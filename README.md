@@ -1,0 +1,1 @@
+The currently committed code is NOT final, and is in fact just a sample. Using this package is not advised as very large changes (including API changes) are both possible and likely.

@@ -58,6 +58,20 @@ func Prod(s []float64) (prod float64) {
 	return prod
 }
 
+// Finds the cumulative sum of the first i elements in 
+// s and puts them in place into the ith element of the
+// receiver. If the receiver is nil a new slice is created
+func CumSum(s, receiver []float64) []float64 {
+	if len(s) == 0 {
+		return receiver[:0]
+	}
+	receiver[0] = s[0]
+	for i := 1; i < len(s); i++ {
+		receiver[i] += receiver[i-1] + s[i]
+	}
+	return receiver
+}
+
 // Tests if all of the slices have equal length.
 // Returns true if there are no input slices
 func HasEqLen(slices ...[]float64) bool {

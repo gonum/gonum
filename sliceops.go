@@ -47,3 +47,53 @@ func Sum(s []float64) (sum float64) {
 	}
 	return
 }
+
+// Returns the product of the elements of the slice
+// Returns 0 if the input has length zero
+func Prod(s []float64) (prod float64) {
+	prod = 1
+	for _, val := range s {
+		prod *= val
+	}
+	return prod
+}
+
+// Tests if all of the slices have equal length.
+// Returns true if there are no input slices
+func HasEqLen(slices ...[]float64) bool {
+	if len(slices) == 0 {
+		return true
+	}
+	l := len(slices[0])
+	for i := 1; i < len(slices); i++ {
+		if len(slices[i]) != l {
+			return false
+		}
+	}
+	return true
+}
+
+// Returns the element-wise sum of the last n slices
+// and puts them in place into the first argument. If the 
+// receiver is nil, a new slice of floats is created.
+// For computational efficiency, it is assumed that all of
+// the variadic arguments have the same length. If this is
+// in doubt, EqLengths can be called. If no slices are input,
+// the receiver is unchanged.
+func ElemSum(receiver []float64, slices ...[]float64) []float64 {
+	if len(slices) == 0 {
+		return receiver
+	}
+	if receiver == nil {
+		receiver = make([]float64, len(slices[0]))
+	}
+	for i, val := range slices[0] {
+		receiver[i] = val
+	}
+	for i := 1; i < len(slices); i++ {
+		for j, val := range slices[i] {
+			receiver[j] += val
+		}
+	}
+	return receiver
+}

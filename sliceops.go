@@ -61,7 +61,10 @@ func Prod(s []float64) (prod float64) {
 // Finds the cumulative sum of the first i elements in 
 // s and puts them in place into the ith element of the
 // receiver. If the receiver is nil a new slice is created
-func CumSum(s, receiver []float64) []float64 {
+func CumSum(receiver, s []float64) []float64 {
+	if receiver == nil {
+		receiver = make([]float64, len(s))
+	}
 	if len(s) == 0 {
 		return receiver[:0]
 	}

@@ -39,3 +39,11 @@ func Max(s []float64) (max float64, ind int) {
 	}
 	return max, ind
 }
+
+// Returns the sum of the elements of the slice
+func Sum(s []float64) (sum float64) {
+	for _, val := range s {
+		sum += val
+	}
+	return
+}

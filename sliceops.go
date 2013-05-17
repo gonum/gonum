@@ -98,7 +98,24 @@ func CumSum(receiver, s []float64) []float64 {
 	}
 	receiver[0] = s[0]
 	for i := 1; i < len(s); i++ {
-		receiver[i] += receiver[i-1] + s[i]
+		receiver[i] = receiver[i-1] + s[i]
+	}
+	return receiver
+}
+
+// Finds the cumulative product of the first i elements in 
+// s and puts them in place into the ith element of the
+// receiver. If the receiver is nil a new slice is created
+func CumProd(receiver, s []float64) []float64 {
+	if receiver == nil {
+		receiver = make([]float64, len(s))
+	}
+	if len(s) == 0 {
+		return receiver[:0]
+	}
+	receiver[0] = s[0]
+	for i := 1; i < len(s); i++ {
+		receiver[i] = receiver[i-1] + s[i]
 	}
 	return receiver
 }

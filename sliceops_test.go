@@ -108,6 +108,10 @@ func TestCumSum(t *testing.T) {
 	val := CumSum(nil, s)
 	truth := []float64{3, 7, 8, 15, 20}
 	if !Eq(val, truth, 1E-15) {
-		t.Errorf("Wrong cumsum returned. Expected %v, returned %v", truth, val)
+		t.Errorf("Wrong cumsum returned with nil receiver. Expected %v, returned %v", truth, val)
+	}
+	val = CumSum(val, s)
+	if !Eq(val, truth, 1E-15) {
+		t.Errorf("Wrong cumsum returned with non-nil receiver. Expected %v, returned %v", truth, val)
 	}
 }

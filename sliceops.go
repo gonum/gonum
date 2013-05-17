@@ -160,8 +160,8 @@ func AddConst(s []float64, c float64) {
 	}
 }
 
-// Multiplies every element in s by a constant
-func MulConst(s []float64, c float64) {
+// Multiplies every element in s by a constant in place
+func Scale(s []float64, c float64) {
 	for i := range s {
 		s[i] *= c
 	}
@@ -233,3 +233,5 @@ func Find(s []float64, f func(float64) bool) (inds []int) {
 	}
 	return inds
 }
+
+// TODO: Add something like find but returns a float slice? Is?

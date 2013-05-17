@@ -49,13 +49,29 @@ func Sum(s []float64) (sum float64) {
 }
 
 // Returns the product of the elements of the slice
-// Returns 0 if the input has length zero
+// Returns 1 if the input has length zero
 func Prod(s []float64) (prod float64) {
 	prod = 1
 	for _, val := range s {
 		prod *= val
 	}
 	return prod
+}
+
+// Returns true if all of the slices have equal length,
+// and false otherwise. 
+// Special case: Returns true if there are no input slices
+func HasEqLen(slices ...[]float64) bool {
+	if len(slices) == 0 {
+		return true
+	}
+	l := len(slices[0])
+	for i := 1; i < len(slices); i++ {
+		if len(slices[i]) != l {
+			return false
+		}
+	}
+	return true
 }
 
 // Finds the cumulative sum of the first i elements in 
@@ -73,21 +89,6 @@ func CumSum(receiver, s []float64) []float64 {
 		receiver[i] += receiver[i-1] + s[i]
 	}
 	return receiver
-}
-
-// Tests if all of the slices have equal length.
-// Returns true if there are no input slices
-func HasEqLen(slices ...[]float64) bool {
-	if len(slices) == 0 {
-		return true
-	}
-	l := len(slices[0])
-	for i := 1; i < len(slices); i++ {
-		if len(slices[i]) != l {
-			return false
-		}
-	}
-	return true
 }
 
 // Returns the element-wise sum of the last n slices

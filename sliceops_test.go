@@ -60,3 +60,16 @@ func TestSum(t *testing.T) {
 		t.Errorf("Wrong sum returned")
 	}
 }
+
+func TestProd(t *testing.T) {
+	s := []float64{}
+	val := Prod(s)
+	if val != 1 {
+		t.Errorf("Val not returned as default when slice length is zero")
+	}
+	s = []float64{3, 4, 1, 7, 5}
+	val = Prod(s)
+	if val != 420 {
+		t.Errorf("Wrong prod returned. Expected %v returned %v", 420, val)
+	}
+}

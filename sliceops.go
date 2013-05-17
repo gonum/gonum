@@ -144,3 +144,22 @@ func ElemSum(receiver []float64, slices ...[]float64) []float64 {
 	}
 	return receiver
 }
+
+// Returns the L norm of the slice S.
+// Special cases: 
+// L = math.Inf(1) gives the maximum value
+// Does not deal with the Zero norm. See Zero norm instead
+func Norm(s []float64, L float64) (norm float64) {
+	// Should this complain if L is not positive?
+	// Should this be done in log space for better numerical stability?
+	//	would be more cost
+	//	maybe only if L is high?
+	if math.IsInf(L, 1) {
+		norm, _ = Max(s)
+		return norm
+	}
+	for _, val := range s {
+		norm += L * math.Pow(math.Abs(val), L)
+	}
+	return math.Pow(norm, 1/L)
+}

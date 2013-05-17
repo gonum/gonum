@@ -73,3 +73,21 @@ func TestProd(t *testing.T) {
 		t.Errorf("Wrong prod returned. Expected %v returned %v", 420, val)
 	}
 }
+
+func TestHasEqLen(t *testing.T) {
+	s1 := []float64{1, 2, 3, 4}
+	s2 := []float64{1, 2, 3, 4}
+	s3 := []float64{1, 2, 3}
+	if !HasEqLen(s1, s2) {
+		t.Errorf("Equal lengths returned as unequal")
+	}
+	if HasEqLen(s1, s3) {
+		t.Errorf("Unequal lengths returned as equal")
+	}
+	if !HasEqLen(s1) {
+		t.Errorf("Single slice returned as unequal")
+	}
+	if !HasEqLen() {
+		t.Errorf("No slices returned as unequal")
+	}
+}

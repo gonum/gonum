@@ -1,6 +1,6 @@
 package sliceops
 
-//import "math"
+import "math"
 
 // Returns the minimum value in the slice and the index of
 // the minimum value. If the input slice is empty, zero is returned
@@ -68,6 +68,18 @@ func HasEqLen(slices ...[]float64) bool {
 	l := len(slices[0])
 	for i := 1; i < len(slices); i++ {
 		if len(slices[i]) != l {
+			return false
+		}
+	}
+	return true
+}
+
+// Returns false if |s1[i] - s2[i]| > tol for any i.
+// Assumes that the slices are of equal length. If this
+// is in doubt it should be checked with HasEqLen
+func Eq(s1, s2 []float64, tol float64) bool {
+	for i, val := range s1 {
+		if math.Abs(s2[i]-val) > tol {
 			return false
 		}
 	}

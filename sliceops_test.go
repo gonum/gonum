@@ -91,3 +91,23 @@ func TestHasEqLen(t *testing.T) {
 		t.Errorf("No slices returned as unequal")
 	}
 }
+
+func TestEq(t *testing.T) {
+	s1 := []float64{1, 2, 3, 4}
+	s2 := []float64{1, 2, 3, 4 + 1E-14}
+	if !Eq(s1, s2, 1E-13) {
+		t.Errorf("Equal slices returned as unequal")
+	}
+	if Eq(s1, s2, 1E-15) {
+		t.Errorf("Unequal slices returned as equal")
+	}
+}
+
+func TestCumSum(t *testing.T) {
+	s := []float64{3, 4, 1, 7, 5}
+	val := CumSum(nil, s)
+	truth := []float64{3, 7, 8, 15, 20}
+	if !Eq(val, truth, 1E-15) {
+		t.Errorf("Wrong cumsum returned. Expected %v, returned %v", truth, val)
+	}
+}

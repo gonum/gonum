@@ -207,6 +207,7 @@ func Linspace(receiver []float64, l, u float64) {
 	}
 }
 
+// a
 // Returns a set of N equally spaced points in log space between l and u, where N
 // is equal to the length of the reciever. The first element of the receiver
 // is l, the final element of the receiver is u. Will panic if the receiver has 

@@ -115,3 +115,16 @@ func TestCumSum(t *testing.T) {
 		t.Errorf("Wrong cumsum returned with non-nil receiver. Expected %v, returned %v", truth, val)
 	}
 }
+
+func TestCumProd(t *testing.T) {
+	s := []float64{3, 4, 1, 7, 5}
+	val := CumProd(nil, s)
+	truth := []float64{3, 12, 12, 84, 420}
+	if !Eq(val, truth, 1E-15) {
+		t.Errorf("Wrong cumprod returned with nil receiver. Expected %v, returned %v", truth, val)
+	}
+	val = CumProd(val, s)
+	if !Eq(val, truth, 1E-15) {
+		t.Errorf("Wrong cumprod returned with non-nil receiver. Expected %v, returned %v", truth, val)
+	}
+}

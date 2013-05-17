@@ -115,7 +115,7 @@ func CumProd(receiver, s []float64) []float64 {
 	}
 	receiver[0] = s[0]
 	for i := 1; i < len(s); i++ {
-		receiver[i] = receiver[i-1] + s[i]
+		receiver[i] = receiver[i-1] * s[i]
 	}
 	return receiver
 }

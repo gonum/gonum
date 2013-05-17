@@ -88,24 +88,17 @@ func Eq(s1, s2 []float64, tol float64) bool {
 
 // Finds the cumulative sum of the first i elements in 
 // s and puts them in place into the ith element of the
-// receiver. If the receiver is nil a new slice is created
-func CumSum(receiver, s []float64) []float64 {
-	if receiver == nil {
-		receiver = make([]float64, len(s))
-	}
-	if len(s) == 0 {
-		return receiver[:0]
-	}
+// receiver. Assumes receiver is at least as long as s
+func CumSum(receiver, s []float64) {
 	receiver[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		receiver[i] = receiver[i-1] + s[i]
 	}
-	return receiver
 }
 
 // Finds the cumulative product of the first i elements in 
 // s and puts them in place into the ith element of the
-// receiver. If the receiver is nil a new slice is created
+// receiver. Assumes receiver is at least as long as s
 func CumProd(receiver, s []float64) []float64 {
 	if receiver == nil {
 		receiver = make([]float64, len(s))
@@ -121,18 +114,14 @@ func CumProd(receiver, s []float64) []float64 {
 }
 
 // Returns the element-wise sum of the last n slices
-// and puts them in place into the first argument. If the 
-// receiver is nil, a new slice of floats is created.
+// and puts them in place into the first argument.
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
 // in doubt, EqLengths can be called. If no slices are input,
 // the receiver is unchanged.
-func ElemSum(receiver []float64, slices ...[]float64) []float64 {
+func ElemSum(receiver []float64, slices ...[]float64) {
 	if len(slices) == 0 {
-		return receiver
-	}
-	if receiver == nil {
-		receiver = make([]float64, len(slices[0]))
+		return
 	}
 	for i, val := range slices[0] {
 		receiver[i] = val
@@ -142,7 +131,7 @@ func ElemSum(receiver []float64, slices ...[]float64) []float64 {
 			receiver[j] += val
 		}
 	}
-	return receiver
+	return
 }
 
 // Returns the L norm of the slice S.
@@ -203,4 +192,29 @@ func LogSumExp(s []float64) (logsumexp float64) {
 	// Take the log and add back on the constant taken out
 	logsumexp = math.Log(logsumexp) + minval
 	return logsumexp
+}
+
+// Returns a set of N equally spaced points between l and u, where N
+// is equal to the length of the reciever. The first element of the receiver
+// is l, the final element of the receiver is u. Will panic if the receiver has 
+// length < 2
+// TODO: Add in examele code here
+func Linspace(receiver []float64, l, u float64) {
+	n := len(receiver)
+	step := (u - l) / float64(n-1)
+	for i := range receiver {
+		receiver[i] = l + step*float64(i)
+	}
+}
+
+// Returns a set of N equally spaced points in log space between l and u, where N
+// is equal to the length of the reciever. The first element of the receiver
+// is l, the final element of the receiver is u. Will panic if the receiver has 
+// length < 2. Note that this call will recturn NaNs if l or u are negative, and
+// zeros if l or u is zero.
+func Logspace(receiver []float64, l, u float64) {
+	Linspace(receiver, math.Log(l), math.Log(u))
+	for i, val := range receiver {
+		receiver[i] = math.Exp(val)
+	}
 }

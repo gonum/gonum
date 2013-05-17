@@ -207,7 +207,6 @@ func Linspace(receiver []float64, l, u float64) {
 	}
 }
 
-// a
 // Returns a set of N equally spaced points in log space between l and u, where N
 // is equal to the length of the reciever. The first element of the receiver
 // is l, the final element of the receiver is u. Will panic if the receiver has 
@@ -218,4 +217,19 @@ func Logspace(receiver []float64, l, u float64) {
 	for i, val := range receiver {
 		receiver[i] = math.Exp(val)
 	}
+}
+
+// Applies a function returning a boolean to the elements of the slice
+// and returns a list of indices for which the value is true
+func Find(s []float64, f func(float64) bool) (inds []int) {
+	// Not sure what an appropriate capacity is here. Don't want to make
+	// it the length of the slice because if the slice is large that is 
+	// a lot of potentially wasted memory
+	inds = make([]int, 0)
+	for i, val := range s {
+		if f(val) {
+			inds = append(inds, i)
+		}
+	}
+	return inds
 }

@@ -61,7 +61,7 @@ func Prod(s []float64) (prod float64) {
 // Returns true if all of the slices have equal length,
 // and false otherwise.
 // Special case: Returns true if there are no input slices
-func EqLen(slices ...[]float64) bool {
+func Eqlen(slices ...[]float64) bool {
 	if len(slices) == 0 {
 		return true
 	}

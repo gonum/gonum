@@ -5,6 +5,7 @@ import (
 )
 
 const (
+	EQTOLERANCE     = 1E-15
 	SmallBenchmark  = 10
 	MediumBenchmark = 1000
 	LargeBenchmark  = 100000
@@ -78,16 +79,16 @@ func TestEqLen(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	s3 := []float64{1, 2, 3}
-	if !EqLen(s1, s2) {
+	if !Eqlen(s1, s2) {
 		t.Errorf("Equal lengths returned as unequal")
 	}
-	if EqLen(s1, s3) {
+	if Eqlen(s1, s3) {
 		t.Errorf("Unequal lengths returned as equal")
 	}
-	if !EqLen(s1) {
+	if !Eqlen(s1) {
 		t.Errorf("Single slice returned as unequal")
 	}
-	if !EqLen() {
+	if !Eqlen() {
 		t.Errorf("No slices returned as unequal")
 	}
 }
@@ -105,26 +106,28 @@ func TestEq(t *testing.T) {
 
 func TestCumSum(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
-	val := CumSum(nil, s)
+	receiver := make([]float64, len(s))
+	Cumsum(receiver, s)
 	truth := []float64{3, 7, 8, 15, 20}
-	if !Eq(val, truth, 1E-15) {
-		t.Errorf("Wrong cumsum returned with nil receiver. Expected %v, returned %v", truth, val)
+	if !Eq(receiver, truth, EQTOLERANCE) {
+		t.Errorf("Wrong cumsum returned with new receiver. Expected %v, returned %v", truth, receiver)
 	}
-	val = CumSum(val, s)
-	if !Eq(val, truth, 1E-15) {
-		t.Errorf("Wrong cumsum returned with non-nil receiver. Expected %v, returned %v", truth, val)
+	Cumsum(receiver, s)
+	if !Eq(receiver, truth, EQTOLERANCE) {
+		t.Errorf("Wrong cumsum returned with reused receiver. Expected %v, returned %v", truth, receiver)
 	}
 }
 
-func TestCumProd(t *testing.T) {
+func TestCumprod(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
-	val := CumProd(nil, s)
+	receiver := make([]float64, len(s))
+	Cumprod(receiver, s)
 	truth := []float64{3, 12, 12, 84, 420}
-	if !Eq(val, truth, 1E-15) {
-		t.Errorf("Wrong cumprod returned with nil receiver. Expected %v, returned %v", truth, val)
+	if !Eq(receiver, truth, EQTOLERANCE) {
+		t.Errorf("Wrong cumprod returned with new receiver. Expected %v, returned %v", truth, receiver)
 	}
-	val = CumProd(val, s)
-	if !Eq(val, truth, 1E-15) {
-		t.Errorf("Wrong cumprod returned with non-nil receiver. Expected %v, returned %v", truth, val)
+	Cumprod(receiver, s)
+	if !Eq(receiver, truth, EQTOLERANCE) {
+		t.Errorf("Wrong cumprod returned with reused receiver. Expected %v, returned %v", truth, receiver)
 	}
 }

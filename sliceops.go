@@ -166,7 +166,7 @@ func Norm(s []float64, L float64) (norm float64) {
 }
 
 // Adds a constant to all of the values in s
-func AddConst(s []float64, c float64) {
+func Addconst(s []float64, c float64) {
 	for i := range s {
 		s[i] += c
 	}
@@ -256,7 +256,7 @@ func (i *InsufficientElements) Error() string {
 // and returns a list of the first k indices for which the value is true.
 // If there are fewer than k indices for which the value is true, it returns
 // the found indices and an error.
-func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error) {
+func Findfirst(s []float64, f func(float64) bool, k int) (inds []int, err error) {
 	count := 0
 	inds = make([]int, 0, k)
 	for i, val := range s {

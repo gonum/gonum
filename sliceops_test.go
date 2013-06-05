@@ -74,20 +74,20 @@ func TestProd(t *testing.T) {
 	}
 }
 
-func TestHasEqLen(t *testing.T) {
+func TestEqLen(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	s3 := []float64{1, 2, 3}
-	if !HasEqLen(s1, s2) {
+	if !EqLen(s1, s2) {
 		t.Errorf("Equal lengths returned as unequal")
 	}
-	if HasEqLen(s1, s3) {
+	if EqLen(s1, s3) {
 		t.Errorf("Unequal lengths returned as equal")
 	}
-	if !HasEqLen(s1) {
+	if !EqLen(s1) {
 		t.Errorf("Single slice returned as unequal")
 	}
-	if !HasEqLen() {
+	if !EqLen() {
 		t.Errorf("No slices returned as unequal")
 	}
 }

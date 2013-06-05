@@ -59,9 +59,9 @@ func Prod(s []float64) (prod float64) {
 }
 
 // Returns true if all of the slices have equal length,
-// and false otherwise. 
+// and false otherwise.
 // Special case: Returns true if there are no input slices
-func HasEqLen(slices ...[]float64) bool {
+func EqLen(slices ...[]float64) bool {
 	if len(slices) == 0 {
 		return true
 	}
@@ -86,20 +86,20 @@ func Eq(s1, s2 []float64, tol float64) bool {
 	return true
 }
 
-// Finds the cumulative sum of the first i elements in 
+// Finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
 // receiver. Assumes receiver is at least as long as s
-func CumSum(receiver, s []float64) {
+func Cumsum(receiver, s []float64) {
 	receiver[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		receiver[i] = receiver[i-1] + s[i]
 	}
 }
 
-// Finds the cumulative product of the first i elements in 
+// Finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // receiver. Assumes receiver is at least as long as s
-func CumProd(receiver, s []float64) []float64 {
+func Cumprod(receiver, s []float64) []float64 {
 	if receiver == nil {
 		receiver = make([]float64, len(s))
 	}
@@ -119,7 +119,7 @@ func CumProd(receiver, s []float64) []float64 {
 // the variadic arguments have the same length. If this is
 // in doubt, EqLengths can be called. If no slices are input,
 // the receiver is unchanged.
-func ElemSum(receiver []float64, slices ...[]float64) {
+func Elemsum(receiver []float64, slices ...[]float64) {
 	if len(slices) == 0 {
 		return
 	}
@@ -135,20 +135,32 @@ func ElemSum(receiver []float64, slices ...[]float64) {
 }
 
 // Returns the L norm of the slice S.
-// Special cases: 
+// Special cases:
 // L = math.Inf(1) gives the maximum value
-// Does not deal with the Zero norm. See Zero norm instead
+// Does not deal with the Zero norm, as the zero norm is a count.
 func Norm(s []float64, L float64) (norm float64) {
 	// Should this complain if L is not positive?
 	// Should this be done in log space for better numerical stability?
 	//	would be more cost
 	//	maybe only if L is high?
+	if L == 2 {
+		for _, val := range s {
+			norm += val * val
+		}
+		return math.Pow(norm, 0.5)
+	}
+	if L == 1 {
+		for _, val := range s {
+			norm += math.Abs(val)
+		}
+		return norm
+	}
 	if math.IsInf(L, 1) {
 		norm, _ = Max(s)
 		return norm
 	}
 	for _, val := range s {
-		norm += L * math.Pow(math.Abs(val), L)
+		norm += math.Pow(math.Abs(val), L)
 	}
 	return math.Pow(norm, 1/L)
 }
@@ -167,8 +179,8 @@ func Scale(s []float64, c float64) {
 	}
 }
 
-// Returns the log of the sum of the exponentials of the values in s 
-func LogSumExp(s []float64) (logsumexp float64) {
+// Returns the log of the sum of the exponentials of the values in s
+func Logsumexp(s []float64) (logsumexp float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
 	// TODO: Add in special case for two values
@@ -196,7 +208,7 @@ func LogSumExp(s []float64) (logsumexp float64) {
 
 // Returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the reciever. The first element of the receiver
-// is l, the final element of the receiver is u. Will panic if the receiver has 
+// is l, the final element of the receiver is u. Will panic if the receiver has
 // length < 2
 // TODO: Add in examele code here
 func Linspace(receiver []float64, l, u float64) {
@@ -209,7 +221,7 @@ func Linspace(receiver []float64, l, u float64) {
 
 // Returns a set of N equally spaced points in log space between l and u, where N
 // is equal to the length of the reciever. The first element of the receiver
-// is l, the final element of the receiver is u. Will panic if the receiver has 
+// is l, the final element of the receiver is u. Will panic if the receiver has
 // length < 2. Note that this call will recturn NaNs if l or u are negative, and
 // zeros if l or u is zero.
 func Logspace(receiver []float64, l, u float64) {
@@ -223,7 +235,7 @@ func Logspace(receiver []float64, l, u float64) {
 // and returns a list of indices for which the value is true
 func Find(s []float64, f func(float64) bool) (inds []int) {
 	// Not sure what an appropriate capacity is here. Don't want to make
-	// it the length of the slice because if the slice is large that is 
+	// it the length of the slice because if the slice is large that is
 	// a lot of potentially wasted memory
 	inds = make([]int, 0)
 	for i, val := range s {
@@ -234,4 +246,27 @@ func Find(s []float64, f func(float64) bool) (inds []int) {
 	return inds
 }
 
-// TODO: Add something like find but returns a float slice? Is?
+type InsufficientElements struct{}
+
+func (i *InsufficientElements) Error() string {
+	return "Insufficient elements found"
+}
+
+// Applies a function returning a boolean to the elements of the slice
+// and returns a list of the first k indices for which the value is true.
+// If there are fewer than k indices for which the value is true, it returns
+// the found indices and an error.
+func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error) {
+	count := 0
+	inds = make([]int, 0, k)
+	for i, val := range s {
+		if f(val) {
+			inds = append(inds, i)
+			count++
+			if count == k {
+				return inds, nil
+			}
+		}
+	}
+	return inds, InsufficientElements
+}

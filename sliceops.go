@@ -194,8 +194,8 @@ func Logsumexp(s []float64) (logsumexp float64) {
 	}
 	// Subtract off the largest value, so the largest value in
 	// the new slice is 0
-	AddConst(s, -minval)
-	defer AddConst(s, minval) // make sure we add it back on at the end
+	Addconst(s, -minval)
+	defer Addconst(s, minval) // make sure we add it back on at the end
 
 	// compute the sumexp part
 	for _, val := range s {
@@ -248,7 +248,7 @@ func Find(s []float64, f func(float64) bool) (inds []int) {
 
 type InsufficientElements struct{}
 
-func (i *InsufficientElements) Error() string {
+func (i InsufficientElements) Error() string {
 	return "Insufficient elements found"
 }
 
@@ -268,5 +268,5 @@ func Findfirst(s []float64, f func(float64) bool, k int) (inds []int, err error)
 			}
 		}
 	}
-	return inds, InsufficientElements
+	return inds, InsufficientElements{}
 }

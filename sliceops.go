@@ -2,10 +2,47 @@ package sliceops
 
 import "math"
 
+// TODO: Should there be a standardized 'Unequal lengths' error?
+
+type InsufficientElements struct{}
+
+func (i InsufficientElements) Error() string {
+	return "Insufficient elements found"
+}
+
+// Returns the element-wise sum of the last n slices
+// and puts them in place into the first argument.
+// For computational efficiency, it is assumed that all of
+// the variadic arguments have the same length. If this is
+// in doubt, EqLengths can be called. If no slices are input,
+// the receiver is unchanged.
+func Add(receiver []float64, slices ...[]float64) {
+	if len(slices) == 0 {
+		return
+	}
+	for i, val := range slices[0] {
+		receiver[i] = val
+	}
+	for i := 1; i < len(slices); i++ {
+		for j, val := range slices[i] {
+			receiver[j] += val
+		}
+	}
+	return
+}
+
 // Adds a constant to all of the values in s
 func Addconst(s []float64, c float64) {
 	for i := range s {
 		s[i] += c
+	}
+}
+
+// Applies a function (math.Exp, math.Sin, etc.) to every element
+// of the slice
+func ApplyFunc(s []float64, f func(float64) float64) {
+	for i, val := range s {
+		s[i] = f(val)
 	}
 }
 
@@ -34,27 +71,6 @@ func Cumsum(receiver, s []float64) {
 	for i := 1; i < len(s); i++ {
 		receiver[i] = receiver[i-1] + s[i]
 	}
-}
-
-// Returns the element-wise sum of the last n slices
-// and puts them in place into the first argument.
-// For computational efficiency, it is assumed that all of
-// the variadic arguments have the same length. If this is
-// in doubt, EqLengths can be called. If no slices are input,
-// the receiver is unchanged.
-func Elemsum(receiver []float64, slices ...[]float64) {
-	if len(slices) == 0 {
-		return
-	}
-	for i, val := range slices[0] {
-		receiver[i] = val
-	}
-	for i := 1; i < len(slices); i++ {
-		for j, val := range slices[i] {
-			receiver[j] += val
-		}
-	}
-	return
 }
 
 // Returns false if |s1[i] - s2[i]| > tol for any i.
@@ -100,17 +116,11 @@ func Find(s []float64, f func(float64) bool) (inds []int) {
 	return inds
 }
 
-type InsufficientElements struct{}
-
-func (i InsufficientElements) Error() string {
-	return "Insufficient elements found"
-}
-
 // Applies a function returning a boolean to the elements of the slice
 // and returns a list of the first k indices for which the value is true.
 // If there are fewer than k indices for which the value is true, it returns
 // the found indices and an error.
-func Findfirst(s []float64, f func(float64) bool, k int) (inds []int, err error) {
+func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error) {
 	count := 0
 	inds = make([]int, 0, k)
 	for i, val := range s {

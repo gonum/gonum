@@ -3,14 +3,16 @@ package sliceops
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"testing"
 )
 
 const (
-	EQTOLERANCE     = 1E-14
-	SmallBenchmark  = 10
-	MediumBenchmark = 1000
-	LargeBenchmark  = 100000
+	EQTOLERANCE = 1E-14
+	SMALL       = 10
+	MEDIUM      = 1000
+	LARGE       = 100000
+	HUGE        = 10000000
 )
 
 func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
@@ -312,4 +314,151 @@ func TestSum(t *testing.T) {
 	if val != 20 {
 		t.Errorf("Wrong sum returned")
 	}
+}
+
+func RandomSlice(l int) []float64 {
+	s := make([]float64, l)
+	for i := range s {
+		s[i] = rand.Float64()
+	}
+	return s
+}
+
+func benchmarkMin(b *testing.B, s []float64) {
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = Min(s)
+	}
+}
+
+func BenchmarkMinSmall(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(SMALL)
+	benchmarkMin(b, s)
+}
+
+func BenchmarkMinMed(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(MEDIUM)
+	benchmarkMin(b, s)
+}
+
+func BenchmarkMinLarge(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(LARGE)
+	benchmarkMin(b, s)
+}
+func BenchmarkMinHuge(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(HUGE)
+	benchmarkMin(b, s)
+}
+
+func benchmarkAdd(b *testing.B, s ...[]float64) {
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		Add(s...)
+	}
+}
+
+func BenchmarkAddTwoSmall(b *testing.B) {
+	b.StopTimer()
+	i := SMALL
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	benchmarkAdd(b, s, t)
+}
+
+func BenchmarkAddFourSmall(b *testing.B) {
+	b.StopTimer()
+	i := SMALL
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	u := RandomSlice(i)
+	v := RandomSlice(i)
+	benchmarkAdd(b, s, t, u, v)
+}
+
+func BenchmarkAddTwoMed(b *testing.B) {
+	b.StopTimer()
+	i := MEDIUM
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	benchmarkAdd(b, s, t)
+}
+
+func BenchmarkAddFourMed(b *testing.B) {
+	b.StopTimer()
+	i := MEDIUM
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	u := RandomSlice(i)
+	v := RandomSlice(i)
+	benchmarkAdd(b, s, t, u, v)
+}
+
+func BenchmarkAddTwoLarge(b *testing.B) {
+	b.StopTimer()
+	i := LARGE
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	benchmarkAdd(b, s, t)
+}
+
+func BenchmarkAddFourLarge(b *testing.B) {
+	b.StopTimer()
+	i := LARGE
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	u := RandomSlice(i)
+	v := RandomSlice(i)
+	benchmarkAdd(b, s, t, u, v)
+}
+
+func BenchmarkAddTwoHuge(b *testing.B) {
+	b.StopTimer()
+	i := HUGE
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	benchmarkAdd(b, s, t)
+}
+
+func BenchmarkAddFourHuge(b *testing.B) {
+	b.StopTimer()
+	i := HUGE
+	s := RandomSlice(i)
+	t := RandomSlice(i)
+	u := RandomSlice(i)
+	v := RandomSlice(i)
+	benchmarkAdd(b, s, t, u, v)
+}
+
+func benchmarkLogsumexp(b *testing.B, s []float64) {
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		_ = Logsumexp(s)
+	}
+}
+
+func BenchmarkLogsumexpSmall(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(SMALL)
+	benchmarkLogsumexp(b, s)
+}
+
+func BenchmarkLogsumexpMed(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(MEDIUM)
+	benchmarkLogsumexp(b, s)
+}
+
+func BenchmarkLogsumexpLarge(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(LARGE)
+	benchmarkLogsumexp(b, s)
+}
+func BenchmarkLogsumexpHuge(b *testing.B) {
+	b.StopTimer()
+	s := RandomSlice(HUGE)
+	benchmarkLogsumexp(b, s)
 }

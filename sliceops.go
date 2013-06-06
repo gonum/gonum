@@ -2,9 +2,6 @@ package sliceops
 
 import "math"
 
-// TODO: Should there be a standardized 'Unequal lengths' error?
-// TODO: Should there be a special receiver in add, or should they all be
-// added to the first slice?
 type InsufficientElements struct{}
 
 func (i InsufficientElements) Error() string {
@@ -134,10 +131,9 @@ func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error)
 }
 
 // Returns a set of N equally spaced points between l and u, where N
-// is equal to the length of the reciever. The first element of the receiver
+// is equal to the length of the receiver. The first element of the receiver
 // is l, the final element of the receiver is u. Will panic if the receiver has
 // length < 2
-// TODO: Add in examele code here
 func Linspace(receiver []float64, l, u float64) {
 	n := len(receiver)
 	step := (u - l) / float64(n-1)
@@ -147,9 +143,9 @@ func Linspace(receiver []float64, l, u float64) {
 }
 
 // Returns a set of N equally spaced points in log space between l and u, where N
-// is equal to the length of the reciever. The first element of the receiver
+// is equal to the length of the receiver. The first element of the receiver
 // is l, the final element of the receiver is u. Will panic if the receiver has
-// length < 2. Note that this call will recturn NaNs if l or u are negative, and
+// length < 2. Note that this call will return NaNs if l or u are negative, and
 // zeros if l or u is zero.
 func Logspace(receiver []float64, l, u float64) {
 	Linspace(receiver, math.Log(l), math.Log(u))
@@ -164,26 +160,24 @@ func Logspace(receiver []float64, l, u float64) {
 func Logsumexp(s []float64) (logsumexp float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
-	// TODO: Add in special case for two values
-
 	// First, find the maximum value in the slice.
-	minval, _ := Max(s)
-	if math.IsInf(minval, 0) {
-		// If it's infinity eitherway, the logsumexp will be infinity as well
+	maxval, _ := Max(s)
+	if math.IsInf(maxval, 0) {
+		// If it's infinity either way, the logsumexp will be infinity as well
 		// returning now avoids NaNs
-		return minval
+		return maxval
 	}
 	// Subtract off the largest value, so the largest value in
 	// the new slice is 0
-	AddConst(s, -minval)
-	defer AddConst(s, minval) // make sure we add it back on at the end
+	AddConst(s, -maxval)
+	defer AddConst(s, maxval) // make sure we add it back on at the end
 
 	// compute the sumexp part
 	for _, val := range s {
 		logsumexp += math.Exp(val)
 	}
 	// Take the log and add back on the constant taken out
-	logsumexp = math.Log(logsumexp) + minval
+	logsumexp = math.Log(logsumexp) + maxval
 	return logsumexp
 }
 

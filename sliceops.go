@@ -3,36 +3,34 @@ package sliceops
 import "math"
 
 // TODO: Should there be a standardized 'Unequal lengths' error?
-
+// TODO: Should there be a special receiver in add, or should they all be
+// added to the first slice?
 type InsufficientElements struct{}
 
 func (i InsufficientElements) Error() string {
 	return "Insufficient elements found"
 }
 
-// Returns the element-wise sum of the last n slices
-// and puts them in place into the first argument.
+// Returns the element-wise sum of all the slices with the
+// results stored in the first slice.
+// Example: Add(a,b) // result will be a[i] = a[i] + b[i]
+// a := make([]float64, len(b)); Add(a,b,c,d,e).
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
-// in doubt, EqLengths can be called. If no slices are input,
-// the receiver is unchanged.
-func Add(receiver []float64, slices ...[]float64) {
+// in doubt, EqLengths can be called.
+func Add(slices ...[]float64) {
 	if len(slices) == 0 {
 		return
 	}
-	for i, val := range slices[0] {
-		receiver[i] = val
-	}
 	for i := 1; i < len(slices); i++ {
 		for j, val := range slices[i] {
-			receiver[j] += val
+			slices[0][j] += val
 		}
 	}
-	return
 }
 
 // Adds a constant to all of the values in s
-func Addconst(s []float64, c float64) {
+func AddConst(s []float64, c float64) {
 	for i := range s {
 		s[i] += c
 	}
@@ -155,9 +153,11 @@ func Linspace(receiver []float64, l, u float64) {
 // zeros if l or u is zero.
 func Logspace(receiver []float64, l, u float64) {
 	Linspace(receiver, math.Log(l), math.Log(u))
-	for i, val := range receiver {
+	ApplyFunc(receiver, math.Exp)
+	/*for i, val := range receiver {
 		receiver[i] = math.Exp(val)
 	}
+	*/
 }
 
 // Returns the log of the sum of the exponentials of the values in s
@@ -175,8 +175,8 @@ func Logsumexp(s []float64) (logsumexp float64) {
 	}
 	// Subtract off the largest value, so the largest value in
 	// the new slice is 0
-	Addconst(s, -minval)
-	defer Addconst(s, minval) // make sure we add it back on at the end
+	AddConst(s, -minval)
+	defer AddConst(s, minval) // make sure we add it back on at the end
 
 	// compute the sumexp part
 	for _, val := range s {
@@ -228,7 +228,7 @@ func Min(s []float64) (min float64, ind int) {
 // Returns the L norm of the slice S.
 // Special cases:
 // L = math.Inf(1) gives the maximum value
-// Does not deal with the Zero norm, as the zero norm is a count.
+// Does not correctly compute the zero norm, as the zero norm is a count.
 func Norm(s []float64, L float64) (norm float64) {
 	// Should this complain if L is not positive?
 	// Should this be done in log space for better numerical stability?
@@ -266,17 +266,34 @@ func Prod(s []float64) (prod float64) {
 	return prod
 }
 
+// Multiplies every element in s by a constant in place
+func Scale(s []float64, c float64) {
+	for i := range s {
+		s[i] *= c
+	}
+}
+
+// Subtract, element-wise, the first argument from the second. Assumes
+// the lengths of s and t match (can be tested with EqLen)
+func Sub(s, t []float64) {
+	for i, val := range t {
+		s[i] -= val
+	}
+}
+
+// Subtract, element-wise, the first argument from the second and
+// store the result in dst. Assumes the lengths of s and t match
+// (can be tested with EqLen)
+func SubDst(dst, s, t []float64) {
+	for i, val := range t {
+		dst[i] = s[i] - val
+	}
+}
+
 // Returns the sum of the elements of the slice
 func Sum(s []float64) (sum float64) {
 	for _, val := range s {
 		sum += val
 	}
 	return
-}
-
-// Multiplies every element in s by a constant in place
-func Scale(s []float64, c float64) {
-	for i := range s {
-		s[i] *= c
-	}
 }

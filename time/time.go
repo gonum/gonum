@@ -15,6 +15,11 @@ func (t Time) Unit() *Unit {
 	return CreateUnit(float64(t), &Dimensions{Time: 1})
 }
 
-func (t Time) Picoseconds() float64 {
-	return float64(t) / float64(Picosecond)
+func (t Time) In(t2 Time) float64 {
+	return float64(t) / float64(t2)
+}
+
+// So it can implement a timer interface
+func (t Time) Time() Time {
+	return l
 }

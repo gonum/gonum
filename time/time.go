@@ -1,4 +1,4 @@
-package unit
+package time
 
 type Time float64
 

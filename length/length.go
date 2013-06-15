@@ -1,5 +1,7 @@
 package length
 
+import "github.com/gonum/unit"
+
 // Length units
 
 // Represents a length in meters
@@ -18,8 +20,8 @@ const (
 	LightYear  Length = 9460730472580800
 )
 
-func (l Length) Unit() *Unit {
-	return CreateUnit(float64(l), &Dimensions{Length: 1})
+func (l Length) Unit() *unit.Unit {
+	return unit.CreateUnit(float64(l), &unit.Dimensions{Length: 1})
 }
 
 func (l Length) In(l2 Length) float64 {

@@ -1,5 +1,7 @@
 package time
 
+import "github.com/gonum/unit"
+
 type Time float64
 
 const (
@@ -11,8 +13,8 @@ const (
 	//Year       Time = 365.24 * Hour
 )
 
-func (t Time) Unit() *Unit {
-	return CreateUnit(float64(t), &Dimensions{Time: 1})
+func (t Time) Unit() *unit.Unit {
+	return unit.CreateUnit(float64(t), &unit.Dimensions{Time: 1})
 }
 
 func (t Time) In(t2 Time) float64 {
@@ -21,5 +23,5 @@ func (t Time) In(t2 Time) float64 {
 
 // So it can implement a timer interface
 func (t Time) Time() Time {
-	return l
+	return t
 }

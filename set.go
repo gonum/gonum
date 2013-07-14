@@ -1,7 +1,7 @@
 package discrete
 
 import (
-	"sync/atomic"
+	"sync"
 )
 
 // On one hand, using an interface{} as a key works on some levels.
@@ -18,16 +18,21 @@ type Set struct {
 
 // I highly doubt we have to worry about running out of IDs, but we could add a little reclaimID function if we're worried
 var globalid uint64 = 0
+var idMu sync.Mutex = sync.Mutex{}
 
 // For cleanliness
 var flag struct{} = struct{}{}
 
 func NewSet() Set {
-	defer func() { atomic.AddUint64(&globalid, 1) }()
-	return Set{
+	idMu.Lock()
+	defer idMu.Unlock()
+	toReturn := Set{
 		data: make(map[interface{}]struct{}, 0),
 		id:   atomic.LoadUint64(&globalid),
 	}
+
+	globalID++
+	return toReturn
 }
 
 // Reverts the set to the empty set without reallocating

@@ -26,7 +26,7 @@ func NewSet() Set {
 	defer func() { atomic.AddUint64(&globalid, 1) }()
 	return Set{
 		data: make(map[interface{}]struct{}, 0),
-		id:   globalid,
+		id:   atomic.LoadUint64(&globalid),
 	}
 }
 

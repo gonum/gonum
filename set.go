@@ -31,7 +31,7 @@ func NewSet() Set {
 		id:   globalid,
 	}
 
-	globalID++
+	globalid++
 	return toReturn
 }
 

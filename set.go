@@ -28,7 +28,7 @@ func NewSet() Set {
 	defer idMu.Unlock()
 	toReturn := Set{
 		data: make(map[interface{}]struct{}, 0),
-		id:   atomic.LoadUint64(&globalid),
+		id:   globalid,
 	}
 
 	globalID++

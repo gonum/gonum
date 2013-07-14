@@ -1,5 +1,9 @@
 package discrete
 
+import (
+	"sync/atomic"
+)
+
 // On one hand, using an interface{} as a key works on some levels.
 // On the other hand, from experience, I can say that working with interface{} is a pain
 // so I don't like it in an API. An alternate idea is to make Set an interface with a method that allows you to GRAB a map[interface{}]struct{} from
@@ -9,17 +13,17 @@ package discrete
 // comparison, making it rather pointless). Also, keying with a float will mean it does a strict == with the floats, possibly causing bad behavior. It may be best to just make it a map[int]struct{}. Thoughts?
 type Set struct {
 	data map[interface{}]struct{}
-	id   uint
+	id   uint64
 }
 
 // I highly doubt we have to worry about running out of IDs, but we could add a little reclaimID function if we're worried
-var globalid uint = 0
+var globalid uint64 = 0
 
 // For cleanliness
 var flag struct{} = struct{}{}
 
 func NewSet() Set {
-	defer func() { globalid++ }()
+	defer func() { atomic.AddUint64(&globalid, 1) }()
 	return Set{
 		data: make(map[interface{}]struct{}, 0),
 		id:   globalid,

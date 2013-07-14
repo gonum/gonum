@@ -4,57 +4,168 @@ package discrete
 // On the other hand, from experience, I can say that working with interface{} is a pain
 // so I don't like it in an API. An alternate idea is to make Set an interface with a method that allows you to GRAB a map[interface{}]struct{} from
 // the implementation, but that adds a lot of calls and needless operations, making the library slower
-type Set map[interface{}]struct{}
+//
+// Another point, using an interface{} may be pointless because a map key MUST have == and != defined, limiting the possible keys anyway (for instance, if you had a set of [3]floats I don't think it will do a deep
+// comparison, making it rather pointless). Also, keying with a float will mean it does a strict == with the floats, possibly causing bad behavior. It may be best to just make it a map[int]struct{}. Thoughts?
+type Set struct {
+	data map[interface{}]struct{}
+	id   uint
+}
+
+// I highly doubt we have to worry about running out of IDs, but we could add a little reclaimID function if we're worried
+var globalid uint = 0
 
 // For cleanliness
 var flag struct{} = struct{}{}
 
-/* All functions copy the sets. Shouldn't be too much of a problem. I could be persuaded to change thing to be in-place though I guess. Partially depends on what we decide for other repositories */
-
-// Add elements of set 2 to set 1
-func (s1 Set) Union(s2 Set) Set {
-	
-	for el := range s2 {
-		s1[el] = flag
+func NewSet() Set {
+	defer func() { globalid++ }()
+	return Set{
+		data: make(map[interface{}]struct{}, 0),
+		id:   globalid,
 	}
-	
-	return s2
 }
 
-// Iterate over the smaller set, remove all elements not also in the bigger set
-func (s1 Set) Intersection(s2 Set) Set {
-	// Iterate over the smaller set
-	if len(s1) > len(s2) {
-		s1,s2 = s2,s1
-	} //Q: Should this just be an if-else? Style-wise I like the swap, not sure if it's performance heavy
-
-	for el := range s1 {
-		if s2[el] != flag {
-			delete(el, s1)
-		}
+// Reverts the set to the empty set without reallocating
+func (s1 Set) Clear() Set {
+	for el, _ := range s1 {
+		delete(s1, el)
 	}
-	
-	return s1
 }
 
-// Del
-func (s1 Set) Diff(s2 Set) Set {
-	// Usually modifying an element being iterated over is a no-no, but go copies the argument to range
-	// so this is safe
-	for el := range s1 {
-		if s2[el] == flag {
-			delete(s1, el)
+// Ensures a perfect copy from s1 to dest (meaning the sets will be equal)
+func (s1 Set) CopyTo(dest Set) Set {
+	if s1.id == dest.id {
+		return dest
+	}
+
+	if len(dest) > 0 {
+		for el := range dest {
+			delete(dest, el)
 		}
 	}
-	
-	return s1
+
+	for el := range s1 {
+		dest[el] = flag
+	}
+
+	return dest
+}
+
+func (s1 Set) Equal(s2 Set) bool {
+	if s1.id == s2.id {
+		return true
+	} else if len(s1.data) != len(s2.data) {
+		return false
+	}
+
+	for el := range s1.data {
+		if _, ok := s2.data[el]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (s1 Set) Union(dest, s2 Set) Set {
+	if dest == nil {
+		dest = NewSet()
+	}
+	if s1.id == s2.id {
+		return s1.CopyTo(dest)
+	}
+
+	if s1.id != dest.id && s2.id != dest.id {
+		dest.Clear()
+	}
+
+	if dest.id != s1.id {
+		for el := range s1.data {
+			dest[el] = flag
+		}
+	}
+
+	if dest.id != s2.id {
+		for el := range s2.data {
+			dest[el] = flag
+		}
+	}
+
+	return dest
+}
+
+func (s1 Set) Intersection(dest, s2 Set) Set {
+	if dest == nil {
+		dest = NewSet()
+	}
+	var swap Set
+
+	if s1.id == s2.id {
+		return s1.CopyTo(dest)
+	} else if s1.id == dest.id {
+		swap = s2
+	} else if s2.id == dest.id {
+		swap = s1
+	} else {
+		dest.Clear()
+
+		if len(s1.data) > len(s2.data) {
+			s1, s2 = s2, s1
+		}
+		for el := range s1.data {
+			if _, ok := s2.data[el]; ok {
+				dest[el] = flag
+			}
+		}
+
+		return dest
+	}
+
+	for el := range dest.data {
+		if _, ok := swap.data[el]; !ok {
+			delete(dest, el)
+		}
+	}
+
+	return dest
+}
+
+func (s1 Set) Diff(dest, s2 Set) Set {
+	if dest == nil {
+		dest = NewSet()
+	}
+
+	if s1.id == s2.id {
+		return dest.Clear()
+	} else if s2.id == dest {
+		tmp := NewSet()
+
+		return s1.Diff(tmp, s2).CopyTo(dest)
+	} else if s1.id == dest {
+		for el := range dest.data {
+			if _, ok := s2.data[el]; ok {
+				delete(dest, el)
+			}
+		}
+
+	} else {
+		dest.Clear()
+		for el := range s1.data {
+			if _, ok := s2.data[el]; !ok {
+				dest[el] = flag
+			}
+		}
+	}
+
+	return dest
 }
 
 // Are Add/Remove necessary?
-func (s1 *Set) Add(element interface{}) {
-	(*s1)[element] = flag
+func (s1 Set) Add(element interface{}) {
+	s1[element] = flag
 }
 
-func (s1 *Set) Remove(element interface{}) {
-	delete(*s1, element)
+func (s1 Set) Remove(element interface{}) {
+	delete(s1, element)
 }

@@ -43,28 +43,28 @@ func ApplyFunc(s []float64, f func(float64) float64) {
 
 // Finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
-// receiver. Assumes receiver is at least as long as s
-func Cumprod(receiver, s []float64) []float64 {
-	if receiver == nil {
-		receiver = make([]float64, len(s))
+// destination. Assumes destination is at least as long as s
+func Cumprod(dst, s []float64) []float64 {
+	if dst == nil {
+		dst = make([]float64, len(s))
 	}
 	if len(s) == 0 {
-		return receiver[:0]
+		return dst[:0]
 	}
-	receiver[0] = s[0]
+	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
-		receiver[i] = receiver[i-1] * s[i]
+		dst[i] = dst[i-1] * s[i]
 	}
-	return receiver
+	return dst
 }
 
 // Finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
-// receiver. Assumes receiver is at least as long as s
-func Cumsum(receiver, s []float64) {
-	receiver[0] = s[0]
+// destination. Assumes destination is at least as long as s
+func Cumsum(dst, s []float64) {
+	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
-		receiver[i] = receiver[i-1] + s[i]
+		dst[i] = dst[i-1] + s[i]
 	}
 }
 
@@ -131,29 +131,25 @@ func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error)
 }
 
 // Returns a set of N equally spaced points between l and u, where N
-// is equal to the length of the receiver. The first element of the receiver
-// is l, the final element of the receiver is u. Will panic if the receiver has
+// is equal to the length of the destination. The first element of the destination
+// is l, the final element of the destination is u. Will panic if the destination has
 // length < 2
-func Linspace(receiver []float64, l, u float64) {
-	n := len(receiver)
+func Linspace(dst []float64, l, u float64) {
+	n := len(dst)
 	step := (u - l) / float64(n-1)
-	for i := range receiver {
-		receiver[i] = l + step*float64(i)
+	for i := range dst {
+		dst[i] = l + step*float64(i)
 	}
 }
 
 // Returns a set of N equally spaced points in log space between l and u, where N
-// is equal to the length of the receiver. The first element of the receiver
-// is l, the final element of the receiver is u. Will panic if the receiver has
+// is equal to the length of the destination. The first element of the destination
+// is l, the final element of the destination is u. Will panic if the destination has
 // length < 2. Note that this call will return NaNs if l or u are negative, and
 // zeros if l or u is zero.
-func Logspace(receiver []float64, l, u float64) {
-	Linspace(receiver, math.Log(l), math.Log(u))
-	ApplyFunc(receiver, math.Exp)
-	/*for i, val := range receiver {
-		receiver[i] = math.Exp(val)
-	}
-	*/
+func Logspace(dst []float64, l, u float64) {
+	Linspace(dst, math.Log(l), math.Log(u))
+	ApplyFunc(dst, math.Exp)
 }
 
 // Returns the log of the sum of the exponentials of the values in s
@@ -276,7 +272,7 @@ func Sub(s, t []float64) {
 }
 
 // Subtract, element-wise, the first argument from the second and
-// store the result in dst. Assumes the lengths of s and t match
+// store the result in destination. Assumes the lengths of s and t match
 // (can be tested with EqLen)
 func SubDst(dst, s, t []float64) {
 	for i, val := range t {

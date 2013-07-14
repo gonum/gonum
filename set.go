@@ -70,7 +70,7 @@ func (s1 Set) Equal(s2 Set) bool {
 	return true
 }
 
-func (s1 Set) Union(dest, s2 Set) Set {
+func (dest Set) Union(s1, s2 Set) Set {
 	if s1.id == s2.id {
 		return s1.CopyTo(dest)
 	}
@@ -94,7 +94,7 @@ func (s1 Set) Union(dest, s2 Set) Set {
 	return dest
 }
 
-func (s1 Set) Intersection(dest, s2 Set) Set {
+func (dest Set) Intersection(s1, s2 Set) Set {
 	var swap Set
 
 	if s1.id == s2.id {
@@ -127,7 +127,7 @@ func (s1 Set) Intersection(dest, s2 Set) Set {
 	return dest
 }
 
-func (s1 Set) Diff(dest, s2 Set) Set {
+func (dest Set) Diff(s1, s2 Set) Set {
 	if s1.id == s2.id {
 		return dest.Clear()
 	} else if s2.id == dest.id {

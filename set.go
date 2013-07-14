@@ -28,9 +28,11 @@ func NewSet() Set {
 
 // Reverts the set to the empty set without reallocating
 func (s1 Set) Clear() Set {
-	for el, _ := range s1 {
-		delete(s1, el)
+	for el, _ := range s1.data {
+		delete(s1.data, el)
 	}
+
+	return s1
 }
 
 // Ensures a perfect copy from s1 to dest (meaning the sets will be equal)
@@ -39,14 +41,14 @@ func (s1 Set) CopyTo(dest Set) Set {
 		return dest
 	}
 
-	if len(dest) > 0 {
-		for el := range dest {
-			delete(dest, el)
+	if len(dest.data) > 0 {
+		for el := range dest.data {
+			delete(dest.data, el)
 		}
 	}
 
-	for el := range s1 {
-		dest[el] = flag
+	for el := range s1.data {
+		dest.data[el] = flag
 	}
 
 	return dest
@@ -69,9 +71,6 @@ func (s1 Set) Equal(s2 Set) bool {
 }
 
 func (s1 Set) Union(dest, s2 Set) Set {
-	if dest == nil {
-		dest = NewSet()
-	}
 	if s1.id == s2.id {
 		return s1.CopyTo(dest)
 	}
@@ -82,13 +81,13 @@ func (s1 Set) Union(dest, s2 Set) Set {
 
 	if dest.id != s1.id {
 		for el := range s1.data {
-			dest[el] = flag
+			dest.data[el] = flag
 		}
 	}
 
 	if dest.id != s2.id {
 		for el := range s2.data {
-			dest[el] = flag
+			dest.data[el] = flag
 		}
 	}
 
@@ -96,9 +95,6 @@ func (s1 Set) Union(dest, s2 Set) Set {
 }
 
 func (s1 Set) Intersection(dest, s2 Set) Set {
-	if dest == nil {
-		dest = NewSet()
-	}
 	var swap Set
 
 	if s1.id == s2.id {
@@ -115,7 +111,7 @@ func (s1 Set) Intersection(dest, s2 Set) Set {
 		}
 		for el := range s1.data {
 			if _, ok := s2.data[el]; ok {
-				dest[el] = flag
+				dest.data[el] = flag
 			}
 		}
 
@@ -124,7 +120,7 @@ func (s1 Set) Intersection(dest, s2 Set) Set {
 
 	for el := range dest.data {
 		if _, ok := swap.data[el]; !ok {
-			delete(dest, el)
+			delete(dest.data, el)
 		}
 	}
 
@@ -132,20 +128,16 @@ func (s1 Set) Intersection(dest, s2 Set) Set {
 }
 
 func (s1 Set) Diff(dest, s2 Set) Set {
-	if dest == nil {
-		dest = NewSet()
-	}
-
 	if s1.id == s2.id {
 		return dest.Clear()
-	} else if s2.id == dest {
+	} else if s2.id == dest.id {
 		tmp := NewSet()
 
 		return s1.Diff(tmp, s2).CopyTo(dest)
-	} else if s1.id == dest {
+	} else if s1.id == dest.id {
 		for el := range dest.data {
 			if _, ok := s2.data[el]; ok {
-				delete(dest, el)
+				delete(dest.data, el)
 			}
 		}
 
@@ -153,7 +145,7 @@ func (s1 Set) Diff(dest, s2 Set) Set {
 		dest.Clear()
 		for el := range s1.data {
 			if _, ok := s2.data[el]; !ok {
-				dest[el] = flag
+				dest.data[el] = flag
 			}
 		}
 	}
@@ -163,9 +155,9 @@ func (s1 Set) Diff(dest, s2 Set) Set {
 
 // Are Add/Remove necessary?
 func (s1 Set) Add(element interface{}) {
-	s1[element] = flag
+	s1.data[element] = flag
 }
 
 func (s1 Set) Remove(element interface{}) {
-	delete(s1, element)
+	delete(s1.data, element)
 }

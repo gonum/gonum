@@ -72,6 +72,16 @@ func TestCumSum(t *testing.T) {
 	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with reused receiver")
 }
 
+func TestDot(t *testing.T) {
+	s1 := []float64{1, 2, 3, 4}
+	s2 := []float64{-3, 4, 5, -6}
+	truth := -4.0
+	ans := Dot(s1, s2)
+	if ans != truth {
+		t.Errorf("Dot product computed incorrectly")
+	}
+}
+
 func TestEq(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4 + 1E-14}

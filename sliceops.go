@@ -2,6 +2,7 @@ package sliceops
 
 import "math"
 
+// InsufficientElements is an error type used by FindFirst
 type InsufficientElements struct{}
 
 func (i InsufficientElements) Error() string {

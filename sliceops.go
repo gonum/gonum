@@ -68,9 +68,21 @@ func Cumsum(dst, s []float64) {
 	}
 }
 
+// Computes the dot product of s1 and s2, i.e.
+// sum_{i = 1}^N s1[n]*s2[n]
+// Assumes the slices are of equal length. If this is
+// in doubt it should be checked with Eqlen
+func Dot(s1, s2 []float64) float64 {
+	var sum float64
+	for i, val := range s1 {
+		sum += val * s2[i]
+	}
+	return sum
+}
+
 // Returns false if |s1[i] - s2[i]| > tol for any i.
 // Assumes that the slices are of equal length. If this
-// is in doubt it should be checked with HasEqLen
+// is in doubt it should be checked with Eqlen
 func Eq(s1, s2 []float64, tol float64) bool {
 	for i, val := range s1 {
 		if math.Abs(s2[i]-val) > tol {

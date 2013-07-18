@@ -8,7 +8,7 @@ func (i InsufficientElements) Error() string {
 	return "Insufficient elements found"
 }
 
-// Returns the element-wise sum of all the slices with the
+// Add returns the element-wise sum of all the slices with the
 // results stored in the first slice.
 // Example: Add(a,b) // result will be a[i] = a[i] + b[i]
 // a := make([]float64, len(b)); Add(a,b,c,d,e).
@@ -26,14 +26,14 @@ func Add(slices ...[]float64) {
 	}
 }
 
-// Adds a constant to all of the values in s
+// AddConst adds a constant to all of the values in s
 func AddConst(s []float64, c float64) {
 	for i := range s {
 		s[i] += c
 	}
 }
 
-// Applies a function (math.Exp, math.Sin, etc.) to every element
+// ApplyFunc applies a function (math.Exp, math.Sin, etc.) to every element
 // of the slice
 func ApplyFunc(s []float64, f func(float64) float64) {
 	for i, val := range s {
@@ -41,7 +41,7 @@ func ApplyFunc(s []float64, f func(float64) float64) {
 	}
 }
 
-// Finds the cumulative product of the first i elements in
+// Cumprod finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Assumes destination is at least as long as s
 func Cumprod(dst, s []float64) []float64 {
@@ -58,7 +58,7 @@ func Cumprod(dst, s []float64) []float64 {
 	return dst
 }
 
-// Finds the cumulative sum of the first i elements in
+// Cumsum finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Assumes destination is at least as long as s
 func Cumsum(dst, s []float64) {
@@ -68,7 +68,7 @@ func Cumsum(dst, s []float64) {
 	}
 }
 
-// Computes the dot product of s1 and s2, i.e.
+// Dot computes the dot product of s1 and s2, i.e.
 // sum_{i = 1}^N s1[n]*s2[n]
 // Assumes the slices are of equal length. If this is
 // in doubt it should be checked with Eqlen
@@ -80,7 +80,7 @@ func Dot(s1, s2 []float64) float64 {
 	return sum
 }
 
-// Returns false if |s1[i] - s2[i]| > tol for any i.
+// Eq returns false if |s1[i] - s2[i]| > tol for any i.
 // Assumes that the slices are of equal length. If this
 // is in doubt it should be checked with Eqlen
 func Eq(s1, s2 []float64, tol float64) bool {
@@ -92,7 +92,7 @@ func Eq(s1, s2 []float64, tol float64) bool {
 	return true
 }
 
-// Returns true if all of the slices have equal length,
+// Eqlen returns true if all of the slices have equal length,
 // and false otherwise.
 // Special case: Returns true if there are no input slices
 func Eqlen(slices ...[]float64) bool {
@@ -108,7 +108,7 @@ func Eqlen(slices ...[]float64) bool {
 	return true
 }
 
-// Applies a function returning a boolean to the elements of the slice
+// Find applies a function returning a boolean to the elements of the slice
 // and returns a list of indices for which the value is true
 func Find(s []float64, f func(float64) bool) (inds []int) {
 	// Not sure what an appropriate capacity is here. Don't want to make
@@ -123,7 +123,7 @@ func Find(s []float64, f func(float64) bool) (inds []int) {
 	return inds
 }
 
-// Applies a function returning a boolean to the elements of the slice
+// FindFirst applies a function returning a boolean to the elements of the slice
 // and returns a list of the first k indices for which the value is true.
 // If there are fewer than k indices for which the value is true, it returns
 // the found indices and an error.
@@ -142,7 +142,7 @@ func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error)
 	return inds, InsufficientElements{}
 }
 
-// Returns a set of N equally spaced points between l and u, where N
+// Linspace returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u. Will panic if the destination has
 // length < 2
@@ -154,7 +154,7 @@ func Linspace(dst []float64, l, u float64) {
 	}
 }
 
-// Returns a set of N equally spaced points in log space between l and u, where N
+// Logspace returns a set of N equally spaced points in log space between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u. Will panic if the destination has
 // length < 2. Note that this call will return NaNs if l or u are negative, and
@@ -164,7 +164,7 @@ func Logspace(dst []float64, l, u float64) {
 	ApplyFunc(dst, math.Exp)
 }
 
-// Returns the log of the sum of the exponentials of the values in s
+// Logsumexp returns the log of the sum of the exponentials of the values in s
 func Logsumexp(s []float64) (logsumexp float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
@@ -189,7 +189,7 @@ func Logsumexp(s []float64) (logsumexp float64) {
 	return logsumexp
 }
 
-// Returns the maximum value in the slice and the location of
+// Max returns the maximum value in the slice and the location of
 // the maximum value. If the input slice is empty, zero is returned
 // as the minimum value and -1 is returned as the index.
 // Use: val,ind := sliceops.Max(slice)
@@ -208,7 +208,7 @@ func Max(s []float64) (max float64, ind int) {
 	return max, ind
 }
 
-// Returns the minimum value in the slice and the index of
+// Min returns the minimum value in the slice and the index of
 // the minimum value. If the input slice is empty, zero is returned
 // as the minimum value and -1 is returned as the index.
 // Use: val,ind := sliceops.Min(slice)
@@ -227,7 +227,7 @@ func Min(s []float64) (min float64, ind int) {
 	return min, ind
 }
 
-// Returns the L norm of the slice S.
+// Norm returns the L norm of the slice S.
 // Special cases:
 // L = math.Inf(1) gives the maximum value
 // Does not correctly compute the zero norm, as the zero norm is a count.
@@ -258,7 +258,7 @@ func Norm(s []float64, L float64) (norm float64) {
 	return math.Pow(norm, 1/L)
 }
 
-// Returns the product of the elements of the slice
+// Prod returns the product of the elements of the slice
 // Returns 1 if the input has length zero
 func Prod(s []float64) (prod float64) {
 	prod = 1
@@ -268,14 +268,14 @@ func Prod(s []float64) (prod float64) {
 	return prod
 }
 
-// Multiplies every element in s by a constant in place
+// Scale multiplies every element in s by a constant in place
 func Scale(s []float64, c float64) {
 	for i := range s {
 		s[i] *= c
 	}
 }
 
-// Subtract, element-wise, the first argument from the second. Assumes
+// Sub subtracts, element-wise, the first argument from the second. Assumes
 // the lengths of s and t match (can be tested with EqLen)
 func Sub(s, t []float64) {
 	for i, val := range t {
@@ -283,7 +283,7 @@ func Sub(s, t []float64) {
 	}
 }
 
-// Subtract, element-wise, the first argument from the second and
+// SubDst subtracts, element-wise, the first argument from the second and
 // store the result in destination. Assumes the lengths of s and t match
 // (can be tested with EqLen)
 func SubDst(dst, s, t []float64) {
@@ -292,7 +292,7 @@ func SubDst(dst, s, t []float64) {
 	}
 }
 
-// Returns the sum of the elements of the slice
+// Sum returns the sum of the elements of the slice
 func Sum(s []float64) (sum float64) {
 	for _, val := range s {
 		sum += val

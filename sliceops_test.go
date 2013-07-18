@@ -472,3 +472,37 @@ func BenchmarkLogsumexpHuge(b *testing.B) {
 	s := RandomSlice(HUGE)
 	benchmarkLogsumexp(b, s)
 }
+
+func benchmarkDot(b *testing.B, s1 []float64, s2 []float64) {
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		_ = Dot(s1, s2)
+	}
+}
+
+func BenchmarkDotSmall(b *testing.B) {
+	b.StopTimer()
+	s1 := RandomSlice(SMALL)
+	s2 := RandomSlice(SMALL)
+	benchmarkDot(b, s1, s2)
+}
+
+func BenchmarkDotMed(b *testing.B) {
+	b.StopTimer()
+	s1 := RandomSlice(MEDIUM)
+	s2 := RandomSlice(MEDIUM)
+	benchmarkDot(b, s1, s2)
+}
+
+func BenchmarkDotLarge(b *testing.B) {
+	b.StopTimer()
+	s1 := RandomSlice(LARGE)
+	s2 := RandomSlice(LARGE)
+	benchmarkDot(b, s1, s2)
+}
+func BenchmarkDotHuge(b *testing.B) {
+	b.StopTimer()
+	s1 := RandomSlice(HUGE)
+	s2 := RandomSlice(HUGE)
+	benchmarkDot(b, s1, s2)
+}

@@ -13,6 +13,6 @@ func ExampleAdd() {
 	fmt.Println("s1 = ", s1)
 	fmt.Println("s2 = ", s2)
 	// Output:
-	// s1 = [6 8 10 12]
-	// s2 = [5 6 7 8]
+	// s1 = [6, 8, 10, 12]
+	// s2 = [5, 6, 7, 8]
 }

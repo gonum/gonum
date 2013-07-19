@@ -24,7 +24,7 @@ func ExampleAdd_simple() {
 	// s3 =  [1 1 1 1]
 }
 
-func ExampleAdd_newSlice() {
+func ExampleAdd_newslice() {
 	// If one wants to store the result in a
 	// new container, just make a new slice
 	s1 := []float64{1, 2, 3, 4}
@@ -45,7 +45,7 @@ func ExampleAdd_newSlice() {
 	// s3 =  [1 1 1 1]
 }
 
-func ExampleAdd_unequalLengths() {
+func ExampleAdd_unequallengths() {
 	// If the lengths of the slices are unknown,
 	// use Eqlen to check
 	s1 := []float64{1, 2, 3}
@@ -61,7 +61,7 @@ func ExampleAdd_unequalLengths() {
 	// Unequal lengths
 }
 
-func ExampleAdd_sliceOfSliceSum() {
+func ExampleAdd_sliceofslicesum() {
 	// Add can also be used to take a columnwise sum
 	// of a slice of slices
 

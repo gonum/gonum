@@ -6,7 +6,7 @@ import (
 
 // Set of examples for all the functions
 
-func ExampleAdd_Simple() {
+func ExampleAdd_simple() {
 	// Adding three slices together. Note that
 	// the result is stored in the first slice
 	s1 := []float64{1, 2, 3, 4}
@@ -24,7 +24,7 @@ func ExampleAdd_Simple() {
 	// s3 =  [1 1 1 1]
 }
 
-func ExampleAdd_NewSlice() {
+func ExampleAdd_newSlice() {
 	// If one wants to store the result in a
 	// new container, just make a new slice
 	s1 := []float64{1, 2, 3, 4}
@@ -45,7 +45,7 @@ func ExampleAdd_NewSlice() {
 	// s3 =  [1 1 1 1]
 }
 
-func ExampleAdd_UnequalLengths() {
+func ExampleAdd_unequalLengths() {
 	// If the lengths of the slices are unknown,
 	// use Eqlen to check
 	s1 := []float64{1, 2, 3}
@@ -61,7 +61,7 @@ func ExampleAdd_UnequalLengths() {
 	// Unequal lengths
 }
 
-func ExampleAdd_SliceOfSliceSum() {
+func ExampleAdd_sliceOfSliceSum() {
 	// Add can also be used to take a columnwise sum
 	// of a slice of slices
 

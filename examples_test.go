@@ -105,3 +105,16 @@ func ExampleCumprod() {
 	// dst =  [1 -2 -6 24]
 	// s =  [1 -2 3 -4]
 }
+
+func ExampleCumsum() {
+	s := []float64{1, -2, 3, -4}
+	dst := make([]float64, len(s))
+
+	Cumprod(dst, s)
+
+	fmt.Println("dst = ", dst)
+	fmt.Println("s = ", s)
+	// Output:
+	// dst =  [1 -1 2 -2]
+	// s =  [1 -2 3 -4]
+}

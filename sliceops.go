@@ -16,13 +16,13 @@ func (i InsufficientElements) Error() string {
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
 // in doubt, EqLengths can be called.
-func Add(slices ...[]float64) {
+func Add(dst []float64, slices ...[]float64) {
 	if len(slices) == 0 {
 		return
 	}
-	for i := 1; i < len(slices); i++ {
+	for i := 0; i < len(slices); i++ {
 		for j, val := range slices[i] {
-			slices[0][j] += val
+			dst[j] += val
 		}
 	}
 }

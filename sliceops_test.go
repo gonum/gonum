@@ -17,7 +17,7 @@ const (
 
 func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
 	if !Eq(comp, truth, EQTOLERANCE) {
-		t.Errorf(str+"Expected %v, returned %v", truth, comp)
+		t.Errorf(str+". Expected %v, returned %v", truth, comp)
 	}
 }
 
@@ -367,7 +367,7 @@ func BenchmarkMinHuge(b *testing.B) {
 func benchmarkAdd(b *testing.B, s ...[]float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		Add(s...)
+		Add(s[0], s[1:]...)
 	}
 }
 

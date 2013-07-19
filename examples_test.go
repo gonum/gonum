@@ -92,3 +92,16 @@ func ExampleAddConst() {
 	// Output:
 	// s =  [6 3 8 1]
 }
+
+func ExampleCumprod() {
+	s := []float64{1, -2, 3, -4}
+	dst := make([]float64, len(s))
+
+	Cumprod(dst, s)
+
+	fmt.Println("dst = ", dst)
+	fmt.Println("s = ", s)
+	// Output:
+	// dst =  [1 -2 -6 24]
+	// s =  [1 -2 3 -4]
+}

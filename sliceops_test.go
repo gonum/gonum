@@ -9,10 +9,10 @@ import (
 
 const (
 	EQTOLERANCE = 1E-14
-	SMALL       = 1E2
-	MEDIUM      = 1E3
-	LARGE       = 1E5
-	HUGE        = 1E7
+	SMALL       = 10
+	MEDIUM      = 1000
+	LARGE       = 100000
+	HUGE        = 10000000
 )
 
 func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {

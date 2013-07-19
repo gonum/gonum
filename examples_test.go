@@ -81,3 +81,14 @@ func ExampleAdd_sliceofslicesum() {
 	// Output:
 	// result =  [0 5 10]
 }
+
+func ExampleAddConst() {
+	s := []float64{1, -2, 3, -4}
+	c := 5.0
+
+	AddConst(s, c)
+
+	fmt.Println("s = ", s)
+	// Output:
+	// s =  [6 3 8 1]
+}

@@ -128,7 +128,7 @@ func (dest *Set) Diff(s1, s2 *Set) *Set {
 	} else if s2 == dest {
 		tmp := NewSet()
 
-		return s1.Diff(tmp, s2).CopyTo(dest)
+		return tmp.Diff(s1, s2).CopyTo(dest)
 	} else if s1 == dest {
 		for el := range *dest {
 			if _, ok := (*s2)[el]; ok {

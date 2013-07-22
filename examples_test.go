@@ -110,7 +110,7 @@ func ExampleCumsum() {
 	s := []float64{1, -2, 3, -4}
 	dst := make([]float64, len(s))
 
-	Cumprod(dst, s)
+	Cumsum(dst, s)
 
 	fmt.Println("dst = ", dst)
 	fmt.Println("s = ", s)

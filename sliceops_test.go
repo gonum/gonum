@@ -41,14 +41,14 @@ func TestAddconst(t *testing.T) {
 	AreSlicesEqual(t, truth, s, "Wrong addition of constant")
 }
 
-func TestApplyFunc(t *testing.T) {
+func TestApply(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	f := math.Sin
 	truth := make([]float64, len(s))
 	for i, val := range s {
 		truth[i] = math.Sin(val)
 	}
-	ApplyFunc(s, f)
+	Apply(s, f)
 	AreSlicesEqual(t, truth, s, "Wrong application of function")
 }
 

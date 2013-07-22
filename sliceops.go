@@ -2,8 +2,6 @@ package sliceops
 
 import "math"
 
-// Test comment
-
 // InsufficientElements is an error type used by FindFirst
 type InsufficientElements struct{}
 
@@ -38,7 +36,7 @@ func AddConst(s []float64, c float64) {
 
 // ApplyFunc applies a function (math.Exp, math.Sin, etc.) to every element
 // of the slice
-func ApplyFunc(s []float64, f func(float64) float64) {
+func Apply(s []float64, f func(float64) float64) {
 	for i, val := range s {
 		s[i] = f(val)
 	}
@@ -164,7 +162,7 @@ func Linspace(dst []float64, l, u float64) {
 // zeros if l or u is zero.
 func Logspace(dst []float64, l, u float64) {
 	Linspace(dst, math.Log(l), math.Log(u))
-	ApplyFunc(dst, math.Exp)
+	Apply(dst, math.Exp)
 }
 
 // Logsumexp returns the log of the sum of the exponentials of the values in s

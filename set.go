@@ -180,6 +180,7 @@ func (ds *DisjointSet) MasterSet() *Set {
 	return ds.master
 }
 
+// If the element isn't already somewhere in there, adds it to the master set and its own tiny set
 func (ds *DisjointSet) MakeSet(el interface{}) {
 	if ds.master.Contains(el) {
 		return
@@ -190,6 +191,7 @@ func (ds *DisjointSet) MakeSet(el interface{}) {
 	ds.subsets = append(ds.subsets, ns)
 }
 
+// Returns the set the element belongs to, or nil if none
 func (ds *DisjointSet) Find(el interface{}) *Set {
 	if !ds.master.Contains(el) {
 		return nil
@@ -204,6 +206,7 @@ func (ds *DisjointSet) Find(el interface{}) *Set {
 	return nil
 }
 
+// Unions two subsets within the DisjointSet
 func (ds *DisjointSet) Union(s1, s2 *Set) {
 	if s1 == s2 {
 		return

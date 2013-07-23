@@ -18,7 +18,7 @@ var globalid uint64 = 0
 var flag struct{} = struct{}{}
 
 func NewSet() *Set {
-	s := Set(make(map[interface{}]struct{}, 0))
+	s := make(Set)
 	return &s
 }
 
@@ -27,7 +27,7 @@ func (s1 *Set) Clear() *Set {
 		return s1
 	}
 
-	(*s1) = *NewSet()
+	(*s1) = make(Set)
 
 	return s1
 }

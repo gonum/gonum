@@ -6,26 +6,33 @@ import (
 )
 
 type Graph interface {
-	Successors(node int) []int            // Gives the Successors connected by OUTBOUND edges, if the graph is a digraph
-	IsSuccessor(node, successor int) bool // Is Successor
-	Predecessors(node int) []int
-	IsPredecessor(node, predecessor int) bool
-	IsAdjacent(node, neighbor int) bool // IsSuccessor || IsPredecessor
-	NodeExists(node int) bool
-	Degree(node int) int // Degree is equivalent to len(Successors(node)) + len(Predecessors(node))
-	EdgeList() [][2]int
-	NodeList() []int // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected
+	Successors(node int) []int                // Gives the nodes connected by OUTBOUND edges, if the graph is an undirected graph, this set is equal to Predecessors
+	IsSuccessor(node, successor int) bool     // If successor shows up in the list returned by Successors(node), then it's a successor
+	Predecessors(node int) []int              // Gives the nodes connected by INBOUND edges, if the graph is an undirected graph, this set is equal to Successors
+	IsPredecessor(node, predecessor int) bool // If predecessor shows up in the list returned by Predecessors(node), then it's a predecessor
+	IsAdjacent(node, neighbor int) bool       // IsSuccessor || IsPredecessor
+	NodeExists(node int) bool                 // Returns whether a node with the given ID is currently in the graph
+	Degree(node int) int                      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
+	EdgeList() [][2]int                       // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph you do only need provide one direction
+	NodeList() []int                          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected
 	IsDirected() bool
 }
 
+// A Graph that implements Coster has an actual cost between adjacent nodes, also known as a weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*), this function will
+// take precedence over the Uniform Cost function (all weights are 1) if "nil" is passed in for the function argument
+//
+// Coster only need worry about the case when an edge from node 1 to node 2 exists (i.e. node2 is a successor to node1) -- asking for the weight in any other case is considered undefined behavior
 type Coster interface {
-	Cost(node1, node2 int) float64 // A non-weighted graph should just return 1 (or some uniform positive value). Returns an error if the two nodes are not adjacent. A digraph returns the cost for node1->node2
+	Cost(node1, node2 int) float64
 }
 
+// A graph that implements HeuristicCoster implements a heuristic between any two given nodes. Like Coster, if a graph implements this and a function needs a heuristic cost (e.g. A*), this function will
+// take precedence over the Null Heuristic (always returns 0) if "nil" is passed in for the function argument
 type HeuristicCoster interface {
 	HeuristicCost(node1, node2 int) float64 // If HeuristicCost is not intended to be used, it can be implemented as the null heuristic (always returns 0)
 }
 
+// A Mutable Graph
 type MutableGraph interface {
 	Graph
 	AddNode(id int, successors []int)                 // The graph itself is responsible for adding reciprocal edges if it's undirected
@@ -34,10 +41,16 @@ type MutableGraph interface {
 	RemoveNode(node int)                              // The graph is reponsible for removing edges to a node that is removed
 	RemoveEdge(node1, node2 int)                      // The graph is responsible for removing reciprocal edges if it's undirected
 	EmptyGraph()                                      // Clears the graph of all nodes and edges
-	SetDirected(bool)                                 // This package will only call SetDirected on the empty graph, so there's no need to worry about the case where a graph suddenly becomes (un)directed
+	SetDirected(bool)                                 // This package will only call SetDirected on an empty graph, so there's no need to worry about the case where a graph suddenly becomes (un)directed
 }
 
-// Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes are traversable.
+// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge[0], Edge[1]) had been called)
+type WeightedEdge struct {
+	Edge   [2]int
+	Weight float64
+}
+
+// Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor
 //
 // Special case: a nil or zero length path is considered valid (true), a path of length 1 (only one node) is the trivial case
 func IsPath(path []int, graph Graph) bool {
@@ -54,6 +67,8 @@ func IsPath(path []int, graph Graph) bool {
 	return true
 }
 
+// Expands the first node it sees trying to find the destination. Depth First Search is *not* guaranteed to find the shortest path,
+// however, if a path exists DFS is guaranteed to find it (provided you don't find a way to implement a Graph with an infinite depth)
 func DepthFirstSearch(start, goal int, graph Graph) []int {
 	closedSet := NewSet()
 	openSet := Stack([]interface{}{start})
@@ -90,10 +105,12 @@ func DepthFirstSearch(start, goal int, graph Graph) []int {
 	return nil
 }
 
+// An admissible, consistent heuristic that won't speed up computation time at all.
 func NullHeuristic(a, b int) float64 {
 	return 0.0
 }
 
+// Assumes all edges in the graph have the same weight (including edges that don't exist!)
 func UniformCost(a, b int) float64 {
 	return 1.0
 }
@@ -164,30 +181,20 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 	return nil, 0.0
 }
 
-func rebuildPath(predecessors map[int]int, goal int) []int {
-	path := []int{goal}
-	curr := goal
-	for prev, ok := predecessors[curr]; ok; prev, ok = predecessors[curr] {
-		path = append([]int{prev}, path...)
-		curr = prev
-	}
-
-	return path
-}
-
 // Finds the shortest path to every (connected) node in the graph from a single source -- no edges may have negative weights
-func Dijkstra(source int, graph Graph) (paths map[int][]int, costs map[int]float64) {
+func Dijkstra(source int, graph Graph, Cost func(int, int) int) (paths map[int][]int, costs map[int]float64) {
 	return nil, nil
 }
 
 // Same as Dijkstra, but handles negative edge weights
-func BellmanFord(source int, graph Graph) (paths map[int][]int, costs map[int]float64) {
+func BellmanFord(source int, graph Graph, Cost func(int, int) int) (paths map[int][]int, costs map[int]float64) {
 	return nil, nil
 }
 
 /* Basic Graph tests */
 
-// Checks if every node in the graph has a degree of at least one, unless it's an empty graph or a graph with a single node in which case it's considered trivially connected
+// Checks if every node in the graph has a degree of at least one. If a node has a degree of two, it checks to make sure the edge is not reflexive
+// The empty graph or a graph with a single node is considered trivially connected
 func FullyConnected(graph Graph) bool {
 	nlist := graph.NodeList()
 	if nlist == nil || len(nlist) <= 1 {
@@ -195,8 +202,12 @@ func FullyConnected(graph Graph) bool {
 	}
 
 	for _, node := range graph.NodeList() {
-		if graph.Degree(node) == 0 {
+		if deg := graph.Degree(node); deg == 0 {
 			return false
+		} else if deg == 2 {
+			if graph.Successors(node)[0] == node {
+				return false
+			}
 		}
 	}
 
@@ -205,6 +216,9 @@ func FullyConnected(graph Graph) bool {
 
 /* Implements minimum-spanning tree algorithms; puts the resulting minimum spanning tree in the dst graph */
 
+// Generates a minimum spanning tree with sets.
+//
+// As with other algorithms that use Cost, the order of precedence is Argument > Interface > UniformCost
 func Prim(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
@@ -233,21 +247,24 @@ func Prim(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 		edgeWeights := make(edgeSorter, 0)
 		for _, edge := range edgeList {
 			if dst.NodeExists(edge[0]) && remainingNodes.Contains(edge[1]) {
-				edgeWeights = append(edgeWeights, edgeWeight{edge, Cost(edge[0], edge[1])})
+				edgeWeights = append(edgeWeights, WeightedEdge{edge, Cost(edge[0], edge[1])})
 			}
 		}
 
 		sort.Sort(edgeWeights)
 		myEdge := edgeWeights[0]
 
-		dst.AddNode(myEdge.edge[0], []int{myEdge.edge[1]})
-		dst.SetEdgeCost(myEdge.edge[0], myEdge.edge[1], myEdge.weight)
+		dst.AddNode(myEdge.Edge[0], []int{myEdge.Edge[1]})
+		dst.SetEdgeCost(myEdge.Edge[0], myEdge.Edge[1], myEdge.Weight)
 
-		remainingNodes.Remove(myEdge.edge[1])
+		remainingNodes.Remove(myEdge.Edge[1])
 	}
 
 }
 
+// Generates a minimum spanning tree for a graph using discrete.DisjointSet
+//
+// As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost
 func Kruskal(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
@@ -262,7 +279,7 @@ func Kruskal(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 	edgeList := graph.EdgeList()
 	edgeWeights := make(edgeSorter, 0, len(edgeList))
 	for _, edge := range edgeList {
-		edgeWeights = append(edgeWeights, edgeWeight{edge, Cost(edge[0], edge[1])})
+		edgeWeights = append(edgeWeights, WeightedEdge{edge, Cost(edge[0], edge[1])})
 	}
 
 	sort.Sort(edgeWeights)
@@ -273,16 +290,19 @@ func Kruskal(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 	}
 
 	for _, edge := range edgeWeights {
-		if s1, s2 := ds.Find(edge.edge[0]), ds.Find(edge.edge[1]); s1 != s2 {
+		if s1, s2 := ds.Find(edge.Edge[0]), ds.Find(edge.Edge[1]); s1 != s2 {
 			ds.Union(s1, s2)
-			dst.AddNode(edge.edge[0], []int{edge.edge[1]})
-			dst.SetEdgeCost(edge.edge[0], edge.edge[1], edge.weight)
+			dst.AddNode(edge.Edge[0], []int{edge.Edge[1]})
+			dst.SetEdgeCost(edge.Edge[0], edge.Edge[1], edge.Weight)
 		}
 	}
 }
 
 /* Control flow graph stuff */
 
+// A dominates B if and only if the only path through B travels through A
+//
+// This returns all possible dominators for all nodes, it does not prune for strict dominators, immediate dominators etc
 func Dominators(start int, graph Graph) map[int]*Set {
 	allNodes := NewSet()
 	nlist := graph.NodeList()
@@ -329,24 +349,74 @@ func Dominators(start int, graph Graph) map[int]*Set {
 	return dominators
 }
 
-type edgeWeight struct {
-	edge   [2]int
-	weight float64
+// A Postdominates B if and only if all paths from B travel through A
+//
+// This returns all possible post-dominators for all nodes, it does not prune for strict postdominators, immediate postdominators etc
+func PostDominators(end int, graph Graph) map[int]*Set {
+	allNodes := NewSet()
+	nlist := graph.NodeList()
+	dominators := make(map[int]*Set, len(nlist))
+	for _, node := range nlist {
+		allNodes.Add(node)
+	}
+
+	for _, node := range nlist {
+		dominators[node] = NewSet()
+		if node == end {
+			dominators[node].Add(end)
+		} else {
+			dominators[node].Copy(allNodes)
+		}
+	}
+
+	for somethingChanged := true; somethingChanged; {
+		somethingChanged = false
+		for _, node := range nlist {
+			if node == end {
+				continue
+			}
+			succs := graph.Successors(node)
+			if len(succs) == 0 {
+				continue
+			}
+			tmp := NewSet().Copy(dominators[succs[0]])
+			for _, succ := range succs[1:] {
+				tmp.Intersection(tmp, dominators[succ])
+			}
+
+			dom := NewSet()
+			dom.Add(node)
+
+			dom.Union(dom, tmp)
+			if !dom.Equal(dominators[node]) {
+				dominators[node] = dom
+				somethingChanged = true
+			}
+		}
+	}
+
+	return dominators
 }
 
-type edgeSorter []edgeWeight
+/* Purely internal data structures and functions (mostly for sorting) */
+
+/** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/
+
+type edgeSorter []WeightedEdge
 
 func (el edgeSorter) Len() int {
 	return len(el)
 }
 
 func (el edgeSorter) Less(i, j int) bool {
-	return el[i].weight < el[j].weight
+	return el[i].Weight < el[j].Weight
 }
 
 func (el edgeSorter) Swap(i, j int) {
 	el[i], el[j] = el[j], el[i]
 }
+
+/** Keeps track of a node's scores so they can be used in a priority queue for A* **/
 
 type internalNode struct {
 	int
@@ -356,7 +426,7 @@ type internalNode struct {
 type aStarPriorityQueue []internalNode
 
 func (pq aStarPriorityQueue) Less(i, j int) bool {
-	return -pq[i].fscore < -pq[j].fscore
+	return -pq[i].fscore < -pq[j].fscore // As the heap documentation says, a priority queue is listed if the actual values are treated as if they were negative
 }
 
 func (pq aStarPriorityQueue) Swap(i, j int) {
@@ -384,4 +454,16 @@ func (pq aStarPriorityQueue) Pop() interface{} {
 	pq = pq[:len(pq)-1]
 
 	return x
+}
+
+// Rebuilds a path backwards from the goal.
+func rebuildPath(predecessors map[int]int, goal int) []int {
+	path := []int{goal}
+	curr := goal
+	for prev, ok := predecessors[curr]; ok; prev, ok = predecessors[curr] {
+		path = append([]int{prev}, path...) // Maybe do something better than prepending?
+		curr = prev
+	}
+
+	return path
 }

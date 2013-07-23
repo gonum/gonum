@@ -4,6 +4,8 @@ import (
 	"errors"
 )
 
+/* Simple Stack/Queue implementations, I don't think they need to be explained much */
+
 type Pusher interface {
 	Push(x interface{})
 }
@@ -85,6 +87,7 @@ func (q Queue) IsEmpty() bool {
 	return len(q) == 0
 }
 
+// Deque is a stack/queue hybrid (from "deck"), I'm not sure if the type conversions will hurt performance or not (I suspect not)
 type Deque []interface{}
 
 func (d Deque) IsEmpty() bool {
@@ -99,6 +102,7 @@ func (d Deque) Pop() (interface{}, error) {
 	return Stack(d).Pop()
 }
 
+// Poll is a queue-pop
 func (d Deque) Poll() (interface{}, error) {
 	return Queue(d).Pop()
 }

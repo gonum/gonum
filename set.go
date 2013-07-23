@@ -32,21 +32,21 @@ func (s1 *Set) Clear() *Set {
 	return s1
 }
 
-// Ensures a perfect copy from s1 to dest (meaning the sets will be equal)
-func (s1 *Set) CopyTo(dest *Set) *Set {
-	if s1 == dest {
-		return dest
+// Ensures a perfect copy from s1 to dst (meaning the sets will be equal)
+func (dst *Set) Copy(src *Set) *Set {
+	if src == dst {
+		return dst
 	}
 
-	if len(*dest) > 0 {
-		*(dest) = *NewSet()
+	if len(*dst) > 0 {
+		*(dst) = *NewSet()
 	}
 
-	for el := range *s1 {
-		(*dest)[el] = flag
+	for el := range *src {
+		(*dst)[el] = flag
 	}
 
-	return dest
+	return dst
 }
 
 func (s1 *Set) Equal(s2 *Set) bool {
@@ -65,87 +65,92 @@ func (s1 *Set) Equal(s2 *Set) bool {
 	return true
 }
 
-func (dest *Set) Union(s1, s2 *Set) *Set {
+func (dst *Set) Union(s1, s2 *Set) *Set {
 	if s1 == s2 {
-		return s1.CopyTo(dest)
+		return dst.Copy(s1)
 	}
 
-	if s1 != dest && s2 != dest {
-		dest.Clear()
+	if s1 != dst && s2 != dst {
+		dst.Clear()
 	}
 
-	if dest != s1 {
+	if dst != s1 {
 		for el := range *s1 {
-			(*dest)[el] = flag
+			(*dst)[el] = flag
 		}
 	}
 
-	if dest != s2 {
+	if dst != s2 {
 		for el := range *s2 {
-			(*dest)[el] = flag
+			(*dst)[el] = flag
 		}
 	}
 
-	return dest
+	return dst
 }
 
-func (dest *Set) Intersection(s1, s2 *Set) *Set {
+func (dst *Set) Intersection(s1, s2 *Set) *Set {
 	var swap *Set
 
 	if s1 == s2 {
-		return s1.CopyTo(dest)
-	} else if s1 == dest {
+		return dst.Copy(s1)
+	} else if s1 == dst {
 		swap = s2
-	} else if s2 == dest {
+	} else if s2 == dst {
 		swap = s1
 	} else {
-		dest.Clear()
+		dst.Clear()
 
 		if len(*s1) > len(*s2) {
 			s1, s2 = s2, s1
 		}
 		for el := range *s1 {
 			if _, ok := (*s2)[el]; ok {
-				(*dest)[el] = flag
+				(*dst)[el] = flag
 			}
 		}
 
-		return dest
+		return dst
 	}
 
-	for el := range *dest {
+	for el := range *dst {
 		if _, ok := (*swap)[el]; !ok {
-			delete(*dest, el)
+			delete(*dst, el)
 		}
 	}
 
-	return dest
+	return dst
 }
 
-func (dest *Set) Diff(s1, s2 *Set) *Set {
+func (dst *Set) Diff(s1, s2 *Set) *Set {
 	if s1 == s2 {
-		return dest.Clear()
-	} else if s2 == dest {
+		return dst.Clear()
+	} else if s2 == dst {
 		tmp := NewSet()
 
-		return tmp.Diff(s1, s2).CopyTo(dest)
-	} else if s1 == dest {
-		for el := range *dest {
+		return dst.Copy(tmp.Diff(s1, s2))
+	} else if s1 == dst {
+		for el := range *dst {
 			if _, ok := (*s2)[el]; ok {
-				delete(*dest, el)
+				delete(*dst, el)
 			}
 		}
 
 	} else {
-		dest.Clear()
+		dst.Clear()
 		for el := range *s1 {
 			if _, ok := (*s2)[el]; !ok {
-				(*dest)[el] = flag
+				(*dst)[el] = flag
 			}
 		}
 	}
 
-	return dest
+	return dst
+}
+
+func (s *Set) Contains(el interface{}) bool {
+	_, ok := (*s)[el]
+	return ok
 }
 
 // Are Add/Remove necessary?
@@ -155,4 +160,72 @@ func (s1 *Set) Add(element interface{}) {
 
 func (s1 *Set) Remove(element interface{}) {
 	delete(*s1, element)
+}
+
+func (s1 *Set) Cardinality() int {
+	return len(*s1)
+}
+
+/* Should probably be re-implemented as a tree later */
+type DisjointSet struct {
+	master  *Set
+	subsets []*Set
+}
+
+func NewDisjointSet() *DisjointSet {
+	return &DisjointSet{NewSet(), make([]*Set, 0)}
+}
+
+func (ds *DisjointSet) MasterSet() *Set {
+	return ds.master
+}
+
+func (ds *DisjointSet) MakeSet(el interface{}) {
+	if ds.master.Contains(el) {
+		return
+	}
+	ds.master.Add(el)
+	ns := NewSet()
+	ns.Add(el)
+	ds.subsets = append(ds.subsets, ns)
+}
+
+func (ds *DisjointSet) Find(el interface{}) *Set {
+	if !ds.master.Contains(el) {
+		return nil
+	}
+
+	for _, subset := range ds.subsets {
+		if subset.Contains(el) {
+			return subset
+		}
+	}
+
+	return nil
+}
+
+func (ds *DisjointSet) Union(s1, s2 *Set) {
+	if s1 == s2 {
+		return
+	}
+	s1Found, s2Found := false, false
+
+	newSubsetList := make([]*Set, 0, len(ds.subsets)-1)
+
+	for _, subset := range ds.subsets {
+		if s1 == subset {
+			s1Found = true
+			continue
+		} else if s2 == subset {
+			s2Found = true
+			continue
+		}
+
+		newSubsetList = append(newSubsetList, subset)
+	}
+
+	if s1Found && s2Found {
+		newSubsetList = append(newSubsetList, s1.Union(s1, s2))
+		ds.subsets = newSubsetList
+	}
 }

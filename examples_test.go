@@ -93,11 +93,11 @@ func ExampleAddConst() {
 	// s =  [6 3 8 1]
 }
 
-func ExampleCumprod() {
+func ExampleCumProd() {
 	s := []float64{1, -2, 3, -4}
 	dst := make([]float64, len(s))
 
-	Cumprod(dst, s)
+	CumProd(dst, s)
 
 	fmt.Println("dst = ", dst)
 	fmt.Println("s = ", s)
@@ -106,11 +106,11 @@ func ExampleCumprod() {
 	// s =  [1 -2 3 -4]
 }
 
-func ExampleCumsum() {
+func ExampleCumSum() {
 	s := []float64{1, -2, 3, -4}
 	dst := make([]float64, len(s))
 
-	Cumsum(dst, s)
+	CumSum(dst, s)
 
 	fmt.Println("dst = ", dst)
 	fmt.Println("s = ", s)

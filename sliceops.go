@@ -45,7 +45,7 @@ func Apply(s []float64, f func(float64) float64) {
 // Cumprod finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Assumes destination is at least as long as s
-func Cumprod(dst, s []float64) []float64 {
+func CumProd(dst, s []float64) []float64 {
 	if dst == nil {
 		dst = make([]float64, len(s))
 	}
@@ -62,7 +62,7 @@ func Cumprod(dst, s []float64) []float64 {
 // Cumsum finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Assumes destination is at least as long as s
-func Cumsum(dst, s []float64) {
+func CumSum(dst, s []float64) {
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] + s[i]
@@ -166,7 +166,7 @@ func Logspace(dst []float64, l, u float64) {
 }
 
 // Logsumexp returns the log of the sum of the exponentials of the values in s
-func Logsumexp(s []float64) (logsumexp float64) {
+func LogSumExp(s []float64) (logsumexp float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
 	// First, find the maximum value in the slice.

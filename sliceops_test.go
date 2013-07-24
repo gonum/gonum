@@ -52,23 +52,23 @@ func TestApply(t *testing.T) {
 	AreSlicesEqual(t, truth, s, "Wrong application of function")
 }
 
-func TestCumprod(t *testing.T) {
+func TestCumProd(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
-	Cumprod(receiver, s)
+	CumProd(receiver, s)
 	truth := []float64{3, 12, 12, 84, 420}
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with new receiver")
-	Cumprod(receiver, s)
+	CumProd(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
 }
 
 func TestCumSum(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
-	Cumsum(receiver, s)
+	CumSum(receiver, s)
 	truth := []float64{3, 7, 8, 15, 20}
 	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with new receiver")
-	Cumsum(receiver, s)
+	CumSum(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with reused receiver")
 }
 
@@ -184,9 +184,9 @@ func TestLogspace(t *testing.T) {
 	AreSlicesEqual(t, comp, tst, "Improper logspace")
 }
 
-func TestLogsumexp(t *testing.T) {
+func TestLogSumExp(t *testing.T) {
 	s := []float64{1, 2, 3, 4, 5}
-	val := Logsumexp(s)
+	val := LogSumExp(s)
 	// http://www.wolframalpha.com/input/?i=log%28exp%281%29+%2B+exp%282%29+%2B+exp%283%29+%2B+exp%284%29+%2B+exp%285%29%29
 	truth := 5.4519143959375933331957225109748087179338972737576824
 	if math.Abs(val-truth) > EQTOLERANCE {
@@ -195,7 +195,7 @@ func TestLogsumexp(t *testing.T) {
 	s = []float64{1, 2}
 	// http://www.wolframalpha.com/input/?i=log%28exp%281%29+%2B+exp%282%29%29
 	truth = 2.3132616875182228340489954949678556419152800856703483
-	val = Logsumexp(s)
+	val = LogSumExp(s)
 	if math.Abs(val-truth) > EQTOLERANCE {
 		t.Errorf("Wrong logsumexp for two values. %v expected, %v found", truth, val)
 	}
@@ -203,7 +203,7 @@ func TestLogsumexp(t *testing.T) {
 	s = []float64{-1001, -1002, -1003, -1004, -1005}
 	// http://www.wolframalpha.com/input/?i=log%28exp%28-1001%29%2Bexp%28-1002%29%2Bexp%28-1003%29%2Bexp%28-1004%29%2Bexp%28-1005%29%29
 	truth = -1000.54808560406240666680427748902519128206610272624
-	val = Logsumexp(s)
+	val = LogSumExp(s)
 	if math.Abs(val-truth) > EQTOLERANCE {
 		t.Errorf("Doesn't match for underflow case. %v expected, %v found", truth, val)
 	}
@@ -446,7 +446,7 @@ func BenchmarkAddFourHuge(b *testing.B) {
 func benchmarkLogsumexp(b *testing.B, s []float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		_ = Logsumexp(s)
+		_ = LogSumExp(s)
 	}
 }
 

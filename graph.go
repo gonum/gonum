@@ -121,8 +121,8 @@ func UniformCost(a, b int) float64 {
 // A heuristic is admissible if, for any node in the graph, the heuristic estimate of the cost between the node and the goal is less than or equal to the true cost.
 //
 // Performance may be improved by providing a consistent heuristic (though one is not needed to find the optimal path), a heuristic is consistent if its value for a given node is less than the
-// actual cost of reaching its neighbors + the heuristic estimate for the neighbor itself. You can force consistency by making your heuristic return max(HeuristicCost(neighbor,goal), HeuristicCost(self,goal) - Cost(self,neighbor)).
-// If there are multiple neighbors, take the max of all of them.
+// actual cost of reaching its neighbors + the heuristic estimate for the neighbor itself. You can force consistency by making your HeuristicCost function
+// return max(NonConsistentHeuristicCost(neighbor,goal), NonConsistentHeuristicCost(self,goal) - Cost(self,neighbor)). If there are multiple neighbors, take the max of all of them.
 //
 // Cost and HeuristicCost take precedence for evaluating cost/heuristic distance. If one is not present (i.e. nil) the function will check the graph's interface for the respective interface:
 // Coster for Cost and HeuristicCoster for HeuristicCost. If the correct one is present, it will use the graph's function for evaluation.
@@ -157,13 +157,14 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 
 	for openSet.Len() != 0 {
 		curr := heap.Pop(openSet).(internalNode)
-		nodesExpanded += 1
 
 		// This isn't in most implementations of A*, it's a restructuring of the step "if node not in openSet, add it"
 		// Instead of searching to check, we see if we already evaluated it. If we have we can ignore it
 		if _, ok := closedSet[curr.int]; ok {
 			continue
 		}
+
+		nodesExpanded += 1
 
 		if curr.int == goal {
 			return rebuildPath(predecessor, goal), curr.gscore, nodesExpanded

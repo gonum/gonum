@@ -164,14 +164,9 @@ func LogSumExp(s []float64) (lse float64) {
 		// returning now avoids NaNs
 		return maxval
 	}
-	// Subtract off the largest value, so the largest value in
-	// the new slice is 0
-	AddConst(s, -maxval)
-	defer AddConst(s, maxval) // make sure we add it back on at the end
-
-	// compute the sumexp part
+	// Compute the sumexp part
 	for _, val := range s {
-		lse += math.Exp(val)
+		lse += math.Exp(val - maxval)
 	}
 	// Take the log and add back on the constant taken out
 	lse = math.Log(lse) + maxval

@@ -138,12 +138,12 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 		if hgraph, ok := graph.(HeuristicCoster); ok {
 			HeuristicCost = hgraph.HeuristicCost
 		} else {
-			HeuristicCost = HeuristicCost
+			HeuristicCost = NullHeuristic
 		}
 	}
 
 	closedSet := make(map[int]internalNode)
-	openSet := make(aStarPriorityQueue, 0)
+	openSet := &aStarPriorityQueue{}
 	heap.Init(openSet)
 	node := internalNode{start, 0, HeuristicCost(start, goal)}
 	heap.Push(openSet, node)
@@ -433,33 +433,25 @@ type internalNode struct {
 
 type aStarPriorityQueue []internalNode
 
-func (pq aStarPriorityQueue) Less(i, j int) bool {
-	return -pq[i].fscore < -pq[j].fscore // As the heap documentation says, a priority queue is listed if the actual values are treated as if they were negative
+func (pq *aStarPriorityQueue) Less(i, j int) bool {
+	return -(*pq)[i].fscore < -(*pq)[j].fscore // As the heap documentation says, a priority queue is listed if the actual values are treated as if they were negative
 }
 
-func (pq aStarPriorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
+func (pq *aStarPriorityQueue) Swap(i, j int) {
+	(*pq)[i], (*pq)[j] = (*pq)[j], (*pq)[i]
 }
 
-func (pq aStarPriorityQueue) Len() int {
-	return len(pq)
+func (pq *aStarPriorityQueue) Len() int {
+	return len(*pq)
 }
 
-func (pq aStarPriorityQueue) Push(x interface{}) {
-	el, ok := x.(internalNode)
-	if !ok {
-		return
-	}
-	pq = append(pq, el)
+func (pq *aStarPriorityQueue) Push(x interface{}) {
+	*pq = append(*pq, x.(internalNode))
 }
 
-func (pq aStarPriorityQueue) Pop() interface{} {
-	if len(pq) == 0 {
-		return nil
-	}
-
-	x := pq[len(pq)-1]
-	pq = pq[:len(pq)-1]
+func (pq *aStarPriorityQueue) Pop() interface{} {
+	x := (*pq)[len(*pq)-1]
+	(*pq) = (*pq)[:len(*pq)-1]
 
 	return x
 }

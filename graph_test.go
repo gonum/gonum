@@ -95,4 +95,31 @@ func TestTileGraph(t *testing.T) {
 	if tg.Degree(0) != 0 {
 		t.Error("Degree returns incorrect number for impassable tile (0,0)")
 	}
+
+}
+
+func TestSimpleAStar(t *testing.T) {
+	tg, err := discrete.GenerateTileGraph("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
+	if err != nil {
+		t.Fatal("Couldn't generate tilegraph")
+	}
+
+	path, cost := discrete.AStar(1, 14, tg, nil, nil)
+	if cost != 4.0 {
+		t.Errorf("A* reports incorrect cost for simple tilegraph search")
+	}
+
+	if path == nil {
+		t.Fatalf("A* fails to find path for for simple tilegraph search")
+	} else {
+		correctPath := []int{1, 2, 6, 10, 14}
+		if len(path) != len(correctPath) {
+			t.Fatalf("Astar returns wrong length path for simple tilegraph search")
+		}
+		for i, node := range path {
+			if node != correctPath[i] {
+				t.Errorf("Astar returns wrong path at step", i, "got:", node, "actual:", correctPath[i])
+			}
+		}
+	}
 }

@@ -154,7 +154,7 @@ func LogSpan(dst []float64, l, u float64) {
 }
 
 // Logsumexp returns the log of the sum of the exponentials of the values in s
-func LogSumExp(s []float64) (logsumexp float64) {
+func LogSumExp(s []float64) (lse float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
 	// First, find the maximum value in the slice.
@@ -171,10 +171,10 @@ func LogSumExp(s []float64) (logsumexp float64) {
 
 	// compute the sumexp part
 	for _, val := range s {
-		logsumexp += math.Exp(val)
+		lse += math.Exp(val)
 	}
 	// Take the log and add back on the constant taken out
-	logsumexp = math.Log(logsumexp) + maxval
+	lse = math.Log(lse) + maxval
 	return logsumexp
 }
 

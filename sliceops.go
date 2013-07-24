@@ -143,25 +143,13 @@ func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error)
 	return inds, InsufficientElements{}
 }
 
-// Linspace returns a set of N equally spaced points between l and u, where N
-// is equal to the length of the destination. The first element of the destination
-// is l, the final element of the destination is u. Will panic if the destination has
-// length < 2
-func Linspace(dst []float64, l, u float64) {
-	n := len(dst)
-	step := (u - l) / float64(n-1)
-	for i := range dst {
-		dst[i] = l + step*float64(i)
-	}
-}
-
-// Logspace returns a set of N equally spaced points in log space between l and u, where N
+// LogSpan returns a set of N equally spaced points in log space between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u. Will panic if the destination has
 // length < 2. Note that this call will return NaNs if l or u are negative, and
 // zeros if l or u is zero.
-func Logspace(dst []float64, l, u float64) {
-	Linspace(dst, math.Log(l), math.Log(u))
+func LogSpan(dst []float64, l, u float64) {
+	Span(dst, math.Log(l), math.Log(u))
 	Apply(dst, math.Exp)
 }
 
@@ -273,6 +261,18 @@ func Prod(s []float64) (prod float64) {
 func Scale(s []float64, c float64) {
 	for i := range s {
 		s[i] *= c
+	}
+}
+
+// Span returns a set of N equally spaced points between l and u, where N
+// is equal to the length of the destination. The first element of the destination
+// is l, the final element of the destination is u. Will panic if the destination has
+// length < 2
+func Span(dst []float64, l, u float64) {
+	n := len(dst)
+	step := (u - l) / float64(n-1)
+	for i := range dst {
+		dst[i] = l + step*float64(i)
 	}
 }
 

@@ -158,21 +158,10 @@ func TestFindFirst(t *testing.T) {
 	}
 }
 
-func TestLinspace(t *testing.T) {
-	receiver := make([]float64, 5)
-	truth := []float64{1, 2, 3, 4, 5}
-	Linspace(receiver, 1, 5)
-	AreSlicesEqual(t, truth, receiver, "Improper linspace")
-	receiver = make([]float64, 6)
-	truth = []float64{0, 0.2, 0.4, 0.6, 0.8, 1.0}
-	Linspace(receiver, 0, 1)
-	AreSlicesEqual(t, truth, receiver, "Improper linspace")
-}
-
-func TestLogspace(t *testing.T) {
+func TestLogSpan(t *testing.T) {
 	receiver := make([]float64, 6)
 	truth := []float64{0.001, 0.01, 0.1, 1, 10, 100}
-	Logspace(receiver, 0.001, 100)
+	LogSpan(receiver, 0.001, 100)
 	tst := make([]float64, 6)
 	for i := range truth {
 		tst[i] = receiver[i] / truth[i]
@@ -294,6 +283,17 @@ func TestScale(t *testing.T) {
 	truth := []float64{15, 20, 5, 35, 25}
 	Scale(s, c)
 	AreSlicesEqual(t, truth, s, "Bad scaling")
+}
+
+func TestSpan(t *testing.T) {
+	receiver := make([]float64, 5)
+	truth := []float64{1, 2, 3, 4, 5}
+	Span(receiver, 1, 5)
+	AreSlicesEqual(t, truth, receiver, "Improper linspace")
+	receiver = make([]float64, 6)
+	truth = []float64{0, 0.2, 0.4, 0.6, 0.8, 1.0}
+	Span(receiver, 0, 1)
+	AreSlicesEqual(t, truth, receiver, "Improper linspace")
 }
 
 func TestSub(t *testing.T) {
@@ -443,34 +443,34 @@ func BenchmarkAddFourHuge(b *testing.B) {
 	benchmarkAdd(b, s, t, u, v)
 }
 
-func benchmarkLogsumexp(b *testing.B, s []float64) {
+func benchmarkLogSumExp(b *testing.B, s []float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		_ = LogSumExp(s)
 	}
 }
 
-func BenchmarkLogsumexpSmall(b *testing.B) {
+func BenchmarkLogSumExpSmall(b *testing.B) {
 	b.StopTimer()
 	s := RandomSlice(SMALL)
-	benchmarkLogsumexp(b, s)
+	benchmarkLogSumExp(b, s)
 }
 
-func BenchmarkLogsumexpMed(b *testing.B) {
+func BenchmarkLogSumExpMed(b *testing.B) {
 	b.StopTimer()
 	s := RandomSlice(MEDIUM)
-	benchmarkLogsumexp(b, s)
+	benchmarkLogSumExp(b, s)
 }
 
-func BenchmarkLogsumexpLarge(b *testing.B) {
+func BenchmarkLogSumExpLarge(b *testing.B) {
 	b.StopTimer()
 	s := RandomSlice(LARGE)
-	benchmarkLogsumexp(b, s)
+	benchmarkLogSumExp(b, s)
 }
-func BenchmarkLogsumexpHuge(b *testing.B) {
+func BenchmarkLogSumExpHuge(b *testing.B) {
 	b.StopTimer()
 	s := RandomSlice(HUGE)
-	benchmarkLogsumexp(b, s)
+	benchmarkLogSumExp(b, s)
 }
 
 func benchmarkDot(b *testing.B, s1 []float64, s2 []float64) {

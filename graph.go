@@ -118,6 +118,12 @@ func UniformCost(a, b int) float64 {
 // Returns an ordered list consisting of the nodes between start and goal. The path will be the shortest path assuming the function heuristicCost is admissible
 // The second return value is the cost
 //
+// A heuristic is admissible if, for any node in the graph, the heuristic estimate of the cost between the node and the goal is less than or equal to the true cost.
+//
+// Performance may be improved by providing a consistent heuristic (though one is not needed to find the optimal path), a heuristic is consistent if its value for a given node is less than the
+// actual cost of reaching its neighbors + the heuristic estimate for the neighbor itself. You can force consistency by making your heuristic return max(HeuristicCost(neighbor,goal), HeuristicCost(self,goal) - Cost(self,neighbor)).
+// If there are multiple neighbors, take the max of all of them.
+//
 // Cost and HeuristicCost take precedence for evaluating cost/heuristic distance. If one is not present (i.e. nil) the function will check the graph's interface for the respective interface:
 // Coster for Cost and HeuristicCoster for HeuristicCost. If the correct one is present, it will use the graph's function for evaluation.
 //

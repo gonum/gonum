@@ -13,8 +13,8 @@ type Graph interface {
 	IsAdjacent(node, neighbor int) bool       // IsSuccessor || IsPredecessor
 	NodeExists(node int) bool                 // Returns whether a node with the given ID is currently in the graph
 	Degree(node int) int                      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
-	EdgeList() [][2]int                       // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph you do only need provide one direction
-	NodeList() []int                          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected
+	EdgeList() [][2]int                       // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph you do only need provide one direction (but may provide both)
+	NodeList() []int                          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected. The caller is free to modify this list (so don't pass a reference to your own list)
 	IsDirected() bool
 }
 
@@ -35,13 +35,13 @@ type HeuristicCoster interface {
 // A Mutable Graph
 type MutableGraph interface {
 	Graph
-	AddNode(id int, successors []int)                 // The graph itself is responsible for adding reciprocal edges if it's undirected
-	AddEdge(node1, node2 int)                         // For a digraph, adds node1->node2; the graph is free to initialize this to any value it wishes. An error should be returned if the edge has not been initialized with AddEdge
-	SetEdgeCost(node1, node2 int, cost float64) error // Returns an error if the edge has not been created with AddEdge (or the edge was removed before this function was called)
-	RemoveNode(node int)                              // The graph is reponsible for removing edges to a node that is removed
-	RemoveEdge(node1, node2 int)                      // The graph is responsible for removing reciprocal edges if it's undirected
-	EmptyGraph()                                      // Clears the graph of all nodes and edges
-	SetDirected(bool)                                 // This package will only call SetDirected on an empty graph, so there's no need to worry about the case where a graph suddenly becomes (un)directed
+	AddNode(id int, successors []int)           // The graph itself is responsible for adding reciprocal edges if it's undirected. Likewise, the graph itself must add any non-existant edges listed in successors.
+	AddEdge(node1, node2 int)                   // For a digraph, adds node1->node2; the graph is free to initialize this to any value it wishes. Node1 must exist, or it will result in undefined behavior, node2 must be created by the function if absent
+	SetEdgeCost(node1, node2 int, cost float64) // The behavior is undefined if the edge has not been created with AddEdge (or the edge was removed before this function was called). For a directed graph only sets node1->node2
+	RemoveNode(node int)                        // The graph is reponsible for removing edges to a node that is removed
+	RemoveEdge(node1, node2 int)                // The graph is responsible for removing reciprocal edges if it's undirected
+	EmptyGraph()                                // Clears the graph of all nodes and edges
+	SetDirected(bool)                           // This package will only call SetDirected on an empty graph, so there's no need to worry about the case where a graph suddenly becomes (un)directed
 }
 
 // A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge[0], Edge[1]) had been called)
@@ -204,7 +204,7 @@ func FullyConnected(graph Graph) bool {
 	for _, node := range graph.NodeList() {
 		if deg := graph.Degree(node); deg == 0 {
 			return false
-		} else if deg == 2 {
+		} else if graph.Degree(node) == 2 {
 			if graph.Successors(node)[0] == node {
 				return false
 			}
@@ -254,7 +254,11 @@ func Prim(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 		sort.Sort(edgeWeights)
 		myEdge := edgeWeights[0]
 
-		dst.AddNode(myEdge.Edge[0], []int{myEdge.Edge[1]})
+		if !dst.NodeExists(myEdge.Edge[0]) {
+			dst.AddNode(myEdge.Edge[0], []int{myEdge.Edge[1]})
+		} else {
+			dst.AddEdge(myEdge.Edge[0], myEdge.Edge[1])
+		}
 		dst.SetEdgeCost(myEdge.Edge[0], myEdge.Edge[1], myEdge.Weight)
 
 		remainingNodes.Remove(myEdge.Edge[1])
@@ -292,7 +296,11 @@ func Kruskal(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 	for _, edge := range edgeWeights {
 		if s1, s2 := ds.Find(edge.Edge[0]), ds.Find(edge.Edge[1]); s1 != s2 {
 			ds.Union(s1, s2)
-			dst.AddNode(edge.Edge[0], []int{edge.Edge[1]})
+			if !dst.NodeExists(edge.Edge[0]) {
+				dst.AddNode(edge.Edge[0], []int{edge.Edge[1]})
+			} else {
+				dst.AddEdge(edge.Edge[0], edge.Edge[1])
+			}
 			dst.SetEdgeCost(edge.Edge[0], edge.Edge[1], edge.Weight)
 		}
 	}
@@ -339,7 +347,7 @@ func Dominators(start int, graph Graph) map[int]*Set {
 			dom.Add(node)
 
 			dom.Union(dom, tmp)
-			if !dom.Equal(dominators[node]) {
+			if !Equal(dom, dominators[node]) {
 				dominators[node] = dom
 				somethingChanged = true
 			}
@@ -388,7 +396,7 @@ func PostDominators(end int, graph Graph) map[int]*Set {
 			dom.Add(node)
 
 			dom.Union(dom, tmp)
-			if !dom.Equal(dominators[node]) {
+			if !Equal(dom, dominators[node]) {
 				dominators[node] = dom
 				somethingChanged = true
 			}

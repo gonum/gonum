@@ -49,7 +49,8 @@ func (dst *Set) Copy(src *Set) *Set {
 	return dst
 }
 
-func (s1 *Set) Equal(s2 *Set) bool {
+// If every element in s1 is also in s2 (and vice versa), the sets are deemed equal
+func Equal(s1, s2 *Set) bool {
 	if s1 == s2 {
 		return true
 	} else if len(*s1) != len(*s2) {
@@ -65,6 +66,15 @@ func (s1 *Set) Equal(s2 *Set) bool {
 	return true
 }
 
+// Takes the union of s1 and s2, and stores it in dst.
+//
+// The union of two sets, s1 and s2, is the set containing all the elements of each, for instance:
+//
+//     {a,b,c} UNION {d,e,f} = {a,b,c,d,e,f}
+//
+// Since sets may not have repetition, unions of two sets that overlap do not contain repeat elements, that is:
+//
+//     {a,b,c} UNION {b,c,d} = {a,b,c,d}
 func (dst *Set) Union(s1, s2 *Set) *Set {
 	if s1 == s2 {
 		return dst.Copy(s1)
@@ -89,6 +99,19 @@ func (dst *Set) Union(s1, s2 *Set) *Set {
 	return dst
 }
 
+// Takes the intersection of s1 and s2, and stores it in dst
+//
+// The intersection of two sets, s1 and s2, is the set containing all the elements shared between the two sets, for instance
+//
+//     {a,b,c} INTERSECT {b,c,d} = {b,c}
+//
+// The intersection between a set and itself is itself, and thus effectively a copy operation:
+//
+//     {a,b,c} INTERSECT {a,b,c} = {a,b,c}
+//
+// The intersection between two sets that share no elements is the empty set:
+//
+//     {a,b,c} INTERSECT {d,e,f} = {}
 func (dst *Set) Intersection(s1, s2 *Set) *Set {
 	var swap *Set
 
@@ -122,13 +145,30 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 	return dst
 }
 
+// Takes the difference (-) of s1 and s2 and stores it in dst.
+//
+// The difference (-) between two sets, s1 and s2, is all the elements in s1 that are NOT also in s2.
+//
+//     {a,b,c} - {b,c,d} = {a}
+//
+// The difference between two identical sets is the empty set:
+//
+//     {a,b,c} - {a,b,c} = {a}
+//
+// The difference between two sets with no overlapping elements is s1
+//
+//     {a,b,c} - {d,e,f} = {a,b,c}
+//
+// Implementation note: if dst == s2 (meaning they have identical pointers), a temporary set must be used to store the data
+// and then copied over, thus s2.Diff(s1,s2) has an extra allocation and may cause worse performance in some cases.
 func (dst *Set) Diff(s1, s2 *Set) *Set {
 	if s1 == s2 {
 		return dst.Clear()
 	} else if s2 == dst {
 		tmp := NewSet()
 
-		return dst.Copy(tmp.Diff(s1, s2))
+		tmp.Diff(s1, s2)
+		*dst = *tmp
 	} else if s1 == dst {
 		for el := range *dst {
 			if _, ok := (*s2)[el]; ok {
@@ -148,25 +188,109 @@ func (dst *Set) Diff(s1, s2 *Set) *Set {
 	return dst
 }
 
+// Returns true if s1 is an improper subset of s2.
+//
+// An improper subset occurs when every element in s1 is also in s2 OR s1 and s2 are equal:
+//
+//     {a,b,c}   SUBSET {a,b,c} = true
+//     {a,b}     SUBSET {a,b,c} = true
+//     {c,d}     SUBSET {a,b,c} = false
+//     {a,b,c,d} SUBSET {a,b,c} = false
+//
+// Special case: The empty set is a subset of everything
+//
+// 	   {} SUBSET {a,b} = true
+//     {} SUBSET {}    = true
+//
+// In the case where one needs to test if s1 is smaller than s2, but not equal, use ProperSubset
+func Subset(s1, s2 *Set) bool {
+	if len(*s1) > len(*s2) {
+		return false
+	} else if s1 == s2 {
+		return true
+	} else if len(*s1) == 0 {
+		return true
+	}
+
+	for _, el := range *s1 {
+		if _, ok := (*s2)[el]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Returns true if s1 is a proper subset of s2.
+// A proper subset is when every element of s1 is in s2, but s1 is smaller than s2 (i.e. they are not equal):
+//
+//     {a,b,c}   PROPER SUBSET {a,b,c} = false
+//     {a,b}     PROPER SUBSET {a,b,c} = true
+//     {c,d}     PROPER SUBSET {a,b,c} = false
+//     {a,b,c,d} PROPER SUBSET {a,b,c} = false
+//
+// Special case: The empty set is a proper subset of everything (except itself):
+//
+//      {} PROPER SUBSET {a,b} = true
+//      {} PROPER SUBSET {}    = false
+//
+// When equality is allowed, use Subset
+func ProperSubset(s1, s2 *Set) bool {
+	if len(*s1) >= len(*s2) {
+		return false
+	} else if len(*s1) == 0 {
+		return true
+	} // We can eschew the s1 == s2 because if they are the same their lens are equal anyway
+
+	for _, el := range *s1 {
+		if _, ok := (*s2)[el]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Returns true if el is an element of s.
 func (s *Set) Contains(el interface{}) bool {
 	_, ok := (*s)[el]
 	return ok
 }
 
-// Are Add/Remove necessary?
+// Adds the element el to s1
 func (s1 *Set) Add(element interface{}) {
 	(*s1)[element] = flag
 }
 
+// Removes the element el from s1
 func (s1 *Set) Remove(element interface{}) {
 	delete(*s1, element)
 }
 
+// Returns the number of elements in s1
 func (s1 *Set) Cardinality() int {
 	return len(*s1)
 }
 
+func (s1 *Set) Elements() (els []interface{}) {
+	els = make([]interface{}, 0, len(*s1))
+	for _, el := range *s1 {
+		els = append(els, el)
+	}
+
+	return els
+}
+
 /* Should probably be re-implemented as a tree later */
+
+// A disjoint set is a collection of non-overlapping sets. That is, for any two sets in the disjoint set, their intersection is the empty set
+//
+// A disjoint set has three principle operations: Make Set, Find, and Union.
+//
+// Make set creates a new set for an element (presuming it does not already exist in any set in the disjoint set), Find finds the set containing that element (if any),
+// and Union merges two sets in the disjoint set. In general, algorithms operating on disjoint sets are "union-find" algorithms, where two sets are found with Find, and then joined with Union.
+//
+// A concrete example of a union-find algorithm can be found as discrete.Kruskal -- which unions two sets when an edge is created between two vertices, and refuses to make an edge between two vertices if they're part of the same set.
 type DisjointSet struct {
 	master  *Set
 	subsets []*Set
@@ -207,6 +331,9 @@ func (ds *DisjointSet) Find(el interface{}) *Set {
 }
 
 // Unions two subsets within the DisjointSet
+//
+// If either s1 or s2 do not appear in the disjoint set (meaning their pointers, deep equality is not tested),
+// the function will return without doing anything. Finding sets to perform a union on is typically done with Find.
 func (ds *DisjointSet) Union(s1, s2 *Set) {
 	if s1 == s2 {
 		return

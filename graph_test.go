@@ -130,6 +130,12 @@ func TestHarderAStar(t *testing.T) {
 	path, cost, _ := discrete.AStar(0, 8, tg, nil, nil)
 
 	if cost != 4.0 || !discrete.IsPath(path, tg) {
-		t.Error("Non-optimal or impossible path found")
+		t.Error("Non-optimal or impossible path found for 3x3 grid")
+	}
+
+	tg = discrete.NewTileGraph(1000, 1000, true)
+	path, cost, _ = discrete.AStar(00, 999*1000+999, tg, nil, nil)
+	if !discrete.IsPath(path, tg) || cost != 1998.0 {
+		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}
 }

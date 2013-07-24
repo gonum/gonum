@@ -91,6 +91,37 @@ func (graph *TileGraph) String() string {
 	return outString[:len(outString)-1] // Kill final newline
 }
 
+func (graph *TileGraph) PathString(path []int) string {
+	if path == nil || len(path) == 0 {
+		return graph.String()
+	}
+
+	var outString string
+	for r := 0; r < graph.numRows; r++ {
+		for c := 0; c < graph.numCols; c++ {
+			if id := r*graph.numCols + c; graph.tiles[id] == false {
+				outString += "\u2580" // Black square
+			} else if id == path[0] {
+				outString += "s"
+			} else if id == path[len(path)-1] {
+				outString += "g"
+			} else {
+				toAppend := " "
+				for _, num := range path[1 : len(path)-1] {
+					if id == num {
+						toAppend = "♥"
+					}
+				}
+				outString += toAppend
+			}
+		}
+
+		outString += "\n"
+	}
+
+	return outString[:len(outString)-1]
+}
+
 func (graph *TileGraph) Dimensions() (rows, cols int) {
 	return graph.numRows, graph.numCols
 }

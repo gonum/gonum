@@ -104,7 +104,7 @@ func TestSimpleAStar(t *testing.T) {
 		t.Fatal("Couldn't generate tilegraph")
 	}
 
-	path, cost := discrete.AStar(1, 14, tg, nil, nil)
+	path, cost, _ := discrete.AStar(1, 14, tg, nil, nil)
 	if cost != 4.0 {
 		t.Errorf("A* reports incorrect cost for simple tilegraph search")
 	}
@@ -121,5 +121,15 @@ func TestSimpleAStar(t *testing.T) {
 				t.Errorf("Astar returns wrong path at step", i, "got:", node, "actual:", correctPath[i])
 			}
 		}
+	}
+}
+
+func TestHarderAStar(t *testing.T) {
+	tg := discrete.NewTileGraph(3, 3, true)
+
+	path, cost, _ := discrete.AStar(0, 8, tg, nil, nil)
+
+	if cost != 4.0 || !discrete.IsPath(path, tg) {
+		t.Error("Non-optimal or impossible path found")
 	}
 }

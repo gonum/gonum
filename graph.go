@@ -126,7 +126,7 @@ func UniformCost(a, b int) float64 {
 // To run Uniform Cost Search, run A* with the NullHeuristic
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost function that returns a uniform positive value)
-func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) float64) (path []int, cost float64) {
+func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) float64) (path []int, cost float64, nodesExpanded int) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
 			Cost = cgraph.Cost
@@ -151,6 +151,7 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 
 	for openSet.Len() != 0 {
 		curr := heap.Pop(openSet).(internalNode)
+		nodesExpanded += 1
 
 		// This isn't in most implementations of A*, it's a restructuring of the step "if node not in openSet, add it"
 		// Instead of searching to check, we see if we already evaluated it. If we have we can ignore it
@@ -159,7 +160,7 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 		}
 
 		if curr.int == goal {
-			return rebuildPath(predecessor, goal), curr.gscore
+			return rebuildPath(predecessor, goal), curr.gscore, nodesExpanded
 		}
 
 		closedSet[curr.int] = curr
@@ -178,7 +179,7 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 		}
 	}
 
-	return nil, 0.0
+	return nil, 0.0, nodesExpanded
 }
 
 // Finds the shortest path to every (connected) node in the graph from a single source -- no edges may have negative weights
@@ -434,7 +435,7 @@ type internalNode struct {
 type aStarPriorityQueue []internalNode
 
 func (pq *aStarPriorityQueue) Less(i, j int) bool {
-	return -(*pq)[i].fscore < -(*pq)[j].fscore // As the heap documentation says, a priority queue is listed if the actual values are treated as if they were negative
+	return (*pq)[i].fscore < (*pq)[j].fscore // As the heap documentation says, a priority queue is listed if the actual values are treated as if they were negative
 }
 
 func (pq *aStarPriorityQueue) Swap(i, j int) {

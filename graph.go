@@ -13,7 +13,7 @@ type Graph interface {
 	IsAdjacent(node, neighbor int) bool       // IsSuccessor || IsPredecessor
 	NodeExists(node int) bool                 // Returns whether a node with the given ID is currently in the graph
 	Degree(node int) int                      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
-	EdgeList() [][2]int                       // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph you do only need provide one direction (but may provide both)
+	EdgeList() [][2]int                       // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph, provide both directions as separate edges
 	NodeList() []int                          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected. The caller is free to modify this list (so don't pass a reference to your own list)
 	IsDirected() bool
 }

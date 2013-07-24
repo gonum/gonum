@@ -175,7 +175,7 @@ func LogSumExp(s []float64) (lse float64) {
 	}
 	// Take the log and add back on the constant taken out
 	lse = math.Log(lse) + maxval
-	return logsumexp
+	return lse
 }
 
 // Max returns the maximum value in the slice and the location of

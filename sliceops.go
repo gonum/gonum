@@ -96,7 +96,7 @@ func Eq(s1, s2 []float64, tol float64) bool {
 // Eqlen returns true if all of the slices have equal length,
 // and false otherwise.
 // Special case: Returns true if there are no input slices
-func Eqlen(slices ...[]float64) bool {
+func EqLen(slices ...[]float64) bool {
 	if len(slices) == 0 {
 		return true
 	}

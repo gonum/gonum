@@ -51,7 +51,7 @@ func ExampleAdd_unequallengths() {
 	s1 := []float64{1, 2, 3}
 	s2 := []float64{5, 6, 7, 8}
 
-	eq := Eqlen(s1, s2)
+	eq := EqLen(s1, s2)
 	if eq {
 		Add(s1, s2)
 	} else {

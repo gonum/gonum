@@ -1,10 +1,11 @@
-package sliceops
+package floats
 
 import "math"
 
 // InsufficientElements is an error type used by FindFirst
 type InsufficientElements struct{}
 
+// Error makes InsufficientElements satisfy the error interface
 func (i *InsufficientElements) Error() string {
 	return "Insufficient elements found"
 }

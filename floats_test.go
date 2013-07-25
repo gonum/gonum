@@ -1,4 +1,4 @@
-package sliceops
+package floats
 
 import (
 	"math"

@@ -21,6 +21,18 @@ func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
 	}
 }
 
+func testAddPanic(s1 []float64, s2 ...[]float64) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+
+	Add(s1, s2...)
+	return
+}
+
 func TestAdd(t *testing.T) {
 	a := []float64{1, 2, 3}
 	b := []float64{4, 5, 6}
@@ -32,6 +44,10 @@ func TestAdd(t *testing.T) {
 	Add(a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
 	// Test that it appropriately panics for an improper length destination
+	paniced := testAddPanic(make([]float64, 2), make([]float64, 3))
+	if !paniced {
+		t.Errorf("Did not panic with length mismatch")
+	}
 
 }
 

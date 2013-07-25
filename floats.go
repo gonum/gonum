@@ -47,12 +47,6 @@ func Apply(s []float64, f func(float64) float64) {
 // s and puts them in place into the ith element of the
 // destination. Assumes destination is at least as long as s
 func CumProd(dst, s []float64) []float64 {
-	if dst == nil {
-		dst = make([]float64, len(s))
-	}
-	if len(s) == 0 {
-		return dst[:0]
-	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] * s[i]

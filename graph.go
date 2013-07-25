@@ -28,6 +28,7 @@ type Coster interface {
 // A graph that implements HeuristicCoster implements a heuristic between any two given nodes. Like Coster, if a graph implements this and a function needs a heuristic cost (e.g. A*), this function will
 // take precedence over the Null Heuristic (always returns 0) if "nil" is passed in for the function argument
 type HeuristicCoster interface {
+	Coster
 	HeuristicCost(node1, node2 int) float64 // If HeuristicCost is not intended to be used, it can be implemented as the null heuristic (always returns 0)
 }
 

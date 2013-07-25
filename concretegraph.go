@@ -1,5 +1,9 @@
 package discrete
 
+import (
+	"sort"
+)
+
 type GonumGraph struct {
 	successors   map[int]map[int]float64
 	predecessors map[int]map[int]float64
@@ -26,6 +30,21 @@ func NewPreAllocatedGonumGraph(directed bool, numVertices int) *GonumGraph {
 }
 
 /* Mutable Graph implementation */
+
+func (graph *GonumGraph) NewNode(successors []int) (id int) {
+	nodes := sort.IntSlice(graph.NodeList())
+	sort.Sort(&nodes)
+	for i, node := range nodes {
+		if i != node {
+			graph.AddNode(i, successors)
+			return i
+		}
+	}
+
+	newID := len(nodes)
+	graph.AddNode(newID, successors)
+	return newID
+}
 
 func (graph *GonumGraph) AddNode(id int, successors []int) {
 	if graph.vertices.Contains(id) {
@@ -237,4 +256,8 @@ func (graph *GonumGraph) NodeList() []int {
 
 func (graph *GonumGraph) IsDirected() bool {
 	return graph.directed
+}
+
+func (graph *GonumGraph) Cost(id, succ int) float64 {
+	return graph.successors[id][succ]
 }

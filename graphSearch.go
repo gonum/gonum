@@ -84,8 +84,7 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 // because running A* in that way will recompute things it's already computed every call. Note that you won't necessarily get the same path
 // you would get for A*, but the cost is guaranteed to be the same (that is, if multiple shortest paths exist, you may get a different shortest path).
 //
-// Like A*, Dijkstra's Algorithm may run in an endless loop if given a negative edge weight cycle (meaning, it can repeatedly take a path with a negative weight)
-// If you have negative costs, use BellmanFord
+// Like A*, Dijkstra's Algorithm likely won't run correctly with negative edge weights -- use Bellman-Ford for that instead
 //
 // Dijkstra's algorithm usually only returns a cost map, however, since the data is available this version will also reconstruct the path to every node
 func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[int][]int, costs map[int]float64) {
@@ -151,7 +150,7 @@ func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[i
 // such that it can take an edge with a negative cost over and over. A -(-2)> B -(2)> C isn't a loop because A->B can only be taken once, but A<-(-2)->B-(2)>C is one because
 // A and B have a bi-directional edge, and algorithms like Dijkstra's will infinitely flail between them getting progressively lower costs.
 //
-// That said, if you do not have a negative edge weight cycle, use Dijkstra's Algorithm instead, because it's faster.
+// That said, if you do not have a negative edge weight, use Dijkstra's Algorithm instead, because it's faster.
 //
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight.
@@ -194,27 +193,71 @@ func BellmanFord(source int, graph Graph, Cost func(int, int) float64) (paths ma
 	return paths, costs, false
 }
 
-/* Basic Graph tests */
-
-// Checks if every node in the graph has a degree of at least one. If a node has a degree of two, it checks to make sure the edge is not reflexive
-// The empty graph or a graph with a single node is considered trivially connected
-func FullyConnected(graph Graph) bool {
-	nlist := graph.NodeList()
-	if nlist == nil || len(nlist) <= 1 {
-		return true
+// Johnson's Algorithm generates the lowest cost path between every pair of nodes in the graph.
+//
+// It makes use of Bellman-Ford and a dummy graph. It creates a dummy node containing edges with a cost of zero to every other node. Then it runs Bellman-Ford with this
+// dummy node as the source.
+//
+// Finally, it removes the dummy node and run Dijkstra's starting at every node.
+//
+// This algorithm is fairly slow. Its purpose is to remove negative edge weights to allow Dijkstra's to function properly. It's probably not worth it to run this algorithm if you have
+// all non-negative edge weights. Also note that this implementation copies your whole graph into a GonumGraph (so it can add/remove the dummy node and edges and reweight the graph).
+//
+// Its return values are, in order: a map from the source node, to the destination node, to the path between them; a map from the source node, to the destination node, to the cost of the path between them;
+// and a bool that is true if Bellman-Ford detected a negative edge weight cycle -- thus causing it (and this algorithm) to abort (if aborted is true, both maps will be nil).
+func Johnson(graph Graph, Cost func(int, int) float64) (nodePaths map[int]map[int][]int, nodeCosts map[int]map[int]float64, aborted bool) {
+	if Cost == nil {
+		if cgraph, ok := graph.(Coster); ok {
+			Cost = cgraph.Cost
+		} else {
+			Cost = UniformCost
+		}
 	}
-
+	/* Copy graph into a mutable one since it has to be altered for this algorithm */
+	dummyGraph := NewGonumGraph(true)
 	for _, node := range graph.NodeList() {
-		if deg := graph.Degree(node); deg == 0 {
-			return false
-		} else if graph.Degree(node) == 2 {
-			if graph.Successors(node)[0] == node {
-				return false
+		neighbors := graph.Successors(node)
+		if !dummyGraph.NodeExists(node) {
+			dummyGraph.AddNode(node, neighbors)
+			for _, neighbor := range neighbors {
+				dummyGraph.SetEdgeCost(node, neighbor, Cost(node, neighbor))
+			}
+		} else {
+			for _, neighbor := range neighbors {
+				dummyGraph.AddEdge(node, neighbor)
+				dummyGraph.SetEdgeCost(node, neighbor, Cost(node, neighbor))
 			}
 		}
 	}
 
-	return true
+	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
+	dummyNode := dummyGraph.NewNode(graph.NodeList())
+	for _, node := range graph.NodeList() {
+		dummyGraph.SetEdgeCost(dummyNode, node, 0)
+	}
+
+	/* Step 2: Run Bellman-Ford starting at the dummy node, abort if it detects a cycle */
+	_, costs, aborted := BellmanFord(dummyNode, dummyGraph, nil)
+	if aborted {
+		return nil, nil, true
+	}
+
+	/* Step 3: reweight the graph and remove the dummy node */
+	for _, edge := range graph.EdgeList() {
+		dummyGraph.SetEdgeCost(edge[0], edge[1], Cost(edge[0], edge[1])+costs[edge[0]]-costs[edge[1]])
+	}
+
+	dummyGraph.RemoveNode(dummyNode)
+
+	/* Step 4: Run Dijkstra's starting at every node */
+	nodePaths = make(map[int]map[int][]int, len(graph.NodeList()))
+	nodeCosts = make(map[int]map[int]float64)
+
+	for _, node := range graph.NodeList() {
+		nodePaths[node], nodeCosts[node] = Dijkstra(node, dummyGraph, nil)
+	}
+
+	return nodePaths, nodeCosts, false
 }
 
 // Expands the first node it sees trying to find the destination. Depth First Search is *not* guaranteed to find the shortest path,

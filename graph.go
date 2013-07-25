@@ -34,6 +34,7 @@ type HeuristicCoster interface {
 // A Mutable Graph
 type MutableGraph interface {
 	Graph
+	NewNode(successors []int) int               //Adds a node with an arbitrary ID, and returns the new, unique ID used
 	AddNode(id int, successors []int)           // The graph itself is responsible for adding reciprocal edges if it's undirected. Likewise, the graph itself must add any non-existant edges listed in successors.
 	AddEdge(node1, node2 int)                   // For a digraph, adds node1->node2; the graph is free to initialize this to any value it wishes. Node1 must exist, or it will result in undefined behavior, node2 must be created by the function if absent
 	SetEdgeCost(node1, node2 int, cost float64) // The behavior is undefined if the edge has not been created with AddEdge (or the edge was removed before this function was called). For a directed graph only sets node1->node2
@@ -47,6 +48,29 @@ type MutableGraph interface {
 type WeightedEdge struct {
 	Edge   [2]int
 	Weight float64
+}
+
+/* Basic Graph tests */
+
+// Checks if every node in the graph has a degree of at least one. If a node has a degree of two, it checks to make sure the edge is not reflexive
+// The empty graph or a graph with a single node is considered trivially connected
+func FullyConnected(graph Graph) bool {
+	nlist := graph.NodeList()
+	if nlist == nil || len(nlist) <= 1 {
+		return true
+	}
+
+	for _, node := range graph.NodeList() {
+		if deg := graph.Degree(node); deg == 0 {
+			return false
+		} else if graph.Degree(node) == 2 {
+			if graph.Successors(node)[0] == node {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 // Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor

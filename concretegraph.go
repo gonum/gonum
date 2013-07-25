@@ -53,7 +53,7 @@ func (graph *GonumGraph) AddNode(id int, successors []int) {
 	if _, ok := graph.successors[id]; ok {
 		return
 	}
-	graph.vertices.Add(id)
+
 	graph.successors[id] = make(map[int]float64, len(successors))
 	if !graph.directed {
 		graph.predecessors[id] = make(map[int]float64, len(successors))
@@ -65,7 +65,6 @@ func (graph *GonumGraph) AddNode(id int, successors []int) {
 
 		// Always add the reciprocal node to the graph
 		if _, ok := graph.successors[succ]; !ok {
-			graph.vertices.Add(succ)
 			graph.predecessors[succ] = make(map[int]float64)
 			graph.successors[succ] = make(map[int]float64)
 		}
@@ -86,7 +85,6 @@ func (graph *GonumGraph) AddEdge(id, successor int) {
 	}
 
 	if _, ok := graph.successors[successor]; !ok {
-		graph.vertices.Add(successor)
 		graph.successors[successor] = make(map[int]float64)
 		graph.predecessors[successor] = make(map[int]float64)
 	}
@@ -249,6 +247,7 @@ func (graph *GonumGraph) EdgeList() [][2]int {
 }
 
 func (graph *GonumGraph) NodeList() []int {
+	nodes := make([]int, 0, len(graph.successors))
 	for node, _ := range graph.successors {
 		nodes = append(nodes, node)
 	}

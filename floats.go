@@ -5,7 +5,7 @@ import "math"
 // InsufficientElements is an error type used by FindFirst
 type InsufficientElements struct{}
 
-func (i InsufficientElements) Error() string {
+func (i *InsufficientElements) Error() string {
 	return "Insufficient elements found"
 }
 
@@ -109,38 +109,51 @@ func EqLen(slices ...[]float64) bool {
 	return true
 }
 
-// Find applies a function returning a boolean to the elements of the slice
-// and returns a list of indices for which the value is true
-func Find(s []float64, f func(float64) bool) (inds []int) {
-	// Not sure what an appropriate capacity is here. Don't want to make
-	// it the length of the slice because if the slice is large that is
-	// a lot of potentially wasted memory
-	inds = make([]int, 0)
-	for i, val := range s {
-		if f(val) {
-			inds = append(inds, i)
-		}
-	}
-	return inds
-}
+// Find finds the first k indices of the slice s for which
+// the function f returns true and stores them in the slice
+// inds. If k < 0, all such elements are found.
+// Find will reslice inds to have 0 length, and will append
+// found indices to inds.
+// If there are fewer than k elements in s satisfying f,
+// all of the found elements will be returned along with an
+// InsufficientElements error
+// TODO: Add example for nil slice, appending to the end of a larger slice
+// reusing memory, insufficient elements
+func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 
-// FindFirst applies a function returning a boolean to the elements of the slice
-// and returns a list of the first k indices for which the value is true.
-// If there are fewer than k indices for which the value is true, it returns
-// the found indices and an error.
-func FindFirst(s []float64, f func(float64) bool, k int) (inds []int, err error) {
-	count := 0
-	inds = make([]int, 0, k)
+	// inds is also returned to allow for calling with nil
+
+	// Reslice inds to have zero length
+	inds = inds[:0]
+
+	// If zero elements requested, can just return
+	if k == 0 {
+		return inds, nil
+	}
+
+	// If k < 0, return all of the found indices
+	if k < 0 {
+		for i, val := range s {
+			if f(val) {
+				inds = append(inds, i)
+			}
+		}
+		return inds, nil
+	}
+
+	// Otherwise, find the first k elements
+	nFound := 0
 	for i, val := range s {
 		if f(val) {
 			inds = append(inds, i)
-			count++
-			if count == k {
+			nFound++
+			if nFound == k {
 				return inds, nil
 			}
 		}
 	}
-	return inds, InsufficientElements{}
+	// Finished iterating over the loop, which means k elements were not found
+	return inds, &InsufficientElements{}
 }
 
 // LogSpan returns a set of N equally spaced points in log space between l and u, where N

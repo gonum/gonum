@@ -1,9 +1,9 @@
 package sliceops
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
+	"strconv"
 	"testing"
 )
 
@@ -111,50 +111,63 @@ func TestEqLen(t *testing.T) {
 	}
 }
 
+func eqIntSlice(one, two []int) string {
+	if len(one) != len(two) {
+		return "Length mismatch"
+	}
+	for i, val := range one {
+		if val != two[i] {
+			return "Index " + strconv.Itoa(i) + " mismatch"
+		}
+	}
+	return ""
+}
+
 func TestFind(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	f := func(v float64) bool { return v > 3.5 }
-	trueInds := []int{1, 3, 4}
-	inds := Find(s, f)
-	if len(inds) != len(trueInds) {
-		t.Errorf("Wrong number of elements returned")
-		return
-	}
-	for i, val := range trueInds {
-		if inds[i] != val {
-			t.Errorf("Index mismatch")
-			fmt.Println(trueInds)
-			fmt.Println(inds)
-			return
-		}
-	}
-}
+	allTrueInds := []int{1, 3, 4}
 
-func TestFindFirst(t *testing.T) {
-	s := []float64{3, 4, 1, 7, 5}
-	f := func(v float64) bool { return v > 3.5 }
-	trueInds := []int{1, 3}
-	k := 2
-	inds, err := FindFirst(s, f, k)
+	// Test finding first two elements
+	inds, err := Find(nil, 2, s, f)
 	if err != nil {
-		t.Errorf("Incorrectly did not find enough elements")
+		t.Errorf("Find first two: Improper error return")
 	}
-	if len(inds) != len(trueInds) {
-		t.Errorf("Wrong number of elements returned")
-		return
+	trueInds := allTrueInds[:2]
+	str := eqIntSlice(inds, trueInds)
+	if str != "" {
+		t.Errorf("Find first two: " + str)
 	}
-	for i, val := range trueInds {
-		if inds[i] != val {
-			t.Errorf("Index mismatch")
-			fmt.Println(trueInds)
-			fmt.Println(inds)
-			return
-		}
+
+	// Test finding first two elements with non nil slice
+	inds = []int{1, 2, 3, 4, 5, 6}
+	inds, err = Find(inds, 2, s, f)
+	if err != nil {
+		t.Errorf("Find first two non-nil: Improper error return")
 	}
-	f = func(v float64) bool { return v > 6.0 }
-	inds, err = FindFirst(s, f, k)
+	str = eqIntSlice(inds, trueInds)
+	if str != "" {
+		t.Errorf("Find first two non-nil: " + str)
+	}
+
+	// Test finding too many elements
+	inds, err = Find(inds, 4, s, f)
 	if err == nil {
-		t.Errorf("Incorrectly found enough elements")
+		t.Errorf("Request too many: No error returned")
+	}
+	str = eqIntSlice(inds, allTrueInds)
+	if str != "" {
+		t.Errorf("Request too many: Does not match all of the inds: " + str)
+	}
+
+	// Test finding all elements
+	inds, err = Find(nil, -1, s, f)
+	if err != nil {
+		t.Errorf("Find all: Improper error returned")
+	}
+	str = eqIntSlice(inds, allTrueInds)
+	if str != "" {
+		t.Errorf("Find all: Does not match all of the inds: " + str)
 	}
 }
 

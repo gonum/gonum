@@ -4,10 +4,15 @@ import (
 	"sort"
 )
 
+// A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and edges -- as well as act as either directed or undirected.
+//
+// Internally, it uses a map of successors AND predecessors, to speed up some operations (such as getting all successors/predecessors). It also speeds up thing like adding edges (assuming both edges exist).
+//
+// However, its generality is also its weakness (and partially a flaw in needing to satisfy MutableGraph). For most purposes, creating your own graph is probably better. For instance, see discrete.TileGraph for an example
+// of an immutable 2D grid of tiles that also implements the Graph interface, but would be more suitable if all you needed was a simple undirected 2D grid.
 type GonumGraph struct {
 	successors   map[int]map[int]float64
 	predecessors map[int]map[int]float64
-	vertices     *Set
 	directed     bool
 }
 
@@ -15,7 +20,6 @@ func NewGonumGraph(directed bool) *GonumGraph {
 	return &GonumGraph{
 		successors:   make(map[int]map[int]float64),
 		predecessors: make(map[int]map[int]float64),
-		vertices:     NewSet(),
 		directed:     directed,
 	}
 }
@@ -24,7 +28,6 @@ func NewPreAllocatedGonumGraph(directed bool, numVertices int) *GonumGraph {
 	return &GonumGraph{
 		successors:   make(map[int]map[int]float64, numVertices),
 		predecessors: make(map[int]map[int]float64, numVertices),
-		vertices:     NewSet(),
 		directed:     directed,
 	}
 }
@@ -47,7 +50,7 @@ func (graph *GonumGraph) NewNode(successors []int) (id int) {
 }
 
 func (graph *GonumGraph) AddNode(id int, successors []int) {
-	if graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; ok {
 		return
 	}
 	graph.vertices.Add(id)
@@ -61,7 +64,7 @@ func (graph *GonumGraph) AddNode(id int, successors []int) {
 		graph.successors[id][succ] = 1.0
 
 		// Always add the reciprocal node to the graph
-		if !graph.vertices.Contains(succ) {
+		if _, ok := graph.successors[succ]; !ok {
 			graph.vertices.Add(succ)
 			graph.predecessors[succ] = make(map[int]float64)
 			graph.successors[succ] = make(map[int]float64)
@@ -78,11 +81,11 @@ func (graph *GonumGraph) AddNode(id int, successors []int) {
 }
 
 func (graph *GonumGraph) AddEdge(id, successor int) {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return
 	}
 
-	if !graph.vertices.Contains(successor) {
+	if _, ok := graph.successors[successor]; !ok {
 		graph.vertices.Add(successor)
 		graph.successors[successor] = make(map[int]float64)
 		graph.predecessors[successor] = make(map[int]float64)
@@ -99,7 +102,7 @@ func (graph *GonumGraph) AddEdge(id, successor int) {
 
 func (graph *GonumGraph) SetEdgeCost(id, successor int, cost float64) {
 	// Normally I'd use graph.vertices.Contains(id) as above, but this is equivalent and a bit easier to read here
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return
 	} else if _, ok := graph.successors[id][successor]; !ok {
 		return
@@ -115,7 +118,7 @@ func (graph *GonumGraph) SetEdgeCost(id, successor int, cost float64) {
 }
 
 func (graph *GonumGraph) RemoveNode(id int) {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; ok {
 		return
 	}
 
@@ -129,12 +132,12 @@ func (graph *GonumGraph) RemoveNode(id int) {
 	}
 	delete(graph.predecessors, id)
 
-	graph.vertices.Remove(id)
-
 }
 
 func (graph *GonumGraph) RemoveEdge(id, succ int) {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
+		return
+	} else if _, ok := graph.successors[succ]; !ok {
 		return
 	}
 
@@ -147,16 +150,15 @@ func (graph *GonumGraph) RemoveEdge(id, succ int) {
 }
 
 func (graph *GonumGraph) EmptyGraph() {
-	if graph.vertices.Cardinality() == 0 {
+	if len(graph.successors) == 0 {
 		return
 	}
-	graph.vertices = NewSet()
 	graph.successors = make(map[int]map[int]float64)
 	graph.predecessors = make(map[int]map[int]float64)
 }
 
 func (graph *GonumGraph) SetDirected(directed bool) {
-	if graph.vertices.Cardinality() > 0 {
+	if len(graph.successors) > 0 {
 		return
 	}
 	graph.directed = directed
@@ -165,7 +167,7 @@ func (graph *GonumGraph) SetDirected(directed bool) {
 /* Graph implementation */
 
 func (graph *GonumGraph) Successors(id int) []int {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return nil
 	}
 
@@ -178,7 +180,7 @@ func (graph *GonumGraph) Successors(id int) []int {
 }
 
 func (graph *GonumGraph) IsSuccessor(id, succ int) bool {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return false
 	}
 
@@ -188,7 +190,7 @@ func (graph *GonumGraph) IsSuccessor(id, succ int) bool {
 }
 
 func (graph *GonumGraph) Predecessors(id int) []int {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return nil
 	}
 
@@ -201,7 +203,7 @@ func (graph *GonumGraph) Predecessors(id int) []int {
 }
 
 func (graph *GonumGraph) IsPredecessor(id, pred int) bool {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return false
 	}
 
@@ -211,7 +213,7 @@ func (graph *GonumGraph) IsPredecessor(id, pred int) bool {
 }
 
 func (graph *GonumGraph) IsAdjacent(id, neighbor int) bool {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return false
 	}
 
@@ -222,11 +224,13 @@ func (graph *GonumGraph) IsAdjacent(id, neighbor int) bool {
 }
 
 func (graph *GonumGraph) NodeExists(id int) bool {
-	return graph.vertices.Contains(id)
+	_, ok := graph.successors[id]
+
+	return ok
 }
 
 func (graph *GonumGraph) Degree(id int) int {
-	if !graph.vertices.Contains(id) {
+	if _, ok := graph.successors[id]; !ok {
 		return 0
 	}
 
@@ -245,10 +249,8 @@ func (graph *GonumGraph) EdgeList() [][2]int {
 }
 
 func (graph *GonumGraph) NodeList() []int {
-	rawNodes := graph.vertices.Elements()
-	nodes := make([]int, 0, len(rawNodes))
-	for _, rawNode := range rawNodes {
-		nodes = append(nodes, rawNode.(int))
+	for node, _ := range graph.successors {
+		nodes = append(nodes, node)
 	}
 
 	return nodes

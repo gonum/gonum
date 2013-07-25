@@ -198,7 +198,7 @@ func BellmanFord(source int, graph Graph, Cost func(int, int) float64) (paths ma
 // It makes use of Bellman-Ford and a dummy graph. It creates a dummy node containing edges with a cost of zero to every other node. Then it runs Bellman-Ford with this
 // dummy node as the source.
 //
-// Finally, it removes the dummy node and run Dijkstra's starting at every node.
+// Finally, it removes the dummy node and runs Dijkstra's starting at every node.
 //
 // This algorithm is fairly slow. Its purpose is to remove negative edge weights to allow Dijkstra's to function properly. It's probably not worth it to run this algorithm if you have
 // all non-negative edge weights. Also note that this implementation copies your whole graph into a GonumGraph (so it can add/remove the dummy node and edges and reweight the graph).

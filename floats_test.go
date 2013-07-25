@@ -21,15 +21,14 @@ func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
 	}
 }
 
-func testAddPanic(s1 []float64, s2 ...[]float64) (b bool) {
+func Panics(fun func()) (b bool) {
 	defer func() {
 		err := recover()
 		if err != nil {
 			b = true
 		}
 	}()
-
-	Add(s1, s2...)
+	fun()
 	return
 }
 
@@ -43,12 +42,10 @@ func TestAdd(t *testing.T) {
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
 	Add(a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
-	// Test that it appropriately panics for an improper length destination
-	paniced := testAddPanic(make([]float64, 2), make([]float64, 3))
-	if !paniced {
+	// Test that it panics
+	if !Panics(func() { Add(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
-
 }
 
 func TestAddconst(t *testing.T) {
@@ -78,6 +75,10 @@ func TestCumProd(t *testing.T) {
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with new receiver")
 	CumProd(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
+	// Test that it panics
+	if !Panics(func() { CumProd(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
 }
 
 func TestCumSum(t *testing.T) {
@@ -88,6 +89,11 @@ func TestCumSum(t *testing.T) {
 	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with new receiver")
 	CumSum(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with reused receiver")
+
+	// Test that it panics
+	if !Panics(func() { CumSum(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
 }
 
 func TestDot(t *testing.T) {
@@ -97,6 +103,11 @@ func TestDot(t *testing.T) {
 	ans := Dot(s1, s2)
 	if ans != truth {
 		t.Errorf("Dot product computed incorrectly")
+	}
+
+	// Test that it panics
+	if !Panics(func() { Dot(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
 	}
 }
 
@@ -333,6 +344,10 @@ func TestSub(t *testing.T) {
 	truth := []float64{2, 2, -2, 3, 0}
 	Sub(s, v)
 	AreSlicesEqual(t, truth, s, "Bad subtract")
+	// Test that it panics
+	if !Panics(func() { Sub(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
 }
 
 func TestSubDst(t *testing.T) {
@@ -342,6 +357,16 @@ func TestSubDst(t *testing.T) {
 	dst := make([]float64, len(s))
 	SubDst(dst, s, v)
 	AreSlicesEqual(t, truth, dst, "Bad subtract")
+	// Test that all mismatch combinations panic
+	if !Panics(func() { SubDst(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with dst different length")
+	}
+	if !Panics(func() { SubDst(make([]float64, 3), make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with subtractor different length")
+	}
+	if !Panics(func() { SubDst(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Did not panic with subtractee different length")
+	}
 }
 
 func TestSum(t *testing.T) {

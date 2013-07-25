@@ -48,6 +48,9 @@ func Apply(s []float64, f func(float64) float64) {
 // s and puts them in place into the ith element of the
 // destination. Assumes destination is at least as long as s
 func CumProd(dst, s []float64) []float64 {
+	if len(dst) != len(s) {
+		panic("Length of destination does not match length of the source")
+	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] * s[i]
@@ -85,8 +88,6 @@ func Dot(s1, s2 []float64) float64 {
 
 // Eq returns false if the slices have different lengths
 // or if |s1[i] - s2[i]| > tol for any i.
-// Assumes that the slices are of equal length. If this
-// is in doubt it should be checked with Eqlen
 func Eq(s1, s2 []float64, tol float64) bool {
 	if len(s1) != len(s2) {
 		return false

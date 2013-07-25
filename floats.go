@@ -12,17 +12,18 @@ func (i *InsufficientElements) Error() string {
 
 // Add returns the element-wise sum of all the slices with the
 // results stored in the first slice.
-// Example: Add(a,b) // result will be a[i] = a[i] + b[i]
-// a := make([]float64, len(b)); Add(a,b,c,d,e).
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
-// in doubt, EqLengths can be called.
+// in doubt, EqLen can be called.
 func Add(dst []float64, slices ...[]float64) {
 	if len(slices) == 0 {
 		return
 	}
-	for i := 0; i < len(slices); i++ {
-		for j, val := range slices[i] {
+	if len(dst) != len(slices[0]) {
+		panic("Length of destination does not match length of the slices")
+	}
+	for _, slice := range slices {
+		for j, val := range slice {
 			dst[j] += val
 		}
 	}

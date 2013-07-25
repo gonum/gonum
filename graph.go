@@ -45,7 +45,7 @@ type HeuristicCoster interface {
 type MutableGraph interface {
 	Graph
 	NewNode(successors []int) int               // Adds a node with an arbitrary ID, and returns the new, unique ID used
-	AddNode(id int, successors []int)           // The graph itself is responsible for adding reciprocal edges if it's undirected. Likewise, the graph itself must add any non-existant edges listed in successors.
+	AddNode(id int, successors []int)           // The graph itself is responsible for adding reciprocal edges if it's undirected. Likewise, the graph itself must add any non-existant nodes listed in successors.
 	AddEdge(node1, node2 int)                   // For a digraph, adds node1->node2; the graph is free to initialize this to any value it wishes. Node1 must exist, or it will result in undefined behavior, node2 must be created by the function if absent
 	SetEdgeCost(node1, node2 int, cost float64) // The behavior is undefined if the edge has not been created with AddEdge (or the edge was removed before this function was called). For a directed graph only sets node1->node2
 	RemoveNode(node int)                        // The graph is reponsible for removing edges to a node that is removed
@@ -62,20 +62,13 @@ type WeightedEdge struct {
 
 /* Basic Graph tests */
 
-// An undirected graph is fully connected if Dijkstra's algorithm can find a cost to every node, so that's what we do. We use UniformCost instead of the graph's own weights to avoid the problems
-// with negative edge weights. If there are no nodes, or only one, it's considered trivially connected.
-func FullyConnectedUndirected(graph Graph) bool {
-	nodes := graph.NodeList()
-	if nodes == nil || len(nodes) <= 1 {
-		return true
-	}
-
-	arbitraryNode := nodes[0]
-	_, costs := Dijkstra(arbitraryNode, graph, UniformCost)
-
-	return len(costs) == len(nodes)
-}
-
+// Also known as Tarjan's Strongly Connected Components Algorithm. This returns all the strongly connected components in the graph.
+//
+// A strongly connected component of a graph is a set of vertices where it's possible to reach any vertex in the set from any other (meaning there's a cycle between them)
+//
+// Generally speaking, a directed graph where the number of strongly connected components is equal to the number of nodes is acyclic, unless you count reflexive edges as a cycle (which requires only a little extra testing)
+//
+// An undirected graph should end up with as many SCCs as there are "islands" (or subgraphs) of connections, meaning having more than one strongly connected component implies that your graph is not fully connected.
 func Tarjan(graph Graph) (sccs [][]int) {
 	index := 0
 	vStack := &Stack{}

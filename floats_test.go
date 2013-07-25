@@ -27,13 +27,10 @@ func TestAdd(t *testing.T) {
 	c := []float64{7, 8, 9}
 	truth := []float64{12, 15, 18}
 	n := make([]float64, len(a))
-	n = Add(n, a, b, c)
+	Add(n, a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
-	a = Add(a, b, c)
+	Add(a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
-	n = Add(nil, a, b, c)
-	AreSlicesEqual(t, truth, n, "Wrong addition of slices nil receiver")
-
 	// Test that it appropriately panics for an improper length destination
 
 }

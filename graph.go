@@ -2,6 +2,7 @@ package discrete
 
 import (
 	"container/heap"
+	//"math"
 	"sort"
 )
 
@@ -115,8 +116,9 @@ func UniformCost(a, b int) float64 {
 	return 1.0
 }
 
-// Returns an ordered list consisting of the nodes between start and goal. The path will be the shortest path assuming the function heuristicCost is admissible
-// The second return value is the cost
+// Returns an ordered list consisting of the nodes between start and goal. The path will be the shortest path assuming the function heuristicCost is admissible.
+// The second return value is the cost, and the third is the number of nodes expanded while searching (useful info for tuning heuristics). Negative Costs will cause
+// bad things to happen, as well as negative heuristic estimates.
 //
 // A heuristic is admissible if, for any node in the graph, the heuristic estimate of the cost between the node and the goal is less than or equal to the true cost.
 //
@@ -189,14 +191,119 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 	return nil, 0.0, nodesExpanded
 }
 
-// Finds the shortest path to every (connected) node in the graph from a single source -- no edges may have negative weights
-func Dijkstra(source int, graph Graph, Cost func(int, int) int) (paths map[int][]int, costs map[int]float64) {
-	return nil, nil
+// Dijkstra's Algorithm is essentially a goalless Uniform Cost Search. That is, its results are roughly equivalent to
+// running A* with the Null Heuristic from a single node to every other node in the graph -- though it's a fair bit faster
+// because running A* in that way will recompute things it's already computed every call. Note that you won't necessarily get the same path
+// you would get for A*, but the cost is guaranteed to be the same (that is, if multiple shortest paths exist, you may get a different shortest path).
+//
+// Like A*, Dijkstra's Algorithm may run in an endless loop if given a negative edge weight cycle (meaning, it can repeatedly take a path with a negative weight)
+// If you have negative costs, use BellmanFord
+//
+// Dijkstra's algorithm usually only returns a cost map, however, since the data is available this version will also reconstruct the path to every node
+func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[int][]int, costs map[int]float64) {
+	if Cost == nil {
+		if cgraph, ok := graph.(Coster); ok {
+			Cost = cgraph.Cost
+		} else {
+			Cost = UniformCost
+		}
+	}
+	nodes := graph.NodeList()
+	openSet := &aStarPriorityQueue{}
+	closedSet := NewSet()                     // This is to make use of that same
+	costs = make(map[int]float64, len(nodes)) // May overallocate, will change if it becomes a problem
+	predecessor := make(map[int]int, len(nodes))
+	heap.Init(openSet)
+
+	// I don't think we actually need the init step since I use a map check rather than inf to check if we're done
+	/*for _, node := range nodes {
+		if node == source {
+			heap.Push(openSet, internalNode{node, 0, 0})
+			costs[node] = 0
+		} else {
+			heap.Push(openSet, internalNode{node, math.MaxFloat64, math.MaxFloat64})
+			predecessor[node] = -1
+		}
+	}*/
+
+	costs[source] = 0
+	heap.Push(openSet, internalNode{source, 0, 0})
+
+	for openSet.Len() != 0 {
+		node := heap.Pop(openSet).(internalNode)
+		/* if _, ok := costs[node.int]; !ok {
+			 break
+		 } */
+
+		if closedSet.Contains(node.int) { // As in A*, prevents us from having to slowly search and reorder the queue
+			continue
+		}
+
+		closedSet.Add(node.int)
+
+		for _, neighbor := range graph.Successors(node.int) {
+			tmpCost := costs[node.int] + Cost(node.int, neighbor)
+			if cost, ok := costs[neighbor]; !ok || tmpCost < cost {
+				costs[neighbor] = cost
+				predecessor[neighbor] = node.int
+				heap.Push(openSet, internalNode{neighbor, cost, cost})
+			}
+		}
+	}
+
+	paths = make(map[int][]int, len(costs))
+	for node, _ := range costs { // Only reconstruct the path if one exists
+		paths[node] = rebuildPath(predecessor, node)
+	}
+	return paths, costs
 }
 
-// Same as Dijkstra, but handles negative edge weights
-func BellmanFord(source int, graph Graph, Cost func(int, int) int) (paths map[int][]int, costs map[int]float64) {
-	return nil, nil
+// The Bellman-Ford Algorithm is the same as Dijkstra's Algorithm with a key difference. They both take a single source and find the shortest path to every other
+// (reachable) node in the graph. Bellman-Ford, however, will detect negative edge loops and abort if one is present. A negative edge loop occurs when there is a cycle in the graph
+// such that it can take an edge with a negative cost over and over. A -(-2)> B -(2)> C isn't a loop because A->B can only be taken once, but A<-(-2)->B-(2)>C is one because
+// A and B have a bi-directional edge, and algorithms like Dijkstra's will infinitely flail between them getting progressively lower costs.
+//
+// That said, if you do not have a negative edge weight cycle, use Dijkstra's Algorithm instead, because it's faster.
+//
+// Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
+// due to the presence of a negative edge weight.
+func BellmanFord(source int, graph Graph, Cost func(int, int) int) (paths map[int][]int, costs map[int]float64, aborted bool) {
+	if Cost == nil {
+		if cgraph, ok := graph.(Coster); ok {
+			Cost = cgraph.Cost
+		} else {
+			Cost = UniformCost
+		}
+	}
+
+	predecessor := make(map[int]int)
+	costs = make(map[int]float64)
+	costs[source] = 0
+	nodes := graph.NodeList()
+	edges := graph.EdgeList()
+
+	for i := 1; i < len(nodes)-1; i++ {
+		for _, edge := range edges {
+			weight := Cost(edge[0], edge[1])
+			if dist := costs[edge[0]] + weight; dist < costs[edge[1]] {
+				costs[edge[1]] = dist
+				predecessor[edge[1]] = edge[0]
+			}
+		}
+	}
+
+	for _, edge := range edges {
+		weight := Cost(edge[0], edge[1])
+		if costs[edge[0]]+weight < costs[edge[1]] {
+			return nil, nil, true // Abandoned because a cycle is detected
+		}
+	}
+
+	paths = make(map[int][]int, len(costs))
+	for node, _ := range costs {
+		paths[node] = rebuildPath(predecessors, node)
+	}
+	return paths, costs, false
 }
 
 /* Basic Graph tests */

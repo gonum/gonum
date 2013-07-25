@@ -14,7 +14,7 @@ func (i *InsufficientElements) Error() string {
 // results stored in the first slice.
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
-// in doubt, EqLen can be called.
+// in doubt, EqLen can be called first.
 func Add(dst []float64, slices ...[]float64) {
 	if len(slices) == 0 {
 		return
@@ -46,7 +46,7 @@ func Apply(s []float64, f func(float64) float64) {
 
 // Cumprod finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
-// destination. Assumes destination is at least as long as s
+// destination. Panic will occur if lengths of do not match
 func CumProd(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("Length of destination does not match length of the source")
@@ -60,7 +60,7 @@ func CumProd(dst, s []float64) []float64 {
 
 // Cumsum finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
-// destination. Assumes destination is at least as long as s
+// destination. Panic will occur if lengths of arguments do not match
 func CumSum(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("Length of destination does not match length of the source")
@@ -73,8 +73,7 @@ func CumSum(dst, s []float64) {
 
 // Dot computes the dot product of s1 and s2, i.e.
 // sum_{i = 1}^N s1[n]*s2[n]
-// Assumes the slices are of equal length. If this is
-// in doubt it should be checked with Eqlen
+// Panic will occur if lengths of arguments do not match
 func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {
 		panic("Lengths of the slices do not match")
@@ -101,9 +100,9 @@ func Eq(s1, s2 []float64, tol float64) bool {
 }
 
 // Eqlen returns true if all of the slices have equal length,
-// and false otherwise.
-// Special case: Returns true if there are no input slices
+// and false otherwise. Returns true if there are no input slices
 func EqLen(slices ...[]float64) bool {
+	// This length check is needed: http://play.golang.org/p/sdty6YiLhM
 	if len(slices) == 0 {
 		return true
 	}
@@ -116,16 +115,14 @@ func EqLen(slices ...[]float64) bool {
 	return true
 }
 
-// Find finds the first k indices of the slice s for which
-// the function f returns true and stores them in the slice
+// Find finds the first k indices of  s for which
+// the function f returns true and stores them in
 // inds. If k < 0, all such elements are found.
 // Find will reslice inds to have 0 length, and will append
 // found indices to inds.
-// If there are fewer than k elements in s satisfying f,
+// If k > 0 and there are fewer than k elements in s satisfying f,
 // all of the found elements will be returned along with an
 // InsufficientElements error
-// TODO: Add example for nil slice, appending to the end of a larger slice
-// reusing memory, insufficient elements
 func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 
 	// inds is also returned to allow for calling with nil
@@ -163,11 +160,13 @@ func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 	return inds, &InsufficientElements{}
 }
 
-// LogSpan returns a set of N equally spaced points in log space between l and u, where N
-// is equal to the length of the destination. The first element of the destination
-// is l, the final element of the destination is u. Will panic if the destination has
-// length < 2. Note that this call will return NaNs if l or u are negative, and
-// zeros if l or u is zero.
+// LogSpan returns a set of N equally spaced points in log space between l and u,
+// where N is equal to the len(dst). The first element of the
+// resulting dst will be l and the final element of dst will be u.
+// If len(dst) = 0, dst will be returned unchanged, and if len(dst) = 1, the
+// only element of dst will become l
+// Note that this call will return NaNs if either l or u are negative, and
+// will return all zeros if l or u is zero.
 func LogSpan(dst []float64, l, u float64) {
 	Span(dst, math.Log(l), math.Log(u))
 	Apply(dst, math.Exp)
@@ -196,7 +195,6 @@ func LogSumExp(s []float64) (lse float64) {
 // Max returns the maximum value in the slice and the location of
 // the maximum value. If the input slice is empty, zero is returned
 // as the minimum value and -1 is returned as the index.
-// Use: val,ind := sliceops.Max(slice)
 func Max(s []float64) (max float64, ind int) {
 	if len(s) == 0 {
 		return max, -1 // Ind is -1 to make clear it's not the zeroth index.
@@ -215,7 +213,6 @@ func Max(s []float64) (max float64, ind int) {
 // Min returns the minimum value in the slice and the index of
 // the minimum value. If the input slice is empty, zero is returned
 // as the minimum value and -1 is returned as the index.
-// Use: val,ind := sliceops.Min(slice)
 func Min(s []float64) (min float64, ind int) {
 	if len(s) == 0 {
 		return min, -1 // Ind is -1 to make clear it's not the zeroth index.
@@ -231,10 +228,11 @@ func Min(s []float64) (min float64, ind int) {
 	return min, ind
 }
 
-// Norm returns the L norm of the slice S.
+// Norm returns the L norm of the slice S, defined as
+// (sum_{i=1}^N s[i]^N)^{1/N}
 // Special cases:
 // L = math.Inf(1) gives the maximum value
-// Does not correctly compute the zero norm, as the zero norm is a count.
+// Does not correctly compute the zero norm
 func Norm(s []float64, L float64) (norm float64) {
 	// Should this complain if L is not positive?
 	// Should this be done in log space for better numerical stability?
@@ -263,7 +261,7 @@ func Norm(s []float64, L float64) (norm float64) {
 }
 
 // Prod returns the product of the elements of the slice
-// Returns 1 if the input has length zero
+// Returns 1 if len(s) = 0
 func Prod(s []float64) (prod float64) {
 	prod = 1
 	for _, val := range s {
@@ -272,7 +270,7 @@ func Prod(s []float64) (prod float64) {
 	return prod
 }
 
-// Scale multiplies every element in s by a constant in place
+// Scale multiplies every element in s by c
 func Scale(s []float64, c float64) {
 	for i := range s {
 		s[i] *= c
@@ -281,8 +279,9 @@ func Scale(s []float64, c float64) {
 
 // Span returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the destination. The first element of the destination
-// is l, the final element of the destination is u. Will panic if the destination has
-// length < 2
+// is l, the final element of the destination is u.
+// If len(dst) = 0, dst will be returned unchanged, and if len(dst) = 1, the
+// only element of dst will become l
 func Span(dst []float64, l, u float64) {
 	n := len(dst)
 	if n < 2 {

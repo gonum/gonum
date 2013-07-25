@@ -53,25 +53,18 @@ type WeightedEdge struct {
 
 /* Basic Graph tests */
 
-// Checks if every node in the graph has a degree of at least one. If a node has a degree of two, it checks to make sure the edge is not reflexive
-// The empty graph or a graph with a single node is considered trivially connected
+// A graph is fully connected if Dijkstra's algorithm can find a cost to every node, so that's what we do. We use UniformCost instead of the graph's own weights to avoid the problems
+// with negative edge weights. If there are no nodes, or only one, it's considered trivially connected.
 func FullyConnected(graph Graph) bool {
-	nlist := graph.NodeList()
-	if nlist == nil || len(nlist) <= 1 {
+	nodes := graph.NodeList()
+	if nodes == nil || len(nodes) <= 1 {
 		return true
 	}
 
-	for _, node := range graph.NodeList() {
-		if deg := graph.Degree(node); deg == 0 {
-			return false
-		} else if graph.Degree(node) == 2 {
-			if graph.Successors(node)[0] == node {
-				return false
-			}
-		}
-	}
+	arbitraryNode := nodes[0]
+	_, costs := Dijkstra(arbitraryNode, graph, UniformCost)
 
-	return true
+	return len(costs) == len(nodes)
 }
 
 // Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor

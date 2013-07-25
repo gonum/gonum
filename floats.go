@@ -59,6 +59,9 @@ func CumProd(dst, s []float64) []float64 {
 // s and puts them in place into the ith element of the
 // destination. Assumes destination is at least as long as s
 func CumSum(dst, s []float64) {
+	if len(dst) != len(s) {
+		panic("Length of destination does not match length of the source")
+	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] + s[i]
@@ -70,6 +73,9 @@ func CumSum(dst, s []float64) {
 // Assumes the slices are of equal length. If this is
 // in doubt it should be checked with Eqlen
 func Dot(s1, s2 []float64) float64 {
+	if len(s1) != len(s2) {
+		panic("Lengths of the slices do not match")
+	}
 	var sum float64
 	for i, val := range s1 {
 		sum += val * s2[i]
@@ -77,10 +83,14 @@ func Dot(s1, s2 []float64) float64 {
 	return sum
 }
 
-// Eq returns false if |s1[i] - s2[i]| > tol for any i.
+// Eq returns false if the slices have different lengths
+// or if |s1[i] - s2[i]| > tol for any i.
 // Assumes that the slices are of equal length. If this
 // is in doubt it should be checked with Eqlen
 func Eq(s1, s2 []float64, tol float64) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
 	for i, val := range s1 {
 		if math.Abs(s2[i]-val) > tol {
 			return false
@@ -274,6 +284,15 @@ func Scale(s []float64, c float64) {
 // length < 2
 func Span(dst []float64, l, u float64) {
 	n := len(dst)
+	if n < 2 {
+		if n == 0 {
+			return
+		}
+		if n == 1 {
+			dst[0] = l
+			return
+		}
+	}
 	step := (u - l) / float64(n-1)
 	for i := range dst {
 		dst[i] = l + step*float64(i)
@@ -283,6 +302,9 @@ func Span(dst []float64, l, u float64) {
 // Sub subtracts, element-wise, the first argument from the second. Assumes
 // the lengths of s and t match (can be tested with EqLen)
 func Sub(s, t []float64) {
+	if len(s) != len(t) {
+		panic("Length of the slices do not match")
+	}
 	for i, val := range t {
 		s[i] -= val
 	}
@@ -292,6 +314,12 @@ func Sub(s, t []float64) {
 // store the result in destination. Assumes the lengths of s and t match
 // (can be tested with EqLen)
 func SubDst(dst, s, t []float64) {
+	if len(s) != len(t) {
+		panic("Length of subtractor and subtractee do not match")
+	}
+	if len(dst) != len(s) {
+		panic("Length of destination does not match length of subtractor")
+	}
 	for i, val := range t {
 		dst[i] = s[i] - val
 	}

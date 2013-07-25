@@ -153,7 +153,7 @@ func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[i
 // That said, if you do not have a negative edge weight, use Dijkstra's Algorithm instead, because it's faster.
 //
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
-// due to the presence of a negative edge weight.
+// due to the presence of a negative edge weight cycle.
 func BellmanFord(source int, graph Graph, Cost func(int, int) float64) (paths map[int][]int, costs map[int]float64, aborted bool) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
@@ -196,7 +196,7 @@ func BellmanFord(source int, graph Graph, Cost func(int, int) float64) (paths ma
 // Johnson's Algorithm generates the lowest cost path between every pair of nodes in the graph.
 //
 // It makes use of Bellman-Ford and a dummy graph. It creates a dummy node containing edges with a cost of zero to every other node. Then it runs Bellman-Ford with this
-// dummy node as the source.
+// dummy node as the source. It then modifies the all the nodes' edge weights (which gets rid of all negative weights).
 //
 // Finally, it removes the dummy node and runs Dijkstra's starting at every node.
 //

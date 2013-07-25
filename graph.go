@@ -4,6 +4,8 @@ import (
 	"sort"
 )
 
+// A Graph implements all methods necessary to run graph-specific algorithms on it. Strictly speaking EdgeList() and NodeList() would be sufficient, but the others (such as Successors)
+// are required to make the algorithms more efficient and/or easier to write and maintain.
 type Graph interface {
 	Successors(node int) []int                // Gives the nodes connected by OUTBOUND edges, if the graph is an undirected graph, this set is equal to Predecessors
 	IsSuccessor(node, successor int) bool     // If successor shows up in the list returned by Successors(node), then it's a successor
@@ -32,10 +34,16 @@ type HeuristicCoster interface {
 	HeuristicCost(node1, node2 int) float64 // If HeuristicCost is not intended to be used, it can be implemented as the null heuristic (always returns 0)
 }
 
-// A Mutable Graph
+// A Mutable Graph is a graph that can be changed in an arbitrary way. It is useful for several algorithms; for instance, Johnson's Algorithm requires adding a temporary node and changing edge weights.
+// Another case where this is used is computing minimum spanning trees. Since trees are graphs, a minimum spanning tree can be created using this interface.
+//
+// Note that just because a graph does not implement MutableGraph does not mean that this package expects it to be invariant (though even a MutableGraph should be treated as invariant while an algorithm
+// is operating on it), it simply means that without this interface this package can not properly handle the graph in order to, say, fill it with a minimum spanning tree.
+//
+// In functions that take a MutableGraph as an argument, it should not be the same as the Graph argument as concurrent modification will likely cause problems in most cases.
 type MutableGraph interface {
 	Graph
-	NewNode(successors []int) int               //Adds a node with an arbitrary ID, and returns the new, unique ID used
+	NewNode(successors []int) int               // Adds a node with an arbitrary ID, and returns the new, unique ID used
 	AddNode(id int, successors []int)           // The graph itself is responsible for adding reciprocal edges if it's undirected. Likewise, the graph itself must add any non-existant edges listed in successors.
 	AddEdge(node1, node2 int)                   // For a digraph, adds node1->node2; the graph is free to initialize this to any value it wishes. Node1 must exist, or it will result in undefined behavior, node2 must be created by the function if absent
 	SetEdgeCost(node1, node2 int, cost float64) // The behavior is undefined if the edge has not been created with AddEdge (or the edge was removed before this function was called). For a directed graph only sets node1->node2
@@ -53,9 +61,9 @@ type WeightedEdge struct {
 
 /* Basic Graph tests */
 
-// A graph is fully connected if Dijkstra's algorithm can find a cost to every node, so that's what we do. We use UniformCost instead of the graph's own weights to avoid the problems
+// An undirected graph is fully connected if Dijkstra's algorithm can find a cost to every node, so that's what we do. We use UniformCost instead of the graph's own weights to avoid the problems
 // with negative edge weights. If there are no nodes, or only one, it's considered trivially connected.
-func FullyConnected(graph Graph) bool {
+func FullyConnectedUndirected(graph Graph) bool {
 	nodes := graph.NodeList()
 	if nodes == nil || len(nodes) <= 1 {
 		return true
@@ -65,6 +73,10 @@ func FullyConnected(graph Graph) bool {
 	_, costs := Dijkstra(arbitraryNode, graph, UniformCost)
 
 	return len(costs) == len(nodes)
+}
+
+func TarjanStronglyConnected(graph Graph) {
+
 }
 
 // Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor

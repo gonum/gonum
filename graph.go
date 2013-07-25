@@ -9,9 +9,9 @@ import (
 // are required to make the algorithms more efficient and/or easier to write and maintain.
 type Graph interface {
 	Successors(node int) []int                // Gives the nodes connected by OUTBOUND edges, if the graph is an undirected graph, this set is equal to Predecessors
-	IsSuccessor(node, successor int) bool     // If successor shows up in the list returned by Successors(node), then it's a successor
+	IsSuccessor(node, successor int) bool     // If successor shows up in the list returned by Successors(node), then it's a successor. If node doesn't exist, this should always return false
 	Predecessors(node int) []int              // Gives the nodes connected by INBOUND edges, if the graph is an undirected graph, this set is equal to Successors
-	IsPredecessor(node, predecessor int) bool // If predecessor shows up in the list returned by Predecessors(node), then it's a predecessor
+	IsPredecessor(node, predecessor int) bool // If predecessor shows up in the list returned by Predecessors(node), then it's a predecessor. If node doesn't exist, this should always return false
 	IsAdjacent(node, neighbor int) bool       // IsSuccessor || IsPredecessor
 	NodeExists(node int) bool                 // Returns whether a node with the given ID is currently in the graph
 	Degree(node int) int                      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
@@ -131,10 +131,12 @@ func Tarjan(graph Graph) (sccs [][]int) {
 
 // Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor
 //
-// Special case: a nil or zero length path is considered valid (true), a path of length 1 (only one node) is the trivial case
+// Special case: a nil or zero length path is considered valid (true), a path of length 1 (only one node) is the trivial case, but only if the node listed in path exists.
 func IsPath(path []int, graph Graph) bool {
-	if path == nil || len(path) <= 1 {
+	if path == nil || len(path) == 0 {
 		return true
+	} else if len(path) == 1 {
+		return graph.NodeExists(path[0])
 	}
 
 	for i := 0; i < len(path)-1; i++ {

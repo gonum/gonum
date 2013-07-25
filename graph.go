@@ -1,6 +1,7 @@
 package discrete
 
 import (
+	"math"
 	"sort"
 )
 
@@ -75,8 +76,57 @@ func FullyConnectedUndirected(graph Graph) bool {
 	return len(costs) == len(nodes)
 }
 
-func TarjanStronglyConnected(graph Graph) {
+func Tarjan(graph Graph) (sccs [][]int) {
+	index := 0
+	vStack := &Stack{}
+	stackSet := NewSet()
+	sccs = make([][]int, 0)
 
+	nodes := graph.NodeList()
+	lowlinks := make(map[int]int, len(nodes))
+	indices := make(map[int]int, len(nodes))
+
+	var strongconnect func(int) []int
+
+	strongconnect = func(node int) []int {
+		indices[node] = index
+		lowlinks[node] = index
+		index += 1
+
+		vStack.Push(node)
+		stackSet.Add(node)
+
+		for _, succ := range graph.Successors(node) {
+			if _, ok := indices[succ]; !ok {
+				strongconnect(succ)
+				lowlinks[node] = int(math.Min(float64(lowlinks[node]), float64(lowlinks[succ])))
+			} else if stackSet.Contains(succ) {
+				lowlinks[node] = int(math.Min(float64(lowlinks[node]), float64(lowlinks[succ])))
+			}
+		}
+
+		if lowlinks[node] == indices[node] {
+			scc := make([]int, 0)
+			for {
+				v, _ := vStack.Pop()
+				stackSet.Remove(v.(int))
+				scc = append(scc, v.(int))
+				if v.(int) == node {
+					return scc
+				}
+			}
+		}
+
+		return nil
+	}
+
+	for _, n := range nodes {
+		if _, ok := indices[n]; !ok {
+			sccs = append(sccs, strongconnect(n))
+		}
+	}
+
+	return sccs
 }
 
 // Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor

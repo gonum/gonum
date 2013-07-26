@@ -176,8 +176,7 @@ func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 // LogSpan returns a set of N equally spaced points in log space between l and u,
 // where N is equal to the len(dst). The first element of the
 // resulting dst will be l and the final element of dst will be u.
-// If len(dst) = 0, dst will be returned unchanged, and if len(dst) = 1, the
-// only element of dst will become l
+// Panics if len(dst) < 2
 // Note that this call will return NaNs if either l or u are negative, and
 // will return all zeros if l or u is zero.
 func LogSpan(dst []float64, l, u float64) []float64 {
@@ -294,8 +293,7 @@ func Scale(s []float64, c float64) {
 // Span returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u.
-// If len(dst) = 0, dst will be returned unchanged, and if len(dst) = 1, the
-// only element of dst will become l
+// Panics if len(dst) < 2
 func Span(dst []float64, l, u float64) []float64 {
 	n := len(dst)
 	if n < 2 {

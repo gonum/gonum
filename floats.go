@@ -235,13 +235,12 @@ func Min(s []float64) (min float64, ind int) {
 }
 
 // Nearest returns the index of the element of s whose value is
-// nearest to v. If none of the values are closer than infinitely
-// far away (all of the values in s are either NaN or Inf, or s
-// has length 0), the index is returned as -1
+// nearest to v. If several such indices exist, the lowest index
+// is returned
 // TODO: Add test
 func Nearest(s []float64, v float64) (ind int, dist float64) {
-	dist = math.Inf(1)
-	ind = -1
+	dist = math.Abs(v - s[0])
+	ind = 0
 	for i, val := range s {
 		newDist := math.Abs(v - val)
 		if newDist < dist {

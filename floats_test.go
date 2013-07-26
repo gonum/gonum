@@ -318,6 +318,37 @@ func TestNearest(t *testing.T) {
 	}
 }
 
+func TestNearestInSpan(t *testing.T) {
+	ind := NearestInSpan(13, 7, 8.2, -1)
+	if ind != 0 {
+		t.Errorf("Wrong value when below the lower bound. %i found, %i expected", ind, 0)
+	}
+	ind = NearestInSpan(13, 7, 8.2, 9)
+	if ind != 12 {
+		t.Errorf("Wrong value when above the upper bound. %i found, %i expected", ind, 12)
+	}
+	ind = NearestInSpan(13, 7, 8.2, 7.19)
+	if ind != 2 {
+		t.Errorf("Wrong value when just below the bucket. %i found, %i expected", ind, 2)
+	}
+	ind = NearestInSpan(13, 7, 8.2, 7.21)
+	if ind != 2 {
+		t.Errorf("Wrong value when just above the bucket. %i found, %i expected", ind, 2)
+	}
+	ind = NearestInSpan(13, 7, 8.2, 7.2)
+	if ind != 2 {
+		t.Errorf("Wrong value when equal to bucket. %i found, %i expected", ind, 2)
+	}
+	ind = NearestInSpan(13, 7, 8.2, 7.151)
+	if ind != 2 {
+		t.Errorf("Wrong value when just above halfway point. %i found, %i expected", ind, 2)
+	}
+	ind = NearestInSpan(13, 7, 8.2, 7.249)
+	if ind != 2 {
+		t.Errorf("Wrong value when just below halfway point. %i found, %i expected", ind, 2)
+	}
+}
+
 func TestNorm(t *testing.T) {
 	s := []float64{-1, -3.4, 5, 6}
 	val := Norm(s, math.Inf(1))

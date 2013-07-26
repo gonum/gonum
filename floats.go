@@ -235,7 +235,6 @@ func Min(s []float64) (min float64, ind int) {
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // indices exist, the lowest index is returned
-// TODO: Add test
 func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
 	ind = 0
@@ -253,9 +252,16 @@ func Nearest(s []float64, v float64) (ind int) {
 // a hypothetical vector created by span with length n
 // and bounds l and u
 // Assumes u > l
-// TODO: Add in tests
 func NearestInSpan(n int, l, u float64, v float64) int {
-	return int((v-l)*float64(n-1)/(u-l) + 0.5)
+	if v < l {
+		return 0
+	}
+	if v > u {
+		return n - 1
+	}
+	// Can't guarantee anything about exactly halfway between
+	// because of floating point weirdness
+	return int((float64(n)-1)/(u-l)*(v-l) + 0.5)
 }
 
 // Norm returns the L norm of the slice S, defined as

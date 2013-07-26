@@ -90,7 +90,7 @@ func ExampleAddConst() {
 	s := []float64{1, -2, 3, -4}
 	c := 5.0
 
-	AddConst(s, c)
+	AddConst(c, s)
 
 	fmt.Println("s = ", s)
 	// Output:

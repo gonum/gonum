@@ -56,7 +56,7 @@ func TestAddconst(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	c := 6.0
 	truth := []float64{9, 10, 7, 13, 11}
-	AddConst(s, c)
+	AddConst(c, s)
 	AreSlicesEqual(t, truth, s, "Wrong addition of constant")
 }
 
@@ -67,7 +67,7 @@ func TestApply(t *testing.T) {
 	for i, val := range s {
 		truth[i] = math.Sin(val)
 	}
-	Apply(s, f)
+	Apply(f, s)
 	AreSlicesEqual(t, truth, s, "Wrong application of function")
 }
 
@@ -75,7 +75,7 @@ func TestCount(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	f := func(v float64) bool { return v > 3.5 }
 	truth := 3
-	n := Count(s, f)
+	n := Count(f, s)
 	if n != truth {
 		t.Errorf("Wrong number of elements counted")
 	}
@@ -172,7 +172,7 @@ func TestFind(t *testing.T) {
 	allTrueInds := []int{1, 3, 4}
 
 	// Test finding first two elements
-	inds, err := Find(nil, 2, s, f)
+	inds, err := Find(nil, f, s, 2)
 	if err != nil {
 		t.Errorf("Find first two: Improper error return")
 	}
@@ -184,7 +184,7 @@ func TestFind(t *testing.T) {
 
 	// Test finding first two elements with non nil slice
 	inds = []int{1, 2, 3, 4, 5, 6}
-	inds, err = Find(inds, 2, s, f)
+	inds, err = Find(inds, f, s, 2)
 	if err != nil {
 		t.Errorf("Find first two non-nil: Improper error return")
 	}
@@ -194,7 +194,7 @@ func TestFind(t *testing.T) {
 	}
 
 	// Test finding too many elements
-	inds, err = Find(inds, 4, s, f)
+	inds, err = Find(inds, f, s, 4)
 	if err == nil {
 		t.Errorf("Request too many: No error returned")
 	}
@@ -204,7 +204,7 @@ func TestFind(t *testing.T) {
 	}
 
 	// Test finding all elements
-	inds, err = Find(nil, -1, s, f)
+	inds, err = Find(nil, f, s, -1)
 	if err != nil {
 		t.Errorf("Find all: Improper error returned")
 	}
@@ -283,9 +283,39 @@ func TestMin(t *testing.T) {
 }
 
 func TestNearest(t *testing.T) {
-	s := []float64{3, 5, 6.2, 6.2, 8}
-	ind := Nearest(2.0, s)
-	if 
+	s := []float64{6.2, 3, 5, 6.2, 8}
+	ind := Nearest(s, 2.0)
+	if ind != 1 {
+		t.Errorf("Wrong index returned when value is less than all of elements")
+	}
+	ind = Nearest(s, 9.0)
+	if ind != 4 {
+		t.Errorf("Wrong index returned when value is greater than all of elements")
+	}
+	ind = Nearest(s, 3.1)
+	if ind != 1 {
+		t.Errorf("Wrong index returned when value is greater than closest element")
+	}
+	ind = Nearest(s, 3.1)
+	if ind != 1 {
+		t.Errorf("Wrong index returned when value is greater than closest element")
+	}
+	ind = Nearest(s, 2.9)
+	if ind != 1 {
+		t.Errorf("Wrong index returned when value is less than closest element")
+	}
+	ind = Nearest(s, 3)
+	if ind != 1 {
+		t.Errorf("Wrong index returned when value is equal to element")
+	}
+	ind = Nearest(s, 6.2)
+	if ind != 0 {
+		t.Errorf("Wrong index returned when value is equal to several elements")
+	}
+	ind = Nearest(s, 4)
+	if ind != 1 {
+		t.Errorf("Wrong index returned when value is exactly between two closest elements")
+	}
 }
 
 func TestNorm(t *testing.T) {
@@ -333,7 +363,7 @@ func TestScale(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	c := 5.0
 	truth := []float64{15, 20, 5, 35, 25}
-	Scale(s, c)
+	Scale(c, s)
 	AreSlicesEqual(t, truth, s, "Bad scaling")
 }
 
@@ -366,21 +396,21 @@ func TestSub(t *testing.T) {
 	}
 }
 
-func TestSubDst(t *testing.T) {
+func TestSubTo(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	v := []float64{1, 2, 3, 4, 5}
 	truth := []float64{2, 2, -2, 3, 0}
 	dst := make([]float64, len(s))
-	SubDst(dst, s, v)
+	SubTo(dst, s, v)
 	AreSlicesEqual(t, truth, dst, "Bad subtract")
 	// Test that all mismatch combinations panic
-	if !Panics(func() { SubDst(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
+	if !Panics(func() { SubTo(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with dst different length")
 	}
-	if !Panics(func() { SubDst(make([]float64, 3), make([]float64, 2), make([]float64, 3)) }) {
+	if !Panics(func() { SubTo(make([]float64, 3), make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with subtractor different length")
 	}
-	if !Panics(func() { SubDst(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
+	if !Panics(func() { SubTo(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Did not panic with subtractee different length")
 	}
 }

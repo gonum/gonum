@@ -19,13 +19,13 @@ func ExampleAdd_simple() {
 
 	Add(s1, s2, s3)
 
-	fmt.Println("s1 = ", s1)
-	fmt.Println("s2 = ", s2)
-	fmt.Println("s3 = ", s3)
+	fmt.Println("s1 =", s1)
+	fmt.Println("s2 =", s2)
+	fmt.Println("s3 =", s3)
 	// Output:
-	// s1 =  [7 9 11 13]
-	// s2 =  [5 6 7 8]
-	// s3 =  [1 1 1 1]
+	// s1 = [7 9 11 13]
+	// s2 = [5 6 7 8]
+	// s3 = [1 1 1 1]
 }
 
 func ExampleAdd_newslice() {
@@ -38,15 +38,15 @@ func ExampleAdd_newslice() {
 
 	Add(dst, s1, s2, s3)
 
-	fmt.Println("dst = ", dst)
-	fmt.Println("s1 = ", s1)
-	fmt.Println("s2 = ", s2)
-	fmt.Println("s3 = ", s3)
+	fmt.Println("dst =", dst)
+	fmt.Println("s1 =", s1)
+	fmt.Println("s2 =", s2)
+	fmt.Println("s3 =", s3)
 	// Output:
-	// dst =  [7 9 11 13]
-	// s1 =  [1 2 3 4]
-	// s2 =  [5 6 7 8]
-	// s3 =  [1 1 1 1]
+	// dst = [7 9 11 13]
+	// s1 = [1 2 3 4]
+	// s2 = [5 6 7 8]
+	// s3 = [1 1 1 1]
 }
 
 func ExampleAdd_unequallengths() {
@@ -81,9 +81,9 @@ func ExampleAdd_sliceofslicesum() {
 	result := make([]float64, len(s[0]))
 	Add(result, s...)
 
-	fmt.Println("result = ", result)
+	fmt.Println("result =", result)
 	// Output:
-	// result =  [0 5 10]
+	// result = [0 5 10]
 }
 
 func ExampleAddConst() {
@@ -92,9 +92,9 @@ func ExampleAddConst() {
 
 	AddConst(c, s)
 
-	fmt.Println("s = ", s)
+	fmt.Println("s =", s)
 	// Output:
-	// s =  [6 3 8 1]
+	// s = [6 3 8 1]
 }
 
 func ExampleCumProd() {
@@ -103,11 +103,11 @@ func ExampleCumProd() {
 
 	CumProd(dst, s)
 
-	fmt.Println("dst = ", dst)
-	fmt.Println("s = ", s)
+	fmt.Println("dst =", dst)
+	fmt.Println("s =", s)
 	// Output:
-	// dst =  [1 -2 -6 24]
-	// s =  [1 -2 3 -4]
+	// dst = [1 -2 -6 24]
+	// s = [1 -2 3 -4]
 }
 
 func ExampleCumSum() {
@@ -116,9 +116,9 @@ func ExampleCumSum() {
 
 	CumSum(dst, s)
 
-	fmt.Println("dst = ", dst)
-	fmt.Println("s = ", s)
+	fmt.Println("dst =", dst)
+	fmt.Println("s =", s)
 	// Output:
-	// dst =  [1 -1 2 -2]
-	// s =  [1 -2 3 -4]
+	// dst = [1 -1 2 -2]
+	// s = [1 -2 3 -4]
 }

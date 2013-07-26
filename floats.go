@@ -206,12 +206,8 @@ func LogSumExp(s []float64) (lse float64) {
 }
 
 // Max returns the maximum value in the slice and the location of
-// the maximum value. If the input slice is empty, zero is returned
-// as the minimum value and -1 is returned as the index.
+// the maximum value. If the input slice is empty, the code will panic
 func Max(s []float64) (max float64, ind int) {
-	if len(s) == 0 {
-		return max, -1 // Ind is -1 to make clear it's not the zeroth index.
-	}
 	max = s[0]
 	ind = 0
 	for i, val := range s {
@@ -227,9 +223,6 @@ func Max(s []float64) (max float64, ind int) {
 // the minimum value. If the input slice is empty, zero is returned
 // as the minimum value and -1 is returned as the index.
 func Min(s []float64) (min float64, ind int) {
-	if len(s) == 0 {
-		return min, -1 // Ind is -1 to make clear it's not the zeroth index.
-	}
 	min = s[0]
 	ind = 0
 	for i, val := range s {
@@ -239,6 +232,33 @@ func Min(s []float64) (min float64, ind int) {
 		}
 	}
 	return min, ind
+}
+
+// Nearest returns the index of the element of s whose value is
+// nearest to v. If none of the values are closer than infinitely
+// far away (all of the values in s are either NaN or Inf, or s
+// has length 0), the index is returned as -1
+// TODO: Add test
+func Nearest(s []float64, v float64) (ind int, dist float64) {
+	dist = math.Inf(1)
+	ind = -1
+	for i, val := range s {
+		newDist := math.Abs(v - val)
+		if newDist < dist {
+			dist = newDist
+			ind = i
+		}
+	}
+	return
+}
+
+// NearestInSpan return the index of the value nearest to v in
+// a hypothetical vector created by span with length N
+// and bounds l and u
+// Assumes u > l
+// TODO: Add in tests
+func NearestInSpan(v float64, n int, l, u float64) int {
+	return int((v-l)*float64(n-1)/(u-l) + 0.5)
 }
 
 // Norm returns the L norm of the slice S, defined as

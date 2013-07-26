@@ -15,18 +15,23 @@ func (i *InsufficientElements) Error() string {
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
 // in doubt, EqLen can be called first.
-func Add(dst []float64, slices ...[]float64) {
+func Add(dst []float64, slices ...[]float64) []float64 {
 	if len(slices) == 0 {
-		return
+		return nil
 	}
 	if len(dst) != len(slices[0]) {
-		panic("floats: length of destination does not match length of the slices")
+		if dst == nil {
+			dst = make([]float64, len(slices[0]))
+		} else {
+			panic("floats: length of destination does not match length of the slices")
+		}
 	}
 	for _, slice := range slices {
 		for j, val := range slice {
 			dst[j] += val
 		}
 	}
+	return dst
 }
 
 // AddConst adds a constant to all of the values in s
@@ -47,28 +52,37 @@ func Apply(s []float64, f func(float64) float64) {
 // Cumprod finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Panic will occur if lengths of do not match
-func CumProd(dst, s []float64) {
+func CumProd(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
-		panic("floats: length of destination does not match length of the source")
+		if dst == nil {
+			dst = make([]float64, len(s))
+		} else {
+			panic("floats: length of destination does not match length of the source")
+		}
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] * s[i]
 	}
-	return
+	return dst
 }
 
 // Cumsum finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Panic will occur if lengths of arguments do not match
-func CumSum(dst, s []float64) {
+func CumSum(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
-		panic("floats: length of destination does not match length of the source")
+		if dst == nil {
+			dst = make([]float64, len(s))
+		} else {
+			panic("floats: length of destination does not match length of the source")
+		}
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] + s[i]
 	}
+	return dst
 }
 
 // Dot computes the dot product of s1 and s2, i.e.
@@ -167,9 +181,10 @@ func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 // only element of dst will become l
 // Note that this call will return NaNs if either l or u are negative, and
 // will return all zeros if l or u is zero.
-func LogSpan(dst []float64, l, u float64) {
+func LogSpan(dst []float64, l, u float64) []float64 {
 	Span(dst, math.Log(l), math.Log(u))
 	Apply(dst, math.Exp)
+	return dst
 }
 
 // Logsumexp returns the log of the sum of the exponentials of the values in s
@@ -282,21 +297,22 @@ func Scale(s []float64, c float64) {
 // is l, the final element of the destination is u.
 // If len(dst) = 0, dst will be returned unchanged, and if len(dst) = 1, the
 // only element of dst will become l
-func Span(dst []float64, l, u float64) {
+func Span(dst []float64, l, u float64) []float64 {
 	n := len(dst)
 	if n < 2 {
 		if n == 0 {
-			return
+			return nil
 		}
 		if n == 1 {
 			dst[0] = l
-			return
+			return nil
 		}
 	}
 	step := (u - l) / float64(n-1)
 	for i := range dst {
 		dst[i] = l + step*float64(i)
 	}
+	return dst
 }
 
 // Sub subtracts, element-wise, the first argument from the second. Assumes
@@ -313,16 +329,21 @@ func Sub(s, t []float64) {
 // SubDst subtracts, element-wise, the first argument from the second and
 // store the result in destination. Assumes the lengths of s and t match
 // (can be tested with EqLen)
-func SubDst(dst, s, t []float64) {
+func SubDst(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of subtractor and subtractee do not match")
 	}
 	if len(dst) != len(s) {
-		panic("floats: length of destination does not match length of subtractor")
+		if dst == nil {
+			dst = make([]float64, len(s))
+		} else {
+			panic("floats: length of destination does not match length of subtractor")
+		}
 	}
 	for i, val := range t {
 		dst[i] = s[i] - val
 	}
+	return dst
 }
 
 // Sum returns the sum of the elements of the slice

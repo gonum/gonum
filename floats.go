@@ -1,14 +1,9 @@
 package floats
 
-import "math"
-
-// InsufficientElements is an error type used by FindFirst
-type InsufficientElements struct{}
-
-// Error makes InsufficientElements satisfy the error interface
-func (i *InsufficientElements) Error() string {
-	return "floats: insufficient elements found"
-}
+import (
+	"errors"
+	"math"
+)
 
 // Add returns the element-wise sum of all the slices with the
 // results stored in the first slice.
@@ -170,7 +165,7 @@ func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 		}
 	}
 	// Finished iterating over the loop, which means k elements were not found
-	return inds, &InsufficientElements{}
+	return inds, errors.New("floats: insufficient elements found")
 }
 
 // LogSpan returns a set of N equally spaced points in log space between l and u,
@@ -252,7 +247,7 @@ func Nearest(s []float64, v float64) (ind int, dist float64) {
 }
 
 // NearestInSpan return the index of the value nearest to v in
-// a hypothetical vector created by span with length N
+// a hypothetical vector created by span with length n
 // and bounds l and u
 // Assumes u > l
 // TODO: Add in tests

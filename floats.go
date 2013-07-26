@@ -7,7 +7,7 @@ type InsufficientElements struct{}
 
 // Error makes InsufficientElements satisfy the error interface
 func (i *InsufficientElements) Error() string {
-	return "Insufficient elements found"
+	return "floats: insufficient elements found"
 }
 
 // Add returns the element-wise sum of all the slices with the
@@ -20,7 +20,7 @@ func Add(dst []float64, slices ...[]float64) {
 		return
 	}
 	if len(dst) != len(slices[0]) {
-		panic("Length of destination does not match length of the slices")
+		panic("floats: length of destination does not match length of the slices")
 	}
 	for _, slice := range slices {
 		for j, val := range slice {
@@ -49,7 +49,7 @@ func Apply(s []float64, f func(float64) float64) {
 // destination. Panic will occur if lengths of do not match
 func CumProd(dst, s []float64) {
 	if len(dst) != len(s) {
-		panic("Length of destination does not match length of the source")
+		panic("floats: length of destination does not match length of the source")
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
@@ -63,7 +63,7 @@ func CumProd(dst, s []float64) {
 // destination. Panic will occur if lengths of arguments do not match
 func CumSum(dst, s []float64) {
 	if len(dst) != len(s) {
-		panic("Length of destination does not match length of the source")
+		panic("floats: length of destination does not match length of the source")
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
@@ -76,7 +76,7 @@ func CumSum(dst, s []float64) {
 // Panic will occur if lengths of arguments do not match
 func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {
-		panic("Lengths of the slices do not match")
+		panic("floats: lengths of the slices do not match")
 	}
 	var sum float64
 	for i, val := range s1 {
@@ -303,7 +303,7 @@ func Span(dst []float64, l, u float64) {
 // the lengths of s and t match (can be tested with EqLen)
 func Sub(s, t []float64) {
 	if len(s) != len(t) {
-		panic("Length of the slices do not match")
+		panic("floats: length of the slices do not match")
 	}
 	for i, val := range t {
 		s[i] -= val
@@ -315,10 +315,10 @@ func Sub(s, t []float64) {
 // (can be tested with EqLen)
 func SubDst(dst, s, t []float64) {
 	if len(s) != len(t) {
-		panic("Length of subtractor and subtractee do not match")
+		panic("floats: length of subtractor and subtractee do not match")
 	}
 	if len(dst) != len(s) {
-		panic("Length of destination does not match length of subtractor")
+		panic("floats: length of destination does not match length of subtractor")
 	}
 	for i, val := range t {
 		dst[i] = s[i] - val

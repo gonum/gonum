@@ -30,22 +30,22 @@ func Add(dst []float64, slices ...[]float64) []float64 {
 }
 
 // AddConst adds a constant to all of the values in s
-func AddConst(s []float64, c float64) {
+func AddConst(c float64, s []float64) {
 	for i := range s {
 		s[i] += c
 	}
 }
 
-// ApplyFunc applies a function (math.Exp, math.Sin, etc.) to every element
-// of the slice
-func Apply(s []float64, f func(float64) float64) {
+// ApplyFunc applies a function f (math.Exp, math.Sin, etc.) to every element
+// of the slice s
+func Apply(f func(float64) float64, s []float64) {
 	for i, val := range s {
 		s[i] = f(val)
 	}
 }
 
 // Count counts the number of elements in s for which f is true
-func Count(s []float64, f func(float64) bool) int {
+func Count(f func(float64) bool, s []float64) int {
 	var n int
 	for _, val := range s {
 		if f(val) {
@@ -134,7 +134,7 @@ func EqLen(slices ...[]float64) bool {
 // found indices to inds.
 // If k > 0 and there are fewer than k elements in s satisfying f,
 // all of the found elements will be returned along with an error
-func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
+func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
 
 	// inds is also returned to allow for calling with nil
 
@@ -179,7 +179,7 @@ func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 // will return all zeros if l or u is zero.
 func LogSpan(dst []float64, l, u float64) []float64 {
 	Span(dst, math.Log(l), math.Log(u))
-	Apply(dst, math.Exp)
+	Apply(math.Exp, dst)
 	return dst
 }
 
@@ -232,11 +232,11 @@ func Min(s []float64) (min float64, ind int) {
 	return min, ind
 }
 
-// Nearest returns the index of the element of s whose value is
-// nearest to v. If several such indices exist, the lowest index
-// is returned
+// Nearest returns the index of the element in s
+// whose value is nearest to v.  If several such
+// indices exist, the lowest index is returned
 // TODO: Add test
-func Nearest(v float64, s []float64) (ind int) {
+func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
 	ind = 0
 	for i, val := range s {
@@ -254,7 +254,7 @@ func Nearest(v float64, s []float64) (ind int) {
 // and bounds l and u
 // Assumes u > l
 // TODO: Add in tests
-func NearestInSpan(v float64, n int, l, u float64) int {
+func NearestInSpan(n int, l, u float64, v float64) int {
 	return int((v-l)*float64(n-1)/(u-l) + 0.5)
 }
 
@@ -301,7 +301,7 @@ func Prod(s []float64) (prod float64) {
 }
 
 // Scale multiplies every element in s by c
-func Scale(s []float64, c float64) {
+func Scale(c float64, s []float64) {
 	for i := range s {
 		s[i] *= c
 	}
@@ -337,7 +337,7 @@ func Sub(s, t []float64) {
 // SubDst subtracts, element-wise, the first argument from the second and
 // store the result in destination. Assumes the lengths of s and t match
 // (can be tested with EqLen)
-func SubDst(dst, s, t []float64) []float64 {
+func SubTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of subtractor and subtractee do not match")
 	}

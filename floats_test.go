@@ -283,8 +283,9 @@ func TestMin(t *testing.T) {
 }
 
 func TestNearest(t *testing.T) {
-	//s := []float64{3, 5, 6.2, 6.2, 8}
-	//ind := Nearest(s, )
+	s := []float64{3, 5, 6.2, 6.2, 8}
+	ind := Nearest(2.0, s)
+	if 
 }
 
 func TestNorm(t *testing.T) {

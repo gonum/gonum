@@ -13,7 +13,7 @@ import (
 // results stored in the first slice.
 // For computational efficiency, it is assumed that all of
 // the variadic arguments have the same length. If this is
-// in doubt, EqLen can be called first.
+// in doubt, EqLen can be used.
 func Add(dst []float64, slices ...[]float64) []float64 {
 	if len(slices) == 0 {
 		return nil
@@ -29,7 +29,7 @@ func Add(dst []float64, slices ...[]float64) []float64 {
 	return dst
 }
 
-// AddConst adds a constant to all of the values in s
+// AddConst adds the value c to all of the values in s
 func AddConst(c float64, s []float64) {
 	for i := range s {
 		s[i] += c
@@ -44,7 +44,8 @@ func Apply(f func(float64) float64, s []float64) {
 	}
 }
 
-// Count counts the number of elements in s for which f is true
+// Count applies the function f to every element of s and returns the number
+// of times the function returned true
 func Count(f func(float64) bool, s []float64) int {
 	var n int
 	for _, val := range s {
@@ -127,9 +128,9 @@ func EqLen(slices ...[]float64) bool {
 	return true
 }
 
-// Find finds the first k indices of  s for which
-// the function f returns true and stores them in
-// inds. If k < 0, all such elements are found.
+// Find applies f to every element of s and returns the first
+// k elements for which the f returns true, or all such elements
+// if k < 0.
 // Find will reslice inds to have 0 length, and will append
 // found indices to inds.
 // If k > 0 and there are fewer than k elements in s satisfying f,
@@ -171,8 +172,8 @@ func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
 	return inds, errors.New("floats: insufficient elements found")
 }
 
-// LogSpan returns a set of N equally spaced points in log space between l and u,
-// where N is equal to the len(dst). The first element of the
+// LogSpan returns a set of n equally spaced points in log space between,
+// l and u where N is equal to len(dst). The first element of the
 // resulting dst will be l and the final element of dst will be u.
 // Panics if len(dst) < 2
 // Note that this call will return NaNs if either l or u are negative, and
@@ -234,7 +235,7 @@ func Min(s []float64) (min float64, ind int) {
 
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
-// indices exist, the lowest index is returned
+// elements exist, the lowest index is returned
 func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
 	ind = 0
@@ -248,10 +249,9 @@ func Nearest(s []float64, v float64) (ind int) {
 	return
 }
 
-// NearestInSpan return the index of the value nearest to v in
-// a hypothetical vector created by span with length n
-// and bounds l and u
-// Assumes u > l
+// NearestInSpan return the index of a hypothetical vector created
+// by Span with length n and bounds l and u whose value is closest
+// to v. Assumes u > l
 func NearestInSpan(n int, l, u float64, v float64) int {
 	if v < l {
 		return 0
@@ -268,7 +268,7 @@ func NearestInSpan(n int, l, u float64, v float64) int {
 // (sum_{i=1}^N s[i]^N)^{1/N}
 // Special cases:
 // L = math.Inf(1) gives the maximum value
-// Does not correctly compute the zero norm
+// Does not correctly compute the zero norm (use Count)
 func Norm(s []float64, L float64) (norm float64) {
 	// Should this complain if L is not positive?
 	// Should this be done in log space for better numerical stability?
@@ -340,9 +340,8 @@ func Sub(s, t []float64) {
 	}
 }
 
-// SubDst subtracts, element-wise, the first argument from the second and
-// store the result in destination. Assumes the lengths of s and t match
-// (can be tested with EqLen)
+// SubTo subtracts, element-wise, the first argument from the second and
+// stores the result in dest. Panics if the lengths of s and t do not match
 func SubTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of subtractor and subtractee do not match")

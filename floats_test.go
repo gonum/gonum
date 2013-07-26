@@ -1,3 +1,7 @@
+// Copyright 2013 The Gonum Authors. All rights reserved.
+// Use of this code is governed by a BSD-style
+// license that can be found in the LICENSE file
+
 package floats
 
 import (
@@ -296,6 +300,10 @@ func TestMin(t *testing.T) {
 	if ind != 2 {
 		t.Errorf("Wrong index returned")
 	}
+}
+
+func TestNearest(t *testing.T) {
+
 }
 
 func TestNorm(t *testing.T) {

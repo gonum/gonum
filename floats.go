@@ -236,8 +236,8 @@ func Min(s []float64) (min float64, ind int) {
 // nearest to v. If several such indices exist, the lowest index
 // is returned
 // TODO: Add test
-func Nearest(s []float64, v float64) (ind int, dist float64) {
-	dist = math.Abs(v - s[0])
+func Nearest(s []float64, v float64) (ind int) {
+	dist := math.Abs(v - s[0])
 	ind = 0
 	for i, val := range s {
 		newDist := math.Abs(v - val)

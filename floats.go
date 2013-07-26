@@ -129,8 +129,7 @@ func EqLen(slices ...[]float64) bool {
 // Find will reslice inds to have 0 length, and will append
 // found indices to inds.
 // If k > 0 and there are fewer than k elements in s satisfying f,
-// all of the found elements will be returned along with an
-// InsufficientElements error
+// all of the found elements will be returned along with an error
 func Find(inds []int, k int, s []float64, f func(float64) bool) ([]int, error) {
 
 	// inds is also returned to allow for calling with nil

@@ -213,6 +213,12 @@ func TestLogSpan(t *testing.T) {
 		comp[i] = 1
 	}
 	AreSlicesEqual(t, comp, tst, "Improper logspace")
+	if !Panics(func() { LogSpan(nil, 1, 5) }) {
+		t.Errorf("Span accepts nil argument")
+	}
+	if !Panics(func() { LogSpan(make([]float64, 1), 1, 5) }) {
+		t.Errorf("Span accepts argument of len = 1")
+	}
 }
 
 func TestLogSumExp(t *testing.T) {
@@ -336,6 +342,12 @@ func TestSpan(t *testing.T) {
 	truth = []float64{0, 0.2, 0.4, 0.6, 0.8, 1.0}
 	Span(receiver, 0, 1)
 	AreSlicesEqual(t, truth, receiver, "Improper linspace")
+	if !Panics(func() { Span(nil, 1, 5) }) {
+		t.Errorf("Span accepts nil argument")
+	}
+	if !Panics(func() { Span(make([]float64, 1), 1, 5) }) {
+		t.Errorf("Span accepts argument of len = 1")
+	}
 }
 
 func TestSub(t *testing.T) {

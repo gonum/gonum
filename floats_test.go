@@ -67,6 +67,16 @@ func TestApply(t *testing.T) {
 	AreSlicesEqual(t, truth, s, "Wrong application of function")
 }
 
+func TestCount(t *testing.T) {
+	s := []float64{3, 4, 1, 7, 5}
+	f := func(v float64) bool { return v > 3.5 }
+	truth := 3
+	n := Count(s, f)
+	if n != truth {
+		t.Errorf("Wrong number of elements counted")
+	}
+}
+
 func TestCumProd(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))

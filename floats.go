@@ -45,6 +45,17 @@ func Apply(s []float64, f func(float64) float64) {
 	}
 }
 
+// Count counts the number of elements in s for which f is true
+func Count(s []float64, f func(float64) bool) int {
+	var n int
+	for _, val := range s {
+		if f(val) {
+			n++
+		}
+	}
+	return n
+}
+
 // Cumprod finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Panic will occur if lengths of do not match

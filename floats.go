@@ -47,7 +47,7 @@ func Apply(s []float64, f func(float64) float64) {
 // Cumprod finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. Panic will occur if lengths of do not match
-func CumProd(dst, s []float64) []float64 {
+func CumProd(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("Length of destination does not match length of the source")
 	}
@@ -55,7 +55,7 @@ func CumProd(dst, s []float64) []float64 {
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] * s[i]
 	}
-	return dst
+	return
 }
 
 // Cumsum finds the cumulative sum of the first i elements in

@@ -20,11 +20,7 @@ func Add(dst []float64, slices ...[]float64) []float64 {
 		return nil
 	}
 	if len(dst) != len(slices[0]) {
-		if dst == nil {
-			dst = make([]float64, len(slices[0]))
-		} else {
-			panic("floats: length of destination does not match length of the slices")
-		}
+		panic("floats: length of destination does not match length of the slices")
 	}
 	for _, slice := range slices {
 		for j, val := range slice {
@@ -54,11 +50,7 @@ func Apply(s []float64, f func(float64) float64) {
 // destination. Panic will occur if lengths of do not match
 func CumProd(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
-		if dst == nil {
-			dst = make([]float64, len(s))
-		} else {
-			panic("floats: length of destination does not match length of the source")
-		}
+		panic("floats: length of destination does not match length of the source")
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
@@ -72,11 +64,7 @@ func CumProd(dst, s []float64) []float64 {
 // destination. Panic will occur if lengths of arguments do not match
 func CumSum(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
-		if dst == nil {
-			dst = make([]float64, len(s))
-		} else {
-			panic("floats: length of destination does not match length of the source")
-		}
+		panic("floats: length of destination does not match length of the source")
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
@@ -300,13 +288,7 @@ func Scale(s []float64, c float64) {
 func Span(dst []float64, l, u float64) []float64 {
 	n := len(dst)
 	if n < 2 {
-		if n == 0 {
-			return nil
-		}
-		if n == 1 {
-			dst[0] = l
-			return nil
-		}
+		panic("floats: destination must have length >1")
 	}
 	step := (u - l) / float64(n-1)
 	for i := range dst {

@@ -251,14 +251,13 @@ func Nearest(s []float64, v float64) (ind int) {
 
 // NearestInSpan return the index of a hypothetical vector created
 // by Span with length n and bounds l and u whose value is closest
-// to v. Assumes u > l
-func NearestInSpan(n int, l, u float64, v float64) int {
-	if v < l {
-		return 0
+// to v. Assumes u > l. If the value is greater than u or less than
+// l, the function will panic.
+func NearestWithinSpan(n int, l, u float64, v float64) int {
+	if v < l || v > u {
+		panic("floats: value outside span bounds")
 	}
-	if v > u {
-		return n - 1
-	}
+
 	// Can't guarantee anything about exactly halfway between
 	// because of floating point weirdness
 	return int((float64(n)-1)/(u-l)*(v-l) + 0.5)

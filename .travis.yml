@@ -1,13 +1,12 @@
 language: go
 
-before_script:
- - go get github.com/gonum/discrete
- - cd $GOSRC/github.com/gonum/discrete
+go:
+ - 1.1
 
 script:
- - go build -v
- - go test -v
- - gofmt -d .
+ - go get -d -v ./... && go build -v ./...
+ - go test -v ./...
+ - gofmt -d ./...
 
 after_failure: failure
 after_error: failure

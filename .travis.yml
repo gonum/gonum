@@ -1,0 +1,20 @@
+language: go
+
+before_script:
+ - go get github.com/gonum/discrete
+ - cd $GOSRC/github.com/gonum/discrete
+
+script:
+ - go build -v
+ - go test -v
+ - gofmt -d .
+
+after_failure: failure
+after_error: failure
+
+notifications:
+  email:
+    recipients:
+      - jragonmiris@gmail.com
+    on_success: change
+    on_failure: always

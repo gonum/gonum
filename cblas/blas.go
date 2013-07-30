@@ -536,8 +536,14 @@ func (Blas) Sgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float32, 
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_sgemv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
 }
@@ -572,8 +578,14 @@ func (Blas) Sgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < kL+kU+1 {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_sgbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
 }
@@ -593,7 +605,7 @@ func (Blas) Strmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_strmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
@@ -617,7 +629,7 @@ func (Blas) Stbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_stbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
@@ -659,7 +671,7 @@ func (Blas) Strsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_strsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
@@ -683,7 +695,7 @@ func (Blas) Stbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_stbsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
@@ -734,8 +746,14 @@ func (Blas) Dgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float64, 
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_dgemv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
 }
@@ -770,8 +788,14 @@ func (Blas) Dgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < kL+kU+1 {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_dgbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
 }
@@ -791,7 +815,7 @@ func (Blas) Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dtrmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
@@ -815,7 +839,7 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dtbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
@@ -857,7 +881,7 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dtrsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
@@ -881,7 +905,7 @@ func (Blas) Dtbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dtbsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
@@ -932,8 +956,14 @@ func (Blas) Cgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex64
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_cgemv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
@@ -968,8 +998,14 @@ func (Blas) Cgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < kL+kU+1 {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_cgbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
@@ -989,7 +1025,7 @@ func (Blas) Ctrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ctrmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1013,7 +1049,7 @@ func (Blas) Ctbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ctbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1055,7 +1091,7 @@ func (Blas) Ctrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ctrsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1079,7 +1115,7 @@ func (Blas) Ctbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ctbsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1130,8 +1166,14 @@ func (Blas) Zgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex12
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_zgemv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
@@ -1166,8 +1208,14 @@ func (Blas) Zgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 	if (lenY-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < kL+kU+1 {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < kL+kU+1 {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_zgbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
@@ -1187,7 +1235,7 @@ func (Blas) Ztrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ztrmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1211,7 +1259,7 @@ func (Blas) Ztbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ztbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1253,7 +1301,7 @@ func (Blas) Ztrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ztrsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1277,7 +1325,7 @@ func (Blas) Ztbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ztbsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
@@ -1319,7 +1367,7 @@ func (Blas) Ssymv(o blas.Order, ul blas.Uplo, n int, alpha float32, a []float32,
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ssymv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
@@ -1343,7 +1391,7 @@ func (Blas) Ssbmv(o blas.Order, ul blas.Uplo, n int, k int, alpha float32, a []f
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ssbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
@@ -1385,8 +1433,14 @@ func (Blas) Sger(o blas.Order, m int, n int, alpha float32, x []float32, incX in
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_sger(C.enum_CBLAS_ORDER(o), C.int(m), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(&a[0]), C.int(lda))
 }
@@ -1403,7 +1457,7 @@ func (Blas) Ssyr(o blas.Order, ul blas.Uplo, n int, alpha float32, x []float32, 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ssyr(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&a[0]), C.int(lda))
@@ -1442,7 +1496,7 @@ func (Blas) Ssyr2(o blas.Order, ul blas.Uplo, n int, alpha float32, x []float32,
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ssyr2(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(&a[0]), C.int(lda))
@@ -1484,7 +1538,7 @@ func (Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float64,
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dsymv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
@@ -1508,7 +1562,7 @@ func (Blas) Dsbmv(o blas.Order, ul blas.Uplo, n int, k int, alpha float64, a []f
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dsbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
@@ -1550,8 +1604,14 @@ func (Blas) Dger(o blas.Order, m int, n int, alpha float64, x []float64, incX in
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_dger(C.enum_CBLAS_ORDER(o), C.int(m), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(&a[0]), C.int(lda))
 }
@@ -1568,7 +1628,7 @@ func (Blas) Dsyr(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, 
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dsyr(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&a[0]), C.int(lda))
@@ -1607,7 +1667,7 @@ func (Blas) Dsyr2(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64,
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dsyr2(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(&a[0]), C.int(lda))
@@ -1649,7 +1709,7 @@ func (Blas) Chemv(o blas.Order, ul blas.Uplo, n int, alpha complex64, a []comple
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_chemv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
@@ -1673,7 +1733,7 @@ func (Blas) Chbmv(o blas.Order, ul blas.Uplo, n int, k int, alpha complex64, a [
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_chbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
@@ -1715,8 +1775,14 @@ func (Blas) Cgeru(o blas.Order, m int, n int, alpha complex64, x []complex64, in
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_cgeru(C.enum_CBLAS_ORDER(o), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
@@ -1736,8 +1802,14 @@ func (Blas) Cgerc(o blas.Order, m int, n int, alpha complex64, x []complex64, in
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_cgerc(C.enum_CBLAS_ORDER(o), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
@@ -1754,7 +1826,7 @@ func (Blas) Cher(o blas.Order, ul blas.Uplo, n int, alpha float32, x []complex64
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_cher(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&a[0]), C.int(lda))
@@ -1793,7 +1865,7 @@ func (Blas) Cher2(o blas.Order, ul blas.Uplo, n int, alpha complex64, x []comple
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_cher2(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
@@ -1835,7 +1907,7 @@ func (Blas) Zhemv(o blas.Order, ul blas.Uplo, n int, alpha complex128, a []compl
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zhemv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
@@ -1859,7 +1931,7 @@ func (Blas) Zhbmv(o blas.Order, ul blas.Uplo, n int, k int, alpha complex128, a 
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < k+1 {
+	if lda*(n-1)+n > len(a) || lda < k+1 {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zhbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
@@ -1901,8 +1973,14 @@ func (Blas) Zgeru(o blas.Order, m int, n int, alpha complex128, x []complex128, 
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_zgeru(C.enum_CBLAS_ORDER(o), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
@@ -1922,8 +2000,14 @@ func (Blas) Zgerc(o blas.Order, m int, n int, alpha complex128, x []complex128, 
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_zgerc(C.enum_CBLAS_ORDER(o), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
@@ -1940,7 +2024,7 @@ func (Blas) Zher(o blas.Order, ul blas.Uplo, n int, alpha float64, x []complex12
 	if incX <= 0 || (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zher(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&a[0]), C.int(lda))
@@ -1979,7 +2063,7 @@ func (Blas) Zher2(o blas.Order, ul blas.Uplo, n int, alpha complex128, x []compl
 	if incY <= 0 || (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
-	if lda*n > len(a) || lda < max(1, n) {
+	if lda*(n-1)+n > len(a) || lda < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zher2(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
@@ -2030,23 +2114,23 @@ func (Blas) Sgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		rowB, colB = n, k
 	}
 	if o == blas.RowMajor {
-		if lda*rowA > len(a) || lda < max(1, colA) {
+		if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*rowB > len(b) || ldb < max(1, colB) {
+		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*m > len(c) || ldc < max(1, n) {
+		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*colA > len(a) || lda < max(1, rowA) {
+		if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*colB > len(b) || ldb < max(1, rowB) {
+		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*n > len(c) || ldc < max(1, m) {
+		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2074,23 +2158,23 @@ func (Blas) Ssymm(o blas.Order, s blas.Side, ul blas.Uplo, m int, n int, alpha f
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
-	}
-	if ldc*n > len(c) || ldc < max(1, m) {
-		panic("cblas: index out of range")
 	}
 	C.cblas_ssymm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb), C.float(beta), (*C.float)(&c[0]), C.int(ldc))
 }
@@ -2114,15 +2198,15 @@ func (Blas) Ssyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ssyrk(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.float(alpha), (*C.float)(&a[0]), C.int(lda), C.float(beta), (*C.float)(&c[0]), C.int(ldc))
@@ -2147,21 +2231,21 @@ func (Blas) Ssyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
-		if ldb*col > len(b) || ldb < max(1, row) {
+		if ldb*(row-1)+col > len(b) || ldb < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
-		if ldb*row > len(b) || ldb < max(1, col) {
+		if ldb*(col-1)+row > len(b) || ldb < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_ssyr2k(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb), C.float(beta), (*C.float)(&c[0]), C.int(ldc))
@@ -2191,18 +2275,15 @@ func (Blas) Strmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
-			panic("cblas: index out of range")
-		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
-			panic("cblas: index out of range")
-		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2227,8 +2308,14 @@ func (Blas) Strsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_strsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb))
 }
@@ -2257,23 +2344,23 @@ func (Blas) Dgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		rowB, colB = n, k
 	}
 	if o == blas.RowMajor {
-		if lda*rowA > len(a) || lda < max(1, colA) {
+		if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*rowB > len(b) || ldb < max(1, colB) {
+		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*m > len(c) || ldc < max(1, n) {
+		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*colA > len(a) || lda < max(1, rowA) {
+		if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*colB > len(b) || ldb < max(1, rowB) {
+		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*n > len(c) || ldc < max(1, m) {
+		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2301,23 +2388,23 @@ func (Blas) Dsymm(o blas.Order, s blas.Side, ul blas.Uplo, m int, n int, alpha f
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
-	}
-	if ldc*n > len(c) || ldc < max(1, m) {
-		panic("cblas: index out of range")
 	}
 	C.cblas_dsymm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb), C.double(beta), (*C.double)(&c[0]), C.int(ldc))
 }
@@ -2341,15 +2428,15 @@ func (Blas) Dsyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dsyrk(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.double(alpha), (*C.double)(&a[0]), C.int(lda), C.double(beta), (*C.double)(&c[0]), C.int(ldc))
@@ -2374,21 +2461,21 @@ func (Blas) Dsyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
-		if ldb*col > len(b) || ldb < max(1, row) {
+		if ldb*(row-1)+col > len(b) || ldb < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
-		if ldb*row > len(b) || ldb < max(1, col) {
+		if ldb*(col-1)+row > len(b) || ldb < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_dsyr2k(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb), C.double(beta), (*C.double)(&c[0]), C.int(ldc))
@@ -2418,18 +2505,15 @@ func (Blas) Dtrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
-			panic("cblas: index out of range")
-		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
-			panic("cblas: index out of range")
-		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2454,8 +2538,14 @@ func (Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_dtrsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb))
 }
@@ -2484,23 +2574,23 @@ func (Blas) Cgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		rowB, colB = n, k
 	}
 	if o == blas.RowMajor {
-		if lda*rowA > len(a) || lda < max(1, colA) {
+		if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*rowB > len(b) || ldb < max(1, colB) {
+		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*m > len(c) || ldc < max(1, n) {
+		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*colA > len(a) || lda < max(1, rowA) {
+		if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*colB > len(b) || ldb < max(1, rowB) {
+		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*n > len(c) || ldc < max(1, m) {
+		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2528,23 +2618,23 @@ func (Blas) Csymm(o blas.Order, s blas.Side, ul blas.Uplo, m int, n int, alpha c
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
-	}
-	if ldc*n > len(c) || ldc < max(1, m) {
-		panic("cblas: index out of range")
 	}
 	C.cblas_csymm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
@@ -2568,15 +2658,15 @@ func (Blas) Csyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_csyrk(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
@@ -2601,21 +2691,21 @@ func (Blas) Csyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
-		if ldb*col > len(b) || ldb < max(1, row) {
+		if ldb*(row-1)+col > len(b) || ldb < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
-		if ldb*row > len(b) || ldb < max(1, col) {
+		if ldb*(col-1)+row > len(b) || ldb < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_csyr2k(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
@@ -2645,18 +2735,15 @@ func (Blas) Ctrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
-			panic("cblas: index out of range")
-		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
-			panic("cblas: index out of range")
-		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2681,8 +2768,14 @@ func (Blas) Ctrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_ctrsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))
 }
@@ -2711,23 +2804,23 @@ func (Blas) Zgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		rowB, colB = n, k
 	}
 	if o == blas.RowMajor {
-		if lda*rowA > len(a) || lda < max(1, colA) {
+		if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*rowB > len(b) || ldb < max(1, colB) {
+		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*m > len(c) || ldc < max(1, n) {
+		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*colA > len(a) || lda < max(1, rowA) {
+		if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) {
 			panic("cblas: index out of range")
 		}
-		if ldb*colB > len(b) || ldb < max(1, rowB) {
+		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*n > len(c) || ldc < max(1, m) {
+		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2755,23 +2848,23 @@ func (Blas) Zsymm(o blas.Order, s blas.Side, ul blas.Uplo, m int, n int, alpha c
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
-	}
-	if ldc*n > len(c) || ldc < max(1, m) {
-		panic("cblas: index out of range")
 	}
 	C.cblas_zsymm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
@@ -2795,15 +2888,15 @@ func (Blas) Zsyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zsyrk(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
@@ -2828,21 +2921,21 @@ func (Blas) Zsyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
-		if ldb*col > len(b) || ldb < max(1, row) {
+		if ldb*(row-1)+col > len(b) || ldb < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
-		if ldb*row > len(b) || ldb < max(1, col) {
+		if ldb*(col-1)+row > len(b) || ldb < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zsyr2k(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
@@ -2872,18 +2965,15 @@ func (Blas) Ztrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
-			panic("cblas: index out of range")
-		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
-			panic("cblas: index out of range")
-		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2908,8 +2998,14 @@ func (Blas) Ztrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if lda*n > len(a) || lda < max(1, m) {
-		panic("cblas: index out of range")
+	if o == blas.RowMajor {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+			panic("cblas: index out of range")
+		}
+	} else {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+			panic("cblas: index out of range")
+		}
 	}
 	C.cblas_ztrsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))
 }
@@ -2935,23 +3031,23 @@ func (Blas) Chemm(o blas.Order, s blas.Side, ul blas.Uplo, m int, n int, alpha c
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
-	}
-	if ldc*n > len(c) || ldc < max(1, m) {
-		panic("cblas: index out of range")
 	}
 	C.cblas_chemm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
@@ -2975,15 +3071,15 @@ func (Blas) Cherk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_cherk(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.float(alpha), unsafe.Pointer(&a[0]), C.int(lda), C.float(beta), unsafe.Pointer(&c[0]), C.int(ldc))
@@ -3008,21 +3104,21 @@ func (Blas) Cher2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
-		if ldb*col > len(b) || ldb < max(1, row) {
+		if ldb*(row-1)+col > len(b) || ldb < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
-		if ldb*row > len(b) || ldb < max(1, col) {
+		if ldb*(col-1)+row > len(b) || ldb < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_cher2k(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), C.float(beta), unsafe.Pointer(&c[0]), C.int(ldc))
@@ -3049,23 +3145,23 @@ func (Blas) Zhemm(o blas.Order, s blas.Side, ul blas.Uplo, m int, n int, alpha c
 	} else {
 		k = n
 	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index out of range")
+	}
 	if o == blas.RowMajor {
-		if lda*n > len(a) || lda < max(1, m) {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 			panic("cblas: index out of range")
 		}
-		if ldb*k > len(b) || ldb < max(1, k) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*k > len(a) || lda < max(1, k) {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
 			panic("cblas: index out of range")
 		}
-		if ldb*n > len(b) || ldb < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
-	}
-	if ldc*n > len(c) || ldc < max(1, m) {
-		panic("cblas: index out of range")
 	}
 	C.cblas_zhemm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
@@ -3089,15 +3185,15 @@ func (Blas) Zherk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zherk(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.double(alpha), unsafe.Pointer(&a[0]), C.int(lda), C.double(beta), unsafe.Pointer(&c[0]), C.int(ldc))
@@ -3122,21 +3218,21 @@ func (Blas) Zher2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 		row, col = k, n
 	}
 	if o == blas.RowMajor {
-		if lda*col > len(a) || lda < max(1, row) {
+		if lda*(row-1)+col > len(a) || lda < max(1, col) {
 			panic("cblas: index out of range")
 		}
-		if ldb*col > len(b) || ldb < max(1, row) {
+		if ldb*(row-1)+col > len(b) || ldb < max(1, col) {
 			panic("cblas: index out of range")
 		}
 	} else {
-		if lda*row > len(a) || lda < max(1, col) {
+		if lda*(col-1)+row > len(a) || lda < max(1, row) {
 			panic("cblas: index out of range")
 		}
-		if ldb*row > len(b) || ldb < max(1, col) {
+		if ldb*(col-1)+row > len(b) || ldb < max(1, row) {
 			panic("cblas: index out of range")
 		}
 	}
-	if ldc*n > len(c) || ldc < max(1, n) {
+	if ldc*(n-1)+n > len(c) || ldc < max(1, n) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zher2k(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), C.double(beta), unsafe.Pointer(&c[0]), C.int(ldc))

@@ -85,7 +85,7 @@ func CumSum(dst, s []float64) []float64 {
 }
 
 // Dot computes the dot product of s1 and s2, i.e.
-// sum_{i = 1}^N s1[n]*s2[n]
+// sum_{i = 1}^N s1[i]*s2[i]
 // Panic will occur if lengths of arguments do not match
 func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {

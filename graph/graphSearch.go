@@ -1,7 +1,9 @@
-package discrete
+package graph
 
 import (
 	"container/heap"
+	"github.com/gonum/discrete/set"
+	"github.com/gonum/discrete/xifo"
 )
 
 // Returns an ordered list consisting of the nodes between start and goal. The path will be the shortest path assuming the function heuristicCost is admissible.
@@ -97,7 +99,7 @@ func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[i
 	}
 	nodes := graph.NodeList()
 	openSet := &aStarPriorityQueue{}
-	closedSet := NewSet()                     // This is to make use of that same
+	closedSet := set.NewSet()                 // This is to make use of that same
 	costs = make(map[int]float64, len(nodes)) // May overallocate, will change if it becomes a problem
 	predecessor := make(map[int]int, len(nodes))
 	heap.Init(openSet)
@@ -263,8 +265,8 @@ func Johnson(graph Graph, Cost func(int, int) float64) (nodePaths map[int]map[in
 // Expands the first node it sees trying to find the destination. Depth First Search is *not* guaranteed to find the shortest path,
 // however, if a path exists DFS is guaranteed to find it (provided you don't find a way to implement a Graph with an infinite depth)
 func DepthFirstSearch(start, goal int, graph Graph) []int {
-	closedSet := NewSet()
-	openSet := Stack([]interface{}{start})
+	closedSet := set.NewSet()
+	openSet := xifo.Stack([]interface{}{start})
 	predecessor := make(map[int]int)
 
 	for !openSet.IsEmpty() {

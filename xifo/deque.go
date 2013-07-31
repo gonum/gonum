@@ -1,4 +1,4 @@
-package discrete
+package xifo
 
 import (
 	"errors"

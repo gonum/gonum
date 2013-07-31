@@ -1,6 +1,8 @@
-package discrete
+package graph
 
 import (
+	"github.com/gonum/discrete/set"
+	"github.com/gonum/discrete/xifo"
 	"math"
 	"sort"
 )
@@ -71,8 +73,8 @@ type WeightedEdge struct {
 // An undirected graph should end up with as many SCCs as there are "islands" (or subgraphs) of connections, meaning having more than one strongly connected component implies that your graph is not fully connected.
 func Tarjan(graph Graph) (sccs [][]int) {
 	index := 0
-	vStack := &Stack{}
-	stackSet := NewSet()
+	vStack := &xifo.Stack{}
+	stackSet := set.NewSet()
 	sccs = make([][]int, 0)
 
 	nodes := graph.NodeList()
@@ -164,7 +166,7 @@ func Prim(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 	}
 
 	dst.AddNode(nlist[0], nil)
-	remainingNodes := NewSet()
+	remainingNodes := set.NewSet()
 	for _, node := range nlist[1:] {
 		remainingNodes.Add(node)
 	}
@@ -215,7 +217,7 @@ func Kruskal(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 
 	sort.Sort(edgeWeights)
 
-	ds := NewDisjointSet()
+	ds := set.NewDisjointSet()
 	for _, node := range graph.NodeList() {
 		ds.MakeSet(node)
 	}
@@ -238,16 +240,16 @@ func Kruskal(dst MutableGraph, graph Graph, Cost func(int, int) float64) {
 // A dominates B if and only if the only path through B travels through A
 //
 // This returns all possible dominators for all nodes, it does not prune for strict dominators, immediate dominators etc
-func Dominators(start int, graph Graph) map[int]*Set {
-	allNodes := NewSet()
+func Dominators(start int, graph Graph) map[int]*set.Set {
+	allNodes := set.NewSet()
 	nlist := graph.NodeList()
-	dominators := make(map[int]*Set, len(nlist))
+	dominators := make(map[int]*set.Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node)
 	}
 
 	for _, node := range nlist {
-		dominators[node] = NewSet()
+		dominators[node] = set.NewSet()
 		if node == start {
 			dominators[node].Add(start)
 		} else {
@@ -265,16 +267,16 @@ func Dominators(start int, graph Graph) map[int]*Set {
 			if len(preds) == 0 {
 				continue
 			}
-			tmp := NewSet().Copy(dominators[preds[0]])
+			tmp := set.NewSet().Copy(dominators[preds[0]])
 			for _, pred := range preds[1:] {
 				tmp.Intersection(tmp, dominators[pred])
 			}
 
-			dom := NewSet()
+			dom := set.NewSet()
 			dom.Add(node)
 
 			dom.Union(dom, tmp)
-			if !Equal(dom, dominators[node]) {
+			if !set.Equal(dom, dominators[node]) {
 				dominators[node] = dom
 				somethingChanged = true
 			}
@@ -287,16 +289,16 @@ func Dominators(start int, graph Graph) map[int]*Set {
 // A Postdominates B if and only if all paths from B travel through A
 //
 // This returns all possible post-dominators for all nodes, it does not prune for strict postdominators, immediate postdominators etc
-func PostDominators(end int, graph Graph) map[int]*Set {
-	allNodes := NewSet()
+func PostDominators(end int, graph Graph) map[int]*set.Set {
+	allNodes := set.NewSet()
 	nlist := graph.NodeList()
-	dominators := make(map[int]*Set, len(nlist))
+	dominators := make(map[int]*set.Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node)
 	}
 
 	for _, node := range nlist {
-		dominators[node] = NewSet()
+		dominators[node] = set.NewSet()
 		if node == end {
 			dominators[node].Add(end)
 		} else {
@@ -314,16 +316,16 @@ func PostDominators(end int, graph Graph) map[int]*Set {
 			if len(succs) == 0 {
 				continue
 			}
-			tmp := NewSet().Copy(dominators[succs[0]])
+			tmp := set.NewSet().Copy(dominators[succs[0]])
 			for _, succ := range succs[1:] {
 				tmp.Intersection(tmp, dominators[succ])
 			}
 
-			dom := NewSet()
+			dom := set.NewSet()
 			dom.Add(node)
 
 			dom.Union(dom, tmp)
-			if !Equal(dom, dominators[node]) {
+			if !set.Equal(dom, dominators[node]) {
 				dominators[node] = dom
 				somethingChanged = true
 			}

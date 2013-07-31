@@ -1,12 +1,12 @@
-package discrete_test
+package graph_test
 
 import (
-	"github.com/gonum/discrete"
+	"github.com/gonum/discrete/graph"
 	"testing"
 )
 
 func TestTileGraph(t *testing.T) {
-	tg := discrete.NewTileGraph(4, 4, false)
+	tg := graph.NewTileGraph(4, 4, false)
 	if tg == nil || tg.String() != "▀▀▀▀\n▀▀▀▀\n▀▀▀▀\n▀▀▀▀" {
 		t.Fatal("Tile graph not generated correctly")
 	}
@@ -46,7 +46,7 @@ func TestTileGraph(t *testing.T) {
 		t.Fatal("Passability set incorrectly")
 	}
 
-	if tg2, err := discrete.GenerateTileGraph("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀"); err != nil {
+	if tg2, err := graph.GenerateTileGraph("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀"); err != nil {
 		t.Error("Tile graph errored on interpreting valid template string\n▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
 	} else if tg2.String() != "▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀" {
 		t.Error("Tile graph failed to generate properly with input string\n▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
@@ -99,12 +99,12 @@ func TestTileGraph(t *testing.T) {
 }
 
 func TestSimpleAStar(t *testing.T) {
-	tg, err := discrete.GenerateTileGraph("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
+	tg, err := graph.GenerateTileGraph("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
 	if err != nil {
 		t.Fatal("Couldn't generate tilegraph")
 	}
 
-	path, cost, _ := discrete.AStar(1, 14, tg, nil, nil)
+	path, cost, _ := graph.AStar(1, 14, tg, nil, nil)
 	if cost != 4.0 {
 		t.Errorf("A* reports incorrect cost for simple tilegraph search")
 	}
@@ -125,17 +125,17 @@ func TestSimpleAStar(t *testing.T) {
 }
 
 func TestHarderAStar(t *testing.T) {
-	tg := discrete.NewTileGraph(3, 3, true)
+	tg := graph.NewTileGraph(3, 3, true)
 
-	path, cost, _ := discrete.AStar(0, 8, tg, nil, nil)
+	path, cost, _ := graph.AStar(0, 8, tg, nil, nil)
 
-	if cost != 4.0 || !discrete.IsPath(path, tg) {
+	if cost != 4.0 || !graph.IsPath(path, tg) {
 		t.Error("Non-optimal or impossible path found for 3x3 grid")
 	}
 
-	tg = discrete.NewTileGraph(1000, 1000, true)
-	path, cost, _ = discrete.AStar(00, 999*1000+999, tg, nil, nil)
-	if !discrete.IsPath(path, tg) || cost != 1998.0 {
+	tg = graph.NewTileGraph(1000, 1000, true)
+	path, cost, _ = graph.AStar(00, 999*1000+999, tg, nil, nil)
+	if !graph.IsPath(path, tg) || cost != 1998.0 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}
 }

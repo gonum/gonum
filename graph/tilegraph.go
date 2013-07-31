@@ -1,4 +1,4 @@
-package discrete
+package graph
 
 import (
 	"errors"

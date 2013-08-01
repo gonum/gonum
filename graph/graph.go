@@ -95,7 +95,7 @@ func CopyGraph(dst MutableGraph, src Graph) {
 
 	for _, node := range src.NodeList() {
 		if !dst.NodeExists(node) {
-			dst.AddNode(id, nil)
+			dst.AddNode(node, nil)
 
 		}
 		for _, succ := range src.Successors(node) {
@@ -126,7 +126,7 @@ func NaiveEqual(graph1, graph2 Graph) bool {
 		if node2 != node {
 			return false
 		}
-		succs1, succs2 := sort.IntSlice(graph1.Successors(node1)), sort.IntSlice(graph2.Successors(node2))
+		succs1, succs2 := sort.IntSlice(graph1.Successors(node)), sort.IntSlice(graph2.Successors(node2))
 		if len(succs1) != len(succs2) {
 			return false
 		}

@@ -30,6 +30,11 @@ type Coster interface {
 	Cost(node1, node2 int) float64
 }
 
+type CostGraph interface {
+	Coster
+	Graph
+}
+
 // A graph that implements HeuristicCoster implements a heuristic between any two given nodes. Like Coster, if a graph implements this and a function needs a heuristic cost (e.g. A*), this function will
 // take precedence over the Null Heuristic (always returns 0) if "nil" is passed in for the function argument
 type HeuristicCoster interface {
@@ -75,6 +80,68 @@ type SmartNode interface {
 type WeightedEdge struct {
 	Edge   [2]int
 	Weight float64
+}
+
+/* Simple operations */
+
+func CopyGraph(dst MutableGraph, src Graph) {
+	dst.EmptyGraph()
+	dst.SetDirected(src.IsDirected())
+
+	var Cost func(int, int) float64
+	if cgraph, ok := src.(Coster); ok {
+		Cost = cgraph.Cost
+	}
+
+	for _, node := range src.NodeList() {
+		if !dst.NodeExists(node) {
+			dst.AddNode(id, nil)
+
+		}
+		for _, succ := range src.Successors(node) {
+			dst.AddEdge(node, succ)
+			if Cost != nil {
+				dst.SetEdgeCost(node, succ, Cost(node, succ))
+			}
+		}
+
+	}
+}
+
+// Node IDs must be the same for this to return true, two graphs representing the same edges,
+// but without the same node IDs are considered unequal (in other words, a true equality test is TODO)
+//
+// Also doesn't handle weighted graphs
+func NaiveEqual(graph1, graph2 Graph) bool {
+	nList1, nList2 := sort.IntSlice(graph1.NodeList()), sort.IntSlice(graph2.NodeList())
+	if len(nList1) != len(nList2) {
+		return false
+	}
+
+	sort.Sort(nList1)
+	sort.Sort(nList2)
+
+	for i, node := range nList1 {
+		node2 := nList2[i]
+		if node2 != node {
+			return false
+		}
+		succs1, succs2 := sort.IntSlice(graph1.Successors(node1)), sort.IntSlice(graph2.Successors(node2))
+		if len(succs1) != len(succs2) {
+			return false
+		}
+
+		sort.Sort(succs1)
+		sort.Sort(succs2)
+
+		for i, succ := range succs1 {
+			if succ != succs2[i] {
+				return false
+			}
+		}
+	}
+
+	return false
 }
 
 /* Basic Graph tests */

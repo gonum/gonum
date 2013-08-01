@@ -56,6 +56,21 @@ type MutableGraph interface {
 	SetDirected(bool)                           // This package will only call SetDirected on an empty graph, so there's no need to worry about the case where a graph suddenly becomes (un)directed
 }
 
+type Node interface {
+	ID() int
+}
+
+type SmartNode interface {
+	Node
+	Successors() []Node
+	Predecessors() []Node
+	Edges() [][2]Node
+	IsSuccessor(succ Node) bool
+	IsPredecessor(pred Node) bool
+	IsAdjacent(neighbor Node) bool
+	Degree() int
+}
+
 // A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge[0], Edge[1]) had been called)
 type WeightedEdge struct {
 	Edge   [2]int

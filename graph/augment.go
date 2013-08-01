@@ -10,7 +10,7 @@ type CutterGraph struct {
 	edgeCutset map[int]*set.Set
 }
 
-func NewCutterGraph(graph Graph) {
+func NewCutterGraph(graph Graph) *CutterGraph {
 	return &CutterGraph{graph, set.NewSet(), make(map[int]*set.Set)}
 }
 
@@ -24,7 +24,7 @@ func (graph *CutterGraph) Successors(node int) []int {
 		return successors
 	}
 
-	realSuccs := make([]int, 0, len(successors)-len(graph.edgeCutset[node]))
+	realSuccs := make([]int, 0, len(successors)-len(*graph.edgeCutset[node]))
 	for _, succ := range successors {
 		if !graph.edgeCutset[node].Contains(succ) {
 			realSuccs = append(realSuccs, succ)
@@ -54,14 +54,14 @@ func (graph *CutterGraph) Predecessors(node int) []int {
 		return predecessors
 	}
 
-	realPreds := make([]int, 0, len(predecessors)-len(graph.edgeCutset[node]))
+	realPreds := make([]int, 0, len(predecessors)-len(*graph.edgeCutset[node]))
 	for _, pred := range predecessors {
 		if !graph.edgeCutset[node].Contains(pred) {
 			realPreds = append(realPreds, pred)
 		}
 	}
 
-	return realSuccs
+	return realPreds
 }
 
 func (graph *CutterGraph) IsPredecessor(node, predecessor int) bool {
@@ -104,7 +104,7 @@ func (graph *CutterGraph) EdgeList() [][2]int {
 
 func (graph *CutterGraph) NodeList() []int {
 	nodeList := graph.graph.NodeList()
-	realNodeList := make([]int, 0, len(nodeList)-len(graph.nodeCutset))
+	realNodeList := make([]int, 0, len(nodeList)-len(*graph.nodeCutset))
 	for _, node := range nodeList {
 		if !graph.nodeCutset.Contains(node) {
 			realNodeList = append(realNodeList, node)

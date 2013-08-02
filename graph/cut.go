@@ -156,8 +156,7 @@ func (graph *CutterGraph) IsCutNode(node int) bool {
 
 func (graph *CutterGraph) IsCutEdge(node, succ int) bool {
 	if cutset, ok := graph.edgeCutset[node]; ok {
-		_, cut := cutset[succ]
-		return cut
+		return cutset.Contains(succ)
 	}
 
 	return false
@@ -169,12 +168,12 @@ func (graph *CutterGraph) CutAllEdges(node int) {
 	}
 
 	for _, pred := range graph.Predecessors(node) {
-		graph.CutEdge(pred, succ)
+		graph.CutEdge(pred, node)
 	}
 }
 
 func (graph *CutterGraph) UncutAllEdges(node int) {
-	delete(graph.edgeCutset[node])
+	delete(graph.edgeCutset, node)
 
 	for _, cutset := range graph.edgeCutset {
 		if cutset.Contains(node) {

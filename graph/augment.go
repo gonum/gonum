@@ -178,13 +178,13 @@ func (graph *AugmentedGraph) SetEdgeCost(node, succ int, cost float64) {
 		graph.augmentedSuccessors[node] = make(map[int]float64, 1)
 	}
 
-	graph.augmentedSuccessors[node] = cost
+	graph.augmentedSuccessors[node][succ] = cost
 
 	if _, ok := graph.augmentedPredecessors[succ]; !ok {
 		graph.augmentedPredecessors[succ] = make(map[int]float64, 1)
 	}
 
-	graph.augmentedPredecessors[succ] = cost
+	graph.augmentedPredecessors[succ][node] = cost
 }
 
 func (graph *AugmentedGraph) IsAugmentedNode(node int) bool {
@@ -211,7 +211,7 @@ func (graph *AugmentedGraph) IsOverriddenEdge(node, succ int) bool {
 	return false
 }
 
-func (graph *AugmentedGraph) KillAugmentedNode(node int) bool {
+func (graph *AugmentedGraph) KillAugmentedNode(node int) {
 	graph.augmentedNodes.Remove(node)
 
 	for succ, _ := range graph.augmentedSuccessors[node] {

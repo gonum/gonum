@@ -12,7 +12,7 @@ func NewPseudomutableGraph(graph Graph) PseudomutableGraph {
 }
 
 func (graph PseudomutableGraph) NewNode(successors []int) int {
-	id := graph.graph.(AugmentedGraph).NewNode(successors)
+	node := graph.graph.(*AugmentedGraph).NewNode(successors)
 
 	for _, succ := range successors {
 		if graph.IsCutNode(succ) {
@@ -20,14 +20,14 @@ func (graph PseudomutableGraph) NewNode(successors []int) int {
 		}
 	}
 
-	return id
+	return node
 }
 
 func (graph PseudomutableGraph) AddNode(node int, succs []int) {
 	if graph.IsCutNode(node) {
 		graph.UncutNode(node)
 	} else {
-		graph.graph.(AugmentedGraph).AddNode(node, succs)
+		graph.graph.(*AugmentedGraph).AddNode(node, succs)
 	}
 
 	for _, succ := range succs {
@@ -54,13 +54,13 @@ func (graph PseudomutableGraph) AddEdge(node, succ int) {
 	if graph.IsCutEdge(node, succ) {
 		graph.UncutEdge(node, succ)
 	} else {
-		graph.graph.(AugmentedGraph).AddEdge(node, succ)
+		graph.graph.(*AugmentedGraph).AddEdge(node, succ)
 	}
 }
 
 func (graph PseudomutableGraph) RemoveNode(node int) {
-	if graph.graph.(AugmentedGraph).IsAugmentedNode(node) {
-		graph.graph.(AugmentedGraph).KillAugmentedNode(node)
+	if graph.graph.(*AugmentedGraph).IsAugmentedNode(node) {
+		graph.graph.(*AugmentedGraph).KillAugmentedNode(node)
 	} else {
 		graph.CutAllEdges(node) // Need to cut all edges in case it gets re-added
 		graph.CutNode(node)
@@ -68,7 +68,7 @@ func (graph PseudomutableGraph) RemoveNode(node int) {
 }
 
 func (graph PseudomutableGraph) RemoveEdge(node, succ int) {
-	ag := graph.graph.(AugmentedGraph)
+	ag := graph.graph.(*AugmentedGraph)
 
 	if ag.IsAugmentedEdge(node, succ) || ag.IsOverriddenEdge(node, succ) {
 		ag.KillAugmentedEdge(node, succ)
@@ -85,7 +85,7 @@ func (graph PseudomutableGraph) SetEdgeCost(node, succ int, cost float64) {
 		return
 	}
 
-	graph.graph.(AugmentedGraph).SetEdgeCost(node, succ, cost)
+	graph.graph.(*AugmentedGraph).SetEdgeCost(node, succ, cost)
 }
 
 func (graph PseudomutableGraph) EmptyGraph() {

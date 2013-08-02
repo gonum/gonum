@@ -149,3 +149,37 @@ func (graph *CutterGraph) UncutEdge(node, succ int) {
 		}
 	}
 }
+
+func (graph *CutterGraph) IsCutNode(node int) bool {
+	return graph.nodeCutset.Contains(node)
+}
+
+func (graph *CutterGraph) IsCutEdge(node, succ int) bool {
+	if cutset, ok := graph.edgeCutset[node]; ok {
+		_, cut := cutset[succ]
+		return cut
+	}
+
+	return false
+}
+
+func (graph *CutterGraph) CutAllEdges(node int) {
+	for _, succ := range graph.Successors(node) {
+		graph.CutEdge(node, succ)
+	}
+
+	for _, pred := range graph.Predecessors(node) {
+		graph.CutEdge(pred, succ)
+	}
+}
+
+func (graph *CutterGraph) UncutAllEdges(node int) {
+	delete(graph.edgeCutset[node])
+
+	for _, cutset := range graph.edgeCutset {
+		if cutset.Contains(node) {
+			cutset.Remove(node)
+		}
+	}
+
+}

@@ -5,16 +5,17 @@ import (
 	"sort"
 )
 
+// TODO: Make ability to be undirected
+
 type AugmentedGraph struct {
 	graph                 Graph
 	augmentedNodes        *set.Set
 	augmentedSuccessors   map[int]map[int]float64
 	augmentedPredecessors map[int]map[int]float64
-	directed              bool
 }
 
-func NewAugmentedGraph(graph Graph, directed bool) *AugmentedGraph {
-	return &AugmentedGraph{graph, set.NewSet(), make(map[int]map[int]float64), make(map[int]map[int]float64), directed}
+func NewAugmentedGraph(graph Graph) *AugmentedGraph {
+	return &AugmentedGraph{graph, set.NewSet(), make(map[int]map[int]float64), make(map[int]map[int]float64)}
 }
 
 func (graph *AugmentedGraph) Successors(node int) (succs []int) {
@@ -96,7 +97,7 @@ func (graph *AugmentedGraph) NodeList() []int {
 }
 
 func (graph *AugmentedGraph) IsDirected() bool {
-	return graph.directed
+	return true
 }
 
 func (graph *AugmentedGraph) NewNode(succs []int) int {
@@ -119,4 +120,131 @@ func (graph *AugmentedGraph) AddNode(node int, succs []int) {
 		return
 	}
 
+	if !graph.augmentedNodes.Contains(node) {
+		graph.augmentedNodes.Add(node)
+	}
+
+	for succ := range succs {
+		if graph.IsSuccessor(node, succ) {
+			continue
+		} else if !graph.graph.NodeExists(node) {
+			graph.augmentedNodes.Add(node)
+		}
+
+		if _, ok := graph.augmentedSuccessors[node]; !ok {
+			graph.augmentedSuccessors[node] = make(map[int]float64, 1)
+		}
+
+		if _, ok := graph.augmentedPredecessors[succ]; !ok {
+			graph.augmentedPredecessors[succ] = make(map[int]float64, 1)
+		}
+
+		graph.augmentedSuccessors[node][succ] = 1.0
+		graph.augmentedPredecessors[succ][node] = 1.0
+	}
+}
+
+func (graph *AugmentedGraph) AddEdge(node, succ int) {
+	if graph.IsSuccessor(node, succ) {
+		return
+	}
+
+	if !graph.NodeExists(node) {
+		return
+	}
+
+	if !graph.NodeExists(succ) {
+		graph.AddNode(succ, nil)
+	}
+
+	if _, ok := graph.augmentedSuccessors[node]; !ok {
+		graph.augmentedSuccessors[node] = make(map[int]float64, 1)
+	}
+
+	if _, ok := graph.augmentedPredecessors[succ]; !ok {
+		graph.augmentedPredecessors[succ] = make(map[int]float64, 1)
+	}
+
+	graph.augmentedSuccessors[node][succ] = 1.0
+	graph.augmentedPredecessors[succ][node] = 1.0
+}
+
+func (graph *AugmentedGraph) SetEdgeCost(node, succ int, cost float64) {
+	if !graph.IsSuccessor(node, succ) {
+		return
+	}
+
+	if _, ok := graph.augmentedSuccessors[node]; !ok {
+		graph.augmentedSuccessors[node] = make(map[int]float64, 1)
+	}
+
+	graph.augmentedSuccessors[node] = cost
+
+	if _, ok := graph.augmentedPredecessors[succ]; !ok {
+		graph.augmentedPredecessors[succ] = make(map[int]float64, 1)
+	}
+
+	graph.augmentedPredecessors[succ] = cost
+}
+
+func (graph *AugmentedGraph) IsAugmentedNode(node int) bool {
+	return graph.augmentedNodes.Contains(node)
+}
+
+func (graph *AugmentedGraph) IsAugmentedEdge(node, succ int) bool {
+	if augset, ok := graph.augmentedSuccessors[node]; ok {
+		_, ok = augset[succ]
+
+		return ok && !graph.graph.IsSuccessor(node, succ)
+	}
+
+	return false
+}
+
+func (graph *AugmentedGraph) IsOverriddenEdge(node, succ int) bool {
+	if augset, ok := graph.augmentedSuccessors[node]; ok {
+		_, ok = augset[succ]
+
+		return ok && graph.graph.IsSuccessor(node, succ)
+	}
+
+	return false
+}
+
+func (graph *AugmentedGraph) KillAugmentedNode(node int) bool {
+	graph.augmentedNodes.Remove(node)
+
+	for succ, _ := range graph.augmentedSuccessors[node] {
+		if succ == node {
+			continue
+		}
+		delete(graph.augmentedPredecessors[succ], node)
+	}
+
+	delete(graph.augmentedSuccessors, node)
+
+	for pred, _ := range graph.augmentedPredecessors[node] {
+		if pred == node {
+			continue
+		}
+		delete(graph.augmentedSuccessors[pred], node)
+	}
+
+	delete(graph.augmentedPredecessors, node)
+}
+
+func (graph *AugmentedGraph) KillAugmentedEdge(node, succ int) {
+	if eList, ok := graph.augmentedSuccessors[node]; ok {
+		delete(eList, succ)
+	}
+
+	if pList, ok := graph.augmentedPredecessors[succ]; ok {
+		delete(pList, node)
+	}
+}
+
+func (graph *AugmentedGraph) Clear() {
+	graph.augmentedNodes = set.NewSet()
+	graph.augmentedSuccessors = make(map[int]map[int]float64)
+	graph.augmentedPredecessors = make(map[int]map[int]float64)
 }

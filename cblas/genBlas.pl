@@ -49,6 +49,7 @@ printf $goblas <<EOH;
 package cblas
 
 /*
+#cgo CFLAGS: -g -O2
 #cgo linux LDFLAGS: -L/usr/lib/ -lblas
 #cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
 #include "${cblasHeader}"

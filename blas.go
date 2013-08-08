@@ -124,8 +124,8 @@ type DrotmParams struct {
 type Order int
 
 const (
-	RowMajor Order = 101
-	ColMajor Order = 102
+	RowMajor Order = 101 + iota
+	ColMajor
 )
 
 // Type Transpose is used to specify the transposition operation for a
@@ -133,9 +133,9 @@ const (
 type Transpose int
 
 const (
-	NoTrans   Transpose = 111
-	Trans     Transpose = 112
-	ConjTrans Transpose = 113
+	NoTrans Transpose = 111 + iota
+	Trans
+	ConjTrans
 )
 
 // Type Uplo is used to specify whether the matrix is an upper or lower
@@ -143,8 +143,8 @@ const (
 type Uplo int
 
 const (
-	Upper Uplo = 121
-	Lower Uplo = 122
+	Upper Uplo = 121 + iota
+	Lower
 )
 
 // Type Diag is used to specify whether the matrix is a unit or non-unit
@@ -152,8 +152,8 @@ const (
 type Diag int
 
 const (
-	NonUnit Diag = 131
-	Unit    Diag = 132
+	NonUnit Diag = 131 + iota
+	Unit
 )
 
 // Type side is used to specify from which side a multiplication operation
@@ -161,8 +161,8 @@ const (
 type Side int
 
 const (
-	Left  Side = 141
-	Right Side = 142
+	Left Side = 141 + iota
+	Right
 )
 
 // Float32 implements the single precision real BLAS routines.

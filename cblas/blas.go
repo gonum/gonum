@@ -2120,7 +2120,7 @@ func (Blas) Sgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
@@ -2130,7 +2130,7 @@ func (Blas) Sgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2350,7 +2350,7 @@ func (Blas) Dgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
@@ -2360,7 +2360,7 @@ func (Blas) Dgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2580,7 +2580,7 @@ func (Blas) Cgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
@@ -2590,7 +2590,7 @@ func (Blas) Cgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}
@@ -2810,7 +2810,7 @@ func (Blas) Zgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) {
+		if ldc*(m-1)+n > len(c) || ldc < max(1, n) {
 			panic("cblas: index out of range")
 		}
 	} else {
@@ -2820,7 +2820,7 @@ func (Blas) Zgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 		if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) {
 			panic("cblas: index out of range")
 		}
-		if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) {
+		if ldc*(n-1)+m > len(c) || ldc < max(1, m) {
 			panic("cblas: index out of range")
 		}
 	}

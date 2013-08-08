@@ -486,11 +486,11 @@ sub processParamToChecks {
 			push @processed, "if o == blas.RowMajor {";
 			push @processed, "if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) { panic(\"cblas: index out of range\") }";
 			push @processed, "if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) { panic(\"cblas: index out of range\") }";
-			push @processed, "if ldc*(rowB-1)+colA > len(c) || ldc < max(1, n) { panic(\"cblas: index out of range\") }";
+			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index out of range\") }";
 			push @processed, "} else {";
 			push @processed, "if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) { panic(\"cblas: index out of range\") }";
 			push @processed, "if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) { panic(\"cblas: index out of range\") }";
-			push @processed, "if ldc*(colB-1)+rowA > len(c) || ldc < max(1, m) { panic(\"cblas: index out of range\") }";
+			push @processed, "if ldc*(n-1)+m > len(c) || ldc < max(1, m) { panic(\"cblas: index out of range\") }";
 			push @processed, "}";
 		}
 	}

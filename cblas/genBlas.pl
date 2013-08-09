@@ -402,21 +402,21 @@ sub processParamToChecks {
 	}
 
 	if ($arrayArgs{'ap'}) {
-		push @processed, "if n*(n + 1)/2 > len(ap) { panic(\"cblas: index out of range\") }"
+		push @processed, "if n*(n + 1)/2 > len(ap) { panic(\"cblas: index of ap out of range\") }"
 	}
 
 	if ($func =~ m/cblas_[sdcz]g[eb]mv/) {
 		push @processed, "if incX <= 0 || incY <= 0 { panic(\"cblas: index out of range\") }";
 		push @processed, "var lenX, lenY int";
 		push @processed, "if tA == blas.NoTrans { lenX, lenY = n, m } else { lenX, lenY = m, n }";
-		push @processed, "if (lenX-1)*incX > len(x) { panic(\"cblas: index out of range\") }";
-		push @processed, "if (lenY-1)*incY > len(y) { panic(\"cblas: index out of range\") }";
+		push @processed, "if (lenX-1)*incX > len(x) { panic(\"cblas: index of x out of range\") }";
+		push @processed, "if (lenY-1)*incY > len(y) { panic(\"cblas: index of y out of range\") }";
 	} elsif ($scalarArgs{'m'}) {
-		push @processed, "if incX <= 0 || (m-1)*incX > len(x) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if incX <= 0 || (m-1)*incX > len(x) { panic(\"cblas: index of x out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index of y out of range\") }" if $scalarArgs{'incY'};
 	} else {
-		push @processed, "if incX <= 0 || (n-1)*incX > len(x) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if incX <= 0 || (n-1)*incX > len(x) { panic(\"cblas: index of x out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index of y out of range\") }" if $scalarArgs{'incY'};
 	}
 
 	if (not $func =~ m/(?:mm|r2?k)$/) {
@@ -424,22 +424,22 @@ sub processParamToChecks {
 			if (($scalarArgs{'kL'} && $scalarArgs{'kU'}) || $scalarArgs{'m'}) {
 				push @processed, "if o == blas.RowMajor {";
 				if ($scalarArgs{'kL'} && $scalarArgs{'kU'}) {
-					push @processed, "if lda*(m-1)+n > len(a) || lda < kL+kU+1 { panic(\"cblas: index out of range\") }";
+					push @processed, "if lda*(m-1)+n > len(a) || lda < kL+kU+1 { panic(\"cblas: index of a out of range\") }";
 				} else {
-					push @processed, "if lda*(m-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index out of range\") }";
+					push @processed, "if lda*(m-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index of a out of range\") }";
 				}
 				push @processed, "} else {";
 				if ($scalarArgs{'kL'} && $scalarArgs{'kU'}) {
-					push @processed, "if lda*(n-1)+m > len(a) || lda < kL+kU+1 { panic(\"cblas: index out of range\") }";
+					push @processed, "if lda*(n-1)+m > len(a) || lda < kL+kU+1 { panic(\"cblas: index of a out of range\") }";
 				} else {
-					push @processed, "if lda*(n-1)+m > len(a) || lda < max(1, m) { panic(\"cblas: index out of range\") }";
+					push @processed, "if lda*(n-1)+m > len(a) || lda < max(1, m) { panic(\"cblas: index of a out of range\") }";
 				}
 				push @processed, "}";
 			} else {
 				if ($scalarArgs{'k'}) {
-					push @processed, "if lda*(n-1)+n > len(a) || lda < k+1 { panic(\"cblas: index out of range\") }";
+					push @processed, "if lda*(n-1)+n > len(a) || lda < k+1 { panic(\"cblas: index of a out of range\") }";
 				} else {
-					push @processed, "if lda*(n-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index out of range\") }";
+					push @processed, "if lda*(n-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index of a out of range\") }";
 				}
 			}
 		}
@@ -447,16 +447,16 @@ sub processParamToChecks {
 		if ($scalarArgs{'s'}) {
 			push @processed, "var k int";
 			push @processed, "if s == blas.Left { k = m } else { k = n }";
-			push @processed, "if lda*(k-1)+k > len(a) || lda < max(1, k) { panic(\"cblas: index out of range\") }";
+			push @processed, "if lda*(k-1)+k > len(a) || lda < max(1, k) { panic(\"cblas: index of a out of range\") }";
 			push @processed, "if o == blas.RowMajor {";
-			push @processed, "if ldb*(m-1)+n > len(b) || ldb < max(1, n) { panic(\"cblas: index out of range\") }";
+			push @processed, "if ldb*(m-1)+n > len(b) || ldb < max(1, n) { panic(\"cblas: index of b out of range\") }";
 			if ($arrayArgs{'c'}) {
-				push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index out of range\") }";
+				push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
 			}
 			push @processed, "} else {";
-			push @processed, "if ldb*(n-1)+m > len(b) || ldb < max(1, m) { panic(\"cblas: index out of range\") }";
+			push @processed, "if ldb*(n-1)+m > len(b) || ldb < max(1, m) { panic(\"cblas: index of b out of range\") }";
 			if ($arrayArgs{'c'}) {
-				push @processed, "if ldc*(n-1)+m > len(c) || ldc < max(1, m) { panic(\"cblas: index out of range\") }";
+				push @processed, "if ldc*(n-1)+m > len(c) || ldc < max(1, m) { panic(\"cblas: index of c out of range\") }";
 			}
 			push @processed, "}";
 		}
@@ -466,18 +466,18 @@ sub processParamToChecks {
 			push @processed, "if o == blas.RowMajor {";
 			foreach my $ref ('a', 'b') {
 				if ($arrayArgs{$ref}) {
-					push @processed, "if ld${ref}*(row-1)+col > len(${ref}) || ld${ref} < max(1, col) { panic(\"cblas: index out of range\") }";
+					push @processed, "if ld${ref}*(row-1)+col > len(${ref}) || ld${ref} < max(1, col) { panic(\"cblas: index of ${ref} out of range\") }";
 				}
 			}
 			push @processed, "} else {";
 			foreach my $ref ('a', 'b') {
 				if ($arrayArgs{$ref}) {
-					push @processed, "if ld${ref}*(col-1)+row > len(${ref}) || ld${ref} < max(1, row) { panic(\"cblas: index out of range\") }";
+					push @processed, "if ld${ref}*(col-1)+row > len(${ref}) || ld${ref} < max(1, row) { panic(\"cblas: index of ${ref} out of range\") }";
 				}
 			}
 			push @processed, "}";
 			if ($arrayArgs{'c'}) {
-				push @processed, "if ldc*(n-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index out of range\") }";
+				push @processed, "if ldc*(n-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
 			}
 		}
 		if ($scalarArgs{'tA'} && $scalarArgs{'tB'}) {
@@ -485,13 +485,13 @@ sub processParamToChecks {
 			push @processed, "if tA == blas.NoTrans { rowA, colA = m, k } else { rowA, colA = k, m }";
 			push @processed, "if tB == blas.NoTrans { rowB, colB = k, n } else { rowB, colB = n, k }";
 			push @processed, "if o == blas.RowMajor {";
-			push @processed, "if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) { panic(\"cblas: index out of range\") }";
-			push @processed, "if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) { panic(\"cblas: index out of range\") }";
-			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index out of range\") }";
+			push @processed, "if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) { panic(\"cblas: index of a out of range\") }";
+			push @processed, "if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) { panic(\"cblas: index of b out of range\") }";
+			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
 			push @processed, "} else {";
-			push @processed, "if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) { panic(\"cblas: index out of range\") }";
-			push @processed, "if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) { panic(\"cblas: index out of range\") }";
-			push @processed, "if ldc*(n-1)+m > len(c) || ldc < max(1, m) { panic(\"cblas: index out of range\") }";
+			push @processed, "if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) { panic(\"cblas: index of a out of range\") }";
+			push @processed, "if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) { panic(\"cblas: index of b out of range\") }";
+			push @processed, "if ldc*(n-1)+m > len(c) || ldc < max(1, m) { panic(\"cblas: index of c out of range\") }";
 			push @processed, "}";
 		}
 	}

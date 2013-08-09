@@ -409,14 +409,14 @@ sub processParamToChecks {
 		push @processed, "if incX <= 0 || incY <= 0 { panic(\"cblas: index out of range\") }";
 		push @processed, "var lenX, lenY int";
 		push @processed, "if tA == blas.NoTrans { lenX, lenY = n, m } else { lenX, lenY = m, n }";
-		push @processed, "if (lenX-1)*incX >= len(x) { panic(\"cblas: index out of range\") }";
-		push @processed, "if (lenY-1)*incY >= len(y) { panic(\"cblas: index out of range\") }";
+		push @processed, "if (lenX-1)*incX > len(x) { panic(\"cblas: index out of range\") }";
+		push @processed, "if (lenY-1)*incY > len(y) { panic(\"cblas: index out of range\") }";
 	} elsif ($scalarArgs{'m'}) {
-		push @processed, "if incX <= 0 || (m-1)*incX >= len(x) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if incY <= 0 || (n-1)*incY >= len(y) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if incX <= 0 || (m-1)*incX > len(x) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incY'};
 	} else {
-		push @processed, "if incX <= 0 || (n-1)*incX >= len(x) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if incY <= 0 || (n-1)*incY >= len(y) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if incX <= 0 || (n-1)*incX > len(x) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index out of range\") }" if $scalarArgs{'incY'};
 	}
 
 	if (not $func =~ m/(?:mm|r2?k)$/) {

@@ -406,7 +406,7 @@ sub processParamToChecks {
 	}
 
 	if ($func =~ m/cblas_[sdcz]g[eb]mv/) {
-		push @processed, "if incX <= 0 || incY <= 0 { panic(\"cblas: index out of range\") }";
+		push @processed, "if incX <= 0 || incY <= 0 { panic(\"cblas: index increment out of range\") }";
 		push @processed, "var lenX, lenY int";
 		push @processed, "if tA == blas.NoTrans { lenX, lenY = n, m } else { lenX, lenY = m, n }";
 		push @processed, "if (lenX-1)*incX > len(x) { panic(\"cblas: index of x out of range\") }";

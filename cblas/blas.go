@@ -523,7 +523,7 @@ func (Blas) Sgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float32, 
 		panic("cblas: n < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {
@@ -565,7 +565,7 @@ func (Blas) Sgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 		panic("cblas: kU < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {
@@ -733,7 +733,7 @@ func (Blas) Dgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float64, 
 		panic("cblas: n < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {
@@ -775,7 +775,7 @@ func (Blas) Dgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 		panic("cblas: kU < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {
@@ -943,7 +943,7 @@ func (Blas) Cgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex64
 		panic("cblas: n < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {
@@ -985,7 +985,7 @@ func (Blas) Cgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 		panic("cblas: kU < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {
@@ -1153,7 +1153,7 @@ func (Blas) Zgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex12
 		panic("cblas: n < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {
@@ -1195,7 +1195,7 @@ func (Blas) Zgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 		panic("cblas: kU < 0")
 	}
 	if incX <= 0 || incY <= 0 {
-		panic("cblas: index out of range")
+		panic("cblas: index increment out of range")
 	}
 	var lenX, lenY int
 	if tA == blas.NoTrans {

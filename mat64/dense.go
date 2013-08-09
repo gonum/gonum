@@ -988,9 +988,9 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 		for j, ja, jm := 0, 0, 0; ja < k*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
 			for i, v := range amat.Data[ja : ja+l] {
 				if blasOrder == blas.RowMajor {
-					r, c = i, j
-				} else {
 					r, c = j, i
+				} else {
+					r, c = i, j
 				}
 				m.mat.Data[i+jm] = f(r, c, v)
 			}
@@ -1080,7 +1080,8 @@ func (m *Dense) U(a Matrix) {
 		if amat.Order != blasOrder {
 			panic(ErrIllegalOrder)
 		}
-		for j, ja, jm := 0, 0, 0; ja < k*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
+		copy(m.mat.Data[:l], amat.Data[:l])
+		for j, ja, jm := 1, amat.Stride, m.mat.Stride; ja < k*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
 			zero(m.mat.Data[jm : jm+j])
 			copy(m.mat.Data[jm+j:jm+l], amat.Data[ja+j:ja+l])
 		}
@@ -1091,10 +1092,10 @@ func (m *Dense) U(a Matrix) {
 		switch blasOrder {
 		case blas.RowMajor:
 			row := make([]float64, ac)
-			for r := 0; r < ar; r++ {
-				a.Row(row, r)
+			copy(m.mat.Data[:m.mat.Cols], a.Row(row, 0))
+			for r := 1; r < ar; r++ {
 				zero(m.mat.Data[r*m.mat.Stride : r*(m.mat.Stride+1)])
-				copy(m.mat.Data[r*(m.mat.Stride+1):r*m.mat.Stride+m.mat.Cols], row)
+				copy(m.mat.Data[r*(m.mat.Stride+1):r*m.mat.Stride+m.mat.Cols], a.Row(row, r))
 			}
 		case blas.ColMajor:
 			col := make([]float64, ar)
@@ -1175,7 +1176,8 @@ func (m *Dense) L(a Matrix) {
 		if amat.Order != blasOrder {
 			panic(ErrIllegalOrder)
 		}
-		for j, ja, jm := 0, 0, 0; ja < k*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
+		copy(m.mat.Data[:l], amat.Data[:l])
+		for j, ja, jm := 1, amat.Stride, m.mat.Stride; ja < k*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
 			zero(m.mat.Data[jm : jm+j])
 			copy(m.mat.Data[jm+j:jm+l], amat.Data[ja+j:ja+l])
 		}
@@ -1192,10 +1194,10 @@ func (m *Dense) L(a Matrix) {
 			}
 		case blas.ColMajor:
 			col := make([]float64, ar)
-			for c := 0; c < ac; c++ {
-				a.Col(col, c)
+			copy(m.mat.Data[:m.mat.Rows], a.Col(col, 0))
+			for c := 1; c < ac; c++ {
 				zero(m.mat.Data[c*m.mat.Stride : c*(m.mat.Stride+1)])
-				copy(m.mat.Data[c*(m.mat.Stride+1):c*m.mat.Stride+m.mat.Rows], col)
+				copy(m.mat.Data[c*(m.mat.Stride+1):c*m.mat.Stride+m.mat.Rows], a.Col(col, c))
 			}
 		default:
 			panic(ErrIllegalOrder)
@@ -1214,7 +1216,7 @@ func (m *Dense) L(a Matrix) {
 func (m *Dense) zeroUpper() {
 	switch blasOrder {
 	case blas.RowMajor:
-		for i := 1; i < m.mat.Rows; i++ {
+		for i := 1; i < m.mat.Rows-1; i++ {
 			zero(m.mat.Data[i*m.mat.Stride+i+1 : (i+1)*m.mat.Stride])
 		}
 	case blas.ColMajor:

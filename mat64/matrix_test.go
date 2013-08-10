@@ -461,7 +461,7 @@ func (s *S) TestMul(c *check.C) {
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
-		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "cblas: index out of range", check.Commentf("Test %d"))
+		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "cblas: index of c out of range", check.Commentf("Test %d"))
 	}
 }
 

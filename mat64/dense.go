@@ -369,17 +369,6 @@ func (m *Dense) Trace() float64 {
 
 var inf = math.Inf(1)
 
-// Norm returns a variety of norms for the matrix.
-//
-// Valid ord values are:
-//
-//     1 - max of the sum of the absolute values of columns
-//    -1 - min of the sum of the absolute values of columns
-//   Inf - max of the sum of the absolute values of rows
-//  -Inf - min of the sum of the absolute values of rows
-//     0 - Frobenius norm
-//
-// Norm will panic with ErrNormOrder if an illegal norm order is specified.
 func (m *Dense) Norm(ord float64) float64 {
 	var n float64
 	switch {

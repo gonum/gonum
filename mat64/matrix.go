@@ -63,43 +63,54 @@ type VectorSetter interface {
 	SetCol(c int, col []float64) int
 }
 
-// A Cloner can make a copy of a into the receiver, destroying the previous value. The clone
-// operation does not make any restriction on shape.
+// A Cloner can make a copy of a into the receiver, overwriting the previous value of the
+// receiver. The clone operation does not make any restriction on shape.
 type Cloner interface {
 	Clone(a Matrix)
 }
 
 // A Copier can make a copy of elements of a into the receiver. The copy operation fills the
 // submatrix in m with the values from the submatrix of a with the dimensions equal to the
-// minumum of two two matrices.
+// minumum of two matrices. The number of row and columns copied it returned.
 type Copier interface {
 	Copy(a Matrix)
 }
 
 // A Viewer can extract a submatrix view of of the receiver, starting at row i, column j
-// and extending r rows and c columns. If i or j are illegal indices, or r or c extend beyond
-// the bounds of the matrix View will panic with ErrIndexOutOfRange. Changes in the
-// elements of the submatrix must be reflected in the original and vice versa.
+// and extending r rows and c columns. If i or j are out of range, or r or c extend beyond
+// the bounds of the matrix View will panic with ErrIndexOutOfRange. Viewer must not return
+// a copy of the submatrix; changes in the elements of the submatrix must be reflected in the
+// original and vice versa.
 type Viewer interface {
 	View(i, j, r, c int) Blasser
 }
 
-// A Submatrixer can extract a submatrix from a into the receiver, starting at row i, column j
-// and extending r rows and c columns. If i or j are illegal indices, or r or c extend beyond
-// the bounds of the matrix Submatrix will panic with ErrIndexOutOfRange. There is no restriction
-// on the shape of the receiver but changes in the elements of the submatrix must not be
-// reflected in the original.
+// A Submatrixer can extract a copy of submatrix from a into the receiver, starting at row i,
+// column j and extending r rows and c columns. If i or j are out of range, or r or c extend
+// beyond the bounds of the matrix Submatrix will panic with ErrIndexOutOfRange. There is no
+// restriction on the shape of the receiver but changes in the elements of the submatrix must
+// not be reflected in the original.
 type Submatrixer interface {
 	Submatrix(a Matrix, i, j, r, c int)
 }
 
-// A Normer returns the specified matrix norm, o of the matrix represented by the receiver.
-// A panic with ErrNormOrder should occur if o is not valid.
+// A Normer can return the specified matrix norm, o of the matrix represented by the receiver.
+//
+// Valid order values are:
+//
+//     1 - max of the sum of the absolute values of columns
+//    -1 - min of the sum of the absolute values of columns
+//   Inf - max of the sum of the absolute values of rows
+//  -Inf - min of the sum of the absolute values of rows
+//     0 - Frobenius norm
+//
+// Norm will panic with ErrNormOrder if an illegal norm order is specified.
 type Normer interface {
 	Norm(o float64) float64
 }
 
-// A Transposer can transpose the matrix represented by a, placing the elements into the receiver.
+// A Transposer can make a copy of the transpose the matrix represented by a, placing the elements
+// into the receiver.
 type Transposer interface {
 	T(a Matrix)
 }
@@ -152,10 +163,10 @@ type ApproxEqualer interface {
 	EqualsApprox(b Matrix, epsilon float64) bool
 }
 
-// A Scaler can perform scalar multiplication of the matrix represented by a with f, placing
+// A Scaler can perform scalar multiplication of the matrix represented by a with c, placing
 // the result in the receiver.
 type Scaler interface {
-	Scale(f float64, a Matrix)
+	Scale(c float64, a Matrix)
 }
 
 // A Sumer can return the sum of elements of the matrix represented by the receiver.
@@ -164,32 +175,32 @@ type Sumer interface {
 }
 
 // A Muler can determine the matrix product of a and b, placing the result in the receiver.
-// If the number of column of the a does not equal the number of rows in b, Mul will panic.
+// If the number of columns in a does not equal the number of rows in b, Mul will panic.
 type Muler interface {
 	Mul(a, b Matrix)
 }
 
-// A Dotter can determine the inner product of the elements of the receiver and b. If the shapes of
-// the two matrices differ, Dot will panic.
+// A Dotter can determine the sum of the element-wise products of the elements of the receiver and b.
+// If the shapes of the two matrices differ, Dot will panic.
 type Dotter interface {
 	Dot(b Matrix) float64
 }
 
 // A Stacker can create the stacked matrix of a with b, where b is placed in the higher indexed rows.
-// The result of stacking is placed in the receiver. Stack will panic if the two input matrices do not
-// have the same number of columns.
+// The result of stacking is placed in the receiver, overwriting the previous value of the receiver.
+// Stack will panic if the two input matrices do not have the same number of columns.
 type Stacker interface {
 	Stack(a, b Matrix)
 }
 
 // An Augmenter can create the augmented matrix of a with b, where b is placed in the higher indexed
-// columns. The result of augmentation is placed in the receiver. Augment will panic if the two input
-// matrices do not have the same number of rows.
+// columns. The result of augmentation is placed in the receiver, overwriting the previous value of the
+// receiver. Augment will panic if the two input matrices do not have the same number of rows.
 type Augmenter interface {
 	Augment(a, b Matrix)
 }
 
-// An ApplyFunc takes a row/col index and element value and returns some function of that tuple.
+// An ApplyFunc takes a row/column index and element value and returns some function of that tuple.
 type ApplyFunc func(r, c int, v float64) float64
 
 // An Applyer can apply an Applyfunc f to each of the elements of the matrix represented by a,
@@ -205,13 +216,13 @@ type Tracer interface {
 }
 
 // A Uer can return the upper triangular matrix of the matrix represented by a, placing the result
-// in the receiver. If the concrete value of a is the receiver, the lower residue is zeroed.
+// in the receiver. If the concrete value of a is the receiver, the lower residue is zeroed in place.
 type Uer interface {
 	U(a Matrix)
 }
 
 // An Ler can return the lower triangular matrix of the matrix represented by a, placing the result
-// in the receiver. If the concrete value of a is the receiver, the upper residue is zeroed.
+// in the receiver. If the concrete value of a is the receiver, the upper residue is zeroed in place.
 type Ler interface {
 	L(a Matrix)
 }
@@ -225,7 +236,7 @@ type BlasMatrix struct {
 }
 
 // Matrix converts a BlasMatrix to a Matrix, writing the data to the matrix represented by c. If c is a
-// Loader, that method will be called, otherwise the matrix must be the correct shape.
+// BlasLoader, that method will be called, otherwise the matrix must be the correct shape.
 func (b BlasMatrix) Matrix(c Mutable) {
 	if c, ok := c.(BlasLoader); ok {
 		c.LoadBlas(b)
@@ -251,7 +262,7 @@ func (b BlasMatrix) Matrix(c Mutable) {
 	}
 }
 
-// A Loader can directly load a BlasMatrix representation. There is no restriction on the shape of the
+// A BlasLoader can directly load a BlasMatrix representation. There is no restriction on the shape of the
 // receiver.
 type BlasLoader interface {
 	LoadBlas(a BlasMatrix)

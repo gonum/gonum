@@ -73,7 +73,7 @@ type Cloner interface {
 // submatrix in m with the values from the submatrix of a with the dimensions equal to the
 // minumum of two matrices. The number of row and columns copied it returned.
 type Copier interface {
-	Copy(a Matrix)
+	Copy(a Matrix) (r, c int)
 }
 
 // A Viewer can extract a submatrix view of of the receiver, starting at row i, column j

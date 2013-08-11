@@ -276,8 +276,8 @@ func (m *Dense) Clone(a Matrix) {
 	}
 }
 
-func (m *Dense) Copy(a Matrix) {
-	r, c := a.Dims()
+func (m *Dense) Copy(a Matrix) (r, c int) {
+	r, c = a.Dims()
 	r = min(r, m.mat.Rows)
 	c = min(c, m.mat.Cols)
 
@@ -316,6 +316,8 @@ func (m *Dense) Copy(a Matrix) {
 			}
 		}
 	}
+
+	return r, c
 }
 
 func (m *Dense) Min() float64 {

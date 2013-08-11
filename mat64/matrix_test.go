@@ -7,9 +7,9 @@ package mat64
 import (
 	"github.com/gonum/blas/cblas"
 	"github.com/gonum/floats"
+
 	check "launchpad.net/gocheck"
 	"math/rand"
-	// "reflect"
 	"testing"
 )
 

@@ -186,14 +186,14 @@ type Dotter interface {
 	Dot(b Matrix) float64
 }
 
-// A Stacker can create the stacked matrix of a with b, where b is placed in the higher indexed rows.
+// A Stacker can create the stacked matrix of a with b, where b is placed in the greater indexed rows.
 // The result of stacking is placed in the receiver, overwriting the previous value of the receiver.
 // Stack will panic if the two input matrices do not have the same number of columns.
 type Stacker interface {
 	Stack(a, b Matrix)
 }
 
-// An Augmenter can create the augmented matrix of a with b, where b is placed in the higher indexed
+// An Augmenter can create the augmented matrix of a with b, where b is placed in the greater indexed
 // columns. The result of augmentation is placed in the receiver, overwriting the previous value of the
 // receiver. Augment will panic if the two input matrices do not have the same number of rows.
 type Augmenter interface {

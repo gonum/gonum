@@ -579,18 +579,18 @@ func (s *S) TestTranspose(c *check.C) {
 
 		var r, rr Dense
 
-		r.T(a)
+		r.TCopy(a)
 		c.Check(r.Equals(t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
-		rr.T(&r)
+		rr.TCopy(&r)
 		c.Check(rr.Equals(a), check.Equals, true, check.Commentf("Test %d: %v transpose = I", i, test.a, test.t))
 
 		zero(r.mat.Data)
-		r.T(a)
+		r.TCopy(a)
 		c.Check(r.Equals(t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
 		zero(rr.mat.Data)
-		rr.T(&r)
+		rr.TCopy(&r)
 		c.Check(rr.Equals(a), check.Equals, true, check.Commentf("Test %d: %v transpose = I", i, test.a, test.t))
 	}
 }

@@ -44,7 +44,7 @@ var (
 	_ Scaler  = matrix
 	_ Applyer = matrix
 
-	_ Transposer = matrix
+	_ TransposeCopier = matrix
 	// _ TransposeViewer = matrix
 
 	// _ Deter  = matrix
@@ -1219,7 +1219,7 @@ func (m *Dense) zeroUpper() {
 	}
 }
 
-func (m *Dense) T(a Matrix) {
+func (m *Dense) TCopy(a Matrix) {
 	ar, ac := a.Dims()
 
 	var w Dense

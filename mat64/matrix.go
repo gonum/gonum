@@ -109,16 +109,16 @@ type Normer interface {
 	Norm(o float64) float64
 }
 
-// A Transposer can make a copy of the transpose the matrix represented by a, placing the elements
+// A TransposeCopier can make a copy of the transpose the matrix represented by a, placing the elements
 // into the receiver.
-type Transposer interface {
-	T(a Matrix)
+type TransposeCopier interface {
+	TCopy(a Matrix)
 }
 
-// A TransposeViewer can create a transposed view matrix from the represented by the receiver.
+// A Transposer can create a transposed view matrix from the represented by the receiver.
 // Changes made to the returned Matrix may be reflected in the original.
-type TransposeViewer interface {
-	TView() Matrix
+type Transposer interface {
+	T() Matrix
 }
 
 // A Deter can return the determinant of the represented matrix.

@@ -346,11 +346,7 @@ func SubTo(dst, s, t []float64) []float64 {
 		panic("floats: length of subtractor and subtractee do not match")
 	}
 	if len(dst) != len(s) {
-		if dst == nil {
-			dst = make([]float64, len(s))
-		} else {
-			panic("floats: length of destination does not match length of subtractor")
-		}
+		panic("floats: length of destination does not match length of subtractor")
 	}
 	for i, val := range t {
 		dst[i] = s[i] - val

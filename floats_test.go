@@ -300,6 +300,41 @@ func TestMul(t *testing.T) {
 	}
 }
 
+func TestMulTo(t *testing.T) {
+	s1 := []float64{1, 2, 3}
+	s1orig := []float64{1, 2, 3}
+	s2 := []float64{1, 2, 3}
+	s2orig := []float64{1, 2, 3}
+	dst := make([]float64, 3)
+	ans := []float64{1, 4, 9}
+	MulTo(dst, s1, s2)
+	if !Eq(dst, ans, EQTOLERANCE) {
+		t.Errorf("MulTo doesn't give correct answer")
+	}
+	if !Eq(s1, s1orig, EQTOLERANCE) {
+		t.Errorf("S1 changes during multo")
+	}
+	if !Eq(s2, s2orig, EQTOLERANCE) {
+		t.Errorf("s2 changes during multo")
+	}
+	MulTo(dst, s1, s2)
+	if !Eq(dst, ans, EQTOLERANCE) {
+		t.Errorf("MulTo doesn't give correct answer reusing dst")
+	}
+	dstShort := []float64{1}
+	if !Panics(func() { MulTo(dstShort, s1, s2) }) {
+		t.Errorf("Did not panic with s1 wrong length")
+	}
+	s1short := []float64{1}
+	if !Panics(func() { MulTo(dst, s1short, s2) }) {
+		t.Errorf("Did not panic with s1 wrong length")
+	}
+	s2short := []float64{1}
+	if !Panics(func() { MulTo(dst, s1, s2short) }) {
+		t.Errorf("Did not panic with s2 wrong length")
+	}
+}
+
 func TestNearest(t *testing.T) {
 	s := []float64{6.2, 3, 5, 6.2, 8}
 	ind := Nearest(s, 2.0)

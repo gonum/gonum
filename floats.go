@@ -233,6 +233,18 @@ func Min(s []float64) (min float64, ind int) {
 	return min, ind
 }
 
+// Mul performs element-wise multiplication between s
+// and t and stores the value in s. Panics if the
+// lengths of s and t are not equal
+func Mul(s []float64, t []float64) {
+	if len(s) != len(t) {
+		panic("floats: slice lengths do not match")
+	}
+	for i, val := range t {
+		s[i] *= val
+	}
+}
+
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned

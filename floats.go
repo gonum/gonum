@@ -245,6 +245,19 @@ func Mul(s []float64, t []float64) {
 	}
 }
 
+// MulTo performs element-wise multiplication between s
+// and t and stores the value in dst. Panics if the
+// lengths of s, t, and dst are not equal
+func MulTo(dst []float64, s []float64, t []float64) []float64 {
+	if len(s) != len(t) || len(dst) != len(t) {
+		panic("floats: slice lengths do not match")
+	}
+	for i, val := range t {
+		dst[i] = val * s[i]
+	}
+	return dst
+}
+
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned

@@ -282,6 +282,10 @@ func TestMin(t *testing.T) {
 	}
 }
 
+func TestMul(t *testing.T) {
+
+}
+
 func TestNearest(t *testing.T) {
 	s := []float64{6.2, 3, 5, 6.2, 8}
 	ind := Nearest(s, 2.0)

@@ -283,7 +283,21 @@ func TestMin(t *testing.T) {
 }
 
 func TestMul(t *testing.T) {
-
+	s1 := []float64{1, 2, 3}
+	s2 := []float64{1, 2, 3}
+	ans := []float64{1, 4, 9}
+	Mul(s1, s2)
+	if !Eq(s1, ans, EQTOLERANCE) {
+		t.Errorf("Mul doesn't give correct answer")
+	}
+	s1short := []float64{1}
+	if !Panics(func() { Mul(s1short, s2) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	s2short := []float64{1}
+	if !Panics(func() { Mul(s1, s2short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
 }
 
 func TestNearest(t *testing.T) {

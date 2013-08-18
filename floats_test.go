@@ -52,12 +52,56 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-func TestAddconst(t *testing.T) {
+func TestAddConst(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	c := 6.0
 	truth := []float64{9, 10, 7, 13, 11}
 	AddConst(c, s)
 	AreSlicesEqual(t, truth, s, "Wrong addition of constant")
+}
+
+func TestAddScaled(t *testing.T) {
+	s := []float64{3, 4, 1, 7, 5}
+	alpha := 6.0
+	dst := []float64{1, 2, 3, 4, 5}
+	ans := []float64{19, 26, 9, 46, 35}
+	AddScaled(dst, alpha, s)
+	if !Eq(dst, ans, EQTOLERANCE) {
+		t.Errorf("Adding scaled did not match")
+	}
+	short := []float64{1}
+	if !Panics(func() { AddScaled(dst, alpha, short) }) {
+		t.Errorf("Doesn't panic if s is smaller than dst")
+	}
+	if !Panics(func() { AddScaled(short, alpha, s) }) {
+		t.Errorf("Doesn't panic if dst is smaller than s")
+	}
+}
+
+func TestAddScaledTo(t *testing.T) {
+	s := []float64{3, 4, 1, 7, 5}
+	alpha := 6.0
+	y := []float64{1, 2, 3, 4, 5}
+	dst := make([]float64, 5)
+	ans := []float64{19, 26, 9, 46, 35}
+	AddScaledTo(dst, y, alpha, s)
+	if !Eq(dst, ans, EQTOLERANCE) {
+		t.Errorf("AddScaledTo did not match")
+	}
+	AddScaledTo(dst, y, alpha, s)
+	if !Eq(dst, ans, EQTOLERANCE) {
+		t.Errorf("Reusing dst did not match")
+	}
+	short := []float64{1}
+	if !Panics(func() { AddScaledTo(dst, y, alpha, short) }) {
+		t.Errorf("Doesn't panic if s is smaller than dst")
+	}
+	if !Panics(func() { AddScaledTo(short, y, alpha, s) }) {
+		t.Errorf("Doesn't panic if dst is smaller than s")
+	}
+	if !Panics(func() { AddScaledTo(dst, short, alpha, s) }) {
+		t.Errorf("Doesn't panic if y is smaller than dst")
+	}
 }
 
 func TestApply(t *testing.T) {

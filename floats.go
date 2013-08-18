@@ -36,6 +36,29 @@ func AddConst(c float64, s []float64) {
 	}
 }
 
+// AddScaled performs dst = dst + alpha * s
+// Panics if the lengths of dst and s are not equal
+func AddScaled(dst []float64, alpha float64, s []float64) {
+	if len(dst) != len(s) {
+		panic("floats: length of destination and source to not match")
+	}
+	for i, val := range s {
+		dst[i] += alpha * val
+	}
+}
+
+// AddScaledTo performs dst = y + alpha * s
+// Panics if the lengths of dst, y, and s are not equal
+func AddScaledTo(dst []float64, y []float64, alpha float64, s []float64) []float64 {
+	if len(dst) != len(s) || len(dst) != len(y) {
+		panic("floats: lengths of slices do not match")
+	}
+	for i, val := range s {
+		dst[i] = y[i] + alpha*val
+	}
+	return dst
+}
+
 // ApplyFunc applies a function f (math.Exp, math.Sin, etc.) to every element
 // of the slice s
 func Apply(f func(float64) float64, s []float64) {

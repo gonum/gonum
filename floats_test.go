@@ -110,6 +110,59 @@ func TestCumSum(t *testing.T) {
 	}
 }
 
+func TestDiv(t *testing.T) {
+	s1 := []float64{5, 12, 27}
+	s2 := []float64{1, 2, 3}
+	ans := []float64{5, 6, 9}
+	Div(s1, s2)
+	if !Eq(s1, ans, EQTOLERANCE) {
+		t.Errorf("Mul doesn't give correct answer")
+	}
+	s1short := []float64{1}
+	if !Panics(func() { Div(s1short, s2) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+	s2short := []float64{1}
+	if !Panics(func() { Div(s1, s2short) }) {
+		t.Errorf("Did not panic with unequal lengths")
+	}
+}
+
+func TestDivTo(t *testing.T) {
+	s1 := []float64{5, 12, 27}
+	s1orig := []float64{5, 12, 27}
+	s2 := []float64{1, 2, 3}
+	s2orig := []float64{1, 2, 3}
+	dst := make([]float64, 3)
+	ans := []float64{5, 6, 9}
+	DivTo(dst, s1, s2)
+	if !Eq(dst, ans, EQTOLERANCE) {
+		t.Errorf("DivTo doesn't give correct answer")
+	}
+	if !Eq(s1, s1orig, EQTOLERANCE) {
+		t.Errorf("S1 changes during multo")
+	}
+	if !Eq(s2, s2orig, EQTOLERANCE) {
+		t.Errorf("s2 changes during multo")
+	}
+	DivTo(dst, s1, s2)
+	if !Eq(dst, ans, EQTOLERANCE) {
+		t.Errorf("DivTo doesn't give correct answer reusing dst")
+	}
+	dstShort := []float64{1}
+	if !Panics(func() { DivTo(dstShort, s1, s2) }) {
+		t.Errorf("Did not panic with s1 wrong length")
+	}
+	s1short := []float64{1}
+	if !Panics(func() { DivTo(dst, s1short, s2) }) {
+		t.Errorf("Did not panic with s1 wrong length")
+	}
+	s2short := []float64{1}
+	if !Panics(func() { DivTo(dst, s1, s2short) }) {
+		t.Errorf("Did not panic with s2 wrong length")
+	}
+}
+
 func TestDot(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{-3, 4, 5, -6}

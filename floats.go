@@ -84,6 +84,31 @@ func CumSum(dst, s []float64) []float64 {
 	return dst
 }
 
+// Div performs element-wise division between s
+// and t and stores the value in s. Panics if the
+// lengths of s and t are not equal
+func Div(s []float64, t []float64) {
+	if len(s) != len(t) {
+		panic("floats: slice lengths do not match")
+	}
+	for i, val := range t {
+		s[i] /= val
+	}
+}
+
+// DivTo performs element-wise division between s
+// and t and stores the value in dst. Panics if the
+// lengths of s, t, and dst are not equal
+func DivTo(dst []float64, s []float64, t []float64) []float64 {
+	if len(s) != len(t) || len(dst) != len(t) {
+		panic("floats: slice lengths do not match")
+	}
+	for i, val := range t {
+		dst[i] = s[i] / val
+	}
+	return dst
+}
+
 // Dot computes the dot product of s1 and s2, i.e.
 // sum_{i = 1}^N s1[i]*s2[i]
 // Panic will occur if lengths of arguments do not match

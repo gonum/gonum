@@ -228,26 +228,54 @@ func TestEquals(t *testing.T) {
 	if !Equals(s1, s2) {
 		t.Errorf("Equal slices returned as unequal")
 	}
-	s2 = []float64{1, 2, 3, 4 + 1E-14}
-	if !EqualsApprox(s1, s2, 1E-13) {
+	s2 = []float64{1, 2, 3, 4 + 1e-14}
+	if Equals(s1, s2) {
 		t.Errorf("Unequal slices returned as equal")
 	}
 }
 
-func TestEqLen(t *testing.T) {
+func TestEqualsApprox(t *testing.T) {
+	s1 := []float64{1, 2, 3, 4}
+	s2 := []float64{1, 2, 3, 4 + 1e-10}
+	if EqualsApprox(s1, s2, 1e-13) {
+		t.Errorf("Unequal slices returned as equal for absolute")
+	}
+	if !EqualsApprox(s1, s2, 1e-5) {
+		t.Errorf("Equal slices returned as unequal for absolute")
+	}
+	s1 = []float64{1, 2, 3, 1000}
+	s2 = []float64{1, 2, 3, 1000 * (1 + 1e-7)}
+	if EqualsApprox(s1, s2, 1e-8) {
+		t.Errorf("Unequal slices returned as equal for relative")
+	}
+	if !EqualsApprox(s1, s2, 1e-5) {
+		t.Errorf("Equal slices returned as unequal for relative")
+	}
+}
+
+func TestEqualsRelative(t *testing.T) {
+	if !EqualsWithinRel(1000, 1000.1, 1e-2) {
+		t.Errorf("Equal values returned as unequal")
+	}
+	if EqualsWithinRel(1000, 1000.1, 1e-8) {
+		t.Errorf("Unequal values returned as equal")
+	}
+}
+
+func TestEqualLen(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	s3 := []float64{1, 2, 3}
-	if !EqLen(s1, s2) {
+	if !EqualLen(s1, s2) {
 		t.Errorf("Equal lengths returned as unequal")
 	}
-	if EqLen(s1, s3) {
+	if EqualLen(s1, s3) {
 		t.Errorf("Unequal lengths returned as equal")
 	}
-	if !EqLen(s1) {
+	if !EqualLen(s1) {
 		t.Errorf("Single slice returned as unequal")
 	}
-	if !EqLen() {
+	if !EqualLen() {
 		t.Errorf("No slices returned as unequal")
 	}
 }

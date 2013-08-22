@@ -213,15 +213,15 @@ func EqualsWithinRel(a, b, tol float64) bool {
 // EqualsWithinAbsOrRel returns true if a and b are equal to within
 // the absolute tolerance
 func EqualsWithinAbsOrRel(a, b, absTol, relTol float64) bool {
-	if !EqualsWithinAbs(a, b, absTol) {
-		return false
+	if EqualsWithinAbs(a, b, absTol) {
+		return true
 	}
 	return EqualsWithinRel(a, b, relTol)
 }
 
 // Eqlen returns true if all of the slices have equal length,
 // and false otherwise. Returns true if there are no input slices
-func EqLen(slices ...[]float64) bool {
+func EqualLen(slices ...[]float64) bool {
 	// This length check is needed: http://play.golang.org/p/sdty6YiLhM
 	if len(slices) == 0 {
 		return true

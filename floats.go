@@ -146,18 +146,77 @@ func Dot(s1, s2 []float64) float64 {
 	return sum
 }
 
-// Eq returns false if the slices have different lengths
-// or if |s1[i] - s2[i]| > tol for any i.
-func Eq(s1, s2 []float64, tol float64) bool {
+// Equal returns true if the slices have equal lengths and
+// all elements are numerically identical
+func Equals(s1, s2 []float64) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
 	for i, val := range s1 {
-		if math.Abs(s2[i]-val) > tol {
+		if s2[i] != val {
 			return false
 		}
 	}
 	return true
+}
+
+// EqualsApprox returns true if the slices have equal lengths and
+// all element pairs have an absolute tolerance less than tol or a
+// relative tolerance less than tol
+func EqualsApprox(s1, s2 []float64, tol float64) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i, a := range s1 {
+		if !EqualsWithinAbsOrRel(a, s2[i], tol, tol) {
+			return false
+		}
+	}
+	return true
+}
+
+// EqualsFunc returns true if the slices have the same lengths
+// and the function returns true for all element pairs
+func EqualsFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i, val := range s1 {
+		if !f(val, s2[i]) {
+			return false
+		}
+	}
+	return true
+
+}
+
+// ApproxEqualAbs returns true if a and b have an absolute
+// difference of less than tol
+func EqualsWithinAbs(a, b, tol float64) bool {
+	if math.Abs(a-b) > tol {
+		return false
+	}
+	return true
+}
+
+// ApproxEqualRel returns true if a and b have a relative
+// difference of less than tol
+func EqualsWithinRel(a, b, tol float64) bool {
+	diff := math.Abs(a - b)
+	largest := math.Max(math.Abs(a), math.Abs(b))
+	if diff > largest*tol {
+		return false
+	}
+	return true
+}
+
+// EqualsWithinAbsOrRel returns true if a and b are equal to within
+// the absolute tolerance
+func EqualsWithinAbsOrRel(a, b, absTol, relTol float64) bool {
+	if !EqualsWithinAbs(a, b, absTol) {
+		return false
+	}
+	return EqualsWithinRel(a, b, relTol)
 }
 
 // Eqlen returns true if all of the slices have equal length,

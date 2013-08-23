@@ -20,7 +20,7 @@ const (
 )
 
 func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
-	if !EqualsApprox(comp, truth, EQTOLERANCE) {
+	if !EqualApprox(comp, truth, EQTOLERANCE) {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
 	}
 }
@@ -66,7 +66,7 @@ func TestAddScaled(t *testing.T) {
 	dst := []float64{1, 2, 3, 4, 5}
 	ans := []float64{19, 26, 9, 46, 35}
 	AddScaled(dst, alpha, s)
-	if !EqualsApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EQTOLERANCE) {
 		t.Errorf("Adding scaled did not match")
 	}
 	short := []float64{1}
@@ -85,11 +85,11 @@ func TestAddScaledTo(t *testing.T) {
 	dst := make([]float64, 5)
 	ans := []float64{19, 26, 9, 46, 35}
 	AddScaledTo(dst, y, alpha, s)
-	if !EqualsApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EQTOLERANCE) {
 		t.Errorf("AddScaledTo did not match")
 	}
 	AddScaledTo(dst, y, alpha, s)
-	if !EqualsApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EQTOLERANCE) {
 		t.Errorf("Reusing dst did not match")
 	}
 	short := []float64{1}
@@ -159,7 +159,7 @@ func TestDiv(t *testing.T) {
 	s2 := []float64{1, 2, 3}
 	ans := []float64{5, 6, 9}
 	Div(s1, s2)
-	if !EqualsApprox(s1, ans, EQTOLERANCE) {
+	if !EqualApprox(s1, ans, EQTOLERANCE) {
 		t.Errorf("Mul doesn't give correct answer")
 	}
 	s1short := []float64{1}
@@ -180,17 +180,17 @@ func TestDivTo(t *testing.T) {
 	dst := make([]float64, 3)
 	ans := []float64{5, 6, 9}
 	DivTo(dst, s1, s2)
-	if !EqualsApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EQTOLERANCE) {
 		t.Errorf("DivTo doesn't give correct answer")
 	}
-	if !EqualsApprox(s1, s1orig, EQTOLERANCE) {
+	if !EqualApprox(s1, s1orig, EQTOLERANCE) {
 		t.Errorf("S1 changes during multo")
 	}
-	if !EqualsApprox(s2, s2orig, EQTOLERANCE) {
+	if !EqualApprox(s2, s2orig, EQTOLERANCE) {
 		t.Errorf("s2 changes during multo")
 	}
 	DivTo(dst, s1, s2)
-	if !EqualsApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EQTOLERANCE) {
 		t.Errorf("DivTo doesn't give correct answer reusing dst")
 	}
 	dstShort := []float64{1}
@@ -225,39 +225,39 @@ func TestDot(t *testing.T) {
 func TestEquals(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
-	if !Equals(s1, s2) {
+	if !Equal(s1, s2) {
 		t.Errorf("Equal slices returned as unequal")
 	}
 	s2 = []float64{1, 2, 3, 4 + 1e-14}
-	if Equals(s1, s2) {
+	if Equal(s1, s2) {
 		t.Errorf("Unequal slices returned as equal")
 	}
 }
 
-func TestEqualsApprox(t *testing.T) {
+func TestEqualApprox(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4 + 1e-10}
-	if EqualsApprox(s1, s2, 1e-13) {
+	if EqualApprox(s1, s2, 1e-13) {
 		t.Errorf("Unequal slices returned as equal for absolute")
 	}
-	if !EqualsApprox(s1, s2, 1e-5) {
+	if !EqualApprox(s1, s2, 1e-5) {
 		t.Errorf("Equal slices returned as unequal for absolute")
 	}
 	s1 = []float64{1, 2, 3, 1000}
 	s2 = []float64{1, 2, 3, 1000 * (1 + 1e-7)}
-	if EqualsApprox(s1, s2, 1e-8) {
+	if EqualApprox(s1, s2, 1e-8) {
 		t.Errorf("Unequal slices returned as equal for relative")
 	}
-	if !EqualsApprox(s1, s2, 1e-5) {
+	if !EqualApprox(s1, s2, 1e-5) {
 		t.Errorf("Equal slices returned as unequal for relative")
 	}
 }
 
 func TestEqualsRelative(t *testing.T) {
-	if !EqualsWithinRel(1000, 1000.1, 1e-2) {
+	if !EqualWithinRel(1000, 1000.1, 1e-2) {
 		t.Errorf("Equal values returned as unequal")
 	}
-	if EqualsWithinRel(1000, 1000.1, 1e-8) {
+	if EqualWithinRel(1000, 1000.1, 1e-8) {
 		t.Errorf("Unequal values returned as equal")
 	}
 }
@@ -413,7 +413,7 @@ func TestMul(t *testing.T) {
 	s2 := []float64{1, 2, 3}
 	ans := []float64{1, 4, 9}
 	Mul(s1, s2)
-	if !EqualsApprox(s1, ans, EQTOLERANCE) {
+	if !EqualApprox(s1, ans, EQTOLERANCE) {
 		t.Errorf("Mul doesn't give correct answer")
 	}
 	s1short := []float64{1}
@@ -434,17 +434,17 @@ func TestMulTo(t *testing.T) {
 	dst := make([]float64, 3)
 	ans := []float64{1, 4, 9}
 	MulTo(dst, s1, s2)
-	if !EqualsApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EQTOLERANCE) {
 		t.Errorf("MulTo doesn't give correct answer")
 	}
-	if !EqualsApprox(s1, s1orig, EQTOLERANCE) {
+	if !EqualApprox(s1, s1orig, EQTOLERANCE) {
 		t.Errorf("S1 changes during multo")
 	}
-	if !EqualsApprox(s2, s2orig, EQTOLERANCE) {
+	if !EqualApprox(s2, s2orig, EQTOLERANCE) {
 		t.Errorf("s2 changes during multo")
 	}
 	MulTo(dst, s1, s2)
-	if !EqualsApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EQTOLERANCE) {
 		t.Errorf("MulTo doesn't give correct answer reusing dst")
 	}
 	dstShort := []float64{1}

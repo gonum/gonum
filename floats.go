@@ -148,7 +148,7 @@ func Dot(s1, s2 []float64) float64 {
 
 // Equal returns true if the slices have equal lengths and
 // all elements are numerically identical
-func Equals(s1, s2 []float64) bool {
+func Equal(s1, s2 []float64) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
@@ -163,12 +163,12 @@ func Equals(s1, s2 []float64) bool {
 // EqualsApprox returns true if the slices have equal lengths and
 // all element pairs have an absolute tolerance less than tol or a
 // relative tolerance less than tol
-func EqualsApprox(s1, s2 []float64, tol float64) bool {
+func EqualApprox(s1, s2 []float64, tol float64) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
 	for i, a := range s1 {
-		if !EqualsWithinAbsOrRel(a, s2[i], tol, tol) {
+		if !EqualWithinAbsOrRel(a, s2[i], tol, tol) {
 			return false
 		}
 	}
@@ -177,7 +177,7 @@ func EqualsApprox(s1, s2 []float64, tol float64) bool {
 
 // EqualsFunc returns true if the slices have the same lengths
 // and the function returns true for all element pairs
-func EqualsFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
+func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
@@ -192,7 +192,7 @@ func EqualsFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 
 // ApproxEqualAbs returns true if a and b have an absolute
 // difference of less than tol
-func EqualsWithinAbs(a, b, tol float64) bool {
+func EqualWithinAbs(a, b, tol float64) bool {
 	if math.Abs(a-b) > tol {
 		return false
 	}
@@ -201,7 +201,7 @@ func EqualsWithinAbs(a, b, tol float64) bool {
 
 // ApproxEqualRel returns true if a and b have a relative
 // difference of less than tol
-func EqualsWithinRel(a, b, tol float64) bool {
+func EqualWithinRel(a, b, tol float64) bool {
 	diff := math.Abs(a - b)
 	largest := math.Max(math.Abs(a), math.Abs(b))
 	if diff > largest*tol {
@@ -212,11 +212,11 @@ func EqualsWithinRel(a, b, tol float64) bool {
 
 // EqualsWithinAbsOrRel returns true if a and b are equal to within
 // the absolute tolerance
-func EqualsWithinAbsOrRel(a, b, absTol, relTol float64) bool {
-	if EqualsWithinAbs(a, b, absTol) {
+func EqualWithinAbsOrRel(a, b, absTol, relTol float64) bool {
+	if EqualWithinAbs(a, b, absTol) {
 		return true
 	}
-	return EqualsWithinRel(a, b, relTol)
+	return EqualWithinRel(a, b, relTol)
 }
 
 // Eqlen returns true if all of the slices have equal length,

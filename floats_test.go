@@ -262,20 +262,20 @@ func TestEqualsRelative(t *testing.T) {
 	}
 }
 
-func TestEqualLen(t *testing.T) {
+func TestEqualLengths(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
 	s3 := []float64{1, 2, 3}
-	if !EqualLen(s1, s2) {
+	if !EqualLengths(s1, s2) {
 		t.Errorf("Equal lengths returned as unequal")
 	}
-	if EqualLen(s1, s3) {
+	if EqualLengths(s1, s3) {
 		t.Errorf("Unequal lengths returned as equal")
 	}
-	if !EqualLen(s1) {
+	if !EqualLengths(s1) {
 		t.Errorf("Single slice returned as unequal")
 	}
-	if !EqualLen() {
+	if !EqualLengths() {
 		t.Errorf("No slices returned as unequal")
 	}
 }

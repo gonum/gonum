@@ -221,7 +221,7 @@ func EqualsWithinAbsOrRel(a, b, absTol, relTol float64) bool {
 
 // Eqlen returns true if all of the slices have equal length,
 // and false otherwise. Returns true if there are no input slices
-func EqualLen(slices ...[]float64) bool {
+func EqualLengths(slices ...[]float64) bool {
 	// This length check is needed: http://play.golang.org/p/sdty6YiLhM
 	if len(slices) == 0 {
 		return true

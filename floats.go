@@ -219,6 +219,28 @@ func EqualWithinAbsOrRel(a, b, absTol, relTol float64) bool {
 	return EqualWithinRel(a, b, relTol)
 }
 
+// EqualWithinULP returns true if a and b are equal to within
+// the specified number of floating point units in the last place.
+func EqualWithinULP(a, b float64, ulp uint) bool {
+	if a == b {
+		return true
+	}
+	if math.IsNaN(a) || math.IsNaN(b) {
+		return false
+	}
+	if math.Signbit(a) != math.Signbit(b) {
+		return false
+	}
+	return ulpDiff(math.Float64bits(a), math.Float64bits(b)) <= ulp
+}
+
+func ulpDiff(a, b uint64) uint {
+	if a > b {
+		a, b = b, a
+	}
+	return uint(b - a)
+}
+
 // Eqlen returns true if all of the slices have equal length,
 // and false otherwise. Returns true if there are no input slices
 func EqualLengths(slices ...[]float64) bool {

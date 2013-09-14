@@ -193,21 +193,18 @@ func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 // ApproxEqualAbs returns true if a and b have an absolute
 // difference of less than tol
 func EqualWithinAbs(a, b, tol float64) bool {
-	if math.Abs(a-b) > tol {
-		return false
-	}
-	return true
+	return a == b || math.Abs(a-b) <= tol
 }
 
 // ApproxEqualRel returns true if a and b have a relative
 // difference of less than tol
 func EqualWithinRel(a, b, tol float64) bool {
+	if a == b {
+		return true
+	}
 	diff := math.Abs(a - b)
 	largest := math.Max(math.Abs(a), math.Abs(b))
-	if diff > largest*tol {
-		return false
-	}
-	return true
+	return diff <= largest*tol
 }
 
 // EqualsWithinAbsOrRel returns true if a and b are equal to within

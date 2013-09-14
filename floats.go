@@ -196,17 +196,17 @@ func EqualWithinAbs(a, b, tol float64) bool {
 	return a == b || math.Abs(a-b) <= tol
 }
 
-var minNormal = 2.2250738585072014e-308
+const minNormalFloat64 = 2.2250738585072014e-308
 
-// ApproxEqualRel returns true if a and b have a relative
-// difference of less than tol.
+// ApproxEqualRel returns true if the difference between a and b
+// is not greater than tol times the greater value.
 func EqualWithinRel(a, b, tol float64) bool {
 	if a == b {
 		return true
 	}
 	delta := math.Abs(a - b)
-	if a == 0 || b == 0 || delta <= minNormal {
-		return delta <= tol*minNormal
+	if delta <= minNormalFloat64 {
+		return delta <= tol*minNormalFloat64
 	}
 	// We depend on the division in this relationship to identify
 	// infinities (we rely on the NaN to fail the test) otherwise

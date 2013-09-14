@@ -254,11 +254,96 @@ func TestEqualApprox(t *testing.T) {
 }
 
 func TestEqualsRelative(t *testing.T) {
-	if !EqualWithinRel(1000, 1000.1, 1e-2) {
-		t.Errorf("Equal values returned as unequal")
+	var equalityTests = []struct {
+		a, b     float64
+		tol      float64
+		equality bool
+	}{
+		{1000000, 1000001, 0, true},
+		{1000001, 1000000, 0, true},
+		{10000, 10001, 0, false},
+		{10001, 10000, 0, false},
+		{-1000000, -1000001, 0, true},
+		{-1000001, -1000000, 0, true},
+		{-10000, -10001, 0, false},
+		{-10001, -10000, 0, false},
+		{1.0000001, 1.0000002, 0, true},
+		{1.0000002, 1.0000001, 0, true},
+		{1.0002, 1.0001, 0, false},
+		{1.0001, 1.0002, 0, false},
+		{-1.000001, -1.000002, 0, true},
+		{-1.000002, -1.000001, 0, true},
+		{-1.0001, -1.0002, 0, false},
+		{-1.0002, -1.0001, 0, false},
+		{0.000000001000001, 0.000000001000002, 0, true},
+		{0.000000001000002, 0.000000001000001, 0, true},
+		{0.000000000001002, 0.000000000001001, 0, false},
+		{0.000000000001001, 0.000000000001002, 0, false},
+		{-0.000000001000001, -0.000000001000002, 0, true},
+		{-0.000000001000002, -0.000000001000001, 0, true},
+		{-0.000000000001002, -0.000000000001001, 0, false},
+		{-0.000000000001001, -0.000000000001002, 0, false},
+		{0, 0, 0, true},
+		{0, -0, 0, true},
+		{-0, -0, 0, true},
+		{0.00000001, 0, 0, false},
+		{0, 0.00000001, 0, false},
+		{-0.00000001, 0, 0, false},
+		{0, -0.00000001, 0, false},
+		{0, 1e-40, 0.01, true},
+		{1e-40, 0, 0.01, true},
+		{1e-40, 0, 0.000001, false},
+		{0, 1e-40, 0.000001, false},
+		{0, -1e-40, 0.1, true},
+		{-1e-40, 0, 0.1, true},
+		{-1e-40, 0, 0.00000001, false},
+		{0, -1e-40, 0.00000001, false},
+		{math.Inf(1), math.Inf(1), 0, true},
+		{math.Inf(-1), math.Inf(-1), 0, true},
+		{math.Inf(-1), math.Inf(1), 0, false},
+		{math.Inf(1), math.MaxFloat64, 0, false},
+		{math.Inf(-1), -math.MaxFloat64, 0, false},
+		{math.NaN(), math.NaN(), 0, false},
+		{math.NaN(), 0, 0, false},
+		{-0, math.NaN(), 0, false},
+		{math.NaN(), -0, 0, false},
+		{0, math.NaN(), 0, false},
+		{math.NaN(), math.Inf(1), 0, false},
+		{math.Inf(1), math.NaN(), 0, false},
+		{math.NaN(), math.Inf(-1), 0, false},
+		{math.Inf(-1), math.NaN(), 0, false},
+		{math.NaN(), math.MaxFloat64, 0, false},
+		{math.MaxFloat64, math.NaN(), 0, false},
+		{math.NaN(), -math.MaxFloat64, 0, false},
+		{-math.MaxFloat64, math.NaN(), 0, false},
+		{math.NaN(), math.SmallestNonzeroFloat64, 0, false},
+		{math.SmallestNonzeroFloat64, math.NaN(), 0, false},
+		{math.NaN(), -math.SmallestNonzeroFloat64, 0, false},
+		{-math.SmallestNonzeroFloat64, math.NaN(), 0, false},
+		{1.000000001, -1.0, 0, false},
+		{-1.0, 1.000000001, 0, false},
+		{-1.000000001, 1.0, 0, false},
+		{1.0, -1.000000001, 0, false},
+		{10 * math.SmallestNonzeroFloat64, 10 * -math.SmallestNonzeroFloat64, 0, true},
+		{10000 * math.SmallestNonzeroFloat64, 10000 * -math.SmallestNonzeroFloat64, 0, false},
+		{math.SmallestNonzeroFloat64, -math.SmallestNonzeroFloat64, 0, true},
+		{-math.SmallestNonzeroFloat64, math.SmallestNonzeroFloat64, 0, true},
+		{math.SmallestNonzeroFloat64, 0, 0, true},
+		{0, math.SmallestNonzeroFloat64, 0, true},
+		{-math.SmallestNonzeroFloat64, 0, 0, true},
+		{0, -math.SmallestNonzeroFloat64, 0, true},
+		{0.000000001, -math.SmallestNonzeroFloat64, 0, false},
+		{0.000000001, math.SmallestNonzeroFloat64, 0, false},
+		{math.SmallestNonzeroFloat64, 0.000000001, 0, false},
+		{-math.SmallestNonzeroFloat64, 0.000000001, 0, false},
 	}
-	if EqualWithinRel(1000, 1000.1, 1e-8) {
-		t.Errorf("Unequal values returned as equal")
+	for _, ts := range equalityTests {
+		if ts.tol == 0 {
+			ts.tol = 1e-5
+		}
+		if equality := EqualWithinRel(ts.a, ts.b, ts.tol); equality != ts.equality {
+			t.Errorf("Relative equality of %g and %g returned: %v. Expected: %v", ts.a, ts.b, equality, ts.equality)
+		}
 	}
 }
 

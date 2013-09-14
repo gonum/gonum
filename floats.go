@@ -234,7 +234,7 @@ func EqualWithinULP(a, b float64, ulp uint) bool {
 		return false
 	}
 	if math.Signbit(a) != math.Signbit(b) {
-		return false
+		return uint(math.Float64bits(math.Abs(a))+math.Float64bits(math.Abs(b))) <= ulp
 	}
 	return ulpDiff(math.Float64bits(a), math.Float64bits(b)) <= ulp
 }

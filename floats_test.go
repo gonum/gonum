@@ -362,6 +362,9 @@ func TestEqualsULP(t *testing.T) {
 	if f := 67329.242; EqualWithinULP(f, nextAfterN(f, math.Inf(1), 5), 1) {
 		t.Errorf("Unequal values returned as equal")
 	}
+	if f := nextAfterN(0, math.Inf(1), 2); !EqualWithinULP(f, nextAfterN(f, math.Inf(-1), 5), 10) {
+		t.Errorf("Equal values returned as unequal")
+	}
 }
 
 func TestEqualLengths(t *testing.T) {

@@ -255,9 +255,9 @@ func TestEqualApprox(t *testing.T) {
 
 func TestEqualsRelative(t *testing.T) {
 	var equalityTests = []struct {
-		a, b     float64
-		tol      float64
-		equality bool
+		a, b  float64
+		tol   float64
+		equal bool
 	}{
 		{1000000, 1000001, 0, true},
 		{1000001, 1000000, 0, true},
@@ -290,14 +290,14 @@ func TestEqualsRelative(t *testing.T) {
 		{0, 0.00000001, 0, false},
 		{-0.00000001, 0, 0, false},
 		{0, -0.00000001, 0, false},
-		{0, 1e-40, 0.01, true},
-		{1e-40, 0, 0.01, true},
-		{1e-40, 0, 0.000001, false},
-		{0, 1e-40, 0.000001, false},
-		{0, -1e-40, 0.1, true},
-		{-1e-40, 0, 0.1, true},
-		{-1e-40, 0, 0.00000001, false},
-		{0, -1e-40, 0.00000001, false},
+		{0, 1e-310, 0.01, true},
+		{1e-310, 0, 0.01, true},
+		{1e-310, 0, 0.000001, false},
+		{0, 1e-310, 0.000001, false},
+		{0, -1e-310, 0.1, true},
+		{-1e-310, 0, 0.1, true},
+		{-1e-310, 0, 0.00000001, false},
+		{0, -1e-310, 0.00000001, false},
 		{math.Inf(1), math.Inf(1), 0, true},
 		{math.Inf(-1), math.Inf(-1), 0, true},
 		{math.Inf(-1), math.Inf(1), 0, false},
@@ -325,7 +325,7 @@ func TestEqualsRelative(t *testing.T) {
 		{-1.000000001, 1.0, 0, false},
 		{1.0, -1.000000001, 0, false},
 		{10 * math.SmallestNonzeroFloat64, 10 * -math.SmallestNonzeroFloat64, 0, true},
-		{10000 * math.SmallestNonzeroFloat64, 10000 * -math.SmallestNonzeroFloat64, 0, false},
+		{1e11 * math.SmallestNonzeroFloat64, 1e11 * -math.SmallestNonzeroFloat64, 0, false},
 		{math.SmallestNonzeroFloat64, -math.SmallestNonzeroFloat64, 0, true},
 		{-math.SmallestNonzeroFloat64, math.SmallestNonzeroFloat64, 0, true},
 		{math.SmallestNonzeroFloat64, 0, 0, true},
@@ -341,8 +341,9 @@ func TestEqualsRelative(t *testing.T) {
 		if ts.tol == 0 {
 			ts.tol = 1e-5
 		}
-		if equality := EqualWithinRel(ts.a, ts.b, ts.tol); equality != ts.equality {
-			t.Errorf("Relative equality of %g and %g returned: %v. Expected: %v", ts.a, ts.b, equality, ts.equality)
+		if equal := EqualWithinRel(ts.a, ts.b, ts.tol); equal != ts.equal {
+			t.Errorf("Relative equality of %g and %g with tolerance %g returned: %v. Expected: %v",
+				ts.a, ts.b, ts.tol, equal, ts.equal)
 		}
 	}
 }

@@ -234,16 +234,16 @@ func EqualWithinULP(a, b float64, ulp uint) bool {
 		return false
 	}
 	if math.Signbit(a) != math.Signbit(b) {
-		return uint(math.Float64bits(math.Abs(a))+math.Float64bits(math.Abs(b))) <= ulp
+		return math.Float64bits(math.Abs(a))+math.Float64bits(math.Abs(b)) <= uint64(ulp)
 	}
-	return ulpDiff(math.Float64bits(a), math.Float64bits(b)) <= ulp
+	return ulpDiff(math.Float64bits(a), math.Float64bits(b)) <= uint64(ulp)
 }
 
-func ulpDiff(a, b uint64) uint {
+func ulpDiff(a, b uint64) uint64 {
 	if a > b {
 		a, b = b, a
 	}
-	return uint(b - a)
+	return b - a
 }
 
 // Eqlen returns true if all of the slices have equal length,

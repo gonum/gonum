@@ -1,18 +1,18 @@
-package mass
-
-import "github.com/gonum/unit"
+package unit
 
 // Represents a mass in kg
 type Mass float64
 
 const (
-	Kilogram Mass = 1.0
-	Gram     Mass = 0.001
-	Pound    Mass = 0.45359237
+	Kilogram  Mass = 1.0
+	Gram      Mass = 1e-3
+	Centigram Mass = 1e-5
+	Milligram Mass = 1e-6
+	Microgram Mass = 1e-9
 )
 
-func (m Mass) Unit() *unit.Unit {
-	return unit.CreateUnit(float64(m), &unit.Dimensions{Mass: 1})
+func (m Mass) Unit() *Unit {
+	return CreateUnit(float64(m), &Dimensions{Mass: 1})
 }
 
 func (m Mass) In(m2 Mass) float64 {

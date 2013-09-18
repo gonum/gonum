@@ -1,14 +1,13 @@
 package unit
 
-// A uniter is a type that can be converted
-// to a unit. These functions declare the
-// power of the basic dimension of the unit
+// Uniter is an interface representing a type that can be converted
+// to a unit.
 type Uniter interface {
 	Unit() *Unit
 }
 
-// A list of the base units as defined by the SI system.
-// Used to create a new unit
+// Dimensions is a struct containing the SI base dimensions. Dimensions
+// can be used in conjuntion with CreateUnit to create a
 type Dimensions struct {
 	Current     int
 	Length      int
@@ -19,7 +18,9 @@ type Dimensions struct {
 	Chemamt     int
 }
 
-// A generic unit type. Mostly used for doing math involving units
+// Unit is a type a value with generic SI units. Most useful for
+// translating between dimensions, for example, by multiplying
+// an acceleration with a mass to get a force
 type Unit struct {
 	current     int
 	length      int
@@ -31,11 +32,9 @@ type Unit struct {
 	value       float64
 }
 
-// TODO: Some oddities with chemamt. Not sure what to do
-
-// Create a new variable of type Unit having the value
+// CreateUnit creates a new variable of type Unit which has the value
 // specified by value and the dimensions specified by the
-// base units struct.
+// base units struct. The value is always in SI Units.
 //
 // Example: To create an acceleration of 3 m/s^2, one could do
 // myvar := CreateUnit(3.0, &Dimensions{length: 1, time: -2})
@@ -52,7 +51,7 @@ func CreateUnit(value float64, d *Dimensions) *Unit {
 	}
 }
 
-// Check if the dimensions of two units are the same
+// DimensionsMatch checks if the dimensions of two Uniters are the same
 func DimensionsMatch(aU, bU Uniter) bool {
 	a := aU.Unit()
 	b := bU.Unit()
@@ -80,6 +79,8 @@ func DimensionsMatch(aU, bU Uniter) bool {
 	return true
 }
 
+// Add adds the function argument to the reciever. Panics if the units of
+// the receiver and the argument don't match.
 func (u *Unit) Add(aU Uniter) *Unit {
 	a := aU.Unit()
 	if !DimensionsMatch(u, a) {
@@ -89,11 +90,13 @@ func (u *Unit) Add(aU Uniter) *Unit {
 	return u
 }
 
+// Unit allows unit to satisfy the uniter interface
 func (u *Unit) Unit() *Unit {
 	return u
 }
 
-// Multiply the receiver by the unit
+// Mul multiply the receiver by the unit changing the dimensions
+// of the receiver as appropriate
 func (u *Unit) Mul(aU Uniter) *Unit {
 	a := aU.Unit()
 	u.length += a.length
@@ -106,7 +109,8 @@ func (u *Unit) Mul(aU Uniter) *Unit {
 	return u
 }
 
-// Divide the receive by the unit
+// Div divides the receiver by the argument changing the
+// dimensions of the receiver as appropriate
 func (u *Unit) Div(aU Uniter) *Unit {
 	a := aU.Unit()
 	u.length -= a.length
@@ -119,17 +123,9 @@ func (u *Unit) Div(aU Uniter) *Unit {
 	return u
 }
 
-// Convert to a different dimension
-func (u *Unit) In(a Uniter) float64 {
-	u2 := a.Unit()
-	if !DimensionsMatch(u, u2) {
-		panic("Attempt to assign to the wrong dimension")
-	}
-	return u.value / u2.value
-}
-
-// Return the value of the unit (will always be in SI units).
-// If it is wanted as a specific dimension, see ToLength, etc.
+// Value return the raw value of the unit as a float64. Use of this
+// method is not recommended, instead it is recommended to use a
+// FromUnit type of a specific dimension
 func (u *Unit) Value() float64 {
 	return u.value
 }

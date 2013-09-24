@@ -753,7 +753,7 @@ func RandomSlice(l int) []float64 {
 func benchmarkMin(b *testing.B, s []float64) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, _ = Min(s)
+		Min(s)
 	}
 }
 
@@ -850,7 +850,7 @@ func BenchmarkAddFourHuge(b *testing.B) {
 func benchmarkLogSumExp(b *testing.B, s []float64) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = LogSumExp(s)
+		LogSumExp(s)
 	}
 }
 
@@ -876,7 +876,7 @@ func BenchmarkLogSumExpHuge(b *testing.B) {
 func benchmarkDot(b *testing.B, s1 []float64, s2 []float64) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = Dot(s1, s2)
+		Dot(s1, s2)
 	}
 }
 

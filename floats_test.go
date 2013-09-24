@@ -751,44 +751,39 @@ func RandomSlice(l int) []float64 {
 }
 
 func benchmarkMin(b *testing.B, s []float64) {
-	b.StartTimer()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = Min(s)
 	}
 }
 
 func BenchmarkMinSmall(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(SMALL)
 	benchmarkMin(b, s)
 }
 
 func BenchmarkMinMed(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(MEDIUM)
 	benchmarkMin(b, s)
 }
 
 func BenchmarkMinLarge(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(LARGE)
 	benchmarkMin(b, s)
 }
 func BenchmarkMinHuge(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(HUGE)
 	benchmarkMin(b, s)
 }
 
 func benchmarkAdd(b *testing.B, s ...[]float64) {
-	b.StartTimer()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Add(s[0], s[1:]...)
 	}
 }
 
 func BenchmarkAddTwoSmall(b *testing.B) {
-	b.StopTimer()
 	i := SMALL
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -796,7 +791,6 @@ func BenchmarkAddTwoSmall(b *testing.B) {
 }
 
 func BenchmarkAddFourSmall(b *testing.B) {
-	b.StopTimer()
 	i := SMALL
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -806,7 +800,6 @@ func BenchmarkAddFourSmall(b *testing.B) {
 }
 
 func BenchmarkAddTwoMed(b *testing.B) {
-	b.StopTimer()
 	i := MEDIUM
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -814,7 +807,6 @@ func BenchmarkAddTwoMed(b *testing.B) {
 }
 
 func BenchmarkAddFourMed(b *testing.B) {
-	b.StopTimer()
 	i := MEDIUM
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -824,7 +816,6 @@ func BenchmarkAddFourMed(b *testing.B) {
 }
 
 func BenchmarkAddTwoLarge(b *testing.B) {
-	b.StopTimer()
 	i := LARGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -832,7 +823,6 @@ func BenchmarkAddTwoLarge(b *testing.B) {
 }
 
 func BenchmarkAddFourLarge(b *testing.B) {
-	b.StopTimer()
 	i := LARGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -842,7 +832,6 @@ func BenchmarkAddFourLarge(b *testing.B) {
 }
 
 func BenchmarkAddTwoHuge(b *testing.B) {
-	b.StopTimer()
 	i := HUGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -850,7 +839,6 @@ func BenchmarkAddTwoHuge(b *testing.B) {
 }
 
 func BenchmarkAddFourHuge(b *testing.B) {
-	b.StopTimer()
 	i := HUGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
@@ -860,64 +848,56 @@ func BenchmarkAddFourHuge(b *testing.B) {
 }
 
 func benchmarkLogSumExp(b *testing.B, s []float64) {
-	b.StartTimer()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = LogSumExp(s)
 	}
 }
 
 func BenchmarkLogSumExpSmall(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(SMALL)
 	benchmarkLogSumExp(b, s)
 }
 
 func BenchmarkLogSumExpMed(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(MEDIUM)
 	benchmarkLogSumExp(b, s)
 }
 
 func BenchmarkLogSumExpLarge(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(LARGE)
 	benchmarkLogSumExp(b, s)
 }
 func BenchmarkLogSumExpHuge(b *testing.B) {
-	b.StopTimer()
 	s := RandomSlice(HUGE)
 	benchmarkLogSumExp(b, s)
 }
 
 func benchmarkDot(b *testing.B, s1 []float64, s2 []float64) {
-	b.StartTimer()
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = Dot(s1, s2)
 	}
 }
 
 func BenchmarkDotSmall(b *testing.B) {
-	b.StopTimer()
 	s1 := RandomSlice(SMALL)
 	s2 := RandomSlice(SMALL)
 	benchmarkDot(b, s1, s2)
 }
 
 func BenchmarkDotMed(b *testing.B) {
-	b.StopTimer()
 	s1 := RandomSlice(MEDIUM)
 	s2 := RandomSlice(MEDIUM)
 	benchmarkDot(b, s1, s2)
 }
 
 func BenchmarkDotLarge(b *testing.B) {
-	b.StopTimer()
 	s1 := RandomSlice(LARGE)
 	s2 := RandomSlice(LARGE)
 	benchmarkDot(b, s1, s2)
 }
 func BenchmarkDotHuge(b *testing.B) {
-	b.StopTimer()
 	s1 := RandomSlice(HUGE)
 	s2 := RandomSlice(HUGE)
 	benchmarkDot(b, s1, s2)

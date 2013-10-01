@@ -74,6 +74,8 @@ type Unit struct {
 // Example: To create an acceleration of 3 m/s^2, one could do
 // myvar := CreateUnit(3.0, &Dimensions{length: 1, time: -2})
 func NewUnit(value float64, d Dimensions) *Unit {
+
+	// TODO: Find most efficient way of doing this
 	u := &Unit{
 		current:     d[Current],
 		length:      d[Length],
@@ -84,17 +86,21 @@ func NewUnit(value float64, d Dimensions) *Unit {
 		chemamt:     d[Chemamt],
 		value:       value,
 	}
+	// Note that this means all of the keys in u.dimension
+	// are custom dimensions
 	for key, val := range d {
 		if key < lastPackageDimension {
 			u.dimensions[key] = val
 		}
 	}
+	return u
 }
 
 // DimensionsMatch checks if the dimensions of two Uniters are the same
 func DimensionsMatch(aU, bU Uniter) bool {
 	a := aU.Unit()
 	b := bU.Unit()
+
 	if a.length != b.length {
 		return false
 	}
@@ -115,6 +121,14 @@ func DimensionsMatch(aU, bU Uniter) bool {
 	}
 	if a.chemamt != b.chemamt {
 		return false
+	}
+	if len(a.dimensions) != len(b.dimensions) {
+		return false
+	}
+	for key, val := range a.dimensions {
+		if b.dimensions[key] != val {
+			return false
+		}
 	}
 	return true
 }
@@ -146,6 +160,9 @@ func (u *Unit) Mul(aU Uniter) *Unit {
 	u.temperature += a.temperature
 	u.luminosity += a.luminosity
 	u.value *= a.value
+	for key, val := range a.dimensions {
+		u.dimensions[key] += val
+	}
 	return u
 }
 
@@ -160,6 +177,9 @@ func (u *Unit) Div(aU Uniter) *Unit {
 	u.temperature -= a.temperature
 	u.luminosity -= a.luminosity
 	u.value /= a.value
+	for key, val := range a.dimensions {
+		u.dimensions[key] -= val
+	}
 	return u
 }
 

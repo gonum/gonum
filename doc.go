@@ -18,4 +18,10 @@
 // of dimensionality when doing unit multiplication or division.
 // Unit represents a dimensional value where the dimensions are
 // not fixed.
+// This is not perfect -- something about newton-meter vs. Joule
+// If one wants to add a new dimensionality NewUnit should be called
+// to guarantee non-overlap
+// Should not use integer literals, only the values
+// Other packages can create the new units in their init functions.
+// This is so two packages will not accidtally use the same unit
 package unit

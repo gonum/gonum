@@ -1,44 +1,70 @@
 package unit
 
+import "sync"
+
 // Uniter is an interface representing a type that can be converted
 // to a unit.
 type Uniter interface {
 	Unit() *Unit
 }
 
-// Dimensions is a struct containing the SI base dimensions. Dimensions
-// can be used in conjuntion with CreateUnit to create a
-type Dimensions struct {
-	Current     int
-	Length      int
-	Luminosity  int
-	Mass        int
-	Temperature int
-	Time        int
-	Chemamt     int
+// Dimension is a type representing an SI base dimension or other
+// orthogonal dimension. If a new dimension is desired for a
+// domain-specific problem, NewDimension should be called.
+type Dimension int
+
+const (
+	// SI Base Units
+	Chemamt Dimension = iota // e.g. mol
+	Current
+	Length
+	Luminosity
+	Mass
+	Temperature
+	Time
+	// Start of other SI Units
+	Angle // e.g. radians
+)
+
+// Dimensions represent the dimensionality of the unit in powers
+// of that dimension. If a key is not present, the power of that
+// dimension is zero. Dimensions is used in conjuction with NewUnit
+type Dimensions map[Dimension]int
+
+var lastCreatedDimension Dimension = 64     // Reserve first 63 for our use
+var newUnitMutex sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
+
+// NewDimension returns a new dimension variable which will have a
+// unique representation across packages to prevent accidental overlap.
+// NewDimension should only be called for unit types that are orthogonal
+// to the base dimensions defined in this package. For example, one unit
+// that comes up in blood work is "White blood cells per microscope slide".
+// NewDimension is appropriate for "White blood cells", as they are not
+// representable in SI base units. However, NewDimension is not appropriate
+// for "Slide", as slide is really a unit of area. Slide should instead be
+// defined as a constant of type unit.Area
+func NewDimension() Dimension {
+	newUnitMutex.Lock()
+	defer newUnitMutex.Unlock()
+	lastCreatedDimension++
+	return lastCreatedDimension
 }
 
 // Unit is a type a value with generic SI units. Most useful for
 // translating between dimensions, for example, by multiplying
 // an acceleration with a mass to get a force
 type Unit struct {
-	current     int
-	length      int
-	luminosity  int
-	mass        int
-	temperature int
-	time        int
-	chemamt     int // For mol
-	value       float64
+	dimensions map[Dimension]int
+	value      float64
 }
 
-// CreateUnit creates a new variable of type Unit which has the value
+// NewUnit creates a new variable of type Unit which has the value
 // specified by value and the dimensions specified by the
 // base units struct. The value is always in SI Units.
 //
 // Example: To create an acceleration of 3 m/s^2, one could do
 // myvar := CreateUnit(3.0, &Dimensions{length: 1, time: -2})
-func CreateUnit(value float64, d *Dimensions) *Unit {
+func NewUnit(value float64, d Dimensions) *Unit {
 	return &Unit{
 		current:     d.Current,
 		length:      d.Length,

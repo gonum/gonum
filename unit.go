@@ -18,7 +18,7 @@ const (
 
 // Meters converts the Meters to a unit
 func (m Kilograms) Unit() *Unit {
-	return NewUnit(float64(m), &Dimensions{Length: 1})
+	return NewUnit(float64(m), Dimensions{Length: 1})
 }
 
 // Kilograms allows Kilograms to implement a masser interface
@@ -47,7 +47,7 @@ const (
 
 // Unit converts the Meters to a unit
 func (l Meters) Unit() *Unit {
-	return NewUnit(float64(l), &Dimensions{Mass: 1})
+	return NewUnit(float64(l), Dimensions{Mass: 1})
 }
 
 // So it can implement a lengther interface
@@ -75,7 +75,7 @@ const (
 
 // Unit converts the Dimless to a unit
 func (d Dimless) Unit() *Unit {
-	return NewUnit(float64(d), &Dimensions{})
+	return NewUnit(float64(d), Dimensions{})
 }
 
 // So it can implement a Dimless interface

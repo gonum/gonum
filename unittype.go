@@ -23,7 +23,8 @@ const (
 	Temperature
 	Time
 	// Start of other SI Units
-	Angle // e.g. radians
+	Angle                // e.g. radians
+	lastPackageDimension // Used in create dimension
 )
 
 // Dimensions represent the dimensionality of the unit in powers
@@ -31,8 +32,9 @@ const (
 // dimension is zero. Dimensions is used in conjuction with NewUnit
 type Dimensions map[Dimension]int
 
-var lastCreatedDimension Dimension = 64     // Reserve first 63 for our use
-var newUnitMutex sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
+//TODO: Should there be some number reserved? We don't want users ever using integer literals
+var lastCreatedDimension Dimension = 64      // Reserve first 63 for our use
+var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
 
 // NewDimension returns a new dimension variable which will have a
 // unique representation across packages to prevent accidental overlap.
@@ -54,8 +56,15 @@ func NewDimension() Dimension {
 // translating between dimensions, for example, by multiplying
 // an acceleration with a mass to get a force
 type Unit struct {
-	dimensions map[Dimension]int
-	value      float64
+	dimensions  map[Dimension]int // Map for custom dimensions
+	value       float64
+	current     int
+	length      int
+	luminosity  int
+	mass        int
+	temperature int
+	time        int
+	chemamt     int
 }
 
 // NewUnit creates a new variable of type Unit which has the value
@@ -65,15 +74,20 @@ type Unit struct {
 // Example: To create an acceleration of 3 m/s^2, one could do
 // myvar := CreateUnit(3.0, &Dimensions{length: 1, time: -2})
 func NewUnit(value float64, d Dimensions) *Unit {
-	return &Unit{
-		current:     d.Current,
-		length:      d.Length,
-		luminosity:  d.Luminosity,
-		mass:        d.Mass,
-		temperature: d.Temperature,
-		time:        d.Time,
-		chemamt:     d.Chemamt,
+	u := &Unit{
+		current:     d[Current],
+		length:      d[Length],
+		luminosity:  d[Luminosity],
+		mass:        d[Mass],
+		temperature: d[Temperature],
+		time:        d[Time],
+		chemamt:     d[Chemamt],
 		value:       value,
+	}
+	for key, val := range d {
+		if key < lastPackageDimension {
+			u.dimensions[key] = val
+		}
 	}
 }
 

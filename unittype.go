@@ -66,6 +66,8 @@ type Unit struct {
 	chemamt     int
 }
 
+//blah
+
 // NewUnit creates a new variable of type Unit which has the value
 // specified by value and the dimensions specified by the
 // base units struct. The value is always in SI Units.

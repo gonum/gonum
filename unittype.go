@@ -23,7 +23,7 @@ const (
 	TimeDim
 	// Start of other SI Units
 	AngleDim             // e.g. radians
-	lastCreatedDimension // Used in create dimension
+	lastPackageDimension // Used in create dimension
 )
 
 // Dimensions represent the dimensionality of the unit in powers
@@ -32,7 +32,7 @@ const (
 type Dimensions map[Dimension]int
 
 //TODO: Should there be some number reserved? We don't want users ever using integer literals
-//var lastCreatedDimension Dimension = 64      // Reserve first 63 for our use
+var lastCreatedDimension Dimension = lastPackageDimension
 var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
 
 // NewDimension returns a new dimension variable which will have a

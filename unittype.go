@@ -15,16 +15,15 @@ type Dimension int
 
 const (
 	// SI Base Units
-	Chemamt Dimension = iota // e.g. mol
-	Current
-	Length
-	Luminosity
-	Mass
-	Temperature
-	Time
+	CurrentDim Dimension = iota
+	LengthDim
+	LuminosityDim
+	MassDim
+	TemperatureDim
+	TimeDim
 	// Start of other SI Units
-	Angle                // e.g. radians
-	lastPackageDimension // Used in create dimension
+	AngleDim                // e.g. radians
+	lastPackageDimensionDim // Used in create dimension
 )
 
 // Dimensions represent the dimensionality of the unit in powers

@@ -22,8 +22,8 @@ const (
 	TemperatureDim
 	TimeDim
 	// Start of other SI Units
-	AngleDim                // e.g. radians
-	lastPackageDimensionDim // Used in create dimension
+	AngleDim             // e.g. radians
+	lastCreatedDimension // Used in create dimension
 )
 
 // Dimensions represent the dimensionality of the unit in powers
@@ -32,7 +32,7 @@ const (
 type Dimensions map[Dimension]int
 
 //TODO: Should there be some number reserved? We don't want users ever using integer literals
-var lastCreatedDimension Dimension = 64      // Reserve first 63 for our use
+//var lastCreatedDimension Dimension = 64      // Reserve first 63 for our use
 var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
 
 // NewDimension returns a new dimension variable which will have a
@@ -55,15 +55,8 @@ func NewDimension() Dimension {
 // translating between dimensions, for example, by multiplying
 // an acceleration with a mass to get a force
 type Unit struct {
-	dimensions  map[Dimension]int // Map for custom dimensions
-	value       float64
-	current     int
-	length      int
-	luminosity  int
-	mass        int
-	temperature int
-	time        int
-	chemamt     int
+	dimensions map[Dimension]int // Map for custom dimensions
+	value      float64
 }
 
 //blah
@@ -77,22 +70,13 @@ type Unit struct {
 func NewUnit(value float64, d Dimensions) *Unit {
 
 	// TODO: Find most efficient way of doing this
+	// I think copy is necessary in case the input
+	// dimension map is changed later
 	u := &Unit{
-		current:     d[Current],
-		length:      d[Length],
-		luminosity:  d[Luminosity],
-		mass:        d[Mass],
-		temperature: d[Temperature],
-		time:        d[Time],
-		chemamt:     d[Chemamt],
-		value:       value,
+		dimensions: make(map[Dimension]int),
 	}
-	// Note that this means all of the keys in u.dimension
-	// are custom dimensions
 	for key, val := range d {
-		if key < lastPackageDimension {
-			u.dimensions[key] = val
-		}
+		u.dimensions[key] = val
 	}
 	return u
 }
@@ -101,28 +85,6 @@ func NewUnit(value float64, d Dimensions) *Unit {
 func DimensionsMatch(aU, bU Uniter) bool {
 	a := aU.Unit()
 	b := bU.Unit()
-
-	if a.length != b.length {
-		return false
-	}
-	if a.time != b.time {
-		return false
-	}
-	if a.mass != b.mass {
-		return false
-	}
-	if a.current != b.current {
-		return false
-	}
-	if a.temperature != b.temperature {
-		return false
-	}
-	if a.luminosity != b.luminosity {
-		return false
-	}
-	if a.chemamt != b.chemamt {
-		return false
-	}
 	if len(a.dimensions) != len(b.dimensions) {
 		return false
 	}
@@ -154,16 +116,10 @@ func (u *Unit) Unit() *Unit {
 // of the receiver as appropriate
 func (u *Unit) Mul(aU Uniter) *Unit {
 	a := aU.Unit()
-	u.length += a.length
-	u.time += a.time
-	u.mass += a.mass
-	u.current += a.current
-	u.temperature += a.temperature
-	u.luminosity += a.luminosity
-	u.value *= a.value
 	for key, val := range a.dimensions {
 		u.dimensions[key] += val
 	}
+	u.value *= a.value
 	return u
 }
 
@@ -171,12 +127,6 @@ func (u *Unit) Mul(aU Uniter) *Unit {
 // dimensions of the receiver as appropriate
 func (u *Unit) Div(aU Uniter) *Unit {
 	a := aU.Unit()
-	u.length -= a.length
-	u.time -= a.time
-	u.mass -= a.mass
-	u.current -= a.current
-	u.temperature -= a.temperature
-	u.luminosity -= a.luminosity
 	u.value /= a.value
 	for key, val := range a.dimensions {
 		u.dimensions[key] -= val

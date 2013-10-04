@@ -16,23 +16,23 @@
 // a variable named 'acc' with a value of 9.8 meters per second squared.
 // These types can be used to add compile-time safety to code. For
 // example,
-//		func UnitAtmosphericConditions(t unit.Temperature, pressure unit.Pressure){
+//		func UnitDensity(t unit.Temperature, pressure unit.Pressure) (unit.Density){
 //			...
 //		}
 //		func main(){
 //			t := 300 * unit.Kelvin
 //			p := 5 * unit.Bar
-//			UnitAtmosphericConditions(p, t) // gives compile-time error
+//			rho := UnitDensity(p, t) // gives compile-time error
 //		}
 // gives a compile-time error (temperature type does not match pressure type)
 // while the corresponding code using float64 runs without error.
-//		func Float64AtmosphericConditions(temperature, pressure float64){
+//		func Float64Density(temperature, pressure float64) (float64){
 //			...
 //		}
 //		func main(){
-//			t := 300
-//			p := 50000 / Pa
-//			Float64AtmosphericConditions(p, t) // no error
+//			t := 300.0 // degrees kelvin
+//			p := 50000.0 // Pascals
+//			rho := Float64Density(p, t) // no error
 //		}
 // Many types have constants defined representing named SI units (Meter,
 // Kilogram, etc. ) or SI derived units (Bar, Milligram, etc.). These are
@@ -43,7 +43,8 @@
 //		j := unit.Length(0.001)
 //
 // 2)
-// Unit provides the type Unit to help guarantee consistency
+// Secondly, unit provides the Unit type to represent units of unknown
+// dimensionality and to help avoid errors in
 // of dimensionality when doing unit multiplication or division.
 // Unit represents a dimensional value where the dimensions are
 // not fixed.

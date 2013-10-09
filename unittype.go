@@ -113,14 +113,14 @@ func NewUnit(value float64, d Dimensions) *Unit {
 }
 
 // DimensionsMatch checks if the dimensions of two Uniters are the same
-func DimensionsMatch(aU, bU Uniter) bool {
-	a := aU.Unit()
-	b := bU.Unit()
-	if len(a.dimensions) != len(b.dimensions) {
+func DimensionsMatch(a, b Uniter) bool {
+	aUnit := a.Unit()
+	bUnit := b.Unit()
+	if len(aUnit.dimensions) != len(bUnit.dimensions) {
 		return false
 	}
-	for key, val := range a.dimensions {
-		if b.dimensions[key] != val {
+	for key, val := range aUnit.dimensions {
+		if bUnit.dimensions[key] != val {
 			return false
 		}
 	}
@@ -129,8 +129,8 @@ func DimensionsMatch(aU, bU Uniter) bool {
 
 // Add adds the function argument to the reciever. Panics if the units of
 // the receiver and the argument don't match.
-func (u *Unit) Add(aU Uniter) *Unit {
-	a := aU.Unit()
+func (u *Unit) Add(uniter Uniter) *Unit {
+	a := uniter.Unit()
 	if !DimensionsMatch(u, a) {
 		panic("Attempted to add the values of two units whose dimensions do not match.")
 	}
@@ -145,8 +145,8 @@ func (u *Unit) Unit() *Unit {
 
 // Mul multiply the receiver by the unit changing the dimensions
 // of the receiver as appropriate
-func (u *Unit) Mul(aU Uniter) *Unit {
-	a := aU.Unit()
+func (u *Unit) Mul(uniter Uniter) *Unit {
+	a := uniter.Unit()
 	for key, val := range a.dimensions {
 		u.dimensions[key] += val
 	}
@@ -156,8 +156,8 @@ func (u *Unit) Mul(aU Uniter) *Unit {
 
 // Div divides the receiver by the argument changing the
 // dimensions of the receiver as appropriate
-func (u *Unit) Div(aU Uniter) *Unit {
-	a := aU.Unit()
+func (u *Unit) Div(uniter Uniter) *Unit {
+	a := uniter.Unit()
 	u.value /= a.value
 	for key, val := range a.dimensions {
 		u.dimensions[key] -= val

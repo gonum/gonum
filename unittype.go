@@ -1,6 +1,7 @@
 package unit
 
 import (
+	"sort"
 	"strconv"
 	"sync"
 )
@@ -171,15 +172,50 @@ func (u *Unit) Value() float64 {
 	return u.value
 }
 
+type symbolString struct {
+	symbol string
+	pow    int
+}
+
+type unitPrinters []symbolString
+
+func (u unitPrinters) Len() int {
+	return len(u)
+}
+
+func (u unitPrinters) Less(i, j int) bool {
+	return u[i].symbol < u[j].symbol
+}
+
+func (u unitPrinters) Swap(i, j int) {
+	u[i], u[j] = u[j], u[i]
+}
+
 func (u Unit) String() string {
 	str := strconv.FormatFloat(u.value, 'e', -1, 64)
+	// Map iterates randomly, but we should output the symbols in a logical order
+	data := make(unitPrinters, 0, 10)
 	for dimension, power := range u.dimensions {
 		if power != 0 {
-			str += " " + dimensionToSymbol[dimension]
-			if power != 1 {
-				str += "^" + strconv.Itoa(power)
-			}
+			data = append(data, symbolString{dimensionToSymbol[dimension], power})
 		}
 	}
+	sort.Sort(data)
+	for _, s := range data {
+		str += " " + s.symbol
+		if s.pow != 1 {
+			str += "^" + strconv.Itoa(s.pow)
+		}
+	}
+	/*
+		for dimension, power := range u.dimensions {
+			if power != 0 {
+				str += " " + dimensionToSymbol[dimension]
+				if power != 1 {
+					str += "^" + strconv.Itoa(power)
+				}
+			}
+		}
+	*/
 	return str
 }

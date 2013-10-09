@@ -54,7 +54,7 @@
 // unit can be used to modify this value, for example:
 // 		acc.Mul(1.0 * unit.Kilogram).Mul(1 * unit.Meter)
 // To convert the unit back into a typed float64 value, the FromUnit methods
-// of the unit types should be used. FromUnit will return an error if the
+// of the dimensional types should be used. FromUnit will return an error if the
 // dimensions do not match.
 // 		var energy unit.Energy
 //		err := (*energy).FromUnit(acc)
@@ -70,7 +70,7 @@
 //			WhiteBloodCellDim := unit.NewDimension()
 //		}
 //		type WbcPerArea float64
-//		func [w WbcPerArea] Unit() *Unit{
+//		func (w WbcPerArea) Unit() *Unit{
 //			return NewUnit(w, Dimensions{WhiteBloodCellDim: 1, LengthDim: -2})
 //		}
 //		func main(){
@@ -80,5 +80,6 @@
 // Different physical ideas are sometimes expressed with the same dimensions
 // and Unit is incapable of catcing these mismatches. For example, energy and
 // torque are both expressed as force times distance (Newton-meters in SI),
-// but it is wrong to say that a torque of 10 N-m == 10 J.
+// but it is wrong to say that a torque of 10 N-m is the same as 10 J, even
+// though the dimensions agree.
 package unit

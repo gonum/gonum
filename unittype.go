@@ -1,6 +1,9 @@
 package unit
 
-import "sync"
+import (
+	"strconv"
+	"sync"
+)
 
 // Uniter is an interface representing a type that can be converted
 // to a unit.
@@ -17,7 +20,7 @@ const (
 	// SI Base Units
 	CurrentDim Dimension = iota
 	LengthDim
-	LuminosityDim
+	LuminousIntensityDim
 	MassDim
 	TemperatureDim
 	TimeDim
@@ -25,6 +28,18 @@ const (
 	AngleDim             // e.g. radians
 	lastPackageDimension // Used in create dimension
 )
+
+var dimensionStrings map[Dimension]string = make(map[Dimension]string)
+
+func init() {
+	dimensionStrings[CurrentDim] = "A"
+	dimensionStrings[LengthDim] = "m"
+	dimensionStrings[LuminousIntensityDim] = "cd"
+	dimensionStrings[MassDim] = "kg"
+	dimensionStrings[TemperatureDim] = "K"
+	dimensionStrings[TimeDim] = "s"
+	dimensionStrings[AngleDim] = "rad"
+}
 
 // Dimensions represent the dimensionality of the unit in powers
 // of that dimension. If a key is not present, the power of that
@@ -35,8 +50,6 @@ type Dimensions map[Dimension]int
 var lastCreatedDimension Dimension = lastPackageDimension
 var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
 
-//var dimensionStrings map[Dimension]string = make()
-
 // NewDimension returns a new dimension variable which will have a
 // unique representation across packages to prevent accidental overlap.
 // NewDimension should only be called for unit types that are orthogonal
@@ -46,10 +59,11 @@ var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition fo
 // representable in SI base units. However, NewDimension is not appropriate
 // for "Slide", as slide is really a unit of area. Slide should instead be
 // defined as a constant of type unit.Area
-func NewDimension() Dimension {
+func NewDimension(printString string) Dimension {
 	newUnitMutex.Lock()
 	defer newUnitMutex.Unlock()
 	lastCreatedDimension++
+	dimensionStrings[lastCreatedDimension] = printString
 	return lastCreatedDimension
 }
 
@@ -141,4 +155,17 @@ func (u *Unit) Div(aU Uniter) *Unit {
 // FromUnit type of a specific dimension
 func (u *Unit) Value() float64 {
 	return u.value
+}
+
+func (u Unit) String() string {
+	str := strconv.FormatFloat(u.value, 'e', 8, 64)
+	for dimension, power := range u.dimensions {
+		if power != 0 {
+			str += " " + dimensionStrings[dimension]
+			if power != 1 {
+				str += "^" + strconv.Itoa(power)
+			}
+		}
+	}
+	return str
 }

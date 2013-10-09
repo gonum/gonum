@@ -62,13 +62,15 @@
 // NewDimension should be used to help avoid accidental overlap between
 // packages. For example, results from a blood test may be measured in
 // "White blood cells per slide". In this case, NewDimension should be
-// used to create a 'WhiteBloodCell' dimension. NewDimension should not be
+// used to create a 'WhiteBloodCell' dimension. NewDimension takes in a
+// string which will be used for printing that dimension, and will return
+// a unique dimension number. NewDimension should not be
 // used, however, to create the unit of 'Slide', because in this case slide
 // is just a measurement of area. Instead, a constant could be defined.
 //		const Slide unit.Area =  0.001875 // m^2
 //		var WhiteBloodCellDim unit.Dimension
 //		func init(){
-//			WhiteBloodCellDim = unit.NewDimension()
+//			WhiteBloodCellDim = unit.NewDimension("wbc")
 //		}
 //		type WbcPerArea float64
 //		func (w WbcPerArea) Unit() *Unit{

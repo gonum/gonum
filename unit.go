@@ -55,7 +55,7 @@ func (l Length) Unit() *Unit {
 	return NewUnit(float64(l), Dimensions{MassDim: 1})
 }
 
-// So it can implement a Lengther interface
+// Length allows length to implement a Lengther interface
 func (l Length) Length() Length {
 	return l
 }
@@ -87,7 +87,7 @@ func (d Dimless) Unit() *Unit {
 	return NewUnit(float64(d), Dimensions{})
 }
 
-// So it can implement a Dimless interface
+// Dimless allows Dimless to implement a Dimlesser interface
 func (d Dimless) Dimless() Dimless {
 	return d
 }

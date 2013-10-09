@@ -43,15 +43,18 @@
 //		j := unit.Length(0.001)
 //
 // 2)
-// Secondly, unit provides the Unit type to represent units of unknown
-// dimensionality and to help avoid errors in
-// of dimensionality when doing unit multiplication or division.
-// Unit represents a dimensional value where the dimensions are
-// not fixed.
-// This is not perfect -- something about newton-meter vs. Joule
-// If one wants to add a new dimensionality NewUnit should be called
-// to guarantee non-overlap
-// Should not use integer literals, only the values
-// Other packages can create the new units in their init functions.
-// This is so two packages will not accidtally use the same unit
+// Unit provides the type "Unit", meant to represent a general dimensional
+// value. unit.Unit can be used to help prevent errors of dimensionality
+// when multiplying or dividing dimensional numbers. This package also
+// provides the "Uniter" interface which is satisfied by any type which can
+// be converted to a unit. New varibles of type Unit can be created with
+// the NewUnit function, and custom dimensions can be created with the use of
+// NewDimension. Please see the rest of the package docs for more
+// details on usage.
+//
+// Please note that Unit cannot catch all errors related to dimensionality.
+// Different physical ideas are sometimes expressed with the same dimensions
+// and Unit is incapable of catcing these mismatches. For example, energy and
+// torque are both expressed as force times distance (Newton-meters in SI),
+// but it is wrong to say that a torque of 10 N-m == 10 J.
 package unit

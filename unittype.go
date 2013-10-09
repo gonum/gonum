@@ -41,84 +41,85 @@ const (
 )
 
 var lastCreatedDimension Dimension = lastPackageDimension
-var dimensionToSymbol map[Dimension]string = make(map[Dimension]string)
-var symbolToDimension map[string]Dimension = make(map[string]Dimension) // for guaranteeing there aren't two identical symbols
+var dimensionToSymbol map[Dimension]string = map[Dimension]string{
+	CurrentDim:           "A",
+	LengthDim:            "m",
+	LuminousIntensityDim: "cd",
+	MassDim:              "kg",
+	TemperatureDim:       "K",
+	TimeDim:              "s",
+	AngleDim:             "rad",
+}
+var symbolToDimension map[string]Dimension = map[string]Dimension{
+	"A":   CurrentDim,
+	"m":   LengthDim,
+	"cd":  LuminousIntensityDim,
+	"kg":  MassDim,
+	"K":   TemperatureDim,
+	"s":   TimeDim,
+	"rad": AngleDim,
+
+	// Reserve common SI symbols
+	// base units
+	"mol": reserved,
+	// prefixes
+	"Y":  reserved,
+	"Z":  reserved,
+	"E":  reserved,
+	"P":  reserved,
+	"T":  reserved,
+	"G":  reserved,
+	"M":  reserved,
+	"k":  reserved,
+	"h":  reserved,
+	"da": reserved,
+	"d":  reserved,
+	"c":  reserved,
+	"μ":  reserved,
+	"n":  reserved,
+	"p":  reserved,
+	"f":  reserved,
+	"a":  reserved,
+	"z":  reserved,
+	"y":  reserved,
+	// SI Derived units with special symbols
+	"sr":  reserved,
+	"F":   reserved,
+	"C":   reserved,
+	"S":   reserved,
+	"H":   reserved,
+	"V":   reserved,
+	"Ω":   reserved,
+	"J":   reserved,
+	"N":   reserved,
+	"Hz":  reserved,
+	"lx":  reserved,
+	"lm":  reserved,
+	"Wb":  reserved,
+	"W":   reserved,
+	"Pa":  reserved,
+	"Bq":  reserved,
+	"Gy":  reserved,
+	"Sv":  reserved,
+	"kat": reserved,
+	// Units in use with SI
+	"ha": reserved,
+	"L":  reserved,
+	"l":  reserved,
+	// Units in Use Temporarily with SI
+	"bar": reserved,
+	"b":   reserved,
+	"Ci":  reserved,
+	"R":   reserved,
+	"rd":  reserved,
+	"rem": reserved,
+} // for guaranteeing there aren't two identical symbols
 
 // TODO: Should we actually reserve "common" SI unit symbols ("N", "J", etc.) so there isn't confusion
 // TODO: If we have a fancier ParseUnit, maybe the 'reserved' symbols should be a different map
 // 		map[string]string which says how they go?
 func init() {
-	dimensionToSymbol[CurrentDim] = "A"
-	symbolToDimension["A"] = CurrentDim
-	dimensionToSymbol[LengthDim] = "m"
-	symbolToDimension["m"] = LengthDim
-	dimensionToSymbol[LuminousIntensityDim] = "cd"
-	symbolToDimension["cd"] = LuminousIntensityDim
-	dimensionToSymbol[MassDim] = "kg"
-	symbolToDimension["kg"] = MassDim
-	dimensionToSymbol[TemperatureDim] = "K"
-	symbolToDimension["K"] = TemperatureDim
-	dimensionToSymbol[TimeDim] = "s"
-	symbolToDimension["s"] = TimeDim
-	dimensionToSymbol[AngleDim] = "rad"
-	symbolToDimension["rad"] = AngleDim
 
-	// Reserve common SI symbols
-	// base units
-	symbolToDimension["mol"] = reserved
-	// prefixes
-	symbolToDimension["Y"] = reserved
-	symbolToDimension["Z"] = reserved
-	symbolToDimension["E"] = reserved
-	symbolToDimension["P"] = reserved
-	symbolToDimension["T"] = reserved
-	symbolToDimension["G"] = reserved
-	symbolToDimension["M"] = reserved
-	symbolToDimension["k"] = reserved
-	symbolToDimension["h"] = reserved
-	symbolToDimension["da"] = reserved
-	symbolToDimension["d"] = reserved
-	symbolToDimension["c"] = reserved
-	symbolToDimension["m"] = reserved
-	symbolToDimension["μ"] = reserved
-	symbolToDimension["n"] = reserved
-	symbolToDimension["p"] = reserved
-	symbolToDimension["f"] = reserved
-	symbolToDimension["a"] = reserved
-	symbolToDimension["z"] = reserved
-	symbolToDimension["y"] = reserved
-	// SI Derived units with special symbols
-	symbolToDimension["sr"] = reserved
-	symbolToDimension["F"] = reserved
-	symbolToDimension["C"] = reserved
-	symbolToDimension["S"] = reserved
-	symbolToDimension["H"] = reserved
-	symbolToDimension["V"] = reserved
-	symbolToDimension["Ω"] = reserved
-	symbolToDimension["J"] = reserved
-	symbolToDimension["N"] = reserved
-	symbolToDimension["Hz"] = reserved
-	symbolToDimension["lx"] = reserved
-	symbolToDimension["lm"] = reserved
-	symbolToDimension["Wb"] = reserved
-	symbolToDimension["T"] = reserved
-	symbolToDimension["W"] = reserved
-	symbolToDimension["Pa"] = reserved
-	symbolToDimension["Bq"] = reserved
-	symbolToDimension["Gy"] = reserved
-	symbolToDimension["Sv"] = reserved
-	symbolToDimension["kat"] = reserved
-	// Units in use with SI
-	symbolToDimension["ha"] = reserved
-	symbolToDimension["L"] = reserved
-	symbolToDimension["l"] = reserved
-	// Units in Use Temporarily with SI
-	symbolToDimension["bar"] = reserved
-	symbolToDimension["b"] = reserved
-	symbolToDimension["Ci"] = reserved
-	symbolToDimension["R"] = reserved
-	symbolToDimension["rd"] = reserved
-	symbolToDimension["rem"] = reserved
 }
 
 // Dimensions represent the dimensionality of the unit in powers

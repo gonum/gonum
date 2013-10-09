@@ -29,16 +29,27 @@ const (
 	lastPackageDimension // Used in create dimension
 )
 
-var dimensionStrings map[Dimension]string = make(map[Dimension]string)
+//TODO: Should there be some number reserved? We don't want users ever using integer literals
+var lastCreatedDimension Dimension = lastPackageDimension
+
+var dimensionToSymbol map[Dimension]string = make(map[Dimension]string)
+var symbolToDimension map[string]Dimension = make(map[string]Dimension)
 
 func init() {
-	dimensionStrings[CurrentDim] = "A"
-	dimensionStrings[LengthDim] = "m"
-	dimensionStrings[LuminousIntensityDim] = "cd"
-	dimensionStrings[MassDim] = "kg"
-	dimensionStrings[TemperatureDim] = "K"
-	dimensionStrings[TimeDim] = "s"
-	dimensionStrings[AngleDim] = "rad"
+	dimensionToSymbol[CurrentDim] = "A"
+	symbolToDimension["A"] = CurrentDim
+	dimensionToSymbol[LengthDim] = "m"
+	symbolToDimension["m"] = LengthDim
+	dimensionToSymbol[LuminousIntensityDim] = "cd"
+	symbolToDimension["cd"] = LuminousIntensityDim
+	dimensionToSymbol[MassDim] = "kg"
+	symbolToDimension["kg"] = MassDim
+	dimensionToSymbol[TemperatureDim] = "K"
+	symbolToDimension["K"] = TemperatureDim
+	dimensionToSymbol[TimeDim] = "s"
+	symbolToDimension["s"] = TimeDim
+	dimensionToSymbol[AngleDim] = "rad"
+	symbolToDimension["rad"] = AngleDim
 }
 
 // Dimensions represent the dimensionality of the unit in powers
@@ -46,8 +57,6 @@ func init() {
 // dimension is zero. Dimensions is used in conjuction with NewUnit
 type Dimensions map[Dimension]int
 
-//TODO: Should there be some number reserved? We don't want users ever using integer literals
-var lastCreatedDimension Dimension = lastPackageDimension
 var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
 
 // NewDimension returns a new dimension variable which will have a
@@ -59,11 +68,17 @@ var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition fo
 // representable in SI base units. However, NewDimension is not appropriate
 // for "Slide", as slide is really a unit of area. Slide should instead be
 // defined as a constant of type unit.Area
-func NewDimension(printString string) Dimension {
+//  Expecting to be used only during initialization, it panics if the mapping between types and names is not a bijection.
+func NewDimension(symbol string) Dimension {
 	newUnitMutex.Lock()
 	defer newUnitMutex.Unlock()
 	lastCreatedDimension++
-	dimensionStrings[lastCreatedDimension] = printString
+	_, ok := symbolToDimension[symbol]
+	if ok {
+		panic("unit: dimension string " + symbol + " already used")
+	}
+	dimensionToSymbol[lastCreatedDimension] = symbol
+	symbolToDimension[symbol] = lastCreatedDimension
 	return lastCreatedDimension
 }
 
@@ -74,8 +89,6 @@ type Unit struct {
 	dimensions map[Dimension]int // Map for custom dimensions
 	value      float64
 }
-
-//blah
 
 // NewUnit creates a new variable of type Unit which has the value
 // specified by value and the dimensions specified by the
@@ -162,7 +175,7 @@ func (u Unit) String() string {
 	str := strconv.FormatFloat(u.value, 'e', -1, 64)
 	for dimension, power := range u.dimensions {
 		if power != 0 {
-			str += " " + dimensionStrings[dimension]
+			str += " " + dimensionToSymbol[dimension]
 			if power != 1 {
 				str += "^" + strconv.Itoa(power)
 			}

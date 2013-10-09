@@ -27,7 +27,7 @@ func (m Mass) Mass() Mass {
 	return m
 }
 
-// FromUnit converts the unit to a mass. Returns an error if there
+// From converts the unit to a mass. Returns an error if there
 // is a mismatch in dimension
 func (m *Mass) From(u Uniter) error {
 	if !DimensionsMatch(u, Kilogram) {
@@ -60,7 +60,7 @@ func (l Length) Length() Length {
 	return l
 }
 
-// FromUnit converts a uniter to a length. Returns an error if there
+// From converts a uniter to a length. Returns an error if there
 // is a mismatch in dimension
 func (l *Length) From(u Uniter) error {
 	if !DimensionsMatch(u, Meter) {
@@ -92,7 +92,7 @@ func (d Dimless) Dimless() Dimless {
 	return d
 }
 
-// FromUnit converts the unit to a dimless. Returns an error if there
+// From converts the unit to a dimless. Returns an error if there
 // is a mismatch in dimension
 func (d *Dimless) From(u *Unit) error {
 	if !DimensionsMatch(u, One) {

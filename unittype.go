@@ -161,7 +161,7 @@ type Unit struct {
 	value      float64
 }
 
-// NewUnit creates a new variable of type Unit which has the value
+// New creates a new variable of type Unit which has the value
 // specified by value and the dimensions specified by the
 // base units struct. The value is always in SI Units.
 //

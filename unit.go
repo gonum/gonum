@@ -19,7 +19,7 @@ const (
 
 // Mass converts the Mass to a unit
 func (m Mass) Unit() *Unit {
-	return NewUnit(float64(m), Dimensions{MassDim: 1})
+	return New(float64(m), Dimensions{MassDim: 1})
 }
 
 // Mass allows Mass to implement a Masser interface
@@ -52,7 +52,7 @@ const (
 
 // Unit converts the Length to a unit
 func (l Length) Unit() *Unit {
-	return NewUnit(float64(l), Dimensions{MassDim: 1})
+	return New(float64(l), Dimensions{MassDim: 1})
 }
 
 // Length allows length to implement a Lengther interface
@@ -84,7 +84,7 @@ const (
 
 // Unit converts the Dimless to a unit
 func (d Dimless) Unit() *Unit {
-	return NewUnit(float64(d), Dimensions{})
+	return New(float64(d), Dimensions{})
 }
 
 // Dimless allows Dimless to implement a Dimlesser interface

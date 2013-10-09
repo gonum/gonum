@@ -29,7 +29,7 @@ func (m Mass) Mass() Mass {
 
 // FromUnit converts the unit to a mass. Returns an error if there
 // is a mismatch in dimension
-func (m *Mass) FromUnit(u Uniter) error {
+func (m *Mass) From(u Uniter) error {
 	if !DimensionsMatch(u, Kilogram) {
 		(*m) = Mass(math.NaN())
 		return errors.New("Dimension mismatch")
@@ -62,7 +62,7 @@ func (l Length) Length() Length {
 
 // FromUnit converts a uniter to a length. Returns an error if there
 // is a mismatch in dimension
-func (l *Length) FromUnit(u Uniter) error {
+func (l *Length) From(u Uniter) error {
 	if !DimensionsMatch(u, Meter) {
 		(*l) = Length(math.NaN())
 		return errors.New("Dimension mismatch")
@@ -94,7 +94,7 @@ func (d Dimless) Dimless() Dimless {
 
 // FromUnit converts the unit to a dimless. Returns an error if there
 // is a mismatch in dimension
-func (d *Dimless) FromUnit(u *Unit) error {
+func (d *Dimless) From(u *Unit) error {
 	if !DimensionsMatch(u, One) {
 		(*d) = Dimless(math.NaN())
 		return errors.New("Dimension mismatch")

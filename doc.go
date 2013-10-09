@@ -78,11 +78,11 @@
 //		}
 //		func main(){
 //			v := WbcPerArea(15)
-//			fmt.Println(v.Unit())
+//			fmt.Println(v.Unit()) // prints: 1.5e+01 m^-2 wbc
 //		}
 // Please note that Unit cannot catch all errors related to dimensionality.
 // Different physical ideas are sometimes expressed with the same dimensions
-// and Unit is incapable of catcing these mismatches. For example, energy and
+// and Unit is incapable of catching these mismatches. For example, energy and
 // torque are both expressed as force times distance (Newton-meters in SI),
 // but it is wrong to say that a torque of 10 N-m is the same as 10 J, even
 // though the dimensions agree.

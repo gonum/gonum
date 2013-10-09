@@ -3,6 +3,7 @@ package unit
 import (
 	"errors"
 	"math"
+	"strconv"
 )
 
 // Represents a mass in kilograms
@@ -37,6 +38,10 @@ func (m *Mass) FromUnit(u Uniter) error {
 	return nil
 }
 
+func (m Mass) String() string {
+	return strconv.FormatFloat(float64(m), 'e', -1, 64) + " kg"
+}
+
 // Length represents a length in meters
 type Length float64
 
@@ -66,6 +71,10 @@ func (l *Length) FromUnit(u Uniter) error {
 	return nil
 }
 
+func (l Length) String() string {
+	return strconv.FormatFloat(float64(l), 'e', -1, 64) + " m"
+}
+
 // Dimless represents a dimensionless constant
 type Dimless float64
 
@@ -92,4 +101,8 @@ func (d *Dimless) FromUnit(u *Unit) error {
 	}
 	(*d) = Dimless(u.Unit().Value())
 	return nil
+}
+
+func (d Dimless) String() string {
+	return strconv.FormatFloat(float64(d), 'e', -1, 64)
 }

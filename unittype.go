@@ -94,6 +94,7 @@ func NewUnit(value float64, d Dimensions) *Unit {
 	for key, val := range d {
 		u.dimensions[key] = val
 	}
+	u.value = value
 	return u
 }
 
@@ -158,7 +159,7 @@ func (u *Unit) Value() float64 {
 }
 
 func (u Unit) String() string {
-	str := strconv.FormatFloat(u.value, 'e', 8, 64)
+	str := strconv.FormatFloat(u.value, 'e', -1, 64)
 	for dimension, power := range u.dimensions {
 		if power != 0 {
 			str += " " + dimensionStrings[dimension]

@@ -35,6 +35,8 @@ type Dimensions map[Dimension]int
 var lastCreatedDimension Dimension = lastPackageDimension
 var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
 
+//var dimensionStrings map[Dimension]string = make()
+
 // NewDimension returns a new dimension variable which will have a
 // unique representation across packages to prevent accidental overlap.
 // NewDimension should only be called for unit types that are orthogonal

@@ -66,15 +66,17 @@
 // used, however, to create the unit of 'Slide', because in this case slide
 // is just a measurement of area. Instead, a constant could be defined.
 //		const Slide unit.Area =  0.001875 // m^2
+//		var WhiteBloodCellDim unit.Dimension
 //		func init(){
-//			WhiteBloodCellDim := unit.NewDimension()
+//			WhiteBloodCellDim = unit.NewDimension()
 //		}
 //		type WbcPerArea float64
 //		func (w WbcPerArea) Unit() *Unit{
-//			return NewUnit(w, Dimensions{WhiteBloodCellDim: 1, LengthDim: -2})
+//			return unit.NewUnit(float64(w), unit.Dimensions{WhiteBloodCellDim: 1, unit.LengthDim: -2})
 //		}
 //		func main(){
-//			// Add in something about using Unit
+//			v := WbcPerArea(15)
+//			fmt.Println(v.Unit())
 //		}
 // Please note that Unit cannot catch all errors related to dimensionality.
 // Different physical ideas are sometimes expressed with the same dimensions

@@ -22,7 +22,7 @@ func (m Mass) Unit() *Unit {
 	return NewUnit(float64(m), Dimensions{MassDim: 1})
 }
 
-// Mass allows Mass to implement a masser interface
+// Mass allows Mass to implement a Masser interface
 func (m Mass) Mass() Mass {
 	return m
 }
@@ -55,7 +55,7 @@ func (l Length) Unit() *Unit {
 	return NewUnit(float64(l), Dimensions{MassDim: 1})
 }
 
-// So it can implement a lengther interface
+// So it can implement a Lengther interface
 func (l Length) Length() Length {
 	return l
 }

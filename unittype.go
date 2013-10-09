@@ -35,7 +35,7 @@ const (
 	MassDim
 	TemperatureDim
 	TimeDim
-	// Start of other SI Units
+	// Other common SI Dimensions
 	AngleDim             // e.g. radians
 	lastPackageDimension // Used in create dimension
 )

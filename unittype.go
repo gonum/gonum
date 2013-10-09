@@ -207,15 +207,5 @@ func (u Unit) String() string {
 			str += "^" + strconv.Itoa(s.pow)
 		}
 	}
-	/*
-		for dimension, power := range u.dimensions {
-			if power != 0 {
-				str += " " + dimensionToSymbol[dimension]
-				if power != 1 {
-					str += "^" + strconv.Itoa(power)
-				}
-			}
-		}
-	*/
 	return str
 }

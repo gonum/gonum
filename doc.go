@@ -48,16 +48,16 @@
 // when multiplying or dividing dimensional numbers. This package also
 // provides the "Uniter" interface which is satisfied by any type which can
 // be converted to a unit. New varibles of type Unit can be created with
-// the NewUnit function and the Dimensions map. For example, the code
-//		acc := NewUnit(9.81, Dimensions{LengthDim:1, TimeDim: -2})
+// the New function and the Dimensions map. For example, the code
+//		acc := New(9.81, Dimensions{LengthDim:1, TimeDim: -2})
 // creates a variable "acc" which has a value of 9.81 m/s^2. Methods of
 // unit can be used to modify this value, for example:
 // 		acc.Mul(1.0 * unit.Kilogram).Mul(1 * unit.Meter)
-// To convert the unit back into a typed float64 value, the FromUnit methods
-// of the dimensional types should be used. FromUnit will return an error if the
+// To convert the unit back into a typed float64 value, the From methods
+// of the dimensional types should be used. From will return an error if the
 // dimensions do not match.
 // 		var energy unit.Energy
-//		err := (*energy).FromUnit(acc)
+//		err := (*energy).From(acc)
 // Domain-specific problems may need custom dimensions, and for this purpose
 // NewDimension should be used to help avoid accidental overlap between
 // packages. For example, results from a blood test may be measured in
@@ -74,7 +74,7 @@
 //		}
 //		type WbcPerArea float64
 //		func (w WbcPerArea) Unit() *Unit{
-//			return unit.NewUnit(float64(w), unit.Dimensions{WhiteBloodCellDim: 1, unit.LengthDim: -2})
+//			return unit.New(float64(w), unit.Dimensions{WhiteBloodCellDim: 1, unit.LengthDim: -2})
 //		}
 //		func main(){
 //			v := WbcPerArea(15)

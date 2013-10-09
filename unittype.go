@@ -27,9 +27,9 @@ type Uniter interface {
 type Dimension int
 
 const (
-	reserved Dimension = iota
 	// SI Base Units
-	CurrentDim Dimension
+	reserved Dimension = iota
+	CurrentDim
 	LengthDim
 	LuminousIntensityDim
 	MassDim
@@ -41,7 +41,7 @@ const (
 )
 
 var lastCreatedDimension Dimension = lastPackageDimension
-var dimensionToSymbol map[Dimension]string = make(map[Dimension]string) // for printing
+var dimensionToSymbol map[Dimension]string = make(map[Dimension]string)
 var symbolToDimension map[string]Dimension = make(map[string]Dimension) // for guaranteeing there aren't two identical symbols
 
 // TODO: Should we actually reserve "common" SI unit symbols ("N", "J", etc.) so there isn't confusion

@@ -118,9 +118,6 @@ var symbolToDimension map[string]Dimension = map[string]Dimension{
 // TODO: Should we actually reserve "common" SI unit symbols ("N", "J", etc.) so there isn't confusion
 // TODO: If we have a fancier ParseUnit, maybe the 'reserved' symbols should be a different map
 // 		map[string]string which says how they go?
-func init() {
-
-}
 
 // Dimensions represent the dimensionality of the unit in powers
 // of that dimension. If a key is not present, the power of that

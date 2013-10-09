@@ -16,14 +16,14 @@ type Uniter interface {
 // orthogonal dimension. If a new dimension is desired for a
 // domain-specific problem, NewDimension should be used. Integers
 // should never be cast as type dimension
-//		// Good: Create a package constant with an init function
-//		var MyDimension unit.Dimension
-//		init(){
-//				MyDimension = NewDimension("my")
-//		}
-//		main(){
-//			var := MyDimension(28.2)
-//      }
+//	// Good: Create a package constant with an init function
+//	var MyDimension unit.Dimension
+//	init(){
+//		MyDimension = NewDimension("my")
+//	}
+//	main(){
+//		var := MyDimension(28.2)
+//	}
 type Dimension int
 
 const (

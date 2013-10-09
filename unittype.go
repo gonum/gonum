@@ -264,7 +264,7 @@ func (u unitPrinters) Swap(i, j int) {
 // symbol^power is appended, if the power is one, just the symbol is appended
 // and if the power is zero, nothing is appended. Dimensions are appended
 // in order by symbol name.
-func (u Unit) String() string {
+func (u *Unit) String() string {
 	str := strconv.FormatFloat(u.value, 'e', -1, 64)
 	// Map iterates randomly, but print should be in a fixed order. Can't use
 	// dimension number, because for user-defined dimension that number may

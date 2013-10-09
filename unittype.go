@@ -167,7 +167,7 @@ type Unit struct {
 //
 // Example: To create an acceleration of 3 m/s^2, one could do
 // myvar := CreateUnit(3.0, &Dimensions{unit.LengthDim: 1, unit.TimeDim: -2})
-func NewUnit(value float64, d Dimensions) *Unit {
+func New(value float64, d Dimensions) *Unit {
 	u := &Unit{
 		dimensions: make(map[Dimension]int),
 	}

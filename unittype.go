@@ -14,12 +14,22 @@ type Uniter interface {
 
 // Dimension is a type representing an SI base dimension or other
 // orthogonal dimension. If a new dimension is desired for a
-// domain-specific problem, NewDimension should be called.
+// domain-specific problem, NewDimension should be used. Integers
+// should never be cast as type dimension
+//		// Good: Create a package constant with an init function
+//		var MyDimension unit.Dimension
+//		init(){
+//				MyDimension = NewDimension("my")
+//		}
+//		main(){
+//			var := MyDimension(28.2)
+//      }
 type Dimension int
 
 const (
+	reserved Dimension = iota
 	// SI Base Units
-	CurrentDim Dimension = iota
+	CurrentDim Dimension
 	LengthDim
 	LuminousIntensityDim
 	MassDim
@@ -30,12 +40,13 @@ const (
 	lastPackageDimension // Used in create dimension
 )
 
-//TODO: Should there be some number reserved? We don't want users ever using integer literals
 var lastCreatedDimension Dimension = lastPackageDimension
+var dimensionToSymbol map[Dimension]string = make(map[Dimension]string) // for printing
+var symbolToDimension map[string]Dimension = make(map[string]Dimension) // for guaranteeing there aren't two identical symbols
 
-var dimensionToSymbol map[Dimension]string = make(map[Dimension]string)
-var symbolToDimension map[string]Dimension = make(map[string]Dimension)
-
+// TODO: Should we actually reserve "common" SI unit symbols ("N", "J", etc.) so there isn't confusion
+// TODO: If we have a fancier ParseUnit, maybe the 'reserved' symbols should be a different map
+// 		map[string]string which says how they go?
 func init() {
 	dimensionToSymbol[CurrentDim] = "A"
 	symbolToDimension["A"] = CurrentDim
@@ -51,6 +62,63 @@ func init() {
 	symbolToDimension["s"] = TimeDim
 	dimensionToSymbol[AngleDim] = "rad"
 	symbolToDimension["rad"] = AngleDim
+
+	// Reserve common SI symbols
+	// base units
+	symbolToDimension["mol"] = reserved
+	// prefixes
+	symbolToDimension["Y"] = reserved
+	symbolToDimension["Z"] = reserved
+	symbolToDimension["E"] = reserved
+	symbolToDimension["P"] = reserved
+	symbolToDimension["T"] = reserved
+	symbolToDimension["G"] = reserved
+	symbolToDimension["M"] = reserved
+	symbolToDimension["k"] = reserved
+	symbolToDimension["h"] = reserved
+	symbolToDimension["da"] = reserved
+	symbolToDimension["d"] = reserved
+	symbolToDimension["c"] = reserved
+	symbolToDimension["m"] = reserved
+	symbolToDimension["μ"] = reserved
+	symbolToDimension["n"] = reserved
+	symbolToDimension["p"] = reserved
+	symbolToDimension["f"] = reserved
+	symbolToDimension["a"] = reserved
+	symbolToDimension["z"] = reserved
+	symbolToDimension["y"] = reserved
+	// SI Derived units with special symbols
+	symbolToDimension["sr"] = reserved
+	symbolToDimension["F"] = reserved
+	symbolToDimension["C"] = reserved
+	symbolToDimension["S"] = reserved
+	symbolToDimension["H"] = reserved
+	symbolToDimension["V"] = reserved
+	symbolToDimension["Ω"] = reserved
+	symbolToDimension["J"] = reserved
+	symbolToDimension["N"] = reserved
+	symbolToDimension["Hz"] = reserved
+	symbolToDimension["lx"] = reserved
+	symbolToDimension["lm"] = reserved
+	symbolToDimension["Wb"] = reserved
+	symbolToDimension["T"] = reserved
+	symbolToDimension["W"] = reserved
+	symbolToDimension["Pa"] = reserved
+	symbolToDimension["Bq"] = reserved
+	symbolToDimension["Gy"] = reserved
+	symbolToDimension["Sv"] = reserved
+	symbolToDimension["kat"] = reserved
+	// Units in use with SI
+	symbolToDimension["ha"] = reserved
+	symbolToDimension["L"] = reserved
+	symbolToDimension["l"] = reserved
+	// Units in Use Temporarily with SI
+	symbolToDimension["bar"] = reserved
+	symbolToDimension["b"] = reserved
+	symbolToDimension["Ci"] = reserved
+	symbolToDimension["R"] = reserved
+	symbolToDimension["rd"] = reserved
+	symbolToDimension["rem"] = reserved
 }
 
 // Dimensions represent the dimensionality of the unit in powers
@@ -62,14 +130,17 @@ var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition fo
 
 // NewDimension returns a new dimension variable which will have a
 // unique representation across packages to prevent accidental overlap.
-// NewDimension should only be called for unit types that are orthogonal
-// to the base dimensions defined in this package. For example, one unit
-// that comes up in blood work is "White blood cells per microscope slide".
-// NewDimension is appropriate for "White blood cells", as they are not
-// representable in SI base units. However, NewDimension is not appropriate
-// for "Slide", as slide is really a unit of area. Slide should instead be
-// defined as a constant of type unit.Area
-//  Expecting to be used only during initialization, it panics if the mapping between types and names is not a bijection.
+// The input string represents a symbol name which will be used for printing
+// Unit types. This symbol may not overlap with any of the SI base units
+// or other symbols of common use in SI ("kg", "J", "μ", etc.). A list of
+// such symbols can be found at http://lamar.colostate.edu/~hillger/basic.htm or
+// by consulting the package source. Furthermore, the provided symbol is also
+// forbidden from overlapping with other packages calling NewDimension. NewDimension
+// is expecting to be used only during initialization, and as such it will panic
+// if the symbol matching an existing symbol
+// NewDimension should only be called for unit types that are actually orthogonal
+// to the base dimensions defined in this package. Please see the package-level
+// documentation for further explanation
 func NewDimension(symbol string) Dimension {
 	newUnitMutex.Lock()
 	defer newUnitMutex.Unlock()
@@ -85,7 +156,8 @@ func NewDimension(symbol string) Dimension {
 
 // Unit is a type a value with generic SI units. Most useful for
 // translating between dimensions, for example, by multiplying
-// an acceleration with a mass to get a force
+// an acceleration with a mass to get a force. Please see the
+// package documentation for further explanation.
 type Unit struct {
 	dimensions map[Dimension]int // Map for custom dimensions
 	value      float64
@@ -96,12 +168,8 @@ type Unit struct {
 // base units struct. The value is always in SI Units.
 //
 // Example: To create an acceleration of 3 m/s^2, one could do
-// myvar := CreateUnit(3.0, &Dimensions{length: 1, time: -2})
+// myvar := CreateUnit(3.0, &Dimensions{unit.LengthDim: 1, unit.TimeDim: -2})
 func NewUnit(value float64, d Dimensions) *Unit {
-
-	// TODO: Find most efficient way of doing this
-	// I think copy is necessary in case the input
-	// dimension map is changed later
 	u := &Unit{
 		dimensions: make(map[Dimension]int),
 	}
@@ -138,13 +206,13 @@ func (u *Unit) Add(uniter Uniter) *Unit {
 	return u
 }
 
-// Unit allows unit to satisfy the uniter interface
+// Unit implements the Uniter interface
 func (u *Unit) Unit() *Unit {
 	return u
 }
 
-// Mul multiply the receiver by the unit changing the dimensions
-// of the receiver as appropriate
+// Mul multiply the receiver by the input changing the dimensions
+// of the receiver as appropriate. The input is not changed
 func (u *Unit) Mul(uniter Uniter) *Unit {
 	a := uniter.Unit()
 	for key, val := range a.dimensions {
@@ -166,8 +234,9 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 }
 
 // Value return the raw value of the unit as a float64. Use of this
-// method is not recommended, instead it is recommended to use a
-// FromUnit type of a specific dimension
+// method is, in general, not recommended, though it can be useful
+// for printing. Instead, the FromUnit type of a specific
+// dimension should be used to guarantee dimension consistency
 func (u *Unit) Value() float64 {
 	return u.value
 }
@@ -191,9 +260,17 @@ func (u unitPrinters) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
 }
 
+// String makes Unit satisfy the stringer interface. The unit is printed
+// using strconv.FormatFloat(unit.value, 'e', -1, 64), with dimensions
+// appended. If the power if the dimension is not zero or one,
+// symbol^power is appended, if the power is one, just the symbol is appended
+// and if the power is zero, nothing is appended. Dimensions are appended
+// in order by symbol name.
 func (u Unit) String() string {
 	str := strconv.FormatFloat(u.value, 'e', -1, 64)
-	// Map iterates randomly, but we should output the symbols in a logical order
+	// Map iterates randomly, but print should be in a fixed order. Can't use
+	// dimension number, because for user-defined dimension that number may
+	// not be fixed from run to run.
 	data := make(unitPrinters, 0, 10)
 	for dimension, power := range u.dimensions {
 		if power != 0 {

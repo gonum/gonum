@@ -1,8 +1,8 @@
 package unit
 
 import (
+	"fmt"
 	"sort"
-	"strconv"
 )
 
 // Uniter is an interface representing a type that can be converted
@@ -24,6 +24,17 @@ type Uniter interface {
 //		var := MyDimension(28.2)
 //	}
 type Dimension int
+
+func (d Dimension) String() string {
+	switch {
+	case d == reserved:
+		return "reserved"
+	case d < Dimension(len(symbols)):
+		return symbols[d]
+	default:
+		panic("unit: illegal dimensiond")
+	}
+}
 
 const (
 	// SI Base Units
@@ -236,48 +247,69 @@ func (u *Unit) Value() float64 {
 	return u.value
 }
 
-type symbolString struct {
-	symbol string
-	pow    int
+type atom struct {
+	Dimension
+	pow int
 }
 
-type unitPrinters []symbolString
+type unitPrinters []atom
 
 func (u unitPrinters) Len() int {
 	return len(u)
 }
 
 func (u unitPrinters) Less(i, j int) bool {
-	return u[i].symbol < u[j].symbol
+	return (u[i].pow > 0 && u[j].pow < 0) || u[i].String() < u[j].String()
 }
 
 func (u unitPrinters) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
 }
 
-// String makes Unit satisfy the stringer interface. The unit is printed
-// using strconv.FormatFloat(unit.value, 'e', -1, 64), with dimensions
-// appended. If the power if the dimension is not zero or one,
+// Format makes Unit satisfy the fmt.Formatter interface. The unit is formatted
+// with dimensions appended. If the power if the dimension is not zero or one,
 // symbol^power is appended, if the power is one, just the symbol is appended
 // and if the power is zero, nothing is appended. Dimensions are appended
-// in order by symbol name.
-func (u *Unit) String() string {
-	str := strconv.FormatFloat(u.value, 'e', -1, 64)
+// in order by symbol name with positive powers ahead of negative powers.
+func (u *Unit) Format(fs fmt.State, c rune) {
+	if u == nil {
+		fmt.Fprint(fs, "<nil>")
+	}
+	switch c {
+	case 'v':
+		if fs.Flag('#') {
+			fmt.Fprintf(fs, "&%#v", *u)
+			return
+		}
+		fallthrough
+	case 'e', 'E', 'f', 'F', 'g', 'G':
+		p, pOk := fs.Precision()
+		if !pOk {
+			p = -1
+		}
+		w, wOk := fs.Width()
+		if !wOk {
+			w = -1
+		}
+		fmt.Fprintf(fs, "%*.*"+string(c), w, p, u.value)
+	default:
+		fmt.Fprintf(fs, "%%!%c(*Unit=%g)", c, u)
+		return
+	}
 	// Map iterates randomly, but print should be in a fixed order. Can't use
 	// dimension number, because for user-defined dimension that number may
 	// not be fixed from run to run.
 	data := make(unitPrinters, 0, len(u.dimensions))
 	for dimension, power := range u.dimensions {
 		if power != 0 {
-			data = append(data, symbolString{symbols[dimension], power})
+			data = append(data, atom{dimension, power})
 		}
 	}
 	sort.Sort(data)
-	for _, s := range data {
-		str += " " + s.symbol
-		if s.pow != 1 {
-			str += "^" + strconv.Itoa(s.pow)
+	for _, a := range data {
+		fmt.Fprintf(fs, " %s", a.Dimension)
+		if a.pow != 1 {
+			fmt.Fprintf(fs, "^%d", a.pow)
 		}
 	}
-	return str
 }

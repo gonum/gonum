@@ -1,6 +1,10 @@
 package unit
 
-import "testing"
+import (
+	"fmt"
+	"math"
+	"testing"
+)
 
 type UnitStructer interface {
 	UnitStruct() *UnitStruct
@@ -15,6 +19,39 @@ type UnitStruct struct {
 	time        int
 	chemamt     int // For mol
 	value       float64
+}
+
+var formatTests = []struct {
+	unit   Uniter
+	format string
+	expect string
+}{
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), "%f", "9.81 kg s^-2"},
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), "%1.f", "10 kg s^-2"},
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), "%.1f", "9.8 kg s^-2"},
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2, LengthDim: 0}), "%f", "9.81 kg s^-2"},
+	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%e", "6.62606957e-34 kg^2 s^-1"},
+	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%.3e", "6.626e-34 kg^2 s^-1"},
+	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%#v", "&unit.Unit{dimensions:map[unit.Dimension]int{4:2, 6:-1}, value:6.62606957e-34}"},
+	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%v", "6.62606957e-34 kg^2 s^-1"},
+	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%s", "%!s(*Unit=6.62606957e-34 kg^2 s^-1)"},
+	{Dimless(math.E), "%v", "2.718281828459045"},
+	{Dimless(math.E), "%#v", "unit.Dimless(2.718281828459045)"},
+	{Dimless(math.E), "%s", "%!s(unit.Dimless=2.718281828459045)"},
+	{Mass(1), "%v", "1 kg"},
+	{Mass(1), "%#v", "unit.Mass(1)"},
+	{Mass(1), "%s", "%!s(unit.Mass=1 kg)"},
+	{Length(1.61619926e-35), "%v", "1.61619926e-35 m"},
+	{Length(1.61619926e-35), "%#v", "unit.Length(1.61619926e-35)"},
+	{Length(1.61619926e-35), "%s", "%!s(unit.Length=1.61619926e-35 m)"},
+}
+
+func TestFormat(t *testing.T) {
+	for _, ts := range formatTests {
+		if r := fmt.Sprintf(ts.format, ts.unit); r != ts.expect {
+			t.Errorf("Format %q: got: %q expected: %q", ts.format, r, ts.expect)
+		}
+	}
 }
 
 // Check if the dimensions of two units are the same

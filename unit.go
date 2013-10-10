@@ -2,8 +2,8 @@ package unit
 
 import (
 	"errors"
+	"fmt"
 	"math"
-	"strconv"
 )
 
 // Represents a mass in kilograms
@@ -38,8 +38,29 @@ func (m *Mass) From(u Uniter) error {
 	return nil
 }
 
-func (m Mass) String() string {
-	return strconv.FormatFloat(float64(m), 'e', -1, 64) + " kg"
+func (m Mass) Format(fs fmt.State, c rune) {
+	switch c {
+	case 'v':
+		if fs.Flag('#') {
+			fmt.Fprintf(fs, "%T(%v)", m, float64(m))
+			return
+		}
+		fallthrough
+	case 'e', 'E', 'f', 'F', 'g', 'G':
+		p, pOk := fs.Precision()
+		if !pOk {
+			p = -1
+		}
+		w, wOk := fs.Width()
+		if !wOk {
+			w = -1
+		}
+		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(m))
+		fmt.Fprint(fs, " kg")
+	default:
+		fmt.Fprintf(fs, "%%!%c(%T=%g kg)", c, m, float64(m))
+		return
+	}
 }
 
 // Length represents a length in meters
@@ -71,8 +92,29 @@ func (l *Length) From(u Uniter) error {
 	return nil
 }
 
-func (l Length) String() string {
-	return strconv.FormatFloat(float64(l), 'e', -1, 64) + " m"
+func (l Length) Format(fs fmt.State, c rune) {
+	switch c {
+	case 'v':
+		if fs.Flag('#') {
+			fmt.Fprintf(fs, "%T(%v)", l, float64(l))
+			return
+		}
+		fallthrough
+	case 'e', 'E', 'f', 'F', 'g', 'G':
+		p, pOk := fs.Precision()
+		if !pOk {
+			p = -1
+		}
+		w, wOk := fs.Width()
+		if !wOk {
+			w = -1
+		}
+		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(l))
+		fmt.Fprint(fs, " m")
+	default:
+		fmt.Fprintf(fs, "%%!%c(%T=%g m)", c, l, float64(l))
+		return
+	}
 }
 
 // Dimless represents a dimensionless constant
@@ -103,6 +145,26 @@ func (d *Dimless) From(u *Unit) error {
 	return nil
 }
 
-func (d Dimless) String() string {
-	return strconv.FormatFloat(float64(d), 'e', -1, 64)
+func (d Dimless) Format(fs fmt.State, c rune) {
+	switch c {
+	case 'v':
+		if fs.Flag('#') {
+			fmt.Fprintf(fs, "%T(%v)", d, float64(d))
+			return
+		}
+		fallthrough
+	case 'e', 'E', 'f', 'F', 'g', 'G':
+		p, pOk := fs.Precision()
+		if !pOk {
+			p = -1
+		}
+		w, wOk := fs.Width()
+		if !wOk {
+			w = -1
+		}
+		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(d))
+	default:
+		fmt.Fprintf(fs, "%%!%c(%T=%g)", c, d, float64(d))
+		return
+	}
 }

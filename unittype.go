@@ -266,7 +266,7 @@ func (u *Unit) String() string {
 	// Map iterates randomly, but print should be in a fixed order. Can't use
 	// dimension number, because for user-defined dimension that number may
 	// not be fixed from run to run.
-	data := make(unitPrinters, 0, 10)
+	data := make(unitPrinters, 0, len(u.dimensions))
 	for dimension, power := range u.dimensions {
 		if power != 0 {
 			data = append(data, symbolString{symbols[dimension], power})

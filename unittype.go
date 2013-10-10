@@ -3,7 +3,6 @@ package unit
 import (
 	"sort"
 	"strconv"
-	"sync"
 )
 
 // Uniter is an interface representing a type that can be converted
@@ -36,84 +35,86 @@ const (
 	TemperatureDim
 	TimeDim
 	// Other common SI Dimensions
-	AngleDim             // e.g. radians
-	lastPackageDimension // Used in create dimension
+	AngleDim // e.g. radians
 )
 
-var lastCreatedDimension Dimension = lastPackageDimension
-var dimensionToSymbol map[Dimension]string = map[Dimension]string{
-	CurrentDim:           "A",
-	LengthDim:            "m",
-	LuminousIntensityDim: "cd",
-	MassDim:              "kg",
-	TemperatureDim:       "K",
-	TimeDim:              "s",
-	AngleDim:             "rad",
-}
-var symbolToDimension map[string]Dimension = map[string]Dimension{
-	"A":   CurrentDim,
-	"m":   LengthDim,
-	"cd":  LuminousIntensityDim,
-	"kg":  MassDim,
-	"K":   TemperatureDim,
-	"s":   TimeDim,
-	"rad": AngleDim,
+var (
+	symbols = []string{
+		CurrentDim:           "A",
+		LengthDim:            "m",
+		LuminousIntensityDim: "cd",
+		MassDim:              "kg",
+		TemperatureDim:       "K",
+		TimeDim:              "s",
+		AngleDim:             "rad",
+	}
 
-	// Reserve common SI symbols
-	// base units
-	"mol": reserved,
-	// prefixes
-	"Y":  reserved,
-	"Z":  reserved,
-	"E":  reserved,
-	"P":  reserved,
-	"T":  reserved,
-	"G":  reserved,
-	"M":  reserved,
-	"k":  reserved,
-	"h":  reserved,
-	"da": reserved,
-	"d":  reserved,
-	"c":  reserved,
-	"μ":  reserved,
-	"n":  reserved,
-	"p":  reserved,
-	"f":  reserved,
-	"a":  reserved,
-	"z":  reserved,
-	"y":  reserved,
-	// SI Derived units with special symbols
-	"sr":  reserved,
-	"F":   reserved,
-	"C":   reserved,
-	"S":   reserved,
-	"H":   reserved,
-	"V":   reserved,
-	"Ω":   reserved,
-	"J":   reserved,
-	"N":   reserved,
-	"Hz":  reserved,
-	"lx":  reserved,
-	"lm":  reserved,
-	"Wb":  reserved,
-	"W":   reserved,
-	"Pa":  reserved,
-	"Bq":  reserved,
-	"Gy":  reserved,
-	"Sv":  reserved,
-	"kat": reserved,
-	// Units in use with SI
-	"ha": reserved,
-	"L":  reserved,
-	"l":  reserved,
-	// Units in Use Temporarily with SI
-	"bar": reserved,
-	"b":   reserved,
-	"Ci":  reserved,
-	"R":   reserved,
-	"rd":  reserved,
-	"rem": reserved,
-} // for guaranteeing there aren't two identical symbols
+	// for guaranteeing there aren't two identical symbols
+	dimensions = map[string]Dimension{
+		"A":   CurrentDim,
+		"m":   LengthDim,
+		"cd":  LuminousIntensityDim,
+		"kg":  MassDim,
+		"K":   TemperatureDim,
+		"s":   TimeDim,
+		"rad": AngleDim,
+
+		// Reserve common SI symbols
+		// base units
+		"mol": reserved,
+		// prefixes
+		"Y":  reserved,
+		"Z":  reserved,
+		"E":  reserved,
+		"P":  reserved,
+		"T":  reserved,
+		"G":  reserved,
+		"M":  reserved,
+		"k":  reserved,
+		"h":  reserved,
+		"da": reserved,
+		"d":  reserved,
+		"c":  reserved,
+		"μ":  reserved,
+		"n":  reserved,
+		"p":  reserved,
+		"f":  reserved,
+		"a":  reserved,
+		"z":  reserved,
+		"y":  reserved,
+		// SI Derived units with special symbols
+		"sr":  reserved,
+		"F":   reserved,
+		"C":   reserved,
+		"S":   reserved,
+		"H":   reserved,
+		"V":   reserved,
+		"Ω":   reserved,
+		"J":   reserved,
+		"N":   reserved,
+		"Hz":  reserved,
+		"lx":  reserved,
+		"lm":  reserved,
+		"Wb":  reserved,
+		"W":   reserved,
+		"Pa":  reserved,
+		"Bq":  reserved,
+		"Gy":  reserved,
+		"Sv":  reserved,
+		"kat": reserved,
+		// Units in use with SI
+		"ha": reserved,
+		"L":  reserved,
+		"l":  reserved,
+		// Units in Use Temporarily with SI
+		"bar": reserved,
+		"b":   reserved,
+		"Ci":  reserved,
+		"R":   reserved,
+		"rd":  reserved,
+		"rem": reserved,
+	}
+)
 
 // TODO: Should we actually reserve "common" SI unit symbols ("N", "J", etc.) so there isn't confusion
 // TODO: If we have a fancier ParseUnit, maybe the 'reserved' symbols should be a different map
@@ -123,8 +124,6 @@ var symbolToDimension map[string]Dimension = map[string]Dimension{
 // of that dimension. If a key is not present, the power of that
 // dimension is zero. Dimensions is used in conjuction with NewUnit
 type Dimensions map[Dimension]int
-
-var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition for dimension
 
 // NewDimension returns a new dimension variable which will have a
 // unique representation across packages to prevent accidental overlap.
@@ -138,18 +137,16 @@ var newUnitMutex *sync.Mutex = &sync.Mutex{} // so there is no race condition fo
 // if the symbol matching an existing symbol
 // NewDimension should only be called for unit types that are actually orthogonal
 // to the base dimensions defined in this package. Please see the package-level
-// documentation for further explanation
+// documentation for further explanation. Calls to NewDimension are not thread safe.
 func NewDimension(symbol string) Dimension {
-	newUnitMutex.Lock()
-	defer newUnitMutex.Unlock()
-	lastCreatedDimension++
-	_, ok := symbolToDimension[symbol]
+	_, ok := dimensions[symbol]
 	if ok {
 		panic("unit: dimension string " + symbol + " already used")
 	}
-	dimensionToSymbol[lastCreatedDimension] = symbol
-	symbolToDimension[symbol] = lastCreatedDimension
-	return lastCreatedDimension
+	symbols = append(symbols, symbol)
+	d := Dimension(len(symbols))
+	dimensions[symbol] = d
+	return d
 }
 
 // Unit is a type a value with generic SI units. Most useful for
@@ -272,7 +269,7 @@ func (u *Unit) String() string {
 	data := make(unitPrinters, 0, 10)
 	for dimension, power := range u.dimensions {
 		if power != 0 {
-			data = append(data, symbolString{dimensionToSymbol[dimension], power})
+			data = append(data, symbolString{symbols[dimension], power})
 		}
 	}
 	sort.Sort(data)

@@ -198,7 +198,7 @@ func DimensionsMatch(a, b Uniter) bool {
 func (u *Unit) Add(uniter Uniter) *Unit {
 	a := uniter.Unit()
 	if !DimensionsMatch(u, a) {
-		panic("Attempted to add the values of two units whose dimensions do not match.")
+		panic("unit: mismatched dimensions in addition")
 	}
 	u.value += a.value
 	return u

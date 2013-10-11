@@ -197,7 +197,7 @@ func (u unitPrinters) Swap(i, j int) {
 func NewDimension(symbol string) Dimension {
 	_, ok := dimensions[symbol]
 	if ok {
-		panic("unit: dimension string " + symbol + " already used")
+		panic("unit: dimension string \"" + symbol + "\" already used")
 	}
 	symbols = append(symbols, symbol)
 	d := Dimension(len(symbols))

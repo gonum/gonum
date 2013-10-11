@@ -1,6 +1,7 @@
 package unit
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 )
@@ -136,6 +137,50 @@ var (
 // dimension is zero. Dimensions is used in conjuction with New.
 type Dimensions map[Dimension]int
 
+func (d Dimensions) String() string {
+	// Map iterates randomly, but print should be in a fixed order. Can't use
+	// dimension number, because for user-defined dimension that number may
+	// not be fixed from run to run.
+	atoms := make(unitPrinters, 0, len(d))
+	for dimension, power := range d {
+		if power != 0 {
+			atoms = append(atoms, atom{dimension, power})
+		}
+	}
+	sort.Sort(atoms)
+	var b bytes.Buffer
+	for i, a := range atoms {
+		if i > 0 {
+			b.WriteByte(' ')
+		}
+		fmt.Fprintf(&b, "%s", a.Dimension)
+		if a.pow != 1 {
+			fmt.Fprintf(&b, "^%d", a.pow)
+		}
+	}
+
+	return b.String()
+}
+
+type atom struct {
+	Dimension
+	pow int
+}
+
+type unitPrinters []atom
+
+func (u unitPrinters) Len() int {
+	return len(u)
+}
+
+func (u unitPrinters) Less(i, j int) bool {
+	return (u[i].pow > 0 && u[j].pow < 0) || u[i].String() < u[j].String()
+}
+
+func (u unitPrinters) Swap(i, j int) {
+	u[i], u[j] = u[j], u[i]
+}
+
 // NewDimension returns a new dimension variable which will have a
 // unique representation across packages to prevent accidental overlap.
 // The input string represents a symbol name which will be used for printing
@@ -165,7 +210,8 @@ func NewDimension(symbol string) Dimension {
 // an acceleration with a mass to get a force. Please see the
 // package documentation for further explanation.
 type Unit struct {
-	dimensions map[Dimension]int // Map for custom dimensions
+	dimensions Dimensions // Map for custom dimensions
+	formatted  string
 	value      float64
 }
 
@@ -178,11 +224,11 @@ type Unit struct {
 func New(value float64, d Dimensions) *Unit {
 	u := &Unit{
 		dimensions: make(map[Dimension]int),
+		value:      value,
 	}
 	for key, val := range d {
 		u.dimensions[key] = val
 	}
-	u.value = value
 	return u
 }
 
@@ -224,6 +270,7 @@ func (u *Unit) Mul(uniter Uniter) *Unit {
 	for key, val := range a.dimensions {
 		u.dimensions[key] += val
 	}
+	u.formatted = ""
 	u.value *= a.value
 	return u
 }
@@ -236,6 +283,7 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 	for key, val := range a.dimensions {
 		u.dimensions[key] -= val
 	}
+	u.formatted = ""
 	return u
 }
 
@@ -245,25 +293,6 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 // should be used to guarantee dimension consistency.
 func (u *Unit) Value() float64 {
 	return u.value
-}
-
-type atom struct {
-	Dimension
-	pow int
-}
-
-type unitPrinters []atom
-
-func (u unitPrinters) Len() int {
-	return len(u)
-}
-
-func (u unitPrinters) Less(i, j int) bool {
-	return (u[i].pow > 0 && u[j].pow < 0) || u[i].String() < u[j].String()
-}
-
-func (u unitPrinters) Swap(i, j int) {
-	u[i], u[j] = u[j], u[i]
 }
 
 // Format makes Unit satisfy the fmt.Formatter interface. The unit is formatted
@@ -296,20 +325,8 @@ func (u *Unit) Format(fs fmt.State, c rune) {
 		fmt.Fprintf(fs, "%%!%c(*Unit=%g)", c, u)
 		return
 	}
-	// Map iterates randomly, but print should be in a fixed order. Can't use
-	// dimension number, because for user-defined dimension that number may
-	// not be fixed from run to run.
-	data := make(unitPrinters, 0, len(u.dimensions))
-	for dimension, power := range u.dimensions {
-		if power != 0 {
-			data = append(data, atom{dimension, power})
-		}
+	if u.formatted == "" && len(u.dimensions) > 0 {
+		u.formatted = u.dimensions.String()
 	}
-	sort.Sort(data)
-	for _, a := range data {
-		fmt.Fprintf(fs, " %s", a.Dimension)
-		if a.pow != 1 {
-			fmt.Fprintf(fs, "^%d", a.pow)
-		}
-	}
+	fmt.Fprintf(fs, " %s", u.formatted)
 }

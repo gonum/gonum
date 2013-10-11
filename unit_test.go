@@ -6,21 +6,6 @@ import (
 	"testing"
 )
 
-type UnitStructer interface {
-	UnitStruct() *UnitStruct
-}
-
-type UnitStruct struct {
-	current     int
-	length      int
-	luminosity  int
-	mass        int
-	temperature int
-	time        int
-	chemamt     int // For mol
-	value       float64
-}
-
 var formatTests = []struct {
 	unit   Uniter
 	format string
@@ -52,6 +37,46 @@ func TestFormat(t *testing.T) {
 			t.Errorf("Format %q: got: %q expected: %q", ts.format, r, ts.expect)
 		}
 	}
+}
+
+var initializationTests = []struct {
+	unit     *Unit
+	expValue float64
+	expMap   map[Dimension]int
+}{
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), 9.81, Dimensions{MassDim: 1, TimeDim: -2}},
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2, LengthDim: 0, CurrentDim: 0}), 9.81, Dimensions{MassDim: 1, TimeDim: -2}},
+}
+
+func TestInitialization(t *testing.T) {
+	for _, ts := range initializationTests {
+		if ts.expValue != ts.unit.value {
+			t.Errorf("Value wrong on initialization: got: %v expected: %v", ts.unit.value, ts.expValue)
+		}
+		if len(ts.expMap) != len(ts.unit.dimensions) {
+			t.Errorf("Map mismatch: got: %#v expected: %#v", ts.unit.dimensions, ts.expMap)
+		}
+		for key, val := range ts.expMap {
+			if ts.unit.dimensions[key] != val {
+				t.Errorf("Map mismatch: got: %#v expected: %#v", ts.unit.dimensions, ts.expMap)
+			}
+		}
+	}
+}
+
+type UnitStructer interface {
+	UnitStruct() *UnitStruct
+}
+
+type UnitStruct struct {
+	current     int
+	length      int
+	luminosity  int
+	mass        int
+	temperature int
+	time        int
+	chemamt     int // For mol
+	value       float64
 }
 
 // Check if the dimensions of two units are the same

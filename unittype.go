@@ -227,7 +227,9 @@ func New(value float64, d Dimensions) *Unit {
 		value:      value,
 	}
 	for key, val := range d {
-		u.dimensions[key] = val
+		if val != 0 {
+			u.dimensions[key] = val
+		}
 	}
 	return u
 }

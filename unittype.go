@@ -269,7 +269,7 @@ func (u *Unit) Mul(uniter Uniter) *Unit {
 	a := uniter.Unit()
 	for key, val := range a.dimensions {
 		if u.dimensions[key] == -val {
-			delet(u.dimensions, key)
+			delete(u.dimensions, key)
 		} else {
 			u.dimensions[key] += val
 		}

@@ -268,7 +268,11 @@ func (u *Unit) Unit() *Unit {
 func (u *Unit) Mul(uniter Uniter) *Unit {
 	a := uniter.Unit()
 	for key, val := range a.dimensions {
-		u.dimensions[key] += val
+		if u.dimensions[key] == -val {
+			delet(u.dimensions, key)
+		} else {
+			u.dimensions[key] += val
+		}
 	}
 	u.formatted = ""
 	u.value *= a.value
@@ -281,7 +285,11 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 	a := uniter.Unit()
 	u.value /= a.value
 	for key, val := range a.dimensions {
-		u.dimensions[key] -= val
+		if u.dimensions[key] == val {
+			delete(u.dimensions, key)
+		} else {
+			u.dimensions[key] -= val
+		}
 	}
 	u.formatted = ""
 	return u

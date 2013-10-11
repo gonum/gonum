@@ -32,7 +32,7 @@ func (d Dimension) String() string {
 	case d < Dimension(len(symbols)):
 		return symbols[d]
 	default:
-		panic("unit: illegal dimensiond")
+		panic("unit: illegal dimension")
 	}
 }
 
@@ -133,7 +133,7 @@ var (
 
 // Dimensions represent the dimensionality of the unit in powers
 // of that dimension. If a key is not present, the power of that
-// dimension is zero. Dimensions is used in conjuction with NewUnit
+// dimension is zero. Dimensions is used in conjuction with New.
 type Dimensions map[Dimension]int
 
 // NewDimension returns a new dimension variable which will have a
@@ -186,7 +186,7 @@ func New(value float64, d Dimensions) *Unit {
 	return u
 }
 
-// DimensionsMatch checks if the dimensions of two Uniters are the same
+// DimensionsMatch checks if the dimensions of two Uniters are the same.
 func DimensionsMatch(a, b Uniter) bool {
 	aUnit := a.Unit()
 	bUnit := b.Unit()
@@ -218,7 +218,7 @@ func (u *Unit) Unit() *Unit {
 }
 
 // Mul multiply the receiver by the input changing the dimensions
-// of the receiver as appropriate. The input is not changed
+// of the receiver as appropriate. The input is not changed.
 func (u *Unit) Mul(uniter Uniter) *Unit {
 	a := uniter.Unit()
 	for key, val := range a.dimensions {
@@ -229,7 +229,7 @@ func (u *Unit) Mul(uniter Uniter) *Unit {
 }
 
 // Div divides the receiver by the argument changing the
-// dimensions of the receiver as appropriate
+// dimensions of the receiver as appropriate.
 func (u *Unit) Div(uniter Uniter) *Unit {
 	a := uniter.Unit()
 	u.value /= a.value
@@ -241,8 +241,8 @@ func (u *Unit) Div(uniter Uniter) *Unit {
 
 // Value return the raw value of the unit as a float64. Use of this
 // method is, in general, not recommended, though it can be useful
-// for printing. Instead, the FromUnit type of a specific
-// dimension should be used to guarantee dimension consistency
+// for printing. Instead, the From type of a specific dimension
+// should be used to guarantee dimension consistency.
 func (u *Unit) Value() float64 {
 	return u.value
 }

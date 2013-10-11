@@ -64,6 +64,30 @@ func TestInitialization(t *testing.T) {
 	}
 }
 
+var dimensionEqualityTests = []struct {
+	name        string
+	a           Uniter
+	b           Uniter
+	shouldMatch bool
+}{
+	{"same_empty", New(1.0, Dimensions{}), New(1.0, Dimensions{}), true},
+	{"same_one", New(1.0, Dimensions{TimeDim: 1}), New(1.0, Dimensions{TimeDim: 1}), true},
+	{"same_mult", New(1.0, Dimensions{TimeDim: 1, LengthDim: -2}), New(1.0, Dimensions{TimeDim: 1, LengthDim: -2}), true},
+	{"diff_one_empty", New(1.0, Dimensions{}), New(1.0, Dimensions{TimeDim: 1, LengthDim: -2}), false},
+	{"diff_same_dim", New(1.0, Dimensions{TimeDim: 1}), New(1.0, Dimensions{TimeDim: 2}), false},
+	{"diff_same_pow", New(1.0, Dimensions{LengthDim: 1}), New(1.0, Dimensions{TimeDim: 1}), false},
+	{"diff_numdim", New(1.0, Dimensions{TimeDim: 1, LengthDim: 2}), New(1.0, Dimensions{TimeDim: 2}), false},
+	{"diff_one_same_dim", New(1.0, Dimensions{LengthDim: 1, TimeDim: 1}), New(1.0, Dimensions{LengthDim: 1, TimeDim: 2}), false},
+}
+
+func TestDimensionEquality(t *testing.T) {
+	for _, ts := range dimensionEqualityTests {
+		if DimensionsMatch(ts.a, ts.b) != ts.shouldMatch {
+			t.Errorf("Dimension comparison incorrect for case %s. got: %v, expected: %v", ts.name, !ts.shouldMatch, ts.shouldMatch)
+		}
+	}
+}
+
 type UnitStructer interface {
 	UnitStruct() *UnitStruct
 }

@@ -201,27 +201,24 @@ func (m *Dense) SetRow(r int, v []float64) int {
 }
 
 // View returns a view on the receiver.
-func (m *Dense) View(i, j, r, c int) Blasser {
-	v := Dense{BlasMatrix{
-		Order:  m.mat.Order,
-		Rows:   r - i,
-		Cols:   c - j,
-		Stride: m.mat.Stride,
-	}}
+func (m *Dense) View(i, j, r, c int) {
 	switch m.mat.Order {
 	case blas.RowMajor:
-		v.mat.Data = m.mat.Data[i*m.mat.Stride+j : (i+r-1)*m.mat.Stride+(j+c)]
+		m.mat.Data = m.mat.Data[i*m.mat.Stride+j : (i+r-1)*m.mat.Stride+(j+c)]
 	case blas.ColMajor:
-		v.mat.Data = m.mat.Data[i+j*m.mat.Stride : (i+r)+(j+c-1)*m.mat.Stride]
+		m.mat.Data = m.mat.Data[i+j*m.mat.Stride : (i+r)+(j+c-1)*m.mat.Stride]
 	default:
 		panic(ErrIllegalOrder)
 	}
-	return &v
+	m.mat.Rows = r - i
+	m.mat.Cols = c - j
 }
 
 func (m *Dense) Submatrix(a Matrix, i, j, r, c int) {
 	// This is probably a bad idea, but for the moment, we do it.
-	m.Clone(&Dense{m.View(i, j, r, c).BlasMatrix()})
+	v := *m
+	v.View(i, j, r, c)
+	m.Clone(&Dense{v.BlasMatrix()})
 }
 
 func (m *Dense) Clone(a Matrix) {

@@ -29,6 +29,9 @@ var formatTests = []struct {
 	{Length(1.61619926e-35), "%v", "1.61619926e-35 m"},
 	{Length(1.61619926e-35), "%#v", "unit.Length(1.61619926e-35)"},
 	{Length(1.61619926e-35), "%s", "%!s(unit.Length=1.61619926e-35 m)"},
+	{Time(15.2), "%v", "15.2 s"},
+	{Time(15.2), "%#v", "unit.Time(15.2)"},
+	{Time(15.2), "%s", "%!s(unit.Time=15.2 s)"},
 }
 
 func TestFormat(t *testing.T) {

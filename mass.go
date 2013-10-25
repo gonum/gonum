@@ -10,7 +10,7 @@ import (
 type Mass float64
 
 const (
-	Yottagram Mass = 1e12
+	Yottagram Mass = 1e21
 	Zettagram Mass = 1e18
 	Exagram   Mass = 1e15
 	Petagram  Mass = 1e12

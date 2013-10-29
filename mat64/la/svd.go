@@ -111,7 +111,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 				for i := k + 1; i < n; i++ {
 					e[i] /= e[k]
 				}
-				e[k+1] += 1.0
+				e[k+1] += 1
 			}
 			e[k] = -e[k]
 			if k+1 < m && e[k] != 0 {
@@ -169,7 +169,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 					for i := k; i < m; i++ {
 						t += u.At(i, k) * u.At(i, j)
 					}
-					t = -t / u.At(k, k)
+					t /= -u.At(k, k)
 					for i := k; i < m; i++ {
 						u.Set(i, j, u.At(i, j)+t*u.At(i, k))
 					}
@@ -213,11 +213,8 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 	}
 
 	// Main iteration loop for the singular values.
-	var (
-		pp   = p - 1
-		iter int
-	)
-	for p > 0 {
+	pp := p - 1
+	for iter := 0; p > 0; {
 		var k, kase int
 
 		// Here is where a test for too many iterations would go.
@@ -285,7 +282,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 				sigma[j] = t
 				if j != k {
 					f = -sn * e[j-1]
-					e[j-1] = cs * e[j-1]
+					e[j-1] *= cs
 				}
 				if wantv {
 					for i := 0; i < n; i++ {
@@ -306,7 +303,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 				sn := f / t
 				sigma[j] = t
 				f = -sn * e[j]
-				e[j] = cs * e[j]
+				e[j] *= cs
 				if wantu {
 					for i := 0; i < m; i++ {
 						t = cs*u.At(i, j) + sn*u.At(i, k-1)
@@ -327,7 +324,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 			epm1 := e[p-2] / scale
 			sk := sigma[k] / scale
 			ek := e[k] / scale
-			b := ((spm1+sp)*(spm1-sp) + epm1*epm1) / 2.0
+			b := ((spm1+sp)*(spm1-sp) + epm1*epm1) / 2
 			c := (sp * epm1) * (sp * epm1)
 
 			var shift float64
@@ -352,7 +349,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 				f = cs*sigma[j] + sn*e[j]
 				e[j] = cs*e[j] - sn*sigma[j]
 				g = sn * sigma[j+1]
-				sigma[j+1] = cs * sigma[j+1]
+				sigma[j+1] *= cs
 				if wantv {
 					for i := 0; i < n; i++ {
 						t = cs*v.At(i, j) + sn*v.At(i, j+1)
@@ -367,7 +364,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 				f = cs*e[j] + sn*sigma[j+1]
 				sigma[j+1] = -sn*e[j] + cs*sigma[j+1]
 				g = sn * e[j+1]
-				e[j+1] = cs * e[j+1]
+				e[j+1] *= cs
 				if wantu && j < m-1 {
 					for i := 0; i < m; i++ {
 						t = cs*u.At(i, j) + sn*u.At(i, j+1)
@@ -377,7 +374,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 				}
 			}
 			e[p-2] = f
-			iter = iter + 1
+			iter++
 
 		// Convergence.
 		case 4:
@@ -400,19 +397,17 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 				if sigma[k] >= sigma[k+1] {
 					break
 				}
-				t := sigma[k]
-				sigma[k] = sigma[k+1]
-				sigma[k+1] = t
+				sigma[k], sigma[k+1] = sigma[k+1], sigma[k]
 				if wantv && (k < n-1) {
 					for i := 0; i < n; i++ {
-						t = v.At(i, k+1)
+						t := v.At(i, k+1)
 						v.Set(i, k+1, v.At(i, k))
 						v.Set(i, k, t)
 					}
 				}
 				if wantu && (k < m-1) {
 					for i := 0; i < m; i++ {
-						t = u.At(i, k+1)
+						t := u.At(i, k+1)
 						u.Set(i, k+1, u.At(i, k))
 						u.Set(i, k, t)
 					}

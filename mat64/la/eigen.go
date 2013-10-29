@@ -23,9 +23,9 @@ func symmetric(m *mat64.Dense) bool {
 }
 
 // Eigen returns the Eigenvalues and eigenvectors of a square real matrix.
-//
-// If a is symmetric, then a = v*D*v' where the eigenvalue matrix D is
-// diagonal and the eigenvector matrix v is orthogonal.
+// The matrix a is overwritten during the decomposition. If a is symmetric,
+// then a = v*D*v' where the eigenvalue matrix D is diagonal and the
+// eigenvector matrix v is orthogonal.
 //
 // If a is not symmetric, then the eigenvalue matrix D is block diagonal
 // with the real eigenvalues in 1-by-1 blocks and any complex eigenvalues,
@@ -69,13 +69,7 @@ func Eigen(a *mat64.Dense, epsilon float64) (d, e []float64, v *mat64.Dense) {
 // Fortran subroutine in EISPACK.
 func tred2(a *mat64.Dense, d, e []float64) (v *mat64.Dense) {
 	n := len(d)
-	v, _ = mat64.NewDense(n, n, make([]float64, n*n))
-
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			v.Set(i, j, a.At(i, j))
-		}
-	}
+	v = a
 
 	for j := 0; j < n; j++ {
 		d[j] = v.At(n-1, j)
@@ -306,13 +300,7 @@ func tql2(d, e []float64, v *mat64.Dense, epsilon float64) {
 // Fortran subroutines in EISPACK.
 func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 	n, _ := a.Dims()
-
-	hess, _ = mat64.NewDense(n, n, make([]float64, n*n))
-	for j := 0; j < n; j++ {
-		for i := 0; i < n; i++ {
-			hess.Set(i, j, a.At(i, j))
-		}
-	}
+	hess = a
 
 	ort := make([]float64, n)
 

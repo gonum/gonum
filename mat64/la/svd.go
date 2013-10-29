@@ -199,7 +199,7 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 					for i := k + 1; i < n; i++ {
 						t += v.At(i, k) * v.At(i, j)
 					}
-					t = -t / v.At(k+1, k)
+					t /= -v.At(k+1, k)
 					for i := k + 1; i < n; i++ {
 						v.Set(i, j, v.At(i, j)+t*v.At(i, k))
 					}

@@ -471,7 +471,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 				s = math.Abs(x) + math.Abs(z)
 				p = x / s
 				q = z / s
-				r = math.Sqrt(p*p + q*q)
+				r = math.Hypot(p, q)
 				p /= r
 				q /= r
 

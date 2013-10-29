@@ -83,7 +83,7 @@ func tred2(a *mat64.Dense, d, e []float64) (v *mat64.Dense) {
 			h     float64
 		)
 		for k := 0; k < i; k++ {
-			scale = scale + math.Abs(d[k])
+			scale += math.Abs(d[k])
 		}
 		if scale == 0 {
 			e[i] = d[i-1]
@@ -206,9 +206,7 @@ func tql2(d, e []float64, v *mat64.Dense, epsilon float64) {
 
 		// If m == l, d[l] is an eigenvalue, otherwise, iterate.
 		if m > l {
-			var iter int
-			for {
-				iter = iter + 1 // (Could check iteration count here.)
+			for iter := 0; ; iter++ { // Could check iteration count here.
 
 				// Compute implicit shift
 				g := d[l]
@@ -266,7 +264,7 @@ func tql2(d, e []float64, v *mat64.Dense, epsilon float64) {
 				}
 			}
 		}
-		d[l] = d[l] + f
+		d[l] += f
 		e[l] = 0
 	}
 
@@ -311,7 +309,7 @@ func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 		// Scale column.
 		var scale float64
 		for i := m; i <= high; i++ {
-			scale = scale + math.Abs(hess.At(i, m-1))
+			scale += math.Abs(hess.At(i, m-1))
 		}
 		if scale != 0 {
 			// Compute Householder transformation.
@@ -325,7 +323,7 @@ func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 				g = -g
 			}
 			h -= ort[m] * g
-			ort[m] = ort[m] - g
+			ort[m] -= g
 
 			// Apply Householder similarity transformation
 			// hess = (I-u*u'/h)*hess*(I-u*u')/h)
@@ -350,7 +348,7 @@ func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 					hess.Set(i, j, hess.At(i, j)-f*ort[j])
 				}
 			}
-			ort[m] = scale * ort[m]
+			ort[m] *= scale
 			hess.Set(m, m-1, scale*g)
 		}
 	}
@@ -418,13 +416,12 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 			e[i] = 0
 		}
 		for j := max(i-1, 0); j < nn; j++ {
-			norm = norm + math.Abs(hess.At(i, j))
+			norm += math.Abs(hess.At(i, j))
 		}
 	}
 
 	// Outer loop over eigenvalue index
-	var iter int
-	for n >= low {
+	for iter := 0; n >= low; {
 		// Look for single small sub-diagonal element
 		l := n
 		for l > low {
@@ -551,7 +548,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 				}
 			}
 
-			iter++ // (Could check iteration count here.)
+			iter++ // Could check iteration count here.
 
 			// Look for two consecutive small sub-diagonal elements
 			m := n - 2
@@ -585,7 +582,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 
 			// Double QR step involving rows l:n and columns m:n
 			for k := m; k <= n-1; k++ {
-				notlast := (k != n-1)
+				notlast := k != n-1
 				if k != m {
 					p = hess.At(k, k-1)
 					q = hess.At(k+1, k-1)
@@ -703,7 +700,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 
 					// Overflow control
 					t = math.Abs(hess.At(i, n))
-					if (epsilon*t)*t > 1 {
+					if epsilon*t*t > 1 {
 						for j := i; j <= n; j++ {
 							hess.Set(j, n, hess.At(j, n)/t)
 						}

@@ -110,7 +110,7 @@ func tred2(a *mat64.Dense, d, e []float64) (v *mat64.Dense) {
 				g = -g
 			}
 			e[i] = scale * g
-			h = h - f*g
+			h -= f * g
 			d[i-1] = f - g
 			for j := 0; j < i; j++ {
 				e[j] = 0
@@ -230,7 +230,7 @@ func tql2(d, e []float64, v *mat64.Dense, epsilon float64) {
 				for i := l + 2; i < n; i++ {
 					d[i] -= h
 				}
-				f = f + h
+				f += h
 
 				// Implicit QL transformation.
 				p = d[m]
@@ -336,7 +336,7 @@ func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 			if ort[m] > 0 {
 				g = -g
 			}
-			h = h - ort[m]*g
+			h -= ort[m] * g
 			ort[m] = ort[m] - g
 
 			// Apply Householder similarity transformation
@@ -346,7 +346,7 @@ func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 				for i := high; i >= m; i-- {
 					f += ort[i] * hess.At(i, j)
 				}
-				f = f / h
+				f /= h
 				for i := m; i <= high; i++ {
 					hess.Set(i, j, hess.At(i, j)-f*ort[i])
 				}
@@ -357,7 +357,7 @@ func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 				for j := high; j >= m; j-- {
 					f += ort[j] * hess.At(i, j)
 				}
-				f = f / h
+				f /= h
 				for j := m; j <= high; j++ {
 					hess.Set(i, j, hess.At(i, j)-f*ort[j])
 				}
@@ -517,7 +517,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 				e[n-1] = z
 				e[n] = -z
 			}
-			n = n - 2
+			n -= 2
 			iter = 0
 		} else {
 			// No convergence yet
@@ -625,7 +625,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 					} else if l != m {
 						hess.Set(k, k-1, -hess.At(k, k-1))
 					}
-					p = p + s
+					p += s
 					x = p / s
 					y = q / s
 					z = r / s
@@ -636,7 +636,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 					for j := k; j < nn; j++ {
 						p = hess.At(k, j) + q*hess.At(k+1, j)
 						if notlast {
-							p = p + r*hess.At(k+2, j)
+							p += r * hess.At(k+2, j)
 							hess.Set(k+2, j, hess.At(k+2, j)-p*z)
 						}
 						hess.Set(k, j, hess.At(k, j)-p*x)
@@ -647,7 +647,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 					for i := 0; i <= min(n, k+3); i++ {
 						p = x*hess.At(i, k) + y*hess.At(i, k+1)
 						if notlast {
-							p = p + z*hess.At(i, k+2)
+							p += z * hess.At(i, k+2)
 							hess.Set(i, k+2, hess.At(i, k+2)-p*r)
 						}
 						hess.Set(i, k, hess.At(i, k)-p)
@@ -658,7 +658,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 					for i := low; i <= high; i++ {
 						p = x*v.At(i, k) + y*v.At(i, k+1)
 						if notlast {
-							p = p + z*v.At(i, k+2)
+							p += z * v.At(i, k+2)
 							v.Set(i, k+2, v.At(i, k+2)-p*r)
 						}
 						v.Set(i, k, v.At(i, k)-p)
@@ -686,7 +686,7 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 				w = hess.At(i, i) - p
 				r = 0
 				for j := l; j <= n; j++ {
-					r = r + hess.At(i, j)*hess.At(j, n)
+					r += hess.At(i, j) * hess.At(j, n)
 				}
 				if e[i] < 0 {
 					z = w

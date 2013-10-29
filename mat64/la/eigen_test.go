@@ -54,6 +54,36 @@ func (s *S) TestEigen(c *check.C) {
 				0.17669818159240022, -0.9488293044247931, 0.2617263908869383,
 			})),
 		},
+		{ // Jama pvals
+			a: mustDense(mat64.NewDense(3, 3, []float64{
+				4, 1, 1,
+				1, 2, 3,
+				1, 3, 6,
+			})),
+
+			epsilon: math.Pow(2, -52.0),
+		},
+		{ // Jama evals
+			a: mustDense(mat64.NewDense(4, 4, []float64{
+				0, 1, 0, 0,
+				1, 0, 2e-7, 0,
+				0, -2e-7, 0, 1,
+				0, 0, 1, 0,
+			})),
+
+			epsilon: math.Pow(2, -52.0),
+		},
+		{ // Jama badeigs
+			a: mustDense(mat64.NewDense(5, 5, []float64{
+				0, 0, 0, 0, 0,
+				0, 0, 0, 0, 1,
+				0, 0, 0, 1, 0,
+				1, 1, 0, 0, 1,
+				1, 0, 1, 0, 1,
+			})),
+
+			epsilon: math.Pow(2, -52.0),
+		},
 	} {
 		a := &mat64.Dense{}
 		a.Clone(t.a)
@@ -65,17 +95,14 @@ func (s *S) TestEigen(c *check.C) {
 		if t.e != nil {
 			c.Check(e, check.DeepEquals, t.e)
 		}
-		// dm := BuildD(d, e)
+		dm := BuildD(d, e)
 
 		if t.v != nil {
 			c.Check(v.Equals(t.v), check.Equals, true)
 		}
 
-		// vt := &mat64.Dense{}
-		// vt.TCopy(v)
-		// v.Mul(v, dm)
-		// v.Mul(v, vt)
-		// c.Check(v.EqualsApprox(a, 1e-6), check.Equals, true)
-		// fmt.Println(v)
+		a.Mul(a, v)
+		v.Mul(v, dm)
+		c.Check(a.EqualsApprox(v, 1e-12), check.Equals, true)
 	}
 }

@@ -98,6 +98,25 @@ func (s *S) TestSVD(c *check.C) {
 
 			sigma: []float64{5.464985704219041, 0.365966190626258},
 		},
+		{
+			// FIXME(kortschak)
+			// This test will fail if t.sigma is set to the real expected values
+			// or if u and v are requested, due to a bug in the original Jama code
+			// forcing a to be a tall or square matrix.
+			//
+			// This is a failing case to use to fix that bug.
+			a: mustDense(mat64.NewDense(3, 11, []float64{
+				1, 1, 0, 1, 0, 0, 0, 0, 0, 11, 1,
+				1, 0, 0, 0, 0, 0, 1, 0, 0, 12, 2,
+				1, 1, 0, 0, 0, 0, 0, 0, 1, 13, 3,
+			})),
+
+			epsilon: math.Pow(2, -52.0),
+			small:   math.Pow(2, -966.0),
+
+			// FIXME(kortschak) sigma is one element longer than it should be.
+			sigma: []float64{21.25950088109745, 1.5415021616856577, 1.2873979074613637, 0},
+		},
 	} {
 		a := &mat64.Dense{}
 		a.Clone(t.a)

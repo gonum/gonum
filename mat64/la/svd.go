@@ -398,14 +398,14 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 					break
 				}
 				sigma[k], sigma[k+1] = sigma[k+1], sigma[k]
-				if wantv && (k < n-1) {
+				if wantv && k < n-1 {
 					for i := 0; i < n; i++ {
 						t := v.At(i, k+1)
 						v.Set(i, k+1, v.At(i, k))
 						v.Set(i, k, t)
 					}
 				}
-				if wantu && (k < m-1) {
+				if wantu && k < m-1 {
 					for i := 0; i < m; i++ {
 						t := u.At(i, k+1)
 						u.Set(i, k+1, u.At(i, k))

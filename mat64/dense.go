@@ -217,8 +217,8 @@ func (m *Dense) View(i, j, r, c int) {
 	default:
 		panic(ErrIllegalOrder)
 	}
-	m.mat.Rows = r - i
-	m.mat.Cols = c - j
+	m.mat.Rows = r
+	m.mat.Cols = c
 }
 
 func (m *Dense) Submatrix(a Matrix, i, j, r, c int) {

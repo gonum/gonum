@@ -25,6 +25,9 @@ func max(a, b int) int {
 
 // Det returns the determinant of the matrix a.
 func Det(a mat64.Matrix) float64 {
+	if a, ok := a.(mat64.Deter); ok {
+		return a.Det()
+	}
 	return LU(mat64.DenseCopyOf(a)).Det()
 }
 

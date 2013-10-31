@@ -142,6 +142,9 @@ func (m *Dense) Col(col []float64, c int) []float64 {
 	switch m.mat.Order {
 	case blas.RowMajor:
 		col = col[:min(len(col), m.mat.Rows)]
+		if blasEngine == nil {
+			panic(ErrNoEngine)
+		}
 		blasEngine.Dcopy(len(col), m.mat.Data[c:], m.mat.Stride, col, 1)
 	case blas.ColMajor:
 		copy(col, m.mat.Data[c*m.mat.Stride:c*m.mat.Stride+m.mat.Rows])
@@ -159,6 +162,9 @@ func (m *Dense) SetCol(c int, v []float64) int {
 
 	switch m.mat.Order {
 	case blas.RowMajor:
+		if blasEngine == nil {
+			panic(ErrNoEngine)
+		}
 		blasEngine.Dcopy(min(len(v), m.mat.Rows), v, 1, m.mat.Data[c:], m.mat.Stride)
 	case blas.ColMajor:
 		copy(m.mat.Data[c*m.mat.Stride:c*m.mat.Stride+m.mat.Rows], v)
@@ -182,6 +188,9 @@ func (m *Dense) Row(row []float64, r int) []float64 {
 		copy(row, m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols])
 	case blas.ColMajor:
 		row = row[:min(len(row), m.mat.Cols)]
+		if blasEngine == nil {
+			panic(ErrNoEngine)
+		}
 		blasEngine.Dcopy(len(row), m.mat.Data[r:], m.mat.Stride, row, 1)
 	default:
 		panic(ErrIllegalOrder)
@@ -199,6 +208,9 @@ func (m *Dense) SetRow(r int, v []float64) int {
 	case blas.RowMajor:
 		copy(m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols], v)
 	case blas.ColMajor:
+		if blasEngine == nil {
+			panic(ErrNoEngine)
+		}
 		blasEngine.Dcopy(min(len(v), m.mat.Cols), v, 1, m.mat.Data[r:], m.mat.Stride)
 	default:
 		panic(ErrIllegalOrder)
@@ -808,6 +820,9 @@ func (m *Dense) Mul(a, b Matrix) {
 			if amat.Order != blasOrder || bmat.Order != blasOrder {
 				panic(ErrIllegalOrder)
 			}
+			if blasEngine == nil {
+				panic(ErrNoEngine)
+			}
 			blasEngine.Dgemm(
 				blasOrder,
 				blas.NoTrans, blas.NoTrans,
@@ -828,6 +843,9 @@ func (m *Dense) Mul(a, b Matrix) {
 			col := make([]float64, br)
 			for r := 0; r < ar; r++ {
 				for c := 0; c < bc; c++ {
+					if blasEngine == nil {
+						panic(ErrNoEngine)
+					}
 					switch blasOrder {
 					case blas.RowMajor:
 						w.mat.Data[r*w.mat.Stride+w.mat.Cols] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)

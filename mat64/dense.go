@@ -47,8 +47,6 @@ var (
 	_ TransposeCopier = matrix
 	// _ TransposeViewer = matrix
 
-	// _ Deter  = matrix
-	// _ Inver  = matrix
 	_ Tracer = matrix
 	_ Normer = matrix
 	_ Sumer  = matrix

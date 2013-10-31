@@ -92,6 +92,13 @@ func NewDense(r, c int, mat []float64) (*Dense, error) {
 	}}, nil
 }
 
+// DenseCopyOf returns a newly allocated copy of the elements of a.
+func DenseCopyOf(a Matrix) *Dense {
+	d := &Dense{}
+	d.Clone(a)
+	return d
+}
+
 func (m *Dense) LoadBlas(b BlasMatrix) { m.mat = b }
 
 func (m *Dense) BlasMatrix() BlasMatrix { return m.mat }

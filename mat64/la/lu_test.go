@@ -122,6 +122,10 @@ func (s *S) TestLUDGaussian(c *check.C) {
 		l.Mul(l, u)
 		c.Check(l.EqualsApprox(pivotRows(mat64.DenseCopyOf(t.a), lf.Pivot), 1e-12), check.Equals, true)
 
+		aInv := Inverse(t.a)
+		aInv.Mul(aInv, t.a)
+		c.Check(aInv.EqualsApprox(eye(), 1e-12), check.Equals, true)
+
 		x := lf.Solve(eye())
 		t.a.Mul(t.a, x)
 		c.Check(t.a.EqualsApprox(eye(), 1e-12), check.Equals, true)

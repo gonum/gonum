@@ -18,14 +18,11 @@ func (s *S) TestQRD(c *check.C) {
 			a: mustDense(mat64.NewDense(4, 3, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12})),
 		},
 	} {
-		a := &mat64.Dense{}
-		a.Clone(t.a)
-
-		qr, rDiag := QRD(t.a)
-		r := QRGetR(qr, rDiag)
-		q := QRGetQ(qr)
+		qf := QR(mat64.DenseCopyOf(t.a))
+		r := qf.R()
+		q := qf.Q()
 
 		q.Mul(q, r)
-		c.Check(a.EqualsApprox(q, 1e-12), check.Equals, true)
+		c.Check(t.a.EqualsApprox(q, 1e-12), check.Equals, true)
 	}
 }

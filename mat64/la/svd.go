@@ -10,6 +10,12 @@ import (
 	"math"
 )
 
+type SVDFactors struct {
+	U     *mat64.Dense
+	Sigma []float64
+	V     *mat64.Dense
+}
+
 // SVD performs singular value decomposition for an m-by-n matrix a with m >= n,
 // the singular value decomposition is an m-by-n orthogonal matrix u, an n-by-n
 // diagonal matrix s, and an n-by-n orthogonal matrix v so that a = u*s*v'. The
@@ -22,7 +28,7 @@ import (
 //
 // The matrix condition number and the effective numerical rank can be computed from
 // this decomposition.
-func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []float64, u, v *mat64.Dense) {
+func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 	m, n := a.Dims()
 
 	// Apparently the failing cases are only a proper subset of (m<n),
@@ -31,8 +37,9 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 	// 	panic(mat64.ErrShape)
 	// }
 
-	sigma = make([]float64, min(m+1, n))
+	sigma := make([]float64, min(m+1, n))
 	nu := min(m, n)
+	var u, v *mat64.Dense
 	if wantu {
 		u, _ = mat64.NewDense(m, nu, make([]float64, m*nu))
 	}
@@ -419,18 +426,29 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) (sigma []flo
 		}
 	}
 
-	return sigma, u, v
+	return SVDFactors{u, sigma, v}
 }
 
-// Rank returns the number of non-negligible singular values for an m-row
-// matrix with the given sigma and epsilon.
-func Rank(m int, sigma []float64, epsilon float64) int {
-	if len(sigma) == 0 {
+// S returns a newly allocated S matrix from the sigma values held by the
+// factorisation.
+func (f SVDFactors) S() *mat64.Dense {
+	s, _ := mat64.NewDense(len(f.Sigma), len(f.Sigma), make([]float64, len(f.Sigma)*len(f.Sigma)))
+	for i, v := range f.Sigma {
+		s.Set(i, i, v)
+	}
+	return s
+}
+
+// Rank returns the number of non-negligible singular values in the sigma held by
+// the factorisation with the given epsilon.
+func (f SVDFactors) Rank(epsilon float64) int {
+	if len(f.Sigma) == 0 {
 		return 0
 	}
-	tol := float64(max(m, len(sigma))) * sigma[0] * epsilon
+	m, _ := f.U.Dims()
+	tol := float64(max(m, len(f.Sigma))) * f.Sigma[0] * epsilon
 	var r int
-	for _, v := range sigma {
+	for _, v := range f.Sigma {
 		if v > tol {
 			r++
 		}
@@ -438,8 +456,9 @@ func Rank(m int, sigma []float64, epsilon float64) int {
 	return r
 }
 
-// Cond returns the 2-norm condition number for the matrix S for an m-by-n
-// matrix with the given sigma.
-func Cond(m, n int, sigma []float64) float64 {
-	return sigma[0] / sigma[min(m, n)-1]
+// Cond returns the 2-norm condition number for the S matrix.
+func (f SVDFactors) Cond() float64 {
+	m, _ := f.U.Dims()
+	n, _ := f.V.Dims()
+	return f.Sigma[0] / f.Sigma[min(m, n)-1]
 }

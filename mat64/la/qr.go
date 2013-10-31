@@ -10,7 +10,12 @@ import (
 	"math"
 )
 
-// QRD computes a QR Decomposition for an m-by-n matrix a with m >= n by Householder
+type QRFactor struct {
+	QR    *mat64.Dense
+	rDiag []float64
+}
+
+// QR computes a QR Decomposition for an m-by-n matrix a with m >= n by Householder
 // reflections, the QR decomposition is an m-by-n orthogonal matrix q and an n-by-n
 // upper triangular matrix r so that a = q.r.
 //
@@ -19,11 +24,11 @@ import (
 // in the least squares solution of non-square systems of simultaneous linear equations.
 // This will fail if QRIsFullRank() returns false. The matrix a is overwritten by the
 // decomposition.
-func QRD(a *mat64.Dense) (qr *mat64.Dense, rDiag []float64) {
+func QR(a *mat64.Dense) QRFactor {
 	// Initialize.
 	m, n := a.Dims()
-	qr = a
-	rDiag = make([]float64, n)
+	qr := a
+	rDiag := make([]float64, n)
 
 	// Main loop.
 	for k := 0; k < n; k++ {
@@ -58,12 +63,12 @@ func QRD(a *mat64.Dense) (qr *mat64.Dense, rDiag []float64) {
 		rDiag[k] = -norm
 	}
 
-	return qr, rDiag
+	return QRFactor{qr, rDiag}
 }
 
-// QRIsFullRank returns whether the r and hence a has full rank.
-func QRIsFullRank(rDiag []float64) bool {
-	for _, v := range rDiag {
+// IsFullRank returns whether the R matrix and hence a has full rank.
+func (f QRFactor) IsFullRank() bool {
+	for _, v := range f.rDiag {
 		if v == 0 {
 			return false
 		}
@@ -71,11 +76,12 @@ func QRIsFullRank(rDiag []float64) bool {
 	return true
 }
 
-// QRGetH returns the Householder vectors in a lower trapezoidal matrix
+// H returns the Householder vectors in a lower trapezoidal matrix
 // whose columns define the reflections.
-func QRGetH(qr *mat64.Dense) (h *mat64.Dense) {
+func (f QRFactor) H() *mat64.Dense {
+	qr := f.QR
 	m, n := qr.Dims()
-	h, _ = mat64.NewDense(m, n, make([]float64, m*n))
+	h, _ := mat64.NewDense(m, n, make([]float64, m*n))
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
 			if i >= j {
@@ -86,10 +92,11 @@ func QRGetH(qr *mat64.Dense) (h *mat64.Dense) {
 	return h
 }
 
-// QRGetR returns the upper triangular factor for the QR decomposition.
-func QRGetR(qr *mat64.Dense, rDiag []float64) (r *mat64.Dense) {
+// R returns the upper triangular factor for the QR decomposition.
+func (f QRFactor) R() *mat64.Dense {
+	qr, rDiag := f.QR, f.rDiag
 	_, n := qr.Dims()
-	r, _ = mat64.NewDense(n, n, make([]float64, n*n))
+	r, _ := mat64.NewDense(n, n, make([]float64, n*n))
 	for i, v := range rDiag[:n] {
 		for j := 0; j < n; j++ {
 			if i < j {
@@ -102,10 +109,11 @@ func QRGetR(qr *mat64.Dense, rDiag []float64) (r *mat64.Dense) {
 	return r
 }
 
-// QRGetQ generates and returns the (economy-sized) orthogonal factor.
-func QRGetQ(qr *mat64.Dense) (q *mat64.Dense) {
+// Q generates and returns the (economy-sized) orthogonal factor.
+func (f QRFactor) Q() *mat64.Dense {
+	qr := f.QR
 	m, n := qr.Dims()
-	q, _ = mat64.NewDense(m, n, make([]float64, m*n))
+	q, _ := mat64.NewDense(m, n, make([]float64, m*n))
 
 	for k := n - 1; k >= 0; k-- {
 		// for i := 0; i < m; i++ {
@@ -129,16 +137,17 @@ func QRGetQ(qr *mat64.Dense) (q *mat64.Dense) {
 	return q
 }
 
-// QRSolve computes a least squares solution of a.x = b where b has as many rows as a.
+// Solve computes a least squares solution of a.x = b where b has as many rows as a.
 // A matrix x is returned that minimizes the two norm of Q*R*X-B. QRSolve will panic
 // if a is not full rank. The matrix b is overwritten during the call.
-func QRSolve(qr, b *mat64.Dense, rDiag []float64) (x *mat64.Dense) {
+func (f QRFactor) Solve(b *mat64.Dense) (x *mat64.Dense) {
+	qr, rDiag := f.QR, f.rDiag
 	m, n := qr.Dims()
 	bm, bn := b.Dims()
 	if bm != m {
 		panic(mat64.ErrShape)
 	}
-	if !QRIsFullRank(rDiag) {
+	if !f.IsFullRank() {
 		panic("la: matrix is rank deficient")
 	}
 

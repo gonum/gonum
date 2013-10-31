@@ -25,8 +25,7 @@ func max(a, b int) int {
 
 // Det returns the determinant of the matrix a.
 func Det(a mat64.Matrix) float64 {
-	lu, _, sign := LUD(mat64.DenseCopyOf(a))
-	return LUDet(lu, sign)
+	return LU(mat64.DenseCopyOf(a)).Det()
 }
 
 // Inverse returns the inverse or pseudoinverse of the matrix a.
@@ -44,9 +43,7 @@ func Inverse(a mat64.Matrix) *mat64.Dense {
 func Solve(a, b mat64.Matrix) (x *mat64.Dense) {
 	m, n := a.Dims()
 	if m == n {
-		lu, piv, _ := LUD(mat64.DenseCopyOf(a))
-		return LUSolve(lu, mat64.DenseCopyOf(b), piv)
+		return LU(mat64.DenseCopyOf(a)).Solve(mat64.DenseCopyOf(b))
 	}
-	qr, rDiag := QRD(mat64.DenseCopyOf(a))
-	return QRSolve(qr, mat64.DenseCopyOf(b), rDiag)
+	return QR(mat64.DenseCopyOf(a)).Solve(mat64.DenseCopyOf(b))
 }

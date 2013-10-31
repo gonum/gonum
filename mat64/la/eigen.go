@@ -22,6 +22,11 @@ func symmetric(m *mat64.Dense) bool {
 	return true
 }
 
+type EigenFactors struct {
+	V    *mat64.Dense
+	d, e []float64
+}
+
 // Eigen returns the Eigenvalues and eigenvectors of a square real matrix.
 // The matrix a is overwritten during the decomposition. If a is symmetric,
 // then a = v*D*v' where the eigenvalue matrix D is diagonal and the
@@ -34,14 +39,15 @@ func symmetric(m *mat64.Dense) bool {
 // i.e. a.v equals v.D. The matrix v may be badly conditioned, or even
 // singular, so the validity of the equation a = v*D*inverse(v) depends
 // upon the 2-norm condition number of v.
-func Eigen(a *mat64.Dense, epsilon float64) (d, e []float64, v *mat64.Dense) {
+func Eigen(a *mat64.Dense, epsilon float64) EigenFactors {
 	m, n := a.Dims()
 	if m != n {
 		panic(mat64.ErrSquare)
 	}
 
-	d = make([]float64, n)
-	e = make([]float64, n)
+	var v *mat64.Dense
+	d := make([]float64, n)
+	e := make([]float64, n)
 
 	if symmetric(a) {
 		// Tridiagonalize.
@@ -58,7 +64,7 @@ func Eigen(a *mat64.Dense, epsilon float64) (d, e []float64, v *mat64.Dense) {
 		hqr2(d, e, hess, v, epsilon)
 	}
 
-	return d, e, v
+	return EigenFactors{v, d, e}
 }
 
 // Symmetric Householder reduction to tridiagonal form.
@@ -798,9 +804,10 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 	}
 }
 
-// BuildD returns the block diagonal eigenvalue matrix from the real and imaginary
-// components d and e. The lengths of d and e must match.
-func BuildD(d, e []float64) *mat64.Dense {
+// D returns the block diagonal eigenvalue matrix from the real and imaginary
+// components d and e.
+func (f EigenFactors) D() *mat64.Dense {
+	d, e := f.d, f.e
 	var n int
 	if n = len(d); n != len(e) {
 		panic(mat64.ErrSquare)

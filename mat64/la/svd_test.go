@@ -11,14 +11,6 @@ import (
 	"math"
 )
 
-func buildSfrom(sigma []float64) *mat64.Dense {
-	s, _ := mat64.NewDense(len(sigma), len(sigma), make([]float64, len(sigma)*len(sigma)))
-	for i, v := range sigma {
-		s.Set(i, i, v)
-	}
-	return s
-}
-
 func (s *S) TestSVD(c *check.C) {
 	for _, t := range []struct {
 		a *mat64.Dense
@@ -118,36 +110,33 @@ func (s *S) TestSVD(c *check.C) {
 			sigma: []float64{21.25950088109745, 1.5415021616856577, 1.2873979074613637, 0},
 		},
 	} {
-		a := &mat64.Dense{}
-		a.Clone(t.a)
-
-		sigma, u, v := SVD(t.a, t.epsilon, t.small, t.wantu, t.wantv)
+		svd := SVD(mat64.DenseCopyOf(t.a), t.epsilon, t.small, t.wantu, t.wantv)
 		if t.sigma != nil {
-			c.Check(sigma, check.DeepEquals, t.sigma)
+			c.Check(svd.Sigma, check.DeepEquals, t.sigma)
 		}
-		s := buildSfrom(sigma)
+		s := svd.S()
 
-		if u != nil {
-			c.Check(u.Equals(t.u), check.Equals, true)
+		if svd.U != nil {
+			c.Check(svd.U.Equals(t.u), check.Equals, true)
 		} else {
 			c.Check(t.wantu, check.Equals, false)
 			c.Check(t.u, check.IsNil)
 		}
-		if v != nil {
-			c.Check(v.Equals(t.v), check.Equals, true)
+		if svd.V != nil {
+			c.Check(svd.V.Equals(t.v), check.Equals, true)
 		} else {
 			c.Check(t.wantv, check.Equals, false)
 			c.Check(t.v, check.IsNil)
 		}
 
 		if t.wantu && t.wantv {
-			c.Assert(u, check.NotNil)
-			c.Assert(v, check.NotNil)
+			c.Assert(svd.U, check.NotNil)
+			c.Assert(svd.V, check.NotNil)
 			vt := &mat64.Dense{}
-			vt.TCopy(v)
-			u.Mul(u, s)
-			u.Mul(u, vt)
-			c.Check(u.EqualsApprox(a, 1e-12), check.Equals, true)
+			vt.TCopy(svd.V)
+			svd.U.Mul(svd.U, s)
+			svd.U.Mul(svd.U, vt)
+			c.Check(svd.U.EqualsApprox(t.a, 1e-12), check.Equals, true)
 		}
 	}
 }

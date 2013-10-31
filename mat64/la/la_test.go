@@ -21,6 +21,14 @@ func mustDense(m *mat64.Dense, err error) *mat64.Dense {
 	return m
 }
 
+func eye() *mat64.Dense {
+	return mustDense(mat64.NewDense(3, 3, []float64{
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1,
+	}))
+}
+
 // Tests
 
 func Test(t *testing.T) { check.TestingT(t) }

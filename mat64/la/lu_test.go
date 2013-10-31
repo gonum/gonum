@@ -45,30 +45,25 @@ func (s *S) TestLUD(c *check.C) {
 			sign: 1,
 		},
 	} {
-		a := &mat64.Dense{}
-		a.Clone(t.a)
-
-		lu, pivot, pivotsign := LUD(a)
+		lf := LU(mat64.DenseCopyOf(t.a))
 		if t.pivot != nil {
-			c.Check(pivot, check.DeepEquals, t.pivot)
-			c.Check(pivotsign, check.Equals, t.sign)
+			c.Check(lf.Pivot, check.DeepEquals, t.pivot)
+			c.Check(lf.Sign, check.Equals, t.sign)
 		}
 
-		l := LUGetL(lu)
+		l := lf.L()
 		if t.l != nil {
 			c.Check(l.Equals(t.l), check.Equals, true)
 		}
-		u := LUGetU(lu)
+		u := lf.U()
 		if t.u != nil {
 			c.Check(u.Equals(t.u), check.Equals, true)
 		}
 
 		l.Mul(l, u)
-		pa := &mat64.Dense{}
-		pa.Clone(t.a)
-		c.Check(l.EqualsApprox(pivotRows(pa, pivot), 1e-12), check.Equals, true)
+		c.Check(l.EqualsApprox(pivotRows(mat64.DenseCopyOf(t.a), lf.Pivot), 1e-12), check.Equals, true)
 
-		x := LUSolve(lu, eye(), pivot)
+		x := lf.Solve(eye())
 		t.a.Mul(t.a, x)
 		c.Check(t.a.EqualsApprox(eye(), 1e-12), check.Equals, true)
 	}
@@ -109,30 +104,25 @@ func (s *S) TestLUDGaussian(c *check.C) {
 			sign: 1,
 		},
 	} {
-		a := &mat64.Dense{}
-		a.Clone(t.a)
-
-		lu, pivot, pivotsign := LUDGaussian(a)
+		lf := LUGaussian(mat64.DenseCopyOf(t.a))
 		if t.pivot != nil {
-			c.Check(pivot, check.DeepEquals, t.pivot)
-			c.Check(pivotsign, check.Equals, t.sign)
+			c.Check(lf.Pivot, check.DeepEquals, t.pivot)
+			c.Check(lf.Sign, check.Equals, t.sign)
 		}
 
-		l := LUGetL(lu)
+		l := lf.L()
 		if t.l != nil {
 			c.Check(l.Equals(t.l), check.Equals, true)
 		}
-		u := LUGetU(lu)
+		u := lf.U()
 		if t.u != nil {
 			c.Check(u.Equals(t.u), check.Equals, true)
 		}
 
 		l.Mul(l, u)
-		pa := &mat64.Dense{}
-		pa.Clone(t.a)
-		c.Check(l.EqualsApprox(pivotRows(pa, pivot), 1e-12), check.Equals, true)
+		c.Check(l.EqualsApprox(pivotRows(mat64.DenseCopyOf(t.a), lf.Pivot), 1e-12), check.Equals, true)
 
-		x := LUSolve(lu, eye(), pivot)
+		x := lf.Solve(eye())
 		t.a.Mul(t.a, x)
 		c.Check(t.a.EqualsApprox(eye(), 1e-12), check.Equals, true)
 	}

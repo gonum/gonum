@@ -10,14 +10,6 @@ import (
 	check "launchpad.net/gocheck"
 )
 
-func eye() *mat64.Dense {
-	return mustDense(mat64.NewDense(3, 3, []float64{
-		1, 0, 0,
-		0, 1, 0,
-		0, 0, 1,
-	}))
-}
-
 func (s *S) TestCholesky(c *check.C) {
 	for _, t := range []struct {
 		a   *mat64.Dense
@@ -33,18 +25,17 @@ func (s *S) TestCholesky(c *check.C) {
 			spd: true,
 		},
 	} {
-		l, spd := CholeskyL(t.a)
-		c.Check(spd, check.Equals, t.spd)
+		cf := Cholesky(t.a)
+		c.Check(cf.SPD, check.Equals, t.spd)
 
 		lt := &mat64.Dense{}
-		lt.TCopy(l)
-		lc := &mat64.Dense{}
-		lc.Clone(l)
+		lt.TCopy(cf.L)
+		lc := mat64.DenseCopyOf(cf.L)
 
 		lc.Mul(lc, lt)
 		c.Check(lc.EqualsApprox(t.a, 1e-12), check.Equals, true)
 
-		x := CholeskySolve(l, eye())
+		x := cf.Solve(eye())
 
 		t.a.Mul(t.a, x)
 		c.Check(t.a.EqualsApprox(eye(), 1e-12), check.Equals, true)

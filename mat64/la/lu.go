@@ -10,6 +10,12 @@ import (
 	"math"
 )
 
+type LUFactors struct {
+	LU    *mat64.Dense
+	Pivot []int
+	Sign  int
+}
+
 // LUD performs an LU Decomposition for an m-by-n matrix a.
 //
 // If m >= n, the LU decomposition is an m-by-n unit lower triangular matrix L,
@@ -22,16 +28,16 @@ import (
 // singular, so the LUD will never fail. The primary use of the LU decomposition
 // is in the solution of square systems of simultaneous linear equations.  This
 // will fail if IsSingular() returns true.
-func LUD(a *mat64.Dense) (lu *mat64.Dense, piv []int, sign int) {
+func LU(a *mat64.Dense) LUFactors {
 	// Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 	m, n := a.Dims()
-	lu = a
+	lu := a
 
-	piv = make([]int, m)
+	piv := make([]int, m)
 	for i := range piv {
 		piv[i] = i
 	}
-	sign = 1
+	sign := 1
 
 	var (
 		luRowi = make([]float64, n)
@@ -88,10 +94,10 @@ func LUD(a *mat64.Dense) (lu *mat64.Dense, piv []int, sign int) {
 		}
 	}
 
-	return lu, piv, sign
+	return LUFactors{lu, piv, sign}
 }
 
-// LUD performs an LU Decomposition for an m-by-n matrix a using Gaussian elimination.
+// LUGaussian performs an LU Decomposition for an m-by-n matrix a using Gaussian elimination.
 // L and U are found using the "daxpy"-based elimination algorithm used in LINPACK and
 // MATLAB.
 //
@@ -105,16 +111,16 @@ func LUD(a *mat64.Dense) (lu *mat64.Dense, piv []int, sign int) {
 // singular, so the LUD will never fail. The primary use of the LU decomposition
 // is in the solution of square systems of simultaneous linear equations.  This
 // will fail if IsSingular() returns true.
-func LUDGaussian(a *mat64.Dense) (lu *mat64.Dense, piv []int, sign int) {
+func LUGaussian(a *mat64.Dense) LUFactors {
 	// Initialize.
 	m, n := a.Dims()
-	lu = a
+	lu := a
 
-	piv = make([]int, m)
+	piv := make([]int, m)
 	for i := range piv {
 		piv[i] = i
 	}
-	sign = 1
+	sign := 1
 
 	// Main loop.
 	for k := 0; k < n; k++ {
@@ -148,12 +154,13 @@ func LUDGaussian(a *mat64.Dense) (lu *mat64.Dense, piv []int, sign int) {
 		}
 	}
 
-	return lu, piv, sign
+	return LUFactors{lu, piv, sign}
 }
 
 // IsSingular returns whether the the upper triangular factor and hence a is
 // singular.
-func IsSingular(lu *mat64.Dense) bool {
+func (f LUFactors) IsSingular() bool {
+	lu := f.LU
 	_, n := lu.Dims()
 	for j := 0; j < n; j++ {
 		if lu.At(j, j) == 0 {
@@ -163,10 +170,11 @@ func IsSingular(lu *mat64.Dense) bool {
 	return false
 }
 
-// LUGetL returns the lower triangular factor of the LU decomposition.
-func LUGetL(lu *mat64.Dense) (l *mat64.Dense) {
+// L returns the lower triangular factor of the LU decomposition.
+func (f LUFactors) L() *mat64.Dense {
+	lu := f.LU
 	m, n := lu.Dims()
-	l, _ = mat64.NewDense(m, n, make([]float64, m*n))
+	l, _ := mat64.NewDense(m, n, make([]float64, m*n))
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
 			if i > j {
@@ -179,10 +187,11 @@ func LUGetL(lu *mat64.Dense) (l *mat64.Dense) {
 	return l
 }
 
-// LUGetU returns the upper triangular factor of the LU decomposition.
-func LUGetU(lu *mat64.Dense) (u *mat64.Dense) {
+// U returns the upper triangular factor of the LU decomposition.
+func (f LUFactors) U() *mat64.Dense {
+	lu := f.LU
 	m, n := lu.Dims()
-	u, _ = mat64.NewDense(m, n, make([]float64, m*n))
+	u, _ := mat64.NewDense(m, n, make([]float64, m*n))
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			if i <= j {
@@ -193,9 +202,10 @@ func LUGetU(lu *mat64.Dense) (u *mat64.Dense) {
 	return u
 }
 
-// LUDet returns the determinant of matrix a decomposed into lu. The matrix
+// Det returns the determinant of matrix a decomposed into lu. The matrix
 // a must have been square.
-func LUDet(lu *mat64.Dense, sign int) float64 {
+func (f LUFactors) Det() float64 {
+	lu, sign := f.LU, f.Sign
 	m, n := lu.Dims()
 	if m != n {
 		panic(mat64.ErrSquare)
@@ -207,16 +217,17 @@ func LUDet(lu *mat64.Dense, sign int) float64 {
 	return d
 }
 
-// LUSolve computes a solution of a.x = b where b has as many rows as a. A matrix x
+// Solve computes a solution of a.x = b where b has as many rows as a. A matrix x
 // is returned that minimizes the two norm of L*U*X = B(piv,:). QRSolve will panic
 // if a is singular. The matrix b is overwritten during the call.
-func LUSolve(lu, b *mat64.Dense, piv []int) (x *mat64.Dense) {
+func (f LUFactors) Solve(b *mat64.Dense) (x *mat64.Dense) {
+	lu, piv := f.LU, f.Pivot
 	m, n := lu.Dims()
 	bm, _ := b.Dims()
 	if bm != m {
 		panic(mat64.ErrShape)
 	}
-	if IsSingular(lu) {
+	if f.IsSingular() {
 		panic("la: matrix is singular")
 	}
 

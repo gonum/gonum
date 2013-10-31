@@ -10,14 +10,19 @@ import (
 	"math"
 )
 
+type CholeskyFactor struct {
+	L   *mat64.Dense
+	SPD bool
+}
+
 // CholeskyL returns the left Cholesky decomposition of the matrix a and whether
 // the matrix is symmetric or positive definite, the returned matrix l is a lower
 // triangular matrix such that a = l.l'.
-func CholeskyL(a *mat64.Dense) (l *mat64.Dense, spd bool) {
+func Cholesky(a *mat64.Dense) CholeskyFactor {
 	// Initialize.
 	m, n := a.Dims()
-	spd = m == n
-	l, _ = mat64.NewDense(n, n, make([]float64, n*n))
+	spd := m == n
+	l, _ := mat64.NewDense(n, n, make([]float64, n*n))
 
 	// Main loop.
 	lRowj := make([]float64, n)
@@ -45,7 +50,7 @@ func CholeskyL(a *mat64.Dense) (l *mat64.Dense, spd bool) {
 		}
 	}
 
-	return l, spd
+	return CholeskyFactor{L: l, SPD: spd}
 }
 
 // CholeskyR returns the right Cholesky decomposition of the matrix a and whether
@@ -84,11 +89,13 @@ func CholeskyR(a *mat64.Dense) (r *mat64.Dense, spd bool) {
 // CholeskySolve returns a matrix x that solves a.x = b where a = l.l'. The matrix b must
 // have the same number of rows as a, and a must be symmetric and positive definite. The
 // matrix b is overwritten by the operation.
-func CholeskySolve(l, b *mat64.Dense) (x *mat64.Dense) {
-	m, n := l.Dims()
-	if n != m {
-		panic(mat64.ErrSquare)
+func (f CholeskyFactor) Solve(b *mat64.Dense) (x *mat64.Dense) {
+	if !f.SPD {
+		panic("la: matrix not symmetric positive definite")
 	}
+	l := f.L
+
+	_, n := l.Dims()
 	_, bn := b.Dims()
 	if n != bn {
 		panic(mat64.ErrShape)

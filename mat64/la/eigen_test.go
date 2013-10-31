@@ -85,24 +85,20 @@ func (s *S) TestEigen(c *check.C) {
 			epsilon: math.Pow(2, -52.0),
 		},
 	} {
-		a := &mat64.Dense{}
-		a.Clone(t.a)
-
-		d, e, v := Eigen(t.a, t.epsilon)
+		ef := Eigen(mat64.DenseCopyOf(t.a), t.epsilon)
 		if t.d != nil {
-			c.Check(d, check.DeepEquals, t.d)
+			c.Check(ef.d, check.DeepEquals, t.d)
 		}
 		if t.e != nil {
-			c.Check(e, check.DeepEquals, t.e)
+			c.Check(ef.e, check.DeepEquals, t.e)
 		}
-		dm := BuildD(d, e)
 
 		if t.v != nil {
-			c.Check(v.Equals(t.v), check.Equals, true)
+			c.Check(ef.V.Equals(t.v), check.Equals, true)
 		}
 
-		a.Mul(a, v)
-		v.Mul(v, dm)
-		c.Check(a.EqualsApprox(v, 1e-12), check.Equals, true)
+		t.a.Mul(t.a, ef.V)
+		ef.V.Mul(ef.V, ef.D())
+		c.Check(t.a.EqualsApprox(ef.V, 1e-12), check.Equals, true)
 	}
 }

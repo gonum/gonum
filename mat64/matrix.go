@@ -325,17 +325,18 @@ type Error string
 func (err Error) Error() string { return string(err) }
 
 const (
-	ErrIndexOutOfRange = Error("matrix: index out of range")
-	ErrZeroLength      = Error("matrix: zero length in matrix definition")
-	ErrRowLength       = Error("matrix: row length mismatch")
-	ErrColLength       = Error("matrix: col length mismatch")
-	ErrSquare          = Error("matrix: expect square matrix")
-	ErrNormOrder       = Error("matrix: invalid norm order for matrix")
-	ErrSingular        = Error("matrix: matrix is singular")
-	ErrShape           = Error("matrix: dimension mismatch")
-	ErrIllegalStride   = Error("matrix: illegal stride")
-	ErrPivot           = Error("matrix: malformed pivot list")
-	ErrIllegalOrder    = Error("matrix: illegal order")
+	ErrIndexOutOfRange = Error("mat64: index out of range")
+	ErrZeroLength      = Error("mat64: zero length in matrix definition")
+	ErrRowLength       = Error("mat64: row length mismatch")
+	ErrColLength       = Error("mat64: col length mismatch")
+	ErrSquare          = Error("mat64: expect square matrix")
+	ErrNormOrder       = Error("mat64: invalid norm order for matrix")
+	ErrSingular        = Error("mat64: matrix is singular")
+	ErrShape           = Error("mat64: dimension mismatch")
+	ErrIllegalStride   = Error("mat64: illegal stride")
+	ErrPivot           = Error("mat64: malformed pivot list")
+	ErrIllegalOrder    = Error("mat64: illegal order")
+	ErrNoEngine        = Error("mat64: no blas engine registered: call Register()")
 )
 
 func min(a, b int) int {

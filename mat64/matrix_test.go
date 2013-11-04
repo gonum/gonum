@@ -465,7 +465,10 @@ func (s *S) TestMul(c *check.C) {
 	}
 }
 
-func randDense(size int, rho float64, rnd func() float64) *Dense {
+func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
+	if size == 0 {
+		return nil, ErrZeroLength
+	}
 	d := &Dense{BlasMatrix{
 		Order: blasOrder,
 		Rows:  size, Cols: size, Stride: size,
@@ -478,94 +481,66 @@ func randDense(size int, rho float64, rnd func() float64) *Dense {
 			}
 		}
 	}
-	return d
+	return d, nil
 }
 
 func (s *S) TestLU(c *check.C) {
-	for _, fns := range []struct {
-		I func(int) (Matrix, error)
-		R func(size int, d float64, rnd func() float64) (Matrix, error)
-	}{
-		{
-			I: func(size int) (Matrix, error) {
-				if size == 0 {
-					return nil, ErrZeroLength
-				}
-				m := &Dense{BlasMatrix{
-					Order: blasOrder,
-					Rows:  size, Cols: size, Stride: size,
-					Data: make([]float64, size*size),
-				}}
-				for i := 0; i < size; i++ {
-					m.Set(i, i, 1)
-				}
-				return m, nil
-			},
-			R: func(size int, rho float64, rnd func() float64) (Matrix, error) {
-				if size == 0 {
-					return nil, ErrZeroLength
-				}
-				return randDense(size, rho, rnd), nil
-			},
-		},
-	} {
-		for i := 0; i < 100; i++ {
-			size := rand.Intn(100)
-			r, err := fns.R(size, rand.Float64(), rand.NormFloat64)
-			if size == 0 {
-				c.Check(err, check.Equals, ErrZeroLength)
-				continue
-			}
-			c.Assert(err, check.Equals, nil)
+	for i := 0; i < 100; i++ {
+		size := rand.Intn(100)
+		r, err := randDense(size, rand.Float64(), rand.NormFloat64)
+		if size == 0 {
+			c.Check(err, check.Equals, ErrZeroLength)
+			continue
+		}
+		c.Assert(err, check.Equals, nil)
 
-			var (
-				u, l Dense
-				rc   *Dense
-			)
+		var (
+			u, l Dense
+			rc   *Dense
+		)
 
-			u.U(r)
-			l.L(r)
-			for m := 0; m < size; m++ {
-				for n := 0; n < size; n++ {
-					switch {
-					case m < n: // Upper triangular matrix.
-						c.Check(u.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					case m == n: // Diagonal matrix.
-						c.Check(u.At(m, n), check.Equals, l.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-						c.Check(u.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					case m < n: // Lower triangular matrix.
-						c.Check(l.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					}
+		u.U(r)
+		l.L(r)
+		for m := 0; m < size; m++ {
+			for n := 0; n < size; n++ {
+				switch {
+				case m < n: // Upper triangular matrix.
+					c.Check(u.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m == n: // Diagonal matrix.
+					c.Check(u.At(m, n), check.Equals, l.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					c.Check(u.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m < n: // Lower triangular matrix.
+					c.Check(l.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
 				}
 			}
+		}
 
-			rc = DenseCopyOf(r)
-			rc.U(rc)
-			for m := 0; m < size; m++ {
-				for n := 0; n < size; n++ {
-					switch {
-					case m < n: // Upper triangular matrix.
-						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					case m == n: // Diagonal matrix.
-						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					case m > n: // Lower triangular matrix.
-						c.Check(rc.At(m, n), check.Equals, 0., check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					}
+		rc = DenseCopyOf(r)
+		rc.U(rc)
+		for m := 0; m < size; m++ {
+			for n := 0; n < size; n++ {
+				switch {
+				case m < n: // Upper triangular matrix.
+					c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m == n: // Diagonal matrix.
+					c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m > n: // Lower triangular matrix.
+					c.Check(rc.At(m, n), check.Equals, 0., check.Commentf("Test #%d At(%d, %d)", i, m, n))
 				}
 			}
+		}
 
-			rc = DenseCopyOf(r)
-			rc.L(rc)
-			for m := 0; m < size; m++ {
-				for n := 0; n < size; n++ {
-					switch {
-					case m < n: // Upper triangular matrix.
-						c.Check(rc.At(m, n), check.Equals, 0., check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					case m == n: // Diagonal matrix.
-						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					case m > n: // Lower triangular matrix.
-						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					}
+		rc = DenseCopyOf(r)
+		rc.L(rc)
+		for m := 0; m < size; m++ {
+			for n := 0; n < size; n++ {
+				switch {
+				case m < n: // Upper triangular matrix.
+					c.Check(rc.At(m, n), check.Equals, 0., check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m == n: // Diagonal matrix.
+					c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m > n: // Lower triangular matrix.
+					c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
 				}
 			}
 		}
@@ -705,8 +680,8 @@ func BenchmarkMulDense1000Hundredth(b *testing.B)  { denseMulBench(b, 1000, 0.01
 func BenchmarkMulDense1000Thousandth(b *testing.B) { denseMulBench(b, 1000, 0.001) }
 func denseMulBench(b *testing.B, size int, rho float64) {
 	b.StopTimer()
-	a := randDense(size, rho, rand.NormFloat64)
-	d := randDense(size, rho, rand.NormFloat64)
+	a, _ := randDense(size, rho, rand.NormFloat64)
+	d, _ := randDense(size, rho, rand.NormFloat64)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		var n Dense
@@ -723,8 +698,8 @@ func BenchmarkPreMulDense1000Hundredth(b *testing.B)  { denseMulBench(b, 1000, 0
 func BenchmarkPreMulDense1000Thousandth(b *testing.B) { denseMulBench(b, 1000, 0.001) }
 func densePreMulBench(b *testing.B, size int, rho float64) {
 	b.StopTimer()
-	a := randDense(size, rho, rand.NormFloat64)
-	d := randDense(size, rho, rand.NormFloat64)
+	a, _ := randDense(size, rho, rand.NormFloat64)
+	d, _ := randDense(size, rho, rand.NormFloat64)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		wd.Mul(a, d)

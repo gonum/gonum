@@ -1227,7 +1227,7 @@ func (m *Dense) L(a Matrix) {
 func (m *Dense) zeroUpper() {
 	switch blasOrder {
 	case blas.RowMajor:
-		for i := 1; i < m.mat.Rows-1; i++ {
+		for i := 0; i < m.mat.Rows-1; i++ {
 			zero(m.mat.Data[i*m.mat.Stride+i+1 : (i+1)*m.mat.Stride])
 		}
 	case blas.ColMajor:

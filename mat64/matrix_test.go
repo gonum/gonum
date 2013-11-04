@@ -472,8 +472,10 @@ func randDense(size int, rho float64, rnd func() float64) *Dense {
 		Data: make([]float64, size*size),
 	}}
 	for i := 0; i < size; i++ {
-		if rand.Float64() < rho {
-			d.Set(i, i, rnd())
+		for j := 0; j < size; j++ {
+			if rand.Float64() < rho {
+				d.Set(i, j, rnd())
+			}
 		}
 	}
 	return d
@@ -509,12 +511,6 @@ func (s *S) TestLU(c *check.C) {
 	} {
 		for i := 0; i < 100; i++ {
 			size := rand.Intn(100)
-			I, err := fns.I(size)
-			if size == 0 {
-				c.Check(err, check.Equals, ErrZeroLength)
-			} else {
-				c.Assert(err, check.Equals, nil)
-			}
 			r, err := fns.R(size, rand.Float64(), rand.NormFloat64)
 			if size == 0 {
 				c.Check(err, check.Equals, ErrZeroLength)
@@ -522,27 +518,56 @@ func (s *S) TestLU(c *check.C) {
 			}
 			c.Assert(err, check.Equals, nil)
 
-			var u, l, d, t Dense
+			var (
+				u, l Dense
+				rc   *Dense
+			)
 
 			u.U(r)
 			l.L(r)
-			d.MulElem(r, I)
-			t.Sub(&l, &d)
-			t.Add(&t, &u)
-			c.Check(r.(*Dense).Equals(&t), check.Equals, true, check.Commentf("Test %d", i))
+			for m := 0; m < size; m++ {
+				for n := 0; n < size; n++ {
+					switch {
+					case m < n: // Upper triangular matrix.
+						c.Check(u.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					case m == n: // Diagonal matrix.
+						c.Check(u.At(m, n), check.Equals, l.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+						c.Check(u.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					case m < n: // Lower triangular matrix.
+						c.Check(l.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					}
+				}
+			}
 
-			t.MulElem(&l, I)
-			c.Check(d.Equals(&t), check.Equals, true, check.Commentf("Test %d", i))
-			t.MulElem(&u, I)
-			c.Check(d.Equals(&t), check.Equals, true, check.Commentf("Test %d", i))
+			rc = DenseCopyOf(r)
+			rc.U(rc)
+			for m := 0; m < size; m++ {
+				for n := 0; n < size; n++ {
+					switch {
+					case m < n: // Upper triangular matrix.
+						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					case m == n: // Diagonal matrix.
+						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					case m > n: // Lower triangular matrix.
+						c.Check(rc.At(m, n), check.Equals, 0., check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					}
+				}
+			}
 
-			t.Clone(r)
-			r.(*Dense).U(r)
-			c.Check(r.(*Dense).Equals(&u), check.Equals, true, check.Commentf("Test %d", i))
-
-			r = &t
-			r.(*Dense).L(r)
-			c.Check(r.(*Dense).Equals(&l), check.Equals, true, check.Commentf("Test %d", i))
+			rc = DenseCopyOf(r)
+			rc.L(rc)
+			for m := 0; m < size; m++ {
+				for n := 0; n < size; n++ {
+					switch {
+					case m < n: // Upper triangular matrix.
+						c.Check(rc.At(m, n), check.Equals, 0., check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					case m == n: // Diagonal matrix.
+						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					case m > n: // Lower triangular matrix.
+						c.Check(rc.At(m, n), check.Equals, r.At(m, n), check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					}
+				}
+			}
 		}
 	}
 }

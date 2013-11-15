@@ -13,15 +13,7 @@ var blasEngine blas.Float64
 
 func Register(b blas.Float64) { blasEngine = b }
 
-var blasOrder = blas.RowMajor
-
-func Order(o blas.Order) blas.Order {
-	if o == blas.RowMajor || o == blas.ColMajor {
-		o, blasOrder = blasOrder, o
-		return o
-	}
-	return blasOrder
-}
+const BlasOrder = blas.RowMajor
 
 var (
 	matrix *Dense
@@ -73,7 +65,7 @@ func NewDense(r, c int, mat []float64) (*Dense, error) {
 		return nil, ErrShape
 	}
 	var stride int
-	switch blasOrder {
+	switch BlasOrder {
 	case blas.RowMajor:
 		stride = c
 	case blas.ColMajor:
@@ -82,7 +74,7 @@ func NewDense(r, c int, mat []float64) (*Dense, error) {
 		panic(ErrIllegalOrder)
 	}
 	return &Dense{BlasMatrix{
-		Order:  blasOrder,
+		Order:  BlasOrder,
 		Rows:   r,
 		Cols:   c,
 		Stride: stride,
@@ -241,7 +233,7 @@ func (m *Dense) Submatrix(a Matrix, i, j, r, c int) {
 func (m *Dense) Clone(a Matrix) {
 	r, c := a.Dims()
 	m.mat = BlasMatrix{
-		Order: blasOrder,
+		Order: BlasOrder,
 		Rows:  r,
 		Cols:  c,
 	}
@@ -249,7 +241,7 @@ func (m *Dense) Clone(a Matrix) {
 	switch a := a.(type) {
 	case Blasser:
 		amat := a.BlasMatrix()
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			for i := 0; i < r; i++ {
 				copy(data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
@@ -265,7 +257,7 @@ func (m *Dense) Clone(a Matrix) {
 		}
 		m.mat.Data = data
 	case Vectorer:
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			for i := 0; i < r; i++ {
 				a.Row(data[i*c:(i+1)*c], i)
@@ -298,7 +290,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 	switch a := a.(type) {
 	case Blasser:
 		amat := a.BlasMatrix()
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			for i := 0; i < r; i++ {
 				copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
@@ -311,7 +303,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 			panic(ErrIllegalOrder)
 		}
 	case Vectorer:
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			for i := 0; i < r; i++ {
 				a.Row(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], i)
@@ -428,7 +420,7 @@ func (m *Dense) Norm(ord float64) float64 {
 		}
 	case ord == 0:
 		var l int
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			l = m.mat.Cols
 		case blas.ColMajor:
@@ -462,12 +454,12 @@ func (m *Dense) Add(a, b Matrix) {
 	var k, l int
 	if m.isZero() {
 		m.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  ac,
 			Data:  realloc(m.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			m.mat.Stride, k, l = ac, ar, ac
 		case blas.ColMajor:
@@ -478,7 +470,7 @@ func (m *Dense) Add(a, b Matrix) {
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
 	} else {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = ar, ac
 		case blas.ColMajor:
@@ -491,7 +483,7 @@ func (m *Dense) Add(a, b Matrix) {
 	if a, ok := a.(Blasser); ok {
 		if b, ok := b.(Blasser); ok {
 			amat, bmat := a.BlasMatrix(), b.BlasMatrix()
-			if amat.Order != blasOrder || bmat.Order != blasOrder {
+			if amat.Order != BlasOrder || bmat.Order != BlasOrder {
 				panic(ErrIllegalOrder)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < k*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -505,7 +497,7 @@ func (m *Dense) Add(a, b Matrix) {
 
 	if a, ok := a.(Vectorer); ok {
 		if b, ok := b.(Vectorer); ok {
-			switch blasOrder {
+			switch BlasOrder {
 			case blas.RowMajor:
 				rowa := make([]float64, ac)
 				rowb := make([]float64, bc)
@@ -551,12 +543,12 @@ func (m *Dense) Sub(a, b Matrix) {
 	var k, l int
 	if m.isZero() {
 		m.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  ac,
 			Data:  realloc(m.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			m.mat.Stride, k, l = ac, ar, ac
 		case blas.ColMajor:
@@ -567,7 +559,7 @@ func (m *Dense) Sub(a, b Matrix) {
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
 	} else {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = ar, ac
 		case blas.ColMajor:
@@ -580,7 +572,7 @@ func (m *Dense) Sub(a, b Matrix) {
 	if a, ok := a.(Blasser); ok {
 		if b, ok := b.(Blasser); ok {
 			amat, bmat := a.BlasMatrix(), b.BlasMatrix()
-			if amat.Order != blasOrder || bmat.Order != blasOrder {
+			if amat.Order != BlasOrder || bmat.Order != BlasOrder {
 				panic(ErrIllegalOrder)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < k*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -594,7 +586,7 @@ func (m *Dense) Sub(a, b Matrix) {
 
 	if a, ok := a.(Vectorer); ok {
 		if b, ok := b.(Vectorer); ok {
-			switch blasOrder {
+			switch BlasOrder {
 			case blas.RowMajor:
 				rowa := make([]float64, ac)
 				rowb := make([]float64, bc)
@@ -640,12 +632,12 @@ func (m *Dense) MulElem(a, b Matrix) {
 	var k, l int
 	if m.isZero() {
 		m.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  ac,
 			Data:  realloc(m.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			m.mat.Stride, k, l = ac, ar, ac
 		case blas.ColMajor:
@@ -656,7 +648,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
 	} else {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = ar, ac
 		case blas.ColMajor:
@@ -669,7 +661,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 	if a, ok := a.(Blasser); ok {
 		if b, ok := b.(Blasser); ok {
 			amat, bmat := a.BlasMatrix(), b.BlasMatrix()
-			if amat.Order != blasOrder || bmat.Order != blasOrder {
+			if amat.Order != BlasOrder || bmat.Order != BlasOrder {
 				panic(ErrIllegalOrder)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < k*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -683,7 +675,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 
 	if a, ok := a.(Vectorer); ok {
 		if b, ok := b.(Vectorer); ok {
-			switch blasOrder {
+			switch BlasOrder {
 			case blas.RowMajor:
 				rowa := make([]float64, ac)
 				rowb := make([]float64, bc)
@@ -727,7 +719,7 @@ func (m *Dense) Dot(b Matrix) float64 {
 	}
 
 	var k, l int
-	switch blasOrder {
+	switch BlasOrder {
 	case blas.RowMajor:
 		k, l = mr, mc
 	case blas.ColMajor:
@@ -740,7 +732,7 @@ func (m *Dense) Dot(b Matrix) float64 {
 
 	if b, ok := b.(Blasser); ok {
 		bmat := b.BlasMatrix()
-		if m.mat.Order != blasOrder || bmat.Order != blasOrder {
+		if m.mat.Order != BlasOrder || bmat.Order != BlasOrder {
 			panic(ErrIllegalOrder)
 		}
 		for jm, jb := 0, 0; jm < k*m.mat.Stride; jm, jb = jm+m.mat.Stride, jb+bmat.Stride {
@@ -752,7 +744,7 @@ func (m *Dense) Dot(b Matrix) float64 {
 	}
 
 	if b, ok := b.(Vectorer); ok {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			row := make([]float64, bc)
 			for r := 0; r < br; r++ {
@@ -795,12 +787,12 @@ func (m *Dense) Mul(a, b Matrix) {
 	}
 	if w.isZero() {
 		w.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  bc,
 			Data:  realloc(w.mat.Data, ar*bc),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			w.mat.Stride = bc
 		case blas.ColMajor:
@@ -815,14 +807,14 @@ func (m *Dense) Mul(a, b Matrix) {
 	if a, ok := a.(Blasser); ok {
 		if b, ok := b.(Blasser); ok {
 			amat, bmat := a.BlasMatrix(), b.BlasMatrix()
-			if amat.Order != blasOrder || bmat.Order != blasOrder {
+			if amat.Order != BlasOrder || bmat.Order != BlasOrder {
 				panic(ErrIllegalOrder)
 			}
 			if blasEngine == nil {
 				panic(ErrNoEngine)
 			}
 			blasEngine.Dgemm(
-				blasOrder,
+				BlasOrder,
 				blas.NoTrans, blas.NoTrans,
 				ar, bc, ac,
 				1.,
@@ -844,7 +836,7 @@ func (m *Dense) Mul(a, b Matrix) {
 					if blasEngine == nil {
 						panic(ErrNoEngine)
 					}
-					switch blasOrder {
+					switch BlasOrder {
 					case blas.RowMajor:
 						w.mat.Data[r*w.mat.Stride+w.mat.Cols] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
 					case blas.ColMajor:
@@ -869,7 +861,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			for i, e := range row {
 				v += e * b.At(i, c)
 			}
-			switch blasOrder {
+			switch BlasOrder {
 			case blas.RowMajor:
 				w.mat.Data[r*w.mat.Stride+w.mat.Cols] = v
 			case blas.ColMajor:
@@ -888,12 +880,12 @@ func (m *Dense) Scale(f float64, a Matrix) {
 	var k, l int
 	if m.isZero() {
 		m.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  ac,
 			Data:  realloc(m.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			m.mat.Stride, k, l = ac, ar, ac
 		case blas.ColMajor:
@@ -904,7 +896,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
 	} else {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = ar, ac
 		case blas.ColMajor:
@@ -916,7 +908,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 
 	if a, ok := a.(Blasser); ok {
 		amat := a.BlasMatrix()
-		if amat.Order != blasOrder {
+		if amat.Order != BlasOrder {
 			panic(ErrIllegalOrder)
 		}
 		for ja, jm := 0, 0; ja < k*amat.Stride; ja, jm = ja+amat.Stride, jm+m.mat.Stride {
@@ -928,7 +920,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 	}
 
 	if a, ok := a.(Vectorer); ok {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			row := make([]float64, ac)
 			for r := 0; r < ar; r++ {
@@ -964,12 +956,12 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 	var k, l int
 	if m.isZero() {
 		m.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  ac,
 			Data:  realloc(m.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			m.mat.Stride, k, l = ac, ar, ac
 		case blas.ColMajor:
@@ -980,7 +972,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
 	} else {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = ar, ac
 		case blas.ColMajor:
@@ -992,13 +984,13 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 
 	if a, ok := a.(Blasser); ok {
 		amat := a.BlasMatrix()
-		if amat.Order != blasOrder {
+		if amat.Order != BlasOrder {
 			panic(ErrIllegalOrder)
 		}
 		var r, c int
 		for j, ja, jm := 0, 0, 0; ja < k*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
 			for i, v := range amat.Data[ja : ja+l] {
-				if blasOrder == blas.RowMajor {
+				if BlasOrder == blas.RowMajor {
 					r, c = j, i
 				} else {
 					r, c = i, j
@@ -1010,7 +1002,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 	}
 
 	if a, ok := a.(Vectorer); ok {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			row := make([]float64, ac)
 			for r := 0; r < ar; r++ {
@@ -1060,12 +1052,12 @@ func (m *Dense) U(a Matrix) {
 		return
 	case m.isZero():
 		m.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  ac,
 			Data:  realloc(m.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			m.mat.Stride, k, l = ac, ar, ac
 		case blas.ColMajor:
@@ -1076,7 +1068,7 @@ func (m *Dense) U(a Matrix) {
 	case ar != m.mat.Rows || ac != m.mat.Cols:
 		panic(ErrShape)
 	default:
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = ar, ac
 		case blas.ColMajor:
@@ -1088,7 +1080,7 @@ func (m *Dense) U(a Matrix) {
 
 	if a, ok := a.(Blasser); ok {
 		amat := a.BlasMatrix()
-		if amat.Order != blasOrder {
+		if amat.Order != BlasOrder {
 			panic(ErrIllegalOrder)
 		}
 		copy(m.mat.Data[:l], amat.Data[:l])
@@ -1100,7 +1092,7 @@ func (m *Dense) U(a Matrix) {
 	}
 
 	if a, ok := a.(Vectorer); ok {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			row := make([]float64, ac)
 			copy(m.mat.Data[:m.mat.Cols], a.Row(row, 0))
@@ -1129,7 +1121,7 @@ func (m *Dense) U(a Matrix) {
 }
 
 func (m *Dense) zeroLower() {
-	switch blasOrder {
+	switch BlasOrder {
 	case blas.RowMajor:
 		for i := 1; i < m.mat.Rows; i++ {
 			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+i])
@@ -1156,12 +1148,12 @@ func (m *Dense) L(a Matrix) {
 		return
 	case m.isZero():
 		m.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ar,
 			Cols:  ac,
 			Data:  realloc(m.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			m.mat.Stride, k, l = ac, ar, ac
 		case blas.ColMajor:
@@ -1172,7 +1164,7 @@ func (m *Dense) L(a Matrix) {
 	case ar != m.mat.Rows || ac != m.mat.Cols:
 		panic(ErrShape)
 	default:
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = ac, ar
 		case blas.ColMajor:
@@ -1184,7 +1176,7 @@ func (m *Dense) L(a Matrix) {
 
 	if a, ok := a.(Blasser); ok {
 		amat := a.BlasMatrix()
-		if amat.Order != blasOrder {
+		if amat.Order != BlasOrder {
 			panic(ErrIllegalOrder)
 		}
 		copy(m.mat.Data[:l], amat.Data[:l])
@@ -1196,7 +1188,7 @@ func (m *Dense) L(a Matrix) {
 	}
 
 	if a, ok := a.(Vectorer); ok {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			row := make([]float64, ac)
 			for r := 0; r < ar; r++ {
@@ -1225,7 +1217,7 @@ func (m *Dense) L(a Matrix) {
 }
 
 func (m *Dense) zeroUpper() {
-	switch blasOrder {
+	switch BlasOrder {
 	case blas.RowMajor:
 		for i := 0; i < m.mat.Rows-1; i++ {
 			zero(m.mat.Data[i*m.mat.Stride+i+1 : (i+1)*m.mat.Stride])
@@ -1248,12 +1240,12 @@ func (m *Dense) TCopy(a Matrix) {
 	}
 	if w.isZero() {
 		w.mat = BlasMatrix{
-			Order: blasOrder,
+			Order: BlasOrder,
 			Rows:  ac,
 			Cols:  ar,
 			Data:  realloc(w.mat.Data, ar*ac),
 		}
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			w.mat.Stride = ar
 		case blas.ColMajor:
@@ -1263,7 +1255,7 @@ func (m *Dense) TCopy(a Matrix) {
 		}
 	} else if ar != m.mat.Cols || ac != m.mat.Rows {
 		panic(ErrShape)
-	} else if blasOrder != blas.RowMajor && blasOrder != blas.ColMajor {
+	} else if BlasOrder != blas.RowMajor && BlasOrder != blas.ColMajor {
 		panic(ErrIllegalOrder)
 	}
 	switch a := a.(type) {
@@ -1285,7 +1277,7 @@ func (m *Dense) TCopy(a Matrix) {
 
 func (m *Dense) Sum() float64 {
 	var l int
-	switch blasOrder {
+	switch BlasOrder {
 	case blas.RowMajor:
 		l = m.mat.Cols
 	case blas.ColMajor:
@@ -1310,7 +1302,7 @@ func (m *Dense) Equals(b Matrix) bool {
 
 	if b, ok := b.(Blasser); ok {
 		var k, l int
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = br, bc
 		case blas.ColMajor:
@@ -1330,7 +1322,7 @@ func (m *Dense) Equals(b Matrix) bool {
 	}
 
 	if b, ok := b.(Vectorer); ok {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			rowb := make([]float64, bc)
 			for r := 0; r < br; r++ {
@@ -1375,7 +1367,7 @@ func (m *Dense) EqualsApprox(b Matrix, epsilon float64) bool {
 
 	if b, ok := b.(Blasser); ok {
 		var k, l int
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			k, l = br, bc
 		case blas.ColMajor:
@@ -1395,7 +1387,7 @@ func (m *Dense) EqualsApprox(b Matrix, epsilon float64) bool {
 	}
 
 	if b, ok := b.(Vectorer); ok {
-		switch blasOrder {
+		switch BlasOrder {
 		case blas.RowMajor:
 			rowb := make([]float64, bc)
 			for r := 0; r < br; r++ {

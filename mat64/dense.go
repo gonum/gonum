@@ -82,7 +82,12 @@ func DenseCopyOf(a Matrix) *Dense {
 	return d
 }
 
-func (m *Dense) LoadBlas(b BlasMatrix) { m.mat = b }
+func (m *Dense) LoadBlas(b BlasMatrix) {
+	if b.Order != BlasOrder {
+		panic(ErrIllegalOrder)
+	}
+	m.mat = b
+}
 
 func (m *Dense) BlasMatrix() BlasMatrix { return m.mat }
 

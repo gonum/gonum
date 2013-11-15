@@ -80,9 +80,6 @@ func (m *Vec) Mul(a, b Matrix) {
 
 	if a, ok := a.(Blasser); ok {
 		amat := a.BlasMatrix()
-		if amat.Order != BlasOrder {
-			panic(ErrIllegalOrder)
-		}
 		blasEngine.Dgemv(BlasOrder,
 			blas.NoTrans,
 			ar, ac,
@@ -98,12 +95,7 @@ func (m *Vec) Mul(a, b Matrix) {
 	if a, ok := a.(Vectorer); ok {
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
-			switch BlasOrder {
-			case blas.RowMajor, blas.ColMajor:
-				w[r] = blasEngine.Ddot(ac, a.Row(row, r), 1, bv, 1)
-			default:
-				panic(ErrIllegalOrder)
-			}
+			w[r] = blasEngine.Ddot(ac, a.Row(row, r), 1, bv, 1)
 		}
 		*m = w
 		return

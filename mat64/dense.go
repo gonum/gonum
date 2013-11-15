@@ -13,6 +13,8 @@ var blasEngine blas.Float64
 
 func Register(b blas.Float64) { blasEngine = b }
 
+func Registered() blas.Float64 { return blasEngine }
+
 const BlasOrder = blas.RowMajor
 
 var (

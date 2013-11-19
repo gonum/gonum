@@ -3,14 +3,13 @@
 // license that can be found in the LICENSE file.
 // Based on the EigenvalueDecomposition class from Jama 1.0.3.
 
-package la
+package mat64
 
 import (
-	"github.com/gonum/matrix/mat64"
 	"math"
 )
 
-func symmetric(m *mat64.Dense) bool {
+func symmetric(m *Dense) bool {
 	n, _ := m.Dims()
 	for i := 0; i < n; i++ {
 		for j := 0; j < i; j++ {
@@ -23,7 +22,7 @@ func symmetric(m *mat64.Dense) bool {
 }
 
 type EigenFactors struct {
-	V    *mat64.Dense
+	V    *Dense
 	d, e []float64
 }
 
@@ -39,13 +38,13 @@ type EigenFactors struct {
 // i.e. a.v equals v.D. The matrix v may be badly conditioned, or even
 // singular, so the validity of the equation a = v*D*inverse(v) depends
 // upon the 2-norm condition number of v.
-func Eigen(a *mat64.Dense, epsilon float64) EigenFactors {
+func Eigen(a *Dense, epsilon float64) EigenFactors {
 	m, n := a.Dims()
 	if m != n {
-		panic(mat64.ErrSquare)
+		panic(ErrSquare)
 	}
 
-	var v *mat64.Dense
+	var v *Dense
 	d := make([]float64, n)
 	e := make([]float64, n)
 
@@ -57,7 +56,7 @@ func Eigen(a *mat64.Dense, epsilon float64) EigenFactors {
 		tql2(d, e, v, epsilon)
 	} else {
 		// Reduce to Hessenberg form.
-		var hess *mat64.Dense
+		var hess *Dense
 		hess, v = orthes(a)
 
 		// Reduce Hessenberg to real Schur form.
@@ -73,7 +72,7 @@ func Eigen(a *mat64.Dense, epsilon float64) EigenFactors {
 // Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
 // Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
 // Fortran subroutine in EISPACK.
-func tred2(a *mat64.Dense, d, e []float64) (v *mat64.Dense) {
+func tred2(a *Dense, d, e []float64) (v *Dense) {
 	n := len(d)
 	v = a
 
@@ -188,7 +187,7 @@ func tred2(a *mat64.Dense, d, e []float64) (v *mat64.Dense) {
 // Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
 // Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
 // Fortran subroutine in EISPACK.
-func tql2(d, e []float64, v *mat64.Dense, epsilon float64) {
+func tql2(d, e []float64, v *Dense, epsilon float64) {
 	n := len(d)
 	for i := 1; i < n; i++ {
 		e[i-1] = e[i]
@@ -302,7 +301,7 @@ func tql2(d, e []float64, v *mat64.Dense, epsilon float64) {
 // by Martin and Wilkinson, Handbook for Auto. Comp.,
 // Vol.ii-Linear Algebra, and the corresponding
 // Fortran subroutines in EISPACK.
-func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
+func orthes(a *Dense) (hess, v *Dense) {
 	n, _ := a.Dims()
 	hess = a
 
@@ -360,7 +359,7 @@ func orthes(a *mat64.Dense) (hess, v *mat64.Dense) {
 	}
 
 	// Accumulate transformations (Algol's ortran).
-	v, _ = mat64.NewDense(n, n, make([]float64, n*n))
+	v, _ = NewDense(n, n, make([]float64, n*n))
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			if i == j {
@@ -404,7 +403,7 @@ func cdiv(xr, xi, yr, yi float64) (float64, float64) {
 // by Martin and Wilkinson, Handbook for Auto. Comp.,
 // Vol.ii-Linear Algebra, and the corresponding
 // Fortran subroutine in EISPACK.
-func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
+func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 	// Initialize
 	nn := len(d)
 	n := nn - 1
@@ -806,13 +805,13 @@ func hqr2(d, e []float64, hess, v *mat64.Dense, epsilon float64) {
 
 // D returns the block diagonal eigenvalue matrix from the real and imaginary
 // components d and e.
-func (f EigenFactors) D() *mat64.Dense {
+func (f EigenFactors) D() *Dense {
 	d, e := f.d, f.e
 	var n int
 	if n = len(d); n != len(e) {
-		panic(mat64.ErrSquare)
+		panic(ErrSquare)
 	}
-	dm, _ := mat64.NewDense(n, n, make([]float64, n*n))
+	dm, _ := NewDense(n, n, make([]float64, n*n))
 	for i := 0; i < n; i++ {
 		dm.Set(i, i, d[i])
 		if e[i] > 0 {

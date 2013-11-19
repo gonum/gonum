@@ -46,6 +46,21 @@ func unflatten(r, c int, d []float64) [][]float64 {
 	return m
 }
 
+func mustDense(m *Dense, err error) *Dense {
+	if err != nil {
+		panic(err)
+	}
+	return m
+}
+
+func eye() *Dense {
+	return mustDense(NewDense(3, 3, []float64{
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1,
+	}))
+}
+
 func (s *S) TestMaybe(c *check.C) {
 	for i, test := range []struct {
 		fn     Panicker

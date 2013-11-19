@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package la
+package mat64
 
 import (
-	"github.com/gonum/matrix/mat64"
-
 	check "launchpad.net/gocheck"
 )
 
 func (s *S) TestCholesky(c *check.C) {
 	for _, t := range []struct {
-		a   *mat64.Dense
+		a   *Dense
 		spd bool
 	}{
 		{
-			a: mustDense(mat64.NewDense(3, 3, []float64{
+			a: mustDense(NewDense(3, 3, []float64{
 				4, 1, 1,
 				1, 2, 3,
 				1, 3, 6,
@@ -28,9 +26,9 @@ func (s *S) TestCholesky(c *check.C) {
 		cf := Cholesky(t.a)
 		c.Check(cf.SPD, check.Equals, t.spd)
 
-		lt := &mat64.Dense{}
+		lt := &Dense{}
 		lt.TCopy(cf.L)
-		lc := mat64.DenseCopyOf(cf.L)
+		lc := DenseCopyOf(cf.L)
 
 		lc.Mul(lc, lt)
 		c.Check(lc.EqualsApprox(t.a, 1e-12), check.Equals, true)

@@ -3,15 +3,14 @@
 // license that can be found in the LICENSE file.
 // Based on the QRDecomposition class from Jama 1.0.3.
 
-package la
+package mat64
 
 import (
-	"github.com/gonum/matrix/mat64"
 	"math"
 )
 
 type QRFactor struct {
-	QR    *mat64.Dense
+	QR    *Dense
 	rDiag []float64
 }
 
@@ -24,7 +23,7 @@ type QRFactor struct {
 // in the least squares solution of non-square systems of simultaneous linear equations.
 // This will fail if QRIsFullRank() returns false. The matrix a is overwritten by the
 // decomposition.
-func QR(a *mat64.Dense) QRFactor {
+func QR(a *Dense) QRFactor {
 	// Initialize.
 	m, n := a.Dims()
 	qr := a
@@ -78,10 +77,10 @@ func (f QRFactor) IsFullRank() bool {
 
 // H returns the Householder vectors in a lower trapezoidal matrix
 // whose columns define the reflections.
-func (f QRFactor) H() *mat64.Dense {
+func (f QRFactor) H() *Dense {
 	qr := f.QR
 	m, n := qr.Dims()
-	h, _ := mat64.NewDense(m, n, make([]float64, m*n))
+	h, _ := NewDense(m, n, make([]float64, m*n))
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
 			if i >= j {
@@ -93,10 +92,10 @@ func (f QRFactor) H() *mat64.Dense {
 }
 
 // R returns the upper triangular factor for the QR decomposition.
-func (f QRFactor) R() *mat64.Dense {
+func (f QRFactor) R() *Dense {
 	qr, rDiag := f.QR, f.rDiag
 	_, n := qr.Dims()
-	r, _ := mat64.NewDense(n, n, make([]float64, n*n))
+	r, _ := NewDense(n, n, make([]float64, n*n))
 	for i, v := range rDiag[:n] {
 		for j := 0; j < n; j++ {
 			if i < j {
@@ -110,10 +109,10 @@ func (f QRFactor) R() *mat64.Dense {
 }
 
 // Q generates and returns the (economy-sized) orthogonal factor.
-func (f QRFactor) Q() *mat64.Dense {
+func (f QRFactor) Q() *Dense {
 	qr := f.QR
 	m, n := qr.Dims()
-	q, _ := mat64.NewDense(m, n, make([]float64, m*n))
+	q, _ := NewDense(m, n, make([]float64, m*n))
 
 	for k := n - 1; k >= 0; k-- {
 		// for i := 0; i < m; i++ {
@@ -140,15 +139,15 @@ func (f QRFactor) Q() *mat64.Dense {
 // Solve computes a least squares solution of a.x = b where b has as many rows as a.
 // A matrix x is returned that minimizes the two norm of Q*R*X-B. QRSolve will panic
 // if a is not full rank. The matrix b is overwritten during the call.
-func (f QRFactor) Solve(b *mat64.Dense) (x *mat64.Dense) {
+func (f QRFactor) Solve(b *Dense) (x *Dense) {
 	qr, rDiag := f.QR, f.rDiag
 	m, n := qr.Dims()
 	bm, bn := b.Dims()
 	if bm != m {
-		panic(mat64.ErrShape)
+		panic(ErrShape)
 	}
 	if !f.IsFullRank() {
-		panic("la: matrix is rank deficient")
+		panic("mat64: matrix is rank deficient")
 	}
 
 	nx := bn

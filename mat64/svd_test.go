@@ -2,38 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package la
+package mat64
 
 import (
-	"github.com/gonum/matrix/mat64"
-
 	check "launchpad.net/gocheck"
 	"math"
 )
 
 func (s *S) TestSVD(c *check.C) {
 	for _, t := range []struct {
-		a *mat64.Dense
+		a *Dense
 
 		epsilon float64
 		small   float64
 
 		wantu bool
-		u     *mat64.Dense
+		u     *Dense
 
 		sigma []float64
 
 		wantv bool
-		v     *mat64.Dense
+		v     *Dense
 	}{
 		{
-			a: mustDense(mat64.NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
 
 			wantu: true,
-			u: mustDense(mat64.NewDense(4, 2, []float64{
+			u: mustDense(NewDense(4, 2, []float64{
 				0.8174155604703632, -0.5760484367663209,
 				0.5760484367663209, 0.8174155604703633,
 				0, 0,
@@ -43,19 +41,19 @@ func (s *S) TestSVD(c *check.C) {
 			sigma: []float64{5.464985704219041, 0.365966190626258},
 
 			wantv: true,
-			v: mustDense(mat64.NewDense(2, 2, []float64{
+			v: mustDense(NewDense(2, 2, []float64{
 				0.4045535848337571, -0.9145142956773044,
 				0.9145142956773044, 0.4045535848337571,
 			})),
 		},
 		{
-			a: mustDense(mat64.NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
 
 			wantu: true,
-			u: mustDense(mat64.NewDense(4, 2, []float64{
+			u: mustDense(NewDense(4, 2, []float64{
 				0.8174155604703632, -0.5760484367663209,
 				0.5760484367663209, 0.8174155604703633,
 				0, 0,
@@ -67,7 +65,7 @@ func (s *S) TestSVD(c *check.C) {
 			wantv: false,
 		},
 		{
-			a: mustDense(mat64.NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
@@ -77,13 +75,13 @@ func (s *S) TestSVD(c *check.C) {
 			sigma: []float64{5.464985704219041, 0.365966190626258},
 
 			wantv: true,
-			v: mustDense(mat64.NewDense(2, 2, []float64{
+			v: mustDense(NewDense(2, 2, []float64{
 				0.4045535848337571, -0.9145142956773044,
 				0.9145142956773044, 0.4045535848337571,
 			})),
 		},
 		{
-			a: mustDense(mat64.NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
@@ -97,7 +95,7 @@ func (s *S) TestSVD(c *check.C) {
 			// forcing a to be a tall or square matrix.
 			//
 			// This is a failing case to use to fix that bug.
-			a: mustDense(mat64.NewDense(3, 11, []float64{
+			a: mustDense(NewDense(3, 11, []float64{
 				1, 1, 0, 1, 0, 0, 0, 0, 0, 11, 1,
 				1, 0, 0, 0, 0, 0, 1, 0, 0, 12, 2,
 				1, 1, 0, 0, 0, 0, 0, 0, 1, 13, 3,
@@ -110,7 +108,7 @@ func (s *S) TestSVD(c *check.C) {
 			sigma: []float64{21.25950088109745, 1.5415021616856577, 1.2873979074613637, 0},
 		},
 	} {
-		svd := SVD(mat64.DenseCopyOf(t.a), t.epsilon, t.small, t.wantu, t.wantv)
+		svd := SVD(DenseCopyOf(t.a), t.epsilon, t.small, t.wantu, t.wantv)
 		if t.sigma != nil {
 			c.Check(svd.Sigma, check.DeepEquals, t.sigma)
 		}
@@ -132,7 +130,7 @@ func (s *S) TestSVD(c *check.C) {
 		if t.wantu && t.wantv {
 			c.Assert(svd.U, check.NotNil)
 			c.Assert(svd.V, check.NotNil)
-			vt := &mat64.Dense{}
+			vt := &Dense{}
 			vt.TCopy(svd.V)
 			svd.U.Mul(svd.U, s)
 			svd.U.Mul(svd.U, vt)

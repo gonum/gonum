@@ -3,15 +3,14 @@
 // license that can be found in the LICENSE file.
 // Based on the LUDecomposition class from Jama 1.0.3.
 
-package la
+package mat64
 
 import (
-	"github.com/gonum/matrix/mat64"
 	"math"
 )
 
 type LUFactors struct {
-	LU    *mat64.Dense
+	LU    *Dense
 	Pivot []int
 	Sign  int
 }
@@ -28,7 +27,7 @@ type LUFactors struct {
 // singular, so the LUD will never fail. The primary use of the LU decomposition
 // is in the solution of square systems of simultaneous linear equations.  This
 // will fail if IsSingular() returns true.
-func LU(a *mat64.Dense) LUFactors {
+func LU(a *Dense) LUFactors {
 	// Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 	m, n := a.Dims()
 	lu := a
@@ -111,7 +110,7 @@ func LU(a *mat64.Dense) LUFactors {
 // singular, so the LUD will never fail. The primary use of the LU decomposition
 // is in the solution of square systems of simultaneous linear equations.  This
 // will fail if IsSingular() returns true.
-func LUGaussian(a *mat64.Dense) LUFactors {
+func LUGaussian(a *Dense) LUFactors {
 	// Initialize.
 	m, n := a.Dims()
 	lu := a
@@ -171,10 +170,10 @@ func (f LUFactors) IsSingular() bool {
 }
 
 // L returns the lower triangular factor of the LU decomposition.
-func (f LUFactors) L() *mat64.Dense {
+func (f LUFactors) L() *Dense {
 	lu := f.LU
 	m, n := lu.Dims()
-	l, _ := mat64.NewDense(m, n, make([]float64, m*n))
+	l, _ := NewDense(m, n, make([]float64, m*n))
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
 			if i > j {
@@ -188,10 +187,10 @@ func (f LUFactors) L() *mat64.Dense {
 }
 
 // U returns the upper triangular factor of the LU decomposition.
-func (f LUFactors) U() *mat64.Dense {
+func (f LUFactors) U() *Dense {
 	lu := f.LU
 	m, n := lu.Dims()
-	u, _ := mat64.NewDense(m, n, make([]float64, m*n))
+	u, _ := NewDense(m, n, make([]float64, m*n))
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			if i <= j {
@@ -208,7 +207,7 @@ func (f LUFactors) Det() float64 {
 	lu, sign := f.LU, f.Sign
 	m, n := lu.Dims()
 	if m != n {
-		panic(mat64.ErrSquare)
+		panic(ErrSquare)
 	}
 	d := float64(sign)
 	for j := 0; j < n; j++ {
@@ -220,15 +219,15 @@ func (f LUFactors) Det() float64 {
 // Solve computes a solution of a.x = b where b has as many rows as a. A matrix x
 // is returned that minimizes the two norm of L*U*X = B(piv,:). QRSolve will panic
 // if a is singular. The matrix b is overwritten during the call.
-func (f LUFactors) Solve(b *mat64.Dense) (x *mat64.Dense) {
+func (f LUFactors) Solve(b *Dense) (x *Dense) {
 	lu, piv := f.LU, f.Pivot
 	m, n := lu.Dims()
 	bm, _ := b.Dims()
 	if bm != m {
-		panic(mat64.ErrShape)
+		panic(ErrShape)
 	}
 	if f.IsSingular() {
-		panic("la: matrix is singular")
+		panic("mat64: matrix is singular")
 	}
 
 	// Copy right hand side with pivoting
@@ -259,7 +258,7 @@ func (f LUFactors) Solve(b *mat64.Dense) (x *mat64.Dense) {
 	return x
 }
 
-func pivotRows(a *mat64.Dense, piv []int) *mat64.Dense {
+func pivotRows(a *Dense, piv []int) *Dense {
 	visit := make([]bool, len(piv))
 	_, n := a.Dims()
 	fromRow := make([]float64, n)

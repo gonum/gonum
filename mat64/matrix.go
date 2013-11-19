@@ -274,6 +274,34 @@ type Blasser interface {
 	BlasMatrix() BlasMatrix
 }
 
+// Det returns the determinant of the matrix a.
+func Det(a Matrix) float64 {
+	if a, ok := a.(Deter); ok {
+		return a.Det()
+	}
+	return LU(DenseCopyOf(a)).Det()
+}
+
+// Inverse returns the inverse or pseudoinverse of the matrix a.
+func Inverse(a Matrix) *Dense {
+	m, _ := a.Dims()
+	d := make([]float64, m*m)
+	for i := 0; i < m*m; i += m + 1 {
+		d[i] = 1
+	}
+	eye, _ := NewDense(m, m, d)
+	return Solve(a, eye)
+}
+
+// Solve returns a matrix x that satisfies ax = b.
+func Solve(a, b Matrix) (x *Dense) {
+	m, n := a.Dims()
+	if m == n {
+		return LU(DenseCopyOf(a)).Solve(DenseCopyOf(b))
+	}
+	return QR(DenseCopyOf(a)).Solve(DenseCopyOf(b))
+}
+
 // A Panicker is a function that may panic.
 type Panicker func()
 
@@ -341,6 +369,13 @@ const (
 
 func min(a, b int) int {
 	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a > b {
 		return a
 	}
 	return b

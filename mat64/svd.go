@@ -3,17 +3,16 @@
 // license that can be found in the LICENSE file.
 // Based on the SingularValueDecomposition class from Jama 1.0.3.
 
-package la
+package mat64
 
 import (
-	"github.com/gonum/matrix/mat64"
 	"math"
 )
 
 type SVDFactors struct {
-	U     *mat64.Dense
+	U     *Dense
 	Sigma []float64
-	V     *mat64.Dense
+	V     *Dense
 }
 
 // SVD performs singular value decomposition for an m-by-n matrix a with m >= n,
@@ -28,23 +27,23 @@ type SVDFactors struct {
 //
 // The matrix condition number and the effective numerical rank can be computed from
 // this decomposition.
-func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
+func SVD(a *Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 	m, n := a.Dims()
 
 	// Apparently the failing cases are only a proper subset of (m<n),
 	// so let's not panic. Correct fix to come later?
 	// if m < n {
-	// 	panic(mat64.ErrShape)
+	// 	panic(ErrShape)
 	// }
 
 	sigma := make([]float64, min(m+1, n))
 	nu := min(m, n)
-	var u, v *mat64.Dense
+	var u, v *Dense
 	if wantu {
-		u, _ = mat64.NewDense(m, nu, make([]float64, m*nu))
+		u, _ = NewDense(m, nu, make([]float64, m*nu))
 	}
 	if wantv {
-		v, _ = mat64.NewDense(n, n, make([]float64, n*n))
+		v, _ = NewDense(n, n, make([]float64, n*n))
 	}
 
 	var (
@@ -431,8 +430,8 @@ func SVD(a *mat64.Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 
 // S returns a newly allocated S matrix from the sigma values held by the
 // factorisation.
-func (f SVDFactors) S() *mat64.Dense {
-	s, _ := mat64.NewDense(len(f.Sigma), len(f.Sigma), make([]float64, len(f.Sigma)*len(f.Sigma)))
+func (f SVDFactors) S() *Dense {
+	s, _ := NewDense(len(f.Sigma), len(f.Sigma), make([]float64, len(f.Sigma)*len(f.Sigma)))
 	for i, v := range f.Sigma {
 		s.Set(i, i, v)
 	}

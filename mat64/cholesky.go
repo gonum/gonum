@@ -3,26 +3,25 @@
 // license that can be found in the LICENSE file.
 // Based on the CholeskyDecomposition class from Jama 1.0.3.
 
-package la
+package mat64
 
 import (
-	"github.com/gonum/matrix/mat64"
 	"math"
 )
 
 type CholeskyFactor struct {
-	L   *mat64.Dense
+	L   *Dense
 	SPD bool
 }
 
 // CholeskyL returns the left Cholesky decomposition of the matrix a and whether
 // the matrix is symmetric or positive definite, the returned matrix l is a lower
 // triangular matrix such that a = l.l'.
-func Cholesky(a *mat64.Dense) CholeskyFactor {
+func Cholesky(a *Dense) CholeskyFactor {
 	// Initialize.
 	m, n := a.Dims()
 	spd := m == n
-	l, _ := mat64.NewDense(n, n, make([]float64, n*n))
+	l, _ := NewDense(n, n, make([]float64, n*n))
 
 	// Main loop.
 	lRowj := make([]float64, n)
@@ -56,11 +55,11 @@ func Cholesky(a *mat64.Dense) CholeskyFactor {
 // CholeskyR returns the right Cholesky decomposition of the matrix a and whether
 // the matrix is symmetric or positive definite, the returned matrix r is an upper
 // triangular matrix such that a = r'.r.
-func CholeskyR(a *mat64.Dense) (r *mat64.Dense, spd bool) {
+func CholeskyR(a *Dense) (r *Dense, spd bool) {
 	// Initialize.
 	m, n := a.Dims()
 	spd = m == n
-	r, _ = mat64.NewDense(n, n, make([]float64, n*n))
+	r, _ = NewDense(n, n, make([]float64, n*n))
 
 	// Main loop.
 	for j := 0; j < n; j++ {
@@ -89,16 +88,16 @@ func CholeskyR(a *mat64.Dense) (r *mat64.Dense, spd bool) {
 // CholeskySolve returns a matrix x that solves a.x = b where a = l.l'. The matrix b must
 // have the same number of rows as a, and a must be symmetric and positive definite. The
 // matrix b is overwritten by the operation.
-func (f CholeskyFactor) Solve(b *mat64.Dense) (x *mat64.Dense) {
+func (f CholeskyFactor) Solve(b *Dense) (x *Dense) {
 	if !f.SPD {
-		panic("la: matrix not symmetric positive definite")
+		panic("mat64: matrix not symmetric positive definite")
 	}
 	l := f.L
 
 	_, n := l.Dims()
 	_, bn := b.Dims()
 	if n != bn {
-		panic(mat64.ErrShape)
+		panic(ErrShape)
 	}
 
 	nx := bn

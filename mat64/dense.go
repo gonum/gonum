@@ -263,6 +263,9 @@ func (m *Dense) Trace() float64 {
 
 var inf = math.Inf(1)
 
+const epsilon = 2.2204e-16
+
+// Norm(±2) depends on SVD, and so m must be tall or square.
 func (m *Dense) Norm(ord float64) float64 {
 	var n float64
 	switch {
@@ -312,7 +315,11 @@ func (m *Dense) Norm(ord float64) float64 {
 		}
 		return math.Sqrt(n)
 	case ord == 2, ord == -2:
-		panic("matrix: 2-norm not implemented (pull requests for svd implementation welcomed)")
+		s := SVD(m, epsilon, math.SmallestNonzeroFloat64, false, false).Sigma
+		if ord == 2 {
+			return s[0]
+		}
+		return s[len(s)-1]
 	default:
 		panic(ErrNormOrder)
 	}

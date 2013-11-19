@@ -610,6 +610,54 @@ func (s *S) TestTranspose(c *check.C) {
 	}
 }
 
+func (s *S) TestNorm(c *check.C) {
+	for i, test := range []struct {
+		a    [][]float64
+		ord  float64
+		norm float64
+	}{
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  0,
+			norm: 25.495097567963924,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  1,
+			norm: 30,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  -1,
+			norm: 22,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  2,
+			norm: 25.46240743603639,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  -2,
+			norm: 9.013990486603544e-16,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  inf,
+			norm: 33,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  -inf,
+			norm: 6,
+		},
+	} {
+		a, err := NewDense(flatten(test.a))
+		c.Assert(err, check.Equals, nil, check.Commentf("Test %d", i))
+		c.Check(a.Norm(test.ord), check.Equals, test.norm, check.Commentf("Test %d: %v norm = %f", i, test.a, test.norm))
+	}
+}
+
 func identity(r, c int, v float64) float64 { return v }
 
 func (s *S) TestApply(c *check.C) {

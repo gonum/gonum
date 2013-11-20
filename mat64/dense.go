@@ -508,7 +508,7 @@ func (m *Dense) Dot(b Matrix) float64 {
 			panic(ErrIllegalOrder)
 		}
 		for jm, jb := 0, 0; jm < mr*m.mat.Stride; jm, jb = jm+m.mat.Stride, jb+bmat.Stride {
-			for i, v := range m.mat.Data[jm : jm+mr] {
+			for i, v := range m.mat.Data[jm : jm+mc] {
 				d += v * bmat.Data[i+jb]
 			}
 		}

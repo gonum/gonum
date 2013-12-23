@@ -405,18 +405,19 @@ sub processParamToChecks {
 		push @processed, "if n*(n + 1)/2 > len(ap) { panic(\"cblas: index of ap out of range\") }"
 	}
 
+	push @processed, "if incX == 0 { panic(\"cblas: zero x index increment\") }" if $scalarArgs{'incX'};
+	push @processed, "if incY == 0 { panic(\"cblas: zero y index increment\") }" if $scalarArgs{'incY'};
 	if ($func =~ m/cblas_[sdcz]g[eb]mv/) {
-		push @processed, "if incX <= 0 || incY <= 0 { panic(\"cblas: index increment out of range\") }";
 		push @processed, "var lenX, lenY int";
 		push @processed, "if tA == blas.NoTrans { lenX, lenY = n, m } else { lenX, lenY = m, n }";
-		push @processed, "if (lenX-1)*incX > len(x) { panic(\"cblas: index of x out of range\") }";
-		push @processed, "if (lenY-1)*incY > len(y) { panic(\"cblas: index of y out of range\") }";
+		push @processed, "if (incX > 0 && (lenX-1)*incX > len(x)) || (incX < 0 && (1-lenX)*incX > len(x)) { panic(\"cblas: x index out of range\") }";
+		push @processed, "if (incY > 0 && (lenY-1)*incY > len(y)) || (incY < 0 && (1-lenY)*incY > len(y)) { panic(\"cblas: y index out of range\") }";
 	} elsif ($scalarArgs{'m'}) {
-		push @processed, "if incX <= 0 || (m-1)*incX > len(x) { panic(\"cblas: index of x out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index of y out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if (incX > 0 && (m-1)*incX > len(x)) || (incX < 0 && (1-m)*incX > len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if (incY > 0 && (n-1)*incY > len(y)) || (incY < 0 && (1-n)*incY > len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
 	} else {
-		push @processed, "if incX <= 0 || (n-1)*incX > len(x) { panic(\"cblas: index of x out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if incY <= 0 || (n-1)*incY > len(y) { panic(\"cblas: index of y out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if (incX > 0 && (n-1)*incX > len(x)) || (incX < 0 && (1-n)*incX > len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if (incY > 0 && (n-1)*incY > len(y)) || (incY < 0 && (1-n)*incY > len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
 	}
 
 	if (not $func =~ m/(?:mm|r2?k)$/) {

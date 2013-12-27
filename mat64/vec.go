@@ -71,7 +71,7 @@ func (m *Vec) Mul(a, b Matrix) {
 		w = *m
 	}
 	if len(w) == 0 {
-		w = realloc(w, ar)
+		w = use(w, ar)
 	} else if ar != len(w) || bc != 1 {
 		panic(ErrShape)
 	}

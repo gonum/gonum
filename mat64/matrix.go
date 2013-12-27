@@ -381,7 +381,9 @@ func max(a, b int) int {
 	return b
 }
 
-func realloc(f []float64, l int) []float64 {
+// use returns a float64 slice with l elements, using f if it
+// has the necessary capacity, otherwise creating a new slice.
+func use(f []float64, l int) []float64 {
 	if l < cap(f) {
 		return f[:l]
 	}

@@ -344,7 +344,7 @@ func (m *Dense) Add(a, b Matrix) {
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
-			Data:   realloc(m.mat.Data, ar*ac),
+			Data:   use(m.mat.Data, ar*ac),
 		}
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
@@ -398,7 +398,7 @@ func (m *Dense) Sub(a, b Matrix) {
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
-			Data:   realloc(m.mat.Data, ar*ac),
+			Data:   use(m.mat.Data, ar*ac),
 		}
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
@@ -452,7 +452,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
-			Data:   realloc(m.mat.Data, ar*ac),
+			Data:   use(m.mat.Data, ar*ac),
 		}
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
@@ -551,7 +551,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			Rows:   ar,
 			Cols:   bc,
 			Stride: bc,
-			Data:   realloc(w.mat.Data, ar*bc),
+			Data:   use(w.mat.Data, ar*bc),
 		}
 	} else if ar != w.mat.Rows || bc != w.mat.Cols {
 		panic(ErrShape)
@@ -619,7 +619,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
-			Data:   realloc(m.mat.Data, ar*ac),
+			Data:   use(m.mat.Data, ar*ac),
 		}
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
@@ -662,7 +662,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
-			Data:   realloc(m.mat.Data, ar*ac),
+			Data:   use(m.mat.Data, ar*ac),
 		}
 	} else if ar != m.mat.Rows || ac != m.mat.Cols {
 		panic(ErrShape)
@@ -719,7 +719,7 @@ func (m *Dense) U(a Matrix) {
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
-			Data:   realloc(m.mat.Data, ar*ac),
+			Data:   use(m.mat.Data, ar*ac),
 		}
 	case ar != m.mat.Rows || ac != m.mat.Cols:
 		panic(ErrShape)
@@ -775,7 +775,7 @@ func (m *Dense) L(a Matrix) {
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
-			Data:   realloc(m.mat.Data, ar*ac),
+			Data:   use(m.mat.Data, ar*ac),
 		}
 	case ar != m.mat.Rows || ac != m.mat.Cols:
 		panic(ErrShape)
@@ -826,7 +826,7 @@ func (m *Dense) TCopy(a Matrix) {
 			Order: BlasOrder,
 			Rows:  ac,
 			Cols:  ar,
-			Data:  realloc(w.mat.Data, ar*ac),
+			Data:  use(w.mat.Data, ar*ac),
 		}
 		w.mat.Stride = ar
 	} else if ar != m.mat.Cols || ac != m.mat.Rows {

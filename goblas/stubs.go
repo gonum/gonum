@@ -2,7 +2,7 @@ package goblas
 
 import "github.com/gonum/blas"
 
-func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p *blas.DrotmParams) {
+func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
 	panic("BLAS function not implemented")
 }
 

@@ -104,18 +104,28 @@ For complex symmetric matrices, trans = ConjTrans is not allowed.
 */
 package blas
 
+// Flag constants indicate Givens transformation H matrix state.
+type Flag int
+
+const (
+	Identity    Flag = iota - 2 // H is the identity matrix; no rotation is needed.
+	Rescaling                   // H specifies rescaling.
+	OffDiagonal                 // Off-diagonal elements of H are units.
+	Diagonal                    // Diagonal elements of H are units.
+)
+
 // Type SrotmParams contains Givens transformation parameters returned
 // by the Float32 Srotm method.
 type SrotmParams struct {
-	Flag float32
-	H    [4]float32 // Column-major 2 by 2 matrix.
+	Flag
+	H [4]float32 // Column-major 2 by 2 matrix.
 }
 
 // Type DrotmParams contains Givens transformation parameters returned
 // by the Float64 Drotm method.
 type DrotmParams struct {
-	Flag float64
-	H    [4]float64 // Column-major 2 by 2 matrix.
+	Flag
+	H [4]float64 // Column-major 2 by 2 matrix.
 }
 
 // Type Order is used to specify the matrix storage format. An implementation
@@ -178,9 +188,9 @@ type Float32 interface {
 	Scopy(n int, x []float32, incX int, y []float32, incY int)
 	Saxpy(n int, alpha float32, x []float32, incX int, y []float32, incY int)
 	Srotg(a, b float32) (c, s, r, z float32)
-	Srotmg(d1, d2, b1, b2 float32) (p *SrotmParams, rd1, rd2, rb1 float32)
+	Srotmg(d1, d2, b1, b2 float32) (p SrotmParams, rd1, rd2, rb1 float32)
 	Srot(n int, x []float32, incX int, y []float32, incY int, c, s float32)
-	Srotm(n int, x []float32, incX int, y []float32, incY int, p *SrotmParams)
+	Srotm(n int, x []float32, incX int, y []float32, incY int, p SrotmParams)
 	Sscal(n int, alpha float32, x []float32, incX int)
 
 	// Level 2 routines.
@@ -221,9 +231,9 @@ type Float64 interface {
 	Dcopy(n int, x []float64, incX int, y []float64, incY int)
 	Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY int)
 	Drotg(a, b float64) (c, s, r, z float64)
-	Drotmg(d1, d2, b1, b2 float64) (p *DrotmParams, rd1, rd2, rb1 float64)
+	Drotmg(d1, d2, b1, b2 float64) (p DrotmParams, rd1, rd2, rb1 float64)
 	Drot(n int, x []float64, incX int, y []float64, incY int, c float64, s float64)
-	Drotm(n int, x []float64, incX int, y []float64, incY int, p *DrotmParams)
+	Drotm(n int, x []float64, incX int, y []float64, incY int, p DrotmParams)
 	Dscal(n int, alpha float64, x []float64, incX int)
 
 	// Level 2 routines.

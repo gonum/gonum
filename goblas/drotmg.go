@@ -1,11 +1,12 @@
 package goblas
 
-import "math"
-
-import "github.com/gonum/blas"
+import (
+	"github.com/gonum/blas"
+	"math"
+)
 
 // Compute a modified Givens transformation
-func (Blas) Drotmg(d1, d2, x1, y1 float64) (p *blas.DrotmParams, rd1, rd2, rx1 float64) {
+func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
 	var p1, p2, q1, q2, u float64
 
 	gam := 4096.0
@@ -17,11 +18,11 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p *blas.DrotmParams, rd1, rd2, rx1 f
 	rx1 = x1
 
 	if d1 < 0 {
-		p.Flag = -1
+		p.Flag = blas.Rescaling
 	} else {
 		p2 = rd2 * y1
 		if p2 == 0 {
-			p.Flag = -2
+			p.Flag = blas.Identity
 			return
 		}
 		p1 = rd1 * x1
@@ -32,19 +33,19 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p *blas.DrotmParams, rd1, rd2, rx1 f
 			p.H[2] = p2 / p1
 			u = 1 - p.H[2]*p.H[1]
 			if u > 0 {
-				p.Flag = 0
+				p.Flag = blas.OffDiagonal
 				rd1 /= u
 				rd2 /= u
 				rx1 /= u
 			}
 		} else {
 			if q2 < 0 {
-				p.Flag = -1
+				p.Flag = blas.Rescaling
 				rd1 = 0
 				rd2 = 0
 				rx1 = 0
 			} else {
-				p.Flag = 1
+				p.Flag = blas.Diagonal
 				p.H[0] = p1 / p2
 				p.H[3] = x1 / y1
 				u = 1 + p.H[0] + p.H[3]
@@ -57,11 +58,11 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p *blas.DrotmParams, rd1, rd2, rx1 f
 				if p.Flag == 0 {
 					p.H[0] = 1
 					p.H[3] = 1
-					p.Flag = -1
+					p.Flag = blas.Rescaling
 				} else {
 					p.H[1] = -1
 					p.H[2] = 1
-					p.Flag = -1
+					p.Flag = blas.Rescaling
 				}
 				if rd1 <= rgamsq {
 					rd1 *= gam * gam
@@ -78,14 +79,14 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p *blas.DrotmParams, rd1, rd2, rx1 f
 		}
 		if rd2 != 0 {
 			for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
-				if p.Flag == 0 {
+				if p.Flag == blas.OffDiagonal {
 					p.H[0] = 1
 					p.H[3] = 1
-					p.Flag = -1
+					p.Flag = blas.Rescaling
 				} else {
 					p.H[1] = -1
 					p.H[2] = 1
-					p.Flag = -1
+					p.Flag = blas.Rescaling
 				}
 				if math.Abs(rd2) <= rgamsq {
 					rd2 *= gam * gam

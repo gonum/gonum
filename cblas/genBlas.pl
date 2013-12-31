@@ -80,16 +80,26 @@ type Blas struct{}
 
 // Special cases...
 
+type srotmParams struct {
+	flag float32
+	h    [4]float32
+}
+
+type drotmParams struct {
+	flag float64
+	h    [4]float64
+}
+
 func (Blas) Srotg(a float32, b float32) (c float32, s float32, r float32, z float32) {
 	C.cblas_srotg((*C.float)(&a), (*C.float)(&b), (*C.float)(&c), (*C.float)(&s))
 	return c, s, a, b
 }
-func (Blas) Srotmg(d1 float32, d2 float32, b1 float32, b2 float32) (p *blas.SrotmParams, rd1 float32, rd2 float32, rb1 float32) {
-	p = &blas.SrotmParams{}
-	C.cblas_srotmg((*C.float)(&d1), (*C.float)(&d2), (*C.float)(&b1), C.float(b2), (*C.float)(unsafe.Pointer(p)))
-	return p, d1, d2, b1
+func (Blas) Srotmg(d1 float32, d2 float32, b1 float32, b2 float32) (p blas.SrotmParams, rd1 float32, rd2 float32, rb1 float32) {
+	var pi srotmParams
+	C.cblas_srotmg((*C.float)(&d1), (*C.float)(&d2), (*C.float)(&b1), C.float(b2), (*C.float)(unsafe.Pointer(&pi)))
+	return blas.SrotmParams{Flag: blas.Flag(pi.flag), H: pi.h}, d1, d2, b1
 }
-func (Blas) Srotm(n int, x []float32, incX int, y []float32, incY int, p *blas.SrotmParams) {
+func (Blas) Srotm(n int, x []float32, incX int, y []float32, incY int, p blas.SrotmParams) {
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -99,18 +109,25 @@ func (Blas) Srotm(n int, x []float32, incX int, y []float32, incY int, p *blas.S
 	if n*incY > len(y) {
 		panic("cblas: index out of range")
 	}
-	C.cblas_srotm(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(unsafe.Pointer(p)))
+	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
+		panic("cblas: illegal blas.Flag value")
+	}
+	pi := srotmParams{
+		flag: float32(p.Flag),
+		h:    p.H,
+	}
+	C.cblas_srotm(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(unsafe.Pointer(&pi)))
 }
 func (Blas) Drotg(a float64, b float64) (c float64, s float64, r float64, z float64) {
 	C.cblas_drotg((*C.double)(&a), (*C.double)(&b), (*C.double)(&c), (*C.double)(&s))
 	return c, s, a, b
 }
-func (Blas) Drotmg(d1 float64, d2 float64, b1 float64, b2 float64) (p *blas.DrotmParams, rd1 float64, rd2 float64, rb1 float64) {
-	p = &blas.DrotmParams{}
-	C.cblas_drotmg((*C.double)(&d1), (*C.double)(&d2), (*C.double)(&b1), C.double(b2), (*C.double)(unsafe.Pointer(p)))
-	return p, d1, d2, b1
+func (Blas) Drotmg(d1 float64, d2 float64, b1 float64, b2 float64) (p blas.DrotmParams, rd1 float64, rd2 float64, rb1 float64) {
+	var pi drotmParams
+	C.cblas_drotmg((*C.double)(&d1), (*C.double)(&d2), (*C.double)(&b1), C.double(b2), (*C.double)(unsafe.Pointer(&pi)))
+	return blas.DrotmParams{Flag: blas.Flag(pi.flag), H: pi.h}, d1, d2, b1
 }
-func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p *blas.DrotmParams) {
+func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -120,7 +137,14 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p *blas.D
 	if n*incY > len(y) {
 		panic("cblas: index out of range")
 	}
-	C.cblas_drotm(C.int(n), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(unsafe.Pointer(p)))
+	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
+		panic("cblas: illegal blas.Flag value")
+	}
+	pi := drotmParams{
+		flag: float64(p.Flag),
+		h:    p.H,
+	}
+	C.cblas_drotm(C.int(n), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(unsafe.Pointer(&pi)))
 }
 func (Blas) Cdotu(n int, x []complex64, incX int, y []complex64, incY int) (dotu complex64) {
 	if n < 0 {

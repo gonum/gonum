@@ -457,15 +457,14 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 		iy = (-n + 1) * incY
 	}
 	for i := 0; i < n; i++ {
-		w := x[ix]
-		z := y[iy]
-		x[ix] = w*h11 + z*h12
-		y[iy] = w*h21 + z*h22
+		x[ix], y[iy] = x[ix]*h11+y[iy]*h12, x[ix]*h21+y[iy]*h22
 		ix += incX
 		iy += incY
 	}
 
 	/*
+		More complicated version of the above, though possibly faster
+
 		if flag == -2 {
 			return
 		}

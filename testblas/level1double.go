@@ -1368,37 +1368,34 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Rd2: 1,
 		Rx1: 16,
 	},
-	/*
-		{
-			Name: "RD1_Big_RD2_Big_Flag_0",
-			P: &blas.DrotmParams{
-				Flag: -1,
-				H:    [4]float64{4096, -3584, 1792, 4096},
-			},
-			D1:  1600000000,
-			D2:  800000000,
-			X1:  8,
-			Y1:  7,
-			Rd1: 68.96627824858757,
-			Rd2: 34.483139124293785,
-			Rx1: 45312,
+	{
+		Name: "RD1_Big_RD2_Big_Flag_0",
+		P: &blas.DrotmParams{
+			Flag: -1,
+			H:    [4]float64{4096, -4096, 1, 4096},
 		},
-
-		{
-			Name: "RD1_Big_RD2_Big_Flag_1",
-			P: &blas.DrotmParams{
-				Flag: -1,
-				H:    [4]float64{2340.5714285714284, -4096, 4096, 4681.142857142857},
-			},
-			D1:  800000000,
-			D2:  1600000000,
-			X1:  8,
-			Y1:  7,
-			Rd1: 57.6914092640818,
-			Rd2: 28.8457046320409,
-			Rx1: 47396.57142857142,
+		D1:  1600000000,
+		D2:  800000000,
+		X1:  8,
+		Y1:  7,
+		Rd1: 68.96627824858757,
+		Rd2: 34.483139124293785,
+		Rx1: 45312,
+	},
+	{
+		Name: "RD1_Big_RD2_Big_Flag_1",
+		P: &blas.DrotmParams{
+			Flag: -1,
+			H:    [4]float64{2340.5714285714284, -4096, 1, 4681.142857142857},
 		},
-	*/
+		D1:  800000000,
+		D2:  1600000000,
+		X1:  8,
+		Y1:  7,
+		Rd1: 57.6914092640818,
+		Rd2: 28.8457046320409,
+		Rx1: 47396.57142857142,
+	},
 	{
 		Name: "RD1_Big_RD2_Med_Flag_0",
 		P: &blas.DrotmParams{
@@ -1560,9 +1557,6 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Rd2: 0.019999999900000003,
 		Rx1: 1953.125009765625,
 	},
-
-	// TODO: Add in tests where things are big and small. Seemed like there was a difference
-	// between this and the c code
 }
 
 type Drotmger interface {

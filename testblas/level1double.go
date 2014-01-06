@@ -1,4 +1,4 @@
-package blastest
+package testblas
 
 import (
 	"github.com/gonum/blas"

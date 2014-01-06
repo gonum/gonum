@@ -1,56 +1,56 @@
 package naivegoblas
 
 import (
-	"blas/blastest"
+	"github.com/gonum/blas/testblas"
 	"testing"
 )
 
 var blasser = Blas{}
 
 func TestDasum(t *testing.T) {
-	blastest.DasumTest(t, blasser)
+	testblas.DasumTest(t, blasser)
 }
 
 func TestDaxpy(t *testing.T) {
-	blastest.DaxpyTest(t, blasser)
+	testblas.DaxpyTest(t, blasser)
 }
 
 func TestDdot(t *testing.T) {
-	blastest.DdotTest(t, blasser)
+	testblas.DdotTest(t, blasser)
 }
 
 func TestDnrm2(t *testing.T) {
-	blastest.Dnrm2Test(t, blasser)
+	testblas.Dnrm2Test(t, blasser)
 }
 
 func TestIdamax(t *testing.T) {
-	blastest.IdamaxTest(t, blasser)
+	testblas.IdamaxTest(t, blasser)
 }
 
 func TestDswap(t *testing.T) {
-	blastest.DswapTest(t, blasser)
+	testblas.DswapTest(t, blasser)
 }
 
 func TestDcopy(t *testing.T) {
-	blastest.DcopyTest(t, blasser)
+	testblas.DcopyTest(t, blasser)
 }
 
 func TestDrotg(t *testing.T) {
-	blastest.DrotgTest(t, blasser)
+	testblas.DrotgTest(t, blasser)
 }
 
 func TestDrotmg(t *testing.T) {
-	blastest.DrotmgTest(t, blasser)
+	testblas.DrotmgTest(t, blasser)
 }
 
 func TestDrot(t *testing.T) {
-	blastest.DrotTest(t, blasser)
+	testblas.DrotTest(t, blasser)
 }
 
 func TestDrotm(t *testing.T) {
-	blastest.DrotmTest(t, blasser)
+	testblas.DrotmTest(t, blasser)
 }
 
 func TestDscal(t *testing.T) {
-	blastest.DscalTest(t, blasser)
+	testblas.DscalTest(t, blasser)
 }

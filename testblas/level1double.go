@@ -1,3 +1,5 @@
+// Package for testing the blas implementation
+
 package testblas
 
 import (

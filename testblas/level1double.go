@@ -473,6 +473,8 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 					Flag: -2,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
+				XAns: []float64{10, 15, -6, 3, 14, 7},
+				YAns: []float64{8, -2, 4, 7, 6, -3},
 				Name: "Neg2Flag",
 			},
 			{
@@ -1607,7 +1609,7 @@ func DrotmTest(t *testing.T, d Drotmer) {
 	for _, c := range DoubleTwoVectorCases {
 		for _, kind := range c.DrotmCases {
 			dCopyTwoTmp(c.X, c.XTmp, c.Y, c.YTmp)
-			if c.Panic || kind.P.Flag == -2 {
+			if c.Panic {
 				f := func() { drotm(c.N, c.XTmp, c.Incx, c.YTmp, c.Incy, kind.P) }
 				testpanics(f, c.Name+", "+kind.Name, t)
 				continue

@@ -431,7 +431,7 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 	}
 	flag := p.Flag
 	if flag == -2 {
-		panic("flag is negative 2")
+		return
 	}
 	if incX == incY && incX > 0 {
 		nsteps := n * incX

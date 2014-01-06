@@ -1424,22 +1424,22 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Rd2: 2,
 		Rx1: 3.2768e+14,
 	},
-	/*
-		{
-			Name: "D1_Big_D2_Small_Flag_1",
-			P: &blas.DrotmParams{
-				Flag: -1,
-				H:    [4]float64{1.3107199999999999e-27, -0.000244140625, 4096, 2.44140625e-16},
-			},
-			D1:  0.000000014,
-			D2:  2000000000,
-			X1:  0.000008,
-			Y1:  8000000,
-			Rd1: 119.20928955078125,
-			Rd2: 0.234881024,
-			Rx1: 3.2768e+10,
+
+	// TODO: Add D1 big, D2 small, Flag = 0
+	{
+		Name: "D1_Big_D2_Small_Flag_1",
+		P: &blas.DrotmParams{
+			Flag: -1,
+			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 1, 2.44140625e-16},
 		},
-	*/
+		D1:  0.000000014,
+		D2:  2000000000,
+		X1:  0.000008,
+		Y1:  8000000,
+		Rd1: 119.20928955078125,
+		Rd2: 0.234881024,
+		Rx1: 3.2768e+10,
+	},
 
 	{
 		Name: "RD1_Med_RD2_Big_Flag_0",
@@ -1497,38 +1497,21 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Rd2: 1.19999999996355,
 		Rx1: 1.9531250000593264e+07,
 	},
-	/*
-		{
-			Name: "D1_Small_D2_Big_Flag_1",
-			P: &blas.DrotmParams{
-				Flag: -1,
-				H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 0.000244140625, 1.6777216e-07},
-			},
-			D1:  120000000000000000,
-			D2:  0.000000000012345,
-			X1:  0.08,
-			Y1:  8000000000000,
-			Rd1: 0.00010502490698765249,
-			Rd2: 216.1836123957717,
-			Rx1: 3.8516669198055897e+09,
+	// TODO: Add Small, Big, 0 case
+	{
+		Name: "D1_Small_D2_Big_Flag_1",
+		P: &blas.DrotmParams{
+			Flag: -1,
+			H:    [4]float64{2.3731773997569866e+10, -4096, 1, 1.6777216e-07},
 		},
-	*/
-	/*
-		{
-			Name: "D1_Small_D2_Med_Flag_0",
-			P: &blas.DrotmParams{
-				Flag: -1,
-				H:    [4]float64{1.3107199999999999e-27, -0.000244140625, 4096, 2.44140625e-16},
-			},
-			D1:  120000000000000000,
-			D2:  0.000000000012345,
-			X1:  0.08,
-			Y1:  8000000000000,
-			Rd1: 119.20928955078125,
-			Rd2: 0.234881024,
-			Rx1: 3.2768e+10,
-		},
-	*/
+		D1:  120000000000000000,
+		D2:  0.000000000012345,
+		X1:  0.08,
+		Y1:  8000000000000,
+		Rd1: 0.00010502490698765249,
+		Rd2: 216.1836123957717,
+		Rx1: 3.8516669198055897e+09,
+	},
 	{
 		Name: "RD1_Small_RD2_Med_Flag_0",
 		P: &blas.DrotmParams{
@@ -1544,7 +1527,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Rx1: 0.000195314453125,
 	},
 	{
-		Name: "RD1_Small_RD2_Med_Flag_1_blah",
+		Name: "RD1_Small_RD2_Med_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: -1,
 			H:    [4]float64{0.0012207031250000002, -1, 0.000244140625, 1e-09},
@@ -1557,6 +1540,8 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Rd2: 0.019999999900000003,
 		Rx1: 1953.125009765625,
 	},
+	// TODO: Add Small, Small, 0 case
+	// TODO: Add Small, Small, 1 case
 }
 
 type Drotmger interface {

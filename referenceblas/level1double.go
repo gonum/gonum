@@ -54,7 +54,7 @@ func (Blas) Dnrm2(n int, x []float64, incX int) float64 {
 		if incX == 0 {
 			panic(zeroInc)
 		}
-		panic(negInc)
+		return 0
 	}
 	if n < 2 {
 		if n == 1 {
@@ -93,11 +93,11 @@ func (Blas) Dasum(n int, x []float64, incX int) float64 {
 	if n < 0 {
 		panic(negativeN)
 	}
-	if incX == 0 {
-		panic(zeroInc)
-	}
-	if incX < 0 {
-		panic(negInc)
+	if incX <= 0 {
+		if incX == 0 {
+			panic(zeroInc)
+		}
+		return 0
 	}
 	for i := 0; i < n; i++ {
 		sum += math.Abs(x[i*incX])
@@ -112,7 +112,7 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 		if incX == 0 {
 			panic(zeroInc)
 		}
-		panic(negInc)
+		return -1
 	}
 	if n < 2 {
 		if n == 1 {
@@ -559,7 +559,7 @@ func (Blas) Dscal(n int, alpha float64, x []float64, incX int) {
 		if incX == 0 {
 			panic(zeroInc)
 		}
-		panic(negInc)
+		return
 	}
 	if n < 1 {
 		if n == 0 {

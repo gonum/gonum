@@ -338,8 +338,8 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 		rx1 = y1 * u
 
 	}
-	fmt.Println("Flag = ", p.Flag)
-	fmt.Println("rd1 = ", rd1)
+	//fmt.Println("Flag = ", p.Flag)
+	//fmt.Println("rd1 = ", rd1)
 	for rd1 <= rgamsq || rd1 >= gamsq {
 		if p.Flag == 0 {
 			p.H[0] = 1
@@ -362,7 +362,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 			p.H[2] *= gam
 		}
 	}
-	fmt.Println("rd2 = ", rd2)
+	//fmt.Println("rd2 = ", rd2)
 	for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
 		if p.Flag == 0 {
 			p.H[0] = 1

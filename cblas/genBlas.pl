@@ -103,10 +103,16 @@ func (Blas) Srotm(n int, x []float32, incX int, y []float32, incY int, p blas.Sr
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if n*incX > len(x) {
+	if incX == 0 {
+		panic("cblas: zero x index increment")
+	}
+	if incY == 0 {
+		panic("cblas: zero y index increment")
+	}
+	if (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if n*incY > len(y) {
+	if (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
@@ -131,10 +137,16 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if n*incX > len(x) {
+	if incX == 0 {
+		panic("cblas: zero x index increment")
+	}
+	if incY == 0 {
+		panic("cblas: zero y index increment")
+	}
+	if (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if n*incY > len(y) {
+	if (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
@@ -150,10 +162,16 @@ func (Blas) Cdotu(n int, x []complex64, incX int, y []complex64, incY int) (dotu
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if incX <= 0 || n*incX > len(x) {
+	if incX == 0 {
+		panic("cblas: zero x index increment")
+	}
+	if incY == 0 {
+		panic("cblas: zero y index increment")
+	}
+	if (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if incY <= 0 || n*incY > len(y) {
+	if (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_cdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
@@ -163,10 +181,16 @@ func (Blas) Cdotc(n int, x []complex64, incX int, y []complex64, incY int) (dotc
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if incX <= 0 || n*incX > len(x) {
+	if incX == 0 {
+		panic("cblas: zero x index increment")
+	}
+	if incY == 0 {
+		panic("cblas: zero y index increment")
+	}
+	if (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if incY <= 0 || n*incY > len(y) {
+	if (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_cdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
@@ -176,10 +200,16 @@ func (Blas) Zdotu(n int, x []complex128, incX int, y []complex128, incY int) (do
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if incX <= 0 || n*incX > len(x) {
+	if incX == 0 {
+		panic("cblas: zero x index increment")
+	}
+	if incY == 0 {
+		panic("cblas: zero y index increment")
+	}
+	if (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if incY <= 0 || n*incY > len(y) {
+	if (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
@@ -189,10 +219,16 @@ func (Blas) Zdotc(n int, x []complex128, incX int, y []complex128, incY int) (do
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if incX <= 0 || n*incX > len(x) {
+	if incX == 0 {
+		panic("cblas: zero x index increment")
+	}
+	if incY == 0 {
+		panic("cblas: zero y index increment")
+	}
+	if (n-1)*incX >= len(x) {
 		panic("cblas: index out of range")
 	}
-	if incY <= 0 || n*incY > len(y) {
+	if (n-1)*incY >= len(y) {
 		panic("cblas: index out of range")
 	}
 	C.cblas_zdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
@@ -434,14 +470,14 @@ sub processParamToChecks {
 	if ($func =~ m/cblas_[sdcz]g[eb]mv/) {
 		push @processed, "var lenX, lenY int";
 		push @processed, "if tA == blas.NoTrans { lenX, lenY = n, m } else { lenX, lenY = m, n }";
-		push @processed, "if (incX > 0 && (lenX-1)*incX > len(x)) || (incX < 0 && (1-lenX)*incX > len(x)) { panic(\"cblas: x index out of range\") }";
-		push @processed, "if (incY > 0 && (lenY-1)*incY > len(y)) || (incY < 0 && (1-lenY)*incY > len(y)) { panic(\"cblas: y index out of range\") }";
+		push @processed, "if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) { panic(\"cblas: x index out of range\") }";
+		push @processed, "if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) { panic(\"cblas: y index out of range\") }";
 	} elsif ($scalarArgs{'m'}) {
-		push @processed, "if (incX > 0 && (m-1)*incX > len(x)) || (incX < 0 && (1-m)*incX > len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if (incY > 0 && (n-1)*incY > len(y)) || (incY < 0 && (1-n)*incY > len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if (incX > 0 && (m-1)*incX >= len(x)) || (incX < 0 && (1-m)*incX >= len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
 	} else {
-		push @processed, "if (incX > 0 && (n-1)*incX > len(x)) || (incX < 0 && (1-n)*incX > len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if (incY > 0 && (n-1)*incY > len(y)) || (incY < 0 && (1-n)*incY > len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
 	}
 
 	if (not $func =~ m/(?:mm|r2?k)$/) {

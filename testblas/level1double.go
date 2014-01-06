@@ -1616,10 +1616,10 @@ func DrotmTest(t *testing.T, d Drotmer) {
 			}
 			drotm(c.N, c.XTmp, c.Incx, c.YTmp, c.Incy, kind.P)
 			if !dSliceTolEqual(c.XTmp, kind.XAns) {
-				t.Errorf("daxpy: mismatch %v: expected %v, found %v", c.Name, kind.XAns, c.XTmp)
+				t.Errorf("drotm: mismatch %v: expected %v, found %v", c.Name, kind.XAns, c.XTmp)
 			}
 			if !dSliceTolEqual(c.YTmp, kind.YAns) {
-				t.Errorf("daxpy: mismatch %v: expected %v, found %v", c.Name, kind.YAns, c.YTmp)
+				t.Errorf("drotm: mismatch %v: expected %v, found %v", c.Name, kind.YAns, c.YTmp)
 			}
 		}
 	}

@@ -429,92 +429,129 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
-	flag := p.Flag
-	if flag == -2 {
+	var h11, h12, h21, h22 float64
+	var ix, iy int
+	switch p.Flag {
+	case -2:
 		return
+	case -1:
+		h11 = p.H[0]
+		h12 = p.H[2]
+		h21 = p.H[1]
+		h22 = p.H[3]
+	case 0:
+		h11 = 1
+		h12 = p.H[2]
+		h21 = p.H[1]
+		h22 = 1
+	case 1:
+		h11 = p.H[0]
+		h12 = 1
+		h21 = -1
+		h22 = p.H[3]
 	}
-	if incX == incY && incX > 0 {
-		nsteps := n * incX
-		if flag < 0 {
-			h11 := p.H[0]
-			h12 := p.H[2]
-			h21 := p.H[1]
-			h22 := p.H[3]
-			for i := 0; i < nsteps; i += incX {
-				w := x[i]
-				z := y[i]
-				x[i] = w*h11 + z*h12
-				y[i] = w*h21 + z*h22
-			}
-			return
-		}
-		if flag == 0 {
-			h12 := p.H[2]
-			h21 := p.H[1]
-			for i := 0; i < nsteps; i += incX {
-				w := x[i]
-				z := y[i]
-				x[i] = w + z*h12
-				y[i] = w*h21 + z
-			}
-			return
-		}
-		h11 := p.H[0]
-		h22 := p.H[3]
-		for i := 0; i < nsteps; i += incX {
-			w := x[i]
-			z := y[i]
-			x[i] = w*h11 + z
-			y[i] = -w + h22*z
-		}
-		return
-	}
-	ix := 0
-	iy := 0
 	if incX < 0 {
 		ix = (-n + 1) * incX
 	}
 	if incY < 0 {
 		iy = (-n + 1) * incY
 	}
-	if flag < 0 {
-		h11 := p.H[0]
-		h12 := p.H[2]
-		h21 := p.H[1]
-		h22 := p.H[3]
-		for i := 0; i < n; i++ {
-			w := x[ix]
-			z := y[iy]
-			x[ix] = w*h11 + z*h12
-			y[iy] = w*h21 + z*h22
-			ix += incX
-			iy += incY
-		}
-		return
-	}
-	if flag == 0 {
-		h12 := p.H[2]
-		h21 := p.H[1]
-		for i := 0; i < n; i++ {
-			w := x[ix]
-			z := y[iy]
-			x[ix] = w + z*h12
-			y[iy] = w*h21 + z
-			ix += incX
-			iy += incY
-		}
-		return
-	}
-	h11 := p.H[0]
-	h22 := p.H[3]
 	for i := 0; i < n; i++ {
 		w := x[ix]
 		z := y[iy]
-		x[ix] = w*h11 + z
-		y[iy] = -w + z*h22
+		x[ix] = w*h11 + z*h12
+		y[iy] = w*h21 + z*h22
 		ix += incX
 		iy += incY
 	}
+
+	/*
+		if flag == -2 {
+			return
+		}
+			if incX == incY && incX > 0 {
+				nsteps := n * incX
+				if flag < 0 {
+					h11 := p.H[0]
+					h12 := p.H[2]
+					h21 := p.H[1]
+					h22 := p.H[3]
+					for i := 0; i < nsteps; i += incX {
+						w := x[i]
+						z := y[i]
+						x[i] = w*h11 + z*h12
+						y[i] = w*h21 + z*h22
+					}
+					return
+				}
+				if flag == 0 {
+					h12 := p.H[2]
+					h21 := p.H[1]
+					for i := 0; i < nsteps; i += incX {
+						w := x[i]
+						z := y[i]
+						x[i] = w + z*h12
+						y[i] = w*h21 + z
+					}
+					return
+				}
+				h11 := p.H[0]
+				h22 := p.H[3]
+				for i := 0; i < nsteps; i += incX {
+					w := x[i]
+					z := y[i]
+					x[i] = w*h11 + z
+					y[i] = -w + h22*z
+				}
+				return
+			}
+			ix := 0
+			iy := 0
+			if incX < 0 {
+				ix = (-n + 1) * incX
+			}
+			if incY < 0 {
+				iy = (-n + 1) * incY
+			}
+			if flag < 0 {
+				h11 := p.H[0]
+				h12 := p.H[2]
+				h21 := p.H[1]
+				h22 := p.H[3]
+				for i := 0; i < n; i++ {
+					w := x[ix]
+					z := y[iy]
+					x[ix] = w*h11 + z*h12
+					y[iy] = w*h21 + z*h22
+					ix += incX
+					iy += incY
+				}
+				return
+			}
+			if flag == 0 {
+				h12 := p.H[2]
+				h21 := p.H[1]
+				for i := 0; i < n; i++ {
+					w := x[ix]
+					z := y[iy]
+					x[ix] = w + z*h12
+					y[iy] = w*h21 + z
+					ix += incX
+					iy += incY
+				}
+				return
+			}
+			h11 := p.H[0]
+			h22 := p.H[3]
+			for i := 0; i < n; i++ {
+				w := x[ix]
+				z := y[iy]
+				x[ix] = w*h11 + z
+				y[iy] = -w + z*h22
+				ix += incX
+				iy += incY
+			}
+	*/
 	return
 }
 

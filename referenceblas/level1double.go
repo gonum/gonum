@@ -263,9 +263,142 @@ func (Blas) Drotg(a, b float64) (c, s, r, z float64) {
 	return
 }
 
+func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
+	var p1, p2, q1, q2, u float64
+
+	gam := 4096.0
+	gamsq := 16777216.0
+	rgamsq := 5.9604645e-8
+	p = blas.DrotmParams{}
+
+	var h11, h12, h21, h22 float64
+	var flag blas.Flag
+
+	rd1 = d1
+	rd2 = d2
+	rx1 = x1
+
+	if d1 < 0 {
+		flag = blas.Rescaling
+		h11 = 0
+		h12 = 0
+		h21 = 0
+		h22 = 0
+		rd1 = 0
+		rd2 = 0
+		rx1 = 0
+	} else {
+		p2 = d2 * y1
+		if p2 == 0 {
+			flag = blas.Identity
+			p.Flag = flag
+			return
+		}
+		p1 = d1 * x1
+		q2 = p2 * y1
+		q1 = p1 * x1
+		if math.Abs(q1) > math.Abs(q2) {
+			h21 = -y1 / x1
+			h12 = p2 / p1
+			u = 1 - h12*h21
+			if u > 0 {
+				flag = blas.OffDiagonal
+				rd1 /= u
+				rd2 /= u
+				rx1 *= u
+			}
+		} else {
+			if q2 < 0 {
+				flag = blas.Rescaling
+				h11 = 0
+				h12 = 0
+				h21 = 0
+				h22 = 0
+
+				rd1 = 0
+				rd2 = 0
+				rx1 = 0
+			} else {
+				flag = blas.Diagonal
+				h11 = p1 / p2
+				h22 = x1 / y1
+				u = 1 + h11*h22
+				temp := d2 / u
+				rd2 = d1 / u
+				rd1 = temp
+				rx1 = y1 * u
+			}
+		}
+		if rd1 != 0 {
+			for rd1 <= rgamsq || rd1 >= gamsq {
+				if flag == blas.OffDiagonal {
+					h11 = 1
+					h22 = 1
+					flag = blas.Rescaling
+				} else {
+					h21 = -1
+					h12 = 1
+					flag = blas.Rescaling
+				}
+				if rd1 <= rgamsq {
+					rd1 *= gam * gam
+					rx1 /= gam
+					h11 /= gam
+					h12 /= gam
+				} else {
+					rd1 /= gam * gam
+					rx1 *= gam
+					h11 *= gam
+					h12 *= gam
+				}
+			}
+		}
+		if rd2 != 0 {
+			for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
+				if flag == blas.OffDiagonal {
+					h11 = 1
+					h22 = 1
+					flag = blas.Rescaling
+				} else {
+					h21 = -1
+					h12 = 1
+					flag = blas.Rescaling
+				}
+				if rd2 <= rgamsq {
+					rd2 *= gam * gam
+					h21 /= gam
+					h22 /= gam
+				} else {
+					rd2 /= gam * gam
+					h21 *= gam
+					h22 *= gam
+				}
+			}
+		}
+	}
+	if flag == blas.Identity || flag == blas.Rescaling {
+		p.H[0] = h11
+		p.H[1] = h21
+		p.H[2] = h12
+		p.H[3] = h22
+	} else if flag == blas.OffDiagonal {
+		p.H[1] = h21
+		p.H[2] = h12
+	} else {
+		p.H[0] = h11
+		p.H[3] = h22
+
+	}
+	p.Flag = flag
+	return
+}
+
+/*
+
 // Drotmg computes the modified Givens rotation. See
 // http://www.netlib.org/lapack/explore-html/df/deb/drotmg_8f.html
 // for more details
+// Simpler implementation, possibly wrong
 func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
 	var p1, p2, q1, q2, u float64
 
@@ -386,6 +519,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	}
 	return
 }
+*/
 
 // Drot applies a plane transformation
 func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64, s float64) {

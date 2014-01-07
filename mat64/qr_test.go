@@ -13,7 +13,7 @@ func (s *S) TestQRD(c *check.C) {
 		a *Dense
 	}{
 		{
-			a: mustDense(NewDense(4, 3, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12})),
+			a: NewDense(4, 3, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}),
 		},
 	} {
 		qf := QR(DenseCopyOf(t.a))

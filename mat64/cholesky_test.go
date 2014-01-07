@@ -14,11 +14,11 @@ func (s *S) TestCholesky(c *check.C) {
 		spd bool
 	}{
 		{
-			a: mustDense(NewDense(3, 3, []float64{
+			a: NewDense(3, 3, []float64{
 				4, 1, 1,
 				1, 2, 3,
 				1, 3, 6,
-			})),
+			}),
 
 			spd: true,
 		},

@@ -359,7 +359,7 @@ func orthes(a *Dense) (hess, v *Dense) {
 	}
 
 	// Accumulate transformations (Algol's ortran).
-	v, _ = NewDense(n, n, make([]float64, n*n))
+	v = NewDense(n, n, nil)
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			if i == j {
@@ -811,7 +811,7 @@ func (f EigenFactors) D() *Dense {
 	if n = len(d); n != len(e) {
 		panic(ErrSquare)
 	}
-	dm, _ := NewDense(n, n, make([]float64, n*n))
+	dm := NewDense(n, n, nil)
 	for i := 0; i < n; i++ {
 		dm.Set(i, i, d[i])
 		if e[i] > 0 {

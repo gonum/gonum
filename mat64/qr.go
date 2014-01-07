@@ -80,7 +80,7 @@ func (f QRFactor) IsFullRank() bool {
 func (f QRFactor) H() *Dense {
 	qr := f.QR
 	m, n := qr.Dims()
-	h, _ := NewDense(m, n, make([]float64, m*n))
+	h := NewDense(m, n, nil)
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
 			if i >= j {
@@ -95,7 +95,7 @@ func (f QRFactor) H() *Dense {
 func (f QRFactor) R() *Dense {
 	qr, rDiag := f.QR, f.rDiag
 	_, n := qr.Dims()
-	r, _ := NewDense(n, n, make([]float64, n*n))
+	r := NewDense(n, n, nil)
 	for i, v := range rDiag[:n] {
 		for j := 0; j < n; j++ {
 			if i < j {
@@ -112,7 +112,7 @@ func (f QRFactor) R() *Dense {
 func (f QRFactor) Q() *Dense {
 	qr := f.QR
 	m, n := qr.Dims()
-	q, _ := NewDense(m, n, make([]float64, m*n))
+	q := NewDense(m, n, nil)
 
 	for k := n - 1; k >= 0; k-- {
 		// for i := 0; i < m; i++ {

@@ -289,7 +289,7 @@ func Inverse(a Matrix) *Dense {
 	for i := 0; i < m*m; i += m + 1 {
 		d[i] = 1
 	}
-	eye, _ := NewDense(m, m, d)
+	eye := NewDense(m, m, d)
 	return Solve(a, eye)
 }
 

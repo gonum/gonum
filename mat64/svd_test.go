@@ -25,47 +25,47 @@ func (s *S) TestSVD(c *check.C) {
 		v     *Dense
 	}{
 		{
-			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0}),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
 
 			wantu: true,
-			u: mustDense(NewDense(4, 2, []float64{
+			u: NewDense(4, 2, []float64{
 				0.8174155604703632, -0.5760484367663209,
 				0.5760484367663209, 0.8174155604703633,
 				0, 0,
 				0, 0,
-			})),
+			}),
 
 			sigma: []float64{5.464985704219041, 0.365966190626258},
 
 			wantv: true,
-			v: mustDense(NewDense(2, 2, []float64{
+			v: NewDense(2, 2, []float64{
 				0.4045535848337571, -0.9145142956773044,
 				0.9145142956773044, 0.4045535848337571,
-			})),
+			}),
 		},
 		{
-			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0}),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
 
 			wantu: true,
-			u: mustDense(NewDense(4, 2, []float64{
+			u: NewDense(4, 2, []float64{
 				0.8174155604703632, -0.5760484367663209,
 				0.5760484367663209, 0.8174155604703633,
 				0, 0,
 				0, 0,
-			})),
+			}),
 
 			sigma: []float64{5.464985704219041, 0.365966190626258},
 
 			wantv: false,
 		},
 		{
-			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0}),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
@@ -75,13 +75,13 @@ func (s *S) TestSVD(c *check.C) {
 			sigma: []float64{5.464985704219041, 0.365966190626258},
 
 			wantv: true,
-			v: mustDense(NewDense(2, 2, []float64{
+			v: NewDense(2, 2, []float64{
 				0.4045535848337571, -0.9145142956773044,
 				0.9145142956773044, 0.4045535848337571,
-			})),
+			}),
 		},
 		{
-			a: mustDense(NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0})),
+			a: NewDense(4, 2, []float64{2, 4, 1, 3, 0, 0, 0, 0}),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),
@@ -95,11 +95,11 @@ func (s *S) TestSVD(c *check.C) {
 			// forcing a to be a tall or square matrix.
 			//
 			// This is a failing case to use to fix that bug.
-			a: mustDense(NewDense(3, 11, []float64{
+			a: NewDense(3, 11, []float64{
 				1, 1, 0, 1, 0, 0, 0, 0, 0, 11, 1,
 				1, 0, 0, 0, 0, 0, 1, 0, 0, 12, 2,
 				1, 1, 0, 0, 0, 0, 0, 0, 1, 13, 3,
-			})),
+			}),
 
 			epsilon: math.Pow(2, -52.0),
 			small:   math.Pow(2, -966.0),

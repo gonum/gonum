@@ -62,9 +62,12 @@ type Dense struct {
 	mat BlasMatrix
 }
 
-func NewDense(r, c int, mat []float64) (*Dense, error) {
-	if r*c != len(mat) {
-		return nil, ErrShape
+func NewDense(r, c int, mat []float64) *Dense {
+	if mat != nil && r*c != len(mat) {
+		panic(ErrShape)
+	}
+	if mat == nil {
+		mat = make([]float64, r*c)
 	}
 	return &Dense{BlasMatrix{
 		Order:  BlasOrder,
@@ -72,7 +75,7 @@ func NewDense(r, c int, mat []float64) (*Dense, error) {
 		Cols:   c,
 		Stride: c,
 		Data:   mat,
-	}}, nil
+	}}
 }
 
 // DenseCopyOf returns a newly allocated copy of the elements of a.

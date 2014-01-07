@@ -1403,7 +1403,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Name: "RD1_Big_RD2_Big_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2340.5714285714284, -4096, 1, 4681.142857142857},
+			H:    [4]float64{2340.5714285714284, -4096, 4096, 4681.142857142857},
 		},
 		D1:  800000000,
 		D2:  1600000000,
@@ -1447,7 +1447,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Name: "D1_Big_D2_Small_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 1, 2.44140625e-16},
+			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 4096, 2.44140625e-16},
 		},
 		D1:  0.000000014,
 		D2:  2000000000,
@@ -1519,7 +1519,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Name: "D1_Small_D2_Big_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2.3731773997569866e+10, -4096, 1, 1.6777216e-07},
+			H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 0.000244140625, 1.6777216e-07},
 		},
 		D1:  120000000000000000,
 		D2:  0.000000000012345,

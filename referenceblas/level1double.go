@@ -274,13 +274,13 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	rgamsq := 5.9604645e-8
 	p = blas.DrotmParams{}
 	if d1 < 0 {
-		p.Flag = -1
+		p.Flag = blas.Rescaling
 		return
 	}
 
 	p2 = d2 * y1
 	if p2 == 0 {
-		p.Flag = -2
+		p.Flag = blas.Identity
 		rd1 = d1
 		rd2 = d2
 		rx1 = x1
@@ -294,12 +294,12 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	absQ2 := math.Abs(q2)
 
 	if absQ1 < absQ2 && q2 < 0 {
-		p.Flag = -1
+		p.Flag = blas.Rescaling
 		return
 	}
 
 	if d1 == 0 {
-		p.Flag = 1
+		p.Flag = blas.Diagonal
 		p.H[0] = p1 / p2
 		p.H[3] = x1 / y1
 		u = 1 + p.H[0]*p.H[3]
@@ -320,7 +320,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 		rd1 = d1
 		rd2 = d2
 		rx1 = x1
-		p.Flag = 0
+		p.Flag = blas.OffDiagonal
 		// u must be greater than zero because |q1| > |q2|, so check from netlib
 		// is unnecessary
 		// This is left in for ease of comparison with complex routines
@@ -330,7 +330,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 		rx1 *= u
 		//}
 	} else {
-		p.Flag = 1
+		p.Flag = blas.Diagonal
 		p.H[0] = p1 / p2
 		p.H[3] = x1 / y1
 		u = 1 + p.H[0]*p.H[3]
@@ -345,11 +345,11 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 		if p.Flag == 0 {
 			p.H[0] = 1
 			p.H[3] = 1
-			p.Flag = -1
+			p.Flag = blas.Rescaling
 		} else {
 			p.H[1] = -1
 			p.H[2] = 1
-			p.Flag = -1
+			p.Flag = blas.Rescaling
 		}
 		if rd1 <= rgamsq {
 			rd1 *= gam * gam
@@ -368,11 +368,11 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 		if p.Flag == 0 {
 			p.H[0] = 1
 			p.H[3] = 1
-			p.Flag = -1
+			p.Flag = blas.Rescaling
 		} else {
 			p.H[1] = -1
 			p.H[2] = 1
-			p.Flag = -1
+			p.Flag = blas.Rescaling
 		}
 		if math.Abs(rd2) <= rgamsq {
 			rd2 *= gam * gam
@@ -433,19 +433,19 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 	var h11, h12, h21, h22 float64
 	var ix, iy int
 	switch p.Flag {
-	case -2:
+	case blas.Identity:
 		return
-	case -1:
+	case blas.Rescaling:
 		h11 = p.H[0]
 		h12 = p.H[2]
 		h21 = p.H[1]
 		h22 = p.H[3]
-	case 0:
+	case blas.OffDiagonal:
 		h11 = 1
 		h12 = p.H[2]
 		h21 = p.H[1]
 		h22 = 1
-	case 1:
+	case blas.Diagonal:
 		h11 = p.H[0]
 		h12 = 1
 		h21 = -1

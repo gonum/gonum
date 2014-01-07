@@ -150,7 +150,7 @@ var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
 		Panic:  false,
 		Dasum:  23,
 		Dnrm2:  10.81665382639196787935766380241148783875388972153573863813135,
-		Idamax: 3,
+		Idamax: 0,
 		DscalCases: []DScalCase{
 			{
 				Alpha: -2,
@@ -166,7 +166,7 @@ var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
 		Panic:  false,
 		Dasum:  23,
 		Dnrm2:  10.81665382639196787935766380241148783875388972153573863813135,
-		Idamax: 1,
+		Idamax: 0,
 		DscalCases: []DScalCase{
 			{
 				Alpha: -2,
@@ -182,7 +182,7 @@ var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
 		Panic:  false,
 		Dasum:  0,
 		Dnrm2:  0,
-		Idamax: 0,
+		Idamax: -1,
 		DscalCases: []DScalCase{
 			{
 				Alpha: -2,
@@ -214,7 +214,7 @@ var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
 		Panic:  false,
 		Dasum:  21,
 		Dnrm2:  12.68857754044952038019377274608948979173952662752515253090272,
-		Idamax: 2,
+		Idamax: 1,
 		DscalCases: []DScalCase{
 			{
 				Alpha: -2,
@@ -230,7 +230,7 @@ var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
 		Panic:  false,
 		Dasum:  18,
 		Dnrm2:  11.83215956619923208513465658312323409683100246158868064575943,
-		Idamax: 6,
+		Idamax: 2,
 		DscalCases: []DScalCase{
 			{
 				Alpha: -2,
@@ -246,7 +246,7 @@ var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
 		Panic:  false,
 		Dasum:  8,
 		Dnrm2:  6.324555320336758663997787088865437067439110278650433653715009,
-		Idamax: 3,
+		Idamax: 0,
 		DscalCases: []DScalCase{
 			{
 				Alpha: -2,

@@ -3,7 +3,7 @@
 // (Documentation says incx must not be zero)
 //
 // TODO: Improve documentation
-package naivegoblas
+package referenceblas
 
 import (
 	"github.com/gonum/blas"
@@ -119,20 +119,21 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 			return 0
 		}
 		if n == 0 {
-			return 0 // Netlib returns first index when n == 0
+			return -1 // Netlib returns invalid index when n == 0
 		}
 		if n < 1 {
 			panic(negativeN)
 		}
 	}
 	idx := 0
-	max := x[0]
+	max := math.Abs(x[0])
 
 	for i := 1; i < n; i++ {
 		v := x[i*incX]
-		if v > max {
-			max = v
-			idx = i * incX
+		absV := math.Abs(v)
+		if absV > max {
+			max = absV
+			idx = i
 		}
 	}
 	return idx

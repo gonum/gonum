@@ -1,4 +1,4 @@
-package naivegoblas
+package referenceblas
 
 import (
 	"github.com/gonum/blas/testblas"

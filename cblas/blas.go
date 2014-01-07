@@ -10,7 +10,7 @@ package cblas
 /*
 #cgo CFLAGS: -g -O2
 #cgo linux LDFLAGS: -L/usr/lib/ -lcblas
-#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
+#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework Accelerate
 #include "cblas.h"
 */
 import "C"

@@ -409,7 +409,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	gam := 4096.0
 	gamsq := 16777216.0
 	rgamsq := 5.9604645e-8
-	p = blas.DrotmParams{}
+
 	if d1 < 0 {
 		p.Flag = blas.Rescaling
 		return

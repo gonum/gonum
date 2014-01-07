@@ -1389,7 +1389,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 		Name: "RD1_Big_RD2_Big_Flag_0",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{4096, -4096, 1, 4096},
+			H:    [4]float64{4096, -3584, 1792, 4096},
 		},
 		D1:  1600000000,
 		D2:  800000000,

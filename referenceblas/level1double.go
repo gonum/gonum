@@ -336,6 +336,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 					h11 = 1
 					h22 = 1
 					flag = blas.Rescaling
+					rescaleFlag = false
 				} else if rescaleFlag {
 					h21 = -1
 					h12 = 1
@@ -357,10 +358,11 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 		}
 		if rd2 != 0 {
 			for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
-				if flag == blas.OffDiagonal {
+				if flag == blas.OffDiagonal && rescaleFlag {
 					h11 = 1
 					h22 = 1
 					flag = blas.Rescaling
+					rescaleFlag = false
 				} else if rescaleFlag {
 					h21 = -1
 					h12 = 1

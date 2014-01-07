@@ -142,17 +142,27 @@ func (graph *TileGraph) CoordsToID(row, col int) (id int) {
 	return id
 }
 
-func (graph *TileGraph) Successors(id int) []int {
+func (graph *TileGraph) CoordsToNode(row, col int) (node Node) {
+	id := graph.CoordsToID(row, col)
+	if id == -1 {
+		return nil
+	} else {
+		return GonumNode(id)
+	}
+}
+
+func (graph *TileGraph) Successors(node Node) []Node {
+	id := node.ID()
 	if id < 0 || id >= len(graph.tiles) || graph.tiles[id] == false {
 		return nil
 	}
 
 	row, col := graph.IDToCoords(id)
 
-	neighbors := []int{graph.CoordsToID(row-1, col), graph.CoordsToID(row+1, col), graph.CoordsToID(row, col-1), graph.CoordsToID(row, col+1)}
-	realNeighbors := make([]int, 0, 4) // Will overallocate sometimes, but not by much. Not a big deal
+	neighbors := []Node{graph.CoordsToNode(row-1, col), graph.CoordsToNode(row+1, col), graph.CoordsToNode(row, col-1), graph.CoordsToNode(row, col+1)}
+	realNeighbors := make([]Node, 0, 4) // Will overallocate sometimes, but not by much. Not a big deal
 	for _, neighbor := range neighbors {
-		if neighbor != -1 && graph.tiles[neighbor] == true {
+		if neighbor != nil && graph.tiles[neighbor.ID()] == true {
 			realNeighbors = append(realNeighbors, neighbor)
 		}
 	}
@@ -160,53 +170,55 @@ func (graph *TileGraph) Successors(id int) []int {
 	return realNeighbors
 }
 
-func (graph *TileGraph) IsSuccessor(id, succ int) bool {
+func (graph *TileGraph) IsSuccessor(node, successor Node) bool {
+	id, succ := node.ID(), successor.ID()
 	return (id >= 0 && id < len(graph.tiles) && graph.tiles[id] == true) && (succ >= 0 && succ < len(graph.tiles) && graph.tiles[succ] == true)
 }
 
-func (graph *TileGraph) Predecessors(id int) []int {
-	return graph.Successors(id)
+func (graph *TileGraph) Predecessors(node Node) []Node {
+	return graph.Successors(node)
 }
 
-func (graph *TileGraph) IsPredecessor(id, pred int) bool {
-	return graph.IsSuccessor(id, pred)
+func (graph *TileGraph) IsPredecessor(node, pred Node) bool {
+	return graph.IsSuccessor(node, pred)
 }
 
-func (graph *TileGraph) IsAdjacent(id, neighbor int) bool {
+func (graph *TileGraph) IsAdjacent(id, neighbor Node) bool {
 	return graph.IsSuccessor(id, neighbor)
 }
 
-func (graph *TileGraph) NodeExists(id int) bool {
+func (graph *TileGraph) NodeExists(node Node) bool {
+	id := node.ID()
 	return id >= 0 && id < len(graph.tiles) && graph.tiles[id] == true
 }
 
-func (graph *TileGraph) Degree(id int) int {
-	return len(graph.Successors(id)) * 2
+func (graph *TileGraph) Degree(node Node) int {
+	return len(graph.Successors(node)) * 2
 }
 
-func (graph *TileGraph) EdgeList() [][2]int {
-	edges := make([][2]int, 0)
+func (graph *TileGraph) EdgeList() []Edge {
+	edges := make([]Edge, 0)
 	for id, passable := range graph.tiles {
 		if !passable {
 			continue
 		}
 
-		for _, succ := range graph.Successors(id) {
-			edges = append(edges, [2]int{id, succ})
+		for _, succ := range graph.Successors(GonumNode(id)) {
+			edges = append(edges, GonumEdge{GonumNode(id), succ})
 		}
 	}
 
 	return edges
 }
 
-func (graph *TileGraph) NodeList() []int {
-	nodes := make([]int, 0)
+func (graph *TileGraph) NodeList() []Node {
+	nodes := make([]Node, 0)
 	for id, passable := range graph.tiles {
 		if !passable {
 			continue
 		}
 
-		nodes = append(nodes, id)
+		nodes = append(nodes, GonumNode(id))
 	}
 
 	return nodes

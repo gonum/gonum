@@ -14,7 +14,6 @@ type Node interface {
 type Edge interface {
 	Head() Node
 	Tail() Node
-	Directed() bool
 }
 
 // A Graph implements all methods necessary to run graph-specific algorithms on it. Strictly speaking EdgeList() and NodeList() would be sufficient, but the others (such as Successors)
@@ -25,7 +24,7 @@ type Graph interface {
 	Predecessors(node Node) []Node             // Gives the nodes connected by INBOUND edges, if the graph is an undirected graph, this set is equal to Successors
 	IsPredecessor(node, predecessor Node) bool // If predecessor shows up in the list returned by Predecessors(node), then it's a predecessor. If node doesn't exist, this should always return false
 	IsAdjacent(node, neighbor Node) bool       // IsSuccessor || IsPredecessor
-	NodeExists(node Node) bool                 // Returns whether a node with the given ID is currently in the graph
+	NodeExists(node Node) bool                 // Returns whether a node with the given Node is currently in the graph
 	Degree(node Node) int                      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
 	EdgeList() []Edge                          // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph, provide both directions as separate edges
 	NodeList() []Node                          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected. The caller is free to modify this list (so don't pass a reference to your own list)
@@ -85,7 +84,6 @@ func (node GonumNode) ID() int {
 
 type GonumEdge struct {
 	H, T Node
-	Dir  bool
 }
 
 func (edge GonumEdge) Head() Node {
@@ -94,10 +92,6 @@ func (edge GonumEdge) Head() Node {
 
 func (edge GonumEdge) Tail() Node {
 	return edge.T
-}
-
-func (edge GonumEdge) Directed() bool {
-	return edge.Dir
 }
 
 /* Simple operations */
@@ -118,7 +112,7 @@ func CopyGraph(dst MutableGraph, src Graph) {
 
 		}
 		for _, succ := range src.Successors(node) {
-			edge := GonumEdge{H: node, T: succ, Dir: dir}
+			edge := GonumEdge{H: node, T: succ}
 			dst.AddEdge(edge)
 			if Cost != nil {
 				dst.SetEdgeCost(edge, Cost(node, succ))

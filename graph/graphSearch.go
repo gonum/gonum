@@ -24,7 +24,7 @@ import (
 // To run Uniform Cost Search, run A* with the NullHeuristic
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost function that returns a uniform positive value)
-func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) float64) (path []int, cost float64, nodesExpanded int) {
+func AStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Node) float64) (path []Node, cost float64, nodesExpanded int) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
 			Cost = cgraph.Cost
@@ -45,34 +45,34 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 	heap.Init(openSet)
 	node := internalNode{start, 0, HeuristicCost(start, goal)}
 	heap.Push(openSet, node)
-	predecessor := make(map[int]int)
+	predecessor := make(map[int]Node)
 
 	for openSet.Len() != 0 {
 		curr := heap.Pop(openSet).(internalNode)
 
 		// This isn't in most implementations of A*, it's a restructuring of the step "if node not in openSet, add it"
 		// Instead of searching to check, we see if we already evaluated it. If we have we can ignore it
-		if _, ok := closedSet[curr.int]; ok {
+		if _, ok := closedSet[curr.ID()]; ok {
 			continue
 		}
 
 		nodesExpanded += 1
 
-		if curr.int == goal {
+		if curr.ID() == goal.ID() {
 			return rebuildPath(predecessor, goal), curr.gscore, nodesExpanded
 		}
 
-		closedSet[curr.int] = curr
+		closedSet[curr.ID()] = curr
 
-		for _, neighbor := range graph.Successors(curr.int) {
-			g := curr.gscore + Cost(curr.int, neighbor)
-			if _, ok := closedSet[neighbor]; ok && g >= closedSet[neighbor].gscore {
+		for _, neighbor := range graph.Successors(curr.Node) {
+			g := curr.gscore + Cost(curr.Node, neighbor)
+			if _, ok := closedSet[neighbor.ID()]; ok && g >= closedSet[neighbor.ID()].gscore {
 				continue
 			}
 
-			if _, ok := closedSet[neighbor]; !ok || g < closedSet[neighbor].gscore {
+			if _, ok := closedSet[neighbor.ID()]; !ok || g < closedSet[neighbor.ID()].gscore {
 				node = internalNode{neighbor, g, g + HeuristicCost(neighbor, goal)}
-				predecessor[node.int] = curr.int
+				predecessor[node.ID()] = curr
 				heap.Push(openSet, node)
 			}
 		}
@@ -89,7 +89,7 @@ func AStar(start, goal int, graph Graph, Cost, HeuristicCost func(int, int) floa
 // Like A*, Dijkstra's Algorithm likely won't run correctly with negative edge weights -- use Bellman-Ford for that instead
 //
 // Dijkstra's algorithm usually only returns a cost map, however, since the data is available this version will also reconstruct the path to every node
-func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[int][]int, costs map[int]float64) {
+func Dijkstra(source Node, graph Graph, Cost func(Node, Node) float64) (paths map[int][]Node, costs map[int]float64) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
 			Cost = cgraph.Cost
@@ -101,7 +101,8 @@ func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[i
 	openSet := &aStarPriorityQueue{}
 	closedSet := set.NewSet()                 // This is to make use of that same
 	costs = make(map[int]float64, len(nodes)) // May overallocate, will change if it becomes a problem
-	predecessor := make(map[int]int, len(nodes))
+	predecessor := make(map[int]Node, len(nodes))
+	nodeIDMap := make(map[int]Node, len(nodes))
 	heap.Init(openSet)
 
 	// I don't think we actually need the init step since I use a map check rather than inf to check if we're done
@@ -115,7 +116,7 @@ func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[i
 		}
 	}*/
 
-	costs[source] = 0
+	costs[source.ID()] = 0
 	heap.Push(openSet, internalNode{source, 0, 0})
 
 	for openSet.Len() != 0 {
@@ -124,25 +125,27 @@ func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[i
 			 break
 		 } */
 
-		if closedSet.Contains(node.int) { // As in A*, prevents us from having to slowly search and reorder the queue
+		if closedSet.Contains(node.ID()) { // As in A*, prevents us from having to slowly search and reorder the queue
 			continue
 		}
 
-		closedSet.Add(node.int)
+		nodeIDMap[node.ID()] = node
 
-		for _, neighbor := range graph.Successors(node.int) {
-			tmpCost := costs[node.int] + Cost(node.int, neighbor)
-			if cost, ok := costs[neighbor]; !ok || tmpCost < cost {
-				costs[neighbor] = cost
-				predecessor[neighbor] = node.int
+		closedSet.Add(node.ID())
+
+		for _, neighbor := range graph.Successors(node) {
+			tmpCost := costs[node.ID()] + Cost(node, neighbor)
+			if cost, ok := costs[neighbor.ID()]; !ok || tmpCost < cost {
+				costs[neighbor.ID()] = cost
+				predecessor[neighbor.ID()] = node
 				heap.Push(openSet, internalNode{neighbor, cost, cost})
 			}
 		}
 	}
 
-	paths = make(map[int][]int, len(costs))
+	paths = make(map[int][]Node, len(costs))
 	for node, _ := range costs { // Only reconstruct the path if one exists
-		paths[node] = rebuildPath(predecessor, node)
+		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
 	return paths, costs
 }
@@ -156,7 +159,7 @@ func Dijkstra(source int, graph Graph, Cost func(int, int) float64) (paths map[i
 //
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight cycle.
-func BellmanFord(source int, graph Graph, Cost func(int, int) float64) (paths map[int][]int, costs map[int]float64, aborted bool) {
+func BellmanFord(source Node, graph Graph, Cost func(Node, Node) float64) (paths map[int][]Node, costs map[int]float64, aborted bool) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
 			Cost = cgraph.Cost
@@ -165,32 +168,36 @@ func BellmanFord(source int, graph Graph, Cost func(int, int) float64) (paths ma
 		}
 	}
 
-	predecessor := make(map[int]int)
+	predecessor := make(map[int]Node)
 	costs = make(map[int]float64)
-	costs[source] = 0
+	nodeIDMap := make(map[int]Node)
+	nodeIDMap[source.ID()] = source
+	costs[source.ID()] = 0
 	nodes := graph.NodeList()
 	edges := graph.EdgeList()
 
 	for i := 1; i < len(nodes)-1; i++ {
 		for _, edge := range edges {
-			weight := Cost(edge[0], edge[1])
-			if dist := costs[edge[0]] + weight; dist < costs[edge[1]] {
-				costs[edge[1]] = dist
-				predecessor[edge[1]] = edge[0]
+			weight := Cost(edge.Head(), edge.Tail())
+			nodeIDMap[edge.Head().ID()] = edge.Head()
+			nodeIDMap[edge.Tail().ID()] = edge.Tail()
+			if dist := costs[edge.Head().ID()] + weight; dist < costs[edge.Tail().ID()] {
+				costs[edge.Tail().ID()] = dist
+				predecessor[edge.Tail().ID()] = edge.Head()
 			}
 		}
 	}
 
 	for _, edge := range edges {
-		weight := Cost(edge[0], edge[1])
-		if costs[edge[0]]+weight < costs[edge[1]] {
+		weight := Cost(edge.Head(), edge.Tail())
+		if costs[edge.Head().ID()]+weight < costs[edge.Tail().ID()] {
 			return nil, nil, true // Abandoned because a cycle is detected
 		}
 	}
 
-	paths = make(map[int][]int, len(costs))
+	paths = make(map[int][]Node, len(costs))
 	for node, _ := range costs {
-		paths[node] = rebuildPath(predecessor, node)
+		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
 	return paths, costs, false
 }
@@ -207,7 +214,7 @@ func BellmanFord(source int, graph Graph, Cost func(int, int) float64) (paths ma
 //
 // Its return values are, in order: a map from the source node, to the destination node, to the path between them; a map from the source node, to the destination node, to the cost of the path between them;
 // and a bool that is true if Bellman-Ford detected a negative edge weight cycle -- thus causing it (and this algorithm) to abort (if aborted is true, both maps will be nil).
-func Johnson(graph Graph, Cost func(int, int) float64) (nodePaths map[int]map[int][]int, nodeCosts map[int]map[int]float64, aborted bool) {
+func Johnson(graph Graph, Cost func(Node, Node) float64) (nodePaths map[int]map[int][]Node, nodeCosts map[int]map[int]float64, aborted bool) {
 	if Cost == nil {
 		if cgraph, ok := graph.(Coster); ok {
 			Cost = cgraph.Cost
@@ -222,12 +229,12 @@ func Johnson(graph Graph, Cost func(int, int) float64) (nodePaths map[int]map[in
 		if !dummyGraph.NodeExists(node) {
 			dummyGraph.AddNode(node, neighbors)
 			for _, neighbor := range neighbors {
-				dummyGraph.SetEdgeCost(node, neighbor, Cost(node, neighbor))
+				dummyGraph.SetEdgeCost(GonumEdge{node, neighbor}, Cost(node, neighbor))
 			}
 		} else {
 			for _, neighbor := range neighbors {
-				dummyGraph.AddEdge(node, neighbor)
-				dummyGraph.SetEdgeCost(node, neighbor, Cost(node, neighbor))
+				dummyGraph.AddEdge(GonumEdge{node, neighbor})
+				dummyGraph.SetEdgeCost(GonumEdge{node, neighbor}, Cost(node, neighbor))
 			}
 		}
 	}
@@ -235,7 +242,7 @@ func Johnson(graph Graph, Cost func(int, int) float64) (nodePaths map[int]map[in
 	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
 	dummyNode := dummyGraph.NewNode(graph.NodeList())
 	for _, node := range graph.NodeList() {
-		dummyGraph.SetEdgeCost(dummyNode, node, 0)
+		dummyGraph.SetEdgeCost(GonumEdge{dummyNode, node}, 0)
 	}
 
 	/* Step 2: Run Bellman-Ford starting at the dummy node, abort if it detects a cycle */
@@ -246,17 +253,17 @@ func Johnson(graph Graph, Cost func(int, int) float64) (nodePaths map[int]map[in
 
 	/* Step 3: reweight the graph and remove the dummy node */
 	for _, edge := range graph.EdgeList() {
-		dummyGraph.SetEdgeCost(edge[0], edge[1], Cost(edge[0], edge[1])+costs[edge[0]]-costs[edge[1]])
+		dummyGraph.SetEdgeCost(edge, Cost(edge.Head(), edge.Tail())+costs[edge.Head().ID()]-costs[edge.Tail().ID()])
 	}
 
 	dummyGraph.RemoveNode(dummyNode)
 
 	/* Step 4: Run Dijkstra's starting at every node */
-	nodePaths = make(map[int]map[int][]int, len(graph.NodeList()))
+	nodePaths = make(map[int]map[int][]Node, len(graph.NodeList()))
 	nodeCosts = make(map[int]map[int]float64)
 
 	for _, node := range graph.NodeList() {
-		nodePaths[node], nodeCosts[node] = Dijkstra(node, dummyGraph, nil)
+		nodePaths[node.ID()], nodeCosts[node.ID()] = Dijkstra(node, dummyGraph, nil)
 	}
 
 	return nodePaths, nodeCosts, false
@@ -264,10 +271,10 @@ func Johnson(graph Graph, Cost func(int, int) float64) (nodePaths map[int]map[in
 
 // Expands the first node it sees trying to find the destination. Depth First Search is *not* guaranteed to find the shortest path,
 // however, if a path exists DFS is guaranteed to find it (provided you don't find a way to implement a Graph with an infinite depth)
-func DepthFirstSearch(start, goal int, graph Graph) []int {
+func DepthFirstSearch(start, goal Node, graph Graph) []Node {
 	closedSet := set.NewSet()
 	openSet := xifo.Stack([]interface{}{start})
-	predecessor := make(map[int]int)
+	predecessor := make(map[int]Node)
 
 	for !openSet.IsEmpty() {
 		c, err := openSet.Pop()
@@ -275,9 +282,9 @@ func DepthFirstSearch(start, goal int, graph Graph) []int {
 			return nil
 		}
 
-		curr := c.(int)
+		curr := c.(Node)
 
-		if closedSet.Contains(curr) {
+		if closedSet.Contains(curr.ID()) {
 			continue
 		}
 
@@ -285,14 +292,14 @@ func DepthFirstSearch(start, goal int, graph Graph) []int {
 			return rebuildPath(predecessor, goal)
 		}
 
-		closedSet.Add(curr)
+		closedSet.Add(curr.ID())
 
 		for _, neighbor := range graph.Successors(curr) {
-			if closedSet.Contains(neighbor) {
+			if closedSet.Contains(neighbor.ID()) {
 				continue
 			}
 
-			predecessor[neighbor] = curr
+			predecessor[neighbor.ID()] = curr
 			openSet.Push(neighbor)
 		}
 	}
@@ -301,19 +308,19 @@ func DepthFirstSearch(start, goal int, graph Graph) []int {
 }
 
 // An admissible, consistent heuristic that won't speed up computation time at all.
-func NullHeuristic(a, b int) float64 {
+func NullHeuristic(a, b Node) float64 {
 	return 0.0
 }
 
 // Assumes all edges in the graph have the same weight (including edges that don't exist!)
-func UniformCost(a, b int) float64 {
+func UniformCost(a, b Node) float64 {
 	return 1.0
 }
 
 /** Keeps track of a node's scores so they can be used in a priority queue for A* **/
 
 type internalNode struct {
-	int
+	Node
 	gscore, fscore float64
 }
 
@@ -343,12 +350,17 @@ func (pq *aStarPriorityQueue) Pop() interface{} {
 }
 
 // Rebuilds a path backwards from the goal.
-func rebuildPath(predecessors map[int]int, goal int) []int {
-	path := []int{goal}
+func rebuildPath(predecessors map[int]Node, goal Node) []Node {
+	path := []Node{goal}
 	curr := goal
-	for prev, ok := predecessors[curr]; ok; prev, ok = predecessors[curr] {
-		path = append([]int{prev}, path...) // Maybe do something better than prepending?
+	for prev, ok := predecessors[curr.ID()]; ok; prev, ok = predecessors[curr.ID()] {
+		path = append(path, prev)
 		curr = prev
+	}
+
+	// Reverse the path since it was built backwards
+	for i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {
+		path[i], path[j] = path[j], path[i]
 	}
 
 	return path

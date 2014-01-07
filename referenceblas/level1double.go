@@ -313,7 +313,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	//fmt.Println("absq1", absQ1)
 	//fmt.Println("absq2", absQ2)
 
-	if math.Abs(q1) > math.Abs(q2) {
+	if absQ1 > absQ2 {
 		p.H[1] = -y1 / x1
 		p.H[2] = p2 / p1
 		u = 1 - p.H[2]*p.H[1]

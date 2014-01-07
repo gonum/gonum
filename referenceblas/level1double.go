@@ -263,6 +263,7 @@ func (Blas) Drotg(a, b float64) (c, s, r, z float64) {
 	return
 }
 
+/*
 func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
 	var p1, p2, q1, q2, u float64
 
@@ -396,8 +397,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	p.Flag = flag
 	return
 }
-
-/*
+*/
 
 // Drotmg computes the modified Givens rotation. See
 // http://www.netlib.org/lapack/explore-html/df/deb/drotmg_8f.html
@@ -479,11 +479,11 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	//fmt.Println("Flag = ", p.Flag)
 	//fmt.Println("rd1 = ", rd1)
 	for rd1 <= rgamsq || rd1 >= gamsq {
-		if p.Flag == 0 {
+		if p.Flag == blas.OffDiagonal {
 			p.H[0] = 1
 			p.H[3] = 1
 			p.Flag = blas.Rescaling
-		} else {
+		} else if p.Flag == blas.Diagonal {
 			p.H[1] = -1
 			p.H[2] = 1
 			p.Flag = blas.Rescaling
@@ -502,11 +502,11 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	}
 	//fmt.Println("rd2 = ", rd2)
 	for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
-		if p.Flag == 0 {
+		if p.Flag == blas.OffDiagonal {
 			p.H[0] = 1
 			p.H[3] = 1
 			p.Flag = blas.Rescaling
-		} else {
+		} else if p.Flag == blas.Diagonal {
 			p.H[1] = -1
 			p.H[2] = 1
 			p.Flag = blas.Rescaling
@@ -523,7 +523,6 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 	}
 	return
 }
-*/
 
 // Drot applies a plane transformation
 func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64, s float64) {

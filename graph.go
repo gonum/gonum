@@ -34,7 +34,8 @@ type Graph interface {
 // A Graph that implements Coster has an actual cost between adjacent nodes, also known as a weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*), this function will
 // take precedence over the Uniform Cost function (all weights are 1) if "nil" is passed in for the function argument
 //
-// Coster only need worry about the case when an edge from node 1 to node 2 exists (i.e. node2 is a successor to node1) -- asking for the weight in any other case is considered undefined behavior
+// Coster only need worry about the case when an edge from node 1 to node 2 exists (i.e. node2 is a successor to node1) -- asking for the weight in any other case is considered undefined behavior.
+// The only possible exception to this is in D*-Lite, if an edge previously existed and then is removed when the graph changes between steps, a suitably discouraging cost such as Inf would likely produce the best behavior.
 type Coster interface {
 	Cost(node1, node2 Node) float64
 }

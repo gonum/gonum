@@ -16,6 +16,8 @@ var _ = fmt.Println
 
 type Blas struct{}
 
+var Blasser Blas
+
 var negativeN = "blas: negative number of elements"
 var zeroInc = "blas: zero value of increment"
 var negInc = "blas: negative value of increment"
@@ -74,7 +76,7 @@ func (Blas) Dnrm2(n int, x []float64, incX int) float64 {
 		if val == 0 {
 			continue
 		}
-		absxi := math.Abs(x[ix])
+		absxi := math.Abs(val)
 		if scale < absxi {
 			sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)
 			scale = absxi

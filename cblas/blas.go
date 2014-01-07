@@ -276,7 +276,7 @@ func (Blas) Snrm2(n int, x []float32, incX int) float32 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float32(C.cblas_snrm2(C.int(n), (*C.float)(&x[0]), C.int(incX)))
@@ -291,7 +291,7 @@ func (Blas) Sasum(n int, x []float32, incX int) float32 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float32(C.cblas_sasum(C.int(n), (*C.float)(&x[0]), C.int(incX)))
@@ -306,7 +306,7 @@ func (Blas) Dnrm2(n int, x []float64, incX int) float64 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float64(C.cblas_dnrm2(C.int(n), (*C.double)(&x[0]), C.int(incX)))
@@ -321,7 +321,7 @@ func (Blas) Dasum(n int, x []float64, incX int) float64 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float64(C.cblas_dasum(C.int(n), (*C.double)(&x[0]), C.int(incX)))
@@ -336,7 +336,7 @@ func (Blas) Scnrm2(n int, x []complex64, incX int) float32 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float32(C.cblas_scnrm2(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
@@ -351,7 +351,7 @@ func (Blas) Scasum(n int, x []complex64, incX int) float32 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float32(C.cblas_scasum(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
@@ -366,7 +366,7 @@ func (Blas) Dznrm2(n int, x []complex128, incX int) float64 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float64(C.cblas_dznrm2(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
@@ -381,7 +381,7 @@ func (Blas) Dzasum(n int, x []complex128, incX int) float64 {
 	if incX < 0 {
 		return 0
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return float64(C.cblas_dzasum(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
@@ -396,7 +396,7 @@ func (Blas) Isamax(n int, x []float32, incX int) int {
 	if incX < 0 {
 		return -1
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return int(C.cblas_isamax(C.int(n), (*C.float)(&x[0]), C.int(incX)))
@@ -411,7 +411,7 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 	if incX < 0 {
 		return -1
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return int(C.cblas_idamax(C.int(n), (*C.double)(&x[0]), C.int(incX)))
@@ -426,7 +426,7 @@ func (Blas) Icamax(n int, x []complex64, incX int) int {
 	if incX < 0 {
 		return -1
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return int(C.cblas_icamax(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
@@ -441,7 +441,7 @@ func (Blas) Izamax(n int, x []complex128, incX int) int {
 	if incX < 0 {
 		return -1
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	return int(C.cblas_izamax(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
@@ -708,7 +708,7 @@ func (Blas) Sscal(n int, alpha float32, x []float32, incX int) {
 	if incX < 0 {
 		return
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	C.cblas_sscal(C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX))
@@ -723,7 +723,7 @@ func (Blas) Dscal(n int, alpha float64, x []float64, incX int) {
 	if incX < 0 {
 		return
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	C.cblas_dscal(C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX))
@@ -738,7 +738,7 @@ func (Blas) Cscal(n int, alpha complex64, x []complex64, incX int) {
 	if incX < 0 {
 		return
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	C.cblas_cscal(C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX))
@@ -753,7 +753,7 @@ func (Blas) Zscal(n int, alpha complex128, x []complex128, incX int) {
 	if incX < 0 {
 		return
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	C.cblas_zscal(C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX))
@@ -768,7 +768,7 @@ func (Blas) Csscal(n int, alpha float32, x []complex64, incX int) {
 	if incX < 0 {
 		return
 	}
-	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+	if incX > 0 && (n-1)*incX >= len(x) {
 		panic("cblas: x index out of range")
 	}
 	C.cblas_csscal(C.int(n), C.float(alpha), unsafe.Pointer(&x[0]), C.int(incX))

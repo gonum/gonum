@@ -477,13 +477,13 @@ sub processParamToChecks {
 		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
 	} elsif ($func =~ m/cblas_[sdcz]s?scal/) {
 		push @processed, "if incX < 0 { return }";
-		push @processed, "if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) { panic(\"cblas: x index out of range\") }";
+		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
 	} elsif ($func =~ m/cblas_i[sdcz]amax/) {
 		push @processed, "if incX < 0 { return -1 }";
-		push @processed, "if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) { panic(\"cblas: x index out of range\") }";
-	} elsif ($func =~ m/cblas_(?:[ds][zc]?asum|[sdz][cz]?nrm2)/) {
+		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
+	} elsif ($func =~ m/cblas_[sdz][cz]?(?:asum|nrm2)/) {
 		push @processed, "if incX < 0 { return 0 }";
-		push @processed, "if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) { panic(\"cblas: x index out of range\") }";
+		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
 	} else {
 		push @processed, "if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
 		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};

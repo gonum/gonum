@@ -2,6 +2,7 @@ package graph_test
 
 import (
 	"github.com/gonum/discrete/graph"
+	"math"
 	"testing"
 )
 
@@ -72,27 +73,27 @@ func TestTileGraph(t *testing.T) {
 		t.Error("ID to Coords fails on 3,0")
 	}
 
-	if succ := tg.Successors(0); succ != nil || len(succ) != 0 {
+	if succ := tg.Successors(graph.GonumNode(0)); succ != nil || len(succ) != 0 {
 		t.Error("Successors for impassable tile not 0")
 	}
 
-	if succ := tg.Successors(2); succ == nil || len(succ) != 2 {
+	if succ := tg.Successors(graph.GonumNode(2)); succ == nil || len(succ) != 2 {
 		t.Error("Incorrect number of successors for (0,2)")
 	} else {
 		for _, s := range succ {
-			if s != 1 && s != 6 {
+			if s.ID() != 1 && s.ID() != 6 {
 				t.Error("Successor for (0,2) neither (0,1) nor (1,2)")
 			}
 		}
 	}
 
-	if tg.Degree(2) != 4 {
+	if tg.Degree(graph.GonumNode(2)) != 4 {
 		t.Error("Degree returns incorrect number for (0,2)")
 	}
-	if tg.Degree(1) != 2 {
+	if tg.Degree(graph.GonumNode(1)) != 2 {
 		t.Error("Degree returns incorrect number for (0,2)")
 	}
-	if tg.Degree(0) != 0 {
+	if tg.Degree(graph.GonumNode(0)) != 0 {
 		t.Error("Degree returns incorrect number for impassable tile (0,0)")
 	}
 
@@ -104,8 +105,8 @@ func TestSimpleAStar(t *testing.T) {
 		t.Fatal("Couldn't generate tilegraph")
 	}
 
-	path, cost, _ := graph.AStar(1, 14, tg, nil, nil)
-	if cost != 4.0 {
+	path, cost, _ := graph.AStar(graph.GonumNode(1), graph.GonumNode(14), tg, nil, nil)
+	if math.Abs(cost-4.0) > .00001 {
 		t.Errorf("A* reports incorrect cost for simple tilegraph search")
 	}
 
@@ -117,7 +118,7 @@ func TestSimpleAStar(t *testing.T) {
 			t.Fatalf("Astar returns wrong length path for simple tilegraph search")
 		}
 		for i, node := range path {
-			if node != correctPath[i] {
+			if node.ID() != correctPath[i] {
 				t.Errorf("Astar returns wrong path at step", i, "got:", node, "actual:", correctPath[i])
 			}
 		}
@@ -127,14 +128,14 @@ func TestSimpleAStar(t *testing.T) {
 func TestHarderAStar(t *testing.T) {
 	tg := graph.NewTileGraph(3, 3, true)
 
-	path, cost, _ := graph.AStar(0, 8, tg, nil, nil)
+	path, cost, _ := graph.AStar(graph.GonumNode(0), graph.GonumNode(8), tg, nil, nil)
 
-	if cost != 4.0 || !graph.IsPath(path, tg) {
+	if math.Abs(cost-4.0) > .00001 || !graph.IsPath(path, tg) {
 		t.Error("Non-optimal or impossible path found for 3x3 grid")
 	}
 
 	tg = graph.NewTileGraph(1000, 1000, true)
-	path, cost, _ = graph.AStar(00, 999*1000+999, tg, nil, nil)
+	path, cost, _ = graph.AStar(graph.GonumNode(00), graph.GonumNode(999*1000+999), tg, nil, nil)
 	if !graph.IsPath(path, tg) || cost != 1998.0 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}

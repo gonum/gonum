@@ -91,7 +91,7 @@ func (graph *TileGraph) String() string {
 	return outString[:len(outString)-1] // Kill final newline
 }
 
-func (graph *TileGraph) PathString(path []int) string {
+func (graph *TileGraph) PathString(path []Node) string {
 	if path == nil || len(path) == 0 {
 		return graph.String()
 	}
@@ -101,14 +101,14 @@ func (graph *TileGraph) PathString(path []int) string {
 		for c := 0; c < graph.numCols; c++ {
 			if id := r*graph.numCols + c; graph.tiles[id] == false {
 				outString += "\u2580" // Black square
-			} else if id == path[0] {
+			} else if id == path[0].ID() {
 				outString += "s"
-			} else if id == path[len(path)-1] {
+			} else if id == path[len(path)-1].ID() {
 				outString += "g"
 			} else {
 				toAppend := " "
 				for _, num := range path[1 : len(path)-1] {
-					if id == num {
+					if id == num.ID() {
 						toAppend = "♥"
 					}
 				}

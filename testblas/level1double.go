@@ -485,7 +485,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -2,
+					Flag: blas.Identity,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{10, 15, -6, 3, 14, 7},
@@ -494,7 +494,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{8.2, 13.7, -5.8, 2, 12, 6.6},
@@ -503,7 +503,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 0,
+					Flag: blas.OffDiagonal,
 					H:    [4]float64{1, 0.1, -0.1, 1},
 				},
 				XAns: []float64{9.2, 15.2, -6.4, 2.3, 13.4, 7.3},
@@ -512,7 +512,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 1,
+					Flag: blas.Diagonal,
 					H:    [4]float64{0.5, -1, 1, 0.7},
 				},
 				XAns: []float64{13, 5.5, 1, 8.5, 13, 0.5},
@@ -557,7 +557,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{8.2, 15, -6.1, 3, 13, 7},
@@ -565,7 +565,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 0,
+					Flag: blas.OffDiagonal,
 					H:    [4]float64{1, 0.1, -0.1, 1},
 				},
 				XAns: []float64{9.2, 15, -6.7, 3, 14.4, 7},
@@ -573,7 +573,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 1,
+					Flag: blas.Diagonal,
 					H:    [4]float64{0.5, -1, 1, 0.7},
 				},
 				XAns: []float64{13, 15, 4, 3, 3, 7},
@@ -617,7 +617,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{8.2, 15, -6.1, 3, 13, 7},
@@ -625,7 +625,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 0,
+					Flag: blas.OffDiagonal,
 					H:    [4]float64{1, 0.1, -0.1, 1},
 				},
 				XAns: []float64{9.2, 15, -6.7, 3, 14.4, 7},
@@ -633,7 +633,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 1,
+					Flag: blas.Diagonal,
 					H:    [4]float64{0.5, -1, 1, 0.7},
 				},
 				XAns: []float64{13, 15, 4, 3, 3, 7},
@@ -677,7 +677,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{9.4, 15, -6.1, 3, 11.8, 7},
@@ -685,7 +685,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 0,
+					Flag: blas.OffDiagonal,
 					H:    [4]float64{1, 0.1, -0.1, 1},
 				},
 				XAns: []float64{10.4, 15, -6.7, 3, 13.2, 7},
@@ -693,7 +693,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 1,
+					Flag: blas.Diagonal,
 					H:    [4]float64{0.5, -1, 1, 0.7},
 				},
 				XAns: []float64{1, 15, 4, 3, 15, 7},
@@ -737,7 +737,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{9.4, 15, -6.1, 3, 11.8, 7},
@@ -745,7 +745,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 0,
+					Flag: blas.OffDiagonal,
 					H:    [4]float64{1, 0.1, -0.1, 1},
 				},
 				XAns: []float64{10.4, 15, -6.7, 3, 13.2, 7},
@@ -753,7 +753,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 			},
 			{
 				P: blas.DrotmParams{
-					Flag: 1,
+					Flag: blas.Diagonal,
 					H:    [4]float64{0.5, -1, 1, 0.7},
 				},
 				XAns: []float64{1, 15, 4, 3, 15, 7},
@@ -796,7 +796,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{10, 15, -6, 3, 14, 7},
@@ -831,7 +831,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{8.2, 13.7, -5.8, 2, 12, 6.6},
@@ -866,7 +866,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{8.2, 13.7, -5.8, 2, 12, 6.6},
@@ -901,7 +901,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{8.2, 13.7, -5.8, 2, 12, 6.6},
@@ -936,7 +936,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{8.2, 13.7, -5.8, 2, 12, 6.6},
@@ -971,7 +971,7 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		DrotmCases: []DrotmCase{
 			{
 				P: blas.DrotmParams{
-					Flag: -1,
+					Flag: blas.Rescaling,
 					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
 				},
 				XAns: []float64{10, 15, -6, 3, 14, 7},
@@ -1272,7 +1272,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "NegD1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 		},
 		D1: -4,
 		D2: 6,
@@ -1282,7 +1282,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "ZeroD2",
 		P: &blas.DrotmParams{
-			Flag: -2,
+			Flag: blas.Identity,
 		},
 		D1:  4,
 		X1:  8,
@@ -1293,7 +1293,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "ZeroY1",
 		P: &blas.DrotmParams{
-			Flag: -2,
+			Flag: blas.Identity,
 		},
 		D1:  4,
 		D2:  -6,
@@ -1305,7 +1305,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "NegQ2_and_AQ1_LT_AQ2",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 		},
 		D1:  8,
 		D2:  -6,
@@ -1318,7 +1318,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "ZeroD1",
 		P: &blas.DrotmParams{
-			Flag: 1,
+			Flag: blas.Diagonal,
 			H:    [4]float64{0, 0, 0, 2},
 		},
 		D1:  0,
@@ -1332,7 +1332,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "AbsQ1_GT_AbsQU__D2_Pos",
 		P: &blas.DrotmParams{
-			Flag: 0,
+			Flag: blas.OffDiagonal,
 			H:    [4]float64{0, -0.625, 0.9375, 0},
 		},
 		D1:  2,
@@ -1346,7 +1346,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "AbsQ1_GT_AbsQU__D2_Neg",
 		P: &blas.DrotmParams{
-			Flag: 0,
+			Flag: blas.OffDiagonal,
 			H:    [4]float64{0, -0.625, -0.9375, 0},
 		},
 		D1:  2,
@@ -1360,7 +1360,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "AbsQ1_LT_AbsQU__D2_Pos",
 		P: &blas.DrotmParams{
-			Flag: 1,
+			Flag: blas.Diagonal,
 			H:    [4]float64{5.0 / 12, 0, 0, 0.625},
 		},
 		D1:  2,
@@ -1374,7 +1374,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "D1=D2_X1=X2",
 		P: &blas.DrotmParams{
-			Flag: 1,
+			Flag: blas.Diagonal,
 			H:    [4]float64{1, 0, 0, 1},
 		},
 		D1:  2,
@@ -1388,7 +1388,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Big_RD2_Big_Flag_0",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{4096, -4096, 1, 4096},
 		},
 		D1:  1600000000,
@@ -1402,7 +1402,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Big_RD2_Big_Flag_1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{2340.5714285714284, -4096, 1, 4681.142857142857},
 		},
 		D1:  800000000,
@@ -1416,7 +1416,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Big_RD2_Med_Flag_0",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{4096, -1, 0.0004096, 1},
 		},
 		D1:  20000000,
@@ -1430,7 +1430,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Big_RD2_Med_Flag_1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{4.096e-17, -1, 4096, 1e-10},
 		},
 		D1:  2,
@@ -1446,7 +1446,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "D1_Big_D2_Small_Flag_1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 1, 2.44140625e-16},
 		},
 		D1:  0.000000014,
@@ -1461,7 +1461,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Med_RD2_Big_Flag_0",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{1, -0.0004096, 1000, 4096},
 		},
 		D1:  2,
@@ -1475,7 +1475,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "D1_Med_D2_Big_Flag_1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{50, -4096, 1, 4.096e-06},
 		},
 		D1:  20000000000,
@@ -1489,7 +1489,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Med_RD2_Small_Flag_0",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{1, -0.0007233796296296296, 1.1111111111111111e-10, 0.000244140625},
 		},
 		D1:  1.2,
@@ -1503,7 +1503,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Med_RD2_Small_Flag_1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{0.0002197265625, -1, 0.000244140625, 3.375e-11},
 		},
 		D1:  1.2,
@@ -1518,7 +1518,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "D1_Small_D2_Big_Flag_1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{2.3731773997569866e+10, -4096, 1, 1.6777216e-07},
 		},
 		D1:  120000000000000000,
@@ -1532,7 +1532,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Small_RD2_Med_Flag_0",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{0.000244140625, -1e-08, 0.24414062499999997, 1},
 		},
 		D1:  0.0000000002,
@@ -1546,7 +1546,7 @@ var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
 	{
 		Name: "RD1_Small_RD2_Med_Flag_1",
 		P: &blas.DrotmParams{
-			Flag: -1,
+			Flag: blas.Rescaling,
 			H:    [4]float64{0.0012207031250000002, -1, 0.000244140625, 1e-09},
 		},
 		D1:  0.02,

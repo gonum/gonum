@@ -10,7 +10,7 @@ package cblas
 /*
 #cgo CFLAGS: -g -O2
 #cgo linux LDFLAGS: -L/usr/lib/ -lcblas
-#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework Accelerate
+#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
 #include "cblas.h"
 */
 import "C"
@@ -393,7 +393,7 @@ func (Blas) Isamax(n int, x []float32, incX int) int {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
-	if incX < 0 {
+	if n == 0 || incX < 0 {
 		return -1
 	}
 	if incX > 0 && (n-1)*incX >= len(x) {
@@ -408,7 +408,7 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
-	if incX < 0 {
+	if n == 0 || incX < 0 {
 		return -1
 	}
 	if incX > 0 && (n-1)*incX >= len(x) {
@@ -423,7 +423,7 @@ func (Blas) Icamax(n int, x []complex64, incX int) int {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
-	if incX < 0 {
+	if n == 0 || incX < 0 {
 		return -1
 	}
 	if incX > 0 && (n-1)*incX >= len(x) {
@@ -438,7 +438,7 @@ func (Blas) Izamax(n int, x []complex128, incX int) int {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
-	if incX < 0 {
+	if n == 0 || incX < 0 {
 		return -1
 	}
 	if incX > 0 && (n-1)*incX >= len(x) {

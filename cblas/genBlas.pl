@@ -479,7 +479,7 @@ sub processParamToChecks {
 		push @processed, "if incX < 0 { return }";
 		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
 	} elsif ($func =~ m/cblas_i[sdcz]amax/) {
-		push @processed, "if incX < 0 { return -1 }";
+		push @processed, "if n == 0 || incX < 0 { return -1 }";
 		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
 	} elsif ($func =~ m/cblas_[sdz][cz]?(?:asum|nrm2)/) {
 		push @processed, "if incX < 0 { return 0 }";

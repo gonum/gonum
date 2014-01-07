@@ -111,10 +111,10 @@ func (ds *DStarInstance) updateVertex(node Node) {
 		ds.rhs[node.ID()] = min
 	}
 
-	ds.u.Remove(node)
-
 	if math.Abs(ds.gScores[node.ID()]-ds.rhs[node.ID()]) > .000001 {
-		heap.Push(ds.u, dStarNode{Node: node, key: ds.calculateKey(node)})
+		ds.u.Fix(node, ds.calculateKey(node))
+	} else {
+		ds.u.Remove(node)
 	}
 }
 
@@ -303,6 +303,13 @@ func (pq *dStarPriorityQueue) Pop() interface{} {
 
 func (pq *dStarPriorityQueue) Peek() dStarNode {
 	return pq.nodes[len(pq.nodes)-1]
+}
+
+func (pq *dStarPriorityQueue) Fix(node Node, newKey key) {
+	if i, ok := pq.indexList[node.ID()]; ok {
+		pq.nodes[i].key = newKey
+		heap.Fix(pq, i)
+	}
 }
 
 func (pq *dStarPriorityQueue) Remove(node Node) {

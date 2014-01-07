@@ -10,7 +10,7 @@ package cblas
 /*
 #cgo CFLAGS: -g -O2
 #cgo linux LDFLAGS: -L/usr/lib/ -lcblas
-#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework Accelerate
+#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
 #include "cblas.h"
 */
 import "C"
@@ -273,6 +273,9 @@ func (Blas) Snrm2(n int, x []float32, incX int) float32 {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return 0
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -284,6 +287,9 @@ func (Blas) Sasum(n int, x []float32, incX int) float32 {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return 0
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
@@ -297,6 +303,9 @@ func (Blas) Dnrm2(n int, x []float64, incX int) float64 {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return 0
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -308,6 +317,9 @@ func (Blas) Dasum(n int, x []float64, incX int) float64 {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return 0
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
@@ -321,6 +333,9 @@ func (Blas) Scnrm2(n int, x []complex64, incX int) float32 {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return 0
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -332,6 +347,9 @@ func (Blas) Scasum(n int, x []complex64, incX int) float32 {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return 0
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
@@ -345,6 +363,9 @@ func (Blas) Dznrm2(n int, x []complex128, incX int) float64 {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return 0
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -356,6 +377,9 @@ func (Blas) Dzasum(n int, x []complex128, incX int) float64 {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return 0
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
@@ -369,6 +393,9 @@ func (Blas) Isamax(n int, x []float32, incX int) int {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return -1
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -380,6 +407,9 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return -1
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
@@ -393,6 +423,9 @@ func (Blas) Icamax(n int, x []complex64, incX int) int {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return -1
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -404,6 +437,9 @@ func (Blas) Izamax(n int, x []complex128, incX int) int {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return -1
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
@@ -669,6 +705,9 @@ func (Blas) Sscal(n int, alpha float32, x []float32, incX int) {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -680,6 +719,9 @@ func (Blas) Dscal(n int, alpha float64, x []float64, incX int) {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
@@ -693,6 +735,9 @@ func (Blas) Cscal(n int, alpha complex64, x []complex64, incX int) {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -705,6 +750,9 @@ func (Blas) Zscal(n int, alpha complex128, x []complex128, incX int) {
 	if incX == 0 {
 		panic("cblas: zero x index increment")
 	}
+	if incX < 0 {
+		return
+	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
@@ -716,6 +764,9 @@ func (Blas) Csscal(n int, alpha float32, x []complex64, incX int) {
 	}
 	if incX == 0 {
 		panic("cblas: zero x index increment")
+	}
+	if incX < 0 {
+		return
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")

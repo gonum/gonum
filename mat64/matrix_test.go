@@ -8,6 +8,7 @@ import (
 	"github.com/gonum/blas/cblas"
 	"github.com/gonum/floats"
 
+	"fmt"
 	check "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
@@ -29,10 +30,11 @@ func leaksPanic(fn Panicker) (panicked bool) {
 	return
 }
 
-func panics(fn func()) (panicked bool) {
+func panics(fn func()) (panicked bool, message string) {
 	defer func() {
 		r := recover()
 		panicked = r != nil
+		message = fmt.Sprint(r)
 	}()
 	fn()
 	return
@@ -830,9 +832,9 @@ func (s *S) TestSolve(c *check.C) {
 			x = Solve(a, b)
 		}
 
-		panicked := panics(fn)
+		panicked, message := panics(fn)
 		if panicked {
-			c.Check(panicked, check.Equals, test.panics, check.Commentf("Test %v", test.name))
+			c.Check(panicked, check.Equals, test.panics, check.Commentf("Test %v panicked: %s", test.name, message))
 			continue
 		}
 		c.Check(x.EqualsApprox(NewDense(flatten(test.x)), 1e-14), check.Equals, true, check.Commentf("Test %v ", test.name))

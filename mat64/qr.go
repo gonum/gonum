@@ -157,11 +157,11 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 	for k := 0; k < n; k++ {
 		for j := 0; j < nx; j++ {
 			var s float64
-			for i := k; i < m; i++ {
+			for i := k; i < n; i++ {
 				s += qr.At(i, k) * x.At(i, j)
 			}
 			s /= -qr.At(k, k)
-			for i := k; i < m; i++ {
+			for i := k; i < n; i++ {
 				x.Set(i, j, x.At(i, j)+s*qr.At(i, k))
 			}
 		}

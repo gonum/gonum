@@ -5,7 +5,7 @@
 package mat64
 
 import (
-	"fmt"
+	//"fmt"
 	check "launchpad.net/gocheck"
 	"math"
 
@@ -54,17 +54,15 @@ func (s *S) TestQRD(c *check.C) {
 				{5.6, 5.8, 2.1},
 			},
 		},
-		/*
-			{
-				name: "Skinny",
-				a: [][]float64{
-					{1.3, 2.4, 8.9},
-					{-2.6, 8.7, 9.1},
-					{5.6, 5.8, 2.1},
-					{19.4, 5.2, -26.1},
-				},
+		{
+			name: "Skinny",
+			a: [][]float64{
+				{1.3, 2.4, 8.9},
+				{-2.6, 8.7, 9.1},
+				{5.6, 5.8, 2.1},
+				{19.4, 5.2, -26.1},
 			},
-		*/
+		},
 	} {
 
 		a := NewDense(flatten(test.a))
@@ -72,10 +70,7 @@ func (s *S) TestQRD(c *check.C) {
 		r := qf.R()
 		q := qf.Q()
 
-		fmt.Println("q=", q)
-		fmt.Println("r=", r)
-
-		rows, cols := r.Dims()
+		rows, cols := a.Dims()
 		newA := NewDense(rows, cols, nil)
 		newA.Mul(q, r)
 

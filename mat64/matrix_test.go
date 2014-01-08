@@ -805,7 +805,7 @@ func (s *S) TestSolve(c *check.C) {
 		},
 
 		{
-			name:   "SkinnyMatrix",
+			name:   "Skinny1",
 			panics: false,
 			a: [][]float64{
 				{0.8147, 0.9134, 0.9},
@@ -825,6 +825,30 @@ func (s *S) TestSolve(c *check.C) {
 				{-0.212938815234215},
 			},
 		},
+		{
+			name:   "Skinny2",
+			panics: false,
+			a: [][]float64{
+				{0.8147, 0.9134, 0.231, -1.65},
+				{0.9058, 0.6324, 0.9, 0.72},
+				{0.1270, 0.0975, 0.1, 1.723},
+				{1.6, 2.8, -3.5, 0.987},
+				{7.231, 9.154, 1.823, 0.9},
+			},
+			b: [][]float64{
+				{0.278, 8.635},
+				{0.547, 9.125},
+				{-0.958, -0.762},
+				{1.452, 1.444},
+				{1.999, -7.234},
+			},
+			x: [][]float64{
+				{1.863006789511373, 44.467887791812750},
+				{-1.127270935407224, -34.073794226035126},
+				{-0.527926457947330, -8.032133759788573},
+				{-0.248621916204897, -2.366366415805275},
+			},
+		},
 	} {
 		a := NewDense(flatten(test.a))
 		b := NewDense(flatten(test.b))
@@ -841,7 +865,8 @@ func (s *S) TestSolve(c *check.C) {
 			continue
 		}
 
-		c.Check(x.EqualsApprox(NewDense(flatten(test.x)), 1e-14), check.Equals, true, check.Commentf("Test %v solution mismatch: Found %v, expected %v ", test.name, x, test.x))
+		trueX := NewDense(flatten(test.x))
+		c.Check(x.EqualsApprox(trueX, 1e-13), check.Equals, true, check.Commentf("Test %v solution mismatch: Found %v, expected %v ", test.name, x, trueX))
 	}
 }
 

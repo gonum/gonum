@@ -6,9 +6,8 @@
 package mat64
 
 import (
+	//"fmt"
 	"math"
-
-	"fmt"
 )
 
 type QRFactor struct {
@@ -147,7 +146,7 @@ func (f QRFactor) Q() *Dense {
 // if a is not full rank. The matrix b is overwritten during the call.
 func (f QRFactor) Solve(b *Dense) (x *Dense) {
 	qr := f.QR
-	//rDiag := f.rDiag
+	rDiag := f.rDiag
 	m, n := qr.Dims()
 	bm, bn := b.Dims()
 	if bm != m {
@@ -156,85 +155,35 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 	if !f.IsFullRank() {
 		panic("mat64: matrix is rank deficient")
 	}
-
-	//x = NewDense(n, bn, use(b.mat.Data, n*bn))
-	x = NewDense(n, bn, nil)
 	nx := bn
-
-	q := f.Q()
 
 	// Compute Y = transpose(Q)*B
 	for k := 0; k < n; k++ {
 		for j := 0; j < nx; j++ {
 			var s float64
-			for i := 0; i < m; i++ {
-				s += q.At(i, k) * b.At(i, j)
+			for i := k; i < m; i++ {
+				s += qr.At(i, k) * b.At(i, j)
 			}
-			x.Set(k, j, s)
+			s /= -qr.At(k, k)
+
+			for i := k; i < m; i++ {
+				b.Set(i, j, b.At(i, j)+s*qr.At(i, k))
+			}
 		}
 	}
 
 	// Solve R*X = Y;
-	r := f.R()
-
-	fmt.Println("r=", r)
-	fmt.Println("q=", q)
-	fmt.Println("y=", x)
-
-	xcopy := DenseCopyOf(x)
-	for j := 0; j < nx; j++ {
-		for k := n - 1; k >= 0; k-- {
-			fmt.Println("k = ", k)
-			val := xcopy.At(k, j)
-			for i := k + 1; i < n; i++ {
-				fmt.Println("i = ", i)
-				val -= r.At(k, i) * x.At(i, j)
+	for k := n - 1; k >= 0; k-- {
+		for j := 0; j < nx; j++ {
+			b.Set(k, j, b.At(k, j)/rDiag[k])
+		}
+		for i := 0; i < k; i++ {
+			for j := 0; j < nx; j++ {
+				b.Set(i, j, b.At(i, j)-b.At(k, j)*qr.At(i, k))
 			}
-			val /= r.At(k, k)
-			x.Set(k, j, val)
 		}
 	}
 
-	/*
-		for k := n - 1; k >= 0; k-- {
-			for j := 0; j < nx; j++ {
-				x.Set(k, j, x.At(k, j)/rDiag[k])
-			}
-			for i := 0; i < k; i++ {
-				for j := 0; j < nx; j++ {
-					x.Set(i, j, x.At(i, j)-x.At(k, j)*qr.At(i, k))
-				}
-			}
-		}
-	*/
-
-	/*
-		// Compute Y = transpose(Q)*B
-		for k := 0; k < n; k++ {
-			for j := 0; j < nx; j++ {
-				var s float64
-				for i := k; i < n; i++ {
-					s += qr.At(i, k) * x.At(i, j)
-				}
-				s /= -qr.At(k, k)
-				for i := k; i < n; i++ {
-					x.Set(i, j, x.At(i, j)+s*qr.At(i, k))
-				}
-			}
-		}
-
-		// Solve R*X = Y;
-		for k := n - 1; k >= 0; k-- {
-			for j := 0; j < nx; j++ {
-				x.Set(k, j, x.At(k, j)/rDiag[k])
-			}
-			for i := 0; i < k; i++ {
-				for j := 0; j < nx; j++ {
-					x.Set(i, j, x.At(i, j)-x.At(k, j)*qr.At(i, k))
-				}
-			}
-		}
-	*/
-
+	x = NewDense(n, bn, use(b.mat.Data, n*bn))
 	return x
 }

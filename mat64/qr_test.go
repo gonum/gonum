@@ -75,6 +75,6 @@ func (s *S) TestQRD(c *check.C) {
 
 		c.Check(isOrthogonal(q), check.Equals, true, check.Commentf("Test %v: Q not orthogonal", test.name))
 		c.Check(isUpperTriangular(r), check.Equals, true, check.Commentf("Test %v: R not upper triangular", test.name))
-		c.Check(a.EqualsApprox(newA, 1e-14), check.Equals, true, check.Commentf("Test %v: Q*R != A", test.name))
+		c.Check(a.EqualsApprox(newA, 1e-13), check.Equals, true, check.Commentf("Test %v: Q*R != A", test.name))
 	}
 }

@@ -703,6 +703,70 @@ func (s *S) TestApply(c *check.C) {
 	}
 }
 
+func (s *S) TestSolve(c *check.C) {
+	for _, test := range []struct {
+		name   string
+		panics bool
+		a      [][]float64
+		b      [][]float64
+		x      [][]float64
+	}{
+		{
+			name:   "OneElement",
+			panics: false,
+			a:      [][]float64{{6}},
+			b:      [][]float64{{3}},
+			x:      [][]float64{{0.5}},
+		},
+		{
+			name:   "SquareIdentity",
+			panics: false,
+			a: [][]float64{
+				{1, 0, 0},
+				{0, 1, 0},
+				{0, 0, 1},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+				{1},
+			},
+			x: [][]float64{
+				{3},
+				{2},
+				{1},
+			},
+		},
+		{
+			name:   "Square",
+			panics: false,
+			a: [][]float64{
+				{0.6046602879796196, 0.9405090880450124, 0.6645600532184904},
+				{0.4377141871869802, 0.4246374970712657, 0.6868230728671094},
+				{0.06563701921747622, 0.15651925473279124, 0.09696951891448456},
+			},
+			b: [][]float64{
+				{0.30091186058528707},
+				{0.5152126285020654},
+				{0.8136399609900968},
+			},
+			x: [][]float64{
+				{-26.618512183136257},
+				{8.730387239011677},
+				{12.316510032082446},
+			},
+		},
+	} {
+		a := NewDense(flatten(test.a))
+		b := NewDense(flatten(test.b))
+
+		x := Solve(a, b)
+		c.Check(x.EqualsApprox(NewDense(flatten(test.x)), 1e-15), check.Equals, true, check.Commentf("Test %v ", test.name))
+		a.Mul(a, x)
+		c.Check(a.EqualsApprox(b, 1e-15), check.Equals, true, check.Commentf("Test %v ", test.name))
+	}
+}
+
 var (
 	wd *Dense
 )
@@ -738,87 +802,5 @@ func densePreMulBench(b *testing.B, size int, rho float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		wd.Mul(a, d)
-	}
-}
-
-func (s *S) TestSolve(c *check.C) {
-	for _, test := range []struct {
-		name   string
-		panics bool
-		a      *Dense
-		b      *Dense
-		x      *Dense
-	}{
-		{
-			name:   "OneElement",
-			panics: false,
-			a: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  1, Cols: 1,
-				Stride: 1,
-				Data:   []float64{6},
-			}},
-			b: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  1, Cols: 1,
-				Stride: 1,
-				Data:   []float64{3},
-			}},
-			x: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  1, Cols: 1,
-				Stride: 1,
-				Data:   []float64{0.5},
-			}},
-		},
-		{
-			name:   "SquareIdentity",
-			panics: false,
-			a: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 3,
-				Stride: 3,
-				Data:   []float64{1, 0, 0, 0, 1, 0, 0, 0, 1},
-			}},
-			b: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 1,
-				Stride: 1,
-				Data:   []float64{3, 2, 1},
-			}},
-			x: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 1,
-				Stride: 1,
-				Data:   []float64{3, 2, 1},
-			}},
-		},
-		{
-			name:   "Square",
-			panics: false,
-			a: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 3,
-				Stride: 3,
-				Data:   []float64{0.6046602879796196, 0.9405090880450124, 0.6645600532184904, 0.4377141871869802, 0.4246374970712657, 0.6868230728671094, 0.06563701921747622, 0.15651925473279124, 0.09696951891448456},
-			}},
-			b: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 1,
-				Stride: 1,
-				Data:   []float64{0.30091186058528707, 0.5152126285020654, 0.8136399609900968},
-			}},
-			x: &Dense{BlasMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 1,
-				Stride: 1,
-				Data:   []float64{-26.618512183136257, 8.730387239011677, 12.316510032082446},
-			}},
-		},
-	} {
-		x := Solve(test.a, test.b)
-		c.Check(x.EqualsApprox(test.x, 1e-15), check.Equals, true, check.Commentf("Test %v ", test.name))
-		test.a.Mul(test.a, x)
-		c.Check(test.a.EqualsApprox(test.b, 1e-15), check.Equals, true, check.Commentf("Test %v ", test.name))
 	}
 }

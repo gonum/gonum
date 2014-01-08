@@ -274,7 +274,7 @@ func (s1 *Set) Cardinality() int {
 
 func (s1 *Set) Elements() (els []interface{}) {
 	els = make([]interface{}, 0, len(*s1))
-	for _, el := range *s1 {
+	for el, _ := range *s1 {
 		els = append(els, el)
 	}
 

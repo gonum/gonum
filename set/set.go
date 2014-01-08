@@ -212,7 +212,7 @@ func Subset(s1, s2 *Set) bool {
 		return true
 	}
 
-	for _, el := range *s1 {
+	for el, _ := range *s1 {
 		if _, ok := (*s2)[el]; !ok {
 			return false
 		}
@@ -236,13 +236,13 @@ func Subset(s1, s2 *Set) bool {
 //
 // When equality is allowed, use Subset
 func ProperSubset(s1, s2 *Set) bool {
-	if len(*s1) >= len(*s2) {
+	if len(*s1) >= len(*s2) { // implicitly tests if s1 and s2 are both the empty set
 		return false
 	} else if len(*s1) == 0 {
 		return true
 	} // We can eschew the s1 == s2 because if they are the same their lens are equal anyway
 
-	for _, el := range *s1 {
+	for el, _ := range *s1 {
 		if _, ok := (*s2)[el]; !ok {
 			return false
 		}

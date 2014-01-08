@@ -123,42 +123,6 @@ func CopyGraph(dst MutableGraph, src Graph) {
 	}
 }
 
-// Node IDs must be the same for this to return true, two graphs representing the same edges,
-// but without the same node IDs are considered unequal (in other words, this is not a true equality test)
-//
-// Also doesn't handle weighted graphs
-/*func NaiveEqual(graph1, graph2 Graph) bool {
-	nList1, nList2 := sort.IntSlice(graph1.IDList()), sort.IntSlice(graph2.NodeList())
-	if len(nList1) != len(nList2) {
-		return false
-	}
-
-	sort.Sort(nList1)
-	sort.Sort(nList2)
-
-	for i, node := range nList1 {
-		node2 := nList2[i]
-		if node2 != node {
-			return false
-		}
-		succs1, succs2 := sort.IntSlice(graph1.Successors(node)), sort.IntSlice(graph2.Successors(node2))
-		if len(succs1) != len(succs2) {
-			return false
-		}
-
-		sort.Sort(succs1)
-		sort.Sort(succs2)
-
-		for i, succ := range succs1 {
-			if succ != succs2[i] {
-				return false
-			}
-		}
-	}
-
-	return false
-}*/
-
 /* Basic Graph tests */
 
 // Also known as Tarjan's Strongly Connected Components Algorithm. This returns all the strongly connected components in the graph.
@@ -316,7 +280,7 @@ func Kruskal(dst MutableGraph, graph Graph, Cost func(Node, Node) float64) {
 
 	ds := set.NewDisjointSet()
 	for _, node := range graph.NodeList() {
-		ds.MakeSet(node)
+		ds.MakeSet(node.ID())
 	}
 
 	for _, edge := range edgeWeights {

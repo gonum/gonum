@@ -153,7 +153,7 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 //
 // The difference between two identical sets is the empty set:
 //
-//     {a,b,c} - {a,b,c} = {a}
+//     {a,b,c} - {a,b,c} = {}
 //
 // The difference between two sets with no overlapping elements is s1
 //
@@ -279,83 +279,4 @@ func (s1 *Set) Elements() (els []interface{}) {
 	}
 
 	return els
-}
-
-/* Should probably be re-implemented as a tree later */
-
-// A disjoint set is a collection of non-overlapping sets. That is, for any two sets in the disjoint set, their intersection is the empty set
-//
-// A disjoint set has three principle operations: Make Set, Find, and Union.
-//
-// Make set creates a new set for an element (presuming it does not already exist in any set in the disjoint set), Find finds the set containing that element (if any),
-// and Union merges two sets in the disjoint set. In general, algorithms operating on disjoint sets are "union-find" algorithms, where two sets are found with Find, and then joined with Union.
-//
-// A concrete example of a union-find algorithm can be found as discrete.Kruskal -- which unions two sets when an edge is created between two vertices, and refuses to make an edge between two vertices if they're part of the same set.
-type DisjointSet struct {
-	master  *Set
-	subsets []*Set
-}
-
-func NewDisjointSet() *DisjointSet {
-	return &DisjointSet{NewSet(), make([]*Set, 0)}
-}
-
-func (ds *DisjointSet) MasterSet() *Set {
-	return ds.master
-}
-
-// If the element isn't already somewhere in there, adds it to the master set and its own tiny set
-func (ds *DisjointSet) MakeSet(el interface{}) {
-	if ds.master.Contains(el) {
-		return
-	}
-	ds.master.Add(el)
-	ns := NewSet()
-	ns.Add(el)
-	ds.subsets = append(ds.subsets, ns)
-}
-
-// Returns the set the element belongs to, or nil if none
-func (ds *DisjointSet) Find(el interface{}) *Set {
-	if !ds.master.Contains(el) {
-		return nil
-	}
-
-	for _, subset := range ds.subsets {
-		if subset.Contains(el) {
-			return subset
-		}
-	}
-
-	return nil
-}
-
-// Unions two subsets within the DisjointSet
-//
-// If either s1 or s2 do not appear in the disjoint set (meaning their pointers, deep equality is not tested),
-// the function will return without doing anything. Finding sets to perform a union on is typically done with Find.
-func (ds *DisjointSet) Union(s1, s2 *Set) {
-	if s1 == s2 {
-		return
-	}
-	s1Found, s2Found := false, false
-
-	newSubsetList := make([]*Set, 0, len(ds.subsets)-1)
-
-	for _, subset := range ds.subsets {
-		if s1 == subset {
-			s1Found = true
-			continue
-		} else if s2 == subset {
-			s2Found = true
-			continue
-		}
-
-		newSubsetList = append(newSubsetList, subset)
-	}
-
-	if s1Found && s2Found {
-		newSubsetList = append(newSubsetList, s1.Union(s1, s2))
-		ds.subsets = newSubsetList
-	}
 }

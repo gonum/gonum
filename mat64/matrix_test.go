@@ -11,8 +11,6 @@ import (
 	check "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
-
-	"fmt"
 )
 
 // Tests
@@ -22,12 +20,21 @@ type S struct{}
 
 var _ = check.Suite(&S{})
 
-func panics(fn Panicker) (panicked bool) {
+func leaksPanic(fn Panicker) (panicked bool) {
 	defer func() {
 		r := recover()
 		panicked = r != nil
 	}()
 	Maybe(fn)
+	return
+}
+
+func panics(fn func()) (panicked bool) {
+	defer func() {
+		r := recover()
+		panicked = r != nil
+	}()
+	fn()
 	return
 }
 
@@ -74,7 +81,7 @@ func (s *S) TestMaybe(c *check.C) {
 			false,
 		},
 	} {
-		c.Check(panics(test.fn), check.Equals, test.panics, check.Commentf("Test %d", i))
+		c.Check(leaksPanic(test.fn), check.Equals, test.panics, check.Commentf("Test %d", i))
 	}
 }
 
@@ -823,27 +830,15 @@ func (s *S) TestSolve(c *check.C) {
 			x = Solve(a, b)
 		}
 
-		panicked := nonMaybePanics(fn)
+		panicked := panics(fn)
 		if panicked {
 			c.Check(panicked, check.Equals, test.panics, check.Commentf("Test %v", test.name))
 			continue
 		}
-		fmt.Println(x)
 		c.Check(x.EqualsApprox(NewDense(flatten(test.x)), 1e-14), check.Equals, true, check.Commentf("Test %v ", test.name))
 		a.Mul(a, x)
 		c.Check(a.EqualsApprox(b, 1e-14), check.Equals, true, check.Commentf("Test %v ", test.name))
 	}
-}
-
-func nonMaybePanics(fn func()) (b bool) {
-	defer func() {
-		err := recover()
-		if err != nil {
-			b = true
-		}
-	}()
-	fn()
-	return
 }
 
 var (

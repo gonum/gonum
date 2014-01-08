@@ -11,6 +11,8 @@ import (
 	check "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
+
+	//"fmt"
 )
 
 // Tests
@@ -756,15 +758,91 @@ func (s *S) TestSolve(c *check.C) {
 				{12.316510032082446},
 			},
 		},
+		{
+			name:   "ColumnMismatch",
+			panics: true,
+			a: [][]float64{
+				{0.6046602879796196, 0.9405090880450124, 0.6645600532184904},
+				{0.4377141871869802, 0.4246374970712657, 0.6868230728671094},
+			},
+			b: [][]float64{
+				{0.30091186058528707},
+				{0.5152126285020654},
+				{0.8136399609900968},
+				{0.12345},
+			},
+			x: [][]float64{
+				{-26.618512183136257},
+				{8.730387239011677},
+				{12.316510032082446},
+				{0.1234},
+			},
+		},
+		{
+			name:   "WideMatrix",
+			panics: true,
+			a: [][]float64{
+				{0.6046602879796196, 0.9405090880450124, 0.6645600532184904},
+				{0.4377141871869802, 0.4246374970712657, 0.6868230728671094},
+			},
+			b: [][]float64{
+				{0.30091186058528707},
+				{0.5152126285020654},
+			},
+			x: [][]float64{
+				{-26.618512183136257},
+				{8.730387239011677},
+			},
+		},
+		{
+			name:   "SkinnyMatrix",
+			panics: false,
+			a: [][]float64{
+				{0.6046602879796196, 0.9405090880450124},
+				{0.6645600532184904, 0.4377141871869802},
+				{0.4246374970712657, 0.6868230728671094},
+			},
+			b: [][]float64{
+				{0.06563701921747622},
+				{0.15651925473279124},
+				{0.09696951891448456},
+			},
+			x: [][]float64{
+				{-26.618512183136257},
+				{1.23456},
+			},
+		},
 	} {
 		a := NewDense(flatten(test.a))
 		b := NewDense(flatten(test.b))
 
-		x := Solve(a, b)
+		var x *Dense
+
+		fn := func() {
+			x = Solve(a, b)
+		}
+
+		panicked := nonMaybePanics(fn)
+		if panicked {
+			c.Check(panicked, check.Equals, test.panics, check.Commentf("Test %v", test.name))
+			continue
+		}
+
 		c.Check(x.EqualsApprox(NewDense(flatten(test.x)), 1e-15), check.Equals, true, check.Commentf("Test %v ", test.name))
 		a.Mul(a, x)
 		c.Check(a.EqualsApprox(b, 1e-15), check.Equals, true, check.Commentf("Test %v ", test.name))
 	}
+}
+
+func nonMaybePanics(fn func()) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+	fn()
+	return
 }
 
 var (

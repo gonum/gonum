@@ -222,7 +222,7 @@ func (f LUFactors) Det() float64 {
 func (f LUFactors) Solve(b *Dense) (x *Dense) {
 	lu, piv := f.LU, f.Pivot
 	m, n := lu.Dims()
-	bm, _ := b.Dims()
+	bm, bn := b.Dims()
 	if bm != m {
 		panic(ErrShape)
 	}
@@ -231,7 +231,7 @@ func (f LUFactors) Solve(b *Dense) (x *Dense) {
 	}
 
 	// Copy right hand side with pivoting
-	nx := bm
+	nx := bn
 	x = pivotRows(b, piv)
 
 	// Solve L*Y = B(piv,:)

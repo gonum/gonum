@@ -808,18 +808,21 @@ func (s *S) TestSolve(c *check.C) {
 			name:   "SkinnyMatrix",
 			panics: false,
 			a: [][]float64{
-				{0.8147, 0.9134},
-				{0.9058, 0.6324},
-				{0.1270, 0.0975},
+				{0.8147, 0.9134, 0.9},
+				{0.9058, 0.6324, 0.9},
+				{0.1270, 0.0975, 0.1},
+				{1.6, 2.8, -3.5},
 			},
 			b: [][]float64{
 				{0.278},
 				{0.547},
-				{0.958},
+				{-0.958},
+				{1.452},
 			},
 			x: [][]float64{
-				{1.291723965752262},
-				{-0.823253621853170},
+				{0.820970340787782},
+				{-0.218604626527306},
+				{-0.212938815234215},
 			},
 		},
 	} {
@@ -837,9 +840,8 @@ func (s *S) TestSolve(c *check.C) {
 			c.Check(panicked, check.Equals, test.panics, check.Commentf("Test %v panicked: %s", test.name, message))
 			continue
 		}
-		c.Check(x.EqualsApprox(NewDense(flatten(test.x)), 1e-14), check.Equals, true, check.Commentf("Test %v ", test.name))
-		a.Mul(a, x)
-		c.Check(a.EqualsApprox(b, 1e-14), check.Equals, true, check.Commentf("Test %v ", test.name))
+
+		c.Check(x.EqualsApprox(NewDense(flatten(test.x)), 1e-14), check.Equals, true, check.Commentf("Test %v solution mismatch: Found %v, expected %v ", test.name, x, test.x))
 	}
 }
 

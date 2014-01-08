@@ -5,7 +5,6 @@
 package mat64
 
 import (
-	//"fmt"
 	check "launchpad.net/gocheck"
 	"math"
 

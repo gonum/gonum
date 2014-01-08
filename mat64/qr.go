@@ -6,7 +6,6 @@
 package mat64
 
 import (
-	//"fmt"
 	"math"
 )
 

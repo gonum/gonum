@@ -26,6 +26,10 @@ type QRFactor struct {
 func QR(a *Dense) QRFactor {
 	// Initialize.
 	m, n := a.Dims()
+	if m < n {
+		panic(ErrShape)
+	}
+
 	qr := a
 	rDiag := make([]float64, n)
 

@@ -150,8 +150,8 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 		panic("mat64: matrix is rank deficient")
 	}
 
+	x = NewDense(n, bn, use(b.mat.Data, n*bn))
 	nx := bn
-	x = b
 
 	// Compute Y = transpose(Q)*B
 	for k := 0; k < n; k++ {

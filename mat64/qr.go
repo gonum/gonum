@@ -16,10 +16,10 @@ type QRFactor struct {
 
 // QR computes a QR Decomposition for an m-by-n matrix a with m >= n by Householder
 // reflections, the QR decomposition is an m-by-n orthogonal matrix q and an n-by-n
-// upper triangular matrix r so that a = q.r.
+// upper triangular matrix r so that a = q.r. QR will panic with ErrShape if m < n.
 //
 // The QR decomposition always exists, even if the matrix does not have full rank,
-// so the constructor will never fail. The primary use of the QR decomposition is
+// so QR will never fail unless m < n. The primary use of the QR decomposition is
 // in the least squares solution of non-square systems of simultaneous linear equations.
 // This will fail if QRIsFullRank() returns false. The matrix a is overwritten by the
 // decomposition.

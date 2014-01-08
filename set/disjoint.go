@@ -13,9 +13,8 @@ type DisjointSet struct {
 }
 
 type DisjointSetNode struct {
-	element interface{}
-	parent  *DisjointSetNode
-	rank    int
+	parent *DisjointSetNode
+	rank   int
 }
 
 func NewDisjointSet() *DisjointSet {
@@ -27,7 +26,7 @@ func (ds *DisjointSet) MakeSet(el interface{}) {
 	if _, ok := ds.master[el]; ok {
 		return
 	}
-	dsNode := &DisjointSetNode{rank: 0, element: el}
+	dsNode := &DisjointSetNode{rank: 0}
 	dsNode.parent = dsNode
 	ds.master[el] = dsNode
 }

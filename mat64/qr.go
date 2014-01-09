@@ -183,6 +183,8 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 		}
 	}
 
-	x = NewDense(n, bn, use(b.mat.Data, n*bn))
+	x = b
+	x.View(0, 0, n, bn)
+
 	return x
 }

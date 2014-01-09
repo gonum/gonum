@@ -273,14 +273,11 @@ func Johnson(graph Graph, Cost func(Node, Node) float64) (nodePaths map[int]map[
 // however, if a path exists DFS is guaranteed to find it (provided you don't find a way to implement a Graph with an infinite depth)
 func DepthFirstSearch(start, goal Node, graph Graph) []Node {
 	closedSet := set.NewSet()
-	openSet := xifo.Stack([]interface{}{start})
+	openSet := xifo.GonumStack([]interface{}{start})
 	predecessor := make(map[int]Node)
 
 	for !openSet.IsEmpty() {
-		c, err := openSet.Pop()
-		if err != nil {
-			return nil
-		}
+		c := openSet.Pop()
 
 		curr := c.(Node)
 

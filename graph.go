@@ -134,7 +134,7 @@ func CopyGraph(dst MutableGraph, src Graph) {
 // An undirected graph should end up with as many SCCs as there are "islands" (or subgraphs) of connections, meaning having more than one strongly connected component implies that your graph is not fully connected.
 func Tarjan(graph Graph) (sccs [][]Node) {
 	index := 0
-	vStack := &xifo.Stack{}
+	vStack := &xifo.GonumStack{}
 	stackSet := set.NewSet()
 	sccs = make([][]Node, 0)
 
@@ -164,7 +164,7 @@ func Tarjan(graph Graph) (sccs [][]Node) {
 		if lowlinks[node.ID()] == indices[node.ID()] {
 			scc := make([]Node, 0)
 			for {
-				v, _ := vStack.Pop()
+				v := vStack.Pop()
 				stackSet.Remove(v.(Node).ID())
 				scc = append(scc, v.(Node))
 				if v.(Node).ID() == node.ID() {

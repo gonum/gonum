@@ -154,11 +154,10 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 	if !f.IsFullRank() {
 		panic("mat64: matrix is rank deficient")
 	}
-	nx := bn
 
 	// Compute Y = transpose(Q)*B
 	for k := 0; k < n; k++ {
-		for j := 0; j < nx; j++ {
+		for j := 0; j < bn; j++ {
 			var s float64
 			for i := k; i < m; i++ {
 				s += qr.At(i, k) * b.At(i, j)
@@ -173,11 +172,11 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 
 	// Solve R*X = Y;
 	for k := n - 1; k >= 0; k-- {
-		for j := 0; j < nx; j++ {
+		for j := 0; j < bn; j++ {
 			b.Set(k, j, b.At(k, j)/rDiag[k])
 		}
 		for i := 0; i < k; i++ {
-			for j := 0; j < nx; j++ {
+			for j := 0; j < bn; j++ {
 				b.Set(i, j, b.At(i, j)-b.At(k, j)*qr.At(i, k))
 			}
 		}

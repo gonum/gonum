@@ -141,7 +141,7 @@ func (f QRFactor) Q() *Dense {
 }
 
 // Solve computes a least squares solution of a.x = b where b has as many rows as a.
-// A matrix x is returned that minimizes the two norm of Q*R*X-B. QRSolve will panic
+// A matrix x is returned that minimizes the two norm of Q*R*X-B. Solve will panic
 // if a is not full rank. The matrix b is overwritten during the call.
 func (f QRFactor) Solve(b *Dense) (x *Dense) {
 	qr := f.QR

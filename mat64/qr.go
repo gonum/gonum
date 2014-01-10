@@ -119,9 +119,6 @@ func (f QRFactor) Q() *Dense {
 	q := NewDense(m, n, nil)
 
 	for k := n - 1; k >= 0; k-- {
-		// for i := 0; i < m; i++ {
-		// 	q.Set(i, k, 0)
-		// }
 		q.Set(k, k, 1)
 		for j := k; j < n; j++ {
 			if qr.At(k, k) != 0 {

@@ -71,7 +71,7 @@ type MutableGraph interface {
 	SetDirected(bool)                     // This package will only call SetDirected on an empty graph, so there's no need to worry about the case where a graph suddenly becomes (un)directed
 }
 
-// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge[0], Edge[1]) had been called)
+// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge.Head(), Edge.Tail()) had been called)
 type WeightedEdge struct {
 	Edge
 	Weight float64

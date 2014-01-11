@@ -23,7 +23,7 @@ type Deque interface {
 	Poll() interface{}
 	Pop() interface{}
 	PeekFirst() interface{}
-	PeekLas() interface{}
+	PeekLast() interface{}
 	IsEmpty() bool
 }
 

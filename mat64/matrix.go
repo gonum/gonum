@@ -227,19 +227,19 @@ type Ler interface {
 	L(a Matrix)
 }
 
-// BlasMatrix represents a cblas native representation of a matrix.
-type BlasMatrix struct {
+// RawMatrix represents a cblas native representation of a matrix.
+type RawMatrix struct {
 	Order      blas.Order
 	Rows, Cols int
 	Stride     int
 	Data       []float64
 }
 
-// Matrix converts a BlasMatrix to a Matrix, writing the data to the matrix represented by c. If c is a
+// Matrix converts a RawMatrix to a Matrix, writing the data to the matrix represented by c. If c is a
 // BlasLoader, that method will be called, otherwise the matrix must be the correct shape.
-func (b BlasMatrix) Matrix(c Mutable) {
-	if c, ok := c.(BlasLoader); ok {
-		c.LoadBlas(b)
+func (b RawMatrix) Matrix(c Mutable) {
+	if c, ok := c.(RawMatrixLoader); ok {
+		c.LoadRawMatrix(b)
 		return
 	}
 	if rows, cols := c.Dims(); rows != b.Rows || cols != b.Cols {
@@ -262,16 +262,16 @@ func (b BlasMatrix) Matrix(c Mutable) {
 	}
 }
 
-// A BlasLoader can directly load a BlasMatrix representation. There is no restriction on the shape of the
+// A RawMatrixLoader can directly load a RawMatrix representation. There is no restriction on the shape of the
 // receiver.
-type BlasLoader interface {
-	LoadBlas(a BlasMatrix)
+type RawMatrixLoader interface {
+	LoadRawMatrix(a RawMatrix)
 }
 
-// A Blasser can return a BlasMatrix representation of the receiver. Changes to the BlasMatrix.Data
+// A RawMatrixer can return a RawMatrix representation of the receiver. Changes to the RawMatrix.Data
 // slice will be reflected in the original matrix, changes to the Rows, Cols and Stride fields will not.
-type Blasser interface {
-	BlasMatrix() BlasMatrix
+type RawMatrixer interface {
+	RawMatrix() RawMatrix
 }
 
 // Det returns the determinant of the matrix a.

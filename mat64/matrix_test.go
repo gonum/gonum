@@ -9,9 +9,9 @@ import (
 	"github.com/gonum/floats"
 
 	"fmt"
-	check "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
+	check "launchpad.net/gocheck"
 )
 
 // Tests
@@ -104,7 +104,7 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			0, 0,
 			0,
-			&Dense{BlasMatrix{
+			&Dense{RawMatrix{
 				Order: BlasOrder,
 				Rows:  3, Cols: 3,
 				Stride: 3,
@@ -120,7 +120,7 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			1, 1,
 			3,
-			&Dense{BlasMatrix{
+			&Dense{RawMatrix{
 				Order: BlasOrder,
 				Rows:  3, Cols: 3,
 				Stride: 3,
@@ -136,7 +136,7 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			0, 1,
 			1.7320508075688772,
-			&Dense{BlasMatrix{
+			&Dense{RawMatrix{
 				Order: BlasOrder,
 				Rows:  3, Cols: 3,
 				Stride: 3,
@@ -152,7 +152,7 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			-1, 0,
 			1.7320508075688772,
-			&Dense{BlasMatrix{Order: BlasOrder,
+			&Dense{RawMatrix{Order: BlasOrder,
 				Rows: 3, Cols: 3,
 				Stride: 3,
 				Data:   []float64{-1, 0, 0, 0, -1, 0, 0, 0, -1},
@@ -166,7 +166,7 @@ func (s *S) TestNewDense(c *check.C) {
 			2, 3,
 			1, 6,
 			9.539392014169456,
-			&Dense{BlasMatrix{Order: BlasOrder,
+			&Dense{RawMatrix{Order: BlasOrder,
 				Rows: 2, Cols: 3,
 				Stride: 3,
 				Data:   []float64{1, 2, 3, 4, 5, 6},
@@ -181,7 +181,7 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 2,
 			1, 6,
 			9.539392014169456,
-			&Dense{BlasMatrix{
+			&Dense{RawMatrix{
 				Order: BlasOrder,
 				Rows:  3, Cols: 2,
 				Stride: 2,
@@ -472,7 +472,7 @@ func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 	if size == 0 {
 		return nil, ErrZeroLength
 	}
-	d := &Dense{BlasMatrix{
+	d := &Dense{RawMatrix{
 		Order: BlasOrder,
 		Rows:  size, Cols: size, Stride: size,
 		Data: make([]float64, size*size),

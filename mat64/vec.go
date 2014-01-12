@@ -36,8 +36,8 @@ var (
 	// _ Equaler       = vector
 	// _ ApproxEqualer = vector
 
-	// _ BlasLoader = vector
-	// _ Blasser    = vector
+	// _ RawMatrixLoader = vector
+	// _ RawMatrixer     = vector
 )
 
 type Vec []float64
@@ -78,8 +78,8 @@ func (m *Vec) Mul(a, b Matrix) {
 
 	bv := *b.(*Vec) // This is a temporary restriction.
 
-	if a, ok := a.(Blasser); ok {
-		amat := a.BlasMatrix()
+	if a, ok := a.(RawMatrixer); ok {
+		amat := a.RawMatrix()
 		blasEngine.Dgemv(BlasOrder,
 			blas.NoTrans,
 			ar, ac,

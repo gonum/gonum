@@ -105,7 +105,7 @@ func (s *S) TestSVD(c *check.C) {
 			small:   math.Pow(2, -966.0),
 
 			// FIXME(kortschak) sigma is one element longer than it should be.
-			sigma: []float64{21.25950088109745, 1.5415021616856577, 1.2873979074613637, 0},
+			sigma: []float64{21.259500881097434, 1.5415021616856566, 1.2873979074613628},
 		},
 	} {
 		svd := SVD(DenseCopyOf(t.a), t.epsilon, t.small, t.wantu, t.wantv)

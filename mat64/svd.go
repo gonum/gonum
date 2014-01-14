@@ -36,6 +36,15 @@ func SVD(a *Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 	// 	panic(ErrShape)
 	// }
 
+	trans := false
+	if m < n {
+		at := new(Dense)
+		at.TCopy(a)
+		a = at
+		m, n = a.Dims()
+		trans = true
+	}
+
 	sigma := make([]float64, min(m+1, n))
 	nu := min(m, n)
 	var u, v *Dense
@@ -425,6 +434,9 @@ func SVD(a *Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 		}
 	}
 
+	if trans {
+		return SVDFactors{v, sigma, u}
+	}
 	return SVDFactors{u, sigma, v}
 }
 

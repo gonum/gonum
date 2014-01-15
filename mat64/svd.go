@@ -15,11 +15,12 @@ type SVDFactors struct {
 	V     *Dense
 }
 
-// SVD performs singular value decomposition for an m-by-n matrix a with m >= n,
-// the singular value decomposition is an m-by-n orthogonal matrix u, an n-by-n
-// diagonal matrix s, and an n-by-n orthogonal matrix v so that a = u*s*v'. The
-// matrix a is overwritten during the decomposition and u and v are only returned
-// when wantu and wantv are true respectively.
+// SVD performs singular value decomposition for an m-by-n matrix a. The
+// singular value decomposition is an m-by-n orthogonal matrix u, an n-by-n
+// diagonal matrix s, and an n-by-n orthogonal matrix v so that a = u*s*v'. If
+// a is a wide matrix a copy of its transpose is allocated, otherwise a is
+// overwritten during the decomposition. Matrices u and v are only created when
+// wantu and wantv are true respectively.
 //
 // The singular values, sigma[k] = s[k][k], are ordered so that
 //
@@ -30,18 +31,11 @@ type SVDFactors struct {
 func SVD(a *Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 	m, n := a.Dims()
 
-	// Apparently the failing cases are only a proper subset of (m<n),
-	// so let's not panic. Correct fix to come later?
-	// if m < n {
-	// 	panic(ErrShape)
-	// }
-
 	trans := false
 	if m < n {
-		at := new(Dense)
-		at.TCopy(a)
-		a = at
-		m, n = a.Dims()
+		a.TCopy(a)
+		m, n = n, m
+		wantu, wantv = wantv, wantu
 		trans = true
 	}
 

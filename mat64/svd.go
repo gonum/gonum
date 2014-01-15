@@ -13,6 +13,7 @@ type SVDFactors struct {
 	U     *Dense
 	Sigma []float64
 	V     *Dense
+	m, n  int
 }
 
 // SVD performs singular value decomposition for an m-by-n matrix a. The
@@ -429,9 +430,21 @@ func SVD(a *Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 	}
 
 	if trans {
-		return SVDFactors{v, sigma, u}
+		return SVDFactors{
+			U:     v,
+			Sigma: sigma,
+			V:     u,
+
+			m: m, n: n,
+		}
 	}
-	return SVDFactors{u, sigma, v}
+	return SVDFactors{
+		U:     u,
+		Sigma: sigma,
+		V:     v,
+
+		m: m, n: n,
+	}
 }
 
 // S returns a newly allocated S matrix from the sigma values held by the
@@ -450,8 +463,7 @@ func (f SVDFactors) Rank(epsilon float64) int {
 	if len(f.Sigma) == 0 {
 		return 0
 	}
-	m, _ := f.U.Dims()
-	tol := float64(max(m, len(f.Sigma))) * f.Sigma[0] * epsilon
+	tol := float64(max(f.m, len(f.Sigma))) * f.Sigma[0] * epsilon
 	var r int
 	for _, v := range f.Sigma {
 		if v > tol {
@@ -463,7 +475,5 @@ func (f SVDFactors) Rank(epsilon float64) int {
 
 // Cond returns the 2-norm condition number for the S matrix.
 func (f SVDFactors) Cond() float64 {
-	m, _ := f.U.Dims()
-	n, _ := f.V.Dims()
-	return f.Sigma[0] / f.Sigma[min(m, n)-1]
+	return f.Sigma[0] / f.Sigma[min(f.m, f.n)-1]
 }

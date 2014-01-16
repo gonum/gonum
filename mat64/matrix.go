@@ -63,6 +63,18 @@ type VectorSetter interface {
 	SetCol(c int, col []float64) int
 }
 
+// A RowViewer can return a slice of float64 reflecting a row that is backed by the matrix
+// data.
+type RowViewer interface {
+	RowView(r int) []float64
+}
+
+// A ColViewer can return a slice of float64 reflecting a column that is backed by the matrix
+// data.
+type ColViewer interface {
+	ColView(c int) []float64
+}
+
 // A Cloner can make a copy of a into the receiver, overwriting the previous value of the
 // receiver. The clone operation does not make any restriction on shape.
 type Cloner interface {

@@ -28,6 +28,7 @@ var (
 	_ Cloner      = matrix
 	_ Viewer      = matrix
 	_ Submatrixer = matrix
+	_ RowViewer   = matrix
 
 	_ Adder     = matrix
 	_ Suber     = matrix
@@ -146,7 +147,7 @@ func (m *Dense) Row(row []float64, r int) []float64 {
 	if row == nil {
 		row = make([]float64, m.mat.Cols)
 	}
-	copy(row, m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols])
+	copy(row, m.rowView(r))
 
 	return row
 }
@@ -156,9 +157,20 @@ func (m *Dense) SetRow(r int, v []float64) int {
 		panic(ErrIndexOutOfRange)
 	}
 
-	copy(m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols], v)
+	copy(m.rowView(r), v)
 
 	return min(len(v), m.mat.Cols)
+}
+
+func (m *Dense) RowView(r int) []float64 {
+	if r >= m.mat.Rows || r < 0 {
+		panic(ErrIndexOutOfRange)
+	}
+	return m.rowView(r)
+}
+
+func (m *Dense) rowView(r int) []float64 {
+	return m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
 }
 
 // View returns a view on the receiver.
@@ -236,7 +248,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 func (m *Dense) Min() float64 {
 	min := m.mat.Data[0]
 	for k := 0; k < m.mat.Rows; k++ {
-		for _, v := range m.mat.Data[k*m.mat.Stride : k*m.mat.Stride+m.mat.Cols] {
+		for _, v := range m.rowView(k) {
 			min = math.Min(min, v)
 		}
 	}
@@ -246,7 +258,7 @@ func (m *Dense) Min() float64 {
 func (m *Dense) Max() float64 {
 	max := m.mat.Data[0]
 	for k := 0; k < m.mat.Rows; k++ {
-		for _, v := range m.mat.Data[k*m.mat.Stride : k*m.mat.Stride+m.mat.Cols] {
+		for _, v := range m.rowView(k) {
 			max = math.Max(max, v)
 		}
 	}
@@ -373,7 +385,7 @@ func (m *Dense) Add(a, b Matrix) {
 				for i, v := range b.Row(rowb, r) {
 					rowa[i] += v
 				}
-				copy(m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols], rowa)
+				copy(m.rowView(r), rowa)
 			}
 			return
 		}
@@ -427,7 +439,7 @@ func (m *Dense) Sub(a, b Matrix) {
 				for i, v := range b.Row(rowb, r) {
 					rowa[i] -= v
 				}
-				copy(m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols], rowa)
+				copy(m.rowView(r), rowa)
 			}
 			return
 		}
@@ -481,7 +493,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 				for i, v := range b.Row(rowb, r) {
 					rowa[i] *= v
 				}
-				copy(m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols], rowa)
+				copy(m.rowView(r), rowa)
 			}
 			return
 		}
@@ -643,7 +655,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 			for i, v := range a.Row(row, r) {
 				row[i] = f * v
 			}
-			copy(m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols], row)
+			copy(m.rowView(r), row)
 		}
 		return
 	}
@@ -686,7 +698,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 			for i, v := range a.Row(row, r) {
 				row[i] = f(r, i, v)
 			}
-			copy(m.mat.Data[r*m.mat.Stride:r*m.mat.Stride+m.mat.Cols], row)
+			copy(m.rowView(r), row)
 		}
 		return
 	}

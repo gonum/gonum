@@ -255,15 +255,13 @@ func (f LUFactors) Solve(b *Dense) (x *Dense) {
 func pivotRows(a *Dense, piv []int) *Dense {
 	visit := make([]bool, len(piv))
 	_, n := a.Dims()
-	fromRow := make([]float64, n)
-	toRow := make([]float64, n)
+	tmpRow := make([]float64, n)
 	for to, from := range piv {
 		for to != from && !visit[from] {
 			visit[from], visit[to] = true, true
-			a.Row(fromRow, from)
-			a.Row(toRow, to)
-			a.SetRow(from, toRow)
-			a.SetRow(to, fromRow)
+			a.Row(tmpRow, from)
+			a.SetRow(from, a.rowView(to))
+			a.SetRow(to, tmpRow)
 			to, from = from, piv[from]
 		}
 	}

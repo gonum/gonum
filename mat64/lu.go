@@ -38,12 +38,8 @@ func LU(a *Dense) LUFactors {
 	}
 	sign := 1
 
-	var (
-		luRowi = make([]float64, n)
-		luColj = make([]float64, m)
-	)
-
 	// Outer loop.
+	luColj := make([]float64, m)
 	for j := 0; j < n; j++ {
 
 		// Make a copy of the j-th column to localize references.
@@ -53,19 +49,17 @@ func LU(a *Dense) LUFactors {
 
 		// Apply previous transformations.
 		for i := 0; i < m; i++ {
-			lu.Row(luRowi, i)
+			luRowi := lu.RowView(i)
 
 			// Most of the time is spent in the following dot product.
 			kmax := min(i, j)
 			var s float64
-			for k := 0; k < kmax; k++ {
-				s += luRowi[k] * luColj[k]
+			for k, v := range luRowi[:kmax] {
+				s += v * luColj[k]
 			}
 
 			luColj[i] -= s
 			luRowi[j] = luColj[i]
-
-			lu.SetRow(i, luRowi)
 		}
 
 		// Find pivot and exchange if necessary.

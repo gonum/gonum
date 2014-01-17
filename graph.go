@@ -16,14 +16,15 @@ type Edge interface {
 	Tail() Node
 }
 
-// A Graph implements all methods necessary to run graph-specific algorithms on it. Strictly speaking EdgeList() and NodeList() would be sufficient, but the others (such as Successors)
-// are required to make the algorithms more efficient and/or easier to write and maintain.
+// A Graph implements all methods necessary to run graph-specific algorithms on it. 90% of the time you want to actually implement DirectedGraph or UndirectedGraph, since the
+// default adjacency functions are (somewhat deliberately) slow.
+//
+//
 type Graph interface {
 	NodeExists(node Node) bool // Returns whether a node with the given Node is currently in the graph
 	Degree(node Node) int      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
-	EdgeList() []Edge          // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph, provide both directions as separate edges
+	EdgeList() []Edge          // Returns a list of all edges in the graph. Edges in EdgeList() are always directed, even when only implementing UndirectedGraph.
 	NodeList() []Node          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected. The caller is free to modify this list (so don't pass a reference to your own list)
-	IsDirected() bool          // Returns whether this graph is directed or not
 }
 
 type UndirectedGraph interface {
@@ -38,6 +39,14 @@ type DirectedGraph interface {
 	IsSuccessor(node, successor Node) bool     // If successor shows up in the list returned by Successors(node), then it's a successor. If node doesn't exist, this should always return false
 	Predecessors(node Node) []Node             // Gives the nodes connected by INBOUND edges, if the graph is an undirected graph, this set is equal to Successors
 	IsPredecessor(node, predecessor Node) bool // If predecessor shows up in the list returned by Predecessors(node), then it's a predecessor. If node doesn't exist, this should always return false
+}
+
+// A crunch graph forces a sparse graph to become a dense graph. That is, if the node IDs are [1,4,9,7] it would "crunch" the ids into the contiguous block [0,1,2,3]
+//
+// All dense graphs should have the first ID at 0
+type CrunchGraph interface {
+	Graph
+	Crunch()
 }
 
 // A Graph that implements Coster has an actual cost between adjacent nodes, also known as a weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*), this function will
@@ -68,6 +77,8 @@ type HeuristicCoster interface {
 // is operating on it), it simply means that without this interface this package can not properly handle the graph in order to, say, fill it with a minimum spanning tree.
 //
 // In functions that take a MutableGraph as an argument, it should not be the same as the Graph argument as concurrent modification will likely cause problems in most cases.
+//
+// Mutable graphs should always record the IDs as they are represented -- which means they are sparse by nature.
 type MutableGraph interface {
 	CostGraph
 	NewNode(successors []Node) Node       // Adds a node with an arbitrary ID, and returns the new, unique ID used

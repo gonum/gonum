@@ -25,20 +25,7 @@ import (
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost function that returns a uniform positive value)
 func AStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Node) float64) (path []Node, cost float64, nodesExpanded int) {
-	if Cost == nil {
-		if cgraph, ok := graph.(Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
-	if HeuristicCost == nil {
-		if hgraph, ok := graph.(HeuristicCoster); ok {
-			HeuristicCost = hgraph.HeuristicCost
-		} else {
-			HeuristicCost = NullHeuristic
-		}
-	}
+	successors, _, _, _, _, _, Cost, HeuristicCost := setupFuncs(graph, Cost, HeuristicCost)
 
 	closedSet := make(map[int]internalNode)
 	openSet := &aStarPriorityQueue{}
@@ -64,7 +51,7 @@ func AStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Node) f
 
 		closedSet[curr.ID()] = curr
 
-		for _, neighbor := range graph.Successors(curr.Node) {
+		for _, neighbor := range successors(curr.Node) {
 			g := curr.gscore + Cost(curr.Node, neighbor)
 			if _, ok := closedSet[neighbor.ID()]; ok && g >= closedSet[neighbor.ID()].gscore {
 				continue
@@ -90,13 +77,8 @@ func AStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Node) f
 //
 // Dijkstra's algorithm usually only returns a cost map, however, since the data is available this version will also reconstruct the path to every node
 func Dijkstra(source Node, graph Graph, Cost func(Node, Node) float64) (paths map[int][]Node, costs map[int]float64) {
-	if Cost == nil {
-		if cgraph, ok := graph.(Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
+	successors, _, _, _, _, _, Cost, _ := setupFuncs(graph, Cost, nil)
+
 	nodes := graph.NodeList()
 	openSet := &aStarPriorityQueue{}
 	closedSet := set.NewSet()                 // This is to make use of that same
@@ -133,7 +115,7 @@ func Dijkstra(source Node, graph Graph, Cost func(Node, Node) float64) (paths ma
 
 		closedSet.Add(node.ID())
 
-		for _, neighbor := range graph.Successors(node) {
+		for _, neighbor := range successors(node) {
 			tmpCost := costs[node.ID()] + Cost(node, neighbor)
 			if cost, ok := costs[neighbor.ID()]; !ok || tmpCost < cost {
 				costs[neighbor.ID()] = cost
@@ -160,13 +142,7 @@ func Dijkstra(source Node, graph Graph, Cost func(Node, Node) float64) (paths ma
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight cycle.
 func BellmanFord(source Node, graph Graph, Cost func(Node, Node) float64) (paths map[int][]Node, costs map[int]float64, aborted bool) {
-	if Cost == nil {
-		if cgraph, ok := graph.(Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
+	_, _, _, _, _, _, Cost, _ = setupFuncs(graph, Cost, nil)
 
 	predecessor := make(map[int]Node)
 	costs = make(map[int]float64)
@@ -215,17 +191,11 @@ func BellmanFord(source Node, graph Graph, Cost func(Node, Node) float64) (paths
 // Its return values are, in order: a map from the source node, to the destination node, to the path between them; a map from the source node, to the destination node, to the cost of the path between them;
 // and a bool that is true if Bellman-Ford detected a negative edge weight cycle -- thus causing it (and this algorithm) to abort (if aborted is true, both maps will be nil).
 func Johnson(graph Graph, Cost func(Node, Node) float64) (nodePaths map[int]map[int][]Node, nodeCosts map[int]map[int]float64, aborted bool) {
-	if Cost == nil {
-		if cgraph, ok := graph.(Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
+	successors, _, _, _, _, _, Cost, _ := setupFuncs(graph, Cost, nil)
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
 	dummyGraph := NewGonumGraph(true)
 	for _, node := range graph.NodeList() {
-		neighbors := graph.Successors(node)
+		neighbors := successors(node)
 		if !dummyGraph.NodeExists(node) {
 			dummyGraph.AddNode(node, neighbors)
 			for _, neighbor := range neighbors {
@@ -272,6 +242,7 @@ func Johnson(graph Graph, Cost func(Node, Node) float64) (nodePaths map[int]map[
 // Expands the first node it sees trying to find the destination. Depth First Search is *not* guaranteed to find the shortest path,
 // however, if a path exists DFS is guaranteed to find it (provided you don't find a way to implement a Graph with an infinite depth)
 func DepthFirstSearch(start, goal Node, graph Graph) []Node {
+	successors, _, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
 	closedSet := set.NewSet()
 	openSet := xifo.GonumStack([]interface{}{start})
 	predecessor := make(map[int]Node)
@@ -291,7 +262,7 @@ func DepthFirstSearch(start, goal Node, graph Graph) []Node {
 
 		closedSet.Add(curr.ID())
 
-		for _, neighbor := range graph.Successors(curr) {
+		for _, neighbor := range successors(curr) {
 			if closedSet.Contains(neighbor.ID()) {
 				continue
 			}

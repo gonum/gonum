@@ -7,10 +7,14 @@ import (
 	"sort"
 )
 
+// All a node needs to do is identify itself. This allows the user to pass in nodes more interesting than an int,
+// but also allow us to reap the benefits of having a map-storable, ==able type.
 type Node interface {
 	ID() int
 }
 
+// Allows edges to do something more interesting that just be a group of nodes. Head and Tail are always directed, that is
+// it always goes FROM Head TO Tail.
 type Edge interface {
 	Head() Node
 	Tail() Node
@@ -104,12 +108,14 @@ type WeightedEdge struct {
 	Weight float64
 }
 
+// A simple int alias.
 type GonumNode int
 
 func (node GonumNode) ID() int {
 	return int(node)
 }
 
+// Just a collection of two nodes
 type GonumEdge struct {
 	H, T Node
 }
@@ -124,6 +130,7 @@ func (edge GonumEdge) Tail() Node {
 
 /* Slow functions to replace the guarantee of a graph being directed or undirected */
 
+// A slow function that iterates over the entire edge list trying to find all successors and predecessors of a node
 func NeighborsFunc(graph Graph) func(node Node) []Node {
 	return func(node Node) []Node {
 		neighbors := []Node{}
@@ -140,6 +147,7 @@ func NeighborsFunc(graph Graph) func(node Node) []Node {
 	}
 }
 
+// A slow function that iterates over the entire edge list trying to find all successors of a node
 func SuccessorsFunc(graph Graph) func(node Node) []Node {
 	return func(node Node) []Node {
 		neighbors := []Node{}
@@ -154,6 +162,7 @@ func SuccessorsFunc(graph Graph) func(node Node) []Node {
 	}
 }
 
+// A slow function that iterates over the entire edge list trying to find all predecessors of a node
 func PredecessorsFunc(graph Graph) func(node Node) []Node {
 	return func(node Node) []Node {
 		neighbors := []Node{}
@@ -168,6 +177,7 @@ func PredecessorsFunc(graph Graph) func(node Node) []Node {
 	}
 }
 
+// A slow function that iterates over the entire edge list trying to find a matching edge such that the first argument is the Head and the second is Tail
 func IsSuccessorFunc(graph Graph) func(Node, Node) bool {
 	return func(node, succ Node) bool {
 		for _, edge := range graph.EdgeList() {
@@ -180,6 +190,7 @@ func IsSuccessorFunc(graph Graph) func(Node, Node) bool {
 	}
 }
 
+// A slow function that iterates over the entire edge list trying to find a matching edge such that the first argument is the Tail and the second is Head
 func IsPredecessorFunc(graph Graph) func(Node, Node) bool {
 	return func(node, pred Node) bool {
 		for _, edge := range graph.EdgeList() {
@@ -192,6 +203,7 @@ func IsPredecessorFunc(graph Graph) func(Node, Node) bool {
 	}
 }
 
+// A slow function that iterates over the entire edge list trying to find a matching edge such that the first argument is one end and the second argument is the other
 func IsNeighborFunc(graph Graph) func(Node, Node) bool {
 	return func(node, succ Node) bool {
 		for _, edge := range graph.EdgeList() {
@@ -206,6 +218,7 @@ func IsNeighborFunc(graph Graph) func(Node, Node) bool {
 
 /* Simple operations */
 
+// Copies a graph into the destination; maintaining all node IDs.
 func CopyGraph(dst MutableGraph, src Graph) {
 	dst.EmptyGraph()
 	dst.SetDirected(false)

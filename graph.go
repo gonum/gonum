@@ -27,8 +27,8 @@ type Graph interface {
 
 type UndirectedGraph interface {
 	Graph
-	Neighbors(node Node) []Node     // Returns all nodes connected by any edge to this node
-	IsNeighbor(node, neighbor Node) // Returns whether neighbor is connected by an edge to node
+	Neighbors(node Node) []Node          // Returns all nodes connected by any edge to this node
+	IsNeighbor(node, neighbor Node) bool // Returns whether neighbor is connected by an edge to node
 }
 
 type DirectedGraph interface {
@@ -195,6 +195,54 @@ func IsNeighborFunc(graph Graph) func(Node, Node) bool {
 	}
 }
 
+func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (successorsFunc, predecessorsFunc, neighborsFunc func(Node) []Node, isSuccessorFunc, isPredecessorFunc, isNeighborFunc func(Node, Node) bool, costFunc, heuristicCostFunc func(Node, Node) float64) {
+	switch g := graph.(type) {
+	case DirectedGraph:
+		successorsFunc = g.Successors
+		predecessorsFunc = g.Predecessors
+		neighborsFunc = g.Neighbors
+		isSuccessorFunc = g.IsSuccessor
+		isPredecessorFunc = g.IsPredecessor
+		isNeighborFunc = g.IsNeighbor
+	case UndirectedGraph:
+		successorsFunc = g.Neighbors
+		predecessorsFunc = g.Neighbors
+		neighborsFunc = g.Neighbors
+		isSuccessorFunc = g.IsNeighbor
+		isPredecessorFunc = g.IsNeighbor
+		isNeighborFunc = g.IsNeighbor
+	default:
+		successorsFunc = SuccessorsFunc(graph)
+		predecessorsFunc = PredecessorsFunc(graph)
+		neighborsFunc = NeighborsFunc(graph)
+		isSuccessorFunc = IsNeighborFunc(graph)
+		isPredecessorFunc = IsNeighborFunc(graph)
+		isNeighborFunc = IsNeighborFunc(graph)
+	}
+
+	if heuristicCost != nil {
+		heuristicCostFunc = heuristicCost
+	} else {
+		if g, ok := graph.(HeuristicCoster); ok {
+			heuristicCostFunc = g.HeuristicCost
+		} else {
+			heuristicCostFunc = NullHeuristic
+		}
+	}
+
+	if cost != nil {
+		costFunc = cost
+	} else {
+		if g, ok := graph.(Coster); ok {
+			costFunc = g.Cost
+		} else {
+			costFunc = UniformCost
+		}
+	}
+
+	return
+}
+
 /* Simple operations */
 
 func CopyGraph(dst MutableGraph, src Graph) {
@@ -238,15 +286,7 @@ func Tarjan(graph Graph) (sccs [][]Node) {
 	lowlinks := make(map[int]int, len(nodes))
 	indices := make(map[int]int, len(nodes))
 
-	var successorsfunc func(Node) []Node
-	switch g := graph.(type) {
-	case DirectedGraph:
-		successorsfunc = g.Successors
-	case UndirectedGraph:
-		successorsfunc = g.Neighbors
-	default:
-		successorsfunc = SuccessorsFunc(graph)
-	}
+	successors, _, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
 
 	var strongconnect func(Node) []Node
 
@@ -258,7 +298,7 @@ func Tarjan(graph Graph) (sccs [][]Node) {
 		vStack.Push(node)
 		stackSet.Add(node.ID())
 
-		for _, succ := range successorsfunc(node) {
+		for _, succ := range successors(node) {
 			if _, ok := indices[succ.ID()]; !ok {
 				strongconnect(succ)
 				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))
@@ -295,6 +335,7 @@ func Tarjan(graph Graph) (sccs [][]Node) {
 //
 // Special case: a nil or zero length path is considered valid (true), a path of length 1 (only one node) is the trivial case, but only if the node listed in path exists.
 func IsPath(path []Node, graph Graph) bool {
+	_, _, _, isSuccessor, _, _, _, _ := setupFuncs(graph, nil, nil)
 	if path == nil || len(path) == 0 {
 		return true
 	} else if len(path) == 1 {
@@ -302,7 +343,7 @@ func IsPath(path []Node, graph Graph) bool {
 	}
 
 	for i := 0; i < len(path)-1; i++ {
-		if !graph.IsSuccessor(path[i], path[i+1]) {
+		if !isSuccessor(path[i], path[i+1]) {
 			return false
 		}
 	}
@@ -417,6 +458,8 @@ func Dominators(start Node, graph Graph) map[int]*set.Set {
 		allNodes.Add(node.ID())
 	}
 
+	_, predecessors, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
+
 	for _, node := range nlist {
 		dominators[node.ID()] = set.NewSet()
 		if node.ID() == start.ID() {
@@ -432,7 +475,7 @@ func Dominators(start Node, graph Graph) map[int]*set.Set {
 			if node.ID() == start.ID() {
 				continue
 			}
-			preds := graph.Predecessors(node)
+			preds := predecessors(node)
 			if len(preds) == 0 {
 				continue
 			}
@@ -459,6 +502,7 @@ func Dominators(start Node, graph Graph) map[int]*set.Set {
 //
 // This returns all possible post-dominators for all nodes, it does not prune for strict postdominators, immediate postdominators etc
 func PostDominators(end Node, graph Graph) map[int]*set.Set {
+	successors, _, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
 	allNodes := set.NewSet()
 	nlist := graph.NodeList()
 	dominators := make(map[int]*set.Set, len(nlist))
@@ -481,7 +525,7 @@ func PostDominators(end Node, graph Graph) map[int]*set.Set {
 			if node.ID() == end.ID() {
 				continue
 			}
-			succs := graph.Successors(node)
+			succs := successors(node)
 			if len(succs) == 0 {
 				continue
 			}

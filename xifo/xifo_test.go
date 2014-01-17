@@ -122,6 +122,7 @@ func testQueue(queue xifo.Queue, t *testing.T) {
 }
 
 func TestDeque(t *testing.T) {
+	_ = xifo.Deque(&xifo.GonumDeque{}) // Makes tests fail to compile if Deque interface is not implemented
 	testStack(&xifo.GonumDeque{}, t)
 	testQueue(&xifo.GonumDeque{}, t)
 }

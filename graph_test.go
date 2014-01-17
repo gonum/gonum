@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+var _ graph.DirectedGraph = (*graph.GonumGraph)(nil)
+var _ graph.MutableGraph = (*graph.GonumGraph)(nil)
+var _ graph.UndirectedGraph = (*graph.TileGraph)(nil)
+
 func TestTileGraph(t *testing.T) {
 	tg := graph.NewTileGraph(4, 4, false)
 	_ = graph.UndirectedGraph(tg) // Compile-time error if TileGraph doesn't properly implement UndirectedGraph
@@ -141,9 +145,4 @@ func TestHarderAStar(t *testing.T) {
 	if !graph.IsPath(path, tg) || cost != 1998.0 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}
-}
-
-func TestGonumGraphInterfaces(t *testing.T) {
-	_ = graph.DirectedGraph(&graph.GonumGraph{})
-	_ = graph.MutableGraph(&graph.GonumGraph{})
 }

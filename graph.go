@@ -18,6 +18,9 @@ type Edge interface {
 
 // A Graph implements all methods necessary to run graph-specific algorithms on it. 90% of the time you want to actually implement DirectedGraph or UndirectedGraph, since the
 // default adjacency functions are (somewhat deliberately) slow.
+//
+// The Graph interface is directed. This means that EdgeList() should return an edge where Head always goes towards Tail. If your graph is undirected and you only maintain edges for one direction,
+// simply return two edges for each one of your edges, with the Head and Tail swapped in each one.
 type Graph interface {
 	NodeExists(node Node) bool // Returns whether a node with the given Node is currently in the graph
 	Degree(node Node) int      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
@@ -25,12 +28,19 @@ type Graph interface {
 	NodeList() []Node          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected. The caller is free to modify this list (so don't pass a reference to your own list)
 }
 
+// Despite its name, a graph implementing UndirectedGraph is not required to be undirected, however, the functions Neighbors and IsNeighbor
+// are built to treat all edges as if they were undirected edges. Directed graphs implement this interface too, because sometimes knowing all
+// adjacent nodes is useful even in a directed graph.
 type UndirectedGraph interface {
 	Graph
 	Neighbors(node Node) []Node          // Returns all nodes connected by any edge to this node
 	IsNeighbor(node, neighbor Node) bool // Returns whether neighbor is connected by an edge to node
 }
 
+// Directed graphs are characterized by having seperable Heads and Tails in their edges. That is, if node1 goes to node2, that does not necessarily imply that node2 goes to node1.
+//
+// While it's possible for a directed graph to have fully reciprocal edges (i.e. the graph is symmetric) -- it is not required to be. The graph is also required to implement UndirectedGraph
+// because it can be useful to know all neighbors regardless of direction; not because this graph treats directed graphs as special cases of undirected ones (the truth is, in fact, the opposite)
 type DirectedGraph interface {
 	UndirectedGraph
 	Successors(node Node) []Node               // Gives the nodes connected by OUTBOUND edges, if the graph is an undirected graph, this set is equal to Predecessors
@@ -55,6 +65,7 @@ type Coster interface {
 	Cost(node1, node2 Node) float64
 }
 
+// Guarantees that something implementing Coster is also a Graph
 type CostGraph interface {
 	Coster
 	Graph
@@ -63,7 +74,6 @@ type CostGraph interface {
 // A graph that implements HeuristicCoster implements a heuristic between any two given nodes. Like Coster, if a graph implements this and a function needs a heuristic cost (e.g. A*), this function will
 // take precedence over the Null Heuristic (always returns 0) if "nil" is passed in for the function argument
 type HeuristicCoster interface {
-	Coster
 	HeuristicCost(node1, node2 Node) float64 // If HeuristicCost is not intended to be used, it can be implemented as the null heuristic (always returns 0)
 }
 

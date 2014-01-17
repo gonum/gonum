@@ -131,7 +131,7 @@ func TestSimpleAStar(t *testing.T) {
 	}
 }
 
-func TestHarderAStar(t *testing.T) {
+func TestBiggerAStar(t *testing.T) {
 	tg := graph.NewTileGraph(3, 3, true)
 
 	path, cost, _ := graph.AStar(graph.GonumNode(0), graph.GonumNode(8), tg, nil, nil)
@@ -145,4 +145,50 @@ func TestHarderAStar(t *testing.T) {
 	if !graph.IsPath(path, tg) || cost != 1998.0 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}
+}
+
+func TestObstructedAStar(t *testing.T) {
+	tg := graph.NewTileGraph(10, 10, true)
+	tg.SetPassability(0, 9, false)
+	tg.SetPassability(1, 9, false)
+	tg.SetPassability(2, 9, false)
+	tg.SetPassability(3, 9, false)
+	tg.SetPassability(4, 1, false)
+	tg.SetPassability(4, 2, false)
+	tg.SetPassability(4, 3, false)
+	tg.SetPassability(4, 4, false)
+	tg.SetPassability(4, 5, false)
+	tg.SetPassability(4, 6, false)
+	tg.SetPassability(4, 7, false)
+	tg.SetPassability(4, 8, false)
+	tg.SetPassability(4, 9, false)
+
+	rows, cols := tg.Dimensions()
+	path, cost1, expanded := graph.AStar(graph.GonumNode(5), tg.CoordsToNode(rows-1, cols-1), tg, nil, nil)
+
+	if !graph.IsPath(path, tg) {
+		t.Error("Path doesn't exist in obstructed graph")
+	}
+
+	ManhattanHeuristic := func(n1, n2 graph.Node) float64 {
+		id1, id2 := n1.ID(), n2.ID()
+		r1, c1 := tg.IDToCoords(id1)
+		r2, c2 := tg.IDToCoords(id2)
+
+		return math.Abs(float64(r1)-float64(r2)) + math.Abs(float64(c1)-float64(c2))
+	}
+
+	path, cost2, expanded2 := graph.AStar(graph.GonumNode(5), tg.CoordsToNode(rows-1, cols-1), tg, nil, ManhattanHeuristic)
+	if !graph.IsPath(path, tg) {
+		t.Error("Path doesn't exist when using heuristic on obstructed graph")
+	}
+
+	if math.Abs(cost1-cost2) > .00001 {
+		t.Error("Cost when using admissible heuristic isn't approximately equal to cost without it")
+	}
+
+	if expanded2 > expanded {
+		t.Error("Using admissible, consistent heuristic expanded more nodes than null heuristic (possible, but unlikely -- suggests an error somewhere)")
+	}
+
 }

@@ -50,8 +50,7 @@ type CrunchGraph interface {
 // A Graph that implements Coster has an actual cost between adjacent nodes, also known as a weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*), this function will
 // take precedence over the Uniform Cost function (all weights are 1) if "nil" is passed in for the function argument
 //
-// Coster only need worry about the case when an edge from node 1 to node 2 exists (i.e. node2 is a successor to node1) -- asking for the weight in any other case is considered undefined behavior.
-// The only possible exception to this is in D*-Lite, if an edge previously existed and then is removed when the graph changes between steps, a suitably discouraging cost such as Inf would likely produce the best behavior.
+// If no edge exists between node1 and node2, the cost should be taken to be +inf (can be gotten by math.Inf(1))
 type Coster interface {
 	Cost(node1, node2 Node) float64
 }
@@ -193,54 +192,6 @@ func IsNeighborFunc(graph Graph) func(Node, Node) bool {
 
 		return false
 	}
-}
-
-func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (successorsFunc, predecessorsFunc, neighborsFunc func(Node) []Node, isSuccessorFunc, isPredecessorFunc, isNeighborFunc func(Node, Node) bool, costFunc, heuristicCostFunc func(Node, Node) float64) {
-	switch g := graph.(type) {
-	case DirectedGraph:
-		successorsFunc = g.Successors
-		predecessorsFunc = g.Predecessors
-		neighborsFunc = g.Neighbors
-		isSuccessorFunc = g.IsSuccessor
-		isPredecessorFunc = g.IsPredecessor
-		isNeighborFunc = g.IsNeighbor
-	case UndirectedGraph:
-		successorsFunc = g.Neighbors
-		predecessorsFunc = g.Neighbors
-		neighborsFunc = g.Neighbors
-		isSuccessorFunc = g.IsNeighbor
-		isPredecessorFunc = g.IsNeighbor
-		isNeighborFunc = g.IsNeighbor
-	default:
-		successorsFunc = SuccessorsFunc(graph)
-		predecessorsFunc = PredecessorsFunc(graph)
-		neighborsFunc = NeighborsFunc(graph)
-		isSuccessorFunc = IsNeighborFunc(graph)
-		isPredecessorFunc = IsNeighborFunc(graph)
-		isNeighborFunc = IsNeighborFunc(graph)
-	}
-
-	if heuristicCost != nil {
-		heuristicCostFunc = heuristicCost
-	} else {
-		if g, ok := graph.(HeuristicCoster); ok {
-			heuristicCostFunc = g.HeuristicCost
-		} else {
-			heuristicCostFunc = NullHeuristic
-		}
-	}
-
-	if cost != nil {
-		costFunc = cost
-	} else {
-		if g, ok := graph.(Coster); ok {
-			costFunc = g.Cost
-		} else {
-			costFunc = UniformCost
-		}
-	}
-
-	return
 }
 
 /* Simple operations */
@@ -546,22 +497,4 @@ func PostDominators(end Node, graph Graph) map[int]*set.Set {
 	}
 
 	return dominators
-}
-
-/* Purely internal data structures and functions (mostly for sorting) */
-
-/** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/
-
-type edgeSorter []WeightedEdge
-
-func (el edgeSorter) Len() int {
-	return len(el)
-}
-
-func (el edgeSorter) Less(i, j int) bool {
-	return el[i].Weight < el[j].Weight
-}
-
-func (el edgeSorter) Swap(i, j int) {
-	el[i], el[j] = el[j], el[i]
 }

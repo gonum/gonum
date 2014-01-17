@@ -12,6 +12,9 @@ but functions that require weighted edges have several methods of dealing with t
 
 For information on the specification for Cost functions, please see the Coster interface.
 
+Finally, although the functions take in a Graph -- they will always use the correct behavior. If your graph implements DirectedGraph, it will use Successors and Predecessors where applicable,
+if undirected, it will use Neighbors instead. If it implements neither, it will scan the edge list for successors and predecessors where applicable. (This is slow, you should always implement either Directed or Undirected)
+
 This package will never modify a graph that is not Mutable (and the interface does not allow it to do so). However, return values are free to be modified, so never pass a reference to your own edge list or node list.
 It also guarantees that any nodes passed back to the user will be the same nodes returned to it -- that is, it will never take a Node's ID and then wrap the ID in a new struct and return that. You'll always get back your
 original data.

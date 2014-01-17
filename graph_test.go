@@ -142,3 +142,8 @@ func TestHarderAStar(t *testing.T) {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}
 }
+
+func TestGonumGraphInterfaces(t *testing.T) {
+	_ = graph.DirectedGraph(&graph.GonumGraph{})
+	_ = graph.MutableGraph(&graph.GonumGraph{})
+}

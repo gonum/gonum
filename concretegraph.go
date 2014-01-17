@@ -238,7 +238,28 @@ func (graph *GonumGraph) IsPredecessor(node, predecessor Node) bool {
 	return ok
 }
 
-func (graph *GonumGraph) IsAdjacent(node, neigh Node) bool {
+func (graph *GonumGraph) Neighbors(node Node) []Node {
+	id := node.ID()
+	if _, ok := graph.successors[id]; !ok {
+		return nil
+	}
+
+	neighbors := make([]Node, 0, len(graph.predecessors[id])+len(graph.successors[id]))
+	for succ, _ := range graph.successors[id] {
+		neighbors = append(neighbors, graph.nodeMap[succ])
+	}
+
+	for pred, _ := range graph.predecessors[id] {
+		// We should only add the predecessor if it wasn't already added from successors
+		if _, ok := graph.successors[pred]; !ok {
+			neighbors = append(neighbors, graph.nodeMap[pred])
+		}
+	}
+
+	return neighbors
+}
+
+func (graph *GonumGraph) IsNeighbor(node, neigh Node) bool {
 	id := node.ID()
 	neighbor := neigh.ID()
 	if _, ok := graph.successors[id]; !ok {

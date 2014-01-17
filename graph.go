@@ -126,6 +126,8 @@ func NeighborsFunc(graph Graph) func(node Node) []Node {
 				neighbors = append(neighbors, edge.Head())
 			}
 		}
+
+		return neighbors
 	}
 }
 
@@ -138,6 +140,8 @@ func SuccessorsFunc(graph Graph) func(node Node) []Node {
 				neighbors = append(neighbors, edge.Tail())
 			}
 		}
+
+		return neighbors
 	}
 }
 
@@ -150,6 +154,44 @@ func PredecessorsFunc(graph Graph) func(node Node) []Node {
 				neighbors = append(neighbors, edge.Head())
 			}
 		}
+
+		return neighbors
+	}
+}
+
+func IsSuccessorFunc(graph Graph) func(Node, Node) bool {
+	return func(node, succ Node) bool {
+		for _, edge := range graph.EdgeList() {
+			if edge.Head().ID() == node.ID() && edge.Tail().ID() == succ.ID() {
+				return true
+			}
+		}
+
+		return false
+	}
+}
+
+func IsPredecessorFunc(graph Graph) func(Node, Node) bool {
+	return func(node, pred Node) bool {
+		for _, edge := range graph.EdgeList() {
+			if edge.Tail().ID() == node.ID() && edge.Head().ID() == pred.ID() {
+				return true
+			}
+		}
+
+		return false
+	}
+}
+
+func IsNeighborFunc(graph Graph) func(Node, Node) bool {
+	return func(node, succ Node) bool {
+		for _, edge := range graph.EdgeList() {
+			if (edge.Tail().ID() == node.ID() || edge.Head().ID() == node.ID()) && (edge.Tail().ID() == succ.ID() || edge.Head().ID() == succ.ID()) {
+				return true
+			}
+		}
+
+		return false
 	}
 }
 
@@ -157,27 +199,23 @@ func PredecessorsFunc(graph Graph) func(node Node) []Node {
 
 func CopyGraph(dst MutableGraph, src Graph) {
 	dst.EmptyGraph()
-	dir := src.IsDirected()
-	dst.SetDirected(dir)
+	dst.SetDirected(false)
 
 	var Cost func(Node, Node) float64
 	if cgraph, ok := src.(Coster); ok {
 		Cost = cgraph.Cost
 	}
 
-	for _, node := range src.NodeList() {
-		if !dst.NodeExists(node) {
-			dst.AddNode(node, nil)
-
-		}
-		for _, succ := range src.Successors(node) {
-			edge := GonumEdge{H: node, T: succ}
+	for _, edge := range src.EdgeList() {
+		if !dst.NodeExists(edge.Head()) {
+			dst.AddNode(edge.Head(), []Node{edge.Tail()})
+		} else {
 			dst.AddEdge(edge)
-			if Cost != nil {
-				dst.SetEdgeCost(edge, Cost(node, succ))
-			}
 		}
 
+		if Cost != nil {
+			dst.SetEdgeCost(edge, Cost(edge.Head(), edge.Tail()))
+		}
 	}
 }
 
@@ -200,6 +238,16 @@ func Tarjan(graph Graph) (sccs [][]Node) {
 	lowlinks := make(map[int]int, len(nodes))
 	indices := make(map[int]int, len(nodes))
 
+	var successorsfunc func(Node) []Node
+	switch g := graph.(type) {
+	case DirectedGraph:
+		successorsfunc = g.Successors
+	case UndirectedGraph:
+		successorsfunc = g.Neighbors
+	default:
+		successorsfunc = SuccessorsFunc(graph)
+	}
+
 	var strongconnect func(Node) []Node
 
 	strongconnect = func(node Node) []Node {
@@ -210,7 +258,7 @@ func Tarjan(graph Graph) (sccs [][]Node) {
 		vStack.Push(node)
 		stackSet.Add(node.ID())
 
-		for _, succ := range graph.Successors(node) {
+		for _, succ := range successorsfunc(node) {
 			if _, ok := indices[succ.ID()]; !ok {
 				strongconnect(succ)
 				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))

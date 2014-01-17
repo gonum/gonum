@@ -8,6 +8,8 @@ import (
 
 func TestTileGraph(t *testing.T) {
 	tg := graph.NewTileGraph(4, 4, false)
+	_ = graph.UndirectedGraph(tg) // Compile-time error if TileGraph doesn't properly implement UndirectedGraph
+
 	if tg == nil || tg.String() != "▀▀▀▀\n▀▀▀▀\n▀▀▀▀\n▀▀▀▀" {
 		t.Fatal("Tile graph not generated correctly")
 	}
@@ -73,11 +75,11 @@ func TestTileGraph(t *testing.T) {
 		t.Error("ID to Coords fails on 3,0")
 	}
 
-	if succ := tg.Successors(graph.GonumNode(0)); succ != nil || len(succ) != 0 {
+	if succ := tg.Neighbors(graph.GonumNode(0)); succ != nil || len(succ) != 0 {
 		t.Error("Successors for impassable tile not 0")
 	}
 
-	if succ := tg.Successors(graph.GonumNode(2)); succ == nil || len(succ) != 2 {
+	if succ := tg.Neighbors(graph.GonumNode(2)); succ == nil || len(succ) != 2 {
 		t.Error("Incorrect number of successors for (0,2)")
 	} else {
 		for _, s := range succ {

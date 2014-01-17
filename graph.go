@@ -18,8 +18,6 @@ type Edge interface {
 
 // A Graph implements all methods necessary to run graph-specific algorithms on it. 90% of the time you want to actually implement DirectedGraph or UndirectedGraph, since the
 // default adjacency functions are (somewhat deliberately) slow.
-//
-//
 type Graph interface {
 	NodeExists(node Node) bool // Returns whether a node with the given Node is currently in the graph
 	Degree(node Node) int      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice

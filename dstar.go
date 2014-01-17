@@ -40,6 +40,8 @@ type DStarInstance struct {
 	gScores           map[int]float64
 	cost              func(Node, Node) float64
 	heuristicCost     func(Node, Node) float64
+	successors        func(Node) []Node
+	predecessors      func(Node) []Node
 	u                 *dStarPriorityQueue
 	rhs               map[int]float64
 	k_m               float64
@@ -74,6 +76,20 @@ func InitDStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Nod
 			HeuristicCost = NullHeuristic
 		}
 	}
+	var successorsfunc func(Node) []Node
+	var predecessorsfunc func(Node) []Node
+
+	switch g := graph.(type) {
+	case DirectedGraph:
+		successorsfunc = g.Successors
+		predecessorsfunc = g.Predecessors
+	case UndirectedGraph:
+		successorsfunc = g.Neighbors
+		predecessorsfunc = g.Neighbors
+	default:
+		successorsfunc = SuccessorsFunc(graph)
+		predecessorsfunc = PredecessorsFunc(graph)
+	}
 
 	u := &dStarPriorityQueue{indexList: make(map[int]int, 0), nodes: make([]dStarNode, 0)}
 	heap.Init(u)
@@ -89,6 +105,8 @@ func InitDStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Nod
 		rhs:           make(map[int]float64, 0),
 		cost:          Cost,
 		heuristicCost: HeuristicCost,
+		successors:    successorsfunc,
+		predecessors:  predecessorsfunc,
 	}
 
 	for _, node := range graph.NodeList() {
@@ -105,7 +123,7 @@ func InitDStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Nod
 func (ds *DStarInstance) updateVertex(node Node) {
 	if node.ID() != ds.goal.ID() {
 		min := math.Inf(1)
-		for _, succ := range ds.graph.Successors(node) {
+		for _, succ := range ds.successors(node) {
 			min = math.Min(min, ds.cost(node, succ)+ds.gScores[succ.ID()])
 		}
 		ds.rhs[node.ID()] = min
@@ -130,7 +148,7 @@ func (ds *DStarInstance) computeShortestPath() {
 		} else if ds.gScores[vert.ID()] > ds.rhs[vert.ID()] {
 
 			ds.gScores[vert.ID()] = ds.rhs[vert.ID()]
-			for _, pred := range ds.graph.Predecessors(vert.Node) {
+			for _, pred := range ds.predecessors(vert.Node) {
 				ds.updateVertex(pred)
 			}
 
@@ -138,7 +156,7 @@ func (ds *DStarInstance) computeShortestPath() {
 
 			ds.gScores[vert.ID()] = math.Inf(1)
 			ds.updateVertex(vert.Node)
-			for _, pred := range ds.graph.Predecessors(vert.Node) {
+			for _, pred := range ds.predecessors(vert.Node) {
 				ds.updateVertex(pred)
 			}
 
@@ -157,7 +175,7 @@ func (ds *DStarInstance) Step() (succ Node, err error) {
 
 	min := math.Inf(1)
 	var next Node
-	for _, succ := range ds.graph.Successors(ds.start) {
+	for _, succ := range ds.successors(ds.start) {
 		newMin := math.Min(min, ds.cost(ds.start, succ)+ds.gScores[succ.ID()])
 		if newMin < min {
 			min = newMin

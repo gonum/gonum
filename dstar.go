@@ -62,34 +62,7 @@ func (ds *DStarInstance) calculateKey(node Node) key {
 //
 // In other words, it's all the lines before the main loop in Main() in the original paper. Essentially a full state initialization.
 func InitDStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Node) float64) *DStarInstance {
-	if Cost == nil {
-		if cgraph, ok := graph.(Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
-	if HeuristicCost == nil {
-		if hgraph, ok := graph.(HeuristicCoster); ok {
-			HeuristicCost = hgraph.HeuristicCost
-		} else {
-			HeuristicCost = NullHeuristic
-		}
-	}
-	var successorsfunc func(Node) []Node
-	var predecessorsfunc func(Node) []Node
-
-	switch g := graph.(type) {
-	case DirectedGraph:
-		successorsfunc = g.Successors
-		predecessorsfunc = g.Predecessors
-	case UndirectedGraph:
-		successorsfunc = g.Neighbors
-		predecessorsfunc = g.Neighbors
-	default:
-		successorsfunc = SuccessorsFunc(graph)
-		predecessorsfunc = PredecessorsFunc(graph)
-	}
+	successors, predecessors, _, _, _, _, Cost, HeuristicCost := setupFuncs(graph, Cost, HeuristicCost)
 
 	u := &dStarPriorityQueue{indexList: make(map[int]int, 0), nodes: make([]dStarNode, 0)}
 	heap.Init(u)
@@ -105,8 +78,8 @@ func InitDStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Nod
 		rhs:           make(map[int]float64, 0),
 		cost:          Cost,
 		heuristicCost: HeuristicCost,
-		successors:    successorsfunc,
-		predecessors:  predecessorsfunc,
+		successors:    successors,
+		predecessors:  predecessors,
 	}
 
 	for _, node := range graph.NodeList() {

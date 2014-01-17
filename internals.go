@@ -7,7 +7,10 @@ import (
 // Sets up the cost functions and successor functions so I don't have to do a type switch every time.
 // This almost always does more work than is necessary, but since it's only executed once per function, and graph functions are rather costly, the "extra work"
 // should be negligible.
-func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (successorsFunc, predecessorsFunc, neighborsFunc func(Node) []Node, isSuccessorFunc, isPredecessorFunc, isNeighborFunc func(Node, Node) bool, costFunc, heuristicCostFunc func(Node, Node) float64) {
+func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (successorsFunc, predecessorsFunc, neighborsFunc func(Node) []Node, isSuccessorFunc, isPredecessorFunc,
+	isNeighborFunc func(Node, Node) bool,
+	costFunc, heuristicCostFunc func(Node, Node) float64) {
+
 	switch g := graph.(type) {
 	case DirectedGraph:
 		successorsFunc = g.Successors

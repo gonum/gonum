@@ -19,16 +19,25 @@ type Edge interface {
 // A Graph implements all methods necessary to run graph-specific algorithms on it. Strictly speaking EdgeList() and NodeList() would be sufficient, but the others (such as Successors)
 // are required to make the algorithms more efficient and/or easier to write and maintain.
 type Graph interface {
+	NodeExists(node Node) bool // Returns whether a node with the given Node is currently in the graph
+	Degree(node Node) int      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
+	EdgeList() []Edge          // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph, provide both directions as separate edges
+	NodeList() []Node          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected. The caller is free to modify this list (so don't pass a reference to your own list)
+	IsDirected() bool          // Returns whether this graph is directed or not
+}
+
+type UndirectedGraph interface {
+	Graph
+	Neighbors(node Node) []Node     // Returns all nodes connected by any edge to this node
+	IsNeighbor(node, neighbor Node) // Returns whether neighbor is connected by an edge to node
+}
+
+type DirectedGraph interface {
+	UndirectedGraph
 	Successors(node Node) []Node               // Gives the nodes connected by OUTBOUND edges, if the graph is an undirected graph, this set is equal to Predecessors
 	IsSuccessor(node, successor Node) bool     // If successor shows up in the list returned by Successors(node), then it's a successor. If node doesn't exist, this should always return false
 	Predecessors(node Node) []Node             // Gives the nodes connected by INBOUND edges, if the graph is an undirected graph, this set is equal to Successors
 	IsPredecessor(node, predecessor Node) bool // If predecessor shows up in the list returned by Predecessors(node), then it's a predecessor. If node doesn't exist, this should always return false
-	IsAdjacent(node, neighbor Node) bool       // IsSuccessor || IsPredecessor
-	NodeExists(node Node) bool                 // Returns whether a node with the given Node is currently in the graph
-	Degree(node Node) int                      // Degree is equivalent to len(Successors(node)) + len(Predecessors(node)); this means that reflexive edges are counted twice
-	EdgeList() []Edge                          // Returns a list of all edges in the graph. In the case of an directed graph edge[0] goes TO edge[1]. In an undirected graph, provide both directions as separate edges
-	NodeList() []Node                          // Returns a list of all node IDs in no particular order, useful for determining things like if a graph is fully connected. The caller is free to modify this list (so don't pass a reference to your own list)
-	IsDirected() bool                          // Returns whether this graph is directed or not
 }
 
 // A Graph that implements Coster has an actual cost between adjacent nodes, also known as a weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*), this function will
@@ -93,6 +102,46 @@ func (edge GonumEdge) Head() Node {
 
 func (edge GonumEdge) Tail() Node {
 	return edge.T
+}
+
+/* Slow functions to replace the guarantee of a graph being directed or undirected */
+
+func NeighborsFunc(graph Graph) func(node Node) []Node {
+	return func(node Node) []Node {
+		neighbors := []Node{}
+
+		for _, edge := range graph.EdgeList() {
+			if edge.Head().ID() == node.ID() {
+				neighbors = append(neighbors, edge.Tail())
+			} else if edge.Tail().ID() == node.ID() {
+				neighbors = append(neighbors, edge.Head())
+			}
+		}
+	}
+}
+
+func SuccessorsFunc(graph Graph) func(node Node) []Node {
+	return func(node Node) []Node {
+		neighbors := []Node{}
+
+		for _, edge := range graph.EdgeList() {
+			if edge.Head().ID() == node.ID() {
+				neighbors = append(neighbors, edge.Tail())
+			}
+		}
+	}
+}
+
+func PredecessorsFunc(graph Graph) func(node Node) []Node {
+	return func(node Node) []Node {
+		neighbors := []Node{}
+
+		for _, edge := range graph.EdgeList() {
+			if edge.Tail().ID() == node.ID() {
+				neighbors = append(neighbors, edge.Head())
+			}
+		}
+	}
 }
 
 /* Simple operations */

@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
+// Asserts that out concrete graphs implement the correct interfaces
 var _ graph.DirectedGraph = (*graph.GonumGraph)(nil)
 var _ graph.MutableGraph = (*graph.GonumGraph)(nil)
 var _ graph.UndirectedGraph = (*graph.TileGraph)(nil)
 
 func TestTileGraph(t *testing.T) {
 	tg := graph.NewTileGraph(4, 4, false)
-	_ = graph.UndirectedGraph(tg) // Compile-time error if TileGraph doesn't properly implement UndirectedGraph
 
 	if tg == nil || tg.String() != "▀▀▀▀\n▀▀▀▀\n▀▀▀▀\n▀▀▀▀" {
 		t.Fatal("Tile graph not generated correctly")

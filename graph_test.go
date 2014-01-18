@@ -204,7 +204,7 @@ func TestNoPathAStar(t *testing.T) {
 	rows, _ := tg.Dimensions()
 	path, _, _ := graph.AStar(tg.CoordsToNode(0, 2), tg.CoordsToNode(rows-1, 2), tg, nil, nil)
 
-	if path != nil || len(path) > 0 {
+	if len(path) > 0 { // Note that a nil slice will return len of 0, this won't panic
 		t.Error("A* finds path where none exists")
 	}
 }

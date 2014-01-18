@@ -110,5 +110,13 @@ func (s *S) TestLQD(c *check.C) {
 
 		c.Check(b.EqualsApprox(bProj, 1e-13), check.Equals, true, check.Commentf("Test %v: A*X != B", test.name))
 
+		qr := QR(DenseCopyOf(a))
+		lambda := qr.Solve(DenseCopyOf(x))
+
+		xCheck := new(Dense)
+		xCheck.Mul(a, lambda)
+
+		c.Check(xCheck.EqualsApprox(x, 1e-13), check.Equals, true,
+			check.Commentf("Test %v: A*lambda != X", test.name))
 	}
 }

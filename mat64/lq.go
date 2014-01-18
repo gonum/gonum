@@ -5,7 +5,6 @@
 package mat64
 
 import (
-	"fmt"
 	"github.com/gonum/blas"
 	"math"
 )
@@ -43,25 +42,27 @@ func LQ(a *Dense) LQFactor {
 		norm := blasEngine.Dnrm2(len(hh), hh, 1)
 		lDiag[k] = norm
 
-		hhNorm := (norm * math.Sqrt(1-hh[0]/norm))
-		if norm != 0 && hhNorm != 0 {
-			// Form k-th Householder vector.
-			s := 1 / hhNorm
-			hh[0] -= norm
-			blasEngine.Dscal(len(hh), s, hh, 1)
+		if norm != 0 {
+			hhNorm := (norm * math.Sqrt(1-hh[0]/norm))
+			if hhNorm == 0 {
+				hh[0] = 0
+			} else {
+				// Form k-th Householder vector.
+				s := 1 / hhNorm
+				hh[0] -= norm
+				blasEngine.Dscal(len(hh), s, hh, 1)
 
-			fmt.Println("hh", hh)
+				// Apply transformation to remaining columns.
+				if k < m-1 {
+					*a = *lq
+					a.View(k+1, k, m-k-1, n-k)
+					projs = projs[0 : m-k-1]
+					projs.Mul(a, &hh)
 
-			// Apply transformation to remaining columns.
-			if k < m-1 {
-				*a = *lq
-				a.View(k+1, k, m-k-1, n-k)
-				projs = projs[0 : m-k-1]
-				projs.Mul(a, &hh)
-
-				for j := 0; j < m-k-1; j++ {
-					dst := a.RowView(j)
-					blasEngine.Daxpy(len(dst), -projs[j], hh, 1, dst, 1)
+					for j := 0; j < m-k-1; j++ {
+						dst := a.RowView(j)
+						blasEngine.Daxpy(len(dst), -projs[j], hh, 1, dst, 1)
+					}
 				}
 			}
 		}
@@ -107,7 +108,7 @@ func (f LQFactor) ApplyQ(x *Dense, trans bool) {
 	proj := make([]float64, n)
 
 	if trans {
-		for k := 0; k < nh; k++ {
+		for k := nh - 1; k >= 0; k-- {
 			sub := &Dense{}
 			*sub = *x
 			hh := f.LQ.RowView(k)[k:]
@@ -122,19 +123,18 @@ func (f LQFactor) ApplyQ(x *Dense, trans bool) {
 			}
 		}
 	} else {
-		for k := nh - 1; k >= 0; k-- {
+		for k := 0; k < nh; k++ {
 			sub := &Dense{}
 			*sub = *x
 			hh := f.LQ.RowView(k)[k:]
 
 			sub.View(k, 0, m-k, n)
-			ms, ns := sub.Dims()
 
-			blasEngine.Dgemv(blas.ColMajor, blas.NoTrans, ns, ms, 1,
+			blasEngine.Dgemv(blas.ColMajor, blas.NoTrans, n, m-k, 1,
 				sub.mat.Data, sub.mat.Stride, hh, 1, 0, proj, 1)
 			for i := k; i < m; i++ {
-				row := x.RowView(k)
-				blasEngine.Daxpy(n, hh[i-k], proj, 1, row, 1)
+				row := x.RowView(i)
+				blasEngine.Daxpy(n, -hh[i-k], proj, 1, row, 1)
 			}
 		}
 	}
@@ -142,7 +142,7 @@ func (f LQFactor) ApplyQ(x *Dense, trans bool) {
 
 // Solve a computes minimum norm least squares solution of a.x = b where b has as many rows as a.
 // A matrix x is returned that minimizes the two norm of Q*R*X-B. Solve will panic
-// if a is not full rank. The matrix b is overwritten during the call.
+// if a is not full rank.
 func (f LQFactor) Solve(b *Dense) (x *Dense) {
 	lq := f.LQ
 	lDiag := f.lDiag
@@ -156,13 +156,19 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 	}
 
 	x = NewDense(n, bn, nil)
+	xv := new(Dense)
+	*xv = *x
+	xv.View(0, 0, bm, bn)
+	xv.Copy(b)
+
 	tau := make([]float64, m)
 	for i := range tau {
 		tau[i] = lq.At(i, i)
 		lq.Set(i, i, lDiag[i])
 	}
-	blasEngine.Dtrsm(blas.RowMajor, blas.Right, blas.Lower, blas.NoTrans, blas.NonUnit,
-		bm, bn, 1, lq.mat.Data, lq.mat.Stride, b.mat.Data, b.mat.Stride)
+	blasEngine.Dtrsm(blas.RowMajor, blas.Left, blas.Lower, blas.NoTrans, blas.NonUnit,
+		bm, bn, 1, lq.mat.Data, lq.mat.Stride, x.mat.Data, x.mat.Stride)
+
 	for i := range tau {
 		lq.Set(i, i, tau[i])
 	}

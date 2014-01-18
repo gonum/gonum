@@ -5,7 +5,6 @@
 package mat64
 
 import (
-	"fmt"
 	check "launchpad.net/gocheck"
 	"math"
 )
@@ -52,18 +51,39 @@ func (s *S) TestLQD(c *check.C) {
 				{0, 0, 1},
 			},
 		},
+		{
+			name: "Id",
+			a: [][]float64{
+				{0, 0, 2},
+				{0, 1, 0},
+				{3, 0, 0},
+			},
+		},
+		{
+			name: "small",
+			a: [][]float64{
+				{1, 1},
+				{1, 2},
+			},
+		},
 	} {
 
 		a := NewDense(flatten(test.a))
+
 		at := new(Dense)
 		at.TCopy(a)
 
-		qf := QR(a)
+		lq := LQ(DenseCopyOf(at))
 
 		rows, cols := a.Dims()
 
-		lq := LQ(at)
+		Q := NewDense(rows, cols, nil)
+		for i := 0; i < cols; i++ {
+			Q.Set(i, i, 1)
+		}
+		lq.ApplyQ(Q, true)
 		l := lq.L()
+
 		lt := NewDense(rows, cols, nil)
 		ltview := new(Dense)
 		*ltview = *lt
@@ -71,14 +91,24 @@ func (s *S) TestLQD(c *check.C) {
 		ltview.TCopy(l)
 		lq.ApplyQ(lt, true)
 
-		qf.QR.TCopy(qf.QR)
-		row := qf.QR.RowView(0)
-		fmt.Println(row, lq.LQ.RowView(0))
-
-		fmt.Println(lt, a)
-
+		c.Check(isOrthogonal(Q), check.Equals, true, check.Commentf("Test %v: Q not orthogonal", test.name))
 		c.Check(a.EqualsApprox(lt, 1e-13), check.Equals, true, check.Commentf("Test %v: Q*R != A", test.name))
 		c.Check(isLowerTriangular(l), check.Equals, true,
 			check.Commentf("Test %v: L not lower triangular", test.name))
+
+		nrhs := 2
+		barr := make([]float64, nrhs*cols)
+		for i := range barr {
+			barr[i] = float64(i)
+		}
+		b := NewDense(cols, nrhs, barr)
+
+		x := lq.Solve(b)
+
+		bProj := new(Dense)
+		bProj.Mul(at, x)
+
+		c.Check(b.EqualsApprox(bProj, 1e-13), check.Equals, true, check.Commentf("Test %v: A*X != B", test.name))
+
 	}
 }

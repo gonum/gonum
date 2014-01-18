@@ -149,10 +149,8 @@ func TestBiggerAStar(t *testing.T) {
 
 func TestObstructedAStar(t *testing.T) {
 	tg := graph.NewTileGraph(10, 10, true)
-	tg.SetPassability(0, 9, false)
-	tg.SetPassability(1, 9, false)
-	tg.SetPassability(2, 9, false)
-	tg.SetPassability(3, 9, false)
+
+	// Creates a partial "wall" down the middle row with a gap down the left side
 	tg.SetPassability(4, 1, false)
 	tg.SetPassability(4, 2, false)
 	tg.SetPassability(4, 3, false)
@@ -191,4 +189,22 @@ func TestObstructedAStar(t *testing.T) {
 		t.Error("Using admissible, consistent heuristic expanded more nodes than null heuristic (possible, but unlikely -- suggests an error somewhere)")
 	}
 
+}
+
+func TestNoPathAStar(t *testing.T) {
+	tg := graph.NewTileGraph(5, 5, true)
+
+	// Creates a "wall" down the middle row
+	tg.SetPassability(2, 0, false)
+	tg.SetPassability(2, 1, false)
+	tg.SetPassability(2, 2, false)
+	tg.SetPassability(2, 3, false)
+	tg.SetPassability(2, 4, false)
+
+	rows, _ := tg.Dimensions()
+	path, _, _ := graph.AStar(tg.CoordsToNode(0, 2), tg.CoordsToNode(rows-1, 2), tg, nil, nil)
+
+	if path != nil || len(path) > 0 {
+		t.Error("A* finds path where none exists")
+	}
 }

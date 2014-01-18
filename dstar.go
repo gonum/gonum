@@ -110,7 +110,7 @@ func (ds *DStarInstance) updateVertex(node Node) {
 }
 
 func (ds *DStarInstance) computeShortestPath() {
-	for ds.u.Peek().Less(dStarNode{Node: ds.start, key: ds.calculateKey(ds.start)}) || math.Abs(ds.rhs[ds.start.ID()]-ds.gScores[ds.start.ID()]) > .000001 {
+	for ds.u.Len() > 0 && (ds.u.Peek().Less(dStarNode{Node: ds.start, key: ds.calculateKey(ds.start)}) || math.Abs(ds.rhs[ds.start.ID()]-ds.gScores[ds.start.ID()]) > .000001) {
 
 		vert := heap.Pop(ds.u).(dStarNode)
 		newKey := ds.calculateKey(vert.Node)

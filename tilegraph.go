@@ -2,6 +2,7 @@ package graph
 
 import (
 	"errors"
+	"math"
 	"strings"
 )
 
@@ -230,4 +231,12 @@ func (graph *TileGraph) NodeList() []Node {
 
 func (graph *TileGraph) IsDirected() bool {
 	return false
+}
+
+func (graph *TileGraph) Cost(node1, node2 Node) float64 {
+	if graph.IsNeighbor(node1, node2) {
+		return 1.0
+	} else {
+		return math.Inf(1)
+	}
 }

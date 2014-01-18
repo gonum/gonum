@@ -262,6 +262,12 @@ func (s1 *Set) Add(element interface{}) {
 	(*s1)[element] = flag
 }
 
+func (s1 *Set) AddAll(elements ...interface{}) {
+	for _, el := range elements {
+		s1.Add(el)
+	}
+}
+
 // Removes the element el from s1
 func (s1 *Set) Remove(element interface{}) {
 	delete(*s1, element)

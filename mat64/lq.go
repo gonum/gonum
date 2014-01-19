@@ -115,8 +115,13 @@ func (f LQFactor) ApplyQ(x *Dense, trans bool) {
 
 			sub.View(k, 0, m-k, n)
 
-			blasEngine.Dgemv(blas.ColMajor, blas.NoTrans, n, m-k, 1,
-				sub.mat.Data, sub.mat.Stride, hh, 1, 0, proj, 1)
+			blasEngine.Dgemv(
+				blas.ColMajor, blas.NoTrans,
+				n, m-k,
+				1, sub.mat.Data, sub.mat.Stride,
+				hh, 1,
+				0, proj, 1,
+			)
 			for i := k; i < m; i++ {
 				row := x.RowView(i)
 				blasEngine.Daxpy(n, -hh[i-k], proj, 1, row, 1)
@@ -130,8 +135,13 @@ func (f LQFactor) ApplyQ(x *Dense, trans bool) {
 
 			sub.View(k, 0, m-k, n)
 
-			blasEngine.Dgemv(blas.ColMajor, blas.NoTrans, n, m-k, 1,
-				sub.mat.Data, sub.mat.Stride, hh, 1, 0, proj, 1)
+			blasEngine.Dgemv(
+				blas.ColMajor, blas.NoTrans,
+				n, m-k,
+				1, sub.mat.Data, sub.mat.Stride,
+				hh, 1,
+				0, proj, 1,
+			)
 			for i := k; i < m; i++ {
 				row := x.RowView(i)
 				blasEngine.Daxpy(n, -hh[i-k], proj, 1, row, 1)
@@ -166,8 +176,12 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 		tau[i] = lq.At(i, i)
 		lq.Set(i, i, lDiag[i])
 	}
-	blasEngine.Dtrsm(blas.RowMajor, blas.Left, blas.Lower, blas.NoTrans, blas.NonUnit,
-		bm, bn, 1, lq.mat.Data, lq.mat.Stride, x.mat.Data, x.mat.Stride)
+	blasEngine.Dtrsm(
+		blas.RowMajor, blas.Left, blas.Lower, blas.NoTrans, blas.NonUnit,
+		bm, bn,
+		1, lq.mat.Data, lq.mat.Stride,
+		x.mat.Data, x.mat.Stride,
+	)
 
 	for i := range tau {
 		lq.Set(i, i, tau[i])

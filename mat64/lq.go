@@ -30,8 +30,7 @@ func LQ(a *Dense) LQFactor {
 		panic(ErrShape)
 	}
 
-	lq := &Dense{}
-	*lq = *a
+	lq := *a
 
 	lDiag := make([]float64, m)
 	projs := make(Vec, m)
@@ -54,7 +53,7 @@ func LQ(a *Dense) LQFactor {
 
 				// Apply transformation to remaining columns.
 				if k < m-1 {
-					*a = *lq
+					*a = lq
 					a.View(k+1, k, m-k-1, n-k)
 					projs = projs[0 : m-k-1]
 					projs.Mul(a, &hh)
@@ -67,8 +66,9 @@ func LQ(a *Dense) LQFactor {
 			}
 		}
 	}
+	*a = lq
 
-	return LQFactor{lq, lDiag}
+	return LQFactor{a, lDiag}
 }
 
 // IsFullRank returns whether the L matrix and hence a has full rank.

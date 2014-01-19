@@ -166,10 +166,7 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 	}
 
 	x = NewDense(n, bn, nil)
-	xv := new(Dense)
-	*xv = *x
-	xv.View(0, 0, bm, bn)
-	xv.Copy(b)
+	x.Copy(b)
 
 	tau := make([]float64, m)
 	for i := range tau {

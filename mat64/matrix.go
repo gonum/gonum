@@ -307,11 +307,19 @@ func Inverse(a Matrix) *Dense {
 
 // Solve returns a matrix x that satisfies ax = b.
 func Solve(a, b Matrix) (x *Dense) {
-	m, n := a.Dims()
-	if m == n {
+	switch m, n := a.Dims(); {
+	case m == n:
 		return LU(DenseCopyOf(a)).Solve(DenseCopyOf(b))
+	case m > n:
+		return QR(DenseCopyOf(a)).Solve(DenseCopyOf(b))
+	default:
+		switch b := b.(type) {
+		case *Dense:
+			return LQ(DenseCopyOf(a)).Solve(b)
+		default:
+			return LQ(DenseCopyOf(a)).Solve(DenseCopyOf(b))
+		}
 	}
-	return QR(DenseCopyOf(a)).Solve(DenseCopyOf(b))
 }
 
 // A Panicker is a function that may panic.

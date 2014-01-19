@@ -65,6 +65,3 @@ func (Blas) Dsyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n, k int, alpha
 func (Blas) Dtrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	panic("BLAS function not implemented")
 }
-func (Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
-	panic("BLAS function not implemented")
-}

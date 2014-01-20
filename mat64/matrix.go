@@ -239,6 +239,12 @@ type Ler interface {
 	L(a Matrix)
 }
 
+// A BandWidther represents a banded matrix and can return the left and right half-bandwidths, k1 and
+// k2.
+type BandWidther interface {
+	BandWidth() (k1, k2 int)
+}
+
 // RawMatrix represents a cblas native representation of a matrix.
 type RawMatrix struct {
 	Order      blas.Order

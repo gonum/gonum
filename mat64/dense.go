@@ -49,8 +49,8 @@ var (
 	_ Uer = matrix
 	_ Ler = matrix
 
-	// _ Stacker   = matrix
-	// _ Augmenter = matrix
+	_ Stacker   = matrix
+	_ Augmenter = matrix
 
 	_ Equaler       = matrix
 	_ ApproxEqualer = matrix
@@ -861,6 +861,56 @@ func (m *Dense) TCopy(a Matrix) {
 		}
 	}
 	*m = w
+}
+
+func (m *Dense) Stack(a, b Matrix) {
+	ar, ac := a.Dims()
+	br, bc := b.Dims()
+	if ac != bc || m == a || m == b {
+		panic(ErrShape)
+	}
+
+	if m.isZero() {
+		m.mat = RawMatrix{
+			Order:  BlasOrder,
+			Rows:   ar + br,
+			Cols:   ac,
+			Stride: ac,
+			Data:   use(m.mat.Data, (ar+br)*ac),
+		}
+	} else if ar+br != m.mat.Rows || ac != m.mat.Cols {
+		panic(ErrShape)
+	}
+
+	m.Copy(a)
+	w := *m
+	w.View(ar, 0, br, bc)
+	w.Copy(b)
+}
+
+func (m *Dense) Augment(a, b Matrix) {
+	ar, ac := a.Dims()
+	br, bc := b.Dims()
+	if ar != br || m == a || m == b {
+		panic(ErrShape)
+	}
+
+	if m.isZero() {
+		m.mat = RawMatrix{
+			Order:  BlasOrder,
+			Rows:   ar,
+			Cols:   ac + bc,
+			Stride: ac + bc,
+			Data:   use(m.mat.Data, ar*(ac+bc)),
+		}
+	} else if ar != m.mat.Rows || ac+bc != m.mat.Cols {
+		panic(ErrShape)
+	}
+
+	m.Copy(a)
+	w := *m
+	w.View(0, ac, br, bc)
+	w.Copy(b)
 }
 
 func (m *Dense) Sum() float64 {

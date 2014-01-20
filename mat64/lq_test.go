@@ -67,7 +67,6 @@ func (s *S) TestLQD(c *check.C) {
 			},
 		},
 	} {
-
 		a := NewDense(flatten(test.a))
 
 		at := new(Dense)
@@ -104,15 +103,15 @@ func (s *S) TestLQD(c *check.C) {
 
 		x := lq.Solve(b)
 
-		bProj := new(Dense)
+		var bProj Dense
 		bProj.Mul(at, x)
 
-		c.Check(b.EqualsApprox(bProj, 1e-13), check.Equals, true, check.Commentf("Test %v: A*X != B", test.name))
+		c.Check(bProj.EqualsApprox(b, 1e-13), check.Equals, true, check.Commentf("Test %v: A*X != B", test.name))
 
 		qr := QR(DenseCopyOf(a))
 		lambda := qr.Solve(DenseCopyOf(x))
 
-		xCheck := new(Dense)
+		var xCheck Dense
 		xCheck.Mul(a, lambda)
 
 		c.Check(xCheck.EqualsApprox(x, 1e-13), check.Equals, true,

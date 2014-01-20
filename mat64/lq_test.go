@@ -80,14 +80,14 @@ func (s *S) TestLQD(c *check.C) {
 		for i := 0; i < cols; i++ {
 			Q.Set(i, i, 1)
 		}
-		lq.ApplyQ(Q, true)
+		lq.applyQTo(Q, true)
 		l := lq.L()
 
 		lt := NewDense(rows, cols, nil)
 		ltview := *lt
 		ltview.View(0, 0, cols, cols)
 		ltview.TCopy(l)
-		lq.ApplyQ(lt, true)
+		lq.applyQTo(lt, true)
 
 		c.Check(isOrthogonal(Q), check.Equals, true, check.Commentf("Test %v: Q not orthogonal", test.name))
 		c.Check(a.EqualsApprox(lt, 1e-13), check.Equals, true, check.Commentf("Test %v: Q*R != A", test.name))

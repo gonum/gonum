@@ -99,7 +99,7 @@ func (f LQFactor) L() *Dense {
 }
 
 // replaces x with Q.x
-func (f LQFactor) ApplyQ(x *Dense, trans bool) {
+func (f LQFactor) applyQTo(x *Dense, trans bool) {
 	nh, nc := f.LQ.Dims()
 	m, n := x.Dims()
 	if m != nc {
@@ -181,7 +181,7 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 	for i := range tau {
 		lq.Set(i, i, tau[i])
 	}
-	f.ApplyQ(x, true)
+	f.applyQTo(x, true)
 
 	return x
 }

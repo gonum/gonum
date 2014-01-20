@@ -5,8 +5,8 @@
 package mat64
 
 import (
-	"github.com/gonum/blas"
 	"math"
+	"github.com/gonum/blas"
 )
 
 type LQFactor struct {
@@ -109,8 +109,7 @@ func (f LQFactor) ApplyQ(x *Dense, trans bool) {
 
 	if trans {
 		for k := nh - 1; k >= 0; k-- {
-			sub := &Dense{}
-			*sub = *x
+			sub := *x
 			hh := f.LQ.RowView(k)[k:]
 
 			sub.View(k, 0, m-k, n)
@@ -129,8 +128,7 @@ func (f LQFactor) ApplyQ(x *Dense, trans bool) {
 		}
 	} else {
 		for k := 0; k < nh; k++ {
-			sub := &Dense{}
-			*sub = *x
+			sub := *x
 			hh := f.LQ.RowView(k)[k:]
 
 			sub.View(k, 0, m-k, n)

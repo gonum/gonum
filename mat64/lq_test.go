@@ -5,8 +5,8 @@
 package mat64
 
 import (
-	check "launchpad.net/gocheck"
 	"math"
+	check "launchpad.net/gocheck"
 )
 
 func isLowerTriangular(a *Dense) bool {
@@ -85,8 +85,7 @@ func (s *S) TestLQD(c *check.C) {
 		l := lq.L()
 
 		lt := NewDense(rows, cols, nil)
-		ltview := new(Dense)
-		*ltview = *lt
+		ltview := *lt
 		ltview.View(0, 0, cols, cols)
 		ltview.TCopy(l)
 		lq.ApplyQ(lt, true)

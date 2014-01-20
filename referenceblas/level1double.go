@@ -8,11 +8,7 @@ package referenceblas
 import (
 	"github.com/gonum/blas"
 	"math"
-
-	"fmt"
 )
-
-var _ = fmt.Println
 
 type Blas struct{}
 
@@ -265,141 +261,6 @@ func (Blas) Drotg(a, b float64) (c, s, r, z float64) {
 	return
 }
 
-/*
-func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
-	var p1, p2, q1, q2, u float64
-
-	gam := 4096.0
-	gamsq := 16777216.0
-	rgamsq := 5.9604645e-8
-
-	var h11, h12, h21, h22 float64
-	var flag blas.Flag
-
-	rd1 = d1
-	rd2 = d2
-	rx1 = x1
-
-	if d1 < 0 {
-		flag = blas.Rescaling
-		h11 = 0
-		h12 = 0
-		h21 = 0
-		h22 = 0
-		rd1 = 0
-		rd2 = 0
-		rx1 = 0
-	} else {
-		p2 = d2 * y1
-		if p2 == 0 {
-			flag = blas.Identity
-			p.Flag = flag
-			return
-		}
-		p1 = d1 * x1
-		q2 = p2 * y1
-		q1 = p1 * x1
-		if math.Abs(q1) > math.Abs(q2) {
-			h21 = -y1 / x1
-			h12 = p2 / p1
-			u = 1 - h12*h21
-			if u > 0 {
-				flag = blas.OffDiagonal
-				rd1 /= u
-				rd2 /= u
-				rx1 *= u
-			}
-		} else {
-			if q2 < 0 {
-				flag = blas.Rescaling
-				h11 = 0
-				h12 = 0
-				h21 = 0
-				h22 = 0
-
-				rd1 = 0
-				rd2 = 0
-				rx1 = 0
-			} else {
-				flag = blas.Diagonal
-				h11 = p1 / p2
-				h22 = x1 / y1
-				u = 1 + h11*h22
-				temp := d2 / u
-				rd2 = d1 / u
-				rd1 = temp
-				rx1 = y1 * u
-			}
-		}
-		rescaleFlag := true
-		if rd1 != 0 {
-			for rd1 <= rgamsq || rd1 >= gamsq {
-				if flag == blas.OffDiagonal {
-					h11 = 1
-					h22 = 1
-					flag = blas.Rescaling
-					rescaleFlag = false
-				} else if rescaleFlag {
-					h21 = -1
-					h12 = 1
-					flag = blas.Rescaling
-					rescaleFlag = false
-				}
-				if rd1 <= rgamsq {
-					rd1 *= gam * gam
-					rx1 /= gam
-					h11 /= gam
-					h12 /= gam
-				} else {
-					rd1 /= gam * gam
-					rx1 *= gam
-					h11 *= gam
-					h12 *= gam
-				}
-			}
-		}
-		if rd2 != 0 {
-			for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
-				if flag == blas.OffDiagonal && rescaleFlag {
-					h11 = 1
-					h22 = 1
-					flag = blas.Rescaling
-					rescaleFlag = false
-				} else if rescaleFlag {
-					h21 = -1
-					h12 = 1
-					flag = blas.Rescaling
-				}
-				if rd2 <= rgamsq {
-					rd2 *= gam * gam
-					h21 /= gam
-					h22 /= gam
-				} else {
-					rd2 /= gam * gam
-					h21 *= gam
-					h22 *= gam
-				}
-			}
-		}
-	}
-	if flag == blas.Identity || flag == blas.Rescaling {
-		p.H[0] = h11
-		p.H[1] = h21
-		p.H[2] = h12
-		p.H[3] = h22
-	} else if flag == blas.OffDiagonal {
-		p.H[1] = h21
-		p.H[2] = h12
-	} else {
-		p.H[0] = h11
-		p.H[3] = h22
-
-	}
-	p.Flag = flag
-	return
-}
-*/
-
 // Drotmg computes the modified Givens rotation. See
 // http://www.netlib.org/lapack/explore-html/df/deb/drotmg_8f.html
 // for more details
@@ -448,8 +309,6 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 
 	// Now we know that d1 != 0, and d2 != 0. If d2 == 0, it would be caught
 	// when p2 == 0, and if d1 == 0, then it is caught above
-	//fmt.Println("absq1", absQ1)
-	//fmt.Println("absq2", absQ2)
 
 	if absQ1 > absQ2 {
 		p.H[1] = -y1 / x1
@@ -477,8 +336,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 		rx1 = y1 * u
 
 	}
-	//fmt.Println("Flag = ", p.Flag)
-	//fmt.Println("rd1 = ", rd1)
+
 	for rd1 <= rgamsq || rd1 >= gamsq {
 		if p.Flag == blas.OffDiagonal {
 			p.H[0] = 1
@@ -489,6 +347,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 			p.H[2] = 1
 			p.Flag = blas.Rescaling
 		}
+
 		if rd1 <= rgamsq {
 			rd1 *= gam * gam
 			rx1 /= gam
@@ -501,7 +360,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 			p.H[2] *= gam
 		}
 	}
-	//fmt.Println("rd2 = ", rd2)
+
 	for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
 		if p.Flag == blas.OffDiagonal {
 			p.H[0] = 1
@@ -600,96 +459,6 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 		ix += incX
 		iy += incY
 	}
-
-	/*
-		More complicated version of the above, though possibly faster
-
-		if flag == -2 {
-			return
-		}
-			if incX == incY && incX > 0 {
-				nsteps := n * incX
-				if flag < 0 {
-					h11 := p.H[0]
-					h12 := p.H[2]
-					h21 := p.H[1]
-					h22 := p.H[3]
-					for i := 0; i < nsteps; i += incX {
-						w := x[i]
-						z := y[i]
-						x[i] = w*h11 + z*h12
-						y[i] = w*h21 + z*h22
-					}
-					return
-				}
-				if flag == 0 {
-					h12 := p.H[2]
-					h21 := p.H[1]
-					for i := 0; i < nsteps; i += incX {
-						w := x[i]
-						z := y[i]
-						x[i] = w + z*h12
-						y[i] = w*h21 + z
-					}
-					return
-				}
-				h11 := p.H[0]
-				h22 := p.H[3]
-				for i := 0; i < nsteps; i += incX {
-					w := x[i]
-					z := y[i]
-					x[i] = w*h11 + z
-					y[i] = -w + h22*z
-				}
-				return
-			}
-			ix := 0
-			iy := 0
-			if incX < 0 {
-				ix = (-n + 1) * incX
-			}
-			if incY < 0 {
-				iy = (-n + 1) * incY
-			}
-			if flag < 0 {
-				h11 := p.H[0]
-				h12 := p.H[2]
-				h21 := p.H[1]
-				h22 := p.H[3]
-				for i := 0; i < n; i++ {
-					w := x[ix]
-					z := y[iy]
-					x[ix] = w*h11 + z*h12
-					y[iy] = w*h21 + z*h22
-					ix += incX
-					iy += incY
-				}
-				return
-			}
-			if flag == 0 {
-				h12 := p.H[2]
-				h21 := p.H[1]
-				for i := 0; i < n; i++ {
-					w := x[ix]
-					z := y[iy]
-					x[ix] = w + z*h12
-					y[iy] = w*h21 + z
-					ix += incX
-					iy += incY
-				}
-				return
-			}
-			h11 := p.H[0]
-			h22 := p.H[3]
-			for i := 0; i < n; i++ {
-				w := x[ix]
-				z := y[iy]
-				x[ix] = w*h11 + z
-				y[iy] = -w + z*h22
-				ix += incX
-				iy += incY
-			}
-	*/
 	return
 }
 

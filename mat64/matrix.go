@@ -88,13 +88,13 @@ type Copier interface {
 	Copy(a Matrix) (r, c int)
 }
 
-// A Viewer can extract a submatrix view of of the receiver, starting at row i, column j
+// A Viewer can extract a submatrix view of the Matrix parameter, starting at row i, column j
 // and extending r rows and c columns. If i or j are out of range, or r or c extend beyond
 // the bounds of the matrix View will panic with ErrIndexOutOfRange. View must retain the
 // receiver's reference to the original matrix such that changes in the elements of the
 // submatrix are reflected in the original and vice versa.
 type Viewer interface {
-	View(i, j, r, c int)
+	View(a Matrix, i, j, r, c int)
 }
 
 // A Submatrixer can extract a copy of submatrix from a into the receiver, starting at row i,

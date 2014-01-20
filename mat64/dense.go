@@ -174,7 +174,8 @@ func (m *Dense) rowView(r int) []float64 {
 }
 
 // View returns a view on the receiver.
-func (m *Dense) View(i, j, r, c int) {
+func (m *Dense) View(a Matrix, i, j, r, c int) {
+	*m = *a.(*Dense)
 	m.mat.Data = m.mat.Data[i*m.mat.Stride+j : (i+r-1)*m.mat.Stride+(j+c)]
 	m.mat.Rows = r
 	m.mat.Cols = c
@@ -182,9 +183,8 @@ func (m *Dense) View(i, j, r, c int) {
 
 func (m *Dense) Submatrix(a Matrix, i, j, r, c int) {
 	// This is probably a bad idea, but for the moment, we do it.
-	v := *m
-	v.View(i, j, r, c)
-	m.Clone(&Dense{v.RawMatrix()})
+	m.View(a, i, j, r, c)
+	m.Clone(m)
 }
 
 func (m *Dense) Clone(a Matrix) {
@@ -883,8 +883,8 @@ func (m *Dense) Stack(a, b Matrix) {
 	}
 
 	m.Copy(a)
-	w := *m
-	w.View(ar, 0, br, bc)
+	var w Dense
+	w.View(m, ar, 0, br, bc)
 	w.Copy(b)
 }
 
@@ -908,8 +908,8 @@ func (m *Dense) Augment(a, b Matrix) {
 	}
 
 	m.Copy(a)
-	w := *m
-	w.View(0, ac, br, bc)
+	var w Dense
+	w.View(m, 0, ac, br, bc)
 	w.Copy(b)
 }
 

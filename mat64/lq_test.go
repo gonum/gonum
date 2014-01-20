@@ -84,8 +84,8 @@ func (s *S) TestLQD(c *check.C) {
 		l := lq.L()
 
 		lt := NewDense(rows, cols, nil)
-		ltview := *lt
-		ltview.View(0, 0, cols, cols)
+		var ltview Dense
+		ltview.View(lt, 0, 0, cols, cols)
 		ltview.TCopy(l)
 		lq.applyQTo(lt, true)
 

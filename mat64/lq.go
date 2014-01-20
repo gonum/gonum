@@ -53,8 +53,7 @@ func LQ(a *Dense) LQFactor {
 
 				// Apply transformation to remaining columns.
 				if k < m-1 {
-					*a = lq
-					a.View(k+1, k, m-k-1, n-k)
+					a.View(&lq, k+1, k, m-k-1, n-k)
 					projs = projs[0 : m-k-1]
 					projs.Mul(a, &hh)
 
@@ -109,10 +108,10 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 
 	if trans {
 		for k := nh - 1; k >= 0; k-- {
-			sub := *x
 			hh := f.LQ.RowView(k)[k:]
 
-			sub.View(k, 0, m-k, n)
+			var sub Dense
+			sub.View(x, k, 0, m-k, n)
 
 			blasEngine.Dgemv(
 				blas.ColMajor, blas.NoTrans,
@@ -128,10 +127,10 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 		}
 	} else {
 		for k := 0; k < nh; k++ {
-			sub := *x
 			hh := f.LQ.RowView(k)[k:]
 
-			sub.View(k, 0, m-k, n)
+			var sub Dense
+			sub.View(x, k, 0, m-k, n)
 
 			blasEngine.Dgemv(
 				blas.ColMajor, blas.NoTrans,

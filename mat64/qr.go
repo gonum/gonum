@@ -182,7 +182,7 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 	}
 
 	x = b
-	x.View(0, 0, n, bn)
+	x.View(b, 0, 0, n, bn)
 
 	return x
 }

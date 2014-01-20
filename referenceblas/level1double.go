@@ -14,9 +14,11 @@ type Blas struct{}
 
 var Blasser Blas
 
-var negativeN = "blas: negative number of elements"
-var zeroInc = "blas: zero value of increment"
-var negInc = "blas: negative value of increment"
+const (
+	negativeN = "blas: negative number of elements"
+	zeroInc   = "blas: zero value of increment"
+	negInc    = "blas: negative value of increment"
+)
 
 // Ddot computes the dot product of the two vectors \sum_i x[i]*y[i]
 func (Blas) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {

@@ -81,6 +81,13 @@ type Cloner interface {
 	Clone(a Matrix)
 }
 
+// A Reset can zero the dimensions of the matrix so that it can be reused as
+// the receiver of a dimensionally restricted operation. This is commonly used
+// when the matrix is being used a a workspace or temporary matrix.
+type Reseter interface {
+	Reset()
+}
+
 // A Copier can make a copy of elements of a into the receiver. The copy operation fills the
 // submatrix in m with the values from the submatrix of a with the dimensions equal to the
 // minumum of two matrices. The number of row and columns copied it returned.

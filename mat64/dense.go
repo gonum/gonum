@@ -187,6 +187,11 @@ func (m *Dense) Submatrix(a Matrix, i, j, r, c int) {
 	m.Clone(m)
 }
 
+func (m *Dense) Reset() {
+	m.mat.Rows, m.mat.Cols = 0, 0
+	m.mat.Data = m.mat.Data[:0]
+}
+
 func (m *Dense) Clone(a Matrix) {
 	r, c := a.Dims()
 	m.mat = RawMatrix{

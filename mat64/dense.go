@@ -173,7 +173,6 @@ func (m *Dense) rowView(r int) []float64 {
 	return m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
 }
 
-// View returns a view on the receiver.
 func (m *Dense) View(a Matrix, i, j, r, c int) {
 	*m = *a.(*Dense)
 	m.mat.Data = m.mat.Data[i*m.mat.Stride+j : (i+r-1)*m.mat.Stride+(j+c)]

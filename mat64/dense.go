@@ -194,34 +194,33 @@ func (m *Dense) Reset() {
 
 func (m *Dense) Clone(a Matrix) {
 	r, c := a.Dims()
-	m.mat = RawMatrix{
+	mat := RawMatrix{
 		Order: BlasOrder,
 		Rows:  r,
 		Cols:  c,
+		Data:  make([]float64, r*c),
 	}
-	data := make([]float64, r*c)
 	switch a := a.(type) {
 	case RawMatrixer:
 		amat := a.RawMatrix()
 		for i := 0; i < r; i++ {
-			copy(data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+			copy(mat.Data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
 		}
-		m.mat.Stride = c
-		m.mat.Data = data
+		mat.Stride = c
 	case Vectorer:
 		for i := 0; i < r; i++ {
-			a.Row(data[i*c:(i+1)*c], i)
+			a.Row(mat.Data[i*c:(i+1)*c], i)
 		}
-		m.mat.Stride = c
-		m.mat.Data = data
+		mat.Stride = c
 	default:
-		m.mat.Data = data
+		m.mat.Data = mat.Data
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {
 				m.Set(i, j, a.At(i, j))
 			}
 		}
 	}
+	m.mat = mat
 }
 
 func (m *Dense) Copy(a Matrix) (r, c int) {

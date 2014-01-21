@@ -639,6 +639,32 @@ func (s *S) TestApply(c *check.C) {
 	}
 }
 
+func (s *S) TestClone(c *check.C) {
+	for i, test := range []struct {
+		a    [][]float64
+		i, j int
+		v    float64
+	}{
+		{
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+			1, 1,
+			1,
+		},
+		{
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			0, 0,
+			0,
+		},
+	} {
+		a := NewDense(flatten(test.a))
+		b := *a
+		a.Clone(a)
+		a.Set(test.i, test.j, test.v)
+
+		c.Check(b.Equals(a), check.Equals, false, check.Commentf("Test %d: %v cloned and altered = %v", i, a, &b))
+	}
+}
+
 func (s *S) TestStack(c *check.C) {
 	for i, test := range []struct {
 		a, b, e [][]float64

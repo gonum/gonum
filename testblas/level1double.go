@@ -33,6 +33,18 @@ func dSliceTolEqual(a, b []float64) bool {
 	return true
 }
 
+func dSliceEqual(a, b []float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if !(a[i] == b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 func dCopyTwoTmp(x, xTmp, y, yTmp []float64) {
 	if len(x) != len(xTmp) {
 		panic("x size mismatch")
@@ -1567,6 +1579,7 @@ type Drotmger interface {
 
 func DrotmgTest(t *testing.T, d Drotmger) {
 	for _, test := range DrotmgTests {
+
 		p, rd1, rd2, rx1 := d.Drotmg(test.D1, test.D2, test.X1, test.Y1)
 
 		if p.Flag != test.P.Flag {

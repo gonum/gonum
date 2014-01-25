@@ -365,7 +365,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			}
 			for r := 0; r < ar; r++ {
 				for c := 0; c < bc; c++ {
-					w.mat.Data[r*w.mat.Stride+w.mat.Cols] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
+					w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
 				}
 			}
 			*m = w
@@ -383,7 +383,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			for i, e := range row {
 				v += e * b.At(i, c)
 			}
-			w.mat.Data[r*w.mat.Stride+w.mat.Cols] = v
+			w.mat.Data[r*w.mat.Stride+c] = v
 		}
 	}
 	*m = w

@@ -9,35 +9,31 @@ import (
 // throwPanic will throw unexpected panics if true, or will just report them as errors if false
 const throwPanic = true
 
-type DoubleMatTwoVecCase struct {
-	Name   string
-	m      int
-	n      int
-	A      [][]float64
-	o      blas.Order
-	tA     blas.Transpose
-	x      []float64
-	incX   int
-	y      []float64
-	incY   int
-	lda    int
-	xCopy  []float64
-	yCopy  []float64
-	Panics bool
+type DgemvCase struct {
+	Name  string
+	m     int
+	n     int
+	A     [][]float64
+	tA    blas.Transpose
+	x     []float64
+	incX  int
+	y     []float64
+	incY  int
+	xCopy []float64
+	yCopy []float64
 
-	DgemvCases []DgemvCase
+	Subcases []DgemvSubcase
 }
 
-type DgemvCase struct {
+type DgemvSubcase struct {
 	alpha float64
 	beta  float64
 	ans   []float64
 }
 
-var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
+var DgemvCases []DgemvCase = []DgemvCase{
 	{
-		Name: "M_gt_N_Inc1_RowMajor_NoTrans",
-		o:    blas.RowMajor,
+		Name: "M_gt_N_Inc1_NoTrans",
 		tA:   blas.NoTrans,
 		m:    5,
 		n:    3,
@@ -48,14 +44,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{1, 1, 2},
 			{9, 2, 5},
 		},
-		incX:   1,
-		incY:   1,
-		x:      []float64{1, 2, 3},
-		y:      []float64{7, 8, 9, 10, 11},
-		lda:    3,
-		Panics: false,
+		incX: 1,
+		incY: 1,
+		x:    []float64{1, 2, 3},
+		y:    []float64{7, 8, 9, 10, 11},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 0,
 				beta:  0,
@@ -79,8 +73,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_gt_N_Inc1_RowMajor_Trans",
-		o:    blas.RowMajor,
+		Name: "M_gt_N_Inc1_Trans",
 		tA:   blas.Trans,
 		m:    5,
 		n:    3,
@@ -91,14 +84,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{1, 1, 2},
 			{9, 2, 5},
 		},
-		incX:   1,
-		incY:   1,
-		x:      []float64{1, 2, 3, -4, 5},
-		y:      []float64{7, 8, 9},
-		lda:    3,
-		Panics: false,
+		incX: 1,
+		incY: 1,
+		x:    []float64{1, 2, 3, -4, 5},
+		y:    []float64{7, 8, 9},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 0,
 				beta:  0,
@@ -122,8 +113,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_eq_N_Inc1_RowMajor_NoTrans",
-		o:    blas.RowMajor,
+		Name: "M_eq_N_Inc1_NoTrans",
 		tA:   blas.NoTrans,
 		m:    3,
 		n:    3,
@@ -132,14 +122,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1},
 			{10, 7, 3},
 		},
-		incX:   1,
-		incY:   1,
-		x:      []float64{1, 2, 3},
-		y:      []float64{7, 2, 2},
-		lda:    3,
-		Panics: false,
+		incX: 1,
+		incY: 1,
+		x:    []float64{1, 2, 3},
+		y:    []float64{7, 2, 2},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 0,
 				beta:  0,
@@ -163,8 +151,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_eq_N_Inc1_RowMajor_Trans",
-		o:    blas.RowMajor,
+		Name: "M_eq_N_Inc1_Trans",
 		tA:   blas.Trans,
 		m:    3,
 		n:    3,
@@ -173,14 +160,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1},
 			{10, 7, 3},
 		},
-		incX:   1,
-		incY:   1,
-		x:      []float64{1, 2, 3},
-		y:      []float64{7, 2, 2},
-		lda:    3,
-		Panics: false,
+		incX: 1,
+		incY: 1,
+		x:    []float64{1, 2, 3},
+		y:    []float64{7, 2, 2},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -189,8 +174,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_lt_N_Inc1_RowMajor_NoTrans",
-		o:    blas.RowMajor,
+		Name: "M_lt_N_Inc1_NoTrans",
 		tA:   blas.NoTrans,
 		m:    3,
 		n:    5,
@@ -199,14 +183,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1, -2, 9},
 			{10, 7, 3, 1, -5},
 		},
-		incX:   1,
-		incY:   1,
-		x:      []float64{1, 2, 3, -7.6, 8.1},
-		y:      []float64{7, 2, 2},
-		lda:    5,
-		Panics: false,
+		incX: 1,
+		incY: 1,
+		x:    []float64{1, 2, 3, -7.6, 8.1},
+		y:    []float64{7, 2, 2},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 0,
 				beta:  0,
@@ -231,8 +213,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_lt_N_Inc1_RowMajor_Trans",
-		o:    blas.RowMajor,
+		Name: "M_lt_N_Inc1_Trans",
 		tA:   blas.Trans,
 		m:    3,
 		n:    5,
@@ -241,14 +222,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1, -2, 9},
 			{10, 7, 3, 1, -5},
 		},
-		incX:   1,
-		incY:   1,
-		x:      []float64{1, 2, 3},
-		y:      []float64{7, 2, 2, -3, 5},
-		lda:    5,
-		Panics: false,
+		incX: 1,
+		incY: 1,
+		x:    []float64{1, 2, 3},
+		y:    []float64{7, 2, 2, -3, 5},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -257,8 +236,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_gt_N_IncNot1_RowMajor_NoTrans",
-		o:    blas.RowMajor,
+		Name: "M_gt_N_IncNot1_NoTrans",
 		tA:   blas.NoTrans,
 		m:    5,
 		n:    3,
@@ -270,13 +248,11 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{1, 1, 2},
 			{9, 2, 5},
 		},
-		incX:   2,
-		incY:   3,
-		x:      []float64{1, 15, 2, 150, 3},
-		y:      []float64{7, 2, 6, 8, -4, -5, 9, 1, 1, 10, 19, 22, 11},
-		lda:    3,
-		Panics: false,
-		DgemvCases: []DgemvCase{
+		incX: 2,
+		incY: 3,
+		x:    []float64{1, 15, 2, 150, 3},
+		y:    []float64{7, 2, 6, 8, -4, -5, 9, 1, 1, 10, 19, 22, 11},
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -285,8 +261,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_gt_N_IncNot1_RowMajor_Trans",
-		o:    blas.RowMajor,
+		Name: "M_gt_N_IncNot1_Trans",
 		tA:   blas.Trans,
 		m:    5,
 		n:    3,
@@ -298,13 +273,11 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{1, 1, 2},
 			{9, 2, 5},
 		},
-		incX:   2,
-		incY:   3,
-		x:      []float64{1, 15, 2, 150, 3, 8, -3, 6, 5},
-		y:      []float64{7, 2, 6, 8, -4, -5, 9},
-		lda:    3,
-		Panics: false,
-		DgemvCases: []DgemvCase{
+		incX: 2,
+		incY: 3,
+		x:    []float64{1, 15, 2, 150, 3, 8, -3, 6, 5},
+		y:    []float64{7, 2, 6, 8, -4, -5, 9},
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -313,8 +286,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_eq_N_IncNot1_RowMajor_NoTrans",
-		o:    blas.RowMajor,
+		Name: "M_eq_N_IncNot1_NoTrans",
 		tA:   blas.NoTrans,
 		m:    3,
 		n:    3,
@@ -323,14 +295,11 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1},
 			{10, 7, 3},
 		},
-		incX:   2,
-		incY:   3,
-		x:      []float64{1, 15, 2, 150, 3},
-		y:      []float64{7, 2, 6, 8, -4, -5, 9},
-		lda:    3,
-		Panics: false,
-
-		DgemvCases: []DgemvCase{
+		incX: 2,
+		incY: 3,
+		x:    []float64{1, 15, 2, 150, 3},
+		y:    []float64{7, 2, 6, 8, -4, -5, 9},
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -339,8 +308,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_eq_N_IncNot1_RowMajor_Trans",
-		o:    blas.RowMajor,
+		Name: "M_eq_N_IncNot1_Trans",
 		tA:   blas.Trans,
 		m:    3,
 		n:    3,
@@ -349,14 +317,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1},
 			{10, 7, 3},
 		},
-		incX:   2,
-		incY:   3,
-		x:      []float64{1, 15, 2, 150, 3},
-		y:      []float64{7, 2, 6, 8, -4, -5, 9},
-		lda:    3,
-		Panics: false,
+		incX: 2,
+		incY: 3,
+		x:    []float64{1, 15, 2, 150, 3},
+		y:    []float64{7, 2, 6, 8, -4, -5, 9},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -365,8 +331,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_lt_N_IncNot1_RowMajor_NoTrans",
-		o:    blas.RowMajor,
+		Name: "M_lt_N_IncNot1_NoTrans",
 		tA:   blas.NoTrans,
 		m:    3,
 		n:    5,
@@ -375,14 +340,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1, -3, -2},
 			{10, 7, 3, -7, -4},
 		},
-		incX:   2,
-		incY:   3,
-		x:      []float64{1, 15, 2, 150, 3, -2, -4, 8, -9},
-		y:      []float64{7, 2, 6, 8, -4, -5, 9},
-		lda:    5,
-		Panics: false,
+		incX: 2,
+		incY: 3,
+		x:    []float64{1, 15, 2, 150, 3, -2, -4, 8, -9},
+		y:    []float64{7, 2, 6, 8, -4, -5, 9},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -391,8 +354,7 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 		},
 	},
 	{
-		Name: "M_lt_N_IncNot1_RowMajor_Trans",
-		o:    blas.RowMajor,
+		Name: "M_lt_N_IncNot1_Trans",
 		tA:   blas.Trans,
 		m:    3,
 		n:    5,
@@ -401,14 +363,12 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 			{9.6, 3.5, 9.1, -3, -2},
 			{10, 7, 3, -7, -4},
 		},
-		incX:   2,
-		incY:   3,
-		x:      []float64{1, 15, 2, 150, 3},
-		y:      []float64{7, 2, 6, 8, -4, -5, 9, -4, -1, -9, 1, 1, 2},
-		lda:    5,
-		Panics: false,
+		incX: 2,
+		incY: 3,
+		x:    []float64{1, 15, 2, 150, 3},
+		y:    []float64{7, 2, 6, 8, -4, -5, 9, -4, -1, -9, 1, 1, 2},
 
-		DgemvCases: []DgemvCase{
+		Subcases: []DgemvSubcase{
 			{
 				alpha: 8,
 				beta:  -6,
@@ -419,8 +379,6 @@ var DoubleMatTwoVecCases []DoubleMatTwoVecCase = []DoubleMatTwoVecCase{
 
 	// TODO: A can be longer than mxn. Add cases where it is longer
 	// TODO: x and y can also be longer. Add tests for these
-	// TODO: Add column major
-	// TODO: Add tests for all the bad inputs
 	// TODO: Add tests for dimension mismatch
 	// TODO: Add negative increments
 	// TODO: Add places with a "submatrix view", where lda != m
@@ -472,37 +430,116 @@ type Dgemver interface {
 }
 
 func DgemvTest(t *testing.T, blasser Dgemver) {
-	for _, test := range DoubleMatTwoVecCases {
-		for i, cas := range test.DgemvCases {
-			x := sliceCopy(test.x)
-			y := sliceCopy(test.y)
-			a := sliceOfSliceCopy(test.A)
-			aFlat := flatten(a, test.o)
-			f := func() {
-				blasser.Dgemv(test.o, test.tA, test.m, test.n, cas.alpha, aFlat, test.lda, x, test.incX, cas.beta, y, test.incY)
-			}
-			if panics(f) {
-				if !test.Panics {
-					t.Errorf("Test %v case %v unexpected panic", test.Name, i)
-					if throwPanic {
-						blasser.Dgemv(test.o, test.tA, test.m, test.n, cas.alpha, aFlat, test.lda, x, test.incX, cas.beta, y, test.incY)
-					}
-				}
-				continue
-			}
-			// Check that x and a are unchanged
-			if !dSliceEqual(x, test.x) {
-				t.Errorf("Test %v, case %v x modified during call", test.Name, i)
-			}
-			aFlat2 := flatten(sliceOfSliceCopy(test.A), test.o)
-			if !dSliceEqual(aFlat2, aFlat) {
-				t.Errorf("Test %v, case %v a modified during call", test.Name, i)
-			}
+	for _, test := range DgemvCases {
+		for i, cas := range test.Subcases {
+			// Test that it passes with row-major
+			dgemvcomp(t, blas.RowMajor, test, cas, i, blasser)
 
-			// Check that the answer matches
-			if !dSliceTolEqual(cas.ans, y) {
-				t.Errorf("Test %v, case %v answer mismatch: Expected %v, Found %v", test.Name, i, cas.ans, y)
-			}
+			// Test that it passes with col-major
+			dgemvcomp(t, blas.ColMajor, test, cas, i, blasser)
+
+			// Test the bad inputs
+			dgemvbad(t, test, cas, i, blasser)
 		}
+	}
+}
+
+func dgemvcomp(t *testing.T, o blas.Order, test DgemvCase, cas DgemvSubcase, i int, blasser Dgemver) {
+	x := sliceCopy(test.x)
+	y := sliceCopy(test.y)
+	a := sliceOfSliceCopy(test.A)
+	aFlat := flatten(a, o)
+
+	var lda int
+	if o == blas.RowMajor {
+		lda = test.n
+	} else if o == blas.ColMajor {
+		lda = test.m
+	} else {
+		panic("bad order")
+	}
+
+	f := func() {
+		blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, test.incX, cas.beta, y, test.incY)
+	}
+	if panics(f) {
+		t.Errorf("Test %v case %v order %v unexpected panic", test.Name, i, o)
+		if throwPanic {
+			blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, test.incX, cas.beta, y, test.incY)
+		}
+
+		return
+	}
+	// Check that x and a are unchanged
+	if !dSliceEqual(x, test.x) {
+		t.Errorf("Test %v, case %v order %v: x modified during call", test.Name, i, o)
+	}
+	aFlat2 := flatten(sliceOfSliceCopy(test.A), o)
+	if !dSliceEqual(aFlat2, aFlat) {
+		t.Errorf("Test %v, case %v order %v: a modified during call", test.Name, i, o)
+	}
+
+	// Check that the answer matches
+	if !dSliceTolEqual(cas.ans, y) {
+		t.Errorf("Test %v, case %v order %v: answer mismatch: Expected %v, Found %v", test.Name, i, o, cas.ans, y)
+	}
+}
+
+func dgemvbad(t *testing.T, test DgemvCase, cas DgemvSubcase, i int, blasser Dgemver) {
+	x := sliceCopy(test.x)
+	y := sliceCopy(test.y)
+	a := sliceOfSliceCopy(test.A)
+	aFlatRow := flatten(a, blas.RowMajor)
+	ldaRow := test.n
+	aFlatCol := flatten(a, blas.ColMajor)
+	ldaCol := test.m
+	// Test that panics on bad order
+	f := func() {
+		blasser.Dgemv(312, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for bad order", test.Name, i)
+	}
+	f = func() {
+		blasser.Dgemv(blas.RowMajor, 312, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for bad transpose", test.Name, i)
+	}
+	f = func() {
+		blasser.Dgemv(blas.RowMajor, test.tA, -2, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for m negative", test.Name, i)
+	}
+	f = func() {
+		blasser.Dgemv(blas.RowMajor, test.tA, test.m, -4, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for n negative", test.Name, i)
+	}
+	f = func() {
+		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, 0, cas.beta, y, test.incY)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for incX zero", test.Name, i)
+	}
+	f = func() {
+		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, 0)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for incY zero", test.Name, i)
+	}
+	f = func() {
+		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow+3, x, test.incX, cas.beta, y, test.incY)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for lda too large row", test.Name, i)
+	}
+	f = func() {
+		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatCol, ldaCol+3, x, test.incX, cas.beta, y, test.incY)
+	}
+	if !panics(f) {
+		t.Errorf("Test %v case %v: no panic for lda too large col", test.Name, i)
 	}
 }

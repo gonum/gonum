@@ -10,7 +10,7 @@ import (
 )
 
 func dTolEqual(a, b float64) bool {
-	m := math.Max(a, b)
+	m := math.Max(math.Abs(a), math.Abs(b))
 	if m > 1 {
 		a /= m
 		b /= m

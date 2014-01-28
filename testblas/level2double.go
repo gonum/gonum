@@ -496,7 +496,6 @@ var DgemvCases []DgemvCase = []DgemvCase{
 	// TODO: A can be longer than mxn. Add cases where it is longer
 	// TODO: x and y can also be longer. Add tests for these
 	// TODO: Add tests for dimension mismatch
-	// TODO: Add negative increments
 	// TODO: Add places with a "submatrix view", where lda != m
 }
 

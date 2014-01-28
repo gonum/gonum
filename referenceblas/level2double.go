@@ -73,7 +73,11 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 	}
 
 	// First form y := beta * y
-	b.Dscal(lenY, beta, y, incY)
+	if incY > 0 {
+		b.Dscal(lenY, beta, y, incY)
+	} else {
+		b.Dscal(lenY, beta, y, -incY)
+	}
 
 	if alpha == 0 {
 		return

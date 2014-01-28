@@ -26,9 +26,11 @@ type DgemvCase struct {
 }
 
 type DgemvSubcase struct {
-	alpha float64
-	beta  float64
-	ans   []float64
+	mulXNeg1 bool
+	mulYNeg1 bool
+	alpha    float64
+	beta     float64
+	ans      []float64
 }
 
 var DgemvCases []DgemvCase = []DgemvCase{
@@ -258,6 +260,25 @@ var DgemvCases []DgemvCase = []DgemvCase{
 				beta:  -6,
 				ans:   []float64{284.4, 2, 6, 303.2, -4, -5, 210, 1, 1, 12, 19, 22, 158},
 			},
+			{
+				mulXNeg1: true,
+				alpha:    8,
+				beta:     -6,
+				ans:      []float64{220.4, 2, 6, 311.2, -4, -5, 322, 1, 1, -4, 19, 22, 222},
+			},
+			{
+				mulYNeg1: true,
+				alpha:    8,
+				beta:     -6,
+				ans:      []float64{182, 2, 6, 24, -4, -5, 210, 1, 1, 291.2, 19, 22, 260.4},
+			},
+			{
+				mulXNeg1: true,
+				mulYNeg1: true,
+				alpha:    8,
+				beta:     -6,
+				ans:      []float64{246, 2, 6, 8, -4, -5, 322, 1, 1, 299.2, 19, 22, 196.4},
+			},
 		},
 	},
 	{
@@ -459,15 +480,23 @@ func dgemvcomp(t *testing.T, o blas.Order, test DgemvCase, cas DgemvSubcase, i i
 		panic("bad order")
 	}
 
+	incX := test.incX
+	if cas.mulXNeg1 {
+		incX *= -1
+	}
+	incY := test.incY
+	if cas.mulYNeg1 {
+		incY *= -1
+	}
+
 	f := func() {
-		blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, test.incX, cas.beta, y, test.incY)
+		blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, incX, cas.beta, y, incY)
 	}
 	if panics(f) {
 		t.Errorf("Test %v case %v order %v unexpected panic", test.Name, i, o)
 		if throwPanic {
-			blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, test.incX, cas.beta, y, test.incY)
+			blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, incX, cas.beta, y, incY)
 		}
-
 		return
 	}
 	// Check that x and a are unchanged

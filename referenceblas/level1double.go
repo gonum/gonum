@@ -6,8 +6,9 @@
 package referenceblas
 
 import (
-	"github.com/gonum/blas"
 	"math"
+
+	"github.com/gonum/blas"
 )
 
 type Blas struct{}

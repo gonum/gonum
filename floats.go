@@ -266,7 +266,7 @@ func EqualLengths(slices ...[]float64) bool {
 // f is called n times, where n = len(s)
 func Fill(f func() float64, s []float64) {
 	for i := range s {
-		s[i] = f
+		s[i] = f()
 	}
 }
 

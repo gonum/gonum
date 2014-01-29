@@ -496,47 +496,6 @@ var DgemvCases []DgemvCase = []DgemvCase{
 	// TODO: Add places with a "submatrix view", where lda != m
 }
 
-func sliceOfSliceCopy(a [][]float64) [][]float64 {
-	n := make([][]float64, len(a))
-	for i := range a {
-		n[i] = make([]float64, len(a[i]))
-		copy(n[i], a[i])
-	}
-	return n
-}
-
-func sliceCopy(a []float64) []float64 {
-	n := make([]float64, len(a))
-	copy(n, a)
-	return n
-}
-
-func flatten(a [][]float64, o blas.Order) []float64 {
-	if len(a) == 0 {
-		return nil
-	}
-	m := len(a)
-	n := len(a[0])
-	s := make([]float64, m*n)
-	if o == blas.RowMajor {
-		for i := 0; i < m; i++ {
-			for j := 0; j < n; j++ {
-				s[i*n+j] = a[i][j]
-			}
-		}
-		return s
-	}
-	if o == blas.ColMajor {
-		for j := 0; j < n; j++ {
-			for i := 0; i < m; i++ {
-				s[j*m+i] = a[i][j]
-			}
-		}
-		return s
-	}
-	return nil
-}
-
 type Dgemver interface {
 	Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)
 }

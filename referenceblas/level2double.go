@@ -174,15 +174,15 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 		return
 	}
 
-	var jy, kx int
+	var ky, kx int
 	if incY > 0 {
-		jy = 1
+		ky = 0
 	} else {
-		jy = -(n - 1) * incY
+		ky = -(n - 1) * incY
 	}
 
 	if incY > 0 {
-		kx = 1
+		kx = 0
 	} else {
 		kx = -(m - 1) * incX
 	}
@@ -191,28 +191,36 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 	default:
 		panic("should not be here")
 	case blas.RowMajor:
-		// TODO: Switch this to looping the other way
-		for j := 0; j < n; j++ {
-			if y[jy] != 0 {
-				tmp := alpha * y[jy]
-				ix := kx
-				for i := 0; i < m; i++ {
-					a[i*lda+j] += x[ix] * tmp
-				}
+		ix := kx
+		for i := 0; i < m; i++ {
+			if x[ix] == 0 {
+				ix += incX
+				continue
 			}
-			jy += incY
+			tmp := alpha * x[ix]
+			jy := ky
+			for j := 0; j < n; j++ {
+				a[i*lda+j] += y[jy] * tmp
+				jy += incY
+			}
+			ix += incX
 		}
 	case blas.ColMajor:
+		jy := ky
 		for j := 0; j < n; j++ {
-			if y[jy] != 0 {
-				tmp := alpha * y[jy]
-				ix := kx
-				for i := 0; i < m; i++ {
-					a[j*lda+i] += x[ix] * tmp
-				}
+			if y[jy] == 0 {
+				jy += incY
+				continue
+			}
+			tmp := alpha * y[jy]
+			ix := kx
+			for i := 0; i < m; i++ {
+				a[j*lda+i] += x[ix] * tmp
+				ix += incX
 			}
 			jy += incY
 		}
+
 	}
 }
 

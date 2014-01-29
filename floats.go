@@ -262,6 +262,14 @@ func EqualLengths(slices ...[]float64) bool {
 	return true
 }
 
+// Fill loops over the elements of s and stores a value generated from f.
+// f is called n times, where n = len(s)
+func Fill(f func() float64, s []float64) {
+	for i := range s {
+		s[i] = f
+	}
+}
+
 // Find applies f to every element of s and returns the first
 // k elements for which the f returns true, or all such elements
 // if k < 0.

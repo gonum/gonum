@@ -6,17 +6,17 @@ import (
 
 type General struct {
 	Order      Order
-	Data       []float64
 	Rows, Cols int
 	Stride     int
+	Data       []float64
 }
 
 func NewGeneral(o Order, m, n int, data []float64) General {
 	var A General
 	if o == RowMajor {
-		A = General{o, data, m, n, n}
+		A = General{o, m, n, n, data}
 	} else {
-		A = General{o, data, m, n, m}
+		A = General{o, m, n, m, data}
 	}
 	must(A.Check())
 	return A
@@ -95,7 +95,7 @@ func (A General) Sub(i, j, r, c int) General {
 	if r < 0 || c < 0 {
 		panic("blas: r < 0 or c < 0")
 	}
-	return General{A.Order, A.Data[A.Index(i, j):], r, c, A.Stride}
+	return General{A.Order, r, c, A.Stride, A.Data[A.Index(i, j):]}
 }
 
 type GeneralBand struct {

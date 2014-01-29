@@ -6,17 +6,17 @@ import (
 
 type GeneralCmplx struct {
 	Order      Order
-	Data       []complex128
 	Rows, Cols int
 	Stride     int
+	Data       []complex128
 }
 
 func NewGeneralCmplx(o Order, m, n int, data []complex128) GeneralCmplx {
 	var A GeneralCmplx
 	if o == RowMajor {
-		A = GeneralCmplx{o, data, m, n, n}
+		A = GeneralCmplx{o, m, n, n, data}
 	} else {
-		A = GeneralCmplx{o, data, m, n, m}
+		A = GeneralCmplx{o, m, n, m, data}
 	}
 	must(A.Check())
 	return A
@@ -95,7 +95,7 @@ func (A GeneralCmplx) Sub(i, j, r, c int) GeneralCmplx {
 	if r < 0 || c < 0 {
 		panic("blas: r < 0 or c < 0")
 	}
-	return GeneralCmplx{A.Order, A.Data[A.Index(i, j):], r, c, A.Stride}
+	return GeneralCmplx{A.Order, r, c, A.Stride, A.Data[A.Index(i, j):]}
 }
 
 type GeneralCmplxBand struct {

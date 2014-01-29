@@ -434,7 +434,7 @@ sub processParamToChecks {
 			};
 			$var =~ /trans/ && do {
 				$var =~ s/trans([AB]?)/t$1/;
-				$scalarArgs{$var} = 1; next;
+				$scalarArgs{$var} = 1;
 				if ($func =~ m/cblas_[cz]h/) {
 					push @processed, "if $var != blas.NoTrans && $var != blas.ConjTrans { panic(\"cblas: illegal transpose\") }"; next;
 				} elsif ($func =~ m/cblas_[cz]s/) {

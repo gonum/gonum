@@ -10,7 +10,7 @@ package cblas
 /*
 #cgo CFLAGS: -g -O2
 #cgo linux LDFLAGS: -L/usr/lib/ -lcblas
-#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework Accelerate
+#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
 #include "cblas.h"
 */
 import "C"
@@ -789,6 +789,9 @@ func (Blas) Sgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float32, 
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if m < 0 {
 		panic("cblas: m < 0")
 	}
@@ -827,6 +830,9 @@ func (Blas) Sgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float32, 
 func (Blas) Sgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int, alpha float32, a []float32, lda int, x []float32, incX int, beta float32, y []float32, incY int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -876,6 +882,9 @@ func (Blas) Strmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -899,6 +908,9 @@ func (Blas) Stbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -927,6 +939,9 @@ func (Blas) Stpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -951,6 +966,9 @@ func (Blas) Strsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -974,6 +992,9 @@ func (Blas) Stbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -1002,6 +1023,9 @@ func (Blas) Stpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1022,6 +1046,9 @@ func (Blas) Stpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 func (Blas) Dgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -1061,6 +1088,9 @@ func (Blas) Dgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha float64, 
 func (Blas) Dgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -1110,6 +1140,9 @@ func (Blas) Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1133,6 +1166,9 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -1161,6 +1197,9 @@ func (Blas) Dtpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1185,6 +1224,9 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1208,6 +1250,9 @@ func (Blas) Dtbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -1236,6 +1281,9 @@ func (Blas) Dtpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1256,6 +1304,9 @@ func (Blas) Dtpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 func (Blas) Cgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex64, a []complex64, lda int, x []complex64, incX int, beta complex64, y []complex64, incY int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -1295,6 +1346,9 @@ func (Blas) Cgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex64
 func (Blas) Cgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int, alpha complex64, a []complex64, lda int, x []complex64, incX int, beta complex64, y []complex64, incY int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -1344,6 +1398,9 @@ func (Blas) Ctrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1367,6 +1424,9 @@ func (Blas) Ctbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -1395,6 +1455,9 @@ func (Blas) Ctpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1419,6 +1482,9 @@ func (Blas) Ctrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1442,6 +1508,9 @@ func (Blas) Ctbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -1470,6 +1539,9 @@ func (Blas) Ctpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1490,6 +1562,9 @@ func (Blas) Ctpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 func (Blas) Zgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -1529,6 +1604,9 @@ func (Blas) Zgemv(o blas.Order, tA blas.Transpose, m int, n int, alpha complex12
 func (Blas) Zgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -1578,6 +1656,9 @@ func (Blas) Ztrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1601,6 +1682,9 @@ func (Blas) Ztbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -1629,6 +1713,9 @@ func (Blas) Ztpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1653,6 +1740,9 @@ func (Blas) Ztrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -1676,6 +1766,9 @@ func (Blas) Ztbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -1703,6 +1796,9 @@ func (Blas) Ztpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -2643,6 +2739,12 @@ func (Blas) Sgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n i
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
+	if tB != blas.NoTrans && tB != blas.Trans && tB != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if m < 0 {
 		panic("cblas: m < 0")
 	}
@@ -2735,6 +2837,9 @@ func (Blas) Ssyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if t != blas.NoTrans && t != blas.Trans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -2767,6 +2872,9 @@ func (Blas) Ssyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if t != blas.NoTrans && t != blas.Trans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if n < 0 {
 		panic("cblas: n < 0")
@@ -2810,6 +2918,9 @@ func (Blas) Strmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -2849,6 +2960,9 @@ func (Blas) Strsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -2872,6 +2986,12 @@ func (Blas) Strsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 func (Blas) Dgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n int, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
+	if tB != blas.NoTrans && tB != blas.Trans && tB != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -2965,6 +3085,9 @@ func (Blas) Dsyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if t != blas.NoTrans && t != blas.Trans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -2997,6 +3120,9 @@ func (Blas) Dsyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if t != blas.NoTrans && t != blas.Trans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if n < 0 {
 		panic("cblas: n < 0")
@@ -3040,6 +3166,9 @@ func (Blas) Dtrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -3079,6 +3208,9 @@ func (Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -3102,6 +3234,12 @@ func (Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 func (Blas) Cgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n int, k int, alpha complex64, a []complex64, lda int, b []complex64, ldb int, beta complex64, c []complex64, ldc int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
+	if tB != blas.NoTrans && tB != blas.Trans && tB != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -3195,6 +3333,9 @@ func (Blas) Csyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if t != blas.NoTrans && t != blas.Trans {
+		panic("cblas: illegal transpose")
+	}
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -3227,6 +3368,9 @@ func (Blas) Csyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if t != blas.NoTrans && t != blas.Trans {
+		panic("cblas: illegal transpose")
 	}
 	if n < 0 {
 		panic("cblas: n < 0")
@@ -3270,6 +3414,9 @@ func (Blas) Ctrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -3309,6 +3456,9 @@ func (Blas) Ctrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -3332,6 +3482,12 @@ func (Blas) Ctrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 func (Blas) Zgemm(o blas.Order, tA blas.Transpose, tB blas.Transpose, m int, n int, k int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic("cblas: illegal order")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
+	if tB != blas.NoTrans && tB != blas.Trans && tB != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if m < 0 {
 		panic("cblas: m < 0")
@@ -3425,6 +3581,9 @@ func (Blas) Zsyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if t != blas.NoTrans && t != blas.Trans {
+		panic("cblas: illegal transpose")
+	}
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -3457,6 +3616,9 @@ func (Blas) Zsyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if t != blas.NoTrans && t != blas.Trans {
+		panic("cblas: illegal transpose")
 	}
 	if n < 0 {
 		panic("cblas: n < 0")
@@ -3500,6 +3662,9 @@ func (Blas) Ztrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
 	}
@@ -3538,6 +3703,9 @@ func (Blas) Ztrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if d != blas.NonUnit && d != blas.Unit {
 		panic("cblas: illegal diagonal")
@@ -3608,6 +3776,9 @@ func (Blas) Cherk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if t != blas.NoTrans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -3640,6 +3811,9 @@ func (Blas) Cher2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if t != blas.NoTrans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if n < 0 {
 		panic("cblas: n < 0")
@@ -3722,6 +3896,9 @@ func (Blas) Zherk(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, al
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
 	}
+	if t != blas.NoTrans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
+	}
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
@@ -3754,6 +3931,9 @@ func (Blas) Zher2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n int, k int, a
 	}
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("cblas: illegal triangle")
+	}
+	if t != blas.NoTrans && t != blas.ConjTrans {
+		panic("cblas: illegal transpose")
 	}
 	if n < 0 {
 		panic("cblas: n < 0")

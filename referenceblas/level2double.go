@@ -14,8 +14,16 @@ const (
 	badUplo      string = "referenceblas: illegal triangularization"
 	badTranspose string = "referenceblas: illegal transpose"
 	badDiag      string = "referenceblas: illegal diag"
-	badLda       string = "lda must be lass than max(1,n)"
+	badLdaRow    string = "lda must be greater than max(1,n) for row major"
+	badLdaCol    string = "lda must be greater than max(1,m) for col major"
 )
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
 
 // Dgemv computes y = alpha*a*x + beta*y if tA = blas.NoTrans
 // or alpha*A^T*x + beta*y if tA = blas.Trans or blas.ConjTrans
@@ -32,13 +40,13 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 	if n < 0 {
 		panic(nLT0)
 	}
-	if o == blas.ColMajor {
-		if lda > m && lda > 1 {
-			panic("blas: lda must be less than max(1,m) for row major")
+	if o == blas.RowMajor {
+		if lda < max(1, n) {
+			panic(badLdaRow)
 		}
 	} else {
-		if lda > n && lda > 0 {
-			panic("blas: lda must be less than max(1,n) for col major")
+		if lda < max(1, m) {
+			panic(badLdaCol)
 		}
 	}
 	if incX == 0 {
@@ -161,12 +169,12 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 		panic(zeroInc)
 	}
 	if o == blas.RowMajor {
-		if lda > 1 && lda > n {
-			panic(badLda)
+		if lda < max(1, n) {
+			panic(badLdaRow)
 		}
 	} else {
-		if lda > 1 && lda > m {
-			panic(badLda)
+		if lda < max(1, m) {
+			panic(badLdaCol)
 		}
 	}
 	// Quick return if possible
@@ -224,6 +232,7 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 	}
 }
 
+/*
 // DTRMV  performs one of the matrix-vector operations
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
@@ -435,6 +444,7 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 }
 
+
 // Dsymv  performs the matrix-vector  operation
 //    y := alpha*A*x + beta*y,
 // where alpha and beta are scalars, x and y are n element vectors and
@@ -532,7 +542,7 @@ func (b Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float6
 		}
 	}
 }
-
+*/
 /*
 // Level 2 routines.
         Dgbmv(o Order, tA Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)

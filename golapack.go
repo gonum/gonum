@@ -1,4 +1,0 @@
-package golapack
-
-func Dgeqrf() {
-}

@@ -6,9 +6,6 @@ import (
 	"github.com/gonum/blas"
 )
 
-// throwPanic will throw unexpected panics if true, or will just report them as errors if false
-const throwPanic = true
-
 type DgemvCase struct {
 	Name  string
 	m     int

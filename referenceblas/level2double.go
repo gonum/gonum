@@ -139,6 +139,83 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 	}
 }
 
+// Dger   performs the rank 1 operation
+//    A := alpha*x*y**T + A,
+// where alpha is a scalar, x is an m element vector, y is an n element
+// vector and A is an m by n matrix.
+func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+	// Check inputs
+	if o != blas.RowMajor && o != blas.ColMajor {
+		panic(badOrder)
+	}
+	if m < 0 {
+		panic("m < 0")
+	}
+	if n < 0 {
+		panic(negativeN)
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if incY == 0 {
+		panic(zeroInc)
+	}
+	if o == blas.RowMajor {
+		if lda > 1 && lda > n {
+			panic(badLda)
+		}
+	} else {
+		if lda > 1 && lda > m {
+			panic(badLda)
+		}
+	}
+	// Quick return if possible
+	if m == 0 || n == 0 || alpha == 0 {
+		return
+	}
+
+	var jy, kx int
+	if incY > 0 {
+		jy = 1
+	} else {
+		jy = -(n - 1) * incY
+	}
+
+	if incY > 0 {
+		kx = 1
+	} else {
+		kx = -(m - 1) * incX
+	}
+
+	switch o {
+	default:
+		panic("should not be here")
+	case blas.RowMajor:
+		// TODO: Switch this to looping the other way
+		for j := 0; j < n; j++ {
+			if y[jy] != 0 {
+				tmp := alpha * y[jy]
+				ix := kx
+				for i := 0; i < m; i++ {
+					a[i*lda+j] += x[ix] * tmp
+				}
+			}
+			jy += incY
+		}
+	case blas.ColMajor:
+		for j := 0; j < n; j++ {
+			if y[jy] != 0 {
+				tmp := alpha * y[jy]
+				ix := kx
+				for i := 0; i < m; i++ {
+					a[j*lda+i] += x[ix] * tmp
+				}
+			}
+			jy += incY
+		}
+	}
+}
+
 // DTRMV  performs one of the matrix-vector operations
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
@@ -443,83 +520,6 @@ func (b Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float6
 			}
 			y[jy] += alpha * tmp2
 			jx += incX
-			jy += incY
-		}
-	}
-}
-
-// Dger   performs the rank 1 operation
-//    A := alpha*x*y**T + A,
-// where alpha is a scalar, x is an m element vector, y is an n element
-// vector and A is an m by n matrix.
-func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
-	// Check inputs
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
-	}
-	if m < 0 {
-		panic("m < 0")
-	}
-	if n < 0 {
-		panic(negativeN)
-	}
-	if incX == 0 {
-		panic(zeroInc)
-	}
-	if incY == 0 {
-		panic(zeroInc)
-	}
-	if o == blas.RowMajor {
-		if lda > 1 && lda > n {
-			panic(badLda)
-		}
-	} else {
-		if lda > 1 && lda > m {
-			panic(badLda)
-		}
-	}
-	// Quick return if possible
-	if m == 0 || n == 0 || alpha == 0 {
-		return
-	}
-
-	var jy, kx int
-	if incY > 0 {
-		jy = 1
-	} else {
-		jy = -(n - 1) * incY
-	}
-
-	if incY > 0 {
-		kx = 1
-	} else {
-		kx = -(m - 1) * incX
-	}
-
-	switch o {
-	default:
-		panic("should not be here")
-	case blas.RowMajor:
-		// TODO: Switch this to looping the other way
-		for j := 0; j < n; j++ {
-			if y[jy] != 0 {
-				tmp := alpha * y[jy]
-				ix := kx
-				for i := 0; i < m; i++ {
-					a[i*lda+j] += x[ix] * tmp
-				}
-			}
-			jy += incY
-		}
-	case blas.ColMajor:
-		for j := 0; j < n; j++ {
-			if y[jy] != 0 {
-				tmp := alpha * y[jy]
-				ix := kx
-				for i := 0; i < m; i++ {
-					a[j*lda+i] += x[ix] * tmp
-				}
-			}
 			jy += incY
 		}
 	}

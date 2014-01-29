@@ -1,8 +1,6 @@
 package blas
 
 func Dgemv(tA Transpose, alpha float64, A General, x Vector, beta float64, y Vector) {
-	must(A.Check())
-	must(x.Check())
 	if tA == NoTrans {
 		if x.N != A.Cols {
 			panic("blas: dimension mismatch")

@@ -1,8 +1,6 @@
 package blas
 
 func Zgemv(tA Transpose, alpha complex128, A GeneralCmplx, x VectorCmplx, beta complex128, y VectorCmplx) {
-	must(A.Check())
-	must(x.Check())
 	if tA == NoTrans {
 		if x.N != A.Cols {
 			panic("blas: dimension mismatch")

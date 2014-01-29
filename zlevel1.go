@@ -1,8 +1,6 @@
 package blas
 
 func Zdotu(x, y VectorCmplx) complex128 {
-	must(x.Check())
-	must(y.Check())
 	if x.N != y.N {
 		panic("blas: dimension mismatch")
 	}
@@ -10,8 +8,6 @@ func Zdotu(x, y VectorCmplx) complex128 {
 }
 
 func Zdotc(x, y VectorCmplx) complex128 {
-	must(x.Check())
-	must(y.Check())
 	if x.N != y.N {
 		panic("blas: dimension mismatch")
 	}
@@ -19,23 +15,18 @@ func Zdotc(x, y VectorCmplx) complex128 {
 }
 
 func Znrm2(x VectorCmplx) float64 {
-	must(x.Check())
 	return implCmplx.Dznrm2(x.N, x.Data, x.Inc)
 }
 
 func Dzasum(x VectorCmplx) float64 {
-	must(x.Check())
 	return implCmplx.Dzasum(x.N, x.Data, x.Inc)
 }
 
 func Izmax(x VectorCmplx) int {
-	must(x.Check())
 	return implCmplx.Izamax(x.N, x.Data, x.Inc)
 }
 
 func Zswap(x, y VectorCmplx) {
-	must(x.Check())
-	must(y.Check())
 	if x.N != y.N {
 		panic("blas: dimension mismatch")
 	}
@@ -43,8 +34,6 @@ func Zswap(x, y VectorCmplx) {
 }
 
 func Zcopy(x, y VectorCmplx) {
-	must(x.Check())
-	must(y.Check())
 	if x.N != y.N {
 		panic("blas: dimension mismatch")
 	}
@@ -52,8 +41,6 @@ func Zcopy(x, y VectorCmplx) {
 }
 
 func Zaxpy(alpha complex128, x, y VectorCmplx) {
-	must(x.Check())
-	must(y.Check())
 	if x.N != y.N {
 		panic("blas: dimension mismatch")
 	}
@@ -61,11 +48,9 @@ func Zaxpy(alpha complex128, x, y VectorCmplx) {
 }
 
 func Zscal(alpha complex128, x VectorCmplx) {
-	must(x.Check())
 	implCmplx.Zscal(x.N, alpha, x.Data, x.Inc)
 }
 
 func Zdscal(alpha float64, x VectorCmplx) {
-	must(x.Check())
 	implCmplx.Zdscal(x.N, alpha, x.Data, x.Inc)
 }

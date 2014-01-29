@@ -616,7 +616,7 @@ func dgemvbad(t *testing.T, test DgemvCase, cas DgemvSubcase, i int, blasser Dge
 		t.Errorf("Test %v case %v: no panic for lda too small row major", test.Name, i)
 	}
 	f = func() {
-		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatCol, ldaCol-1, x, test.incX, cas.beta, y, test.incY)
+		blasser.Dgemv(blas.ColMajor, test.tA, test.m, test.n, cas.alpha, aFlatCol, ldaCol-1, x, test.incX, cas.beta, y, test.incY)
 	}
 	if !panics(f) {
 		t.Errorf("Test %v case %v: no panic for lda too small col major", test.Name, i)

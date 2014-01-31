@@ -43,6 +43,7 @@ func NewGonumGraph(directed bool) *GonumGraph {
 	return &GonumGraph{
 		successors:   make(map[int]map[int]float64),
 		predecessors: make(map[int]map[int]float64),
+		nodeMap:      make(map[int]gr.Node),
 		directed:     directed,
 	}
 }
@@ -51,6 +52,7 @@ func NewPreAllocatedGonumGraph(directed bool, numVertices int) *GonumGraph {
 	return &GonumGraph{
 		successors:   make(map[int]map[int]float64, numVertices),
 		predecessors: make(map[int]map[int]float64, numVertices),
+		nodeMap:      make(map[int]gr.Node, numVertices),
 		directed:     directed,
 	}
 }

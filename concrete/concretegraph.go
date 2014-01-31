@@ -43,6 +43,7 @@ func NewGonumGraph(directed bool) *GonumGraph {
 	return &GonumGraph{
 		successors:   make(map[int]map[int]float64),
 		predecessors: make(map[int]map[int]float64),
+		nodeMap:      make(map[int]gr.Node),
 		directed:     directed,
 	}
 }
@@ -51,6 +52,7 @@ func NewPreAllocatedGonumGraph(directed bool, numVertices int) *GonumGraph {
 	return &GonumGraph{
 		successors:   make(map[int]map[int]float64, numVertices),
 		predecessors: make(map[int]map[int]float64, numVertices),
+		nodeMap:      make(map[int]gr.Node, numVertices),
 		directed:     directed,
 	}
 }
@@ -156,7 +158,7 @@ func (graph *GonumGraph) SetEdgeCost(e gr.Edge, cost float64) {
 
 func (graph *GonumGraph) RemoveNode(node gr.Node) {
 	id := node.ID()
-	if _, ok := graph.successors[id]; ok {
+	if _, ok := graph.successors[id]; !ok {
 		return
 	}
 	delete(graph.nodeMap, id)
@@ -214,7 +216,7 @@ func (graph *GonumGraph) Successors(node gr.Node) []gr.Node {
 		return nil
 	}
 
-	successors := make([]gr.Node, len(graph.successors[id]))
+	successors := make([]gr.Node, 0, len(graph.successors[id]))
 	for succ, _ := range graph.successors[id] {
 		successors = append(successors, graph.nodeMap[succ])
 	}
@@ -240,7 +242,7 @@ func (graph *GonumGraph) Predecessors(node gr.Node) []gr.Node {
 		return nil
 	}
 
-	predecessors := make([]gr.Node, len(graph.predecessors[id]))
+	predecessors := make([]gr.Node, 0, len(graph.predecessors[id]))
 	for pred, _ := range graph.predecessors[id] {
 		predecessors = append(predecessors, graph.nodeMap[pred])
 	}

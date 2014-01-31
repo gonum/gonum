@@ -1,8 +1,8 @@
 package referenceblas
 
 import (
-	"testing"
 	"github.com/gonum/blas/testblas"
+	"testing"
 )
 
 func TestDgemv(t *testing.T) {

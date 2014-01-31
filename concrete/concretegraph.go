@@ -158,7 +158,7 @@ func (graph *GonumGraph) SetEdgeCost(e gr.Edge, cost float64) {
 
 func (graph *GonumGraph) RemoveNode(node gr.Node) {
 	id := node.ID()
-	if _, ok := graph.successors[id]; ok {
+	if _, ok := graph.successors[id]; !ok {
 		return
 	}
 	delete(graph.nodeMap, id)

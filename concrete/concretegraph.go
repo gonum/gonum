@@ -216,7 +216,7 @@ func (graph *GonumGraph) Successors(node gr.Node) []gr.Node {
 		return nil
 	}
 
-	successors := make([]gr.Node, len(graph.successors[id]))
+	successors := make([]gr.Node, 0, len(graph.successors[id]))
 	for succ, _ := range graph.successors[id] {
 		successors = append(successors, graph.nodeMap[succ])
 	}
@@ -242,7 +242,7 @@ func (graph *GonumGraph) Predecessors(node gr.Node) []gr.Node {
 		return nil
 	}
 
-	predecessors := make([]gr.Node, len(graph.predecessors[id]))
+	predecessors := make([]gr.Node, 0, len(graph.predecessors[id]))
 	for pred, _ := range graph.predecessors[id] {
 		predecessors = append(predecessors, graph.nodeMap[pred])
 	}

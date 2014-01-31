@@ -1,8 +1,30 @@
-package graph
+package concrete
 
 import (
 	"sort"
+
+	gr "github.com/gonum/graph"
 )
+
+// A simple int alias.
+type GonumNode int
+
+func (node GonumNode) ID() int {
+	return int(node)
+}
+
+// Just a collection of two nodes
+type GonumEdge struct {
+	H, T gr.Node
+}
+
+func (edge GonumEdge) Head() gr.Node {
+	return edge.H
+}
+
+func (edge GonumEdge) Tail() gr.Node {
+	return edge.T
+}
 
 // A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and edges -- as well as act as either directed or undirected.
 //
@@ -13,7 +35,7 @@ import (
 type GonumGraph struct {
 	successors   map[int]map[int]float64
 	predecessors map[int]map[int]float64
-	nodeMap      map[int]Node
+	nodeMap      map[int]gr.Node
 	directed     bool
 }
 
@@ -35,7 +57,7 @@ func NewPreAllocatedGonumGraph(directed bool, numVertices int) *GonumGraph {
 
 /* Mutable Graph implementation */
 
-func (graph *GonumGraph) NewNode(successors []Node) (node Node) {
+func (graph *GonumGraph) NewNode(successors []gr.Node) (node gr.Node) {
 	nodeList := graph.NodeList()
 	ids := make([]int, len(nodeList))
 	for i, node := range nodeList {
@@ -56,7 +78,7 @@ func (graph *GonumGraph) NewNode(successors []Node) (node Node) {
 	return GonumNode(newID)
 }
 
-func (graph *GonumGraph) AddNode(node Node, successors []Node) {
+func (graph *GonumGraph) AddNode(node gr.Node, successors []gr.Node) {
 	id := node.ID()
 	if _, ok := graph.successors[id]; ok {
 		return
@@ -91,7 +113,7 @@ func (graph *GonumGraph) AddNode(node Node, successors []Node) {
 	}
 }
 
-func (graph *GonumGraph) AddEdge(e Edge) {
+func (graph *GonumGraph) AddEdge(e gr.Edge) {
 	id := e.Head().ID()
 	successor := e.Tail().ID()
 	if _, ok := graph.successors[id]; !ok {
@@ -113,7 +135,7 @@ func (graph *GonumGraph) AddEdge(e Edge) {
 	}
 }
 
-func (graph *GonumGraph) SetEdgeCost(e Edge, cost float64) {
+func (graph *GonumGraph) SetEdgeCost(e gr.Edge, cost float64) {
 	id := e.Head().ID()
 	successor := e.Tail().ID()
 	// Normally I'd use graph.vertices.Contains(id) as above, but this is equivalent and a bit easier to read here
@@ -132,7 +154,7 @@ func (graph *GonumGraph) SetEdgeCost(e Edge, cost float64) {
 	}
 }
 
-func (graph *GonumGraph) RemoveNode(node Node) {
+func (graph *GonumGraph) RemoveNode(node gr.Node) {
 	id := node.ID()
 	if _, ok := graph.successors[id]; ok {
 		return
@@ -151,7 +173,7 @@ func (graph *GonumGraph) RemoveNode(node Node) {
 
 }
 
-func (graph *GonumGraph) RemoveEdge(e Edge) {
+func (graph *GonumGraph) RemoveEdge(e gr.Edge) {
 	id := e.Head().ID()
 	succ := e.Tail().ID()
 	if _, ok := graph.successors[id]; !ok {
@@ -174,7 +196,7 @@ func (graph *GonumGraph) EmptyGraph() {
 	}
 	graph.successors = make(map[int]map[int]float64)
 	graph.predecessors = make(map[int]map[int]float64)
-	graph.nodeMap = make(map[int]Node)
+	graph.nodeMap = make(map[int]gr.Node)
 }
 
 func (graph *GonumGraph) SetDirected(directed bool) {
@@ -186,13 +208,13 @@ func (graph *GonumGraph) SetDirected(directed bool) {
 
 /* Graph implementation */
 
-func (graph *GonumGraph) Successors(node Node) []Node {
+func (graph *GonumGraph) Successors(node gr.Node) []gr.Node {
 	id := node.ID()
 	if _, ok := graph.successors[id]; !ok {
 		return nil
 	}
 
-	successors := make([]Node, len(graph.successors[id]))
+	successors := make([]gr.Node, len(graph.successors[id]))
 	for succ, _ := range graph.successors[id] {
 		successors = append(successors, graph.nodeMap[succ])
 	}
@@ -200,7 +222,7 @@ func (graph *GonumGraph) Successors(node Node) []Node {
 	return successors
 }
 
-func (graph *GonumGraph) IsSuccessor(node, successor Node) bool {
+func (graph *GonumGraph) IsSuccessor(node, successor gr.Node) bool {
 	succ := successor.ID()
 	id := node.ID()
 	if _, ok := graph.successors[id]; !ok {
@@ -212,13 +234,13 @@ func (graph *GonumGraph) IsSuccessor(node, successor Node) bool {
 	return ok
 }
 
-func (graph *GonumGraph) Predecessors(node Node) []Node {
+func (graph *GonumGraph) Predecessors(node gr.Node) []gr.Node {
 	id := node.ID()
 	if _, ok := graph.successors[id]; !ok {
 		return nil
 	}
 
-	predecessors := make([]Node, len(graph.predecessors[id]))
+	predecessors := make([]gr.Node, len(graph.predecessors[id]))
 	for pred, _ := range graph.predecessors[id] {
 		predecessors = append(predecessors, graph.nodeMap[pred])
 	}
@@ -226,7 +248,7 @@ func (graph *GonumGraph) Predecessors(node Node) []Node {
 	return predecessors
 }
 
-func (graph *GonumGraph) IsPredecessor(node, predecessor Node) bool {
+func (graph *GonumGraph) IsPredecessor(node, predecessor gr.Node) bool {
 	id := node.ID()
 	pred := predecessor.ID()
 	if _, ok := graph.successors[id]; !ok {
@@ -238,13 +260,13 @@ func (graph *GonumGraph) IsPredecessor(node, predecessor Node) bool {
 	return ok
 }
 
-func (graph *GonumGraph) Neighbors(node Node) []Node {
+func (graph *GonumGraph) Neighbors(node gr.Node) []gr.Node {
 	id := node.ID()
 	if _, ok := graph.successors[id]; !ok {
 		return nil
 	}
 
-	neighbors := make([]Node, 0, len(graph.predecessors[id])+len(graph.successors[id]))
+	neighbors := make([]gr.Node, 0, len(graph.predecessors[id])+len(graph.successors[id]))
 	for succ, _ := range graph.successors[id] {
 		neighbors = append(neighbors, graph.nodeMap[succ])
 	}
@@ -259,7 +281,7 @@ func (graph *GonumGraph) Neighbors(node Node) []Node {
 	return neighbors
 }
 
-func (graph *GonumGraph) IsNeighbor(node, neigh Node) bool {
+func (graph *GonumGraph) IsNeighbor(node, neigh gr.Node) bool {
 	id := node.ID()
 	neighbor := neigh.ID()
 	if _, ok := graph.successors[id]; !ok {
@@ -272,13 +294,13 @@ func (graph *GonumGraph) IsNeighbor(node, neigh Node) bool {
 	return succ || pred
 }
 
-func (graph *GonumGraph) NodeExists(node Node) bool {
+func (graph *GonumGraph) NodeExists(node gr.Node) bool {
 	_, ok := graph.successors[node.ID()]
 
 	return ok
 }
 
-func (graph *GonumGraph) Degree(node Node) int {
+func (graph *GonumGraph) Degree(node gr.Node) int {
 	id := node.ID()
 	if _, ok := graph.successors[id]; !ok {
 		return 0
@@ -287,8 +309,8 @@ func (graph *GonumGraph) Degree(node Node) int {
 	return len(graph.successors[id]) + len(graph.predecessors[id])
 }
 
-func (graph *GonumGraph) EdgeList() []Edge {
-	eList := make([]Edge, 0, len(graph.successors))
+func (graph *GonumGraph) EdgeList() []gr.Edge {
+	eList := make([]gr.Edge, 0, len(graph.successors))
 	for id, succMap := range graph.successors {
 		for succ, _ := range succMap {
 			eList = append(eList, GonumEdge{graph.nodeMap[id], graph.nodeMap[succ]})
@@ -298,8 +320,8 @@ func (graph *GonumGraph) EdgeList() []Edge {
 	return eList
 }
 
-func (graph *GonumGraph) NodeList() []Node {
-	nodes := make([]Node, 0, len(graph.successors))
+func (graph *GonumGraph) NodeList() []gr.Node {
+	nodes := make([]gr.Node, 0, len(graph.successors))
 	for _, node := range graph.nodeMap {
 		nodes = append(nodes, node)
 	}
@@ -311,6 +333,6 @@ func (graph *GonumGraph) IsDirected() bool {
 	return graph.directed
 }
 
-func (graph *GonumGraph) Cost(node, succ Node) float64 {
+func (graph *GonumGraph) Cost(node, succ gr.Node) float64 {
 	return graph.successors[node.ID()][succ.ID()]
 }

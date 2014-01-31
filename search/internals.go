@@ -1,25 +1,27 @@
-package graph
+package search
 
 import (
 	"container/heap"
+
+	gr "github.com/gonum/graph"
 )
 
 // Sets up the cost functions and successor functions so I don't have to do a type switch every time.
 // This almost always does more work than is necessary, but since it's only executed once per function, and graph functions are rather costly, the "extra work"
 // should be negligible.
-func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (successorsFunc, predecessorsFunc, neighborsFunc func(Node) []Node, isSuccessorFunc, isPredecessorFunc,
-	isNeighborFunc func(Node, Node) bool,
-	costFunc, heuristicCostFunc func(Node, Node) float64) {
+func setupFuncs(graph gr.Graph, cost, heuristicCost func(gr.Node, gr.Node) float64) (successorsFunc, predecessorsFunc, neighborsFunc func(gr.Node) []gr.Node, isSuccessorFunc, isPredecessorFunc,
+	isNeighborFunc func(gr.Node, gr.Node) bool,
+	costFunc, heuristicCostFunc func(gr.Node, gr.Node) float64) {
 
 	switch g := graph.(type) {
-	case DirectedGraph:
+	case gr.DirectedGraph:
 		successorsFunc = g.Successors
 		predecessorsFunc = g.Predecessors
 		neighborsFunc = g.Neighbors
 		isSuccessorFunc = g.IsSuccessor
 		isPredecessorFunc = g.IsPredecessor
 		isNeighborFunc = g.IsNeighbor
-	case UndirectedGraph:
+	case gr.UndirectedGraph:
 		successorsFunc = g.Neighbors
 		predecessorsFunc = g.Neighbors
 		neighborsFunc = g.Neighbors
@@ -38,7 +40,7 @@ func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (succ
 	if heuristicCost != nil {
 		heuristicCostFunc = heuristicCost
 	} else {
-		if g, ok := graph.(HeuristicCoster); ok {
+		if g, ok := graph.(gr.HeuristicCoster); ok {
 			heuristicCostFunc = g.HeuristicCost
 		} else {
 			heuristicCostFunc = NullHeuristic
@@ -48,7 +50,7 @@ func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (succ
 	if cost != nil {
 		costFunc = cost
 	} else {
-		if g, ok := graph.(Coster); ok {
+		if g, ok := graph.(gr.Coster); ok {
 			costFunc = g.Cost
 		} else {
 			costFunc = UniformCost
@@ -59,6 +61,12 @@ func setupFuncs(graph Graph, cost, heuristicCost func(Node, Node) float64) (succ
 }
 
 /* Purely internal data structures and functions (mostly for sorting) */
+
+// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge.Head(), Edge.Tail()) had been called)
+type WeightedEdge struct {
+	gr.Edge
+	Weight float64
+}
 
 /** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/
 
@@ -79,7 +87,7 @@ func (el edgeSorter) Swap(i, j int) {
 /** Keeps track of a node's scores so they can be used in a priority queue for A* **/
 
 type internalNode struct {
-	Node
+	gr.Node
 	gscore, fscore float64
 }
 
@@ -118,7 +126,7 @@ func (k1 key) Less(k2 key) bool {
 }
 
 type dStarNode struct {
-	Node
+	gr.Node
 	key
 }
 
@@ -164,14 +172,14 @@ func (pq *dStarPriorityQueue) Peek() dStarNode {
 	return pq.nodes[len(pq.nodes)-1]
 }
 
-func (pq *dStarPriorityQueue) Fix(node Node, newKey key) {
+func (pq *dStarPriorityQueue) Fix(node gr.Node, newKey key) {
 	if i, ok := pq.indexList[node.ID()]; ok {
 		pq.nodes[i].key = newKey
 		heap.Fix(pq, i)
 	}
 }
 
-func (pq *dStarPriorityQueue) Remove(node Node) {
+func (pq *dStarPriorityQueue) Remove(node gr.Node) {
 	if i, ok := pq.indexList[node.ID()]; ok {
 		heap.Remove(pq, i)
 		delete(pq.indexList, node.ID())
@@ -181,8 +189,8 @@ func (pq *dStarPriorityQueue) Remove(node Node) {
 // General utility funcs
 
 // Rebuilds a path backwards from the goal.
-func rebuildPath(predecessors map[int]Node, goal Node) []Node {
-	path := []Node{goal}
+func rebuildPath(predecessors map[int]gr.Node, goal gr.Node) []gr.Node {
+	path := []gr.Node{goal}
 	curr := goal
 	for prev, ok := predecessors[curr.ID()]; ok; prev, ok = predecessors[curr.ID()] {
 		path = append(path, prev)

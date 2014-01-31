@@ -1,9 +1,11 @@
-package graph
+package concrete
 
 import (
 	"errors"
 	"math"
 	"strings"
+
+	gr "github.com/gonum/graph"
 )
 
 type TileGraph struct {
@@ -92,7 +94,7 @@ func (graph *TileGraph) String() string {
 	return outString[:len(outString)-1] // Kill final newline
 }
 
-func (graph *TileGraph) PathString(path []Node) string {
+func (graph *TileGraph) PathString(path []gr.Node) string {
 	if path == nil || len(path) == 0 {
 		return graph.String()
 	}
@@ -143,7 +145,7 @@ func (graph *TileGraph) CoordsToID(row, col int) (id int) {
 	return id
 }
 
-func (graph *TileGraph) CoordsToNode(row, col int) (node Node) {
+func (graph *TileGraph) CoordsToNode(row, col int) (node gr.Node) {
 	id := graph.CoordsToID(row, col)
 	if id == -1 {
 		return nil
@@ -152,7 +154,7 @@ func (graph *TileGraph) CoordsToNode(row, col int) (node Node) {
 	}
 }
 
-func (graph *TileGraph) successors(node Node) []Node {
+func (graph *TileGraph) successors(node gr.Node) []gr.Node {
 	id := node.ID()
 	if id < 0 || id >= len(graph.tiles) || graph.tiles[id] == false {
 		return nil
@@ -160,8 +162,8 @@ func (graph *TileGraph) successors(node Node) []Node {
 
 	row, col := graph.IDToCoords(id)
 
-	neighbors := []Node{graph.CoordsToNode(row-1, col), graph.CoordsToNode(row+1, col), graph.CoordsToNode(row, col-1), graph.CoordsToNode(row, col+1)}
-	realNeighbors := make([]Node, 0, 4) // Will overallocate sometimes, but not by much. Not a big deal
+	neighbors := []gr.Node{graph.CoordsToNode(row-1, col), graph.CoordsToNode(row+1, col), graph.CoordsToNode(row, col-1), graph.CoordsToNode(row, col+1)}
+	realNeighbors := make([]gr.Node, 0, 4) // Will overallocate sometimes, but not by much. Not a big deal
 	for _, neighbor := range neighbors {
 		if neighbor != nil && graph.tiles[neighbor.ID()] == true {
 			realNeighbors = append(realNeighbors, neighbor)
@@ -171,38 +173,38 @@ func (graph *TileGraph) successors(node Node) []Node {
 	return realNeighbors
 }
 
-func (graph *TileGraph) isSuccessor(node, successor Node) bool {
+func (graph *TileGraph) isSuccessor(node, successor gr.Node) bool {
 	id, succ := node.ID(), successor.ID()
 	return (id >= 0 && id < len(graph.tiles) && graph.tiles[id] == true) && (succ >= 0 && succ < len(graph.tiles) && graph.tiles[succ] == true)
 }
 
-func (graph *TileGraph) predecessors(node Node) []Node {
+func (graph *TileGraph) predecessors(node gr.Node) []gr.Node {
 	return graph.successors(node)
 }
 
-func (graph *TileGraph) isPredecessor(node, pred Node) bool {
+func (graph *TileGraph) isPredecessor(node, pred gr.Node) bool {
 	return graph.isSuccessor(node, pred)
 }
 
-func (graph *TileGraph) Neighbors(node Node) []Node {
+func (graph *TileGraph) Neighbors(node gr.Node) []gr.Node {
 	return graph.successors(node)
 }
 
-func (graph *TileGraph) IsNeighbor(id, neighbor Node) bool {
+func (graph *TileGraph) IsNeighbor(id, neighbor gr.Node) bool {
 	return graph.isSuccessor(id, neighbor)
 }
 
-func (graph *TileGraph) NodeExists(node Node) bool {
+func (graph *TileGraph) NodeExists(node gr.Node) bool {
 	id := node.ID()
 	return id >= 0 && id < len(graph.tiles) && graph.tiles[id] == true
 }
 
-func (graph *TileGraph) Degree(node Node) int {
+func (graph *TileGraph) Degree(node gr.Node) int {
 	return len(graph.successors(node)) * 2
 }
 
-func (graph *TileGraph) EdgeList() []Edge {
-	edges := make([]Edge, 0)
+func (graph *TileGraph) EdgeList() []gr.Edge {
+	edges := make([]gr.Edge, 0)
 	for id, passable := range graph.tiles {
 		if !passable {
 			continue
@@ -216,8 +218,8 @@ func (graph *TileGraph) EdgeList() []Edge {
 	return edges
 }
 
-func (graph *TileGraph) NodeList() []Node {
-	nodes := make([]Node, 0)
+func (graph *TileGraph) NodeList() []gr.Node {
+	nodes := make([]gr.Node, 0)
 	for id, passable := range graph.tiles {
 		if !passable {
 			continue
@@ -233,7 +235,7 @@ func (graph *TileGraph) IsDirected() bool {
 	return false
 }
 
-func (graph *TileGraph) Cost(node1, node2 Node) float64 {
+func (graph *TileGraph) Cost(node1, node2 gr.Node) float64 {
 	if graph.IsNeighbor(node1, node2) {
 		return 1.0
 	} else {

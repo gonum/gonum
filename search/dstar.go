@@ -1,26 +1,12 @@
-package graph
+package search
 
 import (
 	"container/heap"
 	"errors"
 	"math"
-)
 
-// A DStarGraph is a special interface that allows the DStarLite function to be used on a graph
-//
-// D*-lite is an algorithm that allows for the graph representation to change when actions are taken, whether this be from actions taken by the agent or simply new information gathered.
-// As such, there's a Move function, that allows the graph to take into account an agent moving to the next node. This is always followed by a call to ChangedEdges.
-//
-// Traditionally in D*-lite, the algorithm would scan every edge to see if the cost changed, and then update its information if it detected any changes. This slightly remixed step
-// allows the graph to provide notification of any changes, and even provide an alternate cost function if it needs to. This can be used to speed up the algorithm significantly
-// since the graph no longer has to scan for changes, and only updates when told to. If changedEdges is nil or of len 0, no updates will be performed. If changedEdges is not nil, it
-// will update the internal representation. If newCostFunc is non-nil it will be swapped with dStar's current cost function if and only if changedEdges is non-nil/len>0, however,
-// newCostFunc is not required to be non-nil if updates are present. DStar will continue using the current cost function if that is the case.
-type DStarGraph interface {
-	Graph
-	Move(target Node)
-	ChangedEdges() (newCostFunc func(Node, Node) float64, changedEdges []Edge)
-}
+	gr "github.com/gonum/graph"
+)
 
 // A DStarInstance is a way for a general Graph implementer to run D*-Lite. D*-Lite has state over multiple calls, and allows the graph to chnge, so after initialization an instance is returned.
 //
@@ -35,19 +21,19 @@ type DStarGraph interface {
 //         perform the move returned
 //         if the graph changed, call Update(... change info ...)
 type DStarInstance struct {
-	graph             Graph
-	start, goal, last Node
+	graph             gr.Graph
+	start, goal, last gr.Node
 	gScores           map[int]float64
-	cost              func(Node, Node) float64
-	heuristicCost     func(Node, Node) float64
-	successors        func(Node) []Node
-	predecessors      func(Node) []Node
+	cost              func(gr.Node, gr.Node) float64
+	heuristicCost     func(gr.Node, gr.Node) float64
+	successors        func(gr.Node) []gr.Node
+	predecessors      func(gr.Node) []gr.Node
 	u                 *dStarPriorityQueue
 	rhs               map[int]float64
 	k_m               float64
 }
 
-func (ds *DStarInstance) calculateKey(node Node) key {
+func (ds *DStarInstance) calculateKey(node gr.Node) key {
 	rhs := ds.rhs[node.ID()]
 	gScore := ds.gScores[node.ID()]
 	return key{math.Min(gScore, rhs) + ds.heuristicCost(ds.start, node) + ds.k_m, math.Min(gScore, rhs)}
@@ -61,7 +47,7 @@ func (ds *DStarInstance) calculateKey(node Node) key {
 //     ComputeShortestPath()
 //
 // In other words, it's all the lines before the main loop in Main() in the original paper. Essentially a full state initialization.
-func InitDStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Node) float64) *DStarInstance {
+func InitDStar(start, goal gr.Node, graph gr.Graph, Cost, HeuristicCost func(gr.Node, gr.Node) float64) *DStarInstance {
 	successors, predecessors, _, _, _, _, Cost, HeuristicCost := setupFuncs(graph, Cost, HeuristicCost)
 
 	u := &dStarPriorityQueue{indexList: make(map[int]int, 0), nodes: make([]dStarNode, 0)}
@@ -93,7 +79,7 @@ func InitDStar(start, goal Node, graph Graph, Cost, HeuristicCost func(Node, Nod
 	return ds
 }
 
-func (ds *DStarInstance) updateVertex(node Node) {
+func (ds *DStarInstance) updateVertex(node gr.Node) {
 	if node.ID() != ds.goal.ID() {
 		min := math.Inf(1)
 		for _, succ := range ds.successors(node) {
@@ -139,7 +125,7 @@ func (ds *DStarInstance) computeShortestPath() {
 
 // Returns the next action to be taken, or nil and an error if it's determined that no path exists.
 // Should be called before Update every loop
-func (ds *DStarInstance) Step() (succ Node, err error) {
+func (ds *DStarInstance) Step() (succ gr.Node, err error) {
 	if ds.start.ID() == ds.goal.ID() {
 		return ds.start, nil
 	} else if ds.gScores[ds.start.ID()] == math.Inf(1) {
@@ -147,7 +133,7 @@ func (ds *DStarInstance) Step() (succ Node, err error) {
 	}
 
 	min := math.Inf(1)
-	var next Node
+	var next gr.Node
 	for _, succ := range ds.successors(ds.start) {
 		newMin := math.Min(min, ds.cost(ds.start, succ)+ds.gScores[succ.ID()])
 		if newMin < min {
@@ -161,7 +147,7 @@ func (ds *DStarInstance) Step() (succ Node, err error) {
 
 // Updates D*-Lite if new information has been discovered or the graph has changed in any way. Should be called after each call of Step()
 // This is a no-op if changedEdgeCosts is nil or its len is 0.
-func (ds *DStarInstance) Update(cost func(Node, Node) float64, changedEdgeCosts []Edge) {
+func (ds *DStarInstance) Update(cost func(gr.Node, gr.Node) float64, changedEdgeCosts []gr.Edge) {
 	if changedEdgeCosts == nil || len(changedEdgeCosts) == 0 {
 		return
 	}
@@ -196,7 +182,7 @@ func (ds *DStarInstance) Update(cost func(Node, Node) float64, changedEdgeCosts 
 // to UniformCost and NullHeauristic respectively.
 //
 // [1] http://www.aaai.org/Papers/AAAI/2002/AAAI02-072.pdf
-func DStarLite(start, goal Node, graph DStarGraph, Cost, HeuristicCost func(Node, Node) float64) error {
+func DStarLite(start, goal gr.Node, graph gr.DStarGraph, Cost, HeuristicCost func(gr.Node, gr.Node) float64) error {
 	ds := InitDStar(start, goal, graph, Cost, HeuristicCost) // InitDStar does s_last = s_start and computeShortestPath for us
 	for ds.start.ID() != ds.goal.ID() {
 		next, err := ds.Step()
@@ -218,7 +204,7 @@ func DStarLite(start, goal Node, graph DStarGraph, Cost, HeuristicCost func(Node
 // If an error is encountered, it will be sent over the done channel. If D*-lite exits successfully the done channel will be closed with no error written to it.
 //
 // D*-lite is initialized upon call, albeit in the new goroutine. However, the first step/move/update cycle is not performed until a signal is received.
-func SynchronizedDStarLite(start, goal Node, graph DStarGraph, Cost, HeuristicCost func(Node, Node) float64, step <-chan struct{}, done chan<- error) {
+func SynchronizedDStarLite(start, goal gr.Node, graph gr.DStarGraph, Cost, HeuristicCost func(gr.Node, gr.Node) float64, step <-chan struct{}, done chan<- error) {
 	go func() {
 		ds := InitDStar(start, goal, graph, Cost, HeuristicCost) // InitDStar does s_last = s_start and computeShortestPath for us
 		for ds.start.ID() != ds.goal.ID() {

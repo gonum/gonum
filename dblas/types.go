@@ -1,4 +1,4 @@
-package blasd
+package dblas
 
 import "github.com/gonum/blas"
 
@@ -191,6 +191,7 @@ func Ge2Sy(A General, ul blas.Uplo) Symmetric {
 	}
 	return Symmetric{A.Order, A.Data, n, A.Stride, ul}
 }
+
 func must(err error) {
 	if err != nil {
 		panic(err)

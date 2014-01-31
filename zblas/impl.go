@@ -1,12 +1,9 @@
-package blas
+package zblas
 
-var impl Float64
-var implCmplx Complex128
+import "github.com/gonum/blas"
 
-func Register(i Float64) {
+var impl blas.Complex128
+
+func Register(i blas.Complex128) {
 	impl = i
-}
-
-func RegisterCmplx(i Complex128) {
-	implCmplx = i
 }

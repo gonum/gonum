@@ -1,4 +1,4 @@
-package blasd
+package dblas
 
 import "github.com/gonum/blas"
 

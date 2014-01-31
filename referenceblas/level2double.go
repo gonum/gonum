@@ -5,6 +5,8 @@ import "github.com/gonum/blas"
 // See http://www.netlib.org/lapack/explore-html/d4/de1/_l_i_c_e_n_s_e_source.html
 // for more license information
 
+//var _ blas.Float64Level2 = Blasser
+
 // TODO: Need to think about loops when doing row-major. Change after tests?
 
 const (
@@ -230,6 +232,9 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 		}
 
 	}
+}
+
+func (Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 }
 
 /*

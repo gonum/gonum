@@ -308,6 +308,7 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 
 	if o == blas.RowMajor {
 		m, n = n, m
+		kU, kL = kL, kU
 		if tA == blas.NoTrans {
 			tA = blas.Trans
 		} else {

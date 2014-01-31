@@ -1,19 +1,21 @@
-package blas
+package blasd
+
+import "github.com/gonum/blas"
 
 import (
 	"errors"
 )
 
 type General struct {
-	Order      Order
+	Order      blas.Order
 	Rows, Cols int
 	Stride     int
 	Data       []float64
 }
 
-func NewGeneral(o Order, m, n int, data []float64) General {
+func NewGeneral(o blas.Order, m, n int, data []float64) General {
 	var A General
-	if o == RowMajor {
+	if o == blas.RowMajor {
 		A = General{o, m, n, n, data}
 	} else {
 		A = General{o, m, n, m, data}
@@ -23,7 +25,7 @@ func NewGeneral(o Order, m, n int, data []float64) General {
 }
 
 func (A General) Index(i, j int) int {
-	if A.Order == RowMajor {
+	if A.Order == blas.RowMajor {
 		return i*A.Stride + j
 	} else {
 		return i + j*A.Stride
@@ -40,14 +42,14 @@ func (A General) Check() error {
 	if A.Stride < 1 {
 		return errors.New("blas: illegal stride")
 	}
-	if A.Order == ColMajor {
+	if A.Order == blas.ColMajor {
 		if A.Stride < A.Rows {
 			return errors.New("blas: illegal stride")
 		}
 		if (A.Cols-1)*A.Stride+A.Rows > len(A.Data) {
 			return errors.New("blas: insufficient amount of data")
 		}
-	} else if A.Order == RowMajor {
+	} else if A.Order == blas.RowMajor {
 		if A.Stride < A.Cols {
 			return errors.New("blas: illegal stride")
 		}
@@ -64,9 +66,9 @@ func (A General) Row(i int) Vector {
 	if i >= A.Rows || i < 0 {
 		panic("blas: index out of range")
 	}
-	if A.Order == RowMajor {
+	if A.Order == blas.RowMajor {
 		return Vector{A.Data[A.Stride*i:], A.Cols, 1}
-	} else if A.Order == ColMajor {
+	} else if A.Order == blas.ColMajor {
 		return Vector{A.Data[i:], A.Cols, A.Stride}
 	}
 	panic("blas: illegal order")
@@ -76,9 +78,9 @@ func (A General) Col(i int) Vector {
 	if i >= A.Cols || i < 0 {
 		panic("blas: index out of range")
 	}
-	if A.Order == RowMajor {
+	if A.Order == blas.RowMajor {
 		return Vector{A.Data[i:], A.Rows, A.Stride}
-	} else if A.Order == ColMajor {
+	} else if A.Order == blas.ColMajor {
 		return Vector{A.Data[A.Stride*i:], A.Rows, 1}
 	}
 	panic("blas: illegal order")
@@ -99,56 +101,56 @@ func (A General) Sub(i, j, r, c int) General {
 }
 
 type GeneralBand struct {
-	Order Order
+	Order blas.Order
 	General
 	KL, KU int
 }
 
 type Triangular struct {
-	Order  Order
+	Order  blas.Order
 	Data   []float64
 	N      int
 	Stride int
-	Uplo   Uplo
-	Diag   Diag
+	Uplo   blas.Uplo
+	Diag   blas.Diag
 }
 
 type TriangularBand struct {
-	Order  Order
+	Order  blas.Order
 	Data   []float64
 	N, K   int
 	Stride int
-	Uplo   Uplo
-	Diag   Diag
+	Uplo   blas.Uplo
+	Diag   blas.Diag
 }
 
 type TriangularPacked struct {
-	Order Order
+	Order blas.Order
 	Data  []float64
 	N     int
-	Uplo  Uplo
-	Diag  Diag
+	Uplo  blas.Uplo
+	Diag  blas.Diag
 }
 
 type Symmetric struct {
-	Order     Order
+	Order     blas.Order
 	Data      []float64
 	N, Stride int
-	Uplo      Uplo
+	Uplo      blas.Uplo
 }
 
 type SymmetricBand struct {
-	Order        Order
+	Order        blas.Order
 	Data         []float64
 	N, K, Stride int
-	Uplo         Uplo
+	Uplo         blas.Uplo
 }
 
 type SymmetricPacked struct {
-	Order Order
+	Order blas.Order
 	Data  []float64
 	N     int
-	Uplo  Uplo
+	Uplo  blas.Uplo
 }
 
 type Vector struct {
@@ -174,7 +176,7 @@ func (v Vector) Check() error {
 	return nil
 }
 
-func Ge2Tr(A General, d Diag, ul Uplo) Triangular {
+func Ge2Tr(A General, d blas.Diag, ul blas.Uplo) Triangular {
 	n := A.Rows
 	if A.Cols < n {
 		n = A.Cols
@@ -182,7 +184,7 @@ func Ge2Tr(A General, d Diag, ul Uplo) Triangular {
 	return Triangular{A.Order, A.Data, n, A.Stride, ul, d}
 }
 
-func Ge2Sy(A General, ul Uplo) Symmetric {
+func Ge2Sy(A General, ul blas.Uplo) Symmetric {
 	n := A.Rows
 	if A.Cols < n {
 		n = A.Cols

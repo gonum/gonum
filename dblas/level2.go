@@ -1,11 +1,13 @@
-package blas
+package blasd
 
-func Dgemv(tA Transpose, alpha float64, A General, x Vector, beta float64, y Vector) {
-	if tA == NoTrans {
+import "github.com/gonum/blas"
+
+func Dgemv(tA blas.Transpose, alpha float64, A General, x Vector, beta float64, y Vector) {
+	if tA == blas.NoTrans {
 		if x.N != A.Cols {
 			panic("blas: dimension mismatch")
 		}
-	} else if tA == Trans {
+	} else if tA == blas.Trans {
 		if x.N != A.Rows {
 			panic("blas: dimension mismatch")
 		}
@@ -15,12 +17,12 @@ func Dgemv(tA Transpose, alpha float64, A General, x Vector, beta float64, y Vec
 	impl.Dgemv(A.Order, tA, A.Rows, A.Cols, alpha, A.Data, A.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
-func Dgbmv(tA Transpose, alpha float64, A GeneralBand, x Vector, beta float64, y Vector) {
-	if tA == NoTrans {
+func Dgbmv(tA blas.Transpose, alpha float64, A GeneralBand, x Vector, beta float64, y Vector) {
+	if tA == blas.NoTrans {
 		if x.N != A.Cols {
 			panic("blas: dimension mismatch")
 		}
-	} else if tA == Trans {
+	} else if tA == blas.Trans {
 		if x.N != A.Rows {
 			panic("blas: dimension mismatch")
 		}
@@ -31,41 +33,41 @@ func Dgbmv(tA Transpose, alpha float64, A GeneralBand, x Vector, beta float64, y
 		A.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
-func Dtrmv(tA Transpose, A Triangular, x Vector) {
+func Dtrmv(tA blas.Transpose, A Triangular, x Vector) {
 	if x.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dtrmv(A.Order, A.Uplo, tA, A.Diag, A.N, A.Data, A.Stride, x.Data, x.Inc)
 }
 
-func Dtbmv(tA Transpose, A TriangularBand, x Vector) {
+func Dtbmv(tA blas.Transpose, A TriangularBand, x Vector) {
 	if x.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dtbmv(A.Order, A.Uplo, tA, A.Diag, A.N, A.K, A.Data, A.Stride, x.Data, x.Inc)
 }
 
-func Dtpmv(tA Transpose, A TriangularPacked, x Vector) {
+func Dtpmv(tA blas.Transpose, A TriangularPacked, x Vector) {
 	if x.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dtpmv(A.Order, A.Uplo, tA, A.Diag, A.N, A.Data, x.Data, x.Inc)
 }
 
-func Dtrsv(tA Transpose, A Triangular, x Vector) {
+func Dtrsv(tA blas.Transpose, A Triangular, x Vector) {
 	if x.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dtrsv(A.Order, A.Uplo, tA, A.Diag, A.N, A.Data, A.Stride, x.Data, x.Inc)
 }
 
-func Dtbsv(tA Transpose, A TriangularBand, x Vector) {
+func Dtbsv(tA blas.Transpose, A TriangularBand, x Vector) {
 	if x.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dtbsv(A.Order, A.Uplo, tA, A.Diag, A.N, A.K, A.Data, A.Stride, x.Data, x.Inc)
 }
-func Dtpsv(tA Transpose, A TriangularPacked, x Vector) {
+func Dtpsv(tA blas.Transpose, A TriangularPacked, x Vector) {
 	if x.N != A.N {
 		panic("blas: dimension mismatch")
 	}

@@ -1,4 +1,6 @@
-package blas
+package blasd
+
+import "github.com/gonum/blas"
 
 func Ddot(x, y Vector) float64 {
 	if x.N != y.N {
@@ -44,7 +46,7 @@ func Drotg(a, b float64) (c, s, r, z float64) {
 	return impl.Drotg(a, b)
 }
 
-func Drotmg(d1, d2, b1, b2 float64) (p DrotmParams, rd1, rd2, rb1 float64) {
+func Drotmg(d1, d2, b1, b2 float64) (p blas.DrotmParams, rd1, rd2, rb1 float64) {
 	return impl.Drotmg(d1, d2, b1, b2)
 }
 
@@ -55,7 +57,7 @@ func Drot(x, y Vector, c, s float64) {
 	impl.Drot(x.N, x.Data, x.Inc, y.Data, y.Inc, c, s)
 }
 
-func Drotm(x, y Vector, p DrotmParams) {
+func Drotm(x, y Vector, p blas.DrotmParams) {
 	if x.N != y.N {
 		panic("blas: dimension mismatch")
 	}

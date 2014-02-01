@@ -1,6 +1,7 @@
 package concrete
 
 import (
+	"math"
 	"sort"
 
 	gr "github.com/gonum/graph"
@@ -345,5 +346,10 @@ func (graph *GonumGraph) IsDirected() bool {
 }
 
 func (graph *GonumGraph) Cost(node, succ gr.Node) float64 {
-	return graph.successors[node.ID()][succ.ID()]
+	if s, ok := graph.successors[node.ID()]; ok {
+		if c, ok := s[succ.ID()]; ok {
+			return c
+		}
+	}
+	return math.Inf(1)
 }

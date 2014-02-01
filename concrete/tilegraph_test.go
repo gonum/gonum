@@ -3,14 +3,14 @@ package concrete_test
 import (
 	"testing"
 
-	"github.com/gonum/graph"
+	gr "github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 )
 
-// Asserts that out concrete graphs implement the correct interfaces
-var _ graph.DirectedGraph = (*concrete.GonumGraph)(nil)
-var _ graph.MutableGraph = (*concrete.GonumGraph)(nil)
-var _ graph.UndirectedGraph = (*concrete.TileGraph)(nil)
+// Asserts that concrete graphs implement the correct interfaces
+var _ gr.DirectedGraph = (*concrete.GonumGraph)(nil)
+var _ gr.MutableGraph = (*concrete.GonumGraph)(nil)
+var _ gr.UndirectedGraph = (*concrete.TileGraph)(nil)
 
 func TestTileGraph(t *testing.T) {
 	tg := concrete.NewTileGraph(4, 4, false)
@@ -104,4 +104,35 @@ func TestTileGraph(t *testing.T) {
 		t.Error("Degree returns incorrect number for impassable tile (0,0)")
 	}
 
+}
+
+func TestTileGraphCoverage(t *testing.T) {
+	concrete.GenerateTileGraph("▀ x")   // x invalid
+	concrete.GenerateTileGraph("▀ \n▀") // row lengths not equal
+	concrete.GenerateTileGraph("▀ ▀")
+	tg := concrete.NewTileGraph(2, 3, true)
+	tg.SetPassability(0, -1, true)
+	tg.SetPassability(0, 1, false)
+	tg.SetPassability(0, 4, false)
+	tg.PathString(nil)
+	n1 := concrete.GonumNode(1)
+	n2 := concrete.GonumNode(2)
+	n3 := concrete.GonumNode(3)
+	n5 := concrete.GonumNode(5)
+	p := []gr.Node{n3, n2, n1, n5}
+	tg.PathString(p)
+	tg.Dimensions()
+	tg.IDToCoords(0)
+	tg.CoordsToNode(-1, 0)
+	tg.CoordsToNode(0, 0)
+	tg.Neighbors(n1)
+	tg.Neighbors(n2)
+	tg.IsNeighbor(n1, n2)
+	tg.NodeExists(n1)
+	tg.Degree(n1)
+	tg.EdgeList()
+	tg.NodeList()
+	tg.IsDirected()
+	tg.Cost(n1, n2)
+	tg.Cost(n2, n5)
 }

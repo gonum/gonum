@@ -1,6 +1,7 @@
 package concrete
 
 import (
+	"math"
 	"sort"
 
 	gr "github.com/gonum/graph"
@@ -275,7 +276,7 @@ func (graph *GonumGraph) Neighbors(node gr.Node) []gr.Node {
 
 	for pred, _ := range graph.predecessors[id] {
 		// We should only add the predecessor if it wasn't already added from successors
-		if _, ok := graph.successors[pred]; !ok {
+		if _, ok := graph.successors[id][pred]; !ok {
 			neighbors = append(neighbors, graph.nodeMap[pred])
 		}
 	}
@@ -308,14 +309,23 @@ func (graph *GonumGraph) Degree(node gr.Node) int {
 		return 0
 	}
 
-	return len(graph.successors[id]) + len(graph.predecessors[id])
+	d := len(graph.successors[id])
+	if graph.directed {
+		return d + len(graph.predecessors[id])
+	}
+	if _, ok := graph.successors[id][id]; ok {
+		d++
+	}
+	return d
 }
 
 func (graph *GonumGraph) EdgeList() []gr.Edge {
 	eList := make([]gr.Edge, 0, len(graph.successors))
 	for id, succMap := range graph.successors {
 		for succ, _ := range succMap {
-			eList = append(eList, GonumEdge{graph.nodeMap[id], graph.nodeMap[succ]})
+			if graph.directed || id <= succ {
+				eList = append(eList, GonumEdge{graph.nodeMap[id], graph.nodeMap[succ]})
+			}
 		}
 	}
 
@@ -336,5 +346,10 @@ func (graph *GonumGraph) IsDirected() bool {
 }
 
 func (graph *GonumGraph) Cost(node, succ gr.Node) float64 {
-	return graph.successors[node.ID()][succ.ID()]
+	if s, ok := graph.successors[node.ID()]; ok {
+		if c, ok := s[succ.ID()]; ok {
+			return c
+		}
+	}
+	return math.Inf(1)
 }

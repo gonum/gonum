@@ -275,7 +275,7 @@ func (graph *GonumGraph) Neighbors(node gr.Node) []gr.Node {
 
 	for pred, _ := range graph.predecessors[id] {
 		// We should only add the predecessor if it wasn't already added from successors
-		if _, ok := graph.successors[pred]; !ok {
+		if _, ok := graph.successors[id][pred]; !ok {
 			neighbors = append(neighbors, graph.nodeMap[pred])
 		}
 	}

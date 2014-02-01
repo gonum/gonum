@@ -15,6 +15,8 @@ type Blas struct{}
 
 var Blasser Blas
 
+var _ blas.Float64Level1 = Blasser
+
 const (
 	negativeN = "blas: negative number of elements"
 	zeroInc   = "blas: zero value of increment"

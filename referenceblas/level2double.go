@@ -5,6 +5,8 @@ import "github.com/gonum/blas"
 // See http://www.netlib.org/lapack/explore-html/d4/de1/_l_i_c_e_n_s_e_source.html
 // for more license information
 
+//var _ blas.Float64Level2 = Blasser
+
 // TODO: Need to think about loops when doing row-major. Change after tests?
 
 const (
@@ -23,6 +25,13 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func min(a, b int) int {
+	if a > b {
+		return b
+	}
+	return a
 }
 
 // Dgemv computes y = alpha*a*x + beta*y if tA = blas.NoTrans
@@ -229,6 +238,142 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 			jy += incY
 		}
 
+	}
+}
+
+func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	if o != blas.RowMajor && o != blas.ColMajor {
+		panic(badOrder)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if o == blas.RowMajor {
+		if lda < max(1, n) {
+			panic(badLdaRow)
+		}
+	} else {
+		if lda < max(1, m) {
+			panic(badLdaCol)
+		}
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if incY == 0 {
+		panic(zeroInc)
+	}
+
+	// Quick return if possible
+	if m == 0 || n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	// Set up indexes
+	lenX := m
+	lenY := n
+	if tA == blas.NoTrans {
+		lenX = n
+		lenY = m
+	}
+	var kx, ky int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(lenX - 1) * incX
+	}
+	if incY > 0 {
+		ky = 0
+	} else {
+		ky = -(lenY - 1) * incY
+	}
+
+	// First form y := beta * y
+	if incY > 0 {
+		b.Dscal(lenY, beta, y, incY)
+	} else {
+		b.Dscal(lenY, beta, y, -incY)
+	}
+
+	if alpha == 0 {
+		return
+	}
+	kup1 := kU + 1
+
+	if o == blas.RowMajor {
+		m, n = n, m
+		kU, kL = kL, kU
+		if tA == blas.NoTrans {
+			tA = blas.Trans
+		} else {
+			tA = blas.NoTrans
+		}
+	}
+
+	if tA == blas.NoTrans {
+		jx := kx
+		if incY == 1 {
+			for j := 0; j < n; j++ {
+				if x[jx] != 0 {
+					temp := alpha * x[jx]
+					k := kup1 - j
+					for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+						y[i] += temp * a[k+i+j*lda]
+					}
+				}
+				jx += incX
+			}
+		} else {
+			for j := 0; j < n; j++ {
+				if x[jx] != 0 {
+					temp := alpha * x[jx]
+					iy := ky
+					k := kup1 - j
+					for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+						y[iy] += temp * a[k+i+j*lda]
+						iy += incY
+					}
+				}
+				jx += incX
+				if j > kU {
+					ky += incY
+				}
+			}
+		}
+	} else {
+		jy := ky
+		if incX == 1 {
+			for j := 0; j < n; j++ {
+				temp := 0.0
+				k := kup1 - j
+				for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+					temp += a[k+i+j*lda] * x[i]
+				}
+				y[jy] += alpha * temp
+				jy += incX
+			}
+		} else {
+			for j := 0; j < n; j++ {
+				temp := 0.0
+				ix := kx
+				k := kup1 - j
+				for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+					temp += a[k+i+j*lda] * x[ix]
+					ix += incX
+				}
+				y[jy] += alpha * temp
+				jy += incX
+				if j > kU {
+					kx += incX
+				}
+			}
+		}
 	}
 }
 

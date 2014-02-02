@@ -123,9 +123,9 @@ func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float6
 		for _, neighbor := range successors(node) {
 			tmpCost := costs[node.ID()] + Cost(node, neighbor)
 			if cost, ok := costs[neighbor.ID()]; !ok || tmpCost < cost {
-				costs[neighbor.ID()] = cost
+				costs[neighbor.ID()] = tmpCost
 				predecessor[neighbor.ID()] = node
-				heap.Push(openSet, internalNode{neighbor, cost, cost})
+				heap.Push(openSet, internalNode{neighbor, tmpCost, tmpCost})
 			}
 		}
 	}

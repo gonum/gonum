@@ -5,7 +5,7 @@ import (
 	level1 "github.com/ziutek/blas"
 )
 
-func (Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
+func (b Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 
 	if o == blas.RowMajor && s == blas.Left && ul == blas.Lower && tA == blas.NoTrans {
 		for i := 0; i < m; i++ {

@@ -17,6 +17,7 @@ const (
 	badUplo      string = "referenceblas: illegal triangularization"
 	badTranspose string = "referenceblas: illegal transpose"
 	badDiag      string = "referenceblas: illegal diag"
+	badSide      string = "referenceblas: illegal side"
 	badLdaRow    string = "lda must be greater than max(1,n) for row major"
 	badLdaCol    string = "lda must be greater than max(1,m) for col major"
 	badLda       string = "lda must be greater than max(1,n)"
@@ -247,6 +248,16 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic(badOrder)
 	}
+	if o == blas.RowMajor {
+		m, n = n, m
+		kU, kL = kL, kU
+		if tA == blas.NoTrans {
+			tA = blas.Trans
+		} else {
+			tA = blas.NoTrans
+		}
+	}
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic(badTranspose)
 	}
@@ -305,16 +316,6 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 
 	if alpha == 0 {
 		return
-	}
-
-	if o == blas.RowMajor {
-		m, n = n, m
-		kU, kL = kL, kU
-		if tA == blas.NoTrans {
-			tA = blas.Trans
-		} else {
-			tA = blas.NoTrans
-		}
 	}
 
 	if tA == blas.NoTrans {
@@ -696,6 +697,19 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n,
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic(badOrder)
 	}
+	if o == blas.RowMajor {
+		if tA == blas.NoTrans {
+			tA = blas.Trans
+		} else {
+			tA = blas.NoTrans
+		}
+		if ul == blas.Upper {
+			ul = blas.Lower
+		} else {
+			ul = blas.Upper
+		}
+	}
+
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -725,19 +739,6 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n,
 		kx = -(n - 1) * incX
 	} else if incX != 1 {
 		kx = 0
-	}
-
-	if o == blas.RowMajor {
-		if tA == blas.NoTrans {
-			tA = blas.Trans
-		} else {
-			tA = blas.NoTrans
-		}
-		if ul == blas.Upper {
-			ul = blas.Lower
-		} else {
-			ul = blas.Upper
-		}
 	}
 
 	if tA == blas.NoTrans {

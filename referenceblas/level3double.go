@@ -195,6 +195,18 @@ func (bl Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose,
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic(badOrder)
 	}
+	if o == blas.RowMajor {
+		if ul == blas.Upper {
+			ul = blas.Lower
+		} else {
+			ul = blas.Upper
+		}
+		if s == blas.Left {
+			s = blas.Right
+		} else {
+			s = blas.Left
+		}
+	}
 
 	var nrowa int
 	if s == blas.Left {

@@ -885,10 +885,129 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n,
 	}
 }
 
-//TODO: Not yet implemented Level 2 routines.
-func (Blas) Dtpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
-	panic("referenceblas: function not implemented")
+func (bl Blas) Dtpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
+	// Verify inputs
+	if o != blas.RowMajor && o != blas.ColMajor {
+		panic(badOrder)
+	}
+	if o == blas.RowMajor {
+		if tA == blas.NoTrans {
+			tA = blas.Trans
+		} else {
+			tA = blas.NoTrans
+		}
+		if ul == blas.Upper {
+			ul = blas.Lower
+		} else {
+			ul = blas.Upper
+		}
+	}
+
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if d != blas.NonUnit && d != blas.Unit {
+		panic(badDiag)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if len(ap) < (n*(n+1))/2 {
+		panic("blas: not enough data in ap")
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if n == 0 {
+		return
+	}
+	var kx int
+	if incX <= 0 {
+		kx = -(n - 1) * incX
+	} else if incX != 1 {
+		kx = 0
+	}
+
+	if tA == blas.NoTrans {
+
+		//x := A*x
+		if ul == blas.Upper {
+			kk := 0
+			jx := kx
+			for j := 0; j < n; j++ {
+				if x[jx] != 0 {
+					if j > 0 {
+						offset := max(0, -(n-j)*incX)
+						bl.Daxpy(j, x[jx], ap[kk:], 1, x[offset:], incX)
+					}
+					if d == blas.NonUnit {
+						x[jx] *= ap[kk+j]
+					}
+				}
+				kk += j + 1
+				jx += incX
+			}
+		} else {
+			kk := (n*(n+1))/2 - 1
+			jx := kx + (n-1)*incX
+			for j := n - 1; j >= 0; j-- {
+				if x[jx] != 0 {
+					if j+1 < n {
+						offset := max((j+1)*incX, 0)
+						bl.Daxpy(n-j-1, x[jx], ap[kk-n+j+2:], 1, x[offset:], incX)
+					}
+					if d == blas.NonUnit {
+						x[jx] *= ap[kk-n+j+1]
+					}
+				}
+				jx -= incX
+				kk -= n - j
+			}
+		}
+
+	} else {
+
+		// x := A**T*x
+		if ul == blas.Upper {
+			kk := (n*(n+1))/2 - 1
+			jx := kx + (n-1)*incX
+			for j := n - 1; j >= 0; j-- {
+				temp := x[jx]
+				if d == blas.NonUnit {
+					temp *= ap[kk]
+				}
+				if j > 0 {
+					offset := max(0, -(n-j)*incX)
+					temp += bl.Ddot(j, ap[kk-j:], 1, x[offset:], incX)
+				}
+				x[jx] = temp
+				jx -= incX
+				kk -= j + 1
+			}
+		} else {
+			kk := 0
+			jx := kx
+			for j := 0; j < n; j++ {
+				temp := x[jx]
+				if d == blas.NonUnit {
+					temp *= ap[kk]
+				}
+				if j+1 < n {
+					offset := max((j+1)*incX, 0)
+					temp += bl.Ddot(n-j-1, ap[kk+1:], 1, x[offset:], incX)
+				}
+				x[jx] = temp
+				jx += incX
+				kk += n - j
+			}
+		}
+	}
 }
+
+//TODO: Not yet implemented Level 2 routines.
 func (Blas) Dtbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
 }

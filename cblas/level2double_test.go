@@ -17,6 +17,10 @@ func TestDtbmv(t *testing.T) {
 	testblas.DtbmvTest(t, blasser)
 }
 
+func TestDtpmv(t *testing.T) {
+	testblas.DtpmvTest(t, blasser)
+}
+
 func TestDgbmv(t *testing.T) {
 	testblas.DgbmvTest(t, blasser)
 }

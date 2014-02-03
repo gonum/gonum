@@ -1123,11 +1123,11 @@ func (Blas) Dgbmv(o blas.Order, tA blas.Transpose, m int, n int, kL int, kU int,
 		panic("cblas: y index out of range")
 	}
 	if o == blas.RowMajor {
-		if lda*(m-1)+n > len(a) || lda < kL+kU+1 {
+		if lda*(m-1)+kL+kU+1 > len(a) || lda < kL+kU+1 {
 			panic("cblas: index of a out of range")
 		}
 	} else {
-		if lda*(n-1)+m > len(a) || lda < kL+kU+1 {
+		if lda*(n-1)+kL+kU+1 > len(a) || lda < kL+kU+1 {
 			panic("cblas: index of a out of range")
 		}
 	}
@@ -1185,7 +1185,7 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
-	if lda*(n-1)+n > len(a) || lda < k+1 {
+	if lda*(n-1)+k+1 > len(a) || lda < k+1 {
 		panic("cblas: index of a out of range")
 	}
 	C.cblas_dtbmv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
@@ -1269,7 +1269,7 @@ func (Blas) Dtbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("cblas: x index out of range")
 	}
-	if lda*(n-1)+n > len(a) || lda < k+1 {
+	if lda*(n-1)+k+1 > len(a) || lda < k+1 {
 		panic("cblas: index of a out of range")
 	}
 	C.cblas_dtbsv(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))

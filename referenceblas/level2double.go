@@ -5,19 +5,21 @@ import "github.com/gonum/blas"
 // See http://www.netlib.org/lapack/explore-html/d4/de1/_l_i_c_e_n_s_e_source.html
 // for more license information
 
-//var _ blas.Float64Level2 = Blasser
+var _ blas.Float64Level2 = Blasser
 
 // TODO: Need to think about loops when doing row-major. Change after tests?
 
 const (
 	badOrder     string = "referenceblas: illegal order"
 	mLT0         string = "referenceblas: m < 0"
-	nLT0         string = "referenceblas: m < 0"
+	nLT0         string = "referenceblas: n < 0"
+	kLT0         string = "referenceblas: k < 0"
 	badUplo      string = "referenceblas: illegal triangularization"
 	badTranspose string = "referenceblas: illegal transpose"
 	badDiag      string = "referenceblas: illegal diag"
 	badLdaRow    string = "lda must be greater than max(1,n) for row major"
 	badLdaCol    string = "lda must be greater than max(1,m) for col major"
+	badLda       string = "lda must be greater than max(1,n)"
 )
 
 func max(a, b int) int {
@@ -377,7 +379,6 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 	}
 }
 
-/*
 // DTRMV  performs one of the matrix-vector operations
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
@@ -589,7 +590,6 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 }
 
-
 // Dsymv  performs the matrix-vector  operation
 //    y := alpha*A*x + beta*y,
 // where alpha and beta are scalars, x and y are n element vectors and
@@ -687,18 +687,229 @@ func (b Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float6
 		}
 	}
 }
-*/
-/*
-// Level 2 routines.
-        Dgbmv(o Order, tA Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)
-        Dtbmv(o Order, ul Uplo, tA Transpose, d Diag, n, k int, a []float64, lda int, x []float64, incX int)
-        Dtpmv(o Order, ul Uplo, tA Transpose, d Diag, n int, ap []float64, x []float64, incX int)
-        Dtbsv(o Order, ul Uplo, tA Transpose, d Diag, n, k int, a []float64, lda int, x []float64, incX int)
-        Dtpsv(o Order, ul Uplo, tA Transpose, d Diag, n int, ap []float64, x []float64, incX int)
-        Dsbmv(o Order, ul Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)
-        Dspmv(o Order, ul Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int)
-		Dspr(o Order, ul Uplo, n int, alpha float64, x []float64, incX int, ap []float64)
-		Dspr2(o Order, ul Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64)
-        Dsyr(o Order, ul Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int)
-        Dsyr2(o Order, ul Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int)
-*/
+
+// Dtbmv  performs one of the matrix-vector operations
+// 		x := A*x,   or   x := A**T*x,
+// where x is an n element vector and  A is an n by n unit, or non-unit,
+// upper or lower triangular band matrix.
+func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+	// Verify inputs
+	if o != blas.RowMajor && o != blas.ColMajor {
+		panic(badOrder)
+	}
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if d != blas.NonUnit && d != blas.Unit {
+		panic(badDiag)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if k < 0 {
+		panic(kLT0)
+	}
+	if lda < k+1 {
+		panic("blas: lda must be less than max(1,n)")
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if n == 0 {
+		return
+	}
+	var kx int
+	if incX <= 0 {
+		kx = -(n - 1) * incX
+	} else if incX != 1 {
+		kx = 0
+	}
+
+	if o == blas.RowMajor {
+		if tA == blas.NoTrans {
+			tA = blas.Trans
+		} else {
+			tA = blas.NoTrans
+		}
+		if ul == blas.Upper {
+			ul = blas.Lower
+		} else {
+			ul = blas.Upper
+		}
+	}
+
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			if incX == 1 {
+				for j := 0; j < n; j++ {
+					if x[j] != 0 {
+						temp := x[j]
+						l := k - j
+						for i := max(0, j-k); i < j; i++ {
+							x[i] += temp * a[l+i+j*lda]
+						}
+						if d == blas.NonUnit {
+							x[j] *= a[k+j*lda]
+						}
+					}
+				}
+			} else {
+				jx := kx
+				for j := 0; j < n; j++ {
+					if x[jx] != 0 {
+						temp := x[jx]
+						ix := kx
+						l := k - j
+						for i := max(0, j-k); i < j; i++ {
+							x[ix] += temp * a[l+i+j*lda]
+							ix += incX
+						}
+						if d == blas.NonUnit {
+							x[jx] *= a[k+j*lda]
+						}
+					}
+					jx += incX
+					if j >= k {
+						kx += incX
+					}
+				}
+			}
+		} else {
+
+			if incX == 1 {
+				for j := n - 1; j >= 0; j-- {
+					if x[j] != 0 {
+						temp := x[j]
+						l := -j
+						for i := min(n-1, j+k); i >= j+1; i-- {
+							x[i] += temp * a[l+i+j*lda]
+						}
+						if d == blas.NonUnit {
+							x[j] *= a[0+j*lda]
+						}
+					}
+				}
+			} else {
+				kx += (n - 1) * incX
+				jx := kx
+				for j := n - 1; j >= 0; j-- {
+					if x[jx] != 0 {
+						temp := x[jx]
+						ix := kx
+						l := -j
+						for i := min(n-1, j+k); i >= j+1; i-- {
+							x[ix] += temp * a[l+i+j*lda]
+							ix -= incX
+						}
+						if d == blas.NonUnit {
+							x[jx] *= a[0+j*lda]
+						}
+					}
+					jx -= incX
+					if n-j > k {
+						kx -= incX
+					}
+				}
+			}
+		}
+	} else {
+
+		if ul == blas.Upper {
+			if incX == 1 {
+				for j := n - 1; j >= 0; j-- {
+					temp := x[j]
+					l := k - j
+					if d == blas.NonUnit {
+						temp *= a[k+j*lda]
+					}
+					for i := j - 1; i >= max(0, j-k); i-- {
+						temp += a[l+i+j*lda] * x[i]
+					}
+					x[j] = temp
+				}
+			} else {
+				kx += (n - 1) * incX
+				jx := kx
+				for j := n - 1; j >= 0; j-- {
+					temp := x[jx]
+					kx -= incX
+					ix := kx
+					l := k - j
+					if d == blas.NonUnit {
+						temp *= a[k+j*lda]
+					}
+					for i := j - 1; i >= max(0, j-k); i-- {
+						temp += a[l+i+j*lda] * x[ix]
+						ix -= incX
+					}
+					x[jx] = temp
+					jx -= incX
+				}
+			}
+		} else {
+
+			if incX == 1 {
+				for j := 0; j < n; j++ {
+					temp := x[j]
+					l := -j
+					if d == blas.NonUnit {
+						temp *= a[0+j*lda]
+					}
+					for i := j + 1; i < min(n, j+k+1); i++ {
+						temp += a[l+i+j*lda] * x[i]
+					}
+					x[j] = temp
+				}
+			} else {
+				jx := kx
+				for j := 0; j < n; j++ {
+					temp := x[jx]
+					kx += incX
+					ix := kx
+					l := -j
+					if d == blas.NonUnit {
+						temp *= a[0+j*lda]
+					}
+					for i := j + 1; i < min(n, j+k+1); i++ {
+						temp += a[l+i+j*lda] * x[ix]
+						ix += incX
+					}
+					x[jx] = temp
+					jx += incX
+				}
+			}
+		}
+	}
+}
+
+//TODO: Not yet implemented Level 2 routines.
+func (Blas) Dtpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dtbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dtpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dsbmv(o blas.Order, ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dspmv(o blas.Order, ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dspr(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap []float64) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dspr2(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dsyr(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
+	panic("referenceblas: function not implemented")
+}
+func (Blas) Dsyr2(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+	panic("referenceblas: function not implemented")
+}

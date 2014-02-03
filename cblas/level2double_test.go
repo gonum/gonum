@@ -1,4 +1,4 @@
-package referenceblas
+package cblas
 
 import (
 	"github.com/gonum/blas/testblas"

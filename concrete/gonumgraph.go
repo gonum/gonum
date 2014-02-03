@@ -316,9 +316,7 @@ func (graph *GonumGraph) EdgeList() []gr.Edge {
 	eList := make([]gr.Edge, 0, len(graph.successors))
 	for id, succMap := range graph.successors {
 		for succ, _ := range succMap {
-			if graph.directed || id <= succ {
-				eList = append(eList, GonumEdge{graph.nodeMap[id], graph.nodeMap[succ]})
-			}
+			eList = append(eList, GonumEdge{graph.nodeMap[id], graph.nodeMap[succ]})
 		}
 	}
 

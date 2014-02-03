@@ -4,6 +4,7 @@ import "github.com/gonum/blas"
 
 import (
 	"errors"
+	"fmt"
 )
 
 func Allocate(dims ...int) []float64 {
@@ -184,6 +185,16 @@ type Vector struct {
 
 func NewVector(v []float64) Vector {
 	return Vector{v, len(v), 1}
+}
+
+func (v Vector) Slice(l, r int) Vector {
+	if l < 0 || r > v.N {
+		panic("blas: index out of range")
+	}
+	if r > l {
+		panic(fmt.Sprintf("blas: invalid slice index:", r, ">", l))
+	}
+	return Vector{v.Data[l*v.Inc:], r - l, v.Inc}
 }
 
 func (v Vector) Check() error {

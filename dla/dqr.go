@@ -22,6 +22,6 @@ func (f QRFact) R() d.Triangular {
 func (f QRFact) Solve(B d.General) d.General {
 	impl.Dormqr('L', 'T', f.a, f.tau, B)
 	B.Rows = f.a.Cols
-	f.R().SolveM(blas.Left, blas.NoTrans, 1, B)
+	d.Trsm(blas.Left, blas.NoTrans, 1, f.R(), B)
 	return B
 }

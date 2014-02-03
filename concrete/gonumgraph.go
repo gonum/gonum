@@ -309,14 +309,7 @@ func (graph *GonumGraph) Degree(node gr.Node) int {
 		return 0
 	}
 
-	d := len(graph.successors[id])
-	if graph.directed {
-		return d + len(graph.predecessors[id])
-	}
-	if _, ok := graph.successors[id][id]; ok {
-		d++
-	}
-	return d
+	return len(graph.successors[id]) + len(graph.predecessors[id])
 }
 
 func (graph *GonumGraph) EdgeList() []gr.Edge {

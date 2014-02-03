@@ -34,6 +34,19 @@ func dSliceTolEqual(a, b []float64) bool {
 	return true
 }
 
+func dStridedSliceTolEqual(n int, a []float64, inca int, b []float64, incb int) bool {
+	ia := 0
+	ib := 0
+	for i := 0; i < n; i++ {
+		if !dTolEqual(a[ia], b[ib]) {
+			return false
+		}
+		ia += inca
+		ib += incb
+	}
+	return true
+}
+
 func dSliceEqual(a, b []float64) bool {
 	if len(a) != len(b) {
 		return false

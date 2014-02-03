@@ -728,6 +728,19 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n,
 		kx = 0
 	}
 
+	if o == blas.RowMajor {
+		if tA == blas.NoTrans {
+			tA = blas.Trans
+		} else {
+			tA = blas.NoTrans
+		}
+		if ul == blas.Upper {
+			ul = blas.Lower
+		} else {
+			ul = blas.Upper
+		}
+	}
+
 	if tA == blas.NoTrans {
 		if ul == blas.Upper {
 			if incX == 1 {
@@ -759,7 +772,7 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n,
 						}
 					}
 					jx += incX
-					if j > k {
+					if j >= k {
 						kx += incX
 					}
 				}

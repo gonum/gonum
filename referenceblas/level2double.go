@@ -306,7 +306,6 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 	if alpha == 0 {
 		return
 	}
-	kup1 := kU + 1
 
 	if o == blas.RowMajor {
 		m, n = n, m
@@ -324,8 +323,8 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 			for j := 0; j < n; j++ {
 				if x[jx] != 0 {
 					temp := alpha * x[jx]
-					k := kup1 - j
-					for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+					k := kU - j
+					for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
 						y[i] += temp * a[k+i+j*lda]
 					}
 				}
@@ -336,14 +335,14 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 				if x[jx] != 0 {
 					temp := alpha * x[jx]
 					iy := ky
-					k := kup1 - j
-					for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+					k := kU - j
+					for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
 						y[iy] += temp * a[k+i+j*lda]
 						iy += incY
 					}
 				}
 				jx += incX
-				if j > kU {
+				if j >= kU {
 					ky += incY
 				}
 			}
@@ -353,24 +352,24 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 		if incX == 1 {
 			for j := 0; j < n; j++ {
 				temp := 0.0
-				k := kup1 - j
-				for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+				k := kU - j
+				for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
 					temp += a[k+i+j*lda] * x[i]
 				}
 				y[jy] += alpha * temp
-				jy += incX
+				jy += incY
 			}
 		} else {
 			for j := 0; j < n; j++ {
 				temp := 0.0
 				ix := kx
-				k := kup1 - j
-				for i := max(0, j-kU-1); i < min(m, j+kL); i++ {
+				k := kU - j
+				for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
 					temp += a[k+i+j*lda] * x[ix]
 					ix += incX
 				}
 				y[jy] += alpha * temp
-				jy += incX
+				jy += incY
 				if j > kU {
 					kx += incX
 				}

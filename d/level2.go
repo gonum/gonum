@@ -4,11 +4,11 @@ import "github.com/gonum/blas"
 
 func Gemv(tA blas.Transpose, alpha float64, A General, x Vector, beta float64, y Vector) {
 	if tA == blas.NoTrans {
-		if x.N != A.Cols {
+		if x.N != A.Cols || y.N != A.Rows {
 			panic("blas: dimension mismatch")
 		}
 	} else if tA == blas.Trans {
-		if x.N != A.Rows {
+		if x.N != A.Rows || y.N != A.Cols {
 			panic("blas: dimension mismatch")
 		}
 	} else {
@@ -19,11 +19,11 @@ func Gemv(tA blas.Transpose, alpha float64, A General, x Vector, beta float64, y
 
 func Gbmv(tA blas.Transpose, alpha float64, A GeneralBand, x Vector, beta float64, y Vector) {
 	if tA == blas.NoTrans {
-		if x.N != A.Cols {
+		if x.N != A.Cols || y.N != A.Rows {
 			panic("blas: dimension mismatch")
 		}
 	} else if tA == blas.Trans {
-		if x.N != A.Rows {
+		if x.N != A.Rows || y.N != A.Cols {
 			panic("blas: dimension mismatch")
 		}
 	} else {
@@ -76,14 +76,14 @@ func Tpsv(tA blas.Transpose, A TriangularPacked, x Vector) {
 }
 
 func Symv(alpha float64, A Symmetric, x Vector, beta float64, y Vector) {
-	if x.N != A.N {
+	if x.N != A.N || y.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dsymv(A.Order, A.Uplo, A.N, alpha, A.Data, A.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
 func Sbmv(alpha float64, A SymmetricBand, x Vector, beta float64, y Vector) {
-	if x.N != A.N {
+	if x.N != A.N || y.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dsbmv(A.Order, A.Uplo, A.N, A.K, alpha, A.Data, A.Stride, x.Data,
@@ -91,7 +91,7 @@ func Sbmv(alpha float64, A SymmetricBand, x Vector, beta float64, y Vector) {
 }
 
 func Spmv(alpha float64, A SymmetricPacked, x Vector, beta float64, y Vector) {
-	if x.N != A.N {
+	if x.N != A.N || y.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dspmv(A.Order, A.Uplo, A.N, alpha, A.Data, x.Data, x.Inc, beta, y.Data, y.Inc)
@@ -122,20 +122,14 @@ func Spr(alpha float64, x Vector, A SymmetricPacked) {
 }
 
 func Syr2(alpha float64, x Vector, y Vector, A Symmetric) {
-	if x.N != A.N {
-		panic("blas: dimension mismatch")
-	}
-	if y.N != A.N {
+	if x.N != A.N || y.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dsyr2(A.Order, A.Uplo, A.N, alpha, x.Data, x.Inc, y.Data, y.Inc, A.Data, A.Stride)
 }
 
 func Spr2(alpha float64, x Vector, y Vector, A SymmetricPacked) {
-	if x.N != A.N {
-		panic("blas: dimension mismatch")
-	}
-	if y.N != A.N {
+	if x.N != A.N || y.N != A.N {
 		panic("blas: dimension mismatch")
 	}
 	impl.Dspr2(A.Order, A.Uplo, A.N, alpha, x.Data, x.Inc, y.Data, y.Inc, A.Data)

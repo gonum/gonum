@@ -2,7 +2,7 @@ package d
 
 import "github.com/gonum/blas"
 
-func Dgemm(tA, tB blas.Transpose, alpha float64, A, B General, beta float64, C General) {
+func Gemm(tA, tB blas.Transpose, alpha float64, A, B General, beta float64, C General) {
 	var m, n, k int
 	if tA == blas.NoTrans {
 		m, k = A.Rows, A.Cols
@@ -30,7 +30,7 @@ func Dgemm(tA, tB blas.Transpose, alpha float64, A, B General, beta float64, C G
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
-func Dsymm(s blas.Side, alpha float64, A Symmetric, B General, beta float64, C General) {
+func Symm(s blas.Side, alpha float64, A Symmetric, B General, beta float64, C General) {
 	var m, n int
 	if s == blas.Left {
 		m = A.N
@@ -55,7 +55,7 @@ func Dsymm(s blas.Side, alpha float64, A Symmetric, B General, beta float64, C G
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
-func Dsyrk(t blas.Transpose, alpha float64, A General, beta float64, C Symmetric) {
+func Syrk(t blas.Transpose, alpha float64, A General, beta float64, C Symmetric) {
 	var n, k int
 	if t == blas.NoTrans {
 		n, k = A.Rows, A.Cols
@@ -69,7 +69,7 @@ func Dsyrk(t blas.Transpose, alpha float64, A General, beta float64, C Symmetric
 		C.Data, C.Stride)
 }
 
-func Dsyr2k(t blas.Transpose, alpha float64, A, B General, beta float64, C Symmetric) {
+func Syr2k(t blas.Transpose, alpha float64, A, B General, beta float64, C Symmetric) {
 	var n, k int
 	if t == blas.NoTrans {
 		n, k = A.Rows, A.Cols
@@ -89,7 +89,7 @@ func Dsyr2k(t blas.Transpose, alpha float64, A, B General, beta float64, C Symme
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
-func Dtrmm(s blas.Side, tA blas.Transpose, alpha float64, A Triangular, B General) {
+func Trmm(s blas.Side, tA blas.Transpose, alpha float64, A Triangular, B General) {
 	if s == blas.Left {
 		if A.N != B.Rows {
 			panic("blas: dimension mismatch")
@@ -103,7 +103,7 @@ func Dtrmm(s blas.Side, tA blas.Transpose, alpha float64, A Triangular, B Genera
 		B.Data, B.Stride)
 }
 
-func Dtrsm(s blas.Side, tA blas.Transpose, alpha float64, A Triangular, B General) {
+func Trsm(s blas.Side, tA blas.Transpose, alpha float64, A Triangular, B General) {
 	if s == blas.Left {
 		if A.N != B.Rows {
 			panic("blas: dimension mismatch")

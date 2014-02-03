@@ -1,4 +1,4 @@
-package dblas
+package d
 
 import "github.com/gonum/blas"
 
@@ -67,6 +67,7 @@ func Dtbsv(tA blas.Transpose, A TriangularBand, x Vector) {
 	}
 	impl.Dtbsv(A.Order, A.Uplo, tA, A.Diag, A.N, A.K, A.Data, A.Stride, x.Data, x.Inc)
 }
+
 func Dtpsv(tA blas.Transpose, A TriangularPacked, x Vector) {
 	if x.N != A.N {
 		panic("blas: dimension mismatch")

@@ -1,4 +1,4 @@
-package zblas
+package z
 
 import "github.com/gonum/blas"
 

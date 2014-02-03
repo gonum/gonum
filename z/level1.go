@@ -1,4 +1,4 @@
-package zblas
+package z
 
 func Zdotu(x, y Vector) complex128 {
 	if x.N != y.N {

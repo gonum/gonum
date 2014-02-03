@@ -1,10 +1,21 @@
-package dblas
+package d
 
 import "github.com/gonum/blas"
 
 import (
 	"errors"
 )
+
+func Allocate(dims ...int) []float64 {
+	if len(dims) == 0 {
+		return nil
+	}
+	n := 1
+	for _, v := range dims {
+		n *= v
+	}
+	return make([]float64, n)
+}
 
 type General struct {
 	Order      blas.Order
@@ -22,6 +33,18 @@ func NewGeneral(o blas.Order, m, n int, data []float64) General {
 	}
 	must(A.Check())
 	return A
+}
+
+func (A General) At(i, j int) float64 {
+	return A.Data[A.Index(i, j)]
+}
+
+func (A General) Set(i, j int, v float64) {
+	A.Data[A.Index(i, j)] = v
+}
+
+func (A General) Dims() (int, int) {
+	return A.Rows, A.Cols
 }
 
 func (A General) Index(i, j int) int {

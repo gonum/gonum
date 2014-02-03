@@ -193,6 +193,9 @@ func rebuildPath(predecessors map[int]gr.Node, goal gr.Node) []gr.Node {
 	path := []gr.Node{goal}
 	curr := goal
 	for prev, ok := predecessors[curr.ID()]; ok; prev, ok = predecessors[curr.ID()] {
+		if n, ok := prev.(internalNode); ok {
+			prev = n.Node
+		}
 		path = append(path, prev)
 		curr = prev
 	}

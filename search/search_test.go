@@ -115,6 +115,28 @@ func TestNoPathAStar(t *testing.T) {
 	}
 }
 
+func TestSmallAStar(t *testing.T) {
+	gg := newSmallGonumGraph()
+	heur := newSmallHeuristic()
+	if ok, edge, goal := monotonic(gg, heur); !ok {
+		t.Fatalf("non-monotonic heuristic.  edge: %v goal: %v", edge, goal)
+	}
+	for _, start := range gg.NodeList() {
+		// get reference paths by Dijkstra
+		dPaths, dCosts := search.Dijkstra(start, gg, nil)
+		// assert that AStar finds each path
+		for goalID, dPath := range dPaths {
+			exp := fmt.Sprintln(dPath, dCosts[goalID])
+			aPath, aCost, work := search.AStar(start, concrete.GonumNode(goalID), gg, nil, heur)
+			got := fmt.Sprintln(aPath, aCost)
+			if got != exp {
+				t.Fatal("expected", exp, "got", got)
+			}
+			t.Log(aPath, work)
+		}
+	}
+}
+
 func ExampleBreadthFirstSearch() {
 	g := concrete.NewGonumGraph(true)
 	var n0, n1, n2, n3 concrete.GonumNode = 0, 1, 2, 3
@@ -181,13 +203,8 @@ func TestDStarLite(t *testing.T) {
 }
 */
 
-// Test for correct result on a small graph easily solvable by hand
-func TestDijkstra(t *testing.T) {
-	g := concrete.NewGonumGraph(false)
-	for i := 1; i <= 6; i++ {
-		g.AddNode(concrete.GonumNode(i), nil)
-	}
-	for _, ed := range [][3]int{
+func newSmallGonumGraph() *concrete.GonumGraph {
+	eds := []struct{ n1, n2, edgeCost int }{
 		{1, 2, 7},
 		{1, 3, 9},
 		{1, 6, 14},
@@ -197,14 +214,56 @@ func TestDijkstra(t *testing.T) {
 		{3, 6, 2},
 		{4, 5, 6},
 		{5, 6, 9},
-	} {
+	}
+	g := concrete.NewGonumGraph(false)
+	for n := concrete.GonumNode(1); n <= 6; n++ {
+		g.AddNode(n, nil)
+	}
+	for _, ed := range eds {
 		e := concrete.GonumEdge{
-			concrete.GonumNode(ed[0]),
-			concrete.GonumNode(ed[1]),
+			concrete.GonumNode(ed.n1),
+			concrete.GonumNode(ed.n2),
 		}
 		g.AddEdge(e)
-		g.SetEdgeCost(e, float64(ed[2]))
+		g.SetEdgeCost(e, float64(ed.edgeCost))
 	}
+	return g
+}
+
+func newSmallHeuristic() func(n1, n2 graph.Node) float64 {
+	nds := []struct{ id, x, y int }{
+		{1, 0, 6},
+		{2, 1, 0},
+		{3, 8, 7},
+		{4, 16, 0},
+		{5, 17, 5},
+		{6, 9, 8},
+	}
+	return func(n1, n2 graph.Node) float64 {
+		i1 := n1.ID() - 1
+		i2 := n2.ID() - 1
+		dx := nds[i2].x - nds[i1].x
+		dy := nds[i2].y - nds[i1].y
+		return math.Hypot(float64(dx), float64(dy))
+	}
+}
+
+func monotonic(g graph.CostGraph, heur func(n1, n2 graph.Node) float64) (bool, graph.Edge, graph.Node) {
+	for _, goal := range g.NodeList() {
+		for _, edge := range g.EdgeList() {
+			head := edge.Head()
+			tail := edge.Tail()
+			if heur(head, goal) > g.Cost(head, tail)+heur(tail, goal) {
+				return false, edge, goal
+			}
+		}
+	}
+	return true, nil, nil
+}
+
+// Test for correct result on a small graph easily solvable by hand
+func TestDijkstraSmall(t *testing.T) {
+	g := newSmallGonumGraph()
 	paths, lens := search.Dijkstra(concrete.GonumNode(1), g, nil)
 	s := fmt.Sprintln(len(paths), len(lens))
 	for i := 1; i <= 6; i++ {

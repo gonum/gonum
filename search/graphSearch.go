@@ -73,6 +73,15 @@ func AStar(start, goal gr.Node, graph gr.Graph, Cost, HeuristicCost func(gr.Node
 	return nil, 0.0, nodesExpanded
 }
 
+// BreadthFirstSearch finds a path with a minimal number of edges from from start to goal.
+//
+// BreadthFirstSearch returns the path found and the number of nodes visited in the search.
+// The returned path is nil if no path exists.
+func BreadthFirstSearch(start, goal gr.Node, graph gr.Graph) ([]gr.Node, int) {
+	path, _, visited := AStar(start, goal, graph, UniformCost, NullHeuristic)
+	return path, visited
+}
+
 // Dijkstra's Algorithm is essentially a goalless Uniform Cost Search. That is, its results are roughly equivalent to
 // running A* with the Null Heuristic from a single node to every other node in the graph -- though it's a fair bit faster
 // because running A* in that way will recompute things it's already computed every call. Note that you won't necessarily get the same path

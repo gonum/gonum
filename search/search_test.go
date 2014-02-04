@@ -1,6 +1,7 @@
 package search_test
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -112,6 +113,19 @@ func TestNoPathAStar(t *testing.T) {
 	if len(path) > 0 { // Note that a nil slice will return len of 0, this won't panic
 		t.Error("A* finds path where none exists")
 	}
+}
+
+func ExampleBreadthFirstSearch() {
+	g := concrete.NewGonumGraph(true)
+	var n0, n1, n2, n3 concrete.GonumNode = 0, 1, 2, 3
+	g.AddNode(n0, []graph.Node{n1, n2})
+	g.AddEdge(concrete.GonumEdge{n2, n3})
+	path, v := search.BreadthFirstSearch(n0, n3, g)
+	fmt.Println("path:", path)
+	fmt.Println("nodes visited:", v)
+	// Output:
+	// path: [0 2 3]
+	// nodes visited: 4
 }
 
 /* BUG Test fails, presumably indicating a bug.

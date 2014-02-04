@@ -37,6 +37,12 @@ func dSliceTolEqual(a, b []float64) bool {
 func dStridedSliceTolEqual(n int, a []float64, inca int, b []float64, incb int) bool {
 	ia := 0
 	ib := 0
+	if inca <= 0 {
+		ia = -(n - 1) * inca
+	}
+	if incb <= 0 {
+		ib = -(n - 1) * incb
+	}
 	for i := 0; i < n; i++ {
 		if !dTolEqual(a[ia], b[ib]) {
 			return false

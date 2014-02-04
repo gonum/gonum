@@ -5,7 +5,7 @@ import (
 	"github.com/dane-unltd/lapack/clapack"
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/cblas"
-	"github.com/gonum/blas/d"
+	"github.com/gonum/blas/dbw"
 	"github.com/gonum/matrix/mat64"
 	"testing"
 )
@@ -25,16 +25,16 @@ func (m fm) Format(fs fmt.State, c rune) {
 
 func init() {
 	Register(clapack.La{})
-	d.Register(cblas.Blas{})
+	dbw.Register(cblas.Blas{})
 }
 
 func TestQR(t *testing.T) {
-	A := d.NewGeneral(blas.ColMajor, 3, 2,
+	A := dbw.NewGeneral(blas.ColMajor, 3, 2,
 		[]float64{1, 2, 3, 4, 5, 6})
-	B := d.NewGeneral(blas.ColMajor, 3, 2,
+	B := dbw.NewGeneral(blas.ColMajor, 3, 2,
 		[]float64{1, 1, 1, 2, 2, 2})
 
-	tau := d.Allocate(2)
+	tau := dbw.Allocate(2)
 
 	f := QR(A, tau)
 

@@ -190,6 +190,9 @@ func (pq *dStarPriorityQueue) Remove(node gr.Node) {
 
 // Rebuilds a path backwards from the goal.
 func rebuildPath(predecessors map[int]gr.Node, goal gr.Node) []gr.Node {
+	if n, ok := goal.(internalNode); ok {
+		goal = n.Node
+	}
 	path := []gr.Node{goal}
 	curr := goal
 	for prev, ok := predecessors[curr.ID()]; ok; prev, ok = predecessors[curr.ID()] {

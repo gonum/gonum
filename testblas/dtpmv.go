@@ -1,7 +1,6 @@
 package testblas
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/gonum/blas"
@@ -25,9 +24,7 @@ func DtpmvTest(t *testing.T, blasser Dtpmver) {
 
 	in := make([]float64, len(x1))
 	copy(in, x1)
-	fmt.Println(in)
 	blasser.Dtpmv(blas.ColMajor, blas.Upper, blas.NoTrans, blas.NonUnit, 3, tp, in, 1)
-	fmt.Println(in)
 
 	if !dSliceTolEqual(in, solNoTrans) {
 		t.Error("Wrong Dtpmv result for: ColMajor, Upper, NoTrans, NonUnit, IncX==1")

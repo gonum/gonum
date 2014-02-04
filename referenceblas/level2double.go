@@ -388,6 +388,19 @@ func (Blas) Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	if o != blas.RowMajor && o != blas.ColMajor {
 		panic(badOrder)
 	}
+	if o == blas.RowMajor {
+		if tA == blas.NoTrans {
+			tA = blas.Trans
+		} else {
+			tA = blas.NoTrans
+		}
+		if ul == blas.Upper {
+			ul = blas.Lower
+		} else {
+			ul = blas.Upper
+		}
+	}
+
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -401,7 +414,7 @@ func (Blas) Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 		panic(nLT0)
 	}
 	if lda > n && lda > 1 {
-		panic("blas: lda must be less than max(1,n)")
+		panic(badLda)
 	}
 	if incX == 0 {
 		panic(zeroInc)
@@ -415,67 +428,73 @@ func (Blas) Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 	}
 	switch {
 	default:
-		panic("not yet implemented")
-	case o == blas.RowMajor && tA == blas.NoTrans && ul == blas.Upper:
+		panic("unreachable")
+	case tA == blas.NoTrans && ul == blas.Upper:
 		jx := kx
 		for j := 0; j < n; j++ {
+			ja := j * lda
 			if x[jx] != 0 {
 				temp := x[jx]
 				ix := kx
-				for i := 0; i < j-1; i++ {
-					x[ix] += temp * a[lda*i+j]
+				for i := 0; i < j; i++ {
+					x[ix] += temp * a[i+ja]
 					ix += incX
 				}
 				if d == blas.NonUnit {
-					x[jx] *= a[lda*j+j]
+					x[jx] *= a[j+ja]
 				}
 			}
 			jx += incX
 		}
-	case o == blas.RowMajor && tA == blas.NoTrans && ul == blas.Lower:
+	case tA == blas.NoTrans && ul == blas.Lower:
 		kx += (n - 1) * incX
 		jx := kx
 		for j := n - 1; j >= 0; j-- {
+			ja := j * lda
 			if x[jx] != 0 {
 				tmp := x[jx]
 				ix := kx
-				for i := n - 1; i >= j; i-- {
-					x[ix] += tmp * a[lda*i+j]
+				for i := n - 1; i > j; i-- {
+					x[ix] += tmp * a[i+ja]
+					ix -= incX
 				}
 				if d == blas.NonUnit {
-					x[jx] *= a[lda*j+j]
+					x[jx] *= a[j+ja]
 				}
 			}
+			jx -= incX
 		}
-	case o == blas.RowMajor && (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
+	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
 		jx := kx + (n-1)*incX
 		for j := n - 1; j >= 0; j-- {
+			ja := j * lda
 			tmp := x[jx]
 			ix := jx
 			if d == blas.NonUnit {
-				tmp *= a[lda*j+j]
+				tmp *= a[j+ja]
 			}
-			for i := j - 2; j >= 0; j-- {
+			for i := j - 1; i >= 0; i-- {
 				ix -= incX
-				tmp += a[lda*i+j] * x[ix]
+				tmp += a[i+ja] * x[ix]
 			}
 			x[jx] = tmp
 			jx -= incX
 		}
-	case o == blas.RowMajor && (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
+	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
 		jx := kx
 		for j := 0; j < n; j++ {
 			tmp := x[jx]
 			ix := jx
+			ja := j * lda
 			if d == blas.NonUnit {
-				tmp *= a[lda*j+j]
-				for i := j; i < n; i++ {
-					ix += incX
-					tmp += a[lda*i+j] * x[ix]
-				}
-				x[jx] = tmp
-				jx += incX
+				tmp *= a[j+ja]
 			}
+			for i := j + 1; i < n; i++ {
+				ix += incX
+				tmp += a[i+ja] * x[ix]
+			}
+			x[jx] = tmp
+			jx += incX
 		}
 	}
 }

@@ -3,7 +3,7 @@
 // (Documentation says incx must not be zero)
 //
 // TODO: Improve documentation
-package referenceblas
+package goblas
 
 import (
 	"math"

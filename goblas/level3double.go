@@ -1,4 +1,4 @@
-package referenceblas
+package goblas
 
 import "github.com/gonum/blas"
 

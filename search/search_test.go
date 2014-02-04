@@ -180,3 +180,44 @@ func TestDStarLite(t *testing.T) {
 	}
 }
 */
+
+// Test for correct result on a small graph easily solvable by hand
+func TestDijkstra(t *testing.T) {
+	g := concrete.NewGonumGraph(false)
+	for i := 1; i <= 6; i++ {
+		g.AddNode(concrete.GonumNode(i), nil)
+	}
+	for _, ed := range [][3]int{
+		{1, 2, 7},
+		{1, 3, 9},
+		{1, 6, 14},
+		{2, 3, 10},
+		{2, 4, 15},
+		{3, 4, 11},
+		{3, 6, 2},
+		{4, 5, 6},
+		{5, 6, 9},
+	} {
+		e := concrete.GonumEdge{
+			concrete.GonumNode(ed[0]),
+			concrete.GonumNode(ed[1]),
+		}
+		g.AddEdge(e)
+		g.SetEdgeCost(e, float64(ed[2]))
+	}
+	paths, lens := search.Dijkstra(concrete.GonumNode(1), g, nil)
+	s := fmt.Sprintln(len(paths), len(lens))
+	for i := 1; i <= 6; i++ {
+		s += fmt.Sprintln(paths[i], lens[i])
+	}
+	if s != `6 6
+[1] 0
+[1 2] 7
+[1 3] 9
+[1 3 4] 20
+[1 3 6 5] 20
+[1 3 6] 11
+` {
+		t.Fatal(s)
+	}
+}

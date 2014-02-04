@@ -1,18 +1,31 @@
-package z
+package dbw
+
+import "github.com/gonum/blas"
 
 import (
 	"errors"
-	"github.com/gonum/blas"
+	"fmt"
 )
+
+func Allocate(dims ...int) []float64 {
+	if len(dims) == 0 {
+		return nil
+	}
+	n := 1
+	for _, v := range dims {
+		n *= v
+	}
+	return make([]float64, n)
+}
 
 type General struct {
 	Order      blas.Order
 	Rows, Cols int
 	Stride     int
-	Data       []complex128
+	Data       []float64
 }
 
-func NewGeneral(o blas.Order, m, n int, data []complex128) General {
+func NewGeneral(o blas.Order, m, n int, data []float64) General {
 	var A General
 	if o == blas.RowMajor {
 		A = General{o, m, n, n, data}
@@ -21,6 +34,18 @@ func NewGeneral(o blas.Order, m, n int, data []complex128) General {
 	}
 	must(A.Check())
 	return A
+}
+
+func (A General) At(i, j int) float64 {
+	return A.Data[A.Index(i, j)]
+}
+
+func (A General) Set(i, j int, v float64) {
+	A.Data[A.Index(i, j)] = v
+}
+
+func (A General) Dims() (int, int) {
+	return A.Rows, A.Cols
 }
 
 func (A General) Index(i, j int) int {
@@ -107,7 +132,7 @@ type GeneralBand struct {
 
 type Triangular struct {
 	Order  blas.Order
-	Data   []complex128
+	Data   []float64
 	N      int
 	Stride int
 	Uplo   blas.Uplo
@@ -116,7 +141,7 @@ type Triangular struct {
 
 type TriangularBand struct {
 	Order  blas.Order
-	Data   []complex128
+	Data   []float64
 	N, K   int
 	Stride int
 	Uplo   blas.Uplo
@@ -125,7 +150,7 @@ type TriangularBand struct {
 
 type TriangularPacked struct {
 	Order blas.Order
-	Data  []complex128
+	Data  []float64
 	N     int
 	Uplo  blas.Uplo
 	Diag  blas.Diag
@@ -133,40 +158,43 @@ type TriangularPacked struct {
 
 type Symmetric struct {
 	Order     blas.Order
-	Data      []complex128
+	Data      []float64
 	N, Stride int
 	Uplo      blas.Uplo
 }
 
-type Hermitian struct {
-	Order     blas.Order
-	Data      []complex128
-	N, Stride int
-	Uplo      blas.Uplo
-}
-
-type HermitianBand struct {
+type SymmetricBand struct {
 	Order        blas.Order
-	Data         []complex128
+	Data         []float64
 	N, K, Stride int
 	Uplo         blas.Uplo
 }
 
-type HermitianPacked struct {
+type SymmetricPacked struct {
 	Order blas.Order
-	Data  []complex128
+	Data  []float64
 	N     int
 	Uplo  blas.Uplo
 }
 
 type Vector struct {
-	Data []complex128
+	Data []float64
 	N    int
 	Inc  int
 }
 
-func NewVector(v []complex128) Vector {
+func NewVector(v []float64) Vector {
 	return Vector{v, len(v), 1}
+}
+
+func (v Vector) Slice(l, r int) Vector {
+	if l < 0 || r > v.N {
+		panic("blas: index out of range")
+	}
+	if r > l {
+		panic(fmt.Sprintf("blas: invalid slice index:", r, ">", l))
+	}
+	return Vector{v.Data[l*v.Inc:], r - l, v.Inc}
 }
 
 func (v Vector) Check() error {
@@ -190,12 +218,12 @@ func Ge2Tr(A General, d blas.Diag, ul blas.Uplo) Triangular {
 	return Triangular{A.Order, A.Data, n, A.Stride, ul, d}
 }
 
-func Ge2He(A General, ul blas.Uplo) Hermitian {
+func Ge2Sy(A General, ul blas.Uplo) Symmetric {
 	n := A.Rows
 	if A.Cols < n {
 		n = A.Cols
 	}
-	return Hermitian{A.Order, A.Data, n, A.Stride, ul}
+	return Symmetric{A.Order, A.Data, n, A.Stride, ul}
 }
 
 func must(err error) {

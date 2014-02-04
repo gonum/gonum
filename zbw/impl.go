@@ -1,4 +1,4 @@
-package z
+package zbw
 
 import "github.com/gonum/blas"
 

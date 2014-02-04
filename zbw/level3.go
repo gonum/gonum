@@ -1,8 +1,8 @@
-package z
+package zbw
 
 import "github.com/gonum/blas"
 
-func Zgemm(tA, tB blas.Transpose, alpha complex128, A, B General, beta complex128, C General) {
+func Gemm(tA, tB blas.Transpose, alpha complex128, A, B General, beta complex128, C General) {
 	var m, n, k int
 	if tA == blas.NoTrans {
 		m, k = A.Rows, A.Cols
@@ -30,7 +30,7 @@ func Zgemm(tA, tB blas.Transpose, alpha complex128, A, B General, beta complex12
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
-func Zsymm(s blas.Side, alpha complex128, A Symmetric, B General, beta complex128, C General) {
+func Symm(s blas.Side, alpha complex128, A Symmetric, B General, beta complex128, C General) {
 	var m, n int
 	if s == blas.Left {
 		m = A.N
@@ -55,7 +55,7 @@ func Zsymm(s blas.Side, alpha complex128, A Symmetric, B General, beta complex12
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
-func Zsyrk(t blas.Transpose, alpha complex128, A General, beta complex128, C Symmetric) {
+func Syrk(t blas.Transpose, alpha complex128, A General, beta complex128, C Symmetric) {
 	var n, k int
 	if t == blas.NoTrans {
 		n, k = A.Rows, A.Cols
@@ -69,7 +69,7 @@ func Zsyrk(t blas.Transpose, alpha complex128, A General, beta complex128, C Sym
 		C.Data, C.Stride)
 }
 
-func Zsyr2k(t blas.Transpose, alpha complex128, A, B General, beta complex128, C Symmetric) {
+func Syr2k(t blas.Transpose, alpha complex128, A, B General, beta complex128, C Symmetric) {
 	var n, k int
 	if t == blas.NoTrans {
 		n, k = A.Rows, A.Cols
@@ -89,7 +89,7 @@ func Zsyr2k(t blas.Transpose, alpha complex128, A, B General, beta complex128, C
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
-func Ztrmm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B General) {
+func Trmm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B General) {
 	if s == blas.Left {
 		if A.N != B.Rows {
 			panic("blas: dimension mismatch")
@@ -103,7 +103,7 @@ func Ztrmm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B Gen
 		B.Data, B.Stride)
 }
 
-func Ztrsm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B General) {
+func Trsm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B General) {
 	if s == blas.Left {
 		if A.N != B.Rows {
 			panic("blas: dimension mismatch")
@@ -117,7 +117,7 @@ func Ztrsm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B Gen
 		B.Data, B.Stride)
 }
 
-func Zhemm(s blas.Side, alpha complex128, A Hermitian, B General, beta complex128, C General) {
+func Hemm(s blas.Side, alpha complex128, A Hermitian, B General, beta complex128, C General) {
 	var m, n int
 	if s == blas.Left {
 		m = A.N
@@ -142,7 +142,7 @@ func Zhemm(s blas.Side, alpha complex128, A Hermitian, B General, beta complex12
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
-func Zherk(t blas.Transpose, alpha float64, A General, beta float64, C Hermitian) {
+func Herk(t blas.Transpose, alpha float64, A General, beta float64, C Hermitian) {
 	var n, k int
 	if t == blas.NoTrans {
 		n, k = A.Rows, A.Cols
@@ -156,7 +156,7 @@ func Zherk(t blas.Transpose, alpha float64, A General, beta float64, C Hermitian
 		C.Data, C.Stride)
 }
 
-func Zher2k(t blas.Transpose, alpha complex128, A, B General, beta float64, C Hermitian) {
+func Her2k(t blas.Transpose, alpha complex128, A, B General, beta float64, C Hermitian) {
 	var n, k int
 	if t == blas.NoTrans {
 		n, k = A.Rows, A.Cols

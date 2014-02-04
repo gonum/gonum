@@ -1,13 +1,12 @@
-package d
-
-import "github.com/gonum/blas"
+package zbw
 
 import (
 	"errors"
 	"fmt"
+	"github.com/gonum/blas"
 )
 
-func Allocate(dims ...int) []float64 {
+func Allocate(dims ...int) []complex128 {
 	if len(dims) == 0 {
 		return nil
 	}
@@ -15,17 +14,17 @@ func Allocate(dims ...int) []float64 {
 	for _, v := range dims {
 		n *= v
 	}
-	return make([]float64, n)
+	return make([]complex128, n)
 }
 
 type General struct {
 	Order      blas.Order
 	Rows, Cols int
 	Stride     int
-	Data       []float64
+	Data       []complex128
 }
 
-func NewGeneral(o blas.Order, m, n int, data []float64) General {
+func NewGeneral(o blas.Order, m, n int, data []complex128) General {
 	var A General
 	if o == blas.RowMajor {
 		A = General{o, m, n, n, data}
@@ -34,18 +33,6 @@ func NewGeneral(o blas.Order, m, n int, data []float64) General {
 	}
 	must(A.Check())
 	return A
-}
-
-func (A General) At(i, j int) float64 {
-	return A.Data[A.Index(i, j)]
-}
-
-func (A General) Set(i, j int, v float64) {
-	A.Data[A.Index(i, j)] = v
-}
-
-func (A General) Dims() (int, int) {
-	return A.Rows, A.Cols
 }
 
 func (A General) Index(i, j int) int {
@@ -132,7 +119,7 @@ type GeneralBand struct {
 
 type Triangular struct {
 	Order  blas.Order
-	Data   []float64
+	Data   []complex128
 	N      int
 	Stride int
 	Uplo   blas.Uplo
@@ -141,7 +128,7 @@ type Triangular struct {
 
 type TriangularBand struct {
 	Order  blas.Order
-	Data   []float64
+	Data   []complex128
 	N, K   int
 	Stride int
 	Uplo   blas.Uplo
@@ -150,7 +137,7 @@ type TriangularBand struct {
 
 type TriangularPacked struct {
 	Order blas.Order
-	Data  []float64
+	Data  []complex128
 	N     int
 	Uplo  blas.Uplo
 	Diag  blas.Diag
@@ -158,32 +145,39 @@ type TriangularPacked struct {
 
 type Symmetric struct {
 	Order     blas.Order
-	Data      []float64
+	Data      []complex128
 	N, Stride int
 	Uplo      blas.Uplo
 }
 
-type SymmetricBand struct {
+type Hermitian struct {
+	Order     blas.Order
+	Data      []complex128
+	N, Stride int
+	Uplo      blas.Uplo
+}
+
+type HermitianBand struct {
 	Order        blas.Order
-	Data         []float64
+	Data         []complex128
 	N, K, Stride int
 	Uplo         blas.Uplo
 }
 
-type SymmetricPacked struct {
+type HermitianPacked struct {
 	Order blas.Order
-	Data  []float64
+	Data  []complex128
 	N     int
 	Uplo  blas.Uplo
 }
 
 type Vector struct {
-	Data []float64
+	Data []complex128
 	N    int
 	Inc  int
 }
 
-func NewVector(v []float64) Vector {
+func NewVector(v []complex128) Vector {
 	return Vector{v, len(v), 1}
 }
 
@@ -218,12 +212,12 @@ func Ge2Tr(A General, d blas.Diag, ul blas.Uplo) Triangular {
 	return Triangular{A.Order, A.Data, n, A.Stride, ul, d}
 }
 
-func Ge2Sy(A General, ul blas.Uplo) Symmetric {
+func Ge2He(A General, ul blas.Uplo) Hermitian {
 	n := A.Rows
 	if A.Cols < n {
 		n = A.Cols
 	}
-	return Symmetric{A.Order, A.Data, n, A.Stride, ul}
+	return Hermitian{A.Order, A.Data, n, A.Stride, ul}
 }
 
 func must(err error) {

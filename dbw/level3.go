@@ -1,4 +1,4 @@
-package d
+package dbw
 
 import "github.com/gonum/blas"
 

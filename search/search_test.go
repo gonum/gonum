@@ -128,6 +128,7 @@ func TestSmallAStar(t *testing.T) {
 		for goalID, dPath := range dPaths {
 			exp := fmt.Sprintln(dPath, dCosts[goalID])
 			aPath, aCost, work := search.AStar(start, concrete.GonumNode(goalID), gg, nil, heur)
+			fmt.Println()
 			got := fmt.Sprintln(aPath, aCost)
 			if got != exp {
 				t.Fatal("expected", exp, "got", got)

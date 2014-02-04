@@ -33,7 +33,7 @@ func AStar(start, goal gr.Node, graph gr.Graph, Cost, HeuristicCost func(gr.Node
 	successors, _, _, _, _, _, Cost, HeuristicCost := setupFuncs(graph, Cost, HeuristicCost)
 
 	closedSet := make(map[int]internalNode)
-	openSet := &aStarPriorityQueue{}
+	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
 	heap.Init(openSet)
 	node := internalNode{start, 0, HeuristicCost(start, goal)}
 	heap.Push(openSet, node)
@@ -41,12 +41,6 @@ func AStar(start, goal gr.Node, graph gr.Graph, Cost, HeuristicCost func(gr.Node
 
 	for openSet.Len() != 0 {
 		curr := heap.Pop(openSet).(internalNode)
-
-		// This isn't in most implementations of A*, it's a restructuring of the step "if node not in openSet, add it"
-		// Instead of searching to check, we see if we already evaluated it. If we have we can ignore it
-		if _, ok := closedSet[curr.ID()]; ok {
-			continue
-		}
 
 		nodesExpanded += 1
 
@@ -57,15 +51,19 @@ func AStar(start, goal gr.Node, graph gr.Graph, Cost, HeuristicCost func(gr.Node
 		closedSet[curr.ID()] = curr
 
 		for _, neighbor := range successors(curr.Node) {
-			g := curr.gscore + Cost(curr.Node, neighbor)
-			if _, ok := closedSet[neighbor.ID()]; ok && g >= closedSet[neighbor.ID()].gscore {
+			if _, ok := closedSet[neighbor.ID()]; ok {
 				continue
 			}
 
-			if _, ok := closedSet[neighbor.ID()]; !ok || g < closedSet[neighbor.ID()].gscore {
+			g := curr.gscore + Cost(curr.Node, neighbor)
+
+			if existing, exists := openSet.Find(neighbor.ID()); !exists {
+				predecessor[neighbor.ID()] = curr
 				node = internalNode{neighbor, g, g + HeuristicCost(neighbor, goal)}
-				predecessor[node.ID()] = curr
 				heap.Push(openSet, node)
+			} else if g < existing.gscore {
+				predecessor[neighbor.ID()] = curr
+				openSet.Fix(neighbor.ID(), g, g+HeuristicCost(neighbor, goal))
 			}
 		}
 	}
@@ -94,7 +92,7 @@ func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float6
 	successors, _, _, _, _, _, Cost, _ := setupFuncs(graph, Cost, nil)
 
 	nodes := graph.NodeList()
-	openSet := &aStarPriorityQueue{}
+	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
 	closedSet := set.NewSet()                 // This is to make use of that same
 	costs = make(map[int]float64, len(nodes)) // May overallocate, will change if it becomes a problem
 	predecessor := make(map[int]gr.Node, len(nodes))

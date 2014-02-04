@@ -153,7 +153,8 @@ const (
 type Uplo int
 
 const (
-	Upper Uplo = 121 + iota
+	All Uplo = 120 + iota
+	Upper
 	Lower
 )
 

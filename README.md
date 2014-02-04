@@ -46,7 +46,7 @@ func init() {
 }
 
 func main() {
-	v := Vector{[]float64{1, 1, 1}, 3, 1}
+	v := dbw.Vector{[]float64{1, 1, 1}, 3, 1}
 	fmt.Println("v has length:", dbw.Nrm2(v))
 }
 ```

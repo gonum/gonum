@@ -115,7 +115,7 @@ func TestNoPathAStar(t *testing.T) {
 	}
 }
 
-/*func TestSmallAStar(t *testing.T) {
+func TestSmallAStar(t *testing.T) {
 	gg := newSmallGonumGraph()
 	heur := newSmallHeuristic()
 	if ok, edge, goal := monotonic(gg, heur); !ok {
@@ -127,16 +127,14 @@ func TestNoPathAStar(t *testing.T) {
 		// assert that AStar finds each path
 		for goalID, dPath := range dPaths {
 			exp := fmt.Sprintln(dPath, dCosts[goalID])
-			aPath, aCost, work := search.AStar(start, concrete.GonumNode(goalID), gg, nil, heur)
-			fmt.Println()
+			aPath, aCost, _ := search.AStar(start, concrete.GonumNode(goalID), gg, nil, heur)
 			got := fmt.Sprintln(aPath, aCost)
 			if got != exp {
 				t.Error("expected", exp, "got", got)
 			}
-			t.Log(aPath, work)
 		}
 	}
-}*/
+}
 
 func ExampleBreadthFirstSearch() {
 	g := concrete.NewGonumGraph(true)
@@ -160,7 +158,7 @@ func newSmallGonumGraph() *concrete.GonumGraph {
 		{2, 4, 15},
 		{3, 4, 11},
 		{3, 6, 2},
-		{4, 5, 6},
+		{4, 5, 7},
 		{5, 6, 9},
 	}
 	g := concrete.NewGonumGraph(false)
@@ -184,7 +182,7 @@ func newSmallHeuristic() func(n1, n2 graph.Node) float64 {
 		{2, 1, 0},
 		{3, 8, 7},
 		{4, 16, 0},
-		{5, 17, 5},
+		{5, 17, 6},
 		{6, 9, 8},
 	}
 	return func(n1, n2 graph.Node) float64 {

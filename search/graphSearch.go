@@ -5,6 +5,7 @@ import (
 	"math"
 	"sort"
 
+	"errors"
 	gr "github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/set"
@@ -139,8 +140,8 @@ func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float6
 //
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight cycle.
-func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (paths map[int][]gr.Node, costs map[int]float64, aborted bool) {
-	_, _, _, _, _, _, Cost, _ = setupFuncs(graph, Cost, nil)
+func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (paths map[int][]gr.Node, costs map[int]float64, err error) {
+	successors, _, _, _, _, _, Cost, _ := setupFuncs(graph, Cost, nil)
 
 	predecessor := make(map[int]gr.Node)
 	costs = make(map[int]float64)
@@ -148,24 +149,30 @@ func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) flo
 	nodeIDMap[source.ID()] = source
 	costs[source.ID()] = 0
 	nodes := graph.NodeList()
-	edges := graph.EdgeList()
 
 	for i := 1; i < len(nodes)-1; i++ {
-		for _, edge := range edges {
-			weight := Cost(edge.Head(), edge.Tail())
-			nodeIDMap[edge.Head().ID()] = edge.Head()
-			nodeIDMap[edge.Tail().ID()] = edge.Tail()
-			if dist := costs[edge.Head().ID()] + weight; dist < costs[edge.Tail().ID()] {
-				costs[edge.Tail().ID()] = dist
-				predecessor[edge.Tail().ID()] = edge.Head()
+		for _, node := range nodes {
+			nodeIDMap[node.ID()] = node
+			succs := successors(node)
+			for _, succ := range succs {
+				weight := Cost(node, succ)
+				nodeIDMap[succ.ID()] = succ
+
+				if dist := costs[node.ID()] + weight; dist < costs[succ.ID()] {
+					costs[succ.ID()] = dist
+					predecessor[succ.ID()] = node
+				}
 			}
+
 		}
 	}
 
-	for _, edge := range edges {
-		weight := Cost(edge.Head(), edge.Tail())
-		if costs[edge.Head().ID()]+weight < costs[edge.Tail().ID()] {
-			return nil, nil, true // Abandoned because a cycle is detected
+	for _, node := range nodes {
+		for _, succ := range successors(node) {
+			weight := Cost(node, succ)
+			if costs[node.ID()]+weight < costs[succ.ID()] {
+				return nil, nil, errors.New("Negative edge cycle detected")
+			}
 		}
 	}
 
@@ -173,7 +180,7 @@ func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) flo
 	for node, _ := range costs {
 		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
-	return paths, costs, false
+	return paths, costs, nil
 }
 
 // Johnson's Algorithm generates the lowest cost path between every pair of nodes in the graph.

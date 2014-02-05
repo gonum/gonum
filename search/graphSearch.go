@@ -99,15 +99,29 @@ func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float6
 	nodeIDMap := make(map[int]gr.Node, len(nodes))
 	heap.Init(openSet)
 
+	// I don't think we actually need the init step since I use a map check rather than inf to check if we're done
+	/*for _, node := range nodes {
+		if node == source {
+			heap.Push(openSet, internalNode{node, 0, 0})
+			costs[node] = 0
+		} else {
+			heap.Push(openSet, internalNode{node, math.MaxFloat64, math.MaxFloat64})
+			predecessor[node] = -1
+		}
+	}*/
+
 	costs[source.ID()] = 0
 	heap.Push(openSet, internalNode{source, 0, 0})
 
 	for openSet.Len() != 0 {
 		node := heap.Pop(openSet).(internalNode)
+		/* if _, ok := costs[node.int]; !ok {
+			 break
+		 } */
 
-		/*if closedSet.Contains(node.ID()) { // As in A*, prevents us from having to slowly search and reorder the queue
+		if closedSet.Contains(node.ID()) { // As in A*, prevents us from having to slowly search and reorder the queue
 			continue
-		}*/
+		}
 
 		nodeIDMap[node.ID()] = node
 
@@ -115,14 +129,10 @@ func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float6
 
 		for _, neighbor := range successors(node) {
 			tmpCost := costs[node.ID()] + Cost(node, neighbor)
-			if cost, ok := costs[neighbor.ID()]; !ok {
+			if cost, ok := costs[neighbor.ID()]; !ok || tmpCost < cost {
 				costs[neighbor.ID()] = tmpCost
 				predecessor[neighbor.ID()] = node
 				heap.Push(openSet, internalNode{neighbor, tmpCost, tmpCost})
-			} else if tmpCost < cost {
-				costs[neighbor.ID()] = tmpCost
-				predecessor[neighbor.ID()] = node
-				openSet.Fix(neighbor.ID(), tmpCost, tmpCost)
 			}
 		}
 	}

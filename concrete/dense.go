@@ -124,6 +124,7 @@ func (dg *DenseGraph) SetEdgeCost(node, succ graph.Node, cost float64, directed 
 	}
 }
 
+// More or less equivalent to SetEdgeCost(node, succ, math.Inf(1), directed)
 func (dg *DenseGraph) RemoveEdge(node, succ graph.Node, directed bool) {
 	dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()] = math.Inf(1)
 	if !directed {

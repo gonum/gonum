@@ -115,7 +115,7 @@ func TestNoPathAStar(t *testing.T) {
 	}
 }
 
-/*func TestSmallAStar(t *testing.T) {
+func TestSmallAStar(t *testing.T) {
 	gg := newSmallGonumGraph()
 	heur := newSmallHeuristic()
 	if ok, edge, goal := monotonic(gg, heur); !ok {
@@ -136,7 +136,7 @@ func TestNoPathAStar(t *testing.T) {
 			t.Log(aPath, work)
 		}
 	}
-}*/
+}
 
 func ExampleBreadthFirstSearch() {
 	g := concrete.NewGonumGraph(true)

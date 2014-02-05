@@ -115,6 +115,30 @@ func TestApply(t *testing.T) {
 	AreSlicesEqual(t, truth, s, "Wrong application of function")
 }
 
+func TestArgsort(t *testing.T) {
+	s := []float64{3, 4, 1, 7, 5}
+	inds := make([]int, len(s))
+
+	Argsort(s, inds)
+
+	sortedS := []float64{1, 3, 4, 5, 7}
+	trueInds := []int{2, 0, 1, 4, 3}
+
+	if !Equal(s, sortedS) {
+		t.Error("elements not sorted correctly")
+	}
+	for i := range trueInds {
+		if trueInds[i] != inds[i] {
+			t.Error("inds not correct")
+		}
+	}
+
+	inds = []int{1, 2}
+	if !Panics(func() { Argsort(s, inds) }) {
+		t.Error("does not panic if lengths do not match")
+	}
+}
+
 func TestCount(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	f := func(v float64) bool { return v > 3.5 }

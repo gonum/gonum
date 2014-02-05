@@ -458,21 +458,15 @@ func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, Cost func(gr.Node, gr.Nod
 // Generates a minimum spanning tree for a graph using discrete.DisjointSet
 //
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost
-func Kruskal(dst gr.MutableGraph, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) {
-	if Cost == nil {
-		if cgraph, ok := graph.(gr.Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
+func Kruskal(dst gr.MutableGraph, graph gr.EdgeListGraph, cost func(gr.Node, gr.Node) float64) {
+	_, _, _, _, _, _, cost, _ = setupFuncs(graph, cost, nil)
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 
 	edgeList := graph.EdgeList()
 	edgeWeights := make(edgeSorter, 0, len(edgeList))
 	for _, edge := range edgeList {
-		edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: Cost(edge.Head(), edge.Tail())})
+		edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: cost(edge.Head(), edge.Tail())})
 	}
 
 	sort.Sort(edgeWeights)
@@ -483,6 +477,8 @@ func Kruskal(dst gr.MutableGraph, graph gr.Graph, Cost func(gr.Node, gr.Node) fl
 	}
 
 	for _, edge := range edgeWeights {
+		// The disjoint set doesn't really care for which is head and which is tail so this should work fine
+		// without checking both ways
 		if s1, s2 := ds.Find(edge.Edge.Head().ID()), ds.Find(edge.Edge.Tail().ID); s1 != s2 {
 			ds.Union(s1, s2)
 			if !dst.NodeExists(edge.Edge.Head()) {

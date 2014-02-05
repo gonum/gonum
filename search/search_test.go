@@ -8,7 +8,6 @@ import (
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/search"
-	//	"github.com/gonum/graph/set"
 )
 
 func TestSimpleAStar(t *testing.T) {

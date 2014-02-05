@@ -227,8 +227,10 @@ func Johnson(graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (nodePaths map
 	}
 
 	/* Step 3: reweight the graph and remove the dummy node */
-	for _, edge := range graph.EdgeList() {
-		dummyGraph.SetEdgeCost(edge, Cost(edge.Head(), edge.Tail())+costs[edge.Head().ID()]-costs[edge.Tail().ID()])
+	for _, node := range graph.NodeList() {
+		for _, succ := range successors(node) {
+			dummyGraph.SetEdgeCost(concrete.GonumEdge{node, succ}, Cost(node, succ)+costs[node.ID()]-costs[succ.ID()])
+		}
 	}
 
 	dummyGraph.RemoveNode(dummyNode)

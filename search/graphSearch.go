@@ -299,22 +299,21 @@ func CopyGraph(dst gr.MutableGraph, src gr.Graph) {
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 
-	var Cost func(gr.Node, gr.Node) float64
-	if cgraph, ok := src.(gr.Coster); ok {
-		Cost = cgraph.Cost
-	}
+	successors, _, _, _, _, _, cost, _ := setupFuncs(src, nil, nil)
 
-	for _, edge := range src.EdgeList() {
-		if !dst.NodeExists(edge.Head()) {
-			dst.AddNode(edge.Head(), []gr.Node{edge.Tail()})
+	for _, node := range src.NodeList() {
+		succs := successors(node)
+		if !dst.NodeExists(node) {
+			dst.AddNode(node, succs)
 		} else {
-			dst.AddEdge(edge)
-		}
-
-		if Cost != nil {
-			dst.SetEdgeCost(edge, Cost(edge.Head(), edge.Tail()))
+			for _, succ := range succs {
+				edge := concrete.GonumEdge{node, succ}
+				dst.AddEdge(edge)
+				dst.SetEdgeCost(edge, cost(node, succ))
+			}
 		}
 	}
+
 }
 
 /* Basic Graph tests */

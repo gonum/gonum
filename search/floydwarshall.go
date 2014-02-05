@@ -64,8 +64,6 @@ func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (A
 					}
 					// If the cost between the nodes happens to be the same cost as what we know, add the approriate
 					// intermediary to the list
-					//
-					// NOTE: This may be a straight else, awaiting tests.
 				} else if math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < 0.00001 {
 					next[i+j*numNodes] = append(next[i+j*numNodes], k)
 				}

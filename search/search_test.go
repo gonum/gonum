@@ -127,13 +127,11 @@ func TestSmallAStar(t *testing.T) {
 		// assert that AStar finds each path
 		for goalID, dPath := range dPaths {
 			exp := fmt.Sprintln(dPath, dCosts[goalID])
-			aPath, aCost, work := search.AStar(start, concrete.GonumNode(goalID), gg, nil, heur)
-			fmt.Println()
+			aPath, aCost, _ := search.AStar(start, concrete.GonumNode(goalID), gg, nil, heur)
 			got := fmt.Sprintln(aPath, aCost)
 			if got != exp {
 				t.Error("expected", exp, "got", got)
 			}
-			t.Log(aPath, work)
 		}
 	}
 }

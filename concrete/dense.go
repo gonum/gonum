@@ -5,12 +5,18 @@ import (
 	"math"
 )
 
+// A dense graph is a graph such that all IDs are in a contiguous block from 0 to TheNumberOfNodes-1
+// it uses an adjacency matrix and should be relatively fast for both access and writing.
+//
+// This graph implements the CrunchGraph, but since it's naturally dense this is superfluous
 type DenseGraph struct {
 	adjacencyMatrix []float64
 	numNodes        int
 }
 
-func NewDenseGraph(numNodes int, passable bool) graph.Graph {
+// Creates a dense graph with the proper number of nodes. If passable is true all nodes will have
+// an edge with cost 1.0, otherwise every node will start unconnected (cost of +Inf)
+func NewDenseGraph(numNodes int, passable bool) *DenseGraph {
 	dg := &DenseGraph{adjacencyMatrix: make([]float64, numNodes*numNodes), numNodes: numNodes}
 	if passable {
 		for i := range dg.adjacencyMatrix {
@@ -53,7 +59,7 @@ func (dg *DenseGraph) NodeList() []graph.Node {
 	return nodes
 }
 
-func (dg *DenseGraph) EdgeList() []graph.Edge {
+func (dg *DenseGraph) DirectedEdgeList() []graph.Edge {
 	edges := make([]graph.Edge, 0, len(dg.adjacencyMatrix))
 	for i := 0; i < dg.numNodes; i++ {
 		for j := 0; j < dg.numNodes; j++ {
@@ -113,10 +119,17 @@ func (dg *DenseGraph) IsPredecessor(node, pred graph.Node) bool {
 	return dg.adjacencyMatrix[pred.ID()*dg.numNodes+node.ID()] != math.Inf(1)
 }
 
-// Naturally dense, we don't need to do anything
+// DenseGraph is naturally dense, we don't need to do anything
 func (dg *DenseGraph) Crunch() {
 }
 
+func (dg *DenseGraph) Cost(node, succ graph.Node) float64 {
+	return dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()]
+}
+
+// Sets the cost of the edge between node and succ. If the cost is +Inf, it will remove the edge,
+// if directed is true, it will only remove the edge one way. If it's false it will change the cost
+// of the edge from succ to node as well.
 func (dg *DenseGraph) SetEdgeCost(node, succ graph.Node, cost float64, directed bool) {
 	dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()] = cost
 	if !directed {

@@ -131,7 +131,7 @@ func TestSmallAStar(t *testing.T) {
 			fmt.Println()
 			got := fmt.Sprintln(aPath, aCost)
 			if got != exp {
-				t.Fatal("expected", exp, "got", got)
+				t.Error("expected", exp, "got", got)
 			}
 			t.Log(aPath, work)
 		}

@@ -7,6 +7,7 @@ package floats
 import (
 	"errors"
 	"math"
+	"sort"
 )
 
 // Add returns the element-wise sum of all the slices with the
@@ -57,6 +58,40 @@ func AddScaledTo(dst []float64, y []float64, alpha float64, s []float64) []float
 		dst[i] = y[i] + alpha*val
 	}
 	return dst
+}
+
+type argsort struct {
+	s    []float64
+	inds []int
+}
+
+func (a argsort) Len() int {
+	return len(a.s)
+}
+
+func (a argsort) Less(i, j int) bool {
+	return a.s[i] < a.s[j]
+}
+
+func (a argsort) Swap(i, j int) {
+	a.s[i], a.s[j] = a.s[j], a.s[i]
+	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
+}
+
+// Argsort sorts the elements of s while tracking their original order.
+// At the conclusion of Argsort, s will contain the original elements of s
+// but sorted in increasing order, and inds will contain the original position
+// of the elements in the slice such that s[i] = sOrig[inds[i]].
+func Argsort(s []float64, inds []int) {
+	if len(s) != len(inds) {
+		panic("floats: length of inds does not match length of slice")
+	}
+	for i := range s {
+		inds[i] = i
+	}
+
+	a := argsort{s: s, inds: inds}
+	sort.Sort(a)
 }
 
 // ApplyFunc applies a function f (math.Exp, math.Sin, etc.) to every element

@@ -42,6 +42,20 @@ type EdgeLister interface {
 	EdgeList() []Edge
 }
 
+type EdgeListGraph interface {
+	Graph
+	EdgeLister
+}
+
+type DirectedEdgeLister interface {
+	DirectedEdgeList() []Edge
+}
+
+type DirectedEdgeListGraph interface {
+	Graph
+	DirectedEdgeLister
+}
+
 // A crunch graph forces a sparse graph to become a dense graph. That is, if the node IDs are [1,4,9,7] it would "crunch" the ids into the contiguous block [0,1,2,3]
 //
 // All dense graphs should have the first ID at 0

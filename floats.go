@@ -78,6 +78,14 @@ func (a argsort) Swap(i, j int) {
 	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
 }
 
+// ApplyFunc applies a function f (math.Exp, math.Sin, etc.) to every element
+// of the slice s.
+func Apply(f func(float64) float64, s []float64) {
+	for i, val := range s {
+		s[i] = f(val)
+	}
+}
+
 // Argsort sorts the elements of s while tracking their original order.
 // At the conclusion of Argsort, s will contain the original elements of s
 // but sorted in increasing order, and inds will contain the original position
@@ -92,14 +100,6 @@ func Argsort(s []float64, inds []int) {
 
 	a := argsort{s: s, inds: inds}
 	sort.Sort(a)
-}
-
-// ApplyFunc applies a function f (math.Exp, math.Sin, etc.) to every element
-// of the slice s.
-func Apply(f func(float64) float64, s []float64) {
-	for i, val := range s {
-		s[i] = f(val)
-	}
 }
 
 // Count applies the function f to every element of s and returns the number

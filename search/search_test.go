@@ -160,7 +160,7 @@ func newSmallGonumGraph() *concrete.GonumGraph {
 		{2, 4, 15},
 		{3, 4, 11},
 		{3, 6, 2},
-		{4, 5, 6},
+		{4, 5, 7},
 		{5, 6, 9},
 	}
 	g := concrete.NewGonumGraph(false)
@@ -184,7 +184,7 @@ func newSmallHeuristic() func(n1, n2 graph.Node) float64 {
 		{2, 1, 0},
 		{3, 8, 7},
 		{4, 16, 0},
-		{5, 17, 5},
+		{5, 17, 6},
 		{6, 9, 8},
 	}
 	return func(n1, n2 graph.Node) float64 {

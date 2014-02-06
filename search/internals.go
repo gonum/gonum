@@ -6,51 +6,57 @@ import (
 	gr "github.com/gonum/graph"
 )
 
+type searchFuncs struct {
+	successors, predecessors, neighbors    func(gr.Node) []gr.Node
+	isSuccessor, isPredecessor, isNeighbor func(gr.Node, gr.Node) bool
+	cost, heuristicCost                    gr.CostFun
+}
+
 // Sets up the cost functions and successor functions so I don't have to do a type switch every time.
 // This almost always does more work than is necessary, but since it's only executed once per function, and graph functions are rather costly, the "extra work"
 // should be negligible.
-func setupFuncs(graph gr.Graph, cost, heuristicCost func(gr.Node, gr.Node) float64) (successorsFunc, predecessorsFunc, neighborsFunc func(gr.Node) []gr.Node, isSuccessorFunc, isPredecessorFunc,
-	isNeighborFunc func(gr.Node, gr.Node) bool,
-	costFunc, heuristicCostFunc func(gr.Node, gr.Node) float64) {
+func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFun) searchFuncs {
+
+	sf := searchFuncs{}
 
 	switch g := graph.(type) {
 	case gr.DirectedGraph:
-		successorsFunc = g.Successors
-		predecessorsFunc = g.Predecessors
-		neighborsFunc = g.Neighbors
-		isSuccessorFunc = g.IsSuccessor
-		isPredecessorFunc = g.IsPredecessor
-		isNeighborFunc = g.IsNeighbor
+		sf.successors = g.Successors
+		sf.predecessors = g.Predecessors
+		sf.neighbors = g.Neighbors
+		sf.isSuccessor = g.IsSuccessor
+		sf.isPredecessor = g.IsPredecessor
+		sf.isNeighbor = g.IsNeighbor
 	default:
-		successorsFunc = g.Neighbors
-		predecessorsFunc = g.Neighbors
-		neighborsFunc = g.Neighbors
-		isSuccessorFunc = g.IsNeighbor
-		isPredecessorFunc = g.IsNeighbor
-		isNeighborFunc = g.IsNeighbor
+		sf.successors = g.Neighbors
+		sf.predecessors = g.Neighbors
+		sf.neighbors = g.Neighbors
+		sf.isSuccessor = g.IsNeighbor
+		sf.isPredecessor = g.IsNeighbor
+		sf.isNeighbor = g.IsNeighbor
 	}
 
 	if heuristicCost != nil {
-		heuristicCostFunc = heuristicCost
+		sf.heuristicCost = heuristicCost
 	} else {
 		if g, ok := graph.(gr.HeuristicCoster); ok {
-			heuristicCostFunc = g.HeuristicCost
+			sf.heuristicCost = g.HeuristicCost
 		} else {
-			heuristicCostFunc = NullHeuristic
+			sf.heuristicCost = NullHeuristic
 		}
 	}
 
 	if cost != nil {
-		costFunc = cost
+		sf.cost = cost
 	} else {
 		if g, ok := graph.(gr.Coster); ok {
-			costFunc = g.Cost
+			sf.cost = g.Cost
 		} else {
-			costFunc = UniformCost
+			sf.cost = UniformCost
 		}
 	}
 
-	return
+	return sf
 }
 
 /* Purely internal data structures and functions (mostly for sorting) */

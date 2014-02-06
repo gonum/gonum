@@ -91,7 +91,9 @@ func BreadthFirstSearch(start, goal gr.Node, graph gr.Graph) ([]gr.Node, int) {
 //
 // Dijkstra's algorithm usually only returns a cost map, however, since the data is available this version will also reconstruct the path to every node
 func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int][]gr.Node, costs map[int]float64) {
-	successors, _, _, _, _, _, cost, _ := setupFuncs(graph, cost, nil)
+
+	sf := setupFuncs(graph, cost, nil)
+	successors, cost := sf.successors, sf.cost
 
 	nodes := graph.NodeList()
 	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
@@ -142,7 +144,8 @@ func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int][]
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight cycle.
 func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int][]gr.Node, costs map[int]float64, err error) {
-	successors, _, _, _, _, _, cost, _ := setupFuncs(graph, cost, nil)
+	sf := setupFuncs(graph, cost, nil)
+	successors, cost := sf.successors, sf.cost
 
 	predecessor := make(map[int]gr.Node)
 	costs = make(map[int]float64)

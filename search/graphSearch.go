@@ -30,13 +30,13 @@ import (
 // To run Uniform Cost Search, run A* with the NullHeuristic
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost function that returns a uniform positive value)
-func AStar(start, goal gr.Node, graph gr.Graph, Cost, HeuristicCost func(gr.Node, gr.Node) float64) (path []gr.Node, cost float64, nodesExpanded int) {
-	successors, _, _, _, _, _, Cost, HeuristicCost := setupFuncs(graph, Cost, HeuristicCost)
+func AStar(start, goal gr.Node, graph gr.Graph, cost, heuristicCost gr.CostFun) (path []gr.Node, pathCost float64, nodesExpanded int) {
+	successors, _, _, _, _, _, cost, heuristicCost := setupFuncs(graph, cost, heuristicCost)
 
 	closedSet := make(map[int]internalNode)
 	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
 	heap.Init(openSet)
-	node := internalNode{start, 0, HeuristicCost(start, goal)}
+	node := internalNode{start, 0, heuristicCost(start, goal)}
 	heap.Push(openSet, node)
 	predecessor := make(map[int]gr.Node)
 
@@ -56,15 +56,15 @@ func AStar(start, goal gr.Node, graph gr.Graph, Cost, HeuristicCost func(gr.Node
 				continue
 			}
 
-			g := curr.gscore + Cost(curr.Node, neighbor)
+			g := curr.gscore + cost(curr.Node, neighbor)
 
 			if existing, exists := openSet.Find(neighbor.ID()); !exists {
 				predecessor[neighbor.ID()] = curr
-				node = internalNode{neighbor, g, g + HeuristicCost(neighbor, goal)}
+				node = internalNode{neighbor, g, g + heuristicCost(neighbor, goal)}
 				heap.Push(openSet, node)
 			} else if g < existing.gscore {
 				predecessor[neighbor.ID()] = curr
-				openSet.Fix(neighbor.ID(), g, g+HeuristicCost(neighbor, goal))
+				openSet.Fix(neighbor.ID(), g, g+heuristicCost(neighbor, goal))
 			}
 		}
 	}

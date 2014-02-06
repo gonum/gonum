@@ -154,4 +154,18 @@ func TestFWConfoundingPath(t *testing.T) {
 			t.Error("Wrong path found for all paths %v", path)
 		}
 	}
+
+	path, _, err = sPath(concrete.GonumNode(4), concrete.GonumNode(5))
+	if err != nil {
+		t.Log("Success!", err)
+	} else {
+		t.Error("Path was found by FW single path where one shouldn't be %v", path)
+	}
+
+	paths, _, err = aPaths(concrete.GonumNode(4), concrete.GonumNode(5))
+	if err != nil {
+		t.Log("Success!", err)
+	} else {
+		t.Error("Path was found by FW multi-path where one shouldn't be %v", paths)
+	}
 }

@@ -2,6 +2,10 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
+// package floats provides a set of helper routines for dealing with slices
+// of float64. The functions avoid allocations to allow for use within tight
+// loops without garbage collection overhead.
+
 package floats
 
 import (
@@ -305,7 +309,7 @@ func Fill(f func() float64, s []float64) {
 	}
 }
 
-// Find applies f to every element of s and returns the first
+// Find applies f to every element of s and returns the indices of the first
 // k elements for which the f returns true, or all such elements
 // if k < 0.
 // Find will reslice inds to have 0 length, and will append

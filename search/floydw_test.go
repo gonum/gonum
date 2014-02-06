@@ -107,6 +107,9 @@ func TestFWConfoundingPath(t *testing.T) {
 	// Add direct edge to goal of cost 4
 	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(5), 4.0, true)
 
+	// Add edge to a node that's still optimal
+	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(2), 2.0, true)
+
 	// Add edge to 3 that's overpriced
 	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(3), 4.0, true)
 
@@ -121,15 +124,17 @@ func TestFWConfoundingPath(t *testing.T) {
 	}
 
 	if math.Abs(cost-4.0) > .000001 {
-		t.Error("Incorrect cost %f", cost)
+		t.Errorf("Incorrect cost %f", cost)
 	}
 
 	if len(path) == 5 && path[0].ID() == 0 && path[1].ID() == 1 && path[2].ID() == 2 && path[3].ID() == 3 && path[4].ID() == 5 {
-		t.Log("Correct path found for single path %v", path)
+		t.Logf("Correct path found for single path %v", path)
 	} else if len(path) == 2 && path[0].ID() == 0 && path[1].ID() == 5 {
-		t.Log("Correct path found for single path %v", path)
+		t.Logf("Correct path found for single path %v", path)
+	} else if len(path) == 4 && path[0].ID() == 0 && path[1].ID() == 2 && path[2].ID() == 3 && path[3].ID() == 5 {
+		t.Logf("Correct path found for single path %v", path)
 	} else {
-		t.Error("Wrong path found for single path %v", path)
+		t.Errorf("Wrong path found for single path %v", path)
 	}
 
 	paths, cost, err := aPaths(concrete.GonumNode(0), concrete.GonumNode(5))
@@ -138,20 +143,22 @@ func TestFWConfoundingPath(t *testing.T) {
 	}
 
 	if math.Abs(cost-4.0) > .000001 {
-		t.Error("Incorrect cost %f", cost)
+		t.Errorf("Incorrect cost %f", cost)
 	}
 
-	if len(paths) != 2 {
-		t.Error("Wrong paths gooten for all paths %v", paths)
+	if len(paths) != 3 {
+		t.Errorf("Wrong paths gotten for all paths %v", paths)
 	}
 
 	for _, path := range paths {
 		if len(path) == 5 && path[0].ID() == 0 && path[1].ID() == 1 && path[2].ID() == 2 && path[3].ID() == 3 && path[4].ID() == 5 {
-			t.Log("Correct path found for all paths %v", path)
+			t.Logf("Correct path found for multi path %v", path)
 		} else if len(path) == 2 && path[0].ID() == 0 && path[1].ID() == 5 {
-			t.Log("Correct path found for all paths %v", path)
+			t.Logf("Correct path found for multi path %v", path)
+		} else if len(path) == 4 && path[0].ID() == 0 && path[1].ID() == 2 && path[2].ID() == 3 && path[3].ID() == 5 {
+			t.Logf("Correct path found for multi path %v", path)
 		} else {
-			t.Error("Wrong path found for all paths %v", path)
+			t.Errorf("Wrong path found for multi path %v", path)
 		}
 	}
 
@@ -159,13 +166,13 @@ func TestFWConfoundingPath(t *testing.T) {
 	if err != nil {
 		t.Log("Success!", err)
 	} else {
-		t.Error("Path was found by FW single path where one shouldn't be %v", path)
+		t.Errorf("Path was found by FW single path where one shouldn't be %v", path)
 	}
 
 	paths, _, err = aPaths(concrete.GonumNode(4), concrete.GonumNode(5))
 	if err != nil {
 		t.Log("Success!", err)
 	} else {
-		t.Error("Path was found by FW multi-path where one shouldn't be %v", paths)
+		t.Errorf("Path was found by FW multi-path where one shouldn't be %v", paths)
 	}
 }

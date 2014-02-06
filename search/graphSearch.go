@@ -307,7 +307,8 @@ func CopyGraph(dst gr.MutableGraph, src gr.Graph) {
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 
-	successors, _, _, _, _, _, cost, _ := setupFuncs(src, nil, nil)
+	sf := setupFuncs(src, nil, nil)
+	successors, cost := sf.successors, sf.cost
 
 	for _, node := range src.NodeList() {
 		succs := successors(node)

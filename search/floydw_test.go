@@ -7,7 +7,43 @@ import (
 	"testing"
 )
 
-func TestFloydWarshall(t *testing.T) {
+func TestFWOneEdge(t *testing.T) {
+	dg := concrete.NewDenseGraph(2, true)
+	aPaths, sPath := search.FloydWarshall(dg, nil)
+
+	path, cost, err := sPath(concrete.GonumNode(0), concrete.GonumNode(1))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if math.Abs(cost-1.0) > .000001 {
+		t.Errorf("FW got wrong cost %f", cost)
+	}
+
+	if len(path) != 2 || path[0].ID() != 0 && path[1].ID() != 1 {
+		t.Errorf("Wrong path in FW %v", path)
+	}
+
+	paths, cost, err := aPaths(concrete.GonumNode(0), concrete.GonumNode(1))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if math.Abs(cost-1.0) > .000001 {
+		t.Errorf("FW got wrong cost %f", cost)
+	}
+
+	if len(paths) != 1 {
+		t.Errorf("Didn't get right paths in FW %v", paths)
+	}
+
+	path = paths[0]
+	if len(path) != 2 || path[0].ID() != 0 && path[1].ID() != 1 {
+		t.Errorf("Wrong path in FW allpaths %v", path)
+	}
+}
+
+func TestFWTwoPaths(t *testing.T) {
 	dg := concrete.NewDenseGraph(5, false)
 	// Adds two paths from 0->2 of equal length
 	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(2), 2.0, true)

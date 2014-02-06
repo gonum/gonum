@@ -26,7 +26,7 @@ type SinglePathFunc func(start, goal gr.Node) (path []gr.Node, cost float64, err
 // the cost between all pairs of vertices. Using just a little extra memory, we can remember all shortest paths
 func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (AllPathFunc, SinglePathFunc) {
 	graph.Crunch()
-	successors, _, _, _, _, _, cost, _ := setupFuncs(graph, cost, nil)
+	successors, _, _, isSuccessor, _, _, cost, _ := setupFuncs(graph, cost, nil)
 
 	nodes := denseNodeSorter(graph.NodeList())
 	sort.Sort(nodes)
@@ -63,17 +63,17 @@ func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (A
 					}
 					// If the cost between the nodes happens to be the same cost as what we know, add the approriate
 					// intermediary to the list
-				} else if math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < 0.00001 {
+				} else if math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < 0.00001 && i != k && i != j && j != k {
 					next[i+j*numNodes] = append(next[i+j*numNodes], k)
 				}
 			}
 		}
 	}
 
-	return genAllPathsFunc(dist, next, nodes), genSinglePathFunc(dist, next, nodes)
+	return genAllPathsFunc(dist, next, nodes, graph, cost, isSuccessor), genSinglePathFunc(dist, next, nodes)
 }
 
-func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node) func(start, goal gr.Node) ([][]gr.Node, float64, error) {
+func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Graph, cost func(gr.Node, gr.Node) float64, isSuccessor func(gr.Node, gr.Node) bool) func(start, goal gr.Node) ([][]gr.Node, float64, error) {
 	numNodes := len(nodes)
 
 	// A recursive function to reconstruct all possible paths.
@@ -84,8 +84,9 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node) func(start, 
 			return nil, errors.New("No path")
 		}
 		intermediates := next[i+j*numNodes]
-		if intermediates == nil {
-			return [][]gr.Node{}, nil
+		if intermediates == nil || len(intermediates) == 0 {
+			// There is exactly one path
+			return [][]gr.Node{[]gr.Node{}}, nil
 		}
 
 		toReturn := make([][]gr.Node, 0, len(intermediates))
@@ -150,6 +151,10 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node) func(start, 
 			paths[i] = append(paths[i], goal)
 		}
 
+		if isSuccessor(start, goal) && math.Abs(dist[start.ID()+goal.ID()*numNodes]-cost(start, goal)) < .000001 {
+			paths = append(paths, []gr.Node{start, goal})
+		}
+
 		return paths, dist[start.ID()+goal.ID()*numNodes], nil
 	}
 }
@@ -164,7 +169,7 @@ func genSinglePathFunc(dist []float64, next [][]int, nodes []gr.Node) func(start
 		}
 
 		intermediates := next[i+j*numNodes]
-		if intermediates == nil {
+		if intermediates == nil || len(intermediates) == 0 {
 			return []gr.Node{}, nil
 		}
 

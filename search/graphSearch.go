@@ -393,7 +393,8 @@ func Tarjan(graph gr.Graph) (sccs [][]gr.Node) {
 //
 // Special case: a nil or zero length path is considered valid (true), a path of length 1 (only one node) is the trivial case, but only if the node listed in path exists.
 func IsPath(path []gr.Node, graph gr.Graph) bool {
-	_, _, _, isSuccessor, _, _, _, _ := setupFuncs(graph, nil, nil)
+	isSuccessor := setupFuncs(graph, nil, nil).isSuccessor
+
 	if path == nil || len(path) == 0 {
 		return true
 	} else if len(path) == 1 {

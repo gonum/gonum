@@ -405,14 +405,8 @@ func IsPath(path []gr.Node, graph gr.Graph) bool {
 // Generates a minimum spanning tree with sets.
 //
 // As with other algorithms that use Cost, the order of precedence is Argument > Interface > UniformCost
-func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, Cost func(gr.Node, gr.Node) float64) {
-	if Cost == nil {
-		if cgraph, ok := graph.(gr.Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
+func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFun) {
+	_, _, _, _, _, _, cost, _ = setupFuncs(graph, cost, nil)
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 
@@ -433,9 +427,9 @@ func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, Cost func(gr.Node, gr.Nod
 		edgeWeights := make(edgeSorter, 0)
 		for _, edge := range edgeList {
 			if dst.NodeExists(edge.Head()) && remainingNodes.Contains(edge.Tail().ID()) {
-				edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: Cost(edge.Head(), edge.Tail())})
+				edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: cost(edge.Head(), edge.Tail())})
 			} else if dst.NodeExists(edge.Tail()) && remainingNodes.Contains(edge.Head().ID()) {
-				edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: Cost(edge.Tail(), edge.Head())})
+				edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: cost(edge.Tail(), edge.Head())})
 			}
 		}
 

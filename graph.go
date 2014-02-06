@@ -120,3 +120,6 @@ type DStarGraph interface {
 	Move(target Node)
 	ChangedEdges() (newCostFunc func(Node, Node) float64, changedEdges []Edge)
 }
+
+// A function that returns the cost from one node to another
+type CostFun func(Node, Node) float64

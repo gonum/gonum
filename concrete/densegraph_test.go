@@ -20,8 +20,8 @@ func TestBasicDenseImpassable(t *testing.T) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
-		if neighbors := dg.Neighbors(concrete.GonumNode(i)); len(neighbors) != 0 {
-			t.Errorf("Node in impassable graph has a neighbor. Node: %d Neighbors: %v", i, neighbors)
+		if degree := dg.Degree(concrete.GonumNode(i)); degree != 0 {
+			t.Errorf("Node in impassable graph has a neighbor. Node: %d Degree: %d", i, degree)
 		}
 	}
 
@@ -43,8 +43,8 @@ func TestBasicDensePassable(t *testing.T) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
-		if neighbors := dg.Neighbors(concrete.GonumNode(i)); len(neighbors) != 5 {
-			t.Errorf("Node in passable graph doesn't have the right number of neighbors. Node: %d Neighbors: %v", i, neighbors)
+		if degree := dg.Degree(concrete.GonumNode(i)); degree != 10 {
+			t.Errorf("Node in impassable graph has a neighbor. Node: %d Degree: %d", i, degree)
 		}
 	}
 
@@ -54,3 +54,5 @@ func TestBasicDensePassable(t *testing.T) {
 		}
 	}
 }
+
+func 

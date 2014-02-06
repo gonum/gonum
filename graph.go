@@ -122,4 +122,4 @@ type DStarGraph interface {
 }
 
 // A function that returns the cost from one node to another
-type CostFun func(Node, Node) float64
+type CostFunc func(Node, Node) float64

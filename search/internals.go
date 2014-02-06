@@ -40,7 +40,7 @@ func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFun) searchFuncs {
 		sf.heuristicCost = heuristicCost
 	} else {
 		if g, ok := graph.(gr.HeuristicCoster); ok {
-			sf.heuristicCost = heuristicCost
+			sf.heuristicCost = g.HeuristicCost
 		} else {
 			sf.heuristicCost = NullHeuristic
 		}

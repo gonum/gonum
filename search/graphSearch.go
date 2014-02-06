@@ -416,7 +416,8 @@ func IsPath(path []gr.Node, graph gr.Graph) bool {
 //
 // As with other algorithms that use Cost, the order of precedence is Argument > Interface > UniformCost
 func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFun) {
-	_, _, _, _, _, _, cost, _ = setupFuncs(graph, cost, nil)
+	cost = setupFuncs(graph, cost, nil).cost
+
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 

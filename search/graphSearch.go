@@ -31,7 +31,8 @@ import (
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost function that returns a uniform positive value)
 func AStar(start, goal gr.Node, graph gr.Graph, cost, heuristicCost gr.CostFun) (path []gr.Node, pathCost float64, nodesExpanded int) {
-	successors, _, _, _, _, _, cost, heuristicCost := setupFuncs(graph, cost, heuristicCost)
+	sf := setupFuncs(graph, cost, heuristicCost)
+	successors, cost, heuristicCost := sf.successors, sf.cost, sf.heuristicCost
 
 	closedSet := make(map[int]internalNode)
 	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}

@@ -117,6 +117,10 @@ func (dg *DenseGraph) IsPredecessor(node, pred graph.Node) bool {
 func (dg *DenseGraph) Crunch() {
 }
 
+func (dg *DenseGraph) Cost(node, succ graph.Node) float64 {
+	return dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()]
+}
+
 func (dg *DenseGraph) SetEdgeCost(node, succ graph.Node, cost float64, directed bool) {
 	dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()] = cost
 	if !directed {

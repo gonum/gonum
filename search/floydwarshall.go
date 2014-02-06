@@ -148,7 +148,7 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Gra
 		}
 
 		for i := range paths {
-			// Prepend start and postpend goal. pathFinder only does the intermediate steps
+			// Prepend start and postpend goal, but don't repeat start/goal
 
 			if len(paths[i]) != 0 {
 				if paths[i][0].ID() != start.ID() {

@@ -12,19 +12,22 @@ import (
 type AllPathFunc func(start, goal gr.Node) (path [][]gr.Node, cost float64, err error)
 
 // Finds one path between start and goal, which it finds is arbitrary
-type SinglePathFunc func(start, goal gr.Node) (path []gr.Node, cost float64, err error)
+type PathFunc func(start, goal gr.Node) (path []gr.Node, cost float64, err error)
 
 // This function returns two functions: one that will generate all shortest paths between two nodes with ids i and j, and one that will generate just one path.
 //
-// This algorithm requires the CrunchGraph interface which means it only works on nodes with dense ids since it uses an adjacency matrix.
+// This algorithm requires the CrunchGraph interface which means it only works on graphs with dense node ids since it uses an adjacency matrix.
 //
-// This algorithm isn't blazingly fast, but is relatively fast for the domain. It runs at O((number of vertices)^3), and successfully computes
-// the cost between all pairs of vertices.
+// This algorithm isn't blazingly fast, but is relatively fast for the domain. It runs at O((number of vertices)^3) in best, worst, and average case,
+//  and successfully computes the cost between all pairs of vertices.
 //
-// Generating a single path should be pretty cheap after FW is done running. The AllPathFunc is likely to be considerably more expensive,
-// simply because it has to effectively generate all combinations of known valid paths at each recursive step of the algorithm.
-// the cost between all pairs of vertices. Using just a little extra memory, we can remember all shortest paths
-func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (AllPathFunc, SinglePathFunc) {
+// This function operates slightly differently from the others for convenience -- rather than generating paths and returning them to you,
+// it gives you the option of calling one of two functions for each start/goal pair you need info for. One will return the path, cost,
+// or an error if no path exists.
+//
+// The other will return the cost and an error if no path exists, but it will also return ALL possible shortest paths between start and goal.
+// This is not too much more expensive than generating one path, but it does obviously increase with the number of paths.
+func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (AllPathFunc, PathFunc) {
 	graph.Crunch()
 	successors, _, _, isSuccessor, _, _, cost, _ := setupFuncs(graph, cost, nil)
 

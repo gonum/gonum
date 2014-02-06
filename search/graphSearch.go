@@ -512,7 +512,7 @@ func Dominators(start gr.Node, graph gr.Graph) map[int]*set.Set {
 		allNodes.Add(node.ID())
 	}
 
-	_, predecessors, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
+	predecessors := setupFuncs(graph, nil, nil).predecessors
 
 	for _, node := range nlist {
 		dominators[node.ID()] = set.NewSet()

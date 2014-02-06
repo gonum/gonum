@@ -25,7 +25,7 @@ type SinglePathFunc func(start, goal gr.Node) (path []gr.Node, cost float64, err
 // simply because it has to effectively generate all combinations of known valid paths at each recursive step of the algorithm.
 func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (AllPathFunc, SinglePathFunc) {
 	graph.Crunch()
-	_, _, _, _, _, _, cost, _ = setupFuncs(graph, cost, nil)
+	successors, _, _, _, _, _, cost, _ := setupFuncs(graph, cost, nil)
 
 	nodes := denseNodeSorter(graph.NodeList())
 	sort.Sort(nodes)
@@ -41,12 +41,10 @@ func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (A
 		}
 	}
 
-	edges := graph.EdgeList()
-	for _, edge := range edges {
-		u := edge.Head().ID()
-		v := edge.Tail().ID()
-
-		dist[u+v*numNodes] = cost(edge.Head(), edge.Tail())
+	for _, node := range nodes {
+		for _, succ := range successors(node) {
+			dist[node.ID()+succ.ID()*numNodes] = cost(node, succ)
+		}
 	}
 
 	for k := 0; k < numNodes; k++ {

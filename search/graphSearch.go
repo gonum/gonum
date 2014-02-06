@@ -344,7 +344,7 @@ func Tarjan(graph gr.Graph) (sccs [][]gr.Node) {
 	lowlinks := make(map[int]int, len(nodes))
 	indices := make(map[int]int, len(nodes))
 
-	successors, _, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
+	successors := setupFuncs(graph, nil, nil).successors
 
 	var strongconnect func(gr.Node) []gr.Node
 

@@ -255,7 +255,9 @@ func Johnson(graph gr.Graph, cost gr.CostFun) (nodePaths map[int]map[int][]gr.No
 // Expands the first node it sees trying to find the destination. Depth First Search is *not* guaranteed to find the shortest path,
 // however, if a path exists DFS is guaranteed to find it (provided you don't find a way to implement a Graph with an infinite depth)
 func DepthFirstSearch(start, goal gr.Node, graph gr.Graph) []gr.Node {
-	successors, _, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
+	sf := setupFuncs(graph, nil, nil)
+	successors := sf.successors
+
 	closedSet := set.NewSet()
 	openSet := xifo.GonumStack([]interface{}{start})
 	predecessor := make(map[int]gr.Node)

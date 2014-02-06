@@ -200,7 +200,9 @@ func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int
 // Its return values are, in order: a map from the source node, to the destination node, to the path between them; a map from the source node, to the destination node, to the cost of the path between them;
 // and a bool that is true if Bellman-Ford detected a negative edge weight cycle -- thus causing it (and this algorithm) to abort (if aborted is true, both maps will be nil).
 func Johnson(graph gr.Graph, cost gr.CostFun) (nodePaths map[int]map[int][]gr.Node, nodeCosts map[int]map[int]float64, err error) {
-	successors, _, _, _, _, _, cost, _ := setupFuncs(graph, cost, nil)
+	sf := setupFuncs(graph, cost, nil)
+	successors, cost := sf.successors, sf.cost
+
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
 	dummyGraph := concrete.NewGonumGraph(true)
 	for _, node := range graph.NodeList() {

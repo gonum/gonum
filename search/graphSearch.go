@@ -556,7 +556,8 @@ func Dominators(start gr.Node, graph gr.Graph) map[int]*set.Set {
 //
 // This returns all possible post-dominators for all nodes, it does not prune for strict postdominators, immediate postdominators etc
 func PostDominators(end gr.Node, graph gr.Graph) map[int]*set.Set {
-	successors, _, _, _, _, _, _, _ := setupFuncs(graph, nil, nil)
+	successors := setupFuncs(graph, nil, nil).successors
+
 	allNodes := set.NewSet()
 	nlist := graph.NodeList()
 	dominators := make(map[int]*set.Set, len(nlist))

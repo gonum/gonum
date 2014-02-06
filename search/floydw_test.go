@@ -44,6 +44,10 @@ func TestFWOneEdge(t *testing.T) {
 }
 
 func TestFWTwoPaths(t *testing.T) {
+	"testing"
+)
+
+func TestFloydWarshall(t *testing.T) {
 	dg := concrete.NewDenseGraph(5, false)
 	// Adds two paths from 0->2 of equal length
 	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(2), 2.0, true)

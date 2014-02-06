@@ -14,43 +14,16 @@ type AllPathFunc func(start, goal gr.Node) (path [][]gr.Node, cost float64, err 
 // Finds one path between start and goal, which it finds is arbitrary
 type SinglePathFunc func(start, goal gr.Node) (path []gr.Node, cost float64, err error)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 // This function returns two functions: one that will generate all shortest paths between two nodes with ids i and j, and one that will generate just one path.
-=======
-// This function returns two functions that will generate all shortest paths between two nodes with ids i and j.
->>>>>>> Basic skeleton implementation of FW, tests to follow
-=======
-// This function returns two functions: one that will generate all shortest paths between two nodes with ids i and j, and one that will generate just one path.
->>>>>>> Basic skeleton implementation of FW, tests to follow
-=======
-// This function returns two functions: one that will generate all shortest paths between two nodes with ids i and j, and one that will generate just one path.
->>>>>>> f16cc78c331e7dbf763e8b9aea11ca415a5cef45
 //
 // This algorithm requires the CrunchGraph interface which means it only works on nodes with dense ids since it uses an adjacency matrix.
 //
 // This algorithm isn't blazingly fast, but is relatively fast for the domain. It runs at O((number of vertices)^3), and successfully computes
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Basic skeleton implementation of FW, tests to follow
-=======
->>>>>>> f16cc78c331e7dbf763e8b9aea11ca415a5cef45
 // the cost between all pairs of vertices.
 //
 // Generating a single path should be pretty cheap after FW is done running. The AllPathFunc is likely to be considerably more expensive,
 // simply because it has to effectively generate all combinations of known valid paths at each recursive step of the algorithm.
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 // the cost between all pairs of vertices. Using just a little extra memory, we can remember all shortest paths
->>>>>>> Basic skeleton implementation of FW, tests to follow
-=======
->>>>>>> Basic skeleton implementation of FW, tests to follow
-=======
->>>>>>> f16cc78c331e7dbf763e8b9aea11ca415a5cef45
 func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (AllPathFunc, SinglePathFunc) {
 	graph.Crunch()
 	_, _, _, _, _, _, cost, _ = setupFuncs(graph, cost, nil)
@@ -92,21 +65,6 @@ func FloydWarshall(graph gr.CrunchGraph, cost func(gr.Node, gr.Node) float64) (A
 					}
 					// If the cost between the nodes happens to be the same cost as what we know, add the approriate
 					// intermediary to the list
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-					//
-					// NOTE: This may be a straight else, awaiting tests.
-=======
->>>>>>> Basic skeleton implementation of FW, tests to follow
-=======
-					//
-					// NOTE: This may be a straight else, awaiting tests.
->>>>>>> Added a note
-=======
-					//
-					// NOTE: This may be a straight else, awaiting tests.
->>>>>>> f16cc78c331e7dbf763e8b9aea11ca415a5cef45
 				} else if math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < 0.00001 {
 					next[i+j*numNodes] = append(next[i+j*numNodes], k)
 				}

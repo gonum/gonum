@@ -10,7 +10,7 @@ type DenseGraph struct {
 	numNodes        int
 }
 
-func NewDenseGraph(numNodes int, passable bool) graph.Graph {
+func NewDenseGraph(numNodes int, passable bool) *DenseGraph {
 	dg := &DenseGraph{adjacencyMatrix: make([]float64, numNodes*numNodes), numNodes: numNodes}
 	if passable {
 		for i := range dg.adjacencyMatrix {

@@ -9,13 +9,13 @@ import (
 type searchFuncs struct {
 	successors, predecessors, neighbors    func(gr.Node) []gr.Node
 	isSuccessor, isPredecessor, isNeighbor func(gr.Node, gr.Node) bool
-	cost, heuristicCost                    gr.CostFun
+	cost, heuristicCost                    gr.CostFunc
 }
 
 // Sets up the cost functions and successor functions so I don't have to do a type switch every time.
 // This almost always does more work than is necessary, but since it's only executed once per function, and graph functions are rather costly, the "extra work"
 // should be negligible.
-func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFun) searchFuncs {
+func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
 
 	sf := searchFuncs{}
 

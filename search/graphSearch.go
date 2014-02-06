@@ -30,7 +30,7 @@ import (
 // To run Uniform Cost Search, run A* with the NullHeuristic
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost function that returns a uniform positive value)
-func AStar(start, goal gr.Node, graph gr.Graph, cost, heuristicCost gr.CostFun) (path []gr.Node, pathCost float64, nodesExpanded int) {
+func AStar(start, goal gr.Node, graph gr.Graph, cost, heuristicCost gr.CostFunc) (path []gr.Node, pathCost float64, nodesExpanded int) {
 	sf := setupFuncs(graph, cost, heuristicCost)
 	successors, cost, heuristicCost := sf.successors, sf.cost, sf.heuristicCost
 
@@ -90,7 +90,7 @@ func BreadthFirstSearch(start, goal gr.Node, graph gr.Graph) ([]gr.Node, int) {
 // Like A*, Dijkstra's Algorithm likely won't run correctly with negative edge weights -- use Bellman-Ford for that instead
 //
 // Dijkstra's algorithm usually only returns a cost map, however, since the data is available this version will also reconstruct the path to every node
-func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int][]gr.Node, costs map[int]float64) {
+func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[int][]gr.Node, costs map[int]float64) {
 
 	sf := setupFuncs(graph, cost, nil)
 	successors, cost := sf.successors, sf.cost
@@ -143,7 +143,7 @@ func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int][]
 //
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight cycle.
-func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int][]gr.Node, costs map[int]float64, err error) {
+func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[int][]gr.Node, costs map[int]float64, err error) {
 	sf := setupFuncs(graph, cost, nil)
 	successors, cost := sf.successors, sf.cost
 
@@ -199,7 +199,7 @@ func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int
 //
 // Its return values are, in order: a map from the source node, to the destination node, to the path between them; a map from the source node, to the destination node, to the cost of the path between them;
 // and a bool that is true if Bellman-Ford detected a negative edge weight cycle -- thus causing it (and this algorithm) to abort (if aborted is true, both maps will be nil).
-func Johnson(graph gr.Graph, cost gr.CostFun) (nodePaths map[int]map[int][]gr.Node, nodeCosts map[int]map[int]float64, err error) {
+func Johnson(graph gr.Graph, cost gr.CostFunc) (nodePaths map[int]map[int][]gr.Node, nodeCosts map[int]map[int]float64, err error) {
 	sf := setupFuncs(graph, cost, nil)
 	successors, cost := sf.successors, sf.cost
 
@@ -415,7 +415,7 @@ func IsPath(path []gr.Node, graph gr.Graph) bool {
 // Generates a minimum spanning tree with sets.
 //
 // As with other algorithms that use Cost, the order of precedence is Argument > Interface > UniformCost
-func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFun) {
+func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFunc) {
 	cost = setupFuncs(graph, cost, nil).cost
 
 	dst.EmptyGraph()

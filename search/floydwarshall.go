@@ -147,7 +147,7 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Gra
 	return func(start, goal gr.Node) ([][]gr.Node, float64, error) {
 		paths, err := allPathFinder(start.ID(), goal.ID())
 		if err != nil {
-			return nil, math.Inf(1), nil
+			return nil, math.Inf(1), err
 		}
 
 		for i := range paths {
@@ -205,7 +205,7 @@ func genSinglePathFunc(dist []float64, next [][]int, nodes []gr.Node) func(start
 	return func(start, goal gr.Node) ([]gr.Node, float64, error) {
 		path, err := singlePathFinder(start.ID(), goal.ID())
 		if err != nil {
-			return nil, math.Inf(1), nil
+			return nil, math.Inf(1), err
 		}
 
 		path = append(path, nil)

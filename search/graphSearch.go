@@ -464,7 +464,8 @@ func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFun) {
 //
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost
 func Kruskal(dst gr.MutableGraph, graph gr.EdgeListGraph, cost func(gr.Node, gr.Node) float64) {
-	_, _, _, _, _, _, cost, _ = setupFuncs(graph, cost, nil)
+	cost = setupFuncs(graph, cost, nil).cost
+
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 

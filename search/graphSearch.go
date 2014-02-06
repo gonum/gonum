@@ -89,8 +89,8 @@ func BreadthFirstSearch(start, goal gr.Node, graph gr.Graph) ([]gr.Node, int) {
 // Like A*, Dijkstra's Algorithm likely won't run correctly with negative edge weights -- use Bellman-Ford for that instead
 //
 // Dijkstra's algorithm usually only returns a cost map, however, since the data is available this version will also reconstruct the path to every node
-func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (paths map[int][]gr.Node, costs map[int]float64) {
-	successors, _, _, _, _, _, Cost, _ := setupFuncs(graph, Cost, nil)
+func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFun) (paths map[int][]gr.Node, costs map[int]float64) {
+	successors, _, _, _, _, _, cost, _ := setupFuncs(graph, cost, nil)
 
 	nodes := graph.NodeList()
 	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
@@ -111,7 +111,7 @@ func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float6
 		closedSet.Add(node.ID())
 
 		for _, neighbor := range successors(node) {
-			tmpCost := costs[node.ID()] + Cost(node, neighbor)
+			tmpCost := costs[node.ID()] + cost(node, neighbor)
 			if cost, ok := costs[neighbor.ID()]; !ok {
 				costs[neighbor.ID()] = tmpCost
 				predecessor[neighbor.ID()] = node

@@ -7,6 +7,11 @@ import (
 	"github.com/gonum/graph/concrete"
 )
 
+var _ gr.Graph = &concrete.GonumGraph{}
+var _ gr.DirectedGraph = &concrete.GonumGraph{}
+var _ gr.MutableGraph = &concrete.GonumGraph{}
+var _ gr.EdgeListGraph = &concrete.GonumGraph{}
+
 // exercise methods for 100% coverage.
 func TestGonumGraphCoverage(t *testing.T) {
 	var n1 gr.Node = concrete.GonumNode(1)
@@ -55,7 +60,7 @@ func TestGonumGraphCoverage(t *testing.T) {
 	d.Predecessors(n1)
 	d.IsPredecessor(n3, n1)
 	d.IsPredecessor(n1, n3)
-	u := um.(gr.UndirectedGraph)
+	u := um.(gr.Graph)
 	u.Neighbors(n3)
 	um.AddEdge(concrete.GonumEdge{n0, n1})
 	u.Neighbors(n1)
@@ -68,7 +73,7 @@ func TestGonumGraphCoverage(t *testing.T) {
 	d.Degree(n0)
 	u.Degree(n0)
 	u.NodeList()
-	u.EdgeList()
+	u.(gr.EdgeLister).EdgeList()
 	dg.IsDirected()
 	dm.Cost(n0, n1)
 	dm.Cost(n6, n1)

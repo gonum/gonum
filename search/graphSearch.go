@@ -5,6 +5,7 @@ import (
 	"math"
 	"sort"
 
+	"errors"
 	gr "github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/set"
@@ -139,8 +140,8 @@ func Dijkstra(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float6
 //
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight cycle.
-func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (paths map[int][]gr.Node, costs map[int]float64, aborted bool) {
-	_, _, _, _, _, _, Cost, _ = setupFuncs(graph, Cost, nil)
+func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (paths map[int][]gr.Node, costs map[int]float64, err error) {
+	successors, _, _, _, _, _, Cost, _ := setupFuncs(graph, Cost, nil)
 
 	predecessor := make(map[int]gr.Node)
 	costs = make(map[int]float64)
@@ -148,24 +149,30 @@ func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) flo
 	nodeIDMap[source.ID()] = source
 	costs[source.ID()] = 0
 	nodes := graph.NodeList()
-	edges := graph.EdgeList()
 
 	for i := 1; i < len(nodes)-1; i++ {
-		for _, edge := range edges {
-			weight := Cost(edge.Head(), edge.Tail())
-			nodeIDMap[edge.Head().ID()] = edge.Head()
-			nodeIDMap[edge.Tail().ID()] = edge.Tail()
-			if dist := costs[edge.Head().ID()] + weight; dist < costs[edge.Tail().ID()] {
-				costs[edge.Tail().ID()] = dist
-				predecessor[edge.Tail().ID()] = edge.Head()
+		for _, node := range nodes {
+			nodeIDMap[node.ID()] = node
+			succs := successors(node)
+			for _, succ := range succs {
+				weight := Cost(node, succ)
+				nodeIDMap[succ.ID()] = succ
+
+				if dist := costs[node.ID()] + weight; dist < costs[succ.ID()] {
+					costs[succ.ID()] = dist
+					predecessor[succ.ID()] = node
+				}
 			}
+
 		}
 	}
 
-	for _, edge := range edges {
-		weight := Cost(edge.Head(), edge.Tail())
-		if costs[edge.Head().ID()]+weight < costs[edge.Tail().ID()] {
-			return nil, nil, true // Abandoned because a cycle is detected
+	for _, node := range nodes {
+		for _, succ := range successors(node) {
+			weight := Cost(node, succ)
+			if costs[node.ID()]+weight < costs[succ.ID()] {
+				return nil, nil, errors.New("Negative edge cycle detected")
+			}
 		}
 	}
 
@@ -173,7 +180,7 @@ func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) flo
 	for node, _ := range costs {
 		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
-	return paths, costs, false
+	return paths, costs, nil
 }
 
 // Johnson's Algorithm generates the lowest cost path between every pair of nodes in the graph.
@@ -188,7 +195,7 @@ func BellmanFord(source gr.Node, graph gr.Graph, Cost func(gr.Node, gr.Node) flo
 //
 // Its return values are, in order: a map from the source node, to the destination node, to the path between them; a map from the source node, to the destination node, to the cost of the path between them;
 // and a bool that is true if Bellman-Ford detected a negative edge weight cycle -- thus causing it (and this algorithm) to abort (if aborted is true, both maps will be nil).
-func Johnson(graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (nodePaths map[int]map[int][]gr.Node, nodeCosts map[int]map[int]float64, aborted bool) {
+func Johnson(graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (nodePaths map[int]map[int][]gr.Node, nodeCosts map[int]map[int]float64, err error) {
 	successors, _, _, _, _, _, Cost, _ := setupFuncs(graph, Cost, nil)
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
 	dummyGraph := concrete.NewGonumGraph(true)
@@ -214,14 +221,16 @@ func Johnson(graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (nodePaths map
 	}
 
 	/* Step 2: Run Bellman-Ford starting at the dummy node, abort if it detects a cycle */
-	_, costs, aborted := BellmanFord(dummyNode, dummyGraph, nil)
-	if aborted {
-		return nil, nil, true
+	_, costs, err := BellmanFord(dummyNode, dummyGraph, nil)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	/* Step 3: reweight the graph and remove the dummy node */
-	for _, edge := range graph.EdgeList() {
-		dummyGraph.SetEdgeCost(edge, Cost(edge.Head(), edge.Tail())+costs[edge.Head().ID()]-costs[edge.Tail().ID()])
+	for _, node := range graph.NodeList() {
+		for _, succ := range successors(node) {
+			dummyGraph.SetEdgeCost(concrete.GonumEdge{node, succ}, Cost(node, succ)+costs[node.ID()]-costs[succ.ID()])
+		}
 	}
 
 	dummyGraph.RemoveNode(dummyNode)
@@ -234,7 +243,7 @@ func Johnson(graph gr.Graph, Cost func(gr.Node, gr.Node) float64) (nodePaths map
 		nodePaths[node.ID()], nodeCosts[node.ID()] = Dijkstra(node, dummyGraph, nil)
 	}
 
-	return nodePaths, nodeCosts, false
+	return nodePaths, nodeCosts, nil
 }
 
 // Expands the first node it sees trying to find the destination. Depth First Search is *not* guaranteed to find the shortest path,
@@ -283,94 +292,6 @@ func UniformCost(a, b gr.Node) float64 {
 	return 1.0
 }
 
-/* Slow functions to replace the guarantee of a graph being directed or undirected */
-
-// A slow function that iterates over the entire edge list trying to find all successors and predecessors of a node
-func NeighborsFunc(graph gr.Graph) func(node gr.Node) []gr.Node {
-	return func(node gr.Node) []gr.Node {
-		neighbors := []gr.Node{}
-
-		for _, edge := range graph.EdgeList() {
-			if edge.Head().ID() == node.ID() {
-				neighbors = append(neighbors, edge.Tail())
-			} else if edge.Tail().ID() == node.ID() {
-				neighbors = append(neighbors, edge.Head())
-			}
-		}
-
-		return neighbors
-	}
-}
-
-// A slow function that iterates over the entire edge list trying to find all successors of a node
-func SuccessorsFunc(graph gr.Graph) func(node gr.Node) []gr.Node {
-	return func(node gr.Node) []gr.Node {
-		neighbors := []gr.Node{}
-
-		for _, edge := range graph.EdgeList() {
-			if edge.Head().ID() == node.ID() {
-				neighbors = append(neighbors, edge.Tail())
-			}
-		}
-
-		return neighbors
-	}
-}
-
-// A slow function that iterates over the entire edge list trying to find all predecessors of a node
-func PredecessorsFunc(graph gr.Graph) func(node gr.Node) []gr.Node {
-	return func(node gr.Node) []gr.Node {
-		neighbors := []gr.Node{}
-
-		for _, edge := range graph.EdgeList() {
-			if edge.Tail().ID() == node.ID() {
-				neighbors = append(neighbors, edge.Head())
-			}
-		}
-
-		return neighbors
-	}
-}
-
-// A slow function that iterates over the entire edge list trying to find a matching edge such that the first argument is the Head and the second is Tail
-func IsSuccessorFunc(graph gr.Graph) func(gr.Node, gr.Node) bool {
-	return func(node, succ gr.Node) bool {
-		for _, edge := range graph.EdgeList() {
-			if edge.Head().ID() == node.ID() && edge.Tail().ID() == succ.ID() {
-				return true
-			}
-		}
-
-		return false
-	}
-}
-
-// A slow function that iterates over the entire edge list trying to find a matching edge such that the first argument is the Tail and the second is Head
-func IsPredecessorFunc(graph gr.Graph) func(gr.Node, gr.Node) bool {
-	return func(node, pred gr.Node) bool {
-		for _, edge := range graph.EdgeList() {
-			if edge.Tail().ID() == node.ID() && edge.Head().ID() == pred.ID() {
-				return true
-			}
-		}
-
-		return false
-	}
-}
-
-// A slow function that iterates over the entire edge list trying to find a matching edge such that the first argument is one end and the second argument is the other
-func IsNeighborFunc(graph gr.Graph) func(gr.Node, gr.Node) bool {
-	return func(node, succ gr.Node) bool {
-		for _, edge := range graph.EdgeList() {
-			if (edge.Tail().ID() == node.ID() || edge.Head().ID() == node.ID()) && (edge.Tail().ID() == succ.ID() || edge.Head().ID() == succ.ID()) {
-				return true
-			}
-		}
-
-		return false
-	}
-}
-
 /* Simple operations */
 
 // Copies a graph into the destination; maintaining all node IDs.
@@ -378,22 +299,21 @@ func CopyGraph(dst gr.MutableGraph, src gr.Graph) {
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 
-	var Cost func(gr.Node, gr.Node) float64
-	if cgraph, ok := src.(gr.Coster); ok {
-		Cost = cgraph.Cost
-	}
+	successors, _, _, _, _, _, cost, _ := setupFuncs(src, nil, nil)
 
-	for _, edge := range src.EdgeList() {
-		if !dst.NodeExists(edge.Head()) {
-			dst.AddNode(edge.Head(), []gr.Node{edge.Tail()})
+	for _, node := range src.NodeList() {
+		succs := successors(node)
+		if !dst.NodeExists(node) {
+			dst.AddNode(node, succs)
 		} else {
-			dst.AddEdge(edge)
-		}
-
-		if Cost != nil {
-			dst.SetEdgeCost(edge, Cost(edge.Head(), edge.Tail()))
+			for _, succ := range succs {
+				edge := concrete.GonumEdge{node, succ}
+				dst.AddEdge(edge)
+				dst.SetEdgeCost(edge, cost(node, succ))
+			}
 		}
 	}
+
 }
 
 /* Basic Graph tests */
@@ -485,7 +405,7 @@ func IsPath(path []gr.Node, graph gr.Graph) bool {
 // Generates a minimum spanning tree with sets.
 //
 // As with other algorithms that use Cost, the order of precedence is Argument > Interface > UniformCost
-func Prim(dst gr.MutableGraph, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) {
+func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, Cost func(gr.Node, gr.Node) float64) {
 	if Cost == nil {
 		if cgraph, ok := graph.(gr.Coster); ok {
 			Cost = cgraph.Cost
@@ -514,12 +434,15 @@ func Prim(dst gr.MutableGraph, graph gr.Graph, Cost func(gr.Node, gr.Node) float
 		for _, edge := range edgeList {
 			if dst.NodeExists(edge.Head()) && remainingNodes.Contains(edge.Tail().ID()) {
 				edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: Cost(edge.Head(), edge.Tail())})
+			} else if dst.NodeExists(edge.Tail()) && remainingNodes.Contains(edge.Head().ID()) {
+				edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: Cost(edge.Tail(), edge.Head())})
 			}
 		}
 
 		sort.Sort(edgeWeights)
 		myEdge := edgeWeights[0]
 
+		// Since it's undirected this doesn't need to check head vs tail
 		if !dst.NodeExists(myEdge.Head()) {
 			dst.AddNode(myEdge.Head(), []gr.Node{myEdge.Tail()})
 		} else {
@@ -535,21 +458,15 @@ func Prim(dst gr.MutableGraph, graph gr.Graph, Cost func(gr.Node, gr.Node) float
 // Generates a minimum spanning tree for a graph using discrete.DisjointSet
 //
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost
-func Kruskal(dst gr.MutableGraph, graph gr.Graph, Cost func(gr.Node, gr.Node) float64) {
-	if Cost == nil {
-		if cgraph, ok := graph.(gr.Coster); ok {
-			Cost = cgraph.Cost
-		} else {
-			Cost = UniformCost
-		}
-	}
+func Kruskal(dst gr.MutableGraph, graph gr.EdgeListGraph, cost func(gr.Node, gr.Node) float64) {
+	_, _, _, _, _, _, cost, _ = setupFuncs(graph, cost, nil)
 	dst.EmptyGraph()
 	dst.SetDirected(false)
 
 	edgeList := graph.EdgeList()
 	edgeWeights := make(edgeSorter, 0, len(edgeList))
 	for _, edge := range edgeList {
-		edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: Cost(edge.Head(), edge.Tail())})
+		edgeWeights = append(edgeWeights, WeightedEdge{Edge: edge, Weight: cost(edge.Head(), edge.Tail())})
 	}
 
 	sort.Sort(edgeWeights)
@@ -560,6 +477,8 @@ func Kruskal(dst gr.MutableGraph, graph gr.Graph, Cost func(gr.Node, gr.Node) fl
 	}
 
 	for _, edge := range edgeWeights {
+		// The disjoint set doesn't really care for which is head and which is tail so this should work fine
+		// without checking both ways
 		if s1, s2 := ds.Find(edge.Edge.Head().ID()), ds.Find(edge.Edge.Tail().ID); s1 != s2 {
 			ds.Union(s1, s2)
 			if !dst.NodeExists(edge.Edge.Head()) {

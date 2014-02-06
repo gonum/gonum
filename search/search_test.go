@@ -193,7 +193,12 @@ func newSmallHeuristic() func(n1, n2 graph.Node) float64 {
 	}
 }
 
-func monotonic(g graph.CostGraph, heur func(n1, n2 graph.Node) float64) (bool, graph.Edge, graph.Node) {
+type costEdgeListGraph interface {
+	graph.Coster
+	graph.EdgeListGraph
+}
+
+func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool, graph.Edge, graph.Node) {
 	for _, goal := range g.NodeList() {
 		for _, edge := range g.EdgeList() {
 			head := edge.Head()

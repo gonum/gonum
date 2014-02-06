@@ -21,20 +21,13 @@ func setupFuncs(graph gr.Graph, cost, heuristicCost func(gr.Node, gr.Node) float
 		isSuccessorFunc = g.IsSuccessor
 		isPredecessorFunc = g.IsPredecessor
 		isNeighborFunc = g.IsNeighbor
-	case gr.UndirectedGraph:
+	default:
 		successorsFunc = g.Neighbors
 		predecessorsFunc = g.Neighbors
 		neighborsFunc = g.Neighbors
 		isSuccessorFunc = g.IsNeighbor
 		isPredecessorFunc = g.IsNeighbor
 		isNeighborFunc = g.IsNeighbor
-	default:
-		successorsFunc = SuccessorsFunc(graph)
-		predecessorsFunc = PredecessorsFunc(graph)
-		neighborsFunc = NeighborsFunc(graph)
-		isSuccessorFunc = IsNeighborFunc(graph)
-		isPredecessorFunc = IsNeighborFunc(graph)
-		isNeighborFunc = IsNeighborFunc(graph)
 	}
 
 	if heuristicCost != nil {

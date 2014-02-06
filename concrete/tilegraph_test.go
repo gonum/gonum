@@ -7,10 +7,7 @@ import (
 	"github.com/gonum/graph/concrete"
 )
 
-// Asserts that concrete graphs implement the correct interfaces
-var _ gr.DirectedGraph = (*concrete.GonumGraph)(nil)
-var _ gr.MutableGraph = (*concrete.GonumGraph)(nil)
-var _ gr.UndirectedGraph = (*concrete.TileGraph)(nil)
+var _ gr.Graph = (*concrete.TileGraph)(nil)
 
 func TestTileGraph(t *testing.T) {
 	tg := concrete.NewTileGraph(4, 4, false)

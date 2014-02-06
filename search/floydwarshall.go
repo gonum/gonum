@@ -90,6 +90,10 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Gra
 		}
 
 		toReturn := make([][]gr.Node, 0, len(intermediates))
+		// Special case: if intermediates exist we need to explicitly check to see if the i and j is also an optimal path
+		if isSuccessor(nodes[i], nodes[j]) && math.Abs(dist[i+j*numNodes]-cost(nodes[i], nodes[j])) < .000001 {
+			toReturn = append(toReturn, []gr.Node{nodes[i], nodes[j]})
+		}
 
 		// This step is a tad convoluted: we have some list of intermediates.
 		// We can think of each intermediate as a path junction
@@ -145,14 +149,20 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Gra
 
 		for i := range paths {
 			// Prepend start and postpend goal. pathFinder only does the intermediate steps
-			paths[i] = append(paths[i], nil)
-			copy(paths[i][1:], paths[i][:len(paths[i])-1])
-			paths[i][0] = start
-			paths[i] = append(paths[i], goal)
-		}
 
-		if isSuccessor(start, goal) && math.Abs(dist[start.ID()+goal.ID()*numNodes]-cost(start, goal)) < .000001 {
-			paths = append(paths, []gr.Node{start, goal})
+			if len(paths[i]) != 0 {
+				if paths[i][0].ID() != start.ID() {
+					paths[i] = append(paths[i], nil)
+					copy(paths[i][1:], paths[i][:len(paths[i])-1])
+					paths[i][0] = start
+				}
+
+				if paths[i][len(paths[i])-1].ID() != goal.ID() {
+					paths[i] = append(paths[i], goal)
+				}
+			} else {
+				paths[i] = append(paths[i], start, goal)
+			}
 		}
 
 		return paths, dist[start.ID()+goal.ID()*numNodes], nil

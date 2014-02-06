@@ -4,6 +4,7 @@ import (
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"math"
+	"sort"
 	"testing"
 )
 
@@ -134,5 +135,55 @@ func TestDenseAddRemove(t *testing.T) {
 	dg.RemoveEdge(concrete.GonumNode(2), concrete.GonumNode(0), false)
 	if dg.IsSuccessor(concrete.GonumNode(0), concrete.GonumNode(2)) || dg.IsSuccessor(concrete.GonumNode(2), concrete.GonumNode(0)) {
 		t.Error("Removing undirected edge did no work properly")
+	}
+}
+
+type nodeSorter []graph.Node
+
+func (ns nodeSorter) Len() int {
+	return len(ns)
+}
+
+func (ns nodeSorter) Swap(i, j int) {
+	ns[i], ns[j] = ns[j], ns[i]
+}
+
+func (ns nodeSorter) Less(i, j int) bool {
+	return ns[i].ID() < ns[j].ID()
+}
+
+func TestDenseLists(t *testing.T) {
+	dg := concrete.NewDenseGraph(15, true)
+	nodes := nodeSorter(dg.NodeList())
+
+	if len(nodes) != 15 {
+		t.Fatalf("Wrong number of nodes")
+	}
+
+	sort.Sort(nodes)
+
+	for i, node := range dg.NodeList() {
+		if i != node.ID() {
+			t.Errorf("Node list doesn't return properly id'd nodes")
+		}
+	}
+
+	edges := dg.DirectedEdgeList()
+	if len(edges) != 15*15 {
+		t.Errorf("Improper number of edges for passable dense graph")
+	}
+
+	dg.RemoveEdge(concrete.GonumNode(12), concrete.GonumNode(11), true)
+	edges = dg.DirectedEdgeList()
+	if len(edges) != (15*15)-1 {
+		t.Errorf("Removing edge didn't affect edge listing properly")
+	}
+}
+
+func TestCrunch(t *testing.T) {
+	dg := concrete.NewDenseGraph(5, true)
+	dg.Crunch()
+	if len(dg.NodeList()) != 5 || len(dg.DirectedEdgeList()) != 5*5 {
+		t.Errorf("Crunch did something")
 	}
 }

@@ -53,7 +53,7 @@ func (dg *DenseGraph) NodeList() []graph.Node {
 	return nodes
 }
 
-func (dg *DenseGraph) EdgeList() []graph.Edge {
+func (dg *DenseGraph) DirectedEdgeList() []graph.Edge {
 	edges := make([]graph.Edge, 0, len(dg.adjacencyMatrix))
 	for i := 0; i < dg.numNodes; i++ {
 		for j := 0; j < dg.numNodes; j++ {

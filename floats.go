@@ -478,10 +478,14 @@ func Norm(s []float64, L float64) (norm float64) {
 	//	would be more cost
 	//	maybe only if L is high?
 	if L == 2 {
-		for _, val := range s {
-			norm += val * val
+		if len(s) == 0 {
+			return
 		}
-		return math.Pow(norm, 0.5)
+		twoNorm := math.Abs(s[0])
+		for i := 1; i < len(s); i++ {
+			twoNorm = math.Hypot(twoNorm, s[i])
+		}
+		return twoNorm
 	}
 	if L == 1 {
 		for _, val := range s {

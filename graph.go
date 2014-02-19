@@ -23,9 +23,10 @@ type Graph interface {
 	// Degree is equivalent to len(Successors(node)) + len(Predecessors(node)).
 	// This means that reflexive edges are counted twice.
 	Degree(node Node) int
-	// NodeList returns a list of all nodes in no particular order, useful for determining
-	// things like if a graph is fully connected. The caller is free to modify this list.
-	// Implementations should construct a new list and not return internal representation.
+	// NodeList returns a list of all nodes in no particular order, useful for
+	// determining things like if a graph is fully connected. The caller is
+	// free to modify this list. Implementations should construct a new list
+	// and not return internal representation.
 	NodeList() []Node
 	// Neighbors returns all nodes connected by any edge to this node.
 	Neighbors(node Node) []Node
@@ -42,14 +43,15 @@ type DirectedGraph interface {
 	// Successors gives the nodes connected by OUTBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Predecessors.
 	Successors(node Node) []Node
-	// IsSuccessor returns true if successor shows up in the list returned by Successors(node).
-	// If node doesn't exist, this should always return false.
+	// IsSuccessor returns true if successor shows up in the list returned by
+	// Successors(node). If node doesn't exist, this should always return false.
 	IsSuccessor(node, successor Node) bool
 	// Predecessors gives the nodes connected by INBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Successors.
 	Predecessors(node Node) []Node
-	// IsPredecessor returns true if predecessor shows up in the list returned by Predecessors(node).
-	// If node doesn't exist, this should always return false.
+	// IsPredecessor returns true if predecessor shows up in the list returned
+	// by Predecessors(node). If node doesn't exist, this should always return
+	// false.
 	IsPredecessor(node, predecessor Node) bool
 }
 
@@ -114,21 +116,25 @@ type HeuristicCoster interface {
 // Mutable graphs should always record the IDs as they are represented -- which means they are sparse by nature.
 type MutableGraph interface {
 	CostGraph
-	// NewNode adds a node with an arbitrary ID and returns the new, unique ID used.
+	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
+	// used.
 	NewNode(successors []Node) Node
-	// The graph itself is responsible for adding reciprocal edges if it's undirected.
-	// Likewise, the graph itself must add any non-existant nodes listed in successors.
+	// The graph itself is responsible for adding reciprocal edges if it's
+	// undirected. Likewise, the graph itself must add any non-existant nodes
+	// listed in successors.
 	AddNode(node Node, successors []Node)
-	// For a digraph, adds node1->node2; the graph is free to initialize this to any
-	// value it wishes. Node1 must exist, or it will result in undefined behavior.
-	// Node2 must be created by the function if absent.
+	// For a digraph, adds node1->node2; the graph is free to initialize this
+	// to any value it wishes. Node1 must exist, or it will result in undefined
+	// behavior. Node2 must be created by the function if absent.
 	AddEdge(e Edge)
-	// The behavior is undefined if the edge has not been created with AddEdge (or the edge was
-	// removed before this function was called). For a directed graph only sets node1->node2.
+	// The behavior is undefined if the edge has not been created with AddEdge
+	// (or the edge was removed before this function was called). For a
+	// directed graph only sets node1->node2.
 	SetEdgeCost(e Edge, cost float64)
 	// The graph is reponsible for removing edges to a node that is removed.
 	RemoveNode(node Node)
-	// The graph is responsible for removing reciprocal edges if it's undirected.
+	// The graph is responsible for removing reciprocal edges if it's
+	// undirected.
 	RemoveEdge(e Edge)
 	// EmptyGraph clears the graph of all nodes and edges.
 	EmptyGraph()

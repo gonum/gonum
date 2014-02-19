@@ -389,9 +389,15 @@ func Tarjan(graph gr.Graph) (sccs [][]gr.Node) {
 	return sccs
 }
 
-// Returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor
+// IsPath returns true for a connected path within a graph.
 //
-// Special case: a nil or zero length path is considered valid (true), a path of length 1 (only one node) is the trivial case, but only if the node listed in path exists.
+// IsPath returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between
+// are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor.
+//
+// As special cases, IsPath returns true for a nil or zero length path, and for a path of length 1
+// (only one node) but only if the node listed in path exists within the graph.
+//
+// Graph must be non-nil.
 func IsPath(path []gr.Node, graph gr.Graph) bool {
 	isSuccessor := setupFuncs(graph, nil, nil).isSuccessor
 

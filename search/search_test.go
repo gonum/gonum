@@ -230,3 +230,41 @@ func TestDijkstraSmall(t *testing.T) {
 		t.Fatal(s)
 	}
 }
+
+func TestIsPath(t *testing.T) {
+	g := concrete.NewGonumGraph(true)
+	if search.IsPath(nil, g) != true {
+		t.Error("nil path")
+	}
+	p := []graph.Node{concrete.GonumNode(0)}
+	if search.IsPath(p, g) != false {
+		t.Error("node not in graph")
+	}
+	g.AddNode(p[0], nil)
+	if search.IsPath(p, g) != true {
+		t.Error("single node in graph")
+	}
+	p = append(p, concrete.GonumNode(1))
+	g.AddNode(p[1], nil)
+	if search.IsPath(p, g) != false {
+		t.Error("unconnected nodes")
+	}
+	g.AddEdge(concrete.GonumEdge{p[0], p[1]})
+	if search.IsPath(p, g) != true {
+		t.Error("connected nodes")
+	}
+	p[0], p[1] = p[1], p[0]
+	if search.IsPath(p, g) != false {
+		t.Error("reverse path")
+	}
+	p = []graph.Node{p[1], p[0], concrete.GonumNode(2)}
+	g.AddEdge(concrete.GonumEdge{p[1], p[2]})
+	if search.IsPath(p, g) != true {
+		t.Error("three nodes")
+	}
+	g = concrete.NewGonumGraph(false)
+	g.AddNode(p[1], []graph.Node{p[0], p[2]})
+	if search.IsPath(p, g) != true {
+		t.Error("undirected")
+	}
+}

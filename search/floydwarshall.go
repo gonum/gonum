@@ -14,19 +14,24 @@ type AllPathFunc func(start, goal gr.Node) (path [][]gr.Node, cost float64, err 
 // Finds one path between start and goal, which it finds is arbitrary
 type PathFunc func(start, goal gr.Node) (path []gr.Node, cost float64, err error)
 
-// This function returns two functions: one that will generate all shortest paths between two nodes with ids i and j, and one that will generate just one path.
+// This function returns two functions: one that will generate all shortest paths between two
+// nodes with ids i and j, and one that will generate just one path.
 //
-// This algorithm requires the CrunchGraph interface which means it only works on graphs with dense node ids since it uses an adjacency matrix.
+// This algorithm requires the CrunchGraph interface which means it only works on graphs with
+// dense node ids since it uses an adjacency matrix.
 //
-// This algorithm isn't blazingly fast, but is relatively fast for the domain. It runs at O((number of vertices)^3) in best, worst, and average case,
-//  and successfully computes the cost between all pairs of vertices.
+// This algorithm isn't blazingly fast, but is relatively fast for the domain. It runs at
+// O((number of vertices)^3) in best, worst, and average case, and successfully computes the cost
+// between all pairs of vertices.
 //
-// This function operates slightly differently from the others for convenience -- rather than generating paths and returning them to you,
-// it gives you the option of calling one of two functions for each start/goal pair you need info for. One will return the path, cost,
-// or an error if no path exists.
+// This function operates slightly differently from the others for convenience -- rather than
+// generating paths and returning them to you, it gives you the option of calling one of two
+// functions for each start/goal pair you need info for. One will return the path, cost, or an
+// error if no path exists.
 //
-// The other will return the cost and an error if no path exists, but it will also return ALL possible shortest paths between start and goal.
-// This is not too much more expensive than generating one path, but it does obviously increase with the number of paths.
+// The other will return the cost and an error if no path exists, but it will also return ALL
+// possible shortest paths between start and goal. This is not too much more expensive than
+// generating one path, but it does obviously increase with the number of paths.
 func FloydWarshall(graph gr.CrunchGraph, cost gr.CostFunc) (AllPathFunc, PathFunc) {
 	graph.Crunch()
 	sf := setupFuncs(graph, cost, nil)
@@ -58,15 +63,16 @@ func FloydWarshall(graph gr.CrunchGraph, cost gr.CostFunc) (AllPathFunc, PathFun
 				if dist[i+j*numNodes] > dist[i+k*numNodes]+dist[k+j*numNodes] {
 					dist[i+j*numNodes] = dist[i+k*numNodes] + dist[k+j*numNodes]
 
-					// Avoid generating too much garbage by reusing the memory in the list if we've allocated one already
+					// Avoid generating too much garbage by reusing the memory
+					// in the list if we've allocated one already
 					if next[i+j*numNodes] == nil {
 						next[i+j*numNodes] = []int{k}
 					} else {
 						next[i+j*numNodes] = next[i+j*numNodes][:1]
 						next[i+j*numNodes][0] = k
 					}
-					// If the cost between the nodes happens to be the same cost as what we know, add the approriate
-					// intermediary to the list
+					// If the cost between the nodes happens to be the same cost
+					// as what we know, add the approriate intermediary to the list
 				} else if math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < 0.00001 && i != k && i != j && j != k {
 					next[i+j*numNodes] = append(next[i+j*numNodes], k)
 				}

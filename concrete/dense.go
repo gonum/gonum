@@ -5,17 +5,18 @@ import (
 	"math"
 )
 
-// A dense graph is a graph such that all IDs are in a contiguous block from 0 to TheNumberOfNodes-1
-// it uses an adjacency matrix and should be relatively fast for both access and writing.
+// A dense graph is a graph such that all IDs are in a contiguous block from 0 to
+// TheNumberOfNodes-1. It uses an adjacency matrix and should be relatively fast for both access
+// and writing.
 //
-// This graph implements the CrunchGraph, but since it's naturally dense this is superfluous
+// This graph implements the CrunchGraph, but since it's naturally dense this is superfluous.
 type DenseGraph struct {
 	adjacencyMatrix []float64
 	numNodes        int
 }
 
 // Creates a dense graph with the proper number of nodes. If passable is true all nodes will have
-// an edge with cost 1.0, otherwise every node will start unconnected (cost of +Inf)
+// an edge with cost 1.0, otherwise every node will start unconnected (cost of +Inf.)
 func NewDenseGraph(numNodes int, passable bool) *DenseGraph {
 	dg := &DenseGraph{adjacencyMatrix: make([]float64, numNodes*numNodes), numNodes: numNodes}
 	if passable {

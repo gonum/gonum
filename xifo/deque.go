@@ -85,7 +85,8 @@ func (q *GonumQueue) IsEmpty() bool {
 	return len(*q) == 0
 }
 
-// Deque is a stack/queue hybrid (from "deck"), I'm not sure if the type conversions will hurt performance or not (I suspect not)
+// Deque is a stack/queue hybrid (from "deck"), I'm not sure if the type conversions will hurt
+// performance or not (I suspect not.)
 type GonumDeque []interface{}
 
 func (d *GonumDeque) IsEmpty() bool {
@@ -101,7 +102,7 @@ func (d *GonumDeque) Pop() interface{} {
 	return a.Pop()
 }
 
-// Poll is a queue-pop
+// Poll is a queue-pop.
 func (d *GonumDeque) Poll() interface{} {
 	a := (*GonumQueue)(d)
 	return a.Poll()

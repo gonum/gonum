@@ -27,12 +27,17 @@ func (edge GonumEdge) Tail() gr.Node {
 	return edge.T
 }
 
-// A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and edges -- as well as act as either directed or undirected.
+// A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and
+// edges -- as well as act as either directed or undirected.
 //
-// Internally, it uses a map of successors AND predecessors, to speed up some operations (such as getting all successors/predecessors). It also speeds up thing like adding edges (assuming both edges exist).
+// Internally, it uses a map of successors AND predecessors, to speed up some operations (such as
+// getting all successors/predecessors). It also speeds up thing like adding edges (assuming both
+// edges exist).
 //
-// However, its generality is also its weakness (and partially a flaw in needing to satisfy MutableGraph). For most purposes, creating your own graph is probably better. For instance, see discrete.TileGraph for an example
-// of an immutable 2D grid of tiles that also implements the Graph interface, but would be more suitable if all you needed was a simple undirected 2D grid.
+// However, its generality is also its weakness (and partially a flaw in needing to satisfy
+// MutableGraph). For most purposes, creating your own graph is probably better. For instance,
+// see TileGraph for an example of an immutable 2D grid of tiles that also implements the Graph
+// interface, but would be more suitable if all you needed was a simple undirected 2D grid.
 type GonumGraph struct {
 	successors   map[int]map[int]float64
 	predecessors map[int]map[int]float64
@@ -141,7 +146,8 @@ func (graph *GonumGraph) AddEdge(e gr.Edge) {
 func (graph *GonumGraph) SetEdgeCost(e gr.Edge, cost float64) {
 	id := e.Head().ID()
 	successor := e.Tail().ID()
-	// Normally I'd use graph.vertices.Contains(id) as above, but this is equivalent and a bit easier to read here
+	// Normally I'd use graph.vertices.Contains(id) as above, but this is equivalent and a bit
+	// easier to read here
 	if _, ok := graph.successors[id]; !ok {
 		return
 	} else if _, ok := graph.successors[id][successor]; !ok {
@@ -150,7 +156,8 @@ func (graph *GonumGraph) SetEdgeCost(e gr.Edge, cost float64) {
 	graph.successors[id][successor] = cost
 	graph.predecessors[successor][id] = cost
 
-	// By the spec, only the empty graph will be toggled between directed and undirected. Therefore we can be sure the reciprocal edge exists
+	// By the spec, only the empty graph will be toggled between directed and undirected.
+	// Therefore we can be sure the reciprocal edge exists
 	if !graph.directed {
 		graph.successors[successor][id] = cost
 		graph.predecessors[id][successor] = cost

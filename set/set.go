@@ -4,14 +4,19 @@ import ()
 
 // On one hand, using an interface{} as a key works on some levels.
 // On the other hand, from experience, I can say that working with interface{} is a pain
-// so I don't like it in an API. An alternate idea is to make Set an interface with a method that allows you to GRAB a map[interface{}]struct{} from
-// the implementation, but that adds a lot of calls and needless operations, making the library slower
+// so I don't like it in an API. An alternate idea is to make Set an interface with a method
+// that allows you to GRAB a map[interface{}]struct{} from the implementation, but that adds
+// a lot of calls and needless operations, making the library slower.
 //
-// Another point, using an interface{} may be pointless because a map key MUST have == and != defined, limiting the possible keys anyway (for instance, if you had a set of [3]floats I don't think it will do a deep
-// comparison, making it rather pointless). Also, keying with a float will mean it does a strict == with the floats, possibly causing bad behavior. It may be best to just make it a map[int]struct{}. Thoughts?
+// Another point, using an interface{} may be pointless because a map key MUST have == and !=
+// defined, limiting the possible keys anyway (for instance, if you had a set of [3]floats I don't
+// think it will do a deep comparison, making it rather pointless). Also, keying with a float will
+// mean it does a strict == with the floats, possibly causing bad behavior. It may be best to just
+// make it a map[int]struct{}. Thoughts?
 type Set map[interface{}]struct{}
 
-// I highly doubt we have to worry about running out of IDs, but we could add a little reclaimID function if we're worried
+// I highly doubt we have to worry about running out of IDs, but we could add a little reclaimID
+// function if we're worried
 var globalid uint64 = 0
 
 // For cleanliness
@@ -49,7 +54,7 @@ func (dst *Set) Copy(src *Set) *Set {
 	return dst
 }
 
-// If every element in s1 is also in s2 (and vice versa), the sets are deemed equal
+// If every element in s1 is also in s2 (and vice versa), the sets are deemed equal.
 func Equal(s1, s2 *Set) bool {
 	if s1 == s2 {
 		return true
@@ -72,7 +77,8 @@ func Equal(s1, s2 *Set) bool {
 //
 //     {a,b,c} UNION {d,e,f} = {a,b,c,d,e,f}
 //
-// Since sets may not have repetition, unions of two sets that overlap do not contain repeat elements, that is:
+// Since sets may not have repetition, unions of two sets that overlap do not contain repeat
+// elements, that is:
 //
 //     {a,b,c} UNION {b,c,d} = {a,b,c,d}
 func (dst *Set) Union(s1, s2 *Set) *Set {
@@ -101,7 +107,8 @@ func (dst *Set) Union(s1, s2 *Set) *Set {
 
 // Takes the intersection of s1 and s2, and stores it in dst
 //
-// The intersection of two sets, s1 and s2, is the set containing all the elements shared between the two sets, for instance
+// The intersection of two sets, s1 and s2, is the set containing all the elements shared between
+// the two sets, for instance:
 //
 //     {a,b,c} INTERSECT {b,c,d} = {b,c}
 //
@@ -147,7 +154,8 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 
 // Takes the difference (-) of s1 and s2 and stores it in dst.
 //
-// The difference (-) between two sets, s1 and s2, is all the elements in s1 that are NOT also in s2.
+// The difference (-) between two sets, s1 and s2, is all the elements in s1 that are NOT also
+// in s2.
 //
 //     {a,b,c} - {b,c,d} = {a}
 //
@@ -155,12 +163,13 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 //
 //     {a,b,c} - {a,b,c} = {}
 //
-// The difference between two sets with no overlapping elements is s1
+// The difference between two sets with no overlapping elements is s1:
 //
 //     {a,b,c} - {d,e,f} = {a,b,c}
 //
-// Implementation note: if dst == s2 (meaning they have identical pointers), a temporary set must be used to store the data
-// and then copied over, thus s2.Diff(s1,s2) has an extra allocation and may cause worse performance in some cases.
+// Implementation note: if dst == s2 (meaning they have identical pointers), a temporary set must
+// be used to store the data and then copied over, thus s2.Diff(s1,s2) has an extra allocation and
+// may cause worse performance in some cases.
 func (dst *Set) Diff(s1, s2 *Set) *Set {
 	if s1 == s2 {
 		return dst.Clear()
@@ -197,12 +206,12 @@ func (dst *Set) Diff(s1, s2 *Set) *Set {
 //     {c,d}     SUBSET {a,b,c} = false
 //     {a,b,c,d} SUBSET {a,b,c} = false
 //
-// Special case: The empty set is a subset of everything
+// Special case: The empty set is a subset of everything:
 //
 // 	   {} SUBSET {a,b} = true
 //     {} SUBSET {}    = true
 //
-// In the case where one needs to test if s1 is smaller than s2, but not equal, use ProperSubset
+// In the case where one needs to test if s1 is smaller than s2, but not equal, use ProperSubset.
 func Subset(s1, s2 *Set) bool {
 	if len(*s1) > len(*s2) {
 		return false
@@ -222,7 +231,8 @@ func Subset(s1, s2 *Set) bool {
 }
 
 // Returns true if s1 is a proper subset of s2.
-// A proper subset is when every element of s1 is in s2, but s1 is smaller than s2 (i.e. they are not equal):
+// A proper subset is when every element of s1 is in s2, but s1 is smaller than s2 (i.e. they are
+// not equal):
 //
 //     {a,b,c}   PROPER SUBSET {a,b,c} = false
 //     {a,b}     PROPER SUBSET {a,b,c} = true
@@ -234,7 +244,7 @@ func Subset(s1, s2 *Set) bool {
 //      {} PROPER SUBSET {a,b} = true
 //      {} PROPER SUBSET {}    = false
 //
-// When equality is allowed, use Subset
+// When equality is allowed, use Subset.
 func ProperSubset(s1, s2 *Set) bool {
 	if len(*s1) >= len(*s2) { // implicitly tests if s1 and s2 are both the empty set
 		return false
@@ -257,7 +267,7 @@ func (s *Set) Contains(el interface{}) bool {
 	return ok
 }
 
-// Adds the element el to s1
+// Adds the element el to s1.
 func (s1 *Set) Add(element interface{}) {
 	(*s1)[element] = flag
 }
@@ -268,12 +278,12 @@ func (s1 *Set) AddAll(elements ...interface{}) {
 	}
 }
 
-// Removes the element el from s1
+// Removes the element el from s1.
 func (s1 *Set) Remove(element interface{}) {
 	delete(*s1, element)
 }
 
-// Returns the number of elements in s1
+// Returns the number of elements in s1.
 func (s1 *Set) Cardinality() int {
 	return len(*s1)
 }

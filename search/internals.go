@@ -12,9 +12,9 @@ type searchFuncs struct {
 	cost, heuristicCost                    gr.CostFunc
 }
 
-// Sets up the cost functions and successor functions so I don't have to do a type switch every time.
-// This almost always does more work than is necessary, but since it's only executed once per function, and graph functions are rather costly, the "extra work"
-// should be negligible.
+// Sets up the cost functions and successor functions so I don't have to do a type switch every
+// time. This almost always does more work than is necessary, but since it's only executed once
+// per function, and graph functions are rather costly, the "extra work" should be negligible.
 func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
 
 	sf := searchFuncs{}
@@ -61,7 +61,8 @@ func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
 
 /* Purely internal data structures and functions (mostly for sorting) */
 
-// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge.Head(), Edge.Tail()) had been called)
+// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge.Head(),
+// Edge.Tail()) had been called.)
 type WeightedEdge struct {
 	gr.Edge
 	Weight float64
@@ -97,7 +98,9 @@ type aStarPriorityQueue struct {
 }
 
 func (pq *aStarPriorityQueue) Less(i, j int) bool {
-	return pq.nodes[i].fscore < pq.nodes[j].fscore // As the heap documentation says, a priority queue is listed if the actual values are treated as if they were negative
+	// As the heap documentation says, a priority queue is listed if the actual values
+	// are treated as if they were negative
+	return pq.nodes[i].fscore < pq.nodes[j].fscore
 }
 
 func (pq *aStarPriorityQueue) Swap(i, j int) {

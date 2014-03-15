@@ -14,10 +14,10 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 		panic(badOrder)
 	}
 
-	if nota && tA != blas.ConjTrans && tA != blas.Trans {
+	if !nota && tA != blas.ConjTrans && tA != blas.Trans {
 		panic(badTranspose)
 	}
-	if nota && tB != blas.ConjTrans && tB != blas.Trans {
+	if !notb && tB != blas.ConjTrans && tB != blas.Trans {
 		panic(badTranspose)
 	}
 	if m < 0 {
@@ -35,7 +35,7 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 
 	nrowb := n
 	ncolb := k
-	if nota {
+	if notb {
 		nrowb, ncolb = ncolb, nrowb
 	}
 
@@ -87,15 +87,16 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 	// go compiler can eliminate many (all) of the bounds checks
 	if notb {
 		if nota {
-			// C += A*B
+			// C += alpha * A*B
 			if isRowMajor {
 				for i := 0; i < m; i++ {
-					for j := 0; j < n; j++ {
-						var tmp float64
-						for l := 0; l < k; l++ {
-							tmp += a[i*lda+l] * b[j*ldb+l]
+					for l := 0; l < k; l++ {
+						tmp := a[i*lda+l] * alpha
+						if tmp != 0 {
+							for j := 0; j < n; j++ {
+								c[i*ldc+j] += tmp * b[l*ldb+j]
+							}
 						}
-						c[i*ldc+j] += alpha * tmp
 					}
 				}
 				return
@@ -169,11 +170,11 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 	if isRowMajor {
 		for i := 0; i < m; i++ {
 			for l := 0; l < k; l++ {
-				aval := a[i*lda+l]
+				aval := a[l*lda+i]
 				if aval != 0 {
 					tmp := alpha * aval
 					for j := 0; j < n; j++ {
-						c[i*ldc+j] += tmp * b[i*lda+l]
+						c[i*ldc+j] += tmp * b[j*ldb+l]
 					}
 				}
 			}
@@ -184,7 +185,7 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 		for i := 0; i < m; i++ {
 			var tmp float64
 			for l := 0; l < k; l++ {
-				tmp += a[i*lda+l] * b[l*ldb+l]
+				tmp += a[i*lda+l] * b[l*ldb+j]
 			}
 			c[j*ldc+i] += alpha * tmp
 		}

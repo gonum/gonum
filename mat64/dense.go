@@ -97,6 +97,9 @@ func (m *Dense) isZero() bool {
 }
 
 func (m *Dense) At(r, c int) float64 {
+	if c >= m.mat.Cols {
+		panic("dense access out of bounds")
+	}
 	return m.mat.Data[r*m.mat.Stride+c]
 }
 

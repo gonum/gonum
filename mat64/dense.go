@@ -104,6 +104,9 @@ func (m *Dense) At(r, c int) float64 {
 }
 
 func (m *Dense) Set(r, c int, v float64) {
+	if c >= m.mat.Cols {
+		panic("dense access out of bounds")
+	}
 	m.mat.Data[r*m.mat.Stride+c] = v
 }
 

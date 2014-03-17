@@ -97,15 +97,21 @@ func (m *Dense) isZero() bool {
 }
 
 func (m *Dense) At(r, c int) float64 {
-	if c >= m.mat.Cols {
-		panic("dense access out of bounds")
+	if r >= m.mat.Rows || r < 0 {
+		panic("index error: row access out of bounds")
+	}
+	if c >= m.mat.Cols || c < 0 {
+		panic("index error: column access out of bounds")
 	}
 	return m.mat.Data[r*m.mat.Stride+c]
 }
 
 func (m *Dense) Set(r, c int, v float64) {
-	if c >= m.mat.Cols {
-		panic("dense access out of bounds")
+	if r >= m.mat.Rows || r < 0 {
+		panic("index error: row access out of bounds")
+	}
+	if c >= m.mat.Cols || c < 0 {
+		panic("index error: column access out of bounds")
 	}
 	m.mat.Data[r*m.mat.Stride+c] = v
 }

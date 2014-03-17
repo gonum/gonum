@@ -126,6 +126,41 @@ func (s *S) TestNewDense(c *check.C) {
 	}
 }
 
+func (s *S) TestAtSet(c *check.C) {
+	for test, af := range [][][]float64{
+		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}, // even
+		{{1, 2}, {4, 5}, {7, 8}},          // wide
+		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}, //skinny
+	} {
+		m := NewDense(flatten(af))
+		rows, cols := m.Dims()
+		for i := 0; i < rows; i++ {
+			for j := 0; j < cols; j++ {
+				c.Check(m.At(i, j), check.Equals, af[i][j], check.Commentf("At test %d", test))
+
+				v := float64(i * j)
+				m.Set(i, j, v)
+				c.Check(m.At(i, j), check.Equals, v, check.Commentf("Set test %d", test))
+			}
+		}
+		// Check access out of bounds fails
+		c.Check(func() { m.At(rows, 0) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.At(rows+1, 0) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.At(0, cols) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.At(0, cols+1) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.At(-1, 0) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.At(0, -1) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+
+		// Check access out of bounds fails
+		c.Check(func() { m.Set(rows, 0, 1.2) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(rows+1, 0, 1.2) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(0, cols, 1.2) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(0, cols+1, 1.2) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(-1, 0, 1.2) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(0, -1, 1.2) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+	}
+}
+
 func (s *S) TestRowCol(c *check.C) {
 	for i, af := range [][][]float64{
 		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},

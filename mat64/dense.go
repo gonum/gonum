@@ -103,6 +103,10 @@ func (m *Dense) At(r, c int) float64 {
 	if c >= m.mat.Cols || c < 0 {
 		panic("index error: column access out of bounds")
 	}
+	return m.at(r, c)
+}
+
+func (m *Dense) at(r, c int) float64 {
 	return m.mat.Data[r*m.mat.Stride+c]
 }
 

@@ -111,7 +111,7 @@ func TestMul(t *testing.T) {
 
 		// Get correct matrix multiply answer from Dgemm
 		blasEngine.Dgemm(
-			BlasOrder,
+			blas.RowMajor,
 			blas.NoTrans, blas.NoTrans,
 			ar, bc, ac,
 			1.,

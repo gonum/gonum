@@ -10,10 +10,6 @@
 // If the matrix dimensions do not match the result, the method must panic.
 package mat64
 
-import (
-	"github.com/gonum/blas"
-)
-
 // Matrix is the basic matrix interface type.
 type Matrix interface {
 	// Dims returns the dimensions of a Matrix.
@@ -254,7 +250,6 @@ type BandWidther interface {
 
 // RawMatrix represents a cblas native representation of a matrix.
 type RawMatrix struct {
-	Order      blas.Order
 	Rows, Cols int
 	Stride     int
 	Data       []float64
@@ -270,20 +265,10 @@ func (b RawMatrix) Matrix(c Mutable) {
 	if rows, cols := c.Dims(); rows != b.Rows || cols != b.Cols {
 		panic(ErrShape)
 	}
-	if b.Order == blas.ColMajor {
-		for col := 0; col < b.Cols; col++ {
-			for row, v := range b.Data[col*b.Stride : col*b.Stride+b.Rows] {
-				c.Set(row, col, v)
-			}
+	for row := 0; row < b.Rows; row++ {
+		for col, v := range b.Data[row*b.Stride : row*b.Stride+b.Cols] {
+			c.Set(row, col, v)
 		}
-	} else if b.Order == blas.RowMajor {
-		for row := 0; row < b.Rows; row++ {
-			for col, v := range b.Data[row*b.Stride : row*b.Stride+b.Cols] {
-				c.Set(row, col, v)
-			}
-		}
-	} else {
-		panic("matrix: illegal order")
 	}
 }
 
@@ -396,7 +381,6 @@ const (
 	ErrShape           = Error("mat64: dimension mismatch")
 	ErrIllegalStride   = Error("mat64: illegal stride")
 	ErrPivot           = Error("mat64: malformed pivot list")
-	ErrIllegalOrder    = Error("mat64: illegal order")
 	ErrNoEngine        = Error("mat64: no blas engine registered: call Register()")
 )
 

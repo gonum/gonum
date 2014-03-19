@@ -12,8 +12,6 @@ func Register(b blas.Float64) { blasEngine = b }
 
 func Registered() blas.Float64 { return blasEngine }
 
-const BlasOrder = blas.RowMajor
-
 var (
 	matrix *Dense
 
@@ -68,7 +66,6 @@ func NewDense(r, c int, mat []float64) *Dense {
 		mat = make([]float64, r*c)
 	}
 	return &Dense{RawMatrix{
-		Order:  BlasOrder,
 		Rows:   r,
 		Cols:   c,
 		Stride: c,
@@ -83,12 +80,7 @@ func DenseCopyOf(a Matrix) *Dense {
 	return d
 }
 
-func (m *Dense) LoadRawMatrix(b RawMatrix) {
-	if b.Order != BlasOrder {
-		panic(ErrIllegalOrder)
-	}
-	m.mat = b
-}
+func (m *Dense) LoadRawMatrix(b RawMatrix) { m.mat = b }
 
 func (m *Dense) RawMatrix() RawMatrix { return m.mat }
 
@@ -207,7 +199,6 @@ func (m *Dense) Reset() {
 func (m *Dense) Clone(a Matrix) {
 	r, c := a.Dims()
 	mat := RawMatrix{
-		Order:  BlasOrder,
 		Rows:   r,
 		Cols:   c,
 		Stride: c,
@@ -282,7 +273,6 @@ func (m *Dense) U(a Matrix) {
 		return
 	case m.isZero():
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -338,7 +328,6 @@ func (m *Dense) L(a Matrix) {
 		return
 	case m.isZero():
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -390,10 +379,9 @@ func (m *Dense) TCopy(a Matrix) {
 	}
 	if w.isZero() {
 		w.mat = RawMatrix{
-			Order: BlasOrder,
-			Rows:  ac,
-			Cols:  ar,
-			Data:  use(w.mat.Data, ar*ac),
+			Rows: ac,
+			Cols: ar,
+			Data: use(w.mat.Data, ar*ac),
 		}
 		w.mat.Stride = ar
 	} else if ar != m.mat.Cols || ac != m.mat.Rows {
@@ -425,7 +413,6 @@ func (m *Dense) Stack(a, b Matrix) {
 
 	if m.isZero() {
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar + br,
 			Cols:   ac,
 			Stride: ac,
@@ -450,7 +437,6 @@ func (m *Dense) Augment(a, b Matrix) {
 
 	if m.isZero() {
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac + bc,
 			Stride: ac + bc,

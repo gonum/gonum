@@ -119,7 +119,6 @@ func (m *Dense) Add(a, b Matrix) {
 
 	if m.isZero() {
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -173,7 +172,6 @@ func (m *Dense) Sub(a, b Matrix) {
 
 	if m.isZero() {
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -227,7 +225,6 @@ func (m *Dense) MulElem(a, b Matrix) {
 
 	if m.isZero() {
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -283,9 +280,6 @@ func (m *Dense) Dot(b Matrix) float64 {
 
 	if b, ok := b.(RawMatrixer); ok {
 		bmat := b.RawMatrix()
-		if m.mat.Order != BlasOrder || bmat.Order != BlasOrder {
-			panic(ErrIllegalOrder)
-		}
 		for jm, jb := 0, 0; jm < mr*m.mat.Stride; jm, jb = jm+m.mat.Stride, jb+bmat.Stride {
 			for i, v := range m.mat.Data[jm : jm+mc] {
 				d += v * bmat.Data[i+jb]
@@ -326,7 +320,6 @@ func (m *Dense) Mul(a, b Matrix) {
 	}
 	if w.isZero() {
 		w.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   bc,
 			Stride: bc,
@@ -343,7 +336,7 @@ func (m *Dense) Mul(a, b Matrix) {
 				panic(ErrNoEngine)
 			}
 			blasEngine.Dgemm(
-				BlasOrder,
+				blas.RowMajor,
 				blas.NoTrans, blas.NoTrans,
 				ar, bc, ac,
 				1.,
@@ -394,7 +387,6 @@ func (m *Dense) Scale(f float64, a Matrix) {
 
 	if m.isZero() {
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -437,7 +429,6 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 
 	if m.isZero() {
 		m.mat = RawMatrix{
-			Order:  BlasOrder,
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,

@@ -7,9 +7,9 @@ package mat64
 import (
 	"github.com/gonum/floats"
 
+	check "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
-	check "launchpad.net/gocheck"
 )
 
 func (s *S) TestNewDense(c *check.C) {
@@ -30,8 +30,7 @@ func (s *S) TestNewDense(c *check.C) {
 			0, 0,
 			0,
 			&Dense{RawMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 3,
+				Rows: 3, Cols: 3,
 				Stride: 3,
 				Data:   []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 			}},
@@ -46,8 +45,7 @@ func (s *S) TestNewDense(c *check.C) {
 			1, 1,
 			3,
 			&Dense{RawMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 3,
+				Rows: 3, Cols: 3,
 				Stride: 3,
 				Data:   []float64{1, 1, 1, 1, 1, 1, 1, 1, 1},
 			}},
@@ -62,8 +60,7 @@ func (s *S) TestNewDense(c *check.C) {
 			0, 1,
 			1.7320508075688772,
 			&Dense{RawMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 3,
+				Rows: 3, Cols: 3,
 				Stride: 3,
 				Data:   []float64{1, 0, 0, 0, 1, 0, 0, 0, 1},
 			}},
@@ -77,7 +74,7 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			-1, 0,
 			1.7320508075688772,
-			&Dense{RawMatrix{Order: BlasOrder,
+			&Dense{RawMatrix{
 				Rows: 3, Cols: 3,
 				Stride: 3,
 				Data:   []float64{-1, 0, 0, 0, -1, 0, 0, 0, -1},
@@ -91,7 +88,7 @@ func (s *S) TestNewDense(c *check.C) {
 			2, 3,
 			1, 6,
 			9.539392014169456,
-			&Dense{RawMatrix{Order: BlasOrder,
+			&Dense{RawMatrix{
 				Rows: 2, Cols: 3,
 				Stride: 3,
 				Data:   []float64{1, 2, 3, 4, 5, 6},
@@ -107,8 +104,7 @@ func (s *S) TestNewDense(c *check.C) {
 			1, 6,
 			9.539392014169456,
 			&Dense{RawMatrix{
-				Order: BlasOrder,
-				Rows:  3, Cols: 2,
+				Rows: 3, Cols: 2,
 				Stride: 2,
 				Data:   []float64{1, 2, 3, 4, 5, 6},
 			}},
@@ -433,8 +429,7 @@ func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 		return nil, ErrZeroLength
 	}
 	d := &Dense{RawMatrix{
-		Order: BlasOrder,
-		Rows:  size, Cols: size, Stride: size,
+		Rows: size, Cols: size, Stride: size,
 		Data: make([]float64, size*size),
 	}}
 	for i := 0; i < size; i++ {

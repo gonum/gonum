@@ -80,14 +80,16 @@ func (m *Vec) Mul(a, b Matrix) {
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
-		blasEngine.Dgemv(BlasOrder,
+		blasEngine.Dgemv(
+			blas.RowMajor,
 			blas.NoTrans,
 			ar, ac,
 			1.,
 			amat.Data, amat.Stride,
 			bv, 1,
 			0.,
-			w, 1)
+			w, 1,
+		)
 		*m = w
 		return
 	}

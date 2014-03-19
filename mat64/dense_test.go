@@ -87,7 +87,7 @@ func (s *S) TestNewDense(c *check.C) {
 			},
 			2, 3,
 			1, 6,
-			9.539392014169456,
+			9.539392014169458,
 			&Dense{RawMatrix{
 				Rows: 2, Cols: 3,
 				Stride: 3,
@@ -102,7 +102,7 @@ func (s *S) TestNewDense(c *check.C) {
 			},
 			3, 2,
 			1, 6,
-			9.539392014169456,
+			9.539392014169458,
 			&Dense{RawMatrix{
 				Rows: 3, Cols: 2,
 				Stride: 2,
@@ -560,7 +560,7 @@ func (s *S) TestNorm(c *check.C) {
 		{
 			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
 			ord:  0,
-			norm: 25.495097567963924,
+			norm: 25.49509756796392,
 		},
 		{
 			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},

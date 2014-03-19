@@ -92,10 +92,10 @@ func (m *Dense) Norm(ord float64) float64 {
 	case ord == 0:
 		for i := 0; i < len(m.mat.Data); i += m.mat.Stride {
 			for _, v := range m.mat.Data[i : i+m.mat.Cols] {
-				n += v * v
+				n = math.Hypot(n, v)
 			}
 		}
-		return math.Sqrt(n)
+		return n
 	case ord == 2, ord == -2:
 		s := SVD(m, epsilon, small, false, false).Sigma
 		if ord == 2 {

@@ -15,18 +15,14 @@ type Edge interface {
 	Tail() Node
 }
 
-// A Graph ensures the behavior of an undirected graph, necessary to run certain algorithms on it.
+// A Graph implements the behavior of an undirected graph.
 //
-// The Graph interface is directed. This means that EdgeList() should return an edge where Head
-// always goes towards Tail. If your graph is undirected and you only maintain edges for one
-// direction, simply return two edges for each one of your edges, with the Head and Tail swapped
-// in each one.
+// All methods in Graph are implicitly undirected. Graph algorithms that care about directionality will intelligently
+// choose the DirectedGraph behavior if that interface is also implemented, even if the function itself only
+// takes in a Graph (or a super-interface of graph).
 type Graph interface {
 	// NodeExists returns true when node is currently in the graph.
 	NodeExists(node Node) bool
-	// Degree is equivalent to len(Successors(node)) + len(Predecessors(node)).
-	// This means that reflexive edges are counted twice.
-	Degree(node Node) int
 	// NodeList returns a list of all nodes in no particular order, useful for
 	// determining things like if a graph is fully connected. The caller is
 	// free to modify this list. Implementations should construct a new list

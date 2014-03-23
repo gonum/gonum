@@ -2,6 +2,7 @@ package search
 
 import (
 	"container/heap"
+	"fmt"
 
 	gr "github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
@@ -17,6 +18,7 @@ type searchFuncs struct {
 
 func genIsSuccessor(graph gr.DirectedGraph) func(gr.Node, gr.Node) bool {
 	return func(node, succ gr.Node) bool {
+		fmt.Println(graph.EdgeTo(node, succ))
 		return graph.EdgeTo(node, succ) != nil
 	}
 }
@@ -54,9 +56,10 @@ func setupFuncs(graph gr.Graph, cost gr.CostFunc, heuristicCost gr.HeuristicCost
 		sf.successors = g.Neighbors
 		sf.predecessors = g.Neighbors
 		sf.neighbors = g.Neighbors
-		sf.isSuccessor = genIsNeighbor(g)
-		sf.isPredecessor = genIsNeighbor(g)
-		sf.isNeighbor = genIsNeighbor(g)
+		isNeighbor := genIsNeighbor(g)
+		sf.isSuccessor = isNeighbor
+		sf.isPredecessor = isNeighbor
+		sf.isNeighbor = isNeighbor
 		sf.edgeBetween = g.EdgeBetween
 		sf.edgeTo = g.EdgeBetween
 	}

@@ -16,7 +16,7 @@ func TestSimpleAStar(t *testing.T) {
 		t.Fatal("Couldn't generate tilegraph")
 	}
 
-	path, cost, _ := search.AStar(concrete.GonumNode(1), concrete.GonumNode(14), tg, nil, nil)
+	path, cost, _ := search.AStar(concrete.Node(1), concrete.Node(14), tg, nil, nil)
 	if math.Abs(cost-4.0) > .00001 {
 		t.Errorf("A* reports incorrect cost for simple tilegraph search")
 	}
@@ -39,14 +39,14 @@ func TestSimpleAStar(t *testing.T) {
 func TestBiggerAStar(t *testing.T) {
 	tg := concrete.NewTileGraph(3, 3, true)
 
-	path, cost, _ := search.AStar(concrete.GonumNode(0), concrete.GonumNode(8), tg, nil, nil)
+	path, cost, _ := search.AStar(concrete.Node(0), concrete.Node(8), tg, nil, nil)
 
 	if math.Abs(cost-4.0) > .00001 || !search.IsPath(path, tg) {
 		t.Error("Non-optimal or impossible path found for 3x3 grid")
 	}
 
 	tg = concrete.NewTileGraph(1000, 1000, true)
-	path, cost, _ = search.AStar(concrete.GonumNode(00), concrete.GonumNode(999*1000+999), tg, nil, nil)
+	path, cost, _ = search.AStar(concrete.Node(00), concrete.Node(999*1000+999), tg, nil, nil)
 	if !search.IsPath(path, tg) || cost != 1998.0 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}
@@ -67,7 +67,7 @@ func TestObstructedAStar(t *testing.T) {
 	tg.SetPassability(4, 9, false)
 
 	rows, cols := tg.Dimensions()
-	path, cost1, expanded := search.AStar(concrete.GonumNode(5), tg.CoordsToNode(rows-1, cols-1), tg, nil, nil)
+	path, cost1, expanded := search.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, nil, nil)
 
 	if !search.IsPath(path, tg) {
 		t.Error("Path doesn't exist in obstructed graph")
@@ -81,7 +81,7 @@ func TestObstructedAStar(t *testing.T) {
 		return math.Abs(float64(r1)-float64(r2)) + math.Abs(float64(c1)-float64(c2))
 	}
 
-	path, cost2, expanded2 := search.AStar(concrete.GonumNode(5), tg.CoordsToNode(rows-1, cols-1), tg, nil, ManhattanHeuristic)
+	path, cost2, expanded2 := search.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, nil, ManhattanHeuristic)
 	if !search.IsPath(path, tg) {
 		t.Error("Path doesn't exist when using heuristic on obstructed graph")
 	}
@@ -126,7 +126,7 @@ func TestSmallAStar(t *testing.T) {
 		// assert that AStar finds each path
 		for goalID, dPath := range dPaths {
 			exp := fmt.Sprintln(dPath, dCosts[goalID])
-			aPath, aCost, _ := search.AStar(start, concrete.GonumNode(goalID), gg, nil, heur)
+			aPath, aCost, _ := search.AStar(start, concrete.Node(goalID), gg, nil, heur)
 			got := fmt.Sprintln(aPath, aCost)
 			if got != exp {
 				t.Error("expected", exp, "got", got)
@@ -136,10 +136,11 @@ func TestSmallAStar(t *testing.T) {
 }
 
 func ExampleBreadthFirstSearch() {
-	g := concrete.NewGonumGraph(true)
-	var n0, n1, n2, n3 concrete.GonumNode = 0, 1, 2, 3
-	g.AddNode(n0, []graph.Node{n1, n2})
-	g.AddEdge(concrete.GonumEdge{n2, n3})
+	g := concrete.NewGraph()
+	var n0, n1, n2, n3 concrete.Node = 0, 1, 2, 3
+	g.AddEdge(concrete.Edge{n0, n1}, 1.0, true)
+	g.AddEdge(concrete.Edge{n0, n2}, 1.0, true)
+	g.AddEdge(concrete.Edge{n2, n3}, 1.0, true)
 	path, v := search.BreadthFirstSearch(n0, n3, g)
 	fmt.Println("path:", path)
 	fmt.Println("nodes visited:", v)
@@ -148,7 +149,7 @@ func ExampleBreadthFirstSearch() {
 	// nodes visited: 4
 }
 
-func newSmallGonumGraph() *concrete.GonumGraph {
+func newSmallGonumGraph() *concrete.Graph {
 	eds := []struct{ n1, n2, edgeCost int }{
 		{1, 2, 7},
 		{1, 3, 9},
@@ -160,17 +161,16 @@ func newSmallGonumGraph() *concrete.GonumGraph {
 		{4, 5, 7},
 		{5, 6, 9},
 	}
-	g := concrete.NewGonumGraph(false)
-	for n := concrete.GonumNode(1); n <= 6; n++ {
-		g.AddNode(n, nil)
+	g := concrete.NewGraph()
+	for n := concrete.Node(1); n <= 6; n++ {
+		g.AddNode(n)
 	}
 	for _, ed := range eds {
-		e := concrete.GonumEdge{
-			concrete.GonumNode(ed.n1),
-			concrete.GonumNode(ed.n2),
+		e := concrete.Edge{
+			concrete.Node(ed.n1),
+			concrete.Node(ed.n2),
 		}
-		g.AddEdge(e)
-		g.SetEdgeCost(e, float64(ed.edgeCost))
+		g.AddEdge(e, float64(ed.edgeCost), false)
 	}
 	return g
 }
@@ -203,7 +203,7 @@ func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool,
 		for _, edge := range g.EdgeList() {
 			head := edge.Head()
 			tail := edge.Tail()
-			if heur(head, goal) > g.Cost(head, tail)+heur(tail, goal) {
+			if heur(head, goal) > g.Cost(edge)+heur(tail, goal) {
 				return false, edge, goal
 			}
 		}
@@ -214,7 +214,7 @@ func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool,
 // Test for correct result on a small graph easily solvable by hand
 func TestDijkstraSmall(t *testing.T) {
 	g := newSmallGonumGraph()
-	paths, lens := search.Dijkstra(concrete.GonumNode(1), g, nil)
+	paths, lens := search.Dijkstra(concrete.Node(1), g, nil)
 	s := fmt.Sprintln(len(paths), len(lens))
 	for i := 1; i <= 6; i++ {
 		s += fmt.Sprintln(paths[i], lens[i])
@@ -232,39 +232,41 @@ func TestDijkstraSmall(t *testing.T) {
 }
 
 func TestIsPath(t *testing.T) {
-	g := concrete.NewGonumGraph(true)
-	if search.IsPath(nil, g) != true {
-		t.Error("nil path")
+	fmt.Println("Begin test")
+	g := concrete.NewGraph()
+	if !search.IsPath(nil, g) {
+		t.Error("IsPath returns false on nil path")
 	}
-	p := []graph.Node{concrete.GonumNode(0)}
-	if search.IsPath(p, g) != false {
-		t.Error("node not in graph")
+	p := []graph.Node{concrete.Node(0)}
+	if search.IsPath(p, g) {
+		t.Error("IsPath returns true on nonexistant node")
 	}
-	g.AddNode(p[0], nil)
-	if search.IsPath(p, g) != true {
-		t.Error("single node in graph")
+	g.AddNode(p[0])
+	if !search.IsPath(p, g) {
+		t.Error("IsPath returns false on single-length path with existing node")
 	}
-	p = append(p, concrete.GonumNode(1))
-	g.AddNode(p[1], nil)
-	if search.IsPath(p, g) != false {
-		t.Error("unconnected nodes")
+	p = append(p, concrete.Node(1))
+	g.AddNode(p[1])
+	if search.IsPath(p, g) {
+		t.Error("IsPath returns true on bad path of length 2")
 	}
-	g.AddEdge(concrete.GonumEdge{p[0], p[1]})
-	if search.IsPath(p, g) != true {
+	g.AddEdge(concrete.Edge{p[0], p[1]}, 1.0, true)
+	if !search.IsPath(p, g) {
 		t.Error("connected nodes")
 	}
 	p[0], p[1] = p[1], p[0]
-	if search.IsPath(p, g) != false {
+	if search.IsPath(p, g) {
 		t.Error("reverse path")
 	}
-	p = []graph.Node{p[1], p[0], concrete.GonumNode(2)}
-	g.AddEdge(concrete.GonumEdge{p[1], p[2]})
-	if search.IsPath(p, g) != true {
+	p = []graph.Node{p[1], p[0], concrete.Node(2)}
+	g.AddEdge(concrete.Edge{p[1], p[2]}, 1.0, true)
+	if !search.IsPath(p, g) {
 		t.Error("three nodes")
 	}
-	g = concrete.NewGonumGraph(false)
-	g.AddNode(p[1], []graph.Node{p[0], p[2]})
-	if search.IsPath(p, g) != true {
+	g = concrete.NewGraph()
+	g.AddEdge(concrete.Edge{p[1], p[0]}, 1.0, false)
+	g.AddEdge(concrete.Edge{p[1], p[2]}, 1.0, false)
+	if !search.IsPath(p, g) {
 		t.Error("undirected")
 	}
 }

@@ -175,8 +175,10 @@ func (graph *Graph) EdgeTo(node, succ gr.Node) gr.Edge {
 		return nil
 	}
 
-	edge := graph.successors[node.ID()][succ.ID()]
-
+	edge, ok := graph.successors[node.ID()][succ.ID()]
+	if !ok {
+		return nil
+	}
 	return edge
 }
 
@@ -264,4 +266,23 @@ func (graph *Graph) Cost(e gr.Edge) float64 {
 		}
 	}
 	return math.Inf(1)
+}
+
+func (graph *Graph) EdgeList() []gr.Edge {
+	edgeList := make([]gr.Edge, 0, len(graph.successors))
+	edgeMap := make(map[int]map[int]struct{}, len(graph.successors))
+	for node, succMap := range graph.successors {
+		edgeMap[node] = make(map[int]struct{}, len(succMap))
+		for succ, edge := range succMap {
+			if doneMap, ok := edgeMap[succ]; ok {
+				if _, ok := doneMap[node]; ok {
+					continue
+				}
+			}
+			edgeList = append(edgeList, edge)
+			edgeMap[node][succ] = struct{}{}
+		}
+	}
+
+	return edgeList
 }

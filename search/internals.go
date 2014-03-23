@@ -2,7 +2,6 @@ package search
 
 import (
 	"container/heap"
-	"math"
 
 	gr "github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
@@ -78,18 +77,6 @@ func setupFuncs(graph gr.Graph, cost gr.CostFunc, heuristicCost gr.HeuristicCost
 	}
 
 	return sf
-}
-
-func NullHeuristic(node1, node2 gr.Node) float64 {
-	return 0.0
-}
-
-func UniformCost(e gr.Edge) float64 {
-	if e == nil {
-		return math.Inf(1)
-	}
-
-	return 1.0
 }
 
 /** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/

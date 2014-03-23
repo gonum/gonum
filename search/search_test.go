@@ -251,21 +251,21 @@ func TestIsPath(t *testing.T) {
 	}
 	g.AddEdge(concrete.Edge{p[0], p[1]}, 1.0, true)
 	if !search.IsPath(p, g) {
-		t.Error("connected nodes")
+		t.Error("IsPath returns false on correct path of length 2")
 	}
 	p[0], p[1] = p[1], p[0]
 	if search.IsPath(p, g) {
-		t.Error("reverse path")
+		t.Error("IsPath erroenously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
 	g.AddEdge(concrete.Edge{p[1], p[2]}, 1.0, true)
 	if !search.IsPath(p, g) {
-		t.Error("three nodes")
+		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
 	g = concrete.NewGraph()
 	g.AddEdge(concrete.Edge{p[1], p[0]}, 1.0, false)
 	g.AddEdge(concrete.Edge{p[1], p[2]}, 1.0, false)
 	if !search.IsPath(p, g) {
-		t.Error("undirected")
+		t.Error("IsPath does not correctly account for undirected behavior")
 	}
 }

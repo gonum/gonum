@@ -17,9 +17,9 @@ type Edge interface {
 
 // A Graph implements the behavior of an undirected graph.
 //
-// All methods in Graph are implicitly undirected. Graph algorithms that care about directionality will intelligently
-// choose the DirectedGraph behavior if that interface is also implemented, even if the function itself only
-// takes in a Graph (or a super-interface of graph).
+// All methods in Graph are implicitly undirected. Graph algorithms that care about directionality
+// will intelligently choose the DirectedGraph behavior if that interface is also implemented,
+// even if the function itself only takes in a Graph (or a super-interface of graph).
 type Graph interface {
 	// NodeExists returns true when node is currently in the graph.
 	NodeExists(node Node) bool
@@ -40,9 +40,8 @@ type Graph interface {
 // That is, if node1 goes to node2, that does not necessarily imply that node2 goes to node1.
 //
 // While it's possible for a directed graph to have fully reciprocal edges (i.e. the graph is
-// symmetric) -- it is not required to be. The graph is also required to implement UndirectedGraph
-// because it can be useful to know all neighbors regardless of direction; not because this graph
-// treats directed graphs as special cases of undirected ones (the truth is, in fact, the opposite.)
+// symmetric) -- it is not required to be. The graph is also required to implement Graph
+// because in many cases it can be useful to know all neighbors regardless of direction.
 type DirectedGraph interface {
 	Graph
 	// Successors gives the nodes connected by OUTBOUND edges.
@@ -67,6 +66,7 @@ type EdgeListGraph interface {
 	EdgeLister
 }
 
+// Returns all directed edges in the graph.
 type DirectedEdgeLister interface {
 	DirectedEdgeList() []Edge
 }
@@ -77,9 +77,11 @@ type DirectedEdgeListGraph interface {
 }
 
 // A crunch graph forces a sparse graph to become a dense graph. That is, if the node IDs are
-// [1,4,9,7] it would "crunch" the ids into the contiguous block [0,1,2,3].
+// [1,4,9,7] it would "crunch" the ids into the contiguous block [0,1,2,3]. Order is not
+// required to be preserved between the non-cruched and crunched instances (that means in
+// the example above 0 may correspond to 4 or 7 or 9, not necessarily 1).
 //
-// All dense graphs should have the first ID at 0.
+// All dense graphs should have the first ID as 0.
 type CrunchGraph interface {
 	Graph
 	Crunch()
@@ -90,8 +92,7 @@ type CrunchGraph interface {
 // this function will take precedence over the Uniform Cost function (all weights are 1) if "nil"
 // is passed in for the function argument.
 //
-// If no edge exists between node1 and node2, the cost should be taken to be +inf (can be gotten
-// by math.Inf(1).)
+// If the argument is nil, or the edge is invalid for some reason, this should return math.Inf(1)
 type Coster interface {
 	Cost(edge Edge) float64
 }
@@ -123,10 +124,13 @@ type HeuristicCoster interface {
 // properly handle the graph in order to, say, fill it with a minimum spanning tree.
 //
 // In functions that take a MutableGraph as an argument, it should not be the same as the Graph
-// argument as concurrent modification will likely cause problems in most cases.
+// argument as concurrent modification will likely cause problems.
 //
 // Mutable graphs should always record the IDs as they are represented -- which means they are
 // sparse by nature.
+//
+// Mutable graphs are required to keep the exact Nodes and Edges passed in, and return
+// the originals when asked.
 type MutableGraph interface {
 	CostGraph
 	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
@@ -139,7 +143,7 @@ type MutableGraph interface {
 	// it also adds the reciprocal edge. If this is called a second time,
 	// it overrides any existing edge.
 	AddEdge(e Edge, cost float64, directed bool)
-	// RemoveNode removed a node from the graph, as well as any edges
+	// RemoveNode removes a node from the graph, as well as any edges
 	// attached to it
 	RemoveNode(node Node)
 	// RemoveEdge removes a connection between two nodes, but does not

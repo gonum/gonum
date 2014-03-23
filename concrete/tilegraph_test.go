@@ -102,34 +102,3 @@ func TestTileGraph(t *testing.T) {
 	}
 
 }
-
-func TestTileGraphCoverage(t *testing.T) {
-	concrete.GenerateTileGraph("▀ x")   // x invalid
-	concrete.GenerateTileGraph("▀ \n▀") // row lengths not equal
-	concrete.GenerateTileGraph("▀ ▀")
-	tg := concrete.NewTileGraph(2, 3, true)
-	tg.SetPassability(0, -1, true)
-	tg.SetPassability(0, 1, false)
-	tg.SetPassability(0, 4, false)
-	tg.PathString(nil)
-	n1 := concrete.Node(1)
-	n2 := concrete.Node(2)
-	n3 := concrete.Node(3)
-	n5 := concrete.Node(5)
-	p := []gr.Node{n3, n2, n1, n5}
-	tg.PathString(p)
-	tg.Dimensions()
-	tg.IDToCoords(0)
-	tg.CoordsToNode(-1, 0)
-	tg.CoordsToNode(0, 0)
-	tg.Neighbors(n1)
-	tg.Neighbors(n2)
-	tg.IsNeighbor(n1, n2)
-	tg.NodeExists(n1)
-	tg.Degree(n1)
-	tg.EdgeList()
-	tg.NodeList()
-	tg.IsDirected()
-	tg.Cost(n1, n2)
-	tg.Cost(n2, n5)
-}

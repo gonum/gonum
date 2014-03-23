@@ -182,3 +182,9 @@ type CostFunc func(Edge) float64
 
 // Estimates the cost of travelling between two nodes
 type HeuristicCostFunc func(Node, Node) float64
+
+// Convenience constants for AddEdge and RemoveEdge
+const (
+	Directed   bool = true
+	Undirected      = false
+)

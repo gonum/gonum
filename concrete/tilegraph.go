@@ -150,7 +150,7 @@ func (graph *TileGraph) CoordsToNode(row, col int) (node gr.Node) {
 	if id == -1 {
 		return nil
 	} else {
-		return GonumNode(id)
+		return Node(id)
 	}
 }
 
@@ -210,8 +210,8 @@ func (graph *TileGraph) EdgeList() []gr.Edge {
 			continue
 		}
 
-		for _, succ := range graph.successors(GonumNode(id)) {
-			edges = append(edges, GonumEdge{GonumNode(id), succ})
+		for _, succ := range graph.successors(Node(id)) {
+			edges = append(edges, Edge{Node(id), succ})
 		}
 	}
 
@@ -225,7 +225,7 @@ func (graph *TileGraph) NodeList() []gr.Node {
 			continue
 		}
 
-		nodes = append(nodes, GonumNode(id))
+		nodes = append(nodes, Node(id))
 	}
 
 	return nodes

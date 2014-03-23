@@ -54,7 +54,7 @@ func (dg *DenseGraph) Degree(node graph.Node) int {
 func (dg *DenseGraph) NodeList() []graph.Node {
 	nodes := make([]graph.Node, dg.numNodes)
 	for i := 0; i < dg.numNodes; i++ {
-		nodes[i] = GonumNode(i)
+		nodes[i] = Node(i)
 	}
 
 	return nodes
@@ -65,7 +65,7 @@ func (dg *DenseGraph) DirectedEdgeList() []graph.Edge {
 	for i := 0; i < dg.numNodes; i++ {
 		for j := 0; j < dg.numNodes; j++ {
 			if dg.adjacencyMatrix[i*dg.numNodes+j] != math.Inf(1) {
-				edges = append(edges, GonumEdge{GonumNode(i), GonumNode(j)})
+				edges = append(edges, Edge{Node(i), Node(j)})
 			}
 		}
 	}
@@ -78,7 +78,7 @@ func (dg *DenseGraph) Neighbors(node graph.Node) []graph.Node {
 	for i := 0; i < dg.numNodes; i++ {
 		if dg.adjacencyMatrix[i*dg.numNodes+node.ID()] != math.Inf(1) ||
 			dg.adjacencyMatrix[node.ID()*dg.numNodes+i] != math.Inf(1) {
-			neighbors = append(neighbors, GonumNode(i))
+			neighbors = append(neighbors, Node(i))
 		}
 	}
 
@@ -94,7 +94,7 @@ func (dg *DenseGraph) Successors(node graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < dg.numNodes; i++ {
 		if dg.adjacencyMatrix[node.ID()*dg.numNodes+i] != math.Inf(1) {
-			neighbors = append(neighbors, GonumNode(i))
+			neighbors = append(neighbors, Node(i))
 		}
 	}
 
@@ -109,7 +109,7 @@ func (dg *DenseGraph) Predecessors(node graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < dg.numNodes; i++ {
 		if dg.adjacencyMatrix[i*dg.numNodes+node.ID()] != math.Inf(1) {
-			neighbors = append(neighbors, GonumNode(i))
+			neighbors = append(neighbors, Node(i))
 		}
 	}
 

@@ -97,7 +97,7 @@ type CrunchGraph interface {
 // If no edge exists between node1 and node2, the cost should be taken to be +inf (can be gotten
 // by math.Inf(1).)
 type Coster interface {
-	Cost(node1, node2 Node) float64
+	Cost(edge Edge) float64
 }
 
 // Guarantees that something implementing Coster is also a Graph.
@@ -177,5 +177,8 @@ type DStarGraph interface {
 	ChangedEdges() (newCostFunc func(Node, Node) float64, changedEdges []Edge)
 }
 
-// A function that returns the cost from one node to another.
-type CostFunc func(Node, Node) float64
+// A function that returns the cost of following an edge
+type CostFunc func(Edge) float64
+
+// Estimates the cost of travelling between two nodes
+type HeuristicCostFunc func(Node, Node) float64

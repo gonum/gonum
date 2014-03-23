@@ -316,12 +316,16 @@ func DepthFirstSearch(start, goal gr.Node, graph gr.Graph) []gr.Node {
 }
 
 // An admissible, consistent heuristic that won't speed up computation time at all.
-func NullHeuristic(a, b gr.Node) float64 {
+func NullHeuristic(node1, node2 gr.Node) float64 {
 	return 0.0
 }
 
 // Assumes all edges in the graph have the same weight (including edges that don't exist!)
-func UniformCost(a, b gr.Node) float64 {
+func UniformCost(e gr.Edge) float64 {
+	if e == nil {
+		return math.Inf(1)
+	}
+
 	return 1.0
 }
 

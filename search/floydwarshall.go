@@ -35,7 +35,7 @@ type PathFunc func(start, goal gr.Node) (path []gr.Node, cost float64, err error
 func FloydWarshall(graph gr.CrunchGraph, cost gr.CostFunc) (AllPathFunc, PathFunc) {
 	graph.Crunch()
 	sf := setupFuncs(graph, cost, nil)
-	successors, isSuccessor, cost := sf.successors, sf.isSuccessor, sf.cost
+	successors, isSuccessor, cost, edgeTo := sf.successors, sf.isSuccessor, sf.cost, sf.edgeTo
 
 	nodes := denseNodeSorter(graph.NodeList())
 	sort.Sort(nodes)
@@ -53,7 +53,7 @@ func FloydWarshall(graph gr.CrunchGraph, cost gr.CostFunc) (AllPathFunc, PathFun
 
 	for _, node := range nodes {
 		for _, succ := range successors(node) {
-			dist[node.ID()+succ.ID()*numNodes] = cost(node, succ)
+			dist[node.ID()+succ.ID()*numNodes] = cost(edgeTo(node, succ))
 		}
 	}
 
@@ -80,10 +80,10 @@ func FloydWarshall(graph gr.CrunchGraph, cost gr.CostFunc) (AllPathFunc, PathFun
 		}
 	}
 
-	return genAllPathsFunc(dist, next, nodes, graph, cost, isSuccessor), genSinglePathFunc(dist, next, nodes)
+	return genAllPathsFunc(dist, next, nodes, graph, cost, isSuccessor, edgeTo), genSinglePathFunc(dist, next, nodes)
 }
 
-func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Graph, cost func(gr.Node, gr.Node) float64, isSuccessor func(gr.Node, gr.Node) bool) func(start, goal gr.Node) ([][]gr.Node, float64, error) {
+func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Graph, cost gr.CostFunc, isSuccessor func(gr.Node, gr.Node) bool, edgeTo func(gr.Node, gr.Node) gr.Edge) func(start, goal gr.Node) ([][]gr.Node, float64, error) {
 	numNodes := len(nodes)
 
 	// A recursive function to reconstruct all possible paths.
@@ -101,7 +101,7 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []gr.Node, graph gr.Gra
 
 		toReturn := make([][]gr.Node, 0, len(intermediates))
 		// Special case: if intermediates exist we need to explicitly check to see if i and j is also an optimal path
-		if isSuccessor(nodes[i], nodes[j]) && math.Abs(dist[i+j*numNodes]-cost(nodes[i], nodes[j])) < .000001 {
+		if isSuccessor(nodes[i], nodes[j]) && math.Abs(dist[i+j*numNodes]-cost(edgeTo(nodes[i], nodes[j]))) < .000001 {
 			toReturn = append(toReturn, []gr.Node{})
 		}
 

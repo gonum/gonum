@@ -12,6 +12,7 @@ type searchFuncs struct {
 	isSuccessor, isPredecessor, isNeighbor func(gr.Node, gr.Node) bool
 	cost                                   gr.CostFunc
 	heuristicCost                          gr.HeuristicCostFunc
+	edgeTo, edgeBetween                    func(gr.Node, gr.Node) gr.Edge
 }
 
 func genIsSuccessor(graph gr.DirectedGraph) func(gr.Node, gr.Node) bool {
@@ -47,6 +48,8 @@ func setupFuncs(graph gr.Graph, cost gr.CostFunc, heuristicCost gr.HeuristicCost
 		sf.isSuccessor = genIsSuccessor(g)
 		sf.isPredecessor = genIsPredecessor(g)
 		sf.isNeighbor = genIsNeighbor(g)
+		sf.edgeBetween = g.EdgeBetween
+		sf.edgeTo = g.EdgeTo
 	default:
 		sf.successors = g.Neighbors
 		sf.predecessors = g.Neighbors
@@ -54,6 +57,8 @@ func setupFuncs(graph gr.Graph, cost gr.CostFunc, heuristicCost gr.HeuristicCost
 		sf.isSuccessor = genIsNeighbor(g)
 		sf.isPredecessor = genIsNeighbor(g)
 		sf.isNeighbor = genIsNeighbor(g)
+		sf.edgeBetween = g.EdgeBetween
+		sf.edgeTo = g.EdgeBetween
 	}
 
 	if heuristicCost != nil {

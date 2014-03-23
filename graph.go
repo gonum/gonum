@@ -135,7 +135,7 @@ type MutableGraph interface {
 	CostGraph
 	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
 	// used.
-	NewNode(successors []Node) Node
+	NewNode() Node
 	// Adds a node to the graph
 	AddNode(node Node)
 	// AddEdge connects two nodes in the graph. Neither node is required

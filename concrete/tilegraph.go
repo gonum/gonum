@@ -156,7 +156,7 @@ func (graph *TileGraph) CoordsToNode(row, col int) (node gr.Node) {
 
 func (graph *TileGraph) Neighbors(node gr.Node) []gr.Node {
 	id := node.ID()
-	if !NodeExists(node) {
+	if !graph.NodeExists(node) {
 		return nil
 	}
 
@@ -174,8 +174,7 @@ func (graph *TileGraph) Neighbors(node gr.Node) []gr.Node {
 }
 
 func (graph *TileGraph) EdgeBetween(node, neighbor gr.Node) gr.Edge {
-	id, succ := node.ID(), successor.ID()
-	if !graph.NodeExists(node.ID()) || !graph.NodeExist(node.ID()) {
+	if !graph.NodeExists(node) || !graph.NodeExists(neighbor) {
 		return nil
 	}
 
@@ -204,7 +203,7 @@ func (graph *TileGraph) EdgeList() []gr.Edge {
 			continue
 		}
 
-		for _, succ := range graph.successors(Node(id)) {
+		for _, succ := range graph.Neighbors(Node(id)) {
 			edges = append(edges, Edge{Node(id), succ})
 		}
 	}

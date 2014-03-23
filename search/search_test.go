@@ -232,7 +232,6 @@ func TestDijkstraSmall(t *testing.T) {
 }
 
 func TestIsPath(t *testing.T) {
-	fmt.Println("Begin test")
 	g := concrete.NewGraph()
 	if !search.IsPath(nil, g) {
 		t.Error("IsPath returns false on nil path")

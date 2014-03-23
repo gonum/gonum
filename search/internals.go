@@ -2,7 +2,6 @@ package search
 
 import (
 	"container/heap"
-	"fmt"
 
 	gr "github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
@@ -18,7 +17,6 @@ type searchFuncs struct {
 
 func genIsSuccessor(graph gr.DirectedGraph) func(gr.Node, gr.Node) bool {
 	return func(node, succ gr.Node) bool {
-		fmt.Println(graph.EdgeTo(node, succ))
 		return graph.EdgeTo(node, succ) != nil
 	}
 }

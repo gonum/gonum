@@ -34,8 +34,10 @@ type Graph interface {
 	NodeList() []Node
 	// Neighbors returns all nodes connected by any edge to this node.
 	Neighbors(node Node) []Node
-	// IsNeighbor returns true when neighbor is connected to node by an edge.
-	IsNeighbor(node, neighbor Node) bool
+	// EdgeBetween returns an edge between node and neighbor such that
+	// Head is one argument and Tail is the other. If no
+	// such edge exists, this function returns nil.
+	EdgeBetween(node, neighbor Node) Edge
 }
 
 // Directed graphs are characterized by having seperable Heads and Tails in their edges.
@@ -50,16 +52,13 @@ type DirectedGraph interface {
 	// Successors gives the nodes connected by OUTBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Predecessors.
 	Successors(node Node) []Node
-	// IsSuccessor returns true if successor shows up in the list returned by
-	// Successors(node). If node doesn't exist, this should always return false.
-	IsSuccessor(node, successor Node) bool
+	// EdgeTo returns an edge between node and successor such that
+	// Head returns node and Tail returns successor, if no
+	// such edge exists, this function returns nil.
+	EdgeTo(node, successor Node) Edge
 	// Predecessors gives the nodes connected by INBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Successors.
 	Predecessors(node Node) []Node
-	// IsPredecessor returns true if predecessor shows up in the list returned
-	// by Predecessors(node). If node doesn't exist, this should always return
-	// false.
-	IsPredecessor(node, predecessor Node) bool
 }
 
 // Returns all undirected edges in the graph

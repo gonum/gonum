@@ -136,31 +136,24 @@ type MutableGraph interface {
 	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
 	// used.
 	NewNode(successors []Node) Node
-	// The graph itself is responsible for adding reciprocal edges if it's
-	// undirected. Likewise, the graph itself must add any non-existant nodes
-	// listed in successors.
-	AddNode(node Node, successors []Node)
-	// For a digraph, adds node1->node2; the graph is free to initialize this
-	// to any value it wishes. Node1 must exist, or it will result in undefined
-	// behavior. Node2 must be created by the function if absent.
-	AddEdge(e Edge)
-	// The behavior is undefined if the edge has not been created with AddEdge
-	// (or the edge was removed before this function was called). For a
-	// directed graph only sets node1->node2.
-	SetEdgeCost(e Edge, cost float64)
-	// The graph is reponsible for removing edges to a node that is removed.
+	// Adds a node to the graph
+	AddNode(node Node)
+	// AddEdge connects two nodes in the graph. Neither node is required
+	// to have been added before this is called. If directed is false,
+	// it also adds the reciprocal edge. If this is called a second time,
+	// it overrides any existing edge.
+	AddEdge(e Edge, cost float64, directed bool)
+	// RemoveNode removed a node from the graph, as well as any edges
+	// attached to it
 	RemoveNode(node Node)
-	// The graph is responsible for removing reciprocal edges if it's
-	// undirected.
-	RemoveEdge(e Edge)
+	// RemoveEdge removes a connection between two nodes, but does not
+	// remove Head nor Tail under any circumstance. As with AddEdge, if
+	// directed is false it also removes the reciprocal edge. This function
+	// should be treated as a no-op and not an error if the edge doesn't exist.
+	RemoveEdge(e Edge, directed bool)
 	// EmptyGraph clears the graph of all nodes and edges.
 	EmptyGraph()
-	// This package will only call SetDirected on an empty graph, so there's no
-	// need to worry about the case where a graph suddenly becomes (un)directed.
-	SetDirected(bool)
 }
-
-// TODO AddNode, AddEdge, SetEdgeCost, RemoveNode, RemoveEdge, SetDirected need to say what they do.
 
 // A DStarGraph is a special interface that allows the DStarLite function to be used on a graph.
 //

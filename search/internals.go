@@ -2,20 +2,41 @@ package search
 
 import (
 	"container/heap"
+	"math"
 
 	gr "github.com/gonum/graph"
+	"github.com/gonum/graph/concrete"
 )
 
 type searchFuncs struct {
 	successors, predecessors, neighbors    func(gr.Node) []gr.Node
 	isSuccessor, isPredecessor, isNeighbor func(gr.Node, gr.Node) bool
-	cost, heuristicCost                    gr.CostFunc
+	cost                                   gr.CostFunc
+	heuristicCost                          gr.HeuristicCostFunc
+}
+
+func genIsSuccessor(graph gr.DirectedGraph) func(gr.Node, gr.Node) bool {
+	return func(node, succ gr.Node) bool {
+		return graph.EdgeTo(node, succ) != nil
+	}
+}
+
+func genIsPredecessor(graph gr.DirectedGraph) func(gr.Node, gr.Node) bool {
+	return func(node, succ gr.Node) bool {
+		return graph.EdgeTo(succ, node) != nil
+	}
+}
+
+func genIsNeighbor(graph gr.Graph) func(gr.Node, gr.Node) bool {
+	return func(node, succ gr.Node) bool {
+		return graph.EdgeBetween(succ, node) != nil
+	}
 }
 
 // Sets up the cost functions and successor functions so I don't have to do a type switch every
 // time. This almost always does more work than is necessary, but since it's only executed once
 // per function, and graph functions are rather costly, the "extra work" should be negligible.
-func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
+func setupFuncs(graph gr.Graph, cost gr.CostFunc, heuristicCost gr.HeuristicCostFunc) searchFuncs {
 
 	sf := searchFuncs{}
 
@@ -24,16 +45,16 @@ func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
 		sf.successors = g.Successors
 		sf.predecessors = g.Predecessors
 		sf.neighbors = g.Neighbors
-		sf.isSuccessor = g.IsSuccessor
-		sf.isPredecessor = g.IsPredecessor
-		sf.isNeighbor = g.IsNeighbor
+		sf.isSuccessor = genIsSuccessor(g)
+		sf.isPredecessor = genIsPredecessor(g)
+		sf.isNeighbor = genIsNeighbor(g)
 	default:
 		sf.successors = g.Neighbors
 		sf.predecessors = g.Neighbors
 		sf.neighbors = g.Neighbors
-		sf.isSuccessor = g.IsNeighbor
-		sf.isPredecessor = g.IsNeighbor
-		sf.isNeighbor = g.IsNeighbor
+		sf.isSuccessor = genIsNeighbor(g)
+		sf.isPredecessor = genIsNeighbor(g)
+		sf.isNeighbor = genIsNeighbor(g)
 	}
 
 	if heuristicCost != nil {
@@ -59,25 +80,28 @@ func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
 	return sf
 }
 
-/* Purely internal data structures and functions (mostly for sorting) */
+func NullHeuristic(node1, node2 gr.Node) float64 {
+	return 0.0
+}
 
-// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge.Head(),
-// Edge.Tail()) had been called.)
-type WeightedEdge struct {
-	gr.Edge
-	Weight float64
+func UniformCost(e gr.Edge) float64 {
+	if e == nil {
+		return math.Inf(1)
+	}
+
+	return 1.0
 }
 
 /** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/
 
-type edgeSorter []WeightedEdge
+type edgeSorter []concrete.WeightedEdge
 
 func (el edgeSorter) Len() int {
 	return len(el)
 }
 
 func (el edgeSorter) Less(i, j int) bool {
-	return el[i].Weight < el[j].Weight
+	return el[i].Cost < el[j].Cost
 }
 
 func (el edgeSorter) Swap(i, j int) {

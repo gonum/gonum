@@ -154,9 +154,9 @@ func (graph *TileGraph) CoordsToNode(row, col int) (node gr.Node) {
 	}
 }
 
-func (graph *TileGraph) successors(node gr.Node) []gr.Node {
+func (graph *TileGraph) Neighbors(node gr.Node) []gr.Node {
 	id := node.ID()
-	if id < 0 || id >= len(graph.tiles) || graph.tiles[id] == false {
+	if !NodeExists(node) {
 		return nil
 	}
 
@@ -173,25 +173,19 @@ func (graph *TileGraph) successors(node gr.Node) []gr.Node {
 	return realNeighbors
 }
 
-func (graph *TileGraph) isSuccessor(node, successor gr.Node) bool {
+func (graph *TileGraph) EdgeBetween(node, neighbor gr.Node) gr.Edge {
 	id, succ := node.ID(), successor.ID()
-	return (id >= 0 && id < len(graph.tiles) && graph.tiles[id] == true) && (succ >= 0 && succ < len(graph.tiles) && graph.tiles[succ] == true)
-}
+	if !graph.NodeExists(node.ID()) || !graph.NodeExist(node.ID()) {
+		return nil
+	}
 
-func (graph *TileGraph) predecessors(node gr.Node) []gr.Node {
-	return graph.successors(node)
-}
+	r1, c1 := graph.IDToCoords(node.ID())
+	r2, c2 := graph.IDToCoords(neighbor.ID())
+	if (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1)) {
+		return Edge{node, neighbor}
+	}
 
-func (graph *TileGraph) isPredecessor(node, pred gr.Node) bool {
-	return graph.isSuccessor(node, pred)
-}
-
-func (graph *TileGraph) Neighbors(node gr.Node) []gr.Node {
-	return graph.successors(node)
-}
-
-func (graph *TileGraph) IsNeighbor(id, neighbor gr.Node) bool {
-	return graph.isSuccessor(id, neighbor)
+	return nil
 }
 
 func (graph *TileGraph) NodeExists(node gr.Node) bool {
@@ -200,7 +194,7 @@ func (graph *TileGraph) NodeExists(node gr.Node) bool {
 }
 
 func (graph *TileGraph) Degree(node gr.Node) int {
-	return len(graph.successors(node)) * 2
+	return len(graph.Neighbors(node)) * 2
 }
 
 func (graph *TileGraph) EdgeList() []gr.Edge {
@@ -231,14 +225,10 @@ func (graph *TileGraph) NodeList() []gr.Node {
 	return nodes
 }
 
-func (graph *TileGraph) IsDirected() bool {
-	return false
-}
-
-func (graph *TileGraph) Cost(node1, node2 gr.Node) float64 {
-	if graph.IsNeighbor(node1, node2) {
+func (graph *TileGraph) Cost(e gr.Edge) float64 {
+	if edge := graph.EdgeBetween(e.Head(), e.Tail()); edge != nil {
 		return 1.0
-	} else {
-		return math.Inf(1)
 	}
+
+	return math.Inf(1)
 }

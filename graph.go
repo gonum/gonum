@@ -232,6 +232,9 @@ const (
 	Undirected      = false
 )
 
+// Determines if a MutableGraph implements DirectedGraph and panics if it does.
+// This is a utility function to detect unsafe implementations. It's mostly for internal use,
+// but is exported since it may be useful to people who use the package for their own tests.
 func VetMutableGraph(g MutableGraph) {
 	if _, ok := g.(DirectedGraph); ok {
 		panic("A MutableGraph implements DirectedGraph; this is unsafe!")

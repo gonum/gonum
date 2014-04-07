@@ -28,7 +28,7 @@ type MutableDirectedGraph struct {
 	nodeMap      map[int]graph.Node
 }
 
-func NewDirectedMutableGraph() *MutableDirectedGraph {
+func NewMutableDirectedGraph() *MutableDirectedGraph {
 	return &MutableDirectedGraph{
 		successors:   make(map[int]map[int]WeightedEdge),
 		predecessors: make(map[int]map[int]WeightedEdge),

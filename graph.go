@@ -231,3 +231,9 @@ const (
 	Directed   bool = true
 	Undirected      = false
 )
+
+func VetMutableGraph(g MutableGraph) {
+	if _, ok := g.(DirectedGraph); ok {
+		panic("A MutableGraph implements DirectedGraph; this is unsafe!")
+	}
+}

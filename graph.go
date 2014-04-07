@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package graph
 
 // All a node needs to do is identify itself. This allows the user to pass in nodes more

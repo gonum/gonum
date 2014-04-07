@@ -15,51 +15,50 @@ type Edge interface {
 	Tail() Node
 }
 
-// A Graph ensures the behavior of an undirected graph, necessary to run certain algorithms on it.
+// A Graph implements the behavior of an undirected graph.
 //
-// The Graph interface is directed. This means that EdgeList() should return an edge where Head
-// always goes towards Tail. If your graph is undirected and you only maintain edges for one
-// direction, simply return two edges for each one of your edges, with the Head and Tail swapped
-// in each one.
+// All methods in Graph are implicitly undirected. Graph algorithms that care about directionality
+// will intelligently choose the DirectedGraph behavior if that interface is also implemented,
+// even if the function itself only takes in a Graph (or a super-interface of graph).
 type Graph interface {
 	// NodeExists returns true when node is currently in the graph.
 	NodeExists(node Node) bool
-	// Degree is equivalent to len(Successors(node)) + len(Predecessors(node)).
-	// This means that reflexive edges are counted twice.
-	Degree(node Node) int
+
 	// NodeList returns a list of all nodes in no particular order, useful for
 	// determining things like if a graph is fully connected. The caller is
 	// free to modify this list. Implementations should construct a new list
 	// and not return internal representation.
 	NodeList() []Node
+
 	// Neighbors returns all nodes connected by any edge to this node.
 	Neighbors(node Node) []Node
-	// IsNeighbor returns true when neighbor is connected to node by an edge.
-	IsNeighbor(node, neighbor Node) bool
+
+	// EdgeBetween returns an edge between node and neighbor such that
+	// Head is one argument and Tail is the other. If no
+	// such edge exists, this function returns nil.
+	EdgeBetween(node, neighbor Node) Edge
 }
 
 // Directed graphs are characterized by having seperable Heads and Tails in their edges.
 // That is, if node1 goes to node2, that does not necessarily imply that node2 goes to node1.
 //
 // While it's possible for a directed graph to have fully reciprocal edges (i.e. the graph is
-// symmetric) -- it is not required to be. The graph is also required to implement UndirectedGraph
-// because it can be useful to know all neighbors regardless of direction; not because this graph
-// treats directed graphs as special cases of undirected ones (the truth is, in fact, the opposite.)
+// symmetric) -- it is not required to be. The graph is also required to implement Graph
+// because in many cases it can be useful to know all neighbors regardless of direction.
 type DirectedGraph interface {
 	Graph
 	// Successors gives the nodes connected by OUTBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Predecessors.
 	Successors(node Node) []Node
-	// IsSuccessor returns true if successor shows up in the list returned by
-	// Successors(node). If node doesn't exist, this should always return false.
-	IsSuccessor(node, successor Node) bool
+
+	// EdgeTo returns an edge between node and successor such that
+	// Head returns node and Tail returns successor, if no
+	// such edge exists, this function returns nil.
+	EdgeTo(node, successor Node) Edge
+
 	// Predecessors gives the nodes connected by INBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Successors.
 	Predecessors(node Node) []Node
-	// IsPredecessor returns true if predecessor shows up in the list returned
-	// by Predecessors(node). If node doesn't exist, this should always return
-	// false.
-	IsPredecessor(node, predecessor Node) bool
 }
 
 // Returns all undirected edges in the graph
@@ -72,6 +71,7 @@ type EdgeListGraph interface {
 	EdgeLister
 }
 
+// Returns all directed edges in the graph.
 type DirectedEdgeLister interface {
 	DirectedEdgeList() []Edge
 }
@@ -82,9 +82,11 @@ type DirectedEdgeListGraph interface {
 }
 
 // A crunch graph forces a sparse graph to become a dense graph. That is, if the node IDs are
-// [1,4,9,7] it would "crunch" the ids into the contiguous block [0,1,2,3].
+// [1,4,9,7] it would "crunch" the ids into the contiguous block [0,1,2,3]. Order is not
+// required to be preserved between the non-cruched and crunched instances (that means in
+// the example above 0 may correspond to 4 or 7 or 9, not necessarily 1).
 //
-// All dense graphs should have the first ID at 0.
+// All dense graphs must have the first ID as 0.
 type CrunchGraph interface {
 	Graph
 	Crunch()
@@ -95,10 +97,9 @@ type CrunchGraph interface {
 // this function will take precedence over the Uniform Cost function (all weights are 1) if "nil"
 // is passed in for the function argument.
 //
-// If no edge exists between node1 and node2, the cost should be taken to be +inf (can be gotten
-// by math.Inf(1).)
+// If the argument is nil, or the edge is invalid for some reason, this should return math.Inf(1)
 type Coster interface {
-	Cost(node1, node2 Node) float64
+	Cost(edge Edge) float64
 }
 
 // Guarantees that something implementing Coster is also a Graph.
@@ -117,7 +118,7 @@ type HeuristicCoster interface {
 	HeuristicCost(node1, node2 Node) float64
 }
 
-// A Mutable Graph is a graph that can be changed in an arbitrary way. It is useful for several
+// A MutableGraph is a graph that can be changed in an arbitrary way. It is useful for several
 // algorithms; for instance, Johnson's Algorithm requires adding a temporary node and changing
 // edge weights. Another case where this is used is computing minimum spanning trees. Since trees
 // are graphs, a minimum spanning tree can be created using this interface.
@@ -128,40 +129,41 @@ type HeuristicCoster interface {
 // properly handle the graph in order to, say, fill it with a minimum spanning tree.
 //
 // In functions that take a MutableGraph as an argument, it should not be the same as the Graph
-// argument as concurrent modification will likely cause problems in most cases.
+// argument as concurrent modification will likely cause problems.
 //
-// Mutable graphs should always record the IDs as they are represented -- which means they are
+// MutableGraphs should always record the IDs as they are represented -- which means they are
 // sparse by nature.
+//
+// MutableGraphs are required to keep the exact Nodes and Edges passed in, and return
+// the originals when asked.
 type MutableGraph interface {
 	CostGraph
 	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
 	// used.
-	NewNode(successors []Node) Node
-	// The graph itself is responsible for adding reciprocal edges if it's
-	// undirected. Likewise, the graph itself must add any non-existant nodes
-	// listed in successors.
-	AddNode(node Node, successors []Node)
-	// For a digraph, adds node1->node2; the graph is free to initialize this
-	// to any value it wishes. Node1 must exist, or it will result in undefined
-	// behavior. Node2 must be created by the function if absent.
-	AddEdge(e Edge)
-	// The behavior is undefined if the edge has not been created with AddEdge
-	// (or the edge was removed before this function was called). For a
-	// directed graph only sets node1->node2.
-	SetEdgeCost(e Edge, cost float64)
-	// The graph is reponsible for removing edges to a node that is removed.
+	NewNode() Node
+
+	// Adds a node to the graph
+	AddNode(node Node)
+
+	// AddEdge connects two nodes in the graph. Neither node is required
+	// to have been added before this is called. If directed is false,
+	// it also adds the reciprocal edge. If this is called a second time,
+	// it overrides any existing edge.
+	AddEdge(e Edge, cost float64, directed bool)
+
+	// RemoveNode removes a node from the graph, as well as any edges
+	// attached to it
 	RemoveNode(node Node)
-	// The graph is responsible for removing reciprocal edges if it's
-	// undirected.
-	RemoveEdge(e Edge)
+
+	// RemoveEdge removes a connection between two nodes, but does not
+	// remove Head nor Tail under any circumstance. As with AddEdge, if
+	// directed is false it also removes the reciprocal edge. This function
+	// should be treated as a no-op and not an error if the edge doesn't exist.
+	RemoveEdge(e Edge, directed bool)
+
 	// EmptyGraph clears the graph of all nodes and edges.
 	EmptyGraph()
-	// This package will only call SetDirected on an empty graph, so there's no
-	// need to worry about the case where a graph suddenly becomes (un)directed.
-	SetDirected(bool)
 }
-
-// TODO AddNode, AddEdge, SetEdgeCost, RemoveNode, RemoveEdge, SetDirected need to say what they do.
 
 // A DStarGraph is a special interface that allows the DStarLite function to be used on a graph.
 //
@@ -185,5 +187,14 @@ type DStarGraph interface {
 	ChangedEdges() (newCostFunc func(Node, Node) float64, changedEdges []Edge)
 }
 
-// A function that returns the cost from one node to another.
-type CostFunc func(Node, Node) float64
+// A function that returns the cost of following an edge
+type CostFunc func(Edge) float64
+
+// Estimates the cost of travelling between two nodes
+type HeuristicCostFunc func(Node, Node) float64
+
+// Convenience constants for AddEdge and RemoveEdge
+const (
+	Directed   bool = true
+	Undirected      = false
+)

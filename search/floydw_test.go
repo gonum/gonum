@@ -11,7 +11,7 @@ func TestFWOneEdge(t *testing.T) {
 	dg := concrete.NewDenseGraph(2, true)
 	aPaths, sPath := search.FloydWarshall(dg, nil)
 
-	path, cost, err := sPath(concrete.GonumNode(0), concrete.GonumNode(1))
+	path, cost, err := sPath(concrete.Node(0), concrete.Node(1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestFWOneEdge(t *testing.T) {
 		t.Errorf("Wrong path in FW %v", path)
 	}
 
-	paths, cost, err := aPaths(concrete.GonumNode(0), concrete.GonumNode(1))
+	paths, cost, err := aPaths(concrete.Node(0), concrete.Node(1))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,12 +46,12 @@ func TestFWOneEdge(t *testing.T) {
 func TestFWTwoPaths(t *testing.T) {
 	dg := concrete.NewDenseGraph(5, false)
 	// Adds two paths from 0->2 of equal length
-	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(2), 2.0, true)
-	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(1), 1.0, true)
-	dg.SetEdgeCost(concrete.GonumNode(1), concrete.GonumNode(2), 1.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1.0, true)
 
 	aPaths, sPath := search.FloydWarshall(dg, nil)
-	path, cost, err := sPath(concrete.GonumNode(0), concrete.GonumNode(2))
+	path, cost, err := sPath(concrete.Node(0), concrete.Node(2))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestFWTwoPaths(t *testing.T) {
 		t.Errorf("Got wrong path %v", path)
 	}
 
-	paths, cost, err := aPaths(concrete.GonumNode(0), concrete.GonumNode(2))
+	paths, cost, err := aPaths(concrete.Node(0), concrete.Node(2))
 
 	if err != nil {
 		t.Fatal(err)
@@ -99,26 +99,26 @@ func TestFWConfoundingPath(t *testing.T) {
 	dg := concrete.NewDenseGraph(6, false)
 
 	// Add a path from 0->5 of cost 4
-	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(1), 1.0, true)
-	dg.SetEdgeCost(concrete.GonumNode(1), concrete.GonumNode(2), 1.0, true)
-	dg.SetEdgeCost(concrete.GonumNode(2), concrete.GonumNode(3), 1.0, true)
-	dg.SetEdgeCost(concrete.GonumNode(3), concrete.GonumNode(5), 1.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(3), concrete.Node(5)}, 1.0, true)
 
 	// Add direct edge to goal of cost 4
-	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(5), 4.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(5)}, 4.0, true)
 
 	// Add edge to a node that's still optimal
-	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(2), 2.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2.0, true)
 
 	// Add edge to 3 that's overpriced
-	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(3), 4.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(3)}, 4.0, true)
 
 	// Add very cheap edge to 4 which is a dead end
-	dg.SetEdgeCost(concrete.GonumNode(0), concrete.GonumNode(4), 0.25, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(4)}, 0.25, true)
 
 	aPaths, sPath := search.FloydWarshall(dg, nil)
 
-	path, cost, err := sPath(concrete.GonumNode(0), concrete.GonumNode(5))
+	path, cost, err := sPath(concrete.Node(0), concrete.Node(5))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func TestFWConfoundingPath(t *testing.T) {
 		t.Errorf("Wrong path found for single path %v", path)
 	}
 
-	paths, cost, err := aPaths(concrete.GonumNode(0), concrete.GonumNode(5))
+	paths, cost, err := aPaths(concrete.Node(0), concrete.Node(5))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,14 +162,14 @@ func TestFWConfoundingPath(t *testing.T) {
 		}
 	}
 
-	path, _, err = sPath(concrete.GonumNode(4), concrete.GonumNode(5))
+	path, _, err = sPath(concrete.Node(4), concrete.Node(5))
 	if err != nil {
 		t.Log("Success!", err)
 	} else {
 		t.Errorf("Path was found by FW single path where one shouldn't be %v", path)
 	}
 
-	paths, _, err = aPaths(concrete.GonumNode(4), concrete.GonumNode(5))
+	paths, _, err = aPaths(concrete.Node(4), concrete.Node(5))
 	if err != nil {
 		t.Log("Success!", err)
 	} else {

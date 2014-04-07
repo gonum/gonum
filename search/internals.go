@@ -3,43 +3,69 @@ package search
 import (
 	"container/heap"
 
-	gr "github.com/gonum/graph"
+	"github.com/gonum/graph"
+	"github.com/gonum/graph/concrete"
 )
 
 type searchFuncs struct {
-	successors, predecessors, neighbors    func(gr.Node) []gr.Node
-	isSuccessor, isPredecessor, isNeighbor func(gr.Node, gr.Node) bool
-	cost, heuristicCost                    gr.CostFunc
+	successors, predecessors, neighbors    func(graph.Node) []graph.Node
+	isSuccessor, isPredecessor, isNeighbor func(graph.Node, graph.Node) bool
+	cost                                   graph.CostFunc
+	heuristicCost                          graph.HeuristicCostFunc
+	edgeTo, edgeBetween                    func(graph.Node, graph.Node) graph.Edge
+}
+
+func genIsSuccessor(gr graph.DirectedGraph) func(graph.Node, graph.Node) bool {
+	return func(node, succ graph.Node) bool {
+		return gr.EdgeTo(node, succ) != nil
+	}
+}
+
+func genIsPredecessor(gr graph.DirectedGraph) func(graph.Node, graph.Node) bool {
+	return func(node, succ graph.Node) bool {
+		return gr.EdgeTo(succ, node) != nil
+	}
+}
+
+func genIsNeighbor(gr graph.Graph) func(graph.Node, graph.Node) bool {
+	return func(node, succ graph.Node) bool {
+		return gr.EdgeBetween(succ, node) != nil
+	}
 }
 
 // Sets up the cost functions and successor functions so I don't have to do a type switch every
 // time. This almost always does more work than is necessary, but since it's only executed once
 // per function, and graph functions are rather costly, the "extra work" should be negligible.
-func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
+func setupFuncs(gr graph.Graph, cost graph.CostFunc, heuristicCost graph.HeuristicCostFunc) searchFuncs {
 
 	sf := searchFuncs{}
 
-	switch g := graph.(type) {
-	case gr.DirectedGraph:
+	switch g := gr.(type) {
+	case graph.DirectedGraph:
 		sf.successors = g.Successors
 		sf.predecessors = g.Predecessors
 		sf.neighbors = g.Neighbors
-		sf.isSuccessor = g.IsSuccessor
-		sf.isPredecessor = g.IsPredecessor
-		sf.isNeighbor = g.IsNeighbor
+		sf.isSuccessor = genIsSuccessor(g)
+		sf.isPredecessor = genIsPredecessor(g)
+		sf.isNeighbor = genIsNeighbor(g)
+		sf.edgeBetween = g.EdgeBetween
+		sf.edgeTo = g.EdgeTo
 	default:
 		sf.successors = g.Neighbors
 		sf.predecessors = g.Neighbors
 		sf.neighbors = g.Neighbors
-		sf.isSuccessor = g.IsNeighbor
-		sf.isPredecessor = g.IsNeighbor
-		sf.isNeighbor = g.IsNeighbor
+		isNeighbor := genIsNeighbor(g)
+		sf.isSuccessor = isNeighbor
+		sf.isPredecessor = isNeighbor
+		sf.isNeighbor = isNeighbor
+		sf.edgeBetween = g.EdgeBetween
+		sf.edgeTo = g.EdgeBetween
 	}
 
 	if heuristicCost != nil {
 		sf.heuristicCost = heuristicCost
 	} else {
-		if g, ok := graph.(gr.HeuristicCoster); ok {
+		if g, ok := gr.(graph.HeuristicCoster); ok {
 			sf.heuristicCost = g.HeuristicCost
 		} else {
 			sf.heuristicCost = NullHeuristic
@@ -49,7 +75,7 @@ func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
 	if cost != nil {
 		sf.cost = cost
 	} else {
-		if g, ok := graph.(gr.Coster); ok {
+		if g, ok := gr.(graph.Coster); ok {
 			sf.cost = g.Cost
 		} else {
 			sf.cost = UniformCost
@@ -59,25 +85,16 @@ func setupFuncs(graph gr.Graph, cost, heuristicCost gr.CostFunc) searchFuncs {
 	return sf
 }
 
-/* Purely internal data structures and functions (mostly for sorting) */
-
-// A package that contains an edge (as from EdgeList), and a Weight (as if Cost(Edge.Head(),
-// Edge.Tail()) had been called.)
-type WeightedEdge struct {
-	gr.Edge
-	Weight float64
-}
-
 /** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/
 
-type edgeSorter []WeightedEdge
+type edgeSorter []concrete.WeightedEdge
 
 func (el edgeSorter) Len() int {
 	return len(el)
 }
 
 func (el edgeSorter) Less(i, j int) bool {
-	return el[i].Weight < el[j].Weight
+	return el[i].Cost < el[j].Cost
 }
 
 func (el edgeSorter) Swap(i, j int) {
@@ -87,7 +104,7 @@ func (el edgeSorter) Swap(i, j int) {
 /** Keeps track of a node's scores so they can be used in a priority queue for A* **/
 
 type internalNode struct {
-	gr.Node
+	graph.Node
 	gscore, fscore float64
 }
 
@@ -151,7 +168,7 @@ func (pq *aStarPriorityQueue) Exists(id int) bool {
 	return ok
 }
 
-type denseNodeSorter []gr.Node
+type denseNodeSorter []graph.Node
 
 func (dns denseNodeSorter) Less(i, j int) bool {
 	return dns[i].ID() < dns[j].ID()
@@ -168,11 +185,11 @@ func (dns denseNodeSorter) Len() int {
 // General utility funcs
 
 // Rebuilds a path backwards from the goal.
-func rebuildPath(predecessors map[int]gr.Node, goal gr.Node) []gr.Node {
+func rebuildPath(predecessors map[int]graph.Node, goal graph.Node) []graph.Node {
 	if n, ok := goal.(internalNode); ok {
 		goal = n.Node
 	}
-	path := []gr.Node{goal}
+	path := []graph.Node{goal}
 	curr := goal
 	for prev, ok := predecessors[curr.ID()]; ok; prev, ok = predecessors[curr.ID()] {
 		if n, ok := prev.(internalNode); ok {

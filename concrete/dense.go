@@ -54,7 +54,7 @@ func (dg *DenseGraph) Degree(node graph.Node) int {
 func (dg *DenseGraph) NodeList() []graph.Node {
 	nodes := make([]graph.Node, dg.numNodes)
 	for i := 0; i < dg.numNodes; i++ {
-		nodes[i] = GonumNode(i)
+		nodes[i] = Node(i)
 	}
 
 	return nodes
@@ -65,7 +65,7 @@ func (dg *DenseGraph) DirectedEdgeList() []graph.Edge {
 	for i := 0; i < dg.numNodes; i++ {
 		for j := 0; j < dg.numNodes; j++ {
 			if dg.adjacencyMatrix[i*dg.numNodes+j] != math.Inf(1) {
-				edges = append(edges, GonumEdge{GonumNode(i), GonumNode(j)})
+				edges = append(edges, Edge{Node(i), Node(j)})
 			}
 		}
 	}
@@ -78,70 +78,71 @@ func (dg *DenseGraph) Neighbors(node graph.Node) []graph.Node {
 	for i := 0; i < dg.numNodes; i++ {
 		if dg.adjacencyMatrix[i*dg.numNodes+node.ID()] != math.Inf(1) ||
 			dg.adjacencyMatrix[node.ID()*dg.numNodes+i] != math.Inf(1) {
-			neighbors = append(neighbors, GonumNode(i))
+			neighbors = append(neighbors, Node(i))
 		}
 	}
 
 	return neighbors
 }
 
-func (dg *DenseGraph) IsNeighbor(node, neighbor graph.Node) bool {
-	return dg.adjacencyMatrix[neighbor.ID()*dg.numNodes+node.ID()] != math.Inf(1) ||
-		dg.adjacencyMatrix[node.ID()*dg.numNodes+neighbor.ID()] != math.Inf(1)
+func (dg *DenseGraph) EdgeBetween(node, neighbor graph.Node) graph.Edge {
+	if dg.adjacencyMatrix[neighbor.ID()*dg.numNodes+node.ID()] != math.Inf(1) ||
+		dg.adjacencyMatrix[node.ID()*dg.numNodes+neighbor.ID()] != math.Inf(1) {
+		return Edge{node, neighbor}
+	}
+
+	return nil
 }
 
 func (dg *DenseGraph) Successors(node graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < dg.numNodes; i++ {
 		if dg.adjacencyMatrix[node.ID()*dg.numNodes+i] != math.Inf(1) {
-			neighbors = append(neighbors, GonumNode(i))
+			neighbors = append(neighbors, Node(i))
 		}
 	}
 
 	return neighbors
 }
 
-func (dg *DenseGraph) IsSuccessor(node, succ graph.Node) bool {
-	return dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()] != math.Inf(1)
+func (dg *DenseGraph) EdgeTo(node, succ graph.Node) graph.Edge {
+	if dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()] != math.Inf(1) {
+		return Edge{node, succ}
+	}
+
+	return nil
 }
 
 func (dg *DenseGraph) Predecessors(node graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < dg.numNodes; i++ {
 		if dg.adjacencyMatrix[i*dg.numNodes+node.ID()] != math.Inf(1) {
-			neighbors = append(neighbors, GonumNode(i))
+			neighbors = append(neighbors, Node(i))
 		}
 	}
 
 	return neighbors
 }
 
-func (dg *DenseGraph) IsPredecessor(node, pred graph.Node) bool {
-	return dg.adjacencyMatrix[pred.ID()*dg.numNodes+node.ID()] != math.Inf(1)
-}
-
 // DenseGraph is naturally dense, we don't need to do anything
 func (dg *DenseGraph) Crunch() {
 }
 
-func (dg *DenseGraph) Cost(node, succ graph.Node) float64 {
-	return dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()]
+func (dg *DenseGraph) Cost(e graph.Edge) float64 {
+	return dg.adjacencyMatrix[e.Head().ID()*dg.numNodes+e.Tail().ID()]
 }
 
-// Sets the cost of the edge between node and succ. If the cost is +Inf, it will remove the edge,
+// Sets the cost of an edge. If the cost is +Inf, it will remove the edge,
 // if directed is true, it will only remove the edge one way. If it's false it will change the cost
 // of the edge from succ to node as well.
-func (dg *DenseGraph) SetEdgeCost(node, succ graph.Node, cost float64, directed bool) {
-	dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()] = cost
+func (dg *DenseGraph) SetEdgeCost(e graph.Edge, cost float64, directed bool) {
+	dg.adjacencyMatrix[e.Head().ID()*dg.numNodes+e.Tail().ID()] = cost
 	if !directed {
-		dg.adjacencyMatrix[succ.ID()*dg.numNodes+node.ID()] = cost
+		dg.adjacencyMatrix[e.Tail().ID()*dg.numNodes+e.Head().ID()] = cost
 	}
 }
 
-// More or less equivalent to SetEdgeCost(node, succ, math.Inf(1), directed)
-func (dg *DenseGraph) RemoveEdge(node, succ graph.Node, directed bool) {
-	dg.adjacencyMatrix[node.ID()*dg.numNodes+succ.ID()] = math.Inf(1)
-	if !directed {
-		dg.adjacencyMatrix[succ.ID()*dg.numNodes+node.ID()] = math.Inf(1)
-	}
+// Equivalent to SetEdgeCost(edge, math.Inf(1), directed)
+func (dg *DenseGraph) RemoveEdge(e graph.Edge, directed bool) {
+	dg.SetEdgeCost(e, math.Inf(1), directed)
 }

@@ -510,7 +510,7 @@ func Prim(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 		sort.Sort(edgeWeights)
 		myEdge := edgeWeights[0]
 
-		dst.AddEdge(myEdge.Edge, myEdge.Cost, false)
+		dst.AddEdgeBetween(myEdge.Edge, myEdge.Cost)
 		remainingNodes.Remove(myEdge.Edge.Head())
 	}
 
@@ -541,7 +541,7 @@ func Kruskal(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc
 		// should work fine without checking both ways
 		if s1, s2 := ds.Find(edge.Edge.Head().ID()), ds.Find(edge.Edge.Tail().ID); s1 != s2 {
 			ds.Union(s1, s2)
-			dst.AddEdge(edge.Edge, edge.Cost, false)
+			dst.AddEdgeBetween(edge.Edge, edge.Cost)
 		}
 	}
 }

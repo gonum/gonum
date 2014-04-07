@@ -232,21 +232,30 @@ func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]g
 	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
 
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
-	dummyGraph := concrete.NewGraph()
+	dummyGraph := concrete.NewDirectedMutableGraph()
 	for _, node := range gr.NodeList() {
 		neighbors := successors(node)
 		dummyGraph.NodeExists(node)
 		dummyGraph.AddNode(node)
 		for _, neighbor := range neighbors {
 			e := edgeTo(node, neighbor)
-			dummyGraph.AddEdge(e, cost(e), true)
+			c := cost(e)
+			// Make a new edge with head and tail swapped;
+			// works due to the fact that we're not returning
+			// any edges in this so the contract doesn't need
+			// to be fulfilled.
+			if e.Head().ID() != node.ID() {
+				e = concrete.Edge{e.Tail(), e.Head()}
+			}
+
+			dummyGraph.AddEdgeTo(e, c)
 		}
 	}
 
 	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
 	dummyNode := dummyGraph.NewNode()
 	for _, node := range gr.NodeList() {
-		dummyGraph.AddEdge(concrete.Edge{dummyNode, node}, 0.0, true)
+		dummyGraph.AddEdgeTo(concrete.Edge{dummyNode, node}, 0.0)
 	}
 
 	/* Step 2: Run Bellman-Ford starting at the dummy node, abort if it detects a cycle */
@@ -259,7 +268,7 @@ func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]g
 	for _, node := range gr.NodeList() {
 		for _, succ := range successors(node) {
 			e := edgeTo(node, succ)
-			dummyGraph.AddEdge(e, cost(e)+costs[node.ID()]-costs[succ.ID()], true)
+			dummyGraph.AddEdgeTo(e, cost(e)+costs[node.ID()]-costs[succ.ID()])
 		}
 	}
 

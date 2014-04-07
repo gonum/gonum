@@ -10,8 +10,8 @@ import (
 // A simple int alias.
 type Node int
 
-func (node Node) ID() int {
-	return int(node)
+func (n Node) ID() int {
+	return int(n)
 }
 
 // Just a collection of two nodes
@@ -67,17 +67,17 @@ func NewPreAllocatedGraph(numVertices int) *Graph {
 
 /* Mutable Graph implementation */
 
-func (g *Graph) NewNode() (node graph.Node) {
+func (g *Graph) NewNode() graph.Node {
 	nodeList := g.NodeList()
 	ids := make([]int, len(nodeList))
-	for i, node := range nodeList {
-		ids[i] = node.ID()
+	for i, n := range nodeList {
+		ids[i] = n.ID()
 	}
 
 	nodes := sort.IntSlice(ids)
 	sort.Sort(&nodes)
-	for i, node := range nodes {
-		if i != node {
+	for i, n := range nodes {
+		if i != n {
 			g.AddNode(Node(i))
 			return Node(i)
 		}
@@ -88,14 +88,14 @@ func (g *Graph) NewNode() (node graph.Node) {
 	return Node(newID)
 }
 
-func (g *Graph) AddNode(node graph.Node) {
-	if _, ok := g.nodeMap[node.ID()]; ok {
+func (g *Graph) AddNode(n graph.Node) {
+	if _, ok := g.nodeMap[n.ID()]; ok {
 		return
 	}
 
-	g.nodeMap[node.ID()] = node
-	g.successors[node.ID()] = make(map[int]WeightedEdge)
-	g.predecessors[node.ID()] = make(map[int]WeightedEdge)
+	g.nodeMap[n.ID()] = n
+	g.successors[n.ID()] = make(map[int]WeightedEdge)
+	g.predecessors[n.ID()] = make(map[int]WeightedEdge)
 }
 
 func (g *Graph) AddEdge(e graph.Edge, cost float64, directed bool) {
@@ -111,21 +111,21 @@ func (g *Graph) AddEdge(e graph.Edge, cost float64, directed bool) {
 	}
 }
 
-func (g *Graph) RemoveNode(node graph.Node) {
-	if _, ok := g.nodeMap[node.ID()]; !ok {
+func (g *Graph) RemoveNode(n graph.Node) {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return
 	}
-	delete(g.nodeMap, node.ID())
+	delete(g.nodeMap, n.ID())
 
-	for succ, _ := range g.successors[node.ID()] {
-		delete(g.predecessors[succ], node.ID())
+	for succ, _ := range g.successors[n.ID()] {
+		delete(g.predecessors[succ], n.ID())
 	}
-	delete(g.successors, node.ID())
+	delete(g.successors, n.ID())
 
-	for pred, _ := range g.predecessors[node.ID()] {
-		delete(g.successors[pred], node.ID())
+	for pred, _ := range g.predecessors[n.ID()] {
+		delete(g.successors[pred], n.ID())
 	}
-	delete(g.predecessors, node.ID())
+	delete(g.predecessors, n.ID())
 
 }
 
@@ -153,14 +153,14 @@ func (g *Graph) EmptyGraph() {
 
 /* Graph implementation */
 
-func (g *Graph) Successors(node graph.Node) []graph.Node {
-	if _, ok := g.successors[node.ID()]; !ok {
+func (g *Graph) Successors(n graph.Node) []graph.Node {
+	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
 
-	successors := make([]graph.Node, len(g.successors[node.ID()]))
+	successors := make([]graph.Node, len(g.successors[n.ID()]))
 	i := 0
-	for succ, _ := range g.successors[node.ID()] {
+	for succ, _ := range g.successors[n.ID()] {
 		successors[i] = g.nodeMap[succ]
 		i++
 	}
@@ -168,28 +168,28 @@ func (g *Graph) Successors(node graph.Node) []graph.Node {
 	return successors
 }
 
-func (g *Graph) EdgeTo(node, succ graph.Node) graph.Edge {
-	if _, ok := g.nodeMap[node.ID()]; !ok {
+func (g *Graph) EdgeTo(n, succ graph.Node) graph.Edge {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return nil
 	} else if _, ok := g.nodeMap[succ.ID()]; !ok {
 		return nil
 	}
 
-	edge, ok := g.successors[node.ID()][succ.ID()]
+	edge, ok := g.successors[n.ID()][succ.ID()]
 	if !ok {
 		return nil
 	}
 	return edge
 }
 
-func (g *Graph) Predecessors(node graph.Node) []graph.Node {
-	if _, ok := g.successors[node.ID()]; !ok {
+func (g *Graph) Predecessors(n graph.Node) []graph.Node {
+	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
 
-	predecessors := make([]graph.Node, len(g.predecessors[node.ID()]))
+	predecessors := make([]graph.Node, len(g.predecessors[n.ID()]))
 	i := 0
-	for succ, _ := range g.predecessors[node.ID()] {
+	for succ, _ := range g.predecessors[n.ID()] {
 		predecessors[i] = g.nodeMap[succ]
 		i++
 	}
@@ -197,21 +197,21 @@ func (g *Graph) Predecessors(node graph.Node) []graph.Node {
 	return predecessors
 }
 
-func (g *Graph) Neighbors(node graph.Node) []graph.Node {
-	if _, ok := g.successors[node.ID()]; !ok {
+func (g *Graph) Neighbors(n graph.Node) []graph.Node {
+	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
 
-	neighbors := make([]graph.Node, len(g.predecessors[node.ID()])+len(g.successors[node.ID()]))
+	neighbors := make([]graph.Node, len(g.predecessors[n.ID()])+len(g.successors[n.ID()]))
 	i := 0
-	for succ, _ := range g.successors[node.ID()] {
+	for succ, _ := range g.successors[n.ID()] {
 		neighbors[i] = g.nodeMap[succ]
 		i++
 	}
 
-	for pred, _ := range g.predecessors[node.ID()] {
+	for pred, _ := range g.predecessors[n.ID()] {
 		// We should only add the predecessor if it wasn't already added from successors
-		if _, ok := g.successors[node.ID()][pred]; !ok {
+		if _, ok := g.successors[n.ID()][pred]; !ok {
 			neighbors[i] = g.nodeMap[pred]
 			i++
 		}
@@ -220,13 +220,13 @@ func (g *Graph) Neighbors(node graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *Graph) EdgeBetween(node, neigh graph.Node) graph.Edge {
-	e := g.EdgeTo(node, neigh)
+func (g *Graph) EdgeBetween(n, neigh graph.Node) graph.Edge {
+	e := g.EdgeTo(n, neigh)
 	if e != nil {
 		return e
 	}
 
-	e = g.EdgeTo(neigh, node)
+	e = g.EdgeTo(neigh, n)
 	if e != nil {
 		return e
 	}
@@ -234,25 +234,25 @@ func (g *Graph) EdgeBetween(node, neigh graph.Node) graph.Edge {
 	return nil
 }
 
-func (g *Graph) NodeExists(node graph.Node) bool {
-	_, ok := g.nodeMap[node.ID()]
+func (g *Graph) NodeExists(n graph.Node) bool {
+	_, ok := g.nodeMap[n.ID()]
 
 	return ok
 }
 
-func (g *Graph) Degree(node graph.Node) int {
-	if _, ok := g.nodeMap[node.ID()]; !ok {
+func (g *Graph) Degree(n graph.Node) int {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return 0
 	}
 
-	return len(g.successors[node.ID()]) + len(g.predecessors[node.ID()])
+	return len(g.successors[n.ID()]) + len(g.predecessors[n.ID()])
 }
 
 func (g *Graph) NodeList() []graph.Node {
 	nodes := make([]graph.Node, len(g.successors))
 	i := 0
-	for _, node := range g.nodeMap {
-		nodes[i] = node
+	for _, n := range g.nodeMap {
+		nodes[i] = n
 		i++
 	}
 
@@ -271,16 +271,16 @@ func (g *Graph) Cost(e graph.Edge) float64 {
 func (g *Graph) EdgeList() []graph.Edge {
 	edgeList := make([]graph.Edge, 0, len(g.successors))
 	edgeMap := make(map[int]map[int]struct{}, len(g.successors))
-	for node, succMap := range g.successors {
-		edgeMap[node] = make(map[int]struct{}, len(succMap))
+	for n, succMap := range g.successors {
+		edgeMap[n] = make(map[int]struct{}, len(succMap))
 		for succ, edge := range succMap {
 			if doneMap, ok := edgeMap[succ]; ok {
-				if _, ok := doneMap[node]; ok {
+				if _, ok := doneMap[n]; ok {
 					continue
 				}
 			}
 			edgeList = append(edgeList, edge)
-			edgeMap[node][succ] = struct{}{}
+			edgeMap[n][succ] = struct{}{}
 		}
 	}
 

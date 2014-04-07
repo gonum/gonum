@@ -32,18 +32,18 @@ func NewDenseGraph(numNodes int, passable bool) *DenseGraph {
 	return g
 }
 
-func (g *DenseGraph) NodeExists(node graph.Node) bool {
-	return node.ID() < g.numNodes
+func (g *DenseGraph) NodeExists(n graph.Node) bool {
+	return n.ID() < g.numNodes
 }
 
-func (g *DenseGraph) Degree(node graph.Node) int {
+func (g *DenseGraph) Degree(n graph.Node) int {
 	deg := 0
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[i*g.numNodes+node.ID()] != math.Inf(1) {
+		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != math.Inf(1) {
 			deg++
 		}
 
-		if g.adjacencyMatrix[node.ID()*g.numNodes+i] != math.Inf(1) {
+		if g.adjacencyMatrix[n.ID()*g.numNodes+i] != math.Inf(1) {
 			deg++
 		}
 	}
@@ -73,11 +73,11 @@ func (g *DenseGraph) DirectedEdgeList() []graph.Edge {
 	return edges
 }
 
-func (g *DenseGraph) Neighbors(node graph.Node) []graph.Node {
+func (g *DenseGraph) Neighbors(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[i*g.numNodes+node.ID()] != math.Inf(1) ||
-			g.adjacencyMatrix[node.ID()*g.numNodes+i] != math.Inf(1) {
+		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != math.Inf(1) ||
+			g.adjacencyMatrix[n.ID()*g.numNodes+i] != math.Inf(1) {
 			neighbors = append(neighbors, Node(i))
 		}
 	}
@@ -85,19 +85,19 @@ func (g *DenseGraph) Neighbors(node graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *DenseGraph) EdgeBetween(node, neighbor graph.Node) graph.Edge {
-	if g.adjacencyMatrix[neighbor.ID()*g.numNodes+node.ID()] != math.Inf(1) ||
-		g.adjacencyMatrix[node.ID()*g.numNodes+neighbor.ID()] != math.Inf(1) {
-		return Edge{node, neighbor}
+func (g *DenseGraph) EdgeBetween(n, neighbor graph.Node) graph.Edge {
+	if g.adjacencyMatrix[neighbor.ID()*g.numNodes+n.ID()] != math.Inf(1) ||
+		g.adjacencyMatrix[n.ID()*g.numNodes+neighbor.ID()] != math.Inf(1) {
+		return Edge{n, neighbor}
 	}
 
 	return nil
 }
 
-func (g *DenseGraph) Successors(node graph.Node) []graph.Node {
+func (g *DenseGraph) Successors(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[node.ID()*g.numNodes+i] != math.Inf(1) {
+		if g.adjacencyMatrix[n.ID()*g.numNodes+i] != math.Inf(1) {
 			neighbors = append(neighbors, Node(i))
 		}
 	}
@@ -105,18 +105,18 @@ func (g *DenseGraph) Successors(node graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *DenseGraph) EdgeTo(node, succ graph.Node) graph.Edge {
-	if g.adjacencyMatrix[node.ID()*g.numNodes+succ.ID()] != math.Inf(1) {
-		return Edge{node, succ}
+func (g *DenseGraph) EdgeTo(n, succ graph.Node) graph.Edge {
+	if g.adjacencyMatrix[n.ID()*g.numNodes+succ.ID()] != math.Inf(1) {
+		return Edge{n, succ}
 	}
 
 	return nil
 }
 
-func (g *DenseGraph) Predecessors(node graph.Node) []graph.Node {
+func (g *DenseGraph) Predecessors(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[i*g.numNodes+node.ID()] != math.Inf(1) {
+		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != math.Inf(1) {
 			neighbors = append(neighbors, Node(i))
 		}
 	}

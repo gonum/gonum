@@ -136,27 +136,25 @@ func (g *TileGraph) IDToCoords(id int) (row, col int) {
 	return row, col
 }
 
-func (g *TileGraph) CoordsToID(row, col int) (id int) {
+func (g *TileGraph) CoordsToID(row, col int) int {
 	if row < 0 || row >= g.numRows || col < 0 || col >= g.numCols {
 		return -1
 	}
-	id = row*g.numCols + col
 
-	return id
+	return row*g.numCols + col
 }
 
-func (g *TileGraph) CoordsToNode(row, col int) (node graph.Node) {
+func (g *TileGraph) CoordsToNode(row, col int) graph.Node {
 	id := g.CoordsToID(row, col)
 	if id == -1 {
 		return nil
-	} else {
-		return Node(id)
 	}
+	return Node(id)
 }
 
-func (g *TileGraph) Neighbors(node graph.Node) []graph.Node {
-	id := node.ID()
-	if !g.NodeExists(node) {
+func (g *TileGraph) Neighbors(n graph.Node) []graph.Node {
+	id := n.ID()
+	if !g.NodeExists(n) {
 		return nil
 	}
 
@@ -164,36 +162,36 @@ func (g *TileGraph) Neighbors(node graph.Node) []graph.Node {
 
 	neighbors := []graph.Node{g.CoordsToNode(row-1, col), g.CoordsToNode(row+1, col), g.CoordsToNode(row, col-1), g.CoordsToNode(row, col+1)}
 	realNeighbors := make([]graph.Node, 0, 4) // Will overallocate sometimes, but not by much. Not a big deal
-	for _, neighbor := range neighbors {
-		if neighbor != nil && g.tiles[neighbor.ID()] == true {
-			realNeighbors = append(realNeighbors, neighbor)
+	for _, neigh := range neighbors {
+		if neigh != nil && g.tiles[neigh.ID()] == true {
+			realNeighbors = append(realNeighbors, neigh)
 		}
 	}
 
 	return realNeighbors
 }
 
-func (g *TileGraph) EdgeBetween(node, neighbor graph.Node) graph.Edge {
-	if !g.NodeExists(node) || !g.NodeExists(neighbor) {
+func (g *TileGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
+	if !g.NodeExists(n) || !g.NodeExists(neigh) {
 		return nil
 	}
 
-	r1, c1 := g.IDToCoords(node.ID())
-	r2, c2 := g.IDToCoords(neighbor.ID())
+	r1, c1 := g.IDToCoords(n.ID())
+	r2, c2 := g.IDToCoords(neigh.ID())
 	if (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1)) {
-		return Edge{node, neighbor}
+		return Edge{n, neigh}
 	}
 
 	return nil
 }
 
-func (g *TileGraph) NodeExists(node graph.Node) bool {
-	id := node.ID()
+func (g *TileGraph) NodeExists(n graph.Node) bool {
+	id := n.ID()
 	return id >= 0 && id < len(g.tiles) && g.tiles[id] == true
 }
 
-func (g *TileGraph) Degree(node graph.Node) int {
-	return len(g.Neighbors(node)) * 2
+func (g *TileGraph) Degree(n graph.Node) int {
+	return len(g.Neighbors(n)) * 2
 }
 
 func (g *TileGraph) EdgeList() []graph.Edge {

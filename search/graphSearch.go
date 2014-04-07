@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"errors"
-	gr "github.com/gonum/graph"
+	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/set"
 	"github.com/gonum/graph/xifo"
@@ -40,8 +40,8 @@ import (
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost
 // function that returns a uniform positive value.)
-func AStar(start, goal gr.Node, graph gr.Graph, cost gr.CostFunc, heuristicCost gr.HeuristicCostFunc) (path []gr.Node, pathCost float64, nodesExpanded int) {
-	sf := setupFuncs(graph, cost, heuristicCost)
+func AStar(start, goal graph.Node, gr graph.Graph, cost graph.CostFunc, heuristicCost graph.HeuristicCostFunc) (path []graph.Node, pathCost float64, nodesExpanded int) {
+	sf := setupFuncs(gr, cost, heuristicCost)
 	successors, cost, heuristicCost, edgeTo := sf.successors, sf.cost, sf.heuristicCost, sf.edgeTo
 
 	closedSet := make(map[int]internalNode)
@@ -49,7 +49,7 @@ func AStar(start, goal gr.Node, graph gr.Graph, cost gr.CostFunc, heuristicCost 
 	heap.Init(openSet)
 	node := internalNode{start, 0, heuristicCost(start, goal)}
 	heap.Push(openSet, node)
-	predecessor := make(map[int]gr.Node)
+	predecessor := make(map[int]graph.Node)
 
 	for openSet.Len() != 0 {
 		curr := heap.Pop(openSet).(internalNode)
@@ -87,8 +87,8 @@ func AStar(start, goal gr.Node, graph gr.Graph, cost gr.CostFunc, heuristicCost 
 //
 // BreadthFirstSearch returns the path found and the number of nodes visited in the search.
 // The returned path is nil if no path exists.
-func BreadthFirstSearch(start, goal gr.Node, graph gr.Graph) ([]gr.Node, int) {
-	path, _, visited := AStar(start, goal, graph, UniformCost, NullHeuristic)
+func BreadthFirstSearch(start, goal graph.Node, gr graph.Graph) ([]graph.Node, int) {
+	path, _, visited := AStar(start, goal, gr, UniformCost, NullHeuristic)
 	return path, visited
 }
 
@@ -104,17 +104,17 @@ func BreadthFirstSearch(start, goal gr.Node, graph gr.Graph) ([]gr.Node, int) {
 //
 // Dijkstra's algorithm usually only returns a cost map, however, since the data is available
 // this version will also reconstruct the path to every node.
-func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[int][]gr.Node, costs map[int]float64) {
+func Dijkstra(source graph.Node, gr graph.Graph, cost graph.CostFunc) (paths map[int][]graph.Node, costs map[int]float64) {
 
-	sf := setupFuncs(graph, cost, nil)
+	sf := setupFuncs(gr, cost, nil)
 	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
 
-	nodes := graph.NodeList()
+	nodes := gr.NodeList()
 	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
 	closedSet := set.NewSet()                 // This is to make use of that same
 	costs = make(map[int]float64, len(nodes)) // May overallocate, will change if it becomes a problem
-	predecessor := make(map[int]gr.Node, len(nodes))
-	nodeIDMap := make(map[int]gr.Node, len(nodes))
+	predecessor := make(map[int]graph.Node, len(nodes))
+	nodeIDMap := make(map[int]graph.Node, len(nodes))
 	heap.Init(openSet)
 
 	costs[source.ID()] = 0
@@ -141,7 +141,7 @@ func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[int][
 		}
 	}
 
-	paths = make(map[int][]gr.Node, len(costs))
+	paths = make(map[int][]graph.Node, len(costs))
 	for node, _ := range costs { // Only reconstruct the path if one exists
 		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
@@ -162,16 +162,16 @@ func Dijkstra(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[int][
 // Like Dijkstra's, along with the costs this implementation will also construct all the paths for
 // you. In addition, it has a third return value which will be true if the algorithm was aborted
 // due to the presence of a negative edge weight cycle.
-func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[int][]gr.Node, costs map[int]float64, err error) {
-	sf := setupFuncs(graph, cost, nil)
+func BellmanFord(source graph.Node, gr graph.Graph, cost graph.CostFunc) (paths map[int][]graph.Node, costs map[int]float64, err error) {
+	sf := setupFuncs(gr, cost, nil)
 	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
 
-	predecessor := make(map[int]gr.Node)
+	predecessor := make(map[int]graph.Node)
 	costs = make(map[int]float64)
-	nodeIDMap := make(map[int]gr.Node)
+	nodeIDMap := make(map[int]graph.Node)
 	nodeIDMap[source.ID()] = source
 	costs[source.ID()] = 0
-	nodes := graph.NodeList()
+	nodes := gr.NodeList()
 
 	for i := 1; i < len(nodes)-1; i++ {
 		for _, node := range nodes {
@@ -199,7 +199,7 @@ func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[in
 		}
 	}
 
-	paths = make(map[int][]gr.Node, len(costs))
+	paths = make(map[int][]graph.Node, len(costs))
 	for node, _ := range costs {
 		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
@@ -223,13 +223,13 @@ func BellmanFord(source gr.Node, graph gr.Graph, cost gr.CostFunc) (paths map[in
 // path between them; a map from the source node, to the destination node, to the cost of the path
 // between them; and a bool that is true if Bellman-Ford detected a negative edge weight cycle --
 // thus causing it (and this algorithm) to abort (if aborted is true, both maps will be nil).
-func Johnson(graph gr.Graph, cost gr.CostFunc) (nodePaths map[int]map[int][]gr.Node, nodeCosts map[int]map[int]float64, err error) {
-	sf := setupFuncs(graph, cost, nil)
+func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]graph.Node, nodeCosts map[int]map[int]float64, err error) {
+	sf := setupFuncs(gr, cost, nil)
 	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
 
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
 	dummyGraph := concrete.NewGraph()
-	for _, node := range graph.NodeList() {
+	for _, node := range gr.NodeList() {
 		neighbors := successors(node)
 		dummyGraph.NodeExists(node)
 		dummyGraph.AddNode(node)
@@ -241,7 +241,7 @@ func Johnson(graph gr.Graph, cost gr.CostFunc) (nodePaths map[int]map[int][]gr.N
 
 	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
 	dummyNode := dummyGraph.NewNode()
-	for _, node := range graph.NodeList() {
+	for _, node := range gr.NodeList() {
 		dummyGraph.AddEdge(concrete.Edge{dummyNode, node}, 0.0, true)
 	}
 
@@ -252,7 +252,7 @@ func Johnson(graph gr.Graph, cost gr.CostFunc) (nodePaths map[int]map[int][]gr.N
 	}
 
 	/* Step 3: reweight the graph and remove the dummy node */
-	for _, node := range graph.NodeList() {
+	for _, node := range gr.NodeList() {
 		for _, succ := range successors(node) {
 			e := edgeTo(node, succ)
 			dummyGraph.AddEdge(e, cost(e)+costs[node.ID()]-costs[succ.ID()], true)
@@ -262,10 +262,10 @@ func Johnson(graph gr.Graph, cost gr.CostFunc) (nodePaths map[int]map[int][]gr.N
 	dummyGraph.RemoveNode(dummyNode)
 
 	/* Step 4: Run Dijkstra's starting at every node */
-	nodePaths = make(map[int]map[int][]gr.Node, len(graph.NodeList()))
+	nodePaths = make(map[int]map[int][]graph.Node, len(gr.NodeList()))
 	nodeCosts = make(map[int]map[int]float64)
 
-	for _, node := range graph.NodeList() {
+	for _, node := range gr.NodeList() {
 		nodePaths[node.ID()], nodeCosts[node.ID()] = Dijkstra(node, dummyGraph, nil)
 	}
 
@@ -275,18 +275,18 @@ func Johnson(graph gr.Graph, cost gr.CostFunc) (nodePaths map[int]map[int][]gr.N
 // Expands the first node it sees trying to find the destination. Depth First Search is *not*
 // guaranteed to find the shortest path, however, if a path exists DFS is guaranteed to find it
 // (provided you don't find a way to implement a Graph with an infinite depth.)
-func DepthFirstSearch(start, goal gr.Node, graph gr.Graph) []gr.Node {
-	sf := setupFuncs(graph, nil, nil)
+func DepthFirstSearch(start, goal graph.Node, gr graph.Graph) []graph.Node {
+	sf := setupFuncs(gr, nil, nil)
 	successors := sf.successors
 
 	closedSet := set.NewSet()
 	openSet := xifo.GonumStack([]interface{}{start})
-	predecessor := make(map[int]gr.Node)
+	predecessor := make(map[int]graph.Node)
 
 	for !openSet.IsEmpty() {
 		c := openSet.Pop()
 
-		curr := c.(gr.Node)
+		curr := c.(graph.Node)
 
 		if closedSet.Contains(curr.ID()) {
 			continue
@@ -312,12 +312,12 @@ func DepthFirstSearch(start, goal gr.Node, graph gr.Graph) []gr.Node {
 }
 
 // An admissible, consistent heuristic that won't speed up computation time at all.
-func NullHeuristic(node1, node2 gr.Node) float64 {
+func NullHeuristic(node1, node2 graph.Node) float64 {
 	return 0.0
 }
 
 // Assumes all edges in the graph have the same weight (including edges that don't exist!)
-func UniformCost(e gr.Edge) float64 {
+func UniformCost(e graph.Edge) float64 {
 	if e == nil {
 		return math.Inf(1)
 	}
@@ -328,7 +328,7 @@ func UniformCost(e gr.Edge) float64 {
 /* Simple operations */
 
 // Copies a graph into the destination; maintaining all node IDs.
-func CopyGraph(dst gr.MutableGraph, src gr.Graph) {
+func CopyGraph(dst graph.MutableGraph, src graph.Graph) {
 	dst.EmptyGraph()
 
 	sf := setupFuncs(src, nil, nil)
@@ -360,21 +360,21 @@ func CopyGraph(dst gr.MutableGraph, src gr.Graph) {
 // An undirected graph should end up with as many SCCs as there are "islands" (or subgraphs) of
 // connections, meaning having more than one strongly connected component implies that your graph
 // is not fully connected.
-func Tarjan(graph gr.Graph) (sccs [][]gr.Node) {
+func Tarjan(gr graph.Graph) (sccs [][]graph.Node) {
 	index := 0
 	vStack := &xifo.GonumStack{}
 	stackSet := set.NewSet()
-	sccs = make([][]gr.Node, 0)
+	sccs = make([][]graph.Node, 0)
 
-	nodes := graph.NodeList()
+	nodes := gr.NodeList()
 	lowlinks := make(map[int]int, len(nodes))
 	indices := make(map[int]int, len(nodes))
 
-	successors := setupFuncs(graph, nil, nil).successors
+	successors := setupFuncs(gr, nil, nil).successors
 
-	var strongconnect func(gr.Node) []gr.Node
+	var strongconnect func(graph.Node) []graph.Node
 
-	strongconnect = func(node gr.Node) []gr.Node {
+	strongconnect = func(node graph.Node) []graph.Node {
 		indices[node.ID()] = index
 		lowlinks[node.ID()] = index
 		index += 1
@@ -392,12 +392,12 @@ func Tarjan(graph gr.Graph) (sccs [][]gr.Node) {
 		}
 
 		if lowlinks[node.ID()] == indices[node.ID()] {
-			scc := make([]gr.Node, 0)
+			scc := make([]graph.Node, 0)
 			for {
 				v := vStack.Pop()
-				stackSet.Remove(v.(gr.Node).ID())
-				scc = append(scc, v.(gr.Node))
-				if v.(gr.Node).ID() == node.ID() {
+				stackSet.Remove(v.(graph.Node).ID())
+				scc = append(scc, v.(graph.Node))
+				if v.(graph.Node).ID() == node.ID() {
 					return scc
 				}
 			}
@@ -424,13 +424,13 @@ func Tarjan(graph gr.Graph) (sccs [][]gr.Node) {
 // (only one node) but only if the node listed in path exists within the graph.
 //
 // Graph must be non-nil.
-func IsPath(path []gr.Node, graph gr.Graph) bool {
-	isSuccessor := setupFuncs(graph, nil, nil).isSuccessor
+func IsPath(path []graph.Node, gr graph.Graph) bool {
+	isSuccessor := setupFuncs(gr, nil, nil).isSuccessor
 
 	if path == nil || len(path) == 0 {
 		return true
 	} else if len(path) == 1 {
-		return graph.NodeExists(path[0])
+		return gr.NodeExists(path[0])
 	}
 
 	for i := 0; i < len(path)-1; i++ {
@@ -449,13 +449,13 @@ puts the resulting minimum spanning tree in the dst graph */
 //
 // As with other algorithms that use Cost, the order of precedence is
 // Argument > Interface > UniformCost.
-func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFunc) {
-	sf := setupFuncs(graph, cost, nil)
+func Prim(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
+	sf := setupFuncs(gr, cost, nil)
 	cost = sf.cost
 
 	dst.EmptyGraph()
 
-	nlist := graph.NodeList()
+	nlist := gr.NodeList()
 
 	if nlist == nil || len(nlist) == 0 {
 		return
@@ -467,7 +467,7 @@ func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFunc) {
 		remainingNodes.Add(node.ID())
 	}
 
-	edgeList := graph.EdgeList()
+	edgeList := gr.EdgeList()
 	for remainingNodes.Cardinality() != 0 {
 		edgeWeights := make(edgeSorter, 0)
 		for _, edge := range edgeList {
@@ -490,11 +490,11 @@ func Prim(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFunc) {
 // Generates a minimum spanning tree for a graph using discrete.DisjointSet.
 //
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost.
-func Kruskal(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFunc) {
-	cost = setupFuncs(graph, cost, nil).cost
+func Kruskal(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
+	cost = setupFuncs(gr, cost, nil).cost
 	dst.EmptyGraph()
 
-	edgeList := graph.EdgeList()
+	edgeList := gr.EdgeList()
 	edgeWeights := make(edgeSorter, 0, len(edgeList))
 	for _, edge := range edgeList {
 		edgeWeights = append(edgeWeights, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
@@ -503,7 +503,7 @@ func Kruskal(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFunc) {
 	sort.Sort(edgeWeights)
 
 	ds := set.NewDisjointSet()
-	for _, node := range graph.NodeList() {
+	for _, node := range gr.NodeList() {
 		ds.MakeSet(node.ID())
 	}
 
@@ -525,15 +525,15 @@ func Kruskal(dst gr.MutableGraph, graph gr.EdgeListGraph, cost gr.CostFunc) {
 // immediate dominators etc.
 //
 // The int map[int]*set.Set is the node's ID.
-func Dominators(start gr.Node, graph gr.Graph) map[int]*set.Set {
+func Dominators(start graph.Node, gr graph.Graph) map[int]*set.Set {
 	allNodes := set.NewSet()
-	nlist := graph.NodeList()
+	nlist := gr.NodeList()
 	dominators := make(map[int]*set.Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node.ID())
 	}
 
-	predecessors := setupFuncs(graph, nil, nil).predecessors
+	predecessors := setupFuncs(gr, nil, nil).predecessors
 
 	for _, node := range nlist {
 		dominators[node.ID()] = set.NewSet()
@@ -577,11 +577,11 @@ func Dominators(start gr.Node, graph gr.Graph) map[int]*set.Set {
 //
 // This returns all possible post-dominators for all nodes, it does not prune for strict
 // postdominators, immediate postdominators etc.
-func PostDominators(end gr.Node, graph gr.Graph) map[int]*set.Set {
-	successors := setupFuncs(graph, nil, nil).successors
+func PostDominators(end graph.Node, gr graph.Graph) map[int]*set.Set {
+	successors := setupFuncs(gr, nil, nil).successors
 
 	allNodes := set.NewSet()
-	nlist := graph.NodeList()
+	nlist := gr.NodeList()
 	dominators := make(map[int]*set.Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node.ID())

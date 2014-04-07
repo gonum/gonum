@@ -341,18 +341,34 @@ func UniformCost(e graph.Edge) float64 {
 /* Simple operations */
 
 // Copies a graph into the destination; maintaining all node IDs.
-func CopyGraph(dst graph.MutableGraph, src graph.Graph) {
+func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
 	dst.EmptyGraph()
 
-	sf := setupFuncs(src, nil, nil)
-	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
+	cost := setupFuncs(src, nil, nil).cost
 
 	for _, node := range src.NodeList() {
-		succs := successors(node)
+		succs := src.Neighbors(node)
 		dst.AddNode(node)
 		for _, succ := range succs {
-			edge := edgeTo(node, succ)
-			dst.AddEdge(edge, cost(edge), true)
+			edge := src.EdgeBetween(node, succ)
+			dst.AddEdgeBetween(edge, cost(edge))
+		}
+	}
+
+}
+
+// Copies a graph into the destination; maintaining all node IDs.
+func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) {
+	dst.EmptyGraph()
+
+	cost := setupFuncs(src, nil, nil).cost
+
+	for _, node := range src.NodeList() {
+		succs := src.Successors(node)
+		dst.AddNode(node)
+		for _, succ := range succs {
+			edge := src.EdgeTo(node, succ)
+			dst.AddEdgeTo(edge, cost(edge))
 		}
 	}
 

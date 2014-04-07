@@ -5,7 +5,7 @@ import (
 	"math"
 	"strings"
 
-	gr "github.com/gonum/graph"
+	"github.com/gonum/graph"
 )
 
 type TileGraph struct {
@@ -68,20 +68,20 @@ func GenerateTileGraph(template string) (*TileGraph, error) {
 	}, nil
 }
 
-func (graph *TileGraph) SetPassability(row, col int, passability bool) {
-	loc := row*graph.numCols + col
-	if loc >= len(graph.tiles) || row < 0 || col < 0 {
+func (gr *TileGraph) SetPassability(row, col int, passability bool) {
+	loc := row*gr.numCols + col
+	if loc >= len(gr.tiles) || row < 0 || col < 0 {
 		return
 	}
 
-	graph.tiles[loc] = passability
+	gr.tiles[loc] = passability
 }
 
-func (graph *TileGraph) String() string {
+func (gr *TileGraph) String() string {
 	var outString string
-	for r := 0; r < graph.numRows; r++ {
-		for c := 0; c < graph.numCols; c++ {
-			if graph.tiles[r*graph.numCols+c] == false {
+	for r := 0; r < gr.numRows; r++ {
+		for c := 0; c < gr.numCols; c++ {
+			if gr.tiles[r*gr.numCols+c] == false {
 				outString += "\u2580" // Black square
 			} else {
 				outString += " " // Space
@@ -94,15 +94,15 @@ func (graph *TileGraph) String() string {
 	return outString[:len(outString)-1] // Kill final newline
 }
 
-func (graph *TileGraph) PathString(path []gr.Node) string {
+func (gr *TileGraph) PathString(path []graph.Node) string {
 	if path == nil || len(path) == 0 {
-		return graph.String()
+		return gr.String()
 	}
 
 	var outString string
-	for r := 0; r < graph.numRows; r++ {
-		for c := 0; c < graph.numCols; c++ {
-			if id := r*graph.numCols + c; graph.tiles[id] == false {
+	for r := 0; r < gr.numRows; r++ {
+		for c := 0; c < gr.numCols; c++ {
+			if id := r*gr.numCols + c; gr.tiles[id] == false {
 				outString += "\u2580" // Black square
 			} else if id == path[0].ID() {
 				outString += "s"
@@ -125,28 +125,28 @@ func (graph *TileGraph) PathString(path []gr.Node) string {
 	return outString[:len(outString)-1]
 }
 
-func (graph *TileGraph) Dimensions() (rows, cols int) {
-	return graph.numRows, graph.numCols
+func (gr *TileGraph) Dimensions() (rows, cols int) {
+	return gr.numRows, gr.numCols
 }
 
-func (graph *TileGraph) IDToCoords(id int) (row, col int) {
-	col = (id % graph.numCols)
-	row = (id - col) / graph.numCols
+func (gr *TileGraph) IDToCoords(id int) (row, col int) {
+	col = (id % gr.numCols)
+	row = (id - col) / gr.numCols
 
 	return row, col
 }
 
-func (graph *TileGraph) CoordsToID(row, col int) (id int) {
-	if row < 0 || row >= graph.numRows || col < 0 || col >= graph.numCols {
+func (gr *TileGraph) CoordsToID(row, col int) (id int) {
+	if row < 0 || row >= gr.numRows || col < 0 || col >= gr.numCols {
 		return -1
 	}
-	id = row*graph.numCols + col
+	id = row*gr.numCols + col
 
 	return id
 }
 
-func (graph *TileGraph) CoordsToNode(row, col int) (node gr.Node) {
-	id := graph.CoordsToID(row, col)
+func (gr *TileGraph) CoordsToNode(row, col int) (node graph.Node) {
+	id := gr.CoordsToID(row, col)
 	if id == -1 {
 		return nil
 	} else {
@@ -154,18 +154,18 @@ func (graph *TileGraph) CoordsToNode(row, col int) (node gr.Node) {
 	}
 }
 
-func (graph *TileGraph) Neighbors(node gr.Node) []gr.Node {
+func (gr *TileGraph) Neighbors(node graph.Node) []graph.Node {
 	id := node.ID()
-	if !graph.NodeExists(node) {
+	if !gr.NodeExists(node) {
 		return nil
 	}
 
-	row, col := graph.IDToCoords(id)
+	row, col := gr.IDToCoords(id)
 
-	neighbors := []gr.Node{graph.CoordsToNode(row-1, col), graph.CoordsToNode(row+1, col), graph.CoordsToNode(row, col-1), graph.CoordsToNode(row, col+1)}
-	realNeighbors := make([]gr.Node, 0, 4) // Will overallocate sometimes, but not by much. Not a big deal
+	neighbors := []graph.Node{gr.CoordsToNode(row-1, col), gr.CoordsToNode(row+1, col), gr.CoordsToNode(row, col-1), gr.CoordsToNode(row, col+1)}
+	realNeighbors := make([]graph.Node, 0, 4) // Will overallocate sometimes, but not by much. Not a big deal
 	for _, neighbor := range neighbors {
-		if neighbor != nil && graph.tiles[neighbor.ID()] == true {
+		if neighbor != nil && gr.tiles[neighbor.ID()] == true {
 			realNeighbors = append(realNeighbors, neighbor)
 		}
 	}
@@ -173,13 +173,13 @@ func (graph *TileGraph) Neighbors(node gr.Node) []gr.Node {
 	return realNeighbors
 }
 
-func (graph *TileGraph) EdgeBetween(node, neighbor gr.Node) gr.Edge {
-	if !graph.NodeExists(node) || !graph.NodeExists(neighbor) {
+func (gr *TileGraph) EdgeBetween(node, neighbor graph.Node) graph.Edge {
+	if !gr.NodeExists(node) || !gr.NodeExists(neighbor) {
 		return nil
 	}
 
-	r1, c1 := graph.IDToCoords(node.ID())
-	r2, c2 := graph.IDToCoords(neighbor.ID())
+	r1, c1 := gr.IDToCoords(node.ID())
+	r2, c2 := gr.IDToCoords(neighbor.ID())
 	if (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1)) {
 		return Edge{node, neighbor}
 	}
@@ -187,23 +187,23 @@ func (graph *TileGraph) EdgeBetween(node, neighbor gr.Node) gr.Edge {
 	return nil
 }
 
-func (graph *TileGraph) NodeExists(node gr.Node) bool {
+func (gr *TileGraph) NodeExists(node graph.Node) bool {
 	id := node.ID()
-	return id >= 0 && id < len(graph.tiles) && graph.tiles[id] == true
+	return id >= 0 && id < len(gr.tiles) && gr.tiles[id] == true
 }
 
-func (graph *TileGraph) Degree(node gr.Node) int {
-	return len(graph.Neighbors(node)) * 2
+func (gr *TileGraph) Degree(node graph.Node) int {
+	return len(gr.Neighbors(node)) * 2
 }
 
-func (graph *TileGraph) EdgeList() []gr.Edge {
-	edges := make([]gr.Edge, 0)
-	for id, passable := range graph.tiles {
+func (gr *TileGraph) EdgeList() []graph.Edge {
+	edges := make([]graph.Edge, 0)
+	for id, passable := range gr.tiles {
 		if !passable {
 			continue
 		}
 
-		for _, succ := range graph.Neighbors(Node(id)) {
+		for _, succ := range gr.Neighbors(Node(id)) {
 			edges = append(edges, Edge{Node(id), succ})
 		}
 	}
@@ -211,9 +211,9 @@ func (graph *TileGraph) EdgeList() []gr.Edge {
 	return edges
 }
 
-func (graph *TileGraph) NodeList() []gr.Node {
-	nodes := make([]gr.Node, 0)
-	for id, passable := range graph.tiles {
+func (gr *TileGraph) NodeList() []graph.Node {
+	nodes := make([]graph.Node, 0)
+	for id, passable := range gr.tiles {
 		if !passable {
 			continue
 		}
@@ -224,8 +224,8 @@ func (graph *TileGraph) NodeList() []gr.Node {
 	return nodes
 }
 
-func (graph *TileGraph) Cost(e gr.Edge) float64 {
-	if edge := graph.EdgeBetween(e.Head(), e.Tail()); edge != nil {
+func (gr *TileGraph) Cost(e graph.Edge) float64 {
+	if edge := gr.EdgeBetween(e.Head(), e.Tail()); edge != nil {
 		return 1.0
 	}
 

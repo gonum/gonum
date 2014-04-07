@@ -3,11 +3,11 @@ package concrete_test
 import (
 	"testing"
 
-	gr "github.com/gonum/graph"
+	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 )
 
-var _ gr.Graph = (*concrete.TileGraph)(nil)
+var _ graph.Graph = (*concrete.TileGraph)(nil)
 
 func TestTileGraph(t *testing.T) {
 	tg := concrete.NewTileGraph(4, 4, false)

@@ -232,7 +232,7 @@ func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]g
 	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
 
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
-	dummyGraph := concrete.NewDirectedMutableGraph()
+	dummyGraph := concrete.NewMutableDirectedGraph()
 	for _, node := range gr.NodeList() {
 		neighbors := successors(node)
 		dummyGraph.NodeExists(node)

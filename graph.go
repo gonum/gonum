@@ -106,10 +106,14 @@ type Coster interface {
 	Cost(edge Edge) float64
 }
 
-// Guarantees that something implementing Coster is also a Graph.
 type CostGraph interface {
 	Coster
 	Graph
+}
+
+type CostDirectedGraph interface {
+	Coster
+	DirectedGraph
 }
 
 // A graph that implements HeuristicCoster implements a heuristic between any two given nodes.
@@ -122,51 +126,76 @@ type HeuristicCoster interface {
 	HeuristicCost(node1, node2 Node) float64
 }
 
-// A MutableGraph is a graph that can be changed in an arbitrary way. It is useful for several
-// algorithms; for instance, Johnson's Algorithm requires adding a temporary node and changing
-// edge weights. Another case where this is used is computing minimum spanning trees. Since trees
-// are graphs, a minimum spanning tree can be created using this interface.
+// A Mutable is a graph that can have arbitrary nodes and edges added or removed.
 //
-// Note that just because a graph does not implement MutableGraph does not mean that this package
-// expects it to be invariant (though even a MutableGraph should be treated as invariant while an
-// algorithm is operating on it), it simply means that without this interface this package can not
-// properly handle the graph in order to, say, fill it with a minimum spanning tree.
+// Anything implementing Mutable is required to store the actual argument. So if AddNode(myNode) is
+// called and later a user calls on the graph graph.NodeList(), the node added by AddNode must be
+//  an the exact node, not a new node with the same ID.
 //
-// In functions that take a MutableGraph as an argument, it should not be the same as the Graph
-// argument as concurrent modification will likely cause problems.
+// In any case where conflict is possible (e.g. adding two nodes with the same ID), the later
+// call always supercedes the earlier one.
 //
-// MutableGraphs should always record the IDs as they are represented -- which means they are
-// sparse by nature.
-//
-// MutableGraphs are required to keep the exact Nodes and Edges passed in, and return
-// the originals when asked.
-type MutableGraph interface {
-	CostGraph
+// Functions will generally expect one of MutableGraph or MutableDirectedGraph and not Mutable
+// itself. That said, any function that takes Mutable[x], the destination mutable should
+// always be a different graph than the source.
+type Mutable interface {
 	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
 	// used.
 	NewNode() Node
 
-	// Adds a node to the graph
+	// Adds a node to the graph. If this is called multiple times for the same ID, the newer node
+	// overwrites the old one.
 	AddNode(Node)
-
-	// AddEdge connects two nodes in the graph. Neither node is required
-	// to have been added before this is called. If directed is false,
-	// it also adds the reciprocal edge. If this is called a second time,
-	// it overrides any existing edge.
-	AddEdge(e Edge, cost float64, directed bool)
-
-	// RemoveNode removes a node from the graph, as well as any edges
-	// attached to it
-	RemoveNode(Node)
-
-	// RemoveEdge removes a connection between two nodes, but does not
-	// remove Head nor Tail under any circumstance. As with AddEdge, if
-	// directed is false it also removes the reciprocal edge. This function
-	// should be treated as a no-op and not an error if the edge doesn't exist.
-	RemoveEdge(e Edge, directed bool)
 
 	// EmptyGraph clears the graph of all nodes and edges.
 	EmptyGraph()
+
+	// RemoveNode removes a node from the graph, as well as any edges
+	// attached to it. If no such node exists, this is a no-op, not an error.
+	RemoveNode(Node)
+}
+
+// MutableGraph is an interface ensuring the implementation of the ability to construct
+// an arbitrary undirected graph. It is very important to note that any implementation
+// of MutableGraph absolutely cannot safely implement the DirectedGraph interface.
+//
+// A MutableGraph is required to store any Edge argument in the same way Mutable must
+// store a Node argument -- any retrieval call is required to return the exact supplied edge.
+// This is what makes it incompatible with DirectedGraph.
+//
+// A call to AddEdgeBetween(Edge{head,tail}) make is so there is simply no way to safely
+// return EdgeTo(tail, head) since the edge returned will, by this contract, need to be
+// Head() == head and Tail() == tail when the reverse must be true to fulfill the
+// functionality guaranteed of EdgeTo.
+type MutableGraph interface {
+	CostGraph
+	Mutable
+
+	// Like EdgeBetween in Graph, AddEdgeBetween adds an edge between two nodes.
+	// If one or both nodes do not exist, the Graph is expected to add them.
+	AddEdgeBetween(e Edge, cost float64)
+
+	// RemoveEdge clears the stored edge between two nodes. Calling this will never
+	// remove a node. If the edge does not exist this is a no-op, not an error.
+	RemoveEdgeBetween(e Edge, directed bool)
+}
+
+// MutableDirectedGraph is an interface that ensures one can construct an arbitrary directed
+// graph. Naturally, a MutableDirectedGraph works for both undirected and directed cases,
+// but simply using a MutableGraph may be cleaner. As the documentation for MutableGraph
+// notes, however, a graph cannot safely implement MutableGraph and MutableDirectedGraph
+// at the same time, because of the functionality of a EdgeTo in DirectedGraph.
+type MutableDirectedGraph interface {
+	CostDirectedGraph
+	Mutable
+
+	// Adds an edge FROM e.Head TO e.Tail. Newer calls overwrite older ones.
+	// If the nodes Head or Tail do not exist in the graph, this must add them.
+	AddEdgeTo(e Edge, cost float64)
+
+	// Removes an edge FROM e.Head TO e.Tail. If no such edge exists, this is a no-op,
+	// not an error.
+	RemoveEdgeTo(e Edge)
 }
 
 // A DStarGraph is a special interface that allows the DStarLite function to be used on a graph.

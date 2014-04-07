@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package concrete
 
 import (
@@ -10,8 +14,8 @@ import (
 // A simple int alias.
 type Node int
 
-func (node Node) ID() int {
-	return int(node)
+func (n Node) ID() int {
+	return int(n)
 }
 
 // Just a collection of two nodes
@@ -67,152 +71,152 @@ func NewPreAllocatedGraph(numVertices int) *Graph {
 
 /* Mutable Graph implementation */
 
-func (gr *Graph) NewNode() (node graph.Node) {
-	nodeList := gr.NodeList()
+func (g *Graph) NewNode() graph.Node {
+	nodeList := g.NodeList()
 	ids := make([]int, len(nodeList))
-	for i, node := range nodeList {
-		ids[i] = node.ID()
+	for i, n := range nodeList {
+		ids[i] = n.ID()
 	}
 
 	nodes := sort.IntSlice(ids)
 	sort.Sort(&nodes)
-	for i, node := range nodes {
-		if i != node {
-			gr.AddNode(Node(i))
+	for i, n := range nodes {
+		if i != n {
+			g.AddNode(Node(i))
 			return Node(i)
 		}
 	}
 
 	newID := len(nodes)
-	gr.AddNode(Node(newID))
+	g.AddNode(Node(newID))
 	return Node(newID)
 }
 
-func (gr *Graph) AddNode(node graph.Node) {
-	if _, ok := gr.nodeMap[node.ID()]; ok {
+func (g *Graph) AddNode(n graph.Node) {
+	if _, ok := g.nodeMap[n.ID()]; ok {
 		return
 	}
 
-	gr.nodeMap[node.ID()] = node
-	gr.successors[node.ID()] = make(map[int]WeightedEdge)
-	gr.predecessors[node.ID()] = make(map[int]WeightedEdge)
+	g.nodeMap[n.ID()] = n
+	g.successors[n.ID()] = make(map[int]WeightedEdge)
+	g.predecessors[n.ID()] = make(map[int]WeightedEdge)
 }
 
-func (gr *Graph) AddEdge(e graph.Edge, cost float64, directed bool) {
+func (g *Graph) AddEdge(e graph.Edge, cost float64, directed bool) {
 	head, tail := e.Head(), e.Tail()
-	gr.AddNode(head)
-	gr.AddNode(tail)
+	g.AddNode(head)
+	g.AddNode(tail)
 
-	gr.successors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
-	gr.predecessors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.successors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.predecessors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
 	if !directed {
-		gr.successors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
-		gr.predecessors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
+		g.successors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
+		g.predecessors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
 	}
 }
 
-func (gr *Graph) RemoveNode(node graph.Node) {
-	if _, ok := gr.nodeMap[node.ID()]; !ok {
+func (g *Graph) RemoveNode(n graph.Node) {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return
 	}
-	delete(gr.nodeMap, node.ID())
+	delete(g.nodeMap, n.ID())
 
-	for succ, _ := range gr.successors[node.ID()] {
-		delete(gr.predecessors[succ], node.ID())
+	for succ, _ := range g.successors[n.ID()] {
+		delete(g.predecessors[succ], n.ID())
 	}
-	delete(gr.successors, node.ID())
+	delete(g.successors, n.ID())
 
-	for pred, _ := range gr.predecessors[node.ID()] {
-		delete(gr.successors[pred], node.ID())
+	for pred, _ := range g.predecessors[n.ID()] {
+		delete(g.successors[pred], n.ID())
 	}
-	delete(gr.predecessors, node.ID())
+	delete(g.predecessors, n.ID())
 
 }
 
-func (gr *Graph) RemoveEdge(e graph.Edge, directed bool) {
+func (g *Graph) RemoveEdge(e graph.Edge, directed bool) {
 	head, tail := e.Head(), e.Tail()
-	if _, ok := gr.nodeMap[head.ID()]; !ok {
+	if _, ok := g.nodeMap[head.ID()]; !ok {
 		return
-	} else if _, ok := gr.nodeMap[tail.ID()]; !ok {
+	} else if _, ok := g.nodeMap[tail.ID()]; !ok {
 		return
 	}
 
-	delete(gr.successors[head.ID()], tail.ID())
-	delete(gr.predecessors[tail.ID()], head.ID())
+	delete(g.successors[head.ID()], tail.ID())
+	delete(g.predecessors[tail.ID()], head.ID())
 	if !directed {
-		delete(gr.successors[tail.ID()], head.ID())
-		delete(gr.predecessors[head.ID()], tail.ID())
+		delete(g.successors[tail.ID()], head.ID())
+		delete(g.predecessors[head.ID()], tail.ID())
 	}
 }
 
-func (gr *Graph) EmptyGraph() {
-	gr.successors = make(map[int]map[int]WeightedEdge)
-	gr.predecessors = make(map[int]map[int]WeightedEdge)
-	gr.nodeMap = make(map[int]graph.Node)
+func (g *Graph) EmptyGraph() {
+	g.successors = make(map[int]map[int]WeightedEdge)
+	g.predecessors = make(map[int]map[int]WeightedEdge)
+	g.nodeMap = make(map[int]graph.Node)
 }
 
 /* Graph implementation */
 
-func (gr *Graph) Successors(node graph.Node) []graph.Node {
-	if _, ok := gr.successors[node.ID()]; !ok {
+func (g *Graph) Successors(n graph.Node) []graph.Node {
+	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
 
-	successors := make([]graph.Node, len(gr.successors[node.ID()]))
+	successors := make([]graph.Node, len(g.successors[n.ID()]))
 	i := 0
-	for succ, _ := range gr.successors[node.ID()] {
-		successors[i] = gr.nodeMap[succ]
+	for succ, _ := range g.successors[n.ID()] {
+		successors[i] = g.nodeMap[succ]
 		i++
 	}
 
 	return successors
 }
 
-func (gr *Graph) EdgeTo(node, succ graph.Node) graph.Edge {
-	if _, ok := gr.nodeMap[node.ID()]; !ok {
+func (g *Graph) EdgeTo(n, succ graph.Node) graph.Edge {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return nil
-	} else if _, ok := gr.nodeMap[succ.ID()]; !ok {
+	} else if _, ok := g.nodeMap[succ.ID()]; !ok {
 		return nil
 	}
 
-	edge, ok := gr.successors[node.ID()][succ.ID()]
+	edge, ok := g.successors[n.ID()][succ.ID()]
 	if !ok {
 		return nil
 	}
 	return edge
 }
 
-func (gr *Graph) Predecessors(node graph.Node) []graph.Node {
-	if _, ok := gr.successors[node.ID()]; !ok {
+func (g *Graph) Predecessors(n graph.Node) []graph.Node {
+	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
 
-	predecessors := make([]graph.Node, len(gr.predecessors[node.ID()]))
+	predecessors := make([]graph.Node, len(g.predecessors[n.ID()]))
 	i := 0
-	for succ, _ := range gr.predecessors[node.ID()] {
-		predecessors[i] = gr.nodeMap[succ]
+	for succ, _ := range g.predecessors[n.ID()] {
+		predecessors[i] = g.nodeMap[succ]
 		i++
 	}
 
 	return predecessors
 }
 
-func (gr *Graph) Neighbors(node graph.Node) []graph.Node {
-	if _, ok := gr.successors[node.ID()]; !ok {
+func (g *Graph) Neighbors(n graph.Node) []graph.Node {
+	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
 
-	neighbors := make([]graph.Node, len(gr.predecessors[node.ID()])+len(gr.successors[node.ID()]))
+	neighbors := make([]graph.Node, len(g.predecessors[n.ID()])+len(g.successors[n.ID()]))
 	i := 0
-	for succ, _ := range gr.successors[node.ID()] {
-		neighbors[i] = gr.nodeMap[succ]
+	for succ, _ := range g.successors[n.ID()] {
+		neighbors[i] = g.nodeMap[succ]
 		i++
 	}
 
-	for pred, _ := range gr.predecessors[node.ID()] {
+	for pred, _ := range g.predecessors[n.ID()] {
 		// We should only add the predecessor if it wasn't already added from successors
-		if _, ok := gr.successors[node.ID()][pred]; !ok {
-			neighbors[i] = gr.nodeMap[pred]
+		if _, ok := g.successors[n.ID()][pred]; !ok {
+			neighbors[i] = g.nodeMap[pred]
 			i++
 		}
 	}
@@ -220,13 +224,13 @@ func (gr *Graph) Neighbors(node graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (gr *Graph) EdgeBetween(node, neigh graph.Node) graph.Edge {
-	e := gr.EdgeTo(node, neigh)
+func (g *Graph) EdgeBetween(n, neigh graph.Node) graph.Edge {
+	e := g.EdgeTo(n, neigh)
 	if e != nil {
 		return e
 	}
 
-	e = gr.EdgeTo(neigh, node)
+	e = g.EdgeTo(neigh, n)
 	if e != nil {
 		return e
 	}
@@ -234,33 +238,33 @@ func (gr *Graph) EdgeBetween(node, neigh graph.Node) graph.Edge {
 	return nil
 }
 
-func (gr *Graph) NodeExists(node graph.Node) bool {
-	_, ok := gr.nodeMap[node.ID()]
+func (g *Graph) NodeExists(n graph.Node) bool {
+	_, ok := g.nodeMap[n.ID()]
 
 	return ok
 }
 
-func (gr *Graph) Degree(node graph.Node) int {
-	if _, ok := gr.nodeMap[node.ID()]; !ok {
+func (g *Graph) Degree(n graph.Node) int {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return 0
 	}
 
-	return len(gr.successors[node.ID()]) + len(gr.predecessors[node.ID()])
+	return len(g.successors[n.ID()]) + len(g.predecessors[n.ID()])
 }
 
-func (gr *Graph) NodeList() []graph.Node {
-	nodes := make([]graph.Node, len(gr.successors))
+func (g *Graph) NodeList() []graph.Node {
+	nodes := make([]graph.Node, len(g.successors))
 	i := 0
-	for _, node := range gr.nodeMap {
-		nodes[i] = node
+	for _, n := range g.nodeMap {
+		nodes[i] = n
 		i++
 	}
 
 	return nodes
 }
 
-func (gr *Graph) Cost(e graph.Edge) float64 {
-	if s, ok := gr.successors[e.Head().ID()]; ok {
+func (g *Graph) Cost(e graph.Edge) float64 {
+	if s, ok := g.successors[e.Head().ID()]; ok {
 		if we, ok := s[e.Tail().ID()]; ok {
 			return we.Cost
 		}
@@ -268,19 +272,19 @@ func (gr *Graph) Cost(e graph.Edge) float64 {
 	return math.Inf(1)
 }
 
-func (gr *Graph) EdgeList() []graph.Edge {
-	edgeList := make([]graph.Edge, 0, len(gr.successors))
-	edgeMap := make(map[int]map[int]struct{}, len(gr.successors))
-	for node, succMap := range gr.successors {
-		edgeMap[node] = make(map[int]struct{}, len(succMap))
+func (g *Graph) EdgeList() []graph.Edge {
+	edgeList := make([]graph.Edge, 0, len(g.successors))
+	edgeMap := make(map[int]map[int]struct{}, len(g.successors))
+	for n, succMap := range g.successors {
+		edgeMap[n] = make(map[int]struct{}, len(succMap))
 		for succ, edge := range succMap {
 			if doneMap, ok := edgeMap[succ]; ok {
-				if _, ok := doneMap[node]; ok {
+				if _, ok := doneMap[n]; ok {
 					continue
 				}
 			}
 			edgeList = append(edgeList, edge)
-			edgeMap[node][succ] = struct{}{}
+			edgeMap[n][succ] = struct{}{}
 		}
 	}
 

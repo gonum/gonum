@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package graph
 
 // All a node needs to do is identify itself. This allows the user to pass in nodes more
@@ -22,7 +26,7 @@ type Edge interface {
 // even if the function itself only takes in a Graph (or a super-interface of graph).
 type Graph interface {
 	// NodeExists returns true when node is currently in the graph.
-	NodeExists(node Node) bool
+	NodeExists(Node) bool
 
 	// NodeList returns a list of all nodes in no particular order, useful for
 	// determining things like if a graph is fully connected. The caller is
@@ -31,7 +35,7 @@ type Graph interface {
 	NodeList() []Node
 
 	// Neighbors returns all nodes connected by any edge to this node.
-	Neighbors(node Node) []Node
+	Neighbors(Node) []Node
 
 	// EdgeBetween returns an edge between node and neighbor such that
 	// Head is one argument and Tail is the other. If no
@@ -49,7 +53,7 @@ type DirectedGraph interface {
 	Graph
 	// Successors gives the nodes connected by OUTBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Predecessors.
-	Successors(node Node) []Node
+	Successors(Node) []Node
 
 	// EdgeTo returns an edge between node and successor such that
 	// Head returns node and Tail returns successor, if no
@@ -58,7 +62,7 @@ type DirectedGraph interface {
 
 	// Predecessors gives the nodes connected by INBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Successors.
-	Predecessors(node Node) []Node
+	Predecessors(Node) []Node
 }
 
 // Returns all undirected edges in the graph
@@ -143,7 +147,7 @@ type MutableGraph interface {
 	NewNode() Node
 
 	// Adds a node to the graph
-	AddNode(node Node)
+	AddNode(Node)
 
 	// AddEdge connects two nodes in the graph. Neither node is required
 	// to have been added before this is called. If directed is false,
@@ -153,7 +157,7 @@ type MutableGraph interface {
 
 	// RemoveNode removes a node from the graph, as well as any edges
 	// attached to it
-	RemoveNode(node Node)
+	RemoveNode(Node)
 
 	// RemoveEdge removes a connection between two nodes, but does not
 	// remove Head nor Tail under any circumstance. As with AddEdge, if

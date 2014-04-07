@@ -113,7 +113,7 @@ func (g *MutableGraph) RemoveNode(n graph.Node) {
 
 }
 
-func (g *MutableGraph) RemoveEdge(e graph.Edge) {
+func (g *MutableGraph) RemoveEdgeBetween(e graph.Edge) {
 	head, tail := e.Head(), e.Tail()
 	if _, ok := g.nodeMap[head.ID()]; !ok {
 		return

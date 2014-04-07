@@ -177,7 +177,7 @@ type MutableGraph interface {
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
 	// remove a node. If the edge does not exist this is a no-op, not an error.
-	RemoveEdgeBetween(e Edge, directed bool)
+	RemoveEdgeBetween(e Edge)
 }
 
 // MutableDirectedGraph is an interface that ensures one can construct an arbitrary directed

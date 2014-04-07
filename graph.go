@@ -23,13 +23,16 @@ type Edge interface {
 type Graph interface {
 	// NodeExists returns true when node is currently in the graph.
 	NodeExists(node Node) bool
+
 	// NodeList returns a list of all nodes in no particular order, useful for
 	// determining things like if a graph is fully connected. The caller is
 	// free to modify this list. Implementations should construct a new list
 	// and not return internal representation.
 	NodeList() []Node
+
 	// Neighbors returns all nodes connected by any edge to this node.
 	Neighbors(node Node) []Node
+
 	// EdgeBetween returns an edge between node and neighbor such that
 	// Head is one argument and Tail is the other. If no
 	// such edge exists, this function returns nil.
@@ -47,10 +50,12 @@ type DirectedGraph interface {
 	// Successors gives the nodes connected by OUTBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Predecessors.
 	Successors(node Node) []Node
+
 	// EdgeTo returns an edge between node and successor such that
 	// Head returns node and Tail returns successor, if no
 	// such edge exists, this function returns nil.
 	EdgeTo(node, successor Node) Edge
+
 	// Predecessors gives the nodes connected by INBOUND edges.
 	// If the graph is an undirected graph, this set is equal to Successors.
 	Predecessors(node Node) []Node
@@ -81,7 +86,7 @@ type DirectedEdgeListGraph interface {
 // required to be preserved between the non-cruched and crunched instances (that means in
 // the example above 0 may correspond to 4 or 7 or 9, not necessarily 1).
 //
-// All dense graphs should have the first ID as 0.
+// All dense graphs must have the first ID as 0.
 type CrunchGraph interface {
 	Graph
 	Crunch()
@@ -113,7 +118,7 @@ type HeuristicCoster interface {
 	HeuristicCost(node1, node2 Node) float64
 }
 
-// A Mutable Graph is a graph that can be changed in an arbitrary way. It is useful for several
+// A MutableGraph is a graph that can be changed in an arbitrary way. It is useful for several
 // algorithms; for instance, Johnson's Algorithm requires adding a temporary node and changing
 // edge weights. Another case where this is used is computing minimum spanning trees. Since trees
 // are graphs, a minimum spanning tree can be created using this interface.
@@ -126,31 +131,36 @@ type HeuristicCoster interface {
 // In functions that take a MutableGraph as an argument, it should not be the same as the Graph
 // argument as concurrent modification will likely cause problems.
 //
-// Mutable graphs should always record the IDs as they are represented -- which means they are
+// MutableGraphs should always record the IDs as they are represented -- which means they are
 // sparse by nature.
 //
-// Mutable graphs are required to keep the exact Nodes and Edges passed in, and return
+// MutableGraphs are required to keep the exact Nodes and Edges passed in, and return
 // the originals when asked.
 type MutableGraph interface {
 	CostGraph
 	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
 	// used.
 	NewNode() Node
+
 	// Adds a node to the graph
 	AddNode(node Node)
+
 	// AddEdge connects two nodes in the graph. Neither node is required
 	// to have been added before this is called. If directed is false,
 	// it also adds the reciprocal edge. If this is called a second time,
 	// it overrides any existing edge.
 	AddEdge(e Edge, cost float64, directed bool)
+
 	// RemoveNode removes a node from the graph, as well as any edges
 	// attached to it
 	RemoveNode(node Node)
+
 	// RemoveEdge removes a connection between two nodes, but does not
 	// remove Head nor Tail under any circumstance. As with AddEdge, if
 	// directed is false it also removes the reciprocal edge. This function
 	// should be treated as a no-op and not an error if the edge doesn't exist.
 	RemoveEdge(e Edge, directed bool)
+
 	// EmptyGraph clears the graph of all nodes and edges.
 	EmptyGraph()
 }

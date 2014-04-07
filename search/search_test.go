@@ -255,7 +255,7 @@ func TestIsPath(t *testing.T) {
 	}
 	p[0], p[1] = p[1], p[0]
 	if search.IsPath(p, g) {
-		t.Error("IsPath erroenously returns true for a reverse path")
+		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
 	g.AddEdge(concrete.Edge{p[1], p[2]}, 1.0, true)

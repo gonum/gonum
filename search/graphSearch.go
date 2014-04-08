@@ -232,7 +232,7 @@ func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]g
 	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
 
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
-	dummyGraph := concrete.NewMutableDirectedGraph()
+	dummyGraph := concrete.NewDirectedGraph()
 	for _, node := range gr.NodeList() {
 		neighbors := successors(node)
 		dummyGraph.NodeExists(node)
@@ -248,14 +248,14 @@ func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]g
 				e = concrete.Edge{e.Tail(), e.Head()}
 			}
 
-			dummyGraph.AddEdgeTo(e, c)
+			dummyGraph.AddDirectedEdge(e, c)
 		}
 	}
 
 	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
 	dummyNode := dummyGraph.NewNode()
 	for _, node := range gr.NodeList() {
-		dummyGraph.AddEdgeTo(concrete.Edge{dummyNode, node}, 0.0)
+		dummyGraph.AddDirectedEdge(concrete.Edge{dummyNode, node}, 0.0)
 	}
 
 	/* Step 2: Run Bellman-Ford starting at the dummy node, abort if it detects a cycle */
@@ -268,7 +268,7 @@ func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]g
 	for _, node := range gr.NodeList() {
 		for _, succ := range successors(node) {
 			e := edgeTo(node, succ)
-			dummyGraph.AddEdgeTo(e, cost(e)+costs[node.ID()]-costs[succ.ID()])
+			dummyGraph.AddDirectedEdge(e, cost(e)+costs[node.ID()]-costs[succ.ID()])
 		}
 	}
 
@@ -340,10 +340,10 @@ func UniformCost(e graph.Edge) float64 {
 
 /* Simple operations */
 
-// Copies a graph into the destination; maintaining all node IDs.
-func CopyUndirectedGraph(dst graph.Graph, src graph.Graph) {
-	dst.EmptyGraph()
-
+// Copies a graph into the destination; maintaining all node IDs. The destination
+// need not be empty, though overlapping node IDs and conflicting edges will overwrite
+// existing data.
+func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
 	cost := setupFuncs(src, nil, nil).cost
 
 	for _, node := range src.NodeList() {
@@ -351,16 +351,16 @@ func CopyUndirectedGraph(dst graph.Graph, src graph.Graph) {
 		dst.AddNode(node)
 		for _, succ := range succs {
 			edge := src.EdgeBetween(node, succ)
-			dst.AddEdgeBetween(edge, cost(edge))
+			dst.AddUndirectedEdge(edge, cost(edge))
 		}
 	}
 
 }
 
-// Copies a graph into the destination; maintaining all node IDs.
-func CopyDirectedGraph(dst graph.DirectedGraph, src graph.DirectedGraph) {
-	dst.EmptyGraph()
-
+// Copies a graph into the destination; maintaining all node IDs. The destination
+// need not be empty, though overlapping node IDs and conflicting edges will overwrite
+// existing data.
+func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) {
 	cost := setupFuncs(src, nil, nil).cost
 
 	for _, node := range src.NodeList() {
@@ -368,7 +368,7 @@ func CopyDirectedGraph(dst graph.DirectedGraph, src graph.DirectedGraph) {
 		dst.AddNode(node)
 		for _, succ := range succs {
 			edge := src.EdgeTo(node, succ)
-			dst.AddEdgeTo(edge, cost(edge))
+			dst.AddDirectedEdge(edge, cost(edge))
 		}
 	}
 
@@ -478,11 +478,11 @@ puts the resulting minimum spanning tree in the dst graph */
 //
 // As with other algorithms that use Cost, the order of precedence is
 // Argument > Interface > UniformCost.
-func Prim(dst graph.Graph, gr graph.EdgeListGraph, cost graph.CostFunc) {
+//
+// The destination must be empty (or at least disjoint with the node IDs of the input)
+func Prim(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 	sf := setupFuncs(gr, cost, nil)
 	cost = sf.cost
-
-	dst.EmptyGraph()
 
 	nlist := gr.NodeList()
 
@@ -510,7 +510,7 @@ func Prim(dst graph.Graph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 		sort.Sort(edgeWeights)
 		myEdge := edgeWeights[0]
 
-		dst.AddEdgeBetween(myEdge.Edge, myEdge.Cost)
+		dst.AddUndirectedEdge(myEdge.Edge, myEdge.Cost)
 		remainingNodes.Remove(myEdge.Edge.Head())
 	}
 
@@ -519,9 +519,10 @@ func Prim(dst graph.Graph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 // Generates a minimum spanning tree for a graph using discrete.DisjointSet.
 //
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost.
-func Kruskal(dst graph.Graph, gr graph.EdgeListGraph, cost graph.CostFunc) {
+//
+// The destination must be empty (or at least disjoint with the node IDs of the input)
+func Kruskal(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 	cost = setupFuncs(gr, cost, nil).cost
-	dst.EmptyGraph()
 
 	edgeList := gr.EdgeList()
 	edgeWeights := make(edgeSorter, 0, len(edgeList))
@@ -541,7 +542,7 @@ func Kruskal(dst graph.Graph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 		// should work fine without checking both ways
 		if s1, s2 := ds.Find(edge.Edge.Head().ID()), ds.Find(edge.Edge.Tail().ID); s1 != s2 {
 			ds.Union(s1, s2)
-			dst.AddEdgeBetween(edge.Edge, edge.Cost)
+			dst.AddUndirectedEdge(edge.Edge, edge.Cost)
 		}
 	}
 }

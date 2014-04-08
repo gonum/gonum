@@ -140,7 +140,7 @@ func TestSmallAStar(t *testing.T) {
 }
 
 func ExampleBreadthFirstSearch() {
-	g := concrete.NewMutableDirectedGraph()
+	g := concrete.NewDirectedGraph()
 	var n0, n1, n2, n3 concrete.Node = 0, 1, 2, 3
 	g.AddDirectedEdge(concrete.Edge{n0, n1}, 1.0)
 	g.AddDirectedEdge(concrete.Edge{n0, n2}, 1.0)
@@ -165,7 +165,7 @@ func newSmallGonumGraph() *concrete.Graph {
 		{4, 5, 7},
 		{5, 6, 9},
 	}
-	g := concrete.NewMutableGraph()
+	g := concrete.NewGraph()
 	for n := concrete.Node(1); n <= 6; n++ {
 		g.AddNode(n)
 	}
@@ -236,7 +236,7 @@ func TestDijkstraSmall(t *testing.T) {
 }
 
 func TestIsPath(t *testing.T) {
-	g := concrete.NewMutableDirectedGraph()
+	g := concrete.NewDirectedGraph()
 	if !search.IsPath(nil, g) {
 		t.Error("IsPath returns false on nil path")
 	}
@@ -266,7 +266,7 @@ func TestIsPath(t *testing.T) {
 	if !search.IsPath(p, g) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	gr := concrete.NewMutableGraph()
+	gr := concrete.NewGraph()
 	gr.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1.0)
 	gr.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1.0)
 	if !search.IsPath(p, g) {

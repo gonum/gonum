@@ -115,7 +115,6 @@ func Dijkstra(source graph.Node, gr graph.Graph, cost graph.CostFunc) (paths map
 
 	nodes := gr.NodeList()
 	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
-	closedSet := set.NewSet()                 // This is to make use of that same
 	costs = make(map[int]float64, len(nodes)) // May overallocate, will change if it becomes a problem
 	predecessor := make(map[int]graph.Node, len(nodes))
 	nodeIDMap := make(map[int]graph.Node, len(nodes))
@@ -128,8 +127,6 @@ func Dijkstra(source graph.Node, gr graph.Graph, cost graph.CostFunc) (paths map
 		node := heap.Pop(openSet).(internalNode)
 
 		nodeIDMap[node.ID()] = node
-
-		closedSet.Add(node.ID())
 
 		for _, neighbor := range successors(node) {
 			tmpCost := costs[node.ID()] + cost(edgeTo(node, neighbor))

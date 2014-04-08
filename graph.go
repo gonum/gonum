@@ -130,7 +130,7 @@ type HeuristicCoster interface {
 //
 // Anything implementing Mutable is required to store the actual argument. So if AddNode(myNode) is
 // called and later a user calls on the graph graph.NodeList(), the node added by AddNode must be
-//  an the exact node, not a new node with the same ID.
+// an the exact node, not a new node with the same ID.
 //
 // In any case where conflict is possible (e.g. adding two nodes with the same ID), the later
 // call always supercedes the earlier one.

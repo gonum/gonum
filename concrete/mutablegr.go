@@ -63,21 +63,16 @@ func NewGraph() *Graph {
 
 func (g *Graph) NewNode() graph.Node {
 	nodeList := g.NodeList()
-	ids := make([]int, len(nodeList))
-	for i, n := range nodeList {
-		ids[i] = n.ID()
-	}
 
-	nodes := sort.IntSlice(ids)
-	sort.Sort(&nodes)
-	for i, n := range nodes {
-		if i != n {
+	sort.Sort(nodeSorter(nodeList))
+	for i, n := range nodeList {
+		if i != n.ID() {
 			g.AddNode(Node(i))
 			return Node(i)
 		}
 	}
 
-	newID := len(nodes)
+	newID := len(nodeList)
 	g.AddNode(Node(newID))
 	return Node(newID)
 }

@@ -48,10 +48,6 @@ func (g *DirectedGraph) NewNode() graph.Node {
 }
 
 func (g *DirectedGraph) AddNode(n graph.Node) {
-	if _, ok := g.nodeMap[n.ID()]; ok {
-		return
-	}
-
 	g.nodeMap[n.ID()] = n
 	g.successors[n.ID()] = make(map[int]WeightedEdge)
 	g.predecessors[n.ID()] = make(map[int]WeightedEdge)

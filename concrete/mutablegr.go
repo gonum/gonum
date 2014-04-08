@@ -78,10 +78,6 @@ func (g *Graph) NewNode() graph.Node {
 }
 
 func (g *Graph) AddNode(n graph.Node) {
-	if _, ok := g.nodeMap[n.ID()]; ok {
-		return
-	}
-
 	g.nodeMap[n.ID()] = n
 	g.neighbors[n.ID()] = make(map[int]WeightedEdge)
 }

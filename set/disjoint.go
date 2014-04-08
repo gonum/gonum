@@ -18,7 +18,7 @@ package set
 // two sets when an edge is created between two vertices, and refuses to make an edge between two
 // vertices if they're part of the same set.
 type DisjointSet struct {
-	master map[interface{}]*DisjointSetNode
+	master map[int]*DisjointSetNode
 }
 
 type DisjointSetNode struct {
@@ -27,22 +27,22 @@ type DisjointSetNode struct {
 }
 
 func NewDisjointSet() *DisjointSet {
-	return &DisjointSet{master: make(map[interface{}]*DisjointSetNode)}
+	return &DisjointSet{master: make(map[int]*DisjointSetNode)}
 }
 
 // If the element isn't already somewhere in there, adds it to the master set and its own tiny set.
-func (ds *DisjointSet) MakeSet(el interface{}) {
-	if _, ok := ds.master[el]; ok {
+func (ds *DisjointSet) MakeSet(e int) {
+	if _, ok := ds.master[e]; ok {
 		return
 	}
 	dsNode := &DisjointSetNode{rank: 0}
 	dsNode.parent = dsNode
-	ds.master[el] = dsNode
+	ds.master[e] = dsNode
 }
 
 // Returns the set the element belongs to, or nil if none.
-func (ds *DisjointSet) Find(el interface{}) *DisjointSetNode {
-	dsNode, ok := ds.master[el]
+func (ds *DisjointSet) Find(e int) *DisjointSetNode {
+	dsNode, ok := ds.master[e]
 	if !ok {
 		return nil
 	}

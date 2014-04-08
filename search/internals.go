@@ -6,10 +6,13 @@ package search
 
 import (
 	"container/heap"
+	"math"
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 )
+
+var inf = math.Inf(1)
 
 type searchFuncs struct {
 	successors, predecessors, neighbors    func(graph.Node) []graph.Node

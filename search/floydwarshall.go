@@ -50,7 +50,7 @@ func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, Path
 	for i := 0; i < numNodes; i++ {
 		for j := 0; j < numNodes; j++ {
 			if j != i {
-				dist[i+j*numNodes] = math.Inf(1)
+				dist[i+j*numNodes] = inf
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []graph.Node, gr graph.
 	// It's not fast, but it's about as fast as can be reasonably expected
 	var allPathFinder func(i, j int) ([][]graph.Node, error)
 	allPathFinder = func(i, j int) ([][]graph.Node, error) {
-		if dist[i+j*numNodes] == math.Inf(1) {
+		if dist[i+j*numNodes] == inf {
 			return nil, errors.New("No path")
 		}
 		intermediates := next[i+j*numNodes]
@@ -159,7 +159,7 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []graph.Node, gr graph.
 	return func(start, goal graph.Node) ([][]graph.Node, float64, error) {
 		paths, err := allPathFinder(start.ID(), goal.ID())
 		if err != nil {
-			return nil, math.Inf(1), err
+			return nil, inf, err
 		}
 
 		for i := range paths {
@@ -189,7 +189,7 @@ func genSinglePathFunc(dist []float64, next [][]int, nodes []graph.Node) func(st
 
 	var singlePathFinder func(i, j int) ([]graph.Node, error)
 	singlePathFinder = func(i, j int) ([]graph.Node, error) {
-		if dist[i+j*numNodes] == math.Inf(1) {
+		if dist[i+j*numNodes] == inf {
 			return nil, errors.New("No path")
 		}
 
@@ -217,7 +217,7 @@ func genSinglePathFunc(dist []float64, next [][]int, nodes []graph.Node) func(st
 	return func(start, goal graph.Node) ([]graph.Node, float64, error) {
 		path, err := singlePathFinder(start.ID(), goal.ID())
 		if err != nil {
-			return nil, math.Inf(1), err
+			return nil, inf, err
 		}
 
 		path = append(path, nil)

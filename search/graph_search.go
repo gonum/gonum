@@ -6,10 +6,10 @@ package search
 
 import (
 	"container/heap"
+	"errors"
 	"math"
 	"sort"
 
-	"errors"
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/set"
@@ -329,7 +329,7 @@ func NullHeuristic(node1, node2 graph.Node) float64 {
 // Assumes all edges in the graph have the same weight (including edges that don't exist!)
 func UniformCost(e graph.Edge) float64 {
 	if e == nil {
-		return math.Inf(1)
+		return inf
 	}
 
 	return 1

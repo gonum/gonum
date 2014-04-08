@@ -5,7 +5,11 @@
 package concrete
 
 import (
+<<<<<<< HEAD:concrete/mutdir.go
 	"math"
+=======
+	"sort"
+>>>>>>> Use a var for Inf:concrete/gonumgraph.go
 
 	"github.com/gonum/graph"
 )
@@ -242,7 +246,7 @@ func (g *DirectedGraph) Cost(e graph.Edge) float64 {
 			return we.Cost
 		}
 	}
-	return math.Inf(1)
+	return inf
 }
 
 func (g *DirectedGraph) EdgeList() []graph.Edge {

@@ -6,7 +6,6 @@ package concrete
 
 import (
 	"errors"
-	"math"
 	"strings"
 
 	"github.com/gonum/graph"
@@ -231,5 +230,5 @@ func (g *TileGraph) Cost(e graph.Edge) float64 {
 		return 1
 	}
 
-	return math.Inf(1)
+	return inf
 }

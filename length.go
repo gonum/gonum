@@ -39,7 +39,7 @@ const (
 
 // Unit converts the Length to a unit
 func (l Length) Unit() *Unit {
-	return New(float64(l), Dimensions{MassDim: 1})
+	return New(float64(l), Dimensions{LengthDim: 1})
 }
 
 // Length allows length to implement a Lengther interface

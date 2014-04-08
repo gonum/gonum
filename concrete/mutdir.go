@@ -57,7 +57,7 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.predecessors[n.ID()] = make(map[int]WeightedEdge)
 }
 
-func (g *DirectedGraph) AddEdgeTo(e graph.Edge, cost float64) {
+func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
 	head, tail := e.Head(), e.Tail()
 	g.AddNode(head)
 	g.AddNode(tail)
@@ -84,7 +84,7 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 
 }
 
-func (g *DirectedGraph) RemoveEdgeTo(e graph.Edge) {
+func (g *DirectedGraph) RemoveDirectedEdge(e graph.Edge) {
 	head, tail := e.Head(), e.Tail()
 	if _, ok := g.nodeMap[head.ID()]; !ok {
 		return

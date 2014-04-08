@@ -86,7 +86,7 @@ func (g *Graph) AddNode(n graph.Node) {
 	g.neighbors[n.ID()] = make(map[int]WeightedEdge)
 }
 
-func (g *Graph) AddEdgeBetween(e graph.Edge, cost float64) {
+func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
 	head, tail := e.Head(), e.Tail()
 	g.AddNode(head)
 	g.AddNode(tail)
@@ -108,7 +108,7 @@ func (g *Graph) RemoveNode(n graph.Node) {
 
 }
 
-func (g *Graph) RemoveEdgeBetween(e graph.Edge) {
+func (g *Graph) RemoveUndirectedEdge(e graph.Edge) {
 	head, tail := e.Head(), e.Tail()
 	if _, ok := g.nodeMap[head.ID()]; !ok {
 		return

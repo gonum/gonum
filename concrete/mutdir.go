@@ -55,8 +55,13 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 
 func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
 	head, tail := e.Head(), e.Tail()
-	g.AddNode(head)
-	g.AddNode(tail)
+	if !g.NodeExists(head) {
+		g.AddNode(head)
+	}
+
+	if !g.NodeExists(tail) {
+		g.AddNode(tail)
+	}
 
 	g.successors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
 	g.predecessors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}

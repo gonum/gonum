@@ -84,8 +84,13 @@ func (g *Graph) AddNode(n graph.Node) {
 
 func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
 	head, tail := e.Head(), e.Tail()
-	g.AddNode(head)
-	g.AddNode(tail)
+	if !g.NodeExists(head) {
+		g.AddNode(head)
+	}
+
+	if !g.NodeExists(tail) {
+		g.AddNode(tail)
+	}
 
 	g.neighbors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
 	g.neighbors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}

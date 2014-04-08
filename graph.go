@@ -147,9 +147,6 @@ type Mutable interface {
 	// overwrites the old one.
 	AddNode(Node)
 
-	// EmptyGraph clears the graph of all nodes and edges.
-	EmptyGraph()
-
 	// RemoveNode removes a node from the graph, as well as any edges
 	// attached to it. If no such node exists, this is a no-op, not an error.
 	RemoveNode(Node)

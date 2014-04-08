@@ -289,7 +289,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 	sf := setupFuncs(g, nil, nil)
 	successors := sf.successors
 
-	closedSet := set.NewSet()
+	closedSet := make(intSet)
 	openSet := xifo.GonumStack([]interface{}{start})
 	predecessor := make(map[int]graph.Node)
 
@@ -389,7 +389,7 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 	index := 0
 	vStack := &xifo.GonumStack{}
-	stackSet := set.NewSet()
+	stackSet := make(intSet)
 	sccs = make([][]graph.Node, 0)
 
 	nodes := g.NodeList()
@@ -488,7 +488,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	}
 
 	dst.AddNode(nlist[0])
-	remainingNodes := set.NewSet()
+	remainingNodes := make(intSet)
 	for _, node := range nlist[1:] {
 		remainingNodes.Add(node.ID())
 	}

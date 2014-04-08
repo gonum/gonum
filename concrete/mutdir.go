@@ -11,17 +11,10 @@ import (
 	"github.com/gonum/graph"
 )
 
-// A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and
-// edges -- as well as act as either directed or undirected.
+// A Directed graph is a highly generalized MutableDirectedGraph.
 //
-// Internally, it uses a map of successors AND predecessors, to speed up some operations (such as
-// getting all successors/predecessors). It also speeds up thing like adding edges (assuming both
-// edges exist).
-//
-// However, its generality is also its weakness (and partially a flaw in needing to satisfy
-// MutableGraph). For most purposes, creating your own graph is probably better. For instance,
-// see TileGraph for an example of an immutable 2D grid of tiles that also implements the Graph
-// interface, but would be more suitable if all you needed was a simple undirected 2D grid.
+// In most cases it's likely more desireable to use a graph specific to your
+// problem domain.
 type DirectedGraph struct {
 	successors   map[int]map[int]WeightedEdge
 	predecessors map[int]map[int]WeightedEdge
@@ -40,21 +33,16 @@ func NewDirectedGraph() *DirectedGraph {
 
 func (g *DirectedGraph) NewNode() graph.Node {
 	nodeList := g.NodeList()
-	ids := make([]int, len(nodeList))
-	for i, n := range nodeList {
-		ids[i] = n.ID()
-	}
 
-	nodes := sort.IntSlice(ids)
-	sort.Sort(&nodes)
-	for i, n := range nodes {
-		if i != n {
+	sort.Sort(nodeSorter(nodeList))
+	for i, n := range nodeList {
+		if i != n.ID() {
 			g.AddNode(Node(i))
 			return Node(i)
 		}
 	}
 
-	newID := len(nodes)
+	newID := len(nodeList)
 	g.AddNode(Node(newID))
 	return Node(newID)
 }

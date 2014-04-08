@@ -4,24 +4,8 @@
 
 package set
 
-import ()
-
-// On one hand, using an interface{} as a key works on some levels.
-// On the other hand, from experience, I can say that working with interface{} is a pain
-// so I don't like it in an API. An alternate idea is to make Set an interface with a method
-// that allows you to GRAB a map[interface{}]struct{} from the implementation, but that adds
-// a lot of calls and needless operations, making the library slower.
-//
-// Another point, using an interface{} may be pointless because a map key MUST have == and !=
-// defined, limiting the possible keys anyway (for instance, if you had a set of [3]floats I don't
-// think it will do a deep comparison, making it rather pointless). Also, keying with a float will
-// mean it does a strict == with the floats, possibly causing bad behavior. It may be best to just
-// make it a map[int]struct{}. Thoughts?
-type Set map[interface{}]struct{}
-
-// I highly doubt we have to worry about running out of IDs, but we could add a little reclaimID
-// function if we're worried
-var globalid uint64 = 0
+// Set is a set of integer identifiers.
+type Set map[int]struct{}
 
 // For cleanliness
 var flag struct{} = struct{}{}
@@ -36,7 +20,7 @@ func (s1 *Set) Clear() *Set {
 		return s1
 	}
 
-	(*s1) = make(Set)
+	*s1 = make(Set)
 
 	return s1
 }
@@ -47,13 +31,15 @@ func (dst *Set) Copy(src *Set) *Set {
 		return dst
 	}
 
-	if len(*dst) > 0 {
-		*(dst) = *NewSet()
+	d := *dst
+	if len(d) > 0 {
+		d = make(Set, len(*src))
 	}
 
-	for el := range *src {
-		(*dst)[el] = flag
+	for e := range *src {
+		d[e] = flag
 	}
+	*dst = d
 
 	return dst
 }
@@ -62,12 +48,14 @@ func (dst *Set) Copy(src *Set) *Set {
 func Equal(s1, s2 *Set) bool {
 	if s1 == s2 {
 		return true
-	} else if len(*s1) != len(*s2) {
+	}
+	s2m := *s2
+	if len(*s1) != len(s2m) {
 		return false
 	}
 
-	for el := range *s1 {
-		if _, ok := (*s2)[el]; !ok {
+	for e := range *s1 {
+		if _, ok := s2m[e]; !ok {
 			return false
 		}
 	}
@@ -94,15 +82,16 @@ func (dst *Set) Union(s1, s2 *Set) *Set {
 		dst.Clear()
 	}
 
+	d := *dst
 	if dst != s1 {
-		for el := range *s1 {
-			(*dst)[el] = flag
+		for e := range *s1 {
+			d[e] = flag
 		}
 	}
 
 	if dst != s2 {
-		for el := range *s2 {
-			(*dst)[el] = flag
+		for e := range *s2 {
+			d[e] = flag
 		}
 	}
 
@@ -128,7 +117,8 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 
 	if s1 == s2 {
 		return dst.Copy(s1)
-	} else if s1 == dst {
+	}
+	if s1 == dst {
 		swap = s2
 	} else if s2 == dst {
 		swap = s1
@@ -138,18 +128,22 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 		if len(*s1) > len(*s2) {
 			s1, s2 = s2, s1
 		}
-		for el := range *s1 {
-			if _, ok := (*s2)[el]; ok {
-				(*dst)[el] = flag
+		s2m := *s2
+		d := *dst
+		for e := range *s1 {
+			if _, ok := s2m[e]; ok {
+				d[e] = flag
 			}
 		}
 
 		return dst
 	}
 
-	for el := range *dst {
-		if _, ok := (*swap)[el]; !ok {
-			delete(*dst, el)
+	d := *dst
+	s := *swap
+	for e := range d {
+		if _, ok := s[e]; !ok {
+			delete(d, e)
 		}
 	}
 
@@ -177,23 +171,30 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 func (dst *Set) Diff(s1, s2 *Set) *Set {
 	if s1 == s2 {
 		return dst.Clear()
-	} else if s2 == dst {
+	}
+
+	if s2 == dst {
 		tmp := NewSet()
 
 		tmp.Diff(s1, s2)
 		*dst = *tmp
-	} else if s1 == dst {
-		for el := range *dst {
-			if _, ok := (*s2)[el]; ok {
-				delete(*dst, el)
+		return dst
+	}
+
+	s2m := *s2
+	if s1 == dst {
+		d := *dst
+		for e := range d {
+			if _, ok := s2m[e]; ok {
+				delete(d, e)
 			}
 		}
-
 	} else {
 		dst.Clear()
-		for el := range *s1 {
-			if _, ok := (*s2)[el]; !ok {
-				(*dst)[el] = flag
+		d := *dst
+		for e := range *s1 {
+			if _, ok := s2m[e]; !ok {
+				d[e] = flag
 			}
 		}
 	}
@@ -219,14 +220,14 @@ func (dst *Set) Diff(s1, s2 *Set) *Set {
 func Subset(s1, s2 *Set) bool {
 	if len(*s1) > len(*s2) {
 		return false
-	} else if s1 == s2 {
-		return true
-	} else if len(*s1) == 0 {
+	}
+	if s1 == s2 || len(*s1) == 0 {
 		return true
 	}
 
-	for el := range *s1 {
-		if _, ok := (*s2)[el]; !ok {
+	s2m := *s2
+	for e, _ := range *s1 {
+		if _, ok := s2m[e]; !ok {
 			return false
 		}
 	}
@@ -256,8 +257,9 @@ func ProperSubset(s1, s2 *Set) bool {
 		return true
 	} // We can eschew the s1 == s2 because if they are the same their lens are equal anyway
 
-	for el := range *s1 {
-		if _, ok := (*s2)[el]; !ok {
+	s2m := *s2
+	for e, _ := range *s1 {
+		if _, ok := s2m[e]; !ok {
 			return false
 		}
 	}
@@ -265,26 +267,26 @@ func ProperSubset(s1, s2 *Set) bool {
 	return true
 }
 
-// Returns true if el is an element of s.
-func (s *Set) Contains(el interface{}) bool {
-	_, ok := (*s)[el]
+// Returns true if e is an element of s.
+func (s *Set) Contains(e int) bool {
+	_, ok := (*s)[e]
 	return ok
 }
 
-// Adds the element el to s1.
-func (s1 *Set) Add(element interface{}) {
-	(*s1)[element] = flag
+// Adds the element e to s1.
+func (s1 *Set) Add(e int) {
+	(*s1)[e] = flag
 }
 
-func (s1 *Set) AddAll(elements ...interface{}) {
-	for _, el := range elements {
-		s1.Add(el)
+func (s1 *Set) AddAll(es ...int) {
+	for _, e := range es {
+		s1.Add(e)
 	}
 }
 
-// Removes the element el from s1.
-func (s1 *Set) Remove(element interface{}) {
-	delete(*s1, element)
+// Removes the element e from s1.
+func (s1 *Set) Remove(e int) {
+	delete(*s1, e)
 }
 
 // Returns the number of elements in s1.
@@ -292,10 +294,10 @@ func (s1 *Set) Cardinality() int {
 	return len(*s1)
 }
 
-func (s1 *Set) Elements() (els []interface{}) {
-	els = make([]interface{}, 0, len(*s1))
-	for el := range *s1 {
-		els = append(els, el)
+func (s1 *Set) Elements() []int {
+	els := make([]int, 0, len(*s1))
+	for e, _ := range *s1 {
+		els = append(els, e)
 	}
 
 	return els

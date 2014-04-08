@@ -103,15 +103,11 @@ func TestElements(t *testing.T) {
 		t.Fatalf("Elements not of same cardinality as set that spawned it")
 	}
 
-	if e, ok := el[0].(int); !ok {
-		t.Errorf("Element in elements not of right type, %v", e)
-	} else if e != 1 && e != 2 {
+	if e := el[0]; e != 1 && e != 2 {
 		t.Errorf("Element in elements has incorrect value %d", e)
 	}
 
-	if e, ok := el[1].(int); !ok {
-		t.Errorf("Element in elements not of right type, %v", e)
-	} else if e != 1 && e != 2 {
+	if e := el[1]; e != 1 && e != 2 {
 		t.Errorf("Element in elements has incorrect value %d", e)
 	}
 

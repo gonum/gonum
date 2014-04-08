@@ -84,7 +84,7 @@ func AStar(start, goal graph.Node, gr graph.Graph, cost graph.CostFunc, heuristi
 		}
 	}
 
-	return nil, 0.0, nodesExpanded
+	return nil, 0, nodesExpanded
 }
 
 // BreadthFirstSearch finds a path with a minimal number of edges from from start to goal.
@@ -252,7 +252,7 @@ func Johnson(gr graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]g
 	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
 	dummyNode := dummyGraph.NewNode()
 	for _, node := range gr.NodeList() {
-		dummyGraph.AddDirectedEdge(concrete.Edge{dummyNode, node}, 0.0)
+		dummyGraph.AddDirectedEdge(concrete.Edge{dummyNode, node}, 0)
 	}
 
 	/* Step 2: Run Bellman-Ford starting at the dummy node, abort if it detects a cycle */
@@ -323,7 +323,7 @@ func DepthFirstSearch(start, goal graph.Node, gr graph.Graph) []graph.Node {
 
 // An admissible, consistent heuristic that won't speed up computation time at all.
 func NullHeuristic(node1, node2 graph.Node) float64 {
-	return 0.0
+	return 0
 }
 
 // Assumes all edges in the graph have the same weight (including edges that don't exist!)
@@ -332,7 +332,7 @@ func UniformCost(e graph.Edge) float64 {
 		return math.Inf(1)
 	}
 
-	return 1.0
+	return 1
 }
 
 /* Simple operations */

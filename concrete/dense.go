@@ -20,12 +20,12 @@ type DenseGraph struct {
 }
 
 // Creates a dense graph with the proper number of nodes. If passable is true all nodes will have
-// an edge with cost 1.0, otherwise every node will start unconnected (cost of +Inf.)
+// an edge with unit cost, otherwise every node will start unconnected (cost of +Inf).
 func NewDenseGraph(numNodes int, passable bool) *DenseGraph {
 	g := &DenseGraph{adjacencyMatrix: make([]float64, numNodes*numNodes), numNodes: numNodes}
 	if passable {
 		for i := range g.adjacencyMatrix {
-			g.adjacencyMatrix[i] = 1.0
+			g.adjacencyMatrix[i] = 1
 		}
 	} else {
 		for i := range g.adjacencyMatrix {

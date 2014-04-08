@@ -61,6 +61,7 @@ func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, Path
 		}
 	}
 
+	const thresh = 1e-5
 	for k := 0; k < numNodes; k++ {
 		for i := 0; i < numNodes; i++ {
 			for j := 0; j < numNodes; j++ {
@@ -77,7 +78,7 @@ func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, Path
 					}
 					// If the cost between the nodes happens to be the same cost
 					// as what we know, add the approriate intermediary to the list
-				} else if math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < 0.00001 && i != k && i != j && j != k {
+				} else if i != k && i != j && j != k && math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < thresh {
 					next[i+j*numNodes] = append(next[i+j*numNodes], k)
 				}
 			}

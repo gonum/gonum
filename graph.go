@@ -160,16 +160,20 @@ type Mutable interface {
 // store a Node argument -- any retrieval call is required to return the exact supplied edge.
 // This is what makes it incompatible with DirectedGraph.
 //
-// A call to AddEdgeBetween(Edge{head,tail}) make is so there is simply no way to safely
-// return EdgeTo(tail, head) since the edge returned will, by this contract, need to be
-// Head() == head and Tail() == tail when the reverse must be true to fulfill the
-// functionality guaranteed of EdgeTo.
+// The reasoning is this: if you call AddUndirectedEdge(Edge{head,tail}); you are required
+// to return the exact edge passed in when a retrieval method (EdgeTo/EdgeBetween) is called.
+// If I call EdgeTo(tail,head), this means that since the edge exists, and was added as
+// Edge{head,tail} this function MUST return Edge{head,tail}. However, EdgeTo requires this
+// be returned as Edge{tail,head}. Thus there's a conflict that cannot be resolved between the
+// two interface requirements.
 type MutableGraph interface {
 	CostGraph
 	Mutable
 
-	// Like EdgeBetween in Graph, AddEdgeBetween adds an edge between two nodes.
-	// If one or both nodes do not exist, the Graph is expected to add them.
+	// Like EdgeBetween in Graph, AddUndirectedEdge adds an edge between two nodes.
+	// If one or both nodes do not exist, the graph is expected to add them. However,
+	// if the nodes already exist it should NOT replace existing nodes with e.Head() or
+	// e.Tail(). Overwriting nodes should explicitly be done with another call to AddNode()
 	AddUndirectedEdge(e Edge, cost float64)
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
@@ -186,8 +190,10 @@ type MutableDirectedGraph interface {
 	CostDirectedGraph
 	Mutable
 
-	// Adds an edge FROM e.Head TO e.Tail. Newer calls overwrite older ones.
-	// If the nodes Head or Tail do not exist in the graph, this must add them.
+	// Like EdgeTo in DirectedGraph, AddDirectedEdge adds an edge FROM head TO tail.
+	// If one or both nodes do not exist, the graph is expected to add them. However,
+	// if the nodes already exist it should NOT replace existing nodes with e.Head() or
+	// e.Tail(). Overwriting nodes should explicitly be done with another call to AddNode()
 	AddDirectedEdge(e Edge, cost float64)
 
 	// Removes an edge FROM e.Head TO e.Tail. If no such edge exists, this is a no-op,

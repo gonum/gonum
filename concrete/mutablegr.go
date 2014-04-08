@@ -47,13 +47,13 @@ type WeightedEdge struct {
 // MutableGraph). For most purposes, creating your own graph is probably better. For instance,
 // see TileGraph for an example of an immutable 2D grid of tiles that also implements the Graph
 // interface, but would be more suitable if all you needed was a simple undirected 2D grid.
-type MutableGraph struct {
+type Graph struct {
 	neighbors map[int]map[int]WeightedEdge
 	nodeMap   map[int]graph.Node
 }
 
-func NewMutableGraph() *MutableGraph {
-	return &MutableGraph{
+func NewGraph() *Graph {
+	return &Graph{
 		neighbors: make(map[int]map[int]WeightedEdge),
 		nodeMap:   make(map[int]graph.Node),
 	}
@@ -61,7 +61,7 @@ func NewMutableGraph() *MutableGraph {
 
 /* Mutable implementation */
 
-func (g *MutableGraph) NewNode() graph.Node {
+func (g *Graph) NewNode() graph.Node {
 	nodeList := g.NodeList()
 	ids := make([]int, len(nodeList))
 	for i, n := range nodeList {
@@ -82,7 +82,7 @@ func (g *MutableGraph) NewNode() graph.Node {
 	return Node(newID)
 }
 
-func (g *MutableGraph) AddNode(n graph.Node) {
+func (g *Graph) AddNode(n graph.Node) {
 	if _, ok := g.nodeMap[n.ID()]; ok {
 		return
 	}
@@ -91,7 +91,7 @@ func (g *MutableGraph) AddNode(n graph.Node) {
 	g.neighbors[n.ID()] = make(map[int]WeightedEdge)
 }
 
-func (g *MutableGraph) AddEdgeBetween(e graph.Edge, cost float64) {
+func (g *Graph) AddEdgeBetween(e graph.Edge, cost float64) {
 	head, tail := e.Head(), e.Tail()
 	g.AddNode(head)
 	g.AddNode(tail)
@@ -100,7 +100,7 @@ func (g *MutableGraph) AddEdgeBetween(e graph.Edge, cost float64) {
 	g.neighbors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
 }
 
-func (g *MutableGraph) RemoveNode(n graph.Node) {
+func (g *Graph) RemoveNode(n graph.Node) {
 	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return
 	}
@@ -113,7 +113,7 @@ func (g *MutableGraph) RemoveNode(n graph.Node) {
 
 }
 
-func (g *MutableGraph) RemoveEdgeBetween(e graph.Edge) {
+func (g *Graph) RemoveEdgeBetween(e graph.Edge) {
 	head, tail := e.Head(), e.Tail()
 	if _, ok := g.nodeMap[head.ID()]; !ok {
 		return
@@ -125,14 +125,14 @@ func (g *MutableGraph) RemoveEdgeBetween(e graph.Edge) {
 	delete(g.neighbors[tail.ID()], head.ID())
 }
 
-func (g *MutableGraph) EmptyGraph() {
+func (g *Graph) EmptyGraph() {
 	g.neighbors = make(map[int]map[int]WeightedEdge)
 	g.nodeMap = make(map[int]graph.Node)
 }
 
 /* Graph implementation */
 
-func (g *MutableGraph) Neighbors(n graph.Node) []graph.Node {
+func (g *Graph) Neighbors(n graph.Node) []graph.Node {
 	if !g.NodeExists(n) {
 		return nil
 	}
@@ -147,7 +147,7 @@ func (g *MutableGraph) Neighbors(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *MutableGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
+func (g *Graph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	// Don't need to check if neigh exists because
 	// it's implicit in the neighbors access.
 	if !g.NodeExists(n) {
@@ -157,13 +157,13 @@ func (g *MutableGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	return g.neighbors[n.ID()][neigh.ID()]
 }
 
-func (g *MutableGraph) NodeExists(n graph.Node) bool {
+func (g *Graph) NodeExists(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 
 	return ok
 }
 
-func (g *MutableGraph) NodeList() []graph.Node {
+func (g *Graph) NodeList() []graph.Node {
 	nodes := make([]graph.Node, len(g.nodeMap))
 	i := 0
 	for _, n := range g.nodeMap {
@@ -174,7 +174,7 @@ func (g *MutableGraph) NodeList() []graph.Node {
 	return nodes
 }
 
-func (g *MutableGraph) Cost(e graph.Edge) float64 {
+func (g *Graph) Cost(e graph.Edge) float64 {
 	if n, ok := g.neighbors[e.Head().ID()]; ok {
 		if we, ok := n[e.Tail().ID()]; ok {
 			return we.Cost
@@ -183,7 +183,7 @@ func (g *MutableGraph) Cost(e graph.Edge) float64 {
 	return math.Inf(1)
 }
 
-func (g *MutableGraph) EdgeList() []graph.Edge {
+func (g *Graph) EdgeList() []graph.Edge {
 	m := make(map[WeightedEdge]struct{})
 	toReturn := make([]graph.Edge, 0)
 

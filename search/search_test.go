@@ -153,7 +153,7 @@ func ExampleBreadthFirstSearch() {
 	// nodes visited: 4
 }
 
-func newSmallGonumGraph() *concrete.MutableGraph {
+func newSmallGonumGraph() *concrete.Graph {
 	eds := []struct{ n1, n2, edgeCost int }{
 		{1, 2, 7},
 		{1, 3, 9},

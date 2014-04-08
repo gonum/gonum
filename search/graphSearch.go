@@ -341,7 +341,7 @@ func UniformCost(e graph.Edge) float64 {
 /* Simple operations */
 
 // Copies a graph into the destination; maintaining all node IDs.
-func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
+func CopyUndirectedGraph(dst graph.Graph, src graph.Graph) {
 	dst.EmptyGraph()
 
 	cost := setupFuncs(src, nil, nil).cost
@@ -358,7 +358,7 @@ func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
 }
 
 // Copies a graph into the destination; maintaining all node IDs.
-func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) {
+func CopyDirectedGraph(dst graph.DirectedGraph, src graph.DirectedGraph) {
 	dst.EmptyGraph()
 
 	cost := setupFuncs(src, nil, nil).cost
@@ -478,7 +478,7 @@ puts the resulting minimum spanning tree in the dst graph */
 //
 // As with other algorithms that use Cost, the order of precedence is
 // Argument > Interface > UniformCost.
-func Prim(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
+func Prim(dst graph.Graph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 	sf := setupFuncs(gr, cost, nil)
 	cost = sf.cost
 
@@ -519,7 +519,7 @@ func Prim(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 // Generates a minimum spanning tree for a graph using discrete.DisjointSet.
 //
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost.
-func Kruskal(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
+func Kruskal(dst graph.Graph, gr graph.EdgeListGraph, cost graph.CostFunc) {
 	cost = setupFuncs(gr, cost, nil).cost
 	dst.EmptyGraph()
 

@@ -9,3 +9,6 @@ import (
 )
 
 var inf = math.Inf(1)
+
+// TODO(anyone) Package level documentation for this describing the overall
+// reason for the package and a summary for the provided types.

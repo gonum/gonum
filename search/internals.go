@@ -22,32 +22,32 @@ type searchFuncs struct {
 	edgeTo, edgeBetween                    func(graph.Node, graph.Node) graph.Edge
 }
 
-func genIsSuccessor(gr graph.DirectedGraph) func(graph.Node, graph.Node) bool {
+func genIsSuccessor(g graph.DirectedGraph) func(graph.Node, graph.Node) bool {
 	return func(node, succ graph.Node) bool {
-		return gr.EdgeTo(node, succ) != nil
+		return g.EdgeTo(node, succ) != nil
 	}
 }
 
-func genIsPredecessor(gr graph.DirectedGraph) func(graph.Node, graph.Node) bool {
+func genIsPredecessor(g graph.DirectedGraph) func(graph.Node, graph.Node) bool {
 	return func(node, succ graph.Node) bool {
-		return gr.EdgeTo(succ, node) != nil
+		return g.EdgeTo(succ, node) != nil
 	}
 }
 
-func genIsNeighbor(gr graph.Graph) func(graph.Node, graph.Node) bool {
+func genIsNeighbor(g graph.Graph) func(graph.Node, graph.Node) bool {
 	return func(node, succ graph.Node) bool {
-		return gr.EdgeBetween(succ, node) != nil
+		return g.EdgeBetween(succ, node) != nil
 	}
 }
 
 // Sets up the cost functions and successor functions so I don't have to do a type switch every
 // time. This almost always does more work than is necessary, but since it's only executed once
 // per function, and graph functions are rather costly, the "extra work" should be negligible.
-func setupFuncs(gr graph.Graph, cost graph.CostFunc, heuristicCost graph.HeuristicCostFunc) searchFuncs {
+func setupFuncs(g graph.Graph, cost graph.CostFunc, heuristicCost graph.HeuristicCostFunc) searchFuncs {
 
 	sf := searchFuncs{}
 
-	switch g := gr.(type) {
+	switch g := g.(type) {
 	case graph.DirectedGraph:
 		sf.successors = g.Successors
 		sf.predecessors = g.Predecessors
@@ -72,7 +72,7 @@ func setupFuncs(gr graph.Graph, cost graph.CostFunc, heuristicCost graph.Heurist
 	if heuristicCost != nil {
 		sf.heuristicCost = heuristicCost
 	} else {
-		if g, ok := gr.(graph.HeuristicCoster); ok {
+		if g, ok := g.(graph.HeuristicCoster); ok {
 			sf.heuristicCost = g.HeuristicCost
 		} else {
 			sf.heuristicCost = NullHeuristic
@@ -82,7 +82,7 @@ func setupFuncs(gr graph.Graph, cost graph.CostFunc, heuristicCost graph.Heurist
 	if cost != nil {
 		sf.cost = cost
 	} else {
-		if g, ok := gr.(graph.Coster); ok {
+		if g, ok := g.(graph.Coster); ok {
 			sf.cost = g.Cost
 		} else {
 			sf.cost = UniformCost
@@ -96,16 +96,16 @@ func setupFuncs(gr graph.Graph, cost graph.CostFunc, heuristicCost graph.Heurist
 
 type edgeSorter []concrete.WeightedEdge
 
-func (el edgeSorter) Len() int {
-	return len(el)
+func (e edgeSorter) Len() int {
+	return len(e)
 }
 
-func (el edgeSorter) Less(i, j int) bool {
-	return el[i].Cost < el[j].Cost
+func (e edgeSorter) Less(i, j int) bool {
+	return e[i].Cost < e[j].Cost
 }
 
-func (el edgeSorter) Swap(i, j int) {
-	el[i], el[j] = el[j], el[i]
+func (e edgeSorter) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
 }
 
 /** Keeps track of a node's scores so they can be used in a priority queue for A* **/

@@ -36,12 +36,12 @@ type PathFunc func(start, goal graph.Node) (path []graph.Node, cost float64, err
 // The other will return the cost and an error if no path exists, but it will also return ALL
 // possible shortest paths between start and goal. This is not too much more expensive than
 // generating one path, but it does obviously increase with the number of paths.
-func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, PathFunc) {
-	gr.Crunch()
-	sf := setupFuncs(gr, cost, nil)
+func FloydWarshall(g graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, PathFunc) {
+	g.Crunch()
+	sf := setupFuncs(g, cost, nil)
 	successors, isSuccessor, cost, edgeTo := sf.successors, sf.isSuccessor, sf.cost, sf.edgeTo
 
-	nodes := denseNodeSorter(gr.NodeList())
+	nodes := denseNodeSorter(g.NodeList())
 	sort.Sort(nodes)
 	numNodes := len(nodes)
 
@@ -85,10 +85,10 @@ func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, Path
 		}
 	}
 
-	return genAllPathsFunc(dist, next, nodes, gr, cost, isSuccessor, edgeTo), genSinglePathFunc(dist, next, nodes)
+	return genAllPathsFunc(dist, next, nodes, g, cost, isSuccessor, edgeTo), genSinglePathFunc(dist, next, nodes)
 }
 
-func genAllPathsFunc(dist []float64, next [][]int, nodes []graph.Node, gr graph.Graph, cost graph.CostFunc, isSuccessor func(graph.Node, graph.Node) bool, edgeTo func(graph.Node, graph.Node) graph.Edge) func(start, goal graph.Node) ([][]graph.Node, float64, error) {
+func genAllPathsFunc(dist []float64, next [][]int, nodes []graph.Node, g graph.Graph, cost graph.CostFunc, isSuccessor func(graph.Node, graph.Node) bool, edgeTo func(graph.Node, graph.Node) graph.Edge) func(start, goal graph.Node) ([][]graph.Node, float64, error) {
 	numNodes := len(nodes)
 
 	// A recursive function to reconstruct all possible paths.

@@ -5,11 +5,7 @@
 package concrete
 
 import (
-<<<<<<< HEAD:concrete/mutdir.go
 	"math"
-=======
-	"sort"
->>>>>>> Use a var for Inf:concrete/gonumgraph.go
 
 	"github.com/gonum/graph"
 )

@@ -170,11 +170,11 @@ type MutableGraph interface {
 
 	// Like EdgeBetween in Graph, AddEdgeBetween adds an edge between two nodes.
 	// If one or both nodes do not exist, the Graph is expected to add them.
-	AddEdgeBetween(e Edge, cost float64)
+	AddDirectedEdge(e Edge, cost float64)
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
 	// remove a node. If the edge does not exist this is a no-op, not an error.
-	RemoveEdgeBetween(e Edge)
+	RemoveDirectedEdge(e Edge)
 }
 
 // MutableDirectedGraph is an interface that ensures one can construct an arbitrary directed
@@ -188,11 +188,11 @@ type MutableDirectedGraph interface {
 
 	// Adds an edge FROM e.Head TO e.Tail. Newer calls overwrite older ones.
 	// If the nodes Head or Tail do not exist in the graph, this must add them.
-	AddEdgeTo(e Edge, cost float64)
+	AddDirectedEdge(e Edge, cost float64)
 
 	// Removes an edge FROM e.Head TO e.Tail. If no such edge exists, this is a no-op,
 	// not an error.
-	RemoveEdgeTo(e Edge)
+	RemoveDirectedEdge(e Edge)
 }
 
 // A function that returns the cost of following an edge

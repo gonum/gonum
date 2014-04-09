@@ -11,6 +11,6 @@ import (
 	"github.com/gonum/graph/concrete"
 )
 
-var _ graph.Graph = &concrete.MutableDirectedGraph{}
-var _ graph.DirectedGraph = &concrete.MutableDirectedGraph{}
-var _ graph.MutableDirectedGraph = &concrete.MutableDirectedGraph{}
+var _ graph.Graph = &concrete.DirectedGraph{}
+var _ graph.DirectedGraph = &concrete.DirectedGraph{}
+var _ graph.DirectedGraph = &concrete.DirectedGraph{}

@@ -140,11 +140,11 @@ func TestSmallAStar(t *testing.T) {
 }
 
 func ExampleBreadthFirstSearch() {
-	g := concrete.NewMutableDirectedGraph()
+	g := concrete.NewDirectedGraph()
 	var n0, n1, n2, n3 concrete.Node = 0, 1, 2, 3
-	g.AddEdgeTo(concrete.Edge{n0, n1}, 1.0)
-	g.AddEdgeTo(concrete.Edge{n0, n2}, 1.0)
-	g.AddEdgeTo(concrete.Edge{n2, n3}, 1.0)
+	g.AddDirectedEdge(concrete.Edge{n0, n1}, 1.0)
+	g.AddDirectedEdge(concrete.Edge{n0, n2}, 1.0)
+	g.AddDirectedEdge(concrete.Edge{n2, n3}, 1.0)
 	path, v := search.BreadthFirstSearch(n0, n3, g)
 	fmt.Println("path:", path)
 	fmt.Println("nodes visited:", v)
@@ -153,7 +153,7 @@ func ExampleBreadthFirstSearch() {
 	// nodes visited: 4
 }
 
-func newSmallGonumGraph() *concrete.MutableGraph {
+func newSmallGonumGraph() *concrete.Graph {
 	eds := []struct{ n1, n2, edgeCost int }{
 		{1, 2, 7},
 		{1, 3, 9},
@@ -165,7 +165,7 @@ func newSmallGonumGraph() *concrete.MutableGraph {
 		{4, 5, 7},
 		{5, 6, 9},
 	}
-	g := concrete.NewMutableGraph()
+	g := concrete.NewGraph()
 	for n := concrete.Node(1); n <= 6; n++ {
 		g.AddNode(n)
 	}
@@ -174,7 +174,7 @@ func newSmallGonumGraph() *concrete.MutableGraph {
 			concrete.Node(ed.n1),
 			concrete.Node(ed.n2),
 		}
-		g.AddEdgeBetween(e, float64(ed.edgeCost))
+		g.AddUndirectedEdge(e, float64(ed.edgeCost))
 	}
 	return g
 }
@@ -236,7 +236,7 @@ func TestDijkstraSmall(t *testing.T) {
 }
 
 func TestIsPath(t *testing.T) {
-	g := concrete.NewMutableDirectedGraph()
+	g := concrete.NewDirectedGraph()
 	if !search.IsPath(nil, g) {
 		t.Error("IsPath returns false on nil path")
 	}
@@ -253,7 +253,7 @@ func TestIsPath(t *testing.T) {
 	if search.IsPath(p, g) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
-	g.AddEdgeTo(concrete.Edge{p[0], p[1]}, 1.0)
+	g.AddDirectedEdge(concrete.Edge{p[0], p[1]}, 1.0)
 	if !search.IsPath(p, g) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
@@ -262,13 +262,13 @@ func TestIsPath(t *testing.T) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
-	g.AddEdgeTo(concrete.Edge{p[1], p[2]}, 1.0)
+	g.AddDirectedEdge(concrete.Edge{p[1], p[2]}, 1.0)
 	if !search.IsPath(p, g) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	gr := concrete.NewMutableGraph()
-	gr.AddEdgeBetween(concrete.Edge{p[1], p[0]}, 1.0)
-	gr.AddEdgeBetween(concrete.Edge{p[1], p[2]}, 1.0)
+	gr := concrete.NewGraph()
+	gr.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1.0)
+	gr.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1.0)
 	if !search.IsPath(p, g) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}

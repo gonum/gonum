@@ -6,79 +6,91 @@ package concrete
 
 import (
 	"math"
-	"sort"
 
 	"github.com/gonum/graph"
 )
 
-// A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and
-// edges -- as well as act as either directed or undirected.
+// A Directed graph is a highly generalized MutableDirectedGraph.
 //
-// Internally, it uses a map of successors AND predecessors, to speed up some operations (such as
-// getting all successors/predecessors). It also speeds up thing like adding edges (assuming both
-// edges exist).
-//
-// However, its generality is also its weakness (and partially a flaw in needing to satisfy
-// MutableGraph). For most purposes, creating your own graph is probably better. For instance,
-// see TileGraph for an example of an immutable 2D grid of tiles that also implements the Graph
-// interface, but would be more suitable if all you needed was a simple undirected 2D grid.
-type MutableDirectedGraph struct {
+// In most cases it's likely more desireable to use a graph specific to your
+// problem domain.
+type DirectedGraph struct {
 	successors   map[int]map[int]WeightedEdge
 	predecessors map[int]map[int]WeightedEdge
 	nodeMap      map[int]graph.Node
+
+	// Add/remove convenience variables
+	maxID   int
+	freeMap map[int]struct{}
 }
 
-func NewMutableDirectedGraph() *MutableDirectedGraph {
-	return &MutableDirectedGraph{
+func NewDirectedGraph() *DirectedGraph {
+	return &DirectedGraph{
 		successors:   make(map[int]map[int]WeightedEdge),
 		predecessors: make(map[int]map[int]WeightedEdge),
 		nodeMap:      make(map[int]graph.Node),
+		maxID:        0,
+		freeMap:      make(map[int]struct{}),
 	}
 }
 
 /* Mutable Graph implementation */
 
-func (g *MutableDirectedGraph) NewNode() graph.Node {
-	nodeList := g.NodeList()
-	ids := make([]int, len(nodeList))
-	for i, n := range nodeList {
-		ids[i] = n.ID()
+func (g *DirectedGraph) NewNode() graph.Node {
+	if g.maxID != maxInt {
+		g.maxID++
+		g.AddNode(Node(g.maxID))
+		return Node(g.maxID)
 	}
 
-	nodes := sort.IntSlice(ids)
-	sort.Sort(&nodes)
-	for i, n := range nodes {
-		if i != n {
+	// Implicitly checks if len(g.freeMap) == 0
+	for id := range g.freeMap {
+		g.AddNode(Node(id))
+		return Node(id)
+	}
+
+	// I cannot foresee this ever happening, but just in case
+	if len(g.nodeMap) == maxInt {
+		panic("You have a full graph, so an ID can't be created (good job! You have a lot of memory!)")
+	}
+
+	for i := 0; i < maxInt; i++ {
+		if _, ok := g.nodeMap[i]; !ok {
 			g.AddNode(Node(i))
 			return Node(i)
 		}
 	}
 
-	newID := len(nodes)
-	g.AddNode(Node(newID))
-	return Node(newID)
+	// Will never happen
+	return nil
 }
 
-func (g *MutableDirectedGraph) AddNode(n graph.Node) {
-	if _, ok := g.nodeMap[n.ID()]; ok {
-		return
-	}
-
+// Adds a node to the graph. Implementation note: if you add a node close to or at
+// the max int on your machine NewNode will become slower.
+func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.nodeMap[n.ID()] = n
 	g.successors[n.ID()] = make(map[int]WeightedEdge)
 	g.predecessors[n.ID()] = make(map[int]WeightedEdge)
+
+	delete(g.freeMap, n.ID())
+	g.maxID = max(g.maxID, n.ID())
 }
 
-func (g *MutableDirectedGraph) AddEdgeTo(e graph.Edge, cost float64) {
+func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
 	head, tail := e.Head(), e.Tail()
-	g.AddNode(head)
-	g.AddNode(tail)
+	if !g.NodeExists(head) {
+		g.AddNode(head)
+	}
+
+	if !g.NodeExists(tail) {
+		g.AddNode(tail)
+	}
 
 	g.successors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
 	g.predecessors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
 }
 
-func (g *MutableDirectedGraph) RemoveNode(n graph.Node) {
+func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return
 	}
@@ -94,9 +106,11 @@ func (g *MutableDirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.predecessors, n.ID())
 
+	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
+	g.freeMap[n.ID()] = struct{}{}
 }
 
-func (g *MutableDirectedGraph) RemoveEdgeTo(e graph.Edge) {
+func (g *DirectedGraph) RemoveDirectedEdge(e graph.Edge) {
 	head, tail := e.Head(), e.Tail()
 	if _, ok := g.nodeMap[head.ID()]; !ok {
 		return
@@ -108,7 +122,7 @@ func (g *MutableDirectedGraph) RemoveEdgeTo(e graph.Edge) {
 	delete(g.predecessors[tail.ID()], head.ID())
 }
 
-func (g *MutableDirectedGraph) EmptyGraph() {
+func (g *DirectedGraph) EmptyGraph() {
 	g.successors = make(map[int]map[int]WeightedEdge)
 	g.predecessors = make(map[int]map[int]WeightedEdge)
 	g.nodeMap = make(map[int]graph.Node)
@@ -116,7 +130,7 @@ func (g *MutableDirectedGraph) EmptyGraph() {
 
 /* Graph implementation */
 
-func (g *MutableDirectedGraph) Successors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) Successors(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
@@ -131,7 +145,7 @@ func (g *MutableDirectedGraph) Successors(n graph.Node) []graph.Node {
 	return successors
 }
 
-func (g *MutableDirectedGraph) EdgeTo(n, succ graph.Node) graph.Edge {
+func (g *DirectedGraph) EdgeTo(n, succ graph.Node) graph.Edge {
 	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return nil
 	} else if _, ok := g.nodeMap[succ.ID()]; !ok {
@@ -145,7 +159,7 @@ func (g *MutableDirectedGraph) EdgeTo(n, succ graph.Node) graph.Edge {
 	return edge
 }
 
-func (g *MutableDirectedGraph) Predecessors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) Predecessors(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
@@ -160,7 +174,7 @@ func (g *MutableDirectedGraph) Predecessors(n graph.Node) []graph.Node {
 	return predecessors
 }
 
-func (g *MutableDirectedGraph) Neighbors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) Neighbors(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
@@ -183,7 +197,7 @@ func (g *MutableDirectedGraph) Neighbors(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *MutableDirectedGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
+func (g *DirectedGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	e := g.EdgeTo(n, neigh)
 	if e != nil {
 		return e
@@ -197,13 +211,13 @@ func (g *MutableDirectedGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	return nil
 }
 
-func (g *MutableDirectedGraph) NodeExists(n graph.Node) bool {
+func (g *DirectedGraph) NodeExists(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 
 	return ok
 }
 
-func (g *MutableDirectedGraph) Degree(n graph.Node) int {
+func (g *DirectedGraph) Degree(n graph.Node) int {
 	if _, ok := g.nodeMap[n.ID()]; !ok {
 		return 0
 	}
@@ -211,7 +225,7 @@ func (g *MutableDirectedGraph) Degree(n graph.Node) int {
 	return len(g.successors[n.ID()]) + len(g.predecessors[n.ID()])
 }
 
-func (g *MutableDirectedGraph) NodeList() []graph.Node {
+func (g *DirectedGraph) NodeList() []graph.Node {
 	nodes := make([]graph.Node, len(g.successors))
 	i := 0
 	for _, n := range g.nodeMap {
@@ -222,7 +236,7 @@ func (g *MutableDirectedGraph) NodeList() []graph.Node {
 	return nodes
 }
 
-func (g *MutableDirectedGraph) Cost(e graph.Edge) float64 {
+func (g *DirectedGraph) Cost(e graph.Edge) float64 {
 	if s, ok := g.successors[e.Head().ID()]; ok {
 		if we, ok := s[e.Tail().ID()]; ok {
 			return we.Cost
@@ -231,7 +245,7 @@ func (g *MutableDirectedGraph) Cost(e graph.Edge) float64 {
 	return math.Inf(1)
 }
 
-func (g *MutableDirectedGraph) EdgeList() []graph.Edge {
+func (g *DirectedGraph) EdgeList() []graph.Edge {
 	edgeList := make([]graph.Edge, 0, len(g.successors))
 	edgeMap := make(map[int]map[int]struct{}, len(g.successors))
 	for n, succMap := range g.successors {

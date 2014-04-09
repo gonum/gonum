@@ -130,7 +130,7 @@ type HeuristicCoster interface {
 //
 // Anything implementing Mutable is required to store the actual argument. So if AddNode(myNode) is
 // called and later a user calls on the graph graph.NodeList(), the node added by AddNode must be
-//  an the exact node, not a new node with the same ID.
+// an the exact node, not a new node with the same ID.
 //
 // In any case where conflict is possible (e.g. adding two nodes with the same ID), the later
 // call always supercedes the earlier one.
@@ -147,9 +147,6 @@ type Mutable interface {
 	// overwrites the old one.
 	AddNode(Node)
 
-	// EmptyGraph clears the graph of all nodes and edges.
-	EmptyGraph()
-
 	// RemoveNode removes a node from the graph, as well as any edges
 	// attached to it. If no such node exists, this is a no-op, not an error.
 	RemoveNode(Node)
@@ -163,21 +160,25 @@ type Mutable interface {
 // store a Node argument -- any retrieval call is required to return the exact supplied edge.
 // This is what makes it incompatible with DirectedGraph.
 //
-// A call to AddEdgeBetween(Edge{head,tail}) make is so there is simply no way to safely
-// return EdgeTo(tail, head) since the edge returned will, by this contract, need to be
-// Head() == head and Tail() == tail when the reverse must be true to fulfill the
-// functionality guaranteed of EdgeTo.
+// The reasoning is this: if you call AddUndirectedEdge(Edge{head,tail}); you are required
+// to return the exact edge passed in when a retrieval method (EdgeTo/EdgeBetween) is called.
+// If I call EdgeTo(tail,head), this means that since the edge exists, and was added as
+// Edge{head,tail} this function MUST return Edge{head,tail}. However, EdgeTo requires this
+// be returned as Edge{tail,head}. Thus there's a conflict that cannot be resolved between the
+// two interface requirements.
 type MutableGraph interface {
 	CostGraph
 	Mutable
 
-	// Like EdgeBetween in Graph, AddEdgeBetween adds an edge between two nodes.
-	// If one or both nodes do not exist, the Graph is expected to add them.
-	AddEdgeBetween(e Edge, cost float64)
+	// Like EdgeBetween in Graph, AddUndirectedEdge adds an edge between two nodes.
+	// If one or both nodes do not exist, the graph is expected to add them. However,
+	// if the nodes already exist it should NOT replace existing nodes with e.Head() or
+	// e.Tail(). Overwriting nodes should explicitly be done with another call to AddNode()
+	AddUndirectedEdge(e Edge, cost float64)
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
 	// remove a node. If the edge does not exist this is a no-op, not an error.
-	RemoveEdgeBetween(e Edge)
+	RemoveUndirectedEdge(e Edge)
 }
 
 // MutableDirectedGraph is an interface that ensures one can construct an arbitrary directed
@@ -189,13 +190,15 @@ type MutableDirectedGraph interface {
 	CostDirectedGraph
 	Mutable
 
-	// Adds an edge FROM e.Head TO e.Tail. Newer calls overwrite older ones.
-	// If the nodes Head or Tail do not exist in the graph, this must add them.
-	AddEdgeTo(e Edge, cost float64)
+	// Like EdgeTo in DirectedGraph, AddDirectedEdge adds an edge FROM head TO tail.
+	// If one or both nodes do not exist, the graph is expected to add them. However,
+	// if the nodes already exist it should NOT replace existing nodes with e.Head() or
+	// e.Tail(). Overwriting nodes should explicitly be done with another call to AddNode()
+	AddDirectedEdge(e Edge, cost float64)
 
 	// Removes an edge FROM e.Head TO e.Tail. If no such edge exists, this is a no-op,
 	// not an error.
-	RemoveEdgeTo(e Edge)
+	RemoveDirectedEdge(e Edge)
 }
 
 // A function that returns the cost of following an edge
@@ -203,18 +206,3 @@ type CostFunc func(Edge) float64
 
 // Estimates the cost of travelling between two nodes
 type HeuristicCostFunc func(Node, Node) float64
-
-// Convenience constants for AddEdge and RemoveEdge
-const (
-	Directed   bool = true
-	Undirected      = false
-)
-
-// Determines if a MutableGraph implements DirectedGraph and panics if it does.
-// This is a utility function to detect unsafe implementations. It's mostly for internal use,
-// but is exported since it may be useful to people who use the package for their own tests.
-func VetMutableGraph(g MutableGraph) {
-	if _, ok := g.(DirectedGraph); ok {
-		panic("A MutableGraph implements DirectedGraph; this is unsafe!")
-	}
-}

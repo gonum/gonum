@@ -236,54 +236,40 @@ func TestDijkstraSmall(t *testing.T) {
 }
 
 func TestIsPath(t *testing.T) {
-	g := concrete.NewDirectedGraph()
-	if !search.IsPath(nil, g) {
+	dg := concrete.NewDirectedGraph()
+	if !search.IsPath(nil, dg) {
 		t.Error("IsPath returns false on nil path")
 	}
 	p := []graph.Node{concrete.Node(0)}
-	if search.IsPath(p, g) {
+	if search.IsPath(p, dg) {
 		t.Error("IsPath returns true on nonexistant node")
 	}
-	g.AddNode(p[0])
-	if !search.IsPath(p, g) {
+	dg.AddNode(p[0])
+	if !search.IsPath(p, dg) {
 		t.Error("IsPath returns false on single-length path with existing node")
 	}
 	p = append(p, concrete.Node(1))
-	g.AddNode(p[1])
-	if search.IsPath(p, g) {
+	dg.AddNode(p[1])
+	if search.IsPath(p, dg) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
-<<<<<<< HEAD
-	g.AddDirectedEdge(concrete.Edge{p[0], p[1]}, 1.0)
-=======
-	g.AddEdge(concrete.Edge{p[0], p[1]}, 1, true)
->>>>>>> Remove redundant float syntax
-	if !search.IsPath(p, g) {
+	dg.AddDirectedEdge(concrete.Edge{p[0], p[1]}, 1)
+	if !search.IsPath(p, dg) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
 	p[0], p[1] = p[1], p[0]
-	if search.IsPath(p, g) {
+	if search.IsPath(p, dg) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
-<<<<<<< HEAD
-	g.AddDirectedEdge(concrete.Edge{p[1], p[2]}, 1.0)
-	if !search.IsPath(p, g) {
+	dg.AddDirectedEdge(concrete.Edge{p[1], p[2]}, 1)
+	if !search.IsPath(p, dg) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	gr := concrete.NewGraph()
-	gr.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1.0)
-	gr.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1.0)
-=======
-	g.AddEdge(concrete.Edge{p[1], p[2]}, 1, true)
-	if !search.IsPath(p, g) {
-		t.Error("IsPath does not find a correct path for path > 2 nodes")
-	}
-	g = concrete.NewGraph()
-	g.AddEdge(concrete.Edge{p[1], p[0]}, 1, false)
-	g.AddEdge(concrete.Edge{p[1], p[2]}, 1, false)
->>>>>>> Remove redundant float syntax
-	if !search.IsPath(p, g) {
+	ug := concrete.NewGraph()
+	ug.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1)
+	ug.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1)
+	if !search.IsPath(p, ug) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
 }

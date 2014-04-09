@@ -230,7 +230,7 @@ func Johnson(g graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]gr
 
 	/* Copy graph into a mutable one since it has to be altered for this algorithm */
 	dummyGraph := concrete.NewDirectedGraph()
-	for _, node := range gr.NodeList() {
+	for _, node := range g.NodeList() {
 		neighbors := successors(node)
 		dummyGraph.NodeExists(node)
 		dummyGraph.AddNode(node)
@@ -251,13 +251,8 @@ func Johnson(g graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]gr
 
 	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
 	dummyNode := dummyGraph.NewNode()
-<<<<<<< HEAD
-	for _, node := range gr.NodeList() {
-		dummyGraph.AddDirectedEdge(concrete.Edge{dummyNode, node}, 0)
-=======
 	for _, node := range g.NodeList() {
-		dummyGraph.AddEdge(concrete.Edge{dummyNode, node}, 0, true)
->>>>>>> Simplify parameter names
+		dummyGraph.AddDirectedEdge(concrete.Edge{dummyNode, node}, 0)
 	}
 
 	/* Step 2: Run Bellman-Ford starting at the dummy node, abort if it detects a cycle */
@@ -480,23 +475,13 @@ puts the resulting minimum spanning tree in the dst graph */
 //
 // As with other algorithms that use Cost, the order of precedence is
 // Argument > Interface > UniformCost.
-<<<<<<< HEAD
 //
 // The destination must be empty (or at least disjoint with the node IDs of the input)
-func Prim(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
-	sf := setupFuncs(gr, cost, nil)
-	cost = sf.cost
-
-	nlist := gr.NodeList()
-=======
 func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	sf := setupFuncs(g, cost, nil)
 	cost = sf.cost
 
-	dst.EmptyGraph()
-
 	nlist := g.NodeList()
->>>>>>> Simplify parameter names
 
 	if nlist == nil || len(nlist) == 0 {
 		return
@@ -531,16 +516,10 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 // Generates a minimum spanning tree for a graph using discrete.DisjointSet.
 //
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost.
-<<<<<<< HEAD
 //
 // The destination must be empty (or at least disjoint with the node IDs of the input)
-func Kruskal(dst graph.MutableGraph, gr graph.EdgeListGraph, cost graph.CostFunc) {
-	cost = setupFuncs(gr, cost, nil).cost
-=======
 func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	cost = setupFuncs(g, cost, nil).cost
-	dst.EmptyGraph()
->>>>>>> Simplify parameter names
 
 	edgeList := g.EdgeList()
 	edgeWeights := make(edgeSorter, 0, len(edgeList))

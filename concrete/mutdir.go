@@ -5,8 +5,6 @@
 package concrete
 
 import (
-	"math"
-
 	"github.com/gonum/graph"
 )
 

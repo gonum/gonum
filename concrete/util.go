@@ -21,3 +21,16 @@ func (ns nodeSorter) Swap(i, j int) {
 func (ns nodeSorter) Len() int {
 	return len(ns)
 }
+
+// The math package only provides explicitly sized max
+// values. This ensures we get the max for the actual
+// type int.
+const maxInt int = int(^uint(0) >> 1)
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}

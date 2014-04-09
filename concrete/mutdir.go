@@ -6,7 +6,6 @@ package concrete
 
 import (
 	"math"
-	"sort"
 
 	"github.com/gonum/graph"
 )
@@ -19,6 +18,7 @@ type DirectedGraph struct {
 	successors   map[int]map[int]WeightedEdge
 	predecessors map[int]map[int]WeightedEdge
 	nodeMap      map[int]graph.Node
+	maxID        int
 }
 
 func NewDirectedGraph() *DirectedGraph {
@@ -26,31 +26,43 @@ func NewDirectedGraph() *DirectedGraph {
 		successors:   make(map[int]map[int]WeightedEdge),
 		predecessors: make(map[int]map[int]WeightedEdge),
 		nodeMap:      make(map[int]graph.Node),
+		maxID:        0,
 	}
 }
 
 /* Mutable Graph implementation */
 
 func (g *DirectedGraph) NewNode() graph.Node {
-	nodeList := g.NodeList()
+	if g.maxID != maxInt {
+		g.maxID++
+		g.AddNode(Node(g.maxID))
+		return Node(g.maxID)
+	}
 
-	sort.Sort(nodeSorter(nodeList))
-	for i, n := range nodeList {
-		if i != n.ID() {
+	// I cannot foresee this ever happening, but just in case
+	if len(g.nodeMap) == maxInt {
+		panic("You have a full graph, so an ID can't be created (good job! You have a lot of memory!)")
+	}
+
+	for i := 0; i < maxInt; i++ {
+		if _, ok := g.nodeMap[i]; !ok {
 			g.AddNode(Node(i))
 			return Node(i)
 		}
 	}
 
-	newID := len(nodeList)
-	g.AddNode(Node(newID))
-	return Node(newID)
+	// Will never happen
+	return nil
 }
 
+// Adds a node to the graph. Implementation note: if you add a node close to or at
+// the max int on your machine NewNode will become slower.
 func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.nodeMap[n.ID()] = n
 	g.successors[n.ID()] = make(map[int]WeightedEdge)
 	g.predecessors[n.ID()] = make(map[int]WeightedEdge)
+
+	g.maxID = max(g.maxID, n.ID())
 }
 
 func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
@@ -83,6 +95,7 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.predecessors, n.ID())
 
+	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
 }
 
 func (g *DirectedGraph) RemoveDirectedEdge(e graph.Edge) {

@@ -6,7 +6,6 @@ package concrete
 
 import (
 	"math"
-	"sort"
 
 	"github.com/gonum/graph"
 )
@@ -50,36 +49,47 @@ type WeightedEdge struct {
 type Graph struct {
 	neighbors map[int]map[int]WeightedEdge
 	nodeMap   map[int]graph.Node
+	maxID     int
 }
 
 func NewGraph() *Graph {
 	return &Graph{
 		neighbors: make(map[int]map[int]WeightedEdge),
 		nodeMap:   make(map[int]graph.Node),
+		maxID:     0,
 	}
 }
 
 /* Mutable implementation */
 
 func (g *Graph) NewNode() graph.Node {
-	nodeList := g.NodeList()
+	if g.maxID != maxInt {
+		g.maxID++
+		g.AddNode(Node(g.maxID))
+		return Node(g.maxID)
+	}
 
-	sort.Sort(nodeSorter(nodeList))
-	for i, n := range nodeList {
-		if i != n.ID() {
+	// I cannot foresee this ever happening, but just in case
+	if len(g.nodeMap) == maxInt {
+		panic("You have a full graph, so an ID can't be created (good job! You have a lot of memory!)")
+	}
+
+	for i := 0; i < maxInt; i++ {
+		if _, ok := g.nodeMap[i]; !ok {
 			g.AddNode(Node(i))
 			return Node(i)
 		}
 	}
 
-	newID := len(nodeList)
-	g.AddNode(Node(newID))
-	return Node(newID)
+	// Will never happen
+	return nil
 }
 
 func (g *Graph) AddNode(n graph.Node) {
 	g.nodeMap[n.ID()] = n
 	g.neighbors[n.ID()] = make(map[int]WeightedEdge)
+
+	g.maxID = max(g.maxID, n.ID())
 }
 
 func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
@@ -107,6 +117,7 @@ func (g *Graph) RemoveNode(n graph.Node) {
 	}
 	delete(g.neighbors, n.ID())
 
+	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
 }
 
 func (g *Graph) RemoveUndirectedEdge(e graph.Edge) {

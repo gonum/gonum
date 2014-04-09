@@ -49,7 +49,10 @@ type WeightedEdge struct {
 type Graph struct {
 	neighbors map[int]map[int]WeightedEdge
 	nodeMap   map[int]graph.Node
-	maxID     int
+
+	// Node add/remove convenience vars
+	maxID   int
+	freeMap map[int]struct{}
 }
 
 func NewGraph() *Graph {
@@ -57,6 +60,7 @@ func NewGraph() *Graph {
 		neighbors: make(map[int]map[int]WeightedEdge),
 		nodeMap:   make(map[int]graph.Node),
 		maxID:     0,
+		freeMap:   make(map[int]struct{}),
 	}
 }
 
@@ -67,6 +71,12 @@ func (g *Graph) NewNode() graph.Node {
 		g.maxID++
 		g.AddNode(Node(g.maxID))
 		return Node(g.maxID)
+	}
+
+	// Implicitly checks if len(g.freeMap) == 0
+	for id := range g.freeMap {
+		g.AddNode(Node(id))
+		return Node(id)
 	}
 
 	// I cannot foresee this ever happening, but just in case
@@ -89,6 +99,7 @@ func (g *Graph) AddNode(n graph.Node) {
 	g.nodeMap[n.ID()] = n
 	g.neighbors[n.ID()] = make(map[int]WeightedEdge)
 
+	delete(g.freeMap, n.ID())
 	g.maxID = max(g.maxID, n.ID())
 }
 
@@ -118,6 +129,7 @@ func (g *Graph) RemoveNode(n graph.Node) {
 	delete(g.neighbors, n.ID())
 
 	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
+	g.freeMap[n.ID()] = struct{}{}
 }
 
 func (g *Graph) RemoveUndirectedEdge(e graph.Edge) {

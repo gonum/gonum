@@ -18,7 +18,10 @@ type DirectedGraph struct {
 	successors   map[int]map[int]WeightedEdge
 	predecessors map[int]map[int]WeightedEdge
 	nodeMap      map[int]graph.Node
-	maxID        int
+
+	// Add/remove convenience variables
+	maxID   int
+	freeMap map[int]struct{}
 }
 
 func NewDirectedGraph() *DirectedGraph {
@@ -27,6 +30,7 @@ func NewDirectedGraph() *DirectedGraph {
 		predecessors: make(map[int]map[int]WeightedEdge),
 		nodeMap:      make(map[int]graph.Node),
 		maxID:        0,
+		freeMap:      make(map[int]struct{}),
 	}
 }
 
@@ -37,6 +41,12 @@ func (g *DirectedGraph) NewNode() graph.Node {
 		g.maxID++
 		g.AddNode(Node(g.maxID))
 		return Node(g.maxID)
+	}
+
+	// Implicitly checks if len(g.freeMap) == 0
+	for id := range g.freeMap {
+		g.AddNode(Node(id))
+		return Node(id)
 	}
 
 	// I cannot foresee this ever happening, but just in case
@@ -62,6 +72,7 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.successors[n.ID()] = make(map[int]WeightedEdge)
 	g.predecessors[n.ID()] = make(map[int]WeightedEdge)
 
+	delete(g.freeMap, n.ID())
 	g.maxID = max(g.maxID, n.ID())
 }
 
@@ -96,6 +107,7 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	delete(g.predecessors, n.ID())
 
 	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
+	g.freeMap[n.ID()] = struct{}{}
 }
 
 func (g *DirectedGraph) RemoveDirectedEdge(e graph.Edge) {

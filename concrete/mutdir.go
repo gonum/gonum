@@ -51,7 +51,7 @@ func (g *DirectedGraph) NewNode() graph.Node {
 
 	// I cannot foresee this ever happening, but just in case
 	if len(g.nodeMap) == maxInt {
-		panic("You have a full graph, so an ID can't be created (good job! You have a lot of memory!)")
+		panic("You have a full graph, so an ID can't be created (number of nodes is MaxInt)")
 	}
 
 	for i := 0; i < maxInt; i++ {

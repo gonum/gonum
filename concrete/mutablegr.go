@@ -217,3 +217,11 @@ func (g *Graph) EdgeList() []graph.Edge {
 
 	return toReturn
 }
+
+func (g *Graph) Degree(n graph.Node) int {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
+		return 0
+	}
+
+	return len(g.neighbors[n.ID()])
+}

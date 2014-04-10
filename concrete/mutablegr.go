@@ -128,7 +128,9 @@ func (g *Graph) RemoveNode(n graph.Node) {
 	}
 	delete(g.neighbors, n.ID())
 
-	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
+	if g.maxID != 0 && n.ID() == g.maxID {
+		g.maxID--
+	}
 	g.freeMap[n.ID()] = struct{}{}
 }
 

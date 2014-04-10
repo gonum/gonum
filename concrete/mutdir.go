@@ -49,7 +49,7 @@ func (g *DirectedGraph) NewNode() graph.Node {
 
 	// I cannot foresee this ever happening, but just in case
 	if len(g.nodeMap) == maxInt {
-		panic("You have a full graph, so an ID can't be created (number of nodes is MaxInt)")
+		panic("cannot allocate node: graph too large")
 	}
 
 	for i := 0; i < maxInt; i++ {
@@ -59,8 +59,8 @@ func (g *DirectedGraph) NewNode() graph.Node {
 		}
 	}
 
-	// Will never happen
-	return nil
+	// Should not happen.
+	panic("cannot allocate node id: no free id found")
 }
 
 // Adds a node to the graph. Implementation note: if you add a node close to or at

@@ -322,7 +322,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 }
 
 // An admissible, consistent heuristic that won't speed up computation time at all.
-func NullHeuristic(node1, node2 graph.Node) float64 {
+func NullHeuristic(_, _ graph.Node) float64 {
 	return 0
 }
 

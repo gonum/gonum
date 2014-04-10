@@ -201,7 +201,7 @@ func (g *Graph) Cost(e graph.Edge) float64 {
 			return we.Cost
 		}
 	}
-	return math.Inf(1)
+	return inf
 }
 
 func (g *Graph) EdgeList() []graph.Edge {

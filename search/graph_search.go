@@ -143,7 +143,7 @@ func Dijkstra(source graph.Node, g graph.Graph, cost graph.CostFunc) (paths map[
 	}
 
 	paths = make(map[int][]graph.Node, len(costs))
-	for node, _ := range costs { // Only reconstruct the path if one exists
+	for node := range costs { // Only reconstruct the path if one exists
 		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
 	return paths, costs
@@ -201,7 +201,7 @@ func BellmanFord(source graph.Node, g graph.Graph, cost graph.CostFunc) (paths m
 	}
 
 	paths = make(map[int][]graph.Node, len(costs))
-	for node, _ := range costs {
+	for node := range costs {
 		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
 	}
 	return paths, costs, nil

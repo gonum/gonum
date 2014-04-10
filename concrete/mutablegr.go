@@ -123,7 +123,7 @@ func (g *Graph) RemoveNode(n graph.Node) {
 	}
 	delete(g.nodeMap, n.ID())
 
-	for neigh, _ := range g.neighbors[n.ID()] {
+	for neigh := range g.neighbors[n.ID()] {
 		delete(g.neighbors[neigh], n.ID())
 	}
 	delete(g.neighbors, n.ID())
@@ -158,7 +158,7 @@ func (g *Graph) Neighbors(n graph.Node) []graph.Node {
 
 	neighbors := make([]graph.Node, len(g.neighbors[n.ID()]))
 	i := 0
-	for id, _ := range g.neighbors[n.ID()] {
+	for id := range g.neighbors[n.ID()] {
 		neighbors[i] = g.nodeMap[id]
 		i++
 	}

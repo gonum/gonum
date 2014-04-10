@@ -19,7 +19,7 @@ type TileGraph struct {
 func NewTileGraph(dimX, dimY int, isPassable bool) *TileGraph {
 	tiles := make([]bool, dimX*dimY)
 	if isPassable {
-		for i, _ := range tiles {
+		for i := range tiles {
 			tiles[i] = true
 		}
 	}

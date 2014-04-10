@@ -123,7 +123,7 @@ type CostDirectedGraph interface {
 // the null heuristic (always returns 0.)
 type HeuristicCoster interface {
 	// HeuristicCost returns a heuristic cost between any two nodes.
-	HeuristicCost(node1, node2 Node) float64
+	HeuristicCost(n1, n2 Node) float64
 }
 
 // A Mutable is a graph that can have arbitrary nodes and edges added or removed.
@@ -178,7 +178,7 @@ type MutableGraph interface {
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
 	// remove a node. If the edge does not exist this is a no-op, not an error.
-	RemoveUndirectedEdge(e Edge)
+	RemoveUndirectedEdge(Edge)
 }
 
 // MutableDirectedGraph is an interface that ensures one can construct an arbitrary directed
@@ -198,7 +198,7 @@ type MutableDirectedGraph interface {
 
 	// Removes an edge FROM e.Head TO e.Tail. If no such edge exists, this is a no-op,
 	// not an error.
-	RemoveDirectedEdge(e Edge)
+	RemoveDirectedEdge(Edge)
 }
 
 // A function that returns the cost of following an edge

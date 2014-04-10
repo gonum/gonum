@@ -22,12 +22,12 @@ type Edge struct {
 	H, T graph.Node
 }
 
-func (edge Edge) Head() graph.Node {
-	return edge.H
+func (e Edge) Head() graph.Node {
+	return e.H
 }
 
-func (edge Edge) Tail() graph.Node {
-	return edge.T
+func (e Edge) Tail() graph.Node {
+	return e.T
 }
 
 type WeightedEdge struct {

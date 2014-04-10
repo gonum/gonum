@@ -103,7 +103,7 @@ type CrunchGraph interface {
 //
 // If the argument is nil, or the edge is invalid for some reason, this should return math.Inf(1)
 type Coster interface {
-	Cost(edge Edge) float64
+	Cost(Edge) float64
 }
 
 type CostGraph interface {

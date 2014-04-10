@@ -412,7 +412,7 @@ func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 			if _, ok := indices[succ.ID()]; !ok {
 				strongconnect(succ)
 				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))
-			} else if stackSet.Contains(succ) {
+			} else if stackSet.Contains(succ.ID()) {
 				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))
 			}
 		}
@@ -508,7 +508,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 		myEdge := edgeWeights[0]
 
 		dst.AddUndirectedEdge(myEdge.Edge, myEdge.Cost)
-		remainingNodes.Remove(myEdge.Edge.Head())
+		remainingNodes.Remove(myEdge.Edge.Head().ID())
 	}
 
 }
@@ -537,7 +537,7 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 	for _, edge := range edgeWeights {
 		// The disjoint set doesn't really care for which is head and which is tail so this
 		// should work fine without checking both ways
-		if s1, s2 := ds.Find(edge.Edge.Head().ID()), ds.Find(edge.Edge.Tail().ID); s1 != s2 {
+		if s1, s2 := ds.Find(edge.Edge.Head().ID()), ds.Find(edge.Edge.Tail().ID()); s1 != s2 {
 			ds.Union(s1, s2)
 			dst.AddUndirectedEdge(edge.Edge, edge.Cost)
 		}

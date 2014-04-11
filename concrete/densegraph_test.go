@@ -33,7 +33,7 @@ func TestBasicDenseImpassable(t *testing.T) {
 
 	for i := 5; i < 10; i++ {
 		if dg.NodeExists(concrete.Node(i)) {
-			t.Errorf("Node exists that shouldn't: %d")
+			t.Errorf("Node exists that shouldn't: %d", i)
 		}
 	}
 }
@@ -56,7 +56,7 @@ func TestBasicDensePassable(t *testing.T) {
 
 	for i := 5; i < 10; i++ {
 		if dg.NodeExists(concrete.Node(i)) {
-			t.Errorf("Node exists that shouldn't: %d")
+			t.Errorf("Node exists that shouldn't: %d", i)
 		}
 	}
 }

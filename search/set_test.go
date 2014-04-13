@@ -148,32 +148,32 @@ func TestClear(t *testing.T) {
 func TestSelfEqual(t *testing.T) {
 	s := newSet()
 
-	if !isEqual(s, s) {
+	if !equal(s, s) {
 		t.Error("Set is not equal to itself")
 	}
 
 	s.add(1)
 
-	if !isEqual(s, s) {
+	if !equal(s, s) {
 		t.Error("Set ceases self equality after adding element")
 	}
 }
 
-func TestIsEqual(t *testing.T) {
+func TestEqual(t *testing.T) {
 	s1 := newSet()
 	s2 := newSet()
 
-	if !isEqual(s1, s2) {
+	if !equal(s1, s2) {
 		t.Error("Two different empty sets not equal")
 	}
 
 	s1.add(1)
-	if isEqual(s1, s2) {
+	if equal(s1, s2) {
 		t.Error("Two different sets with different elements not equal")
 	}
 
 	s2.add(1)
-	if !isEqual(s1, s2) {
+	if !equal(s1, s2) {
 		t.Error("Two sets with same element not equal")
 	}
 }
@@ -188,13 +188,13 @@ func TestCopy(t *testing.T) {
 
 	s2.copy(s1)
 
-	if !isEqual(s1, s2) {
+	if !equal(s1, s2) {
 		t.Fatalf("Two sets not equal after copy")
 	}
 
 	s2.remove(1)
 
-	if isEqual(s1, s2) {
+	if equal(s1, s2) {
 		t.Errorf("Mutating one set mutated another after copy")
 	}
 }

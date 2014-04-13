@@ -65,7 +65,7 @@ func (dst *set) copy(src *set) *set {
 }
 
 // If every element in s1 is also in s2 (and vice versa), the sets are deemed equal.
-func isEqual(s1, s2 *set) bool {
+func equal(s1, s2 *set) bool {
 	if s1 == s2 {
 		return true
 	}

@@ -589,7 +589,7 @@ func Dominators(start graph.Node, g graph.Graph) map[int][]int {
 			dom.add(node.ID())
 
 			dom.union(dom, tmp)
-			if !isEqual(dom, doms[node.ID()]) {
+			if !equal(dom, doms[node.ID()]) {
 				doms[node.ID()] = dom
 				somethingChanged = true
 			}
@@ -646,7 +646,7 @@ func PostDominators(end graph.Node, g graph.Graph) map[int][]int {
 			dom.add(node.ID())
 
 			dom.union(dom, tmp)
-			if !isEqual(dom, doms[node.ID()]) {
+			if !equal(dom, doms[node.ID()]) {
 				doms[node.ID()] = dom
 				somethingChanged = true
 			}

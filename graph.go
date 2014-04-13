@@ -120,7 +120,7 @@ type CostDirectedGraph interface {
 // Like Coster, if a graph implements this and a function needs a heuristic cost (e.g. A*), this
 // function will take precedence over the Null Heuristic (always returns 0) if "nil" is passed in
 // for the function argument. If HeuristicCost is not intended to be used, it can be implemented as
-// the null heuristic (always returns 0)
+// the null heuristic (always returns 0).
 type HeuristicCoster interface {
 	// HeuristicCost returns a heuristic cost between any two nodes.
 	HeuristicCost(n1, n2 Node) float64

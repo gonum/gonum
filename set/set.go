@@ -7,9 +7,6 @@ package set
 // Set is a set of integer identifiers.
 type Set map[int]struct{}
 
-// For cleanliness
-var flag struct{} = struct{}{}
-
 func NewSet() *Set {
 	s := make(Set)
 	return &s
@@ -37,7 +34,7 @@ func (dst *Set) Copy(src *Set) *Set {
 	}
 
 	for e := range *src {
-		d[e] = flag
+		d[e] = struct{}{}
 	}
 	*dst = d
 
@@ -85,13 +82,13 @@ func (dst *Set) Union(s1, s2 *Set) *Set {
 	d := *dst
 	if dst != s1 {
 		for e := range *s1 {
-			d[e] = flag
+			d[e] = struct{}{}
 		}
 	}
 
 	if dst != s2 {
 		for e := range *s2 {
-			d[e] = flag
+			d[e] = struct{}{}
 		}
 	}
 
@@ -132,7 +129,7 @@ func (dst *Set) Intersection(s1, s2 *Set) *Set {
 		d := *dst
 		for e := range *s1 {
 			if _, ok := s2m[e]; ok {
-				d[e] = flag
+				d[e] = struct{}{}
 			}
 		}
 
@@ -194,7 +191,7 @@ func (dst *Set) Diff(s1, s2 *Set) *Set {
 		d := *dst
 		for e := range *s1 {
 			if _, ok := s2m[e]; !ok {
-				d[e] = flag
+				d[e] = struct{}{}
 			}
 		}
 	}
@@ -275,7 +272,7 @@ func (s *Set) Contains(e int) bool {
 
 // Adds the element e to s1.
 func (s1 *Set) Add(e int) {
-	(*s1)[e] = flag
+	(*s1)[e] = struct{}{}
 }
 
 func (s1 *Set) AddAll(es ...int) {

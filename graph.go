@@ -6,7 +6,7 @@ package graph
 
 // All a node needs to do is identify itself. This allows the user to pass in nodes more
 // interesting than an int, but also allow us to reap the benefits of having a map-storable,
-// ==able type.
+// comparable type.
 type Node interface {
 	ID() int
 }
@@ -103,7 +103,7 @@ type CrunchGraph interface {
 //
 // If the argument is nil, or the edge is invalid for some reason, this should return math.Inf(1)
 type Coster interface {
-	Cost(edge Edge) float64
+	Cost(Edge) float64
 }
 
 type CostGraph interface {
@@ -120,10 +120,10 @@ type CostDirectedGraph interface {
 // Like Coster, if a graph implements this and a function needs a heuristic cost (e.g. A*), this
 // function will take precedence over the Null Heuristic (always returns 0) if "nil" is passed in
 // for the function argument. If HeuristicCost is not intended to be used, it can be implemented as
-// the null heuristic (always returns 0.)
+// the null heuristic (always returns 0).
 type HeuristicCoster interface {
 	// HeuristicCost returns a heuristic cost between any two nodes.
-	HeuristicCost(node1, node2 Node) float64
+	HeuristicCost(n1, n2 Node) float64
 }
 
 // A Mutable is a graph that can have arbitrary nodes and edges added or removed.
@@ -178,7 +178,7 @@ type MutableGraph interface {
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
 	// remove a node. If the edge does not exist this is a no-op, not an error.
-	RemoveUndirectedEdge(e Edge)
+	RemoveUndirectedEdge(Edge)
 }
 
 // MutableDirectedGraph is an interface that ensures one can construct an arbitrary directed
@@ -198,7 +198,7 @@ type MutableDirectedGraph interface {
 
 	// Removes an edge FROM e.Head TO e.Tail. If no such edge exists, this is a no-op,
 	// not an error.
-	RemoveDirectedEdge(e Edge)
+	RemoveDirectedEdge(Edge)
 }
 
 // A function that returns the cost of following an edge

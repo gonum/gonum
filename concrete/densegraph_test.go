@@ -33,7 +33,7 @@ func TestBasicDenseImpassable(t *testing.T) {
 
 	for i := 5; i < 10; i++ {
 		if dg.NodeExists(concrete.Node(i)) {
-			t.Errorf("Node exists that shouldn't: %d")
+			t.Errorf("Node exists that shouldn't: %d", i)
 		}
 	}
 }
@@ -56,14 +56,14 @@ func TestBasicDensePassable(t *testing.T) {
 
 	for i := 5; i < 10; i++ {
 		if dg.NodeExists(concrete.Node(i)) {
-			t.Errorf("Node exists that shouldn't: %d")
+			t.Errorf("Node exists that shouldn't: %d", i)
 		}
 	}
 }
 
 func TestDenseAddRemove(t *testing.T) {
 	dg := concrete.NewDenseGraph(10, false)
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1.0, false)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1, false)
 
 	if neighbors := dg.Neighbors(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeBetween(concrete.Node(0), concrete.Node(2)) == nil {
@@ -125,7 +125,7 @@ func TestDenseAddRemove(t *testing.T) {
 		t.Errorf("Removing directed edge wrongly kept predecessor")
 	}
 
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2.0, true)
+	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2, true)
 	// I figure we've torture tested Neighbors/Successors/Predecessors at this point
 	// so we'll just use the bool functions now
 	if dg.EdgeTo(concrete.Node(0), concrete.Node(2)) == nil {

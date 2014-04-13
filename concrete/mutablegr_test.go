@@ -11,8 +11,8 @@ import (
 	"github.com/gonum/graph/concrete"
 )
 
-var _ graph.Graph = &concrete.Graph{}
-var _ graph.Graph = &concrete.Graph{}
+var _ graph.Graph = (*concrete.Graph)(nil)
+var _ graph.Graph = (*concrete.Graph)(nil)
 
 func TestAssertMutableNotDirected(t *testing.T) {
 	var g graph.MutableGraph = concrete.NewGraph()
@@ -21,4 +21,19 @@ func TestAssertMutableNotDirected(t *testing.T) {
 	}
 }
 
-// var _ gr.EdgeListGraph = &concrete.Graph{}
+func TestMaxID(t *testing.T) {
+	g := concrete.NewGraph()
+	nodes := make(map[graph.Node]struct{})
+	for i := concrete.Node(0); i < 3; i++ {
+		g.AddNode(i)
+		nodes[i] = struct{}{}
+	}
+	g.RemoveNode(concrete.Node(0))
+	delete(nodes, concrete.Node(0))
+	g.RemoveNode(concrete.Node(2))
+	delete(nodes, concrete.Node(2))
+	n := g.NewNode()
+	if _, exists := nodes[n]; exists {
+		t.Errorf("Created already existing node id: %v", n.ID())
+	}
+}

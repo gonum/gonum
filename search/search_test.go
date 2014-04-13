@@ -21,7 +21,7 @@ func TestSimpleAStar(t *testing.T) {
 	}
 
 	path, cost, _ := search.AStar(concrete.Node(1), concrete.Node(14), tg, nil, nil)
-	if math.Abs(cost-4.0) > .00001 {
+	if math.Abs(cost-4) > 1e-5 {
 		t.Errorf("A* reports incorrect cost for simple tilegraph search")
 	}
 
@@ -45,13 +45,13 @@ func TestBiggerAStar(t *testing.T) {
 
 	path, cost, _ := search.AStar(concrete.Node(0), concrete.Node(8), tg, nil, nil)
 
-	if math.Abs(cost-4.0) > .00001 || !search.IsPath(path, tg) {
+	if math.Abs(cost-4) > 1e-5 || !search.IsPath(path, tg) {
 		t.Error("Non-optimal or impossible path found for 3x3 grid")
 	}
 
 	tg = concrete.NewTileGraph(1000, 1000, true)
-	path, cost, _ = search.AStar(concrete.Node(00), concrete.Node(999*1000+999), tg, nil, nil)
-	if !search.IsPath(path, tg) || cost != 1998.0 {
+	path, cost, _ = search.AStar(concrete.Node(0), concrete.Node(999*1000+999), tg, nil, nil)
+	if !search.IsPath(path, tg) || cost != 1998 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
 	}
 }
@@ -90,7 +90,7 @@ func TestObstructedAStar(t *testing.T) {
 		t.Error("Path doesn't exist when using heuristic on obstructed graph")
 	}
 
-	if math.Abs(cost1-cost2) > .00001 {
+	if math.Abs(cost1-cost2) > 1e-5 {
 		t.Error("Cost when using admissible heuristic isn't approximately equal to cost without it")
 	}
 
@@ -142,9 +142,9 @@ func TestSmallAStar(t *testing.T) {
 func ExampleBreadthFirstSearch() {
 	g := concrete.NewDirectedGraph()
 	var n0, n1, n2, n3 concrete.Node = 0, 1, 2, 3
-	g.AddDirectedEdge(concrete.Edge{n0, n1}, 1.0)
-	g.AddDirectedEdge(concrete.Edge{n0, n2}, 1.0)
-	g.AddDirectedEdge(concrete.Edge{n2, n3}, 1.0)
+	g.AddDirectedEdge(concrete.Edge{n0, n1}, 1)
+	g.AddDirectedEdge(concrete.Edge{n0, n2}, 1)
+	g.AddDirectedEdge(concrete.Edge{n2, n3}, 1)
 	path, v := search.BreadthFirstSearch(n0, n3, g)
 	fmt.Println("path:", path)
 	fmt.Println("nodes visited:", v)
@@ -236,40 +236,40 @@ func TestDijkstraSmall(t *testing.T) {
 }
 
 func TestIsPath(t *testing.T) {
-	g := concrete.NewDirectedGraph()
-	if !search.IsPath(nil, g) {
+	dg := concrete.NewDirectedGraph()
+	if !search.IsPath(nil, dg) {
 		t.Error("IsPath returns false on nil path")
 	}
 	p := []graph.Node{concrete.Node(0)}
-	if search.IsPath(p, g) {
+	if search.IsPath(p, dg) {
 		t.Error("IsPath returns true on nonexistant node")
 	}
-	g.AddNode(p[0])
-	if !search.IsPath(p, g) {
+	dg.AddNode(p[0])
+	if !search.IsPath(p, dg) {
 		t.Error("IsPath returns false on single-length path with existing node")
 	}
 	p = append(p, concrete.Node(1))
-	g.AddNode(p[1])
-	if search.IsPath(p, g) {
+	dg.AddNode(p[1])
+	if search.IsPath(p, dg) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
-	g.AddDirectedEdge(concrete.Edge{p[0], p[1]}, 1.0)
-	if !search.IsPath(p, g) {
+	dg.AddDirectedEdge(concrete.Edge{p[0], p[1]}, 1)
+	if !search.IsPath(p, dg) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
 	p[0], p[1] = p[1], p[0]
-	if search.IsPath(p, g) {
+	if search.IsPath(p, dg) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
-	g.AddDirectedEdge(concrete.Edge{p[1], p[2]}, 1.0)
-	if !search.IsPath(p, g) {
+	dg.AddDirectedEdge(concrete.Edge{p[1], p[2]}, 1)
+	if !search.IsPath(p, dg) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	gr := concrete.NewGraph()
-	gr.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1.0)
-	gr.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1.0)
-	if !search.IsPath(p, g) {
+	ug := concrete.NewGraph()
+	ug.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1)
+	ug.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1)
+	if !search.IsPath(p, ug) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
 }

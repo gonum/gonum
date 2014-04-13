@@ -225,7 +225,7 @@ func Subset(s1, s2 *Set) bool {
 		return true
 	}
 
-	for el, _ := range *s1 {
+	for el := range *s1 {
 		if _, ok := (*s2)[el]; !ok {
 			return false
 		}
@@ -256,7 +256,7 @@ func ProperSubset(s1, s2 *Set) bool {
 		return true
 	} // We can eschew the s1 == s2 because if they are the same their lens are equal anyway
 
-	for el, _ := range *s1 {
+	for el := range *s1 {
 		if _, ok := (*s2)[el]; !ok {
 			return false
 		}
@@ -294,7 +294,7 @@ func (s1 *Set) Cardinality() int {
 
 func (s1 *Set) Elements() (els []interface{}) {
 	els = make([]interface{}, 0, len(*s1))
-	for el, _ := range *s1 {
+	for el := range *s1 {
 		els = append(els, el)
 	}
 

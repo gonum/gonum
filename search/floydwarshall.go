@@ -36,12 +36,12 @@ type PathFunc func(start, goal graph.Node) (path []graph.Node, cost float64, err
 // The other will return the cost and an error if no path exists, but it will also return ALL
 // possible shortest paths between start and goal. This is not too much more expensive than
 // generating one path, but it does obviously increase with the number of paths.
-func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, PathFunc) {
-	gr.Crunch()
-	sf := setupFuncs(gr, cost, nil)
+func FloydWarshall(g graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, PathFunc) {
+	g.Crunch()
+	sf := setupFuncs(g, cost, nil)
 	successors, isSuccessor, cost, edgeTo := sf.successors, sf.isSuccessor, sf.cost, sf.edgeTo
 
-	nodes := denseNodeSorter(gr.NodeList())
+	nodes := denseNodeSorter(g.NodeList())
 	sort.Sort(nodes)
 	numNodes := len(nodes)
 
@@ -50,7 +50,7 @@ func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, Path
 	for i := 0; i < numNodes; i++ {
 		for j := 0; j < numNodes; j++ {
 			if j != i {
-				dist[i+j*numNodes] = math.Inf(1)
+				dist[i+j*numNodes] = inf
 			}
 		}
 	}
@@ -61,6 +61,7 @@ func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, Path
 		}
 	}
 
+	const thresh = 1e-5
 	for k := 0; k < numNodes; k++ {
 		for i := 0; i < numNodes; i++ {
 			for j := 0; j < numNodes; j++ {
@@ -77,24 +78,24 @@ func FloydWarshall(gr graph.CrunchGraph, cost graph.CostFunc) (AllPathFunc, Path
 					}
 					// If the cost between the nodes happens to be the same cost
 					// as what we know, add the approriate intermediary to the list
-				} else if math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < 0.00001 && i != k && i != j && j != k {
+				} else if i != k && i != j && j != k && math.Abs(dist[i+k*numNodes]+dist[k+j*numNodes]-dist[i+j*numNodes]) < thresh {
 					next[i+j*numNodes] = append(next[i+j*numNodes], k)
 				}
 			}
 		}
 	}
 
-	return genAllPathsFunc(dist, next, nodes, gr, cost, isSuccessor, edgeTo), genSinglePathFunc(dist, next, nodes)
+	return genAllPathsFunc(dist, next, nodes, g, cost, isSuccessor, edgeTo), genSinglePathFunc(dist, next, nodes)
 }
 
-func genAllPathsFunc(dist []float64, next [][]int, nodes []graph.Node, gr graph.Graph, cost graph.CostFunc, isSuccessor func(graph.Node, graph.Node) bool, edgeTo func(graph.Node, graph.Node) graph.Edge) func(start, goal graph.Node) ([][]graph.Node, float64, error) {
+func genAllPathsFunc(dist []float64, next [][]int, nodes []graph.Node, g graph.Graph, cost graph.CostFunc, isSuccessor func(graph.Node, graph.Node) bool, edgeTo func(graph.Node, graph.Node) graph.Edge) func(start, goal graph.Node) ([][]graph.Node, float64, error) {
 	numNodes := len(nodes)
 
 	// A recursive function to reconstruct all possible paths.
 	// It's not fast, but it's about as fast as can be reasonably expected
 	var allPathFinder func(i, j int) ([][]graph.Node, error)
 	allPathFinder = func(i, j int) ([][]graph.Node, error) {
-		if dist[i+j*numNodes] == math.Inf(1) {
+		if dist[i+j*numNodes] == inf {
 			return nil, errors.New("No path")
 		}
 		intermediates := next[i+j*numNodes]
@@ -158,7 +159,7 @@ func genAllPathsFunc(dist []float64, next [][]int, nodes []graph.Node, gr graph.
 	return func(start, goal graph.Node) ([][]graph.Node, float64, error) {
 		paths, err := allPathFinder(start.ID(), goal.ID())
 		if err != nil {
-			return nil, math.Inf(1), err
+			return nil, inf, err
 		}
 
 		for i := range paths {
@@ -188,7 +189,7 @@ func genSinglePathFunc(dist []float64, next [][]int, nodes []graph.Node) func(st
 
 	var singlePathFinder func(i, j int) ([]graph.Node, error)
 	singlePathFinder = func(i, j int) ([]graph.Node, error) {
-		if dist[i+j*numNodes] == math.Inf(1) {
+		if dist[i+j*numNodes] == inf {
 			return nil, errors.New("No path")
 		}
 
@@ -216,7 +217,7 @@ func genSinglePathFunc(dist []float64, next [][]int, nodes []graph.Node) func(st
 	return func(start, goal graph.Node) ([]graph.Node, float64, error) {
 		path, err := singlePathFinder(start.ID(), goal.ID())
 		if err != nil {
-			return nil, math.Inf(1), err
+			return nil, inf, err
 		}
 
 		path = append(path, nil)

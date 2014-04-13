@@ -6,7 +6,6 @@ package concrete
 
 import (
 	"github.com/gonum/graph"
-	"math"
 )
 
 // A dense graph is a graph such that all IDs are in a contiguous block from 0 to
@@ -20,16 +19,16 @@ type DenseGraph struct {
 }
 
 // Creates a dense graph with the proper number of nodes. If passable is true all nodes will have
-// an edge with cost 1.0, otherwise every node will start unconnected (cost of +Inf.)
+// an edge with unit cost, otherwise every node will start unconnected (cost of +Inf).
 func NewDenseGraph(numNodes int, passable bool) *DenseGraph {
 	g := &DenseGraph{adjacencyMatrix: make([]float64, numNodes*numNodes), numNodes: numNodes}
 	if passable {
 		for i := range g.adjacencyMatrix {
-			g.adjacencyMatrix[i] = 1.0
+			g.adjacencyMatrix[i] = 1
 		}
 	} else {
 		for i := range g.adjacencyMatrix {
-			g.adjacencyMatrix[i] = math.Inf(1)
+			g.adjacencyMatrix[i] = inf
 		}
 	}
 
@@ -43,11 +42,11 @@ func (g *DenseGraph) NodeExists(n graph.Node) bool {
 func (g *DenseGraph) Degree(n graph.Node) int {
 	deg := 0
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != math.Inf(1) {
+		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != inf {
 			deg++
 		}
 
-		if g.adjacencyMatrix[n.ID()*g.numNodes+i] != math.Inf(1) {
+		if g.adjacencyMatrix[n.ID()*g.numNodes+i] != inf {
 			deg++
 		}
 	}
@@ -68,7 +67,7 @@ func (g *DenseGraph) DirectedEdgeList() []graph.Edge {
 	edges := make([]graph.Edge, 0, len(g.adjacencyMatrix))
 	for i := 0; i < g.numNodes; i++ {
 		for j := 0; j < g.numNodes; j++ {
-			if g.adjacencyMatrix[i*g.numNodes+j] != math.Inf(1) {
+			if g.adjacencyMatrix[i*g.numNodes+j] != inf {
 				edges = append(edges, Edge{Node(i), Node(j)})
 			}
 		}
@@ -80,8 +79,8 @@ func (g *DenseGraph) DirectedEdgeList() []graph.Edge {
 func (g *DenseGraph) Neighbors(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != math.Inf(1) ||
-			g.adjacencyMatrix[n.ID()*g.numNodes+i] != math.Inf(1) {
+		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != inf ||
+			g.adjacencyMatrix[n.ID()*g.numNodes+i] != inf {
 			neighbors = append(neighbors, Node(i))
 		}
 	}
@@ -90,8 +89,8 @@ func (g *DenseGraph) Neighbors(n graph.Node) []graph.Node {
 }
 
 func (g *DenseGraph) EdgeBetween(n, neighbor graph.Node) graph.Edge {
-	if g.adjacencyMatrix[neighbor.ID()*g.numNodes+n.ID()] != math.Inf(1) ||
-		g.adjacencyMatrix[n.ID()*g.numNodes+neighbor.ID()] != math.Inf(1) {
+	if g.adjacencyMatrix[neighbor.ID()*g.numNodes+n.ID()] != inf ||
+		g.adjacencyMatrix[n.ID()*g.numNodes+neighbor.ID()] != inf {
 		return Edge{n, neighbor}
 	}
 
@@ -101,7 +100,7 @@ func (g *DenseGraph) EdgeBetween(n, neighbor graph.Node) graph.Edge {
 func (g *DenseGraph) Successors(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[n.ID()*g.numNodes+i] != math.Inf(1) {
+		if g.adjacencyMatrix[n.ID()*g.numNodes+i] != inf {
 			neighbors = append(neighbors, Node(i))
 		}
 	}
@@ -110,7 +109,7 @@ func (g *DenseGraph) Successors(n graph.Node) []graph.Node {
 }
 
 func (g *DenseGraph) EdgeTo(n, succ graph.Node) graph.Edge {
-	if g.adjacencyMatrix[n.ID()*g.numNodes+succ.ID()] != math.Inf(1) {
+	if g.adjacencyMatrix[n.ID()*g.numNodes+succ.ID()] != inf {
 		return Edge{n, succ}
 	}
 
@@ -120,7 +119,7 @@ func (g *DenseGraph) EdgeTo(n, succ graph.Node) graph.Edge {
 func (g *DenseGraph) Predecessors(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
-		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != math.Inf(1) {
+		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != inf {
 			neighbors = append(neighbors, Node(i))
 		}
 	}
@@ -148,5 +147,5 @@ func (g *DenseGraph) SetEdgeCost(e graph.Edge, cost float64, directed bool) {
 
 // Equivalent to SetEdgeCost(edge, math.Inf(1), directed)
 func (g *DenseGraph) RemoveEdge(e graph.Edge, directed bool) {
-	g.SetEdgeCost(e, math.Inf(1), directed)
+	g.SetEdgeCost(e, inf, directed)
 }

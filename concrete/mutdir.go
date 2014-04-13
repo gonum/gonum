@@ -5,8 +5,6 @@
 package concrete
 
 import (
-	"math"
-
 	"github.com/gonum/graph"
 )
 
@@ -51,7 +49,7 @@ func (g *DirectedGraph) NewNode() graph.Node {
 
 	// I cannot foresee this ever happening, but just in case
 	if len(g.nodeMap) == maxInt {
-		panic("You have a full graph, so an ID can't be created (number of nodes is MaxInt)")
+		panic("cannot allocate node: graph too large")
 	}
 
 	for i := 0; i < maxInt; i++ {
@@ -61,8 +59,8 @@ func (g *DirectedGraph) NewNode() graph.Node {
 		}
 	}
 
-	// Will never happen
-	return nil
+	// Should not happen.
+	panic("cannot allocate node id: no free id found")
 }
 
 // Adds a node to the graph. Implementation note: if you add a node close to or at
@@ -96,12 +94,12 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.nodeMap, n.ID())
 
-	for succ, _ := range g.successors[n.ID()] {
+	for succ := range g.successors[n.ID()] {
 		delete(g.predecessors[succ], n.ID())
 	}
 	delete(g.successors, n.ID())
 
-	for pred, _ := range g.predecessors[n.ID()] {
+	for pred := range g.predecessors[n.ID()] {
 		delete(g.successors[pred], n.ID())
 	}
 	delete(g.predecessors, n.ID())
@@ -137,7 +135,7 @@ func (g *DirectedGraph) Successors(n graph.Node) []graph.Node {
 
 	successors := make([]graph.Node, len(g.successors[n.ID()]))
 	i := 0
-	for succ, _ := range g.successors[n.ID()] {
+	for succ := range g.successors[n.ID()] {
 		successors[i] = g.nodeMap[succ]
 		i++
 	}
@@ -166,7 +164,7 @@ func (g *DirectedGraph) Predecessors(n graph.Node) []graph.Node {
 
 	predecessors := make([]graph.Node, len(g.predecessors[n.ID()]))
 	i := 0
-	for succ, _ := range g.predecessors[n.ID()] {
+	for succ := range g.predecessors[n.ID()] {
 		predecessors[i] = g.nodeMap[succ]
 		i++
 	}
@@ -181,12 +179,12 @@ func (g *DirectedGraph) Neighbors(n graph.Node) []graph.Node {
 
 	neighbors := make([]graph.Node, len(g.predecessors[n.ID()])+len(g.successors[n.ID()]))
 	i := 0
-	for succ, _ := range g.successors[n.ID()] {
+	for succ := range g.successors[n.ID()] {
 		neighbors[i] = g.nodeMap[succ]
 		i++
 	}
 
-	for pred, _ := range g.predecessors[n.ID()] {
+	for pred := range g.predecessors[n.ID()] {
 		// We should only add the predecessor if it wasn't already added from successors
 		if _, ok := g.successors[n.ID()][pred]; !ok {
 			neighbors[i] = g.nodeMap[pred]
@@ -242,7 +240,7 @@ func (g *DirectedGraph) Cost(e graph.Edge) float64 {
 			return we.Cost
 		}
 	}
-	return math.Inf(1)
+	return inf
 }
 
 func (g *DirectedGraph) EdgeList() []graph.Edge {

@@ -6,7 +6,6 @@ package concrete
 
 import (
 	"errors"
-	"math"
 	"strings"
 
 	"github.com/gonum/graph"
@@ -20,7 +19,7 @@ type TileGraph struct {
 func NewTileGraph(dimX, dimY int, isPassable bool) *TileGraph {
 	tiles := make([]bool, dimX*dimY)
 	if isPassable {
-		for i, _ := range tiles {
+		for i := range tiles {
 			tiles[i] = true
 		}
 	}
@@ -228,8 +227,8 @@ func (g *TileGraph) NodeList() []graph.Node {
 
 func (g *TileGraph) Cost(e graph.Edge) float64 {
 	if edge := g.EdgeBetween(e.Head(), e.Tail()); edge != nil {
-		return 1.0
+		return 1
 	}
 
-	return math.Inf(1)
+	return inf
 }

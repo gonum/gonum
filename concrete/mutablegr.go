@@ -5,8 +5,6 @@
 package concrete
 
 import (
-	"math"
-
 	"github.com/gonum/graph"
 )
 
@@ -22,12 +20,12 @@ type Edge struct {
 	H, T graph.Node
 }
 
-func (edge Edge) Head() graph.Node {
-	return edge.H
+func (e Edge) Head() graph.Node {
+	return e.H
 }
 
-func (edge Edge) Tail() graph.Node {
-	return edge.T
+func (e Edge) Tail() graph.Node {
+	return e.T
 }
 
 type WeightedEdge struct {
@@ -79,9 +77,9 @@ func (g *Graph) NewNode() graph.Node {
 		return Node(id)
 	}
 
-	// I cannot foresee this ever happening, but just in case
+	// I cannot foresee this ever happening, but just in case, we check.
 	if len(g.nodeMap) == maxInt {
-		panic("You have a full graph, so an ID can't be created (number of nodes is MaxInt)")
+		panic("cannot allocate node: graph too large")
 	}
 
 	for i := 0; i < maxInt; i++ {
@@ -91,8 +89,8 @@ func (g *Graph) NewNode() graph.Node {
 		}
 	}
 
-	// Will never happen
-	return nil
+	// Should not happen.
+	panic("cannot allocate node id: no free id found")
 }
 
 func (g *Graph) AddNode(n graph.Node) {
@@ -123,12 +121,14 @@ func (g *Graph) RemoveNode(n graph.Node) {
 	}
 	delete(g.nodeMap, n.ID())
 
-	for neigh, _ := range g.neighbors[n.ID()] {
+	for neigh := range g.neighbors[n.ID()] {
 		delete(g.neighbors[neigh], n.ID())
 	}
 	delete(g.neighbors, n.ID())
 
-	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
+	if g.maxID != 0 && n.ID() == g.maxID {
+		g.maxID--
+	}
 	g.freeMap[n.ID()] = struct{}{}
 }
 
@@ -158,7 +158,7 @@ func (g *Graph) Neighbors(n graph.Node) []graph.Node {
 
 	neighbors := make([]graph.Node, len(g.neighbors[n.ID()]))
 	i := 0
-	for id, _ := range g.neighbors[n.ID()] {
+	for id := range g.neighbors[n.ID()] {
 		neighbors[i] = g.nodeMap[id]
 		i++
 	}
@@ -199,7 +199,7 @@ func (g *Graph) Cost(e graph.Edge) float64 {
 			return we.Cost
 		}
 	}
-	return math.Inf(1)
+	return inf
 }
 
 func (g *Graph) EdgeList() []graph.Edge {
@@ -216,4 +216,12 @@ func (g *Graph) EdgeList() []graph.Edge {
 	}
 
 	return toReturn
+}
+
+func (g *Graph) Degree(n graph.Node) int {
+	if _, ok := g.nodeMap[n.ID()]; !ok {
+		return 0
+	}
+
+	return len(g.neighbors[n.ID()])
 }

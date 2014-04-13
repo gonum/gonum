@@ -5,6 +5,8 @@
 package concrete
 
 import (
+	"math"
+
 	"github.com/gonum/graph"
 )
 
@@ -26,6 +28,8 @@ func (ns nodeSorter) Len() int {
 // values. This ensures we get the max for the actual
 // type int.
 const maxInt int = int(^uint(0) >> 1)
+
+var inf = math.Inf(1)
 
 func max(a, b int) int {
 	if a > b {

@@ -12,7 +12,6 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/set"
 	"github.com/gonum/graph/xifo"
 )
 
@@ -23,7 +22,7 @@ import (
 // estimates.
 //
 // A heuristic is admissible if, for any node in the graph, the heuristic estimate of the cost
-// between the node and the goal is less than or equal to the true cost.
+// between the node and the goal is less than or set to the true cost.
 //
 // Performance may be improved by providing a consistent heuristic (though one is not needed to
 // find the optimal path), a heuristic is consistent if its value for a given node is less than
@@ -289,7 +288,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 	sf := setupFuncs(g, nil, nil)
 	successors := sf.successors
 
-	closedSet := make(intSet)
+	closedSet := make(simpleSet)
 	openSet := xifo.GonumStack([]interface{}{start})
 	predecessor := make(map[int]graph.Node)
 
@@ -298,7 +297,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 
 		curr := c.(graph.Node)
 
-		if closedSet.Contains(curr.ID()) {
+		if closedSet.has(curr.ID()) {
 			continue
 		}
 
@@ -306,10 +305,10 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 			return rebuildPath(predecessor, goal)
 		}
 
-		closedSet.Add(curr.ID())
+		closedSet.add(curr.ID())
 
 		for _, neighbor := range successors(curr) {
-			if closedSet.Contains(neighbor.ID()) {
+			if closedSet.has(neighbor.ID()) {
 				continue
 			}
 
@@ -389,7 +388,7 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 	index := 0
 	vStack := &xifo.GonumStack{}
-	stackSet := make(intSet)
+	stackSet := make(simpleSet)
 	sccs = make([][]graph.Node, 0)
 
 	nodes := g.NodeList()
@@ -406,13 +405,13 @@ func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 		index += 1
 
 		vStack.Push(node)
-		stackSet.Add(node.ID())
+		stackSet.add(node.ID())
 
 		for _, succ := range successors(node) {
 			if _, ok := indices[succ.ID()]; !ok {
 				strongconnect(succ)
 				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))
-			} else if stackSet.Contains(succ.ID()) {
+			} else if stackSet.has(succ.ID()) {
 				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))
 			}
 		}
@@ -421,7 +420,7 @@ func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 			scc := make([]graph.Node, 0)
 			for {
 				v := vStack.Pop()
-				stackSet.Remove(v.(graph.Node).ID())
+				stackSet.remove(v.(graph.Node).ID())
 				scc = append(scc, v.(graph.Node))
 				if v.(graph.Node).ID() == node.ID() {
 					return scc
@@ -488,17 +487,17 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	}
 
 	dst.AddNode(nlist[0])
-	remainingNodes := make(intSet)
+	remainingNodes := make(simpleSet)
 	for _, node := range nlist[1:] {
-		remainingNodes.Add(node.ID())
+		remainingNodes.add(node.ID())
 	}
 
 	edgeList := g.EdgeList()
-	for remainingNodes.Cardinality() != 0 {
+	for remainingNodes.count() != 0 {
 		edgeWeights := make(edgeSorter, 0)
 		for _, edge := range edgeList {
-			if (dst.NodeExists(edge.Head()) && remainingNodes.Contains(edge.Tail().ID())) ||
-				(dst.NodeExists(edge.Tail()) && remainingNodes.Contains(edge.Head().ID())) {
+			if (dst.NodeExists(edge.Head()) && remainingNodes.has(edge.Tail().ID())) ||
+				(dst.NodeExists(edge.Tail()) && remainingNodes.has(edge.Head().ID())) {
 
 				edgeWeights = append(edgeWeights, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
 			}
@@ -508,7 +507,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 		myEdge := edgeWeights[0]
 
 		dst.AddUndirectedEdge(myEdge.Edge, myEdge.Cost)
-		remainingNodes.Remove(myEdge.Edge.Head().ID())
+		remainingNodes.remove(myEdge.Edge.Head().ID())
 	}
 
 }
@@ -529,7 +528,7 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 
 	sort.Sort(edgeWeights)
 
-	ds := set.NewDisjointSet()
+	ds := newDisjointSet()
 	for _, node := range g.NodeList() {
 		ds.MakeSet(node.ID())
 	}
@@ -551,23 +550,23 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 // This returns all possible dominators for all nodes, it does not prune for strict dominators,
 // immediate dominators etc.
 //
-// The int map[int]*set.Set is the node's ID.
-func Dominators(start graph.Node, g graph.Graph) map[int]*set.Set {
-	allNodes := set.NewSet()
+// The int map[int][]int is the node's ID.
+func Dominators(start graph.Node, g graph.Graph) map[int][]int {
+	allNodes := newSet()
 	nlist := g.NodeList()
-	dominators := make(map[int]*set.Set, len(nlist))
+	doms := make(map[int]*set, len(nlist))
 	for _, node := range nlist {
-		allNodes.Add(node.ID())
+		allNodes.add(node.ID())
 	}
 
 	predecessors := setupFuncs(g, nil, nil).predecessors
 
 	for _, node := range nlist {
-		dominators[node.ID()] = set.NewSet()
+		doms[node.ID()] = newSet()
 		if node.ID() == start.ID() {
-			dominators[node.ID()].Add(start.ID())
+			doms[node.ID()].add(start.ID())
 		} else {
-			dominators[node.ID()].Copy(allNodes)
+			doms[node.ID()].copy(allNodes)
 		}
 	}
 
@@ -581,20 +580,25 @@ func Dominators(start graph.Node, g graph.Graph) map[int]*set.Set {
 			if len(preds) == 0 {
 				continue
 			}
-			tmp := set.NewSet().Copy(dominators[preds[0].ID()])
+			tmp := newSet().copy(doms[preds[0].ID()])
 			for _, pred := range preds[1:] {
-				tmp.Intersection(tmp, dominators[pred.ID()])
+				tmp.intersect(tmp, doms[pred.ID()])
 			}
 
-			dom := set.NewSet()
-			dom.Add(node.ID())
+			dom := newSet()
+			dom.add(node.ID())
 
-			dom.Union(dom, tmp)
-			if !set.Equal(dom, dominators[node.ID()]) {
-				dominators[node.ID()] = dom
+			dom.union(dom, tmp)
+			if !isEqual(dom, doms[node.ID()]) {
+				doms[node.ID()] = dom
 				somethingChanged = true
 			}
 		}
+	}
+
+	dominators := make(map[int][]int, len(doms))
+	for n, d := range doms {
+		dominators[n] = d.elements()
 	}
 
 	return dominators
@@ -604,22 +608,22 @@ func Dominators(start graph.Node, g graph.Graph) map[int]*set.Set {
 //
 // This returns all possible post-dominators for all nodes, it does not prune for strict
 // postdominators, immediate postdominators etc.
-func PostDominators(end graph.Node, g graph.Graph) map[int]*set.Set {
+func PostDominators(end graph.Node, g graph.Graph) map[int][]int {
 	successors := setupFuncs(g, nil, nil).successors
 
-	allNodes := set.NewSet()
+	allNodes := newSet()
 	nlist := g.NodeList()
-	dominators := make(map[int]*set.Set, len(nlist))
+	doms := make(map[int]*set, len(nlist))
 	for _, node := range nlist {
-		allNodes.Add(node.ID())
+		allNodes.add(node.ID())
 	}
 
 	for _, node := range nlist {
-		dominators[node.ID()] = set.NewSet()
+		doms[node.ID()] = newSet()
 		if node.ID() == end.ID() {
-			dominators[node.ID()].Add(end.ID())
+			doms[node.ID()].add(end.ID())
 		} else {
-			dominators[node.ID()].Copy(allNodes)
+			doms[node.ID()].copy(allNodes)
 		}
 	}
 
@@ -633,20 +637,25 @@ func PostDominators(end graph.Node, g graph.Graph) map[int]*set.Set {
 			if len(succs) == 0 {
 				continue
 			}
-			tmp := set.NewSet().Copy(dominators[succs[0].ID()])
+			tmp := newSet().copy(doms[succs[0].ID()])
 			for _, succ := range succs[1:] {
-				tmp.Intersection(tmp, dominators[succ.ID()])
+				tmp.intersect(tmp, doms[succ.ID()])
 			}
 
-			dom := set.NewSet()
-			dom.Add(node.ID())
+			dom := newSet()
+			dom.add(node.ID())
 
-			dom.Union(dom, tmp)
-			if !set.Equal(dom, dominators[node.ID()]) {
-				dominators[node.ID()] = dom
+			dom.union(dom, tmp)
+			if !isEqual(dom, doms[node.ID()]) {
+				doms[node.ID()] = dom
 				somethingChanged = true
 			}
 		}
+	}
+
+	dominators := make(map[int][]int, len(doms))
+	for n, d := range doms {
+		dominators[n] = d.elements()
 	}
 
 	return dominators

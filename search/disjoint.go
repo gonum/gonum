@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package set
+package search
 
 // A disjoint set is a collection of non-overlapping sets. That is, for any two sets in the
 // disjoint set, their intersection is the empty set.
@@ -26,7 +26,7 @@ type DisjointSetNode struct {
 	rank   int
 }
 
-func NewDisjointSet() *DisjointSet {
+func newDisjointSet() *DisjointSet {
 	return &DisjointSet{master: make(map[int]*DisjointSetNode)}
 }
 

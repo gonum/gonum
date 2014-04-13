@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package set
+package search
 
 import (
 	"testing"
 )
 
 func TestDisjointSetMakeSet(t *testing.T) {
-	ds := NewDisjointSet()
+	ds := newDisjointSet()
 	if ds.master == nil {
 		t.Fatal("Internal disjoint set map erroneously nil")
 	} else if len(ds.master) != 0 {
@@ -39,7 +39,7 @@ func TestDisjointSetMakeSet(t *testing.T) {
 }
 
 func TestDisjointSetFind(t *testing.T) {
-	ds := NewDisjointSet()
+	ds := newDisjointSet()
 
 	ds.MakeSet(3)
 	ds.MakeSet(5)
@@ -50,7 +50,7 @@ func TestDisjointSetFind(t *testing.T) {
 }
 
 func TestUnion(t *testing.T) {
-	ds := NewDisjointSet()
+	ds := newDisjointSet()
 
 	ds.MakeSet(3)
 	ds.MakeSet(5)

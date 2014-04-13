@@ -213,3 +213,14 @@ func rebuildPath(predecessors map[int]graph.Node, goal graph.Node) []graph.Node 
 
 	return path
 }
+
+type nodeStack []graph.Node
+
+func (s *nodeStack) len() int { return len(*s) }
+func (s *nodeStack) pop() graph.Node {
+	v := *s
+	v, n := v[:len(v)-1], v[len(v)-1]
+	*s = v
+	return n
+}
+func (s *nodeStack) push(n graph.Node) { *s = append(*s, n) }

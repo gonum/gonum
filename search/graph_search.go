@@ -12,7 +12,6 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/xifo"
 )
 
 // Returns an ordered list consisting of the nodes between start and goal. The path will be the
@@ -289,19 +288,17 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 	successors := sf.successors
 
 	closedSet := make(intSet)
-	openSet := xifo.GonumStack([]interface{}{start})
+	openSet := &nodeStack{start}
 	predecessor := make(map[int]graph.Node)
 
-	for !openSet.IsEmpty() {
-		c := openSet.Pop()
-
-		curr := c.(graph.Node)
+	for openSet.len() != 0 {
+		curr := openSet.pop()
 
 		if closedSet.has(curr.ID()) {
 			continue
 		}
 
-		if curr == goal {
+		if curr.ID() == goal.ID() {
 			return rebuildPath(predecessor, goal)
 		}
 
@@ -313,7 +310,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 			}
 
 			predecessor[neighbor.ID()] = curr
-			openSet.Push(neighbor)
+			openSet.push(neighbor)
 		}
 	}
 
@@ -387,8 +384,8 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 // is not fully connected.
 func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 	index := 0
-	vStack := &xifo.GonumStack{}
 	stackSet := make(intSet)
+	vStack := &nodeStack{}
 	sccs = make([][]graph.Node, 0)
 
 	nodes := g.NodeList()
@@ -404,7 +401,7 @@ func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 		lowlinks[node.ID()] = index
 		index += 1
 
-		vStack.Push(node)
+		vStack.push(node)
 		stackSet.add(node.ID())
 
 		for _, succ := range successors(node) {
@@ -419,10 +416,10 @@ func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 		if lowlinks[node.ID()] == indices[node.ID()] {
 			scc := make([]graph.Node, 0)
 			for {
-				v := vStack.Pop()
-				stackSet.remove(v.(graph.Node).ID())
-				scc = append(scc, v.(graph.Node))
-				if v.(graph.Node).ID() == node.ID() {
+				v := vStack.pop()
+				stackSet.remove(v.ID())
+				scc = append(scc, v)
+				if v.ID() == node.ID() {
 					return scc
 				}
 			}

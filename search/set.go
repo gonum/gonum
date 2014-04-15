@@ -4,78 +4,103 @@
 
 package search
 
-// simpleSet is a set of integer identifiers.
-type simpleSet map[int]struct{}
+import (
+	"unsafe"
+)
 
-// Returns true if e is an element of s.
-func (s simpleSet) has(e int) bool {
+// same determines whether two sets are backed by the same store. In the
+// current implementation using hash maps it makes use of the fact that
+// hash maps (at least in the gc implementation) are passed as a pointer
+// to a runtime Hmap struct.
+//
+// A map is not seen by the runtime as a pointer though, so we cannot
+// directly compare the sets converted to unsafe.Pointer and need to take
+// the sets' addressed and dereference them as pointers to some comparable
+// type.
+func same(s1, s2 set) bool {
+	return *(*uintptr)(unsafe.Pointer(&s1)) == *(*uintptr)(unsafe.Pointer(&s2))
+}
+
+// A set is a set of integer identifiers. The simple accessor methods
+// are provided to allow ease of implementation change should the need
+// arise.
+type set map[int]struct{}
+
+// add inserts an element into the set.
+func (s set) add(e int) {
+	s[e] = struct{}{}
+}
+
+// has reports the existence of the element in the set.
+func (s set) has(e int) bool {
 	_, ok := s[e]
 	return ok
 }
 
-// Adds the element e to s1.
-func (s simpleSet) add(e int) {
-	s[e] = struct{}{}
-}
-
-// Removes the element e from s1.
-func (s simpleSet) remove(e int) {
+// remove delete the specified element from the set.
+func (s set) remove(e int) {
 	delete(s, e)
 }
 
-func (s simpleSet) count() int {
+// count reports the number of elements stored in the set.
+func (s set) count() int {
 	return len(s)
 }
 
-// Set is a set of integer identifiers.
-type set map[int]struct{}
-
-func newSet() *set {
-	s := make(set)
-	return &s
-}
-
-func (s1 *set) clear() *set {
-	if len(*s1) == 0 {
-		return s1
+// elements returns a newly created slice containing all elements of the
+// set. The order of elements in the slice is unspecified.
+func (s set) elements() []int {
+	els := make([]int, 0, len(s))
+	for e, _ := range s {
+		els = append(els, e)
 	}
 
-	*s1 = make(set)
-
-	return s1
+	return els
 }
 
-// Ensures a perfect copy from s1 to dst (meaning the sets will be equal)
-func (dst *set) copy(src *set) *set {
-	if src == dst {
+// clear returns an empty set, possibly using the same backing store.
+// clear is not provided as a method since there is no way to replace
+// the calling value if clearing is performed by a make(set). clear
+// should never be called without keeping the returned value.
+func clear(s set) set {
+	if len(s) == 0 {
+		return s
+	}
+
+	return make(set)
+}
+
+// copy performs a perfect copy from s1 to dst (meaning the sets will
+// be equal).
+func (dst set) copy(src set) set {
+	if same(src, dst) {
 		return dst
 	}
 
-	d := *dst
-	if len(d) > 0 {
-		d = make(set, len(*src))
+	if len(dst) > 0 {
+		dst = make(set, len(src))
 	}
 
-	for e := range *src {
-		d[e] = struct{}{}
+	for e := range src {
+		dst[e] = struct{}{}
 	}
-	*dst = d
 
 	return dst
 }
 
-// If every element in s1 is also in s2 (and vice versa), the sets are deemed equal.
-func equal(s1, s2 *set) bool {
-	if s1 == s2 {
+// equal reports set equality between the parameters. Sets are equal if
+// and only if they have the same elements.
+func equal(s1, s2 set) bool {
+	if same(s1, s2) {
 		return true
 	}
-	s2m := *s2
-	if len(*s1) != len(s2m) {
+
+	if len(s1) != len(s2) {
 		return false
 	}
 
-	for e := range *s1 {
-		if _, ok := s2m[e]; !ok {
+	for e := range s1 {
+		if _, ok := s2[e]; !ok {
 			return false
 		}
 	}
@@ -83,102 +108,90 @@ func equal(s1, s2 *set) bool {
 	return true
 }
 
-// Takes the union of s1 and s2, and stores it in dst.
+// union takes the union of s1 and s2, and stores it in dst.
 //
-// The union of two sets, s1 and s2, is the set containing all the elements of each, for instance:
+// The union of two sets, s1 and s2, is the set containing all the
+// elements of each, for instance:
 //
 //     {a,b,c} UNION {d,e,f} = {a,b,c,d,e,f}
 //
-// Since sets may not have repetition, unions of two sets that overlap do not contain repeat
-// elements, that is:
+// Since sets may not have repetition, unions of two sets that overlap
+// do not contain repeat elements, that is:
 //
 //     {a,b,c} UNION {b,c,d} = {a,b,c,d}
-func (dst *set) union(s1, s2 *set) *set {
-	if s1 == s2 {
+//
+func (dst set) union(s1, s2 set) set {
+	if same(s1, s2) {
 		return dst.copy(s1)
 	}
 
-	if s1 != dst && s2 != dst {
-		dst.clear()
+	if !same(s1, dst) && !same(s2, dst) {
+		dst = clear(dst)
 	}
 
-	d := *dst
-	if dst != s1 {
-		for e := range *s1 {
-			d[e] = struct{}{}
+	if !same(dst, s1) {
+		for e := range s1 {
+			dst[e] = struct{}{}
 		}
 	}
 
-	if dst != s2 {
-		for e := range *s2 {
-			d[e] = struct{}{}
+	if !same(dst, s2) {
+		for e := range s2 {
+			dst[e] = struct{}{}
 		}
 	}
 
 	return dst
 }
 
-// Takes the intersection of s1 and s2, and stores it in dst
+// intersect takes the intersection of s1 and s2, and stores it in dst.
 //
-// The intersection of two sets, s1 and s2, is the set containing all the elements shared between
-// the two sets, for instance:
+// The intersection of two sets, s1 and s2, is the set containing all
+// the elements shared between the two sets, for instance:
 //
 //     {a,b,c} INTERSECT {b,c,d} = {b,c}
 //
-// The intersection between a set and itself is itself, and thus effectively a copy operation:
+// The intersection between a set and itself is itself, and thus
+// effectively a copy operation:
 //
 //     {a,b,c} INTERSECT {a,b,c} = {a,b,c}
 //
-// The intersection between two sets that share no elements is the empty set:
+// The intersection between two sets that share no elements is the empty
+// set:
 //
 //     {a,b,c} INTERSECT {d,e,f} = {}
-func (dst *set) intersect(s1, s2 *set) *set {
-	var swap *set
+//
+func (dst set) intersect(s1, s2 set) set {
+	var swap set
 
-	if s1 == s2 {
+	if same(s1, s2) {
 		return dst.copy(s1)
 	}
-	if s1 == dst {
+	if same(s1, dst) {
 		swap = s2
-	} else if s2 == dst {
+	} else if same(s2, dst) {
 		swap = s1
 	} else {
-		dst.clear()
+		dst = clear(dst)
 
-		if len(*s1) > len(*s2) {
+		if len(s1) > len(s2) {
 			s1, s2 = s2, s1
 		}
-		s2m := *s2
-		d := *dst
-		for e := range *s1 {
-			if _, ok := s2m[e]; ok {
-				d[e] = struct{}{}
+
+		for e := range s1 {
+			if _, ok := s2[e]; ok {
+				dst[e] = struct{}{}
 			}
 		}
 
 		return dst
 	}
 
-	d := *dst
-	s := *swap
-	for e := range d {
-		if _, ok := s[e]; !ok {
-			delete(d, e)
+	for e := range dst {
+		if _, ok := swap[e]; !ok {
+			delete(dst, e)
 		}
 	}
 
 	return dst
-}
-
-func (s *set) add(e int) {
-	(*s)[e] = struct{}{}
-}
-
-func (s *set) elements() []int {
-	els := make([]int, 0, len(*s))
-	for e, _ := range *s {
-		els = append(els, e)
-	}
-
-	return els
 }

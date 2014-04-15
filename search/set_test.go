@@ -8,21 +8,33 @@ import (
 	"testing"
 )
 
-func (s *set) count() int {
-	return len(*s)
-}
+func TestSame(t *testing.T) {
+	var (
+		a = make(set)
+		b = make(set)
+		c = a
+	)
 
-func (s *set) has(e int) bool {
-	_, ok := (*s)[e]
-	return ok
-}
-
-func (s *set) remove(e int) {
-	delete(*s, e)
+	if same(a, b) {
+		t.Error("Independently created sets test as same")
+	}
+	if !same(a, c) {
+		t.Error("Set copy and original test as not same.")
+	}
+	a.add(1)
+	if !same(a, c) {
+		t.Error("Set copy and original test as not same after addition.")
+	}
+	if !same(nil, nil) {
+		t.Error("nil sets test as not same.")
+	}
+	if same(b, nil) {
+		t.Error("nil and empty sets test as same.")
+	}
 }
 
 func TestAdd(t *testing.T) {
-	s := newSet()
+	s := make(set)
 	if s == nil {
 		t.Fatal("Set cannot be created successfully")
 	}
@@ -62,7 +74,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	s := newSet()
+	s := make(set)
 
 	s.add(1)
 	s.add(3)
@@ -97,7 +109,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestElements(t *testing.T) {
-	s := newSet()
+	s := make(set)
 	el := s.elements()
 	if el == nil {
 		t.Errorf("elements of empty set incorrectly returns nil and not zero-length slice")
@@ -132,13 +144,13 @@ func TestElements(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	s := newSet()
+	s := make(set)
 
 	s.add(8)
 	s.add(9)
 	s.add(10)
 
-	s.clear()
+	s = clear(s)
 
 	if s.count() != 0 {
 		t.Error("Clear did not properly reset set to size 0")
@@ -146,7 +158,7 @@ func TestClear(t *testing.T) {
 }
 
 func TestSelfEqual(t *testing.T) {
-	s := newSet()
+	s := make(set)
 
 	if !equal(s, s) {
 		t.Error("Set is not equal to itself")
@@ -160,8 +172,8 @@ func TestSelfEqual(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
+	s1 := make(set)
+	s2 := make(set)
 
 	if !equal(s1, s2) {
 		t.Error("Two different empty sets not equal")
@@ -179,8 +191,8 @@ func TestEqual(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
+	s1 := make(set)
+	s2 := make(set)
 
 	s1.add(1)
 	s1.add(2)
@@ -200,7 +212,7 @@ func TestCopy(t *testing.T) {
 }
 
 func TestSelfCopy(t *testing.T) {
-	s1 := newSet()
+	s1 := make(set)
 
 	s1.add(1)
 	s1.add(2)
@@ -213,9 +225,9 @@ func TestSelfCopy(t *testing.T) {
 }
 
 func TestUnionSame(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
-	s3 := newSet()
+	s1 := make(set)
+	s2 := make(set)
+	s3 := make(set)
 
 	s1.add(1)
 	s1.add(2)
@@ -235,9 +247,9 @@ func TestUnionSame(t *testing.T) {
 }
 
 func TestUnionDiff(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
-	s3 := newSet()
+	s1 := make(set)
+	s2 := make(set)
+	s3 := make(set)
 
 	s1.add(1)
 	s1.add(2)
@@ -264,9 +276,9 @@ func TestUnionDiff(t *testing.T) {
 }
 
 func TestUnionOverlapping(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
-	s3 := newSet()
+	s1 := make(set)
+	s2 := make(set)
+	s3 := make(set)
 
 	s1.add(1)
 	s1.add(2)
@@ -294,9 +306,9 @@ func TestUnionOverlapping(t *testing.T) {
 }
 
 func TestIntersectSame(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
-	s3 := newSet()
+	s1 := make(set)
+	s2 := make(set)
+	s3 := make(set)
 
 	s1.add(2)
 	s1.add(3)
@@ -316,9 +328,9 @@ func TestIntersectSame(t *testing.T) {
 }
 
 func TestIntersectDiff(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
-	s3 := newSet()
+	s1 := make(set)
+	s2 := make(set)
+	s3 := make(set)
 
 	s1.add(2)
 	s1.add(3)
@@ -342,9 +354,9 @@ func TestIntersectDiff(t *testing.T) {
 }
 
 func TestIntersectOverlapping(t *testing.T) {
-	s1 := newSet()
-	s2 := newSet()
-	s3 := newSet()
+	s1 := make(set)
+	s2 := make(set)
+	s3 := make(set)
 
 	s1.add(2)
 	s1.add(3)

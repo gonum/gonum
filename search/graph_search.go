@@ -288,7 +288,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 	sf := setupFuncs(g, nil, nil)
 	successors := sf.successors
 
-	closedSet := make(simpleSet)
+	closedSet := make(set)
 	openSet := xifo.GonumStack([]interface{}{start})
 	predecessor := make(map[int]graph.Node)
 
@@ -388,7 +388,7 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 	index := 0
 	vStack := &xifo.GonumStack{}
-	stackSet := make(simpleSet)
+	stackSet := make(set)
 	sccs = make([][]graph.Node, 0)
 
 	nodes := g.NodeList()
@@ -487,7 +487,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	}
 
 	dst.AddNode(nlist[0])
-	remainingNodes := make(simpleSet)
+	remainingNodes := make(set)
 	for _, node := range nlist[1:] {
 		remainingNodes.add(node.ID())
 	}
@@ -552,9 +552,9 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 //
 // The int map[int][]int is the node's ID.
 func Dominators(start graph.Node, g graph.Graph) map[int][]int {
-	allNodes := newSet()
+	allNodes := make(set)
 	nlist := g.NodeList()
-	doms := make(map[int]*set, len(nlist))
+	doms := make(map[int]set, len(nlist))
 	for _, node := range nlist {
 		allNodes.add(node.ID())
 	}
@@ -562,7 +562,7 @@ func Dominators(start graph.Node, g graph.Graph) map[int][]int {
 	predecessors := setupFuncs(g, nil, nil).predecessors
 
 	for _, node := range nlist {
-		doms[node.ID()] = newSet()
+		doms[node.ID()] = make(set)
 		if node.ID() == start.ID() {
 			doms[node.ID()].add(start.ID())
 		} else {
@@ -580,12 +580,12 @@ func Dominators(start graph.Node, g graph.Graph) map[int][]int {
 			if len(preds) == 0 {
 				continue
 			}
-			tmp := newSet().copy(doms[preds[0].ID()])
+			tmp := make(set).copy(doms[preds[0].ID()])
 			for _, pred := range preds[1:] {
 				tmp.intersect(tmp, doms[pred.ID()])
 			}
 
-			dom := newSet()
+			dom := make(set)
 			dom.add(node.ID())
 
 			dom.union(dom, tmp)
@@ -611,15 +611,15 @@ func Dominators(start graph.Node, g graph.Graph) map[int][]int {
 func PostDominators(end graph.Node, g graph.Graph) map[int][]int {
 	successors := setupFuncs(g, nil, nil).successors
 
-	allNodes := newSet()
+	allNodes := make(set)
 	nlist := g.NodeList()
-	doms := make(map[int]*set, len(nlist))
+	doms := make(map[int]set, len(nlist))
 	for _, node := range nlist {
 		allNodes.add(node.ID())
 	}
 
 	for _, node := range nlist {
-		doms[node.ID()] = newSet()
+		doms[node.ID()] = make(set)
 		if node.ID() == end.ID() {
 			doms[node.ID()].add(end.ID())
 		} else {
@@ -637,12 +637,12 @@ func PostDominators(end graph.Node, g graph.Graph) map[int][]int {
 			if len(succs) == 0 {
 				continue
 			}
-			tmp := newSet().copy(doms[succs[0].ID()])
+			tmp := make(set).copy(doms[succs[0].ID()])
 			for _, succ := range succs[1:] {
 				tmp.intersect(tmp, doms[succ.ID()])
 			}
 
-			dom := newSet()
+			dom := make(set)
 			dom.add(node.ID())
 
 			dom.union(dom, tmp)

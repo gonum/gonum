@@ -109,6 +109,7 @@ func (g *GraphNode) nodeList(list []graph.Node, visited map[int]struct{}) []grap
 			continue
 		}
 		visited[root.ID()] = struct{}{}
+		list = append(list, graph.Node(root))
 
 		list = root.nodeList(list, visited)
 	}

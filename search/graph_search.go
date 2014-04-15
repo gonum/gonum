@@ -288,7 +288,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 	sf := setupFuncs(g, nil, nil)
 	successors := sf.successors
 
-	closedSet := make(set)
+	closedSet := make(Set)
 	openSet := xifo.GonumStack([]interface{}{start})
 	predecessor := make(map[int]graph.Node)
 
@@ -388,7 +388,7 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
 	index := 0
 	vStack := &xifo.GonumStack{}
-	stackSet := make(set)
+	stackSet := make(Set)
 	sccs = make([][]graph.Node, 0)
 
 	nodes := g.NodeList()
@@ -487,7 +487,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	}
 
 	dst.AddNode(nlist[0])
-	remainingNodes := make(set)
+	remainingNodes := make(Set)
 	for _, node := range nlist[1:] {
 		remainingNodes.add(node.ID())
 	}
@@ -551,10 +551,10 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 // immediate dominators etc.
 //
 // The int map[int][]int is the node's ID.
-func Dominators(start graph.Node, g graph.Graph) map[int][]int {
-	allNodes := make(set)
+func Dominators(start graph.Node, g graph.Graph) map[int]Set {
+	allNodes := make(Set)
 	nlist := g.NodeList()
-	doms := make(map[int]set, len(nlist))
+	dominators := make(map[int]Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.add(node.ID())
 	}
@@ -562,11 +562,11 @@ func Dominators(start graph.Node, g graph.Graph) map[int][]int {
 	predecessors := setupFuncs(g, nil, nil).predecessors
 
 	for _, node := range nlist {
-		doms[node.ID()] = make(set)
+		dominators[node.ID()] = make(Set)
 		if node.ID() == start.ID() {
-			doms[node.ID()].add(start.ID())
+			dominators[node.ID()].add(start.ID())
 		} else {
-			doms[node.ID()].copy(allNodes)
+			dominators[node.ID()].copy(allNodes)
 		}
 	}
 
@@ -580,25 +580,20 @@ func Dominators(start graph.Node, g graph.Graph) map[int][]int {
 			if len(preds) == 0 {
 				continue
 			}
-			tmp := make(set).copy(doms[preds[0].ID()])
+			tmp := make(Set).copy(dominators[preds[0].ID()])
 			for _, pred := range preds[1:] {
-				tmp.intersect(tmp, doms[pred.ID()])
+				tmp.intersect(tmp, dominators[pred.ID()])
 			}
 
-			dom := make(set)
+			dom := make(Set)
 			dom.add(node.ID())
 
 			dom.union(dom, tmp)
-			if !equal(dom, doms[node.ID()]) {
-				doms[node.ID()] = dom
+			if !equal(dom, dominators[node.ID()]) {
+				dominators[node.ID()] = dom
 				somethingChanged = true
 			}
 		}
-	}
-
-	dominators := make(map[int][]int, len(doms))
-	for n, d := range doms {
-		dominators[n] = d.elements()
 	}
 
 	return dominators
@@ -608,22 +603,22 @@ func Dominators(start graph.Node, g graph.Graph) map[int][]int {
 //
 // This returns all possible post-dominators for all nodes, it does not prune for strict
 // postdominators, immediate postdominators etc.
-func PostDominators(end graph.Node, g graph.Graph) map[int][]int {
+func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
 	successors := setupFuncs(g, nil, nil).successors
 
-	allNodes := make(set)
+	allNodes := make(Set)
 	nlist := g.NodeList()
-	doms := make(map[int]set, len(nlist))
+	dominators := make(map[int]Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.add(node.ID())
 	}
 
 	for _, node := range nlist {
-		doms[node.ID()] = make(set)
+		dominators[node.ID()] = make(Set)
 		if node.ID() == end.ID() {
-			doms[node.ID()].add(end.ID())
+			dominators[node.ID()].add(end.ID())
 		} else {
-			doms[node.ID()].copy(allNodes)
+			dominators[node.ID()].copy(allNodes)
 		}
 	}
 
@@ -637,25 +632,20 @@ func PostDominators(end graph.Node, g graph.Graph) map[int][]int {
 			if len(succs) == 0 {
 				continue
 			}
-			tmp := make(set).copy(doms[succs[0].ID()])
+			tmp := make(Set).copy(dominators[succs[0].ID()])
 			for _, succ := range succs[1:] {
-				tmp.intersect(tmp, doms[succ.ID()])
+				tmp.intersect(tmp, dominators[succ.ID()])
 			}
 
-			dom := make(set)
+			dom := make(Set)
 			dom.add(node.ID())
 
 			dom.union(dom, tmp)
-			if !equal(dom, doms[node.ID()]) {
-				doms[node.ID()] = dom
+			if !equal(dom, dominators[node.ID()]) {
+				dominators[node.ID()] = dom
 				somethingChanged = true
 			}
 		}
-	}
-
-	dominators := make(map[int][]int, len(doms))
-	for n, d := range doms {
-		dominators[n] = d.elements()
 	}
 
 	return dominators

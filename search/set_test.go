@@ -8,10 +8,15 @@ import (
 	"testing"
 )
 
+// TestSame tests the assumption that pointer equality via unsafe conversion
+// of a map[int]struct{} to uintptr is a valid test for perfect identity between
+// set values. If any of the tests in TestSame fail, the package is broken and same
+// must be reimplemented to conform to the runtime map implementation. The relevant
+// code to look at (at least for gc) is in runtime/hashmap.{h,goc}.
 func TestSame(t *testing.T) {
 	var (
-		a = make(set)
-		b = make(set)
+		a = make(Set)
+		b = make(Set)
 		c = a
 	)
 
@@ -34,7 +39,7 @@ func TestSame(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	s := make(set)
+	s := make(Set)
 	if s == nil {
 		t.Fatal("Set cannot be created successfully")
 	}
@@ -74,7 +79,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	s := make(set)
+	s := make(Set)
 
 	s.add(1)
 	s.add(3)
@@ -109,7 +114,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestElements(t *testing.T) {
-	s := make(set)
+	s := make(Set)
 	el := s.elements()
 	if el == nil {
 		t.Errorf("elements of empty set incorrectly returns nil and not zero-length slice")
@@ -144,7 +149,7 @@ func TestElements(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	s := make(set)
+	s := make(Set)
 
 	s.add(8)
 	s.add(9)
@@ -158,7 +163,7 @@ func TestClear(t *testing.T) {
 }
 
 func TestSelfEqual(t *testing.T) {
-	s := make(set)
+	s := make(Set)
 
 	if !equal(s, s) {
 		t.Error("Set is not equal to itself")
@@ -172,8 +177,8 @@ func TestSelfEqual(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
 
 	if !equal(s1, s2) {
 		t.Error("Two different empty sets not equal")
@@ -191,8 +196,8 @@ func TestEqual(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
 
 	s1.add(1)
 	s1.add(2)
@@ -212,7 +217,7 @@ func TestCopy(t *testing.T) {
 }
 
 func TestSelfCopy(t *testing.T) {
-	s1 := make(set)
+	s1 := make(Set)
 
 	s1.add(1)
 	s1.add(2)
@@ -225,9 +230,9 @@ func TestSelfCopy(t *testing.T) {
 }
 
 func TestUnionSame(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
-	s3 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
+	s3 := make(Set)
 
 	s1.add(1)
 	s1.add(2)
@@ -247,9 +252,9 @@ func TestUnionSame(t *testing.T) {
 }
 
 func TestUnionDiff(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
-	s3 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
+	s3 := make(Set)
 
 	s1.add(1)
 	s1.add(2)
@@ -276,9 +281,9 @@ func TestUnionDiff(t *testing.T) {
 }
 
 func TestUnionOverlapping(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
-	s3 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
+	s3 := make(Set)
 
 	s1.add(1)
 	s1.add(2)
@@ -306,9 +311,9 @@ func TestUnionOverlapping(t *testing.T) {
 }
 
 func TestIntersectSame(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
-	s3 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
+	s3 := make(Set)
 
 	s1.add(2)
 	s1.add(3)
@@ -328,9 +333,9 @@ func TestIntersectSame(t *testing.T) {
 }
 
 func TestIntersectDiff(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
-	s3 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
+	s3 := make(Set)
 
 	s1.add(2)
 	s1.add(3)
@@ -354,9 +359,9 @@ func TestIntersectDiff(t *testing.T) {
 }
 
 func TestIntersectOverlapping(t *testing.T) {
-	s1 := make(set)
-	s2 := make(set)
-	s3 := make(set)
+	s1 := make(Set)
+	s2 := make(Set)
+	s3 := make(Set)
 
 	s1.add(2)
 	s1.add(3)

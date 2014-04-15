@@ -17,39 +17,40 @@ import (
 // directly compare the sets converted to unsafe.Pointer and need to take
 // the sets' addressed and dereference them as pointers to some comparable
 // type.
-func same(s1, s2 set) bool {
+func same(s1, s2 Set) bool {
 	return *(*uintptr)(unsafe.Pointer(&s1)) == *(*uintptr)(unsafe.Pointer(&s2))
 }
 
-// A set is a set of integer identifiers. The simple accessor methods
-// are provided to allow ease of implementation change should the need
-// arise.
-type set map[int]struct{}
+// A set is a set of integer identifiers.
+type Set map[int]struct{}
+
+// The simple accessor methods for Set are provided to allow ease of
+// implementation change should the need arise.
 
 // add inserts an element into the set.
-func (s set) add(e int) {
+func (s Set) add(e int) {
 	s[e] = struct{}{}
 }
 
 // has reports the existence of the element in the set.
-func (s set) has(e int) bool {
+func (s Set) has(e int) bool {
 	_, ok := s[e]
 	return ok
 }
 
 // remove delete the specified element from the set.
-func (s set) remove(e int) {
+func (s Set) remove(e int) {
 	delete(s, e)
 }
 
 // count reports the number of elements stored in the set.
-func (s set) count() int {
+func (s Set) count() int {
 	return len(s)
 }
 
 // elements returns a newly created slice containing all elements of the
 // set. The order of elements in the slice is unspecified.
-func (s set) elements() []int {
+func (s Set) elements() []int {
 	els := make([]int, 0, len(s))
 	for e, _ := range s {
 		els = append(els, e)
@@ -62,23 +63,23 @@ func (s set) elements() []int {
 // clear is not provided as a method since there is no way to replace
 // the calling value if clearing is performed by a make(set). clear
 // should never be called without keeping the returned value.
-func clear(s set) set {
+func clear(s Set) Set {
 	if len(s) == 0 {
 		return s
 	}
 
-	return make(set)
+	return make(Set)
 }
 
 // copy performs a perfect copy from s1 to dst (meaning the sets will
 // be equal).
-func (dst set) copy(src set) set {
+func (dst Set) copy(src Set) Set {
 	if same(src, dst) {
 		return dst
 	}
 
 	if len(dst) > 0 {
-		dst = make(set, len(src))
+		dst = make(Set, len(src))
 	}
 
 	for e := range src {
@@ -90,7 +91,7 @@ func (dst set) copy(src set) set {
 
 // equal reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
-func equal(s1, s2 set) bool {
+func equal(s1, s2 Set) bool {
 	if same(s1, s2) {
 		return true
 	}
@@ -120,7 +121,7 @@ func equal(s1, s2 set) bool {
 //
 //     {a,b,c} UNION {b,c,d} = {a,b,c,d}
 //
-func (dst set) union(s1, s2 set) set {
+func (dst Set) union(s1, s2 Set) Set {
 	if same(s1, s2) {
 		return dst.copy(s1)
 	}
@@ -161,8 +162,8 @@ func (dst set) union(s1, s2 set) set {
 //
 //     {a,b,c} INTERSECT {d,e,f} = {}
 //
-func (dst set) intersect(s1, s2 set) set {
-	var swap set
+func (dst Set) intersect(s1, s2 Set) Set {
+	var swap Set
 
 	if same(s1, s2) {
 		return dst.copy(s1)

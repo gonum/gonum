@@ -530,14 +530,14 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 
 	ds := newDisjointSet()
 	for _, node := range g.NodeList() {
-		ds.MakeSet(node.ID())
+		ds.makeSet(node.ID())
 	}
 
 	for _, edge := range edgeWeights {
 		// The disjoint set doesn't really care for which is head and which is tail so this
 		// should work fine without checking both ways
-		if s1, s2 := ds.Find(edge.Edge.Head().ID()), ds.Find(edge.Edge.Tail().ID()); s1 != s2 {
-			ds.Union(s1, s2)
+		if s1, s2 := ds.find(edge.Edge.Head().ID()), ds.find(edge.Edge.Tail().ID()); s1 != s2 {
+			ds.union(s1, s2)
 			dst.AddUndirectedEdge(edge.Edge, edge.Cost)
 		}
 	}

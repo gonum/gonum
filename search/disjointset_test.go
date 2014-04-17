@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package set
+package search
 
 import (
 	"testing"
 )
 
 func TestDisjointSetMakeSet(t *testing.T) {
-	ds := NewDisjointSet()
+	ds := newDisjointSet()
 	if ds.master == nil {
 		t.Fatal("Internal disjoint set map erroneously nil")
 	} else if len(ds.master) != 0 {
 		t.Error("Disjoint set master map of wrong size")
 	}
 
-	ds.MakeSet(3)
+	ds.makeSet(3)
 	if len(ds.master) != 1 {
 		t.Error("Disjoint set master map of wrong size")
 	}
@@ -25,7 +25,7 @@ func TestDisjointSetMakeSet(t *testing.T) {
 		t.Error("Make set did not successfully add element")
 	} else {
 		if node == nil {
-			t.Fatal("Disjoint set node from MakeSet is nil")
+			t.Fatal("Disjoint set node from makeSet is nil")
 		}
 
 		if node.rank != 0 {
@@ -39,25 +39,25 @@ func TestDisjointSetMakeSet(t *testing.T) {
 }
 
 func TestDisjointSetFind(t *testing.T) {
-	ds := NewDisjointSet()
+	ds := newDisjointSet()
 
-	ds.MakeSet(3)
-	ds.MakeSet(5)
+	ds.makeSet(3)
+	ds.makeSet(5)
 
-	if ds.Find(3) == ds.Find(5) {
+	if ds.find(3) == ds.find(5) {
 		t.Error("Disjoint sets incorrectly found to be the same")
 	}
 }
 
 func TestUnion(t *testing.T) {
-	ds := NewDisjointSet()
+	ds := newDisjointSet()
 
-	ds.MakeSet(3)
-	ds.MakeSet(5)
+	ds.makeSet(3)
+	ds.makeSet(5)
 
-	ds.Union(ds.Find(3), ds.Find(5))
+	ds.union(ds.find(3), ds.find(5))
 
-	if ds.Find(3) != ds.Find(5) {
+	if ds.find(3) != ds.find(5) {
 		t.Error("Sets found to be disjoint after union")
 	}
 }

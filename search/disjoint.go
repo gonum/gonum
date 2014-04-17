@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package set
+package search
 
 // A disjoint set is a collection of non-overlapping sets. That is, for any two sets in the
 // disjoint set, their intersection is the empty set.
@@ -17,32 +17,32 @@ package set
 // A concrete example of a union-find algorithm can be found as discrete.Kruskal -- which unions
 // two sets when an edge is created between two vertices, and refuses to make an edge between two
 // vertices if they're part of the same set.
-type DisjointSet struct {
-	master map[interface{}]*DisjointSetNode
+type disjointSet struct {
+	master map[int]*disjointSetNode
 }
 
-type DisjointSetNode struct {
-	parent *DisjointSetNode
+type disjointSetNode struct {
+	parent *disjointSetNode
 	rank   int
 }
 
-func NewDisjointSet() *DisjointSet {
-	return &DisjointSet{master: make(map[interface{}]*DisjointSetNode)}
+func newDisjointSet() *disjointSet {
+	return &disjointSet{master: make(map[int]*disjointSetNode)}
 }
 
 // If the element isn't already somewhere in there, adds it to the master set and its own tiny set.
-func (ds *DisjointSet) MakeSet(el interface{}) {
-	if _, ok := ds.master[el]; ok {
+func (ds *disjointSet) makeSet(e int) {
+	if _, ok := ds.master[e]; ok {
 		return
 	}
-	dsNode := &DisjointSetNode{rank: 0}
+	dsNode := &disjointSetNode{rank: 0}
 	dsNode.parent = dsNode
-	ds.master[el] = dsNode
+	ds.master[e] = dsNode
 }
 
 // Returns the set the element belongs to, or nil if none.
-func (ds *DisjointSet) Find(el interface{}) *DisjointSetNode {
-	dsNode, ok := ds.master[el]
+func (ds *disjointSet) find(e int) *disjointSetNode {
+	dsNode, ok := ds.master[e]
 	if !ok {
 		return nil
 	}
@@ -50,7 +50,7 @@ func (ds *DisjointSet) Find(el interface{}) *DisjointSetNode {
 	return find(dsNode)
 }
 
-func find(dsNode *DisjointSetNode) *DisjointSetNode {
+func find(dsNode *disjointSetNode) *disjointSetNode {
 	if dsNode.parent != dsNode {
 		dsNode.parent = find(dsNode.parent)
 	}
@@ -58,11 +58,11 @@ func find(dsNode *DisjointSetNode) *DisjointSetNode {
 	return dsNode.parent
 }
 
-// Unions two subsets within the DisjointSet.
+// Unions two subsets within the disjointSet.
 //
 // If x or y are not in this disjoint set, the behavior is undefined. If either pointer is nil,
 // this function will panic.
-func (ds *DisjointSet) Union(x, y *DisjointSetNode) {
+func (ds *disjointSet) union(x, y *disjointSetNode) {
 	if x == nil || y == nil {
 		panic("Disjoint Set union on nil sets")
 	}

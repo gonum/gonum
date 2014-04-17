@@ -6,7 +6,36 @@ package search
 
 import (
 	"unsafe"
+
+	"github.com/gonum/graph"
 )
+
+// A set is a set of integer identifiers.
+type intSet map[int]struct{}
+
+// The simple accessor methods for Set are provided to allow ease of
+// implementation change should the need arise.
+
+// add inserts an element into the set.
+func (s intSet) add(e int) {
+	s[e] = struct{}{}
+}
+
+// has reports the existence of the element in the set.
+func (s intSet) has(e int) bool {
+	_, ok := s[e]
+	return ok
+}
+
+// remove delete the specified element from the set.
+func (s intSet) remove(e int) {
+	delete(s, e)
+}
+
+// count reports the number of elements stored in the set.
+func (s intSet) count() int {
+	return len(s)
+}
 
 // same determines whether two sets are backed by the same store. In the
 // current implementation using hash maps it makes use of the fact that
@@ -21,42 +50,21 @@ func same(s1, s2 Set) bool {
 	return *(*uintptr)(unsafe.Pointer(&s1)) == *(*uintptr)(unsafe.Pointer(&s2))
 }
 
-// A set is a set of integer identifiers.
-type Set map[int]struct{}
+// A set is a set of nodes keyed in their integer identifiers.
+type Set map[int]graph.Node
 
 // The simple accessor methods for Set are provided to allow ease of
 // implementation change should the need arise.
 
 // add inserts an element into the set.
-func (s Set) add(e int) {
-	s[e] = struct{}{}
+func (s Set) add(n graph.Node) {
+	s[n.ID()] = n
 }
 
 // has reports the existence of the element in the set.
-func (s Set) has(e int) bool {
-	_, ok := s[e]
+func (s Set) has(n graph.Node) bool {
+	_, ok := s[n.ID()]
 	return ok
-}
-
-// remove delete the specified element from the set.
-func (s Set) remove(e int) {
-	delete(s, e)
-}
-
-// count reports the number of elements stored in the set.
-func (s Set) count() int {
-	return len(s)
-}
-
-// elements returns a newly created slice containing all elements of the
-// set. The order of elements in the slice is unspecified.
-func (s Set) elements() []int {
-	els := make([]int, 0, len(s))
-	for e, _ := range s {
-		els = append(els, e)
-	}
-
-	return els
 }
 
 // clear returns an empty set, possibly using the same backing store.
@@ -82,8 +90,8 @@ func (dst Set) copy(src Set) Set {
 		dst = make(Set, len(src))
 	}
 
-	for e := range src {
-		dst[e] = struct{}{}
+	for e, n := range src {
+		dst[e] = n
 	}
 
 	return dst
@@ -131,14 +139,14 @@ func (dst Set) union(s1, s2 Set) Set {
 	}
 
 	if !same(dst, s1) {
-		for e := range s1 {
-			dst[e] = struct{}{}
+		for e, n := range s1 {
+			dst[e] = n
 		}
 	}
 
 	if !same(dst, s2) {
-		for e := range s2 {
-			dst[e] = struct{}{}
+		for e, n := range s2 {
+			dst[e] = n
 		}
 	}
 
@@ -179,9 +187,9 @@ func (dst Set) intersect(s1, s2 Set) Set {
 			s1, s2 = s2, s1
 		}
 
-		for e := range s1 {
+		for e, n := range s1 {
 			if _, ok := s2[e]; ok {
-				dst[e] = struct{}{}
+				dst[e] = n
 			}
 		}
 

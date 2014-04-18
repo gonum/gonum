@@ -5,10 +5,19 @@
 package concrete
 
 import (
+	"bytes"
 	"errors"
 	"strings"
 
 	"github.com/gonum/graph"
+)
+
+const (
+	blackSquare = '\u2580'
+	space       = ' '
+	startChar   = 's'
+	goalChar    = 'g'
+	pathChar    = '\u2665'
 )
 
 type TileGraph struct {
@@ -48,9 +57,9 @@ func GenerateTileGraph(template string) (*TileGraph, error) {
 			}
 
 			switch ch {
-			case '\u2580':
+			case blackSquare:
 				tiles = append(tiles, false)
-			case ' ':
+			case space:
 				tiles = append(tiles, true)
 			default:
 				return nil, errors.New("Unrecognized character while reading input string")
@@ -81,51 +90,54 @@ func (g *TileGraph) SetPassability(row, col int, passability bool) {
 }
 
 func (g *TileGraph) String() string {
-	var outString string
+	var b bytes.Buffer
 	for r := 0; r < g.numRows; r++ {
+		if r != 0 {
+			b.WriteByte('\n')
+		}
 		for c := 0; c < g.numCols; c++ {
 			if g.tiles[r*g.numCols+c] == false {
-				outString += "\u2580" // Black square
+				b.WriteRune(blackSquare)
 			} else {
-				outString += " " // Space
+				b.WriteByte(space)
 			}
 		}
-
-		outString += "\n"
 	}
 
-	return outString[:len(outString)-1] // Kill final newline
+	return b.String()
 }
 
 func (g *TileGraph) PathString(path []graph.Node) string {
-	if path == nil || len(path) == 0 {
+	if len(path) == 0 {
 		return g.String()
 	}
 
-	var outString string
+	var b bytes.Buffer
 	for r := 0; r < g.numRows; r++ {
+		if r != 0 {
+			b.WriteByte('\n')
+		}
+	row:
 		for c := 0; c < g.numCols; c++ {
 			if id := r*g.numCols + c; g.tiles[id] == false {
-				outString += "\u2580" // Black square
+				b.WriteRune(blackSquare)
 			} else if id == path[0].ID() {
-				outString += "s"
+				b.WriteRune(startChar)
 			} else if id == path[len(path)-1].ID() {
-				outString += "g"
+				b.WriteRune(goalChar)
 			} else {
-				toAppend := " "
 				for _, num := range path[1 : len(path)-1] {
 					if id == num.ID() {
-						toAppend = "♥"
+						b.WriteRune(pathChar)
+						continue row
 					}
 				}
-				outString += toAppend
+				b.WriteByte(space)
 			}
 		}
-
-		outString += "\n"
 	}
 
-	return outString[:len(outString)-1]
+	return b.String()
 }
 
 func (g *TileGraph) Dimensions() (rows, cols int) {

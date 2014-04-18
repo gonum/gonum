@@ -18,9 +18,14 @@ import (
 )
 
 func TestSimpleAStar(t *testing.T) {
-	tg, err := concrete.GenerateTileGraph("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
+	tg, err := internal.NewTileGraphFrom("" +
+		"▀  ▀\n" +
+		"▀▀ ▀\n" +
+		"▀▀ ▀\n" +
+		"▀▀ ▀",
+	)
 	if err != nil {
-		t.Fatal("Couldn't generate tilegraph")
+		t.Fatalf("Couldn't generate tilegraph: %v", err)
 	}
 
 	path, cost, _ := search.AStar(concrete.Node(1), concrete.Node(14), tg, nil, nil)
@@ -44,7 +49,7 @@ func TestSimpleAStar(t *testing.T) {
 }
 
 func TestBiggerAStar(t *testing.T) {
-	tg := concrete.NewTileGraph(3, 3, true)
+	tg := internal.NewTileGraph(3, 3, true)
 
 	path, cost, _ := search.AStar(concrete.Node(0), concrete.Node(8), tg, nil, nil)
 
@@ -52,7 +57,7 @@ func TestBiggerAStar(t *testing.T) {
 		t.Error("Non-optimal or impossible path found for 3x3 grid")
 	}
 
-	tg = concrete.NewTileGraph(1000, 1000, true)
+	tg = internal.NewTileGraph(1000, 1000, true)
 	path, cost, _ = search.AStar(concrete.Node(0), concrete.Node(999*1000+999), tg, nil, nil)
 	if !search.IsPath(path, tg) || cost != 1998 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
@@ -60,7 +65,7 @@ func TestBiggerAStar(t *testing.T) {
 }
 
 func TestObstructedAStar(t *testing.T) {
-	tg := concrete.NewTileGraph(10, 10, true)
+	tg := internal.NewTileGraph(10, 10, true)
 
 	// Creates a partial "wall" down the middle row with a gap down the left side
 	tg.SetPassability(4, 1, false)
@@ -104,7 +109,7 @@ func TestObstructedAStar(t *testing.T) {
 }
 
 func TestNoPathAStar(t *testing.T) {
-	tg := concrete.NewTileGraph(5, 5, true)
+	tg := internal.NewTileGraph(5, 5, true)
 
 	// Creates a "wall" down the middle row
 	tg.SetPassability(2, 0, false)

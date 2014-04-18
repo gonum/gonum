@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package concrete
+package internal
 
 import (
 	"bytes"
 	"errors"
+	"math"
 	"strings"
 
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/concrete"
 )
 
 const (
@@ -19,6 +21,8 @@ const (
 	goalChar    = 'g'
 	pathChar    = '\u2665'
 )
+
+var inf = math.Inf(1)
 
 type TileGraph struct {
 	tiles            []bool
@@ -40,8 +44,8 @@ func NewTileGraph(dimX, dimY int, isPassable bool) *TileGraph {
 	}
 }
 
-func GenerateTileGraph(template string) (*TileGraph, error) {
-	rows := strings.Split(strings.TrimSpace(template), "\n")
+func NewTileGraphFrom(text string) (*TileGraph, error) {
+	rows := strings.Split(text, "\n")
 
 	tiles := make([]bool, 0)
 
@@ -164,7 +168,7 @@ func (g *TileGraph) CoordsToNode(row, col int) graph.Node {
 	if id == -1 {
 		return nil
 	}
-	return Node(id)
+	return concrete.Node(id)
 }
 
 func (g *TileGraph) Neighbors(n graph.Node) []graph.Node {
@@ -194,7 +198,7 @@ func (g *TileGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	r1, c1 := g.IDToCoords(n.ID())
 	r2, c2 := g.IDToCoords(neigh.ID())
 	if (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1)) {
-		return Edge{n, neigh}
+		return concrete.Edge{n, neigh}
 	}
 
 	return nil
@@ -216,8 +220,8 @@ func (g *TileGraph) EdgeList() []graph.Edge {
 			continue
 		}
 
-		for _, succ := range g.Neighbors(Node(id)) {
-			edges = append(edges, Edge{Node(id), succ})
+		for _, succ := range g.Neighbors(concrete.Node(id)) {
+			edges = append(edges, concrete.Edge{concrete.Node(id), succ})
 		}
 	}
 
@@ -231,7 +235,7 @@ func (g *TileGraph) NodeList() []graph.Node {
 			continue
 		}
 
-		nodes = append(nodes, Node(id))
+		nodes = append(nodes, concrete.Node(id))
 	}
 
 	return nodes

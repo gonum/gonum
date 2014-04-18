@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package concrete_test
+package internal_test
 
 import (
 	"testing"
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
 )
 
-var _ graph.Graph = (*concrete.TileGraph)(nil)
+var _ graph.Graph = (*internal.TileGraph)(nil)
 
 func TestTileGraph(t *testing.T) {
-	tg := concrete.NewTileGraph(4, 4, false)
+	tg := internal.NewTileGraph(4, 4, false)
 
 	if tg == nil || tg.String() != "▀▀▀▀\n▀▀▀▀\n▀▀▀▀\n▀▀▀▀" {
 		t.Fatal("Tile graph not generated correctly")
@@ -55,7 +56,7 @@ func TestTileGraph(t *testing.T) {
 		t.Fatal("Passability set incorrectly")
 	}
 
-	if tg2, err := concrete.GenerateTileGraph("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀"); err != nil {
+	if tg2, err := internal.NewTileGraphFrom("▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀"); err != nil {
 		t.Error("Tile graph errored on interpreting valid template string\n▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
 	} else if tg2.String() != "▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀" {
 		t.Error("Tile graph failed to generate properly with input string\n▀  ▀\n▀▀ ▀\n▀▀ ▀\n▀▀ ▀")
@@ -104,5 +105,4 @@ func TestTileGraph(t *testing.T) {
 	if tg.Degree(concrete.Node(0)) != 0 {
 		t.Error("Degree returns incorrect number for impassable tile (0,0)")
 	}
-
 }

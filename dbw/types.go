@@ -27,6 +27,9 @@ type General struct {
 
 func NewGeneral(o blas.Order, m, n int, data []float64) General {
 	var A General
+	if data == nil {
+		data = make([]float64, m*n)
+	}
 	if o == blas.RowMajor {
 		A = General{o, m, n, n, data}
 	} else {

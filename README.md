@@ -23,7 +23,9 @@ Go implementation of the BLAS API (incomplete, implements most of the float64 AP
 
 Binding to a C implementation of the cblas interface (e.g. ATLAS, OpenBLAS, intel MKL)
 
-On linux the linker flags (i.e. path to the BLAS library and library name) might have to be adapted.
+The linker flags (i.e. path to the BLAS library and library name) might have to be adapted.
+
+The recommended (free) option for good performance on both linux and darwin is OpenBLAS.
 
 ### blas/dbw
 
@@ -46,7 +48,7 @@ func init() {
 }
 
 func main() {
-	v := dbw.Vector{[]float64{1, 1, 1}, 3, 1}
+	v := dbw.NewVector([]float64{1, 1, 1})
 	fmt.Println("v has length:", dbw.Nrm2(v))
 }
 ```

@@ -228,3 +228,12 @@ func must(err error) {
 		panic(err)
 	}
 }
+
+func Real2Cmplx(r []float64, c []complex128) {
+	if len(r) != len(c) {
+		panic("length missmatch")
+	}
+	for ix, v := range r {
+		c[ix] = complex(v, 0)
+	}
+}

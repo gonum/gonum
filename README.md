@@ -4,11 +4,26 @@ A collection of packages to provide BLAS functionality for the Go programming
 language (http://golang.org)
 
 ## Installation 
+
+Recommended procedure for Linux and MacOsX:
 ```
   go get github.com/gonum/blas
-  cd $GOPATH/src/github.com/gonum/blas
+  cd $GOPATH/src/github.com/gonum/blas/cblas
+  git clone https://github.com/xianyi/OpenBLAS
+  cd OpenBLAS
+  make
+  cd ../..
   go install ./...
+  go test ./...
 ```
+
+For Windows you can download binary packages for OpenBLAS at
+http://sourceforge.net/projects/openblas/files/
+
+If you want to use a different BLAS package such as the Intel MKL or you
+use a different installation path you can adjust the LDFLAGS in
+cblas/blas.go
+
 ## Packages
 
 ### blas

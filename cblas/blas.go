@@ -9,11 +9,11 @@ package cblas
 
 /*
 #cgo CFLAGS: -g -O2
-#cgo linux LDFLAGS: -lcblas
+#cgo linux LDFLAGS: -LOpenBLAS/ -lopenblas
 //#cgo linux LDFLAGS: -lmkl_rt
-//#cgo linux LDFLAGS: -L/path/to/OpenBLAS -lopenblas
-#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
-//#cgo darwin LDFLAGS: -L/path/to/OpenBLAS -lopenblas
+//#cgo linux LDFLAGS: -lcblas
+#cgo darwin LDFLAGS: -LOpenBLAS/ -lopenblas
+//#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
 #include "cblas.h"
 */
 import "C"

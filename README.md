@@ -5,24 +5,41 @@ language (http://golang.org)
 
 ## Installation 
 
-Recommended procedure for Linux and MacOsX:
 ```
   go get github.com/gonum/blas
-  cd $GOPATH/src/github.com/gonum/blas/cblas
+```
+
+For the BLAS C-bindings:
+
+If you want to use OpenBLAS install it in any directory
+```
   git clone https://github.com/xianyi/OpenBLAS
   cd OpenBLAS
   make
-  cd ../..
-  go install ./...
-  go test ./...
+```
+
+Then install the cblas package
+```
+  cd $GOPATH/src/github.com/gonum/blas/cblas
+  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install 
 ```
 
 For Windows you can download binary packages for OpenBLAS at
 http://sourceforge.net/projects/openblas/files/
 
-If you want to use a different BLAS package such as the Intel MKL or you
-use a different installation path you can adjust the LDFLAGS in
-cblas/blas.go
+If you want to use a different BLAS package such as the Intel MKL you can adjust the CGO_LDFLAGS variable, e.g.
+```
+  cd $GOPATH/src/github.com/gonum/blas/cblas
+  CGO_LDFLAGS="-lmkl_rt" go install 
+```
+
+On OS X you can also use the libraries provieded by the system:
+```
+  cd $GOPATH/src/github.com/gonum/blas/cblas
+  CGO_LDFLAGS="LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib" go install 
+```
+
+
 
 ## Packages
 

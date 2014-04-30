@@ -24,5 +24,12 @@ http://sourceforge.net/projects/openblas/files/
 generate lapack bindings
 ```
   cd $GOPATH/src/github.com/dane-unltd/lapack/clapack
-  ./genLapack /path/to/OpenBLAS
+  ./genLapack /path/to/OpenBLAS openblas
 ```
+
+If you want to use the Intel MKL and all of your paths are properly set
+```
+  cd $GOPATH/src/github.com/dane-unltd/lapack/clapack
+  ./genLapack mkl_rt
+```
+should work.

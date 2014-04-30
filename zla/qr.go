@@ -26,7 +26,7 @@ func (f QRFact) Solve(B zbw.General) zbw.General {
 	if f.a.Cols != B.Cols {
 		panic("dimension missmatch")
 	}
-	impl.Zunmqr(B.Order, blas.Left, blas.Trans, f.a.Rows, B.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, B.Data, B.Stride)
+	impl.Zunmqr(B.Order, blas.Left, blas.ConjTrans, f.a.Rows, B.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, B.Data, B.Stride)
 	B.Rows = f.a.Cols
 	zbw.Trsm(blas.Left, blas.NoTrans, 1, f.R(), B)
 	return B

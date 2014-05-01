@@ -233,6 +233,7 @@ func (Blas) Dcopy(n int, x []float64, incX int, y []float64, incY int) {
 			return
 		}
 		copy(y[:n], x[:n])
+		return
 	}
 
 	var ix, iy int

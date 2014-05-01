@@ -103,7 +103,22 @@ func (Blas) Dasum(n int, x []float64, incX int) float64 {
 	if n < 0 {
 		panic(negativeN)
 	}
-	if incX <= 0 {
+	if incX <= 1 {
+		if incX == 1 {
+			// Fast path for common case
+			if len(x) == n {
+				for _, v := range x {
+					sum += math.Abs(v)
+				}
+				return sum
+			}
+			for i, v := range x {
+				if i >= n {
+					return sum
+				}
+				sum += math.Abs(v)
+			}
+		}
 		if incX == 0 {
 			panic(zeroInc)
 		}

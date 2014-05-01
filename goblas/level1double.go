@@ -263,6 +263,19 @@ func (Blas) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY
 	if alpha == 0 {
 		return
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, v := range x {
+				y[i] += alpha * v
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			y[i] += alpha * x[i]
+		}
+		return
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX

@@ -496,7 +496,9 @@ func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64,
 		iy = (-n + 1) * incY
 	}
 	for i := 0; i < n; i++ {
-		x[ix], y[iy] = c*x[ix]+s*y[iy], c*y[iy]-s*x[ix]
+		vx := x[ix]
+		vy := y[iy]
+		x[ix], y[iy] = c*vx+s*vy, c*vy-s*vx
 		ix += incX
 		iy += incY
 	}

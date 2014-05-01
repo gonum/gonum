@@ -471,6 +471,23 @@ func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64,
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
+
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, vx := range x {
+				vy := y[i]
+				x[i], y[i] = c*vx+s*vy, c*vy-s*vx
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			vx := x[i]
+			vy := y[i]
+			x[i], y[i] = c*vx+s*vy, c*vy-s*vx
+		}
+		return
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX

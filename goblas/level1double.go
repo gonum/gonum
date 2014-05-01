@@ -227,6 +227,14 @@ func (Blas) Dcopy(n int, x []float64, incX int, y []float64, incY int) {
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			copy(y, x)
+			return
+		}
+		copy(y[:n], x[:n])
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX

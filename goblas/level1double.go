@@ -157,6 +157,17 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 	idx := 0
 	max := math.Abs(x[0])
 
+	if incX == 1 {
+		for i := 1; i < n; i++ {
+			v := x[i]
+			absV := math.Abs(v)
+			if absV > max {
+				max = absV
+				idx = i
+			}
+		}
+	}
+
 	for i := 1; i < n; i++ {
 		v := x[i*incX]
 		absV := math.Abs(v)

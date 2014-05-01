@@ -31,8 +31,15 @@ func (Blas) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
-	var ix, iy int
 	var sum float64
+	// Fast path for common case
+	if incX == 1 && incY == 1 && n == len(x) {
+		for i, v := range x {
+			sum += y[i] * v
+		}
+		return sum
+	}
+	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX
 	}

@@ -589,6 +589,19 @@ func (Blas) Dscal(n int, alpha float64, x []float64, incX int) {
 			panic(negativeN)
 		}
 	}
+	if incX == 1 {
+		if n == len(x) {
+			for i := range x {
+				x[i] *= alpha
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			x[i] *= alpha
+		}
+		return
+	}
+
 	for ix := 0; ix < n*incX; ix += incX {
 		x[ix] *= alpha
 	}

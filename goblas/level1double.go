@@ -562,6 +562,7 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 			vy := y[i]
 			x[i], y[i] = vx*h11+vy*h12, vx*h21+vy*h22
 		}
+		return
 	}
 
 	for i := 0; i < n; i++ {

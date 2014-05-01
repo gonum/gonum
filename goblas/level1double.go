@@ -184,6 +184,18 @@ func (Blas) Dswap(n int, x []float64, incX int, y []float64, incY int) {
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, v := range x {
+				x[i], y[i] = y[i], v
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			x[i], y[i] = y[i], x[i]
+		}
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX

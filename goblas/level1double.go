@@ -194,6 +194,7 @@ func (Blas) Dswap(n int, x []float64, incX int, y []float64, incY int) {
 		for i := 0; i < n; i++ {
 			x[i], y[i] = y[i], x[i]
 		}
+		return
 	}
 
 	var ix, iy int

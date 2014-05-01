@@ -118,12 +118,10 @@ func (Blas) Dasum(n int, x []float64, incX int) float64 {
 				}
 				return sum
 			}
-			for i, v := range x {
-				if i >= n {
-					return sum
-				}
-				sum += math.Abs(v)
+			for i := 0; i < n; i++ {
+				sum += math.Abs(x[i])
 			}
+			return sum
 		}
 		if incX == 0 {
 			panic(zeroInc)

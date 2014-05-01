@@ -549,6 +549,21 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 	if incY < 0 {
 		iy = (-n + 1) * incY
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, vx := range x {
+				vy := y[i]
+				x[i], y[i] = vx*h11+vy*h12, vx*h21+vy*h22
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			vx := x[i]
+			vy := y[i]
+			x[i], y[i] = vx*h11+vy*h12, vx*h21+vy*h22
+		}
+	}
+
 	for i := 0; i < n; i++ {
 		x[ix], y[iy] = x[ix]*h11+y[iy]*h12, x[ix]*h21+y[iy]*h22
 		ix += incX

@@ -56,18 +56,18 @@ func (m *Dense) Norm(ord float64) float64 {
 		for i := 0; i < m.mat.Cols; i++ {
 			var s float64
 			for _, e := range m.Col(col, i) {
-				s += e
+				s += math.Abs(e)
 			}
-			n = math.Max(math.Abs(s), n)
+			n = math.Max(s, n)
 		}
 	case math.IsInf(ord, +1):
 		row := make([]float64, m.mat.Cols)
 		for i := 0; i < m.mat.Rows; i++ {
 			var s float64
 			for _, e := range m.Row(row, i) {
-				s += e
+				s += math.Abs(e)
 			}
-			n = math.Max(math.Abs(s), n)
+			n = math.Max(s, n)
 		}
 	case ord == -1:
 		n = math.MaxFloat64
@@ -75,9 +75,9 @@ func (m *Dense) Norm(ord float64) float64 {
 		for i := 0; i < m.mat.Cols; i++ {
 			var s float64
 			for _, e := range m.Col(col, i) {
-				s += e
+				s += math.Abs(e)
 			}
-			n = math.Min(math.Abs(s), n)
+			n = math.Min(s, n)
 		}
 	case math.IsInf(ord, -1):
 		n = math.MaxFloat64
@@ -85,9 +85,9 @@ func (m *Dense) Norm(ord float64) float64 {
 		for i := 0; i < m.mat.Rows; i++ {
 			var s float64
 			for _, e := range m.Row(row, i) {
-				s += e
+				s += math.Abs(e)
 			}
-			n = math.Min(math.Abs(s), n)
+			n = math.Min(s, n)
 		}
 	case ord == 0:
 		for i := 0; i < len(m.mat.Data); i += m.mat.Stride {

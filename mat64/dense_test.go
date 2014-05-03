@@ -592,6 +592,26 @@ func (s *S) TestNorm(c *check.C) {
 			ord:  -inf,
 			norm: 6,
 		},
+		{
+			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
+			ord:  1,
+			norm: 8,
+		},
+		{
+			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
+			ord:  -1,
+			norm: 5,
+		},
+		{
+			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
+			ord:  inf,
+			norm: 15,
+		},
+		{
+			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
+			ord:  -inf,
+			norm: 5,
+		},
 	} {
 		a := NewDense(flatten(test.a))
 		c.Check(a.Norm(test.ord), check.Equals, test.norm, check.Commentf("Test %d: %v norm = %f", i, test.a, test.norm))

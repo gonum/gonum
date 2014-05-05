@@ -311,7 +311,7 @@ func (bl Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose,
 					if d == blas.NonUnit {
 						bl.Dscal(m, 1/a[k+ka], b[kb:], 1)
 					}
-					for j := 0; j < k-1; j++ {
+					for j := 0; j < k; j++ {
 						if a[j+ka] != 0 {
 							bl.Daxpy(m, a[j+ka], b[kb:], 1, b[j*ldb:], 1)
 						}

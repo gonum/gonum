@@ -207,6 +207,7 @@ func (bl Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose,
 		} else {
 			s = blas.Left
 		}
+		m, n = n, m
 	}
 
 	var nrowa int
@@ -274,7 +275,7 @@ func (bl Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose,
 					if alpha != 1 {
 						bl.Dscal(m, alpha, b[jb:], 1)
 					}
-					for k := 0; k < j-1; k++ {
+					for k := 0; k < j; k++ {
 						if a[k+ja] != 0 {
 							bl.Daxpy(m, -a[k+ja], b[k*ldb:], 1, b[jb:], 1)
 						}

@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright ©2012 The bíogo.blas Authors. All rights reserved.
+# Copyright ©2014 The Gonum Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -41,7 +41,7 @@ if ($excludeAtlas) {
 printf $goblas <<EOH;
 // Do not manually edit this file. It was created by the genBlas.pl script from ${cblasHeader}.
 
-// Copyright ©2012 The bíogo.blas Authors. All rights reserved.
+// Copyright ©2014 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 

@@ -2975,13 +2975,22 @@ func (Blas) Strsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if o == blas.RowMajor {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+	if s == blas.Left {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
 			panic("cblas: index of a out of range")
 		}
 	} else {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
 			panic("cblas: index of a out of range")
+		}
+	}
+	if o == blas.RowMajor {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
+			panic("cblas: index of b out of range")
+		}
+	} else {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
+			panic("cblas: index of b out of range")
 		}
 	}
 	C.cblas_strsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb))
@@ -3223,13 +3232,22 @@ func (Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if o == blas.RowMajor {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+	if s == blas.Left {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
 			panic("cblas: index of a out of range")
 		}
 	} else {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
 			panic("cblas: index of a out of range")
+		}
+	}
+	if o == blas.RowMajor {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
+			panic("cblas: index of b out of range")
+		}
+	} else {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
+			panic("cblas: index of b out of range")
 		}
 	}
 	C.cblas_dtrsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb))
@@ -3471,13 +3489,22 @@ func (Blas) Ctrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if o == blas.RowMajor {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+	if s == blas.Left {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
 			panic("cblas: index of a out of range")
 		}
 	} else {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
 			panic("cblas: index of a out of range")
+		}
+	}
+	if o == blas.RowMajor {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
+			panic("cblas: index of b out of range")
+		}
+	} else {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
+			panic("cblas: index of b out of range")
 		}
 	}
 	C.cblas_ctrsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))
@@ -3719,13 +3746,22 @@ func (Blas) Ztrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d 
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
-	if o == blas.RowMajor {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
+	if s == blas.Left {
+		if lda*(n-1)+m > len(a) || lda < max(1, m) {
 			panic("cblas: index of a out of range")
 		}
 	} else {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
+		if lda*(m-1)+n > len(a) || lda < max(1, n) {
 			panic("cblas: index of a out of range")
+		}
+	}
+	if o == blas.RowMajor {
+		if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
+			panic("cblas: index of b out of range")
+		}
+	} else {
+		if ldb*(n-1)+m > len(b) || ldb < max(1, m) {
+			panic("cblas: index of b out of range")
 		}
 	}
 	C.cblas_ztrsm(C.enum_CBLAS_ORDER(o), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))

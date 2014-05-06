@@ -23,7 +23,8 @@ func TestDtrsm(t *testing.T, blasser Dtrsmer) {
 		a, b     [][]float64
 		lda, ldb int
 
-		Ans [][]float64
+		ans    [][]float64
+		panics bool
 	}{
 		{
 			s:     blas.Left,
@@ -47,34 +48,70 @@ func TestDtrsm(t *testing.T, blasser Dtrsmer) {
 				{9},
 			},
 
-			Ans: [][]float64{
+			ans: [][]float64{
 				{0.504308834262264},
 				{854.7368902709834},
 				{33.70917860157599},
 			},
 		},
+		{
+			s:     blas.Left,
+			ul:    blas.Lower,
+			tA:    blas.NoTrans,
+			d:     blas.NonUnit,
+			m:     3,
+			n:     1,
+			alpha: 2,
+			lda:   3,
+			ldb:   1,
+
+			a: [][]float64{
+				{27.760766912759156, -0.021508733517253534, -0.5705006213444302},
+				{0.0004901483858841176, 0.018718921572188584, 0.13804515090321257},
+				{-0.021508733517253534, -0.5705006213444302, 15.0000324839208237},
+			},
+			b: [][]float64{{7}},
+
+			panics: true,
+		},
 	} {
-		dtrsmcomp(i, "RowMajor", t, blas.RowMajor, blasser, test.s, test.ul, test.tA,
-			test.d, test.m, test.n, test.alpha, test.a, test.lda, test.b, test.ldb, test.Ans)
-	}
-}
+		const (
+			name = "RowMajor"
+			o    = blas.RowMajor
+		)
 
-func dtrsmcomp(i int, name string, t *testing.T, o blas.Order, blasser Dtrsmer, s blas.Side, ul blas.Uplo,
-	tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a [][]float64, lda int, b [][]float64,
-	ldb int, ans [][]float64) {
+		aFlat := flatten(test.a, o)
+		aCopy := flatten(test.a, o)
+		bFlat := flatten(test.b, o)
+		ansFlat := flatten(test.ans, o)
 
-	aFlat := flatten(a, o)
-	aCopy := flatten(a, o)
-	bFlat := flatten(b, o)
-	//fmt.Println("ans is ", ans)
-	ansFlat := flatten(ans, o)
-	blasser.Dtrsm(o, s, ul, tA, d, m, n, alpha, aFlat, lda, bFlat, ldb)
+		fn := func() {
+			blasser.Dtrsm(
+				o, test.s, test.ul, test.tA, test.d,
+				test.m, test.n,
+				test.alpha,
+				aFlat, test.lda,
+				bFlat, test.ldb,
+			)
+		}
 
-	// Check that a is unchanged
-	if !dSliceEqual(aFlat, aCopy) {
-		t.Errorf("Test %v case %v: a changed during Dtrsm", i, name)
-	}
-	if !dSliceTolEqual(ansFlat, bFlat) {
-		t.Errorf("Test %v case %v: answer mismatch. Expected %v, Found %v. ", i, name, ansFlat, bFlat)
+		if panics(fn) != test.panics {
+			if test.panics {
+				t.Errorf("Test %d expected panic.", i)
+			} else {
+				t.Errorf("Test %d unexpected panic.", i)
+			}
+		}
+		if test.panics {
+			continue
+		}
+
+		// Check that a is unchanged
+		if !dSliceEqual(aFlat, aCopy) {
+			t.Errorf("Test %d case %v: a changed during Dtrsm", i, name)
+		}
+		if !dSliceTolEqual(ansFlat, bFlat) {
+			t.Errorf("Test %d case %v: answer mismatch. Expected %v, Found %v. ", i, name, ansFlat, bFlat)
+		}
 	}
 }

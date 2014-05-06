@@ -491,7 +491,18 @@ sub processParamToChecks {
 
 	if (not $func =~ m/(?:mm|r2?k)$/) {
 		if ($arrayArgs{'a'}) {
-			if (($scalarArgs{'kL'} && $scalarArgs{'kU'}) || $scalarArgs{'m'}) {
+			if ($scalarArgs{'s'}) {
+					push @processed, "if s == blas.Left {";
+					push @processed, "if lda*(n-1)+m > len(a) || lda < max(1, m) { panic(\"cblas: index of a out of range\") }";
+					push @processed, "} else {";
+					push @processed, "if lda*(m-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index of a out of range\") }";
+					push @processed, "}";
+					push @processed, "if o == blas.RowMajor {";
+					push @processed, "if ldb*(m-1)+n > len(b) || ldb < max(1, n) { panic(\"cblas: index of b out of range\") }";
+					push @processed, "} else {";
+					push @processed, "if ldb*(n-1)+m > len(b) || ldb < max(1, m) { panic(\"cblas: index of b out of range\") }";
+					push @processed, "}";
+			} elsif (($scalarArgs{'kL'} && $scalarArgs{'kU'}) || $scalarArgs{'m'}) {
 				push @processed, "if o == blas.RowMajor {";
 				if ($scalarArgs{'kL'} && $scalarArgs{'kU'}) {
 					push @processed, "if lda*(m-1)+kL+kU+1 > len(a) || lda < kL+kU+1 { panic(\"cblas: index of a out of range\") }";

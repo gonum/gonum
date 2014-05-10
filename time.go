@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package unit
 
 import (
@@ -6,7 +10,7 @@ import (
 	"math"
 )
 
-// Time represents a length in seconds
+// Time represents a time in seconds
 type Time float64
 
 const (
@@ -35,32 +39,34 @@ const (
 	Yoctosecond Time = 1e-24
 )
 
-// Unit converts the Time to a unit
-func (l Time) Unit() *Unit {
-	return New(float64(l), Dimensions{TimeDim: 1})
+// Unit converts the Time to a *Unit
+func (time Time) Unit() *Unit {
+	return New(float64(time), Dimensions{
+		TimeDim: 1,
+	})
 }
 
-// Time allows length to implement a Timeer interface
-func (l Time) Time() Time {
-	return l
+// Time allows Time to implement a Timer interface
+func (time Time) Time() Time {
+	return time
 }
 
-// From converts a uniter to a length. Returns an error if there
-// is a mismatch in dimension
-func (l *Time) From(u Uniter) error {
+// From converts a Uniter to a Time. Returns an error if
+// there is a mismatch in dimension
+func (time *Time) From(u Uniter) error {
 	if !DimensionsMatch(u, Second) {
-		(*l) = Time(math.NaN())
+		(*time) = Time(math.NaN())
 		return errors.New("Dimension mismatch")
 	}
-	(*l) = Time(u.Unit().Value())
+	(*time) = Time(u.Unit().Value())
 	return nil
 }
 
-func (l Time) Format(fs fmt.State, c rune) {
+func (time Time) Format(fs fmt.State, c rune) {
 	switch c {
 	case 'v':
 		if fs.Flag('#') {
-			fmt.Fprintf(fs, "%T(%v)", l, float64(l))
+			fmt.Fprintf(fs, "%T(%v)", time, float64(time))
 			return
 		}
 		fallthrough
@@ -73,10 +79,10 @@ func (l Time) Format(fs fmt.State, c rune) {
 		if !wOk {
 			w = -1
 		}
-		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(l))
+		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(time))
 		fmt.Fprint(fs, " s")
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=%g s)", c, l, float64(l))
+		fmt.Fprintf(fs, "%%!%c(%T=%g s)", c, time, float64(time))
 		return
 	}
 }

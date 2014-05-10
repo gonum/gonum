@@ -1,4 +1,4 @@
-// Copyright ©2013 The gonum Authors. All rights reserved.
+// Copyright ©2014 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -37,32 +37,34 @@ const (
 	Yoctometer Length = 1e-24
 )
 
-// Unit converts the Length to a unit
-func (l Length) Unit() *Unit {
-	return New(float64(l), Dimensions{LengthDim: 1})
+// Unit converts the Length to a *Unit
+func (length Length) Unit() *Unit {
+	return New(float64(length), Dimensions{
+		LengthDim: 1,
+	})
 }
 
-// Length allows length to implement a Lengther interface
-func (l Length) Length() Length {
-	return l
+// Length allows Length to implement a Lengther interface
+func (length Length) Length() Length {
+	return length
 }
 
-// From converts a uniter to a length. Returns an error if there
-// is a mismatch in dimension
-func (l *Length) From(u Uniter) error {
+// From converts a Uniter to a Length. Returns an error if
+// there is a mismatch in dimension
+func (length *Length) From(u Uniter) error {
 	if !DimensionsMatch(u, Meter) {
-		(*l) = Length(math.NaN())
+		(*length) = Length(math.NaN())
 		return errors.New("Dimension mismatch")
 	}
-	(*l) = Length(u.Unit().Value())
+	(*length) = Length(u.Unit().Value())
 	return nil
 }
 
-func (l Length) Format(fs fmt.State, c rune) {
+func (length Length) Format(fs fmt.State, c rune) {
 	switch c {
 	case 'v':
 		if fs.Flag('#') {
-			fmt.Fprintf(fs, "%T(%v)", l, float64(l))
+			fmt.Fprintf(fs, "%T(%v)", length, float64(length))
 			return
 		}
 		fallthrough
@@ -75,10 +77,10 @@ func (l Length) Format(fs fmt.State, c rune) {
 		if !wOk {
 			w = -1
 		}
-		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(l))
+		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(length))
 		fmt.Fprint(fs, " m")
 	default:
-		fmt.Fprintf(fs, "%%!%c(%T=%g m)", c, l, float64(l))
+		fmt.Fprintf(fs, "%%!%c(%T=%g m)", c, length, float64(length))
 		return
 	}
 }

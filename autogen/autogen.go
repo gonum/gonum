@@ -226,6 +226,8 @@ import (
 type {{.Name}} float64
 `
 
+var header = template.Must(template.New("header").Parse(headerTemplate))
+
 const constTemplate = `
 const(
 	{{$unit := .Unit}}
@@ -236,6 +238,8 @@ const(
 	{{end}}
 )
 `
+
+var prefix = template.Must(template.New("prefix").Parse(constTemplate))
 
 const methodTemplate = `
 // Unit converts the {{.Name}} to a *Unit
@@ -263,6 +267,8 @@ func ({{.Receiver}} *{{.Name}}) From(u Uniter) error{
 }
 `
 
+var methods = template.Must(template.New("methods").Parse(methodTemplate))
+
 const formatTemplate = `
 func ({{.Receiver}} {{.Name}}) Format(fs fmt.State, c rune){
 	switch c {
@@ -289,6 +295,8 @@ func ({{.Receiver}} {{.Name}}) Format(fs fmt.State, c rune){
 }
 }
 `
+
+var form = template.Must(template.New("format").Parse(formatTemplate))
 
 func generate(unit Unit) {
 	lowerName := strings.ToLower(unit.Name)
@@ -318,25 +326,21 @@ func generate(unit Unit) {
 
 	buf := bytes.NewBuffer(make([]byte, 0))
 
-	header := template.Must(template.New("header").Parse(headerTemplate))
 	err = header.Execute(buf, unit)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	prefix := template.Must(template.New("prefix").Parse(constTemplate))
 	err = prefix.Execute(buf, data)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	methods := template.Must(template.New("methods").Parse(methodTemplate))
 	err = methods.Execute(buf, unit)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	form := template.Must(template.New("format").Parse(formatTemplate))
 	err = form.Execute(buf, unit)
 	if err != nil {
 		log.Fatal(err)

@@ -250,7 +250,7 @@ func ({{.Receiver}} {{.Name}}) {{.Name}}() {{.Name}} {
 	return {{.Receiver}}
 }
 
-// From converts the unit into the {{.Receiver}}. From returns an
+// From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
 func ({{.Receiver}} *{{.Name}}) From(u Uniter) error{
 	if !DimensionsMatch(u, {{.Singular}}){

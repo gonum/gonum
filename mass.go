@@ -24,7 +24,7 @@ const (
 	Teragram  Mass = 1e9
 	Gigagram  Mass = 1e6
 	Megagram  Mass = 1e3
-	Kilogram  Mass = 1e0
+	Kilogram  Mass = 1.0
 	Hectogram Mass = 1e-1
 	Decagram  Mass = 1e-2
 	Gram      Mass = 1e-3

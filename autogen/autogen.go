@@ -232,7 +232,7 @@ const(
 	{{range $unit.ExtraConstant}} {{.Name}} {{$unit.Name}} = {{.Value}}
 	{{end}}
 	{{$prefixes := .Prefixes}}
-	{{range $prefixes}} {{if .Name}} {{.Name}}{{$unit.Suffix}} {{else}} {{$unit.Singular}} {{end}} {{$unit.Name}} =  1e{{.Power}}
+	{{range $prefixes}} {{if .Name}} {{.Name}}{{$unit.Suffix}} {{else}} {{$unit.Singular}} {{end}} {{$unit.Name}} = {{if .Power}} 1e{{.Power}} {{else}} 1.0 {{end}}
 	{{end}}
 )
 `

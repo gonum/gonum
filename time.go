@@ -30,7 +30,7 @@ const (
 	Kilosecond  Time = 1e3
 	Hectosecond Time = 1e2
 	Decasecond  Time = 1e1
-	Second      Time = 1e0
+	Second      Time = 1.0
 	Decisecond  Time = 1e-1
 	Centisecond Time = 1e-2
 	Millisecond Time = 1e-3

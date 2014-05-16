@@ -27,7 +27,7 @@ const (
 	Kilometer  Length = 1e3
 	Hectometer Length = 1e2
 	Decameter  Length = 1e1
-	Meter      Length = 1e0
+	Meter      Length = 1.0
 	Decimeter  Length = 1e-1
 	Centimeter Length = 1e-2
 	Millimeter Length = 1e-3

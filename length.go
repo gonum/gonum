@@ -13,6 +13,7 @@ import (
 	"math"
 )
 
+// Length represents a length in meters
 type Length float64
 
 const (
@@ -51,7 +52,7 @@ func (l Length) Length() Length {
 	return l
 }
 
-// From converts the unit into the l. From returns an
+// From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
 func (l *Length) From(u Uniter) error {
 	if !DimensionsMatch(u, Meter) {

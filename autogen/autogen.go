@@ -222,6 +222,7 @@ import (
 	"math"
 )
 
+// {{.TypeComment}}
 type {{.Name}} float64
 `
 

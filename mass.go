@@ -13,6 +13,7 @@ import (
 	"math"
 )
 
+// Mass represents a mass in kilograms
 type Mass float64
 
 const (
@@ -51,7 +52,7 @@ func (m Mass) Mass() Mass {
 	return m
 }
 
-// From converts the unit into the m. From returns an
+// From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
 func (m *Mass) From(u Uniter) error {
 	if !DimensionsMatch(u, Gram) {

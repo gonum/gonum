@@ -13,6 +13,7 @@ import (
 	"math"
 )
 
+// Time represents a time in seconds
 type Time float64
 
 const (
@@ -54,7 +55,7 @@ func (t Time) Time() Time {
 	return t
 }
 
-// From converts the unit into the t. From returns an
+// From converts the unit into the receiver. From returns an
 // error if there is a mismatch in dimension
 func (t *Time) From(u Uniter) error {
 	if !DimensionsMatch(u, Second) {

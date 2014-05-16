@@ -245,7 +245,7 @@ func ({{.Receiver}} {{.Name}}) Unit() *Unit{
 		})
 }
 
-// {{.Name}} allows {{.Name}} to implement a {{.ErForm}} interface
+// {{.Name}} allows {{.Name}} to implement a {{if .ErForm}}{{.ErForm}}{{else}}{{.Name}}er{{end}} interface
 func ({{.Receiver}} {{.Name}}) {{.Name}}() {{.Name}} {
 	return {{.Receiver}}
 }

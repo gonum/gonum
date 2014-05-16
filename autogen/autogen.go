@@ -255,10 +255,10 @@ func ({{.Receiver}} {{.Name}}) {{.Name}}() {{.Name}} {
 // error if there is a mismatch in dimension
 func ({{.Receiver}} *{{.Name}}) From(u Uniter) error{
 	if !DimensionsMatch(u, {{.Singular}}){
-		(*{{.Receiver}}) = {{.Name}}(math.NaN())
+		*{{.Receiver}} = {{.Name}}(math.NaN())
 		return errors.New("Dimension mismatch")
 	}
-	(*{{.Receiver}}) = {{.Name}}(u.Unit().Value())
+	*{{.Receiver}} = {{.Name}}(u.Unit().Value())
 	return nil
 }
 `

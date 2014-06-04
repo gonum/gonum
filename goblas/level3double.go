@@ -4,15 +4,10 @@ import "github.com/gonum/blas"
 
 var _ blas.Float64Level3 = Blasser
 
-func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+func (bl Blas) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 
 	nota := tA == blas.NoTrans
 	notb := tB == blas.NoTrans
-	isRowMajor := o == blas.RowMajor
-
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
-	}
 
 	if !nota && tA != blas.ConjTrans && tA != blas.Trans {
 		panic(badTranspose)
@@ -39,26 +34,14 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 		nrowb, ncolb = ncolb, nrowb
 	}
 
-	if isRowMajor {
-		if lda < max(1, ncola) {
-			panic("lda must be at least the column dimension for row major")
-		}
-		if ldb < max(1, ncolb) {
-			panic("lda must be at least the column dimension for row major")
-		}
-		if ldc < max(1, n) {
-			panic("ldc must be at least the column dimension for row major")
-		}
-	} else {
-		if lda < max(1, nrowa) {
-			panic("lda must be at least the column dimension for col major")
-		}
-		if ldb < max(1, nrowb) {
-			panic("lda must be at least the column dimension for col major")
-		}
-		if ldc < max(1, m) {
-			panic("ldc must be at least the column dimension for col major")
-		}
+	if lda < max(1, ncola) {
+		panic("lda must be at least the column dimension")
+	}
+	if ldb < max(1, ncolb) {
+		panic("lda must be at least the column dimension")
+	}
+	if ldc < max(1, n) {
+		panic("ldc must be at least the column dimension")
 	}
 
 	if m == 0 || n == 0 || ((alpha == 0 || k == 0) && beta == 1) {
@@ -88,39 +71,10 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 	if notb {
 		if nota {
 			// C += alpha * A*B
-			if isRowMajor {
-				for i := 0; i < m; i++ {
-					for l := 0; l < k; l++ {
-						tmp := a[i*lda+l] * alpha
-						if tmp != 0 {
-							for j := 0; j < n; j++ {
-								c[i*ldc+j] += tmp * b[l*ldb+j]
-							}
-						}
-					}
-				}
-				return
-			}
-			for j := 0; j < n; j++ {
-				for l := 0; l < k; l++ {
-					tmp := b[j*ldb+l]
-					if tmp != 0 {
-						tmp *= alpha
-						for i := 0; i < m; i++ {
-							c[j*ldc+i] += tmp * a[l*lda+i]
-						}
-					}
-				}
-			}
-			return
-		}
-		// C += A^T * B
-		if isRowMajor {
 			for i := 0; i < m; i++ {
 				for l := 0; l < k; l++ {
-					tmp := a[l*lda+i]
+					tmp := a[i*lda+l] * alpha
 					if tmp != 0 {
-						tmp *= alpha
 						for j := 0; j < n; j++ {
 							c[i*ldc+j] += tmp * b[l*ldb+j]
 						}
@@ -128,87 +82,63 @@ func (bl Blas) Dgemm(o blas.Order, tA, tB blas.Transpose, m, n, k int, alpha flo
 				}
 			}
 			return
+
 		}
-		for j := 0; j < n; j++ {
-			for i := 0; i < m; i++ {
-				var tmp float64
-				for l := 0; l < k; l++ {
-					tmp += a[i*lda+l] * b[j*ldb+l]
+		// C += A^T * B
+		for i := 0; i < m; i++ {
+			for l := 0; l < k; l++ {
+				tmp := a[l*lda+i]
+				if tmp != 0 {
+					tmp *= alpha
+					for j := 0; j < n; j++ {
+						c[i*ldc+j] += tmp * b[l*ldb+j]
+					}
 				}
-				c[j*ldc+i] += alpha * tmp
 			}
 		}
 		return
 	}
 	if nota {
 		// C += A * B^T
-		if isRowMajor {
-			for i := 0; i < m; i++ {
-				for j := 0; j < n; j++ {
-					var tmp float64
-					for l := 0; l < k; l++ {
-						tmp += a[i*lda+l] * b[j*ldb+l]
-					}
-					c[i*ldc+j] += alpha * tmp
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				var tmp float64
+				for l := 0; l < k; l++ {
+					tmp += a[i*lda+l] * b[j*ldb+l]
 				}
-			}
-			return
-		}
-		for j := 0; j < n; j++ {
-			for l := 0; l < k; l++ {
-				if b[l*ldb+j] != 0 {
-					tmp := alpha * b[l*ldb+j]
-					for i := 0; i < m; i++ {
-						c[j*ldc+i] += tmp * a[l*lda+i]
-					}
-				}
+				c[i*ldc+j] += alpha * tmp
 			}
 		}
 		return
 	}
 	// C += A^T * B^T
-	if isRowMajor {
-		for i := 0; i < m; i++ {
-			for l := 0; l < k; l++ {
-				aval := a[l*lda+i]
-				if aval != 0 {
-					tmp := alpha * aval
-					for j := 0; j < n; j++ {
-						c[i*ldc+j] += tmp * b[j*ldb+l]
-					}
+	for i := 0; i < m; i++ {
+		for l := 0; l < k; l++ {
+			aval := a[l*lda+i]
+			if aval != 0 {
+				tmp := alpha * aval
+				for j := 0; j < n; j++ {
+					c[i*ldc+j] += tmp * b[j*ldb+l]
 				}
 			}
 		}
-		return
 	}
-	for j := 0; j < n; j++ {
-		for i := 0; i < m; i++ {
-			var tmp float64
-			for l := 0; l < k; l++ {
-				tmp += a[i*lda+l] * b[l*ldb+j]
-			}
-			c[j*ldc+i] += alpha * tmp
-		}
-	}
+	return
 }
 
-func (bl Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
+func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
+	// Transform to row major
+	if ul == blas.Upper {
+		ul = blas.Lower
+	} else {
+		ul = blas.Upper
 	}
-	if o == blas.RowMajor {
-		if ul == blas.Upper {
-			ul = blas.Lower
-		} else {
-			ul = blas.Upper
-		}
-		if s == blas.Left {
-			s = blas.Right
-		} else {
-			s = blas.Left
-		}
-		m, n = n, m
+	if s == blas.Left {
+		s = blas.Right
+	} else {
+		s = blas.Left
 	}
+	m, n = n, m
 
 	var nrowa int
 	if s == blas.Left {
@@ -262,7 +192,7 @@ func (bl Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose,
 			if alpha != 1 {
 				bl.Dscal(m, alpha, b[jb:], 1)
 			}
-			bl.Dtrsv(blas.ColMajor, ul, tA, d, m, a, lda, b[jb:], 1)
+			bl.Dtrsv(ul, tA, d, m, a, lda, b[jb:], 1)
 		}
 	} else {
 		if tA == blas.NoTrans {
@@ -341,15 +271,15 @@ func (bl Blas) Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose,
 	}
 }
 
-func (Blas) Dsymm(o blas.Order, s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	panic("blas: function not implemented")
 }
-func (Blas) Dsyrk(o blas.Order, ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
+func (Blas) Dsyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
 	panic("blas: function not implemented")
 }
-func (Blas) Dsyr2k(o blas.Order, ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+func (Blas) Dsyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	panic("blas: function not implemented")
 }
-func (Blas) Dtrmm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
+func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	panic("blas: function not implemented")
 }

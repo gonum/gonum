@@ -7,7 +7,7 @@ import (
 )
 
 type Dtrsmer interface {
-	Dtrsm(o blas.Order, s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag,
+	Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag,
 		m, n int, alpha float64, a []float64, lda int, b []float64, ldb int)
 }
 
@@ -75,19 +75,17 @@ func TestDtrsm(t *testing.T, blasser Dtrsmer) {
 			panics: true,
 		},
 	} {
-		const (
-			name = "RowMajor"
-			o    = blas.RowMajor
-		)
 
-		aFlat := flatten(test.a, o)
-		aCopy := flatten(test.a, o)
-		bFlat := flatten(test.b, o)
-		ansFlat := flatten(test.ans, o)
+		const name = "RowMajor"
+
+		aFlat := flatten(test.a)
+		aCopy := flatten(test.a)
+		bFlat := flatten(test.b)
+		ansFlat := flatten(test.ans)
 
 		fn := func() {
 			blasser.Dtrsm(
-				o, test.s, test.ul, test.tA, test.d,
+				test.s, test.ul, test.tA, test.d,
 				test.m, test.n,
 				test.alpha,
 				aFlat, test.lda,

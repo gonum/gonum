@@ -1,13 +1,9 @@
 package testblas
 
-import (
-	"testing"
-
-	"github.com/gonum/blas"
-)
+import "testing"
 
 type Dgerer interface {
-	Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int)
+	Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int)
 }
 
 func DgerTest(t *testing.T, blasser Dgerer) {
@@ -55,7 +51,6 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 			incX:    1,
 			incY:    1,
 			trueAns: [][]float64{{3.5, -7.6, 3.5}, {5.9, -12.2, 3.3}, {-1.3, -4.3, -9.7}},
-			//trueAns: [][]float64{{3.5, -2, 2.8}, {5.9, -27, -4.3}, {-1.3, 2.4, 9}},
 		},
 
 		{
@@ -131,19 +126,17 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 		a := sliceOfSliceCopy(test.a)
 
 		// Test with row major
-		o := blas.RowMajor
 		alpha := 1.0
-		aFlat := flatten(a, o)
-		blasser.Dger(o, test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.n)
-		ans := unflatten(aFlat, o, test.m, test.n)
+		aFlat := flatten(a)
+		blasser.Dger(test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.n)
+		ans := unflatten(aFlat, test.m, test.n)
 		dgercomp(t, x, test.x, y, test.y, ans, test.trueAns, test.name+" row maj")
 
 		// Test with different alpha
-		o = blas.RowMajor
 		alpha = 4.0
-		aFlat = flatten(a, o)
-		blasser.Dger(o, test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.n)
-		ans = unflatten(aFlat, o, test.m, test.n)
+		aFlat = flatten(a)
+		blasser.Dger(test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.n)
+		ans = unflatten(aFlat, test.m, test.n)
 		trueCopy := sliceOfSliceCopy(test.trueAns)
 		for i := range trueCopy {
 			for j := range trueCopy[i] {
@@ -151,30 +144,6 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 			}
 		}
 		dgercomp(t, x, test.x, y, test.y, ans, trueCopy, test.name+" row maj alpha")
-
-		// Test with col major
-		o = blas.ColMajor
-		alpha = 1.0
-		aFlat = flatten(a, o)
-		blasser.Dger(o, test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.m)
-		//fmt.Println("col maj ans", aFlat)
-		ans = unflatten(aFlat, o, test.m, test.n)
-		dgercomp(t, x, test.x, y, test.y, ans, test.trueAns, test.name+" col maj")
-
-		// Test with different alpha
-		o = blas.ColMajor
-		alpha = -4.0
-		aFlat = flatten(a, o)
-		blasser.Dger(o, test.m, test.n, alpha, x, test.incX, y, test.incY, aFlat, test.m)
-		ans = unflatten(aFlat, o, test.m, test.n)
-		trueCopy = sliceOfSliceCopy(test.trueAns)
-		for i := range trueCopy {
-			for j := range trueCopy[i] {
-				trueCopy[i][j] = alpha*(trueCopy[i][j]-a[i][j]) + a[i][j]
-			}
-		}
-		dgercomp(t, x, test.x, y, test.y, ans, trueCopy, test.name+" col maj alpha")
-
 	}
 }
 

@@ -26,7 +26,7 @@ func Gemm(tA, tB blas.Transpose, alpha complex128, A, B General, beta complex128
 	if n != C.Cols {
 		panic("blas: dimension mismatch")
 	}
-	impl.Zgemm(A.Order, tA, tB, m, n, k, alpha, A.Data, A.Stride,
+	impl.Zgemm(tA, tB, m, n, k, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
@@ -51,7 +51,7 @@ func Symm(s blas.Side, alpha complex128, A Symmetric, B General, beta complex128
 	if n != C.Cols {
 		panic("blas: dimension mismatch")
 	}
-	impl.Zsymm(A.Order, s, A.Uplo, m, n, alpha, A.Data, A.Stride,
+	impl.Zsymm(s, A.Uplo, m, n, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
@@ -65,7 +65,7 @@ func Syrk(t blas.Transpose, alpha complex128, A General, beta complex128, C Symm
 	if n != C.N {
 		panic("blas: dimension mismatch")
 	}
-	impl.Zsyrk(A.Order, C.Uplo, t, n, k, alpha, A.Data, A.Stride, beta,
+	impl.Zsyrk(C.Uplo, t, n, k, alpha, A.Data, A.Stride, beta,
 		C.Data, C.Stride)
 }
 
@@ -85,7 +85,7 @@ func Syr2k(t blas.Transpose, alpha complex128, A, B General, beta complex128, C 
 	if n != C.N {
 		panic("blas: dimension mismatch")
 	}
-	impl.Zsyr2k(A.Order, C.Uplo, t, n, k, alpha, A.Data, A.Stride,
+	impl.Zsyr2k(C.Uplo, t, n, k, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
@@ -99,7 +99,7 @@ func Trmm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B Gene
 			panic("blas: dimension mismatch")
 		}
 	}
-	impl.Ztrmm(A.Order, s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
+	impl.Ztrmm(s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
 		B.Data, B.Stride)
 }
 
@@ -113,7 +113,7 @@ func Trsm(s blas.Side, tA blas.Transpose, alpha complex128, A Triangular, B Gene
 			panic("blas: dimension mismatch")
 		}
 	}
-	impl.Ztrsm(A.Order, s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
+	impl.Ztrsm(s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
 		B.Data, B.Stride)
 }
 
@@ -138,7 +138,7 @@ func Hemm(s blas.Side, alpha complex128, A Hermitian, B General, beta complex128
 	if n != C.Cols {
 		panic("blas: dimension mismatch")
 	}
-	impl.Zhemm(A.Order, s, A.Uplo, m, n, alpha, A.Data, A.Stride,
+	impl.Zhemm(s, A.Uplo, m, n, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
@@ -152,7 +152,7 @@ func Herk(t blas.Transpose, alpha float64, A General, beta float64, C Hermitian)
 	if n != C.N {
 		panic("blas: dimension mismatch")
 	}
-	impl.Zherk(A.Order, C.Uplo, t, n, k, alpha, A.Data, A.Stride, beta,
+	impl.Zherk(C.Uplo, t, n, k, alpha, A.Data, A.Stride, beta,
 		C.Data, C.Stride)
 }
 
@@ -172,6 +172,6 @@ func Her2k(t blas.Transpose, alpha complex128, A, B General, beta float64, C Her
 	if n != C.N {
 		panic("blas: dimension mismatch")
 	}
-	impl.Zher2k(A.Order, C.Uplo, t, n, k, alpha, A.Data, A.Stride,
+	impl.Zher2k(C.Uplo, t, n, k, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }

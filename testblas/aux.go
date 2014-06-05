@@ -3,8 +3,6 @@ package testblas
 import (
 	"math"
 	"testing"
-
-	"github.com/gonum/blas"
 )
 
 // throwPanic will throw unexpected panics if true, or will just report them as errors if false
@@ -114,52 +112,28 @@ func sliceCopy(a []float64) []float64 {
 	return n
 }
 
-func flatten(a [][]float64, o blas.Order) []float64 {
+func flatten(a [][]float64) []float64 {
 	if len(a) == 0 {
 		return nil
 	}
 	m := len(a)
 	n := len(a[0])
 	s := make([]float64, m*n)
-	if o == blas.RowMajor {
-		for i := 0; i < m; i++ {
-			for j := 0; j < n; j++ {
-				s[i*n+j] = a[i][j]
-			}
-		}
-		return s
-	}
-	if o == blas.ColMajor {
+	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
-			for i := 0; i < m; i++ {
-				s[j*m+i] = a[i][j]
-			}
+			s[i*n+j] = a[i][j]
 		}
-		return s
 	}
-	return nil
+	return s
 }
 
-func unflatten(a []float64, o blas.Order, m, n int) [][]float64 {
-	if o == blas.RowMajor {
-		s := make([][]float64, m)
-		for i := 0; i < m; i++ {
-			s[i] = make([]float64, n)
-			for j := 0; j < n; j++ {
-				s[i][j] = a[i*n+j]
-			}
+func unflatten(a []float64, m, n int) [][]float64 {
+	s := make([][]float64, m)
+	for i := 0; i < m; i++ {
+		s[i] = make([]float64, n)
+		for j := 0; j < n; j++ {
+			s[i][j] = a[i*n+j]
 		}
-		return s
 	}
-	if o == blas.ColMajor {
-		s := make([][]float64, m)
-		for i := 0; i < m; i++ {
-			s[i] = make([]float64, n)
-			for j := 0; j < n; j++ {
-				s[i][j] = a[j*m+i]
-			}
-		}
-		return s
-	}
-	return nil
+	return s
 }

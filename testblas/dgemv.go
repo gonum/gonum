@@ -497,17 +497,14 @@ var DgemvCases []DgemvCase = []DgemvCase{
 }
 
 type Dgemver interface {
-	Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)
+	Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)
 }
 
 func DgemvTest(t *testing.T, blasser Dgemver) {
 	for _, test := range DgemvCases {
 		for i, cas := range test.Subcases {
 			// Test that it passes with row-major
-			dgemvcomp(t, blas.RowMajor, test, cas, i, blasser)
-
-			// Test that it passes with col-major
-			dgemvcomp(t, blas.ColMajor, test, cas, i, blasser)
+			dgemvcomp(t, test, cas, i, blasser)
 
 			// Test the bad inputs
 			dgemvbad(t, test, cas, i, blasser)
@@ -515,20 +512,13 @@ func DgemvTest(t *testing.T, blasser Dgemver) {
 	}
 }
 
-func dgemvcomp(t *testing.T, o blas.Order, test DgemvCase, cas DgemvSubcase, i int, blasser Dgemver) {
+func dgemvcomp(t *testing.T, test DgemvCase, cas DgemvSubcase, i int, blasser Dgemver) {
 	x := sliceCopy(test.x)
 	y := sliceCopy(test.y)
 	a := sliceOfSliceCopy(test.A)
-	aFlat := flatten(a, o)
+	aFlat := flatten(a)
 
-	var lda int
-	if o == blas.RowMajor {
-		lda = test.n
-	} else if o == blas.ColMajor {
-		lda = test.m
-	} else {
-		panic("bad order")
-	}
+	lda := test.n
 
 	incX := test.incX
 	if cas.mulXNeg1 {
@@ -540,27 +530,27 @@ func dgemvcomp(t *testing.T, o blas.Order, test DgemvCase, cas DgemvSubcase, i i
 	}
 
 	f := func() {
-		blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, incX, cas.beta, y, incY)
+		blasser.Dgemv(test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, incX, cas.beta, y, incY)
 	}
 	if panics(f) {
-		t.Errorf("Test %v case %v order %v unexpected panic", test.Name, i, o)
+		t.Errorf("Test %v case %v: unexpected panic", test.Name, i)
 		if throwPanic {
-			blasser.Dgemv(o, test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, incX, cas.beta, y, incY)
+			blasser.Dgemv(test.tA, test.m, test.n, cas.alpha, aFlat, lda, x, incX, cas.beta, y, incY)
 		}
 		return
 	}
 	// Check that x and a are unchanged
 	if !dSliceEqual(x, test.x) {
-		t.Errorf("Test %v, case %v order %v: x modified during call", test.Name, i, o)
+		t.Errorf("Test %v, case %v: x modified during call", test.Name, i)
 	}
-	aFlat2 := flatten(sliceOfSliceCopy(test.A), o)
+	aFlat2 := flatten(sliceOfSliceCopy(test.A))
 	if !dSliceEqual(aFlat2, aFlat) {
-		t.Errorf("Test %v, case %v order %v: a modified during call", test.Name, i, o)
+		t.Errorf("Test %v, case %v: a modified during call", test.Name, i)
 	}
 
 	// Check that the answer matches
 	if !dSliceTolEqual(cas.ans, y) {
-		t.Errorf("Test %v, case %v order %v: answer mismatch: Expected %v, Found %v", test.Name, i, o, cas.ans, y)
+		t.Errorf("Test %v, case %v: answer mismatch: Expected %v, Found %v", test.Name, i, cas.ans, y)
 	}
 }
 
@@ -568,57 +558,43 @@ func dgemvbad(t *testing.T, test DgemvCase, cas DgemvSubcase, i int, blasser Dge
 	x := sliceCopy(test.x)
 	y := sliceCopy(test.y)
 	a := sliceOfSliceCopy(test.A)
-	aFlatRow := flatten(a, blas.RowMajor)
+	aFlatRow := flatten(a)
 	ldaRow := test.n
-	aFlatCol := flatten(a, blas.ColMajor)
-	ldaCol := test.m
-	// Test that panics on bad order
+
 	f := func() {
-		blasser.Dgemv(312, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
-	}
-	if !panics(f) {
-		t.Errorf("Test %v case %v: no panic for bad order", test.Name, i)
-	}
-	f = func() {
-		blasser.Dgemv(blas.RowMajor, 312, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
+		blasser.Dgemv(312, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
 	}
 	if !panics(f) {
 		t.Errorf("Test %v case %v: no panic for bad transpose", test.Name, i)
 	}
 	f = func() {
-		blasser.Dgemv(blas.RowMajor, test.tA, -2, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
+		blasser.Dgemv(test.tA, -2, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
 	}
 	if !panics(f) {
 		t.Errorf("Test %v case %v: no panic for m negative", test.Name, i)
 	}
 	f = func() {
-		blasser.Dgemv(blas.RowMajor, test.tA, test.m, -4, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
+		blasser.Dgemv(test.tA, test.m, -4, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, test.incY)
 	}
 	if !panics(f) {
 		t.Errorf("Test %v case %v: no panic for n negative", test.Name, i)
 	}
 	f = func() {
-		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, 0, cas.beta, y, test.incY)
+		blasser.Dgemv(test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, 0, cas.beta, y, test.incY)
 	}
 	if !panics(f) {
 		t.Errorf("Test %v case %v: no panic for incX zero", test.Name, i)
 	}
 	f = func() {
-		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, 0)
+		blasser.Dgemv(test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow, x, test.incX, cas.beta, y, 0)
 	}
 	if !panics(f) {
 		t.Errorf("Test %v case %v: no panic for incY zero", test.Name, i)
 	}
 	f = func() {
-		blasser.Dgemv(blas.RowMajor, test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow-1, x, test.incX, cas.beta, y, test.incY)
+		blasser.Dgemv(test.tA, test.m, test.n, cas.alpha, aFlatRow, ldaRow-1, x, test.incX, cas.beta, y, test.incY)
 	}
 	if !panics(f) {
 		t.Errorf("Test %v case %v: no panic for lda too small row major", test.Name, i)
-	}
-	f = func() {
-		blasser.Dgemv(blas.ColMajor, test.tA, test.m, test.n, cas.alpha, aFlatCol, ldaCol-1, x, test.incX, cas.beta, y, test.incY)
-	}
-	if !panics(f) {
-		t.Errorf("Test %v case %v: no panic for lda too small col major", test.Name, i)
 	}
 }

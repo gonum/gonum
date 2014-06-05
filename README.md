@@ -4,6 +4,8 @@ LAPACK package for the Go language
 A collection of packages to provide LAPACK functionality for the Go programming
 language (http://golang.org)
 
+This is work in progress. Breaking changes are likely to happen.
+
 ## Installation 
 
 ```
@@ -24,12 +26,12 @@ http://sourceforge.net/projects/openblas/files/
 generate lapack bindings
 ```
   cd $GOPATH/src/github.com/dane-unltd/lapack/clapack
-  ./genLapack /path/to/OpenBLAS openblas
+  ./genLapack -L/path/to/OpenBLAS -lopenblas
 ```
 
 If you want to use the Intel MKL and all of your paths are properly set
 ```
   cd $GOPATH/src/github.com/dane-unltd/lapack/clapack
-  ./genLapack mkl_rt
+  ./genLapack -lmkl_rt
 ```
 should work.

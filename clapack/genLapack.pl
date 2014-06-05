@@ -7,14 +7,7 @@ use strict;
 use warnings;
 
 my $clapackHeader = "lapacke.h";
-my $lib = "";
-my $LIB = "";
-if ($ARGV[1]) {
-	$lib = "-l".$ARGV[1];
-	$LIB = "-L".$ARGV[0];
-}elsif ($ARGV[0]) {
-	$lib = "-l".$ARGV[0];
-}
+my $lib = join " ", @ARGV;
 
 my $excludeComplex = 0;
 
@@ -43,7 +36,7 @@ package clapack
 
 /*
 #cgo CFLAGS: -g -O2
-#cgo LDFLAGS: ${LIB} ${lib}
+#cgo LDFLAGS: ${lib}
 #include "${clapackHeader}"
 */
 import "C"

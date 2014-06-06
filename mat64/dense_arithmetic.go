@@ -336,7 +336,6 @@ func (m *Dense) Mul(a, b Matrix) {
 				panic(ErrNoEngine)
 			}
 			blasEngine.Dgemm(
-				blas.RowMajor,
 				blas.NoTrans, blas.NoTrans,
 				ar, bc, ac,
 				1.,

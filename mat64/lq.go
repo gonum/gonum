@@ -114,8 +114,8 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 			sub.View(x, k, 0, m-k, n)
 
 			blasEngine.Dgemv(
-				blas.ColMajor, blas.NoTrans,
-				n, m-k,
+				blas.Trans,
+				m-k, n,
 				1, sub.mat.Data, sub.mat.Stride,
 				hh, 1,
 				0, proj, 1,
@@ -133,8 +133,8 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 			sub.View(x, k, 0, m-k, n)
 
 			blasEngine.Dgemv(
-				blas.ColMajor, blas.NoTrans,
-				n, m-k,
+				blas.Trans,
+				m-k, n,
 				1, sub.mat.Data, sub.mat.Stride,
 				hh, 1,
 				0, proj, 1,
@@ -171,7 +171,7 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 		lq.Set(i, i, lDiag[i])
 	}
 	blasEngine.Dtrsm(
-		blas.RowMajor, blas.Left, blas.Lower, blas.NoTrans, blas.NonUnit,
+		blas.Left, blas.Lower, blas.NoTrans, blas.NonUnit,
 		bm, bn,
 		1, lq.mat.Data, lq.mat.Stride,
 		x.mat.Data, x.mat.Stride,

@@ -81,7 +81,6 @@ func (m *Vec) Mul(a, b Matrix) {
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
 		blasEngine.Dgemv(
-			blas.RowMajor,
 			blas.NoTrans,
 			ar, ac,
 			1.,

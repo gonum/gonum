@@ -29,10 +29,8 @@ func init() {
 }
 
 func TestQR(t *testing.T) {
-	A := dbw.NewGeneral(blas.ColMajor, 3, 2,
-		[]float64{1, 2, 3, 4, 5, 6})
-	B := dbw.NewGeneral(blas.ColMajor, 3, 2,
-		[]float64{1, 1, 1, 2, 2, 2})
+	A := dbw.NewGeneral(3, 2, []float64{1, 2, 3, 4, 5, 6})
+	B := dbw.NewGeneral(3, 2, []float64{1, 1, 1, 2, 2, 2})
 
 	tau := dbw.Allocate(2)
 

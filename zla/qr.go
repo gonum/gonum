@@ -11,7 +11,7 @@ type QRFact struct {
 }
 
 func QR(A zbw.General, tau []complex128) QRFact {
-	impl.Zgeqrf(A.Order, A.Rows, A.Cols, A.Data, A.Stride, tau)
+	impl.Zgeqrf(A.Rows, A.Cols, A.Data, A.Stride, tau)
 	return QRFact{A, tau}
 }
 
@@ -20,13 +20,10 @@ func (f QRFact) R() zbw.Triangular {
 }
 
 func (f QRFact) Solve(B zbw.General) zbw.General {
-	if B.Order != f.a.Order {
-		panic("Order missmatch")
-	}
 	if f.a.Cols != B.Cols {
 		panic("dimension missmatch")
 	}
-	impl.Zunmqr(B.Order, blas.Left, blas.ConjTrans, f.a.Rows, B.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, B.Data, B.Stride)
+	impl.Zunmqr(blas.Left, blas.ConjTrans, f.a.Rows, B.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, B.Data, B.Stride)
 	B.Rows = f.a.Cols
 	zbw.Trsm(blas.Left, blas.NoTrans, 1, f.R(), B)
 	return B

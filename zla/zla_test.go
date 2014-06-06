@@ -29,11 +29,8 @@ func fillRandn(a []complex128, mu complex128, sigmaSq float64) {
 }
 
 func TestQR(t *testing.T) {
-	A := zbw.NewGeneral(blas.ColMajor, 3, 2,
-		[]complex128{complex(1, 0), complex(2, 0), complex(3, 0),
-			complex(4, 0), complex(5, 0), complex(6, 0)})
-	B := zbw.NewGeneral(blas.ColMajor, 3, 2,
-		[]complex128{complex(1, 0), complex(1, 0), complex(1, 0), complex(2, 0), complex(2, 0), complex(2, 0)})
+	A := zbw.NewGeneral(3, 2, []complex128{complex(1, 0), complex(2, 0), complex(3, 0), complex(4, 0), complex(5, 0), complex(6, 0)})
+	B := zbw.NewGeneral(3, 2, []complex128{complex(1, 0), complex(1, 0), complex(1, 0), complex(2, 0), complex(2, 0), complex(2, 0)})
 
 	tau := zbw.Allocate(2)
 
@@ -45,10 +42,10 @@ func TestQR(t *testing.T) {
 }
 
 func TestLanczos(t *testing.T) {
-	A := zbw.NewGeneral(blas.ColMajor, 3, 4, nil)
+	A := zbw.NewGeneral(3, 4, nil)
 	fillRandn(A.Data, 0, 1)
 
-	Acpy := zbw.NewGeneral(blas.ColMajor, 3, 4, nil)
+	Acpy := zbw.NewGeneral(3, 4, nil)
 	copy(Acpy.Data, A.Data)
 
 	u0 := make([]complex128, 3)
@@ -58,8 +55,8 @@ func TestLanczos(t *testing.T) {
 
 	fmt.Println(a, b)
 
-	tmpc := zbw.NewGeneral(blas.ColMajor, 3, 3, nil)
-	bidic := zbw.NewGeneral(blas.ColMajor, 3, 3, nil)
+	tmpc := zbw.NewGeneral(3, 3, nil)
+	bidic := zbw.NewGeneral(3, 3, nil)
 
 	zbw.Gemm(blas.NoTrans, blas.NoTrans, 1, A, Vl, 0, tmpc)
 	zbw.Gemm(blas.ConjTrans, blas.NoTrans, 1, Ul, tmpc, 0, bidic)
@@ -68,8 +65,8 @@ func TestLanczos(t *testing.T) {
 
 	Ur, s, Vr := dla.SVDbd(blas.Lower, a, b)
 
-	tmp := dbw.NewGeneral(blas.ColMajor, 3, 3, nil)
-	bidi := dbw.NewGeneral(blas.ColMajor, 3, 3, nil)
+	tmp := dbw.NewGeneral(3, 3, nil)
+	bidi := dbw.NewGeneral(3, 3, nil)
 
 	copy(tmp.Data, Ur.Data)
 	for i := 0; i < 3; i++ {
@@ -83,12 +80,12 @@ func TestLanczos(t *testing.T) {
 
 		_ = Ul
 		_ = Vl
-			Uc := zbw.NewGeneral(blas.ColMajor, 3, 3, nil)
+			Uc := zbw.NewGeneral( 3, 3, nil)
 			zbw.Real2Cmplx(Ur.Data[:3*3], Uc.Data)
 
 			fmt.Println(Uc.Data)
 
-			U := zbw.NewGeneral(blas.ColMajor, M, K, nil)
+			U := zbw.NewGeneral( M, K, nil)
 			zbw.Gemm(blas.NoTrans, blas.NoTrans, 1, U1, Uc, 0, U)
 	*/
 }

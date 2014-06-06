@@ -48,6 +48,15 @@ import (
 )
 
 type La struct{}
+
+// Type order is used to specify the matrix storage format. We still interact with
+// an API that allows client calls to specify order, so this is here to document that fact.
+type order int
+
+const (
+	rowMajor order = 101 + iota
+	colMajor
+)
  
 func init() {
          _ = lapack.Complex128(La{})
@@ -190,8 +199,7 @@ sub processParamToGo {
 		$param =~ s/const //g;
 		my ($type,$var) = split ' ', $param;
 		$var eq "matrix_order" && do {
-			$var = "o";
-			push @processed, $var." blas.Order"; next;
+			next;
 		};
 		$var =~ /trans/ && do {
 			my $bp = << "EOH";
@@ -284,7 +292,7 @@ sub processParamToC {
 		my ($type,$var) = split ' ', $param;
 
 		$var eq "matrix_order" && do {
-			$var = "o";
+			$var = "rowMajor";
 		};
 		$var =~ /trans/ && do {
 		};

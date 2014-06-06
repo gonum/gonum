@@ -12,16 +12,16 @@ func SVD(A zbw.General) (U zbw.General, s []float64, Vt zbw.General) {
 	U.Stride = 1
 	Vt.Stride = 1
 	if m >= n {
-		Vt = zbw.NewGeneral(A.Order, n, n, nil)
+		Vt = zbw.NewGeneral(n, n, nil)
 		s = make([]float64, n)
 		U = A
 	} else {
-		U = zbw.NewGeneral(A.Order, m, m, nil)
+		U = zbw.NewGeneral(m, m, nil)
 		s = make([]float64, m)
 		Vt = A
 	}
 
-	impl.Zgesdd(A.Order, lapack.Overwrite, A.Rows, A.Cols, A.Data, A.Stride, s, U.Data, U.Stride, Vt.Data, Vt.Stride)
+	impl.Zgesdd(lapack.Overwrite, A.Rows, A.Cols, A.Data, A.Stride, s, U.Data, U.Stride, Vt.Data, Vt.Stride)
 
 	return
 }
@@ -35,8 +35,8 @@ func LanczosBi(L zbw.General, u []complex128, numIter int) (U zbw.General, V zbw
 	uv := zbw.NewVector(u)
 	zbw.Scal(complex(1/zbw.Nrm2(uv), 0), uv)
 
-	U = zbw.NewGeneral(blas.ColMajor, m, numIter, nil)
-	V = zbw.NewGeneral(blas.ColMajor, n, numIter, nil)
+	U = zbw.NewGeneral(m, numIter, nil)
+	V = zbw.NewGeneral(n, numIter, nil)
 
 	a = make([]float64, numIter)
 	b = make([]float64, numIter)

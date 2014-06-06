@@ -1,6 +1,6 @@
 package dla
 
-import "github.com/dane-unltd/lapack"
+import "github.com/gonum/lapack"
 
 var impl lapack.Float64
 

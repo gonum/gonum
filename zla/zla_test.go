@@ -6,12 +6,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/dane-unltd/lapack/clapack"
-	"github.com/dane-unltd/lapack/dla"
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/cblas"
 	"github.com/gonum/blas/dbw"
 	"github.com/gonum/blas/zbw"
+	"github.com/gonum/lapack/clapack"
+	"github.com/gonum/lapack/dla"
 )
 
 func init() {

@@ -2,10 +2,10 @@ package dla
 
 import (
 	"fmt"
-	"github.com/dane-unltd/lapack/clapack"
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/cblas"
 	"github.com/gonum/blas/dbw"
+	"github.com/gonum/lapack/clapack"
 	"github.com/gonum/matrix/mat64"
 	"testing"
 )
@@ -34,9 +34,17 @@ func TestQR(t *testing.T) {
 
 	tau := dbw.Allocate(2)
 
+	C := dbw.NewGeneral(2, 2, nil)
+
+	dbw.Gemm(blas.Trans, blas.NoTrans, 1, A, B, 0, C)
+
+	fmt.Println(C)
+
 	f := QR(A, tau)
 
-	fmt.Println(fm{B, 0})
+	fmt.Println(B)
+	fmt.Println(f)
+
 	f.Solve(B)
 	fmt.Println(fm{B, 0})
 }

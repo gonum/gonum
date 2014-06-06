@@ -1,9 +1,9 @@
 package dla
 
 import (
-	"github.com/dane-unltd/lapack"
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/dbw"
+	"github.com/gonum/lapack"
 )
 
 func SVD(A dbw.General) (U dbw.General, s []float64, Vt dbw.General) {

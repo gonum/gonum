@@ -1,9 +1,9 @@
 package zla
 
 import (
-	"github.com/dane-unltd/lapack"
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/zbw"
+	"github.com/gonum/lapack"
 )
 
 func SVD(A zbw.General) (U zbw.General, s []float64, Vt zbw.General) {

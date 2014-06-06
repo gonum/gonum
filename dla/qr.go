@@ -23,7 +23,7 @@ func (f QRFact) Solve(B dbw.General) dbw.General {
 	if f.a.Cols != B.Cols {
 		panic("dimension missmatch")
 	}
-	impl.Dormqr(blas.Left, blas.Trans, f.a.Rows, B.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, B.Data, B.Stride)
+	impl.Dormqr(blas.Left, blas.Trans, B.Rows, B.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, B.Data, B.Stride)
 	B.Rows = f.a.Cols
 	dbw.Trsm(blas.Left, blas.NoTrans, 1, f.R(), B)
 	return B

@@ -43,7 +43,7 @@ import "C"
 
 import (
 	"github.com/gonum/blas"
-	"github.com/dane-unltd/lapack"
+	"github.com/gonum/lapack"
 	"unsafe"
 )
 

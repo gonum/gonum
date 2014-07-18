@@ -536,8 +536,8 @@ func Span(dst []float64, l, u float64) []float64 {
 	return dst
 }
 
-// Sub subtracts, element-wise, the first argument from the second. Assumes
-// the lengths of s and t match (can be tested with EqLen).
+// Sub subtracts, element-wise, the second argument from the first. Panics if
+// the lengths of s and t do not match.
 func Sub(s, t []float64) {
 	if len(s) != len(t) {
 		panic("floats: length of the slices do not match")
@@ -547,8 +547,8 @@ func Sub(s, t []float64) {
 	}
 }
 
-// SubTo subtracts, element-wise, the first argument from the second and
-// stores the result in dest. Panics if the lengths of s and t do not match.
+// SubTo subtracts, element-wise, the third argument from the second and
+// stores the result in dst. Panics if the lengths of s and t do not match.
 func SubTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of subtractor and subtractee do not match")

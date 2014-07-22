@@ -48,39 +48,6 @@ func Cholesky(a *Dense) CholeskyFactor {
 	return CholeskyFactor{L: l, SPD: spd}
 }
 
-// CholeskyR returns the right Cholesky decomposition of the matrix a and whether
-// the matrix is symmetric or positive definite, the returned matrix r is an upper
-// triangular matrix such that a = r'.r.
-func CholeskyR(a *Dense) (r *Dense, spd bool) {
-	// Initialize.
-	m, n := a.Dims()
-	spd = m == n
-	r = NewDense(n, n, nil)
-
-	// Main loop.
-	for j := 0; j < n; j++ {
-		var d float64
-		for k := 0; k < j; k++ {
-			s := a.At(k, j)
-			for i := 0; i < k; i++ {
-				s -= r.At(i, k) * r.At(i, j)
-			}
-			s /= r.At(k, k)
-			r.Set(k, j, s)
-			d += s * s
-			spd = spd && a.At(k, j) == a.At(j, k)
-		}
-		d = a.At(j, j) - d
-		spd = spd && d > 0
-		r.Set(j, j, math.Sqrt(math.Max(d, 0)))
-		for k := j + 1; k < n; k++ {
-			r.Set(k, j, 0)
-		}
-	}
-
-	return r, spd
-}
-
 // CholeskySolve returns a matrix x that solves a.x = b where a = l.l'. The matrix b must
 // have the same number of rows as a, and a must be symmetric and positive definite. The
 // matrix b is overwritten by the operation.
@@ -90,9 +57,9 @@ func (f CholeskyFactor) Solve(b *Dense) (x *Dense) {
 	}
 	l := f.L
 
-	_, n := l.Dims()
-	_, bn := b.Dims()
-	if n != bn {
+	m, n := l.Dims()
+	bm, bn := b.Dims()
+	if m != bm {
 		panic(ErrShape)
 	}
 

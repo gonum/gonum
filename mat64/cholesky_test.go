@@ -39,3 +39,23 @@ func (s *S) TestCholesky(c *check.C) {
 		c.Check(t.a.EqualsApprox(eye(), 1e-12), check.Equals, true)
 	}
 }
+
+func (s *S) TestCholeskySolve(c *check.C) {
+	for _, t := range []struct {
+		a   *Dense
+		b   *Dense
+		ans *Dense
+	}{
+		{
+			a: NewDense(2, 2, []float64{
+				1, 0,
+				0, 1,
+			}),
+			b:   NewDense(2, 1, []float64{5, 6}),
+			ans: NewDense(2, 1, []float64{5, 6}),
+		},
+	} {
+		ans := Cholesky(t.a).Solve(t.b)
+		c.Check(ans.EqualsApprox(t.ans, 1e-12), check.Equals, true)
+	}
+}

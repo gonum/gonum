@@ -221,7 +221,7 @@ func (f LUFactors) Solve(b *Dense) (x *Dense) {
 		panic(ErrShape)
 	}
 	if f.IsSingular() {
-		panic("mat64: matrix is singular")
+		panic(ErrSingular)
 	}
 
 	// Copy right hand side with pivoting

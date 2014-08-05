@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package stat
 
 import (
@@ -9,20 +13,18 @@ import (
 
 // Correlation returns the weighted correlation between the samples of x and y
 // with the given means.
-// 		sum_i {w_i (x_i - meanX) * (y_i - meanY)} / ((sum_j {w_j} - 1) * stdX * stdY)
-// The lengths of x and y must be equal
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / ((sum_j {w_j} - 1) * stdX * stdY)
+// The lengths of x and y must be equal. If weights is nil then all of the
+// weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Correlation(x []float64, meanX, stdX float64, y []float64, meanY, stdY float64, weights []float64) float64 {
 	return Covariance(x, meanX, y, meanY, weights) / (stdX * stdY)
 }
 
 // Covariance returns the weighted covariance between the samples of x and y
 // with the given means.
-// 		sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
-// The lengths of x and y must be equal
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
+// The lengths of x and y must be equal. If weights is nil then all of the
+// weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Covariance(x []float64, meanX float64, y []float64, meanY float64, weights []float64) float64 {
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")
@@ -38,8 +40,10 @@ func Covariance(x []float64, meanX float64, y []float64, meanY float64, weights 
 	if weights != nil && len(weights) != len(x) {
 		panic("stat: slice length mismatch")
 	}
-	var s float64
-	var sumWeights float64
+	var (
+		s          float64
+		sumWeights float64
+	)
 	for i, v := range x {
 		s += weights[i] * (v - meanX) * (y[i] - meanY)
 		sumWeights += weights[i]
@@ -66,7 +70,7 @@ func CrossEntropy(p, q []float64) float64 {
 
 // Entropy computes the Shannon entropy of a distribution or the distance between
 // two distributions. The natural logarithm is used.
-//		- sum_i (p_i * log_e(p_i))
+//  - sum_i (p_i * log_e(p_i))
 func Entropy(p []float64) float64 {
 	var e float64
 	for _, v := range p {
@@ -81,8 +85,8 @@ func Entropy(p []float64) float64 {
 // The kurtosis is defined by the 4th moment of the mean divided by the squared
 // variance. The excess kurtosis subtracts 3.0 so that the excess kurtosis of
 // the normal distribution is zero.
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
 func ExKurtosis(x []float64, mean, stdev float64, weights []float64) float64 {
 	if weights == nil {
 		var e float64
@@ -96,8 +100,10 @@ func ExKurtosis(x []float64, mean, stdev float64, weights []float64) float64 {
 	if len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	var e float64
-	var sumWeights float64
+	var (
+		e          float64
+		sumWeights float64
+	)
 	for i, v := range x {
 		z := (v - mean) / stdev
 		e += weights[i] * z * z * z * z
@@ -114,10 +120,10 @@ func kurtosisCorrection(n float64) (mul, offset float64) {
 }
 
 // GeoMean returns the weighted geometric mean of the dataset
-// 		\prod_i {x_i ^ w_i}
-// This only applies with positive x and positive weights
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+//  \prod_i {x_i ^ w_i}
+// This only applies with positive x and positive weights. If weights is nil
+// then all of the weights are 1. If weights is not nil, then len(x) must equal
+// len(weights).
 func GeometricMean(x, weights []float64) float64 {
 	if weights == nil {
 		var s float64
@@ -130,8 +136,10 @@ func GeometricMean(x, weights []float64) float64 {
 	if len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	var s float64
-	var sumWeights float64
+	var (
+		s          float64
+		sumWeights float64
+	)
 	for i, v := range x {
 		s += weights[i] * math.Log(v)
 		sumWeights += weights[i]
@@ -141,10 +149,10 @@ func GeometricMean(x, weights []float64) float64 {
 }
 
 // GeoMean returns the weighted harmonic mean of the dataset
-// 		\sum_i {w_i} / ( sum_i {w_i / x_i} )
-// This only applies with positive x and positive weights
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+//  \sum_i {w_i} / ( sum_i {w_i / x_i} )
+// This only applies with positive x and positive weights.
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
 func HarmonicMean(x, weights []float64) float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
@@ -175,10 +183,14 @@ func HarmonicMean(x, weights []float64) float64 {
 // Histogram sums up the weighted number of data points in each bin.
 // The weight of data point x[i] will be placed into count[j] if
 // dividers[j-1] <= x < dividers[j]. The "span" function in the floats package can assist
-// with bin creation. The count variable must either be nil or have length of
-// one less than dividers.
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+// with bin creation.
+//
+// The following conditions on the inputs apply:
+// - The count variable must either be nil or have length of one less than dividers.
+// - The values in dividers must be sorted (use the sort package)
+// - The x values must be sorted
+// - If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
 func Histogram(count, dividers, x, weights []float64) []float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
@@ -189,13 +201,17 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	if len(count) != len(dividers)+1 {
 		panic("histogram: bin count mismatch")
 	}
-
-	sortX, sortWeight := sortXandWeight(x, weights)
+	if !sort.Float64sAreSorted(dividers) {
+		panic("dividers are not sorted")
+	}
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
 
 	idx := 0
 	comp := dividers[idx]
-	if sortWeight == nil {
-		for _, v := range sortX {
+	if weights == nil {
+		for _, v := range x {
 			if v < comp || idx == len(count)-1 {
 				// Still in the current bucket
 				count[idx] += 1
@@ -219,10 +235,10 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 		return count
 	}
 
-	for i, v := range sortX {
+	for i, v := range x {
 		if v < comp || idx == len(count)-1 {
 			// Still in the current bucket
-			count[idx] += sortWeight[i]
+			count[idx] += weights[i]
 			continue
 		}
 		// Need to find the next divider where v is less than the divider
@@ -238,16 +254,14 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 				break
 			}
 		}
-		count[idx] += sortWeight[i]
+		count[idx] += weights[i]
 	}
-	return count
-
 	return count
 }
 
 // KulbeckLeibler computes the Kulbeck-Leibler distance between the
 // distributions p and q. The natural logarithm is used.
-//		sum_i(p_i * log(p_i / q_i))
+//  sum_i(p_i * log(p_i / q_i))
 // Note that the Kulbeck-Leibler distance is not symmetric;
 // KulbeckLeibler(p,q) != KulbeckLeibler(q,p)
 func KulbeckLeibler(p, q []float64) float64 {
@@ -264,9 +278,9 @@ func KulbeckLeibler(p, q []float64) float64 {
 }
 
 // Mean computes the weighted mean of the data set.
-//     sum_i {w_i * x_i} / sum_i {w_i}
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+//  sum_i {w_i * x_i} / sum_i {w_i}
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
 func Mean(x, weights []float64) float64 {
 	if weights == nil {
 		return floats.Sum(x) / float64(len(x))
@@ -274,8 +288,10 @@ func Mean(x, weights []float64) float64 {
 	if len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	var sumValues float64
-	var sumWeights float64
+	var (
+		sumValues  float64
+		sumWeights float64
+	)
 	for i, w := range weights {
 		sumValues += w * x[i]
 		sumWeights += w
@@ -303,8 +319,10 @@ func Mode(x []float64, weights []float64) (val float64, count float64) {
 			m[v] += weights[i]
 		}
 	}
-	var maxCount float64
-	var max float64
+	var (
+		maxCount float64
+		max      float64
+	)
 	for val, count := range m {
 		if count > maxCount {
 			maxCount = count
@@ -315,10 +333,10 @@ func Mode(x []float64, weights []float64) (val float64, count float64) {
 }
 
 // Moment computes the weighted n^th moment of the samples,
-// 		E[(x - μ)^N]
+//  E[(x - μ)^N]
 // No degrees of freedom correction is done.
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
 func Moment(moment float64, x []float64, mean float64, weights []float64) float64 {
 	if weights == nil {
 		var m float64
@@ -331,8 +349,10 @@ func Moment(moment float64, x []float64, mean float64, weights []float64) float6
 	if len(weights) != len(x) {
 		panic("stat: slice length mismatch")
 	}
-	var m float64
-	var sumWeights float64
+	var (
+		m          float64
+		sumWeights float64
+	)
 	for i, v := range x {
 		m += weights[i] * math.Pow(v-mean, moment)
 		sumWeights += weights[i]
@@ -341,10 +361,11 @@ func Moment(moment float64, x []float64, mean float64, weights []float64) float6
 }
 
 // Percentile returns the lowest sample of x such that x is greater than or
-// equal to the fraction p of samples. p should be a number between 0 and 1
-// If no such sample exists, the lowest value is returned
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+// equal to the fraction p of samples. p should be a number between 0 and 1.
+// If no such sample exists, the lowest value is returned.
+//
+// The x data must be sorted in increasing order. If weights is nil then all
+// of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Percentile(p float64, x, weights []float64) float64 {
 	if p < 0 || p > 1 {
 		panic("stat: percentile out of bounds")
@@ -353,23 +374,28 @@ func Percentile(p float64, x, weights []float64) float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
+	if floats.HasNaN(x) {
+		return math.NaN() // This is needed because the algorithm breaks otherwise
+	}
 
-	sortX, sortWeight := sortXandWeight(x, weights)
 	if weights == nil {
 		loc := p * float64(len(x))
 		idx := int(math.Floor(loc))
 		if (loc == float64(idx) && idx != 0) || idx == len(x) {
 			idx--
 		}
-		return sortX[idx]
+		return x[idx]
 	}
 
-	idx := p * floats.Sum(weights)
+	fidx := p * floats.Sum(weights)
 	var cumsum float64
-	for i, w := range sortWeight {
+	for i, w := range weights {
 		cumsum += w
-		if cumsum >= idx {
-			return sortX[i]
+		if cumsum >= fidx {
+			return x[i]
 		}
 	}
 	panic("shouldn't be here")
@@ -377,24 +403,30 @@ func Percentile(p float64, x, weights []float64) float64 {
 
 // Quantile returns the lowest number p such that q is >= the fraction p of samples
 // It is the inverse of the Percentile function.
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+//
+// The x data must be sorted in increasing order. If weights is nil then all
+// of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Quantile(q float64, x, weights []float64) float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	sortX, sortWeight := sortXandWeight(x, weights)
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
+	if floats.HasNaN(x) {
+		return math.NaN()
+	}
 
 	// Find the first x that is greater than the supplied x
-	if q < sortX[0] {
+	if q < x[0] {
 		return 0
 	}
-	if q >= sortX[len(sortX)-1] {
+	if q >= x[len(x)-1] {
 		return 1
 	}
 
 	if weights == nil {
-		for i, v := range sortX {
+		for i, v := range x {
 			if v > q {
 				return float64(i) / float64(len(x))
 			}
@@ -402,18 +434,18 @@ func Quantile(q float64, x, weights []float64) float64 {
 	}
 	sumWeights := floats.Sum(weights)
 	var w float64
-	for i, v := range sortX {
+	for i, v := range x {
 		if v > q {
 			return w / sumWeights
 		}
-		w += sortWeight[i]
+		w += weights[i]
 	}
-	panic("Impossible. Maybe x contains NaNs.")
+	panic("Impossible")
 }
 
-// Skew computes the skewness of the sample data
-// If weights is nil then all of the weights are 1
-// If weights is not nil, then len(x) must equal len(weights)
+// Skew computes the skewness of the sample data.
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
 func Skew(x []float64, mean, stdev float64, weights []float64) float64 {
 	if weights == nil {
 		var s float64
@@ -426,8 +458,10 @@ func Skew(x []float64, mean, stdev float64, weights []float64) float64 {
 	if len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	var s float64
-	var sumWeights float64
+	var (
+		s          float64
+		sumWeights float64
+	)
 	for i, v := range x {
 		z := (v - mean) / stdev
 		s += weights[i] * z * z * z
@@ -436,32 +470,68 @@ func Skew(x []float64, mean, stdev float64, weights []float64) float64 {
 	return s * skewCorrection(sumWeights)
 }
 
+// From: http://www.amstat.org/publications/jse/v19n2/doane.pdf page 7
 func skewCorrection(n float64) float64 {
-	// http://www.amstat.org/publications/jse/v19n2/doane.pdf page 7
 	return (n / (n - 1)) * (1 / (n - 2))
 }
 
-// StdDev returns the population standard deviation with the provided mean
+// SortWeightedData rearranges the data in x along with their corresponding
+// weights so that the x data are sorted. The data is sorted in place.
+// Weights may be nil, but if weights is non-nil then it must have the same
+// length as x.
+func SortWeightedData(x, weights []float64) {
+	if weights == nil {
+		sort.Float64s(x)
+		return
+	}
+	if len(x) != len(weights) {
+		panic("stat: slice length mismatch")
+	}
+	sort.Sort(weightSorter{
+		x: x,
+		w: weights,
+	})
+}
+
+type weightSorter struct {
+	x []float64
+	w []float64
+}
+
+func (w weightSorter) Less(i, j int) bool {
+	return w.x[i] < w.x[j]
+}
+
+func (w weightSorter) Swap(i, j int) {
+	w.x[i], w.x[j] = w.x[j], w.x[i]
+	w.w[i], w.w[j] = w.w[j], w.w[i]
+}
+
+func (w weightSorter) Len() int {
+	return len(w.x)
+}
+
+// StdDev returns the population standard deviation with the provided mean.
 func StDev(x []float64, mean float64, weights []float64) float64 {
 	return math.Sqrt(Variance(x, mean, weights))
 }
 
-// StandardError returns the standard error in the mean with the given values
+// StandardError returns the standard error in the mean with the given values.
 func StdErr(stdev, sampleSize float64) float64 {
 	return stdev / math.Sqrt(sampleSize)
 }
 
 // StdScore returns the standard score (a.k.a. z-score, z-value) for the value x
 // with the givem mean and variance, i.e.
-//		(x - mean) / variance
+//  (x - mean) / variance
 func StdScore(x, mean, variance float64) float64 {
 	return (x - mean) / variance
 }
 
 // Variance computes the weighted sample variance with the provided mean.
-//    \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
-// If weights is nil, then all of the weights are 1.
-// If weights in not nil, then len(x) must equal len(weights).
+//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
 func Variance(x []float64, mean float64, weights []float64) float64 {
 	if weights == nil {
 		var s float64
@@ -473,35 +543,13 @@ func Variance(x []float64, mean float64, weights []float64) float64 {
 	if len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	var ss float64
-	var sumWeights float64
+	var (
+		ss         float64
+		sumWeights float64
+	)
 	for i, v := range x {
 		ss += weights[i] * (v - mean) * (v - mean)
 		sumWeights += weights[i]
 	}
 	return ss / (sumWeights - 1)
-}
-
-// Quartile returns
-//func Quartile(x []float64, weights []float64) float64 {}
-
-func sortXandWeight(x, weights []float64) (sortX, sortWeight []float64) {
-
-	sorted := sort.Float64sAreSorted(x)
-	if !sorted {
-		sortX = make([]float64, len(x))
-		copy(sortX, x)
-		inds := make([]int, len(x))
-		floats.Argsort(sortX, inds)
-		if weights != nil {
-			sortWeight = make([]float64, len(x))
-			for i, v := range inds {
-				sortWeight[i] = weights[v]
-			}
-		}
-	} else {
-		sortX = x
-		sortWeight = weights
-	}
-	return
 }

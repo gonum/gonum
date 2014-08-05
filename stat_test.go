@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package stat
 
 import (
@@ -431,18 +435,6 @@ func TestPercentile(t *testing.T) {
 			w:   []float64{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
 			ans: []float64{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
 		},
-		{
-			p:   []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
-			x:   []float64{3, 10, 1, 2, 5, 9, 7, 8, 6, 4},
-			w:   []float64{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-			ans: []float64{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
-		},
-		{
-			p:   []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
-			x:   []float64{3, 10, 1, 2, 5, 9, 7, 8, 6, 4},
-			w:   nil,
-			ans: []float64{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
-		},
 	} {
 		if len(test.p) != len(test.ans) {
 			panic("bad test")
@@ -483,21 +475,10 @@ func TestQuantile(t *testing.T) {
 			ans: []float64{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1},
 		},
 		{
-			q:   []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
-			x:   []float64{5, 2, 3, 4, 1},
-			ans: []float64{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1},
-		},
-		{
 			q:       []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
-			x:       []float64{5, 2, 3, 4, 1},
+			x:       []float64{1, 2, 3, 4, 5},
 			weights: []float64{1, 1, 1, 1, 1},
 			ans:     []float64{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1},
-		},
-		{
-			q:       []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
-			x:       []float64{5, 2, 3, 4, 1},
-			weights: []float64{1, 1, 2, 5, 1},
-			ans:     []float64{0, 0, 0.1, 0.1, 0.2, 0.4, 0.4, 0.9, 1, 1},
 		},
 	} {
 		copyX := make([]float64, len(test.x))

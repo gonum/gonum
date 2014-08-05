@@ -475,11 +475,11 @@ func skewCorrection(n float64) float64 {
 	return (n / (n - 1)) * (1 / (n - 2))
 }
 
-// SortWeightedData rearranges the data in x along with their corresponding
+// SortWeighted rearranges the data in x along with their corresponding
 // weights so that the x data are sorted. The data is sorted in place.
 // Weights may be nil, but if weights is non-nil then it must have the same
 // length as x.
-func SortWeightedData(x, weights []float64) {
+func SortWeighted(x, weights []float64) {
 	if weights == nil {
 		sort.Float64s(x)
 		return

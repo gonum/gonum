@@ -186,9 +186,13 @@ func HarmonicMean(x, weights []float64) float64 {
 // with bin creation.
 //
 // The following conditions on the inputs apply:
+//
 // - The count variable must either be nil or have length of one less than dividers.
+//
 // - The values in dividers must be sorted (use the sort package)
+//
 // - The x values must be sorted
+//
 // - If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func Histogram(count, dividers, x, weights []float64) []float64 {
@@ -360,13 +364,88 @@ func Moment(moment float64, x []float64, mean float64, weights []float64) float6
 	return m / sumWeights
 }
 
-// Percentile returns the lowest sample of x such that x is greater than or
-// equal to the fraction p of samples. p should be a number between 0 and 1.
-// If no such sample exists, the lowest value is returned.
+type CumulantKind int
+
+const (
+	// Constant values should match the R nomenclature. See
+	// https://en.wikipedia.org/wiki/Quantile#Estimating_the_quantiles_of_a_population
+
+	// Empirical treats the distribution as the actual empirical distribution.
+	Empirical CumulantKind = 1
+)
+
+// Percentile returns the fraction of the samples less than or equal to q. The
+// exact behavior is determined by the CumulantKind. Percentile is theoretically
+// the inverse of the Quantile function, though it may not be the actual inverse
+// for all values q and CumululantKinds.
 //
 // The x data must be sorted in increasing order. If weights is nil then all
 // of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func Percentile(p float64, x, weights []float64) float64 {
+//
+// CumulantKind behaviors:
+//
+// - Empirical: Returns the lowest fraction for which q is greater than or equal
+// to that fraction of samples
+func Percentile(q float64, c CumulantKind, x, weights []float64) float64 {
+	if weights != nil && len(x) != len(weights) {
+		panic("stat: slice length mismatch")
+	}
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
+	if floats.HasNaN(x) {
+		return math.NaN()
+	}
+
+	if q < x[0] {
+		return 0
+	}
+	if q >= x[len(x)-1] {
+		return 1
+	}
+
+	var sumWeights float64
+	if weights == nil {
+		sumWeights = float64(len(x))
+	} else {
+		sumWeights = floats.Sum(weights)
+	}
+
+	// Calculate the index
+	switch c {
+	case Empirical:
+		// Find the smallest value that is greater than that percent of the samples
+		var w float64
+		for i, v := range x {
+			if v > q {
+				return w / sumWeights
+			}
+			if weights == nil {
+				w += 1
+			} else {
+				w += weights[i]
+			}
+		}
+		panic("impossible")
+	default:
+		panic("stat: bad cumulant kind")
+	}
+}
+
+// Quantile returns the sample of x such that x is greater than or
+// equal to the fraction p of samples. The exact behavior is determined by the
+// CumulantKind, and p should be a number between 0 and 1. Quantile is theoretically
+// the inverse of the Percentile function, though it may not be the actual inverse
+// for all values p and CumulantKinds.
+//
+// The x data must be sorted in increasing order. If weights is nil then all
+// of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
+//
+// CumulantKind behaviors:
+//
+// - Empirical: Returns the lowest value q for which q is greater than or equal
+// to the fraction p of samples
+func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	if p < 0 || p > 1 {
 		panic("stat: percentile out of bounds")
 	}
@@ -380,67 +459,28 @@ func Percentile(p float64, x, weights []float64) float64 {
 	if floats.HasNaN(x) {
 		return math.NaN() // This is needed because the algorithm breaks otherwise
 	}
-
+	var sumWeights float64
 	if weights == nil {
-		loc := p * float64(len(x))
-		idx := int(math.Floor(loc))
-		if (loc == float64(idx) && idx != 0) || idx == len(x) {
-			idx--
-		}
-		return x[idx]
+		sumWeights = float64(len(x))
+	} else {
+		sumWeights = floats.Sum(weights)
 	}
-
-	fidx := p * floats.Sum(weights)
-	var cumsum float64
-	for i, w := range weights {
-		cumsum += w
-		if cumsum >= fidx {
-			return x[i]
-		}
-	}
-	panic("shouldn't be here")
-}
-
-// Quantile returns the lowest number p such that q is >= the fraction p of samples
-// It is the inverse of the Percentile function.
-//
-// The x data must be sorted in increasing order. If weights is nil then all
-// of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func Quantile(q float64, x, weights []float64) float64 {
-	if weights != nil && len(x) != len(weights) {
-		panic("stat: slice length mismatch")
-	}
-	if !sort.Float64sAreSorted(x) {
-		panic("x data are not sorted")
-	}
-	if floats.HasNaN(x) {
-		return math.NaN()
-	}
-
-	// Find the first x that is greater than the supplied x
-	if q < x[0] {
-		return 0
-	}
-	if q >= x[len(x)-1] {
-		return 1
-	}
-
-	if weights == nil {
-		for i, v := range x {
-			if v > q {
-				return float64(i) / float64(len(x))
+	switch c {
+	case Empirical:
+		var cumsum float64
+		fidx := p * sumWeights
+		for i := range x {
+			if weights == nil {
+				cumsum += 1
+			} else {
+				cumsum += weights[i]
+			}
+			if cumsum >= fidx {
+				return x[i]
 			}
 		}
 	}
-	sumWeights := floats.Sum(weights)
-	var w float64
-	for i, v := range x {
-		if v > q {
-			return w / sumWeights
-		}
-		w += weights[i]
-	}
-	panic("Impossible")
+	panic("impossible")
 }
 
 // Skew computes the skewness of the sample data.

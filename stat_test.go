@@ -417,68 +417,24 @@ func TestMoment(t *testing.T) {
 }
 
 func TestPercentile(t *testing.T) {
-	for i, test := range []struct {
-		p   []float64
-		x   []float64
-		w   []float64
-		ans []float64
-	}{
-		{
-			p:   []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
-			x:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-			w:   nil,
-			ans: []float64{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
-		},
-		{
-			p:   []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
-			x:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-			w:   []float64{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
-			ans: []float64{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10},
-		},
-	} {
-		if len(test.p) != len(test.ans) {
-			panic("bad test")
-		}
-		copyX := make([]float64, len(test.x))
-		copy(copyX, test.x)
-		var copyW []float64
-		if test.w != nil {
-			copyW = make([]float64, len(test.w))
-			copy(copyW, test.w)
-		}
-		for j, p := range test.p {
-			v := Percentile(p, test.x, test.w)
-			if !floats.Equal(copyX, test.x) {
-				t.Errorf("x changed for case %d percentile %v", i, p)
-			}
-			if !floats.Equal(copyW, test.w) {
-				t.Errorf("x changed for case %d percentile %v", i, p)
-			}
-			if v != test.ans[j] {
-				t.Errorf("mismatch case %d percentile %v. Expected: %v, found: %v", i, p, test.ans[j], v)
-			}
-		}
-	}
-}
-
-func TestQuantile(t *testing.T) {
+	cumulantKinds := []CumulantKind{Empirical}
 	for i, test := range []struct {
 		q       []float64
 		x       []float64
 		weights []float64
-		ans     []float64
+		ans     [][]float64
 	}{
 		{},
 		{
 			q:   []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
 			x:   []float64{1, 2, 3, 4, 5},
-			ans: []float64{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1},
+			ans: [][]float64{{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1}},
 		},
 		{
 			q:       []float64{0, 0.9, 1, 1.1, 2.9, 3, 3.1, 4.9, 5, 5.1},
 			x:       []float64{1, 2, 3, 4, 5},
 			weights: []float64{1, 1, 1, 1, 1},
-			ans:     []float64{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1},
+			ans:     [][]float64{{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1}},
 		},
 	} {
 		copyX := make([]float64, len(test.x))
@@ -489,15 +445,62 @@ func TestQuantile(t *testing.T) {
 			copy(copyW, test.weights)
 		}
 		for j, q := range test.q {
-			v := Quantile(q, test.x, test.weights)
-			if !floats.Equal(copyX, test.x) {
-				t.Errorf("x changed for case %d percentile %v", i, q)
+			for k, kind := range cumulantKinds {
+				v := Percentile(q, kind, test.x, test.weights)
+				if !floats.Equal(copyX, test.x) {
+					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
+				}
+				if !floats.Equal(copyW, test.weights) {
+					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
+				}
+				if v != test.ans[k][j] {
+					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, q, test.ans[k][j], v)
+				}
 			}
-			if !floats.Equal(copyW, test.weights) {
-				t.Errorf("x changed for case %d percentile %v", i, q)
-			}
-			if v != test.ans[j] {
-				t.Errorf("mismatch case %d percentile %v. Expected: %v, found: %v", i, q, test.ans[j], v)
+		}
+	}
+}
+
+func TestQuantile(t *testing.T) {
+	cumulantKinds := []CumulantKind{Empirical}
+	for i, test := range []struct {
+		p   []float64
+		x   []float64
+		w   []float64
+		ans [][]float64
+	}{
+		{
+			p:   []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
+			x:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			w:   nil,
+			ans: [][]float64{{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10}},
+		},
+		{
+			p:   []float64{0, 0.05, 0.1, 0.15, 0.45, 0.5, 0.55, 0.85, 0.9, 0.95, 1},
+			x:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			w:   []float64{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+			ans: [][]float64{{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10}},
+		},
+	} {
+		copyX := make([]float64, len(test.x))
+		copy(copyX, test.x)
+		var copyW []float64
+		if test.w != nil {
+			copyW = make([]float64, len(test.w))
+			copy(copyW, test.w)
+		}
+		for j, p := range test.p {
+			for k, kind := range cumulantKinds {
+				v := Quantile(p, kind, test.x, test.w)
+				if !floats.Equal(copyX, test.x) {
+					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
+				}
+				if !floats.Equal(copyW, test.w) {
+					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
+				}
+				if v != test.ans[k][j] {
+					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, p, test.ans[k][j], v)
+				}
 			}
 		}
 	}

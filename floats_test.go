@@ -469,6 +469,31 @@ func TestFind(t *testing.T) {
 	}
 }
 
+func TestHasNaN(t *testing.T) {
+	for i, test := range []struct {
+		s   []float64
+		ans bool
+	}{
+		{},
+		{
+			s: []float64{1, 2, 3, 4},
+		},
+		{
+			s:   []float64{1, math.NaN(), 3, 4},
+			ans: true,
+		},
+		{
+			s:   []float64{1, 2, 3, math.NaN()},
+			ans: true,
+		},
+	} {
+		b := HasNaN(test.s)
+		if b != test.ans {
+			t.Errorf("HasNaN mismatch case %d. Expected %v, Found %v", i, test.ans, b)
+		}
+	}
+}
+
 func TestLogSpan(t *testing.T) {
 	receiver := make([]float64, 6)
 	truth := []float64{0.001, 0.01, 0.1, 1, 10, 100}

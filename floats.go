@@ -353,6 +353,17 @@ func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
 	return inds, errors.New("floats: insufficient elements found")
 }
 
+// HasNaN returns true if the slice s has any values that are NaN and false
+// otherwise.
+func HasNaN(s []float64) bool {
+	for _, v := range s {
+		if math.IsNaN(v) {
+			return true
+		}
+	}
+	return false
+}
+
 // LogSpan returns a set of n equally spaced points in log space between,
 // l and u where N is equal to len(dst). The first element of the
 // resulting dst will be l and the final element of dst will be u.

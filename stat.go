@@ -479,8 +479,9 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 				return x[i]
 			}
 		}
+	default:
+		panic("impossible")
 	}
-	panic("impossible")
 }
 
 // Skew computes the skewness of the sample data.

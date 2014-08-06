@@ -11,6 +11,7 @@ import (
 	"github.com/gonum/floats"
 )
 
+// CumulantKind specifies the behavior for calculating the empirical CDF or Quantile
 type CumulantKind int
 
 const (
@@ -68,7 +69,7 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 				return w / sumWeights
 			}
 			if weights == nil {
-				w += 1
+				w++
 			} else {
 				w += weights[i]
 			}
@@ -187,7 +188,7 @@ func kurtosisCorrection(n float64) (mul, offset float64) {
 	return ((n + 1) / (n - 1)) * (n / (n - 2)) * (1 / (n - 3)), 3 * ((n - 1) / (n - 2)) * ((n - 1) / (n - 3))
 }
 
-// GeoMean returns the weighted geometric mean of the dataset
+// GeometricMean returns the weighted geometric mean of the dataset
 //  \prod_i {x_i ^ w_i}
 // This only applies with positive x and positive weights. If weights is nil
 // then all of the weights are 1. If weights is not nil, then len(x) must equal
@@ -216,7 +217,7 @@ func GeometricMean(x, weights []float64) float64 {
 	return math.Exp(s)
 }
 
-// GeoMean returns the weighted harmonic mean of the dataset
+// HarmonicMean returns the weighted harmonic mean of the dataset
 //  \sum_i {w_i} / ( sum_i {w_i / x_i} )
 // This only applies with positive x and positive weights.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
@@ -236,7 +237,7 @@ func HarmonicMean(x, weights []float64) float64 {
 	for i := range x {
 		if weights == nil {
 			logs[i] = -math.Log(x[i])
-			W += 1
+			W++
 			continue
 		}
 		logs[i] = math.Log(weights[i]) - math.Log(x[i])
@@ -282,7 +283,7 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 		for _, v := range x {
 			if v < comp || idx == len(count)-1 {
 				// Still in the current bucket
-				count[idx] += 1
+				count[idx]++
 				continue
 			}
 			// Need to find the next divider where v is less than the divider
@@ -298,7 +299,7 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 					break
 				}
 			}
-			count[idx] += 1
+			count[idx]++
 		}
 		return count
 	}
@@ -380,7 +381,7 @@ func Mode(x []float64, weights []float64) (val float64, count float64) {
 	m := make(map[float64]float64)
 	if weights == nil {
 		for _, v := range x {
-			m[v] += 1
+			m[v]++
 		}
 	} else {
 		for i, v := range x {
@@ -466,7 +467,7 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 		fidx := p * sumWeights
 		for i := range x {
 			if weights == nil {
-				cumsum += 1
+				cumsum++
 			} else {
 				cumsum += weights[i]
 			}
@@ -549,11 +550,11 @@ func (w weightSorter) Len() int {
 }
 
 // StdDev returns the population standard deviation with the provided mean.
-func StDev(x []float64, mean float64, weights []float64) float64 {
+func StdDev(x []float64, mean float64, weights []float64) float64 {
 	return math.Sqrt(Variance(x, mean, weights))
 }
 
-// StandardError returns the standard error in the mean with the given values.
+// StdErr returns the standard error in the mean with the given values.
 func StdErr(stdev, sampleSize float64) float64 {
 	return stdev / math.Sqrt(sampleSize)
 }

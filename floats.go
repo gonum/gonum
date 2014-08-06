@@ -82,7 +82,7 @@ func (a argsort) Swap(i, j int) {
 	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
 }
 
-// ApplyFunc applies a function f (math.Exp, math.Sin, etc.) to every element
+// Apply applies a function f (math.Exp, math.Sin, etc.) to every element
 // of the slice s.
 func Apply(f func(float64) float64, s []float64) {
 	for i, val := range s {
@@ -118,7 +118,7 @@ func Count(f func(float64) bool, s []float64) int {
 	return n
 }
 
-// Cumprod finds the cumulative product of the first i elements in
+// CumProd finds the cumulative product of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. A panic will occur if lengths of do not match.
 func CumProd(dst, s []float64) []float64 {
@@ -132,7 +132,7 @@ func CumProd(dst, s []float64) []float64 {
 	return dst
 }
 
-// Cumsum finds the cumulative sum of the first i elements in
+// CumSum finds the cumulative sum of the first i elements in
 // s and puts them in place into the ith element of the
 // destination. A panic will occur if lengths of arguments do not match.
 func CumSum(dst, s []float64) []float64 {
@@ -199,7 +199,7 @@ func Equal(s1, s2 []float64) bool {
 	return true
 }
 
-// EqualsApprox returns true if the slices have equal lengths and
+// EqualApprox returns true if the slices have equal lengths and
 // all element pairs have an absolute tolerance less than tol or a
 // relative tolerance less than tol.
 func EqualApprox(s1, s2 []float64, tol float64) bool {
@@ -214,7 +214,7 @@ func EqualApprox(s1, s2 []float64, tol float64) bool {
 	return true
 }
 
-// EqualsFunc returns true if the slices have the same lengths
+// EqualFunc returns true if the slices have the same lengths
 // and the function returns true for all element pairs.
 func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 	if len(s1) != len(s2) {
@@ -229,7 +229,7 @@ func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 
 }
 
-// ApproxEqualAbs returns true if a and b have an absolute
+// EqualWithinAbs returns true if a and b have an absolute
 // difference of less than tol.
 func EqualWithinAbs(a, b, tol float64) bool {
 	return a == b || math.Abs(a-b) <= tol
@@ -237,7 +237,7 @@ func EqualWithinAbs(a, b, tol float64) bool {
 
 const minNormalFloat64 = 2.2250738585072014e-308
 
-// ApproxEqualRel returns true if the difference between a and b
+// EqualWithinRel returns true if the difference between a and b
 // is not greater than tol times the greater value.
 func EqualWithinRel(a, b, tol float64) bool {
 	if a == b {
@@ -254,7 +254,7 @@ func EqualWithinRel(a, b, tol float64) bool {
 	return delta/math.Max(math.Abs(a), math.Abs(b)) <= tol
 }
 
-// EqualsWithinAbsOrRel returns true if a and b are equal to within
+// EqualWithinAbsOrRel returns true if a and b are equal to within
 // the absolute tolerance.
 func EqualWithinAbsOrRel(a, b, absTol, relTol float64) bool {
 	if EqualWithinAbs(a, b, absTol) {
@@ -285,7 +285,7 @@ func ulpDiff(a, b uint64) uint64 {
 	return b - a
 }
 
-// Eqlen returns true if all of the slices have equal length,
+// EqualLengths returns true if all of the slices have equal length,
 // and false otherwise. Returns true if there are no input slices.
 func EqualLengths(slices ...[]float64) bool {
 	// This length check is needed: http://play.golang.org/p/sdty6YiLhM
@@ -376,7 +376,7 @@ func LogSpan(dst []float64, l, u float64) []float64 {
 	return dst
 }
 
-// Logsumexp returns the log of the sum of the exponentials of the values in s
+// LogSumExp returns the log of the sum of the exponentials of the values in s
 func LogSumExp(s []float64) (lse float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
@@ -464,7 +464,7 @@ func Nearest(s []float64, v float64) (ind int) {
 	return
 }
 
-// NearestInSpan return the index of a hypothetical vector created
+// NearestWithinSpan return the index of a hypothetical vector created
 // by Span with length n and bounds l and u whose value is closest
 // to v. Assumes u > l. If the value is greater than u or less than
 // l, the function will panic.

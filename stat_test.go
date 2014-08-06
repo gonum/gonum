@@ -416,7 +416,7 @@ func TestMoment(t *testing.T) {
 	}
 }
 
-func TestPercentile(t *testing.T) {
+func TestCDF(t *testing.T) {
 	cumulantKinds := []CumulantKind{Empirical}
 	for i, test := range []struct {
 		q       []float64
@@ -446,7 +446,7 @@ func TestPercentile(t *testing.T) {
 		}
 		for j, q := range test.q {
 			for k, kind := range cumulantKinds {
-				v := Percentile(q, kind, test.x, test.weights)
+				v := CDF(q, kind, test.x, test.weights)
 				if !floats.Equal(copyX, test.x) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
 				}

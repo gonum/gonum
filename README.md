@@ -56,7 +56,7 @@ Experimental wrapper for the float64 part of the lapack interface.
 
 You have to register an implementation before you can use the LAPACK functions:
 
-```
+```go
 package main
 
 import (

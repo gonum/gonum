@@ -9,7 +9,7 @@ This is work in progress. Breaking changes are likely to happen.
 ## Installation 
 
 ```
-  go get github.com/dane-unltd/blas
+  go get github.com/gonum/blas
 ```
 
 
@@ -25,14 +25,14 @@ http://sourceforge.net/projects/openblas/files/
 
 generate lapack bindings
 ```
-  cd $GOPATH/src/github.com/dane-unltd/lapack/clapack
-  ./genLapack -L/path/to/OpenBLAS -lopenblas
+  cd $GOPATH/src/github.com/gonum/lapack/clapack
+  ./genLapack.pl -L/path/to/OpenBLAS -lopenblas
 ```
 
 If you want to use the Intel MKL and all of your paths are properly set
 ```
-  cd $GOPATH/src/github.com/dane-unltd/lapack/clapack
-  ./genLapack -lmkl_rt
+  cd $GOPATH/src/github.com/gonum/lapack/clapack
+  ./genLapack.pl -lmkl_rt
 ```
 should work.
 
@@ -56,7 +56,7 @@ Experimental wrapper for the float64 part of the lapack interface.
 
 You have to register an implementation before you can use the LAPACK functions:
 
-```
+```go
 package main
 
 import (
@@ -66,12 +66,11 @@ import (
 	"github.com/gonum/blas/dbw"
 	"github.com/gonum/lapack/clapack"
 	"github.com/gonum/lapack/dla"
-	"github.com/gonum/
 )
 
 func init() {
 	dbw.Register(cblas.Blas{})
-	dla.Register(clapack.Lapack{})
+	dla.Register(clapack.La{})
 }
 
 func main() {

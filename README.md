@@ -70,7 +70,7 @@ import (
 
 func init() {
 	dbw.Register(cblas.Blas{})
-	dla.Register(clapack.La{})
+	dla.Register(clapack.Lapack{})
 }
 
 func main() {

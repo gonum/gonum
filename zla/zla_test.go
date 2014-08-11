@@ -15,8 +15,8 @@ import (
 )
 
 func init() {
-	Register(clapack.La{})
-	dla.Register(clapack.La{})
+	Register(clapack.Lapack{})
+	dla.Register(clapack.Lapack{})
 	zbw.Register(cblas.Blas{})
 	dbw.Register(cblas.Blas{})
 }

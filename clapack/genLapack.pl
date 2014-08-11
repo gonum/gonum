@@ -47,7 +47,7 @@ import (
 	"unsafe"
 )
 
-type La struct{}
+type Lapack struct{}
 
 // Type order is used to specify the matrix storage format. We still interact with
 // an API that allows client calls to specify order, so this is here to document that fact.
@@ -59,8 +59,8 @@ const (
 )
  
 func init() {
-         _ = lapack.Complex128(La{})
-         _ = lapack.Float64(La{})
+         _ = lapack.Complex128(Lapack{})
+         _ = lapack.Float64(Lapack{})
 }
 
 EOH
@@ -169,7 +169,7 @@ sub processProto {
 	if ($params eq "") {
 		return
 	}
-	print $golapack "func (La) ".$gofunc."(".$params.") ".$GoRet."{\n";
+	print $golapack "func (Lapack) ".$gofunc."(".$params.") ".$GoRet."{\n";
 	print $golapack "\t";
 	if ($ret ne 'void') {
 		print $golapack "\n".$bp."\n"."return ".$GoRet."(";

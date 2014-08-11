@@ -2,12 +2,13 @@ package dla
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/cblas"
 	"github.com/gonum/blas/dbw"
 	"github.com/gonum/lapack/clapack"
 	"github.com/gonum/matrix/mat64"
-	"testing"
 )
 
 type fm struct {
@@ -24,7 +25,7 @@ func (m fm) Format(fs fmt.State, c rune) {
 }
 
 func init() {
-	Register(clapack.La{})
+	Register(clapack.Lapack{})
 	dbw.Register(cblas.Blas{})
 }
 

@@ -54,5 +54,5 @@ func TestLaplaceProb(t *testing.T) {
 			logProb: -20.69314718055994530941723212145817656807550013436025525412068000949339362196969471560586332699641869,
 		},
 	}
-	testDistributionProbs(t, Laplace{0, 1}, "Laplace", pts)
+	testDistributionProbs(t, Laplace{Mu: 0, Scale: 1}, "Laplace", pts)
 }

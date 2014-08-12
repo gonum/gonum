@@ -14,7 +14,8 @@ import (
 
 // Exponential represents the exponential distribution (https://en.wikipedia.org/wiki/Exponential_distribution).
 type Exponential struct {
-	Rate float64
+	Rate   float64
+	Source *rand.Rand
 }
 
 // CDF computes the value of the cumulative density function at x.
@@ -196,7 +197,13 @@ func (e Exponential) Quantile(p float64) float64 {
 
 // Rand returns a random sample drawn from the distribution.
 func (e Exponential) Rand() float64 {
-	return -math.Log(rand.Float64()) / e.Rate
+	var rnd float64
+	if e.Source == nil {
+		rnd = rand.ExpFloat64()
+	} else {
+		rnd = e.Source.ExpFloat64()
+	}
+	return rnd / e.Rate
 }
 
 // SetParameters gets the parameters of the distribution. Panics if the length of

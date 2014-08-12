@@ -28,8 +28,9 @@ var UnitNormal = Normal{Mu: 0, Sigma: 1}
 
 // Normal respresents a normal (Gaussian) distribution (https://en.wikipedia.org/wiki/Normal_distribution).
 type Normal struct {
-	Mu    float64 // Mean of the normal distribution
-	Sigma float64 // Standard deviation of the normal distribution
+	Mu     float64 // Mean of the normal distribution
+	Sigma  float64 // Standard deviation of the normal distribution
+	Source *rand.Rand
 
 	// Needs to be Mu and Sigma and not Mean and StdDev because Normal has functions
 	// Mean and StdDev
@@ -214,7 +215,13 @@ func (n Normal) Quantile(p float64) float64 {
 
 // Rand returns a random sample drawn from the distribution.
 func (n Normal) Rand() float64 {
-	return rand.NormFloat64()*n.Sigma + n.Mu
+	var rnd float64
+	if n.Source == nil {
+		rnd = rand.NormFloat64()
+	} else {
+		rnd = n.Source.NormFloat64()
+	}
+	return rnd*n.Sigma + n.Mu
 }
 
 // SetParameters gets the parameters of the distribution. Panics if the length of

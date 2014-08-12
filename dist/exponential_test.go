@@ -36,7 +36,7 @@ func TestExponentialProb(t *testing.T) {
 			logProb: -20,
 		},
 	}
-	testDistributionProbs(t, Exponential{1}, "Exponential", pts)
+	testDistributionProbs(t, Exponential{Rate: 1}, "Exponential", pts)
 }
 
 func TestExponentialFitPrior(t *testing.T) {

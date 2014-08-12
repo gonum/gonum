@@ -43,7 +43,7 @@ func TestNormalProbs(t *testing.T) {
 			logProb: math.Log(9.134720408364593342868613916794233023000190834851937054490546361277622761970225469305158915808284566e-12),
 		},
 	}
-	testDistributionProbs(t, Normal{0, 1}, "normal", pts)
+	testDistributionProbs(t, Normal{Mu: 0, Sigma: 1}, "normal", pts)
 
 	pts = []univariateProbPoint{
 		univariateProbPoint{
@@ -77,7 +77,7 @@ func TestNormalProbs(t *testing.T) {
 			logProb: math.Log(1.826944081672918668573722783358846604600038166970387410898109272255524552394045093861031783161656913e-12),
 		},
 	}
-	testDistributionProbs(t, Normal{2, 5}, "normal", pts)
+	testDistributionProbs(t, Normal{Mu: 2, Sigma: 5}, "normal", pts)
 }
 
 func TestNormFitPrior(t *testing.T) {

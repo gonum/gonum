@@ -192,6 +192,9 @@ func (g *DirectedGraph) Neighbors(n graph.Node) []graph.Node {
 		}
 	}
 
+	// Otherwise we overcount for self loops
+	neighbors = neighbors[:i]
+
 	return neighbors
 }
 

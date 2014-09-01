@@ -346,59 +346,61 @@ func KulbeckLeibler(p, q []float64) float64 {
 	return kl
 }
 
-var Epsilon float64 = math.Nextafter(1, 2) - 1
-
-// Computes the chi-square distance between the distributions p and q given by:
-// \sum_i (p_i-q_i)^2/p_i
-func ChiSquare(p, q []float64) float64 {
-	if len(p) != len(q) {
+// ChiSquare computes the chi-square distance between the observed frequences 'obs' and
+// expected frequences 'exp' given by:
+// \sum_i (obs_i-exp_i)^2 / exp_i
+func ChiSquare(obs, exp []float64) float64 {
+	if len(obs) != len(exp) {
 		panic("stat: slice length mismatch")
 	}
 	var result float64
-	for i, a := range p {
-		if a > Epsilon {
-			b := q[i]
-			result += (a - b) * (a - b) / a
+	for i, a := range obs {
+		b := exp[i]
+		if a == 0 && b == 0 {
+			continue
 		}
+		result += (a - b) * (a - b) / b
 	}
 	return result
 }
 
-// Computes the Bhattacharya distance between the distributions p and q given by:
-// \sqrt{ 1 - \frac{1}{\sqrt{\sum_i p_i \sum_i q_i}} \sum_i \sqrt{ p_i q_i} }
-func Bhattacharya(p, q []float64) float64 {
-	if len(p) != len(q) {
-		panic("stat: slice length mismatch")
-	}
-	var result float64
+func bhattacharyyaCoeff(p, q []float64) float64 {
+	var bc float64
 	var s1, s2 float64
 	for i, a := range p {
 		b := q[i]
-		result += math.Sqrt(a * b)
+		if a == 0 && b == 0 {
+			continue
+		}
+		bc += math.Sqrt(a * b)
 		s1 += a
 		s2 += b
 	}
-	s1 = s1 * s2
-	if s1 < Epsilon {
-		s1 = 1
-	} else {
-		s1 = 1 / math.Sqrt(s1)
-	}
-	result = math.Sqrt(math.Max(1-result*s1, 0))
-	return result
+	// normalize since we cannot assume that the inputs are probability distributions
+	return bc / math.Sqrt(s1*s2)
 }
 
-// Computes the Intersection distance between the distributions p and q given by:
-// \sum_i min(p_i,q_i)
-func Intersection(p, q []float64) float64 {
+// Hellinger computes the distance between the probability distributions p and q given by:
+// \sqrt{ 1 - \sum_i \sqrt{p_i q_i} }
+func Hellinger(p, q []float64) float64 {
 	if len(p) != len(q) {
 		panic("stat: slice length mismatch")
 	}
 	var result float64
-	for i, a := range p {
-		b := q[i]
-		result += math.Min(a, b)
+	bc := bhattacharyyaCoeff(p, q)
+	result = math.Sqrt(1 - bc)
+	return result
+}
+
+// Bhattacharyya computes the distance between the probability distributions p and q given by:
+// -\ln ( \sum_i \sqrt{p_i q_i} )
+func Bhattacharyya(p, q []float64) float64 {
+	if len(p) != len(q) {
+		panic("stat: slice length mismatch")
 	}
+	var result float64
+	bc := bhattacharyyaCoeff(p, q)
+	result = -math.Log(bc)
 	return result
 }
 

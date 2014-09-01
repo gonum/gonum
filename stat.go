@@ -328,12 +328,12 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	return count
 }
 
-// KulbeckLeibler computes the Kulbeck-Leibler distance between the
+// KullbackLeibler computes the Kullback-Leibler distance between the
 // distributions p and q. The natural logarithm is used.
 //  sum_i(p_i * log(p_i / q_i))
-// Note that the Kulbeck-Leibler distance is not symmetric;
-// KulbeckLeibler(p,q) != KulbeckLeibler(q,p)
-func KulbeckLeibler(p, q []float64) float64 {
+// Note that the Kullback-Leibler distance is not symmetric;
+// KullbackLeibler(p,q) != KullbackLeibler(q,p)
+func KullbackLeibler(p, q []float64) float64 {
 	if len(p) != len(q) {
 		panic("stat: slice length mismatch")
 	}

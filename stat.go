@@ -22,6 +22,32 @@ const (
 	Empirical CumulantKind = 1
 )
 
+// bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:
+// \sum_i \sqrt{p_i q_i}
+// Note: assumes p and q have already been checked to have equal length.
+func bhattacharyyaCoeff(p, q []float64) float64 {
+	var bc float64
+	for i, a := range p {
+		b := q[i]
+		if a == 0 && b == 0 {
+			continue
+		}
+		bc += math.Sqrt(a * b)
+	}
+	return bc
+}
+
+// Bhattacharyya computes the distance between the probability distributions p and q given by:
+// -\ln ( \sum_i \sqrt{p_i q_i} )
+// Note: assumes that p and q will sum to 1.
+func Bhattacharyya(p, q []float64) float64 {
+	if len(p) != len(q) {
+		panic("stat: slice length mismatch")
+	}
+	bc := bhattacharyyaCoeff(p, q)
+	return -math.Log(bc)
+}
+
 // CDF returns the empirical cumulative distribution function value of x, that is
 // the fraction of the samples less than or equal to q. The
 // exact behavior is determined by the CumulantKind. CDF is theoretically
@@ -78,6 +104,24 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 	default:
 		panic("stat: bad cumulant kind")
 	}
+}
+
+// ChiSquare computes the chi-square distance between the observed frequences 'obs' and
+// expected frequences 'exp' given by:
+// \sum_i (obs_i-exp_i)^2 / exp_i
+func ChiSquare(obs, exp []float64) float64 {
+	if len(obs) != len(exp) {
+		panic("stat: slice length mismatch")
+	}
+	var result float64
+	for i, a := range obs {
+		b := exp[i]
+		if a == 0 && b == 0 {
+			continue
+		}
+		result += (a - b) * (a - b) / b
+	}
+	return result
 }
 
 // Correlation returns the weighted correlation between the samples of x and y
@@ -249,6 +293,17 @@ func HarmonicMean(x, weights []float64) float64 {
 	return math.Exp(math.Log(W) - v)
 }
 
+// Hellinger computes the distance between the probability distributions p and q given by:
+// \sqrt{ 1 - \sum_i \sqrt{p_i q_i} }
+// Note: assumes that p and q will sum to 1.
+func Hellinger(p, q []float64) float64 {
+	if len(p) != len(q) {
+		panic("stat: slice length mismatch")
+	}
+	bc := bhattacharyyaCoeff(p, q)
+	return math.Sqrt(1 - bc)
+}
+
 // Histogram sums up the weighted number of data points in each bin.
 // The weight of data point x[i] will be placed into count[j] if
 // dividers[j-1] <= x < dividers[j]. The "span" function in the floats package can assist
@@ -344,64 +399,6 @@ func KulbeckLeibler(p, q []float64) float64 {
 		}
 	}
 	return kl
-}
-
-// ChiSquare computes the chi-square distance between the observed frequences 'obs' and
-// expected frequences 'exp' given by:
-// \sum_i (obs_i-exp_i)^2 / exp_i
-func ChiSquare(obs, exp []float64) float64 {
-	if len(obs) != len(exp) {
-		panic("stat: slice length mismatch")
-	}
-	var result float64
-	for i, a := range obs {
-		b := exp[i]
-		if a == 0 && b == 0 {
-			continue
-		}
-		result += (a - b) * (a - b) / b
-	}
-	return result
-}
-
-func bhattacharyyaCoeff(p, q []float64) float64 {
-	var bc float64
-	var s1, s2 float64
-	for i, a := range p {
-		b := q[i]
-		if a == 0 && b == 0 {
-			continue
-		}
-		bc += math.Sqrt(a * b)
-		s1 += a
-		s2 += b
-	}
-	// normalize since we cannot assume that the inputs are probability distributions
-	return bc / math.Sqrt(s1*s2)
-}
-
-// Hellinger computes the distance between the probability distributions p and q given by:
-// \sqrt{ 1 - \sum_i \sqrt{p_i q_i} }
-func Hellinger(p, q []float64) float64 {
-	if len(p) != len(q) {
-		panic("stat: slice length mismatch")
-	}
-	var result float64
-	bc := bhattacharyyaCoeff(p, q)
-	result = math.Sqrt(1 - bc)
-	return result
-}
-
-// Bhattacharyya computes the distance between the probability distributions p and q given by:
-// -\ln ( \sum_i \sqrt{p_i q_i} )
-func Bhattacharyya(p, q []float64) float64 {
-	if len(p) != len(q) {
-		panic("stat: slice length mismatch")
-	}
-	var result float64
-	bc := bhattacharyyaCoeff(p, q)
-	result = -math.Log(bc)
-	return result
 }
 
 // Mean computes the weighted mean of the data set.

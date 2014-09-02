@@ -320,24 +320,24 @@ the count field in order to avoid extra garbage`)
 	// Weighted Hist = [77 175 275 375 423 627 675 775 783 1067]
 }
 
-func ExampleKulbeckLiebler() {
+func ExampleKullbackLeibler() {
 
 	p := []float64{0.05, 0.1, 0.9, 0.05}
 	q := []float64{0.2, 0.4, 0.25, 0.15}
 	s := []float64{0, 0, 1, 0}
 
-	klPQ := KulbeckLeibler(p, q)
-	klPS := KulbeckLeibler(p, s)
-	klPP := KulbeckLeibler(p, p)
+	klPQ := KullbackLeibler(p, q)
+	klPS := KullbackLeibler(p, s)
+	klPP := KullbackLeibler(p, p)
 
-	fmt.Println("Kulbeck-Liebler is one measure of the difference between two distributions")
+	fmt.Println("Kullback-Leibler is one measure of the difference between two distributions")
 	fmt.Printf("The K-L distance between p and q is %.4f\n", klPQ)
 	fmt.Println("It is impossible for s and p to be the same distribution, because")
 	fmt.Println("the first bucket has zero probability in s and non-zero in p. Thus,")
 	fmt.Printf("the K-L distance between them is %.4f\n", klPS)
 	fmt.Printf("The K-L distance between identical distributions is %.4f\n", klPP)
 
-	// Kulbeck-Liebler is one measure of the difference between two distributions
+	// Kullback-Leibler is one measure of the difference between two distributions
 	// The K-L distance between p and q is 0.8900
 	// It is impossible for s and p to be the same distribution, because
 	// the first bucket has zero probability in s and non-zero in p. Thus,

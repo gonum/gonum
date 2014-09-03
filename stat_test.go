@@ -345,6 +345,104 @@ func ExampleKullbackLeibler() {
 	// The K-L distance between identical distributions is 0.0000
 }
 
+func TestChiSquare(t *testing.T) {
+	for i, test := range []struct {
+		p   []float64
+		q   []float64
+		res float64
+	}{
+		{
+			p:   []float64{16, 18, 16, 14, 12, 12},
+			q:   []float64{16, 16, 16, 16, 16, 8},
+			res: 3.5,
+		},
+		{
+			p:   []float64{16, 18, 16, 14, 12, 12},
+			q:   []float64{8, 20, 20, 16, 12, 12},
+			res: 9.25,
+		},
+		{
+			p:   []float64{40, 60, 30, 45},
+			q:   []float64{50, 50, 50, 50},
+			res: 12.5,
+		},
+	} {
+		resultpq := ChiSquare(test.p, test.q)
+
+		if math.Abs(resultpq-test.res) > 1e-10 {
+			t.Errorf("ChiSquare distance mismatch in case %d. Expected %v, Found %v", i, test.res, resultpq)
+		}
+	}
+}
+
+func TestBhattacharyya(t *testing.T) {
+	for i, test := range []struct {
+		p   []float64
+		q   []float64
+		res float64
+	}{
+		{
+			p:   []float64{0.5, 0.1, 0.3, 0.1},
+			q:   []float64{0.1, 0.4, 0.25, 0.25},
+			res: 0.15597338718671386,
+		},
+		{
+			p:   []float64{0.4, 0.6, 0.0},
+			q:   []float64{0.2, 0.2, 0.6},
+			res: 0.46322207765351153,
+		},
+		{
+			p:   []float64{0.1, 0.1, 0.0, 0.8},
+			q:   []float64{0.6, 0.3, 0.0, 0.1},
+			res: 0.3552520032137785,
+		},
+	} {
+		resultpq := Bhattacharyya(test.p, test.q)
+		resultqp := Bhattacharyya(test.q, test.p)
+
+		if math.Abs(resultpq-test.res) > 1e-10 {
+			t.Errorf("Bhattacharyya distance mismatch in case %d. Expected %v, Found %v", i, test.res, resultpq)
+		}
+		if math.Abs(resultpq-resultqp) > 1e-10 {
+			t.Errorf("Bhattacharyya distance is assymmetric in case %d.", i)
+		}
+	}
+}
+
+func TestHellinger(t *testing.T) {
+	for i, test := range []struct {
+		p   []float64
+		q   []float64
+		res float64
+	}{
+		{
+			p:   []float64{0.5, 0.1, 0.3, 0.1},
+			q:   []float64{0.1, 0.4, 0.25, 0.25},
+			res: 0.3800237367441919,
+		},
+		{
+			p:   []float64{0.4, 0.6, 0.0},
+			q:   []float64{0.2, 0.2, 0.6},
+			res: 0.6088900771170487,
+		},
+		{
+			p:   []float64{0.1, 0.1, 0.0, 0.8},
+			q:   []float64{0.6, 0.3, 0.0, 0.1},
+			res: 0.5468118803484205,
+		},
+	} {
+		resultpq := Hellinger(test.p, test.q)
+		resultqp := Hellinger(test.q, test.p)
+
+		if math.Abs(resultpq-test.res) > 1e-10 {
+			t.Errorf("Hellinger distance mismatch in case %d. Expected %v, Found %v", i, test.res, resultpq)
+		}
+		if math.Abs(resultpq-resultqp) > 1e-10 {
+			t.Errorf("Hellinger distance is assymmetric in case %d.", i)
+		}
+	}
+}
+
 func ExampleMean() {
 	x := []float64{8.2, -6, 5, 7}
 	mean := Mean(x, nil)

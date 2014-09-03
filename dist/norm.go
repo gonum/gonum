@@ -47,15 +47,12 @@ func (n Normal) DLogProbDX(x float64) float64 {
 	return -(1 / (2 * n.Sigma * n.Sigma)) * 2 * (x - n.Mu)
 }
 
-// DLogProbDParam returns the derivative of the log of the probability at x with
-// respect to the parameters of the distribution. If deriv is nil, new memory
-// will be allocated, otherwise len(deriv) must equal NumParameters.
-//  The first is ∂LogProb / ∂μ
-//  Second is ∂LogProb / ∂σ
-func (n Normal) DLogProbDParam(x float64, deriv []float64) []float64 {
-	if deriv == nil {
-		deriv = make([]float64, n.NumParameters())
-	}
+// DLogProbDParam returns the derivative of the log of the probability with
+// respect to the parameters of the distribution. The deriv slice must have length
+// equal to the number of parameters of the distribution.
+//
+// The order is first ∂LogProb / ∂Mu and then ∂LogProb / ∂Sigma
+func (n Normal) DLogProbDParam(x float64, deriv []float64) {
 	if len(deriv) != n.NumParameters() {
 		panic("dist: slice length mismatch")
 	}

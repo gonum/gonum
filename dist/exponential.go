@@ -42,18 +42,15 @@ func (e Exponential) DLogProbDX(x float64) float64 {
 }
 
 // DLogProbDParam returns the derivative of the log of the probability with
-// respect to the parameters of the distribution. The deriv slice may either
-// be nil (in which case new memory is allocated), or may have length equal
-// to the number of parameters.
+// respect to the parameters of the distribution. The deriv slice must have length
+// equal to the number of parameters of the distribution.
+//
+// The order is ∂LogProb / ∂Rate
 //
 // Special cases are:
-//  DLogProbDParam(0, nil) == []float64{math.NaN()}
-func (e Exponential) DLogProbDParam(x float64, deriv []float64) []float64 {
-	nParam := e.NumParameters()
-	if deriv == nil {
-		deriv = make([]float64, nParam)
-	}
-	if len(deriv) != nParam {
+//  The derivative at 0 is NaN.
+func (e Exponential) DLogProbDParam(x float64, deriv []float64) {
+	if len(deriv) != e.NumParameters() {
 		panic("dist: slice length mismatch")
 	}
 	if x > 0 {

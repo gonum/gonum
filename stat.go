@@ -23,8 +23,9 @@ const (
 )
 
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:
-// \sum_i \sqrt{p_i q_i}
-// Note: assumes p and q have already been checked to have equal length.
+//  \sum_i \sqrt{p_i q_i}
+//
+// It is assumed that p and q have equal length.
 func bhattacharyyaCoeff(p, q []float64) float64 {
 	var bc float64
 	for i, a := range p {
@@ -38,8 +39,9 @@ func bhattacharyyaCoeff(p, q []float64) float64 {
 }
 
 // Bhattacharyya computes the distance between the probability distributions p and q given by:
-// -\ln ( \sum_i \sqrt{p_i q_i} )
-// Note: assumes that p and q will sum to 1.
+//  -\ln ( \sum_i \sqrt{p_i q_i} )
+//
+// The lengths of p and q must be equal. It is assumed that p and q sum to 1.
 func Bhattacharyya(p, q []float64) float64 {
 	if len(p) != len(q) {
 		panic("stat: slice length mismatch")
@@ -108,7 +110,9 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 
 // ChiSquare computes the chi-square distance between the observed frequences 'obs' and
 // expected frequences 'exp' given by:
-// \sum_i (obs_i-exp_i)^2 / exp_i
+//  \sum_i (obs_i-exp_i)^2 / exp_i
+//
+// The lengths of obs and exp must be equal.
 func ChiSquare(obs, exp []float64) float64 {
 	if len(obs) != len(exp) {
 		panic("stat: slice length mismatch")
@@ -294,8 +298,9 @@ func HarmonicMean(x, weights []float64) float64 {
 }
 
 // Hellinger computes the distance between the probability distributions p and q given by:
-// \sqrt{ 1 - \sum_i \sqrt{p_i q_i} }
-// Note: assumes that p and q will sum to 1.
+//  \sqrt{ 1 - \sum_i \sqrt{p_i q_i} }
+//
+// The lengths of p and q must be equal. It is assumed that p and q sum to 1.
 func Hellinger(p, q []float64) float64 {
 	if len(p) != len(q) {
 		panic("stat: slice length mismatch")

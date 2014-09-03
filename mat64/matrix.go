@@ -84,9 +84,9 @@ type Reseter interface {
 	Reset()
 }
 
-// A Copier can make a copy of elements of a into the receiver. The copy operation fills the
-// submatrix in m with the values from the submatrix of a with the dimensions equal to the
-// minumum of two matrices. The number of row and columns copied it returned.
+// A Copier can make a copy of elements of a into the receiver. The submatrix copied
+// starts at row and column 0 and has dimensions equal to the minimum dimensions of
+// the two matrices. The number of row and columns copied is returned.
 type Copier interface {
 	Copy(a Matrix) (r, c int)
 }

@@ -60,7 +60,7 @@ func (n Normal) DLogProbDParam(x float64, deriv []float64) {
 	deriv[0] = n.Mu * (x - n.Mu) / (n.Sigma * n.Sigma)
 	deriv[1] = 1 / n.Sigma * (-1 + (x-n.Mu)*(x-n.Mu)/2.0)
 
-	return deriv
+	return
 }
 
 // Entropy returns the differential entropy of the distribution.
@@ -161,6 +161,19 @@ func (n Normal) LogProb(x float64) float64 {
 	return negLogRoot2Pi - math.Log(n.Sigma) - (x-n.Mu)*(x-n.Mu)/(2*n.Sigma*n.Sigma)
 }
 
+// MarshalSlice gets the parameters of the distribution.
+// The first element of Parameters is Mu, the second is Sigma.
+// Panics if the length of the input slice is not equal to the number of parameters.
+func (n Normal) MarshalSlice(s []float64) {
+	nParam := n.NumParameters()
+	if len(s) != nParam {
+		panic("exponential: improper parameter length")
+	}
+	s[0] = n.Mu
+	s[1] = n.Sigma
+	return
+}
+
 // Mean returns the mean of the probability distribution.
 func (n Normal) Mean() float64 {
 	return n.Mu
@@ -181,20 +194,13 @@ func (Normal) NumParameters() int {
 	return 2
 }
 
-// Parameters gets the parameters of the distribution. Panics if the length of
-// the input slice is non-zero and not equal to the number of parameters.
-// The first element of Parameters is the Mean, the second is the standard deviation.
-func (n Normal) Parameters(s []float64) []float64 {
-	nParam := n.NumParameters()
-	if s == nil {
-		s = make([]float64, nParam)
-	}
-	if len(s) != nParam {
-		panic("exponential: improper parameter length")
-	}
-	s[0] = n.Mu
-	s[1] = n.Sigma
-	return s
+// NormalMap is the parameter mapping for the Uniform distribution.
+var NormalMap = map[string]int{"Mu": 0, "Sigma": 1}
+
+// ParameterMap returns a mapping from fields of the distribution to elements
+// of the marshaled slice. Do not edit this variable.
+func (n Normal) ParameterMap() map[string]int {
+	return NormalMap
 }
 
 // Prob computes the value of the probability density function at x.
@@ -221,18 +227,6 @@ func (n Normal) Rand() float64 {
 	return rnd*n.Sigma + n.Mu
 }
 
-// SetParameters gets the parameters of the distribution. Panics if the length of
-// the input slice is not equal to the number of parameters.
-// This sets Mu to be the first element of the slice and Sigma to be the second
-// element of the slice.
-func (n *Normal) SetParameters(s []float64) {
-	if len(s) != n.NumParameters() {
-		panic("exponential: incorrect number of parameters to set")
-	}
-	n.Mu = s[0]
-	n.Sigma = s[1]
-}
-
 // Skewness returns the skewness of the distribution.
 func (Normal) Skewness() float64 {
 	return 0
@@ -246,6 +240,18 @@ func (n Normal) StdDev() float64 {
 // Survival returns the survival function (complementary CDF) at x.
 func (n Normal) Survival(x float64) float64 {
 	return 0.5 * (1 - math.Erf((x-n.Mu)/(n.Sigma*math.Sqrt2)))
+}
+
+// UnmarshalSlice sets the parameters of the distribution.
+// This sets Mu to be the first element of the slice and Sigma to be the second
+// element of the slice.
+// Panics if the length of the input slice is not equal to the number of parameters.
+func (n *Normal) UnmarshalSlice(s []float64) {
+	if len(s) != n.NumParameters() {
+		panic("exponential: incorrect number of parameters to set")
+	}
+	n.Mu = s[0]
+	n.Sigma = s[1]
 }
 
 // Variance returns the variance of the probability distribution.

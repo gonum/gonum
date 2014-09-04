@@ -63,7 +63,7 @@ func (l Laplace) DLogProbDParam(x float64, deriv []float64) {
 	}
 
 	deriv[1] = math.Abs(diff)/(l.Scale*l.Scale) - 0.5/(l.Scale)
-	return deriv
+	return
 }
 
 // Entropy returns the entropy of the distribution.
@@ -134,6 +134,19 @@ func (l Laplace) LogProb(x float64) float64 {
 	return -math.Ln2 - math.Log(l.Scale) - math.Abs(x-l.Mu)/l.Scale
 }
 
+// MarshalSlice gets the parameters of the distribution. There are two parameters,
+// the mean and scale.
+// Sets Mean to the first element and Scale as the second element.
+// Panics if the length of the input slice is not equal to the number of parameters
+func (l Laplace) MarshalSlice(s []float64) {
+	if len(s) != l.NumParameters() {
+		panic("dist: slice length mismatch")
+	}
+	s[0] = l.Mu
+	s[1] = l.Scale
+	return
+}
+
 // Mean returns the mean of the probability distribution.
 func (l Laplace) Mean() float64 {
 	return l.Mu
@@ -165,19 +178,13 @@ func (l Laplace) Quantile(p float64) float64 {
 	return l.Mu - l.Scale*math.Log(1-2*(p-0.5))
 }
 
-// Parameters gets the parameters of the distribution. Panics if the length of
-// the input slice is non-zero and not equal to the number of parameters
-// The first element of Parameters is the Mean, the second is the scale variable.
-func (l Laplace) Parameters(s []float64) []float64 {
-	if s == nil {
-		s = make([]float64, l.NumParameters())
-	}
-	if len(s) != l.NumParameters() {
-		panic("dist: slice length mismatch")
-	}
-	s[0] = l.Mu
-	s[1] = l.Scale
-	return s
+// LaplaceMap is the parameter mapping for the Uniform distribution.
+var LaplaceMap = map[string]int{"Mu": 0, "Scale": 1}
+
+// ParameterMap returns a mapping from fields of the distribution to elements
+// of the marshaled slice. Do not edit this variable.
+func (l Laplace) ParameterMap() map[string]int {
+	return LaplaceMap
 }
 
 // Prob computes the value of the probability density function at x.
@@ -200,18 +207,6 @@ func (l Laplace) Rand() float64 {
 	return l.Mu - l.Scale*math.Log(1-2*u)
 }
 
-// SetParameters gets the parameters of the distribution. Panics if the length of
-// the input slice is not equal to the number of parameters.
-// This sets Mu to be the first element of the slice and Scale to be the second
-// element of the slice
-func (l Laplace) SetParameters(s []float64) {
-	if len(s) != l.NumParameters() {
-		panic("dist: slice length mismatch")
-	}
-	l.Mu = s[0]
-	l.Scale = s[1]
-}
-
 // Skewness returns the skewness of the distribution.
 func (Laplace) Skewness() float64 {
 	return 0
@@ -228,6 +223,18 @@ func (l Laplace) Survival(x float64) float64 {
 		return 1 - 0.5*math.Exp((x-l.Mu)/l.Scale)
 	}
 	return 0.5 * math.Exp(-(x-l.Mu)/l.Scale)
+}
+
+// UnmarshalSlice sets the parameters of the distribution.
+// This sets Mu to be the first element of the slice and Scale to be the second
+// element of the slice.
+// Panics if the length of the input slice is not equal to the number of parameters.
+func (l *Laplace) UnmarshalSlice(s []float64) {
+	if len(s) != l.NumParameters() {
+		panic("dist: slice length mismatch")
+	}
+	l.Mu = s[0]
+	l.Scale = s[1]
 }
 
 // Variance returns the variance of the probability distribution.

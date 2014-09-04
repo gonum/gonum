@@ -47,6 +47,18 @@ func (u Uniform) LogProb(x float64) float64 {
 	return -math.Log(u.Max - u.Min)
 }
 
+// MarshalSlice gets the parameters of the distribution.
+// Sets Min to the first element and Max to the second.
+// Panics if the length of the input slice is not equal to the number of parameters.
+func (u Uniform) MarshalSlice(s []float64) {
+	if len(s) != u.NumParameters() {
+		panic("uniform: improper parameter length")
+	}
+	s[0] = u.Min
+	s[1] = u.Max
+	return
+}
+
 // Mean returns the mean of the probability distribution.
 func (u Uniform) Mean() float64 {
 	return (u.Max - u.Min) / 2
@@ -64,21 +76,13 @@ func (Uniform) NumParameters() int {
 	return 2
 }
 
-// Parameters gets the parameters of the distribution. Panics if the length of
-// the input slice is non-zero and not equal to the number of parameters.
-// This returns a slice with length 2 containing the minimum and maximum of
-// the distribution.
-func (u Uniform) Parameters(s []float64) []float64 {
-	nParam := u.NumParameters()
-	if s == nil {
-		s = make([]float64, nParam)
-	}
-	if len(s) != nParam {
-		panic("uniform: improper parameter length")
-	}
-	s[0] = u.Min
-	s[1] = u.Max
-	return s
+// UniformMap is the parameter mapping for the Uniform distribution.
+var UniformMap = map[string]int{"Min": 0, "Max": 1}
+
+// ParameterMap returns a mapping from fields of the distribution to elements
+// of the marshaled slice. Do not edit this variable.
+func (u Uniform) ParameterMap() map[string]int {
+	return UniformMap
 }
 
 // Prob computes the value of the probability density function at x.
@@ -105,18 +109,6 @@ func (u Uniform) Rand() float64 {
 	return rnd*(u.Max-u.Min) + u.Min
 }
 
-// SetParameters gets the parameters of the distribution. Panics if the length of
-// the input slice is not equal to the number of parameters.
-// This sets the minimum to the first element and the maximum to the second
-// element.
-func (u *Uniform) SetParameters(s []float64) {
-	if len(s) != u.NumParameters() {
-		panic("uniform: incorrect number of parameters to set")
-	}
-	u.Min = s[0]
-	u.Max = s[1]
-}
-
 // Skewness returns the skewness of the distribution.
 func (Uniform) Skewness() float64 {
 	return 0
@@ -136,6 +128,17 @@ func (u Uniform) Survival(x float64) float64 {
 		return 0
 	}
 	return (u.Max - x) / (u.Max - u.Min)
+}
+
+// UnmarshalSlice sets the parameters of the distribution.
+// This sets Min to the first element and Max to the second element.
+// Panics if the length of the input slice is not equal to the number of parameters.
+func (u *Uniform) UnmarshalSlice(s []float64) {
+	if len(s) != u.NumParameters() {
+		panic("uniform: incorrect number of parameters to set")
+	}
+	u.Min = s[0]
+	u.Max = s[1]
 }
 
 // Variance returns the variance of the probability distribution.

@@ -55,14 +55,14 @@ func (e Exponential) DLogProbDParam(x float64, deriv []float64) {
 	}
 	if x > 0 {
 		deriv[0] = 1/e.Rate - x
-		return deriv
+		return
 	}
 	if x < 0 {
 		deriv[0] = 0
-		return deriv
+		return
 	}
 	deriv[0] = math.NaN()
-	return deriv
+	return
 }
 
 // Entropy returns the entropy of the distribution.
@@ -144,6 +144,18 @@ func (e Exponential) LogProb(x float64) float64 {
 	return math.Log(e.Rate) - e.Rate*x
 }
 
+// MarshalSlice gets the parameters of the distribution.
+// Sets Rate to the first element of the slice. Panics if the length of
+// the input slice is not equal to the number of parameters.
+func (e Exponential) MarshalSlice(s []float64) {
+	nParam := e.NumParameters()
+	if len(s) != nParam {
+		panic("exponential: improper parameter length")
+	}
+	s[0] = e.Rate
+	return
+}
+
 // Mean returns the mean of the probability distribution.
 func (e Exponential) Mean() float64 {
 	return 1 / e.Rate
@@ -164,19 +176,13 @@ func (Exponential) NumParameters() int {
 	return 1
 }
 
-// Parameters gets the parameters of the distribution. Panics if the length of
-// the input slice is non-zero and not equal to the number of parameters
-// This returns a slice with length 1 containing the rate of the distribution.
-func (e Exponential) Parameters(s []float64) []float64 {
-	nParam := e.NumParameters()
-	if s == nil {
-		s = make([]float64, nParam)
-	}
-	if len(s) != nParam {
-		panic("exponential: improper parameter length")
-	}
-	s[0] = e.Rate
-	return s
+// ExponentialMap is the parameter mapping for the Uniform distribution.
+var ExponentialMap = map[string]int{"Rate": 0}
+
+// ParameterMap returns a mapping from fields of the distribution to elements
+// of the marshaled slice. Do not edit this variable.
+func (e Exponential) ParameterMap() map[string]int {
+	return ExponentialMap
 }
 
 // Prob computes the value of the probability density function at x.
@@ -203,16 +209,6 @@ func (e Exponential) Rand() float64 {
 	return rnd / e.Rate
 }
 
-// SetParameters gets the parameters of the distribution. Panics if the length of
-// the input slice is not equal to the number of parameters.
-// This sets the rate of the distribution to the first element of the slice.
-func (e *Exponential) SetParameters(s []float64) {
-	if len(s) != e.NumParameters() {
-		panic("exponential: incorrect number of parameters to set")
-	}
-	e.Rate = s[0]
-}
-
 // Skewness returns the skewness of the distribution.
 func (Exponential) Skewness() float64 {
 	return 2
@@ -229,6 +225,16 @@ func (e Exponential) Survival(x float64) float64 {
 		return 1
 	}
 	return math.Exp(-e.Rate * x)
+}
+
+// UnmarshalSlice sets the parameters of the distribution.
+// This sets the rate of the distribution to the first element of the slice.
+// Panics if the length of the input slice is not equal to the number of parameters.
+func (e *Exponential) UnmarshalSlice(s []float64) {
+	if len(s) != e.NumParameters() {
+		panic("exponential: incorrect number of parameters to set")
+	}
+	e.Rate = s[0]
 }
 
 // Variance returns the variance of the probability distribution.

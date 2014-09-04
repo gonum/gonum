@@ -64,8 +64,9 @@ func testDistributionProbs(t *testing.T, dist UniProbDist, name string, pts []un
 
 type PriorFittable interface {
 	FitPrior(samples, weights, priorValue, priorWeight []float64) ([]float64, []float64)
-	Parameters([]float64) []float64
+	MarshalSlice([]float64)
 	Rand() float64
+	NumParameters() int
 }
 
 func testFitPrior(t *testing.T, dist PriorFittable, newFittable func() PriorFittable) {
@@ -81,11 +82,13 @@ func testFitPrior(t *testing.T, dist PriorFittable, newFittable func() PriorFitt
 	n4 := newFittable()
 	p4, w4 := n4.FitPrior(samps[7:], nil, p3, w3)
 
-	params2 := n2.Parameters(nil)
+	params2 := make([]float64, n2.NumParameters())
+	n2.MarshalSlice(params2)
 	if len(params2) == 0 {
 		panic("len 0 params")
 	}
-	params4 := n4.Parameters(nil)
+	params4 := make([]float64, n4.NumParameters())
+	n4.MarshalSlice(params4)
 
 	if !floats.EqualApprox(params2, params4, 1e-14) {
 		t.Errorf("parameters don't match: First is %v, second is %v", params2, params4)
@@ -104,7 +107,8 @@ func testFitPrior(t *testing.T, dist PriorFittable, newFittable func() PriorFitt
 		ones[i] = 1
 	}
 	p5, w5 := n5.FitPrior(samps, ones, nil, nil)
-	params5 := n5.Parameters(nil)
+	params5 := make([]float64, n5.NumParameters())
+	n5.MarshalSlice(params5)
 	if !floats.EqualApprox(params2, params5, 1e-14) {
 		t.Errorf("parameters don't match: First is %v, second is %v", params2, params5)
 	}
@@ -127,8 +131,10 @@ func testFitPrior(t *testing.T, dist PriorFittable, newFittable func() PriorFitt
 	n8 := newFittable()
 	p8, w8 := n8.FitPrior(samps[7:], weights[7:], p7, w7)
 
-	params6 := n6.Parameters(nil)
-	params8 := n8.Parameters(nil)
+	params6 := make([]float64, n6.NumParameters())
+	n6.MarshalSlice(params6)
+	params8 := make([]float64, n8.NumParameters())
+	n8.MarshalSlice(params8)
 
 	if !floats.EqualApprox(params6, params8, 1e-14) {
 		t.Errorf("parameters don't match: First is %v, second is %v", params6, params8)

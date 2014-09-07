@@ -56,6 +56,9 @@ func (n Normal) CDF(x float64) float64 {
 // This function panics if len(suffStat) != 2 or len(priorStrength) != 2.
 func (n *Normal) ConjugateUpdate(suffStat []float64, nSamples float64, priorStrength []float64) {
 
+	// TODO: Support prior strength with math.Inf(1) to allow updating with
+	// a known mean/standard deviation
+
 	totalMeanSamples := nSamples + priorStrength[0]
 	totalSum := suffStat[0]*nSamples + n.Mu*priorStrength[0]
 

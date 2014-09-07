@@ -41,6 +41,38 @@ func (n Normal) CDF(x float64) float64 {
 	return 0.5 * (1 + math.Erf((x-n.Mu)/(n.Sigma*math.Sqrt2)))
 }
 
+// ConjugateUpdate updates the parameters of the distribution from the sufficient
+// statistics of a set of samples. The sufficient statistics, suffStat, have been
+// observed with nSamples observations. The prior values of the distribution are those
+// currently in the distribution, and have been observed with priorStrength samples.
+//
+// For the normal distribution, the sufficient statistics are the mean and
+// uncorrected standard deviation of the samples.
+// The prior is having seen strength[0] samples with mean Normal.Mu
+// and strength[1] samples with standard deviation Normal.Sigma. As a result of
+// this function, Normal.Mu and Normal.Sigma are updated based on the weighted
+// samples, and strength is modified to include the new number of samples observed.
+//
+// This function panics if len(suffStat) != 2 or len(priorStrength) != 2.
+func (n *Normal) ConjugateUpdate(suffStat []float64, nSamples float64, priorStrength []float64) {
+
+	totalMeanSamples := nSamples + priorStrength[0]
+	totalSum := suffStat[0]*nSamples + n.Mu*priorStrength[0]
+
+	totalVarianceSamples := nSamples + priorStrength[1]
+	// sample variance
+	totalVariance := nSamples * suffStat[1] * suffStat[1]
+	// add prior variance
+	totalVariance += priorStrength[1] * n.Sigma * n.Sigma
+	// add cross variance from the difference of the means
+	meanDiff := (suffStat[0] - n.Mu)
+	totalVariance += priorStrength[0] * nSamples * meanDiff * meanDiff / totalMeanSamples
+
+	n.Mu = totalSum / totalMeanSamples
+	n.Sigma = math.Sqrt(totalVariance / totalVarianceSamples)
+	floats.AddConst(nSamples, priorStrength)
+}
+
 // DLogProbDX computes the derivative of the log of the probability with respect
 // to the input x.
 func (n Normal) DLogProbDX(x float64) float64 {
@@ -77,83 +109,9 @@ func (Normal) ExKurtosis() float64 {
 // data samples x with relative weights w. If weights is nil, then all the weights
 // are 1. If weights is not nil, then the len(weights) must equal len(samples).
 func (n *Normal) Fit(samples []float64, weights []float64) {
-	n.FitPrior(samples, weights, nil, nil)
-}
-
-// FitPrior fits the distribution with a set of priors for the sufficient
-// statistics. If priorValue and priorWeights both have length 0, no prior is used.
-// For the normal distribution, there are two prior values. The first is the
-// prior guess for the mean, and the second is the effective standard deviation.
-// The strength priorWeight is how many effective samples that prior
-// is worth assuming a normal-inverse-gamma prior. In other words, this means
-// seeing priorStrength[0] samples with mean priorValue[0] and priorStrength[1]
-// samples with mean priorValue[0] and standard deviation priorValue[1].
-//
-// The output is updated values of the prior after observing the input samples.
-func (n *Normal) FitPrior(samples []float64, weights []float64, priorValue []float64, priorWeight []float64) (newPriorValue, newPriorWeight []float64) {
-	// Error checking and initialization
-	lenSamp := len(samples)
-	lenPriorValue := len(priorValue)
-	lenPriorWeight := len(priorWeight)
-
-	if len(weights) != 0 && len(samples) != len(weights) {
-		panic("dist: slice size mismatch")
-	}
-	if lenPriorValue != lenPriorWeight {
-		panic("normal: mismatch in prior lengths")
-	}
-	if lenPriorValue > 2 {
-		panic("normal: too many prior values")
-	}
-	prior := true
-	if lenPriorValue == 0 || lenPriorWeight == 0 {
-		if lenPriorValue == 0 && lenPriorWeight == 0 {
-			prior = false
-		} else if lenPriorValue == 0 && lenPriorWeight != 0 {
-			panic("normal: prior weight provided but not the value")
-		} else {
-			panic("normal: prior value provided but not the weight")
-		}
-	}
-
-	sampleMean := stat.Mean(samples, weights)
-	sampleVariance := stat.Moment(2, samples, sampleMean, weights) // Don't want it corrected
-
-	var sumWeights float64
-	if len(weights) == 0 {
-		sumWeights = float64(lenSamp)
-	} else {
-		sumWeights = floats.Sum(weights)
-	}
-
-	totalWeight := sumWeights
-	totalSum := sampleMean * sumWeights
-	if prior {
-		totalWeight += priorWeight[0]
-		totalSum += priorValue[0] * priorWeight[0]
-	}
-
-	n.Mu = totalSum / totalWeight
-
-	totalVariance := sampleVariance * sumWeights
-	if prior {
-		// Variance from the prior samples
-		totalVariance += priorWeight[1] * priorValue[1] * priorValue[1]
-
-		// Cross varaiance from the differences of the means
-		meanDiff := (sampleMean - priorValue[0])
-		totalVariance += priorWeight[0] * sumWeights * meanDiff * meanDiff / totalWeight
-	}
-
-	n.Sigma = math.Sqrt(totalVariance / totalWeight)
-
-	newPriorValue = []float64{n.Mu, n.Sigma}
-	newPriorWeight = []float64{sumWeights, sumWeights}
-	if prior {
-		newPriorWeight[0] += priorWeight[0]
-		newPriorWeight[1] += priorWeight[1]
-	}
-	return newPriorValue, newPriorWeight
+	suffStat := make([]float64, 1)
+	nSamples := n.SuffStat(samples, weights, suffStat)
+	n.ConjugateUpdate(suffStat, nSamples, []float64{0, 0})
 }
 
 // LogProb computes the natural logarithm of the value of the probability density function at x.
@@ -191,6 +149,10 @@ func (n Normal) Mode() float64 {
 
 // NumParameters returns the number of parameters in the distribution.
 func (Normal) NumParameters() int {
+	return 2
+}
+
+func (Normal) NumSuffStat() int {
 	return 2
 }
 
@@ -235,6 +197,39 @@ func (Normal) Skewness() float64 {
 // StdDev returns the standard deviation of the probability distribution.
 func (n Normal) StdDev() float64 {
 	return n.Sigma
+}
+
+// SuffStat computes the sufficient statistics of a set of samples to update
+// the distribution. The sufficient statistics are stored in place, and the
+// effective number of samples are returned.
+//
+// The normal distribution has two sufficient statistics, the mean of the samples
+// and the standard deviation of the samples.
+//
+// If weights is nil, the weights are assumed to be 1, otherwise panics if
+// len(samples) != len(weights). Panics if len(suffStat) != 2.
+func (Normal) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
+	lenSamp := len(samples)
+	if len(weights) != 0 && len(samples) != len(weights) {
+		panic("dist: slice size mismatch")
+	}
+	if len(suffStat) != 2 {
+		panic("dist: incorrect suffStat length")
+	}
+
+	if len(weights) == 0 {
+		nSamples = float64(lenSamp)
+	} else {
+		nSamples = floats.Sum(weights)
+	}
+
+	mean := stat.Mean(samples, weights)
+	suffStat[0] = mean
+
+	// Use Moment and not StdDev because we want it to be uncorrected
+	variance := stat.Moment(2, samples, mean, weights)
+	suffStat[1] = math.Sqrt(variance)
+	return nSamples
 }
 
 // Survival returns the survival function (complementary CDF) at x.

@@ -40,8 +40,8 @@ func TestExponentialProb(t *testing.T) {
 }
 
 func TestExponentialFitPrior(t *testing.T) {
-	testFitPrior(t, &Exponential{
+	testConjugateUpdate(t, &Exponential{
 		Rate: 13.7,
 	},
-		func() PriorFittable { return &Exponential{} })
+		func() ConjugateUpdater { return &Exponential{} })
 }

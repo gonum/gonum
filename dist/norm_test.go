@@ -81,9 +81,9 @@ func TestNormalProbs(t *testing.T) {
 }
 
 func TestNormFitPrior(t *testing.T) {
-	testFitPrior(t, &Normal{
+	testConjugateUpdate(t, &Normal{
 		Mu:    -10,
 		Sigma: 6,
 	},
-		func() PriorFittable { return &Normal{} })
+		func() ConjugateUpdater { return &Normal{} })
 }

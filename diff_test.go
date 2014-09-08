@@ -63,12 +63,12 @@ func testFirstOrder(t *testing.T, method FDMethod, tol float64, tests []testPoin
 	for _, test := range tests {
 		settings := DefaultFDSettings()
 		settings.Method = method
-		ans := FiniteDiffernce(test.f, test.loc, settings)
+		ans := FiniteDifference(test.f, test.loc, settings)
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("ans mismatch: expected %v, found %v", test.ans, ans)
 		}
 		settings.Concurrent = true
-		ans = FiniteDiffernce(test.f, test.loc, settings)
+		ans = FiniteDifference(test.f, test.loc, settings)
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("ans mismatch: expected %v, found %v", test.ans, ans)
 		}

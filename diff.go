@@ -42,7 +42,7 @@ func DefaultFDSettings() *FDSettings {
 // FiniteDifference estimates a derivative of the function f at the given location.
 // The order of derivative, sample locations, and other options are specified
 // by settings.
-func FiniteDiffernce(f func(float64) float64, x float64, settings *FDSettings) float64 {
+func FiniteDifference(f func(float64) float64, x float64, settings *FDSettings) float64 {
 	var deriv float64
 	method := settings.Method
 	if !settings.Concurrent {

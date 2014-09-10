@@ -3,6 +3,7 @@ package zbw
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gonum/blas"
 )
 
@@ -18,32 +19,23 @@ func Allocate(dims ...int) []complex128 {
 }
 
 type General struct {
-	Order      blas.Order
 	Rows, Cols int
 	Stride     int
 	Data       []complex128
 }
 
-func NewGeneral(o blas.Order, m, n int, data []complex128) General {
+func NewGeneral(m, n int, data []complex128) General {
 	var A General
 	if data == nil {
 		data = make([]complex128, m*n)
 	}
-	if o == blas.RowMajor {
-		A = General{o, m, n, n, data}
-	} else {
-		A = General{o, m, n, m, data}
-	}
+	A = General{m, n, n, data}
 	must(A.Check())
 	return A
 }
 
 func (A General) Index(i, j int) int {
-	if A.Order == blas.RowMajor {
-		return i*A.Stride + j
-	} else {
-		return i + j*A.Stride
-	}
+	return i*A.Stride + j
 }
 
 func (A General) Check() error {
@@ -56,22 +48,11 @@ func (A General) Check() error {
 	if A.Stride < 1 {
 		return errors.New("blas: illegal stride")
 	}
-	if A.Order == blas.ColMajor {
-		if A.Stride < A.Rows {
-			return errors.New("blas: illegal stride")
-		}
-		if (A.Cols-1)*A.Stride+A.Rows > len(A.Data) {
-			return errors.New("blas: insufficient amount of data")
-		}
-	} else if A.Order == blas.RowMajor {
-		if A.Stride < A.Cols {
-			return errors.New("blas: illegal stride")
-		}
-		if (A.Rows-1)*A.Stride+A.Cols > len(A.Data) {
-			return errors.New("blas: insufficient amount of data")
-		}
-	} else {
-		return errors.New("blas: illegal order")
+	if A.Stride < A.Cols {
+		return errors.New("blas: illegal stride")
+	}
+	if (A.Rows-1)*A.Stride+A.Cols > len(A.Data) {
+		return errors.New("blas: insufficient amount of data")
 	}
 	return nil
 }
@@ -80,24 +61,14 @@ func (A General) Row(i int) Vector {
 	if i >= A.Rows || i < 0 {
 		panic("blas: index out of range")
 	}
-	if A.Order == blas.RowMajor {
-		return Vector{A.Data[A.Stride*i:], A.Cols, 1}
-	} else if A.Order == blas.ColMajor {
-		return Vector{A.Data[i:], A.Cols, A.Stride}
-	}
-	panic("blas: illegal order")
+	return Vector{A.Data[A.Stride*i:], A.Cols, 1}
 }
 
 func (A General) Col(i int) Vector {
 	if i >= A.Cols || i < 0 {
 		panic("blas: index out of range")
 	}
-	if A.Order == blas.RowMajor {
-		return Vector{A.Data[i:], A.Rows, A.Stride}
-	} else if A.Order == blas.ColMajor {
-		return Vector{A.Data[A.Stride*i:], A.Rows, 1}
-	}
-	panic("blas: illegal order")
+	return Vector{A.Data[i:], A.Rows, A.Stride}
 }
 
 func (A General) Sub(i, j, r, c int) General {
@@ -111,17 +82,15 @@ func (A General) Sub(i, j, r, c int) General {
 	if r < 0 || c < 0 {
 		panic("blas: r < 0 or c < 0")
 	}
-	return General{A.Order, r, c, A.Stride, A.Data[A.Index(i, j):]}
+	return General{r, c, A.Stride, A.Data[A.Index(i, j):]}
 }
 
 type GeneralBand struct {
-	Order blas.Order
 	General
 	KL, KU int
 }
 
 type Triangular struct {
-	Order  blas.Order
 	Data   []complex128
 	N      int
 	Stride int
@@ -130,7 +99,6 @@ type Triangular struct {
 }
 
 type TriangularBand struct {
-	Order  blas.Order
 	Data   []complex128
 	N, K   int
 	Stride int
@@ -139,39 +107,34 @@ type TriangularBand struct {
 }
 
 type TriangularPacked struct {
-	Order blas.Order
-	Data  []complex128
-	N     int
-	Uplo  blas.Uplo
-	Diag  blas.Diag
+	Data []complex128
+	N    int
+	Uplo blas.Uplo
+	Diag blas.Diag
 }
 
 type Symmetric struct {
-	Order     blas.Order
 	Data      []complex128
 	N, Stride int
 	Uplo      blas.Uplo
 }
 
 type Hermitian struct {
-	Order     blas.Order
 	Data      []complex128
 	N, Stride int
 	Uplo      blas.Uplo
 }
 
 type HermitianBand struct {
-	Order        blas.Order
 	Data         []complex128
 	N, K, Stride int
 	Uplo         blas.Uplo
 }
 
 type HermitianPacked struct {
-	Order blas.Order
-	Data  []complex128
-	N     int
-	Uplo  blas.Uplo
+	Data []complex128
+	N    int
+	Uplo blas.Uplo
 }
 
 type Vector struct {
@@ -212,7 +175,7 @@ func Ge2Tr(A General, d blas.Diag, ul blas.Uplo) Triangular {
 	if A.Cols < n {
 		n = A.Cols
 	}
-	return Triangular{A.Order, A.Data, n, A.Stride, ul, d}
+	return Triangular{A.Data, n, A.Stride, ul, d}
 }
 
 func Ge2He(A General, ul blas.Uplo) Hermitian {
@@ -220,11 +183,20 @@ func Ge2He(A General, ul blas.Uplo) Hermitian {
 	if A.Cols < n {
 		n = A.Cols
 	}
-	return Hermitian{A.Order, A.Data, n, A.Stride, ul}
+	return Hermitian{A.Data, n, A.Stride, ul}
 }
 
 func must(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func Real2Cmplx(r []float64, c []complex128) {
+	if len(r) != len(c) {
+		panic("length missmatch")
+	}
+	for ix, v := range r {
+		c[ix] = complex(v, 0)
 	}
 }

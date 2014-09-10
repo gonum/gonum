@@ -1,15 +1,14 @@
 package testblas
 
 import (
-	"testing"
-
 	"github.com/gonum/blas"
+	"testing"
 )
 
 type Dtxmver interface {
-	Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int)
-	Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int)
-	Dtpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int)
+	Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int)
+	Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int)
+	Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int)
 }
 
 type vec struct {
@@ -32,10 +31,10 @@ var cases = []struct {
 		k:    1,
 		ul:   blas.Upper,
 		d:    blas.NonUnit,
-		tr:   []float64{1, 0, 0, 2, 3, 0, 0, 4, 5},
-		tb:   []float64{0, 1, 2, 3, 4, 5},
+		tr:   []float64{1, 2, 0, 0, 3, 4, 0, 0, 5},
+		tb:   []float64{1, 2, 3, 4, 5, 0},
 		ldab: 2,
-		tp:   []float64{1, 2, 3, 0, 4, 5},
+		tp:   []float64{1, 2, 0, 3, 4, 5},
 		ins: []vec{
 			{[]float64{2, 3, 4}, 1},
 			{[]float64{2, 1, 3, 1, 4}, 2},
@@ -49,10 +48,10 @@ var cases = []struct {
 		k:    1,
 		ul:   blas.Upper,
 		d:    blas.Unit,
-		tr:   []float64{1, 0, 0, 2, 3, 0, 0, 4, 5},
-		tb:   []float64{0, 1, 2, 3, 4, 5},
+		tr:   []float64{1, 2, 0, 0, 3, 4, 0, 0, 5},
+		tb:   []float64{1, 2, 3, 4, 5, 0},
 		ldab: 2,
-		tp:   []float64{1, 2, 3, 0, 4, 5},
+		tp:   []float64{1, 2, 0, 3, 4, 5},
 		ins: []vec{
 			{[]float64{2, 3, 4}, 1},
 			{[]float64{2, 1, 3, 1, 4}, 2},
@@ -66,10 +65,10 @@ var cases = []struct {
 		k:    1,
 		ul:   blas.Lower,
 		d:    blas.NonUnit,
-		tr:   []float64{1, 2, 0, 0, 3, 4, 0, 0, 5},
-		tb:   []float64{1, 2, 3, 4, 5, 0},
+		tr:   []float64{1, 0, 0, 2, 3, 0, 0, 4, 5},
+		tb:   []float64{0, 1, 2, 3, 4, 5},
 		ldab: 2,
-		tp:   []float64{1, 2, 0, 3, 4, 5},
+		tp:   []float64{1, 2, 3, 0, 4, 5},
 		ins: []vec{
 			{[]float64{2, 3, 4}, 1},
 			{[]float64{2, 1, 3, 1, 4}, 2},
@@ -83,10 +82,10 @@ var cases = []struct {
 		k:    1,
 		ul:   blas.Lower,
 		d:    blas.Unit,
-		tr:   []float64{1, 2, 0, 0, 3, 4, 0, 0, 5},
-		tb:   []float64{1, 2, 3, 4, 5, 0},
+		tr:   []float64{1, 0, 0, 2, 3, 0, 0, 4, 5},
+		tb:   []float64{0, 1, 2, 3, 4, 5},
 		ldab: 2,
-		tp:   []float64{1, 2, 0, 3, 4, 5},
+		tp:   []float64{1, 2, 3, 0, 4, 5},
 		ins: []vec{
 			{[]float64{2, 3, 4}, 1},
 			{[]float64{2, 1, 3, 1, 4}, 2},
@@ -103,50 +102,44 @@ func DtxmvTest(t *testing.T, blasser Dtxmver) {
 		for nx, x := range c.ins {
 			in := make([]float64, len(x.data))
 			copy(in, x.data)
-			blasser.Dtrmv(blas.ColMajor, c.ul, blas.NoTrans, c.d,
-				c.n, c.tr, c.n, in, x.inc)
+			blasser.Dtrmv(c.ul, blas.NoTrans, c.d, c.n, c.tr, c.n, in, x.inc)
 			if !dStridedSliceTolEqual(c.n, in, x.inc, c.solNoTrans, 1) {
-				t.Error("Wrong Dtrmv result for: ColMajor, NoTrans  in Case:", nc, "input:", nx)
+				t.Error("Wrong Dtrmv result for: NoTrans  in Case:", nc, "input:", nx)
 			}
 
 			in = make([]float64, len(x.data))
 			copy(in, x.data)
-			blasser.Dtrmv(blas.ColMajor, c.ul, blas.Trans, c.d,
-				c.n, c.tr, c.n, in, x.inc)
+			blasser.Dtrmv(c.ul, blas.Trans, c.d, c.n, c.tr, c.n, in, x.inc)
 			if !dStridedSliceTolEqual(c.n, in, x.inc, c.solTrans, 1) {
-				t.Error("Wrong Dtrmv result for: ColMajor, Trans in Case:", nc, "input:", nx)
+				t.Error("Wrong Dtrmv result for: Trans in Case:", nc, "input:", nx)
 			}
 
 			in = make([]float64, len(x.data))
 			copy(in, x.data)
-			blasser.Dtbmv(blas.ColMajor, c.ul, blas.NoTrans, c.d,
-				c.n, c.k, c.tb, c.ldab, in, x.inc)
+			blasser.Dtbmv(c.ul, blas.NoTrans, c.d, c.n, c.k, c.tb, c.ldab, in, x.inc)
 			if !dStridedSliceTolEqual(c.n, in, x.inc, c.solNoTrans, 1) {
-				t.Error("Wrong Dtbmv result for: ColMajor, NoTrans  in Case:", nc, "input:", nx)
+				t.Error("Wrong Dtbmv result for: NoTrans  in Case:", nc, "input:", nx)
 			}
 
 			in = make([]float64, len(x.data))
 			copy(in, x.data)
-			blasser.Dtbmv(blas.ColMajor, c.ul, blas.Trans, c.d,
-				c.n, c.k, c.tb, c.ldab, in, x.inc)
+			blasser.Dtbmv(c.ul, blas.Trans, c.d, c.n, c.k, c.tb, c.ldab, in, x.inc)
 			if !dStridedSliceTolEqual(c.n, in, x.inc, c.solTrans, 1) {
-				t.Error("Wrong Dtbmv result for: ColMajor, Trans in Case:", nc, "input:", nx)
+				t.Error("Wrong Dtbmv result for: Trans in Case:", nc, "input:", nx)
 			}
 
 			in = make([]float64, len(x.data))
 			copy(in, x.data)
-			blasser.Dtpmv(blas.ColMajor, c.ul, blas.NoTrans, c.d,
-				c.n, c.tp, in, x.inc)
+			blasser.Dtpmv(c.ul, blas.NoTrans, c.d, c.n, c.tp, in, x.inc)
 			if !dStridedSliceTolEqual(c.n, in, x.inc, c.solNoTrans, 1) {
-				t.Error("Wrong Dtpmv result for: ColMajor, NoTrans  in Case:", nc, "input:", nx)
+				t.Error("Wrong Dtpmv result for:  NoTrans  in Case:", nc, "input:", nx)
 			}
 
 			in = make([]float64, len(x.data))
 			copy(in, x.data)
-			blasser.Dtpmv(blas.ColMajor, c.ul, blas.Trans, c.d,
-				c.n, c.tp, in, x.inc)
+			blasser.Dtpmv(c.ul, blas.Trans, c.d, c.n, c.tp, in, x.inc)
 			if !dStridedSliceTolEqual(c.n, in, x.inc, c.solTrans, 1) {
-				t.Error("Wrong Dtpmv result for: ColMajor, Trans in Case:", nc, "input:", nx)
+				t.Error("Wrong Dtpmv result for: Trans in Case:", nc, "input:", nx)
 			}
 		}
 	}

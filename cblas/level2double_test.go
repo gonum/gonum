@@ -1,8 +1,9 @@
 package cblas
 
 import (
-	"github.com/gonum/blas/testblas"
 	"testing"
+
+	"github.com/gonum/blas/testblas"
 )
 
 func TestDgemv(t *testing.T) {
@@ -15,8 +16,4 @@ func TestDger(t *testing.T) {
 
 func TestDtxmv(t *testing.T) {
 	testblas.DtxmvTest(t, blasser)
-}
-
-func TestDgbmv(t *testing.T) {
-	testblas.DgbmvTest(t, blasser)
 }

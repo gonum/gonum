@@ -10,7 +10,6 @@ var _ blas.Float64Level2 = Blasser
 // TODO: Need to think about loops when doing row-major. Change after tests?
 
 const (
-	badOrder     string = "referenceblas: illegal order"
 	mLT0         string = "referenceblas: m < 0"
 	nLT0         string = "referenceblas: n < 0"
 	kLT0         string = "referenceblas: k < 0"
@@ -39,10 +38,7 @@ func min(a, b int) int {
 
 // Dgemv computes y = alpha*a*x + beta*y if tA = blas.NoTrans
 // or alpha*A^T*x + beta*y if tA = blas.Trans or blas.ConjTrans
-func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
-	}
+func (b Blas) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic(badTranspose)
 	}
@@ -52,15 +48,10 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 	if n < 0 {
 		panic(nLT0)
 	}
-	if o == blas.RowMajor {
-		if lda < max(1, n) {
-			panic(badLdaRow)
-		}
-	} else {
-		if lda < max(1, m) {
-			panic(badLdaCol)
-		}
+	if lda < max(1, n) {
+		panic(badLdaRow)
 	}
+
 	if incX == 0 {
 		panic(zeroInc)
 	}
@@ -109,7 +100,7 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 	default:
 		panic("shouldn't be here")
 
-	case o == blas.RowMajor && tA == blas.NoTrans:
+	case tA == blas.NoTrans:
 		iy := ky
 		for i := 0; i < m; i++ {
 			jx := kx
@@ -121,7 +112,7 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 			y[iy] += alpha * temp
 			iy += incY
 		}
-	case o == blas.RowMajor && (tA == blas.Trans || tA == blas.ConjTrans):
+	case tA == blas.Trans || tA == blas.ConjTrans:
 		ix := kx
 		for i := 0; i < m; i++ {
 			jy := ky
@@ -132,30 +123,6 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 			}
 			ix += incX
 		}
-
-	case o == blas.ColMajor && tA == blas.NoTrans:
-		jx := kx
-		for j := 0; j < n; j++ {
-			temp := alpha * x[jx]
-			iy := ky
-			for i := 0; i < m; i++ {
-				y[iy] += temp * a[lda*j+i]
-				iy += incY
-			}
-			jx += incX
-		}
-	case o == blas.ColMajor && (tA == blas.Trans || tA == blas.ConjTrans):
-		jy := ky
-		for j := 0; j < n; j++ {
-			var temp float64
-			ix := kx
-			for i := 0; i < m; i++ {
-				temp += a[lda*j+i] * x[ix]
-				ix += incX
-			}
-			y[jy] += alpha * temp
-			jy += incY
-		}
 	}
 }
 
@@ -163,11 +130,8 @@ func (b Blas) Dgemv(o blas.Order, tA blas.Transpose, m, n int, alpha float64, a 
 //    A := alpha*x*y**T + A,
 // where alpha is a scalar, x is an m element vector, y is an n element
 // vector and A is an m by n matrix.
-func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+func (Blas) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	// Check inputs
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
-	}
 	if m < 0 {
 		panic("m < 0")
 	}
@@ -180,15 +144,10 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 	if incY == 0 {
 		panic(zeroInc)
 	}
-	if o == blas.RowMajor {
-		if lda < max(1, n) {
-			panic(badLdaRow)
-		}
-	} else {
-		if lda < max(1, m) {
-			panic(badLdaCol)
-		}
+	if lda < max(1, n) {
+		panic(badLdaRow)
 	}
+
 	// Quick return if possible
 	if m == 0 || n == 0 || alpha == 0 {
 		return
@@ -207,55 +166,31 @@ func (Blas) Dger(o blas.Order, m, n int, alpha float64, x []float64, incX int, y
 		kx = -(m - 1) * incX
 	}
 
-	switch o {
-	default:
-		panic("should not be here")
-	case blas.RowMajor:
-		ix := kx
-		for i := 0; i < m; i++ {
-			if x[ix] == 0 {
-				ix += incX
-				continue
-			}
-			tmp := alpha * x[ix]
-			jy := ky
-			for j := 0; j < n; j++ {
-				a[i*lda+j] += y[jy] * tmp
-				jy += incY
-			}
+	ix := kx
+	for i := 0; i < m; i++ {
+		if x[ix] == 0 {
 			ix += incX
+			continue
 		}
-	case blas.ColMajor:
+		tmp := alpha * x[ix]
 		jy := ky
 		for j := 0; j < n; j++ {
-			if y[jy] == 0 {
-				jy += incY
-				continue
-			}
-			tmp := alpha * y[jy]
-			ix := kx
-			for i := 0; i < m; i++ {
-				a[j*lda+i] += x[ix] * tmp
-				ix += incX
-			}
+			a[i*lda+j] += y[jy] * tmp
 			jy += incY
 		}
-
+		ix += incX
 	}
+
 }
 
-func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
-	}
-	if o == blas.RowMajor {
-		m, n = n, m
-		kU, kL = kL, kU
-		if tA == blas.NoTrans {
-			tA = blas.Trans
-		} else {
-			tA = blas.NoTrans
-		}
+func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	// Transform for row major
+	m, n = n, m
+	kU, kL = kL, kU
+	if tA == blas.NoTrans {
+		tA = blas.Trans
+	} else {
+		tA = blas.NoTrans
 	}
 
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
@@ -267,15 +202,10 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 	if n < 0 {
 		panic(nLT0)
 	}
-	if o == blas.RowMajor {
-		if lda < max(1, n) {
-			panic(badLdaRow)
-		}
-	} else {
-		if lda < max(1, m) {
-			panic(badLdaCol)
-		}
+	if lda < max(1, n) {
+		panic(badLdaRow)
 	}
+
 	if incX == 0 {
 		panic(zeroInc)
 	}
@@ -383,22 +313,17 @@ func (b Blas) Dgbmv(o blas.Order, tA blas.Transpose, m, n, kL, kU int, alpha flo
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix.
-func (Blas) Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
+func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
 	// Verify inputs
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
+	if tA == blas.NoTrans {
+		tA = blas.Trans
+	} else {
+		tA = blas.NoTrans
 	}
-	if o == blas.RowMajor {
-		if tA == blas.NoTrans {
-			tA = blas.Trans
-		} else {
-			tA = blas.NoTrans
-		}
-		if ul == blas.Upper {
-			ul = blas.Lower
-		} else {
-			ul = blas.Upper
-		}
+	if ul == blas.Upper {
+		ul = blas.Lower
+	} else {
+		ul = blas.Upper
 	}
 
 	if ul != blas.Lower && ul != blas.Upper {
@@ -506,12 +431,9 @@ func (Blas) Dtrmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
+func (Blas) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
 	// Test the input parameters
 	// Verify inputs
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
-	}
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -542,8 +464,8 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 
 	switch {
 	default:
-		panic("col major not yet coded")
-	case o == blas.RowMajor && tA == blas.NoTrans && ul == blas.Upper:
+		panic("goblas: unreachable")
+	case tA == blas.NoTrans && ul == blas.Upper:
 		jx := kx + (n-1)*incX
 		for j := n; j >= 0; j-- {
 			if x[jx] != 0 {
@@ -559,7 +481,7 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 			}
 			jx -= incX
 		}
-	case o == blas.RowMajor && tA == blas.NoTrans && ul == blas.Lower:
+	case tA == blas.NoTrans && ul == blas.Lower:
 		jx := kx
 		for j := 0; j < n; j++ {
 			if x[jx] != 0 {
@@ -575,7 +497,7 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 			}
 			jx += incX
 		}
-	case o == blas.RowMajor && (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
+	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
 		jx := kx
 		for j := 0; j < n; j++ {
 			tmp := x[jx]
@@ -590,7 +512,7 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 			x[jx] = tmp
 			jx += incX
 		}
-	case o == blas.RowMajor && (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
+	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
 		kx += (n - 1) * incX
 		jx := kx
 		for j := n - 1; j >= 0; j-- {
@@ -613,11 +535,8 @@ func (Blas) Dtrsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n 
 //    y := alpha*A*x + beta*y,
 // where alpha and beta are scalars, x and y are n element vectors and
 // A is an n by n symmetric matrix.
-func (b Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+func (b Blas) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	// Check inputs
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
-	}
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -666,8 +585,8 @@ func (b Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float6
 	// Form y = Ax + y
 	switch {
 	default:
-		panic("not yet coded")
-	case o == blas.RowMajor && ul == blas.Upper:
+		panic("goblas: unreachable")
+	case ul == blas.Upper:
 		jx := kx
 		jy := ky
 		for j := 0; j < n; j++ {
@@ -685,7 +604,7 @@ func (b Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float6
 			jx += incX
 			jy += incY
 		}
-	case o == blas.RowMajor && ul == blas.Lower:
+	case ul == blas.Lower:
 		jx := kx
 		jy := ky
 		for j := 0; j < n; j++ {
@@ -711,22 +630,18 @@ func (b Blas) Dsymv(o blas.Order, ul blas.Uplo, n int, alpha float64, a []float6
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular band matrix.
-func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+func (Blas) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
 	// Verify inputs
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
+	// Transform for row major
+	if tA == blas.NoTrans {
+		tA = blas.Trans
+	} else {
+		tA = blas.NoTrans
 	}
-	if o == blas.RowMajor {
-		if tA == blas.NoTrans {
-			tA = blas.Trans
-		} else {
-			tA = blas.NoTrans
-		}
-		if ul == blas.Upper {
-			ul = blas.Lower
-		} else {
-			ul = blas.Upper
-		}
+	if ul == blas.Upper {
+		ul = blas.Lower
+	} else {
+		ul = blas.Upper
 	}
 
 	if ul != blas.Lower && ul != blas.Upper {
@@ -904,22 +819,18 @@ func (Blas) Dtbmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n,
 	}
 }
 
-func (bl Blas) Dtpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
+func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	// Verify inputs
-	if o != blas.RowMajor && o != blas.ColMajor {
-		panic(badOrder)
+	// Transform for row major
+	if tA == blas.NoTrans {
+		tA = blas.Trans
+	} else {
+		tA = blas.NoTrans
 	}
-	if o == blas.RowMajor {
-		if tA == blas.NoTrans {
-			tA = blas.Trans
-		} else {
-			tA = blas.NoTrans
-		}
-		if ul == blas.Upper {
-			ul = blas.Lower
-		} else {
-			ul = blas.Upper
-		}
+	if ul == blas.Upper {
+		ul = blas.Lower
+	} else {
+		ul = blas.Upper
 	}
 
 	if ul != blas.Lower && ul != blas.Upper {
@@ -1027,27 +938,27 @@ func (bl Blas) Dtpmv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag,
 }
 
 //TODO: Not yet implemented Level 2 routines.
-func (Blas) Dtbsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+func (Blas) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dtpsv(o blas.Order, ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
+func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dsbmv(o blas.Order, ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+func (Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dspmv(o blas.Order, ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {
+func (Blas) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dspr(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap []float64) {
+func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap []float64) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dspr2(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
+func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dsyr(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
+func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dsyr2(o blas.Order, ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	panic("referenceblas: function not implemented")
 }

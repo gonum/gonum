@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# Copyright ©2012 The bíogo.blas Authors. All rights reserved.
+# Copyright ©2014 The Gonum Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
@@ -41,7 +41,7 @@ if ($excludeAtlas) {
 printf $goblas <<EOH;
 // Do not manually edit this file. It was created by the genBlas.pl script from ${cblasHeader}.
 
-// Copyright ©2012 The bíogo.blas Authors. All rights reserved.
+// Copyright ©2014 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -67,6 +67,15 @@ var (
 	_ blas.Float64    = Blas{}
 	_ blas.Complex64  = Blas{}
 	_ blas.Complex128 = Blas{}
+)
+
+// Type order is used to specify the matrix storage format. We still interact with
+// an API that allows client calls to specify order, so this is here to document that fact.
+type order int
+
+const (
+	rowMajor order = 101 + iota
+	colMajor
 )
 
 func max(a, b int) int {
@@ -339,6 +348,7 @@ sub processParamToGo {
 	my $complexType = shift;
 	my @processed;
 	my @params = split ',', $paramList;
+	my $skip = 0;
 	foreach my $param (@params) {
 		my @parts = split /[ *]/, $param;
 		my $var = lcfirst $parts[scalar @parts - 1];
@@ -376,10 +386,7 @@ sub processParamToGo {
 			push @processed, $var." float64"; next;
 		};
 		$param =~ m/^const enum/ && do {
-			$var eq "order" && do {
-				$var = "o";
-				push @processed, $var." blas.Order"; next;
-			};
+			$var eq "order" && $skip++;
 			$var =~ /trans/ && do {
 				$var =~ s/trans([AB]?)/t$1/;
 				push @processed, $var." blas.Transpose"; next;
@@ -398,7 +405,7 @@ sub processParamToGo {
 			};
 		};
 	}
-	die "missed Go parameters from '$func', '$paramList'" if scalar @processed != scalar @params;
+	die "missed Go parameters from '$func', '$paramList'" if scalar @processed+$skip != scalar @params;
 	return join ", ", @processed;
 }
 
@@ -430,7 +437,6 @@ sub processParamToChecks {
 		$param =~ m/^const enum [a-zA-Z]/ && do {
 			$var eq "order" && do {
 				$scalarArgs{'o'} = 1;
-				push @processed, "if o != blas.RowMajor && o != blas.ColMajor { panic(\"cblas: illegal order\") }"; next;
 			};
 			$var =~ /trans/ && do {
 				$var =~ s/trans([AB]?)/t$1/;
@@ -491,20 +497,19 @@ sub processParamToChecks {
 
 	if (not $func =~ m/(?:mm|r2?k)$/) {
 		if ($arrayArgs{'a'}) {
-			if (($scalarArgs{'kL'} && $scalarArgs{'kU'}) || $scalarArgs{'m'}) {
-				push @processed, "if o == blas.RowMajor {";
+			if ($scalarArgs{'s'}) {
+					push @processed, "if s == blas.Left {";
+					push @processed, "if lda*(n-1)+m > len(a) || lda < max(1, m) { panic(\"cblas: index of a out of range\") }";
+					push @processed, "} else {";
+					push @processed, "if lda*(m-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index of a out of range\") }";
+					push @processed, "}";
+					push @processed, "if ldb*(m-1)+n > len(b) || ldb < max(1, n) { panic(\"cblas: index of b out of range\") }";
+			} elsif (($scalarArgs{'kL'} && $scalarArgs{'kU'}) || $scalarArgs{'m'}) {
 				if ($scalarArgs{'kL'} && $scalarArgs{'kU'}) {
 					push @processed, "if lda*(m-1)+kL+kU+1 > len(a) || lda < kL+kU+1 { panic(\"cblas: index of a out of range\") }";
 				} else {
 					push @processed, "if lda*(m-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index of a out of range\") }";
 				}
-				push @processed, "} else {";
-				if ($scalarArgs{'kL'} && $scalarArgs{'kU'}) {
-					push @processed, "if lda*(n-1)+kL+kU+1 > len(a) || lda < kL+kU+1 { panic(\"cblas: index of a out of range\") }";
-				} else {
-					push @processed, "if lda*(n-1)+m > len(a) || lda < max(1, m) { panic(\"cblas: index of a out of range\") }";
-				}
-				push @processed, "}";
 			} else {
 				if ($scalarArgs{'k'}) {
 					push @processed, "if lda*(n-1)+k+1 > len(a) || lda < k+1 { panic(\"cblas: index of a out of range\") }";
@@ -518,34 +523,19 @@ sub processParamToChecks {
 			push @processed, "var k int";
 			push @processed, "if s == blas.Left { k = m } else { k = n }";
 			push @processed, "if lda*(k-1)+k > len(a) || lda < max(1, k) { panic(\"cblas: index of a out of range\") }";
-			push @processed, "if o == blas.RowMajor {";
 			push @processed, "if ldb*(m-1)+n > len(b) || ldb < max(1, n) { panic(\"cblas: index of b out of range\") }";
 			if ($arrayArgs{'c'}) {
 				push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
 			}
-			push @processed, "} else {";
-			push @processed, "if ldb*(n-1)+m > len(b) || ldb < max(1, m) { panic(\"cblas: index of b out of range\") }";
-			if ($arrayArgs{'c'}) {
-				push @processed, "if ldc*(n-1)+m > len(c) || ldc < max(1, m) { panic(\"cblas: index of c out of range\") }";
-			}
-			push @processed, "}";
 		}
 		if ($scalarArgs{'t'}) {
 			push @processed, "var row, col int";
 			push @processed, "if t == blas.NoTrans { row, col = n, k } else { row, col = k, n }";
-			push @processed, "if o == blas.RowMajor {";
 			foreach my $ref ('a', 'b') {
 				if ($arrayArgs{$ref}) {
 					push @processed, "if ld${ref}*(row-1)+col > len(${ref}) || ld${ref} < max(1, col) { panic(\"cblas: index of ${ref} out of range\") }";
 				}
 			}
-			push @processed, "} else {";
-			foreach my $ref ('a', 'b') {
-				if ($arrayArgs{$ref}) {
-					push @processed, "if ld${ref}*(col-1)+row > len(${ref}) || ld${ref} < max(1, row) { panic(\"cblas: index of ${ref} out of range\") }";
-				}
-			}
-			push @processed, "}";
 			if ($arrayArgs{'c'}) {
 				push @processed, "if ldc*(n-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
 			}
@@ -554,15 +544,9 @@ sub processParamToChecks {
 			push @processed, "var rowA, colA, rowB, colB int";
 			push @processed, "if tA == blas.NoTrans { rowA, colA = m, k } else { rowA, colA = k, m }";
 			push @processed, "if tB == blas.NoTrans { rowB, colB = k, n } else { rowB, colB = n, k }";
-			push @processed, "if o == blas.RowMajor {";
 			push @processed, "if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) { panic(\"cblas: index of a out of range\") }";
 			push @processed, "if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) { panic(\"cblas: index of b out of range\") }";
 			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
-			push @processed, "} else {";
-			push @processed, "if lda*(colA-1)+rowA > len(a) || lda < max(1, rowA) { panic(\"cblas: index of a out of range\") }";
-			push @processed, "if ldb*(colB-1)+rowB > len(b) || ldb < max(1, rowB) { panic(\"cblas: index of b out of range\") }";
-			push @processed, "if ldc*(n-1)+m > len(c) || ldc < max(1, m) { panic(\"cblas: index of c out of range\") }";
-			push @processed, "}";
 		}
 	}
 
@@ -611,8 +595,7 @@ sub processParamToC {
 		};
 		$param =~ m/^const enum [a-zA-Z]/ && do {
 			$var eq "order" && do {
-				$var = "o";
-				push @processed, "C.enum_$parts[scalar @parts - 2](".$var.")"; next;
+				push @processed, "C.enum_$parts[scalar @parts - 2](rowMajor)"; next;
 			};
 			$var =~ /trans/ && do {
 				$var =~ s/trans([AB]?)/t$1/;

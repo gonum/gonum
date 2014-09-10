@@ -464,6 +464,108 @@ var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
 		},
 	},
 	{
+		Name:  "UnitaryIncLong",
+		X:     []float64{10, 15, -6, 3, 14, 7, 8, -9, 10},
+		Y:     []float64{8, -2, 4, 7, 6, -3, 7, -6},
+		XTmp:  []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+		YTmp:  []float64{0, 0, 0, 0, 0, 0, 0, 0},
+		Incx:  1,
+		Incy:  1,
+		N:     6,
+		Panic: false,
+		DaxpyCases: []DaxpyCase{
+			{
+				Alpha: 1,
+				Ans:   []float64{18, 13, -2, 10, 20, 4, 7, -6},
+			},
+			{
+				Alpha: 2,
+				Ans:   []float64{28, 28, -8, 13, 34, 11, 7, -6},
+			},
+			{
+				Alpha: -3,
+				Ans:   []float64{-22, -47, 22, -2, -36, -24, 7, -6},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{8, -2, 4, 7, 6, -3, 7, -6},
+			},
+		},
+		DdotAns: 110,
+		DswapAns: DTwoVecAnswer{
+			X: []float64{8, -2, 4, 7, 6, -3, 8, -9, 10},
+			Y: []float64{10, 15, -6, 3, 14, 7, 7, -6},
+		},
+		DcopyAns: DTwoVecAnswer{
+			X: []float64{10, 15, -6, 3, 14, 7, 8, -9, 10},
+			Y: []float64{10, 15, -6, 3, 14, 7, 7, -6},
+		},
+		DrotCases: []DrotCase{
+			{
+				C:    math.Cos(0),
+				S:    math.Sin(0),
+				XAns: []float64{10, 15, -6, 3, 14, 7, 8, -9, 10},
+				YAns: []float64{8, -2, 4, 7, 6, -3, 7, -6},
+			},
+			{
+				C:    math.Cos(25 * math.Pi / 180),
+				S:    math.Sin(25 * math.Pi / 180),
+				XAns: []float64{12.444023964292095, 12.749380282068351, -3.7473736752571014, 5.677251193294846, 15.224018588957296, 5.076299724034451, 8, -9, 10},
+				YAns: []float64{3.024279678886205, -8.151889500183792, 6.160940718590796, 5.076299724034451, -0.4788089421498931, -5.677251193294846, 7, -6},
+			},
+			{
+				C:    math.Cos(0.5 * math.Pi),
+				S:    math.Sin(0.5 * math.Pi),
+				XAns: []float64{8, -2, 4, 7, 6, -3, 8, -9, 10},
+				YAns: []float64{-10, -15, 6, -3, -14, -7, 7, -6},
+			},
+			{
+				C:    math.Cos(math.Pi),
+				S:    math.Sin(math.Pi),
+				XAns: []float64{-10, -15, 6, -3, -14, -7, 8, -9, 10},
+				YAns: []float64{-8, 2, -4, -7, -6, 3, 7, -6},
+			},
+		},
+		DrotmCases: []DrotmCase{
+			{
+				P: blas.DrotmParams{
+					Flag: blas.Identity,
+					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
+				},
+				XAns: []float64{10, 15, -6, 3, 14, 7, 8, -9, 10},
+				YAns: []float64{8, -2, 4, 7, 6, -3, 7, -6},
+				Name: "Neg2Flag",
+			},
+			{
+				P: blas.DrotmParams{
+					Flag: blas.Rescaling,
+					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
+				},
+				XAns: []float64{8.2, 13.7, -5.8, 2, 12, 6.6, 8, -9, 10},
+				YAns: []float64{5, 0.5, 1.4, 3.8, 4.4, -0.8, 7, -6},
+				Name: "Neg1Flag",
+			},
+			{
+				P: blas.DrotmParams{
+					Flag: blas.OffDiagonal,
+					H:    [4]float64{1, 0.1, -0.1, 1},
+				},
+				XAns: []float64{9.2, 15.2, -6.4, 2.3, 13.4, 7.3, 8, -9, 10},
+				YAns: []float64{9, -0.5, 3.4, 7.3, 7.4, -2.3, 7, -6},
+				Name: "ZeroFlag",
+			},
+			{
+				P: blas.DrotmParams{
+					Flag: blas.Diagonal,
+					H:    [4]float64{0.5, -1, 1, 0.7},
+				},
+				XAns: []float64{13, 5.5, 1, 8.5, 13, 0.5, 8, -9, 10},
+				YAns: []float64{-4.4, -16.4, 8.8, 1.9, -9.8, -9.1, 7, -6},
+				Name: "OneFlag",
+			},
+		},
+	},
+	{
 		Name:  "PositiveInc",
 		X:     []float64{10, 15, -6, 3, 14, 7},
 		Y:     []float64{8, -2, 4, 7, 6, -3, -4, 10},

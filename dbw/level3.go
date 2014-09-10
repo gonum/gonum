@@ -26,7 +26,7 @@ func Gemm(tA, tB blas.Transpose, alpha float64, A, B General, beta float64, C Ge
 	if n != C.Cols {
 		panic("blas: dimension mismatch")
 	}
-	impl.Dgemm(A.Order, tA, tB, m, n, k, alpha, A.Data, A.Stride,
+	impl.Dgemm(tA, tB, m, n, k, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
@@ -51,7 +51,7 @@ func Symm(s blas.Side, alpha float64, A Symmetric, B General, beta float64, C Ge
 	if n != C.Cols {
 		panic("blas: dimension mismatch")
 	}
-	impl.Dsymm(A.Order, s, A.Uplo, m, n, alpha, A.Data, A.Stride,
+	impl.Dsymm(s, A.Uplo, m, n, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
@@ -65,7 +65,7 @@ func Syrk(t blas.Transpose, alpha float64, A General, beta float64, C Symmetric)
 	if n != C.N {
 		panic("blas: dimension mismatch")
 	}
-	impl.Dsyrk(A.Order, C.Uplo, t, n, k, alpha, A.Data, A.Stride, beta,
+	impl.Dsyrk(C.Uplo, t, n, k, alpha, A.Data, A.Stride, beta,
 		C.Data, C.Stride)
 }
 
@@ -85,7 +85,7 @@ func Syr2k(t blas.Transpose, alpha float64, A, B General, beta float64, C Symmet
 	if n != C.N {
 		panic("blas: dimension mismatch")
 	}
-	impl.Dsyr2k(A.Order, C.Uplo, t, n, k, alpha, A.Data, A.Stride,
+	impl.Dsyr2k(C.Uplo, t, n, k, alpha, A.Data, A.Stride,
 		B.Data, B.Stride, beta, C.Data, C.Stride)
 }
 
@@ -99,7 +99,7 @@ func Trmm(s blas.Side, tA blas.Transpose, alpha float64, A Triangular, B General
 			panic("blas: dimension mismatch")
 		}
 	}
-	impl.Dtrmm(A.Order, s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
+	impl.Dtrmm(s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
 		B.Data, B.Stride)
 }
 
@@ -113,6 +113,6 @@ func Trsm(s blas.Side, tA blas.Transpose, alpha float64, A Triangular, B General
 			panic("blas: dimension mismatch")
 		}
 	}
-	impl.Dtrsm(A.Order, s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
+	impl.Dtrsm(s, A.Uplo, tA, A.Diag, B.Rows, B.Cols, alpha, A.Data, A.Stride,
 		B.Data, B.Stride)
 }

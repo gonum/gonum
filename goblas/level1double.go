@@ -31,8 +31,21 @@ func (Blas) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
-	var ix, iy int
 	var sum float64
+	// Fast path for common case
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, v := range x {
+				sum += y[i] * v
+			}
+			return sum
+		}
+		for i := 0; i < n; i++ {
+			sum += y[i] * x[i]
+		}
+		return sum
+	}
+	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX
 	}
@@ -96,7 +109,20 @@ func (Blas) Dasum(n int, x []float64, incX int) float64 {
 	if n < 0 {
 		panic(negativeN)
 	}
-	if incX <= 0 {
+	if incX <= 1 {
+		if incX == 1 {
+			// Fast path for common case
+			if len(x) == n {
+				for _, v := range x {
+					sum += math.Abs(v)
+				}
+				return sum
+			}
+			for i := 0; i < n; i++ {
+				sum += math.Abs(x[i])
+			}
+			return sum
+		}
 		if incX == 0 {
 			panic(zeroInc)
 		}
@@ -131,6 +157,17 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 	idx := 0
 	max := math.Abs(x[0])
 
+	if incX == 1 {
+		for i := 1; i < n; i++ {
+			v := x[i]
+			absV := math.Abs(v)
+			if absV > max {
+				max = absV
+				idx = i
+			}
+		}
+	}
+
 	for i := 1; i < n; i++ {
 		v := x[i*incX]
 		absV := math.Abs(v)
@@ -153,6 +190,19 @@ func (Blas) Dswap(n int, x []float64, incX int, y []float64, incY int) {
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, v := range x {
+				x[i], y[i] = y[i], v
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			x[i], y[i] = y[i], x[i]
+		}
+		return
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX
@@ -177,6 +227,15 @@ func (Blas) Dcopy(n int, x []float64, incX int, y []float64, incY int) {
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			copy(y, x)
+			return
+		}
+		copy(y[:n], x[:n])
+		return
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX
@@ -205,6 +264,19 @@ func (Blas) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY
 	if alpha == 0 {
 		return
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, v := range x {
+				y[i] += alpha * v
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			y[i] += alpha * x[i]
+		}
+		return
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX
@@ -400,6 +472,23 @@ func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64,
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
+
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, vx := range x {
+				vy := y[i]
+				x[i], y[i] = c*vx+s*vy, c*vy-s*vx
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			vx := x[i]
+			vy := y[i]
+			x[i], y[i] = c*vx+s*vy, c*vy-s*vx
+		}
+		return
+	}
+
 	var ix, iy int
 	if incX < 0 {
 		ix = (-n + 1) * incX
@@ -408,7 +497,9 @@ func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64,
 		iy = (-n + 1) * incY
 	}
 	for i := 0; i < n; i++ {
-		x[ix], y[iy] = c*x[ix]+s*y[iy], c*y[iy]-s*x[ix]
+		vx := x[ix]
+		vy := y[iy]
+		x[ix], y[iy] = c*vx+s*vy, c*vy-s*vx
 		ix += incX
 		iy += incY
 	}
@@ -459,8 +550,26 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 	if incY < 0 {
 		iy = (-n + 1) * incY
 	}
+	if incX == 1 && incY == 1 {
+		if n == len(x) {
+			for i, vx := range x {
+				vy := y[i]
+				x[i], y[i] = vx*h11+vy*h12, vx*h21+vy*h22
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			vx := x[i]
+			vy := y[i]
+			x[i], y[i] = vx*h11+vy*h12, vx*h21+vy*h22
+		}
+		return
+	}
+
 	for i := 0; i < n; i++ {
-		x[ix], y[iy] = x[ix]*h11+y[iy]*h12, x[ix]*h21+y[iy]*h22
+		vx := x[ix]
+		vy := y[iy]
+		x[ix], y[iy] = vx*h11+vy*h12, vx*h21+vy*h22
 		ix += incX
 		iy += incY
 	}
@@ -482,6 +591,19 @@ func (Blas) Dscal(n int, alpha float64, x []float64, incX int) {
 			panic(negativeN)
 		}
 	}
+	if incX == 1 {
+		if n == len(x) {
+			for i := range x {
+				x[i] *= alpha
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			x[i] *= alpha
+		}
+		return
+	}
+
 	for ix := 0; ix < n*incX; ix += incX {
 		x[ix] *= alpha
 	}

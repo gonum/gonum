@@ -6,12 +6,9 @@
 use strict;
 use warnings;
 
-my $cblasHeader = "cblas.h";
-my $LIB = "/usr/lib/";
-
 my $excludeComplex = 0;
 my $excludeAtlas = 1;
-
+my $cblasHeader = "cblas.h";
 
 open(my $cblas, "<", $cblasHeader) or die;
 open(my $goblas, ">", "blas.go") or die;
@@ -31,13 +28,11 @@ my %done = ("cblas_errprn"     => 1,
 	        "cblas_zdotc_sub"  => 1,
 	        );
 
-my $atlas = "";
 if ($excludeAtlas) {
 	$done{'cblas_csrot'} = 1;
 	$done{'cblas_zdrot'} = 1;
-} else {
-	$atlas = " -latlas";
 }
+
 printf $goblas <<EOH;
 // Do not manually edit this file. It was created by the genBlas.pl script from ${cblasHeader}.
 
@@ -50,15 +45,14 @@ package cblas
 
 /*
 #cgo CFLAGS: -g -O2
-#cgo linux LDFLAGS: -L/usr/lib/ -lcblas
-#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
 #include "${cblasHeader}"
 */
 import "C"
 
 import (
-	"github.com/gonum/blas"
 	"unsafe"
+
+	"github.com/gonum/blas"
 )
 
 // Type check assertions:

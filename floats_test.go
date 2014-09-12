@@ -178,6 +178,41 @@ func TestCumSum(t *testing.T) {
 	}
 }
 
+func TestDistance(t *testing.T) {
+	norms := []float64{1, 2, 4, math.Inf(1)}
+	slices := []struct {
+		s []float64
+		t []float64
+	}{
+		{
+			nil,
+			nil,
+		},
+		{
+			[]float64{8, 9, 10, -12},
+			[]float64{8, 9, 10, -12},
+		},
+		{
+			[]float64{1, 2, 3, -4, -5, 8},
+			[]float64{-9.2, -6.8, 9, -3, -2, 1},
+		},
+	}
+
+	for j, test := range slices {
+		tmp := make([]float64, len(test.s))
+		for i, L := range norms {
+			dist := Distance(test.s, test.t, L)
+			copy(tmp, test.s)
+			Sub(tmp, test.t)
+			norm := Norm(tmp, L)
+			if dist != norm { // Use equality because they should be identical
+				t.Errorf("Distance does not match norm for case %v, %v. Expected %v, Found %v.", i, j, norm, dist)
+			}
+		}
+	}
+
+}
+
 func TestDiv(t *testing.T) {
 	s1 := []float64{5, 12, 27}
 	s2 := []float64{1, 2, 3}

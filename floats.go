@@ -146,6 +146,43 @@ func CumSum(dst, s []float64) []float64 {
 	return dst
 }
 
+// Dist computes the L-norm of s - t. See Norm for special cases.
+func Distance(s []float64, t []float64, L float64) float64 {
+	if len(s) != len(t) {
+		panic("floats: slice lengths do not match")
+	}
+	if len(s) == 0 {
+		return 0
+	}
+	var norm float64
+	if L == 2 {
+		for i, v := range s {
+			diff := t[i] - v
+			norm = math.Hypot(norm, diff)
+		}
+		return norm
+	}
+	if L == 1 {
+		for i, v := range s {
+			norm += math.Abs(t[i] - v)
+		}
+		return norm
+	}
+	if math.IsInf(L, 1) {
+		for i, v := range s {
+			absDiff := math.Abs(t[i] - v)
+			if absDiff > norm {
+				norm = absDiff
+			}
+		}
+		return norm
+	}
+	for i, v := range s {
+		norm += math.Pow(math.Abs(t[i]-v), L)
+	}
+	return math.Pow(norm, 1/L)
+}
+
 // Div performs element-wise division between s
 // and t and stores the value in s. It panics if the
 // lengths of s and t are not equal.
@@ -488,10 +525,10 @@ func Norm(s []float64, L float64) (norm float64) {
 	// Should this be done in log space for better numerical stability?
 	//	would be more cost
 	//	maybe only if L is high?
+	if len(s) == 0 {
+		return 0
+	}
 	if L == 2 {
-		if len(s) == 0 {
-			return
-		}
 		twoNorm := math.Abs(s[0])
 		for i := 1; i < len(s); i++ {
 			twoNorm = math.Hypot(twoNorm, s[i])

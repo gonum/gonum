@@ -661,23 +661,23 @@ func TestNearestWithinSpan(t *testing.T) {
 	}
 	ind := NearestWithinSpan(13, 7, 8.2, 7.19)
 	if ind != 2 {
-		t.Errorf("Wrong value when just below the bucket. %i found, %i expected", ind, 2)
+		t.Errorf("Wrong value when just below the bucket. %v found, %v expected", ind, 2)
 	}
 	ind = NearestWithinSpan(13, 7, 8.2, 7.21)
 	if ind != 2 {
-		t.Errorf("Wrong value when just above the bucket. %i found, %i expected", ind, 2)
+		t.Errorf("Wrong value when just above the bucket. %v found, %v expected", ind, 2)
 	}
 	ind = NearestWithinSpan(13, 7, 8.2, 7.2)
 	if ind != 2 {
-		t.Errorf("Wrong value when equal to bucket. %i found, %i expected", ind, 2)
+		t.Errorf("Wrong value when equal to bucket. %v found, %v expected", ind, 2)
 	}
 	ind = NearestWithinSpan(13, 7, 8.2, 7.151)
 	if ind != 2 {
-		t.Errorf("Wrong value when just above halfway point. %i found, %i expected", ind, 2)
+		t.Errorf("Wrong value when just above halfway point. %v found, %v expected", ind, 2)
 	}
 	ind = NearestWithinSpan(13, 7, 8.2, 7.249)
 	if ind != 2 {
-		t.Errorf("Wrong value when just below halfway point. %i found, %i expected", ind, 2)
+		t.Errorf("Wrong value when just below halfway point. %v found, %v expected", ind, 2)
 	}
 }
 

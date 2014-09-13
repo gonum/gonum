@@ -134,16 +134,15 @@ func (l Laplace) LogProb(x float64) float64 {
 	return -math.Ln2 - math.Log(l.Scale) - math.Abs(x-l.Mu)/l.Scale
 }
 
-// MarshalSlice gets the parameters of the distribution. There are two parameters,
-// the mean and scale.
-// Sets Mean to the first element and Scale as the second element.
-// Panics if the length of the input slice is not equal to the number of parameters
-func (l Laplace) MarshalSlice(s []float64) {
-	if len(s) != l.NumParameters() {
+// MarshalParameters implements the ParameterMarshaler interface
+func (l Laplace) MarshalParameters(p []Parameter) {
+	if len(p) != l.NumParameters() {
 		panic("dist: slice length mismatch")
 	}
-	s[0] = l.Mu
-	s[1] = l.Scale
+	p[0].Name = "Mu"
+	p[0].Value = l.Mu
+	p[1].Name = "Scale"
+	p[1].Value = l.Scale
 	return
 }
 
@@ -225,16 +224,19 @@ func (l Laplace) Survival(x float64) float64 {
 	return 0.5 * math.Exp(-(x-l.Mu)/l.Scale)
 }
 
-// UnmarshalSlice sets the parameters of the distribution.
-// This sets Mu to be the first element of the slice and Scale to be the second
-// element of the slice.
-// Panics if the length of the input slice is not equal to the number of parameters.
-func (l *Laplace) UnmarshalSlice(s []float64) {
-	if len(s) != l.NumParameters() {
+// UnmarshalParameters implements the ParameterMarshaler interface
+func (l *Laplace) UnmarshalParameters(p []Parameter) {
+	if len(p) != l.NumParameters() {
 		panic("dist: slice length mismatch")
 	}
-	l.Mu = s[0]
-	l.Scale = s[1]
+	if p[0].Name != "Mu" {
+		panic("laplace: " + panicNameMismatch)
+	}
+	if p[1].Name != "Scale" {
+		panic("laplace: " + panicNameMismatch)
+	}
+	l.Mu = p[0].Value
+	l.Scale = p[1].Value
 }
 
 // Variance returns the variance of the probability distribution.

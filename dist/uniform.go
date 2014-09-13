@@ -47,15 +47,15 @@ func (u Uniform) LogProb(x float64) float64 {
 	return -math.Log(u.Max - u.Min)
 }
 
-// MarshalSlice gets the parameters of the distribution.
-// Sets Min to the first element and Max to the second.
-// Panics if the length of the input slice is not equal to the number of parameters.
-func (u Uniform) MarshalSlice(s []float64) {
-	if len(s) != u.NumParameters() {
+// MarshalParameters implements the ParameterMarshaler interface
+func (u Uniform) MarshalParameters(p []Parameter) {
+	if len(p) != u.NumParameters() {
 		panic("uniform: improper parameter length")
 	}
-	s[0] = u.Min
-	s[1] = u.Max
+	p[0].Name = "Min"
+	p[0].Value = u.Min
+	p[1].Name = "Max"
+	p[1].Value = u.Max
 	return
 }
 
@@ -130,15 +130,20 @@ func (u Uniform) Survival(x float64) float64 {
 	return (u.Max - x) / (u.Max - u.Min)
 }
 
-// UnmarshalSlice sets the parameters of the distribution.
-// This sets Min to the first element and Max to the second element.
-// Panics if the length of the input slice is not equal to the number of parameters.
-func (u *Uniform) UnmarshalSlice(s []float64) {
-	if len(s) != u.NumParameters() {
+// UnmarshalParameters implements the ParameterMarshaler interface
+func (u *Uniform) UnmarshalParameters(p []Parameter) {
+	if len(p) != u.NumParameters() {
 		panic("uniform: incorrect number of parameters to set")
 	}
-	u.Min = s[0]
-	u.Max = s[1]
+	if p[0].Name != "Min" {
+		panic("uniform: " + panicNameMismatch)
+	}
+	if p[1].Name != "Max" {
+		panic("uniform: " + panicNameMismatch)
+	}
+
+	u.Min = p[0].Value
+	u.Max = p[1].Value
 }
 
 // Variance returns the variance of the probability distribution.

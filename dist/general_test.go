@@ -63,8 +63,8 @@ func testDistributionProbs(t *testing.T, dist UniProbDist, name string, pts []un
 }
 
 type ConjugateUpdater interface {
-	MarshalSlice([]float64)
-	UnmarshalSlice([]float64)
+	MarshalParameters([]Parameter)
+	UnmarshalParameters([]Parameter)
 	Rand() float64
 	NumParameters() int
 	SuffStat([]float64, []float64, []float64) float64
@@ -81,32 +81,32 @@ func testConjugateUpdate(t *testing.T, dist ConjugateUpdater, newFittable func()
 	nSuffStat := dist.NumSuffStat()
 
 	stats2 := make([]float64, nSuffStat)
-	p2 := make([]float64, nParams)
+	p2 := make([]Parameter, nParams)
 	w2 := make([]float64, nParams)
 	n2 := newFittable()
 	ns2 := n2.SuffStat(samps, nil, stats2)
 	n2.ConjugateUpdate(stats2, ns2, w2)
-	n2.MarshalSlice(p2)
+	n2.MarshalParameters(p2)
 
 	n3 := newFittable()
-	p3 := make([]float64, nParams)
+	p3 := make([]Parameter, nParams)
 	w3 := make([]float64, nParams)
 	stats3 := make([]float64, nSuffStat)
 	ns3 := n3.SuffStat(samps[:7], nil, stats3)
 	n3.ConjugateUpdate(stats3, ns3, w3)
-	n3.MarshalSlice(p3)
+	n3.MarshalParameters(p3)
 
 	n4 := newFittable()
-	n4.UnmarshalSlice(p3)
-	p4 := make([]float64, nParams)
+	n4.UnmarshalParameters(p3)
+	p4 := make([]Parameter, nParams)
 	w4 := make([]float64, nParams)
 	stats4 := make([]float64, nSuffStat)
 	copy(w4, w3)
 	ns4 := n4.SuffStat(samps[7:], nil, stats4)
 	n4.ConjugateUpdate(stats4, ns4, w4)
-	n4.MarshalSlice(p4)
+	n4.MarshalParameters(p4)
 
-	if !floats.EqualApprox(p2, p4, 1e-14) {
+	if !parametersEqual(p2, p4, 1e-14) {
 		t.Errorf("prior doesn't match after two step update. First is %v, second is %v", p2, p4)
 	}
 	if !floats.EqualApprox(w2, w4, 1e-14) {
@@ -121,14 +121,14 @@ func testConjugateUpdate(t *testing.T, dist ConjugateUpdater, newFittable func()
 
 	n5 := newFittable()
 
-	p5 := make([]float64, nParams)
+	p5 := make([]Parameter, nParams)
 	w5 := make([]float64, nParams)
 	stats5 := make([]float64, nSuffStat)
 	ns5 := n5.SuffStat(samps, ones, stats5)
 	n5.ConjugateUpdate(stats5, ns5, w5)
-	n5.MarshalSlice(p5)
+	n5.MarshalParameters(p5)
 
-	if !floats.EqualApprox(p2, p5, 1e-14) {
+	if !parametersEqual(p2, p5, 1e-14) {
 		t.Errorf("prior doesn't match after unitary weights. First is %v, second is %v", p2, p5)
 	}
 	if !floats.EqualApprox(w2, w5, 1e-14) {
@@ -141,36 +141,48 @@ func testConjugateUpdate(t *testing.T, dist ConjugateUpdater, newFittable func()
 		weights[i] = rand.Float64()
 	}
 
-	p6 := make([]float64, nParams)
+	p6 := make([]Parameter, nParams)
 	w6 := make([]float64, nParams)
 	n6 := newFittable()
 	stats6 := make([]float64, nSuffStat)
 	ns6 := n6.SuffStat(samps, weights, stats6)
 	n6.ConjugateUpdate(stats6, ns6, w6)
-	n6.MarshalSlice(p6)
+	n6.MarshalParameters(p6)
 
-	p7 := make([]float64, nParams)
+	p7 := make([]Parameter, nParams)
 	w7 := make([]float64, nParams)
 	n7 := newFittable()
 	stats7 := make([]float64, nSuffStat)
 	ns7 := n7.SuffStat(samps[:7], weights[:7], stats7)
 	n7.ConjugateUpdate(stats7, ns7, w7)
-	n7.MarshalSlice(p7)
+	n7.MarshalParameters(p7)
 
-	p8 := make([]float64, nParams)
+	p8 := make([]Parameter, nParams)
 	w8 := make([]float64, nParams)
 	n8 := newFittable()
-	n8.UnmarshalSlice(p7)
+	n8.UnmarshalParameters(p7)
 	stats8 := make([]float64, nSuffStat)
 	ns8 := n7.SuffStat(samps[7:], weights[7:], stats8)
 	copy(w8, w7)
 	n8.ConjugateUpdate(stats8, ns8, w8)
-	n8.MarshalSlice(p8)
+	n8.MarshalParameters(p8)
 
-	if !floats.EqualApprox(p6, p8, 1e-14) {
+	if !parametersEqual(p6, p8, 1e-14) {
 		t.Errorf("prior doesn't match after two step update. First is %v, second is %v", p6, p8)
 	}
 	if !floats.EqualApprox(w6, w8, 1e-14) {
 		t.Errorf("prior weight doesn't match after two step update. First is %v, second is %v", w6, w8)
 	}
+}
+
+func parametersEqual(p1, p2 []Parameter, tol float64) bool {
+	for i, p := range p1 {
+		if p.Name != p2[i].Name {
+			return false
+		}
+		if math.Abs(p.Value-p2[i].Value) > tol {
+			return false
+		}
+	}
+	return true
 }

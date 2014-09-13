@@ -122,16 +122,16 @@ func (n Normal) LogProb(x float64) float64 {
 	return negLogRoot2Pi - math.Log(n.Sigma) - (x-n.Mu)*(x-n.Mu)/(2*n.Sigma*n.Sigma)
 }
 
-// MarshalSlice gets the parameters of the distribution.
-// The first element of Parameters is Mu, the second is Sigma.
-// Panics if the length of the input slice is not equal to the number of parameters.
-func (n Normal) MarshalSlice(s []float64) {
+// MarshalParameters implements the ParameterMarshaler interface
+func (n Normal) MarshalParameters(p []Parameter) {
 	nParam := n.NumParameters()
-	if len(s) != nParam {
-		panic("exponential: improper parameter length")
+	if len(p) != nParam {
+		panic("normal: improper parameter length")
 	}
-	s[0] = n.Mu
-	s[1] = n.Sigma
+	p[0].Name = "Mu"
+	p[0].Value = n.Mu
+	p[1].Name = "Sigma"
+	p[1].Value = n.Sigma
 	return
 }
 
@@ -240,16 +240,19 @@ func (n Normal) Survival(x float64) float64 {
 	return 0.5 * (1 - math.Erf((x-n.Mu)/(n.Sigma*math.Sqrt2)))
 }
 
-// UnmarshalSlice sets the parameters of the distribution.
-// This sets Mu to be the first element of the slice and Sigma to be the second
-// element of the slice.
-// Panics if the length of the input slice is not equal to the number of parameters.
-func (n *Normal) UnmarshalSlice(s []float64) {
-	if len(s) != n.NumParameters() {
-		panic("exponential: incorrect number of parameters to set")
+// UnmarshalParameters implements the ParameterMarshaler interface
+func (n *Normal) UnmarshalParameters(p []Parameter) {
+	if len(p) != n.NumParameters() {
+		panic("normal: incorrect number of parameters to set")
 	}
-	n.Mu = s[0]
-	n.Sigma = s[1]
+	if p[0].Name != "Mu" {
+		panic("normal: " + panicNameMismatch)
+	}
+	if p[1].Name != "Sigma" {
+		panic("normal: " + panicNameMismatch)
+	}
+	n.Mu = p[0].Value
+	n.Sigma = p[1].Value
 }
 
 // Variance returns the variance of the probability distribution.

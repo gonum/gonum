@@ -123,15 +123,14 @@ func (e Exponential) LogProb(x float64) float64 {
 	return math.Log(e.Rate) - e.Rate*x
 }
 
-// MarshalSlice gets the parameters of the distribution.
-// Sets Rate to the first element of the slice. Panics if the length of
-// the input slice is not equal to the number of parameters.
-func (e Exponential) MarshalSlice(s []float64) {
+// MarshalParameters implements the ParameterMarshaler interface
+func (e Exponential) MarshalParameters(p []Parameter) {
 	nParam := e.NumParameters()
-	if len(s) != nParam {
+	if len(p) != nParam {
 		panic("exponential: improper parameter length")
 	}
-	s[0] = e.Rate
+	p[0].Name = "Rate"
+	p[0].Value = e.Rate
 	return
 }
 
@@ -239,14 +238,15 @@ func (e Exponential) Survival(x float64) float64 {
 	return math.Exp(-e.Rate * x)
 }
 
-// UnmarshalSlice sets the parameters of the distribution.
-// This sets the rate of the distribution to the first element of the slice.
-// Panics if the length of the input slice is not equal to the number of parameters.
-func (e *Exponential) UnmarshalSlice(s []float64) {
-	if len(s) != e.NumParameters() {
+// UnmarshalParameters implements the ParameterMarshaler interface
+func (e *Exponential) UnmarshalParameters(p []Parameter) {
+	if len(p) != e.NumParameters() {
 		panic("exponential: incorrect number of parameters to set")
 	}
-	e.Rate = s[0]
+	if p[0].Name != "Rate" {
+		panic("exponential: " + panicNameMismatch)
+	}
+	e.Rate = p[0].Value
 }
 
 // Variance returns the variance of the probability distribution.

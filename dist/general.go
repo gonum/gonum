@@ -19,6 +19,8 @@ const panicNameMismatch = "parameter name mismatch"
 // Both MarshalParameters and  UnmarshalParameters will
 // panic if the length of the slice is not equal to the number of parameters.
 // UnmarshalParameters will panic if the names of the parameters do not match.
+// UnmarshalParameters tests names in the same order as they were created in
+// MarshalParameters.
 type ParameterMarshaler interface {
 	MarshalParameters([]Parameter)
 	UnmarshalParameters([]Parameter)

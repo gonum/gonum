@@ -159,15 +159,6 @@ func (Normal) NumSuffStat() int {
 	return 2
 }
 
-// NormalMap is the parameter mapping for the Uniform distribution.
-var NormalMap = map[string]int{"Mu": 0, "Sigma": 1}
-
-// ParameterMap returns a mapping from fields of the distribution to elements
-// of the marshaled slice. Do not edit this variable.
-func (n Normal) ParameterMap() map[string]int {
-	return NormalMap
-}
-
 // Prob computes the value of the probability density function at x.
 func (n Normal) Prob(x float64) float64 {
 	return math.Exp(n.LogProb(x))

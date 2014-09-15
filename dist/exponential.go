@@ -158,15 +158,6 @@ func (Exponential) NumSuffStat() int {
 	return 1
 }
 
-// ExponentialMap is the parameter mapping for the Uniform distribution.
-var ExponentialMap = map[string]int{"Rate": 0}
-
-// ParameterMap returns a mapping from fields of the distribution to elements
-// of the marshaled slice. Do not edit this variable.
-func (e Exponential) ParameterMap() map[string]int {
-	return ExponentialMap
-}
-
 // Prob computes the value of the probability density function at x.
 func (e Exponential) Prob(x float64) float64 {
 	return math.Exp(e.LogProb(x))

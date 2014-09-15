@@ -177,15 +177,6 @@ func (l Laplace) Quantile(p float64) float64 {
 	return l.Mu - l.Scale*math.Log(1-2*(p-0.5))
 }
 
-// LaplaceMap is the parameter mapping for the Uniform distribution.
-var LaplaceMap = map[string]int{"Mu": 0, "Scale": 1}
-
-// ParameterMap returns a mapping from fields of the distribution to elements
-// of the marshaled slice. Do not edit this variable.
-func (l Laplace) ParameterMap() map[string]int {
-	return LaplaceMap
-}
-
 // Prob computes the value of the probability density function at x.
 func (l Laplace) Prob(x float64) float64 {
 	return math.Exp(l.LogProb(x))

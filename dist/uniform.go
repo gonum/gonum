@@ -76,15 +76,6 @@ func (Uniform) NumParameters() int {
 	return 2
 }
 
-// UniformMap is the parameter mapping for the Uniform distribution.
-var UniformMap = map[string]int{"Min": 0, "Max": 1}
-
-// ParameterMap returns a mapping from fields of the distribution to elements
-// of the marshaled slice. Do not edit this variable.
-func (u Uniform) ParameterMap() map[string]int {
-	return UniformMap
-}
-
 // Prob computes the value of the probability density function at x.
 func (u Uniform) Prob(x float64) float64 {
 	return 1 / (u.Max - u.Min)

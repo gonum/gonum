@@ -424,10 +424,8 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 	var (
 		maxDist
 		xCdf, yCdf float64
+		xIdx, yIdx int
 	)
-
-	// First, set the edge case
-	//if
 
 	xVal := math.Inf(-1)
 	yVal := math.Inf(-1)
@@ -436,6 +434,15 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 		maxDist = 0
 	}
 
+	for {
+		switch {
+		case xVal > yVal:
+		case xVal < yVal:
+		case xVal == yVal:
+		default:
+			panic("must contain NaN")
+		}
+	}
 }
 
 // KullbackLeibler computes the Kullback-Leibler distance between the

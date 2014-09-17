@@ -320,6 +320,53 @@ the count field in order to avoid extra garbage`)
 	// Weighted Hist = [77 175 275 375 423 627 675 775 783 1067]
 }
 
+func TestJensenShannon(t *testing.T) {
+	for i, test := range []struct {
+		p []float64
+		q []float64
+	}{
+		{
+			p: []float64{0.5, 0.1, 0.3, 0.1},
+			q: []float64{0.1, 0.4, 0.25, 0.25},
+		},
+		{
+			p: []float64{0.4, 0.6, 0.0},
+			q: []float64{0.2, 0.2, 0.6},
+		},
+		{
+			p: []float64{0.1, 0.1, 0.0, 0.8},
+			q: []float64{0.6, 0.3, 0.0, 0.1},
+		},
+		{
+			p: []float64{0.5, 0.1, 0.3, 0.1},
+			q: []float64{0.5, 0, 0.25, 0.25},
+		},
+		{
+			p: []float64{0.5, 0.1, 0, 0.4},
+			q: []float64{0.1, 0.4, 0.25, 0.25},
+		},
+	} {
+
+		m := make([]float64, len(test.p))
+		p := test.p
+		q := test.q
+		floats.Add(m, p)
+		floats.Add(m, q)
+		floats.Scale(0.5, m)
+
+		js1 := 0.5*KullbackLeibler(p, m) + 0.5*KullbackLeibler(q, m)
+		js2 := JensenShannon(p, q)
+
+		if math.IsNaN(js2) {
+			t.Errorf("In case %v, JS distance is NaN", i)
+		}
+
+		if math.Abs(js1-js2) > 1e-14 {
+			t.Errorf("JS mismatch case %v. Expected %v, found %v.", i, js1, js2)
+		}
+	}
+}
+
 func ExampleKullbackLeibler() {
 
 	p := []float64{0.05, 0.1, 0.9, 0.05}

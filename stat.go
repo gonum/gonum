@@ -388,6 +388,32 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	return count
 }
 
+// JensenShannon computes the JensenShannon divergence between the distributions
+// p and q. The Jensen-Shannon divergence is defined as
+//  m = 0.5 * (p + q)
+//  JS(p, q) = 0.5 ( KL(p, m) + KL(q, m) )
+// Unlike Kullback-Liebler, the Jensen-Shannon distance is symmetric. The value
+// is between 0 and ln(2).
+func JensenShannon(p, q []float64) float64 {
+	if len(p) != len(q) {
+		panic("stat: slice length mismatch")
+	}
+	var js float64
+	for i, v := range p {
+		qi := q[i]
+		m := 0.5 * (v + qi)
+		if v != 0 {
+			// add kl from p to m
+			js += 0.5 * v * (math.Log(v) - math.Log(m))
+		}
+		if qi != 0 {
+			// add kl from q to m
+			js += 0.5 * qi * (math.Log(qi) - math.Log(m))
+		}
+	}
+	return js
+}
+
 // KullbackLeibler computes the Kullback-Leibler distance between the
 // distributions p and q. The natural logarithm is used.
 //  sum_i(p_i * log(p_i / q_i))

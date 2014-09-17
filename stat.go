@@ -388,6 +388,56 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	return count
 }
 
+// KolmogorovSmirnov computes the largest distance between the empirical CDFs
+// of the two datasets. x and y consist of the sample locations with sample counts.
+// xWeights and yWeights respectively. x and y must each be sorted.
+//
+// x and y may have different lengths, though len(x) must equal len(xWeights), and
+// len(y) must equal len(yWeights).
+//
+// If len(x) == len(y) == 0, the function returns 0. Otherwise, it returns 1 if
+// one of the lengths is zero but not the other.
+func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
+	if len(x) != len(xWeights) {
+		panic("stat: slice length mismatch")
+	}
+	if len(y) != len(yWeights) {
+		panic("stat: slice length mismatch")
+	}
+	if len(x) == 0 || len(y) == 0 {
+		if len(x) == 0 && len(y) == 0 {
+			return 0
+		}
+		return 1
+	}
+
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
+	if !sort.Float64sAreSorted(y) {
+		panic("y data are not sorted")
+	}
+
+	xSum := floats.Sum(xWeights)
+	ySum := floats.Sum(yWeights)
+
+	var (
+		maxDist
+		xCdf, yCdf float64
+	)
+
+	// First, set the edge case
+	//if
+
+	xVal := math.Inf(-1)
+	yVal := math.Inf(-1)
+
+	if xVal == yVal {
+		maxDist = 0
+	}
+
+}
+
 // KullbackLeibler computes the Kullback-Leibler distance between the
 // distributions p and q. The natural logarithm is used.
 //  sum_i(p_i * log(p_i / q_i))

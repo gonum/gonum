@@ -357,6 +357,10 @@ func TestJensenShannon(t *testing.T) {
 		js1 := 0.5*KullbackLeibler(p, m) + 0.5*KullbackLeibler(q, m)
 		js2 := JensenShannon(p, q)
 
+		if math.IsNaN(js2) {
+			t.Errorf("In case %v, JS distance is NaN", i)
+		}
+
 		if math.Abs(js1-js2) > 1e-14 {
 			t.Errorf("JS mismatch case %v. Expected %v, found %v.", i, js1, js2)
 		}

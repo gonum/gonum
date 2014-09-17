@@ -402,9 +402,11 @@ func JensenShannon(p, q []float64) float64 {
 	for i, v := range p {
 		qi := q[i]
 		m := 0.5 * (v + qi)
-		if m != 0 {
+		if v != 0 {
 			// add kl from p to m
 			js += 0.5 * v * (math.Log(v) - math.Log(m))
+		}
+		if qi != 0 {
 			// add kl from q to m
 			js += 0.5 * qi * (math.Log(qi) - math.Log(m))
 		}

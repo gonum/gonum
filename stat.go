@@ -424,10 +424,10 @@ func JensenShannon(p, q []float64) float64 {
 // If len(x) == len(y) == 0, the function returns 0. Otherwise, it returns 1 if
 // one of the lengths is zero but not the other.
 func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
-	if len(x) != len(xWeights) {
+	if xWeights != nil && len(x) != len(xWeights) {
 		panic("stat: slice length mismatch")
 	}
-	if len(y) != len(yWeights) {
+	if yWeights != nil && len(y) != len(yWeights) {
 		panic("stat: slice length mismatch")
 	}
 	if len(x) == 0 || len(y) == 0 {
@@ -444,30 +444,101 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 		panic("y data are not sorted")
 	}
 
-	xSum := floats.Sum(xWeights)
-	ySum := floats.Sum(yWeights)
+	if floats.HasNaN(x) {
+		return math.NaN()
+	}
+
+	if floats.HasNaN(y) {
+		return math.NaN()
+	}
+
+	xWeightsNil := xWeights == nil
+	yWeightsNil := yWeights == nil
 
 	var (
-		maxDist
+		maxDist    float64
+		xSum, ySum float64
 		xCdf, yCdf float64
 		xIdx, yIdx int
 	)
 
-	xVal := math.Inf(-1)
-	yVal := math.Inf(-1)
-
-	if xVal == yVal {
-		maxDist = 0
+	if xWeightsNil {
+		xSum = float64(len(x))
+	} else {
+		xSum = floats.Sum(xWeights)
 	}
 
+	if yWeightsNil {
+		ySum = float64(len(y))
+	} else {
+		ySum = floats.Sum(yWeights)
+	}
+
+	xVal := x[0]
+	yVal := y[0]
+
+	// How to deal with the first case well?
+
+	// Step through all the entries in the two vectors. The difference between
+	// the empirical cdfs only changes when a new x or y comes up.
 	for {
 		switch {
-		case xVal > yVal:
 		case xVal < yVal:
+			xVal, xCdf, xIdx = updateKS(xIdx, xCdf, xSum, x, xWeights, xWeightsNil)
+		case yVal < xVal:
+			yVal, yCdf, yIdx = updateKS(yIdx, yCdf, ySum, y, yWeights, yWeightsNil)
 		case xVal == yVal:
+			newX := x[xIdx]
+			newY := y[yIdx]
+			if newX < newY {
+				xVal, xCdf, xIdx = updateKS(xIdx, xCdf, xSum, x, xWeights, xWeightsNil)
+			} else if newY < newX {
+				yVal, yCdf, yIdx = updateKS(yIdx, yCdf, ySum, y, yWeights, yWeightsNil)
+			} else {
+				// Update them both, they'll be equal next time and the right
+				// thing will happen
+				xVal, xCdf, xIdx = updateKS(xIdx, xCdf, xSum, x, xWeights, xWeightsNil)
+				yVal, yCdf, yIdx = updateKS(yIdx, yCdf, ySum, y, yWeights, yWeightsNil)
+			}
 		default:
-			panic("must contain NaN")
+			panic("impossible")
 		}
+
+		dist := math.Abs(xCdf - yCdf)
+		if dist > maxDist {
+			maxDist = dist
+		}
+
+		// Both xCdf and yCdf will equal 1 at the end, so if we have reached the
+		// end of either sample, the distance is as large as it can be, so we can
+		// just leave
+		if xIdx == len(x) || yIdx == len(y) {
+			return maxDist
+		}
+	}
+}
+
+func updateKS(idx int, cdf, sum float64, values, weights []float64, isNil bool) (val, newCdf float64, newIdx int) {
+	// Sum up all the weights of consecutive values that are equal
+	if isNil {
+		newCdf = cdf + 1/sum
+	} else {
+		newCdf = cdf + weights[idx]/sum
+	}
+	newIdx = idx + 1
+	for {
+		if newIdx == len(values) {
+			return values[newIdx-1], newCdf, newIdx
+		}
+		if values[newIdx-1] != values[newIdx] {
+			return values[newIdx], newCdf, newIdx
+		}
+		if isNil {
+			newCdf += 1 / sum
+		} else {
+			newCdf += weights[newIdx] / sum
+		}
+		newIdx++
 	}
 }
 

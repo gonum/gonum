@@ -516,7 +516,7 @@ func NearestWithinSpan(n int, l, u float64, v float64) int {
 }
 
 // Norm returns the L norm of the slice S, defined as
-// (sum_{i=1}^N s[i]^N)^{1/N}
+// (sum_{i=1}^N s[i]^L)^{1/L}
 // Special cases:
 // L = math.Inf(1) gives the maximum value
 // Does not correctly compute the zero norm (use Count).

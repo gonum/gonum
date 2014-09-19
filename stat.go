@@ -501,7 +501,7 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 				yVal, yCdf, yIdx = updateKS(yIdx, yCdf, ySum, y, yWeights, yWeightsNil)
 			}
 		default:
-			panic("impossible")
+			panic("unreachable")
 		}
 
 		dist := math.Abs(xCdf - yCdf)

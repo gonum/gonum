@@ -367,6 +367,163 @@ func TestJensenShannon(t *testing.T) {
 	}
 }
 
+func TestKolmogorovSmirnov(t *testing.T) {
+	for i, test := range []struct {
+		x        []float64
+		xWeights []float64
+		y        []float64
+		yWeights []float64
+		dist     float64
+	}{
+
+		{
+			dist: 0,
+		},
+		{
+			x:    []float64{1},
+			dist: 1,
+		},
+		{
+			y:    []float64{1},
+			dist: 1,
+		},
+		{
+			x:        []float64{1},
+			xWeights: []float64{8},
+			dist:     1,
+		},
+		{
+			y:        []float64{1},
+			yWeights: []float64{8},
+			dist:     1,
+		},
+		{
+			x:        []float64{1},
+			xWeights: []float64{8},
+			y:        []float64{1},
+			yWeights: []float64{8},
+			dist:     0,
+		},
+		{
+			x:        []float64{1, 1, 1},
+			xWeights: []float64{2, 3, 7},
+			y:        []float64{1},
+			yWeights: []float64{8},
+			dist:     0,
+		},
+		{
+			x:        []float64{1, 1, 1, 1, 1},
+			y:        []float64{1, 1, 1},
+			yWeights: []float64{2, 5, 2},
+			dist:     0,
+		},
+
+		{
+			x:    []float64{1, 2, 3},
+			y:    []float64{1, 2, 3},
+			dist: 0,
+		},
+		{
+			x:        []float64{1, 2, 3},
+			y:        []float64{1, 2, 3},
+			yWeights: []float64{1, 1, 1},
+			dist:     0,
+		},
+
+		{
+			x:        []float64{1, 2, 3},
+			xWeights: []float64{1, 1, 1},
+			y:        []float64{1, 2, 3},
+			yWeights: []float64{1, 1, 1},
+			dist:     0,
+		},
+		{
+			x:        []float64{1, 2},
+			xWeights: []float64{2, 5},
+			y:        []float64{1, 1, 2, 2, 2, 2, 2},
+			dist:     0,
+		},
+		{
+			x:        []float64{1, 1, 2, 2, 2, 2, 2},
+			y:        []float64{1, 2},
+			yWeights: []float64{2, 5},
+			dist:     0,
+		},
+		{
+			x:        []float64{1, 1, 2, 2, 2},
+			xWeights: []float64{0.5, 1.5, 1, 2, 2},
+			y:        []float64{1, 2},
+			yWeights: []float64{2, 5},
+			dist:     0,
+		},
+		{
+			x:    []float64{1, 2, 3, 4},
+			y:    []float64{5, 6},
+			dist: 1,
+		},
+		{
+			x:    []float64{5, 6},
+			y:    []float64{1, 2, 3, 4},
+			dist: 1,
+		},
+		{
+			x:        []float64{5, 6},
+			xWeights: []float64{8, 7},
+			y:        []float64{1, 2, 3, 4},
+			dist:     1,
+		},
+		{
+			x:        []float64{5, 6},
+			xWeights: []float64{8, 7},
+			y:        []float64{1, 2, 3, 4},
+			yWeights: []float64{9, 2, 1, 6},
+			dist:     1,
+		},
+		{
+			x:        []float64{-4, 5, 6},
+			xWeights: []float64{0, 8, 7},
+			y:        []float64{1, 2, 3, 4},
+			yWeights: []float64{9, 2, 1, 6},
+			dist:     1,
+		},
+		{
+			x:        []float64{-4, -2, -2, 5, 6},
+			xWeights: []float64{0, 0, 0, 8, 7},
+			y:        []float64{1, 2, 3, 4},
+			yWeights: []float64{9, 2, 1, 6},
+			dist:     1,
+		},
+		{
+			x:    []float64{1, 2, 3},
+			y:    []float64{1, 1, 3},
+			dist: 1.0 / 3.0,
+		},
+		{
+			x:        []float64{1, 2, 3},
+			y:        []float64{1, 3},
+			yWeights: []float64{2, 1},
+			dist:     1.0 / 3.0,
+		},
+		{
+			x:        []float64{1, 2, 3},
+			xWeights: []float64{2, 2, 2},
+			y:        []float64{1, 3},
+			yWeights: []float64{2, 1},
+			dist:     1.0 / 3.0,
+		},
+		{
+			x:    []float64{2, 3, 4},
+			y:    []float64{1, 5},
+			dist: 1.0 / 2.0,
+		},
+	} {
+		dist := KolmogorovSmirnov(test.x, test.xWeights, test.y, test.yWeights)
+		if math.Abs(dist-test.dist) > 1e-14 {
+			t.Errorf("Distance mismatch case %v: Expected: %v, Found: %v", i, test.dist, dist)
+		}
+	}
+}
+
 func ExampleKullbackLeibler() {
 
 	p := []float64{0.05, 0.1, 0.9, 0.05}

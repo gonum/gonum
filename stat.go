@@ -421,8 +421,9 @@ func JensenShannon(p, q []float64) float64 {
 // x and y may have different lengths, though len(x) must equal len(xWeights), and
 // len(y) must equal len(yWeights).
 //
-// If len(x) == len(y) == 0, the function returns 0. Otherwise, it returns 1 if
-// one of the lengths is zero but not the other.
+// Special cases are:
+//  = 0 if len(x) == len(y) == 0
+//  = 1 if len(x) == 0, len(y) != 0 or len(x) != 0 and len(y) == 0
 func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 	if xWeights != nil && len(x) != len(xWeights) {
 		panic("stat: slice length mismatch")
@@ -477,10 +478,15 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 	xVal := x[0]
 	yVal := y[0]
 
-	// How to deal with the first case well?
-
-	// Step through all the entries in the two vectors. The difference between
-	// the empirical cdfs only changes when a new x or y comes up.
+	// Algorithm description:
+	// The goal is to find the maximum difference in the empirical CDFs for the
+	// two datasets. The CDFs are piecewise-constant, and thus the distance
+	// between the CDFs will only change at the values themselves.
+	//
+	// To find the maximum distance, step through the data in ascending order
+	// of value between the two datasets. At each step, compute the empirical CDF
+	// and compare the local distance with the maximum distance.
+	// Due to some corner cases, equal data entries must be tallied simultaneously.
 	for {
 		switch {
 		case xVal < yVal:
@@ -510,14 +516,17 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 		}
 
 		// Both xCdf and yCdf will equal 1 at the end, so if we have reached the
-		// end of either sample, the distance is as large as it can be, so we can
-		// just leave
+		// end of either sample list, the distance is as large as it can be.
 		if xIdx == len(x) || yIdx == len(y) {
 			return maxDist
 		}
 	}
 }
 
+// updateKS gets the next data point from one of the set. In doing so, it combines
+// the weight of all the data points of equal value. Upon return, val is the new
+// value of the data set, newCdf is the total combined CDF up until this point,
+// and newIdx is the index of the next location in that sample to examine.
 func updateKS(idx int, cdf, sum float64, values, weights []float64, isNil bool) (val, newCdf float64, newIdx int) {
 	// Sum up all the weights of consecutive values that are equal
 	if isNil {

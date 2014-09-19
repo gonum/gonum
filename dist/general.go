@@ -6,8 +6,6 @@ type Parameter struct {
 	Value float64
 }
 
-const panicNameMismatch = "parameter name mismatch"
-
 // A ParameterMarshaler is a type that can marshal itself into a slice of Paramaters
 // and unmarshal itself from the slice of parameters.
 // ParameterMarshaler exists to support algorithms that modify parameters of arbitrary distributions.

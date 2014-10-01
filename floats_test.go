@@ -42,10 +42,14 @@ func TestAdd(t *testing.T) {
 	c := []float64{7, 8, 9}
 	truth := []float64{12, 15, 18}
 	n := make([]float64, len(a))
+
+	Add(a)
+	AreSlicesEqual(t, a, a, "Wrong nop addition with no slices")
 	Add(n, a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
 	Add(a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
+
 	// Test that it panics
 	if !Panics(func() { Add(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
@@ -157,10 +161,18 @@ func TestCumProd(t *testing.T) {
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with new receiver")
 	CumProd(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
+
 	// Test that it panics
 	if !Panics(func() { CumProd(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
+
+	// Test empty CumProd
+	emptyReceiver := make([]float64, 0)
+	truth = []float64{}
+	CumProd(emptyReceiver, emptyReceiver)
+	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with emtpy receiver")
+
 }
 
 func TestCumSum(t *testing.T) {
@@ -176,6 +188,13 @@ func TestCumSum(t *testing.T) {
 	if !Panics(func() { CumSum(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
+
+	// Test empty CumSum
+	emptyReceiver := make([]float64, 0)
+	truth = []float64{}
+	CumSum(emptyReceiver, emptyReceiver)
+	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with emtpy receiver")
+
 }
 
 func TestDistance(t *testing.T) {
@@ -209,6 +228,10 @@ func TestDistance(t *testing.T) {
 				t.Errorf("Distance does not match norm for case %v, %v. Expected %v, Found %v.", i, j, norm, dist)
 			}
 		}
+	}
+
+	if !Panics(func() { Distance([]float64{}, norms, 1) }) {
+		t.Errorf("Did not panic with unequal lengths")
 	}
 
 }
@@ -291,6 +314,9 @@ func TestEquals(t *testing.T) {
 	if Equal(s1, s2) {
 		t.Errorf("Unequal slices returned as equal")
 	}
+	if Equal(s1, []float64{}) {
+		t.Errorf("Unequal slice lengths returned as equal")
+	}
 }
 
 func TestEqualApprox(t *testing.T) {
@@ -309,6 +335,25 @@ func TestEqualApprox(t *testing.T) {
 	}
 	if !EqualApprox(s1, s2, 1e-5) {
 		t.Errorf("Equal slices returned as unequal for relative")
+	}
+	if EqualApprox(s1, []float64{}, 1e-5) {
+		t.Errorf("Unequal slice lengths returned as equal")
+	}
+}
+
+func TestEqualFunc(t *testing.T) {
+	s1 := []float64{1, 2, 3, 4}
+	s2 := []float64{1, 2, 3, 4}
+	eq := func(x, y float64) bool { return x == y }
+	if !EqualFunc(s1, s2, eq) {
+		t.Errorf("Equal slices returned as unequal")
+	}
+	s2 = []float64{1, 2, 3, 4 + 1e-14}
+	if EqualFunc(s1, s2, eq) {
+		t.Errorf("Unequal slices returned as equal")
+	}
+	if EqualFunc(s1, []float64{}, eq) {
+		t.Errorf("Unequal slice lengths returned as equal")
 	}
 }
 
@@ -421,9 +466,32 @@ func TestEqualsULP(t *testing.T) {
 	if f := 67329.242; EqualWithinULP(f, nextAfterN(f, math.Inf(1), 5), 1) {
 		t.Errorf("Unequal values returned as equal")
 	}
+	if f := 67329.242; EqualWithinULP(nextAfterN(f, math.Inf(1), 5), f, 1) {
+		t.Errorf("Unequal values returned as equal")
+	}
 	if f := nextAfterN(0, math.Inf(1), 2); !EqualWithinULP(f, nextAfterN(f, math.Inf(-1), 5), 10) {
 		t.Errorf("Equal values returned as unequal")
 	}
+	if !EqualWithinULP(67329.242, 67329.242, 10) {
+		t.Errorf("Equal float64s not returned as equal")
+	}
+	if EqualWithinULP(1, math.NaN(), 10) {
+		t.Errorf("NaN returned as equal")
+	}
+
+}
+
+func TestFill(t *testing.T) {
+	n := make([]float64, 4)
+	i := 0.0
+	f := func() float64 {
+		i = i + 1.0
+		return i
+	}
+	Fill(f, n)
+	truth := []float64{1.0, 2.0, 3.0, 4.0}
+	AreSlicesEqual(t, truth, n, "Wrong fill of generated values")
+
 }
 
 func TestEqualLengths(t *testing.T) {
@@ -470,6 +538,17 @@ func TestFind(t *testing.T) {
 	str := eqIntSlice(inds, trueInds)
 	if str != "" {
 		t.Errorf("Find first two: " + str)
+	}
+
+	// Test finding no elements with non nil slice
+	inds = []int{1, 2, 3, 4, 5, 6}
+	inds, err = Find(inds, f, s, 0)
+	if err != nil {
+		t.Errorf("Find no elements: Improper error return")
+	}
+	str = eqIntSlice(inds, []int{})
+	if str != "" {
+		t.Errorf("Find no non-nil: " + str)
 	}
 
 	// Test finding first two elements with non nil slice
@@ -573,6 +652,21 @@ func TestLogSumExp(t *testing.T) {
 	if math.Abs(val-truth) > EQTOLERANCE {
 		t.Errorf("Doesn't match for underflow case. %v expected, %v found", truth, val)
 	}
+	// positive infinite case
+	s = []float64{1, 2, 3, 4, 5, math.Inf(1)}
+	val = LogSumExp(s)
+	truth = math.Inf(1)
+	if val != truth {
+		t.Errorf("Doesn't match for pos Infinity case. %v expected, %v found", truth, val)
+	}
+	// negative infinite case
+	s = []float64{1, 2, 3, 4, 5, math.Inf(-1)}
+	val = LogSumExp(s)
+	truth = 5.4519143959375933331957225109748087179338972737576824 // same as first case
+	if math.Abs(val-truth) > EQTOLERANCE {
+		t.Errorf("Wrong logsumexp for values with negative infinity")
+	}
+
 }
 
 func TestMax(t *testing.T) {
@@ -981,6 +1075,7 @@ func BenchmarkDotLarge(b *testing.B) {
 	s2 := RandomSlice(LARGE)
 	benchmarkDot(b, s1, s2)
 }
+
 func BenchmarkDotHuge(b *testing.B) {
 	s1 := RandomSlice(HUGE)
 	s2 := RandomSlice(HUGE)

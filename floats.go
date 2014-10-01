@@ -7,7 +7,7 @@
 // loops without garbage collection overhead.
 //
 // The convention used is that when a slice is being modified in place, it has
-// the name "dst"
+// the name dst.
 package floats
 
 import (
@@ -23,7 +23,7 @@ import (
 // in doubt, EqualLengths can be used.  It panics if dst does
 // not have the same length as the first slice.
 //
-// afterwards dst[i] = dst[i] + s1[i] + s2[i] + ...
+// At the return of the function, dst[i] = dst[i] + s1[i] + s2[i] + ...
 func Add(dst []float64, slices ...[]float64) []float64 {
 	if len(slices) == 0 {
 		return nil
@@ -40,8 +40,6 @@ func Add(dst []float64, slices ...[]float64) []float64 {
 }
 
 // AddConst adds the scalar c to all of the values in dst.
-//
-// afterwards dst[i] = dst[i] + c
 func AddConst(c float64, dst []float64) {
 	for i := range dst {
 		dst[i] += c
@@ -50,8 +48,6 @@ func AddConst(c float64, dst []float64) {
 
 // AddScaled performs dst = dst + alpha * s.
 // It panics if the lengths of dst and s are not equal.
-//
-// Afterwards dst[i] = dst[i] + alpha * s[i]
 func AddScaled(dst []float64, alpha float64, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination and source to not match")
@@ -65,7 +61,7 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 // and dst, y and s are all slices.
 // It panics if the lengths of dst, y, and s are not equal.
 //
-// Afterwards dst[i] = y[i] + alpha * s[i]
+// At the return of the function, dst[i] = y[i] + alpha * s[i]
 func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 	if len(dst) != len(s) || len(dst) != len(y) {
 		panic("floats: lengths of slices do not match")
@@ -78,8 +74,6 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 
 // Apply applies a function f (math.Exp, math.Sin, etc.) to every element
 // of the slice dst.
-//
-// Afterwards, dst[i] = f(dst[i])
 func Apply(f func(float64) float64, dst []float64) {
 	for i, val := range dst {
 		dst[i] = f(val)
@@ -139,7 +133,7 @@ func Count(f func(float64) bool, s []float64) (n int) {
 // destination dst. A panic will occur if the lengths of arguments
 // do not match.
 //
-// Afterwards, dst[i] = s[i] * s[i-1] * s[i-2] * ...
+// At the return of the function, dst[i] = s[i] * s[i-1] * s[i-2] * ...
 func CumProd(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
@@ -159,7 +153,7 @@ func CumProd(dst, s []float64) []float64 {
 // destination dst. A panic will occur if the lengths of arguments
 // do not match.
 //
-// Afterwards, dst[i] = s[i] + s[i-1] + s[i-2] + ...
+// At the return of the function, dst[i] = s[i] + s[i-1] + s[i-2] + ...
 func CumSum(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
@@ -212,11 +206,9 @@ func Distance(s, t []float64, L float64) float64 {
 	return math.Pow(norm, 1/L)
 }
 
-// Div performs element-wise division between dst
-// and s and stores the value in dst. It panics if the
+// Div performs element-wise division dst / s
+// and stores the value in dst. It panics if the
 // lengths of s and t are not equal.
-//
-// Afterwards, dst[i] = dst[i] / s[i]
 func Div(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: slice lengths do not match")
@@ -226,11 +218,9 @@ func Div(dst, s []float64) {
 	}
 }
 
-// DivTo performs element-wise division between s
-// and t and stores the value in dst. It panics if the
+// DivTo performs element-wise division s / t
+// and stores the value in dst. It panics if the
 // lengths of s, t, and dst are not equal.
-//
-// Afterwards, dst[i] = s[i] / t[i]
 func DivTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) || len(dst) != len(t) {
 		panic("floats: slice lengths do not match")
@@ -244,14 +234,15 @@ func DivTo(dst, s, t []float64) []float64 {
 // Dot computes the dot product of s1 and s2, i.e.
 // sum_{i = 1}^N s1[i]*s2[i].
 // A panic will occur if lengths of arguments do not match.
-func Dot(s1, s2 []float64) (sum float64) {
+func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {
 		panic("floats: lengths of the slices do not match")
 	}
+	var sum float64
 	for i, val := range s1 {
 		sum += val * s2[i]
 	}
-	return
+	return sum
 }
 
 // Equal returns true if the slices have equal lengths and
@@ -371,9 +362,7 @@ func EqualLengths(slices ...[]float64) bool {
 }
 
 // Fill loops over the elements of dst and stores a value generated from f.
-// f is called n times, where n = len(s)
-//
-// Afterwards, dst[i] = f()
+// f is called len(s) times.
 func Fill(f func() float64, dst []float64) {
 	for i := range dst {
 		dst[i] = f()
@@ -387,8 +376,7 @@ func Fill(f func() float64, dst []float64) {
 // found indices to inds.
 // If k > 0 and there are fewer than k elements in s satisfying f,
 // all of the found elements will be returned along with an error.
-// Note that the elements of the input inds will be modified, but you should
-// use the returned slice instead.
+// At the return of the function, the input inds will be in an undetermined state.
 func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
 
 	// inds is also returned to allow for calling with nil
@@ -443,7 +431,9 @@ func HasNaN(s []float64) bool {
 // Panics if len(dst) < 2
 // Note that this call will return NaNs if either l or u are negative, and
 // will return all zeros if l or u is zero.
-// Also returns the mutated slice dst, so that it can be used in range expressions.
+// Also returns the mutated slice dst, so that it can be used in range, like:
+//
+//     for i, x := range LogSpan(dst, l, u) { ... }
 func LogSpan(dst []float64, l, u float64) []float64 {
 	Span(dst, math.Log(l), math.Log(u))
 	Apply(math.Exp, dst)
@@ -500,8 +490,6 @@ func Min(s []float64) (min float64, ind int) {
 // Mul performs element-wise multiplication between dst
 // and s and stores the value in dst. Panics if the
 // lengths of s and t are not equal.
-//
-// Afterwards, dst[i] = dst[i] * s[i]
 func Mul(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: slice lengths do not match")
@@ -514,8 +502,6 @@ func Mul(dst, s []float64) {
 // MulTo performs element-wise multiplication between s
 // and t and stores the value in dst. Panics if the
 // lengths of s, t, and dst are not equal.
-//
-// Afterwards, dst[i] = s[i] * t[i]
 func MulTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) || len(dst) != len(t) {
 		panic("floats: slice lengths do not match")
@@ -604,9 +590,7 @@ func Prod(s []float64) (prod float64) {
 	return prod
 }
 
-// Scale multiplies every element in dst by a scalar c.
-//
-// Afterwards, dst[i] = dst[i] * s
+// Scale multiplies every element in dst by the scalar c.
 func Scale(c float64, dst []float64) {
 	for i := range dst {
 		dst[i] *= c
@@ -618,7 +602,10 @@ func Scale(c float64, dst []float64) {
 // is l, the final element of the destination is u.
 // Panics if len(dst) < 2.
 //
-// Also returns the mutated slice dst, so that it can be used in range expressions.
+// Also returns the mutated slice dst, so that it can be used in range expressions, like:
+//
+//     for i, x := range Span(dst, l, u) { ... }
+
 func Span(dst []float64, l, u float64) []float64 {
 	n := len(dst)
 	if n < 2 {
@@ -633,8 +620,6 @@ func Span(dst []float64, l, u float64) []float64 {
 
 // Sub subtracts, element-wise, the elements of s from dst. Panics if
 // the lengths of dst and s do not match.
-//
-// Afterwards, dst[i] = dst[i] - s[i]
 func Sub(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of the slices do not match")
@@ -646,8 +631,6 @@ func Sub(dst, s []float64) {
 
 // SubTo subtracts, element-wise, the elements of t from s and
 // stores the result in dst. Panics if the lengths of s, t and dst do not match.
-//
-// Afterwards, dst[i] = s[i] - t[i]
 func SubTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of subtractor and subtractee do not match")

@@ -42,14 +42,14 @@ func TestAdd(t *testing.T) {
 	c := []float64{7, 8, 9}
 	truth := []float64{12, 15, 18}
 	n := make([]float64, len(a))
-	
+
 	Add(a)
 	AreSlicesEqual(t, a, a, "Wrong nop addition with no slices")
 	Add(n, a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
 	Add(a, b, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
-	
+
 	// Test that it panics
 	if !Panics(func() { Add(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
@@ -161,18 +161,18 @@ func TestCumProd(t *testing.T) {
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with new receiver")
 	CumProd(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
-	
+
 	// Test that it panics
 	if !Panics(func() { CumProd(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
-	
+
 	// Test empty CumProd
-	emptyReceiver := make([]float64,0)
+	emptyReceiver := make([]float64, 0)
 	truth = []float64{}
-	CumProd(emptyReceiver,emptyReceiver)
+	CumProd(emptyReceiver, emptyReceiver)
 	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with emtpy receiver")
-	
+
 }
 
 func TestCumSum(t *testing.T) {
@@ -188,13 +188,13 @@ func TestCumSum(t *testing.T) {
 	if !Panics(func() { CumSum(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
-	
+
 	// Test empty CumSum
-	emptyReceiver := make([]float64,0)
+	emptyReceiver := make([]float64, 0)
 	truth = []float64{}
-	CumSum(emptyReceiver,emptyReceiver)
+	CumSum(emptyReceiver, emptyReceiver)
 	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with emtpy receiver")
-	
+
 }
 
 func TestDistance(t *testing.T) {
@@ -233,7 +233,7 @@ func TestDistance(t *testing.T) {
 	if !Panics(func() { Distance([]float64{}, norms, 1) }) {
 		t.Errorf("Did not panic with unequal lengths")
 	}
-	
+
 }
 
 func TestDiv(t *testing.T) {
@@ -338,13 +338,13 @@ func TestEqualApprox(t *testing.T) {
 	}
 	if EqualApprox(s1, []float64{}, 1e-5) {
 		t.Errorf("Unequal slice lengths returned as equal")
-	}	
+	}
 }
 
 func TestEqualFunc(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
-	eq := func(x, y float64) bool { return x == y}
+	eq := func(x, y float64) bool { return x == y }
 	if !EqualFunc(s1, s2, eq) {
 		t.Errorf("Equal slices returned as unequal")
 	}
@@ -356,7 +356,6 @@ func TestEqualFunc(t *testing.T) {
 		t.Errorf("Unequal slice lengths returned as equal")
 	}
 }
-
 
 func TestEqualsRelative(t *testing.T) {
 	var equalityTests = []struct {
@@ -473,28 +472,27 @@ func TestEqualsULP(t *testing.T) {
 	if f := nextAfterN(0, math.Inf(1), 2); !EqualWithinULP(f, nextAfterN(f, math.Inf(-1), 5), 10) {
 		t.Errorf("Equal values returned as unequal")
 	}
-	if !EqualWithinULP(67329.242,67329.242,10) {
+	if !EqualWithinULP(67329.242, 67329.242, 10) {
 		t.Errorf("Equal float64s not returned as equal")
 	}
-	if EqualWithinULP(1,math.NaN(),10) {
+	if EqualWithinULP(1, math.NaN(), 10) {
 		t.Errorf("NaN returned as equal")
 	}
-	
+
 }
 
 func TestFill(t *testing.T) {
-	n := make([]float64,4)
+	n := make([]float64, 4)
 	i := 0.0
-	f := func() float64{
+	f := func() float64 {
 		i = i + 1.0
 		return i
 	}
-	Fill(f,n)
+	Fill(f, n)
 	truth := []float64{1.0, 2.0, 3.0, 4.0}
 	AreSlicesEqual(t, truth, n, "Wrong fill of generated values")
 
 }
-
 
 func TestEqualLengths(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
@@ -541,7 +539,7 @@ func TestFind(t *testing.T) {
 	if str != "" {
 		t.Errorf("Find first two: " + str)
 	}
-	
+
 	// Test finding no elements with non nil slice
 	inds = []int{1, 2, 3, 4, 5, 6}
 	inds, err = Find(inds, f, s, 0)
@@ -668,7 +666,7 @@ func TestLogSumExp(t *testing.T) {
 	if math.Abs(val-truth) > EQTOLERANCE {
 		t.Errorf("Wrong logsumexp for values with negative infinity")
 	}
-	
+
 }
 
 func TestMax(t *testing.T) {

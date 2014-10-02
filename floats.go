@@ -463,7 +463,6 @@ func LogSumExp(s []float64) (lse float64) {
 // the maximum value. If the input slice is empty, Max will panic.
 func Max(s []float64) (max float64, ind int) {
 	max = s[0]
-	ind = 0
 	for i := 1; i < len(s); i++ {
 		if val := s[i]; val > max {
 			max = val
@@ -477,7 +476,6 @@ func Max(s []float64) (max float64, ind int) {
 // the minimum value. If the input slice is empty, Min will panic.
 func Min(s []float64) (min float64, ind int) {
 	min = s[0]
-	ind = 0
 	for i := 1; i < len(s); i++ {
 		if val := s[i]; val < min {
 			min = val

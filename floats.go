@@ -519,8 +519,8 @@ func MulTo(dst, s, t []float64) []float64 {
 func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
 	ind = 0
-	for i, val := range s {
-		newDist := math.Abs(v - val)
+	for i := 1; i < len(s); i++ {
+		newDist := math.Abs(v - s[i])
 		if newDist < dist {
 			dist = newDist
 			ind = i

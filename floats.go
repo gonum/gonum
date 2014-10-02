@@ -464,8 +464,8 @@ func LogSumExp(s []float64) (lse float64) {
 func Max(s []float64) (max float64, ind int) {
 	max = s[0]
 	ind = 0
-	for i, val := range s {
-		if val > max {
+	for i := 1; i < len(s); i++ {
+		if val := s[i]; val > max {
 			max = val
 			ind = i
 		}

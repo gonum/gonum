@@ -441,6 +441,7 @@ func LogSpan(dst []float64, l, u float64) []float64 {
 }
 
 // LogSumExp returns the log of the sum of the exponentials of the values in s
+// Panics if s is an empty slice.
 func LogSumExp(s []float64) (lse float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow

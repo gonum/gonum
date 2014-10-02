@@ -340,7 +340,7 @@ func EqualWithinULP(a, b float64, ulp uint) bool {
 
 func ulpDiff(a, b uint64) uint64 {
 	if a > b {
-		a, b = b, a
+		return a - b
 	}
 	return b - a
 }
@@ -605,7 +605,6 @@ func Scale(c float64, dst []float64) {
 // Also returns the mutated slice dst, so that it can be used in range expressions, like:
 //
 //     for i, x := range Span(dst, l, u) { ... }
-
 func Span(dst []float64, l, u float64) []float64 {
 	n := len(dst)
 	if n < 2 {

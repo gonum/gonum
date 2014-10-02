@@ -478,8 +478,8 @@ func Max(s []float64) (max float64, ind int) {
 func Min(s []float64) (min float64, ind int) {
 	min = s[0]
 	ind = 0
-	for i, val := range s {
-		if val < min {
+	for i := 1; i < len(s); i++ {
+		if val := s[i]; val < min {
 			min = val
 			ind = i
 		}

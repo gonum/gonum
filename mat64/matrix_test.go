@@ -8,8 +8,8 @@ import (
 	"github.com/gonum/blas/cblas"
 
 	"fmt"
-	"testing"
 	check "launchpad.net/gocheck"
+	"testing"
 )
 
 // Tests

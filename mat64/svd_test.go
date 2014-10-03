@@ -5,8 +5,8 @@
 package mat64
 
 import (
-	"math"
 	check "launchpad.net/gocheck"
+	"math"
 )
 
 func (s *S) TestSVD(c *check.C) {

@@ -5,8 +5,8 @@
 package mat64
 
 import (
-	"math"
 	"github.com/gonum/blas"
+	"math"
 )
 
 type LQFactor struct {

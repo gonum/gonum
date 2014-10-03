@@ -85,13 +85,13 @@ func TestMul(t *testing.T) {
 		bc := test.bc
 
 		// Generate random matrices
-		normrand := func(float64) float64 { return rand.NormFloat64() }
 		avec := make([]float64, ar*ac)
-		floats.Apply(normrand, avec)
+		randomSlice(avec)
 		a := NewDense(ar, ac, avec)
 
 		bvec := make([]float64, br*bc)
-		floats.Apply(normrand, bvec)
+		randomSlice(bvec)
+
 		b := NewDense(br, bc, bvec)
 
 		// Check that it panics if it is supposed to
@@ -134,7 +134,7 @@ func TestMul(t *testing.T) {
 
 		// Normal multiply with existing receiver
 		c := NewDense(ar, bc, cvec)
-		floats.Apply(normrand, cvec)
+		randomSlice(cvec)
 		testMul(t, a, b, c, acomp, bcomp, ccomp, false, "existing receiver")
 
 		// Test with vectorers
@@ -146,11 +146,11 @@ func TestMul(t *testing.T) {
 		testMul(t, a, bvm, d, acomp, bcomp, ccomp, true, "b vectoror with zero receiver")
 		d.Reset()
 		testMul(t, avm, bvm, d, acomp, bcomp, ccomp, true, "both vectoror with zero receiver")
-		floats.Apply(normrand, cvec)
+		randomSlice(cvec)
 		testMul(t, avm, b, c, acomp, bcomp, ccomp, true, "a vectoror with existing receiver")
-		floats.Apply(normrand, cvec)
+		randomSlice(cvec)
 		testMul(t, a, bvm, c, acomp, bcomp, ccomp, true, "b vectoror with existing receiver")
-		floats.Apply(normrand, cvec)
+		randomSlice(cvec)
 		testMul(t, avm, bvm, c, acomp, bcomp, ccomp, true, "both vectoror with existing receiver")
 
 		// Cast a as a basic matrix
@@ -162,12 +162,17 @@ func TestMul(t *testing.T) {
 		testMul(t, a, bm, d, acomp, bcomp, ccomp, true, "b is basic, receiver is zero")
 		d.Reset()
 		testMul(t, am, bm, d, acomp, bcomp, ccomp, true, "both basic, receiver is zero")
-		floats.Apply(normrand, cvec)
+		randomSlice(cvec)
 		testMul(t, am, b, d, acomp, bcomp, ccomp, true, "a is basic, receiver is full")
-		floats.Apply(normrand, cvec)
+		randomSlice(cvec)
 		testMul(t, a, bm, d, acomp, bcomp, ccomp, true, "b is basic, receiver is full")
-		floats.Apply(normrand, cvec)
+		randomSlice(cvec)
 		testMul(t, am, bm, d, acomp, bcomp, ccomp, true, "both basic, receiver is full")
+	}
+}
+func randomSlice(s []float64) {
+	for i := range s {
+		s[i] = rand.NormFloat64()
 	}
 }
 

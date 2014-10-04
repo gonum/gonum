@@ -100,15 +100,6 @@ type Viewer interface {
 	View(a Matrix, i, j, r, c int)
 }
 
-// A Submatrixer can extract a copy of submatrix from a into the receiver, starting at row i,
-// column j and extending r rows and c columns. If i or j are out of range, or r or c extend
-// beyond the bounds of the matrix Submatrix will panic with ErrIndexOutOfRange. There is no
-// restriction on the shape of the receiver but changes in the elements of the submatrix must
-// not be reflected in the original.
-type Submatrixer interface {
-	Submatrix(a Matrix, i, j, r, c int)
-}
-
 // A Normer can return the specified matrix norm, o of the matrix represented by the receiver.
 //
 // Valid order values are:

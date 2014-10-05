@@ -43,11 +43,12 @@ func TestAdd(t *testing.T) {
 	truth := []float64{12, 15, 18}
 	n := make([]float64, len(a))
 
-	Add(a)
-	AreSlicesEqual(t, a, a, "Wrong nop addition with no slices")
-	Add(n, a, b, c)
+	Add(n, a)
+	Add(n, b)
+	Add(n, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
-	Add(a, b, c)
+	Add(a, b)
+	Add(a, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
 
 	// Test that it panics
@@ -106,17 +107,6 @@ func TestAddScaledTo(t *testing.T) {
 	if !Panics(func() { AddScaledTo(dst, short, alpha, s) }) {
 		t.Errorf("Doesn't panic if y is smaller than dst")
 	}
-}
-
-func TestApply(t *testing.T) {
-	s := []float64{3, 4, 1, 7, 5}
-	f := math.Sin
-	truth := make([]float64, len(s))
-	for i, val := range s {
-		truth[i] = math.Sin(val)
-	}
-	Apply(f, s)
-	AreSlicesEqual(t, truth, s, "Wrong application of function")
 }
 
 func TestArgsort(t *testing.T) {
@@ -478,19 +468,6 @@ func TestEqualsULP(t *testing.T) {
 	if EqualWithinULP(1, math.NaN(), 10) {
 		t.Errorf("NaN returned as equal")
 	}
-
-}
-
-func TestFill(t *testing.T) {
-	n := make([]float64, 4)
-	i := 0.0
-	f := func() float64 {
-		i = i + 1.0
-		return i
-	}
-	Fill(f, n)
-	truth := []float64{1.0, 2.0, 3.0, 4.0}
-	AreSlicesEqual(t, truth, n, "Wrong fill of generated values")
 
 }
 
@@ -954,75 +931,39 @@ func BenchmarkMinHuge(b *testing.B) {
 	benchmarkMin(b, s)
 }
 
-func benchmarkAdd(b *testing.B, s ...[]float64) {
+func benchmarkAdd(b *testing.B, s1, s2 []float64) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Add(s[0], s[1:]...)
+		Add(s1, s2)
 	}
 }
 
-func BenchmarkAddTwoSmall(b *testing.B) {
+func BenchmarkAddSmall(b *testing.B) {
 	i := SMALL
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
 }
 
-func BenchmarkAddFourSmall(b *testing.B) {
-	i := SMALL
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
-}
-
-func BenchmarkAddTwoMed(b *testing.B) {
+func BenchmarkAddMed(b *testing.B) {
 	i := MEDIUM
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
 }
 
-func BenchmarkAddFourMed(b *testing.B) {
-	i := MEDIUM
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
-}
-
-func BenchmarkAddTwoLarge(b *testing.B) {
+func BenchmarkAddLarge(b *testing.B) {
 	i := LARGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
 }
 
-func BenchmarkAddFourLarge(b *testing.B) {
-	i := LARGE
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
-}
-
-func BenchmarkAddTwoHuge(b *testing.B) {
+func BenchmarkAddHuge(b *testing.B) {
 	i := HUGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
-}
-
-func BenchmarkAddFourHuge(b *testing.B) {
-	i := HUGE
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
 }
 
 func benchmarkLogSumExp(b *testing.B, s []float64) {

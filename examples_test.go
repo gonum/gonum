@@ -16,9 +16,9 @@ func ExampleAdd_simple() {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{5, 6, 7, 8}
 	s3 := []float64{1, 1, 1, 1}
-
-	Add(s1, s2, s3)
-
+	Add(s1, s2)
+	Add(s1, s3)
+	
 	fmt.Println("s1 =", s1)
 	fmt.Println("s2 =", s2)
 	fmt.Println("s3 =", s3)
@@ -36,8 +36,9 @@ func ExampleAdd_newslice() {
 	s3 := []float64{1, 1, 1, 1}
 	dst := make([]float64, len(s1))
 
-	Add(dst, s1, s2, s3)
-
+	AddTo(dst, s1, s2)
+	Add(dst,s3)
+	
 	fmt.Println("dst =", dst)
 	fmt.Println("s1 =", s1)
 	fmt.Println("s2 =", s2)
@@ -65,26 +66,6 @@ func ExampleAdd_unequallengths() {
 	// Unequal lengths
 }
 
-func ExampleAdd_sliceofslicesum() {
-	// Add can also be used to take a columnwise sum
-	// of a slice of slices
-
-	// First, initialize a slice of slices
-	s := make([][]float64, 5)
-	for i := range s {
-		s[i] = make([]float64, 3)
-		for j := range s[i] {
-			s[i][j] = float64(j)
-		}
-	}
-	// Remember that the first entry is the destination
-	result := make([]float64, len(s[0]))
-	Add(result, s...)
-
-	fmt.Println("result =", result)
-	// Output:
-	// result = [0 5 10]
-}
 
 func ExampleAddConst() {
 	s := []float64{1, -2, 3, -4}

@@ -73,9 +73,8 @@ func TestAddTo(t *testing.T) {
 	if !Panics(func() { AddTo(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
-	
-}
 
+}
 
 func TestAddConst(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}

@@ -18,7 +18,7 @@ func ExampleAdd_simple() {
 	s3 := []float64{1, 1, 1, 1}
 	Add(s1, s2)
 	Add(s1, s3)
-	
+
 	fmt.Println("s1 =", s1)
 	fmt.Println("s2 =", s2)
 	fmt.Println("s3 =", s3)
@@ -37,8 +37,8 @@ func ExampleAdd_newslice() {
 	dst := make([]float64, len(s1))
 
 	AddTo(dst, s1, s2)
-	Add(dst,s3)
-	
+	Add(dst, s3)
+
 	fmt.Println("dst =", dst)
 	fmt.Println("s1 =", s1)
 	fmt.Println("s2 =", s2)
@@ -65,7 +65,6 @@ func ExampleAdd_unequallengths() {
 	// Output:
 	// Unequal lengths
 }
-
 
 func ExampleAddConst() {
 	s := []float64{1, -2, 3, -4}

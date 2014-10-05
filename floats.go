@@ -16,8 +16,7 @@ import (
 	"sort"
 )
 
-
-// Add adds, element-wise, the elements of s and dst, and stores in dst. 
+// Add adds, element-wise, the elements of s and dst, and stores in dst.
 // Panics if the lengths of dst and s do not match.
 func Add(dst, s []float64) {
 	if len(dst) != len(s) {

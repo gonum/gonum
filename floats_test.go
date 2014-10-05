@@ -57,6 +57,26 @@ func TestAdd(t *testing.T) {
 	}
 }
 
+func TestAddTo(t *testing.T) {
+	a := []float64{1, 2, 3}
+	b := []float64{4, 5, 6}
+	truth := []float64{5, 7, 9}
+	n := make([]float64, len(a))
+
+	AddTo(n, a, b)
+	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
+
+	// Test that it panics
+	if !Panics(func() { AddTo(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	if !Panics(func() { AddTo(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	
+}
+
+
 func TestAddConst(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	c := 6.0

@@ -440,7 +440,7 @@ func LogSpan(dst []float64, l, u float64) []float64 {
 	return dst
 }
 
-// LogSumExp returns the log of the sum of the exponentials of the values in s
+// LogSumExp returns the log of the sum of the exponentials of the values in s.
 // Panics if s is an empty slice.
 func LogSumExp(s []float64) (lse float64) {
 	// Want to do this in a numerically stable way which avoids
@@ -578,7 +578,7 @@ func Norm(s []float64, L float64) (norm float64) {
 	return math.Pow(norm, 1/L)
 }
 
-// Prod returns the product of the elements of the slice
+// Prod returns the product of the elements of the slice.
 // Returns 1 if len(s) = 0.
 func Prod(s []float64) (prod float64) {
 	prod = 1

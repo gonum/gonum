@@ -464,8 +464,8 @@ func LogSumExp(s []float64) (lse float64) {
 // the maximum value. If the input slice is empty, Max will panic.
 func Max(s []float64) (max float64, ind int) {
 	max = s[0]
-	for i := 1; i < len(s); i++ {
-		if val := s[i]; val > max {
+	for i, val := range s {
+		if val > max {
 			max = val
 			ind = i
 		}
@@ -477,8 +477,8 @@ func Max(s []float64) (max float64, ind int) {
 // the minimum value. If the input slice is empty, Min will panic.
 func Min(s []float64) (min float64, ind int) {
 	min = s[0]
-	for i := 1; i < len(s); i++ {
-		if val := s[i]; val < min {
+	for i, val := range s {
+		if val < min {
 			min = val
 			ind = i
 		}
@@ -517,9 +517,8 @@ func MulTo(dst, s, t []float64) []float64 {
 // Panics if len(s) == 0.
 func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
-	ind = 0
-	for i := 1; i < len(s); i++ {
-		newDist := math.Abs(v - s[i])
+	for i, val := range s {
+		newDist := math.Abs(v - val)
 		if newDist < dist {
 			dist = newDist
 			ind = i

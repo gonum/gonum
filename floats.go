@@ -340,7 +340,7 @@ func EqualWithinULP(a, b float64, ulp uint) bool {
 
 func ulpDiff(a, b uint64) uint64 {
 	if a > b {
-		a, b = b, a
+		return a - b
 	}
 	return b - a
 }
@@ -440,7 +440,8 @@ func LogSpan(dst []float64, l, u float64) []float64 {
 	return dst
 }
 
-// LogSumExp returns the log of the sum of the exponentials of the values in s
+// LogSumExp returns the log of the sum of the exponentials of the values in s.
+// Panics if s is an empty slice.
 func LogSumExp(s []float64) (lse float64) {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
@@ -463,7 +464,6 @@ func LogSumExp(s []float64) (lse float64) {
 // the maximum value. If the input slice is empty, Max will panic.
 func Max(s []float64) (max float64, ind int) {
 	max = s[0]
-	ind = 0
 	for i, val := range s {
 		if val > max {
 			max = val
@@ -477,7 +477,6 @@ func Max(s []float64) (max float64, ind int) {
 // the minimum value. If the input slice is empty, Min will panic.
 func Min(s []float64) (min float64, ind int) {
 	min = s[0]
-	ind = 0
 	for i, val := range s {
 		if val < min {
 			min = val
@@ -518,7 +517,6 @@ func MulTo(dst, s, t []float64) []float64 {
 // Panics if len(s) == 0.
 func Nearest(s []float64, v float64) (ind int) {
 	dist := math.Abs(v - s[0])
-	ind = 0
 	for i, val := range s {
 		newDist := math.Abs(v - val)
 		if newDist < dist {
@@ -580,7 +578,7 @@ func Norm(s []float64, L float64) (norm float64) {
 	return math.Pow(norm, 1/L)
 }
 
-// Prod returns the product of the elements of the slice
+// Prod returns the product of the elements of the slice.
 // Returns 1 if len(s) = 0.
 func Prod(s []float64) (prod float64) {
 	prod = 1

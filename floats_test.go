@@ -43,17 +43,38 @@ func TestAdd(t *testing.T) {
 	truth := []float64{12, 15, 18}
 	n := make([]float64, len(a))
 
-	Add(a)
-	AreSlicesEqual(t, a, a, "Wrong nop addition with no slices")
-	Add(n, a, b, c)
+	Add(n, a)
+	Add(n, b)
+	Add(n, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
-	Add(a, b, c)
+	Add(a, b)
+	Add(a, c)
 	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
 
 	// Test that it panics
 	if !Panics(func() { Add(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
 	}
+}
+
+func TestAddTo(t *testing.T) {
+	a := []float64{1, 2, 3}
+	b := []float64{4, 5, 6}
+	truth := []float64{5, 7, 9}
+	n1 := make([]float64, len(a))
+
+	n2 := AddTo(n1, a, b)
+	AreSlicesEqual(t, truth, n1, "Bad addition from mutator")
+	AreSlicesEqual(t, truth, n2, "Bad addition from returned slice")
+
+	// Test that it panics
+	if !Panics(func() { AddTo(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+	if !Panics(func() { AddTo(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Did not panic with length mismatch")
+	}
+
 }
 
 func TestAddConst(t *testing.T) {
@@ -86,37 +107,29 @@ func TestAddScaledTo(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	alpha := 6.0
 	y := []float64{1, 2, 3, 4, 5}
-	dst := make([]float64, 5)
+	dst1 := make([]float64, 5)
 	ans := []float64{19, 26, 9, 46, 35}
-	AddScaledTo(dst, y, alpha, s)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
-		t.Errorf("AddScaledTo did not match")
+	dst2 := AddScaledTo(dst1, y, alpha, s)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+		t.Errorf("AddScaledTo did not match for mutator")
 	}
-	AddScaledTo(dst, y, alpha, s)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst2, ans, EQTOLERANCE) {
+		t.Errorf("AddScaledTo did not match for returned slice")
+	}
+	AddScaledTo(dst1, y, alpha, s)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
 		t.Errorf("Reusing dst did not match")
 	}
 	short := []float64{1}
-	if !Panics(func() { AddScaledTo(dst, y, alpha, short) }) {
+	if !Panics(func() { AddScaledTo(dst1, y, alpha, short) }) {
 		t.Errorf("Doesn't panic if s is smaller than dst")
 	}
 	if !Panics(func() { AddScaledTo(short, y, alpha, s) }) {
 		t.Errorf("Doesn't panic if dst is smaller than s")
 	}
-	if !Panics(func() { AddScaledTo(dst, short, alpha, s) }) {
+	if !Panics(func() { AddScaledTo(dst1, short, alpha, s) }) {
 		t.Errorf("Doesn't panic if y is smaller than dst")
 	}
-}
-
-func TestApply(t *testing.T) {
-	s := []float64{3, 4, 1, 7, 5}
-	f := math.Sin
-	truth := make([]float64, len(s))
-	for i, val := range s {
-		truth[i] = math.Sin(val)
-	}
-	Apply(f, s)
-	AreSlicesEqual(t, truth, s, "Wrong application of function")
 }
 
 func TestArgsort(t *testing.T) {
@@ -156,9 +169,10 @@ func TestCount(t *testing.T) {
 func TestCumProd(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
-	CumProd(receiver, s)
+	result := CumProd(receiver, s)
 	truth := []float64{3, 12, 12, 84, 420}
-	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with new receiver")
+	AreSlicesEqual(t, truth, receiver, "Wrong cumprod mutated with new receiver")
+	AreSlicesEqual(t, truth, result, "Wrong cumprod result with new receiver")
 	CumProd(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
 
@@ -178,9 +192,10 @@ func TestCumProd(t *testing.T) {
 func TestCumSum(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
-	CumSum(receiver, s)
+	result := CumSum(receiver, s)
 	truth := []float64{3, 7, 8, 15, 20}
-	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with new receiver")
+	AreSlicesEqual(t, truth, receiver, "Wrong cumsum mutated with new receiver")
+	AreSlicesEqual(t, truth, result, "Wrong cumsum returned with new receiver")
 	CumSum(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with reused receiver")
 
@@ -259,11 +274,14 @@ func TestDivTo(t *testing.T) {
 	s1orig := []float64{5, 12, 27}
 	s2 := []float64{1, 2, 3}
 	s2orig := []float64{1, 2, 3}
-	dst := make([]float64, 3)
+	dst1 := make([]float64, 3)
 	ans := []float64{5, 6, 9}
-	DivTo(dst, s1, s2)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
-		t.Errorf("DivTo doesn't give correct answer")
+	dst2 := DivTo(dst1, s1, s2)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+		t.Errorf("DivTo doesn't give correct answer in mutated slice")
+	}
+	if !EqualApprox(dst2, ans, EQTOLERANCE) {
+		t.Errorf("DivTo doesn't give correct answer in returned slice")
 	}
 	if !EqualApprox(s1, s1orig, EQTOLERANCE) {
 		t.Errorf("S1 changes during multo")
@@ -271,8 +289,8 @@ func TestDivTo(t *testing.T) {
 	if !EqualApprox(s2, s2orig, EQTOLERANCE) {
 		t.Errorf("s2 changes during multo")
 	}
-	DivTo(dst, s1, s2)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
+	DivTo(dst1, s1, s2)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
 		t.Errorf("DivTo doesn't give correct answer reusing dst")
 	}
 	dstShort := []float64{1}
@@ -280,11 +298,11 @@ func TestDivTo(t *testing.T) {
 		t.Errorf("Did not panic with s1 wrong length")
 	}
 	s1short := []float64{1}
-	if !Panics(func() { DivTo(dst, s1short, s2) }) {
+	if !Panics(func() { DivTo(dst1, s1short, s2) }) {
 		t.Errorf("Did not panic with s1 wrong length")
 	}
 	s2short := []float64{1}
-	if !Panics(func() { DivTo(dst, s1, s2short) }) {
+	if !Panics(func() { DivTo(dst1, s1, s2short) }) {
 		t.Errorf("Did not panic with s2 wrong length")
 	}
 }
@@ -481,19 +499,6 @@ func TestEqualsULP(t *testing.T) {
 
 }
 
-func TestFill(t *testing.T) {
-	n := make([]float64, 4)
-	i := 0.0
-	f := func() float64 {
-		i = i + 1.0
-		return i
-	}
-	Fill(f, n)
-	truth := []float64{1.0, 2.0, 3.0, 4.0}
-	AreSlicesEqual(t, truth, n, "Wrong fill of generated values")
-
-}
-
 func TestEqualLengths(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}
@@ -609,18 +614,24 @@ func TestHasNaN(t *testing.T) {
 }
 
 func TestLogSpan(t *testing.T) {
-	receiver := make([]float64, 6)
+	receiver1 := make([]float64, 6)
 	truth := []float64{0.001, 0.01, 0.1, 1, 10, 100}
-	LogSpan(receiver, 0.001, 100)
+	receiver2 := LogSpan(receiver1, 0.001, 100)
 	tst := make([]float64, 6)
 	for i := range truth {
-		tst[i] = receiver[i] / truth[i]
+		tst[i] = receiver1[i] / truth[i]
 	}
 	comp := make([]float64, 6)
 	for i := range comp {
 		comp[i] = 1
 	}
-	AreSlicesEqual(t, comp, tst, "Improper logspace")
+	AreSlicesEqual(t, comp, tst, "Improper logspace from mutator")
+
+	for i := range truth {
+		tst[i] = receiver2[i] / truth[i]
+	}
+	AreSlicesEqual(t, comp, tst, "Improper logspace from returned slice")
+
 	if !Panics(func() { LogSpan(nil, 1, 5) }) {
 		t.Errorf("Span accepts nil argument")
 	}
@@ -714,11 +725,14 @@ func TestMulTo(t *testing.T) {
 	s1orig := []float64{1, 2, 3}
 	s2 := []float64{1, 2, 3}
 	s2orig := []float64{1, 2, 3}
-	dst := make([]float64, 3)
+	dst1 := make([]float64, 3)
 	ans := []float64{1, 4, 9}
-	MulTo(dst, s1, s2)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
-		t.Errorf("MulTo doesn't give correct answer")
+	dst2 := MulTo(dst1, s1, s2)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+		t.Errorf("MulTo doesn't give correct answer in mutated slice")
+	}
+	if !EqualApprox(dst2, ans, EQTOLERANCE) {
+		t.Errorf("MulTo doesn't give correct answer in returned slice")
 	}
 	if !EqualApprox(s1, s1orig, EQTOLERANCE) {
 		t.Errorf("S1 changes during multo")
@@ -726,8 +740,8 @@ func TestMulTo(t *testing.T) {
 	if !EqualApprox(s2, s2orig, EQTOLERANCE) {
 		t.Errorf("s2 changes during multo")
 	}
-	MulTo(dst, s1, s2)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
+	MulTo(dst1, s1, s2)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
 		t.Errorf("MulTo doesn't give correct answer reusing dst")
 	}
 	dstShort := []float64{1}
@@ -735,11 +749,11 @@ func TestMulTo(t *testing.T) {
 		t.Errorf("Did not panic with s1 wrong length")
 	}
 	s1short := []float64{1}
-	if !Panics(func() { MulTo(dst, s1short, s2) }) {
+	if !Panics(func() { MulTo(dst1, s1short, s2) }) {
 		t.Errorf("Did not panic with s1 wrong length")
 	}
 	s2short := []float64{1}
-	if !Panics(func() { MulTo(dst, s1, s2short) }) {
+	if !Panics(func() { MulTo(dst1, s1, s2short) }) {
 		t.Errorf("Did not panic with s2 wrong length")
 	}
 }
@@ -860,14 +874,15 @@ func TestScale(t *testing.T) {
 }
 
 func TestSpan(t *testing.T) {
-	receiver := make([]float64, 5)
+	receiver1 := make([]float64, 5)
 	truth := []float64{1, 2, 3, 4, 5}
-	Span(receiver, 1, 5)
-	AreSlicesEqual(t, truth, receiver, "Improper linspace")
-	receiver = make([]float64, 6)
+	receiver2 := Span(receiver1, 1, 5)
+	AreSlicesEqual(t, truth, receiver1, "Improper linspace from mutator")
+	AreSlicesEqual(t, truth, receiver2, "Improper linspace from returned slice")
+	receiver1 = make([]float64, 6)
 	truth = []float64{0, 0.2, 0.4, 0.6, 0.8, 1.0}
-	Span(receiver, 0, 1)
-	AreSlicesEqual(t, truth, receiver, "Improper linspace")
+	Span(receiver1, 0, 1)
+	AreSlicesEqual(t, truth, receiver1, "Improper linspace")
 	if !Panics(func() { Span(nil, 1, 5) }) {
 		t.Errorf("Span accepts nil argument")
 	}
@@ -892,9 +907,10 @@ func TestSubTo(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	v := []float64{1, 2, 3, 4, 5}
 	truth := []float64{2, 2, -2, 3, 0}
-	dst := make([]float64, len(s))
-	SubTo(dst, s, v)
-	AreSlicesEqual(t, truth, dst, "Bad subtract")
+	dst1 := make([]float64, len(s))
+	dst2 := SubTo(dst1, s, v)
+	AreSlicesEqual(t, truth, dst1, "Bad subtract from mutator")
+	AreSlicesEqual(t, truth, dst2, "Bad subtract from returned slice")
 	// Test that all mismatch combinations panic
 	if !Panics(func() { SubTo(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with dst different length")
@@ -954,75 +970,39 @@ func BenchmarkMinHuge(b *testing.B) {
 	benchmarkMin(b, s)
 }
 
-func benchmarkAdd(b *testing.B, s ...[]float64) {
+func benchmarkAdd(b *testing.B, s1, s2 []float64) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Add(s[0], s[1:]...)
+		Add(s1, s2)
 	}
 }
 
-func BenchmarkAddTwoSmall(b *testing.B) {
+func BenchmarkAddSmall(b *testing.B) {
 	i := SMALL
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
 }
 
-func BenchmarkAddFourSmall(b *testing.B) {
-	i := SMALL
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
-}
-
-func BenchmarkAddTwoMed(b *testing.B) {
+func BenchmarkAddMed(b *testing.B) {
 	i := MEDIUM
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
 }
 
-func BenchmarkAddFourMed(b *testing.B) {
-	i := MEDIUM
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
-}
-
-func BenchmarkAddTwoLarge(b *testing.B) {
+func BenchmarkAddLarge(b *testing.B) {
 	i := LARGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
 }
 
-func BenchmarkAddFourLarge(b *testing.B) {
-	i := LARGE
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
-}
-
-func BenchmarkAddTwoHuge(b *testing.B) {
+func BenchmarkAddHuge(b *testing.B) {
 	i := HUGE
 	s := RandomSlice(i)
 	t := RandomSlice(i)
 	benchmarkAdd(b, s, t)
-}
-
-func BenchmarkAddFourHuge(b *testing.B) {
-	i := HUGE
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	u := RandomSlice(i)
-	v := RandomSlice(i)
-	benchmarkAdd(b, s, t, u, v)
 }
 
 func benchmarkLogSumExp(b *testing.B, s []float64) {

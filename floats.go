@@ -16,25 +16,28 @@ import (
 	"sort"
 )
 
-// Add returns the element-wise sum of all the slices with the
-// results stored in the first slice.
-// For computational efficiency, it is assumed that all of
-// the variadic arguments have the same length. If this is
-// in doubt, EqualLengths can be used.  It panics if dst does
-// not have the same length as the first slice.
-//
-// At the return of the function, dst[i] = dst[i] + s1[i] + s2[i] + ...
-func Add(dst []float64, slices ...[]float64) []float64 {
-	if len(slices) == 0 {
-		return nil
+// Add adds, element-wise, the elements of s and dst, and stores in dst.
+// Panics if the lengths of dst and s do not match.
+func Add(dst, s []float64) {
+	if len(dst) != len(s) {
+		panic("floats: length of the slices do not match")
 	}
-	if len(dst) != len(slices[0]) {
-		panic("floats: length of destination does not match length of the slices")
+	for i, val := range s {
+		dst[i] += val
 	}
-	for _, s := range slices {
-		for j, val := range s {
-			dst[j] += val
-		}
+}
+
+// AddTo adds, element-wise, the elements of s and t and
+// stores the result in dst. Panics if the lengths of s, t and dst do not match.
+func AddTo(dst, s, t []float64) []float64 {
+	if len(s) != len(t) {
+		panic("floats: length of adders do not match")
+	}
+	if len(dst) != len(s) {
+		panic("floats: length of destination does not match length of adder")
+	}
+	for i, val := range t {
+		dst[i] = s[i] + val
 	}
 	return dst
 }
@@ -70,14 +73,6 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 		dst[i] = y[i] + alpha*val
 	}
 	return dst
-}
-
-// Apply applies a function f (math.Exp, math.Sin, etc.) to every element
-// of the slice dst.
-func Apply(f func(float64) float64, dst []float64) {
-	for i, val := range dst {
-		dst[i] = f(val)
-	}
 }
 
 // argsort is a helper that implements sort.Interface, as used by
@@ -119,13 +114,14 @@ func Argsort(dst []float64, inds []int) {
 
 // Count applies the function f to every element of s and returns the number
 // of times the function returned true.
-func Count(f func(float64) bool, s []float64) (n int) {
+func Count(f func(float64) bool, s []float64) int {
+	var n int
 	for _, val := range s {
 		if f(val) {
 			n++
 		}
 	}
-	return
+	return n
 }
 
 // CumProd finds the cumulative product of the first i elements in
@@ -286,7 +282,6 @@ func EqualFunc(s1, s2 []float64, f func(float64, float64) bool) bool {
 		}
 	}
 	return true
-
 }
 
 // EqualWithinAbs returns true if a and b have an absolute
@@ -361,14 +356,6 @@ func EqualLengths(slices ...[]float64) bool {
 	return true
 }
 
-// Fill loops over the elements of dst and stores a value generated from f.
-// f is called len(s) times.
-func Fill(f func() float64, dst []float64) {
-	for i := range dst {
-		dst[i] = f()
-	}
-}
-
 // Find applies f to every element of s and returns the indices of the first
 // k elements for which the f returns true, or all such elements
 // if k < 0.
@@ -436,13 +423,15 @@ func HasNaN(s []float64) bool {
 //     for i, x := range LogSpan(dst, l, u) { ... }
 func LogSpan(dst []float64, l, u float64) []float64 {
 	Span(dst, math.Log(l), math.Log(u))
-	Apply(math.Exp, dst)
+	for i := range dst {
+		dst[i] = math.Exp(dst[i])
+	}
 	return dst
 }
 
 // LogSumExp returns the log of the sum of the exponentials of the values in s.
 // Panics if s is an empty slice.
-func LogSumExp(s []float64) (lse float64) {
+func LogSumExp(s []float64) float64 {
 	// Want to do this in a numerically stable way which avoids
 	// overflow and underflow
 	// First, find the maximum value in the slice.
@@ -452,6 +441,7 @@ func LogSumExp(s []float64) (lse float64) {
 		// returning now avoids NaNs
 		return maxval
 	}
+	var lse float64
 	// Compute the sumexp part
 	for _, val := range s {
 		lse += math.Exp(val - maxval)
@@ -515,7 +505,8 @@ func MulTo(dst, s, t []float64) []float64 {
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.
 // Panics if len(s) == 0.
-func Nearest(s []float64, v float64) (ind int) {
+func Nearest(s []float64, v float64) int {
+	var ind int
 	dist := math.Abs(v - s[0])
 	for i, val := range s {
 		newDist := math.Abs(v - val)
@@ -524,7 +515,7 @@ func Nearest(s []float64, v float64) (ind int) {
 			ind = i
 		}
 	}
-	return
+	return ind
 }
 
 // NearestWithinSpan return the index of a hypothetical vector created
@@ -537,8 +528,7 @@ func NearestWithinSpan(n int, l, u float64, v float64) int {
 	}
 
 	// Can't guarantee anything about exactly halfway between
-	// because of floating point weirdness
-	//
+	// because of floating point weirdness.
 	return int((float64(n)-1)/(u-l)*(v-l) + 0.5)
 }
 
@@ -547,7 +537,7 @@ func NearestWithinSpan(n int, l, u float64, v float64) int {
 // Special cases:
 // L = math.Inf(1) gives the maximum value
 // Does not correctly compute the zero norm (use Count).
-func Norm(s []float64, L float64) (norm float64) {
+func Norm(s []float64, L float64) float64 {
 	// Should this complain if L is not positive?
 	// Should this be done in log space for better numerical stability?
 	//	would be more cost
@@ -562,6 +552,7 @@ func Norm(s []float64, L float64) (norm float64) {
 		}
 		return twoNorm
 	}
+	var norm float64
 	if L == 1 {
 		for _, val := range s {
 			norm += math.Abs(val)
@@ -580,8 +571,8 @@ func Norm(s []float64, L float64) (norm float64) {
 
 // Prod returns the product of the elements of the slice.
 // Returns 1 if len(s) = 0.
-func Prod(s []float64) (prod float64) {
-	prod = 1
+func Prod(s []float64) float64 {
+	prod := 1.0
 	for _, val := range s {
 		prod *= val
 	}
@@ -642,9 +633,10 @@ func SubTo(dst, s, t []float64) []float64 {
 }
 
 // Sum returns the sum of the elements of the slice.
-func Sum(s []float64) (sum float64) {
+func Sum(s []float64) float64 {
+	var sum float64
 	for _, val := range s {
 		sum += val
 	}
-	return
+	return sum
 }

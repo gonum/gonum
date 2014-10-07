@@ -29,7 +29,7 @@ func Add(dst, s []float64) {
 
 // AddTo adds, element-wise, the elements of s and t and
 // stores the result in dst. Panics if the lengths of s, t and dst do not match.
-func AddTo(dst, s, t []float64) {
+func AddTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of adders do not match")
 	}
@@ -39,6 +39,7 @@ func AddTo(dst, s, t []float64) {
 	for i, val := range t {
 		dst[i] = s[i] + val
 	}
+	return dst
 }
 
 // AddConst adds the scalar c to all of the values in dst.
@@ -213,13 +214,14 @@ func Div(dst, s []float64) {
 // DivTo performs element-wise division s / t
 // and stores the value in dst. It panics if the
 // lengths of s, t, and dst are not equal.
-func DivTo(dst, s, t []float64) {
+func DivTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) || len(dst) != len(t) {
 		panic("floats: slice lengths do not match")
 	}
 	for i, val := range t {
 		dst[i] = s[i] / val
 	}
+	return dst
 }
 
 // Dot computes the dot product of s1 and s2, i.e.
@@ -486,20 +488,22 @@ func Mul(dst, s []float64) {
 // MulTo performs element-wise multiplication between s
 // and t and stores the value in dst. Panics if the
 // lengths of s, t, and dst are not equal.
-func MulTo(dst, s, t []float64) {
+func MulTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) || len(dst) != len(t) {
 		panic("floats: slice lengths do not match")
 	}
 	for i, val := range t {
 		dst[i] = val * s[i]
 	}
+	return dst
 }
 
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.
 // Panics if len(s) == 0.
-func Nearest(s []float64, v float64) (ind int) {
+func Nearest(s []float64, v float64) int {
+	var ind int
 	dist := math.Abs(v - s[0])
 	for i, val := range s {
 		newDist := math.Abs(v - val)
@@ -508,7 +512,7 @@ func Nearest(s []float64, v float64) (ind int) {
 			ind = i
 		}
 	}
-	return
+	return ind
 }
 
 // NearestWithinSpan return the index of a hypothetical vector created
@@ -612,7 +616,7 @@ func Sub(dst, s []float64) {
 
 // SubTo subtracts, element-wise, the elements of t from s and
 // stores the result in dst. Panics if the lengths of s, t and dst do not match.
-func SubTo(dst, s, t []float64) {
+func SubTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) {
 		panic("floats: length of subtractor and subtractee do not match")
 	}
@@ -622,6 +626,7 @@ func SubTo(dst, s, t []float64) {
 	for i, val := range t {
 		dst[i] = s[i] - val
 	}
+	return dst
 }
 
 // Sum returns the sum of the elements of the slice.

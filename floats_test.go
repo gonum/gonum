@@ -621,12 +621,12 @@ func TestLogSpan(t *testing.T) {
 		comp[i] = 1
 	}
 	AreSlicesEqual(t, comp, tst, "Improper logspace from mutator")
-	
+
 	for i := range truth {
 		tst[i] = receiver2[i] / truth[i]
 	}
 	AreSlicesEqual(t, comp, tst, "Improper logspace from returned slice")
-	
+
 	if !Panics(func() { LogSpan(nil, 1, 5) }) {
 		t.Errorf("Span accepts nil argument")
 	}

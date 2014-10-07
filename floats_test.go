@@ -107,24 +107,27 @@ func TestAddScaledTo(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	alpha := 6.0
 	y := []float64{1, 2, 3, 4, 5}
-	dst := make([]float64, 5)
+	dst1 := make([]float64, 5)
 	ans := []float64{19, 26, 9, 46, 35}
-	AddScaledTo(dst, y, alpha, s)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
-		t.Errorf("AddScaledTo did not match")
+	dst2 := AddScaledTo(dst1, y, alpha, s)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+		t.Errorf("AddScaledTo did not match for mutator")
 	}
-	AddScaledTo(dst, y, alpha, s)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst2, ans, EQTOLERANCE) {
+		t.Errorf("AddScaledTo did not match for returned slice")
+	}
+	AddScaledTo(dst1, y, alpha, s)
+	if !EqualApprox(dst1, ans, EQTOLERANCE) {
 		t.Errorf("Reusing dst did not match")
 	}
 	short := []float64{1}
-	if !Panics(func() { AddScaledTo(dst, y, alpha, short) }) {
+	if !Panics(func() { AddScaledTo(dst1, y, alpha, short) }) {
 		t.Errorf("Doesn't panic if s is smaller than dst")
 	}
 	if !Panics(func() { AddScaledTo(short, y, alpha, s) }) {
 		t.Errorf("Doesn't panic if dst is smaller than s")
 	}
-	if !Panics(func() { AddScaledTo(dst, short, alpha, s) }) {
+	if !Panics(func() { AddScaledTo(dst1, short, alpha, s) }) {
 		t.Errorf("Doesn't panic if y is smaller than dst")
 	}
 }
@@ -166,9 +169,10 @@ func TestCount(t *testing.T) {
 func TestCumProd(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
-	CumProd(receiver, s)
+	result := CumProd(receiver, s)
 	truth := []float64{3, 12, 12, 84, 420}
-	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with new receiver")
+	AreSlicesEqual(t, truth, receiver, "Wrong cumprod mutated with new receiver")
+	AreSlicesEqual(t, truth, result, "Wrong cumprod result with new receiver")
 	CumProd(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
 
@@ -188,9 +192,10 @@ func TestCumProd(t *testing.T) {
 func TestCumSum(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	receiver := make([]float64, len(s))
-	CumSum(receiver, s)
+	result := CumSum(receiver, s)
 	truth := []float64{3, 7, 8, 15, 20}
-	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with new receiver")
+	AreSlicesEqual(t, truth, receiver, "Wrong cumsum mutated with new receiver")
+	AreSlicesEqual(t, truth, result, "Wrong cumsum returned with new receiver")
 	CumSum(receiver, s)
 	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with reused receiver")
 

@@ -65,13 +65,14 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 // It panics if the lengths of dst, y, and s are not equal.
 //
 // At the return of the function, dst[i] = y[i] + alpha * s[i]
-func AddScaledTo(dst, y []float64, alpha float64, s []float64) {
+func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 	if len(dst) != len(s) || len(dst) != len(y) {
 		panic("floats: lengths of slices do not match")
 	}
 	for i, val := range s {
 		dst[i] = y[i] + alpha*val
 	}
+	return dst
 }
 
 // argsort is a helper that implements sort.Interface, as used by
@@ -129,17 +130,18 @@ func Count(f func(float64) bool, s []float64) int {
 // do not match.
 //
 // At the return of the function, dst[i] = s[i] * s[i-1] * s[i-2] * ...
-func CumProd(dst, s []float64) {
+func CumProd(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
 	}
 	if len(dst) == 0 {
-		return
+		return dst
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] * s[i]
 	}
+	return dst
 }
 
 // CumSum finds the cumulative sum of the first i elements in
@@ -148,17 +150,18 @@ func CumProd(dst, s []float64) {
 // do not match.
 //
 // At the return of the function, dst[i] = s[i] + s[i-1] + s[i-2] + ...
-func CumSum(dst, s []float64) {
+func CumSum(dst, s []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of the source")
 	}
 	if len(dst) == 0 {
-		return
+		return dst
 	}
 	dst[0] = s[0]
 	for i := 1; i < len(s); i++ {
 		dst[i] = dst[i-1] + s[i]
 	}
+	return dst
 }
 
 // Distance computes the L-norm of s - t. See Norm for special cases.

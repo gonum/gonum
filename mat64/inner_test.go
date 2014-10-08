@@ -4,35 +4,28 @@
 
 package mat64
 
-import (
-	"math"
-	"testing"
-)
+import check "launchpad.net/gocheck"
 
-func TestInner(t *testing.T) {
+func (s *S) TestInner(c *check.C) {
 	for i, test := range []struct {
-		x   []float64
-		y   []float64
-		m   [][]float64
-		ans float64
+		x []float64
+		y []float64
+		m [][]float64
 	}{
 		{
-			x:   []float64{5},
-			y:   []float64{10},
-			m:   [][]float64{{2}},
-			ans: 100,
+			x: []float64{5},
+			y: []float64{10},
+			m: [][]float64{{2}},
 		},
 		{
-			x:   []float64{5, 6, 1},
-			y:   []float64{10},
-			m:   [][]float64{{2}, {-3}, {5}},
-			ans: -30,
+			x: []float64{5, 6, 1},
+			y: []float64{10},
+			m: [][]float64{{2}, {-3}, {5}},
 		},
 		{
-			x:   []float64{5},
-			y:   []float64{10, 15},
-			m:   [][]float64{{2, -3}},
-			ans: -125,
+			x: []float64{5},
+			y: []float64{10, 15},
+			m: [][]float64{{2, -3}},
 		},
 		{
 			x: []float64{1, 5},
@@ -41,7 +34,6 @@ func TestInner(t *testing.T) {
 				{2, -3},
 				{4, -1},
 			},
-			ans: 100,
 		},
 		{
 			x: []float64{2, 3, 9},
@@ -51,7 +43,6 @@ func TestInner(t *testing.T) {
 				{4, 5},
 				{6, 7},
 			},
-			ans: 1316,
 		},
 		{
 			x: []float64{2, 3},
@@ -60,13 +51,23 @@ func TestInner(t *testing.T) {
 				{2, 3, 6},
 				{4, 5, 7},
 			},
-			ans: 614,
 		},
 	} {
+		x := NewDense(1, len(test.x), test.x)
 		m := NewDense(flatten(test.m))
-		ans := Inner(test.x, m, test.y)
-		if math.Abs(ans-test.ans) > 1e-14 {
-			t.Errorf("Inner product mismatch case %v. Want: %v, Got: %v", i, test.ans, ans)
-		}
+		mWant := NewDense(flatten(test.m))
+		y := NewDense(len(test.y), 1, test.y)
+
+		mWant.Mul(mWant, y)
+		mWant.Mul(x, mWant)
+
+		rm, cm := mWant.Dims()
+		c.Check(rm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 row", i))
+		c.Check(cm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 column", i))
+
+		want := mWant.At(0, 0)
+
+		got := Inner(test.x, m, test.y)
+		c.Check(want, check.Equals, got, check.Commentf("Test %v: want %v, got %v", i, want, got))
 	}
 }

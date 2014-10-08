@@ -7,9 +7,10 @@ package mat64
 import (
 	"github.com/gonum/floats"
 
-	check "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
+
+	check "launchpad.net/gocheck"
 )
 
 func (s *S) TestNewDense(c *check.C) {
@@ -772,6 +773,88 @@ func (s *S) TestAugment(c *check.C) {
 		s.Augment(a, b)
 
 		c.Check(s.Equals(NewDense(flatten(test.e))), check.Equals, true, check.Commentf("Test %d: %v stack %v = %v", i, a, b, s))
+	}
+}
+
+func TestRankOne(t *testing.T) {
+	for i, test := range []struct {
+		x     []float64
+		y     []float64
+		m     [][]float64
+		alpha float64
+		ans   [][]float64
+	}{
+		{
+			x:     []float64{5},
+			y:     []float64{10},
+			m:     [][]float64{{2}},
+			alpha: -3,
+			ans:   [][]float64{{-148}},
+		},
+
+		{
+			x:     []float64{5, 6, 1},
+			y:     []float64{10},
+			m:     [][]float64{{2}, {-3}, {5}},
+			alpha: -3,
+			ans:   [][]float64{{-148}, {-183}, {-25}},
+		},
+
+		{
+			x:     []float64{5},
+			y:     []float64{10, 15, 8},
+			m:     [][]float64{{2, -3, 5}},
+			alpha: -3,
+			ans:   [][]float64{{-148, -228, -115}},
+		},
+		{
+			x: []float64{1, 5},
+			y: []float64{10, 15},
+			m: [][]float64{
+				{2, -3},
+				{4, -1},
+			},
+			alpha: -3,
+			ans:   [][]float64{{-28, -48}, {-146, -226}},
+		},
+
+		{
+			x: []float64{2, 3, 9},
+			y: []float64{8, 9},
+			m: [][]float64{
+				{2, 3},
+				{4, 5},
+				{6, 7},
+			},
+			alpha: -3,
+			ans:   [][]float64{{-46, -51}, {-68, -76}, {-210, -236}},
+		},
+
+		{
+			x: []float64{2, 3},
+			y: []float64{8, 9, 9},
+			m: [][]float64{
+				{2, 3, 6},
+				{4, 5, 7},
+			},
+			alpha: -3,
+			ans: [][]float64{
+				{-46, -51, -48},
+				{-68, -76, -74},
+			},
+		},
+	} {
+		a := NewDense(flatten(test.m))
+		m := &Dense{}
+		m.RankOne(a, test.alpha, test.x, test.y)
+		ans := NewDense(flatten(test.ans))
+		if !m.Equals(ans) {
+			t.Errorf("RankOne case %v. Want: %v, Got: %v.", i, ans, m)
+		}
+		a.RankOne(a, test.alpha, test.x, test.y)
+		if !a.Equals(ans) {
+			t.Errorf("RankOne same receiver case %v. Want: %v, Got: %v.", i, ans, a)
+		}
 	}
 }
 

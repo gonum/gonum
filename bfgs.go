@@ -80,9 +80,7 @@ func (b *BFGS) InitDirection(l Location, dir []float64) (stepSize float64) {
 		b.invHess = mat64.NewDense(dim, dim, nil)
 	}
 
-	for i := 0; i < b.nDim; i++ {
-		b.invHess.Set(i, i, 1)
-	}
+	// The values of the hessian are initialized in the first call to NextDirection
 
 	// initial direcion is just negative of gradient because the hessian is 1
 	copy(dir, l.Gradient)

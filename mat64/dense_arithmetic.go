@@ -557,3 +557,38 @@ func (m *Dense) EqualsApprox(b Matrix, epsilon float64) bool {
 	}
 	return true
 }
+
+// RankOne performs a rank-one update to the matrix b and stores the result
+// in the receiver
+//  m = a + alpha * x * y'
+func (m *Dense) RankOne(a Matrix, alpha float64, x, y []float64) {
+	ar, ac := a.Dims()
+
+	var w Dense
+	if m == a {
+		w = *m
+	}
+	if w.isZero() {
+		w.mat = RawMatrix{
+			Rows:   ar,
+			Cols:   ac,
+			Stride: ac,
+			Data:   use(w.mat.Data, ar*ac),
+		}
+	} else if ar != w.mat.Rows || ac != w.mat.Cols {
+		panic(ErrShape)
+	}
+	// Copy over to the new memory if necessary
+	if m != a {
+		w.Copy(a)
+	}
+	if len(x) != ar {
+		panic(ErrShape)
+	}
+	if len(y) != ac {
+		panic(ErrShape)
+	}
+	blasEngine.Dger(ar, ac, alpha, x, 1, y, 1, w.mat.Data, w.mat.Stride)
+	*m = w
+	return
+}

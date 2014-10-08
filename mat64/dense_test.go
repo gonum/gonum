@@ -7,9 +7,10 @@ package mat64
 import (
 	"github.com/gonum/floats"
 
-	check "launchpad.net/gocheck"
 	"math/rand"
 	"testing"
+
+	check "launchpad.net/gocheck"
 )
 
 func (s *S) TestNewDense(c *check.C) {
@@ -772,6 +773,80 @@ func (s *S) TestAugment(c *check.C) {
 		s.Augment(a, b)
 
 		c.Check(s.Equals(NewDense(flatten(test.e))), check.Equals, true, check.Commentf("Test %d: %v stack %v = %v", i, a, b, s))
+	}
+}
+
+func (s *S) TestRankOne(c *check.C) {
+	for i, test := range []struct {
+		x     []float64
+		y     []float64
+		m     [][]float64
+		alpha float64
+	}{
+		{
+			x:     []float64{5},
+			y:     []float64{10},
+			m:     [][]float64{{2}},
+			alpha: -3,
+		},
+		{
+			x:     []float64{5, 6, 1},
+			y:     []float64{10},
+			m:     [][]float64{{2}, {-3}, {5}},
+			alpha: -3,
+		},
+
+		{
+			x:     []float64{5},
+			y:     []float64{10, 15, 8},
+			m:     [][]float64{{2, -3, 5}},
+			alpha: -3,
+		},
+		{
+			x: []float64{1, 5},
+			y: []float64{10, 15},
+			m: [][]float64{
+				{2, -3},
+				{4, -1},
+			},
+			alpha: -3,
+		},
+		{
+			x: []float64{2, 3, 9},
+			y: []float64{8, 9},
+			m: [][]float64{
+				{2, 3},
+				{4, 5},
+				{6, 7},
+			},
+			alpha: -3,
+		},
+		{
+			x: []float64{2, 3},
+			y: []float64{8, 9, 9},
+			m: [][]float64{
+				{2, 3, 6},
+				{4, 5, 7},
+			},
+			alpha: -3,
+		},
+	} {
+		want := &Dense{}
+		xm := NewDense(len(test.x), 1, test.x)
+		ym := NewDense(1, len(test.y), test.y)
+
+		want.Mul(xm, ym)
+		want.Scale(test.alpha, want)
+		want.Add(want, NewDense(flatten(test.m)))
+
+		a := NewDense(flatten(test.m))
+		m := &Dense{}
+		// Check with a new matrix
+		m.RankOne(a, test.alpha, test.x, test.y)
+		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+		// Check with the same matrix
+		a.RankOne(a, test.alpha, test.x, test.y)
+		c.Check(a.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 	}
 }
 

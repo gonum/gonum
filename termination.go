@@ -26,6 +26,7 @@ const (
 	GradientEvaluationLimit
 	RecorderError
 	UserFunctionError
+	MethodError
 )
 
 func (s Status) String() string {
@@ -46,6 +47,7 @@ var statusMap = map[Status]string{
 	GradientEvaluationLimit: "GradientEvaluationLimit",
 	RecorderError:           "RecorderError",
 	UserFunctionError:       "UserFunctionError",
+	MethodError:             "MethodError",
 }
 
 var minStatus = -100

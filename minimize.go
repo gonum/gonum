@@ -58,6 +58,8 @@ func Minimize(f Function, initX []float64,
 		method = getDefaultMethod(funcStat)
 	}
 
+	methodStatus, methodIsStatuser := method.(Statuser)
+
 	location, err := setStartingLocation(f, funcs, funcStat, initX, settings)
 	if err != nil {
 		return nil, err
@@ -106,6 +108,13 @@ func Minimize(f Function, initX []float64,
 
 		if funcStat.IsStatuser {
 			status, err = funcs.status.Status()
+			if err != nil || status != NotTerminated {
+				break
+			}
+		}
+
+		if methodIsStatuser {
+			status, err = methodStatus.Status()
 			if err != nil || status != NotTerminated {
 				break
 			}

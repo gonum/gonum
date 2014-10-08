@@ -776,28 +776,24 @@ func (s *S) TestAugment(c *check.C) {
 	}
 }
 
-func TestRankOne(t *testing.T) {
+func (s *S) TestRankOne(c *check.C) {
 	for i, test := range []struct {
 		x     []float64
 		y     []float64
 		m     [][]float64
 		alpha float64
-		ans   [][]float64
 	}{
 		{
 			x:     []float64{5},
 			y:     []float64{10},
 			m:     [][]float64{{2}},
 			alpha: -3,
-			ans:   [][]float64{{-148}},
 		},
-
 		{
 			x:     []float64{5, 6, 1},
 			y:     []float64{10},
 			m:     [][]float64{{2}, {-3}, {5}},
 			alpha: -3,
-			ans:   [][]float64{{-148}, {-183}, {-25}},
 		},
 
 		{
@@ -805,7 +801,6 @@ func TestRankOne(t *testing.T) {
 			y:     []float64{10, 15, 8},
 			m:     [][]float64{{2, -3, 5}},
 			alpha: -3,
-			ans:   [][]float64{{-148, -228, -115}},
 		},
 		{
 			x: []float64{1, 5},
@@ -815,9 +810,7 @@ func TestRankOne(t *testing.T) {
 				{4, -1},
 			},
 			alpha: -3,
-			ans:   [][]float64{{-28, -48}, {-146, -226}},
 		},
-
 		{
 			x: []float64{2, 3, 9},
 			y: []float64{8, 9},
@@ -827,9 +820,7 @@ func TestRankOne(t *testing.T) {
 				{6, 7},
 			},
 			alpha: -3,
-			ans:   [][]float64{{-46, -51}, {-68, -76}, {-210, -236}},
 		},
-
 		{
 			x: []float64{2, 3},
 			y: []float64{8, 9, 9},
@@ -838,23 +829,24 @@ func TestRankOne(t *testing.T) {
 				{4, 5, 7},
 			},
 			alpha: -3,
-			ans: [][]float64{
-				{-46, -51, -48},
-				{-68, -76, -74},
-			},
 		},
 	} {
+		want := &Dense{}
+		xm := NewDense(len(test.x), 1, test.x)
+		ym := NewDense(1, len(test.y), test.y)
+
+		want.Mul(xm, ym)
+		want.Scale(test.alpha, want)
+		want.Add(want, NewDense(flatten(test.m)))
+
 		a := NewDense(flatten(test.m))
 		m := &Dense{}
+		// Check with a new matrix
 		m.RankOne(a, test.alpha, test.x, test.y)
-		ans := NewDense(flatten(test.ans))
-		if !m.Equals(ans) {
-			t.Errorf("RankOne case %v. Want: %v, Got: %v.", i, ans, m)
-		}
+		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+		// Check with the same matrix
 		a.RankOne(a, test.alpha, test.x, test.y)
-		if !a.Equals(ans) {
-			t.Errorf("RankOne same receiver case %v. Want: %v, Got: %v.", i, ans, a)
-		}
+		c.Check(a.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 	}
 }
 

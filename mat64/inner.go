@@ -26,15 +26,13 @@ func Inner(x []float64, A Matrix, y []float64) float64 {
 		for i, xi := range x {
 			for j, yj := range y {
 				sum += xi * bmat.Data[i*bmat.Stride+j] * yj
-
 			}
 		}
 		return sum
 	default:
-		for i := 0; i < m; i++ {
-			xi := x[i]
-			for j := 0; j < n; j++ {
-				sum += xi * A.At(i, j) * y[j]
+		for i, xi := range x {
+			for j, yj := range y {
+				sum += xi * A.At(i, j) * yj
 			}
 		}
 		return sum

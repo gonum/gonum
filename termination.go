@@ -50,8 +50,10 @@ var statusMap = map[Status]string{
 	MethodError:             "MethodError",
 }
 
-var minStatus = -100
-var maxStatus = 100
+var (
+	minStatus = -100
+	maxStatus = 100
+)
 
 // NewStatus returns a unique Status variable to represent a custom status.
 // NewStatus is intended to be called only during package initialization , and

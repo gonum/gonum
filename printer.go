@@ -33,11 +33,15 @@ func NewPrinter() *Printer {
 	}
 }
 
-const nPrinterOut = 4
+const nPrinterOut = len(printerHeadings)
 
 var (
-	// TOOD: Add test that these match up
-	printerHeadings = [nPrinterOut]string{"Iter", "FunEval", "Obj", "GradNorm"}
+	printerHeadings = [...]string{
+		"Iter",
+		"FunEval",
+		"Obj",
+		"GradNorm",
+	}
 )
 
 func (p *Printer) Init(f *FunctionStats) error {
@@ -115,7 +119,7 @@ func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, st
 // pad string adds spaces onto the end of the string to make it the correct length
 func padString(s string, l int) string {
 	if len(s) > l {
-		panic("string too long")
+		panic("opt: string too long")
 	}
 	if len(s) == l {
 		return s

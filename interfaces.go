@@ -29,9 +29,11 @@ type LinesearchMethod interface {
 	// Init initializes the linesearch method with the given function value and
 	// projected gradient, and returns the first evaluation type.
 	Init(initF, initProjGrad, initStepSize float64, f *FunctionStats) EvaluationType
+
 	// Finished takes in the most recent function value and projected gradient, and
 	// returns true if the line search has been concluded.
 	Finished(f, projGrad float64) bool
+
 	// Iterate takes in the function value and projected gradient that resulted
 	// from evaluating the function at the previous step size, and returns the
 	// next step size and EvaluationType to evaluate.
@@ -46,6 +48,7 @@ type NextDirectioner interface {
 	// putting the initial direction in place into dir, and returning the initial
 	// step size. InitDirection must not modify Location.
 	InitDirection(l Location, dir []float64) (stepSize float64)
+
 	// NextDirection updates the search direction and step size. Location is
 	// the location seen at the conclusion of the most recent linesearch. The
 	// next search direction is put in place into dir, and the next stepsize

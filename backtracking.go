@@ -1,4 +1,13 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package opt
+
+const (
+	defaultBacktrackingDecrease = 0.5
+	defaultBacktrackingFunConst = 1e-4
+)
 
 // Backtracking is a type that implements LinesearchMethod using a backtracking
 // line search. A backtracking line search checks that the Armijio condition has
@@ -14,8 +23,8 @@ package opt
 // panic otherwise. If either FunConst or Decrease are zero, it will be set to a
 // reasonable default.
 type Backtracking struct {
-	FunConst float64
-	Decrease float64
+	FunConst float64 // Necessary function descrease for Armijio condition.
+	Decrease float64 // Step size multiplier at each iteration (stepSize *= Decrease).
 
 	stepSize float64
 	initF    float64
@@ -24,13 +33,13 @@ type Backtracking struct {
 
 func (b *Backtracking) Init(initF, initG, initStepSize float64, f *FunctionStats) EvaluationType {
 	if b.Decrease == 0 {
-		b.Decrease = 0.5
+		b.Decrease = defaultBacktrackingDecrease
 	}
 	if b.FunConst == 0 {
-		b.FunConst = 1e-4
+		b.FunConst = defaultBacktrackingFunConst
 	}
 	if initStepSize < 0 {
-		panic("bad step size")
+		panic("backtracking: bad step size")
 	}
 
 	if b.Decrease <= 0 || b.Decrease >= 1 {

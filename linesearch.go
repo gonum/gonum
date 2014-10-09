@@ -64,11 +64,6 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 			// We have the function value at the current location, but we don't
 			// have the gradient, so get it before starting the next major iteration.
 			copy(xNext, loc.X)
-			/*
-				if l.f.IsGradFunction {
-					return FunctionAndGradient, Sub, nil
-				}
-			*/
 			return JustGradient, Sub, nil
 		}
 		return l.initializeNextLinesearch(loc, xNext)

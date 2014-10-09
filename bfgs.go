@@ -26,7 +26,7 @@ type BFGS struct {
 
 	x    []float64 // location of the last major iteration
 	grad []float64 // gradient at the last major iteration
-	nDim int
+	dim  int
 
 	// Temporary memory
 	direction []float64
@@ -59,9 +59,8 @@ func (b *BFGS) Iterate(l Location, xNext []float64) (EvaluationType, IterationTy
 }
 
 func (b *BFGS) InitDirection(l Location, dir []float64) (stepSize float64) {
-
 	dim := len(l.X)
-	b.nDim = dim
+	b.dim = dim
 
 	b.x = resize(b.x, dim)
 	copy(b.x, l.X)
@@ -70,14 +69,11 @@ func (b *BFGS) InitDirection(l Location, dir []float64) (stepSize float64) {
 
 	b.y = resize(b.y, dim)
 	b.s = resize(b.s, dim)
-	if b.invHess != nil {
-		if len(b.invHess.RawMatrix().Data) >= (dim * dim) {
-			b.invHess = mat64.NewDense(dim, dim, b.invHess.RawMatrix().Data[:b.nDim*b.nDim])
-		} else {
-			b.invHess = mat64.NewDense(dim, dim, nil)
-		}
-	} else {
+
+	if b.invHess == nil || cap(b.invHess.RawMatrix().Data) < dim*dim {
 		b.invHess = mat64.NewDense(dim, dim, nil)
+	} else {
+		b.invHess = mat64.NewDense(dim, dim, b.invHess.RawMatrix().Data[:dim*dim])
 	}
 
 	// The values of the hessian are initialized in the first call to NextDirection
@@ -97,14 +93,14 @@ func (b *BFGS) InitDirection(l Location, dir []float64) (stepSize float64) {
 }
 
 func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64) {
-	if len(l.X) != b.nDim {
-		panic("unexpected size mismatch")
+	if len(l.X) != b.dim {
+		panic("bfgs: unexpected size mismatch")
 	}
-	if len(l.Gradient) != b.nDim {
-		panic("unexpected size mismatch")
+	if len(l.Gradient) != b.dim {
+		panic("bfgs: unexpected size mismatch")
 	}
-	if len(direction) != b.nDim {
-		panic("unexpected size mismatch")
+	if len(direction) != b.dim {
+		panic("bfgs: unexpected size mismatch")
 	}
 
 	// Compute the gradient difference in the last step
@@ -142,27 +138,26 @@ func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64)
 	firstTermConst := (sDotY + yBy) / (sDotYSquared)
 
 	// Compute the third term.
-	// TODO: Wikipedia suggests you can do this without
-	// temporary matrices. I do not know how to do so.
-	// TODO: Store ymat etc.
-	yMat := mat64.NewDense(b.nDim, 1, b.y)
-	yMatTrans := mat64.NewDense(1, b.nDim, b.y)
-	sMat := mat64.NewDense(b.nDim, 1, b.s)
-	sMatTrans := mat64.NewDense(1, b.nDim, b.s)
+	// TODO: Replace this with Symmetric Rank 2 update (BLAS function)
+	// when there is a Go implementation and mat64 has a symmetric matrix.
+	yMat := mat64.NewDense(b.dim, 1, b.y)
+	yMatTrans := mat64.NewDense(1, b.dim, b.y)
+	sMat := mat64.NewDense(b.dim, 1, b.s)
+	sMatTrans := mat64.NewDense(1, b.dim, b.s)
 
-	tmp := &mat64.Dense{}
+	var tmp mat64.Dense
 	tmp.Mul(b.invHess, yMat)
-	tmp.Mul(tmp, sMatTrans)
-	tmp.Scale(-1/sDotY, tmp)
+	tmp.Mul(&tmp, sMatTrans)
+	tmp.Scale(-1/sDotY, &tmp)
 
-	tmp2 := &mat64.Dense{}
+	var tmp2 mat64.Dense
 	tmp2.Mul(yMatTrans, b.invHess)
-	tmp2.Mul(sMat, tmp2)
-	tmp2.Scale(-1/sDotY, tmp2)
+	tmp2.Mul(sMat, &tmp2)
+	tmp2.Scale(-1/sDotY, &tmp2)
 
 	// Update b hessian
-	b.invHess.Add(b.invHess, tmp)
-	b.invHess.Add(b.invHess, tmp2)
+	b.invHess.Add(b.invHess, &tmp)
+	b.invHess.Add(b.invHess, &tmp2)
 
 	b.invHess.RankOne(b.invHess, firstTermConst, b.s, b.s)
 
@@ -171,8 +166,8 @@ func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64)
 	copy(b.grad, l.Gradient)
 
 	// Compute the new search direction
-	dirmat := mat64.NewDense(b.nDim, 1, direction)
-	gradmat := mat64.NewDense(b.nDim, 1, l.Gradient)
+	dirmat := mat64.NewDense(b.dim, 1, direction)
+	gradmat := mat64.NewDense(b.dim, 1, l.Gradient)
 
 	dirmat.Mul(b.invHess, gradmat) // new direction stored in place
 	floats.Scale(-1, direction)

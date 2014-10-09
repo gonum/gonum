@@ -21,14 +21,14 @@ const (
 )
 
 func (e EvaluationType) String() string {
-	return evaluationMap[e]
+	return evaluationStrings[e]
 }
 
-var evaluationMap = map[EvaluationType]string{
-	NoEvaluation:        "NoEvaluation",
-	FunctionAndGradient: "FunctionAndGradient",
-	JustFunction:        "JustFunction",
-	JustGradient:        "JustGradient",
+var evaluationStrings = [...]string{
+	"NoEvaluation",
+	"FunctionAndGradient",
+	"JustFunction",
+	"JustGradient",
 }
 
 // IterationType specifies the type of iteration.
@@ -39,17 +39,19 @@ const (
 	Major
 	Minor
 	Sub
+	Complete
 )
 
 func (i IterationType) String() string {
-	return iterationMap[i]
+	return iterationStrings[i]
 }
 
-var iterationMap = map[IterationType]string{
-	NoIteration: "NoIteration",
-	Major:       "Major",
-	Minor:       "Minor",
-	Sub:         "Sub",
+var iterationStrings = [...]string{
+	"NoIteration",
+	"Major",
+	"Minor",
+	"Sub",
+	"Complete",
 }
 
 // Location represents a location in the optimization procedure.
@@ -83,8 +85,6 @@ type FunctionStats struct {
 	IsGradient bool
 	IsFunGrad  bool
 	IsStatuser bool
-
-	// note: it's always a function
 }
 
 // functions contains the actual methods of F that have been successfully type
@@ -111,22 +111,27 @@ type Settings struct {
 
 	// Converge if the objective function is less than this value.
 	FunctionAbsoluteTolerance float64
+
 	// Loosely, converge if the 'average' value of the gradient is less than this
 	// value. Specifically, converge if ||grad||_2 / sqrt(len(grad)) is less than
 	// this value.
 	// Has no effect if gradient information is not used.
 	GradientAbsoluteTolerance float64
+
 	// Converge if the number of major iterations equals or exceeds this value.
 	// If it equals zero, this setting has no effect.
 	MaximumMajorIterations int
+
 	// Converge if the duration of the run is longer than this value. Runtime
 	// is only checked at iterations of the optimizer. If it equals zero,
 	// this setting has no effect.
 	MaximumRuntime time.Duration
+
 	// Converge if the total number of function evaluations equals or exceeds this
 	// number. Calls to F() and FDf() are both counted as function evaluations
 	// for this calculation. If it equals zero, this setting has no effect.
 	MaximumFunctionEvaluations int
+
 	// Converge if the total number of gradient evaluations equals or exceeds this
 	// number. Calls to D() and FDf() are both counted as gradient evaluations
 	// for this calculation. If it equals zero, this setting has no effect.

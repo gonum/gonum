@@ -47,9 +47,7 @@ import (
 // function evaluations. If you would like to put limits on this, for example
 // maximum runtime or maximum function evaluations, please modify the Settings
 // input struct.
-func Minimize(f Function, initX []float64,
-	settings *Settings, method Method) (*Result, error) {
-
+func Minimize(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
 	startTime := time.Now()
 
 	funcs, funcStat := findFunctionStats(f)
@@ -185,7 +183,6 @@ func getDefaultMethod(f *FunctionStats) Method {
 // Combine location and stats because maybe in the future we'll add evaluation times
 // to functionStats?
 func setStartingLocation(f Function, funcs functions, stats *FunctionStats, initX []float64, settings *Settings) (Location, error) {
-
 	var l Location
 
 	if len(initX) == 0 {
@@ -218,8 +215,8 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 		}
 		return l, nil
 	}
-	// Compute any missing information in the inital solution
 
+	// Compute missing information in the inital state.
 	if stats.IsFunGrad {
 		l.Gradient = make([]float64, len(initX))
 		l.F = funcs.gradFunc.FDf(initX, l.Gradient)
@@ -236,7 +233,6 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 }
 
 func checkConvergence(loc Location, itertype IterationType, stats *Stats, settings *Settings) Status {
-
 	if itertype == Major && loc.Gradient != nil {
 		if stats.GradNorm <= settings.GradientAbsoluteTolerance {
 			return GradientAbsoluteConvergence
@@ -277,11 +273,9 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 
 // evaluate evaluates the function and stores the answer in place
 func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType, xNext []float64, location *Location) error {
-
 	copy(location.X, xNext)
 	switch evalType {
 	case JustFunction:
-
 		location.F = funcs.function.F(xNext)
 		for i := range location.Gradient {
 			location.Gradient[i] = math.NaN()

@@ -28,7 +28,7 @@ type Bisection struct {
 
 func (b *Bisection) Init(initF, initG, initStepSize float64, f *FunctionStats) EvaluationType {
 	if initG > 0 {
-		panic("init G greater than 0")
+		panic("bisection: init G greater than 0")
 	}
 
 	if b.GradConst == 0 {

@@ -87,7 +87,6 @@ func testMinimize(t *testing.T, method Method) {
 		Tol      float64
 		Settings *Settings
 	}{
-
 		{
 			F:      Rosenbrock{2},
 			X:      []float64{15, 10},
@@ -97,7 +96,6 @@ func testMinimize(t *testing.T, method Method) {
 
 			Settings: DefaultSettings(),
 		},
-
 		{
 			F:      Rosenbrock{2},
 			X:      []float64{15, 10},
@@ -110,7 +108,6 @@ func testMinimize(t *testing.T, method Method) {
 				GradientAbsoluteTolerance: 1e-13,
 			},
 		},
-
 		{
 			F:      Rosenbrock{4},
 			X:      []float64{-150, 100, 5, -6},
@@ -133,6 +130,5 @@ func testMinimize(t *testing.T, method Method) {
 		if math.Abs(result.F-test.OptVal) > test.Tol {
 			t.Errorf("Minimum not found, exited with status: %v. Want: %v, Got: %v", result.Status, test.OptVal, result.F)
 		}
-		//fmt.Printf("%#v\n", result)
 	}
 }

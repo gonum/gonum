@@ -247,20 +247,20 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 
 	if settings.MaximumFunctionEvaluations > 0 {
 		totalFun := stats.NumFunEvals + stats.NumFunGradEvals
-		if totalFun > settings.MaximumFunctionEvaluations {
+		if totalFun >= settings.MaximumFunctionEvaluations {
 			return FunctionEvaluationLimit
 		}
 	}
 
 	if settings.MaximumGradientEvaluations > 0 {
 		totalGrad := stats.NumGradEvals + stats.NumFunGradEvals
-		if totalGrad > settings.MaximumGradientEvaluations {
+		if totalGrad >= settings.MaximumGradientEvaluations {
 			return GradientEvaluationLimit
 		}
 	}
 
 	if settings.MaximumRuntime > 0 {
-		if stats.Runtime > settings.MaximumRuntime {
+		if stats.Runtime >= settings.MaximumRuntime {
 			return RuntimeLimit
 		}
 	}

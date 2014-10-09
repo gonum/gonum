@@ -15,7 +15,6 @@ import "github.com/gonum/floats"
 type GradientDescent struct {
 	LinesearchMethod LinesearchMethod
 	StepSizer        StepSizer
-	NoLinesearch     bool
 
 	linesearch *Linesearch
 }
@@ -23,11 +22,6 @@ type GradientDescent struct {
 func (g *GradientDescent) Init(l Location, f *FunctionStats, xNext []float64) (EvaluationType, IterationType, error) {
 	if g.StepSizer == nil {
 		g.StepSizer = ConstantStepSize{1}
-	}
-	if g.NoLinesearch {
-		stepSize := g.StepSizer.Init(l)
-		floats.AddScaledTo(xNext, l.X, -stepSize, l.Gradient)
-		return FunctionAndGradient, Major, nil
 	}
 	if g.LinesearchMethod == nil {
 		g.LinesearchMethod = &Backtracking{}
@@ -42,12 +36,6 @@ func (g *GradientDescent) Init(l Location, f *FunctionStats, xNext []float64) (E
 }
 
 func (g *GradientDescent) Iterate(l Location, xNext []float64) (EvaluationType, IterationType, error) {
-	if g.NoLinesearch {
-		stepSize := g.StepSizer.StepSize(l)
-		floats.AddScaledTo(xNext, l.X, -stepSize, l.Gradient)
-		return FunctionAndGradient, Major, nil
-	}
-
 	return g.linesearch.Iterate(l, xNext)
 }
 

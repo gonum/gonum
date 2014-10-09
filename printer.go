@@ -53,8 +53,8 @@ func (p *Printer) Init(f *FunctionStats) error {
 }
 
 func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, stats *Stats) error {
-	// Only print on major iterations
-	if iter != Major {
+	// Only print on major iterations or if the iteration is over
+	if iter != Major && iter != Complete {
 		return nil
 	}
 
@@ -86,8 +86,8 @@ func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, st
 		maxLengths[i] = v2
 	}
 
-	// First, see if we want to print the headings
-	if p.lastHeading >= p.HeadingInterval {
+	// First, see if we want to print the headings. Don't print for final.
+	if p.lastHeading >= p.HeadingInterval && iter != Complete {
 		// Yes we do
 		p.lastHeading = 0
 
@@ -101,8 +101,8 @@ func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, st
 		}
 
 	}
-	// See if we want to print the value
-	if time.Since(p.lastValue) > p.ValueInterval {
+	// See if we want to print the value. Always print for final.
+	if iter == Complete || time.Since(p.lastValue) > p.ValueInterval {
 		// Yes we do
 		p.lastHeading++
 		p.lastValue = time.Now()

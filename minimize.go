@@ -131,7 +131,9 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 			break
 		}
 	}
-
+	if settings.Recorder != nil && err == nil {
+		err = settings.Recorder.Record(*optLoc, NoEvaluation, Complete, stats)
+	}
 	stats.Runtime = time.Since(startTime)
 	return &Result{
 		Stats:    *stats,

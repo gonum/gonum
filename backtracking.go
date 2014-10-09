@@ -1,4 +1,4 @@
-package optimize
+package opt
 
 // Backtracking is a type that implements LinesearchMethod using a backtracking
 // line search. A backtracking line search checks that the Armijio condition has

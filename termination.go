@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package optimize
+package opt
 
 // Status represents the status of the optimization. Statuses that are greater than
 // one represent a sufficiently good value was found. Statuses less than one

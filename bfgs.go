@@ -138,14 +138,7 @@ func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64)
 	//     B_k ^-1 y_k sk^T + s_k y_k^T B_k-1
 
 	// y_k^T B_k^-1 y_k is a scalar. Compute it.
-	// TODO: Replace this with an 'inner product' call if mat64 ever gains one.
-	var yBy float64
-	for i := 0; i < b.nDim; i++ {
-		yi := b.y[i]
-		for j := 0; j < b.nDim; j++ {
-			yBy += yi * b.invHess.At(i, j) * b.y[j]
-		}
-	}
+	yBy := mat64.Inner(b.y, b.invHess, b.y)
 	firstTermConst := (sDotY + yBy) / (sDotYSquared)
 
 	// Compute the third term.
@@ -171,18 +164,7 @@ func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64)
 	b.invHess.Add(b.invHess, tmp)
 	b.invHess.Add(b.invHess, tmp2)
 
-	// TODO: Replace this with an outer product call if mat64 gets one.
-	for i := 0; i < b.nDim; i++ {
-		si := b.s[i]
-		for j := i; j < b.nDim; j++ {
-			bij := b.invHess.At(i, j)
-
-			term2 := firstTermConst * si * b.s[j]
-			newBij := bij + term2
-			b.invHess.Set(i, j, newBij)
-			b.invHess.Set(j, i, newBij)
-		}
-	}
+	b.invHess.RankOne(b.invHess, firstTermConst, b.s, b.s)
 
 	// update the bfgs stored data to the new iteration
 	copy(b.x, l.X)

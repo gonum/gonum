@@ -58,13 +58,13 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 
 	projGrad := floats.Dot(loc.Gradient, l.direction)
 	if l.Method.Finished(loc.F, projGrad) {
-		if l.lastEvalType == JustFunction {
+		if l.lastEvalType == FunctionOnly {
 			l.finished = true
 			l.finishedF = loc.F
 			// We have the function value at the current location, but we don't
 			// have the gradient, so get it before starting the next major iteration.
 			copy(xNext, loc.X)
-			return JustGradient, Sub, nil
+			return GradientOnly, Sub, nil
 		}
 		return l.initializeNextLinesearch(loc, xNext)
 	}

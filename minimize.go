@@ -277,13 +277,13 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType, xNext []float64, location *Location) error {
 	copy(location.X, xNext)
 	switch evalType {
-	case JustFunction:
+	case FunctionOnly:
 		location.F = funcs.function.F(xNext)
 		for i := range location.Gradient {
 			location.Gradient[i] = math.NaN()
 		}
 		return nil
-	case JustGradient:
+	case GradientOnly:
 		location.F = math.NaN()
 		if funcStat.IsGradient {
 			funcs.gradient.Df(location.X, location.Gradient)
@@ -313,9 +313,9 @@ func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType,
 // update updates the stats given the new evaluation
 func update(location Location, optLoc *Location, stats *Stats, funcStat *FunctionStats, evalType EvaluationType, iterType IterationType, startTime time.Time) {
 	switch evalType {
-	case JustFunction:
+	case FunctionOnly:
 		stats.NumFunEvals++
-	case JustGradient:
+	case GradientOnly:
 		if funcStat.IsGradient {
 			stats.NumGradEvals++
 		}

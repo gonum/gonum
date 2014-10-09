@@ -60,6 +60,10 @@ func Minimize(f Function, initX []float64,
 
 	methodStatus, methodIsStatuser := method.(Statuser)
 
+	if settings == nil {
+		settings = DefaultSettings()
+	}
+
 	location, err := setStartingLocation(f, funcs, funcStat, initX, settings)
 	if err != nil {
 		return nil, err
@@ -72,10 +76,6 @@ func Minimize(f Function, initX []float64,
 	// update stats (grad norm, function value, etc.) so that things are
 	// initialized for the first convergence check
 	update(location, optLoc, stats, funcStat, NoEvaluation, NoIteration, startTime)
-
-	if settings == nil {
-		settings = DefaultSettings()
-	}
 
 	if settings.Recorder != nil {
 		err = settings.Recorder.Init(funcStat)

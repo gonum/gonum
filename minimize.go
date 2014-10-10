@@ -56,8 +56,6 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 		method = getDefaultMethod(funcStat)
 	}
 
-	methodStatus, methodIsStatuser := method.(Statuser)
-
 	if settings == nil {
 		settings = DefaultSettings()
 	}
@@ -67,10 +65,8 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 		return nil, err
 	}
 
-	optLoc := &Location{}
-	copyLocation(optLoc, location)
-
 	stats := &Stats{}
+	optLoc := &Location{}
 	// update stats (grad norm, function value, etc.) so that things are
 	// initialized for the first convergence check
 	update(location, optLoc, stats, funcStat, NoEvaluation, NoIteration, startTime)
@@ -82,55 +78,13 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 		}
 	}
 
-	xNext := make([]float64, len(location.X))
+	// actually perform the minimization
+	var (
+		status Status
+	)
+	status, err = minimize(settings, location, method, funcStat, stats, funcs, optLoc, startTime)
 
-	evalType, iterType, err := method.Init(location, funcStat, xNext)
-	if err != nil {
-		return nil, err
-	}
-
-	var status Status
-	for {
-		if settings.Recorder != nil {
-			err = settings.Recorder.Record(location, evalType, iterType, stats)
-			if err != nil {
-				status = RecorderError
-				break
-			}
-		}
-
-		status = checkConvergence(location, iterType, stats, settings)
-		if status != NotTerminated {
-			break
-		}
-
-		if funcStat.IsStatuser {
-			status, err = funcs.status.Status()
-			if err != nil || status != NotTerminated {
-				break
-			}
-		}
-
-		if methodIsStatuser {
-			status, err = methodStatus.Status()
-			if err != nil || status != NotTerminated {
-				break
-			}
-		}
-
-		// Compute the new function and update the statistics
-		err = evaluate(funcs, funcStat, evalType, xNext, &location)
-		if err != nil {
-			break
-		}
-		update(location, optLoc, stats, funcStat, evalType, iterType, startTime)
-
-		// Find the next location
-		evalType, iterType, err = method.Iterate(location, xNext)
-		if err != nil {
-			break
-		}
-	}
+	// cleanup at exit
 	if settings.Recorder != nil && err == nil {
 		err = settings.Recorder.Record(*optLoc, NoEvaluation, Complete, stats)
 	}
@@ -140,6 +94,62 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 		Location: *optLoc,
 		Status:   status,
 	}, err
+}
+
+func minimize(settings *Settings, location Location, method Method, funcStat *FunctionStats, stats *Stats, funcs functions, optLoc *Location, startTime time.Time) (status Status, err error) {
+	methodStatus, methodIsStatuser := method.(Statuser)
+	xNext := make([]float64, len(location.X))
+
+	evalType, iterType, err := method.Init(location, funcStat, xNext)
+	if err != nil {
+		return Failure, err
+	}
+	copyLocation(optLoc, location)
+
+	for {
+		if settings.Recorder != nil {
+			err = settings.Recorder.Record(location, evalType, iterType, stats)
+			if err != nil {
+				status = RecorderError
+				return
+			}
+		}
+
+		status = checkConvergence(location, iterType, stats, settings)
+		if status != NotTerminated {
+			return
+		}
+
+		if funcStat.IsStatuser {
+			status, err = funcs.status.Status()
+			if err != nil || status != NotTerminated {
+				return
+			}
+		}
+
+		if methodIsStatuser {
+			status, err = methodStatus.Status()
+			if err != nil || status != NotTerminated {
+				return
+			}
+		}
+
+		// Compute the new function and update the statistics
+		err = evaluate(funcs, funcStat, evalType, xNext, &location)
+		if err != nil {
+			status = Failure
+			return
+		}
+		update(location, optLoc, stats, funcStat, evalType, iterType, startTime)
+
+		// Find the next location
+		evalType, iterType, err = method.Iterate(location, xNext)
+		if err != nil {
+			status = Failure
+			return
+		}
+	}
+	panic("unreachable")
 }
 
 func copyLocation(dst *Location, src Location) {

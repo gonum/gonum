@@ -59,7 +59,10 @@ func (b *Backtracking) Finished(f, g float64) bool {
 	return ArmijioConditionMet(f, b.initF, b.initG, b.stepSize, b.FunConst)
 }
 
-func (b *Backtracking) Iterate(f, g float64) (float64, EvaluationType) {
+func (b *Backtracking) Iterate(f, g float64) (float64, EvaluationType, error) {
 	b.stepSize *= b.Decrease
-	return b.stepSize, FunctionEval
+	if b.stepSize == 0 {
+		return 0, NoEvaluation, ErrLinesearchFailure
+	}
+	return b.stepSize, FunctionEval, nil
 }

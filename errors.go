@@ -15,7 +15,7 @@ var (
 
 	// ErrLinesearchIterations signifies the linesearch has iterated too many times.
 	// This may occur if the gradient tolerance is set too low.
-	ErrLinesearchIterations = errors.New("linesearch: too many iterations")
+	ErrLinesearchFailure = errors.New("linesearch: failed to converge")
 
 	// ErrNaN signifies the initial function value is NaN.
 	ErrNaN = errors.New("optimize: initial function value is NaN")

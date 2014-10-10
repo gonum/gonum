@@ -37,7 +37,7 @@ type LinesearchMethod interface {
 	// Iterate takes in the function value and projected gradient that resulted
 	// from evaluating the function at the previous step size, and returns the
 	// next step size and EvaluationType to evaluate.
-	Iterate(newF, newProjGrad float64) (newStepSize float64, e EvaluationType)
+	Iterate(newF, newProjGrad float64) (newStepSize float64, e EvaluationType, err error)
 }
 
 // A NextDirectioner is an optimization method that uses a linesearch at each

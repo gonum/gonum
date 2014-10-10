@@ -72,7 +72,7 @@ func (b *Bisection) Finished(f, g float64) bool {
 	return StrongWolfeConditionsMet(f, g, b.initF, b.initGrad, b.currStep, 0, b.GradConst)
 }
 
-func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
+func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType, error) {
 	// Deciding on the next step size
 	if math.IsInf(b.maxStep, 1) {
 		// Have not yet bounded the minimum
@@ -82,8 +82,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 			b.maxStep = b.currStep
 			b.maxF = f
 			b.maxGrad = g
-			b.currStep = (b.minStep + b.maxStep) / 2
-			return b.currStep, FunctionAndGradientEval
+			return b.checkStepEqual((b.minStep+b.maxStep)/2, FunctionAndGradientEval)
 		case f <= b.minF:
 			// Still haven't found an upper bound, but there is not an increase in
 			// function value and the gradient is still negative, so go more in
@@ -91,9 +90,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 			b.minStep = b.currStep
 			b.minF = f
 			b.minGrad = g
-			b.currStep *= 2
-
-			return b.currStep, FunctionAndGradientEval
+			return b.checkStepEqual(b.currStep*2, FunctionAndGradientEval)
 		default:
 			// Increase in function value, but the gradient is still negative.
 			// Means we must have skipped over a local minimum, so set this point
@@ -101,9 +98,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 			b.maxStep = b.currStep
 			b.maxF = f
 			b.maxGrad = g
-			b.currStep = (b.minStep + b.maxStep) / 2
-
-			return b.currStep, FunctionAndGradientEval
+			return b.checkStepEqual((b.minStep+b.maxStep)/2, FunctionAndGradientEval)
 		}
 	}
 	// We have already bounded the minimum, so we're just working to find one
@@ -127,7 +122,18 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 		b.maxF = f
 		b.maxGrad = g
 	}
-	b.currStep = (b.minStep + b.maxStep) / 2
+	return b.checkStepEqual((b.minStep+b.maxStep)/2, FunctionAndGradientEval)
+}
 
-	return b.currStep, FunctionAndGradientEval
+// checkStepEqual checks if the new step is equal to the old step.
+// this can happen if min and max are the same, or if the step size is infinity,
+// both of which indicate the minimization must stop. If the steps are different,
+// it sets the new step size and returns the step and evaluation type. If the steps
+// are the same, it returns an error.
+func (b *Bisection) checkStepEqual(newStep float64, e EvaluationType) (float64, EvaluationType, error) {
+	if b.currStep == newStep {
+		return b.currStep, NoEvaluation, ErrLinesearchFailure
+	}
+	b.currStep = newStep
+	return newStep, e, nil
 }

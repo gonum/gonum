@@ -139,7 +139,8 @@ func testMinimize(t *testing.T, method Method) {
 			},
 		},
 		/*
-			// TODO: Fix optimizers so that they don't fail on this
+			// TODO: Turn this on when we have an adaptive linsearch method.
+			// Gradient descent with backtracking will basically never finish
 			{
 				F:      Linear{8},
 				X:      []float64{9, 8, 7, 6, 5, 4, 3, 2},
@@ -147,7 +148,7 @@ func testMinimize(t *testing.T, method Method) {
 				OptLoc: []float64{negInf, negInf, negInf, negInf, negInf, negInf, negInf, negInf},
 
 				Settings: &Settings{
-					FunctionAbsoluteTolerance: math.Inf(-1),
+					FunctionAbsTol: math.Inf(-1),
 				},
 			},
 		*/
@@ -158,6 +159,7 @@ func testMinimize(t *testing.T, method Method) {
 			t.Errorf("error finding minimum: %v", err.Error())
 			continue
 		}
+		// fmt.Println("%#v\n", result) for debugging
 		// TODO: Better tests
 		if math.Abs(result.F-test.OptVal) > test.Tol {
 			t.Errorf("Minimum not found, exited with status: %v. Want: %v, Got: %v", result.Status, test.OptVal, result.F)

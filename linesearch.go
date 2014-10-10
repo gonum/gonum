@@ -6,8 +6,6 @@ package opt
 
 import "github.com/gonum/floats"
 
-const maxLinesearchIterations = 100
-
 // Linesearch is a linesearch-based optimization method.
 // It consists of a NextDirectioner, which specifies the next linesearch method,
 // and a LinesearchMethod which performs the linesearch in the direction specified
@@ -71,13 +69,13 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 		}
 		return l.initializeNextLinesearch(loc, xNext)
 	}
-	if l.iter > maxLinesearchIterations {
-		return NoEvaluation, NoIteration, ErrLinesearchIterations
-	}
 
 	l.iter++
 	// Line search not done, just iterate
-	stepSize, evalType := l.Method.Iterate(loc.F, projGrad)
+	stepSize, evalType, err := l.Method.Iterate(loc.F, projGrad)
+	if err != nil {
+		return NoEvaluation, NoIteration, err
+	}
 	floats.AddScaledTo(xNext, l.initLoc, stepSize, l.direction)
 	l.lastEvalType = evalType
 	return evalType, MinorIteration, nil

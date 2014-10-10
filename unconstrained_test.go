@@ -9,8 +9,11 @@ import (
 	"testing"
 
 	"github.com/gonum/blas/goblas"
+	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
 )
+
+var negInf = math.Inf(-1)
 
 func init() {
 	mat64.Register(goblas.Blas{})
@@ -45,6 +48,21 @@ func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
 	//	fmt.Println("sum ", sum, "norm", floats.Norm(deriv, 2)/math.Sqrt(float64(len(deriv))))
 
 	return sum
+}
+
+type Linear struct {
+	nDim int
+}
+
+func (l Linear) F(x []float64) float64 {
+	return floats.Sum(x)
+}
+
+func (l Linear) FDf(x []float64, deriv []float64) float64 {
+	for i := range deriv {
+		deriv[i] = 1
+	}
+	return floats.Sum(x)
 }
 
 func TestMinimize(t *testing.T) {
@@ -87,7 +105,6 @@ func testMinimize(t *testing.T, method Method) {
 		Tol      float64
 		Settings *Settings
 	}{
-
 		{
 			F:      Rosenbrock{2},
 			X:      []float64{15, 10},
@@ -97,7 +114,6 @@ func testMinimize(t *testing.T, method Method) {
 
 			Settings: DefaultSettings(),
 		},
-
 		{
 			F:      Rosenbrock{4},
 			X:      []float64{-150, 100, 5, -6},
@@ -110,7 +126,6 @@ func testMinimize(t *testing.T, method Method) {
 				GradientAbsoluteTolerance: 1e-13,
 			},
 		},
-
 		{
 			F:      Rosenbrock{2},
 			X:      []float64{15, 10},
@@ -123,6 +138,19 @@ func testMinimize(t *testing.T, method Method) {
 				GradientAbsoluteTolerance: 1e-13,
 			},
 		},
+		/*
+			// TODO: Fix optimizers so that they don't fail on this
+			{
+				F:      Linear{8},
+				X:      []float64{9, 8, 7, 6, 5, 4, 3, 2},
+				OptVal: negInf,
+				OptLoc: []float64{negInf, negInf, negInf, negInf, negInf, negInf, negInf, negInf},
+
+				Settings: &Settings{
+					FunctionAbsoluteTolerance: math.Inf(-1),
+				},
+			},
+		*/
 	} {
 		test.Settings.Recorder = nil
 		result, err := Minimize(test.F, test.X, test.Settings, method)

@@ -16,6 +16,7 @@ const (
 	FunctionAbsoluteConvergence
 	GradientAbsoluteConvergence
 	StepConvergence
+	FunctionNegativeInfinity
 )
 
 const (

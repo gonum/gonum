@@ -245,6 +245,12 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 		return FunctionAbsoluteConvergence
 	}
 
+	// Check every step for negative infinity because it could break the
+	// linesearches and -inf is the best you can do anyway.
+	if math.IsInf(loc.F, -1) {
+		return FunctionNegativeInfinity
+	}
+
 	if settings.MaximumFunctionEvaluations > 0 {
 		totalFun := stats.NumFunEvals + stats.NumFunGradEvals
 		if totalFun >= settings.MaximumFunctionEvaluations {

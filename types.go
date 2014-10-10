@@ -72,12 +72,12 @@ type Result struct {
 
 // Stats contains the statistics of the run.
 type Stats struct {
-	NumMajorIterations int           // Total number of major iterations
-	NumFunEvals        int           // Number of evaluations of F()
-	NumGradEvals       int           // Number of evaluations of Df()
-	NumFunGradEvals    int           // Number of evaluations of FDf()
-	Runtime            time.Duration // Total runtime of the optimization
-	GradNorm           float64       // 2-norm of the gradient normalized by the sqrt of the length
+	MajorIterations       int           // Total number of major iterations
+	FunctionEvals         int           // Number of evaluations of F()
+	GradientEvals         int           // Number of evaluations of Df()
+	FunctionGradientEvals int           // Number of evaluations of FDf()
+	Runtime               time.Duration // Total runtime of the optimization
+	GradNorm              float64       // 2-norm of the gradient normalized by the sqrt of the length
 }
 
 // FunctionStats is data to give to the optimizer about the objective function.
@@ -105,9 +105,9 @@ type functions struct {
 //
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
-	UseInitData          bool      // Use supplied information about the conitions at the initial x.
+	UseInitialData       bool      // Use supplied information about the conitions at the initial x.
 	InitialFunctionValue float64   // F(x) at the initial x.
-	IntialGradient       []float64 // Df(x) at the initial x.
+	InitialGradient      []float64 // Df(x) at the initial x.
 
 	// Converge if the objective function is less than this value.
 	FunctionAbsoluteTolerance float64
@@ -120,22 +120,22 @@ type Settings struct {
 
 	// Converge if the number of major iterations equals or exceeds this value.
 	// If it equals zero, this setting has no effect.
-	MaximumMajorIterations int
+	MajorIterations int
 
 	// Converge if the duration of the run is longer than this value. Runtime
 	// is only checked at iterations of the optimizer. If it equals zero,
 	// this setting has no effect.
-	MaximumRuntime time.Duration
+	Runtime time.Duration
 
 	// Converge if the total number of function evaluations equals or exceeds this
 	// number. Calls to F() and FDf() are both counted as function evaluations
 	// for this calculation. If it equals zero, this setting has no effect.
-	MaximumFunctionEvaluations int
+	FunctionEvaluations int
 
 	// Converge if the total number of gradient evaluations equals or exceeds this
 	// number. Calls to D() and FDf() are both counted as gradient evaluations
 	// for this calculation. If it equals zero, this setting has no effect.
-	MaximumGradientEvaluations int
+	GradientEvaluations int
 
 	Recorder Recorder
 }

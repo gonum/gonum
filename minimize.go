@@ -205,7 +205,7 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 	l.X = make([]float64, len(initX))
 	copy(l.X, initX)
 
-	if settings.UseInitData {
+	if settings.UseInitialData {
 		initF := settings.InitialFunctionValue
 		// Do we allow Inf initial function value?
 		if math.IsNaN(initF) {
@@ -216,7 +216,7 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 		}
 		l.F = initF
 
-		initG := settings.IntialGradient
+		initG := settings.InitialGradient
 		if stats.IsGradient {
 			if len(initX) != len(initG) {
 				panic("minimize: initial location size mismatch")
@@ -261,28 +261,28 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 		return FunctionNegativeInfinity
 	}
 
-	if settings.MaximumFunctionEvaluations > 0 {
-		totalFun := stats.NumFunEvals + stats.NumFunGradEvals
-		if totalFun >= settings.MaximumFunctionEvaluations {
+	if settings.FunctionEvaluations > 0 {
+		totalFun := stats.FunctionEvals + stats.FunctionGradientEvals
+		if totalFun >= settings.FunctionEvaluations {
 			return FunctionEvaluationLimit
 		}
 	}
 
-	if settings.MaximumGradientEvaluations > 0 {
-		totalGrad := stats.NumGradEvals + stats.NumFunGradEvals
-		if totalGrad >= settings.MaximumGradientEvaluations {
+	if settings.GradientEvaluations > 0 {
+		totalGrad := stats.GradientEvals + stats.FunctionGradientEvals
+		if totalGrad >= settings.GradientEvaluations {
 			return GradientEvaluationLimit
 		}
 	}
 
-	if settings.MaximumRuntime > 0 {
-		if stats.Runtime >= settings.MaximumRuntime {
+	if settings.Runtime > 0 {
+		if stats.Runtime >= settings.Runtime {
 			return RuntimeLimit
 		}
 	}
 
-	if itertype == MajorIteration && settings.MaximumMajorIterations > 0 {
-		if stats.NumMajorIterations >= settings.MaximumMajorIterations {
+	if itertype == MajorIteration && settings.MajorIterations > 0 {
+		if stats.MajorIterations >= settings.MajorIterations {
 			return IterationLimit
 		}
 	}
@@ -330,25 +330,25 @@ func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType,
 func update(location Location, optLoc *Location, stats *Stats, funcStat *FunctionStats, evalType EvaluationType, iterType IterationType, startTime time.Time) {
 	switch evalType {
 	case FunctionEval:
-		stats.NumFunEvals++
+		stats.FunctionEvals++
 	case GradientEval:
 		if funcStat.IsGradient {
-			stats.NumGradEvals++
+			stats.GradientEvals++
 		}
 		if funcStat.IsFunGrad {
-			stats.NumFunGradEvals++
+			stats.FunctionGradientEvals++
 		}
 	case FunctionAndGradientEval:
 		if funcStat.IsFunGrad {
-			stats.NumFunGradEvals++
+			stats.FunctionGradientEvals++
 		}
 		if funcStat.IsGradient {
-			stats.NumFunEvals++
-			stats.NumFunGradEvals++
+			stats.FunctionEvals++
+			stats.FunctionGradientEvals++
 		}
 	}
 	if iterType == MajorIteration {
-		stats.NumMajorIterations++
+		stats.MajorIterations++
 	}
 	if location.F < optLoc.F {
 		copyLocation(optLoc, location)

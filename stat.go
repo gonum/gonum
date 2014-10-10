@@ -414,6 +414,143 @@ func JensenShannon(p, q []float64) float64 {
 	return js
 }
 
+// KolmogorovSmirnov computes the largest distance between the empirical CDFs
+// of the two datasets. x and y consist of the sample locations with sample counts.
+// xWeights and yWeights respectively. x and y must each be sorted.
+//
+// x and y may have different lengths, though len(x) must equal len(xWeights), and
+// len(y) must equal len(yWeights).
+//
+// Special cases are:
+//  = 0 if len(x) == len(y) == 0
+//  = 1 if len(x) == 0, len(y) != 0 or len(x) != 0 and len(y) == 0
+func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
+	if xWeights != nil && len(x) != len(xWeights) {
+		panic("stat: slice length mismatch")
+	}
+	if yWeights != nil && len(y) != len(yWeights) {
+		panic("stat: slice length mismatch")
+	}
+	if len(x) == 0 || len(y) == 0 {
+		if len(x) == 0 && len(y) == 0 {
+			return 0
+		}
+		return 1
+	}
+
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
+	if !sort.Float64sAreSorted(y) {
+		panic("y data are not sorted")
+	}
+
+	if floats.HasNaN(x) {
+		return math.NaN()
+	}
+
+	if floats.HasNaN(y) {
+		return math.NaN()
+	}
+
+	xWeightsNil := xWeights == nil
+	yWeightsNil := yWeights == nil
+
+	var (
+		maxDist    float64
+		xSum, ySum float64
+		xCdf, yCdf float64
+		xIdx, yIdx int
+	)
+
+	if xWeightsNil {
+		xSum = float64(len(x))
+	} else {
+		xSum = floats.Sum(xWeights)
+	}
+
+	if yWeightsNil {
+		ySum = float64(len(y))
+	} else {
+		ySum = floats.Sum(yWeights)
+	}
+
+	xVal := x[0]
+	yVal := y[0]
+
+	// Algorithm description:
+	// The goal is to find the maximum difference in the empirical CDFs for the
+	// two datasets. The CDFs are piecewise-constant, and thus the distance
+	// between the CDFs will only change at the values themselves.
+	//
+	// To find the maximum distance, step through the data in ascending order
+	// of value between the two datasets. At each step, compute the empirical CDF
+	// and compare the local distance with the maximum distance.
+	// Due to some corner cases, equal data entries must be tallied simultaneously.
+	for {
+		switch {
+		case xVal < yVal:
+			xVal, xCdf, xIdx = updateKS(xIdx, xCdf, xSum, x, xWeights, xWeightsNil)
+		case yVal < xVal:
+			yVal, yCdf, yIdx = updateKS(yIdx, yCdf, ySum, y, yWeights, yWeightsNil)
+		case xVal == yVal:
+			newX := x[xIdx]
+			newY := y[yIdx]
+			if newX < newY {
+				xVal, xCdf, xIdx = updateKS(xIdx, xCdf, xSum, x, xWeights, xWeightsNil)
+			} else if newY < newX {
+				yVal, yCdf, yIdx = updateKS(yIdx, yCdf, ySum, y, yWeights, yWeightsNil)
+			} else {
+				// Update them both, they'll be equal next time and the right
+				// thing will happen
+				xVal, xCdf, xIdx = updateKS(xIdx, xCdf, xSum, x, xWeights, xWeightsNil)
+				yVal, yCdf, yIdx = updateKS(yIdx, yCdf, ySum, y, yWeights, yWeightsNil)
+			}
+		default:
+			panic("unreachable")
+		}
+
+		dist := math.Abs(xCdf - yCdf)
+		if dist > maxDist {
+			maxDist = dist
+		}
+
+		// Both xCdf and yCdf will equal 1 at the end, so if we have reached the
+		// end of either sample list, the distance is as large as it can be.
+		if xIdx == len(x) || yIdx == len(y) {
+			return maxDist
+		}
+	}
+}
+
+// updateKS gets the next data point from one of the set. In doing so, it combines
+// the weight of all the data points of equal value. Upon return, val is the new
+// value of the data set, newCdf is the total combined CDF up until this point,
+// and newIdx is the index of the next location in that sample to examine.
+func updateKS(idx int, cdf, sum float64, values, weights []float64, isNil bool) (val, newCdf float64, newIdx int) {
+	// Sum up all the weights of consecutive values that are equal
+	if isNil {
+		newCdf = cdf + 1/sum
+	} else {
+		newCdf = cdf + weights[idx]/sum
+	}
+	newIdx = idx + 1
+	for {
+		if newIdx == len(values) {
+			return values[newIdx-1], newCdf, newIdx
+		}
+		if values[newIdx-1] != values[newIdx] {
+			return values[newIdx], newCdf, newIdx
+		}
+		if isNil {
+			newCdf += 1 / sum
+		} else {
+			newCdf += weights[newIdx] / sum
+		}
+		newIdx++
+	}
+}
+
 // KullbackLeibler computes the Kullback-Leibler distance between the
 // distributions p and q. The natural logarithm is used.
 //  sum_i(p_i * log(p_i / q_i))

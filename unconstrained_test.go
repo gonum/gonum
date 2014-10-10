@@ -77,7 +77,7 @@ func testMinimize(t *testing.T, method Method) {
 	// This should be replaced with a more general testing framework with
 	// a plugable method
 
-	for _, test := range []struct {
+	for i, test := range []struct {
 		F Function
 		X []float64
 
@@ -87,6 +87,7 @@ func testMinimize(t *testing.T, method Method) {
 		Tol      float64
 		Settings *Settings
 	}{
+
 		{
 			F:      Rosenbrock{2},
 			X:      []float64{15, 10},
@@ -96,18 +97,7 @@ func testMinimize(t *testing.T, method Method) {
 
 			Settings: DefaultSettings(),
 		},
-		{
-			F:      Rosenbrock{2},
-			X:      []float64{15, 10},
-			OptVal: 0,
-			OptLoc: []float64{1, 1},
-			Tol:    1e-4,
 
-			Settings: &Settings{
-				FunctionAbsoluteTolerance: math.Inf(-1),
-				GradientAbsoluteTolerance: 1e-13,
-			},
-		},
 		{
 			F:      Rosenbrock{4},
 			X:      []float64{-150, 100, 5, -6},
@@ -120,15 +110,56 @@ func testMinimize(t *testing.T, method Method) {
 				GradientAbsoluteTolerance: 1e-13,
 			},
 		},
+
+		{
+			F:      Rosenbrock{2},
+			X:      []float64{15, 10},
+			OptVal: 0,
+			OptLoc: []float64{1, 1},
+			Tol:    1e-4,
+
+			Settings: &Settings{
+				FunctionAbsoluteTolerance: math.Inf(-1),
+				GradientAbsoluteTolerance: 1e-13,
+			},
+		},
 	} {
 		test.Settings.Recorder = nil
 		result, err := Minimize(test.F, test.X, test.Settings, method)
 		if err != nil {
 			t.Errorf("error finding minimum: %v", err.Error())
+			continue
 		}
 		// TODO: Better tests
 		if math.Abs(result.F-test.OptVal) > test.Tol {
 			t.Errorf("Minimum not found, exited with status: %v. Want: %v, Got: %v", result.Status, test.OptVal, result.F)
+			continue
 		}
+		if result == nil {
+			t.Errorf("Case %v: nil result without error", i)
+			continue
+		}
+
+		// rerun it again to ensure it gets the same answer with the same starting
+		// condition
+		result2, err2 := Minimize(test.F, test.X, test.Settings, method)
+		if err2 != nil {
+			t.Errorf("error finding minimum second time: %v", err2.Error())
+			continue
+		}
+		if result2 == nil {
+			t.Errorf("Case %v: nil result without error", i)
+			continue
+		}
+		/*
+			// For debugging purposes, can't use DeepEqual naively becaus of NaNs
+			// kill the runtime before the check, because those don't need to be equal
+			result.Runtime = 0
+			result2.Runtime = 0
+			if !reflect.DeepEqual(result, result2) {
+				t.Error(eqString)
+				continue
+			}
+		*/
 	}
 }

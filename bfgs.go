@@ -120,7 +120,13 @@ func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64)
 		yDotY := floats.Dot(b.y, b.y)
 		scale := sDotY / yDotY
 		for i := 0; i < len(l.X); i++ {
-			b.invHess.Set(i, i, scale)
+			for j := 0; j < len(l.X); j++ {
+				if i == j {
+					b.invHess.Set(i, i, scale)
+				} else {
+					b.invHess.Set(i, j, 0)
+				}
+			}
 		}
 		b.first = false
 	}

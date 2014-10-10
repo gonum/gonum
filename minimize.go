@@ -293,13 +293,13 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType, xNext []float64, location *Location) error {
 	copy(location.X, xNext)
 	switch evalType {
-	case FunctionOnly:
+	case FunctionEval:
 		location.F = funcs.function.F(xNext)
 		for i := range location.Gradient {
 			location.Gradient[i] = math.NaN()
 		}
 		return nil
-	case GradientOnly:
+	case GradientEval:
 		location.F = math.NaN()
 		if funcStat.IsGradient {
 			funcs.gradient.Df(location.X, location.Gradient)
@@ -310,7 +310,7 @@ func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType,
 			return nil
 		}
 		return ErrMismatch{Type: evalType}
-	case FunctionAndGradient:
+	case FunctionAndGradientEval:
 		if funcStat.IsFunGrad {
 			location.F = funcs.gradFunc.FDf(xNext, location.Gradient)
 			return nil
@@ -329,16 +329,16 @@ func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType,
 // update updates the stats given the new evaluation
 func update(location Location, optLoc *Location, stats *Stats, funcStat *FunctionStats, evalType EvaluationType, iterType IterationType, startTime time.Time) {
 	switch evalType {
-	case FunctionOnly:
+	case FunctionEval:
 		stats.NumFunEvals++
-	case GradientOnly:
+	case GradientEval:
 		if funcStat.IsGradient {
 			stats.NumGradEvals++
 		}
 		if funcStat.IsFunGrad {
 			stats.NumFunGradEvals++
 		}
-	case FunctionAndGradient:
+	case FunctionAndGradientEval:
 		if funcStat.IsFunGrad {
 			stats.NumFunGradEvals++
 		}

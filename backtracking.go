@@ -52,7 +52,7 @@ func (b *Backtracking) Init(initF, initG, initStepSize float64, f *FunctionStats
 	b.stepSize = initStepSize
 	b.initF = initF
 	b.initG = initG
-	return FunctionOnly
+	return FunctionEval
 }
 
 func (b *Backtracking) Finished(f, g float64) bool {
@@ -61,5 +61,5 @@ func (b *Backtracking) Finished(f, g float64) bool {
 
 func (b *Backtracking) Iterate(f, g float64) (float64, EvaluationType) {
 	b.stepSize *= b.Decrease
-	return b.stepSize, FunctionOnly
+	return b.stepSize, FunctionEval
 }

@@ -15,9 +15,9 @@ type EvaluationType int
 
 const (
 	NoEvaluation EvaluationType = iota
-	FunctionOnly
-	GradientOnly
-	FunctionAndGradient
+	FunctionEval
+	GradientEval
+	FunctionAndGradientEval
 )
 
 func (e EvaluationType) String() string {

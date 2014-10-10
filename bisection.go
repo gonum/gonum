@@ -54,7 +54,7 @@ func (b *Bisection) Init(initF, initG, initStepSize float64, f *FunctionStats) E
 	b.minGrad = initG
 	b.maxGrad = math.NaN()
 
-	return FunctionAndGradient
+	return FunctionAndGradientEval
 }
 
 const (
@@ -83,7 +83,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 			b.maxF = f
 			b.maxGrad = g
 			b.currStep = (b.minStep + b.maxStep) / 2
-			return b.currStep, FunctionAndGradient
+			return b.currStep, FunctionAndGradientEval
 		case f <= b.minF:
 			// Still haven't found an upper bound, but there is not an increase in
 			// function value and the gradient is still negative, so go more in
@@ -93,7 +93,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 			b.minGrad = g
 			b.currStep *= 2
 
-			return b.currStep, FunctionAndGradient
+			return b.currStep, FunctionAndGradientEval
 		default:
 			// Increase in function value, but the gradient is still negative.
 			// Means we must have skipped over a local minimum, so set this point
@@ -103,7 +103,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 			b.maxGrad = g
 			b.currStep = (b.minStep + b.maxStep) / 2
 
-			return b.currStep, FunctionAndGradient
+			return b.currStep, FunctionAndGradientEval
 		}
 	}
 	// We have already bounded the minimum, so we're just working to find one
@@ -129,5 +129,5 @@ func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType) {
 	}
 	b.currStep = (b.minStep + b.maxStep) / 2
 
-	return b.currStep, FunctionAndGradient
+	return b.currStep, FunctionAndGradientEval
 }

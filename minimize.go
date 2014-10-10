@@ -170,9 +170,9 @@ func findFunctionStats(f Function) (functions, *FunctionStats) {
 	status, isStatuser := f.(Statuser)
 
 	stats := &FunctionStats{
-		IsGradient: isGradient,
-		IsFunGrad:  isFunGrad,
-		IsStatuser: isStatuser,
+		IsGradient:         isGradient,
+		IsFunctionGradient: isFunGrad,
+		IsStatuser:         isStatuser,
 	}
 	funcs := functions{
 		function: f,
@@ -185,7 +185,7 @@ func findFunctionStats(f Function) (functions, *FunctionStats) {
 }
 
 func getDefaultMethod(f *FunctionStats) Method {
-	if f.IsFunGrad {
+	if f.IsFunctionGradient {
 		return &BFGS{}
 	}
 	// TODO: Implement a gradient-free method
@@ -229,7 +229,7 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 	}
 
 	// Compute missing information in the inital state.
-	if stats.IsFunGrad {
+	if stats.IsFunctionGradient {
 		l.Gradient = make([]float64, len(initX))
 		l.F = funcs.gradFunc.FDf(initX, l.Gradient)
 		return l, nil
@@ -246,12 +246,12 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 
 func checkConvergence(loc Location, itertype IterationType, stats *Stats, settings *Settings) Status {
 	if itertype == MajorIteration && loc.Gradient != nil {
-		if stats.GradNorm <= settings.GradientAbsoluteTolerance {
+		if stats.GradientNorm <= settings.GradientAbsTol {
 			return GradientAbsoluteConvergence
 		}
 	}
 
-	if itertype == MajorIteration && loc.F < settings.FunctionAbsoluteTolerance {
+	if itertype == MajorIteration && loc.F < settings.FunctionAbsTol {
 		return FunctionAbsoluteConvergence
 	}
 
@@ -261,16 +261,16 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 		return FunctionNegativeInfinity
 	}
 
-	if settings.FunctionEvaluations > 0 {
+	if settings.FunctionEvals > 0 {
 		totalFun := stats.FunctionEvals + stats.FunctionGradientEvals
-		if totalFun >= settings.FunctionEvaluations {
+		if totalFun >= settings.FunctionEvals {
 			return FunctionEvaluationLimit
 		}
 	}
 
-	if settings.GradientEvaluations > 0 {
+	if settings.GradientEvals > 0 {
 		totalGrad := stats.GradientEvals + stats.FunctionGradientEvals
-		if totalGrad >= settings.GradientEvaluations {
+		if totalGrad >= settings.GradientEvals {
 			return GradientEvaluationLimit
 		}
 	}
@@ -305,13 +305,13 @@ func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType,
 			funcs.gradient.Df(location.X, location.Gradient)
 			return nil
 		}
-		if funcStat.IsFunGrad {
+		if funcStat.IsFunctionGradient {
 			location.F = funcs.gradFunc.FDf(location.X, location.Gradient)
 			return nil
 		}
 		return ErrMismatch{Type: evalType}
 	case FunctionAndGradientEval:
-		if funcStat.IsFunGrad {
+		if funcStat.IsFunctionGradient {
 			location.F = funcs.gradFunc.FDf(xNext, location.Gradient)
 			return nil
 		}
@@ -335,11 +335,11 @@ func update(location Location, optLoc *Location, stats *Stats, funcStat *Functio
 		if funcStat.IsGradient {
 			stats.GradientEvals++
 		}
-		if funcStat.IsFunGrad {
+		if funcStat.IsFunctionGradient {
 			stats.FunctionGradientEvals++
 		}
 	case FunctionAndGradientEval:
-		if funcStat.IsFunGrad {
+		if funcStat.IsFunctionGradient {
 			stats.FunctionGradientEvals++
 		}
 		if funcStat.IsGradient {
@@ -354,5 +354,5 @@ func update(location Location, optLoc *Location, stats *Stats, funcStat *Functio
 		copyLocation(optLoc, location)
 	}
 	stats.Runtime = time.Since(startTime)
-	stats.GradNorm = floats.Norm(location.Gradient, 2) / math.Sqrt(float64(len(location.Gradient)))
+	stats.GradientNorm = floats.Norm(location.Gradient, 2) / math.Sqrt(float64(len(location.Gradient)))
 }

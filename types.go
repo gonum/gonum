@@ -77,14 +77,14 @@ type Stats struct {
 	GradientEvals         int           // Number of evaluations of Df()
 	FunctionGradientEvals int           // Number of evaluations of FDf()
 	Runtime               time.Duration // Total runtime of the optimization
-	GradNorm              float64       // 2-norm of the gradient normalized by the sqrt of the length
+	GradientNorm          float64       // 2-norm of the gradient normalized by the sqrt of the length
 }
 
 // FunctionStats is data to give to the optimizer about the objective function.
 type FunctionStats struct {
-	IsGradient bool
-	IsFunGrad  bool
-	IsStatuser bool
+	IsGradient         bool
+	IsFunctionGradient bool
+	IsStatuser         bool
 }
 
 // functions contains the actual methods of F that have been successfully type
@@ -110,13 +110,13 @@ type Settings struct {
 	InitialGradient      []float64 // Df(x) at the initial x.
 
 	// Converge if the objective function is less than this value.
-	FunctionAbsoluteTolerance float64
+	FunctionAbsTol float64
 
 	// Loosely, converge if the 'average' value of the gradient is less than this
 	// value. Specifically, converge if ||grad||_2 / sqrt(len(grad)) is less than
 	// this value.
 	// Has no effect if gradient information is not used.
-	GradientAbsoluteTolerance float64
+	GradientAbsTol float64
 
 	// Converge if the number of major iterations equals or exceeds this value.
 	// If it equals zero, this setting has no effect.
@@ -130,12 +130,12 @@ type Settings struct {
 	// Converge if the total number of function evaluations equals or exceeds this
 	// number. Calls to F() and FDf() are both counted as function evaluations
 	// for this calculation. If it equals zero, this setting has no effect.
-	FunctionEvaluations int
+	FunctionEvals int
 
 	// Converge if the total number of gradient evaluations equals or exceeds this
 	// number. Calls to D() and FDf() are both counted as gradient evaluations
 	// for this calculation. If it equals zero, this setting has no effect.
-	GradientEvaluations int
+	GradientEvals int
 
 	Recorder Recorder
 }
@@ -143,8 +143,8 @@ type Settings struct {
 // DefaultSettings returns a new Settings struct containing the default settings.
 func DefaultSettings() *Settings {
 	return &Settings{
-		GradientAbsoluteTolerance: 1e-6,
-		FunctionAbsoluteTolerance: math.Inf(-1),
-		Recorder:                  NewPrinter(),
+		GradientAbsTol: 1e-6,
+		FunctionAbsTol: math.Inf(-1),
+		Recorder:       NewPrinter(),
 	}
 }

@@ -45,7 +45,7 @@ var (
 )
 
 func (p *Printer) Init(f *FunctionStats) error {
-	p.printGrad = f.IsFunGrad || f.IsGradient
+	p.printGrad = f.IsFunctionGradient || f.IsGradient
 
 	p.lastHeading = p.HeadingInterval + 1          // So the headings are printed the first time
 	p.lastValue = time.Now().Add(-p.ValueInterval) // So the values are printed the first time
@@ -71,7 +71,7 @@ func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, st
 	valueStrings[1] = strconv.Itoa(stats.FunctionEvals + stats.FunctionGradientEvals)
 	valueStrings[2] = fmt.Sprintf("%g", l.F)
 	if p.printGrad {
-		valueStrings[3] = fmt.Sprintf("%g", stats.GradNorm)
+		valueStrings[3] = fmt.Sprintf("%g", stats.GradientNorm)
 	}
 
 	var maxLengths [nPrinterOut]int

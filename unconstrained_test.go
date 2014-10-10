@@ -122,8 +122,8 @@ func testMinimize(t *testing.T, method Method) {
 			Tol:    1e-4,
 
 			Settings: &Settings{
-				FunctionAbsoluteTolerance: math.Inf(-1),
-				GradientAbsoluteTolerance: 1e-13,
+				FunctionAbsTol: math.Inf(-1),
+				GradientAbsTol: 1e-13,
 			},
 		},
 		{
@@ -134,8 +134,8 @@ func testMinimize(t *testing.T, method Method) {
 			Tol:    1e-4,
 
 			Settings: &Settings{
-				FunctionAbsoluteTolerance: math.Inf(-1),
-				GradientAbsoluteTolerance: 1e-13,
+				FunctionAbsTol: math.Inf(-1),
+				GradientAbsTol: 1e-13,
 			},
 		},
 		/*

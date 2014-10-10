@@ -36,10 +36,10 @@ type IterationType int
 
 const (
 	NoIteration IterationType = iota
-	Major
-	Minor
-	Sub
-	Complete
+	MajorIteration
+	MinorIteration
+	SubIteration
+	PostIteration // Iteration after the optimization. Sent to Recorder.
 )
 
 func (i IterationType) String() string {

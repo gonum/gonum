@@ -47,7 +47,7 @@ func (l *Linesearch) Init(loc Location, f *FunctionStats, xNext []float64) (Eval
 	l.lastEvalType = evalType
 	l.finished = false
 	l.iter = 0
-	return evalType, Major, nil
+	return evalType, MajorIteration, nil
 }
 
 func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
@@ -67,7 +67,7 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 			// We have the function value at the current location, but we don't
 			// have the gradient, so get it before starting the next major iteration.
 			copy(xNext, loc.X)
-			return GradientEval, Sub, nil
+			return GradientEval, SubIteration, nil
 		}
 		return l.initializeNextLinesearch(loc, xNext)
 	}
@@ -80,7 +80,7 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 	stepSize, evalType := l.Method.Iterate(loc.F, projGrad)
 	floats.AddScaledTo(xNext, l.initLoc, stepSize, l.direction)
 	l.lastEvalType = evalType
-	return evalType, Minor, nil
+	return evalType, MinorIteration, nil
 }
 
 func (l *Linesearch) initializeNextLinesearch(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
@@ -99,5 +99,5 @@ func (l *Linesearch) initializeNextLinesearch(loc Location, xNext []float64) (Ev
 
 	l.lastEvalType = evalType
 
-	return evalType, Major, nil
+	return evalType, MajorIteration, nil
 }

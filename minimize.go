@@ -86,7 +86,7 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 
 	// cleanup at exit
 	if settings.Recorder != nil && err == nil {
-		err = settings.Recorder.Record(*optLoc, NoEvaluation, Complete, stats)
+		err = settings.Recorder.Record(*optLoc, NoEvaluation, PostIteration, stats)
 	}
 	stats.Runtime = time.Since(startTime)
 	return &Result{
@@ -245,13 +245,13 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 }
 
 func checkConvergence(loc Location, itertype IterationType, stats *Stats, settings *Settings) Status {
-	if itertype == Major && loc.Gradient != nil {
+	if itertype == MajorIteration && loc.Gradient != nil {
 		if stats.GradNorm <= settings.GradientAbsoluteTolerance {
 			return GradientAbsoluteConvergence
 		}
 	}
 
-	if itertype == Major && loc.F < settings.FunctionAbsoluteTolerance {
+	if itertype == MajorIteration && loc.F < settings.FunctionAbsoluteTolerance {
 		return FunctionAbsoluteConvergence
 	}
 
@@ -281,7 +281,7 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 		}
 	}
 
-	if itertype == Major && settings.MaximumMajorIterations > 0 {
+	if itertype == MajorIteration && settings.MaximumMajorIterations > 0 {
 		if stats.NumMajorIterations >= settings.MaximumMajorIterations {
 			return IterationLimit
 		}
@@ -347,7 +347,7 @@ func update(location Location, optLoc *Location, stats *Stats, funcStat *Functio
 			stats.NumFunGradEvals++
 		}
 	}
-	if iterType == Major {
+	if iterType == MajorIteration {
 		stats.NumMajorIterations++
 	}
 	if location.F < optLoc.F {

@@ -79,10 +79,7 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 	}
 
 	// actually perform the minimization
-	var (
-		status Status
-	)
-	status, err = minimize(settings, location, method, funcStat, stats, funcs, optLoc, startTime)
+	status, err := minimize(settings, location, method, funcStat, stats, funcs, optLoc, startTime)
 
 	// cleanup at exit
 	if settings.Recorder != nil && err == nil {

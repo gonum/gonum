@@ -57,8 +57,13 @@ func (b *Bisection) Init(initF, initG, initStepSize float64, f *FunctionStats) E
 	return FunctionAndGradient
 }
 
+const (
+	funcSmallEqual = 1e-14
+	gradSmallEqual = 1e-10
+)
+
 func (b *Bisection) Finished(f, g float64) bool {
-	if floats.EqualWithinRel(f, b.initF, 1e-14) {
+	if floats.EqualWithinRel(f, b.initF, funcSmallEqual) && math.Abs(g) < gradSmallEqual && math.Abs(b.initGrad) < gradSmallEqual {
 		// The two numbers are so close that we should just check on the gradient
 		// TODO: Should iterate be updated? Maybe find a function where it needs it.
 		return math.Abs(g) < b.GradConst*math.Abs(b.initGrad)

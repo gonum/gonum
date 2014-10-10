@@ -45,7 +45,6 @@ func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
 	for i := 1; i < len(x); i++ {
 		deriv[i] += 2 * 100 * (x[i] - math.Pow(x[i-1], 2))
 	}
-	//	fmt.Println("sum ", sum, "norm", floats.Norm(deriv, 2)/math.Sqrt(float64(len(deriv))))
 
 	return sum
 }

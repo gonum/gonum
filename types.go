@@ -26,9 +26,9 @@ func (e EvaluationType) String() string {
 
 var evaluationStrings = [...]string{
 	"NoEvaluation",
-	"FunctionAndGradient",
-	"JustFunction",
-	"JustGradient",
+	"FunctionEval",
+	"GradientEval",
+	"FunctionAndGradientEval",
 }
 
 // IterationType specifies the type of iteration.
@@ -48,10 +48,10 @@ func (i IterationType) String() string {
 
 var iterationStrings = [...]string{
 	"NoIteration",
-	"Major",
-	"Minor",
-	"Sub",
-	"Complete",
+	"MajorIteration",
+	"MinorIteration",
+	"SubIteration",
+	"PostIteration",
 }
 
 // Location represents a location in the optimization procedure.

@@ -7,7 +7,7 @@ package opt
 import "math"
 
 // ArmijioConditionMet returns true if the Armijio condition (aka sufficient decrease)
-// has been met. Under normal conditions, the following should be true, though this is not enforced.
+// has been met. Under normal conditions, the following should be true, though this is not enforced:
 // 	- initGrad < 0
 //  - step > 0
 //  - 0 < funConst < 1

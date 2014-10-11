@@ -25,7 +25,6 @@ const (
 	RecorderError
 	UserFunctionError
 	MethodError
-	lastProvidedStatus // this exists to make sure that len(statuses) is correct. New Stauses should be added above this
 )
 
 func (s Status) String() string {
@@ -109,18 +108,6 @@ var statuses = []struct {
 		early: true,
 		err:   errors.New("opt: minimizaton stopped due to error in the optimizer."),
 	},
-	{
-		name: "lastProvidedStatus",
-	},
-}
-
-var lastExistingStatus Status
-
-func init() {
-	lastExistingStatus = lastProvidedStatus
-	if int(lastExistingStatus) != len(statuses)-1 {
-		panic("length of statuses is not correct")
-	}
 }
 
 // NewStatus returns a unique Status variable to represent a custom status.
@@ -131,11 +118,10 @@ func init() {
 // Status.String(), a boolean if the status indicates early optimization conclusion,
 // and the error to return from Err (if any).
 func NewStatus(name string, early bool, err error) Status {
-	lastExistingStatus++
 	statuses = append(statuses, struct {
 		name  string
 		early bool
 		err   error
 	}{name, early, err})
-	return lastExistingStatus
+	return Status(len(statuses) - 1)
 }

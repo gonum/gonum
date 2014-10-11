@@ -579,6 +579,25 @@ func Prod(s []float64) float64 {
 	return prod
 }
 
+// Same returns true if the input slices have the same length and the all elements
+// have the same value with NaN treated as the same.
+func Same(s, t []float64) bool {
+	if len(s) != len(t) {
+		return false
+	}
+	for i, v := range s {
+		w := t[i]
+		if v == w {
+			continue
+		}
+		if math.IsNaN(v) && math.IsNaN(w) {
+			continue
+		}
+		return false
+	}
+	return true
+}
+
 // Scale multiplies every element in dst by the scalar c.
 func Scale(c float64, dst []float64) {
 	for i := range dst {

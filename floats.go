@@ -587,7 +587,7 @@ func Same(s, t []float64) bool {
 	}
 	for i, v := range s {
 		w := t[i]
-		if (v != w) && !math.IsNaN(v) && !math.IsNaN(w) {
+		if v != w && !math.IsNaN(v) && !math.IsNaN(w) {
 			return false
 		}
 	}

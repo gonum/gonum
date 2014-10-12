@@ -17,14 +17,14 @@ type Gradient interface {
 }
 
 // FunctionGradient evaluates both the derivative and the function at x, storing
-// the gradient in place. FDf not modify x.
+// the gradient in place. FDf must not modify x.
 type FunctionGradient interface {
 	FDf(x []float64, grad []float64) (obj float64)
 }
 
 // LinesearchMethod is a type that can perform a line search. Typically, these
-// methods not be called by the user directly, and will only be called by the
-// Linesearch struct.
+// methods will not be called by the user directly, as they will be called by
+// a Linesearch struct.
 type LinesearchMethod interface {
 	// Init initializes the linesearch method with the given function value and
 	// projected gradient, and returns the first evaluation type.
@@ -41,8 +41,8 @@ type LinesearchMethod interface {
 }
 
 // A NextDirectioner is an optimization method that uses a linesearch at each
-// major iteration. Typically, these methods not be called by the user directly,
-// and will only be called by the Linesearch struct.
+// major iteration. Typically, these methods will not be called by the user directly,
+// as they will be called by a Linesearch struct.
 type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,
 	// putting the initial direction in place into dir, and returning the initial

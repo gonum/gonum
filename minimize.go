@@ -351,5 +351,7 @@ func update(location Location, optLoc *Location, stats *Stats, funcStat *Functio
 		copyLocation(optLoc, location)
 	}
 	stats.Runtime = time.Since(startTime)
-	stats.GradientNorm = floats.Norm(location.Gradient, 2) / math.Sqrt(float64(len(location.Gradient)))
+	if location.Gradient != nil {
+		stats.GradientNorm = floats.Norm(location.Gradient, 2) / math.Sqrt(float64(len(location.Gradient)))
+	}
 }

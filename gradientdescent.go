@@ -9,9 +9,8 @@ import "github.com/gonum/floats"
 // GradientDescent is a Method that performs gradient-based optimization. Gradient
 // Descent performs successive steps along the direction of the gradient. The
 // LinesearchMethod specifies the kind of linesearch to be done, and StepSizer determines
-// the initial step size of each direction. If NoLinesearch is true, no linesearch
-// will be done. If either LinesearchMethod or StepSizer are nil, a reasonable
-// value will be chosen.
+// the initial step size of each direction. If either LinesearchMethod or StepSizer
+// are nil, a reasonable value will be chosen.
 type GradientDescent struct {
 	LinesearchMethod LinesearchMethod
 	StepSizer        StepSizer

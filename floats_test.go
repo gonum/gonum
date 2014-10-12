@@ -961,6 +961,86 @@ func TestSum(t *testing.T) {
 	}
 }
 
+func TestWithin(t *testing.T) {
+	for i, test := range []struct {
+		s      []float64
+		v      float64
+		idx    int
+		panics bool
+	}{
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   1,
+			idx: 0,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   9,
+			idx: 3,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   1.5,
+			idx: 0,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   2,
+			idx: 1,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   2.5,
+			idx: 1,
+		},
+		{
+			s:      []float64{1, 2, 5, 9},
+			v:      -3,
+			panics: true,
+		},
+		{
+			s:      []float64{1, 2, 5, 9},
+			v:      15,
+			panics: true,
+		},
+		{
+			s:      []float64{1, 2, 5, 9},
+			v:      math.NaN(),
+			panics: true,
+		},
+		{
+			s:      []float64{5, 2, 6},
+			panics: true,
+		},
+		{
+			panics: true,
+		},
+		{
+			s:      []float64{1},
+			panics: true,
+		},
+	} {
+		var idx int
+		panics := Panics(func() { idx = Within(test.s, test.v) })
+		if panics {
+			if !test.panics {
+				t.Errorf("Case %v: bad panic", i)
+			}
+			continue
+		}
+		if test.panics {
+			if !panics {
+				t.Errorf("Case %v: did not panic when it should", i)
+			}
+			continue
+		}
+		if idx != test.idx {
+			t.Errorf("Case %v: Idx mismatch. Want: %v, got: %v", i, test.idx, idx)
+		}
+	}
+
+}
+
 func RandomSlice(l int) []float64 {
 	s := make([]float64, l)
 	for i := range s {

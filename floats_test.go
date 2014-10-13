@@ -795,32 +795,69 @@ func TestNearest(t *testing.T) {
 }
 
 func TestNearestWithinSpan(t *testing.T) {
-
-	if !Panics(func() { NearestWithinSpan(13, 7, 8.2, 10) }) {
-		t.Errorf("Did not panic below lower bound")
+	if !Panics(func() { NearestWithinSpan(10, 8, 2, 4.5) }) {
+		t.Errorf("Did not panic when upper bound is lower than greater bound")
 	}
-	if !Panics(func() { NearestWithinSpan(13, 7, 8.2, 10) }) {
-		t.Errorf("Did not panic above upper bound")
-	}
-	ind := NearestWithinSpan(13, 7, 8.2, 7.19)
-	if ind != 2 {
-		t.Errorf("Wrong value when just below the bucket. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.21)
-	if ind != 2 {
-		t.Errorf("Wrong value when just above the bucket. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.2)
-	if ind != 2 {
-		t.Errorf("Wrong value when equal to bucket. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.151)
-	if ind != 2 {
-		t.Errorf("Wrong value when just above halfway point. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.249)
-	if ind != 2 {
-		t.Errorf("Wrong value when just below halfway point. %v found, %v expected", ind, 2)
+	for i, test := range []struct {
+		length int
+		lower  float64
+		upper  float64
+		value  float64
+		idx    int
+	}{
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  6,
+			idx:    -1,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  10,
+			idx:    -1,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.19,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.21,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.2,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.151,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.249,
+			idx:    2,
+		},
+	} {
+		if idx := NearestWithinSpan(test.length, test.lower, test.upper, test.value); test.idx != idx {
+			t.Errorf("Case %v mismatch: Want: %v, Got: %v", i, test.idx, idx)
+		}
 	}
 }
 

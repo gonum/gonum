@@ -656,14 +656,9 @@ func Sum(s []float64) float64 {
 	return sum
 }
 
-// Within returns the first index i where s[i] <= v < s[i+1]. As a special case, Within
-// returns len(s)-1 if v == s[len(s)-1]. Within can be useful for binning data
-// in non-uniform grids. Within panics if:
+// Within returns the first index i where s[i] <= v < s[i+1]. Within panics if:
 //  - len(s) < 2
 //  - s is not sorted
-//  - v is NaN
-//  - v < s[0]
-//  - v > s[len(s)-1]
 func Within(s []float64, v float64) int {
 	if len(s) < 2 {
 		panic("floats: slice length less than 2")
@@ -671,16 +666,13 @@ func Within(s []float64, v float64) int {
 	if !sort.Float64sAreSorted(s) {
 		panic("floats: input slice not sorted")
 	}
-	if v < s[0] || v > s[len(s)-1] || math.IsNaN(v) {
-		panic("floats: value not within slice limits")
-	}
-	if v == s[len(s)-1] {
-		return len(s) - 1
+	if v < s[0] {
+		return -1
 	}
 	for i := 1; i < len(s); i++ {
 		if v < s[i] {
 			return i - 1
 		}
 	}
-	panic("unreachable")
+	return -1
 }

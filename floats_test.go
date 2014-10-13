@@ -976,7 +976,7 @@ func TestWithin(t *testing.T) {
 		{
 			s:   []float64{1, 2, 5, 9},
 			v:   9,
-			idx: 3,
+			idx: -1,
 		},
 		{
 			s:   []float64{1, 2, 5, 9},
@@ -994,19 +994,19 @@ func TestWithin(t *testing.T) {
 			idx: 1,
 		},
 		{
-			s:      []float64{1, 2, 5, 9},
-			v:      -3,
-			panics: true,
+			s:   []float64{1, 2, 5, 9},
+			v:   -3,
+			idx: -1,
 		},
 		{
-			s:      []float64{1, 2, 5, 9},
-			v:      15,
-			panics: true,
+			s:   []float64{1, 2, 5, 9},
+			v:   15,
+			idx: -1,
 		},
 		{
-			s:      []float64{1, 2, 5, 9},
-			v:      math.NaN(),
-			panics: true,
+			s:   []float64{1, 2, 5, 9},
+			v:   math.NaN(),
+			idx: -1,
 		},
 		{
 			s:      []float64{5, 2, 6},

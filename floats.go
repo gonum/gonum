@@ -520,7 +520,7 @@ func Nearest(s []float64, v float64) int {
 
 // NearestWithinSpan return the index of a hypothetical vector created
 // by Span with length n and bounds l and u whose value is closest
-// to v. NearestWithinSpan panics if u > l. If the value is greater than u or
+// to v. NearestWithinSpan panics if u < l. If the value is greater than u or
 // less than l, the function returns -1.
 func NearestWithinSpan(n int, l, u float64, v float64) int {
 	if u < l {

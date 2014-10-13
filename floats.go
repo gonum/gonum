@@ -671,9 +671,9 @@ func Within(s []float64, v float64) int {
 	if v < s[0] || v >= s[len(s)-1] || math.IsNaN(v) {
 		return -1
 	}
-	for i := 1; i < len(s); i++ {
-		if v < s[i] {
-			return i - 1
+	for i, f := range s[1:] {
+		if v < f {
+			return i
 		}
 	}
 	return -1

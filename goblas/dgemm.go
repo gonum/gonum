@@ -259,8 +259,8 @@ type subMul struct {
 
 // computeNumBlocks says how many blocks there are to compute. maxKLen says the length of the
 // k dimension, parBlocks is the number of blocks that could be computed in parallel
-// (the submatrices in i and j). totalBlocks is the full number of blocks.
-func computeNumBlocks(a, b general, aTrans, bTrans bool) (maxKLen, parBlocks, totalBlocks int) {
+// (the submatrices in i and j). expect is the full number of blocks that will be computed.
+func computeNumBlocks(a, b general, aTrans, bTrans bool) (maxKLen, parBlocks, expect int) {
 	aRowBlocks := a.rows / blockSize
 	if a.rows%blockSize != 0 {
 		aRowBlocks++
@@ -283,22 +283,22 @@ func computeNumBlocks(a, b general, aTrans, bTrans bool) (maxKLen, parBlocks, to
 		// Cij = \sum_k Aik Bki
 		maxKLen = a.cols
 		parBlocks = aRowBlocks * bColBlocks
-		totalBlocks = parBlocks * aColBlocks
+		expect = parBlocks * aColBlocks
 	case aTrans && !bTrans:
 		// Cij = \sum_k Aki Bkj
 		maxKLen = a.rows
 		parBlocks = aColBlocks * bColBlocks
-		totalBlocks = parBlocks * aRowBlocks
+		expect = parBlocks * aRowBlocks
 	case !aTrans && bTrans:
 		// Cij = \sum_k Aik Bjk
 		maxKLen = a.cols
 		parBlocks = aRowBlocks * bRowBlocks
-		totalBlocks = parBlocks * aColBlocks
+		expect = parBlocks * aColBlocks
 	case aTrans && bTrans:
 		// Cij = \sum_k Aki Bjk
 		maxKLen = a.rows
 		parBlocks = aColBlocks * bRowBlocks
-		totalBlocks = parBlocks * aRowBlocks
+		expect = parBlocks * aRowBlocks
 	}
 	return
 }

@@ -228,7 +228,7 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 		// constant, the view of C stays the same.
 		k := sub.k + blockSize
 		lenk := blockSize
-		if lenk > maxKLen {
+		if k+lenk > maxKLen {
 			lenk = maxKLen - k
 		}
 		var aSub, bSub general

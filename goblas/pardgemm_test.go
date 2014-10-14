@@ -100,11 +100,18 @@ func TestDgemmParallel(t *testing.T) {
 			tA:    blas.NoTrans,
 			tB:    blas.NoTrans,
 		},
-
 		{
 			m:     blockSize * minParBlock,
 			n:     blockSize * minParBlock,
 			k:     blockSize * 3,
+			alpha: 2.5,
+			tA:    blas.NoTrans,
+			tB:    blas.NoTrans,
+		},
+		{
+			m:     blockSize + blockSize/2,
+			n:     blockSize + blockSize/2,
+			k:     blockSize + blockSize/2,
 			alpha: 2.5,
 			tA:    blas.NoTrans,
 			tB:    blas.NoTrans,

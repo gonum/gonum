@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	debug = true
+	debug = false
 )
 
 func newGeneral(r, c int) general {

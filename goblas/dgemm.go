@@ -125,7 +125,7 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 	aTrans := tA == blas.Trans
 	bTrans := tB == blas.Trans
 
-	maxKLen, parBlocks, totalBlocks := computeNumBlocks(a, b, aTrans, bTrans)
+	maxKLen, parBlocks, expect := computeNumBlocks(a, b, aTrans, bTrans)
 
 	if parBlocks < minParBlock {
 		// The matrix multiplication is small in the dimensions where it can be
@@ -145,8 +145,8 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 	// but the channel sends don't synchronize between the original block and the
 	// updated blocks. The buffering avoids deadlock, and as a bonus allows for
 	// for minimal communication blocking
-	sendChan := make(chan *subMul, totalBlocks)
-	ansChan := make(chan *subMul, totalBlocks)
+	sendChan := make(chan *subMul, expect)
+	ansChan := make(chan *subMul, expect)
 	quit := make(chan struct{})
 
 	// launch workers. A worker receives a submatrix, computes it, and sends
@@ -212,10 +212,10 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 
 	// Read in the cases as they come in. Send the next k block along that same
 	// {i,j} pair to be computed if there is a block left to compute.
-	var totalReceived int
+	var n int
 	for sub := range ansChan {
-		totalReceived++
-		if totalReceived == totalBlocks {
+		n++
+		if n == expect {
 			close(quit)
 			return
 		}

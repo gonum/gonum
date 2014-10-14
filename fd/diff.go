@@ -113,15 +113,16 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 		}
 		return
 	}
-	quit := make(chan struct{})
-	sendChan := make(chan fdrun)
-	ansChan := make(chan fdrun)
 
 	nWorkers := settings.Workers
 	expect := len(settings.Method.Stencil) * len(x)
 	if nWorkers > expect {
 		nWorkers = expect
 	}
+
+	quit := make(chan struct{})
+	sendChan := make(chan fdrun, expect)
+	ansChan := make(chan fdrun, expect)
 
 	// Launch workers. Workers receive an index and a step, and compute the answer
 	for i := 0; i < settings.Workers; i++ {

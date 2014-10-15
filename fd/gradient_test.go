@@ -22,8 +22,6 @@ func (r Rosenbrock) F(x []float64) (sum float64) {
 }
 
 func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
-	sum = 0
-
 	for i := range deriv {
 		deriv[i] = 0
 	}
@@ -50,7 +48,7 @@ func TestGradient(t *testing.T) {
 	}{
 		{
 			nDim:   2,
-			tol:    1e-4,
+			tol:    2e-4,
 			method: Forward,
 		},
 		{
@@ -60,7 +58,7 @@ func TestGradient(t *testing.T) {
 		},
 		{
 			nDim:   40,
-			tol:    1e-4,
+			tol:    2e-4,
 			method: Forward,
 		},
 		{

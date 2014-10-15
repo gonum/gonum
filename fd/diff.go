@@ -12,7 +12,7 @@ import (
 	"github.com/gonum/floats"
 )
 
-// A Point is a stencil location in a difference method
+// A Point is a stencil location in a difference method.
 type Point struct {
 	Loc   float64
 	Coeff float64
@@ -52,6 +52,9 @@ func DefaultSettings() *Settings {
 // The order of derivative, sample locations, and other options are specified
 // by settings.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
+	if settings == nil {
+		settings = DefaultSettings()
+	}
 	var deriv float64
 	method := settings.Method
 	if !settings.Concurrent {
@@ -81,7 +84,6 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 			mux.Lock()
 			defer mux.Unlock()
 			deriv += pt.Coeff * fofx
-
 		}(pt)
 	}
 	wg.Wait()
@@ -89,7 +91,7 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 }
 
 // Gradient estimates the derivative of a vector-valued function f at the location
-// x. The resulting estimate is stored in-place into deriv. The order of derivative,
+// x. The resulting estimate is stored in-place into gradient. The order of derivative,
 // sample locations, and other options are specified by settings. Gradient panics
 // if len(deriv) != len(x).
 func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradient []float64) {

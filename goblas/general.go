@@ -39,8 +39,9 @@ func (g general) add(h general) {
 		}
 	}
 	for i := 0; i < g.rows; i++ {
-		for j := 0; j < g.cols; j++ {
-			g.data[i*g.stride+j] += h.at(i, j)
+		gtmp := g.data[i*g.stride : i*g.stride+g.cols]
+		for j, v := range h.data[i*h.stride : i*h.stride+h.cols] {
+			gtmp[j] += v
 		}
 	}
 }

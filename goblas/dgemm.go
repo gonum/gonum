@@ -82,8 +82,9 @@ func (Blas) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64
 	// scale c
 	if beta != 1 {
 		for i := 0; i < m; i++ {
-			for j := 0; j < n; j++ {
-				cmat.data[i*cmat.stride+j] *= beta
+			ctmp := cmat.data[i*cmat.stride : i*cmat.stride+cmat.cols]
+			for j := range ctmp {
+				ctmp[j] *= beta
 			}
 		}
 	}
@@ -336,12 +337,16 @@ func dgemmSerialNotNot(a, b, c general, alpha float64) {
 			panic("outer dimension mismatch")
 		}
 	}
+
+	// This style is used instead of the literal [i*stride +j]) is used because
+	// approximately 5 times faster as of go 1.3.
 	for i := 0; i < a.rows; i++ {
-		for l := 0; l < a.cols; l++ {
-			tmp := alpha * a.at(i, l)
+		ctmp := c.data[i*c.stride : i*c.stride+c.cols]
+		for l, v := range a.data[i*a.stride : i*a.stride+a.cols] {
+			tmp := alpha * v
 			if tmp != 0 {
-				for j := 0; j < b.cols; j++ {
-					c.data[i*c.stride+j] += tmp * b.at(l, j)
+				for j, w := range b.data[l*b.stride : l*b.stride+b.cols] {
+					ctmp[j] += tmp * w
 				}
 			}
 		}
@@ -362,12 +367,17 @@ func dgemmSerialTransNot(a, b, c general, alpha float64) {
 			panic("outer dimension mismatch")
 		}
 	}
-	for i := 0; i < a.cols; i++ {
-		for l := 0; l < a.rows; l++ {
-			tmp := alpha * a.at(l, i)
+
+	// This style is used instead of the literal [i*stride +j]) is used because
+	// approximately 5 times faster as of go 1.3.
+	for l := 0; l < a.rows; l++ {
+		btmp := b.data[l*b.stride : l*b.stride+b.cols]
+		for i, v := range a.data[l*a.stride : l*a.stride+a.cols] {
+			tmp := alpha * v
+			ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 			if tmp != 0 {
-				for j := 0; j < b.cols; j++ {
-					c.data[i*c.stride+j] += tmp * b.at(l, j)
+				for j, w := range btmp {
+					ctmp[j] += tmp * w
 				}
 			}
 		}
@@ -387,15 +397,21 @@ func dgemmSerialNotTrans(a, b, c general, alpha float64) {
 			panic("outer dimension mismatch")
 		}
 	}
+
+	// This style is used instead of the literal [i*stride +j]) is used because
+	// approximately 5 times faster as of go 1.3.
 	for i := 0; i < a.rows; i++ {
+		atmp := a.data[i*a.stride : i*a.stride+a.cols]
+		ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 		for j := 0; j < b.rows; j++ {
 			var tmp float64
-			for l := 0; l < a.cols; l++ {
-				tmp += a.at(i, l) * b.at(j, l)
+			for l, v := range b.data[j*b.stride : j*b.stride+b.cols] {
+				tmp += atmp[l] * v
 			}
-			c.data[i*c.stride+j] += alpha * tmp
+			ctmp[j] += alpha * tmp
 		}
 	}
+
 }
 
 // dgemmSerial where both are transposed
@@ -411,13 +427,16 @@ func dgemmSerialTransTrans(a, b, c general, alpha float64) {
 			panic("outer dimension mismatch")
 		}
 	}
-	for i := 0; i < a.cols; i++ {
-		for l := 0; l < a.rows; l++ {
-			v := a.at(l, i)
+
+	// This style is used instead of the literal [i*stride +j]) is used because
+	// approximately 5 times faster as of go 1.3.
+	for l := 0; l < a.rows; l++ {
+		for i, v := range a.data[l*a.stride : l*a.stride+a.cols] {
+			ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 			if v != 0 {
 				tmp := alpha * v
 				for j := 0; j < b.rows; j++ {
-					c.data[i*c.stride+j] += tmp * b.at(j, l)
+					ctmp[j] += tmp * b.data[j*b.stride+l]
 				}
 			}
 		}

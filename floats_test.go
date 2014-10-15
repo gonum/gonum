@@ -795,32 +795,69 @@ func TestNearest(t *testing.T) {
 }
 
 func TestNearestWithinSpan(t *testing.T) {
-
-	if !Panics(func() { NearestWithinSpan(13, 7, 8.2, 10) }) {
-		t.Errorf("Did not panic below lower bound")
+	if !Panics(func() { NearestWithinSpan(10, 8, 2, 4.5) }) {
+		t.Errorf("Did not panic when upper bound is lower than greater bound")
 	}
-	if !Panics(func() { NearestWithinSpan(13, 7, 8.2, 10) }) {
-		t.Errorf("Did not panic above upper bound")
-	}
-	ind := NearestWithinSpan(13, 7, 8.2, 7.19)
-	if ind != 2 {
-		t.Errorf("Wrong value when just below the bucket. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.21)
-	if ind != 2 {
-		t.Errorf("Wrong value when just above the bucket. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.2)
-	if ind != 2 {
-		t.Errorf("Wrong value when equal to bucket. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.151)
-	if ind != 2 {
-		t.Errorf("Wrong value when just above halfway point. %v found, %v expected", ind, 2)
-	}
-	ind = NearestWithinSpan(13, 7, 8.2, 7.249)
-	if ind != 2 {
-		t.Errorf("Wrong value when just below halfway point. %v found, %v expected", ind, 2)
+	for i, test := range []struct {
+		length int
+		lower  float64
+		upper  float64
+		value  float64
+		idx    int
+	}{
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  6,
+			idx:    -1,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  10,
+			idx:    -1,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.19,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.21,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.2,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.151,
+			idx:    2,
+		},
+		{
+			length: 13,
+			lower:  7,
+			upper:  8.2,
+			value:  7.249,
+			idx:    2,
+		},
+	} {
+		if idx := NearestWithinSpan(test.length, test.lower, test.upper, test.value); test.idx != idx {
+			t.Errorf("Case %v mismatch: Want: %v, Got: %v", i, test.idx, idx)
+		}
 	}
 }
 
@@ -862,6 +899,31 @@ func TestProd(t *testing.T) {
 	val = Prod(s)
 	if val != 420 {
 		t.Errorf("Wrong prod returned. Expected %v returned %v", 420, val)
+	}
+}
+
+func TestSame(t *testing.T) {
+	s1 := []float64{1, 2, 3, 4}
+	s2 := []float64{1, 2, 3, 4}
+	if !Same(s1, s2) {
+		t.Errorf("Equal slices returned as unequal")
+	}
+	s2 = []float64{1, 2, 3, 4 + 1e-14}
+	if Same(s1, s2) {
+		t.Errorf("Unequal slices returned as equal")
+	}
+	if Same(s1, []float64{}) {
+		t.Errorf("Unequal slice lengths returned as equal")
+	}
+	s1 = []float64{1, 2, math.NaN(), 4}
+	s2 = []float64{1, 2, math.NaN(), 4}
+	if !Same(s1, s2) {
+		t.Errorf("Slices with matching NaN values returned as unequal")
+	}
+	s1 = []float64{1, 2, math.NaN(), 4}
+	s2 = []float64{1, math.NaN(), 3, 4}
+	if !Same(s1, s2) {
+		t.Errorf("Slices with unmatching NaN values returned as equal")
 	}
 }
 
@@ -934,6 +996,86 @@ func TestSum(t *testing.T) {
 	if val != 20 {
 		t.Errorf("Wrong sum returned")
 	}
+}
+
+func TestWithin(t *testing.T) {
+	for i, test := range []struct {
+		s      []float64
+		v      float64
+		idx    int
+		panics bool
+	}{
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   1,
+			idx: 0,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   9,
+			idx: -1,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   1.5,
+			idx: 0,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   2,
+			idx: 1,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   2.5,
+			idx: 1,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   -3,
+			idx: -1,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   15,
+			idx: -1,
+		},
+		{
+			s:   []float64{1, 2, 5, 9},
+			v:   math.NaN(),
+			idx: -1,
+		},
+		{
+			s:      []float64{5, 2, 6},
+			panics: true,
+		},
+		{
+			panics: true,
+		},
+		{
+			s:      []float64{1},
+			panics: true,
+		},
+	} {
+		var idx int
+		panics := Panics(func() { idx = Within(test.s, test.v) })
+		if panics {
+			if !test.panics {
+				t.Errorf("Case %v: bad panic", i)
+			}
+			continue
+		}
+		if test.panics {
+			if !panics {
+				t.Errorf("Case %v: did not panic when it should", i)
+			}
+			continue
+		}
+		if idx != test.idx {
+			t.Errorf("Case %v: Idx mismatch. Want: %v, got: %v", i, test.idx, idx)
+		}
+	}
+
 }
 
 func RandomSlice(l int) []float64 {

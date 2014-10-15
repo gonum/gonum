@@ -520,13 +520,15 @@ func Nearest(s []float64, v float64) int {
 
 // NearestWithinSpan return the index of a hypothetical vector created
 // by Span with length n and bounds l and u whose value is closest
-// to v. Assumes u > l. If the value is greater than u or less than
-// l, the function will panic.
+// to v. NearestWithinSpan panics if u < l. If the value is greater than u or
+// less than l, the function returns -1.
 func NearestWithinSpan(n int, l, u float64, v float64) int {
-	if v < l || v > u {
-		panic("floats: value outside span bounds")
+	if u < l {
+		panic("floats: upper bound greater than lower bound")
 	}
-
+	if v < l || v > u {
+		return -1
+	}
 	// Can't guarantee anything about exactly halfway between
 	// because of floating point weirdness.
 	return int((float64(n)-1)/(u-l)*(v-l) + 0.5)
@@ -577,6 +579,21 @@ func Prod(s []float64) float64 {
 		prod *= val
 	}
 	return prod
+}
+
+// Same returns true if the input slices have the same length and the all elements
+// have the same value with NaN treated as the same.
+func Same(s, t []float64) bool {
+	if len(s) != len(t) {
+		return false
+	}
+	for i, v := range s {
+		w := t[i]
+		if v != w && !math.IsNaN(v) && !math.IsNaN(w) {
+			return false
+		}
+	}
+	return true
 }
 
 // Scale multiplies every element in dst by the scalar c.
@@ -639,4 +656,25 @@ func Sum(s []float64) float64 {
 		sum += val
 	}
 	return sum
+}
+
+// Within returns the first index i where s[i] <= v < s[i+1]. Within panics if:
+//  - len(s) < 2
+//  - s is not sorted
+func Within(s []float64, v float64) int {
+	if len(s) < 2 {
+		panic("floats: slice length less than 2")
+	}
+	if !sort.Float64sAreSorted(s) {
+		panic("floats: input slice not sorted")
+	}
+	if v < s[0] || v >= s[len(s)-1] || math.IsNaN(v) {
+		return -1
+	}
+	for i, f := range s[1:] {
+		if v < f {
+			return i
+		}
+	}
+	return -1
 }

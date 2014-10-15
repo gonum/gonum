@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	blockSize   = 50 // b x b matrix
+	blockSize   = 64 // b x b matrix
 	minParBlock = 4  // minimum number of blocks needed to go parallel
 )
 
@@ -144,10 +144,16 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 
 	// Create channels. The structure of the code avoids race conditions in updating C,
 	// but the channel sends don't synchronize between the original block and the
-	// updated blocks. The buffering avoids deadlock, and as a bonus allows for
-	// for minimal communication blocking
-	sendChan := make(chan *subMul, expect)
-	ansChan := make(chan *subMul, expect)
+	// updated blocks. A deadlock may occur if there is a small buffer and
+	// no extra goroutine creation in the loop that reads in the results. The
+	// original distributor can send to a worker. The worker is waiting to send
+	// on the answer channel, but the 2nd level distributor is waiting to send
+	// the next case on the channel to the worker. There are two choices around
+	// this. One is to have a very large buffer and no extra goroutine creation.
+	// A second is to have a small buffer and do have extra goroutine creation.
+	// Benchmarking shows the latter is faster.
+	sendChan := make(chan *subMul, nWorkers)
+	ansChan := make(chan *subMul, nWorkers)
 	quit := make(chan struct{})
 
 	// launch workers. A worker receives a submatrix, computes it, and sends
@@ -246,7 +252,9 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 		sub.a = aSub
 		sub.b = bSub
 		sub.k = k
-		sendChan <- sub
+		go func(sub *subMul) {
+			sendChan <- sub
+		}(sub)
 	}
 	close(quit)
 	return

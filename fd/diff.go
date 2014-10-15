@@ -111,7 +111,7 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 				}
 				xcopy[i] += pt.Loc * settings.Step
 				deriv += pt.Coeff * f(xcopy)
-				xcopy[i] -= pt.Loc * settings.Step
+				xcopy[i] = x[i]
 			}
 			gradient[i] = deriv / math.Pow(settings.Step, float64(settings.Method.Order))
 		}
@@ -125,12 +125,13 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 	}
 
 	quit := make(chan struct{})
+	defer close(quit)
 	sendChan := make(chan fdrun, expect)
 	ansChan := make(chan fdrun, expect)
 
 	// Launch workers. Workers receive an index and a step, and compute the answer
 	for i := 0; i < settings.Workers; i++ {
-		go func() {
+		go func(sendChan <-chan fdrun, ansChan chan<- fdrun, quit <-chan struct{}) {
 			xcopy := make([]float64, len(x))
 			copy(xcopy, x)
 			for {
@@ -140,15 +141,15 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 				case run := <-sendChan:
 					xcopy[run.idx] += run.pt.Loc * settings.Step
 					run.result = f(xcopy)
-					xcopy[run.idx] -= run.pt.Loc * settings.Step
+					xcopy[run.idx] = x[run.idx]
 					ansChan <- run
 				}
 			}
-		}()
+		}(sendChan, ansChan, quit)
 	}
 
 	// Launch the distributor. Distributor sends the cases to be computed
-	go func() {
+	go func(sendChan chan<- fdrun, ansChan chan<- fdrun) {
 		for i := range x {
 			for _, pt := range settings.Method.Stencil {
 				if settings.OriginKnown && pt.Loc == 0 {
@@ -167,7 +168,8 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 				}
 			}
 		}
-	}()
+	}(sendChan, ansChan)
+
 	for i := range gradient {
 		gradient[i] = 0
 	}
@@ -177,7 +179,6 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 		gradient[run.idx] += run.pt.Coeff * run.result
 	}
 	floats.Scale(1/math.Pow(settings.Step, float64(settings.Method.Order)), gradient)
-	close(quit)
 }
 
 type fdrun struct {

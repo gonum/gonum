@@ -90,7 +90,7 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 	return deriv / math.Pow(settings.Step, float64(method.Order))
 }
 
-// Gradient estimates the derivative of a vector-valued function f at the location
+// Gradient estimates the derivative of a multivariate function f at the location
 // x. The resulting estimate is stored in-place into gradient. The order of derivative,
 // sample locations, and other options are specified by settings. Gradient panics
 // if len(deriv) != len(x).

@@ -90,7 +90,7 @@ func TestGradient(t *testing.T) {
 			t.Errorf("Case %v: gradient mismatch in serial. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
 		if !floats.Equal(x, xcopy) {
-			t.Errorf("Case %v: x modified during call to gradient in serial")
+			t.Errorf("Case %v: x modified during call to gradient in serial", i)
 		}
 
 		// Try with known value
@@ -115,7 +115,7 @@ func TestGradient(t *testing.T) {
 			t.Errorf("Case %v: gradient mismatch with unknown origin in parallel. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
 		if !floats.Equal(x, xcopy) {
-			t.Errorf("Case %v: x modified during call to gradient in parallel")
+			t.Errorf("Case %v: x modified during call to gradient in parallel", i)
 		}
 
 		// Concurrently with origin known

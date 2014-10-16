@@ -61,7 +61,7 @@ type Location struct {
 	Gradient []float64
 }
 
-// Result represents the answer of an optimizitaion run. It contains the optimum
+// Result represents the answer of an optimization run. It contains the optimum
 // location as well as the Status at convergence and Statistics taken during the
 // run.
 type Result struct {

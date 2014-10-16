@@ -39,7 +39,7 @@ import (
 // in the method will be populated with default values. The methods are also
 // designed such that they can be reused in future calls to method.
 //
-// Minimize returns a Result struct and any error that occured. Please see the
+// Minimize returns a Result struct and any error that occurred. Please see the
 // documentation of Result for more information.
 //
 // Please be aware that the default behavior of minimize is to find the minimum.
@@ -48,6 +48,10 @@ import (
 // maximum runtime or maximum function evaluations, please modify the Settings
 // input struct.
 func Minimize(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
+	if len(initX) == 0 {
+		panic("local: initial X has zero length")
+	}
+
 	startTime := time.Now()
 
 	funcs, funcStat := findFunctionStats(f)
@@ -194,11 +198,6 @@ func getDefaultMethod(f *FunctionStats) Method {
 func setStartingLocation(f Function, funcs functions, stats *FunctionStats, initX []float64, settings *Settings) (Location, error) {
 	var l Location
 
-	if len(initX) == 0 {
-		// maybe panic? This is clearly a mistake
-		return l, ErrZeroDimensional
-	}
-
 	l.X = make([]float64, len(initX))
 	copy(l.X, initX)
 
@@ -225,7 +224,7 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionStats, init
 		return l, nil
 	}
 
-	// Compute missing information in the inital state.
+	// Compute missing information in the initial state.
 	if stats.IsFunctionGradient {
 		l.Gradient = make([]float64, len(initX))
 		l.F = funcs.gradFunc.FDf(initX, l.Gradient)

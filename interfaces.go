@@ -52,7 +52,7 @@ type NextDirectioner interface {
 	// NextDirection updates the search direction and step size. Location is
 	// the location seen at the conclusion of the most recent linesearch. The
 	// next search direction is put in place into dir, and the next stepsize
-	// is returned. NexDirection must not modify Location.
+	// is returned. NextDirection must not modify Location.
 	NextDirection(l Location, dir []float64) (stepSize float64)
 }
 

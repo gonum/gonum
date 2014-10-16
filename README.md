@@ -1,6 +1,6 @@
-# Gonum Opt
+# Gonum Optimize
 
-This is an optimization package for the Go language. More documentation can be seen at godoc.org/github.com/gonum/opt
+This is an optimization package for the Go language. More documentation can be seen at godoc.org/github.com/gonum/optimize
 
 ## Issues
 

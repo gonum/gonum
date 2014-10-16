@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package opt
+package optimize
 
 import (
 	"math"
@@ -190,7 +190,7 @@ func getDefaultMethod(f *FunctionInfo) Method {
 		return &BFGS{}
 	}
 	// TODO: Implement a gradient-free method
-	panic("gradient-free methods not yet coded")
+	panic("optimize: gradient-free methods not yet coded")
 }
 
 // Combine location and stats because maybe in the future we'll add evaluation times
@@ -215,7 +215,7 @@ func setStartingLocation(f Function, funcs functions, stats *FunctionInfo, initX
 		initG := settings.InitialGradient
 		if stats.IsGradient {
 			if len(initX) != len(initG) {
-				panic("minimize: initial location size mismatch")
+				panic("local: initial location size mismatch")
 			}
 
 			l.Gradient = make([]float64, len(initG))

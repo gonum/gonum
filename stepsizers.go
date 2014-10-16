@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package opt
+package optimize
 
 // ConstantStepSize is a StepSizer that returns the same step size for
 // every iteration.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package opt
+package optimize
 
 import "errors"
 
@@ -68,27 +68,27 @@ var statuses = []struct {
 	{
 		name:  "Failure",
 		early: true,
-		err:   errors.New("opt: termination ended in failure"),
+		err:   errors.New("optimize: termination ended in failure"),
 	},
 	{
 		name:  "IterationLimit",
 		early: true,
-		err:   errors.New("opt: maximum number of major iterations reached."),
+		err:   errors.New("optimize: maximum number of major iterations reached."),
 	},
 	{
 		name:  "RuntimeLimit",
 		early: true,
-		err:   errors.New("opt: maximum runtime reached."),
+		err:   errors.New("optimize: maximum runtime reached."),
 	},
 	{
 		name:  "FunctionEvaluationLimit",
 		early: true,
-		err:   errors.New("opt: maximum number of function evaluations reached."),
+		err:   errors.New("optimize: maximum number of function evaluations reached."),
 	},
 	{
 		name:  "GradientEvaluationLimit",
 		early: true,
-		err:   errors.New("opt: maximum number of gradient evaluations reached."),
+		err:   errors.New("optimize: maximum number of gradient evaluations reached."),
 	},
 }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package opt
+package optimize
 
 import (
 	"fmt"
@@ -119,7 +119,7 @@ func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, st
 // pad string adds spaces onto the end of the string to make it the correct length
 func padString(s string, l int) string {
 	if len(s) > l {
-		panic("opt: string too long")
+		panic("optimize: string too long")
 	}
 	if len(s) == l {
 		return s

@@ -74,7 +74,7 @@ func Minimize(f Function, initX []float64, settings *Settings, method Method) (*
 	if settings.Recorder != nil {
 		err = settings.Recorder.Init(funcStat)
 		if err != nil {
-			return &Result{Status: RecorderError}, err
+			return &Result{Status: Failure}, err
 		}
 	}
 
@@ -107,7 +107,7 @@ func minimize(settings *Settings, location Location, method Method, funcStat *Fu
 		if settings.Recorder != nil {
 			err = settings.Recorder.Record(location, evalType, iterType, stats)
 			if err != nil {
-				status = RecorderError
+				status = Failure
 				return
 			}
 		}

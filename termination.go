@@ -22,9 +22,6 @@ const (
 	RuntimeLimit
 	FunctionEvaluationLimit
 	GradientEvaluationLimit
-	RecorderError
-	UserFunctionError
-	MethodError
 )
 
 func (s Status) String() string {
@@ -92,21 +89,6 @@ var statuses = []struct {
 		name:  "GradientEvaluationLimit",
 		early: true,
 		err:   errors.New("opt: maximum number of gradient evaluations reached."),
-	},
-	{
-		name:  "RecorderError",
-		early: true,
-		err:   errors.New("opt: minimizaton stopped due to error in the recorder."),
-	},
-	{
-		name:  "UserFunctionError",
-		early: true,
-		err:   errors.New("opt: minimizaton stopped due to error in the user function."),
-	},
-	{
-		name:  "MethodError",
-		early: true,
-		err:   errors.New("opt: minimizaton stopped due to error in the optimizer."),
 	},
 }
 

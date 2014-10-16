@@ -32,7 +32,6 @@ type Method struct {
 type Settings struct {
 	OriginKnown bool    // Flag that the value at the origin x is known
 	OriginValue float64 // Value at the origin (only used if OriginKnown is true)
-	Step        float64 // step size
 	Concurrent  bool    // Should the function calls be executed concurrently
 	Workers     int     // Maximum number of concurrent executions when evaluating concurrently
 	Method      Method  // Finite difference method to use
@@ -50,16 +49,12 @@ func DefaultSettings() *Settings {
 
 // Derivative estimates the derivative of the function f at the given location.
 // The order of derivative, sample locations, and other options are specified
-// by settings. If the step is zero, then the step size of the method will
-// be used.
+// by settings.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
 	if settings == nil {
 		settings = DefaultSettings()
 	}
-	step := settings.Step
-	if settings.Step == 0 {
-		step = settings.Method.Step
-	}
+	step := settings.Method.Step
 	var deriv float64
 	method := settings.Method
 	if !settings.Concurrent {
@@ -108,10 +103,7 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 	if settings == nil {
 		settings = DefaultSettings()
 	}
-	step := settings.Step
-	if settings.Step == 0 {
-		step = settings.Method.Step
-	}
+	step := settings.Method.Step
 	if !settings.Concurrent {
 		xcopy := make([]float64, len(x)) // So that x is not modified during the call
 		copy(xcopy, x)
@@ -207,7 +199,7 @@ var Forward = Method{
 	Step:    1e-6,
 }
 
-// Backward represents a first-order backward difference
+// Backward represents a first-order backward difference.
 var Backward = Method{
 	Stencil: []Point{{Loc: -1, Coeff: -1}, {Loc: 0, Coeff: 1}},
 	Order:   1,

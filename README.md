@@ -1,4 +1,4 @@
-# Gonum floats
+# Gonum floats ![travis-build-status](https://travis-ci.org/gonum/floats.svg?branch=master)
 
 package floats provides a set of helper routines for dealing with slices of float64. The functions avoid allocations to allow for use within tight loops without garbage collection overhead.
 

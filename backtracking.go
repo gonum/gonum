@@ -10,11 +10,11 @@ const (
 )
 
 // Backtracking is a type that implements LinesearchMethod using a backtracking
-// line search. A backtracking line search checks that the Armijio condition has
-// been met with the given function constant. If the Armijio condition has not
+// line search. A backtracking line search checks that the Armijo condition has
+// been met with the given function constant. If the Armijo condition has not
 // been met, the step size is decreased by a factor of Decrease.
 //
-// The Armijio conditions only require the gradient at the initial condition
+// The Armijo conditions only require the gradient at the initial condition
 // (not successive step locatinons), and so Backtracking may be a good linesearch
 // method for functions with expensive gradients. Backtracking is not appropriate
 // for optimizers that require the Wolfe conditions to be met, such as BFGS.
@@ -23,7 +23,7 @@ const (
 // panic otherwise. If either FunConst or Decrease are zero, it will be set to a
 // reasonable default.
 type Backtracking struct {
-	FunConst float64 // Necessary function descrease for Armijio condition.
+	FunConst float64 // Necessary function descrease for Armijo condition.
 	Decrease float64 // Step size multiplier at each iteration (stepSize *= Decrease).
 
 	stepSize float64
@@ -56,7 +56,7 @@ func (b *Backtracking) Init(initF, initG, initStepSize float64, f *FunctionStats
 }
 
 func (b *Backtracking) Finished(f, g float64) bool {
-	return ArmijioConditionMet(f, b.initF, b.initG, b.stepSize, b.FunConst)
+	return ArmijoConditionMet(f, b.initF, b.initG, b.stepSize, b.FunConst)
 }
 
 func (b *Backtracking) Iterate(f, g float64) (float64, EvaluationType, error) {

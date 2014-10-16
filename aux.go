@@ -6,12 +6,12 @@ package opt
 
 import "math"
 
-// ArmijioConditionMet returns true if the Armijio condition (aka sufficient decrease)
+// ArmijoConditionMet returns true if the Armijo condition (aka sufficient decrease)
 // has been met. Under normal conditions, the following should be true, though this is not enforced:
 // 	- initGrad < 0
 //  - step > 0
 //  - 0 < funConst < 1
-func ArmijioConditionMet(currObj, initObj, initGrad, step, funConst float64) bool {
+func ArmijoConditionMet(currObj, initObj, initGrad, step, funConst float64) bool {
 	return currObj <= initObj+funConst*step*initGrad
 }
 

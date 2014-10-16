@@ -26,18 +26,19 @@ type FunctionGradient interface {
 // methods will not be called by the user directly, as they will be called by
 // a Linesearch struct.
 type LinesearchMethod interface {
-	// Init initializes the linesearch method with the given function value and
-	// projected gradient, and returns the first evaluation type.
-	Init(initF, initProjGrad, initStepSize float64, f *FunctionInfo) EvaluationType
+	// Init initializes the linesearch method. LinesearchLocation contains the
+	// function information at step == 0, and step contains the first step length
+	// as specified by the NextDirectioner.
+	Init(init LinesearchLocation, step float64, f *FunctionInfo) EvaluationType
 
-	// Finished takes in the most recent function value and projected gradient, and
-	// returns true if the line search has been concluded.
-	Finished(f, projGrad float64) bool
+	// Finished takes in the function result at the most recent linesearch location,
+	// and returns true if the line search has been concluded.
+	Finished(l LinesearchLocation) bool
 
-	// Iterate takes in the function value and projected gradient that resulted
-	// from evaluating the function at the previous step size, and returns the
+	// Iterate takes in the function results
+	// from evaluating the function at the previous step, and returns the
 	// next step size and EvaluationType to evaluate.
-	Iterate(newF, newProjGrad float64) (newStepSize float64, e EvaluationType, err error)
+	Iterate(l LinesearchLocation) (nextStep float64, e EvaluationType, err error)
 }
 
 // NextDirectioner implements a strategy for computing a new line search direction

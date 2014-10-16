@@ -30,8 +30,8 @@ type Bisection struct {
 	maxGrad  float64
 }
 
-func (b *Bisection) Init(initF, initG, initStepSize float64, f *FunctionInfo) EvaluationType {
-	if initG > 0 {
+func (b *Bisection) Init(initLoc LinesearchLocation, initStepSize float64, f *FunctionInfo) EvaluationType {
+	if initLoc.Derivative > 0 {
 		panic("bisection: init G greater than 0")
 	}
 
@@ -46,12 +46,12 @@ func (b *Bisection) Init(initF, initG, initStepSize float64, f *FunctionInfo) Ev
 	b.maxStep = math.Inf(1)
 	b.currStep = initStepSize
 
-	b.initF = initF
-	b.minF = initF
+	b.initF = initLoc.F
+	b.minF = initLoc.F
 	b.maxF = math.NaN()
 
-	b.initGrad = initG
-	b.minGrad = initG
+	b.initGrad = initLoc.Derivative
+	b.minGrad = initLoc.Derivative
 	b.maxGrad = math.NaN()
 
 	return FunctionAndGradientEval
@@ -62,17 +62,19 @@ const (
 	gradSmallEqual = 1e-10
 )
 
-func (b *Bisection) Finished(f, g float64) bool {
-	if floats.EqualWithinRel(f, b.initF, funcSmallEqual) && math.Abs(g) < gradSmallEqual && math.Abs(b.initGrad) < gradSmallEqual {
+func (b *Bisection) Finished(l LinesearchLocation) bool {
+	if floats.EqualWithinRel(l.F, b.initF, funcSmallEqual) && math.Abs(l.Derivative) < gradSmallEqual && math.Abs(b.initGrad) < gradSmallEqual {
 		// The two numbers are so close that we should just check on the gradient
 		// TODO: Should iterate be updated? Maybe find a function where it needs it.
-		return math.Abs(g) < b.GradConst*math.Abs(b.initGrad)
+		return math.Abs(l.Derivative) < b.GradConst*math.Abs(b.initGrad)
 	}
 
-	return StrongWolfeConditionsMet(f, g, b.initF, b.initGrad, b.currStep, 0, b.GradConst)
+	return StrongWolfeConditionsMet(l.F, l.Derivative, b.initF, b.initGrad, b.currStep, 0, b.GradConst)
 }
 
-func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType, error) {
+func (b *Bisection) Iterate(l LinesearchLocation) (float64, EvaluationType, error) {
+	f := l.F
+	g := l.Derivative
 	// Deciding on the next step size
 	if math.IsInf(b.maxStep, 1) {
 		// Have not yet bounded the minimum

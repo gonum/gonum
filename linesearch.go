@@ -21,12 +21,11 @@ type Linesearch struct {
 	initLoc   []float64
 	direction []float64
 
-	f *FunctionInfo
+	funInfo *FunctionInfo
 
 	lastEvalType EvaluationType
 	finished     bool
 	finishedF    float64
-	iter         int
 }
 
 func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
@@ -36,19 +35,22 @@ func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (Evalu
 	l.direction = resize(l.direction, len(loc.X))
 	stepSize := l.NextDirectioner.InitDirection(loc, l.direction)
 
-	projGrad := floats.Dot(loc.Gradient, l.direction)
-	if projGrad > 0 {
-		return NoEvaluation, NoIteration, ErrNonNegativeStepDirection
+	projGrad := math.NaN()
+	if loc.Gradient != nil {
+		projGrad = floats.Dot(loc.Gradient, l.direction)
+		if projGrad > 0 {
+			return NoEvaluation, NoIteration, ErrNonNegativeStepDirection
+		}
 	}
-
-	evalType := l.Method.Init(loc.F, projGrad, stepSize, f)
-
+	linesearchLocation := LinesearchLocation{
+		F:          loc.F,
+		Derivative: projGrad,
+	}
+	evalType := l.Method.Init(linesearchLocation, stepSize, f)
 	floats.AddScaledTo(xNext, l.initLoc, stepSize, l.direction)
-
-	l.f = f
+	l.funInfo = f
 	l.lastEvalType = evalType
 	l.finished = false
-	l.iter = 0
 	return evalType, MajorIteration, nil
 }
 
@@ -59,10 +61,15 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 		loc.F = l.finishedF
 		return l.initializeNextLinesearch(loc, xNext)
 	}
-
-	projGrad := floats.Dot(loc.Gradient, l.direction)
-	if l.Method.Finished(loc.F, projGrad) {
-		l.iter = 0
+	projGrad := math.NaN()
+	if loc.Gradient != nil {
+		projGrad = floats.Dot(loc.Gradient, l.direction)
+	}
+	linesearchLocation := LinesearchLocation{
+		F:          loc.F,
+		Derivative: projGrad,
+	}
+	if l.Method.Finished(linesearchLocation) {
 		if l.lastEvalType == FunctionEval {
 			l.finished = true
 			l.finishedF = loc.F
@@ -74,9 +81,8 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 		return l.initializeNextLinesearch(loc, xNext)
 	}
 
-	l.iter++
 	// Line search not done, just iterate
-	stepSize, evalType, err := l.Method.Iterate(loc.F, projGrad)
+	stepSize, evalType, err := l.Method.Iterate(linesearchLocation)
 	if err != nil {
 		return NoEvaluation, NoIteration, err
 	}
@@ -90,17 +96,20 @@ func (l *Linesearch) initializeNextLinesearch(loc Location, xNext []float64) (Ev
 	// start the next line search
 	copy(l.initLoc, loc.X)
 	stepsize := l.NextDirectioner.NextDirection(loc, l.direction)
-	projGrad := floats.Dot(loc.Gradient, l.direction)
-
+	projGrad := math.NaN()
+	if loc.Gradient != nil {
+		projGrad = floats.Dot(loc.Gradient, l.direction)
+	}
 	if projGrad > 0 {
 		return NoEvaluation, NoIteration, ErrNonNegativeStepDirection
 	}
-	evalType := l.Method.Init(loc.F, projGrad, stepsize, l.f)
-
+	initLinesearchLocation := LinesearchLocation{
+		F:          loc.F,
+		Derivative: projGrad,
+	}
+	evalType := l.Method.Init(initLinesearchLocation, stepsize, l.funInfo)
 	floats.AddScaledTo(xNext, l.initLoc, stepsize, l.direction)
-
 	l.lastEvalType = evalType
-
 	return evalType, MajorIteration, nil
 }
 

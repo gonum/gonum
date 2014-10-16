@@ -40,8 +40,8 @@ type LinesearchMethod interface {
 	Iterate(newF, newProjGrad float64) (newStepSize float64, e EvaluationType, err error)
 }
 
-// A NextDirectioner is an optimization method that uses a linesearch at each
-// major iteration. Typically, these methods will not be called by the user directly,
+// NextDirectioner implements a strategy for computing a new line search direction
+// at each major iteration. Typically, these methods will not be called by the user directly,
 // as they will be called by a Linesearch struct.
 type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,

@@ -7,6 +7,7 @@ package opt
 const (
 	defaultBacktrackingDecrease = 0.5
 	defaultBacktrackingFunConst = 1e-4
+	minimumBacktrackingStepSize = 1e-20
 )
 
 // Backtracking is a type that implements LinesearchMethod using a backtracking
@@ -61,7 +62,7 @@ func (b *Backtracking) Finished(f, g float64) bool {
 
 func (b *Backtracking) Iterate(f, g float64) (float64, EvaluationType, error) {
 	b.stepSize *= b.Decrease
-	if b.stepSize == 0 {
+	if b.stepSize < minimumBacktrackingStepSize {
 		return 0, NoEvaluation, ErrLinesearchFailure
 	}
 	return b.stepSize, FunctionEval, nil

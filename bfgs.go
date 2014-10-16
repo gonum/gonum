@@ -116,7 +116,7 @@ func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64)
 
 	if b.first {
 		// Rescale the initial hessian.
-		// From: Numerical optimization, Nocedal and Wright, Page 200 eq. 8.20.
+		// From: Numerical optimization, Nocedal and Wright, Page 143, Eq. 6.20 (second edition).
 		yDotY := floats.Dot(b.y, b.y)
 		scale := sDotY / yDotY
 		for i := 0; i < len(l.X); i++ {

@@ -17,7 +17,7 @@ type Linesearch struct {
 	initLoc   []float64
 	direction []float64
 
-	f *FunctionStats
+	f *FunctionInfo
 
 	lastEvalType EvaluationType
 	finished     bool
@@ -25,7 +25,7 @@ type Linesearch struct {
 	iter         int
 }
 
-func (l *Linesearch) Init(loc Location, f *FunctionStats, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	l.initLoc = resize(l.initLoc, len(loc.X))
 	copy(l.initLoc, loc.X)
 

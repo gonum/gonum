@@ -80,8 +80,8 @@ type Stats struct {
 	GradientNorm          float64       // 2-norm of the gradient normalized by the sqrt of the length
 }
 
-// FunctionStats is data to give to the optimizer about the objective function.
-type FunctionStats struct {
+// FunctionInfo is data to give to the optimizer about the objective function.
+type FunctionInfo struct {
 	IsGradient         bool
 	IsFunctionGradient bool
 	IsStatuser         bool

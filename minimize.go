@@ -97,7 +97,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}, err
 }
 
-func minimize(settings *Settings, location Location, method Method, funcStat *FunctionStats, stats *Stats, funcs functions, optLoc *Location, startTime time.Time) (status Status, err error) {
+func minimize(settings *Settings, location Location, method Method, funcStat *FunctionInfo, stats *Stats, funcs functions, optLoc *Location, startTime time.Time) (status Status, err error) {
 	methodStatus, methodIsStatuser := method.(Statuser)
 	xNext := make([]float64, len(location.X))
 
@@ -163,14 +163,14 @@ func copyLocation(dst *Location, src Location) {
 	copy(dst.Gradient, src.Gradient)
 }
 
-func findFunctionStats(f Function) (functions, *FunctionStats) {
+func findFunctionStats(f Function) (functions, *FunctionInfo) {
 	// Not sure how/if we want to compute timing to be used with functions
 	gradient, isGradient := f.(Gradient)
 	gradFunc, isFunGrad := f.(FunctionGradient)
 
 	status, isStatuser := f.(Statuser)
 
-	stats := &FunctionStats{
+	stats := &FunctionInfo{
 		IsGradient:         isGradient,
 		IsFunctionGradient: isFunGrad,
 		IsStatuser:         isStatuser,
@@ -185,7 +185,7 @@ func findFunctionStats(f Function) (functions, *FunctionStats) {
 	return funcs, stats
 }
 
-func getDefaultMethod(f *FunctionStats) Method {
+func getDefaultMethod(f *FunctionInfo) Method {
 	if f.IsFunctionGradient {
 		return &BFGS{}
 	}
@@ -195,7 +195,7 @@ func getDefaultMethod(f *FunctionStats) Method {
 
 // Combine location and stats because maybe in the future we'll add evaluation times
 // to functionStats?
-func setStartingLocation(f Function, funcs functions, stats *FunctionStats, initX []float64, settings *Settings) (Location, error) {
+func setStartingLocation(f Function, funcs functions, stats *FunctionInfo, initX []float64, settings *Settings) (Location, error) {
 	var l Location
 
 	l.X = make([]float64, len(initX))
@@ -286,7 +286,7 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 }
 
 // evaluate evaluates the function and stores the answer in place
-func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType, xNext []float64, location *Location) error {
+func evaluate(funcs functions, funcStat *FunctionInfo, evalType EvaluationType, xNext []float64, location *Location) error {
 	copy(location.X, xNext)
 	switch evalType {
 	case FunctionEval:
@@ -323,7 +323,7 @@ func evaluate(funcs functions, funcStat *FunctionStats, evalType EvaluationType,
 }
 
 // update updates the stats given the new evaluation
-func update(location Location, optLoc *Location, stats *Stats, funcStat *FunctionStats, evalType EvaluationType, iterType IterationType, startTime time.Time) {
+func update(location Location, optLoc *Location, stats *Stats, funcStat *FunctionInfo, evalType EvaluationType, iterType IterationType, startTime time.Time) {
 	switch evalType {
 	case FunctionEval:
 		stats.FunctionEvals++

@@ -44,7 +44,7 @@ var (
 	}
 )
 
-func (p *Printer) Init(f *FunctionStats) error {
+func (p *Printer) Init(f *FunctionInfo) error {
 	p.printGrad = f.IsFunctionGradient || f.IsGradient
 
 	p.lastHeading = p.HeadingInterval + 1          // So the headings are printed the first time

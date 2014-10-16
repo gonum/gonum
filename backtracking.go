@@ -32,7 +32,7 @@ type Backtracking struct {
 	initG    float64
 }
 
-func (b *Backtracking) Init(initF, initG, initStepSize float64, f *FunctionStats) EvaluationType {
+func (b *Backtracking) Init(initF, initG, initStepSize float64, f *FunctionInfo) EvaluationType {
 	if b.Decrease == 0 {
 		b.Decrease = defaultBacktrackingDecrease
 	}

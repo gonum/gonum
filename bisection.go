@@ -30,7 +30,7 @@ type Bisection struct {
 	maxGrad  float64
 }
 
-func (b *Bisection) Init(initF, initG, initStepSize float64, f *FunctionStats) EvaluationType {
+func (b *Bisection) Init(initF, initG, initStepSize float64, f *FunctionInfo) EvaluationType {
 	if initG > 0 {
 		panic("bisection: init G greater than 0")
 	}

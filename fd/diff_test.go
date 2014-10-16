@@ -16,7 +16,6 @@ type testPoint struct {
 	loc  float64
 	fofx float64
 	ans  float64
-	step float64
 }
 
 var testsFirst = []testPoint{
@@ -25,28 +24,24 @@ var testsFirst = []testPoint{
 		loc:  0,
 		fofx: 0,
 		ans:  0,
-		step: 1e-6,
 	},
 	{
 		f:    xSquared,
 		loc:  5,
 		fofx: 25,
 		ans:  10,
-		step: 1e-6,
 	},
 	{
 		f:    xSquared,
 		loc:  2,
 		fofx: 4,
 		ans:  4,
-		step: 1e-6,
 	},
 	{
 		f:    xSquared,
 		loc:  -5,
 		fofx: 25,
 		ans:  -10,
-		step: 1e-6,
 	},
 }
 
@@ -56,28 +51,24 @@ var testsSecond = []testPoint{
 		loc:  0,
 		fofx: 0,
 		ans:  2,
-		step: 1e-3,
 	},
 	{
 		f:    xSquared,
 		loc:  5,
 		fofx: 25,
 		ans:  2,
-		step: 1e-3,
 	},
 	{
 		f:    xSquared,
 		loc:  2,
 		fofx: 4,
 		ans:  2,
-		step: 1e-3,
 	},
 	{
 		f:    xSquared,
 		loc:  -5,
 		fofx: 25,
 		ans:  2,
-		step: 1e-3,
 	},
 }
 
@@ -86,7 +77,6 @@ func testDerivative(t *testing.T, method Method, tol float64, tests []testPoint)
 
 		settings := DefaultSettings()
 		settings.Method = method
-		settings.Step = 1e-4
 		ans := Derivative(test.f, test.loc, settings)
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("Case %v: ans mismatch serial: expected %v, found %v", i, test.ans, ans)

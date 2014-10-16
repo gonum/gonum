@@ -24,7 +24,8 @@ type Point struct {
 // represents the derivative, Order = 2 represents the curvature, etc.
 type Method struct {
 	Stencil []Point
-	Order   int // The order of the difference method (first derivative, second derivative, etc.)
+	Order   int     // The order of the difference method (first derivative, second derivative, etc.)
+	Step    float64 // Default step size for the method.
 }
 
 // Settings is the settings structure for computing finite differences.
@@ -42,7 +43,6 @@ type Settings struct {
 // of the function.
 func DefaultSettings() *Settings {
 	return &Settings{
-		Step:    1e-6,
 		Method:  Central,
 		Workers: runtime.GOMAXPROCS(0),
 	}
@@ -50,10 +50,15 @@ func DefaultSettings() *Settings {
 
 // Derivative estimates the derivative of the function f at the given location.
 // The order of derivative, sample locations, and other options are specified
-// by settings.
+// by settings. If the step is zero, then the step size of the method will
+// be used.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
 	if settings == nil {
 		settings = DefaultSettings()
+	}
+	step := settings.Step
+	if settings.Step == 0 {
+		step = settings.Method.Step
 	}
 	var deriv float64
 	method := settings.Method
@@ -63,9 +68,9 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 				deriv += pt.Coeff * settings.OriginValue
 				continue
 			}
-			deriv += pt.Coeff * f(x+settings.Step*pt.Loc)
+			deriv += pt.Coeff * f(x+step*pt.Loc)
 		}
-		return deriv / math.Pow(settings.Step, float64(method.Order))
+		return deriv / math.Pow(step, float64(method.Order))
 	}
 
 	wg := &sync.WaitGroup{}
@@ -80,26 +85,32 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 		wg.Add(1)
 		go func(pt Point) {
 			defer wg.Done()
-			fofx := f(x + settings.Step*pt.Loc)
+			fofx := f(x + step*pt.Loc)
 			mux.Lock()
 			defer mux.Unlock()
 			deriv += pt.Coeff * fofx
 		}(pt)
 	}
 	wg.Wait()
-	return deriv / math.Pow(settings.Step, float64(method.Order))
+	return deriv / math.Pow(step, float64(method.Order))
 }
 
 // Gradient estimates the derivative of a multivariate function f at the location
 // x. The resulting estimate is stored in-place into gradient. The order of derivative,
-// sample locations, and other options are specified by settings. Gradient panics
-// if len(deriv) != len(x).
+// sample locations, and other options are specified by settings.
+// If the step size is zero, then the step size of the method will
+// be used.
+// Gradient panics if len(deriv) != len(x).
 func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradient []float64) {
 	if len(gradient) != len(x) {
 		panic("fd: location and gradient length mismatch")
 	}
 	if settings == nil {
 		settings = DefaultSettings()
+	}
+	step := settings.Step
+	if settings.Step == 0 {
+		step = settings.Method.Step
 	}
 	if !settings.Concurrent {
 		xcopy := make([]float64, len(x)) // So that x is not modified during the call
@@ -111,11 +122,11 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 					deriv += pt.Coeff * settings.OriginValue
 					continue
 				}
-				xcopy[i] += pt.Loc * settings.Step
+				xcopy[i] += pt.Loc * step
 				deriv += pt.Coeff * f(xcopy)
 				xcopy[i] = x[i]
 			}
-			gradient[i] = deriv / math.Pow(settings.Step, float64(settings.Method.Order))
+			gradient[i] = deriv / math.Pow(step, float64(settings.Method.Order))
 		}
 		return
 	}
@@ -141,7 +152,7 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 				case <-quit:
 					return
 				case run := <-sendChan:
-					xcopy[run.idx] += run.pt.Loc * settings.Step
+					xcopy[run.idx] += run.pt.Loc * step
 					run.result = f(xcopy)
 					xcopy[run.idx] = x[run.idx]
 					ansChan <- run
@@ -180,7 +191,7 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 		run := <-ansChan
 		gradient[run.idx] += run.pt.Coeff * run.result
 	}
-	floats.Scale(1/math.Pow(settings.Step, float64(settings.Method.Order)), gradient)
+	floats.Scale(1/math.Pow(step, float64(settings.Method.Order)), gradient)
 }
 
 type fdrun struct {
@@ -193,22 +204,26 @@ type fdrun struct {
 var Forward = Method{
 	Stencil: []Point{{Loc: 0, Coeff: -1}, {Loc: 1, Coeff: 1}},
 	Order:   1,
+	Step:    1e-6,
 }
 
 // Backward represents a first-order backward difference
 var Backward = Method{
 	Stencil: []Point{{Loc: -1, Coeff: -1}, {Loc: 0, Coeff: 1}},
 	Order:   1,
+	Step:    1e-6,
 }
 
 // Central represents a first-order central difference.
 var Central = Method{
 	Stencil: []Point{{Loc: -1, Coeff: -0.5}, {Loc: 1, Coeff: 0.5}},
 	Order:   1,
+	Step:    1e-6,
 }
 
 // Central2nd represents a secord-order central difference.
 var Central2nd = Method{
 	Stencil: []Point{{Loc: -1, Coeff: 1}, {Loc: 0, Coeff: -2}, {Loc: 1, Coeff: 1}},
 	Order:   2,
+	Step:    1e-3,
 }

@@ -153,7 +153,7 @@ func testMinimize(t *testing.T, method Method) {
 		*/
 	} {
 		test.Settings.Recorder = nil
-		result, err := Minimize(test.F, test.X, test.Settings, method)
+		result, err := Local(test.F, test.X, test.Settings, method)
 		if err != nil {
 			t.Errorf("error finding minimum: %v", err.Error())
 			continue
@@ -171,7 +171,7 @@ func testMinimize(t *testing.T, method Method) {
 
 		// rerun it again to ensure it gets the same answer with the same starting
 		// condition
-		result2, err2 := Minimize(test.F, test.X, test.Settings, method)
+		result2, err2 := Local(test.F, test.X, test.Settings, method)
 		if err2 != nil {
 			t.Errorf("error finding minimum second time: %v", err2.Error())
 			continue

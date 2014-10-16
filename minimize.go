@@ -11,8 +11,8 @@ import (
 	"github.com/gonum/floats"
 )
 
-// Minimize finds a local minimum of a function using a sequential algorithm.
-// In order to maximize a function, just multiply the output by -1.
+// Local finds a local minimum of a function using a sequential algorithm.
+// In order to maximize a function, multiply the output by -1.
 //
 // The first argument is of Function type representing the function to be minimized.
 // Type switching is used to see if the function implements Gradient, FunctionGradient
@@ -39,15 +39,15 @@ import (
 // in the method will be populated with default values. The methods are also
 // designed such that they can be reused in future calls to method.
 //
-// Minimize returns a Result struct and any error that occurred. Please see the
+// Local returns a Result struct and any error that occurred. Please see the
 // documentation of Result for more information.
 //
-// Please be aware that the default behavior of minimize is to find the minimum.
+// Please be aware that the default behavior of Local is to find the minimum.
 // For certain functions and optimization methods, this process can take many
 // function evaluations. If you would like to put limits on this, for example
 // maximum runtime or maximum function evaluations, please modify the Settings
 // input struct.
-func Minimize(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
+func Local(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
 	if len(initX) == 0 {
 		panic("local: initial X has zero length")
 	}

@@ -26,17 +26,9 @@ func (w Weibull) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	} else {
-		return 1.0 - math.Exp(-math.Pow(x/w.Lambda, w.K))
+		return 1.0 - math.Exp(w.LogCDF(x))
 	}
 }
-
-// ConjugateUpdate updates the parameters of the distribution from the sufficient
-// statistics of a set of samples. The sufficient statistics, suffStat, have been
-// observed with nSamples observations. The prior values of the distribution are those
-// currently in the distribution, and have been observed with priorStrength samples.
-/*func (w *Weibull) ConjugateUpdate(suffStat []float64, nSamples float64, priorStrength []float64) {
-	// TODO: Implement
-}*/
 
 // DLogProbDX returns the derivative of the log of the probability with
 // respect to the input x.
@@ -87,20 +79,22 @@ func (w Weibull) Entropy() float64 {
 
 // ExKurtosis returns the excess kurtosis of the distribution.
 func (w Weibull) ExKurtosis() float64 {
-	return (-6*w.gammaIPow(1, 4) + 12*w.gammaIPow(1, 2)*w.gammaIPow(2, 1) - 3*w.gammaIPow(2, 2) - 4*w.gammaIPow(1, 1)*w.gammaIPow(3, 1) + w.gammaIPow(4, 1)) / math.Pow(w.gammaIPow(2, 1)-w.gammaIPow(1, 2), 2)
+	return (-6*w.gammaIPow(1, 4) + 12*w.gammaIPow(1, 2)*math.Gamma(1+2/w.K) - 3*w.gammaIPow(2, 2) - 4*math.Gamma(1+1/w.K)*math.Gamma(1+3/w.K) + math.Gamma(1+4/w.K)) / math.Pow(math.Gamma(1+2/w.K)-w.gammaIPow(1, 2), 2)
 }
-
-// Fit sets the parameters of the probability distribution from the
-// data samples x with relative weights w. If weights is nil, then all the weights
-// are 1. If weights is not nil, then the len(weights) must equal len(samples).
-/*func (w *Weibull) Fit(samples []float64, weights []float64) {
-	// TODO: Implement
-}*/
 
 // gammaIPow aids in readability for the ExKurtosis, Mean,
 // Skewness, and Variance calculations.
 func (w Weibull) gammaIPow(i, pow float64) float64 {
 	return math.Pow(math.Gamma(1+i/w.K), pow)
+}
+
+// LogCDF computes the value of the log of the cumulative density function at x.
+func (w Weibull) LogCDF(x float64) float64 {
+	if x < 0 {
+		return 0
+	} else {
+		return -math.Pow(x/w.Lambda, w.K)
+	}
 }
 
 // LogProb computes the natural logarithm of the value of the probability
@@ -114,7 +108,16 @@ func (w Weibull) LogProb(x float64) float64 {
 	if x < 0 {
 		return 0
 	} else {
-		return math.Log(w.K/w.Lambda) + (w.K-1)*math.Log(x/w.Lambda) + -math.Pow(x/w.Lambda, w.K)
+		return math.Log(w.K) - math.Log(w.Lambda) + (w.K-1)*(math.Log(x)-math.Log(w.Lambda)) - math.Pow(x/w.Lambda, w.K)
+	}
+}
+
+// Survival returns the log of the survival function (complementary CDF) at x.
+func (w Weibull) LogSurvival(x float64) float64 {
+	if x < 0 {
+		return 0
+	} else {
+		return -math.Pow(x/w.Lambda, w.K)
 	}
 }
 
@@ -133,7 +136,7 @@ func (w Weibull) MarshalParameters(p []Parameter) {
 
 // Mean returns the mean of the probability distribution.
 func (w Weibull) Mean() float64 {
-	return w.Lambda * w.gammaIPow(1, 1)
+	return w.Lambda * math.Gamma(1+1/w.K)
 }
 
 // Median returns the median of the normal distribution.
@@ -160,10 +163,6 @@ func (Weibull) NumParameters() int {
 	return 2
 }
 
-/*func (Weibull) NumSuffStat() int {
-	// TODO: Implement
-}*/
-
 // Prob computes the value of the probability density function at x.
 func (w Weibull) Prob(x float64) float64 {
 	if x < 0 {
@@ -184,9 +183,9 @@ func (w Weibull) Quantile(p float64) float64 {
 func (w Weibull) Rand() float64 {
 	var rnd float64
 	if w.Source == nil {
-		rnd = rand.NormFloat64()
+		rnd = rand.Float64()
 	} else {
-		rnd = w.Source.NormFloat64()
+		rnd = w.Source.Float64()
 	}
 	return w.Quantile(rnd)
 }
@@ -194,7 +193,11 @@ func (w Weibull) Rand() float64 {
 // Skewness returns the skewness of the distribution.
 func (w Weibull) Skewness() float64 {
 	stdDev := w.StdDev()
-	return (w.gammaIPow(3, 1)*math.Pow(w.Lambda, 3) - 3*w.Mean()*math.Pow(stdDev, 2) - math.Pow(w.Mean(), 3)) / math.Pow(stdDev, 3)
+	firstGamma, firstGammaSign := math.Lgamma(1 + 3/w.K)
+	logFirst := firstGamma + 3*(math.Log(w.Lambda)-math.Log(stdDev))
+	logSecond := math.Log(3) + math.Log(w.Mean()) + 2*math.Log(stdDev) - 3*math.Log(stdDev)
+	logThird := 3 * (math.Log(w.Mean()) - math.Log(stdDev))
+	return float64(firstGammaSign)*math.Exp(logFirst) - math.Exp(logSecond) - math.Exp(logThird)
 }
 
 // StdDev returns the standard deviation of the probability distribution.
@@ -202,23 +205,9 @@ func (w Weibull) StdDev() float64 {
 	return math.Sqrt(w.Variance())
 }
 
-// SuffStat computes the sufficient statistics of a set of samples to update
-// the distribution. The sufficient statistics are stored in place, and the
-// effective number of samples are returned.
-//
-// If weights is nil, the weights are assumed to be 1, otherwise panics if
-// len(samples) != len(weights).
-/*func (Weibull) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
-	// TODO: Implement
-}*/
-
 // Survival returns the survival function (complementary CDF) at x.
 func (w Weibull) Survival(x float64) float64 {
-	if x < 0 {
-		return 1
-	} else {
-		return math.Exp(-math.Pow(x/w.Lambda, w.K))
-	}
+	return math.Exp(w.LogSurvival(x))
 }
 
 // UnmarshalParameters implements the ParameterMarshaler interface
@@ -238,5 +227,5 @@ func (w *Weibull) UnmarshalParameters(p []Parameter) {
 
 // Variance returns the variance of the probability distribution.
 func (w Weibull) Variance() float64 {
-	return math.Pow(w.Lambda, 2) * (w.gammaIPow(2, 1) - w.gammaIPow(1, 2))
+	return math.Pow(w.Lambda, 2) * (math.Gamma(1+2/w.K) - w.gammaIPow(1, 2))
 }

@@ -148,3 +148,13 @@ func DefaultSettings() *Settings {
 		Recorder:       NewPrinter(),
 	}
 }
+
+// resize takes x and returns a slice of length dim.
+// It returns a resliced x if cap(x) >= dim, and a new
+// slice otherwies
+func resize(x []float64, dim int) []float64 {
+	if dim > cap(x) {
+		return make([]float64, dim)
+	}
+	return x[:dim]
+}

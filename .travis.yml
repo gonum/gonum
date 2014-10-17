@@ -20,7 +20,7 @@ script:
  - diff <(gofmt -d .) <("")
  - sudo ls -la
  - sudo pwd
- - sudo ./test-coverage.sh
+ - sudo bash test-coverage.sh
 
 after_failure: failure
 

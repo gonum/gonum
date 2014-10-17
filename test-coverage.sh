@@ -23,7 +23,7 @@ do
 done
 if [ -n "$COVERALLS_TOKEN" ]
 then
-	goveralls -coverprofile=acc.out $COVERALLS_TOKEN
+	$HOME/gopath/bin/goveralls -coverprofile=acc.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 fi	
 
 rm -rf ./profile.out

@@ -59,7 +59,7 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 		// Means that we needed to evaluate the gradient, so now we have it and can initialize
 		l.finished = false
 		loc.F = l.finishedF
-		return l.initializeNextLinesearch(loc, xNext)
+		return l.initNextLinesearch(loc, xNext)
 	}
 	projGrad := math.NaN()
 	if loc.Gradient != nil {
@@ -78,7 +78,7 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 			copy(xNext, loc.X)
 			return GradientEval, SubIteration, nil
 		}
-		return l.initializeNextLinesearch(loc, xNext)
+		return l.initNextLinesearch(loc, xNext)
 	}
 
 	// Line search not done, just iterate
@@ -91,7 +91,7 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 	return evalType, MinorIteration, nil
 }
 
-func (l *Linesearch) initializeNextLinesearch(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *Linesearch) initNextLinesearch(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
 	// Line search is finished, so find the next direction, and
 	// start the next line search
 	copy(l.initLoc, loc.X)

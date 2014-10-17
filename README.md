@@ -1,4 +1,4 @@
-# Gonum diff  [![Build Status](https://travis-ci.org/jonlawlor/diff.svg)](https://travis-ci.org/jonlawlor/diff)
+# Gonum diff  [![Build Status](https://travis-ci.org/jonlawlor/diff.svg)](https://travis-ci.org/jonlawlor/diff)  [![Coverage Status](https://img.shields.io/coveralls/gonum/diff.svg)](https://coveralls.io/r/gonum/diff)
 
 This is a package for computing derivatives of functions for the Go language.
 

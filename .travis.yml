@@ -4,10 +4,10 @@ go:
  - release
  - tip
 
-#env:
-#  global:
-#  - secure: "aq8rblr2+Ga10psfUJAKBCVtSIv/Uca7Ga1eTzRnRuGPsCHhC691jPmNAd8P7UhmhZ6ZHNN6yC+yYsS+lzCm62gisyIMA3+NmOM4Y2qf3wTSVEvnjAdVonge8aB3zWk5XimhdwiXWoBtW4+cVrNYWv+uNw7gNzGhND0pWFFU//c="
-
+env:
+  global:
+  - secure: "bbvnev0lw5pf9wY/Fv9CgDCynS0q8wvAiRXC/wPwaTR/X7bWwuQF7YmBhOlS9H/x1IxHW1HyqJMjOipIF2/MgPoTB4xVkk1jLHigd6MCt91o8aZvkaW4ITDKhP29CZNCyBKvPoEs/yLGEfaGYop3ivfJPWnDnMAd04m7+Yr1+3I="
+  
 
 before_install:
  - go get code.google.com/p/go.tools/cmd/cover

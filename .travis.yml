@@ -1,0 +1,30 @@
+language: go
+
+go:
+ - release
+ - tip
+
+#env:
+#  global:
+#  - secure: "aq8rblr2+Ga10psfUJAKBCVtSIv/Uca7Ga1eTzRnRuGPsCHhC691jPmNAd8P7UhmhZ6ZHNN6yC+yYsS+lzCm62gisyIMA3+NmOM4Y2qf3wTSVEvnjAdVonge8aB3zWk5XimhdwiXWoBtW4+cVrNYWv+uNw7gNzGhND0pWFFU//c="
+
+
+before_install:
+ - go get code.google.com/p/go.tools/cmd/cover
+ - go get github.com/mattn/goveralls
+
+script:
+ - go get -d -v ./...
+ - go build -v ./...
+ - go test -v ./...
+ - diff <(gofmt -d .) <("")
+ - ./test-coverage.sh
+
+after_failure: failure
+
+notifications:
+  email:
+    recipients:
+      - jonathan.lawlor@gmail.com
+    on_success: change
+    on_failure: always

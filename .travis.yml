@@ -18,6 +18,8 @@ script:
  - go build -v ./...
  - go test -v ./...
  - diff <(gofmt -d .) <("")
+ - sudo ls -la
+ - sudo pwd
  - sudo ./test-coverage.sh
 
 after_failure: failure

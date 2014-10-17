@@ -38,7 +38,7 @@ func (w Weibull) CDF(x float64) float64 {
 //  DLogProbDX(0) = NaN
 func (w Weibull) DLogProbDX(x float64) float64 {
 	if x > 0 {
-		return -(w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x
+		return (-w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x
 	}
 	if x < 0 {
 		return 0
@@ -59,7 +59,7 @@ func (w Weibull) DLogProbDParam(x float64, deriv []float64) {
 		panic("weibull: slice length mismatch")
 	}
 	if x > 0 {
-		deriv[0] = (1 - w.K*(math.Pow(x/w.Lambda, w.K)-1)*math.Log(x/w.Lambda)) / w.K
+		deriv[0] = 1/w.K + math.Log(x) - math.log(w.Lambda) - (math.Log(x)-math.Log(w.Lambda))*math.Pow(x/w.Lambda, w.K)
 		deriv[1] = (w.K * (math.Pow(x/w.Lambda, w.K) - 1)) / w.Lambda
 		return
 	}

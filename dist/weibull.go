@@ -26,7 +26,7 @@ func (w Weibull) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	} else {
-		return 1.0 - math.Exp(w.LogCDF(x))
+		return 1 - math.Exp(w.LogCDF(x))
 	}
 }
 
@@ -37,7 +37,7 @@ func (w Weibull) CDF(x float64) float64 {
 //  DLogProbDX(0) = NaN
 func (w Weibull) DLogProbDX(x float64) float64 {
 	if x > 0 {
-		return -(w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1.0) / x
+		return -(w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x
 	}
 	if x < 0 {
 		return 0
@@ -58,8 +58,8 @@ func (w Weibull) DLogProbDParam(x float64, deriv []float64) {
 		panic("dist Weibull: slice length mismatch")
 	}
 	if x > 0 {
-		deriv[0] = (1.0 - w.K*(math.Pow(x/w.Lambda, w.K)-1.0)*math.Log(x/w.Lambda)) / w.K
-		deriv[1] = (w.K * (math.Pow(x/w.Lambda, w.K) - 1.0)) / w.Lambda
+		deriv[0] = (1 - w.K*(math.Pow(x/w.Lambda, w.K)-1)*math.Log(x/w.Lambda)) / w.K
+		deriv[1] = (w.K * (math.Pow(x/w.Lambda, w.K) - 1)) / w.Lambda
 		return
 	}
 	if x < 0 {
@@ -74,7 +74,7 @@ func (w Weibull) DLogProbDParam(x float64, deriv []float64) {
 
 // Entropy returns the entropy of the distribution.
 func (w Weibull) Entropy() float64 {
-	return eulerGamma*(1.0-1.0/w.K) + math.Log(w.Lambda/w.K) + 1.0
+	return eulerGamma*(1-1/w.K) + math.Log(w.Lambda/w.K) + 1
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.
@@ -141,7 +141,7 @@ func (w Weibull) Mean() float64 {
 
 // Median returns the median of the normal distribution.
 func (w Weibull) Median() float64 {
-	return w.Lambda * math.Pow(ln2, 1.0/w.K)
+	return w.Lambda * math.Pow(ln2, 1/w.K)
 }
 
 // Mode returns the mode of the normal distribution.
@@ -149,9 +149,9 @@ func (w Weibull) Median() float64 {
 // Special case is:
 //  The mode is NaN if the K (shape) parameter is less than 1.
 func (w Weibull) Mode() float64 {
-	if w.K > 1.0 {
-		return w.Lambda * math.Pow((w.K-1.0)/w.K, 1.0/w.K)
-	} else if w.K == 1.0 {
+	if w.K > 1 {
+		return w.Lambda * math.Pow((w.K-1)/w.K, 1/w.K)
+	} else if w.K == 1 {
 		return 0
 	} else {
 		return math.NaN()
@@ -176,7 +176,7 @@ func (w Weibull) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
 		panic("weibull: percentile out of bounds")
 	}
-	return w.Lambda * math.Pow(-math.Log(1-p), 1.0/w.K)
+	return w.Lambda * math.Pow(-math.Log(1-p), 1/w.K)
 }
 
 // Rand returns a random sample drawn from the distribution.

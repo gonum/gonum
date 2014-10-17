@@ -1,7 +1,8 @@
 language: go
 
-# sets $COVERALLS_TOKEN
-secure: "H6CHFx7jRlUdjVqUg2UkTfNq8gSJ26sSYRkZ2dHRehPP4VguDaKMi92bqhGIXraABWyCgPDA4dvEyJHXND1CeyIgewO2N3LYOmoOmXavkmuiN/FOUdgM8OHC020EQr7rrfpfWfd+GsD/HxKNm3sTy2ynxr9hVUUHS4NVgeYD/40="
+env:
+ COVERALLS_TOKEN:
+  secure: "H6CHFx7jRlUdjVqUg2UkTfNq8gSJ26sSYRkZ2dHRehPP4VguDaKMi92bqhGIXraABWyCgPDA4dvEyJHXND1CeyIgewO2N3LYOmoOmXavkmuiN/FOUdgM8OHC020EQr7rrfpfWfd+GsD/HxKNm3sTy2ynxr9hVUUHS4NVgeYD/40="
 
 go:
  - release

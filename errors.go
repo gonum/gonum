@@ -1,0 +1,39 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package optimize
+
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+	// ErrInf signifies the initial function value is Inf.
+	ErrInf = errors.New("optimize: initial function value is Inf")
+
+	// ErrLinesearchIterations signifies the linesearch has iterated too many times.
+	// This may occur if the gradient tolerance is set too low.
+	ErrLinesearchFailure = errors.New("linesearch: failed to converge")
+
+	// ErrNaN signifies the initial function value is NaN.
+	ErrNaN = errors.New("optimize: initial function value is NaN")
+
+	// ErrNonNegativestepDirection signifies that the linesearch has received a step
+	// direction in which the gradient is not negative.
+	ErrNonNegativeStepDirection = errors.New("linesearch: projected gradient not negative")
+
+	// ErrZeroDimensional signifies an optimization was called with an input of length 0.
+	ErrZeroDimensional = errors.New("optimize: zero dimensional input")
+)
+
+// ErrMismatch signifies that the optimization function did not implement the
+// interfaces necessary for the supplied optimization method.
+type ErrMismatch struct {
+	Type EvaluationType
+}
+
+func (e ErrMismatch) Error() string {
+	return fmt.Sprintf("optimizer wanted to use evaluation type %v, but the user supplied function does not implement it", e.Type)
+}

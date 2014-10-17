@@ -1,14 +1,11 @@
 language: go
 
-env:
- COVERALLS_TOKEN:
-  secure: "H6CHFx7jRlUdjVqUg2UkTfNq8gSJ26sSYRkZ2dHRehPP4VguDaKMi92bqhGIXraABWyCgPDA4dvEyJHXND1CeyIgewO2N3LYOmoOmXavkmuiN/FOUdgM8OHC020EQr7rrfpfWfd+GsD/HxKNm3sTy2ynxr9hVUUHS4NVgeYD/40="
-
 go:
  - release
  - tip
 
 before_install:
+ secure: "aq8rblr2+Ga10psfUJAKBCVtSIv/Uca7Ga1eTzRnRuGPsCHhC691jPmNAd8P7UhmhZ6ZHNN6yC+yYsS+lzCm62gisyIMA3+NmOM4Y2qf3wTSVEvnjAdVonge8aB3zWk5XimhdwiXWoBtW4+cVrNYWv+uNw7gNzGhND0pWFFU//c="
  - go get code.google.com/p/go.tools/cmd/cover
  - go get github.com/mattn/goveralls
 

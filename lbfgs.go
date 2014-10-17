@@ -15,10 +15,9 @@ import (
 // for very large problems. This "forgetful" nature of LBFGS may also make it perform
 // better than BFGS for functions with Hessians that vary rapidly spatially.
 //
-// If Store is 0, Store is defaulted to the ceiling of the square root of the
-// number of dimensions. The LinesearchMethod should find a point which satisfies
-// the strong Wolfe conditions. If LinesearchMethod == nil, an appropriate default
-// is chosen.
+// If Store is 0, Store is defaulted to ceil(sqrt(dim)).
+// A LinesearchMethod for LBFGS must satisfy the strong Wolfe conditions at every
+// iteration. If LinesearchMethod == nil, an appropriate default is chosen.
 type LBFGS struct {
 	LinesearchMethod LinesearchMethod
 	Store            int // how many past iterations to store

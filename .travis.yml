@@ -14,7 +14,7 @@ before_install:
 script:
  - go get -d -v ./...
  - go build -v ./...
- - go test -v ./... -v -covermode=count -coverprofile=coverage.out
+ - go test -v -covermode=count -coverprofile=coverage.out
  - diff <(gofmt -d .) <("")
  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 

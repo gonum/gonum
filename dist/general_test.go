@@ -46,8 +46,9 @@ func testDistributionProbs(t *testing.T, dist UniProbDist, name string, pts []un
 		if !absEq(prob, pt.prob) {
 			t.Errorf("Probability doesn't match for "+name+". Expected %v. Found %v", pt.prob, prob)
 		}
-		if !absEq(dist.CDF(pt.loc), pt.cumProb) {
-			t.Errorf("Cumulative Probability doesn't match for " + name)
+		cumProb := dist.CDF(pt.loc)
+		if !absEq(cumProb, pt.cumProb) {
+			t.Errorf("Cumulative Probability doesn't match for "+name+". Expected %v. Found %v", pt.cumProb, cumProb)
 		}
 		if !absEq(dist.Survival(pt.loc), 1-pt.cumProb) {
 			t.Errorf("Survival doesn't match for %v. Expected %v, Found %v", name, 1-pt.cumProb, dist.Survival(pt.loc))

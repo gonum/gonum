@@ -6,6 +6,7 @@ package dist
 
 import (
 	"math"
+	"math/cmplx"
 	"math/rand"
 )
 
@@ -26,7 +27,7 @@ func (w Weibull) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	} else {
-		return 1 - math.Exp(w.LogCDF(x))
+		return 1 - cmplx.Abs(cmplx.Exp(w.LogCDF(x)))
 	}
 }
 
@@ -55,7 +56,7 @@ func (w Weibull) DLogProbDX(x float64) float64 {
 //  The derivative at 0 is NaN.
 func (w Weibull) DLogProbDParam(x float64, deriv []float64) {
 	if len(deriv) != w.NumParameters() {
-		panic("dist Weibull: slice length mismatch")
+		panic("weibull: slice length mismatch")
 	}
 	if x > 0 {
 		deriv[0] = (1 - w.K*(math.Pow(x/w.Lambda, w.K)-1)*math.Log(x/w.Lambda)) / w.K
@@ -82,28 +83,28 @@ func (w Weibull) ExKurtosis() float64 {
 	return (-6*w.gammaIPow(1, 4) + 12*w.gammaIPow(1, 2)*math.Gamma(1+2/w.K) - 3*w.gammaIPow(2, 2) - 4*math.Gamma(1+1/w.K)*math.Gamma(1+3/w.K) + math.Gamma(1+4/w.K)) / math.Pow(math.Gamma(1+2/w.K)-w.gammaIPow(1, 2), 2)
 }
 
-// gammaIPow aids in readability for the ExKurtosis, Mean,
-// Skewness, and Variance calculations.
+// gammIPow is a shortcut for computing the gamma function to a power.
 func (w Weibull) gammaIPow(i, pow float64) float64 {
 	return math.Pow(math.Gamma(1+i/w.K), pow)
 }
 
 // LogCDF computes the value of the log of the cumulative density function at x.
-func (w Weibull) LogCDF(x float64) float64 {
+func (w Weibull) LogCDF(x float64) complex128 {
 	if x < 0 {
 		return 0
 	} else {
-		return -math.Pow(x/w.Lambda, w.K)
+		return cmplx.Log(-1) + complex(-math.Pow(x/w.Lambda, w.K), 0)
 	}
 }
 
 // LogProb computes the natural logarithm of the value of the probability
 // density function at x. Zero is returned if x is less than zero.
 //
-// Special cases when x is zero are dependent on the shape parameter:
-//  If 0 < K < 1, then log of the probability at 0 is +Inf.
-//  If K == 1, then log of the probability at 0 is 0.
-//  If K > 1, then log of the probability at 0 is -Inf.
+// Special cases occur when x == 0, and the result depends on the shape
+// parameter as follows:
+//  If 0 < K < 1, LogProb returns +Inf.
+//  If K == 1, LogProb returns 0.
+//  If K > 1, LogProb returns -Inf.
 func (w Weibull) LogProb(x float64) float64 {
 	if x < 0 {
 		return 0
@@ -121,7 +122,7 @@ func (w Weibull) LogSurvival(x float64) float64 {
 	}
 }
 
-// MarshalParameters implements the ParameterMarshaler interface
+// MarshalParameters implements the ParameterMarshaler interface.
 func (w Weibull) MarshalParameters(p []Parameter) {
 	nParam := w.NumParameters()
 	if len(p) != nParam {
@@ -146,8 +147,8 @@ func (w Weibull) Median() float64 {
 
 // Mode returns the mode of the normal distribution.
 //
-// Special case is:
-//  The mode is NaN if the K (shape) parameter is less than 1.
+// The mode is NaN in the special case where the K (shape) parameter
+// is less than 1.
 func (w Weibull) Mode() float64 {
 	if w.K > 1 {
 		return w.Lambda * math.Pow((w.K-1)/w.K, 1/w.K)
@@ -172,6 +173,7 @@ func (w Weibull) Prob(x float64) float64 {
 	}
 }
 
+// Quantile returns the inverse of the cumulative probability distribution.
 func (w Weibull) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
 		panic("weibull: percentile out of bounds")
@@ -210,7 +212,7 @@ func (w Weibull) Survival(x float64) float64 {
 	return math.Exp(w.LogSurvival(x))
 }
 
-// UnmarshalParameters implements the ParameterMarshaler interface
+// UnmarshalParameters implements the ParameterMarshaler interface.
 func (w *Weibull) UnmarshalParameters(p []Parameter) {
 	if len(p) != w.NumParameters() {
 		panic("weibull: incorrect number of parameters to set")

@@ -90,6 +90,10 @@ func TestBFGS(t *testing.T) {
 	testMinimize(t, &BFGS{})
 }
 
+func TestLBFGS(t *testing.T) {
+	testMinimize(t, &LBFGS{})
+}
+
 func testMinimize(t *testing.T, method Method) {
 	// This should be replaced with a more general testing framework with
 	// a plugable method

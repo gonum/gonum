@@ -1,14 +1,22 @@
 language: go
 
+# sets $COVERALLS_TOKEN
+secure: "gXljaRyVauO8zs+PIMuTusE9L3e7QkqAjZujkXjaWhvcPVZCLtEmtpM20fkGB10RwOpTqSxfd7VUunMuans9+NIo8u4HjwDzCGDDdOYbTTowFV70htm7s1ynibBh9vYLB9nVcFSOVSRmsdXgR0evxZtdFwdn94Fa6XAaxg6sFIo="
+
 go:
  - release
  - tip
 
+before_install:
+ - go get code.google.com/p/go.tools/cmd/cover
+ - go get github.com/mattn/goveralls
+
 script:
  - go get -d -v ./...
  - go build -v ./...
- - go test -v ./...
- - diff <(gofmt -d .) <("") 
+ - go test -v ./... -v -covermode=count -coverprofile=coverage.out
+ - diff <(gofmt -d .) <("")
+ - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 after_failure: failure
 

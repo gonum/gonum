@@ -18,9 +18,7 @@ script:
  - go build -v ./...
  - go test -v ./...
  - diff <(gofmt -d .) <("")
- - sudo ls -la
- - sudo pwd
- - sudo bash test-coverage.sh
+ - bash test-coverage.sh
 
 after_failure: failure
 

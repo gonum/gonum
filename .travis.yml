@@ -6,7 +6,7 @@ go:
 
 env:
   global:
-  - secure: "ecXVVsFXED71D4yYdOA1SJAtiAGdVcyRlsVPCZZI8BtX1WYHdrxzO2g9F2WLMP5nDe6xz+Mux9sRXxS50W2PUV7+a6vnqY7bzMyOQN2uUziTVFZyKxfFXAd4D+3cIW1uDKGEozOuGXbPm8YTJhmkJ2mUWGDlZ8BAsK//U9jPmHk="
+  - secure: "PXt6fucUeI+eToxV+6lxwVZQWRZ/QLe/rexgPHUMBHcuevQFjRPZ3lcSCcKr9onLkb7REdDZj4Pct2zojPHtzvLV6QBl8LOF0QiGF+NmIZqhJMcJsEU476hKMuxotPMj6zKVhbRFKp/K7NmzezhMbkJembZhA4CMIZf+Buu6cqs="
 
 before_install:
  - go get code.google.com/p/go.tools/cmd/cover

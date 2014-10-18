@@ -1,4 +1,4 @@
-# Gonum unit
+# Gonum unit  [![Build Status](https://travis-ci.org/gonum/unit.svg)](https://travis-ci.org/gonum/unit)  [![Coverage Status](https://img.shields.io/coveralls/gonum/unit.svg)](https://coveralls.io/r/gonum/unit)
 
 Package unit provides a set of types and constants that facilitate the use of the International System of Units (SI).
 

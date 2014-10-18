@@ -54,7 +54,6 @@ script:
  
 
 after_failure: failure
-after_error: failure
 
 notifications:
   email:

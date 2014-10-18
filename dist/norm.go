@@ -12,17 +12,6 @@ import (
 	"github.com/gonum/stat"
 )
 
-const (
-	// oneOverRoot2Pi is the value of 1/(2Pi)^(1/2)
-	// http://www.wolframalpha.com/input/?i=1%2F%282+*+pi%29%5E%281%2F2%29
-	oneOverRoot2Pi = 0.39894228040143267793994605993438186847585863116493465766592582967065792589930183850125233390730693643030255886263518268
-
-	//LogRoot2Pi is the value of log(sqrt(2*Pi))
-	logRoot2Pi    = 0.91893853320467274178032973640561763986139747363778341281715154048276569592726039769474329863595419762200564662463433744
-	negLogRoot2Pi = -logRoot2Pi
-	log2Pi        = 1.8378770664093454835606594728112352797227949472755668
-)
-
 // UnitNormal is an instantiation of the standard normal distribution
 var UnitNormal = Normal{Mu: 0, Sigma: 1}
 

@@ -1,9 +1,10 @@
 language: go
 
 env:
-  - BLAS_LIB=OpenBLAS
   global:
   - secure: "gewG9b13l2/JJkag584f/e7vbH+CN5sE/v5IxJLI24vVBsta0L/rUiRN5e/NRXiyNDT4X2XV6R6BLED8VaUo3vDSWHBFtRAuwbMswxRcjDuIGph53zTNukhEwbFThEhZO5vO9T1tECXK1D8ktgQjmqwQ171InUy2loLFWloUTF4="  # at some point, when testing on osx
+  matrix:
+  - BLAS_LIB=OpenBLAS
   #- BLAS_LIB=Accellerate
   # at some point, when the issue with drotgm is resolved
   #- BLAS_LIB=ATLAS

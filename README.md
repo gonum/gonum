@@ -1,4 +1,4 @@
-LAPACK package for the Go language
+Gonum LAPACK  [![Build Status](https://travis-ci.org/gonum/lapack.svg)](https://travis-ci.org/gonum/lapack)  [![Coverage Status](https://img.shields.io/coveralls/gonum/lapack.svg)](https://coveralls.io/r/gonum/lapack)
 ======
 
 A collection of packages to provide LAPACK functionality for the Go programming

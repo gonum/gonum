@@ -1,0 +1,62 @@
+language: go
+
+env:
+  global:
+  - secure: "cdE3p1PuSBF6pwGCg49Ji/YG1ijfulYaXxSeVos+8TEiI1ePwsHZ+jpZM3OAPGiC5h9U2F1mAxD/gXBjEHBXBTMj04r8XfFM82qMClEArYbGvE2+1HPOE4ZRBZmLQZVjuGth1mRpDvCZLIyNHKczbaL0AtyT3e7ekdZ7MGwowDQ="
+  matrix:
+  - BLAS_LIB=OpenBLAS
+  #- BLAS_LIB=Accellerate
+  # at some point, when the issue with drotgm is resolved
+  #- BLAS_LIB=ATLAS
+
+
+go:
+ - release
+ - tip
+ #- 1.1
+ #- 1.2
+ #- 1.3
+
+before_install:
+ - sudo apt-get update -qq
+ - go get code.google.com/p/go.tools/cmd/cover
+ - go get github.com/mattn/goveralls
+
+
+install:
+ - if [[ "$BLAS_LIB" == "ATLAS" ]]; then sudo apt-get install -qq libatlas-base-dev; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo apt-get install -qq gfortran; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd ~; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo git clone --depth=1 git://github.com/xianyi/OpenBLAS; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd OpenBLAS; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo make FC=gfortran &> /dev/null; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo make PREFIX=/usr install; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then curl http://www.netlib.org/blas/blast-forum/cblas.tgz | tar -zx; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd CBLAS; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo mv Makefile.LINUX Makefile.in; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo BLLIB=/usr/lib/libopenblas.a make alllib; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo mv lib/cblas_LINUX.a /usr/lib/libcblas.a; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then export CGO_LDFLAGS="-L/usr/lib -lopenblas"; fi
+ - go get github.com/gonum/blas
+ - go get github.com/gonum/matrix/mat64
+ - pushd clapack
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then perl genLapack.pl -L/usr/lib -lopenblas; fi
+ - popd
+ 
+script:
+ - go test -x -v ./...
+ - diff <(gofmt -d .) <("")
+ - bash test-coverage.sh
+ 
+
+after_failure: failure
+
+notifications:
+  email:
+    recipients:
+      - jonathan.lawlor@gmail.com
+    on_success: change
+    on_failure: always

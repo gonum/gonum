@@ -582,6 +582,9 @@ func TestChiSquare(t *testing.T) {
 			t.Errorf("ChiSquare distance mismatch in case %d. Expected %v, Found %v", i, test.res, resultpq)
 		}
 	}
+	if !Panics(func() { ChiSquare(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("ChiSquare did not panic with length mismatch")
+	}
 }
 
 // Panics returns true if the called function panics during evaluation.

@@ -40,7 +40,8 @@ install:
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then export CGO_LDFLAGS="-L/usr/lib -lopenblas"; fi
- - go get github.com/gonum/blas;
+ - go get github.com/gonum/floats
+ - go get github.com/gonum/blas
 
 script:
  - go get -d -v ./...

@@ -778,6 +778,46 @@ func TestCDF(t *testing.T) {
 			}
 		}
 	}
+
+	// these test cases should all result in a panic
+	for i, test := range []struct {
+		name    string
+		q       float64
+		kind    CumulantKind
+		x       []float64
+		weights []float64
+	}{
+		{
+			name:    "len(x) != len(weights)",
+			q:       1.5,
+			kind:    Empirical,
+			x:       []float64{1, 2, 3, 4, 5},
+			weights: []float64{1, 2, 3},
+		},
+		{
+			name: "unsorted x",
+			q:    1.5,
+			kind: Empirical,
+			x:    []float64{3, 2, 1},
+		},
+		{
+			name: "x has a NaN",
+			q:    1.5,
+			kind: Empirical,
+			x:    []float64{1, 2, math.NaN()},
+		},
+		{
+			name: "unknown CumulantKind",
+			q:    1.5,
+			kind: CumulantKind(1000), // bogus
+			x:    []float64{1, 2, 3},
+		},
+	} {
+		if !Panics(func() { CDF(test.q, test.kind, test.x, test.weights) }) {
+			t.Errorf("did not panic as expected with %s for case %d kind %d percentile %v x %v weights %v", test.name, i, test.kind, test.q, test.x, test.weights)
+		}
+	}
+
 }
 
 func TestQuantile(t *testing.T) {

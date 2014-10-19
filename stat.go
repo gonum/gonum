@@ -66,11 +66,11 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	if !sort.Float64sAreSorted(x) {
-		panic("x data are not sorted")
-	}
 	if floats.HasNaN(x) {
 		return math.NaN()
+	}
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
 	}
 
 	if q < x[0] {

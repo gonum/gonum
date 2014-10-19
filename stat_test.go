@@ -755,6 +755,11 @@ func TestCDF(t *testing.T) {
 			weights: []float64{1, 1, 1, 1, 1},
 			ans:     [][]float64{{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1}},
 		},
+		{
+			q:   []float64{0, 0.9, 1},
+			x:   []float64{math.NaN()},
+			ans: [][]float64{{math.NaN(), math.NaN(), math.NaN()}},
+		},
 	} {
 		copyX := make([]float64, len(test.x))
 		copy(copyX, test.x)
@@ -766,13 +771,13 @@ func TestCDF(t *testing.T) {
 		for j, q := range test.q {
 			for k, kind := range cumulantKinds {
 				v := CDF(q, kind, test.x, test.weights)
-				if !floats.Equal(copyX, test.x) {
+				if !floats.Equal(copyX, test.x) && !math.IsNaN(v) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
 				}
 				if !floats.Equal(copyW, test.weights) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
 				}
-				if v != test.ans[k][j] {
+				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
 					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, q, test.ans[k][j], v)
 				}
 			}
@@ -799,12 +804,6 @@ func TestCDF(t *testing.T) {
 			q:    1.5,
 			kind: Empirical,
 			x:    []float64{3, 2, 1},
-		},
-		{
-			name: "x has a NaN",
-			q:    1.5,
-			kind: Empirical,
-			x:    []float64{1, 2, math.NaN()},
 		},
 		{
 			name: "unknown CumulantKind",

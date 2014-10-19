@@ -54,7 +54,7 @@ func Bhattacharyya(p, q []float64) float64 {
 // the fraction of the samples less than or equal to q. The
 // exact behavior is determined by the CumulantKind. CDF is theoretically
 // the inverse of the Quantile function, though it may not be the actual inverse
-// for all values q and CumululantKinds.
+// for all values q and CumulantKinds.
 //
 // The x data must be sorted in increasing order. If weights is nil then all
 // of the weights are 1. If weights is not nil, then len(x) must equal len(weights).

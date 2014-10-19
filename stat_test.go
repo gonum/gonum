@@ -570,6 +570,11 @@ func TestChiSquare(t *testing.T) {
 			q:   []float64{50, 50, 50, 50},
 			res: 12.5,
 		},
+		{
+			p:   []float64{40, 60, 30, 45, 0, 0},
+			q:   []float64{50, 50, 50, 50, 0, 0},
+			res: 12.5,
+		},
 	} {
 		resultpq := ChiSquare(test.p, test.q)
 

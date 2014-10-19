@@ -579,6 +579,18 @@ func TestChiSquare(t *testing.T) {
 	}
 }
 
+// Panics returns true if the called function panics during evaluation.
+func Panics(fun func()) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+	fun()
+	return
+}
+
 func TestBhattacharyya(t *testing.T) {
 	for i, test := range []struct {
 		p   []float64

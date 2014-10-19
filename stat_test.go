@@ -623,6 +623,11 @@ func TestBhattacharyya(t *testing.T) {
 			t.Errorf("Bhattacharyya distance is assymmetric in case %d.", i)
 		}
 	}
+	// Bhattacharyya should panic if the inputs have different length
+	if !Panics(func() { Bhattacharyya(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Bhattacharyya did not panic with length mismatch")
+	}
+
 }
 
 func TestHellinger(t *testing.T) {

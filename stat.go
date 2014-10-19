@@ -30,7 +30,7 @@ func bhattacharyyaCoeff(p, q []float64) float64 {
 	var bc float64
 	for i, a := range p {
 		b := q[i]
-		if a == 0 && b == 0 {
+		if a == 0 || b == 0 {
 			continue
 		}
 		bc += math.Sqrt(a * b)

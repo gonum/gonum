@@ -330,17 +330,15 @@ func update(location Location, optLoc *Location, stats *Stats, funcInfo *Functio
 	case GradientEval:
 		if funcInfo.IsGradient {
 			stats.GradientEvals++
-		}
-		if funcInfo.IsFunctionGradient {
+		} else if funcInfo.IsFunctionGradient {
 			stats.FunctionGradientEvals++
 		}
 	case FunctionAndGradientEval:
 		if funcInfo.IsFunctionGradient {
 			stats.FunctionGradientEvals++
-		}
-		if funcInfo.IsGradient {
+		} else if funcInfo.IsGradient {
 			stats.FunctionEvals++
-			stats.FunctionGradientEvals++
+			stats.GradientEvals++
 		}
 	}
 	if iterType == MajorIteration {

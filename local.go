@@ -54,7 +54,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 
 	startTime := time.Now()
 
-	funcs, funcStat := findFunctionStats(f)
+	funcs, funcStat := getFunctionInfo(f)
 
 	if method == nil {
 		method = getDefaultMethod(funcStat)
@@ -64,7 +64,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 		settings = DefaultSettings()
 	}
 
-	location, err := setStartingLocation(f, funcs, funcStat, initX, settings)
+	location, err := getStartingLocation(f, funcs, funcStat, initX, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func copyLocation(dst *Location, src Location) {
 	copy(dst.Gradient, src.Gradient)
 }
 
-func findFunctionStats(f Function) (functions, *FunctionInfo) {
+func getFunctionInfo(f Function) (functions, *FunctionInfo) {
 	// Not sure how/if we want to compute timing to be used with functions
 	gradient, isGradient := f.(Gradient)
 	gradFunc, isFunGrad := f.(FunctionGradient)
@@ -195,7 +195,7 @@ func getDefaultMethod(f *FunctionInfo) Method {
 
 // Combine location and stats because maybe in the future we'll add evaluation times
 // to functionStats?
-func setStartingLocation(f Function, funcs functions, stats *FunctionInfo, initX []float64, settings *Settings) (Location, error) {
+func getStartingLocation(f Function, funcs functions, stats *FunctionInfo, initX []float64, settings *Settings) (Location, error) {
 	var l Location
 
 	l.X = make([]float64, len(initX))

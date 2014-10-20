@@ -338,7 +338,7 @@ func update(location Location, optLoc *Location, stats *Stats, funcStat *Functio
 			stats.FunctionGradientEvals++
 		} else if funcStat.IsGradient {
 			stats.FunctionEvals++
-			stats.FunctionGradientEvals++
+			stats.GradientEvals++
 		}
 	}
 	if iterType == MajorIteration {

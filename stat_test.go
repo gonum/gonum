@@ -193,6 +193,10 @@ func TestCrossEntropy(t *testing.T) {
 			t.Errorf("Cross entropy mismatch case %d: Expected %v, Found %v", i, test.ans, c)
 		}
 	}
+	if !Panics(func() { CrossEntropy(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("CrossEntropy did not panic with p, q length mismatch")
+	}
+
 }
 
 func ExampleEntropy() {

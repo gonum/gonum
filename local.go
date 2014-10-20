@@ -64,12 +64,12 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 		settings = DefaultSettings()
 	}
 
-	location, err := getStartingLocation(f, funcs, funcInfo, initX, settings)
+	stats := &Stats{}
+	location, err := getStartingLocation(f, funcs, funcInfo, initX, stats, settings)
 	if err != nil {
 		return nil, err
 	}
 
-	stats := &Stats{}
 	optLoc := &Location{}
 	// update stats (grad norm, function value, etc.) so that things are
 	// initialized for the first convergence check
@@ -186,7 +186,7 @@ func getFunctionInfo(f Function) (functions, *FunctionInfo) {
 }
 
 func getDefaultMethod(funcInfo *FunctionInfo) Method {
-	if funcInfo.IsFunctionGradient {
+	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
 		return &BFGS{}
 	}
 	// TODO: Implement a gradient-free method
@@ -195,45 +195,43 @@ func getDefaultMethod(funcInfo *FunctionInfo) Method {
 
 // Combine location and stats because maybe in the future we'll add evaluation times
 // to functionStats?
-func getStartingLocation(f Function, funcs functions, funcInfo *FunctionInfo, initX []float64, settings *Settings) (Location, error) {
+func getStartingLocation(f Function, funcs functions, funcInfo *FunctionInfo, initX []float64, stats *Stats, settings *Settings) (Location, error) {
 	var l Location
 
 	l.X = make([]float64, len(initX))
 	copy(l.X, initX)
+	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
+		l.Gradient = make([]float64, len(l.X))
+	}
 
 	if settings.UseInitialData {
-		initF := settings.InitialFunctionValue
-		// Do we allow Inf initial function value?
-		if math.IsNaN(initF) {
-			return l, ErrNaN
-		}
-		if math.IsInf(initF, 1) {
-			return l, ErrInf
-		}
-		l.F = initF
-
+		l.F = settings.InitialFunctionValue
 		initG := settings.InitialGradient
-		if funcInfo.IsGradient {
-			if len(initX) != len(initG) {
+		if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
+			if len(l.Gradient) != len(initG) {
 				panic("local: initial location size mismatch")
 			}
-
-			l.Gradient = make([]float64, len(initG))
 			copy(l.Gradient, initG)
 		}
-		return l, nil
+	} else {
+		// Compute missing information in the initial state.
+		if funcInfo.IsFunctionGradient {
+			l.F = funcs.gradFunc.FDf(l.X, l.Gradient)
+			stats.FunctionGradientEvals++
+		} else {
+			l.F = funcs.function.F(l.X)
+			stats.FunctionEvals++
+			if funcInfo.IsGradient {
+				funcs.gradient.Df(l.X, l.Gradient)
+				stats.GradientEvals++
+			}
+		}
 	}
 
-	// Compute missing information in the initial state.
-	if funcInfo.IsFunctionGradient {
-		l.Gradient = make([]float64, len(initX))
-		l.F = funcs.gradFunc.FDf(initX, l.Gradient)
-		return l, nil
-	}
-	l.F = funcs.function.F(l.X)
 	if math.IsNaN(l.F) {
 		return l, ErrNaN
 	}
+	// Do we allow Inf initial function value?
 	if math.IsInf(l.F, 1) {
 		return l, ErrInf
 	}

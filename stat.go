@@ -154,7 +154,7 @@ func Covariance(x []float64, meanX float64, y []float64, meanY float64, weights 
 		s /= float64(len(x) - 1)
 		return s
 	}
-	if weights != nil && len(weights) != len(x) {
+	if len(weights) != len(x) {
 		panic("stat: slice length mismatch")
 	}
 	var (

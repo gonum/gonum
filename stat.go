@@ -176,11 +176,9 @@ func CrossEntropy(p, q []float64) float64 {
 	}
 	var ce float64
 	for i, v := range p {
-		w := q[i]
-		if v == 0 && w == 0 {
-			continue
+		if v != 0 {
+			ce -= v * math.Log(q[i])
 		}
-		ce -= v * math.Log(w)
 	}
 	return ce
 }

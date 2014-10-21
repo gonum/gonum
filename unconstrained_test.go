@@ -141,6 +141,18 @@ func testMinimize(t *testing.T, method Method) {
 				GradientAbsTol: 1e-13,
 			},
 		},
+		{
+			F:      Rosenbrock{2},
+			X:      []float64{-1.2, 1},
+			OptVal: 0,
+			OptLoc: []float64{1, 1},
+			Tol:    1e-4,
+
+			Settings: &Settings{
+				FunctionAbsTol: math.Inf(-1),
+				GradientAbsTol: 1e-3,
+			},
+		},
 		/*
 			// TODO: Turn this on when we have an adaptive linsearch method.
 			// Gradient descent with backtracking will basically never finish
@@ -162,10 +174,10 @@ func testMinimize(t *testing.T, method Method) {
 			t.Errorf("error finding minimum: %v", err.Error())
 			continue
 		}
-		// fmt.Println("%#v\n", result) for debugging
+		// fmt.Println("%#v\n", result) // for debugging
 		// TODO: Better tests
 		if math.Abs(result.F-test.OptVal) > test.Tol {
-			t.Errorf("Minimum not found, exited with status: %v. Want: %v, Got: %v", result.Status, test.OptVal, result.F)
+			t.Errorf("Case %v: Minimum not found, exited with status: %v. Want: %v, Got: %v", i, result.Status, test.OptVal, result.F)
 			continue
 		}
 		if result == nil {

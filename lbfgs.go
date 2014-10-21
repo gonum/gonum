@@ -15,7 +15,7 @@ import (
 // for very large problems. This "forgetful" nature of LBFGS may also make it perform
 // better than BFGS for functions with Hessians that vary rapidly spatially.
 //
-// If Store is 0, Store is defaulted to ceil(sqrt(dim)).
+// If Store is 0, Store is defaulted to 15.
 // A LinesearchMethod for LBFGS must satisfy the strong Wolfe conditions at every
 // iteration. If LinesearchMethod == nil, an appropriate default is chosen.
 type LBFGS struct {
@@ -25,8 +25,7 @@ type LBFGS struct {
 	linesearch *Linesearch
 
 	dim    int
-	oldest int  // element of the history slices that is the oldest
-	first  bool // is it the first iteration -- used for scaling the Hessian
+	oldest int // element of the history slices that is the oldest
 
 	x    []float64 // location at the last major iteration
 	grad []float64 // gradient at the last major iteration
@@ -62,11 +61,10 @@ func (l *LBFGS) InitDirection(loc Location, direction []float64) (stepSize float
 	l.dim = dim
 
 	if l.Store == 0 {
-		l.Store = int(math.Ceil(math.Sqrt(float64(dim))))
+		l.Store = 15
 	}
 
 	l.oldest = l.Store - 1 // the first vector will be put in at 0
-	l.first = true
 
 	l.x = resize(l.x, dim)
 	l.grad = resize(l.grad, dim)
@@ -122,20 +120,13 @@ func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float
 
 	// Update direction. Uses two-loop correction as described in
 	// Numerical Optimization. Nocedal and Wright, Ch 9, Page 225.
-
-	// Compute gamma for the initial hessian before overwriting the values
-	// of y and s.
-	var prevGamma float64
-	if l.first {
-		prevGamma = 1
-	} else {
-		prevGamma = floats.Dot(l.s, l.y) / floats.Dot(l.y, l.y)
-	}
-
 	floats.SubTo(l.y, loc.Gradient, l.grad)
 	floats.SubTo(l.s, loc.X, l.x)
 	rho := 1 / floats.Dot(l.y, l.s)
 	copy(direction, loc.Gradient)
+
+	// Compute gamma for the initial Hessian.
+	gamma := floats.Dot(l.s, l.y) / floats.Dot(l.y, l.y)
 
 	// two loop update. First loop starts with the most recent element
 	// and goes backward, second starts with the oldest element and goes
@@ -149,7 +140,7 @@ func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float
 		l.a[idx] = l.rhoHist[idx] * floats.Dot(l.sHist[idx], direction)
 		floats.AddScaled(direction, -l.a[idx], l.yHist[idx])
 	}
-	floats.Scale(prevGamma, direction)
+	floats.Scale(gamma, direction)
 	for i := 0; i < l.Store; i++ {
 		idx := i + l.oldest
 		if idx >= l.Store {

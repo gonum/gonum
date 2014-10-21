@@ -119,7 +119,7 @@ func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float
 	}
 
 	// Update direction. Uses two-loop correction as described in
-	// Numerical Optimization. Nocedal and Wright, Ch 9, Page 225.
+	// Nocedal, Wright (2006), Numerical Optimization (2nd ed.). Chapter 7, page 178.
 	floats.SubTo(l.y, loc.Gradient, l.grad)
 	floats.SubTo(l.s, loc.X, l.x)
 	rho := 1 / floats.Dot(l.y, l.s)

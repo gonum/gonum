@@ -14,6 +14,7 @@ import (
 const (
 	blockSize   = 64 // b x b matrix
 	minParBlock = 4  // minimum number of blocks needed to go parallel
+	buffMul     = 4  // how big is the buffer relative to the number of workers
 )
 
 // Dgemm computes c := beta * C + alpha * A * B. If tA or tB is blas.Trans,
@@ -110,10 +111,8 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 	// Cij = \sum_k Aik Bjk,	(A * B^T)
 	// Cij = \sum_k Aki Bjk,	(A^T * B^T)
 	//
-	// For each of these cases, this code computes all that it can in parallel,
-	// and when one of the cases finishes, it sends the next possible element away.
-	// As an example, for A*B, the code sends out A_i1 * B_1j for all i, j. When
-	// this solution is computed, A_i2 * B_2j is sent to be computed. This
+	// This code computes one {i, j} block sequentially along the k dimension,
+	// and computes all of the {i, j} blocks concurrently. This
 	// partitioning allows Cij to be updated in-place without race-conditions.
 	// Instead of launching a goroutine for each possible concurrent computation,
 	// a number of worker goroutines are created and channels are used to pass
@@ -126,8 +125,7 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 	aTrans := tA == blas.Trans
 	bTrans := tB == blas.Trans
 
-	maxKLen, parBlocks, expect := computeNumBlocks(a, b, aTrans, bTrans)
-
+	maxKLen, parBlocks := computeNumBlocks(a, b, aTrans, bTrans)
 	if parBlocks < minParBlock {
 		// The matrix multiplication is small in the dimensions where it can be
 		// computed concurrently. Just do it in serial.
@@ -135,141 +133,95 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 		return
 	}
 
-	// Number of workers is the minimum of the number of processors and the number
-	// of possible parallel computations
 	nWorkers := runtime.GOMAXPROCS(0)
 	if parBlocks < nWorkers {
 		nWorkers = parBlocks
 	}
+	// There is a tradeoff between the workers having to wait for work
+	// and a large buffer making operations slow.
+	buf := buffMul * nWorkers
+	if buf > parBlocks {
+		buf = parBlocks
+	}
 
-	// Create channels. The structure of the code avoids race conditions in updating C,
-	// but the channel sends don't synchronize between the original block and the
-	// updated blocks. A deadlock may occur if there is a small buffer and
-	// no extra goroutine creation in the loop that reads in the results. The
-	// original distributor can send to a worker. The worker is waiting to send
-	// on the answer channel, but the 2nd level distributor is waiting to send
-	// the next case on the channel to the worker. There are two choices around
-	// this. One is to have a very large buffer and no extra goroutine creation.
-	// A second is to have a small buffer and do have extra goroutine creation.
-	// Benchmarking shows the latter is faster.
-	sendChan := make(chan *subMul, nWorkers)
-	ansChan := make(chan *subMul, nWorkers)
-	quit := make(chan struct{})
+	sendChan := make(chan subMul, buf)
+	quitChan := make(chan struct{}, nWorkers)
 
-	// launch workers. A worker receives a submatrix, computes it, and sends
-	// a message back to announce the completion.
+	// Launch workers. A worker receives an {i, j} submatrix of c, and computes
+	// A_ik B_ki (or the transposed version) storing the result in c_ij. When the
+	// channel is finally closed, it sends a message that it has finished the final
+	// computation.
 	for i := 0; i < nWorkers; i++ {
 		go func() {
-			for {
-				select {
-				case <-quit:
-					return
-				case sub := <-sendChan:
-					dgemmSerial(tA, tB, sub.a, sub.b, sub.c, sub.alpha)
-					ansChan <- sub
+			// Make local copies of otherwise global variables to reduce shared memory.
+			// This has a noticable effect on benchmarks in some cases.
+			alpha := alpha
+			aTrans := aTrans
+			bTrans := bTrans
+			crows := c.rows
+			ccols := c.cols
+			for sub := range sendChan {
+				i := sub.i
+				j := sub.j
+				leni := blockSize
+				if i+leni > crows {
+					leni = crows - i
+				}
+				lenj := blockSize
+				if j+lenj > ccols {
+					lenj = ccols - j
+				}
+				cSub := c.view(i, j, leni, lenj)
+
+				// Compute A_ik B_kj for all k
+				for k := 0; k < maxKLen; k += blockSize {
+					lenk := blockSize
+					if k+lenk > maxKLen {
+						lenk = maxKLen - k
+					}
+					var aSub, bSub general
+					if aTrans {
+						aSub = a.view(k, i, lenk, leni)
+					} else {
+						aSub = a.view(i, k, leni, lenk)
+					}
+					if bTrans {
+						bSub = b.view(j, k, lenj, lenk)
+					} else {
+						bSub = b.view(k, j, lenk, lenj)
+					}
+
+					dgemmSerial(tA, tB, aSub, bSub, cSub, alpha)
 				}
 			}
+			quitChan <- struct{}{}
 		}()
 	}
 
-	// Send out the submatrices of the first block along k. For example, in
-	// Cij = \sum Aik * Bki, send out Ai1 * B1j for all i and j.
-	// The lenX variables are the number of elements along that dimension. Normally
-	// that will be blockSize, but at the edges may need to be shorter
-	go func() {
-		lenk := blockSize
-		if lenk > maxKLen {
-			lenk = maxKLen
-		}
-		for i := 0; i < c.rows; i += blockSize {
-			leni := blockSize
-			if i+leni > c.rows {
-				leni = c.rows - i
-			}
-			for j := 0; j < c.cols; j += blockSize {
-				lenj := blockSize
-				if j+lenj > c.cols {
-					lenj = c.cols - j
-				}
-				// Take views of the larger a and b matrices to get the appropriate
-				// subblock.
-				var aSub, bSub general
-				if aTrans {
-					aSub = a.view(0, i, lenk, leni)
-				} else {
-					aSub = a.view(i, 0, leni, lenk)
-				}
-				if bTrans {
-					bSub = b.view(j, 0, lenj, lenk)
-				} else {
-					bSub = b.view(0, j, lenk, lenj)
-				}
-				sendChan <- &subMul{
-					i:     i,
-					j:     j,
-					k:     0,
-					a:     aSub,
-					b:     bSub,
-					c:     c.view(i, j, leni, lenj),
-					alpha: alpha,
-				}
+	// Send out all of the {i, j} subblocks for computation.
+	for i := 0; i < c.rows; i += blockSize {
+		for j := 0; j < c.cols; j += blockSize {
+			sendChan <- subMul{
+				i: i,
+				j: j,
 			}
 		}
-	}()
-
-	// Read in the cases as they come in. Send the next k block along that same
-	// {i,j} pair to be computed if there is a block left to compute.
-	var n int
-	for sub := range ansChan {
-		n++
-		if n == expect {
-			close(quit)
-			return
-		}
-		// If we already computed the final k, don't need to send anything else
-		// along this pair.
-		if sub.k+blockSize >= maxKLen {
-			continue
-		}
-		// Otherwise, get the block of k along the {i,j} pair. Since i and j are
-		// constant, the view of C stays the same.
-		k := sub.k + blockSize
-		lenk := blockSize
-		if k+lenk > maxKLen {
-			lenk = maxKLen - k
-		}
-		var aSub, bSub general
-		if aTrans {
-			aSub = a.view(k, sub.i, lenk, sub.a.cols)
-		} else {
-			aSub = a.view(sub.i, k, sub.a.rows, lenk)
-		}
-		if bTrans {
-			bSub = b.view(sub.j, k, sub.b.rows, lenk)
-		} else {
-			bSub = b.view(k, sub.j, lenk, sub.b.cols)
-		}
-		sub.a = aSub
-		sub.b = bSub
-		sub.k = k
-		go func(sub *subMul) {
-			sendChan <- sub
-		}(sub)
 	}
-	close(quit)
+	close(sendChan)
+	for i := 0; i < nWorkers; i++ {
+		<-quitChan
+	}
 	return
 }
 
 type subMul struct {
-	i, j, k int     // index of block
-	a, b, c general // submatrices of the global a,b,c
-	alpha   float64
+	i, j int // index of block
 }
 
 // computeNumBlocks says how many blocks there are to compute. maxKLen says the length of the
 // k dimension, parBlocks is the number of blocks that could be computed in parallel
 // (the submatrices in i and j). expect is the full number of blocks that will be computed.
-func computeNumBlocks(a, b general, aTrans, bTrans bool) (maxKLen, parBlocks, expect int) {
+func computeNumBlocks(a, b general, aTrans, bTrans bool) (maxKLen, parBlocks int) {
 	aRowBlocks := a.rows / blockSize
 	if a.rows%blockSize != 0 {
 		aRowBlocks++
@@ -292,22 +244,18 @@ func computeNumBlocks(a, b general, aTrans, bTrans bool) (maxKLen, parBlocks, ex
 		// Cij = \sum_k Aik Bki
 		maxKLen = a.cols
 		parBlocks = aRowBlocks * bColBlocks
-		expect = parBlocks * aColBlocks
 	case aTrans && !bTrans:
 		// Cij = \sum_k Aki Bkj
 		maxKLen = a.rows
 		parBlocks = aColBlocks * bColBlocks
-		expect = parBlocks * aRowBlocks
 	case !aTrans && bTrans:
 		// Cij = \sum_k Aik Bjk
 		maxKLen = a.cols
 		parBlocks = aRowBlocks * bRowBlocks
-		expect = parBlocks * aColBlocks
 	case aTrans && bTrans:
 		// Cij = \sum_k Aki Bjk
 		maxKLen = a.rows
 		parBlocks = aColBlocks * bRowBlocks
-		expect = parBlocks * aRowBlocks
 	}
 	return
 }

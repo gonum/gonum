@@ -7,6 +7,7 @@ package goblas
 import (
 	"fmt"
 	"runtime"
+	"sync"
 
 	"github.com/gonum/blas"
 )
@@ -145,14 +146,16 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 	}
 
 	sendChan := make(chan subMul, buf)
-	quitChan := make(chan struct{}, nWorkers)
 
 	// Launch workers. A worker receives an {i, j} submatrix of c, and computes
 	// A_ik B_ki (or the transposed version) storing the result in c_ij. When the
-	// channel is finally closed, it sends a message that it has finished the final
-	// computation.
+	// channel is finally closed, it signals to the waitgroup that it has finished
+	// computing.
+	wg := &sync.WaitGroup{}
+	wg.Add(nWorkers)
 	for i := 0; i < nWorkers; i++ {
 		go func() {
+			defer wg.Done()
 			// Make local copies of otherwise global variables to reduce shared memory.
 			// This has a noticable effect on benchmarks in some cases.
 			alpha := alpha
@@ -194,7 +197,6 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 					dgemmSerial(tA, tB, aSub, bSub, cSub, alpha)
 				}
 			}
-			quitChan <- struct{}{}
 		}()
 	}
 
@@ -208,9 +210,7 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 		}
 	}
 	close(sendChan)
-	for i := 0; i < nWorkers; i++ {
-		<-quitChan
-	}
+	wg.Wait()
 	return
 }
 

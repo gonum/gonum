@@ -29,6 +29,17 @@ func BenchmarkDgemmMedMedMed(b *testing.B) {
 	)
 }
 
+func BenchmarkDgemmMedLgMed(b *testing.B) {
+	testblas.DgemmBenchmark(b,
+		Blas{},
+		testblas.DgemmMedium,
+		testblas.DgemmLarge,
+		testblas.DgemmMedium,
+		blas.NoTrans,
+		blas.NoTrans,
+	)
+}
+
 func BenchmarkDgemmLgLgLg(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},

@@ -151,9 +151,9 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 	// A_ik B_ki (or the transposed version) storing the result in c_ij. When the
 	// channel is finally closed, it signals to the waitgroup that it has finished
 	// computing.
-	wg := &sync.WaitGroup{}
-	wg.Add(nWorkers)
+	var wg sync.WaitGroup
 	for i := 0; i < nWorkers; i++ {
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			// Make local copies of otherwise global variables to reduce shared memory.

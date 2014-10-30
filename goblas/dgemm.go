@@ -211,7 +211,6 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general, alpha float64) {
 	}
 	close(sendChan)
 	wg.Wait()
-	return
 }
 
 type subMul struct {

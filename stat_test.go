@@ -922,18 +922,27 @@ func TestMoment(t *testing.T) {
 		mean    float64
 		ans     float64
 	}{
-		{},
 		{
 			x:      []float64{6, 2, 4, 8, 9},
 			mean:   3,
 			moment: 5,
 			ans:    2.2288e3,
 		},
+		{
+			x:       []float64{6, 2, 4, 8, 9},
+			weights: []float64{1, 2, 2, 2, 1},
+			mean:    3,
+			moment:  5,
+			ans:     1.783625e3,
+		},
 	} {
 		m := Moment(test.moment, test.x, test.mean, test.weights)
 		if math.Abs(test.ans-m) > 1e-14 {
 			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
 		}
+	}
+	if !Panics(func() { Moment(1, make([]float64, 3), 0, make([]float64, 2)) }) {
+		t.Errorf("Moment did not panic with x, weights length mismatch")
 	}
 }
 

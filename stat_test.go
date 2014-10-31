@@ -1260,3 +1260,31 @@ func ExampleVariance() {
 	// The variance of the samples is 77.5000
 	// The weighted variance of the samples is 111.7941
 }
+
+func TestStdScore(t *testing.T) {
+	for i, test := range []struct {
+		x float64
+		u float64
+		s float64
+		z float64
+	}{
+		{
+			x: 4,
+			u: -6,
+			s: 5,
+			z: 2,
+		},
+		{
+			x: 1,
+			u: 0,
+			s: 1,
+			z: 1,
+		},
+	} {
+		z := StdScore(test.x, test.u, test.s)
+		if math.Abs(z-test.z) > 1e-14 {
+			t.Errorf("StdScore mismatch case %d. Expected %v, Found %v", i, test.z, z)
+		}
+	}
+
+}

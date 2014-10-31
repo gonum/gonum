@@ -669,12 +669,13 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	if !sort.Float64sAreSorted(x) {
-		panic("x data are not sorted")
-	}
 	if floats.HasNaN(x) {
 		return math.NaN() // This is needed because the algorithm breaks otherwise
 	}
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
+
 	var sumWeights float64
 	if weights == nil {
 		sumWeights = float64(len(x))

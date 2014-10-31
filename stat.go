@@ -781,10 +781,10 @@ func StdErr(stdev, sampleSize float64) float64 {
 }
 
 // StdScore returns the standard score (a.k.a. z-score, z-value) for the value x
-// with the givem mean and variance, i.e.
-//  (x - mean) / variance
-func StdScore(x, mean, variance float64) float64 {
-	return (x - mean) / variance
+// with the givem mean and standard deviation, i.e.
+//  (x - mean) / std
+func StdScore(x, mean, std float64) float64 {
+	return (x - mean) / std
 }
 
 // Variance computes the weighted sample variance with the provided mean.

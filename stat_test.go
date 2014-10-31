@@ -196,7 +196,6 @@ func TestCrossEntropy(t *testing.T) {
 	if !Panics(func() { CrossEntropy(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("CrossEntropy did not panic with p, q length mismatch")
 	}
-
 }
 
 func ExampleEntropy() {
@@ -273,6 +272,27 @@ func ExampleGeometricMean() {
 	// Output:
 	// The arithmetic mean is 10.1667, but the geometric mean is 8.7637.
 	// The exponential of the mean of the logs is 8.7637
+}
+
+func TestGeometricMean(t *testing.T) {
+	for i, test := range []struct {
+		x   []float64
+		wts []float64
+		ans float64
+	}{
+		{
+			x:   []float64{2, 8},
+			ans: 4,
+		},
+	} {
+		c := GeometricMean(test.x, test.wts)
+		if math.Abs(c-test.ans) > 1e-14 {
+			t.Errorf("Geometric mean mismatch case %d: Expected %v, Found %v", i, test.ans, c)
+		}
+	}
+	if !Panics(func() { GeometricMean(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("GeometricMean did not panic with x, wts length mismatch")
+	}
 }
 
 func ExampleHarmonicMean() {

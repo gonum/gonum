@@ -727,6 +727,12 @@ func ExampleKullbackLeibler() {
 	// The K-L distance between identical distributions is 0.0000
 }
 
+func TestKullbackLeibler(t *testing.T) {
+	if !Panics(func() { KullbackLeibler(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("KullbackLeibler did not panic with p, q length mismatch")
+	}
+}
+
 func TestChiSquare(t *testing.T) {
 	for i, test := range []struct {
 		p   []float64

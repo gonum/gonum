@@ -274,7 +274,7 @@ func HarmonicMean(x, weights []float64) float64 {
 	}
 	// TODO: Fix this to make it more efficient and avoid allocation
 
-	// This can be numerically unstable (for exapmle if x is very small)
+	// This can be numerically unstable (for example if x is very small)
 	// W = \sum_i {w_i}
 	// hm = exp(log(W) - log(\sum_i w_i / x_i))
 

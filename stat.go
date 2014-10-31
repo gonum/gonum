@@ -415,7 +415,7 @@ func JensenShannon(p, q []float64) float64 {
 // KolmogorovSmirnov computes the largest distance between two empirical CDFs.
 // Each dataset x and y consists of sample locations and counts, xWeights and
 // yWeights, respectively.
-// 
+//
 // x and y may have different lengths, though len(x) must equal len(xWeights), and
 // len(y) must equal len(yWeights).  Both x and y must be sorted.
 //
@@ -436,19 +436,18 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 		return 1
 	}
 
+	if floats.HasNaN(x) {
+		return math.NaN()
+	}
+	if floats.HasNaN(y) {
+		return math.NaN()
+	}
+
 	if !sort.Float64sAreSorted(x) {
 		panic("x data are not sorted")
 	}
 	if !sort.Float64sAreSorted(y) {
 		panic("y data are not sorted")
-	}
-
-	if floats.HasNaN(x) {
-		return math.NaN()
-	}
-
-	if floats.HasNaN(y) {
-		return math.NaN()
 	}
 
 	xWeightsNil := xWeights == nil

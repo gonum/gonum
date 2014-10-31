@@ -20,10 +20,9 @@ var (
 	_ Vectorer     = matrix
 	_ VectorSetter = matrix
 
-	_ Cloner      = matrix
-	_ Viewer      = matrix
-	_ Submatrixer = matrix
-	_ RowViewer   = matrix
+	_ Cloner    = matrix
+	_ Viewer    = matrix
+	_ RowViewer = matrix
 
 	_ Adder     = matrix
 	_ Suber     = matrix
@@ -183,12 +182,6 @@ func (m *Dense) View(a Matrix, i, j, r, c int) {
 	m.mat.Data = m.mat.Data[i*m.mat.Stride+j : (i+r-1)*m.mat.Stride+(j+c)]
 	m.mat.Rows = r
 	m.mat.Cols = c
-}
-
-func (m *Dense) Submatrix(a Matrix, i, j, r, c int) {
-	// This is probably a bad idea, but for the moment, we do it.
-	m.View(a, i, j, r, c)
-	m.Clone(m)
 }
 
 func (m *Dense) Reset() {

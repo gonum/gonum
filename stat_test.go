@@ -732,7 +732,6 @@ func TestBhattacharyya(t *testing.T) {
 	if !Panics(func() { Bhattacharyya(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Bhattacharyya did not panic with length mismatch")
 	}
-
 }
 
 func TestHellinger(t *testing.T) {
@@ -766,6 +765,9 @@ func TestHellinger(t *testing.T) {
 		if math.Abs(resultpq-resultqp) > 1e-10 {
 			t.Errorf("Hellinger distance is assymmetric in case %d.", i)
 		}
+	}
+	if !Panics(func() { Hellinger(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Hellinger did not panic with length mismatch")
 	}
 }
 

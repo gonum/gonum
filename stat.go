@@ -412,12 +412,12 @@ func JensenShannon(p, q []float64) float64 {
 	return js
 }
 
-// KolmogorovSmirnov computes the largest distance between the empirical CDFs
-// of the two datasets. x and y consist of the sample locations with sample counts.
-// xWeights and yWeights respectively. x and y must each be sorted.
-//
+// KolmogorovSmirnov computes the largest distance between two empirical CDFs.
+// Each dataset x and y consists of sample locations and counts, xWeights and
+// yWeights, respectively.
+// 
 // x and y may have different lengths, though len(x) must equal len(xWeights), and
-// len(y) must equal len(yWeights).
+// len(y) must equal len(yWeights).  Both x and y must be sorted.
 //
 // Special cases are:
 //  = 0 if len(x) == len(y) == 0

@@ -1180,6 +1180,9 @@ func TestSkew(t *testing.T) {
 			t.Errorf("Skew mismatch case %d. Expected %v, Found %v", i, test.ans, skew)
 		}
 	}
+	if !Panics(func() { Skew(make([]float64, 3), 0, 1, make([]float64, 2)) }) {
+		t.Errorf("Skew did not panic with x, weights length mismatch")
+	}
 }
 
 func TestVariance(t *testing.T) {

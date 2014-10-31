@@ -1185,6 +1185,37 @@ func TestSkew(t *testing.T) {
 	}
 }
 
+func TestSortWeighted(t *testing.T) {
+	for i, test := range []struct {
+		x    []float64
+		w    []float64
+		ansx []float64
+		answ []float64
+	}{
+		{
+			x:    []float64{8, 3, 7, 8, 4},
+			ansx: []float64{3, 4, 7, 8, 8},
+		},
+		{
+			x:    []float64{8, 3, 7, 8, 4},
+			w:    []float64{.5, 1, 1, .5, 1},
+			ansx: []float64{3, 4, 7, 8, 8},
+			answ: []float64{1, 1, 1, .5, .5},
+		},
+	} {
+		SortWeighted(test.x, test.w)
+		if !floats.Same(test.x, test.ansx) {
+			t.Errorf("SortWeighted mismatch case %d. Expected x %v, Found x %v", i, test.ansx, test.x)
+		}
+		if !(test.w == nil) && !floats.Same(test.w, test.answ) {
+			t.Errorf("SortWeighted mismatch case %d. Expected w %v, Found w %v", i, test.answ, test.w)
+		}
+	}
+	if !Panics(func() { SortWeighted(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("SortWeighted did not panic with x, weights length mismatch")
+	}
+}
+
 func TestVariance(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64

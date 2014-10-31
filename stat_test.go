@@ -1244,6 +1244,10 @@ func TestVariance(t *testing.T) {
 			t.Errorf("Variance mismatch case %d. Expected %v, Found %v", i, test.ans, variance)
 		}
 	}
+	if !Panics(func() { Variance(make([]float64, 3), 0, make([]float64, 2)) }) {
+		t.Errorf("Variance did not panic with x, weights length mismatch")
+	}
+
 }
 
 func ExampleVariance() {

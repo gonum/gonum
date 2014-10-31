@@ -875,6 +875,11 @@ func ExampleMean() {
 	// The mean of x2 is 1.9000
 	// The weights act as if there were more samples of that number
 }
+func TestMean(t *testing.T) {
+	if !Panics(func() { Mean(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Mean did not panic with x, weights length mismatch")
+	}
+}
 
 func TestMode(t *testing.T) {
 	for i, test := range []struct {

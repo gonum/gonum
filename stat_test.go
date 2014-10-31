@@ -306,6 +306,27 @@ func ExampleHarmonicMean() {
 	// The arithmetic mean is 10.16667, but the harmonic mean is 6.8354.
 }
 
+func TestHarmonicMean(t *testing.T) {
+	for i, test := range []struct {
+		x   []float64
+		wts []float64
+		ans float64
+	}{
+		{
+			x:   []float64{.5, .125},
+			ans: .2,
+		},
+	} {
+		c := HarmonicMean(test.x, test.wts)
+		if math.Abs(c-test.ans) > 1e-14 {
+			t.Errorf("Harmonic mean mismatch case %d: Expected %v, Found %v", i, test.ans, c)
+		}
+	}
+	if !Panics(func() { HarmonicMean(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("HarmonicMean did not panic with x, wts length mismatch")
+	}
+}
+
 func TestHistogram(t *testing.T) {
 	for i, test := range []struct {
 		x        []float64

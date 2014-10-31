@@ -496,6 +496,9 @@ func TestJensenShannon(t *testing.T) {
 			t.Errorf("JS mismatch case %v. Expected %v, found %v.", i, js1, js2)
 		}
 	}
+	if !Panics(func() { JensenShannon(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("JensenShannon did not panic with p, q length mismatch")
+	}
 }
 
 func TestKolmogorovSmirnov(t *testing.T) {

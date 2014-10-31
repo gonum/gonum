@@ -650,10 +650,54 @@ func TestKolmogorovSmirnov(t *testing.T) {
 			y:    []float64{1, 5},
 			dist: 1.0 / 2.0,
 		},
+		{
+			x:    []float64{1, 2, math.NaN()},
+			y:    []float64{1, 1, 3},
+			dist: math.NaN(),
+		},
+		{
+			x:    []float64{1, 2, 3},
+			y:    []float64{1, 1, math.NaN()},
+			dist: math.NaN(),
+		},
 	} {
 		dist := KolmogorovSmirnov(test.x, test.xWeights, test.y, test.yWeights)
-		if math.Abs(dist-test.dist) > 1e-14 {
+		if math.Abs(dist-test.dist) > 1e-14 && !(math.IsNaN(test.dist) && math.IsNaN(dist)) {
 			t.Errorf("Distance mismatch case %v: Expected: %v, Found: %v", i, test.dist, dist)
+		}
+	}
+	// panic cases
+	for _, test := range []struct {
+		name     string
+		x        []float64
+		xWeights []float64
+		y        []float64
+		yWeights []float64
+	}{
+		{
+			name:     "len(x) != len(xWeights)",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			xWeights: []float64{1, 1, 1, 1},
+		},
+		{
+			name:     "len(y) != len(yWeights)",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			y:        []float64{1, 3, 5, 6, 7, 8},
+			yWeights: []float64{1, 1, 1, 1},
+		},
+		{
+			name: "x not sorted",
+			x:    []float64{10, 3, 5, 6, 7, 8},
+			y:    []float64{1, 3, 5, 6, 7, 8},
+		},
+		{
+			name: "y not sorted",
+			x:    []float64{1, 3, 5, 6, 7, 8},
+			y:    []float64{10, 3, 5, 6, 7, 8},
+		},
+	} {
+		if !Panics(func() { KolmogorovSmirnov(test.x, test.xWeights, test.y, test.yWeights) }) {
+			t.Errorf("KolmogorovSmirnov did not panic when %s", test.name)
 		}
 	}
 }

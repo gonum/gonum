@@ -362,6 +362,40 @@ func TestHistogram(t *testing.T) {
 			t.Errorf("Hist mismatch case %d. Expected %v, Found %v", i, test.ans, hist)
 		}
 	}
+	// panic cases
+	for _, test := range []struct {
+		name     string
+		x        []float64
+		weights  []float64
+		dividers []float64
+		count    []float64
+	}{
+		{
+			name:    "len(x) != len(weights)",
+			x:       []float64{1, 3, 5, 6, 7, 8},
+			weights: []float64{1, 1, 1, 1},
+		},
+		{
+			name:     "len(dividers) != len(count)",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			dividers: []float64{1, 4, 9},
+			count:    make([]float64, 6),
+		},
+		{
+			name:     "dividers not sorted",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			dividers: []float64{0, -1, 0},
+		},
+		{
+			name:     "x not sorted",
+			x:        []float64{1, 5, 2, 9, 7, 8},
+			dividers: []float64{1, 4, 9},
+		},
+	} {
+		if !Panics(func() { Histogram(test.count, test.dividers, test.x, test.weights) }) {
+			t.Errorf("Histogram did not panic when %s", test.name)
+		}
+	}
 }
 
 func ExampleHistogram() {

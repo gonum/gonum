@@ -1050,6 +1050,11 @@ func TestQuantile(t *testing.T) {
 			w:   []float64{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
 			ans: [][]float64{{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10}},
 		},
+		{
+			p:   []float64{0.5},
+			x:   []float64{1, 2, 3, 4, 5, 6, 7, 8, math.NaN(), 10},
+			ans: [][]float64{{math.NaN()}},
+		},
 	} {
 		copyX := make([]float64, len(test.x))
 		copy(copyX, test.x)
@@ -1061,16 +1066,59 @@ func TestQuantile(t *testing.T) {
 		for j, p := range test.p {
 			for k, kind := range cumulantKinds {
 				v := Quantile(p, kind, test.x, test.w)
-				if !floats.Equal(copyX, test.x) {
+				if !floats.Same(copyX, test.x) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
 				}
-				if !floats.Equal(copyW, test.w) {
+				if !floats.Same(copyW, test.w) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
 				}
-				if v != test.ans[k][j] {
+				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
 					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, p, test.ans[k][j], v)
 				}
 			}
+		}
+	}
+	// panic cases
+	for _, test := range []struct {
+		name string
+		p    float64
+		c    CumulantKind
+		x    []float64
+		w    []float64
+	}{
+		{
+			name: "p < 0",
+			c:    Empirical,
+			p:    -1,
+		},
+		{
+			name: "p > 1",
+			c:    Empirical,
+			p:    2,
+		},
+
+		{
+			name: "len(x) != len(weights)",
+			c:    Empirical,
+			p:    .5,
+			x:    make([]float64, 4),
+			w:    make([]float64, 2),
+		},
+		{
+			name: "x not sorted",
+			c:    Empirical,
+			p:    .5,
+			x:    []float64{3, 2, 1},
+		},
+		{
+			name: "CumulantKind is unknown",
+			c:    CumulantKind(1000),
+			p:    .5,
+			x:    []float64{1, 2, 3},
+		},
+	} {
+		if !Panics(func() { Quantile(test.p, test.c, test.x, test.w) }) {
+			t.Errorf("Quantile did not panic when %s", test.name)
 		}
 	}
 }

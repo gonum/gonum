@@ -250,6 +250,13 @@ distribution`)
 	// Weighted ExKurtosis is -0.6779
 }
 
+func TestExKurtosis(t *testing.T) {
+	// the example does a good job, this just has to cover the panic
+	if !Panics(func() { ExKurtosis(make([]float64, 3), 0.0, 0.0, make([]float64, 2)) }) {
+		t.Errorf("ExKurtosis did not panic with x, weights length mismatch")
+	}
+}
+
 func ExampleGeometricMean() {
 	x := []float64{8, 2, 9, 15, 4}
 	weights := []float64{2, 2, 6, 7, 1}

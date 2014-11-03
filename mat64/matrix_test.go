@@ -87,11 +87,12 @@ func (s *S) TestMaybe(c *check.C) {
 
 func (s *S) TestSolve(c *check.C) {
 	for _, test := range []struct {
-		name   string
-		panics bool
-		a      [][]float64
-		b      [][]float64
-		x      [][]float64
+		name     string
+		panics   bool
+		singular bool
+		a        [][]float64
+		b        [][]float64
+		x        [][]float64
 	}{
 		{
 			name:   "OneElement",
@@ -221,17 +222,65 @@ func (s *S) TestSolve(c *check.C) {
 				{-0.248621916204897, -2.366366415805275},
 			},
 		},
+		{
+			name:     "Singular square",
+			singular: true,
+			a: [][]float64{
+				{0, 0},
+				{0, 0},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+			},
+			x: nil,
+		},
+		{
+			name:     "Singular tall",
+			singular: true,
+			a: [][]float64{
+				{0, 0},
+				{0, 0},
+				{0, 0},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+			},
+			x: nil,
+		},
+		{
+			name:     "Singular wide",
+			singular: true,
+			a: [][]float64{
+				{0, 0, 0},
+				{0, 0, 0},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+				{1},
+			},
+			x: nil,
+		},
 	} {
 		a := NewDense(flatten(test.a))
 		b := NewDense(flatten(test.b))
 
 		var x *Dense
-
 		fn := func() {
-			x = Solve(a, b)
+			var err error
+			x, err = Solve(a, b)
+			if (err == ErrSingular) != test.singular {
+				c.Error("Unexpected error for Solve %v: got:%v", test.name, err)
+			}
 		}
 
 		panicked, message := panics(fn)
+		if test.singular {
+			c.Check(x, check.Equals, (*Dense)(nil))
+			continue
+		}
 		if panicked {
 			c.Check(panicked, check.Equals, test.panics, check.Commentf("Test %v panicked: %s", test.name, message))
 			continue

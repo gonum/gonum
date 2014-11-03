@@ -159,7 +159,7 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 		panic(ErrShape)
 	}
 	if !f.IsFullRank() {
-		panic("mat64: matrix is rank deficient")
+		panic(ErrSingular)
 	}
 
 	x = NewDense(n, bn, nil)

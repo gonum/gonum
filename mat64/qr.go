@@ -149,7 +149,7 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 		panic(ErrShape)
 	}
 	if !f.IsFullRank() {
-		panic("mat64: matrix is rank deficient")
+		panic(ErrSingular)
 	}
 
 	// Compute Y = transpose(Q)*B

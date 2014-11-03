@@ -223,7 +223,7 @@ func (s *S) TestSolve(c *check.C) {
 			},
 		},
 		{
-			name:     "Singular",
+			name:     "Singular square",
 			singular: true,
 			a: [][]float64{
 				{0, 0},
@@ -232,6 +232,34 @@ func (s *S) TestSolve(c *check.C) {
 			b: [][]float64{
 				{3},
 				{2},
+			},
+			x: nil,
+		},
+		{
+			name:     "Singular tall",
+			singular: true,
+			a: [][]float64{
+				{0, 0},
+				{0, 0},
+				{0, 0},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+			},
+			x: nil,
+		},
+		{
+			name:     "Singular wide",
+			singular: true,
+			a: [][]float64{
+				{0, 0, 0},
+				{0, 0, 0},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+				{1},
 			},
 			x: nil,
 		},

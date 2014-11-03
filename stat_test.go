@@ -284,6 +284,11 @@ func TestGeometricMean(t *testing.T) {
 			x:   []float64{2, 8},
 			ans: 4,
 		},
+		{
+			x:   []float64{3, 81},
+			wts: []float64{2, 1},
+			ans: 9,
+		},
 	} {
 		c := GeometricMean(test.x, test.wts)
 		if math.Abs(c-test.ans) > 1e-14 {

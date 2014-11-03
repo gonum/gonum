@@ -321,6 +321,11 @@ func TestHarmonicMean(t *testing.T) {
 			x:   []float64{.5, .125},
 			ans: .2,
 		},
+		{
+			x:   []float64{.5, .125},
+			wts: []float64{2, 1},
+			ans: .25,
+		},
 	} {
 		c := HarmonicMean(test.x, test.wts)
 		if math.Abs(c-test.ans) > 1e-14 {

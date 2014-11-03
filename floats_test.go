@@ -862,7 +862,7 @@ func TestNearestWithinSpan(t *testing.T) {
 }
 
 func TestNorm(t *testing.T) {
-	s := []float64{-1, -3.4, 5, 6}
+	s := []float64{-1, -3.4, 5, -6}
 	val := Norm(s, math.Inf(1))
 	truth := 6.0
 	if math.Abs(val-truth) > EQTOLERANCE {

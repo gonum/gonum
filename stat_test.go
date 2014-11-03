@@ -116,6 +116,51 @@ func ExampleCovariance() {
 	// Cov2 is 37.7000, VarX is 37.7000
 }
 
+func TestCovariance(t *testing.T) {
+	for i, test := range []struct {
+		p       []float64
+		q       []float64
+		weights []float64
+		ans     float64
+	}{
+		{
+			p:   []float64{0.75, 0.1, 0.05},
+			q:   []float64{0.5, 0.25, 0.25},
+			ans: 0.05625,
+		},
+		{
+			p:   []float64{1, 2, 3},
+			q:   []float64{2, 4, 6},
+			ans: 2,
+		},
+		{
+			p:   []float64{1, 2, 3},
+			q:   []float64{1, 4, 9},
+			ans: 4,
+		},
+		{
+			p:       []float64{1, 2, 3},
+			q:       []float64{1, 4, 9},
+			weights: []float64{1, 1.5, 1},
+			ans:     3.2,
+		},
+	} {
+		c := Covariance(test.p, Mean(test.p, test.weights), test.q, Mean(test.q, test.weights), test.weights)
+		if math.Abs(c-test.ans) > 1e-14 {
+			t.Errorf("Covariance mismatch case %d: Expected %v, Found %v", i, test.ans, c)
+		}
+	}
+
+	// test the panic states
+	if !Panics(func() { Covariance(make([]float64, 2), 0.0, make([]float64, 3), 0.0, nil) }) {
+		t.Errorf("Covariance did not panic with x, y length mismatch")
+	}
+	if !Panics(func() { Covariance(make([]float64, 3), 0.0, make([]float64, 3), 0.0, make([]float64, 2)) }) {
+		t.Errorf("Covariance did not panic with x, weights length mismatch")
+	}
+
+}
+
 func TestCrossEntropy(t *testing.T) {
 	for i, test := range []struct {
 		p   []float64
@@ -147,6 +192,9 @@ func TestCrossEntropy(t *testing.T) {
 		if math.Abs(c-test.ans) > 1e-14 {
 			t.Errorf("Cross entropy mismatch case %d: Expected %v, Found %v", i, test.ans, c)
 		}
+	}
+	if !Panics(func() { CrossEntropy(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("CrossEntropy did not panic with p, q length mismatch")
 	}
 }
 
@@ -201,6 +249,13 @@ distribution`)
 	// Weighted ExKurtosis is -0.6779
 }
 
+func TestExKurtosis(t *testing.T) {
+	// the example does a good job, this just has to cover the panic
+	if !Panics(func() { ExKurtosis(make([]float64, 3), 0.0, 0.0, make([]float64, 2)) }) {
+		t.Errorf("ExKurtosis did not panic with x, weights length mismatch")
+	}
+}
+
 func ExampleGeometricMean() {
 	x := []float64{8, 2, 9, 15, 4}
 	weights := []float64{2, 2, 6, 7, 1}
@@ -219,6 +274,32 @@ func ExampleGeometricMean() {
 	// The exponential of the mean of the logs is 8.7637
 }
 
+func TestGeometricMean(t *testing.T) {
+	for i, test := range []struct {
+		x   []float64
+		wts []float64
+		ans float64
+	}{
+		{
+			x:   []float64{2, 8},
+			ans: 4,
+		},
+		{
+			x:   []float64{3, 81},
+			wts: []float64{2, 1},
+			ans: 9,
+		},
+	} {
+		c := GeometricMean(test.x, test.wts)
+		if math.Abs(c-test.ans) > 1e-14 {
+			t.Errorf("Geometric mean mismatch case %d: Expected %v, Found %v", i, test.ans, c)
+		}
+	}
+	if !Panics(func() { GeometricMean(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("GeometricMean did not panic with x, wts length mismatch")
+	}
+}
+
 func ExampleHarmonicMean() {
 	x := []float64{8, 2, 9, 15, 4}
 	weights := []float64{2, 2, 6, 7, 1}
@@ -228,6 +309,32 @@ func ExampleHarmonicMean() {
 	fmt.Printf("The arithmetic mean is %.5f, but the harmonic mean is %.4f.\n", mean, hmean)
 	// Output:
 	// The arithmetic mean is 10.16667, but the harmonic mean is 6.8354.
+}
+
+func TestHarmonicMean(t *testing.T) {
+	for i, test := range []struct {
+		x   []float64
+		wts []float64
+		ans float64
+	}{
+		{
+			x:   []float64{.5, .125},
+			ans: .2,
+		},
+		{
+			x:   []float64{.5, .125},
+			wts: []float64{2, 1},
+			ans: .25,
+		},
+	} {
+		c := HarmonicMean(test.x, test.wts)
+		if math.Abs(c-test.ans) > 1e-14 {
+			t.Errorf("Harmonic mean mismatch case %d: Expected %v, Found %v", i, test.ans, c)
+		}
+	}
+	if !Panics(func() { HarmonicMean(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("HarmonicMean did not panic with x, wts length mismatch")
+	}
 }
 
 func TestHistogram(t *testing.T) {
@@ -263,6 +370,40 @@ func TestHistogram(t *testing.T) {
 		hist := Histogram(nil, test.dividers, test.x, test.weights)
 		if !floats.Equal(hist, test.ans) {
 			t.Errorf("Hist mismatch case %d. Expected %v, Found %v", i, test.ans, hist)
+		}
+	}
+	// panic cases
+	for _, test := range []struct {
+		name     string
+		x        []float64
+		weights  []float64
+		dividers []float64
+		count    []float64
+	}{
+		{
+			name:    "len(x) != len(weights)",
+			x:       []float64{1, 3, 5, 6, 7, 8},
+			weights: []float64{1, 1, 1, 1},
+		},
+		{
+			name:     "len(dividers) != len(count)",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			dividers: []float64{1, 4, 9},
+			count:    make([]float64, 6),
+		},
+		{
+			name:     "dividers not sorted",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			dividers: []float64{0, -1, 0},
+		},
+		{
+			name:     "x not sorted",
+			x:        []float64{1, 5, 2, 9, 7, 8},
+			dividers: []float64{1, 4, 9},
+		},
+	} {
+		if !Panics(func() { Histogram(test.count, test.dividers, test.x, test.weights) }) {
+			t.Errorf("Histogram did not panic when %s", test.name)
 		}
 	}
 }
@@ -364,6 +505,9 @@ func TestJensenShannon(t *testing.T) {
 		if math.Abs(js1-js2) > 1e-14 {
 			t.Errorf("JS mismatch case %v. Expected %v, found %v.", i, js1, js2)
 		}
+	}
+	if !Panics(func() { JensenShannon(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("JensenShannon did not panic with p, q length mismatch")
 	}
 }
 
@@ -516,10 +660,54 @@ func TestKolmogorovSmirnov(t *testing.T) {
 			y:    []float64{1, 5},
 			dist: 1.0 / 2.0,
 		},
+		{
+			x:    []float64{1, 2, math.NaN()},
+			y:    []float64{1, 1, 3},
+			dist: math.NaN(),
+		},
+		{
+			x:    []float64{1, 2, 3},
+			y:    []float64{1, 1, math.NaN()},
+			dist: math.NaN(),
+		},
 	} {
 		dist := KolmogorovSmirnov(test.x, test.xWeights, test.y, test.yWeights)
-		if math.Abs(dist-test.dist) > 1e-14 {
+		if math.Abs(dist-test.dist) > 1e-14 && !(math.IsNaN(test.dist) && math.IsNaN(dist)) {
 			t.Errorf("Distance mismatch case %v: Expected: %v, Found: %v", i, test.dist, dist)
+		}
+	}
+	// panic cases
+	for _, test := range []struct {
+		name     string
+		x        []float64
+		xWeights []float64
+		y        []float64
+		yWeights []float64
+	}{
+		{
+			name:     "len(x) != len(xWeights)",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			xWeights: []float64{1, 1, 1, 1},
+		},
+		{
+			name:     "len(y) != len(yWeights)",
+			x:        []float64{1, 3, 5, 6, 7, 8},
+			y:        []float64{1, 3, 5, 6, 7, 8},
+			yWeights: []float64{1, 1, 1, 1},
+		},
+		{
+			name: "x not sorted",
+			x:    []float64{10, 3, 5, 6, 7, 8},
+			y:    []float64{1, 3, 5, 6, 7, 8},
+		},
+		{
+			name: "y not sorted",
+			x:    []float64{1, 3, 5, 6, 7, 8},
+			y:    []float64{10, 3, 5, 6, 7, 8},
+		},
+	} {
+		if !Panics(func() { KolmogorovSmirnov(test.x, test.xWeights, test.y, test.yWeights) }) {
+			t.Errorf("KolmogorovSmirnov did not panic when %s", test.name)
 		}
 	}
 }
@@ -549,6 +737,12 @@ func ExampleKullbackLeibler() {
 	// The K-L distance between identical distributions is 0.0000
 }
 
+func TestKullbackLeibler(t *testing.T) {
+	if !Panics(func() { KullbackLeibler(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("KullbackLeibler did not panic with p, q length mismatch")
+	}
+}
+
 func TestChiSquare(t *testing.T) {
 	for i, test := range []struct {
 		p   []float64
@@ -570,6 +764,11 @@ func TestChiSquare(t *testing.T) {
 			q:   []float64{50, 50, 50, 50},
 			res: 12.5,
 		},
+		{
+			p:   []float64{40, 60, 30, 45, 0, 0},
+			q:   []float64{50, 50, 50, 50, 0, 0},
+			res: 12.5,
+		},
 	} {
 		resultpq := ChiSquare(test.p, test.q)
 
@@ -577,6 +776,21 @@ func TestChiSquare(t *testing.T) {
 			t.Errorf("ChiSquare distance mismatch in case %d. Expected %v, Found %v", i, test.res, resultpq)
 		}
 	}
+	if !Panics(func() { ChiSquare(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("ChiSquare did not panic with length mismatch")
+	}
+}
+
+// Panics returns true if the called function panics during evaluation.
+func Panics(fun func()) (b bool) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			b = true
+		}
+	}()
+	fun()
+	return
 }
 
 func TestBhattacharyya(t *testing.T) {
@@ -610,6 +824,10 @@ func TestBhattacharyya(t *testing.T) {
 		if math.Abs(resultpq-resultqp) > 1e-10 {
 			t.Errorf("Bhattacharyya distance is assymmetric in case %d.", i)
 		}
+	}
+	// Bhattacharyya should panic if the inputs have different length
+	if !Panics(func() { Bhattacharyya(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Bhattacharyya did not panic with length mismatch")
 	}
 }
 
@@ -645,6 +863,9 @@ func TestHellinger(t *testing.T) {
 			t.Errorf("Hellinger distance is assymmetric in case %d.", i)
 		}
 	}
+	if !Panics(func() { Hellinger(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Hellinger did not panic with length mismatch")
+	}
 }
 
 func ExampleMean() {
@@ -663,6 +884,11 @@ func ExampleMean() {
 	// The weighted mean of the samples is 1.9000
 	// The mean of x2 is 1.9000
 	// The weights act as if there were more samples of that number
+}
+func TestMean(t *testing.T) {
+	if !Panics(func() { Mean(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Mean did not panic with x, weights length mismatch")
+	}
 }
 
 func TestMode(t *testing.T) {
@@ -693,6 +919,9 @@ func TestMode(t *testing.T) {
 			t.Errorf("Mode count mismatch case %d. Expected %v, found %v", i, test.count, count)
 		}
 	}
+	if !Panics(func() { Mode(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Mode did not panic with x, weights length mismatch")
+	}
 }
 
 func TestMoment(t *testing.T) {
@@ -703,18 +932,27 @@ func TestMoment(t *testing.T) {
 		mean    float64
 		ans     float64
 	}{
-		{},
 		{
 			x:      []float64{6, 2, 4, 8, 9},
 			mean:   3,
 			moment: 5,
 			ans:    2.2288e3,
 		},
+		{
+			x:       []float64{6, 2, 4, 8, 9},
+			weights: []float64{1, 2, 2, 2, 1},
+			mean:    3,
+			moment:  5,
+			ans:     1.783625e3,
+		},
 	} {
 		m := Moment(test.moment, test.x, test.mean, test.weights)
 		if math.Abs(test.ans-m) > 1e-14 {
 			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
 		}
+	}
+	if !Panics(func() { Moment(1, make([]float64, 3), 0, make([]float64, 2)) }) {
+		t.Errorf("Moment did not panic with x, weights length mismatch")
 	}
 }
 
@@ -738,6 +976,11 @@ func TestCDF(t *testing.T) {
 			weights: []float64{1, 1, 1, 1, 1},
 			ans:     [][]float64{{0, 0, 0.2, 0.2, 0.4, 0.6, 0.6, 0.8, 1, 1}},
 		},
+		{
+			q:   []float64{0, 0.9, 1},
+			x:   []float64{math.NaN()},
+			ans: [][]float64{{math.NaN(), math.NaN(), math.NaN()}},
+		},
 	} {
 		copyX := make([]float64, len(test.x))
 		copy(copyX, test.x)
@@ -749,18 +992,52 @@ func TestCDF(t *testing.T) {
 		for j, q := range test.q {
 			for k, kind := range cumulantKinds {
 				v := CDF(q, kind, test.x, test.weights)
-				if !floats.Equal(copyX, test.x) {
+				if !floats.Equal(copyX, test.x) && !math.IsNaN(v) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
 				}
 				if !floats.Equal(copyW, test.weights) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, q)
 				}
-				if v != test.ans[k][j] {
+				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
 					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, q, test.ans[k][j], v)
 				}
 			}
 		}
 	}
+
+	// these test cases should all result in a panic
+	for i, test := range []struct {
+		name    string
+		q       float64
+		kind    CumulantKind
+		x       []float64
+		weights []float64
+	}{
+		{
+			name:    "len(x) != len(weights)",
+			q:       1.5,
+			kind:    Empirical,
+			x:       []float64{1, 2, 3, 4, 5},
+			weights: []float64{1, 2, 3},
+		},
+		{
+			name: "unsorted x",
+			q:    1.5,
+			kind: Empirical,
+			x:    []float64{3, 2, 1},
+		},
+		{
+			name: "unknown CumulantKind",
+			q:    1.5,
+			kind: CumulantKind(1000), // bogus
+			x:    []float64{1, 2, 3},
+		},
+	} {
+		if !Panics(func() { CDF(test.q, test.kind, test.x, test.weights) }) {
+			t.Errorf("did not panic as expected with %s for case %d kind %d percentile %v x %v weights %v", test.name, i, test.kind, test.q, test.x, test.weights)
+		}
+	}
+
 }
 
 func TestQuantile(t *testing.T) {
@@ -783,6 +1060,11 @@ func TestQuantile(t *testing.T) {
 			w:   []float64{3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
 			ans: [][]float64{{1, 1, 1, 2, 5, 5, 6, 9, 9, 10, 10}},
 		},
+		{
+			p:   []float64{0.5},
+			x:   []float64{1, 2, 3, 4, 5, 6, 7, 8, math.NaN(), 10},
+			ans: [][]float64{{math.NaN()}},
+		},
 	} {
 		copyX := make([]float64, len(test.x))
 		copy(copyX, test.x)
@@ -794,16 +1076,63 @@ func TestQuantile(t *testing.T) {
 		for j, p := range test.p {
 			for k, kind := range cumulantKinds {
 				v := Quantile(p, kind, test.x, test.w)
-				if !floats.Equal(copyX, test.x) {
+				if !floats.Same(copyX, test.x) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
 				}
-				if !floats.Equal(copyW, test.w) {
+				if !floats.Same(copyW, test.w) {
 					t.Errorf("x changed for case %d kind %d percentile %v", i, k, p)
 				}
-				if v != test.ans[k][j] {
+				if v != test.ans[k][j] && !(math.IsNaN(v) && math.IsNaN(test.ans[k][j])) {
 					t.Errorf("mismatch case %d kind %d percentile %v. Expected: %v, found: %v", i, k, p, test.ans[k][j], v)
 				}
 			}
+		}
+	}
+	// panic cases
+	for _, test := range []struct {
+		name string
+		p    float64
+		c    CumulantKind
+		x    []float64
+		w    []float64
+	}{
+		{
+			name: "p < 0",
+			c:    Empirical,
+			p:    -1,
+		},
+		{
+			name: "p > 1",
+			c:    Empirical,
+			p:    2,
+		},
+		{
+			name: "p is NaN",
+			c:    Empirical,
+			p:    math.NaN(),
+		},
+		{
+			name: "len(x) != len(weights)",
+			c:    Empirical,
+			p:    .5,
+			x:    make([]float64, 4),
+			w:    make([]float64, 2),
+		},
+		{
+			name: "x not sorted",
+			c:    Empirical,
+			p:    .5,
+			x:    []float64{3, 2, 1},
+		},
+		{
+			name: "CumulantKind is unknown",
+			c:    CumulantKind(1000),
+			p:    .5,
+			x:    []float64{1, 2, 3},
+		},
+	} {
+		if !Panics(func() { Quantile(test.p, test.c, test.x, test.w) }) {
+			t.Errorf("Quantile did not panic when %s", test.name)
 		}
 	}
 }
@@ -865,6 +1194,40 @@ func TestSkew(t *testing.T) {
 			t.Errorf("Skew mismatch case %d. Expected %v, Found %v", i, test.ans, skew)
 		}
 	}
+	if !Panics(func() { Skew(make([]float64, 3), 0, 1, make([]float64, 2)) }) {
+		t.Errorf("Skew did not panic with x, weights length mismatch")
+	}
+}
+
+func TestSortWeighted(t *testing.T) {
+	for i, test := range []struct {
+		x    []float64
+		w    []float64
+		ansx []float64
+		answ []float64
+	}{
+		{
+			x:    []float64{8, 3, 7, 8, 4},
+			ansx: []float64{3, 4, 7, 8, 8},
+		},
+		{
+			x:    []float64{8, 3, 7, 8, 4},
+			w:    []float64{.5, 1, 1, .5, 1},
+			ansx: []float64{3, 4, 7, 8, 8},
+			answ: []float64{1, 1, 1, .5, .5},
+		},
+	} {
+		SortWeighted(test.x, test.w)
+		if !floats.Same(test.x, test.ansx) {
+			t.Errorf("SortWeighted mismatch case %d. Expected x %v, Found x %v", i, test.ansx, test.x)
+		}
+		if !(test.w == nil) && !floats.Same(test.w, test.answ) {
+			t.Errorf("SortWeighted mismatch case %d. Expected w %v, Found w %v", i, test.answ, test.w)
+		}
+	}
+	if !Panics(func() { SortWeighted(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("SortWeighted did not panic with x, weights length mismatch")
+	}
 }
 
 func TestVariance(t *testing.T) {
@@ -895,6 +1258,10 @@ func TestVariance(t *testing.T) {
 			t.Errorf("Variance mismatch case %d. Expected %v, Found %v", i, test.ans, variance)
 		}
 	}
+	if !Panics(func() { Variance(make([]float64, 3), 0, make([]float64, 2)) }) {
+		t.Errorf("Variance did not panic with x, weights length mismatch")
+	}
+
 }
 
 func ExampleVariance() {
@@ -910,4 +1277,32 @@ func ExampleVariance() {
 	// Output:
 	// The variance of the samples is 77.5000
 	// The weighted variance of the samples is 111.7941
+}
+
+func TestStdScore(t *testing.T) {
+	for i, test := range []struct {
+		x float64
+		u float64
+		s float64
+		z float64
+	}{
+		{
+			x: 4,
+			u: -6,
+			s: 5,
+			z: 2,
+		},
+		{
+			x: 1,
+			u: 0,
+			s: 1,
+			z: 1,
+		},
+	} {
+		z := StdScore(test.x, test.u, test.s)
+		if math.Abs(z-test.z) > 1e-14 {
+			t.Errorf("StdScore mismatch case %d. Expected %v, Found %v", i, test.z, z)
+		}
+	}
+
 }

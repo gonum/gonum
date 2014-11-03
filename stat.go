@@ -29,11 +29,7 @@ const (
 func bhattacharyyaCoeff(p, q []float64) float64 {
 	var bc float64
 	for i, a := range p {
-		b := q[i]
-		if a == 0 && b == 0 {
-			continue
-		}
-		bc += math.Sqrt(a * b)
+		bc += math.Sqrt(a * q[i])
 	}
 	return bc
 }
@@ -54,7 +50,7 @@ func Bhattacharyya(p, q []float64) float64 {
 // the fraction of the samples less than or equal to q. The
 // exact behavior is determined by the CumulantKind. CDF is theoretically
 // the inverse of the Quantile function, though it may not be the actual inverse
-// for all values q and CumululantKinds.
+// for all values q and CumulantKinds.
 //
 // The x data must be sorted in increasing order. If weights is nil then all
 // of the weights are 1. If weights is not nil, then len(x) must equal len(weights).
@@ -66,11 +62,11 @@ func CDF(q float64, c CumulantKind, x, weights []float64) float64 {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	if !sort.Float64sAreSorted(x) {
-		panic("x data are not sorted")
-	}
 	if floats.HasNaN(x) {
 		return math.NaN()
+	}
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
 	}
 
 	if q < x[0] {
@@ -154,7 +150,7 @@ func Covariance(x []float64, meanX float64, y []float64, meanY float64, weights 
 		s /= float64(len(x) - 1)
 		return s
 	}
-	if weights != nil && len(weights) != len(x) {
+	if len(weights) != len(x) {
 		panic("stat: slice length mismatch")
 	}
 	var (
@@ -176,11 +172,9 @@ func CrossEntropy(p, q []float64) float64 {
 	}
 	var ce float64
 	for i, v := range p {
-		w := q[i]
-		if v == 0 && w == 0 {
-			continue
+		if v != 0 {
+			ce -= v * math.Log(q[i])
 		}
-		ce -= v * math.Log(w)
 	}
 	return ce
 }
@@ -276,7 +270,7 @@ func HarmonicMean(x, weights []float64) float64 {
 	}
 	// TODO: Fix this to make it more efficient and avoid allocation
 
-	// This can be numerically unstable (for exapmle if x is very small)
+	// This can be numerically unstable (for example if x is very small)
 	// W = \sum_i {w_i}
 	// hm = exp(log(W) - log(\sum_i w_i / x_i))
 
@@ -414,12 +408,12 @@ func JensenShannon(p, q []float64) float64 {
 	return js
 }
 
-// KolmogorovSmirnov computes the largest distance between the empirical CDFs
-// of the two datasets. x and y consist of the sample locations with sample counts.
-// xWeights and yWeights respectively. x and y must each be sorted.
+// KolmogorovSmirnov computes the largest distance between two empirical CDFs.
+// Each dataset x and y consists of sample locations and counts, xWeights and
+// yWeights, respectively.
 //
 // x and y may have different lengths, though len(x) must equal len(xWeights), and
-// len(y) must equal len(yWeights).
+// len(y) must equal len(yWeights).  Both x and y must be sorted.
 //
 // Special cases are:
 //  = 0 if len(x) == len(y) == 0
@@ -438,19 +432,18 @@ func KolmogorovSmirnov(x, xWeights, y, yWeights []float64) float64 {
 		return 1
 	}
 
+	if floats.HasNaN(x) {
+		return math.NaN()
+	}
+	if floats.HasNaN(y) {
+		return math.NaN()
+	}
+
 	if !sort.Float64sAreSorted(x) {
 		panic("x data are not sorted")
 	}
 	if !sort.Float64sAreSorted(y) {
 		panic("y data are not sorted")
-	}
-
-	if floats.HasNaN(x) {
-		return math.NaN()
-	}
-
-	if floats.HasNaN(y) {
-		return math.NaN()
 	}
 
 	xWeightsNil := xWeights == nil
@@ -665,19 +658,20 @@ func Moment(moment float64, x []float64, mean float64, weights []float64) float6
 //  - Empirical: Returns the lowest value q for which q is greater than or equal
 //  to the fraction p of samples
 func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
-	if p < 0 || p > 1 {
+	if !(p >= 0 && p <= 1) {
 		panic("stat: percentile out of bounds")
 	}
 
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
-	if !sort.Float64sAreSorted(x) {
-		panic("x data are not sorted")
-	}
 	if floats.HasNaN(x) {
 		return math.NaN() // This is needed because the algorithm breaks otherwise
 	}
+	if !sort.Float64sAreSorted(x) {
+		panic("x data are not sorted")
+	}
+
 	var sumWeights float64
 	if weights == nil {
 		sumWeights = float64(len(x))
@@ -783,10 +777,10 @@ func StdErr(stdev, sampleSize float64) float64 {
 }
 
 // StdScore returns the standard score (a.k.a. z-score, z-value) for the value x
-// with the givem mean and variance, i.e.
-//  (x - mean) / variance
-func StdScore(x, mean, variance float64) float64 {
-	return (x - mean) / variance
+// with the givem mean and standard deviation, i.e.
+//  (x - mean) / std
+func StdScore(x, mean, std float64) float64 {
+	return (x - mean) / std
 }
 
 // Variance computes the weighted sample variance with the provided mean.

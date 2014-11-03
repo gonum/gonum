@@ -476,6 +476,15 @@ func Min(s []float64) (min float64, ind int) {
 	return min, ind
 }
 
+// absMax returns the maximum absolute value in the slice.
+func absMax(s []float64) float64 {
+	var max float64
+	for _, val := range s {
+		max = math.Max(max, math.Abs(val))
+	}
+	return max
+}
+
 // Mul performs element-wise multiplication between dst
 // and s and stores the value in dst. Panics if the
 // lengths of s and t are not equal.
@@ -562,8 +571,7 @@ func Norm(s []float64, L float64) float64 {
 		return norm
 	}
 	if math.IsInf(L, 1) {
-		norm, _ = Max(s)
-		return norm
+		return absMax(s)
 	}
 	for _, val := range s {
 		norm += math.Pow(math.Abs(val), L)

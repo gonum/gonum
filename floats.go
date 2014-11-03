@@ -476,15 +476,6 @@ func Min(s []float64) (min float64, ind int) {
 	return min, ind
 }
 
-// absMax returns the maximum absolute value in the slice.
-func absMax(s []float64) float64 {
-	var max float64
-	for _, val := range s {
-		max = math.Max(max, math.Abs(val))
-	}
-	return max
-}
-
 // Mul performs element-wise multiplication between dst
 // and s and stores the value in dst. Panics if the
 // lengths of s and t are not equal.
@@ -546,7 +537,7 @@ func NearestWithinSpan(n int, l, u float64, v float64) int {
 // Norm returns the L norm of the slice S, defined as
 // (sum_{i=1}^N s[i]^L)^{1/L}
 // Special cases:
-// L = math.Inf(1) gives the maximum value
+// L = math.Inf(1) gives the maximum absolute value.
 // Does not correctly compute the zero norm (use Count).
 func Norm(s []float64, L float64) float64 {
 	// Should this complain if L is not positive?
@@ -571,7 +562,10 @@ func Norm(s []float64, L float64) float64 {
 		return norm
 	}
 	if math.IsInf(L, 1) {
-		return absMax(s)
+		for _, val := range s {
+			norm = math.Max(norm, math.Abs(val))
+		}
+		return norm
 	}
 	for _, val := range s {
 		norm += math.Pow(math.Abs(val), L)

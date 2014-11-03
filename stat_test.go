@@ -1106,7 +1106,11 @@ func TestQuantile(t *testing.T) {
 			c:    Empirical,
 			p:    2,
 		},
-
+		{
+			name: "p is NaN",
+			c:    Empirical,
+			p:    math.NaN(),
+		},
 		{
 			name: "len(x) != len(weights)",
 			c:    Empirical,

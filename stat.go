@@ -658,7 +658,7 @@ func Moment(moment float64, x []float64, mean float64, weights []float64) float6
 //  - Empirical: Returns the lowest value q for which q is greater than or equal
 //  to the fraction p of samples
 func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
-	if p < 0 || p > 1 {
+	if !(p >= 0 && p <= 1) {
 		panic("stat: percentile out of bounds")
 	}
 

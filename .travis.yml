@@ -18,7 +18,7 @@ script:
  - go build -v ./...
  - go test -v -covermode=count -coverprofile=coverage.out
  - diff <(gofmt -d .) <("")
- - if [[ $TRAVIS_SECURE_ENV_VARS ]]; then $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
+ - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
 
 after_failure: failure
 

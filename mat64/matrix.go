@@ -32,16 +32,16 @@ type Mutable interface {
 // A Vectorer can return rows and columns of the represented matrix.
 type Vectorer interface {
 	// Row returns a slice of float64 for the row specified. It will panic if the index
-	// is out of bounds. If the call requires a copy and row is not nil it will be used and
+	// is out of bounds. If the call requires a copy and dst is not nil it will be used and
 	// returned, if it is not nil the number of elements copied will be the minimum of the
 	// length of the slice and the number of columns in the matrix.
-	Row(row []float64, r int) []float64
+	Row(dst []float64, i int) []float64
 
 	// Col returns a slice of float64 for the column specified. It will panic if the index
-	// is out of bounds. If the call requires a copy and col is not nil it will be used and
+	// is out of bounds. If the call requires a copy and dst is not nil it will be used and
 	// returned, if it is not nil the number of elements copied will be the minimum of the
 	// length of the slice and the number of rows in the matrix.
-	Col(col []float64, c int) []float64
+	Col(dst []float64, j int) []float64
 }
 
 // A VectorSetter can set rows and columns in the represented matrix.
@@ -50,13 +50,13 @@ type VectorSetter interface {
 	// It will panic if the index is out of bounds. The number of elements copied is
 	// returned and will be the minimum of the length of the slice and the number of columns
 	// in the matrix.
-	SetRow(r int, row []float64) int
+	SetRow(i int, src []float64) int
 
 	// SetCol sets the values of the specified column to the values held in a slice of float64.
 	// It will panic if the index is out of bounds. The number of elements copied is
 	// returned and will be the minimum of the length of the slice and the number of rows
 	// in the matrix.
-	SetCol(c int, col []float64) int
+	SetCol(i int, src []float64) int
 }
 
 // A RowViewer can return a slice of float64 reflecting a row that is backed by the matrix

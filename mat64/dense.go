@@ -113,57 +113,57 @@ func (m *Dense) Set(r, c int, v float64) {
 
 func (m *Dense) Dims() (r, c int) { return m.mat.Rows, m.mat.Cols }
 
-func (m *Dense) Col(col []float64, c int) []float64 {
-	if c >= m.mat.Cols || c < 0 {
+func (m *Dense) Col(dst []float64, j int) []float64 {
+	if j >= m.mat.Cols || j < 0 {
 		panic(ErrIndexOutOfRange)
 	}
 
-	if col == nil {
-		col = make([]float64, m.mat.Rows)
+	if dst == nil {
+		dst = make([]float64, m.mat.Rows)
 	}
-	col = col[:min(len(col), m.mat.Rows)]
+	dst = dst[:min(len(dst), m.mat.Rows)]
 	if blasEngine == nil {
 		panic(ErrNoEngine)
 	}
-	blasEngine.Dcopy(len(col), m.mat.Data[c:], m.mat.Stride, col, 1)
+	blasEngine.Dcopy(len(dst), m.mat.Data[j:], m.mat.Stride, dst, 1)
 
-	return col
+	return dst
 }
 
-func (m *Dense) SetCol(c int, v []float64) int {
-	if c >= m.mat.Cols || c < 0 {
+func (m *Dense) SetCol(j int, src []float64) int {
+	if j >= m.mat.Cols || j < 0 {
 		panic(ErrIndexOutOfRange)
 	}
 
 	if blasEngine == nil {
 		panic(ErrNoEngine)
 	}
-	blasEngine.Dcopy(min(len(v), m.mat.Rows), v, 1, m.mat.Data[c:], m.mat.Stride)
+	blasEngine.Dcopy(min(len(src), m.mat.Rows), src, 1, m.mat.Data[j:], m.mat.Stride)
 
-	return min(len(v), m.mat.Rows)
+	return min(len(src), m.mat.Rows)
 }
 
-func (m *Dense) Row(row []float64, r int) []float64 {
-	if r >= m.mat.Rows || r < 0 {
+func (m *Dense) Row(dst []float64, i int) []float64 {
+	if i >= m.mat.Rows || i < 0 {
 		panic(ErrIndexOutOfRange)
 	}
 
-	if row == nil {
-		row = make([]float64, m.mat.Cols)
+	if dst == nil {
+		dst = make([]float64, m.mat.Cols)
 	}
-	copy(row, m.rowView(r))
+	copy(dst, m.rowView(i))
 
-	return row
+	return dst
 }
 
-func (m *Dense) SetRow(r int, v []float64) int {
-	if r >= m.mat.Rows || r < 0 {
+func (m *Dense) SetRow(i int, src []float64) int {
+	if i >= m.mat.Rows || i < 0 {
 		panic(ErrIndexOutOfRange)
 	}
 
-	copy(m.rowView(r), v)
+	copy(m.rowView(i), src)
 
-	return min(len(v), m.mat.Cols)
+	return min(len(src), m.mat.Cols)
 }
 
 func (m *Dense) RowView(r int) []float64 {

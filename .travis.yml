@@ -49,7 +49,7 @@ script:
  - go build -x -v ./...
  - go test -x -v ./...
  - diff <(gofmt -d .) <("")
- - if [[ $TRAVIS_SECURE_ENV_VARS ]]; then bash test-coverage.sh; fi
+ - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash test-coverage.sh; fi
  
 
 after_failure: failure

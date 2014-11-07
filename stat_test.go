@@ -106,7 +106,7 @@ func ExampleCovariance() {
 	y2 := []float64{12, 1, 11, 12, 0}
 	meanY2 := Mean(y2, nil)
 	cov2 := Covariance(x, meanX, y2, meanY2, nil)
-	varX := Variance(x, meanX, nil)
+	varX := Variance(x, nil)
 	fmt.Printf("Cov2 is %.4f, VarX is %.4f", cov2, varX)
 	// Output:
 	// Covariance computes the degree to which datasets move together
@@ -1252,13 +1252,12 @@ func TestVariance(t *testing.T) {
 			ans:     4.2857142857142865,
 		},
 	} {
-		mean := Mean(test.x, test.weights)
-		variance := Variance(test.x, mean, test.weights)
+		variance := Variance(test.x, test.weights)
 		if math.Abs(variance-test.ans) > 1e-14 {
 			t.Errorf("Variance mismatch case %d. Expected %v, Found %v", i, test.ans, variance)
 		}
 	}
-	if !Panics(func() { Variance(make([]float64, 3), 0, make([]float64, 2)) }) {
+	if !Panics(func() { Variance(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Variance did not panic with x, weights length mismatch")
 	}
 
@@ -1266,13 +1265,11 @@ func TestVariance(t *testing.T) {
 
 func ExampleVariance() {
 	x := []float64{8, 2, -9, 15, 4}
-	mean := Mean(x, nil)
-	variance := Variance(x, mean, nil)
+	variance := Variance(x, nil)
 	fmt.Printf("The variance of the samples is %.4f\n", variance)
 
 	weights := []float64{2, 2, 6, 7, 1}
-	weightedMean := Mean(x, weights)
-	weightedVariance := Variance(x, weightedMean, weights)
+	weightedVariance := Variance(x, weights)
 	fmt.Printf("The weighted variance of the samples is %.4f\n", weightedVariance)
 	// Output:
 	// The variance of the samples is 77.5000

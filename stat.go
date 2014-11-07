@@ -768,7 +768,7 @@ func (w weightSorter) Len() int {
 
 // StdDev returns the population standard deviation with the provided mean.
 func StdDev(x []float64, mean float64, weights []float64) float64 {
-	return math.Sqrt(Variance(x, mean, weights))
+	return math.Sqrt(Variance(x, weights))
 }
 
 // StdErr returns the standard error in the mean with the given values.
@@ -783,28 +783,50 @@ func StdScore(x, mean, std float64) float64 {
 	return (x - mean) / std
 }
 
-// Variance computes the weighted sample variance with the provided mean.
+// Variance computes the weighted sample variance
 //  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func Variance(x []float64, mean float64, weights []float64) float64 {
-	if weights == nil {
-		var s float64
-		for _, v := range x {
-			s += (v - mean) * (v - mean)
-		}
-		return s / float64(len(x)-1)
-	}
-	if len(x) != len(weights) {
-		panic("stat: slice length mismatch")
-	}
+func Variance(x, weights []float64) float64 {
+	_, s2 := MeanVariance(x, weights)
+	return s2
+}
+
+// MeanVariance computes the sample mean and variance, where the mean is
+//  \sum_i w_i * x_i / (sum_i w_i) and variance is \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
+//
+// This uses the corrected two-pass algorithm, from "Algorithms for computing
+// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
+// and Randall J. LeVeque.
+func MeanVariance(x, weights []float64) (u, s2 float64) {
+
+	// note that this will panic if the slice lens do not match
+	u = Mean(x, weights)
 	var (
-		ss         float64
-		sumWeights float64
+		ss           float64
+		compensation float64
 	)
-	for i, v := range x {
-		ss += weights[i] * (v - mean) * (v - mean)
-		sumWeights += weights[i]
+	if weights == nil {
+		for _, v := range x {
+			d := v - u
+			ss += d * d
+			compensation += d
+		}
+		s2 = (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
+		return
 	}
-	return ss / (sumWeights - 1)
+
+	var sumWeights float64
+	for i, v := range x {
+		w := weights[i]
+		d := v - u
+		wd := w * d
+		ss += wd * d
+		compensation += wd
+		sumWeights += w
+	}
+	s2 = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
+	return
 }

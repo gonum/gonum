@@ -130,38 +130,53 @@ func ChiSquare(obs, exp []float64) float64 {
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Correlation(x []float64, meanX, stdX float64, y []float64, meanY, stdY float64, weights []float64) float64 {
-	return Covariance(x, meanX, y, meanY, weights) / (stdX * stdY)
+	return Covariance(x, y, weights) / (stdX * stdY)
 }
 
-// Covariance returns the weighted covariance between the samples of x and y
-// with the given means.
+// Covariance returns the weighted covariance between the samples of x and y.
 //  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func Covariance(x []float64, meanX float64, y []float64, meanY float64, weights []float64) float64 {
+func Covariance(x []float64, y []float64, weights []float64) float64 {
+
+	// don't have a paper for this, but the unweighted adaptation seems natural.
+	// The weighted version doesn't perform a correction.  It seemed like the
+	// performance would suffer too much.
+
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")
 	}
+	xu := Mean(x, weights)
+	yu := Mean(y, weights)
+
 	if weights == nil {
-		var s float64
-		for i, v := range x {
-			s += (v - meanX) * (y[i] - meanY)
+		var (
+			ss            float64
+			xcompensation float64
+			ycompensation float64
+		)
+
+		for i, xv := range x {
+			yv := y[i]
+			xd := xv - xu
+			yd := yv - yu
+			ss += xd * yd
+			xcompensation += xd
+			ycompensation += yd
 		}
-		s /= float64(len(x) - 1)
-		return s
-	}
-	if len(weights) != len(x) {
-		panic("stat: slice length mismatch")
+		return (ss - xcompensation*ycompensation/float64(len(x))) / float64(len(x)-1)
 	}
 	var (
-		s          float64
+		ss         float64
 		sumWeights float64
 	)
-	for i, v := range x {
-		s += weights[i] * (v - meanX) * (y[i] - meanY)
-		sumWeights += weights[i]
+
+	for i, xv := range x {
+		w := weights[i]
+		ss += w * (xv - xu) * (y[i] - yu)
+		sumWeights += w
 	}
-	return s / (sumWeights - 1)
+	return ss / (sumWeights - 1)
 }
 
 // CrossEntropy computes the cross-entropy between the two distributions specified

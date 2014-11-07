@@ -98,14 +98,11 @@ func ExampleCovariance() {
 	fmt.Println("about their mean.")
 	x := []float64{8, -3, 7, 8, -4}
 	y := []float64{10, 2, 2, 4, 1}
-	meanX := Mean(x, nil)
-	meanY := Mean(y, nil)
-	cov := Covariance(x, meanX, y, meanY, nil)
+	cov := Covariance(x, y, nil)
 	fmt.Printf("Cov = %.4f\n", cov)
 	fmt.Println("If datasets move perfectly together, the variance equals the covariance")
 	y2 := []float64{12, 1, 11, 12, 0}
-	meanY2 := Mean(y2, nil)
-	cov2 := Covariance(x, meanX, y2, meanY2, nil)
+	cov2 := Covariance(x, y2, nil)
 	varX := Variance(x, nil)
 	fmt.Printf("Cov2 is %.4f, VarX is %.4f", cov2, varX)
 	// Output:
@@ -145,17 +142,17 @@ func TestCovariance(t *testing.T) {
 			ans:     3.2,
 		},
 	} {
-		c := Covariance(test.p, Mean(test.p, test.weights), test.q, Mean(test.q, test.weights), test.weights)
+		c := Covariance(test.p, test.q, test.weights)
 		if math.Abs(c-test.ans) > 1e-14 {
 			t.Errorf("Covariance mismatch case %d: Expected %v, Found %v", i, test.ans, c)
 		}
 	}
 
 	// test the panic states
-	if !Panics(func() { Covariance(make([]float64, 2), 0.0, make([]float64, 3), 0.0, nil) }) {
+	if !Panics(func() { Covariance(make([]float64, 2), make([]float64, 3), nil) }) {
 		t.Errorf("Covariance did not panic with x, y length mismatch")
 	}
-	if !Panics(func() { Covariance(make([]float64, 3), 0.0, make([]float64, 3), 0.0, make([]float64, 2)) }) {
+	if !Panics(func() { Covariance(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Covariance did not panic with x, weights length mismatch")
 	}
 

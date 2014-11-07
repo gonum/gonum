@@ -129,15 +129,67 @@ func ChiSquare(obs, exp []float64) float64 {
 //  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / ((sum_j {w_j} - 1) * stdX * stdY)
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func Correlation(x []float64, meanX, stdX float64, y []float64, meanY, stdY float64, weights []float64) float64 {
-	return Covariance(x, y, weights) / (stdX * stdY)
+func Correlation(x, y, weights []float64) float64 {
+	// same implementation as Covariance
+
+	// don't have a paper for this, but the unweighted adaptation seems natural.
+	// The weighted version doesn't perform a correction.  It seemed like the
+	// performance would suffer too much.
+
+	if len(x) != len(y) {
+		panic("stat: slice length mismatch")
+	}
+	xu := Mean(x, weights)
+	yu := Mean(y, weights)
+
+	if weights == nil {
+		var (
+			sxx           float64
+			syy           float64
+			sxy           float64
+			xcompensation float64
+			ycompensation float64
+		)
+
+		for i, xv := range x {
+			yv := y[i]
+			xd := xv - xu
+			yd := yv - yu
+			sxx += xd * xd
+			syy += yd * yd
+			sxy += xd * yd
+			xcompensation += xd
+			ycompensation += yd
+		}
+		sxx -= xcompensation * xcompensation / float64(len(x))
+		syy -= ycompensation * ycompensation / float64(len(x))
+		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
+	}
+	var (
+		sxx        float64
+		syy        float64
+		sxy        float64
+		sumWeights float64
+	)
+
+	for i, xv := range x {
+		w := weights[i]
+		yv := y[i]
+		xd := xv - xu
+		yd := yv - yu
+		sxx += w * xd * xd
+		syy += w * yd * yd
+		sxy += w * xd * yd
+		sumWeights += w
+	}
+	return sxy / math.Sqrt(sxx*syy)
 }
 
 // Covariance returns the weighted covariance between the samples of x and y.
 //  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func Covariance(x []float64, y []float64, weights []float64) float64 {
+func Covariance(x, y, weights []float64) float64 {
 
 	// don't have a paper for this, but the unweighted adaptation seems natural.
 	// The weighted version doesn't perform a correction.  It seemed like the

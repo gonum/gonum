@@ -19,23 +19,16 @@ func ExampleCorrelation() {
 
 	fmt.Println("Correlation computes the degree to which two datasets move together")
 	fmt.Println("about their mean. For example, x and y above move similarly.")
-	fmt.Println("Package can be used to compute the mean and standard deviation")
-	fmt.Println("or they can be supplied if they are known")
-	meanX := Mean(x, w)
-	meanY := Mean(x, w)
-	c := Correlation(x, meanX, 3, y, meanY, 4, w)
-	fmt.Printf("Correlation with set standard deviatons is %.5f\n", c)
-	stdX := StdDev(x, w)
-	stdY := StdDev(x, w)
-	c2 := Correlation(x, meanX, stdX, y, meanY, stdY, w)
-	fmt.Printf("Correlation with computed standard deviatons is %.5f\n", c2)
+	fmt.Println("Package can be used to compute the mean and standard deviation.")
+
+	c := Correlation(x, y, w)
+	fmt.Printf("Correlation is %.5f\n", c)
+
 	// Output:
 	// Correlation computes the degree to which two datasets move together
 	// about their mean. For example, x and y above move similarly.
-	// Package can be used to compute the mean and standard deviation
-	// or they can be supplied if they are known
-	// Correlation with set standard deviatons is 0.96894
-	// Correlation with computed standard deviatons is 0.39644
+	// Package can be used to compute the mean and standard deviation.
+	// Correlation is 0.59915
 }
 
 func TestCorrelation(t *testing.T) {
@@ -82,11 +75,7 @@ func TestCorrelation(t *testing.T) {
 			ans: -0.13966633352689,
 		},
 	} {
-		meanX := Mean(test.x, test.w)
-		meanY := Mean(test.y, test.w)
-		stdX := StdDev(test.x, test.w)
-		stdY := StdDev(test.y, test.w)
-		c := Correlation(test.x, meanX, stdX, test.y, meanY, stdY, test.w)
+		c := Correlation(test.x, test.y, test.w)
 		if math.Abs(test.ans-c) > 1e-14 {
 			t.Errorf("Correlation mismatch case %d. Expected %v, Found %v", i, test.ans, c)
 		}

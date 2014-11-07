@@ -25,8 +25,8 @@ func ExampleCorrelation() {
 	meanY := Mean(x, w)
 	c := Correlation(x, meanX, 3, y, meanY, 4, w)
 	fmt.Printf("Correlation with set standard deviatons is %.5f\n", c)
-	stdX := StdDev(x, meanX, w)
-	stdY := StdDev(x, meanY, w)
+	stdX := StdDev(x, w)
+	stdY := StdDev(x, w)
 	c2 := Correlation(x, meanX, stdX, y, meanY, stdY, w)
 	fmt.Printf("Correlation with computed standard deviatons is %.5f\n", c2)
 	// Output:
@@ -84,8 +84,8 @@ func TestCorrelation(t *testing.T) {
 	} {
 		meanX := Mean(test.x, test.w)
 		meanY := Mean(test.y, test.w)
-		stdX := StdDev(test.x, meanX, test.w)
-		stdY := StdDev(test.y, meanY, test.w)
+		stdX := StdDev(test.x, test.w)
+		stdY := StdDev(test.y, test.w)
 		c := Correlation(test.x, meanX, stdX, test.y, meanY, stdY, test.w)
 		if math.Abs(test.ans-c) > 1e-14 {
 			t.Errorf("Correlation mismatch case %d. Expected %v, Found %v", i, test.ans, c)
@@ -233,12 +233,12 @@ excess kurtosis is the kurtosis above or below that of the standard normal
 distribution`)
 	x := []float64{5, 4, -3, -2}
 	mean := Mean(x, nil)
-	stdev := StdDev(x, mean, nil)
+	stdev := StdDev(x, nil)
 	kurt := ExKurtosis(x, mean, stdev, nil)
 	fmt.Printf("ExKurtosis = %.5f\n", kurt)
 	weights := []float64{1, 2, 3, 5}
 	wMean := Mean(x, weights)
-	wStdev := StdDev(x, wMean, weights)
+	wStdev := StdDev(x, weights)
 	wKurt := ExKurtosis(x, wMean, wStdev, weights)
 	fmt.Printf("Weighted ExKurtosis is %.4f", wKurt)
 	// Output:
@@ -1139,13 +1139,11 @@ func TestQuantile(t *testing.T) {
 
 func ExampleStdDev() {
 	x := []float64{8, 2, -9, 15, 4}
-	mean := Mean(x, nil)
-	stdev := StdDev(x, mean, nil)
+	stdev := StdDev(x, nil)
 	fmt.Printf("The standard deviation of the samples is %.4f\n", stdev)
 
 	weights := []float64{2, 2, 6, 7, 1}
-	weightedMean := Mean(x, weights)
-	weightedStdev := StdDev(x, weightedMean, weights)
+	weightedStdev := StdDev(x, weights)
 	fmt.Printf("The weighted standard deviation of the samples is %.4f\n", weightedStdev)
 	// Output:
 	// The standard deviation of the samples is 8.8034
@@ -1156,7 +1154,7 @@ func ExampleStdErr() {
 	x := []float64{8, 2, -9, 15, 4}
 	weights := []float64{2, 2, 6, 7, 1}
 	mean := Mean(x, weights)
-	stdev := StdDev(x, mean, weights)
+	stdev := StdDev(x, weights)
 	nSamples := floats.Sum(weights)
 	stdErr := StdErr(stdev, nSamples)
 	fmt.Printf("The standard deviation is %.4f and there are %g samples, so the mean\nis likely %.4f ± %.4f.", stdev, nSamples, mean, stdErr)
@@ -1188,7 +1186,7 @@ func TestSkew(t *testing.T) {
 		},
 	} {
 		mean := Mean(test.x, test.weights)
-		std := StdDev(test.x, mean, test.weights)
+		std := StdDev(test.x, test.weights)
 		skew := Skew(test.x, mean, std, test.weights)
 		if math.Abs(skew-test.ans) > 1e-14 {
 			t.Errorf("Skew mismatch case %d. Expected %v, Found %v", i, test.ans, skew)

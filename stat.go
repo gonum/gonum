@@ -766,9 +766,17 @@ func (w weightSorter) Len() int {
 	return len(w.x)
 }
 
-// StdDev returns the population standard deviation with the provided mean.
+// StdDev returns the sample standard deviation.
 func StdDev(x []float64, weights []float64) float64 {
-	return math.Sqrt(Variance(x, weights))
+	_, s := MeanStdDev(x, weights)
+	return s
+}
+
+// MeanStdDev returns the sample mean and standard deviation
+func MeanStdDev(x []float64, weights []float64) (u, s float64) {
+	u, s2 := MeanVariance(x, weights)
+	s = math.Sqrt(s2)
+	return
 }
 
 // StdErr returns the standard error in the mean with the given values.

@@ -768,24 +768,27 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 // Skew computes the skewness of the sample data.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func Skew(x []float64, mean, stdev float64, weights []float64) float64 {
+func Skew(x []float64, weights []float64) float64 {
+	
+	// this is a three-pass approach.  There are one pass approaches, but
+	// I don't know of a two-pass one, or the numerical stability of the 
+	// one vs three pass version.
+	
+	u, std := MeanStdDev(x, weights)
 	if weights == nil {
 		var s float64
 		for _, v := range x {
-			z := (v - mean) / stdev
+			z := (v - u) / std
 			s += z * z * z
 		}
 		return s * skewCorrection(float64(len(x)))
-	}
-	if len(x) != len(weights) {
-		panic("stat: slice length mismatch")
 	}
 	var (
 		s          float64
 		sumWeights float64
 	)
 	for i, v := range x {
-		z := (v - mean) / stdev
+		z := (v - u) / std
 		s += weights[i] * z * z * z
 		sumWeights += weights[i]
 	}

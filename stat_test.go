@@ -1171,14 +1171,12 @@ func TestSkew(t *testing.T) {
 			ans:     -1.12066646837198,
 		},
 	} {
-		mean := Mean(test.x, test.weights)
-		std := StdDev(test.x, test.weights)
-		skew := Skew(test.x, mean, std, test.weights)
+		skew := Skew(test.x, test.weights)
 		if math.Abs(skew-test.ans) > 1e-14 {
 			t.Errorf("Skew mismatch case %d. Expected %v, Found %v", i, test.ans, skew)
 		}
 	}
-	if !Panics(func() { Skew(make([]float64, 3), 0, 1, make([]float64, 2)) }) {
+	if !Panics(func() { Skew(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Skew did not panic with x, weights length mismatch")
 	}
 }

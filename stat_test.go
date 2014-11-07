@@ -218,14 +218,10 @@ func ExampleExKurtosis() {
 excess kurtosis is the kurtosis above or below that of the standard normal
 distribution`)
 	x := []float64{5, 4, -3, -2}
-	mean := Mean(x, nil)
-	stdev := StdDev(x, nil)
-	kurt := ExKurtosis(x, mean, stdev, nil)
+	kurt := ExKurtosis(x, nil)
 	fmt.Printf("ExKurtosis = %.5f\n", kurt)
 	weights := []float64{1, 2, 3, 5}
-	wMean := Mean(x, weights)
-	wStdev := StdDev(x, weights)
-	wKurt := ExKurtosis(x, wMean, wStdev, weights)
+	wKurt := ExKurtosis(x, weights)
 	fmt.Printf("Weighted ExKurtosis is %.4f", wKurt)
 	// Output:
 	// Kurtosis is a measure of the 'peakedness' of a distribution, and the
@@ -237,7 +233,7 @@ distribution`)
 
 func TestExKurtosis(t *testing.T) {
 	// the example does a good job, this just has to cover the panic
-	if !Panics(func() { ExKurtosis(make([]float64, 3), 0.0, 0.0, make([]float64, 2)) }) {
+	if !Panics(func() { ExKurtosis(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("ExKurtosis did not panic with x, weights length mismatch")
 	}
 }

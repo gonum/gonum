@@ -693,7 +693,32 @@ func Mode(x []float64, weights []float64) (val float64, count float64) {
 // No degrees of freedom correction is done.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func Moment(moment float64, x []float64, mean float64, weights []float64) float64 {
+func Moment(moment float64, x, weights []float64) float64 {
+	u := Mean(x, weights)
+	if weights == nil {
+		var m float64
+		for _, v := range x {
+			m += math.Pow(v-u, moment)
+		}
+		return m / float64(len(x))
+	}
+	var (
+		m          float64
+		sumWeights float64
+	)
+	for i, v := range x {
+		m += weights[i] * math.Pow(v-u, moment)
+		sumWeights += weights[i]
+	}
+	return m / sumWeights
+}
+
+// MomentAt computes the weighted n^th moment of the samples,
+//  E[(x - μ)^N] given a mean to center it on.
+// No degrees of freedom correction is done.
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
+func MomentAt(moment float64, x []float64, mean float64, weights []float64) float64 {
 	if weights == nil {
 		var m float64
 		for _, v := range x {

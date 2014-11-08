@@ -911,6 +911,35 @@ func TestMoment(t *testing.T) {
 		x       []float64
 		weights []float64
 		moment  float64
+		ans     float64
+	}{
+		{
+			x:      []float64{6, 2, 4, 8, 10},
+			moment: 5,
+			ans:    0,
+		},
+		{
+			x:       []float64{6, 2, 4, 8, 10},
+			weights: []float64{1, 2, 2, 2, 1},
+			moment:  5,
+			ans:     121.875,
+		},
+	} {
+		m := Moment(test.moment, test.x, test.weights)
+		if math.Abs(test.ans-m) > 1e-14 {
+			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
+		}
+	}
+	if !Panics(func() { Moment(1, make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Moment did not panic with x, weights length mismatch")
+	}
+}
+
+func TestMomentAt(t *testing.T) {
+	for i, test := range []struct {
+		x       []float64
+		weights []float64
+		moment  float64
 		mean    float64
 		ans     float64
 	}{
@@ -928,13 +957,13 @@ func TestMoment(t *testing.T) {
 			ans:     1.783625e3,
 		},
 	} {
-		m := Moment(test.moment, test.x, test.mean, test.weights)
+		m := MomentAt(test.moment, test.x, test.mean, test.weights)
 		if math.Abs(test.ans-m) > 1e-14 {
 			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
 		}
 	}
-	if !Panics(func() { Moment(1, make([]float64, 3), 0, make([]float64, 2)) }) {
-		t.Errorf("Moment did not panic with x, weights length mismatch")
+	if !Panics(func() { MomentAt(1, make([]float64, 3), 0, make([]float64, 2)) }) {
+		t.Errorf("MomentAt did not panic with x, weights length mismatch")
 	}
 }
 

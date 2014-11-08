@@ -12,7 +12,7 @@ package cblas
 #cgo linux LDFLAGS: -lcblas
 //#cgo linux LDFLAGS: -lmkl_rt
 //#cgo linux LDFLAGS: -L/path/to/OpenBLAS -lopenblas
-#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib
+#cgo darwin LDFLAGS: -DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework Accelerate
 //#cgo darwin LDFLAGS: -L/path/to/OpenBLAS -lopenblas
 #include "cblas.h"
 */

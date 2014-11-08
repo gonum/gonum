@@ -713,12 +713,12 @@ func Moment(moment float64, x, weights []float64) float64 {
 	return m / sumWeights
 }
 
-// MomentAt computes the weighted n^th moment of the samples,
+// MomentAbout computes the weighted n^th moment of the samples,
 //  E[(x - μ)^N] given a mean to center it on.
 // No degrees of freedom correction is done.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func MomentAt(moment float64, x []float64, mean float64, weights []float64) float64 {
+func MomentAbout(moment float64, x []float64, mean float64, weights []float64) float64 {
 	if weights == nil {
 		var m float64
 		for _, v := range x {

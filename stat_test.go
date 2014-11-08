@@ -935,7 +935,7 @@ func TestMoment(t *testing.T) {
 	}
 }
 
-func TestMomentAt(t *testing.T) {
+func TestMomentAbout(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64
 		weights []float64
@@ -957,13 +957,13 @@ func TestMomentAt(t *testing.T) {
 			ans:     1.783625e3,
 		},
 	} {
-		m := MomentAt(test.moment, test.x, test.mean, test.weights)
+		m := MomentAbout(test.moment, test.x, test.mean, test.weights)
 		if math.Abs(test.ans-m) > 1e-14 {
-			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
+			t.Errorf("MomentAbout mismatch case %d. Expected %v, found %v", i, test.ans, m)
 		}
 	}
-	if !Panics(func() { MomentAt(1, make([]float64, 3), 0, make([]float64, 2)) }) {
-		t.Errorf("MomentAt did not panic with x, weights length mismatch")
+	if !Panics(func() { MomentAbout(1, make([]float64, 3), 0, make([]float64, 2)) }) {
+		t.Errorf("MomentAbout did not panic with x, weights length mismatch")
 	}
 }
 

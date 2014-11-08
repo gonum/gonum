@@ -123,7 +123,7 @@ func (l *Laplace) Fit(samples, weights []float64) {
 
 	// The scale parameter is the average absolute distance
 	// between the sample and the mean
-	absError := stat.Moment(1, samples, l.Mu, weights)
+	absError := stat.MomentAbout(1, samples, l.Mu, weights)
 
 	l.Scale = absError / sumWeights
 }

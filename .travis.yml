@@ -9,7 +9,7 @@ env:
   - secure: "jevVWeS9oKIq2m4EQPpsWZcP24ILbJqAAGXt+ZaNKehrpgiJQfR29oipR/uX2p8OS9jElfnpklz9ErNlgrkztaUXp6wl9q2q/sR48sdvF0WZJTRa+7UNQIDxiM6TCvEE6nkWkvXxg8Wy8ut4r1wb95teYGGdouY5nzxO2xjSwVc="
 
 before_install:
- - go get code.google.com/p/go.tools/cmd/cover
+ - if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
  - go get github.com/mattn/goveralls
 
 script:

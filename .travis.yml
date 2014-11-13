@@ -10,7 +10,7 @@ env:
 
 
 before_install:
- - go get code.google.com/p/go.tools/cmd/cover
+ - if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
  - go get github.com/mattn/goveralls
 
 script:

@@ -1,8 +1,6 @@
 package optimize
 
 import (
-	"math"
-
 	"github.com/gonum/floats"
 )
 
@@ -102,9 +100,7 @@ func (l *LBFGS) InitDirection(loc Location, direction []float64) (stepSize float
 	copy(direction, loc.Gradient)
 	floats.Scale(-1, direction)
 
-	// see BFGS for comment
-	floats.Scale(1/math.Sqrt(floats.Norm(direction, 2)), direction)
-	return 1
+	return 1 / floats.Norm(direction, 2)
 }
 
 func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float64) {

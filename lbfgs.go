@@ -121,6 +121,17 @@ func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float
 	// Update direction. Uses two-loop correction as described in
 	// Nocedal, Wright (2006), Numerical Optimization (2nd ed.). Chapter 7, page 178.
 	copy(direction, loc.Gradient)
+	floats.SubTo(l.y, loc.Gradient, l.grad)
+	floats.SubTo(l.s, loc.X, l.x)
+	copy(l.sHist[l.oldest], l.s)
+	copy(l.yHist[l.oldest], l.y)
+	sDotY := floats.Dot(l.y, l.s)
+	l.rhoHist[l.oldest] = 1 / sDotY
+
+	l.oldest++
+	l.oldest = l.oldest % l.Store
+	copy(l.x, loc.X)
+	copy(l.grad, loc.Gradient)
 
 	// two loop update. First loop starts with the most recent element
 	// and goes backward, second starts with the oldest element and goes
@@ -136,9 +147,7 @@ func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float
 	}
 
 	// Scale the initial Hessian.
-	floats.SubTo(l.y, loc.Gradient, l.grad)
-	floats.SubTo(l.s, loc.X, l.x)
-	gamma := floats.Dot(l.s, l.y) / floats.Dot(l.y, l.y)
+	gamma := sDotY / floats.Dot(l.y, l.y)
 	floats.Scale(gamma, direction)
 
 	for i := 0; i < l.Store; i++ {
@@ -151,13 +160,5 @@ func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float
 	}
 	floats.Scale(-1, direction)
 
-	// store the information from this iteration to prepare for the next one
-	copy(l.x, loc.X)
-	copy(l.grad, loc.Gradient)
-	l.oldest++
-	l.oldest = l.oldest % l.Store
-	copy(l.sHist[l.oldest], l.s)
-	copy(l.yHist[l.oldest], l.y)
-	l.rhoHist[l.oldest] = 1 / floats.Dot(l.y, l.s)
 	return 1
 }

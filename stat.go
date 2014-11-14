@@ -907,8 +907,10 @@ func Variance(x, weights []float64) float64 {
 	return variance
 }
 
-// MeanVariance computes the sample mean and variance, where the mean is
-//  \sum_i w_i * x_i / (sum_i w_i) and variance is \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+// MeanVariance computes the sample mean and variance, where the mean and variance are
+//  \sum_i w_i * x_i / (sum_i w_i)
+//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+// respectively.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func MeanVariance(x, weights []float64) (mean, variance float64) {

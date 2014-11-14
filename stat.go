@@ -912,11 +912,12 @@ func Variance(x, weights []float64) float64 {
 //  \sum_i w_i * x_i / (sum_i w_i) and variance is \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-//
-// This uses the corrected two-pass algorithm, from "Algorithms for computing
-// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
-// and Randall J. LeVeque.
 func MeanVariance(x, weights []float64) (u, s2 float64) {
+	
+	// This uses the corrected two-pass algorithm (1.7), from "Algorithms for computing
+	// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
+	// and Randall J. LeVeque.
+
 
 	// note that this will panic if the slice lens do not match
 	u = Mean(x, weights)

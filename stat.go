@@ -162,11 +162,11 @@ func Correlation(x, y, weights []float64) float64 {
 		// to the second term in (1.7) in that paper.
 		sxx -= xcompensation * xcompensation / float64(len(x))
 		syy -= ycompensation * ycompensation / float64(len(x))
-		
+
 		// the numerator and denominator both contained an (N - 1)
 		// that was cancelled out.
 		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
-		
+
 	}
 
 	var sumWeights float64
@@ -190,7 +190,7 @@ func Correlation(x, y, weights []float64) float64 {
 	// the sumWeights instead of the sample count.
 	sxx -= xcompensation * xcompensation / sumWeights
 	syy -= ycompensation * ycompensation / sumWeights
-	
+
 	// the numerator and denominator both contained a (sumWeights - 1)
 	// that was cancelled out.
 	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
@@ -883,8 +883,7 @@ func StdDev(x []float64, weights []float64) float64 {
 // MeanStdDev returns the sample mean and standard deviation
 func MeanStdDev(x []float64, weights []float64) (u, s float64) {
 	u, s2 := MeanVariance(x, weights)
-	s = math.Sqrt(s2)
-	return
+	return u, math.Sqrt(s2)
 }
 
 // StdErr returns the standard error in the mean with the given values.
@@ -913,11 +912,10 @@ func Variance(x, weights []float64) float64 {
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func MeanVariance(x, weights []float64) (u, s2 float64) {
-	
+
 	// This uses the corrected two-pass algorithm (1.7), from "Algorithms for computing
 	// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
 	// and Randall J. LeVeque.
-
 
 	// note that this will panic if the slice lens do not match
 	u = Mean(x, weights)

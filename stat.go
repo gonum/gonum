@@ -162,9 +162,9 @@ func Correlation(x, y, weights []float64) float64 {
 		// to the second term in (1.7) in that paper.
 		sxx -= xcompensation * xcompensation / float64(len(x))
 		syy -= ycompensation * ycompensation / float64(len(x))
-
-		// the numerator and denominator both contained an (N - 1)
-		// that was cancelled out.
+		
+		// sum_i { (x_i - meanX) * (y_i - meanY)} / sqrt{\sum_i{ (x_i - \mu_x)^2 } * \sum_i{ ( y_i - \mu_y)^2}}
+		// with the implicit 1/(N-1) cancelling out.
 		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
 
 	}
@@ -190,9 +190,9 @@ func Correlation(x, y, weights []float64) float64 {
 	// the sumWeights instead of the sample count.
 	sxx -= xcompensation * xcompensation / sumWeights
 	syy -= ycompensation * ycompensation / sumWeights
-
-	// the numerator and denominator both contained a (sumWeights - 1)
-	// that was cancelled out.
+	
+	// sum_i {w_i * (x_i - meanX) * (y_i - meanY)} / sqrt{\sum_i{w_i * (x_i - \mu_x)^2 } * \sum_i{w_i *( y_i - \mu_y)^2}}
+	// with sum_i { w_i } cancelling out.
 	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
 }
 

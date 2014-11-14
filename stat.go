@@ -130,10 +130,9 @@ func ChiSquare(obs, exp []float64) float64 {
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Correlation(x, y, weights []float64) float64 {
-	// same implementation as Covariance
-
-	// This is a two-pass corrected implementation.
-	// don't have a paper for this, but the adaptation seems natural.
+	// This is a two-pass corrected implementation.  It is an adaptation of the
+	// algorithm used in the MeanVariance function, which applies a correction
+	// to the typical two pass approach.
 
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")

@@ -919,7 +919,7 @@ func MeanVariance(x, weights []float64) (mean, variance float64) {
 	// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
 	// and Randall J. LeVeque.
 
-	// note that this will panic if the slice lens do not match
+	// note that this will panic if the slice lengths do not match
 	mean = Mean(x, weights)
 	var (
 		ss           float64

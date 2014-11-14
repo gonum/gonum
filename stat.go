@@ -157,9 +157,16 @@ func Correlation(x, y, weights []float64) float64 {
 			xcompensation += xd
 			ycompensation += yd
 		}
+		// xcompensation and ycompensation are from the Chan paper
+		// referenced in the MeanVariance function.  They are analogous
+		// to the second term in (1.7) in that paper.
 		sxx -= xcompensation * xcompensation / float64(len(x))
 		syy -= ycompensation * ycompensation / float64(len(x))
+		
+		// the numerator and denominator both contained an (N - 1)
+		// that was cancelled out.
 		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
+		
 	}
 
 	var sumWeights float64
@@ -177,8 +184,15 @@ func Correlation(x, y, weights []float64) float64 {
 		ycompensation += wyd
 		sumWeights += w
 	}
+	// xcompensation and ycompensation are from the Chan paper
+	// referenced in the MeanVariance function.  They are analogous
+	// to the second term in (1.7) in that paper, except they use
+	// the sumWeights instead of the sample count.
 	sxx -= xcompensation * xcompensation / sumWeights
 	syy -= ycompensation * ycompensation / sumWeights
+	
+	// the numerator and denominator both contained a (sumWeights - 1)
+	// that was cancelled out.
 	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
 }
 
@@ -210,6 +224,9 @@ func Covariance(x, y, weights []float64) float64 {
 			xcompensation += xd
 			ycompensation += yd
 		}
+		// xcompensation and ycompensation are from the Chan paper
+		// referenced in the MeanVariance function.  They are analogous
+		// to the second term in (1.7) in that paper.
 		return (ss - xcompensation*ycompensation/float64(len(x))) / float64(len(x)-1)
 	}
 
@@ -225,6 +242,10 @@ func Covariance(x, y, weights []float64) float64 {
 		ycompensation += wyd
 		sumWeights += w
 	}
+	// xcompensation and ycompensation are from the Chan paper
+	// referenced in the MeanVariance function.  They are analogous
+	// to the second term in (1.7) in that paper, except they use
+	// the sumWeights instead of the sample count.
 	return (ss - xcompensation*ycompensation/sumWeights) / (sumWeights - 1)
 }
 

@@ -263,11 +263,6 @@ func Entropy(p []float64) float64 {
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func ExKurtosis(x, weights []float64) float64 {
-
-	// This is a three pass algorithm.  There are one pass algorithms but I am
-	// not aware of a two pass one, and I'm not sure about the relative stability
-	// of the one pass vs three pass versions.
-
 	u, std := MeanStdDev(x, weights)
 	if weights == nil {
 		var e float64

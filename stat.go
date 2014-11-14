@@ -187,10 +187,9 @@ func Correlation(x, y, weights []float64) float64 {
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func Covariance(x, y, weights []float64) float64 {
-
-	// don't have a paper for this, but the unweighted adaptation seems natural.
-	// The weighted version doesn't perform a correction.  It seemed like the
-	// performance would suffer too much.
+	// This is a two-pass corrected implementation.  It is an adaptation of the
+	// algorithm used in the MeanVariance function, which applies a correction
+	// to the typical two pass approach.
 
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")

@@ -157,7 +157,7 @@ func Correlation(x, y, weights []float64) float64 {
 			xcompensation += xd
 			ycompensation += yd
 		}
-		// xcompensation and ycompensation are from the Chan paper
+		// xcompensation and ycompensation are from Chan, et. al.
 		// referenced in the MeanVariance function.  They are analogous
 		// to the second term in (1.7) in that paper.
 		sxx -= xcompensation * xcompensation / float64(len(x))
@@ -184,7 +184,7 @@ func Correlation(x, y, weights []float64) float64 {
 		ycompensation += wyd
 		sumWeights += w
 	}
-	// xcompensation and ycompensation are from the Chan paper
+	// xcompensation and ycompensation are from Chan, et. al.
 	// referenced in the MeanVariance function.  They are analogous
 	// to the second term in (1.7) in that paper, except they use
 	// the sumWeights instead of the sample count.
@@ -224,7 +224,7 @@ func Covariance(x, y, weights []float64) float64 {
 			xcompensation += xd
 			ycompensation += yd
 		}
-		// xcompensation and ycompensation are from the Chan paper
+		// xcompensation and ycompensation are from Chan, et. al.
 		// referenced in the MeanVariance function.  They are analogous
 		// to the second term in (1.7) in that paper.
 		return (ss - xcompensation*ycompensation/float64(len(x))) / float64(len(x)-1)
@@ -242,7 +242,7 @@ func Covariance(x, y, weights []float64) float64 {
 		ycompensation += wyd
 		sumWeights += w
 	}
-	// xcompensation and ycompensation are from the Chan paper
+	// xcompensation and ycompensation are from Chan, et. al.
 	// referenced in the MeanVariance function.  They are analogous
 	// to the second term in (1.7) in that paper, except they use
 	// the sumWeights instead of the sample count.

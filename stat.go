@@ -284,11 +284,11 @@ func Entropy(p []float64) float64 {
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func ExKurtosis(x, weights []float64) float64 {
-	u, std := MeanStdDev(x, weights)
+	mean, std := MeanStdDev(x, weights)
 	if weights == nil {
 		var e float64
 		for _, v := range x {
-			z := (v - u) / std
+			z := (v - mean) / std
 			e += z * z * z * z
 		}
 		mul, offset := kurtosisCorrection(float64(len(x)))
@@ -300,7 +300,7 @@ func ExKurtosis(x, weights []float64) float64 {
 		sumWeights float64
 	)
 	for i, v := range x {
-		z := (v - u) / std
+		z := (v - mean) / std
 		e += weights[i] * z * z * z * z
 		sumWeights += weights[i]
 	}
@@ -707,11 +707,11 @@ func Mode(x []float64, weights []float64) (val float64, count float64) {
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func Moment(moment float64, x, weights []float64) float64 {
-	u := Mean(x, weights)
+	mean := Mean(x, weights)
 	if weights == nil {
 		var m float64
 		for _, v := range x {
-			m += math.Pow(v-u, moment)
+			m += math.Pow(v-mean, moment)
 		}
 		return m / float64(len(x))
 	}
@@ -720,7 +720,7 @@ func Moment(moment float64, x, weights []float64) float64 {
 		sumWeights float64
 	)
 	for i, v := range x {
-		m += weights[i] * math.Pow(v-u, moment)
+		m += weights[i] * math.Pow(v-mean, moment)
 		sumWeights += weights[i]
 	}
 	return m / sumWeights
@@ -812,11 +812,11 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 // len(x) must equal len(weights).
 func Skew(x, weights []float64) float64 {
 
-	u, std := MeanStdDev(x, weights)
+	mean, std := MeanStdDev(x, weights)
 	if weights == nil {
 		var s float64
 		for _, v := range x {
-			z := (v - u) / std
+			z := (v - mean) / std
 			s += z * z * z
 		}
 		return s * skewCorrection(float64(len(x)))
@@ -826,7 +826,7 @@ func Skew(x, weights []float64) float64 {
 		sumWeights float64
 	)
 	for i, v := range x {
-		z := (v - u) / std
+		z := (v - mean) / std
 		s += weights[i] * z * z * z
 		sumWeights += weights[i]
 	}
@@ -876,19 +876,19 @@ func (w weightSorter) Len() int {
 
 // StdDev returns the sample standard deviation.
 func StdDev(x []float64, weights []float64) float64 {
-	_, s := MeanStdDev(x, weights)
-	return s
+	_, std := MeanStdDev(x, weights)
+	return std
 }
 
 // MeanStdDev returns the sample mean and standard deviation
-func MeanStdDev(x []float64, weights []float64) (u, s float64) {
-	u, s2 := MeanVariance(x, weights)
-	return u, math.Sqrt(s2)
+func MeanStdDev(x []float64, weights []float64) (mean, std float64) {
+	mean, variance := MeanVariance(x, weights)
+	return mean, math.Sqrt(variance)
 }
 
 // StdErr returns the standard error in the mean with the given values.
-func StdErr(stdev, sampleSize float64) float64 {
-	return stdev / math.Sqrt(sampleSize)
+func StdErr(std, sampleSize float64) float64 {
+	return std / math.Sqrt(sampleSize)
 }
 
 // StdScore returns the standard score (a.k.a. z-score, z-value) for the value x
@@ -903,45 +903,45 @@ func StdScore(x, mean, std float64) float64 {
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func Variance(x, weights []float64) float64 {
-	_, s2 := MeanVariance(x, weights)
-	return s2
+	_, variance := MeanVariance(x, weights)
+	return variance
 }
 
 // MeanVariance computes the sample mean and variance, where the mean is
 //  \sum_i w_i * x_i / (sum_i w_i) and variance is \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func MeanVariance(x, weights []float64) (u, s2 float64) {
+func MeanVariance(x, weights []float64) (mean, variance float64) {
 
 	// This uses the corrected two-pass algorithm (1.7), from "Algorithms for computing
 	// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
 	// and Randall J. LeVeque.
 
 	// note that this will panic if the slice lens do not match
-	u = Mean(x, weights)
+	mean = Mean(x, weights)
 	var (
 		ss           float64
 		compensation float64
 	)
 	if weights == nil {
 		for _, v := range x {
-			d := v - u
+			d := v - mean
 			ss += d * d
 			compensation += d
 		}
-		s2 = (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
+		variance = (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
 		return
 	}
 
 	var sumWeights float64
 	for i, v := range x {
 		w := weights[i]
-		d := v - u
+		d := v - mean
 		wd := w * d
 		ss += wd * d
 		compensation += wd
 		sumWeights += w
 	}
-	s2 = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
+	variance = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
 	return
 }

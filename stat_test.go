@@ -19,7 +19,6 @@ func ExampleCorrelation() {
 
 	fmt.Println("Correlation computes the degree to which two datasets move together")
 	fmt.Println("about their mean. For example, x and y above move similarly.")
-	fmt.Println("Package can be used to compute the mean and standard deviation.")
 
 	c := Correlation(x, y, w)
 	fmt.Printf("Correlation is %.5f\n", c)
@@ -27,7 +26,6 @@ func ExampleCorrelation() {
 	// Output:
 	// Correlation computes the degree to which two datasets move together
 	// about their mean. For example, x and y above move similarly.
-	// Package can be used to compute the mean and standard deviation.
 	// Correlation is 0.59915
 }
 

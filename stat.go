@@ -162,7 +162,7 @@ func Correlation(x, y, weights []float64) float64 {
 		// to the second term in (1.7) in that paper.
 		sxx -= xcompensation * xcompensation / float64(len(x))
 		syy -= ycompensation * ycompensation / float64(len(x))
-		
+
 		// sum_i { (x_i - meanX) * (y_i - meanY)} / sqrt{\sum_i{ (x_i - \mu_x)^2 } * \sum_i{ ( y_i - \mu_y)^2}}
 		// with the implicit 1/(N-1) cancelling out.
 		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
@@ -190,7 +190,7 @@ func Correlation(x, y, weights []float64) float64 {
 	// the sumWeights instead of the sample count.
 	sxx -= xcompensation * xcompensation / sumWeights
 	syy -= ycompensation * ycompensation / sumWeights
-	
+
 	// sum_i {w_i * (x_i - meanX) * (y_i - meanY)} / sqrt{\sum_i{w_i * (x_i - \mu_x)^2 } * \sum_i{w_i *( y_i - \mu_y)^2}}
 	// with sum_i { w_i } cancelling out.
 	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
@@ -727,7 +727,7 @@ func Moment(moment float64, x, weights []float64) float64 {
 }
 
 // MomentAbout computes the weighted n^th weighted moment of the samples about
-// the given mean \mu, 
+// the given mean \mu,
 //  E[(x - μ)^N]
 // No degrees of freedom correction is done.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
@@ -899,7 +899,7 @@ func StdScore(x, mean, std float64) float64 {
 	return (x - mean) / std
 }
 
-// Variance computes the weighted sample variance
+// Variance computes the weighted sample variance:
 //  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).

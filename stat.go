@@ -132,25 +132,22 @@ func ChiSquare(obs, exp []float64) float64 {
 func Correlation(x, y, weights []float64) float64 {
 	// same implementation as Covariance
 
-	// don't have a paper for this, but the unweighted adaptation seems natural.
-	// The weighted version doesn't perform a correction.  It seemed like the
-	// performance would suffer too much.
+	// This is a two-pass corrected implementation.
+	// don't have a paper for this, but the adaptation seems natural.
 
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")
 	}
 	xu := Mean(x, weights)
 	yu := Mean(y, weights)
-
+	var (
+		sxx           float64
+		syy           float64
+		sxy           float64
+		xcompensation float64
+		ycompensation float64
+	)
 	if weights == nil {
-		var (
-			sxx           float64
-			syy           float64
-			sxy           float64
-			xcompensation float64
-			ycompensation float64
-		)
-
 		for i, xv := range x {
 			yv := y[i]
 			xd := xv - xu
@@ -165,24 +162,25 @@ func Correlation(x, y, weights []float64) float64 {
 		syy -= ycompensation * ycompensation / float64(len(x))
 		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
 	}
-	var (
-		sxx        float64
-		syy        float64
-		sxy        float64
-		sumWeights float64
-	)
-
+	
+	var sumWeights float64
 	for i, xv := range x {
 		w := weights[i]
 		yv := y[i]
 		xd := xv - xu
+		wxd := w * xd
 		yd := yv - yu
-		sxx += w * xd * xd
-		syy += w * yd * yd
-		sxy += w * xd * yd
+		wyd := w * yd
+		sxx += wxd * xd
+		syy += wyd * yd
+		sxy += wxd * yd
+		xcompensation += wxd
+		ycompensation += wyd
 		sumWeights += w
 	}
-	return sxy / math.Sqrt(sxx*syy)
+	sxx -= xcompensation * xcompensation / sumWeights
+	syy -= ycompensation * ycompensation / sumWeights
+	return (sxy -  xcompensation * ycompensation / sumWeights)  / math.Sqrt(sxx*syy)
 }
 
 // Covariance returns the weighted covariance between the samples of x and y.

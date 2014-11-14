@@ -791,10 +791,6 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 // len(x) must equal len(weights).
 func Skew(x, weights []float64) float64 {
 
-	// this is a three-pass approach.  There are one pass approaches, but
-	// I don't know of a two-pass one, or the numerical stability of the
-	// one vs three pass version.
-
 	u, std := MeanStdDev(x, weights)
 	if weights == nil {
 		var s float64

@@ -198,14 +198,12 @@ func Covariance(x, y, weights []float64) float64 {
 	}
 	xu := Mean(x, weights)
 	yu := Mean(y, weights)
-
+	var (
+		ss            float64
+		xcompensation float64
+		ycompensation float64
+	)
 	if weights == nil {
-		var (
-			ss            float64
-			xcompensation float64
-			ycompensation float64
-		)
-
 		for i, xv := range x {
 			yv := y[i]
 			xd := xv - xu
@@ -216,17 +214,20 @@ func Covariance(x, y, weights []float64) float64 {
 		}
 		return (ss - xcompensation*ycompensation/float64(len(x))) / float64(len(x)-1)
 	}
-	var (
-		ss         float64
-		sumWeights float64
-	)
-
+	
+	var	sumWeights float64
+	
 	for i, xv := range x {
 		w := weights[i]
-		ss += w * (xv - xu) * (y[i] - yu)
+		yv := y[i]
+		wxd := w * (xv - xu)
+		wyd := w * (yv - yu)
+		ss += wxd * wyd
+		xcompensation += wxd
+		ycompensation += wyd
 		sumWeights += w
 	}
-	return ss / (sumWeights - 1)
+	return (ss - xcompensation * ycompensation / sumWeights) / (sumWeights - 1)
 }
 
 // CrossEntropy computes the cross-entropy between the two distributions specified

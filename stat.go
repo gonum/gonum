@@ -162,7 +162,7 @@ func Correlation(x, y, weights []float64) float64 {
 		syy -= ycompensation * ycompensation / float64(len(x))
 		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
 	}
-	
+
 	var sumWeights float64
 	for i, xv := range x {
 		w := weights[i]
@@ -180,7 +180,7 @@ func Correlation(x, y, weights []float64) float64 {
 	}
 	sxx -= xcompensation * xcompensation / sumWeights
 	syy -= ycompensation * ycompensation / sumWeights
-	return (sxy -  xcompensation * ycompensation / sumWeights)  / math.Sqrt(sxx*syy)
+	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
 }
 
 // Covariance returns the weighted covariance between the samples of x and y.
@@ -214,9 +214,9 @@ func Covariance(x, y, weights []float64) float64 {
 		}
 		return (ss - xcompensation*ycompensation/float64(len(x))) / float64(len(x)-1)
 	}
-	
-	var	sumWeights float64
-	
+
+	var sumWeights float64
+
 	for i, xv := range x {
 		w := weights[i]
 		yv := y[i]
@@ -227,7 +227,7 @@ func Covariance(x, y, weights []float64) float64 {
 		ycompensation += wyd
 		sumWeights += w
 	}
-	return (ss - xcompensation * ycompensation / sumWeights) / (sumWeights - 1)
+	return (ss - xcompensation*ycompensation/sumWeights) / (sumWeights - 1)
 }
 
 // CrossEntropy computes the cross-entropy between the two distributions specified

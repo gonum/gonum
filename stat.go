@@ -727,7 +727,8 @@ func Moment(moment float64, x, weights []float64) float64 {
 }
 
 // MomentAbout computes the weighted n^th weighted moment of the samples about
-// the given mean \mu, E[(x - μ)^N].
+// the given mean \mu, 
+//  E[(x - μ)^N]
 // No degrees of freedom correction is done.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).

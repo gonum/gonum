@@ -33,15 +33,15 @@ func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
 	}
 
 	// todo: avoid matrix copy?
-	xt := new(mat64.Dense)
+	var xt mat64.Dense
 	xt.TCopy(xc)
 
 	// It would be nice if we could indicate that this was a symmetric
 	// matrix.
-	ss := new(mat64.Dense)
-	ss.Mul(xt, xc)
-	ss.Scale(1/float64(r-1), ss)
-	return ss
+	var ss mat64.Dense
+	ss.Mul(&xt, xc)
+	ss.Scale(1/float64(r-1), &ss)
+	return &ss
 }
 
 // ones is a matrix of all ones.

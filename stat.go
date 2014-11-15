@@ -126,42 +126,123 @@ func ChiSquare(obs, exp []float64) float64 {
 
 // Correlation returns the weighted correlation between the samples of x and y
 // with the given means.
-//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / ((sum_j {w_j} - 1) * stdX * stdY)
+//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (stdX * stdY)
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func Correlation(x []float64, meanX, stdX float64, y []float64, meanY, stdY float64, weights []float64) float64 {
-	return Covariance(x, meanX, y, meanY, weights) / (stdX * stdY)
-}
+func Correlation(x, y, weights []float64) float64 {
+	// This is a two-pass corrected implementation.  It is an adaptation of the
+	// algorithm used in the MeanVariance function, which applies a correction
+	// to the typical two pass approach.
 
-// Covariance returns the weighted covariance between the samples of x and y
-// with the given means.
-//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
-// The lengths of x and y must be equal. If weights is nil then all of the
-// weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func Covariance(x []float64, meanX float64, y []float64, meanY float64, weights []float64) float64 {
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")
 	}
+	xu := Mean(x, weights)
+	yu := Mean(y, weights)
+	var (
+		sxx           float64
+		syy           float64
+		sxy           float64
+		xcompensation float64
+		ycompensation float64
+	)
 	if weights == nil {
-		var s float64
-		for i, v := range x {
-			s += (v - meanX) * (y[i] - meanY)
+		for i, xv := range x {
+			yv := y[i]
+			xd := xv - xu
+			yd := yv - yu
+			sxx += xd * xd
+			syy += yd * yd
+			sxy += xd * yd
+			xcompensation += xd
+			ycompensation += yd
 		}
-		s /= float64(len(x) - 1)
-		return s
+		// xcompensation and ycompensation are from Chan, et. al.
+		// referenced in the MeanVariance function.  They are analogous
+		// to the second term in (1.7) in that paper.
+		sxx -= xcompensation * xcompensation / float64(len(x))
+		syy -= ycompensation * ycompensation / float64(len(x))
+
+		return (sxy - xcompensation*ycompensation/float64(len(x))) / math.Sqrt(sxx*syy)
+
 	}
-	if len(weights) != len(x) {
+
+	var sumWeights float64
+	for i, xv := range x {
+		w := weights[i]
+		yv := y[i]
+		xd := xv - xu
+		wxd := w * xd
+		yd := yv - yu
+		wyd := w * yd
+		sxx += wxd * xd
+		syy += wyd * yd
+		sxy += wxd * yd
+		xcompensation += wxd
+		ycompensation += wyd
+		sumWeights += w
+	}
+	// xcompensation and ycompensation are from Chan, et. al.
+	// referenced in the MeanVariance function.  They are analogous
+	// to the second term in (1.7) in that paper, except they use
+	// the sumWeights instead of the sample count.
+	sxx -= xcompensation * xcompensation / sumWeights
+	syy -= ycompensation * ycompensation / sumWeights
+
+	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
+}
+
+// Covariance returns the weighted covariance between the samples of x and y.
+//  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
+// The lengths of x and y must be equal. If weights is nil then all of the
+// weights are 1. If weights is not nil, then len(x) must equal len(weights).
+func Covariance(x, y, weights []float64) float64 {
+	// This is a two-pass corrected implementation.  It is an adaptation of the
+	// algorithm used in the MeanVariance function, which applies a correction
+	// to the typical two pass approach.
+
+	if len(x) != len(y) {
 		panic("stat: slice length mismatch")
 	}
+	xu := Mean(x, weights)
+	yu := Mean(y, weights)
 	var (
-		s          float64
-		sumWeights float64
+		ss            float64
+		xcompensation float64
+		ycompensation float64
 	)
-	for i, v := range x {
-		s += weights[i] * (v - meanX) * (y[i] - meanY)
-		sumWeights += weights[i]
+	if weights == nil {
+		for i, xv := range x {
+			yv := y[i]
+			xd := xv - xu
+			yd := yv - yu
+			ss += xd * yd
+			xcompensation += xd
+			ycompensation += yd
+		}
+		// xcompensation and ycompensation are from Chan, et. al.
+		// referenced in the MeanVariance function.  They are analogous
+		// to the second term in (1.7) in that paper.
+		return (ss - xcompensation*ycompensation/float64(len(x))) / float64(len(x)-1)
 	}
-	return s / (sumWeights - 1)
+
+	var sumWeights float64
+
+	for i, xv := range x {
+		w := weights[i]
+		yv := y[i]
+		wxd := w * (xv - xu)
+		wyd := w * (yv - yu)
+		ss += wxd * wyd
+		xcompensation += wxd
+		ycompensation += wyd
+		sumWeights += w
+	}
+	// xcompensation and ycompensation are from Chan, et. al.
+	// referenced in the MeanVariance function.  They are analogous
+	// to the second term in (1.7) in that paper, except they use
+	// the sumWeights instead of the sample count.
+	return (ss - xcompensation*ycompensation/sumWeights) / (sumWeights - 1)
 }
 
 // CrossEntropy computes the cross-entropy between the two distributions specified
@@ -198,25 +279,24 @@ func Entropy(p []float64) float64 {
 // the normal distribution is zero.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func ExKurtosis(x []float64, mean, stdev float64, weights []float64) float64 {
+func ExKurtosis(x, weights []float64) float64 {
+	mean, std := MeanStdDev(x, weights)
 	if weights == nil {
 		var e float64
 		for _, v := range x {
-			z := (v - mean) / stdev
+			z := (v - mean) / std
 			e += z * z * z * z
 		}
 		mul, offset := kurtosisCorrection(float64(len(x)))
 		return e*mul - offset
 	}
-	if len(x) != len(weights) {
-		panic("stat: slice length mismatch")
-	}
+
 	var (
 		e          float64
 		sumWeights float64
 	)
 	for i, v := range x {
-		z := (v - mean) / stdev
+		z := (v - mean) / std
 		e += weights[i] * z * z * z * z
 		sumWeights += weights[i]
 	}
@@ -622,7 +702,33 @@ func Mode(x []float64, weights []float64) (val float64, count float64) {
 // No degrees of freedom correction is done.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func Moment(moment float64, x []float64, mean float64, weights []float64) float64 {
+func Moment(moment float64, x, weights []float64) float64 {
+	mean := Mean(x, weights)
+	if weights == nil {
+		var m float64
+		for _, v := range x {
+			m += math.Pow(v-mean, moment)
+		}
+		return m / float64(len(x))
+	}
+	var (
+		m          float64
+		sumWeights float64
+	)
+	for i, v := range x {
+		m += weights[i] * math.Pow(v-mean, moment)
+		sumWeights += weights[i]
+	}
+	return m / sumWeights
+}
+
+// MomentAbout computes the weighted n^th weighted moment of the samples about
+// the given mean \mu,
+//  E[(x - μ)^N]
+// No degrees of freedom correction is done.
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
+func MomentAbout(moment float64, x []float64, mean float64, weights []float64) float64 {
 	if weights == nil {
 		var m float64
 		for _, v := range x {
@@ -701,24 +807,23 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 // Skew computes the skewness of the sample data.
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func Skew(x []float64, mean, stdev float64, weights []float64) float64 {
+func Skew(x, weights []float64) float64 {
+
+	mean, std := MeanStdDev(x, weights)
 	if weights == nil {
 		var s float64
 		for _, v := range x {
-			z := (v - mean) / stdev
+			z := (v - mean) / std
 			s += z * z * z
 		}
 		return s * skewCorrection(float64(len(x)))
-	}
-	if len(x) != len(weights) {
-		panic("stat: slice length mismatch")
 	}
 	var (
 		s          float64
 		sumWeights float64
 	)
 	for i, v := range x {
-		z := (v - mean) / stdev
+		z := (v - mean) / std
 		s += weights[i] * z * z * z
 		sumWeights += weights[i]
 	}
@@ -766,14 +871,21 @@ func (w weightSorter) Len() int {
 	return len(w.x)
 }
 
-// StdDev returns the population standard deviation with the provided mean.
-func StdDev(x []float64, mean float64, weights []float64) float64 {
-	return math.Sqrt(Variance(x, mean, weights))
+// StdDev returns the sample standard deviation.
+func StdDev(x []float64, weights []float64) float64 {
+	_, std := MeanStdDev(x, weights)
+	return std
+}
+
+// MeanStdDev returns the sample mean and standard deviation
+func MeanStdDev(x []float64, weights []float64) (mean, std float64) {
+	mean, variance := MeanVariance(x, weights)
+	return mean, math.Sqrt(variance)
 }
 
 // StdErr returns the standard error in the mean with the given values.
-func StdErr(stdev, sampleSize float64) float64 {
-	return stdev / math.Sqrt(sampleSize)
+func StdErr(std, sampleSize float64) float64 {
+	return std / math.Sqrt(sampleSize)
 }
 
 // StdScore returns the standard score (a.k.a. z-score, z-value) for the value x
@@ -783,28 +895,52 @@ func StdScore(x, mean, std float64) float64 {
 	return (x - mean) / std
 }
 
-// Variance computes the weighted sample variance with the provided mean.
+// Variance computes the weighted sample variance:
 //  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
-func Variance(x []float64, mean float64, weights []float64) float64 {
-	if weights == nil {
-		var s float64
-		for _, v := range x {
-			s += (v - mean) * (v - mean)
-		}
-		return s / float64(len(x)-1)
-	}
-	if len(x) != len(weights) {
-		panic("stat: slice length mismatch")
-	}
+func Variance(x, weights []float64) float64 {
+	_, variance := MeanVariance(x, weights)
+	return variance
+}
+
+// MeanVariance computes the sample mean and variance, where the mean and variance are
+//  \sum_i w_i * x_i / (sum_i w_i)
+//  \sum_i w_i (x_i - mean)^2 / (sum_i w_i - 1)
+// respectively.
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
+func MeanVariance(x, weights []float64) (mean, variance float64) {
+
+	// This uses the corrected two-pass algorithm (1.7), from "Algorithms for computing
+	// the sample variance: Analysis and recommendations" by Chan, Tony F., Gene H. Golub,
+	// and Randall J. LeVeque.
+
+	// note that this will panic if the slice lengths do not match
+	mean = Mean(x, weights)
 	var (
-		ss         float64
-		sumWeights float64
+		ss           float64
+		compensation float64
 	)
-	for i, v := range x {
-		ss += weights[i] * (v - mean) * (v - mean)
-		sumWeights += weights[i]
+	if weights == nil {
+		for _, v := range x {
+			d := v - mean
+			ss += d * d
+			compensation += d
+		}
+		variance = (ss - compensation*compensation/float64(len(x))) / float64(len(x)-1)
+		return
 	}
-	return ss / (sumWeights - 1)
+
+	var sumWeights float64
+	for i, v := range x {
+		w := weights[i]
+		d := v - mean
+		wd := w * d
+		ss += wd * d
+		compensation += wd
+		sumWeights += w
+	}
+	variance = (ss - compensation*compensation/sumWeights) / (sumWeights - 1)
+	return
 }

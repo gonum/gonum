@@ -19,23 +19,14 @@ func ExampleCorrelation() {
 
 	fmt.Println("Correlation computes the degree to which two datasets move together")
 	fmt.Println("about their mean. For example, x and y above move similarly.")
-	fmt.Println("Package can be used to compute the mean and standard deviation")
-	fmt.Println("or they can be supplied if they are known")
-	meanX := Mean(x, w)
-	meanY := Mean(x, w)
-	c := Correlation(x, meanX, 3, y, meanY, 4, w)
-	fmt.Printf("Correlation with set standard deviatons is %.5f\n", c)
-	stdX := StdDev(x, meanX, w)
-	stdY := StdDev(x, meanY, w)
-	c2 := Correlation(x, meanX, stdX, y, meanY, stdY, w)
-	fmt.Printf("Correlation with computed standard deviatons is %.5f\n", c2)
+
+	c := Correlation(x, y, w)
+	fmt.Printf("Correlation is %.5f\n", c)
+
 	// Output:
 	// Correlation computes the degree to which two datasets move together
 	// about their mean. For example, x and y above move similarly.
-	// Package can be used to compute the mean and standard deviation
-	// or they can be supplied if they are known
-	// Correlation with set standard deviatons is 0.96894
-	// Correlation with computed standard deviatons is 0.39644
+	// Correlation is 0.59915
 }
 
 func TestCorrelation(t *testing.T) {
@@ -82,11 +73,7 @@ func TestCorrelation(t *testing.T) {
 			ans: -0.13966633352689,
 		},
 	} {
-		meanX := Mean(test.x, test.w)
-		meanY := Mean(test.y, test.w)
-		stdX := StdDev(test.x, meanX, test.w)
-		stdY := StdDev(test.y, meanY, test.w)
-		c := Correlation(test.x, meanX, stdX, test.y, meanY, stdY, test.w)
+		c := Correlation(test.x, test.y, test.w)
 		if math.Abs(test.ans-c) > 1e-14 {
 			t.Errorf("Correlation mismatch case %d. Expected %v, Found %v", i, test.ans, c)
 		}
@@ -98,15 +85,12 @@ func ExampleCovariance() {
 	fmt.Println("about their mean.")
 	x := []float64{8, -3, 7, 8, -4}
 	y := []float64{10, 2, 2, 4, 1}
-	meanX := Mean(x, nil)
-	meanY := Mean(y, nil)
-	cov := Covariance(x, meanX, y, meanY, nil)
+	cov := Covariance(x, y, nil)
 	fmt.Printf("Cov = %.4f\n", cov)
 	fmt.Println("If datasets move perfectly together, the variance equals the covariance")
 	y2 := []float64{12, 1, 11, 12, 0}
-	meanY2 := Mean(y2, nil)
-	cov2 := Covariance(x, meanX, y2, meanY2, nil)
-	varX := Variance(x, meanX, nil)
+	cov2 := Covariance(x, y2, nil)
+	varX := Variance(x, nil)
 	fmt.Printf("Cov2 is %.4f, VarX is %.4f", cov2, varX)
 	// Output:
 	// Covariance computes the degree to which datasets move together
@@ -145,17 +129,17 @@ func TestCovariance(t *testing.T) {
 			ans:     3.2,
 		},
 	} {
-		c := Covariance(test.p, Mean(test.p, test.weights), test.q, Mean(test.q, test.weights), test.weights)
+		c := Covariance(test.p, test.q, test.weights)
 		if math.Abs(c-test.ans) > 1e-14 {
 			t.Errorf("Covariance mismatch case %d: Expected %v, Found %v", i, test.ans, c)
 		}
 	}
 
 	// test the panic states
-	if !Panics(func() { Covariance(make([]float64, 2), 0.0, make([]float64, 3), 0.0, nil) }) {
+	if !Panics(func() { Covariance(make([]float64, 2), make([]float64, 3), nil) }) {
 		t.Errorf("Covariance did not panic with x, y length mismatch")
 	}
-	if !Panics(func() { Covariance(make([]float64, 3), 0.0, make([]float64, 3), 0.0, make([]float64, 2)) }) {
+	if !Panics(func() { Covariance(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Covariance did not panic with x, weights length mismatch")
 	}
 
@@ -232,14 +216,10 @@ func ExampleExKurtosis() {
 excess kurtosis is the kurtosis above or below that of the standard normal
 distribution`)
 	x := []float64{5, 4, -3, -2}
-	mean := Mean(x, nil)
-	stdev := StdDev(x, mean, nil)
-	kurt := ExKurtosis(x, mean, stdev, nil)
+	kurt := ExKurtosis(x, nil)
 	fmt.Printf("ExKurtosis = %.5f\n", kurt)
 	weights := []float64{1, 2, 3, 5}
-	wMean := Mean(x, weights)
-	wStdev := StdDev(x, wMean, weights)
-	wKurt := ExKurtosis(x, wMean, wStdev, weights)
+	wKurt := ExKurtosis(x, weights)
 	fmt.Printf("Weighted ExKurtosis is %.4f", wKurt)
 	// Output:
 	// Kurtosis is a measure of the 'peakedness' of a distribution, and the
@@ -251,7 +231,7 @@ distribution`)
 
 func TestExKurtosis(t *testing.T) {
 	// the example does a good job, this just has to cover the panic
-	if !Panics(func() { ExKurtosis(make([]float64, 3), 0.0, 0.0, make([]float64, 2)) }) {
+	if !Panics(func() { ExKurtosis(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("ExKurtosis did not panic with x, weights length mismatch")
 	}
 }
@@ -929,6 +909,35 @@ func TestMoment(t *testing.T) {
 		x       []float64
 		weights []float64
 		moment  float64
+		ans     float64
+	}{
+		{
+			x:      []float64{6, 2, 4, 8, 10},
+			moment: 5,
+			ans:    0,
+		},
+		{
+			x:       []float64{6, 2, 4, 8, 10},
+			weights: []float64{1, 2, 2, 2, 1},
+			moment:  5,
+			ans:     121.875,
+		},
+	} {
+		m := Moment(test.moment, test.x, test.weights)
+		if math.Abs(test.ans-m) > 1e-14 {
+			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
+		}
+	}
+	if !Panics(func() { Moment(1, make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Moment did not panic with x, weights length mismatch")
+	}
+}
+
+func TestMomentAbout(t *testing.T) {
+	for i, test := range []struct {
+		x       []float64
+		weights []float64
+		moment  float64
 		mean    float64
 		ans     float64
 	}{
@@ -946,13 +955,13 @@ func TestMoment(t *testing.T) {
 			ans:     1.783625e3,
 		},
 	} {
-		m := Moment(test.moment, test.x, test.mean, test.weights)
+		m := MomentAbout(test.moment, test.x, test.mean, test.weights)
 		if math.Abs(test.ans-m) > 1e-14 {
-			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
+			t.Errorf("MomentAbout mismatch case %d. Expected %v, found %v", i, test.ans, m)
 		}
 	}
-	if !Panics(func() { Moment(1, make([]float64, 3), 0, make([]float64, 2)) }) {
-		t.Errorf("Moment did not panic with x, weights length mismatch")
+	if !Panics(func() { MomentAbout(1, make([]float64, 3), 0, make([]float64, 2)) }) {
+		t.Errorf("MomentAbout did not panic with x, weights length mismatch")
 	}
 }
 
@@ -1139,13 +1148,11 @@ func TestQuantile(t *testing.T) {
 
 func ExampleStdDev() {
 	x := []float64{8, 2, -9, 15, 4}
-	mean := Mean(x, nil)
-	stdev := StdDev(x, mean, nil)
+	stdev := StdDev(x, nil)
 	fmt.Printf("The standard deviation of the samples is %.4f\n", stdev)
 
 	weights := []float64{2, 2, 6, 7, 1}
-	weightedMean := Mean(x, weights)
-	weightedStdev := StdDev(x, weightedMean, weights)
+	weightedStdev := StdDev(x, weights)
 	fmt.Printf("The weighted standard deviation of the samples is %.4f\n", weightedStdev)
 	// Output:
 	// The standard deviation of the samples is 8.8034
@@ -1156,7 +1163,7 @@ func ExampleStdErr() {
 	x := []float64{8, 2, -9, 15, 4}
 	weights := []float64{2, 2, 6, 7, 1}
 	mean := Mean(x, weights)
-	stdev := StdDev(x, mean, weights)
+	stdev := StdDev(x, weights)
 	nSamples := floats.Sum(weights)
 	stdErr := StdErr(stdev, nSamples)
 	fmt.Printf("The standard deviation is %.4f and there are %g samples, so the mean\nis likely %.4f ± %.4f.", stdev, nSamples, mean, stdErr)
@@ -1187,14 +1194,12 @@ func TestSkew(t *testing.T) {
 			ans:     -1.12066646837198,
 		},
 	} {
-		mean := Mean(test.x, test.weights)
-		std := StdDev(test.x, mean, test.weights)
-		skew := Skew(test.x, mean, std, test.weights)
+		skew := Skew(test.x, test.weights)
 		if math.Abs(skew-test.ans) > 1e-14 {
 			t.Errorf("Skew mismatch case %d. Expected %v, Found %v", i, test.ans, skew)
 		}
 	}
-	if !Panics(func() { Skew(make([]float64, 3), 0, 1, make([]float64, 2)) }) {
+	if !Panics(func() { Skew(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Skew did not panic with x, weights length mismatch")
 	}
 }
@@ -1252,13 +1257,12 @@ func TestVariance(t *testing.T) {
 			ans:     4.2857142857142865,
 		},
 	} {
-		mean := Mean(test.x, test.weights)
-		variance := Variance(test.x, mean, test.weights)
+		variance := Variance(test.x, test.weights)
 		if math.Abs(variance-test.ans) > 1e-14 {
 			t.Errorf("Variance mismatch case %d. Expected %v, Found %v", i, test.ans, variance)
 		}
 	}
-	if !Panics(func() { Variance(make([]float64, 3), 0, make([]float64, 2)) }) {
+	if !Panics(func() { Variance(make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Variance did not panic with x, weights length mismatch")
 	}
 
@@ -1266,13 +1270,11 @@ func TestVariance(t *testing.T) {
 
 func ExampleVariance() {
 	x := []float64{8, 2, -9, 15, 4}
-	mean := Mean(x, nil)
-	variance := Variance(x, mean, nil)
+	variance := Variance(x, nil)
 	fmt.Printf("The variance of the samples is %.4f\n", variance)
 
 	weights := []float64{2, 2, 6, 7, 1}
-	weightedMean := Mean(x, weights)
-	weightedVariance := Variance(x, weightedMean, weights)
+	weightedVariance := Variance(x, weights)
 	fmt.Printf("The weighted variance of the samples is %.4f\n", weightedVariance)
 	// Output:
 	// The variance of the samples is 77.5000

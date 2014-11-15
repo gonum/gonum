@@ -210,7 +210,7 @@ func (Normal) SuffStat(samples, weights, suffStat []float64) (nSamples float64) 
 	suffStat[0] = mean
 
 	// Use Moment and not StdDev because we want it to be uncorrected
-	variance := stat.Moment(2, samples, mean, weights)
+	variance := stat.MomentAbout(2, samples, mean, weights)
 	suffStat[1] = math.Sqrt(variance)
 	return nSamples
 }

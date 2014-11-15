@@ -19,14 +19,18 @@ func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
 	b := ones(1, r)
 	b.Mul(b, x)
 	b.Scale(1/float64(r), b)
-
+	
 	// todo: avoid unneeded memory expansion here.
-	mu := new(mat64.Dense)
-	mu.Mul(ones(r, 1), b)
-
+	mu := b.RowView(0)
+	
 	// this could also be done with a clone & row viewer
 	xc := mat64.DenseCopyOf(x)
-	xc.Sub(xc, mu)
+	for i := 0; i < r; i++ {
+		rv := xc.RowView(i)
+		for j, mean := range(mu) {
+			rv[j] -= mean
+		}		
+	}
 
 	// todo: avoid matrix copy
 	xt := new(mat64.Dense)

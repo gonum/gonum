@@ -116,7 +116,8 @@ func BenchmarkCovarianceMatrixLargexSmall(b *testing.B) {
 }
 
 /*func BenchmarkCovarianceMatrixLargexMedium(b *testing.B) {
-	x := randMat(LARGE, MEDIUM)
+	// 1e5 * 1000 elements
+    x := randMat(LARGE, MEDIUM)
 	benchmarkCovarianceMatrix(b, x)
 }
 func BenchmarkCovarianceMatrixLargexLarge(b *testing.B) {
@@ -135,7 +136,8 @@ func BenchmarkCovarianceMatrixHugexSmall(b *testing.B) {
 }
 
 /*func BenchmarkCovarianceMatrixHugexMedium(b *testing.B) {
-	x := randMat(HUGE, MEDIUM)
+	// 1e7 * 1000 elements
+    x := randMat(HUGE, MEDIUM)
 	benchmarkCovarianceMatrix(b, x)
 }
 func BenchmarkCovarianceMatrixHugexLarge(b *testing.B) {

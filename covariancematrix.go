@@ -11,10 +11,6 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
-type covMatElem struct {
-	i, j int
-	v    float64
-}
 
 type covMatSlice struct {
 	i, j int
@@ -53,16 +49,11 @@ func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
 		wg.Wait()
 		
 		colCh := make(chan covMatSlice, blockSize)
-		resCh := make(chan covMatElem, blockSize)
 
 		wg.Add(blockSize)
-		go func() {
-			wg.Wait()
-			close(resCh)
-		}()
-
+		m := mat64.NewDense(c, c, nil)
 		for i := 0; i < blockSize; i++ {
-			go func(in <-chan covMatSlice, out chan<- covMatElem) {
+			go func(in <-chan covMatSlice) {
 				for {
 					xy, more := <-in
 					if !more {
@@ -71,20 +62,14 @@ func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
 					}
 
 					if xy.i == xy.j {
-						out <- covMatElem{
-							i: xy.i,
-							j: xy.j,
-							v: centeredVariance(xy.x),
-						}
+						m.Set(xy.i, xy.j, centeredVariance(xy.x))
 						continue
 					}
-					out <- covMatElem{
-						i: xy.i,
-						j: xy.j,
-						v: centeredCovariance(xy.x, xy.y),
+					v := centeredCovariance(xy.x, xy.y)
+					m.Set(xy.i, xy.j, v)
+					m.Set(xy.j, xy.i, v)
 					}
-				}
-			}(colCh, resCh)
+			}(colCh)
 		}
 		go func(out chan<- covMatSlice) {
 			for i := 0; i < c; i++ {
@@ -100,17 +85,8 @@ func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
 			close(out)
 		}(colCh)
 		// create the output matrix
-		m := mat64.NewDense(c, c, nil)
-		for {
-			c, more := <-resCh
-			if !more {
-				return m
-			}
-			m.Set(c.i, c.j, c.v)
-			if c.i != c.j {
-				m.Set(c.j, c.i, c.v)
-			}
-		}
+		wg.Wait()
+		return m
 	}
 	// determine the mean of each of the columns
 	b := ones(1, r)

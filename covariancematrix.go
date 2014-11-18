@@ -128,6 +128,8 @@ func ones(r, c int) *mat64.Dense {
 	return mat64.NewDense(r, c, x)
 }
 
+// centeredVariance calculates the sum of squares of a single
+// series, for calculating variance.
 func centeredVariance(x []float64) float64 {
 	var ss float64
 	for _, xv := range x {
@@ -136,6 +138,9 @@ func centeredVariance(x []float64) float64 {
 	return ss / float64(len(x)-1)
 }
 
+// centeredCovariance calculates the sum of squares of two
+// series, for calculating variance.  The input lengths are
+// assumed to be identical.
 func centeredCovariance(x, y []float64) float64 {
 	var ss float64
 	for i, xv := range x {

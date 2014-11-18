@@ -18,7 +18,6 @@ func init() {
 }
 
 func TestCovarianceMatrix(t *testing.T) {
-	blasEngine := mat64.Registered()
 	for i, test := range []struct {
 		mat  mat64.Matrix
 		r, c int
@@ -40,8 +39,6 @@ func TestCovarianceMatrix(t *testing.T) {
 			},
 		},
 	} {
-		// tests with a blas engine
-		mat64.Register(goblas.Blas{})
 		c := CovarianceMatrix(test.mat).RawMatrix()
 		if c.Rows != test.r {
 			t.Errorf("BLAS %d: expected rows %d, found %d", i, test.r, c.Rows)
@@ -52,20 +49,7 @@ func TestCovarianceMatrix(t *testing.T) {
 		if !floats.Equal(test.x, c.Data) {
 			t.Errorf("BLAS %d: expected data %#q, found %#q", i, test.x, c.Data)
 		}
-		// tests without a blas engine
-		mat64.Register(nil)
-		c = CovarianceMatrix(test.mat).RawMatrix()
-		if c.Rows != test.r {
-			t.Errorf("No BLAS %d: expected rows %d, found %d", i, test.r, c.Rows)
-		}
-		if c.Cols != test.c {
-			t.Errorf("No BLAS %d: expected cols %d, found %d", i, test.c, c.Cols)
-		}
-		if !floats.Equal(test.x, c.Data) {
-			t.Errorf("No BLAS %d: expected data %#q, found %#q", i, test.x, c.Data)
-		}
 	}
-	mat64.Register(blasEngine)
 }
 
 // benchmarks

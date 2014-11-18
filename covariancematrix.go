@@ -15,7 +15,7 @@ import (
 // algorithm.  It will have better performance if a BLAS engine is
 // registered in gonum/matrix/mat64.
 //
-// The matrix returned will be symmetric, square, and positive-semidefinite.  
+// The matrix returned will be symmetric, square, and positive-semidefinite.
 func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
 
 	// matrix version of the two pass algorithm.  This doesn't use

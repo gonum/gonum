@@ -13,12 +13,12 @@ import (
 // algorithm.  It requires a registered BLAS engine in gonum/matrix/mat64.
 //
 // The matrix returned will be symmetric, square, and positive-semidefinite.
-func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
+func CovarianceMatrix(cov *mat64.Dense, x, wts mat64.Matrix) *mat64.Dense {
 
 	// matrix version of the two pass algorithm.  This doesn't use
 	// the correction found in the Covariance and Variance functions.
 
-	r, _ := x.Dims()
+	r, c := x.Dims()
 
 	// determine the mean of each of the columns
 	ones := make([]float64, r)
@@ -32,20 +32,46 @@ func CovarianceMatrix(x mat64.Matrix) *mat64.Dense {
 
 	// subtract the mean from the data
 	xc := mat64.DenseCopyOf(x)
+
 	for i := 0; i < r; i++ {
 		rv := xc.RowView(i)
 		for j, mean := range mu {
 			rv[j] -= mean
 		}
 	}
-
 	var xt mat64.Dense
 	xt.TCopy(xc)
 
+	// normalization factor, typical n-1
+	var N float64
+	if wts != nil {
+		// should this be col major or row major?
+		if wr, wc := wts.Dims(); wr != r || wc != 1 {
+			panic("matrix length mismatch")
+		}
+
+		for i := 0; i < r; i++ {
+			rv := xc.RowView(i)
+			w := wts.At(i, 0)
+			N += w
+			for j := 0; j < c; j++ {
+				rv[j] *= w
+			}
+		}
+		N = 1 / (N - 1)
+	} else {
+		N = 1 / float64(r-1)
+	}
+
 	// TODO: indicate that the resulting matrix is symmetric, which
 	// should improve performance.
-	var ss mat64.Dense
-	ss.Mul(&xt, xc)
-	ss.Scale(1/float64(r-1), &ss)
-	return &ss
+	if cov == nil {
+		cov = mat64.NewDense(c, c, nil)
+	} else if covr, covc := cov.Dims(); covr != covc || covc != c {
+		panic("matrix size mismatch")
+	}
+
+	cov.Mul(&xt, xc)
+	cov.Scale(N, cov)
+	return cov
 }

@@ -19,9 +19,9 @@ func init() {
 
 func TestCovarianceMatrix(t *testing.T) {
 	for i, test := range []struct {
-		mat  mat64.Matrix
-		r, c int
-		x    []float64
+		mat, weights mat64.Matrix
+		r, c         int
+		x            []float64
 	}{
 		{
 			mat: mat64.NewDense(5, 2, []float64{
@@ -31,15 +31,37 @@ func TestCovarianceMatrix(t *testing.T) {
 				1, -2,
 				2, 4,
 			}),
-			r: 2,
-			c: 2,
+			weights: nil,
+			r:       2,
+			c:       2,
 			x: []float64{
 				2.5, 3,
 				3, 10,
 			},
+		}, {
+			mat: mat64.NewDense(5, 2, []float64{
+				-2, -4,
+				-1, 2,
+				0, 0,
+				1, -2,
+				2, 4,
+			}),
+			weights: mat64.NewDense(5, 1, []float64{
+				1.5,
+				.5,
+				1.5,
+				.5,
+				1,
+			}),
+			r: 2,
+			c: 2,
+			x: []float64{
+				2.75, 4.5,
+				4.5, 11,
+			},
 		},
 	} {
-		c := CovarianceMatrix(test.mat).RawMatrix()
+		c := CovarianceMatrix(nil, test.mat, test.weights).RawMatrix()
 		if c.Rows != test.r {
 			t.Errorf("BLAS %d: expected rows %d, found %d", i, test.r, c.Rows)
 		}
@@ -65,7 +87,15 @@ func randMat(r, c int) mat64.Matrix {
 func benchmarkCovarianceMatrix(b *testing.B, m mat64.Matrix) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		CovarianceMatrix(m)
+		CovarianceMatrix(nil, m, nil)
+	}
+}
+func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat64.Matrix) {
+	_, c := m.Dims()
+	res := mat64.NewDense(c, c, nil)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CovarianceMatrix(res, m, nil)
 	}
 }
 
@@ -147,4 +177,84 @@ func BenchmarkCovarianceMatrixHugexLarge(b *testing.B) {
 func BenchmarkCovarianceMatrixHugexHuge(b *testing.B) {
 	x := randMat(HUGE, HUGE)
 	benchmarkCovarianceMatrix(b, x)
+}*/
+
+func BenchmarkCovarianceMatrixSmallxSmallInPlace(b *testing.B) {
+	// 10 * 10 elements
+	x := randMat(SMALL, SMALL)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixSmallxMediumInPlace(b *testing.B) {
+	// 10 * 1000 elements
+	x := randMat(SMALL, MEDIUM)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+
+/*func BenchmarkCovarianceMatrixSmallxLargeInPlace(b *testing.B) {
+	x := randMat(SMALL, LARGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixSmallxHugeInPlace(b *testing.B) {
+	x := randMat(SMALL, HUGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}*/
+
+func BenchmarkCovarianceMatrixMediumxSmallInPlace(b *testing.B) {
+	// 1000 * 10 elements
+	x := randMat(MEDIUM, SMALL)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixMediumxMediumInPlace(b *testing.B) {
+	// 1000 * 1000 elements
+	x := randMat(MEDIUM, MEDIUM)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+
+/*func BenchmarkCovarianceMatrixMediumxLargeInPlace(b *testing.B) {
+	x := randMat(MEDIUM, LARGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixMediumxHugeInPlace(b *testing.B) {
+	x := randMat(MEDIUM, HUGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}*/
+
+func BenchmarkCovarianceMatrixLargexSmallInPlace(b *testing.B) {
+	// 1e5 * 10 elements
+	x := randMat(LARGE, SMALL)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+
+/*func BenchmarkCovarianceMatrixLargexMediumInPlace(b *testing.B) {
+	// 1e5 * 1000 elements
+    x := randMat(LARGE, MEDIUM)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixLargexLargeInPlace(b *testing.B) {
+	x := randMat(LARGE, LARGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixLargexHugeInPlace(b *testing.B) {
+	x := randMat(LARGE, HUGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}*/
+
+func BenchmarkCovarianceMatrixHugexSmallInPlace(b *testing.B) {
+	// 1e7 * 10 elements
+	x := randMat(HUGE, SMALL)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+
+/*func BenchmarkCovarianceMatrixHugexMediumInPlace(b *testing.B) {
+	// 1e7 * 1000 elements
+    x := randMat(HUGE, MEDIUM)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixHugexLargeInPlace(b *testing.B) {
+	x := randMat(HUGE, LARGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
+}
+func BenchmarkCovarianceMatrixHugexHugeInPlace(b *testing.B) {
+	x := randMat(HUGE, HUGE)
+	benchmarkCovarianceMatrixInPlace(b, x)
 }*/

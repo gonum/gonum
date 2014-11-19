@@ -13,6 +13,11 @@ import (
 // algorithm.  It requires a registered BLAS engine in gonum/matrix/mat64.
 //
 // The matrix returned will be symmetric, square, and positive-semidefinite.
+//
+// The weights matrix wts should have the same number of rows as the input
+// data matrix x.  cov should be a square matrix with the same number of
+// columns as the input data matrix x, or if it is nil then a new Dense
+// matrix will be constructed.
 func CovarianceMatrix(cov *mat64.Dense, x, wts mat64.Matrix) *mat64.Dense {
 
 	// matrix version of the two pass algorithm.  This doesn't use

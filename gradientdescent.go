@@ -20,7 +20,7 @@ type GradientDescent struct {
 
 func (g *GradientDescent) Init(l Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if g.StepSizer == nil {
-		g.StepSizer = ConstantStepSize{1}
+		g.StepSizer = &QuadraticInterpolateStepSize{}
 	}
 	if g.LinesearchMethod == nil {
 		g.LinesearchMethod = &Backtracking{}
@@ -41,11 +41,11 @@ func (g *GradientDescent) Iterate(l Location, xNext []float64) (EvaluationType, 
 func (g *GradientDescent) InitDirection(l Location, direction []float64) (stepSize float64) {
 	copy(direction, l.Gradient)
 	floats.Scale(-1, direction)
-	return g.StepSizer.Init(l)
+	return g.StepSizer.Init(l, direction)
 }
 
 func (g *GradientDescent) NextDirection(l Location, direction []float64) (stepSize float64) {
 	copy(direction, l.Gradient)
 	floats.Scale(-1, direction)
-	return g.StepSizer.StepSize(l)
+	return g.StepSizer.StepSize(l, direction)
 }

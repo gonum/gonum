@@ -68,8 +68,8 @@ type Method interface {
 
 // StepSizer can set the next step size of the optimization given the last Location.
 type StepSizer interface {
-	Init(l Location) float64
-	StepSize(l Location) float64
+	Init(l Location, dir []float64) float64
+	StepSize(l Location, dir []float64) float64
 }
 
 // Statuser returns the status of the Function being optimized. This can be used

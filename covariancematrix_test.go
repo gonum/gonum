@@ -63,15 +63,22 @@ func TestCovarianceMatrix(t *testing.T) {
 	} {
 		c := CovarianceMatrix(nil, test.mat, test.weights).RawMatrix()
 		if c.Rows != test.r {
-			t.Errorf("BLAS %d: expected rows %d, found %d", i, test.r, c.Rows)
+			t.Errorf("%d: expected rows %d, found %d", i, test.r, c.Rows)
 		}
 		if c.Cols != test.c {
-			t.Errorf("BLAS %d: expected cols %d, found %d", i, test.c, c.Cols)
+			t.Errorf("%d: expected cols %d, found %d", i, test.c, c.Cols)
 		}
 		if !floats.Equal(test.x, c.Data) {
-			t.Errorf("BLAS %d: expected data %#q, found %#q", i, test.x, c.Data)
+			t.Errorf("%d: expected data %#q, found %#q", i, test.x, c.Data)
 		}
 	}
+	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), mat64.NewDense(1, 1, nil)) }) {
+		t.Errorf("CovarianceMatrix did not panic with weight size mismatch")
+	}
+	if !Panics(func() { CovarianceMatrix(mat64.NewDense(1, 1, nil), mat64.NewDense(5, 2, nil), nil) }) {
+		t.Errorf("CovarianceMatrix did not panic with preallocation size mismatch")
+	}
+
 }
 
 // benchmarks

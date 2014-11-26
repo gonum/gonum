@@ -348,5 +348,6 @@ func update(location Location, optLoc *Location, stats *Stats, funcInfo *Functio
 	stats.Runtime = time.Since(startTime)
 	if location.Gradient != nil {
 		stats.GradientNorm = floats.Norm(location.Gradient, 2)
+		stats.GradientNormInf = floats.Norm(location.Gradient, math.Inf(1))
 	}
 }

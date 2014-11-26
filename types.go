@@ -83,7 +83,7 @@ type Stats struct {
 	GradientEvals         int           // Number of evaluations of Df()
 	FunctionGradientEvals int           // Number of evaluations of FDf()
 	Runtime               time.Duration // Total runtime of the optimization
-	GradientNorm          float64       // 2-norm of the gradient normalized by the sqrt of the length
+	GradientNorm          float64       // 2-norm of the gradient
 }
 
 // FunctionInfo is data to give to the optimizer about the objective function.

@@ -240,7 +240,7 @@ func getStartingLocation(f Function, funcs functions, funcInfo *FunctionInfo, in
 
 func checkConvergence(loc Location, itertype IterationType, stats *Stats, settings *Settings) Status {
 	if itertype == MajorIteration && loc.Gradient != nil {
-		if stats.GradientNorm <= settings.GradientAbsTol {
+		if stats.GradientNormInf <= settings.GradientAbsTol {
 			return GradientAbsoluteConvergence
 		}
 	}

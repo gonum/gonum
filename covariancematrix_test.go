@@ -19,9 +19,10 @@ func init() {
 
 func TestCovarianceMatrix(t *testing.T) {
 	for i, test := range []struct {
-		mat, weights mat64.Matrix
-		r, c         int
-		x            []float64
+		mat     mat64.Matrix
+		weights mat64.Vec
+		r, c    int
+		x       []float64
 	}{
 		{
 			mat: mat64.NewDense(5, 2, []float64{
@@ -46,7 +47,7 @@ func TestCovarianceMatrix(t *testing.T) {
 				1, -2,
 				2, 4,
 			}),
-			weights: mat64.NewDense(5, 1, []float64{
+			weights: mat64.Vec([]float64{
 				1.5,
 				.5,
 				1.5,
@@ -72,7 +73,7 @@ func TestCovarianceMatrix(t *testing.T) {
 			t.Errorf("%d: expected data %#q, found %#q", i, test.x, c.Data)
 		}
 	}
-	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), mat64.NewDense(1, 1, nil)) }) {
+	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), mat64.Vec([]float64{})) }) {
 		t.Errorf("CovarianceMatrix did not panic with weight size mismatch")
 	}
 	if !Panics(func() { CovarianceMatrix(mat64.NewDense(1, 1, nil), mat64.NewDense(5, 2, nil), nil) }) {

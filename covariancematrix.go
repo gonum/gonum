@@ -18,7 +18,7 @@ import (
 // data matrix x.  cov should be a square matrix with the same number of
 // columns as the input data matrix x, or if it is nil then a new Dense
 // matrix will be constructed.
-func CovarianceMatrix(cov *mat64.Dense, x, wts mat64.Matrix) *mat64.Dense {
+func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts mat64.Vec) *mat64.Dense {
 
 	// matrix version of the two pass algorithm.  This doesn't use
 	// the correction found in the Covariance and Variance functions.
@@ -50,9 +50,8 @@ func CovarianceMatrix(cov *mat64.Dense, x, wts mat64.Matrix) *mat64.Dense {
 	// normalization factor, typical n-1
 	var N float64
 	if wts != nil {
-		// should this be col major or row major?
-		if wr, wc := wts.Dims(); wr != r || wc != 1 {
-			panic("matrix length mismatch")
+		if wr, _ := wts.Dims(); wr != r {
+			panic("weight vector length mismatch")
 		}
 
 		for i := 0; i < r; i++ {

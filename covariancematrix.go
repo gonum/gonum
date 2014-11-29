@@ -54,9 +54,8 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts mat64.Vec) *mat64.De
 			panic("weight vector length mismatch")
 		}
 
-		for i := 0; i < r; i++ {
+		for i, w := range wts {
 			rv := xc.RowView(i)
-			w := wts.At(i, 0)
 			N += w
 			for j := 0; j < c; j++ {
 				rv[j] *= w

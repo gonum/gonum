@@ -76,8 +76,6 @@ func DgbmvTest(t *testing.T, blasser Dgbmver) {
 		extra := 3
 		aFlat := flattenBanded(test.a, test.kU, test.kL)
 		incTest := func(incX, incY, extra int) {
-			incX = -2
-			incY = 3
 			xnew := makeIncremented(test.x, incX, extra)
 			ynew := makeIncremented(test.y, incY, extra)
 			ans := makeIncremented(test.ans, incY, extra)

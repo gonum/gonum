@@ -24,7 +24,7 @@ func (c ConstantStepSize) StepSize(l Location, dir []float64) float64 {
 	return c.Size
 }
 
-// QuadraticInterpolateStepSize estimates the initial line search step size as
+// QuadraticStepSize estimates the initial line search step size as
 // the minimum of a quadratic that interpolates f(x_{k-1}), f(x_k) and grad f_k
 // \dot p_k. This is useful for line search methods that do not produce
 // well-scaled descent directions, such as gradient descent or conjugate
@@ -34,7 +34,7 @@ func (c ConstantStepSize) StepSize(l Location, dir []float64) float64 {
 //
 // See also Nocedal, Wright (2006), Numerical Optimization (2nd ed.), sec.
 // 3.5, page 59.
-type QuadraticInterpolateStepSize struct {
+type QuadraticStepSize struct {
 	// If the relative change in the objective function is larger than
 	// InterpolationCutOff, the step size is estimated by quadratic
 	// interpolation, otherwise it is set to one.
@@ -46,7 +46,7 @@ type QuadraticInterpolateStepSize struct {
 	fPrev float64
 }
 
-func (q *QuadraticInterpolateStepSize) Init(l Location, dir []float64) (stepsize float64) {
+func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepsize float64) {
 	if q.InterpolationCutOff == 0 {
 		q.InterpolationCutOff = 1e-10
 	}
@@ -61,7 +61,7 @@ func (q *QuadraticInterpolateStepSize) Init(l Location, dir []float64) (stepsize
 	return stepsize
 }
 
-func (q *QuadraticInterpolateStepSize) StepSize(l Location, dir []float64) (stepsize float64) {
+func (q *QuadraticStepSize) StepSize(l Location, dir []float64) (stepsize float64) {
 	stepsize = 1
 	t := 1.0
 	if l.F != 0 {

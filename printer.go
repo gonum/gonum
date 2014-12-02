@@ -40,7 +40,7 @@ var (
 		"Iter",
 		"FunEval",
 		"Obj",
-		"GradNormInf",
+		"GradNorm",
 	}
 )
 
@@ -71,7 +71,7 @@ func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, st
 	valueStrings[1] = strconv.Itoa(stats.FunctionEvals + stats.FunctionGradientEvals)
 	valueStrings[2] = fmt.Sprintf("%g", l.F)
 	if p.printGrad {
-		valueStrings[3] = fmt.Sprintf("%g", stats.GradientNormInf)
+		valueStrings[3] = fmt.Sprintf("%g", stats.GradientNorm)
 	}
 
 	var maxLengths [nPrinterOut]int

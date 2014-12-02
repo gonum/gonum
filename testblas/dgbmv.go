@@ -73,19 +73,8 @@ func DgbmvTest(t *testing.T, blasser Dgbmver) {
 			ans: []float64{43, 77, 306, 241, 104, 348},
 		},
 	} {
-		aFlat := flattenBanded(test.a, test.kU, test.kL)
-		yCopy := sliceCopy(test.y)
-
-		// First test with incX == 1 and incY == 1
-		incX := 1
-		incY := 1
-		blasser.Dgbmv(test.tA, test.m, test.n, test.kL, test.kU, test.alpha, aFlat, test.lda, test.x, incX, test.beta, yCopy, incY)
-		if !dSliceTolEqual(test.ans, yCopy) {
-			t.Errorf("Case %v inc1: Want %v, got %v", i, test.ans, yCopy)
-		}
-
 		extra := 3
-
+		aFlat := flattenBanded(test.a, test.kU, test.kL)
 		incTest := func(incX, incY, extra int) {
 			incX = -2
 			incY = 3
@@ -97,6 +86,7 @@ func DgbmvTest(t *testing.T, blasser Dgbmver) {
 				t.Errorf("Case %v: Want %v, got %v", i, ans, ynew)
 			}
 		}
+		incTest(1, 1, extra)
 		incTest(1, 3, extra)
 		incTest(1, -3, extra)
 		incTest(2, 3, extra)

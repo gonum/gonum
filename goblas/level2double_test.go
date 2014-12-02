@@ -17,3 +17,7 @@ func TestDger(t *testing.T) {
 func TestDtxmv(t *testing.T) {
 	testblas.DtxmvTest(t, blasser)
 }
+
+func TestDtbmv(t *testing.T) {
+	testblas.DtbmvTest(t, blasser)
+}

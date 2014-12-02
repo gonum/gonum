@@ -28,9 +28,9 @@ func (c ConstantStepSize) StepSize(l Location, dir []float64) float64 {
 // the minimum of a quadratic that interpolates f(x_{k-1}), f(x_k) and grad f_k
 // \dot p_k. This is useful for line search methods that do not produce
 // well-scaled descent directions, such as gradient descent or conjugate
-// gradient methods. The step size will lie in the interval (0, 1], no minimum
-// step size is imposed as the line search along the descent direction should
-// take care of that.
+// gradient methods. The step size will lie in the interval (0, 1] (except at
+// the first iteration), no minimum step size is imposed as the line search
+// along the descent direction should take care of that.
 //
 // See also Nocedal, Wright (2006), Numerical Optimization (2nd ed.), sec.
 // 3.5, page 59.
@@ -39,8 +39,8 @@ type QuadraticInterpolateStepSize struct {
 	// InterpolationCutOff, the step size is estimated by quadratic
 	// interpolation, otherwise it is set to one.
 	InterpolationCutOff float64
-	// If x0 is not at the origin, the step size at the first iteration is
-	// estimated as InitialStepFactor * |x0|_∞ / |g|_∞.
+	// The step size at the first iteration is estimated as
+	// InitialStepFactor / |g|_∞.
 	InitialStepFactor float64
 
 	fPrev float64
@@ -51,25 +51,11 @@ func (q *QuadraticInterpolateStepSize) Init(l Location, dir []float64) (stepsize
 		q.InterpolationCutOff = 1e-10
 	}
 	if q.InitialStepFactor == 0 {
-		q.InitialStepFactor = 0.01
+		q.InitialStepFactor = 1
 	}
 
-	// In case we lack any other information, take a unit step
-	stepsize = 1
-	xNorm := floats.Norm(l.X, math.Inf(1))
-	if xNorm != 0 {
-		gNorm := floats.Norm(l.Gradient, math.Inf(1))
-		// If the initial location x0 is not at the origin, use the |x0|_∞ and
-		// |g|_∞ to estimate the initial step size. Divide by |g|_∞ to take
-		// shorter step if the magnitude of the gradient is large, multiply by
-		// |x0|_∞ to avoid rounding errors in the computation of x0 + stepsize*dir0.
-		stepsize = q.InitialStepFactor * xNorm / gNorm
-	} else if l.F != 0 {
-		gNorm := floats.Norm(l.Gradient, 2)
-		// If x0 is at the origin and F(x0) != 0, use |F(x0)| and |g|_2 to
-		// estimate the initial step size.
-		stepsize = 2 * math.Abs(l.F) / math.Pow(gNorm, 2)
-	}
+	gNorm := floats.Norm(l.Gradient, math.Inf(1))
+	stepsize = q.InitialStepFactor / gNorm
 
 	q.fPrev = l.F
 	return stepsize

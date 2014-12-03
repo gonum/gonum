@@ -47,13 +47,13 @@ func TestCovarianceMatrix(t *testing.T) {
 				1, -2,
 				2, 4,
 			}),
-			weights: mat64.Vec([]float64{
+			weights: []float64{
 				1.5,
 				.5,
 				1.5,
 				.5,
 				1,
-			}),
+			},
 			r: 2,
 			c: 2,
 			x: []float64{

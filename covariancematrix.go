@@ -14,8 +14,8 @@ import (
 //
 // The matrix returned will be symmetric, square, and positive-semidefinite.
 //
-// The weights matrix wts should have the same number of rows as the input
-// data matrix x.  cov should be a square matrix with the same number of
+// The weights wts should have the same number of elements as the rows in
+// input data matrix x.  cov should be a square matrix with the same number of
 // columns as the input data matrix x, or if it is nil then a new Dense
 // matrix will be constructed.
 func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.Dense {

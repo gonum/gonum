@@ -60,6 +60,27 @@ func TestCovarianceMatrix(t *testing.T) {
 				2.75, 4.5,
 				4.5, 11,
 			},
+		}, {
+			mat: mat64.NewDense(5, 2, []float64{
+				-2, -4,
+				-1, 2,
+				0, 0,
+				1, -2,
+				2, 4,
+			}),
+			weights: mat64.Vec([]float64{
+				1.5,
+				.5,
+				1.5,
+				.5,
+				1,
+			}),
+			r: 2,
+			c: 2,
+			x: []float64{
+				2.75, 4.5,
+				4.5, 11,
+			},
 		},
 	} {
 		c := CovarianceMatrix(nil, test.mat, test.weights).RawMatrix()

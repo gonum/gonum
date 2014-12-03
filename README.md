@@ -33,10 +33,10 @@ adjust the `CGO_LDFLAGS` variable:
   CGO_LDFLAGS="-lmkl_rt" go install
 ```
 
-On OS X you can also use the libraries provided by the system:
+On OS X the easiest solution is to use the libraries provided by the system:
 ```sh
   cd $GOPATH/src/github.com/gonum/blas/cblas
-  CGO_LDFLAGS="-DYA_BLAS -DYA_LAPACK -DYA_BLASMULT -framework vecLib" go install
+  CGO_LDFLAGS="-framework Accelerate" go install
 ```
 
 ## Packages
@@ -53,11 +53,11 @@ Go implementation of the BLAS API (incomplete, implements most of the float64 AP
 
 Binding to a C implementation of the cblas interface (e.g. ATLAS, OpenBLAS, Intel MKL)
 
-The recommended (free) option for good performance on both linux and darwin is OpenBLAS.
+The recommended (free) option for good performance on both Linux and Darwin is OpenBLAS.
 
 ### blas/dbw
 
-Wrapper for an implementation of the double precision real (i.e. `float64`) part
+Wrapper for an implementation of the double precision real (i.e., `float64`) part
 of the blas API
 
 You have to register an implementation before you can use the BLAS functions:
@@ -84,7 +84,7 @@ func main() {
 
 ### blas/zbw
 
-Wrapper for an implementation of the double precision complex (i.e. `complex128`)
+Wrapper for an implementation of the double precision complex (i.e., `complex128`)
 part of the blas API
 
 ## Issues

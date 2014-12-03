@@ -33,7 +33,6 @@ type order int
 
 const (
 	rowMajor order = 101 + iota
-	colMajor
 )
 
 func max(a, b int) int {

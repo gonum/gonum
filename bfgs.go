@@ -5,8 +5,6 @@
 package optimize
 
 import (
-	"math"
-
 	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
 )
@@ -84,12 +82,7 @@ func (b *BFGS) InitDirection(l Location, dir []float64) (stepSize float64) {
 
 	b.first = true
 
-	// Decrease the initial step size by a factor of sqrt(||grad||). This should help
-	// prevent bad initial line searches due to excessively large or small initial
-	// gradients. The hessian will be updated after the first completed line search,
-	// so this decision should only have a big effect on the very first line search.
-	floats.Scale(1/math.Sqrt(floats.Norm(dir, 2)), dir)
-	return 1
+	return 1 / floats.Norm(dir, 2)
 }
 
 func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64) {

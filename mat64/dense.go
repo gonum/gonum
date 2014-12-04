@@ -177,11 +177,12 @@ func (m *Dense) rowView(r int) []float64 {
 	return m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
 }
 
-func (m *Dense) View(a Matrix, i, j, r, c int) {
-	*m = *a.(*Dense)
+func (a *Dense) View(i, j, r, c int) Matrix {
+	m := *a
 	m.mat.Data = m.mat.Data[i*m.mat.Stride+j : (i+r-1)*m.mat.Stride+(j+c)]
 	m.mat.Rows = r
 	m.mat.Cols = c
+	return &m
 }
 
 func (m *Dense) Reset() {
@@ -416,8 +417,7 @@ func (m *Dense) Stack(a, b Matrix) {
 	}
 
 	m.Copy(a)
-	var w Dense
-	w.View(m, ar, 0, br, bc)
+	w := m.View(ar, 0, br, bc).(*Dense)
 	w.Copy(b)
 }
 
@@ -440,7 +440,6 @@ func (m *Dense) Augment(a, b Matrix) {
 	}
 
 	m.Copy(a)
-	var w Dense
-	w.View(m, 0, ac, br, bc)
+	w := m.View(0, ac, br, bc).(*Dense)
 	w.Copy(b)
 }

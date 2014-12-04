@@ -181,8 +181,5 @@ func (f QRFactor) Solve(b *Dense) (x *Dense) {
 		}
 	}
 
-	x = b
-	x.View(b, 0, 0, n, bn)
-
-	return x
+	return b.View(0, 0, n, bn).(*Dense)
 }

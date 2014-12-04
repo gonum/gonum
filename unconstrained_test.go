@@ -126,7 +126,7 @@ func testMinimize(t *testing.T, method Method) {
 
 			Settings: &Settings{
 				FunctionAbsTol: math.Inf(-1),
-				GradientAbsTol: 1e-13,
+				GradientAbsTol: 1e-12,
 			},
 		},
 		{
@@ -138,7 +138,7 @@ func testMinimize(t *testing.T, method Method) {
 
 			Settings: &Settings{
 				FunctionAbsTol: math.Inf(-1),
-				GradientAbsTol: 1e-13,
+				GradientAbsTol: 1e-12,
 			},
 		},
 		{

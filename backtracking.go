@@ -16,7 +16,7 @@ const (
 // been met, the step size is decreased by a factor of Decrease.
 //
 // The Armijo conditions only require the gradient at the initial condition
-// (not successive step locatinons), and so Backtracking may be a good linesearch
+// (not successive step locations), and so Backtracking may be a good linesearch
 // method for functions with expensive gradients. Backtracking is not appropriate
 // for optimizers that require the Wolfe conditions to be met, such as BFGS.
 //
@@ -33,18 +33,21 @@ type Backtracking struct {
 }
 
 func (b *Backtracking) Init(initLoc LinesearchLocation, initStepSize float64, f *FunctionInfo) EvaluationType {
+	if initStepSize <= 0 {
+		panic("backtracking: bad step size")
+	}
+	if initLoc.Derivative >= 0 {
+		panic("Backtracking: init G non-negative")
+	}
+
 	if b.Decrease == 0 {
 		b.Decrease = defaultBacktrackingDecrease
 	}
 	if b.FunConst == 0 {
 		b.FunConst = defaultBacktrackingFunConst
 	}
-	if initStepSize < 0 {
-		panic("backtracking: bad step size")
-	}
-
 	if b.Decrease <= 0 || b.Decrease >= 1 {
-		panic("backtracking: decrease must be between 0 and 1")
+		panic("backtracking: Decrease must be between 0 and 1")
 	}
 	if b.FunConst <= 0 || b.FunConst >= 1 {
 		panic("backtracking: FunConst must be between 0 and 1")

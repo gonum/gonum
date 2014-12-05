@@ -38,7 +38,7 @@ func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (Evalu
 	projGrad := math.NaN()
 	if loc.Gradient != nil {
 		projGrad = floats.Dot(loc.Gradient, l.direction)
-		if projGrad > 0 {
+		if projGrad >= 0 {
 			return NoEvaluation, NoIteration, ErrNonNegativeStepDirection
 		}
 	}
@@ -100,7 +100,7 @@ func (l *Linesearch) initNextLinesearch(loc Location, xNext []float64) (Evaluati
 	if loc.Gradient != nil {
 		projGrad = floats.Dot(loc.Gradient, l.direction)
 	}
-	if projGrad > 0 {
+	if projGrad >= 0 {
 		return NoEvaluation, NoIteration, ErrNonNegativeStepDirection
 	}
 	initLinesearchLocation := LinesearchLocation{

@@ -31,14 +31,17 @@ type Bisection struct {
 }
 
 func (b *Bisection) Init(initLoc LinesearchLocation, initStepSize float64, f *FunctionInfo) EvaluationType {
-	if initLoc.Derivative > 0 {
-		panic("bisection: init G greater than 0")
+	if initLoc.Derivative >= 0 {
+		panic("bisection: init G non-negative")
+	}
+	if initStepSize <= 0 {
+		panic("bisection: bad step size")
 	}
 
 	if b.GradConst == 0 {
 		b.GradConst = 0.9
 	}
-	if b.GradConst <= 0 || b.GradConst > 1 {
+	if b.GradConst <= 0 || b.GradConst >= 1 {
 		panic("bisection: GradConst not between 0 and 1")
 	}
 

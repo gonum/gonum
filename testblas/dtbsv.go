@@ -1,7 +1,6 @@
 package testblas
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/gonum/blas"
@@ -210,55 +209,48 @@ func DtbsvTest(t *testing.T, blasser Dtbsver) {
 		}
 	}
 
-	// TODO: Uncomment when Dtrsv is fixed
-	// Compare with dense for larger matrices
-	for _, ul := range [...]blas.Uplo{blas.Upper, blas.Lower} {
-		for _, tA := range [...]blas.Transpose{blas.NoTrans, blas.Trans} {
-			for _, n := range [...]int{7, 8, 11} {
-				for _, d := range [...]blas.Diag{blas.NonUnit, blas.Unit} {
-					for _, k := range [...]int{0, 1, 3} {
-						for _, incX := range [...]int{1, 3} {
-							a := make([][]float64, n)
-							for i := range a {
-								a[i] = make([]float64, n)
-								for j := range a[i] {
-									a[i][j] = rand.Float64()
+	/*
+		// TODO: Uncomment when Dtrsv is fixed
+		// Compare with dense for larger matrices
+		for _, ul := range [...]blas.Uplo{blas.Upper, blas.Lower} {
+			for _, tA := range [...]blas.Transpose{blas.NoTrans, blas.Trans} {
+				for _, n := range [...]int{7, 8, 11} {
+					for _, d := range [...]blas.Diag{blas.NonUnit, blas.Unit} {
+						for _, k := range [...]int{0, 1, 3} {
+							for _, incX := range [...]int{1, 3} {
+								a := make([][]float64, n)
+								for i := range a {
+									a[i] = make([]float64, n)
+									for j := range a[i] {
+										a[i][j] = rand.Float64()
+									}
 								}
-							}
-							x := make([]float64, n)
-							for i := range x {
-								x[i] = rand.Float64()
-							}
-							extra := 3
-							xinc := makeIncremented(x, incX, extra)
-							bandX := sliceCopy(xinc)
-							var aFlatBand []float64
-							if ul == blas.Upper {
-								aFlatBand = flattenBanded(a, k, 0)
-							} else {
-								aFlatBand = flattenBanded(a, 0, k)
-							}
-							blasser.Dtbsv(ul, tA, d, n, k, aFlatBand, k+1, bandX, incX)
+								x := make([]float64, n)
+								for i := range x {
+									x[i] = rand.Float64()
+								}
+								extra := 3
+								xinc := makeIncremented(x, incX, extra)
+								bandX := sliceCopy(xinc)
+								var aFlatBand []float64
+								if ul == blas.Upper {
+									aFlatBand = flattenBanded(a, k, 0)
+								} else {
+									aFlatBand = flattenBanded(a, 0, k)
+								}
+								blasser.Dtbsv(ul, tA, d, n, k, aFlatBand, k+1, bandX, incX)
 
-							aFlatDense := flatten(a)
-							denseX := sliceCopy(xinc)
-							blasser.Dtrsv(ul, tA, d, n, aFlatDense, n, denseX, incX)
-							if !dSliceTolEqual(denseX, bandX) {
-								t.Errorf("Case %v: dense banded mismatch")
+								aFlatDense := flatten(a)
+								denseX := sliceCopy(xinc)
+								blasser.Dtrsv(ul, tA, d, n, aFlatDense, n, denseX, incX)
+								if !dSliceTolEqual(denseX, bandX) {
+									t.Errorf("Case %v: dense banded mismatch")
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-	}
+	*/
 }
-
-/*
-	xCopy = sliceCopy(test.x)
-	aFlatDense := flatten(test.a)
-	blasser.Dtrsv(test.ul, test.tA, test.d, test.n, aFlatDense, len(test.a[0]), xCopy, test.incX)
-	if !dSliceTolEqual(test.ans, xCopy) {
-		t.Errorf("Case %v: mismatch with Dense Want %v, got %v", i, test.ans, xCopy)
-	}
-*/

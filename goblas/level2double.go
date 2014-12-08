@@ -20,6 +20,10 @@ const (
 	badLdaRow    string = "lda must be greater than max(1,n) for row major"
 	badLdaCol    string = "lda must be greater than max(1,m) for col major"
 	badLda       string = "lda must be greater than max(1,n)"
+
+	badLdaGenBand string = "goblas: lda must be greater than 1 + kL + kU for general banded"
+	kLLT0         string = "goblas: kL < 0"
+	kULT0         string = "goblas: kU < 0"
 )
 
 func max(a, b int) int {
@@ -183,16 +187,11 @@ func (Blas) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, in
 
 }
 
+// Dgbmv performs y = alpha*A*x + beta*y where a is an mxn band matrix with
+// kl subdiagonals and ku super-diagonals. m and n refer to the size of the full
+// dense matrix, not the actual number of rows and columns in the contracted banded
+// matrix.
 func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
-	// Transform for row major
-	m, n = n, m
-	kU, kL = kL, kU
-	if tA == blas.NoTrans {
-		tA = blas.Trans
-	} else {
-		tA = blas.NoTrans
-	}
-
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic(badTranspose)
 	}
@@ -202,10 +201,15 @@ func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []floa
 	if n < 0 {
 		panic(nLT0)
 	}
-	if lda < max(1, n) {
-		panic(badLdaRow)
+	if kL < 0 {
+		panic(kLLT0)
 	}
-
+	if kL < 0 {
+		panic(kULT0)
+	}
+	if lda < kL+kU+1 {
+		panic(badLdaGenBand)
+	}
 	if incX == 0 {
 		panic(zeroInc)
 	}
@@ -248,64 +252,72 @@ func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []floa
 		return
 	}
 
+	// i and j are indices of the compacted banded matrix.
+	// off is the offset into the dense matrix (off + j = densej)
+	ld := min(m, n)
+	nCol := kU + 1 + kL
 	if tA == blas.NoTrans {
-		jx := kx
-		if incY == 1 {
-			for j := 0; j < n; j++ {
-				if x[jx] != 0 {
-					temp := alpha * x[jx]
-					k := kU - j
-					for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
-						y[i] += temp * a[k+i+j*lda]
-					}
-				}
-				jx += incX
-			}
-		} else {
-			for j := 0; j < n; j++ {
-				if x[jx] != 0 {
-					temp := alpha * x[jx]
-					iy := ky
-					k := kU - j
-					for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
-						y[iy] += temp * a[k+i+j*lda]
-						iy += incY
-					}
-				}
-				jx += incX
-				if j >= kU {
-					ky += incY
-				}
-			}
-		}
-	} else {
-		jy := ky
+		iy := ky
 		if incX == 1 {
-			for j := 0; j < n; j++ {
-				temp := 0.0
-				k := kU - j
-				for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
-					temp += a[k+i+j*lda] * x[i]
+			for i := 0; i < m; i++ {
+				l := max(0, kL-i)
+				u := min(nCol, ld+kL-i)
+				off := max(0, i-kL)
+				atmp := a[i*lda+l : i*lda+u]
+				xtmp := x[off : off+u-l]
+				var sum float64
+				for j, v := range atmp {
+					sum += xtmp[j] * v
 				}
-				y[jy] += alpha * temp
-				jy += incY
+				y[iy] += sum * alpha
+				iy += incY
 			}
-		} else {
-			for j := 0; j < n; j++ {
-				temp := 0.0
-				ix := kx
-				k := kU - j
-				for i := max(0, j-kU); i < min(m, j+kL+1); i++ {
-					temp += a[k+i+j*lda] * x[ix]
-					ix += incX
-				}
-				y[jy] += alpha * temp
+			return
+		}
+		for i := 0; i < m; i++ {
+			l := max(0, kL-i)
+			u := min(nCol, ld+kL-i)
+			off := max(0, i-kL)
+			atmp := a[i*lda+l : i*lda+u]
+			jx := kx
+			var sum float64
+			for _, v := range atmp {
+				sum += x[off*incX+jx] * v
+				jx += incX
+			}
+			y[iy] += sum * alpha
+			iy += incY
+		}
+		return
+	}
+	if incX == 1 {
+		for i := 0; i < m; i++ {
+			l := max(0, kL-i)
+			u := min(nCol, ld+kL-i)
+			off := max(0, i-kL)
+			atmp := a[i*lda+l : i*lda+u]
+			tmp := alpha * x[i]
+			jy := ky
+			for _, v := range atmp {
+				y[jy+off*incY] += tmp * v
 				jy += incY
-				if j > kU {
-					kx += incX
-				}
 			}
 		}
+		return
+	}
+	ix := kx
+	for i := 0; i < m; i++ {
+		l := max(0, kL-i)
+		u := min(nCol, ld+kL-i)
+		off := max(0, i-kL)
+		atmp := a[i*lda+l : i*lda+u]
+		tmp := alpha * x[ix]
+		jy := ky
+		for _, v := range atmp {
+			y[jy+off*incY] += tmp * v
+			jy += incY
+		}
+		ix += incX
 	}
 }
 

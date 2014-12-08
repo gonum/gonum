@@ -1012,7 +1012,7 @@ func (Blas) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []fl
 		kx = 0
 	}
 	nonUnit := d == blas.NonUnit
-	// Form x = A^-1 x
+	// Form x = A^-1 x.
 	// Several cases below use subslices for speed improvement. The incX != 1
 	// cases usually do not because incX may be negative.
 	if tA == blas.NoTrans {
@@ -1101,7 +1101,7 @@ func (Blas) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []fl
 		}
 		return
 	}
-	// tA == blas.Transpose
+	// Cases where a is transposed.
 	if ul == blas.Upper {
 		if incX == 1 {
 			for i := 0; i < n; i++ {

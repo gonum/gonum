@@ -19,22 +19,22 @@ var _ blas.Float64Level2 = Blasser
 	the diagonals
 	So, for the matrix
 	[
-	  1  2  3  0  0  0
-	  4  5  6  7  0  0
-	  0  8  9  10 11 0
+	  1  2   3  0  0  0
+	  4  5   6  7  0  0
+	  0  8   9 10 11  0
 	  0  0  12 13 14 15
-	  0  0  0  16 17 18
-	  0  0  0  0  19 20
+	  0  0   0 16 17 18
+	  0  0   0  0 19 20
 	]
 
 	The layout is
 	[
-	  *  1  2  3
-	  4  5  6  7
-	  8  9  10 11
+	   *  1  2  3
+	   4  5  6  7
+	   8  9 10 11
 	  12 13 14 15
-	  16 17 18 *
-	  19 20 *  *
+	  16 17 18  *
+	  19 20  *  *
 	]
 	where entries marked * are never accessed
 */

@@ -145,7 +145,6 @@ func flattenBanded(a [][]float64, ku, kl int) []float64 {
 	if ku < 0 || kl < 0 {
 		panic("testblas: negative band length")
 	}
-	// banded size is minimum of m and n because otherwise just have a bunch of zeros
 	nRows := m
 	nCols := (ku + kl + 1)
 	aflat := make([]float64, nRows*nCols)

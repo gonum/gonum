@@ -7,7 +7,37 @@ import "github.com/gonum/blas"
 
 var _ blas.Float64Level2 = Blasser
 
-// TODO: Need to think about loops when doing row-major. Change after tests?
+/*
+	Accessing guidelines:
+	Dense matrices are laid out in row-major order. [a11 a12 ... a1n a21 a22 ... amn]
+	dense(i, j) = dense[i*ld + j]
+
+	Banded matrices are laid out in a compact format as described in
+	http://www.crest.iu.edu/research/mtl/reference/html/banded.html
+	(the row-major version)
+	In short, all of the rows are scrunched removing the zeros and aligning
+	the diagonals
+	So, for the matrix
+	[
+		1  2  3  0  0  0
+		4  5  6  7  0  0
+		0  8  9  10 11 0
+		0  0  12 13 14 15
+		0  0  0  16 17 18
+		0  0  0  0  19 20
+	]
+
+	The layout is
+	[
+		* 1 2 3
+		4 5 6 7
+		8 9 10 11
+		12 13 14 15
+		16 17 18 *
+		19 20 * *
+	]
+	where entries marked * are never accessed
+*/
 
 const (
 	mLT0         string = "referenceblas: m < 0"
@@ -21,6 +51,7 @@ const (
 	badLdaCol    string = "lda must be greater than max(1,m) for col major"
 	badLda       string = "lda must be greater than max(1,n)"
 
+	badLdaTriBand string = "goblas: lda must be greater than k + 1 for general banded"
 	badLdaGenBand string = "goblas: lda must be greater than 1 + kL + kU for general banded"
 	kLLT0         string = "goblas: kL < 0"
 	kULT0         string = "goblas: kU < 0"
@@ -949,10 +980,209 @@ func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []f
 	}
 }
 
-//TODO: Not yet implemented Level 2 routines.
+// Dtbsv solves A * x = b where A is a triangular banded matrix with k diagonals
+// above the main diagonal. A has compact banded storage.
+// The result in stored in-place into x.
 func (Blas) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
-	panic("referenceblas: function not implemented")
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if d != blas.NonUnit && d != blas.Unit {
+		panic(badDiag)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < k+1 {
+		panic(badLdaTriBand)
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if n == 0 {
+		return
+	}
+	var kx int
+	if incX < 0 {
+		kx = -(n - 1) * incX
+	} else {
+		kx = 0
+	}
+	nonUnit := d == blas.NonUnit
+	// Form x = A^-1 x
+	// Several cases below use subslices for speed improvement. The incX != 1
+	// cases usually do not because incX may be negative.
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			if incX == 1 {
+				for i := n - 1; i >= 0; i-- {
+					bands := k
+					if i+bands >= n {
+						bands = n - i - 1
+					}
+					atmp := a[i*lda+1:]
+					xtmp := x[i+1 : i+bands+1]
+					var sum float64
+					for j, v := range xtmp {
+						sum += v * atmp[j]
+					}
+					x[i] -= sum
+					if nonUnit {
+						x[i] /= a[i*lda]
+					}
+				}
+				return
+			}
+			ix := kx + (n-1)*incX
+			for i := n - 1; i >= 0; i-- {
+				max := k + 1
+				if i+max > n {
+					max = n - i
+				}
+				atmp := a[i*lda:]
+				var (
+					jx  int
+					sum float64
+				)
+				for j := 1; j < max; j++ {
+					jx += incX
+					sum += x[ix+jx] * atmp[j]
+				}
+				x[ix] -= sum
+				if nonUnit {
+					x[ix] /= atmp[0]
+				}
+				ix -= incX
+			}
+			return
+		}
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				bands := k
+				if i-k < 0 {
+					bands = i
+				}
+				atmp := a[i*lda+k-bands:]
+				xtmp := x[i-bands : i]
+				var sum float64
+				for j, v := range xtmp {
+					sum += v * atmp[j]
+				}
+				x[i] -= sum
+				if nonUnit {
+					x[i] /= atmp[bands]
+				}
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			bands := k
+			if i-k < 0 {
+				bands = i
+			}
+			atmp := a[i*lda+k-bands:]
+			var (
+				sum float64
+				jx  int
+			)
+			for j := 0; j < bands; j++ {
+				sum += x[ix-bands*incX+jx] * atmp[j]
+				jx += incX
+			}
+			x[ix] -= sum
+			if nonUnit {
+				x[ix] /= atmp[bands]
+			}
+			ix += incX
+		}
+		return
+	}
+	// tA == blas.Transpose
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				bands := k
+				if i-k < 0 {
+					bands = i
+				}
+				var sum float64
+				for j := 0; j < bands; j++ {
+					sum += x[i-bands+j] * a[(i-bands+j)*lda+bands-j]
+				}
+				x[i] -= sum
+				if nonUnit {
+					x[i] /= a[i*lda]
+				}
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			bands := k
+			if i-k < 0 {
+				bands = i
+			}
+			var (
+				sum float64
+				jx  int
+			)
+			for j := 0; j < bands; j++ {
+				sum += x[ix-bands*incX+jx] * a[(i-bands+j)*lda+bands-j]
+				jx += incX
+			}
+			x[ix] -= sum
+			if nonUnit {
+				x[ix] /= a[i*lda]
+			}
+			ix += incX
+		}
+		return
+	}
+	if incX == 1 {
+		for i := n - 1; i >= 0; i-- {
+			bands := k
+			if i+bands >= n {
+				bands = n - i - 1
+			}
+			var sum float64
+			xtmp := x[i+1 : i+1+bands]
+			for j, v := range xtmp {
+				sum += v * a[(i+j+1)*lda+k-j-1]
+			}
+			x[i] -= sum
+			if nonUnit {
+				x[i] /= a[i*lda+k]
+			}
+		}
+		return
+	}
+	ix := kx + (n-1)*incX
+	for i := n - 1; i >= 0; i-- {
+		bands := k
+		if i+bands >= n {
+			bands = n - i - 1
+		}
+		var (
+			sum float64
+			jx  int
+		)
+		for j := 0; j < bands; j++ {
+			sum += x[ix+jx+incX] * a[(i+j+1)*lda+k-j-1]
+			jx += incX
+		}
+		x[ix] -= sum
+		if nonUnit {
+			x[ix] /= a[i*lda+k]
+		}
+		ix -= incX
+	}
 }
+
+//TODO: Not yet implemented Level 2 routines.
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
 }

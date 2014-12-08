@@ -147,9 +147,6 @@ func flattenBanded(a [][]float64, ku, kl int) []float64 {
 	}
 	// banded size is minimum of m and n because otherwise just have a bunch of zeros
 	nRows := m
-	if m < n {
-		nRows = n
-	}
 	nCols := (ku + kl + 1)
 	aflat := make([]float64, nRows*nCols)
 	for i := range aflat {

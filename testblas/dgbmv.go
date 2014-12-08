@@ -10,7 +10,6 @@ type Dgbmver interface {
 	Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)
 }
 
-// TODO: Redo this test with row major implementation
 func DgbmvTest(t *testing.T, blasser Dgbmver) {
 	for i, test := range []struct {
 		tA     blas.Transpose

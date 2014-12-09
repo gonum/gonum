@@ -1217,8 +1217,6 @@ func (b Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int,
 	} else {
 		ky = -(lenY - 1) * incY
 	}
-	_ = kx
-	_ = ky
 
 	// First form y := beta * y
 	if incY > 0 {

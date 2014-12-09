@@ -1,63 +1,94 @@
 package testblas
 
-import "github.com/gonum/blas"
+import (
+	"testing"
+
+	"github.com/gonum/blas"
+)
 
 type Dgbmver interface {
 	Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int)
 }
 
-// TODO: Redo this test with row major implementation
-/*
 func DgbmvTest(t *testing.T, blasser Dgbmver) {
-	A := []float64{0, 0, 3, 6, 0, 1, 4, 7, 9, 2, 5, 8}
-	kL := 1
-	kU := 2
-	m := 4
-	n := 3
-
-	x1 := []float64{2, 3, 4, 5}
-	incX1 := 1
-	x2 := []float64{2, 1, 3, 1, 4, 1, 5}
-	incX2 := 2
-
-	solNoTrans := []float64{45, 32, 41, 32}
-
-	in := make([]float64, len(x1))
-	out := make([]float64, m*incX1)
-	copy(in, x1)
-	blasser.Dgbmv(blas.NoTrans, m, n, kL, kU, 1, A, m, in, incX1, 0, out, incX1)
-
-	if !dStridedSliceTolEqual(m, out, incX1, solNoTrans, 1) {
-		t.Error("Wrong Dgbmv result for: ColMajor, NoTrans, IncX==1")
-	}
-
-	in = make([]float64, len(x2))
-	out = make([]float64, m*incX2)
-	copy(in, x2)
-	blasser.Dgbmv(blas.NoTrans, m, n, kL, kU, 1, A, m, in, incX2, 0, out, incX2)
-
-	if !dStridedSliceTolEqual(m, out, incX2, solNoTrans, 1) {
-		t.Error("Wrong Dgbmv result for: ColMajor, NoTrans, IncX==2")
-	}
-
-	solTrans := []float64{24, 42, 84}
-
-	in = make([]float64, len(x1))
-	out = make([]float64, n*incX1)
-	copy(in, x1)
-	blasser.Dgbmv(blas.Trans, m, n, kL, kU, 1, A, m, in, incX1, 0, out, incX1)
-
-	if !dStridedSliceTolEqual(n, out, incX1, solTrans, 1) {
-		t.Error("Wrong Dgbmv result for: ColMajor, Trans, IncX==1")
-	}
-
-	in = make([]float64, len(x2))
-	out = make([]float64, n*incX2)
-	copy(in, x2)
-	blasser.Dgbmv(blas.Trans, m, n, kL, kU, 1, A, m, in, incX2, 0, out, incX2)
-
-	if !dStridedSliceTolEqual(n, out, incX2, solTrans, 1) {
-		t.Error("Wrong Dgbmv result for: ColMajor, Trans, IncX==2")
+	for i, test := range []struct {
+		tA     blas.Transpose
+		m, n   int
+		kL, kU int
+		alpha  float64
+		a      [][]float64
+		lda    int
+		x      []float64
+		beta   float64
+		y      []float64
+		ans    []float64
+	}{
+		{
+			tA:    blas.NoTrans,
+			m:     9,
+			n:     6,
+			lda:   4,
+			kL:    2,
+			kU:    1,
+			alpha: 3.0,
+			beta:  2.0,
+			a: [][]float64{
+				{5, 3, 0, 0, 0, 0},
+				{-1, 2, 9, 0, 0, 0},
+				{4, 8, 3, 6, 0, 0},
+				{0, -1, 8, 2, 1, 0},
+				{0, 0, 9, 9, 9, 5},
+				{0, 0, 0, 2, -3, 2},
+				{0, 0, 0, 0, 1, 5},
+				{0, 0, 0, 0, 0, 6},
+				{0, 0, 0, 0, 0, 0},
+			},
+			x:   []float64{1, 2, 3, 4, 5, 6},
+			y:   []float64{-1, -2, -3, -4, -5, -6, -7, -8, -9},
+			ans: []float64{31, 86, 153, 97, 404, 3, 91, 92, -18},
+		},
+		{
+			tA:    blas.Trans,
+			m:     9,
+			n:     6,
+			lda:   4,
+			kL:    2,
+			kU:    1,
+			alpha: 3.0,
+			beta:  2.0,
+			a: [][]float64{
+				{5, 3, 0, 0, 0, 0},
+				{-1, 2, 9, 0, 0, 0},
+				{4, 8, 3, 6, 0, 0},
+				{0, -1, 8, 2, 1, 0},
+				{0, 0, 9, 9, 9, 5},
+				{0, 0, 0, 2, -3, 2},
+				{0, 0, 0, 0, 1, 5},
+				{0, 0, 0, 0, 0, 6},
+				{0, 0, 0, 0, 0, 0},
+			},
+			x:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			y:   []float64{-1, -2, -3, -4, -5, -6},
+			ans: []float64{43, 77, 306, 241, 104, 348},
+		},
+	} {
+		extra := 3
+		aFlat := flattenBanded(test.a, test.kU, test.kL)
+		incTest := func(incX, incY, extra int) {
+			xnew := makeIncremented(test.x, incX, extra)
+			ynew := makeIncremented(test.y, incY, extra)
+			ans := makeIncremented(test.ans, incY, extra)
+			blasser.Dgbmv(test.tA, test.m, test.n, test.kL, test.kU, test.alpha, aFlat, test.lda, xnew, incX, test.beta, ynew, incY)
+			if !dSliceTolEqual(ans, ynew) {
+				t.Errorf("Case %v: Want %v, got %v", i, ans, ynew)
+			}
+		}
+		incTest(1, 1, extra)
+		incTest(1, 3, extra)
+		incTest(1, -3, extra)
+		incTest(2, 3, extra)
+		incTest(2, -3, extra)
+		incTest(3, 2, extra)
+		incTest(-3, 2, extra)
 	}
 }
-*/

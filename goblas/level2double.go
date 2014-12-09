@@ -1182,11 +1182,139 @@ func (Blas) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []fl
 	}
 }
 
+// Dsbmv performs y = alpha*A*x + beta*y where A is a symmetric banded matrix.
+func (b Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if incY == 0 {
+		panic(zeroInc)
+	}
+
+	// Quick return if possible
+	if n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	// Set up indexes
+	lenX := n
+	lenY := n
+	var kx, ky int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(lenX - 1) * incX
+	}
+	if incY > 0 {
+		ky = 0
+	} else {
+		ky = -(lenY - 1) * incY
+	}
+	_ = kx
+	_ = ky
+
+	// First form y := beta * y
+	if incY > 0 {
+		b.Dscal(lenY, beta, y, incY)
+	} else {
+		b.Dscal(lenY, beta, y, -incY)
+	}
+
+	if alpha == 0 {
+		return
+	}
+
+	if ul == blas.Upper {
+		if incX == 1 {
+			iy := ky
+			for i := 0; i < n; i++ {
+				atmp := a[i*lda:]
+				tmp := alpha * x[i]
+				sum := tmp * atmp[0]
+				u := min(k, n-i-1)
+				jy := incY
+				for j := 1; j <= u; j++ {
+					v := atmp[j]
+					sum += alpha * x[i+j] * v
+					y[iy+jy] += tmp * v
+					jy += incY
+				}
+				y[iy] += sum
+				iy += incY
+			}
+			return
+		}
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			atmp := a[i*lda:]
+			tmp := alpha * x[ix]
+			sum := tmp * atmp[0]
+			u := min(k, n-i-1)
+			jx := incX
+			jy := incY
+			for j := 1; j <= u; j++ {
+				v := atmp[j]
+				sum += alpha * x[ix+jx] * v
+				y[iy+jy] += tmp * v
+				jx += incX
+				jy += incY
+			}
+			y[iy] += sum
+			ix += incX
+			iy += incY
+		}
+		return
+	}
+	if incX == 1 {
+		iy := ky
+		for i := 0; i < n; i++ {
+			l := max(0, k-i)
+			tmp := alpha * x[i]
+			jy := l * incY
+			atmp := a[i*lda:]
+			for j := l; j < k; j++ {
+				v := atmp[j]
+				y[iy] += alpha * v * x[i-k+j]
+				y[iy-k*incY+jy] += tmp * v
+				jy += incY
+			}
+			y[iy] += tmp * atmp[k]
+			iy += incY
+		}
+		return
+	}
+	ix := kx
+	iy := ky
+	for i := 0; i < n; i++ {
+		l := max(0, k-i)
+		tmp := alpha * x[ix]
+		jx := l * incX
+		jy := l * incY
+		atmp := a[i*lda:]
+		for j := l; j < k; j++ {
+			v := atmp[j]
+			y[iy] += alpha * v * x[ix-k*incX+jx]
+			y[iy-k*incY+jy] += tmp * v
+			jx += incX
+			jy += incY
+		}
+		y[iy] += tmp * atmp[k]
+		ix += incX
+		iy += incY
+	}
+	return
+}
+
 //TODO: Not yet implemented Level 2 routines.
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
-	panic("referenceblas: function not implemented")
-}
-func (Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	panic("referenceblas: function not implemented")
 }
 func (Blas) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {

@@ -130,34 +130,57 @@ func (b Blas) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda
 	}
 
 	// Form y := alpha * A * x + y
-	switch {
-
-	default:
-		panic("shouldn't be here")
-
-	case tA == blas.NoTrans:
+	if tA == blas.NoTrans {
+		if incX == 1 {
+			for i := 0; i < m; i++ {
+				var tmp float64
+				atmp := a[lda*i : lda*i+n]
+				for j, v := range atmp {
+					tmp += v * x[j]
+				}
+				y[i] += alpha * tmp
+			}
+			return
+		}
 		iy := ky
 		for i := 0; i < m; i++ {
 			jx := kx
-			var temp float64
-			for j := 0; j < n; j++ {
-				temp += a[lda*i+j] * x[jx]
+			var tmp float64
+			atmp := a[lda*i : lda*i+n]
+			for _, v := range atmp {
+				tmp += v * x[jx]
 				jx += incX
 			}
-			y[iy] += alpha * temp
+			y[iy] += alpha * tmp
 			iy += incY
 		}
-	case tA == blas.Trans || tA == blas.ConjTrans:
-		ix := kx
+		return
+	}
+	// Cases where a is not transposed.
+	if incX == 1 {
 		for i := 0; i < m; i++ {
+			tmp := alpha * x[i]
+			if tmp != 0 {
+				atmp := a[lda*i : lda*i+n]
+				for j, v := range atmp {
+					y[j] += v * tmp
+				}
+			}
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < m; i++ {
+		tmp := alpha * x[ix]
+		if tmp != 0 {
 			jy := ky
-			tmp := alpha * x[ix]
-			for j := 0; j < n; j++ {
-				y[jy] += a[lda*i+j] * tmp
+			atmp := a[lda*i : lda*i+n]
+			for _, v := range atmp {
+				y[jy] += v * tmp
 				jy += incY
 			}
-			ix += incX
 		}
+		ix += incX
 	}
 }
 

@@ -1,8 +1,9 @@
 package testblas
 
 import (
-	"github.com/gonum/blas"
 	"testing"
+
+	"github.com/gonum/blas"
 )
 
 type Dtxmver interface {
@@ -113,7 +114,6 @@ func DtxmvTest(t *testing.T, blasser Dtxmver) {
 			if !dStridedSliceTolEqual(c.n, in, x.inc, c.solTrans, 1) {
 				t.Error("Wrong Dtrmv result for: Trans in Case:", nc, "input:", nx)
 			}
-
 			in = make([]float64, len(x.data))
 			copy(in, x.data)
 			blasser.Dtbmv(c.ul, blas.NoTrans, c.d, c.n, c.k, c.tb, c.ldab, in, x.inc)

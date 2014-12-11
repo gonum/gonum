@@ -285,17 +285,24 @@ func checkConvergence(loc Location, itertype IterationType, stats *Stats, settin
 
 // evaluate evaluates the function and stores the answer in place
 func evaluate(funcs functions, funcInfo *FunctionInfo, evalType EvaluationType, xNext []float64, location *Location) error {
-	copy(location.X, xNext)
+	sameX := floats.Equal(location.X, xNext)
+	if !sameX {
+		copy(location.X, xNext)
+	}
 	switch evalType {
 	case FunctionEval:
 		location.F = funcs.function.F(location.X)
-		for i := range location.Gradient {
-			location.Gradient[i] = math.NaN()
+		if !sameX {
+			for i := range location.Gradient {
+				location.Gradient[i] = math.NaN()
+			}
 		}
 		return nil
 	case GradientEval:
-		location.F = math.NaN()
 		if funcInfo.IsGradient {
+			if !sameX {
+				location.F = math.NaN()
+			}
 			funcs.gradient.Df(location.X, location.Gradient)
 			return nil
 		}

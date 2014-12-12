@@ -201,21 +201,34 @@ func (Blas) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, in
 		kx = -(m - 1) * incX
 	}
 
+	if incX == 1 && incY == 1 {
+		x = x[:m]
+		y = y[:n]
+		for i, xv := range x {
+			tmp := alpha * xv
+			if tmp != 0 {
+				atmp := a[i*lda:]
+				for j, yv := range y {
+					atmp[j] += yv * tmp
+				}
+			}
+		}
+		return
+	}
+
 	ix := kx
 	for i := 0; i < m; i++ {
-		if x[ix] == 0 {
-			ix += incX
-			continue
-		}
-		tmp := alpha * x[ix]
-		jy := ky
-		for j := 0; j < n; j++ {
-			a[i*lda+j] += y[jy] * tmp
-			jy += incY
+		if x[ix] != 0 {
+			tmp := alpha * x[ix]
+			jy := ky
+			atmp := a[i*lda:]
+			for j := 0; j < n; j++ {
+				atmp[j] += y[jy] * tmp
+				jy += incY
+			}
 		}
 		ix += incX
 	}
-
 }
 
 // Dgbmv performs y = alpha*A*x + beta*y where a is an mxn band matrix with

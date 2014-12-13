@@ -388,19 +388,25 @@ func (m *Dense) Exp(a Matrix) {
 	if r != c {
 		panic(ErrShape)
 	}
-	if m.isZero() {
+	switch {
+	case m.isZero():
 		m.mat = RawMatrix{
 			Rows:   r,
 			Cols:   c,
 			Stride: c,
 			Data:   use(m.mat.Data, r*r),
 		}
-	} else if r != m.mat.Rows || c != m.mat.Cols {
+		zero(m.mat.Data)
+		for i := 0; i < r*r; i += r + 1 {
+			m.mat.Data[i] = 1
+		}
+	case r == m.mat.Rows && c == m.mat.Cols:
+		for i := 0; i < r; i++ {
+			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
+			m.mat.Data[i*m.mat.Stride+i] = 1
+		}
+	default:
 		panic(ErrShape)
-	}
-	zero(m.mat.Data)
-	for i := 0; i < r*r; i += r + 1 {
-		m.mat.Data[i] = 1
 	}
 
 	const (

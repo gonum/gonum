@@ -6,6 +6,7 @@ package mat64
 
 import (
 	"github.com/gonum/floats"
+	"math"
 
 	"math/rand"
 	"testing"
@@ -447,10 +448,23 @@ func (s *S) TestExp(c *check.C) {
 	for i, t := range []struct {
 		a    [][]float64
 		want [][]float64
+		mod  func(*Dense)
 	}{
 		{
 			a:    [][]float64{{-49, 24}, {-64, 31}},
 			want: [][]float64{{-0.7357587581474017, 0.5518190996594223}, {-1.4715175990917921, 1.103638240717339}},
+		},
+		{
+			a:    [][]float64{{-49, 24}, {-64, 31}},
+			want: [][]float64{{-0.7357587581474017, 0.5518190996594223}, {-1.4715175990917921, 1.103638240717339}},
+			mod: func(a *Dense) {
+				d := make([]float64, 100)
+				for i := range d {
+					d[i] = math.NaN()
+				}
+				*a = *NewDense(10, 10, d).View(1, 1, 2, 2).(*Dense)
+
+			},
 		},
 		{
 			a:    [][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
@@ -458,6 +472,9 @@ func (s *S) TestExp(c *check.C) {
 		},
 	} {
 		var got Dense
+		if t.mod != nil {
+			t.mod(&got)
+		}
 		got.Exp(NewDense(flatten(t.a)))
 		c.Check(got.EqualsApprox(NewDense(flatten(t.want)), 1e-12), check.Equals, true, check.Commentf("Test %d", i))
 	}

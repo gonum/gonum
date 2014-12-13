@@ -433,7 +433,9 @@ func (m *Dense) Exp(a Matrix) {
 		}
 
 		m.Add(m, tmp)
-		power.Mul(&power, &small)
+		if i < terms-1 {
+			power.Mul(&power, &small)
+		}
 	}
 
 	for i := 0; i < scaling; i++ {

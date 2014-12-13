@@ -443,6 +443,26 @@ func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 	return d, nil
 }
 
+func (s *S) TestExp(c *check.C) {
+	for i, t := range []struct {
+		a    [][]float64
+		want [][]float64
+	}{
+		{
+			a:    [][]float64{{-49, 24}, {-64, 31}},
+			want: [][]float64{{-0.7357587581474017, 0.5518190996594223}, {-1.4715175990917921, 1.103638240717339}},
+		},
+		{
+			a:    [][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			want: [][]float64{{2.71828182845905, 0, 0}, {0, 2.71828182845905, 0}, {0, 0, 2.71828182845905}},
+		},
+	} {
+		var got Dense
+		got.Exp(NewDense(flatten(t.a)))
+		c.Check(&got, check.DeepEquals, NewDense(flatten(t.want)), check.Commentf("Test %d", i))
+	}
+}
+
 func (s *S) TestLU(c *check.C) {
 	for i := 0; i < 100; i++ {
 		size := rand.Intn(100)
@@ -885,5 +905,18 @@ func densePreMulBench(b *testing.B, size int, rho float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		wd.Mul(a, d)
+	}
+}
+
+func BenchmarkExp10(b *testing.B)   { expBench(b, 10) }
+func BenchmarkExp100(b *testing.B)  { expBench(b, 100) }
+func BenchmarkExp1000(b *testing.B) { expBench(b, 1000) }
+
+func expBench(b *testing.B, size int) {
+	a, _ := randDense(size, 1, rand.NormFloat64)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		wd.Exp(a)
 	}
 }

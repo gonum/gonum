@@ -186,6 +186,12 @@ type Muler interface {
 	Mul(a, b Matrix)
 }
 
+// An Exper can perform a matrix exponentiation of the square matrix a. Exp will panic with ErrShape
+// if a is not square.
+type Exper interface {
+	Exp(a Matrix)
+}
+
 // A Dotter can determine the sum of the element-wise products of the elements of the receiver and b.
 // If the shapes of the two matrices differ, Dot will panic.
 type Dotter interface {

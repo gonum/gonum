@@ -381,6 +381,68 @@ func (m *Dense) Mul(a, b Matrix) {
 	*m = w
 }
 
+// Exp uses the scaling and squaring method described in section 3 of
+// http://www.cs.cornell.edu/cv/researchpdf/19ways+.pdf.
+func (m *Dense) Exp(a Matrix) {
+	r, c := a.Dims()
+	if r != c {
+		panic(ErrShape)
+	}
+	switch {
+	case m.isZero():
+		m.mat = RawMatrix{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   use(m.mat.Data, r*r),
+		}
+		zero(m.mat.Data)
+		for i := 0; i < r*r; i += r + 1 {
+			m.mat.Data[i] = 1
+		}
+	case r == m.mat.Rows && c == m.mat.Cols:
+		for i := 0; i < r; i++ {
+			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
+			m.mat.Data[i*m.mat.Stride+i] = 1
+		}
+	default:
+		panic(ErrShape)
+	}
+
+	const (
+		terms   = 10
+		scaling = 4
+	)
+
+	var small, power Dense
+	small.Scale(math.Pow(2, -scaling), a)
+	power.Clone(&small)
+
+	var (
+		tmp   = NewDense(r, r, nil)
+		factI = 1.
+	)
+	for i := 1.; i < terms; i++ {
+		factI *= i
+
+		// This is OK to do because power and tmp are
+		// new Dense values so all rows are contiguous.
+		// TODO(kortschak) Make this explicit in the NewDense doc comment.
+		for j, v := range power.mat.Data {
+			tmp.mat.Data[j] = v / factI
+		}
+
+		m.Add(m, tmp)
+		if i < terms-1 {
+			power.Mul(&power, &small)
+		}
+	}
+
+	for i := 0; i < scaling; i++ {
+		m.Mul(m, m)
+	}
+}
+
 func (m *Dense) Scale(f float64, a Matrix) {
 	ar, ac := a.Dims()
 

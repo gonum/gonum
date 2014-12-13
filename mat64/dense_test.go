@@ -459,7 +459,7 @@ func (s *S) TestExp(c *check.C) {
 	} {
 		var got Dense
 		got.Exp(NewDense(flatten(t.a)))
-		c.Check(&got, check.DeepEquals, NewDense(flatten(t.want)), check.Commentf("Test %d", i))
+		c.Check(got.EqualsApprox(NewDense(flatten(t.want)), 1e-12), check.Equals, true, check.Commentf("Test %d", i))
 	}
 }
 

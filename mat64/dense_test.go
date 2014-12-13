@@ -916,7 +916,8 @@ func expBench(b *testing.B, size int) {
 	a, _ := randDense(size, 1, rand.NormFloat64)
 
 	b.ResetTimer()
+	var m Dense
 	for i := 0; i < b.N; i++ {
-		wd.Exp(a)
+		m.Exp(a)
 	}
 }

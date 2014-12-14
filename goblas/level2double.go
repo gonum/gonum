@@ -400,7 +400,6 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	if incX <= 0 {
 		kx = -(n - 1) * incX
 	}
-	_ = kx
 	if tA == blas.NoTrans {
 		if ul == blas.Upper {
 			if incX == 1 {

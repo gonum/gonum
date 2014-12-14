@@ -382,7 +382,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	if n < 0 {
 		panic(nLT0)
 	}
-	if lda > n || lda < 1 {
+	if lda < n {
 		panic(badLda)
 	}
 	if incX == 0 {

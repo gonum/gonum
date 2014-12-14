@@ -365,23 +365,11 @@ func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []floa
 	}
 }
 
-// DTRMV  performs one of the matrix-vector operations
+// Dtrmv  performs one of the matrix-vector operation
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix.
 func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
-	// Verify inputs
-	if tA == blas.NoTrans {
-		tA = blas.Trans
-	} else {
-		tA = blas.NoTrans
-	}
-	if ul == blas.Upper {
-		ul = blas.Lower
-	} else {
-		ul = blas.Upper
-	}
-
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -394,7 +382,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	if n < 0 {
 		panic(nLT0)
 	}
-	if lda > n && lda > 1 {
+	if lda > n || lda < 1 {
 		panic(badLda)
 	}
 	if incX == 0 {
@@ -403,80 +391,143 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	if n == 0 {
 		return
 	}
+	nonunit := d != blas.Unit
+	if n == 1 {
+		x[0] *= a[0]
+		return
+	}
 	var kx int
 	if incX <= 0 {
 		kx = -(n - 1) * incX
 	}
-	switch {
-	default:
-		panic("unreachable")
-	case tA == blas.NoTrans && ul == blas.Upper:
-		jx := kx
-		for j := 0; j < n; j++ {
-			ja := j * lda
-			if x[jx] != 0 {
-				temp := x[jx]
-				ix := kx
-				for i := 0; i < j; i++ {
-					x[ix] += temp * a[i+ja]
-					ix += incX
+	_ = kx
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			if incX == 1 {
+				for i := 0; i < n; i++ {
+					var tmp float64
+					if nonunit {
+						tmp = a[i*lda+i] * x[i]
+					} else {
+						tmp = x[i]
+					}
+					xtmp := x[i+1:]
+					for j, v := range a[i*lda+i+1 : i*lda+n] {
+						tmp += v * xtmp[j]
+					}
+					x[i] = tmp
 				}
-				if d == blas.NonUnit {
-					x[jx] *= a[j+ja]
+				return
+			}
+			ix := kx
+			for i := 0; i < n; i++ {
+				var tmp float64
+				if nonunit {
+					tmp = a[i*lda+i] * x[ix]
+				} else {
+					tmp = x[ix]
 				}
-			}
-			jx += incX
-		}
-	case tA == blas.NoTrans && ul == blas.Lower:
-		kx += (n - 1) * incX
-		jx := kx
-		for j := n - 1; j >= 0; j-- {
-			ja := j * lda
-			if x[jx] != 0 {
-				tmp := x[jx]
-				ix := kx
-				for i := n - 1; i > j; i-- {
-					x[ix] += tmp * a[i+ja]
-					ix -= incX
+				jx := ix + incX
+				for _, v := range a[i*lda+i+1 : i*lda+n] {
+					tmp += v * x[jx]
+					jx += incX
 				}
-				if d == blas.NonUnit {
-					x[jx] *= a[j+ja]
-				}
-			}
-			jx -= incX
-		}
-	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
-		jx := kx + (n-1)*incX
-		for j := n - 1; j >= 0; j-- {
-			ja := j * lda
-			tmp := x[jx]
-			ix := jx
-			if d == blas.NonUnit {
-				tmp *= a[j+ja]
-			}
-			for i := j - 1; i >= 0; i-- {
-				ix -= incX
-				tmp += a[i+ja] * x[ix]
-			}
-			x[jx] = tmp
-			jx -= incX
-		}
-	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
-		jx := kx
-		for j := 0; j < n; j++ {
-			tmp := x[jx]
-			ix := jx
-			ja := j * lda
-			if d == blas.NonUnit {
-				tmp *= a[j+ja]
-			}
-			for i := j + 1; i < n; i++ {
+				x[ix] = tmp
 				ix += incX
-				tmp += a[i+ja] * x[ix]
 			}
-			x[jx] = tmp
+			return
+		}
+		if incX == 1 {
+			for i := n - 1; i >= 0; i-- {
+				var tmp float64
+				if nonunit {
+					tmp += a[i*lda+i] * x[i]
+				} else {
+					tmp = x[i]
+				}
+				for j, v := range a[i*lda : i*lda+i] {
+					tmp += v * x[j]
+				}
+				x[i] = tmp
+			}
+			return
+		}
+		ix := kx + (n-1)*incX
+		for i := n - 1; i >= 0; i-- {
+			var tmp float64
+			if nonunit {
+				tmp += a[i*lda+i] * x[ix]
+			} else {
+				tmp = x[ix]
+			}
+			jx := kx
+			for _, v := range a[i*lda : i*lda+i] {
+				tmp += v * x[jx]
+				jx += incX
+			}
+			x[ix] = tmp
+			ix -= incX
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := n - 1; i >= 0; i-- {
+				xi := x[i]
+				atmp := a[i*lda+i+1 : i*lda+n]
+				xtmp := x[i+1 : n]
+				for j, v := range atmp {
+					xtmp[j] += xi * v
+				}
+				if nonunit {
+					x[i] *= a[i*lda+i]
+				}
+			}
+			return
+		}
+		ix := kx + (n-1)*incX
+		for i := n - 1; i >= 0; i-- {
+			xi := x[ix]
+			jx := kx + (i+1)*incX
+			atmp := a[i*lda+i+1 : i*lda+n]
+			for _, v := range atmp {
+				x[jx] += xi * v
+				jx += incX
+			}
+			if nonunit {
+				x[ix] *= a[i*lda+i]
+			}
+			ix -= incX
+		}
+		return
+	}
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			xi := x[i]
+			atmp := a[i*lda : i*lda+i]
+			for j, v := range atmp {
+				x[j] += xi * v
+			}
+			if nonunit {
+				x[i] *= a[i*lda+i]
+			}
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < n; i++ {
+		xi := x[ix]
+		jx := kx
+		atmp := a[i*lda : i*lda+i]
+		for _, v := range atmp {
+			x[jx] += xi * v
 			jx += incX
 		}
+		if nonunit {
+			x[ix] *= a[i*lda+i]
+		}
+		ix += incX
 	}
 }
 

@@ -365,7 +365,7 @@ func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []floa
 	}
 }
 
-// Dtrmv  performs one of the matrix-vector operation
+// Dtrmv  performs one of the matrix-vector operations
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix.

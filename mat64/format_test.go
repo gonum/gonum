@@ -6,8 +6,9 @@ package mat64
 
 import (
 	"fmt"
-	check "launchpad.net/gocheck"
 	"math"
+
+	"gopkg.in/check.v1"
 )
 
 type fm struct {

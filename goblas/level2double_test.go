@@ -34,11 +34,10 @@ func TestDtbmv(t *testing.T) {
 	testblas.DtbmvTest(t, blasser)
 }
 
-<<<<<<< HEAD
 func TestDsymv(t *testing.T) {
 	testblas.DsymvTest(t, blasser)
-=======
+}
+
 func TestDsyr(t *testing.T) {
 	testblas.DsyrTest(t, blasser)
->>>>>>> 152aa73516f48ea7d29e54439706b928210e7f9d
 }

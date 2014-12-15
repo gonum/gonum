@@ -443,6 +443,44 @@ func (m *Dense) Exp(a Matrix) {
 	}
 }
 
+func (m *Dense) Pow(a Matrix, n int) {
+	if n < 0 {
+		panic("matrix: illegal power")
+	}
+	r, c := a.Dims()
+	if r != c {
+		panic(ErrShape)
+	}
+
+	if m.isZero() {
+		if n == 0 {
+			m.mat = RawMatrix{
+				Rows:   r,
+				Cols:   c,
+				Stride: c,
+				Data:   use(m.mat.Data, r*r),
+			}
+			zero(m.mat.Data)
+			for i := 0; i < r*r; i += r + 1 {
+				m.mat.Data[i] = 1
+			}
+			return
+		}
+		m.Clone(a)
+	} else if r != m.mat.Rows || c != m.mat.Cols {
+		panic(ErrShape)
+	}
+
+	var tmp Dense
+	tmp.Clone(a)
+	for n--; n > 0; n >>= 1 {
+		if n&1 != 0 {
+			m.Mul(m, &tmp)
+		}
+		tmp.Mul(&tmp, &tmp)
+	}
+}
+
 func (m *Dense) Scale(f float64, a Matrix) {
 	ar, ac := a.Dims()
 

@@ -480,6 +480,39 @@ func (s *S) TestExp(c *check.C) {
 	}
 }
 
+func (s *S) TestPow(c *check.C) {
+	for i, t := range []struct {
+		a    [][]float64
+		n    int
+		want [][]float64
+	}{
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    0,
+			want: [][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    1,
+			want: [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    2,
+			want: [][]float64{{30, 36, 42}, {66, 81, 96}, {102, 126, 150}},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    3,
+			want: [][]float64{{468, 576, 684}, {1062, 1305, 1548}, {1656, 2034, 2412}},
+		},
+	} {
+		var got Dense
+		got.Pow(NewDense(flatten(t.a)), t.n)
+		c.Check(&got, check.DeepEquals, NewDense(flatten(t.want)), check.Commentf("Test %d", i))
+	}
+}
+
 func (s *S) TestLU(c *check.C) {
 	for i := 0; i < 100; i++ {
 		size := rand.Intn(100)

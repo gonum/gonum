@@ -463,7 +463,6 @@ func (s *S) TestExp(c *check.C) {
 					d[i] = math.NaN()
 				}
 				*a = *NewDense(10, 10, d).View(1, 1, 2, 2).(*Dense)
-
 			},
 		},
 		{
@@ -477,6 +476,91 @@ func (s *S) TestExp(c *check.C) {
 		}
 		got.Exp(NewDense(flatten(t.a)))
 		c.Check(got.EqualsApprox(NewDense(flatten(t.want)), 1e-12), check.Equals, true, check.Commentf("Test %d", i))
+	}
+}
+
+func (s *S) TestPow(c *check.C) {
+	for i, t := range []struct {
+		a    [][]float64
+		n    int
+		mod  func(*Dense)
+		want [][]float64
+	}{
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    0,
+			want: [][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    0,
+			want: [][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			mod: func(a *Dense) {
+				d := make([]float64, 100)
+				for i := range d {
+					d[i] = math.NaN()
+				}
+				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+			},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    1,
+			want: [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    1,
+			want: [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			mod: func(a *Dense) {
+				d := make([]float64, 100)
+				for i := range d {
+					d[i] = math.NaN()
+				}
+				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+			},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    2,
+			want: [][]float64{{30, 36, 42}, {66, 81, 96}, {102, 126, 150}},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    2,
+			want: [][]float64{{30, 36, 42}, {66, 81, 96}, {102, 126, 150}},
+			mod: func(a *Dense) {
+				d := make([]float64, 100)
+				for i := range d {
+					d[i] = math.NaN()
+				}
+				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+			},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    3,
+			want: [][]float64{{468, 576, 684}, {1062, 1305, 1548}, {1656, 2034, 2412}},
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			n:    3,
+			want: [][]float64{{468, 576, 684}, {1062, 1305, 1548}, {1656, 2034, 2412}},
+			mod: func(a *Dense) {
+				d := make([]float64, 100)
+				for i := range d {
+					d[i] = math.NaN()
+				}
+				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+			},
+		},
+	} {
+		var got Dense
+		if t.mod != nil {
+			t.mod(&got)
+		}
+		got.Pow(NewDense(flatten(t.a)), t.n)
+		c.Check(got.Equals(NewDense(flatten(t.want))), check.Equals, true, check.Commentf("Test %d", i))
 	}
 }
 

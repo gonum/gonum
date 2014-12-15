@@ -1334,6 +1334,89 @@ func (b Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int,
 	return
 }
 
+// Dsyr computes a = alpha*x*x^T + a where a is an nxn symmetric matrix
+func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(negInc)
+	}
+	if lda < n {
+		panic(badLda)
+	}
+	if alpha == 0 || n == 0 {
+		return
+	}
+
+	lenX := n
+	var kx int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(lenX - 1) * incX
+	}
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				tmp := x[i] * alpha
+				if tmp != 0 {
+					atmp := a[i*lda+i : i*lda+n]
+					xtmp := x[i:n]
+					for j, v := range xtmp {
+						atmp[j] += v * tmp
+					}
+				}
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			tmp := x[ix] * alpha
+			if tmp != 0 {
+				jx := ix
+				atmp := a[i*lda:]
+				for j := i; j < n; j++ {
+					atmp[j] += x[jx] * tmp
+					jx += incX
+				}
+			}
+			ix += incX
+		}
+		return
+	}
+	// Cases where a is lower triangular.
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			tmp := x[i] * alpha
+			if tmp != 0 {
+				atmp := a[i*lda:]
+				xtmp := x[:i+1]
+				for j, v := range xtmp {
+					atmp[j] += tmp * v
+				}
+			}
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < n; i++ {
+		tmp := x[ix] * alpha
+		if tmp != 0 {
+			atmp := a[i*lda:]
+			jx := kx
+			for j := 0; j < i+1; j++ {
+				atmp[j] += tmp * x[jx]
+				jx += incX
+			}
+		}
+		ix += incX
+	}
+}
+
 //TODO: Not yet implemented Level 2 routines.
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
@@ -1345,9 +1428,6 @@ func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap [
 	panic("referenceblas: function not implemented")
 }
 func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
-	panic("referenceblas: function not implemented")
-}
-func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
 	panic("referenceblas: function not implemented")
 }
 func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {

@@ -49,6 +49,35 @@ func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
 	return sum
 }
 
+// The Fletcher-Powell helical valley function
+// Dim = 3
+// X0 = [-1, 0, 0]
+// OptX = [1, 0, 0]
+// OptF = 0
+type HelicalValley struct{}
+
+func (HelicalValley) F(x []float64) float64 {
+	θ := 0.5 * math.Atan2(x[1], x[0]) / math.Pi
+	r := math.Sqrt(math.Pow(x[0], 2) + math.Pow(x[1], 2))
+
+	f1 := 10 * (x[2] - 10*θ)
+	f2 := 10 * (r - 1)
+	f3 := x[2]
+
+	return math.Pow(f1, 2) + math.Pow(f2, 2) + math.Pow(f3, 2)
+}
+
+func (HelicalValley) Df(x, g []float64) {
+	θ := 0.5 * math.Atan2(x[1], x[0]) / math.Pi
+	r := math.Sqrt(math.Pow(x[0], 2) + math.Pow(x[1], 2))
+	s := x[2] - 10*θ
+	t := 5 * s / math.Pow(r, 2) / math.Pi
+
+	g[0] = 200 * (x[0] - x[0]/r + x[1]*t)
+	g[1] = 200 * (x[1] - x[1]/r - x[0]*t)
+	g[2] = 2 * (x[2] + 100*s)
+}
+
 type Linear struct {
 	nDim int
 }

@@ -616,69 +616,112 @@ func (b Blas) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x 
 	// Set up start points
 	var kx, ky int
 	if incX > 0 {
-		kx = 1
+		kx = 0
 	} else {
 		kx = -(n - 1) * incX
 	}
 	if incY > 0 {
-		ky = 1
+		ky = 0
 	} else {
 		ky = -(n - 1) * incY
 	}
 
 	// Form y = beta * y
 	if beta != 1 {
-		b.Dscal(n, beta, y, incY)
+		if incY > 0 {
+			b.Dscal(n, beta, y, incY)
+		} else {
+			b.Dscal(n, beta, y, -incY)
+		}
 	}
 
 	if alpha == 0 {
 		return
 	}
 
-	// TODO: Need to think about changing the major and minor
-	// looping when row major (help with cache misses)
+	if n == 1 {
+		y[0] += alpha * a[0] * x[0]
+		return
+	}
 
-	// Form y = Ax + y
-	switch {
-	default:
-		panic("goblas: unreachable")
-	case ul == blas.Upper:
-		jx := kx
-		jy := ky
-		for j := 0; j < n; j++ {
-			tmp1 := alpha * x[jx]
-			var tmp2 float64
-			ix := kx
+	if ul == blas.Upper {
+		if incX == 1 {
 			iy := ky
-			for i := 0; i < j-2; i++ {
-				y[iy] += tmp1 * a[i*lda+j]
-				tmp2 += a[i*lda+j] * x[ix]
-				ix += incX
+			for i := 0; i < n; i++ {
+				xv := x[i] * alpha
+				sum := x[i] * a[i*lda+i]
+				jy := ky + (i+1)*incY
+				atmp := a[i*lda+i+1 : i*lda+n]
+				for j, v := range atmp {
+					jp := j + i + 1
+					sum += x[jp] * v
+					y[jy] += xv * v
+					jy += incY
+				}
+				y[iy] += alpha * sum
 				iy += incY
 			}
-			y[jy] += tmp1*a[j*lda+j] + alpha*tmp2
-			jx += incX
-			jy += incY
+			return
 		}
-	case ul == blas.Lower:
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			xv := x[ix] * alpha
+			sum := x[ix] * a[i*lda+i]
+			jx := kx + (i+1)*incX
+			jy := ky + (i+1)*incY
+			atmp := a[i*lda+i+1 : i*lda+n]
+			for _, v := range atmp {
+				sum += x[jx] * v
+				y[jy] += xv * v
+				jx += incX
+				jy += incY
+			}
+			y[iy] += alpha * sum
+			ix += incX
+			iy += incY
+		}
+		return
+	}
+	// Cases where a is lower triangular.
+	if incX == 1 {
+		iy := ky
+		for i := 0; i < n; i++ {
+			jy := ky
+			xv := alpha * x[i]
+			atmp := a[i*lda : i*lda+i]
+			var sum float64
+			for j, v := range atmp {
+				sum += x[j] * v
+				y[jy] += xv * v
+				jy += incY
+			}
+			sum += x[i] * a[i*lda+i]
+			sum *= alpha
+			y[iy] += sum
+			iy += incY
+		}
+		return
+	}
+	ix := kx
+	iy := ky
+	for i := 0; i < n; i++ {
 		jx := kx
 		jy := ky
-		for j := 0; j < n; j++ {
-			tmp1 := alpha * x[jx]
-			var tmp2 float64
-			y[jy] += tmp1 * a[j*lda+j]
-			ix := jx
-			iy := jy
-			for i := j; i < n; i++ {
-				ix += incX
-				iy += incY
-				y[iy] += tmp1 * a[i*lda+j]
-				tmp2 += a[i*lda+j] * x[ix]
-			}
-			y[jy] += alpha * tmp2
+		xv := alpha * x[ix]
+		atmp := a[i*lda : i*lda+i]
+		var sum float64
+		for _, v := range atmp {
+			sum += x[jx] * v
+			y[jy] += xv * v
 			jx += incX
 			jy += incY
 		}
+		sum += x[ix] * a[i*lda+i]
+		sum *= alpha
+		y[iy] += sum
+		ix += incX
+		iy += incY
 	}
 }
 

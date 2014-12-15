@@ -5,8 +5,9 @@
 package mat64
 
 import (
-	check "launchpad.net/gocheck"
 	"math"
+
+	"gopkg.in/check.v1"
 )
 
 func (s *S) TestEigen(c *check.C) {

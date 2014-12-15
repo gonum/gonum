@@ -5,10 +5,11 @@
 package mat64
 
 import (
-	check "launchpad.net/gocheck"
 	"math"
 
 	"github.com/gonum/floats"
+
+	"gopkg.in/check.v1"
 )
 
 func isUpperTriangular(a *Dense) bool {

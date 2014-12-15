@@ -11,7 +11,7 @@ import (
 	"math/rand"
 	"testing"
 
-	check "launchpad.net/gocheck"
+	"gopkg.in/check.v1"
 )
 
 func (s *S) TestNewDense(c *check.C) {

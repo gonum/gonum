@@ -42,7 +42,7 @@ install:
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then export CGO_LDFLAGS="-L/usr/lib -lopenblas"; fi
  - go get github.com/gonum/floats
  - go get github.com/gonum/blas
- - go get launchpad.net/gocheck
+ - go get gopkg.in/check.v1
 
 script:
  - go get -d -t -v ./...

@@ -5,11 +5,12 @@
 package mat64
 
 import (
+	"fmt"
+	"testing"
+
 	"github.com/gonum/blas/cblas"
 
-	"fmt"
-	check "launchpad.net/gocheck"
-	"testing"
+	"gopkg.in/check.v1"
 )
 
 // Tests

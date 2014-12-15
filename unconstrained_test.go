@@ -279,6 +279,64 @@ func (BiggsEXP6) Df(x, g []float64) {
 	}
 }
 
+// Gaussian function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = 3
+// X0 = [0.4, 1, 0]
+// OptX = [0.3989561..., 1.0000191..., 0]
+// OptF = 1.12793...e-8
+type Gaussian struct{}
+
+func (Gaussian) y(i int) (yi float64) {
+	switch i {
+	case 1, 15:
+		yi = 0.0009
+	case 2, 14:
+		yi = 0.0044
+	case 3, 13:
+		yi = 0.0175
+	case 4, 12:
+		yi = 0.0540
+	case 5, 11:
+		yi = 0.1295
+	case 6, 10:
+		yi = 0.2420
+	case 7, 9:
+		yi = 0.3521
+	case 8:
+		yi = 0.3989
+	}
+	return yi
+}
+
+func (g Gaussian) F(x []float64) (sum float64) {
+	for i := 1; i <= 15; i++ {
+		c := float64(8-i) / 2
+		d := math.Pow(c-x[2], 2)
+		e := math.Exp(-x[1] * d / 2)
+		f := x[0]*e - g.y(i)
+		sum += f * f
+	}
+	return sum
+}
+
+func (g Gaussian) Df(x, grad []float64) {
+	grad[0] = 0
+	grad[1] = 0
+	grad[2] = 0
+	for i := 1; i <= 15; i++ {
+		c := float64(8-i) / 2
+		d := math.Pow(c-x[2], 2)
+		e := math.Exp(-x[1] * d / 2)
+		f := x[0]*e - g.y(i)
+
+		grad[0] += 2 * f * e
+		grad[1] -= f * e * d * x[0]
+		grad[2] += 2 * f * e * x[0] * x[1] * (c - x[2])
+	}
+}
+
 type Linear struct {
 	nDim int
 }

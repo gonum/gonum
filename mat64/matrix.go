@@ -192,6 +192,12 @@ type Exper interface {
 	Exp(a Matrix)
 }
 
+// A Power can raise a square matrix, a to a positive integral power, n. Pow will panic if n is negative
+// or if a is not square.
+type Power interface {
+	Pow(a Matrix, n int)
+}
+
 // A Dotter can determine the sum of the element-wise products of the elements of the receiver and b.
 // If the shapes of the two matrices differ, Dot will panic.
 type Dotter interface {

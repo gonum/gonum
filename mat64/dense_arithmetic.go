@@ -453,32 +453,40 @@ func (m *Dense) Pow(a Matrix, n int) {
 	}
 
 	if m.isZero() {
-		if n == 0 {
-			m.mat = RawMatrix{
-				Rows:   r,
-				Cols:   c,
-				Stride: c,
-				Data:   use(m.mat.Data, r*r),
-			}
-			zero(m.mat.Data)
-			for i := 0; i < r*r; i += r + 1 {
-				m.mat.Data[i] = 1
-			}
-			return
+		m.mat = RawMatrix{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   use(m.mat.Data, r*r),
 		}
-		m.Clone(a)
 	} else if r != m.mat.Rows || c != m.mat.Cols {
 		panic(ErrShape)
 	}
 
-	var tmp Dense
+	// Take possible fast paths.
+	switch n {
+	case 0:
+		for i := 0; i < r; i++ {
+			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
+			m.mat.Data[i*m.mat.Stride+i] = 1
+		}
+		return
+	case 1:
+		m.Copy(a)
+		return
+	}
+
+	// Perform iterative exponentiation by squaring in work space.
+	var w, tmp Dense
+	w.Clone(a)
 	tmp.Clone(a)
 	for n--; n > 0; n >>= 1 {
 		if n&1 != 0 {
-			m.Mul(m, &tmp)
+			w.Mul(&w, &tmp)
 		}
 		tmp.Mul(&tmp, &tmp)
 	}
+	m.Copy(&w)
 }
 
 func (m *Dense) Scale(f float64, a Matrix) {

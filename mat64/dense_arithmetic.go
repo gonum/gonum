@@ -474,6 +474,9 @@ func (m *Dense) Pow(a Matrix, n int) {
 	case 1:
 		m.Copy(a)
 		return
+	case 2:
+		m.Mul(a, a)
+		return
 	}
 
 	// Perform iterative exponentiation by squaring in work space.

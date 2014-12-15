@@ -152,6 +152,46 @@ func (BiggsEXP3) Df(x, g []float64) {
 	}
 }
 
+// Biggs' EXP4 function
+// M.C. Biggs, Minimization algorithms making use of non-quadratic properties
+// of the objective function. J. Inst. Maths Applics 8 (1971), 315-327.
+// Dim = 4
+// X0 = [1, 2, 1, 1]
+// OptX = [1, 10, 1, 5]
+// OptF = 0
+type BiggsEXP4 struct{}
+
+func (BiggsEXP4) F(x []float64) (sum float64) {
+	for i := 1; i <= 10; i++ {
+		z := float64(i) / 10
+		y := math.Exp(-z) - 5*math.Exp(-10*z)
+		f := x[2]*math.Exp(-x[0]*z) - x[3]*math.Exp(-x[1]*z) - y
+		sum += math.Pow(f, 2)
+	}
+	return sum
+}
+
+func (BiggsEXP4) Df(x, g []float64) {
+	for i := 0; i < len(g); i++ {
+		g[i] = 0
+	}
+	for i := 1; i <= 10; i++ {
+		z := float64(i) / 10
+		y := math.Exp(-z) - 5*math.Exp(-10*z)
+		f := x[2]*math.Exp(-x[0]*z) - x[3]*math.Exp(-x[1]*z) - y
+
+		dfdx0 := -z * x[2] * math.Exp(-x[0]*z)
+		dfdx1 := z * x[3] * math.Exp(-x[1]*z)
+		dfdx2 := math.Exp(-x[0] * z)
+		dfdx3 := -math.Exp(-x[1] * z)
+
+		g[0] += 2 * f * dfdx0
+		g[1] += 2 * f * dfdx1
+		g[2] += 2 * f * dfdx2
+		g[3] += 2 * f * dfdx3
+	}
+}
+
 type Linear struct {
 	nDim int
 }

@@ -1533,6 +1533,92 @@ func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []
 	}
 }
 
+// Dsyr2 performs the symmetric rank-2 update
+//  a += alpha * x * y^T + alpha * y * x^T
+func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if incY == 0 {
+		panic(zeroInc)
+	}
+	var ky, kx int
+	if incY > 0 {
+		ky = 0
+	} else {
+		ky = -(n - 1) * incY
+	}
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(n - 1) * incX
+	}
+	if ul == blas.Upper {
+		if incX == 1 && incY == 1 {
+			for i := 0; i < n; i++ {
+				xi := x[i]
+				yi := y[i]
+				atmp := a[i*lda:]
+				for j := i; j < n; j++ {
+					atmp[j] += alpha * (xi*y[j] + x[j]*yi)
+				}
+			}
+			return
+		}
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			jx := kx + i*incX
+			jy := ky + i*incY
+			xi := x[ix]
+			yi := y[iy]
+			atmp := a[i*lda:]
+			for j := i; j < n; j++ {
+				atmp[j] += alpha * (xi*y[jy] + x[jx]*yi)
+				jx += incX
+				jy += incY
+			}
+			ix += incX
+			iy += incY
+		}
+		return
+	}
+	if incX == 1 && incY == 1 {
+		for i := 0; i < n; i++ {
+			xi := x[i]
+			yi := y[i]
+			atmp := a[i*lda:]
+			for j := 0; j <= i; j++ {
+				atmp[j] += alpha * (xi*y[j] + x[j]*yi)
+			}
+		}
+		return
+	}
+	ix := kx
+	iy := ky
+	for i := 0; i < n; i++ {
+		jx := kx
+		jy := ky
+		xi := x[ix]
+		yi := y[iy]
+		atmp := a[i*lda:]
+		for j := 0; j <= i; j++ {
+			atmp[j] += alpha * (xi*y[jy] + x[jx]*yi)
+			jx += incX
+			jy += incY
+		}
+		ix += incX
+		iy += incY
+	}
+	return
+}
+
 //TODO: Not yet implemented Level 2 routines.
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
@@ -1544,8 +1630,5 @@ func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap [
 	panic("referenceblas: function not implemented")
 }
 func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
-	panic("referenceblas: function not implemented")
-}
-func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	panic("referenceblas: function not implemented")
 }

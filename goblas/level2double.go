@@ -518,73 +518,94 @@ func (Blas) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 		kx = -(n - 1) * incX
 	}
 
-	switch {
-	default:
-		panic("goblas: unreachable")
-	case tA == blas.NoTrans && ul == blas.Upper:
-		jx := kx + (n-1)*incX
-		for j := n; j >= 0; j-- {
-			if x[jx] != 0 {
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			ix := kx + (n-1)*incX
+			for i := n - 1; i >= 0; i-- {
+				var sum float64
+				jx := ix + incX
+				for j := i + 1; j < n; j++ {
+					sum += x[jx] * a[i*lda+j]
+					jx += incX
+				}
+				x[ix] -= sum
 				if d == blas.NonUnit {
-					x[jx] /= a[lda*j+j]
+					x[ix] /= a[i*lda+i]
 				}
-				tmp := x[jx]
-				ix := jx
-				for i := j - 2; i >= 0; i-- {
-					ix -= incX
-					x[ix] -= tmp * a[lda*i+j]
-				}
-			}
-			jx -= incX
-		}
-	case tA == blas.NoTrans && ul == blas.Lower:
-		jx := kx
-		for j := 0; j < n; j++ {
-			if x[jx] != 0 {
-				if d == blas.NonUnit {
-					x[jx] /= a[lda*j+j]
-				}
-				tmp := x[jx]
-				ix := jx
-				for i := j; i < n; j++ {
-					ix += incX
-					x[ix] -= tmp * a[lda*i+j]
-				}
-			}
-			jx += incX
-		}
-	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
-		jx := kx
-		for j := 0; j < n; j++ {
-			tmp := x[jx]
-			ix := kx
-			for i := 0; i < j-1; i++ {
-				tmp -= a[lda*i+j] * x[ix]
-				ix += incX
-			}
-			if d == blas.NonUnit {
-				tmp /= a[lda*j+j]
-			}
-			x[jx] = tmp
-			jx += incX
-		}
-	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
-		kx += (n - 1) * incX
-		jx := kx
-		for j := n - 1; j >= 0; j-- {
-			tmp := x[jx]
-			ix := kx
-			for i := n - 1; i >= j; i-- {
-				tmp -= a[lda*i+j] * x[ix]
 				ix -= incX
 			}
-			if d == blas.NonUnit {
-				tmp /= a[lda*j+j]
-				x[jx] = tmp
-				jx -= incX
-			}
+			return
 		}
 	}
+	/*
+		switch {
+		default:
+			panic("goblas: unreachable")
+		case tA == blas.NoTrans && ul == blas.Upper:
+			jx := kx + (n-1)*incX
+			for j := n; j >= 0; j-- {
+				if x[jx] != 0 {
+					if d == blas.NonUnit {
+						x[jx] /= a[lda*j+j]
+					}
+					tmp := x[jx]
+					ix := jx
+					for i := j - 2; i >= 0; i-- {
+						ix -= incX
+						x[ix] -= tmp * a[lda*i+j]
+					}
+				}
+				jx -= incX
+			}
+		case tA == blas.NoTrans && ul == blas.Lower:
+			jx := kx
+			for j := 0; j < n; j++ {
+				if x[jx] != 0 {
+					if d == blas.NonUnit {
+						x[jx] /= a[lda*j+j]
+					}
+					tmp := x[jx]
+					ix := jx
+					for i := j; i < n; j++ {
+						ix += incX
+						x[ix] -= tmp * a[lda*i+j]
+					}
+				}
+				jx += incX
+			}
+		case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
+			jx := kx
+			for j := 0; j < n; j++ {
+				tmp := x[jx]
+				ix := kx
+				for i := 0; i < j-1; i++ {
+					tmp -= a[lda*i+j] * x[ix]
+					ix += incX
+				}
+				if d == blas.NonUnit {
+					tmp /= a[lda*j+j]
+				}
+				x[jx] = tmp
+				jx += incX
+			}
+		case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
+			kx += (n - 1) * incX
+			jx := kx
+			for j := n - 1; j >= 0; j-- {
+				tmp := x[jx]
+				ix := kx
+				for i := n - 1; i >= j; i-- {
+					tmp -= a[lda*i+j] * x[ix]
+					ix -= incX
+				}
+				if d == blas.NonUnit {
+					tmp /= a[lda*j+j]
+					x[jx] = tmp
+					jx -= incX
+				}
+			}
+		}
+	*/
 }
 
 // Dsymv  performs the matrix-vector  operation

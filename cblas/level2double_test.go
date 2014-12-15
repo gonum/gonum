@@ -33,3 +33,7 @@ func TestDtbsv(t *testing.T) {
 func TestDsbmv(t *testing.T) {
 	testblas.DsbmvTest(t, blasser)
 }
+
+func TestDtrsv(t *testing.T) {
+	testblas.DtrsvTest(t, blasser)
+}

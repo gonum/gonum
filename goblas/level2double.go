@@ -391,7 +391,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	if n == 0 {
 		return
 	}
-	nonunit := d != blas.Unit
+	nonUnit := d != blas.Unit
 	if n == 1 {
 		x[0] *= a[0]
 		return
@@ -405,7 +405,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 			if incX == 1 {
 				for i := 0; i < n; i++ {
 					var tmp float64
-					if nonunit {
+					if nonUnit {
 						tmp = a[i*lda+i] * x[i]
 					} else {
 						tmp = x[i]
@@ -421,7 +421,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 			ix := kx
 			for i := 0; i < n; i++ {
 				var tmp float64
-				if nonunit {
+				if nonUnit {
 					tmp = a[i*lda+i] * x[ix]
 				} else {
 					tmp = x[ix]
@@ -439,7 +439,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 		if incX == 1 {
 			for i := n - 1; i >= 0; i-- {
 				var tmp float64
-				if nonunit {
+				if nonUnit {
 					tmp += a[i*lda+i] * x[i]
 				} else {
 					tmp = x[i]
@@ -454,7 +454,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 		ix := kx + (n-1)*incX
 		for i := n - 1; i >= 0; i-- {
 			var tmp float64
-			if nonunit {
+			if nonUnit {
 				tmp += a[i*lda+i] * x[ix]
 			} else {
 				tmp = x[ix]
@@ -479,7 +479,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 				for j, v := range atmp {
 					xtmp[j] += xi * v
 				}
-				if nonunit {
+				if nonUnit {
 					x[i] *= a[i*lda+i]
 				}
 			}
@@ -494,7 +494,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 				x[jx] += xi * v
 				jx += incX
 			}
-			if nonunit {
+			if nonUnit {
 				x[ix] *= a[i*lda+i]
 			}
 			ix -= incX
@@ -508,7 +508,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 			for j, v := range atmp {
 				x[j] += xi * v
 			}
-			if nonunit {
+			if nonUnit {
 				x[i] *= a[i*lda+i]
 			}
 		}
@@ -523,7 +523,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 			x[jx] += xi * v
 			jx += incX
 		}
-		if nonunit {
+		if nonUnit {
 			x[ix] *= a[i*lda+i]
 		}
 		ix += incX

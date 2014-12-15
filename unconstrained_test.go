@@ -78,7 +78,7 @@ func (HelicalValley) Df(x, g []float64) {
 	g[2] = 2 * (x[2] + 100*s)
 }
 
-// Biggs' EXP2 function
+// The Biggs' EXP2 function
 // M.C. Biggs, Minimization algorithms making use of non-quadratic properties
 // of the objective function. J. Inst. Maths Applics 8 (1971), 315-327.
 // Dim = 2
@@ -114,7 +114,7 @@ func (BiggsEXP2) Df(x, g []float64) {
 	}
 }
 
-// Biggs' EXP3 function
+// The Biggs' EXP3 function
 // M.C. Biggs, Minimization algorithms making use of non-quadratic properties
 // of the objective function. J. Inst. Maths Applics 8 (1971), 315-327.
 // Dim = 3
@@ -152,7 +152,7 @@ func (BiggsEXP3) Df(x, g []float64) {
 	}
 }
 
-// Biggs' EXP4 function
+// The Biggs' EXP4 function
 // M.C. Biggs, Minimization algorithms making use of non-quadratic properties
 // of the objective function. J. Inst. Maths Applics 8 (1971), 315-327.
 // Dim = 4
@@ -192,7 +192,7 @@ func (BiggsEXP4) Df(x, g []float64) {
 	}
 }
 
-// Biggs' EXP5 function
+// The Biggs' EXP5 function
 // M.C. Biggs, Minimization algorithms making use of non-quadratic properties
 // of the objective function. J. Inst. Maths Applics 8 (1971), 315-327.
 // Dim = 5
@@ -234,7 +234,7 @@ func (BiggsEXP5) Df(x, g []float64) {
 	}
 }
 
-// Biggs' EXP6 function
+// The Biggs' EXP6 function
 // M.C. Biggs, Minimization algorithms making use of non-quadratic properties
 // of the objective function. J. Inst. Maths Applics 8 (1971), 315-327.
 // Dim = 6
@@ -337,7 +337,7 @@ func (g Gaussian) Df(x, grad []float64) {
 	}
 }
 
-// Powell's badly scaled function
+// The Powell's badly scaled function
 // J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
 // ACM Trans.Math. Softw. 7 (1981), 17-41.
 // Dim = 2
@@ -358,6 +358,41 @@ func (Powell) Df(x, grad []float64) {
 
 	grad[0] = 2 * (1e4*f1*x[1] - f2*math.Exp(-x[0]))
 	grad[1] = 2 * (1e4*f1*x[0] - f2*math.Exp(-x[1]))
+}
+
+// The Box' three-dimensional function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = 3
+// X0 = [0, 10, 20]
+// OptX = [1, 10, 1], [10, 1, -1], [a, a, 0]
+// OptF = 0
+type Box struct{}
+
+func (Box) F(x []float64) (sum float64) {
+	for i := 1; i <= 10; i++ {
+		c := float64(i) / 10
+		y := math.Exp(-c) - math.Exp(10*c)
+		f := math.Exp(-c*x[0]) - math.Exp(-c*x[1]) - x[2]*y
+		sum += math.Pow(f, 2)
+	}
+	return sum
+}
+
+func (Box) Df(x, grad []float64) {
+	grad[0] = 0
+	grad[1] = 0
+	grad[2] = 0
+
+	for i := 1; i <= 10; i++ {
+		c := float64(i) / 10
+		y := math.Exp(-c) - math.Exp(10*c)
+		f := math.Exp(-c*x[0]) - math.Exp(-c*x[1]) - x[2]*y
+
+		grad[0] += -2 * f * c * math.Exp(-c*x[0])
+		grad[1] += -2 * f * c * math.Exp(-c*x[1])
+		grad[2] += -2 * f * y
+	}
 }
 
 type Linear struct {

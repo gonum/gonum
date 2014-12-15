@@ -337,6 +337,29 @@ func (g Gaussian) Df(x, grad []float64) {
 	}
 }
 
+// Powell's badly scaled function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = 2
+// X0 = [0, 1]
+// OptX = [1.09815933...e-5, 9.10614674...]
+// OptF = 0
+type Powell struct{}
+
+func (Powell) F(x []float64) float64 {
+	f1 := 1e4*x[0]*x[1] - 1
+	f2 := math.Exp(-x[0]) + math.Exp(-x[1]) - 1.0001
+	return math.Pow(f1, 2) + math.Pow(f2, 2)
+}
+
+func (Powell) Df(x, grad []float64) {
+	f1 := 1e4*x[0]*x[1] - 1
+	f2 := math.Exp(-x[0]) + math.Exp(-x[1]) - 1.0001
+
+	grad[0] = 2 * (1e4*f1*x[1] - f2*math.Exp(-x[0]))
+	grad[1] = 2 * (1e4*f1*x[0] - f2*math.Exp(-x[1]))
+}
+
 type Linear struct {
 	nDim int
 }

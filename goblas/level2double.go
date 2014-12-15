@@ -130,34 +130,57 @@ func (b Blas) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda
 	}
 
 	// Form y := alpha * A * x + y
-	switch {
-
-	default:
-		panic("shouldn't be here")
-
-	case tA == blas.NoTrans:
+	if tA == blas.NoTrans {
+		if incX == 1 {
+			for i := 0; i < m; i++ {
+				var tmp float64
+				atmp := a[lda*i : lda*i+n]
+				for j, v := range atmp {
+					tmp += v * x[j]
+				}
+				y[i] += alpha * tmp
+			}
+			return
+		}
 		iy := ky
 		for i := 0; i < m; i++ {
 			jx := kx
-			var temp float64
-			for j := 0; j < n; j++ {
-				temp += a[lda*i+j] * x[jx]
+			var tmp float64
+			atmp := a[lda*i : lda*i+n]
+			for _, v := range atmp {
+				tmp += v * x[jx]
 				jx += incX
 			}
-			y[iy] += alpha * temp
+			y[iy] += alpha * tmp
 			iy += incY
 		}
-	case tA == blas.Trans || tA == blas.ConjTrans:
-		ix := kx
+		return
+	}
+	// Cases where a is not transposed.
+	if incX == 1 {
 		for i := 0; i < m; i++ {
+			tmp := alpha * x[i]
+			if tmp != 0 {
+				atmp := a[lda*i : lda*i+n]
+				for j, v := range atmp {
+					y[j] += v * tmp
+				}
+			}
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < m; i++ {
+		tmp := alpha * x[ix]
+		if tmp != 0 {
 			jy := ky
-			tmp := alpha * x[ix]
-			for j := 0; j < n; j++ {
-				y[jy] += a[lda*i+j] * tmp
+			atmp := a[lda*i : lda*i+n]
+			for _, v := range atmp {
+				y[jy] += v * tmp
 				jy += incY
 			}
-			ix += incX
 		}
+		ix += incX
 	}
 }
 
@@ -365,23 +388,11 @@ func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []floa
 	}
 }
 
-// DTRMV  performs one of the matrix-vector operations
+// Dtrmv performs one of the matrix-vector operations
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix.
 func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
-	// Verify inputs
-	if tA == blas.NoTrans {
-		tA = blas.Trans
-	} else {
-		tA = blas.NoTrans
-	}
-	if ul == blas.Upper {
-		ul = blas.Lower
-	} else {
-		ul = blas.Upper
-	}
-
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -394,7 +405,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	if n < 0 {
 		panic(nLT0)
 	}
-	if lda > n && lda > 1 {
+	if lda < n {
 		panic(badLda)
 	}
 	if incX == 0 {
@@ -403,80 +414,142 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	if n == 0 {
 		return
 	}
+	nonUnit := d != blas.Unit
+	if n == 1 {
+		x[0] *= a[0]
+		return
+	}
 	var kx int
 	if incX <= 0 {
 		kx = -(n - 1) * incX
 	}
-	switch {
-	default:
-		panic("unreachable")
-	case tA == blas.NoTrans && ul == blas.Upper:
-		jx := kx
-		for j := 0; j < n; j++ {
-			ja := j * lda
-			if x[jx] != 0 {
-				temp := x[jx]
-				ix := kx
-				for i := 0; i < j; i++ {
-					x[ix] += temp * a[i+ja]
-					ix += incX
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			if incX == 1 {
+				for i := 0; i < n; i++ {
+					var tmp float64
+					if nonUnit {
+						tmp = a[i*lda+i] * x[i]
+					} else {
+						tmp = x[i]
+					}
+					xtmp := x[i+1:]
+					for j, v := range a[i*lda+i+1 : i*lda+n] {
+						tmp += v * xtmp[j]
+					}
+					x[i] = tmp
 				}
-				if d == blas.NonUnit {
-					x[jx] *= a[j+ja]
+				return
+			}
+			ix := kx
+			for i := 0; i < n; i++ {
+				var tmp float64
+				if nonUnit {
+					tmp = a[i*lda+i] * x[ix]
+				} else {
+					tmp = x[ix]
 				}
-			}
-			jx += incX
-		}
-	case tA == blas.NoTrans && ul == blas.Lower:
-		kx += (n - 1) * incX
-		jx := kx
-		for j := n - 1; j >= 0; j-- {
-			ja := j * lda
-			if x[jx] != 0 {
-				tmp := x[jx]
-				ix := kx
-				for i := n - 1; i > j; i-- {
-					x[ix] += tmp * a[i+ja]
-					ix -= incX
+				jx := ix + incX
+				for _, v := range a[i*lda+i+1 : i*lda+n] {
+					tmp += v * x[jx]
+					jx += incX
 				}
-				if d == blas.NonUnit {
-					x[jx] *= a[j+ja]
-				}
-			}
-			jx -= incX
-		}
-	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Upper:
-		jx := kx + (n-1)*incX
-		for j := n - 1; j >= 0; j-- {
-			ja := j * lda
-			tmp := x[jx]
-			ix := jx
-			if d == blas.NonUnit {
-				tmp *= a[j+ja]
-			}
-			for i := j - 1; i >= 0; i-- {
-				ix -= incX
-				tmp += a[i+ja] * x[ix]
-			}
-			x[jx] = tmp
-			jx -= incX
-		}
-	case (tA == blas.Trans || tA == blas.ConjTrans) && ul == blas.Lower:
-		jx := kx
-		for j := 0; j < n; j++ {
-			tmp := x[jx]
-			ix := jx
-			ja := j * lda
-			if d == blas.NonUnit {
-				tmp *= a[j+ja]
-			}
-			for i := j + 1; i < n; i++ {
+				x[ix] = tmp
 				ix += incX
-				tmp += a[i+ja] * x[ix]
 			}
-			x[jx] = tmp
+			return
+		}
+		if incX == 1 {
+			for i := n - 1; i >= 0; i-- {
+				var tmp float64
+				if nonUnit {
+					tmp += a[i*lda+i] * x[i]
+				} else {
+					tmp = x[i]
+				}
+				for j, v := range a[i*lda : i*lda+i] {
+					tmp += v * x[j]
+				}
+				x[i] = tmp
+			}
+			return
+		}
+		ix := kx + (n-1)*incX
+		for i := n - 1; i >= 0; i-- {
+			var tmp float64
+			if nonUnit {
+				tmp += a[i*lda+i] * x[ix]
+			} else {
+				tmp = x[ix]
+			}
+			jx := kx
+			for _, v := range a[i*lda : i*lda+i] {
+				tmp += v * x[jx]
+				jx += incX
+			}
+			x[ix] = tmp
+			ix -= incX
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := n - 1; i >= 0; i-- {
+				xi := x[i]
+				atmp := a[i*lda+i+1 : i*lda+n]
+				xtmp := x[i+1 : n]
+				for j, v := range atmp {
+					xtmp[j] += xi * v
+				}
+				if nonUnit {
+					x[i] *= a[i*lda+i]
+				}
+			}
+			return
+		}
+		ix := kx + (n-1)*incX
+		for i := n - 1; i >= 0; i-- {
+			xi := x[ix]
+			jx := kx + (i+1)*incX
+			atmp := a[i*lda+i+1 : i*lda+n]
+			for _, v := range atmp {
+				x[jx] += xi * v
+				jx += incX
+			}
+			if nonUnit {
+				x[ix] *= a[i*lda+i]
+			}
+			ix -= incX
+		}
+		return
+	}
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			xi := x[i]
+			atmp := a[i*lda : i*lda+i]
+			for j, v := range atmp {
+				x[j] += xi * v
+			}
+			if nonUnit {
+				x[i] *= a[i*lda+i]
+			}
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < n; i++ {
+		xi := x[ix]
+		jx := kx
+		atmp := a[i*lda : i*lda+i]
+		for _, v := range atmp {
+			x[jx] += xi * v
 			jx += incX
 		}
+		if nonUnit {
+			x[ix] *= a[i*lda+i]
+		}
+		ix += incX
 	}
 }
 
@@ -679,69 +752,112 @@ func (b Blas) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x 
 	// Set up start points
 	var kx, ky int
 	if incX > 0 {
-		kx = 1
+		kx = 0
 	} else {
 		kx = -(n - 1) * incX
 	}
 	if incY > 0 {
-		ky = 1
+		ky = 0
 	} else {
 		ky = -(n - 1) * incY
 	}
 
 	// Form y = beta * y
 	if beta != 1 {
-		b.Dscal(n, beta, y, incY)
+		if incY > 0 {
+			b.Dscal(n, beta, y, incY)
+		} else {
+			b.Dscal(n, beta, y, -incY)
+		}
 	}
 
 	if alpha == 0 {
 		return
 	}
 
-	// TODO: Need to think about changing the major and minor
-	// looping when row major (help with cache misses)
+	if n == 1 {
+		y[0] += alpha * a[0] * x[0]
+		return
+	}
 
-	// Form y = Ax + y
-	switch {
-	default:
-		panic("goblas: unreachable")
-	case ul == blas.Upper:
-		jx := kx
-		jy := ky
-		for j := 0; j < n; j++ {
-			tmp1 := alpha * x[jx]
-			var tmp2 float64
-			ix := kx
+	if ul == blas.Upper {
+		if incX == 1 {
 			iy := ky
-			for i := 0; i < j-2; i++ {
-				y[iy] += tmp1 * a[i*lda+j]
-				tmp2 += a[i*lda+j] * x[ix]
-				ix += incX
+			for i := 0; i < n; i++ {
+				xv := x[i] * alpha
+				sum := x[i] * a[i*lda+i]
+				jy := ky + (i+1)*incY
+				atmp := a[i*lda+i+1 : i*lda+n]
+				for j, v := range atmp {
+					jp := j + i + 1
+					sum += x[jp] * v
+					y[jy] += xv * v
+					jy += incY
+				}
+				y[iy] += alpha * sum
 				iy += incY
 			}
-			y[jy] += tmp1*a[j*lda+j] + alpha*tmp2
-			jx += incX
-			jy += incY
+			return
 		}
-	case ul == blas.Lower:
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			xv := x[ix] * alpha
+			sum := x[ix] * a[i*lda+i]
+			jx := kx + (i+1)*incX
+			jy := ky + (i+1)*incY
+			atmp := a[i*lda+i+1 : i*lda+n]
+			for _, v := range atmp {
+				sum += x[jx] * v
+				y[jy] += xv * v
+				jx += incX
+				jy += incY
+			}
+			y[iy] += alpha * sum
+			ix += incX
+			iy += incY
+		}
+		return
+	}
+	// Cases where a is lower triangular.
+	if incX == 1 {
+		iy := ky
+		for i := 0; i < n; i++ {
+			jy := ky
+			xv := alpha * x[i]
+			atmp := a[i*lda : i*lda+i]
+			var sum float64
+			for j, v := range atmp {
+				sum += x[j] * v
+				y[jy] += xv * v
+				jy += incY
+			}
+			sum += x[i] * a[i*lda+i]
+			sum *= alpha
+			y[iy] += sum
+			iy += incY
+		}
+		return
+	}
+	ix := kx
+	iy := ky
+	for i := 0; i < n; i++ {
 		jx := kx
 		jy := ky
-		for j := 0; j < n; j++ {
-			tmp1 := alpha * x[jx]
-			var tmp2 float64
-			y[jy] += tmp1 * a[j*lda+j]
-			ix := jx
-			iy := jy
-			for i := j; i < n; i++ {
-				ix += incX
-				iy += incY
-				y[iy] += tmp1 * a[i*lda+j]
-				tmp2 += a[i*lda+j] * x[ix]
-			}
-			y[jy] += alpha * tmp2
+		xv := alpha * x[ix]
+		atmp := a[i*lda : i*lda+i]
+		var sum float64
+		for _, v := range atmp {
+			sum += x[jx] * v
+			y[jy] += xv * v
 			jx += incX
 			jy += incY
 		}
+		sum += x[ix] * a[i*lda+i]
+		sum *= alpha
+		y[iy] += sum
+		ix += incX
+		iy += incY
 	}
 }
 
@@ -1397,6 +1513,89 @@ func (b Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int,
 	return
 }
 
+// Dsyr computes a = alpha*x*x^T + a where a is an nxn symmetric matrix
+func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(negInc)
+	}
+	if lda < n {
+		panic(badLda)
+	}
+	if alpha == 0 || n == 0 {
+		return
+	}
+
+	lenX := n
+	var kx int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(lenX - 1) * incX
+	}
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				tmp := x[i] * alpha
+				if tmp != 0 {
+					atmp := a[i*lda+i : i*lda+n]
+					xtmp := x[i:n]
+					for j, v := range xtmp {
+						atmp[j] += v * tmp
+					}
+				}
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			tmp := x[ix] * alpha
+			if tmp != 0 {
+				jx := ix
+				atmp := a[i*lda:]
+				for j := i; j < n; j++ {
+					atmp[j] += x[jx] * tmp
+					jx += incX
+				}
+			}
+			ix += incX
+		}
+		return
+	}
+	// Cases where a is lower triangular.
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			tmp := x[i] * alpha
+			if tmp != 0 {
+				atmp := a[i*lda:]
+				xtmp := x[:i+1]
+				for j, v := range xtmp {
+					atmp[j] += tmp * v
+				}
+			}
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < n; i++ {
+		tmp := x[ix] * alpha
+		if tmp != 0 {
+			atmp := a[i*lda:]
+			jx := kx
+			for j := 0; j < i+1; j++ {
+				atmp[j] += tmp * x[jx]
+				jx += incX
+			}
+		}
+		ix += incX
+	}
+}
+
 //TODO: Not yet implemented Level 2 routines.
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
@@ -1408,9 +1607,6 @@ func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap [
 	panic("referenceblas: function not implemented")
 }
 func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
-	panic("referenceblas: function not implemented")
-}
-func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
 	panic("referenceblas: function not implemented")
 }
 func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {

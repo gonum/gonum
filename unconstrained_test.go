@@ -395,6 +395,40 @@ func (Box) Df(x, grad []float64) {
 	}
 }
 
+// Variably dimensioned function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = n
+// X0 = [..., (n-i)/n, ...]
+// OptX = [1, ..., 1]
+// OptF = 0
+type VariablyDimensioned struct{}
+
+func (v VariablyDimensioned) F(x []float64) (sum float64) {
+	for i := 0; i < len(x); i++ {
+		sum += math.Pow(x[i]-1, 2)
+	}
+	s := 0.0
+	for i := 0; i < len(x); i++ {
+		s += float64(i+1) * (x[i] - 1)
+	}
+	sum += math.Pow(s, 2) + math.Pow(s, 4)
+	return sum
+}
+
+func (v VariablyDimensioned) Df(x, grad []float64) {
+	for i := 0; i < len(grad); i++ {
+		grad[i] = 0
+	}
+	s := 0.0
+	for i := 0; i < len(x); i++ {
+		s += float64(i+1) * (x[i] - 1)
+	}
+	for i := 0; i < len(grad); i++ {
+		grad[i] = 2 * ((x[i] - 1) + s*float64(i+1)*(1+2*math.Pow(s, 2)))
+	}
+}
+
 type Linear struct {
 	nDim int
 }

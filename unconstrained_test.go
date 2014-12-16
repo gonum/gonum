@@ -429,6 +429,73 @@ func (v VariablyDimensioned) Df(x, grad []float64) {
 	}
 }
 
+// The Watson function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// For Dim = 9, the problem of minimizing the Watson function is very ill conditioned.
+// Dim = n, 2 <= n <= 31
+// X0 = [0, ..., 0]
+// OptX = [1, ..., 1]
+// For Dim = 6 also:
+// OptX = [-0.015725, 1.012435, -0.232992, 1.260430, -1.513729, 0.992996]
+// OptF = 2.287687...e-3
+// For Dim = 9 also:
+// OptX = [-0.000015, 0.999790, 0.014764, 0.146342, 1.000821, -2.617731, 4.104403, -3.143612, 1.052627]
+// OptF = 1.39976...e-6
+// For Dim = 12 also:
+// OptF = 4.72238...e-10
+type Watson struct{}
+
+func (Watson) F(x []float64) (sum float64) {
+	for i := 1; i <= 29; i++ {
+		c := float64(i) / 29
+
+		s1 := 0.0
+		for j := 1; j < len(x); j++ {
+			s1 += float64(j) * x[j] * math.Pow(c, float64(j-1))
+		}
+
+		s2 := 0.0
+		for j := 0; j < len(x); j++ {
+			s2 += x[j] * math.Pow(c, float64(j))
+		}
+		s2 = math.Pow(s2, 2)
+
+		sum += math.Pow(s1-s2-1, 2)
+	}
+	sum += math.Pow(x[0], 2)
+	sum += math.Pow(x[1]-math.Pow(x[0], 2)-1, 2)
+	return sum
+}
+
+func (Watson) Df(x, grad []float64) {
+	for i := 0; i < len(grad); i++ {
+		grad[i] = 0
+	}
+
+	for i := 1; i <= 29; i++ {
+		c := float64(i) / 29
+
+		s1 := 0.0
+		for j := 1; j < len(x); j++ {
+			s1 += float64(j) * x[j] * math.Pow(c, float64(j-1))
+		}
+
+		s2 := 0.0
+		for j := 0; j < len(x); j++ {
+			s2 += x[j] * math.Pow(c, float64(j))
+		}
+
+		t := s1 - math.Pow(s2, 2) - 1
+		for j := 0; j < len(x); j++ {
+			grad[j] += 2 * t * math.Pow(c, float64(j-1)) * (float64(j) - 2*s2*c)
+		}
+	}
+	t := x[1] - math.Pow(x[0], 2) - 1
+	grad[0] += 2 * (1 - 2*t) * x[0]
+	grad[1] += 2 * t
+}
+
 type Linear struct {
 	nDim int
 }

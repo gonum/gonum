@@ -596,6 +596,31 @@ func (Penalty2) Df(x, grad []float64) {
 	grad[0] += 2 * (x[0] - 0.2)
 }
 
+// The Brown's badly scaled function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = 2
+// X0 = [1, 1]
+// OptX = [1e6, 2*1e-6]
+// OptF = 0
+type Brown struct{}
+
+func (Brown) F(x []float64) (sum float64) {
+	sum = math.Pow(x[0]-1e6, 2)
+	sum += math.Pow(x[1]-2e-6, 2)
+	sum += math.Pow(x[0]*x[1]-2, 2)
+	return sum
+}
+
+func (Brown) Df(x, g []float64) {
+	f1 := x[0] - 1e6
+	f2 := x[1] - 2e-6
+	f3 := x[0]*x[1] - 2
+
+	g[0] = 2*f1 + 2*f3*x[1]
+	g[1] = 2*f2 + 2*f3*x[0]
+}
+
 type Linear struct {
 	nDim int
 }

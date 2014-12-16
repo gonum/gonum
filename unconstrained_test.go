@@ -534,6 +534,68 @@ func (Penalty1) Df(x, grad []float64) {
 	}
 }
 
+// Penalty function #2
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = n
+// X0 = [0.5, ..., 0.5]
+// For Dim = 4:
+// OptF = 9.37629...e-6
+// For Dim = 10:
+// OptF = 2.93660...e-4
+type Penalty2 struct{}
+
+func (Penalty2) F(x []float64) (sum float64) {
+	dim := len(x)
+
+	s := 0.0
+	for i := 0; i < dim; i++ {
+		s += float64(dim-i) * math.Pow(x[i], 2)
+	}
+	s -= 1
+
+	for i := 1; i < dim; i++ {
+		yi := math.Exp(float64(i+1)/10) + math.Exp(float64(i)/10)
+		f := math.Exp(x[i]/10) + math.Exp(x[i-1]/10) - yi
+		sum += math.Pow(f, 2)
+	}
+	for i := 1; i < dim; i++ {
+		f := math.Exp(x[i]/10) - math.Exp(-1.0/10)
+		sum += math.Pow(f, 2)
+	}
+	sum *= 1e-5
+
+	sum += math.Pow(x[0]-0.2, 2)
+	sum += math.Pow(s, 2)
+
+	return sum
+}
+
+func (Penalty2) Df(x, grad []float64) {
+	dim := len(x)
+
+	s := 0.0
+	for i := 0; i < dim; i++ {
+		s += float64(dim-i) * math.Pow(x[i], 2)
+	}
+	s -= 1
+
+	for i := 0; i < dim; i++ {
+		grad[i] = 4 * s * float64(dim-i) * x[i]
+	}
+	for i := 1; i < dim; i++ {
+		yi := math.Exp(float64(i+1)/10) + math.Exp(float64(i)/10)
+		f := math.Exp(x[i]/10) + math.Exp(x[i-1]/10) - yi
+		grad[i] += 1e-5 * f * math.Exp(x[i]/10) / 5
+		grad[i-1] += 1e-5 * f * math.Exp(x[i-1]/10) / 5
+	}
+	for i := 1; i < dim; i++ {
+		f := math.Exp(x[i]/10) - math.Exp(-1.0/10)
+		grad[i] += 1e-5 * f * math.Exp(x[i]/10) / 5
+	}
+	grad[0] += 2 * (x[0] - 0.2)
+}
+
 type Linear struct {
 	nDim int
 }

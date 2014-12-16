@@ -218,7 +218,7 @@ func (Blas) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, in
 		ky = -(n - 1) * incY
 	}
 
-	if incY > 0 {
+	if incX > 0 {
 		kx = 0
 	} else {
 		kx = -(m - 1) * incX

@@ -706,6 +706,58 @@ func (GulfRD) Df(x, grad []float64) {
 	}
 }
 
+// The Trigonometric function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = n
+// X0 = [1/n, ..., 1/n]
+//
+// OptF = 0 (global)
+// OptX = [0.0429645656464827, 0.043976286943042, 0.0450933996565844, 0.0463389157816542, 0.0477443839560646,
+//         0.0493547352444078, 0.0512373449259557, 0.195209463715277, 0.164977664720328, 0.0601485854398078]
+//
+// OptF = 2.79506e-5 (local)
+// OptX = [0.0551509, 0.0568408, 0.0587639, 0.0609906, 0.0636263,
+//         0.0668432, 0.208162, 0.164363, 0.0850068, 0.0914314]
+type Trigonometric struct{}
+
+func (Trigonometric) F(x []float64) (sum float64) {
+	dim := len(x)
+
+	s1 := 0.0
+	for j := 0; j < dim; j++ {
+		s1 += math.Cos(x[j])
+	}
+	for i := 0; i < dim; i++ {
+		f := float64(dim+i) - float64(i)*math.Cos(x[i]) - math.Sin(x[i]) - s1
+		sum += math.Pow(f, 2)
+	}
+
+	return sum
+}
+
+func (Trigonometric) Df(x, grad []float64) {
+	dim := len(x)
+	for i := 0; i < dim; i++ {
+		grad[i] = 0
+	}
+
+	s1 := 0.0
+	for j := 0; j < dim; j++ {
+		s1 += math.Cos(x[j])
+	}
+
+	s2 := 0.0
+	for i := 0; i < dim; i++ {
+		f := float64(dim+i) - float64(i)*math.Cos(x[i]) - math.Sin(x[i]) - s1
+		s2 += f
+		grad[i] = 2 * f * (float64(i)*math.Sin(x[i]) - math.Cos(x[i]))
+	}
+	for i := 0; i < dim; i++ {
+		grad[i] += 2 * s2 * math.Sin(x[i])
+	}
+}
+
 type Linear struct {
 	nDim int
 }

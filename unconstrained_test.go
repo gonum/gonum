@@ -496,6 +496,44 @@ func (Watson) Df(x, grad []float64) {
 	grad[1] += 2 * t
 }
 
+// Penalty function #1
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = n
+// X0 = [..., i-1, i, i+1...]
+// For Dim = 4:
+// OptF = 2.2499775...e-5
+// For Dim = 10:
+// OptF = 7.0876515...e-5
+type Penalty1 struct{}
+
+func (Penalty1) F(x []float64) (sum float64) {
+	for i := 0; i < len(x); i++ {
+		sum += math.Pow(x[i]-1, 2)
+	}
+	sum *= 1e-5
+
+	s := 0.0
+	for i := 0; i < len(x); i++ {
+		s += math.Pow(x[i], 2)
+	}
+	sum += math.Pow(s-0.25, 2)
+
+	return sum
+}
+
+func (Penalty1) Df(x, grad []float64) {
+	s := 0.0
+	for i := 0; i < len(x); i++ {
+		s += math.Pow(x[i], 2)
+	}
+	s -= 0.25
+
+	for i := 0; i < len(grad); i++ {
+		grad[i] = 2 * (2*s*x[i] + 1e-5*(x[i]-1))
+	}
+}
+
 type Linear struct {
 	nDim int
 }

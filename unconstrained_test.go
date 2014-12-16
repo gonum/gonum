@@ -857,19 +857,17 @@ func (Wood) Df(x, grad []float64) {
 	grad[3] = 2 * (90*f3 + 10*f5 - 0.1*f6)
 }
 
-type Linear struct {
-	nDim int
-}
+// The linear function
+type Linear struct{}
 
-func (l Linear) F(x []float64) float64 {
+func (Linear) F(x []float64) float64 {
 	return floats.Sum(x)
 }
 
-func (l Linear) FDf(x []float64, deriv []float64) float64 {
-	for i := range deriv {
-		deriv[i] = 1
+func (Linear) Df(x, grad []float64) {
+	for i := range grad {
+		grad[i] = 1
 	}
-	return floats.Sum(x)
 }
 
 func TestMinimize(t *testing.T) {

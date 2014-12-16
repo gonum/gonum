@@ -19,36 +19,6 @@ func init() {
 	mat64.Register(goblas.Blas{})
 }
 
-type Rosenbrock struct {
-	nDim int
-}
-
-func (r Rosenbrock) F(x []float64) (sum float64) {
-	deriv := make([]float64, len(x))
-	return r.FDf(x, deriv)
-}
-
-func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
-	sum = 0
-
-	for i := range deriv {
-		deriv[i] = 0
-	}
-
-	for i := 0; i < len(x)-1; i++ {
-		sum += math.Pow(1-x[i], 2) + 100*math.Pow(x[i+1]-math.Pow(x[i], 2), 2)
-	}
-	for i := 0; i < len(x)-1; i++ {
-		deriv[i] += -1 * 2 * (1 - x[i])
-		deriv[i] += 2 * 100 * (x[i+1] - math.Pow(x[i], 2)) * (-2 * x[i])
-	}
-	for i := 1; i < len(x); i++ {
-		deriv[i] += 2 * 100 * (x[i] - math.Pow(x[i-1], 2))
-	}
-
-	return sum
-}
-
 // The Fletcher-Powell helical valley function
 // Dim = 3
 // X0 = [-1, 0, 0]
@@ -755,6 +725,36 @@ func (Trigonometric) Df(x, grad []float64) {
 	}
 	for i := 0; i < dim; i++ {
 		grad[i] += 2 * s2 * math.Sin(x[i])
+	}
+}
+
+// The extended Rosenbrock function
+// Very difficult to minimize if the starting point is far from the minimum.
+// Dim = n
+// X0 = [-1.2, 1] for Dim = 2
+// OptF = 0 (global)
+// OptX = [1, ..., 1]
+type Rosenbrock struct{}
+
+func (Rosenbrock) F(x []float64) (sum float64) {
+	for i := 0; i < len(x)-1; i++ {
+		sum += math.Pow(1-x[i], 2) + 100*math.Pow(x[i+1]-math.Pow(x[i], 2), 2)
+	}
+	return sum
+}
+
+func (Rosenbrock) Df(x, grad []float64) {
+	dim := len(x)
+	for i := range grad {
+		grad[i] = 0
+	}
+
+	for i := 0; i < dim-1; i++ {
+		grad[i] -= 2 * (1 - x[i])
+		grad[i] -= 400 * (x[i+1] - math.Pow(x[i], 2)) * x[i]
+	}
+	for i := 1; i < dim; i++ {
+		grad[i] += 200 * (x[i] - math.Pow(x[i-1], 2))
 	}
 }
 

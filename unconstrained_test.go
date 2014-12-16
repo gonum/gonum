@@ -823,6 +823,40 @@ func (Beale) Df(x, grad []float64) {
 	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*math.Pow(x[1], 2))
 }
 
+// The Wood function
+// Dim = 4
+// X0 = [-3, -1, -3, -1]
+// OptF = 0
+// OptX = [1, 1, 1, 1]
+type Wood struct{}
+
+func (Wood) F(x []float64) (sum float64) {
+	f1 := x[1] - math.Pow(x[0], 2)
+	f2 := 1 - x[0]
+	f3 := x[3] - math.Pow(x[2], 2)
+	f4 := 1 - x[2]
+	f5 := x[1] + x[3] - 2
+	f6 := x[2] - x[3]
+
+	sum = 100*math.Pow(f1, 2) + math.Pow(f2, 2) + 90*math.Pow(f3, 2)
+	sum += math.Pow(f4, 2) + 10*math.Pow(f5, 2) + 0.1*math.Pow(f6, 2)
+	return sum
+}
+
+func (Wood) Df(x, grad []float64) {
+	f1 := x[1] - math.Pow(x[0], 2)
+	f2 := 1 - x[0]
+	f3 := x[3] - math.Pow(x[2], 2)
+	f4 := 1 - x[2]
+	f5 := x[1] + x[3] - 2
+	f6 := x[2] - x[3]
+
+	grad[0] = -2 * (200*f1*x[0] + f2)
+	grad[1] = 2 * (100*f1 + 10*f5)
+	grad[2] = 2 * (-180*f3*x[2] - f4 + 0.1*f6)
+	grad[3] = 2 * (90*f3 + 10*f5 - 0.1*f6)
+}
+
 type Linear struct {
 	nDim int
 }

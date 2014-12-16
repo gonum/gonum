@@ -758,6 +758,48 @@ func (Rosenbrock) Df(x, grad []float64) {
 	}
 }
 
+// The Extended Powell singular function
+// Dim = n multiple of 4
+// X0 = [3, -1, 0, 1, 3, -1, 0, 1, ...]
+// OptF = 0
+// OptX = [0, ..., 0]
+type ExtendedPowell struct{}
+
+func (ExtendedPowell) F(x []float64) (sum float64) {
+	dim := len(x)
+	if dim%4 != 0 {
+		panic("dimension of the problem must be a multiple of 4")
+	}
+
+	for i := 0; i < dim; i += 4 {
+		f1 := x[i] + 10*x[i+1]
+		f2 := x[i+2] - x[i+3]
+		f3 := math.Pow(x[i+1]-2*x[i+2], 2)
+		f4 := math.Pow(x[i]-x[i+3], 2)
+		sum += math.Pow(f1, 2) + 5*math.Pow(f2, 2) + math.Pow(f3, 2) + 10*math.Pow(f4, 2)
+	}
+	return sum
+}
+
+func (ExtendedPowell) Df(x, grad []float64) {
+	dim := len(x)
+	if dim%4 != 0 {
+		panic("dimension of the problem must be a multiple of 4")
+	}
+
+	for i := 0; i < dim; i += 4 {
+		f1 := x[i] + 10*x[i+1]
+		f2 := x[i+2] - x[i+3]
+		f3 := math.Pow(x[i+1]-2*x[i+2], 2)
+		f4 := math.Pow(x[i]-x[i+3], 2)
+
+		grad[i] = 2*f1 + 40*f4*(x[i]-x[i+3])
+		grad[i+1] = 20*f1 + 4*f3*(x[i+1]-2*x[i+2])
+		grad[i+2] = 10*f2 - 8*f3*(x[i+1]-2*x[i+2])
+		grad[i+3] = -10*f2 - 40*f4*(x[i]-x[i+3])
+	}
+}
+
 type Linear struct {
 	nDim int
 }

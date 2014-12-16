@@ -657,6 +657,55 @@ func (BrownDennis) Df(x, grad []float64) {
 	}
 }
 
+// The Gulf R&D function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = 3
+// X0 = [5, 2.5, 0.15]
+// OptF = 0 (global)
+// OptX = [50, 25, 1.5]
+//
+// OptF = 0.038 (local)
+// OptX = [99.89537833835886, 60.61453903025014, 9.16124389236433]
+// This local minimum is very flat and the minimizer is surrounded by a
+// "plateau", where the gradient is zero everywhere and the function equals
+// 0.0385.
+//
+// OptF = 0.038 (local)
+// OptX = [201.662589489426, 60.616331504682, 10.224891158489]
+type GulfRD struct{}
+
+func (GulfRD) F(x []float64) (sum float64) {
+	for i := 0; i < 100; i++ {
+		c := float64(i+1) / 100
+		yi := 25 + math.Pow(-50*math.Log(c), 2.0/3.0)
+		d := math.Abs(yi - x[1])
+		e := math.Pow(d, x[2]) / x[0]
+		f := math.Exp(-e) - c
+
+		sum += math.Pow(f, 2)
+	}
+	return sum
+}
+
+func (GulfRD) Df(x, grad []float64) {
+	for i := 0; i < len(grad); i++ {
+		grad[i] = 0
+	}
+
+	for i := 0; i < 100; i++ {
+		c := float64(i+1) / 100
+		yi := 25 + math.Pow(-50*math.Log(c), 2.0/3.0)
+		d := math.Abs(yi - x[1])
+		e := math.Pow(d, x[2]) / x[0]
+		f := math.Exp(-e) - c
+
+		grad[0] += 2 * f * math.Exp(-e) * math.Pow(d, x[2]) / math.Pow(x[0], 2)
+		grad[1] += 2 * f * math.Exp(-e) * e * x[2] / d
+		grad[2] -= 2 * f * math.Exp(-e) * e * math.Log(d)
+	}
+}
+
 type Linear struct {
 	nDim int
 }

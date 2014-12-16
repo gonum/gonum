@@ -800,6 +800,29 @@ func (ExtendedPowell) Df(x, grad []float64) {
 	}
 }
 
+// The Beale function
+// Dim = 2
+// X0 = [1, 1]
+// OptF = 0
+// OptX = [3, 0.5]
+type Beale struct{}
+
+func (Beale) F(x []float64) (sum float64) {
+	f1 := 1.5 - x[0]*(1-x[1])
+	f2 := 2.25 - x[0]*(1-math.Pow(x[1], 2))
+	f3 := 2.625 - x[0]*(1-math.Pow(x[1], 3))
+	return math.Pow(f1, 2) + math.Pow(f2, 2) + math.Pow(f3, 2)
+}
+
+func (Beale) Df(x, grad []float64) {
+	f1 := 1.5 - x[0]*(1-x[1])
+	f2 := 2.25 - x[0]*(1-math.Pow(x[1], 2))
+	f3 := 2.625 - x[0]*(1-math.Pow(x[1], 3))
+
+	grad[0] = -2 * (f1*(1-x[1]) + f2*(1-math.Pow(x[1], 2)) + f3*(1-math.Pow(x[1], 3)))
+	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*math.Pow(x[1], 2))
+}
+
 type Linear struct {
 	nDim int
 }

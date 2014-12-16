@@ -621,6 +621,42 @@ func (Brown) Df(x, g []float64) {
 	g[1] = 2*f2 + 2*f3*x[0]
 }
 
+// The Brown and Dennis function
+// J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
+// ACM Trans.Math. Softw. 7 (1981), 17-41.
+// Dim = 4
+// X0 = [25, 5, -5, -1]
+// OptF = 85822.2
+type BrownDennis struct{}
+
+func (BrownDennis) F(x []float64) (sum float64) {
+	for i := 0; i < 20; i++ {
+		c := float64(i+1) / 5
+		d1 := x[0] + c*x[1] - math.Exp(c)
+		d2 := x[2] + x[3]*math.Sin(c) - math.Cos(c)
+		f := math.Pow(d1, 2) + math.Pow(d2, 2)
+		sum += math.Pow(f, 2)
+	}
+	return sum
+}
+
+func (BrownDennis) Df(x, grad []float64) {
+	for i := 0; i < len(grad); i++ {
+		grad[i] = 0
+	}
+
+	for i := 0; i < 20; i++ {
+		c := float64(i+1) / 5
+		d1 := x[0] + c*x[1] - math.Exp(c)
+		d2 := x[2] + x[3]*math.Sin(c) - math.Cos(c)
+		f := math.Pow(d1, 2) + math.Pow(d2, 2)
+		grad[0] += 4 * f * d1
+		grad[1] += 4 * f * d1 * c
+		grad[2] += 4 * f * d2
+		grad[3] += 4 * f * d2 * math.Sin(c)
+	}
+}
+
 type Linear struct {
 	nDim int
 }

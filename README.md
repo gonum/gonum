@@ -1,4 +1,4 @@
-# Gonum Optimize
+# Gonum Optimize [![Build Status](https://travis-ci.org/gonum/optimize.svg)](https://travis-ci.org/gonum/optimize) [![Coverage Status](https://img.shields.io/coveralls/gonum/optimize.svg)](https://coveralls.io/r/gonum/optimize)
 
 This is an optimization package for the Go language. More documentation can be seen at godoc.org/github.com/gonum/optimize
 

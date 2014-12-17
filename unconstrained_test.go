@@ -935,7 +935,7 @@ func testMinimize(t *testing.T, method Method) {
 		Settings *Settings
 	}{
 		{
-			F:      Rosenbrock{2},
+			F:      Rosenbrock{},
 			X:      []float64{15, 10},
 			OptVal: 0,
 			OptLoc: []float64{1, 1},
@@ -944,7 +944,7 @@ func testMinimize(t *testing.T, method Method) {
 			Settings: DefaultSettings(),
 		},
 		{
-			F:      Rosenbrock{4},
+			F:      Rosenbrock{},
 			X:      []float64{-150, 100, 5, -6},
 			OptVal: 0,
 			OptLoc: []float64{1, 1, 1, 1},
@@ -956,7 +956,7 @@ func testMinimize(t *testing.T, method Method) {
 			},
 		},
 		{
-			F:      Rosenbrock{2},
+			F:      Rosenbrock{},
 			X:      []float64{15, 10},
 			OptVal: 0,
 			OptLoc: []float64{1, 1},
@@ -968,7 +968,7 @@ func testMinimize(t *testing.T, method Method) {
 			},
 		},
 		{
-			F:      Rosenbrock{2},
+			F:      Rosenbrock{},
 			X:      []float64{-1.2, 1},
 			OptVal: 0,
 			OptLoc: []float64{1, 1},

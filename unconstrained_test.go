@@ -28,7 +28,7 @@ type HelicalValley struct{}
 
 func (HelicalValley) F(x []float64) float64 {
 	θ := 0.5 * math.Atan2(x[1], x[0]) / math.Pi
-	r := math.Sqrt(math.Pow(x[0], 2) + math.Pow(x[1], 2))
+	r := math.Hypot(x[0], x[1])
 
 	f1 := 10 * (x[2] - 10*θ)
 	f2 := 10 * (r - 1)
@@ -39,7 +39,7 @@ func (HelicalValley) F(x []float64) float64 {
 
 func (HelicalValley) Df(x, g []float64) {
 	θ := 0.5 * math.Atan2(x[1], x[0]) / math.Pi
-	r := math.Sqrt(math.Pow(x[0], 2) + math.Pow(x[1], 2))
+	r := math.Hypot(x[0], x[1])
 	s := x[2] - 10*θ
 	t := 5 * s / math.Pow(r, 2) / math.Pi
 

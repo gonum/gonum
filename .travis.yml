@@ -6,7 +6,6 @@ go:
 
 env:
   global: 
-  matrix:
     secure: RabyVSnmMellGkWJoW60cVv09St/+plwTDQ7VgxrA59USNSTr30I2abfowW2yK5NfhzsCJGSC7zrEG7k88P5T0f3Mm/EvfNcMUsSXr7LKegugGBoAlY1hpqGbZpr6CFeD6FrMbCmteZ2fn50NH0Tq1ScUaXSazS+fmQ6Pb1oN5s=
     
 before_install:

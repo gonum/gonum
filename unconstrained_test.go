@@ -34,14 +34,14 @@ func (HelicalValley) F(x []float64) float64 {
 	f2 := 10 * (r - 1)
 	f3 := x[2]
 
-	return math.Pow(f1, 2) + math.Pow(f2, 2) + math.Pow(f3, 2)
+	return f1*f1 + f2*f2 + f3*f3
 }
 
 func (HelicalValley) Df(x, g []float64) {
 	θ := 0.5 * math.Atan2(x[1], x[0]) / math.Pi
 	r := math.Hypot(x[0], x[1])
 	s := x[2] - 10*θ
-	t := 5 * s / math.Pow(r, 2) / math.Pi
+	t := 5 * s / r / r / math.Pi
 
 	g[0] = 200 * (x[0] - x[0]/r + x[1]*t)
 	g[1] = 200 * (x[1] - x[1]/r - x[0]*t)
@@ -62,7 +62,7 @@ func (BiggsEXP2) F(x []float64) (sum float64) {
 		z := float64(i) / 10
 		y := math.Exp(-z) - 5*math.Exp(-10*z)
 		f := math.Exp(-x[0]*z) - 5*math.Exp(-x[1]*z) - y
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	return sum
 }
@@ -98,7 +98,7 @@ func (BiggsEXP3) F(x []float64) (sum float64) {
 		z := float64(i) / 10
 		y := math.Exp(-z) - 5*math.Exp(-10*z)
 		f := math.Exp(-x[0]*z) - x[2]*math.Exp(-x[1]*z) - y
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	return sum
 }
@@ -136,7 +136,7 @@ func (BiggsEXP4) F(x []float64) (sum float64) {
 		z := float64(i) / 10
 		y := math.Exp(-z) - 5*math.Exp(-10*z)
 		f := x[2]*math.Exp(-x[0]*z) - x[3]*math.Exp(-x[1]*z) - y
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	return sum
 }
@@ -176,7 +176,7 @@ func (BiggsEXP5) F(x []float64) (sum float64) {
 		z := float64(i) / 10
 		y := math.Exp(-z) - 5*math.Exp(-10*z) + 3*math.Exp(-4*z)
 		f := x[2]*math.Exp(-x[0]*z) - x[3]*math.Exp(-x[1]*z) + 3*math.Exp(-x[4]*z) - y
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	return sum
 }
@@ -219,7 +219,7 @@ func (BiggsEXP6) F(x []float64) (sum float64) {
 		z := float64(i) / 10
 		y := math.Exp(-z) - 5*math.Exp(-10*z) + 3*math.Exp(-4*z)
 		f := x[2]*math.Exp(-x[0]*z) - x[3]*math.Exp(-x[1]*z) + x[5]*math.Exp(-x[4]*z) - y
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	return sum
 }
@@ -282,9 +282,10 @@ func (Gaussian) y(i int) (yi float64) {
 
 func (g Gaussian) F(x []float64) (sum float64) {
 	for i := 1; i <= 15; i++ {
-		c := float64(8-i) / 2
-		d := math.Pow(c-x[2], 2)
-		e := math.Exp(-x[1] * d / 2)
+		c := 0.5 * float64(8-i)
+		b := c - x[2]
+		d := b * b
+		e := math.Exp(-0.5 * x[1] * d)
 		f := x[0]*e - g.y(i)
 		sum += f * f
 	}
@@ -296,14 +297,15 @@ func (g Gaussian) Df(x, grad []float64) {
 	grad[1] = 0
 	grad[2] = 0
 	for i := 1; i <= 15; i++ {
-		c := float64(8-i) / 2
-		d := math.Pow(c-x[2], 2)
-		e := math.Exp(-x[1] * d / 2)
+		c := 0.5 * float64(8-i)
+		b := c - x[2]
+		d := b * b
+		e := math.Exp(-0.5 * x[1] * d)
 		f := x[0]*e - g.y(i)
 
 		grad[0] += 2 * f * e
 		grad[1] -= f * e * d * x[0]
-		grad[2] += 2 * f * e * x[0] * x[1] * (c - x[2])
+		grad[2] += 2 * f * e * x[0] * x[1] * b
 	}
 }
 
@@ -319,7 +321,7 @@ type Powell struct{}
 func (Powell) F(x []float64) float64 {
 	f1 := 1e4*x[0]*x[1] - 1
 	f2 := math.Exp(-x[0]) + math.Exp(-x[1]) - 1.0001
-	return math.Pow(f1, 2) + math.Pow(f2, 2)
+	return f1*f1 + f2*f2
 }
 
 func (Powell) Df(x, grad []float64) {
@@ -344,7 +346,7 @@ func (Box) F(x []float64) (sum float64) {
 		c := float64(i) / 10
 		y := math.Exp(-c) - math.Exp(10*c)
 		f := math.Exp(-c*x[0]) - math.Exp(-c*x[1]) - x[2]*y
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	return sum
 }
@@ -376,13 +378,17 @@ type VariablyDimensioned struct{}
 
 func (v VariablyDimensioned) F(x []float64) (sum float64) {
 	for i := 0; i < len(x); i++ {
-		sum += math.Pow(x[i]-1, 2)
+		t := x[i] - 1
+		sum += t * t
 	}
 	s := 0.0
 	for i := 0; i < len(x); i++ {
 		s += float64(i+1) * (x[i] - 1)
 	}
-	sum += math.Pow(s, 2) + math.Pow(s, 4)
+	s *= s
+	sum += s
+	s *= s
+	sum += s
 	return sum
 }
 
@@ -395,7 +401,7 @@ func (v VariablyDimensioned) Df(x, grad []float64) {
 		s += float64(i+1) * (x[i] - 1)
 	}
 	for i := 0; i < len(grad); i++ {
-		grad[i] = 2 * ((x[i] - 1) + s*float64(i+1)*(1+2*math.Pow(s, 2)))
+		grad[i] = 2 * ((x[i] - 1) + s*float64(i+1)*(1+2*s*s))
 	}
 }
 
@@ -429,12 +435,15 @@ func (Watson) F(x []float64) (sum float64) {
 		for j := 0; j < len(x); j++ {
 			s2 += x[j] * math.Pow(c, float64(j))
 		}
-		s2 = math.Pow(s2, 2)
-
-		sum += math.Pow(s1-s2-1, 2)
+		s2 *= s2
+		t := s1 - s2 - 1
+		sum += t * t
 	}
-	sum += math.Pow(x[0], 2)
-	sum += math.Pow(x[1]-math.Pow(x[0], 2)-1, 2)
+	t := x[0] * x[0]
+	sum += t
+	t = x[1] - t - 1
+	sum += t * t
+
 	return sum
 }
 
@@ -456,12 +465,12 @@ func (Watson) Df(x, grad []float64) {
 			s2 += x[j] * math.Pow(c, float64(j))
 		}
 
-		t := s1 - math.Pow(s2, 2) - 1
+		t := s1 - s2*s2 - 1
 		for j := 0; j < len(x); j++ {
 			grad[j] += 2 * t * math.Pow(c, float64(j-1)) * (float64(j) - 2*s2*c)
 		}
 	}
-	t := x[1] - math.Pow(x[0], 2) - 1
+	t := x[1] - x[0]*x[0] - 1
 	grad[0] += 2 * (1 - 2*t) * x[0]
 	grad[1] += 2 * t
 }
@@ -479,15 +488,16 @@ type Penalty1 struct{}
 
 func (Penalty1) F(x []float64) (sum float64) {
 	for i := 0; i < len(x); i++ {
-		sum += math.Pow(x[i]-1, 2)
+		t := x[i] - 1
+		sum += t * t
 	}
 	sum *= 1e-5
 
 	s := 0.0
 	for i := 0; i < len(x); i++ {
-		s += math.Pow(x[i], 2)
+		s += x[i] * x[i]
 	}
-	sum += math.Pow(s-0.25, 2)
+	sum += (s - 0.25) * (s - 0.25)
 
 	return sum
 }
@@ -495,7 +505,7 @@ func (Penalty1) F(x []float64) (sum float64) {
 func (Penalty1) Df(x, grad []float64) {
 	s := 0.0
 	for i := 0; i < len(x); i++ {
-		s += math.Pow(x[i], 2)
+		s += x[i] * x[i]
 	}
 	s -= 0.25
 
@@ -520,23 +530,23 @@ func (Penalty2) F(x []float64) (sum float64) {
 
 	s := 0.0
 	for i := 0; i < dim; i++ {
-		s += float64(dim-i) * math.Pow(x[i], 2)
+		s += float64(dim-i) * x[i] * x[i]
 	}
 	s -= 1
 
 	for i := 1; i < dim; i++ {
 		yi := math.Exp(float64(i+1)/10) + math.Exp(float64(i)/10)
 		f := math.Exp(x[i]/10) + math.Exp(x[i-1]/10) - yi
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	for i := 1; i < dim; i++ {
 		f := math.Exp(x[i]/10) - math.Exp(-1.0/10)
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	sum *= 1e-5
 
-	sum += math.Pow(x[0]-0.2, 2)
-	sum += math.Pow(s, 2)
+	sum += (x[0] - 0.2) * (x[0] - 0.2)
+	sum += s * s
 
 	return sum
 }
@@ -546,7 +556,7 @@ func (Penalty2) Df(x, grad []float64) {
 
 	s := 0.0
 	for i := 0; i < dim; i++ {
-		s += float64(dim-i) * math.Pow(x[i], 2)
+		s += float64(dim-i) * x[i] * x[i]
 	}
 	s -= 1
 
@@ -575,11 +585,11 @@ func (Penalty2) Df(x, grad []float64) {
 // OptF = 0
 type Brown struct{}
 
-func (Brown) F(x []float64) (sum float64) {
-	sum = math.Pow(x[0]-1e6, 2)
-	sum += math.Pow(x[1]-2e-6, 2)
-	sum += math.Pow(x[0]*x[1]-2, 2)
-	return sum
+func (Brown) F(x []float64) float64 {
+	f1 := x[0] - 1e6
+	f2 := x[1] - 2e-6
+	f3 := x[0]*x[1] - 2
+	return f1*f1 + f2*f2 + f3*f3
 }
 
 func (Brown) Df(x, g []float64) {
@@ -604,8 +614,8 @@ func (BrownDennis) F(x []float64) (sum float64) {
 		c := float64(i+1) / 5
 		d1 := x[0] + c*x[1] - math.Exp(c)
 		d2 := x[2] + x[3]*math.Sin(c) - math.Cos(c)
-		f := math.Pow(d1, 2) + math.Pow(d2, 2)
-		sum += math.Pow(f, 2)
+		f := d1*d1 + d2*d2
+		sum += f * f
 	}
 	return sum
 }
@@ -619,7 +629,7 @@ func (BrownDennis) Df(x, grad []float64) {
 		c := float64(i+1) / 5
 		d1 := x[0] + c*x[1] - math.Exp(c)
 		d2 := x[2] + x[3]*math.Sin(c) - math.Cos(c)
-		f := math.Pow(d1, 2) + math.Pow(d2, 2)
+		f := d1*d1 + d2*d2
 		grad[0] += 4 * f * d1
 		grad[1] += 4 * f * d1 * c
 		grad[2] += 4 * f * d2
@@ -653,7 +663,7 @@ func (GulfRD) F(x []float64) (sum float64) {
 		e := math.Pow(d, x[2]) / x[0]
 		f := math.Exp(-e) - c
 
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 	return sum
 }
@@ -670,7 +680,7 @@ func (GulfRD) Df(x, grad []float64) {
 		e := math.Pow(d, x[2]) / x[0]
 		f := math.Exp(-e) - c
 
-		grad[0] += 2 * f * math.Exp(-e) * math.Pow(d, x[2]) / math.Pow(x[0], 2)
+		grad[0] += 2 * f * math.Exp(-e) * math.Pow(d, x[2]) / x[0] / x[0]
 		grad[1] += 2 * f * math.Exp(-e) * e * x[2] / d
 		grad[2] -= 2 * f * math.Exp(-e) * e * math.Log(d)
 	}
@@ -700,7 +710,7 @@ func (Trigonometric) F(x []float64) (sum float64) {
 	}
 	for i := 0; i < dim; i++ {
 		f := float64(dim+i) - float64(i)*math.Cos(x[i]) - math.Sin(x[i]) - s1
-		sum += math.Pow(f, 2)
+		sum += f * f
 	}
 
 	return sum
@@ -728,7 +738,7 @@ func (Trigonometric) Df(x, grad []float64) {
 	}
 }
 
-// The extended Rosenbrock function
+// The Extended Rosenbrock function
 // Very difficult to minimize if the starting point is far from the minimum.
 // Dim = n
 // X0 = [-1.2, 1] for Dim = 2
@@ -738,7 +748,9 @@ type Rosenbrock struct{}
 
 func (Rosenbrock) F(x []float64) (sum float64) {
 	for i := 0; i < len(x)-1; i++ {
-		sum += math.Pow(1-x[i], 2) + 100*math.Pow(x[i+1]-math.Pow(x[i], 2), 2)
+		a := 1 - x[i]
+		b := x[i+1] - x[i]*x[i]
+		sum += a*a + 100*b*b
 	}
 	return sum
 }
@@ -751,10 +763,10 @@ func (Rosenbrock) Df(x, grad []float64) {
 
 	for i := 0; i < dim-1; i++ {
 		grad[i] -= 2 * (1 - x[i])
-		grad[i] -= 400 * (x[i+1] - math.Pow(x[i], 2)) * x[i]
+		grad[i] -= 400 * (x[i+1] - x[i]*x[i]) * x[i]
 	}
 	for i := 1; i < dim; i++ {
-		grad[i] += 200 * (x[i] - math.Pow(x[i-1], 2))
+		grad[i] += 200 * (x[i] - x[i-1]*x[i-1])
 	}
 }
 
@@ -774,9 +786,11 @@ func (ExtendedPowell) F(x []float64) (sum float64) {
 	for i := 0; i < dim; i += 4 {
 		f1 := x[i] + 10*x[i+1]
 		f2 := x[i+2] - x[i+3]
-		f3 := math.Pow(x[i+1]-2*x[i+2], 2)
-		f4 := math.Pow(x[i]-x[i+3], 2)
-		sum += math.Pow(f1, 2) + 5*math.Pow(f2, 2) + math.Pow(f3, 2) + 10*math.Pow(f4, 2)
+		t := x[i+1] - 2*x[i+2]
+		f3 := t * t
+		t = x[i] - x[i+3]
+		f4 := t * t
+		sum += f1*f1 + 5*f2*f2 + f3*f3 + 10*f4*f4
 	}
 	return sum
 }
@@ -790,13 +804,15 @@ func (ExtendedPowell) Df(x, grad []float64) {
 	for i := 0; i < dim; i += 4 {
 		f1 := x[i] + 10*x[i+1]
 		f2 := x[i+2] - x[i+3]
-		f3 := math.Pow(x[i+1]-2*x[i+2], 2)
-		f4 := math.Pow(x[i]-x[i+3], 2)
+		t1 := x[i+1] - 2*x[i+2]
+		f3 := t1 * t1
+		t2 := x[i] - x[i+3]
+		f4 := t2 * t2
 
-		grad[i] = 2*f1 + 40*f4*(x[i]-x[i+3])
-		grad[i+1] = 20*f1 + 4*f3*(x[i+1]-2*x[i+2])
-		grad[i+2] = 10*f2 - 8*f3*(x[i+1]-2*x[i+2])
-		grad[i+3] = -10*f2 - 40*f4*(x[i]-x[i+3])
+		grad[i] = 2*f1 + 40*f4*t2
+		grad[i+1] = 20*f1 + 4*f3*t1
+		grad[i+2] = 10*f2 - 8*f3*t1
+		grad[i+3] = -10*f2 - 40*f4*t2
 	}
 }
 
@@ -807,20 +823,24 @@ func (ExtendedPowell) Df(x, grad []float64) {
 // OptX = [3, 0.5]
 type Beale struct{}
 
-func (Beale) F(x []float64) (sum float64) {
+func (Beale) F(x []float64) float64 {
 	f1 := 1.5 - x[0]*(1-x[1])
-	f2 := 2.25 - x[0]*(1-math.Pow(x[1], 2))
-	f3 := 2.625 - x[0]*(1-math.Pow(x[1], 3))
-	return math.Pow(f1, 2) + math.Pow(f2, 2) + math.Pow(f3, 2)
+	f2 := 2.25 - x[0]*(1-x[1]*x[1])
+	f3 := 2.625 - x[0]*(1-x[1]*x[1]*x[1])
+	return f1*f1 + f2*f2 + f3*f3
 }
 
 func (Beale) Df(x, grad []float64) {
-	f1 := 1.5 - x[0]*(1-x[1])
-	f2 := 2.25 - x[0]*(1-math.Pow(x[1], 2))
-	f3 := 2.625 - x[0]*(1-math.Pow(x[1], 3))
+	t1 := 1 - x[1]
+	t2 := 1 - x[1]*x[1]
+	t3 := 1 - x[1]*x[1]*x[1]
 
-	grad[0] = -2 * (f1*(1-x[1]) + f2*(1-math.Pow(x[1], 2)) + f3*(1-math.Pow(x[1], 3)))
-	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*math.Pow(x[1], 2))
+	f1 := 1.5 - x[0]*t1
+	f2 := 2.25 - x[0]*t2
+	f3 := 2.625 - x[0]*t3
+
+	grad[0] = -2 * (f1*t1 + f2*t2 + f3*t3)
+	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*x[1]*x[1])
 }
 
 // The Wood function
@@ -831,22 +851,22 @@ func (Beale) Df(x, grad []float64) {
 type Wood struct{}
 
 func (Wood) F(x []float64) (sum float64) {
-	f1 := x[1] - math.Pow(x[0], 2)
+	f1 := x[1] - x[0]*x[0]
 	f2 := 1 - x[0]
-	f3 := x[3] - math.Pow(x[2], 2)
+	f3 := x[3] - x[2]*x[2]
 	f4 := 1 - x[2]
 	f5 := x[1] + x[3] - 2
 	f6 := x[2] - x[3]
 
-	sum = 100*math.Pow(f1, 2) + math.Pow(f2, 2) + 90*math.Pow(f3, 2)
-	sum += math.Pow(f4, 2) + 10*math.Pow(f5, 2) + 0.1*math.Pow(f6, 2)
+	sum = 100*f1*f1 + f2*f2 + 90*f3*f3
+	sum += f4*f4 + 10*f5*f5 + 0.1*f6*f6
 	return sum
 }
 
 func (Wood) Df(x, grad []float64) {
-	f1 := x[1] - math.Pow(x[0], 2)
+	f1 := x[1] - x[0]*x[0]
 	f2 := 1 - x[0]
-	f3 := x[3] - math.Pow(x[2], 2)
+	f3 := x[3] - x[2]*x[2]
 	f4 := 1 - x[2]
 	f5 := x[1] + x[3] - 2
 	f6 := x[2] - x[3]

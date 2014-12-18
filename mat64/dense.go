@@ -109,6 +109,10 @@ func (m *Dense) Set(r, c int, v float64) {
 	if c >= m.mat.Cols || c < 0 {
 		panic("index error: column access out of bounds")
 	}
+	m.set(r, c, v)
+}
+
+func (m *Dense) set(r, c int, v float64) {
 	m.mat.Data[r*m.mat.Stride+c] = v
 }
 
@@ -215,7 +219,7 @@ func (m *Dense) Clone(a Matrix) {
 		m.mat = mat
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {
-				m.Set(i, j, a.At(i, j))
+				m.set(i, j, a.At(i, j))
 			}
 		}
 		return
@@ -241,7 +245,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 	default:
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {
-				m.Set(r, c, a.At(r, c))
+				m.set(r, c, a.At(r, c))
 			}
 		}
 	}
@@ -300,7 +304,7 @@ func (m *Dense) U(a Matrix) {
 	m.zeroLower()
 	for r := 0; r < ar; r++ {
 		for c := r; c < ac; c++ {
-			m.Set(r, c, a.At(r, c))
+			m.set(r, c, a.At(r, c))
 		}
 	}
 }
@@ -354,7 +358,7 @@ func (m *Dense) L(a Matrix) {
 	m.zeroUpper()
 	for c := 0; c < ac; c++ {
 		for r := c; r < ar; r++ {
-			m.Set(r, c, a.At(r, c))
+			m.set(r, c, a.At(r, c))
 		}
 	}
 }
@@ -386,13 +390,13 @@ func (m *Dense) TCopy(a Matrix) {
 	case *Dense:
 		for i := 0; i < ac; i++ {
 			for j := 0; j < ar; j++ {
-				w.Set(i, j, a.At(j, i))
+				w.set(i, j, a.at(j, i))
 			}
 		}
 	default:
 		for i := 0; i < ac; i++ {
 			for j := 0; j < ar; j++ {
-				w.Set(i, j, a.At(j, i))
+				w.set(i, j, a.At(j, i))
 			}
 		}
 	}

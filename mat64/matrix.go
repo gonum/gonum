@@ -258,10 +258,10 @@ type RawMatrix struct {
 	Data       []float64
 }
 
-// A RawMatrixUser can directly attach a RawMatrix representation. There is no restriction on the shape of the
-// receiver. Changes to the receiver's elements will be reflected in the RawMatrix.Data.
-type RawMatrixUser interface {
-	UseRawMatrix(a RawMatrix)
+// A RawMatrixSetter can set the underlying RawMatrix used by the reciever. There is no restriction
+// on the shape of the receiver. Changes to the receiver's elements will be reflected in the RawMatrix.Data.
+type RawMatrixSetter interface {
+	SetRawMatrix(a RawMatrix)
 }
 
 // A RawMatrixer can return a RawMatrix representation of the receiver. Changes to the RawMatrix.Data

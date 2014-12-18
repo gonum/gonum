@@ -50,8 +50,8 @@ var (
 	_ Equaler       = matrix
 	_ ApproxEqualer = matrix
 
-	_ RawMatrixUser = matrix
-	_ RawMatrixer   = matrix
+	_ RawMatrixSetter = matrix
+	_ RawMatrixer     = matrix
 )
 
 type Dense struct {
@@ -80,7 +80,7 @@ func DenseCopyOf(a Matrix) *Dense {
 	return d
 }
 
-func (m *Dense) UseRawMatrix(b RawMatrix) { m.mat = b }
+func (m *Dense) SetRawMatrix(b RawMatrix) { m.mat = b }
 
 func (m *Dense) RawMatrix() RawMatrix { return m.mat }
 

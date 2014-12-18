@@ -88,34 +88,6 @@ func (m *Dense) isZero() bool {
 	return m.mat.Cols == 0 || m.mat.Rows == 0
 }
 
-func (m *Dense) At(r, c int) float64 {
-	if r >= m.mat.Rows || r < 0 {
-		panic("index error: row access out of bounds")
-	}
-	if c >= m.mat.Cols || c < 0 {
-		panic("index error: column access out of bounds")
-	}
-	return m.at(r, c)
-}
-
-func (m *Dense) at(r, c int) float64 {
-	return m.mat.Data[r*m.mat.Stride+c]
-}
-
-func (m *Dense) Set(r, c int, v float64) {
-	if r >= m.mat.Rows || r < 0 {
-		panic("index error: row access out of bounds")
-	}
-	if c >= m.mat.Cols || c < 0 {
-		panic("index error: column access out of bounds")
-	}
-	m.set(r, c, v)
-}
-
-func (m *Dense) set(r, c int, v float64) {
-	m.mat.Data[r*m.mat.Stride+c] = v
-}
-
 func (m *Dense) Dims() (r, c int) { return m.mat.Rows, m.mat.Cols }
 
 func (m *Dense) Col(dst []float64, j int) []float64 {

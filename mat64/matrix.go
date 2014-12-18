@@ -258,27 +258,10 @@ type RawMatrix struct {
 	Data       []float64
 }
 
-// Matrix converts a RawMatrix to a Matrix, writing the data to the matrix represented by c. If c is a
-// BlasLoader, that method will be called, otherwise the matrix must be the correct shape.
-func (b RawMatrix) Matrix(c Mutable) {
-	if c, ok := c.(RawMatrixLoader); ok {
-		c.LoadRawMatrix(b)
-		return
-	}
-	if rows, cols := c.Dims(); rows != b.Rows || cols != b.Cols {
-		panic(ErrShape)
-	}
-	for row := 0; row < b.Rows; row++ {
-		for col, v := range b.Data[row*b.Stride : row*b.Stride+b.Cols] {
-			c.Set(row, col, v)
-		}
-	}
-}
-
-// A RawMatrixLoader can directly load a RawMatrix representation. There is no restriction on the shape of the
-// receiver.
-type RawMatrixLoader interface {
-	LoadRawMatrix(a RawMatrix)
+// A RawMatrixSetter can set the underlying RawMatrix used by the reciever. There is no restriction
+// on the shape of the receiver. Changes to the receiver's elements will be reflected in the RawMatrix.Data.
+type RawMatrixSetter interface {
+	SetRawMatrix(a RawMatrix)
 }
 
 // A RawMatrixer can return a RawMatrix representation of the receiver. Changes to the RawMatrix.Data

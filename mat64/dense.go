@@ -50,7 +50,7 @@ var (
 	_ Equaler       = matrix
 	_ ApproxEqualer = matrix
 
-	_ RawMatrixLoader = matrix
+	_ RawMatrixSetter = matrix
 	_ RawMatrixer     = matrix
 )
 
@@ -80,7 +80,7 @@ func DenseCopyOf(a Matrix) *Dense {
 	return d
 }
 
-func (m *Dense) LoadRawMatrix(b RawMatrix) { m.mat = b }
+func (m *Dense) SetRawMatrix(b RawMatrix) { m.mat = b }
 
 func (m *Dense) RawMatrix() RawMatrix { return m.mat }
 

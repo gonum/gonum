@@ -1681,11 +1681,11 @@ func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 	}
 	return
 }
-
-//TODO: Not yet implemented Level 2 routines.
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
 }
+
+//TODO: Not yet implemented Level 2 routines.
 func (Blas) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {
 	panic("referenceblas: function not implemented")
 }

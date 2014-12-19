@@ -1686,8 +1686,145 @@ func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	panic("referenceblas: function not implemented")
 }
-func (Blas) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {
-	panic("referenceblas: function not implemented")
+
+// Dsymv  performs the matrix-vector  operation
+//    y := alpha*A*x + beta*y,
+// where alpha and beta are scalars, x and y are n element vectors and
+// A is an n by n symmetric matrix in packed format.
+func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64, incX int, beta float64, y []float64, incY int) {
+	// Verify inputs
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if len(a) < (n*(n+1))/2 {
+		panic("blas: not enough data in a")
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if incY == 0 {
+		panic(zeroInc)
+	}
+	// Quick return if possible
+	if n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	// Set up start points
+	var kx, ky int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(n - 1) * incX
+	}
+	if incY > 0 {
+		ky = 0
+	} else {
+		ky = -(n - 1) * incY
+	}
+
+	// Form y = beta * y
+	if beta != 1 {
+		if incY > 0 {
+			b.Dscal(n, beta, y, incY)
+		} else {
+			b.Dscal(n, beta, y, -incY)
+		}
+	}
+
+	if alpha == 0 {
+		return
+	}
+
+	if n == 1 {
+		y[0] += alpha * a[0] * x[0]
+		return
+	}
+	var offset int // Offset is the index of (i,i)
+	if ul == blas.Upper {
+		if incX == 1 {
+			iy := ky
+			for i := 0; i < n; i++ {
+				xv := x[i] * alpha
+				sum := a[offset] * x[i]
+				atmp := a[offset+1 : offset+n-i]
+				xtmp := x[i+1:]
+				jy := ky + (i+1)*incY
+				for j, v := range atmp {
+					sum += v * xtmp[j]
+					y[jy] += v * xv
+					jy += incY
+				}
+				y[iy] += alpha * sum
+				iy += incY
+				offset += n - i
+			}
+			return
+		}
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			xv := x[ix] * alpha
+			sum := a[offset] * x[ix]
+			atmp := a[offset+1 : offset+n-i]
+			jx := kx + (i+1)*incX
+			jy := ky + (i+1)*incY
+			for _, v := range atmp {
+				sum += v * x[jx]
+				y[jy] += v * xv
+				jx += incX
+				jy += incY
+			}
+			y[iy] += alpha * sum
+			ix += incX
+			iy += incY
+			offset += n - i
+		}
+		return
+	}
+	if incX == 1 {
+		iy := ky
+		for i := 0; i < n; i++ {
+			xv := x[i] * alpha
+			atmp := a[offset-i : offset]
+			jy := ky
+			var sum float64
+			for j, v := range atmp {
+				sum += v * x[j]
+				y[jy] += v * xv
+				jy += incY
+			}
+			sum += a[offset] * x[i]
+			y[iy] += alpha * sum
+			iy += incY
+			offset += i + 2
+		}
+		return
+	}
+	ix := kx
+	iy := ky
+	for i := 0; i < n; i++ {
+		xv := x[ix] * alpha
+		atmp := a[offset-i : offset]
+		jx := kx
+		jy := ky
+		var sum float64
+		for _, v := range atmp {
+			sum += v * x[jx]
+			y[jy] += v * xv
+			jx += incX
+			jy += incY
+		}
+
+		sum += a[offset] * x[ix]
+		y[iy] += alpha * sum
+		ix += incX
+		iy += incY
+		offset += i + 2
+	}
 }
 func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap []float64) {
 	panic("referenceblas: function not implemented")

@@ -141,29 +141,19 @@ func unflatten(a []float64, m, n int) [][]float64 {
 }
 
 // flattenTriangular turns the upper or lower triangle of a dense slice of slice
-// into a single slice with packed storage.
+// into a single slice with packed storage. a must be a square matrix.
 func flattenTriangular(a [][]float64, ul blas.Uplo) []float64 {
 	m := len(a)
-	n := len(a[0])
-	if m != n {
-		panic("must be square")
-	}
-	aFlat := make([]float64, n*(n+1)/2)
-	var count int
+	aFlat := make([]float64, m*(m+1)/2)
+	var k int
 	if ul == blas.Upper {
 		for i := 0; i < m; i++ {
-			for j := i; j < n; j++ {
-				aFlat[count] = a[i][j]
-				count++
-			}
+			k += copy(aFlat[k:], a[i][i:])
 		}
 		return aFlat
 	}
 	for i := 0; i < m; i++ {
-		for j := 0; j <= i; j++ {
-			aFlat[count] = a[i][j]
-			count++
-		}
+		k += copy(aFlat[k:], a[i][:i+1])
 	}
 	return aFlat
 }

@@ -3,6 +3,8 @@ package testblas
 import (
 	"math"
 	"testing"
+
+	"github.com/gonum/blas"
 )
 
 // throwPanic will throw unexpected panics if true, or will just report them as errors if false
@@ -136,6 +138,24 @@ func unflatten(a []float64, m, n int) [][]float64 {
 		}
 	}
 	return s
+}
+
+// flattenTriangular turns the upper or lower triangle of a dense slice of slice
+// into a single slice with packed storage. a must be a square matrix.
+func flattenTriangular(a [][]float64, ul blas.Uplo) []float64 {
+	m := len(a)
+	aFlat := make([]float64, m*(m+1)/2)
+	var k int
+	if ul == blas.Upper {
+		for i := 0; i < m; i++ {
+			k += copy(aFlat[k:], a[i][i:])
+		}
+		return aFlat
+	}
+	for i := 0; i < m; i++ {
+		k += copy(aFlat[k:], a[i][:i+1])
+	}
+	return aFlat
 }
 
 // flattenBanded turns a dense banded slice of slice into the compact banded matrix format

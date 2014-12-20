@@ -4,6 +4,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/gonum/blas"
 	"github.com/gonum/floats"
 )
 
@@ -149,6 +150,38 @@ func TestFlattenBanded(t *testing.T) {
 		correct := flatten(test.condensed)
 		if !floats.Same(condensed, correct) {
 			t.Errorf("Case %v mismatch. Want %v, got %v.", i, correct, condensed)
+		}
+	}
+}
+
+func TestFlattenTriangular(t *testing.T) {
+	for i, test := range []struct {
+		a   [][]float64
+		ans []float64
+		ul  blas.Uplo
+	}{
+		{
+			a: [][]float64{
+				{1, 2, 3},
+				{0, 4, 5},
+				{0, 0, 6},
+			},
+			ul:  blas.Upper,
+			ans: []float64{1, 2, 3, 4, 5, 6},
+		},
+		{
+			a: [][]float64{
+				{1, 0, 0},
+				{2, 3, 0},
+				{4, 5, 6},
+			},
+			ul:  blas.Lower,
+			ans: []float64{1, 2, 3, 4, 5, 6},
+		},
+	} {
+		a := flattenTriangular(test.a, test.ul)
+		if !floats.Equal(a, test.ans) {
+			t.Errorf("Case %v. Want %v, got %v.", i, test.ans, a)
 		}
 	}
 }

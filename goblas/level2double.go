@@ -1099,7 +1099,7 @@ func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []fl
 		panic(nLT0)
 	}
 	if len(a) < (n*(n+1))/2 {
-		panic("blas: not enough data in ap")
+		panic("goblas: not enough data in a")
 	}
 	if incX == 0 {
 		panic(zeroInc)

@@ -149,8 +149,44 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 	}
 }
 
+// Dsymm performs one of
+//  C = alpha * A * B + beta * C
+//  C = alpha * B * A + beta * C
+// where A is a symmetric matrix and B and C are m x n matrices.
 func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
-	panic("blas: function not implemented")
+	if s != blas.Right && s != blas.Left {
+		panic("goblas: bad side")
+	}
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if alpha == 0 && beta == 0 {
+		return
+	}
+	if beta != 0 {
+		for i := 0; i < m; i++ {
+			ctmp := c[i*lda : i*lda+n]
+			for j := range ctmp {
+				ctmp[j] *= beta
+			}
+		}
+	}
+
+	if s == blas.Right {
+		if ul == blas.Upper {
+			for i := 0; i < m; i++ {
+				for j := 0; j < n; j++ {
+					for k := i + 1; k < m; k++ {
+						v := alpha * a[i*lda+k] * b[k*ldb+j]
+						c[i*ldc+j] += v
+						if i != j {
+							c[j*ldc+i] += v
+						}
+					}
+				}
+			}
+		}
+	}
 }
 func (Blas) Dsyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
 	panic("blas: function not implemented")

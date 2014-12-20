@@ -1150,7 +1150,7 @@ func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []fl
 			}
 			return
 		}
-		if incX == 0 {
+		if incX == 1 {
 			offset = n*(n+1)/2 - 1
 			for i := n - 1; i >= 0; i-- {
 				xi := x[i]

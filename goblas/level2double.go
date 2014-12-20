@@ -1681,6 +1681,14 @@ func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 	}
 	return
 }
+
+// Dtpsv  solves one of the systems of equations
+//    A*x = b,   or   A**T*x = b,
+// where b and x are n element vectors and A is an n by n unit, or
+// non-unit, upper or lower triangular matrix in packed format.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
 func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {

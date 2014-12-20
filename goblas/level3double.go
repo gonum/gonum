@@ -160,29 +160,60 @@ func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float6
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
-	if alpha == 0 && beta == 0 {
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < 0 {
+		panic(lda)
+	}
+	if ldb < 0 {
+		panic(ldb)
+	}
+	if ldc < 0 {
+		panic(ldc)
+	}
+	if m == 0 || n == 0 {
 		return
 	}
-	if beta != 0 {
+	if alpha == 0 && beta == 1 {
+		return
+	}
+	if alpha == 0 {
+		if beta == 0 {
+			for i := 0; i < m; i++ {
+				ctmp := c[i*ldc : i*ldc+n]
+				for j := range ctmp {
+					ctmp[j] = 0
+				}
+			}
+			return
+		}
 		for i := 0; i < m; i++ {
-			ctmp := c[i*lda : i*lda+n]
-			for j := range ctmp {
+			ctmp := c[i*ldc : i*ldc+n]
+			for j := 0; j < n; j++ {
 				ctmp[j] *= beta
 			}
 		}
+		return
 	}
 
 	if s == blas.Right {
 		if ul == blas.Upper {
 			for i := 0; i < m; i++ {
 				for j := 0; j < n; j++ {
-					for k := i + 1; k < m; k++ {
-						v := alpha * a[i*lda+k] * b[k*ldb+j]
-						c[i*ldc+j] += v
-						if i != j {
-							c[j*ldc+i] += v
+					// for k := i; k <m;
+					/*
+						for k := i + 1; k < m; k++ {
+							v := alpha * a[i*lda+k] * b[k*ldb+j]
+							c[i*ldc+j] += v
+							if i != j {
+								c[j*ldc+i] += v
+							}
 						}
-					}
+					*/
 				}
 			}
 		}

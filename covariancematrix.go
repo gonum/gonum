@@ -45,7 +45,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	var xt mat64.Dense
 	xt.TCopy(xc)
 
-	// normalization factor, typical n-1
+	// Calculate the normalization factor, which is typically N-1.
 	var N float64
 	if wts != nil {
 		if wr := len(wts); wr != r {

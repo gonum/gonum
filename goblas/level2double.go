@@ -2153,14 +2153,12 @@ func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 	if n < 0 {
 		panic(nLT0)
 	}
-	if incX == 0 {
+	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
-	if incY == 0 {
-		panic(zeroInc)
-	}
+
 	if len(a) < (n*(n+1))/2 {
-		panic("blas: not enough data in a")
+		panic("goblas: not enough data in a")
 	}
 	var ky, kx int
 	if incY > 0 {

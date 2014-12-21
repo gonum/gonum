@@ -19,10 +19,8 @@ import (
 // columns as the input data matrix x, or if it is nil then a new Dense
 // matrix will be constructed.
 func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.Dense {
-
-	// matrix version of the two pass algorithm.  This doesn't use
+	// This is the matrix version of the two-pass algorithm. It doesn't use
 	// the correction found in the Covariance and Variance functions.
-
 	r, c := x.Dims()
 
 	// determine the mean of each of the columns

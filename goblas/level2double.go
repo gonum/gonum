@@ -1943,10 +1943,7 @@ func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64
 	if len(a) < (n*(n+1))/2 {
 		panic("blas: not enough data in a")
 	}
-	if incX == 0 {
-		panic(zeroInc)
-	}
-	if incY == 0 {
+	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
 	// Quick return if possible
@@ -1984,7 +1981,7 @@ func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64
 		y[0] += alpha * a[0] * x[0]
 		return
 	}
-	var offset int // Offset is the index of (i,i)
+	var offset int // Offset is the index of (i,i).
 	if ul == blas.Upper {
 		if incX == 1 {
 			iy := ky

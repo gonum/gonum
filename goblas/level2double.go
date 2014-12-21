@@ -2065,8 +2065,82 @@ func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64
 	}
 }
 
-func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap []float64) {
-	panic("referenceblas: function not implemented")
+// Dspr computes a = alpha*x*x^T + a where a is an nxn symmetric matrix in packed format.
+func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(negInc)
+	}
+	if len(a) < (n*(n+1))/2 {
+		panic("blas: not enough data in a")
+	}
+	if alpha == 0 || n == 0 {
+		return
+	}
+	lenX := n
+	var kx int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(lenX - 1) * incX
+	}
+	var offset int // Offset is the index of (i,i).
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				atmp := a[offset:]
+				xv := alpha * x[i]
+				xtmp := x[i:n]
+				for j, v := range xtmp {
+					atmp[j] += xv * v
+				}
+				offset += n - i
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			jx := kx + i*incX
+			atmp := a[offset:]
+			xv := alpha * x[ix]
+			for j := 0; j < n-i; j++ {
+				atmp[j] += xv * x[jx]
+				jx += incX
+			}
+			ix += incX
+			offset += n - i
+		}
+		return
+	}
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			atmp := a[offset-i:]
+			xv := alpha * x[i]
+			xtmp := x[:i+1]
+			for j, v := range xtmp {
+				atmp[j] += xv * v
+			}
+			offset += i + 2
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < n; i++ {
+		jx := kx
+		atmp := a[offset-i:]
+		xv := alpha * x[ix]
+		for j := 0; j <= i; j++ {
+			atmp[j] += xv * x[jx]
+			jx += incX
+		}
+		ix += incX
+		offset += i + 2
+	}
 }
 func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
 	panic("referenceblas: function not implemented")

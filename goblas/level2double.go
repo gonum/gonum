@@ -37,6 +37,24 @@ var _ blas.Float64Level2 = Blasser
 	  19 20  *  *
 	]
 	where entries marked * are never accessed
+
+	Triangular and symmetric packed matrices are laid out with the entries
+	condensed such that all of the zeros are removed. So, the upper triangular
+	matrix
+	[
+	  1  2  3
+	  0  4  5
+	  0  0  6
+	]
+	and the lower-triangular matrix
+	[
+	  1  0  0
+	  2  3  0
+	  4  5  6
+	]
+	will both be compacted as [1 2 3 4 5 6]. The (i, j) element of the original
+	dense matrix can be found at element i*n - (i-1)*i/2 + j for upper triangular,
+	and at element i * (i+1) /2 + j for lower triangular
 */
 
 const (
@@ -1062,20 +1080,12 @@ func (Blas) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []fl
 	}
 }
 
-func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
+// Dtpmv performs one of the matrix-vector operations
+// 		x := A*x,   or   x := A**T*x,
+// where x is an n element vector and  A is an n by n unit, or non-unit,
+// upper or lower triangular matrix represented in packed storage format.
+func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
 	// Verify inputs
-	// Transform for row major
-	if tA == blas.NoTrans {
-		tA = blas.Trans
-	} else {
-		tA = blas.NoTrans
-	}
-	if ul == blas.Upper {
-		ul = blas.Lower
-	} else {
-		ul = blas.Upper
-	}
-
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -1088,8 +1098,8 @@ func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []f
 	if n < 0 {
 		panic(nLT0)
 	}
-	if len(ap) < (n*(n+1))/2 {
-		panic("blas: not enough data in ap")
+	if len(a) < (n*(n+1))/2 {
+		panic("goblas: not enough data in a")
 	}
 	if incX == 0 {
 		panic(zeroInc)
@@ -1100,83 +1110,145 @@ func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []f
 	var kx int
 	if incX <= 0 {
 		kx = -(n - 1) * incX
-	} else if incX != 1 {
-		kx = 0
 	}
 
+	nonUnit := d == blas.NonUnit
+	var offset int // Offset is the index of (i,i)
 	if tA == blas.NoTrans {
-
-		//x := A*x
 		if ul == blas.Upper {
-			kk := 0
-			jx := kx
-			for j := 0; j < n; j++ {
-				if x[jx] != 0 {
-					if j > 0 {
-						offset := max(0, -(n-j)*incX)
-						bl.Daxpy(j, x[jx], ap[kk:], 1, x[offset:], incX)
+			if incX == 1 {
+				for i := 0; i < n; i++ {
+					xi := x[i]
+					if nonUnit {
+						xi *= a[offset]
 					}
-					if d == blas.NonUnit {
-						x[jx] *= ap[kk+j]
+					atmp := a[offset+1 : offset+n-i]
+					xtmp := x[i+1:]
+					for j, v := range atmp {
+						xi += v * xtmp[j]
 					}
+					x[i] = xi
+					offset += n - i
 				}
-				kk += j + 1
+				return
+			}
+			ix := kx
+			for i := 0; i < n; i++ {
+				xix := x[ix]
+				if nonUnit {
+					xix *= a[offset]
+				}
+				atmp := a[offset+1 : offset+n-i]
+				jx := kx + (i+1)*incX
+				for _, v := range atmp {
+					xix += v * x[jx]
+					jx += incX
+				}
+				x[ix] = xix
+				offset += n - i
+				ix += incX
+			}
+			return
+		}
+		if incX == 1 {
+			offset = n*(n+1)/2 - 1
+			for i := n - 1; i >= 0; i-- {
+				xi := x[i]
+				if nonUnit {
+					xi *= a[offset]
+				}
+				atmp := a[offset-i : offset]
+				for j, v := range atmp {
+					xi += v * x[j]
+				}
+				x[i] = xi
+				offset -= i + 1
+			}
+			return
+		}
+		ix := kx + (n-1)*incX
+		offset = n*(n+1)/2 - 1
+		for i := n - 1; i >= 0; i-- {
+			xix := x[ix]
+			if nonUnit {
+				xix *= a[offset]
+			}
+			atmp := a[offset-i : offset]
+			jx := kx
+			for _, v := range atmp {
+				xix += v * x[jx]
 				jx += incX
 			}
-		} else {
-			kk := (n*(n+1))/2 - 1
-			jx := kx + (n-1)*incX
-			for j := n - 1; j >= 0; j-- {
-				if x[jx] != 0 {
-					if j+1 < n {
-						offset := max((j+1)*incX, 0)
-						bl.Daxpy(n-j-1, x[jx], ap[kk-n+j+2:], 1, x[offset:], incX)
-					}
-					if d == blas.NonUnit {
-						x[jx] *= ap[kk-n+j+1]
-					}
-				}
-				jx -= incX
-				kk -= n - j
-			}
+			x[ix] = xix
+			offset -= i + 1
+			ix -= incX
 		}
-
-	} else {
-
-		// x := A**T*x
-		if ul == blas.Upper {
-			kk := (n*(n+1))/2 - 1
-			jx := kx + (n-1)*incX
-			for j := n - 1; j >= 0; j-- {
-				temp := x[jx]
-				if d == blas.NonUnit {
-					temp *= ap[kk]
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		if incX == 1 {
+			offset = n*(n+1)/2 - 1
+			for i := n - 1; i >= 0; i-- {
+				xi := x[i]
+				atmp := a[offset+1 : offset+n-i]
+				xtmp := x[i+1:]
+				for j, v := range atmp {
+					xtmp[j] += v * xi
 				}
-				if j > 0 {
-					offset := max(0, -(n-j)*incX)
-					temp += bl.Ddot(j, ap[kk-j:], 1, x[offset:], incX)
+				if nonUnit {
+					x[i] *= a[offset]
 				}
-				x[jx] = temp
-				jx -= incX
-				kk -= j + 1
+				offset -= n - i + 1
 			}
-		} else {
-			kk := 0
-			jx := kx
-			for j := 0; j < n; j++ {
-				temp := x[jx]
-				if d == blas.NonUnit {
-					temp *= ap[kk]
-				}
-				if j+1 < n {
-					offset := max((j+1)*incX, 0)
-					temp += bl.Ddot(n-j-1, ap[kk+1:], 1, x[offset:], incX)
-				}
-				x[jx] = temp
+			return
+		}
+		ix := kx + (n-1)*incX
+		offset = n*(n+1)/2 - 1
+		for i := n - 1; i >= 0; i-- {
+			xix := x[ix]
+			jx := kx + (i+1)*incX
+			atmp := a[offset+1 : offset+n-i]
+			for _, v := range atmp {
+				x[jx] += v * xix
 				jx += incX
-				kk += n - j
 			}
+			if nonUnit {
+				x[ix] *= a[offset]
+			}
+			offset -= n - i + 1
+			ix -= incX
 		}
+		return
+	}
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			xi := x[i]
+			atmp := a[offset-i : offset]
+			for j, v := range atmp {
+				x[j] += v * xi
+			}
+			if nonUnit {
+				x[i] *= a[offset]
+			}
+			offset += i + 2
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < n; i++ {
+		xix := x[ix]
+		jx := kx
+		atmp := a[offset-i : offset]
+		for _, v := range atmp {
+			x[jx] += v * xix
+			jx += incX
+		}
+		if nonUnit {
+			x[ix] *= a[offset]
+		}
+		ix += incX
+		offset += i + 2
 	}
 }
 
@@ -1682,15 +1754,393 @@ func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 	return
 }
 
-//TODO: Not yet implemented Level 2 routines.
-func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
-	panic("referenceblas: function not implemented")
+// Dtpsv  solves one of the systems of equations
+//    A*x = b,   or   A**T*x = b,
+// where b and x are n element vectors and A is an n by n unit, or
+// non-unit, upper or lower triangular matrix in packed format.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
+func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
+	// Verify inputs
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if d != blas.NonUnit && d != blas.Unit {
+		panic(badDiag)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if len(a) < (n*(n+1))/2 {
+		panic("blas: not enough data in ap")
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if n == 0 {
+		return
+	}
+	var kx int
+	if incX <= 0 {
+		kx = -(n - 1) * incX
+	}
+
+	nonUnit := d == blas.NonUnit
+	var offset int // Offset is the index of (i,i)
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			offset = n*(n+1)/2 - 1
+			if incX == 1 {
+				for i := n - 1; i >= 0; i-- {
+					atmp := a[offset+1 : offset+n-i]
+					xtmp := x[i+1:]
+					var sum float64
+					for j, v := range atmp {
+						sum += v * xtmp[j]
+					}
+					x[i] -= sum
+					if nonUnit {
+						x[i] /= a[offset]
+					}
+					offset -= n - i + 1
+				}
+				return
+			}
+			ix := kx + (n-1)*incX
+			for i := n - 1; i >= 0; i-- {
+				atmp := a[offset+1 : offset+n-i]
+				jx := kx + (i+1)*incX
+				var sum float64
+				for _, v := range atmp {
+					sum += v * x[jx]
+					jx += incX
+				}
+				x[ix] -= sum
+				if nonUnit {
+					x[ix] /= a[offset]
+				}
+				ix -= incX
+				offset -= n - i + 1
+			}
+			return
+		}
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				atmp := a[offset-i : offset]
+				var sum float64
+				for j, v := range atmp {
+					sum += v * x[j]
+				}
+				x[i] -= sum
+				if nonUnit {
+					x[i] /= a[offset]
+				}
+				offset += i + 2
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			jx := kx
+			atmp := a[offset-i : offset]
+			var sum float64
+			for _, v := range atmp {
+				sum += v * x[jx]
+				jx += incX
+			}
+			x[ix] -= sum
+			if nonUnit {
+				x[ix] /= a[offset]
+			}
+			ix += incX
+			offset += i + 2
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				if nonUnit {
+					x[i] /= a[offset]
+				}
+				xi := x[i]
+				atmp := a[offset+1 : offset+n-i]
+				xtmp := x[i+1:]
+				for j, v := range atmp {
+					xtmp[j] -= v * xi
+				}
+				offset += n - i
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			if nonUnit {
+				x[ix] /= a[offset]
+			}
+			xix := x[ix]
+			atmp := a[offset+1 : offset+n-i]
+			jx := kx + (i+1)*incX
+			for _, v := range atmp {
+				x[jx] -= v * xix
+				jx += incX
+			}
+			ix += incX
+			offset += n - i
+		}
+		return
+	}
+	if incX == 1 {
+		offset = n*(n+1)/2 - 1
+		for i := n - 1; i >= 0; i-- {
+			if nonUnit {
+				x[i] /= a[offset]
+			}
+			xi := x[i]
+			atmp := a[offset-i : offset]
+			for j, v := range atmp {
+				x[j] -= v * xi
+			}
+			offset -= i + 1
+		}
+		return
+	}
+	ix := kx + (n-1)*incX
+	offset = n*(n+1)/2 - 1
+	for i := n - 1; i >= 0; i-- {
+		if nonUnit {
+			x[ix] /= a[offset]
+		}
+		xix := x[ix]
+		atmp := a[offset-i : offset]
+		jx := kx
+		for _, v := range atmp {
+			x[jx] -= v * xix
+			jx += incX
+		}
+		ix -= incX
+		offset -= i + 1
+	}
 }
-func (Blas) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {
-	panic("referenceblas: function not implemented")
+
+// Dsymv  performs the matrix-vector  operation
+//    y := alpha*A*x + beta*y,
+// where alpha and beta are scalars, x and y are n element vectors and
+// A is an n by n symmetric matrix in packed format.
+func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64, incX int, beta float64, y []float64, incY int) {
+	// Verify inputs
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if len(a) < (n*(n+1))/2 {
+		panic("blas: not enough data in a")
+	}
+	if incX == 0 || incY == 0 {
+		panic(zeroInc)
+	}
+	// Quick return if possible
+	if n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	// Set up start points
+	var kx, ky int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(n - 1) * incX
+	}
+	if incY > 0 {
+		ky = 0
+	} else {
+		ky = -(n - 1) * incY
+	}
+
+	// Form y = beta * y
+	if beta != 1 {
+		if incY > 0 {
+			b.Dscal(n, beta, y, incY)
+		} else {
+			b.Dscal(n, beta, y, -incY)
+		}
+	}
+
+	if alpha == 0 {
+		return
+	}
+
+	if n == 1 {
+		y[0] += alpha * a[0] * x[0]
+		return
+	}
+	var offset int // Offset is the index of (i,i).
+	if ul == blas.Upper {
+		if incX == 1 {
+			iy := ky
+			for i := 0; i < n; i++ {
+				xv := x[i] * alpha
+				sum := a[offset] * x[i]
+				atmp := a[offset+1 : offset+n-i]
+				xtmp := x[i+1:]
+				jy := ky + (i+1)*incY
+				for j, v := range atmp {
+					sum += v * xtmp[j]
+					y[jy] += v * xv
+					jy += incY
+				}
+				y[iy] += alpha * sum
+				iy += incY
+				offset += n - i
+			}
+			return
+		}
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			xv := x[ix] * alpha
+			sum := a[offset] * x[ix]
+			atmp := a[offset+1 : offset+n-i]
+			jx := kx + (i+1)*incX
+			jy := ky + (i+1)*incY
+			for _, v := range atmp {
+				sum += v * x[jx]
+				y[jy] += v * xv
+				jx += incX
+				jy += incY
+			}
+			y[iy] += alpha * sum
+			ix += incX
+			iy += incY
+			offset += n - i
+		}
+		return
+	}
+	if incX == 1 {
+		iy := ky
+		for i := 0; i < n; i++ {
+			xv := x[i] * alpha
+			atmp := a[offset-i : offset]
+			jy := ky
+			var sum float64
+			for j, v := range atmp {
+				sum += v * x[j]
+				y[jy] += v * xv
+				jy += incY
+			}
+			sum += a[offset] * x[i]
+			y[iy] += alpha * sum
+			iy += incY
+			offset += i + 2
+		}
+		return
+	}
+	ix := kx
+	iy := ky
+	for i := 0; i < n; i++ {
+		xv := x[ix] * alpha
+		atmp := a[offset-i : offset]
+		jx := kx
+		jy := ky
+		var sum float64
+		for _, v := range atmp {
+			sum += v * x[jx]
+			y[jy] += v * xv
+			jx += incX
+			jy += incY
+		}
+
+		sum += a[offset] * x[ix]
+		y[iy] += alpha * sum
+		ix += incX
+		iy += incY
+		offset += i + 2
+	}
 }
-func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap []float64) {
-	panic("referenceblas: function not implemented")
+
+// Dspr computes a = alpha*x*x^T + a where a is an nxn symmetric matrix in packed format.
+func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(negInc)
+	}
+	if len(a) < (n*(n+1))/2 {
+		panic("blas: not enough data in a")
+	}
+	if alpha == 0 || n == 0 {
+		return
+	}
+	lenX := n
+	var kx int
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(lenX - 1) * incX
+	}
+	var offset int // Offset is the index of (i,i).
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				atmp := a[offset:]
+				xv := alpha * x[i]
+				xtmp := x[i:n]
+				for j, v := range xtmp {
+					atmp[j] += xv * v
+				}
+				offset += n - i
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			jx := kx + i*incX
+			atmp := a[offset:]
+			xv := alpha * x[ix]
+			for j := 0; j < n-i; j++ {
+				atmp[j] += xv * x[jx]
+				jx += incX
+			}
+			ix += incX
+			offset += n - i
+		}
+		return
+	}
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			atmp := a[offset-i:]
+			xv := alpha * x[i]
+			xtmp := x[:i+1]
+			for j, v := range xtmp {
+				atmp[j] += xv * v
+			}
+			offset += i + 2
+		}
+		return
+	}
+	ix := kx
+	for i := 0; i < n; i++ {
+		jx := kx
+		atmp := a[offset-i:]
+		xv := alpha * x[ix]
+		for j := 0; j <= i; j++ {
+			atmp[j] += xv * x[jx]
+			jx += incX
+		}
+		ix += incX
+		offset += i + 2
+	}
 }
 
 // Dsyr2 performs the symmetric rank-2 update

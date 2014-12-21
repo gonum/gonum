@@ -57,3 +57,7 @@ func TestDsyr2(t *testing.T) {
 func TestDtpsv(t *testing.T) {
 	testblas.DtpsvTest(t, blasser)
 }
+
+func TestDtpmv(t *testing.T) {
+	testblas.DtpmvTest(t, blasser)
+}

@@ -2142,6 +2142,96 @@ func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []
 		offset += i + 2
 	}
 }
+
+// Dsyr2 performs the symmetric rank-2 update
+//  a += alpha * x * y^T + alpha * y * x^T
+// where a is in packed format.
 func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
-	panic("referenceblas: function not implemented")
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 || incY == 0 {
+		panic(zeroInc)
+	}
+
+	if len(a) < (n*(n+1))/2 {
+		panic("goblas: not enough data in a")
+	}
+	var ky, kx int
+	if incY > 0 {
+		ky = 0
+	} else {
+		ky = -(n - 1) * incY
+	}
+	if incX > 0 {
+		kx = 0
+	} else {
+		kx = -(n - 1) * incX
+	}
+	var offset int // Offset is the index of (i,i).
+	if ul == blas.Upper {
+		if incX == 1 && incY == 1 {
+			for i := 0; i < n; i++ {
+				atmp := a[offset:]
+				xi := x[i]
+				yi := y[i]
+				xtmp := x[i:n]
+				ytmp := y[i:n]
+				for j, v := range xtmp {
+					atmp[j] += alpha * (xi*ytmp[j] + v*yi)
+				}
+				offset += n - i
+			}
+			return
+		}
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			jx := kx + i*incX
+			jy := ky + i*incY
+			atmp := a[offset:]
+			xi := x[ix]
+			yi := y[iy]
+			for j := 0; j < n-i; j++ {
+				atmp[j] += alpha * (xi*y[jy] + x[jx]*yi)
+				jx += incX
+				jy += incY
+			}
+			ix += incX
+			iy += incY
+			offset += n - i
+		}
+		return
+	}
+	if incX == 1 && incY == 1 {
+		for i := 0; i < n; i++ {
+			atmp := a[offset-i:]
+			xi := x[i]
+			yi := y[i]
+			xtmp := x[:i+1]
+			for j, v := range xtmp {
+				atmp[j] += alpha * (xi*y[j] + v*yi)
+			}
+			offset += i + 2
+		}
+		return
+	}
+	ix := kx
+	iy := ky
+	for i := 0; i < n; i++ {
+		jx := kx
+		jy := ky
+		atmp := a[offset-i:]
+		for j := 0; j <= i; j++ {
+			atmp[j] += alpha * (x[ix]*y[jy] + x[jx]*y[iy])
+			jx += incX
+			jy += incY
+		}
+		ix += incX
+		iy += incY
+		offset += i + 2
+	}
 }

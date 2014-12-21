@@ -139,15 +139,6 @@ func BenchmarkCovarianceMatrixSmallxMedium(b *testing.B) {
 	benchmarkCovarianceMatrix(b, x)
 }
 
-/*func BenchmarkCovarianceMatrixSmallxLarge(b *testing.B) {
-	x := randMat(SMALL, LARGE)
-	benchmarkCovarianceMatrix(b, x)
-}
-func BenchmarkCovarianceMatrixSmallxHuge(b *testing.B) {
-	x := randMat(SMALL, HUGE)
-	benchmarkCovarianceMatrix(b, x)
-}*/
-
 func BenchmarkCovarianceMatrixMediumxSmall(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(MEDIUM, SMALL)
@@ -159,54 +150,17 @@ func BenchmarkCovarianceMatrixMediumxMedium(b *testing.B) {
 	benchmarkCovarianceMatrix(b, x)
 }
 
-/*func BenchmarkCovarianceMatrixMediumxLarge(b *testing.B) {
-	x := randMat(MEDIUM, LARGE)
-	benchmarkCovarianceMatrix(b, x)
-}
-func BenchmarkCovarianceMatrixMediumxHuge(b *testing.B) {
-	x := randMat(MEDIUM, HUGE)
-	benchmarkCovarianceMatrix(b, x)
-}*/
-
 func BenchmarkCovarianceMatrixLargexSmall(b *testing.B) {
 	// 1e5 * 10 elements
 	x := randMat(LARGE, SMALL)
 	benchmarkCovarianceMatrix(b, x)
 }
 
-/*func BenchmarkCovarianceMatrixLargexMedium(b *testing.B) {
-	// 1e5 * 1000 elements
-    x := randMat(LARGE, MEDIUM)
-	benchmarkCovarianceMatrix(b, x)
-}
-func BenchmarkCovarianceMatrixLargexLarge(b *testing.B) {
-	x := randMat(LARGE, LARGE)
-	benchmarkCovarianceMatrix(b, x)
-}
-func BenchmarkCovarianceMatrixLargexHuge(b *testing.B) {
-	x := randMat(LARGE, HUGE)
-	benchmarkCovarianceMatrix(b, x)
-}*/
-
 func BenchmarkCovarianceMatrixHugexSmall(b *testing.B) {
 	// 1e7 * 10 elements
 	x := randMat(HUGE, SMALL)
 	benchmarkCovarianceMatrix(b, x)
 }
-
-/*func BenchmarkCovarianceMatrixHugexMedium(b *testing.B) {
-	// 1e7 * 1000 elements
-    x := randMat(HUGE, MEDIUM)
-	benchmarkCovarianceMatrix(b, x)
-}
-func BenchmarkCovarianceMatrixHugexLarge(b *testing.B) {
-	x := randMat(HUGE, LARGE)
-	benchmarkCovarianceMatrix(b, x)
-}
-func BenchmarkCovarianceMatrixHugexHuge(b *testing.B) {
-	x := randMat(HUGE, HUGE)
-	benchmarkCovarianceMatrix(b, x)
-}*/
 
 func BenchmarkCovarianceMatrixSmallxSmallInPlace(b *testing.B) {
 	// 10 * 10 elements
@@ -219,15 +173,6 @@ func BenchmarkCovarianceMatrixSmallxMediumInPlace(b *testing.B) {
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
 
-/*func BenchmarkCovarianceMatrixSmallxLargeInPlace(b *testing.B) {
-	x := randMat(SMALL, LARGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}
-func BenchmarkCovarianceMatrixSmallxHugeInPlace(b *testing.B) {
-	x := randMat(SMALL, HUGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}*/
-
 func BenchmarkCovarianceMatrixMediumxSmallInPlace(b *testing.B) {
 	// 1000 * 10 elements
 	x := randMat(MEDIUM, SMALL)
@@ -239,51 +184,14 @@ func BenchmarkCovarianceMatrixMediumxMediumInPlace(b *testing.B) {
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
 
-/*func BenchmarkCovarianceMatrixMediumxLargeInPlace(b *testing.B) {
-	x := randMat(MEDIUM, LARGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}
-func BenchmarkCovarianceMatrixMediumxHugeInPlace(b *testing.B) {
-	x := randMat(MEDIUM, HUGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}*/
-
 func BenchmarkCovarianceMatrixLargexSmallInPlace(b *testing.B) {
 	// 1e5 * 10 elements
 	x := randMat(LARGE, SMALL)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
 
-/*func BenchmarkCovarianceMatrixLargexMediumInPlace(b *testing.B) {
-	// 1e5 * 1000 elements
-    x := randMat(LARGE, MEDIUM)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}
-func BenchmarkCovarianceMatrixLargexLargeInPlace(b *testing.B) {
-	x := randMat(LARGE, LARGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}
-func BenchmarkCovarianceMatrixLargexHugeInPlace(b *testing.B) {
-	x := randMat(LARGE, HUGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}*/
-
 func BenchmarkCovarianceMatrixHugexSmallInPlace(b *testing.B) {
 	// 1e7 * 10 elements
 	x := randMat(HUGE, SMALL)
 	benchmarkCovarianceMatrixInPlace(b, x)
 }
-
-/*func BenchmarkCovarianceMatrixHugexMediumInPlace(b *testing.B) {
-	// 1e7 * 1000 elements
-    x := randMat(HUGE, MEDIUM)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}
-func BenchmarkCovarianceMatrixHugexLargeInPlace(b *testing.B) {
-	x := randMat(HUGE, LARGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}
-func BenchmarkCovarianceMatrixHugexHugeInPlace(b *testing.B) {
-	x := randMat(HUGE, HUGE)
-	benchmarkCovarianceMatrixInPlace(b, x)
-}*/

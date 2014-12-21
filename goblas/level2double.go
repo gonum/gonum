@@ -1754,10 +1754,181 @@ func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 	return
 }
 
-//TODO: Not yet implemented Level 2 routines.
-func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
-	panic("referenceblas: function not implemented")
+// Dtpsv  solves one of the systems of equations
+//    A*x = b,   or   A**T*x = b,
+// where b and x are n element vectors and A is an n by n unit, or
+// non-unit, upper or lower triangular matrix in packed format.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
+func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
+	// Verify inputs
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if d != blas.NonUnit && d != blas.Unit {
+		panic(badDiag)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if len(a) < (n*(n+1))/2 {
+		panic("blas: not enough data in ap")
+	}
+	if incX == 0 {
+		panic(zeroInc)
+	}
+	if n == 0 {
+		return
+	}
+	var kx int
+	if incX <= 0 {
+		kx = -(n - 1) * incX
+	}
+
+	nonUnit := d == blas.NonUnit
+	var offset int // Offset is the index of (i,i)
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			offset = n*(n+1)/2 - 1
+			if incX == 1 {
+				for i := n - 1; i >= 0; i-- {
+					atmp := a[offset+1 : offset+n-i]
+					xtmp := x[i+1:]
+					var sum float64
+					for j, v := range atmp {
+						sum += v * xtmp[j]
+					}
+					x[i] -= sum
+					if nonUnit {
+						x[i] /= a[offset]
+					}
+					offset -= n - i + 1
+				}
+				return
+			}
+			ix := kx + (n-1)*incX
+			for i := n - 1; i >= 0; i-- {
+				atmp := a[offset+1 : offset+n-i]
+				jx := kx + (i+1)*incX
+				var sum float64
+				for _, v := range atmp {
+					sum += v * x[jx]
+					jx += incX
+				}
+				x[ix] -= sum
+				if nonUnit {
+					x[ix] /= a[offset]
+				}
+				ix -= incX
+				offset -= n - i + 1
+			}
+			return
+		}
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				atmp := a[offset-i : offset]
+				var sum float64
+				for j, v := range atmp {
+					sum += v * x[j]
+				}
+				x[i] -= sum
+				if nonUnit {
+					x[i] /= a[offset]
+				}
+				offset += i + 2
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			jx := kx
+			atmp := a[offset-i : offset]
+			var sum float64
+			for _, v := range atmp {
+				sum += v * x[jx]
+				jx += incX
+			}
+			x[ix] -= sum
+			if nonUnit {
+				x[ix] /= a[offset]
+			}
+			ix += incX
+			offset += i + 2
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				if nonUnit {
+					x[i] /= a[offset]
+				}
+				xi := x[i]
+				atmp := a[offset+1 : offset+n-i]
+				xtmp := x[i+1:]
+				for j, v := range atmp {
+					xtmp[j] -= v * xi
+				}
+				offset += n - i
+			}
+			return
+		}
+		ix := kx
+		for i := 0; i < n; i++ {
+			if nonUnit {
+				x[ix] /= a[offset]
+			}
+			xix := x[ix]
+			atmp := a[offset+1 : offset+n-i]
+			jx := kx + (i+1)*incX
+			for _, v := range atmp {
+				x[jx] -= v * xix
+				jx += incX
+			}
+			ix += incX
+			offset += n - i
+		}
+		return
+	}
+	if incX == 1 {
+		offset = n*(n+1)/2 - 1
+		for i := n - 1; i >= 0; i-- {
+			if nonUnit {
+				x[i] /= a[offset]
+			}
+			xi := x[i]
+			atmp := a[offset-i : offset]
+			for j, v := range atmp {
+				x[j] -= v * xi
+			}
+			offset -= i + 1
+		}
+		return
+	}
+	ix := kx + (n-1)*incX
+	offset = n*(n+1)/2 - 1
+	for i := n - 1; i >= 0; i-- {
+		if nonUnit {
+			x[ix] /= a[offset]
+		}
+		xix := x[ix]
+		atmp := a[offset-i : offset]
+		jx := kx
+		for _, v := range atmp {
+			x[jx] -= v * xix
+			jx += incX
+		}
+		ix -= incX
+		offset -= i + 1
+	}
 }
+
+//TODO: Not yet implemented Level 2 routines.
 func (Blas) Dspmv(ul blas.Uplo, n int, alpha float64, ap []float64, x []float64, incX int, beta float64, y []float64, incY int) {
 	panic("referenceblas: function not implemented")
 }

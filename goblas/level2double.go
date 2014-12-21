@@ -2089,7 +2089,7 @@ func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []
 	} else {
 		kx = -(lenX - 1) * incX
 	}
-	var offset int
+	var offset int // Offset is the index of (i,i).
 	if ul == blas.Upper {
 		if incX == 1 {
 			for i := 0; i < n; i++ {

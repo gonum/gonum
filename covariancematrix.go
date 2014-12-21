@@ -49,7 +49,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	var N float64
 	if wts != nil {
 		if wr := len(wts); wr != r {
-			panic("weight vector length mismatch")
+			panic(mat64.ErrShape)
 		}
 
 		for i, w := range wts {
@@ -69,7 +69,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	if cov == nil {
 		cov = mat64.NewDense(c, c, nil)
 	} else if covr, covc := cov.Dims(); covr != covc || covc != c {
-		panic("matrix size mismatch")
+		panic(mat64.ErrShape)
 	}
 
 	cov.Mul(&xt, xc)

@@ -4,6 +4,11 @@ import "github.com/gonum/blas"
 
 var _ blas.Float64Level3 = Blasser
 
+const (
+	// TODO (btracey): Fix the ld panic messages to be consistent across the package
+	badLd string = "goblas: ld must be greater than the number of columns"
+)
+
 func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	// Transform to row major
 	if ul == blas.Upper {
@@ -166,14 +171,11 @@ func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float6
 	if n < 0 {
 		panic(nLT0)
 	}
-	if lda < 0 {
-		panic(lda)
+	if (lda < m && s == blas.Left) || (lda < n && s == blas.Right) {
+		panic(badLd)
 	}
-	if ldb < 0 {
-		panic(ldb)
-	}
-	if ldc < 0 {
-		panic(ldc)
+	if ldb < n || ldc < n {
+		panic(badLd)
 	}
 	if m == 0 || n == 0 {
 		return

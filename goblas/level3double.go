@@ -200,22 +200,78 @@ func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float6
 		return
 	}
 
-	if s == blas.Right {
-		if ul == blas.Upper {
-			for i := 0; i < m; i++ {
-				for j := 0; j < n; j++ {
-					// for k := i; k <m;
-					/*
-						for k := i + 1; k < m; k++ {
-							v := alpha * a[i*lda+k] * b[k*ldb+j]
-							c[i*ldc+j] += v
-							if i != j {
-								c[j*ldc+i] += v
-							}
-						}
-					*/
+	isUpper := ul == blas.Upper
+	if s == blas.Left {
+		for i := 0; i < m; i++ {
+			atmp := alpha * a[i*lda+i]
+			btmp := b[i*ldb : i*ldb+n]
+			ctmp := c[i*ldc : i*ldc+n]
+			for j, v := range btmp {
+				ctmp[j] *= beta
+				ctmp[j] += atmp * v
+			}
+			for k := 0; k < i; k++ {
+				var atmp float64
+				if isUpper {
+					atmp = a[k*lda+i]
+				} else {
+					atmp = a[i*lda+k]
+				}
+				atmp *= alpha
+				btmp := b[k*ldb : k*ldb+n]
+				ctmp := c[i*ldc : i*ldc+n]
+				for j, v := range btmp {
+					ctmp[j] += atmp * v
 				}
 			}
+			for k := i + 1; k < m; k++ {
+				var atmp float64
+				if isUpper {
+					atmp = a[i*lda+k]
+				} else {
+					atmp = a[k*lda+i]
+				}
+				atmp *= alpha
+				btmp := b[k*ldb : k*ldb+n]
+				ctmp := c[i*ldc : i*ldc+n]
+				for j, v := range btmp {
+					ctmp[j] += atmp * v
+				}
+			}
+		}
+		return
+	}
+	if isUpper {
+		for i := 0; i < m; i++ {
+			for j := n - 1; j >= 0; j-- {
+				tmp := alpha * b[i*ldb+j]
+				var tmp2 float64
+				atmp := a[j*lda+j+1 : j*lda+n]
+				btmp := b[i*ldb+j+1 : i*ldb+n]
+				ctmp := c[i*ldc+j+1 : i*ldc+n]
+				for k, v := range atmp {
+					ctmp[k] += tmp * v
+					tmp2 += btmp[k] * v
+				}
+				c[i*ldc+j] *= beta
+				c[i*ldc+j] += tmp*a[j*lda+j] + alpha*tmp2
+			}
+		}
+		return
+	}
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			tmp := alpha * b[i*ldb+j]
+			var tmp2 float64
+			atmp := a[j*lda : j*lda+j]
+			btmp := b[i*ldb : i*ldb+j]
+			ctmp := c[i*ldc : i*ldc+j]
+			for k, v := range atmp {
+				ctmp[k] += tmp * v
+				tmp2 += btmp[k] * v
+			}
+			c[i*ldc+j] *= beta
+			c[i*ldc+j] += tmp*a[j*lda+j] + alpha*tmp2
 		}
 	}
 }

@@ -4,27 +4,14 @@ import "github.com/gonum/blas"
 
 var _ blas.Float64Level3 = Blasser
 
+// Dtrsm solves
+//  A X = alpha B
+// or
+//  X A = alpha B
+// where X and B are m x n matrices, and A is a unit or non unit upper or lower
+// triangular matrix. The result is stored in place into B. No check is made
+// that A is invertible.
 func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
-	// Transform to row major
-	if ul == blas.Upper {
-		ul = blas.Lower
-	} else {
-		ul = blas.Upper
-	}
-	if s == blas.Left {
-		s = blas.Right
-	} else {
-		s = blas.Left
-	}
-	m, n = n, m
-
-	var nrowa int
-	if s == blas.Left {
-		nrowa = m
-	} else {
-		nrowa = n
-	}
-
 	if s != blas.Left && s != blas.Right {
 		panic(badSide)
 	}
@@ -55,10 +42,10 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 	}
 
 	if alpha == 0 {
-		for j := 0; j < n; j++ {
-			jb := ldb * j
-			for i := 0; i < m; i++ {
-				b[i+jb] = 0
+		for i := 0; i < m; i++ {
+			btmp := b[i*ldb : i*ldb+n]
+			for j := range btmp {
+				btmp[j] = 0
 			}
 		}
 		return

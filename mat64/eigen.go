@@ -13,7 +13,7 @@ func symmetric(m *Dense) bool {
 	n, _ := m.Dims()
 	for i := 0; i < n; i++ {
 		for j := 0; j < i; j++ {
-			if m.At(i, j) != m.At(j, i) {
+			if m.at(i, j) != m.at(j, i) {
 				return false
 			}
 		}
@@ -77,7 +77,7 @@ func tred2(a *Dense, d, e []float64) (v *Dense) {
 	v = a
 
 	for j := 0; j < n; j++ {
-		d[j] = v.At(n-1, j)
+		d[j] = v.at(n-1, j)
 	}
 
 	// Householder reduction to tridiagonal form.
@@ -93,9 +93,9 @@ func tred2(a *Dense, d, e []float64) (v *Dense) {
 		if scale == 0 {
 			e[i] = d[i-1]
 			for j := 0; j < i; j++ {
-				d[j] = v.At(i-1, j)
-				v.Set(i, j, 0)
-				v.Set(j, i, 0)
+				d[j] = v.at(i-1, j)
+				v.set(i, j, 0)
+				v.set(j, i, 0)
 			}
 		} else {
 			// Generate Householder vector.
@@ -118,11 +118,11 @@ func tred2(a *Dense, d, e []float64) (v *Dense) {
 			// Apply similarity transformation to remaining columns.
 			for j := 0; j < i; j++ {
 				f = d[j]
-				v.Set(j, i, f)
-				g = e[j] + v.At(j, j)*f
+				v.set(j, i, f)
+				g = e[j] + v.at(j, j)*f
 				for k := j + 1; k <= i-1; k++ {
-					g += v.At(k, j) * d[k]
-					e[k] += v.At(k, j) * f
+					g += v.at(k, j) * d[k]
+					e[k] += v.at(k, j) * f
 				}
 				e[j] = g
 			}
@@ -139,10 +139,10 @@ func tred2(a *Dense, d, e []float64) (v *Dense) {
 				f = d[j]
 				g = e[j]
 				for k := j; k <= i-1; k++ {
-					v.Set(k, j, v.At(k, j)-(f*e[k]+g*d[k]))
+					v.set(k, j, v.at(k, j)-(f*e[k]+g*d[k]))
 				}
-				d[j] = v.At(i-1, j)
-				v.Set(i, j, 0)
+				d[j] = v.at(i-1, j)
+				v.set(i, j, 0)
 			}
 		}
 		d[i] = h
@@ -150,32 +150,32 @@ func tred2(a *Dense, d, e []float64) (v *Dense) {
 
 	// Accumulate transformations.
 	for i := 0; i < n-1; i++ {
-		v.Set(n-1, i, v.At(i, i))
-		v.Set(i, i, 1)
+		v.set(n-1, i, v.at(i, i))
+		v.set(i, i, 1)
 		h := d[i+1]
 		if h != 0 {
 			for k := 0; k <= i; k++ {
-				d[k] = v.At(k, i+1) / h
+				d[k] = v.at(k, i+1) / h
 			}
 			for j := 0; j <= i; j++ {
 				var g float64
 				for k := 0; k <= i; k++ {
-					g += v.At(k, i+1) * v.At(k, j)
+					g += v.at(k, i+1) * v.at(k, j)
 				}
 				for k := 0; k <= i; k++ {
-					v.Set(k, j, v.At(k, j)-g*d[k])
+					v.set(k, j, v.at(k, j)-g*d[k])
 				}
 			}
 		}
 		for k := 0; k <= i; k++ {
-			v.Set(k, i+1, 0)
+			v.set(k, i+1, 0)
 		}
 	}
 	for j := 0; j < n; j++ {
-		d[j] = v.At(n-1, j)
-		v.Set(n-1, j, 0)
+		d[j] = v.at(n-1, j)
+		v.set(n-1, j, 0)
 	}
-	v.Set(n-1, n-1, 1)
+	v.set(n-1, n-1, 1)
 	e[0] = 0
 
 	return v
@@ -254,9 +254,9 @@ func tql2(d, e []float64, v *Dense, epsilon float64) {
 
 					// Accumulate transformation.
 					for k := 0; k < n; k++ {
-						h = v.At(k, i+1)
-						v.Set(k, i+1, s*v.At(k, i)+c*h)
-						v.Set(k, i, c*v.At(k, i)-s*h)
+						h = v.at(k, i+1)
+						v.set(k, i+1, s*v.at(k, i)+c*h)
+						v.set(k, i, c*v.at(k, i)-s*h)
 					}
 				}
 				p = -s * s2 * c3 * el1 * e[l] / dl1
@@ -287,9 +287,9 @@ func tql2(d, e []float64, v *Dense, epsilon float64) {
 			d[k] = d[i]
 			d[i] = p
 			for j := 0; j < n; j++ {
-				p = v.At(j, i)
-				v.Set(j, i, v.At(j, k))
-				v.Set(j, k, p)
+				p = v.at(j, i)
+				v.set(j, i, v.at(j, k))
+				v.set(j, k, p)
 			}
 		}
 	}
@@ -314,13 +314,13 @@ func orthes(a *Dense) (hess, v *Dense) {
 		// Scale column.
 		var scale float64
 		for i := m; i <= high; i++ {
-			scale += math.Abs(hess.At(i, m-1))
+			scale += math.Abs(hess.at(i, m-1))
 		}
 		if scale != 0 {
 			// Compute Householder transformation.
 			var h float64
 			for i := high; i >= m; i-- {
-				ort[i] = hess.At(i, m-1) / scale
+				ort[i] = hess.at(i, m-1) / scale
 				h += ort[i] * ort[i]
 			}
 			g := math.Sqrt(h)
@@ -335,26 +335,26 @@ func orthes(a *Dense) (hess, v *Dense) {
 			for j := m; j < n; j++ {
 				var f float64
 				for i := high; i >= m; i-- {
-					f += ort[i] * hess.At(i, j)
+					f += ort[i] * hess.at(i, j)
 				}
 				f /= h
 				for i := m; i <= high; i++ {
-					hess.Set(i, j, hess.At(i, j)-f*ort[i])
+					hess.set(i, j, hess.at(i, j)-f*ort[i])
 				}
 			}
 
 			for i := 0; i <= high; i++ {
 				var f float64
 				for j := high; j >= m; j-- {
-					f += ort[j] * hess.At(i, j)
+					f += ort[j] * hess.at(i, j)
 				}
 				f /= h
 				for j := m; j <= high; j++ {
-					hess.Set(i, j, hess.At(i, j)-f*ort[j])
+					hess.set(i, j, hess.at(i, j)-f*ort[j])
 				}
 			}
 			ort[m] *= scale
-			hess.Set(m, m-1, scale*g)
+			hess.set(m, m-1, scale*g)
 		}
 	}
 
@@ -363,27 +363,27 @@ func orthes(a *Dense) (hess, v *Dense) {
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			if i == j {
-				v.Set(i, j, 1)
+				v.set(i, j, 1)
 			} else {
-				v.Set(i, j, 0)
+				v.set(i, j, 0)
 			}
 		}
 	}
 	for m := high - 1; m >= low+1; m-- {
-		if hess.At(m, m-1) != 0 {
+		if hess.at(m, m-1) != 0 {
 			for i := m + 1; i <= high; i++ {
-				ort[i] = hess.At(i, m-1)
+				ort[i] = hess.at(i, m-1)
 			}
 			for j := m; j <= high; j++ {
 				var g float64
 				for i := m; i <= high; i++ {
-					g += ort[i] * v.At(i, j)
+					g += ort[i] * v.at(i, j)
 				}
 
 				// Double division avoids possible underflow
-				g = (g / ort[m]) / hess.At(m, m-1)
+				g = (g / ort[m]) / hess.at(m, m-1)
 				for i := m; i <= high; i++ {
-					v.Set(i, j, v.At(i, j)+g*ort[i])
+					v.set(i, j, v.at(i, j)+g*ort[i])
 				}
 			}
 		}
@@ -417,11 +417,11 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 	var norm float64
 	for i := 0; i < nn; i++ {
 		if i < low || i > high {
-			d[i] = hess.At(i, i)
+			d[i] = hess.at(i, i)
 			e[i] = 0
 		}
 		for j := max(i-1, 0); j < nn; j++ {
-			norm += math.Abs(hess.At(i, j))
+			norm += math.Abs(hess.at(i, j))
 		}
 	}
 
@@ -430,11 +430,11 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 		// Look for single small sub-diagonal element
 		l := n
 		for l > low {
-			s = math.Abs(hess.At(l-1, l-1)) + math.Abs(hess.At(l, l))
+			s = math.Abs(hess.at(l-1, l-1)) + math.Abs(hess.at(l, l))
 			if s == 0 {
 				s = norm
 			}
-			if math.Abs(hess.At(l, l-1)) < epsilon*s {
+			if math.Abs(hess.at(l, l-1)) < epsilon*s {
 				break
 			}
 			l--
@@ -443,20 +443,20 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 		// Check for convergence
 		if l == n {
 			// One root found
-			hess.Set(n, n, hess.At(n, n)+exshift)
-			d[n] = hess.At(n, n)
+			hess.set(n, n, hess.at(n, n)+exshift)
+			d[n] = hess.at(n, n)
 			e[n] = 0
 			n--
 			iter = 0
 		} else if l == n-1 {
 			// Two roots found
-			w = hess.At(n, n-1) * hess.At(n-1, n)
-			p = (hess.At(n-1, n-1) - hess.At(n, n)) / 2.0
+			w = hess.at(n, n-1) * hess.at(n-1, n)
+			p = (hess.at(n-1, n-1) - hess.at(n, n)) / 2.0
 			q = p*p + w
 			z = math.Sqrt(math.Abs(q))
-			hess.Set(n, n, hess.At(n, n)+exshift)
-			hess.Set(n-1, n-1, hess.At(n-1, n-1)+exshift)
-			x = hess.At(n, n)
+			hess.set(n, n, hess.at(n, n)+exshift)
+			hess.set(n-1, n-1, hess.at(n-1, n-1)+exshift)
+			x = hess.at(n, n)
 
 			// Real pair
 			if q >= 0 {
@@ -472,7 +472,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 				}
 				e[n-1] = 0
 				e[n] = 0
-				x = hess.At(n, n-1)
+				x = hess.at(n, n-1)
 				s = math.Abs(x) + math.Abs(z)
 				p = x / s
 				q = z / s
@@ -482,23 +482,23 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 
 				// Row modification
 				for j := n - 1; j < nn; j++ {
-					z = hess.At(n-1, j)
-					hess.Set(n-1, j, q*z+p*hess.At(n, j))
-					hess.Set(n, j, q*hess.At(n, j)-p*z)
+					z = hess.at(n-1, j)
+					hess.set(n-1, j, q*z+p*hess.at(n, j))
+					hess.set(n, j, q*hess.at(n, j)-p*z)
 				}
 
 				// Column modification
 				for i := 0; i <= n; i++ {
-					z = hess.At(i, n-1)
-					hess.Set(i, n-1, q*z+p*hess.At(i, n))
-					hess.Set(i, n, q*hess.At(i, n)-p*z)
+					z = hess.at(i, n-1)
+					hess.set(i, n-1, q*z+p*hess.at(i, n))
+					hess.set(i, n, q*hess.at(i, n)-p*z)
 				}
 
 				// Accumulate transformations
 				for i := low; i <= high; i++ {
-					z = v.At(i, n-1)
-					v.Set(i, n-1, q*z+p*v.At(i, n))
-					v.Set(i, n, q*v.At(i, n)-p*z)
+					z = v.at(i, n-1)
+					v.set(i, n-1, q*z+p*v.at(i, n))
+					v.set(i, n, q*v.at(i, n)-p*z)
 				}
 			} else {
 				// Complex pair
@@ -513,21 +513,21 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 			// No convergence yet
 
 			// Form shift
-			x = hess.At(n, n)
+			x = hess.at(n, n)
 			y = 0
 			w = 0
 			if l < n {
-				y = hess.At(n-1, n-1)
-				w = hess.At(n, n-1) * hess.At(n-1, n)
+				y = hess.at(n-1, n-1)
+				w = hess.at(n, n-1) * hess.at(n-1, n)
 			}
 
 			// Wilkinson's original ad hoc shift
 			if iter == 10 {
 				exshift += x
 				for i := low; i <= n; i++ {
-					hess.Set(i, i, hess.At(i, i)-x)
+					hess.set(i, i, hess.at(i, i)-x)
 				}
-				s = math.Abs(hess.At(n, n-1)) + math.Abs(hess.At(n-1, n-2))
+				s = math.Abs(hess.at(n, n-1)) + math.Abs(hess.at(n-1, n-2))
 				x = 0.75 * s
 				y = x
 				w = -0.4375 * s * s
@@ -544,7 +544,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					}
 					s = x - w/((y-x)/2+s)
 					for i := low; i <= n; i++ {
-						hess.Set(i, i, hess.At(i, i)-s)
+						hess.set(i, i, hess.at(i, i)-s)
 					}
 					exshift += s
 					x = 0.964
@@ -558,12 +558,12 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 			// Look for two consecutive small sub-diagonal elements
 			m := n - 2
 			for m >= l {
-				z = hess.At(m, m)
+				z = hess.at(m, m)
 				r = x - z
 				s = y - z
-				p = (r*s-w)/hess.At(m+1, m) + hess.At(m, m+1)
-				q = hess.At(m+1, m+1) - z - r - s
-				r = hess.At(m+2, m+1)
+				p = (r*s-w)/hess.at(m+1, m) + hess.at(m, m+1)
+				q = hess.at(m+1, m+1) - z - r - s
+				r = hess.at(m+2, m+1)
 				s = math.Abs(p) + math.Abs(q) + math.Abs(r)
 				p /= s
 				q /= s
@@ -571,17 +571,17 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 				if m == l {
 					break
 				}
-				if math.Abs(hess.At(m, m-1))*(math.Abs(q)+math.Abs(r)) <
-					epsilon*(math.Abs(p)*(math.Abs(hess.At(m-1, m-1))+math.Abs(z)+math.Abs(hess.At(m+1, m+1)))) {
+				if math.Abs(hess.at(m, m-1))*(math.Abs(q)+math.Abs(r)) <
+					epsilon*(math.Abs(p)*(math.Abs(hess.at(m-1, m-1))+math.Abs(z)+math.Abs(hess.at(m+1, m+1)))) {
 					break
 				}
 				m--
 			}
 
 			for i := m + 2; i <= n; i++ {
-				hess.Set(i, i-2, 0)
+				hess.set(i, i-2, 0)
 				if i > m+2 {
-					hess.Set(i, i-3, 0)
+					hess.set(i, i-3, 0)
 				}
 			}
 
@@ -589,10 +589,10 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 			for k := m; k <= n-1; k++ {
 				notlast := k != n-1
 				if k != m {
-					p = hess.At(k, k-1)
-					q = hess.At(k+1, k-1)
+					p = hess.at(k, k-1)
+					q = hess.at(k+1, k-1)
 					if notlast {
-						r = hess.At(k+2, k-1)
+						r = hess.at(k+2, k-1)
 					} else {
 						r = 0
 					}
@@ -611,9 +611,9 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 				}
 				if s != 0 {
 					if k != m {
-						hess.Set(k, k-1, -s*x)
+						hess.set(k, k-1, -s*x)
 					} else if l != m {
-						hess.Set(k, k-1, -hess.At(k, k-1))
+						hess.set(k, k-1, -hess.at(k, k-1))
 					}
 					p += s
 					x = p / s
@@ -624,35 +624,35 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 
 					// Row modification
 					for j := k; j < nn; j++ {
-						p = hess.At(k, j) + q*hess.At(k+1, j)
+						p = hess.at(k, j) + q*hess.at(k+1, j)
 						if notlast {
-							p += r * hess.At(k+2, j)
-							hess.Set(k+2, j, hess.At(k+2, j)-p*z)
+							p += r * hess.at(k+2, j)
+							hess.set(k+2, j, hess.at(k+2, j)-p*z)
 						}
-						hess.Set(k, j, hess.At(k, j)-p*x)
-						hess.Set(k+1, j, hess.At(k+1, j)-p*y)
+						hess.set(k, j, hess.at(k, j)-p*x)
+						hess.set(k+1, j, hess.at(k+1, j)-p*y)
 					}
 
 					// Column modification
 					for i := 0; i <= min(n, k+3); i++ {
-						p = x*hess.At(i, k) + y*hess.At(i, k+1)
+						p = x*hess.at(i, k) + y*hess.at(i, k+1)
 						if notlast {
-							p += z * hess.At(i, k+2)
-							hess.Set(i, k+2, hess.At(i, k+2)-p*r)
+							p += z * hess.at(i, k+2)
+							hess.set(i, k+2, hess.at(i, k+2)-p*r)
 						}
-						hess.Set(i, k, hess.At(i, k)-p)
-						hess.Set(i, k+1, hess.At(i, k+1)-p*q)
+						hess.set(i, k, hess.at(i, k)-p)
+						hess.set(i, k+1, hess.at(i, k+1)-p*q)
 					}
 
 					// Accumulate transformations
 					for i := low; i <= high; i++ {
-						p = x*v.At(i, k) + y*v.At(i, k+1)
+						p = x*v.at(i, k) + y*v.at(i, k+1)
 						if notlast {
-							p += z * v.At(i, k+2)
-							v.Set(i, k+2, v.At(i, k+2)-p*r)
+							p += z * v.at(i, k+2)
+							v.set(i, k+2, v.at(i, k+2)-p*r)
 						}
-						v.Set(i, k, v.At(i, k)-p)
-						v.Set(i, k+1, v.At(i, k+1)-p*q)
+						v.set(i, k, v.at(i, k)-p)
+						v.set(i, k+1, v.at(i, k+1)-p*q)
 					}
 				}
 			}
@@ -671,12 +671,12 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 		if q == 0 {
 			// Real vector
 			l := n
-			hess.Set(n, n, 1)
+			hess.set(n, n, 1)
 			for i := n - 1; i >= 0; i-- {
-				w = hess.At(i, i) - p
+				w = hess.at(i, i) - p
 				r = 0
 				for j := l; j <= n; j++ {
-					r += hess.At(i, j) * hess.At(j, n)
+					r += hess.at(i, j) * hess.at(j, n)
 				}
 				if e[i] < 0 {
 					z = w
@@ -685,29 +685,29 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					l = i
 					if e[i] == 0 {
 						if w != 0 {
-							hess.Set(i, n, -r/w)
+							hess.set(i, n, -r/w)
 						} else {
-							hess.Set(i, n, -r/(epsilon*norm))
+							hess.set(i, n, -r/(epsilon*norm))
 						}
 					} else {
 						// Solve real equations
-						x = hess.At(i, i+1)
-						y = hess.At(i+1, i)
+						x = hess.at(i, i+1)
+						y = hess.at(i+1, i)
 						q = (d[i]-p)*(d[i]-p) + e[i]*e[i]
 						t = (x*s - z*r) / q
-						hess.Set(i, n, t)
+						hess.set(i, n, t)
 						if math.Abs(x) > math.Abs(z) {
-							hess.Set(i+1, n, (-r-w*t)/x)
+							hess.set(i+1, n, (-r-w*t)/x)
 						} else {
-							hess.Set(i+1, n, (-s-y*t)/z)
+							hess.set(i+1, n, (-s-y*t)/z)
 						}
 					}
 
 					// Overflow control
-					t = math.Abs(hess.At(i, n))
+					t = math.Abs(hess.at(i, n))
 					if epsilon*t*t > 1 {
 						for j := i; j <= n; j++ {
-							hess.Set(j, n, hess.At(j, n)/t)
+							hess.set(j, n, hess.at(j, n)/t)
 						}
 					}
 				}
@@ -718,24 +718,24 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 			l := n - 1
 
 			// Last vector component imaginary so matrix is triangular
-			if math.Abs(hess.At(n, n-1)) > math.Abs(hess.At(n-1, n)) {
-				hess.Set(n-1, n-1, q/hess.At(n, n-1))
-				hess.Set(n-1, n, -(hess.At(n, n)-p)/hess.At(n, n-1))
+			if math.Abs(hess.at(n, n-1)) > math.Abs(hess.at(n-1, n)) {
+				hess.set(n-1, n-1, q/hess.at(n, n-1))
+				hess.set(n-1, n, -(hess.at(n, n)-p)/hess.at(n, n-1))
 			} else {
-				re, im := cdiv(0, -hess.At(n-1, n), hess.At(n-1, n-1)-p, q)
-				hess.Set(n-1, n-1, re)
-				hess.Set(n-1, n, im)
+				re, im := cdiv(0, -hess.at(n-1, n), hess.at(n-1, n-1)-p, q)
+				hess.set(n-1, n-1, re)
+				hess.set(n-1, n, im)
 			}
-			hess.Set(n, n-1, 0)
-			hess.Set(n, n, 1)
+			hess.set(n, n-1, 0)
+			hess.set(n, n, 1)
 
 			for i := n - 2; i >= 0; i-- {
 				var ra, sa, vr, vi float64
 				for j := l; j <= n; j++ {
-					ra += hess.At(i, j) * hess.At(j, n-1)
-					sa += hess.At(i, j) * hess.At(j, n)
+					ra += hess.at(i, j) * hess.at(j, n-1)
+					sa += hess.at(i, j) * hess.at(j, n)
 				}
-				w = hess.At(i, i) - p
+				w = hess.at(i, i) - p
 
 				if e[i] < 0 {
 					z = w
@@ -745,36 +745,36 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					l = i
 					if e[i] == 0 {
 						re, im := cdiv(-ra, -sa, w, q)
-						hess.Set(i, n-1, re)
-						hess.Set(i, n, im)
+						hess.set(i, n-1, re)
+						hess.set(i, n, im)
 					} else {
 						// Solve complex equations
-						x = hess.At(i, i+1)
-						y = hess.At(i+1, i)
+						x = hess.at(i, i+1)
+						y = hess.at(i+1, i)
 						vr = (d[i]-p)*(d[i]-p) + e[i]*e[i] - q*q
 						vi = (d[i] - p) * 2 * q
 						if vr == 0 && vi == 0 {
 							vr = epsilon * norm * (math.Abs(w) + math.Abs(q) + math.Abs(x) + math.Abs(y) + math.Abs(z))
 						}
 						re, im := cdiv(x*r-z*ra+q*sa, x*s-z*sa-q*ra, vr, vi)
-						hess.Set(i, n-1, re)
-						hess.Set(i, n, im)
+						hess.set(i, n-1, re)
+						hess.set(i, n, im)
 						if math.Abs(x) > (math.Abs(z) + math.Abs(q)) {
-							hess.Set(i+1, n-1, (-ra-w*hess.At(i, n-1)+q*hess.At(i, n))/x)
-							hess.Set(i+1, n, (-sa-w*hess.At(i, n)-q*hess.At(i, n-1))/x)
+							hess.set(i+1, n-1, (-ra-w*hess.at(i, n-1)+q*hess.at(i, n))/x)
+							hess.set(i+1, n, (-sa-w*hess.at(i, n)-q*hess.at(i, n-1))/x)
 						} else {
-							re, im := cdiv(-r-y*hess.At(i, n-1), -s-y*hess.At(i, n), z, q)
-							hess.Set(i+1, n-1, re)
-							hess.Set(i+1, n, im)
+							re, im := cdiv(-r-y*hess.at(i, n-1), -s-y*hess.at(i, n), z, q)
+							hess.set(i+1, n-1, re)
+							hess.set(i+1, n, im)
 						}
 					}
 
 					// Overflow control
-					t = math.Max(math.Abs(hess.At(i, n-1)), math.Abs(hess.At(i, n)))
+					t = math.Max(math.Abs(hess.at(i, n-1)), math.Abs(hess.at(i, n)))
 					if (epsilon*t)*t > 1 {
 						for j := i; j <= n; j++ {
-							hess.Set(j, n-1, hess.At(j, n-1)/t)
-							hess.Set(j, n, hess.At(j, n)/t)
+							hess.set(j, n-1, hess.at(j, n-1)/t)
+							hess.set(j, n, hess.at(j, n)/t)
 						}
 					}
 				}
@@ -786,7 +786,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 	for i := 0; i < nn; i++ {
 		if i < low || i > high {
 			for j := i; j < nn; j++ {
-				v.Set(i, j, hess.At(i, j))
+				v.set(i, j, hess.at(i, j))
 			}
 		}
 	}
@@ -796,9 +796,9 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 		for i := low; i <= high; i++ {
 			z = 0
 			for k := low; k <= min(j, high); k++ {
-				z += v.At(i, k) * hess.At(k, j)
+				z += v.at(i, k) * hess.at(k, j)
 			}
-			v.Set(i, j, z)
+			v.set(i, j, z)
 		}
 	}
 }
@@ -813,11 +813,11 @@ func (f EigenFactors) D() *Dense {
 	}
 	dm := NewDense(n, n, nil)
 	for i := 0; i < n; i++ {
-		dm.Set(i, i, d[i])
+		dm.set(i, i, d[i])
 		if e[i] > 0 {
-			dm.Set(i, i+1, e[i])
+			dm.set(i, i+1, e[i])
 		} else if e[i] < 0 {
-			dm.Set(i, i-1, e[i])
+			dm.set(i, i-1, e[i])
 		}
 	}
 	return dm

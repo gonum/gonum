@@ -88,9 +88,9 @@ func (f LQFactor) L() *Dense {
 	for i, v := range lDiag {
 		for j := 0; j < m; j++ {
 			if i < j {
-				l.Set(j, i, lq.At(j, i))
+				l.set(j, i, lq.at(j, i))
 			} else if i == j {
-				l.Set(j, i, v)
+				l.set(j, i, v)
 			}
 		}
 	}
@@ -165,8 +165,8 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 
 	tau := make([]float64, m)
 	for i := range tau {
-		tau[i] = lq.At(i, i)
-		lq.Set(i, i, lDiag[i])
+		tau[i] = lq.at(i, i)
+		lq.set(i, i, lDiag[i])
 	}
 	blasEngine.Dtrsm(
 		blas.Left, blas.Lower, blas.NoTrans, blas.NonUnit,
@@ -176,7 +176,7 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 	)
 
 	for i := range tau {
-		lq.Set(i, i, tau[i])
+		lq.set(i, i, tau[i])
 	}
 	f.applyQTo(x, true)
 

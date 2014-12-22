@@ -32,16 +32,16 @@ func Cholesky(a *Dense) CholeskyFactor {
 			for i, v := range l.RowView(k)[:k] {
 				s += v * lRowj[i]
 			}
-			s = (a.At(j, k) - s) / l.At(k, k)
+			s = (a.at(j, k) - s) / l.at(k, k)
 			lRowj[k] = s
 			d += s * s
-			spd = spd && a.At(k, j) == a.At(j, k)
+			spd = spd && a.at(k, j) == a.at(j, k)
 		}
-		d = a.At(j, j) - d
+		d = a.at(j, j) - d
 		spd = spd && d > 0
-		l.Set(j, j, math.Sqrt(math.Max(d, 0)))
+		l.set(j, j, math.Sqrt(math.Max(d, 0)))
 		for k := j + 1; k < n; k++ {
-			l.Set(j, k, 0)
+			l.set(j, k, 0)
 		}
 	}
 
@@ -70,9 +70,9 @@ func (f CholeskyFactor) Solve(b *Dense) (x *Dense) {
 	for k := 0; k < n; k++ {
 		for j := 0; j < nx; j++ {
 			for i := 0; i < k; i++ {
-				x.Set(k, j, x.At(k, j)-x.At(i, j)*l.At(k, i))
+				x.set(k, j, x.at(k, j)-x.at(i, j)*l.at(k, i))
 			}
-			x.Set(k, j, x.At(k, j)/l.At(k, k))
+			x.set(k, j, x.at(k, j)/l.at(k, k))
 		}
 	}
 
@@ -80,9 +80,9 @@ func (f CholeskyFactor) Solve(b *Dense) (x *Dense) {
 	for k := n - 1; k >= 0; k-- {
 		for j := 0; j < nx; j++ {
 			for i := k + 1; i < n; i++ {
-				x.Set(k, j, x.At(k, j)-x.At(i, j)*l.At(i, k))
+				x.set(k, j, x.at(k, j)-x.at(i, j)*l.at(i, k))
 			}
-			x.Set(k, j, x.At(k, j)/l.At(k, k))
+			x.set(k, j, x.at(k, j)/l.at(k, k))
 		}
 	}
 

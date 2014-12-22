@@ -157,7 +157,7 @@ func (m *Dense) Add(a, b Matrix) {
 
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
-			m.Set(r, c, a.At(r, c)+b.At(r, c))
+			m.set(r, c, a.At(r, c)+b.At(r, c))
 		}
 	}
 }
@@ -210,7 +210,7 @@ func (m *Dense) Sub(a, b Matrix) {
 
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
-			m.Set(r, c, a.At(r, c)-b.At(r, c))
+			m.set(r, c, a.At(r, c)-b.At(r, c))
 		}
 	}
 }
@@ -263,7 +263,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
-			m.Set(r, c, a.At(r, c)*b.At(r, c))
+			m.set(r, c, a.At(r, c)*b.At(r, c))
 		}
 	}
 }
@@ -529,7 +529,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
-			m.Set(r, c, f*a.At(r, c))
+			m.set(r, c, f*a.At(r, c))
 		}
 	}
 }
@@ -571,7 +571,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
-			m.Set(r, c, f(r, c, a.At(r, c)))
+			m.set(r, c, f(r, c, a.At(r, c)))
 		}
 	}
 }

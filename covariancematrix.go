@@ -11,7 +11,7 @@ import (
 
 // CovarianceMatrix calculates a covariance matrix (also known as a
 // variance-covariance matrix) from a matrix of data, using a two-pass
-// algorithm. The matrix returned will be symmetric, square, and 
+// algorithm. The matrix returned will be symmetric, square, and
 // positive-semidefinite.
 //
 // The weights wts should have the length equal to the number of rows in
@@ -39,16 +39,16 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 		mean := Mean(v, wts)
 		floats.AddConst(-mean, v)
 	}
-	
+
 	var xc mat64.Dense
 	xc.TCopy(&xt)
-	
+
 	var N, scale float64
 	if wts != nil {
 		if wr := len(wts); wr != r {
 			panic(mat64.ErrShape)
 		}
-		
+
 		// Weight the rows.
 		for i := 0; i < c; i++ {
 			v := xt.RowView(i)

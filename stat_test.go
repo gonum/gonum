@@ -1256,6 +1256,16 @@ func TestVariance(t *testing.T) {
 			weights: []float64{2, 1, 2, 1, 1},
 			ans:     4.2857142857142865,
 		},
+		{
+			x:       []float64{1, 4, 9},
+			weights: []float64{1, 1.5, 1},
+			ans:     13.142857142857146,
+		},
+		{
+			x:       []float64{1, 2, 3},
+			weights: []float64{1, 1.5, 1},
+			ans:     .8,
+		},
 	} {
 		variance := Variance(test.x, test.weights)
 		if math.Abs(variance-test.ans) > 1e-14 {

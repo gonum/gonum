@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/gonum/blas/goblas"
-	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
 )
 
@@ -18,14 +17,16 @@ func init() {
 }
 
 func TestCovarianceMatrix(t *testing.T) {
+
+	// An alternate way to test this is to call the Variance
+	// and Covariance functions and ensure that the results are identical.
 	for i, test := range []struct {
-		mat     mat64.Matrix
+		data    mat64.Matrix
 		weights mat64.Vec
-		r, c    int
-		x       []float64
+		ans     mat64.Matrix
 	}{
 		{
-			mat: mat64.NewDense(5, 2, []float64{
+			data: mat64.NewDense(5, 2, []float64{
 				-2, -4,
 				-1, 2,
 				0, 0,
@@ -33,65 +34,30 @@ func TestCovarianceMatrix(t *testing.T) {
 				2, 4,
 			}),
 			weights: nil,
-			r:       2,
-			c:       2,
-			x: []float64{
+			ans: mat64.NewDense(2, 2, []float64{
 				2.5, 3,
 				3, 10,
-			},
+			}),
 		}, {
-			mat: mat64.NewDense(5, 2, []float64{
-				-2, -4,
-				-1, 2,
-				0, 0,
-				1, -2,
+			data: mat64.NewDense(3, 2, []float64{
+				1, 1,
 				2, 4,
+				3, 9,
 			}),
 			weights: []float64{
+				1,
 				1.5,
-				.5,
-				1.5,
-				.5,
 				1,
 			},
-			r: 2,
-			c: 2,
-			x: []float64{
-				2.75, 4.5,
-				4.5, 11,
-			},
-		}, {
-			mat: mat64.NewDense(5, 2, []float64{
-				-2, -4,
-				-1, 2,
-				0, 0,
-				1, -2,
-				2, 4,
+			ans: mat64.NewDense(2, 2, []float64{
+				.8, 3.2,
+				3.2, 13.142857142857146,
 			}),
-			weights: mat64.Vec([]float64{
-				1.5,
-				.5,
-				1.5,
-				.5,
-				1,
-			}),
-			r: 2,
-			c: 2,
-			x: []float64{
-				2.75, 4.5,
-				4.5, 11,
-			},
 		},
 	} {
-		c := CovarianceMatrix(nil, test.mat, test.weights).RawMatrix()
-		if c.Rows != test.r {
-			t.Errorf("%d: expected rows %d, found %d", i, test.r, c.Rows)
-		}
-		if c.Cols != test.c {
-			t.Errorf("%d: expected cols %d, found %d", i, test.c, c.Cols)
-		}
-		if !floats.Equal(test.x, c.Data) {
-			t.Errorf("%d: expected data %#q, found %#q", i, test.x, c.Data)
+		c := CovarianceMatrix(nil, test.data, test.weights)
+		if !c.Equals(test.ans) {
+			t.Errorf("%d: expected cov %v, found %v", i, test.ans, c)
 		}
 	}
 	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), mat64.Vec([]float64{})) }) {

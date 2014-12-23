@@ -2637,14 +2637,14 @@ func (Blas) Strsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m i
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
+	var k int
 	if s == blas.Left {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
-			panic("cblas: index of a out of range")
-		}
+		k = m
 	} else {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
-			panic("cblas: index of a out of range")
-		}
+		k = n
+	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index of a out of range")
 	}
 	if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 		panic("cblas: index of b out of range")
@@ -2828,14 +2828,14 @@ func (Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m i
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
+	var k int
 	if s == blas.Left {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
-			panic("cblas: index of a out of range")
-		}
+		k = m
 	} else {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
-			panic("cblas: index of a out of range")
-		}
+		k = n
+	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index of a out of range")
 	}
 	if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 		panic("cblas: index of b out of range")
@@ -3019,14 +3019,14 @@ func (Blas) Ctrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m i
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
+	var k int
 	if s == blas.Left {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
-			panic("cblas: index of a out of range")
-		}
+		k = m
 	} else {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
-			panic("cblas: index of a out of range")
-		}
+		k = n
+	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index of a out of range")
 	}
 	if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 		panic("cblas: index of b out of range")
@@ -3210,14 +3210,14 @@ func (Blas) Ztrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m i
 	if n < 0 {
 		panic("cblas: n < 0")
 	}
+	var k int
 	if s == blas.Left {
-		if lda*(n-1)+m > len(a) || lda < max(1, m) {
-			panic("cblas: index of a out of range")
-		}
+		k = m
 	} else {
-		if lda*(m-1)+n > len(a) || lda < max(1, n) {
-			panic("cblas: index of a out of range")
-		}
+		k = n
+	}
+	if lda*(k-1)+k > len(a) || lda < max(1, k) {
+		panic("cblas: index of a out of range")
 	}
 	if ldb*(m-1)+n > len(b) || ldb < max(1, n) {
 		panic("cblas: index of b out of range")

@@ -5,66 +5,25 @@
 package stat
 
 import (
+	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
 )
 
 // CovarianceMatrix calculates a covariance matrix (also known as a
 // variance-covariance matrix) from a matrix of data, using a two-pass
-// algorithm.  It requires a registered BLAS engine in gonum/matrix/mat64.
+// algorithm. The matrix returned will be symmetric, square, and 
+// positive-semidefinite.
 //
-// The matrix returned will be symmetric, square, and positive-semidefinite.
-//
-// The weights wts should have the same number of elements as the rows in
-// input data matrix x.  cov should be a square matrix with the same number of
-// columns as the input data matrix x, or if it is nil then a new Dense
-// matrix will be constructed.
+// The weights wts should have the length equal to the number of rows in
+// input data matrix x. cov should either be a square matrix with the same
+// number of columns as the input data matrix x, or nil in which case a new
+// Dense matrix will be constructed.
 func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.Dense {
 	// This is the matrix version of the two-pass algorithm. It doesn't use
 	// the correction found in the Covariance and Variance functions.
 	r, c := x.Dims()
 
-	// determine the mean of each of the columns
-	ones := make([]float64, r)
-	for i := range ones {
-		ones[i] = 1
-	}
-	b := mat64.NewDense(1, r, ones)
-	b.Mul(b, x)
-	b.Scale(1/float64(r), b)
-	mu := b.RowView(0)
-
-	// subtract the mean from the data
-	xc := mat64.DenseCopyOf(x)
-
-	for i := 0; i < r; i++ {
-		rv := xc.RowView(i)
-		for j, mean := range mu {
-			rv[j] -= mean
-		}
-	}
-	var xt mat64.Dense
-	xt.TCopy(xc)
-
-	// Calculate the normalization factor, which is typically N-1.
-	var N float64
-	if wts != nil {
-		if wr := len(wts); wr != r {
-			panic(mat64.ErrShape)
-		}
-
-		for i, w := range wts {
-			rv := xc.RowView(i)
-			N += w
-			for j := 0; j < c; j++ {
-				rv[j] *= w
-			}
-		}
-		N = 1 / (N - 1)
-	} else {
-		N = 1 / float64(r-1)
-	}
-
-	// TODO: indicate that the resulting matrix is symmetric, which
+	// TODO(jonlawlor): indicate that the resulting matrix is symmetric, which
 	// should improve performance.
 	if cov == nil {
 		cov = mat64.NewDense(c, c, nil)
@@ -72,7 +31,41 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 		panic(mat64.ErrShape)
 	}
 
-	cov.Mul(&xt, xc)
-	cov.Scale(N, cov)
+	var xt mat64.Dense
+	xt.TCopy(x)
+	// Subtract the mean of each of the columns.
+	for i := 0; i < c; i++ {
+		v := xt.RowView(i)
+		mean := Mean(v, wts)
+		floats.AddConst(-mean, v)
+	}
+	
+	var xc mat64.Dense
+	xc.TCopy(&xt)
+	
+	var N, scale float64
+	if wts != nil {
+		if wr := len(wts); wr != r {
+			panic(mat64.ErrShape)
+		}
+		
+		// Weight the rows.
+		for i := 0; i < c; i++ {
+			v := xt.RowView(i)
+			floats.Mul(v, wts)
+		}
+
+		// Calculate the normalization factor.
+		N = floats.Sum(wts)
+	} else {
+		N = float64(r)
+	}
+
+	cov.Mul(&xt, &xc)
+
+	// Scale by the sample size.
+	scale = 1 / (N - 1)
+	cov.Scale(scale, cov)
+
 	return cov
 }

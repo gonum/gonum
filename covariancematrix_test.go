@@ -5,8 +5,10 @@
 package stat
 
 import (
+	"math"
 	"math/rand"
 	"testing"
+	"fmt"
 
 	"github.com/gonum/blas/goblas"
 	"github.com/gonum/floats"
@@ -74,6 +76,22 @@ func TestCovarianceMatrix(t *testing.T) {
 		}
 		if !floats.Equal(w, test.weights) {
 			t.Errorf("%d: weights was modified during execution")
+		}
+
+		// compare with call to Covariance
+		_, cols := c.Dims()
+		for ci := 0; ci < cols; ci++ {
+			for cj := 0; cj < cols; cj++ {
+				x := test.data.Col(nil, ci)
+				y := test.data.Col(nil, cj)
+				cov := Covariance(x, y, test.weights)
+				if math.Abs(cov-c.At(ci, cj)) > 1e-14 {
+					fmt.Println(x)
+					fmt.Println(y)
+					fmt.Println(test.weights)
+					t.Errorf("CovMat does not match at (%v, %v). Want %v, got %v.", ci, cj, cov, c.At(ci, cj))
+				}
+			}
 		}
 
 	}

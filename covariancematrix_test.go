@@ -8,7 +8,6 @@ import (
 	"math"
 	"math/rand"
 	"testing"
-	"fmt"
 
 	"github.com/gonum/blas/goblas"
 	"github.com/gonum/floats"
@@ -86,9 +85,6 @@ func TestCovarianceMatrix(t *testing.T) {
 				y := test.data.Col(nil, cj)
 				cov := Covariance(x, y, test.weights)
 				if math.Abs(cov-c.At(ci, cj)) > 1e-14 {
-					fmt.Println(x)
-					fmt.Println(y)
-					fmt.Println(test.weights)
 					t.Errorf("CovMat does not match at (%v, %v). Want %v, got %v.", ci, cj, cov, c.At(ci, cj))
 				}
 			}

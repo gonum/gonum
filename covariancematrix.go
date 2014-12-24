@@ -19,8 +19,10 @@ import (
 // number of columns as the input data matrix x, or nil in which case a new
 // Dense matrix will be constructed.
 func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.Dense {
-	// This is the matrix version of the two-pass algorithm. It doesn't use
-	// the correction found in the Covariance and Variance functions.
+	// This is the matrix version of the two-pass algorithm. It doesn't use the
+	// additional floating point error correction that the Covariance function uses
+	// to reduce the impact of rounding during centering.
+	
 	r, c := x.Dims()
 
 	// TODO(jonlawlor): indicate that the resulting matrix is symmetric, which

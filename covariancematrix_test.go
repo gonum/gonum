@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gonum/blas/goblas"
+	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
 )
 
@@ -21,9 +22,9 @@ func TestCovarianceMatrix(t *testing.T) {
 	// An alternate way to test this is to call the Variance
 	// and Covariance functions and ensure that the results are identical.
 	for i, test := range []struct {
-		data    mat64.Matrix
+		data    *mat64.Dense
 		weights mat64.Vec
-		ans     mat64.Matrix
+		ans     *mat64.Dense
 	}{
 		{
 			data: mat64.NewDense(5, 2, []float64{
@@ -55,10 +56,26 @@ func TestCovarianceMatrix(t *testing.T) {
 			}),
 		},
 	} {
+		// Make a copy of the data to check that it isn't changing.
+		r := test.data.RawMatrix()
+		d := make([]float64, len(r.Data))
+		copy(d, r.Data)
+
+		w := make([]float64, len(test.weights))
+		if test.weights != nil {
+			copy(w, test.weights)
+		}
 		c := CovarianceMatrix(nil, test.data, test.weights)
 		if !c.Equals(test.ans) {
 			t.Errorf("%d: expected cov %v, found %v", i, test.ans, c)
 		}
+		if !floats.Equal(d, r.Data) {
+			t.Errorf("%d: data was modified during execution")
+		}
+		if !floats.Equal(w, test.weights) {
+			t.Errorf("%d: weights was modified during execution")
+		}
+
 	}
 	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), mat64.Vec([]float64{})) }) {
 		t.Errorf("CovarianceMatrix did not panic with weight size mismatch")

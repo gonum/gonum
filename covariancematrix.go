@@ -45,7 +45,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	var xc mat64.Dense
 	xc.TCopy(&xt)
 
-	var N, scale float64
+	var n, scale float64
 	if wts != nil {
 		if wr := len(wts); wr != r {
 			panic(mat64.ErrShape)
@@ -58,15 +58,15 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 		}
 
 		// Calculate the normalization factor.
-		N = floats.Sum(wts)
+		n = floats.Sum(wts)
 	} else {
-		N = float64(r)
+		n = float64(r)
 	}
 
 	cov.Mul(&xt, &xc)
 
 	// Scale by the sample size.
-	scale = 1 / (N - 1)
+	scale = 1 / (n - 1)
 	cov.Scale(scale, cov)
 
 	return cov

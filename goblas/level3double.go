@@ -11,8 +11,9 @@ const (
 
 // Dtrsm solves
 //  A X = alpha B
-// or
+// if side is Left or
 //  X A = alpha B
+// if side is Right
 // where X and B are m x n matrices, and A is a unit or non unit upper or lower
 // triangular matrix. The result is stored in place into B. No check is made
 // that A is invertible.
@@ -35,8 +36,17 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 	if n < 0 {
 		panic(nLT0)
 	}
-	if lda < n || ldb < n {
+	if ldb < n {
 		panic(badLd)
+	}
+	if s == blas.Left {
+		if lda < m {
+			panic(badLd)
+		}
+	} else {
+		if lda < n {
+			panic(badLd)
+		}
 	}
 
 	if m == 0 || n == 0 {
@@ -52,90 +62,130 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 		}
 		return
 	}
-
+	nonUnit := d == blas.NonUnit
 	if s == blas.Left {
-		for j := 0; j < n; j++ {
-			jb := j * ldb
-			if alpha != 1 {
-				bl.Dscal(m, alpha, b[jb:], 1)
-			}
-			bl.Dtrsv(ul, tA, d, m, a, lda, b[jb:], 1)
-		}
-	} else {
 		if tA == blas.NoTrans {
-
-			//B := alpha*B*inv( A )
 			if ul == blas.Upper {
-				for j := 0; j < n; j++ {
-					jb := j * ldb
-					ja := j * lda
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[jb:], 1)
+				for i := m - 1; i >= 0; i-- {
+					atmp := a[i*lda : i*lda+m]
+					btmp := b[i*ldb : i*ldb+n]
+					for j := 0; j < n; j++ {
+						btmp[j] *= alpha
 					}
-					for k := 0; k < j; k++ {
-						if a[k+ja] != 0 {
-							bl.Daxpy(m, -a[k+ja], b[k*ldb:], 1, b[jb:], 1)
+					for k := i + 1; k < m; k++ {
+						binner := b[k*ldb : k*ldb+n]
+						ak := atmp[k]
+						for j, v := range binner {
+							btmp[j] -= v * ak
 						}
 					}
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[j+ja], b[jb:], 1)
+					if nonUnit {
+						ai := atmp[i]
+						for j := 0; j < n; j++ {
+							btmp[j] /= ai
+						}
 					}
 				}
-			} else {
-				for j := n - 1; j >= 0; j-- {
-					jb := j * ldb
-					ja := j * lda
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[jb:], 1)
+				return
+			}
+			for i := 0; i < m; i++ {
+				atmp := a[i*lda : i*lda+m]
+				btmp := b[i*ldb : i*ldb+n]
+				for j := 0; j < n; j++ {
+					btmp[j] *= alpha
+				}
+				for k := 0; k < i; k++ {
+					ak := a[i*lda+k]
+					binner := b[k*ldb : k*ldb+n]
+					for j, v := range binner {
+						btmp[j] -= v * ak
 					}
-					for k := j + 1; k < n; k++ {
-						if a[k+ja] != 0 {
-							bl.Daxpy(m, -a[k+ja], b[k*ldb:], 1, b[jb:], 1)
-						}
-					}
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[j+ja], b[jb:], 1)
+				}
+				if nonUnit {
+					ai := atmp[i]
+					for j := 0; j < n; j++ {
+						btmp[j] /= ai
 					}
 				}
 			}
-		} else {
+			return
+		}
+		// Cases where a is transposed.
 
-			//B := alpha*B*inv( A**T )
-			if ul == blas.Upper {
-				for k := n - 1; k >= 0; k-- {
-					ka := k * lda
-					kb := k * ldb
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[k+ka], b[kb:], 1)
-					}
-					for j := 0; j < k; j++ {
-						if a[j+ka] != 0 {
-							bl.Daxpy(m, a[j+ka], b[kb:], 1, b[j*ldb:], 1)
-						}
-					}
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[kb:], 1)
+		// TODO (btracey): There may be a way to do this without
+		// this additional loop over b, but I'm struggling to figure it out,
+		// as it's not symmetric with the column-major case.
+		// This way at least accesses along rows in the inner loops.
+		if ul == blas.Upper {
+			if alpha != 1 {
+				for i := 0; i < m; i++ {
+					btmp := b[i*ldb : i*ldb+n]
+					for j := 0; j < n; j++ {
+						btmp[j] *= alpha
 					}
 				}
-			} else {
-				for k := 0; k < n; k++ {
-					ka := k * lda
-					kb := k * ldb
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[k+ka], b[kb:], 1)
+			}
+			for i := 0; i < m; i++ {
+				btmp := b[i*ldb : i*ldb+n]
+				ai := a[i*lda+i]
+				for j := 0; j < n; j++ {
+					if nonUnit {
+						btmp[j] /= ai
 					}
-					for j := k + 1; j < n; j++ {
-						if a[j+ka] != 0 {
-							bl.Daxpy(m, a[j+ka], b[kb:], 1, b[j*ldb:], 1)
+				}
+				for ktmp, ak := range a[i*lda+i+1 : i*lda+m] {
+					k := i + 1 + ktmp
+					binner := b[k*ldb : k*ldb+n]
+					for j, v := range btmp {
+						binner[j] -= ak * v
+					}
+				}
+			}
+			return
+		}
+		if alpha != 1 {
+			for i := 0; i < m; i++ {
+				btmp := b[i*ldb : i*ldb+n]
+				for j := 0; j < n; j++ {
+					btmp[j] *= alpha
+				}
+			}
+		}
+		for i := m - 1; i >= 0; i-- {
+			btmp := b[i*ldb : i*ldb+n]
+			if nonUnit {
+				ai := a[i*lda+i]
+				for j := 0; j < n; j++ {
+					btmp[j] /= ai
+				}
+			}
+			for k, ak := range a[i*lda : i*lda+i] {
+				binner := b[k*ldb : k*ldb+n]
+				for j, bj := range btmp {
+					binner[j] -= ak * bj
+				}
+			}
+		}
+		return
+	}
+	/*
+		// Cases where A is to the right of X.
+		if tA == blas.NoTrans {
+			if ul == blas.Upper {
+				for i := 0; i < m; i++ {
+					for j := 0; j < n; j++ {
+						b[i*ldb+j] *= alpha
+					}
+					if nonUnit {
+						ai := atmp[i]
+						for j := 0; j < n; j++ {
+							btmp[j] /= ai
 						}
-					}
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[kb:], 1)
 					}
 				}
 			}
 		}
-	}
+	*/
 }
 
 // Dsymm performs one of

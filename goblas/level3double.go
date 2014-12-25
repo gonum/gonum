@@ -277,8 +277,122 @@ func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float6
 		}
 	}
 }
-func (Blas) Dsyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
-	panic("blas: function not implemented")
+
+// Dsyrk performs the symmetric rank-k operation
+//  C = alpha * A * A^T + beta*C
+// where alpha and beta are scalars, C is an nxn symmetric matrix, and A
+// is n x k if NonTrans, and k x n if Trans.
+func (Blas) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.Trans && tA != blas.NoTrans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if k < 0 {
+		panic(kLT0)
+	}
+	if ldc < n {
+		panic(badLd)
+	}
+	if tA == blas.Trans {
+		if lda < n {
+			panic(badLd)
+		}
+	} else {
+		if lda < k {
+			panic(badLd)
+		}
+	}
+	if alpha == 0 {
+		if ul == blas.Upper {
+			for i := 0; i < n; i++ {
+				ctmp := c[i*ldc+i : i*ldc+n]
+				for j := range ctmp {
+					ctmp[j] *= beta
+				}
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			ctmp := c[i*ldc : i*ldc+i+1]
+			for j := range ctmp {
+				ctmp[j] *= beta
+			}
+		}
+		return
+	}
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			for i := 0; i < n; i++ {
+				ctmp := c[i*ldc+i : i*ldc+n]
+				atmp := a[i*lda : i*lda+k]
+				for jc, vc := range ctmp {
+					j := jc + i
+					var tmp float64
+					for l, av := range a[j*lda : j*lda+k] {
+						tmp += atmp[l] * av
+					}
+					tmp *= alpha
+					tmp += vc * beta
+					ctmp[jc] = tmp
+				}
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			atmp := a[i*lda : i*lda+k]
+			for j, vc := range c[i*ldc : i*ldc+i+1] {
+				var tmp float64
+				for l, va := range a[j*lda : j*lda+k] {
+					tmp += atmp[l] * va
+				}
+				tmp *= alpha
+				tmp += vc * beta
+				c[i*ldc+j] = tmp
+			}
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		for i := 0; i < n; i++ {
+			ctmp := c[i*ldc+i : i*ldc+n]
+			if beta != 1 {
+				for j := range ctmp {
+					ctmp[j] *= beta
+				}
+			}
+			for l := 0; l < k; l++ {
+				tmp := alpha * a[l*lda+i]
+				if tmp != 0 {
+					for j, v := range a[l*lda+i : l*lda+n] {
+						ctmp[j] += tmp * v
+					}
+				}
+			}
+		}
+		return
+	}
+	for i := 0; i < n; i++ {
+		ctmp := c[i*ldc : i*ldc+i+1]
+		if beta != 0 {
+			for j := range ctmp {
+				ctmp[j] *= beta
+			}
+		}
+		for l := 0; l < k; l++ {
+			tmp := alpha * a[l*lda+i]
+			if tmp != 0 {
+				for j, v := range a[l*lda : l*lda+i+1] {
+					ctmp[j] += tmp * v
+				}
+			}
+		}
+	}
 }
 func (Blas) Dsyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	panic("blas: function not implemented")

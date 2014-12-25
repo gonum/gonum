@@ -13,3 +13,7 @@ func TestDgemm(t *testing.T) {
 func TestDsymm(t *testing.T) {
 	testblas.DsymmTest(t, blasser)
 }
+
+func TestDsyr2k(t *testing.T) {
+	testblas.Dsyr2kTest(t, blasser)
+}

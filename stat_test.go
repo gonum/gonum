@@ -128,6 +128,12 @@ func TestCovariance(t *testing.T) {
 			weights: []float64{1, 1.5, 1},
 			ans:     3.2,
 		},
+		{
+			p:       []float64{1, 4, 9},
+			q:       []float64{1, 4, 9},
+			weights: []float64{1, 1.5, 1},
+			ans:     13.142857142857146,
+		},
 	} {
 		c := Covariance(test.p, test.q, test.weights)
 		if math.Abs(c-test.ans) > 1e-14 {
@@ -1255,6 +1261,16 @@ func TestVariance(t *testing.T) {
 			x:       []float64{8, 3, 7, 8, 4},
 			weights: []float64{2, 1, 2, 1, 1},
 			ans:     4.2857142857142865,
+		},
+		{
+			x:       []float64{1, 4, 9},
+			weights: []float64{1, 1.5, 1},
+			ans:     13.142857142857146,
+		},
+		{
+			x:       []float64{1, 2, 3},
+			weights: []float64{1, 1.5, 1},
+			ans:     .8,
 		},
 	} {
 		variance := Variance(test.x, test.weights)

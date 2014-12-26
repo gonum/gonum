@@ -232,10 +232,10 @@ func Covariance(x, y, weights []float64) float64 {
 		w := weights[i]
 		yv := y[i]
 		wxd := w * (xv - xu)
-		wyd := w * (yv - yu)
-		ss += wxd * wyd
+		yd := (yv - yu)
+		ss += wxd * yd
 		xcompensation += wxd
-		ycompensation += wyd
+		ycompensation += w * yd
 		sumWeights += w
 	}
 	// xcompensation and ycompensation are from Chan, et. al.

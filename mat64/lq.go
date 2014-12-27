@@ -5,8 +5,9 @@
 package mat64
 
 import (
-	"github.com/gonum/blas"
 	"math"
+
+	"github.com/gonum/blas"
 )
 
 type LQFactor struct {
@@ -14,9 +15,9 @@ type LQFactor struct {
 	lDiag []float64
 }
 
-// LQ computes a LQ Decomposition for an m-by-n matrix a with m <= n by Householder
-// reflections, the LQ decomposition is an m-by-n orthogonal matrix q and an n-by-n
-// upper triangular matrix r so that a = q.r. LQ will panic with ErrShape if m > n.
+// LQ computes an LQ Decomposition for an m-by-n matrix a with m <= n by Householder
+// reflections. The LQ decomposition is an m-by-n orthogonal matrix q and an m-by-m
+// lower triangular matrix l so that a = l.q. LQ will panic with ErrShape if m > n.
 //
 // The LQ decomposition always exists, even if the matrix does not have full rank,
 // so LQ will never fail unless m > n. The primary use of the LQ decomposition is
@@ -145,7 +146,7 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 	}
 }
 
-// Solve a computes minimum norm least squares solution of a.x = b where b has as many rows as a.
+// Solve computes minimum norm least squares solution of a.x = b where b has as many rows as a.
 // A matrix x is returned that minimizes the two norm of Q*R*X-B. Solve will panic
 // if a is not full rank.
 func (f LQFactor) Solve(b *Dense) (x *Dense) {

@@ -15,7 +15,7 @@ type LUFactors struct {
 	Sign  int
 }
 
-// LUD performs an LU Decomposition for an m-by-n matrix a.
+// LU performs an LU Decomposition for an m-by-n matrix a.
 //
 // If m >= n, the LU decomposition is an m-by-n unit lower triangular matrix L,
 // an n-by-n upper triangular matrix U, and a permutation vector piv of length m
@@ -24,8 +24,8 @@ type LUFactors struct {
 // If m < n, then L is m-by-m and U is m-by-n.
 //
 // The LU decompostion with pivoting always exists, even if the matrix is
-// singular, so the LUD will never fail. The primary use of the LU decomposition
-// is in the solution of square systems of simultaneous linear equations.  This
+// singular, so LU will never fail. The primary use of the LU decomposition
+// is in the solution of square systems of simultaneous linear equations. This
 // will fail if IsSingular() returns true.
 func LU(a *Dense) LUFactors {
 	// Use a "left-looking", dot-product, Crout/Doolittle algorithm.
@@ -101,8 +101,8 @@ func LU(a *Dense) LUFactors {
 // If m < n, then L is m-by-m and U is m-by-n.
 //
 // The LU decompostion with pivoting always exists, even if the matrix is
-// singular, so the LUD will never fail. The primary use of the LU decomposition
-// is in the solution of square systems of simultaneous linear equations.  This
+// singular, so LUGaussian will never fail. The primary use of the LU decomposition
+// is in the solution of square systems of simultaneous linear equations. This
 // will fail if IsSingular() returns true.
 func LUGaussian(a *Dense) LUFactors {
 	// Initialize.
@@ -211,7 +211,7 @@ func (f LUFactors) Det() float64 {
 }
 
 // Solve computes a solution of a.x = b where b has as many rows as a. A matrix x
-// is returned that minimizes the two norm of L*U*X = B(piv,:). QRSolve will panic
+// is returned that minimizes the two norm of L*U*X - B(piv,:). Solve will panic
 // if a is singular. The matrix b is overwritten during the call.
 func (f LUFactors) Solve(b *Dense) (x *Dense) {
 	lu, piv := f.LU, f.Pivot

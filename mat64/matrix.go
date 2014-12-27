@@ -164,7 +164,6 @@ type ElemDiver interface {
 	DivElem(a, b Matrix)
 }
 
-
 // An Equaler can compare the matrices represented by b and the receiver. Matrices with non-equal shapes
 // are not equal.
 type Equaler interface {

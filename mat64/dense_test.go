@@ -425,7 +425,6 @@ func (s *S) TestDivElem(c *check.C) {
 	}
 }
 
-
 func (s *S) TestMul(c *check.C) {
 	for i, test := range []struct {
 		a, b, r [][]float64

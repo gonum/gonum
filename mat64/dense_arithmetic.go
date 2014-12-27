@@ -313,14 +313,13 @@ func (m *Dense) DivElem(a, b Matrix) {
 			return
 		}
 	}
-	
+
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
 			m.set(r, c, a.At(r, c)/b.At(r, c))
 		}
 	}
 }
-
 
 func (m *Dense) Dot(b Matrix) float64 {
 	mr, mc := m.Dims()

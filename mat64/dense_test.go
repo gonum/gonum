@@ -243,7 +243,7 @@ func (s *S) TestAdd(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.Add(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
@@ -297,7 +297,7 @@ func (s *S) TestSub(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.Sub(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
@@ -351,7 +351,7 @@ func (s *S) TestMulElem(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.MulElem(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
@@ -421,7 +421,7 @@ func (s *S) TestDivElem(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.DivElem(a, b)
 		c.Check(temp.same(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
@@ -480,7 +480,7 @@ func (s *S) TestMul(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.Mul(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))

@@ -243,7 +243,7 @@ func (s *S) TestAdd(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.Add(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
@@ -297,7 +297,7 @@ func (s *S) TestSub(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.Sub(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
@@ -351,7 +351,7 @@ func (s *S) TestMulElem(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.MulElem(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
@@ -367,6 +367,76 @@ func (s *S) TestMulElem(c *check.C) {
 
 		a.MulElem(a, b)
 		c.Check(a.Equals(r), check.Equals, true, check.Commentf("Test %d: %v sub %v expect %v got %v",
+			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
+	}
+}
+
+// A comparison that treats NaNs as equal, for testing.
+func (m *Dense) same(b Matrix) bool {
+	br, bc := b.Dims()
+	if br != m.mat.Rows || bc != m.mat.Cols {
+		return false
+	}
+	for r := 0; r < br; r++ {
+		for c := 0; c < bc; c++ {
+			if av, bv := m.At(r, c), b.At(r, c); av != bv && !(math.IsNaN(av) && math.IsNaN(bv)) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func (s *S) TestDivElem(c *check.C) {
+	for i, test := range []struct {
+		a, b, r [][]float64
+	}{
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+			[][]float64{{math.Inf(1), math.NaN(), math.NaN()}, {math.NaN(), math.Inf(1), math.NaN()}, {math.NaN(), math.NaN(), math.Inf(1)}},
+		},
+		{
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+		},
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{1, math.NaN(), math.NaN()}, {math.NaN(), 1, math.NaN()}, {math.NaN(), math.NaN(), 1}},
+		},
+		{
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			[][]float64{{1, math.NaN(), math.NaN()}, {math.NaN(), 1, math.NaN()}, {math.NaN(), math.NaN(), 1}},
+		},
+		{
+			[][]float64{{1, 2, 3}, {4, 5, 6}},
+			[][]float64{{1, 2, 3}, {4, 5, 6}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}},
+		},
+	} {
+		a := NewDense(flatten(test.a))
+		b := NewDense(flatten(test.b))
+		r := NewDense(flatten(test.r))
+
+		var temp Dense
+		temp.DivElem(a, b)
+		c.Check(temp.same(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
+
+		zero(temp.mat.Data)
+		temp.DivElem(a, b)
+		c.Check(temp.same(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
+
+		// These probably warrant a better check and failure. They should never happen in the wild though.
+		temp.mat.Data = nil
+		c.Check(func() { temp.DivElem(a, b) }, check.PanicMatches, "runtime error: index out of range", check.Commentf("Test %d"))
+
+		a.DivElem(a, b)
+		c.Check(a.same(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 	}
 }
@@ -410,7 +480,7 @@ func (s *S) TestMul(c *check.C) {
 		b := NewDense(flatten(test.b))
 		r := NewDense(flatten(test.r))
 
-		temp := &Dense{}
+		var temp Dense
 		temp.Mul(a, b)
 		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))

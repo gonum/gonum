@@ -29,6 +29,7 @@ var (
 	_ Muler     = matrix
 	_ Dotter    = matrix
 	_ ElemMuler = matrix
+	_ ElemDiver = matrix
 	_ Exper     = matrix
 
 	_ Scaler  = matrix

@@ -121,7 +121,7 @@ type TransposeCopier interface {
 	TCopy(a Matrix)
 }
 
-// A Transposer can create a transposed view matrix from the represented by the receiver.
+// A Transposer can create a transposed view matrix from the matrix represented by the receiver.
 // Changes made to the returned Matrix may be reflected in the original.
 type Transposer interface {
 	T() Matrix

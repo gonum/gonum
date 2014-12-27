@@ -15,7 +15,7 @@ type CholeskyFactor struct {
 }
 
 // CholeskyL returns the left Cholesky decomposition of the matrix a and whether
-// the matrix is symmetric or positive definite, the returned matrix l is a lower
+// the matrix is symmetric and positive definite. The returned matrix l is a lower
 // triangular matrix such that a = l.l'.
 func Cholesky(a *Dense) CholeskyFactor {
 	// Initialize.

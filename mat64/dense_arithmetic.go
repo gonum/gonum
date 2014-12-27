@@ -268,6 +268,60 @@ func (m *Dense) MulElem(a, b Matrix) {
 	}
 }
 
+func (m *Dense) DivElem(a, b Matrix) {
+	ar, ac := a.Dims()
+	br, bc := b.Dims()
+
+	if ar != br || ac != bc {
+		panic(ErrShape)
+	}
+
+	if m.isZero() {
+		m.mat = RawMatrix{
+			Rows:   ar,
+			Cols:   ac,
+			Stride: ac,
+			Data:   use(m.mat.Data, ar*ac),
+		}
+	} else if ar != m.mat.Rows || ac != m.mat.Cols {
+		panic(ErrShape)
+	}
+
+	if a, ok := a.(RawMatrixer); ok {
+		if b, ok := b.(RawMatrixer); ok {
+			amat, bmat := a.RawMatrix(), b.RawMatrix()
+			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
+				for i, v := range amat.Data[ja : ja+ac] {
+					m.mat.Data[i+jm] = v / bmat.Data[i+jb]
+				}
+			}
+			return
+		}
+	}
+
+	if a, ok := a.(Vectorer); ok {
+		if b, ok := b.(Vectorer); ok {
+			rowa := make([]float64, ac)
+			rowb := make([]float64, bc)
+			for r := 0; r < ar; r++ {
+				a.Row(rowa, r)
+				for i, v := range b.Row(rowb, r) {
+					rowa[i] /= v
+				}
+				copy(m.rowView(r), rowa)
+			}
+			return
+		}
+	}
+	
+	for r := 0; r < ar; r++ {
+		for c := 0; c < ac; c++ {
+			m.set(r, c, a.At(r, c)/b.At(r, c))
+		}
+	}
+}
+
+
 func (m *Dense) Dot(b Matrix) float64 {
 	mr, mc := m.Dims()
 	br, bc := b.Dims()

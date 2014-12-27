@@ -371,6 +371,61 @@ func (s *S) TestMulElem(c *check.C) {
 	}
 }
 
+func (s *S) TestDivElem(c *check.C) {
+	for i, test := range []struct {
+		a, b, r [][]float64
+	}{
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+			[][]float64{{math.NaN(), math.NaN(), math.NaN()}, {math.NaN(), math.NaN(), math.NaN()}, {math.NaN(), math.NaN(), math.NaN()}},
+		},
+		{
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+		},
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{1, math.NaN(), math.NaN()}, {math.NaN(), 1, math.NaN()}, {math.NaN(), math.NaN(), 1}},
+		},
+		{
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			[][]float64{{1, math.NaN(), math.NaN()}, {math.NaN(), 1, math.NaN()}, {math.NaN(), math.NaN(), 1}},
+		},
+		{
+			[][]float64{{1, 2, 3}, {4, 5, 6}},
+			[][]float64{{1, 2, 3}, {4, 5, 6}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}},
+		},
+	} {
+		a := NewDense(flatten(test.a))
+		b := NewDense(flatten(test.b))
+		r := NewDense(flatten(test.r))
+
+		temp := &Dense{}
+		temp.DivElem(a, b)
+		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
+
+		zero(temp.mat.Data)
+		temp.DivElem(a, b)
+		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
+
+		// These probably warrant a better check and failure. They should never happen in the wild though.
+		temp.mat.Data = nil
+		c.Check(func() { temp.DivElem(a, b) }, check.PanicMatches, "runtime error: index out of range", check.Commentf("Test %d"))
+
+		a.DivElem(a, b)
+		c.Check(a.Equals(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
+	}
+}
+
+
 func (s *S) TestMul(c *check.C) {
 	for i, test := range []struct {
 		a, b, r [][]float64

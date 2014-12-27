@@ -157,6 +157,14 @@ type ElemMuler interface {
 	MulElem(a, b Matrix)
 }
 
+// An ElemDiver can perform element-wise division a / b of the matrices represented by a and b,
+// placing the result in the receiver. DivElem will panic if the two matrices do not have the same
+// shape.
+type ElemDiver interface {
+	DivElem(a, b Matrix)
+}
+
+
 // An Equaler can compare the matrices represented by b and the receiver. Matrices with non-equal shapes
 // are not equal.
 type Equaler interface {

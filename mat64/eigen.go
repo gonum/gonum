@@ -587,11 +587,11 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 
 			// Double QR step involving rows l:n and columns m:n
 			for k := m; k <= n-1; k++ {
-				notlast := k != n-1
+				last := k == n-1
 				if k != m {
 					p = hess.at(k, k-1)
 					q = hess.at(k+1, k-1)
-					if notlast {
+					if !last {
 						r = hess.at(k+2, k-1)
 					} else {
 						r = 0
@@ -625,7 +625,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					// Row modification
 					for j := k; j < nn; j++ {
 						p = hess.at(k, j) + q*hess.at(k+1, j)
-						if notlast {
+						if !last {
 							p += r * hess.at(k+2, j)
 							hess.set(k+2, j, hess.at(k+2, j)-p*z)
 						}
@@ -636,7 +636,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					// Column modification
 					for i := 0; i <= min(n, k+3); i++ {
 						p = x*hess.at(i, k) + y*hess.at(i, k+1)
-						if notlast {
+						if !last {
 							p += z * hess.at(i, k+2)
 							hess.set(i, k+2, hess.at(i, k+2)-p*r)
 						}
@@ -647,7 +647,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					// Accumulate transformations
 					for i := low; i <= high; i++ {
 						p = x*v.at(i, k) + y*v.at(i, k+1)
-						if notlast {
+						if !last {
 							p += z * v.at(i, k+2)
 							v.set(i, k+2, v.at(i, k+2)-p*r)
 						}

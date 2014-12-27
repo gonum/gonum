@@ -378,7 +378,7 @@ func (s *S) TestDivElem(c *check.C) {
 		{
 			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
 			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
-			[][]float64{{math.NaN(), math.NaN(), math.NaN()}, {math.NaN(), math.NaN(), math.NaN()}, {math.NaN(), math.NaN(), math.NaN()}},
+			[][]float64{{math.Inf(1), math.NaN(), math.NaN()}, {math.NaN(), math.Inf(1), math.NaN()}, {math.NaN(), math.NaN(), math.Inf(1)}},
 		},
 		{
 			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},

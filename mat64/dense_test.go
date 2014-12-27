@@ -371,6 +371,22 @@ func (s *S) TestMulElem(c *check.C) {
 	}
 }
 
+// comparison that treats NaNs as equal
+func (m *Dense) equalsNaN(b Matrix) bool {
+	br, bc := b.Dims()
+	if br != m.mat.Rows || bc != m.mat.Cols {
+		return false
+	}
+	for r := 0; r < br; r++ {
+		for c := 0; c < bc; c++ {
+			if av, bv := m.At(r, c), b.At(r, c); av != bv && !(math.IsNaN(av) && math.IsNaN(bv)) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func (s *S) TestDivElem(c *check.C) {
 	for i, test := range []struct {
 		a, b, r [][]float64
@@ -407,12 +423,12 @@ func (s *S) TestDivElem(c *check.C) {
 
 		temp := &Dense{}
 		temp.DivElem(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+		c.Check(temp.equalsNaN(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		zero(temp.mat.Data)
 		temp.DivElem(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+		c.Check(temp.equalsNaN(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
@@ -420,7 +436,7 @@ func (s *S) TestDivElem(c *check.C) {
 		c.Check(func() { temp.DivElem(a, b) }, check.PanicMatches, "runtime error: index out of range", check.Commentf("Test %d"))
 
 		a.DivElem(a, b)
-		c.Check(a.Equals(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
+		c.Check(a.equalsNaN(r), check.Equals, true, check.Commentf("Test %d: %v DivElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 	}
 }

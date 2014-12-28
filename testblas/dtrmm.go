@@ -408,9 +408,6 @@ func DtrmmTest(t *testing.T, blasser Dtrmmer) {
 				{26, 28, 30},
 			},
 		},
-		//
-		//
-		//
 		{
 			s:     blas.Right,
 			ul:    blas.Upper,
@@ -507,8 +504,6 @@ func DtrmmTest(t *testing.T, blasser Dtrmmer) {
 				{26, 80, 248},
 			},
 		},
-		//
-		//
 		{
 			s:     blas.Right,
 			ul:    blas.Lower,

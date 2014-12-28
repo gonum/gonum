@@ -543,6 +543,18 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 	if n < 0 {
 		panic(nLT0)
 	}
+	if ldb < n {
+		panic(badLd)
+	}
+	if s == blas.Left {
+		if lda < m {
+			panic(badLd)
+		}
+	} else {
+		if lda < n {
+			panic(badLd)
+		}
+	}
 	if alpha == 0 {
 		for i := 0; i < m; i++ {
 			btmp := b[i*ldb : i*ldb+n]
@@ -553,7 +565,6 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 	}
 
 	nonUnit := d == blas.NonUnit
-	// Left --> Right and Upper --> Lower
 	if s == blas.Left {
 		if tA == blas.NoTrans {
 			if ul == blas.Upper {
@@ -562,14 +573,16 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 					if nonUnit {
 						tmp *= a[i*lda+i]
 					}
-					for j := 0; j < n; j++ {
-						b[i*ldb+j] *= tmp
+					btmp := b[i*ldb : i*ldb+n]
+					for j := range btmp {
+						btmp[j] *= tmp
 					}
-					for k := i + 1; k < m; k++ {
-						tmp := alpha * a[i*lda+k]
+					for ka, va := range a[i*lda+i+1 : i*lda+m] {
+						k := ka + i + 1
+						tmp := alpha * va
 						if tmp != 0 {
-							for j := 0; j < n; j++ {
-								b[i*ldb+j] += tmp * b[k*ldb+j]
+							for j, vb := range b[k*ldb : k*ldb+n] {
+								btmp[j] += tmp * vb
 							}
 						}
 					}
@@ -581,14 +594,15 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 				if nonUnit {
 					tmp *= a[i*lda+i]
 				}
-				for j := 0; j < n; j++ {
-					b[i*ldb+j] *= tmp
+				btmp := b[i*ldb : i*ldb+n]
+				for j := range btmp {
+					btmp[j] *= tmp
 				}
-				for k := 0; k < i; k++ {
-					tmp := alpha * a[i*lda+k]
+				for k, va := range a[i*lda : i*lda+i] {
+					tmp := alpha * va
 					if tmp != 0 {
-						for j := 0; j < n; j++ {
-							b[i*ldb+j] += tmp * b[k*ldb+j]
+						for j, vb := range b[k*ldb : k*ldb+n] {
+							btmp[j] += tmp * vb
 						}
 					}
 				}
@@ -598,11 +612,14 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 		// Cases where a is transposed.
 		if ul == blas.Upper {
 			for k := m - 1; k >= 0; k-- {
-				for i := k + 1; i < m; i++ {
-					tmp := alpha * a[k*lda+i]
+				btmpk := b[k*ldb : k*ldb+n]
+				for ia, va := range a[k*lda+k+1 : k*lda+m] {
+					i := ia + k + 1
+					btmp := b[i*ldb : i*ldb+n]
+					tmp := alpha * va
 					if tmp != 0 {
-						for j := 0; j < n; j++ {
-							b[i*ldb+j] += tmp * b[k*ldb+j]
+						for j, vb := range btmpk {
+							btmp[j] += tmp * vb
 						}
 					}
 				}
@@ -612,18 +629,20 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 				}
 				if tmp != 1 {
 					for j := 0; j < n; j++ {
-						b[k*ldb+j] *= tmp
+						btmpk[j] *= tmp
 					}
 				}
 			}
 			return
 		}
 		for k := 0; k < m; k++ {
-			for i := 0; i < k; i++ {
-				tmp := alpha * a[k*lda+i]
+			btmpk := b[k*ldb : k*ldb+n]
+			for i, va := range a[k*lda : k*lda+k] {
+				btmp := b[i*ldb : i*ldb+n]
+				tmp := alpha * va
 				if tmp != 0 {
-					for j := 0; j < n; j++ {
-						b[i*ldb+j] += tmp * b[k*ldb+j]
+					for j, vb := range btmpk {
+						btmp[j] += tmp * vb
 					}
 				}
 			}
@@ -633,7 +652,7 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 			}
 			if tmp != 1 {
 				for j := 0; j < n; j++ {
-					b[k*ldb+j] *= tmp
+					btmpk[j] *= tmp
 				}
 			}
 		}
@@ -643,15 +662,17 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 	if tA == blas.NoTrans {
 		if ul == blas.Upper {
 			for i := 0; i < m; i++ {
+				btmp := b[i*ldb : i*ldb+n]
 				for k := n - 1; k >= 0; k-- {
-					tmp := alpha * b[i*lda+k]
+					tmp := alpha * btmp[k]
 					if tmp != 0 {
-						b[i*ldb+k] = tmp
+						btmp[k] = tmp
 						if nonUnit {
-							b[i*ldb+k] *= a[k*lda+k]
+							btmp[k] *= a[k*lda+k]
 						}
-						for j := k + 1; j < n; j++ {
-							b[i*ldb+j] += tmp * a[k*lda+j]
+						for ja, v := range a[k*lda+k+1 : k*lda+n] {
+							j := ja + k + 1
+							btmp[j] += tmp * v
 						}
 					}
 				}
@@ -659,15 +680,16 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 			return
 		}
 		for i := 0; i < m; i++ {
+			btmp := b[i*ldb : i*ldb+n]
 			for k := 0; k < n; k++ {
-				tmp := alpha * b[i*ldb+k]
+				tmp := alpha * btmp[k]
 				if tmp != 0 {
-					b[i*ldb+k] = tmp
+					btmp[k] = tmp
 					if nonUnit {
-						b[i*ldb+k] *= a[k*lda+k]
+						btmp[k] *= a[k*lda+k]
 					}
-					for j := 0; j < k; j++ {
-						b[i*ldb+j] += tmp * a[k*lda+j]
+					for j, v := range a[k*lda : k*lda+k] {
+						btmp[j] += tmp * v
 					}
 				}
 			}
@@ -677,29 +699,32 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 	// Cases where a is transposed.
 	if ul == blas.Upper {
 		for i := 0; i < m; i++ {
-			for j := 0; j < n; j++ {
-				tmp := b[i*lda+j]
+			btmp := b[i*lda : i*lda+n]
+			for j, vb := range btmp {
+				tmp := vb
 				if nonUnit {
 					tmp *= a[j*lda+j]
 				}
-				for k := j + 1; k < n; k++ {
-					tmp += a[j*lda+k] * b[i*ldb+k]
+				for ka, va := range a[j*lda+j+1 : j*lda+n] {
+					k := ka + j + 1
+					tmp += va * btmp[k]
 				}
-				b[i*ldb+j] = alpha * tmp
+				btmp[j] = alpha * tmp
 			}
 		}
 		return
 	}
 	for i := 0; i < m; i++ {
+		btmp := b[i*lda : i*lda+n]
 		for j := n - 1; j >= 0; j-- {
-			tmp := b[i*ldb+j]
+			tmp := btmp[j]
 			if nonUnit {
 				tmp *= a[j*lda+j]
 			}
-			for k := 0; k < j; k++ {
-				tmp += a[j*lda+k] * b[i*ldb+k]
+			for k, v := range a[j*lda : j*lda+j] {
+				tmp += v * btmp[k]
 			}
-			b[i*lda+j] = alpha * tmp
+			btmp[j] = alpha * tmp
 		}
 	}
 }

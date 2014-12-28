@@ -17,3 +17,7 @@ func TestDsymm(t *testing.T) {
 func TestDsyrk(t *testing.T) {
 	testblas.DsyrkTest(t, blasser)
 }
+
+func TestDsyr2k(t *testing.T) {
+	testblas.Dsyr2kTest(t, blasser)
+}

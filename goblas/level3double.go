@@ -394,9 +394,132 @@ func (Blas) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []
 		}
 	}
 }
-func (Blas) Dsyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
-	panic("blas: function not implemented")
+
+// Dsyr2k performs a symmetric rank 2k operation
+//  C = alpha * A * B^T + alpha * B * A^T + beta *C
+// where C is an n x n symmetric matrix and A and B are n x k matrices if
+// tA == NoTrans and k x n otherwise.
+func (Blas) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.Trans && tA != blas.NoTrans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if k < 0 {
+		panic(kLT0)
+	}
+	if ldc < n {
+		panic(badLd)
+	}
+	if tA == blas.Trans {
+		if lda < n || ldb < n {
+			panic(badLd)
+		}
+	} else {
+		if lda < k || ldb < k {
+			panic(badLd)
+		}
+	}
+	if alpha == 0 {
+		if ul == blas.Upper {
+			for i := 0; i < n; i++ {
+				ctmp := c[i*ldc+i : i*ldc+n]
+				for j := range ctmp {
+					ctmp[j] *= beta
+				}
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			ctmp := c[i*ldc : i*ldc+i+1]
+			for j := range ctmp {
+				ctmp[j] *= beta
+			}
+		}
+		return
+	}
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			for i := 0; i < n; i++ {
+				atmp := a[i*lda : i*lda+k]
+				btmp := b[i*lda : i*lda+k]
+				ctmp := c[i*ldc+i : i*ldc+n]
+				for jc := range ctmp {
+					j := i + jc
+					var tmp1, tmp2 float64
+					binner := b[j*ldb : j*ldb+k]
+					for l, v := range a[j*lda : j*lda+k] {
+						tmp1 += v * btmp[l]
+						tmp2 += atmp[l] * binner[l]
+					}
+					ctmp[jc] *= beta
+					ctmp[jc] += alpha * (tmp1 + tmp2)
+				}
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			atmp := a[i*lda : i*lda+k]
+			btmp := b[i*lda : i*lda+k]
+			ctmp := c[i*ldc : i*ldc+i+1]
+			for j := 0; j <= i; j++ {
+				var tmp1, tmp2 float64
+				binner := b[j*ldb : j*ldb+k]
+				for l, v := range a[j*lda : j*lda+k] {
+					tmp1 += v * btmp[l]
+					tmp2 += atmp[l] * binner[l]
+				}
+				ctmp[j] *= beta
+				ctmp[j] += alpha * (tmp1 + tmp2)
+			}
+		}
+		return
+	}
+	if ul == blas.Upper {
+		for i := 0; i < n; i++ {
+			ctmp := c[i*ldc+i : i*ldc+n]
+			if beta != 1 {
+				for j := range ctmp {
+					ctmp[j] *= beta
+				}
+			}
+			for l := 0; l < k; l++ {
+				tmp1 := alpha * b[l*lda+i]
+				tmp2 := alpha * a[l*lda+i]
+				btmp := b[l*ldb+i : l*ldb+n]
+				if tmp1 != 0 || tmp2 != 0 {
+					for j, v := range a[l*lda+i : l*lda+n] {
+						ctmp[j] += v*tmp1 + btmp[j]*tmp2
+					}
+				}
+			}
+		}
+		return
+	}
+	for i := 0; i < n; i++ {
+		ctmp := c[i*ldc : i*ldc+i+1]
+		if beta != 1 {
+			for j := range ctmp {
+				ctmp[j] *= beta
+			}
+		}
+		for l := 0; l < k; l++ {
+			tmp1 := alpha * b[l*lda+i]
+			tmp2 := alpha * a[l*lda+i]
+			btmp := b[l*ldb : l*ldb+i+1]
+			if tmp1 != 0 || tmp2 != 0 {
+				for j, v := range a[l*lda : l*lda+i+1] {
+					ctmp[j] += v*tmp1 + btmp[j]*tmp2
+				}
+			}
+		}
+	}
 }
+
 func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	panic("blas: function not implemented")
 }

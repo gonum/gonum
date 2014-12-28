@@ -520,6 +520,186 @@ func (Blas) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a [
 	}
 }
 
+// Dtrmm performs a symmetric matrix multiply
+//  B = alpha * A * B
+// where B is an m x n matrix and A is symmetric matrix. Side and Transpose
+// set the location of A relative to B and if A is transposed.
 func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
-	panic("blas: function not implemented")
+	if s != blas.Left && s != blas.Right {
+		panic(badSide)
+	}
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if d != blas.NonUnit && d != blas.Unit {
+		panic(badDiag)
+	}
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if alpha == 0 {
+		for i := 0; i < m; i++ {
+			btmp := b[i*ldb : i*ldb+n]
+			for j := range btmp {
+				btmp[j] = 0
+			}
+		}
+	}
+
+	nonUnit := d == blas.NonUnit
+	// Left --> Right and Upper --> Lower
+	if s == blas.Left {
+		if tA == blas.NoTrans {
+			if ul == blas.Upper {
+				for i := 0; i < m; i++ {
+					tmp := alpha
+					if nonUnit {
+						tmp *= a[i*lda+i]
+					}
+					for j := 0; j < n; j++ {
+						b[i*ldb+j] *= tmp
+					}
+					for k := i + 1; k < m; k++ {
+						tmp := alpha * a[i*lda+k]
+						if tmp != 0 {
+							for j := 0; j < n; j++ {
+								b[i*ldb+j] += tmp * b[k*ldb+j]
+							}
+						}
+					}
+				}
+				return
+			}
+			for i := m - 1; i >= 0; i-- {
+				tmp := alpha
+				if nonUnit {
+					tmp *= a[i*lda+i]
+				}
+				for j := 0; j < n; j++ {
+					b[i*ldb+j] *= tmp
+				}
+				for k := 0; k < i; k++ {
+					tmp := alpha * a[i*lda+k]
+					if tmp != 0 {
+						for j := 0; j < n; j++ {
+							b[i*ldb+j] += tmp * b[k*ldb+j]
+						}
+					}
+				}
+			}
+			return
+		}
+		// Cases where a is transposed.
+		if ul == blas.Upper {
+			for k := m - 1; k >= 0; k-- {
+				for i := k + 1; i < m; i++ {
+					tmp := alpha * a[k*lda+i]
+					if tmp != 0 {
+						for j := 0; j < n; j++ {
+							b[i*ldb+j] += tmp * b[k*ldb+j]
+						}
+					}
+				}
+				tmp := alpha
+				if nonUnit {
+					tmp *= a[k*lda+k]
+				}
+				if tmp != 1 {
+					for j := 0; j < n; j++ {
+						b[k*ldb+j] *= tmp
+					}
+				}
+			}
+			return
+		}
+		for k := 0; k < m; k++ {
+			for i := 0; i < k; i++ {
+				tmp := alpha * a[k*lda+i]
+				if tmp != 0 {
+					for j := 0; j < n; j++ {
+						b[i*ldb+j] += tmp * b[k*ldb+j]
+					}
+				}
+			}
+			tmp := alpha
+			if nonUnit {
+				tmp *= a[k*lda+k]
+			}
+			if tmp != 1 {
+				for j := 0; j < n; j++ {
+					b[k*ldb+j] *= tmp
+				}
+			}
+		}
+		return
+	}
+	// Cases where a is on the right
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			for i := 0; i < m; i++ {
+				for k := n - 1; k >= 0; k-- {
+					tmp := alpha * b[i*lda+k]
+					if tmp != 0 {
+						b[i*ldb+k] = tmp
+						if nonUnit {
+							b[i*ldb+k] *= a[k*lda+k]
+						}
+						for j := k + 1; j < n; j++ {
+							b[i*ldb+j] += tmp * a[k*lda+j]
+						}
+					}
+				}
+			}
+			return
+		}
+		for i := 0; i < m; i++ {
+			for k := 0; k < n; k++ {
+				tmp := alpha * b[i*ldb+k]
+				if tmp != 0 {
+					b[i*ldb+k] = tmp
+					if nonUnit {
+						b[i*ldb+k] *= a[k*lda+k]
+					}
+					for j := 0; j < k; j++ {
+						b[i*ldb+j] += tmp * a[k*lda+j]
+					}
+				}
+			}
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		for i := 0; i < m; i++ {
+			for j := 0; j < n; j++ {
+				tmp := b[i*lda+j]
+				if nonUnit {
+					tmp *= a[j*lda+j]
+				}
+				for k := j + 1; k < n; k++ {
+					tmp += a[j*lda+k] * b[i*ldb+k]
+				}
+				b[i*ldb+j] = alpha * tmp
+			}
+		}
+		return
+	}
+	for i := 0; i < m; i++ {
+		for j := n - 1; j >= 0; j-- {
+			tmp := b[i*ldb+j]
+			if nonUnit {
+				tmp *= a[j*lda+j]
+			}
+			for k := 0; k < j; k++ {
+				tmp += a[j*lda+k] * b[i*ldb+k]
+			}
+			b[i*lda+j] = alpha * tmp
+		}
+	}
 }

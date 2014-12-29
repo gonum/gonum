@@ -11,9 +11,6 @@ const (
 
 // Dtrsm solves
 //  A X = alpha B
-// if side is Left or
-//  X A = alpha B
-// if side is Right
 // where X and B are m x n matrices, and A is a unit or non unit upper or lower
 // triangular matrix. The result is stored in place into B. No check is made
 // that A is invertible.
@@ -67,125 +64,180 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 		if tA == blas.NoTrans {
 			if ul == blas.Upper {
 				for i := m - 1; i >= 0; i-- {
-					atmp := a[i*lda : i*lda+m]
 					btmp := b[i*ldb : i*ldb+n]
-					for j := 0; j < n; j++ {
-						btmp[j] *= alpha
+					if alpha != 1 {
+						for j := range btmp {
+							btmp[j] *= alpha
+						}
 					}
-					for k := i + 1; k < m; k++ {
-						binner := b[k*ldb : k*ldb+n]
-						ak := atmp[k]
-						for j, v := range binner {
-							btmp[j] -= v * ak
+					for ka, va := range a[i*lda+i+1 : i*lda+m] {
+						k := ka + i + 1
+						if va != 0 {
+							for j, vb := range b[k*ldb : k*ldb+n] {
+								btmp[j] -= va * vb
+							}
 						}
 					}
 					if nonUnit {
-						ai := atmp[i]
+						tmp := 1 / a[i*lda+i]
 						for j := 0; j < n; j++ {
-							btmp[j] /= ai
+							btmp[j] *= tmp
 						}
 					}
 				}
 				return
 			}
 			for i := 0; i < m; i++ {
-				atmp := a[i*lda : i*lda+m]
 				btmp := b[i*ldb : i*ldb+n]
-				for j := 0; j < n; j++ {
-					btmp[j] *= alpha
-				}
-				for k := 0; k < i; k++ {
-					ak := a[i*lda+k]
-					binner := b[k*ldb : k*ldb+n]
-					for j, v := range binner {
-						btmp[j] -= v * ak
-					}
-				}
-				if nonUnit {
-					ai := atmp[i]
-					for j := 0; j < n; j++ {
-						btmp[j] /= ai
-					}
-				}
-			}
-			return
-		}
-		// Cases where a is transposed.
-
-		// TODO (btracey): There may be a way to do this without
-		// this additional loop over b, but I'm struggling to figure it out,
-		// as it's not symmetric with the column-major case.
-		// This way at least accesses along rows in the inner loops.
-		if ul == blas.Upper {
-			if alpha != 1 {
-				for i := 0; i < m; i++ {
-					btmp := b[i*ldb : i*ldb+n]
+				if alpha != 1 {
 					for j := 0; j < n; j++ {
 						btmp[j] *= alpha
 					}
 				}
-			}
-			for i := 0; i < m; i++ {
-				btmp := b[i*ldb : i*ldb+n]
-				ai := a[i*lda+i]
-				for j := 0; j < n; j++ {
-					if nonUnit {
-						btmp[j] /= ai
+				for k, va := range a[i*lda : i*lda+i] {
+					if va != 0 {
+						for j, vb := range b[k*ldb : k*ldb+n] {
+							btmp[j] -= va * vb
+						}
 					}
 				}
-				for ktmp, ak := range a[i*lda+i+1 : i*lda+m] {
-					k := i + 1 + ktmp
-					binner := b[k*ldb : k*ldb+n]
-					for j, v := range btmp {
-						binner[j] -= ak * v
+				if nonUnit {
+					tmp := 1 / a[i*lda+i]
+					for j := 0; j < n; j++ {
+						btmp[j] *= tmp
 					}
 				}
 			}
 			return
 		}
-		if alpha != 1 {
-			for i := 0; i < m; i++ {
-				btmp := b[i*ldb : i*ldb+n]
-				for j := 0; j < n; j++ {
-					btmp[j] *= alpha
+		// Cases where a is transposed
+		if ul == blas.Upper {
+			for k := 0; k < m; k++ {
+				btmpk := b[k*ldb : k*ldb+n]
+				if nonUnit {
+					tmp := 1 / a[k*lda+k]
+					for j := 0; j < n; j++ {
+						btmpk[j] *= tmp
+					}
+				}
+				for ia, va := range a[k*lda+k+1 : k*lda+m] {
+					i := ia + k + 1
+					btmp := b[i*ldb : i*ldb+n]
+					if va != 0 {
+						for j, vb := range btmpk {
+							btmp[j] -= va * vb
+						}
+					}
+				}
+				if alpha != 1 {
+					for j := 0; j < n; j++ {
+						btmpk[j] *= alpha
+					}
 				}
 			}
+			return
 		}
-		for i := m - 1; i >= 0; i-- {
-			btmp := b[i*ldb : i*ldb+n]
+		for k := m - 1; k >= 0; k-- {
+			btmpk := b[k*ldb : k*ldb+n]
 			if nonUnit {
-				ai := a[i*lda+i]
+				tmp := 1 / a[k*lda+k]
 				for j := 0; j < n; j++ {
-					btmp[j] /= ai
+					btmpk[j] *= tmp
 				}
 			}
-			for k, ak := range a[i*lda : i*lda+i] {
-				binner := b[k*ldb : k*ldb+n]
-				for j, bj := range btmp {
-					binner[j] -= ak * bj
+			for i, va := range a[k*lda : k*lda+k] {
+				btmp := b[i*ldb : i*ldb+n]
+				if va != 0 {
+					for j, vb := range btmpk {
+						btmp[j] -= va * vb
+					}
+				}
+			}
+			if alpha != 1 {
+				for j := 0; j < n; j++ {
+					btmpk[j] *= alpha
 				}
 			}
 		}
 		return
 	}
-	/*
-		// Cases where A is to the right of X.
-		if tA == blas.NoTrans {
-			if ul == blas.Upper {
-				for i := 0; i < m; i++ {
+	// Cases where a is to the right of X.
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			for i := 0; i < m; i++ {
+				btmp := b[i*ldb : i*ldb+n]
+				if alpha != 1 {
 					for j := 0; j < n; j++ {
-						b[i*ldb+j] *= alpha
+						btmp[j] *= alpha
 					}
-					if nonUnit {
-						ai := atmp[i]
-						for j := 0; j < n; j++ {
-							btmp[j] /= ai
+				}
+				for k, vb := range btmp {
+					if vb != 0 {
+						if nonUnit {
+							btmp[k] /= a[k*lda+k]
+						}
+						vb = btmp[k]
+						for ja, va := range a[k*lda+k+1 : k*lda+n] {
+							j := ja + k + 1
+							btmp[j] -= vb * va
 						}
 					}
 				}
 			}
+			return
 		}
-	*/
+		for i := 0; i < m; i++ {
+			btmp := b[i*lda : i*lda+n]
+			if alpha != 1 {
+				for j := 0; j < n; j++ {
+					btmp[j] *= alpha
+				}
+			}
+			for k := n - 1; k >= 0; k-- {
+				if btmp[k] != 0 {
+					if nonUnit {
+						btmp[k] /= a[k*lda+k]
+					}
+				}
+				vb := btmp[k]
+				for j, va := range a[k*lda : k*lda+k] {
+					btmp[j] -= vb * va
+				}
+			}
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		for i := 0; i < m; i++ {
+			btmp := b[i*lda : i*lda+n]
+			for j := n - 1; j >= 0; j-- {
+				tmp := alpha * btmp[j]
+				for ka, va := range a[j*lda+j+1 : j*lda+n] {
+					k := ka + j + 1
+					tmp -= va * btmp[k]
+				}
+				if nonUnit {
+					tmp /= a[j*lda+j]
+				}
+				btmp[j] = tmp
+			}
+		}
+		return
+	}
+	for i := 0; i < m; i++ {
+		btmp := b[i*lda : i*lda+n]
+		for j := 0; j < n; j++ {
+			tmp := alpha * btmp[j]
+			for k, v := range a[j*lda : j*lda+j] {
+				tmp -= v * btmp[k]
+			}
+			if nonUnit {
+				tmp /= a[j*lda+j]
+			}
+			btmp[j] = tmp
+		}
+	}
 }
 
 // Dsymm performs one of

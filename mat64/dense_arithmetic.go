@@ -476,6 +476,9 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 		panic(ErrShape)
 	}
 
+	//TODO(jonlawlor): if we are performing a * a' or a' * a, then make a call to
+	// DSYRK instead of DGEMM.
+
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
 			amat, bmat := a.RawMatrix(), b.RawMatrix()

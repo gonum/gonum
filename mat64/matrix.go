@@ -195,7 +195,7 @@ type Muler interface {
 
 // A MulGener can determine the matrix product of a and b, optionally taking the transpose
 // of either a, b, or both, placing the result in the receiver.
-// If the number of columns in (optionally transposed) a does not equal the number of rows 
+// If the number of columns in (optionally transposed) a does not equal the number of rows
 // in (optionally transposed) b, MulGen will panic.
 type MulGener interface {
 	MulGen(a Matrix, at bool, b Matrix, bt bool)

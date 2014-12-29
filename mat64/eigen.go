@@ -392,11 +392,6 @@ func orthes(a *Dense) (hess, v *Dense) {
 	return hess, v
 }
 
-func cdiv(xr, xi, yr, yi float64) (float64, float64) {
-	r := complex(xr, xi) / complex(yr, yi)
-	return real(r), imag(r)
-}
-
 // Nonsymmetric reduction from Hessenberg to real Schur form.
 //
 // This is derived from the Algol procedure hqr2,
@@ -587,11 +582,11 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 
 			// Double QR step involving rows l:n and columns m:n
 			for k := m; k <= n-1; k++ {
-				notlast := k != n-1
+				last := k == n-1
 				if k != m {
 					p = hess.at(k, k-1)
 					q = hess.at(k+1, k-1)
-					if notlast {
+					if !last {
 						r = hess.at(k+2, k-1)
 					} else {
 						r = 0
@@ -625,7 +620,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					// Row modification
 					for j := k; j < nn; j++ {
 						p = hess.at(k, j) + q*hess.at(k+1, j)
-						if notlast {
+						if !last {
 							p += r * hess.at(k+2, j)
 							hess.set(k+2, j, hess.at(k+2, j)-p*z)
 						}
@@ -636,7 +631,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					// Column modification
 					for i := 0; i <= min(n, k+3); i++ {
 						p = x*hess.at(i, k) + y*hess.at(i, k+1)
-						if notlast {
+						if !last {
 							p += z * hess.at(i, k+2)
 							hess.set(i, k+2, hess.at(i, k+2)-p*r)
 						}
@@ -647,7 +642,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 					// Accumulate transformations
 					for i := low; i <= high; i++ {
 						p = x*v.at(i, k) + y*v.at(i, k+1)
-						if notlast {
+						if !last {
 							p += z * v.at(i, k+2)
 							v.set(i, k+2, v.at(i, k+2)-p*r)
 						}
@@ -722,9 +717,9 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 				hess.set(n-1, n-1, q/hess.at(n, n-1))
 				hess.set(n-1, n, -(hess.at(n, n)-p)/hess.at(n, n-1))
 			} else {
-				re, im := cdiv(0, -hess.at(n-1, n), hess.at(n-1, n-1)-p, q)
-				hess.set(n-1, n-1, re)
-				hess.set(n-1, n, im)
+				c := complex(0, -hess.at(n-1, n)) / complex(hess.at(n-1, n-1)-p, q)
+				hess.set(n-1, n-1, real(c))
+				hess.set(n-1, n, imag(c))
 			}
 			hess.set(n, n-1, 0)
 			hess.set(n, n, 1)
@@ -744,9 +739,9 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 				} else {
 					l = i
 					if e[i] == 0 {
-						re, im := cdiv(-ra, -sa, w, q)
-						hess.set(i, n-1, re)
-						hess.set(i, n, im)
+						c := complex(-ra, -sa) / complex(w, q)
+						hess.set(i, n-1, real(c))
+						hess.set(i, n, imag(c))
 					} else {
 						// Solve complex equations
 						x = hess.at(i, i+1)
@@ -756,16 +751,16 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 						if vr == 0 && vi == 0 {
 							vr = epsilon * norm * (math.Abs(w) + math.Abs(q) + math.Abs(x) + math.Abs(y) + math.Abs(z))
 						}
-						re, im := cdiv(x*r-z*ra+q*sa, x*s-z*sa-q*ra, vr, vi)
-						hess.set(i, n-1, re)
-						hess.set(i, n, im)
+						c := complex(x*r-z*ra+q*sa, x*s-z*sa-q*ra) / complex(vr, vi)
+						hess.set(i, n-1, real(c))
+						hess.set(i, n, imag(c))
 						if math.Abs(x) > (math.Abs(z) + math.Abs(q)) {
 							hess.set(i+1, n-1, (-ra-w*hess.at(i, n-1)+q*hess.at(i, n))/x)
 							hess.set(i+1, n, (-sa-w*hess.at(i, n)-q*hess.at(i, n-1))/x)
 						} else {
-							re, im := cdiv(-r-y*hess.at(i, n-1), -s-y*hess.at(i, n), z, q)
-							hess.set(i+1, n-1, re)
-							hess.set(i+1, n, im)
+							c := complex(-r-y*hess.at(i, n-1), -s-y*hess.at(i, n)) / complex(z, q)
+							hess.set(i+1, n-1, real(c))
+							hess.set(i+1, n, imag(c))
 						}
 					}
 

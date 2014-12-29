@@ -5,9 +5,9 @@
 package mat64
 
 import (
+	"fmt"
 	"github.com/gonum/floats"
 	"math"
-
 	"math/rand"
 	"testing"
 
@@ -493,6 +493,76 @@ func (s *S) TestMul(c *check.C) {
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
 		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "cblas: index of c out of range", check.Commentf("Test %d"))
+	}
+}
+
+func (s *S) TestMulGen(c *check.C) {
+	for i, test := range []struct {
+		a, b [][]float64
+	}{
+		{
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+		},
+		{
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+		},
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+		},
+		{
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+		},
+		{
+			[][]float64{{1, 2, 3}, {4, 5, 6}},
+			[][]float64{{1, 2}, {3, 4}, {5, 6}},
+		},
+		{
+			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
+			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
+		},
+	} {
+		a := NewDense(flatten(test.a))
+		b := NewDense(flatten(test.b))
+		for _, at := range []bool{false, true} {
+			for _, bt := range []bool{false, true} {
+				r := NewDense(0, 0, nil)
+				var aCopy, bCopy Dense
+				if at {
+					aCopy.TCopy(a)
+				} else {
+					aCopy = *a
+				}
+				if bt {
+					bCopy.TCopy(b)
+				} else {
+					bCopy = *b
+				}
+
+				defer func() {
+					if rec := recover(); rec != nil {
+						// check that both calls error and that the same error returns
+						var temp Dense
+						c.Check(func() { temp.Mul(&aCopy, &bCopy) }, check.PanicMatches, fmt.Sprintf("%s", rec), check.Commentf("Test Mul %d", i))
+						c.Check(func() { temp.MulGen(a, at, b, bt) }, check.PanicMatches, fmt.Sprintf("%s", rec), check.Commentf("Test MulGen %d", i))
+					}
+				}()
+				r.Mul(&aCopy, &bCopy)
+
+				var temp Dense
+				temp.MulGen(a, at, b, bt)
+				c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
+					i, test.a, test.b, r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
+
+				zero(temp.mat.Data)
+				temp.MulGen(a, at, b, bt)
+				c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v sub %v expect %v got %v",
+					i, test.a, test.b, r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
+			}
+		}
 	}
 }
 

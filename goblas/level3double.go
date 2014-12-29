@@ -520,6 +520,211 @@ func (Blas) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a [
 	}
 }
 
+// Dtrmm performs a symmetric matrix multiply
+//  B = alpha * A * B
+// where B is an m x n matrix and A is symmetric matrix. Side and Transpose
+// set the location of A relative to B and if A is transposed.
 func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
-	panic("blas: function not implemented")
+	if s != blas.Left && s != blas.Right {
+		panic(badSide)
+	}
+	if ul != blas.Lower && ul != blas.Upper {
+		panic(badUplo)
+	}
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if d != blas.NonUnit && d != blas.Unit {
+		panic(badDiag)
+	}
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if ldb < n {
+		panic(badLd)
+	}
+	if s == blas.Left {
+		if lda < m {
+			panic(badLd)
+		}
+	} else {
+		if lda < n {
+			panic(badLd)
+		}
+	}
+	if alpha == 0 {
+		for i := 0; i < m; i++ {
+			btmp := b[i*ldb : i*ldb+n]
+			for j := range btmp {
+				btmp[j] = 0
+			}
+		}
+	}
+
+	nonUnit := d == blas.NonUnit
+	if s == blas.Left {
+		if tA == blas.NoTrans {
+			if ul == blas.Upper {
+				for i := 0; i < m; i++ {
+					tmp := alpha
+					if nonUnit {
+						tmp *= a[i*lda+i]
+					}
+					btmp := b[i*ldb : i*ldb+n]
+					for j := range btmp {
+						btmp[j] *= tmp
+					}
+					for ka, va := range a[i*lda+i+1 : i*lda+m] {
+						k := ka + i + 1
+						tmp := alpha * va
+						if tmp != 0 {
+							for j, vb := range b[k*ldb : k*ldb+n] {
+								btmp[j] += tmp * vb
+							}
+						}
+					}
+				}
+				return
+			}
+			for i := m - 1; i >= 0; i-- {
+				tmp := alpha
+				if nonUnit {
+					tmp *= a[i*lda+i]
+				}
+				btmp := b[i*ldb : i*ldb+n]
+				for j := range btmp {
+					btmp[j] *= tmp
+				}
+				for k, va := range a[i*lda : i*lda+i] {
+					tmp := alpha * va
+					if tmp != 0 {
+						for j, vb := range b[k*ldb : k*ldb+n] {
+							btmp[j] += tmp * vb
+						}
+					}
+				}
+			}
+			return
+		}
+		// Cases where a is transposed.
+		if ul == blas.Upper {
+			for k := m - 1; k >= 0; k-- {
+				btmpk := b[k*ldb : k*ldb+n]
+				for ia, va := range a[k*lda+k+1 : k*lda+m] {
+					i := ia + k + 1
+					btmp := b[i*ldb : i*ldb+n]
+					tmp := alpha * va
+					if tmp != 0 {
+						for j, vb := range btmpk {
+							btmp[j] += tmp * vb
+						}
+					}
+				}
+				tmp := alpha
+				if nonUnit {
+					tmp *= a[k*lda+k]
+				}
+				if tmp != 1 {
+					for j := 0; j < n; j++ {
+						btmpk[j] *= tmp
+					}
+				}
+			}
+			return
+		}
+		for k := 0; k < m; k++ {
+			btmpk := b[k*ldb : k*ldb+n]
+			for i, va := range a[k*lda : k*lda+k] {
+				btmp := b[i*ldb : i*ldb+n]
+				tmp := alpha * va
+				if tmp != 0 {
+					for j, vb := range btmpk {
+						btmp[j] += tmp * vb
+					}
+				}
+			}
+			tmp := alpha
+			if nonUnit {
+				tmp *= a[k*lda+k]
+			}
+			if tmp != 1 {
+				for j := 0; j < n; j++ {
+					btmpk[j] *= tmp
+				}
+			}
+		}
+		return
+	}
+	// Cases where a is on the right
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			for i := 0; i < m; i++ {
+				btmp := b[i*ldb : i*ldb+n]
+				for k := n - 1; k >= 0; k-- {
+					tmp := alpha * btmp[k]
+					if tmp != 0 {
+						btmp[k] = tmp
+						if nonUnit {
+							btmp[k] *= a[k*lda+k]
+						}
+						for ja, v := range a[k*lda+k+1 : k*lda+n] {
+							j := ja + k + 1
+							btmp[j] += tmp * v
+						}
+					}
+				}
+			}
+			return
+		}
+		for i := 0; i < m; i++ {
+			btmp := b[i*ldb : i*ldb+n]
+			for k := 0; k < n; k++ {
+				tmp := alpha * btmp[k]
+				if tmp != 0 {
+					btmp[k] = tmp
+					if nonUnit {
+						btmp[k] *= a[k*lda+k]
+					}
+					for j, v := range a[k*lda : k*lda+k] {
+						btmp[j] += tmp * v
+					}
+				}
+			}
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		for i := 0; i < m; i++ {
+			btmp := b[i*lda : i*lda+n]
+			for j, vb := range btmp {
+				tmp := vb
+				if nonUnit {
+					tmp *= a[j*lda+j]
+				}
+				for ka, va := range a[j*lda+j+1 : j*lda+n] {
+					k := ka + j + 1
+					tmp += va * btmp[k]
+				}
+				btmp[j] = alpha * tmp
+			}
+		}
+		return
+	}
+	for i := 0; i < m; i++ {
+		btmp := b[i*lda : i*lda+n]
+		for j := n - 1; j >= 0; j-- {
+			tmp := btmp[j]
+			if nonUnit {
+				tmp *= a[j*lda+j]
+			}
+			for k, v := range a[j*lda : j*lda+j] {
+				tmp += v * btmp[k]
+			}
+			btmp[j] = alpha * tmp
+		}
+	}
 }

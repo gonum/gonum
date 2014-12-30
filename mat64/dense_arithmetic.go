@@ -434,30 +434,18 @@ func (m *Dense) Mul(a, b Matrix) {
 	*m = w
 }
 
-func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
-
-	var aOp, bOp blas.Transpose
+func (m *Dense) MulGen(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.Transpose) {
 	ar, ac := a.Dims()
-	var art, act int
-	if at {
-		art, act = ac, ar
-		aOp = blas.Trans
-	} else {
-		art, act = ar, ac
-		aOp = blas.NoTrans
+	if aTrans != blas.NoTrans {
+		ar, ac = ac, ar
 	}
 
 	br, bc := b.Dims()
-	var brt, bct int
-	if bt {
-		brt, bct = bc, br
-		bOp = blas.Trans
-	} else {
-		brt, bct = br, bc
-		bOp = blas.NoTrans
+	if bTrans != blas.NoTrans {
+		br, bc = bc, br
 	}
 
-	if act != brt {
+	if ac != br {
 		panic(ErrShape)
 	}
 
@@ -467,17 +455,17 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 	}
 	if w.isZero() {
 		w.mat = RawMatrix{
-			Rows:   art,
-			Cols:   bct,
-			Stride: bct,
-			Data:   use(w.mat.Data, art*bct),
+			Rows:   ar,
+			Cols:   bc,
+			Stride: bc,
+			Data:   use(w.mat.Data, ar*bc),
 		}
-	} else if art != w.mat.Rows || bct != w.mat.Cols {
+	} else if ar != w.mat.Rows || bc != w.mat.Cols {
 		panic(ErrShape)
 	}
 
 	//TODO(jonlawlor): if we are performing a * a' or a' * a, then make a call to
-	// DSYRK instead of DGEMM.
+	// blas.Dsyrk instead of blas.Dgemm.
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -486,8 +474,8 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 				panic(ErrNoEngine)
 			}
 			blasEngine.Dgemm(
-				aOp, bOp,
-				art, bct, act,
+				aTrans, bTrans,
+				ar, bc, ac,
 				1.,
 				amat.Data, amat.Stride,
 				bmat.Data, bmat.Stride,
@@ -500,15 +488,15 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 
 	if a, ok := a.(Vectorer); ok {
 		if b, ok := b.(Vectorer); ok {
-			row := make([]float64, act)
-			col := make([]float64, brt)
+			row := make([]float64, ac)
+			col := make([]float64, br)
 			if blasEngine == nil {
 				panic(ErrNoEngine)
 			}
-			if at {
-				if bt {
-					for r := 0; r < art; r++ {
-						for c := 0; c < bct; c++ {
+			if aTrans != blas.NoTrans {
+				if bTrans != blas.NoTrans {
+					for r := 0; r < ar; r++ {
+						for c := 0; c < bc; c++ {
 							w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Row(col, c), 1)
 						}
 					}
@@ -516,25 +504,25 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 					return
 				}
 				// TODO(jonlawlor): determine if (b*a)' is more efficient
-				for r := 0; r < art; r++ {
-					for c := 0; c < bct; c++ {
+				for r := 0; r < ar; r++ {
+					for c := 0; c < bc; c++ {
 						w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Col(col, c), 1)
 					}
 				}
 				*m = w
 				return
 			}
-			if bt {
-				for r := 0; r < art; r++ {
-					for c := 0; c < bct; c++ {
+			if bTrans != blas.NoTrans {
+				for r := 0; r < ar; r++ {
+					for c := 0; c < bc; c++ {
 						w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Row(col, c), 1)
 					}
 				}
 				*m = w
 				return
 			}
-			for r := 0; r < art; r++ {
-				for c := 0; c < bct; c++ {
+			for r := 0; r < ar; r++ {
+				for c := 0; c < bc; c++ {
 					w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
 				}
 			}
@@ -543,14 +531,14 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 		}
 	}
 
-	row := make([]float64, act)
-	if at {
-		if bt {
-			for r := 0; r < art; r++ {
+	row := make([]float64, ac)
+	if aTrans != blas.NoTrans {
+		if bTrans != blas.NoTrans {
+			for r := 0; r < ar; r++ {
 				for i := range row {
 					row[i] = a.At(i, r)
 				}
-				for c := 0; c < bct; c++ {
+				for c := 0; c < bc; c++ {
 					var v float64
 					for i, e := range row {
 						v += e * b.At(c, i)
@@ -562,11 +550,11 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 			return
 		}
 
-		for r := 0; r < art; r++ {
+		for r := 0; r < ar; r++ {
 			for i := range row {
 				row[i] = a.At(i, r)
 			}
-			for c := 0; c < bct; c++ {
+			for c := 0; c < bc; c++ {
 				var v float64
 				for i, e := range row {
 					v += e * b.At(i, c)
@@ -577,12 +565,12 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 		*m = w
 		return
 	}
-	if bt {
-		for r := 0; r < art; r++ {
+	if bTrans != blas.NoTrans {
+		for r := 0; r < ar; r++ {
 			for i := range row {
 				row[i] = a.At(r, i)
 			}
-			for c := 0; c < bct; c++ {
+			for c := 0; c < bc; c++ {
 				var v float64
 				for i, e := range row {
 					v += e * b.At(c, i)
@@ -593,11 +581,11 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 		*m = w
 		return
 	}
-	for r := 0; r < art; r++ {
+	for r := 0; r < ar; r++ {
 		for i := range row {
 			row[i] = a.At(r, i)
 		}
-		for c := 0; c < bct; c++ {
+		for c := 0; c < bc; c++ {
 			var v float64
 			for i, e := range row {
 				v += e * b.At(i, c)

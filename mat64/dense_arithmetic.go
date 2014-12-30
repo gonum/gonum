@@ -487,7 +487,7 @@ func (m *Dense) MulGen(a Matrix, at bool, b Matrix, bt bool) {
 			}
 			blasEngine.Dgemm(
 				aOp, bOp,
-				ar, bc, ac,
+				art, bct, act,
 				1.,
 				amat.Data, amat.Stride,
 				bmat.Data, bmat.Stride,

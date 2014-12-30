@@ -55,7 +55,6 @@ func DgerBenchmark(b *testing.B, blasser Dgerer, m, n, incX, incY int) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		//blasser.Dgemv(tA, m, n, 2, a, n, x, incX, 3, y, incY)
 		blasser.Dger(m, n, 2, x, incX, y, incY, a, n)
 	}
 }

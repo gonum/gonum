@@ -14,6 +14,51 @@ import (
 	"gopkg.in/check.v1"
 )
 
+// test classes for checking some of dense's code paths
+type denseAt struct {
+	d *Dense
+}
+
+func (m *denseAt) Dims() (int, int) {
+	return m.d.Dims()
+}
+
+func (m *denseAt) At(r, c int) float64 {
+	return m.d.At(r, c)
+}
+
+type denseVector struct {
+	d *Dense
+}
+
+func (m *denseVector) Dims() (int, int) {
+	return m.d.Dims()
+}
+
+func (m *denseVector) At(r, c int) float64 {
+	return m.d.At(r, c)
+}
+
+func (m *denseVector) Row(dst []float64, i int) []float64 {
+	return m.d.Row(dst, i)
+}
+
+func (m *denseVector) Col(dst []float64, j int) []float64 {
+	return m.d.Col(dst, j)
+}
+
+type denseConverter func(d *Dense) Matrix
+
+func toDense(d *Dense) Matrix {
+	return d
+}
+func toDenseAt(d *Dense) Matrix {
+	return &denseAt{d: d}
+}
+func toDenseVector(d *Dense) Matrix {
+	return &denseVector{d: d}
+}
+
 func (s *S) TestNewDense(c *check.C) {
 	for i, test := range []struct {
 		a          []float64
@@ -525,43 +570,45 @@ func (s *S) TestMulGen(c *check.C) {
 			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
 		},
 	} {
-		a := NewDense(flatten(test.a))
-		b := NewDense(flatten(test.b))
-		for _, aTrans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
-			for _, bTrans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
-				r := NewDense(0, 0, nil)
-				var aCopy, bCopy Dense
-				if aTrans != blas.NoTrans {
-					aCopy.TCopy(a)
-				} else {
-					aCopy = *a
+		for _, matInterface := range []denseConverter{toDense, toDenseAt, toDenseVector} {
+			a := matInterface(NewDense(flatten(test.a)))
+			b := matInterface(NewDense(flatten(test.b)))
+			for _, aTrans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
+				for _, bTrans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
+					r := NewDense(0, 0, nil)
+					var aCopy, bCopy Dense
+					if aTrans != blas.NoTrans {
+						aCopy.TCopy(NewDense(flatten(test.a)))
+					} else {
+						aCopy = *NewDense(flatten(test.a))
+					}
+					if bTrans != blas.NoTrans {
+						bCopy.TCopy(NewDense(flatten(test.b)))
+					} else {
+						bCopy = *NewDense(flatten(test.b))
+					}
+					var temp Dense
+
+					_, ac := aCopy.Dims()
+					br, _ := bCopy.Dims()
+					if ac != br {
+						// check that both calls error and that the same error returns
+						c.Check(func() { temp.Mul(matInterface(&aCopy), matInterface(&bCopy)) }, check.PanicMatches, string(ErrShape), check.Commentf("Test Mul %d", i))
+						c.Check(func() { temp.MulGen(a, aTrans, b, bTrans) }, check.PanicMatches, string(ErrShape), check.Commentf("Test MulGen %d", i))
+						continue
+					}
+
+					r.Mul(matInterface(&aCopy), matInterface(&bCopy))
+
+					temp.MulGen(a, aTrans, b, bTrans)
+					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
+						i, test.a, test.b, r, temp))
+
+					zero(temp.mat.Data)
+					temp.MulGen(a, aTrans, b, bTrans)
+					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v sub %v expect %v got %v",
+						i, test.a, test.b, r, temp))
 				}
-				if bTrans != blas.NoTrans {
-					bCopy.TCopy(b)
-				} else {
-					bCopy = *b
-				}
-				var temp Dense
-
-				_, ac := aCopy.Dims()
-				br, _ := bCopy.Dims()
-				if ac != br {
-					// check that both calls error and that the same error returns
-					c.Check(func() { temp.Mul(&aCopy, &bCopy) }, check.PanicMatches, string(ErrShape), check.Commentf("Test Mul %d", i))
-					c.Check(func() { temp.MulGen(a, aTrans, b, bTrans) }, check.PanicMatches, string(ErrShape), check.Commentf("Test MulGen %d", i))
-					continue
-				}
-
-				r.Mul(&aCopy, &bCopy)
-
-				temp.MulGen(a, aTrans, b, bTrans)
-				c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
-					i, test.a, test.b, r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
-
-				zero(temp.mat.Data)
-				temp.MulGen(a, aTrans, b, bTrans)
-				c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v sub %v expect %v got %v",
-					i, test.a, test.b, r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 			}
 		}
 	}

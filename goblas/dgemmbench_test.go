@@ -10,9 +10,9 @@ import (
 func BenchmarkDgemmSmSmSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmSmall,
-		testblas.DgemmSmall,
-		testblas.DgemmSmall,
+		testblas.SmallMat,
+		testblas.SmallMat,
+		testblas.SmallMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -21,9 +21,9 @@ func BenchmarkDgemmSmSmSm(b *testing.B) {
 func BenchmarkDgemmMedMedMed(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
+		testblas.MediumMat,
+		testblas.MediumMat,
+		testblas.MediumMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -32,9 +32,9 @@ func BenchmarkDgemmMedMedMed(b *testing.B) {
 func BenchmarkDgemmMedLgMed(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmMedium,
-		testblas.DgemmLarge,
-		testblas.DgemmMedium,
+		testblas.MediumMat,
+		testblas.LargeMat,
+		testblas.MediumMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -43,9 +43,9 @@ func BenchmarkDgemmMedLgMed(b *testing.B) {
 func BenchmarkDgemmLgLgLg(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmLarge,
-		testblas.DgemmLarge,
-		testblas.DgemmLarge,
+		testblas.LargeMat,
+		testblas.LargeMat,
+		testblas.LargeMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -54,9 +54,9 @@ func BenchmarkDgemmLgLgLg(b *testing.B) {
 func BenchmarkDgemmLgSmLg(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmLarge,
-		testblas.DgemmSmall,
-		testblas.DgemmLarge,
+		testblas.LargeMat,
+		testblas.SmallMat,
+		testblas.LargeMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -65,9 +65,9 @@ func BenchmarkDgemmLgSmLg(b *testing.B) {
 func BenchmarkDgemmLgLgSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmLarge,
-		testblas.DgemmSmall,
-		testblas.DgemmLarge,
+		testblas.LargeMat,
+		testblas.SmallMat,
+		testblas.LargeMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -76,9 +76,9 @@ func BenchmarkDgemmLgLgSm(b *testing.B) {
 func BenchmarkDgemmHgHgSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmHuge,
-		testblas.DgemmSmall,
-		testblas.DgemmHuge,
+		testblas.HugeMat,
+		testblas.SmallMat,
+		testblas.HugeMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -87,9 +87,9 @@ func BenchmarkDgemmHgHgSm(b *testing.B) {
 func BenchmarkDgemmMedMedMedTNT(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
+		testblas.MediumMat,
+		testblas.MediumMat,
+		testblas.MediumMat,
 		blas.Trans,
 		blas.NoTrans,
 	)
@@ -98,9 +98,9 @@ func BenchmarkDgemmMedMedMedTNT(b *testing.B) {
 func BenchmarkDgemmMedMedMedNTT(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
+		testblas.MediumMat,
+		testblas.MediumMat,
+		testblas.MediumMat,
 		blas.NoTrans,
 		blas.Trans,
 	)
@@ -109,9 +109,9 @@ func BenchmarkDgemmMedMedMedNTT(b *testing.B) {
 func BenchmarkDgemmMedMedMedNTNT(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Blas{},
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
-		testblas.DgemmMedium,
+		testblas.MediumMat,
+		testblas.MediumMat,
+		testblas.MediumMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)

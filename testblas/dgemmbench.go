@@ -7,13 +7,6 @@ import (
 	"github.com/gonum/blas"
 )
 
-const (
-	DgemmSmall  = 10
-	DgemmMedium = 100
-	DgemmLarge  = 1000
-	DgemmHuge   = 10000
-)
-
 func DgemmBenchmark(b *testing.B, dgemm Dgemmer, m, n, k int, tA, tB blas.Transpose) {
 	a := make([]float64, m*k)
 	for i := range a {

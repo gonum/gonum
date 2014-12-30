@@ -14,6 +14,10 @@ func TestDsymm(t *testing.T) {
 	testblas.DsymmTest(t, blasser)
 }
 
+func TestDtrsm(t *testing.T) {
+	testblas.DtrsmTest(t, blasser)
+}
+
 func TestDsyrk(t *testing.T) {
 	testblas.DsyrkTest(t, blasser)
 }

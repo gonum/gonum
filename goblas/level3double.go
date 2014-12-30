@@ -9,27 +9,12 @@ const (
 	badLd string = "goblas: ld must be greater than the number of columns"
 )
 
+// Dtrsm solves
+//  A X = alpha B
+// where X and B are m x n matrices, and A is a unit or non unit upper or lower
+// triangular matrix. The result is stored in place into B. No check is made
+// that A is invertible.
 func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
-	// Transform to row major
-	if ul == blas.Upper {
-		ul = blas.Lower
-	} else {
-		ul = blas.Upper
-	}
-	if s == blas.Left {
-		s = blas.Right
-	} else {
-		s = blas.Left
-	}
-	m, n = n, m
-
-	var nrowa int
-	if s == blas.Left {
-		nrowa = m
-	} else {
-		nrowa = n
-	}
-
 	if s != blas.Left && s != blas.Right {
 		panic(badSide)
 	}
@@ -48,11 +33,17 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 	if n < 0 {
 		panic(nLT0)
 	}
-	if lda < nrowa {
-		panic(badLda)
+	if ldb < n {
+		panic(badLd)
 	}
-	if ldb < m {
-		panic(badLda)
+	if s == blas.Left {
+		if lda < m {
+			panic(badLd)
+		}
+	} else {
+		if lda < n {
+			panic(badLd)
+		}
 	}
 
 	if m == 0 || n == 0 {
@@ -60,96 +51,191 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 	}
 
 	if alpha == 0 {
-		for j := 0; j < n; j++ {
-			jb := ldb * j
-			for i := 0; i < m; i++ {
-				b[i+jb] = 0
+		for i := 0; i < m; i++ {
+			btmp := b[i*ldb : i*ldb+n]
+			for j := range btmp {
+				btmp[j] = 0
 			}
 		}
 		return
 	}
-
+	nonUnit := d == blas.NonUnit
 	if s == blas.Left {
-		for j := 0; j < n; j++ {
-			jb := j * ldb
-			if alpha != 1 {
-				bl.Dscal(m, alpha, b[jb:], 1)
-			}
-			bl.Dtrsv(ul, tA, d, m, a, lda, b[jb:], 1)
-		}
-	} else {
 		if tA == blas.NoTrans {
-
-			//B := alpha*B*inv( A )
 			if ul == blas.Upper {
+				for i := m - 1; i >= 0; i-- {
+					btmp := b[i*ldb : i*ldb+n]
+					if alpha != 1 {
+						for j := range btmp {
+							btmp[j] *= alpha
+						}
+					}
+					for ka, va := range a[i*lda+i+1 : i*lda+m] {
+						k := ka + i + 1
+						if va != 0 {
+							for j, vb := range b[k*ldb : k*ldb+n] {
+								btmp[j] -= va * vb
+							}
+						}
+					}
+					if nonUnit {
+						tmp := 1 / a[i*lda+i]
+						for j := 0; j < n; j++ {
+							btmp[j] *= tmp
+						}
+					}
+				}
+				return
+			}
+			for i := 0; i < m; i++ {
+				btmp := b[i*ldb : i*ldb+n]
+				if alpha != 1 {
+					for j := 0; j < n; j++ {
+						btmp[j] *= alpha
+					}
+				}
+				for k, va := range a[i*lda : i*lda+i] {
+					if va != 0 {
+						for j, vb := range b[k*ldb : k*ldb+n] {
+							btmp[j] -= va * vb
+						}
+					}
+				}
+				if nonUnit {
+					tmp := 1 / a[i*lda+i]
+					for j := 0; j < n; j++ {
+						btmp[j] *= tmp
+					}
+				}
+			}
+			return
+		}
+		// Cases where a is transposed
+		if ul == blas.Upper {
+			for k := 0; k < m; k++ {
+				btmpk := b[k*ldb : k*ldb+n]
+				if nonUnit {
+					tmp := 1 / a[k*lda+k]
+					for j := 0; j < n; j++ {
+						btmpk[j] *= tmp
+					}
+				}
+				for ia, va := range a[k*lda+k+1 : k*lda+m] {
+					i := ia + k + 1
+					btmp := b[i*ldb : i*ldb+n]
+					if va != 0 {
+						for j, vb := range btmpk {
+							btmp[j] -= va * vb
+						}
+					}
+				}
+				if alpha != 1 {
+					for j := 0; j < n; j++ {
+						btmpk[j] *= alpha
+					}
+				}
+			}
+			return
+		}
+		for k := m - 1; k >= 0; k-- {
+			btmpk := b[k*ldb : k*ldb+n]
+			if nonUnit {
+				tmp := 1 / a[k*lda+k]
 				for j := 0; j < n; j++ {
-					jb := j * ldb
-					ja := j * lda
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[jb:], 1)
-					}
-					for k := 0; k < j; k++ {
-						if a[k+ja] != 0 {
-							bl.Daxpy(m, -a[k+ja], b[k*ldb:], 1, b[jb:], 1)
-						}
-					}
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[j+ja], b[jb:], 1)
-					}
+					btmpk[j] *= tmp
 				}
-			} else {
-				for j := n - 1; j >= 0; j-- {
-					jb := j * ldb
-					ja := j * lda
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[jb:], 1)
-					}
-					for k := j + 1; k < n; k++ {
-						if a[k+ja] != 0 {
-							bl.Daxpy(m, -a[k+ja], b[k*ldb:], 1, b[jb:], 1)
-						}
-					}
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[j+ja], b[jb:], 1)
+			}
+			for i, va := range a[k*lda : k*lda+k] {
+				btmp := b[i*ldb : i*ldb+n]
+				if va != 0 {
+					for j, vb := range btmpk {
+						btmp[j] -= va * vb
 					}
 				}
 			}
-		} else {
-
-			//B := alpha*B*inv( A**T )
-			if ul == blas.Upper {
-				for k := n - 1; k >= 0; k-- {
-					ka := k * lda
-					kb := k * ldb
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[k+ka], b[kb:], 1)
-					}
-					for j := 0; j < k; j++ {
-						if a[j+ka] != 0 {
-							bl.Daxpy(m, a[j+ka], b[kb:], 1, b[j*ldb:], 1)
-						}
-					}
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[kb:], 1)
+			if alpha != 1 {
+				for j := 0; j < n; j++ {
+					btmpk[j] *= alpha
+				}
+			}
+		}
+		return
+	}
+	// Cases where a is to the right of X.
+	if tA == blas.NoTrans {
+		if ul == blas.Upper {
+			for i := 0; i < m; i++ {
+				btmp := b[i*ldb : i*ldb+n]
+				if alpha != 1 {
+					for j := 0; j < n; j++ {
+						btmp[j] *= alpha
 					}
 				}
-			} else {
-				for k := 0; k < n; k++ {
-					ka := k * lda
-					kb := k * ldb
-					if d == blas.NonUnit {
-						bl.Dscal(m, 1/a[k+ka], b[kb:], 1)
-					}
-					for j := k + 1; j < n; j++ {
-						if a[j+ka] != 0 {
-							bl.Daxpy(m, a[j+ka], b[kb:], 1, b[j*ldb:], 1)
+				for k, vb := range btmp {
+					if vb != 0 {
+						if nonUnit {
+							btmp[k] /= a[k*lda+k]
 						}
-					}
-					if alpha != 1 {
-						bl.Dscal(m, alpha, b[kb:], 1)
+						vb = btmp[k]
+						for ja, va := range a[k*lda+k+1 : k*lda+n] {
+							j := ja + k + 1
+							btmp[j] -= vb * va
+						}
 					}
 				}
 			}
+			return
+		}
+		for i := 0; i < m; i++ {
+			btmp := b[i*lda : i*lda+n]
+			if alpha != 1 {
+				for j := 0; j < n; j++ {
+					btmp[j] *= alpha
+				}
+			}
+			for k := n - 1; k >= 0; k-- {
+				if btmp[k] != 0 {
+					if nonUnit {
+						btmp[k] /= a[k*lda+k]
+					}
+				}
+				vb := btmp[k]
+				for j, va := range a[k*lda : k*lda+k] {
+					btmp[j] -= vb * va
+				}
+			}
+		}
+		return
+	}
+	// Cases where a is transposed.
+	if ul == blas.Upper {
+		for i := 0; i < m; i++ {
+			btmp := b[i*lda : i*lda+n]
+			for j := n - 1; j >= 0; j-- {
+				tmp := alpha * btmp[j]
+				for ka, va := range a[j*lda+j+1 : j*lda+n] {
+					k := ka + j + 1
+					tmp -= va * btmp[k]
+				}
+				if nonUnit {
+					tmp /= a[j*lda+j]
+				}
+				btmp[j] = tmp
+			}
+		}
+		return
+	}
+	for i := 0; i < m; i++ {
+		btmp := b[i*lda : i*lda+n]
+		for j := 0; j < n; j++ {
+			tmp := alpha * btmp[j]
+			for k, v := range a[j*lda : j*lda+j] {
+				tmp -= v * btmp[k]
+			}
+			if nonUnit {
+				tmp /= a[j*lda+j]
+			}
+			btmp[j] = tmp
 		}
 	}
 }

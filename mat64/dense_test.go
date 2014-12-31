@@ -14,49 +14,14 @@ import (
 	"gopkg.in/check.v1"
 )
 
-// test classes for checking some of dense's code paths
-type denseAt struct {
-	d *Dense
-}
-
-func (m *denseAt) Dims() (int, int) {
-	return m.d.Dims()
-}
-
-func (m *denseAt) At(r, c int) float64 {
-	return m.d.At(r, c)
-}
-
-type denseVector struct {
-	d *Dense
-}
-
-func (m *denseVector) Dims() (int, int) {
-	return m.d.Dims()
-}
-
-func (m *denseVector) At(r, c int) float64 {
-	return m.d.At(r, c)
-}
-
-func (m *denseVector) Row(dst []float64, i int) []float64 {
-	return m.d.Row(dst, i)
-}
-
-func (m *denseVector) Col(dst []float64, j int) []float64 {
-	return m.d.Col(dst, j)
-}
-
-type denseConverter func(d *Dense) Matrix
-
-func toDense(d *Dense) Matrix {
+func asDense(d *Dense) Matrix {
 	return d
 }
-func toDenseAt(d *Dense) Matrix {
-	return &denseAt{d: d}
+func asBasicMatrix(d *Dense) Matrix {
+	return (*basicMatrix)(d)
 }
-func toDenseVector(d *Dense) Matrix {
-	return &denseVector{d: d}
+func asBasicVectorer(d *Dense) Matrix {
+	return (*basicVectorer)(d)
 }
 
 func (s *S) TestNewDense(c *check.C) {
@@ -570,7 +535,7 @@ func (s *S) TestMulGen(c *check.C) {
 			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
 		},
 	} {
-		for _, matInterface := range []denseConverter{toDense, toDenseAt, toDenseVector} {
+		for _, matInterface := range []func(d *Dense) Matrix{asDense, asBasicMatrix, asBasicVectorer} {
 			a := matInterface(NewDense(flatten(test.a)))
 			b := matInterface(NewDense(flatten(test.b)))
 			for _, aTrans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {

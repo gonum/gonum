@@ -95,5 +95,5 @@ are preferred on the [gonum-dev Google Group](https://groups.google.com/forum/#!
 
 ## License
 
-Please see [github.com/gonum/license](github.com/gonum/license) for general
+Please see [github.com/gonum/license](https://github.com/gonum/license) for general
 license information, contributors, authors, etc on the Gonum suite of packages.

@@ -506,7 +506,7 @@ func (s *S) TestMul(c *check.C) {
 	}
 }
 
-func (s *S) TestMulGen(c *check.C) {
+func (s *S) TestMulTrans(c *check.C) {
 	for i, test := range []struct {
 		a, b [][]float64
 	}{
@@ -559,18 +559,18 @@ func (s *S) TestMulGen(c *check.C) {
 					if ac != br {
 						// check that both calls error and that the same error returns
 						c.Check(func() { temp.Mul(matInterface(&aCopy), matInterface(&bCopy)) }, check.PanicMatches, string(ErrShape), check.Commentf("Test Mul %d", i))
-						c.Check(func() { temp.MulGen(a, aTrans, b, bTrans) }, check.PanicMatches, string(ErrShape), check.Commentf("Test MulGen %d", i))
+						c.Check(func() { temp.MulTrans(a, aTrans, b, bTrans) }, check.PanicMatches, string(ErrShape), check.Commentf("Test MulTrans %d", i))
 						continue
 					}
 
 					r.Mul(matInterface(&aCopy), matInterface(&bCopy))
 
-					temp.MulGen(a, aTrans, b, bTrans)
+					temp.MulTrans(a, aTrans, b, bTrans)
 					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
 						i, test.a, test.b, r, temp))
 
 					zero(temp.mat.Data)
-					temp.MulGen(a, aTrans, b, bTrans)
+					temp.MulTrans(a, aTrans, b, bTrans)
 					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v sub %v expect %v got %v",
 						i, test.a, test.b, r, temp))
 				}

@@ -434,7 +434,7 @@ func (m *Dense) Mul(a, b Matrix) {
 	*m = w
 }
 
-func (m *Dense) MulGen(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.Transpose) {
+func (m *Dense) MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.Transpose) {
 	ar, ac := a.Dims()
 	if aTrans != blas.NoTrans {
 		ar, ac = ac, ar

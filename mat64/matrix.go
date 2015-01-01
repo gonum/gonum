@@ -10,10 +10,6 @@
 // If the matrix dimensions do not match the result, the method must panic.
 package mat64
 
-import (
-	"github.com/gonum/blas"
-)
-
 // Matrix is the basic matrix interface type.
 type Matrix interface {
 	// Dims returns the dimensions of a Matrix.
@@ -199,11 +195,11 @@ type Muler interface {
 
 // A MulTranser can determine the matrix product of a and b, optionally taking the transpose
 // of either a, b, or both, placing the result in the receiver.  It performs OpA(a) * OpB(b),
-// where OpA is transpose(a) when aTrans == blas.Trans, conjugate(a) when aTrans == blas.ConjTrans,
-// and does nothing when aTrans == blas.NoTrans.  The same logic applies to OpB.  If the number of
-// columns in OpA(a) does not equal the number of rows in OpB(b), MulTrans will panic.
+// where OpA is transpose(a) when aTrans is true, and does nothing when aTrans == blas.NoTrans.
+// The same logic applies to OpB.  If the number of columns in OpA(a) does not equal the
+// number of rows in OpB(b), MulTrans will panic.
 type MulTranser interface {
-	MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.Transpose)
+	MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool)
 }
 
 // An Exper can perform a matrix exponentiation of the square matrix a. Exp will panic with ErrShape

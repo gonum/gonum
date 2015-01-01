@@ -31,7 +31,11 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#include "textflag.h"
+// TODO(fhs): use textflag.h after we drop Go 1.3 support
+//#include "textflag.h"
+// Don't insert stack check preamble.
+#define NOSPLIT	4
+
 
 // func ddotUnitary(x, y []float64) (sum float64)
 // This function assumes len(y) >= len(x).

@@ -21,6 +21,7 @@ const (
 	negativeN = "blas: negative number of elements"
 	zeroInc   = "blas: zero value of increment"
 	negInc    = "blas: negative value of increment"
+	badLen    = "blas: bad slice length"
 )
 
 /*
@@ -44,13 +45,11 @@ func (Blas) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
 	if incX == 0 || incY == 0 {
 		panic(zeroInc)
 	}
-	var sum float64
 	if incX == 1 && incY == 1 {
-		x = x[:n]
-		for i, v := range x {
-			sum += y[i] * v
+		if len(x) < n || len(y) < n {
+			panic(badLen)
 		}
-		return sum
+		return ddotUnitary(x[:n], y)
 	}
 	var ix, iy int
 	if incX < 0 {
@@ -59,12 +58,10 @@ func (Blas) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
 	if incY < 0 {
 		iy = (-n + 1) * incY
 	}
-	for i := 0; i < n; i++ {
-		sum += y[iy] * x[ix]
-		ix += incX
-		iy += incY
+	if ix >= len(x) || iy >= len(y) || ix+(n-1)*incX >= len(x) || iy+(n-1)*incY >= len(y) {
+		panic(badLen)
 	}
-	return sum
+	return ddotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
 
 // Dnrm2 computes the euclidean norm of a vector, sqrt(x'x).

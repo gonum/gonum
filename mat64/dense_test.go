@@ -5,12 +5,11 @@
 package mat64
 
 import (
-	"github.com/gonum/floats"
 	"math"
-
 	"math/rand"
 	"testing"
 
+	"github.com/gonum/floats"
 	"gopkg.in/check.v1"
 )
 
@@ -492,7 +491,7 @@ func (s *S) TestMul(c *check.C) {
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
-		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "cblas: index of c out of range", check.Commentf("Test %d"))
+		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "general: insufficient length", check.Commentf("Test %d"))
 	}
 }
 

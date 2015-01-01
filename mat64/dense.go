@@ -4,9 +4,13 @@
 
 package mat64
 
-import "github.com/gonum/blas"
+import (
+	"github.com/gonum/blas"
+	"github.com/gonum/blas/goblas"
+)
 
-var blasEngine blas.Float64
+// Set the default BLAS implementation.
+var blasEngine blas.Float64 = goblas.Blas{}
 
 func Register(b blas.Float64) { blasEngine = b }
 

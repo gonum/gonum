@@ -1,3 +1,7 @@
+// Copyright ©2015 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package mat64
 
 import (
@@ -5,13 +9,8 @@ import (
 	"testing"
 
 	"github.com/gonum/blas"
-	"github.com/gonum/blas/cblas"
 	"github.com/gonum/floats"
 )
-
-func init() {
-	Register(cblas.Blas{})
-}
 
 // TODO: Need to add tests where one is overwritten.
 func TestMul(t *testing.T) {

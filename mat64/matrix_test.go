@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gonum/blas/cblas"
-
 	"gopkg.in/check.v1"
 )
 
@@ -38,8 +36,6 @@ func panics(fn func()) (panicked bool, message string) {
 	fn()
 	return
 }
-
-func (s *S) SetUpSuite(c *check.C) { blasEngine = cblas.Blas{} }
 
 func flatten(f [][]float64) (r, c int, d []float64) {
 	for _, r := range f {

@@ -4,11 +4,20 @@
 
 package mat64
 
-import "github.com/gonum/blas"
+import (
+	"github.com/gonum/blas"
+	"github.com/gonum/blas/goblas"
+)
 
-var blasEngine blas.Float64
+// Set the default BLAS implementation.
+var blasEngine blas.Float64 = goblas.Blas{}
 
-func Register(b blas.Float64) { blasEngine = b }
+func Register(b blas.Float64) {
+	if b == nil {
+		panic("mat64: cannot register nil blas.Float64")
+	}
+	blasEngine = b
+}
 
 func Registered() blas.Float64 { return blasEngine }
 
@@ -100,9 +109,6 @@ func (m *Dense) Col(dst []float64, j int) []float64 {
 		dst = make([]float64, m.mat.Rows)
 	}
 	dst = dst[:min(len(dst), m.mat.Rows)]
-	if blasEngine == nil {
-		panic(ErrNoEngine)
-	}
 	blasEngine.Dcopy(len(dst), m.mat.Data[j:], m.mat.Stride, dst, 1)
 
 	return dst
@@ -113,9 +119,6 @@ func (m *Dense) SetCol(j int, src []float64) int {
 		panic(ErrIndexOutOfRange)
 	}
 
-	if blasEngine == nil {
-		panic(ErrNoEngine)
-	}
 	blasEngine.Dcopy(min(len(src), m.mat.Rows), src, 1, m.mat.Data[j:], m.mat.Stride)
 
 	return min(len(src), m.mat.Rows)

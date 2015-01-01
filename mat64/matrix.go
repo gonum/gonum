@@ -397,7 +397,6 @@ const (
 	ErrShape           = Error("mat64: dimension mismatch")
 	ErrIllegalStride   = Error("mat64: illegal stride")
 	ErrPivot           = Error("mat64: malformed pivot list")
-	ErrNoEngine        = Error("mat64: no blas engine registered: call Register()")
 )
 
 func min(a, b int) int {

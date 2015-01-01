@@ -5,11 +5,11 @@
 package mat64
 
 import (
-	"github.com/gonum/floats"
 	"math"
 	"math/rand"
 	"testing"
 
+	"github.com/gonum/floats"
 	"gopkg.in/check.v1"
 )
 
@@ -501,7 +501,7 @@ func (s *S) TestMul(c *check.C) {
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
-		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "cblas: index of c out of range", check.Commentf("Test %d"))
+		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "general: insufficient length", check.Commentf("Test %d"))
 	}
 }
 
@@ -687,6 +687,9 @@ func (s *S) TestPow(c *check.C) {
 					d[i] = math.NaN()
 				}
 				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+				for i := 0; i < a.mat.Rows; i++ {
+					zero(a.mat.Data[i*a.mat.Stride : i*a.mat.Stride+a.mat.Cols])
+				}
 			},
 		},
 		{
@@ -704,6 +707,9 @@ func (s *S) TestPow(c *check.C) {
 					d[i] = math.NaN()
 				}
 				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+				for i := 0; i < a.mat.Rows; i++ {
+					zero(a.mat.Data[i*a.mat.Stride : i*a.mat.Stride+a.mat.Cols])
+				}
 			},
 		},
 	} {

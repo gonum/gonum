@@ -385,9 +385,6 @@ func (m *Dense) Mul(a, b Matrix) {
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
 			amat, bmat := a.RawMatrix(), b.RawMatrix()
-			if blasEngine == nil {
-				panic(ErrNoEngine)
-			}
 			blasEngine.Dgemm(
 				blas.NoTrans, blas.NoTrans,
 				ar, bc, ac,
@@ -405,9 +402,6 @@ func (m *Dense) Mul(a, b Matrix) {
 		if b, ok := b.(Vectorer); ok {
 			row := make([]float64, ac)
 			col := make([]float64, br)
-			if blasEngine == nil {
-				panic(ErrNoEngine)
-			}
 			for r := 0; r < ar; r++ {
 				for c := 0; c < bc; c++ {
 					w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
@@ -482,9 +476,6 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 			}
 
 			amat, bmat := a.RawMatrix(), b.RawMatrix()
-			if blasEngine == nil {
-				panic(ErrNoEngine)
-			}
 			blasEngine.Dgemm(
 				aOp, bOp,
 				ar, bc, ac,
@@ -502,9 +493,6 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 		if b, ok := b.(Vectorer); ok {
 			row := make([]float64, ac)
 			col := make([]float64, br)
-			if blasEngine == nil {
-				panic(ErrNoEngine)
-			}
 			if aTrans {
 				if bTrans {
 					for r := 0; r < ar; r++ {

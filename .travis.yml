@@ -5,6 +5,7 @@ language: go
 go:
  - release
  - tip
+ - 1.3.3
 
 env:
   global:

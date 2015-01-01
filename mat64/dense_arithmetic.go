@@ -434,14 +434,14 @@ func (m *Dense) Mul(a, b Matrix) {
 	*m = w
 }
 
-func (m *Dense) MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.Transpose) {
+func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 	ar, ac := a.Dims()
-	if aTrans != blas.NoTrans {
+	if aTrans {
 		ar, ac = ac, ar
 	}
 
 	br, bc := b.Dims()
-	if bTrans != blas.NoTrans {
+	if bTrans {
 		br, bc = bc, br
 	}
 
@@ -469,12 +469,24 @@ func (m *Dense) MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
+			var aOp, bOp blas.Transpose
+			if aTrans {
+				aOp = blas.Trans
+			} else {
+				aOp = blas.NoTrans
+			}
+			if bTrans {
+				bOp = blas.Trans
+			} else {
+				bOp = blas.NoTrans
+			}
+
 			amat, bmat := a.RawMatrix(), b.RawMatrix()
 			if blasEngine == nil {
 				panic(ErrNoEngine)
 			}
 			blasEngine.Dgemm(
-				aTrans, bTrans,
+				aOp, bOp,
 				ar, bc, ac,
 				1.,
 				amat.Data, amat.Stride,
@@ -493,8 +505,8 @@ func (m *Dense) MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.
 			if blasEngine == nil {
 				panic(ErrNoEngine)
 			}
-			if aTrans != blas.NoTrans {
-				if bTrans != blas.NoTrans {
+			if aTrans {
+				if bTrans {
 					for r := 0; r < ar; r++ {
 						for c := 0; c < bc; c++ {
 							w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Row(col, c), 1)
@@ -512,7 +524,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.
 				*m = w
 				return
 			}
-			if bTrans != blas.NoTrans {
+			if bTrans {
 				for r := 0; r < ar; r++ {
 					for c := 0; c < bc; c++ {
 						w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Row(col, c), 1)
@@ -532,8 +544,8 @@ func (m *Dense) MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.
 	}
 
 	row := make([]float64, ac)
-	if aTrans != blas.NoTrans {
-		if bTrans != blas.NoTrans {
+	if aTrans {
+		if bTrans {
 			for r := 0; r < ar; r++ {
 				for i := range row {
 					row[i] = a.At(i, r)
@@ -565,7 +577,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans blas.Transpose, b Matrix, bTrans blas.
 		*m = w
 		return
 	}
-	if bTrans != blas.NoTrans {
+	if bTrans {
 		for r := 0; r < ar; r++ {
 			for i := range row {
 				row[i] = a.At(r, i)

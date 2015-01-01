@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
 	"gopkg.in/check.v1"
 )
 
@@ -538,16 +537,16 @@ func (s *S) TestMulTrans(c *check.C) {
 		for _, matInterface := range []func(d *Dense) Matrix{asDense, asBasicMatrix, asBasicVectorer} {
 			a := matInterface(NewDense(flatten(test.a)))
 			b := matInterface(NewDense(flatten(test.b)))
-			for _, aTrans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
-				for _, bTrans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
+			for _, aTrans := range []bool{false, true} {
+				for _, bTrans := range []bool{false, true} {
 					r := NewDense(0, 0, nil)
 					var aCopy, bCopy Dense
-					if aTrans != blas.NoTrans {
+					if aTrans {
 						aCopy.TCopy(NewDense(flatten(test.a)))
 					} else {
 						aCopy = *NewDense(flatten(test.a))
 					}
-					if bTrans != blas.NoTrans {
+					if bTrans {
 						bCopy.TCopy(NewDense(flatten(test.b)))
 					} else {
 						bCopy = *NewDense(flatten(test.b))

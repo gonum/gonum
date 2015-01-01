@@ -528,6 +528,9 @@ func (m *Dense) Pow(a Matrix, n int) {
 		m.Copy(a)
 		return
 	case 2:
+		for i := 0; i < r; i++ {
+			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
+		}
 		m.Mul(a, a)
 		return
 	}

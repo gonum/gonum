@@ -434,6 +434,188 @@ func (m *Dense) Mul(a, b Matrix) {
 	*m = w
 }
 
+func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
+	ar, ac := a.Dims()
+	if aTrans {
+		ar, ac = ac, ar
+	}
+
+	br, bc := b.Dims()
+	if bTrans {
+		br, bc = bc, br
+	}
+
+	if ac != br {
+		panic(ErrShape)
+	}
+
+	var w Dense
+	if m != a && m != b {
+		w = *m
+	}
+	if w.isZero() {
+		w.mat = RawMatrix{
+			Rows:   ar,
+			Cols:   bc,
+			Stride: bc,
+			Data:   use(w.mat.Data, ar*bc),
+		}
+	} else if ar != w.mat.Rows || bc != w.mat.Cols {
+		panic(ErrShape)
+	}
+
+	//TODO(jonlawlor): if we are performing a * a' or a' * a, then make a call to
+	// blas.Dsyrk instead of blas.Dgemm.
+
+	if a, ok := a.(RawMatrixer); ok {
+		if b, ok := b.(RawMatrixer); ok {
+			var aOp, bOp blas.Transpose
+			if aTrans {
+				aOp = blas.Trans
+			} else {
+				aOp = blas.NoTrans
+			}
+			if bTrans {
+				bOp = blas.Trans
+			} else {
+				bOp = blas.NoTrans
+			}
+
+			amat, bmat := a.RawMatrix(), b.RawMatrix()
+			if blasEngine == nil {
+				panic(ErrNoEngine)
+			}
+			blasEngine.Dgemm(
+				aOp, bOp,
+				ar, bc, ac,
+				1.,
+				amat.Data, amat.Stride,
+				bmat.Data, bmat.Stride,
+				0.,
+				w.mat.Data, w.mat.Stride)
+			*m = w
+			return
+		}
+	}
+
+	if a, ok := a.(Vectorer); ok {
+		if b, ok := b.(Vectorer); ok {
+			row := make([]float64, ac)
+			col := make([]float64, br)
+			if blasEngine == nil {
+				panic(ErrNoEngine)
+			}
+			if aTrans {
+				if bTrans {
+					for r := 0; r < ar; r++ {
+						dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+						for c := 0; c < bc; c++ {
+							dataTmp[c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Row(col, c), 1)
+						}
+					}
+					*m = w
+					return
+				}
+				// TODO(jonlawlor): determine if (b*a)' is more efficient
+				for r := 0; r < ar; r++ {
+					dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+					for c := 0; c < bc; c++ {
+						dataTmp[c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Col(col, c), 1)
+					}
+				}
+				*m = w
+				return
+			}
+			if bTrans {
+				for r := 0; r < ar; r++ {
+					dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+					for c := 0; c < bc; c++ {
+						dataTmp[c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Row(col, c), 1)
+					}
+				}
+				*m = w
+				return
+			}
+			for r := 0; r < ar; r++ {
+				dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+				for c := 0; c < bc; c++ {
+					dataTmp[c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
+				}
+			}
+			*m = w
+			return
+		}
+	}
+
+	row := make([]float64, ac)
+	if aTrans {
+		if bTrans {
+			for r := 0; r < ar; r++ {
+				dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+				for i := range row {
+					row[i] = a.At(i, r)
+				}
+				for c := 0; c < bc; c++ {
+					var v float64
+					for i, e := range row {
+						v += e * b.At(c, i)
+					}
+					dataTmp[c] = v
+				}
+			}
+			*m = w
+			return
+		}
+
+		for r := 0; r < ar; r++ {
+			dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+			for i := range row {
+				row[i] = a.At(i, r)
+			}
+			for c := 0; c < bc; c++ {
+				var v float64
+				for i, e := range row {
+					v += e * b.At(i, c)
+				}
+				dataTmp[c] = v
+			}
+		}
+		*m = w
+		return
+	}
+	if bTrans {
+		for r := 0; r < ar; r++ {
+			dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+			for i := range row {
+				row[i] = a.At(r, i)
+			}
+			for c := 0; c < bc; c++ {
+				var v float64
+				for i, e := range row {
+					v += e * b.At(c, i)
+				}
+				dataTmp[c] = v
+			}
+		}
+		*m = w
+		return
+	}
+	for r := 0; r < ar; r++ {
+		dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+		for i := range row {
+			row[i] = a.At(r, i)
+		}
+		for c := 0; c < bc; c++ {
+			var v float64
+			for i, e := range row {
+				v += e * b.At(i, c)
+			}
+			dataTmp[c] = v
+		}
+	}
+	*m = w
+}
+
 // Exp uses the scaling and squaring method described in section 3 of
 // http://www.cs.cornell.edu/cv/researchpdf/19ways+.pdf.
 func (m *Dense) Exp(a Matrix) {

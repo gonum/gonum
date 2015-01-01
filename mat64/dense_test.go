@@ -7,12 +7,21 @@ package mat64
 import (
 	"github.com/gonum/floats"
 	"math"
-
 	"math/rand"
 	"testing"
 
 	"gopkg.in/check.v1"
 )
+
+func asDense(d *Dense) Matrix {
+	return d
+}
+func asBasicMatrix(d *Dense) Matrix {
+	return (*basicMatrix)(d)
+}
+func asBasicVectorer(d *Dense) Matrix {
+	return (*basicVectorer)(d)
+}
 
 func (s *S) TestNewDense(c *check.C) {
 	for i, test := range []struct {
@@ -493,6 +502,79 @@ func (s *S) TestMul(c *check.C) {
 		// These probably warrant a better check and failure. They should never happen in the wild though.
 		temp.mat.Data = nil
 		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "cblas: index of c out of range", check.Commentf("Test %d"))
+	}
+}
+
+func (s *S) TestMulTrans(c *check.C) {
+	for i, test := range []struct {
+		a, b [][]float64
+	}{
+		{
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+		},
+		{
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+		},
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+		},
+		{
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+		},
+		{
+			[][]float64{{1, 2, 3}, {4, 5, 6}},
+			[][]float64{{1, 2}, {3, 4}, {5, 6}},
+		},
+		{
+			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
+			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
+		},
+	} {
+		for _, matInterface := range []func(d *Dense) Matrix{asDense, asBasicMatrix, asBasicVectorer} {
+			a := matInterface(NewDense(flatten(test.a)))
+			b := matInterface(NewDense(flatten(test.b)))
+			for _, aTrans := range []bool{false, true} {
+				for _, bTrans := range []bool{false, true} {
+					r := NewDense(0, 0, nil)
+					var aCopy, bCopy Dense
+					if aTrans {
+						aCopy.TCopy(NewDense(flatten(test.a)))
+					} else {
+						aCopy = *NewDense(flatten(test.a))
+					}
+					if bTrans {
+						bCopy.TCopy(NewDense(flatten(test.b)))
+					} else {
+						bCopy = *NewDense(flatten(test.b))
+					}
+					var temp Dense
+
+					_, ac := aCopy.Dims()
+					br, _ := bCopy.Dims()
+					if ac != br {
+						// check that both calls error and that the same error returns
+						c.Check(func() { temp.Mul(matInterface(&aCopy), matInterface(&bCopy)) }, check.PanicMatches, string(ErrShape), check.Commentf("Test Mul %d", i))
+						c.Check(func() { temp.MulTrans(a, aTrans, b, bTrans) }, check.PanicMatches, string(ErrShape), check.Commentf("Test MulTrans %d", i))
+						continue
+					}
+
+					r.Mul(matInterface(&aCopy), matInterface(&bCopy))
+
+					temp.MulTrans(a, aTrans, b, bTrans)
+					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v add %v expect %v got %v",
+						i, test.a, test.b, r, temp))
+
+					zero(temp.mat.Data)
+					temp.MulTrans(a, aTrans, b, bTrans)
+					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v sub %v expect %v got %v",
+						i, test.a, test.b, r, temp))
+				}
+			}
+		}
 	}
 }
 

@@ -103,22 +103,22 @@ func (Blas) Srotmg(d1 float32, d2 float32, b1 float32, b2 float32) (p blas.Srotm
 }
 func (Blas) Srotm(n int, x []float32, incX int, y []float32, incY int, p blas.SrotmParams) {
 	if n < 0 {
-		panic("cblas: n < 0")
+		panic("blas: n < 0")
 	}
 	if incX == 0 {
-		panic("cblas: zero x index increment")
+		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
-		panic("cblas: zero y index increment")
+		panic("blas: zero y index increment")
 	}
 	if (n-1)*incX >= len(x) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if (n-1)*incY >= len(y) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
-		panic("cblas: illegal blas.Flag value")
+		panic("blas: illegal blas.Flag value")
 	}
 	pi := srotmParams{
 		flag: float32(p.Flag),
@@ -137,22 +137,22 @@ func (Blas) Drotmg(d1 float64, d2 float64, b1 float64, b2 float64) (p blas.Drotm
 }
 func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
 	if n < 0 {
-		panic("cblas: n < 0")
+		panic("blas: n < 0")
 	}
 	if incX == 0 {
-		panic("cblas: zero x index increment")
+		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
-		panic("cblas: zero y index increment")
+		panic("blas: zero y index increment")
 	}
 	if (n-1)*incX >= len(x) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if (n-1)*incY >= len(y) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
-		panic("cblas: illegal blas.Flag value")
+		panic("blas: illegal blas.Flag value")
 	}
 	pi := drotmParams{
 		flag: float64(p.Flag),
@@ -162,76 +162,76 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 }
 func (Blas) Cdotu(n int, x []complex64, incX int, y []complex64, incY int) (dotu complex64) {
 	if n < 0 {
-		panic("cblas: n < 0")
+		panic("blas: n < 0")
 	}
 	if incX == 0 {
-		panic("cblas: zero x index increment")
+		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
-		panic("cblas: zero y index increment")
+		panic("blas: zero y index increment")
 	}
 	if (n-1)*incX >= len(x) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if (n-1)*incY >= len(y) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	C.cblas_cdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
 	return dotu
 }
 func (Blas) Cdotc(n int, x []complex64, incX int, y []complex64, incY int) (dotc complex64) {
 	if n < 0 {
-		panic("cblas: n < 0")
+		panic("blas: n < 0")
 	}
 	if incX == 0 {
-		panic("cblas: zero x index increment")
+		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
-		panic("cblas: zero y index increment")
+		panic("blas: zero y index increment")
 	}
 	if (n-1)*incX >= len(x) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if (n-1)*incY >= len(y) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	C.cblas_cdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
 	return dotc
 }
 func (Blas) Zdotu(n int, x []complex128, incX int, y []complex128, incY int) (dotu complex128) {
 	if n < 0 {
-		panic("cblas: n < 0")
+		panic("blas: n < 0")
 	}
 	if incX == 0 {
-		panic("cblas: zero x index increment")
+		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
-		panic("cblas: zero y index increment")
+		panic("blas: zero y index increment")
 	}
 	if (n-1)*incX >= len(x) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if (n-1)*incY >= len(y) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	C.cblas_zdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
 	return dotu
 }
 func (Blas) Zdotc(n int, x []complex128, incX int, y []complex128, incY int) (dotc complex128) {
 	if n < 0 {
-		panic("cblas: n < 0")
+		panic("blas: n < 0")
 	}
 	if incX == 0 {
-		panic("cblas: zero x index increment")
+		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
-		panic("cblas: zero y index increment")
+		panic("blas: zero y index increment")
 	}
 	if (n-1)*incX >= len(x) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	if (n-1)*incY >= len(y) {
-		panic("cblas: index out of range")
+		panic("blas: index out of range")
 	}
 	C.cblas_zdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
 	return dotc
@@ -435,66 +435,66 @@ sub processParamToChecks {
 				$var =~ s/trans([AB]?)/t$1/;
 				$scalarArgs{$var} = 1;
 				if ($func =~ m/cblas_[cz]h/) {
-					push @processed, "if $var != blas.NoTrans && $var != blas.ConjTrans { panic(\"cblas: illegal transpose\") }"; next;
+					push @processed, "if $var != blas.NoTrans && $var != blas.ConjTrans { panic(\"blas: illegal transpose\") }"; next;
 				} elsif ($func =~ m/cblas_[cz]s/) {
-					push @processed, "if $var != blas.NoTrans && $var != blas.Trans { panic(\"cblas: illegal transpose\") }"; next;
+					push @processed, "if $var != blas.NoTrans && $var != blas.Trans { panic(\"blas: illegal transpose\") }"; next;
 				} else {
-					push @processed, "if $var != blas.NoTrans && $var != blas.Trans && $var != blas.ConjTrans { panic(\"cblas: illegal transpose\") }"; next;
+					push @processed, "if $var != blas.NoTrans && $var != blas.Trans && $var != blas.ConjTrans { panic(\"blas: illegal transpose\") }"; next;
 				}
 			};
 			$var eq "uplo" && do {
-				push @processed, "if ul != blas.Upper && ul != blas.Lower { panic(\"cblas: illegal triangle\") }"; next;
+				push @processed, "if ul != blas.Upper && ul != blas.Lower { panic(\"blas: illegal triangle\") }"; next;
 			};
 			$var eq "diag" && do {
-				push @processed, "if d != blas.NonUnit && d != blas.Unit { panic(\"cblas: illegal diagonal\") }"; next;
+				push @processed, "if d != blas.NonUnit && d != blas.Unit { panic(\"blas: illegal diagonal\") }"; next;
 			};
 			$var eq "side" && do {
 				$scalarArgs{'s'} = 1;
-				push @processed, "if s != blas.Left && s != blas.Right { panic(\"cblas: illegal side\") }"; next;
+				push @processed, "if s != blas.Left && s != blas.Right { panic(\"blas: illegal side\") }"; next;
 			};
 		};
 	}
 
 	# shape checks
 	foreach my $ref ('m', 'n', 'k', 'kL', 'kU') {
-		push @processed, "if $ref < 0 { panic(\"cblas: $ref < 0\") }" if $scalarArgs{$ref};
+		push @processed, "if $ref < 0 { panic(\"blas: $ref < 0\") }" if $scalarArgs{$ref};
 	}
 
 	if ($arrayArgs{'ap'}) {
-		push @processed, "if n*(n + 1)/2 > len(ap) { panic(\"cblas: index of ap out of range\") }"
+		push @processed, "if n*(n + 1)/2 > len(ap) { panic(\"blas: index of ap out of range\") }"
 	}
 
-	push @processed, "if incX == 0 { panic(\"cblas: zero x index increment\") }" if $scalarArgs{'incX'};
-	push @processed, "if incY == 0 { panic(\"cblas: zero y index increment\") }" if $scalarArgs{'incY'};
+	push @processed, "if incX == 0 { panic(\"blas: zero x index increment\") }" if $scalarArgs{'incX'};
+	push @processed, "if incY == 0 { panic(\"blas: zero y index increment\") }" if $scalarArgs{'incY'};
 	if ($func =~ m/cblas_[sdcz]g[eb]mv/) {
 		push @processed, "var lenX, lenY int";
 		push @processed, "if tA == blas.NoTrans { lenX, lenY = n, m } else { lenX, lenY = m, n }";
-		push @processed, "if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) { panic(\"cblas: x index out of range\") }";
-		push @processed, "if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) { panic(\"cblas: y index out of range\") }";
+		push @processed, "if (incX > 0 && (lenX-1)*incX >= len(x)) || (incX < 0 && (1-lenX)*incX >= len(x)) { panic(\"blas: x index out of range\") }";
+		push @processed, "if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) { panic(\"blas: y index out of range\") }";
 	} elsif ($scalarArgs{'m'}) {
-		push @processed, "if (incX > 0 && (m-1)*incX >= len(x)) || (incX < 0 && (1-m)*incX >= len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if (incX > 0 && (m-1)*incX >= len(x)) || (incX < 0 && (1-m)*incX >= len(x)) { panic(\"blas: x index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"blas: y index out of range\") }" if $scalarArgs{'incY'};
 	} elsif ($func =~ m/cblas_[sdcz]s?scal/) {
 		push @processed, "if incX < 0 { return }";
-		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
+		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"blas: x index out of range\") }";
 	} elsif ($func =~ m/cblas_i[sdcz]amax/) {
 		push @processed, "if n == 0 || incX < 0 { return -1 }";
-		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
+		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"blas: x index out of range\") }";
 	} elsif ($func =~ m/cblas_[sdz][cz]?(?:asum|nrm2)/) {
 		push @processed, "if incX < 0 { return 0 }";
-		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"cblas: x index out of range\") }";
+		push @processed, "if incX > 0 && (n-1)*incX >= len(x) { panic(\"blas: x index out of range\") }";
 	} else {
-		push @processed, "if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) { panic(\"cblas: x index out of range\") }" if $scalarArgs{'incX'};
-		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"cblas: y index out of range\") }" if $scalarArgs{'incY'};
+		push @processed, "if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) { panic(\"blas: x index out of range\") }" if $scalarArgs{'incX'};
+		push @processed, "if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) { panic(\"blas: y index out of range\") }" if $scalarArgs{'incY'};
 	}
 
 	if ($arrayArgs{'a'} && $scalarArgs{'s'}) {
 		push @processed, "var k int";
 		push @processed, "if s == blas.Left { k = m } else { k = n }";
-		push @processed, "if lda*(k-1)+k > len(a) || lda < max(1, k) { panic(\"cblas: index of a out of range\") }";
-		push @processed, "if ldb*(m-1)+n > len(b) || ldb < max(1, n) { panic(\"cblas: index of b out of range\") }";
+		push @processed, "if lda*(k-1)+k > len(a) || lda < max(1, k) { panic(\"blas: index of a out of range\") }";
+		push @processed, "if ldb*(m-1)+n > len(b) || ldb < max(1, n) { panic(\"blas: index of b out of range\") }";
 		if ($arrayArgs{'c'}) {
-			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
+			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"blas: index of c out of range\") }";
 		}
 	}
 
@@ -502,15 +502,15 @@ sub processParamToChecks {
 		if ($arrayArgs{'a'} && !$scalarArgs{'s'}) {
 			if (($scalarArgs{'kL'} && $scalarArgs{'kU'}) || $scalarArgs{'m'}) {
 				if ($scalarArgs{'kL'} && $scalarArgs{'kU'}) {
-					push @processed, "if lda*(m-1)+kL+kU+1 > len(a) || lda < kL+kU+1 { panic(\"cblas: index of a out of range\") }";
+					push @processed, "if lda*(m-1)+kL+kU+1 > len(a) || lda < kL+kU+1 { panic(\"blas: index of a out of range\") }";
 				} else {
-					push @processed, "if lda*(m-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index of a out of range\") }";
+					push @processed, "if lda*(m-1)+n > len(a) || lda < max(1, n) { panic(\"blas: index of a out of range\") }";
 				}
 			} else {
 				if ($scalarArgs{'k'}) {
-					push @processed, "if lda*(n-1)+k+1 > len(a) || lda < k+1 { panic(\"cblas: index of a out of range\") }";
+					push @processed, "if lda*(n-1)+k+1 > len(a) || lda < k+1 { panic(\"blas: index of a out of range\") }";
 				} else {
-					push @processed, "if lda*(n-1)+n > len(a) || lda < max(1, n) { panic(\"cblas: index of a out of range\") }";
+					push @processed, "if lda*(n-1)+n > len(a) || lda < max(1, n) { panic(\"blas: index of a out of range\") }";
 				}
 			}
 		}
@@ -520,20 +520,20 @@ sub processParamToChecks {
 			push @processed, "if t == blas.NoTrans { row, col = n, k } else { row, col = k, n }";
 			foreach my $ref ('a', 'b') {
 				if ($arrayArgs{$ref}) {
-					push @processed, "if ld${ref}*(row-1)+col > len(${ref}) || ld${ref} < max(1, col) { panic(\"cblas: index of ${ref} out of range\") }";
+					push @processed, "if ld${ref}*(row-1)+col > len(${ref}) || ld${ref} < max(1, col) { panic(\"blas: index of ${ref} out of range\") }";
 				}
 			}
 			if ($arrayArgs{'c'}) {
-				push @processed, "if ldc*(n-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
+				push @processed, "if ldc*(n-1)+n > len(c) || ldc < max(1, n) { panic(\"blas: index of c out of range\") }";
 			}
 		}
 		if ($scalarArgs{'tA'} && $scalarArgs{'tB'}) {
 			push @processed, "var rowA, colA, rowB, colB int";
 			push @processed, "if tA == blas.NoTrans { rowA, colA = m, k } else { rowA, colA = k, m }";
 			push @processed, "if tB == blas.NoTrans { rowB, colB = k, n } else { rowB, colB = n, k }";
-			push @processed, "if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) { panic(\"cblas: index of a out of range\") }";
-			push @processed, "if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) { panic(\"cblas: index of b out of range\") }";
-			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"cblas: index of c out of range\") }";
+			push @processed, "if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) { panic(\"blas: index of a out of range\") }";
+			push @processed, "if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) { panic(\"blas: index of b out of range\") }";
+			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"blas: index of c out of range\") }";
 		}
 	}
 

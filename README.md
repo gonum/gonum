@@ -47,7 +47,7 @@ Defines [BLAS API](www.netlib.org/blas/blast-forum/cinterface.pdf) split in seve
 
 ### blas/goblas
 
-Go implementation of the BLAS API (incomplete, implements most of the float64 API)
+Go implementation of the BLAS API (incomplete, implements the float64 API)
 
 ### blas/cblas
 

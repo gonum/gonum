@@ -508,8 +508,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 			if aTrans {
 				if bTrans {
 					for r := 0; r < ar; r++ {
+						dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 						for c := 0; c < bc; c++ {
-							w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Row(col, c), 1)
+							dataTmp[c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Row(col, c), 1)
 						}
 					}
 					*m = w
@@ -517,8 +518,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				}
 				// TODO(jonlawlor): determine if (b*a)' is more efficient
 				for r := 0; r < ar; r++ {
+					dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 					for c := 0; c < bc; c++ {
-						w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Col(col, c), 1)
+						dataTmp[c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Col(col, c), 1)
 					}
 				}
 				*m = w
@@ -526,16 +528,18 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 			}
 			if bTrans {
 				for r := 0; r < ar; r++ {
+					dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 					for c := 0; c < bc; c++ {
-						w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Row(col, c), 1)
+						dataTmp[c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Row(col, c), 1)
 					}
 				}
 				*m = w
 				return
 			}
 			for r := 0; r < ar; r++ {
+				dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 				for c := 0; c < bc; c++ {
-					w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
+					dataTmp[c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
 				}
 			}
 			*m = w
@@ -547,6 +551,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 	if aTrans {
 		if bTrans {
 			for r := 0; r < ar; r++ {
+				dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 				for i := range row {
 					row[i] = a.At(i, r)
 				}
@@ -555,7 +560,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 					for i, e := range row {
 						v += e * b.At(c, i)
 					}
-					w.mat.Data[r*w.mat.Stride+c] = v
+					dataTmp[c] = v
 				}
 			}
 			*m = w
@@ -563,6 +568,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 		}
 
 		for r := 0; r < ar; r++ {
+			dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 			for i := range row {
 				row[i] = a.At(i, r)
 			}
@@ -571,7 +577,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				for i, e := range row {
 					v += e * b.At(i, c)
 				}
-				w.mat.Data[r*w.mat.Stride+c] = v
+				dataTmp[c] = v
 			}
 		}
 		*m = w
@@ -579,6 +585,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 	}
 	if bTrans {
 		for r := 0; r < ar; r++ {
+			dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 			for i := range row {
 				row[i] = a.At(r, i)
 			}
@@ -587,13 +594,14 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				for i, e := range row {
 					v += e * b.At(c, i)
 				}
-				w.mat.Data[r*w.mat.Stride+c] = v
+				dataTmp[c] = v
 			}
 		}
 		*m = w
 		return
 	}
 	for r := 0; r < ar; r++ {
+		dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 		for i := range row {
 			row[i] = a.At(r, i)
 		}
@@ -602,7 +610,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 			for i, e := range row {
 				v += e * b.At(i, c)
 			}
-			w.mat.Data[r*w.mat.Stride+c] = v
+			dataTmp[c] = v
 		}
 	}
 	*m = w

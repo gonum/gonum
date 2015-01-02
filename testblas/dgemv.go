@@ -30,7 +30,7 @@ type DgemvSubcase struct {
 	ans      []float64
 }
 
-var DgemvCases []DgemvCase = []DgemvCase{
+var DgemvCases = []DgemvCase{
 	{
 		Name: "M_gt_N_Inc1_NoTrans",
 		tA:   blas.NoTrans,

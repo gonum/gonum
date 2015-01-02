@@ -1084,7 +1084,7 @@ func (Blas) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []fl
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix represented in packed storage format.
-func (bl Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
+func (Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1928,7 +1928,7 @@ func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 	}
 }
 
-// Dsymv  performs the matrix-vector  operation
+// Dspmv performs the matrix-vector  operation
 //    y := alpha*A*x + beta*y,
 // where alpha and beta are scalars, x and y are n element vectors and
 // A is an n by n symmetric matrix in packed format.
@@ -2143,7 +2143,7 @@ func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []
 	}
 }
 
-// Dsyr2 performs the symmetric rank-2 update
+// Dspr2 performs the symmetric rank-2 update
 //  a += alpha * x * y^T + alpha * y * x^T
 // where a is in packed format.
 func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {

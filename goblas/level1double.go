@@ -287,7 +287,7 @@ func (Blas) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY
 	}
 }
 
-// DrotG gives plane rotation
+// Drotg gives plane rotation
 //
 // _      _    _   _     _   _
 // | c  s |    | a |     | r |

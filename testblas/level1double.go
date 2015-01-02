@@ -27,7 +27,7 @@ type DScalCase struct {
 	Name  string
 }
 
-var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
+var DoubleOneVectorCases = []DoubleOneVectorCase{
 	{
 		Name:   "AllPositive",
 		X:      []float64{6, 5, 4, 2, 6},
@@ -400,7 +400,7 @@ type DTwoVecAnswer struct {
 	Y []float64
 }
 
-var DoubleTwoVectorCases []DoubleTwoVectorCase = []DoubleTwoVectorCase{
+var DoubleTwoVectorCases = []DoubleTwoVectorCase{
 	{
 		Name:  "UnitaryInc",
 		X:     []float64{10, 15, -6, 3, 14, 7},
@@ -1216,7 +1216,7 @@ type DrotgTestStruct struct {
 	C, S, R, Z float64
 }
 
-var DrotgTests []DrotgTestStruct = []DrotgTestStruct{
+var DrotgTests = []DrotgTestStruct{
 	{
 		Name: "ZeroAB",
 		C:    1,
@@ -1352,7 +1352,7 @@ type DrotmgTestStruct struct {
 	Rd1, Rd2, Rx1  float64
 }
 
-var DrotmgTests []DrotmgTestStruct = []DrotmgTestStruct{
+var DrotmgTests = []DrotmgTestStruct{
 	{
 		Name: "NegD1",
 		P: &blas.DrotmParams{

@@ -117,21 +117,21 @@ const (
 	Diagonal                    // Diagonal elements of H are units.
 )
 
-// Type SrotmParams contains Givens transformation parameters returned
+// SrotmParams contains Givens transformation parameters returned
 // by the Float32 Srotm method.
 type SrotmParams struct {
 	Flag
 	H [4]float32 // Column-major 2 by 2 matrix.
 }
 
-// Type DrotmParams contains Givens transformation parameters returned
+// DrotmParams contains Givens transformation parameters returned
 // by the Float64 Drotm method.
 type DrotmParams struct {
 	Flag
 	H [4]float64 // Column-major 2 by 2 matrix.
 }
 
-// Type Transpose is used to specify the transposition operation for a
+// Transpose is used to specify the transposition operation for a
 // routine.
 type Transpose int
 
@@ -141,7 +141,7 @@ const (
 	ConjTrans
 )
 
-// Type Uplo is used to specify whether the matrix is an upper or lower
+// Uplo is used to specify whether the matrix is an upper or lower
 // triangular matrix.
 type Uplo int
 
@@ -151,7 +151,7 @@ const (
 	Lower
 )
 
-// Type Diag is used to specify whether the matrix is a unit or non-unit
+// Diag is used to specify whether the matrix is a unit or non-unit
 // triangular matrix.
 type Diag int
 
@@ -160,7 +160,7 @@ const (
 	Unit
 )
 
-// Type side is used to specify from which side a multiplication operation
+// Side is used to specify from which side a multiplication operation
 // is performed.
 type Side int
 

@@ -21,7 +21,7 @@ type DgemmCase struct {
 	ans         [][]float64
 }
 
-var DgemmCases []DgemmCase = []DgemmCase{
+var DgemmCases = []DgemmCase{
 
 	{
 		m:        4,

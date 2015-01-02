@@ -1,4 +1,4 @@
-# Gonum Graph [![Build Status](https://travis-ci.org/gonum/graph.png?branch=master)](https://travis-ci.org/gonum/graph)
+# Gonum Graph [![Build Status](https://travis-ci.org/gonum/graph.svg?branch=master)](https://travis-ci.org/gonum/graph) [![Coverage Status](https://img.shields.io/coveralls/gonum/graph.svg)](https://coveralls.io/r/gonum/graph?branch=master)
 
 This is a generalized graph package for the Go language. It aims to provide a clean, transparent API for common algorithms on arbitrary graphs such as finding the graph's strongly connected components, dominators, or searces.
 

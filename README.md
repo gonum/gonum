@@ -43,7 +43,7 @@ On OS X the easiest solution is to use the libraries provided by the system:
 
 ### blas
 
-Defines [BLAS API](www.netlib.org/blas/blast-forum/cinterface.pdf) split in several interfaces
+Defines [BLAS API](http://www.netlib.org/blas/blast-forum/cinterface.pdf) split in several interfaces
 
 ### blas/goblas
 

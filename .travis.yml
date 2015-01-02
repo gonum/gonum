@@ -17,10 +17,10 @@ before_install:
 
 script:
  - go get -d -t -v ./...
- - go build -v ./...
- - go test -v -covermode=count -coverprofile=coverage.out
+ - go build -x -v ./...
+ - go test -x -v ./...
  - diff <(gofmt -d .) <("")
- - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
+ - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash test-coverage.sh; fi
 
 after_failure: failure
 

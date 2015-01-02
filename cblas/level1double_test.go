@@ -1,8 +1,9 @@
 package cblas
 
 import (
-	"github.com/gonum/blas/testblas"
 	"testing"
+
+	"github.com/gonum/blas/testblas"
 )
 
 var blasser = Blas{}

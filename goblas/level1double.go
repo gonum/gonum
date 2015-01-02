@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package goblas is a Go implementation of the BLAS API.
+//
 // Uses the netlib standard. Other implementations may differ. Difference
 // is that the code panics for n < 0 and incx == 0 rather than returning zero.
 // (Documentation says incx must not be zero)

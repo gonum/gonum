@@ -11,6 +11,9 @@ import (
 const throwPanic = true
 
 func dTolEqual(a, b float64) bool {
+	if math.IsNaN(a) && math.IsNaN(b) {
+		return true
+	}
 	m := math.Max(math.Abs(a), math.Abs(b))
 	if m > 1 {
 		a /= m

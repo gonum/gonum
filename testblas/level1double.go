@@ -315,6 +315,46 @@ var DoubleOneVectorCases []DoubleOneVectorCase = []DoubleOneVectorCase{
 			},
 		},
 	},
+	{
+		Name:   "NaN",
+		X:      []float64{math.NaN(), 2.0},
+		Incx:   1,
+		N:      2,
+		Panic:  false,
+		Dasum:  math.NaN(),
+		Dnrm2:  math.NaN(),
+		Idamax: 0,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{math.NaN(), -4.0},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{0, 0},
+			},
+		},
+	},
+	{
+		Name:   "NaNInc",
+		X:      []float64{math.NaN(), math.NaN(), 2.0},
+		Incx:   2,
+		N:      2,
+		Panic:  false,
+		Dasum:  math.NaN(),
+		Dnrm2:  math.NaN(),
+		Idamax: 0,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{math.NaN(), math.NaN(), -4.0},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{0, math.NaN(), 0},
+			},
+		},
+	},
 }
 
 type DoubleTwoVectorCase struct {

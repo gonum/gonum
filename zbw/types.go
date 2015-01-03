@@ -152,7 +152,7 @@ func (v Vector) Slice(l, r int) Vector {
 		panic("blas: index out of range")
 	}
 	if r > l {
-		panic(fmt.Sprintf("blas: invalid slice index:", r, ">", l))
+		panic(fmt.Sprintf("blas: invalid slice index: %d > %d", r, l))
 	}
 	return Vector{v.Data[l*v.Inc:], r - l, v.Inc}
 }

@@ -7,7 +7,7 @@ func Gemv(tA blas.Transpose, alpha complex128, A General, x Vector, beta complex
 		if x.N != A.Cols || y.N != A.Rows {
 			panic("blas: dimension mismatch")
 		}
-	} else if tA == blas.ConjTrans || tA == blas.ConjTrans {
+	} else if tA == blas.Trans || tA == blas.ConjTrans {
 		if x.N != A.Rows || y.N != A.Cols {
 			panic("blas: dimension mismatch")
 		}
@@ -23,7 +23,7 @@ func Gbmv(tA blas.Transpose, alpha complex128, A GeneralBand, x Vector, beta com
 		if x.N != A.Cols || y.N != A.Rows {
 			panic("blas: dimension mismatch")
 		}
-	} else if tA == blas.ConjTrans {
+	} else if tA == blas.Trans || tA == blas.ConjTrans {
 		if x.N != A.Rows || y.N != A.Cols {
 			panic("blas: dimension mismatch")
 		}

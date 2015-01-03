@@ -1086,6 +1086,12 @@ func DdotTest(t *testing.T, d Ddotter) {
 			t.Errorf("ddot: mismatch %v: expected %v, found %v", c.Name, c.DdotAns, dot)
 		}
 	}
+
+	// check it works for 16-byte unaligned slices
+	x := []float64{1, 1, 1, 1, 1}
+	if n := ddot(4, x[:4], 1, x[1:], 1); n != 4 {
+		t.Errorf("ddot: mismatch Unaligned: expected %v, found %v", 4, n)
+	}
 }
 
 type Dnrm2er interface {

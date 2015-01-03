@@ -83,10 +83,19 @@ func (Blas) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64
 
 	// scale c
 	if beta != 1 {
-		for i := 0; i < m; i++ {
-			ctmp := cmat.data[i*cmat.stride : i*cmat.stride+cmat.cols]
-			for j := range ctmp {
-				ctmp[j] *= beta
+		if beta == 0 {
+			for i := 0; i < m; i++ {
+				ctmp := cmat.data[i*cmat.stride : i*cmat.stride+cmat.cols]
+				for j := range ctmp {
+					ctmp[j] = 0
+				}
+			}
+		} else {
+			for i := 0; i < m; i++ {
+				ctmp := cmat.data[i*cmat.stride : i*cmat.stride+cmat.cols]
+				for j := range ctmp {
+					ctmp[j] *= beta
+				}
 			}
 		}
 	}

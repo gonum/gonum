@@ -394,6 +394,24 @@ func (Blas) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []
 		}
 	}
 	if alpha == 0 {
+		if beta == 0 {
+			if ul == blas.Upper {
+				for i := 0; i < n; i++ {
+					ctmp := c[i*ldc+i : i*ldc+n]
+					for j := range ctmp {
+						ctmp[j] = 0
+					}
+				}
+				return
+			}
+			for i := 0; i < n; i++ {
+				ctmp := c[i*ldc : i*ldc+i+1]
+				for j := range ctmp {
+					ctmp[j] = 0
+				}
+			}
+			return
+		}
 		if ul == blas.Upper {
 			for i := 0; i < n; i++ {
 				ctmp := c[i*ldc+i : i*ldc+n]
@@ -511,6 +529,24 @@ func (Blas) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a [
 		}
 	}
 	if alpha == 0 {
+		if beta == 0 {
+			if ul == blas.Upper {
+				for i := 0; i < n; i++ {
+					ctmp := c[i*ldc+i : i*ldc+n]
+					for j := range ctmp {
+						ctmp[j] = 0
+					}
+				}
+				return
+			}
+			for i := 0; i < n; i++ {
+				ctmp := c[i*ldc : i*ldc+i+1]
+				for j := range ctmp {
+					ctmp[j] = 0
+				}
+			}
+			return
+		}
 		if ul == blas.Upper {
 			for i := 0; i < n; i++ {
 				ctmp := c[i*ldc+i : i*ldc+n]
@@ -648,6 +684,7 @@ func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, 
 				btmp[j] = 0
 			}
 		}
+		return
 	}
 
 	nonUnit := d == blas.NonUnit

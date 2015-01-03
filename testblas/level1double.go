@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package testblas tests a blas implementation.
+// Package testblas provides tests for blas implementions.
 package testblas
 
 import (

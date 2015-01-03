@@ -1683,6 +1683,10 @@ func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 	if incY == 0 {
 		panic(zeroInc)
 	}
+	if alpha == 0 {
+		return
+	}
+
 	var ky, kx int
 	if incY > 0 {
 		ky = 0
@@ -2159,6 +2163,9 @@ func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 
 	if len(a) < (n*(n+1))/2 {
 		panic("goblas: not enough data in a")
+	}
+	if alpha == 0 {
+		return
 	}
 	var ky, kx int
 	if incY > 0 {

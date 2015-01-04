@@ -56,9 +56,8 @@ TEXT ·ddotUnitary(SB),NOSPLIT,$0
 
 U1:	// n >= 0
 	// sum += x[i] * y[i] unrolled 2x.
-	// We assume x and y are 16-byte aligned.
-	MOVAPD 0(R8)(SI*8), X0
-	MOVAPD 0(R9)(SI*8), X1
+	MOVUPD 0(R8)(SI*8), X0
+	MOVUPD 0(R9)(SI*8), X1
 	MULPD X1, X0
 	ADDPD X0, X7
 	
@@ -106,7 +105,6 @@ TEXT ·ddotInc(SB),NOSPLIT,$0
 
 U2:	// n >= 0
 	// sum += *p * *q unrolled 2x.
-	// x and y are 16-byte aligned, but we can't take advantage of it here.
 	MOVHPD (SI), X0
 	MOVHPD (DI), X1
 	ADDQ R11, SI			// p += incX

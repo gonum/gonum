@@ -269,10 +269,10 @@ func (Blas) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY
 		return
 	}
 	if incX == 1 && incY == 1 {
-		x = x[:n]
-		for i, v := range x {
-			y[i] += alpha * v
+		if len(x) < n || len(y) < n {
+			panic(badLen)
 		}
+		daxpyUnitary(alpha, x[:n], y)
 		return
 	}
 	var ix, iy int
@@ -282,11 +282,10 @@ func (Blas) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY
 	if incY < 0 {
 		iy = (-n + 1) * incY
 	}
-	for i := 0; i < n; i++ {
-		y[iy] += alpha * x[ix]
-		ix += incX
-		iy += incY
+	if ix >= len(x) || iy >= len(y) || ix+(n-1)*incX >= len(x) || iy+(n-1)*incY >= len(y) {
+		panic(badLen)
 	}
+	daxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
 
 // Drotg gives plane rotation

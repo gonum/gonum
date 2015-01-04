@@ -1092,6 +1092,12 @@ func DdotTest(t *testing.T, d Ddotter) {
 	if n := ddot(4, x[:4], 1, x[1:], 1); n != 4 {
 		t.Errorf("ddot: mismatch Unaligned: expected %v, found %v", 4, n)
 	}
+	if n := ddot(2, x[:4], 2, x[1:], 2); n != 2 {
+		t.Errorf("ddot: mismatch Unaligned: expected %v, found %v", 2, n)
+	}
+	if n := ddot(2, x[:4], 3, x[1:], 3); n != 2 {
+		t.Errorf("ddot: mismatch Unaligned: expected %v, found %v", 2, n)
+	}
 }
 
 type Dnrm2er interface {

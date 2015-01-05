@@ -10,7 +10,13 @@ import (
 	"github.com/gonum/floats"
 )
 
-const minStepSize = 1e-8
+const (
+	initialStepFactor = 1
+
+	quadraticMinimumStepSize = 1e-3
+	quadraticMaximumStepSize = 1.01
+	quadraticThreshold       = 1e-12
+)
 
 // ConstantStepSize is a StepSizer that returns the same step size for
 // every iteration.
@@ -27,63 +33,85 @@ func (c ConstantStepSize) StepSize(l Location, dir []float64) float64 {
 }
 
 // QuadraticStepSize estimates the initial line search step size as the minimum
-// of a quadratic that interpolates f(x_{k-1}), f(x_k) and grad f_k \dot p_k.
+// of a quadratic that interpolates f(x_{k-1}), f(x_k) and ∇f_k⋅p_k.
 // This is useful for line search methods that do not produce well-scaled
 // descent directions, such as gradient descent or conjugate gradient methods.
-// The step size will lie in the closed interval [MinStepSize, 1].
-//
-// See also Nocedal, Wright (2006), Numerical Optimization (2nd ed.), sec.
-// 3.5, page 59.
+// The step size is bounded away from zero.
 type QuadraticStepSize struct {
 	// If the relative change in the objective function is larger than
-	// InterpolationCutOff, the step size is estimated by quadratic
-	// interpolation, otherwise it is set to one.
-	InterpolationCutOff float64
-	// The step size at the first iteration is estimated as
-	// max(MinStepSize, InitialStepFactor / |g|_∞).
+	// Threshold, the step size is estimated by quadratic interpolation,
+	// otherwise it is set to 2*previous step size.
+	// The default value is 1e-12.
+	Threshold float64
+	// The step size at the first iteration is estimated as InitialStepFactor / |g|_∞.
+	// If InitialStepFactor is zero, it will be set to one.
 	InitialStepFactor float64
-	// Minimum step size that is returned.
-	// Default value: 1e-8
+	// The estimated step size is always greater than or equal to MinStepSize.
+	// MinStepSize times GradientAbsTol should always be greater than machine epsilon.
+	// If MinStepSize is zero, it will be set to 1e-3.
 	MinStepSize float64
+	// The estimated step size is always lower than or equal to MaxStepSize.
+	// If MaxStepSize is zero, it will be set to 1.01.
+	MaxStepSize float64
 
-	fPrev float64
+	fPrev        float64
+	dirPrevNorm  float64
+	projGradPrev float64
+	xPrev        []float64
 }
 
-func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepsize float64) {
-	if q.InterpolationCutOff == 0 {
-		q.InterpolationCutOff = 1e-10
+func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepSize float64) {
+	q.xPrev = resize(q.xPrev, len(l.X))
+	if q.Threshold == 0 {
+		q.Threshold = quadraticThreshold
 	}
 	if q.InitialStepFactor == 0 {
-		q.InitialStepFactor = 1
+		q.InitialStepFactor = initialStepFactor
 	}
 	if q.MinStepSize == 0 {
-		q.MinStepSize = minStepSize
+		q.MinStepSize = quadraticMinimumStepSize
+	}
+	if q.MaxStepSize == 0 {
+		q.MaxStepSize = quadraticMaximumStepSize
 	}
 
 	gNorm := floats.Norm(l.Gradient, math.Inf(1))
-	stepsize = math.Max(q.MinStepSize, q.InitialStepFactor/gNorm)
+	stepSize = math.Max(q.MinStepSize, math.Min(q.InitialStepFactor/gNorm, q.MaxStepSize))
 
 	q.fPrev = l.F
-	return stepsize
+	q.dirPrevNorm = floats.Norm(dir, 2)
+	q.projGradPrev = floats.Dot(l.Gradient, dir)
+	copy(q.xPrev, l.X)
+	return stepSize
 }
 
-func (q *QuadraticStepSize) StepSize(l Location, dir []float64) (stepsize float64) {
-	stepsize = 1
-	t := 1.0
-	if !floats.EqualWithinAbsOrRel(l.F, 0, 1e-8, 1e-6) {
-		t = (q.fPrev - l.F) / math.Abs(l.F)
+func (q *QuadraticStepSize) StepSize(l Location, dir []float64) (stepSize float64) {
+	stepSizePrev := floats.Distance(l.X, q.xPrev, 2) / q.dirPrevNorm
+	projGrad := floats.Dot(l.Gradient, dir)
+
+	stepSize = 2 * stepSizePrev
+	if !floats.EqualWithinRel(q.fPrev, l.F, q.Threshold) {
+		// Two consecutive function values are not relatively equal, so
+		// computing the minimum of a quadratic interpolant might make sense
+
+		df := (l.F - q.fPrev) / stepSizePrev
+		quadTest := df - q.projGradPrev
+		if quadTest > 0 {
+			// There is a chance of approximating the function well by a
+			// quadratic only if the finite difference (f_k-f_{k-1})/stepSizePrev
+			// is larger than ∇f_{k-1}⋅p_{k-1}
+
+			// Set the step size to the minimizer of the quadratic function that
+			// interpolates f_{k-1}, ∇f_{k-1}⋅p_{k-1} and f_k
+			stepSize = -q.projGradPrev * stepSizePrev / quadTest / 2
+		}
 	}
-	if t > q.InterpolationCutOff {
-		// The relative change between two consecutive function values compared to
-		// the function value itself is large enough, so compute the minimum of
-		// a quadratic interpolant.
-		// Assuming that the received direction is a descent direction,
-		// stepsize will be positive.
-		stepsize = 2 * (l.F - q.fPrev) / floats.Dot(l.Gradient, dir)
-		// Trim the step size to lie in [MinStepSize, 1]
-		stepsize = math.Max(q.MinStepSize, math.Min(1.01*stepsize, 1))
-	}
+	// Bound the step size to lie in [MinStepSize, MaxStepSize]
+	stepSize = math.Max(q.MinStepSize, math.Min(stepSize, q.MaxStepSize))
 
 	q.fPrev = l.F
-	return stepsize
+	q.dirPrevNorm = floats.Norm(dir, 2)
+	q.projGradPrev = projGrad
+	copy(q.xPrev, l.X)
+	return stepSize
 }

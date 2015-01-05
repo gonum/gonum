@@ -67,6 +67,7 @@ type Method interface {
 }
 
 // StepSizer can set the next step size of the optimization given the last Location.
+// Returned step size must be positive.
 type StepSizer interface {
 	Init(l Location, dir []float64) float64
 	StepSize(l Location, dir []float64) float64

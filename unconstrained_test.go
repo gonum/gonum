@@ -5,7 +5,9 @@
 package optimize
 
 import (
+	"fmt"
 	"math"
+	"reflect"
 	"testing"
 
 	"github.com/gonum/floats"
@@ -31,15 +33,15 @@ func (HelicalValley) F(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (HelicalValley) Df(x, g []float64) {
+func (HelicalValley) Df(x, grad []float64) {
 	θ := 0.5 * math.Atan2(x[1], x[0]) / math.Pi
 	r := math.Hypot(x[0], x[1])
 	s := x[2] - 10*θ
 	t := 5 * s / r / r / math.Pi
 
-	g[0] = 200 * (x[0] - x[0]/r + x[1]*t)
-	g[1] = 200 * (x[1] - x[1]/r - x[0]*t)
-	g[2] = 2 * (x[2] + 100*s)
+	grad[0] = 200 * (x[0] - x[0]/r + x[1]*t)
+	grad[1] = 200 * (x[1] - x[1]/r - x[0]*t)
+	grad[2] = 2 * (x[2] + 100*s)
 }
 
 // The Biggs' EXP2 function
@@ -61,9 +63,9 @@ func (BiggsEXP2) F(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP2) Df(x, g []float64) {
-	for i := 0; i < len(g); i++ {
-		g[i] = 0
+func (BiggsEXP2) Df(x, grad []float64) {
+	for i := range grad {
+		grad[i] = 0
 	}
 	for i := 1; i <= 10; i++ {
 		z := float64(i) / 10
@@ -73,8 +75,8 @@ func (BiggsEXP2) Df(x, g []float64) {
 		dfdx0 := -z * math.Exp(-x[0]*z)
 		dfdx1 := 5 * z * math.Exp(-x[1]*z)
 
-		g[0] += 2 * f * dfdx0
-		g[1] += 2 * f * dfdx1
+		grad[0] += 2 * f * dfdx0
+		grad[1] += 2 * f * dfdx1
 	}
 }
 
@@ -97,9 +99,9 @@ func (BiggsEXP3) F(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP3) Df(x, g []float64) {
-	for i := 0; i < len(g); i++ {
-		g[i] = 0
+func (BiggsEXP3) Df(x, grad []float64) {
+	for i := range grad {
+		grad[i] = 0
 	}
 	for i := 1; i <= 10; i++ {
 		z := float64(i) / 10
@@ -110,9 +112,9 @@ func (BiggsEXP3) Df(x, g []float64) {
 		dfdx1 := x[2] * z * math.Exp(-x[1]*z)
 		dfdx2 := -math.Exp(-x[1] * z)
 
-		g[0] += 2 * f * dfdx0
-		g[1] += 2 * f * dfdx1
-		g[2] += 2 * f * dfdx2
+		grad[0] += 2 * f * dfdx0
+		grad[1] += 2 * f * dfdx1
+		grad[2] += 2 * f * dfdx2
 	}
 }
 
@@ -135,9 +137,9 @@ func (BiggsEXP4) F(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP4) Df(x, g []float64) {
-	for i := 0; i < len(g); i++ {
-		g[i] = 0
+func (BiggsEXP4) Df(x, grad []float64) {
+	for i := range grad {
+		grad[i] = 0
 	}
 	for i := 1; i <= 10; i++ {
 		z := float64(i) / 10
@@ -149,10 +151,10 @@ func (BiggsEXP4) Df(x, g []float64) {
 		dfdx2 := math.Exp(-x[0] * z)
 		dfdx3 := -math.Exp(-x[1] * z)
 
-		g[0] += 2 * f * dfdx0
-		g[1] += 2 * f * dfdx1
-		g[2] += 2 * f * dfdx2
-		g[3] += 2 * f * dfdx3
+		grad[0] += 2 * f * dfdx0
+		grad[1] += 2 * f * dfdx1
+		grad[2] += 2 * f * dfdx2
+		grad[3] += 2 * f * dfdx3
 	}
 }
 
@@ -175,9 +177,9 @@ func (BiggsEXP5) F(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP5) Df(x, g []float64) {
-	for i := 0; i < len(g); i++ {
-		g[i] = 0
+func (BiggsEXP5) Df(x, grad []float64) {
+	for i := range grad {
+		grad[i] = 0
 	}
 	for i := 1; i <= 11; i++ {
 		z := float64(i) / 10
@@ -190,11 +192,11 @@ func (BiggsEXP5) Df(x, g []float64) {
 		dfdx3 := -math.Exp(-x[1] * z)
 		dfdx4 := -3 * z * math.Exp(-x[4]*z)
 
-		g[0] += 2 * f * dfdx0
-		g[1] += 2 * f * dfdx1
-		g[2] += 2 * f * dfdx2
-		g[3] += 2 * f * dfdx3
-		g[4] += 2 * f * dfdx4
+		grad[0] += 2 * f * dfdx0
+		grad[1] += 2 * f * dfdx1
+		grad[2] += 2 * f * dfdx2
+		grad[3] += 2 * f * dfdx3
+		grad[4] += 2 * f * dfdx4
 	}
 }
 
@@ -218,9 +220,9 @@ func (BiggsEXP6) F(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP6) Df(x, g []float64) {
-	for i := 0; i < len(g); i++ {
-		g[i] = 0
+func (BiggsEXP6) Df(x, grad []float64) {
+	for i := range grad {
+		grad[i] = 0
 	}
 	for i := 1; i <= 13; i++ {
 		z := float64(i) / 10
@@ -234,12 +236,12 @@ func (BiggsEXP6) Df(x, g []float64) {
 		dfdx4 := -z * x[5] * math.Exp(-x[4]*z)
 		dfdx5 := math.Exp(-x[4] * z)
 
-		g[0] += 2 * f * dfdx0
-		g[1] += 2 * f * dfdx1
-		g[2] += 2 * f * dfdx2
-		g[3] += 2 * f * dfdx3
-		g[4] += 2 * f * dfdx4
-		g[5] += 2 * f * dfdx5
+		grad[0] += 2 * f * dfdx0
+		grad[1] += 2 * f * dfdx1
+		grad[2] += 2 * f * dfdx2
+		grad[3] += 2 * f * dfdx3
+		grad[4] += 2 * f * dfdx4
+		grad[5] += 2 * f * dfdx5
 	}
 }
 
@@ -365,7 +367,7 @@ func (Box) Df(x, grad []float64) {
 // J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
 // ACM Trans.Math. Softw. 7 (1981), 17-41.
 // Dim = n
-// X0 = [..., (n-i)/n, ...]
+// X0 = [..., (n-i)/n, ...], i=1,...,n,
 // OptX = [1, ..., 1]
 // OptF = 0
 type VariablyDimensioned struct{}
@@ -473,7 +475,7 @@ func (Watson) Df(x, grad []float64) {
 // J. More, B.S. Garbow, K.E. Hillstrom, Testing unconstrained optimization software.
 // ACM Trans.Math. Softw. 7 (1981), 17-41.
 // Dim = n
-// X0 = [..., i-1, i, i+1...]
+// X0 = [1, ..., n]
 // For Dim = 4:
 // OptF = 2.2499775...e-5
 // For Dim = 10:
@@ -522,12 +524,10 @@ type Penalty2 struct{}
 func (Penalty2) F(x []float64) (sum float64) {
 	dim := len(x)
 
-	s := 0.0
+	s := -1.0
 	for i := 0; i < dim; i++ {
 		s += float64(dim-i) * x[i] * x[i]
 	}
-	s--
-
 	for i := 1; i < dim; i++ {
 		yi := math.Exp(float64(i+1)/10) + math.Exp(float64(i)/10)
 		f := math.Exp(x[i]/10) + math.Exp(x[i-1]/10) - yi
@@ -575,7 +575,7 @@ func (Penalty2) Df(x, grad []float64) {
 // ACM Trans.Math. Softw. 7 (1981), 17-41.
 // Dim = 2
 // X0 = [1, 1]
-// OptX = [1e6, 2*1e-6]
+// OptX = [1e6, 2e-6]
 // OptF = 0
 type Brown struct{}
 
@@ -586,13 +586,13 @@ func (Brown) F(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (Brown) Df(x, g []float64) {
+func (Brown) Df(x, grad []float64) {
 	f1 := x[0] - 1e6
 	f2 := x[1] - 2e-6
 	f3 := x[0]*x[1] - 2
 
-	g[0] = 2*f1 + 2*f3*x[1]
-	g[1] = 2*f2 + 2*f3*x[0]
+	grad[0] = 2*f1 + 2*f3*x[1]
+	grad[1] = 2*f2 + 2*f3*x[0]
 }
 
 // The Brown and Dennis function
@@ -600,7 +600,7 @@ func (Brown) Df(x, g []float64) {
 // ACM Trans.Math. Softw. 7 (1981), 17-41.
 // Dim = 4
 // X0 = [25, 5, -5, -1]
-// OptF = 85822.2
+// OptF = 85822.20162635628
 type BrownDennis struct{}
 
 func (BrownDennis) F(x []float64) (sum float64) {
@@ -615,7 +615,7 @@ func (BrownDennis) F(x []float64) (sum float64) {
 }
 
 func (BrownDennis) Df(x, grad []float64) {
-	for i := 0; i < len(grad); i++ {
+	for i := range grad {
 		grad[i] = 0
 	}
 
@@ -732,7 +732,7 @@ func (Trigonometric) Df(x, grad []float64) {
 	}
 }
 
-// The Extended Rosenbrock function
+// The Extended Rosenbrock function implemented with F+Df pair of methods.
 // Very difficult to minimize if the starting point is far from the minimum.
 // Dim = n
 // X0 = [-1.2, 1] for Dim = 2
@@ -762,6 +762,35 @@ func (Rosenbrock) Df(x, grad []float64) {
 	for i := 1; i < dim; i++ {
 		grad[i] += 200 * (x[i] - x[i-1]*x[i-1])
 	}
+}
+
+// The Extended Rosenbrock function implemented with F+FDf pair of methods.
+type RosenbrockFDf struct{}
+
+func (RosenbrockFDf) F(x []float64) (sum float64) {
+	for i := 0; i < len(x)-1; i++ {
+		a := 1 - x[i]
+		b := x[i+1] - x[i]*x[i]
+		sum += a*a + 100*b*b
+	}
+	return sum
+}
+
+func (f RosenbrockFDf) FDf(x, grad []float64) float64 {
+	dim := len(x)
+	for i := range grad {
+		grad[i] = 0
+	}
+
+	for i := 0; i < dim-1; i++ {
+		grad[i] -= 2 * (1 - x[i])
+		grad[i] -= 400 * (x[i+1] - x[i]*x[i]) * x[i]
+	}
+	for i := 1; i < dim; i++ {
+		grad[i] += 200 * (x[i] - x[i-1]*x[i-1])
+	}
+
+	return f.F(x)
 }
 
 // The Extended Powell singular function
@@ -884,16 +913,281 @@ func (Linear) Df(x, grad []float64) {
 	}
 }
 
+type UnconstrainedTest struct {
+	// f is the function that is being minimized.
+	f Function
+	// x is the initial guess.
+	x []float64
+	// optVal is the value of f at a minimum.
+	optVal float64
+
+	// optLoc is the location of the minimum. If it is not known, optLoc is nil.
+	optLoc []float64
+	// gradTol is the absolute gradient tolerance for the test. If gradTol == 0,
+	// the default tolerance 1e-12 will be used.
+	gradTol float64
+	// tol is the tolerance for checking the accuracy of result.F. If tol == 0,
+	// the default tolerance 1e-5 will be used.
+	tol float64
+}
+
+func (t UnconstrainedTest) String() string {
+	dim := len(t.x)
+	if dim <= 10 {
+		// Print the initial and optimal X only for small-dimensional problems.
+		return fmt.Sprintf("F: %v\nDim: %v\nGradientAbsTol: %v\nInitial X: %v\nWant X: %v\nWant F(X): %v",
+			reflect.TypeOf(t.f), dim, t.gradTol, t.x, t.optLoc, t.optVal)
+	}
+	return fmt.Sprintf("F: %v\nDim: %v\nGradientAbsTol: %v\nWant F(X): %v",
+		reflect.TypeOf(t.f), dim, t.gradTol, t.optVal)
+}
+
+var gradientDescentTests = []UnconstrainedTest{
+	{
+		f:       Rosenbrock{},
+		x:       []float64{-1.2, 1},
+		optVal:  0,
+		optLoc:  []float64{1, 1},
+		gradTol: defaultGradientAbsTol,
+	},
+	{
+		f:      Rosenbrock{},
+		x:      []float64{-1.2, 1},
+		optVal: 0,
+		optLoc: []float64{1, 1},
+	},
+	{
+		f:       Rosenbrock{},
+		x:       []float64{-120, 100, 50},
+		optVal:  0,
+		optLoc:  []float64{1, 1, 1},
+		gradTol: defaultGradientAbsTol,
+	},
+	{
+		f:      RosenbrockFDf{},
+		x:      []float64{-1.2, 1},
+		optVal: 0,
+		optLoc: []float64{1, 1},
+	},
+	{
+		f:       RosenbrockFDf{},
+		x:       []float64{-120, 100, 50},
+		optVal:  0,
+		optLoc:  []float64{1, 1, 1},
+		gradTol: defaultGradientAbsTol,
+	},
+	{
+		f:      HelicalValley{},
+		x:      []float64{-1, 0, 0},
+		optVal: 0,
+		optLoc: []float64{1, 0, 0},
+	},
+	{
+		f:      BiggsEXP4{},
+		x:      []float64{1, 2, 1, 1},
+		optVal: 0,
+		optLoc: []float64{1, 10, 1, 5},
+	},
+}
+
+var newtonTests = []UnconstrainedTest{
+	{
+		f:      Rosenbrock{},
+		x:      []float64{10, 10, 10, 10},
+		optVal: 0,
+		optLoc: []float64{1, 1, 1, 1},
+	},
+	{
+		f:      Rosenbrock{},
+		x:      []float64{-12000, 10000},
+		optVal: 0,
+		optLoc: []float64{1, 1},
+	},
+	{
+		f:       Gaussian{},
+		x:       []float64{0.4, 1, 0},
+		optVal:  1.12793e-8,
+		optLoc:  []float64{0.3989561, 1.0000191, 0},
+		gradTol: 1e-11,
+	},
+	{
+		f:      Powell{},
+		x:      []float64{0, 1},
+		optVal: 0,
+		optLoc: []float64{1.09815933e-5, 9.10614674},
+	},
+	{
+		f:      Box{},
+		x:      []float64{0, 10, 20},
+		optVal: 0,
+		optLoc: []float64{1, 10, 1},
+	},
+	generateVariablyDimensioned(10, 0),
+	generateVariablyDimensioned(100, 0),
+	{
+		f:       Watson{},
+		x:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		optVal:  0,
+		optLoc:  []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		gradTol: 1e-8,
+	},
+	{
+		f:      Penalty1{},
+		x:      []float64{1, 2, 3, 4},
+		optVal: 2.2499775e-5,
+	},
+	{
+		f:       Penalty2{},
+		x:       []float64{0.5, 0.5, 0.5, 0.5},
+		optVal:  9.37629e-6,
+		gradTol: 1e-11,
+	},
+	{
+		f:      Brown{},
+		x:      []float64{1, 1},
+		optVal: 0,
+		optLoc: []float64{1e6, 2e-6},
+	},
+	{
+		f:      GulfRD{},
+		x:      []float64{5, 2.5, 0.15},
+		optVal: 0,
+		optLoc: []float64{50, 25, 1.5},
+	},
+	{
+		f:      ExtendedPowell{},
+		x:      []float64{3, -1, 0, 1},
+		optVal: 0,
+		optLoc: []float64{0, 0, 0, 0},
+	},
+	{
+		f:      Beale{},
+		x:      []float64{1, 1},
+		optVal: 0,
+		optLoc: []float64{3, 0.5},
+	},
+	{
+		f:      Wood{},
+		x:      []float64{-3, -1, -3, -1},
+		optVal: 0,
+		optLoc: []float64{1, 1, 1, 1},
+	},
+}
+
+var bfgsTests = []UnconstrainedTest{
+	{
+		f:       BiggsEXP6{},
+		x:       []float64{1, 2, 1, 1, 1, 1},
+		optVal:  0.005655649925,
+		gradTol: 1e-10,
+	},
+	{
+		f:       Penalty1{},
+		x:       []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		optVal:  7.0876515e-5,
+		gradTol: 1e-10,
+	},
+	{
+		f:       Penalty2{},
+		x:       []float64{0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+		optVal:  2.93660e-4,
+		gradTol: 1e-10,
+	},
+	{
+		f:       BrownDennis{},
+		x:       []float64{25, 5, -5, -1},
+		optVal:  85822.20162635628,
+		gradTol: 1e-5,
+	},
+	{
+		f:      Trigonometric{},
+		x:      []float64{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+		optVal: 0,
+		optLoc: []float64{
+			0.0429645656464827, 0.043976286943042, 0.0450933996565844, 0.0463389157816542, 0.0477443839560646,
+			0.0493547352444078, 0.0512373449259557, 0.195209463715277, 0.164977664720328, 0.0601485854398078,
+		},
+		gradTol: 1e-11,
+	},
+}
+
+var lbfgsTests = []UnconstrainedTest{
+	{
+		f:      Rosenbrock{},
+		x:      []float64{-1200000, 1000000},
+		optVal: 0,
+		optLoc: []float64{1, 1},
+	},
+	{
+		f:       BiggsEXP6{},
+		x:       []float64{1, 2, 1, 1, 1, 1},
+		optVal:  0.005655649925,
+		gradTol: 1e-8,
+	},
+	generateVariablyDimensioned(1000, 1e-10),
+	generateVariablyDimensioned(10000, 1e-8),
+	{
+		f:       Penalty1{},
+		x:       []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		optVal:  7.0876515e-5,
+		gradTol: 1e-11,
+	},
+	{
+		f:       Penalty2{},
+		x:       []float64{0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+		optVal:  2.93660e-4,
+		gradTol: 1e-9,
+	},
+	{
+		f:       BrownDennis{},
+		x:       []float64{25, 5, -5, -1},
+		optVal:  85822.20162635628,
+		gradTol: 1e-4, // This is the best LBFGS can currently do.
+	},
+	{
+		f:      Trigonometric{},
+		x:      []float64{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+		optVal: 0,
+		optLoc: []float64{
+			0.0429645656464827, 0.043976286943042, 0.0450933996565844, 0.0463389157816542, 0.0477443839560646,
+			0.0493547352444078, 0.0512373449259557, 0.195209463715277, 0.164977664720328, 0.0601485854398078,
+		},
+		gradTol: 1e-9,
+	},
+}
+
+func generateVariablyDimensioned(dim int, gradTol float64) UnconstrainedTest {
+	x := make([]float64, dim)
+	for i := range x {
+		x[i] = float64(dim-i-1) / float64(dim)
+	}
+	optLoc := make([]float64, dim)
+	for i := range optLoc {
+		optLoc[i] = 1
+	}
+	return UnconstrainedTest{
+		f:       VariablyDimensioned{},
+		x:       x,
+		optVal:  0,
+		optLoc:  optLoc,
+		gradTol: gradTol,
+	}
+}
+
 func TestMinimize(t *testing.T) {
-	testMinimize(t, nil)
+	// TODO: When method is nil, Local chooses the method automatically. At
+	// present, it always chooses BFGS (or panics if the function does not
+	// implement Df() or FDf()). For now, run this test with the simplest set
+	// of problems and revisit this later when more methods are added.
+	testMinimize(t, gradientDescentTests, nil)
 }
 
 func TestGradientDescent(t *testing.T) {
-	testMinimize(t, &GradientDescent{})
+	testMinimize(t, gradientDescentTests, &GradientDescent{})
 }
 
 func TestGradientDescentBacktracking(t *testing.T) {
-	testMinimize(t, &GradientDescent{
+	testMinimize(t, gradientDescentTests, &GradientDescent{
 		LinesearchMethod: &Backtracking{
 			FunConst: 0.1,
 		},
@@ -901,130 +1195,153 @@ func TestGradientDescentBacktracking(t *testing.T) {
 }
 
 func TestGradientDescentBisection(t *testing.T) {
-	testMinimize(t, &GradientDescent{
+	testMinimize(t, gradientDescentTests, &GradientDescent{
 		LinesearchMethod: &Bisection{},
 	})
 }
 
 func TestBFGS(t *testing.T) {
-	testMinimize(t, &BFGS{})
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, newtonTests...)
+	tests = append(tests, bfgsTests...)
+	testMinimize(t, tests, &BFGS{})
 }
 
 func TestLBFGS(t *testing.T) {
-	testMinimize(t, &LBFGS{})
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, newtonTests...)
+	tests = append(tests, lbfgsTests...)
+	testMinimize(t, tests, &LBFGS{})
 }
 
-func testMinimize(t *testing.T, method Method) {
-	// This should be replaced with a more general testing framework with
-	// a plugable method
+func testMinimize(t *testing.T, tests []UnconstrainedTest, method Method) {
+	for _, test := range tests {
+		settings := &Settings{
+			FunctionAbsTol: math.Inf(-1),
+		}
+		if test.gradTol == 0 {
+			test.gradTol = 1e-12
+		}
+		settings.GradientAbsTol = test.gradTol
+		if test.tol == 0 {
+			test.tol = 1e-5
+		}
 
-	for i, test := range []struct {
-		F Function
-		X []float64
-
-		OptVal float64
-		OptLoc []float64
-
-		Tol      float64
-		Settings *Settings
-	}{
-		{
-			F:      Rosenbrock{},
-			X:      []float64{15, 10},
-			OptVal: 0,
-			OptLoc: []float64{1, 1},
-			Tol:    1e-4,
-
-			Settings: DefaultSettings(),
-		},
-		{
-			F:      Rosenbrock{},
-			X:      []float64{-150, 100, 5, -6},
-			OptVal: 0,
-			OptLoc: []float64{1, 1, 1, 1},
-			Tol:    1e-4,
-
-			Settings: &Settings{
-				FunctionAbsTol: math.Inf(-1),
-				GradientAbsTol: 1e-12,
-			},
-		},
-		{
-			F:      Rosenbrock{},
-			X:      []float64{15, 10},
-			OptVal: 0,
-			OptLoc: []float64{1, 1},
-			Tol:    1e-4,
-
-			Settings: &Settings{
-				FunctionAbsTol: math.Inf(-1),
-				GradientAbsTol: 1e-12,
-			},
-		},
-		{
-			F:      Rosenbrock{},
-			X:      []float64{-1.2, 1},
-			OptVal: 0,
-			OptLoc: []float64{1, 1},
-			Tol:    1e-4,
-
-			Settings: &Settings{
-				FunctionAbsTol: math.Inf(-1),
-				GradientAbsTol: 1e-3,
-			},
-		},
-		/*
-			// TODO: Turn this on when we have an adaptive linsearch method.
-			// Gradient descent with backtracking will basically never finish
-			{
-				F:      Linear{8},
-				X:      []float64{9, 8, 7, 6, 5, 4, 3, 2},
-				OptVal: negInf,
-				OptLoc: []float64{negInf, negInf, negInf, negInf, negInf, negInf, negInf, negInf},
-
-				Settings: &Settings{
-					FunctionAbsTol: math.Inf(-1),
-				},
-			},
-		*/
-	} {
-		test.Settings.Recorder = nil
-		result, err := Local(test.F, test.X, test.Settings, method)
+		result, err := Local(test.f, test.x, settings, method)
 		if err != nil {
-			t.Errorf("error finding minimum: %v", err.Error())
-			continue
-		}
-		// fmt.Println("%#v\n", result) // for debugging
-		// TODO: Better tests
-		if math.Abs(result.F-test.OptVal) > test.Tol {
-			t.Errorf("Case %v: Minimum not found, exited with status: %v. Want: %v, Got: %v", i, result.Status, test.OptVal, result.F)
-			continue
-		}
-		if result == nil {
-			t.Errorf("Case %v: nil result without error", i)
+			t.Errorf("error finding minimum (%v) for:\n%v", err, test)
 			continue
 		}
 
-		// rerun it again to ensure it gets the same answer with the same starting
-		// condition
-		result2, err2 := Local(test.F, test.X, test.Settings, method)
+		if result == nil {
+			t.Errorf("nil result without error for:\n%v", test)
+			continue
+		}
+
+		// Check that the optimum function value is as expected.
+		if math.Abs(result.F-test.optVal) > test.tol {
+			t.Errorf("Minimum not found, exited with status: %v. Want: %v, Got: %v for:\n%v",
+				result.Status, test.optVal, result.F, test)
+			continue
+		}
+
+		funcs, funcInfo := getFunctionInfo(test.f)
+
+		// Evaluate the norm of the gradient at the found optimum location.
+		var optF, optNorm float64
+		if funcInfo.IsFunctionGradient {
+			g := make([]float64, len(test.x))
+			optF = funcs.gradFunc.FDf(result.X, g)
+			optNorm = floats.Norm(g, math.Inf(1))
+		} else {
+			optF = funcs.function.F(result.X)
+			if funcInfo.IsGradient {
+				g := make([]float64, len(test.x))
+				funcs.gradient.Df(result.X, g)
+				optNorm = floats.Norm(g, math.Inf(1))
+			}
+		}
+
+		// Check that the function value at the found optimum location is
+		// equal to result.F
+		if optF != result.F {
+			t.Errorf("Function value at the optimum location %v not equal to the returned value %v for:\n%v",
+				optF, result.F, test)
+		}
+
+		// Check that the norm of the gradient at the found optimum location is
+		// smaller than the tolerance.
+		if optNorm >= settings.GradientAbsTol {
+			t.Errorf("Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
+				optNorm, settings.GradientAbsTol, test)
+		}
+
+		// We are going to restart the solution using a fixed starting gradient
+		// and value, so evaluate them.
+		settings.UseInitialData = true
+		if funcInfo.IsFunctionGradient {
+			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
+			settings.InitialFunctionValue = funcs.gradFunc.FDf(test.x, settings.InitialGradient)
+		} else {
+			settings.InitialFunctionValue = funcs.function.F(test.x)
+			if funcInfo.IsGradient {
+				settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
+				funcs.gradient.Df(test.x, settings.InitialGradient)
+			}
+		}
+
+		// Rerun the test again to make sure that it gets the same answer with
+		// the same starting condition. Moreover, we are using the initial data
+		// in settings.InitialFunctionValue and settings.InitialGradient.
+		result2, err2 := Local(test.f, test.x, settings, method)
 		if err2 != nil {
-			t.Errorf("error finding minimum second time: %v", err2.Error())
+			t.Errorf("error finding minimum second time (%v) for:\n%v", err2, test)
 			continue
 		}
+
 		if result2 == nil {
-			t.Errorf("Case %v: nil result without error", i)
+			t.Errorf("second time nil result without error for:\n%v", test)
 			continue
 		}
-		/*
-			// For debugging purposes, can't use DeepEqual naively becaus of NaNs
-			// kill the runtime before the check, because those don't need to be equal
-			result.Runtime = 0
-			result2.Runtime = 0
-			if !reflect.DeepEqual(result, result2) {
-				t.Error(eqString)
+
+		// At the moment all the optimizers are deterministic, so check that we
+		// get _exactly_ the same answer second time as well.
+		if result.F != result2.F {
+			t.Errorf("Different minimum second time. First: %v, Second: %v for:\n%v",
+				result.F, result2.F, test)
+		}
+
+		// Check that providing initial data reduces the number of function
+		// and/or gradient calls exactly by one.
+		if funcInfo.IsFunctionGradient {
+			if result.FunctionGradientEvals != result2.FunctionGradientEvals+1 {
+				t.Errorf("Providing initial data does not reduce the number of function/gradient calls for:\n%v", test)
 				continue
 			}
-		*/
+		} else {
+			if result.FunctionEvals != result2.FunctionEvals+1 {
+				t.Errorf("Providing initial data does not reduce the number of functions calls for:\n%v", test)
+				continue
+			}
+			if funcInfo.IsGradient {
+				if result.GradientEvals != result2.GradientEvals+1 {
+					t.Errorf("Providing initial data does not reduce the number of gradient calls for:\n%v", test)
+					continue
+				}
+			}
+		}
+
+		// TODO: Enable this test once the optimizers reliably handle
+		// minimization from a (nearly) optimal location.
+		// if test.optLoc != nil {
+		// 	settings.UseInitialData = false
+		// 	// Try starting the optimizer from a (nearly) optimum location given by test.optLoc
+		// 	_, err3 := Local(test.f, test.optLoc, settings, method)
+		// 	if err3 != nil {
+		// 		t.Errorf("error finding minimum from a (nearly) optimum location (%v) for:\n%v", err3, test)
+		// 	}
+		// }
 	}
 }

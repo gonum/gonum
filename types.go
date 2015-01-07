@@ -10,8 +10,10 @@ import (
 	"time"
 )
 
-// EvaluationType is used by the optimizer to specify information needed from
-// the objective function.
+const defaultGradientAbsTol = 1e-6
+
+// EvaluationType is used by the optimizer to specify information needed
+// from the objective function.
 type EvaluationType int
 
 const (
@@ -155,7 +157,7 @@ type Settings struct {
 // DefaultSettings returns a new Settings struct containing the default settings.
 func DefaultSettings() *Settings {
 	return &Settings{
-		GradientAbsTol: 1e-6,
+		GradientAbsTol: defaultGradientAbsTol,
 		FunctionAbsTol: math.Inf(-1),
 		Recorder:       NewPrinter(),
 	}

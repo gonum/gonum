@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
 )
 
 func (m *Dense) Min() float64 {
@@ -118,7 +119,7 @@ func (m *Dense) Add(a, b Matrix) {
 	}
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -171,7 +172,7 @@ func (m *Dense) Sub(a, b Matrix) {
 	}
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -224,7 +225,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 	}
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -277,7 +278,7 @@ func (m *Dense) DivElem(a, b Matrix) {
 	}
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -372,7 +373,7 @@ func (m *Dense) Mul(a, b Matrix) {
 		w = *m
 	}
 	if w.isZero() {
-		w.mat = RawMatrix{
+		w.mat = blas64.General{
 			Rows:   ar,
 			Cols:   bc,
 			Stride: bc,
@@ -385,14 +386,7 @@ func (m *Dense) Mul(a, b Matrix) {
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
 			amat, bmat := a.RawMatrix(), b.RawMatrix()
-			blasEngine.Dgemm(
-				blas.NoTrans, blas.NoTrans,
-				ar, bc, ac,
-				1.,
-				amat.Data, amat.Stride,
-				bmat.Data, bmat.Stride,
-				0.,
-				w.mat.Data, w.mat.Stride)
+			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, amat, bmat, 0, w.mat)
 			*m = w
 			return
 		}
@@ -403,8 +397,12 @@ func (m *Dense) Mul(a, b Matrix) {
 			row := make([]float64, ac)
 			col := make([]float64, br)
 			for r := 0; r < ar; r++ {
+				dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 				for c := 0; c < bc; c++ {
-					w.mat.Data[r*w.mat.Stride+c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
+					dataTmp[c] = blas64.Dot(ac,
+						blas64.Vector{Inc: 1, Data: a.Row(row, r)},
+						blas64.Vector{Inc: 1, Data: b.Col(col, c)},
+					)
 				}
 			}
 			*m = w
@@ -448,7 +446,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 		w = *m
 	}
 	if w.isZero() {
-		w.mat = RawMatrix{
+		w.mat = blas64.General{
 			Rows:   ar,
 			Cols:   bc,
 			Stride: bc,
@@ -476,14 +474,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 			}
 
 			amat, bmat := a.RawMatrix(), b.RawMatrix()
-			blasEngine.Dgemm(
-				aOp, bOp,
-				ar, bc, ac,
-				1.,
-				amat.Data, amat.Stride,
-				bmat.Data, bmat.Stride,
-				0.,
-				w.mat.Data, w.mat.Stride)
+			blas64.Gemm(aOp, bOp, 1, amat, bmat, 0, w.mat)
 			*m = w
 			return
 		}
@@ -498,7 +489,10 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 					for r := 0; r < ar; r++ {
 						dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 						for c := 0; c < bc; c++ {
-							dataTmp[c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Row(col, c), 1)
+							dataTmp[c] = blas64.Dot(ac,
+								blas64.Vector{Inc: 1, Data: a.Col(row, r)},
+								blas64.Vector{Inc: 1, Data: b.Row(col, c)},
+							)
 						}
 					}
 					*m = w
@@ -508,7 +502,10 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				for r := 0; r < ar; r++ {
 					dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 					for c := 0; c < bc; c++ {
-						dataTmp[c] = blasEngine.Ddot(ac, a.Col(row, r), 1, b.Col(col, c), 1)
+						dataTmp[c] = blas64.Dot(ac,
+							blas64.Vector{Inc: 1, Data: a.Col(row, r)},
+							blas64.Vector{Inc: 1, Data: b.Col(col, c)},
+						)
 					}
 				}
 				*m = w
@@ -518,7 +515,10 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				for r := 0; r < ar; r++ {
 					dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 					for c := 0; c < bc; c++ {
-						dataTmp[c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Row(col, c), 1)
+						dataTmp[c] = blas64.Dot(ac,
+							blas64.Vector{Inc: 1, Data: a.Row(row, r)},
+							blas64.Vector{Inc: 1, Data: b.Row(col, c)},
+						)
 					}
 				}
 				*m = w
@@ -527,7 +527,10 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 			for r := 0; r < ar; r++ {
 				dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
 				for c := 0; c < bc; c++ {
-					dataTmp[c] = blasEngine.Ddot(ac, a.Row(row, r), 1, b.Col(col, c), 1)
+					dataTmp[c] = blas64.Dot(ac,
+						blas64.Vector{Inc: 1, Data: a.Row(row, r)},
+						blas64.Vector{Inc: 1, Data: b.Col(col, c)},
+					)
 				}
 			}
 			*m = w
@@ -613,7 +616,7 @@ func (m *Dense) Exp(a Matrix) {
 	}
 	switch {
 	case m.isZero():
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   r,
 			Cols:   c,
 			Stride: c,
@@ -676,7 +679,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 	}
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   r,
 			Cols:   c,
 			Stride: c,
@@ -719,7 +722,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 	ar, ac := a.Dims()
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -761,7 +764,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 	ar, ac := a.Dims()
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -903,7 +906,7 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y []float64) {
 		w = *m
 	}
 	if w.isZero() {
-		w.mat = RawMatrix{
+		w.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -922,7 +925,7 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y []float64) {
 	if len(y) != ac {
 		panic(ErrShape)
 	}
-	blasEngine.Dger(ar, ac, alpha, x, 1, y, 1, w.mat.Data, w.mat.Stride)
+	blas64.Ger(alpha, blas64.Vector{Inc: 1, Data: x}, blas64.Vector{Inc: 1, Data: y}, w.mat)
 	*m = w
 	return
 }

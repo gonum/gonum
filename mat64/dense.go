@@ -5,21 +5,8 @@
 package mat64
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/goblas"
+	"github.com/gonum/blas/blas64"
 )
-
-// Set the default BLAS implementation.
-var blasEngine blas.Float64 = goblas.Blas{}
-
-func Register(b blas.Float64) {
-	if b == nil {
-		panic("mat64: cannot register nil blas.Float64")
-	}
-	blasEngine = b
-}
-
-func Registered() blas.Float64 { return blasEngine }
 
 var (
 	matrix *Dense
@@ -65,7 +52,7 @@ var (
 )
 
 type Dense struct {
-	mat RawMatrix
+	mat blas64.General
 }
 
 func NewDense(r, c int, mat []float64) *Dense {
@@ -75,7 +62,7 @@ func NewDense(r, c int, mat []float64) *Dense {
 	if mat == nil {
 		mat = make([]float64, r*c)
 	}
-	return &Dense{RawMatrix{
+	return &Dense{blas64.General{
 		Rows:   r,
 		Cols:   c,
 		Stride: c,
@@ -90,9 +77,9 @@ func DenseCopyOf(a Matrix) *Dense {
 	return d
 }
 
-func (m *Dense) SetRawMatrix(b RawMatrix) { m.mat = b }
+func (m *Dense) SetRawMatrix(b blas64.General) { m.mat = b }
 
-func (m *Dense) RawMatrix() RawMatrix { return m.mat }
+func (m *Dense) RawMatrix() blas64.General { return m.mat }
 
 func (m *Dense) isZero() bool {
 	return m.mat.Cols == 0 || m.mat.Rows == 0
@@ -109,7 +96,10 @@ func (m *Dense) Col(dst []float64, j int) []float64 {
 		dst = make([]float64, m.mat.Rows)
 	}
 	dst = dst[:min(len(dst), m.mat.Rows)]
-	blasEngine.Dcopy(len(dst), m.mat.Data[j:], m.mat.Stride, dst, 1)
+	blas64.Copy(len(dst),
+		blas64.Vector{Inc: m.mat.Stride, Data: m.mat.Data[j:]},
+		blas64.Vector{Inc: 1, Data: dst},
+	)
 
 	return dst
 }
@@ -119,7 +109,10 @@ func (m *Dense) SetCol(j int, src []float64) int {
 		panic(ErrIndexOutOfRange)
 	}
 
-	blasEngine.Dcopy(min(len(src), m.mat.Rows), src, 1, m.mat.Data[j:], m.mat.Stride)
+	blas64.Copy(min(len(src), m.mat.Rows),
+		blas64.Vector{Inc: 1, Data: src},
+		blas64.Vector{Inc: m.mat.Stride, Data: m.mat.Data[j:]},
+	)
 
 	return min(len(src), m.mat.Rows)
 }
@@ -173,7 +166,7 @@ func (m *Dense) Reset() {
 
 func (m *Dense) Clone(a Matrix) {
 	r, c := a.Dims()
-	mat := RawMatrix{
+	mat := blas64.General{
 		Rows:   r,
 		Cols:   c,
 		Stride: c,
@@ -247,7 +240,7 @@ func (m *Dense) U(a Matrix) {
 		m.zeroLower()
 		return
 	case m.isZero():
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -302,7 +295,7 @@ func (m *Dense) L(a Matrix) {
 		m.zeroUpper()
 		return
 	case m.isZero():
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac,
 			Stride: ac,
@@ -353,7 +346,7 @@ func (m *Dense) TCopy(a Matrix) {
 		w = *m
 	}
 	if w.isZero() {
-		w.mat = RawMatrix{
+		w.mat = blas64.General{
 			Rows: ac,
 			Cols: ar,
 			Data: use(w.mat.Data, ar*ac),
@@ -387,7 +380,7 @@ func (m *Dense) Stack(a, b Matrix) {
 	}
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar + br,
 			Cols:   ac,
 			Stride: ac,
@@ -410,7 +403,7 @@ func (m *Dense) Augment(a, b Matrix) {
 	}
 
 	if m.isZero() {
-		m.mat = RawMatrix{
+		m.mat = blas64.General{
 			Rows:   ar,
 			Cols:   ac + bc,
 			Stride: ac + bc,

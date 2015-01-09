@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
 )
 
 type LQFactor struct {
@@ -39,7 +40,7 @@ func LQ(a *Dense) LQFactor {
 	// Main loop.
 	for k := 0; k < m; k++ {
 		hh := Vec(lq.RowView(k))[k:]
-		norm := blasEngine.Dnrm2(len(hh), hh, 1)
+		norm := blas64.Nrm2(len(hh), blas64.Vector{Inc: 1, Data: hh})
 		lDiag[k] = norm
 
 		if norm != 0 {
@@ -50,7 +51,7 @@ func LQ(a *Dense) LQFactor {
 				// Form k-th Householder vector.
 				s := 1 / hhNorm
 				hh[0] -= norm
-				blasEngine.Dscal(len(hh), s, hh, 1)
+				blas64.Scal(len(hh), s, blas64.Vector{Inc: 1, Data: hh})
 
 				// Apply transformation to remaining columns.
 				if k < m-1 {
@@ -60,7 +61,10 @@ func LQ(a *Dense) LQFactor {
 
 					for j := 0; j < m-k-1; j++ {
 						dst := a.RowView(j)
-						blasEngine.Daxpy(len(dst), -projs[j], hh, 1, dst, 1)
+						blas64.Axpy(len(dst), -projs[j],
+							blas64.Vector{Inc: 1, Data: hh},
+							blas64.Vector{Inc: 1, Data: dst},
+						)
 					}
 				}
 			}
@@ -113,16 +117,16 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 
 			sub := x.View(k, 0, m-k, n).(*Dense)
 
-			blasEngine.Dgemv(
-				blas.Trans,
-				m-k, n,
-				1, sub.mat.Data, sub.mat.Stride,
-				hh, 1,
-				0, proj, 1,
+			blas64.Gemv(blas.Trans,
+				1, sub.mat, blas64.Vector{Inc: 1, Data: hh},
+				0, blas64.Vector{Inc: 1, Data: proj},
 			)
 			for i := k; i < m; i++ {
 				row := x.RowView(i)
-				blasEngine.Daxpy(n, -hh[i-k], proj, 1, row, 1)
+				blas64.Axpy(n, -hh[i-k],
+					blas64.Vector{Inc: 1, Data: proj},
+					blas64.Vector{Inc: 1, Data: row},
+				)
 			}
 		}
 	} else {
@@ -131,16 +135,16 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 
 			sub := x.View(k, 0, m-k, n).(*Dense)
 
-			blasEngine.Dgemv(
-				blas.Trans,
-				m-k, n,
-				1, sub.mat.Data, sub.mat.Stride,
-				hh, 1,
-				0, proj, 1,
+			blas64.Gemv(blas.Trans,
+				1, sub.mat, blas64.Vector{Inc: 1, Data: hh},
+				0, blas64.Vector{Inc: 1, Data: proj},
 			)
 			for i := k; i < m; i++ {
 				row := x.RowView(i)
-				blasEngine.Daxpy(n, -hh[i-k], proj, 1, row, 1)
+				blas64.Axpy(n, -hh[i-k],
+					blas64.Vector{Inc: 1, Data: proj},
+					blas64.Vector{Inc: 1, Data: row},
+				)
 			}
 		}
 	}
@@ -169,16 +173,20 @@ func (f LQFactor) Solve(b *Dense) (x *Dense) {
 		tau[i] = lq.at(i, i)
 		lq.set(i, i, lDiag[i])
 	}
-	blasEngine.Dtrsm(
-		blas.Left, blas.Lower, blas.NoTrans, blas.NonUnit,
-		bm, bn,
-		1, lq.mat.Data, lq.mat.Stride,
-		x.mat.Data, x.mat.Stride,
-	)
-
+	lqT := blas64.Triangular{
+		// N omitted since it is not used by Trsm.
+		Stride: lq.mat.Stride,
+		Data:   lq.mat.Data,
+		Uplo:   blas.Lower,
+		Diag:   blas.NonUnit,
+	}
+	x.mat.Rows = bm
+	blas64.Trsm(blas.Left, blas.NoTrans, 1, lqT, x.mat)
+	x.mat.Rows = n
 	for i := range tau {
 		lq.set(i, i, tau[i])
 	}
+
 	f.applyQTo(x, true)
 
 	return x

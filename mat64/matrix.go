@@ -10,6 +10,10 @@
 // If the matrix dimensions do not match the result, the method must panic.
 package mat64
 
+import (
+	"github.com/gonum/blas/blas64"
+)
+
 // Matrix is the basic matrix interface type.
 type Matrix interface {
 	// Dims returns the dimensions of a Matrix.
@@ -267,23 +271,16 @@ type BandWidther interface {
 	BandWidth() (k1, k2 int)
 }
 
-// RawMatrix represents a cblas native representation of a matrix.
-type RawMatrix struct {
-	Rows, Cols int
-	Stride     int
-	Data       []float64
-}
-
-// A RawMatrixSetter can set the underlying RawMatrix used by the reciever. There is no restriction
-// on the shape of the receiver. Changes to the receiver's elements will be reflected in the RawMatrix.Data.
+// A RawMatrixSetter can set the underlying blas64.General used by the receiver. There is no restriction
+// on the shape of the receiver. Changes to the receiver's elements will be reflected in the blas64.General.Data.
 type RawMatrixSetter interface {
-	SetRawMatrix(a RawMatrix)
+	SetRawMatrix(a blas64.General)
 }
 
-// A RawMatrixer can return a RawMatrix representation of the receiver. Changes to the RawMatrix.Data
+// A RawMatrixer can return a blas64.General representation of the receiver. Changes to the blas64.General.Data
 // slice will be reflected in the original matrix, changes to the Rows, Cols and Stride fields will not.
 type RawMatrixer interface {
-	RawMatrix() RawMatrix
+	RawMatrix() blas64.General
 }
 
 // Det returns the determinant of the matrix a.

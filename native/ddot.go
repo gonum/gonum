@@ -4,7 +4,7 @@
 
 // +build !amd64
 
-package goblas
+package native
 
 func ddotUnitary(x []float64, y []float64) (sum float64) {
 	for i, v := range x {

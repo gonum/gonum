@@ -40,8 +40,8 @@ printf $goblas <<EOH;
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package cblas provides bindings to a C BLAS library.
-package cblas
+// Package cgo provides bindings to a C BLAS library.
+package cgo
 
 /*
 #cgo CFLAGS: -g -O2
@@ -57,10 +57,10 @@ import (
 
 // Type check assertions:
 var (
-	_ blas.Float32    = Blas{}
-	_ blas.Float64    = Blas{}
-	_ blas.Complex64  = Blas{}
-	_ blas.Complex128 = Blas{}
+	_ blas.Float32    = Implementation{}
+	_ blas.Float64    = Implementation{}
+	_ blas.Complex64  = Implementation{}
+	_ blas.Complex128 = Implementation{}
 )
 
 // Type order is used to specify the matrix storage format. We still interact with
@@ -78,7 +78,7 @@ func max(a, b int) int {
 	return b
 }
 
-type Blas struct{}
+type Implementation struct{}
 
 // Special cases...
 
@@ -92,16 +92,16 @@ type drotmParams struct {
 	h    [4]float64
 }
 
-func (Blas) Srotg(a float32, b float32) (c float32, s float32, r float32, z float32) {
+func (Implementation) Srotg(a float32, b float32) (c float32, s float32, r float32, z float32) {
 	C.cblas_srotg((*C.float)(&a), (*C.float)(&b), (*C.float)(&c), (*C.float)(&s))
 	return c, s, a, b
 }
-func (Blas) Srotmg(d1 float32, d2 float32, b1 float32, b2 float32) (p blas.SrotmParams, rd1 float32, rd2 float32, rb1 float32) {
+func (Implementation) Srotmg(d1 float32, d2 float32, b1 float32, b2 float32) (p blas.SrotmParams, rd1 float32, rd2 float32, rb1 float32) {
 	var pi srotmParams
 	C.cblas_srotmg((*C.float)(&d1), (*C.float)(&d2), (*C.float)(&b1), C.float(b2), (*C.float)(unsafe.Pointer(&pi)))
 	return blas.SrotmParams{Flag: blas.Flag(pi.flag), H: pi.h}, d1, d2, b1
 }
-func (Blas) Srotm(n int, x []float32, incX int, y []float32, incY int, p blas.SrotmParams) {
+func (Implementation) Srotm(n int, x []float32, incX int, y []float32, incY int, p blas.SrotmParams) {
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -126,16 +126,16 @@ func (Blas) Srotm(n int, x []float32, incX int, y []float32, incY int, p blas.Sr
 	}
 	C.cblas_srotm(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(unsafe.Pointer(&pi)))
 }
-func (Blas) Drotg(a float64, b float64) (c float64, s float64, r float64, z float64) {
+func (Implementation) Drotg(a float64, b float64) (c float64, s float64, r float64, z float64) {
 	C.cblas_drotg((*C.double)(&a), (*C.double)(&b), (*C.double)(&c), (*C.double)(&s))
 	return c, s, a, b
 }
-func (Blas) Drotmg(d1 float64, d2 float64, b1 float64, b2 float64) (p blas.DrotmParams, rd1 float64, rd2 float64, rb1 float64) {
+func (Implementation) Drotmg(d1 float64, d2 float64, b1 float64, b2 float64) (p blas.DrotmParams, rd1 float64, rd2 float64, rb1 float64) {
 	var pi drotmParams
 	C.cblas_drotmg((*C.double)(&d1), (*C.double)(&d2), (*C.double)(&b1), C.double(b2), (*C.double)(unsafe.Pointer(&pi)))
 	return blas.DrotmParams{Flag: blas.Flag(pi.flag), H: pi.h}, d1, d2, b1
 }
-func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
+func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -160,7 +160,7 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 	}
 	C.cblas_drotm(C.int(n), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(unsafe.Pointer(&pi)))
 }
-func (Blas) Cdotu(n int, x []complex64, incX int, y []complex64, incY int) (dotu complex64) {
+func (Implementation) Cdotu(n int, x []complex64, incX int, y []complex64, incY int) (dotu complex64) {
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -179,7 +179,7 @@ func (Blas) Cdotu(n int, x []complex64, incX int, y []complex64, incY int) (dotu
 	C.cblas_cdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
 	return dotu
 }
-func (Blas) Cdotc(n int, x []complex64, incX int, y []complex64, incY int) (dotc complex64) {
+func (Implementation) Cdotc(n int, x []complex64, incX int, y []complex64, incY int) (dotc complex64) {
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -198,7 +198,7 @@ func (Blas) Cdotc(n int, x []complex64, incX int, y []complex64, incY int) (dotc
 	C.cblas_cdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
 	return dotc
 }
-func (Blas) Zdotu(n int, x []complex128, incX int, y []complex128, incY int) (dotu complex128) {
+func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, incY int) (dotu complex128) {
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -217,7 +217,7 @@ func (Blas) Zdotu(n int, x []complex128, incX int, y []complex128, incY int) (do
 	C.cblas_zdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
 	return dotu
 }
-func (Blas) Zdotc(n int, x []complex128, incX int, y []complex128, incY int) (dotc complex128) {
+func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, incY int) (dotc complex128) {
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -239,11 +239,11 @@ func (Blas) Zdotc(n int, x []complex128, incX int, y []complex128, incY int) (do
 EOH
 
 printf $goblas <<EOH unless $excludeAtlas;
-func (Blas) Crotg(a complex64, b complex64) (c complex64, s complex64, r complex64, z complex64) {
+func (Implementation) Crotg(a complex64, b complex64) (c complex64, s complex64, r complex64, z complex64) {
 	C.cblas_srotg(unsafe.Pointer(&a), unsafe.Pointer(&b), unsafe.Pointer(&c), unsafe.Pointer(&s))
 	return c, s, a, b
 }
-func (Blas) Zrotg(a complex128, b complex128) (c complex128, s complex128, r complex128, z complex128) {
+func (Implementation) Zrotg(a complex128, b complex128) (c complex128, s complex128, r complex128, z complex128) {
 	C.cblas_drotg(unsafe.Pointer(&a), unsafe.Pointer(&b), unsafe.Pointer(&c), unsafe.Pointer(&s))
 	return c, s, a, b
 }
@@ -307,7 +307,7 @@ sub processProto {
 	my $GoRet = $retConv{$ret};
 	my $complexType = $func;
 	$complexType =~ s/.*_[isd]?([zc]).*/$1/;
-	print $goblas "func (Blas) ".Gofunc($func)."(".processParamToGo($func, $paramList, $complexType).") ".$GoRet."{\n";
+	print $goblas "func (Implementation) ".Gofunc($func)."(".processParamToGo($func, $paramList, $complexType).") ".$GoRet."{\n";
 	print $goblas processParamToChecks($func, $paramList);
 	print $goblas "\t";
 	if ($ret ne 'void') {

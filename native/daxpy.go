@@ -4,7 +4,7 @@
 
 // +build !amd64
 
-package goblas
+package native
 
 func daxpyUnitary(alpha float64, x, y []float64) {
 	for i, v := range x {

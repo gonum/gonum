@@ -1,11 +1,11 @@
-package goblas
+package native
 
 import "github.com/gonum/blas"
 
 // See http://www.netlib.org/lapack/explore-html/d4/de1/_l_i_c_e_n_s_e_source.html
 // for more license information
 
-var _ blas.Float64Level2 = Blasser
+var _ blas.Float64Level2 = Implementation{}
 
 /*
 	Accessing guidelines:
@@ -91,7 +91,7 @@ func min(a, b int) int {
 
 // Dgemv computes y = alpha*a*x + beta*y if tA = blas.NoTrans
 // or alpha*A^T*x + beta*y if tA = blas.Trans or blas.ConjTrans
-func (b Blas) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic(badTranspose)
 	}
@@ -138,9 +138,9 @@ func (b Blas) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda
 
 	// First form y := beta * y
 	if incY > 0 {
-		b.Dscal(lenY, beta, y, incY)
+		Implementation{}.Dscal(lenY, beta, y, incY)
 	} else {
-		b.Dscal(lenY, beta, y, -incY)
+		Implementation{}.Dscal(lenY, beta, y, -incY)
 	}
 
 	if alpha == 0 {
@@ -206,7 +206,7 @@ func (b Blas) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda
 //    A := alpha*x*y**T + A,
 // where alpha is a scalar, x is an m element vector, y is an n element
 // vector and A is an m by n matrix.
-func (Blas) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	// Check inputs
 	if m < 0 {
 		panic("m < 0")
@@ -276,7 +276,7 @@ func (Blas) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, in
 // kl subdiagonals and ku super-diagonals. m and n refer to the size of the full
 // dense matrix, not the actual number of rows and columns in the contracted banded
 // matrix.
-func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic(badTranspose)
 	}
@@ -328,9 +328,9 @@ func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []floa
 
 	// First form y := beta * y
 	if incY > 0 {
-		b.Dscal(lenY, beta, y, incY)
+		Implementation{}.Dscal(lenY, beta, y, incY)
 	} else {
-		b.Dscal(lenY, beta, y, -incY)
+		Implementation{}.Dscal(lenY, beta, y, -incY)
 	}
 
 	if alpha == 0 {
@@ -410,7 +410,7 @@ func (b Blas) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []floa
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix.
-func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
+func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -578,7 +578,7 @@ func (Blas) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func (Blas) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
+func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
 	// Test the input parameters
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
@@ -745,7 +745,7 @@ func (Blas) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 //    y := alpha*A*x + beta*y,
 // where alpha and beta are scalars, x and y are n element vectors and
 // A is an n by n symmetric matrix.
-func (b Blas) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	// Check inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -783,9 +783,9 @@ func (b Blas) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x 
 	// Form y = beta * y
 	if beta != 1 {
 		if incY > 0 {
-			b.Dscal(n, beta, y, incY)
+			Implementation{}.Dscal(n, beta, y, incY)
 		} else {
-			b.Dscal(n, beta, y, -incY)
+			Implementation{}.Dscal(n, beta, y, -incY)
 		}
 	}
 
@@ -883,7 +883,7 @@ func (b Blas) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x 
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular band matrix.
-func (Blas) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -1084,7 +1084,7 @@ func (Blas) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []fl
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix represented in packed storage format.
-func (Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
+func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1255,7 +1255,7 @@ func (Blas) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 // Dtbsv solves A * x = b where A is a triangular banded matrix with k diagonals
 // above the main diagonal. A has compact banded storage.
 // The result in stored in-place into x.
-func (Blas) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -1455,7 +1455,7 @@ func (Blas) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []fl
 }
 
 // Dsbmv performs y = alpha*A*x + beta*y where A is a symmetric banded matrix.
-func (b Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -1492,9 +1492,9 @@ func (b Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int,
 
 	// First form y := beta * y
 	if incY > 0 {
-		b.Dscal(lenY, beta, y, incY)
+		Implementation{}.Dscal(lenY, beta, y, incY)
 	} else {
-		b.Dscal(lenY, beta, y, -incY)
+		Implementation{}.Dscal(lenY, beta, y, -incY)
 	}
 
 	if alpha == 0 {
@@ -1586,7 +1586,7 @@ func (b Blas) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int,
 }
 
 // Dsyr computes a = alpha*x*x^T + a where a is an nxn symmetric matrix
-func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
+func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -1670,7 +1670,7 @@ func (Blas) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []
 
 // Dsyr2 performs the symmetric rank-2 update
 //  a += alpha * x * y^T + alpha * y * x^T
-func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -1765,7 +1765,7 @@ func (Blas) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y [
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
+func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1936,7 +1936,7 @@ func (Blas) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float
 //    y := alpha*A*x + beta*y,
 // where alpha and beta are scalars, x and y are n element vectors and
 // A is an n by n symmetric matrix in packed format.
-func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64, incX int, beta float64, y []float64, incY int) {
+func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64, incX int, beta float64, y []float64, incY int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1971,9 +1971,9 @@ func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64
 	// Form y = beta * y
 	if beta != 1 {
 		if incY > 0 {
-			b.Dscal(n, beta, y, incY)
+			Implementation{}.Dscal(n, beta, y, incY)
 		} else {
-			b.Dscal(n, beta, y, -incY)
+			Implementation{}.Dscal(n, beta, y, -incY)
 		}
 	}
 
@@ -2070,7 +2070,7 @@ func (b Blas) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64
 }
 
 // Dspr computes a = alpha*x*x^T + a where a is an nxn symmetric matrix in packed format.
-func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64) {
+func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -2150,7 +2150,7 @@ func (Blas) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []
 // Dspr2 performs the symmetric rank-2 update
 //  a += alpha * x * y^T + alpha * y * x^T
 // where a is in packed format.
-func (Blas) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
+func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}

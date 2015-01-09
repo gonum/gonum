@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package goblas is a Go implementation of the BLAS API.
+// Package native is a Go implementation of the BLAS API.
 //
 // Uses the netlib standard. Other implementations may differ. Difference
 // is that the code panics for n < 0 and incx == 0 rather than returning zero.
 // (Documentation says incx must not be zero)
 //
 // TODO: Improve documentation
-package goblas
+package native
 
 import (
 	"math"
@@ -17,11 +17,9 @@ import (
 	"github.com/gonum/blas"
 )
 
-type Blas struct{}
+type Implementation struct{}
 
-var Blasser Blas
-
-var _ blas.Float64Level1 = Blasser
+var _ blas.Float64Level1 = Implementation{}
 
 const (
 	negativeN = "blas: negative number of elements"
@@ -44,7 +42,7 @@ const (
 */
 
 // Ddot computes the dot product of the two vectors \sum_i x[i]*y[i]
-func (Blas) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
+func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
 	if n < 0 {
 		panic(negativeN)
 	}
@@ -73,7 +71,7 @@ func (Blas) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
 // Dnrm2 computes the euclidean norm of a vector, sqrt(x'x).
 // This function returns 0 if the increment is negative. This behavior matches
 // the reference implementation.
-func (Blas) Dnrm2(n int, x []float64, incX int) float64 {
+func (Implementation) Dnrm2(n int, x []float64, incX int) float64 {
 	if incX < 1 {
 		if incX == 0 {
 			panic(zeroInc)
@@ -124,7 +122,7 @@ func (Blas) Dnrm2(n int, x []float64, incX int) float64 {
 
 // Dasum computes the sum of the absolute values of the elements of x
 // Dasum returns 0 if the increment is negative.
-func (Blas) Dasum(n int, x []float64, incX int) float64 {
+func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 	var sum float64
 	if n < 0 {
 		panic(negativeN)
@@ -151,7 +149,7 @@ func (Blas) Dasum(n int, x []float64, incX int) float64 {
 // Idamax returns the index of the largest element of x. If there are multiple
 // such indices it returns the earliest. Returns -1 if increment is negative or if
 // n == 0.
-func (Blas) Idamax(n int, x []float64, incX int) int {
+func (Implementation) Idamax(n int, x []float64, incX int) int {
 	if incX < 1 {
 		if incX == 0 {
 			panic(zeroInc)
@@ -194,7 +192,7 @@ func (Blas) Idamax(n int, x []float64, incX int) int {
 }
 
 // Dswap exchanges the elements of two vectors.
-func (Blas) Dswap(n int, x []float64, incX int, y []float64, incY int) {
+func (Implementation) Dswap(n int, x []float64, incX int, y []float64, incY int) {
 	if n < 1 {
 		if n == 0 {
 			return
@@ -226,7 +224,7 @@ func (Blas) Dswap(n int, x []float64, incX int, y []float64, incY int) {
 }
 
 // Dcopy copies the elements of x into the elements of y.
-func (Blas) Dcopy(n int, x []float64, incX int, y []float64, incY int) {
+func (Implementation) Dcopy(n int, x []float64, incX int, y []float64, incY int) {
 	if n < 1 {
 		if n == 0 {
 			return
@@ -255,7 +253,7 @@ func (Blas) Dcopy(n int, x []float64, incX int, y []float64, incY int) {
 }
 
 // Daxpy computes y <- α x + y.
-func (Blas) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY int) {
+func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY int) {
 	if n < 1 {
 		if n == 0 {
 			return
@@ -303,7 +301,7 @@ func (Blas) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY
 // sign for r when a or b is zero than the BLAS technical manual. Other
 // implementations match the manual, not the reference implementation. This
 // function agrees with the manual.
-func (Blas) Drotg(a, b float64) (c, s, r, z float64) {
+func (Implementation) Drotg(a, b float64) (c, s, r, z float64) {
 	if b == 0 && a == 0 {
 		return 1, 0, a, 0
 	}
@@ -331,7 +329,7 @@ func (Blas) Drotg(a, b float64) (c, s, r, z float64) {
 // Drotmg computes the modified Givens rotation. See
 // http://www.netlib.org/lapack/explore-html/df/deb/drotmg_8f.html
 // for more details.
-func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
+func (Implementation) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
 	var p1, p2, q1, q2, u float64
 
 	gam := 4096.0
@@ -449,7 +447,7 @@ func (Blas) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 fl
 }
 
 // Drot applies a plane transformation.
-func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64, s float64) {
+func (Implementation) Drot(n int, x []float64, incX int, y []float64, incY int, c float64, s float64) {
 	if n < 1 {
 		if n == 0 {
 			return
@@ -485,7 +483,7 @@ func (Blas) Drot(n int, x []float64, incX int, y []float64, incY int, c float64,
 }
 
 // Drotm applies the modified Givens rotation to the 2 x N matrix.
-func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
+func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
 	if n <= 0 {
 		if n == 0 {
 			return
@@ -541,7 +539,7 @@ func (Blas) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.Dr
 }
 
 // Dscal scales x by alpha. Has no effect if incX < 0.
-func (Blas) Dscal(n int, alpha float64, x []float64, incX int) {
+func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
 	if incX < 1 {
 		if incX == 0 {
 			panic(zeroInc)

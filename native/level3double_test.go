@@ -1,4 +1,4 @@
-package cblas
+package native
 
 import (
 	"testing"
@@ -7,25 +7,25 @@ import (
 )
 
 func TestDgemm(t *testing.T) {
-	testblas.TestDgemm(t, blasser)
+	testblas.TestDgemm(t, impl)
 }
 
 func TestDsymm(t *testing.T) {
-	testblas.DsymmTest(t, blasser)
+	testblas.DsymmTest(t, impl)
 }
 
 func TestDtrsm(t *testing.T) {
-	testblas.DtrsmTest(t, blasser)
+	testblas.DtrsmTest(t, impl)
 }
 
 func TestDsyrk(t *testing.T) {
-	testblas.DsyrkTest(t, blasser)
+	testblas.DsyrkTest(t, impl)
 }
 
 func TestDsyr2k(t *testing.T) {
-	testblas.Dsyr2kTest(t, blasser)
+	testblas.Dsyr2kTest(t, impl)
 }
 
 func TestDtrmm(t *testing.T) {
-	testblas.DtrmmTest(t, blasser)
+	testblas.DtrmmTest(t, impl)
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package goblas
+package native
 
 func daxpyUnitary(alpha float64, x, y []float64)
 func daxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)

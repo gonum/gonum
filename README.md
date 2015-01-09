@@ -19,7 +19,7 @@ If you want to use OpenBLAS, install it in any directory:
 
 Then install the cblas package:
 ```sh
-  cd $GOPATH/src/github.com/gonum/blas/cblas
+  cd $GOPATH/src/github.com/gonum/blas/cgo
   CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install 
 ```
 
@@ -29,13 +29,13 @@ For Windows you can download binary packages for OpenBLAS at
 If you want to use a different BLAS package such as the Intel MKL you can
 adjust the `CGO_LDFLAGS` variable:
 ```sh
-  cd $GOPATH/src/github.com/gonum/blas/cblas
+  cd $GOPATH/src/github.com/gonum/blas/cgo
   CGO_LDFLAGS="-lmkl_rt" go install
 ```
 
 On OS X the easiest solution is to use the libraries provided by the system:
 ```sh
-  cd $GOPATH/src/github.com/gonum/blas/cblas
+  cd $GOPATH/src/github.com/gonum/blas/cgo
   CGO_LDFLAGS="-framework Accelerate" go install
 ```
 
@@ -45,11 +45,11 @@ On OS X the easiest solution is to use the libraries provided by the system:
 
 Defines [BLAS API](http://www.netlib.org/blas/blast-forum/cinterface.pdf) split in several interfaces
 
-### blas/goblas
+### blas/native
 
 Go implementation of the BLAS API (incomplete, implements the float64 API)
 
-### blas/cblas
+### blas/cgo
 
 Binding to a C implementation of the cblas interface (e.g. ATLAS, OpenBLAS, Intel MKL)
 
@@ -68,12 +68,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/gonum/blas/cblas"
+	"github.com/gonum/blas/cgo"
 	"github.com/gonum/blas/dbw"
 )
 
 func init() {
-	dbw.Register(cblas.Blas{})
+	dbw.Register(cgo.Implementation{})
 }
 
 func main() {

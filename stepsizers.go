@@ -41,19 +41,20 @@ func (c ConstantStepSize) StepSize(l Location, dir []float64) float64 {
 // descent directions, such as gradient descent or conjugate gradient methods.
 // The step size is bounded away from zero.
 type QuadraticStepSize struct {
-	// If the relative change in the objective function is larger than
-	// Threshold, the step size is estimated by quadratic interpolation,
-	// otherwise it is set to 2*previous step size.
-	// The default value is 1e-12.
+	// Threshold determines that the initial step size should be estimated by
+	// quadratic interpolation when the relative change in the objective
+	// function is larger than Threshold.  Otherwise the initial step size is
+	// set to 2*previous step size.
+	// If Threshold is zero, it will be set to 1e-12.
 	Threshold float64
-	// The step size at the first iteration is estimated as InitialStepFactor / |g|_∞.
+	// InitialStepFactor sets the step size for the first iteration to be InitialStepFactor / |g|_∞.
 	// If InitialStepFactor is zero, it will be set to one.
 	InitialStepFactor float64
-	// The estimated step size is always greater than or equal to MinStepSize.
+	// MinStepSize is the lower bound on the estimated step size.
 	// MinStepSize times GradientAbsTol should always be greater than machine epsilon.
 	// If MinStepSize is zero, it will be set to 1e-3.
 	MinStepSize float64
-	// The estimated step size is always lower than or equal to MaxStepSize.
+	// MaxStepSize is the upper bound on the estimated step size.
 	// If MaxStepSize is zero, it will be set to 1.01.
 	MaxStepSize float64
 
@@ -127,14 +128,14 @@ func (q *QuadraticStepSize) StepSize(l Location, dir []float64) (stepSize float6
 // This is useful for line search methods that do not produce well-scaled
 // descent directions, such as gradient descent or conjugate gradient methods.
 type FirstOrderStepSize struct {
-	// The step size at the first iteration is estimated as InitialStepFactor / |g|_∞.
+	// InitialStepFactor sets the step size for the first iteration to be InitialStepFactor / |g|_∞.
 	// If InitialStepFactor is zero, it will be set to one.
 	InitialStepFactor float64
-	// The estimated step size is always greater than or equal to MinStepSize.
+	// MinStepSize is the lower bound on the estimated step size.
 	// MinStepSize times GradientAbsTol should always be greater than machine epsilon.
 	// If MinStepSize is zero, it will be set to 1e-3.
 	MinStepSize float64
-	// The estimated step size is always lower than or equal to MaxStepSize.
+	// MaxStepSize is the upper bound on the estimated step size.
 	// If MaxStepSize is zero, it will be set to 1.01.
 	MaxStepSize float64
 

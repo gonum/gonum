@@ -13,15 +13,15 @@ var (
 	// ErrInf signifies the initial function value is Inf.
 	ErrInf = errors.New("optimize: initial function value is Inf")
 
-	// ErrLinesearchIterations signifies the linesearch has iterated too many times.
-	// This may occur if the gradient tolerance is set too low.
+	// ErrLinesearchFailure signifies the linesearch has iterated too many
+	// times. This may occur if the gradient tolerance is set too low.
 	ErrLinesearchFailure = errors.New("linesearch: failed to converge")
 
 	// ErrNaN signifies the initial function value is NaN.
 	ErrNaN = errors.New("optimize: initial function value is NaN")
 
-	// ErrNonNegativestepDirection signifies that the linesearch has received a step
-	// direction in which the gradient is not negative.
+	// ErrNonNegativeStepDirection signifies that the linesearch has received a
+	// step direction in which the gradient is not negative.
 	ErrNonNegativeStepDirection = errors.New("linesearch: projected gradient not negative")
 
 	// ErrZeroDimensional signifies an optimization was called with an input of length 0.

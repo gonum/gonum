@@ -532,7 +532,7 @@ func (Penalty2) F(x []float64) (sum float64) {
 	for i := 0; i < dim; i++ {
 		s += float64(dim-i) * x[i] * x[i]
 	}
-	s -= 1
+	s--
 
 	for i := 1; i < dim; i++ {
 		yi := math.Exp(float64(i+1)/10) + math.Exp(float64(i)/10)
@@ -558,7 +558,7 @@ func (Penalty2) Df(x, grad []float64) {
 	for i := 0; i < dim; i++ {
 		s += float64(dim-i) * x[i] * x[i]
 	}
-	s -= 1
+	s--
 
 	for i := 0; i < dim; i++ {
 		grad[i] = 4 * s * float64(dim-i) * x[i]

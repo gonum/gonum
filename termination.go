@@ -73,22 +73,22 @@ var statuses = []struct {
 	{
 		name:  "IterationLimit",
 		early: true,
-		err:   errors.New("optimize: maximum number of major iterations reached."),
+		err:   errors.New("optimize: maximum number of major iterations reached"),
 	},
 	{
 		name:  "RuntimeLimit",
 		early: true,
-		err:   errors.New("optimize: maximum runtime reached."),
+		err:   errors.New("optimize: maximum runtime reached"),
 	},
 	{
 		name:  "FunctionEvaluationLimit",
 		early: true,
-		err:   errors.New("optimize: maximum number of function evaluations reached."),
+		err:   errors.New("optimize: maximum number of function evaluations reached"),
 	},
 	{
 		name:  "GradientEvaluationLimit",
 		early: true,
-		err:   errors.New("optimize: maximum number of gradient evaluations reached."),
+		err:   errors.New("optimize: maximum number of gradient evaluations reached"),
 	},
 }
 

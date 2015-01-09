@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-// EvalutationType is used by the optimizer to specify information needed
-// from the objective function.
+// EvaluationType is used by the optimizer to specify information needed from
+// the objective function.
 type EvaluationType int
 
 const (

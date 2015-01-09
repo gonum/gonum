@@ -157,7 +157,7 @@ func (fo *FirstOrderStepSize) Init(l Location, dir []float64) (stepSize float64)
 	if fo.MaxStepSize == 0 {
 		fo.MaxStepSize = firstOrderMaximumStepSize
 	}
-	if q.MaxStepSize <= q.MinStepSize {
+	if fo.MaxStepSize <= fo.MinStepSize {
 		panic("optimize: MinStepSize not smaller than MaxStepSize")
 	}
 

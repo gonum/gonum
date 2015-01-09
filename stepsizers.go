@@ -65,7 +65,6 @@ type QuadraticStepSize struct {
 }
 
 func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepSize float64) {
-	q.xPrev = resize(q.xPrev, len(l.X))
 	if q.Threshold == 0 {
 		q.Threshold = quadraticThreshold
 	}
@@ -78,6 +77,9 @@ func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepSize float64) {
 	if q.MaxStepSize == 0 {
 		q.MaxStepSize = quadraticMaximumStepSize
 	}
+	if q.MaxStepSize <= q.MinStepSize {
+		panic("optimize: MinStepSize not smaller than MaxStepSize")
+	}
 
 	gNorm := floats.Norm(l.Gradient, math.Inf(1))
 	stepSize = math.Max(q.MinStepSize, math.Min(q.InitialStepFactor/gNorm, q.MaxStepSize))
@@ -85,6 +87,7 @@ func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepSize float64) {
 	q.fPrev = l.F
 	q.dirPrevNorm = floats.Norm(dir, 2)
 	q.projGradPrev = floats.Dot(l.Gradient, dir)
+	q.xPrev = resize(q.xPrev, len(l.X))
 	copy(q.xPrev, l.X)
 	return stepSize
 }
@@ -145,7 +148,6 @@ type FirstOrderStepSize struct {
 }
 
 func (fo *FirstOrderStepSize) Init(l Location, dir []float64) (stepSize float64) {
-	fo.xPrev = resize(fo.xPrev, len(l.X))
 	if fo.InitialStepFactor == 0 {
 		fo.InitialStepFactor = initialStepFactor
 	}
@@ -155,12 +157,16 @@ func (fo *FirstOrderStepSize) Init(l Location, dir []float64) (stepSize float64)
 	if fo.MaxStepSize == 0 {
 		fo.MaxStepSize = firstOrderMaximumStepSize
 	}
+	if q.MaxStepSize <= q.MinStepSize {
+		panic("optimize: MinStepSize not smaller than MaxStepSize")
+	}
 
 	gNorm := floats.Norm(l.Gradient, math.Inf(1))
 	stepSize = math.Max(fo.MinStepSize, math.Min(fo.InitialStepFactor/gNorm, fo.MaxStepSize))
 
 	fo.dirPrevNorm = floats.Norm(dir, 2)
 	fo.projGradPrev = floats.Dot(l.Gradient, dir)
+	fo.xPrev = resize(fo.xPrev, len(l.X))
 	copy(fo.xPrev, l.X)
 	return stepSize
 }

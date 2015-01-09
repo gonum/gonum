@@ -14,7 +14,7 @@ const (
 	initialStepFactor = 1
 
 	quadraticMinimumStepSize = 1e-3
-	quadraticMaximumStepSize = 1.01
+	quadraticMaximumStepSize = 1
 	quadraticThreshold       = 1e-12
 
 	firstOrderMinimumStepSize = quadraticMinimumStepSize
@@ -55,7 +55,7 @@ type QuadraticStepSize struct {
 	// If MinStepSize is zero, it will be set to 1e-3.
 	MinStepSize float64
 	// MaxStepSize is the upper bound on the estimated step size.
-	// If MaxStepSize is zero, it will be set to 1.01.
+	// If MaxStepSize is zero, it will be set to 1.
 	MaxStepSize float64
 
 	fPrev        float64
@@ -136,7 +136,7 @@ type FirstOrderStepSize struct {
 	// If MinStepSize is zero, it will be set to 1e-3.
 	MinStepSize float64
 	// MaxStepSize is the upper bound on the estimated step size.
-	// If MaxStepSize is zero, it will be set to 1.01.
+	// If MaxStepSize is zero, it will be set to 1.
 	MaxStepSize float64
 
 	dirPrevNorm  float64

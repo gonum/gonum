@@ -1212,7 +1212,7 @@ func densePreMulBench(b *testing.B, size int, rho float64) {
 	b.StopTimer()
 	a, _ := randDense(size, rho, rand.NormFloat64)
 	d, _ := randDense(size, rho, rand.NormFloat64)
-	wd := NewDense(size, size, nil)
+	wd = NewDense(size, size, nil)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		wd.Mul(a, d)

@@ -6,6 +6,7 @@ package mat64
 
 import (
 	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
 )
 
 var (
@@ -80,14 +81,9 @@ func (m *Vec) Mul(a, b Matrix) {
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
-		blasEngine.Dgemv(
-			blas.NoTrans,
-			ar, ac,
-			1.,
-			amat.Data, amat.Stride,
-			bv, 1,
-			0.,
-			w, 1,
+		blas64.Gemv(blas.NoTrans,
+			1, amat, blas64.Vector{Inc: 1, Data: bv},
+			0, blas64.Vector{Inc: 1, Data: w},
 		)
 		*m = w
 		return
@@ -96,7 +92,10 @@ func (m *Vec) Mul(a, b Matrix) {
 	if a, ok := a.(Vectorer); ok {
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
-			w[r] = blasEngine.Ddot(ac, a.Row(row, r), 1, bv, 1)
+			w[r] = blas64.Dot(ac,
+				blas64.Vector{Inc: 1, Data: a.Row(row, r)},
+				blas64.Vector{Inc: 1, Data: bv},
+			)
 		}
 		*m = w
 		return

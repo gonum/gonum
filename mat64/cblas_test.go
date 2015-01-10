@@ -7,9 +7,10 @@
 package mat64
 
 import (
-	"github.com/gonum/blas/cblas"
+	"github.com/gonum/blas/blas64"
+	"github.com/gonum/blas/cgo"
 )
 
 func init() {
-	Register(cblas.Blas{})
+	blas64.Use(cgo.Implementation{})
 }

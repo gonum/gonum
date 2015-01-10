@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
 )
 
@@ -108,15 +109,11 @@ func TestMul(t *testing.T) {
 
 		cvec := make([]float64, ar*bc)
 
-		// Get correct matrix multiply answer from Dgemm
-		blasEngine.Dgemm(
-			blas.NoTrans, blas.NoTrans,
-			ar, bc, ac,
-			1.,
-			avec, ac,
-			bvec, bc,
-			0.,
-			cvec, bc)
+		// Get correct matrix multiply answer from blas64.Gemm
+		blas64.Gemm(blas.NoTrans, blas.NoTrans,
+			1, a.mat, b.mat,
+			0, blas64.General{Rows: ar, Cols: bc, Stride: bc, Data: cvec},
+		)
 
 		avecCopy := append([]float64{}, avec...)
 		bvecCopy := append([]float64{}, bvec...)

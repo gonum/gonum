@@ -332,25 +332,30 @@ func TestHistogram(t *testing.T) {
 	}{
 		{
 			x:        []float64{1, 3, 5, 6, 7, 8},
-			dividers: []float64{2, 4, 6, 7},
+			dividers: []float64{0, 2, 4, 6, 7, 9},
 			ans:      []float64{1, 1, 1, 1, 2},
 		},
 		{
 			x:        []float64{1, 3, 5, 6, 7, 8},
-			dividers: []float64{2, 4, 6, 7},
+			dividers: []float64{1, 2, 4, 6, 7, 9},
 			weights:  []float64{1, 2, 1, 1, 1, 2},
 			ans:      []float64{1, 2, 1, 1, 3},
 		},
 		{
 			x:        []float64{1, 8},
-			dividers: []float64{2, 4, 6, 7},
+			dividers: []float64{0, 2, 4, 6, 7, 9},
 			weights:  []float64{1, 2},
 			ans:      []float64{1, 0, 0, 0, 2},
 		},
 		{
 			x:        []float64{1, 8},
-			dividers: []float64{2, 4, 6, 7},
+			dividers: []float64{0, 2, 4, 6, 7, 9},
 			ans:      []float64{1, 0, 0, 0, 1},
+		},
+		{
+			x:        []float64{},
+			dividers: []float64{1, 3},
+			ans:      []float64{0},
 		},
 	} {
 		hist := Histogram(nil, test.dividers, test.x, test.weights)
@@ -372,7 +377,7 @@ func TestHistogram(t *testing.T) {
 			weights: []float64{1, 1, 1, 1},
 		},
 		{
-			name:     "len(dividers) != len(count)",
+			name:     "len(count) != len(dividers) - 1",
 			x:        []float64{1, 3, 5, 6, 7, 8},
 			dividers: []float64{1, 4, 9},
 			count:    make([]float64, 6),
@@ -387,6 +392,21 @@ func TestHistogram(t *testing.T) {
 			x:        []float64{1, 5, 2, 9, 7, 8},
 			dividers: []float64{1, 4, 9},
 		},
+		{
+			name:     "fewer than 2 dividers",
+			x:        []float64{1, 2, 3},
+			dividers: []float64{5},
+		},
+		{
+			name:     "x too large",
+			x:        []float64{1, 2, 3},
+			dividers: []float64{1, 3},
+		},
+		{
+			name:     "x too small",
+			x:        []float64{1, 2, 3},
+			dividers: []float64{2, 3},
+		},
 	} {
 		if !Panics(func() { Histogram(test.count, test.dividers, test.x, test.weights) }) {
 			t.Errorf("Histogram did not panic when %s", test.name)
@@ -399,26 +419,25 @@ func ExampleHistogram() {
 	for i := range x {
 		x[i] = 1.1 * float64(i) // x data ranges from 0 to 110
 	}
-	dividers := []float64{7, 20, 100, 1000}
+	dividers := []float64{0, 7, 20, 100, 1000}
 	fmt.Println(`Histogram counts the amount of data in the bins specified by
-the dividers. In this data set, there are 7 data points less than 7 (dividers[0]),
-12 data points between 7 and 20 (dividers[2] and dividers[1]), and 0 data points
-above 1000. Since dividers has length 4, there will be 5 bins.`)
+the dividers. In this data set, there are 7 data points less than 7 (between dividers[0]
+and dividers[1]), 12 data points between 7 and 20 (dividers[1] and dividers[2]),
+and 0 data points above 1000. Since dividers has length 5, there will be 4 bins.`)
 	hist := Histogram(nil, dividers, x, nil)
 	fmt.Printf("Hist = %v\n", hist)
 
 	fmt.Println()
 	fmt.Println("For ease, the floats Span function can be used to set the dividers")
 	nBins := 10
-	// Create one fewer divider than bins, but add two to work with Span (see
-	// note below)
 	dividers = make([]float64, nBins+1)
 	min, _ := floats.Min(x)
 	max, _ := floats.Max(x)
+	// Increase the maximum divider so that the maximum value of x is contained
+	// within the last bucket.
+	max += 1
 	floats.Span(dividers, min, max)
 	// Span includes the min and the max. Trim the dividers to create 10 buckets
-	dividers = dividers[1 : len(dividers)-1]
-	fmt.Println("len dividers = ", len(dividers))
 	hist = Histogram(nil, dividers, x, nil)
 	fmt.Printf("Hist = %v\n", hist)
 	fmt.Println()
@@ -433,18 +452,17 @@ the count field in order to avoid extra garbage`)
 
 	// Output:
 	// Histogram counts the amount of data in the bins specified by
-	// the dividers. In this data set, there are 7 data points less than 7 (dividers[0]),
-	// 12 data points between 7 and 20 (dividers[2] and dividers[1]), and 0 data points
-	// above 1000. Since dividers has length 4, there will be 5 bins.
-	// Hist = [7 12 72 10 0]
+	// the dividers. In this data set, there are 7 data points less than 7 (between dividers[0]
+	// and dividers[1]), 12 data points between 7 and 20 (dividers[1] and dividers[2]),
+	// and 0 data points above 1000. Since dividers has length 5, there will be 4 bins.
+	// Hist = [7 12 72 10]
 	//
 	// For ease, the floats Span function can be used to set the dividers
-	// len dividers =  9
-	// Hist = [11 10 10 10 9 11 10 10 9 11]
+	// Hist = [11 10 10 10 10 10 10 10 10 10]
 	//
 	// Histogram also works with weighted data, and allows reusing of
 	// the count field in order to avoid extra garbage
-	// Weighted Hist = [77 175 275 375 423 627 675 775 783 1067]
+	// Weighted Hist = [77 175 275 375 475 575 675 775 875 975]
 }
 
 func TestJensenShannon(t *testing.T) {

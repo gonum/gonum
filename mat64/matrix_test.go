@@ -269,7 +269,7 @@ func (s *S) TestSolve(c *check.C) {
 			var err error
 			x, err = Solve(a, b)
 			if (err == ErrSingular) != test.singular {
-				c.Error("Unexpected error for Solve %v: got:%v", test.name, err)
+				c.Errorf("Unexpected error for Solve %v: got:%v", test.name, err)
 			}
 		}
 

@@ -80,17 +80,26 @@ func TestGradient(t *testing.T) {
 
 		settings := DefaultSettings()
 		settings.Method = test.method
-		gradient := make([]float64, len(x))
+
+		// try with gradient nil
+		gradient := Gradient(nil, r.F, x, settings)
+		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
+			t.Errorf("Case %v: gradient mismatch in serial with nil. Want: %v, Got: %v.", i, trueGradient, gradient)
+		}
+		if !floats.Equal(x, xcopy) {
+			t.Errorf("Case %v: x modified during call to gradient in serial with nil.", i)
+		}
+
 		for i := range gradient {
 			gradient[i] = rand.Float64()
 		}
 
-		Gradient(r.F, x, settings, gradient)
+		Gradient(gradient, r.F, x, settings)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch in serial. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
 		if !floats.Equal(x, xcopy) {
-			t.Errorf("Case %v: x modified during call to gradient in serial", i)
+			t.Errorf("Case %v: x modified during call to gradient in serial with non-nil.", i)
 		}
 
 		// Try with known value
@@ -99,7 +108,7 @@ func TestGradient(t *testing.T) {
 		}
 		settings.OriginKnown = true
 		settings.OriginValue = r.F(x)
-		Gradient(r.F, x, settings, gradient)
+		Gradient(gradient, r.F, x, settings)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with known origin in serial. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
@@ -110,7 +119,7 @@ func TestGradient(t *testing.T) {
 		}
 		settings.Concurrent = true
 		settings.OriginKnown = false
-		Gradient(r.F, x, settings, gradient)
+		Gradient(gradient, r.F, x, settings)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with unknown origin in parallel. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
@@ -123,7 +132,7 @@ func TestGradient(t *testing.T) {
 			gradient[i] = rand.Float64()
 		}
 		settings.OriginKnown = true
-		Gradient(r.F, x, settings, gradient)
+		Gradient(gradient, r.F, x, settings)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with known origin in parallel. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}

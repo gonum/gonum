@@ -456,25 +456,41 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 		panic(ErrShape)
 	}
 
-	//TODO(jonlawlor): if we are performing a * a' or a' * a, then make a call to
-	// blas.Dsyrk instead of blas.Dgemm.
-
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
-			var aOp, bOp blas.Transpose
-			if aTrans {
-				aOp = blas.Trans
+			amat := a.RawMatrix()
+			if a == b && aTrans != bTrans {
+				var op blas.Transpose
+				if aTrans {
+					op = blas.Trans
+				} else {
+					op = blas.NoTrans
+				}
+				blas64.Syrk(op, 1, amat, 0, blas64.Symmetric{N: w.mat.Rows, Stride: w.mat.Stride, Data: w.mat.Data, Uplo: blas.Upper})
+
+				// Fill lower matrix with result.
+				// TODO(kortschak): Investigate whether using blas64.Copy improves the performance of this significantly.
+				for i := 0; i < w.mat.Rows; i++ {
+					for j := i + 1; j < w.mat.Cols; j++ {
+						w.set(j, i, w.at(i, j))
+					}
+				}
 			} else {
-				aOp = blas.NoTrans
-			}
-			if bTrans {
-				bOp = blas.Trans
-			} else {
-				bOp = blas.NoTrans
+				var aOp, bOp blas.Transpose
+				if aTrans {
+					aOp = blas.Trans
+				} else {
+					aOp = blas.NoTrans
+				}
+				if bTrans {
+					bOp = blas.Trans
+				} else {
+					bOp = blas.NoTrans
+				}
+				bmat := b.RawMatrix()
+				blas64.Gemm(aOp, bOp, 1, amat, bmat, 0, w.mat)
 			}
 
-			amat, bmat := a.RawMatrix(), b.RawMatrix()
-			blas64.Gemm(aOp, bOp, 1, amat, bmat, 0, w.mat)
 			*m = w
 			return
 		}

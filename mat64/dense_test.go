@@ -579,6 +579,56 @@ func (s *S) TestMulTrans(c *check.C) {
 	}
 }
 
+func (s *S) TestMulTransSelf(c *check.C) {
+	for i, test := range []struct {
+		a [][]float64
+	}{
+		{
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+		},
+		{
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+		},
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+		},
+		{
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+		},
+		{
+			[][]float64{{1, 2, 3}, {4, 5, 6}},
+		},
+		{
+			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
+		},
+	} {
+		var aT Dense
+		a := NewDense(flatten(test.a))
+		aT.TCopy(a)
+		for _, trans := range []bool{false, true} {
+			var aCopy, bCopy Dense
+			if trans {
+				aCopy.TCopy(NewDense(flatten(test.a)))
+				bCopy = *NewDense(flatten(test.a))
+			} else {
+				aCopy = *NewDense(flatten(test.a))
+				bCopy.TCopy(NewDense(flatten(test.a)))
+			}
+
+			var r Dense
+			r.Mul(&aCopy, &bCopy)
+
+			var temp Dense
+			temp.MulTrans(a, trans, a, !trans)
+			c.Check(temp.Equals(&r), check.Equals, true, check.Commentf("Test %d: %v mul self trans=%v expect %v got %v", i, test.a, trans, r, temp))
+
+			zero(temp.mat.Data)
+			temp.MulTrans(a, trans, a, !trans)
+			c.Check(temp.Equals(&r), check.Equals, true, check.Commentf("Test %d: %v mul self trans=%v expect %v got %v", i, test.a, trans, r, temp))
+		}
+	}
+}
+
 func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 	if size == 0 {
 		return nil, ErrZeroLength
@@ -1179,5 +1229,40 @@ func expBench(b *testing.B, size int) {
 	var m Dense
 	for i := 0; i < b.N; i++ {
 		m.Exp(a)
+	}
+}
+
+func BenchmarkMulTransDense100Half(b *testing.B)        { denseMulTransBench(b, 100, 0.5) }
+func BenchmarkMulTransDense100Tenth(b *testing.B)       { denseMulTransBench(b, 100, 0.1) }
+func BenchmarkMulTransDense1000Half(b *testing.B)       { denseMulTransBench(b, 1000, 0.5) }
+func BenchmarkMulTransDense1000Tenth(b *testing.B)      { denseMulTransBench(b, 1000, 0.1) }
+func BenchmarkMulTransDense1000Hundredth(b *testing.B)  { denseMulTransBench(b, 1000, 0.01) }
+func BenchmarkMulTransDense1000Thousandth(b *testing.B) { denseMulTransBench(b, 1000, 0.001) }
+func denseMulTransBench(b *testing.B, size int, rho float64) {
+	b.StopTimer()
+	a, _ := randDense(size, rho, rand.NormFloat64)
+	d, _ := randDense(size, rho, rand.NormFloat64)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		var n Dense
+		n.MulTrans(a, false, d, true)
+		wd = &n
+	}
+}
+
+func BenchmarkMulTransDenseSym100Half(b *testing.B)        { denseMulTransSymBench(b, 100, 0.5) }
+func BenchmarkMulTransDenseSym100Tenth(b *testing.B)       { denseMulTransSymBench(b, 100, 0.1) }
+func BenchmarkMulTransDenseSym1000Half(b *testing.B)       { denseMulTransSymBench(b, 1000, 0.5) }
+func BenchmarkMulTransDenseSym1000Tenth(b *testing.B)      { denseMulTransSymBench(b, 1000, 0.1) }
+func BenchmarkMulTransDenseSym1000Hundredth(b *testing.B)  { denseMulTransSymBench(b, 1000, 0.01) }
+func BenchmarkMulTransDenseSym1000Thousandth(b *testing.B) { denseMulTransSymBench(b, 1000, 0.001) }
+func denseMulTransSymBench(b *testing.B, size int, rho float64) {
+	b.StopTimer()
+	a, _ := randDense(size, rho, rand.NormFloat64)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		var n Dense
+		n.MulTrans(a, false, a, true)
+		wd = &n
 	}
 }

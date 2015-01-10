@@ -385,7 +385,7 @@ func Hellinger(p, q []float64) float64 {
 
 // Histogram sums up the weighted number of data points in each bin.
 // The weight of data point x[i] will be placed into count[j] if
-// dividers[j-1] <= x < dividers[j]. The "span" function in the floats package can assist
+// dividers[j] <= x < dividers[j+1]. The "span" function in the floats package can assist
 // with bin creation.
 //
 // The following conditions on the inputs apply:
@@ -399,37 +399,47 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 		panic("stat: slice length mismatch")
 	}
 	if count == nil {
-		count = make([]float64, len(dividers)+1)
+		count = make([]float64, len(dividers)-1)
 	}
-	if len(count) != len(dividers)+1 {
+	if len(dividers) < 2 {
+		panic("histogram: fewer than two dividers")
+	}
+	if len(count) != len(dividers)-1 {
 		panic("histogram: bin count mismatch")
 	}
 	if !sort.Float64sAreSorted(dividers) {
-		panic("dividers are not sorted")
+		panic("histogram: dividers are not sorted")
 	}
 	if !sort.Float64sAreSorted(x) {
-		panic("x data are not sorted")
+		panic("histogram: x data are not sorted")
+	}
+	for i := range count {
+		count[i] = 0
+	}
+	if len(x) == 0 {
+		return count
+	}
+	if x[0] < dividers[0] {
+		panic("histogram: minimum x value is less than lowest divider")
+	}
+	if x[len(x)-1] >= dividers[len(dividers)-1] {
+		panic("histogram: minimum x value is greater than highest divider")
 	}
 
 	idx := 0
-	comp := dividers[idx]
+	comp := dividers[idx+1]
 	if weights == nil {
 		for _, v := range x {
-			if v < comp || idx == len(count)-1 {
+			if v < comp {
 				// Still in the current bucket
 				count[idx]++
 				continue
 			}
-			// Need to find the next divider where v is less than the divider
-			// or to set the maximum divider if no such exists
-			for j := idx + 1; j < len(count); j++ {
-				if j == len(dividers) {
-					idx = len(dividers)
-					break
-				}
-				if v < dividers[j] {
+			// Find the next divider where v is less than the divider
+			for j := idx + 1; j < len(dividers); j++ {
+				if v < dividers[j+1] {
 					idx = j
-					comp = dividers[j]
+					comp = dividers[j+1]
 					break
 				}
 			}
@@ -439,21 +449,16 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	}
 
 	for i, v := range x {
-		if v < comp || idx == len(count)-1 {
+		if v < comp {
 			// Still in the current bucket
 			count[idx] += weights[i]
 			continue
 		}
-		// Need to find the next divider where v is less than the divider
-		// or to set the maximum divider if no such exists
+		// Need to find the next divider where v is less than the divider.
 		for j := idx + 1; j < len(count); j++ {
-			if j == len(dividers) {
-				idx = len(dividers)
-				break
-			}
-			if v < dividers[j] {
+			if v < dividers[j+1] {
 				idx = j
-				comp = dividers[j]
+				comp = dividers[j+1]
 				break
 			}
 		}

@@ -119,12 +119,8 @@ func TestGradient(t *testing.T) {
 		}
 		settings.Concurrent = true
 		settings.OriginKnown = false
-<<<<<<< HEAD
-		Gradient(gradient, r.F, x, settings)
-=======
 		settings.Workers = 1000
-		Gradient(r.F, x, settings, gradient)
->>>>>>> ba3cee67d1602215d85f9a151429f476ef32c2dc
+		Gradient(gradient, r.F, x, settings)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with unknown origin in parallel. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
@@ -147,7 +143,7 @@ func TestGradient(t *testing.T) {
 			gradient[i] = rand.Float64()
 		}
 		settings = nil
-		Gradient(r.F, x, settings, gradient)
+		Gradient(gradient, r.F, x, settings)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with default settings. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
@@ -169,7 +165,7 @@ func Panics(fun func()) (b bool) {
 func TestGradientPanics(t *testing.T) {
 	// Test that it panics
 	if !Panics(func() {
-		Gradient(func(x []float64) float64 { return x[0] * x[0] }, []float64{0.0, 0.0}, nil, []float64{0.0})
+		Gradient([]float64{0.0}, func(x []float64) float64 { return x[0] * x[0] }, []float64{0.0, 0.0}, nil)
 	}) {
 		t.Errorf("Gradient did not panic with length mismatch")
 	}

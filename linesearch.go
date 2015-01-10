@@ -115,7 +115,7 @@ func (l *Linesearch) initNextLinesearch(loc Location, xNext []float64) (Evaluati
 
 // ArmijoConditionMet returns true if the Armijo condition (aka sufficient decrease)
 // has been met. Under normal conditions, the following should be true, though this is not enforced:
-// 	- initGrad < 0
+//  - initGrad < 0
 //  - step > 0
 //  - 0 < funConst < 1
 func ArmijoConditionMet(currObj, initObj, initGrad, step, funConst float64) bool {

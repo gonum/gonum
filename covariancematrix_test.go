@@ -9,17 +9,11 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas/goblas"
 	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
 )
 
-func init() {
-	mat64.Register(goblas.Blas{})
-}
-
 func TestCovarianceMatrix(t *testing.T) {
-
 	// An alternate way to test this is to call the Variance
 	// and Covariance functions and ensure that the results are identical.
 	for i, test := range []struct {

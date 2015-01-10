@@ -119,3 +119,14 @@ func TestCentral(t *testing.T) {
 func TestCentralSecond(t *testing.T) {
 	testDerivative(t, Central2nd, 1e-3, testsSecond)
 }
+
+// TestDerivativeDefault checks that the derivative works when settings is set to nil.
+func TestDerivativeDefault(t *testing.T) {
+	tol := 1e-6
+	for i, test := range testsFirst {
+		ans := Derivative(test.f, test.loc, nil)
+		if math.Abs(test.ans-ans) > tol {
+			t.Errorf("Case %v: ans mismatch default: expected %v, found %v", i, test.ans, ans)
+		}
+	}
+}

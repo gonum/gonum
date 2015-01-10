@@ -96,7 +96,10 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 // If the step size is zero, then the step size of the method will
 // be used.
 // Gradient panics if len(deriv) != len(x).
-func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradient []float64) {
+func Gradient(gradient []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
+	if gradient == nil {
+		gradient = make([]float64, len(x))
+	}
 	if len(gradient) != len(x) {
 		panic("fd: location and gradient length mismatch")
 	}
@@ -120,7 +123,7 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 			}
 			gradient[i] = deriv / math.Pow(step, float64(settings.Method.Order))
 		}
-		return
+		return gradient
 	}
 
 	nWorkers := settings.Workers
@@ -184,6 +187,7 @@ func Gradient(f func([]float64) float64, x []float64, settings *Settings, gradie
 		gradient[run.idx] += run.pt.Coeff * run.result
 	}
 	floats.Scale(1/math.Pow(step, float64(settings.Method.Order)), gradient)
+	return gradient
 }
 
 type fdrun struct {

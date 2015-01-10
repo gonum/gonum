@@ -13,7 +13,7 @@ import (
 var blas64 blas.Float64 = native.Implementation{}
 
 // Use sets the BLAS float64 implementation to be used by subsequent BLAS calls.
-// The default implementation is native.Blas.
+// The default implementation is native.Implementation.
 func Use(b blas.Float64) {
 	blas64 = b
 }

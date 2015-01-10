@@ -151,12 +151,12 @@ func (m *Dense) rowView(r int) []float64 {
 	return m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
 }
 
-func (a *Dense) View(i, j, r, c int) Matrix {
-	m := *a
-	m.mat.Data = m.mat.Data[i*m.mat.Stride+j : (i+r-1)*m.mat.Stride+(j+c)]
-	m.mat.Rows = r
-	m.mat.Cols = c
-	return &m
+func (m *Dense) View(i, j, r, c int) Matrix {
+	t := *m
+	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (i+r-1)*t.mat.Stride+(j+c)]
+	t.mat.Rows = r
+	t.mat.Cols = c
+	return &t
 }
 
 func (m *Dense) Reset() {

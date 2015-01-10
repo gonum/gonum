@@ -362,6 +362,11 @@ func TestHistogram(t *testing.T) {
 		if !floats.Equal(hist, test.ans) {
 			t.Errorf("Hist mismatch case %d. Expected %v, Found %v", i, test.ans, hist)
 		}
+		// Test with non-zero values
+		Histogram(hist, test.dividers, test.x, test.weights)
+		if !floats.Equal(hist, test.ans) {
+			t.Errorf("Hist mismatch case %d. Expected %v, Found %v", i, test.ans, hist)
+		}
 	}
 	// panic cases
 	for _, test := range []struct {
@@ -462,7 +467,7 @@ the count field in order to avoid extra garbage`)
 	//
 	// Histogram also works with weighted data, and allows reusing of
 	// the count field in order to avoid extra garbage
-	// Weighted Hist = [77 175 275 375 475 575 675 775 875 975]
+	// Weighted Hist = [66 165 265 365 465 565 665 765 865 965]
 }
 
 func TestJensenShannon(t *testing.T) {

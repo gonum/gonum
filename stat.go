@@ -413,10 +413,10 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	if !sort.Float64sAreSorted(x) {
 		panic("histogram: x data are not sorted")
 	}
+	for i := range count {
+		count[i] = 0
+	}
 	if len(x) == 0 {
-		for i := range count {
-			count[i] = 0
-		}
 		return count
 	}
 	if x[0] < dividers[0] {

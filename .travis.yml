@@ -39,7 +39,7 @@ install:
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then export CGO_LDFLAGS="-L/usr/lib -lopenblas"; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then go get github.com/gonum/blas; fi # get rid of this when the fork is merged
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd cblas; fi
+ - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd cgo; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then go install -v -x; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
 

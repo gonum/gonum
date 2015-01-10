@@ -1,4 +1,4 @@
-package cblas
+package cgo
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 
 func BenchmarkDgemmSmSmSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.SmallMat,
 		testblas.SmallMat,
 		testblas.SmallMat,
@@ -20,7 +20,7 @@ func BenchmarkDgemmSmSmSm(b *testing.B) {
 
 func BenchmarkDgemmMedMedMed(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.MediumMat,
 		testblas.MediumMat,
 		testblas.MediumMat,
@@ -31,7 +31,7 @@ func BenchmarkDgemmMedMedMed(b *testing.B) {
 
 func BenchmarkDgemmLgLgLg(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.LargeMat,
 		testblas.LargeMat,
 		testblas.LargeMat,
@@ -42,7 +42,7 @@ func BenchmarkDgemmLgLgLg(b *testing.B) {
 
 func BenchmarkDgemmLgSmLg(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.LargeMat,
 		testblas.SmallMat,
 		testblas.LargeMat,
@@ -53,7 +53,7 @@ func BenchmarkDgemmLgSmLg(b *testing.B) {
 
 func BenchmarkDgemmLgLgSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.LargeMat,
 		testblas.SmallMat,
 		testblas.LargeMat,
@@ -64,7 +64,7 @@ func BenchmarkDgemmLgLgSm(b *testing.B) {
 
 func BenchmarkDgemmHgHgSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.HugeMat,
 		testblas.SmallMat,
 		testblas.HugeMat,
@@ -75,7 +75,7 @@ func BenchmarkDgemmHgHgSm(b *testing.B) {
 
 func BenchmarkDgemmMedMedMedTNT(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.MediumMat,
 		testblas.MediumMat,
 		testblas.MediumMat,
@@ -86,7 +86,7 @@ func BenchmarkDgemmMedMedMedTNT(b *testing.B) {
 
 func BenchmarkDgemmMedMedMedNTT(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.MediumMat,
 		testblas.MediumMat,
 		testblas.MediumMat,
@@ -97,7 +97,7 @@ func BenchmarkDgemmMedMedMedNTT(b *testing.B) {
 
 func BenchmarkDgemmMedMedMedNTNT(b *testing.B) {
 	testblas.DgemmBenchmark(b,
-		Blas{},
+		Implementation{},
 		testblas.MediumMat,
 		testblas.MediumMat,
 		testblas.MediumMat,

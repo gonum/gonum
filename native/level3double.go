@@ -1,8 +1,8 @@
-package goblas
+package native
 
 import "github.com/gonum/blas"
 
-var _ blas.Float64Level3 = Blasser
+var _ blas.Float64Level3 = Implementation{}
 
 const (
 	// TODO (btracey): Fix the ld panic messages to be consistent across the package
@@ -14,7 +14,7 @@ const (
 // where X and B are m x n matrices, and A is a unit or non unit upper or lower
 // triangular matrix. The result is stored in place into B. No check is made
 // that A is invertible.
-func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
+func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	if s != blas.Left && s != blas.Right {
 		panic(badSide)
 	}
@@ -244,7 +244,7 @@ func (bl Blas) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, 
 //  C = alpha * A * B + beta * C
 //  C = alpha * B * A + beta * C
 // where A is a symmetric matrix and B and C are m x n matrices.
-func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if s != blas.Right && s != blas.Left {
 		panic("goblas: bad side")
 	}
@@ -368,7 +368,7 @@ func (Blas) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float6
 //  C = alpha * A * A^T + beta*C
 // where alpha and beta are scalars, C is an nxn symmetric matrix, and A
 // is n x k if NonTrans, and k x n if Trans.
-func (Blas) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
+func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -503,7 +503,7 @@ func (Blas) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []
 //  C = alpha * A * B^T + alpha * B * A^T + beta *C
 // where C is an n x n symmetric matrix and A and B are n x k matrices if
 // tA == NoTrans and k x n otherwise.
-func (Blas) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -646,7 +646,7 @@ func (Blas) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a [
 //  B = alpha * A * B
 // where B is an m x n matrix and A is symmetric matrix. Side and Transpose
 // set the location of A relative to B and if A is transposed.
-func (Blas) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
+func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	if s != blas.Left && s != blas.Right {
 		panic(badSide)
 	}

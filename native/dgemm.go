@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package goblas
+package native
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ const (
 // m is the number of rows in A or A transpose
 // n is the number of columns in B or B transpose
 // k is the columns of A and rows of B
-func (Blas) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	var amat, bmat, cmat general
 	if tA == blas.Trans {
 		amat = general{

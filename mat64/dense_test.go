@@ -1231,3 +1231,38 @@ func expBench(b *testing.B, size int) {
 		m.Exp(a)
 	}
 }
+
+func BenchmarkMulTransDense100Half(b *testing.B)        { denseMulTransBench(b, 100, 0.5) }
+func BenchmarkMulTransDense100Tenth(b *testing.B)       { denseMulTransBench(b, 100, 0.1) }
+func BenchmarkMulTransDense1000Half(b *testing.B)       { denseMulTransBench(b, 1000, 0.5) }
+func BenchmarkMulTransDense1000Tenth(b *testing.B)      { denseMulTransBench(b, 1000, 0.1) }
+func BenchmarkMulTransDense1000Hundredth(b *testing.B)  { denseMulTransBench(b, 1000, 0.01) }
+func BenchmarkMulTransDense1000Thousandth(b *testing.B) { denseMulTransBench(b, 1000, 0.001) }
+func denseMulTransBench(b *testing.B, size int, rho float64) {
+	b.StopTimer()
+	a, _ := randDense(size, rho, rand.NormFloat64)
+	d, _ := randDense(size, rho, rand.NormFloat64)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		var n Dense
+		n.MulTrans(a, false, d, true)
+		wd = &n
+	}
+}
+
+func BenchmarkMulTransDenseSym100Half(b *testing.B)        { denseMulTransSymBench(b, 100, 0.5) }
+func BenchmarkMulTransDenseSym100Tenth(b *testing.B)       { denseMulTransSymBench(b, 100, 0.1) }
+func BenchmarkMulTransDenseSym1000Half(b *testing.B)       { denseMulTransSymBench(b, 1000, 0.5) }
+func BenchmarkMulTransDenseSym1000Tenth(b *testing.B)      { denseMulTransSymBench(b, 1000, 0.1) }
+func BenchmarkMulTransDenseSym1000Hundredth(b *testing.B)  { denseMulTransSymBench(b, 1000, 0.01) }
+func BenchmarkMulTransDenseSym1000Thousandth(b *testing.B) { denseMulTransSymBench(b, 1000, 0.001) }
+func denseMulTransSymBench(b *testing.B, size int, rho float64) {
+	b.StopTimer()
+	a, _ := randDense(size, rho, rand.NormFloat64)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		var n Dense
+		n.MulTrans(a, false, a, true)
+		wd = &n
+	}
+}

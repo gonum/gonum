@@ -1,6 +1,9 @@
 package native
 
-import "github.com/gonum/blas"
+import (
+	"github.com/gonum/blas"
+	"github.com/gonum/internal/asm"
+)
 
 var _ blas.Float64Level3 = Implementation{}
 
@@ -434,13 +437,7 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 				atmp := a[i*lda : i*lda+k]
 				for jc, vc := range ctmp {
 					j := jc + i
-					var tmp float64
-					for l, av := range a[j*lda : j*lda+k] {
-						tmp += atmp[l] * av
-					}
-					tmp *= alpha
-					tmp += vc * beta
-					ctmp[jc] = tmp
+					ctmp[jc] = vc*beta + alpha*asm.DdotUnitary(atmp, a[j*lda:j*lda+k])
 				}
 			}
 			return
@@ -448,13 +445,7 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 		for i := 0; i < n; i++ {
 			atmp := a[i*lda : i*lda+k]
 			for j, vc := range c[i*ldc : i*ldc+i+1] {
-				var tmp float64
-				for l, va := range a[j*lda : j*lda+k] {
-					tmp += atmp[l] * va
-				}
-				tmp *= alpha
-				tmp += vc * beta
-				c[i*ldc+j] = tmp
+				c[i*ldc+j] = vc*beta + alpha*asm.DdotUnitary(a[j*lda:j*lda+k], atmp)
 			}
 		}
 		return
@@ -471,9 +462,7 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 			for l := 0; l < k; l++ {
 				tmp := alpha * a[l*lda+i]
 				if tmp != 0 {
-					for j, v := range a[l*lda+i : l*lda+n] {
-						ctmp[j] += tmp * v
-					}
+					asm.DaxpyUnitary(tmp, a[l*lda+i:l*lda+n], ctmp)
 				}
 			}
 		}
@@ -489,9 +478,7 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 		for l := 0; l < k; l++ {
 			tmp := alpha * a[l*lda+i]
 			if tmp != 0 {
-				for j, v := range a[l*lda : l*lda+i+1] {
-					ctmp[j] += tmp * v
-				}
+				asm.DaxpyUnitary(tmp, a[l*lda:l*lda+i+1], ctmp)
 			}
 		}
 	}

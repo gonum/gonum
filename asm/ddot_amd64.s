@@ -34,6 +34,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//+build !noasm
 
 // TODO(fhs): use textflag.h after we drop Go 1.3 support
 //#include "textflag.h"

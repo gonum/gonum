@@ -4,11 +4,6 @@ import "github.com/gonum/blas"
 
 var _ blas.Float64Level3 = Implementation{}
 
-const (
-	// TODO (btracey): Fix the ld panic messages to be consistent across the package
-	badLd string = "goblas: ld must be greater than the number of columns"
-)
-
 // Dtrsm solves
 //  A X = alpha B
 // where X and B are m x n matrices, and A is a unit or non unit upper or lower
@@ -34,15 +29,15 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		panic(nLT0)
 	}
 	if ldb < n {
-		panic(badLd)
+		panic(badLdB)
 	}
 	if s == blas.Left {
 		if lda < m {
-			panic(badLd)
+			panic(badLdA)
 		}
 	} else {
 		if lda < n {
-			panic(badLd)
+			panic(badLdA)
 		}
 	}
 
@@ -258,10 +253,13 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 		panic(nLT0)
 	}
 	if (lda < m && s == blas.Left) || (lda < n && s == blas.Right) {
-		panic(badLd)
+		panic(badLdA)
 	}
-	if ldb < n || ldc < n {
-		panic(badLd)
+	if ldb < n {
+		panic(badLdB)
+	}
+	if ldc < n {
+		panic(badLdC)
 	}
 	if m == 0 || n == 0 {
 		return
@@ -382,15 +380,15 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 		panic(kLT0)
 	}
 	if ldc < n {
-		panic(badLd)
+		panic(badLdC)
 	}
 	if tA == blas.Trans {
 		if lda < n {
-			panic(badLd)
+			panic(badLdA)
 		}
 	} else {
 		if lda < k {
-			panic(badLd)
+			panic(badLdA)
 		}
 	}
 	if alpha == 0 {
@@ -517,15 +515,21 @@ func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 		panic(kLT0)
 	}
 	if ldc < n {
-		panic(badLd)
+		panic(badLdC)
 	}
 	if tA == blas.Trans {
-		if lda < n || ldb < n {
-			panic(badLd)
+		if lda < n {
+			panic(badLdA)
+		}
+		if ldb < n {
+			panic(badLdB)
 		}
 	} else {
-		if lda < k || ldb < k {
-			panic(badLd)
+		if lda < k {
+			panic(badLdA)
+		}
+		if ldb < k {
+			panic(badLdB)
 		}
 	}
 	if alpha == 0 {
@@ -666,15 +670,15 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		panic(nLT0)
 	}
 	if ldb < n {
-		panic(badLd)
+		panic(badLdB)
 	}
 	if s == blas.Left {
 		if lda < m {
-			panic(badLd)
+			panic(badLdA)
 		}
 	} else {
 		if lda < n {
-			panic(badLd)
+			panic(badLdA)
 		}
 	}
 	if alpha == 0 {

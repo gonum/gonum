@@ -6,6 +6,7 @@ package native
 
 import (
 	"errors"
+	"fmt"
 	"math"
 )
 
@@ -32,10 +33,10 @@ type general struct {
 func (g general) add(h general) {
 	if debug {
 		if g.rows != h.rows {
-			panic("row size mismatch")
+			panic("blas: row size mismatch")
 		}
 		if g.cols != h.cols {
-			panic("col size mismatch")
+			panic("blas: col size mismatch")
 		}
 	}
 	for i := 0; i < g.rows; i++ {
@@ -51,30 +52,30 @@ func (g general) add(h general) {
 func (g general) at(i, j int) float64 {
 	if debug {
 		if i < 0 || i >= g.rows {
-			panic("row out of bounds")
+			panic("blas: row out of bounds")
 		}
 		if j < 0 || j >= g.cols {
-			panic("col out of bounds")
+			panic("blas: col out of bounds")
 		}
 	}
 	return g.data[i*g.stride+j]
 }
 
-func (g general) check() error {
+func (g general) check(c byte) error {
 	if g.rows < 0 {
-		return errors.New("general: rows < 0")
+		return errors.New("blas: rows < 0")
 	}
 	if g.cols < 0 {
-		return errors.New("general: cols < 0")
+		return errors.New("blas: cols < 0")
 	}
 	if g.stride < 1 {
-		return errors.New("general: stride < 1")
+		return errors.New("blas: stride < 1")
 	}
 	if g.stride < g.cols {
-		return errors.New("general: illegal stride")
+		return errors.New("blas: illegal stride")
 	}
 	if (g.rows-1)*g.stride+g.cols > len(g.data) {
-		return errors.New("general: insufficient length")
+		return fmt.Errorf("blas: index of %c out of range", c)
 	}
 	return nil
 }
@@ -94,10 +95,10 @@ func (g general) clone() general {
 func (g general) copy(h general) {
 	if debug {
 		if g.rows != h.rows {
-			panic("row mismatch")
+			panic("blas: row mismatch")
 		}
 		if g.cols != h.cols {
-			panic("col mismatch")
+			panic("blas: col mismatch")
 		}
 	}
 	for k := 0; k < g.rows; k++ {
@@ -131,10 +132,10 @@ func (g general) print() {
 func (g general) view(i, j, r, c int) general {
 	if debug {
 		if i < 0 || i+r > g.rows {
-			panic("row out of bounds")
+			panic("blas: row out of bounds")
 		}
 		if j < 0 || j+c > g.cols {
-			panic("col out of bounds")
+			panic("blas: col out of bounds")
 		}
 	}
 	return general{

@@ -40,9 +40,9 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 			stride: lda,
 		}
 	}
-	err := amat.check()
+	err := amat.check('a')
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	if tB == blas.Trans {
 		bmat = general{
@@ -60,9 +60,9 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 		}
 	}
 
-	err = bmat.check()
+	err = bmat.check('b')
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	cmat = general{
 		data:   c,
@@ -70,9 +70,9 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 		cols:   n,
 		stride: ldc,
 	}
-	err = cmat.check()
+	err = cmat.check('c')
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	if tA != blas.Trans && tA != blas.NoTrans {
 		panic(badTranspose)

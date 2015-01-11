@@ -1,6 +1,9 @@
 package native
 
-import "github.com/gonum/blas"
+import (
+	"github.com/gonum/blas"
+	"github.com/gonum/internal/asm"
+)
 
 var _ blas.Float64Level3 = Implementation{}
 
@@ -68,9 +71,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 					for ka, va := range a[i*lda+i+1 : i*lda+m] {
 						k := ka + i + 1
 						if va != 0 {
-							for j, vb := range b[k*ldb : k*ldb+n] {
-								btmp[j] -= va * vb
-							}
+							asm.DaxpyUnitary(-va, b[k*ldb:k*ldb+n], btmp)
 						}
 					}
 					if nonUnit {
@@ -91,9 +92,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				}
 				for k, va := range a[i*lda : i*lda+i] {
 					if va != 0 {
-						for j, vb := range b[k*ldb : k*ldb+n] {
-							btmp[j] -= va * vb
-						}
+						asm.DaxpyUnitary(-va, b[k*ldb:k*ldb+n], btmp)
 					}
 				}
 				if nonUnit {
@@ -117,11 +116,8 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				}
 				for ia, va := range a[k*lda+k+1 : k*lda+m] {
 					i := ia + k + 1
-					btmp := b[i*ldb : i*ldb+n]
 					if va != 0 {
-						for j, vb := range btmpk {
-							btmp[j] -= va * vb
-						}
+						asm.DaxpyUnitary(-va, btmpk, b[i*ldb:i*ldb+n])
 					}
 				}
 				if alpha != 1 {
@@ -141,11 +137,8 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				}
 			}
 			for i, va := range a[k*lda : k*lda+k] {
-				btmp := b[i*ldb : i*ldb+n]
 				if va != 0 {
-					for j, vb := range btmpk {
-						btmp[j] -= va * vb
-					}
+					asm.DaxpyUnitary(-va, btmpk, b[i*ldb:i*ldb+n])
 				}
 			}
 			if alpha != 1 {
@@ -168,13 +161,11 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				}
 				for k, vb := range btmp {
 					if vb != 0 {
-						if nonUnit {
-							btmp[k] /= a[k*lda+k]
-						}
-						vb = btmp[k]
-						for ja, va := range a[k*lda+k+1 : k*lda+n] {
-							j := ja + k + 1
-							btmp[j] -= vb * va
+						if btmp[k] != 0 {
+							if nonUnit {
+								btmp[k] /= a[k*lda+k]
+							}
+							asm.DaxpyUnitary(-btmp[k], a[k*lda+k+1:k*lda+n], btmp[k+1:n])
 						}
 					}
 				}
@@ -193,10 +184,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 					if nonUnit {
 						btmp[k] /= a[k*lda+k]
 					}
-				}
-				vb := btmp[k]
-				for j, va := range a[k*lda : k*lda+k] {
-					btmp[j] -= vb * va
+					asm.DaxpyUnitary(-btmp[k], a[k*lda:k*lda+k], btmp)
 				}
 			}
 		}
@@ -207,11 +195,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		for i := 0; i < m; i++ {
 			btmp := b[i*lda : i*lda+n]
 			for j := n - 1; j >= 0; j-- {
-				tmp := alpha * btmp[j]
-				for ka, va := range a[j*lda+j+1 : j*lda+n] {
-					k := ka + j + 1
-					tmp -= va * btmp[k]
-				}
+				tmp := alpha*btmp[j] - asm.DdotUnitary(a[j*lda+j+1:j*lda+n], btmp[j+1:])
 				if nonUnit {
 					tmp /= a[j*lda+j]
 				}
@@ -223,10 +207,7 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	for i := 0; i < m; i++ {
 		btmp := b[i*lda : i*lda+n]
 		for j := 0; j < n; j++ {
-			tmp := alpha * btmp[j]
-			for k, v := range a[j*lda : j*lda+j] {
-				tmp -= v * btmp[k]
-			}
+			tmp := alpha*btmp[j] - asm.DdotUnitary(a[j*lda:j*lda+j], btmp)
 			if nonUnit {
 				tmp /= a[j*lda+j]
 			}
@@ -292,10 +273,11 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 			atmp := alpha * a[i*lda+i]
 			btmp := b[i*ldb : i*ldb+n]
 			ctmp := c[i*ldc : i*ldc+n]
-			for j, v := range btmp {
+			for j := range ctmp {
 				ctmp[j] *= beta
-				ctmp[j] += atmp * v
 			}
+			asm.DaxpyUnitary(atmp, btmp, ctmp)
+
 			for k := 0; k < i; k++ {
 				var atmp float64
 				if isUpper {
@@ -304,11 +286,7 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 					atmp = a[i*lda+k]
 				}
 				atmp *= alpha
-				btmp := b[k*ldb : k*ldb+n]
-				ctmp := c[i*ldc : i*ldc+n]
-				for j, v := range btmp {
-					ctmp[j] += atmp * v
-				}
+				asm.DaxpyUnitary(atmp, b[k*ldb:k*ldb+n], c[i*ldc:i*ldc+n])
 			}
 			for k := i + 1; k < m; k++ {
 				var atmp float64
@@ -318,11 +296,7 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 					atmp = a[k*lda+i]
 				}
 				atmp *= alpha
-				btmp := b[k*ldb : k*ldb+n]
-				ctmp := c[i*ldc : i*ldc+n]
-				for j, v := range btmp {
-					ctmp[j] += atmp * v
-				}
+				asm.DaxpyUnitary(atmp, b[k*ldb:k*ldb+n], c[i*ldc:i*ldc+n])
 			}
 		}
 		return
@@ -708,9 +682,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 						k := ka + i + 1
 						tmp := alpha * va
 						if tmp != 0 {
-							for j, vb := range b[k*ldb : k*ldb+n] {
-								btmp[j] += tmp * vb
-							}
+							asm.DaxpyUnitary(tmp, b[k*ldb:k*ldb+n], btmp)
 						}
 					}
 				}
@@ -728,9 +700,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				for k, va := range a[i*lda : i*lda+i] {
 					tmp := alpha * va
 					if tmp != 0 {
-						for j, vb := range b[k*ldb : k*ldb+n] {
-							btmp[j] += tmp * vb
-						}
+						asm.DaxpyUnitary(tmp, b[k*ldb:k*ldb+n], btmp)
 					}
 				}
 			}
@@ -745,9 +715,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 					btmp := b[i*ldb : i*ldb+n]
 					tmp := alpha * va
 					if tmp != 0 {
-						for j, vb := range btmpk {
-							btmp[j] += tmp * vb
-						}
+						asm.DaxpyUnitary(tmp, btmpk, btmp)
 					}
 				}
 				tmp := alpha
@@ -768,9 +736,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				btmp := b[i*ldb : i*ldb+n]
 				tmp := alpha * va
 				if tmp != 0 {
-					for j, vb := range btmpk {
-						btmp[j] += tmp * vb
-					}
+					asm.DaxpyUnitary(tmp, btmpk, btmp)
 				}
 			}
 			tmp := alpha
@@ -815,9 +781,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 					if nonUnit {
 						btmp[k] *= a[k*lda+k]
 					}
-					for j, v := range a[k*lda : k*lda+k] {
-						btmp[j] += tmp * v
-					}
+					asm.DaxpyUnitary(tmp, a[k*lda:k*lda+k], btmp)
 				}
 			}
 		}
@@ -832,10 +796,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 				if nonUnit {
 					tmp *= a[j*lda+j]
 				}
-				for ka, va := range a[j*lda+j+1 : j*lda+n] {
-					k := ka + j + 1
-					tmp += va * btmp[k]
-				}
+				tmp += asm.DdotUnitary(a[j*lda+j+1:j*lda+n], btmp[j+1:n])
 				btmp[j] = alpha * tmp
 			}
 		}
@@ -848,9 +809,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 			if nonUnit {
 				tmp *= a[j*lda+j]
 			}
-			for k, v := range a[j*lda : j*lda+j] {
-				tmp += v * btmp[k]
-			}
+			tmp += asm.DdotUnitary(a[j*lda:j*lda+j], btmp[:j])
 			btmp[j] = alpha * tmp
 		}
 	}

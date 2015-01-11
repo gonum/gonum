@@ -15,6 +15,7 @@ import (
 	"math"
 
 	"github.com/gonum/blas"
+	"github.com/gonum/internal/asm"
 )
 
 type Implementation struct{}
@@ -60,7 +61,7 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 		if len(y) < n {
 			panic(badLenY)
 		}
-		return ddotUnitary(x[:n], y)
+		return asm.DdotUnitary(x[:n], y)
 	}
 	var ix, iy int
 	if incX < 0 {
@@ -75,7 +76,7 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
 		panic(badLenY)
 	}
-	return ddotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+	return asm.DdotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
 
 // Dnrm2 computes the euclidean norm of a vector, sqrt(x'x).
@@ -292,7 +293,7 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 		if len(y) < n {
 			panic(badLenY)
 		}
-		daxpyUnitary(alpha, x[:n], y)
+		asm.DaxpyUnitary(alpha, x[:n], y)
 		return
 	}
 	var ix, iy int
@@ -308,7 +309,7 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
 		panic(badLenY)
 	}
-	daxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+	asm.DaxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
 
 // Drotg gives plane rotation

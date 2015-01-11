@@ -14,6 +14,8 @@ import (
 	"errors"
 	"math"
 	"sort"
+
+	"github.com/gonum/internal/asm"
 )
 
 // Add adds, element-wise, the elements of s and dst, and stores in dst.
@@ -55,9 +57,7 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination and source to not match")
 	}
-	for i, val := range s {
-		dst[i] += alpha * val
-	}
+	asm.DaxpyUnitary(alpha, s, dst)
 }
 
 // AddScaledTo performs dst = y + alpha * s, where alpha is a scalar,
@@ -69,9 +69,8 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 	if len(dst) != len(s) || len(dst) != len(y) {
 		panic("floats: lengths of slices do not match")
 	}
-	for i, val := range s {
-		dst[i] = y[i] + alpha*val
-	}
+	copy(dst, y)
+	asm.DaxpyUnitary(alpha, s, dst)
 	return dst
 }
 
@@ -234,11 +233,7 @@ func Dot(s1, s2 []float64) float64 {
 	if len(s1) != len(s2) {
 		panic("floats: lengths of the slices do not match")
 	}
-	var sum float64
-	for i, val := range s1 {
-		sum += val * s2[i]
-	}
-	return sum
+	return asm.DdotUnitary(s1, s2)
 }
 
 // Equal returns true if the slices have equal lengths and

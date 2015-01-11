@@ -5,3 +5,4 @@
 package asm
 
 func DdotUnitary(x, y []float64) (sum float64)
+func DdotInc(x, y []float64, n, incX, incY, ix, iy uintptr) (sum float64)

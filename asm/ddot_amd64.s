@@ -82,4 +82,58 @@ E1:
 	ADDSD X0, X7
 	MOVSD X7, sum+48(FP)	// return final sum
 	RET
+
+
+// func DdotInc(x, y []float64, n, incX, incY, ix, iy uintptr) (sum float64)
+TEXT ·DdotInc(SB),NOSPLIT,$0
+	MOVQ x+0(FP), R8
+	MOVQ y+24(FP), R9
+	MOVQ n+48(FP), CX
+	MOVQ incX+56(FP), R11
+	MOVQ incY+64(FP), R12
+	MOVQ ix+72(FP), R13
+	MOVQ iy+80(FP), R14
+	
+	MOVSD $(0.0), X7		// sum = 0
+	LEAQ (R8)(R13*8), SI	// p = &x[ix]
+	LEAQ (R9)(R14*8), DI	// q = &y[ix]
+	SHLQ $3, R11			// incX *= sizeof(float64)
+	SHLQ $3, R12			// indY *= sizeof(float64)
+	
+	SUBQ $2, CX				// n -= 2
+	JL V2					// if n < 0 goto V2
+
+U2:	// n >= 0
+	// sum += *p * *q unrolled 2x.
+	MOVHPD (SI), X0
+	MOVHPD (DI), X1
+	ADDQ R11, SI			// p += incX
+	ADDQ R12, DI			// q += incY
+	MOVLPD (SI), X0
+	MOVLPD (DI), X1
+	ADDQ R11, SI			// p += incX
+	ADDQ R12, DI			// q += incY
+	
+	MULPD X1, X0
+	ADDPD X0, X7
+
+	SUBQ $2, CX				// n -= 2
+	JGE U2					// if n >= 0 goto U2
+
+V2:
+	ADDQ $2, CX				// n += 2
+	JLE E2					// if n <= 0 goto E2
+	
+	// sum += *p * *q for the last iteration if n is odd.
+	MOVSD (SI), X0
+	MULSD (DI), X0
+	ADDSD X0, X7
+
+E2:
+	// Add the two sums together.
+	MOVSD X7, X0
+	UNPCKHPD X7, X7
+	ADDSD X0, X7
+	MOVSD X7, sum+88(FP)	// return final sum
+	RET
   

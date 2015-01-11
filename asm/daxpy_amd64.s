@@ -42,7 +42,7 @@
 #define NOSPLIT	4
 
 
-// func DaxpyUnitary(alpha float64, x, y []float64)
+// func DaxpyUnitary(alpha float64, x, y, z []float64)
 // This function assumes len(y) >= len(x).
 TEXT ·DaxpyUnitary(SB),NOSPLIT,$0
 	MOVHPD alpha+0(FP), X7
@@ -50,6 +50,7 @@ TEXT ·DaxpyUnitary(SB),NOSPLIT,$0
 	MOVQ x_len+16(FP), DI	// n = len(x)
 	MOVQ x+8(FP), R8
 	MOVQ y+32(FP), R9
+	MOVQ z+56(FP), R10
 	
 	MOVQ $0, SI				// i = 0
 	SUBQ $2, DI				// n -= 2
@@ -61,7 +62,7 @@ U1:	// n >= 0
 	MOVUPD 0(R9)(SI*8), X1
 	MULPD X7, X0
 	ADDPD X0, X1
-	MOVUPD X1, 0(R9)(SI*8)
+	MOVUPD X1, 0(R10)(SI*8)
 	
 	ADDQ $2, SI				// i += 2
 	SUBQ $2, DI				// n -= 2
@@ -76,7 +77,7 @@ V1:
 	MOVSD 0(R9)(SI*8), X1
 	MULSD X7, X0
 	ADDSD X0, X1
-	MOVSD X1, 0(R9)(SI*8)
+	MOVSD X1, 0(R10)(SI*8)
 
 E1:
 	RET

@@ -293,7 +293,7 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 		if len(y) < n {
 			panic(badLenY)
 		}
-		daxpyUnitary(alpha, x[:n], y)
+		asm.DaxpyUnitary(alpha, x[:n], y)
 		return
 	}
 	var ix, iy int
@@ -309,7 +309,7 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
 		panic(badLenY)
 	}
-	daxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+	asm.DaxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
 
 // Drotg gives plane rotation

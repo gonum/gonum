@@ -273,10 +273,10 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 			atmp := alpha * a[i*lda+i]
 			btmp := b[i*ldb : i*ldb+n]
 			ctmp := c[i*ldc : i*ldc+n]
-			for j := range ctmp {
+			for j, v := range btmp {
 				ctmp[j] *= beta
+				ctmp[j] += atmp * v
 			}
-			asm.DaxpyUnitary(atmp, btmp, ctmp)
 
 			for k := 0; k < i; k++ {
 				var atmp float64

@@ -680,9 +680,10 @@ func TestLogSumExp(t *testing.T) {
 
 }
 
-func TestMax(t *testing.T) {
+func TestMaxAndIdx(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
-	val, ind := Max(s)
+	ind := MaxIdx(s)
+	val := Max(s)
 	if val != 7 {
 		t.Errorf("Wrong value returned")
 	}
@@ -691,9 +692,10 @@ func TestMax(t *testing.T) {
 	}
 }
 
-func TestMin(t *testing.T) {
+func TestMinAndIdx(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
-	val, ind := Min(s)
+	ind := MinIdx(s)
+	val := Min(s)
 	if val != 1 {
 		t.Errorf("Wrong value returned")
 	}

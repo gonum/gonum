@@ -58,21 +58,20 @@ var _ blas.Float64Level2 = Implementation{}
 */
 
 const (
-	mLT0         string = "referenceblas: m < 0"
-	nLT0         string = "referenceblas: n < 0"
-	kLT0         string = "referenceblas: k < 0"
-	badUplo      string = "referenceblas: illegal triangularization"
-	badTranspose string = "referenceblas: illegal transpose"
-	badDiag      string = "referenceblas: illegal diag"
-	badSide      string = "referenceblas: illegal side"
-	badLdaRow    string = "lda must be greater than max(1,n) for row major"
-	badLdaCol    string = "lda must be greater than max(1,m) for col major"
-	badLda       string = "lda must be greater than max(1,n)"
+	mLT0  = "blas: m < 0"
+	nLT0  = "blas: n < 0"
+	kLT0  = "blas: k < 0"
+	kLLT0 = "blas: kL < 0"
+	kULT0 = "blas: kU < 0"
 
-	badLdaTriBand string = "goblas: lda must be greater than k + 1 for general banded"
-	badLdaGenBand string = "goblas: lda must be greater than 1 + kL + kU for general banded"
-	kLLT0         string = "goblas: kL < 0"
-	kULT0         string = "goblas: kU < 0"
+	badUplo      = "blas: illegal triangle"
+	badTranspose = "blas: illegal transpose"
+	badDiag      = "blas: illegal diagonal"
+	badSide      = "blas: illegal side"
+
+	badLdA = "blas: index of a out of range"
+	badLdB = "blas: index of b out of range"
+	badLdC = "blas: index of c out of range"
 )
 
 func max(a, b int) int {
@@ -102,14 +101,14 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 		panic(nLT0)
 	}
 	if lda < max(1, n) {
-		panic(badLdaRow)
+		panic(badLdA)
 	}
 
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if incY == 0 {
-		panic(zeroInc)
+		panic(zeroIncY)
 	}
 
 	// Quick return if possible
@@ -215,13 +214,13 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		panic(negativeN)
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if incY == 0 {
-		panic(zeroInc)
+		panic(zeroIncY)
 	}
 	if lda < max(1, n) {
-		panic(badLdaRow)
+		panic(badLdA)
 	}
 
 	// Quick return if possible
@@ -293,13 +292,13 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		panic(kULT0)
 	}
 	if lda < kL+kU+1 {
-		panic(badLdaGenBand)
+		panic(badLdA)
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if incY == 0 {
-		panic(zeroInc)
+		panic(zeroIncY)
 	}
 
 	// Quick return if possible
@@ -424,10 +423,10 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(nLT0)
 	}
 	if lda < n {
-		panic(badLda)
+		panic(badLdA)
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if n == 0 {
 		return
@@ -597,7 +596,7 @@ func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic("blas: lda must be less than max(1,n)")
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	// Quick return if possible
 	if n == 0 {
@@ -754,13 +753,13 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 		panic(negativeN)
 	}
 	if lda > 1 && lda > n {
-		panic(badLda)
+		panic(badLdA)
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if incY == 0 {
-		panic(zeroInc)
+		panic(zeroIncY)
 	}
 	// Quick return if possible
 	if n == 0 || (alpha == 0 && beta == 1) {
@@ -903,7 +902,7 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic("blas: lda must be less than max(1,n)")
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if n == 0 {
 		return
@@ -1084,7 +1083,7 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 // 		x := A*x,   or   x := A**T*x,
 // where x is an n element vector and  A is an n by n unit, or non-unit,
 // upper or lower triangular matrix represented in packed storage format.
-func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
+func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1098,11 +1097,11 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	if n < 0 {
 		panic(nLT0)
 	}
-	if len(a) < (n*(n+1))/2 {
-		panic("goblas: not enough data in a")
+	if len(ap) < (n*(n+1))/2 {
+		panic("blas: index of ap out of range")
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if n == 0 {
 		return
@@ -1120,9 +1119,9 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 				for i := 0; i < n; i++ {
 					xi := x[i]
 					if nonUnit {
-						xi *= a[offset]
+						xi *= ap[offset]
 					}
-					atmp := a[offset+1 : offset+n-i]
+					atmp := ap[offset+1 : offset+n-i]
 					xtmp := x[i+1:]
 					for j, v := range atmp {
 						xi += v * xtmp[j]
@@ -1136,9 +1135,9 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 			for i := 0; i < n; i++ {
 				xix := x[ix]
 				if nonUnit {
-					xix *= a[offset]
+					xix *= ap[offset]
 				}
-				atmp := a[offset+1 : offset+n-i]
+				atmp := ap[offset+1 : offset+n-i]
 				jx := kx + (i+1)*incX
 				for _, v := range atmp {
 					xix += v * x[jx]
@@ -1155,9 +1154,9 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 			for i := n - 1; i >= 0; i-- {
 				xi := x[i]
 				if nonUnit {
-					xi *= a[offset]
+					xi *= ap[offset]
 				}
-				atmp := a[offset-i : offset]
+				atmp := ap[offset-i : offset]
 				for j, v := range atmp {
 					xi += v * x[j]
 				}
@@ -1171,9 +1170,9 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		for i := n - 1; i >= 0; i-- {
 			xix := x[ix]
 			if nonUnit {
-				xix *= a[offset]
+				xix *= ap[offset]
 			}
-			atmp := a[offset-i : offset]
+			atmp := ap[offset-i : offset]
 			jx := kx
 			for _, v := range atmp {
 				xix += v * x[jx]
@@ -1185,19 +1184,19 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		}
 		return
 	}
-	// Cases where a is transposed.
+	// Cases where ap is transposed.
 	if ul == blas.Upper {
 		if incX == 1 {
 			offset = n*(n+1)/2 - 1
 			for i := n - 1; i >= 0; i-- {
 				xi := x[i]
-				atmp := a[offset+1 : offset+n-i]
+				atmp := ap[offset+1 : offset+n-i]
 				xtmp := x[i+1:]
 				for j, v := range atmp {
 					xtmp[j] += v * xi
 				}
 				if nonUnit {
-					x[i] *= a[offset]
+					x[i] *= ap[offset]
 				}
 				offset -= n - i + 1
 			}
@@ -1208,13 +1207,13 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		for i := n - 1; i >= 0; i-- {
 			xix := x[ix]
 			jx := kx + (i+1)*incX
-			atmp := a[offset+1 : offset+n-i]
+			atmp := ap[offset+1 : offset+n-i]
 			for _, v := range atmp {
 				x[jx] += v * xix
 				jx += incX
 			}
 			if nonUnit {
-				x[ix] *= a[offset]
+				x[ix] *= ap[offset]
 			}
 			offset -= n - i + 1
 			ix -= incX
@@ -1224,12 +1223,12 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	if incX == 1 {
 		for i := 0; i < n; i++ {
 			xi := x[i]
-			atmp := a[offset-i : offset]
+			atmp := ap[offset-i : offset]
 			for j, v := range atmp {
 				x[j] += v * xi
 			}
 			if nonUnit {
-				x[i] *= a[offset]
+				x[i] *= ap[offset]
 			}
 			offset += i + 2
 		}
@@ -1239,13 +1238,13 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	for i := 0; i < n; i++ {
 		xix := x[ix]
 		jx := kx
-		atmp := a[offset-i : offset]
+		atmp := ap[offset-i : offset]
 		for _, v := range atmp {
 			x[jx] += v * xix
 			jx += incX
 		}
 		if nonUnit {
-			x[ix] *= a[offset]
+			x[ix] *= ap[offset]
 		}
 		ix += incX
 		offset += i + 2
@@ -1269,10 +1268,10 @@ func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(nLT0)
 	}
 	if lda < k+1 {
-		panic(badLdaTriBand)
+		panic(badLdA)
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if n == 0 {
 		return
@@ -1464,10 +1463,10 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 	}
 
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if incY == 0 {
-		panic(zeroInc)
+		panic(zeroIncY)
 	}
 
 	// Quick return if possible
@@ -1594,10 +1593,10 @@ func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(nLT0)
 	}
 	if incX == 0 {
-		panic(negInc)
+		panic(zeroIncX)
 	}
 	if lda < n {
-		panic(badLda)
+		panic(badLdA)
 	}
 	if alpha == 0 || n == 0 {
 		return
@@ -1678,10 +1677,10 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(nLT0)
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if incY == 0 {
-		panic(zeroInc)
+		panic(zeroIncY)
 	}
 	if alpha == 0 {
 		return
@@ -1783,7 +1782,7 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic("blas: not enough data in ap")
 	}
 	if incX == 0 {
-		panic(zeroInc)
+		panic(zeroIncX)
 	}
 	if n == 0 {
 		return
@@ -1947,8 +1946,11 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x [
 	if len(a) < (n*(n+1))/2 {
 		panic("blas: not enough data in a")
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 	// Quick return if possible
 	if n == 0 || (alpha == 0 && beta == 1) {
@@ -2078,7 +2080,7 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 		panic(nLT0)
 	}
 	if incX == 0 {
-		panic(negInc)
+		panic(zeroIncX)
 	}
 	if len(a) < (n*(n+1))/2 {
 		panic("blas: not enough data in a")
@@ -2157,8 +2159,11 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	if n < 0 {
 		panic(nLT0)
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 
 	if len(a) < (n*(n+1))/2 {

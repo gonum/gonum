@@ -22,10 +22,11 @@ type Implementation struct{}
 var _ blas.Float64Level1 = Implementation{}
 
 const (
-	negativeN = "blas: negative number of elements"
-	zeroInc   = "blas: zero value of increment"
-	negInc    = "blas: negative value of increment"
-	badLen    = "blas: bad slice length"
+	negativeN = "blas: n < 0"
+	zeroIncX  = "blas: zero x index increment"
+	zeroIncY  = "blas: zero y index increment"
+	badLenX   = "blas: x index out of range"
+	badLenY   = "blas: y index out of range"
 )
 
 /*
@@ -46,12 +47,18 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 	if n < 0 {
 		panic(negativeN)
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 	if incX == 1 && incY == 1 {
-		if len(x) < n || len(y) < n {
-			panic(badLen)
+		if len(x) < n {
+			panic(badLenX)
+		}
+		if len(y) < n {
+			panic(badLenY)
 		}
 		return ddotUnitary(x[:n], y)
 	}
@@ -62,8 +69,11 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 	if incY < 0 {
 		iy = (-n + 1) * incY
 	}
-	if ix >= len(x) || iy >= len(y) || ix+(n-1)*incX >= len(x) || iy+(n-1)*incY >= len(y) {
-		panic(badLen)
+	if ix >= len(x) || ix+(n-1)*incX >= len(x) {
+		panic(badLenX)
+	}
+	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
+		panic(badLenY)
 	}
 	return ddotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
@@ -74,7 +84,7 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 func (Implementation) Dnrm2(n int, x []float64, incX int) float64 {
 	if incX < 1 {
 		if incX == 0 {
-			panic(zeroInc)
+			panic(zeroIncX)
 		}
 		return 0
 	}
@@ -129,7 +139,7 @@ func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 	}
 	if incX < 1 {
 		if incX == 0 {
-			panic(zeroInc)
+			panic(zeroIncX)
 		}
 		return 0
 	}
@@ -152,7 +162,7 @@ func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 func (Implementation) Idamax(n int, x []float64, incX int) int {
 	if incX < 1 {
 		if incX == 0 {
-			panic(zeroInc)
+			panic(zeroIncX)
 		}
 		return -1
 	}
@@ -199,8 +209,11 @@ func (Implementation) Dswap(n int, x []float64, incX int, y []float64, incY int)
 		}
 		panic(negativeN)
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 	if incX == 1 && incY == 1 {
 		x = x[:n]
@@ -231,8 +244,11 @@ func (Implementation) Dcopy(n int, x []float64, incX int, y []float64, incY int)
 		}
 		panic(negativeN)
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 	if incX == 1 && incY == 1 {
 		copy(y[:n], x[:n])
@@ -260,15 +276,21 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 		}
 		panic(negativeN)
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 	if alpha == 0 {
 		return
 	}
 	if incX == 1 && incY == 1 {
-		if len(x) < n || len(y) < n {
-			panic(badLen)
+		if len(x) < n {
+			panic(badLenX)
+		}
+		if len(y) < n {
+			panic(badLenY)
 		}
 		daxpyUnitary(alpha, x[:n], y)
 		return
@@ -280,8 +302,11 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 	if incY < 0 {
 		iy = (-n + 1) * incY
 	}
-	if ix >= len(x) || iy >= len(y) || ix+(n-1)*incX >= len(x) || iy+(n-1)*incY >= len(y) {
-		panic(badLen)
+	if ix >= len(x) || ix+(n-1)*incX >= len(x) {
+		panic(badLenX)
+	}
+	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
+		panic(badLenY)
 	}
 	daxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
@@ -454,8 +479,11 @@ func (Implementation) Drot(n int, x []float64, incX int, y []float64, incY int, 
 		}
 		panic(negativeN)
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
 	}
 
 	if incX == 1 && incY == 1 {
@@ -490,9 +518,13 @@ func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int,
 		}
 		panic(negativeN)
 	}
-	if incX == 0 || incY == 0 {
-		panic(zeroInc)
+	if incX == 0 {
+		panic(zeroIncX)
 	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
+
 	var h11, h12, h21, h22 float64
 	var ix, iy int
 	switch p.Flag {
@@ -542,7 +574,7 @@ func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int,
 func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
 	if incX < 1 {
 		if incX == 0 {
-			panic(zeroInc)
+			panic(zeroIncX)
 		}
 		return
 	}

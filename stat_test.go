@@ -436,8 +436,8 @@ and 0 data points above 1000. Since dividers has length 5, there will be 4 bins.
 	fmt.Println("For ease, the floats Span function can be used to set the dividers")
 	nBins := 10
 	dividers = make([]float64, nBins+1)
-	min, _ := floats.Min(x)
-	max, _ := floats.Max(x)
+	min := floats.Min(x)
+	max := floats.Max(x)
 	// Increase the maximum divider so that the maximum value of x is contained
 	// within the last bucket.
 	max += 1

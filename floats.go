@@ -455,8 +455,9 @@ func Max(s []float64) float64 {
 	return s[MaxIdx(s)]
 }
 
-// MaxIdx returns the index of the maximum value in the input slice.
-// If the slice is empty, MaxIdx will panic.
+// MaxIdx returns the index of the maximum value in the input slice. If several
+// entries have the maximum value, the first such index is returned. If the slice
+// is empty, MaxIdx will panic.
 func MaxIdx(s []float64) int {
 	if len(s) == 0 {
 		panic("floats: zero slice length")
@@ -477,8 +478,9 @@ func Min(s []float64) float64 {
 	return s[MinIdx(s)]
 }
 
-// MinIdx returns the index of the minimum value in the input slice.
-// If the slice is empty, MinIdx will panic.
+// MinIdx returns the index of the minimum value in the input slice. If several
+// entries have the maximum value, the first such index is returned. If the slice
+// is empty, MinIdx will panic.
 func MinIdx(s []float64) int {
 	min := s[0]
 	var ind int

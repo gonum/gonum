@@ -6,9 +6,10 @@
 
 package asm
 
-func DaxpyUnitary(alpha float64, x, y []float64) {
+// The extra z parameter is needed because of floats.AddScaledTo
+func DaxpyUnitary(alpha float64, x, y, z []float64) {
 	for i, v := range x {
-		y[i] += alpha * v
+		z[i] = alpha * v + y[i]
 	}
 }
 

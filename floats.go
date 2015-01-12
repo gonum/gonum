@@ -57,7 +57,7 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination and source to not match")
 	}
-	asm.DaxpyUnitary(alpha, s, dst)
+	asm.DaxpyUnitary(alpha, s, dst, dst)
 }
 
 // AddScaledTo performs dst = y + alpha * s, where alpha is a scalar,
@@ -69,8 +69,7 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 	if len(dst) != len(s) || len(dst) != len(y) {
 		panic("floats: lengths of slices do not match")
 	}
-	copy(dst, y)
-	asm.DaxpyUnitary(alpha, s, dst)
+	asm.DaxpyUnitary(alpha, s, y, dst)
 	return dst
 }
 

@@ -1,3 +1,5 @@
+//+build cblas
+
 package zla
 
 import (
@@ -7,9 +9,8 @@ import (
 	"testing"
 
 	"github.com/gonum/blas"
-	"github.com/gonum/blas/cblas"
-	"github.com/gonum/blas/dbw"
-	"github.com/gonum/blas/zbw"
+	"github.com/gonum/blas/blas64"
+	"github.com/gonum/blas/cblas128"
 	"github.com/gonum/lapack/clapack"
 	"github.com/gonum/lapack/dla"
 )
@@ -17,8 +18,6 @@ import (
 func init() {
 	Register(clapack.Lapack{})
 	dla.Register(clapack.Lapack{})
-	zbw.Register(cblas.Blas{})
-	dbw.Register(cblas.Blas{})
 }
 
 func fillRandn(a []complex128, mu complex128, sigmaSq float64) {
@@ -29,10 +28,20 @@ func fillRandn(a []complex128, mu complex128, sigmaSq float64) {
 }
 
 func TestQR(t *testing.T) {
-	A := zbw.NewGeneral(3, 2, []complex128{complex(1, 0), complex(2, 0), complex(3, 0), complex(4, 0), complex(5, 0), complex(6, 0)})
-	B := zbw.NewGeneral(3, 2, []complex128{complex(1, 0), complex(1, 0), complex(1, 0), complex(2, 0), complex(2, 0), complex(2, 0)})
+	A := cblas128.General{
+		Rows:   3,
+		Cols:   2,
+		Stride: 2,
+		Data:   []complex128{complex(1, 0), complex(2, 0), complex(3, 0), complex(4, 0), complex(5, 0), complex(6, 0)},
+	}
+	B := cblas128.General{
+		Rows:   3,
+		Cols:   2,
+		Stride: 2,
+		Data:   []complex128{complex(1, 0), complex(1, 0), complex(1, 0), complex(2, 0), complex(2, 0), complex(2, 0)},
+	}
 
-	tau := zbw.Allocate(2)
+	tau := make([]complex128, 2)
 
 	f := QR(A, tau)
 
@@ -41,11 +50,18 @@ func TestQR(t *testing.T) {
 	//fmt.Println(B)
 }
 
+func f64col(i int, a blas64.General) blas64.Vector {
+	return blas64.Vector{
+		Inc:  a.Stride,
+		Data: a.Data[i:],
+	}
+}
+
 func TestLanczos(t *testing.T) {
-	A := zbw.NewGeneral(3, 4, nil)
+	A := cblas128.General{Rows: 3, Cols: 4, Stride: 4, Data: make([]complex128, 3*4)}
 	fillRandn(A.Data, 0, 1)
 
-	Acpy := zbw.NewGeneral(3, 4, nil)
+	Acpy := cblas128.General{Rows: 3, Cols: 4, Stride: 4, Data: make([]complex128, 3*4)}
 	copy(Acpy.Data, A.Data)
 
 	u0 := make([]complex128, 3)
@@ -55,25 +71,25 @@ func TestLanczos(t *testing.T) {
 
 	fmt.Println(a, b)
 
-	tmpc := zbw.NewGeneral(3, 3, nil)
-	bidic := zbw.NewGeneral(3, 3, nil)
+	tmpc := cblas128.General{Rows: 3, Cols: 3, Stride: 3, Data: make([]complex128, 3*3)}
+	bidic := cblas128.General{Rows: 3, Cols: 3, Stride: 3, Data: make([]complex128, 3*3)}
 
-	zbw.Gemm(blas.NoTrans, blas.NoTrans, 1, A, Vl, 0, tmpc)
-	zbw.Gemm(blas.ConjTrans, blas.NoTrans, 1, Ul, tmpc, 0, bidic)
+	cblas128.Gemm(blas.NoTrans, blas.NoTrans, 1, A, Vl, 0, tmpc)
+	cblas128.Gemm(blas.ConjTrans, blas.NoTrans, 1, Ul, tmpc, 0, bidic)
 
 	fmt.Println(bidic)
 
 	Ur, s, Vr := dla.SVDbd(blas.Lower, a, b)
 
-	tmp := dbw.NewGeneral(3, 3, nil)
-	bidi := dbw.NewGeneral(3, 3, nil)
+	tmp := blas64.General{Rows: 3, Cols: 3, Stride: 3, Data: make([]float64, 3*3)}
+	bidi := blas64.General{Rows: 3, Cols: 3, Stride: 3, Data: make([]float64, 3*3)}
 
 	copy(tmp.Data, Ur.Data)
 	for i := 0; i < 3; i++ {
-		dbw.Scal(s[i], tmp.Col(i))
+		blas64.Scal(3, s[i], f64col(i, tmp))
 	}
 
-	dbw.Gemm(blas.NoTrans, blas.NoTrans, 1, tmp, Vr, 0, bidi)
+	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, tmp, Vr, 0, bidi)
 
 	fmt.Println(bidi)
 	/*

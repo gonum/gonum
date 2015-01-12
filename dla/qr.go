@@ -2,29 +2,39 @@ package dla
 
 import (
 	"github.com/gonum/blas"
-	"github.com/gonum/blas/dbw"
+	"github.com/gonum/blas/blas64"
 )
 
 type QRFact struct {
-	a   dbw.General
+	a   blas64.General
 	tau []float64
 }
 
-func QR(A dbw.General, tau []float64) QRFact {
-	impl.Dgeqrf(A.Rows, A.Cols, A.Data, A.Stride, tau)
-	return QRFact{A, tau}
+func QR(a blas64.General, tau []float64) QRFact {
+	impl.Dgeqrf(a.Rows, a.Cols, a.Data, a.Stride, tau)
+	return QRFact{a: a, tau: tau}
 }
 
-func (f QRFact) R() dbw.Triangular {
-	return dbw.Ge2Tr(f.a, blas.NonUnit, blas.Upper)
+func (f QRFact) R() blas64.Triangular {
+	n := f.a.Rows
+	if f.a.Cols < n {
+		n = f.a.Cols
+	}
+	return blas64.Triangular{
+		Data:   f.a.Data,
+		N:      n,
+		Stride: f.a.Stride,
+		Uplo:   blas.Upper,
+		Diag:   blas.NonUnit,
+	}
 }
 
-func (f QRFact) Solve(B dbw.General) dbw.General {
-	if f.a.Cols != B.Cols {
+func (f QRFact) Solve(b blas64.General) blas64.General {
+	if f.a.Cols != b.Cols {
 		panic("dimension missmatch")
 	}
-	impl.Dormqr(blas.Left, blas.Trans, B.Rows, B.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, B.Data, B.Stride)
-	B.Rows = f.a.Cols
-	dbw.Trsm(blas.Left, blas.NoTrans, 1, f.R(), B)
-	return B
+	impl.Dormqr(blas.Left, blas.Trans, b.Rows, b.Cols, f.a.Cols, f.a.Data, f.a.Stride, f.tau, b.Data, b.Stride)
+	b.Rows = f.a.Cols
+	blas64.Trsm(blas.Left, blas.NoTrans, 1, f.R(), b)
+	return b
 }

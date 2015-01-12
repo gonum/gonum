@@ -2,21 +2,31 @@ package dla
 
 import (
 	"github.com/gonum/blas"
-	"github.com/gonum/blas/dbw"
+	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack"
 )
 
-func SVD(A dbw.General) (U dbw.General, s []float64, Vt dbw.General) {
+func SVD(A blas64.General) (U blas64.General, s []float64, Vt blas64.General) {
 	m := A.Rows
 	n := A.Cols
 	U.Stride = 1
 	Vt.Stride = 1
 	if m >= n {
-		Vt = dbw.NewGeneral(n, n, nil)
+		Vt = blas64.General{
+			Rows:   n,
+			Cols:   n,
+			Stride: n,
+			Data:   make([]float64, n*n),
+		}
 		s = make([]float64, n)
 		U = A
 	} else {
-		U = dbw.NewGeneral(m, m, nil)
+		U = blas64.General{
+			Rows:   m,
+			Cols:   m,
+			Stride: m,
+			Data:   make([]float64, n*n),
+		}
 		s = make([]float64, m)
 		Vt = A
 	}
@@ -26,14 +36,24 @@ func SVD(A dbw.General) (U dbw.General, s []float64, Vt dbw.General) {
 	return
 }
 
-func SVDbd(uplo blas.Uplo, d, e []float64) (U dbw.General, s []float64, Vt dbw.General) {
+func SVDbd(uplo blas.Uplo, d, e []float64) (U blas64.General, s []float64, Vt blas64.General) {
 	n := len(d)
 	if len(e) != n {
 		panic("dimensionality missmatch")
 	}
 
-	U = dbw.NewGeneral(n, n, nil)
-	Vt = dbw.NewGeneral(n, n, nil)
+	U = blas64.General{
+		Rows:   n,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, n*n),
+	}
+	Vt = blas64.General{
+		Rows:   n,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, n*n),
+	}
 
 	impl.Dbdsdc(uplo, lapack.Explicit, n, d, e, U.Data, U.Stride, Vt.Data, Vt.Stride, nil, nil)
 	s = d

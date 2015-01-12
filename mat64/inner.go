@@ -4,6 +4,8 @@
 
 package mat64
 
+import "github.com/gonum/internal/asm"
+
 // Inner computes the generalized inner product
 //   x^T A y
 // between vectors x and y with matrix A. This is only a true inner product if
@@ -28,8 +30,8 @@ func Inner(x []float64, A Matrix, y []float64) float64 {
 	case RawMatrixer:
 		bmat := b.RawMatrix()
 		for i, xi := range x {
-			for j, yj := range y {
-				sum += xi * bmat.Data[i*bmat.Stride+j] * yj
+			if xi != 0 {
+				sum += xi * asm.DdotUnitary(bmat.Data[i*bmat.Stride:i*bmat.Stride+n], y)
 			}
 		}
 	default:

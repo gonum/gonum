@@ -17,9 +17,9 @@ If you want to use OpenBLAS, install it in any directory:
   make
 ```
 
-The cgo package provides bindings to C-backed BLAS packages. blas/cgo needs the CGO_LDFLAGS
+The blas/cgo package provides bindings to C-backed BLAS packages. blas/cgo needs the `CGO_LDFLAGS`
 environment variable to point to the blas installation. More information can be found in the
-[cgo documentation](http://golang.org/cmd/cgo/).
+[cgo command documentation](http://golang.org/cmd/cgo/).
 
 Then install the blas/cgo package:
 ```sh

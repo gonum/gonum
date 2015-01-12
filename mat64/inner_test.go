@@ -5,6 +5,9 @@
 package mat64
 
 import (
+	"testing"
+
+	"github.com/gonum/blas/blas64"
 	"gopkg.in/check.v1"
 )
 
@@ -72,4 +75,34 @@ func (s *S) TestInner(c *check.C) {
 		got := Inner(test.x, m, test.y)
 		c.Check(want, check.Equals, got, check.Commentf("Test %v: want %v, got %v", i, want, got))
 	}
+}
+
+func benchmarkInner(b *testing.B, m, n int) {
+	x := make([]float64, m)
+	randomSlice(x)
+	y := make([]float64, n)
+	randomSlice(y)
+	data := make([]float64, m*n)
+	randomSlice(data)
+	mat := &Dense{blas64.General{Rows: m, Cols: n, Stride: n, Data: data}}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Inner(x, mat, y)
+	}
+}
+
+func BenchmarkInnerSmSm(b *testing.B) {
+	benchmarkInner(b, Sm, Sm)
+}
+
+func BenchmarkInnerMedMed(b *testing.B) {
+	benchmarkInner(b, Med, Med)
+}
+
+func BenchmarkInnerLgLg(b *testing.B) {
+	benchmarkInner(b, Lg, Lg)
+}
+
+func BenchmarkInnerLgSm(b *testing.B) {
+	benchmarkInner(b, Lg, Sm)
 }

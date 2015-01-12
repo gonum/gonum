@@ -1,6 +1,9 @@
 package native
 
-import "github.com/gonum/blas"
+import (
+	"github.com/gonum/blas"
+	"github.com/gonum/internal/asm"
+)
 
 // See http://www.netlib.org/lapack/explore-html/d4/de1/_l_i_c_e_n_s_e_source.html
 // for more license information
@@ -150,25 +153,13 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 	if tA == blas.NoTrans {
 		if incX == 1 {
 			for i := 0; i < m; i++ {
-				var tmp float64
-				atmp := a[lda*i : lda*i+n]
-				for j, v := range atmp {
-					tmp += v * x[j]
-				}
-				y[i] += alpha * tmp
+				y[i] += alpha * asm.DdotUnitary(a[lda*i:lda*i+n], x)
 			}
 			return
 		}
 		iy := ky
 		for i := 0; i < m; i++ {
-			jx := kx
-			var tmp float64
-			atmp := a[lda*i : lda*i+n]
-			for _, v := range atmp {
-				tmp += v * x[jx]
-				jx += incX
-			}
-			y[iy] += alpha * tmp
+			y[iy] += alpha * asm.DdotInc(x, a[lda*i:lda*i+n], uintptr(n), uintptr(incX), 1, uintptr(kx), 0)
 			iy += incY
 		}
 		return
@@ -178,10 +169,7 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 		for i := 0; i < m; i++ {
 			tmp := alpha * x[i]
 			if tmp != 0 {
-				atmp := a[lda*i : lda*i+n]
-				for j, v := range atmp {
-					y[j] += v * tmp
-				}
+				asm.DaxpyUnitary(tmp, a[lda*i:lda*i+n], y, y)
 			}
 		}
 		return
@@ -190,12 +178,7 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 	for i := 0; i < m; i++ {
 		tmp := alpha * x[ix]
 		if tmp != 0 {
-			jy := ky
-			atmp := a[lda*i : lda*i+n]
-			for _, v := range atmp {
-				y[jy] += v * tmp
-				jy += incY
-			}
+			asm.DaxpyInc(tmp, a[lda*i:lda*i+n], y, uintptr(n), 1, uintptr(incY), 0, uintptr(ky))
 		}
 		ix += incX
 	}
@@ -247,10 +230,8 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		for i, xv := range x {
 			tmp := alpha * xv
 			if tmp != 0 {
-				atmp := a[i*lda:]
-				for j, yv := range y {
-					atmp[j] += yv * tmp
-				}
+				atmp := a[i*lda : i*lda+n]
+				asm.DaxpyUnitary(tmp, y, atmp, atmp)
 			}
 		}
 		return
@@ -258,14 +239,9 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 
 	ix := kx
 	for i := 0; i < m; i++ {
-		if x[ix] != 0 {
-			tmp := alpha * x[ix]
-			jy := ky
-			atmp := a[i*lda:]
-			for j := 0; j < n; j++ {
-				atmp[j] += y[jy] * tmp
-				jy += incY
-			}
+		tmp := alpha * x[ix]
+		if tmp != 0 {
+			asm.DaxpyInc(tmp, y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
 		}
 		ix += incX
 	}

@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/gonum/blas"
+	"github.com/gonum/internal/asm"
 )
 
 const (
@@ -309,9 +310,7 @@ func dgemmSerialNotNot(a, b, c general, alpha float64) {
 		for l, v := range a.data[i*a.stride : i*a.stride+a.cols] {
 			tmp := alpha * v
 			if tmp != 0 {
-				for j, w := range b.data[l*b.stride : l*b.stride+b.cols] {
-					ctmp[j] += tmp * w
-				}
+				asm.DaxpyUnitary(tmp, b.data[l*b.stride:l*b.stride+b.cols], ctmp, ctmp)
 			}
 		}
 	}
@@ -340,9 +339,7 @@ func dgemmSerialTransNot(a, b, c general, alpha float64) {
 			tmp := alpha * v
 			ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 			if tmp != 0 {
-				for j, w := range btmp {
-					ctmp[j] += tmp * w
-				}
+				asm.DaxpyUnitary(tmp, btmp, ctmp, ctmp)
 			}
 		}
 	}
@@ -368,11 +365,7 @@ func dgemmSerialNotTrans(a, b, c general, alpha float64) {
 		atmp := a.data[i*a.stride : i*a.stride+a.cols]
 		ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 		for j := 0; j < b.rows; j++ {
-			var tmp float64
-			for l, v := range b.data[j*b.stride : j*b.stride+b.cols] {
-				tmp += atmp[l] * v
-			}
-			ctmp[j] += alpha * tmp
+			ctmp[j] += alpha * asm.DdotUnitary(atmp, b.data[j*b.stride:j*b.stride+b.cols])
 		}
 	}
 
@@ -399,8 +392,8 @@ func dgemmSerialTransTrans(a, b, c general, alpha float64) {
 			ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 			if v != 0 {
 				tmp := alpha * v
-				for j := 0; j < b.rows; j++ {
-					ctmp[j] += tmp * b.data[j*b.stride+l]
+				if tmp != 0 {
+					asm.DaxpyInc(tmp, b.data[l:], ctmp, uintptr(b.rows), uintptr(b.stride), 1, 0, 0)
 				}
 			}
 		}

@@ -20,7 +20,7 @@ If you want to use OpenBLAS, install it in any directory:
 Then install the cblas package:
 ```sh
   cd $GOPATH/src/github.com/gonum/blas/cgo
-  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install 
+  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install
 ```
 
 For Windows you can download binary packages for OpenBLAS at
@@ -55,12 +55,10 @@ Binding to a C implementation of the cblas interface (e.g. ATLAS, OpenBLAS, Inte
 
 The recommended (free) option for good performance on both Linux and Darwin is OpenBLAS.
 
-### blas/dbw
+### blas/blas64
 
 Wrapper for an implementation of the double precision real (i.e., `float64`) part
 of the blas API
-
-You have to register an implementation before you can use the BLAS functions:
 
 ```Go
 package main
@@ -68,24 +66,27 @@ package main
 import (
 	"fmt"
 
-	"github.com/gonum/blas/cgo"
-	"github.com/gonum/blas/dbw"
+	"github.com/gonum/blas/blas64"
 )
 
-func init() {
-	dbw.Register(cgo.Implementation{})
-}
-
 func main() {
-	v := dbw.NewVector([]float64{1, 1, 1})
-	fmt.Println("v has length:", dbw.Nrm2(v))
+	v := blas64.Vector{Inc: 1, Data: []float64{1, 1, 1}}
+	fmt.Println("v has length:", blas64.Nrm2(len(v.Data), v))
 }
 ```
 
-### blas/zbw
+### blas/cblas128
 
 Wrapper for an implementation of the double precision complex (i.e., `complex128`)
 part of the blas API
+
+Currently blas/cblas128 requires blas/cgo and must be built with the `cblas` build tag,
+assuming blas/cgo is installed:
+
+```sh
+  go install -tags cblas github.com/gonum/blas/cblas128
+```
+
 
 ## Issues
 

@@ -12,15 +12,15 @@ import (
 )
 
 const (
-	EQTOLERANCE = 1E-14
-	SMALL       = 10
-	MEDIUM      = 1000
-	LARGE       = 100000
-	HUGE        = 10000000
+	EqTolerance = 1E-14
+	Small       = 10
+	Medium      = 1000
+	Large       = 100000
+	Huge        = 10000000
 )
 
 func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
-	if !EqualApprox(comp, truth, EQTOLERANCE) {
+	if !EqualApprox(comp, truth, EqTolerance) {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
 	}
 }
@@ -91,7 +91,7 @@ func TestAddScaled(t *testing.T) {
 	dst := []float64{1, 2, 3, 4, 5}
 	ans := []float64{19, 26, 9, 46, 35}
 	AddScaled(dst, alpha, s)
-	if !EqualApprox(dst, ans, EQTOLERANCE) {
+	if !EqualApprox(dst, ans, EqTolerance) {
 		t.Errorf("Adding scaled did not match")
 	}
 	short := []float64{1}
@@ -110,14 +110,14 @@ func TestAddScaledTo(t *testing.T) {
 	dst1 := make([]float64, 5)
 	ans := []float64{19, 26, 9, 46, 35}
 	dst2 := AddScaledTo(dst1, y, alpha, s)
-	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+	if !EqualApprox(dst1, ans, EqTolerance) {
 		t.Errorf("AddScaledTo did not match for mutator")
 	}
-	if !EqualApprox(dst2, ans, EQTOLERANCE) {
+	if !EqualApprox(dst2, ans, EqTolerance) {
 		t.Errorf("AddScaledTo did not match for returned slice")
 	}
 	AddScaledTo(dst1, y, alpha, s)
-	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+	if !EqualApprox(dst1, ans, EqTolerance) {
 		t.Errorf("Reusing dst did not match")
 	}
 	short := []float64{1}
@@ -256,7 +256,7 @@ func TestDiv(t *testing.T) {
 	s2 := []float64{1, 2, 3}
 	ans := []float64{5, 6, 9}
 	Div(s1, s2)
-	if !EqualApprox(s1, ans, EQTOLERANCE) {
+	if !EqualApprox(s1, ans, EqTolerance) {
 		t.Errorf("Mul doesn't give correct answer")
 	}
 	s1short := []float64{1}
@@ -277,20 +277,20 @@ func TestDivTo(t *testing.T) {
 	dst1 := make([]float64, 3)
 	ans := []float64{5, 6, 9}
 	dst2 := DivTo(dst1, s1, s2)
-	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+	if !EqualApprox(dst1, ans, EqTolerance) {
 		t.Errorf("DivTo doesn't give correct answer in mutated slice")
 	}
-	if !EqualApprox(dst2, ans, EQTOLERANCE) {
+	if !EqualApprox(dst2, ans, EqTolerance) {
 		t.Errorf("DivTo doesn't give correct answer in returned slice")
 	}
-	if !EqualApprox(s1, s1orig, EQTOLERANCE) {
+	if !EqualApprox(s1, s1orig, EqTolerance) {
 		t.Errorf("S1 changes during multo")
 	}
-	if !EqualApprox(s2, s2orig, EQTOLERANCE) {
+	if !EqualApprox(s2, s2orig, EqTolerance) {
 		t.Errorf("s2 changes during multo")
 	}
 	DivTo(dst1, s1, s2)
-	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+	if !EqualApprox(dst1, ans, EqTolerance) {
 		t.Errorf("DivTo doesn't give correct answer reusing dst")
 	}
 	dstShort := []float64{1}
@@ -645,14 +645,14 @@ func TestLogSumExp(t *testing.T) {
 	val := LogSumExp(s)
 	// http://www.wolframalpha.com/input/?i=log%28exp%281%29+%2B+exp%282%29+%2B+exp%283%29+%2B+exp%284%29+%2B+exp%285%29%29
 	truth := 5.4519143959375933331957225109748087179338972737576824
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Wrong logsumexp for many values")
 	}
 	s = []float64{1, 2}
 	// http://www.wolframalpha.com/input/?i=log%28exp%281%29+%2B+exp%282%29%29
 	truth = 2.3132616875182228340489954949678556419152800856703483
 	val = LogSumExp(s)
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Wrong logsumexp for two values. %v expected, %v found", truth, val)
 	}
 	// This case would normally underflow
@@ -660,7 +660,7 @@ func TestLogSumExp(t *testing.T) {
 	// http://www.wolframalpha.com/input/?i=log%28exp%28-1001%29%2Bexp%28-1002%29%2Bexp%28-1003%29%2Bexp%28-1004%29%2Bexp%28-1005%29%29
 	truth = -1000.54808560406240666680427748902519128206610272624
 	val = LogSumExp(s)
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Doesn't match for underflow case. %v expected, %v found", truth, val)
 	}
 	// positive infinite case
@@ -674,7 +674,7 @@ func TestLogSumExp(t *testing.T) {
 	s = []float64{1, 2, 3, 4, 5, math.Inf(-1)}
 	val = LogSumExp(s)
 	truth = 5.4519143959375933331957225109748087179338972737576824 // same as first case
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Wrong logsumexp for values with negative infinity")
 	}
 
@@ -709,7 +709,7 @@ func TestMul(t *testing.T) {
 	s2 := []float64{1, 2, 3}
 	ans := []float64{1, 4, 9}
 	Mul(s1, s2)
-	if !EqualApprox(s1, ans, EQTOLERANCE) {
+	if !EqualApprox(s1, ans, EqTolerance) {
 		t.Errorf("Mul doesn't give correct answer")
 	}
 	s1short := []float64{1}
@@ -730,20 +730,20 @@ func TestMulTo(t *testing.T) {
 	dst1 := make([]float64, 3)
 	ans := []float64{1, 4, 9}
 	dst2 := MulTo(dst1, s1, s2)
-	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+	if !EqualApprox(dst1, ans, EqTolerance) {
 		t.Errorf("MulTo doesn't give correct answer in mutated slice")
 	}
-	if !EqualApprox(dst2, ans, EQTOLERANCE) {
+	if !EqualApprox(dst2, ans, EqTolerance) {
 		t.Errorf("MulTo doesn't give correct answer in returned slice")
 	}
-	if !EqualApprox(s1, s1orig, EQTOLERANCE) {
+	if !EqualApprox(s1, s1orig, EqTolerance) {
 		t.Errorf("S1 changes during multo")
 	}
-	if !EqualApprox(s2, s2orig, EQTOLERANCE) {
+	if !EqualApprox(s2, s2orig, EqTolerance) {
 		t.Errorf("s2 changes during multo")
 	}
 	MulTo(dst1, s1, s2)
-	if !EqualApprox(dst1, ans, EQTOLERANCE) {
+	if !EqualApprox(dst1, ans, EqTolerance) {
 		t.Errorf("MulTo doesn't give correct answer reusing dst")
 	}
 	dstShort := []float64{1}
@@ -867,26 +867,26 @@ func TestNorm(t *testing.T) {
 	s := []float64{-1, -3.4, 5, -6}
 	val := Norm(s, math.Inf(1))
 	truth := 6.0
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Doesn't match for inf norm. %v expected, %v found", truth, val)
 	}
 	// http://www.wolframalpha.com/input/?i=%28%28-1%29%5E2+%2B++%28-3.4%29%5E2+%2B+5%5E2%2B++6%5E2%29%5E%281%2F2%29
 	val = Norm(s, 2)
 	truth = 8.5767126569566267590651614132751986658027271236078592
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Doesn't match for inf norm. %v expected, %v found", truth, val)
 	}
 	// http://www.wolframalpha.com/input/?i=%28%28%7C-1%7C%29%5E3+%2B++%28%7C-3.4%7C%29%5E3+%2B+%7C5%7C%5E3%2B++%7C6%7C%5E3%29%5E%281%2F3%29
 	val = Norm(s, 3)
 	truth = 7.2514321388020228478109121239004816430071237369356233
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Doesn't match for inf norm. %v expected, %v found", truth, val)
 	}
 
 	//http://www.wolframalpha.com/input/?i=%7C-1%7C+%2B+%7C-3.4%7C+%2B+%7C5%7C%2B++%7C6%7C
 	val = Norm(s, 1)
 	truth = 15.4
-	if math.Abs(val-truth) > EQTOLERANCE {
+	if math.Abs(val-truth) > EqTolerance {
 		t.Errorf("Doesn't match for inf norm. %v expected, %v found", truth, val)
 	}
 }
@@ -1080,7 +1080,7 @@ func TestWithin(t *testing.T) {
 
 }
 
-func RandomSlice(l int) []float64 {
+func randomSlice(l int) []float64 {
 	s := make([]float64, l)
 	for i := range s {
 		s[i] = rand.Float64()
@@ -1088,7 +1088,8 @@ func RandomSlice(l int) []float64 {
 	return s
 }
 
-func benchmarkMin(b *testing.B, s []float64) {
+func benchmarkMin(b *testing.B, size int) {
+	s := randomSlice(size)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Min(s)
@@ -1096,25 +1097,23 @@ func benchmarkMin(b *testing.B, s []float64) {
 }
 
 func BenchmarkMinSmall(b *testing.B) {
-	s := RandomSlice(SMALL)
-	benchmarkMin(b, s)
+	benchmarkMin(b, Small)
 }
 
 func BenchmarkMinMed(b *testing.B) {
-	s := RandomSlice(MEDIUM)
-	benchmarkMin(b, s)
+	benchmarkMin(b, Medium)
 }
 
 func BenchmarkMinLarge(b *testing.B) {
-	s := RandomSlice(LARGE)
-	benchmarkMin(b, s)
+	benchmarkMin(b, Large)
 }
 func BenchmarkMinHuge(b *testing.B) {
-	s := RandomSlice(HUGE)
-	benchmarkMin(b, s)
+	benchmarkMin(b, Huge)
 }
 
-func benchmarkAdd(b *testing.B, s1, s2 []float64) {
+func benchmarkAdd(b *testing.B, size int) {
+	s1 := randomSlice(size)
+	s2 := randomSlice(size)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Add(s1, s2)
@@ -1122,34 +1121,23 @@ func benchmarkAdd(b *testing.B, s1, s2 []float64) {
 }
 
 func BenchmarkAddSmall(b *testing.B) {
-	i := SMALL
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	benchmarkAdd(b, s, t)
+	benchmarkAdd(b, Small)
 }
 
 func BenchmarkAddMed(b *testing.B) {
-	i := MEDIUM
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	benchmarkAdd(b, s, t)
+	benchmarkAdd(b, Medium)
 }
 
 func BenchmarkAddLarge(b *testing.B) {
-	i := LARGE
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	benchmarkAdd(b, s, t)
+	benchmarkAdd(b, Large)
 }
 
 func BenchmarkAddHuge(b *testing.B) {
-	i := HUGE
-	s := RandomSlice(i)
-	t := RandomSlice(i)
-	benchmarkAdd(b, s, t)
+	benchmarkAdd(b, Huge)
 }
 
-func benchmarkLogSumExp(b *testing.B, s []float64) {
+func benchmarkLogSumExp(b *testing.B, size int) {
+	s := randomSlice(size)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		LogSumExp(s)
@@ -1157,25 +1145,23 @@ func benchmarkLogSumExp(b *testing.B, s []float64) {
 }
 
 func BenchmarkLogSumExpSmall(b *testing.B) {
-	s := RandomSlice(SMALL)
-	benchmarkLogSumExp(b, s)
+	benchmarkLogSumExp(b, Small)
 }
 
 func BenchmarkLogSumExpMed(b *testing.B) {
-	s := RandomSlice(MEDIUM)
-	benchmarkLogSumExp(b, s)
+	benchmarkLogSumExp(b, Medium)
 }
 
 func BenchmarkLogSumExpLarge(b *testing.B) {
-	s := RandomSlice(LARGE)
-	benchmarkLogSumExp(b, s)
+	benchmarkLogSumExp(b, Large)
 }
 func BenchmarkLogSumExpHuge(b *testing.B) {
-	s := RandomSlice(HUGE)
-	benchmarkLogSumExp(b, s)
+	benchmarkLogSumExp(b, Huge)
 }
 
-func benchmarkDot(b *testing.B, s1 []float64, s2 []float64) {
+func benchmarkDot(b *testing.B, size int) {
+	s1 := randomSlice(size)
+	s2 := randomSlice(size)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Dot(s1, s2)
@@ -1183,30 +1169,25 @@ func benchmarkDot(b *testing.B, s1 []float64, s2 []float64) {
 }
 
 func BenchmarkDotSmall(b *testing.B) {
-	s1 := RandomSlice(SMALL)
-	s2 := RandomSlice(SMALL)
-	benchmarkDot(b, s1, s2)
+	benchmarkDot(b, Small)
 }
 
 func BenchmarkDotMed(b *testing.B) {
-	s1 := RandomSlice(MEDIUM)
-	s2 := RandomSlice(MEDIUM)
-	benchmarkDot(b, s1, s2)
+	benchmarkDot(b, Medium)
 }
 
 func BenchmarkDotLarge(b *testing.B) {
-	s1 := RandomSlice(LARGE)
-	s2 := RandomSlice(LARGE)
-	benchmarkDot(b, s1, s2)
+	benchmarkDot(b, Large)
 }
 
 func BenchmarkDotHuge(b *testing.B) {
-	s1 := RandomSlice(HUGE)
-	s2 := RandomSlice(HUGE)
-	benchmarkDot(b, s1, s2)
+	benchmarkDot(b, Huge)
 }
 
-func benchmarkAddScaledTo(b *testing.B, dst, y, s []float64) {
+func benchmarkAddScaledTo(b *testing.B, size int) {
+	dst := randomSlice(size)
+	y := randomSlice(size)
+	s := randomSlice(size)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		AddScaledTo(dst, y, 2.3, s)
@@ -1214,29 +1195,17 @@ func benchmarkAddScaledTo(b *testing.B, dst, y, s []float64) {
 }
 
 func BenchmarkAddScaledToSmall(b *testing.B) {
-	dst := RandomSlice(SMALL)
-	y := RandomSlice(SMALL)
-	s := RandomSlice(SMALL)
-	benchmarkAddScaledTo(b, dst, y, s)
+	benchmarkAddScaledTo(b, Small)
 }
 
 func BenchmarkAddScaledToMedium(b *testing.B) {
-	dst := RandomSlice(MEDIUM)
-	y := RandomSlice(MEDIUM)
-	s := RandomSlice(MEDIUM)
-	benchmarkAddScaledTo(b, dst, y, s)
+	benchmarkAddScaledTo(b, Medium)
 }
 
 func BenchmarkAddScaledToLarge(b *testing.B) {
-	dst := RandomSlice(LARGE)
-	y := RandomSlice(LARGE)
-	s := RandomSlice(LARGE)
-	benchmarkAddScaledTo(b, dst, y, s)
+	benchmarkAddScaledTo(b, Large)
 }
 
 func BenchmarkAddScaledToHuge(b *testing.B) {
-	dst := RandomSlice(HUGE)
-	y := RandomSlice(HUGE)
-	s := RandomSlice(HUGE)
-	benchmarkAddScaledTo(b, dst, y, s)
+	benchmarkAddScaledTo(b, Huge)
 }

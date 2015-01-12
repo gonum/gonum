@@ -210,7 +210,7 @@ func Spmv(alpha float64, a SymmetricPacked, x Vector, beta float64, y Vector) {
 	blas64.Dspmv(a.Uplo, a.N, alpha, a.Data, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
-func Ger(alpha float64, x Vector, y Vector, a General) {
+func Ger(alpha float64, x, y Vector, a General) {
 	blas64.Dger(a.Rows, a.Cols, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
@@ -222,11 +222,11 @@ func Spr(alpha float64, x Vector, a SymmetricPacked) {
 	blas64.Dspr(a.Uplo, a.N, alpha, x.Data, x.Inc, a.Data)
 }
 
-func Syr2(alpha float64, x Vector, y Vector, a Symmetric) {
+func Syr2(alpha float64, x, y Vector, a Symmetric) {
 	blas64.Dsyr2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-func Spr2(alpha float64, x Vector, y Vector, a SymmetricPacked) {
+func Spr2(alpha float64, x, y Vector, a SymmetricPacked) {
 	blas64.Dspr2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data)
 }
 

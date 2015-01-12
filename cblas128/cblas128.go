@@ -221,11 +221,11 @@ func Hpmv(alpha complex128, a HermitianPacked, x Vector, beta complex128, y Vect
 	cblas128.Zhpmv(a.Uplo, a.N, alpha, a.Data, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
-func Geru(alpha complex128, x Vector, y Vector, a General) {
+func Geru(alpha complex128, x, y Vector, a General) {
 	cblas128.Zgeru(a.Rows, a.Cols, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-func Gerc(alpha complex128, x Vector, y Vector, a General) {
+func Gerc(alpha complex128, x, y Vector, a General) {
 	cblas128.Zgerc(a.Rows, a.Cols, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
@@ -237,11 +237,11 @@ func Hpr(alpha float64, x Vector, a HermitianPacked) {
 	cblas128.Zhpr(a.Uplo, a.N, alpha, x.Data, x.Inc, a.Data)
 }
 
-func Her2(alpha complex128, x Vector, y Vector, a Hermitian) {
+func Her2(alpha complex128, x, y Vector, a Hermitian) {
 	cblas128.Zher2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-func Hpr2(alpha complex128, x Vector, y Vector, a HermitianPacked) {
+func Hpr2(alpha complex128, x, y Vector, a HermitianPacked) {
 	cblas128.Zhpr2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data)
 }
 

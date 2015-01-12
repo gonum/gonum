@@ -1205,3 +1205,38 @@ func BenchmarkDotHuge(b *testing.B) {
 	s2 := RandomSlice(HUGE)
 	benchmarkDot(b, s1, s2)
 }
+
+func benchmarkAddScaledTo(b *testing.B, dst, y, s []float64) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		AddScaledTo(dst, y, 2.3, s)
+	}
+}
+
+func BenchmarkAddScaledToSmall(b *testing.B) {
+	dst := RandomSlice(SMALL)
+	y := RandomSlice(SMALL)
+	s := RandomSlice(SMALL)
+	benchmarkAddScaledTo(b, dst, y, s)
+}
+
+func BenchmarkAddScaledToMedium(b *testing.B) {
+	dst := RandomSlice(MEDIUM)
+	y := RandomSlice(MEDIUM)
+	s := RandomSlice(MEDIUM)
+	benchmarkAddScaledTo(b, dst, y, s)
+}
+
+func BenchmarkAddScaledToLarge(b *testing.B) {
+	dst := RandomSlice(LARGE)
+	y := RandomSlice(LARGE)
+	s := RandomSlice(LARGE)
+	benchmarkAddScaledTo(b, dst, y, s)
+}
+
+func BenchmarkAddScaledToHuge(b *testing.B) {
+	dst := RandomSlice(HUGE)
+	y := RandomSlice(HUGE)
+	s := RandomSlice(HUGE)
+	benchmarkAddScaledTo(b, dst, y, s)
+}

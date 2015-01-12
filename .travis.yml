@@ -4,7 +4,9 @@ env:
   global:
   - secure: "gewG9b13l2/JJkag584f/e7vbH+CN5sE/v5IxJLI24vVBsta0L/rUiRN5e/NRXiyNDT4X2XV6R6BLED8VaUo3vDSWHBFtRAuwbMswxRcjDuIGph53zTNukhEwbFThEhZO5vO9T1tECXK1D8ktgQjmqwQ171InUy2loLFWloUTF4="  # at some point, when testing on osx
   matrix:
-  - BLAS_LIB=OpenBLAS
+  - BLAS_LIB=OpenBLAS && GOARCH=amd64
+  - BLAS_LIB=native && GOCROSS=386 && GO386=387 # GOCROSS will be renamed GOARCH to avoid gvm (?) from fiddling with it
+  # at some point, when travis allows builds on darwin
   #- BLAS_LIB=Accellerate
   # at some point, when the issue with drotgm is resolved
   #- BLAS_LIB=ATLAS
@@ -42,13 +44,19 @@ install:
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd cgo; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then go install -v -x; fi
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
+ - if [[ "$GOCROSS" == "386" && "$TRAVIS_GO_VERSION" != "tip" ]]; then export GOARCH=386; fi
+ - if [[ "$GOARCH" == "386" ]]; then gvm cross linux 386; fi
+
 
 script:
+ - go version
+ - go env
+ - env
+ - if [[ "$BLAS_LIB" == "native" ]]; then pushd native; fi
  - go get -d -t -v ./...
- - go build -x -v ./...
  - go test -x -v ./...
  - diff <(gofmt -d .) <("")
- - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash test-coverage.sh; fi
+ - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash -c "${TRAVIS_BUILD_DIR}/.test-coverage.sh"; fi
 
 after_failure: failure
 

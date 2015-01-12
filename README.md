@@ -17,10 +17,13 @@ If you want to use OpenBLAS, install it in any directory:
   make
 ```
 
-Then install the cblas package:
+The cgo package provides bindings to C-backed BLAS packages. blas/cgo needs the CGO_LDFLAGS
+environment variable to point to the blas installation. More information can be found in the
+[cgo documentation](http://golang.org/cmd/cgo/).
+
+Then install the blas/cgo package:
 ```sh
-  cd $GOPATH/src/github.com/gonum/blas/cgo
-  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install
+  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install github.com/gonum/blas/cgo
 ```
 
 For Windows you can download binary packages for OpenBLAS at
@@ -29,14 +32,12 @@ For Windows you can download binary packages for OpenBLAS at
 If you want to use a different BLAS package such as the Intel MKL you can
 adjust the `CGO_LDFLAGS` variable:
 ```sh
-  cd $GOPATH/src/github.com/gonum/blas/cgo
-  CGO_LDFLAGS="-lmkl_rt" go install
+  CGO_LDFLAGS="-lmkl_rt" go install github.com/gonum/blas/cgo
 ```
 
 On OS X the easiest solution is to use the libraries provided by the system:
 ```sh
-  cd $GOPATH/src/github.com/gonum/blas/cgo
-  CGO_LDFLAGS="-framework Accelerate" go install
+  CGO_LDFLAGS="-framework Accelerate" go install github.com/gonum/blas/cgo
 ```
 
 ## Packages

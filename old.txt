@@ -1,6 +1,0 @@
-PASS
-BenchmarkAddScaledToSmall	100000000	        20.9 ns/op
-BenchmarkAddScaledToMedium	 1000000	      1219 ns/op
-BenchmarkAddScaledToLarge	   10000	    120523 ns/op
-BenchmarkAddScaledToHuge	     100	  19079937 ns/op
-ok  	github.com/gonum/floats	8.459s

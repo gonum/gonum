@@ -66,8 +66,8 @@ func BenchmarkDgemmLgLgSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Implementation{},
 		testblas.LargeMat,
-		testblas.SmallMat,
 		testblas.LargeMat,
+		testblas.SmallMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -77,8 +77,8 @@ func BenchmarkDgemmHgHgSm(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Implementation{},
 		testblas.HugeMat,
-		testblas.SmallMat,
 		testblas.HugeMat,
+		testblas.SmallMat,
 		blas.NoTrans,
 		blas.NoTrans,
 	)
@@ -106,13 +106,13 @@ func BenchmarkDgemmMedMedMedNTT(b *testing.B) {
 	)
 }
 
-func BenchmarkDgemmMedMedMedNTNT(b *testing.B) {
+func BenchmarkDgemmMedMedMedTT(b *testing.B) {
 	testblas.DgemmBenchmark(b,
 		Implementation{},
 		testblas.MediumMat,
 		testblas.MediumMat,
 		testblas.MediumMat,
-		blas.NoTrans,
-		blas.NoTrans,
+		blas.Trans,
+		blas.Trans,
 	)
 }

@@ -169,7 +169,7 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 		for i := 0; i < m; i++ {
 			tmp := alpha * x[i]
 			if tmp != 0 {
-				asm.DaxpyUnitary(tmp, a[lda*i:lda*i+n], y)
+				asm.DaxpyUnitary(tmp, a[lda*i:lda*i+n], y, y)
 			}
 		}
 		return
@@ -230,7 +230,8 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		for i, xv := range x {
 			tmp := alpha * xv
 			if tmp != 0 {
-				asm.DaxpyUnitary(tmp, y, a[i*lda:i*lda+n])
+				atmp := a[i*lda : i*lda+n]
+				asm.DaxpyUnitary(tmp, y, atmp, atmp)
 			}
 		}
 		return

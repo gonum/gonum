@@ -462,7 +462,7 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 			for l := 0; l < k; l++ {
 				tmp := alpha * a[l*lda+i]
 				if tmp != 0 {
-					asm.DaxpyUnitary(tmp, a[l*lda+i:l*lda+n], ctmp)
+					asm.DaxpyUnitary(tmp, a[l*lda+i:l*lda+n], ctmp, ctmp)
 				}
 			}
 		}
@@ -478,7 +478,7 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 		for l := 0; l < k; l++ {
 			tmp := alpha * a[l*lda+i]
 			if tmp != 0 {
-				asm.DaxpyUnitary(tmp, a[l*lda:l*lda+i+1], ctmp)
+				asm.DaxpyUnitary(tmp, a[l*lda:l*lda+i+1], ctmp, ctmp)
 			}
 		}
 	}

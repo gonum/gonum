@@ -122,6 +122,9 @@ func Asum(n int, x Vector) float64 {
 
 // Iamax will panic if the vector increment is negative.
 func Iamax(n int, x Vector) int {
+	if x.Inc < 0 {
+		panic(negInc)
+	}
 	return blas64.Idamax(n, x.Data, x.Inc)
 }
 

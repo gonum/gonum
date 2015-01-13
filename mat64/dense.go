@@ -49,6 +49,8 @@ var (
 
 	_ RawMatrixSetter = matrix
 	_ RawMatrixer     = matrix
+
+	_ Reseter = matrix
 )
 
 type Dense struct {
@@ -82,7 +84,9 @@ func (m *Dense) SetRawMatrix(b blas64.General) { m.mat = b }
 func (m *Dense) RawMatrix() blas64.General { return m.mat }
 
 func (m *Dense) isZero() bool {
-	return m.mat.Cols == 0 || m.mat.Rows == 0
+	// It must be the case that m.Dims() returns
+	// zeros in this case. See comment in Reset().
+	return m.mat.Stride == 0
 }
 
 func (m *Dense) Dims() (r, c int) { return m.mat.Rows, m.mat.Cols }
@@ -152,6 +156,10 @@ func (m *Dense) rowView(r int) []float64 {
 }
 
 func (m *Dense) View(i, j, r, c int) Matrix {
+	mr, mc := m.Dims()
+	if i < 0 || i >= mr || j < 0 || j >= mc || r <= 0 || i+r > mr || c <= 0 || j+c > mc {
+		panic(ErrIndexOutOfRange)
+	}
 	t := *m
 	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (i+r-1)*t.mat.Stride+(j+c)]
 	t.mat.Rows = r
@@ -160,7 +168,9 @@ func (m *Dense) View(i, j, r, c int) Matrix {
 }
 
 func (m *Dense) Reset() {
-	m.mat.Rows, m.mat.Cols = 0, 0
+	// No change of Stride, Rows and Cols to 0
+	// may be made unless all are set to 0.
+	m.mat.Rows, m.mat.Cols, m.mat.Stride = 0, 0, 0
 	m.mat.Data = m.mat.Data[:0]
 }
 

@@ -63,3 +63,39 @@ func (m *Vector) set(r int, v float64) {
 	}
 	m.mat.Data[r*m.mat.Inc] = v
 }
+
+// At returns the element at row r and column c.
+func (t *Symmetric) At(r, c int) float64 {
+	return t.at(r, c)
+}
+
+func (t *Symmetric) at(r, c int) float64 {
+	if r >= t.mat.N || r < 0 {
+		panic(ErrRowAccess)
+	}
+	if c >= t.mat.N || c < 0 {
+		panic(ErrColAccess)
+	}
+	if r > c {
+		r, c = c, r
+	}
+	return t.mat.Data[r*t.mat.Stride+c]
+}
+
+// SetSym sets the elements at (r,c) and (c,r) to the value v.
+func (t *Symmetric) SetSym(r, c int, v float64) {
+	t.set(r, c, v)
+}
+
+func (t *Symmetric) set(r, c int, v float64) {
+	if r >= t.mat.N || r < 0 {
+		panic(ErrRowAccess)
+	}
+	if c >= t.mat.N || c < 0 {
+		panic(ErrColAccess)
+	}
+	if r > c {
+		r, c = c, r
+	}
+	t.mat.Data[r*t.mat.Stride+c] = v
+}

@@ -792,9 +792,6 @@ func (s *S) TestPow(c *check.C) {
 					d[i] = math.NaN()
 				}
 				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
-				for i := 0; i < a.mat.Rows; i++ {
-					zero(a.mat.Data[i*a.mat.Stride : i*a.mat.Stride+a.mat.Cols])
-				}
 			},
 		},
 		{
@@ -812,9 +809,6 @@ func (s *S) TestPow(c *check.C) {
 					d[i] = math.NaN()
 				}
 				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
-				for i := 0; i < a.mat.Rows; i++ {
-					zero(a.mat.Data[i*a.mat.Stride : i*a.mat.Stride+a.mat.Cols])
-				}
 			},
 		},
 	} {

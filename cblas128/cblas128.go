@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// TODO(kortschak): Remove this build tag when blas/native covers the complex BLAS API.
-
-//+build cblas
-
 // Package cblas128 provides a simple interface to the complex128 BLAS API.
 package cblas128
 

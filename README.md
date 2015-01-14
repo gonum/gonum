@@ -81,13 +81,7 @@ func main() {
 Wrapper for an implementation of the double precision complex (i.e., `complex128`)
 part of the blas API
 
-Currently blas/cblas128 requires blas/cgo and must be built with the `cblas` build tag,
-assuming blas/cgo is installed:
-
-```sh
-  go install -tags cblas github.com/gonum/blas/cblas128
-```
-
+Currently blas/cblas128 requires blas/cgo.
 
 ## Issues
 

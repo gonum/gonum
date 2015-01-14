@@ -19,6 +19,7 @@ var (
 	_ Cloner    = matrix
 	_ Viewer    = matrix
 	_ RowViewer = matrix
+	_ Grower    = matrix
 
 	_ Adder     = matrix
 	_ Suber     = matrix
@@ -55,6 +56,8 @@ var (
 
 type Dense struct {
 	mat blas64.General
+
+	capRows, capCols int
 }
 
 func NewDense(r, c int, mat []float64) *Dense {
@@ -64,12 +67,16 @@ func NewDense(r, c int, mat []float64) *Dense {
 	if mat == nil {
 		mat = make([]float64, r*c)
 	}
-	return &Dense{blas64.General{
-		Rows:   r,
-		Cols:   c,
-		Stride: c,
-		Data:   mat,
-	}}
+	return &Dense{
+		mat: blas64.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   mat,
+		},
+		capRows: r,
+		capCols: c,
+	}
 }
 
 // DenseCopyOf returns a newly allocated copy of the elements of a.
@@ -79,7 +86,10 @@ func DenseCopyOf(a Matrix) *Dense {
 	return d
 }
 
-func (m *Dense) SetRawMatrix(b blas64.General) { m.mat = b }
+func (m *Dense) SetRawMatrix(b blas64.General) {
+	m.capRows, m.capCols = b.Rows, b.Cols
+	m.mat = b
+}
 
 func (m *Dense) RawMatrix() blas64.General { return m.mat }
 
@@ -90,6 +100,8 @@ func (m *Dense) isZero() bool {
 }
 
 func (m *Dense) Dims() (r, c int) { return m.mat.Rows, m.mat.Cols }
+
+func (m *Dense) Caps() (r, c int) { return m.capRows, m.capCols }
 
 func (m *Dense) Col(dst []float64, j int) []float64 {
 	if j >= m.mat.Cols || j < 0 {
@@ -164,6 +176,62 @@ func (m *Dense) View(i, j, r, c int) Matrix {
 	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (i+r-1)*t.mat.Stride+(j+c)]
 	t.mat.Rows = r
 	t.mat.Cols = c
+	t.capRows -= i
+	t.capCols -= j
+	return &t
+}
+
+func (m *Dense) Grow(r, c int) Matrix {
+	if r < 0 || c < 0 {
+		panic(ErrIndexOutOfRange)
+	}
+	if r == 0 || c == 0 {
+		return m
+	}
+
+	r += m.mat.Rows
+	c += m.mat.Cols
+
+	var t Dense
+	switch {
+	case m.mat.Rows == 0 || m.mat.Cols == 0:
+		t.mat = blas64.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   use(m.mat.Data, r*c),
+		}
+		// We zero here because we don't know how the matrix will be used.
+		// In other places, the mat is immediately filled with a result;
+		// this is not the case here.
+		zero(t.mat.Data[:cap(t.mat.Data)])
+	case r > m.capRows || c > m.capCols:
+		cr := max(r, m.capRows)
+		cc := max(c, m.capCols)
+		t.mat = blas64.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: cc,
+			Data:   make([]float64, cr*cc),
+		}
+		t.capRows = cr
+		t.capCols = cc
+		// Copy the complete matrix over to the new matrix.
+		// Including elements not currently visible.
+		r, c, m.mat.Rows, m.mat.Cols = m.mat.Rows, m.mat.Cols, m.capRows, m.capCols
+		t.Copy(m)
+		m.mat.Rows, m.mat.Cols = r, c
+		return &t
+	default:
+		t.mat = blas64.General{
+			Data:   m.mat.Data[:(r-1)*m.mat.Stride+c],
+			Rows:   r,
+			Cols:   c,
+			Stride: m.mat.Stride,
+		}
+	}
+	t.capRows = r
+	t.capCols = c
 	return &t
 }
 
@@ -171,6 +239,7 @@ func (m *Dense) Reset() {
 	// No change of Stride, Rows and Cols to 0
 	// may be made unless all are set to 0.
 	m.mat.Rows, m.mat.Cols, m.mat.Stride = 0, 0, 0
+	m.capRows, m.capCols = 0, 0
 	m.mat.Data = m.mat.Data[:0]
 }
 
@@ -181,6 +250,7 @@ func (m *Dense) Clone(a Matrix) {
 		Cols:   c,
 		Stride: c,
 	}
+	m.capRows, m.capCols = r, c
 	switch a := a.(type) {
 	case RawMatrixer:
 		amat := a.RawMatrix()

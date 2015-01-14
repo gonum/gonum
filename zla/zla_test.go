@@ -1,5 +1,3 @@
-//+build cblas
-
 package zla
 
 import (

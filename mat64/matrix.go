@@ -107,6 +107,15 @@ type Viewer interface {
 	View(i, j, r, c int) Matrix
 }
 
+// A Grower can grow the size of the represented matrix by the given number of rows and columns.
+// Growing beyond the size given by the Caps method will result in the allocation of a new
+// matrix and copying of the elements. If Grow is called with negative increments it will
+// panic with ErrIndexOutOfRange.
+type Grower interface {
+	Caps() (r, c int)
+	Grow(r, c int) Matrix
+}
+
 // A Normer can return the specified matrix norm, o of the matrix represented by the receiver.
 //
 // Valid order values are:

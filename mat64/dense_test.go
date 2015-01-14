@@ -41,11 +41,14 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			0, 0,
 			0,
-			&Dense{blas64.General{
-				Rows: 3, Cols: 3,
-				Stride: 3,
-				Data:   []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
-			}},
+			&Dense{
+				mat: blas64.General{
+					Rows: 3, Cols: 3,
+					Stride: 3,
+					Data:   []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
+				},
+				capRows: 3, capCols: 3,
+			},
 		},
 		{
 			[]float64{
@@ -56,11 +59,14 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			1, 1,
 			3,
-			&Dense{blas64.General{
-				Rows: 3, Cols: 3,
-				Stride: 3,
-				Data:   []float64{1, 1, 1, 1, 1, 1, 1, 1, 1},
-			}},
+			&Dense{
+				mat: blas64.General{
+					Rows: 3, Cols: 3,
+					Stride: 3,
+					Data:   []float64{1, 1, 1, 1, 1, 1, 1, 1, 1},
+				},
+				capRows: 3, capCols: 3,
+			},
 		},
 		{
 			[]float64{
@@ -71,11 +77,14 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			0, 1,
 			1.7320508075688772,
-			&Dense{blas64.General{
-				Rows: 3, Cols: 3,
-				Stride: 3,
-				Data:   []float64{1, 0, 0, 0, 1, 0, 0, 0, 1},
-			}},
+			&Dense{
+				mat: blas64.General{
+					Rows: 3, Cols: 3,
+					Stride: 3,
+					Data:   []float64{1, 0, 0, 0, 1, 0, 0, 0, 1},
+				},
+				capRows: 3, capCols: 3,
+			},
 		},
 		{
 			[]float64{
@@ -86,11 +95,14 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 3,
 			-1, 0,
 			1.7320508075688772,
-			&Dense{blas64.General{
-				Rows: 3, Cols: 3,
-				Stride: 3,
-				Data:   []float64{-1, 0, 0, 0, -1, 0, 0, 0, -1},
-			}},
+			&Dense{
+				mat: blas64.General{
+					Rows: 3, Cols: 3,
+					Stride: 3,
+					Data:   []float64{-1, 0, 0, 0, -1, 0, 0, 0, -1},
+				},
+				capRows: 3, capCols: 3,
+			},
 		},
 		{
 			[]float64{
@@ -100,11 +112,14 @@ func (s *S) TestNewDense(c *check.C) {
 			2, 3,
 			1, 6,
 			9.539392014169458,
-			&Dense{blas64.General{
-				Rows: 2, Cols: 3,
-				Stride: 3,
-				Data:   []float64{1, 2, 3, 4, 5, 6},
-			}},
+			&Dense{
+				mat: blas64.General{
+					Rows: 2, Cols: 3,
+					Stride: 3,
+					Data:   []float64{1, 2, 3, 4, 5, 6},
+				},
+				capRows: 2, capCols: 3,
+			},
 		},
 		{
 			[]float64{
@@ -115,11 +130,14 @@ func (s *S) TestNewDense(c *check.C) {
 			3, 2,
 			1, 6,
 			9.539392014169458,
-			&Dense{blas64.General{
-				Rows: 3, Cols: 2,
-				Stride: 2,
-				Data:   []float64{1, 2, 3, 4, 5, 6},
-			}},
+			&Dense{
+				mat: blas64.General{
+					Rows: 3, Cols: 2,
+					Stride: 2,
+					Data:   []float64{1, 2, 3, 4, 5, 6},
+				},
+				capRows: 3, capCols: 2,
+			},
 		},
 	} {
 		m := NewDense(test.rows, test.cols, test.a)
@@ -217,6 +235,37 @@ func (s *S) TestSetRowColumn(c *check.C) {
 			c.Check(t.Norm(0), check.Equals, floats.Norm(col, 2))
 		}
 	}
+}
+
+func (s *S) TestGrow(c *check.C) {
+	m := &Dense{}
+	m = m.Grow(10, 10).(*Dense)
+	rows, cols := m.Dims()
+	capRows, capCols := m.Caps()
+	c.Check(rows, check.Equals, 10)
+	c.Check(cols, check.Equals, 10)
+	c.Check(capRows, check.Equals, 10)
+	c.Check(capCols, check.Equals, 10)
+
+	// Test grow within caps is in-place.
+	m.Set(1, 1, 1)
+	v := m.View(1, 1, 4, 4).(*Dense)
+	c.Check(v.At(0, 0), check.Equals, m.At(1, 1))
+	v = v.Grow(5, 5).(*Dense)
+	c.Check(v.Equals(m.View(1, 1, 9, 9)), check.Equals, true)
+
+	// Test grow bigger than caps copies.
+	v = v.Grow(5, 5).(*Dense)
+	c.Check(v.View(0, 0, 9, 9).(*Dense).Equals(m.View(1, 1, 9, 9)), check.Equals, true)
+	v.Set(0, 0, 0)
+	c.Check(v.View(0, 0, 9, 9).(*Dense).Equals(m.View(1, 1, 9, 9)), check.Equals, false)
+
+	// Test grow uses existing data slice when matrix is zero size.
+	v.Reset()
+	p, l := &v.mat.Data[:1][0], cap(v.mat.Data)
+	v = v.Grow(5, 5).(*Dense)
+	c.Check(&v.mat.Data[:1][0], check.Equals, p)
+	c.Check(cap(v.mat.Data), check.Equals, l)
 }
 
 func (s *S) TestAdd(c *check.C) {
@@ -633,10 +682,13 @@ func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 	if size == 0 {
 		return nil, ErrZeroLength
 	}
-	d := &Dense{blas64.General{
-		Rows: size, Cols: size, Stride: size,
-		Data: make([]float64, size*size),
-	}}
+	d := &Dense{
+		mat: blas64.General{
+			Rows: size, Cols: size, Stride: size,
+			Data: make([]float64, size*size),
+		},
+		capRows: size, capCols: size,
+	}
 	for i := 0; i < size; i++ {
 		for j := 0; j < size; j++ {
 			if rand.Float64() < rho {

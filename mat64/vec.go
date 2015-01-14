@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	vector *Vec
+	vector *Vector
 
 	_ Matrix  = vector
 	_ Mutable = vector
@@ -21,7 +21,7 @@ var (
 
 	// _ Adder     = vector
 	// _ Suber     = vector
-	_ Muler = vector
+	// _ Muler = vector
 	// _ Dotter    = vector
 	// _ ElemMuler = vector
 
@@ -41,49 +41,97 @@ var (
 	// _ RawMatrixer     = vector
 )
 
-type Vec []float64
-
-func (m Vec) At(r, c int) float64 {
-	if c != 0 || r < 0 || r >= len(m) {
-		panic(ErrIndexOutOfRange)
-	}
-	return m[r]
+// Vector represents a column vector.
+type Vector struct {
+	mat blas64.Vector
+	n   int
+	// A BLAS vector can have a negative increment, but allowing this
+	// in the mat64 type complicates a lot of code, and doesn't gain anything.
+	// Vector must have positive increment in this package.
 }
 
-func (m Vec) Set(r, c int, v float64) {
-	if c != 0 || r < 0 || r >= len(m) {
-		panic(ErrIndexOutOfRange)
+func NewVector(n int, data []float64) *Vector {
+	if len(data) != n && data != nil {
+		panic(ErrShape)
 	}
-	m[r] = v
+	if data == nil {
+		data = make([]float64, n)
+	}
+	return &Vector{
+		mat: blas64.Vector{
+			Inc:  1,
+			Data: data,
+		},
+		n: n,
+	}
 }
 
-func (m Vec) Dims() (r, c int) { return len(m), 1 }
+func (m *Vector) ViewVec(i, n int) *Vector {
+	if i+n > m.n {
+		panic(ErrIndexOutOfRange)
+	}
+	return &Vector{
+		n: n,
+		mat: blas64.Vector{
+			Inc:  m.mat.Inc,
+			Data: m.mat.Data[i*m.mat.Inc:],
+		},
+	}
+}
 
-func (m *Vec) Mul(a, b Matrix) {
+func (m *Vector) At(r, c int) float64 {
+	if c != 0 || r < 0 || r >= m.n {
+		panic(ErrIndexOutOfRange)
+	}
+	return m.mat.Data[r*m.mat.Inc]
+}
+
+func (m *Vector) Set(r, c int, v float64) {
+	if c != 0 || r < 0 || r >= m.n {
+		panic(ErrIndexOutOfRange)
+	}
+	m.mat.Data[r*m.mat.Inc] = v
+}
+
+func (m *Vector) Dims() (r, c int) { return m.n, 1 }
+
+func (m *Vector) Reset() {
+	m.mat.Data = m.mat.Data[:0]
+	m.mat.Inc = 0
+	m.n = 0
+}
+
+func (m *Vector) RawVector() blas64.Vector {
+	return m.mat
+}
+
+func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
+	// TODO (btracey): should there be some kind of interface for Vector?
 	ar, ac := a.Dims()
-	br, bc := b.Dims()
-
+	br, _ := b.Dims()
 	if ac != br {
 		panic(ErrShape)
 	}
 
-	var w Vec
+	var w Vector
 	if m != a && m != b {
 		w = *m
 	}
-	if len(w) == 0 {
-		w = use(w, ar)
-	} else if ar != len(w) || bc != 1 {
+	if w.n == 0 {
+		w.mat.Data = use(w.mat.Data, ar)
+	} else if ar != w.n {
 		panic(ErrShape)
 	}
 
-	bv := *b.(*Vec) // This is a temporary restriction.
-
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
-		blas64.Gemv(blas.NoTrans,
-			1, amat, blas64.Vector{Inc: 1, Data: bv},
-			0, blas64.Vector{Inc: 1, Data: w},
+		t := blas.NoTrans
+		if trans {
+			t = blas.Trans
+		}
+		blas64.Gemv(t,
+			1, amat, b.mat,
+			0, w.mat,
 		)
 		*m = w
 		return
@@ -92,9 +140,9 @@ func (m *Vec) Mul(a, b Matrix) {
 	if a, ok := a.(Vectorer); ok {
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
-			w[r] = blas64.Dot(ac,
+			w.mat.Data[r*m.mat.Inc] = blas64.Dot(ac,
 				blas64.Vector{Inc: 1, Data: a.Row(row, r)},
-				blas64.Vector{Inc: 1, Data: bv},
+				b.mat,
 			)
 		}
 		*m = w
@@ -108,9 +156,9 @@ func (m *Vec) Mul(a, b Matrix) {
 		}
 		var v float64
 		for i, e := range row {
-			v += e * bv[i]
+			v += e * b.mat.Data[i*b.mat.Inc]
 		}
-		w[r] = v
+		w.mat.Data[r*m.mat.Inc] = v
 	}
 	*m = w
 }

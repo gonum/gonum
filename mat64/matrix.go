@@ -5,9 +5,9 @@
 // Package mat64 provides basic linear algebra operations for float64 matrices.
 //
 // Note that in all interfaces that assign the result to the receiver, the receiver must
-// be either the correct dimensions for the result or the zero value for the concrete type
-// of the matrix. In the latter case, matrix data is allocated and stored in the receiver.
-// If the matrix dimensions do not match the result, the method must panic.
+// be either the correct dimensions for the result or a zero-sized matrix. In the latter
+// case, matrix data is allocated and stored in the receiver. If the matrix dimensions
+// do not match the result, the method must panic.
 package mat64
 
 import (
@@ -81,9 +81,12 @@ type Cloner interface {
 	Clone(a Matrix)
 }
 
-// A Reset can zero the dimensions of the matrix so that it can be reused as
-// the receiver of a dimensionally restricted operation. This is commonly used
-// when the matrix is being used a a workspace or temporary matrix.
+// A Reseter can reset the matrix so that it can be reused as the receiver of a dimensionally
+// restricted operation. This is commonly used when the matrix is being used a a workspace
+// or temporary matrix.
+//
+// If the matrix is a view, using the reset matrix may result in data corruption in elements
+// outside the view.
 type Reseter interface {
 	Reset()
 }
@@ -96,10 +99,10 @@ type Copier interface {
 }
 
 // A Viewer returns a submatrix view of the Matrix parameter, starting at row i, column j
-// and extending r rows and c columns. If i or j are out of range, or r or c extend beyond
-// the bounds of the matrix View will panic with ErrIndexOutOfRange. The returned matrix
-// must retain the receiver's reference to the original matrix such that changes in the
-// elements of the submatrix are reflected in the original and vice versa.
+// and extending r rows and c columns. If i or j are out of range, or r or c are zero or
+// extend beyond the bounds of the matrix View will panic with ErrIndexOutOfRange. The
+// returned matrix must retain the receiver's reference to the original matrix such that
+// changes in the elements of the submatrix are reflected in the original and vice versa.
 type Viewer interface {
 	View(i, j, r, c int) Matrix
 }

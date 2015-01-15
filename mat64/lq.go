@@ -35,11 +35,11 @@ func LQ(a *Dense) LQFactor {
 	lq := *a
 
 	lDiag := make([]float64, m)
-	projs := make(Vec, m)
+	projs := NewVector(m, nil)
 
 	// Main loop.
 	for k := 0; k < m; k++ {
-		hh := Vec(lq.RowView(k))[k:]
+		hh := lq.RowView(k)[k:]
 		norm := blas64.Nrm2(len(hh), blas64.Vector{Inc: 1, Data: hh})
 		lDiag[k] = norm
 
@@ -56,12 +56,12 @@ func LQ(a *Dense) LQFactor {
 				// Apply transformation to remaining columns.
 				if k < m-1 {
 					a = lq.View(k+1, k, m-k-1, n-k).(*Dense)
-					projs = projs[0 : m-k-1]
-					projs.Mul(a, &hh)
+					projs = projs.ViewVec(0, m-k-1)
+					projs.MulVec(a, false, NewVector(len(hh), hh))
 
 					for j := 0; j < m-k-1; j++ {
 						dst := a.RowView(j)
-						blas64.Axpy(len(dst), -projs[j],
+						blas64.Axpy(len(dst), -projs.at(j),
 							blas64.Vector{Inc: 1, Data: hh},
 							blas64.Vector{Inc: 1, Data: dst},
 						)

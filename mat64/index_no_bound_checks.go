@@ -35,3 +35,31 @@ func (m *Dense) Set(r, c int, v float64) {
 func (m *Dense) set(r, c int, v float64) {
 	m.mat.Data[r*m.mat.Stride+c] = v
 }
+
+func (m *Vector) At(r, c int) float64 {
+	if r < 0 || r >= m.n {
+		panic(ErrRowAccess)
+	}
+	if c != 0 {
+		panic(ErrColAccess)
+	}
+	return m.at(r)
+}
+
+func (m *Vector) at(r int) float64 {
+	return m.mat.Data[r*m.mat.Inc]
+}
+
+func (m *Vector) Set(r, c int, v float64) {
+	if r < 0 || r >= m.n {
+		panic(ErrRowAccess)
+	}
+	if c != 0 {
+		panic(ErrColAccess)
+	}
+	m.set(r, v)
+}
+
+func (m *Vector) set(r int, v float64) {
+	m.mat.Data[r*m.mat.Inc] = v
+}

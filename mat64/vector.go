@@ -50,6 +50,9 @@ type Vector struct {
 	// Vector must have positive increment in this package.
 }
 
+// NewVector creates a new Vector of length n. If len(data) == n, data is used
+// as the backing data slice. If data == nil, a new slice is allocated. If
+// neither of these is true, NewVector will panic.
 func NewVector(n int, data []float64) *Vector {
 	if len(data) != n && data != nil {
 		panic(ErrShape)
@@ -66,6 +69,10 @@ func NewVector(n int, data []float64) *Vector {
 	}
 }
 
+// ViewVec returns a sub-vector view of the receiver starting at element i and
+// extending n columns. If i is out of range, or if n is zero or extend beyond the
+// bounds of the Vector ViewVec will panic with ErrIndexOutOfRange. The returned
+// Vector retains reference to the underlying vector.
 func (m *Vector) ViewVec(i, n int) *Vector {
 	if i+n > m.n {
 		panic(ErrIndexOutOfRange)
@@ -77,20 +84,6 @@ func (m *Vector) ViewVec(i, n int) *Vector {
 			Data: m.mat.Data[i*m.mat.Inc:],
 		},
 	}
-}
-
-func (m *Vector) At(r, c int) float64 {
-	if c != 0 || r < 0 || r >= m.n {
-		panic(ErrIndexOutOfRange)
-	}
-	return m.mat.Data[r*m.mat.Inc]
-}
-
-func (m *Vector) Set(r, c int, v float64) {
-	if c != 0 || r < 0 || r >= m.n {
-		panic(ErrIndexOutOfRange)
-	}
-	m.mat.Data[r*m.mat.Inc] = v
 }
 
 func (m *Vector) Dims() (r, c int) { return m.n, 1 }
@@ -105,8 +98,10 @@ func (m *Vector) RawVector() blas64.Vector {
 	return m.mat
 }
 
+// MulVec computes a * b if trans == false and a^T * b if trans == true. The
+// result is stored into the reciever. MulVec panics if the number of columns in
+// a does not equal the number of rows in b.
 func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
-	// TODO (btracey): should there be some kind of interface for Vector?
 	ar, ac := a.Dims()
 	br, _ := b.Dims()
 	if ac != br {
@@ -119,6 +114,8 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 	}
 	if w.n == 0 {
 		w.mat.Data = use(w.mat.Data, ar)
+		w.mat.Inc = 1
+		w.n = ar
 	} else if ar != w.n {
 		panic(ErrShape)
 	}

@@ -430,3 +430,23 @@ func use(f []float64, l int) []float64 {
 	}
 	return make([]float64, l)
 }
+
+// useZeroed returns a float64 slice with l elements, using f if it
+// has the necessary capacity, otherwise creating a new slice. The
+// elements of the returned slice are guaranteed to be zero.
+func useZeroed(f []float64, l int) []float64 {
+	if l <= cap(f) {
+		f = f[:l]
+		zero(f)
+		return f
+	}
+	return make([]float64, l)
+}
+
+// zero does a fast zeroing of the given slice's elements.
+func zero(f []float64) {
+	f[0] = 0
+	for i := 1; i < len(f); {
+		i += copy(f[i:], f[:i])
+	}
+}

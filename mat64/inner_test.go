@@ -84,7 +84,7 @@ func benchmarkInner(b *testing.B, m, n int) {
 	randomSlice(y)
 	data := make([]float64, m*n)
 	randomSlice(data)
-	mat := &Dense{blas64.General{Rows: m, Cols: n, Stride: n, Data: data}}
+	mat := &Dense{mat: blas64.General{Rows: m, Cols: n, Stride: n, Data: data}, capRows: m, capCols: n}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Inner(x, mat, y)

@@ -40,7 +40,7 @@ func (s *S) TestFormat(c *check.C) {
 			[]rp{
 				{"%v", "⎡0  0  0⎤\n⎢0  0  0⎥\n⎣0  0  0⎦"},
 				{"%#f", "⎡.  .  .⎤\n⎢.  .  .⎥\n⎣.  .  .⎦"},
-				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:3, Stride:3, Data:[]float64{0, 0, 0, 0, 0, 0, 0, 0, 0}}}"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:3, Stride:3, Data:[]float64{0, 0, 0, 0, 0, 0, 0, 0, 0}}, capRows:3, capCols:3}"},
 				{"%s", "%!s(*mat64.Dense=Dims(3, 3))"},
 			},
 		},
@@ -49,7 +49,7 @@ func (s *S) TestFormat(c *check.C) {
 			[]rp{
 				{"%v", "⎡1  1  1⎤\n⎢1  1  1⎥\n⎣1  1  1⎦"},
 				{"%#f", "⎡1  1  1⎤\n⎢1  1  1⎥\n⎣1  1  1⎦"},
-				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:3, Stride:3, Data:[]float64{1, 1, 1, 1, 1, 1, 1, 1, 1}}}"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:3, Stride:3, Data:[]float64{1, 1, 1, 1, 1, 1, 1, 1, 1}}, capRows:3, capCols:3}"},
 			},
 		},
 		{
@@ -57,7 +57,7 @@ func (s *S) TestFormat(c *check.C) {
 			[]rp{
 				{"%v", "⎡1  0  0⎤\n⎢0  1  0⎥\n⎣0  0  1⎦"},
 				{"%#f", "⎡1  .  .⎤\n⎢.  1  .⎥\n⎣.  .  1⎦"},
-				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:3, Stride:3, Data:[]float64{1, 0, 0, 0, 1, 0, 0, 0, 1}}}"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:3, Stride:3, Data:[]float64{1, 0, 0, 0, 1, 0, 0, 0, 1}}, capRows:3, capCols:3}"},
 			},
 		},
 		{
@@ -65,7 +65,7 @@ func (s *S) TestFormat(c *check.C) {
 			[]rp{
 				{"%v", "⎡1  2  3⎤\n⎣4  5  6⎦"},
 				{"%#f", "⎡1  2  3⎤\n⎣4  5  6⎦"},
-				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:2, Cols:3, Stride:3, Data:[]float64{1, 2, 3, 4, 5, 6}}}"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:2, Cols:3, Stride:3, Data:[]float64{1, 2, 3, 4, 5, 6}}, capRows:2, capCols:3}"},
 			},
 		},
 		{
@@ -73,7 +73,7 @@ func (s *S) TestFormat(c *check.C) {
 			[]rp{
 				{"%v", "⎡1  2⎤\n⎢3  4⎥\n⎣5  6⎦"},
 				{"%#f", "⎡1  2⎤\n⎢3  4⎥\n⎣5  6⎦"},
-				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:2, Stride:2, Data:[]float64{1, 2, 3, 4, 5, 6}}}"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:2, Stride:2, Data:[]float64{1, 2, 3, 4, 5, 6}}, capRows:3, capCols:2}"},
 			},
 		},
 		{
@@ -86,7 +86,7 @@ func (s *S) TestFormat(c *check.C) {
 				{"%v", "⎡                 0                   1  1.4142135623730951⎤\n⎣1.7320508075688772                   2    2.23606797749979⎦"},
 				{"%.2f", "⎡0.00  1.00  1.41⎤\n⎣1.73  2.00  2.24⎦"},
 				{"%#f", "⎡                 .                   1  1.4142135623730951⎤\n⎣1.7320508075688772                   2    2.23606797749979⎦"},
-				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:2, Cols:3, Stride:3, Data:[]float64{0, 1, 1.4142135623730951, 1.7320508075688772, 2, 2.23606797749979}}}"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:2, Cols:3, Stride:3, Data:[]float64{0, 1, 1.4142135623730951, 1.7320508075688772, 2, 2.23606797749979}}, capRows:2, capCols:3}"},
 			},
 		},
 		{
@@ -99,7 +99,7 @@ func (s *S) TestFormat(c *check.C) {
 				{"%v", "⎡                 0                   1⎤\n⎢1.4142135623730951  1.7320508075688772⎥\n⎣                 2    2.23606797749979⎦"},
 				{"%.2f", "⎡0.00  1.00⎤\n⎢1.41  1.73⎥\n⎣2.00  2.24⎦"},
 				{"%#f", "⎡                 .                   1⎤\n⎢1.4142135623730951  1.7320508075688772⎥\n⎣                 2    2.23606797749979⎦"},
-				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:2, Stride:2, Data:[]float64{0, 1, 1.4142135623730951, 1.7320508075688772, 2, 2.23606797749979}}}"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:3, Cols:2, Stride:2, Data:[]float64{0, 1, 1.4142135623730951, 1.7320508075688772, 2, 2.23606797749979}}, capRows:3, capCols:2}"},
 			},
 		},
 		{

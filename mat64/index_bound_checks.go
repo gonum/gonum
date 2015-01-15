@@ -38,28 +38,28 @@ func (m *Dense) set(r, c int, v float64) {
 
 func (m *Vector) At(r, c int) float64 {
 	if c != 0 {
-		panic(ErrColIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 	return m.at(r)
 }
 
 func (m *Vector) at(r int) float64 {
 	if r < 0 || r >= m.n {
-		panic(ErrRowIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 	return m.mat.Data[r*m.mat.Inc]
 }
 
 func (m *Vector) Set(r, c int, v float64) {
 	if c != 0 {
-		panic(ErrColIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 	m.set(r, v)
 }
 
 func (m *Vector) set(r int, v float64) {
 	if r < 0 || r >= m.n {
-		panic(ErrRowIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 	m.mat.Data[r*m.mat.Inc] = v
 }

@@ -61,19 +61,19 @@ func (s *S) TestVectorAtSet(c *check.C) {
 	} {
 		v := test.vector
 		n := test.vector.n
-		c.Check(func() { v.At(n, 0) }, check.PanicMatches, ErrRowIndexOutOfRange.Error(), check.Commentf("Test %d", i))
-		c.Check(func() { v.At(-1, 0) }, check.PanicMatches, ErrRowIndexOutOfRange.Error(), check.Commentf("Test %d", i))
-		c.Check(func() { v.At(0, 1) }, check.PanicMatches, ErrColIndexOutOfRange.Error(), check.Commentf("Test %d", i))
-		c.Check(func() { v.At(0, -1) }, check.PanicMatches, ErrColIndexOutOfRange.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.At(n, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.At(-1, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.At(0, 1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.At(0, -1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", i))
 
 		c.Check(v.At(0, 0), check.Equals, 0.0, check.Commentf("Test %d", i))
 		c.Check(v.At(1, 0), check.Equals, 1.0, check.Commentf("Test %d", i))
 		c.Check(v.At(n-1, 0), check.Equals, float64(n-1), check.Commentf("Test %d", i))
 
-		c.Check(func() { v.Set(n, 0, 100) }, check.PanicMatches, ErrRowIndexOutOfRange.Error(), check.Commentf("Test %d", i))
-		c.Check(func() { v.Set(-1, 0, 100) }, check.PanicMatches, ErrRowIndexOutOfRange.Error(), check.Commentf("Test %d", i))
-		c.Check(func() { v.Set(0, 1, 100) }, check.PanicMatches, ErrColIndexOutOfRange.Error(), check.Commentf("Test %d", i))
-		c.Check(func() { v.Set(0, -1, 100) }, check.PanicMatches, ErrColIndexOutOfRange.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.Set(n, 0, 100) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.Set(-1, 0, 100) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.Set(0, 1, 100) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", i))
+		c.Check(func() { v.Set(0, -1, 100) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", i))
 
 		v.Set(0, 0, 100)
 		c.Check(v.At(0, 0), check.Equals, 100.0, check.Commentf("Test %d", i))

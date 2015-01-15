@@ -38,10 +38,10 @@ func (m *Dense) set(r, c int, v float64) {
 
 func (m *Vector) At(r, c int) float64 {
 	if r < 0 || r >= m.n {
-		panic(ErrRowIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 	if c != 0 {
-		panic(ErrColIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 	return m.at(r)
 }
@@ -52,10 +52,10 @@ func (m *Vector) at(r int) float64 {
 
 func (m *Vector) Set(r, c int, v float64) {
 	if r < 0 || r >= m.n {
-		panic(ErrRowIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 	if c != 0 {
-		panic(ErrColIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 	m.set(r, v)
 }

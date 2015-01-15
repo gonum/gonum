@@ -388,18 +388,18 @@ type Error string
 func (err Error) Error() string { return string(err) }
 
 const (
-	ErrIndexOutOfRange    = Error("mat64: index out of range")
-	ErrRowIndexOutOfRange = Error("mat64: row index out of range")
-	ErrColIndexOutOfRange = Error("mat64: column index out of range")
-	ErrZeroLength         = Error("mat64: zero length in matrix definition")
-	ErrRowLength          = Error("mat64: row length mismatch")
-	ErrColLength          = Error("mat64: col length mismatch")
-	ErrSquare             = Error("mat64: expect square matrix")
-	ErrNormOrder          = Error("mat64: invalid norm order for matrix")
-	ErrSingular           = Error("mat64: matrix is singular")
-	ErrShape              = Error("mat64: dimension mismatch")
-	ErrIllegalStride      = Error("mat64: illegal stride")
-	ErrPivot              = Error("mat64: malformed pivot list")
+	ErrIndexOutOfRange = Error("mat64: index out of range")
+	ErrRowAccess       = Error("mat64: row index out of range")
+	ErrColAccess       = Error("mat64: column index out of range")
+	ErrZeroLength      = Error("mat64: zero length in matrix definition")
+	ErrRowLength       = Error("mat64: row length mismatch")
+	ErrColLength       = Error("mat64: col length mismatch")
+	ErrSquare          = Error("mat64: expect square matrix")
+	ErrNormOrder       = Error("mat64: invalid norm order for matrix")
+	ErrSingular        = Error("mat64: matrix is singular")
+	ErrShape           = Error("mat64: dimension mismatch")
+	ErrIllegalStride   = Error("mat64: illegal stride")
+	ErrPivot           = Error("mat64: malformed pivot list")
 )
 
 func min(a, b int) int {

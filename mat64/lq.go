@@ -35,7 +35,6 @@ func LQ(a *Dense) LQFactor {
 	lq := *a
 
 	lDiag := make([]float64, m)
-	//projs := make([]float64, m)
 	projs := NewVector(m, nil)
 
 	// Main loop.
@@ -57,9 +56,7 @@ func LQ(a *Dense) LQFactor {
 				// Apply transformation to remaining columns.
 				if k < m-1 {
 					a = lq.View(k+1, k, m-k-1, n-k).(*Dense)
-					//projs = projs[0 : m-k-1]
 					projs = projs.ViewVec(0, m-k-1)
-					//projs.Mul(a, &hh)
 					projs.MulVec(a, false, NewVector(len(hh), hh))
 
 					for j := 0; j < m-k-1; j++ {

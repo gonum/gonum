@@ -199,12 +199,11 @@ func (m *Dense) Grow(r, c int) Matrix {
 			Rows:   r,
 			Cols:   c,
 			Stride: c,
-			Data:   use(m.mat.Data, r*c),
+			// We zero because we don't know how the matrix will be used.
+			// In other places, the mat is immediately filled with a result;
+			// this is not the case here.
+			Data: useZeroed(m.mat.Data, r*c),
 		}
-		// We zero here because we don't know how the matrix will be used.
-		// In other places, the mat is immediately filled with a result;
-		// this is not the case here.
-		zero(t.mat.Data[:cap(t.mat.Data)])
 	case r > m.capRows || c > m.capCols:
 		cr := max(r, m.capRows)
 		cc := max(c, m.capCols)
@@ -300,13 +299,6 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 	}
 
 	return r, c
-}
-
-func zero(f []float64) {
-	f[0] = 0
-	for i := 1; i < len(f); {
-		i += copy(f[i:], f[:i])
-	}
 }
 
 func (m *Dense) U(a Matrix) {

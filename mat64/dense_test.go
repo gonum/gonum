@@ -263,9 +263,11 @@ func (s *S) TestGrow(c *check.C) {
 	// Test grow uses existing data slice when matrix is zero size.
 	v.Reset()
 	p, l := &v.mat.Data[:1][0], cap(v.mat.Data)
+	*p = 1
 	v = v.Grow(5, 5).(*Dense)
 	c.Check(&v.mat.Data[:1][0], check.Equals, p)
 	c.Check(cap(v.mat.Data), check.Equals, l)
+	c.Check(v.At(0, 0), check.Equals, 0.)
 }
 
 func (s *S) TestAdd(c *check.C) {

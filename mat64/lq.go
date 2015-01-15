@@ -61,7 +61,7 @@ func LQ(a *Dense) LQFactor {
 
 					for j := 0; j < m-k-1; j++ {
 						dst := a.RowView(j)
-						blas64.Axpy(len(dst), -projs.At(j, 0),
+						blas64.Axpy(len(dst), -projs.at(j),
 							blas64.Vector{Inc: 1, Data: hh},
 							blas64.Vector{Inc: 1, Data: dst},
 						)

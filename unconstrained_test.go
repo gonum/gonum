@@ -8,16 +8,10 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/blas/goblas"
 	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
 )
 
 var negInf = math.Inf(-1)
-
-func init() {
-	mat64.Register(goblas.Blas{})
-}
 
 // The Fletcher-Powell helical valley function
 // Dim = 3

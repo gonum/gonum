@@ -108,7 +108,7 @@ func (m *Dense) Caps() (r, c int) { return m.capRows, m.capCols }
 
 func (m *Dense) Col(dst []float64, j int) []float64 {
 	if j >= m.mat.Cols || j < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 
 	if dst == nil {
@@ -125,7 +125,7 @@ func (m *Dense) Col(dst []float64, j int) []float64 {
 
 func (m *Dense) ColView(j int) *Vector {
 	if j >= m.mat.Cols || j < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 	return &Vector{
 		mat: blas64.Vector{
@@ -138,7 +138,7 @@ func (m *Dense) ColView(j int) *Vector {
 
 func (m *Dense) SetCol(j int, src []float64) int {
 	if j >= m.mat.Cols || j < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 
 	blas64.Copy(min(len(src), m.mat.Rows),
@@ -151,7 +151,7 @@ func (m *Dense) SetCol(j int, src []float64) int {
 
 func (m *Dense) Row(dst []float64, i int) []float64 {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 
 	if dst == nil {
@@ -164,7 +164,7 @@ func (m *Dense) Row(dst []float64, i int) []float64 {
 
 func (m *Dense) SetRow(i int, src []float64) int {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 
 	copy(m.rowView(i), src)
@@ -174,7 +174,7 @@ func (m *Dense) SetRow(i int, src []float64) int {
 
 func (m *Dense) RowView(i int) *Vector {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 	return &Vector{
 		mat: blas64.Vector{
@@ -187,7 +187,7 @@ func (m *Dense) RowView(i int) *Vector {
 
 func (m *Dense) RawRowView(i int) []float64 {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 	return m.rowView(i)
 }

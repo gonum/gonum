@@ -270,10 +270,10 @@ func (s *S) TestRowColView(c *check.C) {
 	} {
 		m := NewDense(flatten(test.mat))
 		rows, cols := m.Dims()
-		c.Check(func() { m.RowView(-1) }, check.PanicMatches, ErrIndexOutOfRange.Error())
-		c.Check(func() { m.RowView(rows) }, check.PanicMatches, ErrIndexOutOfRange.Error())
-		c.Check(func() { m.ColView(-1) }, check.PanicMatches, ErrIndexOutOfRange.Error())
-		c.Check(func() { m.ColView(cols) }, check.PanicMatches, ErrIndexOutOfRange.Error())
+		c.Check(func() { m.RowView(-1) }, check.PanicMatches, ErrRowAccess.Error())
+		c.Check(func() { m.RowView(rows) }, check.PanicMatches, ErrRowAccess.Error())
+		c.Check(func() { m.ColView(-1) }, check.PanicMatches, ErrColAccess.Error())
+		c.Check(func() { m.ColView(cols) }, check.PanicMatches, ErrColAccess.Error())
 
 		for i := 0; i < rows; i++ {
 			vr := m.RowView(i)

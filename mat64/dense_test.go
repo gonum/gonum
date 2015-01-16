@@ -170,20 +170,20 @@ func (s *S) TestAtSet(c *check.C) {
 			}
 		}
 		// Check access out of bounds fails
-		c.Check(func() { m.At(rows, 0) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.At(rows+1, 0) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.At(0, cols) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.At(0, cols+1) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.At(-1, 0) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.At(0, -1) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.At(rows, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.At(rows+1, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.At(0, cols) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.At(0, cols+1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.At(-1, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.At(0, -1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", test))
 
 		// Check access out of bounds fails
-		c.Check(func() { m.Set(rows, 0, 1.2) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.Set(rows+1, 0, 1.2) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.Set(0, cols, 1.2) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.Set(0, cols+1, 1.2) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.Set(-1, 0, 1.2) }, check.PanicMatches, "index error: row access out of bounds", check.Commentf("Test %d", test))
-		c.Check(func() { m.Set(0, -1, 1.2) }, check.PanicMatches, "index error: column access out of bounds", check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(rows, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(rows+1, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(0, cols, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(0, cols+1, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(-1, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test %d", test))
+		c.Check(func() { m.Set(0, -1, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test %d", test))
 	}
 }
 

@@ -39,7 +39,7 @@ func LQ(a *Dense) LQFactor {
 
 	// Main loop.
 	for k := 0; k < m; k++ {
-		hh := lq.RowView(k)[k:]
+		hh := lq.RawRowView(k)[k:]
 		norm := blas64.Nrm2(len(hh), blas64.Vector{Inc: 1, Data: hh})
 		lDiag[k] = norm
 
@@ -60,7 +60,7 @@ func LQ(a *Dense) LQFactor {
 					projs.MulVec(a, false, NewVector(len(hh), hh))
 
 					for j := 0; j < m-k-1; j++ {
-						dst := a.RowView(j)
+						dst := a.RawRowView(j)
 						blas64.Axpy(len(dst), -projs.at(j),
 							blas64.Vector{Inc: 1, Data: hh},
 							blas64.Vector{Inc: 1, Data: dst},
@@ -113,7 +113,7 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 
 	if trans {
 		for k := nh - 1; k >= 0; k-- {
-			hh := f.LQ.RowView(k)[k:]
+			hh := f.LQ.RawRowView(k)[k:]
 
 			sub := x.View(k, 0, m-k, n).(*Dense)
 
@@ -122,7 +122,7 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 				0, blas64.Vector{Inc: 1, Data: proj},
 			)
 			for i := k; i < m; i++ {
-				row := x.RowView(i)
+				row := x.RawRowView(i)
 				blas64.Axpy(n, -hh[i-k],
 					blas64.Vector{Inc: 1, Data: proj},
 					blas64.Vector{Inc: 1, Data: row},
@@ -131,7 +131,7 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 		}
 	} else {
 		for k := 0; k < nh; k++ {
-			hh := f.LQ.RowView(k)[k:]
+			hh := f.LQ.RawRowView(k)[k:]
 
 			sub := x.View(k, 0, m-k, n).(*Dense)
 
@@ -140,7 +140,7 @@ func (f LQFactor) applyQTo(x *Dense, trans bool) {
 				0, blas64.Vector{Inc: 1, Data: proj},
 			)
 			for i := k; i < m; i++ {
-				row := x.RowView(i)
+				row := x.RawRowView(i)
 				blas64.Axpy(n, -hh[i-k],
 					blas64.Vector{Inc: 1, Data: proj},
 					blas64.Vector{Inc: 1, Data: row},

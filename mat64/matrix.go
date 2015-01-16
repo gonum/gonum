@@ -63,16 +63,28 @@ type VectorSetter interface {
 	SetCol(i int, src []float64) int
 }
 
-// A RowViewer can return a slice of float64 reflecting a row that is backed by the matrix
-// data.
+// A RowViewer can return a Vector reflecting a row that is backed by the matrix
+// data. The Vector returned will have Len() == nCols.
 type RowViewer interface {
-	RowView(r int) []float64
+	RowView(r int) *Vector
 }
 
-// A ColViewer can return a slice of float64 reflecting a column that is backed by the matrix
+// A RawRowViewer can return a slice of float64 reflecting a row that is backed by the matrix
 // data.
+type RawRowViewer interface {
+	RawRowView(r int) []float64
+}
+
+// A ColViewer can return a Vector reflecting a row that is backed by the matrix
+// data. The Vector returned will have Len() == nRows.
 type ColViewer interface {
-	ColView(c int) []float64
+	ColView(c int) *Vector
+}
+
+// A RawColViewer can return a slice of float64 reflecting a column that is backed by the matrix
+// data.
+type RawColViewer interface {
+	RawColView(c int) *Vector
 }
 
 // A Cloner can make a copy of a into the receiver, overwriting the previous value of the

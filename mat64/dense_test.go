@@ -237,6 +237,76 @@ func (s *S) TestSetRowColumn(c *check.C) {
 	}
 }
 
+func (s *S) TestRowColView(c *check.C) {
+	for _, test := range []struct {
+		mat [][]float64
+	}{
+		{
+			mat: [][]float64{
+				{1, 2, 3, 4, 5},
+				{6, 7, 8, 9, 10},
+				{11, 12, 13, 14, 15},
+				{16, 17, 18, 19, 20},
+				{21, 22, 23, 24, 25},
+			},
+		},
+		{
+			mat: [][]float64{
+				{1, 2, 3, 4},
+				{6, 7, 8, 9},
+				{11, 12, 13, 14},
+				{16, 17, 18, 19},
+				{21, 22, 23, 24},
+			},
+		},
+		{
+			mat: [][]float64{
+				{1, 2, 3, 4, 5},
+				{6, 7, 8, 9, 10},
+				{11, 12, 13, 14, 15},
+				{16, 17, 18, 19, 20},
+			},
+		},
+	} {
+		m := NewDense(flatten(test.mat))
+		rows, cols := m.Dims()
+		c.Check(func() { m.RowView(-1) }, check.PanicMatches, ErrRowAccess.Error())
+		c.Check(func() { m.RowView(rows) }, check.PanicMatches, ErrRowAccess.Error())
+		c.Check(func() { m.ColView(-1) }, check.PanicMatches, ErrColAccess.Error())
+		c.Check(func() { m.ColView(cols) }, check.PanicMatches, ErrColAccess.Error())
+
+		for i := 0; i < rows; i++ {
+			vr := m.RowView(i)
+			c.Check(vr.Len(), check.Equals, cols)
+			for j := 0; j < cols; j++ {
+				c.Check(vr.At(j, 0), check.Equals, test.mat[i][j])
+			}
+		}
+		for j := 0; j < cols; j++ {
+			vr := m.ColView(j)
+			c.Check(vr.Len(), check.Equals, rows)
+			for i := 0; i < rows; i++ {
+				c.Check(vr.At(i, 0), check.Equals, test.mat[i][j])
+			}
+		}
+		m = m.View(1, 1, rows-2, cols-2).(*Dense)
+		for i := 1; i < rows-1; i++ {
+			vr := m.RowView(i - 1)
+			c.Check(vr.Len(), check.Equals, cols-2)
+			for j := 1; j < cols-1; j++ {
+				c.Check(vr.At(j-1, 0), check.Equals, test.mat[i][j])
+			}
+		}
+		for j := 1; j < cols-1; j++ {
+			vr := m.ColView(j - 1)
+			c.Check(vr.Len(), check.Equals, rows-2)
+			for i := 1; i < rows-1; i++ {
+				c.Check(vr.At(i-1, 0), check.Equals, test.mat[i][j])
+			}
+		}
+	}
+}
+
 func (s *S) TestGrow(c *check.C) {
 	m := &Dense{}
 	m = m.Grow(10, 10).(*Dense)

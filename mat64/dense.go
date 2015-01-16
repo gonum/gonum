@@ -19,10 +19,12 @@ var (
 	_ Vectorer     = matrix
 	_ VectorSetter = matrix
 
-	_ Cloner    = matrix
-	_ Viewer    = matrix
-	_ RowViewer = matrix
-	_ Grower    = matrix
+	_ Cloner       = matrix
+	_ Viewer       = matrix
+	_ RowViewer    = matrix
+	_ ColViewer    = matrix
+	_ RawRowViewer = matrix
+	_ Grower       = matrix
 
 	_ Adder     = matrix
 	_ Suber     = matrix
@@ -108,7 +110,7 @@ func (m *Dense) Caps() (r, c int) { return m.capRows, m.capCols }
 
 func (m *Dense) Col(dst []float64, j int) []float64 {
 	if j >= m.mat.Cols || j < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 
 	if dst == nil {
@@ -123,9 +125,22 @@ func (m *Dense) Col(dst []float64, j int) []float64 {
 	return dst
 }
 
+func (m *Dense) ColView(j int) *Vector {
+	if j >= m.mat.Cols || j < 0 {
+		panic(ErrColAccess)
+	}
+	return &Vector{
+		mat: blas64.Vector{
+			Inc:  m.mat.Stride,
+			Data: m.mat.Data[j : m.mat.Rows*m.mat.Stride+j],
+		},
+		n: m.mat.Rows,
+	}
+}
+
 func (m *Dense) SetCol(j int, src []float64) int {
 	if j >= m.mat.Cols || j < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrColAccess)
 	}
 
 	blas64.Copy(min(len(src), m.mat.Rows),
@@ -138,7 +153,7 @@ func (m *Dense) SetCol(j int, src []float64) int {
 
 func (m *Dense) Row(dst []float64, i int) []float64 {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 
 	if dst == nil {
@@ -151,7 +166,7 @@ func (m *Dense) Row(dst []float64, i int) []float64 {
 
 func (m *Dense) SetRow(i int, src []float64) int {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(ErrRowAccess)
 	}
 
 	copy(m.rowView(i), src)
@@ -159,11 +174,24 @@ func (m *Dense) SetRow(i int, src []float64) int {
 	return min(len(src), m.mat.Cols)
 }
 
-func (m *Dense) RowView(r int) []float64 {
-	if r >= m.mat.Rows || r < 0 {
-		panic(ErrIndexOutOfRange)
+func (m *Dense) RowView(i int) *Vector {
+	if i >= m.mat.Rows || i < 0 {
+		panic(ErrRowAccess)
 	}
-	return m.rowView(r)
+	return &Vector{
+		mat: blas64.Vector{
+			Inc:  1,
+			Data: m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+m.mat.Cols],
+		},
+		n: m.mat.Cols,
+	}
+}
+
+func (m *Dense) RawRowView(i int) []float64 {
+	if i >= m.mat.Rows || i < 0 {
+		panic(ErrRowAccess)
+	}
+	return m.rowView(i)
 }
 
 func (m *Dense) rowView(r int) []float64 {

@@ -21,6 +21,8 @@ var (
 
 	_ Cloner       = matrix
 	_ Viewer       = matrix
+	_ RowViewer    = matrix
+	_ ColViewer    = matrix
 	_ RawRowViewer = matrix
 	_ Grower       = matrix
 

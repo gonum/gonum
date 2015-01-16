@@ -10,10 +10,10 @@ package mat64
 
 func (m *Dense) At(r, c int) float64 {
 	if r >= m.mat.Rows || r < 0 {
-		panic("index error: row access out of bounds")
+		panic(ErrRowAccess)
 	}
 	if c >= m.mat.Cols || c < 0 {
-		panic("index error: column access out of bounds")
+		panic(ErrColAccess)
 	}
 	return m.at(r, c)
 }
@@ -24,10 +24,10 @@ func (m *Dense) at(r, c int) float64 {
 
 func (m *Dense) Set(r, c int, v float64) {
 	if r >= m.mat.Rows || r < 0 {
-		panic("index error: row access out of bounds")
+		panic(ErrRowAccess)
 	}
 	if c >= m.mat.Cols || c < 0 {
-		panic("index error: column access out of bounds")
+		panic(ErrColAccess)
 	}
 	m.set(r, c, v)
 }

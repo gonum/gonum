@@ -18,7 +18,7 @@ func TestCovarianceMatrix(t *testing.T) {
 	// and Covariance functions and ensure that the results are identical.
 	for i, test := range []struct {
 		data    *mat64.Dense
-		weights mat64.Vec
+		weights []float64
 		ans     *mat64.Dense
 	}{
 		{
@@ -85,7 +85,7 @@ func TestCovarianceMatrix(t *testing.T) {
 		}
 
 	}
-	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), mat64.Vec([]float64{})) }) {
+	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), []float64{}) }) {
 		t.Errorf("CovarianceMatrix did not panic with weight size mismatch")
 	}
 	if !Panics(func() { CovarianceMatrix(mat64.NewDense(1, 1, nil), mat64.NewDense(5, 2, nil), nil) }) {

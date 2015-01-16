@@ -37,7 +37,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	xt.TCopy(x)
 	// Subtract the mean of each of the columns.
 	for i := 0; i < c; i++ {
-		v := xt.RowView(i)
+		v := xt.RawRowView(i)
 		mean := Mean(v, wts)
 		floats.AddConst(-mean, v)
 	}
@@ -53,7 +53,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 
 		// Weight the rows.
 		for i := 0; i < c; i++ {
-			v := xt.RowView(i)
+			v := xt.RawRowView(i)
 			floats.Mul(v, wts)
 		}
 

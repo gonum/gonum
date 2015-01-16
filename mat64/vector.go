@@ -88,6 +88,11 @@ func (m *Vector) ViewVec(i, n int) *Vector {
 
 func (m *Vector) Dims() (r, c int) { return m.n, 1 }
 
+// Len returns the length of the vector.
+func (m *Vector) Len() int {
+	return m.n
+}
+
 func (m *Vector) Reset() {
 	m.mat.Data = m.mat.Data[:0]
 	m.mat.Inc = 0

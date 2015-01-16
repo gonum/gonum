@@ -49,7 +49,7 @@ func LU(a *Dense) LUFactors {
 
 		// Apply previous transformations.
 		for i := 0; i < m; i++ {
-			luRowi := lu.RowView(i)
+			luRowi := lu.RawRowView(i)
 
 			// Most of the time is spent in the following dot product.
 			kmax := min(i, j)

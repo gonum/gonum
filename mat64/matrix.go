@@ -64,7 +64,7 @@ type VectorSetter interface {
 }
 
 // A RowViewer can return a Vector reflecting a row that is backed by the matrix
-// data. The Vector returned should have len(nCols).
+// data. The Vector returned will have Len() == nCols.
 type RowViewer interface {
 	RowView(r int) *Vector
 }
@@ -76,7 +76,7 @@ type RawRowViewer interface {
 }
 
 // A ColViewer can return a Vector reflecting a row that is backed by the matrix
-// data. The Vector returned should have len(nRows).
+// data. The Vector returned will have Len() == nRows.
 type ColViewer interface {
 	ColView(c int) *Vector
 }

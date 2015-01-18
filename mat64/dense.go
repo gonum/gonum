@@ -216,7 +216,7 @@ func (m *Dense) Grow(r, c int) Matrix {
 	if r < 0 || c < 0 {
 		panic(ErrIndexOutOfRange)
 	}
-	if r == 0 || c == 0 {
+	if r == 0 && c == 0 {
 		return m
 	}
 

@@ -28,7 +28,7 @@ type Linesearch struct {
 	finishedF    float64
 }
 
-func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *Linesearch) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	l.initLoc = resize(l.initLoc, len(loc.X))
 	copy(l.initLoc, loc.X)
 
@@ -54,7 +54,7 @@ func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (Evalu
 	return evalType, MajorIteration, nil
 }
 
-func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if l.finished {
 		// Means that we needed to evaluate the gradient, so now we have it and can initialize
 		l.finished = false
@@ -91,7 +91,7 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 	return evalType, MinorIteration, nil
 }
 
-func (l *Linesearch) initNextLinesearch(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *Linesearch) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	// Line search is finished, so find the next direction, and
 	// start the next line search
 	copy(l.initLoc, loc.X)

@@ -27,11 +27,11 @@ type ConstantStepSize struct {
 	Size float64
 }
 
-func (c ConstantStepSize) Init(l Location, dir []float64) float64 {
+func (c ConstantStepSize) Init(l *Location, dir []float64) float64 {
 	return c.Size
 }
 
-func (c ConstantStepSize) StepSize(l Location, dir []float64) float64 {
+func (c ConstantStepSize) StepSize(l *Location, dir []float64) float64 {
 	return c.Size
 }
 
@@ -64,7 +64,7 @@ type QuadraticStepSize struct {
 	xPrev        []float64
 }
 
-func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepSize float64) {
+func (q *QuadraticStepSize) Init(l *Location, dir []float64) (stepSize float64) {
 	if q.Threshold == 0 {
 		q.Threshold = quadraticThreshold
 	}
@@ -92,7 +92,7 @@ func (q *QuadraticStepSize) Init(l Location, dir []float64) (stepSize float64) {
 	return stepSize
 }
 
-func (q *QuadraticStepSize) StepSize(l Location, dir []float64) (stepSize float64) {
+func (q *QuadraticStepSize) StepSize(l *Location, dir []float64) (stepSize float64) {
 	stepSizePrev := floats.Distance(l.X, q.xPrev, 2) / q.dirPrevNorm
 	projGrad := floats.Dot(l.Gradient, dir)
 
@@ -147,7 +147,7 @@ type FirstOrderStepSize struct {
 	xPrev        []float64
 }
 
-func (fo *FirstOrderStepSize) Init(l Location, dir []float64) (stepSize float64) {
+func (fo *FirstOrderStepSize) Init(l *Location, dir []float64) (stepSize float64) {
 	if fo.InitialStepFactor == 0 {
 		fo.InitialStepFactor = initialStepFactor
 	}
@@ -171,7 +171,7 @@ func (fo *FirstOrderStepSize) Init(l Location, dir []float64) (stepSize float64)
 	return stepSize
 }
 
-func (fo *FirstOrderStepSize) StepSize(l Location, dir []float64) (stepSize float64) {
+func (fo *FirstOrderStepSize) StepSize(l *Location, dir []float64) (stepSize float64) {
 	stepSizePrev := floats.Distance(l.X, fo.xPrev, 2) / fo.dirPrevNorm
 	projGrad := floats.Dot(l.Gradient, dir)
 

@@ -16,7 +16,7 @@ const (
 type CGVariant interface {
 	// Init is called at the first iteration and provides a way to initialize
 	// any internal state.
-	Init(loc Location)
+	Init(loc *Location)
 	// Beta returns the value of the scaling parameter that is computed
 	// according to the particular variant of the CG method.
 	Beta(grad, gradPrev, dirPrev []float64) float64
@@ -93,7 +93,7 @@ type CG struct {
 	gradPrevNorm float64
 }
 
-func (cg *CG) Init(loc Location, funcInfo *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (cg *CG) Init(loc *Location, funcInfo *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if cg.IterationRestartFactor < 0 {
 		panic("cg: IterationRestartFactor is negative")
 	}
@@ -127,11 +127,11 @@ func (cg *CG) Init(loc Location, funcInfo *FunctionInfo, xNext []float64) (Evalu
 	return cg.linesearch.Init(loc, funcInfo, xNext)
 }
 
-func (cg *CG) Iterate(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (cg *CG) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	return cg.linesearch.Iterate(loc, xNext)
 }
 
-func (cg *CG) InitDirection(loc Location, direction []float64) (stepSize float64) {
+func (cg *CG) InitDirection(loc *Location, direction []float64) (stepSize float64) {
 	dim := len(loc.X)
 
 	cg.restartAfter = int(math.Ceil(cg.IterationRestartFactor * float64(dim)))
@@ -151,7 +151,7 @@ func (cg *CG) InitDirection(loc Location, direction []float64) (stepSize float64
 	return cg.InitialStep.Init(loc, direction)
 }
 
-func (cg *CG) NextDirection(loc Location, direction []float64) (stepSize float64) {
+func (cg *CG) NextDirection(loc *Location, direction []float64) (stepSize float64) {
 	copy(direction, loc.Gradient)
 	floats.Scale(-1, direction)
 
@@ -211,7 +211,7 @@ type FletcherReeves struct {
 	prevNorm float64
 }
 
-func (fr *FletcherReeves) Init(loc Location) {
+func (fr *FletcherReeves) Init(loc *Location) {
 	fr.prevNorm = floats.Norm(loc.Gradient, 2)
 }
 
@@ -230,7 +230,7 @@ type PolakRibierePolyak struct {
 	prevNorm float64
 }
 
-func (pr *PolakRibierePolyak) Init(loc Location) {
+func (pr *PolakRibierePolyak) Init(loc *Location) {
 	pr.prevNorm = floats.Norm(loc.Gradient, 2)
 }
 
@@ -250,7 +250,7 @@ type HestenesStiefel struct {
 	y []float64
 }
 
-func (hs *HestenesStiefel) Init(loc Location) {
+func (hs *HestenesStiefel) Init(loc *Location) {
 	hs.y = resize(hs.y, len(loc.Gradient))
 }
 
@@ -268,7 +268,7 @@ type DaiYuan struct {
 	y []float64
 }
 
-func (dy *DaiYuan) Init(loc Location) {
+func (dy *DaiYuan) Init(loc *Location) {
 	dy.y = resize(dy.y, len(loc.Gradient))
 }
 
@@ -286,7 +286,7 @@ type HagerZhang struct {
 	y []float64
 }
 
-func (hz *HagerZhang) Init(loc Location) {
+func (hz *HagerZhang) Init(loc *Location) {
 	hz.y = resize(hz.y, len(loc.Gradient))
 }
 

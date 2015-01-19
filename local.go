@@ -65,7 +65,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}
 
 	stats := &Stats{}
-	location, err := getStartingLocation(f, funcs, funcInfo, initX, stats, settings)
+	location, err := getStartingLocation(funcs, funcInfo, initX, stats, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -193,45 +193,37 @@ func getDefaultMethod(funcInfo *FunctionInfo) Method {
 	panic("optimize: gradient-free methods not yet coded")
 }
 
-// Combine location and stats because maybe in the future we'll add evaluation times
-// to functionStats?
-func getStartingLocation(f Function, funcs functions, funcInfo *FunctionInfo, initX []float64, stats *Stats, settings *Settings) (*Location, error) {
+// getStartingLocation allocates and initializes the starting location for the minimization.
+func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float64, stats *Stats, settings *Settings) (*Location, error) {
+	dim := len(initX)
 	l := &Location{
-		X: make([]float64, len(initX)),
+		X: make([]float64, dim),
+	}
+	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
+		l.Gradient = make([]float64, dim)
 	}
 	copy(l.X, initX)
-	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
-		l.Gradient = make([]float64, len(l.X))
-	}
 
 	if settings.UseInitialData {
 		l.F = settings.InitialFunctionValue
-		initG := settings.InitialGradient
-		if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
-			if len(l.Gradient) != len(initG) {
+		if l.Gradient != nil {
+			initG := settings.InitialGradient
+			if len(initG) != dim {
 				panic("local: initial location size mismatch")
 			}
 			copy(l.Gradient, initG)
 		}
 	} else {
-		// Compute missing information in the initial state.
-		if funcInfo.IsFunctionGradient {
-			l.F = funcs.gradFunc.FDf(l.X, l.Gradient)
-			stats.FunctionGradientEvals++
-		} else {
-			l.F = funcs.function.F(l.X)
-			stats.FunctionEvals++
-			if funcInfo.IsGradient {
-				funcs.gradient.Df(l.X, l.Gradient)
-				stats.GradientEvals++
-			}
+		evalType := FunctionEval
+		if l.Gradient != nil {
+			evalType = FunctionAndGradientEval
 		}
+		evaluate(funcs, funcInfo, evalType, l.X, l, stats)
 	}
 
 	if math.IsNaN(l.F) {
 		return l, ErrNaN
 	}
-	// Do we allow Inf initial function value?
 	if math.IsInf(l.F, 1) {
 		return l, ErrInf
 	}

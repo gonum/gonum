@@ -65,10 +65,10 @@ func TestCovarianceMatrix(t *testing.T) {
 			t.Errorf("%d: expected cov %v, found %v", i, test.ans, c)
 		}
 		if !floats.Equal(d, r.Data) {
-			t.Errorf("%d: data was modified during execution")
+			t.Errorf("%d: data was modified during execution", i)
 		}
 		if !floats.Equal(w, test.weights) {
-			t.Errorf("%d: weights was modified during execution")
+			t.Errorf("%d: weights was modified during execution", i)
 		}
 
 		// compare with call to Covariance
@@ -91,7 +91,9 @@ func TestCovarianceMatrix(t *testing.T) {
 	if !Panics(func() { CovarianceMatrix(mat64.NewDense(1, 1, nil), mat64.NewDense(5, 2, nil), nil) }) {
 		t.Errorf("CovarianceMatrix did not panic with preallocation size mismatch")
 	}
-
+	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(2, 2, []float64{1, 2, 3, 4}), []float64{1, -1}) }) {
+		t.Errorf("CovarianceMatrix did not panic with negative weights")
+	}
 }
 
 // benchmarks
@@ -108,6 +110,17 @@ func benchmarkCovarianceMatrix(b *testing.B, m mat64.Matrix) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		CovarianceMatrix(nil, m, nil)
+	}
+}
+func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat64.Matrix) {
+	r, _ := m.Dims()
+	wts := make([]float64, r)
+	for i := range wts {
+		wts[i] = 0.5
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CovarianceMatrix(nil, m, wts)
 	}
 }
 func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat64.Matrix) {
@@ -151,6 +164,40 @@ func BenchmarkCovarianceMatrixHugexSmall(b *testing.B) {
 	// 1e7 * 10 elements
 	x := randMat(huge, small)
 	benchmarkCovarianceMatrix(b, x)
+}
+
+func BenchmarkCovarianceMatrixSmallxSmallWeighted(b *testing.B) {
+	// 10 * 10 elements
+	x := randMat(small, small)
+	benchmarkCovarianceMatrixWeighted(b, x)
+}
+func BenchmarkCovarianceMatrixSmallxMediumWeighted(b *testing.B) {
+	// 10 * 1000 elements
+	x := randMat(small, medium)
+	benchmarkCovarianceMatrixWeighted(b, x)
+}
+
+func BenchmarkCovarianceMatrixMediumxSmallWeighted(b *testing.B) {
+	// 1000 * 10 elements
+	x := randMat(medium, small)
+	benchmarkCovarianceMatrixWeighted(b, x)
+}
+func BenchmarkCovarianceMatrixMediumxMediumWeighted(b *testing.B) {
+	// 1000 * 1000 elements
+	x := randMat(medium, medium)
+	benchmarkCovarianceMatrixWeighted(b, x)
+}
+
+func BenchmarkCovarianceMatrixLargexSmallWeighted(b *testing.B) {
+	// 1e5 * 10 elements
+	x := randMat(large, small)
+	benchmarkCovarianceMatrixWeighted(b, x)
+}
+
+func BenchmarkCovarianceMatrixHugexSmallWeighted(b *testing.B) {
+	// 1e7 * 10 elements
+	x := randMat(huge, small)
+	benchmarkCovarianceMatrixWeighted(b, x)
 }
 
 func BenchmarkCovarianceMatrixSmallxSmallInPlace(b *testing.B) {

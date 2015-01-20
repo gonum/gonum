@@ -232,7 +232,8 @@ func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float6
 
 func checkConvergence(loc *Location, itertype IterationType, stats *Stats, settings *Settings) Status {
 	if itertype == MajorIteration && loc.Gradient != nil {
-		if stats.GradientNorm <= settings.GradientAbsTol {
+		norm := floats.Norm(loc.Gradient, math.Inf(1))
+		if norm < settings.GradientAbsTol {
 			return GradientAbsoluteConvergence
 		}
 	}
@@ -334,7 +335,4 @@ func update(location *Location, optLoc *Location, stats *Stats, iterType Iterati
 		copyLocation(optLoc, location)
 	}
 	stats.Runtime = time.Since(startTime)
-	if location.Gradient != nil {
-		stats.GradientNorm = floats.Norm(location.Gradient, math.Inf(1))
-	}
 }

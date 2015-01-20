@@ -5,6 +5,7 @@
 package optimize
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -136,11 +137,7 @@ func minimize(settings *Settings, location *Location, method Method, funcInfo *F
 		}
 
 		// Compute the new function and update the statistics
-		err = evaluate(funcs, funcInfo, evalType, xNext, location, stats)
-		if err != nil {
-			status = Failure
-			return
-		}
+		evaluate(funcs, funcInfo, evalType, xNext, location, stats)
 		update(location, optLoc, stats, iterType, startTime)
 
 		// Find the next location
@@ -276,54 +273,72 @@ func checkConvergence(loc *Location, itertype IterationType, stats *Stats, setti
 	return NotTerminated
 }
 
-// evaluate evaluates the function and stores the answer in place
-func evaluate(funcs functions, funcInfo *FunctionInfo, evalType EvaluationType, xNext []float64, location *Location, stats *Stats) error {
-	sameX := floats.Equal(location.X, xNext)
-	if !sameX {
+// evaluate evaluates the function given by funcs at xNext, stores the answer
+// into location and updates stats. If location.X is not equal to xNext, then
+// unused fields of location are set to NaN.
+// evaluate panics if the function does not support the requested evalType.
+func evaluate(funcs functions, funcInfo *FunctionInfo, evalType EvaluationType, xNext []float64, location *Location, stats *Stats) {
+	different := !floats.Equal(location.X, xNext)
+	if different {
 		copy(location.X, xNext)
 	}
 	switch evalType {
 	case FunctionEval:
-		location.F = funcs.function.F(location.X)
-		stats.FunctionEvals++
-		if !sameX {
+		if different {
+			// Invalidate the gradient, because it will not be evaluated.
 			for i := range location.Gradient {
 				location.Gradient[i] = math.NaN()
 			}
 		}
-		return nil
+		location.F = funcs.function.F(location.X)
+		stats.FunctionEvals++
+		return
 	case GradientEval:
 		if funcInfo.IsGradient {
-			funcs.gradient.Df(location.X, location.Gradient)
-			stats.GradientEvals++
-			if !sameX {
+			if different {
+				// Invalidate the function value because it will not be
+				// evaluated.
 				location.F = math.NaN()
 			}
-			return nil
+			funcs.gradient.Df(location.X, location.Gradient)
+			stats.GradientEvals++
+			return
 		}
 		if funcInfo.IsFunctionGradient {
 			location.F = funcs.gradFunc.FDf(location.X, location.Gradient)
 			stats.FunctionGradientEvals++
-			return nil
+			return
 		}
-		return ErrMismatch{Type: evalType}
 	case FunctionAndGradientEval:
 		if funcInfo.IsFunctionGradient {
 			location.F = funcs.gradFunc.FDf(location.X, location.Gradient)
 			stats.FunctionGradientEvals++
-			return nil
+			return
 		}
 		if funcInfo.IsGradient {
 			location.F = funcs.function.F(location.X)
 			stats.FunctionEvals++
 			funcs.gradient.Df(location.X, location.Gradient)
 			stats.GradientEvals++
-			return nil
+			return
 		}
-		return ErrMismatch{Type: evalType}
+	case NoEvaluation:
+		if different {
+			// The evaluation point xNext is not equal to location.X, so we
+			// fill location with NaNs to indicate that it does not contain a
+			// valid evaluation result.
+			location.F = math.NaN()
+			for i := range location.X {
+				location.X[i] = math.NaN()
+			}
+			for i := range location.Gradient {
+				location.Gradient[i] = math.NaN()
+			}
+		}
 	default:
-		panic("unreachable")
+		panic(fmt.Sprintf("unknown evaluation type %v", evalType))
 	}
+	panic(fmt.Sprintf("objective function does not support %v", evalType))
 }
 
 // update updates the stats given the new evaluation

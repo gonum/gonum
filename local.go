@@ -54,59 +54,79 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}
 
 	startTime := time.Now()
-
 	funcs, funcInfo := getFunctionInfo(f)
 
-	if method == nil {
-		method = getDefaultMethod(funcInfo)
+	if funcInfo.IsStatuser {
+		_, err := funcs.status.Status()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if settings.Recorder != nil {
+		// Initialize Recorder first. If it fails, we avoid the (possibly
+		// time-consuming) evaluation of F and DF at the starting location.
+		err := settings.Recorder.Init(funcInfo)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if settings == nil {
 		settings = DefaultSettings()
 	}
-
 	stats := &Stats{}
-	location, err := getStartingLocation(funcs, funcInfo, initX, stats, settings)
+	optLoc, evalType, err := getStartingLocation(funcs, funcInfo, initX, stats, settings)
 	if err != nil {
 		return nil, err
 	}
 
-	optLoc := &Location{}
-	// update stats (grad norm, function value, etc.) so that things are
-	// initialized for the first convergence check
-	update(location, optLoc, stats, NoIteration, startTime)
-
+	// Runtime is the only Stats field that needs to be updated here.
+	stats.Runtime = time.Since(startTime)
+	// Send optLoc to Recorder before checking it for convergence.
 	if settings.Recorder != nil {
-		err = settings.Recorder.Init(funcInfo)
-		if err != nil {
-			return &Result{Status: Failure}, err
-		}
+		// TODO(vladimir-ch): Replace NoIteration with InitialIteration when it
+		// is added.
+		err = settings.Recorder.Record(optLoc, evalType, NoIteration, stats)
 	}
 
-	// actually perform the minimization
-	status, err := minimize(settings, location, method, funcInfo, stats, funcs, optLoc, startTime)
+	// Check if the starting location satisfies the convergence criteria.
+	// TODO(vladimir-ch): Replace MajorIteration with InitialIteration when it
+	// is added and checkConvergence() updated to handle it.
+	status := checkConvergence(optLoc, MajorIteration, stats, settings)
+	if status == NotTerminated && err == nil {
+		if method == nil {
+			method = getDefaultMethod(funcInfo)
+		}
+		// The starting location is not good enough, we need to perform a
+		// minimization. The optimal location will be stored in-place in
+		// optLoc.
+		status, err = minimize(settings, method, funcInfo, stats, funcs, optLoc, startTime)
+	}
 
-	// cleanup at exit
 	if settings.Recorder != nil && err == nil {
+		// Send the optimal location to Recorder.
 		err = settings.Recorder.Record(optLoc, NoEvaluation, PostIteration, stats)
 	}
 	stats.Runtime = time.Since(startTime)
 	return &Result{
-		Stats:    *stats,
 		Location: *optLoc,
+		Stats:    *stats,
 		Status:   status,
 	}, err
 }
 
-func minimize(settings *Settings, location *Location, method Method, funcInfo *FunctionInfo, stats *Stats, funcs functions, optLoc *Location, startTime time.Time) (status Status, err error) {
-	methodStatus, methodIsStatuser := method.(Statuser)
+func minimize(settings *Settings, method Method, funcInfo *FunctionInfo, stats *Stats, funcs functions, optLoc *Location, startTime time.Time) (status Status, err error) {
+	location := &Location{}
+	copyLocation(location, optLoc)
 	xNext := make([]float64, len(location.X))
+
+	methodStatus, methodIsStatuser := method.(Statuser)
 
 	evalType, iterType, err := method.Init(location, funcInfo, xNext)
 	if err != nil {
 		return Failure, err
 	}
-	copyLocation(optLoc, location)
 
 	for {
 		if settings.Recorder != nil {
@@ -191,7 +211,7 @@ func getDefaultMethod(funcInfo *FunctionInfo) Method {
 }
 
 // getStartingLocation allocates and initializes the starting location for the minimization.
-func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float64, stats *Stats, settings *Settings) (*Location, error) {
+func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float64, stats *Stats, settings *Settings) (*Location, EvaluationType, error) {
 	dim := len(initX)
 	l := &Location{
 		X: make([]float64, dim),
@@ -201,6 +221,7 @@ func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float6
 	}
 	copy(l.X, initX)
 
+	evalType := NoEvaluation
 	if settings.UseInitialData {
 		l.F = settings.InitialFunctionValue
 		if l.Gradient != nil {
@@ -211,7 +232,7 @@ func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float6
 			copy(l.Gradient, initG)
 		}
 	} else {
-		evalType := FunctionEval
+		evalType = FunctionEval
 		if l.Gradient != nil {
 			evalType = FunctionAndGradientEval
 		}
@@ -219,12 +240,12 @@ func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float6
 	}
 
 	if math.IsNaN(l.F) {
-		return l, ErrNaN
+		return l, evalType, ErrNaN
 	}
 	if math.IsInf(l.F, 1) {
-		return l, ErrInf
+		return l, evalType, ErrInf
 	}
-	return l, nil
+	return l, evalType, nil
 }
 
 func checkConvergence(loc *Location, itertype IterationType, stats *Stats, settings *Settings) Status {
@@ -260,6 +281,7 @@ func checkConvergence(loc *Location, itertype IterationType, stats *Stats, setti
 	}
 
 	if settings.Runtime > 0 {
+		// TODO(vladimir-ch): It would be nice to update Runtime here.
 		if stats.Runtime >= settings.Runtime {
 			return RuntimeLimit
 		}
@@ -285,7 +307,7 @@ func evaluate(funcs functions, funcInfo *FunctionInfo, evalType EvaluationType, 
 	switch evalType {
 	case FunctionEval:
 		if different {
-			// Invalidate the gradient, because it will not be evaluated.
+			// Invalidate the gradient because it will not be evaluated.
 			for i := range location.Gradient {
 				location.Gradient[i] = math.NaN()
 			}
@@ -346,7 +368,7 @@ func update(location *Location, optLoc *Location, stats *Stats, iterType Iterati
 	if iterType == MajorIteration {
 		stats.MajorIterations++
 	}
-	if location.F < optLoc.F {
+	if location.F <= optLoc.F {
 		copyLocation(optLoc, location)
 	}
 	stats.Runtime = time.Since(startTime)

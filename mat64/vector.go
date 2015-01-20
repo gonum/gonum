@@ -109,8 +109,14 @@ func (m *Vector) RawVector() blas64.Vector {
 func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 	ar, ac := a.Dims()
 	br, _ := b.Dims()
-	if ac != br {
-		panic(ErrShape)
+	if trans {
+		if ar != br {
+			panic(ErrShape)
+		}
+	} else {
+		if ac != br {
+			panic(ErrShape)
+		}
 	}
 
 	var w Vector
@@ -118,11 +124,24 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 		w = *m
 	}
 	if w.n == 0 {
-		w.mat.Data = use(w.mat.Data, ar)
+		if trans {
+			w.mat.Data = use(w.mat.Data, ac)
+		} else {
+			w.mat.Data = use(w.mat.Data, ar)
+		}
+
 		w.mat.Inc = 1
 		w.n = ar
-	} else if ar != w.n {
-		panic(ErrShape)
+	} else {
+		if trans {
+			if ac != w.n {
+				panic(ErrShape)
+			}
+		} else {
+			if ar != w.n {
+				panic(ErrShape)
+			}
+		}
 	}
 
 	if a, ok := a.(RawMatrixer); ok {

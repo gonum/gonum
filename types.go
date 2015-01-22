@@ -47,6 +47,9 @@ const (
 )
 
 func (i IterationType) String() string {
+	if i < 0 || int(i) >= len(iterationStrings) {
+		return fmt.Sprintf("IterationType(%d)", i)
+	}
 	return iterationStrings[i]
 }
 

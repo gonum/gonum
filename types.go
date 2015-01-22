@@ -5,6 +5,7 @@
 package optimize
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -21,6 +22,9 @@ const (
 )
 
 func (e EvaluationType) String() string {
+	if e < 0 || int(e) >= len(evaluationStrings) {
+		return fmt.Sprintf("EvaluationType(%d)", e)
+	}
 	return evaluationStrings[e]
 }
 

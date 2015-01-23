@@ -129,24 +129,31 @@ func minimize(settings *Settings, method Method, funcInfo *FunctionInfo, stats *
 	}
 
 	for {
-		if settings.Recorder != nil {
-			err = settings.Recorder.Record(location, evalType, iterType, stats)
-			if err != nil {
-				status = Failure
-				return
-			}
-		}
-
-		status = checkConvergence(location, iterType, stats, settings)
-		if status != NotTerminated {
-			return
-		}
-
 		if funcInfo.IsStatuser {
+			// Check the function status before evaluating.
 			status, err = funcs.status.Status()
 			if err != nil || status != NotTerminated {
 				return
 			}
+		}
+
+		// Perform evalType evaluation of the function at xNext and store the
+		// result in location.
+		evaluate(funcs, funcInfo, evalType, xNext, location, stats)
+		// Update the stats and optLoc.
+		update(location, optLoc, stats, iterType, startTime)
+		// Get the convergence status before recording the new location.
+		status = checkConvergence(optLoc, iterType, stats, settings)
+
+		if settings.Recorder != nil {
+			err = settings.Recorder.Record(location, evalType, iterType, stats)
+			if err != nil {
+				return
+			}
+		}
+
+		if status != NotTerminated {
+			return
 		}
 
 		if methodIsStatuser {
@@ -156,11 +163,7 @@ func minimize(settings *Settings, method Method, funcInfo *FunctionInfo, stats *
 			}
 		}
 
-		// Compute the new function and update the statistics
-		evaluate(funcs, funcInfo, evalType, xNext, location, stats)
-		update(location, optLoc, stats, iterType, startTime)
-
-		// Find the next location
+		// Find the next location (stored in-place into xNext).
 		evalType, iterType, err = method.Iterate(location, xNext)
 		if err != nil {
 			status = Failure

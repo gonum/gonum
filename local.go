@@ -360,6 +360,7 @@ func evaluate(funcs functions, funcInfo *FunctionInfo, evalType EvaluationType, 
 				location.Gradient[i] = math.NaN()
 			}
 		}
+		return
 	default:
 		panic(fmt.Sprintf("unknown evaluation type %v", evalType))
 	}

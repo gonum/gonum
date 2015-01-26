@@ -63,6 +63,10 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 		}
 	}
 
+	if settings == nil {
+		settings = DefaultSettings()
+	}
+
 	if settings.Recorder != nil {
 		// Initialize Recorder first. If it fails, we avoid the (possibly
 		// time-consuming) evaluation of F and DF at the starting location.
@@ -72,9 +76,6 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 		}
 	}
 
-	if settings == nil {
-		settings = DefaultSettings()
-	}
 	stats := &Stats{}
 	optLoc, evalType, err := getStartingLocation(funcs, funcInfo, initX, stats, settings)
 	if err != nil {

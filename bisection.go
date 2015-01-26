@@ -4,11 +4,7 @@
 
 package optimize
 
-import (
-	"math"
-
-	"github.com/gonum/floats"
-)
+import "math"
 
 // Bisection is a LinesearchMethod that uses a bisection to find a point that
 // satisfies the strong Wolfe conditions with the given gradient constant and
@@ -60,18 +56,7 @@ func (b *Bisection) Init(initLoc LinesearchLocation, initStepSize float64, f *Fu
 	return FunctionAndGradientEval
 }
 
-const (
-	funcSmallEqual = 1e-14
-	gradSmallEqual = 1e-10
-)
-
 func (b *Bisection) Finished(l LinesearchLocation) bool {
-	if floats.EqualWithinRel(l.F, b.initF, funcSmallEqual) && math.Abs(l.Derivative) < gradSmallEqual && math.Abs(b.initGrad) < gradSmallEqual {
-		// The two numbers are so close that we should just check on the gradient
-		// TODO: Should iterate be updated? Maybe find a function where it needs it.
-		return math.Abs(l.Derivative) < b.GradConst*math.Abs(b.initGrad)
-	}
-
 	return StrongWolfeConditionsMet(l.F, l.Derivative, b.initF, b.initGrad, b.currStep, 0, b.GradConst)
 }
 

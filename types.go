@@ -5,6 +5,7 @@
 package optimize
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -21,6 +22,9 @@ const (
 )
 
 func (e EvaluationType) String() string {
+	if e < 0 || int(e) >= len(evaluationStrings) {
+		return fmt.Sprintf("EvaluationType(%d)", e)
+	}
 	return evaluationStrings[e]
 }
 
@@ -43,6 +47,9 @@ const (
 )
 
 func (i IterationType) String() string {
+	if i < 0 || int(i) >= len(iterationStrings) {
+		return fmt.Sprintf("IterationType(%d)", i)
+	}
 	return iterationStrings[i]
 }
 
@@ -83,7 +90,6 @@ type Stats struct {
 	GradientEvals         int           // Number of evaluations of Df()
 	FunctionGradientEvals int           // Number of evaluations of FDf()
 	Runtime               time.Duration // Total runtime of the optimization
-	GradientNorm          float64       // Infinity norm of the gradient
 }
 
 // FunctionInfo is data to give to the optimizer about the objective function.

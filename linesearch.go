@@ -24,11 +24,10 @@ type Linesearch struct {
 	funInfo *FunctionInfo
 
 	lastEvalType EvaluationType
-	finished     bool
-	finishedF    float64
+	iterType     IterationType
 }
 
-func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *Linesearch) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	l.initLoc = resize(l.initLoc, len(loc.X))
 	copy(l.initLoc, loc.X)
 
@@ -50,15 +49,22 @@ func (l *Linesearch) Init(loc Location, f *FunctionInfo, xNext []float64) (Evalu
 	floats.AddScaledTo(xNext, l.initLoc, stepSize, l.direction)
 	l.funInfo = f
 	l.lastEvalType = evalType
-	l.finished = false
-	return evalType, MajorIteration, nil
+	l.iterType = MinorIteration
+	return evalType, l.iterType, nil
 }
 
-func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
-	if l.finished {
-		// Means that we needed to evaluate the gradient, so now we have it and can initialize
-		l.finished = false
-		loc.F = l.finishedF
+func (l *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+	if l.iterType == SubIteration {
+		// We needed to evaluate the gradient, so now we have it and can
+		// announce MajorIteration.
+		l.iterType = MajorIteration
+		copy(xNext, loc.X)
+		return NoEvaluation, l.iterType, nil
+	}
+	if l.iterType == MajorIteration {
+		// The linesearch previously signaled MajorIteration. Since we're here,
+		// it means that the previous location is not good enough to converge,
+		// so start the next linesearch.
 		return l.initNextLinesearch(loc, xNext)
 	}
 	projGrad := math.NaN()
@@ -70,30 +76,34 @@ func (l *Linesearch) Iterate(loc Location, xNext []float64) (EvaluationType, Ite
 		Derivative: projGrad,
 	}
 	if l.Method.Finished(linesearchLocation) {
-		if l.lastEvalType == FunctionEval {
-			l.finished = true
-			l.finishedF = loc.F
+		if l.lastEvalType == FunctionEval && loc.Gradient != nil {
 			// We have the function value at the current location, but we don't
-			// have the gradient, so get it before starting the next major iteration.
+			// have the gradient, so get it before announcing MajorIteration.
+			l.iterType = SubIteration
 			copy(xNext, loc.X)
-			return GradientEval, SubIteration, nil
+			return GradientEval, l.iterType, nil
 		}
-		return l.initNextLinesearch(loc, xNext)
+		// The linesearch is finished. Announce so with an update to
+		// MajorIteration. The function value and gradient is already known, so
+		// no function evaluations are necessary.
+		l.iterType = MajorIteration
+		copy(xNext, loc.X)
+		return NoEvaluation, l.iterType, nil
 	}
 
-	// Line search not done, just iterate
+	// Line search not done, just iterate.
 	stepSize, evalType, err := l.Method.Iterate(linesearchLocation)
 	if err != nil {
 		return NoEvaluation, NoIteration, err
 	}
 	floats.AddScaledTo(xNext, l.initLoc, stepSize, l.direction)
 	l.lastEvalType = evalType
-	return evalType, MinorIteration, nil
+	l.iterType = MinorIteration
+	return evalType, l.iterType, nil
 }
 
-func (l *Linesearch) initNextLinesearch(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
-	// Line search is finished, so find the next direction, and
-	// start the next line search
+func (l *Linesearch) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+	// Find the next direction, and start the next line search.
 	copy(l.initLoc, loc.X)
 	stepsize := l.NextDirectioner.NextDirection(loc, l.direction)
 	projGrad := math.NaN()
@@ -110,7 +120,8 @@ func (l *Linesearch) initNextLinesearch(loc Location, xNext []float64) (Evaluati
 	evalType := l.Method.Init(initLinesearchLocation, stepsize, l.funInfo)
 	floats.AddScaledTo(xNext, l.initLoc, stepsize, l.direction)
 	l.lastEvalType = evalType
-	return evalType, MajorIteration, nil
+	l.iterType = MinorIteration
+	return evalType, l.iterType, nil
 }
 
 // ArmijoConditionMet returns true if the Armijo condition (aka sufficient decrease)

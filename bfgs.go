@@ -39,7 +39,7 @@ type BFGS struct {
 // NOTE: This method exists so that it's easier to use a bfgs algorithm because
 // it implements Method
 
-func (b *BFGS) Init(l Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (b *BFGS) Init(l *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if b.LinesearchMethod == nil {
 		b.LinesearchMethod = &Bisection{}
 	}
@@ -52,11 +52,11 @@ func (b *BFGS) Init(l Location, f *FunctionInfo, xNext []float64) (EvaluationTyp
 	return b.linesearch.Init(l, f, xNext)
 }
 
-func (b *BFGS) Iterate(l Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (b *BFGS) Iterate(l *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	return b.linesearch.Iterate(l, xNext)
 }
 
-func (b *BFGS) InitDirection(l Location, dir []float64) (stepSize float64) {
+func (b *BFGS) InitDirection(l *Location, dir []float64) (stepSize float64) {
 	dim := len(l.X)
 	b.dim = dim
 
@@ -85,7 +85,7 @@ func (b *BFGS) InitDirection(l Location, dir []float64) (stepSize float64) {
 	return 1 / floats.Norm(dir, 2)
 }
 
-func (b *BFGS) NextDirection(l Location, direction []float64) (stepSize float64) {
+func (b *BFGS) NextDirection(l *Location, direction []float64) (stepSize float64) {
 	if len(l.X) != b.dim {
 		panic("bfgs: unexpected size mismatch")
 	}

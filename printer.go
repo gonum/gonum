@@ -7,10 +7,13 @@ package optimize
 import (
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gonum/floats"
 )
 
 // Printer writes column-format output to the specified writer as the optimization
@@ -52,7 +55,7 @@ func (p *Printer) Init(f *FunctionInfo) error {
 	return nil
 }
 
-func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, stats *Stats) error {
+func (p *Printer) Record(l *Location, eval EvaluationType, iter IterationType, stats *Stats) error {
 	// Only print on major iterations or if the iteration is over
 	if iter != MajorIteration && iter != PostIteration {
 		return nil
@@ -71,7 +74,8 @@ func (p *Printer) Record(l Location, eval EvaluationType, iter IterationType, st
 	valueStrings[1] = strconv.Itoa(stats.FunctionEvals + stats.FunctionGradientEvals)
 	valueStrings[2] = fmt.Sprintf("%g", l.F)
 	if p.printGrad {
-		valueStrings[3] = fmt.Sprintf("%g", stats.GradientNorm)
+		norm := floats.Norm(l.Gradient, math.Inf(1))
+		valueStrings[3] = fmt.Sprintf("%g", norm)
 	}
 
 	var maxLengths [nPrinterOut]int

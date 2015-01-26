@@ -38,7 +38,7 @@ type LBFGS struct {
 	rhoHist []float64   // last Store iterations of rho
 }
 
-func (l *LBFGS) Init(loc Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *LBFGS) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if l.LinesearchMethod == nil {
 		l.LinesearchMethod = &Bisection{}
 	}
@@ -50,11 +50,11 @@ func (l *LBFGS) Init(loc Location, f *FunctionInfo, xNext []float64) (Evaluation
 	return l.linesearch.Init(loc, f, xNext)
 }
 
-func (l *LBFGS) Iterate(loc Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *LBFGS) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	return l.linesearch.Iterate(loc, xNext)
 }
 
-func (l *LBFGS) InitDirection(loc Location, direction []float64) (stepSize float64) {
+func (l *LBFGS) InitDirection(loc *Location, direction []float64) (stepSize float64) {
 	dim := len(loc.X)
 	l.dim = dim
 
@@ -103,7 +103,7 @@ func (l *LBFGS) InitDirection(loc Location, direction []float64) (stepSize float
 	return 1 / floats.Norm(direction, 2)
 }
 
-func (l *LBFGS) NextDirection(loc Location, direction []float64) (stepSize float64) {
+func (l *LBFGS) NextDirection(loc *Location, direction []float64) (stepSize float64) {
 	if len(loc.X) != l.dim {
 		panic("lbfgs: unexpected size mismatch")
 	}

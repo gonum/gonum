@@ -48,29 +48,29 @@ type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,
 	// putting the initial direction in place into dir, and returning the initial
 	// step size. InitDirection must not modify Location.
-	InitDirection(l Location, dir []float64) (stepSize float64)
+	InitDirection(l *Location, dir []float64) (stepSize float64)
 
 	// NextDirection updates the search direction and step size. Location is
 	// the location seen at the conclusion of the most recent linesearch. The
 	// next search direction is put in place into dir, and the next stepsize
 	// is returned. NextDirection must not modify Location.
-	NextDirection(l Location, dir []float64) (stepSize float64)
+	NextDirection(l *Location, dir []float64) (stepSize float64)
 }
 
 // A Method can optimize an objective function.
 type Method interface {
 	// Initializes the method and returns the first location to evaluate
-	Init(l Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error)
+	Init(l *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error)
 
 	// Stores the next location to evaluate in xNext
-	Iterate(l Location, xNext []float64) (EvaluationType, IterationType, error)
+	Iterate(l *Location, xNext []float64) (EvaluationType, IterationType, error)
 }
 
 // StepSizer can set the next step size of the optimization given the last Location.
 // Returned step size must be positive.
 type StepSizer interface {
-	Init(l Location, dir []float64) float64
-	StepSize(l Location, dir []float64) float64
+	Init(l *Location, dir []float64) float64
+	StepSize(l *Location, dir []float64) float64
 }
 
 // Statuser returns the status of the Function being optimized. This can be used
@@ -85,5 +85,5 @@ type Statuser interface {
 // the progress to StdOut or to a log file. A Recorder must not modify any data.
 type Recorder interface {
 	Init(*FunctionInfo) error
-	Record(Location, EvaluationType, IterationType, *Stats) error
+	Record(*Location, EvaluationType, IterationType, *Stats) error
 }

@@ -56,8 +56,8 @@ func (p *Printer) Init(f *FunctionInfo) error {
 }
 
 func (p *Printer) Record(l *Location, eval EvaluationType, iter IterationType, stats *Stats) error {
-	// Only print on major iterations or if the iteration is over
-	if iter != MajorIteration && iter != PostIteration {
+	// Only print on major and initial iterations, or if the iteration is over.
+	if iter != MajorIteration && iter != InitIteration && iter != PostIteration {
 		return nil
 	}
 

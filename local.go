@@ -86,15 +86,11 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	stats.Runtime = time.Since(startTime)
 	// Send optLoc to Recorder before checking it for convergence.
 	if settings.Recorder != nil {
-		// TODO(vladimir-ch): Replace NoIteration with InitialIteration when it
-		// is added.
-		err = settings.Recorder.Record(optLoc, evalType, NoIteration, stats)
+		err = settings.Recorder.Record(optLoc, evalType, InitIteration, stats)
 	}
 
 	// Check if the starting location satisfies the convergence criteria.
-	// TODO(vladimir-ch): Replace MajorIteration with InitialIteration when it
-	// is added and checkConvergence() updated to handle it.
-	status := checkConvergence(optLoc, MajorIteration, stats, settings)
+	status := checkConvergence(optLoc, InitIteration, stats, settings)
 	if status == NotTerminated && err == nil {
 		if method == nil {
 			method = getDefaultMethod(funcInfo)
@@ -253,15 +249,16 @@ func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float6
 }
 
 func checkConvergence(loc *Location, itertype IterationType, stats *Stats, settings *Settings) Status {
-	if itertype == MajorIteration && loc.Gradient != nil {
-		norm := floats.Norm(loc.Gradient, math.Inf(1))
-		if norm < settings.GradientAbsTol {
-			return GradientAbsoluteConvergence
+	if itertype == MajorIteration || itertype == InitIteration {
+		if loc.Gradient != nil {
+			norm := floats.Norm(loc.Gradient, math.Inf(1))
+			if norm < settings.GradientAbsTol {
+				return GradientAbsoluteConvergence
+			}
 		}
-	}
-
-	if itertype == MajorIteration && loc.F < settings.FunctionAbsTol {
-		return FunctionAbsoluteConvergence
+		if loc.F < settings.FunctionAbsTol {
+			return FunctionAbsoluteConvergence
+		}
 	}
 
 	// Check every step for negative infinity because it could break the

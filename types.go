@@ -45,6 +45,7 @@ const (
 	MajorIteration
 	MinorIteration
 	SubIteration
+	InitIteration
 	PostIteration // Iteration after the optimization. Sent to Recorder.
 )
 
@@ -60,6 +61,7 @@ var iterationStrings = [...]string{
 	"MajorIteration",
 	"MinorIteration",
 	"SubIteration",
+	"InitIteration",
 	"PostIteration",
 }
 

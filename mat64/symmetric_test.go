@@ -40,7 +40,7 @@ func (s *S) TestNewSymmetric(c *check.C) {
 	}
 }
 
-func (s *S) TestTriAtSet(c *check.C) {
+func (s *S) TestSymAtSet(c *check.C) {
 	t := &Symmetric{blas64.Symmetric{
 		N:      3,
 		Stride: 3,

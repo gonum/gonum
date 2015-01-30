@@ -32,11 +32,11 @@ type Backtracking struct {
 	initG    float64
 }
 
-func (b *Backtracking) Init(initLoc LinesearchLocation, initStepSize float64, f *FunctionInfo) EvaluationType {
-	if initStepSize <= 0 {
+func (b *Backtracking) Init(loc LinesearchLocation, step float64, _ *FunctionInfo) EvaluationType {
+	if step <= 0 {
 		panic("backtracking: bad step size")
 	}
-	if initLoc.Derivative >= 0 {
+	if loc.Derivative >= 0 {
 		panic("Backtracking: init G non-negative")
 	}
 
@@ -53,17 +53,17 @@ func (b *Backtracking) Init(initLoc LinesearchLocation, initStepSize float64, f 
 		panic("backtracking: FunConst must be between 0 and 1")
 	}
 
-	b.stepSize = initStepSize
-	b.initF = initLoc.F
-	b.initG = initLoc.Derivative
+	b.stepSize = step
+	b.initF = loc.F
+	b.initG = loc.Derivative
 	return FunctionEval
 }
 
-func (b *Backtracking) Finished(l LinesearchLocation) bool {
-	return ArmijoConditionMet(l.F, b.initF, b.initG, b.stepSize, b.FunConst)
+func (b *Backtracking) Finished(loc LinesearchLocation) bool {
+	return ArmijoConditionMet(loc.F, b.initF, b.initG, b.stepSize, b.FunConst)
 }
 
-func (b *Backtracking) Iterate(l LinesearchLocation) (float64, EvaluationType, error) {
+func (b *Backtracking) Iterate(_ LinesearchLocation) (float64, EvaluationType, error) {
 	b.stepSize *= b.Decrease
 	if b.stepSize < minimumBacktrackingStepSize {
 		return 0, NoEvaluation, ErrLinesearchFailure

@@ -54,7 +54,7 @@ func (l *LBFGS) Iterate(loc *Location, xNext []float64) (EvaluationType, Iterati
 	return l.linesearch.Iterate(loc, xNext)
 }
 
-func (l *LBFGS) InitDirection(loc *Location, direction []float64) (stepSize float64) {
+func (l *LBFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	dim := len(loc.X)
 	l.dim = dim
 
@@ -97,26 +97,26 @@ func (l *LBFGS) InitDirection(loc *Location, direction []float64) (stepSize floa
 		}
 	}
 
-	copy(direction, loc.Gradient)
-	floats.Scale(-1, direction)
+	copy(dir, loc.Gradient)
+	floats.Scale(-1, dir)
 
-	return 1 / floats.Norm(direction, 2)
+	return 1 / floats.Norm(dir, 2)
 }
 
-func (l *LBFGS) NextDirection(loc *Location, direction []float64) (stepSize float64) {
+func (l *LBFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	if len(loc.X) != l.dim {
 		panic("lbfgs: unexpected size mismatch")
 	}
 	if len(loc.Gradient) != l.dim {
 		panic("lbfgs: unexpected size mismatch")
 	}
-	if len(direction) != l.dim {
+	if len(dir) != l.dim {
 		panic("lbfgs: unexpected size mismatch")
 	}
 
 	// Update direction. Uses two-loop correction as described in
 	// Nocedal, Wright (2006), Numerical Optimization (2nd ed.). Chapter 7, page 178.
-	copy(direction, loc.Gradient)
+	copy(dir, loc.Gradient)
 	floats.SubTo(l.y, loc.Gradient, l.grad)
 	floats.SubTo(l.s, loc.X, l.x)
 	copy(l.sHist[l.oldest], l.s)
@@ -138,23 +138,23 @@ func (l *LBFGS) NextDirection(loc *Location, direction []float64) (stepSize floa
 		if idx < 0 {
 			idx += l.Store
 		}
-		l.a[idx] = l.rhoHist[idx] * floats.Dot(l.sHist[idx], direction)
-		floats.AddScaled(direction, -l.a[idx], l.yHist[idx])
+		l.a[idx] = l.rhoHist[idx] * floats.Dot(l.sHist[idx], dir)
+		floats.AddScaled(dir, -l.a[idx], l.yHist[idx])
 	}
 
 	// Scale the initial Hessian.
 	gamma := sDotY / floats.Dot(l.y, l.y)
-	floats.Scale(gamma, direction)
+	floats.Scale(gamma, dir)
 
 	for i := 0; i < l.Store; i++ {
 		idx := i + l.oldest
 		if idx >= l.Store {
 			idx -= l.Store
 		}
-		beta := l.rhoHist[idx] * floats.Dot(l.yHist[idx], direction)
-		floats.AddScaled(direction, l.a[idx]-beta, l.sHist[idx])
+		beta := l.rhoHist[idx] * floats.Dot(l.yHist[idx], dir)
+		floats.AddScaled(dir, l.a[idx]-beta, l.sHist[idx])
 	}
-	floats.Scale(-1, direction)
+	floats.Scale(-1, dir)
 
 	return 1
 }

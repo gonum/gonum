@@ -13,13 +13,13 @@ type Function interface {
 // Gradient evaluates the gradient at x and stores the result in place. Df
 // must not modify x.
 type Gradient interface {
-	Df(x []float64, grad []float64)
+	Df(x, grad []float64)
 }
 
 // FunctionGradient evaluates both the derivative and the function at x, storing
 // the gradient in place. FDf must not modify x.
 type FunctionGradient interface {
-	FDf(x []float64, grad []float64) (obj float64)
+	FDf(x, grad []float64) (obj float64)
 }
 
 // LinesearchMethod is a type that can perform a line search. Typically, these
@@ -29,16 +29,16 @@ type LinesearchMethod interface {
 	// Init initializes the linesearch method. LinesearchLocation contains the
 	// function information at step == 0, and step contains the first step length
 	// as specified by the NextDirectioner.
-	Init(init LinesearchLocation, step float64, f *FunctionInfo) EvaluationType
+	Init(loc LinesearchLocation, step float64, f *FunctionInfo) EvaluationType
 
 	// Finished takes in the function result at the most recent linesearch location,
 	// and returns true if the line search has been concluded.
-	Finished(l LinesearchLocation) bool
+	Finished(loc LinesearchLocation) bool
 
 	// Iterate takes in the function results
 	// from evaluating the function at the previous step, and returns the
 	// next step size and EvaluationType to evaluate.
-	Iterate(l LinesearchLocation) (nextStep float64, e EvaluationType, err error)
+	Iterate(loc LinesearchLocation) (step float64, e EvaluationType, err error)
 }
 
 // NextDirectioner implements a strategy for computing a new line search direction
@@ -48,29 +48,29 @@ type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,
 	// putting the initial direction in place into dir, and returning the initial
 	// step size. InitDirection must not modify Location.
-	InitDirection(l *Location, dir []float64) (stepSize float64)
+	InitDirection(loc *Location, dir []float64) (step float64)
 
 	// NextDirection updates the search direction and step size. Location is
 	// the location seen at the conclusion of the most recent linesearch. The
-	// next search direction is put in place into dir, and the next stepsize
+	// next search direction is put in place into dir, and the next step size
 	// is returned. NextDirection must not modify Location.
-	NextDirection(l *Location, dir []float64) (stepSize float64)
+	NextDirection(loc *Location, dir []float64) (step float64)
 }
 
 // A Method can optimize an objective function.
 type Method interface {
 	// Initializes the method and returns the first location to evaluate
-	Init(l *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error)
+	Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error)
 
 	// Stores the next location to evaluate in xNext
-	Iterate(l *Location, xNext []float64) (EvaluationType, IterationType, error)
+	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
 }
 
 // StepSizer can set the next step size of the optimization given the last Location.
 // Returned step size must be positive.
 type StepSizer interface {
-	Init(l *Location, dir []float64) float64
-	StepSize(l *Location, dir []float64) float64
+	Init(loc *Location, dir []float64) float64
+	StepSize(loc *Location, dir []float64) float64
 }
 
 // Statuser returns the status of the Function being optimized. This can be used

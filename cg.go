@@ -131,29 +131,29 @@ func (cg *CG) Iterate(loc *Location, xNext []float64) (EvaluationType, Iteration
 	return cg.linesearch.Iterate(loc, xNext)
 }
 
-func (cg *CG) InitDirection(loc *Location, direction []float64) (stepSize float64) {
+func (cg *CG) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	dim := len(loc.X)
 
 	cg.restartAfter = int(math.Ceil(cg.IterationRestartFactor * float64(dim)))
 	cg.iterFromRestart = 0
 
 	// The initial direction is always the negative gradient.
-	copy(direction, loc.Gradient)
-	floats.Scale(-1, direction)
+	copy(dir, loc.Gradient)
+	floats.Scale(-1, dir)
 
 	cg.dirPrev = resize(cg.dirPrev, dim)
-	copy(cg.dirPrev, direction)
+	copy(cg.dirPrev, dir)
 	cg.gradPrev = resize(cg.gradPrev, dim)
 	copy(cg.gradPrev, loc.Gradient)
 	cg.gradPrevNorm = floats.Norm(loc.Gradient, 2)
 
 	cg.Variant.Init(loc)
-	return cg.InitialStep.Init(loc, direction)
+	return cg.InitialStep.Init(loc, dir)
 }
 
-func (cg *CG) NextDirection(loc *Location, direction []float64) (stepSize float64) {
-	copy(direction, loc.Gradient)
-	floats.Scale(-1, direction)
+func (cg *CG) NextDirection(loc *Location, dir []float64) (stepSize float64) {
+	copy(dir, loc.Gradient)
+	floats.Scale(-1, dir)
 
 	cg.iterFromRestart++
 	var restart bool
@@ -181,7 +181,7 @@ func (cg *CG) NextDirection(loc *Location, direction []float64) (stepSize float6
 	}
 	if !restart {
 		// The method is not being restarted, so update the descent direction.
-		floats.AddScaled(direction, beta, cg.dirPrev)
+		floats.AddScaled(dir, beta, cg.dirPrev)
 	} else {
 		// Otherwise reset to 0 the counter of iterations taken since the last
 		// restart.
@@ -190,7 +190,7 @@ func (cg *CG) NextDirection(loc *Location, direction []float64) (stepSize float6
 
 	// Get the initial line search step size from the StepSizer, even if the
 	// method was restarted, because StepSizers need to see every iteration.
-	stepSize = cg.InitialStep.StepSize(loc, direction)
+	stepSize = cg.InitialStep.StepSize(loc, dir)
 	if restart {
 		// The method was restarted and since the steepest descent direction is
 		// not related to the previous direction, discard the estimated step
@@ -199,7 +199,7 @@ func (cg *CG) NextDirection(loc *Location, direction []float64) (stepSize float6
 	}
 
 	copy(cg.gradPrev, loc.Gradient)
-	copy(cg.dirPrev, direction)
+	copy(cg.dirPrev, dir)
 	cg.gradPrevNorm = gNorm
 	return stepSize
 }
@@ -215,7 +215,7 @@ func (fr *FletcherReeves) Init(loc *Location) {
 	fr.prevNorm = floats.Norm(loc.Gradient, 2)
 }
 
-func (fr *FletcherReeves) Beta(grad, gradPrev, dirPrev []float64) (beta float64) {
+func (fr *FletcherReeves) Beta(grad, _, _ []float64) (beta float64) {
 	norm := floats.Norm(grad, 2)
 	beta = (norm / fr.prevNorm) * (norm / fr.prevNorm)
 	fr.prevNorm = norm
@@ -234,7 +234,7 @@ func (pr *PolakRibierePolyak) Init(loc *Location) {
 	pr.prevNorm = floats.Norm(loc.Gradient, 2)
 }
 
-func (pr *PolakRibierePolyak) Beta(grad, gradPrev, dirPrev []float64) (beta float64) {
+func (pr *PolakRibierePolyak) Beta(grad, gradPrev, _ []float64) (beta float64) {
 	norm := floats.Norm(grad, 2)
 	dot := floats.Dot(grad, gradPrev)
 	beta = (norm*norm - dot) / (pr.prevNorm * pr.prevNorm)

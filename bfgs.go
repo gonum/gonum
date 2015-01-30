@@ -27,9 +27,8 @@ type BFGS struct {
 	dim  int
 
 	// Temporary memory
-	direction []float64
-	y         []float64
-	s         []float64
+	y []float64
+	s []float64
 
 	invHess *mat64.Dense // TODO: Make symmetric when mat64 has symmetric matrices
 
@@ -39,7 +38,7 @@ type BFGS struct {
 // NOTE: This method exists so that it's easier to use a bfgs algorithm because
 // it implements Method
 
-func (b *BFGS) Init(l *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (b *BFGS) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if b.LinesearchMethod == nil {
 		b.LinesearchMethod = &Bisection{}
 	}
@@ -49,21 +48,21 @@ func (b *BFGS) Init(l *Location, f *FunctionInfo, xNext []float64) (EvaluationTy
 	b.linesearch.Method = b.LinesearchMethod
 	b.linesearch.NextDirectioner = b
 
-	return b.linesearch.Init(l, f, xNext)
+	return b.linesearch.Init(loc, f, xNext)
 }
 
-func (b *BFGS) Iterate(l *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	return b.linesearch.Iterate(l, xNext)
+func (b *BFGS) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+	return b.linesearch.Iterate(loc, xNext)
 }
 
-func (b *BFGS) InitDirection(l *Location, dir []float64) (stepSize float64) {
-	dim := len(l.X)
+func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
+	dim := len(loc.X)
 	b.dim = dim
 
 	b.x = resize(b.x, dim)
-	copy(b.x, l.X)
+	copy(b.x, loc.X)
 	b.grad = resize(b.grad, dim)
-	copy(b.grad, l.Gradient)
+	copy(b.grad, loc.Gradient)
 
 	b.y = resize(b.y, dim)
 	b.s = resize(b.s, dim)
@@ -77,7 +76,7 @@ func (b *BFGS) InitDirection(l *Location, dir []float64) (stepSize float64) {
 	// The values of the hessian are initialized in the first call to NextDirection
 
 	// initial direcion is just negative of gradient because the hessian is 1
-	copy(dir, l.Gradient)
+	copy(dir, loc.Gradient)
 	floats.Scale(-1, dir)
 
 	b.first = true
@@ -85,24 +84,24 @@ func (b *BFGS) InitDirection(l *Location, dir []float64) (stepSize float64) {
 	return 1 / floats.Norm(dir, 2)
 }
 
-func (b *BFGS) NextDirection(l *Location, direction []float64) (stepSize float64) {
-	if len(l.X) != b.dim {
+func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
+	if len(loc.X) != b.dim {
 		panic("bfgs: unexpected size mismatch")
 	}
-	if len(l.Gradient) != b.dim {
+	if len(loc.Gradient) != b.dim {
 		panic("bfgs: unexpected size mismatch")
 	}
-	if len(direction) != b.dim {
+	if len(dir) != b.dim {
 		panic("bfgs: unexpected size mismatch")
 	}
 
 	// Compute the gradient difference in the last step
 	// y = g_{k+1} - g_{k}
-	floats.SubTo(b.y, l.Gradient, b.grad)
+	floats.SubTo(b.y, loc.Gradient, b.grad)
 
 	// Compute the step difference
 	// s = x_{k+1} - x_{k}
-	floats.SubTo(b.s, l.X, b.x)
+	floats.SubTo(b.s, loc.X, b.x)
 
 	sDotY := floats.Dot(b.s, b.y)
 	sDotYSquared := sDotY * sDotY
@@ -112,8 +111,8 @@ func (b *BFGS) NextDirection(l *Location, direction []float64) (stepSize float64
 		// From: Numerical optimization, Nocedal and Wright, Page 143, Eq. 6.20 (second edition).
 		yDotY := floats.Dot(b.y, b.y)
 		scale := sDotY / yDotY
-		for i := 0; i < len(l.X); i++ {
-			for j := 0; j < len(l.X); j++ {
+		for i := 0; i < len(loc.X); i++ {
+			for j := 0; j < len(loc.X); j++ {
 				if i == j {
 					b.invHess.Set(i, i, scale)
 				} else {
@@ -161,14 +160,14 @@ func (b *BFGS) NextDirection(l *Location, direction []float64) (stepSize float64
 	b.invHess.RankOne(b.invHess, firstTermConst, b.s, b.s)
 
 	// update the bfgs stored data to the new iteration
-	copy(b.x, l.X)
-	copy(b.grad, l.Gradient)
+	copy(b.x, loc.X)
+	copy(b.grad, loc.Gradient)
 
 	// Compute the new search direction
-	dirmat := mat64.NewDense(b.dim, 1, direction)
-	gradmat := mat64.NewDense(b.dim, 1, l.Gradient)
+	dirmat := mat64.NewDense(b.dim, 1, dir)
+	gradmat := mat64.NewDense(b.dim, 1, loc.Gradient)
 
 	dirmat.Mul(b.invHess, gradmat) // new direction stored in place
-	floats.Scale(-1, direction)
+	floats.Scale(-1, dir)
 	return 1
 }

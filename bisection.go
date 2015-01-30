@@ -26,11 +26,11 @@ type Bisection struct {
 	maxGrad  float64
 }
 
-func (b *Bisection) Init(initLoc LinesearchLocation, initStepSize float64, f *FunctionInfo) EvaluationType {
-	if initLoc.Derivative >= 0 {
+func (b *Bisection) Init(loc LinesearchLocation, step float64, _ *FunctionInfo) EvaluationType {
+	if loc.Derivative >= 0 {
 		panic("bisection: init G non-negative")
 	}
-	if initStepSize <= 0 {
+	if step <= 0 {
 		panic("bisection: bad step size")
 	}
 
@@ -43,26 +43,26 @@ func (b *Bisection) Init(initLoc LinesearchLocation, initStepSize float64, f *Fu
 
 	b.minStep = 0
 	b.maxStep = math.Inf(1)
-	b.currStep = initStepSize
+	b.currStep = step
 
-	b.initF = initLoc.F
-	b.minF = initLoc.F
+	b.initF = loc.F
+	b.minF = loc.F
 	b.maxF = math.NaN()
 
-	b.initGrad = initLoc.Derivative
-	b.minGrad = initLoc.Derivative
+	b.initGrad = loc.Derivative
+	b.minGrad = loc.Derivative
 	b.maxGrad = math.NaN()
 
 	return FunctionAndGradientEval
 }
 
-func (b *Bisection) Finished(l LinesearchLocation) bool {
-	return StrongWolfeConditionsMet(l.F, l.Derivative, b.initF, b.initGrad, b.currStep, 0, b.GradConst)
+func (b *Bisection) Finished(loc LinesearchLocation) bool {
+	return StrongWolfeConditionsMet(loc.F, loc.Derivative, b.initF, b.initGrad, b.currStep, 0, b.GradConst)
 }
 
-func (b *Bisection) Iterate(l LinesearchLocation) (float64, EvaluationType, error) {
-	f := l.F
-	g := l.Derivative
+func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, error) {
+	f := loc.F
+	g := loc.Derivative
 	// Deciding on the next step size
 	if math.IsInf(b.maxStep, 1) {
 		// Have not yet bounded the minimum

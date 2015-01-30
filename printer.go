@@ -55,7 +55,7 @@ func (p *Printer) Init(f *FunctionInfo) error {
 	return nil
 }
 
-func (p *Printer) Record(l *Location, eval EvaluationType, iter IterationType, stats *Stats) error {
+func (p *Printer) Record(loc *Location, _ EvaluationType, iter IterationType, stats *Stats) error {
 	// Only print on major and initial iterations, or if the iteration is over.
 	if iter != MajorIteration && iter != InitIteration && iter != PostIteration {
 		return nil
@@ -72,9 +72,9 @@ func (p *Printer) Record(l *Location, eval EvaluationType, iter IterationType, s
 	var valueStrings [nPrinterOut]string
 	valueStrings[0] = strconv.Itoa(stats.MajorIterations)
 	valueStrings[1] = strconv.Itoa(stats.FunctionEvals + stats.FunctionGradientEvals)
-	valueStrings[2] = fmt.Sprintf("%g", l.F)
+	valueStrings[2] = fmt.Sprintf("%g", loc.F)
 	if p.printGrad {
-		norm := floats.Norm(l.Gradient, math.Inf(1))
+		norm := floats.Norm(loc.Gradient, math.Inf(1))
 		valueStrings[3] = fmt.Sprintf("%g", norm)
 	}
 

@@ -27,11 +27,11 @@ type ConstantStepSize struct {
 	Size float64
 }
 
-func (c ConstantStepSize) Init(l *Location, dir []float64) float64 {
+func (c ConstantStepSize) Init(_ *Location, _ []float64) float64 {
 	return c.Size
 }
 
-func (c ConstantStepSize) StepSize(l *Location, dir []float64) float64 {
+func (c ConstantStepSize) StepSize(_ *Location, _ []float64) float64 {
 	return c.Size
 }
 
@@ -64,7 +64,7 @@ type QuadraticStepSize struct {
 	xPrev        []float64
 }
 
-func (q *QuadraticStepSize) Init(l *Location, dir []float64) (stepSize float64) {
+func (q *QuadraticStepSize) Init(loc *Location, dir []float64) (stepSize float64) {
 	if q.Threshold == 0 {
 		q.Threshold = quadraticThreshold
 	}
@@ -81,27 +81,27 @@ func (q *QuadraticStepSize) Init(l *Location, dir []float64) (stepSize float64) 
 		panic("optimize: MinStepSize not smaller than MaxStepSize")
 	}
 
-	gNorm := floats.Norm(l.Gradient, math.Inf(1))
+	gNorm := floats.Norm(loc.Gradient, math.Inf(1))
 	stepSize = math.Max(q.MinStepSize, math.Min(q.InitialStepFactor/gNorm, q.MaxStepSize))
 
-	q.fPrev = l.F
+	q.fPrev = loc.F
 	q.dirPrevNorm = floats.Norm(dir, 2)
-	q.projGradPrev = floats.Dot(l.Gradient, dir)
-	q.xPrev = resize(q.xPrev, len(l.X))
-	copy(q.xPrev, l.X)
+	q.projGradPrev = floats.Dot(loc.Gradient, dir)
+	q.xPrev = resize(q.xPrev, len(loc.X))
+	copy(q.xPrev, loc.X)
 	return stepSize
 }
 
-func (q *QuadraticStepSize) StepSize(l *Location, dir []float64) (stepSize float64) {
-	stepSizePrev := floats.Distance(l.X, q.xPrev, 2) / q.dirPrevNorm
-	projGrad := floats.Dot(l.Gradient, dir)
+func (q *QuadraticStepSize) StepSize(loc *Location, dir []float64) (stepSize float64) {
+	stepSizePrev := floats.Distance(loc.X, q.xPrev, 2) / q.dirPrevNorm
+	projGrad := floats.Dot(loc.Gradient, dir)
 
 	stepSize = 2 * stepSizePrev
-	if !floats.EqualWithinRel(q.fPrev, l.F, q.Threshold) {
+	if !floats.EqualWithinRel(q.fPrev, loc.F, q.Threshold) {
 		// Two consecutive function values are not relatively equal, so
 		// computing the minimum of a quadratic interpolant might make sense
 
-		df := (l.F - q.fPrev) / stepSizePrev
+		df := (loc.F - q.fPrev) / stepSizePrev
 		quadTest := df - q.projGradPrev
 		if quadTest > 0 {
 			// There is a chance of approximating the function well by a
@@ -116,10 +116,10 @@ func (q *QuadraticStepSize) StepSize(l *Location, dir []float64) (stepSize float
 	// Bound the step size to lie in [MinStepSize, MaxStepSize]
 	stepSize = math.Max(q.MinStepSize, math.Min(stepSize, q.MaxStepSize))
 
-	q.fPrev = l.F
+	q.fPrev = loc.F
 	q.dirPrevNorm = floats.Norm(dir, 2)
 	q.projGradPrev = projGrad
-	copy(q.xPrev, l.X)
+	copy(q.xPrev, loc.X)
 	return stepSize
 }
 
@@ -147,7 +147,7 @@ type FirstOrderStepSize struct {
 	xPrev        []float64
 }
 
-func (fo *FirstOrderStepSize) Init(l *Location, dir []float64) (stepSize float64) {
+func (fo *FirstOrderStepSize) Init(loc *Location, dir []float64) (stepSize float64) {
 	if fo.InitialStepFactor == 0 {
 		fo.InitialStepFactor = initialStepFactor
 	}
@@ -161,25 +161,25 @@ func (fo *FirstOrderStepSize) Init(l *Location, dir []float64) (stepSize float64
 		panic("optimize: MinStepSize not smaller than MaxStepSize")
 	}
 
-	gNorm := floats.Norm(l.Gradient, math.Inf(1))
+	gNorm := floats.Norm(loc.Gradient, math.Inf(1))
 	stepSize = math.Max(fo.MinStepSize, math.Min(fo.InitialStepFactor/gNorm, fo.MaxStepSize))
 
 	fo.dirPrevNorm = floats.Norm(dir, 2)
-	fo.projGradPrev = floats.Dot(l.Gradient, dir)
-	fo.xPrev = resize(fo.xPrev, len(l.X))
-	copy(fo.xPrev, l.X)
+	fo.projGradPrev = floats.Dot(loc.Gradient, dir)
+	fo.xPrev = resize(fo.xPrev, len(loc.X))
+	copy(fo.xPrev, loc.X)
 	return stepSize
 }
 
-func (fo *FirstOrderStepSize) StepSize(l *Location, dir []float64) (stepSize float64) {
-	stepSizePrev := floats.Distance(l.X, fo.xPrev, 2) / fo.dirPrevNorm
-	projGrad := floats.Dot(l.Gradient, dir)
+func (fo *FirstOrderStepSize) StepSize(loc *Location, dir []float64) (stepSize float64) {
+	stepSizePrev := floats.Distance(loc.X, fo.xPrev, 2) / fo.dirPrevNorm
+	projGrad := floats.Dot(loc.Gradient, dir)
 
 	stepSize = stepSizePrev * fo.projGradPrev / projGrad
 	stepSize = math.Max(fo.MinStepSize, math.Min(stepSize, fo.MaxStepSize))
 
 	fo.dirPrevNorm = floats.Norm(dir, 2)
-	fo.projGradPrev = floats.Dot(l.Gradient, dir)
-	copy(fo.xPrev, l.X)
+	fo.projGradPrev = floats.Dot(loc.Gradient, dir)
+	copy(fo.xPrev, loc.X)
 	return stepSize
 }

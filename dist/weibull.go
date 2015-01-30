@@ -122,19 +122,6 @@ func (w Weibull) LogSurvival(x float64) float64 {
 	}
 }
 
-// MarshalParameters implements the ParameterMarshaler interface.
-func (w Weibull) MarshalParameters(p []Parameter) {
-	nParam := w.NumParameters()
-	if len(p) != nParam {
-		panic("weibull: improper parameter length")
-	}
-	p[0].Name = "K"
-	p[0].Value = w.K
-	p[1].Name = "λ"
-	p[1].Value = w.Lambda
-	return
-}
-
 // Mean returns the mean of the probability distribution.
 func (w Weibull) Mean() float64 {
 	return w.Lambda * math.Gamma(1+1/w.K)
@@ -212,10 +199,10 @@ func (w Weibull) Survival(x float64) float64 {
 	return math.Exp(w.LogSurvival(x))
 }
 
-// UnmarshalParameters implements the ParameterMarshaler interface.
-func (w *Weibull) UnmarshalParameters(p []Parameter) {
+// setParameters modifies the parameters of the distribution.
+func (w *Weibull) setParameters(p []Parameter) {
 	if len(p) != w.NumParameters() {
-		panic("weibull: incorrect number of parameters to set")
+		panic("normal: incorrect number of parameters to set")
 	}
 	if p[0].Name != "K" {
 		panic("weibull: " + panicNameMismatch)
@@ -230,4 +217,20 @@ func (w *Weibull) UnmarshalParameters(p []Parameter) {
 // Variance returns the variance of the probability distribution.
 func (w Weibull) Variance() float64 {
 	return math.Pow(w.Lambda, 2) * (math.Gamma(1+2/w.K) - w.gammaIPow(1, 2))
+}
+
+// parameters returns the parameters of the distribution.
+func (w Weibull) parameters(p []Parameter) []Parameter {
+	nParam := w.NumParameters()
+	if p == nil {
+		p = make([]Parameter, nParam)
+	} else if len(p) != nParam {
+		panic("weibull: improper parameter length")
+	}
+	p[0].Name = "K"
+	p[0].Value = w.K
+	p[1].Name = "λ"
+	p[1].Value = w.Lambda
+	return p
+
 }

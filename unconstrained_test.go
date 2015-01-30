@@ -990,6 +990,90 @@ var gradientDescentTests = []UnconstrainedTest{
 	},
 }
 
+var cgTests = []UnconstrainedTest{
+	{
+		f:      Rosenbrock{},
+		x:      []float64{-1200000, 1000000},
+		optVal: 0,
+		optLoc: []float64{1, 1},
+	},
+	{
+		f:       BiggsEXP6{},
+		x:       []float64{1, 2, 1, 1, 1, 1},
+		optVal:  0.005655649925,
+		gradTol: 1e-6,
+	},
+	{
+		f:       Gaussian{},
+		x:       []float64{0.4, 1, 0},
+		optVal:  1.12793e-8,
+		optLoc:  []float64{0.3989561, 1.0000191, 0},
+		gradTol: 1e-9,
+	},
+	generateVariablyDimensioned(1000, 1e-9),
+	generateVariablyDimensioned(10000, 1e-8),
+	{
+		f:       Watson{},
+		x:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		optVal:  0,
+		optLoc:  []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		gradTol: 1e-6,
+	},
+	{
+		f:       Penalty1{},
+		x:       []float64{1, 2, 3, 4},
+		optVal:  2.2499775e-5,
+		gradTol: 1e-10,
+	},
+	{
+		f:       Penalty1{},
+		x:       []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		optVal:  7.0876515e-5,
+		gradTol: 1e-8,
+	},
+	{
+		f:       Penalty2{},
+		x:       []float64{0.5, 0.5, 0.5, 0.5},
+		optVal:  9.37629e-6,
+		gradTol: 1e-6,
+	},
+	{
+		f:       Penalty2{},
+		x:       []float64{0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
+		optVal:  2.93660e-4,
+		gradTol: 1e-6,
+	},
+	{
+		f:       ExtendedPowell{},
+		x:       []float64{3, -1, 0, 1},
+		optVal:  0,
+		optLoc:  []float64{0, 0, 0, 0},
+		gradTol: 1e-6,
+	},
+	{
+		f:      Beale{},
+		x:      []float64{1, 1},
+		optVal: 0,
+		optLoc: []float64{3, 0.5},
+	},
+	{
+		f:      Wood{},
+		x:      []float64{-3, -1, -3, -1},
+		optVal: 0,
+		optLoc: []float64{1, 1, 1, 1},
+	},
+	{
+		f:      Trigonometric{},
+		x:      []float64{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
+		optVal: 0,
+		optLoc: []float64{
+			0.0429645656464827, 0.043976286943042, 0.0450933996565844, 0.0463389157816542, 0.0477443839560646,
+			0.0493547352444078, 0.0512373449259557, 0.195209463715277, 0.164977664720328, 0.0601485854398078,
+		},
+		gradTol: 1e-8,
+	},
+}
+
 var newtonTests = []UnconstrainedTest{
 	{
 		f:      Rosenbrock{},
@@ -1197,6 +1281,93 @@ func TestGradientDescentBacktracking(t *testing.T) {
 func TestGradientDescentBisection(t *testing.T) {
 	testMinimize(t, gradientDescentTests, &GradientDescent{
 		LinesearchMethod: &Bisection{},
+	})
+}
+
+func TestCG(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{})
+}
+
+func TestFletcherReevesQuadStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &FletcherReeves{},
+		InitialStep: &QuadraticStepSize{},
+	})
+}
+
+func TestFletcherReevesFirstOrderStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &FletcherReeves{},
+		InitialStep: &FirstOrderStepSize{},
+	})
+}
+
+func TestHestenesStiefelQuadStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &HestenesStiefel{},
+		InitialStep: &QuadraticStepSize{},
+	})
+}
+
+func TestHestenesStiefelFirstOrderStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &HestenesStiefel{},
+		InitialStep: &FirstOrderStepSize{},
+	})
+}
+
+func TestPolakRibiereQuadStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &PolakRibierePolyak{},
+		InitialStep: &QuadraticStepSize{},
+	})
+}
+
+func TestPolakRibiereFirstOrderStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &PolakRibierePolyak{},
+		InitialStep: &FirstOrderStepSize{},
+	})
+}
+
+func TestHagerZhangQuadStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &HagerZhang{},
+		InitialStep: &QuadraticStepSize{},
+	})
+}
+
+func TestHagerZhangFirstOrderStep(t *testing.T) {
+	var tests []UnconstrainedTest
+	tests = append(tests, gradientDescentTests...)
+	tests = append(tests, cgTests...)
+	testMinimize(t, tests, &CG{
+		Variant:     &HagerZhang{},
+		InitialStep: &FirstOrderStepSize{},
 	})
 }
 

@@ -123,17 +123,6 @@ func (e Exponential) LogProb(x float64) float64 {
 	return math.Log(e.Rate) - e.Rate*x
 }
 
-// MarshalParameters implements the ParameterMarshaler interface
-func (e Exponential) MarshalParameters(p []Parameter) {
-	nParam := e.NumParameters()
-	if len(p) != nParam {
-		panic("exponential: improper parameter length")
-	}
-	p[0].Name = "Rate"
-	p[0].Value = e.Rate
-	return
-}
-
 // Mean returns the mean of the probability distribution.
 func (e Exponential) Mean() float64 {
 	return 1 / e.Rate
@@ -229,8 +218,8 @@ func (e Exponential) Survival(x float64) float64 {
 	return math.Exp(-e.Rate * x)
 }
 
-// UnmarshalParameters implements the ParameterMarshaler interface
-func (e *Exponential) UnmarshalParameters(p []Parameter) {
+// setParameters modifies the parameters of the distribution.
+func (e *Exponential) setParameters(p []Parameter) {
 	if len(p) != e.NumParameters() {
 		panic("exponential: incorrect number of parameters to set")
 	}
@@ -243,4 +232,17 @@ func (e *Exponential) UnmarshalParameters(p []Parameter) {
 // Variance returns the variance of the probability distribution.
 func (e Exponential) Variance() float64 {
 	return 1 / (e.Rate * e.Rate)
+}
+
+// parameters returns the parameters of the distribution.
+func (e Exponential) parameters(p []Parameter) []Parameter {
+	nParam := e.NumParameters()
+	if p == nil {
+		p = make([]Parameter, nParam)
+	} else if len(p) != nParam {
+		panic("exponential: improper parameter length")
+	}
+	p[0].Name = "Rate"
+	p[0].Value = e.Rate
+	return p
 }

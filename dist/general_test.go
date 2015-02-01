@@ -7,10 +7,7 @@ package dist
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"testing"
-
-	"github.com/gonum/floats"
 )
 
 type univariateProbPoint struct {
@@ -64,116 +61,89 @@ func testDistributionProbs(t *testing.T, dist UniProbDist, name string, pts []un
 }
 
 type ConjugateUpdater interface {
-	MarshalParameters([]Parameter)
-	UnmarshalParameters([]Parameter)
-	Rand() float64
 	NumParameters() int
+	parameters([]Parameter) []Parameter
+
+	NumSuffStat() int
 	SuffStat([]float64, []float64, []float64) float64
 	ConjugateUpdate([]float64, float64, []float64)
-	NumSuffStat() int
+
+	Rand() float64
 }
 
-func testConjugateUpdate(t *testing.T, dist ConjugateUpdater, newFittable func() ConjugateUpdater) {
-	samps := make([]float64, 10)
-	for i := range samps {
-		samps[i] = dist.Rand()
+func testConjugateUpdate(t *testing.T, newFittable func() ConjugateUpdater) {
+	for i, test := range []struct {
+		samps   []float64
+		weights []float64
+	}{
+		{
+			samps:   randn(newFittable(), 10),
+			weights: nil,
+		},
+		{
+			samps:   randn(newFittable(), 10),
+			weights: ones(10),
+		},
+		{
+			samps:   randn(newFittable(), 10),
+			weights: randn(&Exponential{Rate: 1}, 10),
+		},
+	} {
+		// ensure that conjugate produces the same result both incrementally and all at once
+		incDist := newFittable()
+		stats := make([]float64, incDist.NumSuffStat())
+		prior := make([]float64, incDist.NumParameters())
+		for j := range test.samps {
+			var incWeights, allWeights []float64
+			if test.weights != nil {
+				incWeights = test.weights[j : j+1]
+				allWeights = test.weights[0 : j+1]
+			}
+			nsInc := incDist.SuffStat(test.samps[j:j+1], incWeights, stats)
+			incDist.ConjugateUpdate(stats, nsInc, prior)
+
+			allDist := newFittable()
+			nsAll := allDist.SuffStat(test.samps[0:j+1], allWeights, stats)
+			allDist.ConjugateUpdate(stats, nsAll, make([]float64, allDist.NumParameters()))
+			if !parametersEqual(incDist.parameters(nil), allDist.parameters(nil), 1e-14) {
+				t.Errorf("prior doesn't match after incremental update for (%d, %d). Incremental is %v, all at once is %v", i, j, incDist, allDist)
+			}
+
+			if test.weights == nil {
+				onesDist := newFittable()
+				nsOnes := onesDist.SuffStat(test.samps[0:j+1], ones(j+1), stats)
+				onesDist.ConjugateUpdate(stats, nsOnes, make([]float64, onesDist.NumParameters()))
+				if !parametersEqual(onesDist.parameters(nil), incDist.parameters(nil), 1e-14) {
+					t.Errorf("nil and uniform weighted prior doesn't match for incremental update for (%d, %d). Uniform weighted is %v, nil is %v", i, j, onesDist, incDist)
+				}
+				if !parametersEqual(onesDist.parameters(nil), allDist.parameters(nil), 1e-14) {
+					t.Errorf("nil and uniform weighted prior doesn't match for all at once update for (%d, %d). Uniform weighted is %v, nil is %v", i, j, onesDist, incDist)
+				}
+			}
+		}
 	}
-	nParams := dist.NumParameters()
-	nSuffStat := dist.NumSuffStat()
+}
 
-	stats2 := make([]float64, nSuffStat)
-	p2 := make([]Parameter, nParams)
-	w2 := make([]float64, nParams)
-	n2 := newFittable()
-	ns2 := n2.SuffStat(samps, nil, stats2)
-	n2.ConjugateUpdate(stats2, ns2, w2)
-	n2.MarshalParameters(p2)
+// rander can generate random samples from a given distribution
+type Rander interface {
+	Rand() float64
+}
 
-	n3 := newFittable()
-	p3 := make([]Parameter, nParams)
-	w3 := make([]float64, nParams)
-	stats3 := make([]float64, nSuffStat)
-	ns3 := n3.SuffStat(samps[:7], nil, stats3)
-	n3.ConjugateUpdate(stats3, ns3, w3)
-	n3.MarshalParameters(p3)
-
-	n4 := newFittable()
-	n4.UnmarshalParameters(p3)
-	p4 := make([]Parameter, nParams)
-	w4 := make([]float64, nParams)
-	stats4 := make([]float64, nSuffStat)
-	copy(w4, w3)
-	ns4 := n4.SuffStat(samps[7:], nil, stats4)
-	n4.ConjugateUpdate(stats4, ns4, w4)
-	n4.MarshalParameters(p4)
-
-	if !parametersEqual(p2, p4, 1e-14) {
-		t.Errorf("prior doesn't match after two step update. First is %v, second is %v", p2, p4)
+// randn generates a specified number of random samples
+func randn(dist Rander, n int) []float64 {
+	x := make([]float64, n)
+	for i := range x {
+		x[i] = dist.Rand()
 	}
-	if !floats.EqualApprox(w2, w4, 1e-14) {
-		t.Errorf("prior weight doesn't match after two step update. First is %v, second is %v", w2, w4)
+	return x
+}
+
+func ones(n int) []float64 {
+	x := make([]float64, n)
+	for i := range x {
+		x[i] = 1
 	}
-
-	// Try with weights = 1
-	ones := make([]float64, len(samps))
-	for i := range ones {
-		ones[i] = 1
-	}
-
-	n5 := newFittable()
-
-	p5 := make([]Parameter, nParams)
-	w5 := make([]float64, nParams)
-	stats5 := make([]float64, nSuffStat)
-	ns5 := n5.SuffStat(samps, ones, stats5)
-	n5.ConjugateUpdate(stats5, ns5, w5)
-	n5.MarshalParameters(p5)
-
-	if !parametersEqual(p2, p5, 1e-14) {
-		t.Errorf("prior doesn't match after unitary weights. First is %v, second is %v", p2, p5)
-	}
-	if !floats.EqualApprox(w2, w5, 1e-14) {
-		t.Errorf("prior weight doesn't match unitary weights. First is %v, second is %v", w2, w5)
-	}
-
-	// Lastly, make sure it's okay with a bunch of random weights
-	weights := make([]float64, len(samps))
-	for i := range weights {
-		weights[i] = rand.Float64()
-	}
-
-	p6 := make([]Parameter, nParams)
-	w6 := make([]float64, nParams)
-	n6 := newFittable()
-	stats6 := make([]float64, nSuffStat)
-	ns6 := n6.SuffStat(samps, weights, stats6)
-	n6.ConjugateUpdate(stats6, ns6, w6)
-	n6.MarshalParameters(p6)
-
-	p7 := make([]Parameter, nParams)
-	w7 := make([]float64, nParams)
-	n7 := newFittable()
-	stats7 := make([]float64, nSuffStat)
-	ns7 := n7.SuffStat(samps[:7], weights[:7], stats7)
-	n7.ConjugateUpdate(stats7, ns7, w7)
-	n7.MarshalParameters(p7)
-
-	p8 := make([]Parameter, nParams)
-	w8 := make([]float64, nParams)
-	n8 := newFittable()
-	n8.UnmarshalParameters(p7)
-	stats8 := make([]float64, nSuffStat)
-	ns8 := n7.SuffStat(samps[7:], weights[7:], stats8)
-	copy(w8, w7)
-	n8.ConjugateUpdate(stats8, ns8, w8)
-	n8.MarshalParameters(p8)
-
-	if !parametersEqual(p6, p8, 1e-14) {
-		t.Errorf("prior doesn't match after two step update. First is %v, second is %v", p6, p8)
-	}
-	if !floats.EqualApprox(w6, w8, 1e-14) {
-		t.Errorf("prior weight doesn't match after two step update. First is %v, second is %v", w6, w8)
-	}
+	return x
 }
 
 func parametersEqual(p1, p2 []Parameter, tol float64) bool {

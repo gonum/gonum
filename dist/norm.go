@@ -111,19 +111,6 @@ func (n Normal) LogProb(x float64) float64 {
 	return negLogRoot2Pi - math.Log(n.Sigma) - (x-n.Mu)*(x-n.Mu)/(2*n.Sigma*n.Sigma)
 }
 
-// MarshalParameters implements the ParameterMarshaler interface
-func (n Normal) MarshalParameters(p []Parameter) {
-	nParam := n.NumParameters()
-	if len(p) != nParam {
-		panic("normal: improper parameter length")
-	}
-	p[0].Name = "Mu"
-	p[0].Value = n.Mu
-	p[1].Name = "Sigma"
-	p[1].Value = n.Sigma
-	return
-}
-
 // Mean returns the mean of the probability distribution.
 func (n Normal) Mean() float64 {
 	return n.Mu
@@ -220,8 +207,8 @@ func (n Normal) Survival(x float64) float64 {
 	return 0.5 * (1 - math.Erf((x-n.Mu)/(n.Sigma*math.Sqrt2)))
 }
 
-// UnmarshalParameters implements the ParameterMarshaler interface
-func (n *Normal) UnmarshalParameters(p []Parameter) {
+// setParameters modifies the parameters of the distribution.
+func (n *Normal) setParameters(p []Parameter) {
 	if len(p) != n.NumParameters() {
 		panic("normal: incorrect number of parameters to set")
 	}
@@ -346,4 +333,19 @@ func zQuantile(p float64) float64 {
 		return -x
 	}
 	return x
+}
+
+// parameters returns the parameters of the distribution.
+func (n Normal) parameters(p []Parameter) []Parameter {
+	nParam := n.NumParameters()
+	if p == nil {
+		p = make([]Parameter, nParam)
+	} else if len(p) != nParam {
+		panic("normal: improper parameter length")
+	}
+	p[0].Name = "Mu"
+	p[0].Value = n.Mu
+	p[1].Name = "Sigma"
+	p[1].Value = n.Sigma
+	return p
 }

@@ -5,7 +5,7 @@ env:
   - secure: "gewG9b13l2/JJkag584f/e7vbH+CN5sE/v5IxJLI24vVBsta0L/rUiRN5e/NRXiyNDT4X2XV6R6BLED8VaUo3vDSWHBFtRAuwbMswxRcjDuIGph53zTNukhEwbFThEhZO5vO9T1tECXK1D8ktgQjmqwQ171InUy2loLFWloUTF4="  # at some point, when testing on osx
   matrix:
   - BLAS_LIB=OpenBLAS && GOARCH=amd64
-  - BLAS_LIB=native && GOCROSS=386 && GO386=387 # GOCROSS will be renamed GOARCH to avoid gvm (?) from fiddling with it
+  #- BLAS_LIB=native && GOCROSS=386 && GO386=387 # GOCROSS will be renamed GOARCH to avoid gvm (?) from fiddling with it
   # at some point, when travis allows builds on darwin
   #- BLAS_LIB=Accellerate
   # at some point, when the issue with drotgm is resolved

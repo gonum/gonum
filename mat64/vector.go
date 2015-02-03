@@ -144,21 +144,22 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 		}
 	}
 
-	if a, ok := a.(RawMatrixer); ok {
+	switch a := a.(type) {
+	case RawSymmetricer:
+		amat := a.RawSymmetric()
+		blas64.Symv(1, amat, b.mat, 0, w.mat)
+		*m = w
+		return
+	case RawMatrixer:
 		amat := a.RawMatrix()
 		t := blas.NoTrans
 		if trans {
 			t = blas.Trans
 		}
-		blas64.Gemv(t,
-			1, amat, b.mat,
-			0, w.mat,
-		)
+		blas64.Gemv(t, 1, amat, b.mat, 0, w.mat)
 		*m = w
 		return
-	}
-
-	if a, ok := a.(Vectorer); ok {
+	case Vectorer:
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
 			w.mat.Data[r*m.mat.Inc] = blas64.Dot(ac,
@@ -168,18 +169,19 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 		}
 		*m = w
 		return
-	}
-
-	row := make([]float64, ac)
-	for r := 0; r < ar; r++ {
-		for i := range row {
-			row[i] = a.At(r, i)
+	default:
+		row := make([]float64, ac)
+		for r := 0; r < ar; r++ {
+			for i := range row {
+				row[i] = a.At(r, i)
+			}
+			var v float64
+			for i, e := range row {
+				v += e * b.mat.Data[i*b.mat.Inc]
+			}
+			w.mat.Data[r*m.mat.Inc] = v
 		}
-		var v float64
-		for i, e := range row {
-			v += e * b.mat.Data[i*b.mat.Inc]
-		}
-		w.mat.Data[r*m.mat.Inc] = v
+		*m = w
+		return
 	}
-	*m = w
 }

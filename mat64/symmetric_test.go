@@ -76,6 +76,51 @@ func (s *S) TestSymAtSet(c *check.C) {
 	c.Check(t.At(1, 2), check.Equals, 12.0)
 }
 
+func (s *S) TestSymAdd(c *check.C) {
+	for _, test := range []struct {
+		n int
+	}{
+		{n: 1},
+		{n: 2},
+		{n: 3},
+		{n: 4},
+		{n: 5},
+		{n: 10},
+	} {
+		n := test.n
+		a := NewSymDense(n, nil)
+		for i := range a.mat.Data {
+			a.mat.Data[i] = rand.Float64()
+		}
+		b := NewSymDense(n, nil)
+		for i := range a.mat.Data {
+			b.mat.Data[i] = rand.Float64()
+		}
+		var m Dense
+		m.Add(a, b)
+
+		// Check with new receiver
+		var s SymDense
+		s.AddSym(a, b)
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				v := m.At(i, j)
+				c.Check(s.At(i, j), check.Equals, v)
+			}
+		}
+
+		// Check with equal receiver
+		s.CopySym(a)
+		s.AddSym(&s, b)
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				v := m.At(i, j)
+				c.Check(s.At(i, j), check.Equals, v)
+			}
+		}
+	}
+}
+
 func (s *S) TestCopy(c *check.C) {
 	for _, test := range []struct {
 		n int

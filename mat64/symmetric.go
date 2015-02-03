@@ -75,6 +75,44 @@ func (s *SymDense) isZero() bool {
 	return s.mat.N == 0
 }
 
+func (s *SymDense) AddSym(a, b Symmetric) {
+	n := a.Symmetric()
+	if n != b.Symmetric() {
+		panic(ErrShape)
+	}
+	if s.isZero() {
+		s.mat = blas64.Symmetric{
+			N:      n,
+			Stride: n,
+			Data:   use(s.mat.Data, n*n),
+			Uplo:   blas.Upper,
+		}
+	} else if s.mat.N != n {
+		panic(ErrShape)
+	}
+
+	if a, ok := a.(RawSymmmetricer); ok {
+		if b, ok := b.(RawSymmmetricer); ok {
+			amat, bmat := a.RawSymmetric(), b.RawSymmetric()
+			for i := 0; i < n; i++ {
+				btmp := bmat.Data[i*bmat.Stride+i : i*bmat.Stride+n]
+				stmp := s.mat.Data[i*s.mat.Stride+i : i*s.mat.Stride+n]
+				for j, v := range amat.Data[i*amat.Stride+i : i*amat.Stride+n] {
+					stmp[j] = v + btmp[j]
+				}
+			}
+			return
+		}
+	}
+
+	for i := 0; i < n; i++ {
+		stmp := s.mat.Data[i*s.mat.Stride : i*s.mat.Stride+n]
+		for j := i; j < n; j++ {
+			stmp[j] = a.At(i, j) + b.At(i, j)
+		}
+	}
+}
+
 func (s *SymDense) CopySym(a Symmetric) int {
 	n := a.Symmetric()
 	n = min(n, s.mat.N)

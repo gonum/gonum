@@ -8,9 +8,9 @@ import (
 var (
 	symDense *SymDense
 
-	_ Matrix          = symDense
-	_ Symmetric       = symDense
-	_ RawSymmmetricer = symDense
+	_ Matrix         = symDense
+	_ Symmetric      = symDense
+	_ RawSymmetricer = symDense
 )
 
 const (
@@ -31,7 +31,7 @@ type Symmetric interface {
 }
 
 // A RawSymmetricer can return a view of itself as a BLAS Symmetric matrix.
-type RawSymmmetricer interface {
+type RawSymmetricer interface {
 	RawSymmetric() blas64.Symmetric
 }
 
@@ -91,8 +91,8 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 		panic(ErrShape)
 	}
 
-	if a, ok := a.(RawSymmmetricer); ok {
-		if b, ok := b.(RawSymmmetricer); ok {
+	if a, ok := a.(RawSymmetricer); ok {
+		if b, ok := b.(RawSymmetricer); ok {
 			amat, bmat := a.RawSymmetric(), b.RawSymmetric()
 			for i := 0; i < n; i++ {
 				btmp := bmat.Data[i*bmat.Stride+i : i*bmat.Stride+n]
@@ -117,7 +117,7 @@ func (s *SymDense) CopySym(a Symmetric) int {
 	n := a.Symmetric()
 	n = min(n, s.mat.N)
 	switch a := a.(type) {
-	case RawSymmmetricer:
+	case RawSymmetricer:
 		amat := a.RawSymmetric()
 		if amat.Uplo != blas.Upper {
 			panic(ErrUplo)

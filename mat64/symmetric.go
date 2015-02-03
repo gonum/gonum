@@ -71,7 +71,7 @@ func (s *SymDense) RawSymmetric() blas64.Symmetric {
 	return s.mat
 }
 
-func (s *SymDense) IsZero() bool {
+func (s *SymDense) isZero() bool {
 	return s.mat.N == 0
 }
 
@@ -107,7 +107,7 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y []float64) {
 	if s == a {
 		w = *s
 	}
-	if w.IsZero() {
+	if w.isZero() {
 		w.mat = blas64.Symmetric{
 			N:      n,
 			Stride: n,

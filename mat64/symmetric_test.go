@@ -148,6 +148,56 @@ func (s *S) TestCopy(c *check.C) {
 	}
 }
 
+func (s *S) TestSymRankOne(c *check.C) {
+	for _, test := range []struct {
+		n int
+	}{
+		{n: 1},
+		{n: 2},
+		{n: 3},
+		{n: 4},
+		{n: 5},
+		{n: 10},
+	} {
+		n := test.n
+		alpha := 2.0
+		a := NewSymDense(n, nil)
+		for i := range a.mat.Data {
+			a.mat.Data[i] = rand.Float64()
+		}
+		x := make([]float64, n)
+		for i := range x {
+			x[i] = rand.Float64()
+		}
+
+		xMat := NewDense(n, 1, x)
+		var m Dense
+		m.MulTrans(xMat, false, xMat, true)
+		m.Scale(alpha, &m)
+		m.Add(&m, a)
+
+		// Check with new receiver
+		s := NewSymDense(n, nil)
+		s.SymRankOne(a, alpha, x)
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				v := m.At(i, j)
+				c.Check(s.At(i, j), check.Equals, v)
+			}
+		}
+
+		// Check with reused receiver
+		copy(s.mat.Data, a.mat.Data)
+		s.SymRankOne(s, alpha, x)
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				v := m.At(i, j)
+				c.Check(s.At(i, j), check.Equals, v)
+			}
+		}
+	}
+}
+
 func (s *S) TestRankTwo(c *check.C) {
 	for _, test := range []struct {
 		n int

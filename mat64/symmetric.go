@@ -136,6 +136,36 @@ func (s *SymDense) CopySym(a Symmetric) int {
 	return n
 }
 
+// SymRankOne performs a symetric rank-one update to the matrix a and stores
+// the result in the receiver
+//  s = a + alpha * x * x'
+func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x []float64) {
+	n := s.mat.N
+	var w SymDense
+	if s == a {
+		w = *s
+	}
+	if w.isZero() {
+		w.mat = blas64.Symmetric{
+			N:      n,
+			Stride: n,
+			Uplo:   blas.Upper,
+			Data:   use(w.mat.Data, n*n),
+		}
+	} else if n != w.mat.N {
+		panic(ErrShape)
+	}
+	if s != a {
+		w.CopySym(a)
+	}
+	if len(x) != n {
+		panic(ErrShape)
+	}
+	blas64.Syr(alpha, blas64.Vector{Inc: 1, Data: x}, w.mat)
+	*s = w
+	return
+}
+
 // RankTwo performs a symmmetric rank-two update to the matrix a and stores
 // the result in the receiver
 //  m = a + alpha * (x * y' + y * x')

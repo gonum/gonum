@@ -35,7 +35,7 @@ func Inner(x []float64, A Matrix, y []float64) float64 {
 			}
 			yi := y[i]
 			if i != n-1 && yi != 0 {
-				sum += yi * asm.DdotInc(bmat.Data[(i+1)*bmat.Stride+i:], x[i+1:], uintptr(n-i), uintptr(bmat.Stride), 1, 0, 0)
+				sum += yi * asm.DdotUnitary(bmat.Data[i*bmat.Stride+i+1:i*bmat.Stride+n], x[i+1:])
 			}
 		}
 	case RawMatrixer:

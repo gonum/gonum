@@ -6,6 +6,7 @@ package mat64
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/gonum/blas/blas64"
@@ -94,6 +95,13 @@ func (s *S) TestInnerSym(c *check.C) {
 	m := NewDense(n, n, data)
 	ans := Inner(x, m, y)
 	sym := NewSymDense(n, data)
+	// scramble the lower half of data to ensure it is not used
+	for i := 1; i < n; i++ {
+		for j := 0; j < i; j++ {
+			data[i*n+j] = rand.Float64()
+		}
+	}
+
 	if math.Abs(Inner(x, sym, y)-ans) > 1e-14 {
 		c.Error("inner different symmetric and dense")
 	}

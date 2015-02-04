@@ -27,10 +27,13 @@ type BFGS struct {
 	dim  int
 
 	// Temporary memory
-	y []float64
-	s []float64
+	y       []float64
+	yVec    *mat64.Vector
+	s       []float64
+	tmpData []float64
+	tmpVec  *mat64.Vector
 
-	invHess *mat64.Dense // TODO: Make symmetric when mat64 has symmetric matrices
+	invHess *mat64.SymDense
 
 	first bool // Is it the first iteration (used to set the scale of the initial hessian)
 }
@@ -66,11 +69,14 @@ func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 
 	b.y = resize(b.y, dim)
 	b.s = resize(b.s, dim)
+	b.tmpData = resize(b.tmpData, dim)
+	b.yVec = mat64.NewVector(dim, b.y)
+	b.tmpVec = mat64.NewVector(dim, b.tmpData)
 
-	if b.invHess == nil || cap(b.invHess.RawMatrix().Data) < dim*dim {
-		b.invHess = mat64.NewDense(dim, dim, nil)
+	if b.invHess == nil || cap(b.invHess.RawSymmetric().Data) < dim*dim {
+		b.invHess = mat64.NewSymDense(dim, nil)
 	} else {
-		b.invHess = mat64.NewDense(dim, dim, b.invHess.RawMatrix().Data[:dim*dim])
+		b.invHess = mat64.NewSymDense(dim, b.invHess.RawSymmetric().Data[:dim*dim])
 	}
 
 	// The values of the hessian are initialized in the first call to NextDirection
@@ -114,9 +120,9 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		for i := 0; i < len(loc.X); i++ {
 			for j := 0; j < len(loc.X); j++ {
 				if i == j {
-					b.invHess.Set(i, i, scale)
+					b.invHess.SetSym(i, i, scale)
 				} else {
-					b.invHess.Set(i, j, 0)
+					b.invHess.SetSym(i, j, 0)
 				}
 			}
 		}
@@ -130,34 +136,16 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	//     (sk^T yk + yk^T B_k^-1 yk)(s_k sk_^T) / (sk^T yk)^2
 	// Third term is
 	//     B_k ^-1 y_k sk^T + s_k y_k^T B_k-1
-
-	// y_k^T B_k^-1 y_k is a scalar. Compute it.
+	//
+	// y_k^T B_k^-1 y_k is a scalar, and the third term is a rank-two update
+	// where B_k^-1 y_k is one vector and s_k is the other. Compute the update
+	// values then actually perform the rank updates.
 	yBy := mat64.Inner(b.y, b.invHess, b.y)
 	firstTermConst := (sDotY + yBy) / (sDotYSquared)
+	b.tmpVec.MulVec(b.invHess, false, b.yVec)
 
-	// Compute the third term.
-	// TODO: Replace this with Symmetric Rank 2 update (BLAS function)
-	// when there is a Go implementation and mat64 has a symmetric matrix.
-	yMat := mat64.NewDense(b.dim, 1, b.y)
-	yMatTrans := mat64.NewDense(1, b.dim, b.y)
-	sMat := mat64.NewDense(b.dim, 1, b.s)
-	sMatTrans := mat64.NewDense(1, b.dim, b.s)
-
-	var tmp mat64.Dense
-	tmp.Mul(b.invHess, yMat)
-	tmp.Mul(&tmp, sMatTrans)
-	tmp.Scale(-1/sDotY, &tmp)
-
-	var tmp2 mat64.Dense
-	tmp2.Mul(yMatTrans, b.invHess)
-	tmp2.Mul(sMat, &tmp2)
-	tmp2.Scale(-1/sDotY, &tmp2)
-
-	// Update b hessian
-	b.invHess.Add(b.invHess, &tmp)
-	b.invHess.Add(b.invHess, &tmp2)
-
-	b.invHess.RankOne(b.invHess, firstTermConst, b.s, b.s)
+	b.invHess.RankTwo(b.invHess, -1/sDotY, b.tmpData, b.s)
+	b.invHess.SymRankOne(b.invHess, firstTermConst, b.s)
 
 	// update the bfgs stored data to the new iteration
 	copy(b.x, loc.X)

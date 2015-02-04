@@ -27,6 +27,17 @@ func Inner(x []float64, A Matrix, y []float64) float64 {
 	var sum float64
 
 	switch b := A.(type) {
+	case RawSymmetricer:
+		bmat := b.RawSymmetric()
+		for i, xi := range x {
+			if xi != 0 {
+				sum += xi * asm.DdotUnitary(bmat.Data[i*bmat.Stride+i:i*bmat.Stride+n], y[i:])
+			}
+			yi := y[i]
+			if i != n-1 && yi != 0 {
+				sum += yi * asm.DdotInc(bmat.Data[(i+1)*bmat.Stride+i:], x[i+1:], uintptr(n-i), uintptr(bmat.Stride), 1, 0, 0)
+			}
+		}
 	case RawMatrixer:
 		bmat := b.RawMatrix()
 		for i, xi := range x {

@@ -5,6 +5,7 @@
 package mat64
 
 import (
+	"math"
 	"testing"
 
 	"github.com/gonum/blas/blas64"
@@ -74,6 +75,27 @@ func (s *S) TestInner(c *check.C) {
 
 		got := Inner(test.x, m, test.y)
 		c.Check(want, check.Equals, got, check.Commentf("Test %v: want %v, got %v", i, want, got))
+	}
+}
+
+func (s *S) TestInnerSym(c *check.C) {
+	n := 10
+	x := make([]float64, n)
+	y := make([]float64, n)
+	data := make([]float64, n*n)
+	for i := 0; i < n; i++ {
+		x[i] = float64(i)
+		y[i] = float64(i)
+		for j := i; j < n; j++ {
+			data[i*n+j] = float64(i*n + j)
+			data[j*n+i] = data[i*n+j]
+		}
+	}
+	m := NewDense(n, n, data)
+	ans := Inner(x, m, y)
+	sym := NewSymDense(n, data)
+	if math.Abs(Inner(x, sym, y)-ans) > 1e-14 {
+		c.Error("inner different symmetric and dense")
 	}
 }
 

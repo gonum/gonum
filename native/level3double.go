@@ -8,10 +8,17 @@ import (
 var _ blas.Float64Level3 = Implementation{}
 
 // Dtrsm solves
-//  A X = alpha B
-// where X and B are m x n matrices, and A is a unit or non unit upper or lower
-// triangular matrix. The result is stored in place into B. No check is made
-// that A is invertible.
+//  A * X = alpha * B if tA == blas.NoTrans, side == blas.Left
+//  A^T * X = alpha * B if tA == blas.Trans, side == blas.Left
+//  X * A = alpha * B if tA == blas.NoTrans, side == blas.Right
+//  X * A^T = alpha * B if tA == blas.Trans, side == blas.Right
+// where A is an n×n triangular matrix, x is an m×n matrix, and alpha is a
+// scalar.
+//
+// At entry to the function, X contains the values of B, and the result is
+// stored in place into X.
+//
+// No check is made that A is invertible.
 func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	if s != blas.Left && s != blas.Right {
 		panic(badSide)
@@ -220,9 +227,10 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 }
 
 // Dsymm performs one of
-//  C = alpha * A * B + beta * C
-//  C = alpha * B * A + beta * C
-// where A is a symmetric matrix and B and C are m x n matrices.
+//  C = alpha * A * B + beta * C if side == blas.Left
+//  C = alpha * B * A + beta * C if side == blas.Right
+// where A is an n×n symmetric matrix, B and C are m×n matrices, and alpha
+// is a scalar.
 func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if s != blas.Right && s != blas.Left {
 		panic("goblas: bad side")
@@ -343,8 +351,8 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 
 // Dsyrk performs the symmetric rank-k operation
 //  C = alpha * A * A^T + beta*C
-// where alpha and beta are scalars, C is an nxn symmetric matrix, and A
-// is n x k if NonTrans, and k x n if Trans.
+// C is an n×n symmetric matrix. A is an n×k matrix if tA == blas.NoTrans, and
+// a k×n matrix otherwise. alpha and beta are scalars.
 func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -460,10 +468,10 @@ func (Implementation) Dsyrk(ul blas.Uplo, tA blas.Transpose, n, k int, alpha flo
 	}
 }
 
-// Dsyr2k performs a symmetric rank 2k operation
-//  C = alpha * A * B^T + alpha * B * A^T + beta *C
-// where C is an n x n symmetric matrix and A and B are n x k matrices if
-// tA == NoTrans and k x n otherwise.
+// Dsyr2k performs the symmetric rank 2k operation
+//  C = alpha * A * B^T + alpha * B * A^T + beta * C
+// where C is an n×n symmetric matrix. A and B are n×k matrices if
+// tA == NoTrans and k×n otherwise. alpha and beta are scalars.
 func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -609,10 +617,12 @@ func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 	}
 }
 
-// Dtrmm performs a symmetric matrix multiply
-//  B = alpha * A * B
-// where B is an m x n matrix and A is symmetric matrix. Side and Transpose
-// set the location of A relative to B and if A is transposed.
+// Dtrmm performs
+//  B = alpha * A * B if tA == blas.NoTrans and side == blas.Left
+//  B = alpha * A^T * B if tA == blas.Trans and side == blas.Left
+//  B = alpha * B * A if tA == blas.NoTrans and side == blas.Right
+//  B = alpha * B * A^T if tA == blas.Trans and side == blas.Right
+// where A is an n×n triangular matrix, and B is an m×n matrix.
 func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	if s != blas.Left && s != blas.Right {
 		panic(badSide)

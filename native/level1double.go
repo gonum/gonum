@@ -497,7 +497,7 @@ func (Implementation) Drot(n int, x []float64, incX int, y []float64, incY int, 
 	}
 }
 
-// Drotm applies the modified Givens rotation to the 2⨉n matrix.
+// Drotm applies the modified Givens rotation to the 2×n matrix.
 func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int, p blas.DrotmParams) {
 	if n <= 0 {
 		if n == 0 {

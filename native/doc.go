@@ -74,7 +74,7 @@ implicitly becomes (∗ entries are never accessed)
     16 17 18  *
     19 20  *  *
   ]
-which is given to the BLAS routine is [∗ 1 2 3 4 ...].
+which is given to the BLAS routine as [∗ 1 2 3 4 ...].
 
 See http://www.crest.iu.edu/research/mtl/reference/html/banded.html
 for more information

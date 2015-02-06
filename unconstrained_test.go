@@ -1136,7 +1136,7 @@ var newtonTests = []UnconstrainedTest{
 		f:      GulfRD{},
 		x:      []float64{5, 2.5, 0.15},
 		optVal: 0,
-		optLoc: []float64{50, 25, 1.5},
+		optLoc: []float64{50.000000001, 24.99999999999, 1.50000000001},
 	},
 	{
 		f:      ExtendedPowell{},
@@ -1506,13 +1506,13 @@ func testMinimize(t *testing.T, tests []UnconstrainedTest, method Method) {
 
 		// TODO: Enable this test once the optimizers reliably handle
 		// minimization from a (nearly) optimal location.
-		// if test.optLoc != nil {
-		// 	settings.UseInitialData = false
-		// 	// Try starting the optimizer from a (nearly) optimum location given by test.optLoc
-		// 	_, err3 := Local(test.f, test.optLoc, settings, method)
-		// 	if err3 != nil {
-		// 		t.Errorf("error finding minimum from a (nearly) optimum location (%v) for:\n%v", err3, test)
-		// 	}
-		// }
+		if test.optLoc != nil {
+			settings.UseInitialData = false
+			// Try starting the optimizer from a (nearly) optimum location given by test.optLoc
+			_, err3 := Local(test.f, test.optLoc, settings, method)
+			if err3 != nil {
+				t.Errorf("error finding minimum from a (nearly) optimum location (%v) for:\n%v", err3, test)
+			}
+		}
 	}
 }

@@ -245,6 +245,15 @@ func getStartingLocation(funcs functions, funcInfo *FunctionInfo, initX []float6
 	if math.IsInf(loc.F, 1) {
 		return loc, evalType, ErrInf
 	}
+	for _, v := range loc.Gradient {
+		if math.IsInf(v, 0) {
+			return loc, evalType, ErrGradInf
+		}
+		if math.IsNaN(v) {
+			return loc, evalType, ErrGradNaN
+		}
+	}
+
 	return loc, evalType, nil
 }
 

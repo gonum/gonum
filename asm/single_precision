@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+echo Generating dsdot.go
+echo -e '// Generated code do not edit. Run `go generate`.\n' > dsdot.go
+cat ddot.go \
+| grep -v '//+build' \
+| gofmt -r '[]float64 -> []float32' \
+| gofmt -r 'a * b -> float64(a) * float64(b)' \
+| sed 's/Ddot/Dsdot/' \
+>> dsdot.go
+
+echo Generating sdot.go
+echo -e '// Generated code do not edit. Run `go generate`.\n' > sdot.go
+cat ddot.go \
+| grep -v '//+build' \
+| gofmt -r 'float64 -> float32' \
+| sed 's/Ddot/Sdot/' \
+>> sdot.go
+
+echo Generating saxpy.go
+echo -e '// Generated code do not edit. Run `go generate`.\n' > saxpy.go
+cat daxpy.go \
+| grep -v '//+build' \
+| gofmt -r 'float64 -> float32' \
+| sed 's/Daxpy/Saxpy/' \
+>> saxpy.go

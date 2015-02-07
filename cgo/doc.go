@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Ensure changes made to blas/native are reflected in blas/cgo where relevant.
+// Ensure changes made to blas/cgo are reflected in blas/native where relevant.
 
 /*
-Package native is a Go implementation of the BLAS API. This implementation
+Package cgo provides bindings to a C BLAS library. This wrapper interface
 panics when the input arguments are invalid as per the standard, for example
 if a vector increment is zero. Please note that the treatment of NaN values
 is not specified, and differs among the BLAS implementations.
@@ -15,9 +15,6 @@ interface. The rest of this text describes the layout of the data for the input 
 Please note that in the function documentation, x[i] refers to the i^th element
 of the vector, which will be different from the i^th element of the slice if
 incX != 1.
-
-See http://www.netlib.org/lapack/explore-html/d4/de1/_l_i_c_e_n_s_e_source.html
-for more license information.
 
 Vector arguments are effectively strided slices. They have two input arguments,
 a number of elements, n, and an increment, incX. The increment specifies the
@@ -85,4 +82,4 @@ which is given to the BLAS routine as [∗ 1 2 3 4 ...].
 See http://www.crest.iu.edu/research/mtl/reference/html/banded.html
 for more information
 */
-package native
+package cgo

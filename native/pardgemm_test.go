@@ -164,12 +164,12 @@ func testMatchParallelSerial(t *testing.T, i int, tA, tB blas.Transpose, m, n, k
 	}
 }
 
-func randmat(r, c, stride int) general {
+func randmat(r, c, stride int) general64 {
 	data := make([]float64, r*stride+c)
 	for i := range data {
 		data[i] = rand.Float64()
 	}
-	return general{
+	return general64{
 		data:   data,
 		rows:   r,
 		cols:   c,

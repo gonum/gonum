@@ -46,6 +46,7 @@ install:
  - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
  - if [[ "$GOCROSS" == "386" && "$TRAVIS_GO_VERSION" != "tip" ]]; then export GOARCH=386; fi
  - if [[ "$GOARCH" == "386" ]]; then gvm cross linux 386; fi
+ - go get github.com/gonum/floats
 
 
 script:

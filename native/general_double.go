@@ -10,12 +10,8 @@ import (
 	"math"
 )
 
-const (
-	debug = false
-)
-
-func newGeneral(r, c int) general {
-	return general{
+func newGeneral64(r, c int) general64 {
+	return general64{
 		data:   make([]float64, r*c),
 		rows:   r,
 		cols:   c,
@@ -23,14 +19,14 @@ func newGeneral(r, c int) general {
 	}
 }
 
-type general struct {
+type general64 struct {
 	data       []float64
 	rows, cols int
 	stride     int
 }
 
 // adds element-wise into receiver. rows and columns must match
-func (g general) add(h general) {
+func (g general64) add(h general64) {
 	if debug {
 		if g.rows != h.rows {
 			panic("blas: row size mismatch")
@@ -49,7 +45,7 @@ func (g general) add(h general) {
 
 // at returns the value at the ith row and jth column. For speed reasons, the
 // rows and columns are not bounds checked.
-func (g general) at(i, j int) float64 {
+func (g general64) at(i, j int) float64 {
 	if debug {
 		if i < 0 || i >= g.rows {
 			panic("blas: row out of bounds")
@@ -61,7 +57,7 @@ func (g general) at(i, j int) float64 {
 	return g.data[i*g.stride+j]
 }
 
-func (g general) check(c byte) error {
+func (g general64) check(c byte) error {
 	if g.rows < 0 {
 		return errors.New("blas: rows < 0")
 	}
@@ -80,10 +76,10 @@ func (g general) check(c byte) error {
 	return nil
 }
 
-func (g general) clone() general {
+func (g general64) clone() general64 {
 	data := make([]float64, len(g.data))
 	copy(data, g.data)
-	return general{
+	return general64{
 		data:   data,
 		rows:   g.rows,
 		cols:   g.cols,
@@ -92,7 +88,7 @@ func (g general) clone() general {
 }
 
 // assumes they are the same size
-func (g general) copy(h general) {
+func (g general64) copy(h general64) {
 	if debug {
 		if g.rows != h.rows {
 			panic("blas: row mismatch")
@@ -106,7 +102,7 @@ func (g general) copy(h general) {
 	}
 }
 
-func (g general) equal(a general) bool {
+func (g general64) equal(a general64) bool {
 	if g.rows != a.rows || g.cols != a.cols || g.stride != a.stride {
 		return false
 	}
@@ -120,7 +116,7 @@ func (g general) equal(a general) bool {
 
 /*
 // print is to aid debugging. Commented out to avoid fmt import
-func (g general) print() {
+func (g general64) print() {
 	fmt.Println("r = ", g.rows, "c = ", g.cols, "stride: ", g.stride)
 	for i := 0; i < g.rows; i++ {
 		fmt.Println(g.data[i*g.stride : (i+1)*g.stride])
@@ -129,7 +125,7 @@ func (g general) print() {
 }
 */
 
-func (g general) view(i, j, r, c int) general {
+func (g general64) view(i, j, r, c int) general64 {
 	if debug {
 		if i < 0 || i+r > g.rows {
 			panic("blas: row out of bounds")
@@ -138,7 +134,7 @@ func (g general) view(i, j, r, c int) general {
 			panic("blas: col out of bounds")
 		}
 	}
-	return general{
+	return general64{
 		data:   g.data[i*g.stride+j : (i+r-1)*g.stride+j+c],
 		rows:   r,
 		cols:   c,
@@ -146,7 +142,7 @@ func (g general) view(i, j, r, c int) general {
 	}
 }
 
-func (g general) equalWithinAbs(a general, tol float64) bool {
+func (g general64) equalWithinAbs(a general64, tol float64) bool {
 	if g.rows != a.rows || g.cols != a.cols || g.stride != a.stride {
 		return false
 	}

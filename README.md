@@ -44,11 +44,12 @@ On OS X the easiest solution is to use the libraries provided by the system:
 
 ### blas
 
-Defines [BLAS API](http://www.netlib.org/blas/blast-forum/cinterface.pdf) split in several interfaces
+Defines [BLAS API](http://www.netlib.org/blas/blast-forum/cinterface.pdf) split in several
+interfaces.
 
 ### blas/native
 
-Go implementation of the BLAS API (incomplete, implements the float64 API)
+Go implementation of the BLAS API (incomplete, implements the `float32` and `float64` API)
 
 ### blas/cgo
 
@@ -56,10 +57,10 @@ Binding to a C implementation of the cblas interface (e.g. ATLAS, OpenBLAS, Inte
 
 The recommended (free) option for good performance on both Linux and Darwin is OpenBLAS.
 
-### blas/blas64
+### blas/blas64 and blas/blas32
 
-Wrapper for an implementation of the double precision real (i.e., `float64`) part
-of the blas API
+Wrappers for an implementation of the double (i.e., `float64`) and single (`float32`)
+precision real parts of the blas API
 
 ```Go
 package main
@@ -76,12 +77,12 @@ func main() {
 }
 ```
 
-### blas/cblas128
+### blas/cblas128 and blas/cblas64
 
-Wrapper for an implementation of the double precision complex (i.e., `complex128`)
-part of the blas API
+Wrappers for an implementation of the double (i.e., `complex128`) and single (`complex64`) 
+precision complex parts of the blas API
 
-Currently blas/cblas128 requires blas/cgo.
+Currently blas/cblas648 and blas/cblas128 require blas/cgo.
 
 ## Issues
 

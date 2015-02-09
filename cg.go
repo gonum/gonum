@@ -39,6 +39,7 @@ type CGVariant interface {
 //    a reasonable default based on the problem dimension.
 //  - The angle between the gradients at two consecutive iterations ∇f_k and
 //    ∇f_{k+1} is too large.
+//  - The direction d_{k+1} is not a descent direction.
 //  - β_k given by CGVariant.Beta() is equal to zero.
 //
 // The line search for CG must yield step sizes that satisfy the strong Wolfe
@@ -182,10 +183,12 @@ func (cg *CG) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	if !restart {
 		// The method is not being restarted, so update the descent direction.
 		floats.AddScaled(dir, beta, cg.dirPrev)
-	} else {
-		// Otherwise reset to 0 the counter of iterations taken since the last
-		// restart.
-		cg.iterFromRestart = 0
+		if floats.Dot(loc.Gradient, dir) >= 0 {
+			// Restart because the new direction is not a descent direction.
+			restart = true
+			copy(dir, loc.Gradient)
+			floats.Scale(-1, dir)
+		}
 	}
 
 	// Get the initial line search step size from the StepSizer, even if the
@@ -196,6 +199,8 @@ func (cg *CG) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		// not related to the previous direction, discard the estimated step
 		// size from cg.InitialStep and use step size of 1 instead.
 		stepSize = 1
+		// Reset to 0 the counter of iterations taken since the last restart.
+		cg.iterFromRestart = 0
 	}
 
 	copy(cg.gradPrev, loc.Gradient)

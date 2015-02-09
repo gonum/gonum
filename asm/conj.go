@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate ./single_precision
-//go:generate ./complex
-
 package asm
+
+func conj(c complex64) complex64 { return complex(real(c), -imag(c)) }

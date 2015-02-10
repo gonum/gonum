@@ -1315,22 +1315,27 @@ type Watson struct{}
 
 func (Watson) F(x []float64) (sum float64) {
 	for i := 1; i <= 29; i++ {
-		c := float64(i) / 29
+		d1 := float64(i) / 29
 
+		d2 := 1.0
 		var s1 float64
 		for j := 1; j < len(x); j++ {
-			s1 += float64(j) * x[j] * math.Pow(c, float64(j-1))
+			s1 += float64(j) * d2 * x[j]
+			d2 *= d1
 		}
 
+		d2 = 1.0
 		var s2 float64
-		for j, v := range x {
-			s2 += v * math.Pow(c, float64(j))
+		for _, v := range x {
+			s2 += d2 * v
+			d2 *= d1
 		}
-		sum += (s1 - s2*s2 - 1) * (s1 - s2*s2 - 1)
+
+		t := s1 - s2*s2 - 1
+		sum += t * t
 	}
-	sum += x[0] * x[0]
 	t := x[1] - x[0]*x[0] - 1
-	sum += t * t
+	sum += x[0]*x[0] + t*t
 	return sum
 }
 
@@ -1343,42 +1348,48 @@ func (Watson) Df(x, grad []float64) {
 		grad[i] = 0
 	}
 	for i := 1; i <= 29; i++ {
-		c := float64(i) / 29
+		d1 := float64(i) / 29
 
+		d2 := 1.0
 		var s1 float64
 		for j := 1; j < len(x); j++ {
-			s1 += float64(j) * x[j] * math.Pow(c, float64(j-1))
+			s1 += float64(j) * d2 * x[j]
+			d2 *= d1
 		}
 
+		d2 = 1.0
 		var s2 float64
-		for j, v := range x {
-			s2 += v * math.Pow(c, float64(j))
+		for _, v := range x {
+			s2 += d2 * v
+			d2 *= d1
 		}
 
 		t := s1 - s2*s2 - 1
+		s3 := 2 * d1 * s2
+		d2 = 2 / d1
 		for j := range x {
-			grad[j] += 2 * t * math.Pow(c, float64(j-1)) * (float64(j) - 2*s2*c)
+			grad[j] += d2 * (float64(j) - s3) * t
+			d2 *= d1
 		}
 	}
 	t := x[1] - x[0]*x[0] - 1
-	grad[0] += 2*x[0] - 4*t*x[0]
+	grad[0] += x[0] * (2 - 4*t)
 	grad[1] += 2 * t
 }
 
 func (Watson) Minima() []Minimum {
 	return []Minimum{
 		{
-			X: []float64{-0.01572508639445209, 1.0124348693647496, -0.23299162596578743,
-				1.2604300879396417, -1.5137289229557926, 0.9929964325532394},
-			F:      0.002287670053552403,
+			X: []float64{-0.01572508644590686, 1.012434869244884, -0.23299162372002916,
+				1.2604300800978554, -1.51372891341701, 0.9929964286340117},
+			F:      0.0022876700535523838,
 			Global: true,
 		},
 		{
-			X: []float64{-1.5307036746695823e-05, 0.9997897039329611,
-				0.014763963657024618, 0.146342328644901, 1.0008211015487485,
-				-2.6177311373274232, 4.104403160682486, -3.1436122762314374,
-				1.0526264074353293},
-			F:      1.3997601380906803e-06,
+			X: []float64{-1.5307036521992127e-05, 0.9997897039319495, 0.01476396369355022,
+				0.14634232829939883, 1.0008211030046426, -2.617731140519101, 4.104403164479245,
+				-3.1436122785568514, 1.0526264080103074},
+			F:      1.399760138096796e-06,
 			Global: true,
 		},
 		// TODO(vladimir-ch): More, Garbow, Hillstrom list just the value, but

@@ -834,13 +834,12 @@ func (GulfResearchAndDevelopment) F(x []float64) (sum float64) {
 	}
 
 	for i := 1; i <= 99; i++ {
-		c := float64(i) / 100
-		yi := 25 + math.Pow(-50*math.Log(c), 2.0/3.0)
-		d := math.Abs(yi - x[1])
-		e := math.Pow(d, x[2]) / x[0]
-		f := math.Exp(-e) - c
-
-		sum += f * f
+		arg := float64(i) / 100
+		r := math.Pow(-50*math.Log(arg), 2.0/3.0) + 25 - x[1]
+		t1 := math.Pow(math.Abs(r), x[2]) / x[0]
+		t2 := math.Exp(-t1)
+		t := t2 - arg
+		sum += t * t
 	}
 	return sum
 }
@@ -857,16 +856,19 @@ func (GulfResearchAndDevelopment) Df(x, grad []float64) {
 		grad[i] = 0
 	}
 	for i := 1; i <= 99; i++ {
-		c := float64(i) / 100
-		yi := 25 + math.Pow(-50*math.Log(c), 2.0/3.0)
-		d := math.Abs(yi - x[1])
-		e := math.Pow(d, x[2]) / x[0]
-		f := math.Exp(-e) - c
-
-		grad[0] += 2 * f * math.Exp(-e) * math.Pow(d, x[2]) / x[0] / x[0]
-		grad[1] += 2 * f * math.Exp(-e) * e * x[2] / d
-		grad[2] -= 2 * f * math.Exp(-e) * e * math.Log(d)
+		arg := float64(i) / 100
+		r := math.Pow(-50*math.Log(arg), 2.0/3.0) + 25 - x[1]
+		t1 := math.Pow(math.Abs(r), x[2]) / x[0]
+		t2 := math.Exp(-t1)
+		t := t2 - arg
+		s1 := t1 * t2 * t
+		grad[0] += s1
+		grad[1] += s1 / r
+		grad[2] -= s1 * math.Log(math.Abs(r))
 	}
+	grad[0] *= 2 / x[0]
+	grad[1] *= 2 * x[2]
+	grad[2] *= 2
 }
 
 func (GulfResearchAndDevelopment) Minima() []Minimum {
@@ -877,12 +879,12 @@ func (GulfResearchAndDevelopment) Minima() []Minimum {
 			Global: true,
 		},
 		{
-			X:      []float64{99.89537833835886, 60.61453903025014, 9.16124389236433},
+			X:      []float64{99.89529935174151, 60.61453902799833, 9.161242695144592},
 			F:      32.8345,
 			Global: false,
 		},
 		{
-			X:      []float64{201.662589489426, 60.616331504682, 10.224891158489},
+			X:      []float64{201.662589489426, 60.61633150468155, 10.224891158488965},
 			F:      32.8345,
 			Global: false,
 		},

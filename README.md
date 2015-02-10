@@ -82,7 +82,7 @@ func main() {
 Wrappers for an implementation of the double (i.e., `complex128`) and single (`complex64`) 
 precision complex parts of the blas API
 
-Currently blas/cblas648 and blas/cblas128 require blas/cgo.
+Currently blas/cblas64 and blas/cblas128 require blas/cgo.
 
 ## Issues
 

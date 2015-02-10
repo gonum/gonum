@@ -100,7 +100,7 @@ func (Normal) ExKurtosis() float64 {
 // Fit sets the parameters of the probability distribution from the
 // data samples x with relative weights w. If weights is nil, then all the weights
 // are 1. If weights is not nil, then the len(weights) must equal len(samples).
-func (n *Normal) Fit(samples []float64, weights []float64) {
+func (n *Normal) Fit(samples, weights []float64) {
 	suffStat := make([]float64, 1)
 	nSamples := n.SuffStat(samples, weights, suffStat)
 	n.ConjugateUpdate(suffStat, nSamples, []float64{0, 0})

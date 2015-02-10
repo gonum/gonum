@@ -672,7 +672,7 @@ func Mean(x, weights []float64) float64 {
 // Mode returns the most common value in the dataset specified by x and the
 // given weights. Strict float64 equality is used when comparing values, so users
 // should take caution. If several values are the mode, any of them may be returned.
-func Mode(x []float64, weights []float64) (val float64, count float64) {
+func Mode(x, weights []float64) (val float64, count float64) {
 	if weights != nil && len(x) != len(weights) {
 		panic("stat: slice length mismatch")
 	}
@@ -877,13 +877,13 @@ func (w weightSorter) Len() int {
 }
 
 // StdDev returns the sample standard deviation.
-func StdDev(x []float64, weights []float64) float64 {
+func StdDev(x, weights []float64) float64 {
 	_, std := MeanStdDev(x, weights)
 	return std
 }
 
 // MeanStdDev returns the sample mean and standard deviation
-func MeanStdDev(x []float64, weights []float64) (mean, std float64) {
+func MeanStdDev(x, weights []float64) (mean, std float64) {
 	mean, variance := MeanVariance(x, weights)
 	return mean, math.Sqrt(variance)
 }

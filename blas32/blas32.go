@@ -224,7 +224,7 @@ func Gemv(tA blas.Transpose, alpha float32, a General, x Vector, beta float32, y
 
 // Gbmv computes
 //  y = alpha * A * x + beta * y if tA == blas.NoTrans
-//  y = alpha * A^T * x + beta * y if tA == blas.Trans
+//  y = alpha * A^T * x + beta * y if tA == blas.Trans or blas.ConjTrans
 // where a is an m×n band matrix kL subdiagonals and kU super-diagonals, and
 // m and n refer to the size of the full dense matrix it represents.
 // x and y are vectors, and alpha and beta are scalars.
@@ -234,7 +234,7 @@ func Gbmv(tA blas.Transpose, alpha float32, a Band, x Vector, beta float32, y Ve
 
 // Trmv computes
 //  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
 // A is an n×n Triangular matrix and x is a vector.
 func Trmv(tA blas.Transpose, a Triangular, x Vector) {
 	blas32.Strmv(a.Uplo, tA, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
@@ -242,7 +242,7 @@ func Trmv(tA blas.Transpose, a Triangular, x Vector) {
 
 // Tbmv computes
 //  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
 // where A is an n×n triangular banded matrix with k diagonals, and x is a vector.
 func Tbmv(tA blas.Transpose, a TriangularBand, x Vector) {
 	blas32.Stbmv(a.Uplo, tA, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
@@ -250,7 +250,7 @@ func Tbmv(tA blas.Transpose, a TriangularBand, x Vector) {
 
 // Tpmv computes
 //  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
 // where A is an n×n unit triangular matrix in packed format, and x is a vector.
 func Tpmv(tA blas.Transpose, a TriangularPacked, x Vector) {
 	blas32.Stpmv(a.Uplo, tA, a.Diag, a.N, a.Data, x.Data, x.Inc)
@@ -258,7 +258,7 @@ func Tpmv(tA blas.Transpose, a TriangularPacked, x Vector) {
 
 // Trsv solves
 //  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
 // A is an n×n triangular matrix and x is a vector.
 // At entry to the function, x contains the values of b, and the result is
 // stored in place into x.
@@ -284,7 +284,7 @@ func Tbsv(tA blas.Transpose, a TriangularBand, x Vector) {
 
 // Tpsv solves
 //  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
 // where A is an n×n triangular matrix in packed format and x is a vector.
 // At entry to the function, x contains the values of b, and the result is
 // stored in place into x.
@@ -359,7 +359,7 @@ func Spr2(alpha float32, x, y Vector, a SymmetricPacked) {
 
 // Gemm computes
 //  C = beta * C + alpha * A * B.
-// tA and tB specify whether A or B are transposed. A, B, and C are n×n dense
+// tA and tB specify whether A or B are transposed. A, B, and C are m×n dense
 // matrices.
 func Gemm(tA, tB blas.Transpose, alpha float32, a, b General, beta float32, c General) {
 	var m, n, k int
@@ -421,19 +421,19 @@ func Syr2k(t blas.Transpose, alpha float32, a, b General, beta float32, c Symmet
 
 // Trmm performs
 //  B = alpha * A * B if tA == blas.NoTrans and side == blas.Left
-//  B = alpha * A^T * B if tA == blas.Trans and side == blas.Left
+//  B = alpha * A^T * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Left
 //  B = alpha * B * A if tA == blas.NoTrans and side == blas.Right
-//  B = alpha * B * A^T if tA == blas.Trans and side == blas.Right
+//  B = alpha * B * A^T if tA == blas.Trans or blas.ConjTrans, and side == blas.Right
 // where A is an n×n triangular matrix, and B is an m×n matrix.
 func Trmm(s blas.Side, tA blas.Transpose, alpha float32, a Triangular, b General) {
 	blas32.Strmm(s, a.Uplo, tA, a.Diag, b.Rows, b.Cols, alpha, a.Data, a.Stride, b.Data, b.Stride)
 }
 
 // Trsm solves
-//  A * X = alpha * B if tA == blas.NoTrans, side == blas.Left
-//  A^T * X = alpha * B if tA == blas.Trans, side == blas.Left
-//  X * A = alpha * B if tA == blas.NoTrans, side == blas.Right
-//  X * A^T = alpha * B if tA == blas.Trans, side == blas.Right
+//  A * X = alpha * B if tA == blas.NoTrans side == blas.Left
+//  A^T * X = alpha * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Left
+//  X * A = alpha * B if tA == blas.NoTrans side == blas.Right
+//  X * A^T = alpha * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Right
 // where A is an n×n triangular matrix, x is an m×n matrix, and alpha is a
 // scalar.
 //

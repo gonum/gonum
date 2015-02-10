@@ -361,7 +361,7 @@ func Hpr2(alpha complex128, x, y Vector, a HermitianPacked) {
 
 // Gemm computes
 //  C = beta * C + alpha * A * B.
-// tA and tB specify whether A or B are transposed or conjugated. A, B, and C are n×n dense
+// tA and tB specify whether A or B are transposed or conjugated. A, B, and C are m×n dense
 // matrices.
 func Gemm(tA, tB blas.Transpose, alpha complex128, a, b General, beta complex128, c General) {
 	var m, n, k int
@@ -423,19 +423,23 @@ func Syr2k(t blas.Transpose, alpha complex128, a, b General, beta complex128, c 
 
 // Trmm performs
 //  B = alpha * A * B if tA == blas.NoTrans and side == blas.Left
-//  B = alpha * A^T * B if tA == blas.Trans or blas.ConjTrans and side == blas.Left
+//  B = alpha * A^T * B if tA == blas.Trans and side == blas.Left
+//  B = alpha * A^H * B if tA == blas.ConjTrans and side == blas.Left
 //  B = alpha * B * A if tA == blas.NoTrans and side == blas.Right
-//  B = alpha * B * A^T if tA == blas.Trans or blas.ConjTrans and side == blas.Right
+//  B = alpha * B * A^T if tA == blas.Trans and side == blas.Right
+//  B = alpha * B * A^H if tA == blas.ConjTrans and side == blas.Right
 // where A is an n×n triangular matrix, and B is an m×n matrix.
 func Trmm(s blas.Side, tA blas.Transpose, alpha complex128, a Triangular, b General) {
 	cblas128.Ztrmm(s, a.Uplo, tA, a.Diag, b.Rows, b.Cols, alpha, a.Data, a.Stride, b.Data, b.Stride)
 }
 
 // Trsm solves
-//  A * X = alpha * B if tA == blas.NoTrans, side == blas.Left
-//  A^T * X = alpha * B if tA == blas.Trans or blas.ConjTrans, side == blas.Left
-//  X * A = alpha * B if tA == blas.NoTrans, side == blas.Right
-//  X * A^T = alpha * B if tA == blas.Trans or blas.ConjTrans, side == blas.Right
+//  A * X = alpha * B if tA == blas.NoTrans and side == blas.Left
+//  A^T * X = alpha * B if tA == blas.Trans and side == blas.Left
+//  A^H * X = alpha * B if tA == blas.ConjTrans and side == blas.Left
+//  X * A = alpha * B if tA == blas.NoTrans and side == blas.Right
+//  X * A^T = alpha * B if tA == blas.Trans and side == blas.Right
+//  X * A^H = alpha * B if tA ==  blas.ConjTrans and side == blas.Right
 // where A is an n×n triangular matrix, x is an m×n matrix, and alpha is a
 // scalar.
 //
@@ -449,9 +453,9 @@ func Trsm(s blas.Side, tA blas.Transpose, alpha complex128, a Triangular, b Gene
 
 // Hemm performs
 //  B = alpha * A * B if tA == blas.NoTrans and side == blas.Left
-//  B = alpha * A^T * B if tA == blas.ConjTrans and side == blas.Left
+//  B = alpha * A^H * B if tA == blas.ConjTrans and side == blas.Left
 //  B = alpha * B * A if tA == blas.NoTrans and side == blas.Right
-//  B = alpha * B * A^T if tA == blas.ConjTrans and side == blas.Right
+//  B = alpha * B * A^H if tA == blas.ConjTrans and side == blas.Right
 // where A is an n×n Hermitia matrix, and B is an m×n matrix.
 func Hemm(s blas.Side, alpha complex128, a Hermitian, b General, beta complex128, c General) {
 	var m, n int
@@ -478,7 +482,7 @@ func Herk(t blas.Transpose, alpha float64, a General, beta float64, c Hermitian)
 }
 
 // Her2k performs the symmetric rank 2k operation
-//  C = alpha * A * B^T + alpha * B * A^H + beta * C
+//  C = alpha * A * B^H + alpha * B * A^H + beta * C
 // where C is an n×n Hermitian matrix. A and B are n×k matrices if
 // tA == NoTrans and k×n otherwise. alpha and beta are scalars.
 func Her2k(t blas.Transpose, alpha complex128, a, b General, beta float64, c Hermitian) {

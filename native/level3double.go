@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package native
 
 import (
@@ -8,10 +12,10 @@ import (
 var _ blas.Float64Level3 = Implementation{}
 
 // Dtrsm solves
-//  A * X = alpha * B if tA == blas.NoTrans, side == blas.Left
-//  A^T * X = alpha * B if tA == blas.Trans, side == blas.Left
-//  X * A = alpha * B if tA == blas.NoTrans, side == blas.Right
-//  X * A^T = alpha * B if tA == blas.Trans, side == blas.Right
+//  A * X = alpha * B if tA == blas.NoTrans and side == blas.Left
+//  A^T * X = alpha * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Left
+//  X * A = alpha * B if tA == blas.NoTrans and side == blas.Right
+//  X * A^T = alpha * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Right
 // where A is an n×n triangular matrix, x is an m×n matrix, and alpha is a
 // scalar.
 //
@@ -619,9 +623,9 @@ func (Implementation) Dsyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 
 // Dtrmm performs
 //  B = alpha * A * B if tA == blas.NoTrans and side == blas.Left
-//  B = alpha * A^T * B if tA == blas.Trans and side == blas.Left
+//  B = alpha * A^T * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Left
 //  B = alpha * B * A if tA == blas.NoTrans and side == blas.Right
-//  B = alpha * B * A^T if tA == blas.Trans and side == blas.Right
+//  B = alpha * B * A^T if tA == blas.Trans or blas.ConjTrans, and side == blas.Right
 // where A is an n×n triangular matrix, and B is an m×n matrix.
 func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
 	if s != blas.Left && s != blas.Right {

@@ -1,3 +1,7 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package native
 
 import (
@@ -166,7 +170,7 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 
 // Dgbmv computes
 //  y = alpha * A * x + beta * y if tA == blas.NoTrans
-//  y = alpha * A^T * x + beta * y if tA == blas.Trans
+//  y = alpha * A^T * x + beta * y if tA == blas.Trans or blas.ConjTrans
 // where a is an m×n band matrix kL subdiagonals and kU super-diagonals, and
 // m and n refer to the size of the full dense matrix it represents.
 // x and y are vectors, and alpha and beta are scalars.
@@ -302,7 +306,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 
 // Dtrmv computes
 //  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
 // A is an n×n Triangular matrix and x is a vector.
 func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
 	if ul != blas.Lower && ul != blas.Upper {
@@ -467,7 +471,7 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 
 // Dtrsv solves
 //  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
 // A is an n×n triangular matrix and x is a vector.
 // At entry to the function, x contains the values of b, and the result is
 // stored in place into x.
@@ -490,7 +494,7 @@ func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		panic(nLT0)
 	}
 	if lda > n && lda > 1 {
-		panic("blas: lda must be less than max(1,n)")
+		panic(badLdA)
 	}
 	if incX == 0 {
 		panic(zeroIncX)
@@ -777,7 +781,7 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 
 // Dtbmv computes
 //  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
 // where A is an n×n triangular banded matrix with k diagonals, and x is a vector.
 func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
 	if ul != blas.Lower && ul != blas.Upper {
@@ -796,7 +800,7 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		panic(kLT0)
 	}
 	if lda < k+1 {
-		panic("blas: lda must be less than max(1,n)")
+		panic(badLdA)
 	}
 	if incX == 0 {
 		panic(zeroIncX)
@@ -977,7 +981,7 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 
 // Dtpmv computes
 //  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
 // where A is an n×n unit triangular matrix in packed format, and x is a vector.
 func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	// Verify inputs
@@ -1667,14 +1671,14 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 
 // Dtpsv solves
 //  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
 // where A is an n×n triangular matrix in packed format and x is a vector.
 // At entry to the function, x contains the values of b, and the result is
 // stored in place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, x []float64, incX int) {
+func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1688,8 +1692,8 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	if n < 0 {
 		panic(nLT0)
 	}
-	if len(a) < (n*(n+1))/2 {
-		panic("blas: not enough data in ap")
+	if len(ap) < (n*(n+1))/2 {
+		panic("blas: index of ap out of range")
 	}
 	if incX == 0 {
 		panic(zeroIncX)
@@ -1709,7 +1713,7 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 			offset = n*(n+1)/2 - 1
 			if incX == 1 {
 				for i := n - 1; i >= 0; i-- {
-					atmp := a[offset+1 : offset+n-i]
+					atmp := ap[offset+1 : offset+n-i]
 					xtmp := x[i+1:]
 					var sum float64
 					for j, v := range atmp {
@@ -1717,7 +1721,7 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 					}
 					x[i] -= sum
 					if nonUnit {
-						x[i] /= a[offset]
+						x[i] /= ap[offset]
 					}
 					offset -= n - i + 1
 				}
@@ -1725,7 +1729,7 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 			}
 			ix := kx + (n-1)*incX
 			for i := n - 1; i >= 0; i-- {
-				atmp := a[offset+1 : offset+n-i]
+				atmp := ap[offset+1 : offset+n-i]
 				jx := kx + (i+1)*incX
 				var sum float64
 				for _, v := range atmp {
@@ -1734,7 +1738,7 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 				}
 				x[ix] -= sum
 				if nonUnit {
-					x[ix] /= a[offset]
+					x[ix] /= ap[offset]
 				}
 				ix -= incX
 				offset -= n - i + 1
@@ -1743,14 +1747,14 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		}
 		if incX == 1 {
 			for i := 0; i < n; i++ {
-				atmp := a[offset-i : offset]
+				atmp := ap[offset-i : offset]
 				var sum float64
 				for j, v := range atmp {
 					sum += v * x[j]
 				}
 				x[i] -= sum
 				if nonUnit {
-					x[i] /= a[offset]
+					x[i] /= ap[offset]
 				}
 				offset += i + 2
 			}
@@ -1759,7 +1763,7 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		ix := kx
 		for i := 0; i < n; i++ {
 			jx := kx
-			atmp := a[offset-i : offset]
+			atmp := ap[offset-i : offset]
 			var sum float64
 			for _, v := range atmp {
 				sum += v * x[jx]
@@ -1767,22 +1771,22 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 			}
 			x[ix] -= sum
 			if nonUnit {
-				x[ix] /= a[offset]
+				x[ix] /= ap[offset]
 			}
 			ix += incX
 			offset += i + 2
 		}
 		return
 	}
-	// Cases where a is transposed.
+	// Cases where ap is transposed.
 	if ul == blas.Upper {
 		if incX == 1 {
 			for i := 0; i < n; i++ {
 				if nonUnit {
-					x[i] /= a[offset]
+					x[i] /= ap[offset]
 				}
 				xi := x[i]
-				atmp := a[offset+1 : offset+n-i]
+				atmp := ap[offset+1 : offset+n-i]
 				xtmp := x[i+1:]
 				for j, v := range atmp {
 					xtmp[j] -= v * xi
@@ -1794,10 +1798,10 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		ix := kx
 		for i := 0; i < n; i++ {
 			if nonUnit {
-				x[ix] /= a[offset]
+				x[ix] /= ap[offset]
 			}
 			xix := x[ix]
-			atmp := a[offset+1 : offset+n-i]
+			atmp := ap[offset+1 : offset+n-i]
 			jx := kx + (i+1)*incX
 			for _, v := range atmp {
 				x[jx] -= v * xix
@@ -1812,10 +1816,10 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		offset = n*(n+1)/2 - 1
 		for i := n - 1; i >= 0; i-- {
 			if nonUnit {
-				x[i] /= a[offset]
+				x[i] /= ap[offset]
 			}
 			xi := x[i]
-			atmp := a[offset-i : offset]
+			atmp := ap[offset-i : offset]
 			for j, v := range atmp {
 				x[j] -= v * xi
 			}
@@ -1827,10 +1831,10 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	offset = n*(n+1)/2 - 1
 	for i := n - 1; i >= 0; i-- {
 		if nonUnit {
-			x[ix] /= a[offset]
+			x[ix] /= ap[offset]
 		}
 		xix := x[ix]
-		atmp := a[offset-i : offset]
+		atmp := ap[offset-i : offset]
 		jx := kx
 		for _, v := range atmp {
 			x[jx] -= v * xix
@@ -2065,7 +2069,7 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 // Dspr2 performs the symmetric rank-2 update
 //  a += alpha * x * y^T + alpha * y * x^T
 // where a is an n×n symmetric matrix in packed format and x and y are vectors.
-func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64) {
+func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, ap []float64) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
 	}
@@ -2079,8 +2083,8 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		panic(zeroIncY)
 	}
 
-	if len(a) < (n*(n+1))/2 {
-		panic("goblas: not enough data in a")
+	if len(ap) < (n*(n+1))/2 {
+		panic("blas: index of ap out of range")
 	}
 	if alpha == 0 {
 		return
@@ -2100,7 +2104,7 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	if ul == blas.Upper {
 		if incX == 1 && incY == 1 {
 			for i := 0; i < n; i++ {
-				atmp := a[offset:]
+				atmp := ap[offset:]
 				xi := x[i]
 				yi := y[i]
 				xtmp := x[i:n]
@@ -2117,7 +2121,7 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		for i := 0; i < n; i++ {
 			jx := kx + i*incX
 			jy := ky + i*incY
-			atmp := a[offset:]
+			atmp := ap[offset:]
 			xi := x[ix]
 			yi := y[iy]
 			for j := 0; j < n-i; j++ {
@@ -2133,7 +2137,7 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	}
 	if incX == 1 && incY == 1 {
 		for i := 0; i < n; i++ {
-			atmp := a[offset-i:]
+			atmp := ap[offset-i:]
 			xi := x[i]
 			yi := y[i]
 			xtmp := x[:i+1]
@@ -2149,7 +2153,7 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	for i := 0; i < n; i++ {
 		jx := kx
 		jy := ky
-		atmp := a[offset-i:]
+		atmp := ap[offset-i:]
 		for j := 0; j <= i; j++ {
 			atmp[j] += alpha * (x[ix]*y[jy] + x[jx]*y[iy])
 			jx += incX

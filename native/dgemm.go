@@ -15,11 +15,18 @@ import (
 
 // Dgemm computes
 //  C = beta * C + alpha * A * B.
-// tA and tB specify whether A or B are transposed. A, B, and C are n×n dense
+// tA and tB specify whether A or B are transposed. A, B, and C are m×n dense
 // matrices.
 func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if tB != blas.NoTrans && tB != blas.Trans && tB != blas.ConjTrans {
+		panic(badTranspose)
+	}
+
 	var amat, bmat, cmat general64
-	if tA == blas.Trans {
+	if tA != blas.NoTrans {
 		amat = general64{
 			data:   a,
 			rows:   k,
@@ -38,7 +45,7 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 	if err != nil {
 		panic(err.Error())
 	}
-	if tB == blas.Trans {
+	if tB != blas.NoTrans {
 		bmat = general64{
 			data:   b,
 			rows:   n,
@@ -67,12 +74,6 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 	err = cmat.check('c')
 	if err != nil {
 		panic(err.Error())
-	}
-	if tA != blas.Trans && tA != blas.NoTrans {
-		panic(badTranspose)
-	}
-	if tB != blas.Trans && tB != blas.NoTrans {
-		panic(badTranspose)
 	}
 
 	// scale c
@@ -126,8 +127,8 @@ func dgemmParallel(tA, tB blas.Transpose, a, b, c general64, alpha float64) {
 	// multiplies, though this code does not copy matrices to attempt to eliminate
 	// cache misses.
 
-	aTrans := tA == blas.Trans
-	bTrans := tB == blas.Trans
+	aTrans := tA == blas.Trans || tA == blas.ConjTrans
+	bTrans := tB == blas.Trans || tB == blas.ConjTrans
 
 	maxKLen, parBlocks := computeNumBlocks64(a, b, aTrans, bTrans)
 	if parBlocks < minParBlock {
@@ -264,13 +265,13 @@ func dgemmSerial(tA, tB blas.Transpose, a, b, c general64, alpha float64) {
 	case tA == blas.NoTrans && tB == blas.NoTrans:
 		dgemmSerialNotNot(a, b, c, alpha)
 		return
-	case tA == blas.Trans && tB == blas.NoTrans:
+	case tA != blas.NoTrans && tB == blas.NoTrans:
 		dgemmSerialTransNot(a, b, c, alpha)
 		return
-	case tA == blas.NoTrans && tB == blas.Trans:
+	case tA == blas.NoTrans && tB != blas.NoTrans:
 		dgemmSerialNotTrans(a, b, c, alpha)
 		return
-	case tA == blas.Trans && tB == blas.Trans:
+	case tA != blas.NoTrans && tB != blas.NoTrans:
 		dgemmSerialTransTrans(a, b, c, alpha)
 		return
 	default:

@@ -124,36 +124,51 @@ type functionInfo struct {
 //
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
-	UseInitialData       bool      // Use supplied information about the conitions at the initial x.
+	UseInitialData       bool      // Use supplied information about the conditions at the initial x.
 	InitialFunctionValue float64   // F(x) at the initial x.
 	InitialGradient      []float64 // Df(x) at the initial x.
 
-	// Converge if the objective function is less than this value.
+	// FunctionAbsTol is the threshold for acceptably small values of the
+	// objective function. FunctionAbsoluteConvergence status is returned if
+	// the objective function is less than this value.
+	// The default value is -inf.
 	FunctionAbsTol float64
 
-	// Loosely, converge if the 'average' value of the gradient is less than this
-	// value. Specifically, converge if ||grad||_2 / sqrt(len(grad)) is less than
-	// this value.
+	// GradientAbsTol determines the accuracy to which the minimum is found.
+	// GradientAbsoluteConvergence status is returned if the infinity norm of
+	// the gradient is less than this value.
 	// Has no effect if gradient information is not used.
+	// The default value is 1e-6.
 	GradientAbsTol float64
 
-	// Converge if the number of major iterations equals or exceeds this value.
+	// MajorIterations is the maximum number of iterations allowed.
+	// IterationLimit status is returned if the number of major iterations
+	// equals or exceeds this value.
 	// If it equals zero, this setting has no effect.
+	// The default value is 0.
 	MajorIterations int
 
-	// Converge if the duration of the run is longer than this value. Runtime
-	// is only checked at iterations of the optimizer. If it equals zero,
-	// this setting has no effect.
+	// Runtime is the maximum runtime allowed. RuntimeLimit status is returned
+	// if the duration of the run is longer than this value. Runtime is only
+	// checked at iterations of the Method.
+	// If it equals zero, this setting has no effect.
+	// The default value is 0.
 	Runtime time.Duration
 
-	// Converge if the total number of function evaluations equals or exceeds this
-	// number. Calls to F() and FDf() are both counted as function evaluations
-	// for this calculation. If it equals zero, this setting has no effect.
+	// FunctionEvals is the maximum allowed number of function evaluations.
+	// FunctionEvaluationLimit status is returned  if the total number of
+	// function evaluations equals or exceeds this number. Calls to F() and
+	// FDf() are both counted as function evaluations for this calculation.
+	// If it equals zero, this setting has no effect.
+	// The default value is 0.
 	FunctionEvals int
 
-	// Converge if the total number of gradient evaluations equals or exceeds this
-	// number. Calls to D() and FDf() are both counted as gradient evaluations
-	// for this calculation. If it equals zero, this setting has no effect.
+	// GradientEvals is the maximum allowed number of gradient evaluations.
+	// GradientEvaluationLimit status is returned if the total number of
+	// gradient evaluations equals or exceeds this number. Calls to Df() and
+	// FDf() are both counted as gradient evaluations for this calculation.
+	// If it equals zero, this setting has no effect.
+	// The default value is 0.
 	GradientEvals int
 
 	Recorder Recorder
@@ -168,9 +183,8 @@ func DefaultSettings() *Settings {
 	}
 }
 
-// resize takes x and returns a slice of length dim.
-// It returns a resliced x if cap(x) >= dim, and a new
-// slice otherwies
+// resize takes x and returns a slice of length dim. It returns a resliced x
+// if cap(x) >= dim, and a new slice otherwise.
 func resize(x []float64, dim int) []float64 {
 	if dim > cap(x) {
 		return make([]float64, dim)

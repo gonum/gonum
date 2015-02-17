@@ -158,12 +158,10 @@ var cgTests = []unconstrainedTest{
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-8,
 	},
-	// TODO(vladimir-ch): Enable this test when angle restart condition in CG
-	// has been revised.
-	// {
-	// 	f:       funcs.Box3D{},
-	// 	x:       []float64{0, 10, 20},
-	// },
+	{
+		f: funcs.Box3D{},
+		x: []float64{0, 10, 20},
+	},
 	{
 		f: funcs.Box3D{},
 		x: []float64{1.00001, 10.00001, 1.00001},

@@ -32,6 +32,11 @@ var (
 
 	// ErrZeroDimensional signifies an optimization was called with an input of length 0.
 	ErrZeroDimensional = errors.New("optimize: zero dimensional input")
+
+	// ErrNoProgress signifies that Linesearch cannot make further progress
+	// because there is no change in location after LinesearchMethod step due
+	// to floating-point arithmetic.
+	ErrNoProgress = errors.New("linesearch: no change in location after linesearch step")
 )
 
 // ErrMismatch signifies that the optimization function did not implement the

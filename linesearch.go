@@ -97,6 +97,11 @@ func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, I
 		return NoEvaluation, NoIteration, err
 	}
 	floats.AddScaledTo(xNext, ls.initX, stepSize, ls.dir)
+	// Compare the starting point for the current iteration with the next
+	// evaluation point to make sure that rounding errors do not prevent progress.
+	if floats.Equal(ls.initX, xNext) {
+		return NoEvaluation, NoIteration, ErrNoProgress
+	}
 	ls.lastEvalType = evalType
 	ls.iterType = MinorIteration
 	return evalType, ls.iterType, nil
@@ -119,6 +124,11 @@ func (ls *Linesearch) initNextLinesearch(loc *Location, xNext []float64) (Evalua
 	}
 	evalType := ls.Method.Init(lsLoc, stepsize, ls.funcInfo)
 	floats.AddScaledTo(xNext, ls.initX, stepsize, ls.dir)
+	// Compare the starting point for the current iteration with the next
+	// evaluation point to make sure that rounding errors do not prevent progress.
+	if floats.Equal(ls.initX, xNext) {
+		return NoEvaluation, NoIteration, ErrNoProgress
+	}
 	ls.lastEvalType = evalType
 	ls.iterType = MinorIteration
 	return evalType, ls.iterType, nil

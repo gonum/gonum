@@ -755,3 +755,25 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		}
 	}
 }
+
+func TestIssue76(t *testing.T) {
+	f := functions.BrownAndDennis{}
+	// Location very close to the minimum.
+	x := []float64{-11.594439904886773, 13.203630051265385, -0.40343948776868443, 0.2367787746745986}
+	s := &Settings{
+		FunctionAbsTol:  math.Inf(-1),
+		GradientAbsTol:  1e-14,
+		MajorIterations: 1000000,
+	}
+	m := &GradientDescent{
+		LinesearchMethod: &Backtracking{},
+	}
+	// We are not interested in the error, only in the returned status.
+	r, _ := Local(f, x, s, m)
+	// With the above stringent tolerance, the optimizer will never
+	// successfully reach the minimum. Check if it terminated in a finite
+	// number of steps.
+	if r.Status == IterationLimit {
+		t.Error("Issue https://github.com/gonum/optimize/issues/76 not fixed")
+	}
+}

@@ -237,8 +237,8 @@ var cgTests = []unconstrainedTest{
 		gradTol: 1e-8,
 	},
 	newVariablyDimensioned(100, 1e-10),
-	newVariablyDimensioned(1000, 1e-9),
-	newVariablyDimensioned(10000, 1e-7),
+	newVariablyDimensioned(1000, 1e-7),
+	newVariablyDimensioned(10000, 1e-4),
 	{
 		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0},
@@ -403,7 +403,7 @@ var newtonTests = []unconstrainedTest{
 		x:       []float64{1.09815e-05, 9.10614},
 		gradTol: 1e-10,
 	},
-	newVariablyDimensioned(100, 0),
+	newVariablyDimensioned(100, 1e-10),
 	{
 		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0},
@@ -471,15 +471,15 @@ var lbfgsTests = []unconstrainedTest{
 	},
 	{
 		f: functions.ExtendedRosenbrock{},
-		x: []float64{1e7, 1e7},
+		x: []float64{1e7, 1e6},
 	},
 	{
 		f:       functions.Gaussian{},
 		x:       []float64{0.398, 1, 0},
 		gradTol: 1e-10,
 	},
-	newVariablyDimensioned(1000, 1e-10),
-	newVariablyDimensioned(10000, 1e-8),
+	newVariablyDimensioned(1000, 1e-8),
+	newVariablyDimensioned(10000, 1e-5),
 }
 
 func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {

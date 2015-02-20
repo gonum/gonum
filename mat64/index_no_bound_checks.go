@@ -67,39 +67,39 @@ func (m *Vector) set(r int, v float64) {
 }
 
 // At returns the element at row r and column c.
-func (t *SymDense) At(r, c int) float64 {
-	if r >= t.mat.N || r < 0 {
+func (s *SymDense) At(r, c int) float64 {
+	if r >= s.mat.N || r < 0 {
 		panic(ErrRowAccess)
 	}
-	if c >= t.mat.N || c < 0 {
+	if c >= s.mat.N || c < 0 {
 		panic(ErrColAccess)
 	}
-	return t.at(r, c)
+	return s.at(r, c)
 }
 
-func (t *SymDense) at(r, c int) float64 {
+func (s *SymDense) at(r, c int) float64 {
 	if r > c {
 		r, c = c, r
 	}
-	return t.mat.Data[r*t.mat.Stride+c]
+	return s.mat.Data[r*s.mat.Stride+c]
 }
 
 // SetSym sets the elements at (r,c) and (c,r) to the value v.
-func (t *SymDense) SetSym(r, c int, v float64) {
-	if r >= t.mat.N || r < 0 {
+func (s *SymDense) SetSym(r, c int, v float64) {
+	if r >= s.mat.N || r < 0 {
 		panic(ErrRowAccess)
 	}
-	if c >= t.mat.N || c < 0 {
+	if c >= s.mat.N || c < 0 {
 		panic(ErrColAccess)
 	}
-	t.set(r, c, v)
+	s.set(r, c, v)
 }
 
-func (t *SymDense) set(r, c int, v float64) {
+func (s *SymDense) set(r, c int, v float64) {
 	if r > c {
 		r, c = c, r
 	}
-	t.mat.Data[r*t.mat.Stride+c] = v
+	s.mat.Data[r*s.mat.Stride+c] = v
 }
 
 // At returns the element at row r and column c.
@@ -126,7 +126,7 @@ func (t *Triangular) at(r, c int) float64 {
 	return t.mat.Data[r*t.mat.Stride+c]
 }
 
-// Set sets the element at row r and column c. Set panics if the location is outside
+// SetTri sets the element at row r and column c. Set panics if the location is outside
 // the appropriate half of the matrix.
 func (t *Triangular) SetTri(r, c int, v float64) {
 	if r >= t.mat.N || r < 0 {

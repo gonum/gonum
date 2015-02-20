@@ -524,13 +524,13 @@ func (m *Dense) Augment(a, b Matrix) {
 // MarshalBinary encodes the receiver into a binary form and returns the result.
 //
 // Dense is little-endian encoded as follows:
-//  0 -  8  number of rows    (int64)
-//  8 - 16  number of columns (int64)
-// 16 - ..  matrix data elements (float64)
-//          [0,0] [0,1] ... [0,ncols-1]
-//          [1,0] [1,1] ... [1,ncols-1]
-//          ...
-//          [nrows-1,0] ... [nrows-1,ncols-1]
+//   0 -  8  number of rows    (int64)
+//   8 - 16  number of columns (int64)
+//  16 - ..  matrix data elements (float64)
+//           [0,0] [0,1] ... [0,ncols-1]
+//           [1,0] [1,1] ... [1,ncols-1]
+//           ...
+//           [nrows-1,0] ... [nrows-1,ncols-1]
 func (m Dense) MarshalBinary() ([]byte, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, m.mat.Rows*m.mat.Cols*sizeFloat64+2*sizeInt64))
 	err := binary.Write(buf, defaultEndian, int64(m.mat.Rows))

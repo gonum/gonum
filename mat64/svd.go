@@ -121,7 +121,7 @@ func SVD(a *Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 				for i := k + 1; i < n; i++ {
 					e[i] /= e[k]
 				}
-				e[k+1] += 1
+				e[k+1]++
 			}
 			e[k] = -e[k]
 			if k+1 < m && e[k] != 0 {

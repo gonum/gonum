@@ -94,17 +94,17 @@ func setupFuncs(g graph.Graph, cost graph.CostFunc, heuristicCost graph.Heuristi
 
 /** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/
 
-type edgeSorter []concrete.WeightedEdge
+type byWeight []concrete.WeightedEdge
 
-func (e edgeSorter) Len() int {
+func (e byWeight) Len() int {
 	return len(e)
 }
 
-func (e edgeSorter) Less(i, j int) bool {
+func (e byWeight) Less(i, j int) bool {
 	return e[i].Cost < e[j].Cost
 }
 
-func (e edgeSorter) Swap(i, j int) {
+func (e byWeight) Swap(i, j int) {
 	e[i], e[j] = e[j], e[i]
 }
 

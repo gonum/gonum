@@ -365,7 +365,7 @@ var tarjanTests = []struct {
 	},
 }
 
-func TestTarjan(t *testing.T) {
+func TestTarjanSCC(t *testing.T) {
 	for i, test := range tarjanTests {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
@@ -377,7 +377,7 @@ func TestTarjan(t *testing.T) {
 				g.AddDirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		gotSCCs := search.Tarjan(g)
+		gotSCCs := search.TarjanSCC(g)
 		// tarjan.strongconnect does range iteration over maps,
 		// so sort SCC members to ensure consistent ordering.
 		gotIDs := make([][]int, len(gotSCCs))

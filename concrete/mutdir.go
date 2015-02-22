@@ -37,13 +37,11 @@ func NewDirectedGraph() *DirectedGraph {
 func (g *DirectedGraph) NewNode() graph.Node {
 	if g.maxID != maxInt {
 		g.maxID++
-		g.AddNode(Node(g.maxID))
 		return Node(g.maxID)
 	}
 
 	// Implicitly checks if len(g.freeMap) == 0
 	for id := range g.freeMap {
-		g.AddNode(Node(id))
 		return Node(id)
 	}
 
@@ -54,7 +52,6 @@ func (g *DirectedGraph) NewNode() graph.Node {
 
 	for i := 0; i < maxInt; i++ {
 		if _, ok := g.nodeMap[i]; !ok {
-			g.AddNode(Node(i))
 			return Node(i)
 		}
 	}

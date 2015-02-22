@@ -33,6 +33,10 @@ func TestMaxID(t *testing.T) {
 	g.RemoveNode(concrete.Node(2))
 	delete(nodes, concrete.Node(2))
 	n := g.NewNode()
+	g.AddNode(n)
+	if !g.NodeExists(n) {
+		t.Error("added node does not exist in graph")
+	}
 	if _, exists := nodes[n]; exists {
 		t.Errorf("Created already existing node id: %v", n.ID())
 	}

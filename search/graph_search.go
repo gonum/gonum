@@ -249,6 +249,7 @@ func Johnson(g graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]gr
 
 	/* Step 1: Dummy node with 0 cost edge weights to every other node*/
 	dummyNode := dummyGraph.NewNode()
+	dummyGraph.AddNode(dummyNode)
 	for _, node := range g.NodeList() {
 		dummyGraph.AddDirectedEdge(concrete.Edge{dummyNode, node}, 0)
 	}

@@ -139,8 +139,7 @@ type HeuristicCoster interface {
 // itself. That said, any function that takes Mutable[x], the destination mutable should
 // always be a different graph than the source.
 type Mutable interface {
-	// NewNode adds a node with an arbitrary ID and returns the new, unique ID
-	// used.
+	// NewNode returns a node with a unique arbitrary ID.
 	NewNode() Node
 
 	// Adds a node to the graph. If this is called multiple times for the same ID, the newer node

@@ -7,7 +7,6 @@ package search
 import (
 	"container/heap"
 	"errors"
-	"math"
 	"sort"
 
 	"github.com/gonum/graph"
@@ -383,59 +382,85 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 // An undirected graph should end up with as many SCCs as there are "islands" (or subgraphs) of
 // connections, meaning having more than one strongly connected component implies that your graph
 // is not fully connected.
-func Tarjan(g graph.Graph) (sccs [][]graph.Node) {
-	index := 0
-	stackSet := make(intSet)
-	vStack := &nodeStack{}
-	sccs = make([][]graph.Node, 0)
-
+func Tarjan(g graph.Graph) [][]graph.Node {
 	nodes := g.NodeList()
-	lowlinks := make(map[int]int, len(nodes))
-	indices := make(map[int]int, len(nodes))
+	t := tarjan{
+		succ: setupFuncs(g, nil, nil).successors,
 
-	successors := setupFuncs(g, nil, nil).successors
-
-	var strongconnect func(graph.Node) []graph.Node
-
-	strongconnect = func(node graph.Node) []graph.Node {
-		indices[node.ID()] = index
-		lowlinks[node.ID()] = index
-		index += 1
-
-		vStack.push(node)
-		stackSet.add(node.ID())
-
-		for _, succ := range successors(node) {
-			if _, ok := indices[succ.ID()]; !ok {
-				strongconnect(succ)
-				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))
-			} else if stackSet.has(succ.ID()) {
-				lowlinks[node.ID()] = int(math.Min(float64(lowlinks[node.ID()]), float64(lowlinks[succ.ID()])))
-			}
-		}
-
-		if lowlinks[node.ID()] == indices[node.ID()] {
-			scc := make([]graph.Node, 0)
-			for {
-				v := vStack.pop()
-				stackSet.remove(v.ID())
-				scc = append(scc, v)
-				if v.ID() == node.ID() {
-					return scc
-				}
-			}
-		}
-
-		return nil
+		indexTable: make(map[int]int, len(nodes)),
+		lowLink:    make(map[int]int, len(nodes)),
+		onStack:    make(intSet, len(nodes)),
 	}
-
-	for _, n := range nodes {
-		if _, ok := indices[n.ID()]; !ok {
-			sccs = append(sccs, strongconnect(n))
+	for _, v := range nodes {
+		if t.indexTable[v.ID()] == 0 {
+			t.strongconnect(v)
 		}
 	}
+	return t.sccs
+}
 
-	return sccs
+// tarjan implements Tarjan's strongly connected component finding
+// algorithm. The implementation is from the pseudocode at
+//
+// http://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm?oldid=642744644
+//
+type tarjan struct {
+	succ func(graph.Node) []graph.Node
+
+	index      int
+	indexTable map[int]int
+	lowLink    map[int]int
+	onStack    intSet
+
+	stack []graph.Node
+
+	sccs [][]graph.Node
+}
+
+// strongconnect is the strongconnect function described in the
+// wikipedia article.
+func (t *tarjan) strongconnect(v graph.Node) {
+	vID := v.ID()
+
+	// Set the depth index for v to the smallest unused index.
+	t.index++
+	t.indexTable[vID] = t.index
+	t.lowLink[vID] = t.index
+	t.stack = append(t.stack, v)
+	t.onStack.add(vID)
+
+	// Consider successors of v.
+	for _, w := range t.succ(v) {
+		wID := w.ID()
+		if t.indexTable[wID] == 0 {
+			// Successor w has not yet been visited; recur on it.
+			t.strongconnect(w)
+			t.lowLink[vID] = min(t.lowLink[vID], t.lowLink[wID])
+		} else if t.onStack.has(wID) {
+			// Successor w is in stack s and hence in the current SCC.
+			t.lowLink[vID] = min(t.lowLink[vID], t.indexTable[wID])
+		}
+	}
+
+	// If v is a root node, pop the stack and generate an SCC.
+	if t.lowLink[vID] == t.indexTable[vID] {
+		// Start a new strongly connected component.
+		var (
+			scc []graph.Node
+			w   graph.Node
+		)
+		for {
+			w, t.stack = t.stack[len(t.stack)-1], t.stack[:len(t.stack)-1]
+			t.onStack.remove(w.ID())
+			// Add w to current strongly connected component.
+			scc = append(scc, w)
+			if w.ID() == vID {
+				break
+			}
+		}
+		// Output the current strongly connected component.
+		t.sccs = append(t.sccs, scc)
+	}
 }
 
 // IsPath returns true for a connected path within a graph.

@@ -224,3 +224,10 @@ func (s *nodeStack) pop() graph.Node {
 	return n
 }
 func (s *nodeStack) push(n graph.Node) { *s = append(*s, n) }
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

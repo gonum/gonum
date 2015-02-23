@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/gonum/floats"
-	funcs "github.com/gonum/optimize/functions"
+	"github.com/gonum/optimize/functions"
 )
 
 type unconstrainedTest struct {
@@ -40,199 +40,199 @@ func (t unconstrainedTest) String() string {
 
 var gradientDescentTests = []unconstrainedTest{
 	{
-		f: funcs.Beale{},
+		f: functions.Beale{},
 		x: []float64{1, 1},
 	},
 	{
-		f: funcs.Beale{},
+		f: functions.Beale{},
 		x: []float64{3.00001, 0.50001},
 	},
 	{
-		f: funcs.BiggsEXP2{},
+		f: functions.BiggsEXP2{},
 		x: []float64{1, 2},
 	},
 	{
-		f: funcs.BiggsEXP2{},
+		f: functions.BiggsEXP2{},
 		x: []float64{1.00001, 10.00001},
 	},
 	{
-		f: funcs.BiggsEXP3{},
+		f: functions.BiggsEXP3{},
 		x: []float64{1, 2, 1},
 	},
 	{
-		f: funcs.BiggsEXP3{},
+		f: functions.BiggsEXP3{},
 		x: []float64{1.00001, 10.00001, 3.00001},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{-1.2, 1},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{1.00001, 1.00001},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{-1.2, 1, -1.2},
 	},
 	{
-		f:    funcs.ExtendedRosenbrock{},
+		f:    functions.ExtendedRosenbrock{},
 		x:    []float64{-120, 100, 50},
 		long: true,
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{1, 1, 1},
 	},
 	{
-		f:       funcs.ExtendedRosenbrock{},
+		f:       functions.ExtendedRosenbrock{},
 		x:       []float64{1.00001, 1.00001, 1.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f:       funcs.Gaussian{},
+		f:       functions.Gaussian{},
 		x:       []float64{0.4, 1, 0},
 		gradTol: 1e-9,
 	},
 	{
-		f:       funcs.Gaussian{},
+		f:       functions.Gaussian{},
 		x:       []float64{0.3989561, 1.0000191, 0},
 		gradTol: 1e-9,
 	},
 	{
-		f: funcs.HelicalValley{},
+		f: functions.HelicalValley{},
 		x: []float64{-1, 0, 0},
 	},
 	{
-		f: funcs.HelicalValley{},
+		f: functions.HelicalValley{},
 		x: []float64{1.00001, 0.00001, 0.00001},
 	},
 	{
-		f:       funcs.Trigonometric{},
+		f:       functions.Trigonometric{},
 		x:       []float64{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
 		gradTol: 1e-8,
 	},
 	{
-		f: funcs.Trigonometric{},
+		f: functions.Trigonometric{},
 		x: []float64{0.042964, 0.043976, 0.045093, 0.046338, 0.047744,
 			0.049354, 0.051237, 0.195209, 0.164977, 0.060148},
 		gradTol: 1e-8,
 	},
 	newVariablyDimensioned(2, 0),
 	{
-		f: funcs.VariablyDimensioned{},
+		f: functions.VariablyDimensioned{},
 		x: []float64{1.00001, 1.00001},
 	},
 	newVariablyDimensioned(10, 0),
 	{
-		f: funcs.VariablyDimensioned{},
+		f: functions.VariablyDimensioned{},
 		x: []float64{1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001},
 	},
 }
 
 var cgTests = []unconstrainedTest{
 	{
-		f: funcs.BiggsEXP4{},
+		f: functions.BiggsEXP4{},
 		x: []float64{1, 2, 1, 1},
 	},
 	{
-		f: funcs.BiggsEXP4{},
+		f: functions.BiggsEXP4{},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001},
 	},
 	{
-		f:       funcs.BiggsEXP5{},
+		f:       functions.BiggsEXP5{},
 		x:       []float64{1, 2, 1, 1, 1},
 		gradTol: 1e-7,
 	},
 	{
-		f: funcs.BiggsEXP5{},
+		f: functions.BiggsEXP5{},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001},
 	},
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-7,
 	},
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f: funcs.Box3D{},
+		f: functions.Box3D{},
 		x: []float64{0, 10, 20},
 	},
 	{
-		f: funcs.Box3D{},
+		f: functions.Box3D{},
 		x: []float64{1.00001, 10.00001, 1.00001},
 	},
 	{
-		f: funcs.Box3D{},
+		f: functions.Box3D{},
 		x: []float64{100.00001, 100.00001, 0.00001},
 	},
 	{
-		f: funcs.ExtendedPowellSingular{},
+		f: functions.ExtendedPowellSingular{},
 		x: []float64{3, -1, 0, 3},
 	},
 	{
-		f: funcs.ExtendedPowellSingular{},
+		f: functions.ExtendedPowellSingular{},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f:       funcs.ExtendedPowellSingular{},
+		f:       functions.ExtendedPowellSingular{},
 		x:       []float64{3, -1, 0, 3, 3, -1, 0, 3},
 		gradTol: 1e-8,
 	},
 	{
-		f: funcs.ExtendedPowellSingular{},
+		f: functions.ExtendedPowellSingular{},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{-1.2, 1, -1.2, 1},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{1e4, 1e4},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{1.00001, 1.00001, 1.00001, 1.00001},
 	},
 	{
-		f:       funcs.PenaltyI{},
+		f:       functions.PenaltyI{},
 		x:       []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 		gradTol: 1e-10,
 	},
 	{
-		f:       funcs.PenaltyI{},
+		f:       functions.PenaltyI{},
 		x:       []float64{0.250007, 0.250007, 0.250007, 0.250007},
 		gradTol: 1e-10,
 	},
 	{
-		f: funcs.PenaltyI{},
+		f: functions.PenaltyI{},
 		x: []float64{0.1581, 0.1581, 0.1581, 0.1581, 0.1581, 0.1581,
 			0.1581, 0.1581, 0.1581, 0.1581},
 		gradTol: 1e-10,
 	},
 	{
-		f:       funcs.PenaltyII{},
+		f:       functions.PenaltyII{},
 		x:       []float64{0.5, 0.5, 0.5, 0.5},
 		gradTol: 1e-8,
 	},
 	{
-		f:       funcs.PenaltyII{},
+		f:       functions.PenaltyII{},
 		x:       []float64{0.19999, 0.19131, 0.4801, 0.51884},
 		gradTol: 1e-8,
 	},
 	{
-		f: funcs.PenaltyII{},
+		f: functions.PenaltyII{},
 		x: []float64{0.19998, 0.01035, 0.01960, 0.03208, 0.04993, 0.07651,
 			0.11862, 0.19214, 0.34732, 0.36916},
 		gradTol: 1e-6,
 	},
 	{
-		f:       funcs.PowellBadlyScaled{},
+		f:       functions.PowellBadlyScaled{},
 		x:       []float64{1.09815e-05, 9.10614},
 		gradTol: 1e-8,
 	},
@@ -240,29 +240,29 @@ var cgTests = []unconstrainedTest{
 	newVariablyDimensioned(1000, 1e-9),
 	newVariablyDimensioned(10000, 1e-7),
 	{
-		f:       funcs.Watson{},
+		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0},
 		gradTol: 1e-7,
 	},
 	{
-		f:       funcs.Watson{},
+		f:       functions.Watson{},
 		x:       []float64{-0.01572, 1.01243, -0.23299, 1.26043, -1.51372, 0.99299},
 		gradTol: 1e-7,
 	},
 	{
-		f:       funcs.Watson{},
+		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		gradTol: 1e-7,
 		long:    true,
 	},
 	{
-		f: funcs.Watson{},
+		f: functions.Watson{},
 		x: []float64{-1.53070e-05, 0.99978, 0.01476, 0.14634, 1.00082,
 			-2.61773, 4.10440, -3.14361, 1.05262},
 		gradTol: 1e-7,
 	},
 	{
-		f:       funcs.Wood{},
+		f:       functions.Wood{},
 		x:       []float64{-3, -1, -3, -1},
 		gradTol: 1e-6,
 	},
@@ -270,157 +270,157 @@ var cgTests = []unconstrainedTest{
 
 var newtonTests = []unconstrainedTest{
 	{
-		f: funcs.BiggsEXP4{},
+		f: functions.BiggsEXP4{},
 		x: []float64{1, 2, 1, 1},
 	},
 	{
-		f: funcs.BiggsEXP4{},
+		f: functions.BiggsEXP4{},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001},
 	},
 	{
-		f: funcs.BiggsEXP5{},
+		f: functions.BiggsEXP5{},
 		x: []float64{1, 2, 1, 1, 1},
 	},
 	{
-		f: funcs.BiggsEXP5{},
+		f: functions.BiggsEXP5{},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001},
 	},
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-8,
 	},
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f: funcs.Box3D{},
+		f: functions.Box3D{},
 		x: []float64{0, 10, 20},
 	},
 	{
-		f: funcs.Box3D{},
+		f: functions.Box3D{},
 		x: []float64{1.00001, 10.00001, 1.00001},
 	},
 	{
-		f: funcs.Box3D{},
+		f: functions.Box3D{},
 		x: []float64{100.00001, 100.00001, 0.00001},
 	},
 	{
-		f: funcs.BrownBadlyScaled{},
+		f: functions.BrownBadlyScaled{},
 		x: []float64{1, 1},
 	},
 	{
-		f: funcs.BrownBadlyScaled{},
+		f: functions.BrownBadlyScaled{},
 		x: []float64{1.000001e6, 2.01e-6},
 	},
 	{
-		f: funcs.ExtendedPowellSingular{},
+		f: functions.ExtendedPowellSingular{},
 		x: []float64{3, -1, 0, 3},
 	},
 	{
-		f: funcs.ExtendedPowellSingular{},
+		f: functions.ExtendedPowellSingular{},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f: funcs.ExtendedPowellSingular{},
+		f: functions.ExtendedPowellSingular{},
 		x: []float64{3, -1, 0, 3, 3, -1, 0, 3},
 	},
 	{
-		f: funcs.ExtendedPowellSingular{},
+		f: functions.ExtendedPowellSingular{},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{-1.2, 1, -1.2, 1},
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{1.00001, 1.00001, 1.00001, 1.00001},
 	},
 	{
-		f:       funcs.Gaussian{},
+		f:       functions.Gaussian{},
 		x:       []float64{0.4, 1, 0},
 		gradTol: 1e-11,
 	},
 	{
-		f: funcs.GulfResearchAndDevelopment{},
+		f: functions.GulfResearchAndDevelopment{},
 		x: []float64{5, 2.5, 0.15},
 	},
 	{
-		f: funcs.GulfResearchAndDevelopment{},
+		f: functions.GulfResearchAndDevelopment{},
 		x: []float64{50.00001, 25.00001, 1.50001},
 	},
 	{
-		f: funcs.GulfResearchAndDevelopment{},
+		f: functions.GulfResearchAndDevelopment{},
 		x: []float64{99.89529, 60.61453, 9.16124},
 	},
 	{
-		f: funcs.GulfResearchAndDevelopment{},
+		f: functions.GulfResearchAndDevelopment{},
 		x: []float64{201.66258, 60.61633, 10.22489},
 	},
 	{
-		f: funcs.PenaltyI{},
+		f: functions.PenaltyI{},
 		x: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 	},
 	{
-		f: funcs.PenaltyI{},
+		f: functions.PenaltyI{},
 		x: []float64{0.250007, 0.250007, 0.250007, 0.250007},
 	},
 	{
-		f: funcs.PenaltyI{},
+		f: functions.PenaltyI{},
 		x: []float64{0.1581, 0.1581, 0.1581, 0.1581, 0.1581, 0.1581,
 			0.1581, 0.1581, 0.1581, 0.1581},
 	},
 	{
-		f:       funcs.PenaltyII{},
+		f:       functions.PenaltyII{},
 		x:       []float64{0.5, 0.5, 0.5, 0.5},
 		gradTol: 1e-10,
 	},
 	{
-		f:       funcs.PenaltyII{},
+		f:       functions.PenaltyII{},
 		x:       []float64{0.19999, 0.19131, 0.4801, 0.51884},
 		gradTol: 1e-10,
 	},
 	{
-		f:       funcs.PenaltyII{},
+		f:       functions.PenaltyII{},
 		x:       []float64{0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
 		gradTol: 1e-9,
 	},
 	{
-		f: funcs.PenaltyII{},
+		f: functions.PenaltyII{},
 		x: []float64{0.19998, 0.01035, 0.01960, 0.03208, 0.04993, 0.07651,
 			0.11862, 0.19214, 0.34732, 0.36916},
 		gradTol: 1e-9,
 	},
 	{
-		f: funcs.PowellBadlyScaled{},
+		f: functions.PowellBadlyScaled{},
 		x: []float64{0, 1},
 	},
 	{
-		f:       funcs.PowellBadlyScaled{},
+		f:       functions.PowellBadlyScaled{},
 		x:       []float64{1.09815e-05, 9.10614},
 		gradTol: 1e-10,
 	},
 	newVariablyDimensioned(100, 0),
 	{
-		f:       funcs.Watson{},
+		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0},
 		gradTol: 1e-7,
 	},
 	{
-		f:       funcs.Watson{},
+		f:       functions.Watson{},
 		x:       []float64{-0.01572, 1.01243, -0.23299, 1.26043, -1.51372, 0.99299},
 		gradTol: 1e-7,
 	},
 	{
-		f:       funcs.Watson{},
+		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 		gradTol: 1e-8,
 	},
 	{
-		f: funcs.Watson{},
+		f: functions.Watson{},
 		x: []float64{-1.53070e-05, 0.99978, 0.01476, 0.14634, 1.00082,
 			-2.61773, 4.10440, -3.14361, 1.05262},
 		gradTol: 1e-8,
@@ -429,52 +429,52 @@ var newtonTests = []unconstrainedTest{
 
 var bfgsTests = []unconstrainedTest{
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-10,
 	},
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-10,
 	},
 	{
-		f:       funcs.BrownAndDennis{},
+		f:       functions.BrownAndDennis{},
 		x:       []float64{25, 5, -5, -1},
 		gradTol: 1e-5,
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{1e5, 1e5},
 	},
 	{
-		f:       funcs.Gaussian{},
+		f:       functions.Gaussian{},
 		x:       []float64{0.398, 1, 0},
 		gradTol: 1e-11,
 	},
 	{
-		f: funcs.Wood{},
+		f: functions.Wood{},
 		x: []float64{-3, -1, -3, -1},
 	},
 }
 
 var lbfgsTests = []unconstrainedTest{
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-8,
 	},
 	{
-		f:       funcs.BiggsEXP6{},
+		f:       functions.BiggsEXP6{},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f: funcs.ExtendedRosenbrock{},
+		f: functions.ExtendedRosenbrock{},
 		x: []float64{1e7, 1e7},
 	},
 	{
-		f:       funcs.Gaussian{},
+		f:       functions.Gaussian{},
 		x:       []float64{0.398, 1, 0},
 		gradTol: 1e-10,
 	},
@@ -488,7 +488,7 @@ func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {
 		x[i] = float64(dim-i-1) / float64(dim)
 	}
 	return unconstrainedTest{
-		f:       funcs.VariablyDimensioned{},
+		f:       functions.VariablyDimensioned{},
 		x:       x,
 		gradTol: gradTol,
 	}

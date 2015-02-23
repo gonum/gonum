@@ -668,19 +668,19 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			continue
 		}
 
-		funcs, funcInfo := getFunctionInfo(test.f)
+		funcInfo := getFunctionInfo(test.f)
 
 		// Evaluate the norm of the gradient at the found optimum location.
 		var optF, optNorm float64
 		if funcInfo.IsFunctionGradient {
 			g := make([]float64, len(test.x))
-			optF = funcs.gradFunc.FDf(result.X, g)
+			optF = funcInfo.functionGradient.FDf(result.X, g)
 			optNorm = floats.Norm(g, math.Inf(1))
 		} else {
-			optF = funcs.function.F(result.X)
+			optF = funcInfo.function.F(result.X)
 			if funcInfo.IsGradient {
 				g := make([]float64, len(test.x))
-				funcs.gradient.Df(result.X, g)
+				funcInfo.gradient.Df(result.X, g)
 				optNorm = floats.Norm(g, math.Inf(1))
 			}
 		}
@@ -704,12 +704,12 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		settings.UseInitialData = true
 		if funcInfo.IsFunctionGradient {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			settings.InitialFunctionValue = funcs.gradFunc.FDf(test.x, settings.InitialGradient)
+			settings.InitialFunctionValue = funcInfo.functionGradient.FDf(test.x, settings.InitialGradient)
 		} else {
-			settings.InitialFunctionValue = funcs.function.F(test.x)
+			settings.InitialFunctionValue = funcInfo.function.F(test.x)
 			if funcInfo.IsGradient {
 				settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-				funcs.gradient.Df(test.x, settings.InitialGradient)
+				funcInfo.gradient.Df(test.x, settings.InitialGradient)
 			}
 		}
 

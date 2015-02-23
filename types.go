@@ -103,13 +103,16 @@ type FunctionInfo struct {
 	IsStatuser         bool
 }
 
-// functions contains the actual methods of F that have been successfully type
-// switched
-type functions struct {
-	function Function
-	gradient Gradient
-	gradFunc FunctionGradient
-	status   Statuser
+// functionInfo contains information about which interfaces the objective
+// function F implements and the actual methods of F that have been
+// successfully type switched.
+type functionInfo struct {
+	FunctionInfo
+
+	function         Function
+	gradient         Gradient
+	functionGradient FunctionGradient
+	statuser         Statuser
 }
 
 // Settings represents settings of the optimization run. It contains initial

@@ -318,7 +318,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 				loc.Gradient[i] = math.NaN()
 			}
 		}
-		loc.F = funcInfo.function.F(loc.X)
+		loc.F = funcInfo.function.Func(loc.X)
 		stats.FunctionEvals++
 		return
 	case GradientEval:
@@ -344,7 +344,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 			return
 		}
 		if funcInfo.IsGradient {
-			loc.F = funcInfo.function.F(loc.X)
+			loc.F = funcInfo.function.Func(loc.X)
 			stats.FunctionEvals++
 			funcInfo.gradient.Df(loc.X, loc.Gradient)
 			stats.GradientEvals++

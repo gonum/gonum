@@ -20,7 +20,7 @@ import (
 
 // function represents an objective function.
 type function interface {
-	F(x []float64) float64
+	Func(x []float64) float64
 }
 
 type gradient interface {
@@ -101,11 +101,11 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 	}
 
 	for i, test := range tests {
-		F := f.F(test.X)
+		F := f.Func(test.X)
 
 		// Check that the function value is as expected.
 		if math.Abs(F-test.F) > defaultTol {
-			t.Errorf("Test #%d: function value given by F() is incorrect. Want: %v, Got: %v",
+			t.Errorf("Test #%d: function value given by Func() is incorrect. Want: %v, Got: %v",
 				i, test.F, F)
 		}
 
@@ -114,7 +114,7 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 		}
 
 		// Evaluate the finite difference gradient.
-		fdGrad := fd.Gradient(nil, f.F, test.X, nil)
+		fdGrad := fd.Gradient(nil, f.Func, test.X, nil)
 
 		// Check that the finite difference and expected gradients match.
 		if !floats.EqualApprox(fdGrad, test.Gradient, defaultFDGradTol) {

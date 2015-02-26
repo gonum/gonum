@@ -90,7 +90,7 @@ type Result struct {
 // Stats contains the statistics of the run.
 type Stats struct {
 	MajorIterations       int           // Total number of major iterations
-	FunctionEvals         int           // Number of evaluations of F()
+	FunctionEvals         int           // Number of evaluations of Func()
 	GradientEvals         int           // Number of evaluations of Df()
 	FunctionGradientEvals int           // Number of evaluations of FDf()
 	Runtime               time.Duration // Total runtime of the optimization
@@ -125,7 +125,7 @@ type functionInfo struct {
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
 	UseInitialData       bool      // Use supplied information about the conditions at the initial x.
-	InitialFunctionValue float64   // F(x) at the initial x.
+	InitialFunctionValue float64   // Func(x) at the initial x.
 	InitialGradient      []float64 // Df(x) at the initial x.
 
 	// FunctionAbsTol is the threshold for acceptably small values of the
@@ -157,7 +157,7 @@ type Settings struct {
 
 	// FunctionEvals is the maximum allowed number of function evaluations.
 	// FunctionEvaluationLimit status is returned  if the total number of
-	// function evaluations equals or exceeds this number. Calls to F() and
+	// function evaluations equals or exceeds this number. Calls to Func() and
 	// FDf() are both counted as function evaluations for this calculation.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.

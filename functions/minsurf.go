@@ -45,8 +45,8 @@ func NewMinimalSurface(nx, ny int) *MinimalSurface {
 	return ms
 }
 
-// F returns the area of the surface represented by the vector x.
-func (ms *MinimalSurface) F(x []float64) (area float64) {
+// Func returns the area of the surface represented by the vector x.
+func (ms *MinimalSurface) Func(x []float64) (area float64) {
 	return ms.FDf(x, nil)
 }
 

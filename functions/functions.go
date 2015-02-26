@@ -24,7 +24,7 @@ import (
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Beale struct{}
 
-func (Beale) F(x []float64) float64 {
+func (Beale) Func(x []float64) float64 {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -75,7 +75,7 @@ func (Beale) Minima() []Minimum {
 //  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP2 struct{}
 
-func (BiggsEXP2) F(x []float64) (sum float64) {
+func (BiggsEXP2) Func(x []float64) (sum float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -133,7 +133,7 @@ func (BiggsEXP2) Minima() []Minimum {
 //  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP3 struct{}
 
-func (BiggsEXP3) F(x []float64) (sum float64) {
+func (BiggsEXP3) Func(x []float64) (sum float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -193,7 +193,7 @@ func (BiggsEXP3) Minima() []Minimum {
 //  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP4 struct{}
 
-func (BiggsEXP4) F(x []float64) (sum float64) {
+func (BiggsEXP4) Func(x []float64) (sum float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -255,7 +255,7 @@ func (BiggsEXP4) Minima() []Minimum {
 //  of the objective function. IMA J Appl Math 8 (1971), 315-327; doi:10.1093/imamat/8.3.315
 type BiggsEXP5 struct{}
 
-func (BiggsEXP5) F(x []float64) (sum float64) {
+func (BiggsEXP5) Func(x []float64) (sum float64) {
 	if len(x) != 5 {
 		panic("dimension of the problem must be 5")
 	}
@@ -322,7 +322,7 @@ func (BiggsEXP5) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type BiggsEXP6 struct{}
 
-func (BiggsEXP6) F(x []float64) (sum float64) {
+func (BiggsEXP6) Func(x []float64) (sum float64) {
 	if len(x) != 6 {
 		panic("dimension of the problem must be 6")
 	}
@@ -402,7 +402,7 @@ func (BiggsEXP6) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Box3D struct{}
 
-func (Box3D) F(x []float64) (sum float64) {
+func (Box3D) Func(x []float64) (sum float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -468,7 +468,7 @@ func (Box3D) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type BrownBadlyScaled struct{}
 
-func (BrownBadlyScaled) F(x []float64) float64 {
+func (BrownBadlyScaled) Func(x []float64) float64 {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -517,7 +517,7 @@ func (BrownBadlyScaled) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type BrownAndDennis struct{}
 
-func (BrownAndDennis) F(x []float64) (sum float64) {
+func (BrownAndDennis) Func(x []float64) (sum float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -579,7 +579,7 @@ func (BrownAndDennis) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type ExtendedPowellSingular struct{}
 
-func (ExtendedPowellSingular) F(x []float64) (sum float64) {
+func (ExtendedPowellSingular) Func(x []float64) (sum float64) {
 	if len(x)%4 != 0 {
 		panic("dimension of the problem must be a multiple of 4")
 	}
@@ -651,7 +651,7 @@ func (ExtendedPowellSingular) Minima() []Minimum {
 //  - http://en.wikipedia.org/wiki/Rosenbrock_function
 type ExtendedRosenbrock struct{}
 
-func (ExtendedRosenbrock) F(x []float64) (sum float64) {
+func (ExtendedRosenbrock) Func(x []float64) (sum float64) {
 	for i := 0; i < len(x)-1; i++ {
 		a := 1 - x[i]
 		b := x[i+1] - x[i]*x[i]
@@ -766,7 +766,7 @@ func (Gaussian) y(i int) (yi float64) {
 	return yi
 }
 
-func (g Gaussian) F(x []float64) (sum float64) {
+func (g Gaussian) Func(x []float64) (sum float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -828,7 +828,7 @@ func (Gaussian) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type GulfResearchAndDevelopment struct{}
 
-func (GulfResearchAndDevelopment) F(x []float64) (sum float64) {
+func (GulfResearchAndDevelopment) Func(x []float64) (sum float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -904,7 +904,7 @@ func (GulfResearchAndDevelopment) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type HelicalValley struct{}
 
-func (HelicalValley) F(x []float64) float64 {
+func (HelicalValley) Func(x []float64) float64 {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -959,7 +959,7 @@ func (HelicalValley) Minima() []Minimum {
 // Linear implements a linear function.
 type Linear struct{}
 
-func (Linear) F(x []float64) float64 {
+func (Linear) Func(x []float64) float64 {
 	return floats.Sum(x)
 }
 
@@ -986,7 +986,7 @@ func (Linear) Df(x, grad []float64) {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type PenaltyI struct{}
 
-func (PenaltyI) F(x []float64) (sum float64) {
+func (PenaltyI) Func(x []float64) (sum float64) {
 	for _, v := range x {
 		sum += (v - 1) * (v - 1)
 	}
@@ -1044,7 +1044,7 @@ func (PenaltyI) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type PenaltyII struct{}
 
-func (PenaltyII) F(x []float64) (sum float64) {
+func (PenaltyII) Func(x []float64) (sum float64) {
 	dim := len(x)
 	s := -1.0
 	for i, v := range x {
@@ -1124,7 +1124,7 @@ func (PenaltyII) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type PowellBadlyScaled struct{}
 
-func (PowellBadlyScaled) F(x []float64) float64 {
+func (PowellBadlyScaled) Func(x []float64) float64 {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -1171,7 +1171,7 @@ func (PowellBadlyScaled) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Trigonometric struct{}
 
-func (Trigonometric) F(x []float64) (sum float64) {
+func (Trigonometric) Func(x []float64) (sum float64) {
 	var s1 float64
 	for _, v := range x {
 		s1 += math.Cos(v)
@@ -1238,7 +1238,7 @@ func (Trigonometric) Minima() []Minimum {
 //  software. ACM Trans Math Softw 7 (1981), 17-41
 type VariablyDimensioned struct{}
 
-func (VariablyDimensioned) F(x []float64) (sum float64) {
+func (VariablyDimensioned) Func(x []float64) (sum float64) {
 	for _, v := range x {
 		t := v - 1
 		sum += t * t
@@ -1313,7 +1313,7 @@ func (VariablyDimensioned) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Watson struct{}
 
-func (Watson) F(x []float64) (sum float64) {
+func (Watson) Func(x []float64) (sum float64) {
 	for i := 1; i <= 29; i++ {
 		d1 := float64(i) / 29
 
@@ -1416,7 +1416,7 @@ func (Watson) Minima() []Minimum {
 //    optimization software. ACM Trans Math Softw 7 (1981), 17-41
 type Wood struct{}
 
-func (Wood) F(x []float64) (sum float64) {
+func (Wood) Func(x []float64) (sum float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}

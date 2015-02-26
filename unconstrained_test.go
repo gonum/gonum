@@ -677,7 +677,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			optF = funcInfo.functionGradient.FDf(result.X, g)
 			optNorm = floats.Norm(g, math.Inf(1))
 		} else {
-			optF = funcInfo.function.F(result.X)
+			optF = funcInfo.function.Func(result.X)
 			if funcInfo.IsGradient {
 				g := make([]float64, len(test.x))
 				funcInfo.gradient.Df(result.X, g)
@@ -706,7 +706,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
 			settings.InitialFunctionValue = funcInfo.functionGradient.FDf(test.x, settings.InitialGradient)
 		} else {
-			settings.InitialFunctionValue = funcInfo.function.F(test.x)
+			settings.InitialFunctionValue = funcInfo.function.Func(test.x)
 			if funcInfo.IsGradient {
 				settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
 				funcInfo.gradient.Df(test.x, settings.InitialGradient)

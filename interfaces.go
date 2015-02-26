@@ -7,7 +7,7 @@ package optimize
 // Function evaluates the objective function at the given location. F
 // must not modify x.
 type Function interface {
-	F(x []float64) (obj float64)
+	Func(x []float64) (obj float64)
 }
 
 // Gradient evaluates the gradient at x and stores the result in place. Df

@@ -333,13 +333,13 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 			return
 		}
 		if funcInfo.IsFunctionGradient {
-			loc.F = funcInfo.functionGradient.FDf(loc.X, loc.Gradient)
+			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FunctionGradientEvals++
 			return
 		}
 	case FunctionAndGradientEval:
 		if funcInfo.IsFunctionGradient {
-			loc.F = funcInfo.functionGradient.FDf(loc.X, loc.Gradient)
+			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FunctionGradientEvals++
 			return
 		}

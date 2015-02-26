@@ -16,10 +16,10 @@ type Gradient interface {
 	Grad(x, grad []float64)
 }
 
-// FunctionGradient evaluates both the derivative and the function at x, storing
-// the gradient in place. FDf must not modify x.
+// FunctionGradient evaluates both the function and the gradient at x, storing
+// the gradient in-place in grad. FuncGrad must not modify x.
 type FunctionGradient interface {
-	FDf(x, grad []float64) (obj float64)
+	FuncGrad(x, grad []float64) (obj float64)
 }
 
 // LinesearchMethod is a type that can perform a line search. Typically, these

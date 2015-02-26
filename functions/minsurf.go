@@ -47,12 +47,12 @@ func NewMinimalSurface(nx, ny int) *MinimalSurface {
 
 // Func returns the area of the surface represented by the vector x.
 func (ms *MinimalSurface) Func(x []float64) (area float64) {
-	return ms.FDf(x, nil)
+	return ms.FuncGrad(x, nil)
 }
 
-// FDf returns the area of the surface represented by the vector x and
+// FuncGrad returns the area of the surface represented by the vector x and
 // evaluates its gradient.
-func (ms *MinimalSurface) FDf(x, grad []float64) (area float64) {
+func (ms *MinimalSurface) FuncGrad(x, grad []float64) (area float64) {
 	nx, ny := ms.Dims()
 	if len(x) != (nx-2)*(ny-2) {
 		panic("problem size mismatch")

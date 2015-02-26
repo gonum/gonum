@@ -28,7 +28,7 @@ type gradient interface {
 }
 
 type functionGradient interface {
-	FDf(x, grad []float64) float64
+	FuncGrad(x, grad []float64) float64
 }
 
 // minimumer is an objective function that can also provide information about
@@ -139,16 +139,16 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 		// value and the gradient correctly.
 		if isFunctionGradient {
 			grad := make([]float64, len(test.Gradient))
-			F := fFunctionGradient.FDf(test.X, grad)
+			F := fFunctionGradient.FuncGrad(test.X, grad)
 
 			if math.Abs(F-test.F) > defaultTol {
-				t.Errorf("Test #%d: function value given by FDf() is incorrect. Want: %v, Got: %v",
+				t.Errorf("Test #%d: function value given by FuncGrad() is incorrect. Want: %v, Got: %v",
 					i, test.F, F)
 			}
 
 			if !floats.EqualApprox(grad, test.Gradient, defaultGradTol) {
 				dist := floats.Distance(grad, test.Gradient, math.Inf(1))
-				t.Errorf("Test #%d: gradient given by FDf() is incorrect. |grad - WantGrad|_∞ = %v",
+				t.Errorf("Test #%d: gradient given by FuncGrad() is incorrect. |grad - WantGrad|_∞ = %v",
 					i, dist)
 			}
 		}

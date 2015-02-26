@@ -92,7 +92,7 @@ type Stats struct {
 	MajorIterations       int           // Total number of major iterations
 	FunctionEvals         int           // Number of evaluations of Func()
 	GradientEvals         int           // Number of evaluations of Grad()
-	FunctionGradientEvals int           // Number of evaluations of FDf()
+	FunctionGradientEvals int           // Number of evaluations of FuncGrad()
 	Runtime               time.Duration // Total runtime of the optimization
 }
 
@@ -158,7 +158,7 @@ type Settings struct {
 	// FunctionEvals is the maximum allowed number of function evaluations.
 	// FunctionEvaluationLimit status is returned  if the total number of
 	// function evaluations equals or exceeds this number. Calls to Func() and
-	// FDf() are both counted as function evaluations for this calculation.
+	// FuncGrad() are both counted as function evaluations for this calculation.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	FunctionEvals int
@@ -166,7 +166,7 @@ type Settings struct {
 	// GradientEvals is the maximum allowed number of gradient evaluations.
 	// GradientEvaluationLimit status is returned if the total number of
 	// gradient evaluations equals or exceeds this number. Calls to Grad() and
-	// FDf() are both counted as gradient evaluations for this calculation.
+	// FuncGrad() are both counted as gradient evaluations for this calculation.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	GradientEvals int

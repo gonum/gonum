@@ -53,7 +53,7 @@ func (b *Bisection) Init(loc LinesearchLocation, step float64, _ *FunctionInfo) 
 	b.minGrad = loc.Derivative
 	b.maxGrad = math.NaN()
 
-	return FunctionAndGradientEval
+	return FuncGradEvaluation
 }
 
 func (b *Bisection) Finished(loc LinesearchLocation) bool {
@@ -72,7 +72,7 @@ func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, er
 			b.maxStep = b.currStep
 			b.maxF = f
 			b.maxGrad = g
-			return b.checkStepEqual((b.minStep+b.maxStep)/2, FunctionAndGradientEval)
+			return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncGradEvaluation)
 		case f <= b.minF:
 			// Still haven't found an upper bound, but there is not an increase in
 			// function value and the gradient is still negative, so go more in
@@ -80,7 +80,7 @@ func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, er
 			b.minStep = b.currStep
 			b.minF = f
 			b.minGrad = g
-			return b.checkStepEqual(b.currStep*2, FunctionAndGradientEval)
+			return b.checkStepEqual(b.currStep*2, FuncGradEvaluation)
 		default:
 			// Increase in function value, but the gradient is still negative.
 			// Means we must have skipped over a local minimum, so set this point
@@ -88,7 +88,7 @@ func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, er
 			b.maxStep = b.currStep
 			b.maxF = f
 			b.maxGrad = g
-			return b.checkStepEqual((b.minStep+b.maxStep)/2, FunctionAndGradientEval)
+			return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncGradEvaluation)
 		}
 	}
 	// We have already bounded the minimum, so we're just working to find one
@@ -112,7 +112,7 @@ func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, er
 		b.maxF = f
 		b.maxGrad = g
 	}
-	return b.checkStepEqual((b.minStep+b.maxStep)/2, FunctionAndGradientEval)
+	return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncGradEvaluation)
 }
 
 // checkStepEqual checks if the new step is equal to the old step.

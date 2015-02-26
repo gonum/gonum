@@ -230,7 +230,7 @@ func getStartingLocation(funcInfo *functionInfo, initX []float64, stats *Stats, 
 	} else {
 		evalType = FuncEvaluation
 		if loc.Gradient != nil {
-			evalType = FunctionAndGradientEval
+			evalType = FuncGradEvaluation
 		}
 		evaluate(funcInfo, evalType, loc.X, loc, stats)
 	}
@@ -337,7 +337,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 			stats.FunctionGradientEvals++
 			return
 		}
-	case FunctionAndGradientEval:
+	case FuncGradEvaluation:
 		if funcInfo.IsFunctionGradient {
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FunctionGradientEvals++

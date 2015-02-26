@@ -228,7 +228,7 @@ func getStartingLocation(funcInfo *functionInfo, initX []float64, stats *Stats, 
 			copy(loc.Gradient, initG)
 		}
 	} else {
-		evalType = FunctionEval
+		evalType = FuncEvaluation
 		if loc.Gradient != nil {
 			evalType = FunctionAndGradientEval
 		}
@@ -311,7 +311,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 		copy(loc.X, xNext)
 	}
 	switch evalType {
-	case FunctionEval:
+	case FuncEvaluation:
 		if different {
 			// Invalidate the gradient because it will not be evaluated.
 			for i := range loc.Gradient {

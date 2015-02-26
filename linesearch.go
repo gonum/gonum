@@ -76,7 +76,7 @@ func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, I
 		Derivative: projGrad,
 	}
 	if ls.Method.Finished(lsLoc) {
-		if ls.lastEvalType == FunctionEval && loc.Gradient != nil {
+		if ls.lastEvalType == FuncEvaluation && loc.Gradient != nil {
 			// We have the function value at the current location, but we don't
 			// have the gradient, so get it before announcing MajorIteration.
 			ls.iterType = SubIteration

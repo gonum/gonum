@@ -56,7 +56,7 @@ func (b *Backtracking) Init(loc LinesearchLocation, step float64, _ *FunctionInf
 	b.stepSize = step
 	b.initF = loc.F
 	b.initG = loc.Derivative
-	return FunctionEval
+	return FuncEvaluation
 }
 
 func (b *Backtracking) Finished(loc LinesearchLocation) bool {
@@ -68,5 +68,5 @@ func (b *Backtracking) Iterate(_ LinesearchLocation) (float64, EvaluationType, e
 	if b.stepSize < minimumBacktrackingStepSize {
 		return 0, NoEvaluation, ErrLinesearchFailure
 	}
-	return b.stepSize, FunctionEval, nil
+	return b.stepSize, FuncEvaluation, nil
 }

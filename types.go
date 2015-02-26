@@ -18,7 +18,7 @@ type EvaluationType int
 
 const (
 	NoEvaluation EvaluationType = iota
-	FunctionEval
+	FuncEvaluation
 	GradientEval
 	FunctionAndGradientEval
 )
@@ -32,7 +32,7 @@ func (e EvaluationType) String() string {
 
 var evaluationStrings = [...]string{
 	"NoEvaluation",
-	"FunctionEval",
+	"FuncEvaluation",
 	"GradientEval",
 	"FunctionAndGradientEval",
 }

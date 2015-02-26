@@ -91,7 +91,7 @@ type Result struct {
 type Stats struct {
 	MajorIterations       int           // Total number of major iterations
 	FunctionEvals         int           // Number of evaluations of Func()
-	GradientEvals         int           // Number of evaluations of Df()
+	GradientEvals         int           // Number of evaluations of Grad()
 	FunctionGradientEvals int           // Number of evaluations of FDf()
 	Runtime               time.Duration // Total runtime of the optimization
 }
@@ -126,7 +126,7 @@ type functionInfo struct {
 type Settings struct {
 	UseInitialData       bool      // Use supplied information about the conditions at the initial x.
 	InitialFunctionValue float64   // Func(x) at the initial x.
-	InitialGradient      []float64 // Df(x) at the initial x.
+	InitialGradient      []float64 // Grad(x) at the initial x.
 
 	// FunctionAbsTol is the threshold for acceptably small values of the
 	// objective function. FunctionAbsoluteConvergence status is returned if
@@ -165,7 +165,7 @@ type Settings struct {
 
 	// GradientEvals is the maximum allowed number of gradient evaluations.
 	// GradientEvaluationLimit status is returned if the total number of
-	// gradient evaluations equals or exceeds this number. Calls to Df() and
+	// gradient evaluations equals or exceeds this number. Calls to Grad() and
 	// FDf() are both counted as gradient evaluations for this calculation.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.

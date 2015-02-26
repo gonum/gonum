@@ -35,7 +35,7 @@ func (Beale) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (Beale) Df(x, grad []float64) {
+func (Beale) Grad(x, grad []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -89,7 +89,7 @@ func (BiggsEXP2) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP2) Df(x, grad []float64) {
+func (BiggsEXP2) Grad(x, grad []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -147,7 +147,7 @@ func (BiggsEXP3) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP3) Df(x, grad []float64) {
+func (BiggsEXP3) Grad(x, grad []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -207,7 +207,7 @@ func (BiggsEXP4) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP4) Df(x, grad []float64) {
+func (BiggsEXP4) Grad(x, grad []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -269,7 +269,7 @@ func (BiggsEXP5) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP5) Df(x, grad []float64) {
+func (BiggsEXP5) Grad(x, grad []float64) {
 	if len(x) != 5 {
 		panic("dimension of the problem must be 5")
 	}
@@ -336,7 +336,7 @@ func (BiggsEXP6) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP6) Df(x, grad []float64) {
+func (BiggsEXP6) Grad(x, grad []float64) {
 	if len(x) != 6 {
 		panic("dimension of the problem must be 6")
 	}
@@ -416,7 +416,7 @@ func (Box3D) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Box3D) Df(x, grad []float64) {
+func (Box3D) Grad(x, grad []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -479,7 +479,7 @@ func (BrownBadlyScaled) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (BrownBadlyScaled) Df(x, grad []float64) {
+func (BrownBadlyScaled) Grad(x, grad []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -532,7 +532,7 @@ func (BrownAndDennis) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BrownAndDennis) Df(x, grad []float64) {
+func (BrownAndDennis) Grad(x, grad []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -596,7 +596,7 @@ func (ExtendedPowellSingular) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (ExtendedPowellSingular) Df(x, grad []float64) {
+func (ExtendedPowellSingular) Grad(x, grad []float64) {
 	if len(x)%4 != 0 {
 		panic("dimension of the problem must be a multiple of 4")
 	}
@@ -660,7 +660,7 @@ func (ExtendedRosenbrock) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (ExtendedRosenbrock) Df(x, grad []float64) {
+func (ExtendedRosenbrock) Grad(x, grad []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -782,7 +782,7 @@ func (g Gaussian) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (g Gaussian) Df(x, grad []float64) {
+func (g Gaussian) Grad(x, grad []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -844,7 +844,7 @@ func (GulfResearchAndDevelopment) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (GulfResearchAndDevelopment) Df(x, grad []float64) {
+func (GulfResearchAndDevelopment) Grad(x, grad []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -922,7 +922,7 @@ func (HelicalValley) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (HelicalValley) Df(x, grad []float64) {
+func (HelicalValley) Grad(x, grad []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -963,7 +963,7 @@ func (Linear) Func(x []float64) float64 {
 	return floats.Sum(x)
 }
 
-func (Linear) Df(x, grad []float64) {
+func (Linear) Grad(x, grad []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1000,7 +1000,7 @@ func (PenaltyI) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (PenaltyI) Df(x, grad []float64) {
+func (PenaltyI) Grad(x, grad []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1065,7 +1065,7 @@ func (PenaltyII) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (PenaltyII) Df(x, grad []float64) {
+func (PenaltyII) Grad(x, grad []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1134,7 +1134,7 @@ func (PowellBadlyScaled) Func(x []float64) float64 {
 	return f1*f1 + f2*f2
 }
 
-func (PowellBadlyScaled) Df(x, grad []float64) {
+func (PowellBadlyScaled) Grad(x, grad []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -1183,7 +1183,7 @@ func (Trigonometric) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Trigonometric) Df(x, grad []float64) {
+func (Trigonometric) Grad(x, grad []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1255,7 +1255,7 @@ func (VariablyDimensioned) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (VariablyDimensioned) Df(x, grad []float64) {
+func (VariablyDimensioned) Grad(x, grad []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1339,7 +1339,7 @@ func (Watson) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Watson) Df(x, grad []float64) {
+func (Watson) Grad(x, grad []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1430,7 +1430,7 @@ func (Wood) Func(x []float64) (sum float64) {
 	return 100*f1*f1 + f2*f2 + 90*f3*f3 + f4*f4 + 10*f5*f5 + 0.1*f6*f6
 }
 
-func (Wood) Df(x, grad []float64) {
+func (Wood) Grad(x, grad []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}

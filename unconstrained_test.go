@@ -497,7 +497,7 @@ func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {
 func TestLocal(t *testing.T) {
 	// TODO: When method is nil, Local chooses the method automatically. At
 	// present, it always chooses BFGS (or panics if the function does not
-	// implement Df() or FDf()). For now, run this test with the simplest set
+	// implement Grad() or FDf()). For now, run this test with the simplest set
 	// of problems and revisit this later when more methods are added.
 	testLocal(t, gradientDescentTests, nil)
 }
@@ -680,7 +680,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			optF = funcInfo.function.Func(result.X)
 			if funcInfo.IsGradient {
 				g := make([]float64, len(test.x))
-				funcInfo.gradient.Df(result.X, g)
+				funcInfo.gradient.Grad(result.X, g)
 				optNorm = floats.Norm(g, math.Inf(1))
 			}
 		}
@@ -709,7 +709,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			settings.InitialFunctionValue = funcInfo.function.Func(test.x)
 			if funcInfo.IsGradient {
 				settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-				funcInfo.gradient.Df(test.x, settings.InitialGradient)
+				funcInfo.gradient.Grad(test.x, settings.InitialGradient)
 			}
 		}
 

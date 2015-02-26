@@ -10,10 +10,10 @@ type Function interface {
 	Func(x []float64) (obj float64)
 }
 
-// Gradient evaluates the gradient at x and stores the result in place. Df
-// must not modify x.
+// Gradient evaluates the gradient at x and stores the result in-place in grad.
+// Grad must not modify x.
 type Gradient interface {
-	Df(x, grad []float64)
+	Grad(x, grad []float64)
 }
 
 // FunctionGradient evaluates both the derivative and the function at x, storing

@@ -24,7 +24,7 @@ type function interface {
 }
 
 type gradient interface {
-	Df(x, grad []float64)
+	Grad(x, grad []float64)
 }
 
 type functionGradient interface {
@@ -126,11 +126,11 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 		// If the function is a Gradient, check that it computes the gradient correctly.
 		if isGradient {
 			grad := make([]float64, len(test.Gradient))
-			fGradient.Df(test.X, grad)
+			fGradient.Grad(test.X, grad)
 
 			if !floats.EqualApprox(grad, test.Gradient, defaultGradTol) {
 				dist := floats.Distance(grad, test.Gradient, math.Inf(1))
-				t.Errorf("Test #%d: gradient given by Df() is incorrect. |grad - WantGrad|_∞ = %v",
+				t.Errorf("Test #%d: gradient given by Grad() is incorrect. |grad - WantGrad|_∞ = %v",
 					i, dist)
 			}
 		}

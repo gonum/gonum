@@ -145,6 +145,9 @@ func minimize(settings *Settings, method Method, funcInfo *functionInfo, stats *
 		if settings.Recorder != nil {
 			err = settings.Recorder.Record(loc, evalType, iterType, stats)
 			if err != nil {
+				if status == NotTerminated {
+					status = Failure
+				}
 				return
 			}
 		}

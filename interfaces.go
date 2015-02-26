@@ -4,6 +4,8 @@
 
 package optimize
 
+import "github.com/gonum/matrix/mat64"
+
 // Function evaluates the objective function at the given location. F
 // must not modify x.
 type Function interface {
@@ -16,10 +18,23 @@ type Gradient interface {
 	Grad(x, grad []float64)
 }
 
+// Hessian evaluates the Hessian at x and stores the result in-place in hess.
+// Hess must not modify x.
+type Hessian interface {
+	Hess(x []float64, hess *mat64.SymDense)
+}
+
 // FunctionGradient evaluates both the function and the gradient at x, storing
 // the gradient in-place in grad. FuncGrad must not modify x.
 type FunctionGradient interface {
 	FuncGrad(x, grad []float64) (obj float64)
+}
+
+// FunctionGradientHessian evaluates the function, the gradient and the Hessian
+// at x, storing the gradient and the Hessian in-place in grad and hess,
+// respectively. FuncGradHess must not modify x.
+type FunctionGradientHessian interface {
+	FuncGradHess(x, grad []float64, hess *mat64.SymDense) (obj float64)
 }
 
 // LinesearchMethod is a type that can perform a line search. Typically, these

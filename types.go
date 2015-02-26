@@ -20,7 +20,9 @@ const (
 	NoEvaluation EvaluationType = iota
 	FuncEvaluation
 	GradEvaluation
+	HessEvaluation
 	FuncGradEvaluation
+	FuncGradHessEvaluation
 )
 
 func (e EvaluationType) String() string {
@@ -34,7 +36,9 @@ var evaluationStrings = [...]string{
 	"NoEvaluation",
 	"FuncEvaluation",
 	"GradEvaluation",
+	"HessEvaluation",
 	"FuncGradEvaluation",
+	"FuncGradHessEvaluation",
 }
 
 // IterationType specifies the type of iteration.

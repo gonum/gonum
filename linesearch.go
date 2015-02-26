@@ -81,7 +81,7 @@ func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, I
 			// have the gradient, so get it before announcing MajorIteration.
 			ls.iterType = SubIteration
 			copy(xNext, loc.X)
-			return GradientEval, ls.iterType, nil
+			return GradEvaluation, ls.iterType, nil
 		}
 		// The linesearch is finished. Announce so with an update to
 		// MajorIteration. The function value and gradient is already known, so

@@ -321,7 +321,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 		loc.F = funcInfo.function.Func(loc.X)
 		stats.FunctionEvals++
 		return
-	case GradientEval:
+	case GradEvaluation:
 		if funcInfo.IsGradient {
 			if different {
 				// Invalidate the function value because it will not be

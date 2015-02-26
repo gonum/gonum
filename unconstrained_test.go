@@ -743,7 +743,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 				continue
 			}
 		} else {
-			if result.FunctionEvals != result2.FunctionEvals+1 {
+			if result.FuncEvaluations != result2.FuncEvaluations+1 {
 				t.Errorf("Providing initial data does not reduce the number of functions calls for:\n%v", test)
 				continue
 			}

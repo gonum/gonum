@@ -71,7 +71,7 @@ func (p *Printer) Record(loc *Location, _ EvaluationType, iter IterationType, st
 	// Make the value strings
 	var valueStrings [nPrinterOut]string
 	valueStrings[0] = strconv.Itoa(stats.MajorIterations)
-	valueStrings[1] = strconv.Itoa(stats.FuncEvaluations + stats.FunctionGradientEvals)
+	valueStrings[1] = strconv.Itoa(stats.FuncEvaluations + stats.FuncGradEvaluations)
 	valueStrings[2] = fmt.Sprintf("%g", loc.F)
 	if p.printGrad {
 		norm := floats.Norm(loc.Gradient, math.Inf(1))

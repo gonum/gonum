@@ -273,14 +273,14 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	}
 
 	if settings.FuncEvaluations > 0 {
-		totalFun := stats.FuncEvaluations + stats.FunctionGradientEvals
+		totalFun := stats.FuncEvaluations + stats.FuncGradEvaluations
 		if totalFun >= settings.FuncEvaluations {
 			return FunctionEvaluationLimit
 		}
 	}
 
 	if settings.GradEvaluations > 0 {
-		totalGrad := stats.GradEvaluations + stats.FunctionGradientEvals
+		totalGrad := stats.GradEvaluations + stats.FuncGradEvaluations
 		if totalGrad >= settings.GradEvaluations {
 			return GradientEvaluationLimit
 		}
@@ -334,13 +334,13 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 		}
 		if funcInfo.IsFunctionGradient {
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
-			stats.FunctionGradientEvals++
+			stats.FuncGradEvaluations++
 			return
 		}
 	case FuncGradEvaluation:
 		if funcInfo.IsFunctionGradient {
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
-			stats.FunctionGradientEvals++
+			stats.FuncGradEvaluations++
 			return
 		}
 		if funcInfo.IsGradient {

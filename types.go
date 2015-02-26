@@ -91,7 +91,7 @@ type Result struct {
 type Stats struct {
 	MajorIterations       int           // Total number of major iterations
 	FuncEvaluations       int           // Number of evaluations of Func()
-	GradientEvals         int           // Number of evaluations of Grad()
+	GradEvaluations       int           // Number of evaluations of Grad()
 	FunctionGradientEvals int           // Number of evaluations of FuncGrad()
 	Runtime               time.Duration // Total runtime of the optimization
 }
@@ -163,13 +163,13 @@ type Settings struct {
 	// The default value is 0.
 	FuncEvaluations int
 
-	// GradientEvals is the maximum allowed number of gradient evaluations.
+	// GradEvaluations is the maximum allowed number of gradient evaluations.
 	// GradientEvaluationLimit status is returned if the total number of
 	// gradient evaluations equals or exceeds this number. Calls to Grad() and
 	// FuncGrad() are both counted as gradient evaluations for this calculation.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
-	GradientEvals int
+	GradEvaluations int
 
 	Recorder Recorder
 }

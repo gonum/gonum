@@ -748,7 +748,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 				continue
 			}
 			if funcInfo.IsGradient {
-				if result.GradientEvals != result2.GradientEvals+1 {
+				if result.GradEvaluations != result2.GradEvaluations+1 {
 					t.Errorf("Providing initial data does not reduce the number of gradient calls for:\n%v", test)
 					continue
 				}

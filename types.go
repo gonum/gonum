@@ -93,11 +93,13 @@ type Result struct {
 
 // Stats contains the statistics of the run.
 type Stats struct {
-	MajorIterations     int           // Total number of major iterations
-	FuncEvaluations     int           // Number of evaluations of Func()
-	GradEvaluations     int           // Number of evaluations of Grad()
-	FuncGradEvaluations int           // Number of evaluations of FuncGrad()
-	Runtime             time.Duration // Total runtime of the optimization
+	MajorIterations         int           // Total number of major iterations
+	FuncEvaluations         int           // Number of evaluations of Func()
+	GradEvaluations         int           // Number of evaluations of Grad()
+	HessEvaluations         int           // Number of evaluations of Hess()
+	FuncGradEvaluations     int           // Number of evaluations of FuncGrad()
+	FuncGradHessEvaluations int           // Number of evaluations of FuncGradHess()
+	Runtime                 time.Duration // Total runtime of the optimization
 }
 
 // FunctionInfo is data to give to the optimizer about the objective function.

@@ -22,6 +22,7 @@ const (
 	RuntimeLimit
 	FunctionEvaluationLimit
 	GradientEvaluationLimit
+	HessianEvaluationLimit
 )
 
 func (s Status) String() string {
@@ -89,6 +90,11 @@ var statuses = []struct {
 		name:  "GradientEvaluationLimit",
 		early: true,
 		err:   errors.New("optimize: maximum number of gradient evaluations reached"),
+	},
+	{
+		name:  "HessianEvaluationLimit",
+		early: true,
+		err:   errors.New("optimize: maximum number of Hessian evaluations reached"),
 	},
 }
 

@@ -273,16 +273,23 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	}
 
 	if settings.FuncEvaluations > 0 {
-		totalFun := stats.FuncEvaluations + stats.FuncGradEvaluations
+		totalFun := stats.FuncEvaluations + stats.FuncGradEvaluations + stats.FuncGradHessEvaluations
 		if totalFun >= settings.FuncEvaluations {
 			return FunctionEvaluationLimit
 		}
 	}
 
 	if settings.GradEvaluations > 0 {
-		totalGrad := stats.GradEvaluations + stats.FuncGradEvaluations
+		totalGrad := stats.GradEvaluations + stats.FuncGradEvaluations + stats.FuncGradHessEvaluations
 		if totalGrad >= settings.GradEvaluations {
 			return GradientEvaluationLimit
+		}
+	}
+
+	if settings.HessEvaluations > 0 {
+		totalHess := stats.HessEvaluations + stats.FuncGradHessEvaluations
+		if totalHess >= settings.HessEvaluations {
+			return HessianEvaluationLimit
 		}
 	}
 

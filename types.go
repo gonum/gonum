@@ -163,19 +163,29 @@ type Settings struct {
 
 	// FuncEvaluations is the maximum allowed number of function evaluations.
 	// FunctionEvaluationLimit status is returned if the total number of
-	// function evaluations equals or exceeds this number. Calls to Func() and
-	// FuncGrad() are both counted as function evaluations for this calculation.
+	// function evaluations equals or exceeds this number. Calls to Func(),
+	// FuncGrad() and FuncGradHess() are all counted as function evaluations
+	// for this calculation.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	FuncEvaluations int
 
 	// GradEvaluations is the maximum allowed number of gradient evaluations.
 	// GradientEvaluationLimit status is returned if the total number of
-	// gradient evaluations equals or exceeds this number. Calls to Grad() and
-	// FuncGrad() are both counted as gradient evaluations for this calculation.
+	// gradient evaluations equals or exceeds this number. Calls to Grad(),
+	// FuncGrad() and FuncGradHess() are all counted as gradient evaluations
+	// for this calculation.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	GradEvaluations int
+
+	// HessEvaluations is the maximum allowed number of Hessian evaluations.
+	// HessianEvaluationLimit status is returned if the total number of Hessian
+	// evaluations equals or exceeds this number. Calls to Hess() and
+	// FuncGradHess() are both counted as gradient evaluations for this calculation.
+	// If it equals zero, this setting has no effect.
+	// The default value is 0.
+	HessEvaluations int
 
 	Recorder Recorder
 }

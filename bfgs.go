@@ -159,3 +159,13 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	floats.Scale(-1, dir)
 	return 1
 }
+
+func (*BFGS) Needs() struct {
+	Gradient bool
+	Hessian  bool
+} {
+	return struct {
+		Gradient bool
+		Hessian  bool
+	}{true, false}
+}

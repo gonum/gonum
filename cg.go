@@ -209,6 +209,16 @@ func (cg *CG) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	return stepSize
 }
 
+func (*CG) Needs() struct {
+	Gradient bool
+	Hessian  bool
+} {
+	return struct {
+		Gradient bool
+		Hessian  bool
+	}{true, false}
+}
+
 // FletcherReeves implements the Fletcher-Reeves variant of the CG method that
 // computes the scaling parameter β_k according to the formula
 //  β_k = |∇f_{k+1}|^2 / |∇f_k|^2.

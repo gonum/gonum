@@ -79,6 +79,15 @@ type Method interface {
 
 	// Stores the next location to evaluate in xNext
 	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
+
+	// Needs specifies information about the objective function needed by the
+	// optimizer beyond just the function value. The information is used
+	// internally for initialization and has to match evaluation types returned
+	// by Init() and Iterate() during the optimization process.
+	Needs() struct {
+		Gradient bool
+		Hessian  bool
+	}
 }
 
 // StepSizer can set the next step size of the optimization given the last Location.

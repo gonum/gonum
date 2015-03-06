@@ -132,7 +132,7 @@ func (m *Dense) ColView(j int) *Vector {
 	return &Vector{
 		mat: blas64.Vector{
 			Inc:  m.mat.Stride,
-			Data: m.mat.Data[j : m.mat.Rows*m.mat.Stride+j],
+			Data: m.mat.Data[j : (m.mat.Rows-1)*m.mat.Stride+j+1],
 		},
 		n: m.mat.Rows,
 	}

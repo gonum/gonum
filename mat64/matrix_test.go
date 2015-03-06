@@ -38,9 +38,12 @@ func panics(fn func()) (panicked bool, message string) {
 }
 
 func flatten(f [][]float64) (r, c int, d []float64) {
+	collected := make([]float64, 0)
 	for _, r := range f {
-		d = append(d, r...)
+		collected = append(collected, r...)
 	}
+	d = make([]float64, len(collected))
+	copy(d, collected[:len(d)])
 	return len(f), len(f[0]), d
 }
 

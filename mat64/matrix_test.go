@@ -38,13 +38,19 @@ func panics(fn func()) (panicked bool, message string) {
 }
 
 func flatten(f [][]float64) (r, c int, d []float64) {
-	collected := make([]float64, 0)
-	for _, r := range f {
-		collected = append(collected, r...)
+	r = len(f)
+	if r == 0 {
+		panic("bad test: no row")
 	}
-	d = make([]float64, len(collected))
-	copy(d, collected[:len(d)])
-	return len(f), len(f[0]), d
+	c = len(f[0])
+	d = make([]float64, 0, r*c)
+	for _, row := range f {
+		if len(row) != c {
+			panic("bad test: ragged input")
+		}
+		d = append(d, row...)
+	}
+	return r, c, d
 }
 
 func unflatten(r, c int, d []float64) [][]float64 {

@@ -268,8 +268,13 @@ func (s *S) TestRowColView(c *check.C) {
 			},
 		},
 	} {
-		m := NewDense(flatten(test.mat))
-		rows, cols := m.Dims()
+		// This over cautious approach to building a matrix data
+		// slice is to ensure that changes to flatten in the future
+		// do not mask a regression to the issue identified in
+		// gonum/matrix#110.
+		rows, cols, flat := flatten(test.mat)
+		m := NewDense(rows, cols, flat[:len(flat):len(flat)])
+
 		c.Check(func() { m.RowView(-1) }, check.PanicMatches, ErrRowAccess.Error())
 		c.Check(func() { m.RowView(rows) }, check.PanicMatches, ErrRowAccess.Error())
 		c.Check(func() { m.ColView(-1) }, check.PanicMatches, ErrColAccess.Error())

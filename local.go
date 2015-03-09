@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix/mat64"
 )
 
 // Local finds a local minimum of a function using a sequential algorithm.
@@ -204,7 +205,9 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 	if method.Needs().Gradient {
 		loc.Gradient = make([]float64, dim)
 	}
-	// TODO(vladimir-ch): Allocate loc.Hessian when it is added to Location.
+	if method.Needs().Hessian {
+		loc.Hessian = mat64.NewSymDense(dim, nil)
+	}
 
 	evalType := NoEvaluation
 	if settings.UseInitialData {

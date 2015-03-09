@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"math"
 	"time"
+
+	"github.com/gonum/matrix/mat64"
 )
 
 const defaultGradientAbsTol = 1e-6
@@ -75,6 +77,7 @@ type Location struct {
 	X        []float64
 	F        float64
 	Gradient []float64
+	Hessian  *mat64.SymDense
 }
 
 // LinesearchLocation is a location for a linesearch subiteration

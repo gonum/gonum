@@ -336,10 +336,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	switch evalType {
 	case FuncEvaluation:
 		if different {
-			// Invalidate the gradient because it will not be evaluated.
-			for i := range loc.Gradient {
-				loc.Gradient[i] = math.NaN()
-			}
+			invalidate(loc, false, false, true, true)
 		}
 		loc.F = funcInfo.function.Func(loc.X)
 		stats.FuncEvaluations++
@@ -347,30 +344,85 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	case GradEvaluation:
 		if funcInfo.IsGradient {
 			if different {
-				// Invalidate the function value because it will not be
-				// evaluated.
-				loc.F = math.NaN()
+				invalidate(loc, false, true, false, true)
 			}
 			funcInfo.gradient.Grad(loc.X, loc.Gradient)
 			stats.GradEvaluations++
 			return
 		}
 		if funcInfo.IsFunctionGradient {
+			if different {
+				invalidate(loc, false, false, false, true)
+			}
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FuncGradEvaluations++
 			return
 		}
+		if funcInfo.IsFunctionGradientHessian {
+			if loc.Hessian == nil {
+				loc.Hessian = mat64.NewSymDense(len(loc.X), nil)
+			}
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
+	case HessEvaluation:
+		if funcInfo.IsHessian {
+			if different {
+				invalidate(loc, false, true, true, false)
+			}
+			funcInfo.hessian.Hess(loc.X, loc.Hessian)
+			stats.HessEvaluations++
+			return
+		}
+		if funcInfo.IsFunctionGradientHessian {
+			if loc.Gradient == nil {
+				loc.Gradient = make([]float64, len(loc.X))
+			}
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
 	case FuncGradEvaluation:
 		if funcInfo.IsFunctionGradient {
+			if different {
+				invalidate(loc, false, false, false, true)
+			}
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FuncGradEvaluations++
 			return
 		}
 		if funcInfo.IsGradient {
+			if different {
+				invalidate(loc, false, false, false, true)
+			}
 			loc.F = funcInfo.function.Func(loc.X)
 			stats.FuncEvaluations++
 			funcInfo.gradient.Grad(loc.X, loc.Gradient)
 			stats.GradEvaluations++
+			return
+		}
+		if funcInfo.IsFunctionGradientHessian {
+			if loc.Hessian == nil {
+				loc.Hessian = mat64.NewSymDense(len(loc.X), nil)
+			}
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
+	case FuncGradHessEvaluation:
+		if funcInfo.IsFunctionGradientHessian {
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
+		if funcInfo.IsGradient && funcInfo.IsHessian {
+			loc.F = funcInfo.function.Func(loc.X)
+			stats.FuncEvaluations++
+			funcInfo.gradient.Grad(loc.X, loc.Gradient)
+			stats.GradEvaluations++
+			funcInfo.hessian.Hess(loc.X, loc.Hessian)
+			stats.HessEvaluations++
 			return
 		}
 	case NoEvaluation:
@@ -378,13 +430,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 			// The evaluation point xNext is not equal to loc.X, so we fill loc
 			// with NaNs to indicate that it does not contain a valid
 			// evaluation result.
-			loc.F = math.NaN()
-			for i := range loc.X {
-				loc.X[i] = math.NaN()
-			}
-			for i := range loc.Gradient {
-				loc.Gradient[i] = math.NaN()
-			}
+			invalidate(loc, true, true, true, true)
 		}
 		return
 	default:

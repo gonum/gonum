@@ -122,6 +122,24 @@ type functionInfo struct {
 	statuser         Statuser
 }
 
+func newFunctionInfo(f Function) *functionInfo {
+	gradient, isGradient := f.(Gradient)
+	funcGrad, isFuncGrad := f.(FunctionGradient)
+	statuser, isStatuser := f.(Statuser)
+
+	return &functionInfo{
+		FunctionInfo: FunctionInfo{
+			IsGradient:         isGradient,
+			IsFunctionGradient: isFuncGrad,
+			IsStatuser:         isStatuser,
+		},
+		function:         f,
+		gradient:         gradient,
+		functionGradient: funcGrad,
+		statuser:         statuser,
+	}
+}
+
 // TODO(btracey): Think about making this an exported function when the
 // constraint interface is designed.
 func (f functionInfo) satisfies(method Method) error {

@@ -669,7 +669,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			continue
 		}
 
-		funcInfo := getFunctionInfo(test.f)
+		funcInfo := newFunctionInfo(test.f)
 
 		// Evaluate the norm of the gradient at the found optimum location.
 		var optF, optNorm float64

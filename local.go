@@ -55,6 +55,12 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 
 	startTime := time.Now()
 	funcInfo := getFunctionInfo(f)
+	if method == nil {
+		method = getDefaultMethod(funcInfo)
+	}
+	if err := funcInfo.satisfies(method); err != nil {
+		return nil, err
+	}
 
 	if funcInfo.IsStatuser {
 		_, err := funcInfo.statuser.Status()
@@ -92,9 +98,6 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	// Check if the starting location satisfies the convergence criteria.
 	status := checkConvergence(optLoc, InitIteration, stats, settings)
 	if status == NotTerminated && err == nil {
-		if method == nil {
-			method = getDefaultMethod(funcInfo)
-		}
 		// The starting location is not good enough, we need to perform a
 		// minimization. The optimal location will be stored in-place in
 		// optLoc.

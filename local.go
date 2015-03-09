@@ -300,6 +300,30 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	return NotTerminated
 }
 
+func invalidate(loc *Location, x, f, grad, hess bool) {
+	if x {
+		for i := range loc.X {
+			loc.X[i] = math.NaN()
+		}
+	}
+	if f {
+		loc.F = math.NaN()
+	}
+	if grad {
+		for i := range loc.Gradient {
+			loc.Gradient[i] = math.NaN()
+		}
+	}
+	if hess && loc.Hessian != nil {
+		n := loc.Hessian.Symmetric()
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				loc.Hessian.SetSym(i, j, math.NaN())
+			}
+		}
+	}
+}
+
 // evaluate evaluates the function given by funcInfo at xNext, stores the
 // answer into loc and updates stats. If loc.X is not equal to xNext, then
 // unused fields of loc are set to NaN.

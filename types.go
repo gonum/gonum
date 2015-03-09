@@ -105,9 +105,11 @@ type Stats struct {
 
 // FunctionInfo is data to give to the optimizer about the objective function.
 type FunctionInfo struct {
-	IsGradient         bool
-	IsFunctionGradient bool
-	IsStatuser         bool
+	IsGradient                bool
+	IsHessian                 bool
+	IsFunctionGradient        bool
+	IsFunctionGradientHessian bool
+	IsStatuser                bool
 }
 
 // functionInfo contains information about which interfaces the objective
@@ -116,27 +118,35 @@ type FunctionInfo struct {
 type functionInfo struct {
 	FunctionInfo
 
-	function         Function
-	gradient         Gradient
-	functionGradient FunctionGradient
-	statuser         Statuser
+	function                Function
+	gradient                Gradient
+	hessian                 Hessian
+	functionGradient        FunctionGradient
+	functionGradientHessian FunctionGradientHessian
+	statuser                Statuser
 }
 
 func newFunctionInfo(f Function) *functionInfo {
 	gradient, isGradient := f.(Gradient)
+	hessian, isHessian := f.(Hessian)
 	funcGrad, isFuncGrad := f.(FunctionGradient)
+	funcGradHess, isFuncGradHess := f.(FunctionGradientHessian)
 	statuser, isStatuser := f.(Statuser)
 
 	return &functionInfo{
 		FunctionInfo: FunctionInfo{
-			IsGradient:         isGradient,
-			IsFunctionGradient: isFuncGrad,
-			IsStatuser:         isStatuser,
+			IsGradient:                isGradient,
+			IsHessian:                 isHessian,
+			IsFunctionGradient:        isFuncGrad,
+			IsFunctionGradientHessian: isFuncGradHess,
+			IsStatuser:                isStatuser,
 		},
-		function:         f,
-		gradient:         gradient,
-		functionGradient: funcGrad,
-		statuser:         statuser,
+		function:                f,
+		gradient:                gradient,
+		hessian:                 hessian,
+		functionGradient:        funcGrad,
+		functionGradientHessian: funcGradHess,
+		statuser:                statuser,
 	}
 }
 

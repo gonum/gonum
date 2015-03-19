@@ -105,9 +105,11 @@ type Stats struct {
 
 // FunctionInfo is data to give to the optimizer about the objective function.
 type FunctionInfo struct {
-	IsGradient         bool
-	IsFunctionGradient bool
-	IsStatuser         bool
+	IsGradient                bool
+	IsHessian                 bool
+	IsFunctionGradient        bool
+	IsFunctionGradientHessian bool
+	IsStatuser                bool
 }
 
 // functionInfo contains information about which interfaces the objective
@@ -116,21 +118,49 @@ type FunctionInfo struct {
 type functionInfo struct {
 	FunctionInfo
 
-	function         Function
-	gradient         Gradient
-	functionGradient FunctionGradient
-	statuser         Statuser
+	function                Function
+	gradient                Gradient
+	hessian                 Hessian
+	functionGradient        FunctionGradient
+	functionGradientHessian FunctionGradientHessian
+	statuser                Statuser
+}
+
+func newFunctionInfo(f Function) *functionInfo {
+	gradient, isGradient := f.(Gradient)
+	hessian, isHessian := f.(Hessian)
+	funcGrad, isFuncGrad := f.(FunctionGradient)
+	funcGradHess, isFuncGradHess := f.(FunctionGradientHessian)
+	statuser, isStatuser := f.(Statuser)
+
+	return &functionInfo{
+		FunctionInfo: FunctionInfo{
+			IsGradient:                isGradient,
+			IsHessian:                 isHessian,
+			IsFunctionGradient:        isFuncGrad,
+			IsFunctionGradientHessian: isFuncGradHess,
+			IsStatuser:                isStatuser,
+		},
+		function:                f,
+		gradient:                gradient,
+		hessian:                 hessian,
+		functionGradient:        funcGrad,
+		functionGradientHessian: funcGradHess,
+		statuser:                statuser,
+	}
 }
 
 // TODO(btracey): Think about making this an exported function when the
 // constraint interface is designed.
 func (f functionInfo) satisfies(method Method) error {
-	gradOk := f.IsGradient || f.IsFunctionGradient
+	gradOk := f.IsGradient || f.IsFunctionGradient || f.IsFunctionGradientHessian
 	if method.Needs().Gradient && !gradOk {
-		return errors.New("optimize: function does not implement needed Gradient or FunctionGradient")
+		return errors.New("optimize: function does not implement needed Gradient, FunctionGradient or FunctionGradientHessian interface")
 	}
-	// TODO(vladimir-ch): check IsHessian and IsFunctionGradientHessian when
-	// they are added to FunctionInfo.
+	hessOk := f.IsHessian || f.IsFunctionGradientHessian
+	if method.Needs().Hessian && !hessOk {
+		return errors.New("optimize: function does not implement needed Hessian or FunctionGradientHessian interface")
+	}
 	return nil
 }
 

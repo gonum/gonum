@@ -54,7 +54,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}
 
 	startTime := time.Now()
-	funcInfo := getFunctionInfo(f)
+	funcInfo := newFunctionInfo(f)
 	if method == nil {
 		method = getDefaultMethod(funcInfo)
 	}
@@ -184,24 +184,6 @@ func copyLocation(dst, src *Location) {
 
 	dst.Gradient = resize(dst.Gradient, len(src.Gradient))
 	copy(dst.Gradient, src.Gradient)
-}
-
-func getFunctionInfo(f Function) *functionInfo {
-	gradient, isGradient := f.(Gradient)
-	funcGrad, isFuncGrad := f.(FunctionGradient)
-	statuser, isStatuser := f.(Statuser)
-
-	return &functionInfo{
-		FunctionInfo: FunctionInfo{
-			IsGradient:         isGradient,
-			IsFunctionGradient: isFuncGrad,
-			IsStatuser:         isStatuser,
-		},
-		function:         f,
-		gradient:         gradient,
-		functionGradient: funcGrad,
-		statuser:         statuser,
-	}
 }
 
 func getDefaultMethod(funcInfo *functionInfo) Method {

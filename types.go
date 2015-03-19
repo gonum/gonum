@@ -5,6 +5,7 @@
 package optimize
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -119,6 +120,18 @@ type functionInfo struct {
 	gradient         Gradient
 	functionGradient FunctionGradient
 	statuser         Statuser
+}
+
+// TODO(btracey): Think about making this an exported function when the
+// constraint interface is designed.
+func (f functionInfo) satisfies(method Method) error {
+	gradOk := f.IsGradient || f.IsFunctionGradient
+	if method.Needs().Gradient && !gradOk {
+		return errors.New("optimize: function does not implement needed Gradient or FunctionGradient")
+	}
+	// TODO(vladimir-ch): check IsHessian and IsFunctionGradientHessian when
+	// they are added to FunctionInfo.
+	return nil
 }
 
 // Settings represents settings of the optimization run. It contains initial

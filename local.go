@@ -55,6 +55,12 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 
 	startTime := time.Now()
 	funcInfo := getFunctionInfo(f)
+	if method == nil {
+		method = getDefaultMethod(funcInfo)
+	}
+	if err := funcInfo.satisfies(method); err != nil {
+		return nil, err
+	}
 
 	if funcInfo.IsStatuser {
 		_, err := funcInfo.statuser.Status()
@@ -77,7 +83,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}
 
 	stats := &Stats{}
-	optLoc, evalType, err := getStartingLocation(funcInfo, initX, stats, settings)
+	optLoc, evalType, err := getStartingLocation(funcInfo, method, initX, stats, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -92,9 +98,6 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	// Check if the starting location satisfies the convergence criteria.
 	status := checkConvergence(optLoc, InitIteration, stats, settings)
 	if status == NotTerminated && err == nil {
-		if method == nil {
-			method = getDefaultMethod(funcInfo)
-		}
 		// The starting location is not good enough, we need to perform a
 		// minimization. The optimal location will be stored in-place in
 		// optLoc.
@@ -210,15 +213,16 @@ func getDefaultMethod(funcInfo *functionInfo) Method {
 }
 
 // getStartingLocation allocates and initializes the starting location for the minimization.
-func getStartingLocation(funcInfo *functionInfo, initX []float64, stats *Stats, settings *Settings) (*Location, EvaluationType, error) {
+func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64, stats *Stats, settings *Settings) (*Location, EvaluationType, error) {
 	dim := len(initX)
 	loc := &Location{
 		X: make([]float64, dim),
 	}
-	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
+	copy(loc.X, initX)
+	if method.Needs().Gradient {
 		loc.Gradient = make([]float64, dim)
 	}
-	copy(loc.X, initX)
+	// TODO(vladimir-ch): Allocate loc.Hessian when it is added to Location.
 
 	evalType := NoEvaluation
 	if settings.UseInitialData {

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix/mat64"
 )
 
 // Local finds a local minimum of a function using a sequential algorithm.
@@ -50,7 +51,7 @@ import (
 // input struct.
 func Local(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
 	if len(initX) == 0 {
-		panic("local: initial X has zero length")
+		panic("optimize: initial X has zero length")
 	}
 
 	startTime := time.Now()
@@ -173,7 +174,7 @@ func minimize(settings *Settings, method Method, funcInfo *functionInfo, stats *
 			return
 		}
 	}
-	panic("unreachable")
+	panic("optimize: unreachable")
 }
 
 func copyLocation(dst, src *Location) {
@@ -184,6 +185,13 @@ func copyLocation(dst, src *Location) {
 
 	dst.Gradient = resize(dst.Gradient, len(src.Gradient))
 	copy(dst.Gradient, src.Gradient)
+
+	if src.Hessian != nil {
+		if dst.Hessian == nil || dst.Hessian.Symmetric() != len(src.X) {
+			dst.Hessian = mat64.NewSymDense(len(src.X), nil)
+		}
+		dst.Hessian.CopySym(src.Hessian)
+	}
 }
 
 func getDefaultMethod(funcInfo *functionInfo) Method {
@@ -204,7 +212,9 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 	if method.Needs().Gradient {
 		loc.Gradient = make([]float64, dim)
 	}
-	// TODO(vladimir-ch): Allocate loc.Hessian when it is added to Location.
+	if method.Needs().Hessian {
+		loc.Hessian = mat64.NewSymDense(dim, nil)
+	}
 
 	evalType := NoEvaluation
 	if settings.UseInitialData {
@@ -212,7 +222,7 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 		if loc.Gradient != nil {
 			initG := settings.InitialGradient
 			if len(initG) != dim {
-				panic("local: initial location size mismatch")
+				panic("optimize: initial location size mismatch")
 			}
 			copy(loc.Gradient, initG)
 		}
@@ -297,6 +307,22 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	return NotTerminated
 }
 
+// invalidate marks unused fields of Location with NaNs. It exists as a help
+// for implementers to detect silent bugs in Methods using inconsistent
+// Location, e.g., using Gradient after FuncEvaluation request. It is the
+// responsibility of Method to make Location valid again.
+func invalidate(loc *Location, f, grad, hess bool) {
+	if f {
+		loc.F = math.NaN()
+	}
+	if grad && loc.Gradient != nil {
+		loc.Gradient[0] = math.NaN()
+	}
+	if hess && loc.Hessian != nil {
+		loc.Hessian.SetSym(0, 0, math.NaN())
+	}
+}
+
 // evaluate evaluates the function given by funcInfo at xNext, stores the
 // answer into loc and updates stats. If loc.X is not equal to xNext, then
 // unused fields of loc are set to NaN.
@@ -309,10 +335,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	switch evalType {
 	case FuncEvaluation:
 		if different {
-			// Invalidate the gradient because it will not be evaluated.
-			for i := range loc.Gradient {
-				loc.Gradient[i] = math.NaN()
-			}
+			invalidate(loc, false, true, true)
 		}
 		loc.F = funcInfo.function.Func(loc.X)
 		stats.FuncEvaluations++
@@ -320,50 +343,98 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	case GradEvaluation:
 		if funcInfo.IsGradient {
 			if different {
-				// Invalidate the function value because it will not be
-				// evaluated.
-				loc.F = math.NaN()
+				invalidate(loc, true, false, true)
 			}
 			funcInfo.gradient.Grad(loc.X, loc.Gradient)
 			stats.GradEvaluations++
 			return
 		}
 		if funcInfo.IsFunctionGradient {
+			if different {
+				invalidate(loc, false, false, true)
+			}
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FuncGradEvaluations++
 			return
 		}
+		if funcInfo.IsFunctionGradientHessian {
+			if loc.Hessian == nil {
+				loc.Hessian = mat64.NewSymDense(len(loc.X), nil)
+			}
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
+	case HessEvaluation:
+		if funcInfo.IsHessian {
+			if different {
+				invalidate(loc, true, true, false)
+			}
+			funcInfo.hessian.Hess(loc.X, loc.Hessian)
+			stats.HessEvaluations++
+			return
+		}
+		if funcInfo.IsFunctionGradientHessian {
+			if loc.Gradient == nil {
+				loc.Gradient = make([]float64, len(loc.X))
+			}
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
 	case FuncGradEvaluation:
 		if funcInfo.IsFunctionGradient {
+			if different {
+				invalidate(loc, false, false, true)
+			}
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FuncGradEvaluations++
 			return
 		}
 		if funcInfo.IsGradient {
+			if different {
+				invalidate(loc, false, false, true)
+			}
 			loc.F = funcInfo.function.Func(loc.X)
 			stats.FuncEvaluations++
 			funcInfo.gradient.Grad(loc.X, loc.Gradient)
 			stats.GradEvaluations++
 			return
 		}
+		if funcInfo.IsFunctionGradientHessian {
+			if loc.Hessian == nil {
+				loc.Hessian = mat64.NewSymDense(len(loc.X), nil)
+			}
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
+	case FuncGradHessEvaluation:
+		if funcInfo.IsFunctionGradientHessian {
+			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
+			stats.FuncGradHessEvaluations++
+			return
+		}
+		if funcInfo.IsGradient && funcInfo.IsHessian {
+			loc.F = funcInfo.function.Func(loc.X)
+			stats.FuncEvaluations++
+			funcInfo.gradient.Grad(loc.X, loc.Gradient)
+			stats.GradEvaluations++
+			funcInfo.hessian.Hess(loc.X, loc.Hessian)
+			stats.HessEvaluations++
+			return
+		}
 	case NoEvaluation:
 		if different {
-			// The evaluation point xNext is not equal to loc.X, so we fill loc
-			// with NaNs to indicate that it does not contain a valid
-			// evaluation result.
-			loc.F = math.NaN()
-			for i := range loc.X {
-				loc.X[i] = math.NaN()
-			}
-			for i := range loc.Gradient {
-				loc.Gradient[i] = math.NaN()
-			}
+			// Optimizers should not request NoEvaluation at a new location.
+			// The intent and therefore an appropriate action are both unclear.
+			panic("optimize: no evaluation requested at new location")
 		}
 		return
 	default:
-		panic(fmt.Sprintf("unknown evaluation type %v", evalType))
+		panic(fmt.Sprintf("optimize: unknown evaluation type %v", evalType))
 	}
-	panic(fmt.Sprintf("objective function does not support %v", evalType))
+	panic(fmt.Sprintf("optimize: objective function does not support %v", evalType))
 }
 
 // update updates the stats given the new evaluation

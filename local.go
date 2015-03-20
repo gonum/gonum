@@ -185,6 +185,13 @@ func copyLocation(dst, src *Location) {
 
 	dst.Gradient = resize(dst.Gradient, len(src.Gradient))
 	copy(dst.Gradient, src.Gradient)
+
+	if src.Hessian != nil {
+		if dst.Hessian == nil || dst.Hessian.Symmetric() != len(src.X) {
+			dst.Hessian = mat64.NewSymDense(len(src.X), nil)
+		}
+		dst.Hessian.CopySym(src.Hessian)
+	}
 }
 
 func getDefaultMethod(funcInfo *functionInfo) Method {

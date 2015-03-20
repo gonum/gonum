@@ -307,6 +307,10 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	return NotTerminated
 }
 
+// invalidate marks unused fields of Location with NaNs. It exists as a help
+// for implementers to detect silent bugs in Methods using inconsistent
+// Location, e.g., using Gradient after FuncEvaluation request. It is the
+// responsibility of Method to make Location valid again.
 func invalidate(loc *Location, f, grad, hess bool) {
 	if f {
 		loc.F = math.NaN()

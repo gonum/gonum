@@ -311,18 +311,11 @@ func invalidate(loc *Location, f, grad, hess bool) {
 	if f {
 		loc.F = math.NaN()
 	}
-	if grad {
-		for i := range loc.Gradient {
-			loc.Gradient[i] = math.NaN()
-		}
+	if grad && loc.Gradient != nil {
+		loc.Gradient[0] = math.NaN()
 	}
 	if hess && loc.Hessian != nil {
-		n := loc.Hessian.Symmetric()
-		for i := 0; i < n; i++ {
-			for j := i; j < n; j++ {
-				loc.Hessian.SetSym(i, j, math.NaN())
-			}
-		}
+		loc.Hessian.SetSym(0, 0, math.NaN())
 	}
 }
 

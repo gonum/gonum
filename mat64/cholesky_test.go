@@ -4,50 +4,121 @@
 
 package mat64
 
-import (
-	"gopkg.in/check.v1"
-)
+import "gopkg.in/check.v1"
 
 func (s *S) TestCholesky(c *check.C) {
 	for _, t := range []struct {
-		a   *Dense
-		spd bool
+		a     *SymDense
+		upper bool
+		f     *Triangular
+
+		want *Triangular
+		pd   bool
 	}{
 		{
-			a: NewDense(3, 3, []float64{
+			a: NewSymDense(3, []float64{
 				4, 1, 1,
-				1, 2, 3,
-				1, 3, 6,
+				0, 2, 3,
+				0, 0, 6,
 			}),
+			upper: false,
+			f:     &Triangular{},
 
-			spd: true,
+			want: NewTriangular(3, false, []float64{
+				2, 0, 0,
+				0.5, 1.3228756555322954, 0,
+				0.5, 2.0788046015507495, 1.195228609334394,
+			}),
+			pd: true,
+		},
+		{
+			a: NewSymDense(3, []float64{
+				4, 1, 1,
+				0, 2, 3,
+				0, 0, 6,
+			}),
+			upper: true,
+			f:     &Triangular{},
+
+			want: NewTriangular(3, true, []float64{
+				2, 0.5, 0.5,
+				0, 1.3228756555322954, 2.0788046015507495,
+				0, 0, 1.195228609334394,
+			}),
+			pd: true,
+		},
+		{
+			a: NewSymDense(3, []float64{
+				4, 1, 1,
+				0, 2, 3,
+				0, 0, 6,
+			}),
+			upper: false,
+			f:     NewTriangular(3, false, nil),
+
+			want: NewTriangular(3, false, []float64{
+				2, 0, 0,
+				0.5, 1.3228756555322954, 0,
+				0.5, 2.0788046015507495, 1.195228609334394,
+			}),
+			pd: true,
+		},
+		{
+			a: NewSymDense(3, []float64{
+				4, 1, 1,
+				0, 2, 3,
+				0, 0, 6,
+			}),
+			upper: true,
+			f:     NewTriangular(3, false, nil),
+
+			want: NewTriangular(3, true, []float64{
+				2, 0.5, 0.5,
+				0, 1.3228756555322954, 2.0788046015507495,
+				0, 0, 1.195228609334394,
+			}),
+			pd: true,
 		},
 	} {
-		cf := Cholesky(t.a)
-		c.Check(cf.SPD, check.Equals, t.spd)
+		ok := t.f.Cholesky(t.a, t.upper)
+		c.Check(ok, check.Equals, t.pd)
+		fc := DenseCopyOf(t.f)
+		c.Check(fc.Equals(t.want), check.Equals, true)
 
-		lt := &Dense{}
-		lt.TCopy(cf.L)
-		lc := DenseCopyOf(cf.L)
+		ft := &Dense{}
+		ft.TCopy(t.f)
 
-		lc.Mul(lc, lt)
-		c.Check(lc.EqualsApprox(t.a, 1e-12), check.Equals, true)
+		if t.upper {
+			fc.Mul(ft, fc)
+		} else {
+			fc.Mul(fc, ft)
+		}
+		c.Check(fc.EqualsApprox(t.a, 1e-12), check.Equals, true)
 
-		x := cf.Solve(eye())
+		var x Dense
+		x.SolveCholesky(t.f, eye())
 
-		t.a.Mul(t.a, x)
-		c.Check(t.a.EqualsApprox(eye(), 1e-12), check.Equals, true)
+		var res Dense
+		res.Mul(t.a, &x)
+		c.Check(res.EqualsApprox(eye(), 1e-12), check.Equals, true)
+
+		x = Dense{}
+		x.SolveTri(t.f, t.upper, eye())
+		x.SolveTri(t.f, !t.upper, &x)
+
+		res.Mul(t.a, &x)
+		c.Check(res.EqualsApprox(eye(), 1e-12), check.Equals, true)
 	}
 }
 
 func (s *S) TestCholeskySolve(c *check.C) {
 	for _, t := range []struct {
-		a   *Dense
+		a   *SymDense
 		b   *Dense
 		ans *Dense
 	}{
 		{
-			a: NewDense(2, 2, []float64{
+			a: NewSymDense(2, []float64{
 				1, 0,
 				0, 1,
 			}),
@@ -55,7 +126,17 @@ func (s *S) TestCholeskySolve(c *check.C) {
 			ans: NewDense(2, 1, []float64{5, 6}),
 		},
 	} {
-		ans := Cholesky(t.a).Solve(t.b)
-		c.Check(ans.EqualsApprox(t.ans, 1e-12), check.Equals, true)
+		var f Triangular
+		ok := f.Cholesky(t.a, false)
+		c.Assert(ok, check.Equals, true)
+
+		var x Dense
+		x.SolveCholesky(&f, t.b)
+		c.Check(x.EqualsApprox(t.ans, 1e-12), check.Equals, true)
+
+		x = Dense{}
+		x.SolveTri(&f, false, t.b)
+		x.SolveTri(&f, true, &x)
+		c.Check(x.EqualsApprox(t.ans, 1e-12), check.Equals, true)
 	}
 }

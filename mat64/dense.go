@@ -333,7 +333,7 @@ func (m *Dense) Grow(r, c int) Matrix {
 }
 
 // Reset zeros the dimensions of the matrix so that it can be reused as the
-// receiver of a dimensionally restricted operation
+// receiver of a dimensionally restricted operation.
 //
 // See the Reseter interface for more information.
 func (m *Dense) Reset() {

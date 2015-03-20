@@ -52,3 +52,23 @@ func (t *Triangular) Dims() (r, c int) {
 func (t *Triangular) RawTriangular() blas64.Triangular {
 	return t.mat
 }
+
+func (t *Triangular) isZero() bool {
+	// It must be the case that t.Dims() returns
+	// zeros in this case. See comment in Reset().
+	return t.mat.Stride == 0
+}
+
+// Reset zeros the dimensions of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
+func (t *Triangular) Reset() {
+	// No change of Stride, N to 0 may
+	// be made unless both are set to 0.
+	t.mat.N, t.mat.Stride = 0, 0
+	// Defensively zero Uplo to ensure
+	// it is set correctly later.
+	t.mat.Uplo = 0
+	t.mat.Data = t.mat.Data[:0]
+}

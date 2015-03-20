@@ -51,7 +51,7 @@ import (
 // input struct.
 func Local(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
 	if len(initX) == 0 {
-		panic("local: initial X has zero length")
+		panic("optimize: initial X has zero length")
 	}
 
 	startTime := time.Now()
@@ -174,7 +174,7 @@ func minimize(settings *Settings, method Method, funcInfo *functionInfo, stats *
 			return
 		}
 	}
-	panic("unreachable")
+	panic("optimize: unreachable")
 }
 
 func copyLocation(dst, src *Location) {
@@ -222,7 +222,7 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 		if loc.Gradient != nil {
 			initG := settings.InitialGradient
 			if len(initG) != dim {
-				panic("local: initial location size mismatch")
+				panic("optimize: initial location size mismatch")
 			}
 			copy(loc.Gradient, initG)
 		}
@@ -428,13 +428,13 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 		if different {
 			// Optimizers should not request NoEvaluation at a new location.
 			// The intent and therefore an appropriate action are both unclear.
-			panic("no evaluation requested at new location")
+			panic("optimize: no evaluation requested at new location")
 		}
 		return
 	default:
-		panic(fmt.Sprintf("unknown evaluation type %v", evalType))
+		panic(fmt.Sprintf("optimize: unknown evaluation type %v", evalType))
 	}
-	panic(fmt.Sprintf("objective function does not support %v", evalType))
+	panic(fmt.Sprintf("optimize: objective function does not support %v", evalType))
 }
 
 // update updates the stats given the new evaluation

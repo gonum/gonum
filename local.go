@@ -300,12 +300,7 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	return NotTerminated
 }
 
-func invalidate(loc *Location, x, f, grad, hess bool) {
-	if x {
-		for i := range loc.X {
-			loc.X[i] = math.NaN()
-		}
-	}
+func invalidate(loc *Location, f, grad, hess bool) {
 	if f {
 		loc.F = math.NaN()
 	}
@@ -336,7 +331,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	switch evalType {
 	case FuncEvaluation:
 		if different {
-			invalidate(loc, false, false, true, true)
+			invalidate(loc, false, true, true)
 		}
 		loc.F = funcInfo.function.Func(loc.X)
 		stats.FuncEvaluations++
@@ -344,7 +339,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	case GradEvaluation:
 		if funcInfo.IsGradient {
 			if different {
-				invalidate(loc, false, true, false, true)
+				invalidate(loc, true, false, true)
 			}
 			funcInfo.gradient.Grad(loc.X, loc.Gradient)
 			stats.GradEvaluations++
@@ -352,7 +347,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 		}
 		if funcInfo.IsFunctionGradient {
 			if different {
-				invalidate(loc, false, false, false, true)
+				invalidate(loc, false, false, true)
 			}
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FuncGradEvaluations++
@@ -369,7 +364,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	case HessEvaluation:
 		if funcInfo.IsHessian {
 			if different {
-				invalidate(loc, false, true, true, false)
+				invalidate(loc, true, true, false)
 			}
 			funcInfo.hessian.Hess(loc.X, loc.Hessian)
 			stats.HessEvaluations++
@@ -386,7 +381,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 	case FuncGradEvaluation:
 		if funcInfo.IsFunctionGradient {
 			if different {
-				invalidate(loc, false, false, false, true)
+				invalidate(loc, false, false, true)
 			}
 			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
 			stats.FuncGradEvaluations++
@@ -394,7 +389,7 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 		}
 		if funcInfo.IsGradient {
 			if different {
-				invalidate(loc, false, false, false, true)
+				invalidate(loc, false, false, true)
 			}
 			loc.F = funcInfo.function.Func(loc.X)
 			stats.FuncEvaluations++
@@ -427,10 +422,9 @@ func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, 
 		}
 	case NoEvaluation:
 		if different {
-			// The evaluation point xNext is not equal to loc.X, so we fill loc
-			// with NaNs to indicate that it does not contain a valid
-			// evaluation result.
-			invalidate(loc, true, true, true, true)
+			// Optimizers should not request NoEvaluation at a new location.
+			// The intent and therefore an appropriate action are both unclear.
+			panic("no evaluation requested at new location")
 		}
 		return
 	default:

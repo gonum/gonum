@@ -13,9 +13,7 @@ var (
 	_ RawSymmetricer = symDense
 )
 
-const (
-	ErrUplo = "mat64: blas64.Symmetric not upper"
-)
+const badSymTriangle = "mat64: blas64.Symmetric not upper"
 
 // SymDense is a symmetric matrix that uses Dense storage.
 type SymDense struct {
@@ -120,7 +118,7 @@ func (s *SymDense) CopySym(a Symmetric) int {
 	case RawSymmetricer:
 		amat := a.RawSymmetric()
 		if amat.Uplo != blas.Upper {
-			panic(ErrUplo)
+			panic(badSymTriangle)
 		}
 		for i := 0; i < n; i++ {
 			copy(s.mat.Data[i*s.mat.Stride+i:i*s.mat.Stride+n], amat.Data[i*amat.Stride+i:i*amat.Stride+n])

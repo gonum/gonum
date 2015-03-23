@@ -13,6 +13,8 @@ import (
 	"github.com/gonum/internal/asm"
 )
 
+const badTriangle = "mat64: invalid triangle"
+
 // Cholesky calculates the Cholesky decomposition of the matrix A and returns
 // whether the matrix is positive definite. The returned matrix is either a
 // lower triangular matrix such that A = L * L^T or an upper triangular matrix
@@ -99,7 +101,7 @@ func (m *Dense) SolveCholesky(t *Triangular, b Matrix) {
 		blas64.Trsm(blas.Left, blas.NoTrans, 1, t.mat, m.mat)
 		blas64.Trsm(blas.Left, blas.Trans, 1, t.mat, m.mat)
 	default:
-		panic("mat64: invalid triangle")
+		panic(badTriangle)
 	}
 }
 
@@ -125,6 +127,6 @@ func (m *Dense) SolveTri(a *Triangular, trans bool, b Matrix) {
 	case blas.Upper, blas.Lower:
 		blas64.Trsm(blas.Left, t, 1, a.mat, m.mat)
 	default:
-		panic("mat64: invalid triangle")
+		panic(badTriangle)
 	}
 }

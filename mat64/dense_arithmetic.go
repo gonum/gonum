@@ -129,7 +129,7 @@ func (m *Dense) Add(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -176,7 +176,7 @@ func (m *Dense) Sub(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -224,7 +224,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -272,7 +272,7 @@ func (m *Dense) DivElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -365,7 +365,7 @@ func (m *Dense) Mul(a, b Matrix) {
 	if m != a && m != b {
 		w = *m
 	}
-	w.reUseAs(ar, bc)
+	w.reuseAs(ar, bc)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -433,7 +433,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 	if m != a && m != b {
 		w = *m
 	}
-	w.reUseAs(ar, bc)
+	w.reuseAs(ar, bc)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -622,6 +622,8 @@ func (m *Dense) Exp(a Matrix) {
 			Stride: c,
 			Data:   useZeroed(m.mat.Data, r*r),
 		}
+		m.capRows = r
+		m.capCols = c
 		for i := 0; i < r*r; i += r + 1 {
 			m.mat.Data[i] = 1
 		}
@@ -681,7 +683,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 		panic(ErrShape)
 	}
 
-	m.reUseAs(r, c)
+	m.reuseAs(r, c)
 
 	// Take possible fast paths.
 	switch n {
@@ -718,7 +720,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 func (m *Dense) Scale(f float64, a Matrix) {
 	ar, ac := a.Dims()
 
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -755,7 +757,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 	ar, ac := a.Dims()
 
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -899,7 +901,7 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y []float64) {
 	if m == a {
 		w = *m
 	}
-	w.reUseAs(ar, ac)
+	w.reuseAs(ar, ac)
 
 	// Copy over to the new memory if necessary
 	if m != a {

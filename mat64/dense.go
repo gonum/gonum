@@ -90,9 +90,13 @@ func NewDense(r, c int, mat []float64) *Dense {
 	}
 }
 
-// reUseAs resizes an empty matrix to a r×c matrix,
+// reuseAs resizes an empty matrix to a r×c matrix,
 // or checks that a non-empty matrix is r×c.
-func (m *Dense) reUseAs(r, c int) {
+func (m *Dense) reuseAs(r, c int) {
+	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
+		// Panic as a string, not a mat64.Error.
+		panic("mat64: caps not correctly set")
+	}
 	if m.isZero() {
 		m.mat = blas64.General{
 			Rows:   r,
@@ -100,6 +104,8 @@ func (m *Dense) reUseAs(r, c int) {
 			Stride: c,
 			Data:   use(m.mat.Data, r*c),
 		}
+		m.capRows = r
+		m.capCols = c
 		return
 	}
 	if r != m.mat.Rows || c != m.mat.Cols {
@@ -419,7 +425,7 @@ func (m *Dense) U(a Matrix) {
 		m.zeroLower()
 		return
 	}
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -468,7 +474,7 @@ func (m *Dense) L(a Matrix) {
 		m.zeroUpper()
 		return
 	}
-	m.reUseAs(ar, ac)
+	m.reuseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -514,7 +520,7 @@ func (m *Dense) TCopy(a Matrix) {
 	if m != a {
 		w = *m
 	}
-	w.reUseAs(ac, ar)
+	w.reuseAs(ac, ar)
 
 	switch a := a.(type) {
 	case *Dense:
@@ -544,7 +550,7 @@ func (m *Dense) Stack(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reUseAs(ar+br, ac)
+	m.reuseAs(ar+br, ac)
 
 	m.Copy(a)
 	w := m.View(ar, 0, br, bc).(*Dense)
@@ -562,7 +568,7 @@ func (m *Dense) Augment(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	m.reUseAs(ar, ac+bc)
+	m.reuseAs(ar, ac+bc)
 
 	m.Copy(a)
 	w := m.View(0, ac, br, bc).(*Dense)

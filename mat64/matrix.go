@@ -365,8 +365,11 @@ type Panicker func()
 func Maybe(fn Panicker) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			var ok bool
-			if err, ok = r.(Error); ok {
+			if e, ok := r.(Error); ok {
+				if e.string == "" {
+					panic("mat64: invalid error")
+				}
+				err = e
 				return
 			}
 			panic(r)
@@ -385,6 +388,9 @@ func MaybeFloat(fn FloatPanicker) (f float64, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(Error); ok {
+				if e.string == "" {
+					panic("mat64: invalid error")
+				}
 				err = e
 				return
 			}
@@ -395,23 +401,23 @@ func MaybeFloat(fn FloatPanicker) (f float64, err error) {
 }
 
 // Type Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.
-type Error string
+type Error struct{ string }
 
-func (err Error) Error() string { return string(err) }
+func (err Error) Error() string { return err.string }
 
-const (
-	ErrIndexOutOfRange = Error("mat64: index out of range")
-	ErrRowAccess       = Error("mat64: row index out of range")
-	ErrColAccess       = Error("mat64: column index out of range")
-	ErrZeroLength      = Error("mat64: zero length in matrix definition")
-	ErrRowLength       = Error("mat64: row length mismatch")
-	ErrColLength       = Error("mat64: col length mismatch")
-	ErrSquare          = Error("mat64: expect square matrix")
-	ErrNormOrder       = Error("mat64: invalid norm order for matrix")
-	ErrSingular        = Error("mat64: matrix is singular")
-	ErrShape           = Error("mat64: dimension mismatch")
-	ErrIllegalStride   = Error("mat64: illegal stride")
-	ErrPivot           = Error("mat64: malformed pivot list")
+var (
+	ErrIndexOutOfRange = Error{"mat64: index out of range"}
+	ErrRowAccess       = Error{"mat64: row index out of range"}
+	ErrColAccess       = Error{"mat64: column index out of range"}
+	ErrZeroLength      = Error{"mat64: zero length in matrix definition"}
+	ErrRowLength       = Error{"mat64: row length mismatch"}
+	ErrColLength       = Error{"mat64: col length mismatch"}
+	ErrSquare          = Error{"mat64: expect square matrix"}
+	ErrNormOrder       = Error{"mat64: invalid norm order for matrix"}
+	ErrSingular        = Error{"mat64: matrix is singular"}
+	ErrShape           = Error{"mat64: dimension mismatch"}
+	ErrIllegalStride   = Error{"mat64: illegal stride"}
+	ErrPivot           = Error{"mat64: malformed pivot list"}
 )
 
 func min(a, b int) int {

@@ -83,7 +83,7 @@ func (s *S) TestMaybe(c *check.C) {
 			true,
 		},
 		{
-			func() { panic(Error("panic")) },
+			func() { panic(Error{"panic"}) },
 			false,
 		},
 	} {

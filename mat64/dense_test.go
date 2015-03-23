@@ -684,8 +684,8 @@ func (s *S) TestMulTrans(c *check.C) {
 					br, _ := bCopy.Dims()
 					if ac != br {
 						// check that both calls error and that the same error returns
-						c.Check(func() { temp.Mul(matInterface(&aCopy), matInterface(&bCopy)) }, check.PanicMatches, string(ErrShape), check.Commentf("Test Mul %d", i))
-						c.Check(func() { temp.MulTrans(a, aTrans, b, bTrans) }, check.PanicMatches, string(ErrShape), check.Commentf("Test MulTrans %d", i))
+						c.Check(func() { temp.Mul(matInterface(&aCopy), matInterface(&bCopy)) }, check.PanicMatches, ErrShape.Error(), check.Commentf("Test Mul %d", i))
+						c.Check(func() { temp.MulTrans(a, aTrans, b, bTrans) }, check.PanicMatches, ErrShape.Error(), check.Commentf("Test MulTrans %d", i))
 						continue
 					}
 

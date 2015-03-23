@@ -129,16 +129,7 @@ func (m *Dense) Add(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	} else if ar != m.mat.Rows || ac != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -185,16 +176,7 @@ func (m *Dense) Sub(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	} else if ar != m.mat.Rows || ac != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -242,16 +224,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	} else if ar != m.mat.Rows || ac != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -299,16 +272,7 @@ func (m *Dense) DivElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	} else if ar != m.mat.Rows || ac != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -401,16 +365,7 @@ func (m *Dense) Mul(a, b Matrix) {
 	if m != a && m != b {
 		w = *m
 	}
-	if w.isZero() {
-		w.mat = blas64.General{
-			Rows:   ar,
-			Cols:   bc,
-			Stride: bc,
-			Data:   use(w.mat.Data, ar*bc),
-		}
-	} else if ar != w.mat.Rows || bc != w.mat.Cols {
-		panic(ErrShape)
-	}
+	w.reUseAs(ar, bc)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -478,16 +433,7 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 	if m != a && m != b {
 		w = *m
 	}
-	if w.isZero() {
-		w.mat = blas64.General{
-			Rows:   ar,
-			Cols:   bc,
-			Stride: bc,
-			Data:   use(w.mat.Data, ar*bc),
-		}
-	} else if ar != w.mat.Rows || bc != w.mat.Cols {
-		panic(ErrShape)
-	}
+	w.reUseAs(ar, bc)
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -674,9 +620,8 @@ func (m *Dense) Exp(a Matrix) {
 			Rows:   r,
 			Cols:   c,
 			Stride: c,
-			Data:   use(m.mat.Data, r*r),
+			Data:   useZeroed(m.mat.Data, r*r),
 		}
-		zero(m.mat.Data)
 		for i := 0; i < r*r; i += r + 1 {
 			m.mat.Data[i] = 1
 		}
@@ -736,16 +681,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 		panic(ErrShape)
 	}
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   r,
-			Cols:   c,
-			Stride: c,
-			Data:   use(m.mat.Data, r*r),
-		}
-	} else if r != m.mat.Rows || c != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(r, c)
 
 	// Take possible fast paths.
 	switch n {
@@ -782,16 +718,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 func (m *Dense) Scale(f float64, a Matrix) {
 	ar, ac := a.Dims()
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	} else if ar != m.mat.Rows || ac != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -828,16 +755,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 	ar, ac := a.Dims()
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	} else if ar != m.mat.Rows || ac != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -981,16 +899,8 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y []float64) {
 	if m == a {
 		w = *m
 	}
-	if w.isZero() {
-		w.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(w.mat.Data, ar*ac),
-		}
-	} else if ar != w.mat.Rows || ac != w.mat.Cols {
-		panic(ErrShape)
-	}
+	w.reUseAs(ar, ac)
+
 	// Copy over to the new memory if necessary
 	if m != a {
 		w.Copy(a)

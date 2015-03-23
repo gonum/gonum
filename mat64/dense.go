@@ -90,6 +90,29 @@ func NewDense(r, c int, mat []float64) *Dense {
 	}
 }
 
+// reUseAs resizes an empty matrix to a r×c matrix,
+// or checks that a non-empty matrix is r×c.
+func (m *Dense) reUseAs(r, c int) {
+	if m.isZero() {
+		m.mat = blas64.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   use(m.mat.Data, r*c),
+		}
+		return
+	}
+	if r != m.mat.Rows || c != m.mat.Cols {
+		panic(ErrShape)
+	}
+}
+
+func (m *Dense) isZero() bool {
+	// It must be the case that m.Dims() returns
+	// zeros in this case. See comment in Reset().
+	return m.mat.Stride == 0
+}
+
 // DenseCopyOf returns a newly allocated copy of the elements of a.
 func DenseCopyOf(a Matrix) *Dense {
 	d := &Dense{}
@@ -109,12 +132,6 @@ func (m *Dense) SetRawMatrix(b blas64.General) {
 // Changes to elements in the receiver following the call will be reflected
 // in returned blas64.General.
 func (m *Dense) RawMatrix() blas64.General { return m.mat }
-
-func (m *Dense) isZero() bool {
-	// It must be the case that m.Dims() returns
-	// zeros in this case. See comment in Reset().
-	return m.mat.Stride == 0
-}
 
 // Dims returns the number of rows and columns in the matrix.
 func (m *Dense) Dims() (r, c int) { return m.mat.Rows, m.mat.Cols }
@@ -398,20 +415,11 @@ func (m *Dense) U(a Matrix) {
 		panic(ErrSquare)
 	}
 
-	switch {
-	case m == a:
+	if m == a {
 		m.zeroLower()
 		return
-	case m.isZero():
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	case ar != m.mat.Rows || ac != m.mat.Cols:
-		panic(ErrShape)
 	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -456,20 +464,11 @@ func (m *Dense) L(a Matrix) {
 		panic(ErrSquare)
 	}
 
-	switch {
-	case m == a:
+	if m == a {
 		m.zeroUpper()
 		return
-	case m.isZero():
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, ar*ac),
-		}
-	case ar != m.mat.Rows || ac != m.mat.Cols:
-		panic(ErrShape)
 	}
+	m.reUseAs(ar, ac)
 
 	if a, ok := a.(RawMatrixer); ok {
 		amat := a.RawMatrix()
@@ -515,16 +514,8 @@ func (m *Dense) TCopy(a Matrix) {
 	if m != a {
 		w = *m
 	}
-	if w.isZero() {
-		w.mat = blas64.General{
-			Rows: ac,
-			Cols: ar,
-			Data: use(w.mat.Data, ar*ac),
-		}
-		w.mat.Stride = ar
-	} else if ar != m.mat.Cols || ac != m.mat.Rows {
-		panic(ErrShape)
-	}
+	w.reUseAs(ac, ar)
+
 	switch a := a.(type) {
 	case *Dense:
 		for i := 0; i < ac; i++ {
@@ -553,16 +544,7 @@ func (m *Dense) Stack(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar + br,
-			Cols:   ac,
-			Stride: ac,
-			Data:   use(m.mat.Data, (ar+br)*ac),
-		}
-	} else if ar+br != m.mat.Rows || ac != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar+br, ac)
 
 	m.Copy(a)
 	w := m.View(ar, 0, br, bc).(*Dense)
@@ -580,16 +562,7 @@ func (m *Dense) Augment(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	if m.isZero() {
-		m.mat = blas64.General{
-			Rows:   ar,
-			Cols:   ac + bc,
-			Stride: ac + bc,
-			Data:   use(m.mat.Data, ar*(ac+bc)),
-		}
-	} else if ar != m.mat.Rows || ac+bc != m.mat.Cols {
-		panic(ErrShape)
-	}
+	m.reUseAs(ar, ac+bc)
 
 	m.Copy(a)
 	w := m.View(0, ac, br, bc).(*Dense)

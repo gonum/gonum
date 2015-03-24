@@ -82,7 +82,7 @@ type Method interface {
 
 	// Needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
-	// internally for initialization and has to match evaluation types returned
+	// internally for initialization and must match evaluation types returned
 	// by Init() and Iterate() during the optimization process.
 	Needs() struct {
 		Gradient bool

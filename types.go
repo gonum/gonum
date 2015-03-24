@@ -157,7 +157,7 @@ func newFunctionInfo(f Function) *functionInfo {
 // constraint interface is designed.
 func (f functionInfo) satisfies(method Method) error {
 	gradOk := f.IsGradient || f.IsFunctionGradient || f.IsFunctionGradientHessian
-	if method.Needs().Gradient && !gradOk {
+	if (method.Needs().Gradient || method.Needs().Hessian) && !gradOk {
 		return errors.New("optimize: function does not implement needed Gradient, FunctionGradient or FunctionGradientHessian interface")
 	}
 	hessOk := f.IsHessian || f.IsFunctionGradientHessian
@@ -171,14 +171,15 @@ func (f functionInfo) satisfies(method Method) error {
 // settings, convergence information, and Recorder information. In general, users
 // should use DefaultSettings() rather than constructing a Settings literal.
 //
-// If UseInitData is true, InitialFunctionValue and InitialGradient specify
-// function information at the initial location.
+// If UseInitData is true, InitialValue, InitialGradient and InitialHessian
+// specify function information at the initial location.
 //
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
-	UseInitialData       bool      // Use supplied information about the conditions at the initial x.
-	InitialFunctionValue float64   // Func(x) at the initial x.
-	InitialGradient      []float64 // Grad(x) at the initial x.
+	UseInitialData  bool            // Use supplied information about the conditions at the initial x.
+	InitialValue    float64         // Func(x) at the initial x.
+	InitialGradient []float64       // Grad(x) at the initial x.
+	InitialHessian  *mat64.SymDense // Hess(x) at the initial x.
 
 	// FunctionThreshold is the threshold for acceptably small values of the
 	// objective function. FunctionThreshold status is returned if

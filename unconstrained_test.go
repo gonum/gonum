@@ -705,9 +705,9 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		settings.UseInitialData = true
 		if funcInfo.IsFunctionGradient {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			settings.InitialFunctionValue = funcInfo.functionGradient.FuncGrad(test.x, settings.InitialGradient)
+			settings.InitialValue = funcInfo.functionGradient.FuncGrad(test.x, settings.InitialGradient)
 		} else {
-			settings.InitialFunctionValue = funcInfo.function.Func(test.x)
+			settings.InitialValue = funcInfo.function.Func(test.x)
 			if funcInfo.IsGradient {
 				settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
 				funcInfo.gradient.Grad(test.x, settings.InitialGradient)
@@ -716,7 +716,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// Rerun the test again to make sure that it gets the same answer with
 		// the same starting condition. Moreover, we are using the initial data
-		// in settings.InitialFunctionValue and settings.InitialGradient.
+		// in settings.InitialValue and settings.InitialGradient.
 		result2, err2 := Local(test.f, test.x, settings, method)
 		if err2 != nil {
 			t.Errorf("error finding minimum second time (%v) for:\n%v", err2, test)

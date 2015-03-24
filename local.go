@@ -212,7 +212,7 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 		X: make([]float64, dim),
 	}
 	copy(loc.X, initX)
-	if method.Needs().Gradient {
+	if method.Needs().Gradient || method.Needs().Hessian {
 		loc.Gradient = make([]float64, dim)
 	}
 	if method.Needs().Hessian {
@@ -221,18 +221,35 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 
 	evalType := NoEvaluation
 	if settings.UseInitialData {
-		loc.F = settings.InitialFunctionValue
+		loc.F = settings.InitialValue
 		if loc.Gradient != nil {
 			initG := settings.InitialGradient
+			if initG == nil {
+				panic("optimize: initial gradient is nil")
+			}
 			if len(initG) != dim {
-				panic("optimize: initial location size mismatch")
+				panic("optimize: initial gradient size mismatch")
 			}
 			copy(loc.Gradient, initG)
 		}
+		if loc.Hessian != nil {
+			initH := settings.InitialHessian
+			if initH == nil {
+				panic("optimize: initial Hessian is nil")
+			}
+			if initH.Symmetric() != dim {
+				panic("optimize: initial Hessian size mismatch")
+			}
+			loc.Hessian.CopySym(initH)
+		}
 	} else {
-		evalType = FuncEvaluation
-		if loc.Gradient != nil {
+		switch {
+		case loc.Hessian != nil:
+			evalType = FuncGradHessEvaluation
+		case loc.Gradient != nil:
 			evalType = FuncGradEvaluation
+		default:
+			evalType = FuncEvaluation
 		}
 		evaluate(funcInfo, evalType, loc.X, loc, stats)
 	}

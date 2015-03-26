@@ -257,11 +257,11 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 		if loc.Gradient != nil {
 			norm := floats.Norm(loc.Gradient, math.Inf(1))
 			if norm < settings.GradientAbsTol {
-				return GradientAbsoluteConvergence
+				return GradientThreshhold
 			}
 		}
 		if loc.F < settings.FunctionAbsTol {
-			return FunctionAbsoluteConvergence
+			return FunctionThreshhold
 		}
 	}
 

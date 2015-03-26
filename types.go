@@ -180,18 +180,25 @@ type Settings struct {
 	InitialFunctionValue float64   // Func(x) at the initial x.
 	InitialGradient      []float64 // Grad(x) at the initial x.
 
-	// FunctionAbsTol is the threshold for acceptably small values of the
-	// objective function. FunctionAbsoluteConvergence status is returned if
+	// FunctionThreshold is the threshold for acceptably small values of the
+	// objective function. FunctionThreshhold status is returned if
 	// the objective function is less than this value.
 	// The default value is -inf.
-	FunctionAbsTol float64
+	FunctionThreshhold float64
 
-	// GradientAbsTol determines the accuracy to which the minimum is found.
-	// GradientAbsoluteConvergence status is returned if the infinity norm of
+	// GradientThreshold determines the accuracy to which the minimum is found.
+	// GradientThreshhold status is returned if the infinity norm of
 	// the gradient is less than this value.
 	// Has no effect if gradient information is not used.
 	// The default value is 1e-6.
-	GradientAbsTol float64
+	GradientThreshhold float64
+
+	// FunctionConvergence sets the absolute and/or relative amount by which
+	// the function value must change over the specified number of iterations.
+	// If these values are not met, FunctionAbsoluteConvergence or
+	// FunctionRelativeConvergence will be returned. If Iterations is zero has
+	// no effect.
+	FunctionConvergence *FunctionConvergence
 
 	// MajorIterations is the maximum number of iterations allowed.
 	// IterationLimit status is returned if the number of major iterations
@@ -242,6 +249,10 @@ func DefaultSettings() *Settings {
 		GradientAbsTol: defaultGradientAbsTol,
 		FunctionAbsTol: math.Inf(-1),
 		Recorder:       NewPrinter(),
+		FunctionConvergence: &FunctionConvergence{
+			Absolute:   1e-10,
+			Iterations: 20,
+		},
 	}
 }
 

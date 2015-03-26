@@ -507,6 +507,23 @@ func TestGradientDescent(t *testing.T) {
 	testLocal(t, gradientDescentTests, &GradientDescent{})
 }
 
+func TestNelderMead(t *testing.T) {
+	//testLocal(t, gradientDescentTests, &NelderMead{})
+	/*
+		testLocal(t, []unconstrainedTest{
+			{
+				f: functions.ExtendedRosenbrock{},
+				x: []float64{-5, 4, 16, 23},
+				//x: []float64{-100, 100, -100, 100},
+			}}, &NelderMead{})
+	*/
+	xopt := []float64{-0.7757508152987741, 0.6132325844890015, 0.3822278774303768, 0.146089935031402}
+
+	gradopt := make([]float64, len(xopt))
+	functions.ExtendedRosenbrock{}.Grad(xopt, gradopt)
+	fmt.Println(gradopt)
+}
+
 func TestGradientDescentBacktracking(t *testing.T) {
 	testLocal(t, gradientDescentTests, &GradientDescent{
 		LinesearchMethod: &Backtracking{

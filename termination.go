@@ -14,7 +14,9 @@ const (
 	NotTerminated Status = iota
 	Success
 	FunctionAbsoluteConvergence
-	GradientAbsoluteConvergence
+	FunctionRelativeConvergence
+	FunctionThreshhold
+	GradientThreshhold
 	StepConvergence
 	FunctionNegativeInfinity
 	Failure

@@ -10,9 +10,9 @@ func (s *S) TestCholesky(c *check.C) {
 	for _, t := range []struct {
 		a     *SymDense
 		upper bool
-		f     *Triangular
+		f     *TriDense
 
-		want *Triangular
+		want *TriDense
 		pd   bool
 	}{
 		{
@@ -22,9 +22,9 @@ func (s *S) TestCholesky(c *check.C) {
 				0, 0, 6,
 			}),
 			upper: false,
-			f:     &Triangular{},
+			f:     &TriDense{},
 
-			want: NewTriangular(3, false, []float64{
+			want: NewTriDense(3, false, []float64{
 				2, 0, 0,
 				0.5, 1.3228756555322954, 0,
 				0.5, 2.0788046015507495, 1.195228609334394,
@@ -38,9 +38,9 @@ func (s *S) TestCholesky(c *check.C) {
 				0, 0, 6,
 			}),
 			upper: true,
-			f:     &Triangular{},
+			f:     &TriDense{},
 
-			want: NewTriangular(3, true, []float64{
+			want: NewTriDense(3, true, []float64{
 				2, 0.5, 0.5,
 				0, 1.3228756555322954, 2.0788046015507495,
 				0, 0, 1.195228609334394,
@@ -54,9 +54,9 @@ func (s *S) TestCholesky(c *check.C) {
 				0, 0, 6,
 			}),
 			upper: false,
-			f:     NewTriangular(3, false, nil),
+			f:     NewTriDense(3, false, nil),
 
-			want: NewTriangular(3, false, []float64{
+			want: NewTriDense(3, false, []float64{
 				2, 0, 0,
 				0.5, 1.3228756555322954, 0,
 				0.5, 2.0788046015507495, 1.195228609334394,
@@ -70,9 +70,9 @@ func (s *S) TestCholesky(c *check.C) {
 				0, 0, 6,
 			}),
 			upper: true,
-			f:     NewTriangular(3, false, nil),
+			f:     NewTriDense(3, false, nil),
 
-			want: NewTriangular(3, true, []float64{
+			want: NewTriDense(3, true, []float64{
 				2, 0.5, 0.5,
 				0, 1.3228756555322954, 2.0788046015507495,
 				0, 0, 1.195228609334394,
@@ -126,7 +126,7 @@ func (s *S) TestCholeskySolve(c *check.C) {
 			ans: NewDense(2, 1, []float64{5, 6}),
 		},
 	} {
-		var f Triangular
+		var f TriDense
 		ok := f.Cholesky(t.a, false)
 		c.Assert(ok, check.Equals, true)
 

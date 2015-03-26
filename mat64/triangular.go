@@ -6,13 +6,27 @@ import (
 )
 
 var (
-	triangular *Triangular
-	_          Matrix = triangular
+	triDense *TriDense
+	_        Matrix        = triDense
+	_        Triangular    = triDense
+	_        RawTriangular = triDense
 )
 
-// Triangular represents an upper or lower triangular matrix.
-type Triangular struct {
+// TriDense represents an upper or lower triangular matrix in dense storage
+// format.
+type TriDense struct {
 	mat blas64.Triangular
+}
+
+type Triangular interface {
+	Matrix
+	// Triangular returns the number of rows/columns in the matrix and if it is
+	// an upper triangular matrix.
+	Triangle() (n int, upper bool)
+}
+
+type RawTriangular interface {
+	RawTriangular() blas64.Triangular
 }
 
 // NewTriangular constructs an n x n triangular matrix. The constructed matrix
@@ -22,7 +36,7 @@ type Triangular struct {
 // cases is true.
 // The underlying data representation is the same as that of a Dense matrix,
 // except the values of the entries in the opposite half are completely ignored.
-func NewTriangular(n int, upper bool, mat []float64) *Triangular {
+func NewTriDense(n int, upper bool, mat []float64) *TriDense {
 	if n < 0 {
 		panic("mat64: negative dimension")
 	}
@@ -36,7 +50,7 @@ func NewTriangular(n int, upper bool, mat []float64) *Triangular {
 	if upper {
 		uplo = blas.Upper
 	}
-	return &Triangular{blas64.Triangular{
+	return &TriDense{blas64.Triangular{
 		N:      n,
 		Stride: n,
 		Data:   mat,
@@ -45,15 +59,19 @@ func NewTriangular(n int, upper bool, mat []float64) *Triangular {
 	}}
 }
 
-func (t *Triangular) Dims() (r, c int) {
+func (t *TriDense) Dims() (r, c int) {
 	return t.mat.N, t.mat.N
 }
 
-func (t *Triangular) RawTriangular() blas64.Triangular {
+func (t *TriDense) Triangle() (n int, upper bool) {
+	return t.mat.N, t.mat.Uplo == blas.Upper
+}
+
+func (t *TriDense) RawTriangular() blas64.Triangular {
 	return t.mat
 }
 
-func (t *Triangular) isZero() bool {
+func (t *TriDense) isZero() bool {
 	// It must be the case that t.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return t.mat.Stride == 0
@@ -63,7 +81,7 @@ func (t *Triangular) isZero() bool {
 // receiver of a dimensionally restricted operation.
 //
 // See the Reseter interface for more information.
-func (t *Triangular) Reset() {
+func (t *TriDense) Reset() {
 	// No change of Stride, N to 0 may
 	// be made unless both are set to 0.
 	t.mat.N, t.mat.Stride = 0, 0
@@ -71,4 +89,36 @@ func (t *Triangular) Reset() {
 	// it is set correctly later.
 	t.mat.Uplo = 0
 	t.mat.Data = t.mat.Data[:0]
+}
+
+// getBlasTriangular transforms t into a blas64.Triangular. If t is a RawTriangular,
+// the direct matrix representation is returned, otherwise t is copied into one.
+func getBlasTriangular(t Triangular) blas64.Triangular {
+	n, upper := t.Triangle()
+	rt, ok := t.(RawTriangular)
+	if ok {
+		return rt.RawTriangular()
+	}
+	ta := blas64.Triangular{
+		N:      n,
+		Stride: n,
+		Diag:   blas.NonUnit,
+		Data:   make([]float64, n*n),
+	}
+	if upper {
+		ta.Uplo = blas.Upper
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				ta.Data[i*n+j] = t.At(i, j)
+			}
+		}
+		return ta
+	}
+	ta.Uplo = blas.Lower
+	for i := 0; i < n; i++ {
+		for j := 0; j < i; j++ {
+			ta.Data[i*n+j] = t.At(i, j)
+		}
+	}
+	return ta
 }

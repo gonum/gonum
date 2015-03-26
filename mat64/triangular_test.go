@@ -11,7 +11,7 @@ func (s *S) TestNewTriangular(c *check.C) {
 		data  []float64
 		N     int
 		upper bool
-		mat   *Triangular
+		mat   *TriDense
 	}{
 		{
 			data: []float64{
@@ -21,7 +21,7 @@ func (s *S) TestNewTriangular(c *check.C) {
 			},
 			N:     3,
 			upper: true,
-			mat: &Triangular{blas64.Triangular{
+			mat: &TriDense{blas64.Triangular{
 				N:      3,
 				Stride: 3,
 				Uplo:   blas.Upper,
@@ -30,7 +30,7 @@ func (s *S) TestNewTriangular(c *check.C) {
 			}},
 		},
 	} {
-		t := NewTriangular(test.N, test.upper, test.data)
+		t := NewTriDense(test.N, test.upper, test.data)
 		rows, cols := t.Dims()
 		c.Check(rows, check.Equals, test.N, check.Commentf("Test %d", i))
 		c.Check(cols, check.Equals, test.N, check.Commentf("Test %d", i))
@@ -38,7 +38,7 @@ func (s *S) TestNewTriangular(c *check.C) {
 	}
 }
 func (s *S) TestTriAtSet(c *check.C) {
-	t := &Triangular{blas64.Triangular{
+	t := &TriDense{blas64.Triangular{
 		N:      3,
 		Stride: 3,
 		Uplo:   blas.Upper,

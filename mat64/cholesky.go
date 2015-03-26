@@ -19,7 +19,7 @@ const badTriangle = "mat64: invalid triangle"
 // whether the matrix is positive definite. The returned matrix is either a
 // lower triangular matrix such that A = L * L^T or an upper triangular matrix
 // such that A = U^T * U depending on the upper parameter.
-func (t *Triangular) Cholesky(a *SymDense, upper bool) (ok bool) {
+func (t *TriDense) Cholesky(a *SymDense, upper bool) (ok bool) {
 	n := a.Symmetric()
 	if t.isZero() {
 		t.mat = blas64.Triangular{
@@ -81,7 +81,7 @@ func (t *Triangular) Cholesky(a *SymDense, upper bool) (ok bool) {
 // SolveCholesky finds the matrix x that solves A * X = B where A = L * L^T or
 // A = U^T * U, and U or L are represented by t. The matrix A must be symmetric
 // and positive definite.
-func (m *Dense) SolveCholesky(t *Triangular, b Matrix) {
+func (m *Dense) SolveCholesky(t Triangular, b Matrix) {
 	_, n := t.Dims()
 	bm, bn := b.Dims()
 	if n != bm {
@@ -93,13 +93,17 @@ func (m *Dense) SolveCholesky(t *Triangular, b Matrix) {
 		m.Copy(b)
 	}
 
-	switch t.mat.Uplo {
+	// TODO(btracey): Implement an algorithm that doesn't require a copy into
+	// a blas64.Triangular.
+	ta := getBlasTriangular(t)
+
+	switch ta.Uplo {
 	case blas.Upper:
-		blas64.Trsm(blas.Left, blas.Trans, 1, t.mat, m.mat)
-		blas64.Trsm(blas.Left, blas.NoTrans, 1, t.mat, m.mat)
+		blas64.Trsm(blas.Left, blas.Trans, 1, ta, m.mat)
+		blas64.Trsm(blas.Left, blas.NoTrans, 1, ta, m.mat)
 	case blas.Lower:
-		blas64.Trsm(blas.Left, blas.NoTrans, 1, t.mat, m.mat)
-		blas64.Trsm(blas.Left, blas.Trans, 1, t.mat, m.mat)
+		blas64.Trsm(blas.Left, blas.NoTrans, 1, ta, m.mat)
+		blas64.Trsm(blas.Left, blas.Trans, 1, ta, m.mat)
 	default:
 		panic(badTriangle)
 	}
@@ -107,8 +111,8 @@ func (m *Dense) SolveCholesky(t *Triangular, b Matrix) {
 
 // SolveTri finds the matrix x that solves op(A) * X = B where A is a triangular
 // matrix and op is specified by trans.
-func (m *Dense) SolveTri(a *Triangular, trans bool, b Matrix) {
-	_, n := a.Dims()
+func (m *Dense) SolveTri(a Triangular, trans bool, b Matrix) {
+	n, _ := a.Triangle()
 	bm, bn := b.Dims()
 	if n != bm {
 		panic(ErrShape)
@@ -119,13 +123,17 @@ func (m *Dense) SolveTri(a *Triangular, trans bool, b Matrix) {
 		m.Copy(b)
 	}
 
+	// TODO(btracey): Implement an algorithm that doesn't require a copy into
+	// a blas64.Triangular.
+	ta := getBlasTriangular(a)
+
 	t := blas.NoTrans
 	if trans {
 		t = blas.Trans
 	}
-	switch a.mat.Uplo {
+	switch ta.Uplo {
 	case blas.Upper, blas.Lower:
-		blas64.Trsm(blas.Left, t, 1, a.mat, m.mat)
+		blas64.Trsm(blas.Left, t, 1, ta, m.mat)
 	default:
 		panic(badTriangle)
 	}

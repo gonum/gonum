@@ -651,12 +651,12 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		}
 
 		settings := &Settings{
-			FunctionAbsTol: math.Inf(-1),
+			FunctionThreshold: math.Inf(-1),
 		}
 		if test.gradTol == 0 {
 			test.gradTol = 1e-12
 		}
-		settings.GradientAbsTol = test.gradTol
+		settings.GradientThreshold = test.gradTol
 
 		result, err := Local(test.f, test.x, settings, method)
 		if err != nil {
@@ -695,9 +695,9 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// Check that the norm of the gradient at the found optimum location is
 		// smaller than the tolerance.
-		if optNorm >= settings.GradientAbsTol {
+		if optNorm >= settings.GradientThreshold {
 			t.Errorf("Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
-				optNorm, settings.GradientAbsTol, test)
+				optNorm, settings.GradientThreshold, test)
 		}
 
 		// We are going to restart the solution using a fixed starting gradient
@@ -762,9 +762,9 @@ func TestIssue76(t *testing.T) {
 	// Location very close to the minimum.
 	x := []float64{-11.594439904886773, 13.203630051265385, -0.40343948776868443, 0.2367787746745986}
 	s := &Settings{
-		FunctionAbsTol:  math.Inf(-1),
-		GradientAbsTol:  1e-14,
-		MajorIterations: 1000000,
+		FunctionThreshold: math.Inf(-1),
+		GradientThreshold: 1e-14,
+		MajorIterations:   1000000,
 	}
 	m := &GradientDescent{
 		LinesearchMethod: &Backtracking{},

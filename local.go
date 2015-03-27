@@ -89,6 +89,10 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 		return nil, err
 	}
 
+	if settings.FunctionConverge != nil {
+		settings.FunctionConverge.Init(optLoc.F)
+	}
+
 	// Runtime is the only Stats field that needs to be updated here.
 	stats.Runtime = time.Since(startTime)
 	// Send optLoc to Recorder before checking it for convergence.
@@ -198,8 +202,7 @@ func getDefaultMethod(funcInfo *functionInfo) Method {
 	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
 		return &BFGS{}
 	}
-	// TODO: Implement a gradient-free method
-	panic("optimize: gradient-free methods not yet coded")
+	return &NelderMead{}
 }
 
 // getStartingLocation allocates and initializes the starting location for the minimization.
@@ -256,12 +259,19 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	if iterType == MajorIteration || iterType == InitIteration {
 		if loc.Gradient != nil {
 			norm := floats.Norm(loc.Gradient, math.Inf(1))
-			if norm < settings.GradientAbsTol {
-				return GradientAbsoluteConvergence
+			if norm < settings.GradientThreshold {
+				return GradientThreshold
 			}
 		}
-		if loc.F < settings.FunctionAbsTol {
-			return FunctionAbsoluteConvergence
+		if loc.F < settings.FunctionThreshold {
+			return FunctionThreshold
+		}
+	}
+
+	if iterType == MajorIteration && settings.FunctionConverge != nil {
+		status := settings.FunctionConverge.FunctionConverged(loc.F)
+		if status != NotTerminated {
+			return status
 		}
 	}
 

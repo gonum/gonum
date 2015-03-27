@@ -15,33 +15,40 @@ import (
 
 const defaultGradientAbsTol = 1e-6
 
-// EvaluationType is used by the optimizer to specify information needed
-// from the objective function.
-type EvaluationType int
+// EvaluationType is used by a Method to specify the objective-function
+// information needed at an x location. The types can be composed together
+// using the binary or operator, for example 'FuncEvaluation | GradEvaluation'
+// to evaluate both the function value and the gradient.
+type EvaluationType uint
 
+// Basic evaluation types.
 const (
-	NoEvaluation EvaluationType = iota
-	FuncEvaluation
+	NoEvaluation   EvaluationType = 0
+	FuncEvaluation EvaluationType = 1 << iota
 	GradEvaluation
 	HessEvaluation
-	FuncGradEvaluation
-	FuncGradHessEvaluation
+)
+
+// Combined evaluation types.
+const (
+	FuncGradEvaluation     = FuncEvaluation | GradEvaluation
+	FuncGradHessEvaluation = FuncGradEvaluation | HessEvaluation
 )
 
 func (e EvaluationType) String() string {
-	if e < 0 || int(e) >= len(evaluationStrings) {
-		return fmt.Sprintf("EvaluationType(%d)", e)
+	if s, ok := evaluationStrings[e]; ok {
+		return s
 	}
-	return evaluationStrings[e]
+	return fmt.Sprintf("EvaluationType(%d)", e)
 }
 
-var evaluationStrings = [...]string{
-	"NoEvaluation",
-	"FuncEvaluation",
-	"GradEvaluation",
-	"HessEvaluation",
-	"FuncGradEvaluation",
-	"FuncGradHessEvaluation",
+var evaluationStrings = map[EvaluationType]string{
+	NoEvaluation:           "NoEvaluation",
+	FuncEvaluation:         "FuncEvaluation",
+	GradEvaluation:         "GradEvaluation",
+	HessEvaluation:         "HessEvaluation",
+	FuncGradEvaluation:     "FuncGradEvaluation",
+	FuncGradHessEvaluation: "FuncGradHessEvaluation",
 }
 
 // IterationType specifies the type of iteration.

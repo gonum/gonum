@@ -199,7 +199,7 @@ func copyLocation(dst, src *Location) {
 }
 
 func getDefaultMethod(funcInfo *functionInfo) Method {
-	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
+	if funcInfo.IsGradient {
 		return &BFGS{}
 	}
 	return &NelderMead{}
@@ -212,7 +212,7 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 		X: make([]float64, dim),
 	}
 	copy(loc.X, initX)
-	if method.Needs().Gradient || method.Needs().Hessian {
+	if method.Needs().Gradient {
 		loc.Gradient = make([]float64, dim)
 	}
 	if method.Needs().Hessian {

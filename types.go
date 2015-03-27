@@ -163,13 +163,11 @@ func newFunctionInfo(f Function) *functionInfo {
 // TODO(btracey): Think about making this an exported function when the
 // constraint interface is designed.
 func (f functionInfo) satisfies(method Method) error {
-	gradOk := f.IsGradient || f.IsFunctionGradient || f.IsFunctionGradientHessian
-	if (method.Needs().Gradient || method.Needs().Hessian) && !gradOk {
-		return errors.New("optimize: function does not implement needed Gradient, FunctionGradient or FunctionGradientHessian interface")
+	if method.Needs().Gradient && !f.IsGradient {
+		return errors.New("optimize: function does not implement needed Gradient interface")
 	}
-	hessOk := f.IsHessian || f.IsFunctionGradientHessian
-	if method.Needs().Hessian && !hessOk {
-		return errors.New("optimize: function does not implement needed Hessian or FunctionGradientHessian interface")
+	if method.Needs().Hessian && !f.IsHessian {
+		return errors.New("optimize: function does not implement needed Hessian interface")
 	}
 	return nil
 }

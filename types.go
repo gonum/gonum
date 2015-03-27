@@ -181,24 +181,25 @@ type Settings struct {
 	InitialGradient      []float64 // Grad(x) at the initial x.
 
 	// FunctionThreshold is the threshold for acceptably small values of the
-	// objective function. FunctionThreshhold status is returned if
+	// objective function. FunctionThreshold status is returned if
 	// the objective function is less than this value.
 	// The default value is -inf.
-	FunctionThreshhold float64
+	FunctionThreshold float64
 
 	// GradientThreshold determines the accuracy to which the minimum is found.
-	// GradientThreshhold status is returned if the infinity norm of
+	// GradientThreshold status is returned if the infinity norm of
 	// the gradient is less than this value.
 	// Has no effect if gradient information is not used.
 	// The default value is 1e-6.
-	GradientThreshhold float64
+	GradientThreshold float64
 
-	// FunctionConvergence sets the absolute and/or relative amount by which
-	// the function value must change over the specified number of iterations.
-	// If these values are not met, FunctionAbsoluteConvergence or
-	// FunctionRelativeConvergence will be returned. If Iterations is zero has
-	// no effect.
-	FunctionConvergence *FunctionConvergence
+	// FunctionConverge tests that the function value decreases by a significant
+	// amount over the specified number of iterations. If
+	//  f < f_best && f_best - f > Relative * maxabs(f, f_best) + Absolute
+	// then a significant decrease has occured, and f_best is updated. If there is
+	// no significant decrease for Iterations major iterations, FunctionConvergence
+	// is returned. If this is nil or if Iterations == 0, it has no effect.
+	FunctionConverge *FunctionConverge
 
 	// MajorIterations is the maximum number of iterations allowed.
 	// IterationLimit status is returned if the number of major iterations
@@ -246,10 +247,10 @@ type Settings struct {
 // DefaultSettings returns a new Settings struct containing the default settings.
 func DefaultSettings() *Settings {
 	return &Settings{
-		GradientAbsTol: defaultGradientAbsTol,
-		FunctionAbsTol: math.Inf(-1),
-		Recorder:       NewPrinter(),
-		FunctionConvergence: &FunctionConvergence{
+		GradientThreshold: defaultGradientAbsTol,
+		FunctionThreshold: math.Inf(-1),
+		Recorder:          NewPrinter(),
+		FunctionConverge: &FunctionConverge{
 			Absolute:   1e-10,
 			Iterations: 20,
 		},

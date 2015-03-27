@@ -13,10 +13,9 @@ type Status int
 const (
 	NotTerminated Status = iota
 	Success
-	FunctionAbsoluteConvergence
-	FunctionRelativeConvergence
-	FunctionThreshhold
-	GradientThreshhold
+	FunctionThreshold
+	FunctionConvergence
+	GradientThreshold
 	StepConvergence
 	FunctionNegativeInfinity
 	Failure
@@ -57,10 +56,13 @@ var statuses = []struct {
 		name: "Success",
 	},
 	{
-		name: "FunctionAbsoluteConvergence",
+		name: "FunctionThreshold",
 	},
 	{
-		name: "GradientAbsoluteConvergence",
+		name: "FunctionConvergence",
+	},
+	{
+		name: "GradientThreshold",
 	},
 	{
 		name: "StepConvergence",

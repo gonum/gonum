@@ -1,4 +1,4 @@
-// Copyright ©2014 The gonum Authors. All rights reserved.
+// Copyright ©2015 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -49,7 +49,10 @@ func (n nmVertexSorter) Swap(i, j int) {
 //
 // If an initial simplex is provided, it is used and initLoc is ignored. If
 // InitialVertices and InitialValues are both nil, an initial simplex will be
-// generated automatically. If the simplex update parameters (Reflection, etc.)
+// generated automatically using the initial location as one vertex, and each
+// additional vertex as SimplexSize away in one dimension.
+//
+// If the simplex update parameters (Reflection, etc.)
 // are zero, they will be set automatically based on the dimension according to
 // the recommendations in
 //
@@ -61,6 +64,12 @@ type NelderMead struct {
 	Expansion       float64 // Expansion parameter (>1)
 	Contraction     float64 // Contraction parameter (>0, <1)
 	Shrink          float64 // Shrink parameter (>0, <1)
+	SimplexSize     float64 // size of auto-constructed initial simplex
+
+	reflection  float64
+	expansion   float64
+	contraction float64
+	shrink      float64
 
 	vertices [][]float64 // location of the vertices sorted in ascending f
 	values   []float64   // function values at the vertices sorted in ascending f
@@ -85,19 +94,27 @@ func (n *NelderMead) Init(loc *Location, f *FunctionInfo, xNext []float64) (Eval
 	n.centroid = resize(n.centroid, dim)
 	n.reflectedPoint = resize(n.reflectedPoint, dim)
 
+	if n.SimplexSize == 0 {
+		n.SimplexSize = 0.05
+	}
+
 	// Default parameter choices are chosen in a dimension-dependent way
 	// from http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf
-	if n.Reflection == 0 {
-		n.Reflection = 1
+	n.reflection = n.Reflection
+	if n.reflection == 0 {
+		n.reflection = 1
 	}
-	if n.Expansion == 0 {
-		n.Expansion = 1 + 2.0/float64(dim)
+	n.expansion = n.Expansion
+	if n.expansion == 0 {
+		n.expansion = 1 + 2/float64(dim)
 	}
-	if n.Contraction == 0 {
-		n.Contraction = 0.75 - 1.0/(2.0*float64(dim))
+	n.contraction = n.Contraction
+	if n.contraction == 0 {
+		n.contraction = 0.75 - 1/(2*float64(dim))
 	}
-	if n.Shrink == 0 {
-		n.Shrink = 1 - 1.0/float64(dim)
+	n.shrink = n.Shrink
+	if n.shrink == 0 {
+		n.shrink = 1 - 1/float64(dim)
 	}
 
 	if n.InitialVertices != nil {
@@ -126,8 +143,7 @@ func (n *NelderMead) Init(loc *Location, f *FunctionInfo, xNext []float64) (Eval
 	n.values[dim] = loc.F
 	n.fillIdx = 0
 	copy(xNext, loc.X)
-	xNext[0] += 1
-	copy(n.vertices[0], xNext)
+	xNext[0] += n.SimplexSize
 	n.lastIter = nmInitialize
 	return FuncEvaluation, InitIteration, nil
 }
@@ -155,6 +171,7 @@ func (n *NelderMead) Iterate(loc *Location, xNext []float64) (EvaluationType, It
 	switch n.lastIter {
 	case nmInitialize:
 		n.values[n.fillIdx] = loc.F
+		copy(n.vertices[n.fillIdx], loc.X)
 		n.fillIdx++
 		if n.fillIdx == dim {
 			// Successfully finished building initial simplex.
@@ -162,10 +179,8 @@ func (n *NelderMead) Iterate(loc *Location, xNext []float64) (EvaluationType, It
 			computeCentroid(n.vertices, n.centroid)
 			return n.returnNext(nmReflected, xNext)
 		}
-		copy(xNext, loc.X)
-		xNext[n.fillIdx-1] -= 1
-		xNext[n.fillIdx] += 1
-		copy(n.vertices[n.fillIdx], xNext)
+		copy(xNext, n.vertices[dim])
+		xNext[n.fillIdx] += n.SimplexSize
 		return FuncEvaluation, InitIteration, nil
 	case nmReflected:
 		n.reflectedValue = loc.F
@@ -228,13 +243,13 @@ func (n *NelderMead) returnNext(iter nmIterType, xNext []float64) (EvaluationTyp
 		var scale float64
 		switch iter {
 		case nmReflected:
-			scale = n.Reflection
+			scale = n.reflection
 		case nmExpanded:
-			scale = n.Reflection * n.Expansion
+			scale = n.reflection * n.expansion
 		case nmContractedOutside:
-			scale = n.Reflection * n.Contraction
+			scale = n.reflection * n.contraction
 		case nmContractedInside:
-			scale = -n.Contraction
+			scale = -n.contraction
 		}
 		floats.SubTo(xNext, n.centroid, n.vertices[dim])
 		floats.Scale(scale, xNext)
@@ -248,7 +263,7 @@ func (n *NelderMead) returnNext(iter nmIterType, xNext []float64) (EvaluationTyp
 	case nmShrink:
 		// x_shrink = x_best + delta * (x_i + x_best)
 		floats.SubTo(xNext, n.vertices[n.fillIdx], n.vertices[0])
-		floats.Scale(n.Shrink, xNext)
+		floats.Scale(n.shrink, xNext)
 		floats.Add(xNext, n.vertices[0])
 		return FuncEvaluation, SubIteration, nil
 	default:
@@ -279,4 +294,14 @@ func (n *NelderMead) replaceWorst(x []float64, f float64) {
 	// subtract the worst point and add the new one.
 	floats.AddScaled(n.centroid, -1/float64(dim), n.vertices[dim])
 	floats.AddScaled(n.centroid, 1/float64(dim), x)
+}
+
+func (*NelderMead) Needs() struct {
+	Gradient bool
+	Hessian  bool
+} {
+	return struct {
+		Gradient bool
+		Hessian  bool
+	}{false, false}
 }

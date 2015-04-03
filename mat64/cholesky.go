@@ -61,7 +61,7 @@ func (t *TriDense) Cholesky(a *SymDense, upper bool) (ok bool) {
 		for j := 0; j < n; j++ {
 			var d float64
 			for k := 0; k < j; k++ {
-				s := asm.DdotUnitary(mat[k*stride:k*stride+(n-k)], mat[j*stride:j*stride+(n-k)])
+				s := asm.DdotUnitary(mat[k*stride:k*stride+k], mat[j*stride:j*stride+k])
 				s = (a.at(j, k) - s) / t.at(k, k)
 				t.set(j, k, s)
 				d += s * s

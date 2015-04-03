@@ -172,6 +172,21 @@ func (f functionInfo) satisfies(method Method) error {
 	return nil
 }
 
+// complementEval returns an evaluation type that evaluates fields of loc not
+// evaluated by eval.
+func complementEval(loc *Location, eval EvaluationType) (complEval EvaluationType) {
+	if eval&FuncEvaluation == 0 {
+		complEval = FuncEvaluation
+	}
+	if loc.Gradient != nil && eval&GradEvaluation == 0 {
+		complEval |= GradEvaluation
+	}
+	if loc.Hessian != nil && eval&HessEvaluation == 0 {
+		complEval |= HessEvaluation
+	}
+	return complEval
+}
+
 // Settings represents settings of the optimization run. It contains initial
 // settings, convergence information, and Recorder information. In general, users
 // should use DefaultSettings() rather than constructing a Settings literal.

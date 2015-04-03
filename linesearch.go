@@ -55,8 +55,8 @@ func (ls *Linesearch) Init(loc *Location, f *FunctionInfo, xNext []float64) (Eva
 
 func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if ls.iterType == SubIteration {
-		// We needed to evaluate the gradient, so now we have it and can
-		// announce MajorIteration.
+		// We needed to evaluate invalid fields of Location. Now we have them
+		// and can announce MajorIteration.
 		ls.iterType = MajorIteration
 		copy(xNext, loc.X)
 		return NoEvaluation, ls.iterType, nil
@@ -76,19 +76,17 @@ func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, I
 		Derivative: projGrad,
 	}
 	if ls.Method.Finished(lsLoc) {
-		if ls.lastEvalType == FuncEvaluation && loc.Gradient != nil {
-			// We have the function value at the current location, but we don't
-			// have the gradient, so get it before announcing MajorIteration.
-			ls.iterType = SubIteration
-			copy(xNext, loc.X)
-			return GradEvaluation, ls.iterType, nil
-		}
-		// The linesearch is finished. Announce so with an update to
-		// MajorIteration. The function value and gradient is already known, so
-		// no function evaluations are necessary.
-		ls.iterType = MajorIteration
 		copy(xNext, loc.X)
-		return NoEvaluation, ls.iterType, nil
+		// Check if the last evaluation evaluated all fields of Location.
+		complEval := complementEval(loc, ls.lastEvalType)
+		if complEval == NoEvaluation {
+			// Location is complete and MajorIteration can be announced directly.
+			ls.iterType = MajorIteration
+			return complEval, ls.iterType, nil
+		}
+		// Location is not complete, evaluate its invalid fields in SubIteration.
+		ls.iterType = SubIteration
+		return complEval, ls.iterType, nil
 	}
 
 	// Line search not done, just iterate.

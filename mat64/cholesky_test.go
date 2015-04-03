@@ -4,7 +4,11 @@
 
 package mat64
 
-import "gopkg.in/check.v1"
+import (
+	"math"
+
+	"gopkg.in/check.v1"
+)
 
 func (s *S) TestCholesky(c *check.C) {
 	for _, t := range []struct {
@@ -76,6 +80,27 @@ func (s *S) TestCholesky(c *check.C) {
 				2, 0.5, 0.5,
 				0, 1.3228756555322954, 2.0788046015507495,
 				0, 0, 1.195228609334394,
+			}),
+			pd: true,
+		},
+		{
+			// Test case for issue #119.
+			a: NewSymDense(3, []float64{
+				4, 1, 1,
+				0, 2, 3,
+				0, 0, 6,
+			}),
+			upper: false,
+			f: NewTriDense(3, false, []float64{
+				math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(),
+				math.NaN(), math.NaN(), math.NaN(),
+			}),
+
+			want: NewTriDense(3, false, []float64{
+				2, 0, 0,
+				0.5, 1.3228756555322954, 0,
+				0.5, 2.0788046015507495, 1.195228609334394,
 			}),
 			pd: true,
 		},

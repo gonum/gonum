@@ -257,3 +257,17 @@ func resize(x []float64, dim int) []float64 {
 	}
 	return x[:dim]
 }
+
+func resizeSymDense(m *mat64.SymDense, dim int) *mat64.SymDense {
+	if m == nil || cap(m.RawSymmetric().Data) < dim*dim {
+		return mat64.NewSymDense(dim, nil)
+	}
+	return mat64.NewSymDense(dim, m.RawSymmetric().Data[:dim*dim])
+}
+
+func resizeTriDense(m *mat64.TriDense, dim int) *mat64.TriDense {
+	if m == nil || cap(m.RawTriangular().Data) < dim*dim {
+		return mat64.NewTriDense(dim, false, nil)
+	}
+	return mat64.NewTriDense(dim, false, m.RawTriangular().Data[:dim*dim])
+}

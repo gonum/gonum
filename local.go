@@ -354,8 +354,7 @@ func invalidate(loc *Location) {
 // loc are set to NaN.
 // evaluate panics if the function does not support the requested evalType.
 func evaluate(f *functionInfo, evalType EvaluationType, xNext []float64, loc *Location, stats *Stats) {
-	different := !floats.Equal(loc.X, xNext)
-	if different {
+	if !floats.Equal(loc.X, xNext) {
 		if evalType == NoEvaluation {
 			// Optimizers should not request NoEvaluation at a new location.
 			// The intent and therefore an appropriate action are both unclear.
@@ -365,43 +364,24 @@ func evaluate(f *functionInfo, evalType EvaluationType, xNext []float64, loc *Lo
 		copy(loc.X, xNext)
 	}
 
-	if evalType == NoEvaluation {
-		return
-	}
-
-	if evalType == FuncGradHessEvaluation && f.IsFunctionGradientHessian {
-		loc.F = f.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
-		stats.FuncGradHessEvaluations++
-		return
-	}
-	if evalType == FuncGradEvaluation && f.IsFunctionGradient {
-		loc.F = f.functionGradient.FuncGrad(loc.X, loc.Gradient)
-		stats.FuncGradEvaluations++
-		return
-	}
-
-	if evalType == FuncGradHessEvaluation && f.IsFunctionGradient {
-		loc.F = f.functionGradient.FuncGrad(loc.X, loc.Gradient)
-		stats.FuncGradEvaluations++
-		evalType = HessEvaluation
-	}
+	toEval := evalType
 	if evalType&FuncEvaluation != 0 {
 		loc.F = f.function.Func(loc.X)
 		stats.FuncEvaluations++
-		evalType &= ^FuncEvaluation
+		toEval &= ^FuncEvaluation
 	}
 	if evalType&GradEvaluation != 0 {
 		f.gradient.Grad(loc.X, loc.Gradient)
 		stats.GradEvaluations++
-		evalType &= ^GradEvaluation
+		toEval &= ^GradEvaluation
 	}
 	if evalType&HessEvaluation != 0 {
 		f.hessian.Hess(loc.X, loc.Hessian)
 		stats.HessEvaluations++
-		evalType &= ^HessEvaluation
+		toEval &= ^HessEvaluation
 	}
 
-	if evalType != NoEvaluation {
+	if toEval != NoEvaluation {
 		panic(fmt.Sprintf("optimize: unknown evaluation type %v", evalType))
 	}
 }

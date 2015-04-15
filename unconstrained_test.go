@@ -672,18 +672,12 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		funcInfo := newFunctionInfo(test.f)
 
 		// Evaluate the norm of the gradient at the found optimum location.
-		var optF, optNorm float64
-		if funcInfo.IsFunctionGradient {
+		optF := funcInfo.function.Func(result.X)
+		var optNorm float64
+		if funcInfo.IsGradient {
 			g := make([]float64, len(test.x))
-			optF = funcInfo.functionGradient.FuncGrad(result.X, g)
+			funcInfo.gradient.Grad(result.X, g)
 			optNorm = floats.Norm(g, math.Inf(1))
-		} else {
-			optF = funcInfo.function.Func(result.X)
-			if funcInfo.IsGradient {
-				g := make([]float64, len(test.x))
-				funcInfo.gradient.Grad(result.X, g)
-				optNorm = floats.Norm(g, math.Inf(1))
-			}
 		}
 
 		// Check that the function value at the found optimum location is
@@ -703,15 +697,10 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		// We are going to restart the solution using a fixed starting gradient
 		// and value, so evaluate them.
 		settings.UseInitialData = true
-		if funcInfo.IsFunctionGradient {
+		settings.InitialValue = funcInfo.function.Func(test.x)
+		if funcInfo.IsGradient {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			settings.InitialValue = funcInfo.functionGradient.FuncGrad(test.x, settings.InitialGradient)
-		} else {
-			settings.InitialValue = funcInfo.function.Func(test.x)
-			if funcInfo.IsGradient {
-				settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-				funcInfo.gradient.Grad(test.x, settings.InitialGradient)
-			}
+			funcInfo.gradient.Grad(test.x, settings.InitialGradient)
 		}
 
 		// Rerun the test again to make sure that it gets the same answer with
@@ -737,21 +726,14 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// Check that providing initial data reduces the number of function
 		// and/or gradient calls exactly by one.
-		if funcInfo.IsFunctionGradient {
-			if result.FuncGradEvaluations != result2.FuncGradEvaluations+1 {
-				t.Errorf("Providing initial data does not reduce the number of function/gradient calls for:\n%v", test)
+		if result.FuncEvaluations != result2.FuncEvaluations+1 {
+			t.Errorf("Providing initial data does not reduce the number of functions calls for:\n%v", test)
+			continue
+		}
+		if funcInfo.IsGradient {
+			if result.GradEvaluations != result2.GradEvaluations+1 {
+				t.Errorf("Providing initial data does not reduce the number of gradient calls for:\n%v", test)
 				continue
-			}
-		} else {
-			if result.FuncEvaluations != result2.FuncEvaluations+1 {
-				t.Errorf("Providing initial data does not reduce the number of functions calls for:\n%v", test)
-				continue
-			}
-			if funcInfo.IsGradient {
-				if result.GradEvaluations != result2.GradEvaluations+1 {
-					t.Errorf("Providing initial data does not reduce the number of gradient calls for:\n%v", test)
-					continue
-				}
 			}
 		}
 	}

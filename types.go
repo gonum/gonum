@@ -128,35 +128,27 @@ type FunctionInfo struct {
 type functionInfo struct {
 	FunctionInfo
 
-	function                Function
-	gradient                Gradient
-	hessian                 Hessian
-	functionGradient        FunctionGradient
-	functionGradientHessian FunctionGradientHessian
-	statuser                Statuser
+	function Function
+	gradient Gradient
+	hessian  Hessian
+	statuser Statuser
 }
 
 func newFunctionInfo(f Function) *functionInfo {
 	gradient, isGradient := f.(Gradient)
 	hessian, isHessian := f.(Hessian)
-	funcGrad, isFuncGrad := f.(FunctionGradient)
-	funcGradHess, isFuncGradHess := f.(FunctionGradientHessian)
 	statuser, isStatuser := f.(Statuser)
 
 	return &functionInfo{
 		FunctionInfo: FunctionInfo{
-			IsGradient:                isGradient,
-			IsHessian:                 isHessian,
-			IsFunctionGradient:        isFuncGrad,
-			IsFunctionGradientHessian: isFuncGradHess,
-			IsStatuser:                isStatuser,
+			IsGradient: isGradient,
+			IsHessian:  isHessian,
+			IsStatuser: isStatuser,
 		},
-		function:                f,
-		gradient:                gradient,
-		hessian:                 hessian,
-		functionGradient:        funcGrad,
-		functionGradientHessian: funcGradHess,
-		statuser:                statuser,
+		function: f,
+		gradient: gradient,
+		hessian:  hessian,
+		statuser: statuser,
 	}
 }
 

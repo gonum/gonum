@@ -1551,6 +1551,26 @@ func (Wood) Grad(x, grad []float64) {
 	grad[3] = 2 * (90*f3 + 10*f5 - 0.1*f6)
 }
 
+func (Wood) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 4 {
+		panic("dimension of the problem must be 4")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	hess.SetSym(0, 0, 400*(3*x[0]*x[0]-x[1])+2)
+	hess.SetSym(0, 1, -400*x[0])
+	hess.SetSym(1, 1, 220.2)
+	hess.SetSym(0, 2, 0)
+	hess.SetSym(1, 2, 0)
+	hess.SetSym(2, 2, 360*(3*x[2]*x[2]-x[3])+2)
+	hess.SetSym(0, 3, 0)
+	hess.SetSym(1, 3, 19.8)
+	hess.SetSym(2, 3, -360*x[2])
+	hess.SetSym(3, 3, 200.2)
+}
+
 func (Wood) Minima() []Minimum {
 	return []Minimum{
 		{

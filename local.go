@@ -199,7 +199,7 @@ func copyLocation(dst, src *Location) {
 }
 
 func getDefaultMethod(funcInfo *functionInfo) Method {
-	if funcInfo.IsGradient || funcInfo.IsFunctionGradient {
+	if funcInfo.IsGradient {
 		return &BFGS{}
 	}
 	return &NelderMead{}
@@ -212,7 +212,7 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 		X: make([]float64, dim),
 	}
 	copy(loc.X, initX)
-	if method.Needs().Gradient || method.Needs().Hessian {
+	if method.Needs().Gradient {
 		loc.Gradient = make([]float64, dim)
 	}
 	if method.Needs().Hessian {
@@ -334,134 +334,56 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	return NotTerminated
 }
 
-// invalidate marks unused fields of Location with NaNs. It exists as a help
-// for implementers to detect silent bugs in Methods using inconsistent
-// Location, e.g., using Gradient after FuncEvaluation request. It is the
-// responsibility of Method to make Location valid again.
-func invalidate(loc *Location, f, grad, hess bool) {
-	if f {
-		loc.F = math.NaN()
-	}
-	if grad && loc.Gradient != nil {
+// invalidate marks all fields of Location with NaNs and it is the
+// responsibility of Method to issue such EvaluationTypes that make Location
+// valid again. Invalidation is done internally as a help for implementers to
+// detect silent bugs in Methods using inconsistent Location, e.g., using
+// Gradient without a GradEvaluation request.
+func invalidate(loc *Location) {
+	loc.F = math.NaN()
+	if loc.Gradient != nil {
 		loc.Gradient[0] = math.NaN()
 	}
-	if hess && loc.Hessian != nil {
+	if loc.Hessian != nil {
 		loc.Hessian.SetSym(0, 0, math.NaN())
 	}
 }
 
-// evaluate evaluates the function given by funcInfo at xNext, stores the
-// answer into loc and updates stats. If loc.X is not equal to xNext, then
-// unused fields of loc are set to NaN.
+// evaluate evaluates the function given by f at xNext, stores the answer into
+// loc and updates stats. If loc.X is not equal to xNext, then unused fields of
+// loc are set to NaN.
 // evaluate panics if the function does not support the requested evalType.
-func evaluate(funcInfo *functionInfo, evalType EvaluationType, xNext []float64, loc *Location, stats *Stats) {
-	different := !floats.Equal(loc.X, xNext)
-	if different {
-		copy(loc.X, xNext)
-	}
-	switch evalType {
-	case FuncEvaluation:
-		if different {
-			invalidate(loc, false, true, true)
-		}
-		loc.F = funcInfo.function.Func(loc.X)
-		stats.FuncEvaluations++
-		return
-	case GradEvaluation:
-		if funcInfo.IsGradient {
-			if different {
-				invalidate(loc, true, false, true)
-			}
-			funcInfo.gradient.Grad(loc.X, loc.Gradient)
-			stats.GradEvaluations++
-			return
-		}
-		if funcInfo.IsFunctionGradient {
-			if different {
-				invalidate(loc, false, false, true)
-			}
-			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
-			stats.FuncGradEvaluations++
-			return
-		}
-		if funcInfo.IsFunctionGradientHessian {
-			if loc.Hessian == nil {
-				loc.Hessian = mat64.NewSymDense(len(loc.X), nil)
-			}
-			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
-			stats.FuncGradHessEvaluations++
-			return
-		}
-	case HessEvaluation:
-		if funcInfo.IsHessian {
-			if different {
-				invalidate(loc, true, true, false)
-			}
-			funcInfo.hessian.Hess(loc.X, loc.Hessian)
-			stats.HessEvaluations++
-			return
-		}
-		if funcInfo.IsFunctionGradientHessian {
-			if loc.Gradient == nil {
-				loc.Gradient = make([]float64, len(loc.X))
-			}
-			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
-			stats.FuncGradHessEvaluations++
-			return
-		}
-	case FuncGradEvaluation:
-		if funcInfo.IsFunctionGradient {
-			if different {
-				invalidate(loc, false, false, true)
-			}
-			loc.F = funcInfo.functionGradient.FuncGrad(loc.X, loc.Gradient)
-			stats.FuncGradEvaluations++
-			return
-		}
-		if funcInfo.IsGradient {
-			if different {
-				invalidate(loc, false, false, true)
-			}
-			loc.F = funcInfo.function.Func(loc.X)
-			stats.FuncEvaluations++
-			funcInfo.gradient.Grad(loc.X, loc.Gradient)
-			stats.GradEvaluations++
-			return
-		}
-		if funcInfo.IsFunctionGradientHessian {
-			if loc.Hessian == nil {
-				loc.Hessian = mat64.NewSymDense(len(loc.X), nil)
-			}
-			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
-			stats.FuncGradHessEvaluations++
-			return
-		}
-	case FuncGradHessEvaluation:
-		if funcInfo.IsFunctionGradientHessian {
-			loc.F = funcInfo.functionGradientHessian.FuncGradHess(loc.X, loc.Gradient, loc.Hessian)
-			stats.FuncGradHessEvaluations++
-			return
-		}
-		if funcInfo.IsGradient && funcInfo.IsHessian {
-			loc.F = funcInfo.function.Func(loc.X)
-			stats.FuncEvaluations++
-			funcInfo.gradient.Grad(loc.X, loc.Gradient)
-			stats.GradEvaluations++
-			funcInfo.hessian.Hess(loc.X, loc.Hessian)
-			stats.HessEvaluations++
-			return
-		}
-	case NoEvaluation:
-		if different {
+func evaluate(f *functionInfo, evalType EvaluationType, xNext []float64, loc *Location, stats *Stats) {
+	if !floats.Equal(loc.X, xNext) {
+		if evalType == NoEvaluation {
 			// Optimizers should not request NoEvaluation at a new location.
 			// The intent and therefore an appropriate action are both unclear.
 			panic("optimize: no evaluation requested at new location")
 		}
-		return
-	default:
+		invalidate(loc)
+		copy(loc.X, xNext)
+	}
+
+	toEval := evalType
+	if evalType&FuncEvaluation != 0 {
+		loc.F = f.function.Func(loc.X)
+		stats.FuncEvaluations++
+		toEval &= ^FuncEvaluation
+	}
+	if evalType&GradEvaluation != 0 {
+		f.gradient.Grad(loc.X, loc.Gradient)
+		stats.GradEvaluations++
+		toEval &= ^GradEvaluation
+	}
+	if evalType&HessEvaluation != 0 {
+		f.hessian.Hess(loc.X, loc.Hessian)
+		stats.HessEvaluations++
+		toEval &= ^HessEvaluation
+	}
+
+	if toEval != NoEvaluation {
 		panic(fmt.Sprintf("optimize: unknown evaluation type %v", evalType))
 	}
-	panic(fmt.Sprintf("optimize: objective function does not support %v", evalType))
 }
 
 // update updates the stats given the new evaluation

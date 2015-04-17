@@ -24,19 +24,6 @@ type Hessian interface {
 	Hess(x []float64, hess *mat64.SymDense)
 }
 
-// FunctionGradient evaluates both the function and the gradient at x, storing
-// the gradient in-place in grad. FuncGrad must not modify x.
-type FunctionGradient interface {
-	FuncGrad(x, grad []float64) (obj float64)
-}
-
-// FunctionGradientHessian evaluates the function, the gradient and the Hessian
-// at x, storing the gradient and the Hessian in-place in grad and hess,
-// respectively. FuncGradHess must not modify x.
-type FunctionGradientHessian interface {
-	FuncGradHess(x, grad []float64, hess *mat64.SymDense) (obj float64)
-}
-
 // LinesearchMethod is a type that can perform a line search. Typically, these
 // methods will not be called by the user directly, as they will be called by
 // a Linesearch struct.

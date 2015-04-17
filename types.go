@@ -15,33 +15,40 @@ import (
 
 const defaultGradientAbsTol = 1e-6
 
-// EvaluationType is used by the optimizer to specify information needed
-// from the objective function.
-type EvaluationType int
+// EvaluationType is used by a Method to specify the objective-function
+// information needed at an x location. The types can be composed together
+// using the binary or operator, for example 'FuncEvaluation | GradEvaluation'
+// to evaluate both the function value and the gradient.
+type EvaluationType uint
 
+// Basic evaluation types.
 const (
-	NoEvaluation EvaluationType = iota
-	FuncEvaluation
+	NoEvaluation   EvaluationType = 0
+	FuncEvaluation EvaluationType = 1 << iota
 	GradEvaluation
 	HessEvaluation
-	FuncGradEvaluation
-	FuncGradHessEvaluation
+)
+
+// Combined evaluation types.
+const (
+	FuncGradEvaluation     = FuncEvaluation | GradEvaluation
+	FuncGradHessEvaluation = FuncGradEvaluation | HessEvaluation
 )
 
 func (e EvaluationType) String() string {
-	if e < 0 || int(e) >= len(evaluationStrings) {
-		return fmt.Sprintf("EvaluationType(%d)", e)
+	if s, ok := evaluationStrings[e]; ok {
+		return s
 	}
-	return evaluationStrings[e]
+	return fmt.Sprintf("EvaluationType(%d)", e)
 }
 
-var evaluationStrings = [...]string{
-	"NoEvaluation",
-	"FuncEvaluation",
-	"GradEvaluation",
-	"HessEvaluation",
-	"FuncGradEvaluation",
-	"FuncGradHessEvaluation",
+var evaluationStrings = map[EvaluationType]string{
+	NoEvaluation:           "NoEvaluation",
+	FuncEvaluation:         "FuncEvaluation",
+	GradEvaluation:         "GradEvaluation",
+	HessEvaluation:         "HessEvaluation",
+	FuncGradEvaluation:     "FuncGradEvaluation",
+	FuncGradHessEvaluation: "FuncGradHessEvaluation",
 }
 
 // IterationType specifies the type of iteration.
@@ -121,50 +128,55 @@ type FunctionInfo struct {
 type functionInfo struct {
 	FunctionInfo
 
-	function                Function
-	gradient                Gradient
-	hessian                 Hessian
-	functionGradient        FunctionGradient
-	functionGradientHessian FunctionGradientHessian
-	statuser                Statuser
+	function Function
+	gradient Gradient
+	hessian  Hessian
+	statuser Statuser
 }
 
 func newFunctionInfo(f Function) *functionInfo {
 	gradient, isGradient := f.(Gradient)
 	hessian, isHessian := f.(Hessian)
-	funcGrad, isFuncGrad := f.(FunctionGradient)
-	funcGradHess, isFuncGradHess := f.(FunctionGradientHessian)
 	statuser, isStatuser := f.(Statuser)
 
 	return &functionInfo{
 		FunctionInfo: FunctionInfo{
-			IsGradient:                isGradient,
-			IsHessian:                 isHessian,
-			IsFunctionGradient:        isFuncGrad,
-			IsFunctionGradientHessian: isFuncGradHess,
-			IsStatuser:                isStatuser,
+			IsGradient: isGradient,
+			IsHessian:  isHessian,
+			IsStatuser: isStatuser,
 		},
-		function:                f,
-		gradient:                gradient,
-		hessian:                 hessian,
-		functionGradient:        funcGrad,
-		functionGradientHessian: funcGradHess,
-		statuser:                statuser,
+		function: f,
+		gradient: gradient,
+		hessian:  hessian,
+		statuser: statuser,
 	}
 }
 
 // TODO(btracey): Think about making this an exported function when the
 // constraint interface is designed.
 func (f functionInfo) satisfies(method Method) error {
-	gradOk := f.IsGradient || f.IsFunctionGradient || f.IsFunctionGradientHessian
-	if (method.Needs().Gradient || method.Needs().Hessian) && !gradOk {
-		return errors.New("optimize: function does not implement needed Gradient, FunctionGradient or FunctionGradientHessian interface")
+	if method.Needs().Gradient && !f.IsGradient {
+		return errors.New("optimize: function does not implement needed Gradient interface")
 	}
-	hessOk := f.IsHessian || f.IsFunctionGradientHessian
-	if method.Needs().Hessian && !hessOk {
-		return errors.New("optimize: function does not implement needed Hessian or FunctionGradientHessian interface")
+	if method.Needs().Hessian && !f.IsHessian {
+		return errors.New("optimize: function does not implement needed Hessian interface")
 	}
 	return nil
+}
+
+// complementEval returns an evaluation type that evaluates fields of loc not
+// evaluated by eval.
+func complementEval(loc *Location, eval EvaluationType) (complEval EvaluationType) {
+	if eval&FuncEvaluation == 0 {
+		complEval = FuncEvaluation
+	}
+	if loc.Gradient != nil && eval&GradEvaluation == 0 {
+		complEval |= GradEvaluation
+	}
+	if loc.Hessian != nil && eval&HessEvaluation == 0 {
+		complEval |= HessEvaluation
+	}
+	return complEval
 }
 
 // Settings represents settings of the optimization run. It contains initial

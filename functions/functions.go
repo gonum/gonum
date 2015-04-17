@@ -1478,6 +1478,53 @@ func (Watson) Grad(x, grad []float64) {
 	grad[1] += 2 * t
 }
 
+func (Watson) Hess(x []float64, hess *mat64.SymDense) {
+	dim := len(x)
+	if dim != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	for j := 0; j < dim; j++ {
+		for k := j; k < dim; k++ {
+			hess.SetSym(j, k, 0)
+		}
+	}
+	for i := 1; i <= 29; i++ {
+		d1 := float64(i) / 29
+		d2 := 1.0
+		var s1 float64
+		for j := 1; j < dim; j++ {
+			s1 += float64(j) * d2 * x[j]
+			d2 *= d1
+		}
+
+		d2 = 1.0
+		var s2 float64
+		for _, v := range x {
+			s2 += d2 * v
+			d2 *= d1
+		}
+
+		t := s1 - s2*s2 - 1
+		s3 := 2 * d1 * s2
+		d2 = 2 / d1
+		th := 2 * d1 * d1 * t
+		for j := 0; j < dim; j++ {
+			v := float64(j) - s3
+			d3 := 1 / d1
+			for k := 0; k <= j; k++ {
+				hess.SetSym(k, j, hess.At(k, j)+d2*d3*(v*(float64(k)-s3)-th))
+				d3 *= d1
+			}
+			d2 *= d1
+		}
+	}
+	t1 := x[1] - x[0]*x[0] - 1
+	hess.SetSym(0, 0, hess.At(0, 0)+8*x[0]*x[0]+2-4*t1)
+	hess.SetSym(0, 1, hess.At(0, 1)-4*x[0])
+	hess.SetSym(1, 1, hess.At(1, 1)+2)
+}
+
 func (Watson) Minima() []Minimum {
 	return []Minimum{
 		{

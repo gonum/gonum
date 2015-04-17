@@ -16,23 +16,17 @@ import (
 const defaultGradientAbsTol = 1e-6
 
 // EvaluationType is used by a Method to specify the objective-function
-// information needed at an x location. The types can be composed together
-// using the binary or operator, for example 'FuncEvaluation | GradEvaluation'
-// to evaluate both the function value and the gradient.
+// information needed at an x location.
 type EvaluationType uint
 
-// Basic evaluation types.
+// Evaluation types can be composed together using the binary or operator, for
+// example 'FuncEvaluation | GradEvaluation' to evaluate both the function
+// value and the gradient.
 const (
 	NoEvaluation   EvaluationType = 0
 	FuncEvaluation EvaluationType = 1 << iota
 	GradEvaluation
 	HessEvaluation
-)
-
-// Combined evaluation types.
-const (
-	FuncGradEvaluation     = FuncEvaluation | GradEvaluation
-	FuncGradHessEvaluation = FuncGradEvaluation | HessEvaluation
 )
 
 func (e EvaluationType) String() string {
@@ -43,12 +37,10 @@ func (e EvaluationType) String() string {
 }
 
 var evaluationStrings = map[EvaluationType]string{
-	NoEvaluation:           "NoEvaluation",
-	FuncEvaluation:         "FuncEvaluation",
-	GradEvaluation:         "GradEvaluation",
-	HessEvaluation:         "HessEvaluation",
-	FuncGradEvaluation:     "FuncGradEvaluation",
-	FuncGradHessEvaluation: "FuncGradHessEvaluation",
+	NoEvaluation:   "NoEvaluation",
+	FuncEvaluation: "FuncEvaluation",
+	GradEvaluation: "GradEvaluation",
+	HessEvaluation: "HessEvaluation",
 }
 
 // IterationType specifies the type of iteration.
@@ -104,13 +96,11 @@ type Result struct {
 
 // Stats contains the statistics of the run.
 type Stats struct {
-	MajorIterations         int           // Total number of major iterations
-	FuncEvaluations         int           // Number of evaluations of Func()
-	GradEvaluations         int           // Number of evaluations of Grad()
-	HessEvaluations         int           // Number of evaluations of Hess()
-	FuncGradEvaluations     int           // Number of evaluations of FuncGrad()
-	FuncGradHessEvaluations int           // Number of evaluations of FuncGradHess()
-	Runtime                 time.Duration // Total runtime of the optimization
+	MajorIterations int           // Total number of major iterations
+	FuncEvaluations int           // Number of evaluations of Func()
+	GradEvaluations int           // Number of evaluations of Grad()
+	HessEvaluations int           // Number of evaluations of Hess()
+	Runtime         time.Duration // Total runtime of the optimization
 }
 
 // FunctionInfo is data to give to the optimizer about the objective function.
@@ -229,27 +219,22 @@ type Settings struct {
 	Runtime time.Duration
 
 	// FuncEvaluations is the maximum allowed number of function evaluations.
-	// FunctionEvaluationLimit status is returned if the total number of
-	// function evaluations equals or exceeds this number. Calls to Func(),
-	// FuncGrad() and FuncGradHess() are all counted as function evaluations
-	// for this calculation.
+	// FunctionEvaluationLimit status is returned if the total number of calls
+	// to Func() equals or exceeds this number.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	FuncEvaluations int
 
 	// GradEvaluations is the maximum allowed number of gradient evaluations.
-	// GradientEvaluationLimit status is returned if the total number of
-	// gradient evaluations equals or exceeds this number. Calls to Grad(),
-	// FuncGrad() and FuncGradHess() are all counted as gradient evaluations
-	// for this calculation.
+	// GradientEvaluationLimit status is returned if the total number of calls
+	// to Grad() equals or exceeds this number.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	GradEvaluations int
 
 	// HessEvaluations is the maximum allowed number of Hessian evaluations.
-	// HessianEvaluationLimit status is returned if the total number of Hessian
-	// evaluations equals or exceeds this number. Calls to Hess() and
-	// FuncGradHess() are both counted as gradient evaluations for this calculation.
+	// HessianEvaluationLimit status is returned if the total number of calls
+	// to Hess() equals or exceeds this number.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	HessEvaluations int

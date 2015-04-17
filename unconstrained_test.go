@@ -108,16 +108,19 @@ var gradientDescentTests = []unconstrainedTest{
 		x: []float64{1.00001, 10.00001, 3.00001},
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
-		x: []float64{-1.2, 1},
+		f:       functions.ExtendedRosenbrock{},
+		x:       []float64{-1.2, 1},
+		gradTol: 1e-10,
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
-		x: []float64{1.00001, 1.00001},
+		f:       functions.ExtendedRosenbrock{},
+		x:       []float64{1.00001, 1.00001},
+		gradTol: 1e-10,
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
-		x: []float64{-1.2, 1, -1.2},
+		f:       functions.ExtendedRosenbrock{},
+		x:       []float64{-1.2, 1, -1.2},
+		gradTol: 1e-10,
 	},
 	{
 		f:    functions.ExtendedRosenbrock{},
@@ -154,7 +157,7 @@ var gradientDescentTests = []unconstrainedTest{
 	{
 		f:       functions.Trigonometric{},
 		x:       []float64{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
-		gradTol: 1e-8,
+		gradTol: 1e-7,
 	},
 	{
 		f: functions.Trigonometric{},
@@ -236,17 +239,19 @@ var cgTests = []unconstrainedTest{
 		x: []float64{-1.2, 1, -1.2, 1},
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
-		x: []float64{1e4, 1e4},
+		f:       functions.ExtendedRosenbrock{},
+		x:       []float64{1e4, 1e4},
+		gradTol: 1e-10,
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
-		x: []float64{1.00001, 1.00001, 1.00001, 1.00001},
+		f:       functions.ExtendedRosenbrock{},
+		x:       []float64{1.00001, 1.00001, 1.00001, 1.00001},
+		gradTol: 1e-10,
 	},
 	{
 		f:       functions.PenaltyI{},
 		x:       []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		gradTol: 1e-10,
+		gradTol: 1e-9,
 	},
 	{
 		f:       functions.PenaltyI{},
@@ -286,24 +291,24 @@ var cgTests = []unconstrainedTest{
 	{
 		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0},
-		gradTol: 1e-7,
+		gradTol: 1e-6,
 	},
 	{
 		f:       functions.Watson{},
 		x:       []float64{-0.01572, 1.01243, -0.23299, 1.26043, -1.51372, 0.99299},
-		gradTol: 1e-7,
+		gradTol: 1e-6,
 	},
 	{
 		f:       functions.Watson{},
 		x:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		gradTol: 1e-7,
+		gradTol: 1e-6,
 		long:    true,
 	},
 	{
 		f: functions.Watson{},
 		x: []float64{-1.53070e-05, 0.99978, 0.01476, 0.14634, 1.00082,
 			-2.61773, 4.10440, -3.14361, 1.05262},
-		gradTol: 1e-7,
+		gradTol: 1e-6,
 	},
 	{
 		f:       functions.Wood{},
@@ -409,8 +414,9 @@ var quasiNewtonTests = []unconstrainedTest{
 		x: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 	},
 	{
-		f: functions.PenaltyI{},
-		x: []float64{0.250007, 0.250007, 0.250007, 0.250007},
+		f:       functions.PenaltyI{},
+		x:       []float64{0.250007, 0.250007, 0.250007, 0.250007},
+		gradTol: 1e-9,
 	},
 	{
 		f: functions.PenaltyI{},
@@ -488,8 +494,9 @@ var bfgsTests = []unconstrainedTest{
 		gradTol: 1e-5,
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
-		x: []float64{1e5, 1e5},
+		f:       functions.ExtendedRosenbrock{},
+		x:       []float64{1e5, 1e5},
+		gradTol: 1e-10,
 	},
 	{
 		f:       functions.Gaussian{},
@@ -514,8 +521,9 @@ var lbfgsTests = []unconstrainedTest{
 		gradTol: 1e-8,
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
-		x: []float64{1e7, 1e6},
+		f:       functions.ExtendedRosenbrock{},
+		x:       []float64{1e7, 1e6},
+		gradTol: 1e-10,
 	},
 	{
 		f:       functions.Gaussian{},

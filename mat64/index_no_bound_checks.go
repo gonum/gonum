@@ -10,6 +10,7 @@ package mat64
 
 import "github.com/gonum/blas"
 
+// At returns the element at row r, column c.
 func (m *Dense) At(r, c int) float64 {
 	if r >= m.mat.Rows || r < 0 {
 		panic(ErrRowAccess)
@@ -24,6 +25,7 @@ func (m *Dense) at(r, c int) float64 {
 	return m.mat.Data[r*m.mat.Stride+c]
 }
 
+// Set sets the element at row r, column c to the value v.
 func (m *Dense) Set(r, c int, v float64) {
 	if r >= m.mat.Rows || r < 0 {
 		panic(ErrRowAccess)
@@ -38,6 +40,7 @@ func (m *Dense) set(r, c int, v float64) {
 	m.mat.Data[r*m.mat.Stride+c] = v
 }
 
+// At returns the element at row r, column c. It panics if c is not zero.
 func (m *Vector) At(r, c int) float64 {
 	if r < 0 || r >= m.n {
 		panic(ErrRowAccess)
@@ -52,6 +55,7 @@ func (m *Vector) at(r int) float64 {
 	return m.mat.Data[r*m.mat.Inc]
 }
 
+// Set sets the element at (r,c) to the value v. It panics if c is not zero.
 func (m *Vector) Set(r, c int, v float64) {
 	if r < 0 || r >= m.n {
 		panic(ErrRowAccess)
@@ -102,7 +106,7 @@ func (s *SymDense) set(r, c int, v float64) {
 	s.mat.Data[r*s.mat.Stride+c] = v
 }
 
-// At returns the element at row r and column c.
+// At returns the element at row r, column c.
 func (t *TriDense) At(r, c int) float64 {
 	if r >= t.mat.N || r < 0 {
 		panic(ErrRowAccess)
@@ -126,8 +130,8 @@ func (t *TriDense) at(r, c int) float64 {
 	return t.mat.Data[r*t.mat.Stride+c]
 }
 
-// SetTri sets the element at row r and column c. Set panics if the location is outside
-// the appropriate half of the matrix.
+// SetTri sets the element at row r, column c to the value v.
+// It panics if the location is outside the appropriate half of the matrix.
 func (t *TriDense) SetTri(r, c int, v float64) {
 	if r >= t.mat.N || r < 0 {
 		panic(ErrRowAccess)

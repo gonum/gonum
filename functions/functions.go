@@ -595,11 +595,51 @@ func (BrownAndDennis) Grad(x, grad []float64) {
 	}
 }
 
+func (BrownAndDennis) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 4 {
+		panic("dimension of the problem must be 4")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	for i := 0; i < 4; i++ {
+		for j := i; j < 4; j++ {
+			hess.SetSym(i, j, 0)
+		}
+	}
+	for i := 1; i <= 20; i++ {
+		d1 := float64(i) / 5
+		d2 := math.Sin(d1)
+		t1 := x[0] + d1*x[1] - math.Exp(d1)
+		t2 := x[2] + d2*x[3] - math.Cos(d1)
+		t := t1*t1 + t2*t2
+		s3 := 2 * t1 * t2
+		r1 := t + 2*t1*t1
+		r2 := t + 2*t2*t2
+		hess.SetSym(0, 0, hess.At(0, 0)+r1)
+		hess.SetSym(0, 1, hess.At(0, 1)+d1*r1)
+		hess.SetSym(1, 1, hess.At(1, 1)+d1*d1*r1)
+		hess.SetSym(0, 2, hess.At(0, 2)+s3)
+		hess.SetSym(1, 2, hess.At(1, 2)+d1*s3)
+		hess.SetSym(2, 2, hess.At(2, 2)+r2)
+		hess.SetSym(0, 3, hess.At(0, 3)+d2*s3)
+		hess.SetSym(1, 3, hess.At(1, 3)+d1*d2*s3)
+		hess.SetSym(2, 3, hess.At(2, 3)+d2*r2)
+		hess.SetSym(3, 3, hess.At(3, 3)+d2*d2*r2)
+	}
+	for i := 0; i < 4; i++ {
+		for j := i; j < 4; j++ {
+			hess.SetSym(i, j, 4*hess.At(i, j))
+		}
+	}
+}
+
 func (BrownAndDennis) Minima() []Minimum {
 	return []Minimum{
 		{
-			X:      []float64{-11.594439904886773, 13.203630051265385, -0.40343948776868443, 0.2367787746745986},
-			F:      85822.20162635627,
+			X:      []float64{-11.594439904762162, 13.203630051207202, -0.4034394881768612, 0.2367787744557347},
+			F:      85822.20162635634,
 			Global: true,
 		},
 	}

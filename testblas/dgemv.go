@@ -235,6 +235,86 @@ var DgemvCases = []DgemvCase{
 		},
 	},
 	{
+		Name: "M_gt_N_Part1_NoTrans",
+		tA:   blas.NoTrans,
+		m:    5,
+		n:    3,
+		A: [][]float64{
+			{4.1, 6.2, 8.1},
+			{9.6, 3.5, 9.1},
+			{10, 7, 3},
+			{1, 1, 2},
+			{9, 2, 5},
+		},
+		incX: 1,
+		incY: 2,
+		x:    []float64{1, 2, 3},
+		y:    []float64{7, 100, 8, 101, 9, 102, 10, 103, 11},
+
+		Subcases: []DgemvSubcase{
+			{
+				alpha: 0,
+				beta:  0,
+				ans:   []float64{0, 100, 0, 101, 0, 102, 0, 103, 0},
+			},
+			{
+				alpha: 0,
+				beta:  1,
+				ans:   []float64{7, 100, 8, 101, 9, 102, 10, 103, 11},
+			},
+			{
+				alpha: 1,
+				beta:  0,
+				ans:   []float64{40.8, 100, 43.9, 101, 33, 102, 9, 103, 28},
+			},
+			{
+				alpha: 8,
+				beta:  -6,
+				ans:   []float64{284.4, 100, 303.2, 101, 210, 102, 12, 103, 158},
+			},
+		},
+	},
+	{
+		Name: "M_gt_N_Part1_Trans",
+		tA:   blas.Trans,
+		m:    5,
+		n:    3,
+		A: [][]float64{
+			{4.1, 6.2, 8.1},
+			{9.6, 3.5, 9.1},
+			{10, 7, 3},
+			{1, 1, 2},
+			{9, 2, 5},
+		},
+		incX: 1,
+		incY: 2,
+		x:    []float64{1, 2, 3, -4, 5},
+		y:    []float64{7, 100, 8, 101, 9},
+
+		Subcases: []DgemvSubcase{
+			{
+				alpha: 0,
+				beta:  0,
+				ans:   []float64{0, 100, 0, 101, 0},
+			},
+			{
+				alpha: 0,
+				beta:  1,
+				ans:   []float64{7, 100, 8, 101, 9},
+			},
+			{
+				alpha: 1,
+				beta:  0,
+				ans:   []float64{94.3, 100, 40.2, 101, 52.3},
+			},
+			{
+				alpha: 8,
+				beta:  -6,
+				ans:   []float64{712.4, 100, 273.6, 101, 364.4},
+			},
+		},
+	},
+	{
 		Name: "M_gt_N_IncNot1_NoTrans",
 		tA:   blas.NoTrans,
 		m:    5,

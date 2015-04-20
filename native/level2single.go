@@ -77,7 +77,7 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 
 	// Form y := alpha * A * x + y
 	if tA == blas.NoTrans {
-		if incX == 1 {
+		if incX == 1 && incY == 1 {
 			for i := 0; i < m; i++ {
 				y[i] += alpha * asm.SdotUnitary(a[lda*i:lda*i+n], x)
 			}
@@ -90,8 +90,8 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 		}
 		return
 	}
-	// Cases where a is not transposed.
-	if incX == 1 {
+	// Cases where a is transposed.
+	if incX == 1 && incY == 1 {
 		for i := 0; i < m; i++ {
 			tmp := alpha * x[i]
 			if tmp != 0 {

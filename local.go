@@ -243,13 +243,12 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 			loc.Hessian.CopySym(initH)
 		}
 	} else {
-		switch {
-		case loc.Hessian != nil:
-			evalType = FuncGradHessEvaluation
-		case loc.Gradient != nil:
-			evalType = FuncGradEvaluation
-		default:
-			evalType = FuncEvaluation
+		evalType = FuncEvaluation
+		if loc.Gradient != nil {
+			evalType |= GradEvaluation
+		}
+		if loc.Hessian != nil {
+			evalType |= HessEvaluation
 		}
 		evaluate(funcInfo, evalType, loc.X, loc, stats)
 	}
@@ -299,22 +298,19 @@ func checkConvergence(loc *Location, iterType IterationType, stats *Stats, setti
 	}
 
 	if settings.FuncEvaluations > 0 {
-		totalFun := stats.FuncEvaluations + stats.FuncGradEvaluations + stats.FuncGradHessEvaluations
-		if totalFun >= settings.FuncEvaluations {
+		if stats.FuncEvaluations >= settings.FuncEvaluations {
 			return FunctionEvaluationLimit
 		}
 	}
 
 	if settings.GradEvaluations > 0 {
-		totalGrad := stats.GradEvaluations + stats.FuncGradEvaluations + stats.FuncGradHessEvaluations
-		if totalGrad >= settings.GradEvaluations {
+		if stats.GradEvaluations >= settings.GradEvaluations {
 			return GradientEvaluationLimit
 		}
 	}
 
 	if settings.HessEvaluations > 0 {
-		totalHess := stats.HessEvaluations + stats.FuncGradHessEvaluations
-		if totalHess >= settings.HessEvaluations {
+		if stats.HessEvaluations >= settings.HessEvaluations {
 			return HessianEvaluationLimit
 		}
 	}

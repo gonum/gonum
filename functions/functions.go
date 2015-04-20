@@ -518,6 +518,22 @@ func (BrownBadlyScaled) Grad(x, grad []float64) {
 	grad[1] = 2*f2 + 2*f3*x[0]
 }
 
+func (BrownBadlyScaled) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 2 {
+		panic("dimension of the problem must be 2")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	h00 := 2 + 2*x[1]*x[1]
+	h01 := 4*x[0]*x[1] - 4
+	h11 := 2 + 2*x[0]*x[0]
+	hess.SetSym(0, 0, h00)
+	hess.SetSym(0, 1, h01)
+	hess.SetSym(1, 1, h11)
+}
+
 func (BrownBadlyScaled) Minima() []Minimum {
 	return []Minimum{
 		{

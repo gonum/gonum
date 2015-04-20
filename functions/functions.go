@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix/mat64"
 )
 
 // Beale implements the Beale's function.
@@ -53,6 +54,29 @@ func (Beale) Grad(x, grad []float64) {
 
 	grad[0] = -2 * (f1*t1 + f2*t2 + f3*t3)
 	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*x[1]*x[1])
+}
+
+func (Beale) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 2 {
+		panic("dimension of the problem must be 2")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	t1 := 1 - x[1]
+	t2 := 1 - x[1]*x[1]
+	t3 := 1 - x[1]*x[1]*x[1]
+	f1 := 1.5 - x[1]*t1
+	f2 := 2.25 - x[1]*t2
+	f3 := 2.625 - x[1]*t3
+
+	h00 := 2 * (t1*t1 + t2*t2 + t3*t3)
+	h01 := 2 * (f1 + x[1]*(2*f2+3*x[1]*f3) - x[0]*(t1+x[1]*(2*t2+3*x[1]*t3)))
+	h11 := 2 * x[0] * (x[0] + 2*f2 + x[1]*(6*f3+x[0]*x[1]*(4+9*x[1]*x[1])))
+	hess.SetSym(0, 0, h00)
+	hess.SetSym(0, 1, h01)
+	hess.SetSym(1, 1, h11)
 }
 
 func (Beale) Minima() []Minimum {

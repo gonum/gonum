@@ -24,23 +24,17 @@ type EvaluationType uint
 // value and the gradient.
 const (
 	NoEvaluation   EvaluationType = 0
-	FuncEvaluation EvaluationType = 1 << iota
+	FuncEvaluation EvaluationType = 1 << (iota - 1)
 	GradEvaluation
 	HessEvaluation
 )
 
 func (e EvaluationType) String() string {
-	if s, ok := evaluationStrings[e]; ok {
-		return s
-	}
-	return fmt.Sprintf("EvaluationType(%d)", e)
-}
-
-var evaluationStrings = map[EvaluationType]string{
-	NoEvaluation:   "NoEvaluation",
-	FuncEvaluation: "FuncEvaluation",
-	GradEvaluation: "GradEvaluation",
-	HessEvaluation: "HessEvaluation",
+	return fmt.Sprintf("EvaluationType(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
+		e&FuncEvaluation != 0,
+		e&GradEvaluation != 0,
+		e&HessEvaluation != 0,
+		e&^(FuncEvaluation|GradEvaluation|HessEvaluation))
 }
 
 // IterationType specifies the type of iteration.

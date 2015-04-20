@@ -1228,6 +1228,27 @@ func (PowellBadlyScaled) Grad(x, grad []float64) {
 	grad[1] = 2 * (1e4*f1*x[0] - f2*math.Exp(-x[1]))
 }
 
+func (PowellBadlyScaled) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 2 {
+		panic("dimension of the problem must be 2")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	t1 := 1e4*x[0]*x[1] - 1
+	s1 := math.Exp(-x[0])
+	s2 := math.Exp(-x[1])
+	t2 := s1 + s2 - 1.0001
+
+	h00 := 2 * (1e8*x[1]*x[1] + s1*(s1+t2))
+	h01 := 2 * (1e4*(1+2*t1) + s1*s2)
+	h11 := 2 * (1e8*x[0]*x[0] + s2*(s2+t2))
+	hess.SetSym(0, 0, h00)
+	hess.SetSym(0, 1, h01)
+	hess.SetSym(1, 1, h11)
+}
+
 func (PowellBadlyScaled) Minima() []Minimum {
 	return []Minimum{
 		{

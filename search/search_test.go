@@ -284,7 +284,6 @@ var tarjanTests = []struct {
 	ambiguousOrder []interval
 	want           [][]int
 }{
-
 	{
 		g: []set{
 			0: linksTo(1),
@@ -395,6 +394,98 @@ func TestTarjan(t *testing.T) {
 		}
 		if !reflect.DeepEqual(gotIDs, test.want) {
 			t.Errorf("unexpected Tarjan scc result for %d:\n\tgot:%v\n\twant:%v", i, gotIDs, test.want)
+		}
+	}
+}
+
+var vOrderTests = []struct {
+	g        []set
+	wantCore [][]int
+	wantK    int
+}{
+	{
+		g: []set{
+			0: linksTo(1, 2, 4, 6),
+			1: linksTo(2, 4, 6),
+			2: linksTo(3, 6),
+			3: linksTo(4, 5),
+			4: linksTo(6),
+			5: nil,
+			6: nil,
+		},
+		wantCore: [][]int{
+			{},
+			{5},
+			{3},
+			{0, 1, 2, 4, 6},
+		},
+		wantK: 3,
+	},
+	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
+		g: []set{
+			0: nil,
+
+			1: linksTo(2, 3),
+			2: linksTo(4),
+			3: linksTo(4),
+			4: linksTo(5),
+
+			6:  linksTo(7, 8, 14),
+			7:  linksTo(8, 11, 12, 14),
+			8:  linksTo(14),
+			9:  linksTo(11),
+			10: linksTo(11),
+			11: linksTo(12),
+			12: linksTo(18),
+			13: linksTo(14, 15),
+			14: linksTo(15, 17),
+			15: linksTo(16, 17),
+			16: nil,
+			17: linksTo(18, 19, 20),
+			18: linksTo(19, 20),
+			19: linksTo(20),
+			20: nil,
+		},
+		wantCore: [][]int{
+			{0},
+			{5, 9, 10, 16},
+			{1, 2, 3, 4, 11, 12, 13, 15},
+			{6, 7, 8, 14, 17, 18, 19, 20},
+		},
+		wantK: 3,
+	},
+}
+
+func TestVertexOrdering(t *testing.T) {
+	for i, test := range vOrderTests {
+		g := concrete.NewGraph()
+		for u, e := range test.g {
+			if !g.NodeExists(concrete.Node(u)) {
+				g.AddNode(concrete.Node(u))
+			}
+			for v := range e {
+				if !g.NodeExists(concrete.Node(v)) {
+					g.AddNode(concrete.Node(v))
+				}
+				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+			}
+		}
+		o, k := search.VertexOrdering(g)
+		if k != test.wantK {
+			t.Errorf("unexpected value of k for test %d: got: %d want: %d", i, k, test.wantK)
+		}
+		var offset int
+		for _, want := range test.wantCore {
+			got := make([]int, len(want))
+			for j, n := range o[len(o)-len(want)-offset : len(o)-offset] {
+				got[j] = n.ID()
+			}
+			sort.Ints(got)
+			sort.Ints(want)
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", got, test.wantCore)
+			}
+			offset += len(want)
 		}
 	}
 }

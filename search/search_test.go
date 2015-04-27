@@ -470,18 +470,26 @@ func TestVertexOrdering(t *testing.T) {
 				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		o, k := search.VertexOrdering(g)
-		if k != test.wantK {
-			t.Errorf("unexpected value of k for test %d: got: %d want: %d", i, k, test.wantK)
+		order, core := search.VertexOrdering(g)
+		if len(core)-1 != test.wantK {
+			t.Errorf("unexpected value of k for test %d: got: %d want: %d", i, len(core)-1, test.wantK)
 		}
 		var offset int
-		for _, want := range test.wantCore {
+		for k, want := range test.wantCore {
+			sort.Ints(want)
 			got := make([]int, len(want))
-			for j, n := range o[len(o)-len(want)-offset : len(o)-offset] {
+			for j, n := range order[len(order)-len(want)-offset : len(order)-offset] {
 				got[j] = n.ID()
 			}
 			sort.Ints(got)
-			sort.Ints(want)
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", got, test.wantCore)
+			}
+
+			for j, n := range core[k] {
+				got[j] = n.ID()
+			}
+			sort.Ints(got)
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", got, test.wantCore)
 			}

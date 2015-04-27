@@ -673,9 +673,9 @@ func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
 	return dominators
 }
 
-// VertexOrdering returns the vertex ordering and the degeneracy, k, of
+// VertexOrdering returns the vertex ordering and the k-cores of
 // the undirected graph g.
-func VertexOrdering(g graph.Graph) (order []graph.Node, k int) {
+func VertexOrdering(g graph.Graph) (order []graph.Node, cores [][]graph.Node) {
 	nodes := g.NodeList()
 
 	// The algorithm used here is essentially as described at
@@ -710,8 +710,9 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, k int) {
 	}
 
 	// Initialize k to 0.
-	k = 0
+	k := 0
 	// Repeat n times:
+	s := []int{0}
 	for _ = range nodes { // TODO(kortschak): Remove blank assignment when go1.3.3 is no longer supported.
 		// Scan the array cells D[0], D[1], ... until
 		// finding an i for which D[i] is nonempty.
@@ -728,6 +729,7 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, k int) {
 		// Set k to max(k,i).
 		if i > k {
 			k = i
+			s = append(s, make([]int, k-len(s)+1)...)
 		}
 
 		// Select a vertex v from D[i]. Add v to the
@@ -735,6 +737,7 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, k int) {
 		var v graph.Node
 		v, d[i] = di[len(di)-1], di[:len(di)-1]
 		l = append(l, v)
+		s[k]++
 		delete(dv, v.ID())
 
 		// For each neighbor w of v not already in L,
@@ -760,5 +763,11 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, k int) {
 	for i, j := 0, len(l)-1; i < j; i, j = i+1, j-1 {
 		l[i], l[j] = l[j], l[i]
 	}
-	return l, k
+	cores = make([][]graph.Node, len(s))
+	offset := len(l)
+	for i, n := range s {
+		cores[i] = l[offset-n : offset]
+		offset -= n
+	}
+	return l, cores
 }

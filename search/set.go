@@ -27,7 +27,7 @@ func (s intSet) has(e int) bool {
 	return ok
 }
 
-// remove delete the specified element from the set.
+// remove deletes the specified element from the set.
 func (s intSet) remove(e int) {
 	delete(s, e)
 }
@@ -59,6 +59,11 @@ type Set map[int]graph.Node
 // add inserts an element into the set.
 func (s Set) add(n graph.Node) {
 	s[n.ID()] = n
+}
+
+// remove deletes the specified element from the set.
+func (s Set) remove(e graph.Node) {
+	delete(s, e.ID())
 }
 
 // has reports the existence of the element in the set.

@@ -771,3 +771,82 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, cores [][]graph.Node) {
 	}
 	return l, cores
 }
+
+// BronKerbosch returns the set of maximal cliques of the undirected graph g.
+func BronKerbosch(g graph.Graph) [][]graph.Node {
+	nodes := g.NodeList()
+
+	// The algorithm used here is essentially BronKerbosch3 as described at
+	// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
+
+	p := make(Set, len(nodes))
+	for _, n := range nodes {
+		p.add(n)
+	}
+	x := make(Set)
+	var bk bronKerbosch
+	order, _ := VertexOrdering(g)
+	for _, v := range order {
+		neighbours := g.Neighbors(v)
+		nv := make(Set, len(neighbours))
+		for _, n := range neighbours {
+			nv.add(n)
+		}
+		bk.maximalCliquePivot(g, []graph.Node{v}, make(Set).intersect(p, nv), make(Set).intersect(x, nv))
+		p.remove(v)
+		x.add(v)
+	}
+	return bk
+}
+
+type bronKerbosch [][]graph.Node
+
+func (bk *bronKerbosch) maximalCliquePivot(g graph.Graph, r []graph.Node, p, x Set) {
+	if len(p) == 0 && len(x) == 0 {
+		*bk = append(*bk, r)
+		return
+	}
+
+	u := bk.choosePivot(p, x)
+
+	neighbours := g.Neighbors(u)
+	nu := make(Set, len(neighbours))
+	for _, n := range neighbours {
+		nu.add(n)
+	}
+	for _, v := range p {
+		if nu.has(v) {
+			continue
+		}
+		neighbours := g.Neighbors(v)
+		nv := make(Set, len(neighbours))
+		for _, n := range neighbours {
+			nv.add(n)
+		}
+
+		var found bool
+		for _, n := range r {
+			if n.ID() == v.ID() {
+				found = true
+				break
+			}
+		}
+		var sr []graph.Node
+		if !found {
+			sr = append(r, v)
+		}
+
+		bk.maximalCliquePivot(g, sr, make(Set).intersect(p, nv), make(Set).intersect(x, nv))
+		p.remove(v)
+		x.add(v)
+	}
+}
+
+func (*bronKerbosch) choosePivot(p, x Set) graph.Node {
+	// TODO(kortschak): Implement pivot choice function
+	// that maximises |p ⋂ neighbours(u)|.
+	for _, n := range make(Set).union(p, x) {
+		return n
+	}
+	panic("bronKerbosch: empty set")
+}

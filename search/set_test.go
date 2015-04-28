@@ -4,11 +4,7 @@
 
 package search
 
-import (
-	"testing"
-
-	"github.com/gonum/graph"
-)
+import "testing"
 
 type node int
 
@@ -17,11 +13,6 @@ func (n node) ID() int { return int(n) }
 // count reports the number of elements stored in the set.
 func (s Set) count() int {
 	return len(s)
-}
-
-// remove delete the specified element from the set.
-func (s Set) remove(n graph.Node) {
-	delete(s, n.ID())
 }
 
 // TestSame tests the assumption that pointer equality via unsafe conversion

@@ -498,6 +498,105 @@ func TestVertexOrdering(t *testing.T) {
 	}
 }
 
+var bronKerboschTests = []struct {
+	g    []set
+	want [][]int
+}{
+	{
+		// This is the example given in the Bron-Kerbosch article on wikipedia (renumbered).
+		// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
+		g: []set{
+			0: linksTo(1, 4),
+			1: linksTo(2, 4),
+			2: linksTo(3),
+			3: linksTo(4, 5),
+			4: nil,
+			5: nil,
+		},
+		want: [][]int{
+			{0, 1, 4},
+			{1, 2},
+			{2, 3},
+			{3, 4},
+			{3, 5},
+		},
+	},
+	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
+		g: []set{
+			0: nil,
+
+			1: linksTo(2, 3),
+			2: linksTo(4),
+			3: linksTo(4),
+			4: linksTo(5),
+
+			6:  linksTo(7, 8, 14),
+			7:  linksTo(8, 11, 12, 14),
+			8:  linksTo(14),
+			9:  linksTo(11),
+			10: linksTo(11),
+			11: linksTo(12),
+			12: linksTo(18),
+			13: linksTo(14, 15),
+			14: linksTo(15, 17),
+			15: linksTo(16, 17),
+			16: nil,
+			17: linksTo(18, 19, 20),
+			18: linksTo(19, 20),
+			19: linksTo(20),
+			20: nil,
+		},
+		want: [][]int{
+			{0},
+			{1, 2},
+			{1, 3},
+			{2, 4},
+			{3, 4},
+			{4, 5},
+			{6, 7, 8, 14},
+			{7, 11, 12},
+			{9, 11},
+			{10, 11},
+			{12, 18},
+			{13, 14, 15},
+			{14, 15, 17},
+			{15, 16},
+			{17, 18, 19, 20},
+		},
+	},
+}
+
+func TestBronKerbosch(t *testing.T) {
+	for i, test := range bronKerboschTests {
+		g := concrete.NewGraph()
+		for u, e := range test.g {
+			if !g.NodeExists(concrete.Node(u)) {
+				g.AddNode(concrete.Node(u))
+			}
+			for v := range e {
+				if !g.NodeExists(concrete.Node(v)) {
+					g.AddNode(concrete.Node(v))
+				}
+				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+			}
+		}
+		cliques := search.BronKerbosch(g)
+		got := make([][]int, len(cliques))
+		for j, c := range cliques {
+			ids := make([]int, len(c))
+			for k, n := range c {
+				ids[k] = n.ID()
+			}
+			sort.Ints(ids)
+			got[j] = ids
+		}
+		sort.Sort(bySliceValues(got))
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("unexpected cliques for test %d:\ngot: %v\nwant:%v", i, got, test.want)
+		}
+	}
+}
+
 // set is an integer set.
 type set map[int]struct{}
 
@@ -519,3 +618,24 @@ func (c byComponentLengthOrStart) Less(i, j int) bool {
 	return len(c[i]) < len(c[j]) || (len(c[i]) == len(c[j]) && c[i][0] < c[j][0])
 }
 func (c byComponentLengthOrStart) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+
+type bySliceValues [][]int
+
+func (c bySliceValues) Len() int { return len(c) }
+func (c bySliceValues) Less(i, j int) bool {
+	a, b := c[i], c[j]
+	l := len(a)
+	if len(b) < l {
+		l = len(b)
+	}
+	for k, v := range a[:l] {
+		if v < b[k] {
+			return true
+		}
+		if v > b[k] {
+			return false
+		}
+	}
+	return len(a) < len(b)
+}
+func (c bySliceValues) Swap(i, j int) { c[i], c[j] = c[j], c[i] }

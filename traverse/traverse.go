@@ -69,6 +69,35 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 	return nil
 }
 
+// WalkAll calls Walk for each unvisited node of the graph g using edges independent
+// of their direction. The functions before and after are called prior to commencing
+// and after completing each walk if they are non-nil respectively. The function
+// during is called on each node as it is traversed.
+func (b *BreadthFirst) WalkAll(g graph.Graph, before, after func(), during func(graph.Node)) {
+	// Ensure that when we pass a directed graph
+	// we use neighbors and not successors.
+	g = struct{ graph.Graph }{g}
+
+	b.Reset()
+	for _, from := range g.NodeList() {
+		if b.Visited(from) {
+			continue
+		}
+		if before != nil {
+			before()
+		}
+		b.Walk(g, from, func(n graph.Node, _ int) bool {
+			if during != nil {
+				during(n)
+			}
+			return false
+		})
+		if after != nil {
+			after()
+		}
+	}
+}
+
 // Visited returned whether the node n was visited during a traverse.
 func (b *BreadthFirst) Visited(n graph.Node) bool {
 	_, ok := b.visited[n.ID()]
@@ -131,6 +160,35 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 	}
 
 	return nil
+}
+
+// WalkAll calls Walk for each unvisited node of the graph g using edges independent
+// of their direction. The functions before and after are called prior to commencing
+// and after completing each walk if they are non-nil respectively. The function
+// during is called on each node as it is traversed.
+func (d *DepthFirst) WalkAll(g graph.Graph, before, after func(), during func(graph.Node)) {
+	// Ensure that when we pass a directed graph
+	// we use neighbors and not successors.
+	g = struct{ graph.Graph }{g}
+
+	d.Reset()
+	for _, from := range g.NodeList() {
+		if d.Visited(from) {
+			continue
+		}
+		if before != nil {
+			before()
+		}
+		d.Walk(g, from, func(n graph.Node) bool {
+			if during != nil {
+				during(n)
+			}
+			return false
+		})
+		if after != nil {
+			after()
+		}
+	}
 }
 
 // Visited returned whether the node n was visited during a traverse.

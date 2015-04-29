@@ -5,6 +5,7 @@
 package traverse_test
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"testing"
@@ -375,6 +376,157 @@ func TestDepthFirst(t *testing.T) {
 	}
 }
 
+var walkAllTests = []struct {
+	g    []set
+	edge func(graph.Edge) bool
+	want [][]int
+}{
+	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
+		g: []set{
+			0: nil,
+
+			1: linksTo(2, 3),
+			2: linksTo(4),
+			3: linksTo(4),
+			4: linksTo(5),
+			5: nil,
+
+			6:  linksTo(7, 8, 14),
+			7:  linksTo(8, 11, 12, 14),
+			8:  linksTo(14),
+			9:  linksTo(11),
+			10: linksTo(11),
+			11: linksTo(12),
+			12: linksTo(18),
+			13: linksTo(14, 15),
+			14: linksTo(15, 17),
+			15: linksTo(16, 17),
+			16: nil,
+			17: linksTo(18, 19, 20),
+			18: linksTo(19, 20),
+			19: linksTo(20),
+			20: nil,
+		},
+		want: [][]int{
+			{0},
+			{1, 2, 3, 4, 5},
+			{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+		},
+	},
+	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
+		g: []set{
+			0: nil,
+
+			1: linksTo(2, 3),
+			2: linksTo(4),
+			3: linksTo(4),
+			4: linksTo(5),
+			5: nil,
+
+			6:  linksTo(7, 8, 14),
+			7:  linksTo(8, 11, 12, 14),
+			8:  linksTo(14),
+			9:  linksTo(11),
+			10: linksTo(11),
+			11: linksTo(12),
+			12: linksTo(18),
+			13: linksTo(14, 15),
+			14: linksTo(15, 17),
+			15: linksTo(16, 17),
+			16: nil,
+			17: linksTo(18, 19, 20),
+			18: linksTo(19, 20),
+			19: linksTo(20),
+			20: nil,
+		},
+		edge: func(e graph.Edge) bool {
+			// Do not traverse an edge between 3 and 5.
+			return (e.Head().ID() != 4 || e.Tail().ID() != 5) && (e.Head().ID() != 5 || e.Tail().ID() != 4)
+		},
+		want: [][]int{
+			{0},
+			{1, 2, 3, 4},
+			{5},
+			{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+		},
+	},
+}
+
+func TestWalkAll(t *testing.T) {
+	for _, directed := range []bool{false, true} {
+		for i, test := range walkAllTests {
+			var g graph.Graph
+			if directed {
+				g = concrete.NewDirectedGraph()
+			} else {
+				g = concrete.NewGraph()
+			}
+
+			for u, e := range test.g {
+				if !g.NodeExists(concrete.Node(u)) {
+					g.(graph.Mutable).AddNode(concrete.Node(u))
+				}
+				for v := range e {
+					if !g.NodeExists(concrete.Node(v)) {
+						g.(graph.Mutable).AddNode(concrete.Node(v))
+					}
+					switch g := g.(type) {
+					case graph.MutableDirectedGraph:
+						g.AddDirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+					case graph.MutableGraph:
+						g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+					default:
+						panic("unexpected graph type")
+					}
+				}
+			}
+			type walker interface {
+				WalkAll(g graph.Graph, before, after func(), during func(graph.Node))
+			}
+			for _, w := range []walker{
+				&traverse.BreadthFirst{},
+				&traverse.DepthFirst{},
+			} {
+				var (
+					c  []graph.Node
+					cc [][]graph.Node
+				)
+				switch w := w.(type) {
+				case *traverse.BreadthFirst:
+					w.EdgeFilter = test.edge
+				case *traverse.DepthFirst:
+					w.EdgeFilter = test.edge
+				default:
+					panic(fmt.Sprintf("bad walker type: %T", w))
+				}
+				during := func(n graph.Node) {
+					c = append(c, n)
+				}
+				after := func() {
+					cc = append(cc, []graph.Node(nil))
+					cc[len(cc)-1] = append(cc[len(cc)-1], c...)
+					c = c[:0]
+				}
+				w.WalkAll(g, nil, after, during)
+
+				got := make([][]int, len(cc))
+				for j, c := range cc {
+					ids := make([]int, len(c))
+					for k, n := range c {
+						ids[k] = n.ID()
+					}
+					sort.Ints(ids)
+					got[j] = ids
+				}
+				sort.Sort(bySliceValues(got))
+				if !reflect.DeepEqual(got, test.want) {
+					t.Errorf("unexpected connected components for test %d using %T:\ngot: %v\nwant:%v", i, w, got, test.want)
+				}
+			}
+		}
+	}
+}
+
 // set is an integer set.
 type set map[int]struct{}
 
@@ -388,3 +540,24 @@ func linksTo(i ...int) set {
 	}
 	return s
 }
+
+type bySliceValues [][]int
+
+func (c bySliceValues) Len() int { return len(c) }
+func (c bySliceValues) Less(i, j int) bool {
+	a, b := c[i], c[j]
+	l := len(a)
+	if len(b) < l {
+		l = len(b)
+	}
+	for k, v := range a[:l] {
+		if v < b[k] {
+			return true
+		}
+		if v > b[k] {
+			return false
+		}
+	}
+	return len(a) < len(b)
+}
+func (c bySliceValues) Swap(i, j int) { c[i], c[j] = c[j], c[i] }

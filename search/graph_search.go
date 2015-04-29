@@ -11,6 +11,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/traverse"
 )
 
 // Returns an ordered list consisting of the nodes between start and goal. The path will be the
@@ -378,13 +379,10 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 // to the number of nodes is acyclic, unless you count reflexive edges as a cycle (which requires
 // only a little extra testing.)
 //
-// An undirected graph should end up with as many SCCs as there are "islands" (or subgraphs) of
-// connections, meaning having more than one strongly connected component implies that your graph
-// is not fully connected.
-func TarjanSCC(g graph.Graph) [][]graph.Node {
+func TarjanSCC(g graph.DirectedGraph) [][]graph.Node {
 	nodes := g.NodeList()
 	t := tarjan{
-		succ: setupFuncs(g, nil, nil).successors,
+		succ: g.Successors,
 
 		indexTable: make(map[int]int, len(nodes)),
 		lowLink:    make(map[int]int, len(nodes)),
@@ -885,4 +883,25 @@ func (*bronKerbosch) choosePivotFrom(g graph.Graph, p, x Set) (neighbors []graph
 		panic("bronKerbosch: empty set")
 	}
 	return neighbors
+}
+
+// ConnectedComponents returns the connected components of the graph g. All
+// edges are treated as undirected.
+func ConnectedComponents(g graph.Graph) [][]graph.Node {
+	var (
+		w  traverse.DepthFirst
+		c  []graph.Node
+		cc [][]graph.Node
+	)
+	during := func(n graph.Node) {
+		c = append(c, n)
+	}
+	after := func() {
+		cc = append(cc, []graph.Node(nil))
+		cc[len(cc)-1] = append(cc[len(cc)-1], c...)
+		c = c[:0]
+	}
+	w.WalkAll(g, nil, after, during)
+
+	return cc
 }

@@ -429,6 +429,7 @@ var vOrderTests = []struct {
 			2: linksTo(4),
 			3: linksTo(4),
 			4: linksTo(5),
+			5: nil,
 
 			6:  linksTo(7, 8, 14),
 			7:  linksTo(8, 11, 12, 14),
@@ -529,6 +530,7 @@ var bronKerboschTests = []struct {
 			2: linksTo(4),
 			3: linksTo(4),
 			4: linksTo(5),
+			5: nil,
 
 			6:  linksTo(7, 8, 14),
 			7:  linksTo(8, 11, 12, 14),
@@ -593,6 +595,90 @@ func TestBronKerbosch(t *testing.T) {
 		sort.Sort(bySliceValues(got))
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected cliques for test %d:\ngot: %v\nwant:%v", i, got, test.want)
+		}
+	}
+}
+
+var connectedComponentTests = []struct {
+	g    []set
+	want [][]int
+}{
+	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
+		g: []set{
+			0: nil,
+
+			1: linksTo(2, 3),
+			2: linksTo(4),
+			3: linksTo(4),
+			4: linksTo(5),
+			5: nil,
+
+			6:  linksTo(7, 8, 14),
+			7:  linksTo(8, 11, 12, 14),
+			8:  linksTo(14),
+			9:  linksTo(11),
+			10: linksTo(11),
+			11: linksTo(12),
+			12: linksTo(18),
+			13: linksTo(14, 15),
+			14: linksTo(15, 17),
+			15: linksTo(16, 17),
+			16: nil,
+			17: linksTo(18, 19, 20),
+			18: linksTo(19, 20),
+			19: linksTo(20),
+			20: nil,
+		},
+		want: [][]int{
+			{0},
+			{1, 2, 3, 4, 5},
+			{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+		},
+	},
+}
+
+func TestConnectedComponents(t *testing.T) {
+	for _, directed := range []bool{false, true} {
+		for i, test := range connectedComponentTests {
+			var g graph.Graph
+			if directed {
+				g = concrete.NewDirectedGraph()
+			} else {
+				g = concrete.NewGraph()
+			}
+
+			for u, e := range test.g {
+				if !g.NodeExists(concrete.Node(u)) {
+					g.(graph.Mutable).AddNode(concrete.Node(u))
+				}
+				for v := range e {
+					if !g.NodeExists(concrete.Node(v)) {
+						g.(graph.Mutable).AddNode(concrete.Node(v))
+					}
+					switch g := g.(type) {
+					case graph.MutableDirectedGraph:
+						g.AddDirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+					case graph.MutableGraph:
+						g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+					default:
+						panic("unexpected graph type")
+					}
+				}
+			}
+			cc := search.ConnectedComponents(g)
+			got := make([][]int, len(cc))
+			for j, c := range cc {
+				ids := make([]int, len(c))
+				for k, n := range c {
+					ids[k] = n.ID()
+				}
+				sort.Ints(ids)
+				got[j] = ids
+			}
+			sort.Sort(bySliceValues(got))
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("unexpected connected components for test %d:\ngot: %v\nwant:%v", i, got, test.want)
+			}
 		}
 	}
 }

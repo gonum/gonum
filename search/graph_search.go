@@ -807,9 +807,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Graph, r []graph.Node, p, x S
 		return
 	}
 
-	u := bk.choosePivot(p, x)
-
-	neighbours := g.Neighbors(u)
+	neighbours := bk.choosePivotFrom(g, p, x)
 	nu := make(Set, len(neighbours))
 	for _, n := range neighbours {
 		nu.add(n)
@@ -842,11 +840,50 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Graph, r []graph.Node, p, x S
 	}
 }
 
-func (*bronKerbosch) choosePivot(p, x Set) graph.Node {
-	// TODO(kortschak): Implement pivot choice function
-	// that maximises |p ⋂ neighbours(u)|.
-	for _, n := range make(Set).union(p, x) {
-		return n
+func (*bronKerbosch) choosePivotFrom(g graph.Graph, p, x Set) (neighbors []graph.Node) {
+	// TODO(kortschak): Investigate the impact of pivot choice that maximises
+	// |p ⋂ neighbours(u)| as a function of input size. Until then, leave as
+	// compile time option.
+	if !tomitaTanakaTakahashi {
+		for _, n := range p {
+			return g.Neighbors(n)
+		}
+		for _, n := range x {
+			return g.Neighbors(n)
+		}
+		panic("bronKerbosch: empty set")
 	}
-	panic("bronKerbosch: empty set")
+
+	var (
+		max   = -1
+		pivot graph.Node
+	)
+	maxNeighbors := func(s Set) {
+	outer:
+		for _, u := range s {
+			nb := g.Neighbors(u)
+			c := len(nb)
+			if c <= max {
+				continue
+			}
+			for n := range nb {
+				if _, ok := p[n]; ok {
+					continue
+				}
+				c--
+				if c <= max {
+					continue outer
+				}
+			}
+			max = c
+			pivot = u
+			neighbors = nb
+		}
+	}
+	maxNeighbors(p)
+	maxNeighbors(x)
+	if pivot == nil {
+		panic("bronKerbosch: empty set")
+	}
+	return neighbors
 }

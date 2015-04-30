@@ -361,7 +361,8 @@ var tarjanTests = []struct {
 			{0, 2},
 		},
 		want: [][]int{
-			{3, 4}, {0, 1, 2},
+			{0, 1, 2},
+			{3, 4},
 		},
 	},
 }
@@ -390,8 +391,8 @@ func TestTarjanSCC(t *testing.T) {
 			sort.Ints(gotIDs[i])
 		}
 		for _, iv := range test.ambiguousOrder {
-			sort.Sort(internal.ByComponentLengthOrStart(test.want[iv.start:iv.end]))
-			sort.Sort(internal.ByComponentLengthOrStart(gotIDs[iv.start:iv.end]))
+			sort.Sort(internal.BySliceValues(test.want[iv.start:iv.end]))
+			sort.Sort(internal.BySliceValues(gotIDs[iv.start:iv.end]))
 		}
 		if !reflect.DeepEqual(gotIDs, test.want) {
 			t.Errorf("unexpected Tarjan scc result for %d:\n\tgot:%v\n\twant:%v", i, gotIDs, test.want)

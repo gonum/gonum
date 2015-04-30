@@ -4,14 +4,8 @@
 
 package internal
 
-type ByComponentLengthOrStart [][]int
-
-func (c ByComponentLengthOrStart) Len() int { return len(c) }
-func (c ByComponentLengthOrStart) Less(i, j int) bool {
-	return len(c[i]) < len(c[j]) || (len(c[i]) == len(c[j]) && c[i][0] < c[j][0])
-}
-func (c ByComponentLengthOrStart) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
-
+// BySliceValues implements the sort.Interface sorting a slice of
+// []int lexically by the values of the []int.
 type BySliceValues [][]int
 
 func (c BySliceValues) Len() int { return len(c) }

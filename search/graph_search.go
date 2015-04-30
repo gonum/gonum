@@ -369,8 +369,7 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 
 /* Basic Graph tests */
 
-// Also known as Tarjan's Strongly Connected Components Algorithm. This returns all the strongly
-// connected components in the graph.
+// TarjanSCC returns the strongly connected components of the graph g using Tarjan's algorithm.
 //
 // A strongly connected component of a graph is a set of vertices where it's possible to reach any
 // vertex in the set from any other (meaning there's a cycle between them.)
@@ -382,7 +381,7 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 // An undirected graph should end up with as many SCCs as there are "islands" (or subgraphs) of
 // connections, meaning having more than one strongly connected component implies that your graph
 // is not fully connected.
-func Tarjan(g graph.Graph) [][]graph.Node {
+func TarjanSCC(g graph.Graph) [][]graph.Node {
 	nodes := g.NodeList()
 	t := tarjan{
 		succ: setupFuncs(g, nil, nil).successors,
@@ -517,17 +516,17 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 
 	edgeList := g.EdgeList()
 	for remainingNodes.count() != 0 {
-		edgeWeights := make(edgeSorter, 0)
+		var edges []concrete.WeightedEdge
 		for _, edge := range edgeList {
 			if (dst.NodeExists(edge.Head()) && remainingNodes.has(edge.Tail().ID())) ||
 				(dst.NodeExists(edge.Tail()) && remainingNodes.has(edge.Head().ID())) {
 
-				edgeWeights = append(edgeWeights, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
+				edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
 			}
 		}
 
-		sort.Sort(edgeWeights)
-		myEdge := edgeWeights[0]
+		sort.Sort(byWeight(edges))
+		myEdge := edges[0]
 
 		dst.AddUndirectedEdge(myEdge.Edge, myEdge.Cost)
 		remainingNodes.remove(myEdge.Edge.Head().ID())
@@ -544,19 +543,19 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 	cost = setupFuncs(g, cost, nil).cost
 
 	edgeList := g.EdgeList()
-	edgeWeights := make(edgeSorter, 0, len(edgeList))
+	edges := make([]concrete.WeightedEdge, 0, len(edgeList))
 	for _, edge := range edgeList {
-		edgeWeights = append(edgeWeights, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
+		edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
 	}
 
-	sort.Sort(edgeWeights)
+	sort.Sort(byWeight(edges))
 
 	ds := newDisjointSet()
 	for _, node := range g.NodeList() {
 		ds.makeSet(node.ID())
 	}
 
-	for _, edge := range edgeWeights {
+	for _, edge := range edges {
 		// The disjoint set doesn't really care for which is head and which is tail so this
 		// should work fine without checking both ways
 		if s1, s2 := ds.find(edge.Edge.Head().ID()), ds.find(edge.Edge.Tail().ID()); s1 != s2 {

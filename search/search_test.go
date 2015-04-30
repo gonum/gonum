@@ -13,6 +13,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/search"
 )
 
@@ -389,8 +390,8 @@ func TestTarjanSCC(t *testing.T) {
 			sort.Ints(gotIDs[i])
 		}
 		for _, iv := range test.ambiguousOrder {
-			sort.Sort(byComponentLengthOrStart(test.want[iv.start:iv.end]))
-			sort.Sort(byComponentLengthOrStart(gotIDs[iv.start:iv.end]))
+			sort.Sort(internal.ByComponentLengthOrStart(test.want[iv.start:iv.end]))
+			sort.Sort(internal.ByComponentLengthOrStart(gotIDs[iv.start:iv.end]))
 		}
 		if !reflect.DeepEqual(gotIDs, test.want) {
 			t.Errorf("unexpected Tarjan scc result for %d:\n\tgot:%v\n\twant:%v", i, gotIDs, test.want)
@@ -572,7 +573,7 @@ func TestBronKerbosch(t *testing.T) {
 			sort.Ints(ids)
 			got[j] = ids
 		}
-		sort.Sort(bySliceValues(got))
+		sort.Sort(internal.BySliceValues(got))
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected cliques for test %d:\ngot: %v\nwant:%v", i, got, test.want)
 		}
@@ -631,7 +632,7 @@ func TestConnectedComponents(t *testing.T) {
 				sort.Ints(ids)
 				got[j] = ids
 			}
-			sort.Sort(bySliceValues(got))
+			sort.Sort(internal.BySliceValues(got))
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected connected components for test %d:\ngot: %v\nwant:%v", i, got, test.want)
 			}
@@ -652,32 +653,3 @@ func linksTo(i ...int) set {
 	}
 	return s
 }
-
-type byComponentLengthOrStart [][]int
-
-func (c byComponentLengthOrStart) Len() int { return len(c) }
-func (c byComponentLengthOrStart) Less(i, j int) bool {
-	return len(c[i]) < len(c[j]) || (len(c[i]) == len(c[j]) && c[i][0] < c[j][0])
-}
-func (c byComponentLengthOrStart) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
-
-type bySliceValues [][]int
-
-func (c bySliceValues) Len() int { return len(c) }
-func (c bySliceValues) Less(i, j int) bool {
-	a, b := c[i], c[j]
-	l := len(a)
-	if len(b) < l {
-		l = len(b)
-	}
-	for k, v := range a[:l] {
-		if v < b[k] {
-			return true
-		}
-		if v > b[k] {
-			return false
-		}
-	}
-	return len(a) < len(b)
-}
-func (c bySliceValues) Swap(i, j int) { c[i], c[j] = c[j], c[i] }

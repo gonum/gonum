@@ -12,6 +12,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/traverse"
 )
 
@@ -349,7 +350,7 @@ func TestWalkAll(t *testing.T) {
 					sort.Ints(ids)
 					got[j] = ids
 				}
-				sort.Sort(bySliceValues(got))
+				sort.Sort(internal.BySliceValues(got))
 				if !reflect.DeepEqual(got, test.want) {
 					t.Errorf("unexpected connected components for test %d using %T:\ngot: %v\nwant:%v", i, w, got, test.want)
 				}
@@ -371,24 +372,3 @@ func linksTo(i ...int) set {
 	}
 	return s
 }
-
-type bySliceValues [][]int
-
-func (c bySliceValues) Len() int { return len(c) }
-func (c bySliceValues) Less(i, j int) bool {
-	a, b := c[i], c[j]
-	l := len(a)
-	if len(b) < l {
-		l = len(b)
-	}
-	for k, v := range a[:l] {
-		if v < b[k] {
-			return true
-		}
-		if v > b[k] {
-			return false
-		}
-	}
-	return len(a) < len(b)
-}
-func (c bySliceValues) Swap(i, j int) { c[i], c[j] = c[j], c[i] }

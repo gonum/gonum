@@ -11,6 +11,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/traverse"
 )
 
@@ -288,14 +289,14 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 	sf := setupFuncs(g, nil, nil)
 	successors := sf.successors
 
-	closedSet := make(intSet)
+	closedSet := make(internal.IntSet)
 	openSet := &nodeStack{start}
 	predecessor := make(map[int]graph.Node)
 
 	for openSet.len() != 0 {
 		curr := openSet.pop()
 
-		if closedSet.has(curr.ID()) {
+		if closedSet.Has(curr.ID()) {
 			continue
 		}
 
@@ -303,10 +304,10 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 			return rebuildPath(predecessor, goal)
 		}
 
-		closedSet.add(curr.ID())
+		closedSet.Add(curr.ID())
 
 		for _, neighbor := range successors(curr) {
-			if closedSet.has(neighbor.ID()) {
+			if closedSet.Has(neighbor.ID()) {
 				continue
 			}
 
@@ -386,7 +387,7 @@ func TarjanSCC(g graph.DirectedGraph) [][]graph.Node {
 
 		indexTable: make(map[int]int, len(nodes)),
 		lowLink:    make(map[int]int, len(nodes)),
-		onStack:    make(intSet, len(nodes)),
+		onStack:    make(internal.IntSet, len(nodes)),
 	}
 	for _, v := range nodes {
 		if t.indexTable[v.ID()] == 0 {
@@ -407,7 +408,7 @@ type tarjan struct {
 	index      int
 	indexTable map[int]int
 	lowLink    map[int]int
-	onStack    intSet
+	onStack    internal.IntSet
 
 	stack []graph.Node
 
@@ -424,7 +425,7 @@ func (t *tarjan) strongconnect(v graph.Node) {
 	t.indexTable[vID] = t.index
 	t.lowLink[vID] = t.index
 	t.stack = append(t.stack, v)
-	t.onStack.add(vID)
+	t.onStack.Add(vID)
 
 	// Consider successors of v.
 	for _, w := range t.succ(v) {
@@ -433,7 +434,7 @@ func (t *tarjan) strongconnect(v graph.Node) {
 			// Successor w has not yet been visited; recur on it.
 			t.strongconnect(w)
 			t.lowLink[vID] = min(t.lowLink[vID], t.lowLink[wID])
-		} else if t.onStack.has(wID) {
+		} else if t.onStack.Has(wID) {
 			// Successor w is in stack s and hence in the current SCC.
 			t.lowLink[vID] = min(t.lowLink[vID], t.indexTable[wID])
 		}
@@ -448,7 +449,7 @@ func (t *tarjan) strongconnect(v graph.Node) {
 		)
 		for {
 			w, t.stack = t.stack[len(t.stack)-1], t.stack[:len(t.stack)-1]
-			t.onStack.remove(w.ID())
+			t.onStack.Remove(w.ID())
 			// Add w to current strongly connected component.
 			scc = append(scc, w)
 			if w.ID() == vID {
@@ -507,17 +508,17 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	}
 
 	dst.AddNode(nlist[0])
-	remainingNodes := make(intSet)
+	remainingNodes := make(internal.IntSet)
 	for _, node := range nlist[1:] {
-		remainingNodes.add(node.ID())
+		remainingNodes.Add(node.ID())
 	}
 
 	edgeList := g.EdgeList()
-	for remainingNodes.count() != 0 {
+	for remainingNodes.Count() != 0 {
 		var edges []concrete.WeightedEdge
 		for _, edge := range edgeList {
-			if (dst.NodeExists(edge.Head()) && remainingNodes.has(edge.Tail().ID())) ||
-				(dst.NodeExists(edge.Tail()) && remainingNodes.has(edge.Head().ID())) {
+			if (dst.NodeExists(edge.Head()) && remainingNodes.Has(edge.Tail().ID())) ||
+				(dst.NodeExists(edge.Tail()) && remainingNodes.Has(edge.Head().ID())) {
 
 				edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
 			}
@@ -527,7 +528,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 		myEdge := edges[0]
 
 		dst.AddUndirectedEdge(myEdge.Edge, myEdge.Cost)
-		remainingNodes.remove(myEdge.Edge.Head().ID())
+		remainingNodes.Remove(myEdge.Edge.Head().ID())
 	}
 
 }

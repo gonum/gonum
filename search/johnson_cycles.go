@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/internal"
 )
 
 // johnson implements Johnson's "Finding all the elementary
@@ -16,8 +17,8 @@ import (
 // Comments in the johnson methods are kept in sync with the comments
 // and labels from the paper.
 type johnson struct {
-	adjacent johnsonGraph // SCC adjacency list.
-	b        []intSet     // Johnson's "B-list".
+	adjacent johnsonGraph      // SCC adjacency list.
+	b        []internal.IntSet // Johnson's "B-list".
 	blocked  []bool
 	s        int
 
@@ -31,7 +32,7 @@ func CyclesIn(g graph.DirectedGraph) [][]graph.Node {
 	jg := johnsonGraphFrom(g)
 	j := johnson{
 		adjacent: jg,
-		b:        make([]intSet, len(jg.orig)),
+		b:        make([]internal.IntSet, len(jg.orig)),
 		blocked:  make([]bool, len(jg.orig)),
 	}
 
@@ -51,12 +52,12 @@ func CyclesIn(g graph.DirectedGraph) [][]graph.Node {
 			j.s = s
 		}
 		for i, v := range j.adjacent.orig {
-			if !j.adjacent.nodes.has(v.ID()) {
+			if !j.adjacent.nodes.Has(v.ID()) {
 				continue
 			}
 			if len(j.adjacent.succ[v.ID()]) > 0 {
 				j.blocked[i] = false
-				j.b[i] = make(intSet)
+				j.b[i] = make(internal.IntSet)
 			}
 		}
 		//L3:
@@ -96,7 +97,7 @@ func (j *johnson) circuit(v int) bool {
 		j.unblock(v)
 	} else {
 		for w := range j.adjacent.succ[n.ID()] {
-			j.b[j.adjacent.indexOf(w)].add(v)
+			j.b[j.adjacent.indexOf(w)].Add(v)
 		}
 	}
 	j.stack = j.stack[:len(j.stack)-1]
@@ -108,7 +109,7 @@ func (j *johnson) circuit(v int) bool {
 func (j *johnson) unblock(u int) {
 	j.blocked[u] = false
 	for w := range j.b[u] {
-		j.b[u].remove(w)
+		j.b[u].Remove(w)
 		if j.blocked[w] {
 			j.unblock(w)
 		}
@@ -124,8 +125,8 @@ type johnsonGraph struct {
 	orig  []graph.Node
 	index map[int]int
 
-	nodes intSet
-	succ  map[int]intSet
+	nodes internal.IntSet
+	succ  map[int]internal.IntSet
 }
 
 // johnsonGraphFrom returns a deep copy of the graph g.
@@ -136,18 +137,18 @@ func johnsonGraphFrom(g graph.DirectedGraph) johnsonGraph {
 		orig:  nodes,
 		index: make(map[int]int, len(nodes)),
 
-		nodes: make(intSet, len(nodes)),
-		succ:  make(map[int]intSet),
+		nodes: make(internal.IntSet, len(nodes)),
+		succ:  make(map[int]internal.IntSet),
 	}
 	for i, u := range nodes {
 		c.index[u.ID()] = i
 		for _, v := range g.Successors(u) {
 			if c.succ[u.ID()] == nil {
-				c.succ[u.ID()] = make(intSet)
-				c.nodes.add(u.ID())
+				c.succ[u.ID()] = make(internal.IntSet)
+				c.nodes.Add(u.ID())
 			}
-			c.nodes.add(v.ID())
-			c.succ[u.ID()].add(v.ID())
+			c.nodes.Add(v.ID())
+			c.succ[u.ID()].Add(v.ID())
 		}
 	}
 	return c
@@ -160,7 +161,7 @@ func (n byID) Less(i, j int) bool { return n[i].ID() < n[j].ID() }
 func (n byID) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
 
 // order returns the order of the graph.
-func (g johnsonGraph) order() int { return g.nodes.count() }
+func (g johnsonGraph) order() int { return g.nodes.Count() }
 
 // indexOf returns the index of the retained node for the given node ID.
 func (g johnsonGraph) indexOf(id int) int {
@@ -170,20 +171,11 @@ func (g johnsonGraph) indexOf(id int) int {
 // leastVertexIndex returns the index into orig of the least vertex.
 func (g johnsonGraph) leastVertexIndex() int {
 	for _, v := range g.orig {
-		if g.nodes.has(v.ID()) {
+		if g.nodes.Has(v.ID()) {
 			return g.indexOf(v.ID())
 		}
 	}
 	panic("johnsonCycles: empty set")
-}
-
-// remove deletes edges that make up the given paths from the graph.
-func (g johnsonGraph) remove(paths [][]int) {
-	for _, p := range paths {
-		for i, u := range p[:len(p)-1] {
-			g.succ[u].remove(p[i+1])
-		}
-	}
 }
 
 // subgraph returns a subgraph of g induced by {s, s+1, ... , n}. The
@@ -192,13 +184,13 @@ func (g johnsonGraph) subgraph(s int) johnsonGraph {
 	sn := g.orig[s].ID()
 	for u, e := range g.succ {
 		if u < sn {
-			g.nodes.remove(u)
+			g.nodes.Remove(u)
 			delete(g.succ, u)
 			continue
 		}
 		for v := range e {
 			if v < sn {
-				g.succ[u].remove(v)
+				g.succ[u].Remove(v)
 			}
 		}
 	}
@@ -218,8 +210,8 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 	sub := johnsonGraph{
 		orig:  g.orig,
 		index: g.index,
-		nodes: make(intSet),
-		succ:  make(map[int]intSet),
+		nodes: make(internal.IntSet),
+		succ:  make(map[int]internal.IntSet),
 	}
 
 	var n int
@@ -232,11 +224,11 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 			for _, v := range scc {
 				if _, ok := g.succ[u.ID()][v.ID()]; ok {
 					if sub.succ[u.ID()] == nil {
-						sub.succ[u.ID()] = make(intSet)
-						sub.nodes.add(u.ID())
+						sub.succ[u.ID()] = make(internal.IntSet)
+						sub.nodes.Add(u.ID())
 					}
-					sub.nodes.add(v.ID())
-					sub.succ[u.ID()].add(v.ID())
+					sub.nodes.Add(v.ID())
+					sub.succ[u.ID()].Add(v.ID())
 				}
 			}
 		}

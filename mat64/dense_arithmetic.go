@@ -260,7 +260,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 	}
 }
 
-// DivElem performs element-wise multiplication of a and b, placing the result
+// DivElem performs element-wise division of a by b, placing the result
 // in the receiver.
 //
 // See the ElemDiver interface for more information.

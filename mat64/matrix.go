@@ -307,6 +307,12 @@ type RawMatrixer interface {
 	RawMatrix() blas64.General
 }
 
+// A RawVectorer can return a blas64.Vector representation of the receiver. Changes to the blas64.Vector.Data
+// slice will be reflected in the original matrix, changes to the Inc field will not.
+type RawVectorer interface {
+	RawVector() blas64.Vector
+}
+
 // Det returns the determinant of the matrix a.
 func Det(a Matrix) float64 {
 	if a, ok := a.(Deter); ok {

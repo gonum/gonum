@@ -103,6 +103,76 @@ func (m *Vector) RawVector() blas64.Vector {
 	return m.mat
 }
 
+// AddVec adds a and b element-wise, placing the result in the receiver.
+func (v *Vector) AddVec(a, b *Vector) {
+	ar := a.Len()
+	br := b.Len()
+
+	if ar != br {
+		panic(ErrShape)
+	}
+
+	v.reuseAs(ar)
+
+	amat, bmat := a.RawVector(), b.RawVector()
+	for i := 0; i < v.n; i++ {
+		v.mat.Data[i*v.mat.Inc] = amat.Data[i*amat.Inc] + bmat.Data[i*bmat.Inc]
+	}
+}
+
+// SubVec subtracts the vector b from a, placing the result in the receiver.
+func (v *Vector) SubVec(a, b *Vector) {
+	ar := a.Len()
+	br := b.Len()
+
+	if ar != br {
+		panic(ErrShape)
+	}
+
+	v.reuseAs(ar)
+
+	amat, bmat := a.RawVector(), b.RawVector()
+	for i := 0; i < v.n; i++ {
+		v.mat.Data[i*v.mat.Inc] = amat.Data[i*amat.Inc] - bmat.Data[i*bmat.Inc]
+	}
+}
+
+// MulElemVec performs element-wise multiplication of a and b, placing the result
+// in the receiver.
+func (v *Vector) MulElemVec(a, b *Vector) {
+	ar := a.Len()
+	br := b.Len()
+
+	if ar != br {
+		panic(ErrShape)
+	}
+
+	v.reuseAs(ar)
+
+	amat, bmat := a.RawVector(), b.RawVector()
+	for i := 0; i < v.n; i++ {
+		v.mat.Data[i*v.mat.Inc] = amat.Data[i*amat.Inc] * bmat.Data[i*bmat.Inc]
+	}
+}
+
+// DivElemVec performs element-wise division of a by b, placing the result
+// in the receiver.
+func (v *Vector) DivElemVec(a, b *Vector) {
+	ar := a.Len()
+	br := b.Len()
+
+	if ar != br {
+		panic(ErrShape)
+	}
+
+	v.reuseAs(ar)
+
+	amat, bmat := a.RawVector(), b.RawVector()
+	for i := 0; i < v.n; i++ {
+		v.mat.Data[i*v.mat.Inc] = amat.Data[i*amat.Inc] / bmat.Data[i*bmat.Inc]
+	}
+}
+
 // MulVec computes a * b if trans == false and a^T * b if trans == true. The
 // result is stored into the reciever. MulVec panics if the number of columns in
 // a does not equal the number of rows in b.
@@ -184,4 +254,26 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 		*m = w
 		return
 	}
+}
+
+// reuseAs resizes an empty vector to a r×1 vector,
+// or checks that a non-empty matrix is r×1.
+func (v *Vector) reuseAs(r int) {
+	if v.isZero() {
+		v.mat = blas64.Vector{
+			Inc:  1,
+			Data: use(v.mat.Data, r),
+		}
+		v.n = r
+		return
+	}
+	if r != v.n {
+		panic(ErrShape)
+	}
+}
+
+func (v *Vector) isZero() bool {
+	// It must be the case that v.Dims() returns
+	// zeros in this case. See comment in Reset().
+	return v.mat.Inc == 0
 }

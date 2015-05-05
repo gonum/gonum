@@ -133,3 +133,111 @@ func (s *S) TestVectorMul(c *check.C) {
 		*/
 	}
 }
+
+func (s *S) TestVectorAdd(c *check.C) {
+	for i, test := range []struct {
+		a, b *Vector
+		want *Vector
+	}{
+		{
+			a:    NewVector(3, []float64{0, 1, 2}),
+			b:    NewVector(3, []float64{0, 2, 3}),
+			want: NewVector(3, []float64{0, 3, 5}),
+		},
+		{
+			a:    NewVector(3, []float64{0, 1, 2}),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			want: NewVector(3, []float64{0, 3, 5}),
+		},
+		{
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			want: NewVector(3, []float64{0, 3, 5}),
+		},
+	} {
+		var v Vector
+		v.AddVec(test.a, test.b)
+		c.Check(v.RawVector(), check.DeepEquals, test.want.RawVector(), check.Commentf("Test %d", i))
+	}
+}
+
+func (s *S) TestVectorSub(c *check.C) {
+	for i, test := range []struct {
+		a, b *Vector
+		want *Vector
+	}{
+		{
+			a:    NewVector(3, []float64{0, 1, 2}),
+			b:    NewVector(3, []float64{0, 0.5, 1}),
+			want: NewVector(3, []float64{0, 0.5, 1}),
+		},
+		{
+			a:    NewVector(3, []float64{0, 1, 2}),
+			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0),
+			want: NewVector(3, []float64{0, 0.5, 1}),
+		},
+		{
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0),
+			want: NewVector(3, []float64{0, 0.5, 1}),
+		},
+	} {
+		var v Vector
+		v.SubVec(test.a, test.b)
+		c.Check(v.RawVector(), check.DeepEquals, test.want.RawVector(), check.Commentf("Test %d", i))
+	}
+}
+
+func (s *S) TestVectorMulElem(c *check.C) {
+	for i, test := range []struct {
+		a, b *Vector
+		want *Vector
+	}{
+		{
+			a:    NewVector(3, []float64{0, 1, 2}),
+			b:    NewVector(3, []float64{0, 2, 3}),
+			want: NewVector(3, []float64{0, 2, 6}),
+		},
+		{
+			a:    NewVector(3, []float64{0, 1, 2}),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			want: NewVector(3, []float64{0, 2, 6}),
+		},
+		{
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			want: NewVector(3, []float64{0, 2, 6}),
+		},
+	} {
+		var v Vector
+		v.MulElemVec(test.a, test.b)
+		c.Check(v.RawVector(), check.DeepEquals, test.want.RawVector(), check.Commentf("Test %d", i))
+	}
+}
+
+func (s *S) TestVectorDivElem(c *check.C) {
+	for i, test := range []struct {
+		a, b *Vector
+		want *Vector
+	}{
+		{
+			a:    NewVector(3, []float64{0.5, 1, 2}),
+			b:    NewVector(3, []float64{0.5, 0.5, 1}),
+			want: NewVector(3, []float64{1, 2, 2}),
+		},
+		{
+			a:    NewVector(3, []float64{0.5, 1, 2}),
+			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0),
+			want: NewVector(3, []float64{1, 2, 2}),
+		},
+		{
+			a:    NewDense(3, 1, []float64{0.5, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0),
+			want: NewVector(3, []float64{1, 2, 2}),
+		},
+	} {
+		var v Vector
+		v.DivElemVec(test.a, test.b)
+		c.Check(v.RawVector(), check.DeepEquals, test.want.RawVector(), check.Commentf("Test %d", i))
+	}
+}

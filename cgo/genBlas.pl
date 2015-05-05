@@ -110,10 +110,10 @@ func (Implementation) Srotm(n int, x []float32, incX int, y []float32, incY int,
 	if incY == 0 {
 		panic("blas: zero y index increment")
 	}
-	if (n-1)*incX >= len(x) {
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
 	}
-	if (n-1)*incY >= len(y) {
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
@@ -144,10 +144,10 @@ func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int,
 	if incY == 0 {
 		panic("blas: zero y index increment")
 	}
-	if (n-1)*incX >= len(x) {
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
 	}
-	if (n-1)*incY >= len(y) {
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
@@ -169,10 +169,10 @@ func (Implementation) Cdotu(n int, x []complex64, incX int, y []complex64, incY 
 	if incY == 0 {
 		panic("blas: zero y index increment")
 	}
-	if (n-1)*incX >= len(x) {
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
 	}
-	if (n-1)*incY >= len(y) {
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
 	C.cblas_cdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
@@ -188,10 +188,10 @@ func (Implementation) Cdotc(n int, x []complex64, incX int, y []complex64, incY 
 	if incY == 0 {
 		panic("blas: zero y index increment")
 	}
-	if (n-1)*incX >= len(x) {
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
 	}
-	if (n-1)*incY >= len(y) {
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
 	C.cblas_cdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
@@ -207,10 +207,10 @@ func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, inc
 	if incY == 0 {
 		panic("blas: zero y index increment")
 	}
-	if (n-1)*incX >= len(x) {
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
 	}
-	if (n-1)*incY >= len(y) {
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
 	C.cblas_zdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
@@ -226,10 +226,10 @@ func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, inc
 	if incY == 0 {
 		panic("blas: zero y index increment")
 	}
-	if (n-1)*incX >= len(x) {
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
 	}
-	if (n-1)*incY >= len(y) {
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
 	C.cblas_zdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))

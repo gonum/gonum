@@ -174,11 +174,11 @@ func (v *Vector) DivElemVec(a, b *Vector) {
 }
 
 // MulVec computes a * b if trans == false and a^T * b if trans == true. The
-// result is stored into the reciever. MulVec panics if the number of columns in
+// result is stored into the receiver. MulVec panics if the number of columns in
 // a does not equal the number of rows in b.
 func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 	ar, ac := a.Dims()
-	br, _ := b.Dims()
+	br := b.Len()
 	if trans {
 		if ar != br {
 			panic(ErrShape)

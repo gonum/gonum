@@ -23,6 +23,9 @@ func (Implementation) Dnrm2(n int, x []float64, incX int) float64 {
 		}
 		return 0
 	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
+	}
 	if n < 2 {
 		if n == 1 {
 			return math.Abs(x[0])
@@ -81,6 +84,9 @@ func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 		}
 		return 0
 	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
+	}
 	if incX == 1 {
 		x = x[:n]
 		for _, v := range x {
@@ -103,6 +109,9 @@ func (Implementation) Idamax(n int, x []float64, incX int) int {
 			panic(zeroIncX)
 		}
 		return -1
+	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
 	}
 	if n < 2 {
 		if n == 1 {
@@ -154,6 +163,12 @@ func (Implementation) Dswap(n int, x []float64, incX int, y []float64, incY int)
 	if incY == 0 {
 		panic(zeroIncY)
 	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
+	}
 	if incX == 1 && incY == 1 {
 		x = x[:n]
 		for i, v := range x {
@@ -190,6 +205,12 @@ func (Implementation) Dcopy(n int, x []float64, incX int, y []float64, incY int)
 	if incY == 0 {
 		panic(zeroIncY)
 	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
+	}
 	if incX == 1 && incY == 1 {
 		copy(y[:n], x[:n])
 		return
@@ -222,6 +243,12 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 	}
 	if incY == 0 {
 		panic(zeroIncY)
+	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
 	}
 	if alpha == 0 {
 		return
@@ -429,7 +456,12 @@ func (Implementation) Drot(n int, x []float64, incX int, y []float64, incY int, 
 	if incY == 0 {
 		panic(zeroIncY)
 	}
-
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
+	}
 	if incX == 1 && incY == 1 {
 		x = x[:n]
 		for i, vx := range x {
@@ -467,6 +499,12 @@ func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int,
 	}
 	if incY == 0 {
 		panic(zeroIncY)
+	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
 	}
 
 	var h11, h12, h21, h22 float64
@@ -523,6 +561,9 @@ func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
 			panic(zeroIncX)
 		}
 		return
+	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
 	}
 	if n < 1 {
 		if n == 0 {

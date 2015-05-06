@@ -27,6 +27,9 @@ func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
 		}
 		return 0
 	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
+	}
 	if n < 2 {
 		if n == 1 {
 			return math.Abs(x[0])
@@ -87,6 +90,9 @@ func (Implementation) Sasum(n int, x []float32, incX int) float32 {
 		}
 		return 0
 	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
+	}
 	if incX == 1 {
 		x = x[:n]
 		for _, v := range x {
@@ -111,6 +117,9 @@ func (Implementation) Isamax(n int, x []float32, incX int) int {
 			panic(zeroIncX)
 		}
 		return -1
+	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
 	}
 	if n < 2 {
 		if n == 1 {
@@ -164,6 +173,12 @@ func (Implementation) Sswap(n int, x []float32, incX int, y []float32, incY int)
 	if incY == 0 {
 		panic(zeroIncY)
 	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
+	}
 	if incX == 1 && incY == 1 {
 		x = x[:n]
 		for i, v := range x {
@@ -202,6 +217,12 @@ func (Implementation) Scopy(n int, x []float32, incX int, y []float32, incY int)
 	if incY == 0 {
 		panic(zeroIncY)
 	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
+	}
 	if incX == 1 && incY == 1 {
 		copy(y[:n], x[:n])
 		return
@@ -236,6 +257,12 @@ func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []flo
 	}
 	if incY == 0 {
 		panic(zeroIncY)
+	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
 	}
 	if alpha == 0 {
 		return
@@ -449,7 +476,12 @@ func (Implementation) Srot(n int, x []float32, incX int, y []float32, incY int, 
 	if incY == 0 {
 		panic(zeroIncY)
 	}
-
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
+	}
 	if incX == 1 && incY == 1 {
 		x = x[:n]
 		for i, vx := range x {
@@ -489,6 +521,12 @@ func (Implementation) Srotm(n int, x []float32, incX int, y []float32, incY int,
 	}
 	if incY == 0 {
 		panic(zeroIncY)
+	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
 	}
 
 	var h11, h12, h21, h22 float32
@@ -547,6 +585,9 @@ func (Implementation) Sscal(n int, alpha float32, x []float32, incX int) {
 			panic(zeroIncX)
 		}
 		return
+	}
+	if incX > 0 && (n-1)*incX >= len(x) {
+		panic(badX)
 	}
 	if n < 1 {
 		if n == 0 {

@@ -30,6 +30,9 @@ const (
 	badLdA = "blas: index of a out of range"
 	badLdB = "blas: index of b out of range"
 	badLdC = "blas: index of c out of range"
+
+	badX = "blas: x index out of range"
+	badY = "blas: y index out of range"
 )
 
 // [SD]gemm behavior constants. These are kept here to keep them out of the

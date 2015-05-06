@@ -2,9 +2,8 @@ Gonum LAPACK  [![Build Status](https://travis-ci.org/gonum/lapack.svg)](https://
 ======
 
 A collection of packages to provide LAPACK functionality for the Go programming
-language (http://golang.org)
-
-This is work in progress. Breaking changes are likely to happen.
+language (http://golang.org). This provides a partial implementation in native go
+and a wrapper using cgo to a c-based implementation.
 
 ## Installation
 

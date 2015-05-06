@@ -40,4 +40,3 @@ then
 fi	
 
 rm -rf ./profile.out
-rm -rf ./acc.out

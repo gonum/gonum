@@ -424,6 +424,7 @@ var (
 	ErrShape           = Error{"mat64: dimension mismatch"}
 	ErrIllegalStride   = Error{"mat64: illegal stride"}
 	ErrPivot           = Error{"mat64: malformed pivot list"}
+	ErrTriangle        = Error{"mat64: triangular storage mismatch"}
 )
 
 func min(a, b int) int {

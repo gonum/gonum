@@ -74,7 +74,7 @@ func (s *S) TestCholesky(c *check.C) {
 				0, 0, 6,
 			}),
 			upper: true,
-			f:     NewTriDense(3, false, nil),
+			f:     NewTriDense(3, true, nil),
 
 			want: NewTriDense(3, true, []float64{
 				2, 0.5, 0.5,

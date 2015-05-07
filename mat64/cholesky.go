@@ -78,9 +78,9 @@ func (t *TriDense) Cholesky(a *SymDense, upper bool) (ok bool) {
 	return true
 }
 
-// SolveCholesky finds the matrix x that solves A * X = B where A = L * L^T or
-// A = U^T * U, and U or L are represented by t. The matrix A must be symmetric
-// and positive definite.
+// SolveCholesky finds the matrix m that solves A * m = b where A = L * L^T or
+// A = U^T * U, and U or L are represented by t, placing the result in the
+// receiver.
 func (m *Dense) SolveCholesky(t Triangular, b Matrix) {
 	_, n := t.Dims()
 	bm, bn := b.Dims()
@@ -104,6 +104,32 @@ func (m *Dense) SolveCholesky(t Triangular, b Matrix) {
 	case blas.Lower:
 		blas64.Trsm(blas.Left, blas.NoTrans, 1, ta, m.mat)
 		blas64.Trsm(blas.Left, blas.Trans, 1, ta, m.mat)
+	default:
+		panic(badTriangle)
+	}
+}
+
+// SolveCholeskyVec finds the vector v that solves A * v = b where A = L * L^T or
+// A = U^T * U, and U or L are represented by t, placing the result in the
+// receiver.
+func (v *Vector) SolveCholeskyVec(t Triangular, b *Vector) {
+	_, n := t.Dims()
+	vn := b.Len()
+	if vn != n {
+		panic(ErrShape)
+	}
+	v.reuseAs(n)
+	if v != b {
+		v.CopyVec(b)
+	}
+	ta := getBlasTriangular(t)
+	switch ta.Uplo {
+	case blas.Upper:
+		blas64.Trsv(blas.Trans, ta, v.mat)
+		blas64.Trsv(blas.NoTrans, ta, v.mat)
+	case blas.Lower:
+		blas64.Trsv(blas.NoTrans, ta, v.mat)
+		blas64.Trsv(blas.Trans, ta, v.mat)
 	default:
 		panic(badTriangle)
 	}

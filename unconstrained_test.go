@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix/mat64"
 	"github.com/gonum/optimize/functions"
 )
 
@@ -20,7 +21,7 @@ type unconstrainedTest struct {
 	// x is the initial guess.
 	x []float64
 	// gradTol is the absolute gradient tolerance for the test. If gradTol == 0,
-	// the default tolerance 1e-12 will be used.
+	// the default value of 1e-12 will be used.
 	gradTol float64
 	// long indicates that the test takes long time to finish and will be
 	// excluded if testing.Short() is true.
@@ -31,10 +32,10 @@ func (t unconstrainedTest) String() string {
 	dim := len(t.x)
 	if dim <= 10 {
 		// Print the initial X only for small-dimensional problems.
-		return fmt.Sprintf("F: %v\nDim: %v\nInitial X: %v\nGradientAbsTol: %v",
+		return fmt.Sprintf("F: %v\nDim: %v\nInitial X: %v\nGradientThreshold: %v",
 			reflect.TypeOf(t.f), dim, t.x, t.gradTol)
 	}
-	return fmt.Sprintf("F: %v\nDim: %v\nGradientAbsTol: %v",
+	return fmt.Sprintf("F: %v\nDim: %v\nGradientThreshold: %v",
 		reflect.TypeOf(t.f), dim, t.gradTol)
 }
 
@@ -663,55 +664,71 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			t.Errorf("error finding minimum (%v) for:\n%v", err, test)
 			continue
 		}
-
 		if result == nil {
 			t.Errorf("nil result without error for:\n%v", test)
 			continue
 		}
 
-		funcInfo := newFunctionInfo(test.f)
-
-		// Evaluate the norm of the gradient at the found optimum location.
-		optF := funcInfo.function.Func(result.X)
-		var optNorm float64
-		if funcInfo.IsGradient {
-			g := make([]float64, len(test.x))
-			funcInfo.gradient.Grad(result.X, g)
-			optNorm = floats.Norm(g, math.Inf(1))
-		}
+		f := newFunctionInfo(test.f)
 
 		// Check that the function value at the found optimum location is
-		// equal to result.F
+		// equal to result.F.
+		optF := test.f.Func(result.X)
 		if optF != result.F {
 			t.Errorf("Function value at the optimum location %v not equal to the returned value %v for:\n%v",
 				optF, result.F, test)
 		}
+		if result.Gradient != nil {
+			// Evaluate the norm of the gradient at the found optimum location.
+			g := make([]float64, len(test.x))
+			f.gradient.Grad(result.X, g)
 
-		// Check that the norm of the gradient at the found optimum location is
-		// smaller than the tolerance.
-		if optNorm >= settings.GradientThreshold {
-			t.Errorf("Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
-				optNorm, settings.GradientThreshold, test)
+			if !floats.Equal(result.Gradient, g) {
+				t.Errorf("Gradient at the optimum location not equal to the returned value for:\n%v", test)
+			}
+
+			optNorm := floats.Norm(g, math.Inf(1))
+			// Check that the norm of the gradient at the found optimum location is
+			// smaller than the tolerance.
+			if optNorm >= settings.GradientThreshold {
+				t.Errorf("Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
+					optNorm, settings.GradientThreshold, test)
+			}
 		}
 
-		// We are going to restart the solution using a fixed starting gradient
-		// and value, so evaluate them.
+		if method == nil {
+			// The tests below make sense only if the method used is known.
+			continue
+		}
+
+		if !method.Needs().Gradient && !method.Needs().Hessian {
+			// Gradient-free tests can correctly terminate only with
+			// FunctionConvergence status.
+			if result.Status != FunctionConvergence {
+				t.Errorf("Status not %v, %v instead", FunctionConvergence, result.Status)
+			}
+		}
+
+		// We are going to restart the solution using known initial data, so
+		// evaluate them.
 		settings.UseInitialData = true
-		settings.InitialValue = funcInfo.function.Func(test.x)
-		if funcInfo.IsGradient {
+		settings.InitialValue = test.f.Func(test.x)
+		if method.Needs().Gradient {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			funcInfo.gradient.Grad(test.x, settings.InitialGradient)
+			f.gradient.Grad(test.x, settings.InitialGradient)
+		}
+		if method.Needs().Hessian {
+			settings.InitialHessian = mat64.NewSymDense(len(test.x), nil)
+			f.hessian.Hess(test.x, settings.InitialHessian)
 		}
 
 		// Rerun the test again to make sure that it gets the same answer with
-		// the same starting condition. Moreover, we are using the initial data
-		// in settings.InitialValue and settings.InitialGradient.
+		// the same starting condition. Moreover, we are using the initial data.
 		result2, err2 := Local(test.f, test.x, settings, method)
 		if err2 != nil {
 			t.Errorf("error finding minimum second time (%v) for:\n%v", err2, test)
 			continue
 		}
-
 		if result2 == nil {
 			t.Errorf("second time nil result without error for:\n%v", test)
 			continue
@@ -719,20 +736,24 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// At the moment all the optimizers are deterministic, so check that we
 		// get _exactly_ the same answer second time as well.
-		if result.F != result2.F {
-			t.Errorf("Different minimum second time. First: %v, Second: %v for:\n%v",
-				result.F, result2.F, test)
+		if result.F != result2.F || !floats.Equal(result.X, result2.X) {
+			t.Errorf("Different minimum second time for:\n%v", test)
 		}
 
-		// Check that providing initial data reduces the number of function
-		// and/or gradient calls exactly by one.
+		// Check that providing initial data reduces the number of evaluations exactly by one.
 		if result.FuncEvaluations != result2.FuncEvaluations+1 {
-			t.Errorf("Providing initial data does not reduce the number of functions calls for:\n%v", test)
+			t.Errorf("Providing initial data does not reduce the number of Func() calls for:\n%v", test)
 			continue
 		}
-		if funcInfo.IsGradient {
+		if method.Needs().Gradient {
 			if result.GradEvaluations != result2.GradEvaluations+1 {
-				t.Errorf("Providing initial data does not reduce the number of gradient calls for:\n%v", test)
+				t.Errorf("Providing initial data does not reduce the number of Grad() calls for:\n%v", test)
+				continue
+			}
+		}
+		if method.Needs().Hessian {
+			if result.HessEvaluations != result2.HessEvaluations+1 {
+				t.Errorf("Providing initial data does not reduce the number of Hess() calls for:\n%v", test)
 				continue
 			}
 		}

@@ -23,6 +23,12 @@ type unconstrainedTest struct {
 	// gradTol is the absolute gradient tolerance for the test. If gradTol == 0,
 	// the default value of 1e-12 will be used.
 	gradTol float64
+	// fAbsTol is the absolute function convergence for the test. If fAbsTol == 0,
+	// the default value of 1e-12 will be used.
+	fAbsTol float64
+	// fIter is the number of iterations for function convergence. If fIter == 0,
+	// the default value of 20 will be used.
+	fIter int
 	// long indicates that the test takes long time to finish and will be
 	// excluded if testing.Short() is true.
 	long bool
@@ -37,6 +43,43 @@ func (t unconstrainedTest) String() string {
 	}
 	return fmt.Sprintf("F: %v\nDim: %v\nGradientThreshold: %v",
 		reflect.TypeOf(t.f), dim, t.gradTol)
+}
+
+// gradFree ensures that the function is gradient free.
+type gradFree struct {
+	f Function
+}
+
+func (g gradFree) Func(x []float64) float64 {
+	return g.f.Func(x)
+}
+
+// makeGradFree ensures that a function contains no gradient method.
+func makeGradFree(f Function) gradFree {
+	return gradFree{f}
+}
+
+var gradFreeTests = []unconstrainedTest{
+	{
+		f: makeGradFree(functions.Beale{}),
+		x: []float64{1, 1},
+	},
+	{
+		f: makeGradFree(functions.BiggsEXP6{}),
+		x: []float64{1, 2, 1, 1, 1, 1},
+	},
+	{
+		f: makeGradFree(functions.BrownAndDennis{}),
+		x: []float64{25, 5, -5, -1},
+	},
+	{
+		f: makeGradFree(functions.ExtendedRosenbrock{}),
+		x: []float64{-10, 10},
+	},
+	{
+		f: makeGradFree(functions.ExtendedRosenbrock{}),
+		x: []float64{-5, 4, 16, 3},
+	},
 }
 
 var gradientDescentTests = []unconstrainedTest{
@@ -496,12 +539,19 @@ func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {
 }
 
 func TestLocal(t *testing.T) {
-	// TODO: When method is nil, Local chooses the method automatically. At
-	// present, it always chooses BFGS (or panics if the function does not
-	// implement Grad() or FuncGrad()). For now, run this test with the
-	// simplest set of problems and revisit this later when more methods are
-	// added.
+	var tests []unconstrainedTest
+	// Mix of functions with and without Grad() method.
+	tests = append(tests, gradFreeTests...)
+	tests = append(tests, gradientDescentTests...)
 	testLocal(t, gradientDescentTests, nil)
+}
+
+func TestNelderMead(t *testing.T) {
+	var tests []unconstrainedTest
+	// Mix of functions with and without Grad() method.
+	tests = append(tests, gradFreeTests...)
+	tests = append(tests, gradientDescentTests...)
+	testLocal(t, tests, &NelderMead{})
 }
 
 func TestGradientDescent(t *testing.T) {
@@ -651,8 +701,20 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			continue
 		}
 
-		settings := &Settings{
-			FunctionThreshold: math.Inf(-1),
+		settings := DefaultSettings()
+		settings.Recorder = nil
+		if method != nil && method.Needs().Gradient {
+			// Turn off function convergence checks for gradient-based methods.
+			settings.FunctionConverge = nil
+		} else {
+			if test.fIter == 0 {
+				test.fIter = 20
+			}
+			settings.FunctionConverge.Iterations = test.fIter
+			if test.fAbsTol == 0 {
+				test.fAbsTol = 1e-12
+			}
+			settings.FunctionConverge.Absolute = test.fAbsTol
 		}
 		if test.gradTol == 0 {
 			test.gradTol = 1e-12

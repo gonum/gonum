@@ -121,10 +121,9 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		// Try to apply the Cholesky factorization.
 		pd := n.chol.Cholesky(n.hess, true)
 		if pd {
-			d := mat64.NewDense(dim, 1, dir)
+			d := mat64.NewVector(dim, dir)
 			// Store the solution in d's backing array, dir.
-			// TODO(vladimir-ch): This should use mat64.Vector.SolveCholesky() when it exists.
-			d.SolveCholesky(n.chol, mat64.NewDense(dim, 1, loc.Gradient))
+			d.SolveCholeskyVec(n.chol, mat64.NewVector(dim, loc.Gradient))
 			floats.Scale(-1, dir)
 			return 1
 		}

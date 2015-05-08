@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix/mat64"
 )
 
 // Beale implements the Beale's function.
@@ -53,6 +54,29 @@ func (Beale) Grad(x, grad []float64) {
 
 	grad[0] = -2 * (f1*t1 + f2*t2 + f3*t3)
 	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*x[1]*x[1])
+}
+
+func (Beale) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 2 {
+		panic("dimension of the problem must be 2")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	t1 := 1 - x[1]
+	t2 := 1 - x[1]*x[1]
+	t3 := 1 - x[1]*x[1]*x[1]
+	f1 := 1.5 - x[1]*t1
+	f2 := 2.25 - x[1]*t2
+	f3 := 2.625 - x[1]*t3
+
+	h00 := 2 * (t1*t1 + t2*t2 + t3*t3)
+	h01 := 2 * (f1 + x[1]*(2*f2+3*x[1]*f3) - x[0]*(t1+x[1]*(2*t2+3*x[1]*t3)))
+	h11 := 2 * x[0] * (x[0] + 2*f2 + x[1]*(6*f3+x[0]*x[1]*(4+9*x[1]*x[1])))
+	hess.SetSym(0, 0, h00)
+	hess.SetSym(0, 1, h01)
+	hess.SetSym(1, 1, h11)
 }
 
 func (Beale) Minima() []Minimum {
@@ -494,6 +518,22 @@ func (BrownBadlyScaled) Grad(x, grad []float64) {
 	grad[1] = 2*f2 + 2*f3*x[0]
 }
 
+func (BrownBadlyScaled) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 2 {
+		panic("dimension of the problem must be 2")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	h00 := 2 + 2*x[1]*x[1]
+	h01 := 4*x[0]*x[1] - 4
+	h11 := 2 + 2*x[0]*x[0]
+	hess.SetSym(0, 0, h00)
+	hess.SetSym(0, 1, h01)
+	hess.SetSym(1, 1, h11)
+}
+
 func (BrownBadlyScaled) Minima() []Minimum {
 	return []Minimum{
 		{
@@ -555,11 +595,51 @@ func (BrownAndDennis) Grad(x, grad []float64) {
 	}
 }
 
+func (BrownAndDennis) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 4 {
+		panic("dimension of the problem must be 4")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	for i := 0; i < 4; i++ {
+		for j := i; j < 4; j++ {
+			hess.SetSym(i, j, 0)
+		}
+	}
+	for i := 1; i <= 20; i++ {
+		d1 := float64(i) / 5
+		d2 := math.Sin(d1)
+		t1 := x[0] + d1*x[1] - math.Exp(d1)
+		t2 := x[2] + d2*x[3] - math.Cos(d1)
+		t := t1*t1 + t2*t2
+		s3 := 2 * t1 * t2
+		r1 := t + 2*t1*t1
+		r2 := t + 2*t2*t2
+		hess.SetSym(0, 0, hess.At(0, 0)+r1)
+		hess.SetSym(0, 1, hess.At(0, 1)+d1*r1)
+		hess.SetSym(1, 1, hess.At(1, 1)+d1*d1*r1)
+		hess.SetSym(0, 2, hess.At(0, 2)+s3)
+		hess.SetSym(1, 2, hess.At(1, 2)+d1*s3)
+		hess.SetSym(2, 2, hess.At(2, 2)+r2)
+		hess.SetSym(0, 3, hess.At(0, 3)+d2*s3)
+		hess.SetSym(1, 3, hess.At(1, 3)+d1*d2*s3)
+		hess.SetSym(2, 3, hess.At(2, 3)+d2*r2)
+		hess.SetSym(3, 3, hess.At(3, 3)+d2*d2*r2)
+	}
+	for i := 0; i < 4; i++ {
+		for j := i; j < 4; j++ {
+			hess.SetSym(i, j, 4*hess.At(i, j))
+		}
+	}
+}
+
 func (BrownAndDennis) Minima() []Minimum {
 	return []Minimum{
 		{
-			X:      []float64{-11.594439904886773, 13.203630051265385, -0.40343948776868443, 0.2367787746745986},
-			F:      85822.20162635627,
+			X:      []float64{-11.594439904762162, 13.203630051207202, -0.4034394881768612, 0.2367787744557347},
+			F:      85822.20162635634,
 			Global: true,
 		},
 	}
@@ -1148,6 +1228,27 @@ func (PowellBadlyScaled) Grad(x, grad []float64) {
 	grad[1] = 2 * (1e4*f1*x[0] - f2*math.Exp(-x[1]))
 }
 
+func (PowellBadlyScaled) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 2 {
+		panic("dimension of the problem must be 2")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	t1 := 1e4*x[0]*x[1] - 1
+	s1 := math.Exp(-x[0])
+	s2 := math.Exp(-x[1])
+	t2 := s1 + s2 - 1.0001
+
+	h00 := 2 * (1e8*x[1]*x[1] + s1*(s1+t2))
+	h01 := 2 * (1e4*(1+2*t1) + s1*s2)
+	h11 := 2 * (1e8*x[0]*x[0] + s2*(s2+t2))
+	hess.SetSym(0, 0, h00)
+	hess.SetSym(0, 1, h01)
+	hess.SetSym(1, 1, h11)
+}
+
 func (PowellBadlyScaled) Minima() []Minimum {
 	return []Minimum{
 		{
@@ -1377,6 +1478,53 @@ func (Watson) Grad(x, grad []float64) {
 	grad[1] += 2 * t
 }
 
+func (Watson) Hess(x []float64, hess *mat64.SymDense) {
+	dim := len(x)
+	if dim != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	for j := 0; j < dim; j++ {
+		for k := j; k < dim; k++ {
+			hess.SetSym(j, k, 0)
+		}
+	}
+	for i := 1; i <= 29; i++ {
+		d1 := float64(i) / 29
+		d2 := 1.0
+		var s1 float64
+		for j := 1; j < dim; j++ {
+			s1 += float64(j) * d2 * x[j]
+			d2 *= d1
+		}
+
+		d2 = 1.0
+		var s2 float64
+		for _, v := range x {
+			s2 += d2 * v
+			d2 *= d1
+		}
+
+		t := s1 - s2*s2 - 1
+		s3 := 2 * d1 * s2
+		d2 = 2 / d1
+		th := 2 * d1 * d1 * t
+		for j := 0; j < dim; j++ {
+			v := float64(j) - s3
+			d3 := 1 / d1
+			for k := 0; k <= j; k++ {
+				hess.SetSym(k, j, hess.At(k, j)+d2*d3*(v*(float64(k)-s3)-th))
+				d3 *= d1
+			}
+			d2 *= d1
+		}
+	}
+	t1 := x[1] - x[0]*x[0] - 1
+	hess.SetSym(0, 0, hess.At(0, 0)+8*x[0]*x[0]+2-4*t1)
+	hess.SetSym(0, 1, hess.At(0, 1)-4*x[0])
+	hess.SetSym(1, 1, hess.At(1, 1)+2)
+}
+
 func (Watson) Minima() []Minimum {
 	return []Minimum{
 		{
@@ -1448,6 +1596,26 @@ func (Wood) Grad(x, grad []float64) {
 	grad[1] = 2 * (100*f1 + 10*f5 + 0.1*f6)
 	grad[2] = -2 * (180*f3*x[2] + f4)
 	grad[3] = 2 * (90*f3 + 10*f5 - 0.1*f6)
+}
+
+func (Wood) Hess(x []float64, hess *mat64.SymDense) {
+	if len(x) != 4 {
+		panic("dimension of the problem must be 4")
+	}
+	if len(x) != hess.Symmetric() {
+		panic("incorrect size of the Hessian")
+	}
+
+	hess.SetSym(0, 0, 400*(3*x[0]*x[0]-x[1])+2)
+	hess.SetSym(0, 1, -400*x[0])
+	hess.SetSym(1, 1, 220.2)
+	hess.SetSym(0, 2, 0)
+	hess.SetSym(1, 2, 0)
+	hess.SetSym(2, 2, 360*(3*x[2]*x[2]-x[3])+2)
+	hess.SetSym(0, 3, 0)
+	hess.SetSym(1, 3, 19.8)
+	hess.SetSym(2, 3, -360*x[2])
+	hess.SetSym(3, 3, 200.2)
 }
 
 func (Wood) Minima() []Minimum {

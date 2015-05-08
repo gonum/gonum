@@ -312,7 +312,7 @@ var cgTests = []unconstrainedTest{
 	},
 }
 
-var newtonTests = []unconstrainedTest{
+var quasiNewtonTests = []unconstrainedTest{
 	{
 		f: functions.BiggsEXP4{},
 		x: []float64{1, 2, 1, 1},
@@ -526,6 +526,39 @@ var lbfgsTests = []unconstrainedTest{
 	newVariablyDimensioned(10000, 1e-5),
 }
 
+var newtonTests = []unconstrainedTest{
+	{
+		f: functions.Beale{},
+		x: []float64{1, 1},
+	},
+	{
+		f:       functions.BrownAndDennis{},
+		x:       []float64{25, 5, -5, -1},
+		gradTol: 1e-10,
+	},
+	{
+		f: functions.BrownBadlyScaled{},
+		x: []float64{1, 1},
+	},
+	{
+		f:       functions.PowellBadlyScaled{},
+		x:       []float64{0, 1},
+		gradTol: 1e-10,
+	},
+	{
+		f: functions.Watson{},
+		x: []float64{0, 0, 0, 0, 0, 0},
+	},
+	{
+		f: functions.Watson{},
+		x: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	},
+	{
+		f: functions.Wood{},
+		x: []float64{-3, -1, -3, -1},
+	},
+}
+
 func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {
 	x := make([]float64, dim)
 	for i := range x {
@@ -682,7 +715,7 @@ func TestHagerZhangFirstOrderStep(t *testing.T) {
 func TestBFGS(t *testing.T) {
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
-	tests = append(tests, newtonTests...)
+	tests = append(tests, quasiNewtonTests...)
 	tests = append(tests, bfgsTests...)
 	testLocal(t, tests, &BFGS{})
 }
@@ -690,9 +723,13 @@ func TestBFGS(t *testing.T) {
 func TestLBFGS(t *testing.T) {
 	var tests []unconstrainedTest
 	tests = append(tests, gradientDescentTests...)
-	tests = append(tests, newtonTests...)
+	tests = append(tests, quasiNewtonTests...)
 	tests = append(tests, lbfgsTests...)
 	testLocal(t, tests, &LBFGS{})
+}
+
+func TestNewton(t *testing.T) {
+	testLocal(t, newtonTests, &Newton{})
 }
 
 func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {

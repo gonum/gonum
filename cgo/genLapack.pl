@@ -57,11 +57,13 @@ const (
 	rowMajor order = 101 + iota
 	colMajor
 )
- 
+
 func init() {
          _ = lapack.Complex128(Lapack{})
          _ = lapack.Float64(Lapack{})
 }
+
+func isZero(ret C.int) bool { return ret == 0 }
 
 EOH
 
@@ -110,11 +112,18 @@ our %typeConv = (
 	"LAPACK_C_SELECT2" => "Select2Complex64",
 	"LAPACK_Z_SELECT1" => "Select1Complex128",
 	"LAPACK_Z_SELECT2" => "Select2Complex128",
-	"void" => ""
+	"void" => "",
+
+	"lapack_int_return_type" => "bool",
+	"lapack_int_return" => "isZero",
+	"float_return_type" => "float32",
+	"float_return" => "float32",
+	"double_return_type" => "float64",
+	"double_return" => "float64"
 );
 
 foreach my $line (@lines) {
-	process($line);	
+	process($line);
 }
 
 close($golapack);
@@ -162,14 +171,15 @@ sub processProto {
 		$gofunc = ucfirst $func;
 	}
 
-	my $GoRet = $typeConv{$ret};
+	my $GoRet = $typeConv{$ret."_return"};
+	my $GoRetType = $typeConv{$ret."_return_type"};
 	my $complexType = $func;
 	$complexType =~ s/.*_[isd]?([zc]).*/$1/;
 	my ($params,$bp) = processParamToGo($func, $paramList, $complexType);
 	if ($params eq "") {
 		return
 	}
-	print $golapack "func (Lapack) ".$gofunc."(".$params.") ".$GoRet."{\n";
+	print $golapack "func (Lapack) ".$gofunc."(".$params.") ".$GoRetType."{\n";
 	print $golapack "\t";
 	if ($ret ne 'void') {
 		print $golapack "\n".$bp."\n"."return ".$GoRet."(";

@@ -11,6 +11,8 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
+const maxNewtonModifications = 20
+
 // Newton implements a modified Newton's method for Hessian-based unconstrained
 // minimization. It applies regularization when the Hessian is not positive
 // definite, and it can converge to a local minimum from any starting point.
@@ -109,7 +111,7 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		n.tau = -minA + 0.001
 	}
 
-	for {
+	for k := 0; k < maxNewtonModifications; k++ {
 		if n.tau != 0 {
 			// Add a multiple of identity to the Hessian.
 			for i := 0; i < dim; i++ {
@@ -119,18 +121,21 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		// Try to apply the Cholesky factorization.
 		pd := n.chol.Cholesky(n.hess, true)
 		if pd {
-			break
+			d := mat64.NewDense(dim, 1, dir)
+			// Store the solution in d's backing array, dir.
+			// TODO(vladimir-ch): This should use mat64.Vector.SolveCholesky() when it exists.
+			d.SolveCholesky(n.chol, mat64.NewDense(dim, 1, loc.Gradient))
+			floats.Scale(-1, dir)
+			return 1
 		}
 		// Modified Hessian is not PD, so increase tau.
 		n.tau = math.Max(n.Increase*n.tau, 0.001)
 	}
 
-	d := mat64.NewDense(dim, 1, dir)
-	// Store the solution in d's backing array, dir.
-	// TODO(vladimir-ch): This should use mat64.Vector.SolveCholesky() when it exists.
-	d.SolveCholesky(n.chol, mat64.NewDense(dim, 1, loc.Gradient))
+	// Hessian modification failed to get a PD matrix. Return the negative
+	// gradient as the descent direction.
+	copy(dir, loc.Gradient)
 	floats.Scale(-1, dir)
-
 	return 1
 }
 

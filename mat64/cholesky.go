@@ -28,14 +28,23 @@ func (t *TriDense) Cholesky(a *SymDense, upper bool) (ok bool) {
 			Diag:   blas.NonUnit,
 			Data:   use(t.mat.Data, n*n),
 		}
-	} else if n != t.mat.N {
-		panic(ErrShape)
+		if upper {
+			t.mat.Uplo = blas.Upper
+		} else {
+			t.mat.Uplo = blas.Lower
+		}
+	} else {
+		if n != t.mat.N {
+			panic(ErrShape)
+		}
+		if (upper && t.mat.Uplo != blas.Upper) || (!upper && t.mat.Uplo != blas.Lower) {
+			panic(ErrTriangle)
+		}
 	}
 	mat := t.mat.Data
 	stride := t.mat.Stride
 
 	if upper {
-		t.mat.Uplo = blas.Upper
 		for j := 0; j < n; j++ {
 			var d float64
 			for k := 0; k < j; k++ {
@@ -57,7 +66,6 @@ func (t *TriDense) Cholesky(a *SymDense, upper bool) (ok bool) {
 			t.set(j, j, math.Sqrt(math.Max(d, 0)))
 		}
 	} else {
-		t.mat.Uplo = blas.Lower
 		for j := 0; j < n; j++ {
 			var d float64
 			for k := 0; k < j; k++ {

@@ -150,6 +150,15 @@ func (s *S) TestCholeskySolve(c *check.C) {
 			b:   NewDense(2, 1, []float64{5, 6}),
 			ans: NewDense(2, 1, []float64{5, 6}),
 		},
+		{
+			a: NewSymDense(3, []float64{
+				53, 59, 37,
+				0, 83, 71,
+				37, 71, 101,
+			}),
+			b:   NewDense(3, 1, []float64{5, 6, 7}),
+			ans: NewDense(3, 1, []float64{0.20745069393718094, -0.17421475529583694, 0.11577794010226464}),
+		},
 	} {
 		var f TriDense
 		ok := f.Cholesky(t.a, false)
@@ -163,5 +172,47 @@ func (s *S) TestCholeskySolve(c *check.C) {
 		x.SolveTri(&f, false, t.b)
 		x.SolveTri(&f, true, &x)
 		c.Check(x.EqualsApprox(t.ans, 1e-12), check.Equals, true)
+	}
+}
+
+func (s *S) TestCholeskySolveVec(c *check.C) {
+	for _, t := range []struct {
+		a   *SymDense
+		b   *Vector
+		ans *Vector
+	}{
+		{
+			a: NewSymDense(2, []float64{
+				1, 0,
+				0, 1,
+			}),
+			b:   NewVector(2, []float64{5, 6}),
+			ans: NewVector(2, []float64{5, 6}),
+		},
+		{
+			a: NewSymDense(3, []float64{
+				53, 59, 37,
+				0, 83, 71,
+				0, 0, 101,
+			}),
+			b:   NewVector(3, []float64{5, 6, 7}),
+			ans: NewVector(3, []float64{0.20745069393718094, -0.17421475529583694, 0.11577794010226464}),
+		},
+	} {
+		var f TriDense
+		ok := f.Cholesky(t.a, false)
+		c.Assert(ok, check.Equals, true)
+
+		var x Vector
+		x.SolveCholeskyVec(&f, t.b)
+		c.Check(x.EqualsApproxVec(t.ans, 1e-12), check.Equals, true)
+
+		var fl TriDense
+		ok = fl.Cholesky(t.a, true)
+		c.Assert(ok, check.Equals, true)
+
+		var xl Vector
+		xl.SolveCholeskyVec(&fl, t.b)
+		c.Check(xl.EqualsApproxVec(t.ans, 1e-12), check.Equals, true)
 	}
 }

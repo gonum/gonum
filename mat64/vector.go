@@ -5,6 +5,8 @@
 package mat64
 
 import (
+	"math"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 )
@@ -101,6 +103,15 @@ func (m *Vector) Reset() {
 
 func (m *Vector) RawVector() blas64.Vector {
 	return m.mat
+}
+
+// CopyVec makes a copy of elements of a into the receiver. It is similar to the
+// built-in copy; it copies as much as the overlap between the two matrices and
+// returns the number of rows and columns it copied.
+func (m *Vector) CopyVec(a *Vector) (n int) {
+	n = min(m.Len(), a.Len())
+	blas64.Copy(n, a.mat, m.mat)
+	return n
 }
 
 // AddVec adds a and b element-wise, placing the result in the receiver.
@@ -254,6 +265,22 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 		*m = w
 		return
 	}
+}
+
+// EqualsApproxVec compares the vectors represented by b and the receiver, with
+// tolerance for element-wise equality specified by epsilon.
+func (v *Vector) EqualsApproxVec(b *Vector, epsilon float64) bool {
+	n := v.Len()
+	nb := b.Len()
+	if n != nb {
+		return false
+	}
+	for i := 0; i < n; i++ {
+		if math.Abs(v.mat.Data[i*v.mat.Inc]-b.mat.Data[i*b.mat.Inc]) > epsilon {
+			return false
+		}
+	}
+	return true
 }
 
 // reuseAs resizes an empty vector to a r×1 vector,

@@ -83,3 +83,18 @@ func TestNormalProbs(t *testing.T) {
 func TestNormFitPrior(t *testing.T) {
 	testConjugateUpdate(t, func() ConjugateUpdater { return &Normal{Mu: -10, Sigma: 6} })
 }
+
+func TestNormDerivParam(t *testing.T) {
+	for _, test := range []*Normal{
+		&Normal{
+			Mu:    0,
+			Sigma: 1,
+		},
+		&Normal{
+			Mu:    0.32238,
+			Sigma: 13.69,
+		},
+	} {
+		testDerivParam(t, test)
+	}
+}

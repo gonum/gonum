@@ -80,10 +80,8 @@ func (n Normal) DLogProbDParam(x float64, deriv []float64) {
 	if len(deriv) != n.NumParameters() {
 		panic("dist: slice length mismatch")
 	}
-
-	deriv[0] = n.Mu * (x - n.Mu) / (n.Sigma * n.Sigma)
-	deriv[1] = 1 / n.Sigma * (-1 + (x-n.Mu)*(x-n.Mu)/2.0)
-
+	deriv[0] = (x - n.Mu) / (n.Sigma * n.Sigma)
+	deriv[1] = 1 / n.Sigma * (-1 + ((x-n.Mu)/n.Sigma)*((x-n.Mu)/n.Sigma))
 	return
 }
 

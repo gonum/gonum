@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"math"
 	"testing"
+
+	"github.com/gonum/diff/fd"
+	"github.com/gonum/floats"
 )
 
 type univariateProbPoint struct {
@@ -156,4 +159,47 @@ func parametersEqual(p1, p2 []Parameter, tol float64) bool {
 		}
 	}
 	return true
+}
+
+type derivParamTester interface {
+	LogProb(x float64) float64
+	DLogProbDParam(x float64, deriv []float64)
+	Quantile(p float64) float64
+	NumParameters() int
+	parameters([]Parameter) []Parameter
+	setParameters([]Parameter)
+}
+
+func testDerivParam(t *testing.T, d derivParamTester) {
+	// Tests that the derivative matches for a number of different quantiles
+	// along the distribution.
+	nTest := 10
+	quantiles := make([]float64, nTest)
+	floats.Span(quantiles, 0.1, 0.9)
+
+	deriv := make([]float64, d.NumParameters())
+	fdDeriv := make([]float64, d.NumParameters())
+
+	initParams := d.parameters(nil)
+	init := make([]float64, d.NumParameters())
+	for i, v := range initParams {
+		init[i] = v.Value
+	}
+	for _, v := range quantiles {
+		d.setParameters(initParams)
+		x := d.Quantile(v)
+		d.DLogProbDParam(x, deriv)
+		f := func(p []float64) float64 {
+			params := d.parameters(nil)
+			for i, v := range p {
+				params[i].Value = v
+			}
+			d.setParameters(params)
+			return d.LogProb(x)
+		}
+		fd.Gradient(fdDeriv, f, init, nil)
+		if !floats.EqualApprox(deriv, fdDeriv, 1e-6) {
+			t.Fatal("Derivative mismatch. Want", fdDeriv, ", got", deriv, ".")
+		}
+	}
 }

@@ -13,6 +13,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/search"
 )
 
@@ -360,7 +361,8 @@ var tarjanTests = []struct {
 			{0, 2},
 		},
 		want: [][]int{
-			{3, 4}, {0, 1, 2},
+			{0, 1, 2},
+			{3, 4},
 		},
 	},
 }
@@ -389,13 +391,41 @@ func TestTarjanSCC(t *testing.T) {
 			sort.Ints(gotIDs[i])
 		}
 		for _, iv := range test.ambiguousOrder {
-			sort.Sort(byComponentLengthOrStart(test.want[iv.start:iv.end]))
-			sort.Sort(byComponentLengthOrStart(gotIDs[iv.start:iv.end]))
+			sort.Sort(internal.BySliceValues(test.want[iv.start:iv.end]))
+			sort.Sort(internal.BySliceValues(gotIDs[iv.start:iv.end]))
 		}
 		if !reflect.DeepEqual(gotIDs, test.want) {
 			t.Errorf("unexpected Tarjan scc result for %d:\n\tgot:%v\n\twant:%v", i, gotIDs, test.want)
 		}
 	}
+}
+
+// batageljZaversnikGraph is the example graph from
+// figure 1 of http://arxiv.org/abs/cs/0310049v1
+var batageljZaversnikGraph = []set{
+	0: nil,
+
+	1: linksTo(2, 3),
+	2: linksTo(4),
+	3: linksTo(4),
+	4: linksTo(5),
+	5: nil,
+
+	6:  linksTo(7, 8, 14),
+	7:  linksTo(8, 11, 12, 14),
+	8:  linksTo(14),
+	9:  linksTo(11),
+	10: linksTo(11),
+	11: linksTo(12),
+	12: linksTo(18),
+	13: linksTo(14, 15),
+	14: linksTo(15, 17),
+	15: linksTo(16, 17),
+	16: nil,
+	17: linksTo(18, 19, 20),
+	18: linksTo(19, 20),
+	19: linksTo(20),
+	20: nil,
 }
 
 var vOrderTests = []struct {
@@ -421,32 +451,8 @@ var vOrderTests = []struct {
 		},
 		wantK: 3,
 	},
-	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+	{
+		g: batageljZaversnikGraph,
 		wantCore: [][]int{
 			{0},
 			{5, 9, 10, 16},
@@ -522,32 +528,8 @@ var bronKerboschTests = []struct {
 			{3, 5},
 		},
 	},
-	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+	{
+		g: batageljZaversnikGraph,
 		want: [][]int{
 			{0},
 			{1, 2},
@@ -592,7 +574,7 @@ func TestBronKerbosch(t *testing.T) {
 			sort.Ints(ids)
 			got[j] = ids
 		}
-		sort.Sort(bySliceValues(got))
+		sort.Sort(internal.BySliceValues(got))
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected cliques for test %d:\ngot: %v\nwant:%v", i, got, test.want)
 		}
@@ -603,32 +585,8 @@ var connectedComponentTests = []struct {
 	g    []set
 	want [][]int
 }{
-	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+	{
+		g: batageljZaversnikGraph,
 		want: [][]int{
 			{0},
 			{1, 2, 3, 4, 5},
@@ -675,7 +633,7 @@ func TestConnectedComponents(t *testing.T) {
 				sort.Ints(ids)
 				got[j] = ids
 			}
-			sort.Sort(bySliceValues(got))
+			sort.Sort(internal.BySliceValues(got))
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected connected components for test %d:\ngot: %v\nwant:%v", i, got, test.want)
 			}
@@ -696,32 +654,3 @@ func linksTo(i ...int) set {
 	}
 	return s
 }
-
-type byComponentLengthOrStart [][]int
-
-func (c byComponentLengthOrStart) Len() int { return len(c) }
-func (c byComponentLengthOrStart) Less(i, j int) bool {
-	return len(c[i]) < len(c[j]) || (len(c[i]) == len(c[j]) && c[i][0] < c[j][0])
-}
-func (c byComponentLengthOrStart) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
-
-type bySliceValues [][]int
-
-func (c bySliceValues) Len() int { return len(c) }
-func (c bySliceValues) Less(i, j int) bool {
-	a, b := c[i], c[j]
-	l := len(a)
-	if len(b) < l {
-		l = len(b)
-	}
-	for k, v := range a[:l] {
-		if v < b[k] {
-			return true
-		}
-		if v > b[k] {
-			return false
-		}
-	}
-	return len(a) < len(b)
-}
-func (c bySliceValues) Swap(i, j int) { c[i], c[j] = c[j], c[i] }

@@ -12,7 +12,49 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/traverse"
+)
+
+var (
+	// batageljZaversnikGraph is the example graph from
+	// figure 1 of http://arxiv.org/abs/cs/0310049v1
+	batageljZaversnikGraph = []set{
+		0: nil,
+
+		1: linksTo(2, 3),
+		2: linksTo(4),
+		3: linksTo(4),
+		4: linksTo(5),
+		5: nil,
+
+		6:  linksTo(7, 8, 14),
+		7:  linksTo(8, 11, 12, 14),
+		8:  linksTo(14),
+		9:  linksTo(11),
+		10: linksTo(11),
+		11: linksTo(12),
+		12: linksTo(18),
+		13: linksTo(14, 15),
+		14: linksTo(15, 17),
+		15: linksTo(16, 17),
+		16: nil,
+		17: linksTo(18, 19, 20),
+		18: linksTo(19, 20),
+		19: linksTo(20),
+		20: nil,
+	}
+
+	// wpBronKerboschGraph is the example given in the Bron-Kerbosch article on wikipedia (renumbered).
+	// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
+	wpBronKerboschGraph = []set{
+		0: linksTo(1, 4),
+		1: linksTo(2, 4),
+		2: linksTo(3),
+		3: linksTo(4, 5),
+		4: nil,
+		5: nil,
+	}
 )
 
 var breadthFirstTests = []struct {
@@ -24,14 +66,7 @@ var breadthFirstTests = []struct {
 	want  [][]int
 }{
 	{
-		g: []set{
-			0: linksTo(1, 4),
-			1: linksTo(2, 4),
-			2: linksTo(3),
-			3: linksTo(4, 5),
-			4: nil,
-			5: nil,
-		},
+		g:     wpBronKerboschGraph,
 		from:  concrete.Node(1),
 		final: map[graph.Node]bool{nil: true},
 		want: [][]int{
@@ -42,14 +77,7 @@ var breadthFirstTests = []struct {
 		},
 	},
 	{
-		g: []set{
-			0: linksTo(1, 4),
-			1: linksTo(2, 4),
-			2: linksTo(3),
-			3: linksTo(4, 5),
-			4: nil,
-			5: nil,
-		},
+		g: wpBronKerboschGraph,
 		edge: func(e graph.Edge) bool {
 			// Do not traverse an edge between 3 and 5.
 			return (e.Head().ID() != 3 || e.Tail().ID() != 5) && (e.Head().ID() != 5 || e.Tail().ID() != 3)
@@ -63,14 +91,7 @@ var breadthFirstTests = []struct {
 		},
 	},
 	{
-		g: []set{
-			0: linksTo(1, 4),
-			1: linksTo(2, 4),
-			2: linksTo(3),
-			3: linksTo(4, 5),
-			4: nil,
-			5: nil,
-		},
+		g:     wpBronKerboschGraph,
 		from:  concrete.Node(1),
 		until: func(n graph.Node, _ int) bool { return n == concrete.Node(3) },
 		final: map[graph.Node]bool{concrete.Node(3): true},
@@ -80,31 +101,7 @@ var breadthFirstTests = []struct {
 		},
 	},
 	{
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+		g:     batageljZaversnikGraph,
 		from:  concrete.Node(13),
 		final: map[graph.Node]bool{nil: true},
 		want: [][]int{
@@ -116,31 +113,7 @@ var breadthFirstTests = []struct {
 		},
 	},
 	{
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+		g:     batageljZaversnikGraph,
 		from:  concrete.Node(13),
 		until: func(_ graph.Node, d int) bool { return d > 2 },
 		final: map[graph.Node]bool{
@@ -207,27 +180,13 @@ var depthFirstTests = []struct {
 	want  []int
 }{
 	{
-		g: []set{
-			0: linksTo(1, 4),
-			1: linksTo(2, 4),
-			2: linksTo(3),
-			3: linksTo(4, 5),
-			4: nil,
-			5: nil,
-		},
+		g:     wpBronKerboschGraph,
 		from:  concrete.Node(1),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{0, 1, 2, 3, 4, 5},
 	},
 	{
-		g: []set{
-			0: linksTo(1, 4),
-			1: linksTo(2, 4),
-			2: linksTo(3),
-			3: linksTo(4, 5),
-			4: nil,
-			5: nil,
-		},
+		g: wpBronKerboschGraph,
 		edge: func(e graph.Edge) bool {
 			// Do not traverse an edge between 3 and 5.
 			return (e.Head().ID() != 3 || e.Tail().ID() != 5) && (e.Head().ID() != 5 || e.Tail().ID() != 3)
@@ -237,104 +196,25 @@ var depthFirstTests = []struct {
 		want:  []int{0, 1, 2, 3, 4},
 	},
 	{
-		g: []set{
-			0: linksTo(1, 4),
-			1: linksTo(2, 4),
-			2: linksTo(3),
-			3: linksTo(4, 5),
-			4: nil,
-			5: nil,
-		},
+		g:     wpBronKerboschGraph,
 		from:  concrete.Node(1),
 		until: func(n graph.Node) bool { return n == concrete.Node(3) },
 		final: map[graph.Node]bool{concrete.Node(3): true},
 	},
 	{
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+		g:     batageljZaversnikGraph,
 		from:  concrete.Node(0),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{0},
 	},
 	{
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+		g:     batageljZaversnikGraph,
 		from:  concrete.Node(3),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{1, 2, 3, 4, 5},
 	},
 	{
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+		g:     batageljZaversnikGraph,
 		from:  concrete.Node(13),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
@@ -381,64 +261,16 @@ var walkAllTests = []struct {
 	edge func(graph.Edge) bool
 	want [][]int
 }{
-	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+	{
+		g: batageljZaversnikGraph,
 		want: [][]int{
 			{0},
 			{1, 2, 3, 4, 5},
 			{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 		},
 	},
-	{ // This is the example graph from figure 1 of http://arxiv.org/abs/cs/0310049v1
-		g: []set{
-			0: nil,
-
-			1: linksTo(2, 3),
-			2: linksTo(4),
-			3: linksTo(4),
-			4: linksTo(5),
-			5: nil,
-
-			6:  linksTo(7, 8, 14),
-			7:  linksTo(8, 11, 12, 14),
-			8:  linksTo(14),
-			9:  linksTo(11),
-			10: linksTo(11),
-			11: linksTo(12),
-			12: linksTo(18),
-			13: linksTo(14, 15),
-			14: linksTo(15, 17),
-			15: linksTo(16, 17),
-			16: nil,
-			17: linksTo(18, 19, 20),
-			18: linksTo(19, 20),
-			19: linksTo(20),
-			20: nil,
-		},
+	{
+		g: batageljZaversnikGraph,
 		edge: func(e graph.Edge) bool {
 			// Do not traverse an edge between 3 and 5.
 			return (e.Head().ID() != 4 || e.Tail().ID() != 5) && (e.Head().ID() != 5 || e.Tail().ID() != 4)
@@ -518,7 +350,7 @@ func TestWalkAll(t *testing.T) {
 					sort.Ints(ids)
 					got[j] = ids
 				}
-				sort.Sort(bySliceValues(got))
+				sort.Sort(internal.BySliceValues(got))
 				if !reflect.DeepEqual(got, test.want) {
 					t.Errorf("unexpected connected components for test %d using %T:\ngot: %v\nwant:%v", i, w, got, test.want)
 				}
@@ -540,24 +372,3 @@ func linksTo(i ...int) set {
 	}
 	return s
 }
-
-type bySliceValues [][]int
-
-func (c bySliceValues) Len() int { return len(c) }
-func (c bySliceValues) Less(i, j int) bool {
-	a, b := c[i], c[j]
-	l := len(a)
-	if len(b) < l {
-		l = len(b)
-	}
-	for k, v := range a[:l] {
-		if v < b[k] {
-			return true
-		}
-		if v > b[k] {
-			return false
-		}
-	}
-	return len(a) < len(b)
-}
-func (c bySliceValues) Swap(i, j int) { c[i], c[j] = c[j], c[i] }

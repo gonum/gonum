@@ -5,14 +5,17 @@
 // Package traverse provides basic graph traversal primitives.
 package traverse
 
-import "github.com/gonum/graph"
+import (
+	"github.com/gonum/graph"
+	"github.com/gonum/graph/internal"
+)
 
 // BreadthFirst implements stateful breadth-first graph traversal.
 type BreadthFirst struct {
 	EdgeFilter func(graph.Edge) bool
 	Visit      func(u, v graph.Node)
 	queue      nodeQueue
-	visited    intSet
+	visited    internal.IntSet
 }
 
 // Walk performs a breadth-first traversal of the graph g starting from the given node,
@@ -30,10 +33,10 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 	}
 
 	if b.visited == nil {
-		b.visited = make(intSet)
+		b.visited = make(internal.IntSet)
 	}
 	b.queue.enqueue(from)
-	b.visited.add(from.ID())
+	b.visited.Add(from.ID())
 
 	var (
 		depth     int
@@ -49,13 +52,13 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 			if b.EdgeFilter != nil && !b.EdgeFilter(g.EdgeBetween(t, n)) {
 				continue
 			}
-			if b.visited.has(n.ID()) {
+			if b.visited.Has(n.ID()) {
 				continue
 			}
 			if b.Visit != nil {
 				b.Visit(t, n)
 			}
-			b.visited.add(n.ID())
+			b.visited.Add(n.ID())
 			children++
 			b.queue.enqueue(n)
 		}
@@ -116,7 +119,7 @@ type DepthFirst struct {
 	EdgeFilter func(graph.Edge) bool
 	Visit      func(u, v graph.Node)
 	stack      nodeStack
-	visited    intSet
+	visited    internal.IntSet
 }
 
 // Walk performs a depth-first traversal of the graph g starting from the given node,
@@ -134,10 +137,10 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 	}
 
 	if d.visited == nil {
-		d.visited = make(intSet)
+		d.visited = make(internal.IntSet)
 	}
 	d.stack.push(from)
-	d.visited.add(from.ID())
+	d.visited.Add(from.ID())
 
 	for d.stack.len() > 0 {
 		t := d.stack.pop()
@@ -148,13 +151,13 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 			if d.EdgeFilter != nil && !d.EdgeFilter(g.EdgeBetween(t, n)) {
 				continue
 			}
-			if d.visited.has(n.ID()) {
+			if d.visited.Has(n.ID()) {
 				continue
 			}
 			if d.Visit != nil {
 				d.Visit(t, n)
 			}
-			d.visited.add(n.ID())
+			d.visited.Add(n.ID())
 			d.stack.push(n)
 		}
 	}
@@ -247,31 +250,4 @@ func (q *nodeQueue) dequeue() graph.Node {
 	}
 
 	return n
-}
-
-// A set is a set of integer identifiers.
-type intSet map[int]struct{}
-
-// The simple accessor methods for Set are provided to allow ease of
-// implementation change should the need arise.
-
-// add inserts an element into the set.
-func (s intSet) add(e int) {
-	s[e] = struct{}{}
-}
-
-// has reports the existence of the element in the set.
-func (s intSet) has(e int) bool {
-	_, ok := s[e]
-	return ok
-}
-
-// remove deletes the specified element from the set.
-func (s intSet) remove(e int) {
-	delete(s, e)
-}
-
-// count reports the number of elements stored in the set.
-func (s intSet) count() int {
-	return len(s)
 }

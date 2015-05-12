@@ -10,33 +10,6 @@ import (
 	"github.com/gonum/graph"
 )
 
-// A set is a set of integer identifiers.
-type intSet map[int]struct{}
-
-// The simple accessor methods for Set are provided to allow ease of
-// implementation change should the need arise.
-
-// add inserts an element into the set.
-func (s intSet) add(e int) {
-	s[e] = struct{}{}
-}
-
-// has reports the existence of the element in the set.
-func (s intSet) has(e int) bool {
-	_, ok := s[e]
-	return ok
-}
-
-// remove deletes the specified element from the set.
-func (s intSet) remove(e int) {
-	delete(s, e)
-}
-
-// count reports the number of elements stored in the set.
-func (s intSet) count() int {
-	return len(s)
-}
-
 // same determines whether two sets are backed by the same store. In the
 // current implementation using hash maps it makes use of the fact that
 // hash maps (at least in the gc implementation) are passed as a pointer

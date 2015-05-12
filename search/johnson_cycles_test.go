@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/search"
 )
 
@@ -77,8 +78,8 @@ var cyclesInTests = []struct {
 			4: linksTo(3),
 		},
 		want: [][]int{
-			{3, 4, 3},
 			{0, 1, 2, 0},
+			{3, 4, 3},
 		},
 	},
 }
@@ -112,7 +113,7 @@ func TestCyclesIn(t *testing.T) {
 			}
 			got[j] = ids
 		}
-		sort.Sort(byComponentLengthOrStart(got))
+		sort.Sort(internal.BySliceValues(got))
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected johnson result for %d:\n\tgot:%#v\n\twant:%#v", i, got, test.want)
 		}

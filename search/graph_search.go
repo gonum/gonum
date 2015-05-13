@@ -290,11 +290,11 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 	successors := sf.successors
 
 	closedSet := make(internal.IntSet)
-	openSet := &nodeStack{start}
 	predecessor := make(map[int]graph.Node)
 
-	for openSet.len() != 0 {
-		curr := openSet.pop()
+	openSet := internal.NodeStack{start}
+	for openSet.Len() != 0 {
+		curr := openSet.Pop()
 
 		if closedSet.Has(curr.ID()) {
 			continue
@@ -312,7 +312,7 @@ func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
 			}
 
 			predecessor[neighbor.ID()] = curr
-			openSet.push(neighbor)
+			openSet.Push(neighbor)
 		}
 	}
 

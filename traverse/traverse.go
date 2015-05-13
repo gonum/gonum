@@ -14,7 +14,7 @@ import (
 type BreadthFirst struct {
 	EdgeFilter func(graph.Edge) bool
 	Visit      func(u, v graph.Node)
-	queue      nodeQueue
+	queue      internal.NodeQueue
 	visited    internal.IntSet
 }
 
@@ -35,7 +35,7 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 	if b.visited == nil {
 		b.visited = make(internal.IntSet)
 	}
-	b.queue.enqueue(from)
+	b.queue.Enqueue(from)
 	b.visited.Add(from.ID())
 
 	var (
@@ -43,8 +43,8 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 		children  int
 		untilNext = 1
 	)
-	for b.queue.len() > 0 {
-		t := b.queue.dequeue()
+	for b.queue.Len() > 0 {
+		t := b.queue.Dequeue()
 		if until != nil && until(t, depth) {
 			return t
 		}
@@ -60,7 +60,7 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 			}
 			b.visited.Add(n.ID())
 			children++
-			b.queue.enqueue(n)
+			b.queue.Enqueue(n)
 		}
 		if untilNext--; untilNext == 0 {
 			depth++
@@ -109,8 +109,7 @@ func (b *BreadthFirst) Visited(n graph.Node) bool {
 
 // Reset resets the state of the traverser for reuse.
 func (b *BreadthFirst) Reset() {
-	b.queue.head = 0
-	b.queue.data = b.queue.data[:0]
+	b.queue.Reset()
 	b.visited = nil
 }
 
@@ -118,7 +117,7 @@ func (b *BreadthFirst) Reset() {
 type DepthFirst struct {
 	EdgeFilter func(graph.Edge) bool
 	Visit      func(u, v graph.Node)
-	stack      nodeStack
+	stack      internal.NodeStack
 	visited    internal.IntSet
 }
 
@@ -139,11 +138,11 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 	if d.visited == nil {
 		d.visited = make(internal.IntSet)
 	}
-	d.stack.push(from)
+	d.stack.Push(from)
 	d.visited.Add(from.ID())
 
-	for d.stack.len() > 0 {
-		t := d.stack.pop()
+	for d.stack.Len() > 0 {
+		t := d.stack.Pop()
 		if until != nil && until(t) {
 			return t
 		}
@@ -158,7 +157,7 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 				d.Visit(t, n)
 			}
 			d.visited.Add(n.ID())
-			d.stack.push(n)
+			d.stack.Push(n)
 		}
 	}
 
@@ -204,50 +203,4 @@ func (d *DepthFirst) Visited(n graph.Node) bool {
 func (d *DepthFirst) Reset() {
 	d.stack = d.stack[:0]
 	d.visited = nil
-}
-
-// nodeStack implements a LIFO stack.
-type nodeStack []graph.Node
-
-func (s *nodeStack) len() int { return len(*s) }
-func (s *nodeStack) pop() graph.Node {
-	v := *s
-	v, n := v[:len(v)-1], v[len(v)-1]
-	*s = v
-	return n
-}
-func (s *nodeStack) push(n graph.Node) { *s = append(*s, n) }
-
-// nodeQueue implements a FIFO queue.
-type nodeQueue struct {
-	head int
-	data []graph.Node
-}
-
-func (q *nodeQueue) len() int { return len(q.data) - q.head }
-func (q *nodeQueue) enqueue(n graph.Node) {
-	if len(q.data) == cap(q.data) && q.head > 0 {
-		l := q.len()
-		copy(q.data, q.data[q.head:])
-		q.head = 0
-		q.data = append(q.data[:l], n)
-	} else {
-		q.data = append(q.data, n)
-	}
-}
-func (q *nodeQueue) dequeue() graph.Node {
-	if q.len() == 0 {
-		panic("queue: empty queue")
-	}
-
-	var n graph.Node
-	n, q.data[q.head] = q.data[q.head], nil
-	q.head++
-
-	if q.len() == 0 {
-		q.head = 0
-		q.data = q.data[:0]
-	}
-
-	return n
 }

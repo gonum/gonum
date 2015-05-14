@@ -57,7 +57,20 @@ func (b *Bisection) Init(loc LinesearchLocation, step float64, _ *FunctionInfo) 
 }
 
 func (b *Bisection) Finished(loc LinesearchLocation) bool {
-	return StrongWolfeConditionsMet(loc.F, loc.Derivative, b.initF, b.initGrad, b.currStep, 0, b.GradConst)
+	// Don't finish the linesearch until a minimum is found that is better than
+	// the best point found so far. We want to end up in the lowest basin of
+	// attraction
+	minF := b.initF
+	if b.maxF < b.initF {
+		minF = b.maxF
+	}
+	if b.minF < minF {
+		minF = b.minF
+	}
+	if StrongWolfeConditionsMet(loc.F, loc.Derivative, minF, b.initGrad, b.currStep, 0, b.GradConst) {
+		return true
+	}
+	return false
 }
 
 func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, error) {
@@ -91,26 +104,30 @@ func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, er
 			return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncEvaluation|GradEvaluation)
 		}
 	}
-	// We have already bounded the minimum, so we're just working to find one
-	// close enough to the minimum to meet the strong wolfe conditions
-	if g < 0 {
-		if f <= b.minF {
+
+	// Already bounded the minimum, but wolfe conditions not met. Need to step to
+	// find minimum.
+	if f <= b.minF && f <= b.maxF {
+		if g < 0 {
 			b.minStep = b.currStep
 			b.minF = f
 			b.minGrad = g
 		} else {
-			// Negative gradient, but increase in function value, so must have
-			// skipped over a local minimum. Set this as the new maximum location
 			b.maxStep = b.currStep
 			b.maxF = f
 			b.maxGrad = g
 		}
 	} else {
-		// Gradient is positive, so minimum must be between the max point and
-		// the minimum point
-		b.maxStep = b.currStep
-		b.maxF = f
-		b.maxGrad = g
+		// We found a higher point. Want to push toward the minimal bound
+		if b.minF <= b.maxF {
+			b.maxStep = b.currStep
+			b.maxF = f
+			b.maxGrad = g
+		} else {
+			b.minStep = b.currStep
+			b.minF = f
+			b.minGrad = g
+		}
 	}
 	return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncEvaluation|GradEvaluation)
 }

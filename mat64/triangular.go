@@ -122,3 +122,56 @@ func getBlasTriangular(t Triangular) blas64.Triangular {
 	}
 	return ta
 }
+
+// copySymIntoTriangle copies a symmetric matrix into a TriDense
+func copySymIntoTriangle(t *TriDense, s Symmetric) {
+	n, upper := t.Triangle()
+	ns := s.Symmetric()
+	if n != ns {
+		panic("mat64: triangle size mismatch")
+	}
+	ts := t.mat.Stride
+	if rs, ok := s.(RawSymmetricer); ok {
+		sd := rs.RawSymmetric()
+		ss := sd.Stride
+		if upper {
+			if sd.Uplo == blas.Upper {
+				for i := 0; i < n; i++ {
+					copy(t.mat.Data[i*ts+i:i*ts+n], sd.Data[i*ss+i:i*ss+n])
+				}
+				return
+			}
+			for i := 0; i < n; i++ {
+				for j := i; j < n; j++ {
+					t.mat.Data[i*ts+j] = sd.Data[j*ss+i]
+				}
+				return
+			}
+		}
+		if sd.Uplo == blas.Upper {
+			for i := 0; i < n; i++ {
+				for j := 0; j <= i; j++ {
+					t.mat.Data[i*ts+j] = sd.Data[j*ss+i]
+				}
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			copy(t.mat.Data[i*ts:i*ts+i+1], sd.Data[i*ss:i*ss+i+1])
+		}
+		return
+	}
+	if upper {
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				t.mat.Data[i*ts+j] = s.At(i, j)
+			}
+		}
+		return
+	}
+	for i := 0; i < n; i++ {
+		for j := 0; j <= i; j++ {
+			t.mat.Data[i*ts+j] = s.At(i, j)
+		}
+	}
+}

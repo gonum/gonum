@@ -1026,6 +1026,56 @@ func TestRound(t *testing.T) {
 	}
 }
 
+func TestRoundEven(t *testing.T) {
+	for _, test := range []struct {
+		x    float64
+		prec int
+		want float64
+	}{
+		{x: 0, prec: 1, want: 0},
+		{x: math.Inf(1), prec: 1, want: math.Inf(1)},
+		{x: math.NaN(), prec: 1, want: math.NaN()},
+		{x: func() float64 { var f float64; return -f }(), prec: 1, want: 0},
+		{x: math.MaxFloat64 / 2, prec: 1, want: math.MaxFloat64 / 2},
+		{x: 1 << 64, prec: 1, want: 1 << 64},
+		{x: 454.4445, prec: 3, want: 454.444},
+		{x: 454.44445, prec: 4, want: 454.4444},
+		{x: 0.42499, prec: 4, want: 0.425},
+		{x: 0.42599, prec: 4, want: 0.426},
+		{x: 0.424999999999993, prec: 2, want: 0.42},
+		{x: 0.425, prec: 2, want: 0.42},
+		{x: 0.425000000000001, prec: 2, want: 0.43},
+		{x: 123.4244999999999, prec: 3, want: 123.424},
+		{x: 123.4245, prec: 3, want: 123.424},
+		{x: 123.4245000000001, prec: 3, want: 123.425},
+
+		{x: 454.45, prec: 0, want: 454},
+		{x: 454.45, prec: 1, want: 454.4},
+		{x: 454.45, prec: 2, want: 454.45},
+		{x: 454.45, prec: 3, want: 454.45},
+		{x: 454.445, prec: 0, want: 454},
+		{x: 454.445, prec: 1, want: 454.4},
+		{x: 454.445, prec: 2, want: 454.44},
+		{x: 454.445, prec: 3, want: 454.445},
+		{x: 454.445, prec: 4, want: 454.445},
+
+		// Negative precision.
+		{x: 454.45, prec: -1, want: 450},
+		{x: 454.45, prec: -2, want: 500},
+	} {
+		for _, sign := range []float64{1, -1} {
+			got := RoundEven(sign*test.x, test.prec)
+			want := sign * test.want
+			if want == 0 {
+				want = 0
+			}
+			if (got != want || math.Signbit(got) != math.Signbit(want)) && !(math.IsNaN(got) && math.IsNaN(want)) {
+				t.Errorf("unexpected result for RoundEven(%g, %d): got: %g, want: %g", test.x, test.prec, got, want)
+			}
+		}
+	}
+}
+
 func TestSame(t *testing.T) {
 	s1 := []float64{1, 2, 3, 4}
 	s2 := []float64{1, 2, 3, 4}

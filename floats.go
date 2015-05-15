@@ -627,6 +627,39 @@ func Round(x float64, prec int) float64 {
 	return x / pow
 }
 
+// RoundEven returns the half even rounded value of x with prec precision.
+//
+// Special cases are:
+// 	RoundEven(±0) = +0
+// 	RoundEven(±Inf) = ±Inf
+// 	RoundEven(NaN) = NaN
+func RoundEven(x float64, prec int) float64 {
+	if x == math.Trunc(x) {
+		if x == 0 {
+			// Make sure zero is returned
+			// without the negative bit set.
+			return 0
+		}
+		return x
+	}
+	pow := math.Pow(10, float64(prec))
+	intermed := x * pow
+	if math.IsInf(intermed, 0) {
+		return x
+	}
+	if int(intermed)&1 == 0 && intermed > 0 {
+		x = math.Ceil(intermed - 0.5)
+	} else {
+		x = math.Floor(intermed + 0.5)
+	}
+
+	if x == 0 {
+		return 0
+	}
+
+	return x / pow
+}
+
 // Same returns true if the input slices have the same length and the all elements
 // have the same value with NaN treated as the same.
 func Same(s, t []float64) bool {

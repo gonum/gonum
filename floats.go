@@ -601,15 +601,16 @@ func Prod(s []float64) float64 {
 // 	Round(±Inf) = ±Inf
 // 	Round(NaN) = NaN
 func Round(x float64, prec int) float64 {
-	if x == math.Trunc(x) {
-		if x == 0 {
-			// Make sure zero is returned
-			// without the negative bit set.
-			return 0
-		}
+	if x == 0 {
+		// Make sure zero is returned
+		// without the negative bit set.
+		return 0
+	}
+	// Fast path for positive precision on integers.
+	if prec >= 0 && x == math.Trunc(x) {
 		return x
 	}
-	pow := math.Pow(10, float64(prec))
+	pow := math.Pow10(prec)
 	intermed := x * pow
 	if math.IsInf(intermed, 0) {
 		return x
@@ -634,23 +635,34 @@ func Round(x float64, prec int) float64 {
 // 	RoundEven(±Inf) = ±Inf
 // 	RoundEven(NaN) = NaN
 func RoundEven(x float64, prec int) float64 {
-	if x == math.Trunc(x) {
-		if x == 0 {
-			// Make sure zero is returned
-			// without the negative bit set.
-			return 0
-		}
+	if x == 0 {
+		// Make sure zero is returned
+		// without the negative bit set.
+		return 0
+	}
+	// Fast path for positive precision on integers.
+	if prec >= 0 && x == math.Trunc(x) {
 		return x
 	}
-	pow := math.Pow(10, float64(prec))
+	pow := math.Pow10(prec)
 	intermed := x * pow
 	if math.IsInf(intermed, 0) {
 		return x
 	}
-	if int(intermed)&1 == 0 && intermed > 0 {
-		x = math.Ceil(intermed - 0.5)
+	if isHalfway(intermed) {
+		correction, _ := math.Modf(math.Mod(intermed, 2))
+		intermed += correction
+		if intermed > 0 {
+			x = math.Floor(intermed)
+		} else {
+			x = math.Ceil(intermed)
+		}
 	} else {
-		x = math.Floor(intermed + 0.5)
+		if x < 0 {
+			x = math.Ceil(intermed - 0.5)
+		} else {
+			x = math.Floor(intermed + 0.5)
+		}
 	}
 
 	if x == 0 {
@@ -658,6 +670,12 @@ func RoundEven(x float64, prec int) float64 {
 	}
 
 	return x / pow
+}
+
+func isHalfway(x float64) bool {
+	_, frac := math.Modf(x)
+	frac = math.Abs(frac)
+	return frac == 0.5 || (math.Nextafter(frac, math.Inf(-1)) < 0.5 && math.Nextafter(frac, math.Inf(1)) > 0.5)
 }
 
 // Same returns true if the input slices have the same length and the all elements

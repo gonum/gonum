@@ -966,11 +966,17 @@ func TestRound(t *testing.T) {
 		// Negative precision.
 		{x: 454.45, prec: -1, want: 450},
 		{x: 454.45, prec: -2, want: 500},
+		{x: 500, prec: -3, want: 1000},
+		{x: 500, prec: -4, want: 0},
 	} {
 		for _, sign := range []float64{1, -1} {
 			got := Round(sign*test.x, test.prec)
-			if got != sign*test.want || math.Signbit(got) != math.Signbit(sign*test.want) {
-				t.Errorf("unexpected result for Round(%g, %d): got: %g, want: %g", test.x, test.prec, got, sign*test.want)
+			want := sign * test.want
+			if want == 0 {
+				want = 0
+			}
+			if got != want || math.Signbit(got) != math.Signbit(want) {
+				t.Errorf("unexpected result for Round(%g, %d): got: %g, want: %g", test.x, test.prec, got, test.want)
 			}
 		}
 	}
@@ -1058,10 +1064,23 @@ func TestRoundEven(t *testing.T) {
 		{x: 454.445, prec: 2, want: 454.44},
 		{x: 454.445, prec: 3, want: 454.445},
 		{x: 454.445, prec: 4, want: 454.445},
+		{x: 454.55, prec: 0, want: 455},
+		{x: 454.55, prec: 1, want: 454.6},
+		{x: 454.55, prec: 2, want: 454.55},
+		{x: 454.55, prec: 3, want: 454.55},
+		{x: 454.455, prec: 0, want: 454},
+		{x: 454.455, prec: 1, want: 454.5},
+		{x: 454.455, prec: 2, want: 454.46},
+		{x: 454.455, prec: 3, want: 454.455},
+		{x: 454.455, prec: 4, want: 454.455},
 
 		// Negative precision.
 		{x: 454.45, prec: -1, want: 450},
 		{x: 454.45, prec: -2, want: 500},
+		{x: 500, prec: -3, want: 0},
+		{x: 500, prec: -4, want: 0},
+		{x: 1500, prec: -3, want: 2000},
+		{x: 1500, prec: -4, want: 0},
 	} {
 		for _, sign := range []float64{1, -1} {
 			got := RoundEven(sign*test.x, test.prec)
@@ -1070,7 +1089,7 @@ func TestRoundEven(t *testing.T) {
 				want = 0
 			}
 			if (got != want || math.Signbit(got) != math.Signbit(want)) && !(math.IsNaN(got) && math.IsNaN(want)) {
-				t.Errorf("unexpected result for RoundEven(%g, %d): got: %g, want: %g", test.x, test.prec, got, want)
+				t.Errorf("unexpected result for RoundEven(%g, %d): got: %g, want: %g", sign*test.x, test.prec, got, want)
 			}
 		}
 	}

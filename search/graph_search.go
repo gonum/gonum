@@ -829,7 +829,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Graph, r []graph.Node, p, x S
 		}
 		var sr []graph.Node
 		if !found {
-			sr = append(r, v)
+			sr = append(r[:len(r):len(r)], v)
 		}
 
 		bk.maximalCliquePivot(g, sr, make(Set).intersect(p, nv), make(Set).intersect(x, nv))

@@ -241,7 +241,6 @@ func DefaultSettings() *Settings {
 	return &Settings{
 		GradientThreshold: defaultGradientAbsTol,
 		FunctionThreshold: math.Inf(-1),
-		Recorder:          NewPrinter(),
 		FunctionConverge: &FunctionConverge{
 			Absolute:   1e-10,
 			Iterations: 20,

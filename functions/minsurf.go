@@ -47,18 +47,41 @@ func NewMinimalSurface(nx, ny int) *MinimalSurface {
 
 // Func returns the area of the surface represented by the vector x.
 func (ms *MinimalSurface) Func(x []float64) (area float64) {
-	return ms.FuncGrad(x, nil)
-}
-
-// FuncGrad returns the area of the surface represented by the vector x and
-// evaluates its gradient.
-func (ms *MinimalSurface) FuncGrad(x, grad []float64) (area float64) {
 	nx, ny := ms.Dims()
 	if len(x) != (nx-2)*(ny-2) {
-		panic("problem size mismatch")
+		panic("functions: problem size mismatch")
+	}
+
+	hx, hy := ms.Steps()
+	for j := 0; j < ny-1; j++ {
+		for i := 0; i < nx-1; i++ {
+			vLL := ms.at(i, j, x)
+			vLR := ms.at(i+1, j, x)
+			vUL := ms.at(i, j+1, x)
+			vUR := ms.at(i+1, j+1, x)
+
+			dvLdx := (vLR - vLL) / hx
+			dvLdy := (vUL - vLL) / hy
+			dvUdx := (vUR - vUL) / hx
+			dvUdy := (vUR - vLR) / hy
+
+			fL := math.Sqrt(1 + dvLdx*dvLdx + dvLdy*dvLdy)
+			fU := math.Sqrt(1 + dvUdx*dvUdx + dvUdy*dvUdy)
+			area += fL + fU
+		}
+	}
+	area *= 0.5 * hx * hy
+	return area
+}
+
+// Grad evaluates the area gradient of the surface represented by the vector.
+func (ms *MinimalSurface) Grad(x, grad []float64) {
+	nx, ny := ms.Dims()
+	if len(x) != (nx-2)*(ny-2) {
+		panic("functions: problem size mismatch")
 	}
 	if grad != nil && len(x) != len(grad) {
-		panic("unexpected size mismatch")
+		panic("functions: unexpected size mismatch")
 	}
 
 	for i := range grad {
@@ -79,7 +102,6 @@ func (ms *MinimalSurface) FuncGrad(x, grad []float64) (area float64) {
 
 			fL := math.Sqrt(1 + dvLdx*dvLdx + dvLdy*dvLdy)
 			fU := math.Sqrt(1 + dvUdx*dvUdx + dvUdy*dvUdy)
-			area += fL + fU
 
 			if grad != nil {
 				if i > 0 {
@@ -103,11 +125,9 @@ func (ms *MinimalSurface) FuncGrad(x, grad []float64) (area float64) {
 
 	}
 	cellSize := 0.5 * hx * hy
-	area *= cellSize
 	for i := range grad {
 		grad[i] *= cellSize
 	}
-	return area
 }
 
 // InitX returns a starting location for the minimization problem. Length of

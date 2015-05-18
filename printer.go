@@ -49,7 +49,7 @@ func NewPrinter() *Printer {
 	}
 }
 
-func (p *Printer) Init(_ *FunctionInfo) error {
+func (p *Printer) Init() error {
 	p.lastHeading = p.HeadingInterval              // So the headings are printed the first time.
 	p.lastValue = time.Now().Add(-p.ValueInterval) // So the values are printed the first time.
 	return nil

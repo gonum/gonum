@@ -137,11 +137,12 @@ loop: // These are likely to be rare, so just loop over collisions.
 
 // Weight returns the weight of the minimum path between u and v.
 func (p ShortestPaths) Weight(u, v graph.Node) float64 {
-	from, to := p.indexOf[u.ID()], p.indexOf[v.ID()]
-	if from < 0 || from >= len(p.nodes) || to < 0 || to >= len(p.nodes) {
+	from, fromOK := p.indexOf[u.ID()]
+	to, toOK := p.indexOf[v.ID()]
+	if !fromOK || !toOK {
 		return math.Inf(1)
 	}
-	return p.dist.At(p.indexOf[u.ID()], p.indexOf[v.ID()])
+	return p.dist.At(from, to)
 }
 
 // Between returns a shortest path from u to v and the weight of the path. If more than
@@ -163,7 +164,8 @@ func (p ShortestPaths) Between(u, v graph.Node) (path []graph.Node, weight float
 		from = c[rand.Intn(len(c))]
 		path = append(path, p.nodes[from])
 	}
-	return path, p.dist.At(p.indexOf[u.ID()], p.indexOf[v.ID()]), unique
+	// We need to re-access from in this case because from has been mutated.
+	return path, p.dist.At(p.indexOf[u.ID()], to), unique
 }
 
 // AllBetween returns all shortest paths from u to v and the weight of the paths.
@@ -174,7 +176,7 @@ func (p ShortestPaths) AllBetween(u, v graph.Node) (paths [][]graph.Node, weight
 		return nil, math.Inf(1)
 	}
 	paths = p.allBetween(from, to, []graph.Node{p.nodes[from]}, nil)
-	return paths, p.dist.At(p.indexOf[u.ID()], p.indexOf[v.ID()])
+	return paths, p.dist.At(from, to)
 }
 
 func (p ShortestPaths) allBetween(from, to int, path []graph.Node, paths [][]graph.Node) [][]graph.Node {

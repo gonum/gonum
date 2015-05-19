@@ -5,178 +5,262 @@
 package search_test
 
 import (
-	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/search"
 	"math"
+	"reflect"
+	"sort"
 	"testing"
+
+	"github.com/gonum/graph"
+	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/search"
 )
 
-func TestFWOneEdge(t *testing.T) {
-	dg := concrete.NewDenseGraph(2, true)
-	aPaths, sPath := search.FloydWarshall(dg, nil)
+var floydWarshallTests = []struct {
+	name  string
+	g     func() graph.Mutable
+	edges []concrete.WeightedEdge
 
-	path, cost, err := sPath(concrete.Node(0), concrete.Node(1))
-	if err != nil {
-		t.Fatal(err)
-	}
+	query  concrete.Edge
+	weight float64
+	want   [][]int
 
-	if math.Abs(cost-1) > 1e-6 {
-		t.Errorf("FW got wrong cost %f", cost)
-	}
+	none concrete.Edge
+}{
+	{
+		name: "empty directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
 
-	if len(path) != 2 || path[0].ID() != 0 && path[1].ID() != 1 {
-		t.Errorf("Wrong path in FW %v", path)
-	}
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(1)},
+		weight: math.Inf(1),
 
-	paths, cost, err := aPaths(concrete.Node(0), concrete.Node(1))
-	if err != nil {
-		t.Fatal(err)
-	}
+		none: concrete.Edge{concrete.Node(0), concrete.Node(1)},
+	},
+	{
+		name: "empty undirected",
+		g:    func() graph.Mutable { return concrete.NewGraph() },
 
-	if math.Abs(cost-1) > 1e-6 {
-		t.Errorf("FW got wrong cost %f", cost)
-	}
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(1)},
+		weight: math.Inf(1),
 
-	if len(paths) != 1 {
-		t.Errorf("Didn't get right paths in FW %v", paths)
-	}
+		none: concrete.Edge{concrete.Node(0), concrete.Node(1)},
+	},
+	{
+		name: "one edge directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+		},
 
-	path = paths[0]
-	if len(path) != 2 || path[0].ID() != 0 && path[1].ID() != 1 {
-		t.Errorf("Wrong path in FW allpaths %v", path)
-	}
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(1)},
+		weight: 1,
+		want: [][]int{
+			{0, 1},
+		},
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
+	},
+	{
+		name: "one edge undirected",
+		g:    func() graph.Mutable { return concrete.NewGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(1)},
+		weight: 1,
+		want: [][]int{
+			{0, 1},
+		},
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
+	},
+	{
+		name: "two paths directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2},
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(2)},
+		weight: 2,
+		want: [][]int{
+			{0, 1, 2},
+			{0, 2},
+		},
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(1)},
+	},
+	{
+		name: "two paths undirected",
+		g:    func() graph.Mutable { return concrete.NewGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2},
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(2)},
+		weight: 2,
+		want: [][]int{
+			{0, 1, 2},
+			{0, 2},
+		},
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(4)},
+	},
+	{
+		name: "confounding paths directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			// Add a path from 0->5 of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+			{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+			{concrete.Edge{concrete.Node(3), concrete.Node(5)}, 1},
+
+			// Add direct edge to goal of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(5)}, 4},
+
+			// Add edge to a node that's still optimal
+			{concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2},
+
+			// Add edge to 3 that's overpriced
+			{concrete.Edge{concrete.Node(0), concrete.Node(3)}, 4},
+
+			// Add very cheap edge to 4 which is a dead end
+			{concrete.Edge{concrete.Node(0), concrete.Node(4)}, 0.25},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(5)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 5},
+			{0, 2, 3, 5},
+			{0, 5},
+		},
+
+		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
+	},
+	{
+		name: "confounding paths undirected",
+		g:    func() graph.Mutable { return concrete.NewGraph() },
+		edges: []concrete.WeightedEdge{
+			// Add a path from 0->5 of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+			{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+			{concrete.Edge{concrete.Node(3), concrete.Node(5)}, 1},
+
+			// Add direct edge to goal of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(5)}, 4},
+
+			// Add edge to a node that's still optimal
+			{concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2},
+
+			// Add edge to 3 that's overpriced
+			{concrete.Edge{concrete.Node(0), concrete.Node(3)}, 4},
+
+			// Add very cheap edge to 4 which is a dead end
+			{concrete.Edge{concrete.Node(0), concrete.Node(4)}, 0.25},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(5)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 5},
+			{0, 2, 3, 5},
+			{0, 5},
+		},
+
+		none: concrete.Edge{concrete.Node(5), concrete.Node(6)},
+	},
 }
 
-func TestFWTwoPaths(t *testing.T) {
-	dg := concrete.NewDenseGraph(5, false)
-	// Adds two paths from 0->2 of equal length
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2, true)
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1, true)
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1, true)
-
-	aPaths, sPath := search.FloydWarshall(dg, nil)
-	path, cost, err := sPath(concrete.Node(0), concrete.Node(2))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if math.Abs(cost-2) > .00001 {
-		t.Errorf("Path has incorrect cost, %f", cost)
-	}
-
-	if len(path) == 2 && path[0].ID() == 0 && path[1].ID() == 2 {
-		t.Logf("Got correct path: %v", path)
-	} else if len(path) == 3 && path[0].ID() == 0 && path[1].ID() == 1 && path[2].ID() == 2 {
-		t.Logf("Got correct path %v", path)
-	} else {
-		t.Errorf("Got wrong path %v", path)
-	}
-
-	paths, cost, err := aPaths(concrete.Node(0), concrete.Node(2))
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if math.Abs(cost-2) > .00001 {
-		t.Errorf("All paths function gets incorrect cost, %f", cost)
-	}
-
-	if len(paths) != 2 {
-		t.Fatalf("Didn't get all shortest paths %v", paths)
-	}
-
-	for _, path := range paths {
-		if len(path) == 2 && path[0].ID() == 0 && path[1].ID() == 2 {
-			t.Logf("Got correct path for all paths: %v", path)
-		} else if len(path) == 3 && path[0].ID() == 0 && path[1].ID() == 1 && path[2].ID() == 2 {
-			t.Logf("Got correct path for all paths %v", path)
-		} else {
-			t.Errorf("Got wrong path for all paths %v", path)
+func TestFloydWarshall(t *testing.T) {
+	for _, test := range floydWarshallTests {
+		g := test.g()
+		for _, e := range test.edges {
+			switch g := g.(type) {
+			case graph.MutableDirectedGraph:
+				g.AddDirectedEdge(e, e.Cost)
+			case graph.MutableGraph:
+				g.AddUndirectedEdge(e, e.Cost)
+			default:
+				panic("floyd warshall: bad graph type")
+			}
 		}
-	}
-}
 
-// Tests with multiple right paths, but also one dead-end path
-// and one path that reaches the goal, but not optimally
-func TestFWConfoundingPath(t *testing.T) {
-	dg := concrete.NewDenseGraph(6, false)
-
-	// Add a path from 0->5 of cost 4
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1, true)
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1, true)
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1, true)
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(3), concrete.Node(5)}, 1, true)
-
-	// Add direct edge to goal of cost 4
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(5)}, 4, true)
-
-	// Add edge to a node that's still optimal
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2, true)
-
-	// Add edge to 3 that's overpriced
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(3)}, 4, true)
-
-	// Add very cheap edge to 4 which is a dead end
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(4)}, 0.25, true)
-
-	aPaths, sPath := search.FloydWarshall(dg, nil)
-
-	path, cost, err := sPath(concrete.Node(0), concrete.Node(5))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if math.Abs(cost-4) > 1e-6 {
-		t.Errorf("Incorrect cost %f", cost)
-	}
-
-	if len(path) == 5 && path[0].ID() == 0 && path[1].ID() == 1 && path[2].ID() == 2 && path[3].ID() == 3 && path[4].ID() == 5 {
-		t.Logf("Correct path found for single path %v", path)
-	} else if len(path) == 2 && path[0].ID() == 0 && path[1].ID() == 5 {
-		t.Logf("Correct path found for single path %v", path)
-	} else if len(path) == 4 && path[0].ID() == 0 && path[1].ID() == 2 && path[2].ID() == 3 && path[3].ID() == 5 {
-		t.Logf("Correct path found for single path %v", path)
-	} else {
-		t.Errorf("Wrong path found for single path %v", path)
-	}
-
-	paths, cost, err := aPaths(concrete.Node(0), concrete.Node(5))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if math.Abs(cost-4) > 1e-6 {
-		t.Errorf("Incorrect cost %f", cost)
-	}
-
-	if len(paths) != 3 {
-		t.Errorf("Wrong paths gotten for all paths %v", paths)
-	}
-
-	for _, path := range paths {
-		if len(path) == 5 && path[0].ID() == 0 && path[1].ID() == 1 && path[2].ID() == 2 && path[3].ID() == 3 && path[4].ID() == 5 {
-			t.Logf("Correct path found for multi path %v", path)
-		} else if len(path) == 2 && path[0].ID() == 0 && path[1].ID() == 5 {
-			t.Logf("Correct path found for multi path %v", path)
-		} else if len(path) == 4 && path[0].ID() == 0 && path[1].ID() == 2 && path[2].ID() == 3 && path[3].ID() == 5 {
-			t.Logf("Correct path found for multi path %v", path)
-		} else {
-			t.Errorf("Wrong path found for multi path %v", path)
+		pt, ok := search.FloydWarshall(g.(graph.Graph), nil)
+		if !ok {
+			t.Fatalf("%q: unexpected negative cycle", test.name)
 		}
-	}
 
-	path, _, err = sPath(concrete.Node(4), concrete.Node(5))
-	if err != nil {
-		t.Log("Success!", err)
-	} else {
-		t.Errorf("Path was found by FW single path where one shouldn't be %v", path)
-	}
+		// Check all random paths returned are OK.
+		for i := 0; i < 10; i++ {
+			p, weight, unique := pt.Between(test.query.Head(), test.query.Tail())
+			if weight != test.weight {
+				t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
+					test.name, weight, test.weight)
+			}
+			if weight := pt.Weight(test.query.Head(), test.query.Tail()); weight != test.weight {
+				t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
+					test.name, weight, test.weight)
+			}
+			if unique != (len(test.want) == 1) {
+				t.Errorf("%q: unexpected number of paths: got: unique=%t want: unique=%d",
+					test.name, unique, len(test.want) == 1)
+			}
 
-	paths, _, err = aPaths(concrete.Node(4), concrete.Node(5))
-	if err != nil {
-		t.Log("Success!", err)
-	} else {
-		t.Errorf("Path was found by FW multi-path where one shouldn't be %v", paths)
+			var got []int
+			for _, n := range p {
+				got = append(got, n.ID())
+			}
+			for _, sp := range test.want {
+				if reflect.DeepEqual(got, sp) {
+					ok = true
+					break
+				}
+			}
+			if !ok {
+				t.Errorf("%q: unexpected shortest path:\ngot: %v\nwant from:%v",
+					test.name, p, test.want)
+			}
+
+			np, weight, unique := pt.Between(test.none.Head(), test.none.Tail())
+			if np != nil || !math.IsInf(weight, 1) || unique != false {
+				t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f unique=%t\nwant:path=<nil> weight=+Inf unique=false",
+					test.name, np, weight, unique)
+			}
+		}
+
+		paths, weight := pt.AllBetween(test.query.Head(), test.query.Tail())
+		if weight != test.weight {
+			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
+				test.name, weight, test.weight)
+		}
+
+		var got [][]int
+		if len(paths) != 0 {
+			got = make([][]int, len(paths))
+		}
+		for i, p := range paths {
+			for _, v := range p {
+				got[i] = append(got[i], v.ID())
+			}
+		}
+		sort.Sort(internal.BySliceValues(got))
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("testing %q: unexpected shortest paths:\ngot: %v\nwant:%v",
+				test.name, got, test.want)
+		}
+
+		np, weight := pt.AllBetween(test.none.Head(), test.none.Tail())
+		if np != nil || !math.IsInf(weight, 1) {
+			t.Errorf("%q: unexpected path:\ngot: paths=%v weight=%f\nwant:path=<nil> weight=+Inf",
+				test.name, np, weight)
+		}
 	}
 }

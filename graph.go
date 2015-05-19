@@ -85,17 +85,6 @@ type DirectedEdgeListGraph interface {
 	DirectedEdgeLister
 }
 
-// A crunch graph forces a sparse graph to become a dense graph. That is, if the node IDs are
-// [1,4,9,7] it would "crunch" the ids into the contiguous block [0,1,2,3]. Order is not
-// required to be preserved between the non-cruched and crunched instances (that means in
-// the example above 0 may correspond to 4 or 7 or 9, not necessarily 1).
-//
-// All dense graphs must have the first ID as 0.
-type CrunchGraph interface {
-	Graph
-	Crunch()
-}
-
 // A Graph that implements Coster has an actual cost between adjacent nodes, also known as a
 // weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*),
 // this function will take precedence over the Uniform Cost function (all weights are 1) if "nil"

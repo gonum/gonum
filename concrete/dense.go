@@ -11,8 +11,6 @@ import (
 // A dense graph is a graph such that all IDs are in a contiguous block from 0 to
 // TheNumberOfNodes-1. It uses an adjacency matrix and should be relatively fast for both access
 // and writing.
-//
-// This graph implements the CrunchGraph, but since it's naturally dense this is superfluous.
 type DenseGraph struct {
 	adjacencyMatrix []float64
 	numNodes        int
@@ -125,10 +123,6 @@ func (g *DenseGraph) Predecessors(n graph.Node) []graph.Node {
 	}
 
 	return neighbors
-}
-
-// DenseGraph is naturally dense, we don't need to do anything
-func (g *DenseGraph) Crunch() {
 }
 
 func (g *DenseGraph) Cost(e graph.Edge) float64 {

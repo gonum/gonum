@@ -5,15 +5,15 @@
 package concrete_test
 
 import (
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
 	"math"
 	"sort"
 	"testing"
+
+	"github.com/gonum/graph"
+	"github.com/gonum/graph/concrete"
 )
 
 var _ graph.DirectedGraph = &concrete.DenseGraph{}
-var _ graph.CrunchGraph = &concrete.DenseGraph{}
 
 func TestBasicDenseImpassable(t *testing.T) {
 	dg := concrete.NewDenseGraph(5, false)
@@ -181,13 +181,5 @@ func TestDenseLists(t *testing.T) {
 	edges = dg.DirectedEdgeList()
 	if len(edges) != (15*15)-1 {
 		t.Errorf("Removing edge didn't affect edge listing properly")
-	}
-}
-
-func TestCrunch(t *testing.T) {
-	dg := concrete.NewDenseGraph(5, true)
-	dg.Crunch()
-	if len(dg.NodeList()) != 5 || len(dg.DirectedEdgeList()) != 5*5 {
-		t.Errorf("Crunch did something")
 	}
 }

@@ -170,7 +170,7 @@ func (g *Graph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 		return nil
 	}
 
-	return g.neighbors[n.ID()][neigh.ID()]
+	return g.neighbors[n.ID()][neigh.ID()].Edge
 }
 
 func (g *Graph) NodeExists(n graph.Node) bool {

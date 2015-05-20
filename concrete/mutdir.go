@@ -151,7 +151,7 @@ func (g *DirectedGraph) EdgeTo(n, succ graph.Node) graph.Edge {
 	if !ok {
 		return nil
 	}
-	return edge
+	return edge.Edge
 }
 
 func (g *DirectedGraph) Predecessors(n graph.Node) []graph.Node {

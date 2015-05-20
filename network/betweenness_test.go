@@ -10,6 +10,7 @@ import (
 
 	"github.com/gonum/floats"
 	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/search"
 )
 
 var betweennessTests = []struct {
@@ -36,17 +37,9 @@ var betweennessTests = []struct {
 
 		wantTol: 1e-1,
 		want: map[int]float64{
-			A: 0,
 			B: 32,
-			C: 0,
 			D: 18,
 			E: 48,
-			F: 0,
-			G: 0,
-			H: 0,
-			I: 0,
-			J: 0,
-			K: 0,
 		},
 	},
 	{
@@ -77,9 +70,7 @@ var betweennessTests = []struct {
 
 		wantTol: 1e-3,
 		want: map[int]float64{
-			A: 0,
 			B: 2,
-			C: 0,
 		},
 	},
 	{
@@ -93,11 +84,9 @@ var betweennessTests = []struct {
 
 		wantTol: 1e-3,
 		want: map[int]float64{
-			A: 0,
 			B: 6,
 			C: 8,
 			D: 6,
-			E: 0,
 		},
 	},
 	{
@@ -111,11 +100,7 @@ var betweennessTests = []struct {
 
 		wantTol: 1e-3,
 		want: map[int]float64{
-			A: 0,
-			B: 0,
 			C: 12,
-			D: 0,
-			E: 0,
 		},
 	},
 	{
@@ -128,13 +113,7 @@ var betweennessTests = []struct {
 		},
 
 		wantTol: 1e-3,
-		want: map[int]float64{
-			A: 0,
-			B: 0,
-			C: 0,
-			D: 0,
-			E: 0,
-		},
+		want:    map[int]float64{},
 	},
 }
 
@@ -155,8 +134,51 @@ func TestBetweenness(t *testing.T) {
 		got := Betweenness(g)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[n], test.want[n], test.wantTol, test.wantTol) {
-				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
+			wantN, gotOK := got[n]
+			gotN, wantOK := test.want[n]
+			if gotOK != wantOK {
+				t.Errorf("unexpected betweenness result for test %d, node %d", i, n)
+			}
+			if !floats.EqualWithinAbsOrRel(gotN, wantN, test.wantTol, test.wantTol) {
+				t.Errorf("unexpected betweenness result for test %d:\ngot: %v\nwant:%v",
+					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
+				break
+			}
+		}
+	}
+}
+
+func TestBetweennessWeighted(t *testing.T) {
+	for i, test := range betweennessTests {
+		g := concrete.NewGraph()
+		for u, e := range test.g {
+			if !g.NodeExists(concrete.Node(u)) {
+				g.AddNode(concrete.Node(u))
+			}
+			for v := range e {
+				if !g.NodeExists(concrete.Node(v)) {
+					g.AddNode(concrete.Node(v))
+				}
+				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 1)
+			}
+		}
+
+		p, ok := search.FloydWarshall(g, nil)
+		if !ok {
+			t.Errorf("unexpected negative cycle in test %d", i)
+			continue
+		}
+
+		got := BetweennessWeighted(g, p)
+		prec := 1 - int(math.Log10(test.wantTol))
+		for n := range test.g {
+			gotN, gotOK := got[n]
+			wantN, wantOK := test.want[n]
+			if gotOK != wantOK {
+				t.Errorf("unexpected betweenness existence for test %d, node %d", i, n)
+			}
+			if !floats.EqualWithinAbsOrRel(gotN, wantN, test.wantTol, test.wantTol) {
+				t.Errorf("unexpected betweenness result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
 			}

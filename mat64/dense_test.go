@@ -896,6 +896,45 @@ func (s *S) TestPow(c *check.C) {
 	}
 }
 
+func (s *S) TestPowN(c *check.C) {
+	for i, t := range []struct {
+		a    [][]float64
+		mod  func(*Dense)
+		want [][]float64
+	}{
+		{
+			a: [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+		},
+		{
+			a: [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			mod: func(a *Dense) {
+				d := make([]float64, 100)
+				for i := range d {
+					d[i] = math.NaN()
+				}
+				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+			},
+		},
+	} {
+		for n := 1; n <= 14; n++ {
+			var got, want Dense
+			if t.mod != nil {
+				t.mod(&got)
+			}
+			got.Pow(NewDense(flatten(t.a)), n)
+			want.iterativePow(NewDense(flatten(t.a)), n)
+			c.Check(got.Equals(&want), check.Equals, true, check.Commentf("Test %d", i))
+		}
+	}
+}
+
+func (m *Dense) iterativePow(a Matrix, n int) {
+	m.Clone(a)
+	for i := 1; i < n; i++ {
+		m.Mul(m, a)
+	}
+}
+
 func (s *S) TestLU(c *check.C) {
 	for i := 0; i < 100; i++ {
 		size := rand.Intn(100)
@@ -1353,6 +1392,38 @@ func expBench(b *testing.B, size int) {
 	var m Dense
 	for i := 0; i < b.N; i++ {
 		m.Exp(a)
+	}
+}
+
+func BenchmarkPow10_3(b *testing.B)   { powBench(b, 10, 3) }
+func BenchmarkPow100_3(b *testing.B)  { powBench(b, 100, 3) }
+func BenchmarkPow1000_3(b *testing.B) { powBench(b, 1000, 3) }
+func BenchmarkPow10_4(b *testing.B)   { powBench(b, 10, 4) }
+func BenchmarkPow100_4(b *testing.B)  { powBench(b, 100, 4) }
+func BenchmarkPow1000_4(b *testing.B) { powBench(b, 1000, 4) }
+func BenchmarkPow10_5(b *testing.B)   { powBench(b, 10, 5) }
+func BenchmarkPow100_5(b *testing.B)  { powBench(b, 100, 5) }
+func BenchmarkPow1000_5(b *testing.B) { powBench(b, 1000, 5) }
+func BenchmarkPow10_6(b *testing.B)   { powBench(b, 10, 6) }
+func BenchmarkPow100_6(b *testing.B)  { powBench(b, 100, 6) }
+func BenchmarkPow1000_6(b *testing.B) { powBench(b, 1000, 6) }
+func BenchmarkPow10_7(b *testing.B)   { powBench(b, 10, 7) }
+func BenchmarkPow100_7(b *testing.B)  { powBench(b, 100, 7) }
+func BenchmarkPow1000_7(b *testing.B) { powBench(b, 1000, 7) }
+func BenchmarkPow10_8(b *testing.B)   { powBench(b, 10, 8) }
+func BenchmarkPow100_8(b *testing.B)  { powBench(b, 100, 8) }
+func BenchmarkPow1000_8(b *testing.B) { powBench(b, 1000, 8) }
+func BenchmarkPow10_9(b *testing.B)   { powBench(b, 10, 9) }
+func BenchmarkPow100_9(b *testing.B)  { powBench(b, 100, 9) }
+func BenchmarkPow1000_9(b *testing.B) { powBench(b, 1000, 9) }
+
+func powBench(b *testing.B, size, n int) {
+	a, _ := randDense(size, 1, rand.NormFloat64)
+
+	b.ResetTimer()
+	var m Dense
+	for i := 0; i < b.N; i++ {
+		m.Pow(a, n)
 	}
 }
 

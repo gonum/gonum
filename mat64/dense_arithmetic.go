@@ -709,7 +709,9 @@ func (m *Dense) Pow(a Matrix, n int) {
 		if n&1 != 0 {
 			w.Mul(&w, &tmp)
 		}
-		tmp.Mul(&tmp, &tmp)
+		if n != 1 {
+			tmp.Mul(&tmp, &tmp)
+		}
 	}
 	m.Copy(&w)
 }

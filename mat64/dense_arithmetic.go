@@ -702,15 +702,17 @@ func (m *Dense) Pow(a Matrix, n int) {
 	}
 
 	// Perform iterative exponentiation by squaring in work space.
-	var w, tmp Dense
+	var w, s, x Dense
 	w.Clone(a)
-	tmp.Clone(a)
+	s.Clone(a)
 	for n--; n > 0; n >>= 1 {
 		if n&1 != 0 {
-			w.Mul(&w, &tmp)
+			x.Mul(&w, &s)
+			w, x = x, w
 		}
 		if n != 1 {
-			tmp.Mul(&tmp, &tmp)
+			x.Mul(&s, &s)
+			s, x = x, s
 		}
 	}
 	m.Copy(&w)

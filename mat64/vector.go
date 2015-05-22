@@ -75,42 +75,42 @@ func NewVector(n int, data []float64) *Vector {
 // extending n columns. If i is out of range, or if n is zero or extend beyond the
 // bounds of the Vector ViewVec will panic with ErrIndexOutOfRange. The returned
 // Vector retains reference to the underlying vector.
-func (m *Vector) ViewVec(i, n int) *Vector {
-	if i+n > m.n {
+func (v *Vector) ViewVec(i, n int) *Vector {
+	if i+n > v.n {
 		panic(ErrIndexOutOfRange)
 	}
 	return &Vector{
 		n: n,
 		mat: blas64.Vector{
-			Inc:  m.mat.Inc,
-			Data: m.mat.Data[i*m.mat.Inc:],
+			Inc:  v.mat.Inc,
+			Data: v.mat.Data[i*v.mat.Inc:],
 		},
 	}
 }
 
-func (m *Vector) Dims() (r, c int) { return m.n, 1 }
+func (v *Vector) Dims() (r, c int) { return v.n, 1 }
 
 // Len returns the length of the vector.
-func (m *Vector) Len() int {
-	return m.n
+func (v *Vector) Len() int {
+	return v.n
 }
 
-func (m *Vector) Reset() {
-	m.mat.Data = m.mat.Data[:0]
-	m.mat.Inc = 0
-	m.n = 0
+func (v *Vector) Reset() {
+	v.mat.Data = v.mat.Data[:0]
+	v.mat.Inc = 0
+	v.n = 0
 }
 
-func (m *Vector) RawVector() blas64.Vector {
-	return m.mat
+func (v *Vector) RawVector() blas64.Vector {
+	return v.mat
 }
 
 // CopyVec makes a copy of elements of a into the receiver. It is similar to the
 // built-in copy; it copies as much as the overlap between the two matrices and
 // returns the number of rows and columns it copied.
-func (m *Vector) CopyVec(a *Vector) (n int) {
-	n = min(m.Len(), a.Len())
-	blas64.Copy(n, a.mat, m.mat)
+func (v *Vector) CopyVec(a *Vector) (n int) {
+	n = min(v.Len(), a.Len())
+	blas64.Copy(n, a.mat, v.mat)
 	return n
 }
 
@@ -187,7 +187,7 @@ func (v *Vector) DivElemVec(a, b *Vector) {
 // MulVec computes a * b if trans == false and a^T * b if trans == true. The
 // result is stored into the receiver. MulVec panics if the number of columns in
 // a does not equal the number of rows in b.
-func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
+func (v *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 	ar, ac := a.Dims()
 	br := b.Len()
 	if trans {
@@ -201,8 +201,8 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 	}
 
 	var w Vector
-	if m != a && m != b {
-		w = *m
+	if v != a && v != b {
+		w = *v
 	}
 	if w.n == 0 {
 		if trans {
@@ -229,8 +229,6 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 	case RawSymmetricer:
 		amat := a.RawSymmetric()
 		blas64.Symv(1, amat, b.mat, 0, w.mat)
-		*m = w
-		return
 	case RawMatrixer:
 		amat := a.RawMatrix()
 		t := blas.NoTrans
@@ -238,33 +236,28 @@ func (m *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 			t = blas.Trans
 		}
 		blas64.Gemv(t, 1, amat, b.mat, 0, w.mat)
-		*m = w
-		return
 	case Vectorer:
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
-			w.mat.Data[r*m.mat.Inc] = blas64.Dot(ac,
+			w.mat.Data[r*v.mat.Inc] = blas64.Dot(ac,
 				blas64.Vector{Inc: 1, Data: a.Row(row, r)},
 				b.mat,
 			)
 		}
-		*m = w
-		return
 	default:
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
 			for i := range row {
 				row[i] = a.At(r, i)
 			}
-			var v float64
+			var f float64
 			for i, e := range row {
-				v += e * b.mat.Data[i*b.mat.Inc]
+				f += e * b.mat.Data[i*b.mat.Inc]
 			}
-			w.mat.Data[r*m.mat.Inc] = v
+			w.mat.Data[r*v.mat.Inc] = f
 		}
-		*m = w
-		return
 	}
+	*v = w
 }
 
 // EqualsApproxVec compares the vectors represented by b and the receiver, with

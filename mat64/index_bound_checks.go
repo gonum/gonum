@@ -41,33 +41,33 @@ func (m *Dense) set(r, c int, v float64) {
 }
 
 // At returns the element at row r, column c. It panics if c is not zero.
-func (m *Vector) At(r, c int) float64 {
+func (v *Vector) At(r, c int) float64 {
 	if c != 0 {
 		panic(ErrColAccess)
 	}
-	return m.at(r)
+	return v.at(r)
 }
 
-func (m *Vector) at(r int) float64 {
-	if r < 0 || r >= m.n {
+func (v *Vector) at(r int) float64 {
+	if r < 0 || r >= v.n {
 		panic(ErrRowAccess)
 	}
-	return m.mat.Data[r*m.mat.Inc]
+	return v.mat.Data[r*v.mat.Inc]
 }
 
-// Set sets the element at (r,c) to the value v. It panics if c is not zero.
-func (m *Vector) Set(r, c int, v float64) {
+// Set sets the element at (r,c) to the value val. It panics if c is not zero.
+func (v *Vector) Set(r, c int, val float64) {
 	if c != 0 {
 		panic(ErrColAccess)
 	}
-	m.set(r, v)
+	v.set(r, val)
 }
 
-func (m *Vector) set(r int, v float64) {
-	if r < 0 || r >= m.n {
+func (v *Vector) set(r int, val float64) {
+	if r < 0 || r >= v.n {
 		panic(ErrRowAccess)
 	}
-	m.mat.Data[r*m.mat.Inc] = v
+	v.mat.Data[r*v.mat.Inc] = val
 }
 
 // At returns the element at row r and column c.

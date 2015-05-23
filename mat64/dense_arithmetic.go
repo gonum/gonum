@@ -895,11 +895,17 @@ func (m *Dense) EqualsApprox(b Matrix, epsilon float64) bool {
 	return true
 }
 
-// RankOne performs a rank-one update to the matrix b and stores the result
+// RankOne performs a rank-one update to the matrix a and stores the result
 // in the receiver
 //  m = a + alpha * x * y'
-func (m *Dense) RankOne(a Matrix, alpha float64, x, y []float64) {
+func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 	ar, ac := a.Dims()
+	if x.Len() != ar {
+		panic(ErrShape)
+	}
+	if y.Len() != ac {
+		panic(ErrShape)
+	}
 
 	var w Dense
 	if m == a {
@@ -911,13 +917,6 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y []float64) {
 	if m != a {
 		w.Copy(a)
 	}
-	if len(x) != ar {
-		panic(ErrShape)
-	}
-	if len(y) != ac {
-		panic(ErrShape)
-	}
-	blas64.Ger(alpha, blas64.Vector{Inc: 1, Data: x}, blas64.Vector{Inc: 1, Data: y}, w.mat)
+	blas64.Ger(alpha, x.mat, y.mat, w.mat)
 	*m = w
-	return
 }

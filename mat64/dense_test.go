@@ -1334,10 +1334,10 @@ func (s *S) TestRankOne(c *check.C) {
 		a := NewDense(flatten(test.m))
 		m := &Dense{}
 		// Check with a new matrix
-		m.RankOne(a, test.alpha, test.x, test.y)
+		m.RankOne(a, test.alpha, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
 		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 		// Check with the same matrix
-		a.RankOne(a, test.alpha, test.x, test.y)
+		a.RankOne(a, test.alpha, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
 		c.Check(a.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 	}
 }

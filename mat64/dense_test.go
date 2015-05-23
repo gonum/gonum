@@ -1342,6 +1342,53 @@ func (s *S) TestRankOne(c *check.C) {
 	}
 }
 
+func (s *S) TestOuter(c *check.C) {
+	for i, test := range []struct {
+		x []float64
+		y []float64
+	}{
+		{
+			x: []float64{5},
+			y: []float64{10},
+		},
+		{
+			x: []float64{5, 6, 1},
+			y: []float64{10},
+		},
+
+		{
+			x: []float64{5},
+			y: []float64{10, 15, 8},
+		},
+		{
+			x: []float64{1, 5},
+			y: []float64{10, 15},
+		},
+		{
+			x: []float64{2, 3, 9},
+			y: []float64{8, 9},
+		},
+		{
+			x: []float64{2, 3},
+			y: []float64{8, 9, 9},
+		},
+	} {
+		want := &Dense{}
+		xm := NewDense(len(test.x), 1, test.x)
+		ym := NewDense(1, len(test.y), test.y)
+
+		want.Mul(xm, ym)
+
+		var m Dense
+		// Check with a new matrix
+		m.Outer(NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
+		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+		// Check with the same matrix
+		m.Outer(NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
+		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+	}
+}
+
 var (
 	wd *Dense
 )

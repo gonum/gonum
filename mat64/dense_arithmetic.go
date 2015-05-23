@@ -896,7 +896,7 @@ func (m *Dense) EqualsApprox(b Matrix, epsilon float64) bool {
 }
 
 // RankOne performs a rank-one update to the matrix a and stores the result
-// in the receiver
+// in the receiver. If a is zero, see Outer.
 //  m = a + alpha * x * y'
 func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 	ar, ac := a.Dims()
@@ -919,4 +919,40 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 	}
 	blas64.Ger(alpha, x.mat, y.mat, w.mat)
 	*m = w
+}
+
+// Outer calculates the outer product of x and y, and stores the result
+// in the receiver. In order to update to an existing matrix, see RankOne.
+//  m = x * y'
+func (m *Dense) Outer(x, y *Vector) {
+	r := x.Len()
+	c := y.Len()
+
+	// Copied from reuseAs with use replaced by useZeroed
+	// and a final zero of the matrix elements if we pass
+	// the shape checks.
+	// TODO(kortschak): Factor out into reuseZeroedAs if
+	// we find another case that needs it.
+	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
+		// Panic as a string, not a mat64.Error.
+		panic("mat64: caps not correctly set")
+	}
+	if m.isZero() {
+		m.mat = blas64.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   useZeroed(m.mat.Data, r*c),
+		}
+		m.capRows = r
+		m.capCols = c
+	} else if r != m.mat.Rows || c != m.mat.Cols {
+		panic(ErrShape)
+	} else {
+		for i := 0; i < r; i++ {
+			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
+		}
+	}
+
+	blas64.Ger(1, x.mat, y.mat, m.mat)
 }

@@ -240,8 +240,8 @@ func Johnson(g graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]gr
 			// works due to the fact that we're not returning
 			// any edges in this so the contract doesn't need
 			// to be fulfilled.
-			if e.Head().ID() != node.ID() {
-				e = concrete.Edge{e.Tail(), e.Head()}
+			if e.From().ID() != node.ID() {
+				e = concrete.Edge{e.To(), e.From()}
 			}
 
 			dummyGraph.AddDirectedEdge(e, c)
@@ -517,8 +517,8 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	for remainingNodes.Count() != 0 {
 		var edges []concrete.WeightedEdge
 		for _, edge := range edgeList {
-			if (dst.NodeExists(edge.Head()) && remainingNodes.Has(edge.Tail().ID())) ||
-				(dst.NodeExists(edge.Tail()) && remainingNodes.Has(edge.Head().ID())) {
+			if (dst.NodeExists(edge.From()) && remainingNodes.Has(edge.To().ID())) ||
+				(dst.NodeExists(edge.To()) && remainingNodes.Has(edge.From().ID())) {
 
 				edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
 			}
@@ -528,7 +528,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 		myEdge := edges[0]
 
 		dst.AddUndirectedEdge(myEdge.Edge, myEdge.Cost)
-		remainingNodes.Remove(myEdge.Edge.Head().ID())
+		remainingNodes.Remove(myEdge.Edge.From().ID())
 	}
 
 }
@@ -557,7 +557,7 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 	for _, edge := range edges {
 		// The disjoint set doesn't really care for which is head and which is tail so this
 		// should work fine without checking both ways
-		if s1, s2 := ds.find(edge.Edge.Head().ID()), ds.find(edge.Edge.Tail().ID()); s1 != s2 {
+		if s1, s2 := ds.find(edge.Edge.From().ID()), ds.find(edge.Edge.To().ID()); s1 != s2 {
 			ds.union(s1, s2)
 			dst.AddUndirectedEdge(edge.Edge, edge.Cost)
 		}

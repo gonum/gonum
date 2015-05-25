@@ -80,7 +80,7 @@ var breadthFirstTests = []struct {
 		g: wpBronKerboschGraph,
 		edge: func(e graph.Edge) bool {
 			// Do not traverse an edge between 3 and 5.
-			return (e.Head().ID() != 3 || e.Tail().ID() != 5) && (e.Head().ID() != 5 || e.Tail().ID() != 3)
+			return (e.From().ID() != 3 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 3)
 		},
 		from:  concrete.Node(1),
 		final: map[graph.Node]bool{nil: true},
@@ -142,7 +142,7 @@ func TestBreadthFirst(t *testing.T) {
 				if !g.NodeExists(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		w := traverse.BreadthFirst{
@@ -189,7 +189,7 @@ var depthFirstTests = []struct {
 		g: wpBronKerboschGraph,
 		edge: func(e graph.Edge) bool {
 			// Do not traverse an edge between 3 and 5.
-			return (e.Head().ID() != 3 || e.Tail().ID() != 5) && (e.Head().ID() != 5 || e.Tail().ID() != 3)
+			return (e.From().ID() != 3 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 3)
 		},
 		from:  concrete.Node(1),
 		final: map[graph.Node]bool{nil: true},
@@ -232,7 +232,7 @@ func TestDepthFirst(t *testing.T) {
 				if !g.NodeExists(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		w := traverse.DepthFirst{
@@ -273,7 +273,7 @@ var walkAllTests = []struct {
 		g: batageljZaversnikGraph,
 		edge: func(e graph.Edge) bool {
 			// Do not traverse an edge between 3 and 5.
-			return (e.Head().ID() != 4 || e.Tail().ID() != 5) && (e.Head().ID() != 5 || e.Tail().ID() != 4)
+			return (e.From().ID() != 4 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 4)
 		},
 		want: [][]int{
 			{0},
@@ -304,9 +304,9 @@ func TestWalkAll(t *testing.T) {
 					}
 					switch g := g.(type) {
 					case graph.MutableDirectedGraph:
-						g.AddDirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+						g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 					case graph.MutableGraph:
-						g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+						g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 					default:
 						panic("unexpected graph type")
 					}

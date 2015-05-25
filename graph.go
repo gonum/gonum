@@ -12,11 +12,11 @@ type Node interface {
 }
 
 // Allows edges to do something more interesting that just be a group of nodes. While the methods
-// are called Head and Tail, they are not considered directed unless the given interface specifies
+// are called From and To, they are not considered directed unless the given interface specifies
 // otherwise.
 type Edge interface {
-	Head() Node
-	Tail() Node
+	From() Node
+	To() Node
 }
 
 // A Graph implements the behavior of an undirected graph.
@@ -38,7 +38,7 @@ type Graph interface {
 	Neighbors(Node) []Node
 
 	// EdgeBetween returns an edge between node and neighbor such that
-	// Head is one argument and Tail is the other. If no
+	// From is one argument and To is the other. If no
 	// such edge exists, this function returns nil.
 	EdgeBetween(node, neighbor Node) Edge
 }
@@ -56,7 +56,7 @@ type DirectedGraph interface {
 	Successors(Node) []Node
 
 	// EdgeTo returns an edge between node and successor such that
-	// Head returns node and Tail returns successor, if no
+	// From returns node and To returns successor, if no
 	// such edge exists, this function returns nil.
 	EdgeTo(node, successor Node) Edge
 
@@ -160,8 +160,8 @@ type MutableGraph interface {
 
 	// Like EdgeBetween in Graph, AddUndirectedEdge adds an edge between two nodes.
 	// If one or both nodes do not exist, the graph is expected to add them. However,
-	// if the nodes already exist it should NOT replace existing nodes with e.Head() or
-	// e.Tail(). Overwriting nodes should explicitly be done with another call to AddNode()
+	// if the nodes already exist it should NOT replace existing nodes with e.From() or
+	// e.To(). Overwriting nodes should explicitly be done with another call to AddNode()
 	AddUndirectedEdge(e Edge, cost float64)
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
@@ -178,13 +178,13 @@ type MutableDirectedGraph interface {
 	CostDirectedGraph
 	Mutable
 
-	// Like EdgeTo in DirectedGraph, AddDirectedEdge adds an edge FROM head TO tail.
+	// Like EdgeTo in DirectedGraph, AddDirectedEdge adds an edge FROM From TO To.
 	// If one or both nodes do not exist, the graph is expected to add them. However,
-	// if the nodes already exist it should NOT replace existing nodes with e.Head() or
-	// e.Tail(). Overwriting nodes should explicitly be done with another call to AddNode()
+	// if the nodes already exist it should NOT replace existing nodes with e.From() or
+	// e.To(). Overwriting nodes should explicitly be done with another call to AddNode()
 	AddDirectedEdge(e Edge, cost float64)
 
-	// Removes an edge FROM e.Head TO e.Tail. If no such edge exists, this is a no-op,
+	// Removes an edge FROM e.From TO e.To. If no such edge exists, this is a no-op,
 	// not an error.
 	RemoveDirectedEdge(Edge)
 }

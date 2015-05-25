@@ -128,7 +128,7 @@ func TestBetweenness(t *testing.T) {
 				if !g.NodeExists(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		got := Betweenness(g)
@@ -159,7 +159,7 @@ func TestBetweennessWeighted(t *testing.T) {
 				if !g.NodeExists(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 1)
+				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
 

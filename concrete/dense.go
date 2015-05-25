@@ -126,16 +126,16 @@ func (g *DenseGraph) Predecessors(n graph.Node) []graph.Node {
 }
 
 func (g *DenseGraph) Cost(e graph.Edge) float64 {
-	return g.adjacencyMatrix[e.Head().ID()*g.numNodes+e.Tail().ID()]
+	return g.adjacencyMatrix[e.From().ID()*g.numNodes+e.To().ID()]
 }
 
 // Sets the cost of an edge. If the cost is +Inf, it will remove the edge,
 // if directed is true, it will only remove the edge one way. If it's false it will change the cost
 // of the edge from succ to node as well.
 func (g *DenseGraph) SetEdgeCost(e graph.Edge, cost float64, directed bool) {
-	g.adjacencyMatrix[e.Head().ID()*g.numNodes+e.Tail().ID()] = cost
+	g.adjacencyMatrix[e.From().ID()*g.numNodes+e.To().ID()] = cost
 	if !directed {
-		g.adjacencyMatrix[e.Tail().ID()*g.numNodes+e.Head().ID()] = cost
+		g.adjacencyMatrix[e.To().ID()*g.numNodes+e.From().ID()] = cost
 	}
 }
 

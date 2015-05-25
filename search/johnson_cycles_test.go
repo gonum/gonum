@@ -96,7 +96,7 @@ func TestCyclesIn(t *testing.T) {
 				if !g.NodeExists(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.AddDirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		cycles := search.CyclesIn(g)

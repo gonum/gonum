@@ -152,7 +152,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 				if !g.NodeExists(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.AddUndirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 1)
+				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
 		p, ok := search.FloydWarshall(g, nil)
@@ -344,7 +344,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 				if !g.NodeExists(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.AddDirectedEdge(concrete.Edge{H: concrete.Node(u), T: concrete.Node(v)}, 1)
+				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
 		p, ok := search.FloydWarshall(g, nil)

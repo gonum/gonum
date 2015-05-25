@@ -72,17 +72,17 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 }
 
 func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
-	head, tail := e.Head(), e.Tail()
-	if !g.NodeExists(head) {
-		g.AddNode(head)
+	from, to := e.From(), e.To()
+	if !g.NodeExists(from) {
+		g.AddNode(from)
 	}
 
-	if !g.NodeExists(tail) {
-		g.AddNode(tail)
+	if !g.NodeExists(to) {
+		g.AddNode(to)
 	}
 
-	g.successors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
-	g.predecessors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.successors[from.ID()][to.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.predecessors[to.ID()][from.ID()] = WeightedEdge{Edge: e, Cost: cost}
 }
 
 func (g *DirectedGraph) RemoveNode(n graph.Node) {
@@ -106,15 +106,15 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 }
 
 func (g *DirectedGraph) RemoveDirectedEdge(e graph.Edge) {
-	head, tail := e.Head(), e.Tail()
-	if _, ok := g.nodeMap[head.ID()]; !ok {
+	from, to := e.From(), e.To()
+	if _, ok := g.nodeMap[from.ID()]; !ok {
 		return
-	} else if _, ok := g.nodeMap[tail.ID()]; !ok {
+	} else if _, ok := g.nodeMap[to.ID()]; !ok {
 		return
 	}
 
-	delete(g.successors[head.ID()], tail.ID())
-	delete(g.predecessors[tail.ID()], head.ID())
+	delete(g.successors[from.ID()], to.ID())
+	delete(g.predecessors[to.ID()], from.ID())
 }
 
 func (g *DirectedGraph) EmptyGraph() {
@@ -235,8 +235,8 @@ func (g *DirectedGraph) NodeList() []graph.Node {
 }
 
 func (g *DirectedGraph) Cost(e graph.Edge) float64 {
-	if s, ok := g.successors[e.Head().ID()]; ok {
-		if we, ok := s[e.Tail().ID()]; ok {
+	if s, ok := g.successors[e.From().ID()]; ok {
+		if we, ok := s[e.To().ID()]; ok {
 			return we.Cost
 		}
 	}

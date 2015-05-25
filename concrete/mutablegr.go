@@ -17,14 +17,14 @@ func (n Node) ID() int {
 
 // Just a collection of two nodes
 type Edge struct {
-	H, T graph.Node
+	F, T graph.Node
 }
 
-func (e Edge) Head() graph.Node {
-	return e.H
+func (e Edge) From() graph.Node {
+	return e.F
 }
 
-func (e Edge) Tail() graph.Node {
+func (e Edge) To() graph.Node {
 	return e.T
 }
 
@@ -99,17 +99,17 @@ func (g *Graph) AddNode(n graph.Node) {
 }
 
 func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
-	head, tail := e.Head(), e.Tail()
-	if !g.NodeExists(head) {
-		g.AddNode(head)
+	from, to := e.From(), e.To()
+	if !g.NodeExists(from) {
+		g.AddNode(from)
 	}
 
-	if !g.NodeExists(tail) {
-		g.AddNode(tail)
+	if !g.NodeExists(to) {
+		g.AddNode(to)
 	}
 
-	g.neighbors[head.ID()][tail.ID()] = WeightedEdge{Edge: e, Cost: cost}
-	g.neighbors[tail.ID()][head.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.neighbors[from.ID()][to.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.neighbors[to.ID()][from.ID()] = WeightedEdge{Edge: e, Cost: cost}
 }
 
 func (g *Graph) RemoveNode(n graph.Node) {
@@ -130,15 +130,15 @@ func (g *Graph) RemoveNode(n graph.Node) {
 }
 
 func (g *Graph) RemoveUndirectedEdge(e graph.Edge) {
-	head, tail := e.Head(), e.Tail()
-	if _, ok := g.nodeMap[head.ID()]; !ok {
+	from, to := e.From(), e.To()
+	if _, ok := g.nodeMap[from.ID()]; !ok {
 		return
-	} else if _, ok := g.nodeMap[tail.ID()]; !ok {
+	} else if _, ok := g.nodeMap[to.ID()]; !ok {
 		return
 	}
 
-	delete(g.neighbors[head.ID()], tail.ID())
-	delete(g.neighbors[tail.ID()], head.ID())
+	delete(g.neighbors[from.ID()], to.ID())
+	delete(g.neighbors[to.ID()], from.ID())
 }
 
 func (g *Graph) EmptyGraph() {
@@ -191,8 +191,8 @@ func (g *Graph) NodeList() []graph.Node {
 }
 
 func (g *Graph) Cost(e graph.Edge) float64 {
-	if n, ok := g.neighbors[e.Head().ID()]; ok {
-		if we, ok := n[e.Tail().ID()]; ok {
+	if n, ok := g.neighbors[e.From().ID()]; ok {
+		if we, ok := n[e.To().ID()]; ok {
 			return we.Cost
 		}
 	}

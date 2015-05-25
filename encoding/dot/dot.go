@@ -81,9 +81,9 @@ type Subgrapher interface {
 
 // Marshal returns the DOT encoding for the graph g, applying the prefix
 // and indent to the encoding. Name is used to specify the graph name. If
-// name is empty and g does not implement Graph, the default name "G" is
-// used. If strict is true the output bytes will be prefixed with the DOT
-// "strict" keyword.
+// name is empty and g implements Graph, the returned string from DOTID
+// will be used. If strict is true the output bytes will be prefixed with
+// the DOT "strict" keyword.
 //
 // Graph serialization will work for a graph.Graph without modification,
 // however, advanced GraphViz DOT features provided by Marshal depend on
@@ -142,12 +142,12 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 	if name == "" {
 		if g, ok := g.(Graph); ok {
 			name = g.DOTID()
-		} else {
-			name = "G"
 		}
 	}
-	p.buf.WriteByte(' ')
-	p.buf.WriteString(name)
+	if name != "" {
+		p.buf.WriteByte(' ')
+		p.buf.WriteString(name)
+	}
 
 	p.openBlock(" {")
 	if a, ok := g.(Attributers); ok {

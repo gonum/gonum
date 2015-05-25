@@ -417,7 +417,7 @@ var encodeTests = []struct {
 			return g
 		}(),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 
@@ -467,7 +467,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedGraphFrom(pageRankGraph),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -502,7 +502,7 @@ var encodeTests = []struct {
 	{
 		g: directedGraphFrom(powerMethodGraph),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	0;
 	1;
@@ -523,7 +523,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedGraphFrom(powerMethodGraph),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -545,7 +545,7 @@ var encodeTests = []struct {
 		g:      undirectedGraphFrom(powerMethodGraph),
 		prefix: "# ",
 
-		want: `# graph G {
+		want: `# graph {
 # 	// Node definitions.
 # 	0;
 # 	1;
@@ -606,7 +606,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedNamedIDGraphFrom(pageRankGraph),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	A;
 	B;
@@ -641,7 +641,7 @@ var encodeTests = []struct {
 	{
 		g: directedNamedIDGraphFrom(powerMethodGraph),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	A;
 	B;
@@ -662,7 +662,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedNamedIDGraphFrom(powerMethodGraph),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	A;
 	B;
@@ -684,7 +684,7 @@ var encodeTests = []struct {
 		g:      undirectedNamedIDGraphFrom(powerMethodGraph),
 		prefix: "# ",
 
-		want: `# graph G {
+		want: `# graph {
 # 	// Node definitions.
 # 	A;
 # 	B;
@@ -707,7 +707,7 @@ var encodeTests = []struct {
 	{
 		g: directedNodeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	0;
 	1;
@@ -728,7 +728,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedNodeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -752,7 +752,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	0;
 	1;
@@ -779,7 +779,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -806,7 +806,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	A;
 	B;
@@ -836,7 +836,7 @@ var encodeTests = []struct {
 			4: {},
 		}),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	A;
 	B;
@@ -862,7 +862,7 @@ var encodeTests = []struct {
 	{
 		g: directedEdgeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	0;
 	1;
@@ -883,7 +883,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, nil),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -908,7 +908,7 @@ var encodeTests = []struct {
 			edge{from: 3, to: 4}: {{"color", "red"}},
 		}),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	0;
 	1;
@@ -936,7 +936,7 @@ var encodeTests = []struct {
 			edge{from: 3, to: 4}: {{"color", "red"}},
 		}),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -962,7 +962,7 @@ var encodeTests = []struct {
 	{
 		g: directedPortedAttrGraphFrom(powerMethodGraph, nil, nil),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	0;
 	1;
@@ -983,7 +983,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedPortedAttrGraphFrom(powerMethodGraph, nil, nil),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -1017,7 +1017,7 @@ var encodeTests = []struct {
 			},
 		),
 
-		want: `digraph G {
+		want: `digraph {
 	// Node definitions.
 	0;
 	1;
@@ -1064,7 +1064,7 @@ var encodeTests = []struct {
 			},
 		),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -1097,7 +1097,7 @@ var encodeTests = []struct {
 			edge{from: 3, to: 4}: {{"color", "red"}},
 		})},
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	0;
 	1;
@@ -1128,7 +1128,7 @@ var encodeTests = []struct {
 			node:  []Attribute{{"fontsize", "16"}, {"shape", "ellipse"}},
 		},
 
-		want: `graph G {
+		want: `graph {
 	graph [
 		rankdir="LR"
 	];
@@ -1162,7 +1162,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedStructuredGraphFrom(nil, powerMethodGraph, pageRankGraph),
 
-		want: `graph G {
+		want: `graph {
 	subgraph A {
 		// Node definitions.
 		0;
@@ -1216,7 +1216,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedStructuredGraphFrom([]edge{{from: 0, to: 9}}, powerMethodGraph, pageRankGraph),
 
-		want: `graph G {
+		want: `graph {
 	subgraph A {
 		// Node definitions.
 		0;
@@ -1278,7 +1278,7 @@ var encodeTests = []struct {
 	{
 		g: undirectedSubGraphFrom(pageRankGraph, map[int][]set{2: powerMethodGraph}),
 
-		want: `graph G {
+		want: `graph {
 	// Node definitions.
 	5;
 	6;

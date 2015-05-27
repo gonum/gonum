@@ -646,6 +646,8 @@ func (m *Dense) Exp(a Matrix) {
 	if r != c {
 		panic(ErrShape)
 	}
+
+	var w *Dense
 	switch {
 	case m.isZero():
 		m.mat = blas64.General{
@@ -659,10 +661,11 @@ func (m *Dense) Exp(a Matrix) {
 		for i := 0; i < r*r; i += r + 1 {
 			m.mat.Data[i] = 1
 		}
+		w = m
 	case r == m.mat.Rows && c == m.mat.Cols:
+		w = NewDense(r, r, nil)
 		for i := 0; i < r; i++ {
-			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
-			m.mat.Data[i*m.mat.Stride+i] = 1
+			w.mat.Data[i*w.mat.Stride+i] = 1
 		}
 	default:
 		panic(ErrShape)
@@ -673,9 +676,10 @@ func (m *Dense) Exp(a Matrix) {
 		scaling = 4
 	)
 
-	var small, power Dense
+	small := &Dense{}
 	small.Scale(math.Pow(2, -scaling), a)
-	power.Clone(&small)
+	power := &Dense{}
+	power.Clone(small)
 
 	var (
 		tmp   = NewDense(r, r, nil)
@@ -691,14 +695,19 @@ func (m *Dense) Exp(a Matrix) {
 			tmp.mat.Data[j] = v / factI
 		}
 
-		m.Add(m, tmp)
+		w.Add(w, tmp)
 		if i < terms-1 {
-			power.Mul(&power, &small)
+			tmp.Mul(power, small)
+			tmp, power = power, tmp
 		}
 	}
 
 	for i := 0; i < scaling; i++ {
-		m.Mul(m, m)
+		tmp.Mul(w, w)
+		tmp, w = w, tmp
+	}
+	if w != m {
+		m.Copy(w)
 	}
 }
 

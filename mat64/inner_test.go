@@ -6,7 +6,6 @@ package mat64
 
 import (
 	"math"
-	"math/rand"
 	"testing"
 
 	"github.com/gonum/blas/blas64"
@@ -60,58 +59,96 @@ func (s *S) TestInner(c *check.C) {
 			},
 		},
 	} {
-		x := NewDense(1, len(test.x), test.x)
-		m := NewDense(flatten(test.m))
-		mWant := NewDense(flatten(test.m))
-		y := NewDense(len(test.y), 1, test.y)
+		for _, inc := range []struct{ x, y int }{
+			{1, 1},
+			{1, 2},
+			{2, 1},
+			{2, 2},
+		} {
+			x := NewDense(1, len(test.x), test.x)
+			m := NewDense(flatten(test.m))
+			mWant := NewDense(flatten(test.m))
+			y := NewDense(len(test.y), 1, test.y)
 
-		mWant.Mul(mWant, y)
-		mWant.Mul(x, mWant)
+			mWant.Mul(mWant, y)
+			mWant.Mul(x, mWant)
 
-		rm, cm := mWant.Dims()
-		c.Check(rm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 row", i))
-		c.Check(cm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 column", i))
+			rm, cm := mWant.Dims()
+			c.Check(rm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 row", i))
+			c.Check(cm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 column", i))
 
-		want := mWant.At(0, 0)
+			want := mWant.At(0, 0)
 
-		got := Inner(test.x, m, test.y)
-		c.Check(want, check.Equals, got, check.Commentf("Test %v: want %v, got %v", i, want, got))
+			got := Inner(makeVectorInc(inc.x, test.x), m, makeVectorInc(inc.y, test.y))
+			c.Check(want, check.Equals, got, check.Commentf("Test %v: want %v, got %v", i, want, got))
+		}
 	}
 }
 
 func (s *S) TestInnerSym(c *check.C) {
-	n := 10
-	x := make([]float64, n)
-	y := make([]float64, n)
-	data := make([]float64, n*n)
-	for i := 0; i < n; i++ {
-		x[i] = float64(i)
-		y[i] = float64(i)
-		for j := i; j < n; j++ {
-			data[i*n+j] = float64(i*n + j)
-			data[j*n+i] = data[i*n+j]
+	for _, inc := range []struct{ x, y int }{
+		{1, 1},
+		{1, 2},
+		{2, 1},
+		{2, 2},
+	} {
+		n := 10
+		xData := make([]float64, n)
+		yData := make([]float64, n)
+		data := make([]float64, n*n)
+		for i := 0; i < n; i++ {
+			xData[i] = float64(i)
+			yData[i] = float64(i)
+			for j := i; j < n; j++ {
+				data[i*n+j] = float64(i*n + j)
+				data[j*n+i] = data[i*n+j]
+			}
 		}
-	}
-	m := NewDense(n, n, data)
-	ans := Inner(x, m, y)
-	sym := NewSymDense(n, data)
-	// scramble the lower half of data to ensure it is not used
-	for i := 1; i < n; i++ {
-		for j := 0; j < i; j++ {
-			data[i*n+j] = rand.Float64()
+		x := makeVectorInc(inc.x, xData)
+		y := makeVectorInc(inc.y, yData)
+		m := NewDense(n, n, data)
+		ans := Inner(x, m, y)
+		sym := NewSymDense(n, data)
+		// Poison the lower half of data to ensure it is not used.
+		for i := 1; i < n; i++ {
+			for j := 0; j < i; j++ {
+				data[i*n+j] = math.NaN()
+			}
 		}
-	}
 
-	if math.Abs(Inner(x, sym, y)-ans) > 1e-14 {
-		c.Error("inner different symmetric and dense")
+		if math.Abs(Inner(x, sym, y)-ans) > 1e-14 {
+			c.Error("inner different symmetric and dense")
+		}
 	}
 }
 
+func makeVectorInc(inc int, f []float64) *Vector {
+	v := &Vector{
+		n: len(f),
+		mat: blas64.Vector{
+			Inc:  inc,
+			Data: make([]float64, (len(f)-1)*inc+1),
+		},
+	}
+
+	// Contaminate backing data in all positions...
+	const base = 100
+	for i := range v.mat.Data {
+		v.mat.Data[i] = float64(i + base)
+	}
+
+	// then write real elements.
+	for i := range f {
+		v.mat.Data[i*inc] = f[i]
+	}
+	return v
+}
+
 func benchmarkInner(b *testing.B, m, n int) {
-	x := make([]float64, m)
-	randomSlice(x)
-	y := make([]float64, n)
-	randomSlice(y)
+	x := NewVector(m, nil)
+	randomSlice(x.mat.Data)
+	y := NewVector(n, nil)
+	randomSlice(y.mat.Data)
 	data := make([]float64, m*n)
 	randomSlice(data)
 	mat := &Dense{mat: blas64.General{Rows: m, Cols: n, Stride: n, Data: data}, capRows: m, capCols: n}

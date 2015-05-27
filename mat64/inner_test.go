@@ -70,14 +70,15 @@ func (s *S) TestInner(c *check.C) {
 			mWant := NewDense(flatten(test.m))
 			y := NewDense(len(test.y), 1, test.y)
 
-			mWant.Mul(mWant, y)
-			mWant.Mul(x, mWant)
+			var tmp, cell Dense
+			tmp.Mul(mWant, y)
+			cell.Mul(x, &tmp)
 
-			rm, cm := mWant.Dims()
+			rm, cm := cell.Dims()
 			c.Check(rm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 row", i))
 			c.Check(cm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 column", i))
 
-			want := mWant.At(0, 0)
+			want := cell.At(0, 0)
 
 			got := Inner(makeVectorInc(inc.x, test.x), m, makeVectorInc(inc.y, test.y))
 			c.Check(want, check.Equals, got, check.Commentf("Test %v: want %v, got %v", i, want, got))

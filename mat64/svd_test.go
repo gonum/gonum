@@ -194,9 +194,10 @@ func (s *S) TestSVD(c *check.C) {
 			c.Assert(svd.V, check.NotNil)
 			vt := &Dense{}
 			vt.TCopy(svd.V)
-			svd.U.Mul(svd.U, s)
-			svd.U.Mul(svd.U, vt)
-			c.Check(svd.U.EqualsApprox(t.a, 1e-12), check.Equals, true)
+			var tmp, got Dense
+			tmp.Mul(svd.U, s)
+			got.Mul(&tmp, vt)
+			c.Check(got.EqualsApprox(t.a, 1e-12), check.Equals, true)
 		}
 	}
 }

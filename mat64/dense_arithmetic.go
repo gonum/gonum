@@ -351,6 +351,7 @@ func (m *Dense) Dot(b Matrix) float64 {
 }
 
 // Mul takes the matrix product of a and b, placing the result in the receiver.
+// If a or b are also the receiver, temporary workspace memory will be allocated.
 //
 // See the Muler interface for more information.
 func (m *Dense) Mul(a, b Matrix) {
@@ -361,9 +362,12 @@ func (m *Dense) Mul(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	var w Dense
+	var w *Dense
 	if m != a && m != b {
-		w = *m
+		w = m
+	} else {
+		m.reuseAs(ar, bc)
+		w = &Dense{}
 	}
 	w.reuseAs(ar, bc)
 
@@ -371,7 +375,9 @@ func (m *Dense) Mul(a, b Matrix) {
 		if b, ok := b.(RawMatrixer); ok {
 			amat, bmat := a.RawMatrix(), b.RawMatrix()
 			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, amat, bmat, 0, w.mat)
-			*m = w
+			if w != m {
+				m.Copy(w)
+			}
 			return
 		}
 	}
@@ -389,7 +395,9 @@ func (m *Dense) Mul(a, b Matrix) {
 					)
 				}
 			}
-			*m = w
+			if w != m {
+				m.Copy(w)
+			}
 			return
 		}
 	}
@@ -407,11 +415,14 @@ func (m *Dense) Mul(a, b Matrix) {
 			w.mat.Data[r*w.mat.Stride+c] = v
 		}
 	}
-	*m = w
+	if w != m {
+		m.Copy(w)
+	}
 }
 
 // MulTrans takes the matrix product of a and b, optionally transposing each,
-// and placing the result in the receiver.
+// and placing the result in the receiver. If a or b are also the receiver,
+// temporary workspace memory will be allocated.
 //
 // See the MulTranser interface for more information.
 func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
@@ -429,9 +440,12 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 		panic(ErrShape)
 	}
 
-	var w Dense
+	var w *Dense
 	if m != a && m != b {
-		w = *m
+		w = m
+	} else {
+		m.reuseAs(ar, bc)
+		w = &Dense{}
 	}
 	w.reuseAs(ar, bc)
 
@@ -470,7 +484,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				blas64.Gemm(aOp, bOp, 1, amat, bmat, 0, w.mat)
 			}
 
-			*m = w
+			if w != m {
+				m.Copy(w)
+			}
 			return
 		}
 	}
@@ -490,7 +506,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 							)
 						}
 					}
-					*m = w
+					if w != m {
+						m.Copy(w)
+					}
 					return
 				}
 				// TODO(jonlawlor): determine if (b*a)' is more efficient
@@ -503,7 +521,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 						)
 					}
 				}
-				*m = w
+				if w != m {
+					m.Copy(w)
+				}
 				return
 			}
 			if bTrans {
@@ -516,7 +536,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 						)
 					}
 				}
-				*m = w
+				if w != m {
+					m.Copy(w)
+				}
 				return
 			}
 			for r := 0; r < ar; r++ {
@@ -528,7 +550,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 					)
 				}
 			}
-			*m = w
+			if w != m {
+				m.Copy(w)
+			}
 			return
 		}
 	}
@@ -549,7 +573,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 					dataTmp[c] = v
 				}
 			}
-			*m = w
+			if w != m {
+				m.Copy(w)
+			}
 			return
 		}
 
@@ -566,7 +592,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				dataTmp[c] = v
 			}
 		}
-		*m = w
+		if w != m {
+			m.Copy(w)
+		}
 		return
 	}
 	if bTrans {
@@ -583,7 +611,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 				dataTmp[c] = v
 			}
 		}
-		*m = w
+		if w != m {
+			m.Copy(w)
+		}
 		return
 	}
 	for r := 0; r < ar; r++ {
@@ -599,7 +629,9 @@ func (m *Dense) MulTrans(a Matrix, aTrans bool, b Matrix, bTrans bool) {
 			dataTmp[c] = v
 		}
 	}
-	*m = w
+	if w != m {
+		m.Copy(w)
+	}
 }
 
 // Exp calculates the exponential of the matrix a, e^a, placing the result

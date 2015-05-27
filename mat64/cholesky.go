@@ -6,11 +6,9 @@
 package mat64
 
 import (
-	"math"
-
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
-	"github.com/gonum/internal/asm"
+	"github.com/gonum/lapack/lapack64"
 )
 
 const badTriangle = "mat64: invalid triangle"
@@ -41,49 +39,17 @@ func (t *TriDense) Cholesky(a *SymDense, upper bool) (ok bool) {
 			panic(ErrTriangle)
 		}
 	}
-	mat := t.mat.Data
-	stride := t.mat.Stride
+	copySymIntoTriangle(t, a)
 
-	if upper {
-		for j := 0; j < n; j++ {
-			var d float64
-			for k := 0; k < j; k++ {
-				s := asm.DdotInc(
-					mat, mat,
-					uintptr(k),
-					uintptr(stride), uintptr(stride),
-					uintptr(k), uintptr(j),
-				)
-				s = (a.at(j, k) - s) / t.at(k, k)
-				t.set(k, j, s)
-				d += s * s
-			}
-			d = a.at(j, j) - d
-			if d <= 0 {
-				t.Reset()
-				return false
-			}
-			t.set(j, j, math.Sqrt(math.Max(d, 0)))
-		}
-	} else {
-		for j := 0; j < n; j++ {
-			var d float64
-			for k := 0; k < j; k++ {
-				s := asm.DdotUnitary(mat[k*stride:k*stride+k], mat[j*stride:j*stride+k])
-				s = (a.at(j, k) - s) / t.at(k, k)
-				t.set(j, k, s)
-				d += s * s
-			}
-			d = a.at(j, j) - d
-			if d <= 0 {
-				t.Reset()
-				return false
-			}
-			t.set(j, j, math.Sqrt(math.Max(d, 0)))
-		}
-	}
-
-	return true
+	// Potrf modifies the data in place
+	_, ok = lapack64.Potrf(
+		blas64.Symmetric{
+			N:      t.mat.N,
+			Stride: t.mat.Stride,
+			Data:   t.mat.Data,
+			Uplo:   t.mat.Uplo,
+		})
+	return ok
 }
 
 // SolveCholesky finds the matrix m that solves A * m = b where A = L * L^T or

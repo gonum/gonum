@@ -6,6 +6,8 @@ package mat64
 
 import (
 	"math"
+	"math/rand"
+	"testing"
 
 	"gopkg.in/check.v1"
 )
@@ -214,5 +216,36 @@ func (s *S) TestCholeskySolveVec(c *check.C) {
 		var xl Vector
 		xl.SolveCholeskyVec(&fl, t.b)
 		c.Check(xl.EqualsApproxVec(t.ans, 1e-12), check.Equals, true)
+	}
+}
+
+func BenchmarkCholeskySmall(b *testing.B) {
+	benchmarkCholesky(b, 2)
+}
+
+func BenchmarkCholeskyMedium(b *testing.B) {
+	benchmarkCholesky(b, Med)
+}
+
+func BenchmarkCholeskyLarge(b *testing.B) {
+	benchmarkCholesky(b, Lg)
+}
+
+func benchmarkCholesky(b *testing.B, n int) {
+	base := make([]float64, n*n)
+	for i := range base {
+		base[i] = rand.Float64()
+	}
+	bm := NewDense(n, n, base)
+	bm.MulTrans(bm, true, bm, false)
+	am := NewSymDense(n, bm.mat.Data)
+
+	t := NewTriDense(n, true, nil)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ok := t.Cholesky(am, true)
+		if !ok {
+			panic("not pos def")
+		}
 	}
 }

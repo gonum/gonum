@@ -145,13 +145,11 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 	for i, test := range undirectedCentralityTests {
 		g := concrete.NewGraph()
 		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
 			if !g.NodeExists(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				if !g.NodeExists(concrete.Node(v)) {
-					g.AddNode(concrete.Node(v))
-				}
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
@@ -337,13 +335,11 @@ func TestDistanceCentralityDirected(t *testing.T) {
 	for i, test := range directedCentralityTests {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
 			if !g.NodeExists(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				if !g.NodeExists(concrete.Node(v)) {
-					g.AddNode(concrete.Node(v))
-				}
 				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}

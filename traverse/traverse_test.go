@@ -135,13 +135,11 @@ func TestBreadthFirst(t *testing.T) {
 	for i, test := range breadthFirstTests {
 		g := concrete.NewGraph()
 		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
 			if !g.NodeExists(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				if !g.NodeExists(concrete.Node(v)) {
-					g.AddNode(concrete.Node(v))
-				}
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
@@ -225,13 +223,11 @@ func TestDepthFirst(t *testing.T) {
 	for i, test := range depthFirstTests {
 		g := concrete.NewGraph()
 		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
 			if !g.NodeExists(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				if !g.NodeExists(concrete.Node(v)) {
-					g.AddNode(concrete.Node(v))
-				}
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
@@ -295,13 +291,11 @@ func TestWalkAll(t *testing.T) {
 			}
 
 			for u, e := range test.g {
+				// Add nodes that are not defined by an edge.
 				if !g.NodeExists(concrete.Node(u)) {
 					g.(graph.Mutable).AddNode(concrete.Node(u))
 				}
 				for v := range e {
-					if !g.NodeExists(concrete.Node(v)) {
-						g.(graph.Mutable).AddNode(concrete.Node(v))
-					}
 					switch g := g.(type) {
 					case graph.MutableDirectedGraph:
 						g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)

@@ -140,7 +140,7 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	// y_k^T B_k^-1 y_k is a scalar, and the third term is a rank-two update
 	// where B_k^-1 y_k is one vector and s_k is the other. Compute the update
 	// values then actually perform the rank updates.
-	yBy := mat64.Inner(b.y, b.invHess, b.y)
+	yBy := mat64.Inner(b.yVec, b.invHess, b.yVec)
 	firstTermConst := (sDotY + yBy) / (sDotYSquared)
 	b.tmpVec.MulVec(b.invHess, false, b.yVec)
 

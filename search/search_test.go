@@ -147,20 +147,6 @@ func TestSmallAStar(t *testing.T) {
 	}
 }
 
-func ExampleBreadthFirstSearch() {
-	g := concrete.NewDirectedGraph()
-	var n0, n1, n2, n3 concrete.Node = 0, 1, 2, 3
-	g.AddDirectedEdge(concrete.Edge{n0, n1}, 1)
-	g.AddDirectedEdge(concrete.Edge{n0, n2}, 1)
-	g.AddDirectedEdge(concrete.Edge{n2, n3}, 1)
-	path, v := search.BreadthFirstSearch(n0, n3, g)
-	fmt.Println("path:", path)
-	fmt.Println("nodes visited:", v)
-	// Output:
-	// path: [0 2 3]
-	// nodes visited: 4
-}
-
 func newSmallGonumGraph() *concrete.Graph {
 	eds := []struct{ n1, n2, edgeCost int }{
 		{1, 2, 7},

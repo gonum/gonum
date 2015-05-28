@@ -86,15 +86,6 @@ func AStar(start, goal graph.Node, g graph.Graph, cost graph.CostFunc, heuristic
 	return nil, 0, nodesExpanded
 }
 
-// BreadthFirstSearch finds a path with a minimal number of edges from from start to goal.
-//
-// BreadthFirstSearch returns the path found and the number of nodes visited in the search.
-// The returned path is nil if no path exists.
-func BreadthFirstSearch(start, goal graph.Node, g graph.Graph) ([]graph.Node, int) {
-	path, _, visited := AStar(start, goal, g, UniformCost, NullHeuristic)
-	return path, visited
-}
-
 // Dijkstra's Algorithm is essentially a goalless Uniform Cost Search. That is, its results are
 // roughly equivalent to running A* with the Null Heuristic from a single node to every other node
 // in the graph -- though it's a fair bit faster because running A* in that way will recompute
@@ -280,43 +271,6 @@ func Johnson(g graph.Graph, cost graph.CostFunc) (nodePaths map[int]map[int][]gr
 	}
 
 	return nodePaths, nodeCosts, nil
-}
-
-// Expands the first node it sees trying to find the destination. Depth First Search is *not*
-// guaranteed to find the shortest path, however, if a path exists DFS is guaranteed to find it
-// (provided you don't find a way to implement a Graph with an infinite depth.)
-func DepthFirstSearch(start, goal graph.Node, g graph.Graph) []graph.Node {
-	sf := setupFuncs(g, nil, nil)
-	successors := sf.successors
-
-	closedSet := make(internal.IntSet)
-	predecessor := make(map[int]graph.Node)
-
-	openSet := internal.NodeStack{start}
-	for openSet.Len() != 0 {
-		curr := openSet.Pop()
-
-		if closedSet.Has(curr.ID()) {
-			continue
-		}
-
-		if curr.ID() == goal.ID() {
-			return rebuildPath(predecessor, goal)
-		}
-
-		closedSet.Add(curr.ID())
-
-		for _, neighbor := range successors(curr) {
-			if closedSet.Has(neighbor.ID()) {
-				continue
-			}
-
-			predecessor[neighbor.ID()] = curr
-			openSet.Push(neighbor)
-		}
-	}
-
-	return nil
 }
 
 // An admissible, consistent heuristic that won't speed up computation time at all.

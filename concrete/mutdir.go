@@ -5,6 +5,8 @@
 package concrete
 
 import (
+	"fmt"
+
 	"github.com/gonum/graph"
 )
 
@@ -63,6 +65,9 @@ func (g *DirectedGraph) NewNode() graph.Node {
 // Adds a node to the graph. Implementation note: if you add a node close to or at
 // the max int on your machine NewNode will become slower.
 func (g *DirectedGraph) AddNode(n graph.Node) {
+	if _, exists := g.nodeMap[n.ID()]; exists {
+		panic(fmt.Sprintf("concrete: node ID collision: %d", n.ID()))
+	}
 	g.nodeMap[n.ID()] = n
 	g.successors[n.ID()] = make(map[int]WeightedEdge)
 	g.predecessors[n.ID()] = make(map[int]WeightedEdge)

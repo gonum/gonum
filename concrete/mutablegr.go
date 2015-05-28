@@ -5,6 +5,8 @@
 package concrete
 
 import (
+	"fmt"
+
 	"github.com/gonum/graph"
 )
 
@@ -91,6 +93,9 @@ func (g *Graph) NewNode() graph.Node {
 }
 
 func (g *Graph) AddNode(n graph.Node) {
+	if _, exists := g.nodeMap[n.ID()]; exists {
+		panic(fmt.Sprintf("concrete: node ID collision: %d", n.ID()))
+	}
 	g.nodeMap[n.ID()] = n
 	g.neighbors[n.ID()] = make(map[int]WeightedEdge)
 

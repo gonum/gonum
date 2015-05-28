@@ -131,8 +131,8 @@ type Mutable interface {
 	// NewNode returns a node with a unique arbitrary ID.
 	NewNode() Node
 
-	// Adds a node to the graph. If this is called multiple times for the same ID, the newer node
-	// overwrites the old one.
+	// Adds a node to the graph. AddNode panics if
+	// the added node ID matches an existing node ID.
 	AddNode(Node)
 
 	// RemoveNode removes a node from the graph, as well as any edges

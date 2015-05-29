@@ -210,7 +210,7 @@ func TestFloydWarshall(t *testing.T) {
 					test.name, weight, test.weight)
 			}
 			if unique != (len(test.want) == 1) {
-				t.Errorf("%q: unexpected number of paths: got: unique=%t want: unique=%d",
+				t.Errorf("%q: unexpected number of paths: got: unique=%t want: unique=%t",
 					test.name, unique, len(test.want) == 1)
 			}
 
@@ -218,6 +218,7 @@ func TestFloydWarshall(t *testing.T) {
 			for _, n := range p {
 				got = append(got, n.ID())
 			}
+			ok := len(got) == 0 && len(test.want) == 0
 			for _, sp := range test.want {
 				if reflect.DeepEqual(got, sp) {
 					ok = true

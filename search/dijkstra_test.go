@@ -15,7 +15,7 @@ import (
 	"github.com/gonum/graph/search"
 )
 
-func TestFloydWarshall(t *testing.T) {
+func TestDijkstraFrom(t *testing.T) {
 	for _, test := range positiveWeightTests {
 		g := test.g()
 		for _, e := range test.edges {
@@ -25,14 +25,65 @@ func TestFloydWarshall(t *testing.T) {
 			case graph.MutableGraph:
 				g.AddUndirectedEdge(e, e.Cost)
 			default:
-				panic("floyd warshall: bad graph type")
+				panic("dijkstra: bad graph type")
 			}
 		}
 
-		pt, ok := search.FloydWarshall(g.(graph.Graph), nil)
-		if !ok {
-			t.Fatalf("%q: unexpected negative cycle", test.name)
+		pt := search.DijkstraFrom(test.query.From(), g.(graph.Graph), nil)
+
+		if pt.From().ID() != test.query.From().ID() {
+			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", pt.From().ID(), test.query.From().ID())
 		}
+
+		p, weight := pt.To(test.query.To())
+		if weight != test.weight {
+			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
+				test.name, weight, test.weight)
+		}
+		if weight := pt.WeightTo(test.query.To()); weight != test.weight {
+			t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
+				test.name, weight, test.weight)
+		}
+
+		var got []int
+		for _, n := range p {
+			got = append(got, n.ID())
+		}
+		ok := len(got) == 0 && len(test.want) == 0
+		for _, sp := range test.want {
+			if reflect.DeepEqual(got, sp) {
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			t.Errorf("%q: unexpected shortest path:\ngot: %v\nwant from:%v",
+				test.name, p, test.want)
+		}
+
+		np, weight := pt.To(test.none.To())
+		if pt.From().ID() == test.none.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
+			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f\nwant:path=<nil> weight=+Inf",
+				test.name, np, weight)
+		}
+	}
+}
+
+func TestDijkstraAllPaths(t *testing.T) {
+	for _, test := range positiveWeightTests {
+		g := test.g()
+		for _, e := range test.edges {
+			switch g := g.(type) {
+			case graph.MutableDirectedGraph:
+				g.AddDirectedEdge(e, e.Cost)
+			case graph.MutableGraph:
+				g.AddUndirectedEdge(e, e.Cost)
+			default:
+				panic("dijkstra: bad graph type")
+			}
+		}
+
+		pt := search.DijkstraAllPaths(g.(graph.Graph), nil)
 
 		// Check all random paths returned are OK.
 		for i := 0; i < 10; i++ {

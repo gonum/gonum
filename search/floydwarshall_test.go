@@ -177,6 +177,74 @@ var floydWarshallTests = []struct {
 
 		none: concrete.Edge{concrete.Node(5), concrete.Node(6)},
 	},
+	{
+		name: "confounding paths directed 2-step",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			// Add a path from 0->5 of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+			{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+			{concrete.Edge{concrete.Node(3), concrete.Node(5)}, 1},
+
+			// Add two step path to goal of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(6)}, 2},
+			{concrete.Edge{concrete.Node(6), concrete.Node(5)}, 2},
+
+			// Add edge to a node that's still optimal
+			{concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2},
+
+			// Add edge to 3 that's overpriced
+			{concrete.Edge{concrete.Node(0), concrete.Node(3)}, 4},
+
+			// Add very cheap edge to 4 which is a dead end
+			{concrete.Edge{concrete.Node(0), concrete.Node(4)}, 0.25},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(5)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 5},
+			{0, 2, 3, 5},
+			{0, 6, 5},
+		},
+
+		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
+	},
+	{
+		name: "confounding paths undirected 2-step",
+		g:    func() graph.Mutable { return concrete.NewGraph() },
+		edges: []concrete.WeightedEdge{
+			// Add a path from 0->5 of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+			{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+			{concrete.Edge{concrete.Node(3), concrete.Node(5)}, 1},
+
+			// Add two step path to goal of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(6)}, 2},
+			{concrete.Edge{concrete.Node(6), concrete.Node(5)}, 2},
+
+			// Add edge to a node that's still optimal
+			{concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2},
+
+			// Add edge to 3 that's overpriced
+			{concrete.Edge{concrete.Node(0), concrete.Node(3)}, 4},
+
+			// Add very cheap edge to 4 which is a dead end
+			{concrete.Edge{concrete.Node(0), concrete.Node(4)}, 0.25},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(5)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 5},
+			{0, 2, 3, 5},
+			{0, 6, 5},
+		},
+
+		none: concrete.Edge{concrete.Node(5), concrete.Node(7)},
+	},
 }
 
 func TestFloydWarshall(t *testing.T) {

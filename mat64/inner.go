@@ -47,7 +47,7 @@ func Inner(x *Vector, A Matrix, y *Vector) float64 {
 				} else {
 					sum += xi * asm.DdotInc(
 						bmat.Data[i*bmat.Stride+i:i*bmat.Stride+n],
-						y.mat.Data[i*y.mat.Inc:], uintptr(n),
+						y.mat.Data[i*y.mat.Inc:], uintptr(n-i),
 						1, uintptr(y.mat.Inc),
 						0, 0,
 					)
@@ -63,7 +63,7 @@ func Inner(x *Vector, A Matrix, y *Vector) float64 {
 				} else {
 					sum += yi * asm.DdotInc(
 						bmat.Data[i*bmat.Stride+i+1:i*bmat.Stride+n],
-						x.mat.Data[(i+1)*x.mat.Inc:], uintptr(n),
+						x.mat.Data[(i+1)*x.mat.Inc:], uintptr(n-i-1),
 						1, uintptr(x.mat.Inc),
 						0, 0,
 					)

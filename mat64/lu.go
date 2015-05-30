@@ -90,66 +90,6 @@ func LU(a *Dense) LUFactors {
 	return LUFactors{lu, piv, sign}
 }
 
-// LUGaussian performs an LU Decomposition for an m-by-n matrix a using Gaussian elimination.
-// L and U are found using the "daxpy"-based elimination algorithm used in LINPACK and
-// MATLAB.
-//
-// If m >= n, the LU decomposition is an m-by-n unit lower triangular matrix L,
-// an n-by-n upper triangular matrix U, and a permutation vector piv of length m
-// so that A(piv,:) = L*U.
-//
-// If m < n, then L is m-by-m and U is m-by-n.
-//
-// The LU decompostion with pivoting always exists, even if the matrix is
-// singular, so LUGaussian will never fail. The primary use of the LU decomposition
-// is in the solution of square systems of simultaneous linear equations. This
-// will fail if IsSingular() returns true.
-func LUGaussian(a *Dense) LUFactors {
-	// Initialize.
-	m, n := a.Dims()
-	lu := a
-
-	piv := make([]int, m)
-	for i := range piv {
-		piv[i] = i
-	}
-	sign := 1
-
-	// Main loop.
-	for k := 0; k < n; k++ {
-		// Find pivot.
-		p := k
-		for i := k + 1; i < m; i++ {
-			if math.Abs(lu.at(i, k)) > math.Abs(lu.at(p, k)) {
-				p = i
-			}
-		}
-
-		// Exchange if necessary.
-		if p != k {
-			for j := 0; j < n; j++ {
-				t := lu.at(p, j)
-				lu.set(p, j, lu.at(k, j))
-				lu.set(k, j, t)
-			}
-			piv[p], piv[k] = piv[k], piv[p]
-			sign = -sign
-		}
-
-		// Compute multipliers and eliminate k-th column.
-		if lu.at(k, k) != 0 {
-			for i := k + 1; i < m; i++ {
-				lu.set(i, k, lu.at(i, k)/lu.at(k, k))
-				for j := k + 1; j < n; j++ {
-					lu.set(i, j, lu.at(i, j)-lu.at(i, k)*lu.at(k, j))
-				}
-			}
-		}
-	}
-
-	return LUFactors{lu, piv, sign}
-}
-
 // IsSingular returns whether the the upper triangular factor and hence a is
 // singular.
 func (f LUFactors) IsSingular() bool {

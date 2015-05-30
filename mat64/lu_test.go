@@ -42,6 +42,26 @@ func (s *S) TestLUD(c *check.C) {
 			},
 			sign: 1,
 		},
+		{
+			a: NewDense(2, 3, []float64{
+				0, 2, 3,
+				4, 5, 6,
+			}),
+
+			l: NewDense(2, 2, []float64{
+				1, 0,
+				0, 1,
+			}),
+			u: NewDense(2, 3, []float64{
+				4, 5, 6,
+				0, 2, 3,
+			}),
+			pivot: []int{
+				1, // 0 1
+				0, // 1 0
+			},
+			sign: -1,
+		},
 	} {
 		lf := LU(DenseCopyOf(t.a))
 		if t.pivot != nil {
@@ -58,9 +78,13 @@ func (s *S) TestLUD(c *check.C) {
 			c.Check(u.Equals(t.u), check.Equals, true)
 		}
 
-		l.Mul(l, u)
-		c.Check(l.EqualsApprox(pivotRows(DenseCopyOf(t.a), lf.Pivot), 1e-12), check.Equals, true)
+		var got Dense
+		got.Mul(l, u)
+		c.Check(got.EqualsApprox(pivotRows(DenseCopyOf(t.a), lf.Pivot), 1e-12), check.Equals, true)
 
+		if m, n := t.a.Dims(); m != n {
+			continue
+		}
 		x := lf.Solve(eye())
 		t.a.Mul(t.a, x)
 		c.Check(t.a.EqualsApprox(eye(), 1e-12), check.Equals, true)

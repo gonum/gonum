@@ -68,7 +68,7 @@ func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths ShortestPaths, o
 				joint := paths.dist.At(i, k) + paths.dist.At(k, j)
 				if ij > joint {
 					paths.set(i, j, joint, paths.at(i, k)...)
-				} else if i != k && k != j && ij-joint == 0 {
+				} else if ij-joint == 0 {
 					paths.add(i, j, paths.at(i, k)...)
 				}
 			}
@@ -147,7 +147,8 @@ func (p ShortestPaths) Weight(u, v graph.Node) float64 {
 
 // Between returns a shortest path from u to v and the weight of the path. If more than
 // one shortest path exists between u and v, a randomly chosen path will be returned and
-// unique is returned false.
+// unique is returned false. If a cycle with zero weight exists in the path, it will not
+// be included, but unique will be returned false.
 func (p ShortestPaths) Between(u, v graph.Node) (path []graph.Node, weight float64, unique bool) {
 	from, fromOK := p.indexOf[u.ID()]
 	to, toOK := p.indexOf[v.ID()]
@@ -156,38 +157,65 @@ func (p ShortestPaths) Between(u, v graph.Node) (path []graph.Node, weight float
 	}
 	path = []graph.Node{p.nodes[from]}
 	unique = true
+	seen := make([]int, len(p.nodes))
+	for i := range seen {
+		seen[i] = -1
+	}
+	seen[from] = 0
+	// TODO(kortschak): Consider a more progressive approach
+	// to handling zero-weight cycles. One way is outlined
+	// here https://github.com/gonum/graph/pull/73#discussion_r31398601
 	for from != to {
 		c := p.at(from, to)
 		if len(c) != 1 {
 			unique = false
 		}
-		from = c[rand.Intn(len(c))]
+		i := rand.Intn(len(c))
+		from = c[i]
+		if seen[from] >= 0 {
+			path = path[:seen[from]+1]
+			continue
+		}
+		seen[from] = len(path)
 		path = append(path, p.nodes[from])
 	}
 	// We need to re-access from in this case because from has been mutated.
 	return path, p.dist.At(p.indexOf[u.ID()], to), unique
 }
 
-// AllBetween returns all shortest paths from u to v and the weight of the paths.
+// AllBetween returns all shortest paths from u to v and the weight of the paths. Paths
+// containing zero-weight cycles are not returned.
 func (p ShortestPaths) AllBetween(u, v graph.Node) (paths [][]graph.Node, weight float64) {
 	from, fromOK := p.indexOf[u.ID()]
 	to, toOK := p.indexOf[v.ID()]
 	if !fromOK || !toOK || len(p.at(from, to)) == 0 {
 		return nil, math.Inf(1)
 	}
-	paths = p.allBetween(from, to, []graph.Node{p.nodes[from]}, nil)
+	seen := make([]bool, len(p.nodes))
+	seen[from] = true
+	paths = p.allBetween(from, to, seen, []graph.Node{p.nodes[from]}, nil)
 	return paths, p.dist.At(from, to)
 }
 
-func (p ShortestPaths) allBetween(from, to int, path []graph.Node, paths [][]graph.Node) [][]graph.Node {
+func (p ShortestPaths) allBetween(from, to int, seen []bool, path []graph.Node, paths [][]graph.Node) [][]graph.Node {
 	if from == to {
+		if path == nil {
+			return paths
+		}
 		return append(paths, path)
 	}
-	for i, from := range p.at(from, to) {
-		if i != 0 {
-			path = append([]graph.Node(nil), path...)
+	first := true
+	for _, from := range p.at(from, to) {
+		if seen[from] {
+			continue
 		}
-		paths = p.allBetween(from, to, append(path, p.nodes[from]), paths)
+		if first {
+			path = append([]graph.Node(nil), path...)
+			first = false
+		}
+		s := append([]bool(nil), seen...)
+		s[from] = true
+		paths = p.allBetween(from, to, s, append(path, p.nodes[from]), paths)
 	}
 	return paths
 }

@@ -24,6 +24,7 @@ var floydWarshallTests = []struct {
 	query  concrete.Edge
 	weight float64
 	want   [][]int
+	unique bool
 
 	none concrete.Edge
 }{
@@ -57,6 +58,7 @@ var floydWarshallTests = []struct {
 		want: [][]int{
 			{0, 1},
 		},
+		unique: true,
 
 		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
 	},
@@ -72,6 +74,7 @@ var floydWarshallTests = []struct {
 		want: [][]int{
 			{0, 1},
 		},
+		unique: true,
 
 		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
 	},
@@ -90,6 +93,7 @@ var floydWarshallTests = []struct {
 			{0, 1, 2},
 			{0, 2},
 		},
+		unique: false,
 
 		none: concrete.Edge{concrete.Node(2), concrete.Node(1)},
 	},
@@ -108,6 +112,7 @@ var floydWarshallTests = []struct {
 			{0, 1, 2},
 			{0, 2},
 		},
+		unique: false,
 
 		none: concrete.Edge{concrete.Node(2), concrete.Node(4)},
 	},
@@ -141,6 +146,7 @@ var floydWarshallTests = []struct {
 			{0, 2, 3, 5},
 			{0, 5},
 		},
+		unique: false,
 
 		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
 	},
@@ -174,6 +180,7 @@ var floydWarshallTests = []struct {
 			{0, 2, 3, 5},
 			{0, 5},
 		},
+		unique: false,
 
 		none: concrete.Edge{concrete.Node(5), concrete.Node(6)},
 	},
@@ -208,6 +215,7 @@ var floydWarshallTests = []struct {
 			{0, 2, 3, 5},
 			{0, 6, 5},
 		},
+		unique: false,
 
 		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
 	},
@@ -242,8 +250,121 @@ var floydWarshallTests = []struct {
 			{0, 2, 3, 5},
 			{0, 6, 5},
 		},
+		unique: false,
 
 		none: concrete.Edge{concrete.Node(5), concrete.Node(7)},
+	},
+	{
+		name: "zero-weight cycle directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			// Add a path from 0->4 of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+			{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+			{concrete.Edge{concrete.Node(3), concrete.Node(4)}, 1},
+
+			// Add a zero-weight cycle.
+			{concrete.Edge{concrete.Node(1), concrete.Node(5)}, 0},
+			{concrete.Edge{concrete.Node(5), concrete.Node(1)}, 0},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(4)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 4},
+		},
+		unique: false,
+
+		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
+	},
+	{
+		name: "zero-weight cycle^2 directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			// Add a path from 0->4 of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+			{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+			{concrete.Edge{concrete.Node(3), concrete.Node(4)}, 1},
+
+			// Add a zero-weight cycle.
+			{concrete.Edge{concrete.Node(1), concrete.Node(5)}, 0},
+			{concrete.Edge{concrete.Node(5), concrete.Node(1)}, 0},
+			// With its own zero-weight cycle.
+			{concrete.Edge{concrete.Node(5), concrete.Node(5)}, 0},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(4)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 4},
+		},
+		unique: false,
+
+		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
+	},
+	{
+		name: "zero-weight cycle^3 directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			// Add a path from 0->4 of weight 4
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+			{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+			{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+			{concrete.Edge{concrete.Node(3), concrete.Node(4)}, 1},
+
+			// Add a zero-weight cycle.
+			{concrete.Edge{concrete.Node(1), concrete.Node(5)}, 0},
+			{concrete.Edge{concrete.Node(5), concrete.Node(1)}, 0},
+			// With its own zero-weight cycle.
+			{concrete.Edge{concrete.Node(5), concrete.Node(6)}, 0},
+			{concrete.Edge{concrete.Node(6), concrete.Node(5)}, 0},
+			// With its own zero-weight cycle.
+			{concrete.Edge{concrete.Node(6), concrete.Node(6)}, 0},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(4)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 4},
+		},
+		unique: false,
+
+		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
+	},
+	{
+		name: "zero-weight n·cycle directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: func() []concrete.WeightedEdge {
+			e := []concrete.WeightedEdge{
+				// Add a path from 0->4 of weight 4
+				{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+				{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+				{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+				{concrete.Edge{concrete.Node(3), concrete.Node(4)}, 1},
+			}
+			next := len(e) + 1
+
+			// Add n zero-weight cycles.
+			const n = 100
+			for i := 0; i < n; i++ {
+				e = append(e,
+					concrete.WeightedEdge{concrete.Edge{concrete.Node(next + i), concrete.Node(i)}, 0},
+					concrete.WeightedEdge{concrete.Edge{concrete.Node(i), concrete.Node(next + i)}, 0},
+				)
+			}
+			return e
+		}(),
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(4)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 4},
+		},
+		unique: false,
+
+		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
 	},
 }
 
@@ -277,9 +398,9 @@ func TestFloydWarshall(t *testing.T) {
 				t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
 					test.name, weight, test.weight)
 			}
-			if unique != (len(test.want) == 1) {
+			if unique != test.unique {
 				t.Errorf("%q: unexpected number of paths: got: unique=%t want: unique=%t",
-					test.name, unique, len(test.want) == 1)
+					test.name, unique, test.unique)
 			}
 
 			var got []int
@@ -297,12 +418,12 @@ func TestFloydWarshall(t *testing.T) {
 				t.Errorf("%q: unexpected shortest path:\ngot: %v\nwant from:%v",
 					test.name, p, test.want)
 			}
+		}
 
-			np, weight, unique := pt.Between(test.none.From(), test.none.To())
-			if np != nil || !math.IsInf(weight, 1) || unique != false {
-				t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f unique=%t\nwant:path=<nil> weight=+Inf unique=false",
-					test.name, np, weight, unique)
-			}
+		np, weight, unique := pt.Between(test.none.From(), test.none.To())
+		if np != nil || !math.IsInf(weight, 1) || unique != false {
+			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f unique=%t\nwant:path=<nil> weight=+Inf unique=false",
+				test.name, np, weight, unique)
 		}
 
 		paths, weight := pt.AllBetween(test.query.From(), test.query.To())
@@ -326,10 +447,10 @@ func TestFloydWarshall(t *testing.T) {
 				test.name, got, test.want)
 		}
 
-		np, weight := pt.AllBetween(test.none.From(), test.none.To())
-		if np != nil || !math.IsInf(weight, 1) {
+		nps, weight := pt.AllBetween(test.none.From(), test.none.To())
+		if nps != nil || !math.IsInf(weight, 1) {
 			t.Errorf("%q: unexpected path:\ngot: paths=%v weight=%f\nwant:path=<nil> weight=+Inf",
-				test.name, np, weight)
+				test.name, nps, weight)
 		}
 	}
 }

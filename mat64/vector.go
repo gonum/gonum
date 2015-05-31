@@ -213,6 +213,9 @@ func (v *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 
 		w.mat.Inc = 1
 		w.n = ar
+		if trans {
+			w.n = ac
+		}
 	} else {
 		if trans {
 			if ac != w.n {
@@ -237,27 +240,67 @@ func (v *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 		}
 		blas64.Gemv(t, 1, amat, b.mat, 0, w.mat)
 	case Vectorer:
-		row := make([]float64, ac)
-		for r := 0; r < ar; r++ {
-			w.mat.Data[r*v.mat.Inc] = blas64.Dot(ac,
-				blas64.Vector{Inc: 1, Data: a.Row(row, r)},
-				b.mat,
-			)
+		if trans {
+			col := make([]float64, ar)
+			for c := 0; c < ac; c++ {
+				w.mat.Data[c*w.mat.Inc] = blas64.Dot(ar,
+					blas64.Vector{Inc: 1, Data: a.Col(col, c)},
+					b.mat,
+				)
+			}
+		} else {
+			row := make([]float64, ac)
+			for r := 0; r < ar; r++ {
+				w.mat.Data[r*w.mat.Inc] = blas64.Dot(ac,
+					blas64.Vector{Inc: 1, Data: a.Row(row, r)},
+					b.mat,
+				)
+			}
 		}
 	default:
-		row := make([]float64, ac)
-		for r := 0; r < ar; r++ {
-			for i := range row {
-				row[i] = a.At(r, i)
+		if trans {
+			col := make([]float64, ar)
+			for c := 0; c < ac; c++ {
+				for i := range col {
+					col[i] = a.At(i, c)
+				}
+				var f float64
+				for i, e := range col {
+					f += e * b.mat.Data[i*b.mat.Inc]
+				}
+				w.mat.Data[c*w.mat.Inc] = f
 			}
-			var f float64
-			for i, e := range row {
-				f += e * b.mat.Data[i*b.mat.Inc]
+		} else {
+			row := make([]float64, ac)
+			for r := 0; r < ar; r++ {
+				for i := range row {
+					row[i] = a.At(r, i)
+				}
+				var f float64
+				for i, e := range row {
+					f += e * b.mat.Data[i*b.mat.Inc]
+				}
+				w.mat.Data[r*w.mat.Inc] = f
 			}
-			w.mat.Data[r*v.mat.Inc] = f
 		}
 	}
 	*v = w
+}
+
+// Equals compares the vectors represented by b and the receiver and returns true
+// if the vectors are element-wise equal.
+func (v *Vector) EqualsVec(b *Vector) bool {
+	n := v.Len()
+	nb := b.Len()
+	if n != nb {
+		return false
+	}
+	for i := 0; i < n; i++ {
+		if v.mat.Data[i*v.mat.Inc] != b.mat.Data[i*b.mat.Inc] {
+			return false
+		}
+	}
+	return true
 }
 
 // EqualsApproxVec compares the vectors represented by b and the receiver, with

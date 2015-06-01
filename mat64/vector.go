@@ -232,6 +232,14 @@ func (v *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 	case RawSymmetricer:
 		amat := a.RawSymmetric()
 		blas64.Symv(1, amat, b.mat, 0, w.mat)
+	case RawTriangular:
+		w.CopyVec(b)
+		amat := a.RawTriangular()
+		ta := blas.NoTrans
+		if trans {
+			ta = blas.Trans
+		}
+		blas64.Trmv(ta, amat, w.mat)
 	case RawMatrixer:
 		amat := a.RawMatrix()
 		t := blas.NoTrans

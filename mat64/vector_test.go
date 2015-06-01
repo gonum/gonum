@@ -153,6 +153,54 @@ func (s *S) TestVectorMul(c *check.C) {
 		same = v3.EqualsApproxVec(&v2, 1e-14)
 		c.Check(same, check.Equals, true, check.Commentf("Test %d Vectorer T", i))
 	}
+	// Test symmetric and triangular cases
+	for _, n := range []int{3, 5, 8} {
+		vData := make([]float64, n)
+		for i := range vData {
+			vData[i] = rand.Float64()
+		}
+		v := NewVector(n, vData)
+		data := make([]float64, n*n)
+		for i := range data {
+			data[i] = rand.Float64()
+		}
+		var dense Dense
+		var got Vector
+		var want Vector
+
+		triUpper := NewTriDense(n, true, data)
+		dense.Clone(triUpper)
+		got.MulVec(triUpper, false, v)
+		want.MulVec(&dense, false, v)
+		same := want.EqualsApproxVec(&got, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
+		got.MulVec(triUpper, true, v)
+		want.MulVec(&dense, true, v)
+		same = want.EqualsApproxVec(&got, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
+
+		triLower := NewTriDense(n, false, data)
+		dense.Clone(triLower)
+		got.MulVec(triLower, false, v)
+		want.MulVec(&dense, false, v)
+		same = want.EqualsApproxVec(&got, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
+		got.MulVec(triLower, true, v)
+		want.MulVec(&dense, true, v)
+		same = want.EqualsApproxVec(&got, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
+
+		sym := NewSymDense(n, data)
+		dense.Clone(sym)
+		got.MulVec(sym, false, v)
+		want.MulVec(&dense, false, v)
+		same = want.EqualsApproxVec(&got, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
+		got.MulVec(sym, true, v)
+		want.MulVec(&dense, true, v)
+		same = want.EqualsApproxVec(&got, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
+	}
 }
 
 func (s *S) TestVectorAdd(c *check.C) {

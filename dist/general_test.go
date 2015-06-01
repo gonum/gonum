@@ -127,11 +127,6 @@ func testConjugateUpdate(t *testing.T, newFittable func() ConjugateUpdater) {
 	}
 }
 
-// rander can generate random samples from a given distribution
-type Rander interface {
-	Rand() float64
-}
-
 // randn generates a specified number of random samples
 func randn(dist Rander, n int) []float64 {
 	x := make([]float64, n)

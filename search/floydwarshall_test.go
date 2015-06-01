@@ -334,7 +334,7 @@ var floydWarshallTests = []struct {
 		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
 	},
 	{
-		name: "zero-weight n·cycle directed",
+		name: "zero-weight |V|·cycle^(n/|V|) directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
 		edges: func() []concrete.WeightedEdge {
 			e := []concrete.WeightedEdge{
@@ -352,6 +352,39 @@ var floydWarshallTests = []struct {
 				e = append(e,
 					concrete.WeightedEdge{concrete.Edge{concrete.Node(next + i), concrete.Node(i)}, 0},
 					concrete.WeightedEdge{concrete.Edge{concrete.Node(i), concrete.Node(next + i)}, 0},
+				)
+			}
+			return e
+		}(),
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(4)},
+		weight: 4,
+		want: [][]int{
+			{0, 1, 2, 3, 4},
+		},
+		unique: false,
+
+		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
+	},
+	{
+		name: "zero-weight n·cycle directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: func() []concrete.WeightedEdge {
+			e := []concrete.WeightedEdge{
+				// Add a path from 0->4 of weight 4
+				{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+				{concrete.Edge{concrete.Node(1), concrete.Node(2)}, 1},
+				{concrete.Edge{concrete.Node(2), concrete.Node(3)}, 1},
+				{concrete.Edge{concrete.Node(3), concrete.Node(4)}, 1},
+			}
+			next := len(e) + 1
+
+			// Add n zero-weight cycles.
+			const n = 100
+			for i := 0; i < n; i++ {
+				e = append(e,
+					concrete.WeightedEdge{concrete.Edge{concrete.Node(next + i), concrete.Node(1)}, 0},
+					concrete.WeightedEdge{concrete.Edge{concrete.Node(1), concrete.Node(next + i)}, 0},
 				)
 			}
 			return e

@@ -121,16 +121,37 @@ func (s *S) TestVectorMul(c *check.C) {
 		c.Check(same, check.Equals, true, check.Commentf("Test %d", i))
 
 		var aT Dense
+		v2.Reset()
 		aT.TCopy(a)
 		v2.MulVec(&aT, true, v)
 		same = floats.EqualApprox(v2.mat.Data, v2M.mat.Data, 1e-14)
 		c.Check(same, check.Equals, true, check.Commentf("Test %d", i))
 
-		/*
-			v.MulVec(&aT, true, v)
-			same = floats.EqualApprox(v.mat.Data, v2M.mat.Data, 1e-14)
-			c.Check(same, check.Equals, true, check.Commentf("Test %d", i))
-		*/
+		// Try with anonymous matrix type
+		o := asBasicMatrix(a)
+		var v3 Vector
+		v3.MulVec(o, false, v)
+		same = v3.EqualsApproxVec(&v2, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Matrix", i))
+
+		v3.Reset()
+		o = asBasicMatrix(&aT)
+		v3.MulVec(o, true, v)
+		same = v3.EqualsApproxVec(&v2, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Matrix T", i))
+
+		// Try with anonymous matrix type
+		v3.Reset()
+		o = asBasicVectorer(a)
+		v3.MulVec(o, false, v)
+		same = v3.EqualsApproxVec(&v2, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Vectorer", i))
+
+		v3.Reset()
+		o = asBasicVectorer(&aT)
+		v3.MulVec(o, true, v)
+		same = v3.EqualsApproxVec(&v2, 1e-14)
+		c.Check(same, check.Equals, true, check.Commentf("Test %d Vectorer T", i))
 	}
 }
 

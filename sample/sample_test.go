@@ -38,7 +38,7 @@ func TestLatinHypercube(t *testing.T) {
 }
 
 func TestImportance(t *testing.T) {
-	// Test by finding the expected value of a Normal
+	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
 	target := dist.Normal{Mu: trueMean, Sigma: 2}
 	proposal := dist.Normal{Mu: 0, Sigma: 5}
@@ -53,7 +53,7 @@ func TestImportance(t *testing.T) {
 }
 
 func TestRejection(t *testing.T) {
-	// Test by finding the expected value of a Normal
+	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
 	target := dist.Normal{Mu: trueMean, Sigma: 2}
 	proposal := dist.Normal{Mu: 0, Sigma: 5}
@@ -80,7 +80,7 @@ func (c condNorm) ConditionalLogProb(x, y float64) float64 {
 }
 
 func TestMetropolisHastings(t *testing.T) {
-	// Test by finding the expected value of a Normal
+	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
 	target := dist.Normal{Mu: trueMean, Sigma: 2}
 	proposal := condNorm{Sigma: 5}

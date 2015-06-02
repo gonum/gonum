@@ -101,7 +101,7 @@ func Rejection(samples []float64, target dist.LogProber, proposal dist.RandLogPr
 		px := target.LogProb(v)
 		accept := math.Exp(px-qx) / c
 		if accept > 1 {
-			// Invalidate the whole result and return a failure
+			// Invalidate the whole result and return a failure.
 			for i := range samples {
 				samples[i] = math.NaN()
 			}
@@ -118,6 +118,7 @@ func Rejection(samples []float64, target dist.LogProber, proposal dist.RandLogPr
 	return nProposed, true
 }
 
+// MHProposal defines a proposal distribution for Metropolis Hastings.
 type MHProposal interface {
 	// ConditionalDist returns the probability of the first argument conditioned on
 	// being at the second argument
@@ -125,7 +126,7 @@ type MHProposal interface {
 	ConditionalLogProb(x, y float64) (prob float64)
 
 	// ConditionalRand generates a new random location conditioned being at the
-	// location y
+	// location y.
 	ConditionalRand(y float64) (x float64)
 }
 

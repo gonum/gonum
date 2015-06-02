@@ -26,7 +26,7 @@ func ExampleMetropolisHastings_samplingRate() {
 
 	tmp := make([]float64, max(rate, burnin))
 
-	// First deal with burnin
+	// First deal with burnin.
 	tmp = tmp[:burnin]
 	MetropolisHastings(tmp, initial, target, proposal, nil)
 	// The final sample in tmp in the final point in the chain.

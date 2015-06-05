@@ -12,7 +12,8 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
-// Shortest is a shortest-path tree created by the DijkstraFrom function.
+// Shortest is a shortest-path tree created by the BellmanFordFrom or DijkstraFrom
+// single-source shortest path functions.
 type Shortest struct {
 	// from holds the source node given to
 	// DijkstraFrom.
@@ -42,6 +43,29 @@ type Shortest struct {
 	// linear mapping of from-dense-id
 	// and to-dense-id.
 	next []int
+}
+
+func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
+	indexOf := make(map[int]int, len(nodes))
+	for i, n := range nodes {
+		indexOf[n.ID()] = i
+	}
+
+	p := Shortest{
+		from: u,
+
+		nodes:   nodes,
+		indexOf: indexOf,
+
+		dist: make([]float64, len(nodes)),
+		next: make([]int, len(nodes)),
+	}
+	for i := range nodes {
+		p.dist[i] = math.Inf(1)
+		p.next[i] = -1
+	}
+
+	return p
 }
 
 func (p Shortest) set(to int, weight float64, mid int) {

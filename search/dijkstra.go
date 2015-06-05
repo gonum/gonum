@@ -39,24 +39,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 	}
 
 	nodes := g.NodeList()
-
-	indexOf := make(map[int]int, len(nodes))
-	for i, n := range nodes {
-		indexOf[n.ID()] = i
-	}
-
-	path := Shortest{
-		from: u,
-
-		nodes:   nodes,
-		indexOf: indexOf,
-
-		dist: make([]float64, len(nodes)),
-		next: make([]int, len(nodes)),
-	}
-	for i := range path.dist {
-		path.dist[i] = math.Inf(1)
-	}
+	path := newShortestFrom(u, nodes)
 
 	// Dijkstra's algorithm here is implemented essentially as
 	// described in Function B.2 in figure 6 of UTCS Technical

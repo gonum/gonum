@@ -101,8 +101,8 @@ func (p Shortest) To(v graph.Node) (path []graph.Node, weight float64) {
 	return path, p.dist[p.indexOf[v.ID()]]
 }
 
-// ShortestPaths is a shortest-path tree created by the FloydWarshall or DijkstraAllPaths
-// functions.
+// ShortestPaths is a shortest-path tree created by the DijkstraAllPaths, FloydWarshall
+// or JohnsonAllPaths all-pairs shortest paths functions.
 type ShortestPaths struct {
 	// nodes hold the nodes of the analysed
 	// graph.

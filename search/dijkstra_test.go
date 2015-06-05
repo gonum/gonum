@@ -16,7 +16,7 @@ import (
 )
 
 func TestDijkstraFrom(t *testing.T) {
-	for _, test := range positiveWeightTests {
+	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
 			switch g := g.(type) {
@@ -29,7 +29,26 @@ func TestDijkstraFrom(t *testing.T) {
 			}
 		}
 
-		pt := search.DijkstraFrom(test.query.From(), g.(graph.Graph), nil)
+		var (
+			pt search.Shortest
+
+			panicked bool
+		)
+		func() {
+			defer func() {
+				panicked = recover() != nil
+			}()
+			pt = search.DijkstraFrom(test.query.From(), g.(graph.Graph), nil)
+		}()
+		if panicked || test.negative {
+			if !test.negative {
+				t.Errorf("%q: unexpected panic", test.name)
+			}
+			if !panicked {
+				t.Errorf("%q: expected panic for negative edge weight", test.name)
+			}
+			continue
+		}
 
 		if pt.From().ID() != test.query.From().ID() {
 			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", pt.From().ID(), test.query.From().ID())
@@ -70,7 +89,7 @@ func TestDijkstraFrom(t *testing.T) {
 }
 
 func TestDijkstraAllPaths(t *testing.T) {
-	for _, test := range positiveWeightTests {
+	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
 			switch g := g.(type) {
@@ -83,7 +102,26 @@ func TestDijkstraAllPaths(t *testing.T) {
 			}
 		}
 
-		pt := search.DijkstraAllPaths(g.(graph.Graph), nil)
+		var (
+			pt search.ShortestPaths
+
+			panicked bool
+		)
+		func() {
+			defer func() {
+				panicked = recover() != nil
+			}()
+			pt = search.DijkstraAllPaths(g.(graph.Graph), nil)
+		}()
+		if panicked || test.negative {
+			if !test.negative {
+				t.Errorf("%q: unexpected panic", test.name)
+			}
+			if !panicked {
+				t.Errorf("%q: expected panic for negative edge weight", test.name)
+			}
+			continue
+		}
 
 		// Check all random paths returned are OK.
 		for i := 0; i < 10; i++ {

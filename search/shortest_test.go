@@ -13,19 +13,21 @@ import (
 )
 
 func init() {
-	for _, test := range positiveWeightTests {
+	for _, test := range shortestPathTests {
 		if len(test.want) != 1 && test.unique {
 			panic(fmt.Sprintf("%q: bad shortest path test: non-unique paths marked unique", test.name))
 		}
 	}
 }
 
-// positiveWeightTests are positively weighted edge graphs
-// used to test DijkstraAllPaths, DijkstraFrom and FloydWarshall.
-var positiveWeightTests = []struct {
-	name  string
-	g     func() graph.Mutable
-	edges []concrete.WeightedEdge
+// shortestPathTests are graphs used to test BellmanFord,
+// DijkstraAllPaths, DijkstraFrom, FloydWarshall and Johnson.
+var shortestPathTests = []struct {
+	name             string
+	g                func() graph.Mutable
+	edges            []concrete.WeightedEdge
+	negative         bool
+	hasNegativeCycle bool
 
 	query  concrete.Edge
 	weight float64
@@ -34,6 +36,7 @@ var positiveWeightTests = []struct {
 
 	none concrete.Edge
 }{
+	// Positive weighted graphs.
 	{
 		name: "empty directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
@@ -551,5 +554,81 @@ var positiveWeightTests = []struct {
 		unique: false,
 
 		none: concrete.Edge{concrete.Node(4), concrete.Node(5)},
+	},
+
+	// Negative weighted graphs.
+	{
+		name: "one edge directed negative",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, -1},
+		},
+		negative: true,
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(1)},
+		weight: -1,
+		want: [][]int{
+			{0, 1},
+		},
+		unique: true,
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
+	},
+	{
+		name: "one edge undirected negative",
+		g:    func() graph.Mutable { return concrete.NewGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, -1},
+		},
+		negative:         true,
+		hasNegativeCycle: true,
+
+		query: concrete.Edge{concrete.Node(0), concrete.Node(1)},
+	},
+	{
+		name: "wp graph negative", // http://en.wikipedia.org/w/index.php?title=Johnson%27s_algorithm&oldid=564595231
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node('w'), concrete.Node('z')}, 2},
+			{concrete.Edge{concrete.Node('x'), concrete.Node('w')}, 6},
+			{concrete.Edge{concrete.Node('x'), concrete.Node('y')}, 3},
+			{concrete.Edge{concrete.Node('y'), concrete.Node('w')}, 4},
+			{concrete.Edge{concrete.Node('y'), concrete.Node('z')}, 5},
+			{concrete.Edge{concrete.Node('z'), concrete.Node('x')}, -7},
+			{concrete.Edge{concrete.Node('z'), concrete.Node('y')}, -3},
+		},
+		negative: true,
+
+		query:  concrete.Edge{concrete.Node('z'), concrete.Node('y')},
+		weight: -4,
+		want: [][]int{
+			{'z', 'x', 'y'},
+		},
+		unique: true,
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
+	},
+	{
+		name: "roughgarden negative",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node('a'), concrete.Node('b')}, -2},
+			{concrete.Edge{concrete.Node('b'), concrete.Node('c')}, -1},
+			{concrete.Edge{concrete.Node('c'), concrete.Node('a')}, 4},
+			{concrete.Edge{concrete.Node('c'), concrete.Node('x')}, 2},
+			{concrete.Edge{concrete.Node('c'), concrete.Node('y')}, -3},
+			{concrete.Edge{concrete.Node('z'), concrete.Node('x')}, 1},
+			{concrete.Edge{concrete.Node('z'), concrete.Node('y')}, -4},
+		},
+		negative: true,
+
+		query:  concrete.Edge{concrete.Node('a'), concrete.Node('y')},
+		weight: -6,
+		want: [][]int{
+			{'a', 'b', 'c', 'y'},
+		},
+		unique: true,
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
 	},
 }

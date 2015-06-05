@@ -16,7 +16,7 @@ import (
 )
 
 func TestFloydWarshall(t *testing.T) {
-	for _, test := range positiveWeightTests {
+	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
 			switch g := g.(type) {
@@ -30,6 +30,12 @@ func TestFloydWarshall(t *testing.T) {
 		}
 
 		pt, ok := search.FloydWarshall(g.(graph.Graph), nil)
+		if test.hasNegativeCycle {
+			if ok {
+				t.Errorf("%q: expected negative cycle", test.name)
+			}
+			continue
+		}
 		if !ok {
 			t.Fatalf("%q: unexpected negative cycle", test.name)
 		}

@@ -7,7 +7,7 @@ go:
 
 # After go 1.3, go tools moved from code.google.com to golang.org
 before_install:
- - if ! go get golang.org/x/tools/cmd/cover; then go get code.google.com/p/go.tools/cmd/cover; fi
+ - go get golang.org/x/tools/cmd/cover
  - go get github.com/mattn/goveralls
 
 # Get deps, build, test, and ensure the code is gofmt'ed.

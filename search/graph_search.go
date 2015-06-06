@@ -7,6 +7,7 @@ package search
 import (
 	"container/heap"
 	"errors"
+	"fmt"
 	"sort"
 
 	"github.com/gonum/graph"
@@ -324,6 +325,51 @@ func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) 
 }
 
 /* Basic Graph tests */
+
+// Unorderable is an error containing sets of unorderable graph.Nodes.
+type Unorderable [][]graph.Node
+
+// Error satisfies the error interface.
+func (e Unorderable) Error() string {
+	const maxNodes = 10
+	var n int
+	for _, c := range e {
+		n += len(c)
+	}
+	if n > maxNodes {
+		// Don't return errors that are too long.
+		return fmt.Sprintf("search: no topological ordering: %d nodes in %d cyclic components", n, len(e))
+	}
+	return fmt.Sprintf("search: no topological ordering: cyclic components: %v", [][]graph.Node(e))
+}
+
+// Sort performs a topological sort of the directed graph g returning the 'from' to 'to'
+// sort order. If a topological ordering is not possible, an Unorderable error is returned
+// listing cyclic components in g with each cyclic component's members sorted by ID. When
+// an Unorderable error is returned, each cyclic component's topological position within
+// the sorted nodes is marked with a nil graph.Node.
+func Sort(g graph.DirectedGraph) (sorted []graph.Node, err error) {
+	sccs := TarjanSCC(g)
+	sorted = make([]graph.Node, 0, len(sccs))
+	var sc Unorderable
+	for _, s := range sccs {
+		if len(s) != 1 {
+			sort.Sort(byID(s))
+			sc = append(sc, s)
+			sorted = append(sorted, nil)
+			continue
+		}
+		sorted = append(sorted, s[0])
+	}
+	if sc != nil {
+		for i, j := 0, len(sc)-1; i < j; i, j = i+1, j-1 {
+			sc[i], sc[j] = sc[j], sc[i]
+		}
+		err = sc
+	}
+	reverse(sorted)
+	return sorted, err
+}
 
 // TarjanSCC returns the strongly connected components of the graph g using Tarjan's algorithm.
 //

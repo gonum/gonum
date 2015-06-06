@@ -275,6 +275,10 @@ var tarjanTests = []struct {
 
 	ambiguousOrder []interval
 	want           [][]int
+
+	sortedLength      int
+	unorderableLength int
+	sortable          bool
 }{
 	{
 		g: []set{
@@ -292,6 +296,10 @@ var tarjanTests = []struct {
 			{2, 3, 4, 6},
 			{0, 1, 7},
 		},
+
+		sortedLength:      1,
+		unorderableLength: 2,
+		sortable:          false,
 	},
 	{
 		g: []set{
@@ -305,6 +313,10 @@ var tarjanTests = []struct {
 			{1, 2, 3},
 			{0},
 		},
+
+		sortedLength:      1,
+		unorderableLength: 1,
+		sortable:          false,
 	},
 	{
 		g: []set{
@@ -316,6 +328,10 @@ var tarjanTests = []struct {
 		want: [][]int{
 			{0, 1, 2},
 		},
+
+		sortedLength:      0,
+		unorderableLength: 1,
+		sortable:          false,
 	},
 	{
 		g: []set{
@@ -337,6 +353,9 @@ var tarjanTests = []struct {
 		want: [][]int{
 			{6}, {5}, {4}, {3}, {2}, {1}, {0},
 		},
+
+		sortedLength: 7,
+		sortable:     true,
 	},
 	{
 		g: []set{
@@ -355,7 +374,42 @@ var tarjanTests = []struct {
 			{0, 1, 2},
 			{3, 4},
 		},
+
+		sortedLength:      0,
+		unorderableLength: 2,
+		sortable:          false,
 	},
+}
+
+func TestSort(t *testing.T) {
+	for i, test := range tarjanTests {
+		g := concrete.NewDirectedGraph()
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.NodeExists(concrete.Node(u)) {
+				g.AddNode(concrete.Node(u))
+			}
+			for v := range e {
+				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+			}
+		}
+		sorted, err := search.Sort(g)
+		var gotSortedLen int
+		for _, n := range sorted {
+			if n != nil {
+				gotSortedLen++
+			}
+		}
+		if gotSortedLen != test.sortedLength {
+			t.Errorf("unexpected number of sortable nodes for test %d: got:%d want:%d", i, gotSortedLen, test.sortedLength)
+		}
+		if err == nil != test.sortable {
+			t.Errorf("unexpected sortability for test %d: got error: %v want: nil-error=%t", i, err, test.sortable)
+		}
+		if err != nil && len(err.(search.Unorderable)) != test.unorderableLength {
+			t.Errorf("unexpected number of unorderable nodes for test %d: got:%d want:%d", i, len(err.(search.Unorderable)), test.unorderableLength)
+		}
+	}
 }
 
 func TestTarjanSCC(t *testing.T) {

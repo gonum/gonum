@@ -77,7 +77,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 // DijkstraAllPaths will panic if g has a negative edge weight.
 //
 // The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
-func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths ShortestPaths) {
+func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) {
 	var (
 		from   = g.Neighbors
 		edgeTo func(graph.Node, graph.Node) graph.Edge
@@ -108,7 +108,7 @@ func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths ShortestPaths
 	for i := range dist {
 		dist[i] = math.Inf(1)
 	}
-	paths = ShortestPaths{
+	paths = AllShortest{
 		nodes:   nodes,
 		indexOf: indexOf,
 

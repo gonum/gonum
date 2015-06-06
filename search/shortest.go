@@ -101,9 +101,9 @@ func (p Shortest) To(v graph.Node) (path []graph.Node, weight float64) {
 	return path, p.dist[p.indexOf[v.ID()]]
 }
 
-// ShortestPaths is a shortest-path tree created by the DijkstraAllPaths, FloydWarshall
+// AllShortest is a shortest-path tree created by the DijkstraAllPaths, FloydWarshall
 // or JohnsonAllPaths all-pairs shortest paths functions.
-type ShortestPaths struct {
+type AllShortest struct {
 	// nodes hold the nodes of the analysed
 	// graph.
 	nodes []graph.Node
@@ -142,16 +142,16 @@ type ShortestPaths struct {
 	forward bool
 }
 
-func (p ShortestPaths) at(from, to int) (mid []int) {
+func (p AllShortest) at(from, to int) (mid []int) {
 	return p.next[from+to*len(p.nodes)]
 }
 
-func (p ShortestPaths) set(from, to int, weight float64, mid ...int) {
+func (p AllShortest) set(from, to int, weight float64, mid ...int) {
 	p.dist.Set(from, to, weight)
 	p.next[from+to*len(p.nodes)] = append(p.next[from+to*len(p.nodes)][:0], mid...)
 }
 
-func (p ShortestPaths) add(from, to int, mid ...int) {
+func (p AllShortest) add(from, to int, mid ...int) {
 loop: // These are likely to be rare, so just loop over collisions.
 	for _, k := range mid {
 		for _, v := range p.next[from+to*len(p.nodes)] {
@@ -164,7 +164,7 @@ loop: // These are likely to be rare, so just loop over collisions.
 }
 
 // Weight returns the weight of the minimum path between u and v.
-func (p ShortestPaths) Weight(u, v graph.Node) float64 {
+func (p AllShortest) Weight(u, v graph.Node) float64 {
 	from, fromOK := p.indexOf[u.ID()]
 	to, toOK := p.indexOf[v.ID()]
 	if !fromOK || !toOK {
@@ -177,7 +177,7 @@ func (p ShortestPaths) Weight(u, v graph.Node) float64 {
 // one shortest path exists between u and v, a randomly chosen path will be returned and
 // unique is returned false. If a cycle with zero weight exists in the path, it will not
 // be included, but unique will be returned false.
-func (p ShortestPaths) Between(u, v graph.Node) (path []graph.Node, weight float64, unique bool) {
+func (p AllShortest) Between(u, v graph.Node) (path []graph.Node, weight float64, unique bool) {
 	from, fromOK := p.indexOf[u.ID()]
 	to, toOK := p.indexOf[v.ID()]
 	if !fromOK || !toOK || len(p.at(from, to)) == 0 {
@@ -230,7 +230,7 @@ func (p ShortestPaths) Between(u, v graph.Node) (path []graph.Node, weight float
 
 // AllBetween returns all shortest paths from u to v and the weight of the paths. Paths
 // containing zero-weight cycles are not returned.
-func (p ShortestPaths) AllBetween(u, v graph.Node) (paths [][]graph.Node, weight float64) {
+func (p AllShortest) AllBetween(u, v graph.Node) (paths [][]graph.Node, weight float64) {
 	from, fromOK := p.indexOf[u.ID()]
 	to, toOK := p.indexOf[v.ID()]
 	if !fromOK || !toOK || len(p.at(from, to)) == 0 {
@@ -249,7 +249,7 @@ func (p ShortestPaths) AllBetween(u, v graph.Node) (paths [][]graph.Node, weight
 	return paths, p.dist.At(from, to)
 }
 
-func (p ShortestPaths) allBetween(from, to int, seen []bool, path []graph.Node, paths [][]graph.Node) [][]graph.Node {
+func (p AllShortest) allBetween(from, to int, seen []bool, path []graph.Node, paths [][]graph.Node) [][]graph.Node {
 	if p.forward {
 		seen[from] = true
 	} else {

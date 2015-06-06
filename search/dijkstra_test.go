@@ -103,7 +103,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 		}
 
 		var (
-			pt search.ShortestPaths
+			pt search.AllShortest
 
 			panicked bool
 		)

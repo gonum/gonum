@@ -102,7 +102,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 //
 // where \sigma_{st} and \sigma_{st}(v) are number of the shortest paths from s to t.
 // and the subset of those paths containing v respectively.
-func BetweennessWeighted(g graph.CostGraph, p search.ShortestPaths) map[int]float64 {
+func BetweennessWeighted(g graph.CostGraph, p search.AllShortest) map[int]float64 {
 	cb := make(map[int]float64)
 
 	nodes := g.NodeList()

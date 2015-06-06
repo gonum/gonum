@@ -16,7 +16,7 @@ import (
 // implement graph.Coster, UniformCost is used.
 //
 // The time complexity of FloydWarshall is O(|V|^3).
-func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths ShortestPaths, ok bool) {
+func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok bool) {
 	var (
 		from   = g.Neighbors
 		edgeTo func(graph.Node, graph.Node) graph.Edge
@@ -47,7 +47,7 @@ func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths ShortestPaths, o
 	for i := range dist {
 		dist[i] = math.Inf(1)
 	}
-	paths = ShortestPaths{
+	paths = AllShortest{
 		nodes:   nodes,
 		indexOf: indexOf,
 

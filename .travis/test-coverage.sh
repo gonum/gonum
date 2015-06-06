@@ -10,13 +10,13 @@ if [[ ${returnval} != *FAIL* ]]
 then
 	if [ -f profile.out ]
 	then
-		cat profile.out | grep -v "mode: set" >> acc.out 
+		cat profile.out | grep -v "mode: set" >> acc.out
 	fi
 else
 	exit 1
-fi	
+fi
 
-for Dir in $(find ./* -maxdepth 10 -type d ); 
+for Dir in $(find ./* -maxdepth 10 -type d );
 do
 	if ls $Dir/*.go &> /dev/null;
 	then
@@ -27,17 +27,17 @@ do
 		then
     		if [ -f profile.out ]
     		then
-        		cat profile.out | grep -v "mode: set" >> acc.out 
+        		cat profile.out | grep -v "mode: set" >> acc.out
     		fi
     	else
     		exit 1
-    	fi	
+    	fi
     fi
 done
 if [ -n "$COVERALLS_TOKEN" ]
 then
 	$HOME/gopath/bin/goveralls -coverprofile=acc.out -service=travis-ci -repotoken $COVERALLS_TOKEN
-fi	
+fi
 
 rm -rf ./profile.out
 rm -rf ./acc.out

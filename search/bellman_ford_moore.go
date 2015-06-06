@@ -9,6 +9,8 @@ import "github.com/gonum/graph"
 // BellmanFordFrom returns a shortest-path tree for a shortest path from u to all nodes in
 // the graph g, or false indicating that a negative cycle exists in the graph. If weight
 // is nil and the graph does not implement graph.Coster, UniformCost is used.
+//
+// The time complexity of BellmanFordFrom is O(|V|.|E|).
 func BellmanFordFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) (path Shortest, ok bool) {
 	if !g.NodeExists(u) {
 		return Shortest{from: u}, true

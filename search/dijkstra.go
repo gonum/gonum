@@ -15,6 +15,8 @@ import (
 // DijkstraFrom returns a shortest-path tree for a shortest path from u to all nodes in
 // the graph g. If weight is nil and the graph does not implement graph.Coster, UniformCost
 // is used. DijkstraFrom will panic if g has a u-reachable negative edge weight.
+//
+// The time complexity of DijkstrFrom is O(|E|+|V|.log|V|).
 func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 	if !g.NodeExists(u) {
 		return Shortest{from: u}
@@ -73,6 +75,8 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 // DijkstraAllPaths returns a shortest-path tree for shortest paths in the graph g.
 // If weight is nil and the graph does not implement graph.Coster, UniformCost is used.
 // DijkstraAllPaths will panic if g has a negative edge weight.
+//
+// The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths ShortestPaths) {
 	var (
 		from   = g.Neighbors

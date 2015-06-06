@@ -14,6 +14,8 @@ import (
 
 // JohnsonAllPaths returns a shortest-path tree for shortest paths in the graph g.
 // If weight is nil and the graph does not implement graph.Coster, UniformCost is used.
+//
+// The time complexity of JohnsonAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths ShortestPaths, ok bool) {
 	jg := johnsonWeightAdjuster{
 		g:      g,

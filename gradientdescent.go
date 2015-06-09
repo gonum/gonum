@@ -18,7 +18,7 @@ type GradientDescent struct {
 	linesearch *Linesearch
 }
 
-func (g *GradientDescent) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (g *GradientDescent) Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if g.StepSizer == nil {
 		g.StepSizer = &QuadraticStepSize{}
 	}
@@ -31,7 +31,7 @@ func (g *GradientDescent) Init(loc *Location, f *FunctionInfo, xNext []float64) 
 	g.linesearch.Method = g.LinesearchMethod
 	g.linesearch.NextDirectioner = g
 
-	return g.linesearch.Init(loc, f, xNext)
+	return g.linesearch.Init(loc, p, xNext)
 }
 
 func (g *GradientDescent) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {

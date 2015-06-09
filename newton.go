@@ -54,7 +54,7 @@ type Newton struct {
 	tau  float64
 }
 
-func (n *Newton) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (n *Newton) Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if n.Increase == 0 {
 		n.Increase = 5
 	}
@@ -70,7 +70,7 @@ func (n *Newton) Init(loc *Location, f *FunctionInfo, xNext []float64) (Evaluati
 	n.linesearch.Method = n.LinesearchMethod
 	n.linesearch.NextDirectioner = n
 
-	return n.linesearch.Init(loc, f, xNext)
+	return n.linesearch.Init(loc, p, xNext)
 }
 
 func (n *Newton) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {

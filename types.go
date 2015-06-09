@@ -97,33 +97,32 @@ type Stats struct {
 	Runtime         time.Duration // Total runtime of the optimization
 }
 
-// FunctionInfo is data to give to the optimizer about the objective function.
-type FunctionInfo struct {
-	IsGradient                bool
-	IsHessian                 bool
-	IsFunctionGradient        bool
-	IsFunctionGradientHessian bool
-	IsStatuser                bool
+// ProblemInfo is data to give to the optimizer about the objective function.
+type ProblemInfo struct {
+	HasGradient                bool
+	HasHessian                 bool
+	HasFunctionGradient        bool
+	HasFunctionGradientHessian bool
+	HasStatus                  bool
 }
 
-// functionInfo contains information about which interfaces the objective
-// function F implements and the actual methods of F that have been
-// successfully type switched. TODO(jds) change this comment
-type functionInfo struct {
-	FunctionInfo
+// problemInfo contains information about which methods the optimization
+// problem provides as well as the optimization problem itself.
+type problemInfo struct {
+	ProblemInfo
 	Problem
 }
 
-func newFunctionInfo(p Problem) *functionInfo {
-	isGradient := p.Grad != nil
-	isHessian := p.Hess != nil
-	isStatuser := p.Status != nil
+func newProblemInfo(p Problem) *problemInfo {
+	hasGradient := p.Grad != nil
+	hasHessian := p.Hess != nil
+	hasStatus := p.Status != nil
 
-	return &functionInfo{
-		FunctionInfo: FunctionInfo{
-			IsGradient: isGradient,
-			IsHessian:  isHessian,
-			IsStatuser: isStatuser,
+	return &problemInfo{
+		ProblemInfo: ProblemInfo{
+			HasGradient: hasGradient,
+			HasHessian:  hasHessian,
+			HasStatus:   hasStatus,
 		},
 		Problem: p,
 	}
@@ -131,11 +130,11 @@ func newFunctionInfo(p Problem) *functionInfo {
 
 // TODO(btracey): Think about making this an exported function when the
 // constraint interface is designed.
-func (f functionInfo) satisfies(method Method) error {
-	if method.Needs().Gradient && !f.IsGradient {
+func (f problemInfo) satisfies(method Method) error {
+	if method.Needs().Gradient && !f.HasGradient {
 		return errors.New("optimize: function does not implement needed Gradient interface")
 	}
-	if method.Needs().Hessian && !f.IsHessian {
+	if method.Needs().Hessian && !f.HasHessian {
 		return errors.New("optimize: function does not implement needed Hessian interface")
 	}
 	return nil
@@ -158,9 +157,9 @@ func complementEval(loc *Location, eval EvaluationType) (complEval EvaluationTyp
 
 // TODO Comment
 type Problem struct {
-	Func func([]float64) float64
-	Grad func([]float64, []float64)
-	Hess func([]float64, *mat64.SymDense)
+	Func   func([]float64) float64
+	Grad   func([]float64, []float64)
+	Hess   func([]float64, *mat64.SymDense)
 	Status func() (Status, error)
 }
 

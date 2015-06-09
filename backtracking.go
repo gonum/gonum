@@ -32,7 +32,7 @@ type Backtracking struct {
 	initG    float64
 }
 
-func (b *Backtracking) Init(loc LinesearchLocation, step float64, _ *FunctionInfo) EvaluationType {
+func (b *Backtracking) Init(loc LinesearchLocation, step float64, _ *ProblemInfo) EvaluationType {
 	if step <= 0 {
 		panic("backtracking: bad step size")
 	}

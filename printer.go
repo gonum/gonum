@@ -47,8 +47,8 @@ var (
 	}
 )
 
-func (p *Printer) Init(f *FunctionInfo) error {
-	p.printGrad = f.IsFunctionGradient || f.IsGradient
+func (p *Printer) Init(prob *ProblemInfo) error {
+	p.printGrad = prob.HasFunctionGradient || prob.HasGradient
 
 	p.lastHeading = p.HeadingInterval + 1          // So the headings are printed the first time
 	p.lastValue = time.Now().Add(-p.ValueInterval) // So the values are printed the first time

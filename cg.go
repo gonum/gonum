@@ -94,7 +94,7 @@ type CG struct {
 	gradPrevNorm float64
 }
 
-func (cg *CG) Init(loc *Location, funcInfo *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (cg *CG) Init(loc *Location, probInfo *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if cg.IterationRestartFactor < 0 {
 		panic("cg: IterationRestartFactor is negative")
 	}
@@ -125,7 +125,7 @@ func (cg *CG) Init(loc *Location, funcInfo *FunctionInfo, xNext []float64) (Eval
 	cg.linesearch.Method = cg.LinesearchMethod
 	cg.linesearch.NextDirectioner = cg
 
-	return cg.linesearch.Init(loc, funcInfo, xNext)
+	return cg.linesearch.Init(loc, probInfo, xNext)
 }
 
 func (cg *CG) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {

@@ -5,7 +5,6 @@
 package search_test
 
 import (
-	"fmt"
 	"math"
 	"reflect"
 	"sort"
@@ -127,21 +126,24 @@ func TestNoPathAStar(t *testing.T) {
 }
 
 func TestSmallAStar(t *testing.T) {
-	gg := newSmallGonumGraph()
+	g := newSmallGonumGraph()
 	heur := newSmallHeuristic()
-	if ok, edge, goal := monotonic(gg, heur); !ok {
+	if ok, edge, goal := monotonic(g, heur); !ok {
 		t.Fatalf("non-monotonic heuristic.  edge: %v goal: %v", edge, goal)
 	}
-	for _, start := range gg.NodeList() {
-		// get reference paths by Dijkstra
-		dPaths, dCosts := search.Dijkstra(start, gg, nil)
-		// assert that AStar finds each path
-		for goalID, dPath := range dPaths {
-			exp := fmt.Sprintln(dPath, dCosts[goalID])
-			aPath, aCost, _ := search.AStar(start, concrete.Node(goalID), gg, nil, heur)
-			got := fmt.Sprintln(aPath, aCost)
-			if got != exp {
-				t.Error("expected", exp, "got", got)
+
+	ps := search.DijkstraAllPaths(g, nil)
+	for _, start := range g.NodeList() {
+		for _, goal := range g.NodeList() {
+			gotPath, gotWeight, _ := search.AStar(start, goal, g, nil, heur)
+			wantPath, wantWeight, _ := ps.Between(start, goal)
+			if gotWeight != wantWeight {
+				t.Errorf("unexpected A* path weight from %v to %v result: got:%s want:%s",
+					start, goal, gotWeight, wantWeight)
+			}
+			if !reflect.DeepEqual(gotPath, wantPath) {
+				t.Errorf("unexpected A* path from %v to %v result:\ngot: %v\nwant:%v",
+					start, goal, gotPath, wantPath)
 			}
 		}
 	}
@@ -207,26 +209,6 @@ func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool,
 		}
 	}
 	return true, nil, nil
-}
-
-// Test for correct result on a small graph easily solvable by hand
-func TestDijkstraSmall(t *testing.T) {
-	g := newSmallGonumGraph()
-	paths, lens := search.Dijkstra(concrete.Node(1), g, nil)
-	s := fmt.Sprintln(len(paths), len(lens))
-	for i := 1; i <= 6; i++ {
-		s += fmt.Sprintln(paths[i], lens[i])
-	}
-	if s != `6 6
-[1] 0
-[1 2] 7
-[1 3] 9
-[1 3 4] 20
-[1 3 6 5] 20
-[1 3 6] 11
-` {
-		t.Fatal(s)
-	}
 }
 
 func TestIsPath(t *testing.T) {

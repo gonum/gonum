@@ -86,59 +86,6 @@ func AStar(start, goal graph.Node, g graph.Graph, cost graph.CostFunc, heuristic
 	return nil, 0, nodesExpanded
 }
 
-// Dijkstra's Algorithm is essentially a goalless Uniform Cost Search. That is, its results are
-// roughly equivalent to running A* with the Null Heuristic from a single node to every other node
-// in the graph -- though it's a fair bit faster because running A* in that way will recompute
-// things it's already computed every call. Note that you won't necessarily get the same path
-// you would get for A*, but the cost is guaranteed to be the same (that is, if multiple shortest
-// paths exist, you may get a different shortest path).
-//
-// Like A*, Dijkstra's Algorithm likely won't run correctly with negative edge weights -- use
-// Bellman-Ford for that instead.
-//
-// Dijkstra's algorithm usually only returns a cost map, however, since the data is available
-// this version will also reconstruct the path to every node.
-func Dijkstra(source graph.Node, g graph.Graph, cost graph.CostFunc) (paths map[int][]graph.Node, costs map[int]float64) {
-
-	sf := setupFuncs(g, cost, nil)
-	successors, cost, edgeTo := sf.successors, sf.cost, sf.edgeTo
-
-	nodes := g.NodeList()
-	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
-	costs = make(map[int]float64, len(nodes)) // May overallocate, will change if it becomes a problem
-	predecessor := make(map[int]graph.Node, len(nodes))
-	nodeIDMap := make(map[int]graph.Node, len(nodes))
-	heap.Init(openSet)
-
-	costs[source.ID()] = 0
-	heap.Push(openSet, internalNode{source, 0, 0})
-
-	for openSet.Len() != 0 {
-		node := heap.Pop(openSet).(internalNode)
-
-		nodeIDMap[node.ID()] = node
-
-		for _, neighbor := range successors(node) {
-			tmpCost := costs[node.ID()] + cost(edgeTo(node, neighbor))
-			if cost, ok := costs[neighbor.ID()]; !ok {
-				costs[neighbor.ID()] = tmpCost
-				predecessor[neighbor.ID()] = node
-				heap.Push(openSet, internalNode{neighbor, tmpCost, tmpCost})
-			} else if tmpCost < cost {
-				costs[neighbor.ID()] = tmpCost
-				predecessor[neighbor.ID()] = node
-				openSet.Fix(neighbor.ID(), tmpCost, tmpCost)
-			}
-		}
-	}
-
-	paths = make(map[int][]graph.Node, len(costs))
-	for node := range costs { // Only reconstruct the path if one exists
-		paths[node] = rebuildPath(predecessor, nodeIDMap[node])
-	}
-	return paths, costs
-}
-
 // An admissible, consistent heuristic that won't speed up computation time at all.
 func NullHeuristic(_, _ graph.Node) float64 {
 	return 0

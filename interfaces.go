@@ -4,26 +4,6 @@
 
 package optimize
 
-import "github.com/gonum/matrix/mat64"
-
-// Function evaluates the objective function at the given location. F
-// must not modify x.
-type Function interface {
-	Func(x []float64) (obj float64)
-}
-
-// Gradient evaluates the gradient at x and stores the result in-place in grad.
-// Grad must not modify x.
-type Gradient interface {
-	Grad(x, grad []float64)
-}
-
-// Hessian evaluates the Hessian at x and stores the result in-place in hess.
-// Hess must not modify x.
-type Hessian interface {
-	Hess(x []float64, hess *mat64.SymDense)
-}
-
 // LinesearchMethod is a type that can perform a line search. Typically, these
 // methods will not be called by the user directly, as they will be called by
 // a Linesearch struct.

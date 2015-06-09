@@ -108,20 +108,16 @@ type FunctionInfo struct {
 
 // functionInfo contains information about which interfaces the objective
 // function F implements and the actual methods of F that have been
-// successfully type switched.
+// successfully type switched. TODO(jds) change this comment
 type functionInfo struct {
 	FunctionInfo
-
-	function Function
-	gradient Gradient
-	hessian  Hessian
-	statuser Statuser
+	Problem
 }
 
-func newFunctionInfo(f Function) *functionInfo {
-	gradient, isGradient := f.(Gradient)
-	hessian, isHessian := f.(Hessian)
-	statuser, isStatuser := f.(Statuser)
+func newFunctionInfo(p Problem) *functionInfo {
+	isGradient := p.Grad != nil
+	isHessian := p.Hess != nil
+	isStatuser := p.Status != nil
 
 	return &functionInfo{
 		FunctionInfo: FunctionInfo{
@@ -129,10 +125,7 @@ func newFunctionInfo(f Function) *functionInfo {
 			IsHessian:  isHessian,
 			IsStatuser: isStatuser,
 		},
-		function: f,
-		gradient: gradient,
-		hessian:  hessian,
-		statuser: statuser,
+		Problem: p,
 	}
 }
 
@@ -161,6 +154,14 @@ func complementEval(loc *Location, eval EvaluationType) (complEval EvaluationTyp
 		complEval |= HessEvaluation
 	}
 	return complEval
+}
+
+// TODO Comment
+type Problem struct {
+	Func func([]float64) float64
+	Grad func([]float64, []float64)
+	Hess func([]float64, *mat64.SymDense)
+	Status func() (Status, error)
 }
 
 // Settings represents settings of the optimization run. It contains initial

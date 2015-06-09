@@ -49,13 +49,13 @@ import (
 // function evaluations. If you would like to put limits on this, for example
 // maximum runtime or maximum function evaluations, please modify the Settings
 // input struct.
-func Local(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
+func Local(p Problem, initX []float64, settings *Settings, method Method) (*Result, error) {
 	if len(initX) == 0 {
 		panic("optimize: initial X has zero length")
 	}
 
 	startTime := time.Now()
-	funcInfo := newFunctionInfo(f)
+	funcInfo := newFunctionInfo(p)
 	if method == nil {
 		method = getDefaultMethod(funcInfo)
 	}
@@ -64,7 +64,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}
 
 	if funcInfo.IsStatuser {
-		_, err := funcInfo.statuser.Status()
+		_, err := funcInfo.Status()
 		if err != nil {
 			return nil, err
 		}
@@ -136,7 +136,7 @@ func minimize(settings *Settings, method Method, funcInfo *functionInfo, stats *
 	for {
 		if funcInfo.IsStatuser {
 			// Check the function status before evaluating.
-			status, err = funcInfo.statuser.Status()
+			status, err = funcInfo.Status()
 			if err != nil || status != NotTerminated {
 				return
 			}
@@ -362,17 +362,17 @@ func evaluate(f *functionInfo, evalType EvaluationType, xNext []float64, loc *Lo
 
 	toEval := evalType
 	if evalType&FuncEvaluation != 0 {
-		loc.F = f.function.Func(loc.X)
+		loc.F = f.Func(loc.X)
 		stats.FuncEvaluations++
 		toEval &= ^FuncEvaluation
 	}
 	if evalType&GradEvaluation != 0 {
-		f.gradient.Grad(loc.X, loc.Gradient)
+		f.Grad(loc.X, loc.Gradient)
 		stats.GradEvaluations++
 		toEval &= ^GradEvaluation
 	}
 	if evalType&HessEvaluation != 0 {
-		f.hessian.Hess(loc.X, loc.Hessian)
+		f.Hess(loc.X, loc.Hessian)
 		stats.HessEvaluations++
 		toEval &= ^HessEvaluation
 	}

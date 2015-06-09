@@ -72,6 +72,22 @@ var shortestPathTests = []struct {
 		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
 	},
 	{
+		name: "one edge self directed",
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		edges: []concrete.WeightedEdge{
+			{concrete.Edge{concrete.Node(0), concrete.Node(1)}, 1},
+		},
+
+		query:  concrete.Edge{concrete.Node(0), concrete.Node(0)},
+		weight: 0,
+		want: [][]int{
+			{0},
+		},
+		unique: true,
+
+		none: concrete.Edge{concrete.Node(2), concrete.Node(3)},
+	},
+	{
 		name: "one edge undirected",
 		g:    func() graph.Mutable { return concrete.NewGraph() },
 		edges: []concrete.WeightedEdge{

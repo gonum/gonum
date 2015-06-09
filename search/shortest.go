@@ -47,8 +47,12 @@ type Shortest struct {
 
 func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
 	indexOf := make(map[int]int, len(nodes))
+	uid := u.ID()
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
+		if n.ID() == uid {
+			u = n
+		}
 	}
 
 	p := Shortest{
@@ -92,7 +96,7 @@ func (p Shortest) To(v graph.Node) (path []graph.Node, weight float64) {
 		return nil, math.Inf(1)
 	}
 	from := p.indexOf[p.from.ID()]
-	path = []graph.Node{v}
+	path = []graph.Node{p.nodes[to]}
 	for to != from {
 		path = append(path, p.nodes[p.next[to]])
 		to = p.next[to]
@@ -181,6 +185,9 @@ func (p AllShortest) Between(u, v graph.Node) (path []graph.Node, weight float64
 	from, fromOK := p.indexOf[u.ID()]
 	to, toOK := p.indexOf[v.ID()]
 	if !fromOK || !toOK || len(p.at(from, to)) == 0 {
+		if u.ID() == v.ID() {
+			return []graph.Node{p.nodes[from]}, 0, true
+		}
 		return nil, math.Inf(1), false
 	}
 
@@ -190,10 +197,10 @@ func (p AllShortest) Between(u, v graph.Node) (path []graph.Node, weight float64
 	}
 	var n graph.Node
 	if p.forward {
-		n = u
+		n = p.nodes[from]
 		seen[from] = 0
 	} else {
-		n = v
+		n = p.nodes[to]
 		seen[to] = 0
 	}
 
@@ -234,6 +241,9 @@ func (p AllShortest) AllBetween(u, v graph.Node) (paths [][]graph.Node, weight f
 	from, fromOK := p.indexOf[u.ID()]
 	to, toOK := p.indexOf[v.ID()]
 	if !fromOK || !toOK || len(p.at(from, to)) == 0 {
+		if u.ID() == v.ID() {
+			return [][]graph.Node{{p.nodes[from]}}, 0
+		}
 		return nil, math.Inf(1)
 	}
 

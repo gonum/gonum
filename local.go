@@ -50,6 +50,9 @@ import (
 // maximum runtime or maximum function evaluations, please modify the Settings
 // input struct.
 func Local(p Problem, initX []float64, settings *Settings, method Method) (*Result, error) {
+	if p.Func == nil {
+		panic("optimize: objective function is undefined")
+	}
 	if len(initX) == 0 {
 		panic("optimize: initial X has zero length")
 	}

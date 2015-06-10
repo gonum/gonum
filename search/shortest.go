@@ -40,8 +40,7 @@ type Shortest struct {
 	dist []float64
 	// next contains the shortest-path
 	// tree of the graph. The index is a
-	// linear mapping of from-dense-id
-	// and to-dense-id.
+	// linear mapping of to-dense-id.
 	next []int
 }
 

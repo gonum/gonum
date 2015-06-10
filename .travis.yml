@@ -1,69 +1,38 @@
+sudo: required
+
 language: go
 
+# Versions of go that are explicitly supported by gonum.
+go:
+ - 1.3.3
+ - 1.4.2
+
 env:
-  global:
-  - secure: "gewG9b13l2/JJkag584f/e7vbH+CN5sE/v5IxJLI24vVBsta0L/rUiRN5e/NRXiyNDT4X2XV6R6BLED8VaUo3vDSWHBFtRAuwbMswxRcjDuIGph53zTNukhEwbFThEhZO5vO9T1tECXK1D8ktgQjmqwQ171InUy2loLFWloUTF4="  # at some point, when testing on osx
   matrix:
-  - BLAS_LIB=OpenBLAS && GOARCH=amd64
-  #- BLAS_LIB=native && GOCROSS=386 && GO386=387 # GOCROSS will be renamed GOARCH to avoid gvm (?) from fiddling with it
+  - BLAS_LIB=OpenBLAS
+  - BLAS_LIB=gonum
   # at some point, when travis allows builds on darwin
   #- BLAS_LIB=Accellerate
   # at some point, when the issue with drotgm is resolved
   #- BLAS_LIB=ATLAS
 
-
-go:
- - 1.3.3
- - 1.4.2
- - tip
-
+# Required for coverage.
 before_install:
- - sudo apt-get update -qq
- - if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
+ - go get golang.org/x/tools/cmd/cover
  - go get github.com/mattn/goveralls
 
-
+# Install the appropriate blas library if we are using cgo.
 install:
- - if [[ "$BLAS_LIB" == "ATLAS" ]]; then sudo apt-get install -qq libatlas-base-dev; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo apt-get install -qq gfortran; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd ~; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo git clone --depth=1 git://github.com/xianyi/OpenBLAS; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd OpenBLAS; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo make FC=gfortran &> /dev/null; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo make PREFIX=/usr install; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then curl http://www.netlib.org/blas/blast-forum/cblas.tgz | tar -zx; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd CBLAS; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo mv Makefile.LINUX Makefile.in; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo BLLIB=/usr/lib/libopenblas.a make alllib; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then sudo mv lib/cblas_LINUX.a /usr/lib/libcblas.a; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then export CGO_LDFLAGS="-L/usr/lib -lopenblas"; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then go get github.com/gonum/blas; fi # get rid of this when the fork is merged
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then pushd cgo; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then go install -v -x; fi
- - if [[ "$BLAS_LIB" == "OpenBLAS" ]]; then popd; fi
- - if [[ "$GOCROSS" == "386" && "$TRAVIS_GO_VERSION" != "tip" ]]; then export GOARCH=386; fi
- - if [[ "$GOARCH" == "386" ]]; then gvm cross linux 386; fi
+ - source .travis/$TRAVIS_OS_NAME/$BLAS_LIB/install.sh
  - go get github.com/gonum/floats
 
-
+# Get deps, build, test, and ensure the code is gofmt'ed.
+# Move into the native directory if we aren't using an external blas lib.
+# If we are building as gonum, then we have access to the coveralls api key, so we can run coverage as well.
 script:
- - go version
- - go env
- - env
- - if [[ "$BLAS_LIB" == "native" ]]; then pushd native; fi
+ - if [[ "$BLAS_LIB" == "gonum" ]]; then pushd native; fi
  - go get -d -t -v ./...
- - go test -x -v ./...
+ - go test -a -v ./...
+ - go test -a -tags noasm -v ./...
  - diff <(gofmt -d .) <("")
- - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash -c "${TRAVIS_BUILD_DIR}/.test-coverage.sh"; fi
-
-after_failure: failure
-
-notifications:
-  email:
-    recipients:
-      - jonathan.lawlor@gmail.com
-    on_success: change
-    on_failure: always
+ - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash -c "${TRAVIS_BUILD_DIR}/.travis/test-coverage.sh"; fi

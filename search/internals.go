@@ -51,16 +51,16 @@ func setupFuncs(g graph.Graph, cost graph.CostFunc, heuristicCost graph.Heuristi
 	case graph.DirectedGraph:
 		sf.successors = g.Successors
 		sf.predecessors = g.Predecessors
-		sf.neighbors = g.Neighbors
+		sf.neighbors = g.From
 		sf.isSuccessor = genIsSuccessor(g)
 		sf.isPredecessor = genIsPredecessor(g)
 		sf.isNeighbor = genIsNeighbor(g)
 		sf.edgeBetween = g.EdgeBetween
 		sf.edgeTo = g.EdgeTo
 	default:
-		sf.successors = g.Neighbors
-		sf.predecessors = g.Neighbors
-		sf.neighbors = g.Neighbors
+		sf.successors = g.From
+		sf.predecessors = g.From
+		sf.neighbors = g.From
 		isNeighbor := genIsNeighbor(g)
 		sf.isSuccessor = isNeighbor
 		sf.isPredecessor = isNeighbor

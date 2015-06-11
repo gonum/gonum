@@ -29,7 +29,7 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 	case graph.DirectedGraph:
 		neighbors = g.Successors
 	default:
-		neighbors = g.Neighbors
+		neighbors = g.From
 	}
 
 	if b.visited == nil {
@@ -132,7 +132,7 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 	case graph.DirectedGraph:
 		neighbors = g.Successors
 	default:
-		neighbors = g.Neighbors
+		neighbors = g.From
 	}
 
 	if d.visited == nil {

@@ -25,7 +25,7 @@ For information on the specification for Cost functions, please see the Coster i
 
 Finally, although the functions take in a Graph -- they will always use the correct behavior.
 If your graph implements DirectedGraph, it will use Successors and Predecessors where applicable,
-if undirected, it will use Neighbors instead. If it implements neither, it will scan the edge list
+if undirected, it will use From instead. If it implements neither, it will scan the edge list
 for successors and predecessors where applicable. (This is slow, you should always implement either
 Directed or Undirected)
 

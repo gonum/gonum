@@ -267,7 +267,7 @@ func (g johnsonGraph) Successors(n graph.Node) []graph.Node {
 func (johnsonGraph) Has(graph.Node) bool {
 	panic("search: unintended use of johnsonGraph")
 }
-func (johnsonGraph) Neighbors(graph.Node) []graph.Node {
+func (johnsonGraph) From(graph.Node) []graph.Node {
 	panic("search: unintended use of johnsonGraph")
 }
 func (johnsonGraph) EdgeBetween(_, _ graph.Node) graph.Edge {

@@ -174,7 +174,7 @@ func (g *DirectedGraph) Predecessors(n graph.Node) []graph.Node {
 	return predecessors
 }
 
-func (g *DirectedGraph) Neighbors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) From(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}

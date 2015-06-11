@@ -19,8 +19,8 @@ import (
 func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok bool) {
 	jg := johnsonWeightAdjuster{
 		g:      g,
-		from:   g.Neighbors,
-		to:     g.Neighbors,
+		from:   g.From,
+		to:     g.From,
 		weight: weight,
 	}
 	switch g := g.(type) {
@@ -135,7 +135,7 @@ func (g johnsonWeightAdjuster) Cost(e graph.Edge) float64 {
 	return g.weight(e) + g.adjustBy.WeightTo(e.From()) - g.adjustBy.WeightTo(e.To())
 }
 
-func (johnsonWeightAdjuster) Neighbors(graph.Node) []graph.Node {
+func (johnsonWeightAdjuster) From(graph.Node) []graph.Node {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }
 func (johnsonWeightAdjuster) EdgeBetween(_, _ graph.Node) graph.Edge {

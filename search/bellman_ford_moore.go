@@ -16,7 +16,7 @@ func BellmanFordFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) (path S
 		return Shortest{from: u}, true
 	}
 	var (
-		from   = g.Neighbors
+		from   = g.From
 		edgeTo func(graph.Node, graph.Node) graph.Edge
 	)
 	switch g := g.(type) {

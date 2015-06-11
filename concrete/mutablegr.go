@@ -153,7 +153,7 @@ func (g *Graph) EmptyGraph() {
 
 /* Graph implementation */
 
-func (g *Graph) Neighbors(n graph.Node) []graph.Node {
+func (g *Graph) From(n graph.Node) []graph.Node {
 	if !g.Has(n) {
 		return nil
 	}

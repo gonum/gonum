@@ -31,8 +31,9 @@ type Graph interface {
 	// Nodes returns all the nodes in the graph.
 	Nodes() []Node
 
-	// Neighbors returns all nodes connected by any edge to this node.
-	Neighbors(Node) []Node
+	// From returns all nodes that can be reached from
+	// the given node.
+	From(Node) []Node
 
 	// EdgeBetween returns an edge between node and neighbor such that
 	// From is one argument and To is the other. If no

@@ -74,7 +74,7 @@ func (g *DenseGraph) DirectedEdgeList() []graph.Edge {
 	return edges
 }
 
-func (g *DenseGraph) Neighbors(n graph.Node) []graph.Node {
+func (g *DenseGraph) From(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
 		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != inf ||

@@ -171,7 +171,7 @@ func (g *TileGraph) CoordsToNode(row, col int) graph.Node {
 	return concrete.Node(id)
 }
 
-func (g *TileGraph) Neighbors(n graph.Node) []graph.Node {
+func (g *TileGraph) From(n graph.Node) []graph.Node {
 	id := n.ID()
 	if !g.Has(n) {
 		return nil
@@ -210,7 +210,7 @@ func (g *TileGraph) Has(n graph.Node) bool {
 }
 
 func (g *TileGraph) Degree(n graph.Node) int {
-	return len(g.Neighbors(n)) * 2
+	return len(g.From(n)) * 2
 }
 
 func (g *TileGraph) EdgeList() []graph.Edge {
@@ -220,7 +220,7 @@ func (g *TileGraph) EdgeList() []graph.Edge {
 			continue
 		}
 
-		for _, succ := range g.Neighbors(concrete.Node(id)) {
+		for _, succ := range g.From(concrete.Node(id)) {
 			edges = append(edges, concrete.Edge{concrete.Node(id), succ})
 		}
 	}

@@ -65,7 +65,7 @@ func TestDenseAddRemove(t *testing.T) {
 	dg := concrete.NewDenseGraph(10, false)
 	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1, false)
 
-	if neighbors := dg.Neighbors(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
+	if neighbors := dg.From(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeBetween(concrete.Node(0), concrete.Node(2)) == nil {
 		t.Errorf("Couldn't add neighbor")
 	}
@@ -80,7 +80,7 @@ func TestDenseAddRemove(t *testing.T) {
 		t.Errorf("Adding undirected edge didn't create predecessor")
 	}
 
-	if neighbors := dg.Neighbors(concrete.Node(2)); len(neighbors) != 1 || neighbors[0].ID() != 0 ||
+	if neighbors := dg.From(concrete.Node(2)); len(neighbors) != 1 || neighbors[0].ID() != 0 ||
 		dg.EdgeBetween(concrete.Node(2), concrete.Node(0)) == nil {
 		t.Errorf("Adding an undirected neighbor didn't add it reciprocally")
 	}
@@ -97,7 +97,7 @@ func TestDenseAddRemove(t *testing.T) {
 
 	dg.RemoveEdge(concrete.Edge{concrete.Node(0), concrete.Node(2)}, true)
 
-	if neighbors := dg.Neighbors(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
+	if neighbors := dg.From(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeBetween(concrete.Node(0), concrete.Node(2)) == nil {
 		t.Errorf("Removing a directed edge changed result of neighbors when neighbors is undirected; neighbors: %v", neighbors)
 	}
@@ -111,7 +111,7 @@ func TestDenseAddRemove(t *testing.T) {
 		t.Errorf("Removing directed edge improperly removed predecessor")
 	}
 
-	if neighbors := dg.Neighbors(concrete.Node(2)); len(neighbors) != 1 || neighbors[0].ID() != 0 ||
+	if neighbors := dg.From(concrete.Node(2)); len(neighbors) != 1 || neighbors[0].ID() != 0 ||
 		dg.EdgeBetween(concrete.Node(2), concrete.Node(0)) == nil {
 		t.Errorf("Removing a directed edge removed reciprocal edge, neighbors: %v", neighbors)
 	}
@@ -126,7 +126,7 @@ func TestDenseAddRemove(t *testing.T) {
 	}
 
 	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2, true)
-	// I figure we've torture tested Neighbors/Successors/Predecessors at this point
+	// I figure we've torture tested From/Successors/Predecessors at this point
 	// so we'll just use the bool functions now
 	if dg.EdgeTo(concrete.Node(0), concrete.Node(2)) == nil {
 		t.Error("Adding directed edge didn't change successor back")

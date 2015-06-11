@@ -13,7 +13,7 @@ import "github.com/gonum/graph"
 // The time complexity of FloydWarshall is O(|V|^3).
 func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok bool) {
 	var (
-		from   = g.Neighbors
+		from   = g.From
 		edgeTo func(graph.Node, graph.Node) graph.Edge
 	)
 	switch g := g.(type) {

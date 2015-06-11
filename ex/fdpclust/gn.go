@@ -128,7 +128,7 @@ func (g *GraphNode) nodes(list []graph.Node, visited map[int]struct{}) []graph.N
 	return list
 }
 
-func (g *GraphNode) Neighbors(n graph.Node) []graph.Node {
+func (g *GraphNode) From(n graph.Node) []graph.Node {
 	if n.ID() == g.ID() {
 		return g.neighbors
 	}

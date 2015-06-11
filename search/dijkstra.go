@@ -20,7 +20,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 		return Shortest{from: u}
 	}
 	var (
-		from   = g.Neighbors
+		from   = g.From
 		edgeTo func(graph.Node, graph.Node) graph.Edge
 	)
 	switch g := g.(type) {
@@ -87,7 +87,7 @@ func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) 
 // result of the work in the paths parameter which is a reference type.
 func dijkstraAllPaths(g graph.Graph, weight graph.CostFunc, paths AllShortest) {
 	var (
-		from   = g.Neighbors
+		from   = g.From
 		edgeTo func(graph.Node, graph.Node) graph.Edge
 	)
 	switch g := g.(type) {

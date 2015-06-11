@@ -61,7 +61,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 		for queue.Len() != 0 {
 			v := queue.Dequeue()
 			stack.Push(v)
-			for _, w := range g.Neighbors(v) {
+			for _, w := range g.From(v) {
 				// w found for the first time?
 				if d[w.ID()] < 0 {
 					queue.Enqueue(w)

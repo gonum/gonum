@@ -82,11 +82,11 @@ func TestTileGraph(t *testing.T) {
 		t.Error("ID to Coords fails on 3,0")
 	}
 
-	if succ := tg.Neighbors(concrete.Node(0)); succ != nil || len(succ) != 0 {
+	if succ := tg.From(concrete.Node(0)); succ != nil || len(succ) != 0 {
 		t.Error("Successors for impassable tile not 0")
 	}
 
-	if succ := tg.Neighbors(concrete.Node(2)); succ == nil || len(succ) != 2 {
+	if succ := tg.From(concrete.Node(2)); succ == nil || len(succ) != 2 {
 		t.Error("Incorrect number of successors for (0,2)")
 	} else {
 		for _, s := range succ {

@@ -109,7 +109,7 @@ func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
 	cost := setupFuncs(src, nil, nil).cost
 
 	for _, node := range src.Nodes() {
-		succs := src.Neighbors(node)
+		succs := src.From(node)
 		dst.AddNode(node)
 		for _, succ := range succs {
 			edge := src.EdgeBetween(node, succ)
@@ -503,7 +503,7 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, cores [][]graph.Node) {
 		neighbours = make(map[int][]graph.Node)
 	)
 	for _, n := range nodes {
-		adj := g.Neighbors(n)
+		adj := g.From(n)
 		neighbours[n.ID()] = adj
 		dv[n.ID()] = len(adj)
 		if len(adj) > maxDegree {
@@ -597,7 +597,7 @@ func BronKerbosch(g graph.Graph) [][]graph.Node {
 	var bk bronKerbosch
 	order, _ := VertexOrdering(g)
 	for _, v := range order {
-		neighbours := g.Neighbors(v)
+		neighbours := g.From(v)
 		nv := make(Set, len(neighbours))
 		for _, n := range neighbours {
 			nv.add(n)
@@ -626,7 +626,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Graph, r []graph.Node, p, x S
 		if nu.has(v) {
 			continue
 		}
-		neighbours := g.Neighbors(v)
+		neighbours := g.From(v)
 		nv := make(Set, len(neighbours))
 		for _, n := range neighbours {
 			nv.add(n)
@@ -656,10 +656,10 @@ func (*bronKerbosch) choosePivotFrom(g graph.Graph, p, x Set) (neighbors []graph
 	// compile time option.
 	if !tomitaTanakaTakahashi {
 		for _, n := range p {
-			return g.Neighbors(n)
+			return g.From(n)
 		}
 		for _, n := range x {
-			return g.Neighbors(n)
+			return g.From(n)
 		}
 		panic("bronKerbosch: empty set")
 	}
@@ -671,7 +671,7 @@ func (*bronKerbosch) choosePivotFrom(g graph.Graph, p, x Set) (neighbors []graph
 	maxNeighbors := func(s Set) {
 	outer:
 		for _, u := range s {
-			nb := g.Neighbors(u)
+			nb := g.From(u)
 			c := len(nb)
 			if c <= max {
 				continue

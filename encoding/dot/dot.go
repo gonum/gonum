@@ -169,7 +169,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 		if s, ok := n.(Subgrapher); ok {
 			// If the node is not linked to any other node
 			// the graph needs to be written now.
-			if len(g.Neighbors(n)) == 0 {
+			if len(g.From(n)) == 0 {
 				g := s.Subgraph()
 				_, subIsDirected := g.(graph.DirectedGraph)
 				if subIsDirected != isDirected {
@@ -204,7 +204,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 		if isDirected {
 			to = dg.Successors(n)
 		} else {
-			to = g.Neighbors(n)
+			to = g.From(n)
 		}
 		sort.Sort(byID(to))
 		for _, t := range to {

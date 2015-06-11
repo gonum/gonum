@@ -7,7 +7,6 @@ package optimize
 import (
 	"fmt"
 	"math"
-	"reflect"
 	"testing"
 
 	"github.com/gonum/floats"
@@ -16,8 +15,10 @@ import (
 )
 
 type unconstrainedTest struct {
-	// f is the function that is being minimized.
-	f Function
+	// name is the name of the test function.
+	name string
+	// p is the optimization problem to be solved.
+	p Problem
 	// x is the initial guess.
 	x []float64
 	// gradTol is the absolute gradient tolerance for the test. If gradTol == 0,
@@ -39,249 +40,422 @@ func (t unconstrainedTest) String() string {
 	if dim <= 10 {
 		// Print the initial X only for small-dimensional problems.
 		return fmt.Sprintf("F: %v\nDim: %v\nInitial X: %v\nGradientThreshold: %v",
-			reflect.TypeOf(t.f), dim, t.x, t.gradTol)
+			t.name, dim, t.x, t.gradTol) // TODO This won't print the name of the test
 	}
 	return fmt.Sprintf("F: %v\nDim: %v\nGradientThreshold: %v",
-		reflect.TypeOf(t.f), dim, t.gradTol)
-}
-
-// gradFree ensures that the function is gradient free.
-type gradFree struct {
-	f Function
-}
-
-func (g gradFree) Func(x []float64) float64 {
-	return g.f.Func(x)
-}
-
-// makeGradFree ensures that a function contains no gradient method.
-func makeGradFree(f Function) gradFree {
-	return gradFree{f}
+		t.name, dim, t.gradTol)
 }
 
 var gradFreeTests = []unconstrainedTest{
 	{
-		f: makeGradFree(functions.Beale{}),
+		name: "Beale",
+		p: Problem{
+			Func: functions.Beale{}.Func,
+		},
 		x: []float64{1, 1},
 	},
 	{
-		f: makeGradFree(functions.BiggsEXP6{}),
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+		},
 		x: []float64{1, 2, 1, 1, 1, 1},
 	},
 	{
-		f: makeGradFree(functions.BrownAndDennis{}),
+		name: "BrownAndDennis",
+		p: Problem{
+			Func: functions.BrownAndDennis{}.Func,
+		},
 		x: []float64{25, 5, -5, -1},
 	},
 	{
-		f: makeGradFree(functions.ExtendedRosenbrock{}),
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+		},
 		x: []float64{-10, 10},
 	},
 	{
-		f: makeGradFree(functions.ExtendedRosenbrock{}),
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+		},
 		x: []float64{-5, 4, 16, 3},
 	},
 }
 
 var gradientDescentTests = []unconstrainedTest{
 	{
-		f: functions.Beale{},
+		name: "Beale",
+		p: Problem{
+			Func: functions.Beale{}.Func,
+			Grad: functions.Beale{}.Grad,
+		},
 		x: []float64{1, 1},
 	},
 	{
-		f: functions.Beale{},
+		name: "Beale",
+		p: Problem{
+			Func: functions.Beale{}.Func,
+			Grad: functions.Beale{}.Grad,
+		},
 		x: []float64{3.00001, 0.50001},
 	},
 	{
-		f: functions.BiggsEXP2{},
+		name: "BiggsEXP2",
+		p: Problem{
+			Func: functions.BiggsEXP2{}.Func,
+			Grad: functions.BiggsEXP2{}.Grad,
+		},
 		x: []float64{1, 2},
 	},
 	{
-		f: functions.BiggsEXP2{},
+		name: "BiggsEXP2",
+		p: Problem{
+			Func: functions.BiggsEXP2{}.Func,
+			Grad: functions.BiggsEXP2{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001},
 	},
 	{
-		f: functions.BiggsEXP3{},
+		name: "BiggsEXP3",
+		p: Problem{
+			Func: functions.BiggsEXP3{}.Func,
+			Grad: functions.BiggsEXP3{}.Grad,
+		},
 		x: []float64{1, 2, 1},
 	},
 	{
-		f: functions.BiggsEXP3{},
+		name: "BiggsEXP3",
+		p: Problem{
+			Func: functions.BiggsEXP3{}.Func,
+			Grad: functions.BiggsEXP3{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001, 3.00001},
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{-1.2, 1},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{1.00001, 1.00001},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{-1.2, 1, -1.2},
 		gradTol: 1e-10,
 	},
 	{
-		f:    functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:    []float64{-120, 100, 50},
 		long: true,
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x: []float64{1, 1, 1},
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{1.00001, 1.00001, 1.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f:       functions.Gaussian{},
+		name: "Gaussian",
+		p: Problem{
+			Func: functions.Gaussian{}.Func,
+			Grad: functions.Gaussian{}.Grad,
+		},
 		x:       []float64{0.4, 1, 0},
 		gradTol: 1e-9,
 	},
 	{
-		f:       functions.Gaussian{},
+		name: "Gaussian",
+		p: Problem{
+			Func: functions.Gaussian{}.Func,
+			Grad: functions.Gaussian{}.Grad,
+		},
 		x:       []float64{0.3989561, 1.0000191, 0},
 		gradTol: 1e-9,
 	},
 	{
-		f: functions.HelicalValley{},
+		name: "HelicalValley",
+		p: Problem{
+			Func: functions.HelicalValley{}.Func,
+			Grad: functions.HelicalValley{}.Grad,
+		},
 		x: []float64{-1, 0, 0},
 	},
 	{
-		f: functions.HelicalValley{},
+		name: "HelicalValley",
+		p: Problem{
+			Func: functions.HelicalValley{}.Func,
+			Grad: functions.HelicalValley{}.Grad,
+		},
 		x: []float64{1.00001, 0.00001, 0.00001},
 	},
 	{
-		f:       functions.Trigonometric{},
+		name: "Trigonometric",
+		p: Problem{
+			Func: functions.Trigonometric{}.Func,
+			Grad: functions.Trigonometric{}.Grad,
+		},
 		x:       []float64{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1},
 		gradTol: 1e-7,
 	},
 	{
-		f: functions.Trigonometric{},
+		name: "Trigonometric",
+		p: Problem{
+			Func: functions.Trigonometric{}.Func,
+			Grad: functions.Trigonometric{}.Grad,
+		},
 		x: []float64{0.042964, 0.043976, 0.045093, 0.046338, 0.047744,
 			0.049354, 0.051237, 0.195209, 0.164977, 0.060148},
 		gradTol: 1e-8,
 	},
 	newVariablyDimensioned(2, 0),
 	{
-		f: functions.VariablyDimensioned{},
+		name: "VariablyDimensioned",
+		p: Problem{
+			Func: functions.VariablyDimensioned{}.Func,
+			Grad: functions.VariablyDimensioned{}.Grad,
+		},
 		x: []float64{1.00001, 1.00001},
 	},
 	newVariablyDimensioned(10, 0),
 	{
-		f: functions.VariablyDimensioned{},
+		name: "VariablyDimensioned",
+		p: Problem{
+			Func: functions.VariablyDimensioned{}.Func,
+			Grad: functions.VariablyDimensioned{}.Grad,
+		},
 		x: []float64{1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001, 1.00001},
 	},
 }
 
 var cgTests = []unconstrainedTest{
 	{
-		f: functions.BiggsEXP4{},
+		name: "BiggsEXP4",
+		p: Problem{
+			Func: functions.BiggsEXP4{}.Func,
+			Grad: functions.BiggsEXP4{}.Grad,
+		},
 		x: []float64{1, 2, 1, 1},
 	},
 	{
-		f: functions.BiggsEXP4{},
+		name: "BiggsEXP4",
+		p: Problem{
+			Func: functions.BiggsEXP4{}.Func,
+			Grad: functions.BiggsEXP4{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001},
 	},
 	{
-		f:       functions.BiggsEXP5{},
+		name: "BiggsEXP5",
+		p: Problem{
+			Func: functions.BiggsEXP5{}.Func,
+			Grad: functions.BiggsEXP5{}.Grad,
+		},
 		x:       []float64{1, 2, 1, 1, 1},
 		gradTol: 1e-7,
 	},
 	{
-		f: functions.BiggsEXP5{},
+		name: "BiggsEXP5",
+		p: Problem{
+			Func: functions.BiggsEXP5{}.Func,
+			Grad: functions.BiggsEXP5{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001},
 	},
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-7,
 	},
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f: functions.Box3D{},
+		name: "Box3D",
+		p: Problem{
+			Func: functions.Box3D{}.Func,
+			Grad: functions.Box3D{}.Grad,
+		},
 		x: []float64{0, 10, 20},
 	},
 	{
-		f: functions.Box3D{},
+		name: "Box3D",
+		p: Problem{
+			Func: functions.Box3D{}.Func,
+			Grad: functions.Box3D{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001, 1.00001},
 	},
 	{
-		f: functions.Box3D{},
+		name: "Box3D",
+		p: Problem{
+			Func: functions.Box3D{}.Func,
+			Grad: functions.Box3D{}.Grad,
+		},
 		x: []float64{100.00001, 100.00001, 0.00001},
 	},
 	{
-		f: functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x: []float64{3, -1, 0, 3},
 	},
 	{
-		f: functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f:       functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x:       []float64{3, -1, 0, 3, 3, -1, 0, 3},
 		gradTol: 1e-8,
 	},
 	{
-		f: functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x: []float64{-1.2, 1, -1.2, 1},
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{1e4, 1e4},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{1.00001, 1.00001, 1.00001, 1.00001},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.PenaltyI{},
+		name: "PenaltyI",
+		p: Problem{
+			Func: functions.PenaltyI{}.Func,
+			Grad: functions.PenaltyI{}.Grad,
+		},
 		x:       []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 		gradTol: 1e-9,
 	},
 	{
-		f:       functions.PenaltyI{},
+		name: "PenaltyI",
+		p: Problem{
+			Func: functions.PenaltyI{}.Func,
+			Grad: functions.PenaltyI{}.Grad,
+		},
 		x:       []float64{0.250007, 0.250007, 0.250007, 0.250007},
 		gradTol: 1e-10,
 	},
 	{
-		f: functions.PenaltyI{},
+		name: "PenaltyI",
+		p: Problem{
+			Func: functions.PenaltyI{}.Func,
+			Grad: functions.PenaltyI{}.Grad,
+		},
 		x: []float64{0.1581, 0.1581, 0.1581, 0.1581, 0.1581, 0.1581,
 			0.1581, 0.1581, 0.1581, 0.1581},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.PenaltyII{},
+		name: "PenaltyII",
+		p: Problem{
+			Func: functions.PenaltyII{}.Func,
+			Grad: functions.PenaltyII{}.Grad,
+		},
 		x:       []float64{0.5, 0.5, 0.5, 0.5},
 		gradTol: 1e-8,
 	},
 	{
-		f:       functions.PenaltyII{},
+		name: "PenaltyII",
+		p: Problem{
+			Func: functions.PenaltyII{}.Func,
+			Grad: functions.PenaltyII{}.Grad,
+		},
 		x:       []float64{0.19999, 0.19131, 0.4801, 0.51884},
 		gradTol: 1e-8,
 	},
 	{
-		f: functions.PenaltyII{},
+		name: "PenaltyII",
+		p: Problem{
+			Func: functions.PenaltyII{}.Func,
+			Grad: functions.PenaltyII{}.Grad,
+		},
 		x: []float64{0.19998, 0.01035, 0.01960, 0.03208, 0.04993, 0.07651,
 			0.11862, 0.19214, 0.34732, 0.36916},
 		gradTol: 1e-6,
 	},
 	{
-		f:       functions.PowellBadlyScaled{},
+		name: "PowellBadlyScaled",
+		p: Problem{
+			Func: functions.PowellBadlyScaled{}.Func,
+			Grad: functions.PowellBadlyScaled{}.Grad,
+		},
 		x:       []float64{1.09815e-05, 9.10614},
 		gradTol: 1e-8,
 	},
@@ -289,29 +463,49 @@ var cgTests = []unconstrainedTest{
 	newVariablyDimensioned(1000, 1e-7),
 	newVariablyDimensioned(10000, 1e-4),
 	{
-		f:       functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x:       []float64{0, 0, 0, 0, 0, 0},
 		gradTol: 1e-6,
 	},
 	{
-		f:       functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x:       []float64{-0.01572, 1.01243, -0.23299, 1.26043, -1.51372, 0.99299},
 		gradTol: 1e-6,
 	},
 	{
-		f:       functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		gradTol: 1e-6,
 		long:    true,
 	},
 	{
-		f: functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x: []float64{-1.53070e-05, 0.99978, 0.01476, 0.14634, 1.00082,
 			-2.61773, 4.10440, -3.14361, 1.05262},
 		gradTol: 1e-6,
 	},
 	{
-		f:       functions.Wood{},
+		name: "Wood",
+		p: Problem{
+			Func: functions.Wood{}.Func,
+			Grad: functions.Wood{}.Grad,
+		},
 		x:       []float64{-3, -1, -3, -1},
 		gradTol: 1e-6,
 	},
@@ -319,158 +513,298 @@ var cgTests = []unconstrainedTest{
 
 var quasiNewtonTests = []unconstrainedTest{
 	{
-		f: functions.BiggsEXP4{},
+		name: "BiggsEXP4",
+		p: Problem{
+			Func: functions.BiggsEXP4{}.Func,
+			Grad: functions.BiggsEXP4{}.Grad,
+		},
 		x: []float64{1, 2, 1, 1},
 	},
 	{
-		f: functions.BiggsEXP4{},
+		name: "BiggsEXP4",
+		p: Problem{
+			Func: functions.BiggsEXP4{}.Func,
+			Grad: functions.BiggsEXP4{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001},
 	},
 	{
-		f: functions.BiggsEXP5{},
+		name: "BiggsEXP5",
+		p: Problem{
+			Func: functions.BiggsEXP5{}.Func,
+			Grad: functions.BiggsEXP5{}.Grad,
+		},
 		x: []float64{1, 2, 1, 1, 1},
 	},
 	{
-		f: functions.BiggsEXP5{},
+		name: "BiggsEXP5",
+		p: Problem{
+			Func: functions.BiggsEXP5{}.Func,
+			Grad: functions.BiggsEXP5{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001},
 	},
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-8,
 	},
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f: functions.Box3D{},
+		name: "Box3D",
+		p: Problem{
+			Func: functions.Box3D{}.Func,
+			Grad: functions.Box3D{}.Grad,
+		},
 		x: []float64{0, 10, 20},
 	},
 	{
-		f: functions.Box3D{},
+		name: "Box3D",
+		p: Problem{
+			Func: functions.Box3D{}.Func,
+			Grad: functions.Box3D{}.Grad,
+		},
 		x: []float64{1.00001, 10.00001, 1.00001},
 	},
 	{
-		f: functions.Box3D{},
+		name: "Box3D",
+		p: Problem{
+			Func: functions.Box3D{}.Func,
+			Grad: functions.Box3D{}.Grad,
+		},
 		x: []float64{100.00001, 100.00001, 0.00001},
 	},
 	{
-		f: functions.BrownBadlyScaled{},
+		name: "BrownBadlyScaled",
+		p: Problem{
+			Func: functions.BrownBadlyScaled{}.Func,
+			Grad: functions.BrownBadlyScaled{}.Grad,
+		},
 		x: []float64{1, 1},
 	},
 	{
-		f: functions.BrownBadlyScaled{},
+		name: "BrownBadlyScaled",
+		p: Problem{
+			Func: functions.BrownBadlyScaled{}.Func,
+			Grad: functions.BrownBadlyScaled{}.Grad,
+		},
 		x: []float64{1.000001e6, 2.01e-6},
 	},
 	{
-		f: functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x: []float64{3, -1, 0, 3},
 	},
 	{
-		f: functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f: functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x: []float64{3, -1, 0, 3, 3, -1, 0, 3},
 	},
 	{
-		f: functions.ExtendedPowellSingular{},
+		name: "ExtendedPowellSingular",
+		p: Problem{
+			Func: functions.ExtendedPowellSingular{}.Func,
+			Grad: functions.ExtendedPowellSingular{}.Grad,
+		},
 		x: []float64{0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001},
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x: []float64{-1.2, 1, -1.2, 1},
 	},
 	{
-		f: functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x: []float64{1.00001, 1.00001, 1.00001, 1.00001},
 	},
 	{
-		f:       functions.Gaussian{},
+		name: "Gaussian",
+		p: Problem{
+			Func: functions.Gaussian{}.Func,
+			Grad: functions.Gaussian{}.Grad,
+		},
 		x:       []float64{0.4, 1, 0},
 		gradTol: 1e-11,
 	},
 	{
-		f: functions.GulfResearchAndDevelopment{},
+		name: "GulfResearchAndDevelopment",
+		p: Problem{
+			Func: functions.GulfResearchAndDevelopment{}.Func,
+			Grad: functions.GulfResearchAndDevelopment{}.Grad,
+		},
 		x: []float64{5, 2.5, 0.15},
 	},
 	{
-		f: functions.GulfResearchAndDevelopment{},
+		name: "GulfResearchAndDevelopment",
+		p: Problem{
+			Func: functions.GulfResearchAndDevelopment{}.Func,
+			Grad: functions.GulfResearchAndDevelopment{}.Grad,
+		},
 		x: []float64{50.00001, 25.00001, 1.50001},
 	},
 	{
-		f: functions.GulfResearchAndDevelopment{},
+		name: "GulfResearchAndDevelopment",
+		p: Problem{
+			Func: functions.GulfResearchAndDevelopment{}.Func,
+			Grad: functions.GulfResearchAndDevelopment{}.Grad,
+		},
 		x: []float64{99.89529, 60.61453, 9.16124},
 	},
 	{
-		f: functions.GulfResearchAndDevelopment{},
+		name: "GulfResearchAndDevelopment",
+		p: Problem{
+			Func: functions.GulfResearchAndDevelopment{}.Func,
+			Grad: functions.GulfResearchAndDevelopment{}.Grad,
+		},
 		x: []float64{201.66258, 60.61633, 10.22489},
 	},
 	{
-		f: functions.PenaltyI{},
+		name: "PenaltyI",
+		p: Problem{
+			Func: functions.PenaltyI{}.Func,
+			Grad: functions.PenaltyI{}.Grad,
+		},
 		x: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 	},
 	{
-		f:       functions.PenaltyI{},
+		name: "PenaltyI",
+		p: Problem{
+			Func: functions.PenaltyI{}.Func,
+			Grad: functions.PenaltyI{}.Grad,
+		},
 		x:       []float64{0.250007, 0.250007, 0.250007, 0.250007},
 		gradTol: 1e-9,
 	},
 	{
-		f: functions.PenaltyI{},
+		name: "PenaltyI",
+		p: Problem{
+			Func: functions.PenaltyI{}.Func,
+			Grad: functions.PenaltyI{}.Grad,
+		},
 		x: []float64{0.1581, 0.1581, 0.1581, 0.1581, 0.1581, 0.1581,
 			0.1581, 0.1581, 0.1581, 0.1581},
 	},
 	{
-		f:       functions.PenaltyII{},
+		name: "PenaltyII",
+		p: Problem{
+			Func: functions.PenaltyII{}.Func,
+			Grad: functions.PenaltyII{}.Grad,
+		},
 		x:       []float64{0.5, 0.5, 0.5, 0.5},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.PenaltyII{},
+		name: "PenaltyII",
+		p: Problem{
+			Func: functions.PenaltyII{}.Func,
+			Grad: functions.PenaltyII{}.Grad,
+		},
 		x:       []float64{0.19999, 0.19131, 0.4801, 0.51884},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.PenaltyII{},
+		name: "PenaltyII",
+		p: Problem{
+			Func: functions.PenaltyII{}.Func,
+			Grad: functions.PenaltyII{}.Grad,
+		},
 		x:       []float64{0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5},
 		gradTol: 1e-9,
 	},
 	{
-		f: functions.PenaltyII{},
+		name: "PenaltyII",
+		p: Problem{
+			Func: functions.PenaltyII{}.Func,
+			Grad: functions.PenaltyII{}.Grad,
+		},
 		x: []float64{0.19998, 0.01035, 0.01960, 0.03208, 0.04993, 0.07651,
 			0.11862, 0.19214, 0.34732, 0.36916},
 		gradTol: 1e-9,
 	},
 	{
-		f: functions.PowellBadlyScaled{},
+		name: "PowellBadlyScaled",
+		p: Problem{
+			Func: functions.PowellBadlyScaled{}.Func,
+			Grad: functions.PowellBadlyScaled{}.Grad,
+		},
 		x: []float64{0, 1},
 	},
 	{
-		f:       functions.PowellBadlyScaled{},
+		name: "PowellBadlyScaled",
+		p: Problem{
+			Func: functions.PowellBadlyScaled{}.Func,
+			Grad: functions.PowellBadlyScaled{}.Grad,
+		},
 		x:       []float64{1.09815e-05, 9.10614},
 		gradTol: 1e-10,
 	},
 	newVariablyDimensioned(100, 1e-10),
 	{
-		f:       functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x:       []float64{0, 0, 0, 0, 0, 0},
 		gradTol: 1e-7,
 	},
 	{
-		f:       functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x:       []float64{-0.01572, 1.01243, -0.23299, 1.26043, -1.51372, 0.99299},
 		gradTol: 1e-7,
 	},
 	{
-		f:       functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x:       []float64{0, 0, 0, 0, 0, 0, 0, 0, 0},
 		gradTol: 1e-8,
 	},
 	{
-		f: functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+		},
 		x: []float64{-1.53070e-05, 0.99978, 0.01476, 0.14634, 1.00082,
 			-2.61773, 4.10440, -3.14361, 1.05262},
 		gradTol: 1e-8,
@@ -479,54 +813,94 @@ var quasiNewtonTests = []unconstrainedTest{
 
 var bfgsTests = []unconstrainedTest{
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.BrownAndDennis{},
+		name: "BrownAndDennis",
+		p: Problem{
+			Func: functions.BrownAndDennis{}.Func,
+			Grad: functions.BrownAndDennis{}.Grad,
+		},
 		x:       []float64{25, 5, -5, -1},
 		gradTol: 1e-5,
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{1e5, 1e5},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.Gaussian{},
+		name: "Gaussian",
+		p: Problem{
+			Func: functions.Gaussian{}.Func,
+			Grad: functions.Gaussian{}.Grad,
+		},
 		x:       []float64{0.398, 1, 0},
 		gradTol: 1e-11,
 	},
 	{
-		f: functions.Wood{},
+		name: "Wood",
+		p: Problem{
+			Func: functions.Wood{}.Func,
+			Grad: functions.Wood{}.Grad,
+		},
 		x: []float64{-3, -1, -3, -1},
 	},
 }
 
 var lbfgsTests = []unconstrainedTest{
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1, 2, 1, 1, 1, 1},
 		gradTol: 1e-8,
 	},
 	{
-		f:       functions.BiggsEXP6{},
+		name: "BiggsEXP6",
+		p: Problem{
+			Func: functions.BiggsEXP6{}.Func,
+			Grad: functions.BiggsEXP6{}.Grad,
+		},
 		x:       []float64{1.00001, 10.00001, 1.00001, 5.00001, 4.00001, 3.00001},
 		gradTol: 1e-8,
 	},
 	{
-		f:       functions.ExtendedRosenbrock{},
+		name: "ExtendedRosenbrock",
+		p: Problem{
+			Func: functions.ExtendedRosenbrock{}.Func,
+			Grad: functions.ExtendedRosenbrock{}.Grad,
+		},
 		x:       []float64{1e7, 1e6},
 		gradTol: 1e-10,
 	},
 	{
-		f:       functions.Gaussian{},
+		name: "Gaussian",
+		p: Problem{
+			Func: functions.Gaussian{}.Func,
+			Grad: functions.Gaussian{}.Grad,
+		},
 		x:       []float64{0.398, 1, 0},
 		gradTol: 1e-10,
 	},
@@ -536,33 +910,68 @@ var lbfgsTests = []unconstrainedTest{
 
 var newtonTests = []unconstrainedTest{
 	{
-		f: functions.Beale{},
+		name: "Beale",
+		p: Problem{
+			Func: functions.Beale{}.Func,
+			Grad: functions.Beale{}.Grad,
+			Hess: functions.Beale{}.Hess,
+		},
 		x: []float64{1, 1},
 	},
 	{
-		f:       functions.BrownAndDennis{},
+		name: "BrownAndDennis",
+		p: Problem{
+			Func: functions.BrownAndDennis{}.Func,
+			Grad: functions.BrownAndDennis{}.Grad,
+			Hess: functions.BrownAndDennis{}.Hess,
+		},
 		x:       []float64{25, 5, -5, -1},
 		gradTol: 1e-10,
 	},
 	{
-		f: functions.BrownBadlyScaled{},
+		name: "BrownBadlyScaled",
+		p: Problem{
+			Func: functions.BrownBadlyScaled{}.Func,
+			Grad: functions.BrownBadlyScaled{}.Grad,
+			Hess: functions.BrownBadlyScaled{}.Hess,
+		},
 		x: []float64{1, 1},
 	},
 	{
-		f:       functions.PowellBadlyScaled{},
+		name: "PowellBadlyScaled",
+		p: Problem{
+			Func: functions.PowellBadlyScaled{}.Func,
+			Grad: functions.PowellBadlyScaled{}.Grad,
+			Hess: functions.PowellBadlyScaled{}.Hess,
+		},
 		x:       []float64{0, 1},
 		gradTol: 1e-10,
 	},
 	{
-		f: functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+			Hess: functions.Watson{}.Hess,
+		},
 		x: []float64{0, 0, 0, 0, 0, 0},
 	},
 	{
-		f: functions.Watson{},
+		name: "Watson",
+		p: Problem{
+			Func: functions.Watson{}.Func,
+			Grad: functions.Watson{}.Grad,
+			Hess: functions.Watson{}.Hess,
+		},
 		x: []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	},
 	{
-		f: functions.Wood{},
+		name: "Wood",
+		p: Problem{
+			Func: functions.Wood{}.Func,
+			Grad: functions.Wood{}.Grad,
+			Hess: functions.Wood{}.Hess,
+		},
 		x: []float64{-3, -1, -3, -1},
 	},
 }
@@ -573,7 +982,11 @@ func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {
 		x[i] = float64(dim-i-1) / float64(dim)
 	}
 	return unconstrainedTest{
-		f:       functions.VariablyDimensioned{},
+		name: "VariablyDimensioned",
+		p: Problem{
+			Func: functions.VariablyDimensioned{}.Func,
+			Grad: functions.VariablyDimensioned{}.Grad,
+		},
 		x:       x,
 		gradTol: gradTol,
 	}
@@ -766,7 +1179,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		}
 		settings.GradientThreshold = test.gradTol
 
-		result, err := Local(test.f, test.x, settings, method)
+		result, err := Local(test.p, test.x, settings, method)
 		if err != nil {
 			t.Errorf("error finding minimum (%v) for:\n%v", err, test)
 			continue
@@ -776,11 +1189,11 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			continue
 		}
 
-		p := newProblemInfo(test.f)
+		p := newProblemInfo(test.p)
 
 		// Check that the function value at the found optimum location is
 		// equal to result.F.
-		optF := test.f.Func(result.X)
+		optF := test.p.Func(result.X)
 		if optF != result.F {
 			t.Errorf("Function value at the optimum location %v not equal to the returned value %v for:\n%v",
 				optF, result.F, test)
@@ -788,7 +1201,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		if result.Gradient != nil {
 			// Evaluate the norm of the gradient at the found optimum location.
 			g := make([]float64, len(test.x))
-			p.gradient.Grad(result.X, g)
+			p.Grad(result.X, g)
 
 			if !floats.Equal(result.Gradient, g) {
 				t.Errorf("Gradient at the optimum location not equal to the returned value for:\n%v", test)
@@ -819,19 +1232,19 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		// We are going to restart the solution using known initial data, so
 		// evaluate them.
 		settings.UseInitialData = true
-		settings.InitialValue = test.f.Func(test.x)
+		settings.InitialValue = test.p.Func(test.x)
 		if method.Needs().Gradient {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			p.gradient.Grad(test.x, settings.InitialGradient)
+			p.Grad(test.x, settings.InitialGradient)
 		}
 		if method.Needs().Hessian {
 			settings.InitialHessian = mat64.NewSymDense(len(test.x), nil)
-			p.hessian.Hess(test.x, settings.InitialHessian)
+			p.Hess(test.x, settings.InitialHessian)
 		}
 
 		// Rerun the test again to make sure that it gets the same answer with
 		// the same starting condition. Moreover, we are using the initial data.
-		result2, err2 := Local(test.f, test.x, settings, method)
+		result2, err2 := Local(test.p, test.x, settings, method)
 		if err2 != nil {
 			t.Errorf("error finding minimum second time (%v) for:\n%v", err2, test)
 			continue
@@ -868,7 +1281,10 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 }
 
 func TestIssue76(t *testing.T) {
-	f := functions.BrownAndDennis{}
+	p := Problem{
+		Func: functions.BrownAndDennis{}.Func,
+		Grad: functions.BrownAndDennis{}.Grad,
+	}
 	// Location very close to the minimum.
 	x := []float64{-11.594439904886773, 13.203630051265385, -0.40343948776868443, 0.2367787746745986}
 	s := &Settings{
@@ -880,7 +1296,7 @@ func TestIssue76(t *testing.T) {
 		LinesearchMethod: &Backtracking{},
 	}
 	// We are not interested in the error, only in the returned status.
-	r, _ := Local(f, x, s, m)
+	r, _ := Local(p, x, s, m)
 	// With the above stringent tolerance, the optimizer will never
 	// successfully reach the minimum. Check if it terminated in a finite
 	// number of steps.

@@ -8,7 +8,7 @@ import "github.com/gonum/graph"
 
 // FloydWarshall returns a shortest-path tree for the graph g or false indicating
 // that a negative cycle exists in the graph. If the graph does not implement
-// graph.Coster, UniformCost is used.
+// graph.Coster, graph.UniformCost is used.
 //
 // The time complexity of FloydWarshall is O(|V|^3).
 func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
@@ -16,7 +16,7 @@ func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
 	if g, ok := g.(graph.Coster); ok {
 		weight = g.Cost
 	} else {
-		weight = UniformCost
+		weight = graph.UniformCost
 	}
 
 	nodes := g.Nodes()

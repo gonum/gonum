@@ -4,6 +4,8 @@
 
 package graph
 
+import "math"
+
 // All a node needs to do is identify itself. This allows the user to pass in nodes more
 // interesting than an int, but also allow us to reap the benefits of having a map-storable,
 // comparable type.
@@ -187,5 +189,56 @@ type MutableDirectedGraph interface {
 // A function that returns the cost of following an edge
 type CostFunc func(Edge) float64
 
+// UniformCost returns an edge cost of 1 for a non-nil Edge and Inf for a nil Edge.
+func UniformCost(e Edge) float64 {
+	if e == nil {
+		return math.Inf(1)
+	}
+	return 1
+}
+
 // Estimates the cost of travelling between two nodes
 type HeuristicCostFunc func(Node, Node) float64
+
+// CopyUndirected copies nodes and edges as undirected edges from the source to the
+// destination without first clearing the destination. If the source does not
+// provide edge weights, UniformCost is used.
+func CopyUndirected(dst MutableGraph, src Graph) {
+	var weight CostFunc
+	if g, ok := src.(Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
+	}
+
+	for _, node := range src.Nodes() {
+		succs := src.From(node)
+		dst.AddNode(node)
+		for _, succ := range succs {
+			edge := src.Edge(node, succ)
+			dst.AddUndirectedEdge(edge, weight(edge))
+		}
+	}
+}
+
+// CopyDirected copies nodes and edges as directed edges from the source to the
+// destination without first clearing the destination. If src is undirected both
+// directions will be present in the destination after the copy is complete. If
+// the source does not provide edge weights, UniformCost is used.
+func CopyDirected(dst MutableDirectedGraph, src Graph) {
+	var weight CostFunc
+	if g, ok := src.(Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
+	}
+
+	for _, node := range src.Nodes() {
+		succs := src.From(node)
+		dst.AddNode(node)
+		for _, succ := range succs {
+			edge := src.Edge(node, succ)
+			dst.AddDirectedEdge(edge, weight(edge))
+		}
+	}
+}

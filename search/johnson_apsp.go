@@ -13,7 +13,7 @@ import (
 )
 
 // JohnsonAllPaths returns a shortest-path tree for shortest paths in the graph g.
-// If the graph does not implement graph.Coster, UniformCost is used.
+// If the graph does not implement graph.Coster, graph.UniformCost is used.
 //
 // The time complexity of JohnsonAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
@@ -25,7 +25,7 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 	if g, ok := g.(graph.Coster); ok {
 		jg.weight = g.Cost
 	} else {
-		jg.weight = UniformCost
+		jg.weight = graph.UniformCost
 	}
 
 	paths = newAllShortest(g.Nodes(), false)

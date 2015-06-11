@@ -7,7 +7,6 @@ package search
 import (
 	"container/heap"
 	"fmt"
-	"math"
 	"sort"
 
 	"github.com/gonum/graph"
@@ -42,7 +41,7 @@ func AStar(start, goal graph.Node, g graph.Graph, heuristic graph.HeuristicCostF
 	if g, ok := g.(graph.Coster); ok {
 		weight = g.Cost
 	} else {
-		weight = UniformCost
+		weight = graph.UniformCost
 	}
 	if heuristic == nil {
 		if g, ok := g.(graph.HeuristicCoster); ok {
@@ -94,60 +93,6 @@ func AStar(start, goal graph.Node, g graph.Graph, heuristic graph.HeuristicCostF
 // An admissible, consistent heuristic that won't speed up computation time at all.
 func NullHeuristic(_, _ graph.Node) float64 {
 	return 0
-}
-
-// Assumes all edges in the graph have the same weight (including edges that don't exist!)
-func UniformCost(e graph.Edge) float64 {
-	if e == nil {
-		return math.Inf(1)
-	}
-	return 1
-}
-
-/* Simple operations */
-
-// Copies a graph into the destination; maintaining all node IDs. The destination
-// need not be empty, though overlapping node IDs and conflicting edges will overwrite
-// existing data.
-func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
-	var weight graph.CostFunc
-	if g, ok := src.(graph.Coster); ok {
-		weight = g.Cost
-	} else {
-		weight = UniformCost
-	}
-
-	for _, node := range src.Nodes() {
-		succs := src.From(node)
-		dst.AddNode(node)
-		for _, succ := range succs {
-			edge := src.Edge(node, succ)
-			dst.AddUndirectedEdge(edge, weight(edge))
-		}
-	}
-
-}
-
-// Copies a graph into the destination; maintaining all node IDs. The destination
-// need not be empty, though overlapping node IDs and conflicting edges will overwrite
-// existing data.
-func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.Graph) {
-	var weight graph.CostFunc
-	if g, ok := src.(graph.Coster); ok {
-		weight = g.Cost
-	} else {
-		weight = UniformCost
-	}
-
-	for _, node := range src.Nodes() {
-		succs := src.From(node)
-		dst.AddNode(node)
-		for _, succ := range succs {
-			edge := src.Edge(node, succ)
-			dst.AddDirectedEdge(edge, weight(edge))
-		}
-	}
-
 }
 
 /* Basic Graph tests */
@@ -333,7 +278,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph) {
 	if g, ok := g.(graph.Coster); ok {
 		weight = g.Cost
 	} else {
-		weight = UniformCost
+		weight = graph.UniformCost
 	}
 
 	nlist := g.Nodes()
@@ -376,7 +321,7 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph) {
 	if g, ok := g.(graph.Coster); ok {
 		weight = g.Cost
 	} else {
-		weight = UniformCost
+		weight = graph.UniformCost
 	}
 
 	edgeList := g.Edges()

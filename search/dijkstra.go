@@ -11,7 +11,7 @@ import (
 )
 
 // DijkstraFrom returns a shortest-path tree for a shortest path from u to all nodes in
-// the graph g. If the graph does not implement graph.Coster, UniformCost is used.
+// the graph g. If the graph does not implement graph.Coster, graph.UniformCost is used.
 // DijkstraFrom will panic if g has a u-reachable negative edge weight.
 //
 // The time complexity of DijkstrFrom is O(|E|+|V|.log|V|).
@@ -23,7 +23,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 	if g, ok := g.(graph.Coster); ok {
 		weight = g.Cost
 	} else {
-		weight = UniformCost
+		weight = graph.UniformCost
 	}
 
 	nodes := g.Nodes()
@@ -59,7 +59,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 }
 
 // DijkstraAllPaths returns a shortest-path tree for shortest paths in the graph g.
-// If the graph does not implement graph.Coster, UniformCost is used.
+// If the graph does not implement graph.Coster, graph.UniformCost is used.
 // DijkstraAllPaths will panic if g has a negative edge weight.
 //
 // The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
@@ -78,7 +78,7 @@ func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
 	if g, ok := g.(graph.Coster); ok {
 		weight = g.Cost
 	} else {
-		weight = UniformCost
+		weight = graph.UniformCost
 	}
 
 	var Q priorityQueue

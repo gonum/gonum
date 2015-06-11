@@ -32,7 +32,7 @@ func HITS(g graph.DirectedGraph, tol float64) map[int]HubAuthority {
 	nodesLinkingTo := make([][]int, len(nodes))
 	nodesLinkedFrom := make([][]int, len(nodes))
 	for i, n := range nodes {
-		for _, u := range g.Predecessors(n) {
+		for _, u := range g.To(n) {
 			nodesLinkingTo[i] = append(nodesLinkingTo[i], indexOf[u.ID()])
 		}
 		for _, v := range g.Successors(n) {

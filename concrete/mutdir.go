@@ -159,7 +159,7 @@ func (g *DirectedGraph) EdgeTo(n, succ graph.Node) graph.Edge {
 	return edge.Edge
 }
 
-func (g *DirectedGraph) Predecessors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) To(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}

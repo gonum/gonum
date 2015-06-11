@@ -50,7 +50,7 @@ func setupFuncs(g graph.Graph, cost graph.CostFunc, heuristicCost graph.Heuristi
 	switch g := g.(type) {
 	case graph.DirectedGraph:
 		sf.successors = g.Successors
-		sf.predecessors = g.Predecessors
+		sf.predecessors = g.To
 		sf.neighbors = g.From
 		sf.isSuccessor = genIsSuccessor(g)
 		sf.isPredecessor = genIsPredecessor(g)

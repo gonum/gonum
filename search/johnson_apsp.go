@@ -26,7 +26,7 @@ func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, o
 	switch g := g.(type) {
 	case graph.DirectedGraph:
 		jg.from = g.Successors
-		jg.to = g.Predecessors
+		jg.to = g.To
 		jg.edgeTo = g.EdgeTo
 	default:
 		jg.edgeTo = g.EdgeBetween
@@ -141,6 +141,6 @@ func (johnsonWeightAdjuster) From(graph.Node) []graph.Node {
 func (johnsonWeightAdjuster) EdgeBetween(_, _ graph.Node) graph.Edge {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }
-func (johnsonWeightAdjuster) Predecessors(graph.Node) []graph.Node {
+func (johnsonWeightAdjuster) To(graph.Node) []graph.Node {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }

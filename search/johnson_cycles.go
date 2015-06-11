@@ -276,7 +276,7 @@ func (johnsonGraph) EdgeBetween(_, _ graph.Node) graph.Edge {
 func (johnsonGraph) EdgeTo(_, _ graph.Node) graph.Edge {
 	panic("search: unintended use of johnsonGraph")
 }
-func (johnsonGraph) Predecessors(graph.Node) []graph.Node {
+func (johnsonGraph) To(graph.Node) []graph.Node {
 	panic("search: unintended use of johnsonGraph")
 }
 

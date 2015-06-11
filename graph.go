@@ -50,7 +50,7 @@ type Graph interface {
 type DirectedGraph interface {
 	Graph
 	// Successors gives the nodes connected by OUTBOUND edges.
-	// If the graph is an undirected graph, this set is equal to Predecessors.
+	// If the graph is an undirected graph, this set is equal to To.
 	Successors(Node) []Node
 
 	// EdgeTo returns an edge between node and successor such that
@@ -58,9 +58,9 @@ type DirectedGraph interface {
 	// such edge exists, this function returns nil.
 	EdgeTo(node, successor Node) Edge
 
-	// Predecessors gives the nodes connected by INBOUND edges.
-	// If the graph is an undirected graph, this set is equal to Successors.
-	Predecessors(Node) []Node
+	// To returns all nodes that can be lead to the
+	// given node.
+	To(Node) []Node
 }
 
 // Returns all undirected edges in the graph

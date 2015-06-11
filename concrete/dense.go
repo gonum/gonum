@@ -114,7 +114,7 @@ func (g *DenseGraph) EdgeTo(n, succ graph.Node) graph.Edge {
 	return nil
 }
 
-func (g *DenseGraph) Predecessors(n graph.Node) []graph.Node {
+func (g *DenseGraph) To(n graph.Node) []graph.Node {
 	neighbors := make([]graph.Node, 0)
 	for i := 0; i < g.numNodes; i++ {
 		if g.adjacencyMatrix[i*g.numNodes+n.ID()] != inf {

@@ -22,7 +22,7 @@ func TestBasicDenseImpassable(t *testing.T) {
 	}
 
 	for i := 0; i < 5; i++ {
-		if !dg.NodeExists(concrete.Node(i)) {
+		if !dg.Has(concrete.Node(i)) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
@@ -32,7 +32,7 @@ func TestBasicDenseImpassable(t *testing.T) {
 	}
 
 	for i := 5; i < 10; i++ {
-		if dg.NodeExists(concrete.Node(i)) {
+		if dg.Has(concrete.Node(i)) {
 			t.Errorf("Node exists that shouldn't: %d", i)
 		}
 	}
@@ -45,7 +45,7 @@ func TestBasicDensePassable(t *testing.T) {
 	}
 
 	for i := 0; i < 5; i++ {
-		if !dg.NodeExists(concrete.Node(i)) {
+		if !dg.Has(concrete.Node(i)) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
@@ -55,7 +55,7 @@ func TestBasicDensePassable(t *testing.T) {
 	}
 
 	for i := 5; i < 10; i++ {
-		if dg.NodeExists(concrete.Node(i)) {
+		if dg.Has(concrete.Node(i)) {
 			t.Errorf("Node exists that shouldn't: %d", i)
 		}
 	}

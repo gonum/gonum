@@ -33,7 +33,7 @@ func NewDenseGraph(numNodes int, passable bool) *DenseGraph {
 	return g
 }
 
-func (g *DenseGraph) NodeExists(n graph.Node) bool {
+func (g *DenseGraph) Has(n graph.Node) bool {
 	return n.ID() < g.numNodes
 }
 

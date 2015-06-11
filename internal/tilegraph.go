@@ -173,7 +173,7 @@ func (g *TileGraph) CoordsToNode(row, col int) graph.Node {
 
 func (g *TileGraph) Neighbors(n graph.Node) []graph.Node {
 	id := n.ID()
-	if !g.NodeExists(n) {
+	if !g.Has(n) {
 		return nil
 	}
 
@@ -191,7 +191,7 @@ func (g *TileGraph) Neighbors(n graph.Node) []graph.Node {
 }
 
 func (g *TileGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
-	if !g.NodeExists(n) || !g.NodeExists(neigh) {
+	if !g.Has(n) || !g.Has(neigh) {
 		return nil
 	}
 
@@ -204,7 +204,7 @@ func (g *TileGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	return nil
 }
 
-func (g *TileGraph) NodeExists(n graph.Node) bool {
+func (g *TileGraph) Has(n graph.Node) bool {
 	id := n.ID()
 	return id >= 0 && id < len(g.tiles) && g.tiles[id] == true
 }

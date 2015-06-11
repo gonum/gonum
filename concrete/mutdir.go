@@ -78,11 +78,11 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 
 func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
 	from, to := e.From(), e.To()
-	if !g.NodeExists(from) {
+	if !g.Has(from) {
 		g.AddNode(from)
 	}
 
-	if !g.NodeExists(to) {
+	if !g.Has(to) {
 		g.AddNode(to)
 	}
 
@@ -214,7 +214,7 @@ func (g *DirectedGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	return nil
 }
 
-func (g *DirectedGraph) NodeExists(n graph.Node) bool {
+func (g *DirectedGraph) Has(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 
 	return ok

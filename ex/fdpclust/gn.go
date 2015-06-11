@@ -11,7 +11,7 @@ type GraphNode struct {
 	roots     []*GraphNode
 }
 
-func (g *GraphNode) NodeExists(n graph.Node) bool {
+func (g *GraphNode) Has(n graph.Node) bool {
 	if n.ID() == g.id {
 		return true
 	}
@@ -22,7 +22,7 @@ func (g *GraphNode) NodeExists(n graph.Node) bool {
 			return true
 		}
 
-		if root.nodeExists(n, visited) {
+		if root.has(n, visited) {
 			return true
 		}
 	}
@@ -33,7 +33,7 @@ func (g *GraphNode) NodeExists(n graph.Node) bool {
 		}
 
 		if gn, ok := neigh.(*GraphNode); ok {
-			if gn.nodeExists(n, visited) {
+			if gn.has(n, visited) {
 				return true
 			}
 		}
@@ -42,7 +42,7 @@ func (g *GraphNode) NodeExists(n graph.Node) bool {
 	return false
 }
 
-func (g *GraphNode) nodeExists(n graph.Node, visited map[int]struct{}) bool {
+func (g *GraphNode) has(n graph.Node, visited map[int]struct{}) bool {
 	for _, root := range g.roots {
 		if _, ok := visited[root.ID()]; ok {
 			continue
@@ -53,7 +53,7 @@ func (g *GraphNode) nodeExists(n graph.Node, visited map[int]struct{}) bool {
 			return true
 		}
 
-		if root.nodeExists(n, visited) {
+		if root.has(n, visited) {
 			return true
 		}
 
@@ -70,7 +70,7 @@ func (g *GraphNode) nodeExists(n graph.Node, visited map[int]struct{}) bool {
 		}
 
 		if gn, ok := neigh.(*GraphNode); ok {
-			if gn.nodeExists(n, visited) {
+			if gn.has(n, visited) {
 				return true
 			}
 		}

@@ -288,7 +288,7 @@ func IsPath(path []graph.Node, g graph.Graph) bool {
 	if path == nil || len(path) == 0 {
 		return true
 	} else if len(path) == 1 {
-		return g.NodeExists(path[0])
+		return g.Has(path[0])
 	}
 
 	for i := 0; i < len(path)-1; i++ {
@@ -329,8 +329,8 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	for remainingNodes.Count() != 0 {
 		var edges []concrete.WeightedEdge
 		for _, edge := range edgeList {
-			if (dst.NodeExists(edge.From()) && remainingNodes.Has(edge.To().ID())) ||
-				(dst.NodeExists(edge.To()) && remainingNodes.Has(edge.From().ID())) {
+			if (dst.Has(edge.From()) && remainingNodes.Has(edge.To().ID())) ||
+				(dst.Has(edge.To()) && remainingNodes.Has(edge.From().ID())) {
 
 				edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
 			}

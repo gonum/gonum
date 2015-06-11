@@ -105,11 +105,11 @@ func (g *Graph) AddNode(n graph.Node) {
 
 func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
 	from, to := e.From(), e.To()
-	if !g.NodeExists(from) {
+	if !g.Has(from) {
 		g.AddNode(from)
 	}
 
-	if !g.NodeExists(to) {
+	if !g.Has(to) {
 		g.AddNode(to)
 	}
 
@@ -154,7 +154,7 @@ func (g *Graph) EmptyGraph() {
 /* Graph implementation */
 
 func (g *Graph) Neighbors(n graph.Node) []graph.Node {
-	if !g.NodeExists(n) {
+	if !g.Has(n) {
 		return nil
 	}
 
@@ -171,14 +171,14 @@ func (g *Graph) Neighbors(n graph.Node) []graph.Node {
 func (g *Graph) EdgeBetween(n, neigh graph.Node) graph.Edge {
 	// Don't need to check if neigh exists because
 	// it's implicit in the neighbors access.
-	if !g.NodeExists(n) {
+	if !g.Has(n) {
 		return nil
 	}
 
 	return g.neighbors[n.ID()][neigh.ID()].Edge
 }
 
-func (g *Graph) NodeExists(n graph.Node) bool {
+func (g *Graph) Has(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 
 	return ok

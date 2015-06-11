@@ -92,11 +92,11 @@ var (
 	_ graph.Coster        = johnsonWeightAdjuster{}
 )
 
-func (g johnsonWeightAdjuster) NodeExists(n graph.Node) bool {
+func (g johnsonWeightAdjuster) Has(n graph.Node) bool {
 	if g.bellmanFord && n.ID() == g.q {
 		return true
 	}
-	return g.g.NodeExists(n)
+	return g.g.Has(n)
 
 }
 
@@ -115,7 +115,7 @@ func (g johnsonWeightAdjuster) Successors(n graph.Node) []graph.Node {
 }
 
 func (g johnsonWeightAdjuster) EdgeTo(u, v graph.Node) graph.Edge {
-	if g.bellmanFord && u.ID() == g.q && g.g.NodeExists(v) {
+	if g.bellmanFord && u.ID() == g.q && g.g.Has(v) {
 		return concrete.Edge{johnsonGraphNode(g.q), v}
 	}
 	return g.edgeTo(u, v)

@@ -46,7 +46,7 @@ func TestHITS(t *testing.T) {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {

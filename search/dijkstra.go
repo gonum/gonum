@@ -16,7 +16,7 @@ import (
 //
 // The time complexity of DijkstrFrom is O(|E|+|V|.log|V|).
 func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
-	if !g.NodeExists(u) {
+	if !g.Has(u) {
 		return Shortest{from: u}
 	}
 	var (

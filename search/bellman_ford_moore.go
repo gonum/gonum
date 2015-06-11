@@ -12,7 +12,7 @@ import "github.com/gonum/graph"
 //
 // The time complexity of BellmanFordFrom is O(|V|.|E|).
 func BellmanFordFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) (path Shortest, ok bool) {
-	if !g.NodeExists(u) {
+	if !g.Has(u) {
 		return Shortest{from: u}, true
 	}
 	var (

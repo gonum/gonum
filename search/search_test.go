@@ -368,7 +368,7 @@ func TestSort(t *testing.T) {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
@@ -399,7 +399,7 @@ func TestTarjanSCC(t *testing.T) {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
@@ -495,7 +495,7 @@ func TestVertexOrdering(t *testing.T) {
 		g := concrete.NewGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
@@ -580,7 +580,7 @@ func TestBronKerbosch(t *testing.T) {
 		g := concrete.NewGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
@@ -630,7 +630,7 @@ func TestConnectedComponents(t *testing.T) {
 
 			for u, e := range test.g {
 				// Add nodes that are not defined by an edge.
-				if !g.NodeExists(concrete.Node(u)) {
+				if !g.Has(concrete.Node(u)) {
 					g.(graph.Mutable).AddNode(concrete.Node(u))
 				}
 				for v := range e {

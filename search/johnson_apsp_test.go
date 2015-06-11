@@ -29,7 +29,7 @@ func TestJohnsonAllPaths(t *testing.T) {
 			}
 		}
 
-		pt, ok := search.JohnsonAllPaths(g.(graph.Graph), nil)
+		pt, ok := search.JohnsonAllPaths(g.(graph.Graph))
 		if test.hasNegativeCycle {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.name)

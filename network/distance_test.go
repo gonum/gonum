@@ -153,7 +153,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
-		p, ok := search.FloydWarshall(g, nil)
+		p, ok := search.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue
@@ -343,7 +343,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
-		p, ok := search.FloydWarshall(g, nil)
+		p, ok := search.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue

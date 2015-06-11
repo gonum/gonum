@@ -13,22 +13,19 @@ import (
 )
 
 // JohnsonAllPaths returns a shortest-path tree for shortest paths in the graph g.
-// If weight is nil and the graph does not implement graph.Coster, UniformCost is used.
+// If the graph does not implement graph.Coster, UniformCost is used.
 //
 // The time complexity of JohnsonAllPaths is O(|V|.|E|+|V|^2.log|V|).
-func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok bool) {
+func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 	jg := johnsonWeightAdjuster{
 		g:      g,
 		from:   g.From,
-		weight: weight,
 		edgeTo: g.Edge,
 	}
-	if jg.weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			jg.weight = g.Cost
-		} else {
-			jg.weight = UniformCost
-		}
+	if g, ok := g.(graph.Coster); ok {
+		jg.weight = g.Cost
+	} else {
+		jg.weight = UniformCost
 	}
 
 	paths = newAllShortest(g.Nodes(), false)
@@ -45,13 +42,13 @@ func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, o
 	}
 
 	jg.bellmanFord = true
-	jg.adjustBy, ok = BellmanFordFrom(johnsonGraphNode(jg.q), jg, nil)
+	jg.adjustBy, ok = BellmanFordFrom(johnsonGraphNode(jg.q), jg)
 	if !ok {
 		return paths, false
 	}
 
 	jg.bellmanFord = false
-	dijkstraAllPaths(jg, nil, paths)
+	dijkstraAllPaths(jg, paths)
 
 	for i, u := range paths.nodes {
 		hu := jg.adjustBy.WeightTo(u)

@@ -27,7 +27,7 @@ func TestBellmanFordFrom(t *testing.T) {
 			}
 		}
 
-		pt, ok := search.BellmanFordFrom(test.query.From(), g.(graph.Graph), nil)
+		pt, ok := search.BellmanFordFrom(test.query.From(), g.(graph.Graph))
 		if test.hasNegativeCycle {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.name)

@@ -11,20 +11,19 @@ import (
 )
 
 // DijkstraFrom returns a shortest-path tree for a shortest path from u to all nodes in
-// the graph g. If weight is nil and the graph does not implement graph.Coster, UniformCost
-// is used. DijkstraFrom will panic if g has a u-reachable negative edge weight.
+// the graph g. If the graph does not implement graph.Coster, UniformCost is used.
+// DijkstraFrom will panic if g has a u-reachable negative edge weight.
 //
 // The time complexity of DijkstrFrom is O(|E|+|V|.log|V|).
-func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
+func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 	if !g.Has(u) {
 		return Shortest{from: u}
 	}
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+	var weight graph.CostFunc
+	if g, ok := g.(graph.Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
 	}
 
 	nodes := g.Nodes()
@@ -60,13 +59,13 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 }
 
 // DijkstraAllPaths returns a shortest-path tree for shortest paths in the graph g.
-// If weight is nil and the graph does not implement graph.Coster, UniformCost is used.
+// If the graph does not implement graph.Coster, UniformCost is used.
 // DijkstraAllPaths will panic if g has a negative edge weight.
 //
 // The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
-func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) {
+func DijkstraAllPaths(g graph.Graph) (paths AllShortest) {
 	paths = newAllShortest(g.Nodes(), false)
-	dijkstraAllPaths(g, weight, paths)
+	dijkstraAllPaths(g, paths)
 	return paths
 }
 
@@ -74,13 +73,12 @@ func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) 
 // between DijkstraAllPaths and JohnsonAllPaths to avoid repeated allocation
 // of the nodes slice and the indexOf map. It returns nothing, but stores the
 // result of the work in the paths parameter which is a reference type.
-func dijkstraAllPaths(g graph.Graph, weight graph.CostFunc, paths AllShortest) {
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
+	var weight graph.CostFunc
+	if g, ok := g.(graph.Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
 	}
 
 	var Q priorityQueue

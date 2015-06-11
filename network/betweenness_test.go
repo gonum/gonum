@@ -159,7 +159,7 @@ func TestBetweennessWeighted(t *testing.T) {
 			}
 		}
 
-		p, ok := search.FloydWarshall(g, nil)
+		p, ok := search.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue

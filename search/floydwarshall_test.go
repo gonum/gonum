@@ -29,7 +29,7 @@ func TestFloydWarshall(t *testing.T) {
 			}
 		}
 
-		pt, ok := search.FloydWarshall(g.(graph.Graph), nil)
+		pt, ok := search.FloydWarshall(g.(graph.Graph))
 		if test.hasNegativeCycle {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.name)

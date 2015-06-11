@@ -38,7 +38,7 @@ func TestDijkstraFrom(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt = search.DijkstraFrom(test.query.From(), g.(graph.Graph), nil)
+			pt = search.DijkstraFrom(test.query.From(), g.(graph.Graph))
 		}()
 		if panicked || test.negative {
 			if !test.negative {
@@ -111,7 +111,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt = search.DijkstraAllPaths(g.(graph.Graph), nil)
+			pt = search.DijkstraAllPaths(g.(graph.Graph))
 		}()
 		if panicked || test.negative {
 			if !test.negative {

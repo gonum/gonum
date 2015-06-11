@@ -32,25 +32,17 @@ import (
 // max(NonConsistentHeuristicCost(neighbor,goal), NonConsistentHeuristicCost(self,goal) -
 // Cost(self,neighbor)). If there are multiple neighbors, take the max of all of them.
 //
-// Cost and HeuristicCost take precedence for evaluating cost/heuristic distance. If one is not
-// present (i.e. nil) the function will check the graph's interface for the respective interface:
-// Coster for Cost and HeuristicCoster for HeuristicCost. If the correct one is present, it will
-// use the graph's function for evaluation.
-//
-// Finally, if neither the argument nor the interface is present, the function will assume
-// UniformCost for Cost and NullHeuristic for HeuristicCost.
-//
-// To run Uniform Cost Search, run A* with the NullHeuristic.
+// If heuristice is nil, A* will use the graph's HeuristicCost method if present, otherwise
+// falling back to NullHeuristic. To run Uniform Cost Search, run A* with the NullHeuristic.
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost
 // function that returns a uniform positive value.)
-func AStar(start, goal graph.Node, g graph.Graph, weight graph.CostFunc, heuristic graph.HeuristicCostFunc) (path []graph.Node, pathCost float64, nodesExpanded int) {
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+func AStar(start, goal graph.Node, g graph.Graph, heuristic graph.HeuristicCostFunc) (path []graph.Node, pathCost float64, nodesExpanded int) {
+	var weight graph.CostFunc
+	if g, ok := g.(graph.Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
 	}
 	if heuristic == nil {
 		if g, ok := g.(graph.HeuristicCoster); ok {
@@ -335,17 +327,13 @@ puts the resulting minimum spanning tree in the dst graph */
 
 // Generates a minimum spanning tree with sets.
 //
-// As with other algorithms that use Cost, the order of precedence is
-// Argument > Interface > UniformCost.
-//
 // The destination must be empty (or at least disjoint with the node IDs of the input)
-func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, weight graph.CostFunc) {
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+func Prim(dst graph.MutableGraph, g graph.EdgeListGraph) {
+	var weight graph.CostFunc
+	if g, ok := g.(graph.Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
 	}
 
 	nlist := g.Nodes()
@@ -382,16 +370,13 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, weight graph.CostFunc) 
 
 // Generates a minimum spanning tree for a graph using discrete.DisjointSet.
 //
-// As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost.
-//
 // The destination must be empty (or at least disjoint with the node IDs of the input)
-func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, weight graph.CostFunc) {
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph) {
+	var weight graph.CostFunc
+	if g, ok := g.(graph.Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
 	}
 
 	edgeList := g.Edges()

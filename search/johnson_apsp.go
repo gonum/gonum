@@ -20,13 +20,8 @@ func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, o
 	jg := johnsonWeightAdjuster{
 		g:      g,
 		from:   g.From,
-		to:     g.From,
 		weight: weight,
 		edgeTo: g.Edge,
-	}
-	switch g := g.(type) {
-	case graph.Directed:
-		jg.to = g.To
 	}
 	if jg.weight == nil {
 		if g, ok := g.(graph.Coster); ok {
@@ -76,17 +71,21 @@ type johnsonWeightAdjuster struct {
 	q int
 	g graph.Graph
 
-	from, to func(graph.Node) []graph.Node
-	edgeTo   func(graph.Node, graph.Node) graph.Edge
-	weight   graph.CostFunc
+	from   func(graph.Node) []graph.Node
+	edgeTo func(graph.Node, graph.Node) graph.Edge
+	weight graph.CostFunc
 
 	bellmanFord bool
 	adjustBy    Shortest
 }
 
 var (
-	_ graph.Directed = johnsonWeightAdjuster{}
-	_ graph.Coster   = johnsonWeightAdjuster{}
+	// johnsonWeightAdjuster has the behaviour
+	// of a directed graph, but we don't need
+	// to be explicit with the type since it
+	// is not exported.
+	_ graph.Graph  = johnsonWeightAdjuster{}
+	_ graph.Coster = johnsonWeightAdjuster{}
 )
 
 func (g johnsonWeightAdjuster) Has(n graph.Node) bool {
@@ -133,11 +132,5 @@ func (g johnsonWeightAdjuster) Cost(e graph.Edge) float64 {
 }
 
 func (johnsonWeightAdjuster) HasEdge(_, _ graph.Node) bool {
-	panic("search: unintended use of johnsonWeightAdjuster")
-}
-func (johnsonWeightAdjuster) EdgeFromTo(_, _ graph.Node) graph.Edge {
-	panic("search: unintended use of johnsonWeightAdjuster")
-}
-func (johnsonWeightAdjuster) To(graph.Node) []graph.Node {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }

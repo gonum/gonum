@@ -16,7 +16,7 @@ import (
 //
 //  C_B(v) = \sum_{s ≠ v ≠ t ∈ V} (\sigma_{st}(v) / \sigma_{st})
 //
-// where \sigma_{st} and \sigma_{st}(v) are number of the shortest paths from s to t,
+// where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
 func Betweenness(g graph.Graph) map[int]float64 {
 	// Brandes' algorithm for finding betweenness centrality for nodes in
@@ -95,12 +95,12 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	return cb
 }
 
-// BetweennessWeighted returns the non-zero etweenness centrality for nodes in the weighted
+// BetweennessWeighted returns the non-zero betweenness centrality for nodes in the weighted
 // graph g used to construct the given shortest paths.
 //
 //  C_B(v) = \sum_{s ≠ v ≠ t ∈ V} (\sigma_{st}(v) / \sigma_{st})
 //
-// where \sigma_{st} and \sigma_{st}(v) are number of the shortest paths from s to t.
+// where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
 func BetweennessWeighted(g graph.CostGraph, p search.AllShortest) map[int]float64 {
 	cb := make(map[int]float64)

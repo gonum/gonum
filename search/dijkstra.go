@@ -19,17 +19,6 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 	if !g.Has(u) {
 		return Shortest{from: u}
 	}
-	var (
-		from   = g.From
-		edgeTo func(graph.Node, graph.Node) graph.Edge
-	)
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		from = g.Successors
-		edgeTo = g.EdgeTo
-	default:
-		edgeTo = g.EdgeBetween
-	}
 	if weight == nil {
 		if g, ok := g.(graph.Coster); ok {
 			weight = g.Cost
@@ -53,9 +42,9 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 		if mid.dist < path.dist[k] {
 			path.dist[k] = mid.dist
 		}
-		for _, v := range from(mid.node) {
+		for _, v := range g.From(mid.node) {
 			j := path.indexOf[v.ID()]
-			w := weight(edgeTo(mid.node, v))
+			w := weight(g.Edge(mid.node, v))
 			if w < 0 {
 				panic("dijkstra: negative edge weight")
 			}
@@ -86,17 +75,6 @@ func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) 
 // of the nodes slice and the indexOf map. It returns nothing, but stores the
 // result of the work in the paths parameter which is a reference type.
 func dijkstraAllPaths(g graph.Graph, weight graph.CostFunc, paths AllShortest) {
-	var (
-		from   = g.From
-		edgeTo func(graph.Node, graph.Node) graph.Edge
-	)
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		from = g.Successors
-		edgeTo = g.EdgeTo
-	default:
-		edgeTo = g.EdgeBetween
-	}
 	if weight == nil {
 		if g, ok := g.(graph.Coster); ok {
 			weight = g.Cost
@@ -122,9 +100,9 @@ func dijkstraAllPaths(g graph.Graph, weight graph.CostFunc, paths AllShortest) {
 			if mid.dist < paths.dist.At(i, k) {
 				paths.dist.Set(i, k, mid.dist)
 			}
-			for _, v := range from(mid.node) {
+			for _, v := range g.From(mid.node) {
 				j := paths.indexOf[v.ID()]
-				w := weight(edgeTo(mid.node, v))
+				w := weight(g.Edge(mid.node, v))
 				if w < 0 {
 					panic("dijkstra: negative edge weight")
 				}

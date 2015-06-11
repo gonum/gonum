@@ -7,6 +7,7 @@ package search
 import (
 	"container/heap"
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/gonum/graph"
@@ -43,14 +44,26 @@ import (
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost
 // function that returns a uniform positive value.)
-func AStar(start, goal graph.Node, g graph.Graph, cost graph.CostFunc, heuristicCost graph.HeuristicCostFunc) (path []graph.Node, pathCost float64, nodesExpanded int) {
-	sf := setupFuncs(g, cost, heuristicCost)
-	successors, cost, heuristicCost, edgeTo := sf.successors, sf.cost, sf.heuristicCost, sf.edgeTo
+func AStar(start, goal graph.Node, g graph.Graph, weight graph.CostFunc, heuristic graph.HeuristicCostFunc) (path []graph.Node, pathCost float64, nodesExpanded int) {
+	if weight == nil {
+		if g, ok := g.(graph.Coster); ok {
+			weight = g.Cost
+		} else {
+			weight = UniformCost
+		}
+	}
+	if heuristic == nil {
+		if g, ok := g.(graph.HeuristicCoster); ok {
+			heuristic = g.HeuristicCost
+		} else {
+			heuristic = NullHeuristic
+		}
+	}
 
 	closedSet := make(map[int]internalNode)
 	openSet := &aStarPriorityQueue{nodes: make([]internalNode, 0), indexList: make(map[int]int)}
 	heap.Init(openSet)
-	node := internalNode{start, 0, heuristicCost(start, goal)}
+	node := internalNode{start, 0, heuristic(start, goal)}
 	heap.Push(openSet, node)
 	predecessor := make(map[int]graph.Node)
 
@@ -65,20 +78,20 @@ func AStar(start, goal graph.Node, g graph.Graph, cost graph.CostFunc, heuristic
 
 		closedSet[curr.ID()] = curr
 
-		for _, neighbor := range successors(curr.Node) {
+		for _, neighbor := range g.From(curr.Node) {
 			if _, ok := closedSet[neighbor.ID()]; ok {
 				continue
 			}
 
-			g := curr.gscore + cost(edgeTo(curr.Node, neighbor))
+			g := curr.gscore + weight(g.Edge(curr.Node, neighbor))
 
 			if existing, exists := openSet.Find(neighbor.ID()); !exists {
 				predecessor[neighbor.ID()] = curr
-				node = internalNode{neighbor, g, g + heuristicCost(neighbor, goal)}
+				node = internalNode{neighbor, g, g + heuristic(neighbor, goal)}
 				heap.Push(openSet, node)
 			} else if g < existing.gscore {
 				predecessor[neighbor.ID()] = curr
-				openSet.Fix(neighbor.ID(), g, g+heuristicCost(neighbor, goal))
+				openSet.Fix(neighbor.ID(), g, g+heuristic(neighbor, goal))
 			}
 		}
 	}
@@ -94,9 +107,8 @@ func NullHeuristic(_, _ graph.Node) float64 {
 // Assumes all edges in the graph have the same weight (including edges that don't exist!)
 func UniformCost(e graph.Edge) float64 {
 	if e == nil {
-		return inf
+		return math.Inf(1)
 	}
-
 	return 1
 }
 
@@ -106,14 +118,19 @@ func UniformCost(e graph.Edge) float64 {
 // need not be empty, though overlapping node IDs and conflicting edges will overwrite
 // existing data.
 func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
-	cost := setupFuncs(src, nil, nil).cost
+	var weight graph.CostFunc
+	if g, ok := src.(graph.Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
+	}
 
 	for _, node := range src.Nodes() {
 		succs := src.From(node)
 		dst.AddNode(node)
 		for _, succ := range succs {
-			edge := src.EdgeBetween(node, succ)
-			dst.AddUndirectedEdge(edge, cost(edge))
+			edge := src.Edge(node, succ)
+			dst.AddUndirectedEdge(edge, weight(edge))
 		}
 	}
 
@@ -122,15 +139,20 @@ func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
 // Copies a graph into the destination; maintaining all node IDs. The destination
 // need not be empty, though overlapping node IDs and conflicting edges will overwrite
 // existing data.
-func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) {
-	cost := setupFuncs(src, nil, nil).cost
+func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.Graph) {
+	var weight graph.CostFunc
+	if g, ok := src.(graph.Coster); ok {
+		weight = g.Cost
+	} else {
+		weight = UniformCost
+	}
 
 	for _, node := range src.Nodes() {
-		succs := src.Successors(node)
+		succs := src.From(node)
 		dst.AddNode(node)
 		for _, succ := range succs {
-			edge := src.EdgeTo(node, succ)
-			dst.AddDirectedEdge(edge, cost(edge))
+			edge := src.Edge(node, succ)
+			dst.AddDirectedEdge(edge, weight(edge))
 		}
 	}
 
@@ -160,7 +182,7 @@ func (e Unorderable) Error() string {
 // listing cyclic components in g with each cyclic component's members sorted by ID. When
 // an Unorderable error is returned, each cyclic component's topological position within
 // the sorted nodes is marked with a nil graph.Node.
-func Sort(g graph.DirectedGraph) (sorted []graph.Node, err error) {
+func Sort(g graph.Directed) (sorted []graph.Node, err error) {
 	sccs := TarjanSCC(g)
 	sorted = make([]graph.Node, 0, len(sccs))
 	var sc Unorderable
@@ -192,10 +214,10 @@ func Sort(g graph.DirectedGraph) (sorted []graph.Node, err error) {
 // to the number of nodes is acyclic, unless you count reflexive edges as a cycle (which requires
 // only a little extra testing.)
 //
-func TarjanSCC(g graph.DirectedGraph) [][]graph.Node {
+func TarjanSCC(g graph.Directed) [][]graph.Node {
 	nodes := g.Nodes()
 	t := tarjan{
-		succ: g.Successors,
+		succ: g.From,
 
 		indexTable: make(map[int]int, len(nodes)),
 		lowLink:    make(map[int]int, len(nodes)),
@@ -283,7 +305,15 @@ func (t *tarjan) strongconnect(v graph.Node) {
 //
 // Graph must be non-nil.
 func IsPath(path []graph.Node, g graph.Graph) bool {
-	isSuccessor := setupFuncs(g, nil, nil).isSuccessor
+	var canReach func(u, v graph.Node) bool
+	switch g := g.(type) {
+	case graph.Directed:
+		canReach = func(u, v graph.Node) bool {
+			return g.EdgeFromTo(u, v) != nil
+		}
+	default:
+		canReach = g.HasEdge
+	}
 
 	if path == nil || len(path) == 0 {
 		return true
@@ -292,7 +322,7 @@ func IsPath(path []graph.Node, g graph.Graph) bool {
 	}
 
 	for i := 0; i < len(path)-1; i++ {
-		if !isSuccessor(path[i], path[i+1]) {
+		if !canReach(path[i], path[i+1]) {
 			return false
 		}
 	}
@@ -309,9 +339,14 @@ puts the resulting minimum spanning tree in the dst graph */
 // Argument > Interface > UniformCost.
 //
 // The destination must be empty (or at least disjoint with the node IDs of the input)
-func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
-	sf := setupFuncs(g, cost, nil)
-	cost = sf.cost
+func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, weight graph.CostFunc) {
+	if weight == nil {
+		if g, ok := g.(graph.Coster); ok {
+			weight = g.Cost
+		} else {
+			weight = UniformCost
+		}
+	}
 
 	nlist := g.Nodes()
 
@@ -332,7 +367,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 			if (dst.Has(edge.From()) && remainingNodes.Has(edge.To().ID())) ||
 				(dst.Has(edge.To()) && remainingNodes.Has(edge.From().ID())) {
 
-				edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
+				edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: weight(edge)})
 			}
 		}
 
@@ -350,13 +385,19 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 // As with other algorithms with Cost, the precedence goes Argument > Interface > UniformCost.
 //
 // The destination must be empty (or at least disjoint with the node IDs of the input)
-func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
-	cost = setupFuncs(g, cost, nil).cost
+func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, weight graph.CostFunc) {
+	if weight == nil {
+		if g, ok := g.(graph.Coster); ok {
+			weight = g.Cost
+		} else {
+			weight = UniformCost
+		}
+	}
 
 	edgeList := g.Edges()
 	edges := make([]concrete.WeightedEdge, 0, len(edgeList))
 	for _, edge := range edgeList {
-		edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})
+		edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: weight(edge)})
 	}
 
 	sort.Sort(byWeight(edges))
@@ -391,7 +432,13 @@ func Dominators(start graph.Node, g graph.Graph) map[int]Set {
 		allNodes.add(node)
 	}
 
-	predecessors := setupFuncs(g, nil, nil).predecessors
+	var to func(graph.Node) []graph.Node
+	switch g := g.(type) {
+	case graph.Directed:
+		to = g.To
+	default:
+		to = g.From
+	}
 
 	for _, node := range nlist {
 		dominators[node.ID()] = make(Set)
@@ -408,7 +455,7 @@ func Dominators(start graph.Node, g graph.Graph) map[int]Set {
 			if node.ID() == start.ID() {
 				continue
 			}
-			preds := predecessors(node)
+			preds := to(node)
 			if len(preds) == 0 {
 				continue
 			}
@@ -436,8 +483,6 @@ func Dominators(start graph.Node, g graph.Graph) map[int]Set {
 // This returns all possible post-dominators for all nodes, it does not prune for strict
 // postdominators, immediate postdominators etc.
 func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
-	successors := setupFuncs(g, nil, nil).successors
-
 	allNodes := make(Set)
 	nlist := g.Nodes()
 	dominators := make(map[int]Set, len(nlist))
@@ -460,7 +505,7 @@ func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
 			if node.ID() == end.ID() {
 				continue
 			}
-			succs := successors(node)
+			succs := g.From(node)
 			if len(succs) == 0 {
 				continue
 			}
@@ -700,7 +745,7 @@ func (*bronKerbosch) choosePivotFrom(g graph.Graph, p, x Set) (neighbors []graph
 
 // ConnectedComponents returns the connected components of the graph g. All
 // edges are treated as undirected.
-func ConnectedComponents(g graph.Graph) [][]graph.Node {
+func ConnectedComponents(g graph.Undirected) [][]graph.Node {
 	var (
 		w  traverse.DepthFirst
 		c  []graph.Node

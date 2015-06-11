@@ -24,14 +24,6 @@ type BreadthFirst struct {
 // for which until(node, depth) is true. During the traversal, if the Visit field is
 // non-nil, it is called with the nodes joined by each followed edge.
 func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.Node, d int) bool) graph.Node {
-	var neighbors func(graph.Node) []graph.Node
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		neighbors = g.Successors
-	default:
-		neighbors = g.From
-	}
-
 	if b.visited == nil {
 		b.visited = make(internal.IntSet)
 	}
@@ -48,8 +40,8 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 		if until != nil && until(t, depth) {
 			return t
 		}
-		for _, n := range neighbors(t) {
-			if b.EdgeFilter != nil && !b.EdgeFilter(g.EdgeBetween(t, n)) {
+		for _, n := range g.From(t) {
+			if b.EdgeFilter != nil && !b.EdgeFilter(g.Edge(t, n)) {
 				continue
 			}
 			if b.visited.Has(n.ID()) {
@@ -76,11 +68,7 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 // of their direction. The functions before and after are called prior to commencing
 // and after completing each walk if they are non-nil respectively. The function
 // during is called on each node as it is traversed.
-func (b *BreadthFirst) WalkAll(g graph.Graph, before, after func(), during func(graph.Node)) {
-	// Ensure that when we pass a directed graph
-	// we use neighbors and not successors.
-	g = struct{ graph.Graph }{g}
-
+func (b *BreadthFirst) WalkAll(g graph.Undirected, before, after func(), during func(graph.Node)) {
 	b.Reset()
 	for _, from := range g.Nodes() {
 		if b.Visited(from) {
@@ -127,14 +115,6 @@ type DepthFirst struct {
 // for which until(node) is true. During the traversal, if the Visit field is non-nil, it
 // is called with the nodes joined by each followed edge.
 func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node) bool) graph.Node {
-	var neighbors func(graph.Node) []graph.Node
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		neighbors = g.Successors
-	default:
-		neighbors = g.From
-	}
-
 	if d.visited == nil {
 		d.visited = make(internal.IntSet)
 	}
@@ -146,8 +126,8 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 		if until != nil && until(t) {
 			return t
 		}
-		for _, n := range neighbors(t) {
-			if d.EdgeFilter != nil && !d.EdgeFilter(g.EdgeBetween(t, n)) {
+		for _, n := range g.From(t) {
+			if d.EdgeFilter != nil && !d.EdgeFilter(g.Edge(t, n)) {
 				continue
 			}
 			if d.visited.Has(n.ID()) {
@@ -168,11 +148,7 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 // of their direction. The functions before and after are called prior to commencing
 // and after completing each walk if they are non-nil respectively. The function
 // during is called on each node as it is traversed.
-func (d *DepthFirst) WalkAll(g graph.Graph, before, after func(), during func(graph.Node)) {
-	// Ensure that when we pass a directed graph
-	// we use neighbors and not successors.
-	g = struct{ graph.Graph }{g}
-
+func (d *DepthFirst) WalkAll(g graph.Undirected, before, after func(), during func(graph.Node)) {
 	d.Reset()
 	for _, from := range g.Nodes() {
 		if d.Visited(from) {

@@ -22,14 +22,11 @@ func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, o
 		from:   g.From,
 		to:     g.From,
 		weight: weight,
+		edgeTo: g.Edge,
 	}
 	switch g := g.(type) {
-	case graph.DirectedGraph:
-		jg.from = g.Successors
+	case graph.Directed:
 		jg.to = g.To
-		jg.edgeTo = g.EdgeTo
-	default:
-		jg.edgeTo = g.EdgeBetween
 	}
 	if jg.weight == nil {
 		if g, ok := g.(graph.Coster); ok {
@@ -88,8 +85,8 @@ type johnsonWeightAdjuster struct {
 }
 
 var (
-	_ graph.DirectedGraph = johnsonWeightAdjuster{}
-	_ graph.Coster        = johnsonWeightAdjuster{}
+	_ graph.Directed = johnsonWeightAdjuster{}
+	_ graph.Coster   = johnsonWeightAdjuster{}
 )
 
 func (g johnsonWeightAdjuster) Has(n graph.Node) bool {
@@ -107,14 +104,14 @@ func (g johnsonWeightAdjuster) Nodes() []graph.Node {
 	return g.g.Nodes()
 }
 
-func (g johnsonWeightAdjuster) Successors(n graph.Node) []graph.Node {
+func (g johnsonWeightAdjuster) From(n graph.Node) []graph.Node {
 	if g.bellmanFord && n.ID() == g.q {
 		return g.g.Nodes()
 	}
 	return g.from(n)
 }
 
-func (g johnsonWeightAdjuster) EdgeTo(u, v graph.Node) graph.Edge {
+func (g johnsonWeightAdjuster) Edge(u, v graph.Node) graph.Edge {
 	if g.bellmanFord && u.ID() == g.q && g.g.Has(v) {
 		return concrete.Edge{johnsonGraphNode(g.q), v}
 	}
@@ -135,10 +132,10 @@ func (g johnsonWeightAdjuster) Cost(e graph.Edge) float64 {
 	return g.weight(e) + g.adjustBy.WeightTo(e.From()) - g.adjustBy.WeightTo(e.To())
 }
 
-func (johnsonWeightAdjuster) From(graph.Node) []graph.Node {
+func (johnsonWeightAdjuster) HasEdge(_, _ graph.Node) bool {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }
-func (johnsonWeightAdjuster) EdgeBetween(_, _ graph.Node) graph.Edge {
+func (johnsonWeightAdjuster) EdgeFromTo(_, _ graph.Node) graph.Edge {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }
 func (johnsonWeightAdjuster) To(graph.Node) []graph.Node {

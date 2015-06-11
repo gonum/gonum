@@ -281,73 +281,61 @@ var walkAllTests = []struct {
 }
 
 func TestWalkAll(t *testing.T) {
-	for _, directed := range []bool{false, true} {
-		for i, test := range walkAllTests {
-			var g graph.Graph
-			if directed {
-				g = concrete.NewDirectedGraph()
-			} else {
-				g = concrete.NewGraph()
-			}
+	for i, test := range walkAllTests {
+		g := concrete.NewGraph()
 
-			for u, e := range test.g {
-				// Add nodes that are not defined by an edge.
-				if !g.Has(concrete.Node(u)) {
-					g.(graph.Mutable).AddNode(concrete.Node(u))
-				}
-				for v := range e {
-					switch g := g.(type) {
-					case graph.MutableDirectedGraph:
-						g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
-					case graph.MutableGraph:
-						g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
-					default:
-						panic("unexpected graph type")
-					}
-				}
+		for u, e := range test.g {
+			if !g.Has(concrete.Node(u)) {
+				g.AddNode(concrete.Node(u))
 			}
-			type walker interface {
-				WalkAll(g graph.Graph, before, after func(), during func(graph.Node))
+			for v := range e {
+				if !g.Has(concrete.Node(v)) {
+					g.AddNode(concrete.Node(v))
+				}
+				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
-			for _, w := range []walker{
-				&traverse.BreadthFirst{},
-				&traverse.DepthFirst{},
-			} {
-				var (
-					c  []graph.Node
-					cc [][]graph.Node
-				)
-				switch w := w.(type) {
-				case *traverse.BreadthFirst:
-					w.EdgeFilter = test.edge
-				case *traverse.DepthFirst:
-					w.EdgeFilter = test.edge
-				default:
-					panic(fmt.Sprintf("bad walker type: %T", w))
-				}
-				during := func(n graph.Node) {
-					c = append(c, n)
-				}
-				after := func() {
-					cc = append(cc, []graph.Node(nil))
-					cc[len(cc)-1] = append(cc[len(cc)-1], c...)
-					c = c[:0]
-				}
-				w.WalkAll(g, nil, after, during)
+		}
+		type walker interface {
+			WalkAll(g graph.Undirected, before, after func(), during func(graph.Node))
+		}
+		for _, w := range []walker{
+			&traverse.BreadthFirst{},
+			&traverse.DepthFirst{},
+		} {
+			var (
+				c  []graph.Node
+				cc [][]graph.Node
+			)
+			switch w := w.(type) {
+			case *traverse.BreadthFirst:
+				w.EdgeFilter = test.edge
+			case *traverse.DepthFirst:
+				w.EdgeFilter = test.edge
+			default:
+				panic(fmt.Sprintf("bad walker type: %T", w))
+			}
+			during := func(n graph.Node) {
+				c = append(c, n)
+			}
+			after := func() {
+				cc = append(cc, []graph.Node(nil))
+				cc[len(cc)-1] = append(cc[len(cc)-1], c...)
+				c = c[:0]
+			}
+			w.WalkAll(g, nil, after, during)
 
-				got := make([][]int, len(cc))
-				for j, c := range cc {
-					ids := make([]int, len(c))
-					for k, n := range c {
-						ids[k] = n.ID()
-					}
-					sort.Ints(ids)
-					got[j] = ids
+			got := make([][]int, len(cc))
+			for j, c := range cc {
+				ids := make([]int, len(c))
+				for k, n := range c {
+					ids[k] = n.ID()
 				}
-				sort.Sort(internal.BySliceValues(got))
-				if !reflect.DeepEqual(got, test.want) {
-					t.Errorf("unexpected connected components for test %d using %T:\ngot: %v\nwant:%v", i, w, got, test.want)
-				}
+				sort.Ints(ids)
+				got[j] = ids
+			}
+			sort.Sort(internal.BySliceValues(got))
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("unexpected connected components for test %d using %T:\ngot: %v\nwant:%v", i, w, got, test.want)
 			}
 		}
 	}

@@ -6,91 +6,10 @@ package search
 
 import (
 	"container/heap"
-	"math"
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 )
-
-var inf = math.Inf(1)
-
-type searchFuncs struct {
-	successors, predecessors, neighbors    func(graph.Node) []graph.Node
-	isSuccessor, isPredecessor, isNeighbor func(graph.Node, graph.Node) bool
-	cost                                   graph.CostFunc
-	heuristicCost                          graph.HeuristicCostFunc
-	edgeTo, edgeBetween                    func(graph.Node, graph.Node) graph.Edge
-}
-
-func genIsSuccessor(g graph.DirectedGraph) func(graph.Node, graph.Node) bool {
-	return func(node, succ graph.Node) bool {
-		return g.EdgeTo(node, succ) != nil
-	}
-}
-
-func genIsPredecessor(g graph.DirectedGraph) func(graph.Node, graph.Node) bool {
-	return func(node, succ graph.Node) bool {
-		return g.EdgeTo(succ, node) != nil
-	}
-}
-
-func genIsNeighbor(g graph.Graph) func(graph.Node, graph.Node) bool {
-	return func(node, succ graph.Node) bool {
-		return g.EdgeBetween(succ, node) != nil
-	}
-}
-
-// Sets up the cost functions and successor functions so I don't have to do a type switch every
-// time. This almost always does more work than is necessary, but since it's only executed once
-// per function, and graph functions are rather costly, the "extra work" should be negligible.
-func setupFuncs(g graph.Graph, cost graph.CostFunc, heuristicCost graph.HeuristicCostFunc) searchFuncs {
-
-	sf := searchFuncs{}
-
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		sf.successors = g.Successors
-		sf.predecessors = g.To
-		sf.neighbors = g.From
-		sf.isSuccessor = genIsSuccessor(g)
-		sf.isPredecessor = genIsPredecessor(g)
-		sf.isNeighbor = genIsNeighbor(g)
-		sf.edgeBetween = g.EdgeBetween
-		sf.edgeTo = g.EdgeTo
-	default:
-		sf.successors = g.From
-		sf.predecessors = g.From
-		sf.neighbors = g.From
-		isNeighbor := genIsNeighbor(g)
-		sf.isSuccessor = isNeighbor
-		sf.isPredecessor = isNeighbor
-		sf.isNeighbor = isNeighbor
-		sf.edgeBetween = g.EdgeBetween
-		sf.edgeTo = g.EdgeBetween
-	}
-
-	if heuristicCost != nil {
-		sf.heuristicCost = heuristicCost
-	} else {
-		if g, ok := g.(graph.HeuristicCoster); ok {
-			sf.heuristicCost = g.HeuristicCost
-		} else {
-			sf.heuristicCost = NullHeuristic
-		}
-	}
-
-	if cost != nil {
-		sf.cost = cost
-	} else {
-		if g, ok := g.(graph.Coster); ok {
-			sf.cost = g.Cost
-		} else {
-			sf.cost = UniformCost
-		}
-	}
-
-	return sf
-}
 
 /** Sorts a list of edges by weight, agnostic to repeated edges as well as direction **/
 

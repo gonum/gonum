@@ -187,21 +187,28 @@ func (g *GraphNode) findNeighbors(n graph.Node, visited map[int]struct{}) []grap
 	return nil
 }
 
-func (g *GraphNode) EdgeBetween(n, neighbor graph.Node) graph.Edge {
-	if n.ID() == g.id || neighbor.ID() == g.id {
+func (g *GraphNode) HasEdge(u, v graph.Node) bool {
+	return g.EdgeBetween(u, v) != nil
+}
+
+func (g *GraphNode) Edge(u, v graph.Node) graph.Edge {
+	return g.EdgeBetween(u, v)
+}
+
+func (g *GraphNode) EdgeBetween(u, v graph.Node) graph.Edge {
+	if u.ID() == g.id || v.ID() == g.id {
 		for _, neigh := range g.neighbors {
-			if neigh.ID() == n.ID() || neigh.ID() == neighbor.ID() {
+			if neigh.ID() == u.ID() || neigh.ID() == v.ID() {
 				return concrete.Edge{g, neigh}
 			}
 		}
-
 		return nil
 	}
 
 	visited := map[int]struct{}{g.id: struct{}{}}
 	for _, root := range g.roots {
 		visited[root.ID()] = struct{}{}
-		if result := root.edgeBetween(n, neighbor, visited); result != nil {
+		if result := root.edgeBetween(u, v, visited); result != nil {
 			return result
 		}
 	}
@@ -209,7 +216,7 @@ func (g *GraphNode) EdgeBetween(n, neighbor graph.Node) graph.Edge {
 	for _, neigh := range g.neighbors {
 		visited[neigh.ID()] = struct{}{}
 		if gn, ok := neigh.(*GraphNode); ok {
-			if result := gn.edgeBetween(n, neighbor, visited); result != nil {
+			if result := gn.edgeBetween(u, v, visited); result != nil {
 				return result
 			}
 		}
@@ -218,14 +225,13 @@ func (g *GraphNode) EdgeBetween(n, neighbor graph.Node) graph.Edge {
 	return nil
 }
 
-func (g *GraphNode) edgeBetween(n, neighbor graph.Node, visited map[int]struct{}) graph.Edge {
-	if n.ID() == g.id || neighbor.ID() == g.id {
+func (g *GraphNode) edgeBetween(u, v graph.Node, visited map[int]struct{}) graph.Edge {
+	if u.ID() == g.id || v.ID() == g.id {
 		for _, neigh := range g.neighbors {
-			if neigh.ID() == n.ID() || neigh.ID() == neighbor.ID() {
+			if neigh.ID() == u.ID() || neigh.ID() == v.ID() {
 				return concrete.Edge{g, neigh}
 			}
 		}
-
 		return nil
 	}
 
@@ -234,7 +240,7 @@ func (g *GraphNode) edgeBetween(n, neighbor graph.Node, visited map[int]struct{}
 			continue
 		}
 		visited[root.ID()] = struct{}{}
-		if result := root.edgeBetween(n, neighbor, visited); result != nil {
+		if result := root.edgeBetween(u, v, visited); result != nil {
 			return result
 		}
 	}
@@ -246,7 +252,7 @@ func (g *GraphNode) edgeBetween(n, neighbor graph.Node, visited map[int]struct{}
 
 		visited[neigh.ID()] = struct{}{}
 		if gn, ok := neigh.(*GraphNode); ok {
-			if result := gn.edgeBetween(n, neighbor, visited); result != nil {
+			if result := gn.edgeBetween(u, v, visited); result != nil {
 				return result
 			}
 		}

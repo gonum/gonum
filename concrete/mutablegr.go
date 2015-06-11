@@ -168,14 +168,23 @@ func (g *Graph) From(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *Graph) EdgeBetween(n, neigh graph.Node) graph.Edge {
-	// Don't need to check if neigh exists because
+func (g *Graph) HasEdge(n, neigh graph.Node) bool {
+	_, ok := g.neighbors[n.ID()][neigh.ID()]
+	return ok
+}
+
+func (g *Graph) Edge(u, v graph.Node) graph.Edge {
+	return g.EdgeBetween(u, v)
+}
+
+func (g *Graph) EdgeBetween(u, v graph.Node) graph.Edge {
+	// We don't need to check if neigh exists because
 	// it's implicit in the neighbors access.
-	if !g.Has(n) {
+	if !g.Has(u) {
 		return nil
 	}
 
-	return g.neighbors[n.ID()][neigh.ID()].Edge
+	return g.neighbors[u.ID()][v.ID()].Edge
 }
 
 func (g *Graph) Has(n graph.Node) bool {

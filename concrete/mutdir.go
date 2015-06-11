@@ -130,7 +130,7 @@ func (g *DirectedGraph) EmptyGraph() {
 
 /* Graph implementation */
 
-func (g *DirectedGraph) Successors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) From(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
@@ -145,14 +145,28 @@ func (g *DirectedGraph) Successors(n graph.Node) []graph.Node {
 	return successors
 }
 
-func (g *DirectedGraph) EdgeTo(n, succ graph.Node) graph.Edge {
+func (g *DirectedGraph) HasEdge(n, succ graph.Node) bool {
 	if _, ok := g.nodeMap[n.ID()]; !ok {
-		return nil
+		return false
 	} else if _, ok := g.nodeMap[succ.ID()]; !ok {
+		return false
+	}
+	_, ok := g.successors[n.ID()][succ.ID()]
+	return ok
+}
+
+func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
+	return g.EdgeFromTo(u, v)
+}
+
+func (g *DirectedGraph) EdgeFromTo(u, v graph.Node) graph.Edge {
+	if _, ok := g.nodeMap[u.ID()]; !ok {
+		return nil
+	} else if _, ok := g.nodeMap[v.ID()]; !ok {
 		return nil
 	}
 
-	edge, ok := g.successors[n.ID()][succ.ID()]
+	edge, ok := g.successors[u.ID()][v.ID()]
 	if !ok {
 		return nil
 	}
@@ -172,46 +186,6 @@ func (g *DirectedGraph) To(n graph.Node) []graph.Node {
 	}
 
 	return predecessors
-}
-
-func (g *DirectedGraph) From(n graph.Node) []graph.Node {
-	if _, ok := g.successors[n.ID()]; !ok {
-		return nil
-	}
-
-	neighbors := make([]graph.Node, len(g.predecessors[n.ID()])+len(g.successors[n.ID()]))
-	i := 0
-	for succ := range g.successors[n.ID()] {
-		neighbors[i] = g.nodeMap[succ]
-		i++
-	}
-
-	for pred := range g.predecessors[n.ID()] {
-		// We should only add the predecessor if it wasn't already added from successors
-		if _, ok := g.successors[n.ID()][pred]; !ok {
-			neighbors[i] = g.nodeMap[pred]
-			i++
-		}
-	}
-
-	// Otherwise we overcount for self loops
-	neighbors = neighbors[:i]
-
-	return neighbors
-}
-
-func (g *DirectedGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
-	e := g.EdgeTo(n, neigh)
-	if e != nil {
-		return e
-	}
-
-	e = g.EdgeTo(neigh, n)
-	if e != nil {
-		return e
-	}
-
-	return nil
 }
 
 func (g *DirectedGraph) Has(n graph.Node) bool {

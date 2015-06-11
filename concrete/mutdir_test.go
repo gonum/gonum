@@ -12,8 +12,8 @@ import (
 )
 
 var _ graph.Graph = &concrete.DirectedGraph{}
-var _ graph.DirectedGraph = &concrete.DirectedGraph{}
-var _ graph.DirectedGraph = &concrete.DirectedGraph{}
+var _ graph.Directed = &concrete.DirectedGraph{}
+var _ graph.Directed = &concrete.DirectedGraph{}
 
 // Tests Issue #27
 func TestEdgeOvercounting(t *testing.T) {

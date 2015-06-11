@@ -28,7 +28,7 @@ type johnson struct {
 }
 
 // CyclesIn returns the set of elementary cycles in the graph g.
-func CyclesIn(g graph.DirectedGraph) [][]graph.Node {
+func CyclesIn(g graph.Directed) [][]graph.Node {
 	jg := johnsonGraphFrom(g)
 	j := johnson{
 		adjacent: jg,
@@ -130,7 +130,7 @@ type johnsonGraph struct {
 }
 
 // johnsonGraphFrom returns a deep copy of the graph g.
-func johnsonGraphFrom(g graph.DirectedGraph) johnsonGraph {
+func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 	nodes := g.Nodes()
 	sort.Sort(byID(nodes))
 	c := johnsonGraph{
@@ -142,7 +142,7 @@ func johnsonGraphFrom(g graph.DirectedGraph) johnsonGraph {
 	}
 	for i, u := range nodes {
 		c.index[u.ID()] = i
-		for _, v := range g.Successors(u) {
+		for _, v := range g.From(u) {
 			if c.succ[u.ID()] == nil {
 				c.succ[u.ID()] = make(internal.IntSet)
 				c.nodes.Add(u.ID())
@@ -252,7 +252,7 @@ func (g johnsonGraph) Nodes() []graph.Node {
 }
 
 // Successors is required to satisfy Tarjan.
-func (g johnsonGraph) Successors(n graph.Node) []graph.Node {
+func (g johnsonGraph) From(n graph.Node) []graph.Node {
 	adj := g.succ[n.ID()]
 	if len(adj) == 0 {
 		return nil
@@ -267,13 +267,13 @@ func (g johnsonGraph) Successors(n graph.Node) []graph.Node {
 func (johnsonGraph) Has(graph.Node) bool {
 	panic("search: unintended use of johnsonGraph")
 }
-func (johnsonGraph) From(graph.Node) []graph.Node {
+func (johnsonGraph) HasEdge(_, _ graph.Node) bool {
 	panic("search: unintended use of johnsonGraph")
 }
-func (johnsonGraph) EdgeBetween(_, _ graph.Node) graph.Edge {
+func (johnsonGraph) Edge(_, _ graph.Node) graph.Edge {
 	panic("search: unintended use of johnsonGraph")
 }
-func (johnsonGraph) EdgeTo(_, _ graph.Node) graph.Edge {
+func (johnsonGraph) EdgeFromTo(_, _ graph.Node) graph.Edge {
 	panic("search: unintended use of johnsonGraph")
 }
 func (johnsonGraph) To(graph.Node) []graph.Node {

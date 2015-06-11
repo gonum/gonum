@@ -52,7 +52,7 @@ var (
 	}
 )
 
-func directedGraphFrom(g []set) graph.DirectedGraph {
+func directedGraphFrom(g []set) graph.Directed {
 	dg := concrete.NewDirectedGraph()
 	for u, e := range g {
 		for v := range e {
@@ -82,7 +82,7 @@ type namedNode struct {
 func (n namedNode) ID() int       { return n.id }
 func (n namedNode) DOTID() string { return n.name }
 
-func directedNamedIDGraphFrom(g []set) graph.DirectedGraph {
+func directedNamedIDGraphFrom(g []set) graph.Directed {
 	dg := concrete.NewDirectedGraph()
 	for u, e := range g {
 		nu := namedNode{id: u, name: alpha[u : u+1]}
@@ -115,7 +115,7 @@ type attrNode struct {
 func (n attrNode) ID() int                    { return n.id }
 func (n attrNode) DOTAttributes() []Attribute { return n.attr }
 
-func directedNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.DirectedGraph {
+func directedNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Directed {
 	dg := concrete.NewDirectedGraph()
 	for u, e := range g {
 		var at []Attribute
@@ -163,7 +163,7 @@ func (n namedAttrNode) ID() int                    { return n.id }
 func (n namedAttrNode) DOTID() string              { return n.name }
 func (n namedAttrNode) DOTAttributes() []Attribute { return n.attr }
 
-func directedNamedIDNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.DirectedGraph {
+func directedNamedIDNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Directed {
 	dg := concrete.NewDirectedGraph()
 	for u, e := range g {
 		var at []Attribute
@@ -211,7 +211,7 @@ func (e attrEdge) From() graph.Node           { return e.from }
 func (e attrEdge) To() graph.Node             { return e.to }
 func (e attrEdge) DOTAttributes() []Attribute { return e.attr }
 
-func directedEdgeAttrGraphFrom(g []set, attr map[edge][]Attribute) graph.DirectedGraph {
+func directedEdgeAttrGraphFrom(g []set, attr map[edge][]Attribute) graph.Directed {
 	dg := concrete.NewDirectedGraph()
 	for u, e := range g {
 		for v := range e {
@@ -260,7 +260,7 @@ func (e portedEdge) ToPort() (port, compass string) {
 	return e.toPort, e.toCompass
 }
 
-func directedPortedAttrGraphFrom(g []set, attr [][]Attribute, ports map[edge]portedEdge) graph.DirectedGraph {
+func directedPortedAttrGraphFrom(g []set, attr [][]Attribute, ports map[edge]portedEdge) graph.Directed {
 	dg := concrete.NewDirectedGraph()
 	for u, e := range g {
 		var at []Attribute

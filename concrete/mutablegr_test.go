@@ -16,7 +16,7 @@ var _ graph.Graph = (*concrete.Graph)(nil)
 
 func TestAssertMutableNotDirected(t *testing.T) {
 	var g graph.MutableGraph = concrete.NewGraph()
-	if _, ok := g.(graph.DirectedGraph); ok {
+	if _, ok := g.(graph.Directed); ok {
 		t.Fatal("concrete.Graph is directed, but a MutableGraph cannot safely be directed!")
 	}
 }

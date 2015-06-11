@@ -190,15 +190,28 @@ func (g *TileGraph) From(n graph.Node) []graph.Node {
 	return realNeighbors
 }
 
-func (g *TileGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
-	if !g.Has(n) || !g.Has(neigh) {
+func (g *TileGraph) HasEdge(u, v graph.Node) bool {
+	if !g.Has(u) || !g.Has(v) {
+		return false
+	}
+	r1, c1 := g.IDToCoords(u.ID())
+	r2, c2 := g.IDToCoords(v.ID())
+	return (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1))
+}
+
+func (g *TileGraph) Edge(u, v graph.Node) graph.Edge {
+	return g.EdgeBetween(u, v)
+}
+
+func (g *TileGraph) EdgeBetween(u, v graph.Node) graph.Edge {
+	if !g.Has(u) || !g.Has(v) {
 		return nil
 	}
 
-	r1, c1 := g.IDToCoords(n.ID())
-	r2, c2 := g.IDToCoords(neigh.ID())
+	r1, c1 := g.IDToCoords(u.ID())
+	r2, c2 := g.IDToCoords(v.ID())
 	if (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1)) {
-		return concrete.Edge{n, neigh}
+		return concrete.Edge{u, v}
 	}
 
 	return nil

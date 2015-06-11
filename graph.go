@@ -19,11 +19,7 @@ type Edge interface {
 	To() Node
 }
 
-// A Graph implements the behavior of an undirected graph.
-//
-// All methods in Graph are implicitly undirected. Graph algorithms that care about directionality
-// will intelligently choose the DirectedGraph behavior if that interface is also implemented,
-// even if the function itself only takes in a Graph (or a super-interface of graph).
+// Graph is a generalized graph.
 type Graph interface {
 	// Has returns whether the node exists within the graph.
 	Has(Node) bool
@@ -35,28 +31,29 @@ type Graph interface {
 	// the given node.
 	From(Node) []Node
 
-	// EdgeBetween returns an edge between node and neighbor such that
-	// From is one argument and To is the other. If no
-	// such edge exists, this function returns nil.
-	EdgeBetween(node, neighbor Node) Edge
+	// HasEdge returns whether an edge exists between
+	// nodes x and y without considering direction.
+	HasEdge(x, y Node) bool
+
+	// Edge returns the edge between nodes u and v when
+	// the nodes returned by From(u) include v.
+	Edge(u, v Node) Edge
 }
 
-// Directed graphs are characterized by having seperable Heads and Tails in their edges.
-// That is, if node1 goes to node2, that does not necessarily imply that node2 goes to node1.
-//
-// While it's possible for a directed graph to have fully reciprocal edges (i.e. the graph is
-// symmetric) -- it is not required to be. The graph is also required to implement Graph
-// because in many cases it can be useful to know all neighbors regardless of direction.
-type DirectedGraph interface {
+// Undirected is an undirected graph.
+type Undirected interface {
 	Graph
-	// Successors gives the nodes connected by OUTBOUND edges.
-	// If the graph is an undirected graph, this set is equal to To.
-	Successors(Node) []Node
 
-	// EdgeTo returns an edge between node and successor such that
-	// From returns node and To returns successor, if no
-	// such edge exists, this function returns nil.
-	EdgeTo(node, successor Node) Edge
+	// EdgeBetween returns the edge between nodes u and v.
+	EdgeBetween(u, v Node) Edge
+}
+
+// Directed is a directed graph.
+type Directed interface {
+	Graph
+
+	// EdgeFromTo returns the edge leading from u to v.
+	EdgeFromTo(u, v Node) Edge
 
 	// To returns all nodes that can be lead to the
 	// given node.
@@ -100,7 +97,7 @@ type CostGraph interface {
 
 type CostDirectedGraph interface {
 	Coster
-	DirectedGraph
+	Directed
 }
 
 // A graph that implements HeuristicCoster implements a heuristic between any two given nodes.

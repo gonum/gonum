@@ -12,17 +12,6 @@ import "github.com/gonum/graph"
 //
 // The time complexity of FloydWarshall is O(|V|^3).
 func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok bool) {
-	var (
-		from   = g.From
-		edgeTo func(graph.Node, graph.Node) graph.Edge
-	)
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		from = g.Successors
-		edgeTo = g.EdgeTo
-	default:
-		edgeTo = g.EdgeBetween
-	}
 	if weight == nil {
 		if g, ok := g.(graph.Coster); ok {
 			weight = g.Cost
@@ -35,9 +24,9 @@ func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok 
 	paths = newAllShortest(nodes, true)
 	for i, u := range nodes {
 		paths.dist.Set(i, i, 0)
-		for _, v := range from(u) {
+		for _, v := range g.From(u) {
 			j := paths.indexOf[v.ID()]
-			paths.set(i, j, weight(edgeTo(u, v)), j)
+			paths.set(i, j, weight(g.Edge(u, v)), j)
 		}
 	}
 

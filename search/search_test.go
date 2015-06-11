@@ -5,6 +5,7 @@
 package search_test
 
 import (
+	"fmt"
 	"math"
 	"reflect"
 	"sort"
@@ -619,46 +620,35 @@ var connectedComponentTests = []struct {
 }
 
 func TestConnectedComponents(t *testing.T) {
-	for _, directed := range []bool{false, true} {
-		for i, test := range connectedComponentTests {
-			var g graph.Graph
-			if directed {
-				g = concrete.NewDirectedGraph()
-			} else {
-				g = concrete.NewGraph()
-			}
+	for i, test := range connectedComponentTests {
+		g := concrete.NewGraph()
 
-			for u, e := range test.g {
-				// Add nodes that are not defined by an edge.
-				if !g.Has(concrete.Node(u)) {
-					g.(graph.Mutable).AddNode(concrete.Node(u))
-				}
-				for v := range e {
-					switch g := g.(type) {
-					case graph.MutableDirectedGraph:
-						g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
-					case graph.MutableGraph:
-						g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
-					default:
-						panic("unexpected graph type")
-					}
-				}
+		for u, e := range test.g {
+			if !g.Has(concrete.Node(u)) {
+				g.AddNode(concrete.Node(u))
 			}
-			cc := search.ConnectedComponents(g)
-			got := make([][]int, len(cc))
-			for j, c := range cc {
-				ids := make([]int, len(c))
-				for k, n := range c {
-					ids[k] = n.ID()
+			for v := range e {
+				if !g.Has(concrete.Node(v)) {
+					g.AddNode(concrete.Node(v))
 				}
-				sort.Ints(ids)
-				got[j] = ids
-			}
-			sort.Sort(internal.BySliceValues(got))
-			if !reflect.DeepEqual(got, test.want) {
-				t.Errorf("unexpected connected components for test %d:\ngot: %v\nwant:%v", i, got, test.want)
+				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
+		cc := search.ConnectedComponents(g)
+		got := make([][]int, len(cc))
+		for j, c := range cc {
+			ids := make([]int, len(c))
+			for k, n := range c {
+				ids[k] = n.ID()
+			}
+			sort.Ints(ids)
+			got[j] = ids
+		}
+		sort.Sort(internal.BySliceValues(got))
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("unexpected connected components for test %d %T:\ngot: %v\nwant:%v", i, g, got, test.want)
+		}
+		fmt.Println()
 	}
 }
 

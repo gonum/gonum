@@ -184,7 +184,7 @@ func (g *Graph) Has(n graph.Node) bool {
 	return ok
 }
 
-func (g *Graph) NodeList() []graph.Node {
+func (g *Graph) Nodes() []graph.Node {
 	nodes := make([]graph.Node, len(g.nodeMap))
 	i := 0
 	for _, n := range g.nodeMap {

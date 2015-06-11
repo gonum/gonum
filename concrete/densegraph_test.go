@@ -158,7 +158,7 @@ func (ns nodeSorter) Less(i, j int) bool {
 
 func TestDenseLists(t *testing.T) {
 	dg := concrete.NewDenseGraph(15, true)
-	nodes := nodeSorter(dg.NodeList())
+	nodes := nodeSorter(dg.Nodes())
 
 	if len(nodes) != 15 {
 		t.Fatalf("Wrong number of nodes")
@@ -166,7 +166,7 @@ func TestDenseLists(t *testing.T) {
 
 	sort.Sort(nodes)
 
-	for i, node := range dg.NodeList() {
+	for i, node := range dg.Nodes() {
 		if i != node.ID() {
 			t.Errorf("Node list doesn't return properly id'd nodes")
 		}

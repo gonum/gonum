@@ -31,7 +31,7 @@ func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok 
 		}
 	}
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	paths = newAllShortest(nodes, true)
 	for i, u := range nodes {
 		paths.dist.Set(i, i, 0)

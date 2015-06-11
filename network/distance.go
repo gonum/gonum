@@ -19,7 +19,7 @@ import (
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
 func Closeness(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	c := make(map[int]float64, len(nodes))
 	for _, u := range nodes {
 		var sum float64
@@ -46,7 +46,7 @@ func Closeness(g graph.Graph, p search.AllShortest) map[int]float64 {
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
 func Farness(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	f := make(map[int]float64, len(nodes))
 	for _, u := range nodes {
 		var sum float64
@@ -73,7 +73,7 @@ func Farness(g graph.Graph, p search.AllShortest) map[int]float64 {
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
 func Harmonic(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	h := make(map[int]float64, len(nodes))
 	for i, u := range nodes {
 		var sum float64
@@ -102,7 +102,7 @@ func Harmonic(g graph.Graph, p search.AllShortest) map[int]float64 {
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
 func Residual(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	r := make(map[int]float64, len(nodes))
 	for i, u := range nodes {
 		var sum float64

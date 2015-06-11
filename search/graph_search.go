@@ -108,7 +108,7 @@ func UniformCost(e graph.Edge) float64 {
 func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
 	cost := setupFuncs(src, nil, nil).cost
 
-	for _, node := range src.NodeList() {
+	for _, node := range src.Nodes() {
 		succs := src.Neighbors(node)
 		dst.AddNode(node)
 		for _, succ := range succs {
@@ -125,7 +125,7 @@ func CopyUndirectedGraph(dst graph.MutableGraph, src graph.Graph) {
 func CopyDirectedGraph(dst graph.MutableDirectedGraph, src graph.DirectedGraph) {
 	cost := setupFuncs(src, nil, nil).cost
 
-	for _, node := range src.NodeList() {
+	for _, node := range src.Nodes() {
 		succs := src.Successors(node)
 		dst.AddNode(node)
 		for _, succ := range succs {
@@ -193,7 +193,7 @@ func Sort(g graph.DirectedGraph) (sorted []graph.Node, err error) {
 // only a little extra testing.)
 //
 func TarjanSCC(g graph.DirectedGraph) [][]graph.Node {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	t := tarjan{
 		succ: g.Successors,
 
@@ -313,7 +313,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	sf := setupFuncs(g, cost, nil)
 	cost = sf.cost
 
-	nlist := g.NodeList()
+	nlist := g.Nodes()
 
 	if nlist == nil || len(nlist) == 0 {
 		return
@@ -362,7 +362,7 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 	sort.Sort(byWeight(edges))
 
 	ds := newDisjointSet()
-	for _, node := range g.NodeList() {
+	for _, node := range g.Nodes() {
 		ds.makeSet(node.ID())
 	}
 
@@ -385,7 +385,7 @@ func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc)
 //
 func Dominators(start graph.Node, g graph.Graph) map[int]Set {
 	allNodes := make(Set)
-	nlist := g.NodeList()
+	nlist := g.Nodes()
 	dominators := make(map[int]Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.add(node)
@@ -439,7 +439,7 @@ func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
 	successors := setupFuncs(g, nil, nil).successors
 
 	allNodes := make(Set)
-	nlist := g.NodeList()
+	nlist := g.Nodes()
 	dominators := make(map[int]Set, len(nlist))
 	for _, node := range nlist {
 		allNodes.add(node)
@@ -486,7 +486,7 @@ func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
 // VertexOrdering returns the vertex ordering and the k-cores of
 // the undirected graph g.
 func VertexOrdering(g graph.Graph) (order []graph.Node, cores [][]graph.Node) {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 
 	// The algorithm used here is essentially as described at
 	// http://en.wikipedia.org/w/index.php?title=Degeneracy_%28graph_theory%29&oldid=640308710
@@ -584,7 +584,7 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, cores [][]graph.Node) {
 
 // BronKerbosch returns the set of maximal cliques of the undirected graph g.
 func BronKerbosch(g graph.Graph) [][]graph.Node {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 
 	// The algorithm used here is essentially BronKerbosch3 as described at
 	// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858

@@ -28,11 +28,8 @@ type Graph interface {
 	// Has returns whether the node exists within the graph.
 	Has(Node) bool
 
-	// NodeList returns a list of all nodes in no particular order, useful for
-	// determining things like if a graph is fully connected. The caller is
-	// free to modify this list. Implementations should construct a new list
-	// and not return internal representation.
-	NodeList() []Node
+	// Nodes returns all the nodes in the graph.
+	Nodes() []Node
 
 	// Neighbors returns all nodes connected by any edge to this node.
 	Neighbors(Node) []Node
@@ -118,7 +115,7 @@ type HeuristicCoster interface {
 // A Mutable is a graph that can have arbitrary nodes and edges added or removed.
 //
 // Anything implementing Mutable is required to store the actual argument. So if AddNode(myNode) is
-// called and later a user calls on the graph graph.NodeList(), the node added by AddNode must be
+// called and later a user calls on the graph graph.Nodes(), the node added by AddNode must be
 // an the exact node, not a new node with the same ID.
 //
 // In any case where conflict is possible (e.g. adding two nodes with the same ID), the later

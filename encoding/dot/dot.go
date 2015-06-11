@@ -122,7 +122,7 @@ type edge struct {
 }
 
 func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	sort.Sort(byID(nodes))
 
 	p.buf.WriteString(p.prefix)

@@ -22,7 +22,7 @@ type HubAuthority struct {
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
 func HITS(g graph.DirectedGraph, tol float64) map[int]HubAuthority {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 
 	// Make a topological copy of g with dense node IDs.
 	indexOf := make(map[int]int, len(nodes))

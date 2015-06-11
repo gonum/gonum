@@ -25,7 +25,7 @@ func PageRank(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	indexOf := make(map[int]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -98,7 +98,7 @@ func PageRankSparse(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	indexOf := make(map[int]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i

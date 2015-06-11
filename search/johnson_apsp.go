@@ -39,7 +39,7 @@ func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, o
 		}
 	}
 
-	paths = newAllShortest(g.NodeList(), false)
+	paths = newAllShortest(g.Nodes(), false)
 
 	sign := -1
 	for {
@@ -100,16 +100,16 @@ func (g johnsonWeightAdjuster) Has(n graph.Node) bool {
 
 }
 
-func (g johnsonWeightAdjuster) NodeList() []graph.Node {
+func (g johnsonWeightAdjuster) Nodes() []graph.Node {
 	if g.bellmanFord {
-		return append(g.g.NodeList(), johnsonGraphNode(g.q))
+		return append(g.g.Nodes(), johnsonGraphNode(g.q))
 	}
-	return g.g.NodeList()
+	return g.g.Nodes()
 }
 
 func (g johnsonWeightAdjuster) Successors(n graph.Node) []graph.Node {
 	if g.bellmanFord && n.ID() == g.q {
-		return g.g.NodeList()
+		return g.g.Nodes()
 	}
 	return g.from(n)
 }

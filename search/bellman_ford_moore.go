@@ -34,7 +34,7 @@ func BellmanFordFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) (path S
 		}
 	}
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 
 	path = newShortestFrom(u, nodes)
 	path.dist[path.indexOf[u.ID()]] = 0

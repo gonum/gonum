@@ -131,7 +131,7 @@ type johnsonGraph struct {
 
 // johnsonGraphFrom returns a deep copy of the graph g.
 func johnsonGraphFrom(g graph.DirectedGraph) johnsonGraph {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	sort.Sort(byID(nodes))
 	c := johnsonGraph{
 		orig:  nodes,
@@ -242,8 +242,8 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 	return sub
 }
 
-// NodeList is required to satisfy Tarjan.
-func (g johnsonGraph) NodeList() []graph.Node {
+// Nodes is required to satisfy Tarjan.
+func (g johnsonGraph) Nodes() []graph.Node {
 	n := make([]graph.Node, 0, len(g.nodes))
 	for id := range g.nodes {
 		n = append(n, johnsonGraphNode(id))

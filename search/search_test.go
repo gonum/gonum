@@ -133,8 +133,8 @@ func TestSmallAStar(t *testing.T) {
 	}
 
 	ps := search.DijkstraAllPaths(g, nil)
-	for _, start := range g.NodeList() {
-		for _, goal := range g.NodeList() {
+	for _, start := range g.Nodes() {
+		for _, goal := range g.Nodes() {
 			gotPath, gotWeight, _ := search.AStar(start, goal, g, nil, heur)
 			wantPath, wantWeight, _ := ps.Between(start, goal)
 			if gotWeight != wantWeight {
@@ -199,7 +199,7 @@ type costEdgeListGraph interface {
 }
 
 func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool, graph.Edge, graph.Node) {
-	for _, goal := range g.NodeList() {
+	for _, goal := range g.Nodes() {
 		for _, edge := range g.EdgeList() {
 			from := edge.From()
 			to := edge.To()

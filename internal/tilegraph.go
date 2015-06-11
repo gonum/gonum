@@ -228,7 +228,7 @@ func (g *TileGraph) EdgeList() []graph.Edge {
 	return edges
 }
 
-func (g *TileGraph) NodeList() []graph.Node {
+func (g *TileGraph) Nodes() []graph.Node {
 	nodes := make([]graph.Node, 0)
 	for id, passable := range g.tiles {
 		if !passable {

@@ -82,7 +82,7 @@ func (b *BreadthFirst) WalkAll(g graph.Graph, before, after func(), during func(
 	g = struct{ graph.Graph }{g}
 
 	b.Reset()
-	for _, from := range g.NodeList() {
+	for _, from := range g.Nodes() {
 		if b.Visited(from) {
 			continue
 		}
@@ -174,7 +174,7 @@ func (d *DepthFirst) WalkAll(g graph.Graph, before, after func(), during func(gr
 	g = struct{ graph.Graph }{g}
 
 	d.Reset()
-	for _, from := range g.NodeList() {
+	for _, from := range g.Nodes() {
 		if d.Visited(from) {
 			continue
 		}

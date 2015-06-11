@@ -52,7 +52,7 @@ func (g *DenseGraph) Degree(n graph.Node) int {
 	return deg
 }
 
-func (g *DenseGraph) NodeList() []graph.Node {
+func (g *DenseGraph) Nodes() []graph.Node {
 	nodes := make([]graph.Node, g.numNodes)
 	for i := 0; i < g.numNodes; i++ {
 		nodes[i] = Node(i)

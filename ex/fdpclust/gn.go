@@ -80,7 +80,7 @@ func (g *GraphNode) has(n graph.Node, visited map[int]struct{}) bool {
 	return false
 }
 
-func (g *GraphNode) NodeList() []graph.Node {
+func (g *GraphNode) Nodes() []graph.Node {
 	toReturn := []graph.Node{g}
 	visited := map[int]struct{}{g.id: struct{}{}}
 
@@ -88,7 +88,7 @@ func (g *GraphNode) NodeList() []graph.Node {
 		toReturn = append(toReturn, root)
 		visited[root.ID()] = struct{}{}
 
-		toReturn = root.nodeList(toReturn, visited)
+		toReturn = root.nodes(toReturn, visited)
 	}
 
 	for _, neigh := range g.neighbors {
@@ -96,14 +96,14 @@ func (g *GraphNode) NodeList() []graph.Node {
 		visited[neigh.ID()] = struct{}{}
 
 		if gn, ok := neigh.(*GraphNode); ok {
-			toReturn = gn.nodeList(toReturn, visited)
+			toReturn = gn.nodes(toReturn, visited)
 		}
 	}
 
 	return toReturn
 }
 
-func (g *GraphNode) nodeList(list []graph.Node, visited map[int]struct{}) []graph.Node {
+func (g *GraphNode) nodes(list []graph.Node, visited map[int]struct{}) []graph.Node {
 	for _, root := range g.roots {
 		if _, ok := visited[root.ID()]; ok {
 			continue
@@ -111,7 +111,7 @@ func (g *GraphNode) nodeList(list []graph.Node, visited map[int]struct{}) []grap
 		visited[root.ID()] = struct{}{}
 		list = append(list, graph.Node(root))
 
-		list = root.nodeList(list, visited)
+		list = root.nodes(list, visited)
 	}
 
 	for _, neigh := range g.neighbors {
@@ -121,7 +121,7 @@ func (g *GraphNode) nodeList(list []graph.Node, visited map[int]struct{}) []grap
 
 		list = append(list, neigh)
 		if gn, ok := neigh.(*GraphNode); ok {
-			list = gn.nodeList(list, visited)
+			list = gn.nodes(list, visited)
 		}
 	}
 

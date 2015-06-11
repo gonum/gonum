@@ -38,7 +38,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 		}
 	}
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	path := newShortestFrom(u, nodes)
 
 	// Dijkstra's algorithm here is implemented essentially as
@@ -76,7 +76,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 //
 // The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) {
-	paths = newAllShortest(g.NodeList(), false)
+	paths = newAllShortest(g.Nodes(), false)
 	dijkstraAllPaths(g, weight, paths)
 	return paths
 }

@@ -35,7 +35,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	var (
 		cb = make(map[int]float64)
 
-		nodes = g.NodeList()
+		nodes = g.Nodes()
 		stack internal.NodeStack
 		p     = make(map[int][]graph.Node, len(nodes))
 		sigma = make(map[int]float64, len(nodes))
@@ -105,7 +105,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 func BetweennessWeighted(g graph.CostGraph, p search.AllShortest) map[int]float64 {
 	cb := make(map[int]float64)
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	for i, s := range nodes {
 		for j, t := range nodes {
 			if i == j {

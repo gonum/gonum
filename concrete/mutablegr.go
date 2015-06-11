@@ -204,7 +204,7 @@ func (g *Graph) Cost(e graph.Edge) float64 {
 	return inf
 }
 
-func (g *Graph) EdgeList() []graph.Edge {
+func (g *Graph) Edges() []graph.Edge {
 	m := make(map[WeightedEdge]struct{})
 	toReturn := make([]graph.Edge, 0)
 

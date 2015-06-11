@@ -248,7 +248,7 @@ func (g *DirectedGraph) Cost(e graph.Edge) float64 {
 	return inf
 }
 
-func (g *DirectedGraph) EdgeList() []graph.Edge {
+func (g *DirectedGraph) Edges() []graph.Edge {
 	edgeList := make([]graph.Edge, 0, len(g.successors))
 	edgeMap := make(map[int]map[int]struct{}, len(g.successors))
 	for n, succMap := range g.successors {

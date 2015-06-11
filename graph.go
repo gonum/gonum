@@ -63,9 +63,9 @@ type DirectedGraph interface {
 	To(Node) []Node
 }
 
-// Returns all undirected edges in the graph
+// EdgeLister wraps the Edges method.
 type EdgeLister interface {
-	EdgeList() []Edge
+	Edges() []Edge
 }
 
 type EdgeListGraph interface {

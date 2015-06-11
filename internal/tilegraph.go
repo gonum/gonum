@@ -213,7 +213,7 @@ func (g *TileGraph) Degree(n graph.Node) int {
 	return len(g.From(n)) * 2
 }
 
-func (g *TileGraph) EdgeList() []graph.Edge {
+func (g *TileGraph) Edges() []graph.Edge {
 	edges := make([]graph.Edge, 0)
 	for id, passable := range g.tiles {
 		if !passable {

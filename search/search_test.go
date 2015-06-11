@@ -200,7 +200,7 @@ type costEdgeListGraph interface {
 
 func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool, graph.Edge, graph.Node) {
 	for _, goal := range g.Nodes() {
-		for _, edge := range g.EdgeList() {
+		for _, edge := range g.Edges() {
 			from := edge.From()
 			to := edge.To()
 			if heur(from, goal) > g.Cost(edge)+heur(to, goal) {

@@ -325,7 +325,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 		remainingNodes.Add(node.ID())
 	}
 
-	edgeList := g.EdgeList()
+	edgeList := g.Edges()
 	for remainingNodes.Count() != 0 {
 		var edges []concrete.WeightedEdge
 		for _, edge := range edgeList {
@@ -353,7 +353,7 @@ func Prim(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 func Kruskal(dst graph.MutableGraph, g graph.EdgeListGraph, cost graph.CostFunc) {
 	cost = setupFuncs(g, cost, nil).cost
 
-	edgeList := g.EdgeList()
+	edgeList := g.Edges()
 	edges := make([]concrete.WeightedEdge, 0, len(edgeList))
 	for _, edge := range edgeList {
 		edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: cost(edge)})

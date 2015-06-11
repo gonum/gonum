@@ -264,14 +264,21 @@ func (g johnsonGraph) Successors(n graph.Node) []graph.Node {
 	return succ
 }
 
-// The following methods are purely here to satisfy graph.DirectedGraph.
-// Use of this type for anything except Tarjan or CyclesIn is likely to result in
-// incorrect results.
-func (johnsonGraph) NodeExists(n graph.Node) bool           { return false }
-func (johnsonGraph) Neighbors(n graph.Node) []graph.Node    { return nil }
-func (johnsonGraph) EdgeBetween(u, v graph.Node) graph.Edge { return nil }
-func (johnsonGraph) EdgeTo(u, v graph.Node) graph.Edge      { return nil }
-func (johnsonGraph) Predecessors(v graph.Node) []graph.Node { return nil }
+func (johnsonGraph) NodeExists(graph.Node) bool {
+	panic("search: unintended use of johnsonGraph")
+}
+func (johnsonGraph) Neighbors(graph.Node) []graph.Node {
+	panic("search: unintended use of johnsonGraph")
+}
+func (johnsonGraph) EdgeBetween(_, _ graph.Node) graph.Edge {
+	panic("search: unintended use of johnsonGraph")
+}
+func (johnsonGraph) EdgeTo(_, _ graph.Node) graph.Edge {
+	panic("search: unintended use of johnsonGraph")
+}
+func (johnsonGraph) Predecessors(graph.Node) []graph.Node {
+	panic("search: unintended use of johnsonGraph")
+}
 
 type johnsonGraphNode int
 

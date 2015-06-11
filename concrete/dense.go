@@ -61,7 +61,7 @@ func (g *DenseGraph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *DenseGraph) DirectedEdgeList() []graph.Edge {
+func (g *DenseGraph) DirectedEdges() []graph.Edge {
 	edges := make([]graph.Edge, 0, len(g.adjacencyMatrix))
 	for i := 0; i < g.numNodes; i++ {
 		for j := 0; j < g.numNodes; j++ {

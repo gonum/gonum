@@ -73,9 +73,9 @@ type EdgeListGraph interface {
 	EdgeLister
 }
 
-// Returns all directed edges in the graph.
+// DirectedEdgeLister wraps the DirectedEdges method.
 type DirectedEdgeLister interface {
-	DirectedEdgeList() []Edge
+	DirectedEdges() []Edge
 }
 
 type DirectedEdgeListGraph interface {

@@ -4,12 +4,7 @@
 
 package search
 
-import (
-	"math"
-
-	"github.com/gonum/graph"
-	"github.com/gonum/matrix/mat64"
-)
+import "github.com/gonum/graph"
 
 // FloydWarshall returns a shortest-path tree for the graph g or false indicating
 // that a negative cycle exists in the graph. If weight is nil and the graph does not
@@ -37,28 +32,11 @@ func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok 
 	}
 
 	nodes := g.NodeList()
-
-	indexOf := make(map[int]int, len(nodes))
-	for i, n := range nodes {
-		indexOf[n.ID()] = i
-	}
-
-	dist := make([]float64, len(nodes)*len(nodes))
-	for i := range dist {
-		dist[i] = math.Inf(1)
-	}
-	paths = AllShortest{
-		nodes:   nodes,
-		indexOf: indexOf,
-
-		dist:    mat64.NewDense(len(nodes), len(nodes), dist),
-		next:    make([][]int, len(nodes)*len(nodes)),
-		forward: true,
-	}
+	paths = newAllShortest(nodes, true)
 	for i, u := range nodes {
 		paths.dist.Set(i, i, 0)
 		for _, v := range from(u) {
-			j := indexOf[v.ID()]
+			j := paths.indexOf[v.ID()]
 			paths.set(i, j, weight(edgeTo(u, v)), j)
 		}
 	}

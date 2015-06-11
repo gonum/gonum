@@ -145,6 +145,25 @@ type AllShortest struct {
 	forward bool
 }
 
+func newAllShortest(nodes []graph.Node, forward bool) AllShortest {
+	indexOf := make(map[int]int, len(nodes))
+	for i, n := range nodes {
+		indexOf[n.ID()] = i
+	}
+	dist := make([]float64, len(nodes)*len(nodes))
+	for i := range dist {
+		dist[i] = math.Inf(1)
+	}
+	return AllShortest{
+		nodes:   nodes,
+		indexOf: indexOf,
+
+		dist:    mat64.NewDense(len(nodes), len(nodes), dist),
+		next:    make([][]int, len(nodes)*len(nodes)),
+		forward: forward,
+	}
+}
+
 func (p AllShortest) at(from, to int) (mid []int) {
 	return p.next[from+to*len(p.nodes)]
 }

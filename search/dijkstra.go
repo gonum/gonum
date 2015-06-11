@@ -6,10 +6,8 @@ package search
 
 import (
 	"container/heap"
-	"math"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/matrix/mat64"
 )
 
 // DijkstraFrom returns a shortest-path tree for a shortest path from u to all nodes in
@@ -78,6 +76,16 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 //
 // The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) {
+	paths = newAllShortest(g.NodeList(), false)
+	dijkstraAllPaths(g, weight, paths)
+	return paths
+}
+
+// dijkstraAllPaths is the all-paths implementation of Dijkstra. It is shared
+// between DijkstraAllPaths and JohnsonAllPaths to avoid repeated allocation
+// of the nodes slice and the indexOf map. It returns nothing, but stores the
+// result of the work in the paths parameter which is a reference type.
+func dijkstraAllPaths(g graph.Graph, weight graph.CostFunc, paths AllShortest) {
 	var (
 		from   = g.Neighbors
 		edgeTo func(graph.Node, graph.Node) graph.Edge
@@ -97,28 +105,8 @@ func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) 
 		}
 	}
 
-	nodes := g.NodeList()
-
-	indexOf := make(map[int]int, len(nodes))
-	for i, n := range nodes {
-		indexOf[n.ID()] = i
-	}
-
-	dist := make([]float64, len(nodes)*len(nodes))
-	for i := range dist {
-		dist[i] = math.Inf(1)
-	}
-	paths = AllShortest{
-		nodes:   nodes,
-		indexOf: indexOf,
-
-		dist:    mat64.NewDense(len(nodes), len(nodes), dist),
-		next:    make([][]int, len(nodes)*len(nodes)),
-		forward: false,
-	}
-
 	var Q priorityQueue
-	for i, u := range nodes {
+	for i, u := range paths.nodes {
 		// Dijkstra's algorithm here is implemented essentially as
 		// described in Function B.2 in figure 6 of UTCS Technical
 		// Report TR-07-54 with the addition of handling multiple
@@ -150,8 +138,6 @@ func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) 
 			}
 		}
 	}
-
-	return paths
 }
 
 type distanceNode struct {

@@ -39,17 +39,14 @@ func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, o
 		}
 	}
 
-	nodes := g.NodeList()
-	indexOf := make(map[int]int, len(nodes))
-	for i, n := range nodes {
-		indexOf[n.ID()] = i
-	}
+	paths = newAllShortest(g.NodeList(), false)
+
 	sign := -1
 	for {
 		// Choose a random node ID until we find
 		// one that is not in g.
 		jg.q = sign * rand.Int()
-		if _, exists := indexOf[jg.q]; !exists {
+		if _, exists := paths.indexOf[jg.q]; !exists {
 			break
 		}
 		sign *= -1
@@ -62,7 +59,7 @@ func JohnsonAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest, o
 	}
 
 	jg.bellmanFord = false
-	paths = DijkstraAllPaths(jg, nil)
+	dijkstraAllPaths(jg, nil, paths)
 
 	for i, u := range paths.nodes {
 		hu := jg.adjustBy.WeightTo(u)

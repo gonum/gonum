@@ -88,7 +88,7 @@ func TestPageRank(t *testing.T) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.SetDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		got := PageRank(g, test.damp, test.tol)
@@ -112,7 +112,7 @@ func TestPageRankSparse(t *testing.T) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.SetDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		got := PageRankSparse(g, test.damp, test.tol)

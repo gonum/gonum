@@ -97,18 +97,7 @@ type HeuristicCoster interface {
 	HeuristicCost(n1, n2 Node) float64
 }
 
-// A Mutable is a graph that can have arbitrary nodes and edges added or removed.
-//
-// Anything implementing Mutable is required to store the actual argument. So if AddNode(myNode) is
-// called and later a user calls on the graph graph.Nodes(), the node added by AddNode must be
-// an the exact node, not a new node with the same ID.
-//
-// In any case where conflict is possible (e.g. adding two nodes with the same ID), the later
-// call always supercedes the earlier one.
-//
-// Functions will generally expect one of MutableGraph or MutableDirectedGraph and not Mutable
-// itself. That said, any function that takes Mutable[x], the destination mutable should
-// always be a different graph than the source.
+// Mutable wraps generalized graph alteration methods.
 type Mutable interface {
 	// NewNode returns a node with a unique arbitrary ID.
 	NewNode() Node
@@ -117,43 +106,33 @@ type Mutable interface {
 	// the added node ID matches an existing node ID.
 	AddNode(Node)
 
-	// RemoveNode removes a node from the graph, as well as any edges
-	// attached to it. If no such node exists, this is a no-op, not an error.
+	// RemoveNode removes a node from the graph, as
+	// well as any edges attached to it. If the node
+	// is not in the graph it is a no-op.
 	RemoveNode(Node)
+
+	// SetEdge adds an edge from one node to another.
+	// If the nodes do not exist, they are added.
+	// SetEdge will panic if the IDs of the e.From
+	// and e.To are equal.
+	SetEdge(e Edge, cost float64)
+
+	// RemoveEdge removes the given edge, leaving the
+	// terminal nodes. If the edge does not exist it
+	// is a no-op.
+	RemoveEdge(Edge)
 }
 
 // MutableUndirected is an undirected graph that can be arbitrarily altered.
 type MutableUndirected interface {
 	Undirected
 	Mutable
-
-	// SetUndirectedEdge adds an undirected edge between
-	// distinct nodes. If the nodes do not exist, they
-	// are added. SetUndirectedEdge will panic if the
-	// IDs of the e.From and e.To are equal.
-	SetUndirectedEdge(e Edge, cost float64)
-
-	// RemoveUndirectedEdge removes the given edge,
-	// leaving the terminal nodes. If the edge does not
-	// exist it is a no-op.
-	RemoveUndirectedEdge(Edge)
 }
 
 // MutableDirected is a directed graph that can be arbitrarily altered.
 type MutableDirected interface {
 	Directed
 	Mutable
-
-	// SetDirectedEdge adds a directed edge from one
-	// node to another. If the nodes do not exist, they
-	// are added. SetDirectedEdge will panic if the
-	// IDs of the e.From and e.To are equal.
-	SetDirectedEdge(e Edge, cost float64)
-
-	// RemoveDirectedEdge removes the given edge,
-	// leaving the terminal nodes. If the edge does not
-	// exist it is a no-op.
-	RemoveDirectedEdge(Edge)
 }
 
 // A function that returns the cost of following an edge
@@ -186,7 +165,7 @@ func CopyUndirected(dst MutableUndirected, src Graph) {
 		dst.AddNode(node)
 		for _, succ := range succs {
 			edge := src.Edge(node, succ)
-			dst.SetUndirectedEdge(edge, weight(edge))
+			dst.SetEdge(edge, weight(edge))
 		}
 	}
 }
@@ -208,7 +187,7 @@ func CopyDirected(dst MutableDirected, src Graph) {
 		dst.AddNode(node)
 		for _, succ := range succs {
 			edge := src.Edge(node, succ)
-			dst.SetDirectedEdge(edge, weight(edge))
+			dst.SetEdge(edge, weight(edge))
 		}
 	}
 }

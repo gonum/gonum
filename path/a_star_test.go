@@ -170,7 +170,7 @@ func newSmallGonumGraph() *concrete.Graph {
 			concrete.Node(ed.n1),
 			concrete.Node(ed.n2),
 		}
-		g.SetUndirectedEdge(e, float64(ed.edgeCost))
+		g.SetEdge(e, float64(ed.edgeCost))
 	}
 	return g
 }

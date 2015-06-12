@@ -76,7 +76,7 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.maxID = max(g.maxID, n.ID())
 }
 
-func (g *DirectedGraph) SetDirectedEdge(e graph.Edge, cost float64) {
+func (g *DirectedGraph) SetEdge(e graph.Edge, cost float64) {
 	var (
 		from = e.From()
 		fid  = from.ID()
@@ -120,7 +120,7 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	g.freeMap[n.ID()] = struct{}{}
 }
 
-func (g *DirectedGraph) RemoveDirectedEdge(e graph.Edge) {
+func (g *DirectedGraph) RemoveEdge(e graph.Edge) {
 	from, to := e.From(), e.To()
 	if _, ok := g.nodeMap[from.ID()]; !ok {
 		return

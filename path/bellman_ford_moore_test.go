@@ -19,9 +19,9 @@ func TestBellmanFordFrom(t *testing.T) {
 		for _, e := range test.edges {
 			switch g := g.(type) {
 			case graph.MutableDirected:
-				g.SetDirectedEdge(e, e.Cost)
+				g.SetEdge(e, e.Cost)
 			case graph.MutableUndirected:
-				g.SetUndirectedEdge(e, e.Cost)
+				g.SetEdge(e, e.Cost)
 			default:
 				panic("bellman-ford: bad graph type")
 			}

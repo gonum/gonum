@@ -35,7 +35,7 @@ func generateDummyGraph() *concrete.DirectedGraph {
 	g := concrete.NewDirectedGraph()
 
 	for _, n := range nodes {
-		g.AddDirectedEdge(concrete.Edge{concrete.Node(n.srcId), concrete.Node(n.targetId)}, 1)
+		g.SetDirectedEdge(concrete.Edge{concrete.Node(n.srcId), concrete.Node(n.targetId)}, 1)
 	}
 
 	return g

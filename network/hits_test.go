@@ -50,7 +50,7 @@ func TestHITS(t *testing.T) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		got := HITS(g, test.tol)

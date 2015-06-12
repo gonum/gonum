@@ -150,7 +150,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
+				g.SetUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
 		p, ok := path.FloydWarshall(g)
@@ -340,7 +340,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
+				g.SetDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
 		p, ok := path.FloydWarshall(g)

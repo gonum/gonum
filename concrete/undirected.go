@@ -103,7 +103,7 @@ func (g *Graph) AddNode(n graph.Node) {
 	g.maxID = max(g.maxID, n.ID())
 }
 
-func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
+func (g *Graph) SetUndirectedEdge(e graph.Edge, cost float64) {
 	var (
 		from = e.From()
 		fid  = from.ID()

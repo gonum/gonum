@@ -145,11 +145,11 @@ type MutableGraph interface {
 	CostGraph
 	Mutable
 
-	// AddUndirected adds an undirected edge between
+	// SetUndirectedEdge adds an undirected edge between
 	// distinct nodes. If the nodes do not exist, they
-	// are added. AddUndirectedEdge will panic if the
+	// are added. SetUndirectedEdge will panic if the
 	// IDs of the e.From and e.To are equal.
-	AddUndirectedEdge(e Edge, cost float64)
+	SetUndirectedEdge(e Edge, cost float64)
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
 	// remove a node. If the edge does not exist this is a no-op, not an error.
@@ -165,11 +165,11 @@ type MutableDirectedGraph interface {
 	CostDirectedGraph
 	Mutable
 
-	// AddUndirected adds a directed edge from one
+	// SetDirectedEdge adds a directed edge from one
 	// node to another. If the nodes do not exist, they
-	// are added. AddDirectedEdge will panic if the
+	// are added. SetDirectedEdge will panic if the
 	// IDs of the e.From and e.To are equal.
-	AddDirectedEdge(e Edge, cost float64)
+	SetDirectedEdge(e Edge, cost float64)
 
 	// Removes an edge FROM e.From TO e.To. If no such edge exists, this is a no-op,
 	// not an error.
@@ -206,7 +206,7 @@ func CopyUndirected(dst MutableGraph, src Graph) {
 		dst.AddNode(node)
 		for _, succ := range succs {
 			edge := src.Edge(node, succ)
-			dst.AddUndirectedEdge(edge, weight(edge))
+			dst.SetUndirectedEdge(edge, weight(edge))
 		}
 	}
 }
@@ -228,7 +228,7 @@ func CopyDirected(dst MutableDirectedGraph, src Graph) {
 		dst.AddNode(node)
 		for _, succ := range succs {
 			edge := src.Edge(node, succ)
-			dst.AddDirectedEdge(edge, weight(edge))
+			dst.SetDirectedEdge(edge, weight(edge))
 		}
 	}
 }

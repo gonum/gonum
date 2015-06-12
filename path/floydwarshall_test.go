@@ -21,9 +21,9 @@ func TestFloydWarshall(t *testing.T) {
 		for _, e := range test.edges {
 			switch g := g.(type) {
 			case graph.MutableDirectedGraph:
-				g.AddDirectedEdge(e, e.Cost)
+				g.SetDirectedEdge(e, e.Cost)
 			case graph.MutableGraph:
-				g.AddUndirectedEdge(e, e.Cost)
+				g.SetUndirectedEdge(e, e.Cost)
 			default:
 				panic("floyd warshall: bad graph type")
 			}

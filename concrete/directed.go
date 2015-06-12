@@ -76,7 +76,7 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.maxID = max(g.maxID, n.ID())
 }
 
-func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
+func (g *DirectedGraph) SetDirectedEdge(e graph.Edge, cost float64) {
 	var (
 		from = e.From()
 		fid  = from.ID()

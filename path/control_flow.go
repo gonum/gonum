@@ -4,18 +4,21 @@
 
 package path
 
-import "github.com/gonum/graph"
+import (
+	"github.com/gonum/graph"
+	"github.com/gonum/graph/internal"
+)
 
 // PostDominatores returns all dominators for all nodes in g. It does not
 // prune for strict post-dominators, immediate dominators etc.
 //
 // A dominates B if and only if the only path through B travels through A.
-func Dominators(start graph.Node, g graph.Graph) map[int]Set {
-	allNodes := make(Set)
+func Dominators(start graph.Node, g graph.Graph) map[int]internal.Set {
+	allNodes := make(internal.Set)
 	nlist := g.Nodes()
-	dominators := make(map[int]Set, len(nlist))
+	dominators := make(map[int]internal.Set, len(nlist))
 	for _, node := range nlist {
-		allNodes.add(node)
+		allNodes.Add(node)
 	}
 
 	var to func(graph.Node) []graph.Node
@@ -27,11 +30,11 @@ func Dominators(start graph.Node, g graph.Graph) map[int]Set {
 	}
 
 	for _, node := range nlist {
-		dominators[node.ID()] = make(Set)
+		dominators[node.ID()] = make(internal.Set)
 		if node.ID() == start.ID() {
-			dominators[node.ID()].add(start)
+			dominators[node.ID()].Add(start)
 		} else {
-			dominators[node.ID()].copy(allNodes)
+			dominators[node.ID()].Copy(allNodes)
 		}
 	}
 
@@ -45,16 +48,16 @@ func Dominators(start graph.Node, g graph.Graph) map[int]Set {
 			if len(preds) == 0 {
 				continue
 			}
-			tmp := make(Set).copy(dominators[preds[0].ID()])
+			tmp := make(internal.Set).Copy(dominators[preds[0].ID()])
 			for _, pred := range preds[1:] {
-				tmp.intersect(tmp, dominators[pred.ID()])
+				tmp.Intersect(tmp, dominators[pred.ID()])
 			}
 
-			dom := make(Set)
-			dom.add(node)
+			dom := make(internal.Set)
+			dom.Add(node)
 
-			dom.union(dom, tmp)
-			if !equal(dom, dominators[node.ID()]) {
+			dom.Union(dom, tmp)
+			if !internal.Equal(dom, dominators[node.ID()]) {
 				dominators[node.ID()] = dom
 				somethingChanged = true
 			}
@@ -68,20 +71,20 @@ func Dominators(start graph.Node, g graph.Graph) map[int]Set {
 // prune for strict post-dominators, immediate post-dominators etc.
 //
 // A post-dominates B if and only if all paths from B travel through A.
-func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
-	allNodes := make(Set)
+func PostDominators(end graph.Node, g graph.Graph) map[int]internal.Set {
+	allNodes := make(internal.Set)
 	nlist := g.Nodes()
-	dominators := make(map[int]Set, len(nlist))
+	dominators := make(map[int]internal.Set, len(nlist))
 	for _, node := range nlist {
-		allNodes.add(node)
+		allNodes.Add(node)
 	}
 
 	for _, node := range nlist {
-		dominators[node.ID()] = make(Set)
+		dominators[node.ID()] = make(internal.Set)
 		if node.ID() == end.ID() {
-			dominators[node.ID()].add(end)
+			dominators[node.ID()].Add(end)
 		} else {
-			dominators[node.ID()].copy(allNodes)
+			dominators[node.ID()].Copy(allNodes)
 		}
 	}
 
@@ -95,16 +98,16 @@ func PostDominators(end graph.Node, g graph.Graph) map[int]Set {
 			if len(succs) == 0 {
 				continue
 			}
-			tmp := make(Set).copy(dominators[succs[0].ID()])
+			tmp := make(internal.Set).Copy(dominators[succs[0].ID()])
 			for _, succ := range succs[1:] {
-				tmp.intersect(tmp, dominators[succ.ID()])
+				tmp.Intersect(tmp, dominators[succ.ID()])
 			}
 
-			dom := make(Set)
-			dom.add(node)
+			dom := make(internal.Set)
+			dom.Add(node)
 
-			dom.union(dom, tmp)
-			if !equal(dom, dominators[node.ID()]) {
+			dom.Union(dom, tmp)
+			if !internal.Equal(dom, dominators[node.ID()]) {
 				dominators[node.ID()] = dom
 				somethingChanged = true
 			}

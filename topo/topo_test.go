@@ -5,7 +5,6 @@
 package topo_test
 
 import (
-	"fmt"
 	"reflect"
 	"sort"
 	"testing"
@@ -98,6 +97,5 @@ func TestConnectedComponents(t *testing.T) {
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected connected components for test %d %T:\ngot: %v\nwant:%v", i, g, got, test.want)
 		}
-		fmt.Println()
 	}
 }

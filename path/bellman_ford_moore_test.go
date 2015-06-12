@@ -17,14 +17,7 @@ func TestBellmanFordFrom(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
-			switch g := g.(type) {
-			case graph.MutableDirected:
-				g.SetEdge(e, e.Cost)
-			case graph.MutableUndirected:
-				g.SetEdge(e, e.Cost)
-			default:
-				panic("bellman-ford: bad graph type")
-			}
+			g.SetEdge(e, e.Cost)
 		}
 
 		pt, ok := path.BellmanFordFrom(test.query.From(), g.(graph.Graph))

@@ -11,7 +11,7 @@ import (
 
 // VertexOrdering returns the vertex ordering and the k-cores of
 // the undirected graph g.
-func VertexOrdering(g graph.Graph) (order []graph.Node, cores [][]graph.Node) {
+func VertexOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Node) {
 	nodes := g.Nodes()
 
 	// The algorithm used here is essentially as described at
@@ -109,7 +109,7 @@ func VertexOrdering(g graph.Graph) (order []graph.Node, cores [][]graph.Node) {
 }
 
 // BronKerbosch returns the set of maximal cliques of the undirected graph g.
-func BronKerbosch(g graph.Graph) [][]graph.Node {
+func BronKerbosch(g graph.Undirected) [][]graph.Node {
 	nodes := g.Nodes()
 
 	// The algorithm used here is essentially BronKerbosch3 as described at
@@ -137,7 +137,7 @@ func BronKerbosch(g graph.Graph) [][]graph.Node {
 
 type bronKerbosch [][]graph.Node
 
-func (bk *bronKerbosch) maximalCliquePivot(g graph.Graph, r []graph.Node, p, x internal.Set) {
+func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p, x internal.Set) {
 	if len(p) == 0 && len(x) == 0 {
 		*bk = append(*bk, r)
 		return
@@ -176,7 +176,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Graph, r []graph.Node, p, x i
 	}
 }
 
-func (*bronKerbosch) choosePivotFrom(g graph.Graph, p, x internal.Set) (neighbors []graph.Node) {
+func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x internal.Set) (neighbors []graph.Node) {
 	// TODO(kortschak): Investigate the impact of pivot choice that maximises
 	// |p ⋂ neighbours(u)| as a function of input size. Until then, leave as
 	// compile time option.

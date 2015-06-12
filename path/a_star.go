@@ -10,6 +10,15 @@ import (
 	"github.com/gonum/graph"
 )
 
+// Heuristic returns an estimate of the cost of travelling between two nodes.
+type Heuristic func(x, y graph.Node) float64
+
+// HeuristicCoster wraps the HeuristicCost method. A graph that implementing
+// the interface provides a heuristic between any two given nodes.
+type HeuristicCoster interface {
+	HeuristicCost(x, y graph.Node) float64
+}
+
 // Returns an ordered list consisting of the nodes between start and goal. The path will be the
 // shortest path assuming the function heuristicCost is admissible. The second return value is the
 // cost, and the third is the number of nodes expanded while searching (useful info for tuning
@@ -31,25 +40,25 @@ import (
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost
 // function that returns a uniform positive value.)
-func AStar(start, goal graph.Node, g graph.Graph, heuristic graph.HeuristicCostFunc) (path []graph.Node, pathCost float64, nodesExpanded int) {
+func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, pathCost float64, nodesExpanded int) {
 	var weight graph.WeightFunc
 	if g, ok := g.(graph.Weighter); ok {
 		weight = g.Weight
 	} else {
 		weight = graph.UniformCost
 	}
-	if heuristic == nil {
-		if g, ok := g.(graph.HeuristicCoster); ok {
-			heuristic = g.HeuristicCost
+	if h == nil {
+		if g, ok := g.(HeuristicCoster); ok {
+			h = g.HeuristicCost
 		} else {
-			heuristic = NullHeuristic
+			h = NullHeuristic
 		}
 	}
 
 	closedSet := make(map[int]aStarNode)
 	openSet := &aStarQueue{nodes: make([]aStarNode, 0), indexList: make(map[int]int)}
 	heap.Init(openSet)
-	node := aStarNode{start, 0, heuristic(start, goal)}
+	node := aStarNode{start, 0, h(start, goal)}
 	heap.Push(openSet, node)
 	predecessor := make(map[int]graph.Node)
 
@@ -73,11 +82,11 @@ func AStar(start, goal graph.Node, g graph.Graph, heuristic graph.HeuristicCostF
 
 			if existing, exists := openSet.Find(neighbor.ID()); !exists {
 				predecessor[neighbor.ID()] = curr
-				node = aStarNode{neighbor, g, g + heuristic(neighbor, goal)}
+				node = aStarNode{neighbor, g, g + h(neighbor, goal)}
 				heap.Push(openSet, node)
 			} else if g < existing.gscore {
 				predecessor[neighbor.ID()] = curr
-				openSet.Fix(neighbor.ID(), g, g+heuristic(neighbor, goal))
+				openSet.Fix(neighbor.ID(), g, g+h(neighbor, goal))
 			}
 		}
 	}
@@ -85,7 +94,7 @@ func AStar(start, goal graph.Node, g graph.Graph, heuristic graph.HeuristicCostF
 	return nil, 0, nodesExpanded
 }
 
-// An admissible, consistent heuristic that won't speed up computation time at all.
+// NullHeuristic is an admissible, consistent heuristic that will not speed up computation.
 func NullHeuristic(_, _ graph.Node) float64 {
 	return 0
 }

@@ -6,16 +6,14 @@ package graph
 
 import "math"
 
-// All a node needs to do is identify itself. This allows the user to pass in nodes more
-// interesting than an int, but also allow us to reap the benefits of having a map-storable,
-// comparable type.
+// Node is a graph node. It returns a graph-unique integer ID.
 type Node interface {
 	ID() int
 }
 
-// Allows edges to do something more interesting that just be a group of nodes. While the methods
-// are called From and To, they are not considered directed unless the given interface specifies
-// otherwise.
+// Edge is a graph edge. In directed graphs, the direction of the
+// edge is given from -> to, otherwise the edge is semantically
+// unordered.
 type Edge interface {
 	From() Node
 	To() Node
@@ -73,16 +71,6 @@ type Weighter interface {
 	Weight(Edge) float64
 }
 
-// A graph that implements HeuristicCoster implements a heuristic between any two given nodes.
-// Like Weighter, if a graph implements this and a function needs a heuristic cost (e.g. A*), this
-// function will take precedence over the Null Heuristic (always returns 0) if "nil" is passed in
-// for the function argument. If HeuristicCost is not intended to be used, it can be implemented as
-// the null heuristic (always returns 0).
-type HeuristicCoster interface {
-	// HeuristicCost returns a heuristic cost between any two nodes.
-	HeuristicCost(n1, n2 Node) float64
-}
-
 // Mutable wraps generalized graph alteration methods.
 type Mutable interface {
 	// NewNode returns a node with a unique arbitrary ID.
@@ -132,9 +120,6 @@ func UniformCost(e Edge) float64 {
 	}
 	return 1
 }
-
-// Estimates the cost of travelling between two nodes
-type HeuristicCostFunc func(Node, Node) float64
 
 // CopyUndirected copies nodes and edges as undirected edges from the source to the
 // destination without first clearing the destination. If the source does not

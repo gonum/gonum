@@ -410,21 +410,6 @@ var encodeTests = []struct {
 
 	want string
 }{
-	{
-		g: func() graph.Graph {
-			g := concrete.NewGraph()
-			g.AddUndirectedEdge(concrete.Edge{concrete.Node(0), concrete.Node(0)}, 0)
-			return g
-		}(),
-
-		want: `graph {
-	// Node definitions.
-	0;
-
-	// Edge definitions.
-	0 -- 0;
-}`,
-	},
 	// Basic graph.Graph handling.
 	{
 		name: "PageRank",

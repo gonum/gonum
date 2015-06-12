@@ -19,15 +19,14 @@ var _ graph.Directed = &concrete.DirectedGraph{}
 func TestEdgeOvercounting(t *testing.T) {
 	g := generateDummyGraph()
 
-	if neigh := g.From(concrete.Node(concrete.Node(2))); len(neigh) != 3 {
-		t.Errorf("Node 2 has incorrect number of neighbors got neighbors %v (count %d), expected 3 neighbors {0,1,2}", neigh, len(neigh))
+	if neigh := g.From(concrete.Node(concrete.Node(2))); len(neigh) != 2 {
+		t.Errorf("Node 2 has incorrect number of neighbors got neighbors %v (count %d), expected 2 neighbors {0,1}", neigh, len(neigh))
 	}
 }
 
 func generateDummyGraph() *concrete.DirectedGraph {
-	nodes := [5]struct{ srcId, targetId int }{
+	nodes := [4]struct{ srcId, targetId int }{
 		{2, 1},
-		{2, 2},
 		{1, 0},
 		{2, 0},
 		{0, 2},

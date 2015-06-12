@@ -104,7 +104,17 @@ func (g *Graph) AddNode(n graph.Node) {
 }
 
 func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
-	from, to := e.From(), e.To()
+	var (
+		from = e.From()
+		fid  = from.ID()
+		to   = e.To()
+		tid  = to.ID()
+	)
+
+	if fid == tid {
+		panic("concrete: adding self edge")
+	}
+
 	if !g.Has(from) {
 		g.AddNode(from)
 	}
@@ -113,8 +123,8 @@ func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
 		g.AddNode(to)
 	}
 
-	g.neighbors[from.ID()][to.ID()] = WeightedEdge{Edge: e, Cost: cost}
-	g.neighbors[to.ID()][from.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.neighbors[fid][tid] = WeightedEdge{Edge: e, Cost: cost}
+	g.neighbors[tid][fid] = WeightedEdge{Edge: e, Cost: cost}
 }
 
 func (g *Graph) RemoveNode(n graph.Node) {

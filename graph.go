@@ -155,10 +155,10 @@ type MutableGraph interface {
 	CostGraph
 	Mutable
 
-	// Like EdgeBetween in Graph, AddUndirectedEdge adds an edge between two nodes.
-	// If one or both nodes do not exist, the graph is expected to add them. However,
-	// if the nodes already exist it should NOT replace existing nodes with e.From() or
-	// e.To(). Overwriting nodes should explicitly be done with another call to AddNode()
+	// AddUndirected adds an undirected edge between
+	// distinct nodes. If the nodes do not exist, they
+	// are added. AddUndirectedEdge will panic if the
+	// IDs of the e.From and e.To are equal.
 	AddUndirectedEdge(e Edge, cost float64)
 
 	// RemoveEdge clears the stored edge between two nodes. Calling this will never
@@ -175,10 +175,10 @@ type MutableDirectedGraph interface {
 	CostDirectedGraph
 	Mutable
 
-	// Like EdgeTo in DirectedGraph, AddDirectedEdge adds an edge FROM From TO To.
-	// If one or both nodes do not exist, the graph is expected to add them. However,
-	// if the nodes already exist it should NOT replace existing nodes with e.From() or
-	// e.To(). Overwriting nodes should explicitly be done with another call to AddNode()
+	// AddUndirected adds a directed edge from one
+	// node to another. If the nodes do not exist, they
+	// are added. AddDirectedEdge will panic if the
+	// IDs of the e.From and e.To are equal.
 	AddDirectedEdge(e Edge, cost float64)
 
 	// Removes an edge FROM e.From TO e.To. If no such edge exists, this is a no-op,

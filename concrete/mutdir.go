@@ -77,7 +77,17 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 }
 
 func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
-	from, to := e.From(), e.To()
+	var (
+		from = e.From()
+		fid  = from.ID()
+		to   = e.To()
+		tid  = to.ID()
+	)
+
+	if fid == tid {
+		panic("concrete: adding self edge")
+	}
+
 	if !g.Has(from) {
 		g.AddNode(from)
 	}
@@ -86,8 +96,8 @@ func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
 		g.AddNode(to)
 	}
 
-	g.successors[from.ID()][to.ID()] = WeightedEdge{Edge: e, Cost: cost}
-	g.predecessors[to.ID()][from.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.successors[fid][tid] = WeightedEdge{Edge: e, Cost: cost}
+	g.predecessors[tid][fid] = WeightedEdge{Edge: e, Cost: cost}
 }
 
 func (g *DirectedGraph) RemoveNode(n graph.Node) {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package path_test
 
 import (
 	"math"
@@ -12,10 +12,10 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
-func TestJohnsonAllPaths(t *testing.T) {
+func TestFloydWarshall(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
@@ -25,11 +25,11 @@ func TestJohnsonAllPaths(t *testing.T) {
 			case graph.MutableGraph:
 				g.AddUndirectedEdge(e, e.Cost)
 			default:
-				panic("johnson: bad graph type")
+				panic("floyd warshall: bad graph type")
 			}
 		}
 
-		pt, ok := search.JohnsonAllPaths(g.(graph.Graph))
+		pt, ok := path.FloydWarshall(g.(graph.Graph))
 		if test.hasNegativeCycle {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.name)

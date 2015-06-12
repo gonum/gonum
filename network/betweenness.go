@@ -9,7 +9,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 // Betweenness returns the non-zero betweenness centrality for nodes in the unweighted graph g.
@@ -102,7 +102,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
-func BetweennessWeighted(g graph.CostGraph, p search.AllShortest) map[int]float64 {
+func BetweennessWeighted(g graph.CostGraph, p path.AllShortest) map[int]float64 {
 	cb := make(map[int]float64)
 
 	nodes := g.Nodes()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package topo_test
 
 // batageljZaversnikGraph is the example graph from
 // figure 1 of http://arxiv.org/abs/cs/0310049v1

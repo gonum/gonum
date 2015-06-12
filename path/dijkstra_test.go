@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package path_test
 
 import (
 	"math"
@@ -12,7 +12,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 func TestDijkstraFrom(t *testing.T) {
@@ -30,7 +30,7 @@ func TestDijkstraFrom(t *testing.T) {
 		}
 
 		var (
-			pt search.Shortest
+			pt path.Shortest
 
 			panicked bool
 		)
@@ -38,7 +38,7 @@ func TestDijkstraFrom(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt = search.DijkstraFrom(test.query.From(), g.(graph.Graph))
+			pt = path.DijkstraFrom(test.query.From(), g.(graph.Graph))
 		}()
 		if panicked || test.negative {
 			if !test.negative {
@@ -103,7 +103,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 		}
 
 		var (
-			pt search.AllShortest
+			pt path.AllShortest
 
 			panicked bool
 		)
@@ -111,7 +111,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt = search.DijkstraAllPaths(g.(graph.Graph))
+			pt = path.DijkstraAllPaths(g.(graph.Graph))
 		}()
 		if panicked || test.negative {
 			if !test.negative {

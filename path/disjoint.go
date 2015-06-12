@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search
+package path
 
 // A disjoint set is a collection of non-overlapping sets. That is, for any two sets in the
 // disjoint set, their intersection is the empty set.

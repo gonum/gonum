@@ -10,7 +10,7 @@ import (
 
 	"github.com/gonum/floats"
 	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 var undirectedCentralityTests = []struct {
@@ -153,7 +153,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
-		p, ok := search.FloydWarshall(g)
+		p, ok := path.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue
@@ -343,7 +343,7 @@ func TestDistanceCentralityDirected(t *testing.T) {
 				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
-		p, ok := search.FloydWarshall(g)
+		p, ok := path.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue

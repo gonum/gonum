@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package topo_test
 
 import (
 	"fmt"
@@ -13,44 +13,44 @@ import (
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/topo"
 )
 
 func TestIsPath(t *testing.T) {
 	dg := concrete.NewDirectedGraph()
-	if !search.IsPath(nil, dg) {
+	if !topo.IsPath(nil, dg) {
 		t.Error("IsPath returns false on nil path")
 	}
 	p := []graph.Node{concrete.Node(0)}
-	if search.IsPath(p, dg) {
+	if topo.IsPath(p, dg) {
 		t.Error("IsPath returns true on nonexistant node")
 	}
 	dg.AddNode(p[0])
-	if !search.IsPath(p, dg) {
+	if !topo.IsPath(p, dg) {
 		t.Error("IsPath returns false on single-length path with existing node")
 	}
 	p = append(p, concrete.Node(1))
 	dg.AddNode(p[1])
-	if search.IsPath(p, dg) {
+	if topo.IsPath(p, dg) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
 	dg.AddDirectedEdge(concrete.Edge{p[0], p[1]}, 1)
-	if !search.IsPath(p, dg) {
+	if !topo.IsPath(p, dg) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
 	p[0], p[1] = p[1], p[0]
-	if search.IsPath(p, dg) {
+	if topo.IsPath(p, dg) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
 	dg.AddDirectedEdge(concrete.Edge{p[1], p[2]}, 1)
-	if !search.IsPath(p, dg) {
+	if !topo.IsPath(p, dg) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
 	ug := concrete.NewGraph()
 	ug.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1)
 	ug.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1)
-	if !search.IsPath(p, ug) {
+	if !topo.IsPath(p, ug) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
 }
@@ -84,7 +84,7 @@ func TestConnectedComponents(t *testing.T) {
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		cc := search.ConnectedComponents(g)
+		cc := topo.ConnectedComponents(g)
 		got := make([][]int, len(cc))
 		for j, c := range cc {
 			ids := make([]int, len(c))

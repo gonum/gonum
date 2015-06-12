@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search
+package topo
 
 import (
 	"fmt"
@@ -24,9 +24,9 @@ func (e Unorderable) Error() string {
 	}
 	if n > maxNodes {
 		// Don't return errors that are too long.
-		return fmt.Sprintf("search: no topological ordering: %d nodes in %d cyclic components", n, len(e))
+		return fmt.Sprintf("topo: no topological ordering: %d nodes in %d cyclic components", n, len(e))
 	}
-	return fmt.Sprintf("search: no topological ordering: cyclic components: %v", [][]graph.Node(e))
+	return fmt.Sprintf("topo: no topological ordering: cyclic components: %v", [][]graph.Node(e))
 }
 
 // Sort performs a topological sort of the directed graph g returning the 'from' to 'to'
@@ -55,6 +55,12 @@ func Sort(g graph.Directed) (sorted []graph.Node, err error) {
 	}
 	reverse(sorted)
 	return sorted, err
+}
+
+func reverse(p []graph.Node) {
+	for i, j := 0, len(p)-1; i < j; i, j = i+1, j-1 {
+		p[i], p[j] = p[j], p[i]
+	}
 }
 
 // TarjanSCC returns the strongly connected components of the graph g using Tarjan's algorithm.

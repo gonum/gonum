@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search
+package path
 
 import (
 	"math"
@@ -131,3 +131,7 @@ func (g johnsonWeightAdjuster) Cost(e graph.Edge) float64 {
 func (johnsonWeightAdjuster) HasEdge(_, _ graph.Node) bool {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }
+
+type johnsonGraphNode int
+
+func (n johnsonGraphNode) ID() int { return int(n) }

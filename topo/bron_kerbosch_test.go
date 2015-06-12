@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package topo_test
 
 import (
 	"reflect"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/topo"
 )
 
 var vOrderTests = []struct {
@@ -61,7 +61,7 @@ func TestVertexOrdering(t *testing.T) {
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		order, core := search.VertexOrdering(g)
+		order, core := topo.VertexOrdering(g)
 		if len(core)-1 != test.wantK {
 			t.Errorf("unexpected value of k for test %d: got: %d want: %d", i, len(core)-1, test.wantK)
 		}
@@ -146,7 +146,7 @@ func TestBronKerbosch(t *testing.T) {
 				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		cliques := search.BronKerbosch(g)
+		cliques := topo.BronKerbosch(g)
 		got := make([][]int, len(cliques))
 		for j, c := range cliques {
 			ids := make([]int, len(c))

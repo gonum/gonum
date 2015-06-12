@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package path_test
 
 import (
 	"math"
@@ -12,7 +12,8 @@ import (
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
+	"github.com/gonum/graph/topo"
 )
 
 func TestSimpleAStar(t *testing.T) {
@@ -26,19 +27,19 @@ func TestSimpleAStar(t *testing.T) {
 		t.Fatalf("Couldn't generate tilegraph: %v", err)
 	}
 
-	path, cost, _ := search.AStar(concrete.Node(1), concrete.Node(14), tg, nil)
+	p, cost, _ := path.AStar(concrete.Node(1), concrete.Node(14), tg, nil)
 	if math.Abs(cost-4) > 1e-5 {
 		t.Errorf("A* reports incorrect cost for simple tilegraph search")
 	}
 
-	if path == nil {
+	if p == nil {
 		t.Fatalf("A* fails to find path for for simple tilegraph search")
 	} else {
 		correctPath := []int{1, 2, 6, 10, 14}
-		if len(path) != len(correctPath) {
+		if len(p) != len(correctPath) {
 			t.Fatalf("Astar returns wrong length path for simple tilegraph search")
 		}
-		for i, node := range path {
+		for i, node := range p {
 			if node.ID() != correctPath[i] {
 				t.Errorf("Astar returns wrong path at step", i, "got:", node, "actual:", correctPath[i])
 			}
@@ -49,16 +50,16 @@ func TestSimpleAStar(t *testing.T) {
 func TestBiggerAStar(t *testing.T) {
 	tg := internal.NewTileGraph(3, 3, true)
 
-	path, cost, _ := search.AStar(concrete.Node(0), concrete.Node(8), tg, nil)
+	p, cost, _ := path.AStar(concrete.Node(0), concrete.Node(8), tg, nil)
 
-	if math.Abs(cost-4) > 1e-5 || !search.IsPath(path, tg) {
+	if math.Abs(cost-4) > 1e-5 || !topo.IsPath(p, tg) {
 		t.Error("Non-optimal or impossible path found for 3x3 grid")
 	}
 
 	tg = internal.NewTileGraph(1000, 1000, true)
-	path, cost, _ = search.AStar(concrete.Node(0), concrete.Node(999*1000+999), tg, nil)
-	if !search.IsPath(path, tg) || cost != 1998 {
-		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(path))
+	p, cost, _ = path.AStar(concrete.Node(0), concrete.Node(999*1000+999), tg, nil)
+	if !topo.IsPath(p, tg) || cost != 1998 {
+		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(p))
 	}
 }
 
@@ -77,9 +78,9 @@ func TestObstructedAStar(t *testing.T) {
 	tg.SetPassability(4, 9, false)
 
 	rows, cols := tg.Dimensions()
-	path, cost1, expanded := search.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, nil)
+	p, cost1, expanded := path.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, nil)
 
-	if !search.IsPath(path, tg) {
+	if !topo.IsPath(p, tg) {
 		t.Error("Path doesn't exist in obstructed graph")
 	}
 
@@ -91,8 +92,8 @@ func TestObstructedAStar(t *testing.T) {
 		return math.Abs(float64(r1)-float64(r2)) + math.Abs(float64(c1)-float64(c2))
 	}
 
-	path, cost2, expanded2 := search.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, ManhattanHeuristic)
-	if !search.IsPath(path, tg) {
+	p, cost2, expanded2 := path.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, ManhattanHeuristic)
+	if !topo.IsPath(p, tg) {
 		t.Error("Path doesn't exist when using heuristic on obstructed graph")
 	}
 
@@ -117,7 +118,7 @@ func TestNoPathAStar(t *testing.T) {
 	tg.SetPassability(2, 4, false)
 
 	rows, _ := tg.Dimensions()
-	path, _, _ := search.AStar(tg.CoordsToNode(0, 2), tg.CoordsToNode(rows-1, 2), tg, nil)
+	path, _, _ := path.AStar(tg.CoordsToNode(0, 2), tg.CoordsToNode(rows-1, 2), tg, nil)
 
 	if len(path) > 0 { // Note that a nil slice will return len of 0, this won't panic
 		t.Error("A* finds path where none exists")
@@ -131,10 +132,10 @@ func TestSmallAStar(t *testing.T) {
 		t.Fatalf("non-monotonic heuristic.  edge: %v goal: %v", edge, goal)
 	}
 
-	ps := search.DijkstraAllPaths(g)
+	ps := path.DijkstraAllPaths(g)
 	for _, start := range g.Nodes() {
 		for _, goal := range g.Nodes() {
-			gotPath, gotWeight, _ := search.AStar(start, goal, g, heur)
+			gotPath, gotWeight, _ := path.AStar(start, goal, g, heur)
 			wantPath, wantWeight, _ := ps.Between(start, goal)
 			if gotWeight != wantWeight {
 				t.Errorf("unexpected A* path weight from %v to %v result: got:%s want:%s",

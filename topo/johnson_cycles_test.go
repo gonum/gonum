@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package topo_test
 
 import (
 	"reflect"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/topo"
 )
 
 var cyclesInTests = []struct {
@@ -97,7 +97,7 @@ func TestCyclesIn(t *testing.T) {
 				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		cycles := search.CyclesIn(g)
+		cycles := topo.CyclesIn(g)
 		var got [][]int
 		if cycles != nil {
 			got = make([][]int, len(cycles))

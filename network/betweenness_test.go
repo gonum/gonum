@@ -10,7 +10,7 @@ import (
 
 	"github.com/gonum/floats"
 	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 var betweennessTests = []struct {
@@ -159,7 +159,7 @@ func TestBetweennessWeighted(t *testing.T) {
 			}
 		}
 
-		p, ok := search.FloydWarshall(g)
+		p, ok := path.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue

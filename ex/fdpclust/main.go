@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/topo"
 )
 
 func main() {
@@ -67,7 +68,7 @@ func main() {
 	// }
 
 	path := []graph.Node{C, D, d, f}
-	if !search.IsPath(path, G) {
+	if !topo.IsPath(path, G) {
 		fmt.Println("Not working!")
 	} else {
 		fmt.Println("Working!")

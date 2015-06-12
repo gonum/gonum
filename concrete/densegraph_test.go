@@ -52,7 +52,7 @@ func TestBasicDensePassable(t *testing.T) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
-		if degree := dg.Degree(concrete.Node(i)); degree != 6 {
+		if degree := dg.Degree(concrete.Node(i)); degree != 4 {
 			t.Errorf("Node in passable graph missing neighbors. Node: %d Degree: %d", i, degree)
 		}
 	}
@@ -138,14 +138,14 @@ func TestDenseLists(t *testing.T) {
 		}
 	}
 
-	edges := dg.DirectedEdges()
-	if len(edges) != 15*15 {
+	edges := dg.Edges()
+	if len(edges) != 15*14 {
 		t.Errorf("Improper number of edges for passable dense graph")
 	}
 
 	dg.RemoveEdge(concrete.Edge{concrete.Node(12), concrete.Node(11)})
-	edges = dg.DirectedEdges()
-	if len(edges) != (15*15)-1 {
+	edges = dg.Edges()
+	if len(edges) != (15*14)-1 {
 		t.Errorf("Removing edge didn't affect edge listing properly")
 	}
 }

@@ -46,11 +46,14 @@ func (g *DirectedDenseGraph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *DirectedDenseGraph) DirectedEdges() []graph.Edge {
+func (g *DirectedDenseGraph) Edges() []graph.Edge {
 	var edges []graph.Edge
 	r, _ := g.mat.Dims()
 	for i := 0; i < r; i++ {
 		for j := 0; j < r; j++ {
+			if i == j {
+				continue
+			}
 			if !isSame(g.mat.At(i, j), g.absent) {
 				edges = append(edges, Edge{Node(i), Node(j)})
 			}
@@ -64,6 +67,9 @@ func (g *DirectedDenseGraph) From(n graph.Node) []graph.Node {
 	id := n.ID()
 	_, c := g.mat.Dims()
 	for j := 0; j < c; j++ {
+		if j == id {
+			continue
+		}
 		if !isSame(g.mat.At(id, j), g.absent) {
 			neighbors = append(neighbors, Node(j))
 		}
@@ -76,6 +82,9 @@ func (g *DirectedDenseGraph) To(n graph.Node) []graph.Node {
 	id := n.ID()
 	r, _ := g.mat.Dims()
 	for i := 0; i < r; i++ {
+		if i == id {
+			continue
+		}
 		if !isSame(g.mat.At(i, id), g.absent) {
 			neighbors = append(neighbors, Node(i))
 		}
@@ -84,7 +93,9 @@ func (g *DirectedDenseGraph) To(n graph.Node) []graph.Node {
 }
 
 func (g *DirectedDenseGraph) HasEdge(u, v graph.Node) bool {
-	return !isSame(g.mat.At(u.ID(), v.ID()), g.absent)
+	uid := u.ID()
+	vid := v.ID()
+	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
 }
 
 func (g *DirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
@@ -103,7 +114,12 @@ func (g *DirectedDenseGraph) Cost(e graph.Edge) float64 {
 }
 
 func (g *DirectedDenseGraph) SetEdgeCost(e graph.Edge, weight float64) {
-	g.mat.Set(e.From().ID(), e.To().ID(), weight)
+	fid := e.From().ID()
+	tid := e.To().ID()
+	if fid == tid {
+		panic("concrete: set edge cost of illegal edge")
+	}
+	g.mat.Set(fid, tid, weight)
 }
 
 func (g *DirectedDenseGraph) RemoveEdge(e graph.Edge) {

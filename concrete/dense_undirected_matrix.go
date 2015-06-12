@@ -46,14 +46,27 @@ func (g *UndirectedDenseGraph) Nodes() []graph.Node {
 	return nodes
 }
 
+func (g *UndirectedDenseGraph) Edges() []graph.Edge {
+	var edges []graph.Edge
+	r, _ := g.mat.Dims()
+	for i := 0; i < r; i++ {
+		for j := i + 1; j < r; j++ {
+			if !isSame(g.mat.At(i, j), g.absent) {
+				edges = append(edges, Edge{Node(i), Node(j)})
+			}
+		}
+	}
+	return edges
+}
+
 func (g *UndirectedDenseGraph) Degree(n graph.Node) int {
 	id := n.ID()
 	var deg int
-	if !isSame(g.mat.At(id, id), g.absent) {
-		deg = 1
-	}
 	r := g.mat.Symmetric()
 	for i := 0; i < r; i++ {
+		if i == id {
+			continue
+		}
 		if !isSame(g.mat.At(id, i), g.absent) {
 			deg++
 		}
@@ -66,6 +79,9 @@ func (g *UndirectedDenseGraph) From(n graph.Node) []graph.Node {
 	id := n.ID()
 	r := g.mat.Symmetric()
 	for i := 0; i < r; i++ {
+		if i == id {
+			continue
+		}
 		if !isSame(g.mat.At(id, i), g.absent) {
 			neighbors = append(neighbors, Node(i))
 		}
@@ -74,7 +90,9 @@ func (g *UndirectedDenseGraph) From(n graph.Node) []graph.Node {
 }
 
 func (g *UndirectedDenseGraph) HasEdge(u, v graph.Node) bool {
-	return !isSame(g.mat.At(u.ID(), v.ID()), g.absent)
+	uid := u.ID()
+	vid := v.ID()
+	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
 }
 
 func (g *UndirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
@@ -93,7 +111,12 @@ func (g *UndirectedDenseGraph) Cost(e graph.Edge) float64 {
 }
 
 func (g *UndirectedDenseGraph) SetEdgeCost(e graph.Edge, weight float64) {
-	g.mat.SetSym(e.From().ID(), e.To().ID(), weight)
+	fid := e.From().ID()
+	tid := e.To().ID()
+	if fid == tid {
+		panic("concrete: set edge cost of illegal edge")
+	}
+	g.mat.SetSym(fid, tid, weight)
 }
 
 func (g *UndirectedDenseGraph) RemoveEdge(e graph.Edge) {

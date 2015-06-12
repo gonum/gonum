@@ -67,8 +67,7 @@ func main() {
 	G.AddRoot(clusterB)
 	// }
 
-	path := []graph.Node{C, D, d, f}
-	if !topo.IsPath(path, G) {
+	if !topo.IsPathIn(G, []graph.Node{C, D, d, f}) {
 		fmt.Println("Not working!")
 	} else {
 		fmt.Println("Working!")

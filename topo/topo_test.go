@@ -17,39 +17,39 @@ import (
 
 func TestIsPath(t *testing.T) {
 	dg := concrete.NewDirectedGraph()
-	if !topo.IsPath(nil, dg) {
+	if !topo.IsPathIn(dg, nil) {
 		t.Error("IsPath returns false on nil path")
 	}
 	p := []graph.Node{concrete.Node(0)}
-	if topo.IsPath(p, dg) {
+	if topo.IsPathIn(dg, p) {
 		t.Error("IsPath returns true on nonexistant node")
 	}
 	dg.AddNode(p[0])
-	if !topo.IsPath(p, dg) {
+	if !topo.IsPathIn(dg, p) {
 		t.Error("IsPath returns false on single-length path with existing node")
 	}
 	p = append(p, concrete.Node(1))
 	dg.AddNode(p[1])
-	if topo.IsPath(p, dg) {
+	if topo.IsPathIn(dg, p) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
 	dg.AddDirectedEdge(concrete.Edge{p[0], p[1]}, 1)
-	if !topo.IsPath(p, dg) {
+	if !topo.IsPathIn(dg, p) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
 	p[0], p[1] = p[1], p[0]
-	if topo.IsPath(p, dg) {
+	if topo.IsPathIn(dg, p) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
 	dg.AddDirectedEdge(concrete.Edge{p[1], p[2]}, 1)
-	if !topo.IsPath(p, dg) {
+	if !topo.IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
 	ug := concrete.NewGraph()
 	ug.AddUndirectedEdge(concrete.Edge{p[1], p[0]}, 1)
 	ug.AddUndirectedEdge(concrete.Edge{p[1], p[2]}, 1)
-	if !topo.IsPath(p, ug) {
+	if !topo.IsPathIn(dg, p) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
 }

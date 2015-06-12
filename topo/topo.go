@@ -18,7 +18,7 @@ import (
 // (only one node) but only if the node listed in path exists within the graph.
 //
 // Graph must be non-nil.
-func IsPath(path []graph.Node, g graph.Graph) bool {
+func IsPathIn(g graph.Graph, path []graph.Node) bool {
 	var canReach func(u, v graph.Node) bool
 	switch g := g.(type) {
 	case graph.Directed:

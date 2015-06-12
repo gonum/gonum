@@ -52,13 +52,13 @@ func TestBiggerAStar(t *testing.T) {
 
 	p, cost, _ := path.AStar(concrete.Node(0), concrete.Node(8), tg, nil)
 
-	if math.Abs(cost-4) > 1e-5 || !topo.IsPath(p, tg) {
+	if math.Abs(cost-4) > 1e-5 || !topo.IsPathIn(tg, p) {
 		t.Error("Non-optimal or impossible path found for 3x3 grid")
 	}
 
 	tg = internal.NewTileGraph(1000, 1000, true)
 	p, cost, _ = path.AStar(concrete.Node(0), concrete.Node(999*1000+999), tg, nil)
-	if !topo.IsPath(p, tg) || cost != 1998 {
+	if !topo.IsPathIn(tg, p) || cost != 1998 {
 		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(p))
 	}
 }
@@ -80,7 +80,7 @@ func TestObstructedAStar(t *testing.T) {
 	rows, cols := tg.Dimensions()
 	p, cost1, expanded := path.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, nil)
 
-	if !topo.IsPath(p, tg) {
+	if !topo.IsPathIn(tg, p) {
 		t.Error("Path doesn't exist in obstructed graph")
 	}
 
@@ -93,7 +93,7 @@ func TestObstructedAStar(t *testing.T) {
 	}
 
 	p, cost2, expanded2 := path.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, ManhattanHeuristic)
-	if !topo.IsPath(p, tg) {
+	if !topo.IsPathIn(tg, p) {
 		t.Error("Path doesn't exist when using heuristic on obstructed graph")
 	}
 

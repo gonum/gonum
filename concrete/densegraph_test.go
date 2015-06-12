@@ -66,7 +66,7 @@ func TestBasicDensePassable(t *testing.T) {
 
 func TestDirectedDenseAddRemove(t *testing.T) {
 	dg := concrete.NewDirectedDenseGraph(10, false, math.Inf(1))
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1)
+	dg.SetEdgeWeight(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1)
 
 	if neighbors := dg.From(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeFromTo(concrete.Node(0), concrete.Node(2)) == nil {
@@ -83,19 +83,19 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 		t.Errorf("Removing directed edge wrongly kept predecessor")
 	}
 
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2)
+	dg.SetEdgeWeight(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2)
 	// I figure we've torture tested From/To at this point
 	// so we'll just use the bool functions now
 	if dg.EdgeFromTo(concrete.Node(0), concrete.Node(2)) == nil {
 		t.Error("Adding directed edge didn't change successor back")
-	} else if c1, c2 := dg.Cost(concrete.Edge{concrete.Node(2), concrete.Node(0)}), dg.Cost(concrete.Edge{concrete.Node(0), concrete.Node(2)}); math.Abs(c1-c2) < .000001 {
+	} else if c1, c2 := dg.Weight(concrete.Edge{concrete.Node(2), concrete.Node(0)}), dg.Weight(concrete.Edge{concrete.Node(0), concrete.Node(2)}); math.Abs(c1-c2) < .000001 {
 		t.Error("Adding directed edge affected cost in undirected manner")
 	}
 }
 
 func TestUndirectedDenseAddRemove(t *testing.T) {
 	dg := concrete.NewUndirectedDenseGraph(10, false, math.Inf(1))
-	dg.SetEdgeCost(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1)
+	dg.SetEdgeWeight(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1)
 
 	if neighbors := dg.From(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeBetween(concrete.Node(0), concrete.Node(2)) == nil {

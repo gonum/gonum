@@ -67,28 +67,14 @@ type EdgeLister interface {
 	Edges() []Edge
 }
 
-type EdgeListGraph interface {
-	Graph
-	EdgeLister
-}
-
-// A Graph that implements Coster has an actual cost between adjacent nodes, also known as a
-// weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*),
-// this function will take precedence over the Uniform Cost function (all weights are 1) if "nil"
-// is passed in for the function argument.
-//
-// If the argument is nil, or the edge is invalid for some reason, this should return math.Inf(1)
-type Coster interface {
-	Cost(Edge) float64
-}
-
-type CostGraph interface {
-	Graph
-	Coster
+// Weighter wraps the Weight method.
+type Weighter interface {
+	// Weight returns the edge weight for the parameter,
+	Weight(Edge) float64
 }
 
 // A graph that implements HeuristicCoster implements a heuristic between any two given nodes.
-// Like Coster, if a graph implements this and a function needs a heuristic cost (e.g. A*), this
+// Like Weighter, if a graph implements this and a function needs a heuristic cost (e.g. A*), this
 // function will take precedence over the Null Heuristic (always returns 0) if "nil" is passed in
 // for the function argument. If HeuristicCost is not intended to be used, it can be implemented as
 // the null heuristic (always returns 0).
@@ -135,10 +121,11 @@ type MutableDirected interface {
 	Mutable
 }
 
-// A function that returns the cost of following an edge
-type CostFunc func(Edge) float64
+// WeightFunc is a mapping between an edge and an edge weight.
+type WeightFunc func(Edge) float64
 
-// UniformCost returns an edge cost of 1 for a non-nil Edge and Inf for a nil Edge.
+// UniformCost is a WeightFunc that returns an edge cost of 1 for a non-nil Edge
+// and Inf for a nil Edge.
 func UniformCost(e Edge) float64 {
 	if e == nil {
 		return math.Inf(1)
@@ -153,9 +140,9 @@ type HeuristicCostFunc func(Node, Node) float64
 // destination without first clearing the destination. If the source does not
 // provide edge weights, UniformCost is used.
 func CopyUndirected(dst MutableUndirected, src Graph) {
-	var weight CostFunc
-	if g, ok := src.(Coster); ok {
-		weight = g.Cost
+	var weight WeightFunc
+	if g, ok := src.(Weighter); ok {
+		weight = g.Weight
 	} else {
 		weight = UniformCost
 	}
@@ -175,9 +162,9 @@ func CopyUndirected(dst MutableUndirected, src Graph) {
 // directions will be present in the destination after the copy is complete. If
 // the source does not provide edge weights, UniformCost is used.
 func CopyDirected(dst MutableDirected, src Graph) {
-	var weight CostFunc
-	if g, ok := src.(Coster); ok {
-		weight = g.Cost
+	var weight WeightFunc
+	if g, ok := src.(Weighter); ok {
+		weight = g.Weight
 	} else {
 		weight = UniformCost
 	}

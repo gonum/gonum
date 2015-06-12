@@ -214,7 +214,7 @@ func (g *Graph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *Graph) Cost(e graph.Edge) float64 {
+func (g *Graph) Weight(e graph.Edge) float64 {
 	if n, ok := g.neighbors[e.From().ID()]; ok {
 		if we, ok := n[e.To().ID()]; ok {
 			return we.Cost

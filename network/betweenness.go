@@ -95,6 +95,12 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	return cb
 }
 
+// WeightedGraph is a graph with edge weights.
+type WeightedGraph interface {
+	graph.Graph
+	graph.Weighter
+}
+
 // BetweennessWeighted returns the non-zero betweenness centrality for nodes in the weighted
 // graph g used to construct the given shortest paths.
 //
@@ -102,7 +108,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
-func BetweennessWeighted(g graph.CostGraph, p path.AllShortest) map[int]float64 {
+func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int]float64 {
 	cb := make(map[int]float64)
 
 	nodes := g.Nodes()

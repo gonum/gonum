@@ -109,11 +109,11 @@ func (g *DirectedDenseGraph) EdgeFromTo(u, v graph.Node) graph.Edge {
 	return nil
 }
 
-func (g *DirectedDenseGraph) Cost(e graph.Edge) float64 {
+func (g *DirectedDenseGraph) Weight(e graph.Edge) float64 {
 	return g.mat.At(e.From().ID(), e.To().ID())
 }
 
-func (g *DirectedDenseGraph) SetEdgeCost(e graph.Edge, weight float64) {
+func (g *DirectedDenseGraph) SetEdgeWeight(e graph.Edge, weight float64) {
 	fid := e.From().ID()
 	tid := e.To().ID()
 	if fid == tid {

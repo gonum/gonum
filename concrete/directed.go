@@ -223,7 +223,7 @@ func (g *DirectedGraph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *DirectedGraph) Cost(e graph.Edge) float64 {
+func (g *DirectedGraph) Weight(e graph.Edge) float64 {
 	if s, ok := g.successors[e.From().ID()]; ok {
 		if we, ok := s[e.To().ID()]; ok {
 			return we.Cost

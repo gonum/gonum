@@ -32,9 +32,9 @@ import (
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost
 // function that returns a uniform positive value.)
 func AStar(start, goal graph.Node, g graph.Graph, heuristic graph.HeuristicCostFunc) (path []graph.Node, pathCost float64, nodesExpanded int) {
-	var weight graph.CostFunc
-	if g, ok := g.(graph.Coster); ok {
-		weight = g.Cost
+	var weight graph.WeightFunc
+	if g, ok := g.(graph.Weighter); ok {
+		weight = g.Weight
 	} else {
 		weight = graph.UniformCost
 	}

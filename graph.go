@@ -83,13 +83,8 @@ type Coster interface {
 }
 
 type CostGraph interface {
-	Coster
 	Graph
-}
-
-type CostDirectedGraph interface {
 	Coster
-	Directed
 }
 
 // A graph that implements HeuristicCoster implements a heuristic between any two given nodes.
@@ -127,22 +122,9 @@ type Mutable interface {
 	RemoveNode(Node)
 }
 
-// MutableGraph is an interface ensuring the implementation of the ability to construct
-// an arbitrary undirected graph. It is very important to note that any implementation
-// of MutableGraph absolutely cannot safely implement the DirectedGraph interface.
-//
-// A MutableGraph is required to store any Edge argument in the same way Mutable must
-// store a Node argument -- any retrieval call is required to return the exact supplied edge.
-// This is what makes it incompatible with DirectedGraph.
-//
-// The reasoning is this: if you call AddUndirectedEdge(Edge{head,tail}); you are required
-// to return the exact edge passed in when a retrieval method (EdgeTo/EdgeBetween) is called.
-// If I call EdgeTo(tail,head), this means that since the edge exists, and was added as
-// Edge{head,tail} this function MUST return Edge{head,tail}. However, EdgeTo requires this
-// be returned as Edge{tail,head}. Thus there's a conflict that cannot be resolved between the
-// two interface requirements.
-type MutableGraph interface {
-	CostGraph
+// MutableUndirected is an undirected graph that can be arbitrarily altered.
+type MutableUndirected interface {
+	Undirected
 	Mutable
 
 	// SetUndirectedEdge adds an undirected edge between
@@ -151,18 +133,15 @@ type MutableGraph interface {
 	// IDs of the e.From and e.To are equal.
 	SetUndirectedEdge(e Edge, cost float64)
 
-	// RemoveEdge clears the stored edge between two nodes. Calling this will never
-	// remove a node. If the edge does not exist this is a no-op, not an error.
+	// RemoveUndirectedEdge removes the given edge,
+	// leaving the terminal nodes. If the edge does not
+	// exist it is a no-op.
 	RemoveUndirectedEdge(Edge)
 }
 
-// MutableDirectedGraph is an interface that ensures one can construct an arbitrary directed
-// graph. Naturally, a MutableDirectedGraph works for both undirected and directed cases,
-// but simply using a MutableGraph may be cleaner. As the documentation for MutableGraph
-// notes, however, a graph cannot safely implement MutableGraph and MutableDirectedGraph
-// at the same time, because of the functionality of a EdgeTo in DirectedGraph.
-type MutableDirectedGraph interface {
-	CostDirectedGraph
+// MutableDirected is a directed graph that can be arbitrarily altered.
+type MutableDirected interface {
+	Directed
 	Mutable
 
 	// SetDirectedEdge adds a directed edge from one
@@ -171,8 +150,9 @@ type MutableDirectedGraph interface {
 	// IDs of the e.From and e.To are equal.
 	SetDirectedEdge(e Edge, cost float64)
 
-	// Removes an edge FROM e.From TO e.To. If no such edge exists, this is a no-op,
-	// not an error.
+	// RemoveDirectedEdge removes the given edge,
+	// leaving the terminal nodes. If the edge does not
+	// exist it is a no-op.
 	RemoveDirectedEdge(Edge)
 }
 
@@ -193,7 +173,7 @@ type HeuristicCostFunc func(Node, Node) float64
 // CopyUndirected copies nodes and edges as undirected edges from the source to the
 // destination without first clearing the destination. If the source does not
 // provide edge weights, UniformCost is used.
-func CopyUndirected(dst MutableGraph, src Graph) {
+func CopyUndirected(dst MutableUndirected, src Graph) {
 	var weight CostFunc
 	if g, ok := src.(Coster); ok {
 		weight = g.Cost
@@ -215,7 +195,7 @@ func CopyUndirected(dst MutableGraph, src Graph) {
 // destination without first clearing the destination. If src is undirected both
 // directions will be present in the destination after the copy is complete. If
 // the source does not provide edge weights, UniformCost is used.
-func CopyDirected(dst MutableDirectedGraph, src Graph) {
+func CopyDirected(dst MutableDirected, src Graph) {
 	var weight CostFunc
 	if g, ok := src.(Coster); ok {
 		weight = g.Cost

@@ -20,9 +20,9 @@ func TestDijkstraFrom(t *testing.T) {
 		g := test.g()
 		for _, e := range test.edges {
 			switch g := g.(type) {
-			case graph.MutableDirectedGraph:
+			case graph.MutableDirected:
 				g.SetDirectedEdge(e, e.Cost)
-			case graph.MutableGraph:
+			case graph.MutableUndirected:
 				g.SetUndirectedEdge(e, e.Cost)
 			default:
 				panic("dijkstra: bad graph type")
@@ -93,9 +93,9 @@ func TestDijkstraAllPaths(t *testing.T) {
 		g := test.g()
 		for _, e := range test.edges {
 			switch g := g.(type) {
-			case graph.MutableDirectedGraph:
+			case graph.MutableDirected:
 				g.SetDirectedEdge(e, e.Cost)
-			case graph.MutableGraph:
+			case graph.MutableUndirected:
 				g.SetUndirectedEdge(e, e.Cost)
 			default:
 				panic("dijkstra: bad graph type")

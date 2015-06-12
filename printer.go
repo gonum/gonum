@@ -25,7 +25,7 @@ var printerHeadings = [...]string{
 }
 
 const (
-	printerBaseTmpl = "%6v  %12v  %9v  %22v" // Base template for headings and values that are always printed.
+	printerBaseTmpl = "%9v  %16v  %9v  %22v" // Base template for headings and values that are always printed.
 	printerGradTmpl = "  %9v  %22v"          // Appended to base template when loc.Gradient != nil.
 	printerHessTmpl = "  %9v"                // Appended to base template when loc.Hessian != nil.
 )

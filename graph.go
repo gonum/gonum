@@ -124,6 +124,10 @@ func UniformCost(e Edge) float64 {
 // CopyUndirected copies nodes and edges as undirected edges from the source to the
 // destination without first clearing the destination. If the source does not
 // provide edge weights, UniformCost is used.
+//
+// Note that if the source is a directed graph and a fundamental cycle exists with
+// two node where the edge weights differ, the resulting destination graph's edge
+// weight between those nodes is undefined.
 func CopyUndirected(dst MutableUndirected, src Graph) {
 	var weight WeightFunc
 	if g, ok := src.(Weighter); ok {

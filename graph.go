@@ -72,16 +72,6 @@ type EdgeListGraph interface {
 	EdgeLister
 }
 
-// DirectedEdgeLister wraps the DirectedEdges method.
-type DirectedEdgeLister interface {
-	DirectedEdges() []Edge
-}
-
-type DirectedEdgeListGraph interface {
-	Graph
-	DirectedEdgeLister
-}
-
 // A Graph that implements Coster has an actual cost between adjacent nodes, also known as a
 // weighted graph. If a graph implements coster and a function needs to read cost (e.g. A*),
 // this function will take precedence over the Uniform Cost function (all weights are 1) if "nil"

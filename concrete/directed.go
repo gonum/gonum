@@ -34,17 +34,15 @@ func NewDirectedGraph() *DirectedGraph {
 	}
 }
 
-/* Mutable Graph implementation */
-
-func (g *DirectedGraph) NewNode() graph.Node {
+func (g *DirectedGraph) NewNodeID() int {
 	if g.maxID != maxInt {
 		g.maxID++
-		return Node(g.maxID)
+		return g.maxID
 	}
 
 	// Implicitly checks if len(g.freeMap) == 0
 	for id := range g.freeMap {
-		return Node(id)
+		return id
 	}
 
 	// I cannot foresee this ever happening, but just in case
@@ -54,7 +52,7 @@ func (g *DirectedGraph) NewNode() graph.Node {
 
 	for i := 0; i < maxInt; i++ {
 		if _, ok := g.nodeMap[i]; !ok {
-			return Node(i)
+			return i
 		}
 	}
 

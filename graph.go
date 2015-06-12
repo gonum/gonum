@@ -73,8 +73,8 @@ type Weighter interface {
 
 // Mutable wraps generalized graph alteration methods.
 type Mutable interface {
-	// NewNode returns a node with a unique arbitrary ID.
-	NewNode() Node
+	// NewNodeID returns a new unique arbitrary ID.
+	NewNodeID() int
 
 	// Adds a node to the graph. AddNode panics if
 	// the added node ID matches an existing node ID.

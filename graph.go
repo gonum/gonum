@@ -123,8 +123,9 @@ func UniformCost(e Edge) float64 {
 }
 
 // CopyUndirected copies nodes and edges as undirected edges from the source to the
-// destination without first clearing the destination. If the source does not
-// implement Weighter, UniformCost is used to define edge weights.
+// destination without first clearing the destination. CopyUndirected will panic if
+// a node ID in the source graph matches a node ID in the destination. If the source
+// does not implement Weighter, UniformCost is used to define edge weights.
 //
 // Note that if the source is a directed graph and a fundamental cycle exists with
 // two nodes where the edge weights differ, the resulting destination graph's edge
@@ -137,21 +138,24 @@ func CopyUndirected(dst MutableUndirected, src Graph) {
 		weight = UniformCost
 	}
 
-	for _, node := range src.Nodes() {
-		succs := src.From(node)
-		dst.AddNode(node)
-		for _, succ := range succs {
-			edge := src.Edge(node, succ)
+	nodes := src.Nodes()
+	for _, n := range nodes {
+		dst.AddNode(n)
+	}
+	for _, u := range nodes {
+		for _, v := range src.From(u) {
+			edge := src.Edge(u, v)
 			dst.SetEdge(edge, weight(edge))
 		}
 	}
 }
 
 // CopyDirected copies nodes and edges as directed edges from the source to the
-// destination without first clearing the destination. If src is undirected both
-// directions will be present in the destination after the copy is complete. If
-// the source does not implement Weighter, UniformCost is used to define edge
-// weights.
+// destination without first clearing the destination. CopyDirected will panic if
+// a node ID in the source graph matches a node ID in the destination. If the
+// source is undirected both directions will be present in the destination after
+// the copy is complete. If the source does not implement Weighter, UniformCost
+// is used to define edge weights.
 func CopyDirected(dst MutableDirected, src Graph) {
 	var weight WeightFunc
 	if g, ok := src.(Weighter); ok {
@@ -160,11 +164,13 @@ func CopyDirected(dst MutableDirected, src Graph) {
 		weight = UniformCost
 	}
 
-	for _, node := range src.Nodes() {
-		succs := src.From(node)
-		dst.AddNode(node)
-		for _, succ := range succs {
-			edge := src.Edge(node, succ)
+	nodes := src.Nodes()
+	for _, n := range nodes {
+		dst.AddNode(n)
+	}
+	for _, u := range nodes {
+		for _, v := range src.From(u) {
+			edge := src.Edge(u, v)
 			dst.SetEdge(edge, weight(edge))
 		}
 	}

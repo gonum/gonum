@@ -52,9 +52,6 @@ type Undirected interface {
 type Directed interface {
 	Graph
 
-	// EdgeFromTo returns the edge leading from u to v.
-	EdgeFromTo(u, v Node) Edge
-
 	// To returns all nodes that can be lead to the
 	// given node.
 	To(Node) []Node

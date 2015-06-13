@@ -23,7 +23,7 @@ func IsPathIn(g graph.Graph, path []graph.Node) bool {
 	switch g := g.(type) {
 	case graph.Directed:
 		canReach = func(u, v graph.Node) bool {
-			return g.EdgeFromTo(u, v) != nil
+			return g.Edge(u, v) != nil
 		}
 	default:
 		canReach = g.HasEdge

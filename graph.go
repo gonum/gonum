@@ -61,12 +61,6 @@ type Directed interface {
 	To(Node) []Node
 }
 
-// EdgeLister defines graphs that can enumerate their edges.
-type EdgeLister interface {
-	// Edges returns all edges in the graph.
-	Edges() []Edge
-}
-
 // Weighter defines graphs that can report edge weights.
 type Weighter interface {
 	// Weight returns the weight for the given edge.

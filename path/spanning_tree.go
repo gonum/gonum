@@ -12,15 +12,15 @@ import (
 	"github.com/gonum/graph/internal"
 )
 
-// EdgeListGraph is a graph than returns its set of edges.
-type EdgeListGraph interface {
+// EdgeListerGraph is an undirected graph than returns its complete set of edges.
+type EdgeListerGraph interface {
 	graph.Undirected
-	graph.EdgeLister
+	Edges() []graph.Edge
 }
 
 // Prim generates a minimum spanning tree of g by greedy tree extension, placing
 // the result in the destination. The destination is not cleared first.
-func Prim(dst graph.MutableUndirected, g EdgeListGraph) {
+func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
 	var weight graph.WeightFunc
 	if g, ok := g.(graph.Weighter); ok {
 		weight = g.Weight
@@ -62,7 +62,7 @@ func Prim(dst graph.MutableUndirected, g EdgeListGraph) {
 
 // Kruskal generates a minimum spanning tree of g by greedy tree coalesence, placing
 // the result in the destination. The destination is not cleared first.
-func Kruskal(dst graph.MutableUndirected, g EdgeListGraph) {
+func Kruskal(dst graph.MutableUndirected, g EdgeListerGraph) {
 	var weight graph.WeightFunc
 	if g, ok := g.(graph.Weighter); ok {
 		weight = g.Weight

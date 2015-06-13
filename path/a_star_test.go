@@ -195,7 +195,7 @@ func newSmallHeuristic() func(n1, n2 graph.Node) float64 {
 
 type costEdgeListGraph interface {
 	graph.Weighter
-	path.EdgeListGraph
+	path.EdgeListerGraph
 }
 
 func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool, graph.Edge, graph.Node) {

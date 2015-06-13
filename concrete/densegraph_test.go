@@ -69,24 +69,24 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 	dg.SetEdgeWeight(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 1)
 
 	if neighbors := dg.From(concrete.Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
-		dg.EdgeFromTo(concrete.Node(0), concrete.Node(2)) == nil {
+		dg.Edge(concrete.Node(0), concrete.Node(2)) == nil {
 		t.Errorf("Adding edge didn't create successor")
 	}
 
 	dg.RemoveEdge(concrete.Edge{concrete.Node(0), concrete.Node(2)})
 
-	if neighbors := dg.From(concrete.Node(0)); len(neighbors) != 0 || dg.EdgeFromTo(concrete.Node(0), concrete.Node(2)) != nil {
+	if neighbors := dg.From(concrete.Node(0)); len(neighbors) != 0 || dg.Edge(concrete.Node(0), concrete.Node(2)) != nil {
 		t.Errorf("Removing edge didn't properly remove successor")
 	}
 
-	if neighbors := dg.To(concrete.Node(2)); len(neighbors) != 0 || dg.EdgeFromTo(concrete.Node(0), concrete.Node(2)) != nil {
+	if neighbors := dg.To(concrete.Node(2)); len(neighbors) != 0 || dg.Edge(concrete.Node(0), concrete.Node(2)) != nil {
 		t.Errorf("Removing directed edge wrongly kept predecessor")
 	}
 
 	dg.SetEdgeWeight(concrete.Edge{concrete.Node(0), concrete.Node(2)}, 2)
 	// I figure we've torture tested From/To at this point
 	// so we'll just use the bool functions now
-	if dg.EdgeFromTo(concrete.Node(0), concrete.Node(2)) == nil {
+	if dg.Edge(concrete.Node(0), concrete.Node(2)) == nil {
 		t.Error("Adding directed edge didn't change successor back")
 	} else if c1, c2 := dg.Weight(concrete.Edge{concrete.Node(2), concrete.Node(0)}), dg.Weight(concrete.Edge{concrete.Node(0), concrete.Node(2)}); math.Abs(c1-c2) < .000001 {
 		t.Error("Adding directed edge affected cost in undirected manner")

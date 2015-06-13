@@ -153,32 +153,47 @@ func (g *DirectedGraph) From(n graph.Node) []graph.Node {
 	return successors
 }
 
-func (g *DirectedGraph) HasEdge(n, succ graph.Node) bool {
-	if _, ok := g.nodeMap[n.ID()]; !ok {
-		return false
-	} else if _, ok := g.nodeMap[succ.ID()]; !ok {
+func (g *DirectedGraph) HasEdge(x, y graph.Node) bool {
+	xid := x.ID()
+	yid := y.ID()
+	if _, ok := g.nodeMap[xid]; !ok {
 		return false
 	}
-	_, ok := g.successors[n.ID()][succ.ID()]
+	if _, ok := g.nodeMap[yid]; !ok {
+		return false
+	}
+	if _, ok := g.successors[xid][yid]; ok {
+		return true
+	}
+	_, ok := g.successors[yid][xid]
 	return ok
 }
 
 func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeFromTo(u, v)
-}
-
-func (g *DirectedGraph) EdgeFromTo(u, v graph.Node) graph.Edge {
 	if _, ok := g.nodeMap[u.ID()]; !ok {
 		return nil
-	} else if _, ok := g.nodeMap[v.ID()]; !ok {
+	}
+	if _, ok := g.nodeMap[v.ID()]; !ok {
 		return nil
 	}
-
 	edge, ok := g.successors[u.ID()][v.ID()]
 	if !ok {
 		return nil
 	}
 	return edge.Edge
+}
+
+func (g *DirectedGraph) HasEdgeFromTo(u, v graph.Node) bool {
+	if _, ok := g.nodeMap[u.ID()]; !ok {
+		return false
+	}
+	if _, ok := g.nodeMap[v.ID()]; !ok {
+		return false
+	}
+	if _, ok := g.successors[u.ID()][v.ID()]; !ok {
+		return false
+	}
+	return true
 }
 
 func (g *DirectedGraph) To(n graph.Node) []graph.Node {

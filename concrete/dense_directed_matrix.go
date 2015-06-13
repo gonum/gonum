@@ -92,21 +92,23 @@ func (g *DirectedDenseGraph) To(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *DirectedDenseGraph) HasEdge(u, v graph.Node) bool {
-	uid := u.ID()
-	vid := v.ID()
-	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
+func (g *DirectedDenseGraph) HasEdge(x, y graph.Node) bool {
+	xid := x.ID()
+	yid := y.ID()
+	return xid != yid && (!isSame(g.mat.At(xid, yid), g.absent) || !isSame(g.mat.At(yid, xid), g.absent))
 }
 
 func (g *DirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeFromTo(u, v)
-}
-
-func (g *DirectedDenseGraph) EdgeFromTo(u, v graph.Node) graph.Edge {
 	if g.HasEdge(u, v) {
 		return Edge{u, v}
 	}
 	return nil
+}
+
+func (g *DirectedDenseGraph) HasEdgeFromTo(u, v graph.Node) bool {
+	uid := u.ID()
+	vid := v.ID()
+	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
 }
 
 func (g *DirectedDenseGraph) Weight(e graph.Edge) float64 {

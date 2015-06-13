@@ -44,13 +44,17 @@ type Graph interface {
 type Undirected interface {
 	Graph
 
-	// EdgeBetween returns the edge between nodes u and v.
-	EdgeBetween(u, v Node) Edge
+	// EdgeBetween returns the edge between nodes x and y.
+	EdgeBetween(x, y Node) Edge
 }
 
 // Directed is a directed graph.
 type Directed interface {
 	Graph
+
+	// HasEdgeFromTo returns whether an edge exists
+	// in the graph from u to v.
+	HasEdgeFromTo(u, v Node) bool
 
 	// To returns all nodes that can be lead to the
 	// given node.

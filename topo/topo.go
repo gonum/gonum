@@ -9,15 +9,10 @@ import (
 	"github.com/gonum/graph/traverse"
 )
 
-// IsPath returns true for a connected path within a graph.
+// IsPathIn returns whether path is a path in g.
 //
-// IsPath returns true if, starting at path[0] and ending at path[len(path)-1], all nodes between
-// are valid neighbors. That is, for each element path[i], path[i+1] is a valid successor.
-//
-// As special cases, IsPath returns true for a nil or zero length path, and for a path of length 1
-// (only one node) but only if the node listed in path exists within the graph.
-//
-// Graph must be non-nil.
+// As special cases, IsPathIn returns true for a zero length path or for
+// a path of length 1 when the node in path exists in the graph.
 func IsPathIn(g graph.Graph, path []graph.Node) bool {
 	var canReach func(u, v graph.Node) bool
 	switch g := g.(type) {

@@ -14,27 +14,27 @@ import (
 // As special cases, IsPathIn returns true for a zero length path or for
 // a path of length 1 when the node in path exists in the graph.
 func IsPathIn(g graph.Graph, path []graph.Node) bool {
-	var canReach func(u, v graph.Node) bool
-	switch g := g.(type) {
-	case graph.Directed:
-		canReach = g.HasEdgeFromTo
-	default:
-		canReach = g.HasEdge
-	}
-
-	if path == nil || len(path) == 0 {
+	switch len(path) {
+	case 0:
 		return true
-	} else if len(path) == 1 {
+	case 1:
 		return g.Has(path[0])
-	}
-
-	for i := 0; i < len(path)-1; i++ {
-		if !canReach(path[i], path[i+1]) {
-			return false
+	default:
+		var canReach func(u, v graph.Node) bool
+		switch g := g.(type) {
+		case graph.Directed:
+			canReach = g.HasEdgeFromTo
+		default:
+			canReach = g.HasEdge
 		}
-	}
 
-	return true
+		for i, u := range path[:len(path)-1] {
+			if !canReach(u, path[i+1]) {
+				return false
+			}
+		}
+		return true
+	}
 }
 
 // ConnectedComponents returns the connected components of the graph g. All

@@ -37,8 +37,7 @@ func IsPathIn(g graph.Graph, path []graph.Node) bool {
 	}
 }
 
-// ConnectedComponents returns the connected components of the graph g. All
-// edges are treated as undirected.
+// ConnectedComponents returns the connected components of the undirected graph g.
 func ConnectedComponents(g graph.Undirected) [][]graph.Node {
 	var (
 		w  traverse.DepthFirst

@@ -8,6 +8,7 @@ import (
 	"container/heap"
 
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/internal"
 )
 
 // Heuristic returns an estimate of the cost of travelling between two nodes.
@@ -40,7 +41,7 @@ type HeuristicCoster interface {
 //
 // To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost
 // function that returns a uniform positive value.)
-func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, pathCost float64, nodesExpanded int) {
+func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost float64, expanded int) {
 	var weight graph.WeightFunc
 	if g, ok := g.(graph.Weighter); ok {
 		weight = g.Weight
@@ -55,43 +56,41 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 		}
 	}
 
-	closedSet := make(map[int]aStarNode)
-	openSet := &aStarQueue{nodes: make([]aStarNode, 0), indexList: make(map[int]int)}
-	heap.Init(openSet)
-	node := aStarNode{start, 0, h(start, goal)}
-	heap.Push(openSet, node)
-	predecessor := make(map[int]graph.Node)
+	gid := goal.ID()
+	visited := make(internal.IntSet)
+	prev := make(map[int]graph.Node)
 
-	for openSet.Len() != 0 {
-		curr := heap.Pop(openSet).(aStarNode)
+	open := &aStarQueue{indexList: make(map[int]int)}
+	heap.Push(open, aStarNode{Node: start, gscore: 0, fscore: h(start, goal)})
 
-		nodesExpanded += 1
+	for open.Len() != 0 {
+		u := heap.Pop(open).(aStarNode)
+		uid := u.ID()
+		expanded++
 
-		if curr.ID() == goal.ID() {
-			return rebuildPath(predecessor, goal), curr.gscore, nodesExpanded
+		if uid == gid {
+			return rebuildPath(prev, goal), u.gscore, expanded
 		}
 
-		closedSet[curr.ID()] = curr
-
-		for _, neighbor := range g.From(curr.Node) {
-			if _, ok := closedSet[neighbor.ID()]; ok {
+		visited.Add(uid)
+		for _, v := range g.From(u.Node) {
+			vid := v.ID()
+			if visited.Has(vid) {
 				continue
 			}
 
-			g := curr.gscore + weight(g.Edge(curr.Node, neighbor))
-
-			if existing, exists := openSet.Find(neighbor.ID()); !exists {
-				predecessor[neighbor.ID()] = curr
-				node = aStarNode{neighbor, g, g + h(neighbor, goal)}
-				heap.Push(openSet, node)
-			} else if g < existing.gscore {
-				predecessor[neighbor.ID()] = curr
-				openSet.Fix(neighbor.ID(), g, g+h(neighbor, goal))
+			g := u.gscore + weight(g.Edge(u.Node, v))
+			if n, ok := open.node(vid); !ok {
+				prev[vid] = u
+				heap.Push(open, aStarNode{Node: v, gscore: g, fscore: g + h(v, goal)})
+			} else if g < n.gscore {
+				prev[vid] = u
+				open.update(vid, g, g+h(v, goal))
 			}
 		}
 	}
 
-	return nil, 0, nodesExpanded
+	return nil, 0, expanded
 }
 
 // NullHeuristic is an admissible, consistent heuristic that will not speed up computation.
@@ -110,15 +109,12 @@ type aStarQueue struct {
 }
 
 func (pq *aStarQueue) Less(i, j int) bool {
-	// As the heap documentation says, a priority queue is listed if the actual values
-	// are treated as if they were negative
 	return pq.nodes[i].fscore < pq.nodes[j].fscore
 }
 
 func (pq *aStarQueue) Swap(i, j int) {
 	pq.indexList[pq.nodes[i].ID()] = j
 	pq.indexList[pq.nodes[j].ID()] = i
-
 	pq.nodes[i], pq.nodes[j] = pq.nodes[j], pq.nodes[i]
 }
 
@@ -136,31 +132,25 @@ func (pq *aStarQueue) Pop() interface{} {
 	x := pq.nodes[len(pq.nodes)-1]
 	pq.nodes = pq.nodes[:len(pq.nodes)-1]
 	delete(pq.indexList, x.ID())
-
 	return x
 }
 
-func (pq *aStarQueue) Fix(id int, newGScore, newFScore float64) {
-	if i, ok := pq.indexList[id]; ok {
-		pq.nodes[i].gscore = newGScore
-		pq.nodes[i].fscore = newFScore
-		heap.Fix(pq, i)
+func (pq *aStarQueue) update(id int, g, f float64) {
+	i, ok := pq.indexList[id]
+	if !ok {
+		return
 	}
+	pq.nodes[i].gscore = g
+	pq.nodes[i].fscore = f
+	heap.Fix(pq, i)
 }
 
-func (pq *aStarQueue) Find(id int) (aStarNode, bool) {
+func (pq *aStarQueue) node(id int) (aStarNode, bool) {
 	loc, ok := pq.indexList[id]
 	if ok {
 		return pq.nodes[loc], true
-	} else {
-		return aStarNode{}, false
 	}
-
-}
-
-func (pq *aStarQueue) Exists(id int) bool {
-	_, ok := pq.indexList[id]
-	return ok
+	return aStarNode{}, false
 }
 
 // Rebuilds a path backwards from the goal.

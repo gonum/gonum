@@ -61,19 +61,19 @@ type Directed interface {
 	To(Node) []Node
 }
 
-// EdgeLister wraps the Edges method.
+// EdgeLister defines graphs that can enumerate their edges.
 type EdgeLister interface {
 	// Edges returns all edges in the graph.
 	Edges() []Edge
 }
 
-// Weighter wraps the Weight method.
+// Weighter defines graphs that can report edge weights.
 type Weighter interface {
 	// Weight returns the weight for the given edge.
 	Weight(Edge) float64
 }
 
-// Mutable wraps generalized graph alteration methods.
+// Mutable is an interface for generalized graph mutation.
 type Mutable interface {
 	// NewNodeID returns a new unique arbitrary ID.
 	NewNodeID() int

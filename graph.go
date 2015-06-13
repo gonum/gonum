@@ -62,12 +62,13 @@ type Directed interface {
 
 // EdgeLister wraps the Edges method.
 type EdgeLister interface {
+	// Edges returns all edges in the graph.
 	Edges() []Edge
 }
 
 // Weighter wraps the Weight method.
 type Weighter interface {
-	// Weight returns the edge weight for the parameter,
+	// Weight returns the weight for the given edge.
 	Weight(Edge) float64
 }
 
@@ -123,10 +124,10 @@ func UniformCost(e Edge) float64 {
 
 // CopyUndirected copies nodes and edges as undirected edges from the source to the
 // destination without first clearing the destination. If the source does not
-// provide edge weights, UniformCost is used.
+// implement Weighter, UniformCost is used to define edge weights.
 //
 // Note that if the source is a directed graph and a fundamental cycle exists with
-// two node where the edge weights differ, the resulting destination graph's edge
+// two nodes where the edge weights differ, the resulting destination graph's edge
 // weight between those nodes is undefined.
 func CopyUndirected(dst MutableUndirected, src Graph) {
 	var weight WeightFunc
@@ -149,7 +150,8 @@ func CopyUndirected(dst MutableUndirected, src Graph) {
 // CopyDirected copies nodes and edges as directed edges from the source to the
 // destination without first clearing the destination. If src is undirected both
 // directions will be present in the destination after the copy is complete. If
-// the source does not provide edge weights, UniformCost is used.
+// the source does not implement Weighter, UniformCost is used to define edge
+// weights.
 func CopyDirected(dst MutableDirected, src Graph) {
 	var weight WeightFunc
 	if g, ok := src.(Weighter); ok {

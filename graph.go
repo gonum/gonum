@@ -27,8 +27,8 @@ type Graph interface {
 	// Nodes returns all the nodes in the graph.
 	Nodes() []Node
 
-	// From returns all nodes that can be reached from
-	// the given node.
+	// From returns all nodes that can be reached directly
+	// from the given node.
 	From(Node) []Node
 
 	// HasEdge returns whether an edge exists between
@@ -56,8 +56,8 @@ type Directed interface {
 	// in the graph from u to v.
 	HasEdgeFromTo(u, v Node) bool
 
-	// To returns all nodes that can be lead to the
-	// given node.
+	// To returns all nodes that can reach directly
+	// to the given node.
 	To(Node) []Node
 }
 

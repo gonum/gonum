@@ -131,7 +131,9 @@ var aStarTests = []struct {
 
 func TestAStar(t *testing.T) {
 	for _, test := range aStarTests {
-		p, cost, _ := path.AStar(concrete.Node(test.s), concrete.Node(test.t), test.g, test.heuristic)
+		pt, _ := path.AStar(concrete.Node(test.s), concrete.Node(test.t), test.g, test.heuristic)
+
+		p, cost := pt.To(concrete.Node(test.t))
 
 		if !topo.IsPathIn(test.g, p) {
 			t.Error("got path that is not path in input graph for %q", test.name)
@@ -197,7 +199,8 @@ func TestExhaustiveAStar(t *testing.T) {
 	ps := path.DijkstraAllPaths(g)
 	for _, start := range g.Nodes() {
 		for _, goal := range g.Nodes() {
-			gotPath, gotWeight, _ := path.AStar(start, goal, g, heuristic)
+			pt, _ := path.AStar(start, goal, g, heuristic)
+			gotPath, gotWeight := pt.To(goal)
 			wantPath, wantWeight, _ := ps.Between(start, goal)
 			if gotWeight != wantWeight {
 				t.Errorf("unexpected path weight from %v to %v result: got:%s want:%s",

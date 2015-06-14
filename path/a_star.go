@@ -14,15 +14,16 @@ import (
 // Heuristic returns an estimate of the cost of travelling between two nodes.
 type Heuristic func(x, y graph.Node) float64
 
-// HeuristicCoster wraps the HeuristicCost method. A graph that implementing
-// the interface provides a heuristic between any two given nodes.
+// HeuristicCoster wraps the HeuristicCost method. A graph implementing the
+// interface provides a heuristic between any two given nodes.
 type HeuristicCoster interface {
 	HeuristicCost(x, y graph.Node) float64
 }
 
 // AStar returns the A*-shortest path from s to t in g using the heuristic h, and the
-// cost of that path. The number of expanded nodes is also returned. This value may
-// help with heuristic tuning.
+// cost of that path. The path and cost is held in a Shortest along with paths and costs
+// to all nodes explored during the search. The number of expanded nodes is also returned.
+// This value may help with heuristic tuning.
 //
 // The path will be the shortest path if the heuristic is admissible. A heuristic is
 // admissible if for any node, n, in the graph, the heuristic estimate of the cost of
@@ -31,7 +32,7 @@ type HeuristicCoster interface {
 // If h is nil, AStar will use the g.HeuristicCost method if g implements HeuristicCoster,
 // falling back to NullHeuristic otherwise. If the graph does not implement graph.Weighter,
 // graph.UniformCost is used. AStar will panic if g has an A*-reachable negative edge weight.
-func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost float64, expanded int) {
+func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded int) {
 	var weight graph.WeightFunc
 	if g, ok := g.(graph.Weighter); ok {
 		weight = g.Weight
@@ -46,7 +47,7 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost
 		}
 	}
 
-	p := newShortestFrom(s, g.Nodes())
+	path = newShortestFrom(s, g.Nodes())
 	tid := t.ID()
 
 	visited := make(internal.IntSet)
@@ -56,7 +57,7 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost
 	for open.Len() != 0 {
 		u := heap.Pop(open).(aStarNode)
 		uid := u.node.ID()
-		i := p.indexOf[uid]
+		i := path.indexOf[uid]
 		expanded++
 
 		if uid == tid {
@@ -69,7 +70,7 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost
 			if visited.Has(vid) {
 				continue
 			}
-			j := p.indexOf[vid]
+			j := path.indexOf[vid]
 
 			w := weight(g.Edge(u.node, v))
 			if w < 0 {
@@ -77,17 +78,16 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost
 			}
 			g := u.gscore + w
 			if n, ok := open.node(vid); !ok {
-				p.set(j, g, i)
+				path.set(j, g, i)
 				heap.Push(open, aStarNode{node: v, gscore: g, fscore: g + h(v, t)})
 			} else if g < n.gscore {
-				p.set(j, g, i)
+				path.set(j, g, i)
 				open.update(vid, g, g+h(v, t))
 			}
 		}
 	}
 
-	path, cost = p.To(t)
-	return path, cost, expanded
+	return path, expanded
 }
 
 // NullHeuristic is an admissible, consistent heuristic that will not speed up computation.

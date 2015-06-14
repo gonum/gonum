@@ -20,28 +20,18 @@ type HeuristicCoster interface {
 	HeuristicCost(x, y graph.Node) float64
 }
 
-// Returns an ordered list consisting of the nodes between start and goal. The path will be the
-// shortest path assuming the function heuristicCost is admissible. The second return value is the
-// cost, and the third is the number of nodes expanded while searching (useful info for tuning
-// heuristics). Negative Costs will cause bad things to happen, as well as negative heuristic
-// estimates.
+// AStar returns the A*-shortest path from s to t in g using the heuristic h, and the
+// cost of that path. The number of expanded nodes is also returned. This value may
+// help with heuristic tuning.
 //
-// A heuristic is admissible if, for any node in the graph, the heuristic estimate of the cost
-// between the node and the goal is less than or set to the true cost.
+// The path will be the shortest path if the heuristic is admissible. A heuristic is
+// admissible if for any node, n, in the graph, the heuristic estimate of the cost of
+// the path from n to t is less than or equal to the true cost of that path.
 //
-// Performance may be improved by providing a consistent heuristic (though one is not needed to
-// find the optimal path), a heuristic is consistent if its value for a given node is less than
-// (or equal to) the actual cost of reaching its neighbors + the heuristic estimate for the
-// neighbor itself. You can force consistency by making your HeuristicCost function return
-// max(NonConsistentHeuristicCost(neighbor,goal), NonConsistentHeuristicCost(self,goal) -
-// Cost(self,neighbor)). If there are multiple neighbors, take the max of all of them.
-//
-// If heuristice is nil, A* will use the graph's HeuristicCost method if present, otherwise
-// falling back to NullHeuristic. To run Uniform Cost Search, run A* with the NullHeuristic.
-//
-// To run Breadth First Search, run A* with both the NullHeuristic and UniformCost (or any cost
-// function that returns a uniform positive value.)
-func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost float64, expanded int) {
+// If h is nil, AStar will use the g.HeuristicCost method if g implements HeuristicCoster,
+// falling back to NullHeuristic otherwise. If the graph does not implement graph.Weighter,
+// graph.UniformCost is used.
+func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path []graph.Node, cost float64, expanded int) {
 	var weight graph.WeightFunc
 	if g, ok := g.(graph.Weighter); ok {
 		weight = g.Weight
@@ -56,12 +46,12 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 		}
 	}
 
-	p := newShortestFrom(start, g.Nodes())
-	gid := goal.ID()
+	p := newShortestFrom(s, g.Nodes())
+	tid := t.ID()
 
 	visited := make(internal.IntSet)
 	open := &aStarQueue{indexOf: make(map[int]int)}
-	heap.Push(open, aStarNode{node: start, gscore: 0, fscore: h(start, goal)})
+	heap.Push(open, aStarNode{node: s, gscore: 0, fscore: h(s, t)})
 
 	for open.Len() != 0 {
 		u := heap.Pop(open).(aStarNode)
@@ -69,7 +59,7 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 		i := p.indexOf[uid]
 		expanded++
 
-		if uid == gid {
+		if uid == tid {
 			break
 		}
 
@@ -84,15 +74,15 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 			g := u.gscore + weight(g.Edge(u.node, v))
 			if n, ok := open.node(vid); !ok {
 				p.set(j, g, i)
-				heap.Push(open, aStarNode{node: v, gscore: g, fscore: g + h(v, goal)})
+				heap.Push(open, aStarNode{node: v, gscore: g, fscore: g + h(v, t)})
 			} else if g < n.gscore {
 				p.set(j, g, i)
-				open.update(vid, g, g+h(v, goal))
+				open.update(vid, g, g+h(v, t))
 			}
 		}
 	}
 
-	path, cost = p.To(goal)
+	path, cost = p.To(t)
 	return path, cost, expanded
 }
 
@@ -101,12 +91,14 @@ func NullHeuristic(_, _ graph.Node) float64 {
 	return 0
 }
 
+// aStarNode adds A* accounting to a graph.Node.
 type aStarNode struct {
 	node   graph.Node
 	gscore float64
 	fscore float64
 }
 
+// aStarQueue is an A* priority queue.
 type aStarQueue struct {
 	indexOf map[int]int
 	nodes   []aStarNode

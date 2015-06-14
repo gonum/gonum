@@ -67,6 +67,7 @@ func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
 		p.dist[i] = math.Inf(1)
 		p.next[i] = -1
 	}
+	p.dist[indexOf[uid]] = 0
 
 	return p
 }
@@ -91,7 +92,7 @@ func (p Shortest) WeightTo(v graph.Node) float64 {
 // To returns a shortest path to v and the weight of the path.
 func (p Shortest) To(v graph.Node) (path []graph.Node, weight float64) {
 	to, toOK := p.indexOf[v.ID()]
-	if !toOK {
+	if !toOK || math.IsInf(p.dist[to], 1) {
 		return nil, math.Inf(1)
 	}
 	from := p.indexOf[p.from.ID()]

@@ -56,20 +56,21 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 		}
 	}
 
+	p := newShortestFrom(start, g.Nodes())
 	gid := goal.ID()
-	visited := make(internal.IntSet)
-	prev := make(map[int]graph.Node)
 
+	visited := make(internal.IntSet)
 	open := &aStarQueue{indexList: make(map[int]int)}
 	heap.Push(open, aStarNode{Node: start, gscore: 0, fscore: h(start, goal)})
 
 	for open.Len() != 0 {
 		u := heap.Pop(open).(aStarNode)
 		uid := u.ID()
+		i := p.indexOf[uid]
 		expanded++
 
 		if uid == gid {
-			return rebuildPath(prev, goal), u.gscore, expanded
+			break
 		}
 
 		visited.Add(uid)
@@ -78,19 +79,21 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 			if visited.Has(vid) {
 				continue
 			}
+			j := p.indexOf[vid]
 
 			g := u.gscore + weight(g.Edge(u.Node, v))
 			if n, ok := open.node(vid); !ok {
-				prev[vid] = u
+				p.set(j, g, i)
 				heap.Push(open, aStarNode{Node: v, gscore: g, fscore: g + h(v, goal)})
 			} else if g < n.gscore {
-				prev[vid] = u
+				p.set(j, g, i)
 				open.update(vid, g, g+h(v, goal))
 			}
 		}
 	}
 
-	return nil, 0, expanded
+	path, cost = p.To(goal)
+	return path, cost, expanded
 }
 
 // NullHeuristic is an admissible, consistent heuristic that will not speed up computation.
@@ -151,23 +154,4 @@ func (pq *aStarQueue) node(id int) (aStarNode, bool) {
 		return pq.nodes[loc], true
 	}
 	return aStarNode{}, false
-}
-
-// Rebuilds a path backwards from the goal.
-func rebuildPath(predecessors map[int]graph.Node, goal graph.Node) []graph.Node {
-	if n, ok := goal.(aStarNode); ok {
-		goal = n.Node
-	}
-	path := []graph.Node{goal}
-	curr := goal
-	for prev, ok := predecessors[curr.ID()]; ok; prev, ok = predecessors[curr.ID()] {
-		if n, ok := prev.(aStarNode); ok {
-			prev = n.Node
-		}
-		path = append(path, prev)
-		curr = prev
-	}
-
-	reverse(path)
-	return path
 }

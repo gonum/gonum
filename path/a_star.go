@@ -33,6 +33,9 @@ type HeuristicCoster interface {
 // falling back to NullHeuristic otherwise. If the graph does not implement graph.Weighter,
 // graph.UniformCost is used. AStar will panic if g has an A*-reachable negative edge weight.
 func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded int) {
+	if !g.Has(s) {
+		return Shortest{from: s}, 0
+	}
 	var weight graph.WeightFunc
 	if g, ok := g.(graph.Weighter); ok {
 		weight = g.Weight

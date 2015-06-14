@@ -160,27 +160,27 @@ func TestAStar(t *testing.T) {
 func TestExhaustiveAStar(t *testing.T) {
 	g := concrete.NewGraph()
 	nodes := []locatedNode{
-		1: {id: 1, x: 0, y: 6},
-		2: {id: 2, x: 1, y: 0},
-		3: {id: 3, x: 8, y: 7},
-		4: {id: 4, x: 16, y: 0},
-		5: {id: 5, x: 17, y: 6},
-		6: {id: 6, x: 9, y: 8},
+		{id: 1, x: 0, y: 6},
+		{id: 2, x: 1, y: 0},
+		{id: 3, x: 8, y: 7},
+		{id: 4, x: 16, y: 0},
+		{id: 5, x: 17, y: 6},
+		{id: 6, x: 9, y: 8},
 	}
-	for _, n := range nodes[1:] {
+	for _, n := range nodes {
 		g.AddNode(n)
 	}
 
 	edges := []weightedEdge{
-		{from: nodes[1], to: nodes[2], cost: 7},
-		{from: nodes[1], to: nodes[3], cost: 9},
-		{from: nodes[1], to: nodes[6], cost: 14},
-		{from: nodes[2], to: nodes[3], cost: 10},
-		{from: nodes[2], to: nodes[4], cost: 15},
-		{from: nodes[3], to: nodes[4], cost: 11},
-		{from: nodes[3], to: nodes[6], cost: 2},
-		{from: nodes[4], to: nodes[5], cost: 7},
-		{from: nodes[5], to: nodes[6], cost: 9},
+		{from: g.Node(1), to: g.Node(2), cost: 7},
+		{from: g.Node(1), to: g.Node(3), cost: 9},
+		{from: g.Node(1), to: g.Node(6), cost: 14},
+		{from: g.Node(2), to: g.Node(3), cost: 10},
+		{from: g.Node(2), to: g.Node(4), cost: 15},
+		{from: g.Node(3), to: g.Node(4), cost: 11},
+		{from: g.Node(3), to: g.Node(6), cost: 2},
+		{from: g.Node(4), to: g.Node(5), cost: 7},
+		{from: g.Node(5), to: g.Node(6), cost: 9},
 	}
 	for _, e := range edges {
 		g.SetEdge(e, e.cost)
@@ -222,7 +222,7 @@ type locatedNode struct {
 func (n locatedNode) ID() int { return n.id }
 
 type weightedEdge struct {
-	from, to locatedNode
+	from, to graph.Node
 	cost     float64
 }
 

@@ -60,12 +60,12 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 	gid := goal.ID()
 
 	visited := make(internal.IntSet)
-	open := &aStarQueue{indexList: make(map[int]int)}
-	heap.Push(open, aStarNode{Node: start, gscore: 0, fscore: h(start, goal)})
+	open := &aStarQueue{indexOf: make(map[int]int)}
+	heap.Push(open, aStarNode{node: start, gscore: 0, fscore: h(start, goal)})
 
 	for open.Len() != 0 {
 		u := heap.Pop(open).(aStarNode)
-		uid := u.ID()
+		uid := u.node.ID()
 		i := p.indexOf[uid]
 		expanded++
 
@@ -74,17 +74,17 @@ func AStar(start, goal graph.Node, g graph.Graph, h Heuristic) (path []graph.Nod
 		}
 
 		visited.Add(uid)
-		for _, v := range g.From(u.Node) {
+		for _, v := range g.From(u.node) {
 			vid := v.ID()
 			if visited.Has(vid) {
 				continue
 			}
 			j := p.indexOf[vid]
 
-			g := u.gscore + weight(g.Edge(u.Node, v))
+			g := u.gscore + weight(g.Edge(u.node, v))
 			if n, ok := open.node(vid); !ok {
 				p.set(j, g, i)
-				heap.Push(open, aStarNode{Node: v, gscore: g, fscore: g + h(v, goal)})
+				heap.Push(open, aStarNode{node: v, gscore: g, fscore: g + h(v, goal)})
 			} else if g < n.gscore {
 				p.set(j, g, i)
 				open.update(vid, g, g+h(v, goal))
@@ -102,56 +102,57 @@ func NullHeuristic(_, _ graph.Node) float64 {
 }
 
 type aStarNode struct {
-	graph.Node
-	gscore, fscore float64
+	node   graph.Node
+	gscore float64
+	fscore float64
 }
 
 type aStarQueue struct {
-	indexList map[int]int
-	nodes     []aStarNode
+	indexOf map[int]int
+	nodes   []aStarNode
 }
 
-func (pq *aStarQueue) Less(i, j int) bool {
-	return pq.nodes[i].fscore < pq.nodes[j].fscore
+func (q *aStarQueue) Less(i, j int) bool {
+	return q.nodes[i].fscore < q.nodes[j].fscore
 }
 
-func (pq *aStarQueue) Swap(i, j int) {
-	pq.indexList[pq.nodes[i].ID()] = j
-	pq.indexList[pq.nodes[j].ID()] = i
-	pq.nodes[i], pq.nodes[j] = pq.nodes[j], pq.nodes[i]
+func (q *aStarQueue) Swap(i, j int) {
+	q.indexOf[q.nodes[i].node.ID()] = j
+	q.indexOf[q.nodes[j].node.ID()] = i
+	q.nodes[i], q.nodes[j] = q.nodes[j], q.nodes[i]
 }
 
-func (pq *aStarQueue) Len() int {
-	return len(pq.nodes)
+func (q *aStarQueue) Len() int {
+	return len(q.nodes)
 }
 
-func (pq *aStarQueue) Push(x interface{}) {
-	node := x.(aStarNode)
-	pq.nodes = append(pq.nodes, node)
-	pq.indexList[node.ID()] = len(pq.nodes) - 1
+func (q *aStarQueue) Push(x interface{}) {
+	n := x.(aStarNode)
+	q.nodes = append(q.nodes, n)
+	q.indexOf[n.node.ID()] = len(q.nodes) - 1
 }
 
-func (pq *aStarQueue) Pop() interface{} {
-	x := pq.nodes[len(pq.nodes)-1]
-	pq.nodes = pq.nodes[:len(pq.nodes)-1]
-	delete(pq.indexList, x.ID())
-	return x
+func (q *aStarQueue) Pop() interface{} {
+	n := q.nodes[len(q.nodes)-1]
+	q.nodes = q.nodes[:len(q.nodes)-1]
+	delete(q.indexOf, n.node.ID())
+	return n
 }
 
-func (pq *aStarQueue) update(id int, g, f float64) {
-	i, ok := pq.indexList[id]
+func (q *aStarQueue) update(id int, g, f float64) {
+	i, ok := q.indexOf[id]
 	if !ok {
 		return
 	}
-	pq.nodes[i].gscore = g
-	pq.nodes[i].fscore = f
-	heap.Fix(pq, i)
+	q.nodes[i].gscore = g
+	q.nodes[i].fscore = f
+	heap.Fix(q, i)
 }
 
-func (pq *aStarQueue) node(id int) (aStarNode, bool) {
-	loc, ok := pq.indexList[id]
+func (q *aStarQueue) node(id int) (aStarNode, bool) {
+	loc, ok := q.indexOf[id]
 	if ok {
-		return pq.nodes[loc], true
+		return q.nodes[loc], true
 	}
 	return aStarNode{}, false
 }

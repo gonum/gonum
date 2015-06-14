@@ -120,8 +120,8 @@ func (q *aStarQueue) Len() int {
 
 func (q *aStarQueue) Push(x interface{}) {
 	n := x.(aStarNode)
+	q.indexOf[n.node.ID()] = len(q.nodes)
 	q.nodes = append(q.nodes, n)
-	q.indexOf[n.node.ID()] = len(q.nodes) - 1
 }
 
 func (q *aStarQueue) Pop() interface{} {

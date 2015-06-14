@@ -16,194 +16,227 @@ import (
 	"github.com/gonum/graph/topo"
 )
 
-func TestSimpleAStar(t *testing.T) {
-	tg, err := internal.NewTileGraphFrom("" +
-		"▀  ▀\n" +
-		"▀▀ ▀\n" +
-		"▀▀ ▀\n" +
-		"▀▀ ▀",
-	)
-	if err != nil {
-		t.Fatalf("Couldn't generate tilegraph: %v", err)
-	}
+var aStarTests = []struct {
+	name string
+	g    graph.Graph
 
-	p, cost, _ := path.AStar(concrete.Node(1), concrete.Node(14), tg, nil)
-	if math.Abs(cost-4) > 1e-5 {
-		t.Errorf("A* reports incorrect cost for simple tilegraph search")
-	}
-
-	if p == nil {
-		t.Fatalf("A* fails to find path for for simple tilegraph search")
-	} else {
-		correctPath := []int{1, 2, 6, 10, 14}
-		if len(p) != len(correctPath) {
-			t.Fatalf("Astar returns wrong length path for simple tilegraph search")
-		}
-		for i, node := range p {
-			if node.ID() != correctPath[i] {
-				t.Errorf("Astar returns wrong path at step", i, "got:", node, "actual:", correctPath[i])
+	s, t      int
+	heuristic path.Heuristic
+	wantPath  []int
+}{
+	{
+		name: "simple path",
+		g: func() graph.Graph {
+			tg, err := internal.NewTileGraphFrom("" +
+				"▀  ▀\n" +
+				"▀▀ ▀\n" +
+				"▀▀ ▀\n" +
+				"▀▀ ▀",
+			)
+			if err != nil {
+				panic("bad test graph")
 			}
+			return tg
+		}(),
+
+		s: 1, t: 14,
+		wantPath: []int{1, 2, 6, 10, 14},
+	},
+	{
+		name: "small open graph",
+		g:    internal.NewTileGraph(3, 3, true),
+
+		s: 0, t: 8,
+	},
+	{
+		name: "large open graph",
+		g:    internal.NewTileGraph(1000, 1000, true),
+
+		s: 0, t: 999*1000 + 999,
+	},
+	{
+		name: "no path",
+		g: func() graph.Graph {
+			tg := internal.NewTileGraph(5, 5, true)
+
+			// Create a complete "wall" across the middle row.
+			tg.SetPassability(2, 0, false)
+			tg.SetPassability(2, 1, false)
+			tg.SetPassability(2, 2, false)
+			tg.SetPassability(2, 3, false)
+			tg.SetPassability(2, 4, false)
+
+			return tg
+		}(),
+
+		s: 2, t: 22,
+	},
+	{
+		name: "partially obstructed",
+		g: func() graph.Graph {
+			tg := internal.NewTileGraph(10, 10, true)
+
+			// Create a partial "wall" accross the middle
+			// row with a gap at the left-hand end.
+			tg.SetPassability(4, 1, false)
+			tg.SetPassability(4, 2, false)
+			tg.SetPassability(4, 3, false)
+			tg.SetPassability(4, 4, false)
+			tg.SetPassability(4, 5, false)
+			tg.SetPassability(4, 6, false)
+			tg.SetPassability(4, 7, false)
+			tg.SetPassability(4, 8, false)
+			tg.SetPassability(4, 9, false)
+
+			return tg
+		}(),
+
+		s: 5, t: 9*10 + 9,
+	},
+	{
+		name: "partially obstructed with heuristic",
+		g: func() graph.Graph {
+			tg := internal.NewTileGraph(10, 10, true)
+
+			// Create a partial "wall" accross the middle
+			// row with a gap at the left-hand end.
+			tg.SetPassability(4, 1, false)
+			tg.SetPassability(4, 2, false)
+			tg.SetPassability(4, 3, false)
+			tg.SetPassability(4, 4, false)
+			tg.SetPassability(4, 5, false)
+			tg.SetPassability(4, 6, false)
+			tg.SetPassability(4, 7, false)
+			tg.SetPassability(4, 8, false)
+			tg.SetPassability(4, 9, false)
+
+			return tg
+		}(),
+
+		s: 5, t: 9*10 + 9,
+		// Manhattan Heuristic
+		heuristic: func(u, v graph.Node) float64 {
+			uid := u.ID()
+			cu := (uid % 10)
+			ru := (uid - cu) / 10
+
+			vid := v.ID()
+			cv := (vid % 10)
+			rv := (vid - cv) / 10
+
+			return math.Abs(float64(ru-rv)) + math.Abs(float64(cu-cv))
+		},
+	},
+}
+
+func TestAStar(t *testing.T) {
+	for _, test := range aStarTests {
+		p, cost, _ := path.AStar(concrete.Node(test.s), concrete.Node(test.t), test.g, test.heuristic)
+
+		if !topo.IsPathIn(test.g, p) {
+			t.Error("got path that is not path in input graph for %q", test.name)
+		}
+
+		bfp, ok := path.BellmanFordFrom(concrete.Node(test.s), test.g)
+		if !ok {
+			t.Fatalf("unexpected negative cycle in %q", test.name)
+		}
+		if want := bfp.WeightTo(concrete.Node(test.t)); cost != want {
+			t.Errorf("unexpected cost for %q: got:%v want:%v", test.name, cost, want)
+		}
+
+		var got = make([]int, 0, len(p))
+		for _, n := range p {
+			got = append(got, n.ID())
+		}
+		if test.wantPath != nil && !reflect.DeepEqual(got, test.wantPath) {
+			t.Errorf("unexpected result for %q:\ngot: %v\nwant:%v", test.name, got, test.wantPath)
 		}
 	}
 }
 
-func TestBiggerAStar(t *testing.T) {
-	tg := internal.NewTileGraph(3, 3, true)
-
-	p, cost, _ := path.AStar(concrete.Node(0), concrete.Node(8), tg, nil)
-
-	if math.Abs(cost-4) > 1e-5 || !topo.IsPathIn(tg, p) {
-		t.Error("Non-optimal or impossible path found for 3x3 grid")
+func TestExhaustiveAStar(t *testing.T) {
+	g := concrete.NewGraph()
+	nodes := []locatedNode{
+		1: {id: 1, x: 0, y: 6},
+		2: {id: 2, x: 1, y: 0},
+		3: {id: 3, x: 8, y: 7},
+		4: {id: 4, x: 16, y: 0},
+		5: {id: 5, x: 17, y: 6},
+		6: {id: 6, x: 9, y: 8},
+	}
+	for _, n := range nodes[1:] {
+		g.AddNode(n)
 	}
 
-	tg = internal.NewTileGraph(1000, 1000, true)
-	p, cost, _ = path.AStar(concrete.Node(0), concrete.Node(999*1000+999), tg, nil)
-	if !topo.IsPathIn(tg, p) || cost != 1998 {
-		t.Error("Non-optimal or impossible path found for 100x100 grid; cost:", cost, "path:\n"+tg.PathString(p))
+	edges := []weightedEdge{
+		{from: nodes[1], to: nodes[2], cost: 7},
+		{from: nodes[1], to: nodes[3], cost: 9},
+		{from: nodes[1], to: nodes[6], cost: 14},
+		{from: nodes[2], to: nodes[3], cost: 10},
+		{from: nodes[2], to: nodes[4], cost: 15},
+		{from: nodes[3], to: nodes[4], cost: 11},
+		{from: nodes[3], to: nodes[6], cost: 2},
+		{from: nodes[4], to: nodes[5], cost: 7},
+		{from: nodes[5], to: nodes[6], cost: 9},
 	}
-}
-
-func TestObstructedAStar(t *testing.T) {
-	tg := internal.NewTileGraph(10, 10, true)
-
-	// Creates a partial "wall" down the middle row with a gap down the left side
-	tg.SetPassability(4, 1, false)
-	tg.SetPassability(4, 2, false)
-	tg.SetPassability(4, 3, false)
-	tg.SetPassability(4, 4, false)
-	tg.SetPassability(4, 5, false)
-	tg.SetPassability(4, 6, false)
-	tg.SetPassability(4, 7, false)
-	tg.SetPassability(4, 8, false)
-	tg.SetPassability(4, 9, false)
-
-	rows, cols := tg.Dimensions()
-	p, cost1, expanded := path.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, nil)
-
-	if !topo.IsPathIn(tg, p) {
-		t.Error("Path doesn't exist in obstructed graph")
+	for _, e := range edges {
+		g.SetEdge(e, e.cost)
 	}
 
-	ManhattanHeuristic := func(n1, n2 graph.Node) float64 {
-		id1, id2 := n1.ID(), n2.ID()
-		r1, c1 := tg.IDToCoords(id1)
-		r2, c2 := tg.IDToCoords(id2)
-
-		return math.Abs(float64(r1)-float64(r2)) + math.Abs(float64(c1)-float64(c2))
+	heuristic := func(u, v graph.Node) float64 {
+		lu := u.(locatedNode)
+		lv := v.(locatedNode)
+		return math.Hypot(lu.x-lv.x, lu.y-lv.y)
 	}
 
-	p, cost2, expanded2 := path.AStar(concrete.Node(5), tg.CoordsToNode(rows-1, cols-1), tg, ManhattanHeuristic)
-	if !topo.IsPathIn(tg, p) {
-		t.Error("Path doesn't exist when using heuristic on obstructed graph")
-	}
-
-	if math.Abs(cost1-cost2) > 1e-5 {
-		t.Error("Cost when using admissible heuristic isn't approximately equal to cost without it")
-	}
-
-	if expanded2 > expanded {
-		t.Error("Using admissible, consistent heuristic expanded more nodes than null heuristic (possible, but unlikely -- suggests an error somewhere)")
-	}
-
-}
-
-func TestNoPathAStar(t *testing.T) {
-	tg := internal.NewTileGraph(5, 5, true)
-
-	// Creates a "wall" down the middle row
-	tg.SetPassability(2, 0, false)
-	tg.SetPassability(2, 1, false)
-	tg.SetPassability(2, 2, false)
-	tg.SetPassability(2, 3, false)
-	tg.SetPassability(2, 4, false)
-
-	rows, _ := tg.Dimensions()
-	path, _, _ := path.AStar(tg.CoordsToNode(0, 2), tg.CoordsToNode(rows-1, 2), tg, nil)
-
-	if len(path) > 0 { // Note that a nil slice will return len of 0, this won't panic
-		t.Error("A* finds path where none exists")
-	}
-}
-
-func TestSmallAStar(t *testing.T) {
-	g := newSmallGonumGraph()
-	heur := newSmallHeuristic()
-	if ok, edge, goal := monotonic(g, heur); !ok {
-		t.Fatalf("non-monotonic heuristic.  edge: %v goal: %v", edge, goal)
+	if ok, edge, goal := isMonotonic(g, heuristic); !ok {
+		t.Fatalf("non-monotonic heuristic at edge:%v for goal:%v", edge, goal)
 	}
 
 	ps := path.DijkstraAllPaths(g)
 	for _, start := range g.Nodes() {
 		for _, goal := range g.Nodes() {
-			gotPath, gotWeight, _ := path.AStar(start, goal, g, heur)
+			gotPath, gotWeight, _ := path.AStar(start, goal, g, heuristic)
 			wantPath, wantWeight, _ := ps.Between(start, goal)
 			if gotWeight != wantWeight {
-				t.Errorf("unexpected A* path weight from %v to %v result: got:%s want:%s",
+				t.Errorf("unexpected path weight from %v to %v result: got:%s want:%s",
 					start, goal, gotWeight, wantWeight)
 			}
 			if !reflect.DeepEqual(gotPath, wantPath) {
-				t.Errorf("unexpected A* path from %v to %v result:\ngot: %v\nwant:%v",
+				t.Errorf("unexpected path from %v to %v result:\ngot: %v\nwant:%v",
 					start, goal, gotPath, wantPath)
 			}
 		}
 	}
 }
 
-func newSmallGonumGraph() *concrete.Graph {
-	eds := []struct{ n1, n2, edgeCost int }{
-		{1, 2, 7},
-		{1, 3, 9},
-		{1, 6, 14},
-		{2, 3, 10},
-		{2, 4, 15},
-		{3, 4, 11},
-		{3, 6, 2},
-		{4, 5, 7},
-		{5, 6, 9},
-	}
-	g := concrete.NewGraph()
-	for n := concrete.Node(1); n <= 6; n++ {
-		g.AddNode(n)
-	}
-	for _, ed := range eds {
-		e := concrete.Edge{
-			concrete.Node(ed.n1),
-			concrete.Node(ed.n2),
-		}
-		g.SetEdge(e, float64(ed.edgeCost))
-	}
-	return g
+type locatedNode struct {
+	id   int
+	x, y float64
 }
 
-func newSmallHeuristic() func(n1, n2 graph.Node) float64 {
-	nds := []struct{ id, x, y int }{
-		{1, 0, 6},
-		{2, 1, 0},
-		{3, 8, 7},
-		{4, 16, 0},
-		{5, 17, 6},
-		{6, 9, 8},
-	}
-	return func(n1, n2 graph.Node) float64 {
-		i1 := n1.ID() - 1
-		i2 := n2.ID() - 1
-		dx := nds[i2].x - nds[i1].x
-		dy := nds[i2].y - nds[i1].y
-		return math.Hypot(float64(dx), float64(dy))
-	}
+func (n locatedNode) ID() int { return n.id }
+
+type weightedEdge struct {
+	from, to locatedNode
+	cost     float64
 }
+
+func (e weightedEdge) From() graph.Node { return e.from }
+func (e weightedEdge) To() graph.Node   { return e.to }
 
 type costEdgeListGraph interface {
 	graph.Weighter
 	path.EdgeListerGraph
 }
 
-func monotonic(g costEdgeListGraph, heur func(n1, n2 graph.Node) float64) (bool, graph.Edge, graph.Node) {
+func isMonotonic(g costEdgeListGraph, h path.Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
 	for _, goal := range g.Nodes() {
 		for _, edge := range g.Edges() {
 			from := edge.From()
 			to := edge.To()
-			if heur(from, goal) > g.Weight(edge)+heur(to, goal) {
+			if h(from, goal) > g.Weight(edge)+h(to, goal) {
 				return false, edge, goal
 			}
 		}

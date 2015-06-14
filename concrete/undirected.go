@@ -195,6 +195,10 @@ func (g *Graph) EdgeBetween(u, v graph.Node) graph.Edge {
 	return g.neighbors[u.ID()][v.ID()].Edge
 }
 
+func (g *Graph) Node(id int) graph.Node {
+	return g.nodeMap[id]
+}
+
 func (g *Graph) Has(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 

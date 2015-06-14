@@ -211,6 +211,10 @@ func (g *DirectedGraph) To(n graph.Node) []graph.Node {
 	return predecessors
 }
 
+func (g *DirectedGraph) Node(id int) graph.Node {
+	return g.nodeMap[id]
+}
+
 func (g *DirectedGraph) Has(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 

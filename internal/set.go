@@ -73,8 +73,8 @@ func (s Set) Has(n graph.Node) bool {
 }
 
 // Clear returns an empty set, possibly using the same backing store.
-// clear is not provided as a method since there is no way to replace
-// the calling value if clearing is performed by a make(set). clear
+// Clear is not provided as a method since there is no way to replace
+// the calling value if clearing is performed by a make(set). Clear
 // should never be called without keeping the returned value.
 func Clear(s Set) Set {
 	if len(s) == 0 {

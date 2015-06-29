@@ -35,8 +35,9 @@ type Graph interface {
 	// nodes x and y without considering direction.
 	HasEdge(x, y Node) bool
 
-	// Edge returns the edge between nodes u and v when
-	// the nodes returned by From(u) include v.
+	// Edge returns the edge from u to v if such an edge
+	// exists and nil otherwise. The node v must be directly
+	// reachable from u as defined by the From method.
 	Edge(u, v Node) Edge
 }
 

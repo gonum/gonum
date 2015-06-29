@@ -17,8 +17,9 @@ type DirectedDenseGraph struct {
 }
 
 // NewDirectedDenseGraph creates a directed dense graph with n nodes.
-// If passable is true all nodes will have an edge with unit cost, otherwise
-// every node will start unconnected with the cost specified by absent.
+// If passable is true all pairs of nodes will be connected by an edge
+// with unit cost, otherwise every node will start unconnected with
+// the cost specified by absent.
 func NewDirectedDenseGraph(n int, passable bool, absent float64) *DirectedDenseGraph {
 	mat := make([]float64, n*n)
 	v := 1.

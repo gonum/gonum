@@ -1,3 +1,7 @@
+// Copyright ©2015 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package testlapack
 
 import (
@@ -31,6 +35,17 @@ func Dpotf2Test(t *testing.T, impl Dpotf2er) {
 				{0, 3.387958215439679, -1.976308959006481, -1.026654004678691},
 				{0, 0, 3.582364210034111, 2.419258947036024},
 				{0, 0, 0, 3.401680257083044},
+			},
+		},
+		{
+			a: [][]float64{
+				{8, 2},
+				{2, 4},
+			},
+			pos: true,
+			U: [][]float64{
+				{2.82842712474619, 0.707106781186547},
+				{0, 1.870828693386971},
 			},
 		},
 	} {

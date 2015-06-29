@@ -20,10 +20,10 @@ type HeuristicCoster interface {
 	HeuristicCost(x, y graph.Node) float64
 }
 
-// AStar returns the A*-shortest path from s to t in g using the heuristic h, and the
-// cost of that path. The path and cost is held in a Shortest along with paths and costs
-// to all nodes explored during the search. The number of expanded nodes is also returned.
-// This value may help with heuristic tuning.
+// AStar finds the A*-shortest path from s to t in g using the heuristic h. The path and
+// its cost are returned in a Shortest along with paths and costs to all nodes explored
+// during the search. The number of expanded nodes is also returned. This value may help
+// with heuristic tuning.
 //
 // The path will be the shortest path if the heuristic is admissible. A heuristic is
 // admissible if for any node, n, in the graph, the heuristic estimate of the cost of

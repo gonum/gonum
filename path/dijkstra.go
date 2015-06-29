@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search
+package path
 
 import (
 	"container/heap"
@@ -11,34 +11,22 @@ import (
 )
 
 // DijkstraFrom returns a shortest-path tree for a shortest path from u to all nodes in
-// the graph g. If weight is nil and the graph does not implement graph.Coster, UniformCost
-// is used. DijkstraFrom will panic if g has a u-reachable negative edge weight.
+// the graph g. If the graph does not implement graph.Weighter, graph.UniformCost is used.
+// DijkstraFrom will panic if g has a u-reachable negative edge weight.
 //
 // The time complexity of DijkstrFrom is O(|E|+|V|.log|V|).
-func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
-	if !g.NodeExists(u) {
+func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
+	if !g.Has(u) {
 		return Shortest{from: u}
 	}
-	var (
-		from   = g.Neighbors
-		edgeTo func(graph.Node, graph.Node) graph.Edge
-	)
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		from = g.Successors
-		edgeTo = g.EdgeTo
-	default:
-		edgeTo = g.EdgeBetween
-	}
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+	var weight graph.WeightFunc
+	if g, ok := g.(graph.Weighter); ok {
+		weight = g.Weight
+	} else {
+		weight = graph.UniformCost
 	}
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	path := newShortestFrom(u, nodes)
 
 	// Dijkstra's algorithm here is implemented essentially as
@@ -53,9 +41,9 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 		if mid.dist < path.dist[k] {
 			path.dist[k] = mid.dist
 		}
-		for _, v := range from(mid.node) {
+		for _, v := range g.From(mid.node) {
 			j := path.indexOf[v.ID()]
-			w := weight(edgeTo(mid.node, v))
+			w := weight(g.Edge(mid.node, v))
 			if w < 0 {
 				panic("dijkstra: negative edge weight")
 			}
@@ -71,13 +59,13 @@ func DijkstraFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) Shortest {
 }
 
 // DijkstraAllPaths returns a shortest-path tree for shortest paths in the graph g.
-// If weight is nil and the graph does not implement graph.Coster, UniformCost is used.
+// If the graph does not implement graph.Weighter, graph.UniformCost is used.
 // DijkstraAllPaths will panic if g has a negative edge weight.
 //
 // The time complexity of DijkstrAllPaths is O(|V|.|E|+|V|^2.log|V|).
-func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) {
-	paths = newAllShortest(g.NodeList(), false)
-	dijkstraAllPaths(g, weight, paths)
+func DijkstraAllPaths(g graph.Graph) (paths AllShortest) {
+	paths = newAllShortest(g.Nodes(), false)
+	dijkstraAllPaths(g, paths)
 	return paths
 }
 
@@ -85,24 +73,12 @@ func DijkstraAllPaths(g graph.Graph, weight graph.CostFunc) (paths AllShortest) 
 // between DijkstraAllPaths and JohnsonAllPaths to avoid repeated allocation
 // of the nodes slice and the indexOf map. It returns nothing, but stores the
 // result of the work in the paths parameter which is a reference type.
-func dijkstraAllPaths(g graph.Graph, weight graph.CostFunc, paths AllShortest) {
-	var (
-		from   = g.Neighbors
-		edgeTo func(graph.Node, graph.Node) graph.Edge
-	)
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		from = g.Successors
-		edgeTo = g.EdgeTo
-	default:
-		edgeTo = g.EdgeBetween
-	}
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
+	var weight graph.WeightFunc
+	if g, ok := g.(graph.Weighter); ok {
+		weight = g.Weight
+	} else {
+		weight = graph.UniformCost
 	}
 
 	var Q priorityQueue
@@ -122,9 +98,9 @@ func dijkstraAllPaths(g graph.Graph, weight graph.CostFunc, paths AllShortest) {
 			if mid.dist < paths.dist.At(i, k) {
 				paths.dist.Set(i, k, mid.dist)
 			}
-			for _, v := range from(mid.node) {
+			for _, v := range g.From(mid.node) {
 				j := paths.indexOf[v.ID()]
-				w := weight(edgeTo(mid.node, v))
+				w := weight(g.Edge(mid.node, v))
 				if w < 0 {
 					panic("dijkstra: negative edge weight")
 				}

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package path_test
 
 import (
 	"math"
@@ -12,25 +12,18 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 func TestDijkstraFrom(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
-			switch g := g.(type) {
-			case graph.MutableDirectedGraph:
-				g.AddDirectedEdge(e, e.Cost)
-			case graph.MutableGraph:
-				g.AddUndirectedEdge(e, e.Cost)
-			default:
-				panic("dijkstra: bad graph type")
-			}
+			g.SetEdge(e, e.Cost)
 		}
 
 		var (
-			pt search.Shortest
+			pt path.Shortest
 
 			panicked bool
 		)
@@ -38,7 +31,7 @@ func TestDijkstraFrom(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt = search.DijkstraFrom(test.query.From(), g.(graph.Graph), nil)
+			pt = path.DijkstraFrom(test.query.From(), g.(graph.Graph))
 		}()
 		if panicked || test.negative {
 			if !test.negative {
@@ -92,18 +85,11 @@ func TestDijkstraAllPaths(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
-			switch g := g.(type) {
-			case graph.MutableDirectedGraph:
-				g.AddDirectedEdge(e, e.Cost)
-			case graph.MutableGraph:
-				g.AddUndirectedEdge(e, e.Cost)
-			default:
-				panic("dijkstra: bad graph type")
-			}
+			g.SetEdge(e, e.Cost)
 		}
 
 		var (
-			pt search.AllShortest
+			pt path.AllShortest
 
 			panicked bool
 		)
@@ -111,7 +97,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt = search.DijkstraAllPaths(g.(graph.Graph), nil)
+			pt = path.DijkstraAllPaths(g.(graph.Graph))
 		}()
 		if panicked || test.negative {
 			if !test.negative {

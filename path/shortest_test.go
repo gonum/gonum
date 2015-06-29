@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package path_test
 
 import (
 	"fmt"
@@ -317,7 +317,8 @@ var shortestPathTests = []struct {
 			{concrete.Edge{concrete.Node(1), concrete.Node(5)}, 0},
 			{concrete.Edge{concrete.Node(5), concrete.Node(1)}, 0},
 			// With its own zero-weight cycle.
-			{concrete.Edge{concrete.Node(5), concrete.Node(5)}, 0},
+			{concrete.Edge{concrete.Node(5), concrete.Node(6)}, 0},
+			{concrete.Edge{concrete.Node(6), concrete.Node(5)}, 0},
 		},
 
 		query:  concrete.Edge{concrete.Node(0), concrete.Node(4)},
@@ -343,7 +344,8 @@ var shortestPathTests = []struct {
 			{concrete.Edge{concrete.Node(1), concrete.Node(5)}, 0},
 			{concrete.Edge{concrete.Node(5), concrete.Node(1)}, 0},
 			// With its own zero-weight cycle.
-			{concrete.Edge{concrete.Node(5), concrete.Node(5)}, 0},
+			{concrete.Edge{concrete.Node(5), concrete.Node(6)}, 0},
+			{concrete.Edge{concrete.Node(6), concrete.Node(5)}, 0},
 			// But leading to the target.
 			{concrete.Edge{concrete.Node(5), concrete.Node(4)}, 3},
 		},
@@ -375,7 +377,8 @@ var shortestPathTests = []struct {
 			{concrete.Edge{concrete.Node(5), concrete.Node(6)}, 0},
 			{concrete.Edge{concrete.Node(6), concrete.Node(5)}, 0},
 			// With its own zero-weight cycle.
-			{concrete.Edge{concrete.Node(6), concrete.Node(6)}, 0},
+			{concrete.Edge{concrete.Node(6), concrete.Node(7)}, 0},
+			{concrete.Edge{concrete.Node(7), concrete.Node(6)}, 0},
 		},
 
 		query:  concrete.Edge{concrete.Node(0), concrete.Node(4)},

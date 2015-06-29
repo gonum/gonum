@@ -17,7 +17,7 @@ import (
 // using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func PageRank(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
+func PageRank(g graph.Directed, damp, tol float64) map[int]float64 {
 	// PageRank is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack".
 	//
@@ -25,7 +25,7 @@ func PageRank(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	indexOf := make(map[int]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -34,7 +34,7 @@ func PageRank(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
 	m := mat64.NewDense(len(nodes), len(nodes), nil)
 	dangling := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.Successors(u)
+		to := g.From(u)
 		f := damp / float64(len(to))
 		for _, v := range to {
 			m.Set(indexOf[v.ID()], j, f)
@@ -90,7 +90,7 @@ func PageRank(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
 // graph g using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func PageRankSparse(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
+func PageRankSparse(g graph.Directed, damp, tol float64) map[int]float64 {
 	// PageRankSparse is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack".
 	//
@@ -98,7 +98,7 @@ func PageRankSparse(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	indexOf := make(map[int]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -108,7 +108,7 @@ func PageRankSparse(g graph.DirectedGraph, damp, tol float64) map[int]float64 {
 	var dangling compressedRow
 	df := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.Successors(u)
+		to := g.From(u)
 		f := damp / float64(len(to))
 		for _, v := range to {
 			m.addTo(indexOf[v.ID()], j, f)

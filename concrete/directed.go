@@ -34,17 +34,15 @@ func NewDirectedGraph() *DirectedGraph {
 	}
 }
 
-/* Mutable Graph implementation */
-
-func (g *DirectedGraph) NewNode() graph.Node {
+func (g *DirectedGraph) NewNodeID() int {
 	if g.maxID != maxInt {
 		g.maxID++
-		return Node(g.maxID)
+		return g.maxID
 	}
 
 	// Implicitly checks if len(g.freeMap) == 0
 	for id := range g.freeMap {
-		return Node(id)
+		return id
 	}
 
 	// I cannot foresee this ever happening, but just in case
@@ -54,7 +52,7 @@ func (g *DirectedGraph) NewNode() graph.Node {
 
 	for i := 0; i < maxInt; i++ {
 		if _, ok := g.nodeMap[i]; !ok {
-			return Node(i)
+			return i
 		}
 	}
 
@@ -76,18 +74,28 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.maxID = max(g.maxID, n.ID())
 }
 
-func (g *DirectedGraph) AddDirectedEdge(e graph.Edge, cost float64) {
-	from, to := e.From(), e.To()
-	if !g.NodeExists(from) {
+func (g *DirectedGraph) SetEdge(e graph.Edge, cost float64) {
+	var (
+		from = e.From()
+		fid  = from.ID()
+		to   = e.To()
+		tid  = to.ID()
+	)
+
+	if fid == tid {
+		panic("concrete: adding self edge")
+	}
+
+	if !g.Has(from) {
 		g.AddNode(from)
 	}
 
-	if !g.NodeExists(to) {
+	if !g.Has(to) {
 		g.AddNode(to)
 	}
 
-	g.successors[from.ID()][to.ID()] = WeightedEdge{Edge: e, Cost: cost}
-	g.predecessors[to.ID()][from.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.successors[fid][tid] = WeightedEdge{Edge: e, Cost: cost}
+	g.predecessors[tid][fid] = WeightedEdge{Edge: e, Cost: cost}
 }
 
 func (g *DirectedGraph) RemoveNode(n graph.Node) {
@@ -110,7 +118,7 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	g.freeMap[n.ID()] = struct{}{}
 }
 
-func (g *DirectedGraph) RemoveDirectedEdge(e graph.Edge) {
+func (g *DirectedGraph) RemoveEdge(e graph.Edge) {
 	from, to := e.From(), e.To()
 	if _, ok := g.nodeMap[from.ID()]; !ok {
 		return
@@ -130,7 +138,7 @@ func (g *DirectedGraph) EmptyGraph() {
 
 /* Graph implementation */
 
-func (g *DirectedGraph) Successors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) From(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
@@ -145,21 +153,50 @@ func (g *DirectedGraph) Successors(n graph.Node) []graph.Node {
 	return successors
 }
 
-func (g *DirectedGraph) EdgeTo(n, succ graph.Node) graph.Edge {
-	if _, ok := g.nodeMap[n.ID()]; !ok {
-		return nil
-	} else if _, ok := g.nodeMap[succ.ID()]; !ok {
+func (g *DirectedGraph) HasEdge(x, y graph.Node) bool {
+	xid := x.ID()
+	yid := y.ID()
+	if _, ok := g.nodeMap[xid]; !ok {
+		return false
+	}
+	if _, ok := g.nodeMap[yid]; !ok {
+		return false
+	}
+	if _, ok := g.successors[xid][yid]; ok {
+		return true
+	}
+	_, ok := g.successors[yid][xid]
+	return ok
+}
+
+func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
+	if _, ok := g.nodeMap[u.ID()]; !ok {
 		return nil
 	}
-
-	edge, ok := g.successors[n.ID()][succ.ID()]
+	if _, ok := g.nodeMap[v.ID()]; !ok {
+		return nil
+	}
+	edge, ok := g.successors[u.ID()][v.ID()]
 	if !ok {
 		return nil
 	}
 	return edge.Edge
 }
 
-func (g *DirectedGraph) Predecessors(n graph.Node) []graph.Node {
+func (g *DirectedGraph) HasEdgeFromTo(u, v graph.Node) bool {
+	if _, ok := g.nodeMap[u.ID()]; !ok {
+		return false
+	}
+	if _, ok := g.nodeMap[v.ID()]; !ok {
+		return false
+	}
+	if _, ok := g.successors[u.ID()][v.ID()]; !ok {
+		return false
+	}
+	return true
+}
+
+func (g *DirectedGraph) To(n graph.Node) []graph.Node {
 	if _, ok := g.successors[n.ID()]; !ok {
 		return nil
 	}
@@ -174,47 +211,11 @@ func (g *DirectedGraph) Predecessors(n graph.Node) []graph.Node {
 	return predecessors
 }
 
-func (g *DirectedGraph) Neighbors(n graph.Node) []graph.Node {
-	if _, ok := g.successors[n.ID()]; !ok {
-		return nil
-	}
-
-	neighbors := make([]graph.Node, len(g.predecessors[n.ID()])+len(g.successors[n.ID()]))
-	i := 0
-	for succ := range g.successors[n.ID()] {
-		neighbors[i] = g.nodeMap[succ]
-		i++
-	}
-
-	for pred := range g.predecessors[n.ID()] {
-		// We should only add the predecessor if it wasn't already added from successors
-		if _, ok := g.successors[n.ID()][pred]; !ok {
-			neighbors[i] = g.nodeMap[pred]
-			i++
-		}
-	}
-
-	// Otherwise we overcount for self loops
-	neighbors = neighbors[:i]
-
-	return neighbors
+func (g *DirectedGraph) Node(id int) graph.Node {
+	return g.nodeMap[id]
 }
 
-func (g *DirectedGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
-	e := g.EdgeTo(n, neigh)
-	if e != nil {
-		return e
-	}
-
-	e = g.EdgeTo(neigh, n)
-	if e != nil {
-		return e
-	}
-
-	return nil
-}
-
-func (g *DirectedGraph) NodeExists(n graph.Node) bool {
+func (g *DirectedGraph) Has(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 
 	return ok
@@ -228,7 +229,7 @@ func (g *DirectedGraph) Degree(n graph.Node) int {
 	return len(g.successors[n.ID()]) + len(g.predecessors[n.ID()])
 }
 
-func (g *DirectedGraph) NodeList() []graph.Node {
+func (g *DirectedGraph) Nodes() []graph.Node {
 	nodes := make([]graph.Node, len(g.successors))
 	i := 0
 	for _, n := range g.nodeMap {
@@ -239,7 +240,7 @@ func (g *DirectedGraph) NodeList() []graph.Node {
 	return nodes
 }
 
-func (g *DirectedGraph) Cost(e graph.Edge) float64 {
+func (g *DirectedGraph) Weight(e graph.Edge) float64 {
 	if s, ok := g.successors[e.From().ID()]; ok {
 		if we, ok := s[e.To().ID()]; ok {
 			return we.Cost
@@ -248,7 +249,7 @@ func (g *DirectedGraph) Cost(e graph.Edge) float64 {
 	return inf
 }
 
-func (g *DirectedGraph) EdgeList() []graph.Edge {
+func (g *DirectedGraph) Edges() []graph.Edge {
 	edgeList := make([]graph.Edge, 0, len(g.successors))
 	edgeMap := make(map[int]map[int]struct{}, len(g.successors))
 	for n, succMap := range g.successors {

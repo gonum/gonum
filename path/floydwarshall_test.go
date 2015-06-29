@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search_test
+package path_test
 
 import (
 	"math"
@@ -12,24 +12,17 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 func TestFloydWarshall(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
-			switch g := g.(type) {
-			case graph.MutableDirectedGraph:
-				g.AddDirectedEdge(e, e.Cost)
-			case graph.MutableGraph:
-				g.AddUndirectedEdge(e, e.Cost)
-			default:
-				panic("floyd warshall: bad graph type")
-			}
+			g.SetEdge(e, e.Cost)
 		}
 
-		pt, ok := search.FloydWarshall(g.(graph.Graph), nil)
+		pt, ok := path.FloydWarshall(g.(graph.Graph))
 		if test.hasNegativeCycle {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.name)

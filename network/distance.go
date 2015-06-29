@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 // Closeness returns the closeness centrality for nodes in the graph g used to
@@ -18,8 +18,8 @@ import (
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Closeness(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+func Closeness(g graph.Graph, p path.AllShortest) map[int]float64 {
+	nodes := g.Nodes()
 	c := make(map[int]float64, len(nodes))
 	for _, u := range nodes {
 		var sum float64
@@ -45,8 +45,8 @@ func Closeness(g graph.Graph, p search.AllShortest) map[int]float64 {
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Farness(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+func Farness(g graph.Graph, p path.AllShortest) map[int]float64 {
+	nodes := g.Nodes()
 	f := make(map[int]float64, len(nodes))
 	for _, u := range nodes {
 		var sum float64
@@ -72,8 +72,8 @@ func Farness(g graph.Graph, p search.AllShortest) map[int]float64 {
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Harmonic(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+func Harmonic(g graph.Graph, p path.AllShortest) map[int]float64 {
+	nodes := g.Nodes()
 	h := make(map[int]float64, len(nodes))
 	for i, u := range nodes {
 		var sum float64
@@ -101,8 +101,8 @@ func Harmonic(g graph.Graph, p search.AllShortest) map[int]float64 {
 //
 // For directed graphs the incoming paths are used. Infinite distances are
 // not considered.
-func Residual(g graph.Graph, p search.AllShortest) map[int]float64 {
-	nodes := g.NodeList()
+func Residual(g graph.Graph, p path.AllShortest) map[int]float64 {
+	nodes := g.Nodes()
 	r := make(map[int]float64, len(nodes))
 	for i, u := range nodes {
 		var sum float64

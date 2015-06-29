@@ -2,39 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search
+package path
 
 import "github.com/gonum/graph"
 
 // BellmanFordFrom returns a shortest-path tree for a shortest path from u to all nodes in
-// the graph g, or false indicating that a negative cycle exists in the graph. If weight
-// is nil and the graph does not implement graph.Coster, UniformCost is used.
+// the graph g, or false indicating that a negative cycle exists in the graph. If the graph
+// does not implement graph.Weighter, graph.UniformCost is used.
 //
 // The time complexity of BellmanFordFrom is O(|V|.|E|).
-func BellmanFordFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) (path Shortest, ok bool) {
-	if !g.NodeExists(u) {
+func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
+	if !g.Has(u) {
 		return Shortest{from: u}, true
 	}
-	var (
-		from   = g.Neighbors
-		edgeTo func(graph.Node, graph.Node) graph.Edge
-	)
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		from = g.Successors
-		edgeTo = g.EdgeTo
-	default:
-		edgeTo = g.EdgeBetween
-	}
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+	var weight graph.WeightFunc
+	if g, ok := g.(graph.Weighter); ok {
+		weight = g.Weight
+	} else {
+		weight = graph.UniformCost
 	}
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 
 	path = newShortestFrom(u, nodes)
 	path.dist[path.indexOf[u.ID()]] = 0
@@ -44,9 +32,9 @@ func BellmanFordFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) (path S
 	for i := 1; i < len(nodes); i++ {
 		changed := false
 		for j, u := range nodes {
-			for _, v := range from(u) {
+			for _, v := range g.From(u) {
 				k := path.indexOf[v.ID()]
-				joint := path.dist[j] + weight(edgeTo(u, v))
+				joint := path.dist[j] + weight(g.Edge(u, v))
 				if joint < path.dist[k] {
 					path.set(k, joint, j)
 					changed = true
@@ -59,9 +47,9 @@ func BellmanFordFrom(u graph.Node, g graph.Graph, weight graph.CostFunc) (path S
 	}
 
 	for j, u := range nodes {
-		for _, v := range from(u) {
+		for _, v := range g.From(u) {
 			k := path.indexOf[v.ID()]
-			if path.dist[j]+weight(edgeTo(u, v)) < path.dist[k] {
+			if path.dist[j]+weight(g.Edge(u, v)) < path.dist[k] {
 				return path, false
 			}
 		}

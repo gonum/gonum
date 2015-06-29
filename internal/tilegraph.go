@@ -171,9 +171,9 @@ func (g *TileGraph) CoordsToNode(row, col int) graph.Node {
 	return concrete.Node(id)
 }
 
-func (g *TileGraph) Neighbors(n graph.Node) []graph.Node {
+func (g *TileGraph) From(n graph.Node) []graph.Node {
 	id := n.ID()
-	if !g.NodeExists(n) {
+	if !g.Has(n) {
 		return nil
 	}
 
@@ -190,37 +190,50 @@ func (g *TileGraph) Neighbors(n graph.Node) []graph.Node {
 	return realNeighbors
 }
 
-func (g *TileGraph) EdgeBetween(n, neigh graph.Node) graph.Edge {
-	if !g.NodeExists(n) || !g.NodeExists(neigh) {
+func (g *TileGraph) HasEdge(u, v graph.Node) bool {
+	if !g.Has(u) || !g.Has(v) {
+		return false
+	}
+	r1, c1 := g.IDToCoords(u.ID())
+	r2, c2 := g.IDToCoords(v.ID())
+	return (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1))
+}
+
+func (g *TileGraph) Edge(u, v graph.Node) graph.Edge {
+	return g.EdgeBetween(u, v)
+}
+
+func (g *TileGraph) EdgeBetween(u, v graph.Node) graph.Edge {
+	if !g.Has(u) || !g.Has(v) {
 		return nil
 	}
 
-	r1, c1 := g.IDToCoords(n.ID())
-	r2, c2 := g.IDToCoords(neigh.ID())
+	r1, c1 := g.IDToCoords(u.ID())
+	r2, c2 := g.IDToCoords(v.ID())
 	if (c1 == c2 && (r2 == r1+1 || r2 == r1-1)) || (r1 == r2 && (c2 == c1+1 || c2 == c1-1)) {
-		return concrete.Edge{n, neigh}
+		return concrete.Edge{u, v}
 	}
 
 	return nil
 }
 
-func (g *TileGraph) NodeExists(n graph.Node) bool {
+func (g *TileGraph) Has(n graph.Node) bool {
 	id := n.ID()
 	return id >= 0 && id < len(g.tiles) && g.tiles[id] == true
 }
 
 func (g *TileGraph) Degree(n graph.Node) int {
-	return len(g.Neighbors(n)) * 2
+	return len(g.From(n)) * 2
 }
 
-func (g *TileGraph) EdgeList() []graph.Edge {
+func (g *TileGraph) Edges() []graph.Edge {
 	edges := make([]graph.Edge, 0)
 	for id, passable := range g.tiles {
 		if !passable {
 			continue
 		}
 
-		for _, succ := range g.Neighbors(concrete.Node(id)) {
+		for _, succ := range g.From(concrete.Node(id)) {
 			edges = append(edges, concrete.Edge{concrete.Node(id), succ})
 		}
 	}
@@ -228,7 +241,7 @@ func (g *TileGraph) EdgeList() []graph.Edge {
 	return edges
 }
 
-func (g *TileGraph) NodeList() []graph.Node {
+func (g *TileGraph) Nodes() []graph.Node {
 	nodes := make([]graph.Node, 0)
 	for id, passable := range g.tiles {
 		if !passable {
@@ -241,7 +254,7 @@ func (g *TileGraph) NodeList() []graph.Node {
 	return nodes
 }
 
-func (g *TileGraph) Cost(e graph.Edge) float64 {
+func (g *TileGraph) Weight(e graph.Edge) float64 {
 	if edge := g.EdgeBetween(e.From(), e.To()); edge != nil {
 		return 1
 	}

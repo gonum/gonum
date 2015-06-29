@@ -2,42 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package search
+package path
 
 import "github.com/gonum/graph"
 
 // FloydWarshall returns a shortest-path tree for the graph g or false indicating
-// that a negative cycle exists in the graph. If weight is nil and the graph does not
-// implement graph.Coster, UniformCost is used.
+// that a negative cycle exists in the graph. If the graph does not implement
+// graph.Weighter, graph.UniformCost is used.
 //
 // The time complexity of FloydWarshall is O(|V|^3).
-func FloydWarshall(g graph.Graph, weight graph.CostFunc) (paths AllShortest, ok bool) {
-	var (
-		from   = g.Neighbors
-		edgeTo func(graph.Node, graph.Node) graph.Edge
-	)
-	switch g := g.(type) {
-	case graph.DirectedGraph:
-		from = g.Successors
-		edgeTo = g.EdgeTo
-	default:
-		edgeTo = g.EdgeBetween
-	}
-	if weight == nil {
-		if g, ok := g.(graph.Coster); ok {
-			weight = g.Cost
-		} else {
-			weight = UniformCost
-		}
+func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
+	var weight graph.WeightFunc
+	if g, ok := g.(graph.Weighter); ok {
+		weight = g.Weight
+	} else {
+		weight = graph.UniformCost
 	}
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	paths = newAllShortest(nodes, true)
 	for i, u := range nodes {
 		paths.dist.Set(i, i, 0)
-		for _, v := range from(u) {
+		for _, v := range g.From(u) {
 			j := paths.indexOf[v.ID()]
-			paths.set(i, j, weight(edgeTo(u, v)), j)
+			paths.set(i, j, weight(g.Edge(u, v)), j)
 		}
 	}
 

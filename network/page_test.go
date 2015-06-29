@@ -84,11 +84,11 @@ func TestPageRank(t *testing.T) {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		got := PageRank(g, test.damp, test.tol)
@@ -108,11 +108,11 @@ func TestPageRankSparse(t *testing.T) {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
 		got := PageRankSparse(g, test.damp, test.tol)

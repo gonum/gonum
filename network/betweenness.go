@@ -9,7 +9,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 // Betweenness returns the non-zero betweenness centrality for nodes in the unweighted graph g.
@@ -35,7 +35,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	var (
 		cb = make(map[int]float64)
 
-		nodes = g.NodeList()
+		nodes = g.Nodes()
 		stack internal.NodeStack
 		p     = make(map[int][]graph.Node, len(nodes))
 		sigma = make(map[int]float64, len(nodes))
@@ -61,7 +61,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 		for queue.Len() != 0 {
 			v := queue.Dequeue()
 			stack.Push(v)
-			for _, w := range g.Neighbors(v) {
+			for _, w := range g.From(v) {
 				// w found for the first time?
 				if d[w.ID()] < 0 {
 					queue.Enqueue(w)
@@ -95,6 +95,12 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	return cb
 }
 
+// WeightedGraph is a graph with edge weights.
+type WeightedGraph interface {
+	graph.Graph
+	graph.Weighter
+}
+
 // BetweennessWeighted returns the non-zero betweenness centrality for nodes in the weighted
 // graph g used to construct the given shortest paths.
 //
@@ -102,10 +108,10 @@ func Betweenness(g graph.Graph) map[int]float64 {
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
-func BetweennessWeighted(g graph.CostGraph, p search.AllShortest) map[int]float64 {
+func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int]float64 {
 	cb := make(map[int]float64)
 
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	for i, s := range nodes {
 		for j, t := range nodes {
 			if i == j {

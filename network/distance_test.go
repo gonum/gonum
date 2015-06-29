@@ -10,7 +10,7 @@ import (
 
 	"github.com/gonum/floats"
 	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/search"
+	"github.com/gonum/graph/path"
 )
 
 var undirectedCentralityTests = []struct {
@@ -146,14 +146,14 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 		g := concrete.NewGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.AddUndirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
-		p, ok := search.FloydWarshall(g, nil)
+		p, ok := path.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue
@@ -336,14 +336,14 @@ func TestDistanceCentralityDirected(t *testing.T) {
 		g := concrete.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.NodeExists(concrete.Node(u)) {
+			if !g.Has(concrete.Node(u)) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.AddDirectedEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 1)
 			}
 		}
-		p, ok := search.FloydWarshall(g, nil)
+		p, ok := path.FloydWarshall(g)
 		if !ok {
 			t.Errorf("unexpected negative cycle in test %d", i)
 			continue

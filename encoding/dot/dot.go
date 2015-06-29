@@ -122,7 +122,7 @@ type edge struct {
 }
 
 func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {
-	nodes := g.NodeList()
+	nodes := g.Nodes()
 	sort.Sort(byID(nodes))
 
 	p.buf.WriteString(p.prefix)
@@ -131,7 +131,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			p.buf.WriteString(p.indent)
 		}
 	}
-	dg, isDirected := g.(graph.DirectedGraph)
+	_, isDirected := g.(graph.Directed)
 	if isSubgraph {
 		p.buf.WriteString("sub")
 	} else if isDirected {
@@ -155,7 +155,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 	}
 	if s, ok := g.(Structurer); ok {
 		for _, g := range s.Structure() {
-			_, subIsDirected := g.(graph.DirectedGraph)
+			_, subIsDirected := g.(graph.Directed)
 			if subIsDirected != isDirected {
 				return errors.New("dot: mismatched graph type")
 			}
@@ -169,9 +169,9 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 		if s, ok := n.(Subgrapher); ok {
 			// If the node is not linked to any other node
 			// the graph needs to be written now.
-			if len(g.Neighbors(n)) == 0 {
+			if len(g.From(n)) == 0 {
 				g := s.Subgraph()
-				_, subIsDirected := g.(graph.DirectedGraph)
+				_, subIsDirected := g.(graph.Directed)
 				if subIsDirected != isDirected {
 					return errors.New("dot: mismatched graph type")
 				}
@@ -200,12 +200,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 
 	havePrintedEdgeHeader := false
 	for _, n := range nodes {
-		var to []graph.Node
-		if isDirected {
-			to = dg.Successors(n)
-		} else {
-			to = g.Neighbors(n)
-		}
+		to := g.From(n)
 		sort.Sort(byID(to))
 		for _, t := range to {
 			if isDirected {
@@ -232,7 +227,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 
 			if s, ok := n.(Subgrapher); ok {
 				g := s.Subgraph()
-				_, subIsDirected := g.(graph.DirectedGraph)
+				_, subIsDirected := g.(graph.Directed)
 				if subIsDirected != isDirected {
 					return errors.New("dot: mismatched graph type")
 				}
@@ -240,7 +235,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			} else {
 				p.writeNode(n)
 			}
-			e, edgeIsPorter := g.EdgeBetween(n, t).(Porter)
+			e, edgeIsPorter := g.Edge(n, t).(Porter)
 			if edgeIsPorter {
 				p.writePorts(e.FromPort())
 			}
@@ -253,7 +248,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 
 			if s, ok := t.(Subgrapher); ok {
 				g := s.Subgraph()
-				_, subIsDirected := g.(graph.DirectedGraph)
+				_, subIsDirected := g.(graph.Directed)
 				if subIsDirected != isDirected {
 					return errors.New("dot: mismatched graph type")
 				}
@@ -265,7 +260,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 				p.writePorts(e.ToPort())
 			}
 
-			if a, ok := g.EdgeBetween(n, t).(Attributer); ok {
+			if a, ok := g.Edge(n, t).(Attributer); ok {
 				p.writeAttributeList(a)
 			}
 

@@ -64,17 +64,15 @@ func NewGraph() *Graph {
 	}
 }
 
-/* Mutable implementation */
-
-func (g *Graph) NewNode() graph.Node {
+func (g *Graph) NewNodeID() int {
 	if g.maxID != maxInt {
 		g.maxID++
-		return Node(g.maxID)
+		return g.maxID
 	}
 
 	// Implicitly checks if len(g.freeMap) == 0
 	for id := range g.freeMap {
-		return Node(id)
+		return id
 	}
 
 	// I cannot foresee this ever happening, but just in case, we check.
@@ -84,7 +82,7 @@ func (g *Graph) NewNode() graph.Node {
 
 	for i := 0; i < maxInt; i++ {
 		if _, ok := g.nodeMap[i]; !ok {
-			return Node(i)
+			return i
 		}
 	}
 
@@ -103,18 +101,28 @@ func (g *Graph) AddNode(n graph.Node) {
 	g.maxID = max(g.maxID, n.ID())
 }
 
-func (g *Graph) AddUndirectedEdge(e graph.Edge, cost float64) {
-	from, to := e.From(), e.To()
-	if !g.NodeExists(from) {
+func (g *Graph) SetEdge(e graph.Edge, cost float64) {
+	var (
+		from = e.From()
+		fid  = from.ID()
+		to   = e.To()
+		tid  = to.ID()
+	)
+
+	if fid == tid {
+		panic("concrete: adding self edge")
+	}
+
+	if !g.Has(from) {
 		g.AddNode(from)
 	}
 
-	if !g.NodeExists(to) {
+	if !g.Has(to) {
 		g.AddNode(to)
 	}
 
-	g.neighbors[from.ID()][to.ID()] = WeightedEdge{Edge: e, Cost: cost}
-	g.neighbors[to.ID()][from.ID()] = WeightedEdge{Edge: e, Cost: cost}
+	g.neighbors[fid][tid] = WeightedEdge{Edge: e, Cost: cost}
+	g.neighbors[tid][fid] = WeightedEdge{Edge: e, Cost: cost}
 }
 
 func (g *Graph) RemoveNode(n graph.Node) {
@@ -134,7 +142,7 @@ func (g *Graph) RemoveNode(n graph.Node) {
 	g.freeMap[n.ID()] = struct{}{}
 }
 
-func (g *Graph) RemoveUndirectedEdge(e graph.Edge) {
+func (g *Graph) RemoveEdge(e graph.Edge) {
 	from, to := e.From(), e.To()
 	if _, ok := g.nodeMap[from.ID()]; !ok {
 		return
@@ -153,8 +161,8 @@ func (g *Graph) EmptyGraph() {
 
 /* Graph implementation */
 
-func (g *Graph) Neighbors(n graph.Node) []graph.Node {
-	if !g.NodeExists(n) {
+func (g *Graph) From(n graph.Node) []graph.Node {
+	if !g.Has(n) {
 		return nil
 	}
 
@@ -168,23 +176,36 @@ func (g *Graph) Neighbors(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *Graph) EdgeBetween(n, neigh graph.Node) graph.Edge {
-	// Don't need to check if neigh exists because
+func (g *Graph) HasEdge(n, neigh graph.Node) bool {
+	_, ok := g.neighbors[n.ID()][neigh.ID()]
+	return ok
+}
+
+func (g *Graph) Edge(u, v graph.Node) graph.Edge {
+	return g.EdgeBetween(u, v)
+}
+
+func (g *Graph) EdgeBetween(u, v graph.Node) graph.Edge {
+	// We don't need to check if neigh exists because
 	// it's implicit in the neighbors access.
-	if !g.NodeExists(n) {
+	if !g.Has(u) {
 		return nil
 	}
 
-	return g.neighbors[n.ID()][neigh.ID()].Edge
+	return g.neighbors[u.ID()][v.ID()].Edge
 }
 
-func (g *Graph) NodeExists(n graph.Node) bool {
+func (g *Graph) Node(id int) graph.Node {
+	return g.nodeMap[id]
+}
+
+func (g *Graph) Has(n graph.Node) bool {
 	_, ok := g.nodeMap[n.ID()]
 
 	return ok
 }
 
-func (g *Graph) NodeList() []graph.Node {
+func (g *Graph) Nodes() []graph.Node {
 	nodes := make([]graph.Node, len(g.nodeMap))
 	i := 0
 	for _, n := range g.nodeMap {
@@ -195,7 +216,7 @@ func (g *Graph) NodeList() []graph.Node {
 	return nodes
 }
 
-func (g *Graph) Cost(e graph.Edge) float64 {
+func (g *Graph) Weight(e graph.Edge) float64 {
 	if n, ok := g.neighbors[e.From().ID()]; ok {
 		if we, ok := n[e.To().ID()]; ok {
 			return we.Cost
@@ -204,7 +225,7 @@ func (g *Graph) Cost(e graph.Edge) float64 {
 	return inf
 }
 
-func (g *Graph) EdgeList() []graph.Edge {
+func (g *Graph) Edges() []graph.Edge {
 	m := make(map[WeightedEdge]struct{})
 	toReturn := make([]graph.Edge, 0)
 

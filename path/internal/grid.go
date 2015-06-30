@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	Closed = '*' // Closed is the closed grid node representation.
-	Open   = '.' // Open is the open grid node repesentation.
+	Closed  = '*' // Closed is the closed grid node representation.
+	Open    = '.' // Open is the open grid node repesentation.
+	Unknown = '?' // Unknown is the unknown grid node repesentation.
 )
 
 // Grid is a 2D grid planar undirected graph.
@@ -24,6 +25,17 @@ type Grid struct {
 	// diagonally adjacent nodes can
 	// be connected by an edge.
 	AllowDiagonal bool
+	// UnitEdgeWeight specifies whether
+	// finite edge weights are returned as
+	// the unit length. Otherwise edge
+	// weights are the Euclidean distance
+	// between connected nodes.
+	UnitEdgeWeight bool
+
+	// AllVisible specifies whether
+	// non-open nodes are visible
+	// in calls to Nodes and HasNode.
+	AllVisible bool
 
 	open []bool
 	r, c int
@@ -77,20 +89,28 @@ func NewGridFrom(rows ...string) *Grid {
 	}
 }
 
-// Nodes returns all the open nodes in the grid.
+// Nodes returns all the open nodes in the grid if AllVisible is
+// false, otherwise all nodes are returned.
 func (g *Grid) Nodes() []graph.Node {
 	var nodes []graph.Node
 	for id, ok := range g.open {
-		if !ok {
-			continue
+		if ok || g.AllVisible {
+			nodes = append(nodes, concrete.Node(id))
 		}
-		nodes = append(nodes, concrete.Node(id))
 	}
 	return nodes
 }
 
-// Has returns whether n is an open node in the grid.
+// Has returns whether n is a node in the grid. The state of
+// the AllVisible field determines whether a non-open node is
+// present.
 func (g *Grid) Has(n graph.Node) bool {
+	id := n.ID()
+	return id >= 0 && id < len(g.open) && (g.AllVisible || g.open[id])
+}
+
+// HasOpen returns whether n is an open node in the grid.
+func (g *Grid) HasOpen(n graph.Node) bool {
 	id := n.ID()
 	return id >= 0 && id < len(g.open) && g.open[id]
 }
@@ -138,9 +158,10 @@ func (g *Grid) NodeAt(r, c int) graph.Node {
 	return concrete.Node(r*g.c + c)
 }
 
-// From returns all the nodes reachable from u.
+// From returns all the nodes reachable from u. Reachabilty requires that both
+// ends of an edge must be open.
 func (g *Grid) From(u graph.Node) []graph.Node {
-	if !g.Has(u) {
+	if !g.HasOpen(u) {
 		return nil
 	}
 	nr, nc := g.RowCol(u.ID())
@@ -157,12 +178,12 @@ func (g *Grid) From(u graph.Node) []graph.Node {
 
 // HasEdge returns whether there is an edge between u and v.
 func (g *Grid) HasEdge(u, v graph.Node) bool {
-	if !g.Has(u) || !g.Has(v) || u.ID() == v.ID() {
+	if !g.HasOpen(u) || !g.HasOpen(v) || u.ID() == v.ID() {
 		return false
 	}
 	ur, uc := g.RowCol(u.ID())
 	vr, vc := g.RowCol(v.ID())
-	if abs(ur-vr) > 1 && abs(uc-vc) > 1 {
+	if abs(ur-vr) > 1 || abs(uc-vc) > 1 {
 		return false
 	}
 	return g.AllowDiagonal || ur == vr || uc == vc
@@ -191,7 +212,7 @@ func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
 // Weight returns the weight of the given edge.
 func (g *Grid) Weight(e graph.Edge) float64 {
 	if e := g.EdgeBetween(e.From(), e.To()); e != nil {
-		if !g.AllowDiagonal {
+		if !g.AllowDiagonal || g.UnitEdgeWeight {
 			return 1
 		}
 		ux, uy := g.XY(e.From())

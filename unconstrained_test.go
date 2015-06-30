@@ -40,7 +40,7 @@ func (t unconstrainedTest) String() string {
 	if dim <= 10 {
 		// Print the initial X only for small-dimensional problems.
 		return fmt.Sprintf("F: %v\nDim: %v\nInitial X: %v\nGradientThreshold: %v",
-			t.name, dim, t.x, t.gradTol) // TODO This won't print the name of the test
+			t.name, dim, t.x, t.gradTol)
 	}
 	return fmt.Sprintf("F: %v\nDim: %v\nGradientThreshold: %v",
 		t.name, dim, t.gradTol)

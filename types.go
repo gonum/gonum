@@ -131,10 +131,10 @@ func newProblemInfo(p Problem) *problemInfo {
 // TODO(btracey): Think about making this an exported function when the
 // constraint interface is designed.
 func (p problemInfo) satisfies(method Method) error {
-	if method.Needs().Gradient && !f.HasGradient {
+	if method.Needs().Gradient && !p.HasGradient {
 		return errors.New("optimize: function does not implement needed Gradient interface")
 	}
-	if method.Needs().Hessian && !f.HasHessian {
+	if method.Needs().Hessian && !p.HasHessian {
 		return errors.New("optimize: function does not implement needed Hessian interface")
 	}
 	return nil

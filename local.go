@@ -76,8 +76,8 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 
 	if settings.Recorder != nil {
 		// Initialize Recorder first. If it fails, we avoid the (possibly
-		// time-consuming) evaluation of F and DF at the starting location.
-		err := settings.Recorder.Init(&funcInfo.FunctionInfo)
+		// time-consuming) evaluation of Func() and Grad() at the starting location.
+		err := settings.Recorder.Init()
 		if err != nil {
 			return nil, err
 		}

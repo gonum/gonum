@@ -95,6 +95,6 @@ type Statuser interface {
 // A Recorder can record the progress of the optimization, for example to print
 // the progress to StdOut or to a log file. A Recorder must not modify any data.
 type Recorder interface {
-	Init(*FunctionInfo) error
+	Init() error
 	Record(*Location, EvaluationType, IterationType, *Stats) error
 }

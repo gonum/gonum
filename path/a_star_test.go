@@ -11,8 +11,8 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/path"
+	"github.com/gonum/graph/path/internal"
 	"github.com/gonum/graph/topo"
 )
 
@@ -27,16 +27,12 @@ var aStarTests = []struct {
 	{
 		name: "simple path",
 		g: func() graph.Graph {
-			tg, err := internal.NewTileGraphFrom("" +
-				"▀  ▀\n" +
-				"▀▀ ▀\n" +
-				"▀▀ ▀\n" +
-				"▀▀ ▀",
+			return internal.NewGridFrom(
+				"*..*",
+				"**.*",
+				"**.*",
+				"**.*",
 			)
-			if err != nil {
-				panic("bad test graph")
-			}
-			return tg
 		}(),
 
 		s: 1, t: 14,
@@ -44,27 +40,27 @@ var aStarTests = []struct {
 	},
 	{
 		name: "small open graph",
-		g:    internal.NewTileGraph(3, 3, true),
+		g:    internal.NewGrid(3, 3, true),
 
 		s: 0, t: 8,
 	},
 	{
 		name: "large open graph",
-		g:    internal.NewTileGraph(1000, 1000, true),
+		g:    internal.NewGrid(1000, 1000, true),
 
 		s: 0, t: 999*1000 + 999,
 	},
 	{
 		name: "no path",
 		g: func() graph.Graph {
-			tg := internal.NewTileGraph(5, 5, true)
+			tg := internal.NewGrid(5, 5, true)
 
 			// Create a complete "wall" across the middle row.
-			tg.SetPassability(2, 0, false)
-			tg.SetPassability(2, 1, false)
-			tg.SetPassability(2, 2, false)
-			tg.SetPassability(2, 3, false)
-			tg.SetPassability(2, 4, false)
+			tg.Set(2, 0, false)
+			tg.Set(2, 1, false)
+			tg.Set(2, 2, false)
+			tg.Set(2, 3, false)
+			tg.Set(2, 4, false)
 
 			return tg
 		}(),
@@ -74,19 +70,19 @@ var aStarTests = []struct {
 	{
 		name: "partially obstructed",
 		g: func() graph.Graph {
-			tg := internal.NewTileGraph(10, 10, true)
+			tg := internal.NewGrid(10, 10, true)
 
 			// Create a partial "wall" accross the middle
 			// row with a gap at the left-hand end.
-			tg.SetPassability(4, 1, false)
-			tg.SetPassability(4, 2, false)
-			tg.SetPassability(4, 3, false)
-			tg.SetPassability(4, 4, false)
-			tg.SetPassability(4, 5, false)
-			tg.SetPassability(4, 6, false)
-			tg.SetPassability(4, 7, false)
-			tg.SetPassability(4, 8, false)
-			tg.SetPassability(4, 9, false)
+			tg.Set(4, 1, false)
+			tg.Set(4, 2, false)
+			tg.Set(4, 3, false)
+			tg.Set(4, 4, false)
+			tg.Set(4, 5, false)
+			tg.Set(4, 6, false)
+			tg.Set(4, 7, false)
+			tg.Set(4, 8, false)
+			tg.Set(4, 9, false)
 
 			return tg
 		}(),
@@ -96,19 +92,19 @@ var aStarTests = []struct {
 	{
 		name: "partially obstructed with heuristic",
 		g: func() graph.Graph {
-			tg := internal.NewTileGraph(10, 10, true)
+			tg := internal.NewGrid(10, 10, true)
 
 			// Create a partial "wall" accross the middle
 			// row with a gap at the left-hand end.
-			tg.SetPassability(4, 1, false)
-			tg.SetPassability(4, 2, false)
-			tg.SetPassability(4, 3, false)
-			tg.SetPassability(4, 4, false)
-			tg.SetPassability(4, 5, false)
-			tg.SetPassability(4, 6, false)
-			tg.SetPassability(4, 7, false)
-			tg.SetPassability(4, 8, false)
-			tg.SetPassability(4, 9, false)
+			tg.Set(4, 1, false)
+			tg.Set(4, 2, false)
+			tg.Set(4, 3, false)
+			tg.Set(4, 4, false)
+			tg.Set(4, 5, false)
+			tg.Set(4, 6, false)
+			tg.Set(4, 7, false)
+			tg.Set(4, 8, false)
+			tg.Set(4, 9, false)
 
 			return tg
 		}(),

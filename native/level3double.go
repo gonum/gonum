@@ -805,7 +805,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	// Cases where a is transposed.
 	if ul == blas.Upper {
 		for i := 0; i < m; i++ {
-			btmp := b[i*lda : i*lda+n]
+			btmp := b[i*ldb : i*ldb+n]
 			for j, vb := range btmp {
 				tmp := vb
 				if nonUnit {
@@ -818,7 +818,7 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 		return
 	}
 	for i := 0; i < m; i++ {
-		btmp := b[i*lda : i*lda+n]
+		btmp := b[i*ldb : i*ldb+n]
 		for j := n - 1; j >= 0; j-- {
 			tmp := btmp[j]
 			if nonUnit {

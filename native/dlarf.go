@@ -17,25 +17,37 @@ import (
 //  h = 1 - tau * v * v^T
 // and c is an m * n matrix.
 //
-// Work is pre-allocated memory of size at least m if side == Left and at least
-// n if side == Right. Dlarf will panic if this length requirement is not met.
+
+// Work is temporary storage of length at least m if side == Left and at least
+// n if side == Right. This function will panic if this length requirement is not met.
 func (impl Implementation) Dlarf(side blas.Side, m, n int, v []float64, incv int, tau float64, c []float64, ldc int, work []float64) {
 	applyleft := side == blas.Left
 	if (applyleft && len(work) < n) || (!applyleft && len(work) < m) {
-		panic("dlarf: insufficient work length")
+		panic(badWork)
 	}
+	checkMatrix(m, n, c, ldc)
+
+	// v has length m if applyleft and n otherwise.
+	lenV := n
+	if applyleft {
+		lenV = m
+	}
+
+	checkVector(lenV, v, incv)
+
 	lastv := 0 // last non-zero element of v
 	lastc := 0 // last non-zero row/column of c
 	if tau != 0 {
 		var i int
 		if applyleft {
-			lastv = m
+			lastv = m - 1
 		} else {
-			lastv = n
+			lastv = n - 1
 		}
 		if incv > 0 {
-			i = (lastv - 1) * incv
+			i = lastv * incv
 		}
+
 		// Look for the last non-zero row in v.
 		for lastv >= 0 && v[i] == 0 {
 			lastv--
@@ -43,10 +55,10 @@ func (impl Implementation) Dlarf(side blas.Side, m, n int, v []float64, incv int
 		}
 		if applyleft {
 			// Scan for the last non-zero column in C[0:lastv, :]
-			lastc = impl.Iladlc(lastv, n, c, ldc)
+			lastc = impl.Iladlc(lastv+1, n, c, ldc)
 		} else {
 			// Scan for the last non-zero row in C[:, 0:lastv]
-			lastc = impl.Iladlr(m, lastv, c, ldc)
+			lastc = impl.Iladlr(m, lastv+1, c, ldc)
 		}
 	}
 	if lastv == -1 || lastc == -1 {

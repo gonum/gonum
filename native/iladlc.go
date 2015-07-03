@@ -7,9 +7,11 @@ package native
 // Iladlc scans a matrix for its last non-zero column. Returns -1 if the matrix
 // is all zeros.
 func (Implementation) Iladlc(m, n int, a []float64, lda int) int {
-	if n == 0 {
+	if n == 0 || m == 0 {
 		return n - 1
 	}
+	checkMatrix(m, n, a, lda)
+
 	// Test common case where corner is non-zero.
 	if a[n-1] != 0 || a[(m-1)*lda+(n-1)] != 0 {
 		return n - 1

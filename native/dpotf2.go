@@ -43,7 +43,9 @@ func (Implementation) Dpotf2(ul blas.Uplo, n int, a []float64, lda int) (ok bool
 			ajj = math.Sqrt(ajj)
 			a[j*lda+j] = ajj
 			if j < n-1 {
-				bi.Dgemv(blas.Trans, j, n-j-1, -1, a[j+1:], lda, a[j:], lda, 1, a[j*lda+j+1:], 1)
+				bi.Dgemv(blas.Trans, j, n-j-1,
+					-1, a[j+1:], lda, a[j:], lda,
+					1, a[j*lda+j+1:], 1)
 				bi.Dscal(n-j-1, 1/ajj, a[j*lda+j+1:], 1)
 			}
 		}
@@ -61,7 +63,9 @@ func (Implementation) Dpotf2(ul blas.Uplo, n int, a []float64, lda int) (ok bool
 		ajj = math.Sqrt(ajj)
 		a[j*lda+j] = ajj
 		if j < n-1 {
-			bi.Dgemv(blas.NoTrans, n-j-1, j, -1, a[(j+1)*lda:], lda, a[j*lda:], 1, 1, a[(j+1)*lda+j:], lda)
+			bi.Dgemv(blas.NoTrans, n-j-1, j,
+				-1, a[(j+1)*lda:], lda, a[j*lda:], 1,
+				1, a[(j+1)*lda+j:], lda)
 			bi.Dscal(n-j-1, 1/ajj, a[(j+1)*lda+j:], lda)
 		}
 	}

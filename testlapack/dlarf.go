@@ -64,6 +64,19 @@ func DlarfTest(t *testing.T, impl Dlarfer) {
 			tau: 2,
 		},
 		{
+			m:   2,
+			n:   3,
+			ldc: 3,
+
+			incv:  4,
+			lastv: 0,
+
+			lastr: 0,
+			lastc: 1,
+
+			tau: 2,
+		},
+		{
 			m:   10,
 			n:   10,
 			ldc: 10,
@@ -93,7 +106,7 @@ func DlarfTest(t *testing.T, impl Dlarfer) {
 		sz := max(test.m, test.n) // so v works for both right and left side.
 		v := make([]float64, test.incv*sz+1)
 		// Fill with nonzero entries up until lastv.
-		for i := 0; i < test.lastv; i++ {
+		for i := 0; i <= test.lastv; i++ {
 			v[i*test.incv] = rand.Float64()
 		}
 		// Construct h explicitly to compare.
@@ -132,7 +145,7 @@ func DlarfTest(t *testing.T, impl Dlarfer) {
 		work := make([]float64, sz)
 		impl.Dlarf(blas.Right, test.m, test.n, v, test.incv, test.tau, c, test.ldc, work)
 		if !floats.EqualApprox(c, cMat.Data, 1e-14) {
-			t.Errorf("Dlarf mismatch case %v. Want %v, got %v", i, cMat.Data, c)
+			t.Errorf("Dlarf mismatch right, case %v. Want %v, got %v", i, cMat.Data, c)
 		}
 
 		// Test on the left side.
@@ -153,7 +166,7 @@ func DlarfTest(t *testing.T, impl Dlarfer) {
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, hMat, cMat2, 0, cMat)
 		impl.Dlarf(blas.Left, test.m, test.n, v, test.incv, test.tau, c, test.ldc, work)
 		if !floats.EqualApprox(c, cMat.Data, 1e-14) {
-			t.Errorf("Dlarf mismatch case %v. Want %v, got %v", i, cMat.Data, c)
+			t.Errorf("Dlarf mismatch left, case %v. Want %v, got %v", i, cMat.Data, c)
 		}
 	}
 }

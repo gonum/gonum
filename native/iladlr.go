@@ -10,6 +10,9 @@ func (Implementation) Iladlr(m, n int, a []float64, lda int) int {
 	if m == 0 {
 		return m - 1
 	}
+
+	checkMatrix(m, n, a, lda)
+
 	// Check the common case where the corner is non-zero
 	if a[(m-1)*lda] != 0 || a[(m-1)*lda+n-1] != 0 {
 		return m - 1

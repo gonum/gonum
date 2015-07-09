@@ -76,14 +76,17 @@ func (t Time) Format(fs fmt.State, c rune) {
 		fallthrough
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
-		if !pOk {
-			p = -1
-		}
 		w, wOk := fs.Width()
-		if !wOk {
-			w = -1
+		switch {
+		case pOk && wOk:
+			fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(t))
+		case pOk:
+			fmt.Fprintf(fs, "%.*"+string(c), p, float64(t))
+		case wOk:
+			fmt.Fprintf(fs, "%*"+string(c), w, float64(t))
+		default:
+			fmt.Fprintf(fs, "%"+string(c), float64(t))
 		}
-		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(t))
 		fmt.Fprint(fs, " s")
 	default:
 		fmt.Fprintf(fs, "%%!%c(%T=%g s)", c, t, float64(t))

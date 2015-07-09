@@ -15,11 +15,11 @@ var formatTests = []struct {
 	format string
 	expect string
 }{
-	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), "%f", "9.81 kg s^-2"},
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), "%f", "9.810000 kg s^-2"},
 	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), "%1.f", "10 kg s^-2"},
 	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2}), "%.1f", "9.8 kg s^-2"},
-	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2, LengthDim: 0}), "%f", "9.81 kg s^-2"},
-	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%e", "6.62606957e-34 kg^2 s^-1"},
+	{New(9.81, Dimensions{MassDim: 1, TimeDim: -2, LengthDim: 0}), "%f", "9.810000 kg s^-2"},
+	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%e", "6.626070e-34 kg^2 s^-1"},
 	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%.3e", "6.626e-34 kg^2 s^-1"},
 	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%v", "6.62606957e-34 kg^2 s^-1"},
 	{New(6.62606957e-34, Dimensions{MassDim: 2, TimeDim: -1}), "%s", "%!s(*Unit=6.62606957e-34 kg^2 s^-1)"},

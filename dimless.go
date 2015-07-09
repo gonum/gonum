@@ -48,14 +48,17 @@ func (d Dimless) Format(fs fmt.State, c rune) {
 		fallthrough
 	case 'e', 'E', 'f', 'F', 'g', 'G':
 		p, pOk := fs.Precision()
-		if !pOk {
-			p = -1
-		}
 		w, wOk := fs.Width()
-		if !wOk {
-			w = -1
+		switch {
+		case pOk && wOk:
+			fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(d))
+		case pOk:
+			fmt.Fprintf(fs, "%.*"+string(c), p, float64(d))
+		case wOk:
+			fmt.Fprintf(fs, "%*"+string(c), w, float64(d))
+		default:
+			fmt.Fprintf(fs, "%"+string(c), float64(d))
 		}
-		fmt.Fprintf(fs, "%*.*"+string(c), w, p, float64(d))
 	default:
 		fmt.Fprintf(fs, "%%!%c(%T=%g)", c, d, float64(d))
 		return

@@ -135,13 +135,14 @@ func (Implementation) Isamax(n int, x []float32, incX int) int {
 	idx := 0
 	max := math.Abs(x[0])
 	if incX == 1 {
-		for i, v := range x {
+		for i, v := range x[:n] {
 			absV := math.Abs(v)
 			if absV > max {
 				max = absV
 				idx = i
 			}
 		}
+		return idx
 	}
 	ix := incX
 	for i := 1; i < n; i++ {

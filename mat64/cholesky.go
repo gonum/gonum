@@ -17,7 +17,7 @@ const badTriangle = "mat64: invalid triangle"
 // whether the matrix is positive definite. The returned matrix is either a
 // lower triangular matrix such that A = L * L^T or an upper triangular matrix
 // such that A = U^T * U depending on the upper parameter.
-func (t *TriDense) Cholesky(a *SymDense, upper bool) (ok bool) {
+func (t *TriDense) Cholesky(a Symmetric, upper bool) (ok bool) {
 	n := a.Symmetric()
 	if t.isZero() {
 		t.mat = blas64.Triangular{

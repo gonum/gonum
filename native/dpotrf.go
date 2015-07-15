@@ -28,39 +28,47 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 	if n == 0 {
 		return true
 	}
-	nb := blockSize()
+	nb := impl.Ilaenv(1, "DPOTRF", string(ul), n, -1, -1, -1)
 	if n <= nb {
 		return impl.Dpotf2(ul, n, a, lda)
 	}
 	if ul == blas.Upper {
 		for j := 0; j < n; j += nb {
 			jb := min(nb, n-j)
-			bi.Dsyrk(blas.Upper, blas.Trans, jb, j, -1, a[j:], lda, 1, a[j*lda+j:], lda)
+			bi.Dsyrk(blas.Upper, blas.Trans, jb, j,
+				-1, a[j:], lda,
+				1, a[j*lda+j:], lda)
 			ok = impl.Dpotf2(blas.Upper, jb, a[j*lda+j:], lda)
 			if !ok {
 				return ok
 			}
 			if j+jb < n {
-				bi.Dgemm(blas.Trans, blas.NoTrans, jb, n-j-jb, j, -1,
-					a[j:], lda, a[j+jb:], lda, 1, a[j*lda+j+jb:], lda)
-				bi.Dtrsm(blas.Left, blas.Upper, blas.Trans, blas.NonUnit, jb, n-j-jb, 1,
-					a[j*lda+j:], lda, a[j*lda+j+jb:], lda)
+				bi.Dgemm(blas.Trans, blas.NoTrans, jb, n-j-jb, j,
+					-1, a[j:], lda, a[j+jb:], lda,
+					1, a[j*lda+j+jb:], lda)
+				bi.Dtrsm(blas.Left, blas.Upper, blas.Trans, blas.NonUnit, jb, n-j-jb,
+					1, a[j*lda+j:], lda,
+					a[j*lda+j+jb:], lda)
 			}
 		}
 		return true
 	}
 	for j := 0; j < n; j += nb {
 		jb := min(nb, n-j)
-		bi.Dsyrk(blas.Lower, blas.NoTrans, jb, j, -1, a[j*lda:], lda, 1, a[j*lda+j:], lda)
+		bi.Dsyrk(blas.Lower, blas.NoTrans, jb, j,
+			-1, a[j*lda:], lda,
+			1, a[j*lda+j:], lda)
 		ok := impl.Dpotf2(blas.Lower, jb, a[j*lda+j:], lda)
 		if !ok {
 			return ok
 		}
 		if j+jb < n {
-			bi.Dgemm(blas.NoTrans, blas.Trans, n-j-jb, jb, j, -1,
-				a[(j+jb)*lda:], lda, a[j*lda:], lda, 1, a[(j+jb)*lda+j:], lda)
-			bi.Dtrsm(blas.Right, blas.Lower, blas.Trans, blas.NonUnit, n-j-jb, jb, 1,
-				a[j*lda+j:], lda, a[(j+jb)*lda+j:], lda)
+			bi.Dgemm(blas.NoTrans, blas.Trans, n-j-jb, jb, j,
+				-1, a[(j+jb)*lda:], lda, a[j*lda:], lda,
+				1, a[(j+jb)*lda+j:], lda)
+			bi.Dtrsm(blas.Right, blas.Lower, blas.Trans, blas.NonUnit, n-j-jb, jb,
+				1, a[j*lda+j:], lda,
+				a[(j+jb)*lda+j:], lda)
 		}
 	}
 	return true

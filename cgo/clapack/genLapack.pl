@@ -21,7 +21,7 @@ foreach my $obj (@lapack_extendedprecision_objs) {
 }
 
 open(my $clapack, "<", $clapackHeader) or die;
-open(my $golapack, ">", "lapack.go") or die;
+open(my $golapack, ">", "clapack.go") or die;
 
 my %done;
 
@@ -32,11 +32,18 @@ printf $golapack <<"EOH";
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package clapack provides bindings to a C LAPACK library.
 package clapack
 
 /*
 #cgo CFLAGS: -g -O2
-#cgo LDFLAGS: ${lib}
+EOH
+
+if ($lib) {
+	print $golapack "#cgo LDFLAGS: ${lib}\n"
+}
+
+printf $golapack <<"EOH";
 #include "${clapackHeader}"
 */
 import "C"
@@ -47,8 +54,6 @@ import (
 	"unsafe"
 )
 
-type Lapack struct{}
-
 // Type order is used to specify the matrix storage format. We still interact with
 // an API that allows client calls to specify order, so this is here to document that fact.
 type order int
@@ -57,11 +62,6 @@ const (
 	rowMajor order = 101 + iota
 	colMajor
 )
-
-func init() {
-         _ = lapack.Complex128(Lapack{})
-         _ = lapack.Float64(Lapack{})
-}
 
 func isZero(ret C.int) bool { return ret == 0 }
 
@@ -179,23 +179,16 @@ sub processProto {
 	if ($params eq "") {
 		return
 	}
-	print $golapack "func (Lapack) ".$gofunc."(".$params.") ".$GoRetType."{\n";
+	print $golapack "func ".$gofunc."(".$params.") ".$GoRetType."{\n";
 	print $golapack "\t";
 	if ($ret ne 'void') {
-		print $golapack "\n".$bp."\n"."return ".$GoRet."(";
+		print $golapack $bp."return ".$GoRet."(";
 	}
 	print $golapack "C.LAPACKE_$func(".processParamToC($func, $paramList).")";
 	if ($ret ne 'void') {
 		print $golapack ")";
 	}
-	print $golapack "\n}\n";
-}
-
-sub Gofunc {
-	my $fnName = shift;
-	my ($pack, $func, $tail) = split '_', $fnName;
-	return ucfirst $func . ucfirst $tail if $tail;
-	return ucfirst $func;
+	print $golapack "\n}\n\n";
 }
 
 sub processParamToGo {
@@ -213,48 +206,69 @@ sub processParamToGo {
 		};
 		$var =~ /trans/ && do {
 			my $bp = << "EOH";
-var $var C.char
-if go$var == blas.NoTrans{ $var = 'n' }
-if go$var == blas.Trans{ $var = 't' }
-if go$var == blas.ConjTrans{ $var = 'c' }
+switch $var {
+case blas.NoTrans:
+$var = 'N'
+case blas.Trans:
+$var = 'T'
+case blas.ConjTrans:
+$var = 'C'
+default:
+panic("lapack: bad trans")
+}
 EOH
 			push @boilerplate, $bp;
-			push @processed, "go".$var." blas.Transpose"; next;
+			push @processed, $var." blas.Transpose"; next;
 		};
 		$var eq "uplo" && do {
 			$var = "ul";
 			my $bp = << "EOH";
-var $var C.char
-if go$var == blas.Upper{ $var = 'u' }
-if go$var == blas.Lower{ $var = 'l' }
+switch $var {
+case blas.Upper:
+$var = 'U'
+case blas.Lower:
+$var = 'L'
+default:
+panic("lapack: illegal triangle")
+}
 EOH
 			push @boilerplate, $bp;
-			push @processed, "go".$var." blas.Uplo"; next;
+			push @processed, $var." blas.Uplo"; next;
 		};
 		$var eq "diag" && do {
 			$var = "d";
 			my $bp = << "EOH";
-var $var C.char
-if go$var == blas.Unit{ $var = 'u' }
-if go$var == blas.NonUnit{ $var = 'n' }
+switch $var {
+case blas.Unit:
+$var = 'U'
+case blas.NonUnit:
+$var = 'N'
+default:
+panic("lapack: illegal diagonal")
+}
 EOH
 			push @boilerplate, $bp;
-			push @processed, "go".$var." blas.Diag"; next;
+			push @processed, $var." blas.Diag"; next;
 		};
 		$var eq "side" && do {
 			$var = "s";
 			my $bp = << "EOH";
-var $var C.char
-if go$var == blas.Left{ $var = 'l' }
-if go$var == blas.Right{ $var = 'r' }
+switch $var {
+case blas.Left:
+$var = 'L'
+case blas.Right:
+$var = 'R'
+default:
+panic("lapack: bad side")
+}
 EOH
 			push @boilerplate, $bp;
-			push @processed, "go".$var." blas.Side"; next;
+			push @processed, $var." blas.Side"; next;
 		};
-		$var eq "compq" && do {
+		$var =~ /^comp./ && do {
 			push @processed, $var." lapack.CompSV"; next;
 		};
-		$var =~ /job+/ && do {
+		$var =~ /job/ && do {
 			push @processed, $var." lapack.Job"; next;
 		};
 		$var eq "select" && do {
@@ -270,25 +284,12 @@ EOH
 
 		my $goType = $typeConv{$type};
 
-		if (substr($type,-1) eq "*") {
-			my $base = $typeConv{$type};
-			$base =~ s/\[\]//;
-			my $bp = << "EOH";
-var $var *$base
-if len(go$var) > 0 {
-	$var = &go$var [0]
-}
-EOH
-			push @boilerplate, $bp;
-			$var = "go".$var;
-		}
-
 		if (not $goType) {
 			die "missed Go parameters from '$func', '$type', '$param'";
 		}
 		push @processed, $var." ".$goType; next;
 	}
-	return ((join ", ", @processed), (join "\n", @boilerplate));
+	return ((join ", ", @processed), (join "", @boilerplate));
 }
 
 sub processParamToC {
@@ -326,9 +327,9 @@ sub processParamToC {
 			chop $type;
 
 			if ($type eq "char") {
-				push @processed, "(*C.".$type.")(unsafe.Pointer(".$var."))"; next;
+				push @processed, "(*C.".$type.")(unsafe.Pointer(&".$var."[0]))"; next;
 			} else {
-				push @processed, "(*C.".$type.")(".$var.")"; next;
+				push @processed, "(*C.".$type.")(&".$var."[0])"; next;
 			}
 		}else{
 			push @processed, "(C.".$type.")(".$var.")"; next;

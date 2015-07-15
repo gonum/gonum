@@ -19,21 +19,19 @@ Install OpenBLAS:
   make
 ```
 
+Then install the lapack/cgo package:
+```sh
+  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install github.com/gonum/lapack/cgo
+```
+
 For Windows you can download binary packages for OpenBLAS at
 http://sourceforge.net/projects/openblas/files/
 
-generate lapack bindings
+If you want to use a different BLAS package such as the Intel MKL you can
+adjust the `CGO_LDFLAGS` variable:
+```sh
+  CGO_LDFLAGS="-lmkl_rt" go install github.com/gonum/lapack/cgo
 ```
-  cd $GOPATH/src/github.com/gonum/lapack/clapack
-  ./genLapack.pl -L/path/to/OpenBLAS -lopenblas
-```
-
-If you want to use the Intel MKL and all of your paths are properly set
-```
-  cd $GOPATH/src/github.com/gonum/lapack/clapack
-  ./genLapack.pl -lmkl_rt
-```
-should work.
 
 ## Packages
 

@@ -18,6 +18,6 @@ export CGO_LDFLAGS="-L/usr/lib -lopenblas"
 go get github.com/gonum/blas
 go get github.com/gonum/matrix/mat64
 
-pushd cgo
-sudo perl genLapack.pl -L/usr/lib -lopenblas
+pushd cgo/clapack
+go install -v -x
 popd

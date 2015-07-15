@@ -55,19 +55,17 @@ func (v *Vector) at(r int) float64 {
 	return v.mat.Data[r*v.mat.Inc]
 }
 
-// Set sets the element at (r,c) to the value val. It panics if c is not zero.
-func (v *Vector) Set(r, c int, val float64) {
-	if r < 0 || r >= v.n {
-		panic(ErrRowAccess)
+// Set sets the element at row r to the value val. It panics if r is less than
+// zero or greater than the length.
+func (v *Vector) SetVec(i int, val float64) {
+	if i < 0 || i >= v.n {
+		panic(ErrVectorAccess)
 	}
-	if c != 0 {
-		panic(ErrColAccess)
-	}
-	v.set(r, val)
+	v.setVec(i, val)
 }
 
-func (v *Vector) set(r int, val float64) {
-	v.mat.Data[r*v.mat.Inc] = val
+func (v *Vector) setVec(i int, val float64) {
+	v.mat.Data[i*v.mat.Inc] = val
 }
 
 // At returns the element at row r and column c.

@@ -14,8 +14,7 @@ import (
 var (
 	vector *Vector
 
-	_ Matrix  = vector
-	_ Mutable = vector
+	_ Matrix = vector
 
 	// _ Cloner      = vector
 	// _ Viewer      = vector

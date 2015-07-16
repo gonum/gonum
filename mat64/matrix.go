@@ -415,6 +415,7 @@ var (
 	ErrIndexOutOfRange = Error{"mat64: index out of range"}
 	ErrRowAccess       = Error{"mat64: row index out of range"}
 	ErrColAccess       = Error{"mat64: column index out of range"}
+	ErrVectorAccess    = Error{"mat64: vector index out of range"}
 	ErrZeroLength      = Error{"mat64: zero length in matrix definition"}
 	ErrRowLength       = Error{"mat64: row length mismatch"}
 	ErrColLength       = Error{"mat64: col length mismatch"}

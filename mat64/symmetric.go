@@ -59,6 +59,12 @@ func (s *SymDense) Dims() (r, c int) {
 	return s.mat.N, s.mat.N
 }
 
+// T implements the Matrix interface. Symmetric matrices, by definition, are
+// equal to their transpose, and this is a no-op.
+func (s *SymDense) T() Matrix {
+	return s
+}
+
 func (s *SymDense) Symmetric() int {
 	return s.mat.N
 }

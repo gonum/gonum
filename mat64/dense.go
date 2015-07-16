@@ -145,6 +145,11 @@ func (m *Dense) Dims() (r, c int) { return m.mat.Rows, m.mat.Cols }
 // Caps returns the number of rows and columns in the backing matrix.
 func (m *Dense) Caps() (r, c int) { return m.capRows, m.capCols }
 
+// T performs an implicit transpose by returning the receiver inside a Transpose.
+func (m *Dense) T() Matrix {
+	return Transpose{m}
+}
+
 // Col copies the elements in the jth column of the matrix into the slice dst.
 // If the provided slice is nil, a new slice is first allocated.
 //

@@ -23,10 +23,61 @@ type Triangular interface {
 	// Triangular returns the number of rows/columns in the matrix and if it is
 	// an upper triangular matrix.
 	Triangle() (n int, upper bool)
+
+	// TTri is the equivalent of the T() method in the Matrix interface but
+	// guarantees the transpose is of triangular type.
+	TTri() Triangular
 }
 
 type RawTriangular interface {
 	RawTriangular() blas64.Triangular
+}
+
+var (
+	_ Matrix     = TransposeTri{}
+	_ Triangular = TransposeTri{}
+)
+
+// TransposeTri is a type for performing an implicit transpose of a Triangular
+// matrix. It implements the Triangular interface, returning values from the
+// transpose of the matrix within.
+type TransposeTri struct {
+	Triangular Triangular
+}
+
+// At returns the value of the element at row i and column j of the transposed
+// matrix, that is, row j and column i of the Triangular field.
+func (t TransposeTri) At(i, j int) float64 {
+	return t.Triangular.At(j, i)
+}
+
+// Dims returns the dimensions of the transposed matrix. Triangular matrices are
+// square and thus this is the same size as the original Triangular.
+func (t TransposeTri) Dims() (r, c int) {
+	c, r = t.Triangular.Dims()
+	return r, c
+}
+
+// T performs an implicit transpose by returning the Triangular field.
+func (t TransposeTri) T() Matrix {
+	return t.Triangular
+}
+
+// Triangle returns the number of rows/columns in the matrix and if it is
+// an upper triangular matrix.
+func (t TransposeTri) Triangle() (int, bool) {
+	n, upper := t.Triangular.Triangle()
+	return n, !upper
+}
+
+// TTri performs an implicit transpose by returning the Triangular field.
+func (t TransposeTri) TTri() Triangular {
+	return t.Triangular
+}
+
+// Untranspose returns the Triangular field.
+func (t TransposeTri) Untranspose() Matrix {
+	return t.Triangular
 }
 
 // NewTriangular constructs an n x n triangular matrix. The constructed matrix
@@ -65,6 +116,16 @@ func (t *TriDense) Dims() (r, c int) {
 
 func (t *TriDense) Triangle() (n int, upper bool) {
 	return t.mat.N, t.mat.Uplo == blas.Upper
+}
+
+// T performs an implicit transpose by returning the receiver inside a Transpose.
+func (t *TriDense) T() Matrix {
+	return Transpose{t}
+}
+
+// TTri performs an implicit transpose by returning the receiver inside a TransposeTri.
+func (t *TriDense) TTri() Triangular {
+	return TransposeTri{t}
 }
 
 func (t *TriDense) RawTriangular() blas64.Triangular {

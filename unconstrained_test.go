@@ -15,7 +15,7 @@ import (
 )
 
 type unconstrainedTest struct {
-	// name is the name of the test function.
+	// name is the name of the test.
 	name string
 	// p is the optimization problem to be solved.
 	p Problem
@@ -1189,8 +1189,6 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			continue
 		}
 
-		p := newProblemInfo(test.p)
-
 		// Check that the function value at the found optimum location is
 		// equal to result.F.
 		optF := test.p.Func(result.X)
@@ -1201,7 +1199,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		if result.Gradient != nil {
 			// Evaluate the norm of the gradient at the found optimum location.
 			g := make([]float64, len(test.x))
-			p.Grad(result.X, g)
+			test.p.Grad(result.X, g)
 
 			if !floats.Equal(result.Gradient, g) {
 				t.Errorf("Gradient at the optimum location not equal to the returned value for:\n%v", test)
@@ -1235,11 +1233,11 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		settings.InitialValue = test.p.Func(test.x)
 		if method.Needs().Gradient {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			p.Grad(test.x, settings.InitialGradient)
+			test.p.Grad(test.x, settings.InitialGradient)
 		}
 		if method.Needs().Hessian {
 			settings.InitialHessian = mat64.NewSymDense(len(test.x), nil)
-			p.Hess(test.x, settings.InitialHessian)
+			test.p.Hess(test.x, settings.InitialHessian)
 		}
 
 		// Rerun the test again to make sure that it gets the same answer with

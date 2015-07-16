@@ -99,45 +99,21 @@ type Stats struct {
 
 // ProblemInfo is data to give to the optimizer about the objective function.
 type ProblemInfo struct {
-	HasGradient                bool
-	HasHessian                 bool
-	HasFunctionGradient        bool
-	HasFunctionGradientHessian bool
-	HasStatus                  bool
+	HasGradient bool
+	HasHessian  bool
+	HasStatus   bool
 }
 
-// problemInfo contains information about which methods the optimization
-// problem provides as well as the optimization problem itself.
-type problemInfo struct {
-	ProblemInfo
-	Problem
-}
-
-func newProblemInfo(p Problem) *problemInfo {
+func newProblemInfo(p *Problem) *ProblemInfo {
 	hasGradient := p.Grad != nil
 	hasHessian := p.Hess != nil
 	hasStatus := p.Status != nil
 
-	return &problemInfo{
-		ProblemInfo: ProblemInfo{
-			HasGradient: hasGradient,
-			HasHessian:  hasHessian,
-			HasStatus:   hasStatus,
-		},
-		Problem: p,
+	return &ProblemInfo{
+		HasGradient: hasGradient,
+		HasHessian:  hasHessian,
+		HasStatus:   hasStatus,
 	}
-}
-
-// TODO(btracey): Think about making this an exported function when the
-// constraint interface is designed.
-func (p problemInfo) satisfies(method Method) error {
-	if method.Needs().Gradient && !p.HasGradient {
-		return errors.New("optimize: function does not implement needed Gradient interface")
-	}
-	if method.Needs().Hessian && !p.HasHessian {
-		return errors.New("optimize: function does not implement needed Hessian interface")
-	}
-	return nil
 }
 
 // complementEval returns an evaluation type that evaluates fields of loc not
@@ -157,10 +133,30 @@ func complementEval(loc *Location, eval EvaluationType) (complEval EvaluationTyp
 
 // Problem describes the optimization problem to be solved.
 type Problem struct {
-	Func   func([]float64) float64
-	Grad   func([]float64, []float64)
-	Hess   func([]float64, *mat64.SymDense)
+	// Func evaluates the objective function at the given location. Func
+	// must not modify x.
+	Func func(x []float64) float64
+	// Grad evaluates the gradient at x and stores the result in-place in grad.
+	// Grad must not modify x.
+	Grad func(x []float64, grad []float64)
+	// Hess evaluates the Hessian at x and stores the result in-place in hess.
+	// Hess must not modify x.
+	Hess func(x []float64, hess *mat64.SymDense)
+	// Status reports the status of the optimization problem and reports
+	// any error.
 	Status func() (Status, error)
+}
+
+// TODO(btracey): Think about making this an exported function when the
+// constraint interface is designed.
+func (p Problem) satisfies(method Method) error {
+	if method.Needs().Gradient && p.Grad == nil {
+		return errors.New("optimize: problem does not provide needed Grad function")
+	}
+	if method.Needs().Hessian && p.Hess == nil {
+		return errors.New("optimize: problem does not provide needed Hess function")
+	}
+	return nil
 }
 
 // Settings represents settings of the optimization run. It contains initial

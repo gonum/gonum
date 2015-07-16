@@ -101,18 +101,12 @@ type Stats struct {
 type ProblemInfo struct {
 	HasGradient bool
 	HasHessian  bool
-	HasStatus   bool
 }
 
 func newProblemInfo(p *Problem) *ProblemInfo {
-	hasGradient := p.Grad != nil
-	hasHessian := p.Hess != nil
-	hasStatus := p.Status != nil
-
 	return &ProblemInfo{
-		HasGradient: hasGradient,
-		HasHessian:  hasHessian,
-		HasStatus:   hasStatus,
+		HasGradient: p.Grad != nil,
+		HasHessian:  p.Hess != nil,
 	}
 }
 

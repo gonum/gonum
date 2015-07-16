@@ -33,6 +33,8 @@ printf $golapack <<"EOH";
 // license that can be found in the LICENSE file.
 
 // Package clapack provides bindings to a C LAPACK library.
+//
+// Links are provided to the NETLIB fortran implementation/dependencies for each function.
 package clapack
 
 /*
@@ -179,6 +181,7 @@ sub processProto {
 	if ($params eq "") {
 		return
 	}
+	print $golapack "// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/".$func.".f.\n";
 	print $golapack "func ".$gofunc."(".$params.") ".$GoRetType."{\n";
 	print $golapack "\t";
 	if ($ret ne 'void') {

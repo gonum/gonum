@@ -49,22 +49,25 @@ import (
 // function evaluations. If you would like to put limits on this, for example
 // maximum runtime or maximum function evaluations, please modify the Settings
 // input struct.
-func Local(f Function, initX []float64, settings *Settings, method Method) (*Result, error) {
+func Local(p Problem, initX []float64, settings *Settings, method Method) (*Result, error) {
+	if p.Func == nil {
+		panic("optimize: objective function is undefined")
+	}
 	if len(initX) == 0 {
 		panic("optimize: initial X has zero length")
 	}
 
 	startTime := time.Now()
-	funcInfo := newFunctionInfo(f)
+
 	if method == nil {
-		method = getDefaultMethod(funcInfo)
+		method = getDefaultMethod(&p)
 	}
-	if err := funcInfo.satisfies(method); err != nil {
+	if err := p.satisfies(method); err != nil {
 		return nil, err
 	}
 
-	if funcInfo.IsStatuser {
-		_, err := funcInfo.statuser.Status()
+	if p.Status != nil {
+		_, err := p.Status()
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +87,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}
 
 	stats := &Stats{}
-	optLoc, evalType, err := getStartingLocation(funcInfo, method, initX, stats, settings)
+	optLoc, evalType, err := getStartingLocation(&p, method, initX, stats, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +109,7 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 		// The starting location is not good enough, we need to perform a
 		// minimization. The optimal location will be stored in-place in
 		// optLoc.
-		status, err = minimize(settings, method, funcInfo, stats, optLoc, startTime)
+		status, err = minimize(settings, method, &p, stats, optLoc, startTime)
 	}
 
 	if settings.Recorder != nil && err == nil {
@@ -121,22 +124,22 @@ func Local(f Function, initX []float64, settings *Settings, method Method) (*Res
 	}, err
 }
 
-func minimize(settings *Settings, method Method, funcInfo *functionInfo, stats *Stats, optLoc *Location, startTime time.Time) (status Status, err error) {
+func minimize(settings *Settings, method Method, p *Problem, stats *Stats, optLoc *Location, startTime time.Time) (status Status, err error) {
 	loc := &Location{}
 	copyLocation(loc, optLoc)
 	xNext := make([]float64, len(loc.X))
 
 	methodStatus, methodIsStatuser := method.(Statuser)
 
-	evalType, iterType, err := method.Init(loc, &funcInfo.FunctionInfo, xNext)
+	evalType, iterType, err := method.Init(loc, newProblemInfo(p), xNext)
 	if err != nil {
 		return Failure, err
 	}
 
 	for {
-		if funcInfo.IsStatuser {
+		if p.Status != nil {
 			// Check the function status before evaluating.
-			status, err = funcInfo.statuser.Status()
+			status, err = p.Status()
 			if err != nil || status != NotTerminated {
 				return
 			}
@@ -144,7 +147,7 @@ func minimize(settings *Settings, method Method, funcInfo *functionInfo, stats *
 
 		// Perform evalType evaluation of the function at xNext and store the
 		// result in location.
-		evaluate(funcInfo, evalType, xNext, loc, stats)
+		evaluate(p, evalType, xNext, loc, stats)
 		// Update the stats and optLoc.
 		update(loc, optLoc, stats, iterType, startTime)
 		// Get the convergence status before recording the new location.
@@ -198,15 +201,15 @@ func copyLocation(dst, src *Location) {
 	}
 }
 
-func getDefaultMethod(funcInfo *functionInfo) Method {
-	if funcInfo.IsGradient {
+func getDefaultMethod(p *Problem) Method {
+	if p.Grad != nil {
 		return &BFGS{}
 	}
 	return &NelderMead{}
 }
 
 // getStartingLocation allocates and initializes the starting location for the minimization.
-func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64, stats *Stats, settings *Settings) (*Location, EvaluationType, error) {
+func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stats, settings *Settings) (*Location, EvaluationType, error) {
 	dim := len(initX)
 	loc := &Location{
 		X: make([]float64, dim),
@@ -250,7 +253,7 @@ func getStartingLocation(funcInfo *functionInfo, method Method, initX []float64,
 		if loc.Hessian != nil {
 			evalType |= HessEvaluation
 		}
-		evaluate(funcInfo, evalType, loc.X, loc, stats)
+		evaluate(p, evalType, loc.X, loc, stats)
 	}
 
 	if math.IsNaN(loc.F) {
@@ -345,11 +348,11 @@ func invalidate(loc *Location) {
 	}
 }
 
-// evaluate evaluates the function given by f at xNext, stores the answer into
+// evaluate evaluates the problem given by p at xNext, stores the answer into
 // loc and updates stats. If loc.X is not equal to xNext, then unused fields of
 // loc are set to NaN.
 // evaluate panics if the function does not support the requested evalType.
-func evaluate(f *functionInfo, evalType EvaluationType, xNext []float64, loc *Location, stats *Stats) {
+func evaluate(p *Problem, evalType EvaluationType, xNext []float64, loc *Location, stats *Stats) {
 	if !floats.Equal(loc.X, xNext) {
 		if evalType == NoEvaluation {
 			// Optimizers should not request NoEvaluation at a new location.
@@ -362,17 +365,17 @@ func evaluate(f *functionInfo, evalType EvaluationType, xNext []float64, loc *Lo
 
 	toEval := evalType
 	if evalType&FuncEvaluation != 0 {
-		loc.F = f.function.Func(loc.X)
+		loc.F = p.Func(loc.X)
 		stats.FuncEvaluations++
 		toEval &= ^FuncEvaluation
 	}
 	if evalType&GradEvaluation != 0 {
-		f.gradient.Grad(loc.X, loc.Gradient)
+		p.Grad(loc.X, loc.Gradient)
 		stats.GradEvaluations++
 		toEval &= ^GradEvaluation
 	}
 	if evalType&HessEvaluation != 0 {
-		f.hessian.Hess(loc.X, loc.Hessian)
+		p.Hess(loc.X, loc.Hessian)
 		stats.HessEvaluations++
 		toEval &= ^HessEvaluation
 	}

@@ -4,26 +4,6 @@
 
 package optimize
 
-import "github.com/gonum/matrix/mat64"
-
-// Function evaluates the objective function at the given location. F
-// must not modify x.
-type Function interface {
-	Func(x []float64) (obj float64)
-}
-
-// Gradient evaluates the gradient at x and stores the result in-place in grad.
-// Grad must not modify x.
-type Gradient interface {
-	Grad(x, grad []float64)
-}
-
-// Hessian evaluates the Hessian at x and stores the result in-place in hess.
-// Hess must not modify x.
-type Hessian interface {
-	Hess(x []float64, hess *mat64.SymDense)
-}
-
 // LinesearchMethod is a type that can perform a line search. Typically, these
 // methods will not be called by the user directly, as they will be called by
 // a Linesearch struct.
@@ -31,7 +11,7 @@ type LinesearchMethod interface {
 	// Init initializes the linesearch method. LinesearchLocation contains the
 	// function information at step == 0, and step contains the first step length
 	// as specified by the NextDirectioner.
-	Init(loc LinesearchLocation, step float64, f *FunctionInfo) EvaluationType
+	Init(loc LinesearchLocation, step float64, p *ProblemInfo) EvaluationType
 
 	// Finished takes in the function result at the most recent linesearch location,
 	// and returns true if the line search has been concluded.
@@ -62,7 +42,7 @@ type NextDirectioner interface {
 // A Method can optimize an objective function.
 type Method interface {
 	// Initializes the method and returns the first location to evaluate
-	Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error)
+	Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error)
 
 	// Stores the next location to evaluate in xNext
 	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)

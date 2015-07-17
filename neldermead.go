@@ -81,7 +81,7 @@ type NelderMead struct {
 	reflectedValue float64    // Value at the last reflection point
 }
 
-func (n *NelderMead) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (n *NelderMead) Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	dim := len(loc.X)
 	if cap(n.vertices) < dim+1 {
 		n.vertices = make([][]float64, dim+1)

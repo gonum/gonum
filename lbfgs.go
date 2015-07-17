@@ -38,7 +38,7 @@ type LBFGS struct {
 	rhoHist []float64   // last Store iterations of rho
 }
 
-func (l *LBFGS) Init(loc *Location, f *FunctionInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (l *LBFGS) Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error) {
 	if l.LinesearchMethod == nil {
 		l.LinesearchMethod = &Bisection{}
 	}
@@ -47,7 +47,7 @@ func (l *LBFGS) Init(loc *Location, f *FunctionInfo, xNext []float64) (Evaluatio
 	}
 	l.linesearch.Method = l.LinesearchMethod
 	l.linesearch.NextDirectioner = l
-	return l.linesearch.Init(loc, f, xNext)
+	return l.linesearch.Init(loc, p, xNext)
 }
 
 func (l *LBFGS) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {

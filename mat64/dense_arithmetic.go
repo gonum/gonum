@@ -124,12 +124,21 @@ func (m *Dense) Norm(ord float64) float64 {
 func (m *Dense) Add(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
-
 	if ar != br || ac != bc {
 		panic(ErrShape)
 	}
 
+	aMat, _ := untranspose(a)
+	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
+	}
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {

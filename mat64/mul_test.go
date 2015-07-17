@@ -254,6 +254,48 @@ func (m *basicVectorer) Col(row []float64, c int) []float64 {
 	return (*Dense)(m).Col(row, c)
 }
 
+type basicSymmetric SymDense
+
+var _ Symmetric = &basicSymmetric{}
+
+func (m *basicSymmetric) At(r, c int) float64 {
+	return (*SymDense)(m).At(r, c)
+}
+
+func (m *basicSymmetric) Dims() (r, c int) {
+	return (*SymDense)(m).Dims()
+}
+
+func (m *basicSymmetric) T() Matrix {
+	return m
+}
+
+func (m *basicSymmetric) Symmetric() int {
+	return (*SymDense)(m).Symmetric()
+}
+
+type basicTriangular TriDense
+
+func (m *basicTriangular) At(r, c int) float64 {
+	return (*TriDense)(m).At(r, c)
+}
+
+func (m *basicTriangular) Dims() (r, c int) {
+	return (*TriDense)(m).Dims()
+}
+
+func (m *basicTriangular) T() Matrix {
+	return Transpose{m}
+}
+
+func (m *basicTriangular) Triangle() (int, bool) {
+	return (*TriDense)(m).Triangle()
+}
+
+func (m *basicTriangular) TTri() Triangular {
+	return TransposeTri{m}
+}
+
 func denseEqual(a *Dense, acomp matComp) bool {
 	ar2, ac2 := a.Dims()
 	if ar2 != acomp.r {

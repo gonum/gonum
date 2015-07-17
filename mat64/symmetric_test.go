@@ -1,3 +1,7 @@
+// Copyright ©2015 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package mat64
 
 import (
@@ -119,6 +123,18 @@ func (s *S) TestSymAdd(c *check.C) {
 			}
 		}
 	}
+
+	method := func(receiver, a, b Matrix) {
+		type addSymer interface {
+			AddSym(a, b Symmetric)
+		}
+		rd := receiver.(addSymer)
+		rd.AddSym(a.(Symmetric), b.(Symmetric))
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Add(a, b)
+	}
+	testTwoInput(c, "AddSym", &SymDense{}, method, denseComparison, legalTypesSym, legalSizeSameSquare)
 }
 
 func (s *S) TestCopy(c *check.C) {

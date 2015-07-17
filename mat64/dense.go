@@ -113,6 +113,28 @@ func (m *Dense) reuseAs(r, c int) {
 	}
 }
 
+// untranspose untransposes a matrix if applicable. If a is an Untransposer, then
+// untranspose returns the underlying matrix and true. If it is not, then it returns
+// the input matrix and false.
+func untranspose(a Matrix) (Matrix, bool) {
+	if ut, ok := a.(Untransposer); ok {
+		return ut.Untranspose(), true
+	}
+	return a, false
+}
+
+// isolatedWorkspace returns a new dense matrix w with the size of a and
+// returns a callback to defer which performs cleanup at the return of the call.
+// This should be used when a method receiver is the same pointer as an input argument.
+func (m *Dense) isolatedWorkspace(a Matrix) (w *Dense, restore func()) {
+	r, c := a.Dims()
+	w = getWorkspace(r, c, false)
+	return w, func() {
+		m.Copy(w)
+		putWorkspace(w)
+	}
+}
+
 func (m *Dense) isZero() bool {
 	// It must be the case that m.Dims() returns
 	// zeros in this case. See comment in Reset().

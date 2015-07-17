@@ -94,6 +94,11 @@ func (v *Vector) Len() int {
 	return v.n
 }
 
+// T performs an implicit transpose by returning the receiver inside a Transpose.
+func (v *Vector) T() Matrix {
+	return Transpose{v}
+}
+
 func (v *Vector) Reset() {
 	v.mat.Data = v.mat.Data[:0]
 	v.mat.Inc = 0

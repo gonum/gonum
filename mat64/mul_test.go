@@ -228,6 +228,10 @@ func (m *basicMatrix) Dims() (r, c int) {
 	return (*Dense)(m).Dims()
 }
 
+func (m *basicMatrix) T() Matrix {
+	return Transpose{m}
+}
+
 type basicVectorer Dense
 
 func (m *basicVectorer) At(r, c int) float64 {
@@ -236,6 +240,10 @@ func (m *basicVectorer) At(r, c int) float64 {
 
 func (m *basicVectorer) Dims() (r, c int) {
 	return (*Dense)(m).Dims()
+}
+
+func (m *basicVectorer) T() Matrix {
+	return Transpose{m}
 }
 
 func (m *basicVectorer) Row(row []float64, r int) []float64 {

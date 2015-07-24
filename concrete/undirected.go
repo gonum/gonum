@@ -226,19 +226,23 @@ func (g *Graph) Weight(e graph.Edge) float64 {
 }
 
 func (g *Graph) Edges() []graph.Edge {
-	m := make(map[WeightedEdge]struct{})
-	toReturn := make([]graph.Edge, 0)
+	var edges []graph.Edge
 
-	for _, neighs := range g.neighbors {
-		for _, we := range neighs {
-			if _, ok := m[we]; !ok {
-				m[we] = struct{}{}
-				toReturn = append(toReturn, we.Edge)
+	seen := make(map[[2]int]struct{})
+	for _, u := range g.neighbors {
+		for _, e := range u {
+			uid := e.From().ID()
+			vid := e.To().ID()
+			if _, ok := seen[[2]int{uid, vid}]; ok {
+				continue
 			}
+			seen[[2]int{uid, vid}] = struct{}{}
+			seen[[2]int{vid, uid}] = struct{}{}
+			edges = append(edges, e.Edge)
 		}
 	}
 
-	return toReturn
+	return edges
 }
 
 func (g *Graph) Degree(n graph.Node) int {

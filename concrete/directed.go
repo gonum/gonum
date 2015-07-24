@@ -250,20 +250,11 @@ func (g *DirectedGraph) Weight(e graph.Edge) float64 {
 }
 
 func (g *DirectedGraph) Edges() []graph.Edge {
-	edgeList := make([]graph.Edge, 0, len(g.successors))
-	edgeMap := make(map[int]map[int]struct{}, len(g.successors))
-	for n, succMap := range g.successors {
-		edgeMap[n] = make(map[int]struct{}, len(succMap))
-		for succ, edge := range succMap {
-			if doneMap, ok := edgeMap[succ]; ok {
-				if _, ok := doneMap[n]; ok {
-					continue
-				}
-			}
-			edgeList = append(edgeList, edge)
-			edgeMap[n][succ] = struct{}{}
+	var edges []graph.Edge
+	for _, u := range g.nodeMap {
+		for _, e := range g.successors[u.ID()] {
+			edges = append(edges, e.Edge)
 		}
 	}
-
-	return edgeList
+	return edges
 }

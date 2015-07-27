@@ -131,7 +131,7 @@ func minimize(settings *Settings, method Method, p *Problem, stats *Stats, optLo
 
 	methodStatus, methodIsStatuser := method.(Statuser)
 
-	evalType, iterType, err := method.Init(loc, newProblemInfo(p), xNext)
+	evalType, iterType, err := method.Init(loc, xNext)
 	if err != nil {
 		return Failure, err
 	}

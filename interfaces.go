@@ -11,7 +11,7 @@ type LinesearchMethod interface {
 	// Init initializes the linesearch method. LinesearchLocation contains the
 	// function information at step == 0, and step contains the first step length
 	// as specified by the NextDirectioner.
-	Init(loc LinesearchLocation, step float64, p *ProblemInfo) EvaluationType
+	Init(loc LinesearchLocation, step float64) EvaluationType
 
 	// Finished takes in the function result at the most recent linesearch location,
 	// and returns true if the line search has been concluded.
@@ -42,7 +42,7 @@ type NextDirectioner interface {
 // A Method can optimize an objective function.
 type Method interface {
 	// Initializes the method and returns the first location to evaluate
-	Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error)
+	Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
 
 	// Stores the next location to evaluate in xNext
 	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)

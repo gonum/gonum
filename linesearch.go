@@ -21,13 +21,11 @@ type Linesearch struct {
 	initX []float64
 	dir   []float64
 
-	probInfo *ProblemInfo
-
 	lastEvalType EvaluationType
 	iterType     IterationType
 }
 
-func (ls *Linesearch) Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *Linesearch) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	ls.initX = resize(ls.initX, len(loc.X))
 	copy(ls.initX, loc.X)
 
@@ -45,9 +43,8 @@ func (ls *Linesearch) Init(loc *Location, p *ProblemInfo, xNext []float64) (Eval
 		F:          loc.F,
 		Derivative: projGrad,
 	}
-	evalType := ls.Method.Init(lsLoc, stepSize, p)
+	evalType := ls.Method.Init(lsLoc, stepSize)
 	floats.AddScaledTo(xNext, ls.initX, stepSize, ls.dir)
-	ls.probInfo = p
 	ls.lastEvalType = evalType
 	ls.iterType = MinorIteration
 	return evalType, ls.iterType, nil
@@ -120,7 +117,7 @@ func (ls *Linesearch) initNextLinesearch(loc *Location, xNext []float64) (Evalua
 		F:          loc.F,
 		Derivative: projGrad,
 	}
-	evalType := ls.Method.Init(lsLoc, stepsize, ls.probInfo)
+	evalType := ls.Method.Init(lsLoc, stepsize)
 	floats.AddScaledTo(xNext, ls.initX, stepsize, ls.dir)
 	// Compare the starting point for the current iteration with the next
 	// evaluation point to make sure that rounding errors do not prevent progress.

@@ -26,7 +26,7 @@ type Bisection struct {
 	maxGrad  float64
 }
 
-func (b *Bisection) Init(loc LinesearchLocation, step float64, _ *ProblemInfo) EvaluationType {
+func (b *Bisection) Init(loc LinesearchLocation, step float64) EvaluationType {
 	if loc.Derivative >= 0 {
 		panic("bisection: init G non-negative")
 	}

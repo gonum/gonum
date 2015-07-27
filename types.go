@@ -97,19 +97,6 @@ type Stats struct {
 	Runtime         time.Duration // Total runtime of the optimization
 }
 
-// ProblemInfo is data to give to the optimizer about the objective function.
-type ProblemInfo struct {
-	HasGradient bool
-	HasHessian  bool
-}
-
-func newProblemInfo(p *Problem) *ProblemInfo {
-	return &ProblemInfo{
-		HasGradient: p.Grad != nil,
-		HasHessian:  p.Hess != nil,
-	}
-}
-
 // complementEval returns an evaluation type that evaluates fields of loc not
 // evaluated by eval.
 func complementEval(loc *Location, eval EvaluationType) (complEval EvaluationType) {

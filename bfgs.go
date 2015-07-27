@@ -41,7 +41,7 @@ type BFGS struct {
 // NOTE: This method exists so that it's easier to use a bfgs algorithm because
 // it implements Method
 
-func (b *BFGS) Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationType, IterationType, error) {
+func (b *BFGS) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if b.LinesearchMethod == nil {
 		b.LinesearchMethod = &Bisection{}
 	}
@@ -51,7 +51,7 @@ func (b *BFGS) Init(loc *Location, p *ProblemInfo, xNext []float64) (EvaluationT
 	b.linesearch.Method = b.LinesearchMethod
 	b.linesearch.NextDirectioner = b
 
-	return b.linesearch.Init(loc, p, xNext)
+	return b.linesearch.Init(loc, xNext)
 }
 
 func (b *BFGS) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {

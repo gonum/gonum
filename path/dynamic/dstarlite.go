@@ -57,13 +57,14 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 	*/
 
 	d := &DStarLite{
-		s: &dStarLiteNode{Node: s, rhs: math.Inf(1), g: math.Inf(1), key: badKey},
-		t: &dStarLiteNode{Node: t, g: math.Inf(1), key: badKey}, // badKey is overwritten below.
+		s: newDStarLiteNode(s),
+		t: newDStarLiteNode(t), // badKey is overwritten below.
 
 		model: m,
 
 		heuristic: h,
 	}
+	d.t.rhs = 0
 
 	/*
 		procedure Main()
@@ -85,7 +86,6 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 		}
 	}
 
-	d.queue.indexOf = make(map[int]int)
 	d.queue.insert(d.t, key{d.heuristic(s, t), 0})
 
 	for _, n := range g.Nodes() {
@@ -95,7 +95,7 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 		case d.t.ID():
 			d.model.AddNode(d.t)
 		default:
-			d.model.AddNode(&dStarLiteNode{Node: n, rhs: math.Inf(1), g: math.Inf(1), key: badKey})
+			d.model.AddNode(newDStarLiteNode(n))
 		}
 	}
 	for _, u := range d.model.Nodes() {
@@ -136,15 +136,14 @@ func (d *DStarLite) update(u *dStarLiteNode) {
 	   {08”} else if (g(u) != rhs(u) AND u /∈ U) U.Insert(u,CalculateKey(u));
 	   {09”} else if (g(u) = rhs(u) AND u ∈ U) U.Remove(u);
 	*/
-	uid := u.ID()
-	inQueue := d.queue.has(uid)
+	inQueue := u.inQueue()
 	switch {
 	case inQueue && u.g != u.rhs:
-		d.queue.update(uid, d.keyFor(u))
+		d.queue.update(u, d.keyFor(u))
 	case !inQueue && u.g != u.rhs:
 		d.queue.insert(u, d.keyFor(u))
 	case inQueue && u.g == u.rhs:
-		d.queue.remove(uid)
+		d.queue.remove(u)
 	}
 }
 
@@ -179,10 +178,10 @@ func (d *DStarLite) findShortestPath() {
 		}
 		switch kNew := d.keyFor(u); {
 		case u.key.less(kNew):
-			d.queue.update(u.ID(), kNew)
+			d.queue.update(u, kNew)
 		case u.g > u.rhs:
 			u.g = u.rhs
-			d.queue.remove(u.ID())
+			d.queue.remove(u)
 			for _, _s := range d.model.To(u) {
 				s := _s.(*dStarLiteNode)
 				if s.ID() != d.t.ID() {
@@ -322,7 +321,7 @@ func (d *DStarLite) worldNodeFor(n graph.Node) *dStarLiteNode {
 	case graph.Node:
 		panic(fmt.Sprintf("D* Lite: illegal world model node type: %T", w))
 	default:
-		return &dStarLiteNode{Node: n, rhs: math.Inf(1), g: math.Inf(1), key: badKey}
+		return newDStarLiteNode(n)
 	}
 }
 
@@ -407,54 +406,63 @@ func (k key) less(other key) bool {
 type dStarLiteNode struct {
 	graph.Node
 	key key
+	idx int
 	rhs float64
 	g   float64
 }
 
+// newDStarLiteNode returns a dStarLite node that is in a legal state
+// for existence outside the DStarLite priority queue.
+func newDStarLiteNode(n graph.Node) *dStarLiteNode {
+	return &dStarLiteNode{
+		Node: n,
+		rhs:  math.Inf(1),
+		g:    math.Inf(1),
+		key:  badKey,
+		idx:  -1,
+	}
+}
+
+// inQueue returns whether the node is in the queue.
+func (q *dStarLiteNode) inQueue() bool {
+	return q.idx >= 0
+}
+
 // dStarLiteQueue is a D* Lite priority queue.
-type dStarLiteQueue struct {
-	indexOf map[int]int
-	nodes   []*dStarLiteNode
+type dStarLiteQueue []*dStarLiteNode
+
+func (q dStarLiteQueue) Less(i, j int) bool {
+	return q[i].key.less(q[j].key)
 }
 
-func (q *dStarLiteQueue) Less(i, j int) bool {
-	return q.nodes[i].key.less(q.nodes[j].key)
+func (q dStarLiteQueue) Swap(i, j int) {
+	q[i], q[j] = q[j], q[i]
+	q[i].idx = i
+	q[j].idx = j
 }
 
-func (q *dStarLiteQueue) Swap(i, j int) {
-	q.indexOf[q.nodes[i].ID()] = j
-	q.indexOf[q.nodes[j].ID()] = i
-	q.nodes[i], q.nodes[j] = q.nodes[j], q.nodes[i]
-}
-
-func (q *dStarLiteQueue) Len() int {
-	return len(q.nodes)
+func (q dStarLiteQueue) Len() int {
+	return len(q)
 }
 
 func (q *dStarLiteQueue) Push(x interface{}) {
 	n := x.(*dStarLiteNode)
-	q.indexOf[n.ID()] = len(q.nodes)
-	q.nodes = append(q.nodes, n)
+	n.idx = len(*q)
+	*q = append(*q, n)
 }
 
 func (q *dStarLiteQueue) Pop() interface{} {
-	n := q.nodes[len(q.nodes)-1]
-	q.nodes = q.nodes[:len(q.nodes)-1]
-	delete(q.indexOf, n.ID())
+	n := (*q)[len(*q)-1]
+	n.idx = -1
+	*q = (*q)[:len(*q)-1]
 	return n
-}
-
-// has returns whether the node identified by id is in the queue.
-func (q *dStarLiteQueue) has(id int) bool {
-	_, ok := q.indexOf[id]
-	return ok
 }
 
 // top returns the top node in the queue. Note that instead of
 // returning a key [∞;∞] when q is empty, the caller checks for
 // an empty queue by calling q.Len.
-func (q *dStarLiteQueue) top() *dStarLiteNode {
-	return q.nodes[0]
+func (q dStarLiteQueue) top() *dStarLiteNode {
+	return q[0]
 }
 
 // insert puts the node u into the queue with the key k.
@@ -464,21 +472,14 @@ func (q *dStarLiteQueue) insert(u *dStarLiteNode, k key) {
 }
 
 // update updates the node in the queue identified by id with the key k.
-func (q *dStarLiteQueue) update(id int, k key) {
-	i, ok := q.indexOf[id]
-	if !ok {
-		return
-	}
-	q.nodes[i].key = k
-	heap.Fix(q, i)
+func (q *dStarLiteQueue) update(n *dStarLiteNode, k key) {
+	n.key = k
+	heap.Fix(q, n.idx)
 }
 
 // remove removes the node identified by id from the queue.
-func (q *dStarLiteQueue) remove(id int) {
-	i, ok := q.indexOf[id]
-	if !ok {
-		return
-	}
-	q.nodes[i].key = badKey
-	heap.Remove(q, i)
+func (q *dStarLiteQueue) remove(n *dStarLiteNode) {
+	heap.Remove(q, n.idx)
+	n.key = badKey
+	n.idx = -1
 }

@@ -10,14 +10,14 @@ import (
 	"github.com/gonum/floats"
 )
 
-// Linesearch encapsulates the common functionality of gradient-based
+// LinesearchHelper encapsulates the common functionality of gradient-based
 // line-search optimization methods and serves as a helper struct for their
 // implementation. It consists of a NextDirectioner, which specifies the search
-// direction at each iteration, and a LinesearchMethod which performs a linesearch
+// direction at each iteration, and a Linesearch which performs a linesearch
 // along the search direction.
-type Linesearch struct {
+type LinesearchHelper struct {
 	NextDirectioner NextDirectioner
-	Method          LinesearchMethod
+	Linesearch      Linesearch
 
 	x     []float64 // Starting point for the current iteration.
 	dir   []float64 // Search direction for the current iteration.
@@ -27,7 +27,7 @@ type Linesearch struct {
 	iterType IterationType
 }
 
-func (ls *Linesearch) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *LinesearchHelper) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if loc.Gradient == nil {
 		panic("linesearch: gradient is nil")
 	}
@@ -40,7 +40,7 @@ func (ls *Linesearch) Init(loc *Location, xNext []float64) (EvaluationType, Iter
 	return ls.initNextLinesearch(loc, xNext)
 }
 
-func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *LinesearchHelper) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if ls.iterType == SubIteration {
 		// We needed to evaluate invalid fields of Location. Now we have them
 		// and can announce MajorIteration.
@@ -62,7 +62,7 @@ func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, I
 		F:          loc.F,
 		Derivative: projGrad,
 	}
-	if ls.Method.Finished(lsLoc) {
+	if ls.Linesearch.Finished(lsLoc) {
 		copy(xNext, loc.X)
 		// Check if the last evaluation evaluated all fields of Location.
 		ls.evalType = complementEval(loc, ls.evalType)
@@ -77,7 +77,7 @@ func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, I
 	}
 
 	// Line search not done, just iterate.
-	stepSize, evalType, err := ls.Method.Iterate(lsLoc)
+	stepSize, evalType, err := ls.Linesearch.Iterate(lsLoc)
 	if err != nil {
 		ls.evalType = NoEvaluation
 		ls.iterType = NoIteration
@@ -98,7 +98,7 @@ func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, I
 	return ls.evalType, ls.iterType, nil
 }
 
-func (ls *Linesearch) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *LinesearchHelper) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	copy(ls.x, loc.X)
 
 	var stepSize float64
@@ -120,7 +120,7 @@ func (ls *Linesearch) initNextLinesearch(loc *Location, xNext []float64) (Evalua
 		F:          loc.F,
 		Derivative: projGrad,
 	}
-	ls.evalType = ls.Method.Init(lsLoc, stepSize)
+	ls.evalType = ls.Linesearch.Init(lsLoc, stepSize)
 
 	floats.AddScaledTo(xNext, ls.x, stepSize, ls.dir)
 	// Compare the starting point for the current iteration with the next

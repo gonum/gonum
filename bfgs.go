@@ -18,9 +18,9 @@ import (
 // convergence when in proximity to a local minimum. It has memory cost that is
 // O(n^2) relative to the input dimension.
 type BFGS struct {
-	LinesearchMethod LinesearchMethod
+	Linesearch Linesearch
 
-	linesearch *Linesearch
+	ls *LinesearchHelper
 
 	x    []float64 // location of the last major iteration
 	grad []float64 // gradient at the last major iteration
@@ -43,20 +43,20 @@ type BFGS struct {
 // it implements Method
 
 func (b *BFGS) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	if b.LinesearchMethod == nil {
-		b.LinesearchMethod = &Bisection{}
+	if b.Linesearch == nil {
+		b.Linesearch = &Bisection{}
 	}
-	if b.linesearch == nil {
-		b.linesearch = &Linesearch{}
+	if b.ls == nil {
+		b.ls = &LinesearchHelper{}
 	}
-	b.linesearch.Method = b.LinesearchMethod
-	b.linesearch.NextDirectioner = b
+	b.ls.Linesearch = b.Linesearch
+	b.ls.NextDirectioner = b
 
-	return b.linesearch.Init(loc, xNext)
+	return b.ls.Init(loc, xNext)
 }
 
 func (b *BFGS) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	return b.linesearch.Iterate(loc, xNext)
+	return b.ls.Iterate(loc, xNext)
 }
 
 func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {

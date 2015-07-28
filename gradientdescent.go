@@ -6,36 +6,36 @@ package optimize
 
 import "github.com/gonum/floats"
 
-// GradientDescent is a Method that performs gradient-based optimization. Gradient
-// Descent performs successive steps along the direction of the gradient. The
-// LinesearchMethod specifies the kind of linesearch to be done, and StepSizer determines
-// the initial step size of each direction. If either LinesearchMethod or StepSizer
-// are nil, a reasonable value will be chosen.
+// GradientDescent is a Method that performs gradient-based optimization.
+// Gradient Descent performs successive steps along the direction of the
+// gradient. The Linesearch specifies the kind of linesearch to be done, and
+// StepSizer determines the initial step size of each direction. If either
+// Linesearch or StepSizer are nil, a reasonable value will be chosen.
 type GradientDescent struct {
-	LinesearchMethod LinesearchMethod
-	StepSizer        StepSizer
+	Linesearch Linesearch
+	StepSizer  StepSizer
 
-	linesearch *Linesearch
+	ls *LinesearchHelper
 }
 
 func (g *GradientDescent) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if g.StepSizer == nil {
 		g.StepSizer = &QuadraticStepSize{}
 	}
-	if g.LinesearchMethod == nil {
-		g.LinesearchMethod = &Backtracking{}
+	if g.Linesearch == nil {
+		g.Linesearch = &Backtracking{}
 	}
-	if g.linesearch == nil {
-		g.linesearch = &Linesearch{}
+	if g.ls == nil {
+		g.ls = &LinesearchHelper{}
 	}
-	g.linesearch.Method = g.LinesearchMethod
-	g.linesearch.NextDirectioner = g
+	g.ls.Linesearch = g.Linesearch
+	g.ls.NextDirectioner = g
 
-	return g.linesearch.Init(loc, xNext)
+	return g.ls.Init(loc, xNext)
 }
 
 func (g *GradientDescent) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	return g.linesearch.Iterate(loc, xNext)
+	return g.ls.Iterate(loc, xNext)
 }
 
 func (g *GradientDescent) InitDirection(loc *Location, dir []float64) (stepSize float64) {

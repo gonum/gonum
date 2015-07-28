@@ -35,11 +35,11 @@ const maxNewtonModifications = 20
 // cost of its factorization is prohibitive, BFGS or L-BFGS quasi-Newton method
 // can be used instead.
 type Newton struct {
-	// LinesearchMethod is a method used for selecting suitable steps along the
+	// Linesearch is a method used for selecting suitable steps along the
 	// descent direction d. Steps should satisfy at least one of the Wolfe,
-	// Goldstein or Armijo conditions. If LinesearchMethod == nil, an
-	// appropriate default is chosen.
-	LinesearchMethod LinesearchMethod
+	// Goldstein or Armijo conditions.
+	// If Linesearch == nil, an appropriate default is chosen.
+	Linesearch Linesearch
 	// Increase is the factor by which a scalar tau is successively increased
 	// so that (H + tau*I) is positive definite. Larger values reduce the
 	// number of trial Hessian factorizations, but also reduce the second-order
@@ -47,7 +47,7 @@ type Newton struct {
 	// Increase must be greater than 1. If Increase is 0, it is defaulted to 5.
 	Increase float64
 
-	linesearch *Linesearch
+	ls *LinesearchHelper
 
 	hess *mat64.SymDense // Storage for a copy of the Hessian matrix.
 	chol *mat64.TriDense // Storage for the Cholesky factorization.
@@ -61,20 +61,20 @@ func (n *Newton) Init(loc *Location, xNext []float64) (EvaluationType, Iteration
 	if n.Increase <= 1 {
 		panic("optimize: Newton.Increase must be greater than 1")
 	}
-	if n.LinesearchMethod == nil {
-		n.LinesearchMethod = &Bisection{}
+	if n.Linesearch == nil {
+		n.Linesearch = &Bisection{}
 	}
-	if n.linesearch == nil {
-		n.linesearch = &Linesearch{}
+	if n.ls == nil {
+		n.ls = &LinesearchHelper{}
 	}
-	n.linesearch.Method = n.LinesearchMethod
-	n.linesearch.NextDirectioner = n
+	n.ls.Linesearch = n.Linesearch
+	n.ls.NextDirectioner = n
 
-	return n.linesearch.Init(loc, xNext)
+	return n.ls.Init(loc, xNext)
 }
 
 func (n *Newton) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	return n.linesearch.Iterate(loc, xNext)
+	return n.ls.Iterate(loc, xNext)
 }
 
 func (n *Newton) InitDirection(loc *Location, dir []float64) (stepSize float64) {

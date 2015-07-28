@@ -1015,7 +1015,7 @@ func TestGradientDescent(t *testing.T) {
 
 func TestGradientDescentBacktracking(t *testing.T) {
 	testLocal(t, gradientDescentTests, &GradientDescent{
-		LinesearchMethod: &Backtracking{
+		Linesearch: &Backtracking{
 			FunConst: 0.1,
 		},
 	})
@@ -1023,7 +1023,7 @@ func TestGradientDescentBacktracking(t *testing.T) {
 
 func TestGradientDescentBisection(t *testing.T) {
 	testLocal(t, gradientDescentTests, &GradientDescent{
-		LinesearchMethod: &Bisection{},
+		Linesearch: &Bisection{},
 	})
 }
 
@@ -1292,7 +1292,7 @@ func TestIssue76(t *testing.T) {
 		MajorIterations:   1000000,
 	}
 	m := &GradientDescent{
-		LinesearchMethod: &Backtracking{},
+		Linesearch: &Backtracking{},
 	}
 	// We are not interested in the error, only in the returned status.
 	r, _ := Local(p, x, s, m)

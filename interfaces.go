@@ -4,10 +4,10 @@
 
 package optimize
 
-// LinesearchMethod is a type that can perform a line search. Typically, these
+// Linesearch is a type that can perform a line search. Typically, these
 // methods will not be called by the user directly, as they will be called by
-// a Linesearch struct.
-type LinesearchMethod interface {
+// a LinesearchHelper struct.
+type Linesearch interface {
 	// Init initializes the linesearch method. LinesearchLocation contains the
 	// function information at step == 0, and step contains the first step length
 	// as specified by the NextDirectioner.

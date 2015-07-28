@@ -24,6 +24,14 @@ func asBasicVectorer(d *Dense) Matrix {
 	return (*basicVectorer)(d)
 }
 
+func asBasicSymmetric(s *SymDense) Matrix {
+	return (*basicSymmetric)(s)
+}
+
+func asBasicTriangular(t *TriDense) Triangular {
+	return (*basicTriangular)(t)
+}
+
 func (s *S) TestNewDense(c *check.C) {
 	for i, test := range []struct {
 		a          []float64
@@ -397,6 +405,15 @@ func (s *S) TestAdd(c *check.C) {
 		c.Check(a.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 	}
+
+	method := func(receiver, a, b Matrix) {
+		rd := receiver.(Adder)
+		rd.Add(a, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Add(a, b)
+	}
+	testTwoInput(c, "Add", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameRectangular)
 }
 
 func (s *S) TestSub(c *check.C) {

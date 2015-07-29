@@ -78,3 +78,17 @@ func getWorkspace(r, c int, clear bool) *Dense {
 func putWorkspace(w *Dense) {
 	pool[bits(uint64(cap(w.mat.Data)))].Put(w)
 }
+
+// getWorkspaceVec returns a *Vec of length n and a cap that is less than 2*n. If clear is true, the
+// data slice visible through the Matrix interface is zeroed.
+func getWorkspaceVec(n int, clear bool) *Vector {
+	// TODO(btracey): Replace this when there is a resolution to issue 160.
+	return NewVector(n, nil)
+}
+
+// putWorkspaceVec replaces a used *Vector into the appropriate size
+// workspace pool. putWorkspace must not be called with a matrix
+// where references to the underlying data slice has been kept.
+func putWorkspaceVec(v *Vector) {
+	// TODO(btracey): Make this not a no-op when there is a resolution to issue 160.
+}

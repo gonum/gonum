@@ -158,12 +158,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		matrix = returnAs(mat, t)
 	case *Vector:
 		if m == 0 && n == 0 {
-			return &Vector{
-				n: 0,
-				mat: blas64.Vector{
-					Inc: 1,
-				},
-			}
+			return &Vector{}
 		}
 		if n != 1 {
 			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))

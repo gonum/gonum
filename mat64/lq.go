@@ -57,7 +57,7 @@ func LQ(a *Dense) LQFactor {
 				if k < m-1 {
 					a = lq.View(k+1, k, m-k-1, n-k).(*Dense)
 					projs = projs.ViewVec(0, m-k-1)
-					projs.MulVec(a, false, NewVector(len(hh), hh))
+					projs.MulVec(a, NewVector(len(hh), hh))
 
 					for j := 0; j < m-k-1; j++ {
 						dst := a.RawRowView(j)

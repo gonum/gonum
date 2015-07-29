@@ -55,11 +55,20 @@ func legalTypesSym(a, b Matrix) bool {
 	return true
 }
 
+// legalTypesNotVecVec returns whether the first input is an arbitrary Matrix
+// and the second input is a *Vector.
+func legalTypesNotVecVec(a, b Matrix) bool {
+	_, ok := b.(*Vector)
+	return ok
+}
+
 // legalDims returns whether {m,n} is a valid dimension of the given matrix type.
 func legalDims(a Matrix, m, n int) bool {
-	switch a.(type) {
+	switch t := a.(type) {
 	default:
-		panic("not coded")
+		panic("legal dims type not coded")
+	case Untransposer:
+		return legalDims(t.Untranspose(), n, m)
 	case *Dense, *basicMatrix, *basicVectorer:
 		if m < 0 || n < 0 {
 			return false
@@ -74,15 +83,12 @@ func legalDims(a Matrix, m, n int) bool {
 		if m < 0 || n < 0 {
 			return false
 		}
-		if m != 1 && n != 1 {
-			return false
-		}
-		return true
+		return n == 1
 	}
 }
 
 // returnAs returns the matrix a with the type of t. Used for making a concrete
-// type and changing to the basicform
+// type and changing to the basic form.
 func returnAs(a, t Matrix) Matrix {
 	switch mat := a.(type) {
 	default:
@@ -119,12 +125,29 @@ func returnAs(a, t Matrix) Matrix {
 	}
 }
 
+// retranspose returns the matrix m inside an Untransposer of the type
+// of a.
+func retranspose(a, m Matrix) Matrix {
+	switch a.(type) {
+	case Transpose:
+		return Transpose{m}
+	case TransposeTri:
+		return TransposeTri{m.(Triangular)}
+	case Untransposer:
+		panic("unknown transposer type")
+	default:
+		panic("a is not an untransposer")
+	}
+}
+
 // makeRandOf returns a new randomly filled m×n matrix of the underlying matrix type.
 func makeRandOf(a Matrix, m, n int) Matrix {
 	var matrix Matrix
 	switch t := a.(type) {
 	default:
-		panic("unknown type")
+		panic("unknown type for make rand of")
+	case Untransposer:
+		matrix = retranspose(a, makeRandOf(t.Untranspose(), n, m))
 	case *Dense, *basicMatrix, *basicVectorer:
 		mat := NewDense(m, n, nil)
 		for i := 0; i < m; i++ {
@@ -134,27 +157,33 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		}
 		matrix = returnAs(mat, t)
 	case *Vector:
-		if m != 1 && n != 1 {
-			panic("bad size")
+		if m == 0 && n == 0 {
+			return &Vector{
+				n: 0,
+				mat: blas64.Vector{
+					Inc: 1,
+				},
+			}
 		}
-		length := n
-		if n == 1 {
-			length = m
+		if n != 1 {
+			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))
+		}
+		length := m
+		inc := 1
+		if t.mat.Inc != 0 {
+			inc = t.mat.Inc
 		}
 		mat := &Vector{
 			mat: blas64.Vector{
-				Inc:  t.mat.Inc,
-				Data: make([]float64, t.mat.Inc*length),
+				Inc:  inc,
+				Data: make([]float64, inc*length),
 			},
 			n: length,
 		}
 		for i := 0; i < length; i++ {
 			mat.SetVec(i, rand.Float64())
 		}
-		if n == 1 {
-			return mat
-		}
-		matrix = Transpose{mat}
+		return mat
 	case *SymDense, *basicSymmetric:
 		if m != n {
 			panic("bad size")
@@ -198,6 +227,8 @@ func makeCopyOf(a Matrix) Matrix {
 	switch t := a.(type) {
 	default:
 		panic("unknown type in makeCopyOf")
+	case Untransposer:
+		return retranspose(a, makeCopyOf(t.Untranspose()))
 	case *Dense, *basicMatrix, *basicVectorer:
 		var m Dense
 		m.Clone(a)
@@ -234,69 +265,7 @@ func makeCopyOf(a Matrix) Matrix {
 		}
 		copy(m.mat.Data, t.mat.Data)
 		return m
-	case Transpose:
-		matrix := t.Matrix
-		mat := matrix.(*Vector) // Should only be here for the vector type
-		m := &Vector{
-			mat: blas64.Vector{
-				Inc:  mat.mat.Inc,
-				Data: make([]float64, len(mat.mat.Data)),
-			},
-			n: mat.n,
-		}
-		copy(m.mat.Data, mat.mat.Data)
-		return Transpose{m}
 	}
-}
-
-// makeTransposeCopyOf returns a transpose copy of the given matrix with the same
-// underlying type.
-func makeTransposeCopyOf(a Matrix) Matrix {
-	var matrix Matrix
-	r, c := a.Dims()
-	switch t := a.(type) {
-	default:
-		panic("unknown type in make transpose of")
-	case *Dense, *basicMatrix, *basicVectorer:
-		m := NewDense(c, r, nil)
-		for i := 0; i < r; i++ {
-			for j := 0; j < c; j++ {
-				m.Set(j, i, a.At(i, j))
-			}
-		}
-		matrix = returnAs(m, t)
-	case *SymDense, *basicSymmetric:
-		matrix = makeCopyOf(a)
-	case *TriDense, *basicTriangular:
-		n, upper := t.(Triangular).Triangle()
-		mUpper := !upper
-		m := NewTriDense(n, mUpper, nil)
-		if mUpper {
-			for i := 0; i < n; i++ {
-				for j := i; j < n; j++ {
-					m.SetTri(i, j, t.At(j, i))
-				}
-			}
-		} else {
-			for i := 0; i < n; i++ {
-				for j := 0; j <= i; j++ {
-					m.SetTri(i, j, t.At(j, i))
-				}
-			}
-		}
-		matrix = returnAs(m, t)
-	case *Vector:
-		m := makeCopyOf(a)
-		matrix = Transpose{m}
-	case Transpose:
-		v := t.Matrix.(*Vector)
-		m := makeCopyOf(v)
-		matrix = m
-	}
-	if mr, mc := matrix.Dims(); mr != c || mc != r {
-		panic(fmt.Sprintf("makeTransposeOf for %T returns wrong size: %d×%d != %d×%d", a, c, r, mr, mc))
-	}
-	return matrix
 }
 
 // sameType returns true if a and b have the same underlying type.
@@ -308,6 +277,10 @@ func sameType(a, b Matrix) bool {
 // pointer.
 func maybeSame(receiver, a Matrix) bool {
 	rr, rc := receiver.Dims()
+	u, ok := a.(Untransposer)
+	if ok {
+		a = u.Untranspose()
+	}
 	ar, ac := a.Dims()
 	if !sameType(receiver, a) {
 		return false
@@ -361,9 +334,13 @@ func underlyingData(a Matrix) []float64 {
 	switch t := a.(type) {
 	default:
 		panic("matrix type not implemented for extracting underlying data")
+	case Untransposer:
+		return underlyingData(t.Untranspose())
 	case *Dense:
 		return t.mat.Data
 	case *SymDense:
+		return t.mat.Data
+	case *Vector:
 		return t.mat.Data
 	}
 }
@@ -395,6 +372,11 @@ func testTwoInput(c *check.C,
 			Inc: 10,
 		},
 	}
+	// It is useful to isolate a single Matrix in the types list during debugging.
+	// Ensure that strideVec is always a used variable to avoid compile errors
+	// when commenting out types.
+	_ = strideVec
+
 	// Loop over all of the matrix types.
 	types := []Matrix{
 		&Dense{},
@@ -402,11 +384,23 @@ func testTwoInput(c *check.C,
 		NewTriDense(0, true, nil),
 		NewTriDense(0, false, nil),
 		NewVector(0, nil),
+		Transpose{NewVector(0, nil)},
 		strideVec,
 		&basicMatrix{},
 		&basicVectorer{},
 		&basicSymmetric{},
 		&basicTriangular{},
+
+		Transpose{&Dense{}},
+		Transpose{NewTriDense(0, true, nil)},
+		TransposeTri{NewTriDense(0, true, nil)},
+		Transpose{NewTriDense(0, false, nil)},
+		TransposeTri{NewTriDense(0, false, nil)},
+		Transpose{strideVec},
+		Transpose{&basicMatrix{}},
+		Transpose{&basicVectorer{}},
+		Transpose{&basicSymmetric{}},
+		Transpose{&basicTriangular{}},
 	}
 
 	for _, aMat := range types {
@@ -415,7 +409,6 @@ func testTwoInput(c *check.C,
 			for _, test := range []struct {
 				ar, ac, br, bc int
 			}{
-
 				{1, 1, 1, 1},
 				{6, 6, 6, 6},
 				{7, 7, 7, 7},
@@ -424,6 +417,7 @@ func testTwoInput(c *check.C,
 				{1, 1, 5, 1},
 				{1, 5, 1, 1},
 				{5, 1, 1, 1},
+
 				{6, 6, 6, 11},
 				{6, 6, 11, 6},
 				{6, 11, 6, 6},
@@ -522,180 +516,159 @@ func testTwoInput(c *check.C,
 					bDense.Clone(b)
 					denseComparison(&want, &aDense, &bDense)
 				}
-				// Call the method and check the result with all transpose variations.
-				// The transpose cases are tested by creating a transpose copy
-				// and calling T().
-				for _, aTrans := range []bool{false, true} {
-					for _, bTrans := range []bool{false, true} {
-						aCopy := makeCopyOf(a)
-						bCopy := makeCopyOf(b)
+				aCopy := makeCopyOf(a)
+				bCopy := makeCopyOf(b)
 
-						aCall := a
-						bCall := b
-						if aTrans {
-							aCall = makeTransposeCopyOf(a).T()
-						}
-						if bTrans {
-							bCall = makeTransposeCopyOf(b).T()
-						}
+				// Test the method for a zero-value of the receiver.
+				aType, aTrans := untranspose(a)
+				bType, bTrans := untranspose(b)
+				errStr := fmt.Sprintf("%T.%s(%T, %T), sizes: %#v, atrans %v, btrans %v", receiver, name, aType, bType, test, aTrans, bTrans)
+				zero := makeRandOf(receiver, 0, 0)
+				panicked, err := panics(func() { method(zero, a, b) })
+				if !dimsOK && !panicked {
+					c.Errorf("Did not panic with illegal size: %s", errStr)
+					continue
+				}
+				if dimsOK && panicked {
+					c.Errorf("Panicked with legal size: %s %s", errStr, err)
+					continue
+				}
+				if !equal(a, aCopy) {
+					c.Errorf("First input argument changed in call: %s", errStr)
+				}
+				if !equal(b, bCopy) {
+					c.Errorf("Second input argument changed in call: %s", errStr)
+				}
+				if !dimsOK {
+					continue
+				}
+				if !equalApprox(zero, &want, 1e-14) {
+					c.Errorf("Answer mismatch with zero receiver: %s", errStr)
+					continue
+				}
 
-						// Test the method for a zero-value of the receiver.
-						errStr := fmt.Sprintf("%T.%s(%T, %T), sizes: %#v, atrans %v, btrans %v", receiver, name, a, b, test, aTrans, bTrans)
-						zero := makeRandOf(receiver, 0, 0)
-						panicked, err := panics(func() { method(zero, aCall, bCall) })
-						if !dimsOK && !panicked {
-							c.Errorf("Did not panic with illegal size: %s", errStr)
-							continue
-						}
-						if dimsOK && panicked {
-							c.Errorf("Panicked with legal size: %s %s", errStr, err)
-							continue
-						}
-						if !equalApprox(zero, &want, 1e-14) {
-							c.Errorf("Answer mismatch with zero receiver: %s", errStr)
-							continue
-						}
-						if !equal(a, aCopy) {
-							c.Errorf("First input argument changed in call: %s", errStr)
-						}
-						if !equal(b, bCopy) {
-							c.Errorf("Second input argument changed in call: %s", errStr)
-						}
+				// Test the method with a non-zero-value of the receiver.
+				// The receiver has been overwritten in place so use its size
+				// to construct a new random matrix.
+				rr, rc := zero.Dims()
+				nonZero := makeRandOf(receiver, rr, rc)
+				panicked, _ = panics(func() { method(nonZero, a, b) })
+				if panicked {
+					c.Errorf("Panicked with non-zero receiver: %s", errStr)
+				}
+				if !equalApprox(nonZero, &want, 1e-14) {
+					c.Errorf("Answer mismatch non-zero receiver: %s", errStr)
+				}
 
-						if !dimsOK {
-							continue
-						}
+				// Test with an incorrectly sized matrix.
+				switch receiver.(type) {
+				default:
+					panic("matrix type not coded for incorrect receiver size")
+				case *Dense:
+					wrongSize := makeRandOf(receiver, rr+1, rc)
+					panicked, _ = panics(func() { method(wrongSize, a, b) })
+					if !panicked {
+						c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+					}
+					wrongSize = makeRandOf(receiver, rr, rc+1)
+					panicked, _ = panics(func() { method(wrongSize, a, b) })
+					if !panicked {
+						c.Errorf("Did not panic with wrong number of columns: %s", errStr)
+					}
+				case *TriDense, *SymDense:
+					// Add to the square size.
+					wrongSize := makeRandOf(receiver, rr+1, rc+1)
+					panicked, _ = panics(func() { method(wrongSize, a, b) })
+					if !panicked {
+						c.Errorf("Did not panic with wrong size: %s", errStr)
+					}
+				case *Vector:
+					// Add to the column length.
+					wrongSize := makeRandOf(receiver, rr+1, rc)
+					panicked, _ = panics(func() { method(wrongSize, a, b) })
+					if !panicked {
+						c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+					}
+				}
 
-						// Test the method with a non-zero-value of the receiver.
-						// The receiver has been overwritten in place so we can
-						// take its new size.
-						rr, rc := zero.Dims()
-						nonZero := makeRandOf(receiver, rr, rc)
-						panicked, _ = panics(func() { method(nonZero, aCall, bCall) })
-						if panicked {
-							c.Errorf("Panicked with non-zero receiver: %s", errStr)
+				// The receiver and an input may share a matrix pointer
+				// if the type and size of the receiver and one of the
+				// arguments match. Test the method works properly
+				// when this is the case.
+				aMaybeSame := maybeSame(nonZero, a)
+				bMaybeSame := maybeSame(nonZero, b)
+				if aMaybeSame {
+					aSame := makeCopyOf(a)
+					receiver = aSame
+					u, ok := aSame.(Untransposer)
+					if ok {
+						receiver = u.Untranspose()
+					}
+					preData := underlyingData(receiver)
+					panicked, err = panics(func() { method(receiver, aSame, b) })
+					if panicked {
+						c.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
+					} else {
+						if !equalApprox(receiver, &want, 1e-14) {
+							c.Errorf("Wrong answer when a maybeSame: %s", errStr)
 						}
-						if !equalApprox(nonZero, &want, 1e-14) {
-							c.Errorf("Answer mismatch non-zero receiver: %s", errStr)
+						postData := underlyingData(receiver)
+						if !floats.Equal(preData, postData) {
+							c.Errorf("Original data slice not modified when a maybeSame: %s", errStr)
 						}
-
-						// Test with an incorrectly sized matrix.
-						switch receiver.(type) {
-						default:
-							panic("matrix type not coded for incorrect receiver size")
-						case *Dense:
-							wrongSize := makeRandOf(receiver, rr+1, rc)
-							panicked, _ = panics(func() { method(wrongSize, aCall, bCall) })
-							if !panicked {
-								c.Errorf("Did not panic with wrong number of rows: %s", errStr)
-							}
-							wrongSize = makeRandOf(receiver, rr, rc+1)
-							panicked, _ = panics(func() { method(wrongSize, aCall, bCall) })
-							if !panicked {
-								c.Errorf("Did not panic with wrong number of columns: %s", errStr)
-							}
-						case *TriDense, *SymDense:
-							// Add to the square size.
-							wrongSize := makeRandOf(receiver, rr+1, rc+1)
-							panicked, _ = panics(func() { method(wrongSize, aCall, bCall) })
-							if !panicked {
-								c.Errorf("Did not panic with wrong size: %s", errStr)
-							}
-						case *Vector:
-							// Add to the column length.
-							wrongSize := makeRandOf(receiver, rr+1, rc)
-							panicked, _ = panics(func() { method(wrongSize, aCall, bCall) })
-							if !panicked {
-								c.Errorf("Did not panic with wrong number of rows: %s", errStr)
-							}
+					}
+				}
+				if bMaybeSame {
+					bSame := makeCopyOf(b)
+					receiver = bSame
+					u, ok := bSame.(Untransposer)
+					if ok {
+						receiver = u.Untranspose()
+					}
+					preData := underlyingData(receiver)
+					panicked, err = panics(func() { method(receiver, a, bSame) })
+					if panicked {
+						c.Errorf("Panics when b maybeSame: %s", errStr)
+					} else {
+						if !equalApprox(receiver, &want, 1e-14) {
+							c.Errorf("Wrong answer when b maybeSame: %s: %s", errStr, err)
 						}
-
-						// The receiver and an input may share a matrix pointer
-						// if the type and size of the receiver and one of the
-						// arguments match. Test the method works properly
-						// when this is the case.
-						aMaybeSame := maybeSame(nonZero, a)
-						if aTrans {
-							aMaybeSame = maybeSame(nonZero, makeTransposeCopyOf(a))
+						postData := underlyingData(receiver)
+						if !floats.Equal(preData, postData) {
+							c.Errorf("Original data slice not modified when b maybeSame: %s", errStr)
 						}
-						bMaybeSame := maybeSame(nonZero, b)
-						if bTrans {
-							bMaybeSame = maybeSame(nonZero, makeTransposeCopyOf(b))
+					}
+				}
+				if aMaybeSame && bMaybeSame {
+					aSame := makeCopyOf(a)
+					receiver = aSame
+					u, ok := aSame.(Untransposer)
+					if ok {
+						receiver = u.Untranspose()
+					}
+					// Ensure that b is the correct transpose type if applicable.
+					// The receiver is always a concrete type so use it.
+					bSame := receiver
+					u, ok = bSame.(Untransposer)
+					if ok {
+						bSame = retranspose(bSame, receiver)
+					}
+					// Compute the real answer for this case. It is different
+					// from the inital answer since now a and b have the
+					// same data.
+					zero = makeRandOf(zero, 0, 0)
+					method(zero, aSame, bSame)
+					preData := underlyingData(receiver)
+					panicked, err = panics(func() { method(receiver, aSame, bSame) })
+					if panicked {
+						c.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
+					} else {
+						if !equalApprox(receiver, zero, 1e-14) {
+							c.Errorf("Wrong answer when both maybeSame: %s", errStr)
 						}
-						if aMaybeSame {
-							var aSame Matrix
-							if aTrans {
-								receiver = makeTransposeCopyOf(a)
-								aSame = receiver.T()
-							} else {
-								receiver = makeCopyOf(a)
-								aSame = receiver
-							}
-							preData := underlyingData(receiver)
-							panicked, _ = panics(func() { method(receiver, aSame, bCall) })
-							if panicked {
-								c.Errorf("Panics when a maybeSame: %s", errStr)
-							}
-							if !equalApprox(receiver, &want, 1e-14) {
-								c.Errorf("Wrong answer when a maybeSame: %s", errStr)
-							}
-							postData := underlyingData(receiver)
-							if !floats.Equal(preData, postData) {
-								c.Errorf("Original data slice not modified when a maybeSame: %s", errStr)
-							}
-						}
-						if bMaybeSame {
-							var bSame Matrix
-							if bTrans {
-								receiver = makeTransposeCopyOf(b)
-								bSame = receiver.T()
-							} else {
-								receiver = makeCopyOf(b)
-								bSame = receiver
-							}
-							preData := underlyingData(receiver)
-							panicked, _ = panics(func() { method(receiver, aCall, bSame) })
-							if panicked {
-								c.Errorf("Panics when b maybeSame: %s", errStr)
-							}
-							if !equalApprox(receiver, &want, 1e-14) {
-								c.Errorf("Wrong answer when b maybeSame: %s", errStr)
-							}
-							postData := underlyingData(receiver)
-							if !floats.Equal(preData, postData) {
-								c.Errorf("Original data slice not modified when b maybeSame: %s", errStr)
-							}
-						}
-						if aMaybeSame && bMaybeSame {
-							var aSame Matrix
-							if aTrans {
-								receiver = makeTransposeCopyOf(a)
-								aSame = receiver.T()
-							} else {
-								receiver = makeCopyOf(a)
-								aSame = receiver
-							}
-							bSame := receiver
-							if bTrans {
-								bSame = receiver.T()
-							}
-							// Compute the real answer for this case. It is different
-							// from the inital answer since now a and b have the
-							// same data.
-							zero := makeRandOf(a, 0, 0)
-							method(zero, aSame, bSame)
-							preData := underlyingData(receiver)
-							panicked, _ = panics(func() { method(receiver, aSame, bSame) })
-							if panicked {
-								c.Errorf("Panics when both maybeSame: %s", errStr)
-							}
-							if !equalApprox(receiver, zero, 1e-14) {
-								c.Errorf("Wrong answer when both maybeSame: %s", errStr)
-							}
-							postData := underlyingData(receiver)
-							if !floats.Equal(preData, postData) {
-								c.Errorf("Original data slice not modified when both maybeSame: %s", errStr)
-							}
+						postData := underlyingData(receiver)
+						if !floats.Equal(preData, postData) {
+							c.Errorf("Original data slice not modified when both maybeSame: %s", errStr)
 						}
 					}
 				}

@@ -647,6 +647,18 @@ func (s *S) TestMul(c *check.C) {
 		temp.mat.Data = nil
 		c.Check(func() { temp.Mul(a, b) }, check.PanicMatches, "blas: index of c out of range", check.Commentf("Test %d", i))
 	}
+
+	method := func(receiver, a, b Matrix) {
+		rd := receiver.(Muler)
+		rd.Mul(a, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Mul(a, b)
+	}
+	legalSizeMul := func(ar, ac, br, bc int) bool {
+		return ac == br
+	}
+	testTwoInput(c, "Mul", &Dense{}, method, denseComparison, legalTypesAll, legalSizeMul)
 }
 
 func (s *S) TestMulTrans(c *check.C) {

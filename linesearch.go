@@ -58,11 +58,7 @@ func (ls *LinesearchHelper) Iterate(loc *Location, xNext []float64) (EvaluationT
 	}
 
 	projGrad := floats.Dot(loc.Gradient, ls.dir)
-	lsLoc := LinesearchLocation{
-		F:          loc.F,
-		Derivative: projGrad,
-	}
-	if ls.Linesearch.Finished(lsLoc) {
+	if ls.Linesearch.Finished(loc.F, projGrad) {
 		copy(xNext, loc.X)
 		// Check if the last evaluation evaluated all fields of Location.
 		ls.evalType = complementEval(loc, ls.evalType)
@@ -77,7 +73,7 @@ func (ls *LinesearchHelper) Iterate(loc *Location, xNext []float64) (EvaluationT
 	}
 
 	// Line search not done, just iterate.
-	stepSize, evalType, err := ls.Linesearch.Iterate(lsLoc)
+	stepSize, evalType, err := ls.Linesearch.Iterate(loc.F, projGrad)
 	if err != nil {
 		ls.evalType = NoEvaluation
 		ls.iterType = NoIteration
@@ -116,11 +112,7 @@ func (ls *LinesearchHelper) initNextLinesearch(loc *Location, xNext []float64) (
 		return ls.evalType, ls.iterType, ErrNonNegativeStepDirection
 	}
 
-	lsLoc := LinesearchLocation{
-		F:          loc.F,
-		Derivative: projGrad,
-	}
-	ls.evalType = ls.Linesearch.Init(lsLoc, stepSize)
+	ls.evalType = ls.Linesearch.Init(loc.F, projGrad, stepSize)
 
 	floats.AddScaledTo(xNext, ls.x, stepSize, ls.dir)
 	// Compare the starting point for the current iteration with the next

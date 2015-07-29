@@ -11,16 +11,16 @@ type Linesearch interface {
 	// Init initializes the linesearch method. LinesearchLocation contains the
 	// function information at step == 0, and step contains the first step length
 	// as specified by the NextDirectioner.
-	Init(loc LinesearchLocation, step float64) EvaluationType
+	Init(value, derivative float64, step float64) EvaluationType
 
 	// Finished takes in the function result at the most recent linesearch location,
 	// and returns true if the line search has been concluded.
-	Finished(loc LinesearchLocation) bool
+	Finished(value, derivative float64) bool
 
 	// Iterate takes in the function results
 	// from evaluating the function at the previous step, and returns the
 	// next step size and EvaluationType to evaluate.
-	Iterate(loc LinesearchLocation) (step float64, e EvaluationType, err error)
+	Iterate(value, derivative float64) (step float64, e EvaluationType, err error)
 }
 
 // NextDirectioner implements a strategy for computing a new line search direction

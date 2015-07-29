@@ -73,12 +73,6 @@ type Location struct {
 	Hessian  *mat64.SymDense
 }
 
-// LinesearchLocation is a location for a linesearch subiteration
-type LinesearchLocation struct {
-	F          float64 // Function value at the step
-	Derivative float64 // Projected gradient in the linesearch direction
-}
-
 // Result represents the answer of an optimization run. It contains the optimum
 // location as well as the Status at convergence and Statistics taken during the
 // run.

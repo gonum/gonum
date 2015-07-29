@@ -26,9 +26,9 @@ type Bisection struct {
 	maxGrad  float64
 }
 
-func (b *Bisection) Init(loc LinesearchLocation, step float64) EvaluationType {
-	if loc.Derivative >= 0 {
-		panic("bisection: init G non-negative")
+func (b *Bisection) Init(f, g float64, step float64) EvaluationType {
+	if g >= 0 {
+		panic("bisection: initial derivative is non-negative")
 	}
 	if step <= 0 {
 		panic("bisection: bad step size")
@@ -45,18 +45,18 @@ func (b *Bisection) Init(loc LinesearchLocation, step float64) EvaluationType {
 	b.maxStep = math.Inf(1)
 	b.currStep = step
 
-	b.initF = loc.F
-	b.minF = loc.F
+	b.initF = f
+	b.minF = f
 	b.maxF = math.NaN()
 
-	b.initGrad = loc.Derivative
-	b.minGrad = loc.Derivative
+	b.initGrad = g
+	b.minGrad = g
 	b.maxGrad = math.NaN()
 
 	return FuncEvaluation | GradEvaluation
 }
 
-func (b *Bisection) Finished(loc LinesearchLocation) bool {
+func (b *Bisection) Finished(f, g float64) bool {
 	// Don't finish the linesearch until a minimum is found that is better than
 	// the best point found so far. We want to end up in the lowest basin of
 	// attraction
@@ -67,15 +67,13 @@ func (b *Bisection) Finished(loc LinesearchLocation) bool {
 	if b.minF < minF {
 		minF = b.minF
 	}
-	if StrongWolfeConditionsMet(loc.F, loc.Derivative, minF, b.initGrad, b.currStep, 0, b.GradConst) {
+	if StrongWolfeConditionsMet(f, g, minF, b.initGrad, b.currStep, 0, b.GradConst) {
 		return true
 	}
 	return false
 }
 
-func (b *Bisection) Iterate(loc LinesearchLocation) (float64, EvaluationType, error) {
-	f := loc.F
-	g := loc.Derivative
+func (b *Bisection) Iterate(f, g float64) (float64, EvaluationType, error) {
 	// Deciding on the next step size
 	if math.IsInf(b.maxStep, 1) {
 		// Have not yet bounded the minimum

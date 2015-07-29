@@ -370,22 +370,22 @@ func (m *Dense) Mul(a, b Matrix) {
 		panic(ErrShape)
 	}
 
+	aMat, _ := untranspose(a)
+	bMat, _ := untranspose(b)
 	m.reuseAs(ar, bc)
-	var w *Dense
-	if m != a && m != b {
-		w = m
-	} else {
-		w = getWorkspace(ar, bc, false)
-		defer func() {
-			m.Copy(w)
-			putWorkspace(w)
-		}()
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
 	}
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
 			amat, bmat := a.RawMatrix(), b.RawMatrix()
-			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, amat, bmat, 0, w.mat)
+			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, amat, bmat, 0, m.mat)
 			return
 		}
 	}
@@ -395,7 +395,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			row := make([]float64, ac)
 			col := make([]float64, br)
 			for r := 0; r < ar; r++ {
-				dataTmp := w.mat.Data[r*w.mat.Stride : r*w.mat.Stride+bc]
+				dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
 				for c := 0; c < bc; c++ {
 					dataTmp[c] = blas64.Dot(ac,
 						blas64.Vector{Inc: 1, Data: a.Row(row, r)},
@@ -417,7 +417,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			for i, e := range row {
 				v += e * b.At(i, c)
 			}
-			w.mat.Data[r*w.mat.Stride+c] = v
+			m.mat.Data[r*m.mat.Stride+c] = v
 		}
 	}
 }

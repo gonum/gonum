@@ -10,12 +10,13 @@ import (
 	"github.com/gonum/floats"
 )
 
-// LinesearchHelper encapsulates the common functionality of gradient-based
-// line-search optimization methods and serves as a helper struct for their
-// implementation. It consists of a NextDirectioner, which specifies the search
-// direction at each iteration, and a Linesearcher which performs a linesearch
-// along the search direction.
-type LinesearchHelper struct {
+// LinesearchMethod encapsulates the common functionality of gradient-based
+// line-search methods and can serve as a helper struct for their
+// implementation. It does not implement the Method interface because of the
+// missing Needs() method. It consists of a NextDirectioner, which specifies
+// the search direction at each iteration, and a Linesearcher which performs a
+// linesearch along the search direction.
+type LinesearchMethod struct {
 	NextDirectioner NextDirectioner
 	Linesearcher    Linesearcher
 
@@ -27,7 +28,7 @@ type LinesearchHelper struct {
 	iterType IterationType
 }
 
-func (ls *LinesearchHelper) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *LinesearchMethod) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if loc.Gradient == nil {
 		panic("linesearch: gradient is nil")
 	}
@@ -40,7 +41,7 @@ func (ls *LinesearchHelper) Init(loc *Location, xNext []float64) (EvaluationType
 	return ls.initNextLinesearch(loc, xNext)
 }
 
-func (ls *LinesearchHelper) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *LinesearchMethod) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if ls.iterType == SubIteration {
 		// We needed to evaluate invalid fields of Location. Now we have them
 		// and can announce MajorIteration.
@@ -94,7 +95,7 @@ func (ls *LinesearchHelper) Iterate(loc *Location, xNext []float64) (EvaluationT
 	return ls.evalType, ls.iterType, nil
 }
 
-func (ls *LinesearchHelper) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *LinesearchMethod) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	copy(ls.x, loc.X)
 
 	var stepSize float64

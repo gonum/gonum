@@ -20,7 +20,7 @@ type LBFGS struct {
 	Linesearcher Linesearcher
 	Store        int // how many past iterations to store
 
-	ls *LinesearchHelper
+	ls *LinesearchMethod
 
 	dim    int
 	oldest int // element of the history slices that is the oldest
@@ -43,7 +43,7 @@ func (l *LBFGS) Init(loc *Location, xNext []float64) (EvaluationType, IterationT
 		l.Linesearcher = &Bisection{}
 	}
 	if l.ls == nil {
-		l.ls = &LinesearchHelper{}
+		l.ls = &LinesearchMethod{}
 	}
 	l.ls.Linesearcher = l.Linesearcher
 	l.ls.NextDirectioner = l

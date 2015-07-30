@@ -15,7 +15,7 @@ type GradientDescent struct {
 	Linesearcher Linesearcher
 	StepSizer    StepSizer
 
-	ls *LinesearchHelper
+	ls *LinesearchMethod
 }
 
 func (g *GradientDescent) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
@@ -26,7 +26,7 @@ func (g *GradientDescent) Init(loc *Location, xNext []float64) (EvaluationType, 
 		g.Linesearcher = &Backtracking{}
 	}
 	if g.ls == nil {
-		g.ls = &LinesearchHelper{}
+		g.ls = &LinesearchMethod{}
 	}
 	g.ls.Linesearcher = g.Linesearcher
 	g.ls.NextDirectioner = g

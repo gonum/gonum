@@ -47,7 +47,7 @@ type Newton struct {
 	// Increase must be greater than 1. If Increase is 0, it is defaulted to 5.
 	Increase float64
 
-	ls *LinesearchHelper
+	ls *LinesearchMethod
 
 	hess *mat64.SymDense // Storage for a copy of the Hessian matrix.
 	chol *mat64.TriDense // Storage for the Cholesky factorization.
@@ -65,7 +65,7 @@ func (n *Newton) Init(loc *Location, xNext []float64) (EvaluationType, Iteration
 		n.Linesearcher = &Bisection{}
 	}
 	if n.ls == nil {
-		n.ls = &LinesearchHelper{}
+		n.ls = &LinesearchMethod{}
 	}
 	n.ls.Linesearcher = n.Linesearcher
 	n.ls.NextDirectioner = n

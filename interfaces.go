@@ -30,7 +30,7 @@ type Method interface {
 // function
 //  φ(step) := f(x_k + step * dir_k), step > 0.
 // Typically, these methods will not be called by the user directly, as they
-// will be called by the LinesearchHelper struct.
+// will be called by the LinesearchMethod struct.
 type Linesearcher interface {
 	// Init initializes the linesearch method. Value and derivative contain
 	// φ(0) and φ'(0), respectively, and step contains the first trial step
@@ -50,7 +50,7 @@ type Linesearcher interface {
 
 // NextDirectioner implements a strategy for computing a new line search
 // direction at each major iteration. Typically, these methods will not be
-// called by the user directly, as they will be called by the LinesearchHelper
+// called by the user directly, as they will be called by the LinesearchMethod
 // struct.
 type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,

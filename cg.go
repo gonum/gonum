@@ -84,7 +84,7 @@ type CG struct {
 	// CG will panic if AngleRestartThreshold is not in the interval [-1, 0].
 	AngleRestartThreshold float64
 
-	ls *LinesearchHelper
+	ls *LinesearchMethod
 
 	restartAfter    int
 	iterFromRestart int
@@ -120,7 +120,7 @@ func (cg *CG) Init(loc *Location, xNext []float64) (EvaluationType, IterationTyp
 	}
 
 	if cg.ls == nil {
-		cg.ls = &LinesearchHelper{}
+		cg.ls = &LinesearchMethod{}
 	}
 	cg.ls.Linesearcher = cg.Linesearcher
 	cg.ls.NextDirectioner = cg

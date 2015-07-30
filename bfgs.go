@@ -20,7 +20,7 @@ import (
 type BFGS struct {
 	Linesearcher Linesearcher
 
-	ls *LinesearchHelper
+	ls *LinesearchMethod
 
 	x    []float64 // location of the last major iteration
 	grad []float64 // gradient at the last major iteration
@@ -44,7 +44,7 @@ func (b *BFGS) Init(loc *Location, xNext []float64) (EvaluationType, IterationTy
 		b.Linesearcher = &Bisection{}
 	}
 	if b.ls == nil {
-		b.ls = &LinesearchHelper{}
+		b.ls = &LinesearchMethod{}
 	}
 	b.ls.Linesearcher = b.Linesearcher
 	b.ls.NextDirectioner = b

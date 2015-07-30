@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package topo_test
+package topo
 
 import (
 	"reflect"
@@ -11,7 +11,6 @@ import (
 
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/topo"
 )
 
 type interval struct{ start, end int }
@@ -139,7 +138,7 @@ func TestSort(t *testing.T) {
 				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		sorted, err := topo.Sort(g)
+		sorted, err := Sort(g)
 		var gotSortedLen int
 		for _, n := range sorted {
 			if n != nil {
@@ -152,8 +151,8 @@ func TestSort(t *testing.T) {
 		if err == nil != test.sortable {
 			t.Errorf("unexpected sortability for test %d: got error: %v want: nil-error=%t", i, err, test.sortable)
 		}
-		if err != nil && len(err.(topo.Unorderable)) != test.unorderableLength {
-			t.Errorf("unexpected number of unorderable nodes for test %d: got:%d want:%d", i, len(err.(topo.Unorderable)), test.unorderableLength)
+		if err != nil && len(err.(Unorderable)) != test.unorderableLength {
+			t.Errorf("unexpected number of unorderable nodes for test %d: got:%d want:%d", i, len(err.(Unorderable)), test.unorderableLength)
 		}
 	}
 }
@@ -170,7 +169,7 @@ func TestTarjanSCC(t *testing.T) {
 				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		gotSCCs := topo.TarjanSCC(g)
+		gotSCCs := TarjanSCC(g)
 		// tarjan.strongconnect does range iteration over maps,
 		// so sort SCC members to ensure consistent ordering.
 		gotIDs := make([][]int, len(gotSCCs))

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package topo_test
+package topo
 
 import (
 	"reflect"
@@ -12,44 +12,43 @@ import (
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/topo"
 )
 
 func TestIsPath(t *testing.T) {
 	dg := concrete.NewDirectedGraph()
-	if !topo.IsPathIn(dg, nil) {
+	if !IsPathIn(dg, nil) {
 		t.Error("IsPath returns false on nil path")
 	}
 	p := []graph.Node{concrete.Node(0)}
-	if topo.IsPathIn(dg, p) {
+	if IsPathIn(dg, p) {
 		t.Error("IsPath returns true on nonexistant node")
 	}
 	dg.AddNode(p[0])
-	if !topo.IsPathIn(dg, p) {
+	if !IsPathIn(dg, p) {
 		t.Error("IsPath returns false on single-length path with existing node")
 	}
 	p = append(p, concrete.Node(1))
 	dg.AddNode(p[1])
-	if topo.IsPathIn(dg, p) {
+	if IsPathIn(dg, p) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
 	dg.SetEdge(concrete.Edge{p[0], p[1]}, 1)
-	if !topo.IsPathIn(dg, p) {
+	if !IsPathIn(dg, p) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
 	p[0], p[1] = p[1], p[0]
-	if topo.IsPathIn(dg, p) {
+	if IsPathIn(dg, p) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
 	dg.SetEdge(concrete.Edge{p[1], p[2]}, 1)
-	if !topo.IsPathIn(dg, p) {
+	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
 	ug := concrete.NewGraph()
 	ug.SetEdge(concrete.Edge{p[1], p[0]}, 1)
 	ug.SetEdge(concrete.Edge{p[1], p[2]}, 1)
-	if !topo.IsPathIn(dg, p) {
+	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
 }
@@ -83,7 +82,7 @@ func TestConnectedComponents(t *testing.T) {
 				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		cc := topo.ConnectedComponents(g)
+		cc := ConnectedComponents(g)
 		got := make([][]int, len(cc))
 		for j, c := range cc {
 			ids := make([]int, len(c))

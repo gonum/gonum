@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package path_test
+package path
 
 import (
 	"math"
@@ -11,7 +11,6 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
-	"github.com/gonum/graph/path"
 	"github.com/gonum/graph/path/internal"
 	"github.com/gonum/graph/topo"
 )
@@ -21,7 +20,7 @@ var aStarTests = []struct {
 	g    graph.Graph
 
 	s, t      int
-	heuristic path.Heuristic
+	heuristic Heuristic
 	wantPath  []int
 }{
 	{
@@ -127,7 +126,7 @@ var aStarTests = []struct {
 
 func TestAStar(t *testing.T) {
 	for _, test := range aStarTests {
-		pt, _ := path.AStar(concrete.Node(test.s), concrete.Node(test.t), test.g, test.heuristic)
+		pt, _ := AStar(concrete.Node(test.s), concrete.Node(test.t), test.g, test.heuristic)
 
 		p, cost := pt.To(concrete.Node(test.t))
 
@@ -135,7 +134,7 @@ func TestAStar(t *testing.T) {
 			t.Error("got path that is not path in input graph for %q", test.name)
 		}
 
-		bfp, ok := path.BellmanFordFrom(concrete.Node(test.s), test.g)
+		bfp, ok := BellmanFordFrom(concrete.Node(test.s), test.g)
 		if !ok {
 			t.Fatalf("unexpected negative cycle in %q", test.name)
 		}
@@ -192,10 +191,10 @@ func TestExhaustiveAStar(t *testing.T) {
 		t.Fatalf("non-monotonic heuristic at edge:%v for goal:%v", edge, goal)
 	}
 
-	ps := path.DijkstraAllPaths(g)
+	ps := DijkstraAllPaths(g)
 	for _, start := range g.Nodes() {
 		for _, goal := range g.Nodes() {
-			pt, _ := path.AStar(start, goal, g, heuristic)
+			pt, _ := AStar(start, goal, g, heuristic)
 			gotPath, gotWeight := pt.To(goal)
 			wantPath, wantWeight, _ := ps.Between(start, goal)
 			if gotWeight != wantWeight {
@@ -227,10 +226,10 @@ func (e weightedEdge) To() graph.Node   { return e.to }
 
 type costEdgeListGraph interface {
 	graph.Weighter
-	path.EdgeListerGraph
+	EdgeListerGraph
 }
 
-func isMonotonic(g costEdgeListGraph, h path.Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
+func isMonotonic(g costEdgeListGraph, h Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
 	for _, goal := range g.Nodes() {
 		for _, edge := range g.Edges() {
 			from := edge.From()
@@ -251,7 +250,7 @@ func TestAStarNullHeuristic(t *testing.T) {
 		}
 
 		var (
-			pt path.Shortest
+			pt Shortest
 
 			panicked bool
 		)
@@ -259,7 +258,7 @@ func TestAStarNullHeuristic(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt, _ = path.AStar(test.query.From(), test.query.To(), g.(graph.Graph), nil)
+			pt, _ = AStar(test.query.From(), test.query.To(), g.(graph.Graph), nil)
 		}()
 		if panicked || test.negative {
 			if !test.negative {

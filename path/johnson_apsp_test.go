@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package path_test
+package path
 
 import (
 	"math"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/path"
 )
 
 func TestJohnsonAllPaths(t *testing.T) {
@@ -22,7 +21,7 @@ func TestJohnsonAllPaths(t *testing.T) {
 			g.SetEdge(e, e.Cost)
 		}
 
-		pt, ok := path.JohnsonAllPaths(g.(graph.Graph))
+		pt, ok := JohnsonAllPaths(g.(graph.Graph))
 		if test.hasNegativeCycle {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.name)

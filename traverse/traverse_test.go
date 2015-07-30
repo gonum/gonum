@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package traverse_test
+package traverse
 
 import (
 	"fmt"
@@ -13,7 +13,6 @@ import (
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
-	"github.com/gonum/graph/traverse"
 )
 
 var (
@@ -143,7 +142,7 @@ func TestBreadthFirst(t *testing.T) {
 				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		w := traverse.BreadthFirst{
+		w := BreadthFirst{
 			EdgeFilter: test.edge,
 		}
 		var got [][]int
@@ -231,7 +230,7 @@ func TestDepthFirst(t *testing.T) {
 				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
 			}
 		}
-		w := traverse.DepthFirst{
+		w := DepthFirst{
 			EdgeFilter: test.edge,
 		}
 		var got []int
@@ -299,17 +298,17 @@ func TestWalkAll(t *testing.T) {
 			WalkAll(g graph.Undirected, before, after func(), during func(graph.Node))
 		}
 		for _, w := range []walker{
-			&traverse.BreadthFirst{},
-			&traverse.DepthFirst{},
+			&BreadthFirst{},
+			&DepthFirst{},
 		} {
 			var (
 				c  []graph.Node
 				cc [][]graph.Node
 			)
 			switch w := w.(type) {
-			case *traverse.BreadthFirst:
+			case *BreadthFirst:
 				w.EdgeFilter = test.edge
-			case *traverse.DepthFirst:
+			case *DepthFirst:
 				w.EdgeFilter = test.edge
 			default:
 				panic(fmt.Sprintf("bad walker type: %T", w))

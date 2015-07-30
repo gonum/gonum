@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package path_test
+package path
 
 import (
 	"math"
@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/path"
 )
 
 func TestBellmanFordFrom(t *testing.T) {
@@ -20,7 +19,7 @@ func TestBellmanFordFrom(t *testing.T) {
 			g.SetEdge(e, e.Cost)
 		}
 
-		pt, ok := path.BellmanFordFrom(test.query.From(), g.(graph.Graph))
+		pt, ok := BellmanFordFrom(test.query.From(), g.(graph.Graph))
 		if test.hasNegativeCycle {
 			if ok {
 				t.Errorf("%q: expected negative cycle", test.name)

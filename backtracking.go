@@ -10,7 +10,7 @@ const (
 	minimumBacktrackingStepSize  = 1e-20
 )
 
-// Backtracking is a Linesearcher that uses a backtracking to find a point that
+// Backtracking is a Linesearcher that uses backtracking to find a point that
 // satisfies the Armijo condition with the given function constant FuncConst. If
 // the Armijo condition has not been met, the step size is decreased by a
 // factor of Decrease.

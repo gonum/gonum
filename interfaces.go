@@ -26,16 +26,16 @@ type Method interface {
 
 // Linesearcher is a type that can perform a line search. It tries to find an
 // (approximate) minimum of the objective function along the search direction
-// dir_k starting at the most recent location x_k, i.e., it tries to minimize a
-// function
-//  φ(step) := f(x_k + step * dir_k), step > 0.
-// Typically, these methods will not be called by the user directly, as they
-// will be called by the LinesearchMethod struct.
+// dir_k starting at the most recent location x_k, i.e., it tries to minimize
+// the function
+//  φ(step) := f(x_k + step * dir_k) where step > 0.
+// Typically, a Linesearcher will be used in conjuction with LinesearchMethod
+// for performing gradient-based optimization through sequential line searches.
 type Linesearcher interface {
 	// Init initializes the linesearch method. Value and derivative contain
 	// φ(0) and φ'(0), respectively, and step contains the first trial step
-	// length as returned by the NextDirectioner.InitDirection(). It returns
-	// the type of evaluation to be performed at x_0 + step * dir_0.
+	// length. It returns the type of evaluation to be performed at
+	// x_0 + step * dir_0.
 	Init(value, derivative float64, step float64) EvaluationType
 
 	// Finished takes in the values of φ and φ' evaluated at the previous step,
@@ -49,9 +49,9 @@ type Linesearcher interface {
 }
 
 // NextDirectioner implements a strategy for computing a new line search
-// direction at each major iteration. Typically, these methods will not be
-// called by the user directly, as they will be called by the LinesearchMethod
-// struct.
+// direction at each major iteration. Typically, a NextDirectioner will be
+// used in conjuction with LinesearchMethod for performing gradient-based
+// optimization through sequential line searches.
 type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,
 	// putting the initial direction in place into dir, and returning the initial

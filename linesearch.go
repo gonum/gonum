@@ -10,12 +10,11 @@ import (
 	"github.com/gonum/floats"
 )
 
-// LinesearchMethod encapsulates the common functionality of gradient-based
-// line-search methods and can serve as a helper struct for their
-// implementation. It does not implement the Method interface because of the
-// missing Needs() method. It consists of a NextDirectioner, which specifies
-// the search direction at each iteration, and a Linesearcher which performs a
-// linesearch along the search direction.
+// LinesearchMethod represents an abstract optimization method in which
+// a function is optimized through successive line search optimizations.
+// It consists of a NextDirectioner, which specifies the search direction
+// of each linesearch, and a Linesearcher which performs a linesearch along
+// the search direction.
 type LinesearchMethod struct {
 	NextDirectioner NextDirectioner
 	Linesearcher    Linesearcher
@@ -128,8 +127,9 @@ func (ls *LinesearchMethod) initNextLinesearch(loc *Location, xNext []float64) (
 	return ls.evalType, ls.iterType, nil
 }
 
-// ArmijoConditionMet returns true if the Armijo condition (aka sufficient decrease)
-// has been met. Under normal conditions, the following should be true, though this is not enforced:
+// ArmijoConditionMet returns true if the Armijo condition (aka sufficient
+// decrease) has been met. Under normal conditions, the following should be
+// true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
 //  - 0 < funcConst < 1
@@ -138,9 +138,10 @@ func ArmijoConditionMet(currObj, initObj, initGrad, step, funcConst float64) boo
 }
 
 // StrongWolfeConditionsMet returns true if the strong Wolfe conditions have been met.
-// The strong wolfe conditions ensure sufficient decrease in the function value,
-// and sufficient decrease in the magnitude of the projected gradient. Under normal
-// conditions, the following should be true, though this is not enforced:
+// The strong Wolfe conditions ensure sufficient decrease in the function
+// value, and sufficient decrease in the magnitude of the projected gradient.
+// Under normal conditions, the following should be true, though this is not
+// enforced:
 //  - initGrad < 0
 //  - step > 0
 //  - 0 <= funcConst < gradConst < 1
@@ -152,7 +153,7 @@ func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcCo
 }
 
 // WeakWolfeConditionsMet returns true if the weak Wolfe conditions have been met.
-// The weak wolfe conditions ensure sufficient decrease in the function value,
+// The weak Wolfe conditions ensure sufficient decrease in the function value,
 // and sufficient decrease in the value of the projected gradient. Under normal
 // conditions, the following should be true, though this is not enforced:
 //  - initGrad < 0

@@ -3,6 +3,7 @@ sudo apt-get install -qq gfortran
 pushd ~
 sudo git clone --depth=1 git://github.com/xianyi/OpenBLAS
 pushd OpenBLAS
+echo OpenBLAS $(git rev-parse HEAD)
 sudo make FC=gfortran &> /dev/null
 sudo make PREFIX=/usr install
 popd

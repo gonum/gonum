@@ -131,9 +131,9 @@ func (ls *LinesearchHelper) initNextLinesearch(loc *Location, xNext []float64) (
 // has been met. Under normal conditions, the following should be true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 < funConst < 1
-func ArmijoConditionMet(currObj, initObj, initGrad, step, funConst float64) bool {
-	return currObj <= initObj+funConst*step*initGrad
+//  - 0 < funcConst < 1
+func ArmijoConditionMet(currObj, initObj, initGrad, step, funcConst float64) bool {
+	return currObj <= initObj+funcConst*step*initGrad
 }
 
 // StrongWolfeConditionsMet returns true if the strong Wolfe conditions have been met.
@@ -142,9 +142,9 @@ func ArmijoConditionMet(currObj, initObj, initGrad, step, funConst float64) bool
 // conditions, the following should be true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 <= funConst < gradConst < 1
-func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funConst, gradConst float64) bool {
-	if currObj > initObj+funConst*step*initGrad {
+//  - 0 <= funcConst < gradConst < 1
+func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcConst, gradConst float64) bool {
+	if currObj > initObj+funcConst*step*initGrad {
 		return false
 	}
 	return math.Abs(currGrad) < gradConst*math.Abs(initGrad)
@@ -156,9 +156,9 @@ func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funCon
 // conditions, the following should be true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 <= funConst < gradConst < 1
-func WeakWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funConst, gradConst float64) bool {
-	if currObj > initObj+funConst*step*initGrad {
+//  - 0 <= funcConst < gradConst < 1
+func WeakWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcConst, gradConst float64) bool {
+	if currObj > initObj+funcConst*step*initGrad {
 		return false
 	}
 	return currGrad >= gradConst*initGrad

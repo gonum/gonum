@@ -5,13 +5,13 @@
 package optimize
 
 const (
-	defaultBacktrackingDecrease = 0.5
-	defaultBacktrackingFunConst = 1e-4
-	minimumBacktrackingStepSize = 1e-20
+	defaultBacktrackingDecrease  = 0.5
+	defaultBacktrackingFuncConst = 1e-4
+	minimumBacktrackingStepSize  = 1e-20
 )
 
 // Backtracking is a Linesearcher that uses a backtracking to find a point that
-// satisfies the Armijo condition with the given function constant FunConst. If
+// satisfies the Armijo condition with the given function constant FuncConst. If
 // the Armijo condition has not been met, the step size is decreased by a
 // factor of Decrease.
 //
@@ -21,12 +21,12 @@ const (
 // not appropriate for optimizers that require the Wolfe conditions to be met,
 // such as BFGS.
 //
-// Both FunConst and Decrease must be between zero and one, and Backtracking will
-// panic otherwise. If either FunConst or Decrease are zero, it will be set to a
+// Both FuncConst and Decrease must be between zero and one, and Backtracking will
+// panic otherwise. If either FuncConst or Decrease are zero, it will be set to a
 // reasonable default.
 type Backtracking struct {
-	FunConst float64 // Necessary function descrease for Armijo condition.
-	Decrease float64 // Step size multiplier at each iteration (stepSize *= Decrease).
+	FuncConst float64 // Necessary function descrease for Armijo condition.
+	Decrease  float64 // Step size multiplier at each iteration (stepSize *= Decrease).
 
 	stepSize float64
 	initF    float64
@@ -44,14 +44,14 @@ func (b *Backtracking) Init(f, g float64, step float64) EvaluationType {
 	if b.Decrease == 0 {
 		b.Decrease = defaultBacktrackingDecrease
 	}
-	if b.FunConst == 0 {
-		b.FunConst = defaultBacktrackingFunConst
+	if b.FuncConst == 0 {
+		b.FuncConst = defaultBacktrackingFuncConst
 	}
 	if b.Decrease <= 0 || b.Decrease >= 1 {
 		panic("backtracking: Decrease must be between 0 and 1")
 	}
-	if b.FunConst <= 0 || b.FunConst >= 1 {
-		panic("backtracking: FunConst must be between 0 and 1")
+	if b.FuncConst <= 0 || b.FuncConst >= 1 {
+		panic("backtracking: FuncConst must be between 0 and 1")
 	}
 
 	b.stepSize = step
@@ -61,7 +61,7 @@ func (b *Backtracking) Init(f, g float64, step float64) EvaluationType {
 }
 
 func (b *Backtracking) Finished(f, _ float64) bool {
-	return ArmijoConditionMet(f, b.initF, b.initG, b.stepSize, b.FunConst)
+	return ArmijoConditionMet(f, b.initF, b.initG, b.stepSize, b.FuncConst)
 }
 
 func (b *Backtracking) Iterate(_, _ float64) (float64, EvaluationType, error) {

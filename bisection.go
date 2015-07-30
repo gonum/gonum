@@ -27,11 +27,11 @@ type Bisection struct {
 }
 
 func (b *Bisection) Init(f, g float64, step float64) EvaluationType {
-	if g >= 0 {
-		panic("bisection: initial derivative is non-negative")
-	}
 	if step <= 0 {
 		panic("bisection: bad step size")
+	}
+	if g >= 0 {
+		panic("bisection: initial derivative is non-negative")
 	}
 
 	if b.GradConst == 0 {

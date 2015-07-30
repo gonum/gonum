@@ -33,11 +33,11 @@ type Backtracking struct {
 }
 
 func (b *Backtracking) Init(f, g float64, step float64) EvaluationType {
-	if g >= 0 {
-		panic("backtracking: initial derivative is non-negative")
-	}
 	if step <= 0 {
 		panic("backtracking: bad step size")
+	}
+	if g >= 0 {
+		panic("backtracking: initial derivative is non-negative")
 	}
 
 	if b.Decrease == 0 {

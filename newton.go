@@ -35,11 +35,11 @@ const maxNewtonModifications = 20
 // cost of its factorization is prohibitive, BFGS or L-BFGS quasi-Newton method
 // can be used instead.
 type Newton struct {
-	// Linesearch is a method used for selecting suitable steps along the
-	// descent direction d. Steps should satisfy at least one of the Wolfe,
+	// Linesearcher is used for selecting suitable steps along the descent
+	// direction d. Accepted steps should satisfy at least one of the Wolfe,
 	// Goldstein or Armijo conditions.
-	// If Linesearch == nil, an appropriate default is chosen.
-	Linesearch Linesearch
+	// If Linesearcher == nil, an appropriate default is chosen.
+	Linesearcher Linesearcher
 	// Increase is the factor by which a scalar tau is successively increased
 	// so that (H + tau*I) is positive definite. Larger values reduce the
 	// number of trial Hessian factorizations, but also reduce the second-order
@@ -61,13 +61,13 @@ func (n *Newton) Init(loc *Location, xNext []float64) (EvaluationType, Iteration
 	if n.Increase <= 1 {
 		panic("optimize: Newton.Increase must be greater than 1")
 	}
-	if n.Linesearch == nil {
-		n.Linesearch = &Bisection{}
+	if n.Linesearcher == nil {
+		n.Linesearcher = &Bisection{}
 	}
 	if n.ls == nil {
 		n.ls = &LinesearchHelper{}
 	}
-	n.ls.Linesearch = n.Linesearch
+	n.ls.Linesearcher = n.Linesearcher
 	n.ls.NextDirectioner = n
 
 	return n.ls.Init(loc, xNext)

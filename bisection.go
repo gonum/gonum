@@ -6,7 +6,7 @@ package optimize
 
 import "math"
 
-// Bisection is a LinesearchMethod that uses a bisection to find a point that
+// Bisection is a Linesearcher that uses a bisection to find a point that
 // satisfies the strong Wolfe conditions with the given gradient constant and
 // function constant of zero. If GradConst is zero, it will be set to a reasonable
 // value. Bisection will panic if GradConst is not between zero and one.

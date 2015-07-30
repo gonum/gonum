@@ -24,14 +24,14 @@ type Method interface {
 	}
 }
 
-// Linesearch is a type that can perform a line search. It tries to find an
+// Linesearcher is a type that can perform a line search. It tries to find an
 // (approximate) minimum of the objective function along the search direction
 // dir_k starting at the most recent location x_k, i.e., it tries to minimize a
 // function
 //  φ(step) := f(x_k + step * dir_k), step > 0.
 // Typically, these methods will not be called by the user directly, as they
 // will be called by the LinesearchHelper struct.
-type Linesearch interface {
+type Linesearcher interface {
 	// Init initializes the linesearch method. Value and derivative contain
 	// φ(0) and φ'(0), respectively, and step contains the first trial step
 	// length as returned by the NextDirectioner.InitDirection(). It returns

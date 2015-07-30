@@ -14,11 +14,11 @@ import (
 // better than BFGS for functions with Hessians that vary rapidly spatially.
 //
 // If Store is 0, Store is defaulted to 15.
-// A Linesearch for LBFGS must satisfy the strong Wolfe conditions at every
-// iteration. If Linesearch == nil, an appropriate default is chosen.
+// A Linesearcher for LBFGS must satisfy the strong Wolfe conditions at every
+// iteration. If Linesearcher == nil, an appropriate default is chosen.
 type LBFGS struct {
-	Linesearch Linesearch
-	Store      int // how many past iterations to store
+	Linesearcher Linesearcher
+	Store        int // how many past iterations to store
 
 	ls *LinesearchHelper
 
@@ -39,13 +39,13 @@ type LBFGS struct {
 }
 
 func (l *LBFGS) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	if l.Linesearch == nil {
-		l.Linesearch = &Bisection{}
+	if l.Linesearcher == nil {
+		l.Linesearcher = &Bisection{}
 	}
 	if l.ls == nil {
 		l.ls = &LinesearchHelper{}
 	}
-	l.ls.Linesearch = l.Linesearch
+	l.ls.Linesearcher = l.Linesearcher
 	l.ls.NextDirectioner = l
 	return l.ls.Init(loc, xNext)
 }

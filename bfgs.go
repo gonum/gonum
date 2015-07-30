@@ -10,7 +10,7 @@ import (
 )
 
 // BFGS implements the Method interface to perform the Broyden–Fletcher–Goldfarb–Shanno
-// optimization method with the given linesearch method. If LinesearchMethod is nil,
+// optimization method with the given linesearch method. If Linesearcher is nil,
 // it will be set to a reasonable default.
 //
 // BFGS is a quasi-Newton method that performs successive rank-one updates to
@@ -18,7 +18,7 @@ import (
 // convergence when in proximity to a local minimum. It has memory cost that is
 // O(n^2) relative to the input dimension.
 type BFGS struct {
-	Linesearch Linesearch
+	Linesearcher Linesearcher
 
 	ls *LinesearchHelper
 
@@ -39,17 +39,14 @@ type BFGS struct {
 	first bool // Is it the first iteration (used to set the scale of the initial hessian)
 }
 
-// NOTE: This method exists so that it's easier to use a bfgs algorithm because
-// it implements Method
-
 func (b *BFGS) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	if b.Linesearch == nil {
-		b.Linesearch = &Bisection{}
+	if b.Linesearcher == nil {
+		b.Linesearcher = &Bisection{}
 	}
 	if b.ls == nil {
 		b.ls = &LinesearchHelper{}
 	}
-	b.ls.Linesearch = b.Linesearch
+	b.ls.Linesearcher = b.Linesearcher
 	b.ls.NextDirectioner = b
 
 	return b.ls.Init(loc, xNext)

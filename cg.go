@@ -53,9 +53,9 @@ type CGVariant interface {
 // gradient methods. Pacific Journal of Optimization, 2 (2006), pp. 35-58, and
 // references therein.
 type CG struct {
-	// Linesearch must satisfy the strong Wolfe conditions at every iteration.
-	// If Linesearch == nil, an appropriate default is chosen.
-	Linesearch Linesearch
+	// Linesearcher must satisfy the strong Wolfe conditions at every iteration.
+	// If Linesearcher == nil, an appropriate default is chosen.
+	Linesearcher Linesearcher
 	// Variant implements the particular CG formula for computing β_k.
 	// If Variant is nil, an appropriate default is chosen.
 	Variant CGVariant
@@ -102,8 +102,8 @@ func (cg *CG) Init(loc *Location, xNext []float64) (EvaluationType, IterationTyp
 		panic("cg: AngleRestartThreshold not in [-1, 0]")
 	}
 
-	if cg.Linesearch == nil {
-		cg.Linesearch = &Bisection{GradConst: 0.1}
+	if cg.Linesearcher == nil {
+		cg.Linesearcher = &Bisection{GradConst: 0.1}
 	}
 	if cg.Variant == nil {
 		cg.Variant = &HestenesStiefel{}
@@ -122,7 +122,7 @@ func (cg *CG) Init(loc *Location, xNext []float64) (EvaluationType, IterationTyp
 	if cg.ls == nil {
 		cg.ls = &LinesearchHelper{}
 	}
-	cg.ls.Linesearch = cg.Linesearch
+	cg.ls.Linesearcher = cg.Linesearcher
 	cg.ls.NextDirectioner = cg
 
 	return cg.ls.Init(loc, xNext)

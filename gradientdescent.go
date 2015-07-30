@@ -8,12 +8,12 @@ import "github.com/gonum/floats"
 
 // GradientDescent is a Method that performs gradient-based optimization.
 // Gradient Descent performs successive steps along the direction of the
-// gradient. The Linesearch specifies the kind of linesearch to be done, and
+// gradient. The Linesearcher specifies the kind of linesearch to be done, and
 // StepSizer determines the initial step size of each direction. If either
-// Linesearch or StepSizer are nil, a reasonable value will be chosen.
+// Linesearcher or StepSizer are nil, a reasonable value will be chosen.
 type GradientDescent struct {
-	Linesearch Linesearch
-	StepSizer  StepSizer
+	Linesearcher Linesearcher
+	StepSizer    StepSizer
 
 	ls *LinesearchHelper
 }
@@ -22,13 +22,13 @@ func (g *GradientDescent) Init(loc *Location, xNext []float64) (EvaluationType, 
 	if g.StepSizer == nil {
 		g.StepSizer = &QuadraticStepSize{}
 	}
-	if g.Linesearch == nil {
-		g.Linesearch = &Backtracking{}
+	if g.Linesearcher == nil {
+		g.Linesearcher = &Backtracking{}
 	}
 	if g.ls == nil {
 		g.ls = &LinesearchHelper{}
 	}
-	g.ls.Linesearch = g.Linesearch
+	g.ls.Linesearcher = g.Linesearcher
 	g.ls.NextDirectioner = g
 
 	return g.ls.Init(loc, xNext)

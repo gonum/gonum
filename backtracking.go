@@ -10,15 +10,16 @@ const (
 	minimumBacktrackingStepSize = 1e-20
 )
 
-// Backtracking is a type that implements LinesearchMethod using a backtracking
-// line search. A backtracking line search checks that the Armijo condition has
-// been met with the given function constant. If the Armijo condition has not
-// been met, the step size is decreased by a factor of Decrease.
+// Backtracking is a Linesearcher that uses a backtracking to find a point that
+// satisfies the Armijo condition with the given function constant FunConst. If
+// the Armijo condition has not been met, the step size is decreased by a
+// factor of Decrease.
 //
-// The Armijo conditions only require the gradient at the initial condition
-// (not successive step locations), and so Backtracking may be a good linesearch
-// method for functions with expensive gradients. Backtracking is not appropriate
-// for optimizers that require the Wolfe conditions to be met, such as BFGS.
+// The Armijo condition only requires the gradient at the beginning of each
+// major iteration (not at successive step locations), and so Backtracking may
+// be a good linesearch for functions with expensive gradients. Backtracking is
+// not appropriate for optimizers that require the Wolfe conditions to be met,
+// such as BFGS.
 //
 // Both FunConst and Decrease must be between zero and one, and Backtracking will
 // panic otherwise. If either FunConst or Decrease are zero, it will be set to a

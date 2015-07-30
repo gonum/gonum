@@ -13,11 +13,11 @@ import (
 // LinesearchHelper encapsulates the common functionality of gradient-based
 // line-search optimization methods and serves as a helper struct for their
 // implementation. It consists of a NextDirectioner, which specifies the search
-// direction at each iteration, and a Linesearch which performs a linesearch
+// direction at each iteration, and a Linesearcher which performs a linesearch
 // along the search direction.
 type LinesearchHelper struct {
 	NextDirectioner NextDirectioner
-	Linesearch      Linesearch
+	Linesearcher    Linesearcher
 
 	x     []float64 // Starting point for the current iteration.
 	dir   []float64 // Search direction for the current iteration.
@@ -58,7 +58,7 @@ func (ls *LinesearchHelper) Iterate(loc *Location, xNext []float64) (EvaluationT
 	}
 
 	projGrad := floats.Dot(loc.Gradient, ls.dir)
-	if ls.Linesearch.Finished(loc.F, projGrad) {
+	if ls.Linesearcher.Finished(loc.F, projGrad) {
 		copy(xNext, loc.X)
 		// Check if the last evaluation evaluated all fields of Location.
 		ls.evalType = complementEval(loc, ls.evalType)
@@ -73,7 +73,7 @@ func (ls *LinesearchHelper) Iterate(loc *Location, xNext []float64) (EvaluationT
 	}
 
 	// Line search not done, just iterate.
-	stepSize, evalType, err := ls.Linesearch.Iterate(loc.F, projGrad)
+	stepSize, evalType, err := ls.Linesearcher.Iterate(loc.F, projGrad)
 	if err != nil {
 		ls.evalType = NoEvaluation
 		ls.iterType = NoIteration
@@ -112,7 +112,7 @@ func (ls *LinesearchHelper) initNextLinesearch(loc *Location, xNext []float64) (
 		return ls.evalType, ls.iterType, ErrNonNegativeStepDirection
 	}
 
-	ls.evalType = ls.Linesearch.Init(loc.F, projGrad, stepSize)
+	ls.evalType = ls.Linesearcher.Init(loc.F, projGrad, stepSize)
 
 	floats.AddScaledTo(xNext, ls.x, stepSize, ls.dir)
 	// Compare the starting point for the current iteration with the next

@@ -32,6 +32,10 @@ func TestDgeqrf(t *testing.T) {
 	testlapack.DgeqrfTest(t, impl)
 }
 
+func TestDgetf2(t *testing.T) {
+	testlapack.Dgetf2Test(t, impl)
+}
+
 func TestDlange(t *testing.T) {
 	testlapack.DlangeTest(t, impl)
 }

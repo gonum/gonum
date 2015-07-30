@@ -15,3 +15,7 @@ var impl = Implementation{}
 func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }
+
+func TestDgetf2(t *testing.T) {
+	testlapack.Dgetf2Test(t, impl)
+}

@@ -142,7 +142,7 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	// values then actually perform the rank updates.
 	yBy := mat64.Inner(b.yVec, b.invHess, b.yVec)
 	firstTermConst := (sDotY + yBy) / (sDotYSquared)
-	b.tmpVec.MulVec(b.invHess, false, b.yVec)
+	b.tmpVec.MulVec(b.invHess, b.yVec)
 
 	b.invHess.RankTwo(b.invHess, -1/sDotY, b.tmpData, b.s)
 	b.invHess.SymRankOne(b.invHess, firstTermConst, b.s)

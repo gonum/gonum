@@ -5,6 +5,8 @@
 package testlapack
 
 import (
+	"fmt"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack"
@@ -289,4 +291,17 @@ func constructQ(kind string, m, n int, a []float64, lda int, tau []float64) blas
 		}
 	}
 	return q
+}
+
+// printRowise prints the matrix with one row per line. This is useful for debugging.
+// If beyond is true, it prints beyond the final column to lda. If false, only
+// the columns are printed.
+func printRowise(a []float64, m, n, lda int, beyond bool) {
+	for i := 0; i < m; i++ {
+		end := n
+		if beyond {
+			end = lda
+		}
+		fmt.Println(a[i*lda : i*lda+end])
+	}
 }

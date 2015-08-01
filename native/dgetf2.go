@@ -6,7 +6,7 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-// Dgetf2 computes the LU decomposition of the m×n matrix a.
+// Dgetf2 computes the LU decomposition of the m×n matrix A.
 // The LU decomposition is a factorization of a into
 //  A = P * L * U
 // where P is a permutation matrix, L is a unit lower triangular matrix, and
@@ -15,9 +15,9 @@ import (
 //
 // ipiv is a permutation vector. It indicates that row i of the matrix was
 // changed with ipiv[i]. ipiv must have length at least min(m,n), and will panic
-// otherwise.
+// otherwise. ipiv is zero-indexed.
 //
-// Dgetf2 returns whether the matrix a is singular. The LU decomposition will
+// Dgetf2 returns whether the matrix A is singular. The LU decomposition will
 // be computed regardless of the singularity of A, but division by zero
 // will occur if the false is returned and the result is used to solve a
 // system of equations.

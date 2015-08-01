@@ -19,3 +19,7 @@ func TestDpotrf(t *testing.T) {
 func TestDgetf2(t *testing.T) {
 	testlapack.Dgetf2Test(t, impl)
 }
+
+func TestDgetrf(t *testing.T) {
+	testlapack.DgetrfTest(t, impl)
+}

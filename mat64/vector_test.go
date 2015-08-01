@@ -1,10 +1,7 @@
 package mat64
 
 import (
-	"math/rand"
-
 	"github.com/gonum/blas/blas64"
-	"github.com/gonum/floats"
 	"gopkg.in/check.v1"
 )
 
@@ -81,124 +78,26 @@ func (s *S) TestVectorAtSet(c *check.C) {
 }
 
 func (s *S) TestVectorMul(c *check.C) {
-
-	for i, test := range []struct {
-		m int
-		n int
-	}{
-		{
-			m: 10,
-			n: 5,
-		},
-		{
-			m: 5,
-			n: 5,
-		},
-		{
-			m: 5,
-			n: 10,
-		},
-	} {
-		vData := make([]float64, test.n)
-		for i := range vData {
-			vData[i] = rand.Float64()
+	method := func(receiver, a, b Matrix) {
+		type mulVecer interface {
+			MulVec(a Matrix, b *Vector)
 		}
-		vDataCopy := make([]float64, test.n)
-		copy(vDataCopy, vData)
-		v := NewVector(test.n, vData)
-		aData := make([]float64, test.n*test.m)
-		for i := range aData {
-			aData[i] = rand.Float64()
-		}
-		a := NewDense(test.m, test.n, aData)
-		var v2 Vector
-		v2.MulVec(a, false, v)
-		var v2M Dense
-		v2M.Mul(a, v)
-		same := floats.EqualApprox(v2.mat.Data, v2M.mat.Data, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d", i))
-
-		var aT Dense
-		v2.Reset()
-		aT.TCopy(a)
-		v2.MulVec(&aT, true, v)
-		same = floats.EqualApprox(v2.mat.Data, v2M.mat.Data, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d", i))
-
-		// Try with anonymous matrix type
-		o := asBasicMatrix(a)
-		var v3 Vector
-		v3.MulVec(o, false, v)
-		same = v3.EqualsApproxVec(&v2, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Matrix", i))
-
-		v3.Reset()
-		o = asBasicMatrix(&aT)
-		v3.MulVec(o, true, v)
-		same = v3.EqualsApproxVec(&v2, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Matrix T", i))
-
-		// Try with anonymous matrix type
-		v3.Reset()
-		o = asBasicVectorer(a)
-		v3.MulVec(o, false, v)
-		same = v3.EqualsApproxVec(&v2, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Vectorer", i))
-
-		v3.Reset()
-		o = asBasicVectorer(&aT)
-		v3.MulVec(o, true, v)
-		same = v3.EqualsApproxVec(&v2, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Vectorer T", i))
+		rd := receiver.(mulVecer)
+		rd.MulVec(a, b.(*Vector))
 	}
-	// Test symmetric and triangular cases
-	for _, n := range []int{3, 5, 8} {
-		vData := make([]float64, n)
-		for i := range vData {
-			vData[i] = rand.Float64()
-		}
-		v := NewVector(n, vData)
-		data := make([]float64, n*n)
-		for i := range data {
-			data[i] = rand.Float64()
-		}
-		var dense Dense
-		var got Vector
-		var want Vector
-
-		triUpper := NewTriDense(n, true, data)
-		dense.Clone(triUpper)
-		got.MulVec(triUpper, false, v)
-		want.MulVec(&dense, false, v)
-		same := want.EqualsApproxVec(&got, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
-		got.MulVec(triUpper, true, v)
-		want.MulVec(&dense, true, v)
-		same = want.EqualsApproxVec(&got, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
-
-		triLower := NewTriDense(n, false, data)
-		dense.Clone(triLower)
-		got.MulVec(triLower, false, v)
-		want.MulVec(&dense, false, v)
-		same = want.EqualsApproxVec(&got, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
-		got.MulVec(triLower, true, v)
-		want.MulVec(&dense, true, v)
-		same = want.EqualsApproxVec(&got, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
-
-		sym := NewSymDense(n, data)
-		dense.Clone(sym)
-		got.MulVec(sym, false, v)
-		want.MulVec(&dense, false, v)
-		same = want.EqualsApproxVec(&got, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
-		got.MulVec(sym, true, v)
-		want.MulVec(&dense, true, v)
-		same = want.EqualsApproxVec(&got, 1e-14)
-		c.Check(same, check.Equals, true, check.Commentf("Test %d Tri", n))
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Mul(a, b)
 	}
+	legalSizeMulVec := func(ar, ac, br, bc int) bool {
+		var legal bool
+		if bc != 1 {
+			legal = false
+		} else {
+			legal = ac == br
+		}
+		return legal
+	}
+	testTwoInput(c, "MulVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec)
 }
 
 func (s *S) TestVectorAdd(c *check.C) {

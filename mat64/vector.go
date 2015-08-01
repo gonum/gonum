@@ -188,48 +188,30 @@ func (v *Vector) DivElemVec(a, b *Vector) {
 	}
 }
 
-// MulVec computes a * b if trans == false and a^T * b if trans == true. The
-// result is stored into the receiver. MulVec panics if the number of columns in
-// a does not equal the number of rows in b.
-func (v *Vector) MulVec(a Matrix, trans bool, b *Vector) {
-	ar, ac := a.Dims()
+// MulVec computes a * b. The result is stored into the receiver.
+// MulVec panics if the number of columns in a does not equal the number of rows in b.
+func (v *Vector) MulVec(aMat Matrix, b *Vector) {
+	r, c := aMat.Dims()
 	br := b.Len()
-	if trans {
-		if ar != br {
-			panic(ErrShape)
-		}
-	} else {
-		if ac != br {
-			panic(ErrShape)
-		}
+	if c != br {
+		panic(ErrShape)
 	}
-
-	var w Vector
-	if v != a && v != b {
-		w = *v
-	}
-	if w.n == 0 {
-		if trans {
-			w.mat.Data = use(w.mat.Data, ac)
-		} else {
-			w.mat.Data = use(w.mat.Data, ar)
-		}
-
-		w.mat.Inc = 1
-		w.n = ar
-		if trans {
-			w.n = ac
-		}
+	a, trans := untranspose(aMat)
+	ar, ac := a.Dims()
+	v.reuseAs(r)
+	var w *Vector
+	var restore func()
+	if v == a {
+		w, restore = v.isolatedWorkspace(a.(*Vector))
+		defer restore()
+	} else if v == b {
+		w, restore = v.isolatedWorkspace(b)
+		defer restore()
 	} else {
-		if trans {
-			if ac != w.n {
-				panic(ErrShape)
-			}
-		} else {
-			if ar != w.n {
-				panic(ErrShape)
-			}
-		}
+		w = v
+		defer func() {
+			v.CopyVec(w)
+		}()
 	}
 
 	switch a := a.(type) {
@@ -296,7 +278,6 @@ func (v *Vector) MulVec(a Matrix, trans bool, b *Vector) {
 			}
 		}
 	}
-	*v = w
 }
 
 // Equals compares the vectors represented by b and the receiver and returns true
@@ -351,4 +332,13 @@ func (v *Vector) isZero() bool {
 	// It must be the case that v.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return v.mat.Inc == 0
+}
+
+func (v *Vector) isolatedWorkspace(a *Vector) (n *Vector, restore func()) {
+	l := a.Len()
+	n = getWorkspaceVec(l, false)
+	return n, func() {
+		v.CopyVec(n)
+		putWorkspaceVec(n)
+	}
 }

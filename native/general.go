@@ -17,7 +17,9 @@ type Implementation struct{}
 
 var _ lapack.Float64 = Implementation{}
 
+// This list is duplicated in lapack/cgo. Keep in sync.
 const (
+	absIncNotOne  = "lapack: increment not one or negative one"
 	badDirect     = "lapack: bad direct"
 	badIpiv       = "lapack: insufficient permutation length"
 	badLdA        = "lapack: index of a out of range"

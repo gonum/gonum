@@ -9,7 +9,7 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dgeqrf computes the QR factorization of the m×n matrix a using a blocked
+// Dgeqrf computes the QR factorization of the m×n matrix A using a blocked
 // algorithm. Please see the documentation for Dgeqr2 for a description of the
 // parameters at entry and exit.
 //
@@ -21,9 +21,6 @@ import (
 //
 // tau must be at least len min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
-	// TODO(btracey): This algorithm is oriented for column-major storage.
-	// Consider modifying the algorithm to better suit row-major storage.
-
 	// nb is the optimal blocksize, i.e. the number of columns transformed at a time.
 	nb := impl.Ilaenv(1, "DGEQRF", " ", m, n, -1, -1)
 	lworkopt := n * max(nb, 1)

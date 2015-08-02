@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package mat64 provides basic linear algebra operations for float64 matrices.
-//
-// Note that in all interfaces that assign the result to the receiver, the receiver must
-// be either the correct dimensions for the result or a zero-sized matrix. In the latter
-// case, matrix data is allocated and stored in the receiver. If the matrix dimensions
-// do not match the result, the method must panic.
 package mat64
 
 import (

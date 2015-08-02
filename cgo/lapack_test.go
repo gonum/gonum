@@ -23,3 +23,7 @@ func TestDgetf2(t *testing.T) {
 func TestDgetrf(t *testing.T) {
 	testlapack.DgetrfTest(t, impl)
 }
+
+func TestDgetrs(t *testing.T) {
+	testlapack.DgetrsTest(t, impl)
+}

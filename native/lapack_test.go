@@ -40,6 +40,10 @@ func TestDgetrf(t *testing.T) {
 	testlapack.DgetrfTest(t, impl)
 }
 
+func TestDgetrs(t *testing.T) {
+	testlapack.DgetrsTest(t, impl)
+}
+
 func TestDlange(t *testing.T) {
 	testlapack.DlangeTest(t, impl)
 }

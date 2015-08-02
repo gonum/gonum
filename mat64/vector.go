@@ -190,54 +190,72 @@ func (v *Vector) DivElemVec(a, b *Vector) {
 
 // MulVec computes a * b. The result is stored into the receiver.
 // MulVec panics if the number of columns in a does not equal the number of rows in b.
-func (v *Vector) MulVec(aMat Matrix, b *Vector) {
-	r, c := aMat.Dims()
+func (v *Vector) MulVec(a Matrix, b *Vector) {
+	r, c := a.Dims()
 	br := b.Len()
 	if c != br {
 		panic(ErrShape)
 	}
-	a, trans := untranspose(aMat)
+	a, trans := untranspose(a)
 	ar, ac := a.Dims()
 	v.reuseAs(r)
-	var w *Vector
 	var restore func()
 	if v == a {
-		w, restore = v.isolatedWorkspace(a.(*Vector))
+		v, restore = v.isolatedWorkspace(a.(*Vector))
 		defer restore()
 	} else if v == b {
-		w, restore = v.isolatedWorkspace(b)
+		v, restore = v.isolatedWorkspace(b)
 		defer restore()
-	} else {
-		w = v
-		defer func() {
-			v.CopyVec(w)
-		}()
 	}
 
 	switch a := a.(type) {
+	case *Vector:
+		if a.Len() == 1 {
+			// {1,1} x {1,n}
+			av := a.At(0, 0)
+			for i := 0; i < b.Len(); i++ {
+				v.mat.Data[i*v.mat.Inc] = av * b.mat.Data[i*b.mat.Inc]
+			}
+			return
+		}
+		if b.Len() == 1 {
+			// {1,n} x {1,1}
+			bv := b.At(0, 0)
+			for i := 0; i < a.Len(); i++ {
+				v.mat.Data[i*v.mat.Inc] = bv * a.mat.Data[i*a.mat.Inc]
+			}
+			return
+		}
+		// {n,1} x {1,n}
+		var sum float64
+		for i := 0; i < c; i++ {
+			sum += a.At(i, 0) * b.At(i, 0)
+		}
+		v.SetVec(0, sum)
+		return
 	case RawSymmetricer:
 		amat := a.RawSymmetric()
-		blas64.Symv(1, amat, b.mat, 0, w.mat)
+		blas64.Symv(1, amat, b.mat, 0, v.mat)
 	case RawTriangular:
-		w.CopyVec(b)
+		v.CopyVec(b)
 		amat := a.RawTriangular()
 		ta := blas.NoTrans
 		if trans {
 			ta = blas.Trans
 		}
-		blas64.Trmv(ta, amat, w.mat)
+		blas64.Trmv(ta, amat, v.mat)
 	case RawMatrixer:
 		amat := a.RawMatrix()
 		t := blas.NoTrans
 		if trans {
 			t = blas.Trans
 		}
-		blas64.Gemv(t, 1, amat, b.mat, 0, w.mat)
+		blas64.Gemv(t, 1, amat, b.mat, 0, v.mat)
 	case Vectorer:
 		if trans {
 			col := make([]float64, ar)
 			for c := 0; c < ac; c++ {
-				w.mat.Data[c*w.mat.Inc] = blas64.Dot(ar,
+				v.mat.Data[c*v.mat.Inc] = blas64.Dot(ar,
 					blas64.Vector{Inc: 1, Data: a.Col(col, c)},
 					b.mat,
 				)
@@ -245,7 +263,7 @@ func (v *Vector) MulVec(aMat Matrix, b *Vector) {
 		} else {
 			row := make([]float64, ac)
 			for r := 0; r < ar; r++ {
-				w.mat.Data[r*w.mat.Inc] = blas64.Dot(ac,
+				v.mat.Data[r*v.mat.Inc] = blas64.Dot(ac,
 					blas64.Vector{Inc: 1, Data: a.Row(row, r)},
 					b.mat,
 				)
@@ -262,7 +280,7 @@ func (v *Vector) MulVec(aMat Matrix, b *Vector) {
 				for i, e := range col {
 					f += e * b.mat.Data[i*b.mat.Inc]
 				}
-				w.mat.Data[c*w.mat.Inc] = f
+				v.mat.Data[c*v.mat.Inc] = f
 			}
 		} else {
 			row := make([]float64, ac)
@@ -274,7 +292,7 @@ func (v *Vector) MulVec(aMat Matrix, b *Vector) {
 				for i, e := range row {
 					f += e * b.mat.Data[i*b.mat.Inc]
 				}
-				w.mat.Data[r*w.mat.Inc] = f
+				v.mat.Data[r*v.mat.Inc] = f
 			}
 		}
 	}

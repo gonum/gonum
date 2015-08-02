@@ -43,11 +43,20 @@ func bits(v uint64) byte {
 // slice capped at 1<<i.
 var pool [63]sync.Pool
 
+// poolVec is the Vector equivalent of pool.
+var poolVec [63]sync.Pool
+
 func init() {
 	for i := range pool {
 		l := 1 << uint(i)
 		pool[i].New = func() interface{} {
 			return &Dense{mat: blas64.General{
+				Data: make([]float64, l),
+			}}
+		}
+		poolVec[i].New = func() interface{} {
+			return &Vector{mat: blas64.Vector{
+				Inc:  1,
 				Data: make([]float64, l),
 			}}
 		}
@@ -82,13 +91,19 @@ func putWorkspace(w *Dense) {
 // getWorkspaceVec returns a *Vec of length n and a cap that is less than 2*n. If clear is true, the
 // data slice visible through the Matrix interface is zeroed.
 func getWorkspaceVec(n int, clear bool) *Vector {
-	// TODO(btracey): Replace this when there is a resolution to issue 160.
-	return NewVector(n, nil)
+	l := uint64(n)
+	v := poolVec[bits(l)].Get().(*Vector)
+	v.mat.Data = v.mat.Data[:l]
+	if clear {
+		zero(v.mat.Data)
+	}
+	v.n = n
+	return v
 }
 
 // putWorkspaceVec replaces a used *Vector into the appropriate size
 // workspace pool. putWorkspace must not be called with a matrix
 // where references to the underlying data slice has been kept.
 func putWorkspaceVec(v *Vector) {
-	// TODO(btracey): Make this not a no-op when there is a resolution to issue 160.
+	pool[bits(uint64(cap(v.mat.Data)))].Put(v)
 }

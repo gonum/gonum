@@ -10,7 +10,7 @@ import (
 )
 
 // Dgeqrf computes the QR factorization of the m×n matrix A using a blocked
-// algorithm. Please see the documentation for Dgeqr2 for a description of the
+// algorithm. See the documentation for Dgeqr2 for a description of the
 // parameters at entry and exit.
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
@@ -19,7 +19,7 @@ import (
 // by the temporary space available. If lwork == -1, instead of performing Dgelqf,
 // the optimal work length will be stored into work[0].
 //
-// tau must be at least len min(m,n), and this function will panic otherwise.
+// tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
 	// nb is the optimal blocksize, i.e. the number of columns transformed at a time.
 	nb := impl.Ilaenv(1, "DGEQRF", " ", m, n, -1, -1)

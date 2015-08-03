@@ -82,10 +82,10 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 // In a QR factorization, Q is an m×m orthonormal matrix, and R is an
 // upper triangular m×n matrix.
 //
-// During Dgeqr2, a is modified to contain the information to construct Q and R.
+// A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
 // (not including the diagonal) contain the elementary reflectors. Tau is modified
-// to contain the reflector scales. Tau must have length at least k = min(m,n), and
+// to contain the reflector scales. tau must have length at least min(m,n), and
 // this function will panic otherwise.
 //
 // The ith elementary reflector can be explicitly constructed by first extracting
@@ -115,14 +115,14 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 }
 
 // Dgeqrf computes the QR factorization of the m×n matrix A using a blocked
-// algorithm. Please see the documentation for Dgeqr2 for a description of the
+// algorithm. See the documentation for Dgeqr2 for a description of the
 // parameters at entry and exit.
 //
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
 // work necessary to work[0]. If len(work) < lwork, Dgels will panic.
 //
-// tau must be at least len min(m,n), and this function will panic otherwise.
+// tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
 	if lwork == -1 {
 		work[0] = float64(n)

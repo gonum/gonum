@@ -49,10 +49,10 @@ func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 }
 
 // Geqrf computes the QR factorization of the m×n matrix A using a blocked
-// algorithm. During Dgeqr2, A is modified to contain the information to construct Q and R.
+// algorithm. A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
 // (not including the diagonal) contain the elementary reflectors. Tau is modified
-// to contain the reflector scales. Tau must have length at least k = min(m,n), and
+// to contain the reflector scales. Tau must have length at least min(m,n), and
 // this function will panic otherwise.
 //
 // The ith elementary reflector can be explicitly constructed by first extracting

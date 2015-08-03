@@ -23,6 +23,7 @@ type Complex128 interface{}
 
 // Float64 defines the public float64 LAPACK API supported by gonum/lapack.
 type Float64 interface {
+	Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
 	Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok bool)
 }
 

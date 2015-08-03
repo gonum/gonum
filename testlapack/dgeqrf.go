@@ -66,7 +66,7 @@ func DgeqrfTest(t *testing.T, impl Dgeqrfer) {
 		impl.Dgeqr2(m, n, ans, lda, tau, work)
 		// Compute blocked QR with small work.
 		impl.Dgeqrf(m, n, a, lda, tau, work, len(work))
-		if !floats.EqualApprox(ans, a, 1e-14) {
+		if !floats.EqualApprox(ans, a, 1e-12) {
 			t.Errorf("Case %v, mismatch small work.", c)
 		}
 		// Try the full length of work.
@@ -80,6 +80,9 @@ func DgeqrfTest(t *testing.T, impl Dgeqrfer) {
 		}
 
 		// Try a slightly smaller version of work to test blocking.
+		if len(work) <= n {
+			continue
+		}
 		work = work[1:]
 		lwork--
 		copy(a, aCopy)

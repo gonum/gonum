@@ -6,7 +6,7 @@ package native
 
 import "github.com/gonum/blas"
 
-// Dgeqr2 computes a QR factorization of the m×n matrix a.
+// Dgeqr2 computes a QR factorization of the m×n matrix A.
 //
 // In a QR factorization, Q is an m×m orthonormal matrix, and R is an
 // upper triangular m×n matrix.

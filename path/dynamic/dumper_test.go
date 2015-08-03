@@ -126,7 +126,7 @@ func (d *dumper) dump(withpath bool) {
 // printEdges pretty prints the given edges to the dumper's io.Writer using the provided
 // format string. The edges are first formated to a string, so the format string must use
 // the %s verb to indicate where the edges are to be printed.
-func (d *dumper) printEdges(format string, edges []concrete.WeightedEdge) {
+func (d *dumper) printEdges(format string, edges []concrete.Edge) {
 	if d == nil {
 		return
 	}
@@ -136,7 +136,7 @@ func (d *dumper) printEdges(format string, edges []concrete.WeightedEdge) {
 		if i != 0 {
 			fmt.Fprint(&buf, ", ")
 		}
-		fmt.Fprintf(&buf, "%d->%d:%.4v", e.From().ID(), e.To().ID(), e.Cost)
+		fmt.Fprintf(&buf, "%d->%d:%.4v", e.From().ID(), e.To().ID(), e.Weight())
 	}
 	if len(edges) == 0 {
 		fmt.Fprint(&buf, "none")
@@ -144,7 +144,7 @@ func (d *dumper) printEdges(format string, edges []concrete.WeightedEdge) {
 	fmt.Fprintf(d.w, format, buf.Bytes())
 }
 
-type lexically []concrete.WeightedEdge
+type lexically []concrete.Edge
 
 func (l lexically) Len() int { return len(l) }
 func (l lexically) Less(i, j int) bool {

@@ -15,8 +15,8 @@ import (
 // In most cases it's likely more desireable to use a graph specific to your
 // problem domain.
 type DirectedGraph struct {
-	successors   map[int]map[int]WeightedEdge
-	predecessors map[int]map[int]WeightedEdge
+	successors   map[int]map[int]graph.Edge
+	predecessors map[int]map[int]graph.Edge
 	nodeMap      map[int]graph.Node
 
 	// Add/remove convenience variables
@@ -26,8 +26,8 @@ type DirectedGraph struct {
 
 func NewDirectedGraph() *DirectedGraph {
 	return &DirectedGraph{
-		successors:   make(map[int]map[int]WeightedEdge),
-		predecessors: make(map[int]map[int]WeightedEdge),
+		successors:   make(map[int]map[int]graph.Edge),
+		predecessors: make(map[int]map[int]graph.Edge),
 		nodeMap:      make(map[int]graph.Node),
 		maxID:        0,
 		freeMap:      make(map[int]struct{}),
@@ -67,8 +67,8 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 		panic(fmt.Sprintf("concrete: node ID collision: %d", n.ID()))
 	}
 	g.nodeMap[n.ID()] = n
-	g.successors[n.ID()] = make(map[int]WeightedEdge)
-	g.predecessors[n.ID()] = make(map[int]WeightedEdge)
+	g.successors[n.ID()] = make(map[int]graph.Edge)
+	g.predecessors[n.ID()] = make(map[int]graph.Edge)
 
 	delete(g.freeMap, n.ID())
 	g.maxID = max(g.maxID, n.ID())
@@ -94,8 +94,8 @@ func (g *DirectedGraph) SetEdge(e graph.Edge, cost float64) {
 		g.AddNode(to)
 	}
 
-	g.successors[fid][tid] = WeightedEdge{Edge: e, Cost: cost}
-	g.predecessors[tid][fid] = WeightedEdge{Edge: e, Cost: cost}
+	g.successors[fid][tid] = e
+	g.predecessors[tid][fid] = e
 }
 
 func (g *DirectedGraph) RemoveNode(n graph.Node) {
@@ -131,8 +131,8 @@ func (g *DirectedGraph) RemoveEdge(e graph.Edge) {
 }
 
 func (g *DirectedGraph) EmptyGraph() {
-	g.successors = make(map[int]map[int]WeightedEdge)
-	g.predecessors = make(map[int]map[int]WeightedEdge)
+	g.successors = make(map[int]map[int]graph.Edge)
+	g.predecessors = make(map[int]map[int]graph.Edge)
 	g.nodeMap = make(map[int]graph.Node)
 }
 
@@ -180,7 +180,7 @@ func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
 	if !ok {
 		return nil
 	}
-	return edge.Edge
+	return edge
 }
 
 func (g *DirectedGraph) HasEdgeFromTo(u, v graph.Node) bool {
@@ -243,7 +243,7 @@ func (g *DirectedGraph) Nodes() []graph.Node {
 func (g *DirectedGraph) Weight(e graph.Edge) float64 {
 	if s, ok := g.successors[e.From().ID()]; ok {
 		if we, ok := s[e.To().ID()]; ok {
-			return we.Cost
+			return we.Weight()
 		}
 	}
 	return inf
@@ -253,7 +253,7 @@ func (g *DirectedGraph) Edges() []graph.Edge {
 	var edges []graph.Edge
 	for _, u := range g.nodeMap {
 		for _, e := range g.successors[u.ID()] {
-			edges = append(edges, e.Edge)
+			edges = append(edges, e)
 		}
 	}
 	return edges

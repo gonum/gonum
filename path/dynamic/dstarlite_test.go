@@ -34,7 +34,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 
 		g := test.g()
 		for _, e := range test.edges {
-			g.SetEdge(e, e.Cost)
+			g.SetEdge(e, e.Weight())
 		}
 
 		var (
@@ -595,7 +595,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 			}
 
 			dp.dump(true)
-			dp.printEdges("Initial world knowledge: %s\n\n", weightedEdgesOf(l, world.Edges()))
+			dp.printEdges("Initial world knowledge: %s\n\n", concreteEdgesOf(l, world.Edges()))
 			for d.Step() {
 				changes, _ := l.MoveTo(d.Here())
 				got = append(got, l.Location)
@@ -608,7 +608,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 							i, memory(remember), gotPath, wantedPath)
 					}
 				}
-				dp.printEdges("Edges changing after last step:\n%s\n\n", weightedEdgesOf(l, changes))
+				dp.printEdges("Edges changing after last step:\n%s\n\n", concreteEdgesOf(l, changes))
 			}
 
 			if weight := weightOf(got, l.Grid); !samePath(got, test.want) || weight != test.weight {
@@ -671,12 +671,13 @@ func weightOf(path []graph.Node, g weightedGraph) float64 {
 	return w
 }
 
-// weightedEdgesOf returns the weighted edges in g corresponding to the given edges.
-func weightedEdgesOf(g weightedGraph, edges []graph.Edge) []concrete.WeightedEdge {
-	w := make([]concrete.WeightedEdge, len(edges))
+// concreteEdgesOf returns the weighted edges in g corresponding to the given edges.
+func concreteEdgesOf(g weightedGraph, edges []graph.Edge) []concrete.Edge {
+	w := make([]concrete.Edge, len(edges))
 	for i, e := range edges {
-		w[i].Edge = e
-		w[i].Cost = g.Weight(e)
+		w[i].F = e.From()
+		w[i].T = e.To()
+		w[i].W = g.Weight(e)
 	}
 	return w
 }

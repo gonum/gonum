@@ -18,7 +18,7 @@ func TestDijkstraFrom(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
-			g.SetEdge(e, e.Cost)
+			g.SetEdge(e, e.Weight())
 		}
 
 		var (
@@ -84,7 +84,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
-			g.SetEdge(e, e.Cost)
+			g.SetEdge(e, e.Weight())
 		}
 
 		var (

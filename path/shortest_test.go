@@ -25,7 +25,7 @@ func init() {
 var shortestPathTests = []struct {
 	name             string
 	g                func() graph.Mutable
-	edges            []concrete.WeightedEdge
+	edges            []concrete.Edge
 	negative         bool
 	hasNegativeCycle bool
 
@@ -58,8 +58,8 @@ var shortestPathTests = []struct {
 	{
 		name: "one edge directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
+		edges: []concrete.Edge{
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(1)},
@@ -74,8 +74,8 @@ var shortestPathTests = []struct {
 	{
 		name: "one edge self directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
+		edges: []concrete.Edge{
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(0)},
@@ -90,8 +90,8 @@ var shortestPathTests = []struct {
 	{
 		name: "one edge undirected",
 		g:    func() graph.Mutable { return concrete.NewGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
+		edges: []concrete.Edge{
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(1)},
@@ -106,10 +106,10 @@ var shortestPathTests = []struct {
 	{
 		name: "two paths directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(2), W: 2}, 2},
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
+		edges: []concrete.Edge{
+			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(2)},
@@ -125,10 +125,10 @@ var shortestPathTests = []struct {
 	{
 		name: "two paths undirected",
 		g:    func() graph.Mutable { return concrete.NewGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(2), W: 2}, 2},
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
+		edges: []concrete.Edge{
+			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(2)},
@@ -144,24 +144,24 @@ var shortestPathTests = []struct {
 	{
 		name: "confounding paths directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(5), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(5), W: 1},
 
 			// Add direct edge to goal of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(5), W: 4}, 4},
+			{F: concrete.Node(0), T: concrete.Node(5), W: 4},
 
 			// Add edge to a node that's still optimal
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(2), W: 2}, 2},
+			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
 
 			// Add edge to 3 that's overpriced
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(3), W: 4}, 4},
+			{F: concrete.Node(0), T: concrete.Node(3), W: 4},
 
 			// Add very cheap edge to 4 which is a dead end
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(4), W: 0.25}, 0.25},
+			{F: concrete.Node(0), T: concrete.Node(4), W: 0.25},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(5)},
@@ -178,24 +178,24 @@ var shortestPathTests = []struct {
 	{
 		name: "confounding paths undirected",
 		g:    func() graph.Mutable { return concrete.NewGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(5), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(5), W: 1},
 
 			// Add direct edge to goal of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(5), W: 4}, 4},
+			{F: concrete.Node(0), T: concrete.Node(5), W: 4},
 
 			// Add edge to a node that's still optimal
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(2), W: 2}, 2},
+			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
 
 			// Add edge to 3 that's overpriced
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(3), W: 4}, 4},
+			{F: concrete.Node(0), T: concrete.Node(3), W: 4},
 
 			// Add very cheap edge to 4 which is a dead end
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(4), W: 0.25}, 0.25},
+			{F: concrete.Node(0), T: concrete.Node(4), W: 0.25},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(5)},
@@ -212,25 +212,25 @@ var shortestPathTests = []struct {
 	{
 		name: "confounding paths directed 2-step",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(5), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(5), W: 1},
 
 			// Add two step path to goal of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(6), W: 2}, 2},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(5), W: 2}, 2},
+			{F: concrete.Node(0), T: concrete.Node(6), W: 2},
+			{F: concrete.Node(6), T: concrete.Node(5), W: 2},
 
 			// Add edge to a node that's still optimal
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(2), W: 2}, 2},
+			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
 
 			// Add edge to 3 that's overpriced
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(3), W: 4}, 4},
+			{F: concrete.Node(0), T: concrete.Node(3), W: 4},
 
 			// Add very cheap edge to 4 which is a dead end
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(4), W: 0.25}, 0.25},
+			{F: concrete.Node(0), T: concrete.Node(4), W: 0.25},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(5)},
@@ -247,25 +247,25 @@ var shortestPathTests = []struct {
 	{
 		name: "confounding paths undirected 2-step",
 		g:    func() graph.Mutable { return concrete.NewGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(5), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(5), W: 1},
 
 			// Add two step path to goal of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(6), W: 2}, 2},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(5), W: 2}, 2},
+			{F: concrete.Node(0), T: concrete.Node(6), W: 2},
+			{F: concrete.Node(6), T: concrete.Node(5), W: 2},
 
 			// Add edge to a node that's still optimal
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(2), W: 2}, 2},
+			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
 
 			// Add edge to 3 that's overpriced
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(3), W: 4}, 4},
+			{F: concrete.Node(0), T: concrete.Node(3), W: 4},
 
 			// Add very cheap edge to 4 which is a dead end
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(4), W: 0.25}, 0.25},
+			{F: concrete.Node(0), T: concrete.Node(4), W: 0.25},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(5)},
@@ -282,16 +282,16 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight cycle directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 
 			// Add a zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(1), W: 0}, 0},
+			{F: concrete.Node(1), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(1), W: 0},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(4)},
@@ -306,19 +306,19 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight cycle^2 directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 
 			// Add a zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(1), W: 0}, 0},
+			{F: concrete.Node(1), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(1), W: 0},
 			// With its own zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(6), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(5), W: 0}, 0},
+			{F: concrete.Node(5), T: concrete.Node(6), W: 0},
+			{F: concrete.Node(6), T: concrete.Node(5), W: 0},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(4)},
@@ -333,21 +333,21 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight cycle^2 confounding directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 
 			// Add a zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(1), W: 0}, 0},
+			{F: concrete.Node(1), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(1), W: 0},
 			// With its own zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(6), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(5), W: 0}, 0},
+			{F: concrete.Node(5), T: concrete.Node(6), W: 0},
+			{F: concrete.Node(6), T: concrete.Node(5), W: 0},
 			// But leading to the target.
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(4), W: 3}, 3},
+			{F: concrete.Node(5), T: concrete.Node(4), W: 3},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(4)},
@@ -363,22 +363,22 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight cycle^3 directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 
 			// Add a zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(1), W: 0}, 0},
+			{F: concrete.Node(1), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(1), W: 0},
 			// With its own zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(6), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(5), W: 0}, 0},
+			{F: concrete.Node(5), T: concrete.Node(6), W: 0},
+			{F: concrete.Node(6), T: concrete.Node(5), W: 0},
 			// With its own zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(7), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(7), T: concrete.Node(6), W: 0}, 0},
+			{F: concrete.Node(6), T: concrete.Node(7), W: 0},
+			{F: concrete.Node(7), T: concrete.Node(6), W: 0},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(4)},
@@ -393,25 +393,25 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight 3·cycle^2 confounding directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 
 			// Add a zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(1), W: 0}, 0},
+			{F: concrete.Node(1), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(1), W: 0},
 			// With 3 of its own zero-weight cycles.
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(6), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(7), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(7), T: concrete.Node(5), W: 0}, 0},
+			{F: concrete.Node(5), T: concrete.Node(6), W: 0},
+			{F: concrete.Node(6), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(7), W: 0},
+			{F: concrete.Node(7), T: concrete.Node(5), W: 0},
 			// Each leading to the target.
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(4), W: 3}, 3},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(4), W: 3}, 3},
-			{concrete.Edge{F: concrete.Node(7), T: concrete.Node(4), W: 3}, 3},
+			{F: concrete.Node(5), T: concrete.Node(4), W: 3},
+			{F: concrete.Node(6), T: concrete.Node(4), W: 3},
+			{F: concrete.Node(7), T: concrete.Node(4), W: 3},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(4)},
@@ -429,25 +429,25 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight reversed 3·cycle^2 confounding directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
+		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+			{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+			{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+			{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 
 			// Add a zero-weight cycle.
-			{concrete.Edge{F: concrete.Node(3), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(3), W: 0}, 0},
+			{F: concrete.Node(3), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(3), W: 0},
 			// With 3 of its own zero-weight cycles.
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(6), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(6), T: concrete.Node(5), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(5), T: concrete.Node(7), W: 0}, 0},
-			{concrete.Edge{F: concrete.Node(7), T: concrete.Node(5), W: 0}, 0},
+			{F: concrete.Node(5), T: concrete.Node(6), W: 0},
+			{F: concrete.Node(6), T: concrete.Node(5), W: 0},
+			{F: concrete.Node(5), T: concrete.Node(7), W: 0},
+			{F: concrete.Node(7), T: concrete.Node(5), W: 0},
 			// Each leading from the source.
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(5), W: 3}, 3},
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(6), W: 3}, 3},
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(7), W: 3}, 3},
+			{F: concrete.Node(0), T: concrete.Node(5), W: 3},
+			{F: concrete.Node(0), T: concrete.Node(6), W: 3},
+			{F: concrete.Node(0), T: concrete.Node(7), W: 3},
 		},
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(4)},
@@ -465,13 +465,13 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight |V|·cycle^(n/|V|) directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: func() []concrete.WeightedEdge {
-			e := []concrete.WeightedEdge{
+		edges: func() []concrete.Edge {
+			e := []concrete.Edge{
 				// Add a path from 0->4 of weight 4
-				{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+				{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+				{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+				{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+				{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 			}
 			next := len(e) + 1
 
@@ -479,8 +479,8 @@ var shortestPathTests = []struct {
 			const n = 100
 			for i := 0; i < n; i++ {
 				e = append(e,
-					concrete.WeightedEdge{concrete.Edge{F: concrete.Node(next + i), T: concrete.Node(i), W: 0}, 0},
-					concrete.WeightedEdge{concrete.Edge{F: concrete.Node(i), T: concrete.Node(next + i), W: 0}, 0},
+					concrete.Edge{F: concrete.Node(next + i), T: concrete.Node(i), W: 0},
+					concrete.Edge{F: concrete.Node(i), T: concrete.Node(next + i), W: 0},
 				)
 			}
 			return e
@@ -498,13 +498,13 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight n·cycle directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: func() []concrete.WeightedEdge {
-			e := []concrete.WeightedEdge{
+		edges: func() []concrete.Edge {
+			e := []concrete.Edge{
 				// Add a path from 0->4 of weight 4
-				{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+				{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+				{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+				{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+				{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 			}
 			next := len(e) + 1
 
@@ -512,8 +512,8 @@ var shortestPathTests = []struct {
 			const n = 100
 			for i := 0; i < n; i++ {
 				e = append(e,
-					concrete.WeightedEdge{concrete.Edge{F: concrete.Node(next + i), T: concrete.Node(1), W: 0}, 0},
-					concrete.WeightedEdge{concrete.Edge{F: concrete.Node(1), T: concrete.Node(next + i), W: 0}, 0},
+					concrete.Edge{F: concrete.Node(next + i), T: concrete.Node(1), W: 0},
+					concrete.Edge{F: concrete.Node(1), T: concrete.Node(next + i), W: 0},
 				)
 			}
 			return e
@@ -531,13 +531,13 @@ var shortestPathTests = []struct {
 	{
 		name: "zero-weight bi-directional tree with single exit directed",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: func() []concrete.WeightedEdge {
-			e := []concrete.WeightedEdge{
+		edges: func() []concrete.Edge {
+			e := []concrete.Edge{
 				// Add a path from 0->4 of weight 4
-				{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(1), T: concrete.Node(2), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(2), T: concrete.Node(3), W: 1}, 1},
-				{concrete.Edge{F: concrete.Node(3), T: concrete.Node(4), W: 1}, 1},
+				{F: concrete.Node(0), T: concrete.Node(1), W: 1},
+				{F: concrete.Node(1), T: concrete.Node(2), W: 1},
+				{F: concrete.Node(2), T: concrete.Node(3), W: 1},
+				{F: concrete.Node(3), T: concrete.Node(4), W: 1},
 			}
 
 			// Make a bi-directional tree rooted at node 2 with
@@ -554,13 +554,13 @@ var shortestPathTests = []struct {
 			for l := 0; l < depth; l++ {
 				for i = 0; i < branching; i++ {
 					last = next + i
-					e = append(e, concrete.WeightedEdge{concrete.Edge{F: concrete.Node(src), T: concrete.Node(last), W: 0}, 0})
-					e = append(e, concrete.WeightedEdge{concrete.Edge{F: concrete.Node(last), T: concrete.Node(src), W: 0}, 0})
+					e = append(e, concrete.Edge{F: concrete.Node(src), T: concrete.Node(last), W: 0})
+					e = append(e, concrete.Edge{F: concrete.Node(last), T: concrete.Node(src), W: 0})
 				}
 				src = next + 1
 				next += branching
 			}
-			e = append(e, concrete.WeightedEdge{concrete.Edge{F: concrete.Node(last), T: concrete.Node(4), W: 2}, 2})
+			e = append(e, concrete.Edge{F: concrete.Node(last), T: concrete.Node(4), W: 2})
 			return e
 		}(),
 
@@ -579,8 +579,8 @@ var shortestPathTests = []struct {
 	{
 		name: "one edge directed negative",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: -1}, -1},
+		edges: []concrete.Edge{
+			{F: concrete.Node(0), T: concrete.Node(1), W: -1},
 		},
 		negative: true,
 
@@ -596,8 +596,8 @@ var shortestPathTests = []struct {
 	{
 		name: "one edge undirected negative",
 		g:    func() graph.Mutable { return concrete.NewGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node(0), T: concrete.Node(1), W: -1}, -1},
+		edges: []concrete.Edge{
+			{F: concrete.Node(0), T: concrete.Node(1), W: -1},
 		},
 		negative:         true,
 		hasNegativeCycle: true,
@@ -607,14 +607,14 @@ var shortestPathTests = []struct {
 	{
 		name: "wp graph negative", // http://en.wikipedia.org/w/index.php?title=Johnson%27s_algorithm&oldid=564595231
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node('w'), T: concrete.Node('z'), W: 2}, 2},
-			{concrete.Edge{F: concrete.Node('x'), T: concrete.Node('w'), W: 6}, 6},
-			{concrete.Edge{F: concrete.Node('x'), T: concrete.Node('y'), W: 3}, 3},
-			{concrete.Edge{F: concrete.Node('y'), T: concrete.Node('w'), W: 4}, 4},
-			{concrete.Edge{F: concrete.Node('y'), T: concrete.Node('z'), W: 5}, 5},
-			{concrete.Edge{F: concrete.Node('z'), T: concrete.Node('x'), W: -7}, -7},
-			{concrete.Edge{F: concrete.Node('z'), T: concrete.Node('y'), W: -3}, -3},
+		edges: []concrete.Edge{
+			{F: concrete.Node('w'), T: concrete.Node('z'), W: 2},
+			{F: concrete.Node('x'), T: concrete.Node('w'), W: 6},
+			{F: concrete.Node('x'), T: concrete.Node('y'), W: 3},
+			{F: concrete.Node('y'), T: concrete.Node('w'), W: 4},
+			{F: concrete.Node('y'), T: concrete.Node('z'), W: 5},
+			{F: concrete.Node('z'), T: concrete.Node('x'), W: -7},
+			{F: concrete.Node('z'), T: concrete.Node('y'), W: -3},
 		},
 		negative: true,
 
@@ -630,14 +630,14 @@ var shortestPathTests = []struct {
 	{
 		name: "roughgarden negative",
 		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
-		edges: []concrete.WeightedEdge{
-			{concrete.Edge{F: concrete.Node('a'), T: concrete.Node('b'), W: -2}, -2},
-			{concrete.Edge{F: concrete.Node('b'), T: concrete.Node('c'), W: -1}, -1},
-			{concrete.Edge{F: concrete.Node('c'), T: concrete.Node('a'), W: 4}, 4},
-			{concrete.Edge{F: concrete.Node('c'), T: concrete.Node('x'), W: 2}, 2},
-			{concrete.Edge{F: concrete.Node('c'), T: concrete.Node('y'), W: -3}, -3},
-			{concrete.Edge{F: concrete.Node('z'), T: concrete.Node('x'), W: 1}, 1},
-			{concrete.Edge{F: concrete.Node('z'), T: concrete.Node('y'), W: -4}, -4},
+		edges: []concrete.Edge{
+			{F: concrete.Node('a'), T: concrete.Node('b'), W: -2},
+			{F: concrete.Node('b'), T: concrete.Node('c'), W: -1},
+			{F: concrete.Node('c'), T: concrete.Node('a'), W: 4},
+			{F: concrete.Node('c'), T: concrete.Node('x'), W: 2},
+			{F: concrete.Node('c'), T: concrete.Node('y'), W: -3},
+			{F: concrete.Node('z'), T: concrete.Node('x'), W: 1},
+			{F: concrete.Node('z'), T: concrete.Node('y'), W: -4},
 		},
 		negative: true,
 

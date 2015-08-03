@@ -27,11 +27,6 @@ func (e Edge) From() graph.Node { return e.F }
 func (e Edge) To() graph.Node   { return e.T }
 func (e Edge) Weight() float64  { return e.W }
 
-type WeightedEdge struct {
-	graph.Edge
-	Cost float64
-}
-
 // A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and
 // edges -- as well as act as either directed or undirected.
 //
@@ -44,7 +39,7 @@ type WeightedEdge struct {
 // see TileGraph for an example of an immutable 2D grid of tiles that also implements the Graph
 // interface, but would be more suitable if all you needed was a simple undirected 2D grid.
 type Graph struct {
-	neighbors map[int]map[int]WeightedEdge
+	neighbors map[int]map[int]graph.Edge
 	nodeMap   map[int]graph.Node
 
 	// Node add/remove convenience vars
@@ -54,7 +49,7 @@ type Graph struct {
 
 func NewGraph() *Graph {
 	return &Graph{
-		neighbors: make(map[int]map[int]WeightedEdge),
+		neighbors: make(map[int]map[int]graph.Edge),
 		nodeMap:   make(map[int]graph.Node),
 		maxID:     0,
 		freeMap:   make(map[int]struct{}),
@@ -92,7 +87,7 @@ func (g *Graph) AddNode(n graph.Node) {
 		panic(fmt.Sprintf("concrete: node ID collision: %d", n.ID()))
 	}
 	g.nodeMap[n.ID()] = n
-	g.neighbors[n.ID()] = make(map[int]WeightedEdge)
+	g.neighbors[n.ID()] = make(map[int]graph.Edge)
 
 	delete(g.freeMap, n.ID())
 	g.maxID = max(g.maxID, n.ID())
@@ -118,8 +113,8 @@ func (g *Graph) SetEdge(e graph.Edge, cost float64) {
 		g.AddNode(to)
 	}
 
-	g.neighbors[fid][tid] = WeightedEdge{Edge: e, Cost: cost}
-	g.neighbors[tid][fid] = WeightedEdge{Edge: e, Cost: cost}
+	g.neighbors[fid][tid] = e
+	g.neighbors[tid][fid] = e
 }
 
 func (g *Graph) RemoveNode(n graph.Node) {
@@ -152,7 +147,7 @@ func (g *Graph) RemoveEdge(e graph.Edge) {
 }
 
 func (g *Graph) EmptyGraph() {
-	g.neighbors = make(map[int]map[int]WeightedEdge)
+	g.neighbors = make(map[int]map[int]graph.Edge)
 	g.nodeMap = make(map[int]graph.Node)
 }
 
@@ -189,7 +184,7 @@ func (g *Graph) EdgeBetween(u, v graph.Node) graph.Edge {
 		return nil
 	}
 
-	return g.neighbors[u.ID()][v.ID()].Edge
+	return g.neighbors[u.ID()][v.ID()]
 }
 
 func (g *Graph) Node(id int) graph.Node {
@@ -216,7 +211,7 @@ func (g *Graph) Nodes() []graph.Node {
 func (g *Graph) Weight(e graph.Edge) float64 {
 	if n, ok := g.neighbors[e.From().ID()]; ok {
 		if we, ok := n[e.To().ID()]; ok {
-			return we.Cost
+			return we.Weight()
 		}
 	}
 	return inf
@@ -235,7 +230,7 @@ func (g *Graph) Edges() []graph.Edge {
 			}
 			seen[[2]int{uid, vid}] = struct{}{}
 			seen[[2]int{vid, uid}] = struct{}{}
-			edges = append(edges, e.Edge)
+			edges = append(edges, e)
 		}
 	}
 

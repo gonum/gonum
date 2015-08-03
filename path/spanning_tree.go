@@ -42,20 +42,20 @@ func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
 
 	edgeList := g.Edges()
 	for remainingNodes.Count() != 0 {
-		var edges []concrete.WeightedEdge
+		var edges []concrete.Edge
 		for _, edge := range edgeList {
 			if (dst.Has(edge.From()) && remainingNodes.Has(edge.To().ID())) ||
 				(dst.Has(edge.To()) && remainingNodes.Has(edge.From().ID())) {
 
-				edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: weight(edge)})
+				edges = append(edges, concrete.Edge{F: edge.From(), T: edge.To(), W: weight(edge)})
 			}
 		}
 
 		sort.Sort(byWeight(edges))
 		myEdge := edges[0]
 
-		dst.SetEdge(myEdge.Edge, myEdge.Cost)
-		remainingNodes.Remove(myEdge.Edge.From().ID())
+		dst.SetEdge(myEdge, myEdge.W)
+		remainingNodes.Remove(myEdge.From().ID())
 	}
 
 }
@@ -71,9 +71,9 @@ func Kruskal(dst graph.MutableUndirected, g EdgeListerGraph) {
 	}
 
 	edgeList := g.Edges()
-	edges := make([]concrete.WeightedEdge, 0, len(edgeList))
+	edges := make([]concrete.Edge, 0, len(edgeList))
 	for _, edge := range edgeList {
-		edges = append(edges, concrete.WeightedEdge{Edge: edge, Cost: weight(edge)})
+		edges = append(edges, concrete.Edge{F: edge.From(), T: edge.To(), W: weight(edge)})
 	}
 
 	sort.Sort(byWeight(edges))
@@ -86,23 +86,15 @@ func Kruskal(dst graph.MutableUndirected, g EdgeListerGraph) {
 	for _, edge := range edges {
 		// The disjoint set doesn't really care for which is head and which is tail so this
 		// should work fine without checking both ways
-		if s1, s2 := ds.find(edge.Edge.From().ID()), ds.find(edge.Edge.To().ID()); s1 != s2 {
+		if s1, s2 := ds.find(edge.From().ID()), ds.find(edge.To().ID()); s1 != s2 {
 			ds.union(s1, s2)
-			dst.SetEdge(edge.Edge, edge.Cost)
+			dst.SetEdge(edge, edge.W)
 		}
 	}
 }
 
-type byWeight []concrete.WeightedEdge
+type byWeight []concrete.Edge
 
-func (e byWeight) Len() int {
-	return len(e)
-}
-
-func (e byWeight) Less(i, j int) bool {
-	return e[i].Cost < e[j].Cost
-}
-
-func (e byWeight) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
-}
+func (e byWeight) Len() int           { return len(e) }
+func (e byWeight) Less(i, j int) bool { return e[i].Weight() < e[j].Weight() }
+func (e byWeight) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }

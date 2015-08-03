@@ -188,7 +188,7 @@ func (s *S) TestSymRankOne(c *check.C) {
 
 		xMat := NewDense(n, 1, x)
 		var m Dense
-		m.MulTrans(xMat, false, xMat, true)
+		m.Mul(xMat, xMat.T())
 		m.Scale(alpha, &m)
 		m.Add(&m, a)
 
@@ -241,9 +241,9 @@ func (s *S) TestRankTwo(c *check.C) {
 		xMat := NewDense(n, 1, x)
 		yMat := NewDense(n, 1, y)
 		var m Dense
-		m.MulTrans(xMat, false, yMat, true)
+		m.Mul(xMat, yMat.T())
 		var tmp Dense
-		tmp.MulTrans(yMat, false, xMat, true)
+		tmp.Mul(yMat, xMat.T())
 		m.Add(&m, &tmp)
 		m.Scale(alpha, &m)
 		m.Add(&m, a)

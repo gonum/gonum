@@ -5,9 +5,10 @@
 package stat
 
 import (
+	"math"
+
 	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
-	"math"
 )
 
 // CovarianceMatrix calculates a covariance matrix (also known as a
@@ -51,7 +52,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 
 		n = float64(r)
 
-		cov.MulTrans(&xt, false, &xt, true)
+		cov.Mul(&xt, (&xt).T())
 
 		// Scale by the sample size.
 		cov.Scale(1/(n-1), cov)
@@ -74,7 +75,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 
 	// Calculate the normalization factor.
 	n = floats.Sum(wts)
-	cov.MulTrans(&xt, false, &xt, true)
+	cov.Mul(&xt, (&xt).T())
 
 	// Scale by the sample size.
 	cov.Scale(1/(n-1), cov)

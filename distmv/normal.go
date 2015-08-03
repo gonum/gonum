@@ -120,7 +120,7 @@ func (n *Normal) Rand(x []float64) []float64 {
 	}
 	tmpVec := mat64.NewVector(n.dim, tmp)
 	xVec := mat64.NewVector(n.dim, x)
-	xVec.MulVec(n.chol, true, tmpVec)
+	xVec.MulVec(n.chol.T(), tmpVec)
 	floats.Add(x, n.mu)
 	return x
 }

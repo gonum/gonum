@@ -534,7 +534,8 @@ var quasiNewtonTests = []unconstrainedTest{
 			Func: functions.BiggsEXP5{}.Func,
 			Grad: functions.BiggsEXP5{}.Grad,
 		},
-		x: []float64{1, 2, 1, 1, 1},
+		x:       []float64{1, 2, 1, 1, 1},
+		gradTol: 1e-10,
 	},
 	{
 		name: "BiggsEXP5",

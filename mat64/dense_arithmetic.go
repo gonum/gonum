@@ -370,36 +370,203 @@ func (m *Dense) Mul(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aMat, _ := untranspose(a)
-	bMat, _ := untranspose(b)
+	aU, aTrans := untranspose(a)
+	bU, bTrans := untranspose(b)
 	m.reuseAs(ar, bc)
 	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
+	if m == aU {
+		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
+	} else if m == bU {
+		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
+	aT := blas.NoTrans
+	if aTrans {
+		aT = blas.Trans
+	}
+	bT := blas.NoTrans
+	if bTrans {
+		bT = blas.Trans
+	}
 
-	if a, ok := a.(RawMatrixer); ok {
-		if b, ok := b.(RawMatrixer); ok {
-			amat, bmat := a.RawMatrix(), b.RawMatrix()
-			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, amat, bmat, 0, m.mat)
+	// Some of the cases do not have a transpose option, so create
+	// temporary memory.
+	// C = A^T * B = (B^T * A)^T
+	// C^T = B^T * A.
+	if aU, ok := aU.(RawMatrixer); ok {
+		amat := aU.RawMatrix()
+		if bU, ok := bU.(RawMatrixer); ok {
+			bmat := bU.RawMatrix()
+			blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
+			return
+		}
+		if bU, ok := bU.(RawSymmetricer); ok {
+			bmat := bU.RawSymmetric()
+			if aTrans {
+				c := getWorkspace(ac, ar, false)
+				blas64.Symm(blas.Left, 1, bmat, amat, 0, c.mat)
+				m.TCopy(c)
+				putWorkspace(c)
+				return
+			}
+			blas64.Symm(blas.Right, 1, bmat, amat, 0, m.mat)
+			return
+		}
+		if bU, ok := bU.(RawTriangular); ok {
+			// Trmm updates in place, so copy aU first.
+			bmat := bU.RawTriangular()
+			if aTrans {
+				c := getWorkspace(ac, ar, false)
+				var tmp Dense
+				tmp.SetRawMatrix(aU.RawMatrix())
+				c.Copy(&tmp)
+				bT := blas.Trans
+				if bTrans {
+					bT = blas.NoTrans
+				}
+				blas64.Trmm(blas.Left, bT, 1, bmat, c.mat)
+				m.TCopy(c)
+				putWorkspace(c)
+				return
+			}
+			m.Copy(a)
+			blas64.Trmm(blas.Right, bT, 1, bmat, m.mat)
+			return
+		}
+		if bU, ok := bU.(*Vector); ok {
+			bvec := bU.RawVector()
+			if bTrans {
+				// {ar,1} x {1,bc}, which is not a vector.
+				// Instead, construct B as a General.
+				bmat := blas64.General{
+					Rows:   bc,
+					Cols:   1,
+					Stride: bvec.Inc,
+					Data:   bvec.Data,
+				}
+				blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
+				return
+			}
+			cvec := blas64.Vector{
+				Inc:  m.mat.Stride,
+				Data: m.mat.Data,
+			}
+			blas64.Gemv(aT, 1, amat, bvec, 0, cvec)
+			return
+		}
+	}
+	if bU, ok := bU.(RawMatrixer); ok {
+		bmat := bU.RawMatrix()
+		if aU, ok := aU.(RawSymmetricer); ok {
+			amat := aU.RawSymmetric()
+			if bTrans {
+				c := getWorkspace(bc, br, false)
+				blas64.Symm(blas.Right, 1, amat, bmat, 0, c.mat)
+				m.TCopy(c)
+				putWorkspace(c)
+				return
+			}
+			blas64.Symm(blas.Left, 1, amat, bmat, 0, m.mat)
+			return
+		}
+		if aU, ok := aU.(RawTriangular); ok {
+			// Trmm updates in place, so copy bU first.
+			amat := aU.RawTriangular()
+			if bTrans {
+				c := getWorkspace(bc, br, false)
+				var tmp Dense
+				tmp.SetRawMatrix(bU.RawMatrix())
+				c.Copy(&tmp)
+				aT := blas.Trans
+				if aTrans {
+					aT = blas.NoTrans
+				}
+				blas64.Trmm(blas.Right, aT, 1, amat, c.mat)
+				m.TCopy(c)
+				putWorkspace(c)
+				return
+			}
+			m.Copy(b)
+			blas64.Trmm(blas.Left, aT, 1, amat, m.mat)
+			return
+		}
+		if aU, ok := aU.(*Vector); ok {
+			avec := aU.RawVector()
+			if aTrans {
+				// {1,ac} x {ac, bc}
+				// Transpose B so that the vector is on the right.
+				cvec := blas64.Vector{
+					Inc:  1,
+					Data: m.mat.Data,
+				}
+				bT := blas.Trans
+				if bTrans {
+					bT = blas.NoTrans
+				}
+				blas64.Gemv(bT, 1, bmat, avec, 0, cvec)
+				return
+			}
+			// {ar,1} x {1,bc} which is not a vector result.
+			// Instead, construct A as a General.
+			amat := blas64.General{
+				Rows:   ar,
+				Cols:   1,
+				Stride: avec.Inc,
+				Data:   avec.Data,
+			}
+			blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
 			return
 		}
 	}
 
-	if a, ok := a.(Vectorer); ok {
-		if b, ok := b.(Vectorer); ok {
+	if aU, ok := aU.(Vectorer); ok {
+		if bU, ok := bU.(Vectorer); ok {
 			row := make([]float64, ac)
 			col := make([]float64, br)
+			if aTrans {
+				if bTrans {
+					for r := 0; r < ar; r++ {
+						dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
+						for c := 0; c < bc; c++ {
+							dataTmp[c] = blas64.Dot(ac,
+								blas64.Vector{Inc: 1, Data: aU.Col(row, r)},
+								blas64.Vector{Inc: 1, Data: bU.Row(col, c)},
+							)
+						}
+					}
+					return
+				}
+				// TODO(jonlawlor): determine if (b*a)' is more efficient
+				for r := 0; r < ar; r++ {
+					dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
+					for c := 0; c < bc; c++ {
+						dataTmp[c] = blas64.Dot(ac,
+							blas64.Vector{Inc: 1, Data: aU.Col(row, r)},
+							blas64.Vector{Inc: 1, Data: bU.Col(col, c)},
+						)
+					}
+				}
+				return
+			}
+			if bTrans {
+				for r := 0; r < ar; r++ {
+					dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
+					for c := 0; c < bc; c++ {
+						dataTmp[c] = blas64.Dot(ac,
+							blas64.Vector{Inc: 1, Data: aU.Row(row, r)},
+							blas64.Vector{Inc: 1, Data: bU.Row(col, c)},
+						)
+					}
+				}
+				return
+			}
 			for r := 0; r < ar; r++ {
 				dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
 				for c := 0; c < bc; c++ {
 					dataTmp[c] = blas64.Dot(ac,
-						blas64.Vector{Inc: 1, Data: a.Row(row, r)},
-						blas64.Vector{Inc: 1, Data: b.Col(col, c)},
+						blas64.Vector{Inc: 1, Data: aU.Row(row, r)},
+						blas64.Vector{Inc: 1, Data: bU.Col(col, c)},
 					)
 				}
 			}

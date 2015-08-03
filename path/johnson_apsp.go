@@ -109,7 +109,7 @@ func (g johnsonWeightAdjuster) From(n graph.Node) []graph.Node {
 
 func (g johnsonWeightAdjuster) Edge(u, v graph.Node) graph.Edge {
 	if g.bellmanFord && u.ID() == g.q && g.g.Has(v) {
-		return concrete.Edge{johnsonGraphNode(g.q), v}
+		return concrete.Edge{F: johnsonGraphNode(g.q), T: v}
 	}
 	return g.edgeTo(u, v)
 }

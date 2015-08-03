@@ -20,15 +20,12 @@ func (n Node) ID() int {
 // Just a collection of two nodes
 type Edge struct {
 	F, T graph.Node
+	W    float64
 }
 
-func (e Edge) From() graph.Node {
-	return e.F
-}
-
-func (e Edge) To() graph.Node {
-	return e.T
-}
+func (e Edge) From() graph.Node { return e.F }
+func (e Edge) To() graph.Node   { return e.T }
+func (e Edge) Weight() float64  { return e.W }
 
 type WeightedEdge struct {
 	graph.Edge

@@ -223,6 +223,7 @@ type weightedEdge struct {
 
 func (e weightedEdge) From() graph.Node { return e.from }
 func (e weightedEdge) To() graph.Node   { return e.to }
+func (e weightedEdge) Weight() float64  { return e.cost }
 
 type costEdgeListGraph interface {
 	graph.Weighter

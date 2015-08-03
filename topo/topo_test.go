@@ -32,7 +32,7 @@ func TestIsPath(t *testing.T) {
 	if IsPathIn(dg, p) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
-	dg.SetEdge(concrete.Edge{p[0], p[1]}, 1)
+	dg.SetEdge(concrete.Edge{F: p[0], T: p[1], W: 1}, 1)
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
@@ -41,13 +41,13 @@ func TestIsPath(t *testing.T) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
-	dg.SetEdge(concrete.Edge{p[1], p[2]}, 1)
+	dg.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1}, 1)
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
 	ug := concrete.NewGraph()
-	ug.SetEdge(concrete.Edge{p[1], p[0]}, 1)
-	ug.SetEdge(concrete.Edge{p[1], p[2]}, 1)
+	ug.SetEdge(concrete.Edge{F: p[1], T: p[0], W: 1}, 1)
+	ug.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1}, 1)
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}

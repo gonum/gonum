@@ -209,6 +209,7 @@ type attrEdge struct {
 
 func (e attrEdge) From() graph.Node           { return e.from }
 func (e attrEdge) To() graph.Node             { return e.to }
+func (e attrEdge) Weight() float64            { return 0 }
 func (e attrEdge) DOTAttributes() []Attribute { return e.attr }
 
 func directedEdgeAttrGraphFrom(g []set, attr map[edge][]Attribute) graph.Directed {
@@ -244,6 +245,7 @@ type portedEdge struct {
 
 func (e portedEdge) From() graph.Node { return e.from }
 func (e portedEdge) To() graph.Node   { return e.to }
+func (e portedEdge) Weight() float64  { return 0 }
 
 // TODO(kortschak): Figure out a better way to handle the fact that
 // headedness is an undefined concept in undirected graphs. We sort

@@ -65,14 +65,14 @@ func TestBasicDensePassable(t *testing.T) {
 
 func TestDirectedDenseAddRemove(t *testing.T) {
 	dg := NewDirectedDenseGraph(10, false, math.Inf(1))
-	dg.SetEdgeWeight(Edge{Node(0), Node(2)}, 1)
+	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2), W: 1}, 1)
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.Edge(Node(0), Node(2)) == nil {
 		t.Errorf("Adding edge didn't create successor")
 	}
 
-	dg.RemoveEdge(Edge{Node(0), Node(2)})
+	dg.RemoveEdge(Edge{F: Node(0), T: Node(2)})
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 0 || dg.Edge(Node(0), Node(2)) != nil {
 		t.Errorf("Removing edge didn't properly remove successor")
@@ -82,19 +82,19 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 		t.Errorf("Removing directed edge wrongly kept predecessor")
 	}
 
-	dg.SetEdgeWeight(Edge{Node(0), Node(2)}, 2)
+	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2), W: 2}, 2)
 	// I figure we've torture tested From/To at this point
 	// so we'll just use the bool functions now
 	if dg.Edge(Node(0), Node(2)) == nil {
 		t.Error("Adding directed edge didn't change successor back")
-	} else if c1, c2 := dg.Weight(Edge{Node(2), Node(0)}), dg.Weight(Edge{Node(0), Node(2)}); math.Abs(c1-c2) < .000001 {
+	} else if c1, c2 := dg.Weight(Edge{F: Node(2), T: Node(0)}), dg.Weight(Edge{F: Node(0), T: Node(2)}); math.Abs(c1-c2) < .000001 {
 		t.Error("Adding directed edge affected cost in undirected manner")
 	}
 }
 
 func TestUndirectedDenseAddRemove(t *testing.T) {
 	dg := NewUndirectedDenseGraph(10, false, math.Inf(1))
-	dg.SetEdgeWeight(Edge{Node(0), Node(2)}, 1)
+	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2)}, 1)
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeBetween(Node(0), Node(2)) == nil {
@@ -134,7 +134,7 @@ func TestDenseLists(t *testing.T) {
 		t.Errorf("Improper number of edges for passable dense graph")
 	}
 
-	dg.RemoveEdge(Edge{Node(12), Node(11)})
+	dg.RemoveEdge(Edge{F: Node(12), T: Node(11)})
 	edges = dg.Edges()
 	if len(edges) != (15*14)-1 {
 		t.Errorf("Removing edge didn't affect edge listing properly")

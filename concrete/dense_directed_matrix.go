@@ -55,8 +55,8 @@ func (g *DirectedDenseGraph) Edges() []graph.Edge {
 			if i == j {
 				continue
 			}
-			if !isSame(g.mat.At(i, j), g.absent) {
-				edges = append(edges, Edge{Node(i), Node(j)})
+			if w := g.mat.At(i, j); !isSame(w, g.absent) {
+				edges = append(edges, Edge{F: Node(i), T: Node(j), W: w})
 			}
 		}
 	}
@@ -101,7 +101,7 @@ func (g *DirectedDenseGraph) HasEdge(x, y graph.Node) bool {
 
 func (g *DirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
 	if g.HasEdge(u, v) {
-		return Edge{u, v}
+		return Edge{F: u, T: v, W: g.mat.At(u.ID(), v.ID())}
 	}
 	return nil
 }

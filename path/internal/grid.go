@@ -204,7 +204,12 @@ func (g *Grid) Edge(u, v graph.Node) graph.Edge {
 // EdgeBetween returns the edge between u and v.
 func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
 	if g.HasEdge(u, v) {
-		return concrete.Edge{u, v}
+		if !g.AllowDiagonal || g.UnitEdgeWeight {
+			return concrete.Edge{F: u, T: v, W: 1}
+		}
+		ux, uy := g.XY(u)
+		vx, vy := g.XY(v)
+		return concrete.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }
@@ -218,7 +223,6 @@ func (g *Grid) Weight(e graph.Edge) float64 {
 		ux, uy := g.XY(e.From())
 		vx, vy := g.XY(e.To())
 		return math.Hypot(ux-vx, uy-vy)
-
 	}
 	return math.Inf(1)
 }

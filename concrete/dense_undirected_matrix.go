@@ -52,8 +52,8 @@ func (g *UndirectedDenseGraph) Edges() []graph.Edge {
 	r, _ := g.mat.Dims()
 	for i := 0; i < r; i++ {
 		for j := i + 1; j < r; j++ {
-			if !isSame(g.mat.At(i, j), g.absent) {
-				edges = append(edges, Edge{Node(i), Node(j)})
+			if w := g.mat.At(i, j); !isSame(w, g.absent) {
+				edges = append(edges, Edge{F: Node(i), T: Node(j), W: w})
 			}
 		}
 	}
@@ -102,7 +102,7 @@ func (g *UndirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
 
 func (g *UndirectedDenseGraph) EdgeBetween(u, v graph.Node) graph.Edge {
 	if g.HasEdge(u, v) {
-		return Edge{u, v}
+		return Edge{F: u, T: v, W: g.mat.At(u.ID(), v.ID())}
 	}
 	return nil
 }

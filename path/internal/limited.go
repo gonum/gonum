@@ -220,7 +220,12 @@ func (l *LimitedVisionGrid) Edge(u, v graph.Node) graph.Edge {
 // Edge optimistically returns the edge between u and v.
 func (l *LimitedVisionGrid) EdgeBetween(u, v graph.Node) graph.Edge {
 	if l.HasEdge(u, v) {
-		return concrete.Edge{u, v}
+		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
+			return concrete.Edge{F: u, T: v, W: 1}
+		}
+		ux, uy := l.XY(u)
+		vx, vy := l.XY(v)
+		return concrete.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }

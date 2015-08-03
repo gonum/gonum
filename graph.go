@@ -17,6 +17,7 @@ type Node interface {
 type Edge interface {
 	From() Node
 	To() Node
+	Weight() float64
 }
 
 // Graph is a generalized graph.

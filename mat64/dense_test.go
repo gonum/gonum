@@ -661,129 +661,6 @@ func (s *S) TestMul(c *check.C) {
 	testTwoInput(c, "Mul", &Dense{}, method, denseComparison, legalTypesAll, legalSizeMul)
 }
 
-func (s *S) TestMulTrans(c *check.C) {
-	for i, test := range []struct {
-		a, b [][]float64
-	}{
-		{
-			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
-			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
-		},
-		{
-			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-		},
-		{
-			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
-			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
-		},
-		{
-			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
-			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
-		},
-		{
-			[][]float64{{1, 2, 3}, {4, 5, 6}},
-			[][]float64{{1, 2}, {3, 4}, {5, 6}},
-		},
-		{
-			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
-			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
-		},
-	} {
-		for _, matInterface := range []func(d *Dense) Matrix{asDense, asBasicMatrix, asBasicVectorer} {
-			a := matInterface(NewDense(flatten(test.a)))
-			b := matInterface(NewDense(flatten(test.b)))
-			for _, aTrans := range []bool{false, true} {
-				for _, bTrans := range []bool{false, true} {
-					r := NewDense(0, 0, nil)
-					var aCopy, bCopy Dense
-					if aTrans {
-						aCopy.TCopy(NewDense(flatten(test.a)))
-					} else {
-						aCopy = *NewDense(flatten(test.a))
-					}
-					if bTrans {
-						bCopy.TCopy(NewDense(flatten(test.b)))
-					} else {
-						bCopy = *NewDense(flatten(test.b))
-					}
-					var temp Dense
-
-					_, ac := aCopy.Dims()
-					br, _ := bCopy.Dims()
-					if ac != br {
-						// check that both calls error and that the same error returns
-						c.Check(func() { temp.Mul(matInterface(&aCopy), matInterface(&bCopy)) }, check.PanicMatches, ErrShape.Error(), check.Commentf("Test Mul %d", i))
-						c.Check(func() { temp.MulTrans(a, aTrans, b, bTrans) }, check.PanicMatches, ErrShape.Error(), check.Commentf("Test MulTrans %d", i))
-						continue
-					}
-
-					r.Mul(matInterface(&aCopy), matInterface(&bCopy))
-
-					temp.MulTrans(a, aTrans, b, bTrans)
-					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v trans=%b MulTrans %v trans=%b expect %v got %v",
-						i, test.a, aTrans, test.b, bTrans, r, temp))
-
-					zero(temp.mat.Data)
-					temp.MulTrans(a, aTrans, b, bTrans)
-					c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v trans=%b MulTrans %v trans=%b expect %v got %v",
-						i, test.a, aTrans, test.b, bTrans, r, temp))
-				}
-			}
-		}
-	}
-}
-
-func (s *S) TestMulTransSelf(c *check.C) {
-	for i, test := range []struct {
-		a [][]float64
-	}{
-		{
-			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
-		},
-		{
-			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
-		},
-		{
-			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
-		},
-		{
-			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
-		},
-		{
-			[][]float64{{1, 2, 3}, {4, 5, 6}},
-		},
-		{
-			[][]float64{{0, 1, 1}, {0, 1, 1}, {0, 1, 1}},
-		},
-	} {
-		var aT Dense
-		a := NewDense(flatten(test.a))
-		aT.TCopy(a)
-		for _, trans := range []bool{false, true} {
-			var aCopy, bCopy Dense
-			if trans {
-				aCopy.TCopy(NewDense(flatten(test.a)))
-				bCopy = *NewDense(flatten(test.a))
-			} else {
-				aCopy = *NewDense(flatten(test.a))
-				bCopy.TCopy(NewDense(flatten(test.a)))
-			}
-
-			var r Dense
-			r.Mul(&aCopy, &bCopy)
-
-			var temp Dense
-			temp.MulTrans(a, trans, a, !trans)
-			c.Check(temp.Equals(&r), check.Equals, true, check.Commentf("Test %d: %v MulTrans self trans=%b expect %v got %v", i, test.a, trans, r, temp))
-
-			zero(temp.mat.Data)
-			temp.MulTrans(a, trans, a, !trans)
-			c.Check(temp.Equals(&r), check.Equals, true, check.Commentf("Test %d: %v MulTrans self trans=%b expect %v got %v", i, test.a, trans, r, temp))
-		}
-	}
-}
-
 func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 	if size == 0 {
 		return nil, ErrZeroLength
@@ -1516,7 +1393,7 @@ func denseMulTransBench(b *testing.B, size int, rho float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		var n Dense
-		n.MulTrans(a, false, d, true)
+		n.Mul(a, d.T())
 		wd = &n
 	}
 }
@@ -1533,7 +1410,7 @@ func denseMulTransSymBench(b *testing.B, size int, rho float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		var n Dense
-		n.MulTrans(a, false, a, true)
+		n.Mul(a, a.T())
 		wd = &n
 	}
 }

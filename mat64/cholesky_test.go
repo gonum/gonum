@@ -237,7 +237,7 @@ func benchmarkCholesky(b *testing.B, n int) {
 		base[i] = rand.Float64()
 	}
 	bm := NewDense(n, n, base)
-	bm.MulTrans(bm, true, bm, false)
+	bm.Mul(bm.T(), bm)
 	am := NewSymDense(n, bm.mat.Data)
 
 	t := NewTriDense(n, true, nil)

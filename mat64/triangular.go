@@ -138,6 +138,25 @@ func (t *TriDense) isZero() bool {
 	return t.mat.Stride == 0
 }
 
+// reuseAS resizes a zero receiver to an n×n triangular matrix with the given
+// orientation. If the receiver is non-zero, reuseAs checks that the receiver
+// is the correct size and orientation.
+func (t *TriDense) reuseAs(n int, ul blas.Uplo) {
+	if t.isZero() {
+		t.mat = blas64.Triangular{
+			N:      n,
+			Stride: n,
+			Diag:   blas.NonUnit,
+			Data:   use(t.mat.Data, n*n),
+			Uplo:   ul,
+		}
+		return
+	}
+	if t.mat.N != n || t.mat.Uplo != ul {
+		panic(ErrShape)
+	}
+}
+
 // Reset zeros the dimensions of the matrix so that it can be reused as the
 // receiver of a dimensionally restricted operation.
 //

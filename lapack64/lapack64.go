@@ -48,6 +48,39 @@ func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 	return
 }
 
+// Gels finds a minimum-norm solution based on the matrices A and B using the
+// QR or LQ factorization. Dgels returns false if the matrix
+// A is singular, and true if this solution was successfully found.
+//
+// The minimization problem solved depends on the input parameters.
+//
+//  1. If m >= n and trans == blas.NoTrans, Dgels finds X such that || A*X - B||_2
+//     is minimized.
+//  2. If m < n and trans == blas.NoTrans, Dgels finds the minimum norm solution of
+//     A * X = B.
+//  3. If m >= n and trans == blas.Trans, Dgels finds the minimum norm solution of
+//     A^T * X = B.
+//  4. If m < n and trans == blas.Trans, Dgels finds X such that || A*X - B||_2
+//     is minimized.
+// Note that the least-squares solutions (cases 1 and 3) perform the minimization
+// per column of B. This is not the same as finding the minimum-norm matrix.
+//
+// The matrix A is a general matrix of size m×n and is modified during this call.
+// The input matrix B is of size max(m,n)×nrhs, and serves two purposes. On entry,
+// the elements of b specify the input matrix B. B has size m×nrhs if
+// trans == blas.NoTrans, and n×nrhs if trans == blas.Trans. On exit, the
+// leading submatrix of b contains the solution vectors X. If trans == blas.NoTrans,
+// this submatrix is of size n×nrhs, and of size m×nrhs otherwise.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= max(m,n) + max(m,n,nrhs), and this function will panic
+// otherwise. A longer work will enable blocked algorithms to be called.
+// In the special case that lwork == -1, work[0] will be set to the optimal working
+// length.
+func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float64, lwork int) {
+	lapack64.Dgels(trans, a.Rows, a.Cols, b.Cols, a.Data, a.Stride, b.Data, b.Stride, work, lwork)
+}
+
 // Geqrf computes the QR factorization of the m×n matrix A using a blocked
 // algorithm. A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
@@ -92,4 +125,40 @@ func Geqrf(a blas64.General, tau, work []float64, lwork int) {
 // the optimal work length will be stored into work[0].
 func Gelqf(a blas64.General, tau, work []float64, lwork int) {
 	lapack64.Dgelqf(a.Rows, a.Cols, a.Data, a.Stride, tau, work, lwork)
+}
+
+// Getrf computes the LU decomposition of the m×n matrix A.
+// The LU decomposition is a factorization of A into
+//  A = P * L * U
+// where P is a permutation matrix, L is a unit lower triangular matrix, and
+// U is a (usually) non-unit upper triangular matrix. On exit, L and U are stored
+// in place into a.
+//
+// ipiv is a permutation vector. It indicates that row i of the matrix was
+// changed with ipiv[i]. ipiv must have length at least min(m,n), and will panic
+// otherwise. ipiv is zero-indexed.
+//
+// Dgetrf is the blocked version of the algorithm.
+//
+// Dgetrf returns whether the matrix A is singular. The LU decomposition will
+// be computed regardless of the singularity of A, but division by zero
+// will occur if the false is returned and the result is used to solve a
+// system of equations.
+func Getrf(a blas64.General, ipiv []int) bool {
+	return lapack64.Dgetrf(a.Rows, a.Cols, a.Data, a.Stride, ipiv)
+}
+
+// Dgetrs solves a system of equations using an LU factorization.
+// The system of equations solved is
+//  A * X = B if trans == blas.Trans
+//  A^T * X = B if trans == blas.NoTrans
+// A is a general n×n matrix with stride lda. B is a general matrix of size n×nrhs.
+//
+// On entry b contains the elements of the matrix B. On exit, b contains the
+// elements of X, the solution to the system of equations.
+//
+// a and ipiv contain the LU factorization of A and the permutation indices as
+// computed by Getrf. ipiv is zero-indexed.
+func Getrs(trans blas.Transpose, a blas64.General, b blas64.General, ipiv []int) {
+	lapack64.Dgetrs(trans, a.Cols, b.Cols, a.Data, a.Stride, ipiv, b.Data, b.Stride)
 }

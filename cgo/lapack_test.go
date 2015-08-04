@@ -16,6 +16,14 @@ func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }
 
+func TestDgeqr2(t *testing.T) {
+	testlapack.Dgeqr2Test(t, impl)
+}
+
+func TestDgeqrf(t *testing.T) {
+	testlapack.DgeqrfTest(t, impl)
+}
+
 func TestDgetf2(t *testing.T) {
 	testlapack.Dgetf2Test(t, impl)
 }

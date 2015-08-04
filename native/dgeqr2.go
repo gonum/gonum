@@ -6,15 +6,15 @@ package native
 
 import "github.com/gonum/blas"
 
-// Dgeqr2 computes a QR factorization of the m×n matrix a.
+// Dgeqr2 computes a QR factorization of the m×n matrix A.
 //
 // In a QR factorization, Q is an m×m orthonormal matrix, and R is an
 // upper triangular m×n matrix.
 //
-// During Dgeqr2, a is modified to contain the information to construct Q and R.
+// A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
 // (not including the diagonal) contain the elementary reflectors. Tau is modified
-// to contain the reflector scales. Tau must have length at least k = min(m,n), and
+// to contain the reflector scales. tau must have length at least min(m,n), and
 // this function will panic otherwise.
 //
 // The ith elementary reflector can be explicitly constructed by first extracting

@@ -67,9 +67,29 @@ func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.
-// Dgeqrf is a blocked LQ factorization, but the block size is limited
-// by the temporary space available. If lwork == -1, instead of performing Dgelqf,
+// Dgeqrf is a blocked QR factorization, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Geqrf,
 // the optimal work length will be stored into work[0].
 func Geqrf(a blas64.General, tau, work []float64, lwork int) {
 	lapack64.Dgeqrf(a.Rows, a.Cols, a.Data, a.Stride, tau, work, lwork)
+}
+
+// Gelqf computes the QR factorization of the m×n matrix A using a blocked
+// algorithm. A is modified to contain the information to construct L and Q.
+// The lower triangle of a contains the matrix L. The lower triangular elements
+// (not including the diagonal) contain the elementary reflectors. Tau is modified
+// to contain the reflector scales. Tau must have length at least min(m,n), and
+// this function will panic otherwise.
+//
+// See Geqrf for a description of the elementary reflectors and orthonormal
+// matrix Q. Q is constructed as a product of these elementary reflectors,
+// Q = H_k ... H_2*H_1.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= m and this function will panic otherwise.
+// Dgeqrf is a blocked LQ factorization, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Gelqf,
+// the optimal work length will be stored into work[0].
+func Gelqf(a blas64.General, tau, work []float64, lwork int) {
+	lapack64.Dgelqf(a.Rows, a.Cols, a.Data, a.Stride, tau, work, lwork)
 }

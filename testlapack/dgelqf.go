@@ -69,7 +69,7 @@ func DgelqfTest(t *testing.T, impl Dgelqfer) {
 		impl.Dgelq2(m, n, ans, lda, tau, work)
 		// Compute blocked QR with small work.
 		impl.Dgelqf(m, n, a, lda, tau, work, len(work))
-		if !floats.EqualApprox(ans, a, 1e-14) {
+		if !floats.EqualApprox(ans, a, 1e-12) {
 			t.Errorf("Case %v, mismatch small work.", c)
 		}
 		// Try the full length of work.
@@ -83,6 +83,9 @@ func DgelqfTest(t *testing.T, impl Dgelqfer) {
 		}
 
 		// Try a slightly smaller version of work to test blocking code.
+		if len(work) <= m {
+			continue
+		}
 		work = work[1:]
 		lwork--
 		copy(a, aCopy)

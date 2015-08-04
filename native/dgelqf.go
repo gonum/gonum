@@ -9,7 +9,7 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dgelqf computes the LQ factorization of the m×n matrix a using a blocked
+// Dgelqf computes the LQ factorization of the m×n matrix A using a blocked
 // algorithm. Please see the documentation for Dgelq2 for a description of the
 // parameters at entry and exit.
 //

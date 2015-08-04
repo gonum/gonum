@@ -77,6 +77,60 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 	return clapack.Dpotrf(ul, n, a, lda)
 }
 
+// Dgelq2 computes the LQ factorization of the m×n matrix A.
+//
+// In an LQ factorization, L is a lower triangular m×n matrix, and Q is an n×n
+// orthornormal matrix.
+//
+// a is modified to contain the information to construct L and Q.
+// The lower triangle of a contains the matrix L. The upper triangular elements
+// (not including the diagonal) contain the elementary reflectors. Tau is modified
+// to contain the reflector scales. tau must have length of at least k = min(m,n)
+// and this function will panic otherwise.
+//
+// See Dgeqr2 for a description of the elementary reflectors and orthonormal
+// matrix Q. Q is constructed as a product of these elementary reflectors,
+// Q = H_k ... H_2*H_1.
+//
+// Work is temporary storage of length at least m and this function will panic otherwise.
+func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []float64) {
+	checkMatrix(m, n, a, lda)
+	if len(tau) < min(m, n) {
+		panic(badTau)
+	}
+	if len(work) < m {
+		panic(badWork)
+	}
+	clapack.Dgelq2(m, n, a, lda, tau)
+}
+
+// Dgelqf computes the LQ factorization of the m×n matrix A using a blocked
+// algorithm. See the documentation for Dgelq2 for a description of the
+// parameters at entry and exit.
+//
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+//
+// tau must have length at least min(m,n), and this function will panic otherwise.
+func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
+	if lwork == -1 {
+		work[0] = float64(m)
+		return
+	}
+	checkMatrix(m, n, a, lda)
+	if len(work) < lwork {
+		panic(shortWork)
+	}
+	if lwork < m {
+		panic(badWork)
+	}
+	if len(tau) < min(m, n) {
+		panic(badTau)
+	}
+	clapack.Dgelqf(m, n, a, lda, tau)
+}
+
 // Dgeqr2 computes a QR factorization of the m×n matrix A.
 //
 // In a QR factorization, Q is an m×m orthonormal matrix, and R is an
@@ -100,9 +154,6 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 //
 // Work is temporary storage of length at least n and this function will panic otherwise.
 func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []float64) {
-	// TODO(btracey): This is oriented such that columns of a are eliminated.
-	// This likely could be re-arranged to take better advantage of row-major
-	// storage.
 	checkMatrix(m, n, a, lda)
 	if len(work) < n {
 		panic(badWork)
@@ -120,7 +171,7 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 //
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgels will panic.
+// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {

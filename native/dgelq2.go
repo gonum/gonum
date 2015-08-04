@@ -6,9 +6,12 @@ package native
 
 import "github.com/gonum/blas"
 
-// Dgelq2 computes the LQ factorization of the m×n matrix a.
+// Dgelq2 computes the LQ factorization of the m×n matrix A.
 //
-// During Dgelq2, a is modified to contain the information to construct Q and L.
+// In an LQ factorization, L is a lower triangular m×n matrix, and Q is an n×n
+// orthornormal matrix.
+//
+// a is modified to contain the information to construct L and Q.
 // The lower triangle of a contains the matrix L. The upper triangular elements
 // (not including the diagonal) contain the elementary reflectors. Tau is modified
 // to contain the reflector scales. Tau must have length of at least k = min(m,n)

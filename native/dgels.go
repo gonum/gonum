@@ -9,25 +9,25 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dgels finds a minimum-norm solution based on the matrices a and b using the
+// Dgels finds a minimum-norm solution based on the matrices A and B using the
 // QR or LQ factorization. Dgels returns false if the matrix
 // A is singular, and true if this solution was successfully found.
 //
 // The minimization problem solved depends on the input parameters.
 //
 //  1. If m >= n and trans == blas.NoTrans, Dgels finds X such that || A*X - B||_2
-//  is minimized.
+//     is minimized.
 //  2. If m < n and trans == blas.NoTrans, Dgels finds the minimum norm solution of
-//  A * X = B.
+//     A * X = B.
 //  3. If m >= n and trans == blas.Trans, Dgels finds the minimum norm solution of
-//  A^T * X = B.
+//     A^T * X = B.
 //  4. If m < n and trans == blas.Trans, Dgels finds X such that || A*X - B||_2
-//  is minimized.
+//     is minimized.
 // Note that the least-squares solutions (cases 1 and 3) perform the minimization
 // per column of B. This is not the same as finding the minimum-norm matrix.
 //
-// The matrix a is a general matrix of size m×n and is modified during this call.
-// The input matrix b is of size max(m,n)×nrhs, and serves two purposes. On entry,
+// The matrix A is a general matrix of size m×n and is modified during this call.
+// The input matrix B is of size max(m,n)×nrhs, and serves two purposes. On entry,
 // the elements of b specify the input matrix B. B has size m×nrhs if
 // trans == blas.NoTrans, and n×nrhs if trans == blas.Trans. On exit, the
 // leading submatrix of b contains the solution vectors X. If trans == blas.NoTrans,

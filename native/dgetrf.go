@@ -5,8 +5,8 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-// Dgetrf computes the LU decomposition of the m×n matrix a.
-// The LU decomposition is a factorization of a into
+// Dgetrf computes the LU decomposition of the m×n matrix A.
+// The LU decomposition is a factorization of A into
 //  A = P * L * U
 // where P is a permutation matrix, L is a unit lower triangular matrix, and
 // U is a (usually) non-unit upper triangular matrix. On exit, L and U are stored

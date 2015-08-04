@@ -23,9 +23,12 @@ type Complex128 interface{}
 
 // Float64 defines the public float64 LAPACK API supported by gonum/lapack.
 type Float64 interface {
+	Dgels(trans blas.Transpose, m, n, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool
 	Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
 	Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
 	Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok bool)
+	Dgetrf(m, n int, a []float64, lda int, ipiv []int) (ok bool)
+	Dgetrs(trans blas.Transpose, n, nrhs int, a []float64, lda int, ipiv []int, b []float64, ldb int)
 }
 
 // Direct specifies the direction of the multiplication for the Householder matrix.

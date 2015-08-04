@@ -20,6 +20,10 @@ func TestDgelq2(t *testing.T) {
 	testlapack.Dgelq2Test(t, impl)
 }
 
+func TestDgels(t *testing.T) {
+	testlapack.DgelsTest(t, impl)
+}
+
 func TestDgelqf(t *testing.T) {
 	testlapack.DgelqfTest(t, impl)
 }

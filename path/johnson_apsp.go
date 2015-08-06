@@ -13,7 +13,7 @@ import (
 )
 
 // JohnsonAllPaths returns a shortest-path tree for shortest paths in the graph g.
-// If the graph does not implement graph.Weighter, graph.UniformCost is used.
+// If the graph does not implement graph.Weighter, UniformCost is used.
 //
 // The time complexity of JohnsonAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
@@ -25,7 +25,7 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 	if wg, ok := g.(graph.Weighter); ok {
 		jg.weight = wg.Weight
 	} else {
-		jg.weight = graph.UniformCost(g)
+		jg.weight = UniformCost(g)
 	}
 
 	paths = newAllShortest(g.Nodes(), false)
@@ -70,7 +70,7 @@ type johnsonWeightAdjuster struct {
 
 	from   func(graph.Node) []graph.Node
 	edgeTo func(graph.Node, graph.Node) graph.Edge
-	weight graph.Weighting
+	weight Weighting
 
 	bellmanFord bool
 	adjustBy    Shortest

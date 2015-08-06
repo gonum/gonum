@@ -4,8 +4,6 @@
 
 package graph
 
-import "math"
-
 // Node is a graph node. It returns a graph-unique integer ID.
 type Node interface {
 	ID() int
@@ -112,26 +110,6 @@ type MutableUndirected interface {
 type MutableDirected interface {
 	Directed
 	Mutable
-}
-
-// Weighting is a mapping between a pair of nodes and a weight. It follows the
-// semantics of the Weighter interface.
-type Weighting func(x, y Node) (w float64, ok bool)
-
-// UniformCost returns a Weighting that returns an edge cost of 1 for existing
-// edges, zero for node identity and Inf for otherwise absent edges.
-func UniformCost(g Graph) Weighting {
-	return func(x, y Node) (w float64, ok bool) {
-		xid := x.ID()
-		yid := y.ID()
-		if xid == yid {
-			return 0, true
-		}
-		if e := g.Edge(x, y); e != nil {
-			return 1, true
-		}
-		return math.Inf(1), false
-	}
 }
 
 // CopyUndirected copies nodes and edges as undirected edges from the source to the

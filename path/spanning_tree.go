@@ -21,11 +21,11 @@ type EdgeListerGraph interface {
 // Prim generates a minimum spanning tree of g by greedy tree extension, placing
 // the result in the destination. The destination is not cleared first.
 func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
-	var weight graph.Weighting
+	var weight Weighting
 	if wg, ok := g.(graph.Weighter); ok {
 		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost(g)
+		weight = UniformCost(g)
 	}
 
 	nlist := g.Nodes()
@@ -66,11 +66,11 @@ func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
 // Kruskal generates a minimum spanning tree of g by greedy tree coalesence, placing
 // the result in the destination. The destination is not cleared first.
 func Kruskal(dst graph.MutableUndirected, g EdgeListerGraph) {
-	var weight graph.Weighting
+	var weight Weighting
 	if wg, ok := g.(graph.Weighter); ok {
 		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost(g)
+		weight = UniformCost(g)
 	}
 
 	edgeList := g.Edges()

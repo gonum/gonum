@@ -11,15 +11,6 @@ import (
 	"github.com/gonum/graph/internal"
 )
 
-// Heuristic returns an estimate of the cost of travelling between two nodes.
-type Heuristic func(x, y graph.Node) float64
-
-// HeuristicCoster wraps the HeuristicCost method. A graph implementing the
-// interface provides a heuristic between any two given nodes.
-type HeuristicCoster interface {
-	HeuristicCost(x, y graph.Node) float64
-}
-
 // AStar finds the A*-shortest path from s to t in g using the heuristic h. The path and
 // its cost are returned in a Shortest along with paths and costs to all nodes explored
 // during the search. The number of expanded nodes is also returned. This value may help
@@ -31,16 +22,16 @@ type HeuristicCoster interface {
 //
 // If h is nil, AStar will use the g.HeuristicCost method if g implements HeuristicCoster,
 // falling back to NullHeuristic otherwise. If the graph does not implement graph.Weighter,
-// graph.UniformCost is used. AStar will panic if g has an A*-reachable negative edge weight.
+// UniformCost is used. AStar will panic if g has an A*-reachable negative edge weight.
 func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded int) {
 	if !g.Has(s) || !g.Has(t) {
 		return Shortest{from: s}, 0
 	}
-	var weight graph.Weighting
+	var weight Weighting
 	if wg, ok := g.(graph.Weighter); ok {
 		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost(g)
+		weight = UniformCost(g)
 	}
 	if h == nil {
 		if g, ok := g.(HeuristicCoster); ok {

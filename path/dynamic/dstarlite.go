@@ -26,7 +26,7 @@ type DStarLite struct {
 	queue       dStarLiteQueue
 	keyModifier float64
 
-	weight    graph.Weighting
+	weight    path.Weighting
 	heuristic path.Heuristic
 }
 
@@ -44,7 +44,7 @@ type WorldModel interface {
 //
 // If h is nil, the DStarLite will use the g.HeuristicCost method if g implements
 // path.HeuristicCoster, falling back to path.NullHeuristic otherwise. If the graph does not
-// implement graph.Weighter, graph.UniformCost is used. NewDStarLite will panic if g has
+// implement graph.Weighter, path.UniformCost is used. NewDStarLite will panic if g has
 // a negative edge weight.
 func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel) *DStarLite {
 	/*
@@ -76,7 +76,7 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 	if wg, ok := g.(graph.Weighter); ok {
 		d.weight = wg.Weight
 	} else {
-		d.weight = graph.UniformCost(g)
+		d.weight = path.UniformCost(g)
 	}
 	if d.heuristic == nil {
 		if g, ok := g.(path.HeuristicCoster); ok {
@@ -120,7 +120,7 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 // edgeWeight is a helper function that returns the weight of the edge between
 // two connected nodes, u and v using the provided weight function. It panics
 // if there is no edge between u and v.
-func edgeWeight(weight graph.Weighting, u, v graph.Node) float64 {
+func edgeWeight(weight path.Weighting, u, v graph.Node) float64 {
 	w, ok := weight(u, v)
 	if !ok {
 		panic("D* Lite: unexpected invalid weight")

@@ -87,7 +87,7 @@ type Mutable interface {
 	// If the nodes do not exist, they are added.
 	// SetEdge will panic if the IDs of the e.From
 	// and e.To are equal.
-	SetEdge(e Edge, cost float64)
+	SetEdge(Edge)
 
 	// RemoveEdge removes the given edge, leaving the
 	// terminal nodes. If the edge does not exist it
@@ -121,28 +121,19 @@ func UniformCost(e Edge) float64 {
 
 // CopyUndirected copies nodes and edges as undirected edges from the source to the
 // destination without first clearing the destination. CopyUndirected will panic if
-// a node ID in the source graph matches a node ID in the destination. If the source
-// does not implement Weighter, UniformCost is used to define edge weights.
+// a node ID in the source graph matches a node ID in the destination.
 //
 // Note that if the source is a directed graph and a fundamental cycle exists with
 // two nodes where the edge weights differ, the resulting destination graph's edge
 // weight between those nodes is undefined.
 func CopyUndirected(dst MutableUndirected, src Graph) {
-	var weight WeightFunc
-	if g, ok := src.(Weighter); ok {
-		weight = g.Weight
-	} else {
-		weight = UniformCost
-	}
-
 	nodes := src.Nodes()
 	for _, n := range nodes {
 		dst.AddNode(n)
 	}
 	for _, u := range nodes {
 		for _, v := range src.From(u) {
-			edge := src.Edge(u, v)
-			dst.SetEdge(edge, weight(edge))
+			dst.SetEdge(src.Edge(u, v))
 		}
 	}
 }
@@ -151,24 +142,15 @@ func CopyUndirected(dst MutableUndirected, src Graph) {
 // destination without first clearing the destination. CopyDirected will panic if
 // a node ID in the source graph matches a node ID in the destination. If the
 // source is undirected both directions will be present in the destination after
-// the copy is complete. If the source does not implement Weighter, UniformCost
-// is used to define edge weights.
+// the copy is complete.
 func CopyDirected(dst MutableDirected, src Graph) {
-	var weight WeightFunc
-	if g, ok := src.(Weighter); ok {
-		weight = g.Weight
-	} else {
-		weight = UniformCost
-	}
-
 	nodes := src.Nodes()
 	for _, n := range nodes {
 		dst.AddNode(n)
 	}
 	for _, u := range nodes {
 		for _, v := range src.From(u) {
-			edge := src.Edge(u, v)
-			dst.SetEdge(edge, weight(edge))
+			dst.SetEdge(src.Edge(u, v))
 		}
 	}
 }

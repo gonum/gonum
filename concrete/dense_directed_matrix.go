@@ -116,13 +116,13 @@ func (g *DirectedDenseGraph) Weight(e graph.Edge) float64 {
 	return g.mat.At(e.From().ID(), e.To().ID())
 }
 
-func (g *DirectedDenseGraph) SetEdgeWeight(e graph.Edge, weight float64) {
+func (g *DirectedDenseGraph) SetEdgeWeight(e graph.Edge) {
 	fid := e.From().ID()
 	tid := e.To().ID()
 	if fid == tid {
 		panic("concrete: set edge cost of illegal edge")
 	}
-	g.mat.Set(fid, tid, weight)
+	g.mat.Set(fid, tid, e.Weight())
 }
 
 func (g *DirectedDenseGraph) RemoveEdge(e graph.Edge) {

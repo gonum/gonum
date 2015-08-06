@@ -34,7 +34,7 @@ func generateDummyGraph() *DirectedGraph {
 	g := NewDirectedGraph()
 
 	for _, n := range nodes {
-		g.SetEdge(Edge{F: Node(n.srcId), T: Node(n.targetId), W: 1}, 1)
+		g.SetEdge(Edge{F: Node(n.srcId), T: Node(n.targetId), W: 1})
 	}
 
 	return g

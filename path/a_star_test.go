@@ -178,7 +178,7 @@ func TestExhaustiveAStar(t *testing.T) {
 		{from: g.Node(5), to: g.Node(6), cost: 9},
 	}
 	for _, e := range edges {
-		g.SetEdge(e, e.cost)
+		g.SetEdge(e)
 	}
 
 	heuristic := func(u, v graph.Node) float64 {
@@ -247,7 +247,7 @@ func TestAStarNullHeuristic(t *testing.T) {
 	for _, test := range shortestPathTests {
 		g := test.g()
 		for _, e := range test.edges {
-			g.SetEdge(e, e.Weight())
+			g.SetEdge(e)
 		}
 
 		var (

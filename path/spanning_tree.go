@@ -43,19 +43,18 @@ func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
 	edgeList := g.Edges()
 	for remainingNodes.Count() != 0 {
 		var edges []concrete.Edge
-		for _, edge := range edgeList {
-			if (dst.Has(edge.From()) && remainingNodes.Has(edge.To().ID())) ||
-				(dst.Has(edge.To()) && remainingNodes.Has(edge.From().ID())) {
+		for _, e := range edgeList {
+			if (dst.Has(e.From()) && remainingNodes.Has(e.To().ID())) ||
+				(dst.Has(e.To()) && remainingNodes.Has(e.From().ID())) {
 
-				edges = append(edges, concrete.Edge{F: edge.From(), T: edge.To(), W: weight(edge)})
+				edges = append(edges, concrete.Edge{F: e.From(), T: e.To(), W: weight(e)})
 			}
 		}
 
 		sort.Sort(byWeight(edges))
-		myEdge := edges[0]
-
-		dst.SetEdge(myEdge, myEdge.W)
-		remainingNodes.Remove(myEdge.From().ID())
+		min := edges[0]
+		dst.SetEdge(min)
+		remainingNodes.Remove(min.From().ID())
 	}
 
 }
@@ -83,12 +82,12 @@ func Kruskal(dst graph.MutableUndirected, g EdgeListerGraph) {
 		ds.makeSet(node.ID())
 	}
 
-	for _, edge := range edges {
+	for _, e := range edges {
 		// The disjoint set doesn't really care for which is head and which is tail so this
 		// should work fine without checking both ways
-		if s1, s2 := ds.find(edge.From().ID()), ds.find(edge.To().ID()); s1 != s2 {
+		if s1, s2 := ds.find(e.From().ID()), ds.find(e.To().ID()); s1 != s2 {
 			ds.union(s1, s2)
-			dst.SetEdge(edge, edge.W)
+			dst.SetEdge(e)
 		}
 	}
 }

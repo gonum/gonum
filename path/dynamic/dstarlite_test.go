@@ -34,7 +34,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 
 		g := test.g()
 		for _, e := range test.edges {
-			g.SetEdge(e, e.Weight())
+			g.SetEdge(e)
 		}
 
 		var (

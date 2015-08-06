@@ -139,7 +139,7 @@ func TestBreadthFirst(t *testing.T) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
 			}
 		}
 		w := BreadthFirst{
@@ -227,7 +227,7 @@ func TestDepthFirst(t *testing.T) {
 				g.AddNode(concrete.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
 			}
 		}
 		w := DepthFirst{
@@ -291,7 +291,7 @@ func TestWalkAll(t *testing.T) {
 				if !g.Has(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
 			}
 		}
 		type walker interface {

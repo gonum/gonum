@@ -32,7 +32,7 @@ func TestIsPath(t *testing.T) {
 	if IsPathIn(dg, p) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
-	dg.SetEdge(concrete.Edge{F: p[0], T: p[1], W: 1}, 1)
+	dg.SetEdge(concrete.Edge{F: p[0], T: p[1], W: 1})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
@@ -41,13 +41,13 @@ func TestIsPath(t *testing.T) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], concrete.Node(2)}
-	dg.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1}, 1)
+	dg.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
 	ug := concrete.NewGraph()
-	ug.SetEdge(concrete.Edge{F: p[1], T: p[0], W: 1}, 1)
-	ug.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1}, 1)
+	ug.SetEdge(concrete.Edge{F: p[1], T: p[0], W: 1})
+	ug.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
@@ -79,7 +79,7 @@ func TestConnectedComponents(t *testing.T) {
 				if !g.Has(concrete.Node(v)) {
 					g.AddNode(concrete.Node(v))
 				}
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)}, 0)
+				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
 			}
 		}
 		cc := ConnectedComponents(g)

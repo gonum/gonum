@@ -65,7 +65,7 @@ func TestBasicDensePassable(t *testing.T) {
 
 func TestDirectedDenseAddRemove(t *testing.T) {
 	dg := NewDirectedDenseGraph(10, false, math.Inf(1))
-	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2), W: 1}, 1)
+	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2), W: 1})
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.Edge(Node(0), Node(2)) == nil {
@@ -82,7 +82,7 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 		t.Errorf("Removing directed edge wrongly kept predecessor")
 	}
 
-	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2), W: 2}, 2)
+	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2), W: 2})
 	// I figure we've torture tested From/To at this point
 	// so we'll just use the bool functions now
 	if dg.Edge(Node(0), Node(2)) == nil {
@@ -94,7 +94,7 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 
 func TestUndirectedDenseAddRemove(t *testing.T) {
 	dg := NewUndirectedDenseGraph(10, false, math.Inf(1))
-	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2)}, 1)
+	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2)})
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeBetween(Node(0), Node(2)) == nil {

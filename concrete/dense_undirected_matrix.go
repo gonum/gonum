@@ -111,13 +111,13 @@ func (g *UndirectedDenseGraph) Weight(e graph.Edge) float64 {
 	return g.mat.At(e.From().ID(), e.To().ID())
 }
 
-func (g *UndirectedDenseGraph) SetEdgeWeight(e graph.Edge, weight float64) {
+func (g *UndirectedDenseGraph) SetEdgeWeight(e graph.Edge) {
 	fid := e.From().ID()
 	tid := e.To().ID()
 	if fid == tid {
 		panic("concrete: set edge cost of illegal edge")
 	}
-	g.mat.SetSym(fid, tid, weight)
+	g.mat.SetSym(fid, tid, e.Weight())
 }
 
 func (g *UndirectedDenseGraph) RemoveEdge(e graph.Edge) {

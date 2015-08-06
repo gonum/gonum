@@ -164,6 +164,19 @@ func (s *S) TestCopy(c *check.C) {
 	}
 }
 
+// TODO(kortschak) Roll this into testOneInput when it exists.
+// https://github.com/gonum/matrix/issues/171
+func (s *S) TestSymCopyPanic(c *check.C) {
+	var (
+		a SymDense
+		n int
+	)
+	m := NewSymDense(1, nil)
+	panicked, _ := panics(func() { n = m.CopySym(&a) })
+	c.Check(panicked, check.Equals, false)
+	c.Check(n, check.Equals, 0)
+}
+
 func (s *S) TestSymRankOne(c *check.C) {
 	for _, test := range []struct {
 		n int

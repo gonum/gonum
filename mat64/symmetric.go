@@ -120,6 +120,9 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 func (s *SymDense) CopySym(a Symmetric) int {
 	n := a.Symmetric()
 	n = min(n, s.mat.N)
+	if n == 0 {
+		return 0
+	}
 	switch a := a.(type) {
 	case RawSymmetricer:
 		amat := a.RawSymmetric()

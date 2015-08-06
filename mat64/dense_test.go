@@ -1114,6 +1114,22 @@ func (s *S) TestClone(c *check.C) {
 	}
 }
 
+// TODO(kortschak) Roll this into testOneInput when it exists.
+func (s *S) TestCopyPanic(c *check.C) {
+	for _, a := range []*Dense{
+		&Dense{},
+		&Dense{mat: blas64.General{Rows: 1}},
+		&Dense{mat: blas64.General{Cols: 1}},
+	} {
+		var rows, cols int
+		m := NewDense(1, 1, nil)
+		panicked, _ := panics(func() { rows, cols = m.Copy(a) })
+		c.Check(panicked, check.Equals, false)
+		c.Check(rows, check.Equals, 0)
+		c.Check(cols, check.Equals, 0)
+	}
+}
+
 func (s *S) TestStack(c *check.C) {
 	for i, test := range []struct {
 		a, b, e [][]float64

@@ -417,6 +417,9 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 	r, c = a.Dims()
 	r = min(r, m.mat.Rows)
 	c = min(c, m.mat.Cols)
+	if r == 0 || c == 0 {
+		return 0, 0
+	}
 
 	switch a := a.(type) {
 	case RawMatrixer:

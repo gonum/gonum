@@ -33,7 +33,10 @@ func NewDirectedDenseGraph(n int, passable bool, absent float64) *DirectedDenseG
 }
 
 func (g *DirectedDenseGraph) Has(n graph.Node) bool {
-	id := n.ID()
+	return g.has(n.ID())
+}
+
+func (g *DirectedDenseGraph) has(id int) bool {
 	r, _ := g.mat.Dims()
 	return 0 <= id && id < r
 }
@@ -112,8 +115,16 @@ func (g *DirectedDenseGraph) HasEdgeFromTo(u, v graph.Node) bool {
 	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
 }
 
-func (g *DirectedDenseGraph) Weight(e graph.Edge) float64 {
-	return g.mat.At(e.From().ID(), e.To().ID())
+func (g *DirectedDenseGraph) Weight(x, y graph.Node) (w float64, ok bool) {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid {
+		return 0, true
+	}
+	if g.has(xid) && g.has(yid) {
+		return g.mat.At(xid, yid), true
+	}
+	return g.absent, false
 }
 
 func (g *DirectedDenseGraph) SetEdgeWeight(e graph.Edge) {

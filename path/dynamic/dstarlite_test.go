@@ -661,11 +661,11 @@ func weightOf(path []graph.Node, g weightedGraph) float64 {
 	var w float64
 	if len(path) > 1 {
 		for p, n := range path[1:] {
-			e := g.Edge(path[p], n)
-			if e == nil {
+			ew, ok := g.Weight(path[p], n)
+			if !ok {
 				return math.Inf(1)
 			}
-			w += g.Weight(e)
+			w += ew
 		}
 	}
 	return w
@@ -677,7 +677,8 @@ func concreteEdgesOf(g weightedGraph, edges []graph.Edge) []concrete.Edge {
 	for i, e := range edges {
 		w[i].F = e.From()
 		w[i].T = e.To()
-		w[i].W = g.Weight(e)
+		ew, _ := g.Weight(e.From(), e.To())
+		w[i].W = ew
 	}
 	return w
 }

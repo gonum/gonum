@@ -208,13 +208,18 @@ func (g *Graph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *Graph) Weight(e graph.Edge) float64 {
-	if n, ok := g.neighbors[e.From().ID()]; ok {
-		if we, ok := n[e.To().ID()]; ok {
-			return we.Weight()
+func (g *Graph) Weight(x, y graph.Node) (w float64, ok bool) {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid {
+		return 0, true
+	}
+	if n, ok := g.neighbors[xid]; ok {
+		if e, ok := n[yid]; ok {
+			return e.Weight(), true
 		}
 	}
-	return inf
+	return inf, false
 }
 
 func (g *Graph) Edges() []graph.Edge {

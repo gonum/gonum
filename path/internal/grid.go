@@ -105,7 +105,10 @@ func (g *Grid) Nodes() []graph.Node {
 // the AllVisible field determines whether a non-open node is
 // present.
 func (g *Grid) Has(n graph.Node) bool {
-	id := n.ID()
+	return g.has(n.ID())
+}
+
+func (g *Grid) has(id int) bool {
 	return id >= 0 && id < len(g.open) && (g.AllVisible || g.open[id])
 }
 
@@ -215,16 +218,22 @@ func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
 }
 
 // Weight returns the weight of the given edge.
-func (g *Grid) Weight(e graph.Edge) float64 {
-	if e := g.EdgeBetween(e.From(), e.To()); e != nil {
+func (g *Grid) Weight(x, y graph.Node) (w float64, ok bool) {
+	if x.ID() == y.ID() {
+		return 0, true
+	}
+	if !g.HasEdge(x, y) {
+		return math.Inf(1), false
+	}
+	if e := g.EdgeBetween(x, y); e != nil {
 		if !g.AllowDiagonal || g.UnitEdgeWeight {
-			return 1
+			return 1, true
 		}
 		ux, uy := g.XY(e.From())
 		vx, vy := g.XY(e.To())
-		return math.Hypot(ux-vx, uy-vy)
+		return math.Hypot(ux-vx, uy-vy), true
 	}
-	return math.Inf(1)
+	return math.Inf(1), true
 }
 
 // String returns a string representation of the grid.

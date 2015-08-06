@@ -240,13 +240,18 @@ func (g *DirectedGraph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *DirectedGraph) Weight(e graph.Edge) float64 {
-	if s, ok := g.successors[e.From().ID()]; ok {
-		if we, ok := s[e.To().ID()]; ok {
-			return we.Weight()
+func (g *DirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid {
+		return 0, true
+	}
+	if s, ok := g.successors[xid]; ok {
+		if e, ok := s[yid]; ok {
+			return e.Weight(), true
 		}
 	}
-	return inf
+	return inf, false
 }
 
 func (g *DirectedGraph) Edges() []graph.Edge {

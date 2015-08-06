@@ -65,8 +65,15 @@ type Directed interface {
 
 // Weighter defines graphs that can report edge weights.
 type Weighter interface {
-	// Weight returns the weight for the given edge.
-	Weight(Edge) float64
+	// Weight returns the weight for the edge between
+	// x and y if an edge exists between them. If x and
+	// x are the same node or there is no joining edge
+	// the weight value returned is implementation
+	// dependent.
+	// Weight returns true if an edge exists between
+	// x and y or if x and y have the same ID, false
+	// otherwise.
+	Weight(x, y Node) (w float64, ok bool)
 }
 
 // Mutable is an interface for generalized graph mutation.
@@ -107,16 +114,24 @@ type MutableDirected interface {
 	Mutable
 }
 
-// WeightFunc is a mapping between an edge and an edge weight.
-type WeightFunc func(Edge) float64
+// Weighting is a mapping between a pair of nodes and a weight. It follows the
+// semantics of the Weighter interface.
+type Weighting func(x, y Node) (w float64, ok bool)
 
-// UniformCost is a WeightFunc that returns an edge cost of 1 for a non-nil Edge
-// and Inf for a nil Edge.
-func UniformCost(e Edge) float64 {
-	if e == nil {
-		return math.Inf(1)
+// UniformCost returns a Weighting that returns an edge cost of 1 for existing
+// edges, zero for node identity and Inf for otherwise absent edges.
+func UniformCost(g Graph) Weighting {
+	return func(x, y Node) (w float64, ok bool) {
+		xid := x.ID()
+		yid := y.ID()
+		if xid == yid {
+			return 0, true
+		}
+		if e := g.Edge(x, y); e != nil {
+			return 1, true
+		}
+		return math.Inf(1), false
 	}
-	return 1
 }
 
 // CopyUndirected copies nodes and edges as undirected edges from the source to the

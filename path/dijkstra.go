@@ -19,11 +19,11 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 	if !g.Has(u) {
 		return Shortest{from: u}
 	}
-	var weight graph.WeightFunc
-	if g, ok := g.(graph.Weighter); ok {
-		weight = g.Weight
+	var weight graph.Weighting
+	if wg, ok := g.(graph.Weighter); ok {
+		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost
+		weight = graph.UniformCost(g)
 	}
 
 	nodes := g.Nodes()
@@ -43,7 +43,10 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 		}
 		for _, v := range g.From(mid.node) {
 			j := path.indexOf[v.ID()]
-			w := weight(g.Edge(mid.node, v))
+			w, ok := weight(mid.node, v)
+			if !ok {
+				panic("dijkstra: unexpected invalid weight")
+			}
 			if w < 0 {
 				panic("dijkstra: negative edge weight")
 			}
@@ -74,11 +77,11 @@ func DijkstraAllPaths(g graph.Graph) (paths AllShortest) {
 // of the nodes slice and the indexOf map. It returns nothing, but stores the
 // result of the work in the paths parameter which is a reference type.
 func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
-	var weight graph.WeightFunc
-	if g, ok := g.(graph.Weighter); ok {
-		weight = g.Weight
+	var weight graph.Weighting
+	if wg, ok := g.(graph.Weighter); ok {
+		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost
+		weight = graph.UniformCost(g)
 	}
 
 	var Q priorityQueue
@@ -100,7 +103,10 @@ func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
 			}
 			for _, v := range g.From(mid.node) {
 				j := paths.indexOf[v.ID()]
-				w := weight(g.Edge(mid.node, v))
+				w, ok := weight(mid.node, v)
+				if !ok {
+					panic("dijkstra: unexpected invalid weight")
+				}
 				if w < 0 {
 					panic("dijkstra: negative edge weight")
 				}

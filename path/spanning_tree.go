@@ -21,11 +21,11 @@ type EdgeListerGraph interface {
 // Prim generates a minimum spanning tree of g by greedy tree extension, placing
 // the result in the destination. The destination is not cleared first.
 func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
-	var weight graph.WeightFunc
-	if g, ok := g.(graph.Weighter); ok {
-		weight = g.Weight
+	var weight graph.Weighting
+	if wg, ok := g.(graph.Weighter); ok {
+		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost
+		weight = graph.UniformCost(g)
 	}
 
 	nlist := g.Nodes()
@@ -35,26 +35,30 @@ func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
 	}
 
 	dst.AddNode(nlist[0])
-	remainingNodes := make(internal.IntSet)
+	remain := make(internal.IntSet)
 	for _, node := range nlist[1:] {
-		remainingNodes.Add(node.ID())
+		remain.Add(node.ID())
 	}
 
 	edgeList := g.Edges()
-	for remainingNodes.Count() != 0 {
+	for remain.Count() != 0 {
 		var edges []concrete.Edge
 		for _, e := range edgeList {
-			if (dst.Has(e.From()) && remainingNodes.Has(e.To().ID())) ||
-				(dst.Has(e.To()) && remainingNodes.Has(e.From().ID())) {
-
-				edges = append(edges, concrete.Edge{F: e.From(), T: e.To(), W: weight(e)})
+			u := e.From()
+			v := e.To()
+			if (dst.Has(u) && remain.Has(v.ID())) || (dst.Has(v) && remain.Has(u.ID())) {
+				w, ok := weight(u, v)
+				if !ok {
+					panic("prim: unexpected invalid weight")
+				}
+				edges = append(edges, concrete.Edge{F: u, T: v, W: w})
 			}
 		}
 
 		sort.Sort(byWeight(edges))
 		min := edges[0]
 		dst.SetEdge(min)
-		remainingNodes.Remove(min.From().ID())
+		remain.Remove(min.From().ID())
 	}
 
 }
@@ -62,17 +66,23 @@ func Prim(dst graph.MutableUndirected, g EdgeListerGraph) {
 // Kruskal generates a minimum spanning tree of g by greedy tree coalesence, placing
 // the result in the destination. The destination is not cleared first.
 func Kruskal(dst graph.MutableUndirected, g EdgeListerGraph) {
-	var weight graph.WeightFunc
-	if g, ok := g.(graph.Weighter); ok {
-		weight = g.Weight
+	var weight graph.Weighting
+	if wg, ok := g.(graph.Weighter); ok {
+		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost
+		weight = graph.UniformCost(g)
 	}
 
 	edgeList := g.Edges()
 	edges := make([]concrete.Edge, 0, len(edgeList))
-	for _, edge := range edgeList {
-		edges = append(edges, concrete.Edge{F: edge.From(), T: edge.To(), W: weight(edge)})
+	for _, e := range edgeList {
+		u := e.From()
+		v := e.To()
+		w, ok := weight(u, v)
+		if !ok {
+			panic("kruskal: unexpected invalid weight")
+		}
+		edges = append(edges, concrete.Edge{F: u, T: v, W: w})
 	}
 
 	sort.Sort(byWeight(edges))

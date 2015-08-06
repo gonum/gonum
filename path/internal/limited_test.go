@@ -1205,7 +1205,11 @@ func asConcreteEdges(changes []graph.Edge, in graph.Weighter) []concrete.Edge {
 	for i, e := range changes {
 		we[i].F = e.From()
 		we[i].T = e.To()
-		we[i].W = in.Weight(e)
+		w, ok := in.Weight(e.From(), e.To())
+		if !ok && !math.IsInf(w, 1) {
+			panic("unexpected invalid finite weight")
+		}
+		we[i].W = w
 	}
 	return we
 }

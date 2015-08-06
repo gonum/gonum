@@ -36,11 +36,11 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded
 	if !g.Has(s) || !g.Has(t) {
 		return Shortest{from: s}, 0
 	}
-	var weight graph.WeightFunc
-	if g, ok := g.(graph.Weighter); ok {
-		weight = g.Weight
+	var weight graph.Weighting
+	if wg, ok := g.(graph.Weighter); ok {
+		weight = wg.Weight
 	} else {
-		weight = graph.UniformCost
+		weight = graph.UniformCost(g)
 	}
 	if h == nil {
 		if g, ok := g.(HeuristicCoster); ok {
@@ -75,7 +75,10 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded
 			}
 			j := path.indexOf[vid]
 
-			w := weight(g.Edge(u.node, v))
+			w, ok := weight(u.node, v)
+			if !ok {
+				panic("A*: unexpected invalid weight")
+			}
 			if w < 0 {
 				panic("A*: negative edge weight")
 			}

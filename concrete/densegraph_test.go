@@ -86,8 +86,11 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 	// I figure we've torture tested From/To at this point
 	// so we'll just use the bool functions now
 	if dg.Edge(Node(0), Node(2)) == nil {
-		t.Error("Adding directed edge didn't change successor back")
-	} else if c1, c2 := dg.Weight(Edge{F: Node(2), T: Node(0)}), dg.Weight(Edge{F: Node(0), T: Node(2)}); math.Abs(c1-c2) < .000001 {
+		t.Fatal("Adding directed edge didn't change successor back")
+	}
+	c1, _ := dg.Weight(Node(2), Node(0))
+	c2, _ := dg.Weight(Node(0), Node(2))
+	if c1 == c2 {
 		t.Error("Adding directed edge affected cost in undirected manner")
 	}
 }

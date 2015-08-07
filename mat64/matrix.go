@@ -5,7 +5,11 @@
 package mat64
 
 import (
+	"fmt"
+
+	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/lapack/lapack64"
 )
 
 // Matrix is the basic matrix interface type.
@@ -359,7 +363,9 @@ func Det(a Matrix) float64 {
 	if a, ok := a.(Deter); ok {
 		return a.Det()
 	}
-	return LU(DenseCopyOf(a)).Det()
+	var lu LU
+	lu.Factorize(a)
+	return lu.Det()
 }
 
 // Inverse returns the inverse or pseudoinverse of the matrix a.
@@ -379,11 +385,14 @@ func Inverse(a Matrix) (*Dense, error) {
 func Solve(a, b Matrix) (x *Dense, err error) {
 	switch m, n := a.Dims(); {
 	case m == n:
-		lu := LU(DenseCopyOf(a))
-		if lu.IsSingular() {
+		var lu LU
+		lu.Factorize(a)
+		if lu.Det() == 0 {
 			return nil, ErrSingular
 		}
-		return lu.Solve(DenseCopyOf(b)), nil
+		x := DenseCopyOf(b)
+		lapack64.Getrs(blas.NoTrans, lu.lu.mat, x.mat, lu.pivot)
+		return x, nil
 	case m > n:
 		qr := QR(DenseCopyOf(a))
 		if !qr.IsFullRank() {
@@ -447,6 +456,23 @@ func MaybeFloat(fn FloatPanicker) (f float64, err error) {
 	return fn(), nil
 }
 
+// Condition is the reciprocal of the condition number of a matrix. The condition
+// number is defined as ||A|| * ||A^-1||.
+//
+// One important use of Condition is during linear solve routines (finding x such
+// that A * x = b). The condition number of A indicates the accuracy of
+// the computed solution. A Condition error will be returned if the inverse condition
+// number of A is sufficiently large. If A is exactly singular to working precision,
+// Condition == ∞, and the solve algorithm may have completed early. If Condition
+// is large and finite the solve algorithm will be performed, but the computed
+// solution may be innacurate. Due to the nature of finite precision arithmetic,
+// the value of Condition is only an approximate test of singularity.
+type Condition float64
+
+func (c Condition) Error() string {
+	return "Matrix singular or near-singular with inverse condition number " + fmt.Sprintf("%.4e", c)
+}
+
 // Type Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.
 type Error struct{ string }
 
@@ -467,6 +493,10 @@ var (
 	ErrIllegalStride   = Error{"mat64: illegal stride"}
 	ErrPivot           = Error{"mat64: malformed pivot list"}
 	ErrTriangle        = Error{"mat64: triangular storage mismatch"}
+)
+
+var (
+	badSliceLength = "mat64: improper slice length"
 )
 
 func min(a, b int) int {

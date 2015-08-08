@@ -18,7 +18,7 @@ type S struct{}
 
 var _ = check.Suite(&S{})
 
-func leaksPanic(fn Panicker) (panicked bool) {
+func leaksPanic(fn func()) (panicked bool) {
 	defer func() {
 		r := recover()
 		panicked = r != nil
@@ -71,7 +71,7 @@ func eye() *Dense {
 
 func (s *S) TestMaybe(c *check.C) {
 	for i, test := range []struct {
-		fn     Panicker
+		fn     func()
 		panics bool
 	}{
 		{

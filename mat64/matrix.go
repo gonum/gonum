@@ -413,12 +413,9 @@ func Solve(a, b Matrix) (x *Dense, err error) {
 	}
 }
 
-// A Panicker is a function that may panic.
-type Panicker func()
-
 // Maybe will recover a panic with a type mat64.Error from fn, and return this error.
 // Any other error is re-panicked.
-func Maybe(fn Panicker) (err error) {
+func Maybe(fn func()) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(Error); ok {
@@ -435,12 +432,9 @@ func Maybe(fn Panicker) (err error) {
 	return
 }
 
-// A FloatPanicker is a function that returns a float64 and may panic.
-type FloatPanicker func() float64
-
 // MaybeFloat will recover a panic with a type mat64.Error from fn, and return this error.
 // Any other error is re-panicked.
-func MaybeFloat(fn FloatPanicker) (f float64, err error) {
+func MaybeFloat(fn func() float64) (f float64, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(Error); ok {
@@ -470,7 +464,7 @@ func MaybeFloat(fn FloatPanicker) (f float64, err error) {
 type Condition float64
 
 func (c Condition) Error() string {
-	return "Matrix singular or near-singular with inverse condition number " + fmt.Sprintf("%.4e", c)
+	return fmt.Sprintf("matrix singular or near-singular with inverse condition number %.4e", c)
 }
 
 // Type Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.

@@ -31,12 +31,12 @@ func ExampleFormatted() {
 	// a = ⎡1  2  3⎤
 	//     ⎢0  4  5⎥
 	//     ⎣0  0  6⎦
-
+	//
 	// with only non-zero values:
 	// a = ⎡1  2  3⎤
 	//     ⎢.  4  5⎥
 	//     ⎣.  .  6⎦
-
+	//
 	// after modification with only non-zero values:
 	// a = ⎡1  2  .⎤
 	//     ⎢.  4  5⎥

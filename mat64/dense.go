@@ -257,7 +257,8 @@ func (m *Dense) SetRow(i int, src []float64) int {
 	return min(len(src), m.mat.Cols)
 }
 
-// RowView returns a Vector reflecting row i, backed by the matrix data.
+// RowView returns row i of the matrix data represented as a column vector,
+// backed by the matrix data.
 //
 // See RowViewer for more information.
 func (m *Dense) RowView(i int) *Vector {

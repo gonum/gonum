@@ -10,7 +10,7 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
-func Example_Formatted() {
+func ExampleFormatted() {
 	a := mat64.NewDense(3, 3, []float64{1, 2, 3, 0, 4, 5, 0, 0, 6})
 
 	// Create a matrix formatting value with a prefix ...
@@ -43,7 +43,7 @@ func Example_Formatted() {
 	//     ⎣.  .  6⎦
 }
 
-func Example_Excerpt() {
+func ExampleExcerpt() {
 	// Excerpt allows diagnostic display of very large
 	// matrices and vectors.
 

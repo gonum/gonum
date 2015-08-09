@@ -207,7 +207,7 @@ func (s *S) TestSymRankOne(c *check.C) {
 
 		// Check with new receiver
 		s := NewSymDense(n, nil)
-		s.SymRankOne(a, alpha, x)
+		s.SymRankOne(a, alpha, NewVector(len(x), x))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				v := m.At(i, j)
@@ -217,7 +217,7 @@ func (s *S) TestSymRankOne(c *check.C) {
 
 		// Check with reused receiver
 		copy(s.mat.Data, a.mat.Data)
-		s.SymRankOne(s, alpha, x)
+		s.SymRankOne(s, alpha, NewVector(len(x), x))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				v := m.At(i, j)
@@ -263,7 +263,7 @@ func (s *S) TestRankTwo(c *check.C) {
 
 		// Check with new receiver
 		s := NewSymDense(n, nil)
-		s.RankTwo(a, alpha, x, y)
+		s.RankTwo(a, alpha, NewVector(len(x), x), NewVector(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				v := m.At(i, j)
@@ -273,7 +273,7 @@ func (s *S) TestRankTwo(c *check.C) {
 
 		// Check with reused receiver
 		copy(s.mat.Data, a.mat.Data)
-		s.RankTwo(s, alpha, x, y)
+		s.RankTwo(s, alpha, NewVector(len(x), x), NewVector(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				v := m.At(i, j)

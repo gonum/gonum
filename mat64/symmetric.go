@@ -1,3 +1,7 @@
+// Copyright ©2015 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package mat64
 
 import (
@@ -146,8 +150,11 @@ func (s *SymDense) CopySym(a Symmetric) int {
 // SymRankOne performs a symetric rank-one update to the matrix a and stores
 // the result in the receiver
 //  s = a + alpha * x * x'
-func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x []float64) {
+func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
 	n := s.mat.N
+	if x.Len() != n {
+		panic(ErrShape)
+	}
 	var w SymDense
 	if s == a {
 		w = *s
@@ -165,10 +172,7 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x []float64) {
 	if s != a {
 		w.CopySym(a)
 	}
-	if len(x) != n {
-		panic(ErrShape)
-	}
-	blas64.Syr(alpha, blas64.Vector{Inc: 1, Data: x}, w.mat)
+	blas64.Syr(alpha, x.mat, w.mat)
 	*s = w
 	return
 }
@@ -176,8 +180,14 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x []float64) {
 // RankTwo performs a symmmetric rank-two update to the matrix a and stores
 // the result in the receiver
 //  m = a + alpha * (x * y' + y * x')
-func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y []float64) {
+func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
 	n := s.mat.N
+	if x.Len() != n {
+		panic(ErrShape)
+	}
+	if y.Len() != n {
+		panic(ErrShape)
+	}
 	var w SymDense
 	if s == a {
 		w = *s
@@ -195,13 +205,7 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y []float64) {
 	if s != a {
 		w.CopySym(a)
 	}
-	if len(x) != n {
-		panic(ErrShape)
-	}
-	if len(y) != n {
-		panic(ErrShape)
-	}
-	blas64.Syr2(alpha, blas64.Vector{Inc: 1, Data: x}, blas64.Vector{Inc: 1, Data: y}, w.mat)
+	blas64.Syr2(alpha, x.mat, y.mat, w.mat)
 	*s = w
 	return
 }

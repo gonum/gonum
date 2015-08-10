@@ -234,7 +234,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 		return true
 	}
 	checkMatrix(m, n, a, lda)
-	checkMatrix(mn, nrhs, b, ldb)
+	checkMatrix(max(m, n), nrhs, b, ldb)
 	if len(work) < lwork {
 		panic(shortWork)
 	}

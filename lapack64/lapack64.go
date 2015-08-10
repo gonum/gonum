@@ -77,8 +77,8 @@ func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 // otherwise. A longer work will enable blocked algorithms to be called.
 // In the special case that lwork == -1, work[0] will be set to the optimal working
 // length.
-func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float64, lwork int) {
-	lapack64.Dgels(trans, a.Rows, a.Cols, b.Cols, a.Data, a.Stride, b.Data, b.Stride, work, lwork)
+func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float64, lwork int) bool {
+	return lapack64.Dgels(trans, a.Rows, a.Cols, b.Cols, a.Data, a.Stride, b.Data, b.Stride, work, lwork)
 }
 
 // Geqrf computes the QR factorization of the m×n matrix A using a blocked

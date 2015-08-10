@@ -27,11 +27,12 @@ type BFGS struct {
 	dim  int
 
 	// Temporary memory
-	y       []float64
-	yVec    *mat64.Vector
-	s       []float64
-	tmpData []float64
-	tmpVec  *mat64.Vector
+	y      []float64
+	yVec   *mat64.Vector
+	s      []float64
+	sVec   *mat64.Vector
+	tmp    []float64
+	tmpVec *mat64.Vector
 
 	invHess *mat64.SymDense
 
@@ -69,9 +70,10 @@ func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 
 	b.y = resize(b.y, dim)
 	b.s = resize(b.s, dim)
-	b.tmpData = resize(b.tmpData, dim)
+	b.tmp = resize(b.tmp, dim)
 	b.yVec = mat64.NewVector(dim, b.y)
-	b.tmpVec = mat64.NewVector(dim, b.tmpData)
+	b.sVec = mat64.NewVector(dim, b.s)
+	b.tmpVec = mat64.NewVector(dim, b.tmp)
 
 	if b.invHess == nil || cap(b.invHess.RawSymmetric().Data) < dim*dim {
 		b.invHess = mat64.NewSymDense(dim, nil)
@@ -144,8 +146,8 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	firstTermConst := (sDotY + yBy) / (sDotYSquared)
 	b.tmpVec.MulVec(b.invHess, b.yVec)
 
-	b.invHess.RankTwo(b.invHess, -1/sDotY, b.tmpData, b.s)
-	b.invHess.SymRankOne(b.invHess, firstTermConst, b.s)
+	b.invHess.RankTwo(b.invHess, -1/sDotY, b.tmpVec, b.sVec)
+	b.invHess.SymRankOne(b.invHess, firstTermConst, b.sVec)
 
 	// update the bfgs stored data to the new iteration
 	copy(b.x, loc.X)

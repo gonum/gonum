@@ -7,6 +7,7 @@ package cgo
 import (
 	"testing"
 
+	"github.com/gonum/blas"
 	"github.com/gonum/lapack/testlapack"
 )
 
@@ -47,3 +48,29 @@ func TestDgetrf(t *testing.T) {
 func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
 }
+
+// blockedTranslate transforms some blocked C calls to be the unblocked algorithms
+// for testing, as several of the unblocked algorithms are not defined by the C
+// interface.
+type blockedTranslate struct {
+	Implementation
+}
+
+func (d blockedTranslate) Dorm2r(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64) {
+	impl.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, len(work))
+}
+
+func (d blockedTranslate) Dorml2(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64) {
+	impl.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, len(work))
+}
+
+func TestDormqr(t *testing.T) {
+	testlapack.Dorm2rTest(t, blockedTranslate{impl})
+}
+
+/*
+// Test disabled because of bug in c interface. Leaving stub for easy reproducer.
+func TestDormlq(t *testing.T) {
+	testlapack.Dorml2Test(t, blockedTranslate{impl})
+}
+*/

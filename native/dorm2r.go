@@ -6,7 +6,7 @@ package native
 
 import "github.com/gonum/blas"
 
-// Dorm2r multiplies a general matrix c by an orthogonal matrix from a QR factorization
+// Dorm2r multiplies a general matrix C by an orthogonal matrix from a QR factorization
 // determined by Dgeqrf.
 //  C = Q * C    if side == blas.Left and trans == blas.NoTrans
 //  C = Q^T * C  if side == blas.Left and trans == blas.Trans

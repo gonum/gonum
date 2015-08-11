@@ -162,3 +162,53 @@ func Getrf(a blas64.General, ipiv []int) bool {
 func Getrs(trans blas.Transpose, a blas64.General, b blas64.General, ipiv []int) {
 	lapack64.Dgetrs(trans, a.Cols, b.Cols, a.Data, a.Stride, ipiv, b.Data, b.Stride)
 }
+
+// Ormlq multiplies the matrix C by the othogonal matrix Q defined by
+// A and tau. A and tau are as returned from Gelqf.
+//  C = Q * C    if side == blas.Left and trans == blas.NoTrans
+//  C = Q^T * C  if side == blas.Left and trans == blas.Trans
+//  C = C * Q    if side == blas.Right and trans == blas.NoTrans
+//  C = C * Q^T  if side == blas.Right and trans == blas.Trans
+// If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
+// A is of size k×n. This uses a blocked algorithm.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= m if side == blas.Left and lwork >= n if side == blas.Right,
+// and this function will panic otherwise.
+// Ormlq uses a block algorithm, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Ormlq,
+// the optimal work length will be stored into work[0].
+//
+// Tau contains the householder scales and must have length at least k, and
+// this function will panic otherwise.
+func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64, c blas64.General, work []float64, lwork int) {
+	lapack64.Dormlq(side, trans, c.Rows, c.Cols, a.Rows, a.Data, a.Stride, tau, c.Data, c.Stride, work, lwork)
+}
+
+// Ormqr multiplies the matrix C by the othogonal matrix Q defined by
+// A and tau. A and tau are as returned from Geqrf.
+//  C = Q * C    if side == blas.Left and trans == blas.NoTrans
+//  C = Q^T * C  if side == blas.Left and trans == blas.Trans
+//  C = C * Q    if side == blas.Right and trans == blas.NoTrans
+//  C = C * Q^T  if side == blas.Right and trans == blas.Trans
+// If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
+// A is of size k×n. This uses a blocked algorithm.
+//
+// tau contains the householder scales and must have length at least k, and
+// this function will panic otherwise.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= m if side == blas.Left and lwork >= n if side == blas.Right,
+// and this function will panic otherwise.
+// Ormqr uses a block algorithm, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Ormqr,
+// the optimal work length will be stored into work[0].
+func Ormqr(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64, c blas64.General, work []float64, lwork int) {
+	lapack64.Dormqr(side, trans, c.Rows, c.Cols, a.Cols, a.Data, a.Stride, tau, c.Data, c.Stride, work, lwork)
+}
+
+// Trtrs solves a triangular system of the form A * X = B or A^T * X = B. Trtrs
+// returns whether the solve completed successfully. If A is singular, no solve is performed.
+func Trtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, a blas64.Triangular, b blas64.General) (ok bool) {
+	return lapack64.Dtrtrs(uplo, trans, diag, a.N, b.Cols, a.Data, a.Stride, b.Data, b.Stride)
+}

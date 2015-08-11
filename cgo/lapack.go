@@ -327,3 +327,114 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 	}
 	clapack.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
 }
+
+// Dormlq multiplies the matrix C by the othogonal matrix Q defined by the
+// slices a and tau. A and tau are as returned from Dgelqf.
+//  C = Q * C    if side == blas.Left and trans == blas.NoTrans
+//  C = Q^T * C  if side == blas.Left and trans == blas.Trans
+//  C = C * Q    if side == blas.Right and trans == blas.NoTrans
+//  C = C * Q^T  if side == blas.Right and trans == blas.Trans
+// If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
+// A is of size k×n. This uses a blocked algorithm.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= m if side == blas.Left and lwork >= n if side == blas.Right,
+// and this function will panic otherwise.
+// Dormlq uses a block algorithm, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dormlq,
+// the optimal work length will be stored into work[0].
+//
+// tau contains the householder scales and must have length at least k, and
+// this function will panic otherwise.
+func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
+	if side != blas.Left && side != blas.Right {
+		panic(badSide)
+	}
+	if trans != blas.Trans && trans != blas.NoTrans {
+		panic(badTrans)
+	}
+	left := side == blas.Left
+	if left {
+		checkMatrix(k, m, a, lda)
+	} else {
+		checkMatrix(k, n, a, lda)
+	}
+	checkMatrix(m, n, c, ldc)
+	if len(tau) < k {
+		panic(badTau)
+	}
+	if lwork == -1 {
+		if left {
+			work[0] = float64(n)
+			return
+		}
+		work[0] = float64(m)
+		return
+	}
+	if left {
+		if lwork < n {
+			panic(badWork)
+		}
+	} else {
+		if lwork < m {
+			panic(badWork)
+		}
+	}
+	clapack.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc)
+}
+
+// Dormqr multiplies the matrix C by the othogonal matrix Q defined by the
+// slices a and tau. a and tau are as returned from Dgeqrf.
+//  C = Q * C    if side == blas.Left and trans == blas.NoTrans
+//  C = Q^T * C  if side == blas.Left and trans == blas.Trans
+//  C = C * Q    if side == blas.Right and trans == blas.NoTrans
+//  C = C * Q^T  if side == blas.Right and trans == blas.Trans
+// If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
+// A is of size k×n. This uses a blocked algorithm.
+//
+// tau contains the householder scales and must have length at least k, and
+// this function will panic otherwise.
+//
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
+	left := side == blas.Left
+	if left {
+		checkMatrix(m, k, a, lda)
+	} else {
+		checkMatrix(n, k, a, lda)
+	}
+	checkMatrix(m, n, c, ldc)
+
+	if len(tau) < k {
+		panic(badTau)
+	}
+
+	if lwork == -1 {
+		if left {
+			work[0] = float64(m)
+			return
+		}
+		work[0] = float64(n)
+		return
+	}
+
+	if left {
+		if lwork < n {
+			panic(badWork)
+		}
+	} else {
+		if lwork < m {
+			panic(badWork)
+		}
+	}
+
+	clapack.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc)
+}
+
+// Dtrtrs solves a triangular system of the form A * X = B or A^T * X = B. Dtrtrs
+// returns whether the solve completed successfully. If A is singular, no solve is performed.
+func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int) (ok bool) {
+	return clapack.Dtrtrs(uplo, trans, diag, n, nrhs, a, lda, b, ldb)
+}

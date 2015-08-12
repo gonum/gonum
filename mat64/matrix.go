@@ -383,7 +383,12 @@ func Inverse(a Matrix) (*Dense, error) {
 // Solve returns a matrix x that satisfies ax = b.
 // It returns a nil matrix and ErrSingular if a is singular.
 func Solve(a, b Matrix) (x *Dense, err error) {
-	switch m, n := a.Dims(); {
+	m, n := a.Dims()
+	br, _ := b.Dims()
+	if m != br {
+		panic("rowMismatch")
+	}
+	switch {
 	case m == n:
 		var lu LU
 		lu.Factorize(a)
@@ -393,23 +398,22 @@ func Solve(a, b Matrix) (x *Dense, err error) {
 		x := DenseCopyOf(b)
 		lapack64.Getrs(blas.NoTrans, lu.lu.mat, x.mat, lu.pivot)
 		return x, nil
-	case m > n:
-		qr := QR(DenseCopyOf(a))
-		if !qr.IsFullRank() {
-			return nil, ErrSingular
-		}
-		return qr.Solve(DenseCopyOf(b)), nil
 	default:
-		lq := LQ(DenseCopyOf(a))
-		if !lq.IsFullRank() {
+		_, bc := b.Dims()
+		mn := max(m, n)
+		// TODO(btracey): Employ special cases to avoid the copy where possible.
+		aCopy := DenseCopyOf(a)
+		x := NewDense(mn, bc, nil)
+
+		x.Copy(b)
+		work := make([]float64, 1)
+		lapack64.Gels(blas.NoTrans, aCopy.mat, x.mat, work, -1)
+		work = make([]float64, int(work[0]))
+		ok := lapack64.Gels(blas.NoTrans, aCopy.mat, x.mat, work, len(work))
+		if !ok {
 			return nil, ErrSingular
 		}
-		switch b := b.(type) {
-		case *Dense:
-			return lq.Solve(b), nil
-		default:
-			return lq.Solve(DenseCopyOf(b)), nil
-		}
+		return x.View(0, 0, n, bc).(*Dense), nil
 	}
 }
 

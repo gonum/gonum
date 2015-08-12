@@ -25,8 +25,8 @@ func (s *S) TestLUD(c *check.C) {
 		lu.Factorize(a)
 
 		var l, u TriDense
-		l.LFrom(lu)
-		u.UFrom(lu)
+		l.LFromLU(lu)
+		u.UFromLU(lu)
 		var p Dense
 		pivot := lu.Pivot(nil)
 		p.Permutation(n, pivot)
@@ -37,6 +37,73 @@ func (s *S) TestLUD(c *check.C) {
 			c.Errorf("PLU does not equal original matrix.\nWant: %v\n Got: %v", want, got)
 		}
 	}
+}
+
+func (s *S) TestLURankOne(c *check.C) {
+	for _, pivoting := range []bool{true} {
+		for _, n := range []int{3, 10, 50} {
+			// Construct a random LU factorization
+			lu := &LU{}
+			lu.lu = NewDense(n, n, nil)
+			for i := 0; i < n; i++ {
+				for j := 0; j < n; j++ {
+					lu.lu.Set(i, j, rand.Float64())
+				}
+			}
+			lu.pivot = make([]int, n)
+			for i := range lu.pivot {
+				lu.pivot[i] = i
+			}
+			if pivoting {
+				// For each row, randomly swap with itself or a row after (like is done)
+				// in the actual LU factorization.
+				for i := range lu.pivot {
+					idx := i + rand.Intn(n-i)
+					lu.pivot[i], lu.pivot[idx] = lu.pivot[idx], lu.pivot[i]
+				}
+			}
+			// Apply a rank one update. Ensure the update magnitude is larger than
+			// the equal tolerance.
+			alpha := rand.Float64() + 1
+			x := NewVector(n, nil)
+			y := NewVector(n, nil)
+			for i := 0; i < n; i++ {
+				x.setVec(i, rand.Float64()+1)
+				y.setVec(i, rand.Float64()+1)
+			}
+			a := luReconstruct(lu)
+			a.RankOne(a, alpha, x, y)
+
+			var luNew LU
+			luNew.RankOne(lu, alpha, x, y)
+			lu.RankOne(lu, alpha, x, y)
+
+			aR1New := luReconstruct(&luNew)
+			aR1 := luReconstruct(lu)
+
+			if !aR1.Equals(aR1New) {
+				c.Error("Different answer when new receiver")
+			}
+			if !aR1.EqualsApprox(a, 1e-10) {
+				c.Errorf("Rank one mismatch, pivot %v.\nWant: %v\nGot:%v\n", pivoting, a, aR1)
+			}
+		}
+	}
+}
+
+// luReconstruct reconstructs the original A matrix from an LU decomposition.
+func luReconstruct(lu *LU) *Dense {
+	var L, U TriDense
+	L.LFromLU(lu)
+	U.UFromLU(lu)
+	var P Dense
+	pivot := lu.Pivot(nil)
+	P.Permutation(len(pivot), pivot)
+
+	var a Dense
+	a.Mul(&L, &U)
+	a.Mul(&P, &a)
+	return &a
 }
 
 func (s *S) TestSolveLU(c *check.C) {

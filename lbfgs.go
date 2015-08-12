@@ -14,13 +14,13 @@ import (
 // better than BFGS for functions with Hessians that vary rapidly spatially.
 //
 // If Store is 0, Store is defaulted to 15.
-// A LinesearchMethod for LBFGS must satisfy the strong Wolfe conditions at every
-// iteration. If LinesearchMethod == nil, an appropriate default is chosen.
+// A Linesearcher for LBFGS must satisfy the strong Wolfe conditions at every
+// iteration. If Linesearcher == nil, an appropriate default is chosen.
 type LBFGS struct {
-	LinesearchMethod LinesearchMethod
-	Store            int // how many past iterations to store
+	Linesearcher Linesearcher
+	Store        int // how many past iterations to store
 
-	linesearch *Linesearch
+	ls *LinesearchMethod
 
 	dim    int
 	oldest int // element of the history slices that is the oldest
@@ -39,19 +39,19 @@ type LBFGS struct {
 }
 
 func (l *LBFGS) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	if l.LinesearchMethod == nil {
-		l.LinesearchMethod = &Bisection{}
+	if l.Linesearcher == nil {
+		l.Linesearcher = &Bisection{}
 	}
-	if l.linesearch == nil {
-		l.linesearch = &Linesearch{}
+	if l.ls == nil {
+		l.ls = &LinesearchMethod{}
 	}
-	l.linesearch.Method = l.LinesearchMethod
-	l.linesearch.NextDirectioner = l
-	return l.linesearch.Init(loc, xNext)
+	l.ls.Linesearcher = l.Linesearcher
+	l.ls.NextDirectioner = l
+	return l.ls.Init(loc, xNext)
 }
 
 func (l *LBFGS) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	return l.linesearch.Iterate(loc, xNext)
+	return l.ls.Iterate(loc, xNext)
 }
 
 func (l *LBFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {

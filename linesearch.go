@@ -10,157 +10,157 @@ import (
 	"github.com/gonum/floats"
 )
 
-// Linesearch is a linesearch-based optimization method.
-// It consists of a NextDirectioner, which specifies the next linesearch method,
-// and a LinesearchMethod which performs the linesearch in the direction specified
-// by the NextDirectioner.
-type Linesearch struct {
+// LinesearchMethod represents an abstract optimization method in which
+// a function is optimized through successive line search optimizations.
+// It consists of a NextDirectioner, which specifies the search direction
+// of each linesearch, and a Linesearcher which performs a linesearch along
+// the search direction.
+type LinesearchMethod struct {
 	NextDirectioner NextDirectioner
-	Method          LinesearchMethod
+	Linesearcher    Linesearcher
 
-	initX []float64
-	dir   []float64
+	x     []float64 // Starting point for the current iteration.
+	dir   []float64 // Search direction for the current iteration.
+	first bool      // Indicator of the first iteration.
 
-	lastEvalType EvaluationType
-	iterType     IterationType
+	evalType EvaluationType
+	iterType IterationType
 }
 
-func (ls *Linesearch) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	ls.initX = resize(ls.initX, len(loc.X))
-	copy(ls.initX, loc.X)
-
-	ls.dir = resize(ls.dir, len(loc.X))
-	stepSize := ls.NextDirectioner.InitDirection(loc, ls.dir)
-
-	projGrad := math.NaN()
-	if loc.Gradient != nil {
-		projGrad = floats.Dot(loc.Gradient, ls.dir)
-		if projGrad >= 0 {
-			return NoEvaluation, NoIteration, ErrNonNegativeStepDirection
-		}
+func (ls *LinesearchMethod) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+	if loc.Gradient == nil {
+		panic("linesearch: gradient is nil")
 	}
-	lsLoc := LinesearchLocation{
-		F:          loc.F,
-		Derivative: projGrad,
-	}
-	evalType := ls.Method.Init(lsLoc, stepSize)
-	floats.AddScaledTo(xNext, ls.initX, stepSize, ls.dir)
-	ls.lastEvalType = evalType
-	ls.iterType = MinorIteration
-	return evalType, ls.iterType, nil
+
+	dim := len(loc.X)
+	ls.x = resize(ls.x, dim)
+	ls.dir = resize(ls.dir, dim)
+	ls.first = true
+
+	return ls.initNextLinesearch(loc, xNext)
 }
 
-func (ls *Linesearch) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (ls *LinesearchMethod) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
 	if ls.iterType == SubIteration {
 		// We needed to evaluate invalid fields of Location. Now we have them
 		// and can announce MajorIteration.
-		ls.iterType = MajorIteration
 		copy(xNext, loc.X)
-		return NoEvaluation, ls.iterType, nil
+		ls.evalType = NoEvaluation
+		ls.iterType = MajorIteration
+		return ls.evalType, ls.iterType, nil
 	}
+
 	if ls.iterType == MajorIteration {
 		// The linesearch previously signaled MajorIteration. Since we're here,
 		// it means that the previous location is not good enough to converge,
 		// so start the next linesearch.
 		return ls.initNextLinesearch(loc, xNext)
 	}
-	projGrad := math.NaN()
-	if loc.Gradient != nil {
-		projGrad = floats.Dot(loc.Gradient, ls.dir)
-	}
-	lsLoc := LinesearchLocation{
-		F:          loc.F,
-		Derivative: projGrad,
-	}
-	if ls.Method.Finished(lsLoc) {
+
+	projGrad := floats.Dot(loc.Gradient, ls.dir)
+	if ls.Linesearcher.Finished(loc.F, projGrad) {
 		copy(xNext, loc.X)
 		// Check if the last evaluation evaluated all fields of Location.
-		complEval := complementEval(loc, ls.lastEvalType)
-		if complEval == NoEvaluation {
+		ls.evalType = complementEval(loc, ls.evalType)
+		if ls.evalType == NoEvaluation {
 			// Location is complete and MajorIteration can be announced directly.
 			ls.iterType = MajorIteration
-			return complEval, ls.iterType, nil
+		} else {
+			// Location is not complete, evaluate its invalid fields in SubIteration.
+			ls.iterType = SubIteration
 		}
-		// Location is not complete, evaluate its invalid fields in SubIteration.
-		ls.iterType = SubIteration
-		return complEval, ls.iterType, nil
+		return ls.evalType, ls.iterType, nil
 	}
 
 	// Line search not done, just iterate.
-	stepSize, evalType, err := ls.Method.Iterate(lsLoc)
+	stepSize, evalType, err := ls.Linesearcher.Iterate(loc.F, projGrad)
 	if err != nil {
-		return NoEvaluation, NoIteration, err
+		ls.evalType = NoEvaluation
+		ls.iterType = NoIteration
+		return ls.evalType, ls.iterType, err
 	}
-	floats.AddScaledTo(xNext, ls.initX, stepSize, ls.dir)
+
+	floats.AddScaledTo(xNext, ls.x, stepSize, ls.dir)
 	// Compare the starting point for the current iteration with the next
 	// evaluation point to make sure that rounding errors do not prevent progress.
-	if floats.Equal(ls.initX, xNext) {
-		return NoEvaluation, NoIteration, ErrNoProgress
+	if floats.Equal(ls.x, xNext) {
+		ls.evalType = NoEvaluation
+		ls.iterType = NoIteration
+		return ls.evalType, ls.iterType, ErrNoProgress
 	}
-	ls.lastEvalType = evalType
+
+	ls.evalType = evalType
 	ls.iterType = MinorIteration
-	return evalType, ls.iterType, nil
+	return ls.evalType, ls.iterType, nil
 }
 
-func (ls *Linesearch) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	// Find the next direction, and start the next line search.
-	copy(ls.initX, loc.X)
-	stepsize := ls.NextDirectioner.NextDirection(loc, ls.dir)
-	projGrad := math.NaN()
-	if loc.Gradient != nil {
-		projGrad = floats.Dot(loc.Gradient, ls.dir)
+func (ls *LinesearchMethod) initNextLinesearch(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+	copy(ls.x, loc.X)
+
+	var stepSize float64
+	if ls.first {
+		stepSize = ls.NextDirectioner.InitDirection(loc, ls.dir)
+		ls.first = false
+	} else {
+		stepSize = ls.NextDirectioner.NextDirection(loc, ls.dir)
 	}
+
+	projGrad := floats.Dot(loc.Gradient, ls.dir)
 	if projGrad >= 0 {
-		return NoEvaluation, NoIteration, ErrNonNegativeStepDirection
+		ls.evalType = NoEvaluation
+		ls.iterType = NoIteration
+		return ls.evalType, ls.iterType, ErrNonNegativeStepDirection
 	}
-	lsLoc := LinesearchLocation{
-		F:          loc.F,
-		Derivative: projGrad,
-	}
-	evalType := ls.Method.Init(lsLoc, stepsize)
-	floats.AddScaledTo(xNext, ls.initX, stepsize, ls.dir)
+
+	ls.evalType = ls.Linesearcher.Init(loc.F, projGrad, stepSize)
+
+	floats.AddScaledTo(xNext, ls.x, stepSize, ls.dir)
 	// Compare the starting point for the current iteration with the next
 	// evaluation point to make sure that rounding errors do not prevent progress.
-	if floats.Equal(ls.initX, xNext) {
-		return NoEvaluation, NoIteration, ErrNoProgress
+	if floats.Equal(ls.x, xNext) {
+		ls.evalType = NoEvaluation
+		ls.iterType = NoIteration
+		return ls.evalType, ls.iterType, ErrNoProgress
 	}
-	ls.lastEvalType = evalType
+
 	ls.iterType = MinorIteration
-	return evalType, ls.iterType, nil
+	return ls.evalType, ls.iterType, nil
 }
 
-// ArmijoConditionMet returns true if the Armijo condition (aka sufficient decrease)
-// has been met. Under normal conditions, the following should be true, though this is not enforced:
+// ArmijoConditionMet returns true if the Armijo condition (aka sufficient
+// decrease) has been met. Under normal conditions, the following should be
+// true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 < funConst < 1
-func ArmijoConditionMet(currObj, initObj, initGrad, step, funConst float64) bool {
-	return currObj <= initObj+funConst*step*initGrad
+//  - 0 < funcConst < 1
+func ArmijoConditionMet(currObj, initObj, initGrad, step, funcConst float64) bool {
+	return currObj <= initObj+funcConst*step*initGrad
 }
 
 // StrongWolfeConditionsMet returns true if the strong Wolfe conditions have been met.
-// The strong wolfe conditions ensure sufficient decrease in the function value,
-// and sufficient decrease in the magnitude of the projected gradient. Under normal
-// conditions, the following should be true, though this is not enforced:
+// The strong Wolfe conditions ensure sufficient decrease in the function
+// value, and sufficient decrease in the magnitude of the projected gradient.
+// Under normal conditions, the following should be true, though this is not
+// enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 <= funConst < gradConst < 1
-func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funConst, gradConst float64) bool {
-	if currObj > initObj+funConst*step*initGrad {
+//  - 0 <= funcConst < gradConst < 1
+func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcConst, gradConst float64) bool {
+	if currObj > initObj+funcConst*step*initGrad {
 		return false
 	}
 	return math.Abs(currGrad) < gradConst*math.Abs(initGrad)
 }
 
 // WeakWolfeConditionsMet returns true if the weak Wolfe conditions have been met.
-// The weak wolfe conditions ensure sufficient decrease in the function value,
+// The weak Wolfe conditions ensure sufficient decrease in the function value,
 // and sufficient decrease in the value of the projected gradient. Under normal
 // conditions, the following should be true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 <= funConst < gradConst < 1
-func WeakWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funConst, gradConst float64) bool {
-	if currObj > initObj+funConst*step*initGrad {
+//  - 0 <= funcConst < gradConst < 1
+func WeakWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcConst, gradConst float64) bool {
+	if currObj > initObj+funcConst*step*initGrad {
 		return false
 	}
 	return currGrad >= gradConst*initGrad

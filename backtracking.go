@@ -5,65 +5,66 @@
 package optimize
 
 const (
-	defaultBacktrackingDecrease = 0.5
-	defaultBacktrackingFunConst = 1e-4
-	minimumBacktrackingStepSize = 1e-20
+	defaultBacktrackingDecrease  = 0.5
+	defaultBacktrackingFuncConst = 1e-4
+	minimumBacktrackingStepSize  = 1e-20
 )
 
-// Backtracking is a type that implements LinesearchMethod using a backtracking
-// line search. A backtracking line search checks that the Armijo condition has
-// been met with the given function constant. If the Armijo condition has not
-// been met, the step size is decreased by a factor of Decrease.
+// Backtracking is a Linesearcher that uses backtracking to find a point that
+// satisfies the Armijo condition with the given function constant FuncConst. If
+// the Armijo condition has not been met, the step size is decreased by a
+// factor of Decrease.
 //
-// The Armijo conditions only require the gradient at the initial condition
-// (not successive step locations), and so Backtracking may be a good linesearch
-// method for functions with expensive gradients. Backtracking is not appropriate
-// for optimizers that require the Wolfe conditions to be met, such as BFGS.
+// The Armijo condition only requires the gradient at the beginning of each
+// major iteration (not at successive step locations), and so Backtracking may
+// be a good linesearch for functions with expensive gradients. Backtracking is
+// not appropriate for optimizers that require the Wolfe conditions to be met,
+// such as BFGS.
 //
-// Both FunConst and Decrease must be between zero and one, and Backtracking will
-// panic otherwise. If either FunConst or Decrease are zero, it will be set to a
+// Both FuncConst and Decrease must be between zero and one, and Backtracking will
+// panic otherwise. If either FuncConst or Decrease are zero, it will be set to a
 // reasonable default.
 type Backtracking struct {
-	FunConst float64 // Necessary function descrease for Armijo condition.
-	Decrease float64 // Step size multiplier at each iteration (stepSize *= Decrease).
+	FuncConst float64 // Necessary function descrease for Armijo condition.
+	Decrease  float64 // Step size multiplier at each iteration (stepSize *= Decrease).
 
 	stepSize float64
 	initF    float64
 	initG    float64
 }
 
-func (b *Backtracking) Init(loc LinesearchLocation, step float64) EvaluationType {
+func (b *Backtracking) Init(f, g float64, step float64) EvaluationType {
 	if step <= 0 {
 		panic("backtracking: bad step size")
 	}
-	if loc.Derivative >= 0 {
-		panic("Backtracking: init G non-negative")
+	if g >= 0 {
+		panic("backtracking: initial derivative is non-negative")
 	}
 
 	if b.Decrease == 0 {
 		b.Decrease = defaultBacktrackingDecrease
 	}
-	if b.FunConst == 0 {
-		b.FunConst = defaultBacktrackingFunConst
+	if b.FuncConst == 0 {
+		b.FuncConst = defaultBacktrackingFuncConst
 	}
 	if b.Decrease <= 0 || b.Decrease >= 1 {
 		panic("backtracking: Decrease must be between 0 and 1")
 	}
-	if b.FunConst <= 0 || b.FunConst >= 1 {
-		panic("backtracking: FunConst must be between 0 and 1")
+	if b.FuncConst <= 0 || b.FuncConst >= 1 {
+		panic("backtracking: FuncConst must be between 0 and 1")
 	}
 
 	b.stepSize = step
-	b.initF = loc.F
-	b.initG = loc.Derivative
+	b.initF = f
+	b.initG = g
 	return FuncEvaluation
 }
 
-func (b *Backtracking) Finished(loc LinesearchLocation) bool {
-	return ArmijoConditionMet(loc.F, b.initF, b.initG, b.stepSize, b.FunConst)
+func (b *Backtracking) Finished(f, _ float64) bool {
+	return ArmijoConditionMet(f, b.initF, b.initG, b.stepSize, b.FuncConst)
 }
 
-func (b *Backtracking) Iterate(_ LinesearchLocation) (float64, EvaluationType, error) {
+func (b *Backtracking) Iterate(_, _ float64) (float64, EvaluationType, error) {
 	b.stepSize *= b.Decrease
 	if b.stepSize < minimumBacktrackingStepSize {
 		return 0, NoEvaluation, ErrLinesearchFailure

@@ -4,28 +4,54 @@
 
 package optimize
 
-// LinesearchMethod is a type that can perform a line search. Typically, these
-// methods will not be called by the user directly, as they will be called by
-// a Linesearch struct.
-type LinesearchMethod interface {
-	// Init initializes the linesearch method. LinesearchLocation contains the
-	// function information at step == 0, and step contains the first step length
-	// as specified by the NextDirectioner.
-	Init(loc LinesearchLocation, step float64) EvaluationType
+// A Method can optimize an objective function.
+type Method interface {
+	// Init initializes the method and stores the first location to evaluate
+	// in xNext.
+	Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
 
-	// Finished takes in the function result at the most recent linesearch location,
-	// and returns true if the line search has been concluded.
-	Finished(loc LinesearchLocation) bool
+	// Iterate performs one iteration of the method and stores the next
+	// location to evaluate in xNext.
+	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
 
-	// Iterate takes in the function results
-	// from evaluating the function at the previous step, and returns the
-	// next step size and EvaluationType to evaluate.
-	Iterate(loc LinesearchLocation) (step float64, e EvaluationType, err error)
+	// Needs specifies information about the objective function needed by the
+	// optimizer beyond just the function value. The information is used
+	// internally for initialization and must match evaluation types returned
+	// by Init() and Iterate() during the optimization process.
+	Needs() struct {
+		Gradient bool
+		Hessian  bool
+	}
 }
 
-// NextDirectioner implements a strategy for computing a new line search direction
-// at each major iteration. Typically, these methods will not be called by the user directly,
-// as they will be called by a Linesearch struct.
+// Linesearcher is a type that can perform a line search. It tries to find an
+// (approximate) minimum of the objective function along the search direction
+// dir_k starting at the most recent location x_k, i.e., it tries to minimize
+// the function
+//  φ(step) := f(x_k + step * dir_k) where step > 0.
+// Typically, a Linesearcher will be used in conjuction with LinesearchMethod
+// for performing gradient-based optimization through sequential line searches.
+type Linesearcher interface {
+	// Init initializes the linesearch method. Value and derivative contain
+	// φ(0) and φ'(0), respectively, and step contains the first trial step
+	// length. It returns the type of evaluation to be performed at
+	// x_0 + step * dir_0.
+	Init(value, derivative float64, step float64) EvaluationType
+
+	// Finished takes in the values of φ and φ' evaluated at the previous step,
+	// and returns whether a sufficiently accurate minimum of φ has been found.
+	Finished(value, derivative float64) bool
+
+	// Iterate takes in the values of φ and φ' evaluated at the previous step
+	// and returns the next step size and the type of evaluation to be
+	// performed at x_k + step * dir_k.
+	Iterate(value, derivative float64) (step float64, e EvaluationType, err error)
+}
+
+// NextDirectioner implements a strategy for computing a new line search
+// direction at each major iteration. Typically, a NextDirectioner will be
+// used in conjuction with LinesearchMethod for performing gradient-based
+// optimization through sequential line searches.
 type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,
 	// putting the initial direction in place into dir, and returning the initial
@@ -37,24 +63,6 @@ type NextDirectioner interface {
 	// next search direction is put in place into dir, and the next step size
 	// is returned. NextDirection must not modify Location.
 	NextDirection(loc *Location, dir []float64) (step float64)
-}
-
-// A Method can optimize an objective function.
-type Method interface {
-	// Initializes the method and returns the first location to evaluate
-	Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
-
-	// Stores the next location to evaluate in xNext
-	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
-
-	// Needs specifies information about the objective function needed by the
-	// optimizer beyond just the function value. The information is used
-	// internally for initialization and must match evaluation types returned
-	// by Init() and Iterate() during the optimization process.
-	Needs() struct {
-		Gradient bool
-		Hessian  bool
-	}
 }
 
 // StepSizer can set the next step size of the optimization given the last Location.

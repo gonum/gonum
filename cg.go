@@ -53,9 +53,9 @@ type CGVariant interface {
 // gradient methods. Pacific Journal of Optimization, 2 (2006), pp. 35-58, and
 // references therein.
 type CG struct {
-	// LinesearchMethod must satisfy the strong Wolfe conditions at every
-	// iteration. If LinesearchMethod == nil, an appropriate default is chosen.
-	LinesearchMethod LinesearchMethod
+	// Linesearcher must satisfy the strong Wolfe conditions at every iteration.
+	// If Linesearcher == nil, an appropriate default is chosen.
+	Linesearcher Linesearcher
 	// Variant implements the particular CG formula for computing β_k.
 	// If Variant is nil, an appropriate default is chosen.
 	Variant CGVariant
@@ -84,7 +84,7 @@ type CG struct {
 	// CG will panic if AngleRestartThreshold is not in the interval [-1, 0].
 	AngleRestartThreshold float64
 
-	linesearch *Linesearch
+	ls *LinesearchMethod
 
 	restartAfter    int
 	iterFromRestart int
@@ -102,8 +102,8 @@ func (cg *CG) Init(loc *Location, xNext []float64) (EvaluationType, IterationTyp
 		panic("cg: AngleRestartThreshold not in [-1, 0]")
 	}
 
-	if cg.LinesearchMethod == nil {
-		cg.LinesearchMethod = &Bisection{GradConst: 0.1}
+	if cg.Linesearcher == nil {
+		cg.Linesearcher = &Bisection{GradConst: 0.1}
 	}
 	if cg.Variant == nil {
 		cg.Variant = &HestenesStiefel{}
@@ -119,17 +119,17 @@ func (cg *CG) Init(loc *Location, xNext []float64) (EvaluationType, IterationTyp
 		cg.AngleRestartThreshold = angleRestartThreshold
 	}
 
-	if cg.linesearch == nil {
-		cg.linesearch = &Linesearch{}
+	if cg.ls == nil {
+		cg.ls = &LinesearchMethod{}
 	}
-	cg.linesearch.Method = cg.LinesearchMethod
-	cg.linesearch.NextDirectioner = cg
+	cg.ls.Linesearcher = cg.Linesearcher
+	cg.ls.NextDirectioner = cg
 
-	return cg.linesearch.Init(loc, xNext)
+	return cg.ls.Init(loc, xNext)
 }
 
 func (cg *CG) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	return cg.linesearch.Iterate(loc, xNext)
+	return cg.ls.Iterate(loc, xNext)
 }
 
 func (cg *CG) InitDirection(loc *Location, dir []float64) (stepSize float64) {

@@ -209,6 +209,6 @@ func Ormqr(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 
 // Trtrs solves a triangular system of the form A * X = B or A^T * X = B. Trtrs
 // returns whether the solve completed successfully. If A is singular, no solve is performed.
-func Trtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, a blas64.Triangular, b blas64.General) (ok bool) {
-	return lapack64.Dtrtrs(uplo, trans, diag, a.N, b.Cols, a.Data, a.Stride, b.Data, b.Stride)
+func Trtrs(trans blas.Transpose, a blas64.Triangular, b blas64.General) (ok bool) {
+	return lapack64.Dtrtrs(a.Uplo, trans, a.Diag, a.N, b.Cols, a.Data, a.Stride, b.Data, b.Stride)
 }

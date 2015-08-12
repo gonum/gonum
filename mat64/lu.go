@@ -76,8 +76,69 @@ func (lu *LU) Pivot(swaps []int) []int {
 	return swaps
 }
 
-// LFrom extracts the lower triangular matrix from an LU factorization.
-func (t *TriDense) LFrom(lu *LU) {
+// RankOne updates an LU factorization as if a rank-one update had been applied to
+// the original matrix A, storing the result into the receiver. That is, if in
+// the original LU decomposition P * L * U = A, in the updated decomposition
+// P * L * U = A + alpha * x^T * y.
+func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
+	// RankOne uses algorithm a1 on page 28 of "Multiple-Rank Updates to Matrix
+	// Factorizations for Nonlinear Analysis and Circuit Design" by Linzhong Deng.
+	// http://web.stanford.edu/group/SOL/dissertations/Linzhong-Deng-thesis.pdf
+	_, n := orig.lu.Dims()
+	if x.Len() != n {
+		panic(ErrShape)
+	}
+	if y.Len() != n {
+		panic(ErrShape)
+	}
+	if orig != lu {
+		if len(lu.pivot) == 0 {
+			// lu is zero
+			lu.pivot = make([]int, n)
+			lu.lu = NewDense(n, n, nil)
+		} else {
+			if len(lu.pivot) != n {
+				panic(ErrShape)
+			}
+		}
+		copy(lu.pivot, orig.pivot)
+		lu.lu.Copy(orig.lu)
+	}
+
+	xs := make([]float64, n)
+	ys := make([]float64, n)
+	for i := 0; i < n; i++ {
+		xs[i] = x.at(i)
+		ys[i] = y.at(i)
+	}
+
+	// Adjust for the pivoting in the LU factorization
+	for i, v := range lu.pivot {
+		xs[i], xs[v] = xs[v], xs[i]
+	}
+
+	lum := lu.lu.mat
+	omega := alpha
+	for j := 0; j < n; j++ {
+		ujj := lum.Data[j*lum.Stride+j]
+		ys[j] /= ujj
+		theta := 1 + xs[j]*ys[j]*omega
+		beta := omega * ys[j] / theta
+		gamma := omega * xs[j]
+		omega -= beta * gamma
+		lum.Data[j*lum.Stride+j] *= theta
+		for i := j + 1; i < n; i++ {
+			xs[i] -= lum.Data[i*lum.Stride+j] * xs[j]
+			tmp := ys[i]
+			ys[i] -= lum.Data[j*lum.Stride+i] * ys[j]
+			lum.Data[i*lum.Stride+j] += beta * xs[i]
+			lum.Data[j*lum.Stride+i] += gamma * tmp
+		}
+	}
+}
+
+// LFromLU extracts the lower triangular matrix from an LU factorization.
+func (t *TriDense) LFromLU(lu *LU) {
 	_, n := lu.lu.Dims()
 	t.reuseAs(n, blas.Lower)
 	// Extract the lower triangular elements.
@@ -92,8 +153,8 @@ func (t *TriDense) LFrom(lu *LU) {
 	}
 }
 
-// UFrom extracts the upper triangular matrix from an LU factorization.
-func (t *TriDense) UFrom(lu *LU) {
+// UFromLU extracts the upper triangular matrix from an LU factorization.
+func (t *TriDense) UFromLU(lu *LU) {
 	_, n := lu.lu.Dims()
 	t.reuseAs(n, blas.Upper)
 	// Extract the upper triangular elements.

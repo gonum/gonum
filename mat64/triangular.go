@@ -114,8 +114,21 @@ func (t *TriDense) Dims() (r, c int) {
 	return t.mat.N, t.mat.N
 }
 
+// Triangle returns the dimension of t and whether t is an upper triangular
+// matrix. The returned boolean upper is only valid when n is not zero.
 func (t *TriDense) Triangle() (n int, upper bool) {
-	return t.mat.N, t.mat.Uplo == blas.Upper
+	return t.mat.N, !t.isZero() && t.isUpper()
+}
+
+func (t *TriDense) isUpper() bool {
+	switch t.mat.Uplo {
+	case blas.Upper:
+		return true
+	case blas.Lower:
+		return false
+	default:
+		panic(badTriangle)
+	}
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.

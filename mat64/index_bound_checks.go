@@ -8,8 +8,6 @@
 
 package mat64
 
-import "github.com/gonum/blas"
-
 // At returns the element at row r, column c.
 func (m *Dense) At(r, c int) float64 {
 	return m.at(r, c)
@@ -116,13 +114,8 @@ func (t *TriDense) at(r, c int) float64 {
 	if c >= t.mat.N || c < 0 {
 		panic(ErrColAccess)
 	}
-	if t.mat.Uplo == blas.Upper {
-		if r > c {
-			return 0
-		}
-		return t.mat.Data[r*t.mat.Stride+c]
-	}
-	if r < c {
+	isUpper := t.isUpper()
+	if (isUpper && r > c) || (!isUpper && r < c) {
 		return 0
 	}
 	return t.mat.Data[r*t.mat.Stride+c]
@@ -141,10 +134,8 @@ func (t *TriDense) set(r, c int, v float64) {
 	if c >= t.mat.N || c < 0 {
 		panic(ErrColAccess)
 	}
-	if t.mat.Uplo == blas.Upper && r > c {
-		panic("mat64: triangular set out of bounds")
-	}
-	if t.mat.Uplo == blas.Lower && r < c {
+	isUpper := t.isUpper()
+	if (isUpper && r > c) || (!isUpper && r < c) {
 		panic("mat64: triangular set out of bounds")
 	}
 	t.mat.Data[r*t.mat.Stride+c] = v

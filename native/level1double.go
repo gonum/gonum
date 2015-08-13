@@ -44,6 +44,9 @@ func (Implementation) Dnrm2(n int, x []float64, incX int) float64 {
 	if incX == 1 {
 		x = x[:n]
 		for _, v := range x {
+			if v == 0 {
+				continue
+			}
 			absxi := math.Abs(v)
 			if scale < absxi {
 				sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)

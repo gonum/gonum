@@ -322,18 +322,6 @@ type Tracer interface {
 	Trace() float64
 }
 
-// A Uer can return the upper triangular matrix of the matrix represented by a, placing the result
-// in the receiver. If the concrete value of a is the receiver, the lower residue is zeroed in place.
-type Uer interface {
-	U(a Matrix)
-}
-
-// An Ler can return the lower triangular matrix of the matrix represented by a, placing the result
-// in the receiver. If the concrete value of a is the receiver, the upper residue is zeroed in place.
-type Ler interface {
-	L(a Matrix)
-}
-
 // A BandWidther represents a banded matrix and can return the left and right half-bandwidths, k1 and
 // k2.
 type BandWidther interface {

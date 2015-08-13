@@ -1,6 +1,8 @@
 package mat64
 
 import (
+	"math/rand"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"gopkg.in/check.v1"
@@ -70,4 +72,70 @@ func (s *S) TestTriAtSet(c *check.C) {
 	c.Check(t.At(1, 2), check.Equals, 6.0)
 	t.SetTri(1, 2, 15)
 	c.Check(t.At(1, 2), check.Equals, 15.0)
+}
+
+func (s *S) TestTriDenseCopy(c *check.C) {
+	for i := 0; i < 100; i++ {
+		size := rand.Intn(100)
+		r, err := randDense(size, 0.9, rand.NormFloat64)
+		if size == 0 {
+			c.Check(err, check.Equals, ErrZeroLength)
+			continue
+		}
+		c.Assert(err, check.Equals, nil)
+
+		u := NewTriDense(size, true, nil)
+		l := NewTriDense(size, false, nil)
+
+		u.Copy(r)
+		l.Copy(r)
+		for m := 0; m < size; m++ {
+			for n := 0; n < size; n++ {
+				e := r.At(m, n)
+				switch {
+				case m < n: // Upper triangular matrix.
+					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m == n: // Diagonal matrix.
+					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m < n: // Lower triangular matrix.
+					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				}
+			}
+		}
+
+		u.Copy((*basicVectorer)(r))
+		l.Copy((*basicVectorer)(r))
+		for m := 0; m < size; m++ {
+			for n := 0; n < size; n++ {
+				e := r.At(m, n)
+				switch {
+				case m < n: // Upper triangular matrix.
+					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m == n: // Diagonal matrix.
+					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m < n: // Lower triangular matrix.
+					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				}
+			}
+		}
+
+		u.Copy((*basicMatrix)(r))
+		l.Copy((*basicMatrix)(r))
+		for m := 0; m < size; m++ {
+			for n := 0; n < size; n++ {
+				e := r.At(m, n)
+				switch {
+				case m < n: // Upper triangular matrix.
+					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m == n: // Diagonal matrix.
+					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				case m < n: // Lower triangular matrix.
+					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+				}
+			}
+		}
+	}
 }

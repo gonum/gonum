@@ -184,6 +184,63 @@ func (t *TriDense) Reset() {
 	t.mat.Data = t.mat.Data[:0]
 }
 
+// Copy makes a copy of elements of a into the receiver. It is similar to the
+// built-in copy; it copies as much as the overlap between the two matrices and
+// returns the number of rows and columns it copied. Only elements within the
+// receiver's non-zero triangle are set.
+//
+// See the Copier interface for more information.
+func (t *TriDense) Copy(a Matrix) (r, c int) {
+	r, c = a.Dims()
+	r = min(r, t.mat.N)
+	c = min(c, t.mat.N)
+	if r == 0 || c == 0 {
+		return 0, 0
+	}
+
+	switch a := a.(type) {
+	case RawMatrixer:
+		amat := a.RawMatrix()
+		if t.isUpper() {
+			for i := 0; i < r; i++ {
+				copy(t.mat.Data[i*t.mat.Stride+i:i*t.mat.Stride+c], amat.Data[i*amat.Stride+i:i*amat.Stride+c])
+			}
+		} else {
+			for i := 0; i < r; i++ {
+				copy(t.mat.Data[i*t.mat.Stride:i*t.mat.Stride+i+1], amat.Data[i*amat.Stride:i*amat.Stride+i+1])
+			}
+		}
+	case Vectorer:
+		row := make([]float64, c)
+		if t.isUpper() {
+			for i := 0; i < r; i++ {
+				a.Row(row, i)
+				copy(t.mat.Data[i*t.mat.Stride+i:i*t.mat.Stride+c], row[i:])
+			}
+		} else {
+			for i := 0; i < r; i++ {
+				a.Row(row, i)
+				copy(t.mat.Data[i*t.mat.Stride:i*t.mat.Stride+i+1], row[:i+1])
+			}
+		}
+	default:
+		isUpper := t.isUpper()
+		for i := 0; i < r; i++ {
+			if isUpper {
+				for j := i; j < c; j++ {
+					t.set(i, j, a.At(i, j))
+				}
+			} else {
+				for j := 0; j <= i; j++ {
+					t.set(i, j, a.At(i, j))
+				}
+			}
+		}
+	}
+
+	return r, c
+}
+
 // getBlasTriangular transforms t into a blas64.Triangular. If t is a RawTriangular,
 // the direct matrix representation is returned, otherwise t is copied into one.
 func getBlasTriangular(t Triangular) blas64.Triangular {

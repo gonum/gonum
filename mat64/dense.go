@@ -44,9 +44,6 @@ var (
 	_ Normer = matrix
 	_ Sumer  = matrix
 
-	_ Uer = matrix
-	_ Ler = matrix
-
 	_ Stacker   = matrix
 	_ Augmenter = matrix
 
@@ -441,103 +438,6 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 	}
 
 	return r, c
-}
-
-// U places the upper triangular matrix of a in the receiver.
-//
-// See the Uer interface for more information.
-func (m *Dense) U(a Matrix) {
-	ar, ac := a.Dims()
-	if ar != ac {
-		panic(ErrSquare)
-	}
-
-	if m == a {
-		m.zeroLower()
-		return
-	}
-	m.reuseAs(ar, ac)
-
-	if a, ok := a.(RawMatrixer); ok {
-		amat := a.RawMatrix()
-		copy(m.mat.Data[:ac], amat.Data[:ac])
-		for j, ja, jm := 1, amat.Stride, m.mat.Stride; ja < ar*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
-			zero(m.mat.Data[jm : jm+j])
-			copy(m.mat.Data[jm+j:jm+ac], amat.Data[ja+j:ja+ac])
-		}
-		return
-	}
-
-	if a, ok := a.(Vectorer); ok {
-		row := make([]float64, ac)
-		copy(m.mat.Data[:m.mat.Cols], a.Row(row, 0))
-		for r := 1; r < ar; r++ {
-			zero(m.mat.Data[r*m.mat.Stride : r*(m.mat.Stride+1)])
-			copy(m.mat.Data[r*(m.mat.Stride+1):r*m.mat.Stride+m.mat.Cols], a.Row(row, r))
-		}
-		return
-	}
-
-	m.zeroLower()
-	for r := 0; r < ar; r++ {
-		for c := r; c < ac; c++ {
-			m.set(r, c, a.At(r, c))
-		}
-	}
-}
-
-func (m *Dense) zeroLower() {
-	for i := 1; i < m.mat.Rows; i++ {
-		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+i])
-	}
-}
-
-// L places the lower triangular matrix of a in the receiver.
-//
-// See the Ler interface for more information.
-func (m *Dense) L(a Matrix) {
-	ar, ac := a.Dims()
-	if ar != ac {
-		panic(ErrSquare)
-	}
-
-	if m == a {
-		m.zeroUpper()
-		return
-	}
-	m.reuseAs(ar, ac)
-
-	if a, ok := a.(RawMatrixer); ok {
-		amat := a.RawMatrix()
-		copy(m.mat.Data[:ar], amat.Data[:ar])
-		for j, ja, jm := 1, amat.Stride, m.mat.Stride; ja < ac*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
-			zero(m.mat.Data[jm : jm+j])
-			copy(m.mat.Data[jm+j:jm+ar], amat.Data[ja+j:ja+ar])
-		}
-		return
-	}
-
-	if a, ok := a.(Vectorer); ok {
-		row := make([]float64, ac)
-		for r := 0; r < ar; r++ {
-			a.Row(row[:r+1], r)
-			m.SetRow(r, row)
-		}
-		return
-	}
-
-	m.zeroUpper()
-	for c := 0; c < ac; c++ {
-		for r := c; r < ar; r++ {
-			m.set(r, c, a.At(r, c))
-		}
-	}
-}
-
-func (m *Dense) zeroUpper() {
-	for i := 0; i < m.mat.Rows-1; i++ {
-		zero(m.mat.Data[i*m.mat.Stride+i+1 : (i+1)*m.mat.Stride])
-	}
 }
 
 // TCopy makes a copy of the transpose the matrix represented by a, placing the

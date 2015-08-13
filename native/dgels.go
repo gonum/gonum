@@ -42,7 +42,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 	notran := trans == blas.NoTrans
 	checkMatrix(m, n, a, lda)
 	mn := min(m, n)
-	checkMatrix(mn, nrhs, b, ldb)
+	checkMatrix(max(m, n), nrhs, b, ldb)
 
 	// Find optimal block size.
 	tpsd := true

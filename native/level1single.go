@@ -48,6 +48,9 @@ func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
 	if incX == 1 {
 		x = x[:n]
 		for _, v := range x {
+			if v == 0 {
+				continue
+			}
 			absxi := math.Abs(v)
 			if scale < absxi {
 				sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)

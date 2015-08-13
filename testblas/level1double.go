@@ -56,6 +56,30 @@ var DoubleOneVectorCases = []DoubleOneVectorCase{
 		},
 	},
 	{
+		Name:   "LeadingZero",
+		X:      []float64{0, 1},
+		Incx:   1,
+		N:      2,
+		Panic:  false,
+		Dasum:  1,
+		Dnrm2:  1,
+		Idamax: 1,
+		DscalCases: []DScalCase{
+			{
+				Alpha: 0,
+				Ans:   []float64{0, 0},
+			},
+			{
+				Alpha: 1,
+				Ans:   []float64{0, 1},
+			},
+			{
+				Alpha: -2,
+				Ans:   []float64{0, -2},
+			},
+		},
+	},
+	{
 		Name:   "MaxInMiddle",
 		X:      []float64{6, 5, 9, 0, 6},
 		Incx:   1,

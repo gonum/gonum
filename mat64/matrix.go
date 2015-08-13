@@ -479,6 +479,7 @@ var (
 	ErrIllegalStride   = Error{"mat64: illegal stride"}
 	ErrPivot           = Error{"mat64: malformed pivot list"}
 	ErrTriangle        = Error{"mat64: triangular storage mismatch"}
+	ErrTriangleSet     = Error{"mat64: triangular set out of bounds"}
 )
 
 var (

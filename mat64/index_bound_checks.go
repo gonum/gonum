@@ -136,7 +136,7 @@ func (t *TriDense) set(r, c int, v float64) {
 	}
 	isUpper := t.isUpper()
 	if (isUpper && r > c) || (!isUpper && r < c) {
-		panic("mat64: triangular set out of bounds")
+		panic(ErrTriangleSet)
 	}
 	t.mat.Data[r*t.mat.Stride+c] = v
 }

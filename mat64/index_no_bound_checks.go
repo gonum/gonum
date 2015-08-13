@@ -132,7 +132,7 @@ func (t *TriDense) SetTri(r, c int, v float64) {
 	}
 	isUpper := t.isUpper()
 	if (isUpper && r > c) || (!isUpper && r < c) {
-		panic("mat64: triangular set out of bounds")
+		panic(ErrTriangleSet)
 	}
 	t.set(r, c, v)
 }

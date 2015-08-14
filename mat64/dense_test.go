@@ -959,7 +959,7 @@ func identity(r, c int, v float64) float64 { return v }
 func (s *S) TestApply(c *check.C) {
 	for i, test := range []struct {
 		a, t [][]float64
-		fn   ApplyFunc
+		fn   func(r, c int, v float64) float64
 	}{
 		{
 			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},

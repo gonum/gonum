@@ -307,13 +307,11 @@ type Augmenter interface {
 	Augment(a, b Matrix)
 }
 
-// An ApplyFunc takes a row/column index and element value and returns some function of that tuple.
-type ApplyFunc func(r, c int, v float64) float64
-
-// An Applyer can apply an Applyfunc f to each of the elements of the matrix represented by a,
-// placing the resulting matrix in the receiver.
+// An Applyer can apply fn to each of the elements of the matrix represented by a, placing the
+// resulting matrix in the receiver. The function fn takes a row/column index and element value
+// and returns some function of that tuple.
 type Applyer interface {
-	Apply(f ApplyFunc, a Matrix)
+	Apply(fn func(r, c int, v float64) float64, a Matrix)
 }
 
 // A Tracer can return the trace of the matrix represented by the receiver. Trace will panic if the

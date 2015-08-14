@@ -759,11 +759,11 @@ func (m *Dense) Scale(f float64, a Matrix) {
 	}
 }
 
-// Apply applies the function f to each of the elements of a, placing the
+// Apply applies the function fn to each of the elements of a, placing the
 // resulting matrix in the receiver.
 //
 // See the Applyer interface for more information.
-func (m *Dense) Apply(f ApplyFunc, a Matrix) {
+func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 	ar, ac := a.Dims()
 
 	m.reuseAs(ar, ac)
@@ -772,7 +772,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 		amat := a.RawMatrix()
 		for j, ja, jm := 0, 0, 0; ja < ar*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
 			for i, v := range amat.Data[ja : ja+ac] {
-				m.mat.Data[i+jm] = f(j, i, v)
+				m.mat.Data[i+jm] = fn(j, i, v)
 			}
 		}
 		return
@@ -782,7 +782,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
 			for i, v := range a.Row(row, r) {
-				row[i] = f(r, i, v)
+				row[i] = fn(r, i, v)
 			}
 			copy(m.rowView(r), row)
 		}
@@ -791,7 +791,7 @@ func (m *Dense) Apply(f ApplyFunc, a Matrix) {
 
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
-			m.set(r, c, f(r, c, a.At(r, c)))
+			m.set(r, c, fn(r, c, a.At(r, c)))
 		}
 	}
 }

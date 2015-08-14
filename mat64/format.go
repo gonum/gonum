@@ -22,10 +22,11 @@ func Formatted(m Matrix, options ...FormatOption) fmt.Formatter {
 }
 
 type formatter struct {
-	matrix Matrix
-	prefix string
-	margin int
-	dot    byte
+	matrix  Matrix
+	prefix  string
+	margin  int
+	dot     byte
+	squeeze bool
 }
 
 // FormatOption is a functional option for matrix formatting.
@@ -50,13 +51,18 @@ func DotByte(b byte) FormatOption {
 	return func(f *formatter) { f.dot = b }
 }
 
+// Squeeze sets the printing behaviour to minimise column width for each individual column.
+func Squeeze() FormatOption {
+	return func(f *formatter) { f.squeeze = true }
+}
+
 // Format satisfies the fmt.Formatter interface.
 func (f formatter) Format(fs fmt.State, c rune) {
 	if c == 'v' && fs.Flag('#') {
 		fmt.Fprintf(fs, "%#v", f.matrix)
 		return
 	}
-	format(f.matrix, f.prefix, f.margin, f.dot, fs, c)
+	format(f.matrix, f.prefix, f.margin, f.dot, f.squeeze, fs, c)
 }
 
 // format prints a pretty representation of m to the fs io.Writer. The format character c
@@ -65,10 +71,10 @@ func (f formatter) Format(fs fmt.State, c rune) {
 // preceding a verb indicates that zero values should be represented by the dot character.
 // The printed range of the matrix can be limited by specifying a positive value for margin;
 // If margin is greater than zero, only the first and last margin rows/columns of the matrix
-// are output.
+// are output. If squeeze is true, column widths are determined on a per-column basis.
 //
 // format will not provide Go syntax output.
-func format(m Matrix, prefix string, margin int, dot byte, fs fmt.State, c rune) {
+func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.State, c rune) {
 	rows, cols := m.Dims()
 
 	var printed int
@@ -88,14 +94,20 @@ func format(m Matrix, prefix string, margin int, dot byte, fs fmt.State, c rune)
 
 	var (
 		maxWidth int
+		widths   widther
 		buf, pad []byte
 	)
+	if squeeze {
+		widths = make(columnWidth, cols)
+	} else {
+		widths = new(uniformWidth)
+	}
 	switch c {
 	case 'v', 'e', 'E', 'f', 'F', 'g', 'G':
 		if c == 'v' {
-			buf, maxWidth = maxCellWidth(m, 'g', printed, prec)
+			buf, maxWidth = maxCellWidth(m, 'g', printed, prec, widths)
 		} else {
-			buf, maxWidth = maxCellWidth(m, c, printed, prec)
+			buf, maxWidth = maxCellWidth(m, c, printed, prec, widths)
 		}
 	default:
 		fmt.Fprintf(fs, "%%!%c(%T=Dims(%d, %d))", c, m, rows, cols)
@@ -160,9 +172,9 @@ func format(m Matrix, prefix string, margin int, dot byte, fs fmt.State, c rune)
 			}
 			if fs.Flag('-') {
 				fs.Write(buf)
-				fs.Write(pad[:width-len(buf)])
+				fs.Write(pad[:widths.width(j)-len(buf)])
 			} else {
-				fs.Write(pad[:width-len(buf)])
+				fs.Write(pad[:widths.width(j)-len(buf)])
 				fs.Write(buf)
 			}
 
@@ -181,7 +193,7 @@ func format(m Matrix, prefix string, margin int, dot byte, fs fmt.State, c rune)
 	}
 }
 
-func maxCellWidth(m Matrix, c rune, printed, prec int) ([]byte, int) {
+func maxCellWidth(m Matrix, c rune, printed, prec int, w widther) ([]byte, int) {
 	var (
 		buf        = make([]byte, 0, 64)
 		rows, cols = m.Dims()
@@ -201,8 +213,26 @@ func maxCellWidth(m Matrix, c rune, printed, prec int) ([]byte, int) {
 			if len(buf) > max {
 				max = len(buf)
 			}
+			if len(buf) > w.width(j) {
+				w.setWidth(j, len(buf))
+			}
 			buf = buf[:0]
 		}
 	}
 	return buf, max
 }
+
+type widther interface {
+	width(i int) int
+	setWidth(i, w int)
+}
+
+type uniformWidth int
+
+func (u *uniformWidth) width(_ int) int   { return int(*u) }
+func (u *uniformWidth) setWidth(_, w int) { *u = uniformWidth(w) }
+
+type columnWidth []int
+
+func (c columnWidth) width(i int) int   { return c[i] }
+func (c columnWidth) setWidth(i, w int) { c[i] = w }

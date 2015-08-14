@@ -99,6 +99,19 @@ func (s *S) TestFormat(c *check.C) {
 		},
 		{
 			func() fmt.Formatter {
+				m := NewDense(2, 3, []float64{0, 1, 2, 3, 4, 5})
+				m.Apply(sqrt, m)
+				return Formatted(m, Squeeze())
+			}(),
+			[]rp{
+				{"%v", "⎡                 0  1  1.4142135623730951⎤\n⎣1.7320508075688772  2    2.23606797749979⎦"},
+				{"%.2f", "⎡0.00  1.00  1.41⎤\n⎣1.73  2.00  2.24⎦"},
+				{"% f", "⎡                 .  1  1.4142135623730951⎤\n⎣1.7320508075688772  2    2.23606797749979⎦"},
+				{"%#v", "&mat64.Dense{mat:blas64.General{Rows:2, Cols:3, Stride:3, Data:[]float64{0, 1, 1.4142135623730951, 1.7320508075688772, 2, 2.23606797749979}}, capRows:2, capCols:3}"},
+			},
+		},
+		{
+			func() fmt.Formatter {
 				m := NewDense(1, 10, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
 				return Formatted(m, Excerpt(3))
 			}(),

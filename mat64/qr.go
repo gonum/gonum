@@ -62,6 +62,11 @@ func (m *Dense) RFromQR(qr *QR) {
 		},
 	}
 	m.Copy(t)
+
+	// Zero below the triangular.
+	for i := r; i < c; i++ {
+		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
+	}
 }
 
 // QFromQR extracts the m×m orthonormal matrix Q from a QR decomposition.
@@ -92,8 +97,7 @@ func (m *Dense) QFromQR(qr *QR) {
 		Inc:  1,
 		Data: make([]float64, r),
 	}
-	k := min(r, c)
-	for i := 0; i < k; i++ {
+	for i := 0; i < c; i++ {
 		// Set h = I.
 		for i := range h.Data {
 			h.Data[i] = 0
@@ -121,24 +125,22 @@ func (m *Dense) QFromQR(qr *QR) {
 }
 
 // SolveQR solves a minimum-norm solution to a system of linear equations defined
-// by the matrices A and B, where A is an m×n matrix represented in its QR factorized
+// by the matrices A and b, where A is an m×n matrix represented in its QR factorized
 // form. If A is singular or near-singular a Condition error is returned. Please
 // see the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
-//  1. If m >= n and trans == false, find X such that || A*X - B||_2 is minimized.
-//  2. If m < n and trans == false, find the minimum norm solution of A * X = B.
-//  3. If m >= n and trans == true, find the minimum norm solution of A^T * X = B.
-//  4. If m < n and trans == true, find X such that || A*X - B||_2 is minimized.
-// The solution matrix, X, is stored in place into the receiver.
+//  If trans == false, find x such that || A*x - b||_2 is minimized.
+//  If trans == true, find the minimum norm solution of A^T * x = b.
+// The solution matrix, x, is stored in place into the receiver.
 func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	r, c := qr.qr.Dims()
 	br, bc := b.Dims()
 
-	// The QR solve algorithm stores the result in-place into B. The storage
-	// for the answer must be large enough to hold both B and X. However,
-	// the receiver must be the size of x. Copy B, and then copy into m at the
-	// end.
+	// The QR solve algorithm stores the result in-place into the right hand side.
+	// The storage for the answer must be large enough to hold both b and x.
+	// However, this method's receiver must be the size of x. Copy b, and then
+	// copy the result into m at the end.
 	if trans {
 		if c != br {
 			panic(ErrShape)
@@ -154,22 +156,14 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	// independent storage.
 	x := getWorkspace(max(r, c), bc, false)
 	x.Copy(b)
-	t := blas64.Triangular{
-		N:      qr.qr.mat.Cols,
-		Stride: qr.qr.mat.Stride,
-		Data:   qr.qr.mat.Data,
-		Uplo:   blas.Upper,
-		Diag:   blas.NonUnit,
-	}
+	t := qr.qr.asTriDense(qr.qr.mat.Cols, blas.NonUnit, blas.Upper).mat
 	if trans {
 		ok := lapack64.Trtrs(blas.Trans, t, x.mat)
 		if !ok {
 			return Condition(math.Inf(1))
 		}
 		for i := c; i < r; i++ {
-			for j := 0; j < bc; j++ {
-				x.mat.Data[i*x.mat.Stride+j] = 0
-			}
+			zero(x.mat.Data[i*x.mat.Stride : i*x.mat.Stride+bc])
 		}
 		work := make([]float64, 1)
 		lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, x.mat, work, -1)
@@ -192,6 +186,8 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	return nil
 }
 
+// SolveQRVec solves a minimum-norm solution to a system of linear equations.
+// Please see Dense.SolveQR for the full documentation.
 func (v *Vector) SolveQRVec(qr *QR, trans bool, b *Vector) error {
 	r, c := qr.qr.Dims()
 	// The Solve implementation is non-trivial, so rather than duplicate the code,

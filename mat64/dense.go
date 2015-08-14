@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/binary"
 
+	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 )
 
@@ -133,6 +134,20 @@ func (m *Dense) isZero() bool {
 	// It must be the case that m.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return m.mat.Stride == 0
+}
+
+// asTriDense returns a TriDense with the given size and side. The backing data
+// of the TriDense is the same as the receiver.
+func (m *Dense) asTriDense(n int, diag blas.Diag, uplo blas.Uplo) *TriDense {
+	return &TriDense{
+		blas64.Triangular{
+			N:      n,
+			Stride: m.mat.Stride,
+			Data:   m.mat.Data,
+			Uplo:   uplo,
+			Diag:   diag,
+		},
+	}
 }
 
 // DenseCopyOf returns a newly allocated copy of the elements of a.

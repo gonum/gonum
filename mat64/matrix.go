@@ -157,6 +157,8 @@ type Reseter interface {
 // A Copier can make a copy of elements of a into the receiver. The submatrix copied
 // starts at row and column 0 and has dimensions equal to the minimum dimensions of
 // the two matrices. The number of row and columns copied is returned.
+// Note that the behavior of Copy from a Matrix with backing data that aliases the
+// receiver is undefined.
 type Copier interface {
 	Copy(a Matrix) (r, c int)
 }
@@ -192,12 +194,6 @@ type Grower interface {
 // Norm will panic with ErrNormOrder if an illegal norm order is specified.
 type Normer interface {
 	Norm(o float64) float64
-}
-
-// A TransposeCopier can make a copy of the transpose the matrix represented by a, placing the elements
-// into the receiver.
-type TransposeCopier interface {
-	TCopy(a Matrix)
 }
 
 // A Deter can return the determinant of the represented matrix.

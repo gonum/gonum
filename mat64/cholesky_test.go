@@ -112,13 +112,10 @@ func (s *S) TestCholesky(c *check.C) {
 		fc := DenseCopyOf(t.f)
 		c.Check(fc.Equals(t.want), check.Equals, true)
 
-		ft := &Dense{}
-		ft.TCopy(t.f)
-
 		if t.upper {
-			fc.Mul(ft, fc)
+			fc.Mul(t.f.T(), fc)
 		} else {
-			fc.Mul(fc, ft)
+			fc.Mul(fc, t.f.T())
 		}
 		c.Check(fc.EqualsApprox(t.a, 1e-12), check.Equals, true)
 

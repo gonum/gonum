@@ -37,9 +37,6 @@ var (
 	_ Scaler  = matrix
 	_ Applyer = matrix
 
-	_ TransposeCopier = matrix
-	// _ TransposeViewer = matrix
-
 	_ Tracer = matrix
 	_ Normer = matrix
 	_ Sumer  = matrix
@@ -381,17 +378,38 @@ func (m *Dense) Clone(a Matrix) {
 		Stride: c,
 	}
 	m.capRows, m.capCols = r, c
-	switch a := a.(type) {
+
+	aU, trans := untranspose(a)
+	switch aU := aU.(type) {
 	case RawMatrixer:
-		amat := a.RawMatrix()
+		amat := aU.RawMatrix()
+		// TODO(kortschak): Consider being more precise with determining whether a and m are aliases.
+		// The current approach is that all RawMatrixers are considered potential aliases.
+		// Note that below we assume that non-RawMatrixers are not aliases; this is not necessarily
+		// true, but cases where it is not are not sensible. We should probably fix or document
+		// this though.
 		mat.Data = make([]float64, r*c)
-		for i := 0; i < r; i++ {
-			copy(mat.Data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+		if trans {
+			for i := 0; i < r; i++ {
+				blas64.Copy(c,
+					blas64.Vector{Inc: amat.Stride, Data: amat.Data[i : i+(c-1)*amat.Stride+1]},
+					blas64.Vector{Inc: 1, Data: mat.Data[i*c : (i+1)*c]})
+			}
+		} else {
+			for i := 0; i < r; i++ {
+				copy(mat.Data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+			}
 		}
 	case Vectorer:
 		mat.Data = use(m.mat.Data, r*c)
-		for i := 0; i < r; i++ {
-			a.Row(mat.Data[i*c:(i+1)*c], i)
+		if trans {
+			for i := 0; i < r; i++ {
+				aU.Col(mat.Data[i*c:(i+1)*c], i)
+			}
+		} else {
+			for i := 0; i < r; i++ {
+				aU.Row(mat.Data[i*c:(i+1)*c], i)
+			}
 		}
 	default:
 		mat.Data = use(m.mat.Data, r*c)
@@ -413,21 +431,39 @@ func (m *Dense) Clone(a Matrix) {
 // See the Copier interface for more information.
 func (m *Dense) Copy(a Matrix) (r, c int) {
 	r, c = a.Dims()
+	if a == m {
+		return r, c
+	}
 	r = min(r, m.mat.Rows)
 	c = min(c, m.mat.Cols)
 	if r == 0 || c == 0 {
 		return 0, 0
 	}
 
-	switch a := a.(type) {
+	aU, trans := untranspose(a)
+	switch aU := aU.(type) {
 	case RawMatrixer:
-		amat := a.RawMatrix()
-		for i := 0; i < r; i++ {
-			copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+		amat := aU.RawMatrix()
+		if trans {
+			for i := 0; i < r; i++ {
+				blas64.Copy(c,
+					blas64.Vector{Inc: amat.Stride, Data: amat.Data[i : i+(c-1)*amat.Stride+1]},
+					blas64.Vector{Inc: 1, Data: m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c]})
+			}
+		} else {
+			for i := 0; i < r; i++ {
+				copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+			}
 		}
 	case Vectorer:
-		for i := 0; i < r; i++ {
-			a.Row(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], i)
+		if trans {
+			for i := 0; i < r; i++ {
+				aU.Col(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], i)
+			}
+		} else {
+			for i := 0; i < r; i++ {
+				aU.Row(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], i)
+			}
 		}
 	default:
 		for i := 0; i < r; i++ {
@@ -438,36 +474,6 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 	}
 
 	return r, c
-}
-
-// TCopy makes a copy of the transpose the matrix represented by a, placing the
-// result into the receiver.
-//
-// See the TransposeCopier interface for more information.
-func (m *Dense) TCopy(a Matrix) {
-	ar, ac := a.Dims()
-
-	var w Dense
-	if m != a {
-		w = *m
-	}
-	w.reuseAs(ac, ar)
-
-	switch a := a.(type) {
-	case *Dense:
-		for i := 0; i < ac; i++ {
-			for j := 0; j < ar; j++ {
-				w.set(i, j, a.at(j, i))
-			}
-		}
-	default:
-		for i := 0; i < ac; i++ {
-			for j := 0; j < ar; j++ {
-				w.set(i, j, a.At(j, i))
-			}
-		}
-	}
-	*m = w
 }
 
 // Stack appends the rows of b onto the rows of a, placing the result into the

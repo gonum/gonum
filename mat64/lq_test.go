@@ -71,10 +71,7 @@ func (s *S) TestLQD(c *check.C) {
 	} {
 		a := NewDense(flatten(test.a))
 
-		at := new(Dense)
-		at.TCopy(a)
-
-		lq := LQ(DenseCopyOf(at))
+		lq := LQ(DenseCopyOf(a.T()))
 
 		rows, cols := a.Dims()
 
@@ -87,8 +84,7 @@ func (s *S) TestLQD(c *check.C) {
 
 		lt := NewDense(rows, cols, nil)
 		ltview := lt.View(0, 0, cols, cols).(*Dense)
-		ltview.TCopy(l)
-		lq.applyQTo(lt, true)
+		lq.applyQTo(l.T(), true)
 
 		c.Check(isOrthogonal(Q), check.Equals, true, check.Commentf("Test %v: Q not orthogonal", test.name))
 		c.Check(a.EqualsApprox(lt, 1e-13), check.Equals, true, check.Commentf("Test %v: Q*R != A", test.name))
@@ -105,7 +101,7 @@ func (s *S) TestLQD(c *check.C) {
 		x := lq.Solve(b)
 
 		var bProj Dense
-		bProj.Mul(at, x)
+		bProj.Mul(a.T(), x)
 
 		c.Check(bProj.EqualsApprox(b, 1e-13), check.Equals, true, check.Commentf("Test %v: A*X != B", test.name))
 

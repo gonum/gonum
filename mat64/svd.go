@@ -34,7 +34,7 @@ func SVD(a *Dense, epsilon, small float64, wantu, wantv bool) SVDFactors {
 
 	trans := false
 	if m < n {
-		a.TCopy(a)
+		a.Clone(a.T())
 		m, n = n, m
 		wantu, wantv = wantv, wantu
 		trans = true

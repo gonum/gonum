@@ -406,7 +406,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			if aTrans {
 				c := getWorkspace(ac, ar, false)
 				blas64.Symm(blas.Left, 1, bmat, amat, 0, c.mat)
-				m.TCopy(c)
+				strictCopy(m, c.T())
 				putWorkspace(c)
 				return
 			}
@@ -426,7 +426,7 @@ func (m *Dense) Mul(a, b Matrix) {
 					bT = blas.NoTrans
 				}
 				blas64.Trmm(blas.Left, bT, 1, bmat, c.mat)
-				m.TCopy(c)
+				strictCopy(m, c.T())
 				putWorkspace(c)
 				return
 			}
@@ -463,7 +463,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			if bTrans {
 				c := getWorkspace(bc, br, false)
 				blas64.Symm(blas.Right, 1, amat, bmat, 0, c.mat)
-				m.TCopy(c)
+				strictCopy(m, c.T())
 				putWorkspace(c)
 				return
 			}
@@ -483,7 +483,7 @@ func (m *Dense) Mul(a, b Matrix) {
 					aT = blas.NoTrans
 				}
 				blas64.Trmm(blas.Right, aT, 1, amat, c.mat)
-				m.TCopy(c)
+				strictCopy(m, c.T())
 				putWorkspace(c)
 				return
 			}
@@ -586,6 +586,16 @@ func (m *Dense) Mul(a, b Matrix) {
 			}
 			m.mat.Data[r*m.mat.Stride+c] = v
 		}
+	}
+}
+
+// strictCopy copies a into m panicking if the shape of a and m differ.
+func strictCopy(m *Dense, a Matrix) {
+	r, c := m.Copy(a)
+	if r != m.mat.Rows || c != m.mat.Cols {
+		// Panic with a string since this
+		// is not a user-facing panic.
+		panic(ErrShape.string)
 	}
 }
 

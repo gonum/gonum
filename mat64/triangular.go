@@ -121,7 +121,11 @@ func (t *TriDense) Triangle() (n int, upper bool) {
 }
 
 func (t *TriDense) isUpper() bool {
-	switch t.mat.Uplo {
+	return isUpperUplo(t.mat.Uplo)
+}
+
+func isUpperUplo(u blas.Uplo) bool {
+	switch u {
 	case blas.Upper:
 		return true
 	case blas.Lower:
@@ -208,6 +212,24 @@ func (t *TriDense) Copy(a Matrix) (r, c int) {
 		} else {
 			for i := 0; i < r; i++ {
 				copy(t.mat.Data[i*t.mat.Stride:i*t.mat.Stride+i+1], amat.Data[i*amat.Stride:i*amat.Stride+i+1])
+			}
+		}
+	case RawTriangular:
+		amat := a.RawTriangular()
+		aIsUpper := isUpperUplo(amat.Uplo)
+		tIsUpper := t.isUpper()
+		switch {
+		case tIsUpper && aIsUpper:
+			for i := 0; i < r; i++ {
+				copy(t.mat.Data[i*t.mat.Stride+i:i*t.mat.Stride+c], amat.Data[i*amat.Stride+i:i*amat.Stride+c])
+			}
+		case !tIsUpper && !aIsUpper:
+			for i := 0; i < r; i++ {
+				copy(t.mat.Data[i*t.mat.Stride:i*t.mat.Stride+i+1], amat.Data[i*amat.Stride:i*amat.Stride+i+1])
+			}
+		default:
+			for i := 0; i < r; i++ {
+				t.set(i, i, amat.Data[i*amat.Stride+i])
 			}
 		}
 	case Vectorer:

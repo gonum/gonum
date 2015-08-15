@@ -139,3 +139,51 @@ func (s *S) TestTriDenseCopy(c *check.C) {
 		}
 	}
 }
+
+func (s *S) TestTriTriDenseCopy(c *check.C) {
+	for i := 0; i < 100; i++ {
+		size := rand.Intn(100)
+		r, err := randDense(size, 1, rand.NormFloat64)
+		if size == 0 {
+			c.Check(err, check.Equals, ErrZeroLength)
+			continue
+		}
+		c.Assert(err, check.Equals, nil)
+
+		ur := NewTriDense(size, true, nil)
+		lr := NewTriDense(size, false, nil)
+
+		ur.Copy(r)
+		lr.Copy(r)
+
+		u := NewTriDense(size, true, nil)
+		u.Copy(ur)
+		if !equal(u, ur) {
+			c.Fatal("unexpected result for U triangle copy of U triangle: not equal")
+		}
+
+		l := NewTriDense(size, false, nil)
+		l.Copy(lr)
+		if !equal(l, lr) {
+			c.Fatal("unexpected result for L triangle copy of L triangle: not equal")
+		}
+
+		zero(u.mat.Data)
+		u.Copy(lr)
+		if !isDiagonal(u) {
+			c.Fatal("unexpected result for U triangle copy of L triangle: off diagonal non-zero element")
+		}
+		if !equalDiagonal(u, lr) {
+			c.Fatal("unexpected result for U triangle copy of L triangle: diagonal not equal")
+		}
+
+		zero(l.mat.Data)
+		l.Copy(ur)
+		if !isDiagonal(l) {
+			c.Fatal("unexpected result for L triangle copy of U triangle: off diagonal non-zero element")
+		}
+		if !equalDiagonal(l, ur) {
+			c.Fatal("unexpected result for L triangle copy of U triangle: diagonal not equal")
+		}
+	}
+}

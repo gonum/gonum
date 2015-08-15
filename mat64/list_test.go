@@ -324,6 +324,34 @@ func equal(a, b Matrix) bool {
 	return true
 }
 
+// isDiagonal returns whether a is a diagonal matrix.
+func isDiagonal(a Matrix) bool {
+	r, c := a.Dims()
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			if a.At(i, j) != 0 && i != j {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// equalDiagonal returns whether a and b are equal on the diagonal.
+func equalDiagonal(a, b Matrix) bool {
+	ar, ac := a.Dims()
+	br, bc := a.Dims()
+	if min(ar, ac) != min(br, bc) {
+		return false
+	}
+	for i := 0; i < min(ar, ac); i++ {
+		if a.At(i, i) != b.At(i, i) {
+			return false
+		}
+	}
+	return true
+}
+
 // underlyingData extracts the underlying data of the matrix a.
 func underlyingData(a Matrix) []float64 {
 	switch t := a.(type) {

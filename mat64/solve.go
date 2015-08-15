@@ -10,15 +10,15 @@ import (
 )
 
 // Solve solves a minimum-norm solution to a system of linear equations defined
-// by the matrices A and B. If A is singular or near-singular a Condition error
+// by the matrices a and b. If a is singular or near-singular a Condition error
 // is returned. Please see the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
-//  1. If m >= n and trans == false, find X such that || A*X - B||_2 is minimized.
-//  2. If m < n and trans == false, find the minimum norm solution of A * X = B.
-//  3. If m >= n and trans == true, find the minimum norm solution of A^T * X = B.
-//  4. If m < n and trans == true, find X such that || A*X - B||_2 is minimized.
-// The solution matrix, X, is stored in place into the receiver.
+//  1. If m >= n and trans == false, find x such that || a*x - b||_2 is minimized.
+//  2. If m < n and trans == false, find the minimum norm solution of a * x = b.
+//  3. If m >= n and trans == true, find the minimum norm solution of a^T * x = b.
+//  4. If m < n and trans == true, find X such that || a*x - b||_2 is minimized.
+// The solution matrix, x, is stored in place into the receiver.
 func (m *Dense) Solve(a, b Matrix) error {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()

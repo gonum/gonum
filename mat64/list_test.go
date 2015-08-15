@@ -7,7 +7,6 @@ package mat64
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"reflect"
 
 	"github.com/gonum/blas/blas64"
@@ -551,11 +550,7 @@ func testTwoInput(c *check.C,
 					continue
 				}
 				if !equalApprox(zero, &want, 1e-14) {
-					fmt.Println(errStr)
-					fmt.Println("zero = ", zero)
-					fmt.Println("want = ", want)
 					c.Errorf("Answer mismatch with zero receiver: %s", errStr)
-					os.Exit(1)
 					continue
 				}
 

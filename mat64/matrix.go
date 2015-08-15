@@ -7,9 +7,7 @@ package mat64
 import (
 	"fmt"
 
-	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack/lapack64"
 )
 
 // Matrix is the basic matrix interface type.
@@ -359,44 +357,9 @@ func Inverse(a Matrix) (*Dense, error) {
 		d[i] = 1
 	}
 	eye := NewDense(m, m, d)
-	return Solve(a, eye)
-}
-
-// Solve returns a matrix x that satisfies ax = b.
-// It returns a nil matrix and ErrSingular if a is singular.
-func Solve(a, b Matrix) (x *Dense, err error) {
-	m, n := a.Dims()
-	br, _ := b.Dims()
-	if m != br {
-		panic("rowMismatch")
-	}
-	switch {
-	case m == n:
-		var lu LU
-		lu.Factorize(a)
-		if lu.Det() == 0 {
-			return nil, ErrSingular
-		}
-		x := DenseCopyOf(b)
-		lapack64.Getrs(blas.NoTrans, lu.lu.mat, x.mat, lu.pivot)
-		return x, nil
-	default:
-		_, bc := b.Dims()
-		mn := max(m, n)
-		// TODO(btracey): Employ special cases to avoid the copy where possible.
-		aCopy := DenseCopyOf(a)
-		x := NewDense(mn, bc, nil)
-
-		x.Copy(b)
-		work := make([]float64, 1)
-		lapack64.Gels(blas.NoTrans, aCopy.mat, x.mat, work, -1)
-		work = make([]float64, int(work[0]))
-		ok := lapack64.Gels(blas.NoTrans, aCopy.mat, x.mat, work, len(work))
-		if !ok {
-			return nil, ErrSingular
-		}
-		return x.View(0, 0, n, bc).(*Dense), nil
-	}
+	x := &Dense{}
+	err := x.Solve(a, eye)
+	return x, err
 }
 
 // Maybe will recover a panic with a type mat64.Error from fn, and return this error.

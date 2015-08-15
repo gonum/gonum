@@ -7,6 +7,7 @@ package mat64
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"reflect"
 
 	"github.com/gonum/blas/blas64"
@@ -34,6 +35,14 @@ func legalSizeSameSquare(ar, ac, br, bc int) bool {
 		return false
 	}
 	if ar != ac {
+		return false
+	}
+	return true
+}
+
+// legalSizeSolve returns whether the two matrices can be used in a linear solve.
+func legalSizeSolve(ar, ac, br, bc int) bool {
+	if ar != br {
 		return false
 	}
 	return true
@@ -374,28 +383,32 @@ func testTwoInput(c *check.C,
 
 	// Loop over all of the matrix types.
 	types := []Matrix{
-		&Dense{},
-		&SymDense{},
-		NewTriDense(0, true, nil),
-		NewTriDense(0, false, nil),
-		NewVector(0, nil),
-		strideVec,
-		&basicMatrix{},
-		&basicVectorer{},
-		&basicSymmetric{},
-		&basicTriangular{},
+		/*
+			&Dense{},
+			&SymDense{},
+			NewTriDense(0, true, nil),
+			NewTriDense(0, false, nil),
+			NewVector(0, nil),
+			strideVec,
+			&basicMatrix{},
+			&basicVectorer{},
+			&basicSymmetric{},
+			&basicTriangular{},
+		*/
 
 		Transpose{&Dense{}},
-		Transpose{NewTriDense(0, true, nil)},
-		TransposeTri{NewTriDense(0, true, nil)},
-		Transpose{NewTriDense(0, false, nil)},
-		TransposeTri{NewTriDense(0, false, nil)},
-		Transpose{NewVector(0, nil)},
-		Transpose{strideVec},
-		Transpose{&basicMatrix{}},
-		Transpose{&basicVectorer{}},
-		Transpose{&basicSymmetric{}},
-		Transpose{&basicTriangular{}},
+		/*
+			Transpose{NewTriDense(0, true, nil)},
+			TransposeTri{NewTriDense(0, true, nil)},
+			Transpose{NewTriDense(0, false, nil)},
+			TransposeTri{NewTriDense(0, false, nil)},
+			Transpose{NewVector(0, nil)},
+			Transpose{strideVec},
+			Transpose{&basicMatrix{}},
+			Transpose{&basicVectorer{}},
+			Transpose{&basicSymmetric{}},
+			Transpose{&basicTriangular{}},
+		*/
 	}
 
 	for _, aMat := range types {
@@ -538,7 +551,11 @@ func testTwoInput(c *check.C,
 					continue
 				}
 				if !equalApprox(zero, &want, 1e-14) {
+					fmt.Println(errStr)
+					fmt.Println("zero = ", zero)
+					fmt.Println("want = ", want)
 					c.Errorf("Answer mismatch with zero receiver: %s", errStr)
+					os.Exit(1)
 					continue
 				}
 

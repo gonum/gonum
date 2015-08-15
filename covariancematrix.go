@@ -37,7 +37,7 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	}
 
 	var xt mat64.Dense
-	xt.TCopy(x)
+	xt.Clone(x.T())
 	// Subtract the mean of each of the columns.
 	for i := 0; i < c; i++ {
 		v := xt.RawRowView(i)

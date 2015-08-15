@@ -382,32 +382,28 @@ func testTwoInput(c *check.C,
 
 	// Loop over all of the matrix types.
 	types := []Matrix{
-		/*
-			&Dense{},
-			&SymDense{},
-			NewTriDense(0, true, nil),
-			NewTriDense(0, false, nil),
-			NewVector(0, nil),
-			strideVec,
-			&basicMatrix{},
-			&basicVectorer{},
-			&basicSymmetric{},
-			&basicTriangular{},
-		*/
+		&Dense{},
+		&SymDense{},
+		NewTriDense(0, true, nil),
+		NewTriDense(0, false, nil),
+		NewVector(0, nil),
+		strideVec,
+		&basicMatrix{},
+		&basicVectorer{},
+		&basicSymmetric{},
+		&basicTriangular{},
 
 		Transpose{&Dense{}},
-		/*
-			Transpose{NewTriDense(0, true, nil)},
-			TransposeTri{NewTriDense(0, true, nil)},
-			Transpose{NewTriDense(0, false, nil)},
-			TransposeTri{NewTriDense(0, false, nil)},
-			Transpose{NewVector(0, nil)},
-			Transpose{strideVec},
-			Transpose{&basicMatrix{}},
-			Transpose{&basicVectorer{}},
-			Transpose{&basicSymmetric{}},
-			Transpose{&basicTriangular{}},
-		*/
+		Transpose{NewTriDense(0, true, nil)},
+		TransposeTri{NewTriDense(0, true, nil)},
+		Transpose{NewTriDense(0, false, nil)},
+		TransposeTri{NewTriDense(0, false, nil)},
+		Transpose{NewVector(0, nil)},
+		Transpose{strideVec},
+		Transpose{&basicMatrix{}},
+		Transpose{&basicVectorer{}},
+		Transpose{&basicSymmetric{}},
+		Transpose{&basicTriangular{}},
 	}
 
 	for _, aMat := range types {

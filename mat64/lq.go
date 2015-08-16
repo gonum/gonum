@@ -77,13 +77,9 @@ func (m *Dense) QFromLQ(lq *LQ) {
 
 	// Set Q = I.
 	for i := 0; i < c; i++ {
-		for j := 0; j < i; j++ {
-			m.mat.Data[i*m.mat.Stride+j] = 0
-		}
-		m.mat.Data[i*m.mat.Stride+i] = 1
-		for j := i + 1; j < c; j++ {
-			m.mat.Data[i*m.mat.Stride+j] = 0
-		}
+		v := m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c]
+		zero(v)
+		v[i] = 1
 	}
 
 	// Construct Q from the elementary reflectors.
@@ -100,11 +96,9 @@ func (m *Dense) QFromLQ(lq *LQ) {
 	}
 	for i := 0; i < r; i++ {
 		// Set h = I.
-		for i := range h.Data {
-			h.Data[i] = 0
-		}
-		for j := 0; j < c; j++ {
-			h.Data[j*c+j] = 1
+		zero(h.Data)
+		for j := 0; j < len(h.Data); j += c + 1 {
+			h.Data[j] = 1
 		}
 
 		// Set the vector data as the elementary reflector.

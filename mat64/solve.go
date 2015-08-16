@@ -39,10 +39,9 @@ func (m *Dense) Solve(a, b Matrix) error {
 				return nil
 			}
 			for i := 0; i < ar; i++ {
-				v := m.mat.Data[i*m.mat.Stride:]
-				zero(v[:i])
+				v := m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+ac]
+				zero(v)
 				v[i] = 1
-				zero(v[i+1 : ac])
 			}
 			return nil
 		}

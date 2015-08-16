@@ -16,33 +16,42 @@ import (
 // is returned. Please see the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
-//  1. If m >= n and trans == false, find x such that ||a*x - b||_2 is minimized.
-//  2. If m < n and trans == false, find the minimum norm solution of a * x = b.
-//  3. If m >= n and trans == true, find the minimum norm solution of a^T * x = b.
-//  4. If m < n and trans == true, find X such that ||a*x - b||_2 is minimized.
-// The solution matrix, x, is stored in place into the receiver.
+//  1. If m >= n and trans == false, find X such that ||a*X - b||_2 is minimized.
+//  2. If m < n and trans == false, find the minimum norm solution of a * X = b.
+//  3. If m >= n and trans == true, find the minimum norm solution of a^T * X = b.
+//  4. If m < n and trans == true, find X such that ||a*X - b||_2 is minimized.
+// The solution matrix, X, is stored in place into the receiver.
 func (m *Dense) Solve(a, b Matrix) error {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br {
 		panic(ErrShape)
 	}
-
-	aMat, _ := untranspose(a)
-	bMat, _ := untranspose(b)
 	m.reuseAs(ac, bc)
-	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
-		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
-		defer restore()
-	}
 	// TODO(btracey): Add a test for the condition number of A.
 	// TODO(btracey): Add special cases for TriDense, SymDense, etc.
 	switch {
 	case ar == ac:
+		if a == b {
+			// x = I.
+			if ar == 1 {
+				m.mat.Data[0] = 1
+				return nil
+			}
+			for i := 0; i < ar; i++ {
+				v := m.mat.Data[i*m.mat.Stride:]
+				zero(v[:i])
+				v[i] = 1
+				zero(v[i+1 : ac])
+			}
+			return nil
+		}
+		bMat, _ := untranspose(b)
+		if m == bMat {
+			var restore func()
+			m, restore = m.isolatedWorkspace(bMat)
+			defer restore()
+		}
 		// Solve using an LU decomposition.
 		var lu LU
 		lu.Factorize(a)

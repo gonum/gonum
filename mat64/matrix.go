@@ -478,10 +478,9 @@ func useZeroed(f []float64, l int) []float64 {
 	return make([]float64, l)
 }
 
-// zero does a fast zeroing of the given slice's elements.
+// zero zeros the given slice's elements.
 func zero(f []float64) {
-	f[0] = 0
-	for i := 1; i < len(f); {
-		i += copy(f[i:], f[:i])
+	for i := range f {
+		f[i] = 0
 	}
 }

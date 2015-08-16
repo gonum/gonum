@@ -5,9 +5,7 @@
 package mat64
 
 import (
-	"fmt"
 	"math/rand"
-	"os"
 
 	"gopkg.in/check.v1"
 )
@@ -133,27 +131,47 @@ func (s *S) TestSolve(c *check.C) {
 			ans:       nil,
 			shouldErr: true,
 		},
+		/*
+			These are commented out because lapack64.Gels returns 0 for the answer
+			instead of a singular.
+			TODO(btracey): Add these back in when there is a test for the condition
+			number.
+				{
+					a: [][]float64{
+						{0, 0},
+						{0, 0},
+						{0, 0},
+					},
+					b: [][]float64{
+						{3},
+						{2},
+					},
+					ans: nil,
+					shouldErr: true,
+				},
+				{
+					name:     "Singular wide",
+					singular: true,
+					a: [][]float64{
+						{0, 0, 0},
+						{0, 0, 0},
+					},
+					b: [][]float64{
+						{3},
+						{2},
+						{1},
+					},
+					ans: nil,
+					shouldErr: true,
+				},
+		*/
 	} {
-		a := NewDense(len(test.a), len(test.a[0]), nil)
-		for i := 0; i < len(test.a); i++ {
-			for j := 0; j < len(test.a[0]); j++ {
-				a.Set(i, j, test.a[i][j])
-			}
-		}
-		b := NewDense(len(test.b), len(test.b[0]), nil)
-		for i := 0; i < len(test.b); i++ {
-			for j := 0; j < len(test.b[0]); j++ {
-				b.Set(i, j, test.b[i][j])
-			}
-		}
+		a := NewDense(flatten(test.a))
+		b := NewDense(flatten(test.b))
+
 		var ans *Dense
 		if test.ans != nil {
-			ans = NewDense(len(test.ans), len(test.ans[0]), nil)
-			for i := 0; i < len(test.ans); i++ {
-				for j := 0; j < len(test.ans[0]); j++ {
-					ans.Set(i, j, test.ans[i][j])
-				}
-			}
+			ans = NewDense(flatten(test.ans))
 		}
 
 		var x Dense
@@ -165,8 +183,6 @@ func (s *S) TestSolve(c *check.C) {
 			continue
 		}
 		if err == nil && test.shouldErr {
-			fmt.Println("a =", a)
-			os.Exit(1)
 			c.Errorf("Did not error during solve.")
 			continue
 		}

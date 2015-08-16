@@ -5,6 +5,8 @@
 package mat64
 
 import (
+	"math"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/lapack/lapack64"
 )
@@ -14,10 +16,10 @@ import (
 // is returned. Please see the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
-//  1. If m >= n and trans == false, find x such that || a*x - b||_2 is minimized.
+//  1. If m >= n and trans == false, find x such that ||a*x - b||_2 is minimized.
 //  2. If m < n and trans == false, find the minimum norm solution of a * x = b.
 //  3. If m >= n and trans == true, find the minimum norm solution of a^T * x = b.
-//  4. If m < n and trans == true, find X such that || a*x - b||_2 is minimized.
+//  4. If m < n and trans == true, find X such that ||a*x - b||_2 is minimized.
 // The solution matrix, x, is stored in place into the receiver.
 func (m *Dense) Solve(a, b Matrix) error {
 	ar, ac := a.Dims()
@@ -45,7 +47,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 		var lu LU
 		lu.Factorize(a)
 		if lu.Det() == 0 {
-			return ErrSingular
+			return Condition(math.Inf(1))
 		}
 		m.Copy(b)
 		lapack64.Getrs(blas.NoTrans, lu.lu.mat, m.mat, lu.pivot)
@@ -59,6 +61,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 		aCopy.Clone(a)
 
 		x := getWorkspace(max(ar, ac), bc, false)
+		defer putWorkspace(x)
 		x.Copy(b)
 
 		work := make([]float64, 1)
@@ -66,7 +69,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 		work = make([]float64, int(work[0]))
 		ok := lapack64.Gels(blas.NoTrans, aCopy.mat, x.mat, work, len(work))
 		if !ok {
-			return ErrSingular
+			return Condition(math.Inf(1))
 		}
 		m.Copy(x)
 		return nil

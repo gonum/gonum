@@ -41,10 +41,7 @@ func legalSizeSameSquare(ar, ac, br, bc int) bool {
 
 // legalSizeSolve returns whether the two matrices can be used in a linear solve.
 func legalSizeSolve(ar, ac, br, bc int) bool {
-	if ar != br {
-		return false
-	}
-	return true
+	return ar == br
 }
 
 // legalTypesAll returns true for all Matrix types.

@@ -130,9 +130,9 @@ func (m *Dense) QFromQR(qr *QR) {
 // see the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
-//  If trans == false, find x such that || A*x - b||_2 is minimized.
-//  If trans == true, find the minimum norm solution of A^T * x = b.
-// The solution matrix, x, is stored in place into the receiver.
+//  If trans == false, find X such that ||A*X - b||_2 is minimized.
+//  If trans == true, find the minimum norm solution of A^T * X = b.
+// The solution matrix, X, is stored in place into the receiver.
 func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	r, c := qr.qr.Dims()
 	br, bc := b.Dims()

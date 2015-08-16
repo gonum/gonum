@@ -132,7 +132,7 @@ func (m *Dense) QFromLQ(lq *LQ) {
 //
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find the minimum norm solution of A * X = b.
-//  If trans == true, find X such that || A*X - b||_2 is minimized.
+//  If trans == true, find X such that ||A*X - b||_2 is minimized.
 // The solution matrix, X, is stored in place into the receiver.
 func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 	r, c := lq.lq.Dims()

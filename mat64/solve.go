@@ -46,19 +46,21 @@ func (m *Dense) Solve(a, b Matrix) error {
 			}
 			return nil
 		}
-		bMat, _ := untranspose(b)
-		if m == bMat {
-			var restore func()
-			m, restore = m.isolatedWorkspace(bMat)
-			defer restore()
-		}
 		// Solve using an LU decomposition.
 		var lu LU
 		lu.Factorize(a)
 		if lu.Det() == 0 {
 			return Condition(math.Inf(1))
 		}
-		m.Copy(b)
+		bMat, bTrans := untranspose(b)
+		if m == bMat && bTrans {
+			var restore func()
+			m, restore = m.isolatedWorkspace(bMat)
+			defer restore()
+		}
+		if m != bMat {
+			m.Copy(b)
+		}
 		lapack64.Getrs(blas.NoTrans, lu.lu.mat, m.mat, lu.pivot)
 		return nil
 	default:

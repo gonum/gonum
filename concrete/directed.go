@@ -19,18 +19,24 @@ type DirectedGraph struct {
 	predecessors map[int]map[int]graph.Edge
 	nodeMap      map[int]graph.Node
 
+	self, absent float64
+
 	// Add/remove convenience variables
 	maxID   int
 	freeMap map[int]struct{}
 }
 
-func NewDirectedGraph() *DirectedGraph {
+func NewDirectedGraph(self, absent float64) *DirectedGraph {
 	return &DirectedGraph{
 		successors:   make(map[int]map[int]graph.Edge),
 		predecessors: make(map[int]map[int]graph.Edge),
 		nodeMap:      make(map[int]graph.Node),
-		maxID:        0,
-		freeMap:      make(map[int]struct{}),
+
+		self:   self,
+		absent: absent,
+
+		maxID:   0,
+		freeMap: make(map[int]struct{}),
 	}
 }
 
@@ -240,13 +246,18 @@ func (g *DirectedGraph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *DirectedGraph) Weight(e graph.Edge) float64 {
-	if s, ok := g.successors[e.From().ID()]; ok {
-		if we, ok := s[e.To().ID()]; ok {
-			return we.Weight()
+func (g *DirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid {
+		return g.self, true
+	}
+	if s, ok := g.successors[xid]; ok {
+		if e, ok := s[yid]; ok {
+			return e.Weight(), true
 		}
 	}
-	return inf
+	return g.absent, false
 }
 
 func (g *DirectedGraph) Edges() []graph.Edge {

@@ -6,6 +6,7 @@ package traverse
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"sort"
 	"testing"
@@ -132,7 +133,7 @@ var breadthFirstTests = []struct {
 
 func TestBreadthFirst(t *testing.T) {
 	for i, test := range breadthFirstTests {
-		g := concrete.NewGraph()
+		g := concrete.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(concrete.Node(u)) {
@@ -220,7 +221,7 @@ var depthFirstTests = []struct {
 
 func TestDepthFirst(t *testing.T) {
 	for i, test := range depthFirstTests {
-		g := concrete.NewGraph()
+		g := concrete.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(concrete.Node(u)) {
@@ -281,7 +282,7 @@ var walkAllTests = []struct {
 
 func TestWalkAll(t *testing.T) {
 	for i, test := range walkAllTests {
-		g := concrete.NewGraph()
+		g := concrete.NewGraph(0, math.Inf(1))
 
 		for u, e := range test.g {
 			if !g.Has(concrete.Node(u)) {

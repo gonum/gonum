@@ -4,8 +4,6 @@
 
 package graph
 
-import "math"
-
 // Node is a graph node. It returns a graph-unique integer ID.
 type Node interface {
 	ID() int
@@ -65,8 +63,15 @@ type Directed interface {
 
 // Weighter defines graphs that can report edge weights.
 type Weighter interface {
-	// Weight returns the weight for the given edge.
-	Weight(Edge) float64
+	// Weight returns the weight for the edge between
+	// x and y if Edge(x, y) returns a non-nil Edge.
+	// If x and y are the same node or there is no
+	// joining edge between the two nodes the weight
+	// value returned is implementation dependent.
+	// Weight returns true if an edge exists between
+	// x and y or if x and y have the same ID, false
+	// otherwise.
+	Weight(x, y Node) (w float64, ok bool)
 }
 
 // Mutable is an interface for generalized graph mutation.
@@ -105,18 +110,6 @@ type MutableUndirected interface {
 type MutableDirected interface {
 	Directed
 	Mutable
-}
-
-// WeightFunc is a mapping between an edge and an edge weight.
-type WeightFunc func(Edge) float64
-
-// UniformCost is a WeightFunc that returns an edge cost of 1 for a non-nil Edge
-// and Inf for a nil Edge.
-func UniformCost(e Edge) float64 {
-	if e == nil {
-		return math.Inf(1)
-	}
-	return 1
 }
 
 // CopyUndirected copies nodes and edges as undirected edges from the source to the

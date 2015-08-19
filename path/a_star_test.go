@@ -153,7 +153,7 @@ func TestAStar(t *testing.T) {
 }
 
 func TestExhaustiveAStar(t *testing.T) {
-	g := concrete.NewGraph()
+	g := concrete.NewGraph(0, math.Inf(1))
 	nodes := []locatedNode{
 		{id: 1, x: 0, y: 6},
 		{id: 2, x: 1, y: 0},
@@ -235,7 +235,11 @@ func isMonotonic(g costEdgeListGraph, h Heuristic) (ok bool, at graph.Edge, goal
 		for _, edge := range g.Edges() {
 			from := edge.From()
 			to := edge.To()
-			if h(from, goal) > g.Weight(edge)+h(to, goal) {
+			w, ok := g.Weight(from, to)
+			if !ok {
+				panic("A*: unexpected invalid weight")
+			}
+			if h(from, goal) > w+h(to, goal) {
 				return false, edge, goal
 			}
 		}

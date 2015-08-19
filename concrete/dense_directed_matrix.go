@@ -12,6 +12,7 @@ import (
 // DirectedDenseGraph represents a graph such that all IDs are in a contiguous
 // block from 0 to n-1.
 type DirectedDenseGraph struct {
+	self   float64
 	absent float64
 	mat    *mat64.Dense
 }
@@ -19,8 +20,9 @@ type DirectedDenseGraph struct {
 // NewDirectedDenseGraph creates a directed dense graph with n nodes.
 // If passable is true all pairs of nodes will be connected by an edge
 // with unit cost, otherwise every node will start unconnected with
-// the cost specified by absent.
-func NewDirectedDenseGraph(n int, passable bool, absent float64) *DirectedDenseGraph {
+// the cost specified by absent. The self parameter specifies the cost
+// of self connection.
+func NewDirectedDenseGraph(n int, passable bool, self, absent float64) *DirectedDenseGraph {
 	mat := make([]float64, n*n)
 	v := 1.
 	if !passable {
@@ -29,11 +31,18 @@ func NewDirectedDenseGraph(n int, passable bool, absent float64) *DirectedDenseG
 	for i := range mat {
 		mat[i] = v
 	}
-	return &DirectedDenseGraph{mat: mat64.NewDense(n, n, mat), absent: absent}
+	return &DirectedDenseGraph{
+		mat:    mat64.NewDense(n, n, mat),
+		self:   self,
+		absent: absent,
+	}
 }
 
 func (g *DirectedDenseGraph) Has(n graph.Node) bool {
-	id := n.ID()
+	return g.has(n.ID())
+}
+
+func (g *DirectedDenseGraph) has(id int) bool {
 	r, _ := g.mat.Dims()
 	return 0 <= id && id < r
 }
@@ -112,8 +121,16 @@ func (g *DirectedDenseGraph) HasEdgeFromTo(u, v graph.Node) bool {
 	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
 }
 
-func (g *DirectedDenseGraph) Weight(e graph.Edge) float64 {
-	return g.mat.At(e.From().ID(), e.To().ID())
+func (g *DirectedDenseGraph) Weight(x, y graph.Node) (w float64, ok bool) {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid {
+		return 0, true
+	}
+	if g.has(xid) && g.has(yid) {
+		return g.mat.At(xid, yid), true
+	}
+	return g.absent, false
 }
 
 func (g *DirectedDenseGraph) SetEdgeWeight(e graph.Edge) {

@@ -39,7 +39,7 @@ var shortestPathTests = []struct {
 	// Positive weighted graphs.
 	{
 		name: "empty directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(1)},
 		weight: math.Inf(1),
@@ -48,7 +48,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "empty undirected",
-		g:    func() graph.Mutable { return concrete.NewGraph() },
+		g:    func() graph.Mutable { return concrete.NewGraph(0, math.Inf(1)) },
 
 		query:  concrete.Edge{F: concrete.Node(0), T: concrete.Node(1)},
 		weight: math.Inf(1),
@@ -57,7 +57,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "one edge directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
 		},
@@ -73,7 +73,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "one edge self directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
 		},
@@ -89,7 +89,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "one edge undirected",
-		g:    func() graph.Mutable { return concrete.NewGraph() },
+		g:    func() graph.Mutable { return concrete.NewGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
 		},
@@ -105,7 +105,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "two paths directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -124,7 +124,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "two paths undirected",
-		g:    func() graph.Mutable { return concrete.NewGraph() },
+		g:    func() graph.Mutable { return concrete.NewGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node(0), T: concrete.Node(2), W: 2},
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -143,7 +143,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "confounding paths directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -177,7 +177,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "confounding paths undirected",
-		g:    func() graph.Mutable { return concrete.NewGraph() },
+		g:    func() graph.Mutable { return concrete.NewGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -211,7 +211,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "confounding paths directed 2-step",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -246,7 +246,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "confounding paths undirected 2-step",
-		g:    func() graph.Mutable { return concrete.NewGraph() },
+		g:    func() graph.Mutable { return concrete.NewGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -281,7 +281,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight cycle directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -305,7 +305,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight cycle^2 directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -332,7 +332,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight cycle^2 confounding directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -362,7 +362,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight cycle^3 directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -392,7 +392,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight 3·cycle^2 confounding directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -428,7 +428,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight reversed 3·cycle^2 confounding directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: concrete.Node(0), T: concrete.Node(1), W: 1},
@@ -464,7 +464,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight |V|·cycle^(n/|V|) directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: func() []concrete.Edge {
 			e := []concrete.Edge{
 				// Add a path from 0->4 of weight 4
@@ -497,7 +497,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight n·cycle directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: func() []concrete.Edge {
 			e := []concrete.Edge{
 				// Add a path from 0->4 of weight 4
@@ -530,7 +530,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "zero-weight bi-directional tree with single exit directed",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: func() []concrete.Edge {
 			e := []concrete.Edge{
 				// Add a path from 0->4 of weight 4
@@ -578,7 +578,7 @@ var shortestPathTests = []struct {
 	// Negative weighted graphs.
 	{
 		name: "one edge directed negative",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node(0), T: concrete.Node(1), W: -1},
 		},
@@ -595,7 +595,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "one edge undirected negative",
-		g:    func() graph.Mutable { return concrete.NewGraph() },
+		g:    func() graph.Mutable { return concrete.NewGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node(0), T: concrete.Node(1), W: -1},
 		},
@@ -606,7 +606,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "wp graph negative", // http://en.wikipedia.org/w/index.php?title=Johnson%27s_algorithm&oldid=564595231
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node('w'), T: concrete.Node('z'), W: 2},
 			{F: concrete.Node('x'), T: concrete.Node('w'), W: 6},
@@ -629,7 +629,7 @@ var shortestPathTests = []struct {
 	},
 	{
 		name: "roughgarden negative",
-		g:    func() graph.Mutable { return concrete.NewDirectedGraph() },
+		g:    func() graph.Mutable { return concrete.NewDirectedGraph(0, math.Inf(1)) },
 		edges: []concrete.Edge{
 			{F: concrete.Node('a'), T: concrete.Node('b'), W: -2},
 			{F: concrete.Node('b'), T: concrete.Node('c'), W: -1},

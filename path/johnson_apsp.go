@@ -13,7 +13,7 @@ import (
 )
 
 // JohnsonAllPaths returns a shortest-path tree for shortest paths in the graph g.
-// If the graph does not implement graph.Weighter, graph.UniformCost is used.
+// If the graph does not implement graph.Weighter, UniformCost is used.
 //
 // The time complexity of JohnsonAllPaths is O(|V|.|E|+|V|^2.log|V|).
 func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
@@ -22,10 +22,10 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 		from:   g.From,
 		edgeTo: g.Edge,
 	}
-	if g, ok := g.(graph.Weighter); ok {
-		jg.weight = g.Weight
+	if wg, ok := g.(graph.Weighter); ok {
+		jg.weight = wg.Weight
 	} else {
-		jg.weight = graph.UniformCost
+		jg.weight = UniformCost(g)
 	}
 
 	paths = newAllShortest(g.Nodes(), false)
@@ -70,7 +70,7 @@ type johnsonWeightAdjuster struct {
 
 	from   func(graph.Node) []graph.Node
 	edgeTo func(graph.Node, graph.Node) graph.Edge
-	weight graph.WeightFunc
+	weight Weighting
 
 	bellmanFord bool
 	adjustBy    Shortest
@@ -114,18 +114,19 @@ func (g johnsonWeightAdjuster) Edge(u, v graph.Node) graph.Edge {
 	return g.edgeTo(u, v)
 }
 
-func (g johnsonWeightAdjuster) Weight(e graph.Edge) float64 {
+func (g johnsonWeightAdjuster) Weight(x, y graph.Node) (w float64, ok bool) {
 	if g.bellmanFord {
 		switch g.q {
-		case e.From().ID():
-			return 0
-		case e.To().ID():
-			return math.Inf(1)
+		case x.ID():
+			return 0, true
+		case y.ID():
+			return math.Inf(1), false
 		default:
-			return g.weight(e)
+			return g.weight(x, y)
 		}
 	}
-	return g.weight(e) + g.adjustBy.WeightTo(e.From()) - g.adjustBy.WeightTo(e.To())
+	w, ok = g.weight(x, y)
+	return w + g.adjustBy.WeightTo(x) - g.adjustBy.WeightTo(y), ok
 }
 
 func (johnsonWeightAdjuster) HasEdge(_, _ graph.Node) bool {

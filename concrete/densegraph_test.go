@@ -18,7 +18,7 @@ var (
 )
 
 func TestBasicDenseImpassable(t *testing.T) {
-	dg := NewUndirectedDenseGraph(5, false, math.Inf(1))
+	dg := NewUndirectedDenseGraph(5, false, 0, math.Inf(1))
 	if dg == nil {
 		t.Fatal("Directed graph could not be made")
 	}
@@ -41,7 +41,7 @@ func TestBasicDenseImpassable(t *testing.T) {
 }
 
 func TestBasicDensePassable(t *testing.T) {
-	dg := NewUndirectedDenseGraph(5, true, math.Inf(1))
+	dg := NewUndirectedDenseGraph(5, true, 0, math.Inf(1))
 	if dg == nil {
 		t.Fatal("Directed graph could not be made")
 	}
@@ -64,7 +64,7 @@ func TestBasicDensePassable(t *testing.T) {
 }
 
 func TestDirectedDenseAddRemove(t *testing.T) {
-	dg := NewDirectedDenseGraph(10, false, math.Inf(1))
+	dg := NewDirectedDenseGraph(10, false, 0, math.Inf(1))
 	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2), W: 1})
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
@@ -86,14 +86,17 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 	// I figure we've torture tested From/To at this point
 	// so we'll just use the bool functions now
 	if dg.Edge(Node(0), Node(2)) == nil {
-		t.Error("Adding directed edge didn't change successor back")
-	} else if c1, c2 := dg.Weight(Edge{F: Node(2), T: Node(0)}), dg.Weight(Edge{F: Node(0), T: Node(2)}); math.Abs(c1-c2) < .000001 {
+		t.Fatal("Adding directed edge didn't change successor back")
+	}
+	c1, _ := dg.Weight(Node(2), Node(0))
+	c2, _ := dg.Weight(Node(0), Node(2))
+	if c1 == c2 {
 		t.Error("Adding directed edge affected cost in undirected manner")
 	}
 }
 
 func TestUndirectedDenseAddRemove(t *testing.T) {
-	dg := NewUndirectedDenseGraph(10, false, math.Inf(1))
+	dg := NewUndirectedDenseGraph(10, false, 0, math.Inf(1))
 	dg.SetEdgeWeight(Edge{F: Node(0), T: Node(2)})
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
@@ -114,7 +117,7 @@ func (n byID) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
 func (n byID) Less(i, j int) bool { return n[i].ID() < n[j].ID() }
 
 func TestDenseLists(t *testing.T) {
-	dg := NewDirectedDenseGraph(15, true, math.Inf(1))
+	dg := NewDirectedDenseGraph(15, true, 0, math.Inf(1))
 	nodes := dg.Nodes()
 
 	if len(nodes) != 15 {

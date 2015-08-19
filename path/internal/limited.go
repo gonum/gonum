@@ -158,7 +158,10 @@ func (l *LimitedVisionGrid) NodeAt(r, c int) graph.Node {
 
 // Has returns whether n is a node in the grid.
 func (l *LimitedVisionGrid) Has(n graph.Node) bool {
-	id := n.ID()
+	return l.has(n.ID())
+}
+
+func (l *LimitedVisionGrid) has(id int) bool {
 	return id >= 0 && id < len(l.Grid.open)
 }
 
@@ -231,17 +234,23 @@ func (l *LimitedVisionGrid) EdgeBetween(u, v graph.Node) graph.Edge {
 }
 
 // Weight returns the weight of the given edge.
-func (l *LimitedVisionGrid) Weight(e graph.Edge) float64 {
-	if e := l.EdgeBetween(e.From(), e.To()); e != nil {
+func (l *LimitedVisionGrid) Weight(x, y graph.Node) (w float64, ok bool) {
+	if x.ID() == y.ID() {
+		return 0, true
+	}
+	if !l.HasEdge(x, y) {
+		return math.Inf(1), false
+	}
+	if e := l.EdgeBetween(x, y); e != nil {
 		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
-			return 1
+			return 1, true
 		}
 		ux, uy := l.XY(e.From())
 		vx, vy := l.XY(e.To())
-		return math.Hypot(ux-vx, uy-vy)
+		return math.Hypot(ux-vx, uy-vy), true
 
 	}
-	return math.Inf(1)
+	return math.Inf(1), true
 }
 
 // String returns a string representation of the grid.

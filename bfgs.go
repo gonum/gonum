@@ -151,10 +151,10 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	copy(b.grad, loc.Gradient)
 
 	// Compute the new search direction
-	dirmat := mat64.NewDense(b.dim, 1, dir)
-	gradmat := mat64.NewDense(b.dim, 1, loc.Gradient)
+	d := mat64.NewVector(b.dim, dir)
+	g := mat64.NewVector(b.dim, loc.Gradient)
 
-	dirmat.Mul(b.invHess, gradmat) // new direction stored in place
+	d.MulVec(b.invHess, g) // new direction stored in place
 	floats.Scale(-1, dir)
 	return 1
 }

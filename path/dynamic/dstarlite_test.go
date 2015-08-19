@@ -46,7 +46,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			d = NewDStarLite(test.query.From(), test.query.To(), g.(graph.Graph), path.NullHeuristic, concrete.NewDirectedGraph())
+			d = NewDStarLite(test.query.From(), test.query.To(), g.(graph.Graph), path.NullHeuristic, concrete.NewDirectedGraph(0, math.Inf(1)))
 		}()
 		if panicked || test.negative {
 			if !test.negative {
@@ -578,7 +578,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 				return test.heuristic(ax-bx, ay-by)
 			}
 
-			world := concrete.NewDirectedGraph()
+			world := concrete.NewDirectedGraph(0, math.Inf(1))
 			d := NewDStarLite(test.s, test.t, l, heuristic, world)
 			var (
 				dp  *dumper

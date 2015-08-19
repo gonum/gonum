@@ -11,8 +11,6 @@ import "math"
 // type int.
 const maxInt int = int(^uint(0) >> 1)
 
-var inf = math.Inf(1)
-
 func isSame(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }

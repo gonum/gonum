@@ -153,7 +153,7 @@ func TestAStar(t *testing.T) {
 }
 
 func TestExhaustiveAStar(t *testing.T) {
-	g := concrete.NewGraph()
+	g := concrete.NewGraph(0, math.Inf(1))
 	nodes := []locatedNode{
 		{id: 1, x: 0, y: 6},
 		{id: 2, x: 1, y: 0},

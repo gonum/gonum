@@ -43,7 +43,7 @@ var hitsTests = []struct {
 
 func TestHITS(t *testing.T) {
 	for i, test := range hitsTests {
-		g := concrete.NewDirectedGraph()
+		g := concrete.NewDirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(concrete.Node(u)) {

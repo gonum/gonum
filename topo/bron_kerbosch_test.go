@@ -5,6 +5,7 @@
 package topo
 
 import (
+	"math"
 	"reflect"
 	"sort"
 	"testing"
@@ -50,7 +51,7 @@ var vOrderTests = []struct {
 
 func TestVertexOrdering(t *testing.T) {
 	for i, test := range vOrderTests {
-		g := concrete.NewGraph()
+		g := concrete.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(concrete.Node(u)) {
@@ -135,7 +136,7 @@ var bronKerboschTests = []struct {
 
 func TestBronKerbosch(t *testing.T) {
 	for i, test := range bronKerboschTests {
-		g := concrete.NewGraph()
+		g := concrete.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(concrete.Node(u)) {

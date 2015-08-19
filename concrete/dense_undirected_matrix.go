@@ -12,6 +12,7 @@ import (
 // UndirectedDenseGraph represents a graph such that all IDs are in a contiguous
 // block from 0 to n-1.
 type UndirectedDenseGraph struct {
+	self   float64
 	absent float64
 	mat    *mat64.SymDense
 }
@@ -19,8 +20,9 @@ type UndirectedDenseGraph struct {
 // NewUndirectedDenseGraph creates an undirected dense graph with n nodes.
 // If passable is true all pairs of nodes will be connected by an edge
 // with unit cost, otherwise every node will start unconnected with
-// the cost specified by absent.
-func NewUndirectedDenseGraph(n int, passable bool, absent float64) *UndirectedDenseGraph {
+// the cost specified by absent. The self parameter specifies the cost
+// of self connection.
+func NewUndirectedDenseGraph(n int, passable bool, self, absent float64) *UndirectedDenseGraph {
 	mat := make([]float64, n*n)
 	v := 1.
 	if !passable {
@@ -29,7 +31,11 @@ func NewUndirectedDenseGraph(n int, passable bool, absent float64) *UndirectedDe
 	for i := range mat {
 		mat[i] = v
 	}
-	return &UndirectedDenseGraph{mat: mat64.NewSymDense(n, mat), absent: absent}
+	return &UndirectedDenseGraph{
+		mat:    mat64.NewSymDense(n, mat),
+		self:   self,
+		absent: absent,
+	}
 }
 
 func (g *UndirectedDenseGraph) Has(n graph.Node) bool {
@@ -114,7 +120,7 @@ func (g *UndirectedDenseGraph) Weight(x, y graph.Node) (w float64, ok bool) {
 	xid := x.ID()
 	yid := y.ID()
 	if xid == yid {
-		return 0, true
+		return g.self, true
 	}
 	if g.has(xid) && g.has(yid) {
 		return g.mat.At(xid, yid), true

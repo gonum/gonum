@@ -5,6 +5,7 @@
 package topo
 
 import (
+	"math"
 	"reflect"
 	"sort"
 	"testing"
@@ -15,7 +16,7 @@ import (
 )
 
 func TestIsPath(t *testing.T) {
-	dg := concrete.NewDirectedGraph()
+	dg := concrete.NewDirectedGraph(0, math.Inf(1))
 	if !IsPathIn(dg, nil) {
 		t.Error("IsPath returns false on nil path")
 	}
@@ -45,7 +46,7 @@ func TestIsPath(t *testing.T) {
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	ug := concrete.NewGraph()
+	ug := concrete.NewGraph(0, math.Inf(1))
 	ug.SetEdge(concrete.Edge{F: p[1], T: p[0], W: 1})
 	ug.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1})
 	if !IsPathIn(dg, p) {
@@ -69,7 +70,7 @@ var connectedComponentTests = []struct {
 
 func TestConnectedComponents(t *testing.T) {
 	for i, test := range connectedComponentTests {
-		g := concrete.NewGraph()
+		g := concrete.NewGraph(0, math.Inf(1))
 
 		for u, e := range test.g {
 			if !g.Has(concrete.Node(u)) {

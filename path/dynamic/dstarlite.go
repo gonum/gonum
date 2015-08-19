@@ -118,7 +118,7 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 }
 
 // edgeWeight is a helper function that returns the weight of the edge between
-// two connected nodes, u and v using the provided weight function. It panics
+// two connected nodes, u and v, using the provided weight function. It panics
 // if there is no edge between u and v.
 func edgeWeight(weight path.Weighting, u, v graph.Node) float64 {
 	w, ok := weight(u, v)

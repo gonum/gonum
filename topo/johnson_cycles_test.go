@@ -5,6 +5,7 @@
 package topo
 
 import (
+	"math"
 	"reflect"
 	"sort"
 	"testing"
@@ -85,7 +86,7 @@ var cyclesInTests = []struct {
 
 func TestCyclesIn(t *testing.T) {
 	for i, test := range cyclesInTests {
-		g := concrete.NewDirectedGraph()
+		g := concrete.NewDirectedGraph(0, math.Inf(1))
 		g.AddNode(concrete.Node(-10)) // Make sure we test graphs with sparse IDs.
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.

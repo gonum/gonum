@@ -64,10 +64,10 @@ type Directed interface {
 // Weighter defines graphs that can report edge weights.
 type Weighter interface {
 	// Weight returns the weight for the edge between
-	// x and y if an edge exists between them. If x and
-	// x are the same node or there is no joining edge
-	// the weight value returned is implementation
-	// dependent.
+	// x and y if Edge(x, y) returns a non-nil Edge.
+	// If x and y are the same node or there is no
+	// joining edge between the two nodes the weight
+	// value returned is implementation dependent.
 	// Weight returns true if an edge exists between
 	// x and y or if x and y have the same ID, false
 	// otherwise.

@@ -42,17 +42,24 @@ type Graph struct {
 	neighbors map[int]map[int]graph.Edge
 	nodeMap   map[int]graph.Node
 
+	self, absent float64
+
 	// Node add/remove convenience vars
 	maxID   int
 	freeMap map[int]struct{}
 }
 
-func NewGraph() *Graph {
+// NewGraph returns a Graph with the specified self and absent edge costs.
+func NewGraph(self, absent float64) *Graph {
 	return &Graph{
 		neighbors: make(map[int]map[int]graph.Edge),
 		nodeMap:   make(map[int]graph.Node),
-		maxID:     0,
-		freeMap:   make(map[int]struct{}),
+
+		self:   self,
+		absent: absent,
+
+		maxID:   0,
+		freeMap: make(map[int]struct{}),
 	}
 }
 
@@ -212,14 +219,14 @@ func (g *Graph) Weight(x, y graph.Node) (w float64, ok bool) {
 	xid := x.ID()
 	yid := y.ID()
 	if xid == yid {
-		return 0, true
+		return g.self, true
 	}
 	if n, ok := g.neighbors[xid]; ok {
 		if e, ok := n[yid]; ok {
 			return e.Weight(), true
 		}
 	}
-	return inf, false
+	return g.absent, false
 }
 
 func (g *Graph) Edges() []graph.Edge {

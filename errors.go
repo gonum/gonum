@@ -4,10 +4,7 @@
 
 package optimize
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 var (
 	// ErrInf signifies the initial function value is Inf.
@@ -38,13 +35,3 @@ var (
 	// to floating-point arithmetic.
 	ErrNoProgress = errors.New("linesearch: no change in location after linesearch step")
 )
-
-// ErrMismatch signifies that the optimization function did not implement the
-// interfaces necessary for the supplied optimization method.
-type ErrMismatch struct {
-	Type EvaluationType
-}
-
-func (e ErrMismatch) Error() string {
-	return fmt.Sprintf("optimizer wanted to use evaluation type %v, but the user supplied function does not implement it", e.Type)
-}

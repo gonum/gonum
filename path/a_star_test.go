@@ -12,6 +12,7 @@ import (
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/path/internal"
+	"github.com/gonum/graph/path/internal/testgraphs"
 	"github.com/gonum/graph/topo"
 )
 
@@ -248,9 +249,9 @@ func isMonotonic(g costEdgeListGraph, h Heuristic) (ok bool, at graph.Edge, goal
 }
 
 func TestAStarNullHeuristic(t *testing.T) {
-	for _, test := range shortestPathTests {
-		g := test.g()
-		for _, e := range test.edges {
+	for _, test := range testgraphs.ShortestPathTests {
+		g := test.Graph()
+		for _, e := range test.Edges {
 			g.SetEdge(e)
 		}
 
@@ -263,38 +264,38 @@ func TestAStarNullHeuristic(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			pt, _ = AStar(test.query.From(), test.query.To(), g.(graph.Graph), nil)
+			pt, _ = AStar(test.Query.From(), test.Query.To(), g.(graph.Graph), nil)
 		}()
-		if panicked || test.negative {
-			if !test.negative {
-				t.Errorf("%q: unexpected panic", test.name)
+		if panicked || test.HasNegativeWeight {
+			if !test.HasNegativeWeight {
+				t.Errorf("%q: unexpected panic", test.Name)
 			}
 			if !panicked {
-				t.Errorf("%q: expected panic for negative edge weight", test.name)
+				t.Errorf("%q: expected panic for negative edge weight", test.Name)
 			}
 			continue
 		}
 
-		if pt.From().ID() != test.query.From().ID() {
-			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", pt.From().ID(), test.query.From().ID())
+		if pt.From().ID() != test.Query.From().ID() {
+			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", pt.From().ID(), test.Query.From().ID())
 		}
 
-		p, weight := pt.To(test.query.To())
-		if weight != test.weight {
+		p, weight := pt.To(test.Query.To())
+		if weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
-				test.name, weight, test.weight)
+				test.Name, weight, test.Weight)
 		}
-		if weight := pt.WeightTo(test.query.To()); weight != test.weight {
+		if weight := pt.WeightTo(test.Query.To()); weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
-				test.name, weight, test.weight)
+				test.Name, weight, test.Weight)
 		}
 
 		var got []int
 		for _, n := range p {
 			got = append(got, n.ID())
 		}
-		ok := len(got) == 0 && len(test.want) == 0
-		for _, sp := range test.want {
+		ok := len(got) == 0 && len(test.WantPaths) == 0
+		for _, sp := range test.WantPaths {
 			if reflect.DeepEqual(got, sp) {
 				ok = true
 				break
@@ -302,13 +303,13 @@ func TestAStarNullHeuristic(t *testing.T) {
 		}
 		if !ok {
 			t.Errorf("%q: unexpected shortest path:\ngot: %v\nwant from:%v",
-				test.name, p, test.want)
+				test.Name, p, test.WantPaths)
 		}
 
-		np, weight := pt.To(test.none.To())
-		if pt.From().ID() == test.none.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
+		np, weight := pt.To(test.NoPathFor.To())
+		if pt.From().ID() == test.NoPathFor.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
 			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f\nwant:path=<nil> weight=+Inf",
-				test.name, np, weight)
+				test.Name, np, weight)
 		}
 	}
 }

@@ -119,6 +119,9 @@ func (Implementation) Srotm(n int, x []float32, incX int, y []float32, incY int,
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
 		panic("blas: illegal blas.Flag value")
 	}
+	if n == 0 {
+		return
+	}
 	pi := srotmParams{
 		flag: float32(p.Flag),
 		h:    p.H,
@@ -153,6 +156,9 @@ func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int,
 	if p.Flag < blas.Identity || p.Flag > blas.Diagonal {
 		panic("blas: illegal blas.Flag value")
 	}
+	if n == 0 {
+		return
+	}
 	pi := drotmParams{
 		flag: float64(p.Flag),
 		h:    p.H,
@@ -175,6 +181,9 @@ func (Implementation) Cdotu(n int, x []complex64, incX int, y []complex64, incY 
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
+	if n == 0 {
+		return 0
+	}
 	C.cblas_cdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
 	return dotu
 }
@@ -193,6 +202,9 @@ func (Implementation) Cdotc(n int, x []complex64, incX int, y []complex64, incY 
 	}
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
+	}
+	if n == 0 {
+		return 0
 	}
 	C.cblas_cdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
 	return dotc
@@ -213,6 +225,9 @@ func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, inc
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
+	if n == 0 {
+		return 0
+	}
 	C.cblas_zdotu_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotu))
 	return dotu
 }
@@ -232,9 +247,14 @@ func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, inc
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic("blas: y index out of range")
 	}
+	if n == 0 {
+		return 0
+	}
 	C.cblas_zdotc_sub(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&dotc))
 	return dotc
 }
+
+// Generated cases ...
 EOH
 
 printf $goblas <<EOH unless $excludeAtlas;
@@ -307,7 +327,7 @@ sub processProto {
 	my $complexType = $func;
 	$complexType =~ s/.*_[isd]?([zc]).*/$1/;
 	print $goblas "func (Implementation) ".Gofunc($func)."(".processParamToGo($func, $paramList, $complexType).") ".$GoRet."{\n";
-	print $goblas processParamToChecks($func, $paramList);
+	print $goblas processParamToChecks($func, $paramList, $GoRet);
 	print $goblas "\t";
 	if ($ret ne 'void') {
 		chop($GoRet);
@@ -404,6 +424,7 @@ sub processParamToGo {
 sub processParamToChecks {
 	my $func = shift;
 	my $paramList = shift;
+	my $retType = shift;
 	my @processed;
 	my @params = split ',', $paramList;
 	my %arrayArgs;
@@ -533,6 +554,16 @@ sub processParamToChecks {
 			push @processed, "if lda*(rowA-1)+colA > len(a) || lda < max(1, colA) { panic(\"blas: index of a out of range\") }";
 			push @processed, "if ldb*(rowB-1)+colB > len(b) || ldb < max(1, colB) { panic(\"blas: index of b out of range\") }";
 			push @processed, "if ldc*(m-1)+n > len(c) || ldc < max(1, n) { panic(\"blas: index of c out of range\") }";
+		}
+	}
+
+	if ($scalarArgs{'n'} && !defined($scalarArgs{'lda'}) && !defined($scalarArgs{'ldb'})) {
+		if ($retType eq "int ") {
+			push @processed, "if n == 0 { return -1 }";
+		} elsif ($retType =~ m/(?:float|complex)/) {
+			push @processed, "if n == 0 { return 0 }";
+		} else {
+			push @processed, "if n == 0 { return }";
 		}
 	}
 

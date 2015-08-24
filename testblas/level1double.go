@@ -382,6 +382,26 @@ var DoubleOneVectorCases = []DoubleOneVectorCase{
 			},
 		},
 	},
+	{
+		Name:   "Empty",
+		X:      []float64{},
+		Incx:   1,
+		N:      0,
+		Panic:  false,
+		Dasum:  0,
+		Dnrm2:  0,
+		Idamax: -1,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{},
+			},
+		},
+	},
 }
 
 type DoubleTwoVectorCase struct {

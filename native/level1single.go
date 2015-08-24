@@ -52,12 +52,18 @@ func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
 				continue
 			}
 			absxi := math.Abs(v)
+			if math.IsNaN(absxi) {
+				return math.NaN()
+			}
 			if scale < absxi {
 				sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)
 				scale = absxi
 			} else {
 				sumSquares = sumSquares + (absxi/scale)*(absxi/scale)
 			}
+		}
+		if math.IsInf(scale, 1) {
+			return math.Inf(1)
 		}
 		return scale * math.Sqrt(sumSquares)
 	}
@@ -67,12 +73,18 @@ func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
 			continue
 		}
 		absxi := math.Abs(val)
+		if math.IsNaN(absxi) {
+			return math.NaN()
+		}
 		if scale < absxi {
 			sumSquares = 1 + sumSquares*(scale/absxi)*(scale/absxi)
 			scale = absxi
 		} else {
 			sumSquares = sumSquares + (absxi/scale)*(absxi/scale)
 		}
+	}
+	if math.IsInf(scale, 1) {
+		return math.Inf(1)
 	}
 	return scale * math.Sqrt(sumSquares)
 }

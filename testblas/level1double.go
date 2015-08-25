@@ -6,7 +6,11 @@
 package testblas
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/gonum/blas"
+	"github.com/gonum/floats"
 
 	"math"
 	"testing"
@@ -399,6 +403,66 @@ var DoubleOneVectorCases = []DoubleOneVectorCase{
 			{
 				Alpha: 0,
 				Ans:   []float64{},
+			},
+		},
+	},
+	{
+		Name:   "MultiInf",
+		X:      []float64{5, math.Inf(1), math.Inf(-1), 8, 9},
+		Incx:   1,
+		N:      5,
+		Panic:  false,
+		Dasum:  math.Inf(1),
+		Dnrm2:  math.Inf(1),
+		Idamax: 1,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{-10, math.Inf(-1), math.Inf(1), -16, -18},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{0, 0, 0, 0, 0},
+			},
+		},
+	},
+	{
+		Name:   "NaNInf",
+		X:      []float64{5, math.NaN(), math.Inf(-1), 8, 9},
+		Incx:   1,
+		N:      5,
+		Panic:  false,
+		Dasum:  math.NaN(),
+		Dnrm2:  math.NaN(),
+		Idamax: 2,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{-10, math.NaN(), math.Inf(1), -16, -18},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{0, 0, 0, 0, 0},
+			},
+		},
+	},
+	{
+		Name:   "InfNaN",
+		X:      []float64{5, math.Inf(1), math.NaN(), 8, 9},
+		Incx:   1,
+		N:      5,
+		Panic:  false,
+		Dasum:  math.NaN(),
+		Dnrm2:  math.NaN(),
+		Idamax: 1,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{-10, math.Inf(-1), math.NaN(), -16, -18},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{0, 0, 0, 0, 0},
 			},
 		},
 	},
@@ -1196,7 +1260,12 @@ func IdamaxTest(t *testing.T, blasser Idamaxer) {
 		}
 		v := idamax(c.N, c.X, c.Incx)
 		if v != c.Idamax {
-			t.Errorf("idamax: mismatch %v: expected %v, found %v", c.Name, c.Idamax, v)
+			s := fmt.Sprintf("idamax: mismatch %v: expected %v, found %v", c.Name, c.Idamax, v)
+			if floats.HasNaN(c.X) {
+				log.Println(s)
+			} else {
+				t.Errorf(s)
+			}
 		}
 	}
 }

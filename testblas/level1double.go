@@ -407,6 +407,46 @@ var DoubleOneVectorCases = []DoubleOneVectorCase{
 		},
 	},
 	{
+		Name:   "EmptyZeroInc",
+		X:      []float64{},
+		Incx:   0,
+		N:      0,
+		Panic:  true,
+		Dasum:  0,
+		Dnrm2:  0,
+		Idamax: -1,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{},
+			},
+		},
+	},
+	{
+		Name:   "EmptyReverse",
+		X:      []float64{},
+		Incx:   -1,
+		N:      0,
+		Panic:  false,
+		Dasum:  0,
+		Dnrm2:  0,
+		Idamax: -1,
+		DscalCases: []DScalCase{
+			{
+				Alpha: -2,
+				Ans:   []float64{},
+			},
+			{
+				Alpha: 0,
+				Ans:   []float64{},
+			},
+		},
+	},
+	{
 		Name:   "MultiInf",
 		X:      []float64{5, math.Inf(1), math.Inf(-1), 8, 9},
 		Incx:   1,
@@ -1171,6 +1211,138 @@ var DoubleTwoVectorCases = []DoubleTwoVectorCase{
 				},
 				XAns: []float64{10, 15, -6, 3, 14, 7},
 				YAns: []float64{8, -2, 4, 7, 6, -3, -4, 10},
+			},
+		},
+	},
+	{
+		Name:  "Empty",
+		X:     []float64{},
+		Y:     []float64{},
+		Incx:  1,
+		Incy:  1,
+		N:     0,
+		Panic: false,
+		DaxpyCases: []DaxpyCase{
+			{
+				Alpha: 2,
+				Ans:   []float64{},
+			},
+		},
+		DrotCases: []DrotCase{
+			{
+				C:    math.Cos(25 * math.Pi / 180),
+				S:    math.Sin(25 * math.Pi / 180),
+				XAns: []float64{},
+				YAns: []float64{},
+			},
+		},
+		DrotmCases: []DrotmCase{
+			{
+				P: blas.DrotmParams{
+					Flag: blas.Rescaling,
+					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
+				},
+				XAns: []float64{},
+				YAns: []float64{},
+			},
+		},
+	},
+	{
+		Name:  "EmptyZeroIncX",
+		X:     []float64{},
+		Y:     []float64{},
+		Incx:  0,
+		Incy:  1,
+		N:     0,
+		Panic: true,
+		DaxpyCases: []DaxpyCase{
+			{
+				Alpha: 2,
+				Ans:   []float64{},
+			},
+		},
+		DrotCases: []DrotCase{
+			{
+				C:    math.Cos(25 * math.Pi / 180),
+				S:    math.Sin(25 * math.Pi / 180),
+				XAns: []float64{},
+				YAns: []float64{},
+			},
+		},
+		DrotmCases: []DrotmCase{
+			{
+				P: blas.DrotmParams{
+					Flag: blas.Rescaling,
+					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
+				},
+				XAns: []float64{},
+				YAns: []float64{},
+			},
+		},
+	},
+	{
+		Name:  "EmptyZeroIncY",
+		X:     []float64{},
+		Y:     []float64{},
+		Incx:  1,
+		Incy:  0,
+		N:     0,
+		Panic: true,
+		DaxpyCases: []DaxpyCase{
+			{
+				Alpha: 2,
+				Ans:   []float64{},
+			},
+		},
+		DrotCases: []DrotCase{
+			{
+				C:    math.Cos(25 * math.Pi / 180),
+				S:    math.Sin(25 * math.Pi / 180),
+				XAns: []float64{},
+				YAns: []float64{},
+			},
+		},
+		DrotmCases: []DrotmCase{
+			{
+				P: blas.DrotmParams{
+					Flag: blas.Rescaling,
+					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
+				},
+				XAns: []float64{},
+				YAns: []float64{},
+			},
+		},
+	},
+	{
+		Name:  "EmptyReverse",
+		X:     []float64{},
+		Y:     []float64{},
+		Incx:  -1,
+		Incy:  -1,
+		N:     0,
+		Panic: false,
+		DaxpyCases: []DaxpyCase{
+			{
+				Alpha: 2,
+				Ans:   []float64{},
+			},
+		},
+		DrotCases: []DrotCase{
+			{
+				C:    math.Cos(25 * math.Pi / 180),
+				S:    math.Sin(25 * math.Pi / 180),
+				XAns: []float64{},
+				YAns: []float64{},
+			},
+		},
+		DrotmCases: []DrotmCase{
+			{
+				P: blas.DrotmParams{
+					Flag: blas.Rescaling,
+					H:    [4]float64{0.9, 0.1, -0.1, 0.5},
+				},
+				XAns: []float64{},
+				YAns: []float64{},
 			},
 		},
 	},

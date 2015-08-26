@@ -11,14 +11,17 @@ import (
 // Ddot computes the dot product of the two vectors
 //  \sum_i x[i]*y[i]
 func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
-	if n < 0 {
-		panic(negativeN)
-	}
 	if incX == 0 {
 		panic(zeroIncX)
 	}
 	if incY == 0 {
 		panic(zeroIncY)
+	}
+	if n <= 0 {
+		if n == 0 {
+			return 0
+		}
+		panic(negativeN)
 	}
 	if incX == 1 && incY == 1 {
 		if len(x) < n {

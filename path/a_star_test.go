@@ -226,12 +226,7 @@ func (e weightedEdge) From() graph.Node { return e.from }
 func (e weightedEdge) To() graph.Node   { return e.to }
 func (e weightedEdge) Weight() float64  { return e.cost }
 
-type costEdgeListGraph interface {
-	graph.Weighter
-	EdgeListerGraph
-}
-
-func isMonotonic(g costEdgeListGraph, h Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
+func isMonotonic(g UndirectedWeightLister, h Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
 	for _, goal := range g.Nodes() {
 		for _, edge := range g.Edges() {
 			from := edge.From()

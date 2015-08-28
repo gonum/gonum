@@ -142,7 +142,7 @@ type keyFloatVal struct {
 	val  float64
 }
 
-func (kv keyFloatVal) String() string { return fmt.Sprintf("%d:%.*f", kv.key, kv.prec, kv.val) }
+func (kv keyFloatVal) String() string { return fmt.Sprintf("%c:%.*f", kv.key+'A', kv.prec, kv.val) }
 
 type orderedFloatsMap []keyFloatVal
 

@@ -122,17 +122,11 @@ func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int]float64 {
 				continue
 			}
 
-			sID := s.ID()
-			tID := t.ID()
-
 			// If we have a unique path, don't do the
 			// extra work needed to get all paths.
 			path, _, unique := p.Between(s, t)
 			if unique {
-				for _, v := range path {
-					if vID := v.ID(); vID == sID || vID == tID {
-						continue
-					}
+				for _, v := range path[1 : len(path)-1] {
 					// For undirected graphs we double count
 					// passage though nodes. This is consistent
 					// with Brandes' algorithm's behaviour.
@@ -145,10 +139,7 @@ func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int]float64 {
 			paths, _ := p.AllBetween(s, t)
 			stFrac := 1 / float64(len(paths))
 			for _, path := range paths {
-				for _, v := range path {
-					if vID := v.ID(); vID == sID || vID == tID {
-						continue
-					}
+				for _, v := range path[1 : len(path)-1] {
 					cb[v.ID()] += stFrac
 				}
 			}

@@ -32,53 +32,8 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	// Also note special case for sparse networks:
 	// http://wwwold.iit.cnr.it/staff/marco.pellegrini/papiri/asonam-final.pdf
 
-	var (
-		cb = make(map[int]float64)
-
-		nodes = g.Nodes()
-		stack internal.NodeStack
-		p     = make(map[int][]graph.Node, len(nodes))
-		sigma = make(map[int]float64, len(nodes))
-		d     = make(map[int]int, len(nodes))
-		delta = make(map[int]float64, len(nodes))
-		queue internal.NodeQueue
-	)
-	for _, s := range nodes {
-		stack = stack[:0]
-
-		for _, w := range nodes {
-			p[w.ID()] = p[w.ID()][:0]
-		}
-
-		for _, t := range nodes {
-			sigma[t.ID()] = 0
-			d[t.ID()] = -1
-		}
-		sigma[s.ID()] = 1
-		d[s.ID()] = 0
-
-		queue.Enqueue(s)
-		for queue.Len() != 0 {
-			v := queue.Dequeue()
-			stack.Push(v)
-			for _, w := range g.From(v) {
-				// w found for the first time?
-				if d[w.ID()] < 0 {
-					queue.Enqueue(w)
-					d[w.ID()] = d[v.ID()] + 1
-				}
-				// shortest path to w via v?
-				if d[w.ID()] == d[v.ID()]+1 {
-					sigma[w.ID()] += sigma[v.ID()]
-					p[w.ID()] = append(p[w.ID()], v)
-				}
-			}
-		}
-
-		for _, v := range nodes {
-			delta[v.ID()] = 0
-		}
-		// S returns vertices in order of non-increasing distance from s
+	cb := make(map[int]float64)
+	brandes(g, func(s graph.Node, stack internal.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
 		for stack.Len() != 0 {
 			w := stack.Pop()
 			for _, v := range p[w.ID()] {
@@ -90,8 +45,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 				}
 			}
 		}
-	}
-
+	})
 	return cb
 }
 
@@ -112,9 +66,30 @@ func EdgeBetweenness(g graph.Graph) map[[2]int]float64 {
 	// http://algo.uni-konstanz.de/publications/b-vspbc-08.pdf
 
 	_, isUndirected := g.(graph.Undirected)
-	var (
-		cb = make(map[[2]int]float64)
+	cb := make(map[[2]int]float64)
+	brandes(g, func(s graph.Node, stack internal.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
+		for stack.Len() != 0 {
+			w := stack.Pop()
+			for _, v := range p[w.ID()] {
+				c := sigma[v.ID()] / sigma[w.ID()] * (1 + delta[w.ID()])
+				vid := v.ID()
+				wid := w.ID()
+				if isUndirected && wid < vid {
+					vid, wid = wid, vid
+				}
+				cb[[2]int{vid, wid}] += c
+				delta[v.ID()] += c
+			}
+		}
+	})
+	return cb
+}
 
+// brandes is the common code for Betweenness and EdgeBetweenness. It corresponds
+// to algorithm 1 in http://algo.uni-konstanz.de/publications/b-vspbc-08.pdf with
+// the accumulation loop provided by the accumulate closure.
+func brandes(g graph.Graph, accumulate func(s graph.Node, stack internal.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64)) {
+	var (
 		nodes = g.Nodes()
 		stack internal.NodeStack
 		p     = make(map[int][]graph.Node, len(nodes))
@@ -158,23 +133,10 @@ func EdgeBetweenness(g graph.Graph) map[[2]int]float64 {
 		for _, v := range nodes {
 			delta[v.ID()] = 0
 		}
-		// S returns vertices in order of non-increasing distance from s
-		for stack.Len() != 0 {
-			w := stack.Pop()
-			for _, v := range p[w.ID()] {
-				c := sigma[v.ID()] / sigma[w.ID()] * (1 + delta[w.ID()])
-				vid := v.ID()
-				wid := w.ID()
-				if isUndirected && wid < vid {
-					vid, wid = wid, vid
-				}
-				cb[[2]int{vid, wid}] += c
-				delta[v.ID()] += c
-			}
-		}
-	}
 
-	return cb
+		// S returns vertices in order of non-increasing distance from s
+		accumulate(s, stack, p, delta, sigma)
+	}
 }
 
 // WeightedGraph is a graph with edge weights.

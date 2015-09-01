@@ -46,7 +46,7 @@ func TestIsPath(t *testing.T) {
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	ug := simple.NewGraph(0, math.Inf(1))
+	ug := simple.NewUndirectedGraph(0, math.Inf(1))
 	ug.SetEdge(simple.Edge{F: p[1], T: p[0], W: 1})
 	ug.SetEdge(simple.Edge{F: p[1], T: p[2], W: 1})
 	if !IsPathIn(dg, p) {
@@ -70,7 +70,7 @@ var connectedComponentTests = []struct {
 
 func TestConnectedComponents(t *testing.T) {
 	for i, test := range connectedComponentTests {
-		g := simple.NewGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph(0, math.Inf(1))
 
 		for u, e := range test.g {
 			if !g.Has(simple.Node(u)) {

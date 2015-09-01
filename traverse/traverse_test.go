@@ -133,7 +133,7 @@ var breadthFirstTests = []struct {
 
 func TestBreadthFirst(t *testing.T) {
 	for i, test := range breadthFirstTests {
-		g := simple.NewGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -221,7 +221,7 @@ var depthFirstTests = []struct {
 
 func TestDepthFirst(t *testing.T) {
 	for i, test := range depthFirstTests {
-		g := simple.NewGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -282,7 +282,7 @@ var walkAllTests = []struct {
 
 func TestWalkAll(t *testing.T) {
 	for i, test := range walkAllTests {
-		g := simple.NewGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph(0, math.Inf(1))
 
 		for u, e := range test.g {
 			if !g.Has(simple.Node(u)) {

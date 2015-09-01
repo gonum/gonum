@@ -143,7 +143,7 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 	prec := 1 - int(math.Log10(tol))
 
 	for i, test := range undirectedCentralityTests {
-		g := simple.NewGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {

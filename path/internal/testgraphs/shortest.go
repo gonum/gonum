@@ -49,7 +49,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "empty undirected",
-		Graph: func() graph.Mutable { return simple.NewGraph(0, math.Inf(1)) },
+		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		Weight: math.Inf(1),
@@ -90,7 +90,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "one edge undirected",
-		Graph: func() graph.Mutable { return simple.NewGraph(0, math.Inf(1)) },
+		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 		},
@@ -125,7 +125,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "two paths undirected",
-		Graph: func() graph.Mutable { return simple.NewGraph(0, math.Inf(1)) },
+		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(2), W: 2},
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -178,7 +178,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "confounding paths undirected",
-		Graph: func() graph.Mutable { return simple.NewGraph(0, math.Inf(1)) },
+		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -247,7 +247,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "confounding paths undirected 2-step",
-		Graph: func() graph.Mutable { return simple.NewGraph(0, math.Inf(1)) },
+		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -596,7 +596,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "one edge undirected negative",
-		Graph: func() graph.Mutable { return simple.NewGraph(0, math.Inf(1)) },
+		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(1), W: -1},
 		},

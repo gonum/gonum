@@ -11,18 +11,17 @@ import (
 	"github.com/gonum/graph"
 )
 
-var _ graph.Graph = (*Graph)(nil)
-var _ graph.Graph = (*Graph)(nil)
+var _ graph.Graph = (*UndirectedGraph)(nil)
 
 func TestAssertMutableNotDirected(t *testing.T) {
-	var g graph.MutableUndirected = NewGraph(0, math.Inf(1))
+	var g graph.MutableUndirected = NewUndirectedGraph(0, math.Inf(1))
 	if _, ok := g.(graph.Directed); ok {
 		t.Fatal("Graph is directed, but a MutableGraph cannot safely be directed!")
 	}
 }
 
 func TestMaxID(t *testing.T) {
-	g := NewGraph(0, math.Inf(1))
+	g := NewUndirectedGraph(0, math.Inf(1))
 	nodes := make(map[graph.Node]struct{})
 	for i := Node(0); i < 3; i++ {
 		g.AddNode(i)

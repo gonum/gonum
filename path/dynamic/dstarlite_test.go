@@ -14,10 +14,10 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/path"
 	"github.com/gonum/graph/path/internal"
 	"github.com/gonum/graph/path/internal/testgraphs"
+	"github.com/gonum/graph/simple"
 )
 
 var (
@@ -47,7 +47,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			d = NewDStarLite(test.Query.From(), test.Query.To(), g.(graph.Graph), path.NullHeuristic, concrete.NewDirectedGraph(0, math.Inf(1)))
+			d = NewDStarLite(test.Query.From(), test.Query.To(), g.(graph.Graph), path.NullHeuristic, simple.NewDirectedGraph(0, math.Inf(1)))
 		}()
 		if panicked || test.HasNegativeWeight {
 			if !test.HasNegativeWeight {
@@ -122,15 +122,15 @@ var dynamicDStarLiteTests = []struct {
 			return math.Max(math.Abs(dx), math.Abs(dy))
 		},
 
-		s: concrete.Node(3),
-		t: concrete.Node(14),
+		s: simple.Node(3),
+		t: simple.Node(14),
 
 		want: []graph.Node{
-			concrete.Node(3),
-			concrete.Node(6),
-			concrete.Node(9),
-			concrete.Node(13),
-			concrete.Node(14),
+			simple.Node(3),
+			simple.Node(6),
+			simple.Node(9),
+			simple.Node(13),
+			simple.Node(14),
 		},
 		weight: 4,
 	},
@@ -154,21 +154,21 @@ var dynamicDStarLiteTests = []struct {
 			return math.Max(math.Abs(dx), math.Abs(dy))
 		},
 
-		s: concrete.Node(15),
-		t: concrete.Node(14),
+		s: simple.Node(15),
+		t: simple.Node(14),
 
 		want: []graph.Node{
-			concrete.Node(15),
-			concrete.Node(16),
-			concrete.Node(12),
-			concrete.Node(7),
-			concrete.Node(3),
-			concrete.Node(9),
-			concrete.Node(14),
+			simple.Node(15),
+			simple.Node(16),
+			simple.Node(12),
+			simple.Node(7),
+			simple.Node(3),
+			simple.Node(9),
+			simple.Node(14),
 		},
 		weight: 7.242640687119285,
 		wantedPaths: map[int][]graph.Node{
-			12: []graph.Node{concrete.Node(12), concrete.Node(7), concrete.Node(3), concrete.Node(9), concrete.Node(14)},
+			12: []graph.Node{simple.Node(12), simple.Node(7), simple.Node(3), simple.Node(9), simple.Node(14)},
 		},
 	},
 	{
@@ -202,23 +202,23 @@ var dynamicDStarLiteTests = []struct {
 			return math.Max(math.Abs(dx), math.Abs(dy))
 		},
 
-		s: concrete.Node(253),
-		t: concrete.Node(122),
+		s: simple.Node(253),
+		t: simple.Node(122),
 
 		want: []graph.Node{
-			concrete.Node(253),
-			concrete.Node(254),
-			concrete.Node(255),
-			concrete.Node(256),
-			concrete.Node(239),
-			concrete.Node(221),
-			concrete.Node(203),
-			concrete.Node(185),
-			concrete.Node(167),
-			concrete.Node(149),
-			concrete.Node(131),
-			concrete.Node(113),
-			concrete.Node(96),
+			simple.Node(253),
+			simple.Node(254),
+			simple.Node(255),
+			simple.Node(256),
+			simple.Node(239),
+			simple.Node(221),
+			simple.Node(203),
+			simple.Node(185),
+			simple.Node(167),
+			simple.Node(149),
+			simple.Node(131),
+			simple.Node(113),
+			simple.Node(96),
 
 			// The following section depends
 			// on map iteration order.
@@ -230,7 +230,7 @@ var dynamicDStarLiteTests = []struct {
 			nil,
 			nil,
 
-			concrete.Node(122),
+			simple.Node(122),
 		},
 		weight: 21.242640687119287,
 	},
@@ -265,22 +265,22 @@ var dynamicDStarLiteTests = []struct {
 			return math.Max(math.Abs(dx), math.Abs(dy))
 		},
 
-		s: concrete.Node(253),
-		t: concrete.Node(122),
+		s: simple.Node(253),
+		t: simple.Node(122),
 
 		want: []graph.Node{
-			concrete.Node(253),
-			concrete.Node(254),
-			concrete.Node(255),
-			concrete.Node(256),
-			concrete.Node(239),
-			concrete.Node(221),
-			concrete.Node(203),
-			concrete.Node(185),
-			concrete.Node(167),
-			concrete.Node(150),
-			concrete.Node(151),
-			concrete.Node(152),
+			simple.Node(253),
+			simple.Node(254),
+			simple.Node(255),
+			simple.Node(256),
+			simple.Node(239),
+			simple.Node(221),
+			simple.Node(203),
+			simple.Node(185),
+			simple.Node(167),
+			simple.Node(150),
+			simple.Node(151),
+			simple.Node(152),
 
 			// The following section depends
 			// on map iteration order.
@@ -290,7 +290,7 @@ var dynamicDStarLiteTests = []struct {
 			nil,
 			nil,
 
-			concrete.Node(122),
+			simple.Node(122),
 		},
 		weight: 18.656854249492383,
 	},
@@ -325,25 +325,25 @@ var dynamicDStarLiteTests = []struct {
 			return math.Max(math.Abs(dx), math.Abs(dy))
 		},
 
-		s: concrete.Node(253),
-		t: concrete.Node(122),
+		s: simple.Node(253),
+		t: simple.Node(122),
 
 		want: []graph.Node{
-			concrete.Node(253),
-			concrete.Node(254),
-			concrete.Node(255),
-			concrete.Node(256),
-			concrete.Node(239),
-			concrete.Node(221),
-			concrete.Node(203),
-			concrete.Node(185),
-			concrete.Node(167),
-			concrete.Node(150),
-			concrete.Node(151),
-			concrete.Node(150),
-			concrete.Node(131),
-			concrete.Node(113),
-			concrete.Node(96),
+			simple.Node(253),
+			simple.Node(254),
+			simple.Node(255),
+			simple.Node(256),
+			simple.Node(239),
+			simple.Node(221),
+			simple.Node(203),
+			simple.Node(185),
+			simple.Node(167),
+			simple.Node(150),
+			simple.Node(151),
+			simple.Node(150),
+			simple.Node(131),
+			simple.Node(113),
+			simple.Node(96),
 
 			// The following section depends
 			// on map iteration order.
@@ -355,7 +355,7 @@ var dynamicDStarLiteTests = []struct {
 			nil,
 			nil,
 
-			concrete.Node(122),
+			simple.Node(122),
 		},
 		weight: 24.07106781186548,
 	},
@@ -423,23 +423,23 @@ var dynamicDStarLiteTests = []struct {
 			return math.Max(math.Abs(dx), math.Abs(dy))
 		},
 
-		s: concrete.Node(253),
-		t: concrete.Node(122),
+		s: simple.Node(253),
+		t: simple.Node(122),
 
 		want: []graph.Node{
-			concrete.Node(253),
-			concrete.Node(254),
-			concrete.Node(255),
-			concrete.Node(256),
-			concrete.Node(239),
-			concrete.Node(221),
-			concrete.Node(203),
-			concrete.Node(185),
-			concrete.Node(167),
-			concrete.Node(149),
-			concrete.Node(131),
-			concrete.Node(113),
-			concrete.Node(96),
+			simple.Node(253),
+			simple.Node(254),
+			simple.Node(255),
+			simple.Node(256),
+			simple.Node(239),
+			simple.Node(221),
+			simple.Node(203),
+			simple.Node(185),
+			simple.Node(167),
+			simple.Node(149),
+			simple.Node(131),
+			simple.Node(113),
+			simple.Node(96),
 
 			// The following section depends
 			// on map iteration order.
@@ -451,7 +451,7 @@ var dynamicDStarLiteTests = []struct {
 			nil,
 			nil,
 
-			concrete.Node(122),
+			simple.Node(122),
 		},
 		weight: 21.242640687119287,
 	},
@@ -471,15 +471,15 @@ var dynamicDStarLiteTests = []struct {
 			return math.Hypot(dx, dy)
 		},
 
-		s: concrete.Node(1),
-		t: concrete.Node(14),
+		s: simple.Node(1),
+		t: simple.Node(14),
 
 		want: []graph.Node{
-			concrete.Node(1),
-			concrete.Node(2),
-			concrete.Node(6),
-			concrete.Node(10),
-			concrete.Node(14),
+			simple.Node(1),
+			simple.Node(2),
+			simple.Node(6),
+			simple.Node(10),
+			simple.Node(14),
 		},
 		weight: 4,
 	},
@@ -499,14 +499,14 @@ var dynamicDStarLiteTests = []struct {
 			return math.Hypot(dx, dy)
 		},
 
-		s: concrete.Node(1),
-		t: concrete.Node(14),
+		s: simple.Node(1),
+		t: simple.Node(14),
 
 		want: []graph.Node{
-			concrete.Node(1),
-			concrete.Node(6),
-			concrete.Node(10),
-			concrete.Node(14),
+			simple.Node(1),
+			simple.Node(6),
+			simple.Node(10),
+			simple.Node(14),
 		},
 		weight: math.Sqrt2 + 2,
 	},
@@ -527,23 +527,23 @@ var dynamicDStarLiteTests = []struct {
 			return math.Hypot(dx, dy)
 		},
 
-		s: concrete.Node(6),
-		t: concrete.Node(14),
+		s: simple.Node(6),
+		t: simple.Node(14),
 
 		want: []graph.Node{
-			concrete.Node(6),
-			concrete.Node(9),
-			concrete.Node(12),
-			concrete.Node(9),
-			concrete.Node(6),
-			concrete.Node(3),
-			concrete.Node(0),
-			concrete.Node(1),
-			concrete.Node(2),
-			concrete.Node(5),
-			concrete.Node(8),
-			concrete.Node(11),
-			concrete.Node(14),
+			simple.Node(6),
+			simple.Node(9),
+			simple.Node(12),
+			simple.Node(9),
+			simple.Node(6),
+			simple.Node(3),
+			simple.Node(0),
+			simple.Node(1),
+			simple.Node(2),
+			simple.Node(5),
+			simple.Node(8),
+			simple.Node(11),
+			simple.Node(14),
 		},
 		weight: 12,
 	},
@@ -579,7 +579,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 				return test.heuristic(ax-bx, ay-by)
 			}
 
-			world := concrete.NewDirectedGraph(0, math.Inf(1))
+			world := simple.NewDirectedGraph(0, math.Inf(1))
 			d := NewDStarLite(test.s, test.t, l, heuristic, world)
 			var (
 				dp  *dumper
@@ -596,7 +596,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 			}
 
 			dp.dump(true)
-			dp.printEdges("Initial world knowledge: %s\n\n", concreteEdgesOf(l, world.Edges()))
+			dp.printEdges("Initial world knowledge: %s\n\n", simpleEdgesOf(l, world.Edges()))
 			for d.Step() {
 				changes, _ := l.MoveTo(d.Here())
 				got = append(got, l.Location)
@@ -609,7 +609,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 							i, memory(remember), gotPath, wantedPath)
 					}
 				}
-				dp.printEdges("Edges changing after last step:\n%s\n\n", concreteEdgesOf(l, changes))
+				dp.printEdges("Edges changing after last step:\n%s\n\n", simpleEdgesOf(l, changes))
 			}
 
 			if weight := weightOf(got, l.Grid); !samePath(got, test.want) || weight != test.weight {
@@ -672,9 +672,9 @@ func weightOf(path []graph.Node, g weightedGraph) float64 {
 	return w
 }
 
-// concreteEdgesOf returns the weighted edges in g corresponding to the given edges.
-func concreteEdgesOf(g weightedGraph, edges []graph.Edge) []concrete.Edge {
-	w := make([]concrete.Edge, len(edges))
+// simpleEdgesOf returns the weighted edges in g corresponding to the given edges.
+func simpleEdgesOf(g weightedGraph, edges []graph.Edge) []simple.Edge {
+	w := make([]simple.Edge, len(edges))
 	for i, e := range edges {
 		w[i].F = e.From()
 		w[i].T = e.To()

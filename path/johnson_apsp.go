@@ -9,7 +9,7 @@ import (
 	"math/rand"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/simple"
 )
 
 // JohnsonAllPaths returns a shortest-path tree for shortest paths in the graph g.
@@ -109,7 +109,7 @@ func (g johnsonWeightAdjuster) From(n graph.Node) []graph.Node {
 
 func (g johnsonWeightAdjuster) Edge(u, v graph.Node) graph.Edge {
 	if g.bellmanFord && u.ID() == g.q && g.g.Has(v) {
-		return concrete.Edge{F: johnsonGraphNode(g.q), T: v}
+		return simple.Edge{F: johnsonGraphNode(g.q), T: v}
 	}
 	return g.edgeTo(u, v)
 }

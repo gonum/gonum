@@ -10,8 +10,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/simple"
 )
 
 type interval struct{ start, end int }
@@ -129,14 +129,14 @@ var tarjanTests = []struct {
 
 func TestSort(t *testing.T) {
 	for i, test := range tarjanTests {
-		g := concrete.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		sorted, err := Sort(g)
@@ -160,14 +160,14 @@ func TestSort(t *testing.T) {
 
 func TestTarjanSCC(t *testing.T) {
 	for i, test := range tarjanTests {
-		g := concrete.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		gotSCCs := TarjanSCC(g)

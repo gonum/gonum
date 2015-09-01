@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/simple"
 )
 
 var (
@@ -67,7 +67,7 @@ var breadthFirstTests = []struct {
 }{
 	{
 		g:     wpBronKerboschGraph,
-		from:  concrete.Node(1),
+		from:  simple.Node(1),
 		final: map[graph.Node]bool{nil: true},
 		want: [][]int{
 			{1},
@@ -82,7 +82,7 @@ var breadthFirstTests = []struct {
 			// Do not traverse an edge between 3 and 5.
 			return (e.From().ID() != 3 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 3)
 		},
-		from:  concrete.Node(1),
+		from:  simple.Node(1),
 		final: map[graph.Node]bool{nil: true},
 		want: [][]int{
 			{1},
@@ -92,9 +92,9 @@ var breadthFirstTests = []struct {
 	},
 	{
 		g:     wpBronKerboschGraph,
-		from:  concrete.Node(1),
-		until: func(n graph.Node, _ int) bool { return n == concrete.Node(3) },
-		final: map[graph.Node]bool{concrete.Node(3): true},
+		from:  simple.Node(1),
+		until: func(n graph.Node, _ int) bool { return n == simple.Node(3) },
+		final: map[graph.Node]bool{simple.Node(3): true},
 		want: [][]int{
 			{1},
 			{0, 2, 4},
@@ -102,7 +102,7 @@ var breadthFirstTests = []struct {
 	},
 	{
 		g:     batageljZaversnikGraph,
-		from:  concrete.Node(13),
+		from:  simple.Node(13),
 		final: map[graph.Node]bool{nil: true},
 		want: [][]int{
 			{13},
@@ -114,14 +114,14 @@ var breadthFirstTests = []struct {
 	},
 	{
 		g:     batageljZaversnikGraph,
-		from:  concrete.Node(13),
+		from:  simple.Node(13),
 		until: func(_ graph.Node, d int) bool { return d > 2 },
 		final: map[graph.Node]bool{
-			concrete.Node(11): true,
-			concrete.Node(12): true,
-			concrete.Node(18): true,
-			concrete.Node(19): true,
-			concrete.Node(20): true,
+			simple.Node(11): true,
+			simple.Node(12): true,
+			simple.Node(18): true,
+			simple.Node(19): true,
+			simple.Node(20): true,
 		},
 		want: [][]int{
 			{13},
@@ -133,14 +133,14 @@ var breadthFirstTests = []struct {
 
 func TestBreadthFirst(t *testing.T) {
 	for i, test := range breadthFirstTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		w := BreadthFirst{
@@ -179,7 +179,7 @@ var depthFirstTests = []struct {
 }{
 	{
 		g:     wpBronKerboschGraph,
-		from:  concrete.Node(1),
+		from:  simple.Node(1),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{0, 1, 2, 3, 4, 5},
 	},
@@ -189,31 +189,31 @@ var depthFirstTests = []struct {
 			// Do not traverse an edge between 3 and 5.
 			return (e.From().ID() != 3 || e.To().ID() != 5) && (e.From().ID() != 5 || e.To().ID() != 3)
 		},
-		from:  concrete.Node(1),
+		from:  simple.Node(1),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{0, 1, 2, 3, 4},
 	},
 	{
 		g:     wpBronKerboschGraph,
-		from:  concrete.Node(1),
-		until: func(n graph.Node) bool { return n == concrete.Node(3) },
-		final: map[graph.Node]bool{concrete.Node(3): true},
+		from:  simple.Node(1),
+		until: func(n graph.Node) bool { return n == simple.Node(3) },
+		final: map[graph.Node]bool{simple.Node(3): true},
 	},
 	{
 		g:     batageljZaversnikGraph,
-		from:  concrete.Node(0),
+		from:  simple.Node(0),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{0},
 	},
 	{
 		g:     batageljZaversnikGraph,
-		from:  concrete.Node(3),
+		from:  simple.Node(3),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{1, 2, 3, 4, 5},
 	},
 	{
 		g:     batageljZaversnikGraph,
-		from:  concrete.Node(13),
+		from:  simple.Node(13),
 		final: map[graph.Node]bool{nil: true},
 		want:  []int{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 	},
@@ -221,14 +221,14 @@ var depthFirstTests = []struct {
 
 func TestDepthFirst(t *testing.T) {
 	for i, test := range depthFirstTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		w := DepthFirst{
@@ -282,17 +282,17 @@ var walkAllTests = []struct {
 
 func TestWalkAll(t *testing.T) {
 	for i, test := range walkAllTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 
 		for u, e := range test.g {
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				if !g.Has(concrete.Node(v)) {
-					g.AddNode(concrete.Node(v))
+				if !g.Has(simple.Node(v)) {
+					g.AddNode(simple.Node(v))
 				}
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		type walker interface {

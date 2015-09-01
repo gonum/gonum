@@ -11,16 +11,16 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/simple"
 )
 
 func TestIsPath(t *testing.T) {
-	dg := concrete.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	if !IsPathIn(dg, nil) {
 		t.Error("IsPath returns false on nil path")
 	}
-	p := []graph.Node{concrete.Node(0)}
+	p := []graph.Node{simple.Node(0)}
 	if IsPathIn(dg, p) {
 		t.Error("IsPath returns true on nonexistant node")
 	}
@@ -28,12 +28,12 @@ func TestIsPath(t *testing.T) {
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath returns false on single-length path with existing node")
 	}
-	p = append(p, concrete.Node(1))
+	p = append(p, simple.Node(1))
 	dg.AddNode(p[1])
 	if IsPathIn(dg, p) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
-	dg.SetEdge(concrete.Edge{F: p[0], T: p[1], W: 1})
+	dg.SetEdge(simple.Edge{F: p[0], T: p[1], W: 1})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
@@ -41,14 +41,14 @@ func TestIsPath(t *testing.T) {
 	if IsPathIn(dg, p) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
-	p = []graph.Node{p[1], p[0], concrete.Node(2)}
-	dg.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1})
+	p = []graph.Node{p[1], p[0], simple.Node(2)}
+	dg.SetEdge(simple.Edge{F: p[1], T: p[2], W: 1})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	ug := concrete.NewGraph(0, math.Inf(1))
-	ug.SetEdge(concrete.Edge{F: p[1], T: p[0], W: 1})
-	ug.SetEdge(concrete.Edge{F: p[1], T: p[2], W: 1})
+	ug := simple.NewGraph(0, math.Inf(1))
+	ug.SetEdge(simple.Edge{F: p[1], T: p[0], W: 1})
+	ug.SetEdge(simple.Edge{F: p[1], T: p[2], W: 1})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
@@ -70,17 +70,17 @@ var connectedComponentTests = []struct {
 
 func TestConnectedComponents(t *testing.T) {
 	for i, test := range connectedComponentTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 
 		for u, e := range test.g {
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				if !g.Has(concrete.Node(v)) {
-					g.AddNode(concrete.Node(v))
+				if !g.Has(simple.Node(v)) {
+					g.AddNode(simple.Node(v))
 				}
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v)})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		cc := ConnectedComponents(g)

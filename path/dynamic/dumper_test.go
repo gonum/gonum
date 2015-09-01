@@ -11,8 +11,8 @@ import (
 	"sort"
 	"text/tabwriter"
 
-	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/path/internal"
+	"github.com/gonum/graph/simple"
 )
 
 // dumper implements a grid D* Lite statistics dump.
@@ -126,7 +126,7 @@ func (d *dumper) dump(withpath bool) {
 // printEdges pretty prints the given edges to the dumper's io.Writer using the provided
 // format string. The edges are first formated to a string, so the format string must use
 // the %s verb to indicate where the edges are to be printed.
-func (d *dumper) printEdges(format string, edges []concrete.Edge) {
+func (d *dumper) printEdges(format string, edges []simple.Edge) {
 	if d == nil {
 		return
 	}
@@ -144,7 +144,7 @@ func (d *dumper) printEdges(format string, edges []concrete.Edge) {
 	fmt.Fprintf(d.w, format, buf.Bytes())
 }
 
-type lexically []concrete.Edge
+type lexically []simple.Edge
 
 func (l lexically) Len() int { return len(l) }
 func (l lexically) Less(i, j int) bool {

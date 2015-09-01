@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"github.com/gonum/floats"
-	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/path"
+	"github.com/gonum/graph/simple"
 )
 
 var betweennessTests = []struct {
@@ -176,15 +176,15 @@ var betweennessTests = []struct {
 
 func TestBetweenness(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
 				// Weight omitted to show weight-independence.
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v), W: 0})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 0})
 			}
 		}
 		got := Betweenness(g)
@@ -206,15 +206,15 @@ func TestBetweenness(t *testing.T) {
 
 func TestEdgeBetweenness(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
 				// Weight omitted to show weight-independence.
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v), W: 0})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 0})
 			}
 		}
 		got := EdgeBetweenness(g)
@@ -239,14 +239,14 @@ func TestEdgeBetweenness(t *testing.T) {
 
 func TestBetweennessWeighted(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v), W: 1})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -275,14 +275,14 @@ func TestBetweennessWeighted(t *testing.T) {
 
 func TestEdgeBetweennessWeighted(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := concrete.NewGraph(0, math.Inf(1))
+		g := simple.NewGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(concrete.Node(u)) {
-				g.AddNode(concrete.Node(u))
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(concrete.Edge{F: concrete.Node(u), T: concrete.Node(v), W: 1})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 

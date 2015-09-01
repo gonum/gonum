@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package concrete
+package simple
 
 import (
 	"fmt"
@@ -70,7 +70,7 @@ func (g *DirectedGraph) NewNodeID() int {
 // the max int on your machine NewNode will become slower.
 func (g *DirectedGraph) AddNode(n graph.Node) {
 	if _, exists := g.nodeMap[n.ID()]; exists {
-		panic(fmt.Sprintf("concrete: node ID collision: %d", n.ID()))
+		panic(fmt.Sprintf("simple: node ID collision: %d", n.ID()))
 	}
 	g.nodeMap[n.ID()] = n
 	g.successors[n.ID()] = make(map[int]graph.Edge)
@@ -89,7 +89,7 @@ func (g *DirectedGraph) SetEdge(e graph.Edge) {
 	)
 
 	if fid == tid {
-		panic("concrete: adding self edge")
+		panic("simple: adding self edge")
 	}
 
 	if !g.Has(from) {

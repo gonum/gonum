@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/simple"
 )
 
 func init() {
@@ -34,13 +34,13 @@ type spanningGraph interface {
 var spanningTreeTests = []struct {
 	name      string
 	graph     func() spanningGraph
-	edges     []concrete.Edge
+	edges     []simple.Edge
 	want      float64
-	treeEdges []concrete.Edge
+	treeEdges []simple.Edge
 }{
 	{
 		name:  "Empty",
-		graph: func() spanningGraph { return concrete.NewGraph(0, math.Inf(1)) },
+		graph: func() spanningGraph { return simple.NewGraph(0, math.Inf(1)) },
 		want:  0,
 	},
 	{
@@ -48,153 +48,153 @@ var spanningTreeTests = []struct {
 		// Modified to make edge weights unique; A--B is increased to 2.5 otherwise
 		// to prevent the alternative solution being found.
 		name:  "Prim WP figure 1",
-		graph: func() spanningGraph { return concrete.NewGraph(0, math.Inf(1)) },
-		edges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('B'), W: 2.5},
-			{F: concrete.Node('A'), T: concrete.Node('D'), W: 1},
-			{F: concrete.Node('B'), T: concrete.Node('D'), W: 2},
-			{F: concrete.Node('C'), T: concrete.Node('D'), W: 3},
+		graph: func() spanningGraph { return simple.NewGraph(0, math.Inf(1)) },
+		edges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('B'), W: 2.5},
+			{F: simple.Node('A'), T: simple.Node('D'), W: 1},
+			{F: simple.Node('B'), T: simple.Node('D'), W: 2},
+			{F: simple.Node('C'), T: simple.Node('D'), W: 3},
 		},
 
 		want: 6,
-		treeEdges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('D'), W: 1},
-			{F: concrete.Node('B'), T: concrete.Node('D'), W: 2},
-			{F: concrete.Node('C'), T: concrete.Node('D'), W: 3},
+		treeEdges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('D'), W: 1},
+			{F: simple.Node('B'), T: simple.Node('D'), W: 2},
+			{F: simple.Node('C'), T: simple.Node('D'), W: 3},
 		},
 	},
 	{
 		// https://upload.wikimedia.org/wikipedia/commons/5/5c/MST_kruskal_en.gif
 		name:  "Kruskal WP figure 1",
-		graph: func() spanningGraph { return concrete.NewGraph(0, math.Inf(1)) },
-		edges: []concrete.Edge{
-			{F: concrete.Node('a'), T: concrete.Node('b'), W: 3},
-			{F: concrete.Node('a'), T: concrete.Node('e'), W: 1},
-			{F: concrete.Node('b'), T: concrete.Node('c'), W: 5},
-			{F: concrete.Node('b'), T: concrete.Node('e'), W: 4},
-			{F: concrete.Node('c'), T: concrete.Node('d'), W: 2},
-			{F: concrete.Node('c'), T: concrete.Node('e'), W: 6},
-			{F: concrete.Node('d'), T: concrete.Node('e'), W: 7},
+		graph: func() spanningGraph { return simple.NewGraph(0, math.Inf(1)) },
+		edges: []simple.Edge{
+			{F: simple.Node('a'), T: simple.Node('b'), W: 3},
+			{F: simple.Node('a'), T: simple.Node('e'), W: 1},
+			{F: simple.Node('b'), T: simple.Node('c'), W: 5},
+			{F: simple.Node('b'), T: simple.Node('e'), W: 4},
+			{F: simple.Node('c'), T: simple.Node('d'), W: 2},
+			{F: simple.Node('c'), T: simple.Node('e'), W: 6},
+			{F: simple.Node('d'), T: simple.Node('e'), W: 7},
 		},
 
 		want: 11,
-		treeEdges: []concrete.Edge{
-			{F: concrete.Node('a'), T: concrete.Node('b'), W: 3},
-			{F: concrete.Node('a'), T: concrete.Node('e'), W: 1},
-			{F: concrete.Node('b'), T: concrete.Node('c'), W: 5},
-			{F: concrete.Node('c'), T: concrete.Node('d'), W: 2},
+		treeEdges: []simple.Edge{
+			{F: simple.Node('a'), T: simple.Node('b'), W: 3},
+			{F: simple.Node('a'), T: simple.Node('e'), W: 1},
+			{F: simple.Node('b'), T: simple.Node('c'), W: 5},
+			{F: simple.Node('c'), T: simple.Node('d'), W: 2},
 		},
 	},
 	{
 		// https://upload.wikimedia.org/wikipedia/commons/8/87/Kruskal_Algorithm_6.svg
 		name:  "Kruskal WP example",
-		graph: func() spanningGraph { return concrete.NewGraph(0, math.Inf(1)) },
-		edges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('B'), W: 7},
-			{F: concrete.Node('A'), T: concrete.Node('D'), W: 5},
-			{F: concrete.Node('B'), T: concrete.Node('C'), W: 8},
-			{F: concrete.Node('B'), T: concrete.Node('D'), W: 9},
-			{F: concrete.Node('B'), T: concrete.Node('E'), W: 7},
-			{F: concrete.Node('C'), T: concrete.Node('E'), W: 5},
-			{F: concrete.Node('D'), T: concrete.Node('E'), W: 15},
-			{F: concrete.Node('D'), T: concrete.Node('F'), W: 6},
-			{F: concrete.Node('E'), T: concrete.Node('F'), W: 8},
-			{F: concrete.Node('E'), T: concrete.Node('G'), W: 9},
-			{F: concrete.Node('F'), T: concrete.Node('G'), W: 11},
+		graph: func() spanningGraph { return simple.NewGraph(0, math.Inf(1)) },
+		edges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('B'), W: 7},
+			{F: simple.Node('A'), T: simple.Node('D'), W: 5},
+			{F: simple.Node('B'), T: simple.Node('C'), W: 8},
+			{F: simple.Node('B'), T: simple.Node('D'), W: 9},
+			{F: simple.Node('B'), T: simple.Node('E'), W: 7},
+			{F: simple.Node('C'), T: simple.Node('E'), W: 5},
+			{F: simple.Node('D'), T: simple.Node('E'), W: 15},
+			{F: simple.Node('D'), T: simple.Node('F'), W: 6},
+			{F: simple.Node('E'), T: simple.Node('F'), W: 8},
+			{F: simple.Node('E'), T: simple.Node('G'), W: 9},
+			{F: simple.Node('F'), T: simple.Node('G'), W: 11},
 		},
 
 		want: 39,
-		treeEdges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('B'), W: 7},
-			{F: concrete.Node('A'), T: concrete.Node('D'), W: 5},
-			{F: concrete.Node('B'), T: concrete.Node('E'), W: 7},
-			{F: concrete.Node('C'), T: concrete.Node('E'), W: 5},
-			{F: concrete.Node('D'), T: concrete.Node('F'), W: 6},
-			{F: concrete.Node('E'), T: concrete.Node('G'), W: 9},
+		treeEdges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('B'), W: 7},
+			{F: simple.Node('A'), T: simple.Node('D'), W: 5},
+			{F: simple.Node('B'), T: simple.Node('E'), W: 7},
+			{F: simple.Node('C'), T: simple.Node('E'), W: 5},
+			{F: simple.Node('D'), T: simple.Node('F'), W: 6},
+			{F: simple.Node('E'), T: simple.Node('G'), W: 9},
 		},
 	},
 	{
 		// https://upload.wikimedia.org/wikipedia/commons/2/2e/Boruvka%27s_algorithm_%28Sollin%27s_algorithm%29_Anim.gif
 		name:  "Borůvka WP example",
-		graph: func() spanningGraph { return concrete.NewGraph(0, math.Inf(1)) },
-		edges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('B'), W: 13},
-			{F: concrete.Node('A'), T: concrete.Node('C'), W: 6},
-			{F: concrete.Node('B'), T: concrete.Node('C'), W: 7},
-			{F: concrete.Node('B'), T: concrete.Node('D'), W: 1},
-			{F: concrete.Node('C'), T: concrete.Node('D'), W: 14},
-			{F: concrete.Node('C'), T: concrete.Node('E'), W: 8},
-			{F: concrete.Node('C'), T: concrete.Node('H'), W: 20},
-			{F: concrete.Node('D'), T: concrete.Node('E'), W: 9},
-			{F: concrete.Node('D'), T: concrete.Node('F'), W: 3},
-			{F: concrete.Node('E'), T: concrete.Node('F'), W: 2},
-			{F: concrete.Node('E'), T: concrete.Node('J'), W: 18},
-			{F: concrete.Node('G'), T: concrete.Node('H'), W: 15},
-			{F: concrete.Node('G'), T: concrete.Node('I'), W: 5},
-			{F: concrete.Node('G'), T: concrete.Node('J'), W: 19},
-			{F: concrete.Node('G'), T: concrete.Node('K'), W: 10},
-			{F: concrete.Node('H'), T: concrete.Node('J'), W: 17},
-			{F: concrete.Node('I'), T: concrete.Node('K'), W: 11},
-			{F: concrete.Node('J'), T: concrete.Node('K'), W: 16},
-			{F: concrete.Node('J'), T: concrete.Node('L'), W: 4},
-			{F: concrete.Node('K'), T: concrete.Node('L'), W: 12},
+		graph: func() spanningGraph { return simple.NewGraph(0, math.Inf(1)) },
+		edges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('B'), W: 13},
+			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
+			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
+			{F: simple.Node('B'), T: simple.Node('D'), W: 1},
+			{F: simple.Node('C'), T: simple.Node('D'), W: 14},
+			{F: simple.Node('C'), T: simple.Node('E'), W: 8},
+			{F: simple.Node('C'), T: simple.Node('H'), W: 20},
+			{F: simple.Node('D'), T: simple.Node('E'), W: 9},
+			{F: simple.Node('D'), T: simple.Node('F'), W: 3},
+			{F: simple.Node('E'), T: simple.Node('F'), W: 2},
+			{F: simple.Node('E'), T: simple.Node('J'), W: 18},
+			{F: simple.Node('G'), T: simple.Node('H'), W: 15},
+			{F: simple.Node('G'), T: simple.Node('I'), W: 5},
+			{F: simple.Node('G'), T: simple.Node('J'), W: 19},
+			{F: simple.Node('G'), T: simple.Node('K'), W: 10},
+			{F: simple.Node('H'), T: simple.Node('J'), W: 17},
+			{F: simple.Node('I'), T: simple.Node('K'), W: 11},
+			{F: simple.Node('J'), T: simple.Node('K'), W: 16},
+			{F: simple.Node('J'), T: simple.Node('L'), W: 4},
+			{F: simple.Node('K'), T: simple.Node('L'), W: 12},
 		},
 
 		want: 83,
-		treeEdges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('C'), W: 6},
-			{F: concrete.Node('B'), T: concrete.Node('C'), W: 7},
-			{F: concrete.Node('B'), T: concrete.Node('D'), W: 1},
-			{F: concrete.Node('D'), T: concrete.Node('F'), W: 3},
-			{F: concrete.Node('E'), T: concrete.Node('F'), W: 2},
-			{F: concrete.Node('E'), T: concrete.Node('J'), W: 18},
-			{F: concrete.Node('G'), T: concrete.Node('H'), W: 15},
-			{F: concrete.Node('G'), T: concrete.Node('I'), W: 5},
-			{F: concrete.Node('G'), T: concrete.Node('K'), W: 10},
-			{F: concrete.Node('J'), T: concrete.Node('L'), W: 4},
-			{F: concrete.Node('K'), T: concrete.Node('L'), W: 12},
+		treeEdges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
+			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
+			{F: simple.Node('B'), T: simple.Node('D'), W: 1},
+			{F: simple.Node('D'), T: simple.Node('F'), W: 3},
+			{F: simple.Node('E'), T: simple.Node('F'), W: 2},
+			{F: simple.Node('E'), T: simple.Node('J'), W: 18},
+			{F: simple.Node('G'), T: simple.Node('H'), W: 15},
+			{F: simple.Node('G'), T: simple.Node('I'), W: 5},
+			{F: simple.Node('G'), T: simple.Node('K'), W: 10},
+			{F: simple.Node('J'), T: simple.Node('L'), W: 4},
+			{F: simple.Node('K'), T: simple.Node('L'), W: 12},
 		},
 	},
 	{
 		// https://upload.wikimedia.org/wikipedia/commons/d/d2/Minimum_spanning_tree.svg
 		// Nodes labelled row major.
 		name:  "Minimum Spanning Tree WP figure 1",
-		graph: func() spanningGraph { return concrete.NewGraph(0, math.Inf(1)) },
-		edges: []concrete.Edge{
-			{F: concrete.Node(1), T: concrete.Node(2), W: 4},
-			{F: concrete.Node(1), T: concrete.Node(3), W: 1},
-			{F: concrete.Node(1), T: concrete.Node(4), W: 4},
-			{F: concrete.Node(2), T: concrete.Node(3), W: 5},
-			{F: concrete.Node(2), T: concrete.Node(5), W: 9},
-			{F: concrete.Node(2), T: concrete.Node(6), W: 9},
-			{F: concrete.Node(2), T: concrete.Node(8), W: 7},
-			{F: concrete.Node(3), T: concrete.Node(4), W: 3},
-			{F: concrete.Node(3), T: concrete.Node(8), W: 9},
-			{F: concrete.Node(4), T: concrete.Node(8), W: 10},
-			{F: concrete.Node(4), T: concrete.Node(10), W: 18},
-			{F: concrete.Node(5), T: concrete.Node(6), W: 2},
-			{F: concrete.Node(5), T: concrete.Node(7), W: 4},
-			{F: concrete.Node(5), T: concrete.Node(9), W: 6},
-			{F: concrete.Node(6), T: concrete.Node(7), W: 2},
-			{F: concrete.Node(6), T: concrete.Node(8), W: 8},
-			{F: concrete.Node(7), T: concrete.Node(8), W: 9},
-			{F: concrete.Node(7), T: concrete.Node(9), W: 3},
-			{F: concrete.Node(7), T: concrete.Node(10), W: 9},
-			{F: concrete.Node(8), T: concrete.Node(10), W: 8},
-			{F: concrete.Node(9), T: concrete.Node(10), W: 9},
+		graph: func() spanningGraph { return simple.NewGraph(0, math.Inf(1)) },
+		edges: []simple.Edge{
+			{F: simple.Node(1), T: simple.Node(2), W: 4},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(1), T: simple.Node(4), W: 4},
+			{F: simple.Node(2), T: simple.Node(3), W: 5},
+			{F: simple.Node(2), T: simple.Node(5), W: 9},
+			{F: simple.Node(2), T: simple.Node(6), W: 9},
+			{F: simple.Node(2), T: simple.Node(8), W: 7},
+			{F: simple.Node(3), T: simple.Node(4), W: 3},
+			{F: simple.Node(3), T: simple.Node(8), W: 9},
+			{F: simple.Node(4), T: simple.Node(8), W: 10},
+			{F: simple.Node(4), T: simple.Node(10), W: 18},
+			{F: simple.Node(5), T: simple.Node(6), W: 2},
+			{F: simple.Node(5), T: simple.Node(7), W: 4},
+			{F: simple.Node(5), T: simple.Node(9), W: 6},
+			{F: simple.Node(6), T: simple.Node(7), W: 2},
+			{F: simple.Node(6), T: simple.Node(8), W: 8},
+			{F: simple.Node(7), T: simple.Node(8), W: 9},
+			{F: simple.Node(7), T: simple.Node(9), W: 3},
+			{F: simple.Node(7), T: simple.Node(10), W: 9},
+			{F: simple.Node(8), T: simple.Node(10), W: 8},
+			{F: simple.Node(9), T: simple.Node(10), W: 9},
 		},
 
 		want: 38,
-		treeEdges: []concrete.Edge{
-			{F: concrete.Node(1), T: concrete.Node(2), W: 4},
-			{F: concrete.Node(1), T: concrete.Node(3), W: 1},
-			{F: concrete.Node(2), T: concrete.Node(8), W: 7},
-			{F: concrete.Node(3), T: concrete.Node(4), W: 3},
-			{F: concrete.Node(5), T: concrete.Node(6), W: 2},
-			{F: concrete.Node(6), T: concrete.Node(7), W: 2},
-			{F: concrete.Node(6), T: concrete.Node(8), W: 8},
-			{F: concrete.Node(7), T: concrete.Node(9), W: 3},
-			{F: concrete.Node(8), T: concrete.Node(10), W: 8},
+		treeEdges: []simple.Edge{
+			{F: simple.Node(1), T: simple.Node(2), W: 4},
+			{F: simple.Node(1), T: simple.Node(3), W: 1},
+			{F: simple.Node(2), T: simple.Node(8), W: 7},
+			{F: simple.Node(3), T: simple.Node(4), W: 3},
+			{F: simple.Node(5), T: simple.Node(6), W: 2},
+			{F: simple.Node(6), T: simple.Node(7), W: 2},
+			{F: simple.Node(6), T: simple.Node(8), W: 8},
+			{F: simple.Node(7), T: simple.Node(9), W: 3},
+			{F: simple.Node(8), T: simple.Node(10), W: 8},
 		},
 	},
 
@@ -202,40 +202,40 @@ var spanningTreeTests = []struct {
 		// https://upload.wikimedia.org/wikipedia/commons/2/2e/Boruvka%27s_algorithm_%28Sollin%27s_algorithm%29_Anim.gif
 		// but with C--H and E--J cut.
 		name:  "Borůvka WP example cut",
-		graph: func() spanningGraph { return concrete.NewGraph(0, math.Inf(1)) },
-		edges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('B'), W: 13},
-			{F: concrete.Node('A'), T: concrete.Node('C'), W: 6},
-			{F: concrete.Node('B'), T: concrete.Node('C'), W: 7},
-			{F: concrete.Node('B'), T: concrete.Node('D'), W: 1},
-			{F: concrete.Node('C'), T: concrete.Node('D'), W: 14},
-			{F: concrete.Node('C'), T: concrete.Node('E'), W: 8},
-			{F: concrete.Node('D'), T: concrete.Node('E'), W: 9},
-			{F: concrete.Node('D'), T: concrete.Node('F'), W: 3},
-			{F: concrete.Node('E'), T: concrete.Node('F'), W: 2},
-			{F: concrete.Node('G'), T: concrete.Node('H'), W: 15},
-			{F: concrete.Node('G'), T: concrete.Node('I'), W: 5},
-			{F: concrete.Node('G'), T: concrete.Node('J'), W: 19},
-			{F: concrete.Node('G'), T: concrete.Node('K'), W: 10},
-			{F: concrete.Node('H'), T: concrete.Node('J'), W: 17},
-			{F: concrete.Node('I'), T: concrete.Node('K'), W: 11},
-			{F: concrete.Node('J'), T: concrete.Node('K'), W: 16},
-			{F: concrete.Node('J'), T: concrete.Node('L'), W: 4},
-			{F: concrete.Node('K'), T: concrete.Node('L'), W: 12},
+		graph: func() spanningGraph { return simple.NewGraph(0, math.Inf(1)) },
+		edges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('B'), W: 13},
+			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
+			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
+			{F: simple.Node('B'), T: simple.Node('D'), W: 1},
+			{F: simple.Node('C'), T: simple.Node('D'), W: 14},
+			{F: simple.Node('C'), T: simple.Node('E'), W: 8},
+			{F: simple.Node('D'), T: simple.Node('E'), W: 9},
+			{F: simple.Node('D'), T: simple.Node('F'), W: 3},
+			{F: simple.Node('E'), T: simple.Node('F'), W: 2},
+			{F: simple.Node('G'), T: simple.Node('H'), W: 15},
+			{F: simple.Node('G'), T: simple.Node('I'), W: 5},
+			{F: simple.Node('G'), T: simple.Node('J'), W: 19},
+			{F: simple.Node('G'), T: simple.Node('K'), W: 10},
+			{F: simple.Node('H'), T: simple.Node('J'), W: 17},
+			{F: simple.Node('I'), T: simple.Node('K'), W: 11},
+			{F: simple.Node('J'), T: simple.Node('K'), W: 16},
+			{F: simple.Node('J'), T: simple.Node('L'), W: 4},
+			{F: simple.Node('K'), T: simple.Node('L'), W: 12},
 		},
 
 		want: 65,
-		treeEdges: []concrete.Edge{
-			{F: concrete.Node('A'), T: concrete.Node('C'), W: 6},
-			{F: concrete.Node('B'), T: concrete.Node('C'), W: 7},
-			{F: concrete.Node('B'), T: concrete.Node('D'), W: 1},
-			{F: concrete.Node('D'), T: concrete.Node('F'), W: 3},
-			{F: concrete.Node('E'), T: concrete.Node('F'), W: 2},
-			{F: concrete.Node('G'), T: concrete.Node('H'), W: 15},
-			{F: concrete.Node('G'), T: concrete.Node('I'), W: 5},
-			{F: concrete.Node('G'), T: concrete.Node('K'), W: 10},
-			{F: concrete.Node('J'), T: concrete.Node('L'), W: 4},
-			{F: concrete.Node('K'), T: concrete.Node('L'), W: 12},
+		treeEdges: []simple.Edge{
+			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
+			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
+			{F: simple.Node('B'), T: simple.Node('D'), W: 1},
+			{F: simple.Node('D'), T: simple.Node('F'), W: 3},
+			{F: simple.Node('E'), T: simple.Node('F'), W: 2},
+			{F: simple.Node('G'), T: simple.Node('H'), W: 15},
+			{F: simple.Node('G'), T: simple.Node('I'), W: 5},
+			{F: simple.Node('G'), T: simple.Node('K'), W: 10},
+			{F: simple.Node('J'), T: simple.Node('L'), W: 4},
+			{F: simple.Node('K'), T: simple.Node('L'), W: 12},
 		},
 	},
 }
@@ -247,7 +247,7 @@ func testMinumumSpanning(mst func(dst graph.MutableUndirected, g spanningGraph) 
 			g.SetEdge(e)
 		}
 
-		dst := concrete.NewGraph(0, math.Inf(1))
+		dst := simple.NewGraph(0, math.Inf(1))
 		w := mst(dst, g)
 		if w != test.want {
 			t.Errorf("unexpected minimum spanning tree weight for %q: got: %f want: %f",

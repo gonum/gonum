@@ -10,7 +10,7 @@ import (
 	"math"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/simple"
 )
 
 const (
@@ -95,7 +95,7 @@ func (g *Grid) Nodes() []graph.Node {
 	var nodes []graph.Node
 	for id, ok := range g.open {
 		if ok || g.AllVisible {
-			nodes = append(nodes, concrete.Node(id))
+			nodes = append(nodes, simple.Node(id))
 		}
 	}
 	return nodes
@@ -158,7 +158,7 @@ func (g *Grid) NodeAt(r, c int) graph.Node {
 	if r < 0 || r >= g.r || c < 0 || c >= g.c {
 		return nil
 	}
-	return concrete.Node(r*g.c + c)
+	return simple.Node(r*g.c + c)
 }
 
 // From returns all the nodes reachable from u. Reachabilty requires that both
@@ -208,11 +208,11 @@ func (g *Grid) Edge(u, v graph.Node) graph.Edge {
 func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
 	if g.HasEdge(u, v) {
 		if !g.AllowDiagonal || g.UnitEdgeWeight {
-			return concrete.Edge{F: u, T: v, W: 1}
+			return simple.Edge{F: u, T: v, W: 1}
 		}
 		ux, uy := g.XY(u)
 		vx, vy := g.XY(v)
-		return concrete.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
+		return simple.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }

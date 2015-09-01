@@ -9,7 +9,7 @@ import (
 	"math"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/simple"
 )
 
 // LimitedVisionGrid is a 2D grid planar undirected graph where the capacity
@@ -62,7 +62,7 @@ func (l *LimitedVisionGrid) MoveTo(n graph.Node) (new, old []graph.Edge) {
 					continue
 				}
 
-				e := concrete.Edge{F: u, T: v}
+				e := simple.Edge{F: u, T: v}
 				if !l.Known[u.ID()] || !l.Known[v.ID()] {
 					new = append(new, e)
 				} else {
@@ -146,7 +146,7 @@ func (l *LimitedVisionGrid) XY(n graph.Node) (x, y float64) {
 func (l *LimitedVisionGrid) Nodes() []graph.Node {
 	nodes := make([]graph.Node, 0, len(l.Grid.open))
 	for id := range l.Grid.open {
-		nodes = append(nodes, concrete.Node(id))
+		nodes = append(nodes, simple.Node(id))
 	}
 	return nodes
 }
@@ -224,11 +224,11 @@ func (l *LimitedVisionGrid) Edge(u, v graph.Node) graph.Edge {
 func (l *LimitedVisionGrid) EdgeBetween(u, v graph.Node) graph.Edge {
 	if l.HasEdge(u, v) {
 		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
-			return concrete.Edge{F: u, T: v, W: 1}
+			return simple.Edge{F: u, T: v, W: 1}
 		}
 		ux, uy := l.XY(u)
 		vx, vy := l.XY(v)
-		return concrete.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
+		return simple.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }

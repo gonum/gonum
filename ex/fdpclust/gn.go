@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/simple"
 )
 
 type GraphNode struct {
@@ -199,7 +199,7 @@ func (g *GraphNode) EdgeBetween(u, v graph.Node) graph.Edge {
 	if u.ID() == g.id || v.ID() == g.id {
 		for _, neigh := range g.neighbors {
 			if neigh.ID() == u.ID() || neigh.ID() == v.ID() {
-				return concrete.Edge{F: g, T: neigh}
+				return simple.Edge{F: g, T: neigh}
 			}
 		}
 		return nil
@@ -229,7 +229,7 @@ func (g *GraphNode) edgeBetween(u, v graph.Node, visited map[int]struct{}) graph
 	if u.ID() == g.id || v.ID() == g.id {
 		for _, neigh := range g.neighbors {
 			if neigh.ID() == u.ID() || neigh.ID() == v.ID() {
-				return concrete.Edge{F: g, T: neigh}
+				return simple.Edge{F: g, T: neigh}
 			}
 		}
 		return nil

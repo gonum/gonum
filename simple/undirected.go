@@ -2,30 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package concrete
+package simple
 
 import (
 	"fmt"
 
 	"github.com/gonum/graph"
 )
-
-// A simple int alias.
-type Node int
-
-func (n Node) ID() int {
-	return int(n)
-}
-
-// Just a collection of two nodes
-type Edge struct {
-	F, T graph.Node
-	W    float64
-}
-
-func (e Edge) From() graph.Node { return e.F }
-func (e Edge) To() graph.Node   { return e.T }
-func (e Edge) Weight() float64  { return e.W }
 
 // A GonumGraph is a very generalized graph that can handle an arbitrary number of vertices and
 // edges -- as well as act as either directed or undirected.
@@ -91,7 +74,7 @@ func (g *Graph) NewNodeID() int {
 
 func (g *Graph) AddNode(n graph.Node) {
 	if _, exists := g.nodeMap[n.ID()]; exists {
-		panic(fmt.Sprintf("concrete: node ID collision: %d", n.ID()))
+		panic(fmt.Sprintf("simple: node ID collision: %d", n.ID()))
 	}
 	g.nodeMap[n.ID()] = n
 	g.neighbors[n.ID()] = make(map[int]graph.Edge)
@@ -109,7 +92,7 @@ func (g *Graph) SetEdge(e graph.Edge) {
 	)
 
 	if fid == tid {
-		panic("concrete: adding self edge")
+		panic("simple: adding self edge")
 	}
 
 	if !g.Has(from) {

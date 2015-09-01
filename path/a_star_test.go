@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
 	"github.com/gonum/graph/path/internal"
 	"github.com/gonum/graph/path/internal/testgraphs"
+	"github.com/gonum/graph/simple"
 	"github.com/gonum/graph/topo"
 )
 
@@ -127,19 +127,19 @@ var aStarTests = []struct {
 
 func TestAStar(t *testing.T) {
 	for _, test := range aStarTests {
-		pt, _ := AStar(concrete.Node(test.s), concrete.Node(test.t), test.g, test.heuristic)
+		pt, _ := AStar(simple.Node(test.s), simple.Node(test.t), test.g, test.heuristic)
 
-		p, cost := pt.To(concrete.Node(test.t))
+		p, cost := pt.To(simple.Node(test.t))
 
 		if !topo.IsPathIn(test.g, p) {
 			t.Error("got path that is not path in input graph for %q", test.name)
 		}
 
-		bfp, ok := BellmanFordFrom(concrete.Node(test.s), test.g)
+		bfp, ok := BellmanFordFrom(simple.Node(test.s), test.g)
 		if !ok {
 			t.Fatalf("unexpected negative cycle in %q", test.name)
 		}
-		if want := bfp.WeightTo(concrete.Node(test.t)); cost != want {
+		if want := bfp.WeightTo(simple.Node(test.t)); cost != want {
 			t.Errorf("unexpected cost for %q: got:%v want:%v", test.name, cost, want)
 		}
 
@@ -154,7 +154,7 @@ func TestAStar(t *testing.T) {
 }
 
 func TestExhaustiveAStar(t *testing.T) {
-	g := concrete.NewGraph(0, math.Inf(1))
+	g := simple.NewGraph(0, math.Inf(1))
 	nodes := []locatedNode{
 		{id: 1, x: 0, y: 6},
 		{id: 2, x: 1, y: 0},

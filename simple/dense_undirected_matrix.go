@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package concrete
+package simple
 
 import (
 	"github.com/gonum/graph"
@@ -132,7 +132,7 @@ func (g *UndirectedDenseGraph) SetEdgeWeight(e graph.Edge) {
 	fid := e.From().ID()
 	tid := e.To().ID()
 	if fid == tid {
-		panic("concrete: set edge cost of illegal edge")
+		panic("simple: set edge cost of illegal edge")
 	}
 	g.mat.SetSym(fid, tid, e.Weight())
 }

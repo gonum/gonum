@@ -10,7 +10,7 @@ import (
 	"sort"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/simple"
 )
 
 // UndirectedWeighter is an undirected graph that returns edge weights.
@@ -33,10 +33,10 @@ func Prim(dst graph.MutableUndirected, g UndirectedWeighter) float64 {
 
 	q := &primQueue{
 		indexOf: make(map[int]int, len(nodes)-1),
-		nodes:   make([]concrete.Edge, 0, len(nodes)-1),
+		nodes:   make([]simple.Edge, 0, len(nodes)-1),
 	}
 	for _, u := range nodes[1:] {
-		heap.Push(q, concrete.Edge{F: u, W: math.Inf(1)})
+		heap.Push(q, simple.Edge{F: u, W: math.Inf(1)})
 	}
 
 	u := nodes[0]
@@ -50,7 +50,7 @@ func Prim(dst graph.MutableUndirected, g UndirectedWeighter) float64 {
 
 	var w float64
 	for q.Len() > 0 {
-		e := heap.Pop(q).(concrete.Edge)
+		e := heap.Pop(q).(simple.Edge)
 		if e.To() != nil && g.HasEdge(e.From(), e.To()) {
 			dst.SetEdge(e)
 			w += e.Weight()
@@ -78,7 +78,7 @@ func Prim(dst graph.MutableUndirected, g UndirectedWeighter) float64 {
 // spanning forest.
 type primQueue struct {
 	indexOf map[int]int
-	nodes   []concrete.Edge
+	nodes   []simple.Edge
 }
 
 func (q *primQueue) Less(i, j int) bool {
@@ -96,7 +96,7 @@ func (q *primQueue) Len() int {
 }
 
 func (q *primQueue) Push(x interface{}) {
-	n := x.(concrete.Edge)
+	n := x.(simple.Edge)
 	q.indexOf[n.From().ID()] = len(q.nodes)
 	q.nodes = append(q.nodes, n)
 }
@@ -147,7 +147,7 @@ type UndirectedWeightLister interface {
 // spanning tree weights will be returned.
 func Kruskal(dst graph.MutableUndirected, g UndirectedWeightLister) float64 {
 	edges := g.Edges()
-	ascend := make([]concrete.Edge, 0, len(edges))
+	ascend := make([]simple.Edge, 0, len(edges))
 	for _, e := range edges {
 		u := e.From()
 		v := e.To()
@@ -155,7 +155,7 @@ func Kruskal(dst graph.MutableUndirected, g UndirectedWeightLister) float64 {
 		if !ok {
 			panic("kruskal: unexpected invalid weight")
 		}
-		ascend = append(ascend, concrete.Edge{F: u, T: v, W: w})
+		ascend = append(ascend, simple.Edge{F: u, T: v, W: w})
 	}
 	sort.Sort(byWeight(ascend))
 
@@ -175,7 +175,7 @@ func Kruskal(dst graph.MutableUndirected, g UndirectedWeightLister) float64 {
 	return w
 }
 
-type byWeight []concrete.Edge
+type byWeight []simple.Edge
 
 func (e byWeight) Len() int           { return len(e) }
 func (e byWeight) Less(i, j int) bool { return e[i].Weight() < e[j].Weight() }

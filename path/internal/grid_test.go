@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/concrete"
+	"github.com/gonum/graph/simple"
 )
 
 var _ graph.Graph = (*Grid)(nil)
@@ -234,17 +234,17 @@ func TestGrid(t *testing.T) {
 		{
 			from:     node(2),
 			diagonal: false,
-			to:       []graph.Node{concrete.Node(1), concrete.Node(6)},
+			to:       []graph.Node{simple.Node(1), simple.Node(6)},
 		},
 		{
 			from:     node(1),
 			diagonal: false,
-			to:       []graph.Node{concrete.Node(2)},
+			to:       []graph.Node{simple.Node(2)},
 		},
 		{
 			from:     node(1),
 			diagonal: true,
-			to:       []graph.Node{concrete.Node(2), concrete.Node(6)},
+			to:       []graph.Node{simple.Node(2), simple.Node(6)},
 		},
 	}
 	for _, test := range reach {

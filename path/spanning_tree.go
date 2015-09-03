@@ -25,7 +25,7 @@ type UndirectedWeighter interface {
 // first. The weight of the minimum spanning tree is returned. If g is not connected,
 // a minimum spanning forest will be constructed in dst and the sum of minimum
 // spanning tree weights will be returned.
-func Prim(dst graph.MutableUndirected, g UndirectedWeighter) float64 {
+func Prim(dst graph.UndirectedBuilder, g UndirectedWeighter) float64 {
 	nodes := g.Nodes()
 	if len(nodes) == 0 {
 		return 0
@@ -145,7 +145,7 @@ type UndirectedWeightLister interface {
 // first. The weight of the minimum spanning tree is returned. If g is not connected,
 // a minimum spanning forest will be constructed in dst and the sum of minimum
 // spanning tree weights will be returned.
-func Kruskal(dst graph.MutableUndirected, g UndirectedWeightLister) float64 {
+func Kruskal(dst graph.UndirectedBuilder, g UndirectedWeightLister) float64 {
 	edges := g.Edges()
 	ascend := make([]simple.Edge, 0, len(edges))
 	for _, e := range edges {

@@ -25,7 +25,7 @@ func init() {
 // dynamic shortest path routine in path/dynamic: DStarLite.
 var ShortestPathTests = []struct {
 	Name              string
-	Graph             func() graph.Mutable
+	Graph             func() graph.EdgeSetter
 	Edges             []simple.Edge
 	HasNegativeWeight bool
 	HasNegativeCycle  bool
@@ -40,7 +40,7 @@ var ShortestPathTests = []struct {
 	// Positive weighted graphs.
 	{
 		Name:  "empty directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		Weight: math.Inf(1),
@@ -49,7 +49,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "empty undirected",
-		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		Weight: math.Inf(1),
@@ -58,7 +58,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "one edge directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 		},
@@ -74,7 +74,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "one edge self directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 		},
@@ -90,7 +90,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "one edge undirected",
-		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 		},
@@ -106,7 +106,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "two paths directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(2), W: 2},
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -125,7 +125,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "two paths undirected",
-		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(2), W: 2},
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -144,7 +144,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "confounding paths directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -178,7 +178,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "confounding paths undirected",
-		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -212,7 +212,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "confounding paths directed 2-step",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -247,7 +247,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "confounding paths undirected 2-step",
-		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -282,7 +282,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight cycle directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -306,7 +306,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight cycle^2 directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -333,7 +333,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight cycle^2 confounding directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -363,7 +363,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight cycle^3 directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -393,7 +393,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight 3·cycle^2 confounding directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -429,7 +429,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight reversed 3·cycle^2 confounding directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
@@ -465,7 +465,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight |V|·cycle^(n/|V|) directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: func() []simple.Edge {
 			e := []simple.Edge{
 				// Add a path from 0->4 of weight 4
@@ -498,7 +498,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight n·cycle directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: func() []simple.Edge {
 			e := []simple.Edge{
 				// Add a path from 0->4 of weight 4
@@ -531,7 +531,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "zero-weight bi-directional tree with single exit directed",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: func() []simple.Edge {
 			e := []simple.Edge{
 				// Add a path from 0->4 of weight 4
@@ -579,7 +579,7 @@ var ShortestPathTests = []struct {
 	// Negative weighted graphs.
 	{
 		Name:  "one edge directed negative",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(1), W: -1},
 		},
@@ -596,7 +596,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "one edge undirected negative",
-		Graph: func() graph.Mutable { return simple.NewUndirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewUndirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node(0), T: simple.Node(1), W: -1},
 		},
@@ -607,7 +607,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "wp graph negative", // http://en.wikipedia.org/w/index.php?title=Johnson%27s_algorithm&oldid=564595231
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node('w'), T: simple.Node('z'), W: 2},
 			{F: simple.Node('x'), T: simple.Node('w'), W: 6},
@@ -630,7 +630,7 @@ var ShortestPathTests = []struct {
 	},
 	{
 		Name:  "roughgarden negative",
-		Graph: func() graph.Mutable { return simple.NewDirectedGraph(0, math.Inf(1)) },
+		Graph: func() graph.EdgeSetter { return simple.NewDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.Edge{
 			{F: simple.Node('a'), T: simple.Node('b'), W: -2},
 			{F: simple.Node('b'), T: simple.Node('c'), W: -1},

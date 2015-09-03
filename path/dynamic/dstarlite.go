@@ -33,7 +33,7 @@ type DStarLite struct {
 // WorldModel is a mutable weighted directed graph that returns nodes identified
 // by id number.
 type WorldModel interface {
-	graph.MutableDirected
+	graph.DirectedBuilder
 	graph.Weighter
 	Node(id int) graph.Node
 }

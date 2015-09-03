@@ -14,7 +14,7 @@ import (
 var _ graph.Graph = (*UndirectedGraph)(nil)
 
 func TestAssertMutableNotDirected(t *testing.T) {
-	var g graph.MutableUndirected = NewUndirectedGraph(0, math.Inf(1))
+	var g graph.UndirectedBuilder = NewUndirectedGraph(0, math.Inf(1))
 	if _, ok := g.(graph.Directed); ok {
 		t.Fatal("Graph is directed, but a MutableGraph cannot safely be directed!")
 	}

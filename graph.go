@@ -74,69 +74,70 @@ type Weighter interface {
 	Weight(x, y Node) (w float64, ok bool)
 }
 
-// Mutable is an interface for generalized graph mutation.
-type Mutable interface {
+// NodeAdder is an interface for adding arbitrary nodes to a graph.
+type NodeAdder interface {
 	// NewNodeID returns a new unique arbitrary ID.
 	NewNodeID() int
 
 	// Adds a node to the graph. AddNode panics if
 	// the added node ID matches an existing node ID.
 	AddNode(Node)
+}
 
+// NodeRemover is an interface for removing nodes from a graph.
+type NodeRemover interface {
 	// RemoveNode removes a node from the graph, as
 	// well as any edges attached to it. If the node
 	// is not in the graph it is a no-op.
 	RemoveNode(Node)
+}
 
+// EdgeSetter is an interface for adding edges to a graph.
+type EdgeSetter interface {
 	// SetEdge adds an edge from one node to another.
 	// If the nodes do not exist, they are added.
 	// SetEdge will panic if the IDs of the e.From
 	// and e.To are equal.
 	SetEdge(Edge)
+}
 
+// EdgeRemover is an interface for removing nodes from a graph.
+type EdgeRemover interface {
 	// RemoveEdge removes the given edge, leaving the
 	// terminal nodes. If the edge does not exist it
 	// is a no-op.
 	RemoveEdge(Edge)
 }
 
-// MutableUndirected is an undirected graph that can be arbitrarily altered.
-type MutableUndirected interface {
+// Builder is a graph that can have nodes and edges added.
+type Builder interface {
+	NodeAdder
+	EdgeSetter
+}
+
+// UndirectedBuilder is an undirected graph builder.
+type UndirectedBuilder interface {
 	Undirected
-	Mutable
+	Builder
 }
 
-// MutableDirected is a directed graph that can be arbitrarily altered.
-type MutableDirected interface {
+// DirectedBuilder is a directed graph builder.
+type DirectedBuilder interface {
 	Directed
-	Mutable
+	Builder
 }
 
-// CopyUndirected copies nodes and edges as undirected edges from the source to the
-// destination without first clearing the destination. CopyUndirected will panic if
-// a node ID in the source graph matches a node ID in the destination.
+// Copy copies nodes and edges as undirected edges from the source to the destination
+// without first clearing the destination. Copy will panic if a node ID in the source
+// graph matches a node ID in the destination.
 //
-// Note that if the source is a directed graph and a fundamental cycle exists with
-// two nodes where the edge weights differ, the resulting destination graph's edge
-// weight between those nodes is undefined.
-func CopyUndirected(dst MutableUndirected, src Graph) {
-	nodes := src.Nodes()
-	for _, n := range nodes {
-		dst.AddNode(n)
-	}
-	for _, u := range nodes {
-		for _, v := range src.From(u) {
-			dst.SetEdge(src.Edge(u, v))
-		}
-	}
-}
-
-// CopyDirected copies nodes and edges as directed edges from the source to the
-// destination without first clearing the destination. CopyDirected will panic if
-// a node ID in the source graph matches a node ID in the destination. If the
-// source is undirected both directions will be present in the destination after
-// the copy is complete.
-func CopyDirected(dst MutableDirected, src Graph) {
+// If the source is undirected and the destination is directed both directions will
+// be present in the destination after the copy is complete.
+//
+// If the source is a directed graph, the destination is undirected, and a fundamental
+// cycle exists with two nodes where the edge weights differ, the resulting destination
+// graph's edge weight between those nodes is undefined.
+func Copy(dst Builder, src Graph) {
 	nodes := src.Nodes()
 	for _, n := range nodes {
 		dst.AddNode(n)

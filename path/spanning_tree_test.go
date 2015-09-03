@@ -26,7 +26,7 @@ func init() {
 }
 
 type spanningGraph interface {
-	graph.MutableUndirected
+	graph.UndirectedBuilder
 	graph.Weighter
 	Edges() []graph.Edge
 }
@@ -240,7 +240,7 @@ var spanningTreeTests = []struct {
 	},
 }
 
-func testMinumumSpanning(mst func(dst graph.MutableUndirected, g spanningGraph) float64, t *testing.T) {
+func testMinumumSpanning(mst func(dst graph.UndirectedBuilder, g spanningGraph) float64, t *testing.T) {
 	for _, test := range spanningTreeTests {
 		g := test.graph()
 		for _, e := range test.edges {
@@ -282,13 +282,13 @@ func testMinumumSpanning(mst func(dst graph.MutableUndirected, g spanningGraph) 
 }
 
 func TestKruskal(t *testing.T) {
-	testMinumumSpanning(func(dst graph.MutableUndirected, g spanningGraph) float64 {
+	testMinumumSpanning(func(dst graph.UndirectedBuilder, g spanningGraph) float64 {
 		return Kruskal(dst, g)
 	}, t)
 }
 
 func TestPrim(t *testing.T) {
-	testMinumumSpanning(func(dst graph.MutableUndirected, g spanningGraph) float64 {
+	testMinumumSpanning(func(dst graph.UndirectedBuilder, g spanningGraph) float64 {
 		return Prim(dst, g)
 	}, t)
 }

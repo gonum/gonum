@@ -78,18 +78,15 @@ func max(a, b int) int {
 // fixed values. Probably a way to get them as constants.
 // TODO(btracey): Is there a better way to find the smallest number such that 1+E > 1
 
-var dlamchE, dlamchS, dlamchP float64
+var (
+	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
+	dlamchE = math.Float64frombits(0x3ca0000000000000)
 
-func init() {
-	onePlusEps := math.Nextafter(1, math.Inf(1))
-	eps := (math.Nextafter(1, math.Inf(1)) - 1) * 0.5
-	dlamchE = eps
-	sfmin := math.SmallestNonzeroFloat64
-	small := 1 / math.MaxFloat64
-	if small >= sfmin {
-		sfmin = small * onePlusEps
-	}
-	dlamchS = sfmin
-	radix := 2.0
-	dlamchP = radix * eps
-}
+	// dlamchP is 2 * eps
+	dlamchP = math.Float64frombits(0x3cb0000000000000)
+
+	// dlamchS is the "safe min", that is, the lowest number such that 1/sfmin does
+	// not overflow. The Netlib code for calculating this number is not correct --
+	// it overflows. Found by trial and error, it is equal to (1/math.MaxFloat64) * (1+ 6*eps)
+	dlamchS = math.Float64frombits(0x4000000000001)
+)

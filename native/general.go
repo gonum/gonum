@@ -20,6 +20,7 @@ var _ lapack.Float64 = Implementation{}
 // This list is duplicated in lapack/cgo. Keep in sync.
 const (
 	absIncNotOne  = "lapack: increment not one or negative one"
+	badDiag       = "lapack: bad diag"
 	badDirect     = "lapack: bad direct"
 	badIpiv       = "lapack: insufficient permutation length"
 	badLdA        = "lapack: index of a out of range"
@@ -74,10 +75,6 @@ func max(a, b int) int {
 	return b
 }
 
-// dlamch is a function in fortran, but since go forces IEEE-754 these are all
-// fixed values. Probably a way to get them as constants.
-// TODO(btracey): Is there a better way to find the smallest number such that 1+E > 1
-
 var (
 	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
 	dlamchE = math.Float64frombits(0x3ca0000000000000)
@@ -89,4 +86,7 @@ var (
 	// not overflow. The Netlib code for calculating this number is not correct --
 	// it overflows. Found by trial and error, it is equal to (1/math.MaxFloat64) * (1+ 6*eps)
 	dlamchS = math.Float64frombits(0x4000000000001)
+
+	smlnum = dlamchS / dlamchP
+	bignum = 1 / smlnum
 )

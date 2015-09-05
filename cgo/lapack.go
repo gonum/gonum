@@ -14,6 +14,7 @@ import (
 // Copied from lapack/native. Keep in sync.
 const (
 	absIncNotOne  = "lapack: increment not one or negative one"
+	badDiag       = "lapack: bad diag"
 	badDirect     = "lapack: bad direct"
 	badIpiv       = "lapack: insufficient permutation length"
 	badLdA        = "lapack: index of a out of range"

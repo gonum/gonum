@@ -88,6 +88,10 @@ func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }
 
+func TestDrscl(t *testing.T) {
+	testlapack.DrsclTest(t, impl)
+}
+
 func TestIladlc(t *testing.T) {
 	testlapack.IladlcTest(t, impl)
 }

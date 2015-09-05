@@ -21,6 +21,14 @@ import (
 func (impl Implementation) Dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int, work []float64) float64 {
 	// TODO(btracey): These should probably be refactored to use BLAS calls.
 	checkMatrix(m, n, a, lda)
+	switch norm {
+	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.NormFrob, lapack.MaxAbs:
+	default:
+		panic(badNorm)
+	}
+	if norm == lapack.MaxColumnSum && len(work) < n {
+		panic(badWork)
+	}
 	if m == 0 && n == 0 {
 		return 0
 	}

@@ -18,6 +18,7 @@ const (
 	badDirect     = "lapack: bad direct"
 	badIpiv       = "lapack: insufficient permutation length"
 	badLdA        = "lapack: index of a out of range"
+	badNorm       = "lapack: bad norm"
 	badSide       = "lapack: bad side"
 	badStore      = "lapack: bad store"
 	badTau        = "lapack: tau has insufficient length"
@@ -65,6 +66,49 @@ func checkMatrix(m, n int, a []float64, lda int) {
 type Implementation struct{}
 
 var _ lapack.Float64 = Implementation{}
+
+// Dlange computes the matrix norm of the general m×n matrix a. The input norm
+// specifies the norm computed.
+//  lapack.MaxAbs: the maximum absolute value of an element.
+//  lapack.MaxColumnSum: the maximum column sum of the absolute values of the entries.
+//  lapack.MaxRowSum: the maximum row sum of the absolute values of the entries.
+//  lapack.Frobenius: the square root of the sum of the squares of the entries.
+// If norm == lapack.MaxColumnSum, work must be of length n, and this function will panic otherwise.
+// There are no restrictions on work for the other matrix norms.
+func (impl Implementation) Dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int, work []float64) float64 {
+	checkMatrix(m, n, a, lda)
+	switch norm {
+	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.NormFrob, lapack.MaxAbs:
+	default:
+		panic(badNorm)
+	}
+	if norm == lapack.MaxColumnSum && len(work) < n {
+		panic(badWork)
+	}
+	return clapack.Dlange(byte(norm), m, n, a, lda)
+}
+
+// Dlantr computes the specified norm of an m×n trapezoidal matrix A. If
+// norm == lapack.MaxColumnSum work must have length at least n, otherwise work
+// is unused.
+func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag blas.Diag, m, n int, a []float64, lda int, work []float64) float64 {
+	checkMatrix(m, n, a, lda)
+	switch norm {
+	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.NormFrob, lapack.MaxAbs:
+	default:
+		panic(badNorm)
+	}
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	if diag != blas.Unit && diag != blas.NonUnit {
+		panic(badDiag)
+	}
+	if norm == lapack.MaxColumnSum && len(work) < n {
+		panic(badWork)
+	}
+	return clapack.Dlantr(byte(norm), uplo, diag, m, n, a, lda)
+}
 
 // Dpotrf computes the cholesky decomposition of the symmetric positive definite
 // matrix a. If ul == blas.Upper, then a is stored as an upper-triangular matrix,

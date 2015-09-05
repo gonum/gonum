@@ -20,6 +20,7 @@ var _ lapack.Float64 = Implementation{}
 // This list is duplicated in lapack/cgo. Keep in sync.
 const (
 	absIncNotOne  = "lapack: increment not one or negative one"
+	badDiag       = "lapack: bad diag"
 	badDirect     = "lapack: bad direct"
 	badIpiv       = "lapack: insufficient permutation length"
 	badLdA        = "lapack: index of a out of range"
@@ -79,6 +80,7 @@ func max(a, b int) int {
 // TODO(btracey): Is there a better way to find the smallest number such that 1+E > 1
 
 var dlamchE, dlamchS, dlamchP float64
+var smlnum, bignum float64
 
 func init() {
 	onePlusEps := math.Nextafter(1, math.Inf(1))
@@ -92,4 +94,6 @@ func init() {
 	dlamchS = sfmin
 	radix := 2.0
 	dlamchP = radix * eps
+	smlnum = dlamchS / dlamchP
+	bignum = 1 / smlnum
 }

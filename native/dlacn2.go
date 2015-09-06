@@ -18,7 +18,7 @@ import (
 //
 // isign, v, and x must all have length n and will panic otherwise. isave is used
 // for temporary storage.
-func (impl Implementation) Dlacn2(n int, v, x []float64, isgn []int, est float64, kase int, isave [3]int) (float64, int) {
+func (impl Implementation) Dlacn2(n int, v, x []float64, isgn []int, est float64, kase int, isave *[3]int) (float64, int) {
 	checkVector(n, x, 1)
 	checkVector(n, v, 1)
 	if len(isgn) < n {

@@ -69,7 +69,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 			if i != 0 && rnd() < p {
 				for _, w := range permute(dst.From(simple.Node(u)), rndN) {
 					wid := w.ID()
-					if wid == v || dst.HasEdge(w, simple.Node(v)) {
+					if wid == v || dst.HasEdgeBetween(w, simple.Node(v)) {
 						continue
 					}
 					dst.SetEdge(simple.Edge{F: w, T: simple.Node(v), W: 1})
@@ -86,7 +86,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 				if !ok {
 					return errors.New("gen: depleted distribution")
 				}
-				if u == v || dst.HasEdge(simple.Node(u), simple.Node(v)) {
+				if u == v || dst.HasEdgeBetween(simple.Node(u), simple.Node(v)) {
 					continue
 				}
 				dst.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})

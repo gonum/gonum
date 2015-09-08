@@ -25,7 +25,7 @@ func IsPathIn(g graph.Graph, path []graph.Node) bool {
 		case graph.Directed:
 			canReach = g.HasEdgeFromTo
 		default:
-			canReach = g.HasEdge
+			canReach = g.HasEdgeBetween
 		}
 
 		for i, u := range path[:len(path)-1] {

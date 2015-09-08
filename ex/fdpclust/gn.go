@@ -187,7 +187,7 @@ func (g *GraphNode) findNeighbors(n graph.Node, visited map[int]struct{}) []grap
 	return nil
 }
 
-func (g *GraphNode) HasEdge(u, v graph.Node) bool {
+func (g *GraphNode) HasEdgeBetween(u, v graph.Node) bool {
 	return g.EdgeBetween(u, v) != nil
 }
 

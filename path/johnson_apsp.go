@@ -129,7 +129,7 @@ func (g johnsonWeightAdjuster) Weight(x, y graph.Node) (w float64, ok bool) {
 	return w + g.adjustBy.WeightTo(x) - g.adjustBy.WeightTo(y), ok
 }
 
-func (johnsonWeightAdjuster) HasEdge(_, _ graph.Node) bool {
+func (johnsonWeightAdjuster) HasEdgeBetween(_, _ graph.Node) bool {
 	panic("search: unintended use of johnsonWeightAdjuster")
 }
 

@@ -44,7 +44,7 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 		}
 	}
 
-	hasEdge := dst.HasEdge
+	hasEdge := dst.HasEdgeBetween
 	d, isDirected := dst.(graph.Directed)
 	if isDirected {
 		hasEdge = d.HasEdgeFromTo

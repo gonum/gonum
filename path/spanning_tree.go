@@ -51,7 +51,7 @@ func Prim(dst graph.UndirectedBuilder, g UndirectedWeighter) float64 {
 	var w float64
 	for q.Len() > 0 {
 		e := heap.Pop(q).(simple.Edge)
-		if e.To() != nil && g.HasEdge(e.From(), e.To()) {
+		if e.To() != nil && g.HasEdgeBetween(e.From(), e.To()) {
 			dst.SetEdge(e)
 			w += e.Weight()
 		}

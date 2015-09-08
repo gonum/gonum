@@ -267,7 +267,7 @@ func (g johnsonGraph) From(n graph.Node) []graph.Node {
 func (johnsonGraph) Has(graph.Node) bool {
 	panic("search: unintended use of johnsonGraph")
 }
-func (johnsonGraph) HasEdge(_, _ graph.Node) bool {
+func (johnsonGraph) HasEdgeBetween(_, _ graph.Node) bool {
 	panic("search: unintended use of johnsonGraph")
 }
 func (johnsonGraph) Edge(_, _ graph.Node) graph.Edge {

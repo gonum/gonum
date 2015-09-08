@@ -175,7 +175,7 @@ func (l *LimitedVisionGrid) From(u graph.Node) []graph.Node {
 	var to []graph.Node
 	for r := nr - 1; r <= nr+1; r++ {
 		for c := nc - 1; c <= nc+1; c++ {
-			if v := l.NodeAt(r, c); v != nil && l.HasEdge(u, v) {
+			if v := l.NodeAt(r, c); v != nil && l.HasEdgeBetween(u, v) {
 				to = append(to, v)
 			}
 		}
@@ -183,8 +183,8 @@ func (l *LimitedVisionGrid) From(u graph.Node) []graph.Node {
 	return to
 }
 
-// HasEdge optimistically returns whether an edge is exists between u and v.
-func (l *LimitedVisionGrid) HasEdge(u, v graph.Node) bool {
+// HasEdgeBetween optimistically returns whether an edge is exists between u and v.
+func (l *LimitedVisionGrid) HasEdgeBetween(u, v graph.Node) bool {
 	if u.ID() == v.ID() {
 		return false
 	}
@@ -205,7 +205,7 @@ func (l *LimitedVisionGrid) HasEdge(u, v graph.Node) bool {
 
 	switch {
 	case uKnown && vKnown:
-		return l.Grid.HasEdge(u, v)
+		return l.Grid.HasEdgeBetween(u, v)
 	case uKnown:
 		return l.Grid.HasOpen(u)
 	case vKnown:
@@ -222,7 +222,7 @@ func (l *LimitedVisionGrid) Edge(u, v graph.Node) graph.Edge {
 
 // Edge optimistically returns the edge between u and v.
 func (l *LimitedVisionGrid) EdgeBetween(u, v graph.Node) graph.Edge {
-	if l.HasEdge(u, v) {
+	if l.HasEdgeBetween(u, v) {
 		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
 			return simple.Edge{F: u, T: v, W: 1}
 		}
@@ -238,7 +238,7 @@ func (l *LimitedVisionGrid) Weight(x, y graph.Node) (w float64, ok bool) {
 	if x.ID() == y.ID() {
 		return 0, true
 	}
-	if !l.HasEdge(x, y) {
+	if !l.HasEdgeBetween(x, y) {
 		return math.Inf(1), false
 	}
 	if e := l.EdgeBetween(x, y); e != nil {
@@ -284,7 +284,7 @@ func (l *LimitedVisionGrid) Render(path []graph.Node) ([]byte, error) {
 	// We don't use topo.IsPathIn at the outset because we
 	// want to draw as much as possible before failing.
 	for i, n := range path {
-		if !l.Has(n) || (i != 0 && !l.HasEdge(path[i-1], n)) {
+		if !l.Has(n) || (i != 0 && !l.HasEdgeBetween(path[i-1], n)) {
 			id := n.ID()
 			if id >= 0 && id < len(l.Grid.open) {
 				r, c := l.RowCol(n.ID())

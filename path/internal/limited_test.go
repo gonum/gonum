@@ -1172,16 +1172,16 @@ func TestLimitedVisionGrid(t *testing.T) {
 			for _, v := range l.Nodes() {
 				vx, vy := l.XY(v)
 				vNear := math.Hypot(x-vx, y-vy) <= test.radius
-				if u.ID() == v.ID() && l.HasEdge(u, v) {
+				if u.ID() == v.ID() && l.HasEdgeBetween(u, v) {
 					t.Errorf("unexpected self edge: %v -- %v", u, v)
 				}
-				if !uNear && !vNear && !l.HasEdge(u, v) && couldConnectIn(l, u, v) {
+				if !uNear && !vNear && !l.HasEdgeBetween(u, v) && couldConnectIn(l, u, v) {
 					t.Errorf("unexpected pessimism: no hope in distant edge between %v and %v for test %d",
 						u, v, i)
 				}
-				if (uNear && vNear) && l.HasEdge(u, v) != l.Grid.HasEdge(u, v) {
+				if (uNear && vNear) && l.HasEdgeBetween(u, v) != l.Grid.HasEdgeBetween(u, v) {
 					t.Errorf("unrealistic optimism: disagreement about edge between %v and %v for test %d: got:%t want:%t",
-						u, v, i, l.HasEdge(u, v), l.Grid.HasEdge(u, v))
+						u, v, i, l.HasEdgeBetween(u, v), l.Grid.HasEdgeBetween(u, v))
 				}
 			}
 		}

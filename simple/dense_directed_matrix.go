@@ -102,14 +102,14 @@ func (g *DirectedDenseGraph) To(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *DirectedDenseGraph) HasEdge(x, y graph.Node) bool {
+func (g *DirectedDenseGraph) HasEdgeBetween(x, y graph.Node) bool {
 	xid := x.ID()
 	yid := y.ID()
 	return xid != yid && (!isSame(g.mat.At(xid, yid), g.absent) || !isSame(g.mat.At(yid, xid), g.absent))
 }
 
 func (g *DirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
-	if g.HasEdge(u, v) {
+	if g.HasEdgeBetween(u, v) {
 		return Edge{F: u, T: v, W: g.mat.At(u.ID(), v.ID())}
 	}
 	return nil

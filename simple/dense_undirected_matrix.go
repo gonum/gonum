@@ -99,7 +99,7 @@ func (g *UndirectedDenseGraph) From(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *UndirectedDenseGraph) HasEdge(u, v graph.Node) bool {
+func (g *UndirectedDenseGraph) HasEdgeBetween(u, v graph.Node) bool {
 	uid := u.ID()
 	vid := v.ID()
 	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
@@ -110,7 +110,7 @@ func (g *UndirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
 }
 
 func (g *UndirectedDenseGraph) EdgeBetween(u, v graph.Node) graph.Edge {
-	if g.HasEdge(u, v) {
+	if g.HasEdgeBetween(u, v) {
 		return Edge{F: u, T: v, W: g.mat.At(u.ID(), v.ID())}
 	}
 	return nil

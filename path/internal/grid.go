@@ -171,7 +171,7 @@ func (g *Grid) From(u graph.Node) []graph.Node {
 	var to []graph.Node
 	for r := nr - 1; r <= nr+1; r++ {
 		for c := nc - 1; c <= nc+1; c++ {
-			if v := g.NodeAt(r, c); v != nil && g.HasEdge(u, v) {
+			if v := g.NodeAt(r, c); v != nil && g.HasEdgeBetween(u, v) {
 				to = append(to, v)
 			}
 		}
@@ -179,8 +179,8 @@ func (g *Grid) From(u graph.Node) []graph.Node {
 	return to
 }
 
-// HasEdge returns whether there is an edge between u and v.
-func (g *Grid) HasEdge(u, v graph.Node) bool {
+// HasEdgeBetween returns whether there is an edge between u and v.
+func (g *Grid) HasEdgeBetween(u, v graph.Node) bool {
 	if !g.HasOpen(u) || !g.HasOpen(v) || u.ID() == v.ID() {
 		return false
 	}
@@ -206,7 +206,7 @@ func (g *Grid) Edge(u, v graph.Node) graph.Edge {
 
 // EdgeBetween returns the edge between u and v.
 func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
-	if g.HasEdge(u, v) {
+	if g.HasEdgeBetween(u, v) {
 		if !g.AllowDiagonal || g.UnitEdgeWeight {
 			return simple.Edge{F: u, T: v, W: 1}
 		}
@@ -222,7 +222,7 @@ func (g *Grid) Weight(x, y graph.Node) (w float64, ok bool) {
 	if x.ID() == y.ID() {
 		return 0, true
 	}
-	if !g.HasEdge(x, y) {
+	if !g.HasEdgeBetween(x, y) {
 		return math.Inf(1), false
 	}
 	if e := g.EdgeBetween(x, y); e != nil {
@@ -264,7 +264,7 @@ func (g *Grid) Render(path []graph.Node) ([]byte, error) {
 	// We don't use topo.IsPathIn at the outset because we
 	// want to draw as much as possible before failing.
 	for i, n := range path {
-		if !g.Has(n) || (i != 0 && !g.HasEdge(path[i-1], n)) {
+		if !g.Has(n) || (i != 0 && !g.HasEdgeBetween(path[i-1], n)) {
 			id := n.ID()
 			if id >= 0 && id < len(g.open) {
 				r, c := g.RowCol(n.ID())

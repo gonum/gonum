@@ -402,18 +402,18 @@ var dynamicDStarLiteTests = []struct {
 			// Check we have a correctly modified representation.
 			for _, u := range l.Nodes() {
 				for _, v := range l.Nodes() {
-					if l.HasEdge(u, v) != l.Grid.HasEdge(u, v) {
+					if l.HasEdgeBetween(u, v) != l.Grid.HasEdgeBetween(u, v) {
 						ur, uc := l.RowCol(u.ID())
 						vr, vc := l.RowCol(v.ID())
 						if (ur == wallRow && uc == wallCol) || (vr == wallRow && vc == wallCol) {
-							if !l.HasEdge(u, v) {
+							if !l.HasEdgeBetween(u, v) {
 								panic(fmt.Sprintf("expected to believe edge between %v (%d,%d) and %v (%d,%d) is passable",
 									u, v, ur, uc, vr, vc))
 							}
 							continue
 						}
 						panic(fmt.Sprintf("disagreement about edge between %v (%d,%d) and %v (%d,%d): got:%t want:%t",
-							u, v, ur, uc, vr, vc, l.HasEdge(u, v), l.Grid.HasEdge(u, v)))
+							u, v, ur, uc, vr, vc, l.HasEdgeBetween(u, v), l.Grid.HasEdgeBetween(u, v)))
 					}
 				}
 			}

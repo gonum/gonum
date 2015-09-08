@@ -148,7 +148,7 @@ func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
 	return neighbors
 }
 
-func (g *UndirectedGraph) HasEdge(n, neigh graph.Node) bool {
+func (g *UndirectedGraph) HasEdgeBetween(n, neigh graph.Node) bool {
 	_, ok := g.neighbors[n.ID()][neigh.ID()]
 	return ok
 }

@@ -90,7 +90,7 @@ func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 		return nil
 	}
 
-	hasEdge := dst.HasEdge
+	hasEdge := dst.HasEdgeBetween
 	d, isDirected := dst.(graph.Directed)
 	if isDirected {
 		m /= 2
@@ -173,7 +173,7 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 		rndN = src.Intn
 	}
 
-	hasEdge := dst.HasEdge
+	hasEdge := dst.HasEdgeBetween
 	dg, isDirected := dst.(graph.Directed)
 	if isDirected {
 		hasEdge = dg.HasEdgeFromTo

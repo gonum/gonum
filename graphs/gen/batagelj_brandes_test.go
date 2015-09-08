@@ -26,7 +26,7 @@ func (g *gnUndirected) SetEdge(e graph.Edge) {
 		return
 	case e.From().ID() > e.To().ID():
 		g.addBackwards = true
-	case g.UndirectedBuilder.HasEdge(e.From(), e.To()):
+	case g.UndirectedBuilder.HasEdgeBetween(e.From(), e.To()):
 		g.addMultipleEdge = true
 	}
 

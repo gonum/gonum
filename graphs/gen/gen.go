@@ -10,7 +10,7 @@ import "github.com/gonum/graph"
 // GraphBuilder is a graph that can have nodes and edges added.
 type GraphBuilder interface {
 	Has(graph.Node) bool
-	HasEdge(x, y graph.Node) bool
+	HasEdgeBetween(x, y graph.Node) bool
 	graph.Builder
 }
 

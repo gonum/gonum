@@ -159,7 +159,7 @@ func (g *DirectedGraph) From(n graph.Node) []graph.Node {
 	return successors
 }
 
-func (g *DirectedGraph) HasEdge(x, y graph.Node) bool {
+func (g *DirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 	xid := x.ID()
 	yid := y.ID()
 	if _, ok := g.nodeMap[xid]; !ok {

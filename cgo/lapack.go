@@ -129,6 +129,33 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 	return clapack.Dpotrf(ul, n, a, lda)
 }
 
+// Dgecon estimates the reciprocal of the condition number of the n×n matrix A
+// given the LU decomposition of the matrix. The condition number computed may
+// be based on the 1-norm or the ∞-norm.
+//
+// The slice a contains the result of the LU decomposition of A as computed by Dgetrf.
+//
+// anorm is the corresponding 1-norm or ∞-norm of the original matrix A.
+//
+// work is a temporary data slice of length at least 4*n and Dgecon will panic otherwise.
+//
+// iwork is a temporary data slice of length at least n and Dgecon will panic otherwise.
+func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, lda int, anorm float64, work []float64, iwork []int) float64 {
+	checkMatrix(n, n, a, lda)
+	if norm != lapack.MaxColumnSum && norm != lapack.MaxRowSum {
+		panic("bad norm")
+	}
+	if len(work) < 4*n {
+		panic(badWork)
+	}
+	if len(iwork) < n {
+		panic(badWork)
+	}
+	rcond := make([]float64, 1)
+	clapack.Dgecon(byte(norm), n, a, lda, anorm, rcond)
+	return rcond[0]
+}
+
 // Dgelq2 computes the LQ factorization of the m×n matrix A.
 //
 // In an LQ factorization, L is a lower triangular m×n matrix, and Q is an n×n

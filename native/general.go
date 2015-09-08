@@ -24,6 +24,7 @@ const (
 	badDirect     = "lapack: bad direct"
 	badIpiv       = "lapack: insufficient permutation length"
 	badLdA        = "lapack: index of a out of range"
+	badNorm       = "lapack: bad norm"
 	badSide       = "lapack: bad side"
 	badStore      = "lapack: bad store"
 	badTau        = "lapack: tau has insufficient length"

@@ -13,6 +13,17 @@ import (
 
 var impl = Implementation{}
 
+func TestDlange(t *testing.T) {
+	testlapack.DlangeTest(t, impl)
+}
+
+// The results from Dlantr do not match the results from Dlange. In some cases,
+// there also appear to be memory corruption issues.
+// TODO(btracey): Re-enable this test when the implementations are fixed.
+// func TestDlantr(t *testing.T) {
+//	testlapack.DlantrTest(t, impl)
+// }
+
 func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }

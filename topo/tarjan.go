@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"sort"
 
+	"golang.org/x/tools/container/intsets"
+
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal"
 )
 
 // Unorderable is an error containing sets of unorderable graph.Nodes.
@@ -79,7 +80,7 @@ func TarjanSCC(g graph.Directed) [][]graph.Node {
 
 		indexTable: make(map[int]int, len(nodes)),
 		lowLink:    make(map[int]int, len(nodes)),
-		onStack:    make(internal.IntSet, len(nodes)),
+		onStack:    &intsets.Sparse{},
 	}
 	for _, v := range nodes {
 		if t.indexTable[v.ID()] == 0 {
@@ -100,7 +101,7 @@ type tarjan struct {
 	index      int
 	indexTable map[int]int
 	lowLink    map[int]int
-	onStack    internal.IntSet
+	onStack    *intsets.Sparse
 
 	stack []graph.Node
 
@@ -117,7 +118,7 @@ func (t *tarjan) strongconnect(v graph.Node) {
 	t.indexTable[vID] = t.index
 	t.lowLink[vID] = t.index
 	t.stack = append(t.stack, v)
-	t.onStack.Add(vID)
+	t.onStack.Insert(vID)
 
 	// Consider successors of v.
 	for _, w := range t.succ(v) {

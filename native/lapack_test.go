@@ -12,6 +12,10 @@ import (
 
 var impl = Implementation{}
 
+func TestDgecon(t *testing.T) {
+	testlapack.DgeconTest(t, impl)
+}
+
 func TestDgelqf(t *testing.T) {
 	testlapack.DgelqfTest(t, impl)
 }

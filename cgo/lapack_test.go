@@ -28,6 +28,10 @@ func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }
 
+func TestDgecon(t *testing.T) {
+	testlapack.DgeconTest(t, impl)
+}
+
 func TestDgelq2(t *testing.T) {
 	testlapack.Dgelq2Test(t, impl)
 }

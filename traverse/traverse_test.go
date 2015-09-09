@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/graphs/gen"
 	"github.com/gonum/graph/internal"
 	"github.com/gonum/graph/simple"
 )
@@ -353,4 +354,81 @@ func linksTo(i ...int) set {
 		s[v] = struct{}{}
 	}
 	return s
+}
+
+var (
+	gnpUndirected_10_tenth   = gnpUndirected(10, 0.1)
+	gnpUndirected_100_tenth  = gnpUndirected(100, 0.1)
+	gnpUndirected_1000_tenth = gnpUndirected(1000, 0.1)
+	gnpUndirected_10_half    = gnpUndirected(10, 0.5)
+	gnpUndirected_100_half   = gnpUndirected(100, 0.5)
+	gnpUndirected_1000_half  = gnpUndirected(1000, 0.5)
+)
+
+func gnpUndirected(n int, p float64) graph.Undirected {
+	g := simple.NewUndirectedGraph(0, math.Inf(1))
+	gen.Gnp(g, n, p, nil)
+	return g
+}
+
+func benchMarkWalkAllBreadthFirst(b *testing.B, g graph.Undirected) {
+	n := len(g.Nodes())
+	b.ResetTimer()
+	var bft BreadthFirst
+	for i := 0; i < b.N; i++ {
+		bft.WalkAll(g, nil, nil, nil)
+	}
+	if bft.visited.Len() != n {
+		b.Errorf("unexpected number of nodes visited: want: %d got %d", n, bft.visited.Len())
+	}
+}
+
+func BenchmarkWalkAllBreadthFirstGnp_10_tenth(b *testing.B) {
+	benchMarkWalkAllBreadthFirst(b, gnpUndirected_10_tenth)
+}
+func BenchmarkWalkAllBreadthFirstGnp_100_tenth(b *testing.B) {
+	benchMarkWalkAllBreadthFirst(b, gnpUndirected_100_tenth)
+}
+func BenchmarkWalkAllBreadthFirstGnp_1000_tenth(b *testing.B) {
+	benchMarkWalkAllBreadthFirst(b, gnpUndirected_1000_tenth)
+}
+func BenchmarkWalkAllBreadthFirstGnp_10_half(b *testing.B) {
+	benchMarkWalkAllBreadthFirst(b, gnpUndirected_10_half)
+}
+func BenchmarkWalkAllBreadthFirstGnp_100_half(b *testing.B) {
+	benchMarkWalkAllBreadthFirst(b, gnpUndirected_100_half)
+}
+func BenchmarkWalkAllBreadthFirstGnp_1000_half(b *testing.B) {
+	benchMarkWalkAllBreadthFirst(b, gnpUndirected_1000_half)
+}
+
+func benchMarkWalkAllDepthFirst(b *testing.B, g graph.Undirected) {
+	n := len(g.Nodes())
+	b.ResetTimer()
+	var dft DepthFirst
+	for i := 0; i < b.N; i++ {
+		dft.WalkAll(g, nil, nil, nil)
+	}
+	if dft.visited.Len() != n {
+		b.Errorf("unexpected number of nodes visited: want: %d got %d", n, dft.visited.Len())
+	}
+}
+
+func BenchmarkWalkAllDepthFirstGnp_10_tenth(b *testing.B) {
+	benchMarkWalkAllDepthFirst(b, gnpUndirected_10_tenth)
+}
+func BenchmarkWalkAllDepthFirstGnp_100_tenth(b *testing.B) {
+	benchMarkWalkAllDepthFirst(b, gnpUndirected_100_tenth)
+}
+func BenchmarkWalkAllDepthFirstGnp_1000_tenth(b *testing.B) {
+	benchMarkWalkAllDepthFirst(b, gnpUndirected_1000_tenth)
+}
+func BenchmarkWalkAllDepthFirstGnp_10_half(b *testing.B) {
+	benchMarkWalkAllDepthFirst(b, gnpUndirected_10_half)
+}
+func BenchmarkWalkAllDepthFirstGnp_100_half(b *testing.B) {
+	benchMarkWalkAllDepthFirst(b, gnpUndirected_100_half)
+}
+func BenchmarkWalkAllDepthFirstGnp_1000_half(b *testing.B) {
+	benchMarkWalkAllDepthFirst(b, gnpUndirected_1000_half)
 }

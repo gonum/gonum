@@ -88,6 +88,25 @@ func (impl Implementation) Dlange(norm lapack.MatrixNorm, m, n int, a []float64,
 	return clapack.Dlange(byte(norm), m, n, a, lda)
 }
 
+// Dlansy computes the specified norm of an n×n symmetric matrix. If
+// norm == lapack.MaxColumnSum or norm == lapackMaxRowSum work must have length
+// at least n, otherwise work is unused.
+func (impl Implementation) Dlansy(norm lapack.MatrixNorm, uplo blas.Uplo, n int, a []float64, lda int, work []float64) float64 {
+	checkMatrix(n, n, a, lda)
+	switch norm {
+	case lapack.MaxRowSum, lapack.MaxColumnSum, lapack.NormFrob, lapack.MaxAbs:
+	default:
+		panic(badNorm)
+	}
+	if (norm == lapack.MaxColumnSum || norm == lapack.MaxRowSum) && len(work) < n {
+		panic(badWork)
+	}
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	return clapack.Dlansy(byte(norm), uplo, n, a, lda)
+}
+
 // Dlantr computes the specified norm of an m×n trapezoidal matrix A. If
 // norm == lapack.MaxColumnSum work must have length at least n, otherwise work
 // is unused.

@@ -109,7 +109,7 @@ func (g *DirectedDenseGraph) HasEdgeBetween(x, y graph.Node) bool {
 }
 
 func (g *DirectedDenseGraph) Edge(u, v graph.Node) graph.Edge {
-	if g.HasEdgeBetween(u, v) {
+	if g.HasEdgeFromTo(u, v) {
 		return Edge{F: u, T: v, W: g.mat.At(u.ID(), v.ID())}
 	}
 	return nil

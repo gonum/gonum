@@ -524,6 +524,31 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 	clapack.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc)
 }
 
+// Dtrcon estimates the reciprocal of the condition number of a positive-definite
+// matrix A given the Cholesky decmposition of A. The condition number computed
+// is based on the 1-norm and the ∞-norm.
+//
+// anorm is the 1-norm and the ∞-norm of the original matrix A.
+//
+// work is a temporary data slice of length at least 3*n and Dpocon will panic otherwise.
+//
+// iwork is a temporary data slice of length at least n and Dpocon will panic otherwise.
+func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, anorm float64, work []float64, iwork []int) float64 {
+	checkMatrix(n, n, a, lda)
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	if len(work) < 3*n {
+		panic(badWork)
+	}
+	if len(iwork) < n {
+		panic(badWork)
+	}
+	rcond := make([]float64, 1)
+	clapack.Dpocon(uplo, n, a, lda, anorm, rcond)
+	return rcond[0]
+}
+
 // Dtrcon estimates the reciprocal of the condition number of a triangular matrix A.
 // The condition number computed may be based on the 1-norm or the ∞-norm.
 //

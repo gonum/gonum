@@ -86,3 +86,7 @@ func TestDormlq(t *testing.T) {
 	testlapack.Dorml2Test(t, blockedTranslate{impl})
 }
 */
+
+func TestDtrcon(t *testing.T) {
+	testlapack.DtrconTest(t, impl)
+}

@@ -66,7 +66,7 @@ func DlantrTest(t *testing.T, impl Dlantrer) {
 								aDense[i*lda+i] = 1
 							}
 						}
-						work := make([]float64, n)
+						work := make([]float64, n+6)
 						for i := range work {
 							work[i] = rand.Float64()
 						}

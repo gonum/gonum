@@ -524,6 +524,33 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 	clapack.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc)
 }
 
+// Dtrcon estimates the reciprocal of the condition number of a triangular matrix A.
+// The condition number computed may be based on the 1-norm or the ∞-norm.
+//
+// work is a temporary data slice of length at least 3*n and Dtrcon will panic otherwise.
+//
+// iwork is a temporary data slice of length at least n and Dtrcon will panic otherwise.
+func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int, work []float64, iwork []int) float64 {
+	if norm != lapack.MaxColumnSum && norm != lapack.MaxRowSum {
+		panic(badNorm)
+	}
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	if diag != blas.NonUnit && diag != blas.Unit {
+		panic(badDiag)
+	}
+	if len(work) < 3*n {
+		panic(badWork)
+	}
+	if len(iwork) < n {
+		panic(badWork)
+	}
+	rcond := []float64{0}
+	clapack.Dtrcon(byte(norm), uplo, diag, n, a, lda, rcond)
+	return rcond[0]
+}
+
 // Dtrtrs solves a triangular system of the form A * X = B or A^T * X = B. Dtrtrs
 // returns whether the solve completed successfully. If A is singular, no solve is performed.
 func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int) (ok bool) {

@@ -104,6 +104,10 @@ func TestDrscl(t *testing.T) {
 	testlapack.DrsclTest(t, impl)
 }
 
+func TestDtrcon(t *testing.T) {
+	testlapack.DtrconTest(t, impl)
+}
+
 func TestIladlc(t *testing.T) {
 	testlapack.IladlcTest(t, impl)
 }

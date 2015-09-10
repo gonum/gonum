@@ -92,6 +92,10 @@ func TestDorm2r(t *testing.T) {
 	testlapack.Dorm2rTest(t, impl)
 }
 
+func TestDpocon(t *testing.T) {
+	testlapack.DpoconTest(t, impl)
+}
+
 func TestDpotf2(t *testing.T) {
 	testlapack.Dpotf2Test(t, impl)
 }

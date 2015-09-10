@@ -87,6 +87,10 @@ func TestDormlq(t *testing.T) {
 }
 */
 
+func TestDpocon(t *testing.T) {
+	testlapack.DpoconTest(t, impl)
+}
+
 func TestDtrcon(t *testing.T) {
 	testlapack.DtrconTest(t, impl)
 }

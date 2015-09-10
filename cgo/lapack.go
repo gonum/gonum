@@ -544,7 +544,9 @@ func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, a
 	if len(iwork) < n {
 		panic(badWork)
 	}
+	rcond := make([]float64, 1)
 	clapack.Dpocon(uplo, n, a, lda, anorm, rcond)
+	return rcond[0]
 }
 
 // Dtrcon estimates the reciprocal of the condition number of a triangular matrix A.

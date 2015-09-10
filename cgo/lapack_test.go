@@ -87,12 +87,9 @@ func TestDormlq(t *testing.T) {
 }
 */
 
-/*
-// Test disabled because of memory crashes. https://github.com/xianyi/OpenBLAS/issues/639.
 func TestDpocon(t *testing.T) {
 	testlapack.DpoconTest(t, impl)
 }
-*/
 
 func TestDtrcon(t *testing.T) {
 	testlapack.DtrconTest(t, impl)

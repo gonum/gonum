@@ -7,7 +7,7 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-// Dtrcon estimates the reciprocal of the condition number of a positive-definite
+// Dpocon estimates the reciprocal of the condition number of a positive-definite
 // matrix A given the Cholesky decmposition of A. The condition number computed
 // is based on the 1-norm and the ∞-norm.
 //

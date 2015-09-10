@@ -129,7 +129,7 @@ func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 			}
 		}
 		var max float64
-		for _, v := range work {
+		for _, v := range work[:n] {
 			if math.IsNaN(v) {
 				return math.NaN()
 			}

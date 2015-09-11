@@ -178,6 +178,33 @@ func Getrs(trans blas.Transpose, a blas64.General, b blas64.General, ipiv []int)
 	lapack64.Dgetrs(trans, a.Cols, b.Cols, a.Data, a.Stride, ipiv, b.Data, b.Stride)
 }
 
+// Lange computes the matrix norm of the general m×n matrix A. The input norm
+// specifies the norm computed.
+//  lapack.MaxAbs: the maximum absolute value of an element.
+//  lapack.MaxColumnSum: the maximum column sum of the absolute values of the entries.
+//  lapack.MaxRowSum: the maximum row sum of the absolute values of the entries.
+//  lapack.Frobenius: the square root of the sum of the squares of the entries.
+// If norm == lapack.MaxColumnSum, work must be of length n, and this function will panic otherwise.
+// There are no restrictions on work for the other matrix norms.
+func Lange(norm lapack.MatrixNorm, a blas64.General, work []float64) float64 {
+	return lapack64.Dlange(norm, a.Rows, a.Cols, a.Data, a.Stride, work)
+}
+
+// Lansy computes the specified norm of an n×n symmetric matrix. If
+// norm == lapack.MaxColumnSum or norm == lapackMaxRowSum work must have length
+// at least n and this function will panic otherwise.
+// There are no restrictions on work for the other matrix norms.
+func Lansy(norm lapack.MatrixNorm, a blas64.Symmetric, work []float64) float64 {
+	return lapack64.Dlansy(norm, a.Uplo, a.N, a.Data, a.Stride, work)
+}
+
+// Lantr computes the specified norm of an m×n trapezoidal matrix A. If
+// norm == lapack.MaxColumnSum work must have length at least n and this function
+// will panic otherwise. There are no restrictions on work for the other matrix norms.
+func Lantr(norm lapack.MatrixNorm, a blas64.Triangular, work []float64) float64 {
+	return lapack64.Dlantr(norm, a.Uplo, a.Diag, a.N, a.N, a.Data, a.Stride, work)
+}
+
 // Ormlq multiplies the matrix C by the othogonal matrix Q defined by
 // A and tau. A and tau are as returned from Gelqf.
 //  C = Q * C    if side == blas.Left and trans == blas.NoTrans

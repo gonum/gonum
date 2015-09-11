@@ -14,12 +14,11 @@ import (
 
 func (s *S) TestCholesky(c *check.C) {
 	for _, t := range []struct {
-		a     *SymDense
-		upper bool
-		f     *TriDense
+		a *SymDense
 
-		want *TriDense
-		pd   bool
+		cond   float64
+		want   *TriDense
+		posdef bool
 	}{
 		{
 			a: NewSymDense(3, []float64{
@@ -27,111 +26,78 @@ func (s *S) TestCholesky(c *check.C) {
 				0, 2, 3,
 				0, 0, 6,
 			}),
-			upper: false,
-			f:     &TriDense{},
-
-			want: NewTriDense(3, false, []float64{
-				2, 0, 0,
-				0.5, 1.3228756555322954, 0,
-				0.5, 2.0788046015507495, 1.195228609334394,
-			}),
-			pd: true,
-		},
-		{
-			a: NewSymDense(3, []float64{
-				4, 1, 1,
-				0, 2, 3,
-				0, 0, 6,
-			}),
-			upper: true,
-			f:     &TriDense{},
-
+			cond: 37,
 			want: NewTriDense(3, true, []float64{
 				2, 0.5, 0.5,
 				0, 1.3228756555322954, 2.0788046015507495,
 				0, 0, 1.195228609334394,
 			}),
-			pd: true,
-		},
-		{
-			a: NewSymDense(3, []float64{
-				4, 1, 1,
-				0, 2, 3,
-				0, 0, 6,
-			}),
-			upper: false,
-			f:     NewTriDense(3, false, nil),
-
-			want: NewTriDense(3, false, []float64{
-				2, 0, 0,
-				0.5, 1.3228756555322954, 0,
-				0.5, 2.0788046015507495, 1.195228609334394,
-			}),
-			pd: true,
-		},
-		{
-			a: NewSymDense(3, []float64{
-				4, 1, 1,
-				0, 2, 3,
-				0, 0, 6,
-			}),
-			upper: true,
-			f:     NewTriDense(3, true, nil),
-
-			want: NewTriDense(3, true, []float64{
-				2, 0.5, 0.5,
-				0, 1.3228756555322954, 2.0788046015507495,
-				0, 0, 1.195228609334394,
-			}),
-			pd: true,
-		},
-		{
-			// Test case for issue #119.
-			a: NewSymDense(3, []float64{
-				4, 1, 1,
-				0, 2, 3,
-				0, 0, 6,
-			}),
-			upper: false,
-			f: NewTriDense(3, false, []float64{
-				math.NaN(), math.NaN(), math.NaN(),
-				math.NaN(), math.NaN(), math.NaN(),
-				math.NaN(), math.NaN(), math.NaN(),
-			}),
-
-			want: NewTriDense(3, false, []float64{
-				2, 0, 0,
-				0.5, 1.3228756555322954, 0,
-				0.5, 2.0788046015507495, 1.195228609334394,
-			}),
-			pd: true,
+			posdef: true,
 		},
 	} {
-		ok := t.f.Cholesky(t.a, t.upper)
-		c.Check(ok, check.Equals, t.pd)
-		fc := DenseCopyOf(t.f)
+		_, n := t.a.Dims()
+		// Try with a new cholesky struct
+		var chol Cholesky
+		ok := chol.Factorize(t.a)
+		c.Check(ok, check.Equals, t.posdef)
+		fc := DenseCopyOf(chol.chol)
 		c.Check(fc.Equals(t.want), check.Equals, true)
-
-		if t.upper {
-			fc.Mul(t.f.T(), fc)
-		} else {
-			fc.Mul(fc, t.f.T())
+		if math.Abs(t.cond-chol.cond) > 1e-13 {
+			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
 		}
-		c.Check(fc.EqualsApprox(t.a, 1e-12), check.Equals, true)
+		var U TriDense
+		U.UFromCholesky(&chol)
+		aCopy := DenseCopyOf(t.a)
+		var a Dense
+		a.Mul(U.TTri(), &U)
+		c.Check(a.EqualsApprox(aCopy, 1e-14), check.Equals, true)
 
-		var x Dense
-		x.SolveCholesky(t.f, eye())
+		var L TriDense
+		L.LFromCholesky(&chol)
+		a.Mul(&L, L.TTri())
+		c.Check(a.EqualsApprox(aCopy, 1e-14), check.Equals, true)
 
-		var res Dense
-		res.Mul(t.a, &x)
-		c.Check(res.EqualsApprox(eye(), 1e-12), check.Equals, true)
+		// Try with a cholesky struct that is too small
+		cholSmall := &Cholesky{
+			chol: NewTriDense(n-1, true, nil),
+		}
+		for i := range cholSmall.chol.mat.Data {
+			cholSmall.chol.mat.Data[i] = rand.Float64()
+		}
+		ok = cholSmall.Factorize(t.a)
+		c.Check(ok, check.Equals, t.posdef)
+		c.Check(fc.Equals(t.want), check.Equals, true)
+		if math.Abs(t.cond-cholSmall.cond) > 1e-13 {
+			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
+		}
 
-		x = Dense{}
-		x.SolveTri(t.f, t.upper, eye())
-		x.SolveTri(t.f, !t.upper, &x)
+		// Try with a cholesky struct that is the right size.
+		cholCorrect := &Cholesky{
+			chol: NewTriDense(n, true, nil),
+		}
+		for i := range cholCorrect.chol.mat.Data {
+			cholCorrect.chol.mat.Data[i] = rand.Float64()
+		}
+		ok = cholCorrect.Factorize(t.a)
+		c.Check(ok, check.Equals, t.posdef)
+		c.Check(fc.Equals(t.want), check.Equals, true)
+		if math.Abs(t.cond-cholCorrect.cond) > 1e-13 {
+			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
+		}
 
-		res.Mul(t.a, &x)
-		c.Check(res.EqualsApprox(eye(), 1e-12), check.Equals, true)
+		// Try with a cholesky struct that is too large
+		cholLarge := &Cholesky{
+			chol: NewTriDense(n+1, true, nil),
+		}
+		for i := range cholLarge.chol.mat.Data {
+			cholLarge.chol.mat.Data[i] = rand.Float64()
+		}
+		ok = cholLarge.Factorize(t.a)
+		c.Check(ok, check.Equals, t.posdef)
+		c.Check(fc.Equals(t.want), check.Equals, true)
+		if math.Abs(t.cond-cholLarge.cond) > 1e-13 {
+			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
+		}
 	}
 }
 
@@ -159,18 +125,17 @@ func (s *S) TestCholeskySolve(c *check.C) {
 			ans: NewDense(3, 1, []float64{0.20745069393718094, -0.17421475529583694, 0.11577794010226464}),
 		},
 	} {
-		var f TriDense
-		ok := f.Cholesky(t.a, false)
+		var chol Cholesky
+		ok := chol.Factorize(t.a)
 		c.Assert(ok, check.Equals, true)
 
 		var x Dense
-		x.SolveCholesky(&f, t.b)
+		x.SolveCholesky(&chol, t.b)
 		c.Check(x.EqualsApprox(t.ans, 1e-12), check.Equals, true)
 
-		x = Dense{}
-		x.SolveTri(&f, false, t.b)
-		x.SolveTri(&f, true, &x)
-		c.Check(x.EqualsApprox(t.ans, 1e-12), check.Equals, true)
+		var ans Dense
+		ans.Mul(t.a, &x)
+		c.Check(ans.EqualsApprox(t.b, 1e-12), check.Equals, true)
 	}
 }
 
@@ -198,21 +163,17 @@ func (s *S) TestCholeskySolveVec(c *check.C) {
 			ans: NewVector(3, []float64{0.20745069393718094, -0.17421475529583694, 0.11577794010226464}),
 		},
 	} {
-		var f TriDense
-		ok := f.Cholesky(t.a, false)
+		var chol Cholesky
+		ok := chol.Factorize(t.a)
 		c.Assert(ok, check.Equals, true)
 
 		var x Vector
-		x.SolveCholeskyVec(&f, t.b)
+		x.SolveCholeskyVec(&chol, t.b)
 		c.Check(x.EqualsApproxVec(t.ans, 1e-12), check.Equals, true)
 
-		var fl TriDense
-		ok = fl.Cholesky(t.a, true)
-		c.Assert(ok, check.Equals, true)
-
-		var xl Vector
-		xl.SolveCholeskyVec(&fl, t.b)
-		c.Check(xl.EqualsApproxVec(t.ans, 1e-12), check.Equals, true)
+		var ans Vector
+		ans.MulVec(t.a, &x)
+		c.Check(ans.EqualsApproxVec(t.b, 1e-12), check.Equals, true)
 	}
 }
 
@@ -237,10 +198,10 @@ func benchmarkCholesky(b *testing.B, n int) {
 	bm.Mul(bm.T(), bm)
 	am := NewSymDense(n, bm.mat.Data)
 
-	t := NewTriDense(n, true, nil)
+	var chol Cholesky
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ok := t.Cholesky(am, true)
+		ok := chol.Factorize(am)
 		if !ok {
 			panic("not pos def")
 		}

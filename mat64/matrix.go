@@ -415,6 +415,10 @@ var condTol float64 = 1e16
 // condNorm describes the matrix norm to use for computing the condition number.
 var condNorm = lapack.MaxRowSum
 
+// condNormTrans is the norm to compute on A^T to get the same result as computing
+// condNorm on A.
+var condNormTrans = lapack.MaxColumnSum
+
 // Type Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.
 type Error struct{ string }
 

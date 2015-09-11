@@ -17,6 +17,29 @@ import (
 type LU struct {
 	lu    *Dense
 	pivot []int
+	cond  float64
+}
+
+// updateCond updates the stored condition number of the matrix. Norm is the
+// norm of the original matrix. If norm is negative it will be estimated.
+func (lu *LU) updateCond(norm float64) {
+	n := lu.lu.mat.Cols
+	work := make([]float64, 4*n)
+	iwork := make([]int, n)
+	if norm < 0 {
+		// This is an approximation. By the defintion of a norm, ||AB|| <= ||A|| ||B||.
+		// The condition number is ||A|| || A^-1||, so this will underestimate
+		// the condition number somewhat.
+		// The norm of the original factorized matrix cannot be stored because of
+		// update possibilites, e.g. RankOne.
+		u := lu.lu.asTriDense(n, blas.NonUnit, blas.Upper)
+		l := lu.lu.asTriDense(n, blas.Unit, blas.Lower)
+		unorm := lapack64.Lantr(condNorm, u.mat, work)
+		lnorm := lapack64.Lantr(condNorm, l.mat, work)
+		norm = unorm * lnorm
+	}
+	v := lapack64.Gecon(condNorm, lu.lu.mat, norm, work, iwork)
+	lu.cond = 1 / v
 }
 
 // Factorize computes the LU factorization of the square matrix a and stores the
@@ -39,7 +62,10 @@ func (lu *LU) Factorize(a Matrix) {
 		lu.pivot = make([]int, r)
 	}
 	lu.pivot = lu.pivot[:r]
+	work := make([]float64, r)
+	anorm := lapack64.Lange(condNorm, lu.lu.mat, work)
 	lapack64.Getrf(lu.lu.mat, lu.pivot)
+	lu.updateCond(anorm)
 }
 
 // Det returns the determinant of the matrix that has been factorized.
@@ -135,6 +161,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 			lum.Data[j*lum.Stride+i] += gamma * tmp
 		}
 	}
+	lu.updateCond(-1)
 }
 
 // LFromLU extracts the lower triangular matrix from an LU factorization.
@@ -215,6 +242,9 @@ func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
 		t = blas.Trans
 	}
 	lapack64.Getrs(t, lu.lu.mat, m.mat, lu.pivot)
+	if lu.cond > condTol {
+		return Condition(lu.cond)
+	}
 	return nil
 }
 
@@ -257,5 +287,8 @@ func (v *Vector) SolveLUVec(lu *LU, trans bool, b *Vector) error {
 		t = blas.Trans
 	}
 	lapack64.Getrs(t, lu.lu.mat, vMat, lu.pivot)
+	if lu.cond > condTol {
+		return Condition(lu.cond)
+	}
 	return nil
 }

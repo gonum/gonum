@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/lapack"
 )
 
 // Matrix is the basic matrix interface type.
@@ -390,12 +391,12 @@ func MaybeFloat(fn func() float64) (f float64, err error) {
 	return fn(), nil
 }
 
-// Condition is the reciprocal of the condition number of a matrix. The condition
+// Condition is the condition number of a matrix. The condition
 // number is defined as ||A|| * ||A^-1||.
 //
 // One important use of Condition is during linear solve routines (finding x such
 // that A * x = b). The condition number of A indicates the accuracy of
-// the computed solution. A Condition error will be returned if the inverse condition
+// the computed solution. A Condition error will be returned if the condition
 // number of A is sufficiently large. If A is exactly singular to working precision,
 // Condition == ∞, and the solve algorithm may have completed early. If Condition
 // is large and finite the solve algorithm will be performed, but the computed
@@ -406,6 +407,13 @@ type Condition float64
 func (c Condition) Error() string {
 	return fmt.Sprintf("matrix singular or near-singular with inverse condition number %.4e", c)
 }
+
+// condTol describes the limit of the condition number. If the inverse of the
+// condition number is above this value, the matrix is considered singular.
+var condTol float64 = 1e16
+
+// condNorm describes the matrix norm to use for computing the condition number.
+var condNorm = lapack.MaxRowSum
 
 // Type Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.
 type Error struct{ string }

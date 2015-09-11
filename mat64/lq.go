@@ -14,8 +14,20 @@ import (
 
 // LQ is a type for creating and using the LQ factorization of a matrix.
 type LQ struct {
-	lq  *Dense
-	tau []float64
+	lq   *Dense
+	tau  []float64
+	cond float64
+}
+
+func (lq *LQ) updateCond() {
+	// A = LQ, where Q is orthonormal. Orthonormal multiplications do not change
+	// the condition number. Thus, ||A|| = ||L|| ||Q|| = ||Q||.
+	m := lq.lq.mat.Rows
+	work := make([]float64, 3*m)
+	iwork := make([]int, m)
+	l := lq.lq.asTriDense(m, blas.NonUnit, blas.Lower)
+	v := lapack64.Trcon(condNorm, l.mat, work, iwork)
+	lq.cond = 1 / v
 }
 
 // Factorize computes the LQ factorization of an m×n matrix a where n <= m. The LQ
@@ -39,6 +51,7 @@ func (lq *LQ) Factorize(a Matrix) {
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, -1)
 	work = make([]float64, int(work[0]))
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, len(work))
+	lq.updateCond()
 }
 
 // TODO(btracey): Add in the "Reduced" forms for extracting the m×m orthogonal
@@ -178,6 +191,9 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 	// M was set above to be the correct size for the result.
 	m.Copy(x)
 	putWorkspace(x)
+	if lq.cond > condTol {
+		return Condition(lq.cond)
+	}
 	return nil
 }
 

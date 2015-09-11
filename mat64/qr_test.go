@@ -182,3 +182,25 @@ func (s *S) TestSolveQRVec(c *check.C) {
 	}
 	// TODO(btracey): Add in testOneInput when it exists.
 }
+
+func (s *S) TestSolveQRCond(c *check.C) {
+	for _, test := range []*Dense{
+		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
+		NewDense(3, 2, []float64{1, 0, 0, 1e-20, 0, 0}),
+	} {
+		m, _ := test.Dims()
+		var qr QR
+		qr.Factorize(test)
+		b := NewDense(m, 2, nil)
+		var x Dense
+		if err := x.SolveQR(&qr, false, b); err == nil {
+			c.Error("No error for near-singular matrix in matrix solve.")
+		}
+
+		bvec := NewVector(m, nil)
+		var xvec Vector
+		if err := xvec.SolveQRVec(&qr, false, bvec); err == nil {
+			c.Error("No error for near-singular matrix in matrix solve.")
+		}
+	}
+}

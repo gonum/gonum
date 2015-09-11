@@ -48,6 +48,21 @@ func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 	return
 }
 
+// Gecon estimates the reciprocal of the condition number of the n×n matrix A
+// given the LU decomposition of the matrix. The condition number computed may
+// be based on the 1-norm or the ∞-norm.
+//
+// The slice a contains the result of the LU decomposition of A as computed by Dgetrf.
+//
+// anorm is the corresponding 1-norm or ∞-norm of the original matrix A.
+//
+// work is a temporary data slice of length at least 4*n and Gecon will panic otherwise.
+//
+// iwork is a temporary data slice of length at least n and Gecon will panic otherwise.
+func Gecon(norm lapack.MatrixNorm, a blas64.General, anorm float64, work []float64, iwork []int) float64 {
+	return lapack64.Dgecon(norm, a.Cols, a.Data, a.Stride, anorm, work, iwork)
+}
+
 // Gels finds a minimum-norm solution based on the matrices A and B using the
 // QR or LQ factorization. Dgels returns false if the matrix
 // A is singular, and true if this solution was successfully found.
@@ -205,6 +220,29 @@ func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 // the optimal work length will be stored into work[0].
 func Ormqr(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64, c blas64.General, work []float64, lwork int) {
 	lapack64.Dormqr(side, trans, c.Rows, c.Cols, a.Cols, a.Data, a.Stride, tau, c.Data, c.Stride, work, lwork)
+}
+
+// Pocon estimates the reciprocal of the condition number of a positive-definite
+// matrix A given the Cholesky decmposition of A. The condition number computed
+// is based on the 1-norm and the ∞-norm.
+//
+// anorm is the 1-norm and the ∞-norm of the original matrix A.
+//
+// work is a temporary data slice of length at least 3*n and Pocon will panic otherwise.
+//
+// iwork is a temporary data slice of length at least n and Pocon will panic otherwise.
+func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float64 {
+	return lapack64.Dpocon(a.Uplo, a.N, a.Data, a.Stride, anorm, work, iwork)
+}
+
+// Trcon estimates the reciprocal of the condition number of a triangular matrix A.
+// The condition number computed may be based on the 1-norm or the ∞-norm.
+//
+// work is a temporary data slice of length at least 3*n and Trcon will panic otherwise.
+//
+// iwork is a temporary data slice of length at least n and Trcon will panic otherwise.
+func Trcon(norm lapack.MatrixNorm, a blas64.Triangular, work []float64, iwork []int) float64 {
+	return lapack64.Dtrcon(norm, a.Uplo, a.Diag, a.N, a.Data, a.Stride, work, iwork)
 }
 
 // Trtrs solves a triangular system of the form A * X = B or A^T * X = B. Trtrs

@@ -4,13 +4,6 @@
 
 package mat64
 
-import (
-	"math"
-
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack/lapack64"
-)
-
 // Solve solves a minimum-norm solution to a system of linear equations defined
 // by the matrices a and b. If a is singular or near-singular a Condition error
 // is returned. Please see the documentation for Condition for more information.
@@ -45,44 +38,17 @@ func (m *Dense) Solve(a, b Matrix) error {
 			}
 			return nil
 		}
-		// Solve using an LU decomposition.
 		var lu LU
 		lu.Factorize(a)
-		if lu.Det() == 0 {
-			return Condition(math.Inf(1))
-		}
-		bMat, bTrans := untranspose(b)
-		if m == bMat && bTrans {
-			var restore func()
-			m, restore = m.isolatedWorkspace(bMat)
-			defer restore()
-		}
-		if m != bMat {
-			m.Copy(b)
-		}
-		lapack64.Getrs(blas.NoTrans, lu.lu.mat, m.mat, lu.pivot)
-		return nil
+		return m.SolveLU(&lu, false, b)
+	case ar > ac:
+		var qr QR
+		qr.Factorize(a)
+		return m.SolveQR(&qr, false, b)
 	default:
-		// Solve using QR/LQ.
-
-		// Copy a since the corresponding LAPACK argument is modified during
-		// the call.
-		var aCopy Dense
-		aCopy.Clone(a)
-
-		x := getWorkspace(max(ar, ac), bc, false)
-		defer putWorkspace(x)
-		x.Copy(b)
-
-		work := make([]float64, 1)
-		lapack64.Gels(blas.NoTrans, aCopy.mat, x.mat, work, -1)
-		work = make([]float64, int(work[0]))
-		ok := lapack64.Gels(blas.NoTrans, aCopy.mat, x.mat, work, len(work))
-		if !ok {
-			return Condition(math.Inf(1))
-		}
-		m.Copy(x)
-		return nil
+		var lq LQ
+		lq.Factorize(a)
+		return m.SolveLQ(&lq, false, b)
 	}
 }
 

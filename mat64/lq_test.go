@@ -157,3 +157,25 @@ func (s *S) TestSolveLQVec(c *check.C) {
 	}
 	// TODO(btracey): Add in testOneInput when it exists.
 }
+
+func (s *S) TestSolveLQCond(c *check.C) {
+	for _, test := range []*Dense{
+		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
+		NewDense(2, 3, []float64{1, 0, 0, 0, 1e-20, 0}),
+	} {
+		m, _ := test.Dims()
+		var lq LQ
+		lq.Factorize(test)
+		b := NewDense(m, 2, nil)
+		var x Dense
+		if err := x.SolveLQ(&lq, false, b); err == nil {
+			c.Error("No error for near-singular matrix in matrix solve.")
+		}
+
+		bvec := NewVector(m, nil)
+		var xvec Vector
+		if err := xvec.SolveLQVec(&lq, false, bvec); err == nil {
+			c.Error("No error for near-singular matrix in matrix solve.")
+		}
+	}
+}

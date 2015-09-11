@@ -15,8 +15,20 @@ import (
 
 // QR is a type for creating and using the QR factorization of a matrix.
 type QR struct {
-	qr  *Dense
-	tau []float64
+	qr   *Dense
+	tau  []float64
+	cond float64
+}
+
+func (qr *QR) updateCond() {
+	// A = QR, where Q is orthonormal. Orthonormal multiplications do not change
+	// the condition number. Thus, ||A|| = ||Q|| ||R|| = ||R||.
+	n := qr.qr.mat.Cols
+	work := make([]float64, 3*n)
+	iwork := make([]int, n)
+	r := qr.qr.asTriDense(n, blas.NonUnit, blas.Upper)
+	v := lapack64.Trcon(condNorm, r.mat, work, iwork)
+	qr.cond = 1 / v
 }
 
 // Factorize computes the QR factorization of an m×n matrix a where m >= n. The QR
@@ -41,6 +53,7 @@ func (qr *QR) Factorize(a Matrix) {
 
 	work = make([]float64, int(work[0]))
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, len(work))
+	qr.updateCond()
 }
 
 // TODO(btracey): Add in the "Reduced" forms for extracting the n×n orthogonal
@@ -177,6 +190,9 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	// M was set above to be the correct size for the result.
 	m.Copy(x)
 	putWorkspace(x)
+	if qr.cond > condTol {
+		return Condition(qr.cond)
+	}
 	return nil
 }
 

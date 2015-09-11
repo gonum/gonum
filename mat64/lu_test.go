@@ -143,6 +143,27 @@ func (s *S) TestSolveLU(c *check.C) {
 	// TODO(btracey): Add testOneInput test when such a function exists.
 }
 
+func (s *S) TestSolveLUCond(c *check.C) {
+	for _, test := range []*Dense{
+		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
+	} {
+		m, _ := test.Dims()
+		var lu LU
+		lu.Factorize(test)
+		b := NewDense(m, 2, nil)
+		var x Dense
+		if err := x.SolveLU(&lu, false, b); err == nil {
+			c.Error("No error for near-singular matrix in matrix solve.")
+		}
+
+		bvec := NewVector(m, nil)
+		var xvec Vector
+		if err := xvec.SolveLUVec(&lu, false, bvec); err == nil {
+			c.Error("No error for near-singular matrix in matrix solve.")
+		}
+	}
+}
+
 func (s *S) TestSolveLUVec(c *check.C) {
 	for _, n := range []int{5, 10} {
 		a := NewDense(n, n, nil)

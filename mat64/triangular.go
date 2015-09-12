@@ -135,6 +135,22 @@ func isUpperUplo(u blas.Uplo) bool {
 	}
 }
 
+// asSymBlas returns the receiver restructured as a blas64.Symmetric with the
+// same backing memory. Panics if the receiver is unit.
+// This returns a blas64.Symmetric and not a *SymDense because SymDense can only
+// be upper triangular.
+func (t *TriDense) asSymBlas() blas64.Symmetric {
+	if t.mat.Diag == blas.Unit {
+		panic("mat64: cannot convert unit TriDense into blas64.Symmetric")
+	}
+	return blas64.Symmetric{
+		N:      t.mat.N,
+		Stride: t.mat.Stride,
+		Data:   t.mat.Data,
+		Uplo:   t.mat.Uplo,
+	}
+}
+
 // T performs an implicit transpose by returning the receiver inside a Transpose.
 func (t *TriDense) T() Matrix {
 	return Transpose{t}

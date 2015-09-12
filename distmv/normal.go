@@ -18,10 +18,10 @@ import (
 // where μ is the mean vector and Σ the covariance matrix. Σ must be symmetric
 // and positive definite. Use NewNormal to construct.
 type Normal struct {
-	mu    []float64
-	sigma *mat64.SymDense
+	mu []float64
 
-	chol       *mat64.TriDense
+	chol       mat64.Cholesky
+	lower      mat64.TriDense
 	logSqrtDet float64
 	dim        int
 
@@ -40,23 +40,17 @@ func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bo
 		panic(badSizeMismatch)
 	}
 	n := &Normal{
-		src:   src,
-		dim:   dim,
-		mu:    make([]float64, dim),
-		sigma: mat64.NewSymDense(dim, nil),
-		chol:  mat64.NewTriDense(dim, true, nil),
+		src: src,
+		dim: dim,
+		mu:  make([]float64, dim),
 	}
 	copy(n.mu, mu)
-	n.sigma.CopySym(sigma)
-	// TODO(btracey): Change this to the input Sigma, in case it is diagonal or
-	// banded.
-	ok := n.chol.Cholesky(n.sigma, true)
+	ok := n.chol.Factorize(sigma)
 	if !ok {
 		return nil, false
 	}
-	for i := 0; i < dim; i++ {
-		n.logSqrtDet += math.Log(n.chol.At(i, i))
-	}
+	n.lower.LFromCholesky(&n.chol)
+	n.logSqrtDet = 0.5 * n.chol.LogDet()
 	return n, true
 }
 
@@ -85,7 +79,7 @@ func (n *Normal) LogProb(x []float64) float64 {
 	d := mat64.NewVector(dim, xMinusMu)
 	tmp := make([]float64, dim)
 	tmpVec := mat64.NewVector(dim, tmp)
-	tmpVec.SolveCholeskyVec(n.chol, d)
+	tmpVec.SolveCholeskyVec(&n.chol, d)
 	return c - 0.5*floats.Dot(tmp, xMinusMu)
 }
 
@@ -120,7 +114,7 @@ func (n *Normal) Rand(x []float64) []float64 {
 	}
 	tmpVec := mat64.NewVector(n.dim, tmp)
 	xVec := mat64.NewVector(n.dim, x)
-	xVec.MulVec(n.chol.T(), tmpVec)
+	xVec.MulVec(&n.lower, tmpVec)
 	floats.Add(x, n.mu)
 	return x
 }

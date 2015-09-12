@@ -22,6 +22,24 @@ func DtrmvTest(t *testing.T, blasser Dtrmver) {
 		ans []float64
 	}{
 		{
+			n:   1,
+			a:   [][]float64{{5}},
+			x:   []float64{2},
+			d:   blas.NonUnit,
+			ul:  blas.Upper,
+			tA:  blas.NoTrans,
+			ans: []float64{10},
+		},
+		{
+			n:   1,
+			a:   [][]float64{{5}},
+			x:   []float64{2},
+			d:   blas.Unit,
+			ul:  blas.Upper,
+			tA:  blas.NoTrans,
+			ans: []float64{2},
+		},
+		{
 			n: 3,
 			a: [][]float64{
 				{5, 6, 7},

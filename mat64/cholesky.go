@@ -68,7 +68,19 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	return ok
 }
 
-// TODO(btracey): Add in UFromChol and LFromChol
+// Det returns the determinant of the matrix that has been factorized.
+func (c *Cholesky) Det() float64 {
+	return math.Exp(c.LogDet())
+}
+
+// LogDet returns the log of the determinant of the matrix that has been factorized.
+func (c *Cholesky) LogDet() float64 {
+	var det float64
+	for i := 0; i < c.chol.mat.N; i++ {
+		det += 2 * math.Log(c.chol.mat.Data[i*c.chol.mat.Stride+i])
+	}
+	return det
+}
 
 // SolveCholesky finds the matrix m that solves A * m = b where A is represented
 // by the cholesky decomposition, placing the result in the receiver.

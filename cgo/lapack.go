@@ -577,9 +577,11 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 }
 
 // Dtrtri computes the inverse of a triangular matrix, storing the result in place
-// into a. This is the BLAS level 3 version of the algorithm.
+// into a. This is the BLAS level 3 version of the algorithm which builds upon
+// Dtrti2 to operate on matrix blocks instead of only individual columns.
 //
-// Dtrti returns whether the matrix a is singular.
+// Dtrti returns whether the matrix a is singular or whether it's not singular.
+// If the matrix is singular the inversion is not performed.
 func (impl Implementation) Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if uplo != blas.Upper && uplo != blas.Lower {

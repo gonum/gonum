@@ -14,7 +14,11 @@ type Dtrti2er interface {
 	Dtrti2(uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int)
 }
 
+<<<<<<< HEAD
 func Dtrtri2Test(t *testing.T, impl Dtrti2er) {
+=======
+func Dtrti2Test(t *testing.T, impl Dtrti2er) {
+>>>>>>> e131d240e5e881fdfa8d62252d1825c4bcee1745
 	for _, test := range []struct {
 		a    []float64
 		n    int

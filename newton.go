@@ -50,7 +50,7 @@ type Newton struct {
 	ls *LinesearchMethod
 
 	hess *mat64.SymDense // Storage for a copy of the Hessian matrix.
-	chol *mat64.Cholesky // Storage for the Cholesky factorization.
+	chol mat64.Cholesky  // Storage for the Cholesky factorization.
 	tau  float64
 }
 
@@ -79,9 +79,6 @@ func (n *Newton) Iterate(loc *Location, xNext []float64) (EvaluationType, Iterat
 
 func (n *Newton) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	dim := len(loc.X)
-	if n.chol == nil {
-		n.chol = &mat64.Cholesky{}
-	}
 	n.hess = resizeSymDense(n.hess, dim)
 	n.tau = 0
 	return n.NextDirection(loc, dir)
@@ -125,7 +122,7 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		if pd {
 			d := mat64.NewVector(dim, dir)
 			// Store the solution in d's backing array, dir.
-			d.SolveCholeskyVec(n.chol, mat64.NewVector(dim, loc.Gradient))
+			d.SolveCholeskyVec(&n.chol, mat64.NewVector(dim, loc.Gradient))
 			floats.Scale(-1, dir)
 			return 1
 		}

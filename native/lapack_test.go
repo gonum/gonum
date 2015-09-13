@@ -116,8 +116,12 @@ func TestDtrcon(t *testing.T) {
 	testlapack.DtrconTest(t, impl)
 }
 
-func TestDtrtri2(t *testing.T) {
-	testlapack.Dtrtri2Test(t, impl)
+func TestDtrti2(t *testing.T) {
+	testlapack.Dtrti2Test(t, impl)
+}
+
+func TestDtrtri(t *testing.T) {
+	testlapack.DtrtriTest(t, impl)
 }
 
 func TestIladlc(t *testing.T) {

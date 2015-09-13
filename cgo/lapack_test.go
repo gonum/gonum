@@ -94,3 +94,7 @@ func TestDpocon(t *testing.T) {
 func TestDtrcon(t *testing.T) {
 	testlapack.DtrconTest(t, impl)
 }
+
+func TestDtrtri(t *testing.T) {
+	testlapack.DtrtriTest(t, impl)
+}

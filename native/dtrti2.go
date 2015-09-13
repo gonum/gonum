@@ -6,7 +6,7 @@ import (
 )
 
 // Dtrti2 computes the inverse of a triangular matrix, storing the result in place
-// into a.
+// into a. This is the BLAS level 2 version of the algorithm.
 func (impl Implementation) Dtrti2(uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int) {
 	checkMatrix(n, n, a, lda)
 	if uplo != blas.Upper && uplo != blas.Lower {

@@ -6,6 +6,7 @@ package mat64
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack"
@@ -195,11 +196,6 @@ type Normer interface {
 	Norm(o float64) float64
 }
 
-// A Deter can return the determinant of the represented matrix.
-type Deter interface {
-	Det() float64
-}
-
 // An Inver can calculate the inverse of the matrix represented by a and stored in the receiver.
 // ErrSingular is returned if there is no inverse of the matrix.
 type Inver interface {
@@ -330,14 +326,21 @@ type RawVectorer interface {
 	RawVector() blas64.Vector
 }
 
-// Det returns the determinant of the matrix a.
+// Det returns the determinant of the matrix a. In many expressions using LogDet
+// will be more numerically stable.
 func Det(a Matrix) float64 {
-	if a, ok := a.(Deter); ok {
-		return a.Det()
-	}
+	det, sign := LogDet(a)
+	return math.Exp(det) * sign
+}
+
+// LogDet returns the log of the determinant and the sign of the determinant
+// for the matrix that has been factorized. Numerical stability in product and
+// division expressions is generally improved by working in log space.
+func LogDet(a Matrix) (det float64, sign float64) {
+	// TODO(btracey): Add specialized routines for TriDense, etc.
 	var lu LU
 	lu.Factorize(a)
-	return lu.Det()
+	return lu.LogDet()
 }
 
 // Inverse returns the inverse or pseudoinverse of the matrix a.

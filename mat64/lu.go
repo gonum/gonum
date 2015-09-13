@@ -10,6 +10,7 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/floats"
 	"github.com/gonum/lapack/lapack64"
 )
 
@@ -68,14 +69,28 @@ func (lu *LU) Factorize(a Matrix) {
 	lu.updateCond(anorm)
 }
 
-// Det returns the determinant of the matrix that has been factorized.
+// Det returns the determinant of the matrix that has been factorized. In many
+// expressions, using LogDet will be more numerically stable.
 func (lu *LU) Det() float64 {
+	det, sign := lu.LogDet()
+	return math.Exp(det) * sign
+}
+
+// LogDet returns the log of the determinant and the sign of the determinant
+// for the matrix that has been factorized. Numerical stability in product and
+// division expressions is generally improved by working in log space.
+func (lu *LU) LogDet() (det float64, sign float64) {
 	_, n := lu.lu.Dims()
-	det := 1.0
+	logDiag := make([]float64, n)
+	sign = 1.0
 	for i := 0; i < n; i++ {
-		det *= lu.lu.at(i, i)
+		v := lu.lu.at(i, i)
+		if v < 0 {
+			sign *= -1
+		}
+		logDiag[i] = math.Log(math.Abs(v))
 	}
-	return det
+	return floats.LogSumExp(logDiag), sign
 }
 
 // Pivot returns pivot indices that enable the construction of the permutation

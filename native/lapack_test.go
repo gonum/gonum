@@ -116,17 +116,12 @@ func TestDtrcon(t *testing.T) {
 	testlapack.DtrconTest(t, impl)
 }
 
-<<<<<<< HEAD
-func TestDtrtri2(t *testing.T) {
-	testlapack.Dtrtri2Test(t, impl)
-=======
-func TestDtrtri(t *testing.T) {
-	testlapack.DtrtriTest(t, impl)
-}
-
 func TestDtrti2(t *testing.T) {
 	testlapack.Dtrti2Test(t, impl)
->>>>>>> e131d240e5e881fdfa8d62252d1825c4bcee1745
+}
+
+func TestDtrtri(t *testing.T) {
+	testlapack.DtrtriTest(t, impl)
 }
 
 func TestIladlc(t *testing.T) {

@@ -6,6 +6,7 @@ package mat64
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"reflect"
 
@@ -42,6 +43,24 @@ func legalSizeSameSquare(ar, ac, br, bc int) bool {
 // legalSizeSolve returns whether the two matrices can be used in a linear solve.
 func legalSizeSolve(ar, ac, br, bc int) bool {
 	return ar == br
+}
+
+// isSquare returns whether the input matrix is square.
+func isSquare(r, c int) bool {
+	return r == c
+}
+
+// sameAnswerFloat returns whether the two inputs are both NaN or are equal.
+func sameAnswerFloat(a, b interface{}) bool {
+	if math.IsNaN(a.(float64)) {
+		return math.IsNaN(b.(float64))
+	}
+	return a.(float64) == b.(float64)
+}
+
+// legalTypeAll returns true for all Matrix types.
+func isAny(a Matrix) bool {
+	return true
 }
 
 // legalTypesAll returns true for all Matrix types.
@@ -373,6 +392,114 @@ func underlyingData(a Matrix) []float64 {
 	}
 }
 
+// testMatrices is a list of matrix types to test.
+var testMatrices = []Matrix{
+	&Dense{},
+	&SymDense{},
+	NewTriDense(0, true, nil),
+	NewTriDense(0, false, nil),
+	NewVector(0, nil),
+	&Vector{mat: blas64.Vector{Inc: 10}},
+	&basicMatrix{},
+	&basicVectorer{},
+	&basicSymmetric{},
+	&basicTriangular{},
+
+	Transpose{&Dense{}},
+	Transpose{NewTriDense(0, true, nil)},
+	TransposeTri{NewTriDense(0, true, nil)},
+	Transpose{NewTriDense(0, false, nil)},
+	TransposeTri{NewTriDense(0, false, nil)},
+	Transpose{NewVector(0, nil)},
+	Transpose{&Vector{mat: blas64.Vector{Inc: 10}}},
+	Transpose{&basicMatrix{}},
+	Transpose{&basicVectorer{}},
+	Transpose{&basicSymmetric{}},
+	Transpose{&basicTriangular{}},
+}
+
+func testOneInputFunc(c *check.C,
+	// name is the name of the function being tested.
+	name string,
+
+	// f is the function being tested.
+	f func(a Matrix) interface{},
+
+	// denseComparison performs the same operation, but using Dense matrices for
+	// comparison.
+	denseComparison func(a *Dense) interface{},
+
+	// sameAnswer compares the result from two different evaluations of the function
+	// and returns true if they are the same. The specific function being tested
+	// determines the definition of "same". It may mean identical or it may mean
+	// approximately equal.
+	sameAnswer func(a, b interface{}) bool,
+
+	// legalType returns true if the type of the input is a legal type for the
+	// input of the function.
+	legalType func(a Matrix) bool,
+
+	// legalSize returns true if the size is valid for the function.
+	legalSize func(r, c int) bool,
+) {
+	for _, aMat := range testMatrices {
+		for _, test := range []struct {
+			ar, ac int
+		}{
+			{1, 1},
+			{1, 3},
+			{3, 1},
+
+			{6, 6},
+			{6, 11},
+			{11, 6},
+		} {
+			// Skip the test if the argument would not be assignable to the
+			// method's corresponding input parameter or it is not possible
+			// to construct an argument of the requested size.
+			if !legalType(aMat) {
+				continue
+			}
+			if !legalDims(aMat, test.ar, test.ac) {
+				continue
+			}
+			a := makeRandOf(aMat, test.ar, test.ac)
+
+			// Compute the true answer if the sizes are legal.
+			dimsOK := legalSize(test.ar, test.ac)
+			var want interface{}
+			if dimsOK {
+				var aDense Dense
+				aDense.Clone(a)
+				want = denseComparison(&aDense)
+			}
+			aCopy := makeCopyOf(a)
+			// Test the method for a zero-value of the receiver.
+			aType, aTrans := untranspose(a)
+			errStr := fmt.Sprintf("%v(%T), size: %#v, atrans %t", name, aType, test, aTrans)
+			var got interface{}
+			panicked, err := panics(func() { got = f(a) })
+			if !dimsOK && !panicked {
+				c.Errorf("Did not panic with illegal size: %s", errStr)
+				continue
+			}
+			if dimsOK && panicked {
+				c.Errorf("Panicked with legal size: %s %s", errStr, err)
+				continue
+			}
+			if !equal(a, aCopy) {
+				c.Errorf("First input argument changed in call: %s", errStr)
+			}
+			if !dimsOK {
+				continue
+			}
+			if !sameAnswer(want, got) {
+				c.Errorf("Answer mismatch: %s", errStr)
+			}
+		}
+	}
+}
+
 // testTwoInput tests a method that has two input arguments.
 func testTwoInput(c *check.C,
 	// name is the name of the method being tested.
@@ -395,44 +522,8 @@ func testTwoInput(c *check.C,
 	// dimsOK returns whether the matrix sizes are valid for the method.
 	legalSize func(ar, ac, br, bc int) bool,
 ) {
-	strideVec := &Vector{
-		mat: blas64.Vector{
-			Inc: 10,
-		},
-	}
-	// It is useful to isolate a single Matrix in the types list during debugging.
-	// Ensure that strideVec is always a used variable to avoid compile errors
-	// when commenting out types.
-	_ = strideVec
-
-	// Loop over all of the matrix types.
-	types := []Matrix{
-		&Dense{},
-		&SymDense{},
-		NewTriDense(0, true, nil),
-		NewTriDense(0, false, nil),
-		NewVector(0, nil),
-		strideVec,
-		&basicMatrix{},
-		&basicVectorer{},
-		&basicSymmetric{},
-		&basicTriangular{},
-
-		Transpose{&Dense{}},
-		Transpose{NewTriDense(0, true, nil)},
-		TransposeTri{NewTriDense(0, true, nil)},
-		Transpose{NewTriDense(0, false, nil)},
-		TransposeTri{NewTriDense(0, false, nil)},
-		Transpose{NewVector(0, nil)},
-		Transpose{strideVec},
-		Transpose{&basicMatrix{}},
-		Transpose{&basicVectorer{}},
-		Transpose{&basicSymmetric{}},
-		Transpose{&basicTriangular{}},
-	}
-
-	for _, aMat := range types {
-		for _, bMat := range types {
+	for _, aMat := range testMatrices {
+		for _, bMat := range testMatrices {
 			// Loop over all of the size combinations (bigger, smaller, etc.).
 			for _, test := range []struct {
 				ar, ac, br, bc int

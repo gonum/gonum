@@ -38,7 +38,6 @@ var (
 	_ Scaler  = matrix
 	_ Applyer = matrix
 
-	_ Tracer = matrix
 	_ Normer = matrix
 	_ Sumer  = matrix
 

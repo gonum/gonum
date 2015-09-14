@@ -296,12 +296,6 @@ type Applyer interface {
 	Apply(fn func(r, c int, v float64) float64, a Matrix)
 }
 
-// A Tracer can return the trace of the matrix represented by the receiver. Trace will panic if the
-// matrix is not square.
-type Tracer interface {
-	Trace() float64
-}
-
 // A BandWidther represents a banded matrix and can return the left and right half-bandwidths, k1 and
 // k2.
 type BandWidther interface {
@@ -392,6 +386,46 @@ func MaybeFloat(fn func() float64) (f float64, err error) {
 		}
 	}()
 	return fn(), nil
+}
+
+// Trace returns the trace of the matrix. Trace will panic if the
+// matrix is not square.
+func Trace(a Matrix) float64 {
+	r, c := a.Dims()
+	if r != c {
+		panic(ErrSquare)
+	}
+
+	aMat, _ := untranspose(a)
+	switch m := aMat.(type) {
+	case RawMatrixer:
+		rm := m.RawMatrix()
+		var t float64
+		for i := 0; i < r; i++ {
+			t += rm.Data[i*rm.Stride+i]
+		}
+		return t
+	case RawTriangular:
+		rm := m.RawTriangular()
+		var t float64
+		for i := 0; i < r; i++ {
+			t += rm.Data[i*rm.Stride+i]
+		}
+		return t
+	case RawSymmetricer:
+		rm := m.RawSymmetric()
+		var t float64
+		for i := 0; i < r; i++ {
+			t += rm.Data[i*rm.Stride+i]
+		}
+		return t
+	default:
+		var t float64
+		for i := 0; i < r; i++ {
+			t += a.At(i, i)
+		}
+		return t
+	}
 }
 
 // Condition is the condition number of a matrix. The condition

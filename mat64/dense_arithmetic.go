@@ -33,20 +33,6 @@ func (m *Dense) Max() float64 {
 	return max
 }
 
-// Trace returns the trace of the matrix.
-//
-// See the Tracer interface for more information.
-func (m *Dense) Trace() float64 {
-	if m.mat.Rows != m.mat.Cols {
-		panic(ErrSquare)
-	}
-	var t float64
-	for i := 0; i < len(m.mat.Data); i += m.mat.Stride + 1 {
-		t += m.mat.Data[i]
-	}
-	return t
-}
-
 var inf = math.Inf(1)
 
 const (

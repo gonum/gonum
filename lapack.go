@@ -28,6 +28,7 @@ type Float64 interface {
 	Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
 	Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
 	Dgetrf(m, n int, a []float64, lda int, ipiv []int) (ok bool)
+	Dgetri(n int, a []float64, lda int, ipiv []int, work []float64, lwork int) (ok bool)
 	Dgetrs(trans blas.Transpose, n, nrhs int, a []float64, lda int, ipiv []int, b []float64, ldb int)
 	Dlantr(norm MatrixNorm, uplo blas.Uplo, diag blas.Diag, m, n int, a []float64, lda int, work []float64) float64
 	Dlange(norm MatrixNorm, m, n int, a []float64, lda int, work []float64) float64
@@ -37,6 +38,7 @@ type Float64 interface {
 	Dpocon(uplo blas.Uplo, n int, a []float64, lda int, anorm float64, work []float64, iwork []int) float64
 	Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok bool)
 	Dtrcon(norm MatrixNorm, uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int, work []float64, iwork []int) float64
+	Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int) (ok bool)
 	Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int) (ok bool)
 }
 

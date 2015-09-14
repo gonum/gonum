@@ -90,3 +90,27 @@ func (s *S) TestMaybe(c *check.C) {
 		c.Check(leaksPanic(test.fn), check.Equals, test.panics, check.Commentf("Test %d", i))
 	}
 }
+
+func (s *S) TestTrace(c *check.C) {
+	for _, test := range []struct {
+		a     *Dense
+		trace float64
+	}{
+		{
+			a:     NewDense(3, 3, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}),
+			trace: 15,
+		},
+	} {
+		trace := Trace(test.a)
+		if trace != test.trace {
+			c.Errorf("Trace mismatch. Want %v, got %v", test.trace, trace)
+		}
+	}
+	f := func(a Matrix) interface{} {
+		return Trace(a)
+	}
+	denseComparison := func(a *Dense) interface{} {
+		return Trace(a)
+	}
+	testOneInputFunc(c, "Trace", f, denseComparison, sameAnswerFloat, isAny, isSquare)
+}

@@ -87,7 +87,7 @@ func Local(p Problem, initX []float64, settings *Settings, method Method) (*Resu
 	}
 
 	stats := &Stats{}
-	optLoc, evalType, err := getStartingLocation(&p, method, initX, stats, settings)
+	optLoc, err := getStartingLocation(&p, method, initX, stats, settings)
 	if err != nil {
 		return nil, err
 	}
@@ -100,21 +100,21 @@ func Local(p Problem, initX []float64, settings *Settings, method Method) (*Resu
 	stats.Runtime = time.Since(startTime)
 	// Send optLoc to Recorder before checking it for convergence.
 	if settings.Recorder != nil {
-		err = settings.Recorder.Record(optLoc, evalType, InitIteration, stats)
+		err = settings.Recorder.Record(optLoc, InitIteration, stats)
 	}
 
 	// Check if the starting location satisfies the convergence criteria.
-	status := checkConvergence(optLoc, InitIteration, stats, settings)
+	status := checkConvergence(optLoc, settings)
 	if status == NotTerminated && err == nil {
 		// The starting location is not good enough, we need to perform a
 		// minimization. The optimal location will be stored in-place in
 		// optLoc.
-		status, err = minimize(settings, method, &p, stats, optLoc, startTime)
+		status, err = minimize(&p, method, settings, stats, optLoc, startTime)
 	}
 
 	if settings.Recorder != nil && err == nil {
 		// Send the optimal location to Recorder.
-		err = settings.Recorder.Record(optLoc, NoEvaluation, PostIteration, stats)
+		err = settings.Recorder.Record(optLoc, PostIteration, stats)
 	}
 	stats.Runtime = time.Since(startTime)
 	return &Result{
@@ -124,37 +124,47 @@ func Local(p Problem, initX []float64, settings *Settings, method Method) (*Resu
 	}, err
 }
 
-func minimize(settings *Settings, method Method, p *Problem, stats *Stats, optLoc *Location, startTime time.Time) (status Status, err error) {
+func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLoc *Location, startTime time.Time) (status Status, err error) {
 	loc := &Location{}
 	copyLocation(loc, optLoc)
-	xNext := make([]float64, len(loc.X))
 
 	methodStatus, methodIsStatuser := method.(Statuser)
 
-	evalType, iterType, err := method.Init(loc, xNext)
+	var request RequestType
+	request, err = method.Init(loc)
 	if err != nil {
-		return Failure, err
+		status = Failure
+		return
 	}
 
 	for {
-		if p.Status != nil {
-			// Check the function status before evaluating.
-			status, err = p.Status()
-			if err != nil || status != NotTerminated {
-				return
+		// Sequentially call method.Iterate(), performing the operations it has
+		// requested, until convergence.
+
+		switch request {
+		case NoRequest:
+			panic("optimize: Method returned NoRequest without an error")
+		case InitIteration:
+			panic("optimize: Method returned InitIteration")
+		case PostIteration:
+			panic("optimize: Method returned PostIteration")
+		case MajorIteration:
+			stats.MajorIterations++
+			copyLocation(optLoc, loc)
+			status = checkConvergence(optLoc, settings)
+		default: // Any of the Evaluation requests.
+			if p.Status != nil {
+				status, err = p.Status()
+				if err != nil || status != NotTerminated {
+					return
+				}
 			}
+			evaluate(p, loc, request, stats)
 		}
 
-		// Perform evalType evaluation of the function at xNext and store the
-		// result in location.
-		evaluate(p, evalType, xNext, loc, stats)
-		// Update the stats and optLoc.
-		update(loc, optLoc, stats, iterType, startTime)
-		// Get the convergence status before recording the new location.
-		status = checkConvergence(optLoc, iterType, stats, settings)
-
 		if settings.Recorder != nil {
-			err = settings.Recorder.Record(loc, evalType, iterType, stats)
+			stats.Runtime = time.Since(startTime)
+			err = settings.Recorder.Record(loc, request, stats)
 			if err != nil {
 				if status == NotTerminated {
 					status = Failure
@@ -167,6 +177,12 @@ func minimize(settings *Settings, method Method, p *Problem, stats *Stats, optLo
 			return
 		}
 
+		stats.Runtime = time.Since(startTime)
+		status = checkLimits(loc, stats, settings)
+		if status != NotTerminated {
+			return
+		}
+
 		if methodIsStatuser {
 			status, err = methodStatus.Status()
 			if err != nil || status != NotTerminated {
@@ -174,8 +190,7 @@ func minimize(settings *Settings, method Method, p *Problem, stats *Stats, optLo
 			}
 		}
 
-		// Find the next location (stored in-place into xNext).
-		evalType, iterType, err = method.Iterate(loc, xNext)
+		request, err = method.Iterate(loc)
 		if err != nil {
 			status = Failure
 			return
@@ -209,7 +224,7 @@ func getDefaultMethod(p *Problem) Method {
 }
 
 // getStartingLocation allocates and initializes the starting location for the minimization.
-func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stats, settings *Settings) (*Location, EvaluationType, error) {
+func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stats, settings *Settings) (*Location, error) {
 	dim := len(initX)
 	loc := &Location{
 		X: make([]float64, dim),
@@ -222,7 +237,6 @@ func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stat
 		loc.Hessian = mat64.NewSymDense(dim, nil)
 	}
 
-	evalType := NoEvaluation
 	if settings.UseInitialData {
 		loc.F = settings.InitialValue
 		if loc.Gradient != nil {
@@ -246,99 +260,100 @@ func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stat
 			loc.Hessian.CopySym(initH)
 		}
 	} else {
-		evalType = FuncEvaluation
+		eval := FuncEvaluation
 		if loc.Gradient != nil {
-			evalType |= GradEvaluation
+			eval |= GradEvaluation
 		}
 		if loc.Hessian != nil {
-			evalType |= HessEvaluation
+			eval |= HessEvaluation
 		}
-		evaluate(p, evalType, loc.X, loc, stats)
+		evaluate(p, loc, eval, stats)
 	}
 
 	if math.IsNaN(loc.F) {
-		return loc, evalType, ErrNaN
+		return loc, ErrNaN
 	}
 	if math.IsInf(loc.F, 1) {
-		return loc, evalType, ErrInf
+		return loc, ErrInf
 	}
 	for _, v := range loc.Gradient {
 		if math.IsInf(v, 0) {
-			return loc, evalType, ErrGradInf
+			return loc, ErrGradInf
 		}
 		if math.IsNaN(v) {
-			return loc, evalType, ErrGradNaN
+			return loc, ErrGradNaN
 		}
 	}
 
-	return loc, evalType, nil
+	return loc, nil
 }
 
-func checkConvergence(loc *Location, iterType IterationType, stats *Stats, settings *Settings) Status {
-	if iterType == MajorIteration || iterType == InitIteration {
-		if loc.Gradient != nil {
-			norm := floats.Norm(loc.Gradient, math.Inf(1))
-			if norm < settings.GradientThreshold {
-				return GradientThreshold
-			}
-		}
-		if loc.F < settings.FunctionThreshold {
-			return FunctionThreshold
-		}
-	}
-
-	if iterType == MajorIteration && settings.FunctionConverge != nil {
-		status := settings.FunctionConverge.FunctionConverged(loc.F)
-		if status != NotTerminated {
-			return status
+// checkConvergence returns NotTerminated if the Location does not satisfy the
+// convergence criteria given by settings. Otherwise a corresponding status is
+// returned.
+// Unlike checkLimits, it is called by Local() only at MajorIterations.
+func checkConvergence(loc *Location, settings *Settings) Status {
+	if loc.Gradient != nil {
+		norm := floats.Norm(loc.Gradient, math.Inf(1))
+		if norm < settings.GradientThreshold {
+			return GradientThreshold
 		}
 	}
 
-	// Check every step for negative infinity because it could break the
-	// linesearches and -inf is the best you can do anyway.
+	if loc.F < settings.FunctionThreshold {
+		return FunctionThreshold
+	}
+
+	if settings.FunctionConverge != nil {
+		return settings.FunctionConverge.FunctionConverged(loc.F)
+	}
+
+	return NotTerminated
+}
+
+// checkLimits returns NotTerminated status if the various limits given by
+// settings has not been reached. Otherwise it returns a corresponding status.
+// Unlike checkConvergence(), it is called by Local() at _every_ iteration.
+func checkLimits(loc *Location, stats *Stats, settings *Settings) Status {
+	// Check the objective function value for negative infinity because it
+	// could break the linesearches and -inf is the best we can do anyway.
 	if math.IsInf(loc.F, -1) {
 		return FunctionNegativeInfinity
 	}
 
-	if settings.FuncEvaluations > 0 {
-		if stats.FuncEvaluations >= settings.FuncEvaluations {
-			return FunctionEvaluationLimit
-		}
+	if settings.MajorIterations > 0 && stats.MajorIterations >= settings.MajorIterations {
+		return IterationLimit
 	}
 
-	if settings.GradEvaluations > 0 {
-		if stats.GradEvaluations >= settings.GradEvaluations {
-			return GradientEvaluationLimit
-		}
+	if settings.FuncEvaluations > 0 && stats.FuncEvaluations >= settings.FuncEvaluations {
+		return FunctionEvaluationLimit
 	}
 
-	if settings.HessEvaluations > 0 {
-		if stats.HessEvaluations >= settings.HessEvaluations {
-			return HessianEvaluationLimit
-		}
+	if settings.GradEvaluations > 0 && stats.GradEvaluations >= settings.GradEvaluations {
+		return GradientEvaluationLimit
 	}
 
-	if settings.Runtime > 0 {
-		// TODO(vladimir-ch): It would be nice to update Runtime here.
-		if stats.Runtime >= settings.Runtime {
-			return RuntimeLimit
-		}
+	if settings.HessEvaluations > 0 && stats.HessEvaluations >= settings.HessEvaluations {
+		return HessianEvaluationLimit
 	}
 
-	if iterType == MajorIteration && settings.MajorIterations > 0 {
-		if stats.MajorIterations >= settings.MajorIterations {
-			return IterationLimit
-		}
+	// TODO(vladimir-ch): It would be nice to update Runtime here.
+	if settings.Runtime > 0 && stats.Runtime >= settings.Runtime {
+		return RuntimeLimit
 	}
+
 	return NotTerminated
 }
 
-// invalidate marks all fields of Location with NaNs and it is the
-// responsibility of Method to issue such EvaluationTypes that make Location
-// valid again. Invalidation is done internally as a help for implementers to
-// detect silent bugs in Methods using inconsistent Location, e.g., using
-// Gradient without a GradEvaluation request.
-func invalidate(loc *Location) {
+// evaluate evaluates the routines specified by the Operation at loc.X, storing
+// the answer into loc and updating stats. Unused fields of loc are set to NaN.
+// It is the responsibility of Method to assemble a valid Location before
+// requesting MajorIteration.
+func evaluate(p *Problem, loc *Location, eval RequestType, stats *Stats) {
+	if eval == NoRequest || eval&EvaluationRequest == 0 {
+		panic(fmt.Sprintf("optimize: invalid evaluation request %v", eval))
+	}
+
 	loc.F = math.NaN()
 	if loc.Gradient != nil {
 		loc.Gradient[0] = math.NaN()
@@ -346,52 +361,17 @@ func invalidate(loc *Location) {
 	if loc.Hessian != nil {
 		loc.Hessian.SetSym(0, 0, math.NaN())
 	}
-}
 
-// evaluate evaluates the problem given by p at xNext, stores the answer into
-// loc and updates stats. If loc.X is not equal to xNext, then unused fields of
-// loc are set to NaN.
-// evaluate panics if the function does not support the requested evalType.
-func evaluate(p *Problem, evalType EvaluationType, xNext []float64, loc *Location, stats *Stats) {
-	if !floats.Equal(loc.X, xNext) {
-		if evalType == NoEvaluation {
-			// Optimizers should not request NoEvaluation at a new location.
-			// The intent and therefore an appropriate action are both unclear.
-			panic("optimize: no evaluation requested at new location")
-		}
-		invalidate(loc)
-		copy(loc.X, xNext)
-	}
-
-	toEval := evalType
-	if evalType&FuncEvaluation != 0 {
+	if eval&FuncEvaluation != 0 {
 		loc.F = p.Func(loc.X)
 		stats.FuncEvaluations++
-		toEval &= ^FuncEvaluation
 	}
-	if evalType&GradEvaluation != 0 {
+	if eval&GradEvaluation != 0 {
 		p.Grad(loc.X, loc.Gradient)
 		stats.GradEvaluations++
-		toEval &= ^GradEvaluation
 	}
-	if evalType&HessEvaluation != 0 {
+	if eval&HessEvaluation != 0 {
 		p.Hess(loc.X, loc.Hessian)
 		stats.HessEvaluations++
-		toEval &= ^HessEvaluation
 	}
-
-	if toEval != NoEvaluation {
-		panic(fmt.Sprintf("optimize: unknown evaluation type %v", evalType))
-	}
-}
-
-// update updates the stats given the new evaluation
-func update(loc *Location, optLoc *Location, stats *Stats, iterType IterationType, startTime time.Time) {
-	if iterType == MajorIteration {
-		stats.MajorIterations++
-	}
-	if loc.F <= optLoc.F {
-		copyLocation(optLoc, loc)
-	}
-	stats.Runtime = time.Since(startTime)
 }

@@ -81,7 +81,7 @@ type NelderMead struct {
 	reflectedValue float64    // Value at the last reflection point
 }
 
-func (n *NelderMead) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (n *NelderMead) Init(loc *Location) (RequestType, error) {
 	dim := len(loc.X)
 	if cap(n.vertices) < dim+1 {
 		n.vertices = make([][]float64, dim+1)
@@ -134,7 +134,7 @@ func (n *NelderMead) Init(loc *Location, xNext []float64) (EvaluationType, Itera
 		copy(n.values, n.InitialValues)
 		sort.Sort(nmVertexSorter{n.vertices, n.values})
 		computeCentroid(n.vertices, n.centroid)
-		return n.returnNext(nmReflected, xNext)
+		return n.returnNext(nmReflected, loc.X)
 	}
 
 	// No simplex provided. Begin initializing initial simplex. First simplex
@@ -142,10 +142,9 @@ func (n *NelderMead) Init(loc *Location, xNext []float64) (EvaluationType, Itera
 	copy(n.vertices[dim], loc.X)
 	n.values[dim] = loc.F
 	n.fillIdx = 0
-	copy(xNext, loc.X)
-	xNext[0] += n.SimplexSize
+	loc.X[n.fillIdx] += n.SimplexSize
 	n.lastIter = nmInitialize
-	return FuncEvaluation, InitIteration, nil
+	return FuncEvaluation, nil // InitIteration
 }
 
 // computeCentroid computes the centroid of all the simplex vertices except the
@@ -166,7 +165,8 @@ func computeCentroid(vertices [][]float64, centroid []float64) {
 	}
 }
 
-func (n *NelderMead) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (n *NelderMead) Iterate(loc *Location) (RequestType, error) {
+	xNext := loc.X
 	dim := len(xNext)
 	switch n.lastIter {
 	case nmInitialize:
@@ -181,7 +181,7 @@ func (n *NelderMead) Iterate(loc *Location, xNext []float64) (EvaluationType, It
 		}
 		copy(xNext, n.vertices[dim])
 		xNext[n.fillIdx] += n.SimplexSize
-		return FuncEvaluation, InitIteration, nil
+		return FuncEvaluation, nil // InitIteration
 	case nmReflected:
 		n.reflectedValue = loc.F
 		switch {
@@ -234,7 +234,7 @@ func (n *NelderMead) Iterate(loc *Location, xNext []float64) (EvaluationType, It
 
 // returnNext finds the next location to evaluate, stores the location in xNext,
 // and returns the data
-func (n *NelderMead) returnNext(iter nmIterType, xNext []float64) (EvaluationType, IterationType, error) {
+func (n *NelderMead) returnNext(iter nmIterType, xNext []float64) (RequestType, error) {
 	dim := len(xNext)
 	n.lastIter = iter
 	switch iter {
@@ -257,15 +257,15 @@ func (n *NelderMead) returnNext(iter nmIterType, xNext []float64) (EvaluationTyp
 		if iter == nmReflected {
 			copy(n.reflectedPoint, xNext)
 			// Nelder Mead iterations start with Reflection step
-			return FuncEvaluation, MajorIteration, nil
+			return FuncEvaluation, nil // MajorIteration
 		}
-		return FuncEvaluation, MinorIteration, nil
+		return FuncEvaluation, nil // MinorIteration
 	case nmShrink:
 		// x_shrink = x_best + delta * (x_i + x_best)
 		floats.SubTo(xNext, n.vertices[n.fillIdx], n.vertices[0])
 		floats.Scale(n.shrink, xNext)
 		floats.Add(xNext, n.vertices[0])
-		return FuncEvaluation, SubIteration, nil
+		return FuncEvaluation, nil // SubIteration
 	default:
 		panic("unreachable")
 	}

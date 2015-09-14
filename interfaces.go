@@ -8,11 +8,11 @@ package optimize
 type Method interface {
 	// Init initializes the method and stores the first location to evaluate
 	// in xNext.
-	Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
+	Init(loc *Location) (RequestType, error)
 
 	// Iterate performs one iteration of the method and stores the next
 	// location to evaluate in xNext.
-	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
+	Iterate(loc *Location) (RequestType, error)
 
 	// Needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
@@ -36,7 +36,7 @@ type Linesearcher interface {
 	// φ(0) and φ'(0), respectively, and step contains the first trial step
 	// length. It returns the type of evaluation to be performed at
 	// x_0 + step * dir_0.
-	Init(value, derivative float64, step float64) EvaluationType
+	Init(value, derivative float64, step float64) RequestType
 
 	// Finished takes in the values of φ and φ' evaluated at the previous step,
 	// and returns whether a sufficiently accurate minimum of φ has been found.
@@ -45,7 +45,7 @@ type Linesearcher interface {
 	// Iterate takes in the values of φ and φ' evaluated at the previous step
 	// and returns the next step size and the type of evaluation to be
 	// performed at x_k + step * dir_k.
-	Iterate(value, derivative float64) (step float64, e EvaluationType, err error)
+	Iterate(value, derivative float64) (step float64, r RequestType, err error)
 }
 
 // NextDirectioner implements a strategy for computing a new line search
@@ -84,5 +84,5 @@ type Statuser interface {
 // the progress to StdOut or to a log file. A Recorder must not modify any data.
 type Recorder interface {
 	Init() error
-	Record(*Location, EvaluationType, IterationType, *Stats) error
+	Record(*Location, RequestType, *Stats) error
 }

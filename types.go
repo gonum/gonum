@@ -15,54 +15,58 @@ import (
 
 const defaultGradientAbsTol = 1e-6
 
-// EvaluationType is used by a Method to specify the objective-function
-// information needed at an x location.
-type EvaluationType uint
+// RequestType represents the set of actions requested by Method at each
+// iteration.
+type RequestType uint64
 
-// Evaluation types can be composed together using the binary or operator, for
-// example 'FuncEvaluation | GradEvaluation' to evaluate both the function
-// value and the gradient.
+// Supported RequestTypes. Individual values must not be combined together by
+// the binary OR (|) operator except for the various Evaluation requests.
 const (
-	NoEvaluation   EvaluationType = 0
-	FuncEvaluation EvaluationType = 1 << (iota - 1)
-	GradEvaluation
-	HessEvaluation
-)
-
-func (e EvaluationType) String() string {
-	return fmt.Sprintf("EvaluationType(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
-		e&FuncEvaluation != 0,
-		e&GradEvaluation != 0,
-		e&HessEvaluation != 0,
-		e&^(FuncEvaluation|GradEvaluation|HessEvaluation))
-}
-
-// IterationType specifies the type of iteration.
-type IterationType int
-
-const (
-	NoIteration IterationType = iota
+	// NoRequest does not specify any request.
+	NoRequest RequestType = 0
+	// InitIteration is sent to Recorder to indicate the initial location. All
+	// fields of the location to record are valid.
+	// Methods must not return it.
+	InitIteration RequestType = 1 << (iota - 1)
+	// MajorIteration indicates that a Method has found the next candidate
+	// location for an optimum and convergence should be checked.
 	MajorIteration
-	MinorIteration
-	SubIteration
-	InitIteration
-	PostIteration // Iteration after the optimization. Sent to Recorder.
+	// PostIteration is sent to Recorder to indicate the final location reached
+	// during the optimization run. All fields of the location to record are
+	// valid.
+	// Methods must not return it.
+	PostIteration
+	// FuncEvaluation is the request to evaluate the objective function.
+	FuncEvaluation
+	// GradEvaluation is the request to evaluate the gradient of the objective function.
+	GradEvaluation
+	// HessEvaluation is the request to evaluate the Hessian of the objective function.
+	HessEvaluation
+
+	// Mask for the evaluation requests.
+	EvaluationRequest = FuncEvaluation | GradEvaluation | HessEvaluation
 )
 
-func (i IterationType) String() string {
-	if i < 0 || int(i) >= len(iterationStrings) {
-		return fmt.Sprintf("IterationType(%d)", i)
+func (r RequestType) String() string {
+	if r&EvaluationRequest != 0 {
+		return fmt.Sprintf("RequestType(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
+			r&FuncEvaluation != 0,
+			r&GradEvaluation != 0,
+			r&HessEvaluation != 0,
+			r&^(EvaluationRequest))
 	}
-	return iterationStrings[i]
+	s, ok := requestTypeNames[r]
+	if ok {
+		return s
+	}
+	return fmt.Sprintf("RequestType(%d)", r)
 }
 
-var iterationStrings = [...]string{
-	"NoIteration",
-	"MajorIteration",
-	"MinorIteration",
-	"SubIteration",
-	"InitIteration",
-	"PostIteration",
+var requestTypeNames = map[RequestType]string{
+	NoRequest:      "NoRequest",
+	InitIteration:  "InitIteration",
+	MajorIteration: "MajorIteration",
+	PostIteration:  "PostIteration",
 }
 
 // Location represents a location in the optimization procedure.
@@ -91,9 +95,9 @@ type Stats struct {
 	Runtime         time.Duration // Total runtime of the optimization
 }
 
-// complementEval returns an evaluation type that evaluates fields of loc not
-// evaluated by eval.
-func complementEval(loc *Location, eval EvaluationType) (complEval EvaluationType) {
+// complementEval returns an evaluation request that evaluates fields of loc
+// not evaluated by eval.
+func complementEval(loc *Location, eval RequestType) (complEval RequestType) {
 	if eval&FuncEvaluation == 0 {
 		complEval = FuncEvaluation
 	}

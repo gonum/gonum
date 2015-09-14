@@ -94,7 +94,7 @@ type CG struct {
 	gradPrevNorm float64
 }
 
-func (cg *CG) Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
+func (cg *CG) Init(loc *Location) (RequestType, error) {
 	if cg.IterationRestartFactor < 0 {
 		panic("cg: IterationRestartFactor is negative")
 	}
@@ -125,11 +125,11 @@ func (cg *CG) Init(loc *Location, xNext []float64) (EvaluationType, IterationTyp
 	cg.ls.Linesearcher = cg.Linesearcher
 	cg.ls.NextDirectioner = cg
 
-	return cg.ls.Init(loc, xNext)
+	return cg.ls.Init(loc)
 }
 
-func (cg *CG) Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error) {
-	return cg.ls.Iterate(loc, xNext)
+func (cg *CG) Iterate(loc *Location) (RequestType, error) {
+	return cg.ls.Iterate(loc)
 }
 
 func (cg *CG) InitDirection(loc *Location, dir []float64) (stepSize float64) {

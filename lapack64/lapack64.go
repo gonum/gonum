@@ -163,6 +163,22 @@ func Getrf(a blas64.General, ipiv []int) bool {
 	return lapack64.Dgetrf(a.Rows, a.Cols, a.Data, a.Stride, ipiv)
 }
 
+// Getri computes the inverse of the matrix A using the LU factorization computed
+// by Getrf. On entry, a contains the PLU decomposition of A as computed by
+// Getrf and on exit contains the reciprocal of the original matrix.
+//
+// Getri will not perform the inversion if the matrix is singular, and returns
+// a boolean indicating whether the inversion was successful.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= n and this function will panic otherwise.
+// Dgetri is a blocked inversion, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Getri,
+// the optimal work length will be stored into work[0].
+func Getri(a blas64.General, ipiv []int, work []float64, lwork int) (ok bool) {
+	return lapack64.Dgetri(a.Cols, a.Data, a.Stride, ipiv, work, lwork)
+}
+
 // Dgetrs solves a system of equations using an LU factorization.
 // The system of equations solved is
 //  A * X = B if trans == blas.Trans
@@ -270,6 +286,15 @@ func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float
 // iwork is a temporary data slice of length at least n and Trcon will panic otherwise.
 func Trcon(norm lapack.MatrixNorm, a blas64.Triangular, work []float64, iwork []int) float64 {
 	return lapack64.Dtrcon(norm, a.Uplo, a.Diag, a.N, a.Data, a.Stride, work, iwork)
+}
+
+// Trtri computes the inverse of a triangular matrix, storing the result in place
+// into a.
+//
+// Trtri will not perform the inversion if the matrix is singular, and returns
+// a boolean indicating whether the inversion was successful.
+func Trtri(a blas64.Triangular) (ok bool) {
+	return lapack64.Dtrtri(a.Uplo, a.Diag, a.N, a.Data, a.Stride)
 }
 
 // Trtrs solves a triangular system of the form A * X = B or A^T * X = B. Trtrs

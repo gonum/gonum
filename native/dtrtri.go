@@ -9,8 +9,8 @@ import (
 // into a. This is the BLAS level 3 version of the algorithm which builds upon
 // Dtrti2 to operate on matrix blocks instead of only individual columns.
 //
-// Dtrti returns whether the matrix a is singular or whether it's not singular.
-// If the matrix is singular the inversion is not performed.
+// Dtrtri will not perform the inversion if the matrix is singular, and returns
+// a boolean indicating whether the inversion was successful.
 func (impl Implementation) Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if uplo != blas.Upper && uplo != blas.Lower {

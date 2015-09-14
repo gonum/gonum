@@ -395,6 +395,38 @@ func (impl Implementation) Dgetrf(m, n int, a []float64, lda int, ipiv []int) (o
 	return ok
 }
 
+// Dgetri computes the inverse of the matrix A using the LU factorization computed
+// by Dgetrf. On entry, a contains the PLU decomposition of A as computed by
+// Dgetrf and on exit contains the reciprocal of the original matrix.
+//
+// Dtrtri will not perform the inversion if the matrix is singular, and returns
+// a boolean indicating whether the inversion was successful.
+//
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dgetri but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgetri will panic.
+func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work []float64, lwork int) (ok bool) {
+	checkMatrix(n, n, a, lda)
+	if len(ipiv) < n {
+		panic(badIpiv)
+	}
+	if lwork == -1 {
+		work[0] = float64(n)
+		return true
+	}
+	if lwork < n {
+		panic(badWork)
+	}
+	if len(work) < lwork {
+		panic(badWork)
+	}
+	ipiv32 := make([]int32, len(ipiv))
+	for i, v := range ipiv {
+		ipiv32[i] = int32(v) + 1 // Transform to one-indexed.
+	}
+	return clapack.Dgetri(n, a, lda, ipiv32)
+}
+
 // Dgetrs solves a system of equations using an LU factorization.
 // The system of equations solved is
 //  A * X = B if trans == blas.Trans

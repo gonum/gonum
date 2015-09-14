@@ -57,6 +57,10 @@ func TestDgetrf(t *testing.T) {
 	testlapack.DgetrfTest(t, impl)
 }
 
+func TestDgetri(t *testing.T) {
+	testlapack.DgetriTest(t, impl)
+}
+
 func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
 }

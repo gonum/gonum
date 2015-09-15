@@ -11,28 +11,6 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-// Min returns the smallest element value of the receiver.
-func (m *Dense) Min() float64 {
-	min := m.mat.Data[0]
-	for k := 0; k < m.mat.Rows; k++ {
-		for _, v := range m.rowView(k) {
-			min = math.Min(min, v)
-		}
-	}
-	return min
-}
-
-// Max returns the largest element value of the receiver.
-func (m *Dense) Max() float64 {
-	max := m.mat.Data[0]
-	for k := 0; k < m.mat.Rows; k++ {
-		for _, v := range m.rowView(k) {
-			max = math.Max(max, v)
-		}
-	}
-	return max
-}
-
 var inf = math.Inf(1)
 
 const (

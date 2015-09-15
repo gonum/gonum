@@ -69,6 +69,27 @@ func eye() *Dense {
 	})
 }
 
+func (s *S) TestMax(c *check.C) {
+	// A direct test of Max with *Dense arguments is in TestNewDense.
+	f := func(a Matrix) interface{} {
+		return Max(a)
+	}
+	denseComparison := func(a *Dense) interface{} {
+		return Max(a)
+	}
+	testOneInputFunc(c, "Max", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
+}
+func (s *S) TestMin(c *check.C) {
+	// A direct test of Min with *Dense arguments is in TestNewDense.
+	f := func(a Matrix) interface{} {
+		return Min(a)
+	}
+	denseComparison := func(a *Dense) interface{} {
+		return Min(a)
+	}
+	testOneInputFunc(c, "Min", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
+}
+
 func (s *S) TestMaybe(c *check.C) {
 	for i, test := range []struct {
 		fn     func()
@@ -112,5 +133,5 @@ func (s *S) TestTrace(c *check.C) {
 	denseComparison := func(a *Dense) interface{} {
 		return Trace(a)
 	}
-	testOneInputFunc(c, "Trace", f, denseComparison, sameAnswerFloat, isAny, isSquare)
+	testOneInputFunc(c, "Trace", f, denseComparison, sameAnswerFloat, isAnyType, isSquare)
 }

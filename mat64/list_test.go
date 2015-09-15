@@ -45,6 +45,11 @@ func legalSizeSolve(ar, ac, br, bc int) bool {
 	return ar == br
 }
 
+// isAnySize returns true for all matrix sizes.
+func isAnySize(ar, ac int) bool {
+	return true
+}
+
 // isSquare returns whether the input matrix is square.
 func isSquare(r, c int) bool {
 	return r == c
@@ -58,8 +63,8 @@ func sameAnswerFloat(a, b interface{}) bool {
 	return a.(float64) == b.(float64)
 }
 
-// legalTypeAll returns true for all Matrix types.
-func isAny(a Matrix) bool {
+// isAnyType returns true for all Matrix types.
+func isAnyType(Matrix) bool {
 	return true
 }
 

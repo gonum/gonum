@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack"
 )
@@ -349,6 +350,170 @@ func Inverse(a Matrix) (*Dense, error) {
 	x := &Dense{}
 	err := x.Solve(a, eye)
 	return x, err
+}
+
+// Max returns the largest element value of the matrix A.
+func Max(a Matrix) float64 {
+	r, c := a.Dims()
+	if r == 0 || c == 0 {
+		return 0
+	}
+	// Max(A) = Max(A^T)
+	aMat, _ := untranspose(a)
+	switch m := aMat.(type) {
+	case RawMatrixer:
+		rm := m.RawMatrix()
+		max := math.Inf(-1)
+		for i := 0; i < rm.Rows; i++ {
+			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+rm.Cols] {
+				if v > max {
+					max = v
+				}
+			}
+		}
+		return max
+	case RawTriangular:
+		rm := m.RawTriangular()
+		// The max of a triangular is at least 0 unless the size is 1.
+		if rm.N == 1 {
+			return rm.Data[0]
+		}
+		max := 0.0
+		if rm.Uplo == blas.Upper {
+			for i := 0; i < rm.N; i++ {
+				for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
+					if v > max {
+						max = v
+					}
+				}
+			}
+			return max
+		}
+		for i := 0; i < rm.N; i++ {
+			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+i+1] {
+				if v > max {
+					max = v
+				}
+			}
+		}
+		return max
+	case RawSymmetricer:
+		rm := m.RawSymmetric()
+		if rm.Uplo == blas.Upper {
+			max := math.Inf(-1)
+			for i := 0; i < rm.N; i++ {
+				for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
+					if v > max {
+						max = v
+					}
+				}
+			}
+			return max
+		}
+		max := math.Inf(-1)
+		for i := 0; i < rm.N; i++ {
+			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+i+1] {
+				if v > max {
+					max = v
+				}
+			}
+		}
+		return max
+	default:
+		r, c := aMat.Dims()
+		max := math.Inf(-1)
+		for i := 0; i < r; i++ {
+			for j := 0; j < c; j++ {
+				v := aMat.At(i, j)
+				if v > max {
+					max = v
+				}
+			}
+		}
+		return max
+	}
+}
+
+// Min returns the smallest element value of the matrix A.
+func Min(a Matrix) float64 {
+	r, c := a.Dims()
+	if r == 0 || c == 0 {
+		return 0
+	}
+	// Min(A) = Min(A^T)
+	aMat, _ := untranspose(a)
+	switch m := aMat.(type) {
+	case RawMatrixer:
+		rm := m.RawMatrix()
+		min := math.Inf(1)
+		for i := 0; i < rm.Rows; i++ {
+			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+rm.Cols] {
+				if v < min {
+					min = v
+				}
+			}
+		}
+		return min
+	case RawTriangular:
+		rm := m.RawTriangular()
+		// The min of a triangular is at most 0 unless the size is 1.
+		if rm.N == 1 {
+			return rm.Data[0]
+		}
+		min := 0.0
+		if rm.Uplo == blas.Upper {
+			for i := 0; i < rm.N; i++ {
+				for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
+					if v < min {
+						min = v
+					}
+				}
+			}
+			return min
+		}
+		for i := 0; i < rm.N; i++ {
+			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+i+1] {
+				if v < min {
+					min = v
+				}
+			}
+		}
+		return min
+	case RawSymmetricer:
+		rm := m.RawSymmetric()
+		if rm.Uplo == blas.Upper {
+			min := math.Inf(1)
+			for i := 0; i < rm.N; i++ {
+				for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
+					if v < min {
+						min = v
+					}
+				}
+			}
+			return min
+		}
+		min := math.Inf(1)
+		for i := 0; i < rm.N; i++ {
+			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+i+1] {
+				if v < min {
+					min = v
+				}
+			}
+		}
+		return min
+	default:
+		r, c := aMat.Dims()
+		min := math.Inf(1)
+		for i := 0; i < r; i++ {
+			for j := 0; j < c; j++ {
+				v := aMat.At(i, j)
+				if v < min {
+					min = v
+				}
+			}
+		}
+		return min
+	}
 }
 
 // Maybe will recover a panic with a type mat64.Error from fn, and return this error.

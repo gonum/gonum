@@ -16,23 +16,23 @@ import (
 const defaultGradientAbsTol = 1e-6
 
 // RequestType represents the set of actions requested by Method at each
-// iteration.
+// iteration. It is a bitmap of *Iteration and *Evaluation constants.
 type RequestType uint64
 
-// Supported RequestTypes. Individual values must not be combined together by
-// the binary OR (|) operator except for the various Evaluation requests.
+// Supported RequestTypes. Individual requests must NOT be combined together by
+// the binary OR operator except for the *Evaluation requests.
 const (
 	// NoRequest does not specify any request.
 	NoRequest RequestType = 0
 	// InitIteration is sent to Recorder to indicate the initial location. All
-	// fields of the location to record are valid.
+	// fields of the location to record must be valid.
 	// Methods must not return it.
 	InitIteration RequestType = 1 << (iota - 1)
 	// MajorIteration indicates that a Method has found the next candidate
 	// location for an optimum and convergence should be checked.
 	MajorIteration
 	// PostIteration is sent to Recorder to indicate the final location reached
-	// during the optimization run. All fields of the location to record are
+	// during an optimization run. All fields of the location to record must be
 	// valid.
 	// Methods must not return it.
 	PostIteration
@@ -49,7 +49,7 @@ const (
 
 func (r RequestType) String() string {
 	if r&EvaluationRequest != 0 {
-		return fmt.Sprintf("RequestType(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
+		return fmt.Sprintf("EvaluationRequest(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
 			r&FuncEvaluation != 0,
 			r&GradEvaluation != 0,
 			r&HessEvaluation != 0,
@@ -165,12 +165,17 @@ type Settings struct {
 	// The default value is 1e-6.
 	GradientThreshold float64
 
-	// FunctionConverge tests that the function value decreases by a significant
-	// amount over the specified number of iterations. If
-	//  f < f_best && f_best - f > Relative * maxabs(f, f_best) + Absolute
-	// then a significant decrease has occured, and f_best is updated. If there is
-	// no significant decrease for Iterations major iterations, FunctionConvergence
-	// is returned. If this is nil or if Iterations == 0, it has no effect.
+	// FunctionConverge tests that the function value decreases by a
+	// significant amount over the specified number of iterations.
+	//
+	// If f < f_best and
+	//  f_best - f > FunctionConverge.Relative * maxabs(f, f_best) + FunctionConverge.Absolute
+	// then a significant decrease has occured, and f_best is updated.
+	//
+	// If there is no significant decrease for FunctionConverge.Iterations
+	// major iterations, FunctionConvergence status is returned.
+	//
+	// If this is nil or if FunctionConverge.Iterations == 0, it has no effect.
 	FunctionConverge *FunctionConverge
 
 	// MajorIterations is the maximum number of iterations allowed.

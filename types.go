@@ -115,14 +115,19 @@ type Problem struct {
 	// Func evaluates the objective function at the given location. Func
 	// must not modify x.
 	Func func(x []float64) float64
+
 	// Grad evaluates the gradient at x and stores the result in-place in grad.
 	// Grad must not modify x.
 	Grad func(x []float64, grad []float64)
+
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
 	// Hess must not modify x.
 	Hess func(x []float64, hess *mat64.SymDense)
-	// Status reports the status of the optimization problem and reports
-	// any error.
+
+	// Status reports the status of the objective function being optimized and any
+	// error. This can be used to terminate early, for example when the function is
+	// not able to evaluate itself. The user can use one of the pre-provided Status
+	// constants, or may call NewStatus to create a custom Status value.
 	Status func() (Status, error)
 }
 

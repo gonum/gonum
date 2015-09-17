@@ -13,12 +13,21 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
-// Local finds a local minimum of a function using a sequential algorithm.
-// In order to maximize a function, multiply the output by -1.
+// Local finds a local minimum of a minimization problem using a sequential
+// algorithm. A maximization problem can be transformed into a minimization
+// problem by multiplying the function by -1.
 //
-// The first argument is of Function type representing the function to be minimized.
-// Type switching is used to see if the function implements Gradient, FunctionGradient
-// and Statuser.
+// The first argument represents the problem to be minimized. Its fields are
+// routines that evaluate the objective function, gradient, and other
+// quantities related to the problem. The objective function, p.Func, must not
+// be nil. The optimization method used may require other fields to be non-nil
+// as specified by method.Needs(). Local will panic if these are not met. The
+// method can be determined automatically from the supplied problem which is
+// described below.
+//
+// If p.Status is not nil, it is called before every evaluation. If the
+// returned Status is not NotTerminated or the error is not nil, the
+// optimization run is terminated.
 //
 // The second argument is the initial location at which to start the minimization.
 // The initial location must be supplied, and must have a length equal to the
@@ -27,7 +36,7 @@ import (
 // The third argument contains the settings for the minimization. It is here that
 // gradient tolerance, etc. are specified. The DefaultSettings() function
 // can be called for a Settings struct with the default values initialized.
-// If settings == nil, the default settings are used. Please see the documentation
+// If settings == nil, the default settings are used. See the documentation
 // for the Settings structure for more information. The optimization Method used
 // may also contain settings, see documentation for the appropriate optimizer.
 //
@@ -36,18 +45,22 @@ import (
 // (dimension, gradient-free or gradient-based, etc.). The optimization
 // methods in this package are designed such that reasonable defaults occur
 // if options are not specified explicitly. For example, the code
-//  method := &Bfgs{}
-// creates a pointer to a new Bfgs struct. When minimize is called, the settings
+//  method := &optimize.BFGS{}
+// creates a pointer to a new BFGS struct. When Local is called, the settings
 // in the method will be populated with default values. The methods are also
-// designed such that they can be reused in future calls to method.
+// designed such that they can be reused in future calls to Local.
 //
-// Local returns a Result struct and any error that occurred. Please see the
+// If method implements Statuser, method.Status() is called before every call
+// to method.Iterate(). If the returned Status is not NotTerminated or the
+// error is non-nil, the optimization run is terminated.
+//
+// Local returns a Result struct and any error that occurred. See the
 // documentation of Result for more information.
 //
-// Please be aware that the default behavior of Local is to find the minimum.
+// Be aware that the default behavior of Local is to find the minimum.
 // For certain functions and optimization methods, this process can take many
 // function evaluations. If you would like to put limits on this, for example
-// maximum runtime or maximum function evaluations, please modify the Settings
+// maximum runtime or maximum function evaluations, modify the Settings
 // input struct.
 func Local(p Problem, initX []float64, settings *Settings, method Method) (*Result, error) {
 	if p.Func == nil {
@@ -79,7 +92,7 @@ func Local(p Problem, initX []float64, settings *Settings, method Method) (*Resu
 
 	if settings.Recorder != nil {
 		// Initialize Recorder first. If it fails, we avoid the (possibly
-		// time-consuming) evaluation of Func() and Grad() at the starting location.
+		// time-consuming) evaluation at the starting location.
 		err := settings.Recorder.Init()
 		if err != nil {
 			return nil, err

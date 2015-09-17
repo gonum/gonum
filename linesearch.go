@@ -10,14 +10,13 @@ import (
 	"github.com/gonum/floats"
 )
 
-// LinesearchMethod represents an abstract optimization method in which
-// a function is optimized through successive line search optimizations.
-// It consists of a NextDirectioner, which specifies the search direction
-// of each linesearch, and a Linesearcher which performs a linesearch along
-// the search direction.
+// LinesearchMethod represents an abstract optimization method in which a
+// function is optimized through successive line search optimizations.
 type LinesearchMethod struct {
+	// NextDirectioner specifies the search direction of each linesearch.
 	NextDirectioner NextDirectioner
-	Linesearcher    Linesearcher
+	// Linesearcher performs a linesearch along the search direction.
+	Linesearcher Linesearcher
 
 	x   []float64 // Starting point for the current iteration.
 	dir []float64 // Search direction for the current iteration.

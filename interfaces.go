@@ -30,15 +30,15 @@ package optimize
 // combine the Evaluation operations with the Iteration operations.
 type Method interface {
 	// Init initializes the method based on the initial data in loc, updates it
-	// and returns the first request.
+	// and returns the first operation to be carried out by the caller.
 	// The initial location must be valid as specified by Needs().
-	Init(loc *Location) (RequestType, error)
+	Init(loc *Location) (Operation, error)
 
 	// Iterate retrieves data from loc, performs one iteration of the method,
-	// updates loc and returns the next request.
+	// updates loc and returns the next operation.
 	// TODO(vladimir-ch): When decided, say something whether the contents of
 	// Location is preserved between calls to Iterate().
-	Iterate(loc *Location) (RequestType, error)
+	Iterate(loc *Location) (Operation, error)
 
 	// Needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
@@ -69,7 +69,7 @@ type Linesearcher interface {
 	// φ(0) and φ'(0), respectively, and step contains the first trial step
 	// length. It returns the type of evaluation to be performed at
 	// x_0 + step * dir_0.
-	Init(value, derivative float64, step float64) RequestType
+	Init(value, derivative float64, step float64) Operation
 
 	// Finished takes in the values of φ and φ' evaluated at the previous step,
 	// and returns whether a sufficiently accurate minimum of φ has been found.
@@ -78,7 +78,7 @@ type Linesearcher interface {
 	// Iterate takes in the values of φ and φ' evaluated at the previous step
 	// and returns the next step size and the type of evaluation to be
 	// performed at x_k + step * dir_k.
-	Iterate(value, derivative float64) (step float64, r RequestType, err error)
+	Iterate(value, derivative float64) (step float64, op Operation, err error)
 }
 
 // NextDirectioner implements a strategy for computing a new line search
@@ -109,5 +109,5 @@ type StepSizer interface {
 // the progress to StdOut or to a log file. A Recorder must not modify any data.
 type Recorder interface {
 	Init() error
-	Record(*Location, RequestType, *Stats) error
+	Record(*Location, Operation, *Stats) error
 }

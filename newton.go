@@ -54,7 +54,7 @@ type Newton struct {
 	tau  float64
 }
 
-func (n *Newton) Init(loc *Location) (RequestType, error) {
+func (n *Newton) Init(loc *Location) (Operation, error) {
 	if n.Increase == 0 {
 		n.Increase = 5
 	}
@@ -73,7 +73,7 @@ func (n *Newton) Init(loc *Location) (RequestType, error) {
 	return n.ls.Init(loc)
 }
 
-func (n *Newton) Iterate(loc *Location) (RequestType, error) {
+func (n *Newton) Iterate(loc *Location) (Operation, error) {
 	return n.ls.Iterate(loc)
 }
 

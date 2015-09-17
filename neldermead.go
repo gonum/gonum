@@ -82,7 +82,7 @@ type NelderMead struct {
 	reflectedValue float64    // Value at the last reflection point
 }
 
-func (n *NelderMead) Init(loc *Location) (RequestType, error) {
+func (n *NelderMead) Init(loc *Location) (Operation, error) {
 	dim := len(loc.X)
 	if cap(n.vertices) < dim+1 {
 		n.vertices = make([][]float64, dim+1)
@@ -166,7 +166,7 @@ func computeCentroid(vertices [][]float64, centroid []float64) {
 	}
 }
 
-func (n *NelderMead) Iterate(loc *Location) (RequestType, error) {
+func (n *NelderMead) Iterate(loc *Location) (Operation, error) {
 	dim := len(loc.X)
 	switch n.lastIter {
 	case nmInitialize:
@@ -237,7 +237,7 @@ func (n *NelderMead) Iterate(loc *Location) (RequestType, error) {
 
 // returnNext updates the location based on the iteration type and the current
 // simplex, and returns the next request.
-func (n *NelderMead) returnNext(iter nmIterType, loc *Location) (RequestType, error) {
+func (n *NelderMead) returnNext(iter nmIterType, loc *Location) (Operation, error) {
 	n.lastIter = iter
 	switch iter {
 	case nmMajor:

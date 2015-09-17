@@ -94,7 +94,7 @@ type CG struct {
 	gradPrevNorm float64
 }
 
-func (cg *CG) Init(loc *Location) (RequestType, error) {
+func (cg *CG) Init(loc *Location) (Operation, error) {
 	if cg.IterationRestartFactor < 0 {
 		panic("cg: IterationRestartFactor is negative")
 	}
@@ -128,7 +128,7 @@ func (cg *CG) Init(loc *Location) (RequestType, error) {
 	return cg.ls.Init(loc)
 }
 
-func (cg *CG) Iterate(loc *Location) (RequestType, error) {
+func (cg *CG) Iterate(loc *Location) (Operation, error) {
 	return cg.ls.Iterate(loc)
 }
 

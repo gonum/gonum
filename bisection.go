@@ -26,7 +26,7 @@ type Bisection struct {
 	maxGrad  float64
 }
 
-func (b *Bisection) Init(f, g float64, step float64) RequestType {
+func (b *Bisection) Init(f, g float64, step float64) Operation {
 	if step <= 0 {
 		panic("bisection: bad step size")
 	}
@@ -73,7 +73,7 @@ func (b *Bisection) Finished(f, g float64) bool {
 	return false
 }
 
-func (b *Bisection) Iterate(f, g float64) (float64, RequestType, error) {
+func (b *Bisection) Iterate(f, g float64) (float64, Operation, error) {
 	// Deciding on the next step size
 	if math.IsInf(b.maxStep, 1) {
 		// Have not yet bounded the minimum
@@ -135,10 +135,10 @@ func (b *Bisection) Iterate(f, g float64) (float64, RequestType, error) {
 // both of which indicate the minimization must stop. If the steps are different,
 // it sets the new step size and returns the step and evaluation type. If the steps
 // are the same, it returns an error.
-func (b *Bisection) checkStepEqual(newStep float64, r RequestType) (float64, RequestType, error) {
+func (b *Bisection) checkStepEqual(newStep float64, op Operation) (float64, Operation, error) {
 	if b.currStep == newStep {
-		return b.currStep, NoRequest, ErrLinesearchFailure
+		return b.currStep, NoOperation, ErrLinesearchFailure
 	}
 	b.currStep = newStep
-	return newStep, r, nil
+	return newStep, op, nil
 }

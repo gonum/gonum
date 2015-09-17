@@ -143,8 +143,8 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 
 	methodStatus, methodIsStatuser := method.(Statuser)
 
-	var request RequestType
-	request, err = method.Init(loc)
+	var op Operation
+	op, err = method.Init(loc)
 	if err != nil {
 		status = Failure
 		return
@@ -154,30 +154,37 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 		// Sequentially call method.Iterate(), performing the operations it has
 		// requested, until convergence.
 
-		switch request {
-		case NoRequest:
-			panic("optimize: Method returned NoRequest without an error")
+		switch op {
+		case NoOperation:
+
 		case InitIteration:
 			panic("optimize: Method returned InitIteration")
+
 		case PostIteration:
 			panic("optimize: Method returned PostIteration")
+
 		case MajorIteration:
 			stats.MajorIterations++
 			copyLocation(optLoc, loc)
 			status = checkConvergence(optLoc, settings)
-		default: // Any of the Evaluation requests.
+
+		default: // Any of the Evaluation operations.
+			if !op.IsEvaluation() {
+				panic(fmt.Sprintf("optimize: invalid evaluation %v", op))
+			}
+
 			if p.Status != nil {
 				status, err = p.Status()
 				if err != nil || status != NotTerminated {
 					return
 				}
 			}
-			evaluate(p, loc, request, stats)
+			evaluate(p, loc, op, stats)
 		}
 
 		if settings.Recorder != nil {
 			stats.Runtime = time.Since(startTime)
-			err = settings.Recorder.Record(loc, request, stats)
+			err = settings.Recorder.Record(loc, op, stats)
 			if err != nil {
 				if status == NotTerminated {
 					status = Failure
@@ -203,7 +210,7 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 			}
 		}
 
-		request, err = method.Iterate(loc)
+		op, err = method.Iterate(loc)
 		if err != nil {
 			status = Failure
 			return
@@ -362,11 +369,7 @@ func checkLimits(loc *Location, stats *Stats, settings *Settings) Status {
 // the answer into loc and updating stats. Unused fields of loc are set to NaN.
 // It is the responsibility of Method to assemble a valid Location before
 // requesting MajorIteration.
-func evaluate(p *Problem, loc *Location, eval RequestType, stats *Stats) {
-	if eval == NoRequest || eval&EvaluationRequest == 0 {
-		panic(fmt.Sprintf("optimize: invalid evaluation request %v", eval))
-	}
-
+func evaluate(p *Problem, loc *Location, eval Operation, stats *Stats) {
 	loc.F = math.NaN()
 	if loc.Gradient != nil {
 		loc.Gradient[0] = math.NaN()

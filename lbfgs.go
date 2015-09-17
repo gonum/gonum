@@ -38,7 +38,7 @@ type LBFGS struct {
 	rhoHist []float64   // last Store iterations of rho
 }
 
-func (l *LBFGS) Init(loc *Location) (RequestType, error) {
+func (l *LBFGS) Init(loc *Location) (Operation, error) {
 	if l.Linesearcher == nil {
 		l.Linesearcher = &Bisection{}
 	}
@@ -50,7 +50,7 @@ func (l *LBFGS) Init(loc *Location) (RequestType, error) {
 	return l.ls.Init(loc)
 }
 
-func (l *LBFGS) Iterate(loc *Location) (RequestType, error) {
+func (l *LBFGS) Iterate(loc *Location) (Operation, error) {
 	return l.ls.Iterate(loc)
 }
 

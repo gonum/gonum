@@ -39,7 +39,7 @@ type BFGS struct {
 	first bool // Is it the first iteration (used to set the scale of the initial hessian)
 }
 
-func (b *BFGS) Init(loc *Location) (RequestType, error) {
+func (b *BFGS) Init(loc *Location) (Operation, error) {
 	if b.Linesearcher == nil {
 		b.Linesearcher = &Bisection{}
 	}
@@ -52,7 +52,7 @@ func (b *BFGS) Init(loc *Location) (RequestType, error) {
 	return b.ls.Init(loc)
 }
 
-func (b *BFGS) Iterate(loc *Location) (RequestType, error) {
+func (b *BFGS) Iterate(loc *Location) (Operation, error) {
 	return b.ls.Iterate(loc)
 }
 

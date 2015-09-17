@@ -24,14 +24,14 @@ type LinesearchMethod struct {
 	first     bool // Indicator of the first iteration.
 	nextMajor bool // Indicates that MajorIteration must be requested at the next call to Iterate().
 
-	loc  Location    // Storage for intermediate locations.
-	eval RequestType // Indicator of valid fields in loc.
+	loc  Location  // Storage for intermediate locations.
+	eval Operation // Indicator of valid fields in loc.
 
-	lastStep    float64     // Step taken from x in the previous call to Iterate().
-	lastRequest RequestType // Request returned from the previous call to Iterate().
+	lastStep float64   // Step taken from x in the previous call to Iterate().
+	lastOp   Operation // Operation returned from the previous call to Iterate().
 }
 
-func (ls *LinesearchMethod) Init(loc *Location) (RequestType, error) {
+func (ls *LinesearchMethod) Init(loc *Location) (Operation, error) {
 	if loc.Gradient == nil {
 		panic("linesearch: gradient is nil")
 	}
@@ -51,14 +51,14 @@ func (ls *LinesearchMethod) Init(loc *Location) (RequestType, error) {
 	}
 
 	ls.lastStep = math.NaN()
-	ls.lastRequest = NoRequest
+	ls.lastOp = NoOperation
 
 	return ls.initNextLinesearch(loc.X)
 }
 
-func (ls *LinesearchMethod) Iterate(loc *Location) (RequestType, error) {
-	switch ls.lastRequest {
-	case NoRequest:
+func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
+	switch ls.lastOp {
+	case NoOperation:
 		// TODO(vladimir-ch): We have previously returned with an error and
 		// Init() was not called. What to do? What about ls's internal state?
 
@@ -69,22 +69,22 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (RequestType, error) {
 		return ls.initNextLinesearch(loc.X)
 
 	default:
-		if ls.lastRequest&EvaluationRequest == 0 {
-			panic("linesearch: unexpected request")
+		if !ls.lastOp.IsEvaluation() {
+			panic("linesearch: unexpected operation")
 		}
 
 		// Store the result of the previously requested evaluation into ls.loc.
-		if ls.lastRequest&FuncEvaluation != 0 {
+		if ls.lastOp&FuncEvaluation != 0 {
 			ls.loc.F = loc.F
 		}
-		if ls.lastRequest&GradEvaluation != 0 {
+		if ls.lastOp&GradEvaluation != 0 {
 			copy(ls.loc.Gradient, loc.Gradient)
 		}
-		if ls.lastRequest&HessEvaluation != 0 {
+		if ls.lastOp&HessEvaluation != 0 {
 			ls.loc.Hessian.CopySym(loc.Hessian)
 		}
 		// Update the indicator of valid fields of ls.loc.
-		ls.eval |= ls.lastRequest
+		ls.eval |= ls.lastOp
 
 		if ls.nextMajor {
 			ls.nextMajor = false
@@ -94,26 +94,26 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (RequestType, error) {
 			// can announce MajorIteration.
 
 			copyLocation(loc, &ls.loc)
-			ls.lastRequest = MajorIteration
-			return ls.lastRequest, nil
+			ls.lastOp = MajorIteration
+			return ls.lastOp, nil
 		}
 	}
 
 	projGrad := floats.Dot(ls.loc.Gradient, ls.dir)
 	if ls.Linesearcher.Finished(ls.loc.F, projGrad) {
-		// Form a request that evaluates invalid fields of ls.loc.
-		ls.lastRequest = complementEval(&ls.loc, ls.eval)
-		if ls.lastRequest == NoRequest {
+		// Form an operation that evaluates invalid fields of ls.loc.
+		ls.lastOp = complementEval(&ls.loc, ls.eval)
+		if ls.lastOp == NoOperation {
 			// ls.loc is complete and MajorIteration can be announced directly.
 			copyLocation(loc, &ls.loc)
-			ls.lastRequest = MajorIteration
+			ls.lastOp = MajorIteration
 		} else {
 			ls.nextMajor = true
 		}
-		return ls.lastRequest, nil
+		return ls.lastOp, nil
 	}
 
-	step, request, err := ls.Linesearcher.Iterate(ls.loc.F, projGrad)
+	step, op, err := ls.Linesearcher.Iterate(ls.loc.F, projGrad)
 	if err != nil {
 		return ls.error(err)
 	}
@@ -132,26 +132,26 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (RequestType, error) {
 
 		ls.lastStep = step
 		copy(ls.loc.X, loc.X) // Move ls.loc to the next evaluation point
-		ls.eval = NoRequest   // and invalidate all its fields.
+		ls.eval = NoOperation // and invalidate all its fields.
 	} else {
 		// Linesearcher is requesting another evaluation at the same point
 		// which is stored in ls.loc.X.
 		copy(loc.X, ls.loc.X)
 	}
 
-	ls.lastRequest = request
-	return ls.lastRequest, nil
+	ls.lastOp = op
+	return ls.lastOp, nil
 }
 
-func (ls *LinesearchMethod) error(err error) (RequestType, error) {
-	ls.lastRequest = NoRequest
-	return ls.lastRequest, err
+func (ls *LinesearchMethod) error(err error) (Operation, error) {
+	ls.lastOp = NoOperation
+	return ls.lastOp, err
 }
 
 // initNextLinesearch initializes the next linesearch using the previous
-// complete location stored in ls.loc. It fills xNext and returns an
-// evaluation request to be performed at xNext.
-func (ls *LinesearchMethod) initNextLinesearch(xNext []float64) (RequestType, error) {
+// complete location stored in ls.loc. It fills xNext and returns an evaluation
+// to be performed at xNext.
+func (ls *LinesearchMethod) initNextLinesearch(xNext []float64) (Operation, error) {
 	copy(ls.x, ls.loc.X)
 
 	var step float64
@@ -167,7 +167,7 @@ func (ls *LinesearchMethod) initNextLinesearch(xNext []float64) (RequestType, er
 		return ls.error(ErrNonNegativeStepDirection)
 	}
 
-	ls.lastRequest = ls.Linesearcher.Init(ls.loc.F, projGrad, step)
+	ls.lastOp = ls.Linesearcher.Init(ls.loc.F, projGrad, step)
 
 	floats.AddScaledTo(xNext, ls.x, step, ls.dir)
 	if floats.Equal(ls.x, xNext) {
@@ -179,9 +179,9 @@ func (ls *LinesearchMethod) initNextLinesearch(xNext []float64) (RequestType, er
 
 	ls.lastStep = step
 	copy(ls.loc.X, xNext) // Move ls.loc to the next evaluation point
-	ls.eval = NoRequest   // and invalidate all its fields.
+	ls.eval = NoOperation // and invalidate all its fields.
 
-	return ls.lastRequest, nil
+	return ls.lastOp, nil
 }
 
 // ArmijoConditionMet returns true if the Armijo condition (aka sufficient

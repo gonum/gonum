@@ -15,19 +15,19 @@ import (
 
 const defaultGradientAbsTol = 1e-6
 
-// RequestType represents the set of actions requested by Method at each
+// Operation represents the set of operations requested by Method at each
 // iteration. It is a bitmap of *Iteration and *Evaluation constants.
-type RequestType uint64
+type Operation uint64
 
-// Supported RequestTypes. Individual requests must NOT be combined together by
-// the binary OR operator except for the *Evaluation requests.
+// Supported Operations. Individual operations must NOT be combined together by
+// the binary OR operator except for the various *Evaluations.
 const (
-	// NoRequest does not specify any request.
-	NoRequest RequestType = 0
+	// NoOperation does not specify any operation.
+	NoOperation Operation = 0
 	// InitIteration is sent to Recorder to indicate the initial location. All
 	// fields of the location to record must be valid.
 	// Methods must not return it.
-	InitIteration RequestType = 1 << (iota - 1)
+	InitIteration Operation = 1 << (iota - 1)
 	// MajorIteration indicates that a Method has found the next candidate
 	// location for an optimum and convergence should be checked.
 	MajorIteration
@@ -43,27 +43,31 @@ const (
 	// HessEvaluation is the request to evaluate the Hessian of the objective function.
 	HessEvaluation
 
-	// Mask for the evaluation requests.
-	EvaluationRequest = FuncEvaluation | GradEvaluation | HessEvaluation
+	// Mask for the evaluating operations.
+	Evaluations = FuncEvaluation | GradEvaluation | HessEvaluation
 )
 
-func (r RequestType) String() string {
-	if r&EvaluationRequest != 0 {
-		return fmt.Sprintf("EvaluationRequest(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
-			r&FuncEvaluation != 0,
-			r&GradEvaluation != 0,
-			r&HessEvaluation != 0,
-			r&^(EvaluationRequest))
+func (op Operation) IsEvaluation() bool {
+	return op&Evaluations != 0 && op&^Evaluations == 0
+}
+
+func (op Operation) String() string {
+	if op&Evaluations != 0 {
+		return fmt.Sprintf("Evaluation(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
+			op&FuncEvaluation != 0,
+			op&GradEvaluation != 0,
+			op&HessEvaluation != 0,
+			op&^(Evaluations))
 	}
-	s, ok := requestTypeNames[r]
+	s, ok := operationNames[op]
 	if ok {
 		return s
 	}
-	return fmt.Sprintf("RequestType(%d)", r)
+	return fmt.Sprintf("Operation(%d)", op)
 }
 
-var requestTypeNames = map[RequestType]string{
-	NoRequest:      "NoRequest",
+var operationNames = map[Operation]string{
+	NoOperation:    "NoOperation",
 	InitIteration:  "InitIteration",
 	MajorIteration: "MajorIteration",
 	PostIteration:  "PostIteration",
@@ -95,9 +99,9 @@ type Stats struct {
 	Runtime         time.Duration // Total runtime of the optimization
 }
 
-// complementEval returns an evaluation request that evaluates fields of loc
+// complementEval returns an evaluating operation that evaluates fields of loc
 // not evaluated by eval.
-func complementEval(loc *Location, eval RequestType) (complEval RequestType) {
+func complementEval(loc *Location, eval Operation) (complEval Operation) {
 	if eval&FuncEvaluation == 0 {
 		complEval = FuncEvaluation
 	}

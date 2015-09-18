@@ -69,10 +69,6 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
 		return ls.initNextLinesearch(loc.X)
 
 	default:
-		if !ls.lastOp.IsEvaluation() {
-			panic("linesearch: unexpected operation")
-		}
-
 		// Store the result of the previously requested evaluation into ls.loc.
 		if ls.lastOp&FuncEvaluation != 0 {
 			ls.loc.F = loc.F
@@ -116,6 +112,9 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
 	step, op, err := ls.Linesearcher.Iterate(ls.loc.F, projGrad)
 	if err != nil {
 		return ls.error(err)
+	}
+	if !op.isEvaluation() {
+		panic("linesearch: Linesearcher returned invalid operation")
 	}
 
 	if step != ls.lastStep {
@@ -167,7 +166,10 @@ func (ls *LinesearchMethod) initNextLinesearch(xNext []float64) (Operation, erro
 		return ls.error(ErrNonNegativeStepDirection)
 	}
 
-	ls.lastOp = ls.Linesearcher.Init(ls.loc.F, projGrad, step)
+	op := ls.Linesearcher.Init(ls.loc.F, projGrad, step)
+	if !op.isEvaluation() {
+		panic("linesearch: Linesearcher returned invalid operation")
+	}
 
 	floats.AddScaledTo(xNext, ls.x, step, ls.dir)
 	if floats.Equal(ls.x, xNext) {
@@ -181,6 +183,7 @@ func (ls *LinesearchMethod) initNextLinesearch(xNext []float64) (Operation, erro
 	copy(ls.loc.X, xNext) // Move ls.loc to the next evaluation point
 	ls.eval = NoOperation // and invalidate all its fields.
 
+	ls.lastOp = op
 	return ls.lastOp, nil
 }
 

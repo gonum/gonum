@@ -169,7 +169,7 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 			status = checkConvergence(optLoc, settings)
 
 		default: // Any of the Evaluation operations.
-			if !op.IsEvaluation() {
+			if !op.isEvaluation() {
 				panic(fmt.Sprintf("optimize: invalid evaluation %v", op))
 			}
 

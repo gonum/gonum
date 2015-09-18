@@ -44,20 +44,20 @@ const (
 	HessEvaluation
 
 	// Mask for the evaluating operations.
-	Evaluations = FuncEvaluation | GradEvaluation | HessEvaluation
+	evaluations = FuncEvaluation | GradEvaluation | HessEvaluation
 )
 
-func (op Operation) IsEvaluation() bool {
-	return op&Evaluations != 0 && op&^Evaluations == 0
+func (op Operation) isEvaluation() bool {
+	return op&evaluations != 0 && op&^evaluations == 0
 }
 
 func (op Operation) String() string {
-	if op&Evaluations != 0 {
+	if op&evaluations != 0 {
 		return fmt.Sprintf("Evaluation(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
 			op&FuncEvaluation != 0,
 			op&GradEvaluation != 0,
 			op&HessEvaluation != 0,
-			op&^(Evaluations))
+			op&^(evaluations))
 	}
 	s, ok := operationNames[op]
 	if ok {

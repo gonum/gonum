@@ -16,48 +16,53 @@ import (
 const defaultGradientAbsTol = 1e-6
 
 // Operation represents the set of operations requested by Method at each
-// iteration. It is a bitmap of *Iteration and *Evaluation constants.
+// iteration. It is a bitmap of various Iteration and Evaluation constants.
+// Individual constants must NOT be combined together by the binary OR operator
+// except for the Evaluation operations.
 type Operation uint64
 
-// Supported Operations. Individual operations must NOT be combined together by
-// the binary OR operator except for the various *Evaluations.
+// Supported Operations.
 const (
-	// NoOperation does not specify any operation.
+	// NoOperation specifies that no evaluation or convergence check should
+	// take place.
 	NoOperation Operation = 0
-	// InitIteration is sent to Recorder to indicate the initial location. All
-	// fields of the location to record must be valid.
-	// Methods must not return it.
+	// InitIteration is sent to Recorder to indicate the initial location.
+	// All fields of the location to record must be valid.
+	// Method must not return it.
 	InitIteration Operation = 1 << (iota - 1)
-	// MajorIteration indicates that a Method has found the next candidate
-	// location for an optimum and convergence should be checked.
-	MajorIteration
-	// PostIteration is sent to Recorder to indicate the final location reached
-	// during an optimization run. All fields of the location to record must be
-	// valid.
-	// Methods must not return it.
+	// PostIteration is sent to Recorder to indicate the final location
+	// reached during an optimization run.
+	// All fields of the location to record must be valid.
+	// Method must not return it.
 	PostIteration
-	// FuncEvaluation is the request to evaluate the objective function.
+	// MajorIteration indicates that the next candidate location for
+	// an optimum has been found and convergence should be checked.
+	MajorIteration
+	// FuncEvaluation specifies that the objective function
+	// should be evaluated.
 	FuncEvaluation
-	// GradEvaluation is the request to evaluate the gradient of the objective function.
+	// GradEvaluation specifies that the gradient
+	// of the objective function should be evaluated.
 	GradEvaluation
-	// HessEvaluation is the request to evaluate the Hessian of the objective function.
+	// HessEvaluation specifies that the Hessian
+	// of the objective function should be evaluated.
 	HessEvaluation
 
 	// Mask for the evaluating operations.
-	evaluations = FuncEvaluation | GradEvaluation | HessEvaluation
+	evalMask = FuncEvaluation | GradEvaluation | HessEvaluation
 )
 
 func (op Operation) isEvaluation() bool {
-	return op&evaluations != 0 && op&^evaluations == 0
+	return op&evalMask != 0 && op&^evalMask == 0
 }
 
 func (op Operation) String() string {
-	if op&evaluations != 0 {
+	if op&evalMask != 0 {
 		return fmt.Sprintf("Evaluation(Func: %t, Grad: %t, Hess: %t, Extra: 0b%b)",
 			op&FuncEvaluation != 0,
 			op&GradEvaluation != 0,
 			op&HessEvaluation != 0,
-			op&^(evaluations))
+			op&^(evalMask))
 	}
 	s, ok := operationNames[op]
 	if ok {

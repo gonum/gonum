@@ -50,6 +50,11 @@ func isAnySize(ar, ac int) bool {
 	return true
 }
 
+// isAnySize2 returns true for all matrix sizes.
+func isAnySize2(ar, ac, br, bc int) bool {
+	return true
+}
+
 // isSquare returns whether the input matrix is square.
 func isSquare(r, c int) bool {
 	return r == c
@@ -61,6 +66,11 @@ func sameAnswerFloat(a, b interface{}) bool {
 		return math.IsNaN(b.(float64))
 	}
 	return a.(float64) == b.(float64)
+}
+
+// sameAnswerBool returns whether the two inputs have the same value.
+func sameAnswerBool(a, b interface{}) bool {
+	return a.(bool) == b.(bool)
 }
 
 // isAnyType returns true for all Matrix types.
@@ -500,6 +510,176 @@ func testOneInputFunc(c *check.C,
 			}
 			if !sameAnswer(want, got) {
 				c.Errorf("Answer mismatch: %s", errStr)
+			}
+		}
+	}
+}
+
+func testTwoInputFunc(c *check.C,
+	// name is the name of the function being tested.
+	name string,
+
+	// f is the function being tested.
+	f func(a, b Matrix) interface{},
+
+	// denseComparison performs the same operation, but using Dense matrices for
+	// comparison.
+	denseComparison func(a, b *Dense) interface{},
+
+	// sameAnswer compares the result from two different evaluations of the function
+	// and returns true if they are the same. The specific function being tested
+	// determines the definition of "same". It may mean identical or it may mean
+	// approximately equal.
+	sameAnswer func(a, b interface{}) bool,
+
+	// legalType returns true if the types of the inputs are legal for the
+	// input of the function.
+	legalType func(a, b Matrix) bool,
+
+	// legalSize returns true if the sizes are valid for the function.
+	legalSize func(ar, ac, br, bc int) bool,
+) {
+	for _, aMat := range testMatrices {
+		for _, bMat := range testMatrices {
+			// Loop over all of the size combinations (bigger, smaller, etc.).
+			for _, test := range []struct {
+				ar, ac, br, bc int
+			}{
+				{1, 1, 1, 1},
+				{6, 6, 6, 6},
+				{7, 7, 7, 7},
+
+				{1, 1, 1, 5},
+				{1, 1, 5, 1},
+				{1, 5, 1, 1},
+				{5, 1, 1, 1},
+
+				{6, 6, 6, 11},
+				{6, 6, 11, 6},
+				{6, 11, 6, 6},
+				{11, 6, 6, 6},
+				{11, 11, 11, 6},
+				{11, 11, 6, 11},
+				{11, 6, 11, 11},
+				{6, 11, 11, 11},
+
+				{1, 1, 5, 5},
+				{1, 5, 1, 5},
+				{1, 5, 5, 1},
+				{5, 1, 1, 5},
+				{5, 1, 5, 1},
+				{5, 5, 1, 1},
+				{6, 6, 11, 11},
+				{6, 11, 6, 11},
+				{6, 11, 11, 6},
+				{11, 6, 6, 11},
+				{11, 6, 11, 6},
+				{11, 11, 6, 6},
+
+				{1, 1, 17, 11},
+				{1, 1, 11, 17},
+				{1, 11, 1, 17},
+				{1, 17, 1, 11},
+				{1, 11, 17, 1},
+				{1, 17, 11, 1},
+				{11, 1, 1, 17},
+				{17, 1, 1, 11},
+				{11, 1, 17, 1},
+				{17, 1, 11, 1},
+				{11, 17, 1, 1},
+				{17, 11, 1, 1},
+
+				{6, 6, 1, 11},
+				{6, 6, 11, 1},
+				{6, 11, 6, 1},
+				{6, 1, 6, 11},
+				{6, 11, 1, 6},
+				{6, 1, 11, 6},
+				{11, 6, 6, 1},
+				{1, 6, 6, 11},
+				{11, 6, 1, 6},
+				{1, 6, 11, 6},
+				{11, 1, 6, 6},
+				{1, 11, 6, 6},
+
+				{6, 6, 17, 1},
+				{6, 6, 1, 17},
+				{6, 1, 6, 17},
+				{6, 17, 6, 1},
+				{6, 1, 17, 6},
+				{6, 17, 1, 6},
+				{1, 6, 6, 17},
+				{17, 6, 6, 1},
+				{1, 6, 17, 6},
+				{17, 6, 1, 6},
+				{1, 17, 6, 6},
+				{17, 1, 6, 6},
+
+				{6, 6, 17, 11},
+				{6, 6, 11, 17},
+				{6, 11, 6, 17},
+				{6, 17, 6, 11},
+				{6, 11, 17, 6},
+				{6, 17, 11, 6},
+				{11, 6, 6, 17},
+				{17, 6, 6, 11},
+				{11, 6, 17, 6},
+				{17, 6, 11, 6},
+				{11, 17, 6, 6},
+				{17, 11, 6, 6},
+			} {
+				// Skip the test if the argument would not be assignable to the
+				// method's corresponding input parameter or it is not possible
+				// to construct an argument of the requested size.
+				if !legalType(aMat, bMat) {
+					continue
+				}
+				if !legalDims(aMat, test.ar, test.ac) {
+					continue
+				}
+				if !legalDims(bMat, test.br, test.bc) {
+					continue
+				}
+				a := makeRandOf(aMat, test.ar, test.ac)
+				b := makeRandOf(bMat, test.br, test.bc)
+
+				// Compute the true answer if the sizes are legal.
+				dimsOK := legalSize(test.ar, test.ac, test.br, test.bc)
+				var want interface{}
+				if dimsOK {
+					var aDense, bDense Dense
+					aDense.Clone(a)
+					bDense.Clone(b)
+					want = denseComparison(&aDense, &bDense)
+				}
+				aCopy := makeCopyOf(a)
+				bCopy := makeCopyOf(b)
+				// Test the method for a zero-value of the receiver.
+				aType, aTrans := untranspose(a)
+				bType, bTrans := untranspose(b)
+				errStr := fmt.Sprintf("%v(%T, %T), size: %#v, atrans %t, btrans %t", name, aType, bType, test, aTrans, bTrans)
+				var got interface{}
+				panicked, err := panics(func() { got = f(a, b) })
+				if !dimsOK && !panicked {
+					c.Errorf("Did not panic with illegal size: %s", errStr)
+					continue
+				}
+				if dimsOK && panicked {
+					c.Errorf("Panicked with legal size: %s %s", errStr, err)
+					continue
+				}
+				if !equal(a, aCopy) {
+					c.Errorf("First input argument changed in call: %s", errStr)
+				}
+				if !equal(b, bCopy) {
+					c.Errorf("First input argument changed in call: %s", errStr)
+				}
+				if !dimsOK {
+					continue
+				}
+				if !sameAnswer(want, got) {
+					c.Errorf("Answer mismatch: %s", errStr)
+				}
 			}
 		}
 	}

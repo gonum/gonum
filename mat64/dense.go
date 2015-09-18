@@ -44,7 +44,6 @@ var (
 	_ Stacker   = matrix
 	_ Augmenter = matrix
 
-	_ Equaler       = matrix
 	_ ApproxEqualer = matrix
 
 	_ RawMatrixSetter = matrix

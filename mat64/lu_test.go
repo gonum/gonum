@@ -81,7 +81,7 @@ func (s *S) TestLURankOne(c *check.C) {
 			aR1New := luReconstruct(&luNew)
 			aR1 := luReconstruct(lu)
 
-			if !aR1.Equals(aR1New) {
+			if !Equal(aR1, aR1New) {
 				c.Error("Different answer when new receiver")
 			}
 			if !aR1.EqualsApprox(a, 1e-10) {

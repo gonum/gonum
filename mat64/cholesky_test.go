@@ -41,7 +41,7 @@ func (s *S) TestCholesky(c *check.C) {
 		ok := chol.Factorize(t.a)
 		c.Check(ok, check.Equals, t.posdef)
 		fc := DenseCopyOf(chol.chol)
-		c.Check(fc.Equals(t.want), check.Equals, true)
+		c.Check(Equal(fc, t.want), check.Equals, true)
 		if math.Abs(t.cond-chol.cond) > 1e-13 {
 			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
 		}
@@ -66,7 +66,7 @@ func (s *S) TestCholesky(c *check.C) {
 		}
 		ok = cholSmall.Factorize(t.a)
 		c.Check(ok, check.Equals, t.posdef)
-		c.Check(fc.Equals(t.want), check.Equals, true)
+		c.Check(Equal(fc, t.want), check.Equals, true)
 		if math.Abs(t.cond-cholSmall.cond) > 1e-13 {
 			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
 		}
@@ -80,7 +80,7 @@ func (s *S) TestCholesky(c *check.C) {
 		}
 		ok = cholCorrect.Factorize(t.a)
 		c.Check(ok, check.Equals, t.posdef)
-		c.Check(fc.Equals(t.want), check.Equals, true)
+		c.Check(Equal(fc, t.want), check.Equals, true)
 		if math.Abs(t.cond-cholCorrect.cond) > 1e-13 {
 			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
 		}
@@ -94,7 +94,7 @@ func (s *S) TestCholesky(c *check.C) {
 		}
 		ok = cholLarge.Factorize(t.a)
 		c.Check(ok, check.Equals, t.posdef)
-		c.Check(fc.Equals(t.want), check.Equals, true)
+		c.Check(Equal(fc, t.want), check.Equals, true)
 		if math.Abs(t.cond-cholLarge.cond) > 1e-13 {
 			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
 		}

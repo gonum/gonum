@@ -93,7 +93,7 @@ func (s *S) TestEigen(c *check.C) {
 		}
 
 		if t.v != nil {
-			c.Check(ef.V.Equals(t.v), check.Equals, true)
+			c.Check(Equal(ef.V, t.v), check.Equals, true)
 		}
 
 		t.a.Mul(t.a, ef.V)

@@ -298,22 +298,6 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 	}
 }
 
-// Equals compares the vectors represented by b and the receiver and returns true
-// if the vectors are element-wise equal.
-func (v *Vector) EqualsVec(b *Vector) bool {
-	n := v.Len()
-	nb := b.Len()
-	if n != nb {
-		return false
-	}
-	for i := 0; i < n; i++ {
-		if v.mat.Data[i*v.mat.Inc] != b.mat.Data[i*b.mat.Inc] {
-			return false
-		}
-	}
-	return true
-}
-
 // EqualsApproxVec compares the vectors represented by b and the receiver, with
 // tolerance for element-wise equality specified by epsilon.
 func (v *Vector) EqualsApproxVec(b *Vector, epsilon float64) bool {

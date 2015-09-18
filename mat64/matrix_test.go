@@ -69,6 +69,16 @@ func eye() *Dense {
 	})
 }
 
+func (s *S) TestEqual(c *check.C) {
+	f := func(a, b Matrix) interface{} {
+		return Equal(a, b)
+	}
+	denseComparison := func(a, b *Dense) interface{} {
+		return Equal(a, b)
+	}
+	testTwoInputFunc(c, "Equal", f, denseComparison, sameAnswerBool, legalTypesAll, isAnySize2)
+}
+
 func (s *S) TestMax(c *check.C) {
 	// A direct test of Max with *Dense arguments is in TestNewDense.
 	f := func(a Matrix) interface{} {
@@ -79,6 +89,7 @@ func (s *S) TestMax(c *check.C) {
 	}
 	testOneInputFunc(c, "Max", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
 }
+
 func (s *S) TestMin(c *check.C) {
 	// A direct test of Min with *Dense arguments is in TestNewDense.
 	f := func(a Matrix) interface{} {

@@ -107,7 +107,7 @@ var statuses = []struct {
 // calls to NewStatus are not thread safe.
 //
 // NewStatus takes in three arguments, the string that should be output from
-// Status.String(), a boolean if the status indicates early optimization conclusion,
+// Status.String, a boolean if the status indicates early optimization conclusion,
 // and the error to return from Err (if any).
 func NewStatus(name string, early bool, err error) Status {
 	statuses = append(statuses, struct {

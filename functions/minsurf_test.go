@@ -32,8 +32,8 @@ func TestMinimalSurface(t *testing.T) {
 		}
 
 		// Test that the gradient at the minimum is small enough.
-		// In some sense this test is not completely correct because ExactX()
-		// is the exact solution to the continuous problem projected on the
+		// In some sense this test is not completely correct because ExactX
+		// returns the exact solution to the continuous problem projected on the
 		// grid, not the exact solution to the discrete problem which we are
 		// solving. This is the reason why a relatively loose tolerance 1e-4
 		// must be used.

@@ -98,9 +98,9 @@ type Result struct {
 // Stats contains the statistics of the run.
 type Stats struct {
 	MajorIterations int           // Total number of major iterations
-	FuncEvaluations int           // Number of evaluations of Func()
-	GradEvaluations int           // Number of evaluations of Grad()
-	HessEvaluations int           // Number of evaluations of Hess()
+	FuncEvaluations int           // Number of evaluations of Func
+	GradEvaluations int           // Number of evaluations of Grad
+	HessEvaluations int           // Number of evaluations of Hess
 	Runtime         time.Duration // Total runtime of the optimization
 }
 
@@ -154,7 +154,7 @@ func (p Problem) satisfies(method Method) error {
 
 // Settings represents settings of the optimization run. It contains initial
 // settings, convergence information, and Recorder information. In general, users
-// should use DefaultSettings() rather than constructing a Settings literal.
+// should use DefaultSettings rather than constructing a Settings literal.
 //
 // If UseInitData is true, InitialValue, InitialGradient and InitialHessian
 // specify function information at the initial location.
@@ -208,21 +208,21 @@ type Settings struct {
 
 	// FuncEvaluations is the maximum allowed number of function evaluations.
 	// FunctionEvaluationLimit status is returned if the total number of calls
-	// to Func() equals or exceeds this number.
+	// to Func equals or exceeds this number.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	FuncEvaluations int
 
 	// GradEvaluations is the maximum allowed number of gradient evaluations.
 	// GradientEvaluationLimit status is returned if the total number of calls
-	// to Grad() equals or exceeds this number.
+	// to Grad equals or exceeds this number.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	GradEvaluations int
 
 	// HessEvaluations is the maximum allowed number of Hessian evaluations.
 	// HessianEvaluationLimit status is returned if the total number of calls
-	// to Hess() equals or exceeds this number.
+	// to Hess equals or exceeds this number.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	HessEvaluations int

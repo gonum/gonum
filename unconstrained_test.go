@@ -31,7 +31,7 @@ type unconstrainedTest struct {
 	// the default value of 20 will be used.
 	fIter int
 	// long indicates that the test takes long time to finish and will be
-	// excluded if testing.Short() is true.
+	// excluded if testing.Short returns true.
 	long bool
 }
 
@@ -995,7 +995,7 @@ func newVariablyDimensioned(dim int, gradTol float64) unconstrainedTest {
 
 func TestLocal(t *testing.T) {
 	var tests []unconstrainedTest
-	// Mix of functions with and without Grad() method.
+	// Mix of functions with and without Grad method.
 	tests = append(tests, gradFreeTests...)
 	tests = append(tests, gradientDescentTests...)
 	testLocal(t, gradientDescentTests, nil)
@@ -1003,7 +1003,7 @@ func TestLocal(t *testing.T) {
 
 func TestNelderMead(t *testing.T) {
 	var tests []unconstrainedTest
-	// Mix of functions with and without Grad() method.
+	// Mix of functions with and without Grad method.
 	tests = append(tests, gradFreeTests...)
 	tests = append(tests, gradientDescentTests...)
 	testLocal(t, tests, &NelderMead{})

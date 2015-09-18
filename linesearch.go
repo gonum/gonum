@@ -22,13 +22,13 @@ type LinesearchMethod struct {
 	dir []float64 // Search direction for the current iteration.
 
 	first     bool // Indicator of the first iteration.
-	nextMajor bool // Indicates that MajorIteration must be requested at the next call to Iterate().
+	nextMajor bool // Indicates that MajorIteration must be requested at the next call to Iterate.
 
 	loc  Location  // Storage for intermediate locations.
 	eval Operation // Indicator of valid fields in loc.
 
-	lastStep float64   // Step taken from x in the previous call to Iterate().
-	lastOp   Operation // Operation returned from the previous call to Iterate().
+	lastStep float64   // Step taken from x in the previous call to Iterate.
+	lastOp   Operation // Operation returned from the previous call to Iterate.
 }
 
 func (ls *LinesearchMethod) Init(loc *Location) (Operation, error) {
@@ -60,7 +60,7 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
 	switch ls.lastOp {
 	case NoOperation:
 		// TODO(vladimir-ch): We have previously returned with an error and
-		// Init() was not called. What to do? What about ls's internal state?
+		// Init was not called. What to do? What about ls's internal state?
 
 	case MajorIteration:
 		// We previously requested MajorIteration but since we're here, the

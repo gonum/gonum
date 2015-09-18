@@ -40,7 +40,7 @@ type CGVariant interface {
 //  - The angle between the gradients at two consecutive iterations ∇f_k and
 //    ∇f_{k+1} is too large.
 //  - The direction d_{k+1} is not a descent direction.
-//  - β_k given by CGVariant.Beta() is equal to zero.
+//  - β_k returned from CGVariant.Beta is equal to zero.
 //
 // The line search for CG must yield step sizes that satisfy the strong Wolfe
 // conditions at every iteration, otherwise the generated search direction

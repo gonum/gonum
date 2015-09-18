@@ -31,19 +31,19 @@ package optimize
 type Method interface {
 	// Init initializes the method based on the initial data in loc, updates it
 	// and returns the first operation to be carried out by the caller.
-	// The initial location must be valid as specified by Needs().
+	// The initial location must be valid as specified by Needs.
 	Init(loc *Location) (Operation, error)
 
 	// Iterate retrieves data from loc, performs one iteration of the method,
 	// updates loc and returns the next operation.
 	// TODO(vladimir-ch): When decided, say something whether the contents of
-	// Location is preserved between calls to Iterate().
+	// Location is preserved between calls to Iterate.
 	Iterate(loc *Location) (Operation, error)
 
 	// Needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
 	// internally for initialization and must match evaluation types returned
-	// by Init() and Iterate() during the optimization process.
+	// by Init and Iterate during the optimization process.
 	Needs() struct {
 		Gradient bool
 		Hessian  bool
@@ -52,7 +52,7 @@ type Method interface {
 
 // Statuser can report the status and any error. It is intended for methods as
 // an additional error reporting mechanism apart from the errors returned from
-// Init() and Iterate().
+// Init and Iterate.
 type Statuser interface {
 	Status() (Status, error)
 }

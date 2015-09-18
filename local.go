@@ -21,7 +21,7 @@ import (
 // routines that evaluate the objective function, gradient, and other
 // quantities related to the problem. The objective function, p.Func, must not
 // be nil. The optimization method used may require other fields to be non-nil
-// as specified by method.Needs(). Local will panic if these are not met. The
+// as specified by method.Needs. Local will panic if these are not met. The
 // method can be determined automatically from the supplied problem which is
 // described below.
 //
@@ -34,7 +34,7 @@ import (
 // problem dimension.
 //
 // The third argument contains the settings for the minimization. It is here that
-// gradient tolerance, etc. are specified. The DefaultSettings() function
+// gradient tolerance, etc. are specified. The DefaultSettings function
 // can be called for a Settings struct with the default values initialized.
 // If settings == nil, the default settings are used. See the documentation
 // for the Settings structure for more information. The optimization Method used
@@ -50,8 +50,8 @@ import (
 // in the method will be populated with default values. The methods are also
 // designed such that they can be reused in future calls to Local.
 //
-// If method implements Statuser, method.Status() is called before every call
-// to method.Iterate(). If the returned Status is not NotTerminated or the
+// If method implements Statuser, method.Status is called before every call
+// to method.Iterate. If the returned Status is not NotTerminated or the
 // error is non-nil, the optimization run is terminated.
 //
 // Local returns a Result struct and any error that occurred. See the
@@ -151,7 +151,7 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 	}
 
 	for {
-		// Sequentially call method.Iterate(), performing the operations it has
+		// Sequentially call method.Iterate, performing the operations it has
 		// requested, until convergence.
 
 		switch op {
@@ -311,7 +311,7 @@ func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stat
 // checkConvergence returns NotTerminated if the Location does not satisfy the
 // convergence criteria given by settings. Otherwise a corresponding status is
 // returned.
-// Unlike checkLimits, it is called by Local() only at MajorIterations.
+// Unlike checkLimits, checkConvergence is called by Local only at MajorIterations.
 func checkConvergence(loc *Location, settings *Settings) Status {
 	if loc.Gradient != nil {
 		norm := floats.Norm(loc.Gradient, math.Inf(1))
@@ -333,7 +333,7 @@ func checkConvergence(loc *Location, settings *Settings) Status {
 
 // checkLimits returns NotTerminated status if the various limits given by
 // settings has not been reached. Otherwise it returns a corresponding status.
-// Unlike checkConvergence(), it is called by Local() at _every_ iteration.
+// Unlike checkConvergence, checkLimits is called by Local at _every_ iteration.
 func checkLimits(loc *Location, stats *Stats, settings *Settings) Status {
 	// Check the objective function value for negative infinity because it
 	// could break the linesearches and -inf is the best we can do anyway.

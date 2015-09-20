@@ -14,8 +14,8 @@ import (
 )
 
 func TestCovarianceMatrix(t *testing.T) {
-	// An alternate way to test this is to call the Variance
-	// and Covariance functions and ensure that the results are identical.
+	// An alternative way to test this is to call the Variance and
+	// Covariance functions and ensure that the results are identical.
 	for i, test := range []struct {
 		data    *mat64.Dense
 		weights []float64

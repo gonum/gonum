@@ -61,7 +61,7 @@ func TestCovarianceMatrix(t *testing.T) {
 			copy(w, test.weights)
 		}
 		c := CovarianceMatrix(nil, test.data, test.weights)
-		if !c.Equals(test.ans) {
+		if !mat64.Equal(c, test.ans) {
 			t.Errorf("%d: expected cov %v, found %v", i, test.ans, c)
 		}
 		if !floats.Equal(d, r.Data) {
@@ -155,7 +155,7 @@ func TestCorrelationMatrix(t *testing.T) {
 			copy(w, test.weights)
 		}
 		c := CorrelationMatrix(nil, test.data, test.weights)
-		if !c.Equals(test.ans) {
+		if !mat64.Equal(c, test.ans) {
 			t.Errorf("%d: expected corr %v, found %v", i, test.ans, c)
 		}
 		if !floats.Equal(d, r.Data) {

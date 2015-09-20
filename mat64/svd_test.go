@@ -177,13 +177,13 @@ func (s *S) TestSVD(c *check.C) {
 		s := svd.S()
 
 		if svd.U != nil {
-			c.Check(svd.U.Equals(t.u), check.Equals, true)
+			c.Check(Equal(svd.U, t.u), check.Equals, true)
 		} else {
 			c.Check(t.wantu, check.Equals, false)
 			c.Check(t.u, check.IsNil)
 		}
 		if svd.V != nil {
-			c.Check(svd.V.Equals(t.v), check.Equals, true)
+			c.Check(Equal(svd.V, t.v), check.Equals, true)
 		} else {
 			c.Check(t.wantv, check.Equals, false)
 			c.Check(t.v, check.IsNil)

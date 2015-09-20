@@ -784,51 +784,6 @@ func (m *Dense) Sum() float64 {
 	return s
 }
 
-// Equals returns true if b and the receiver have the same size and contain all
-// equal elements.
-//
-// See the Equaler interface for more information.
-func (m *Dense) Equals(b Matrix) bool {
-	br, bc := b.Dims()
-	if br != m.mat.Rows || bc != m.mat.Cols {
-		return false
-	}
-
-	if b, ok := b.(RawMatrixer); ok {
-		bmat := b.RawMatrix()
-		for jb, jm := 0, 0; jm < br*m.mat.Stride; jb, jm = jb+bmat.Stride, jm+m.mat.Stride {
-			for i, v := range m.mat.Data[jm : jm+bc] {
-				if v != bmat.Data[i+jb] {
-					return false
-				}
-			}
-		}
-		return true
-	}
-
-	if b, ok := b.(Vectorer); ok {
-		rowb := make([]float64, bc)
-		for r := 0; r < br; r++ {
-			rowm := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
-			for i, v := range b.Row(rowb, r) {
-				if rowm[i] != v {
-					return false
-				}
-			}
-		}
-		return true
-	}
-
-	for r := 0; r < br; r++ {
-		for c := 0; c < bc; c++ {
-			if m.At(r, c) != b.At(r, c) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // EqualsApprox compares the matrices represented by b and the receiver, with
 // tolerance for element-wise equality specified by epsilon.
 //

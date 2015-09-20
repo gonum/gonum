@@ -229,12 +229,6 @@ type ElemDiver interface {
 	DivElem(a, b Matrix)
 }
 
-// An Equaler can compare the matrices represented by b and the receiver. Matrices with non-equal shapes
-// are not equal.
-type Equaler interface {
-	Equals(b Matrix) bool
-}
-
 // An ApproxEqualer can compare the matrices represented by b and the receiver, with tolerance for
 // element-wise equailty specified by epsilon. Matrices with non-equal shapes are not equal.
 type ApproxEqualer interface {
@@ -326,6 +320,77 @@ type RawVectorer interface {
 func Det(a Matrix) float64 {
 	det, sign := LogDet(a)
 	return math.Exp(det) * sign
+}
+
+// Equal returns whether element a and b have the same size and contain all equal
+// elements.
+func Equal(a, b Matrix) bool {
+	ar, ac := a.Dims()
+	br, bc := b.Dims()
+	if ar != br || ac != bc {
+		return false
+	}
+	aMat, aTrans := untranspose(a)
+	bMat, bTrans := untranspose(b)
+	if rma, ok := aMat.(RawMatrixer); ok {
+		if rmb, ok := bMat.(RawMatrixer); ok {
+			ra := rma.RawMatrix()
+			rb := rmb.RawMatrix()
+			if aTrans == bTrans {
+				for i := 0; i < ra.Rows; i++ {
+					for j := 0; j < ra.Cols; j++ {
+						if ra.Data[i*ra.Stride+j] != rb.Data[i*rb.Stride+j] {
+							return false
+						}
+					}
+				}
+				return true
+			}
+			for i := 0; i < ra.Rows; i++ {
+				for j := 0; j < ra.Cols; j++ {
+					if ra.Data[i*ra.Stride+j] != rb.Data[j*rb.Stride+i] {
+						return false
+					}
+				}
+			}
+			return true
+		}
+	}
+	if rma, ok := aMat.(RawSymmetricer); ok {
+		if rmb, ok := bMat.(RawSymmetricer); ok {
+			ra := rma.RawSymmetric()
+			rb := rmb.RawSymmetric()
+			// Symmetric matrices are always upper and equal to their transpose.
+			for i := 0; i < ra.N; i++ {
+				for j := i; j < ra.N; j++ {
+					if ra.Data[i*ra.Stride+j] != rb.Data[i*rb.Stride+j] {
+						return false
+					}
+				}
+			}
+			return true
+		}
+	}
+	if ra, ok := aMat.(*Vector); ok {
+		if rb, ok := bMat.(*Vector); ok {
+			// If the raw vectors are the same length they must either both be
+			// transposed or both not transposed (or have length 1).
+			for i := 0; i < ra.n; i++ {
+				if ra.mat.Data[i*ra.mat.Inc] != rb.mat.Data[i*rb.mat.Inc] {
+					return false
+				}
+			}
+			return true
+		}
+	}
+	for i := 0; i < ar; i++ {
+		for j := 0; j < ac; j++ {
+			if a.At(i, j) != b.At(i, j) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // LogDet returns the log of the determinant and the sign of the determinant

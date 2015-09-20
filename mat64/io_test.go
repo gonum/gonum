@@ -30,6 +30,6 @@ func (s *S) TestDenseRW(c *check.C) {
 		err = got.UnmarshalBinary(buf)
 		c.Check(err, check.Equals, nil, check.Commentf("error decoding test #%d: %v\n", i, err))
 
-		c.Check(got.Equals(test), check.Equals, true, check.Commentf("r/w test #%d failed\nwant=%#v\n got=%#v\n", i, test, &got))
+		c.Check(Equal(&got, test), check.Equals, true, check.Commentf("r/w test #%d failed\nwant=%#v\n got=%#v\n", i, test, &got))
 	}
 }

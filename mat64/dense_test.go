@@ -156,7 +156,7 @@ func (s *S) TestNewDense(c *check.C) {
 		c.Check(Max(m), check.Equals, test.max, check.Commentf("Test %d", i))
 		c.Check(m.Norm(0), check.Equals, test.fro, check.Commentf("Test %d", i))
 		c.Check(m, check.DeepEquals, test.mat, check.Commentf("Test %d", i))
-		c.Check(m.Equals(test.mat), check.Equals, true, check.Commentf("Test %d", i))
+		c.Check(Equal(m, test.mat), check.Equals, true, check.Commentf("Test %d", i))
 	}
 }
 
@@ -335,13 +335,13 @@ func (s *S) TestGrow(c *check.C) {
 	v := m.View(1, 1, 4, 4).(*Dense)
 	c.Check(v.At(0, 0), check.Equals, m.At(1, 1))
 	v = v.Grow(5, 5).(*Dense)
-	c.Check(v.Equals(m.View(1, 1, 9, 9)), check.Equals, true)
+	c.Check(Equal(v, m.View(1, 1, 9, 9)), check.Equals, true)
 
 	// Test grow bigger than caps copies.
 	v = v.Grow(5, 5).(*Dense)
-	c.Check(v.View(0, 0, 9, 9).(*Dense).Equals(m.View(1, 1, 9, 9)), check.Equals, true)
+	c.Check(Equal(v.View(0, 0, 9, 9), m.View(1, 1, 9, 9)), check.Equals, true)
 	v.Set(0, 0, 0)
-	c.Check(v.View(0, 0, 9, 9).(*Dense).Equals(m.View(1, 1, 9, 9)), check.Equals, false)
+	c.Check(Equal(v.View(0, 0, 9, 9), m.View(1, 1, 9, 9)), check.Equals, false)
 
 	// Test grow uses existing data slice when matrix is zero size.
 	v.Reset()
@@ -389,12 +389,12 @@ func (s *S) TestAdd(c *check.C) {
 
 		var temp Dense
 		temp.Add(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Add %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v Add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		zero(temp.mat.Data)
 		temp.Add(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Add %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v Add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
@@ -402,7 +402,7 @@ func (s *S) TestAdd(c *check.C) {
 		c.Check(func() { temp.Add(a, b) }, check.PanicMatches, "runtime error: index out of range", check.Commentf("Test %d", i))
 
 		a.Add(a, b)
-		c.Check(a.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Add %v expect %v got %v",
+		c.Check(Equal(a, r), check.Equals, true, check.Commentf("Test %d: %v Add %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 	}
 
@@ -452,12 +452,12 @@ func (s *S) TestSub(c *check.C) {
 
 		var temp Dense
 		temp.Sub(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Sub %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v Sub %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		zero(temp.mat.Data)
 		temp.Sub(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Sub %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v Sub %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
@@ -465,7 +465,7 @@ func (s *S) TestSub(c *check.C) {
 		c.Check(func() { temp.Sub(a, b) }, check.PanicMatches, "runtime error: index out of range", check.Commentf("Test %d", i))
 
 		a.Sub(a, b)
-		c.Check(a.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Sub %v expect %v got %v",
+		c.Check(Equal(a, r), check.Equals, true, check.Commentf("Test %d: %v Sub %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 	}
 }
@@ -506,12 +506,12 @@ func (s *S) TestMulElem(c *check.C) {
 
 		var temp Dense
 		temp.MulElem(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v MulElem %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v MulElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		zero(temp.mat.Data)
 		temp.MulElem(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v MulElem %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v MulElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
@@ -519,7 +519,7 @@ func (s *S) TestMulElem(c *check.C) {
 		c.Check(func() { temp.MulElem(a, b) }, check.PanicMatches, "runtime error: index out of range", check.Commentf("Test %d", i))
 
 		a.MulElem(a, b)
-		c.Check(a.Equals(r), check.Equals, true, check.Commentf("Test %d: %v MulElem %v expect %v got %v",
+		c.Check(Equal(a, r), check.Equals, true, check.Commentf("Test %d: %v MulElem %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 	}
 }
@@ -635,12 +635,12 @@ func (s *S) TestMul(c *check.C) {
 
 		var temp Dense
 		temp.Mul(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Mul %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v Mul %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(temp.mat.Rows, temp.mat.Cols, temp.mat.Data)))
 
 		zero(temp.mat.Data)
 		temp.Mul(a, b)
-		c.Check(temp.Equals(r), check.Equals, true, check.Commentf("Test %d: %v Mul %v expect %v got %v",
+		c.Check(Equal(&temp, r), check.Equals, true, check.Commentf("Test %d: %v Mul %v expect %v got %v",
 			i, test.a, test.b, test.r, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data)))
 
 		// These probably warrant a better check and failure. They should never happen in the wild though.
@@ -798,7 +798,7 @@ func (s *S) TestPow(c *check.C) {
 			t.mod(&got)
 		}
 		got.Pow(NewDense(flatten(t.a)), t.n)
-		c.Check(got.Equals(NewDense(flatten(t.want))), check.Equals, true, check.Commentf("Test %d", i))
+		c.Check(Equal(&got, NewDense(flatten(t.want))), check.Equals, true, check.Commentf("Test %d", i))
 	}
 }
 
@@ -829,7 +829,7 @@ func (s *S) TestPowN(c *check.C) {
 			}
 			got.Pow(NewDense(flatten(t.a)), n)
 			want.iterativePow(NewDense(flatten(t.a)), n)
-			c.Check(got.Equals(&want), check.Equals, true, check.Commentf("Test %d", i))
+			c.Check(Equal(&got, &want), check.Equals, true, check.Commentf("Test %d", i))
 		}
 	}
 }
@@ -872,18 +872,18 @@ func (s *S) TestCloneT(c *check.C) {
 		var r, rr Dense
 
 		r.Clone(a.T())
-		c.Check(r.Equals(t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(&r, t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
 		rr.Clone(r.T())
-		c.Check(rr.Equals(a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(&rr, a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
 		zero(r.mat.Data)
 		r.Clone(a.T())
-		c.Check(r.Equals(t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(&r, t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
 		zero(rr.mat.Data)
 		rr.Clone(r.T())
-		c.Check(rr.Equals(a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(&rr, a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 	}
 }
 
@@ -920,18 +920,18 @@ func (s *S) TestCopyT(c *check.C) {
 		rr := NewDense(ar, ac, nil)
 
 		r.Copy(a.T())
-		c.Check(r.Equals(t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(r, t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
 		rr.Copy(r.T())
-		c.Check(rr.Equals(a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(rr, a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
 		zero(r.mat.Data)
 		r.Copy(a.T())
-		c.Check(r.Equals(t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(r, t), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 
 		zero(rr.mat.Data)
 		rr.Copy(r.T())
-		c.Check(rr.Equals(a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
+		c.Check(Equal(rr, a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
 	}
 }
 
@@ -1066,10 +1066,10 @@ func (s *S) TestApply(c *check.C) {
 		var r Dense
 
 		r.Apply(test.fn, a)
-		c.Check(r.Equals(t), check.Equals, true, check.Commentf("Test %d: obtained %v expect: %v", i, r.mat.Data, t.mat.Data))
+		c.Check(Equal(&r, t), check.Equals, true, check.Commentf("Test %d: obtained %v expect: %v", i, r.mat.Data, t.mat.Data))
 
 		a.Apply(test.fn, a)
-		c.Check(a.Equals(t), check.Equals, true, check.Commentf("Test %d: obtained %v expect: %v", i, a.mat.Data, t.mat.Data))
+		c.Check(Equal(a, t), check.Equals, true, check.Commentf("Test %d: obtained %v expect: %v", i, a.mat.Data, t.mat.Data))
 	}
 }
 
@@ -1095,7 +1095,7 @@ func (s *S) TestClone(c *check.C) {
 		a.Clone(a)
 		a.Set(test.i, test.j, test.v)
 
-		c.Check(b.Equals(a), check.Equals, false, check.Commentf("Test %d: %v cloned and altered = %v", i, a, &b))
+		c.Check(Equal(&b, a), check.Equals, false, check.Commentf("Test %d: %v cloned and altered = %v", i, a, &b))
 	}
 }
 
@@ -1141,7 +1141,7 @@ func (s *S) TestStack(c *check.C) {
 		var s Dense
 		s.Stack(a, b)
 
-		c.Check(s.Equals(NewDense(flatten(test.e))), check.Equals, true, check.Commentf("Test %d: %v stack %v = %v", i, a, b, s))
+		c.Check(Equal(&s, NewDense(flatten(test.e))), check.Equals, true, check.Commentf("Test %d: %v stack %v = %v", i, a, b, s))
 	}
 }
 
@@ -1171,7 +1171,7 @@ func (s *S) TestAugment(c *check.C) {
 		var s Dense
 		s.Augment(a, b)
 
-		c.Check(s.Equals(NewDense(flatten(test.e))), check.Equals, true, check.Commentf("Test %d: %v stack %v = %v", i, a, b, s))
+		c.Check(Equal(&s, NewDense(flatten(test.e))), check.Equals, true, check.Commentf("Test %d: %v stack %v = %v", i, a, b, s))
 	}
 }
 
@@ -1242,10 +1242,10 @@ func (s *S) TestRankOne(c *check.C) {
 		m := &Dense{}
 		// Check with a new matrix
 		m.RankOne(a, test.alpha, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
-		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+		c.Check(Equal(m, want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 		// Check with the same matrix
 		a.RankOne(a, test.alpha, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
-		c.Check(a.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+		c.Check(Equal(a, want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 	}
 }
 
@@ -1289,10 +1289,10 @@ func (s *S) TestOuter(c *check.C) {
 		var m Dense
 		// Check with a new matrix
 		m.Outer(NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
-		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+		c.Check(Equal(&m, want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 		// Check with the same matrix
 		m.Outer(NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
-		c.Check(m.Equals(want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
+		c.Check(Equal(&m, want), check.Equals, true, check.Commentf("Test %v. Want %v, Got %v", i, want, m))
 	}
 }
 

@@ -6,7 +6,7 @@
 // calls, as specified in the netlib standard (www.netlib.org).
 //
 // The native Go routines are used by default, and the Use function can be used
-// to set an alternate implementation.
+// to set an alternative implementation.
 //
 // If the type of matrix (General, Symmetric, etc.) is known and fixed, it is
 // used in the wrapper signature. In many cases, however, the type of the matrix

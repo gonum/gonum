@@ -33,7 +33,7 @@ func (s *S) TestLUD(c *check.C) {
 		var got Dense
 		got.Mul(&p, &l)
 		got.Mul(&got, &u)
-		if !got.EqualsApprox(&want, 1e-12) {
+		if !EqualApprox(&got, &want, 1e-12) {
 			c.Errorf("PLU does not equal original matrix.\nWant: %v\n Got: %v", want, got)
 		}
 	}
@@ -84,7 +84,7 @@ func (s *S) TestLURankOne(c *check.C) {
 			if !Equal(aR1, aR1New) {
 				c.Error("Different answer when new receiver")
 			}
-			if !aR1.EqualsApprox(a, 1e-10) {
+			if !EqualApprox(aR1, a, 1e-10) {
 				c.Errorf("Rank one mismatch, pivot %v.\nWant: %v\nGot:%v\n", pivoting, a, aR1)
 			}
 		}
@@ -136,7 +136,7 @@ func (s *S) TestSolveLU(c *check.C) {
 		}
 		var got Dense
 		got.Mul(a, &x)
-		if !got.EqualsApprox(b, 1e-12) {
+		if !EqualApprox(&got, b, 1e-12) {
 			c.Error("Solve mismatch for non-singular matrix. n = %v, bc = %v.\nWant: %v\nGot: %v", n, bc, b, got)
 		}
 	}
@@ -184,7 +184,7 @@ func (s *S) TestSolveLUVec(c *check.C) {
 		}
 		var got Vector
 		got.MulVec(a, &x)
-		if !got.EqualsApproxVec(b, 1e-12) {
+		if !EqualApprox(&got, b, 1e-12) {
 			c.Error("Solve mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)
 		}
 	}

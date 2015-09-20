@@ -5,8 +5,6 @@
 package mat64
 
 import (
-	"math"
-
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 )
@@ -296,22 +294,6 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 			}
 		}
 	}
-}
-
-// EqualsApproxVec compares the vectors represented by b and the receiver, with
-// tolerance for element-wise equality specified by epsilon.
-func (v *Vector) EqualsApproxVec(b *Vector, epsilon float64) bool {
-	n := v.Len()
-	nb := b.Len()
-	if n != nb {
-		return false
-	}
-	for i := 0; i < n; i++ {
-		if math.Abs(v.mat.Data[i*v.mat.Inc]-b.mat.Data[i*b.mat.Inc]) > epsilon {
-			return false
-		}
-	}
-	return true
 }
 
 // reuseAs resizes an empty vector to a r×1 vector,

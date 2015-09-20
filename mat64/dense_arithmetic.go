@@ -784,51 +784,6 @@ func (m *Dense) Sum() float64 {
 	return s
 }
 
-// EqualsApprox compares the matrices represented by b and the receiver, with
-// tolerance for element-wise equality specified by epsilon.
-//
-// See the ApproxEqualer interface for more information.
-func (m *Dense) EqualsApprox(b Matrix, epsilon float64) bool {
-	br, bc := b.Dims()
-	if br != m.mat.Rows || bc != m.mat.Cols {
-		return false
-	}
-
-	if b, ok := b.(RawMatrixer); ok {
-		bmat := b.RawMatrix()
-		for jb, jm := 0, 0; jm < br*m.mat.Stride; jb, jm = jb+bmat.Stride, jm+m.mat.Stride {
-			for i, v := range m.mat.Data[jm : jm+bc] {
-				if math.Abs(v-bmat.Data[i+jb]) > epsilon {
-					return false
-				}
-			}
-		}
-		return true
-	}
-
-	if b, ok := b.(Vectorer); ok {
-		rowb := make([]float64, bc)
-		for r := 0; r < br; r++ {
-			rowm := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
-			for i, v := range b.Row(rowb, r) {
-				if math.Abs(rowm[i]-v) > epsilon {
-					return false
-				}
-			}
-		}
-		return true
-	}
-
-	for r := 0; r < br; r++ {
-		for c := 0; c < bc; c++ {
-			if math.Abs(m.At(r, c)-b.At(r, c)) > epsilon {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // RankOne performs a rank-one update to the matrix a and stores the result
 // in the receiver. If a is zero, see Outer.
 //  m = a + alpha * x * y'

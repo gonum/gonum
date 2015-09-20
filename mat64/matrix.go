@@ -10,6 +10,7 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/floats"
 	"github.com/gonum/lapack"
 )
 
@@ -229,12 +230,6 @@ type ElemDiver interface {
 	DivElem(a, b Matrix)
 }
 
-// An ApproxEqualer can compare the matrices represented by b and the receiver, with tolerance for
-// element-wise equailty specified by epsilon. Matrices with non-equal shapes are not equal.
-type ApproxEqualer interface {
-	EqualsApprox(b Matrix, epsilon float64) bool
-}
-
 // A Scaler can perform scalar multiplication of the matrix represented by a with c, placing
 // the result in the receiver.
 type Scaler interface {
@@ -386,6 +381,78 @@ func Equal(a, b Matrix) bool {
 	for i := 0; i < ar; i++ {
 		for j := 0; j < ac; j++ {
 			if a.At(i, j) != b.At(i, j) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// EqualApprox returns whether element a and b have the same size and contain all equal
+// elements with tolerance for element-wise equality specified by epsilon. Matrices
+// with non-equal shapes are not equal.
+func EqualApprox(a, b Matrix, epsilon float64) bool {
+	ar, ac := a.Dims()
+	br, bc := b.Dims()
+	if ar != br || ac != bc {
+		return false
+	}
+	aMat, aTrans := untranspose(a)
+	bMat, bTrans := untranspose(b)
+	if rma, ok := aMat.(RawMatrixer); ok {
+		if rmb, ok := bMat.(RawMatrixer); ok {
+			ra := rma.RawMatrix()
+			rb := rmb.RawMatrix()
+			if aTrans == bTrans {
+				for i := 0; i < ra.Rows; i++ {
+					for j := 0; j < ra.Cols; j++ {
+						if !floats.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[i*rb.Stride+j], epsilon, epsilon) {
+							return false
+						}
+					}
+				}
+				return true
+			}
+			for i := 0; i < ra.Rows; i++ {
+				for j := 0; j < ra.Cols; j++ {
+					if !floats.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[j*rb.Stride+i], epsilon, epsilon) {
+						return false
+					}
+				}
+			}
+			return true
+		}
+	}
+	if rma, ok := aMat.(RawSymmetricer); ok {
+		if rmb, ok := bMat.(RawSymmetricer); ok {
+			ra := rma.RawSymmetric()
+			rb := rmb.RawSymmetric()
+			// Symmetric matrices are always upper and equal to their transpose.
+			for i := 0; i < ra.N; i++ {
+				for j := i; j < ra.N; j++ {
+					if !floats.EqualWithinAbsOrRel(ra.Data[i*ra.Stride+j], rb.Data[i*rb.Stride+j], epsilon, epsilon) {
+						return false
+					}
+				}
+			}
+			return true
+		}
+	}
+	if ra, ok := aMat.(*Vector); ok {
+		if rb, ok := bMat.(*Vector); ok {
+			// If the raw vectors are the same length they must either both be
+			// transposed or both not transposed (or have length 1).
+			for i := 0; i < ra.n; i++ {
+				if !floats.EqualWithinAbsOrRel(ra.mat.Data[i*ra.mat.Inc], rb.mat.Data[i*rb.mat.Inc], epsilon, epsilon) {
+					return false
+				}
+			}
+			return true
+		}
+	}
+	for i := 0; i < ar; i++ {
+		for j := 0; j < ac; j++ {
+			if !floats.EqualWithinAbsOrRel(a.At(i, j), b.At(i, j), epsilon, epsilon) {
 				return false
 			}
 		}

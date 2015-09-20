@@ -195,7 +195,7 @@ func (s *S) TestSVD(c *check.C) {
 			var tmp, got Dense
 			tmp.Mul(svd.U, s)
 			got.Mul(&tmp, svd.V.T())
-			c.Check(got.EqualsApprox(t.a, 1e-12), check.Equals, true)
+			c.Check(EqualApprox(&got, t.a, 1e-12), check.Equals, true)
 		}
 	}
 }

@@ -186,7 +186,7 @@ func (s *S) TestSolve(c *check.C) {
 			c.Errorf("Did not error during solve.")
 			continue
 		}
-		if !x.EqualsApprox(ans, 1e-12) {
+		if !EqualApprox(&x, ans, 1e-12) {
 			c.Errorf("Solve answer mismatch. Want %v, got %v", ans, x)
 		}
 	}
@@ -230,7 +230,7 @@ func (s *S) TestSolve(c *check.C) {
 		tmp.Mul(a.T(), a)
 		lhs.Mul(&tmp, &x)
 		rhs.Mul(a.T(), b)
-		if !lhs.EqualsApprox(&rhs, 1e-10) {
+		if !EqualApprox(&lhs, &rhs, 1e-10) {
 			c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 		}
 	}
@@ -285,7 +285,7 @@ func (s *S) TestSolveVec(c *check.C) {
 		tmp.Mul(a.T(), a)
 		lhs.Mul(&tmp, &x)
 		rhs.Mul(a.T(), b)
-		if !lhs.EqualsApprox(&rhs, 1e-10) {
+		if !EqualApprox(&lhs, &rhs, 1e-10) {
 			c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 		}
 	}

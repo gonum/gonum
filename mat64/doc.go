@@ -20,7 +20,7 @@
 // Many operations are performed by calling into the gonum/blas/blas64 and
 // gonum/lapack/lapack64 packages which implement BLAS and LAPACK routines
 // respectively. By default, blas64 and lapack64 use native Go implementations
-// of the routines. Alternately, it is possible to use c-based libraries for
+// of the routines. Alternatively, it is possible to use c-based libraries for
 // the BLAS routines and/or the LAPACK routines with the respective cgo packages
 // and Use routines. The Go implementation of LAPACK itself makes calls to blas64,
 // so if a cgo BLAS implementation is used, the lapack64 calls will be partially

@@ -11,13 +11,15 @@ import (
 )
 
 func ExampleCholesky() {
-	// Construct a new SymDense. Only the upper triangular data elements are used
-	// so the lower triangular elements could alternately be zero.
+	// Construct a new SymDense. Only the upper triangular data
+	// elements are used, so the lower triangular elements may
+	// be set zero without altering the semantics.
 	a := mat64.NewSymDense(4, []float64{
 		108, -21, -9, -96,
 		-21, 7, 5, 15,
 		-9, 5, 61, 25,
-		-96, 15, 25, 142})
+		-96, 15, 25, 142,
+	})
 
 	fmt.Printf("a = %0.4v\n", mat64.Formatted(a, mat64.Prefix("    ")))
 

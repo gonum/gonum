@@ -282,3 +282,31 @@ func (s *S) TestRankTwo(c *check.C) {
 		}
 	}
 }
+
+func (s *S) TestSymRankK(c *check.C) {
+	alpha := 3.0
+	method := func(receiver, a, b Matrix) {
+		type SymRankKer interface {
+			SymRankK(a Symmetric, alpha float64, x Matrix)
+		}
+		rd := receiver.(SymRankKer)
+		rd.SymRankK(a.(Symmetric), alpha, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		var tmp Dense
+		tmp.Mul(b, b.T())
+		tmp.Scale(alpha, &tmp)
+		receiver.Add(a, &tmp)
+	}
+	legalTypes := func(a, b Matrix) bool {
+		_, ok := a.(Symmetric)
+		return ok
+	}
+	legalSize := func(ar, ac, br, bc int) bool {
+		if ar != ac {
+			return false
+		}
+		return br == ar
+	}
+	testTwoInput(c, "SymRankK", &SymDense{}, method, denseComparison, legalTypes, legalSize)
+}

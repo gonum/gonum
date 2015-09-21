@@ -83,6 +83,26 @@ func (s *SymDense) isZero() bool {
 	return s.mat.N == 0
 }
 
+// reuseAs resizes an empty matrix to a n×n matrix,
+// or checks that a non-empty matrix is n×n.
+func (s *SymDense) reuseAs(n int) {
+	if s.isZero() {
+		s.mat = blas64.Symmetric{
+			N:      n,
+			Stride: n,
+			Data:   use(s.mat.Data, n*n),
+			Uplo:   blas.Upper,
+		}
+		return
+	}
+	if s.mat.Uplo != blas.Upper {
+		panic(badSymTriangle)
+	}
+	if s.mat.N != n {
+		panic(ErrShape)
+	}
+}
+
 func (s *SymDense) AddSym(a, b Symmetric) {
 	n := a.Symmetric()
 	if n != b.Symmetric() {
@@ -175,6 +195,44 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
 	blas64.Syr(alpha, x.mat, w.mat)
 	*s = w
 	return
+}
+
+// SymRankK performs a symmetric rank-k update to the matrix a and stores the
+// result into the receiver. If a is zero, see SymOuterK.
+//  s = a + alpha * x * x'
+func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
+	n := a.Symmetric()
+	r, _ := x.Dims()
+	if r != n {
+		panic(ErrShape)
+	}
+	xMat, aTrans := untranspose(x)
+	var g blas64.General
+	if rm, ok := xMat.(RawMatrixer); ok {
+		g = rm.RawMatrix()
+	} else {
+		g = DenseCopyOf(x).mat
+		aTrans = false
+	}
+	if a != s {
+		s.reuseAs(n)
+		s.CopySym(a)
+	}
+	t := blas.NoTrans
+	if aTrans {
+		t = blas.Trans
+	}
+	blas64.Syrk(t, alpha, g, 1, s.mat)
+}
+
+// SymOuterK calculates the outer product of a times its transpose and stores
+// the result into the receiver. In order to update an existing matrix, see
+// SymRankOne
+//  s = x * x'
+func (s *SymDense) SymOuterK(x Matrix) {
+	r, _ := x.Dims()
+	s.reuseAs(r)
+	s.SymRankK(s, 1, x)
 }
 
 // RankTwo performs a symmmetric rank-two update to the matrix a and stores

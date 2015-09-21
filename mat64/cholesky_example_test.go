@@ -11,21 +11,21 @@ import (
 )
 
 func ExampleCholesky() {
-	// Construct a new SymDense. Only the upper triangular data
-	// elements are used, so the lower triangular elements may
-	// be set zero without altering the semantics.
-	a := mat64.NewSymDense(4, []float64{
-		108, -21, -9, -96,
-		-21, 7, 5, 15,
-		-9, 5, 61, 25,
-		-96, 15, 25, 142,
+	// Construct a symmetric positive definite matrix.
+	tmp := mat64.NewDense(4, 4, []float64{
+		2, 6, 8, -4,
+		1, 8, 7, -2,
+		2, 2, 1, 7,
+		8, -2, -2, 1,
 	})
+	var a mat64.SymDense
+	a.SymOuterK(tmp)
 
-	fmt.Printf("a = %0.4v\n", mat64.Formatted(a, mat64.Prefix("    ")))
+	fmt.Printf("a = %0.4v\n", mat64.Formatted(&a, mat64.Prefix("    ")))
 
 	// Compute the cholesky factorization.
 	var chol mat64.Cholesky
-	if ok := chol.Factorize(a); !ok {
+	if ok := chol.Factorize(&a); !ok {
 		fmt.Println("a matrix is not positive semi-definite.")
 	}
 
@@ -47,24 +47,24 @@ func ExampleCholesky() {
 	var test mat64.Dense
 	test.Mul(&t, t.T())
 	fmt.Println()
-	fmt.Printf("L * L^T = %0.4v\n", mat64.Formatted(a, mat64.Prefix("          ")))
+	fmt.Printf("L * L^T = %0.4v\n", mat64.Formatted(&a, mat64.Prefix("          ")))
 
 	// Output:
-	// a = ⎡108  -21   -9  -96⎤
-	//     ⎢-21    7    5   15⎥
-	//     ⎢ -9    5   61   25⎥
-	//     ⎣-96   15   25  142⎦
+	// a = ⎡120  114   -4  -16⎤
+	//     ⎢114  118   11  -24⎥
+	//     ⎢ -4   11   58   17⎥
+	//     ⎣-16  -24   17   73⎦
 	//
-	// The determinant of a is 7.885e+05
+	// The determinant of a is 1.543e+06
 	//
 	// Solve a * x = b
-	// x = ⎡  0.3524⎤
-	//     ⎢    1.02⎥
-	//     ⎢-0.05115⎥
-	//     ⎣  0.1676⎦
+	// x = ⎡  -0.239⎤
+	//     ⎢  0.2732⎥
+	//     ⎢-0.04681⎥
+	//     ⎣  0.1031⎦
 	//
-	// L * L^T = ⎡108  -21   -9  -96⎤
-	//           ⎢-21    7    5   15⎥
-	//           ⎢ -9    5   61   25⎥
-	//           ⎣-96   15   25  142⎦
+	// L * L^T = ⎡120  114   -4  -16⎤
+	//           ⎢114  118   11  -24⎥
+	//           ⎢ -4   11   58   17⎥
+	//           ⎣-16  -24   17   73⎦
 }

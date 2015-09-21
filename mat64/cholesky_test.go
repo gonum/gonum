@@ -50,12 +50,12 @@ func (s *S) TestCholesky(c *check.C) {
 		aCopy := DenseCopyOf(t.a)
 		var a Dense
 		a.Mul(U.TTri(), &U)
-		c.Check(a.EqualsApprox(aCopy, 1e-14), check.Equals, true)
+		c.Check(EqualApprox(&a, aCopy, 1e-14), check.Equals, true)
 
 		var L TriDense
 		L.LFromCholesky(&chol)
 		a.Mul(&L, L.TTri())
-		c.Check(a.EqualsApprox(aCopy, 1e-14), check.Equals, true)
+		c.Check(EqualApprox(&a, aCopy, 1e-14), check.Equals, true)
 
 		// Try with a cholesky struct that is too small
 		cholSmall := &Cholesky{
@@ -131,11 +131,11 @@ func (s *S) TestCholeskySolve(c *check.C) {
 
 		var x Dense
 		x.SolveCholesky(&chol, t.b)
-		c.Check(x.EqualsApprox(t.ans, 1e-12), check.Equals, true)
+		c.Check(EqualApprox(&x, t.ans, 1e-12), check.Equals, true)
 
 		var ans Dense
 		ans.Mul(t.a, &x)
-		c.Check(ans.EqualsApprox(t.b, 1e-12), check.Equals, true)
+		c.Check(EqualApprox(&ans, t.b, 1e-12), check.Equals, true)
 	}
 }
 
@@ -169,11 +169,11 @@ func (s *S) TestCholeskySolveVec(c *check.C) {
 
 		var x Vector
 		x.SolveCholeskyVec(&chol, t.b)
-		c.Check(x.EqualsApproxVec(t.ans, 1e-12), check.Equals, true)
+		c.Check(EqualApprox(&x, t.ans, 1e-12), check.Equals, true)
 
 		var ans Vector
 		ans.MulVec(t.a, &x)
-		c.Check(ans.EqualsApproxVec(t.b, 1e-12), check.Equals, true)
+		c.Check(EqualApprox(&ans, t.b, 1e-12), check.Equals, true)
 	}
 }
 

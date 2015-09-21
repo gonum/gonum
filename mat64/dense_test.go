@@ -713,7 +713,7 @@ func (s *S) TestExp(c *check.C) {
 			t.mod(&got)
 		}
 		got.Exp(NewDense(flatten(t.a)))
-		c.Check(got.EqualsApprox(NewDense(flatten(t.want)), 1e-12), check.Equals, true, check.Commentf("Test %d", i))
+		c.Check(EqualApprox(&got, NewDense(flatten(t.want)), 1e-12), check.Equals, true, check.Commentf("Test %d", i))
 	}
 }
 

@@ -43,7 +43,7 @@ func (s *S) TestQR(c *check.C) {
 
 		var got Dense
 		got.Mul(&q, &r)
-		if !got.EqualsApprox(&want, 1e-12) {
+		if !EqualApprox(&got, &want, 1e-12) {
 			c.Errorf("QR does not equal original matrix. \nWant: %v\nGot: %v", want, got)
 		}
 	}
@@ -122,7 +122,7 @@ func (s *S) TestSolveQR(c *check.C) {
 				lhs.Mul(&tmp, &x)
 				rhs.Mul(a.T(), b)
 			}
-			if !lhs.EqualsApprox(&rhs, 1e-10) {
+			if !EqualApprox(&lhs, &rhs, 1e-10) {
 				c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 			}
 		}
@@ -175,7 +175,7 @@ func (s *S) TestSolveQRVec(c *check.C) {
 				lhs.Mul(&tmp, &x)
 				rhs.Mul(a.T(), b)
 			}
-			if !lhs.EqualsApprox(&rhs, 1e-10) {
+			if !EqualApprox(&lhs, &rhs, 1e-10) {
 				c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 			}
 		}

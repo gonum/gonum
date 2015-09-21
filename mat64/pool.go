@@ -7,7 +7,6 @@ package mat64
 import (
 	"sync"
 
-	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 )
 
@@ -47,9 +46,6 @@ var pool [63]sync.Pool
 // poolVec is the Vector equivalent of pool.
 var poolVec [63]sync.Pool
 
-// poolSymDense is the SymDense equivalent of pool.
-var poolSymDense [63]sync.Pool
-
 func init() {
 	for i := range pool {
 		l := 1 << uint(i)
@@ -61,12 +57,6 @@ func init() {
 		poolVec[i].New = func() interface{} {
 			return &Vector{mat: blas64.Vector{
 				Inc:  1,
-				Data: make([]float64, l),
-			}}
-		}
-		poolSymDense[i].New = func() interface{} {
-			return &SymDense{mat: blas64.Symmetric{
-				Uplo: blas.Upper,
 				Data: make([]float64, l),
 			}}
 		}
@@ -116,26 +106,4 @@ func getWorkspaceVec(n int, clear bool) *Vector {
 // where references to the underlying data slice has been kept.
 func putWorkspaceVec(v *Vector) {
 	pool[bits(uint64(cap(v.mat.Data)))].Put(v)
-}
-
-// getWorkspaceSymDense returns a *SymDense of size n×n and a cap that is less
-// than 2*n*n. If clear is true, the first n×n elements of the underlying data
-// are zeroed.
-func getWorkspaceSymDense(n int, clear bool) *SymDense {
-	l := uint64(n)
-	s := poolSymDense[bits(l)].Get().(*SymDense)
-	s.mat.Data = s.mat.Data[:l]
-	if clear {
-		zero(s.mat.Data)
-	}
-	s.mat.Stride = n
-	s.mat.N = n
-	return s
-}
-
-// putWorkspaceSymDense replaces a used *SymDense into the appropriate size
-// workspace pool. putWorkspaceSymDense must not be called with a matrix
-// where references to the underlying data slice has been kept.
-func putWorkspaceSymDense(w *SymDense) {
-	pool[bits(uint64(cap(w.mat.Data)))].Put(w)
 }

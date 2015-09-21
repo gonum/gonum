@@ -83,6 +83,8 @@ func (s *SymDense) isZero() bool {
 	return s.mat.N == 0
 }
 
+// reuseAs resizes an empty matrix to a n×n matrix,
+// or checks that a non-empty matrix is n×n.
 func (s *SymDense) reuseAs(n int) {
 	if s.isZero() {
 		s.mat = blas64.Symmetric{
@@ -98,21 +100,6 @@ func (s *SymDense) reuseAs(n int) {
 	}
 	if s.mat.N != n {
 		panic(ErrShape)
-	}
-}
-
-// isolatedWorkspace returns a new SymDense matrix w with the size of a and
-// returns a callback to defer which performs cleanup at the return of the call.
-// This should be used when a method receiver is the same pointer as an input argument.
-func (m *SymDense) isolatedWorkspace(a Matrix) (w *SymDense, restore func()) {
-	r, c := a.Dims()
-	if r != c {
-		panic(ErrShape)
-	}
-	w = getWorkspaceSymDense(r, false)
-	return w, func() {
-		m.CopySym(w)
-		putWorkspaceSymDense(w)
 	}
 }
 
@@ -211,7 +198,7 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
 }
 
 // SymRankK performs a symmetric rank-k update to the matrix a and stores the
-// result into the receiver.
+// result into the receiver. If a is zero, see SymOuterK.
 //  s = a + alpha * x * x'
 func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 	n := a.Symmetric()
@@ -236,6 +223,16 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 		t = blas.Trans
 	}
 	blas64.Syrk(t, alpha, g, 1, s.mat)
+}
+
+// SymOuterK calculates the outer product of a times its transpose and stores
+// the result into the receiver. In order to update an existing matrix, see
+// SymRankOne
+//  s = x * x'
+func (s *SymDense) SymOuterK(x Matrix) {
+	r, _ := x.Dims()
+	s.reuseAs(r)
+	s.SymRankK(s, 1, x)
 }
 
 // RankTwo performs a symmmetric rank-two update to the matrix a and stores

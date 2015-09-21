@@ -242,10 +242,10 @@ func TestCorrCov(t *testing.T) {
 		corrFromCov := mat64.DenseCopyOf(cov)
 		covToCorr(corrFromCov)
 
-		if !corr.EqualsApprox(corrFromCov, 1e-14) {
+		if !mat64.EqualApprox(corr, corrFromCov, 1e-14) {
 			t.Errorf("%d: corrToCov did not match direct Correlation calculation.  Want: %v, got: %v. ", i, corr, corrFromCov)
 		}
-		if !cov.EqualsApprox(covFromCorr, 1e-14) {
+		if !mat64.EqualApprox(cov, covFromCorr, 1e-14) {
 			t.Errorf("%d: covToCorr did not match direct Covariance calculation.  Want: %v, got: %v. ", i, cov, covFromCorr)
 		}
 

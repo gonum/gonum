@@ -91,7 +91,7 @@ func TestNormRand(t *testing.T) {
 			t.Errorf("Mean mismatch: want: %v, got %v", test.mean, estMean)
 		}
 		estCov := stat.CovarianceMatrix(nil, samps, nil)
-		if !estCov.EqualsApprox(cov, 1e-2) {
+		if !mat64.EqualApprox(estCov, cov, 1e-2) {
 			t.Errorf("Cov mismatch: want: %v, got %v", cov, estCov)
 		}
 	}

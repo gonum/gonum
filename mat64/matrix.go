@@ -388,7 +388,7 @@ func Equal(a, b Matrix) bool {
 	return true
 }
 
-// EqualApprox returns whether element a and b have the same size and contain all equal
+// EqualApprox returns whether the matrices a and b have the same size and contain all equal
 // elements with tolerance for element-wise equality specified by epsilon. Matrices
 // with non-equal shapes are not equal.
 func EqualApprox(a, b Matrix, epsilon float64) bool {

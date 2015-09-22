@@ -88,32 +88,26 @@ type Mutable interface {
 
 // A Vectorer can return rows and columns of the represented matrix.
 type Vectorer interface {
-	// Row returns a slice of float64 for the row specified. It will panic if the index
-	// is out of bounds. If the call requires a copy and dst is not nil it will be used and
-	// returned, if it is not nil the number of elements copied will be the minimum of the
-	// length of the slice and the number of columns in the matrix.
+	// Row returns a []float64 for the row specified by the index i. It will
+	// panic if the index is out of bounds. len(dst) must equal the number of
+	// columns unless dst is nil in which case a new slice must be allocated.
 	Row(dst []float64, i int) []float64
 
-	// Col returns a slice of float64 for the column specified. It will panic if the index
-	// is out of bounds. If the call requires a copy and dst is not nil it will be used and
-	// returned, if it is not nil the number of elements copied will be the minimum of the
-	// length of the slice and the number of rows in the matrix.
+	// Col returns a []float64 for the row specified by the index i. It will
+	// panic if the index is out of bounds. len(dst) must equal the number of
+	// rows unless dst is nil in which case a new slice must be allocated.
 	Col(dst []float64, j int) []float64
 }
 
 // A VectorSetter can set rows and columns in the represented matrix.
 type VectorSetter interface {
-	// SetRow sets the values of the specified row to the values held in a slice of float64.
-	// It will panic if the index is out of bounds. The number of elements copied is
-	// returned and will be the minimum of the length of the slice and the number of columns
-	// in the matrix.
-	SetRow(i int, src []float64) int
+	// SetRow sets the values in the specified rows of the matrix to the values
+	// in src. len(src) must equal the number of columns in the receiver.
+	SetRow(i int, src []float64)
 
-	// SetCol sets the values of the specified column to the values held in a slice of float64.
-	// It will panic if the index is out of bounds. The number of elements copied is
-	// returned and will be the minimum of the length of the slice and the number of rows
-	// in the matrix.
-	SetCol(i int, src []float64) int
+	// SetCol sets the values in the specified column of the matrix to the values
+	// in src. len(src) must equal the number of rows in the receiver.
+	SetCol(i int, src []float64)
 }
 
 // A RowViewer can return a Vector reflecting a row that is backed by the matrix
@@ -308,6 +302,78 @@ type RawMatrixer interface {
 // slice will be reflected in the original matrix, changes to the Inc field will not.
 type RawVectorer interface {
 	RawVector() blas64.Vector
+}
+
+// TODO(btracey): Consider adding CopyCol/CopyRow if the behavior seems useful.
+// TODO(btracey): Add in fast paths to Row/Col for the other concrete types
+// (TriDense, etc.) as well as relevant interfaces (Vectorer, RawRowViewer, etc.)
+
+// Col copies the elements in the jth column of the matrix into the slice dst.
+// The length of the provided slice must equal the number of rows, unless the
+// slice is nil in which case a new slice is first allocated.
+func Col(dst []float64, j int, a Matrix) []float64 {
+	r, c := a.Dims()
+	if j < 0 || j >= c {
+		panic(ErrColAccess)
+	}
+	if dst == nil {
+		dst = make([]float64, r)
+	} else {
+		if len(dst) != r {
+			panic(ErrRowLength)
+		}
+	}
+	aMat, aTrans := untranspose(a)
+	if rm, ok := aMat.(RawMatrixer); ok {
+		m := rm.RawMatrix()
+		if aTrans {
+			copy(dst, m.Data[j*m.Stride:j*m.Stride+m.Cols])
+			return dst
+		}
+		blas64.Copy(r,
+			blas64.Vector{Inc: m.Stride, Data: m.Data[j:]},
+			blas64.Vector{Inc: 1, Data: dst},
+		)
+		return dst
+	}
+	for i := 0; i < r; i++ {
+		dst[i] = a.At(i, j)
+	}
+	return dst
+}
+
+// Row copies the elements in the jth column of the matrix into the slice dst.
+// The length of the provided slice must equal the number of columns, unless the
+// slice is nil in which case a new slice is first allocated.
+func Row(dst []float64, i int, a Matrix) []float64 {
+	r, c := a.Dims()
+	if i < 0 || i >= r {
+		panic(ErrColAccess)
+	}
+	if dst == nil {
+		dst = make([]float64, c)
+	} else {
+		if len(dst) != c {
+			panic(ErrColLength)
+		}
+	}
+	aMat, aTrans := untranspose(a)
+	if rm, ok := aMat.(RawMatrixer); ok {
+		m := rm.RawMatrix()
+		if aTrans {
+			blas64.Copy(c,
+				blas64.Vector{Inc: m.Stride, Data: m.Data[i:]},
+				blas64.Vector{Inc: 1, Data: dst},
+			)
+			return dst
+		}
+		copy(dst, m.Data[i*m.Stride:i*m.Stride+m.Cols])
+		return dst
+	}
+	for j := 0; j < c; j++ {
+		dst[j] = a.At(i, j)
+	}
+	return dst
 }
 
 // Det returns the determinant of the matrix a. In many expressions using LogDet

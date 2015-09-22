@@ -9,6 +9,8 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/floats"
+
 	"gopkg.in/check.v1"
 )
 
@@ -266,8 +268,9 @@ func (s *S) TestRankTwo(c *check.C) {
 		s.RankTwo(a, alpha, NewVector(len(x), x), NewVector(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				v := m.At(i, j)
-				c.Check(s.At(i, j), check.Equals, v)
+				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
+					c.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
+				}
 			}
 		}
 
@@ -276,8 +279,9 @@ func (s *S) TestRankTwo(c *check.C) {
 		s.RankTwo(s, alpha, NewVector(len(x), x), NewVector(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				v := m.At(i, j)
-				c.Check(s.At(i, j), check.Equals, v)
+				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
+					c.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
+				}
 			}
 		}
 	}

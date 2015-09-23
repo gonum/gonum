@@ -28,16 +28,15 @@ func (m *Dense) Norm(ord float64) float64 {
 		col := make([]float64, m.mat.Rows)
 		for i := 0; i < m.mat.Cols; i++ {
 			var s float64
-			for _, e := range m.Col(col, i) {
+			for _, e := range Col(col, i, m) {
 				s += math.Abs(e)
 			}
 			n = math.Max(s, n)
 		}
 	case math.IsInf(ord, +1):
-		row := make([]float64, m.mat.Cols)
 		for i := 0; i < m.mat.Rows; i++ {
 			var s float64
-			for _, e := range m.Row(row, i) {
+			for _, e := range m.RawRowView(i) {
 				s += math.Abs(e)
 			}
 			n = math.Max(s, n)
@@ -47,17 +46,16 @@ func (m *Dense) Norm(ord float64) float64 {
 		col := make([]float64, m.mat.Rows)
 		for i := 0; i < m.mat.Cols; i++ {
 			var s float64
-			for _, e := range m.Col(col, i) {
+			for _, e := range Col(col, i, m) {
 				s += math.Abs(e)
 			}
 			n = math.Min(s, n)
 		}
 	case math.IsInf(ord, -1):
 		n = math.MaxFloat64
-		row := make([]float64, m.mat.Cols)
 		for i := 0; i < m.mat.Rows; i++ {
 			var s float64
-			for _, e := range m.Row(row, i) {
+			for _, e := range m.RawRowView(i) {
 				s += math.Abs(e)
 			}
 			n = math.Min(s, n)

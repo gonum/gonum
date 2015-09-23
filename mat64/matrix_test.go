@@ -69,6 +69,66 @@ func eye() *Dense {
 	})
 }
 
+func (s *S) TestCol(c *check.C) {
+	f := func(a Matrix) interface{} {
+		_, c := a.Dims()
+		ans := make([][]float64, c)
+		for j := range ans {
+			ans[j] = Col(nil, j, a)
+		}
+		return ans
+	}
+	denseComparison := func(a *Dense) interface{} {
+		_, c := a.Dims()
+		ans := make([][]float64, c)
+		for j := range ans {
+			ans[j] = Col(nil, j, a)
+		}
+		return ans
+	}
+	testOneInputFunc(c, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+	f = func(a Matrix) interface{} {
+		r, c := a.Dims()
+		ans := make([][]float64, c)
+		for j := range ans {
+			ans[j] = make([]float64, r)
+			Col(ans[j], j, a)
+		}
+		return ans
+	}
+	testOneInputFunc(c, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+}
+
+func (s *S) TestRow(c *check.C) {
+	f := func(a Matrix) interface{} {
+		r, _ := a.Dims()
+		ans := make([][]float64, r)
+		for i := range ans {
+			ans[i] = Row(nil, i, a)
+		}
+		return ans
+	}
+	denseComparison := func(a *Dense) interface{} {
+		r, _ := a.Dims()
+		ans := make([][]float64, r)
+		for i := range ans {
+			ans[i] = Row(nil, i, a)
+		}
+		return ans
+	}
+	testOneInputFunc(c, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+	f = func(a Matrix) interface{} {
+		r, c := a.Dims()
+		ans := make([][]float64, r)
+		for i := range ans {
+			ans[i] = make([]float64, c)
+			Row(ans[i], i, a)
+		}
+		return ans
+	}
+	testOneInputFunc(c, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+}
+
 func (s *S) TestEqual(c *check.C) {
 	f := func(a, b Matrix) interface{} {
 		return Equal(a, b)

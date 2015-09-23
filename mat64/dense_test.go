@@ -203,14 +203,14 @@ func (s *S) TestRowCol(c *check.C) {
 	} {
 		a := NewDense(flatten(af))
 		for ri, row := range af {
-			c.Check(a.Row(nil, ri), check.DeepEquals, row, check.Commentf("Test %d", i))
+			c.Check(Row(nil, ri, a), check.DeepEquals, row, check.Commentf("Test %d", i))
 		}
 		for ci := range af[0] {
 			col := make([]float64, a.mat.Rows)
 			for j := range col {
 				col[j] = float64(ci + 1 + j*a.mat.Cols)
 			}
-			c.Check(a.Col(nil, ci), check.DeepEquals, col, check.Commentf("Test %d", i))
+			c.Check(Col(nil, ci, a), check.DeepEquals, col, check.Commentf("Test %d", i))
 		}
 	}
 }
@@ -1332,6 +1332,21 @@ func densePreMulBench(b *testing.B, size int, rho float64) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		wd.Mul(a, d)
+	}
+}
+
+func BenchmarkRow10(b *testing.B)   { rowBench(b, 10) }
+func BenchmarkRow100(b *testing.B)  { rowBench(b, 100) }
+func BenchmarkRow1000(b *testing.B) { rowBench(b, 1000) }
+
+func rowBench(b *testing.B, size int) {
+	a, _ := randDense(size, 1, rand.NormFloat64)
+	_, c := a.Dims()
+	dst := make([]float64, c)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Row(dst, 0, a)
 	}
 }
 

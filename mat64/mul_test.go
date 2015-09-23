@@ -247,11 +247,11 @@ func (m *basicVectorer) T() Matrix {
 }
 
 func (m *basicVectorer) Row(row []float64, r int) []float64 {
-	return (*Dense)(m).Row(row, r)
+	return Row(row, r, m)
 }
 
 func (m *basicVectorer) Col(row []float64, c int) []float64 {
-	return (*Dense)(m).Col(row, c)
+	return Col(row, c, m)
 }
 
 type basicSymmetric SymDense

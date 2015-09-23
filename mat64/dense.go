@@ -15,9 +15,9 @@ import (
 var (
 	matrix *Dense
 
-	_ Matrix       = matrix
-	_ Mutable      = matrix
-	_ Vectorer     = matrix
+	_ Matrix  = matrix
+	_ Mutable = matrix
+
 	_ VectorSetter = matrix
 
 	_ Cloner       = matrix
@@ -177,27 +177,6 @@ func (m *Dense) T() Matrix {
 	return Transpose{m}
 }
 
-// Col copies the elements in the jth column of the matrix into the slice dst.
-// If the provided slice is nil, a new slice is first allocated.
-//
-// See the Vectorer interface for more information.
-func (m *Dense) Col(dst []float64, j int) []float64 {
-	if j >= m.mat.Cols || j < 0 {
-		panic(ErrColAccess)
-	}
-
-	if dst == nil {
-		dst = make([]float64, m.mat.Rows)
-	}
-	dst = dst[:min(len(dst), m.mat.Rows)]
-	blas64.Copy(len(dst),
-		blas64.Vector{Inc: m.mat.Stride, Data: m.mat.Data[j:]},
-		blas64.Vector{Inc: 1, Data: dst},
-	)
-
-	return dst
-}
-
 // ColView returns a Vector reflecting col j, backed by the matrix data.
 //
 // See ColViewer for more information.
@@ -214,52 +193,33 @@ func (m *Dense) ColView(j int) *Vector {
 	}
 }
 
-// SetCol sets the elements of the matrix in the specified column to the values
-// of src.
-//
-// See the VectorSetter interface for more information.
-func (m *Dense) SetCol(j int, src []float64) int {
+// SetCol sets the values in the specified column of the matrix to the values
+// in src. len(src) must equal the number of rows in the receiver.
+func (m *Dense) SetCol(j int, src []float64) {
 	if j >= m.mat.Cols || j < 0 {
 		panic(ErrColAccess)
 	}
+	if len(src) != m.mat.Rows {
+		panic(ErrColLength)
+	}
 
-	blas64.Copy(min(len(src), m.mat.Rows),
+	blas64.Copy(m.mat.Rows,
 		blas64.Vector{Inc: 1, Data: src},
 		blas64.Vector{Inc: m.mat.Stride, Data: m.mat.Data[j:]},
 	)
-
-	return min(len(src), m.mat.Rows)
 }
 
-// Row copies the elements in the ith row of the matrix into the slice dst.
-// If the provided slice is nil, a new slice is first allocated.
-//
-// See the Vectorer interface for more information.
-func (m *Dense) Row(dst []float64, i int) []float64 {
+// SetRow sets the values in the specified rows of the matrix to the values
+// in src. len(src) must equal the number of columns in the receiver.
+func (m *Dense) SetRow(i int, src []float64) {
 	if i >= m.mat.Rows || i < 0 {
 		panic(ErrRowAccess)
 	}
-
-	if dst == nil {
-		dst = make([]float64, m.mat.Cols)
-	}
-	copy(dst, m.rowView(i))
-
-	return dst
-}
-
-// SetRow sets the elements of the matrix in the specified row to the values of
-// src.
-//
-// See the VectorSetter interface for more information.
-func (m *Dense) SetRow(i int, src []float64) int {
-	if i >= m.mat.Rows || i < 0 {
-		panic(ErrRowAccess)
+	if len(src) != m.mat.Cols {
+		panic(ErrRowLength)
 	}
 
 	copy(m.rowView(i), src)
-
-	return min(len(src), m.mat.Cols)
 }
 
 // RowView returns row i of the matrix data represented as a column vector,

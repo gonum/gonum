@@ -68,6 +68,15 @@ func sameAnswerFloat(a, b interface{}) bool {
 	return a.(float64) == b.(float64)
 }
 
+func sameAnswerF64SliceOfSlice(a, b interface{}) bool {
+	for i, v := range a.([][]float64) {
+		if same := floats.Same(v, b.([][]float64)[i]); !same {
+			return false
+		}
+	}
+	return true
+}
+
 // sameAnswerBool returns whether the two inputs have the same value.
 func sameAnswerBool(a, b interface{}) bool {
 	return a.(bool) == b.(bool)

@@ -193,6 +193,16 @@ func (s *S) TestMaybe(c *check.C) {
 	}
 }
 
+func (s *S) TestSum(c *check.C) {
+	f := func(a Matrix) interface{} {
+		return Sum(a)
+	}
+	denseComparison := func(a *Dense) interface{} {
+		return Sum(a)
+	}
+	testOneInputFunc(c, "Sum", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+}
+
 func (s *S) TestTrace(c *check.C) {
 	for _, test := range []struct {
 		a     *Dense

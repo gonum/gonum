@@ -230,11 +230,6 @@ type Scaler interface {
 	Scale(c float64, a Matrix)
 }
 
-// A Sumer can return the sum of elements of the matrix represented by the receiver.
-type Sumer interface {
-	Sum() float64
-}
-
 // A Muler can determine the matrix product of a and b, placing the result in the receiver.
 // If the number of columns in a does not equal the number of rows in b, Mul will panic.
 type Muler interface {
@@ -784,6 +779,30 @@ func MaybeFloat(fn func() float64) (f float64, err error) {
 		}
 	}()
 	return fn(), nil
+}
+
+// Sum returns the sum of the elements of the matrix.
+func Sum(a Matrix) float64 {
+	// TODO(btracey): Add a fast path for the other supported matrix types.
+
+	r, c := a.Dims()
+	var sum float64
+	aMat, _ := untranspose(a)
+	if rma, ok := aMat.(RawMatrixer); ok {
+		rm := rma.RawMatrix()
+		for i := 0; i < rm.Rows; i++ {
+			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+rm.Cols] {
+				sum += v
+			}
+		}
+		return sum
+	}
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			sum += a.At(i, j)
+		}
+	}
+	return sum
 }
 
 // Trace returns the trace of the matrix. Trace will panic if the

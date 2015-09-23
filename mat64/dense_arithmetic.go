@@ -726,20 +726,6 @@ func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 	}
 }
 
-// Sum returns the sum of the elements of the matrix.
-//
-// See the Sumer interface for more information.
-func (m *Dense) Sum() float64 {
-	l := m.mat.Cols
-	var s float64
-	for i := 0; i < len(m.mat.Data); i += m.mat.Stride {
-		for _, v := range m.mat.Data[i : i+l] {
-			s += v
-		}
-	}
-	return s
-}
-
 // RankOne performs a rank-one update to the matrix a and stores the result
 // in the receiver. If a is zero, see Outer.
 //  m = a + alpha * x * y'

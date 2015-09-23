@@ -279,48 +279,6 @@ func (m *Dense) DivElem(a, b Matrix) {
 	}
 }
 
-// Dot returns the sum of the element-wise products of the elements of the
-// receiver and b.
-//
-// See the Dotter interface for more information.
-func (m *Dense) Dot(b Matrix) float64 {
-	mr, mc := m.Dims()
-	br, bc := b.Dims()
-
-	if mr != br || mc != bc {
-		panic(ErrShape)
-	}
-
-	var d float64
-
-	if b, ok := b.(RawMatrixer); ok {
-		bmat := b.RawMatrix()
-		for jm, jb := 0, 0; jm < mr*m.mat.Stride; jm, jb = jm+m.mat.Stride, jb+bmat.Stride {
-			for i, v := range m.mat.Data[jm : jm+mc] {
-				d += v * bmat.Data[i+jb]
-			}
-		}
-		return d
-	}
-
-	if b, ok := b.(Vectorer); ok {
-		row := make([]float64, bc)
-		for r := 0; r < br; r++ {
-			for i, v := range b.Row(row, r) {
-				d += m.mat.Data[r*m.mat.Stride+i] * v
-			}
-		}
-		return d
-	}
-
-	for r := 0; r < mr; r++ {
-		for c := 0; c < mc; c++ {
-			d += m.At(r, c) * b.At(r, c)
-		}
-	}
-	return d
-}
-
 // Mul takes the matrix product of a and b, placing the result in the receiver.
 //
 // See the Muler interface for more information.

@@ -30,7 +30,6 @@ var (
 	_ Adder     = matrix
 	_ Suber     = matrix
 	_ Muler     = matrix
-	_ Dotter    = matrix
 	_ ElemMuler = matrix
 	_ ElemDiver = matrix
 	_ Exper     = matrix

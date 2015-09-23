@@ -253,12 +253,6 @@ type Power interface {
 	Pow(a Matrix, n int)
 }
 
-// A Dotter can determine the sum of the element-wise products of the elements of the receiver and b.
-// If the shapes of the two matrices differ, Dot will panic.
-type Dotter interface {
-	Dot(b Matrix) float64
-}
-
 // A Stacker can create the stacked matrix of a with b, where b is placed in the greater indexed rows.
 // The result of stacking is placed in the receiver, overwriting the previous value of the receiver.
 // Stack will panic if the two input matrices do not have the same number of columns.
@@ -381,6 +375,47 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 func Det(a Matrix) float64 {
 	det, sign := LogDet(a)
 	return math.Exp(det) * sign
+}
+
+// Dot returns the sum of the element-wise products of the elements of a and b.
+// Dot panics if the matrix sizes are unequal.
+func Dot(a, b Matrix) float64 {
+	r, c := a.Dims()
+	rb, cb := b.Dims()
+	if r != rb || c != cb {
+		panic(ErrShape)
+	}
+	var sum float64
+	aMat, aTrans := untranspose(a)
+	bMat, bTrans := untranspose(b)
+	if rma, ok := aMat.(RawMatrixer); ok {
+		if rmb, ok := bMat.(RawMatrixer); ok {
+			ra := rma.RawMatrix()
+			rb := rmb.RawMatrix()
+			if aTrans == bTrans {
+				for i := 0; i < ra.Rows; i++ {
+					sum += blas64.Dot(ra.Cols,
+						blas64.Vector{Inc: 1, Data: ra.Data[i*ra.Stride:]},
+						blas64.Vector{Inc: 1, Data: rb.Data[i*rb.Stride:]},
+					)
+				}
+				return sum
+			}
+			for i := 0; i < ra.Rows; i++ {
+				sum += blas64.Dot(ra.Cols,
+					blas64.Vector{Inc: 1, Data: ra.Data[i*ra.Stride:]},
+					blas64.Vector{Inc: rb.Stride, Data: rb.Data[i:]},
+				)
+			}
+			return sum
+		}
+	}
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			sum += a.At(i, j) * b.At(i, j)
+		}
+	}
+	return sum
 }
 
 // Equal returns whether element a and b have the same size and contain all equal

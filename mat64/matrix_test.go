@@ -129,6 +129,16 @@ func (s *S) TestRow(c *check.C) {
 	testOneInputFunc(c, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
 }
 
+func (s *S) TestDot(c *check.C) {
+	f := func(a, b Matrix) interface{} {
+		return Dot(a, b)
+	}
+	denseComparison := func(a, b *Dense) interface{} {
+		return Dot(a, b)
+	}
+	testTwoInputFunc(c, "Dot", f, denseComparison, sameAnswerFloatApprox, legalTypesAll, legalSizeSameRectangular)
+}
+
 func (s *S) TestEqual(c *check.C) {
 	f := func(a, b Matrix) interface{} {
 		return Equal(a, b)

@@ -105,5 +105,5 @@ func getWorkspaceVec(n int, clear bool) *Vector {
 // workspace pool. putWorkspace must not be called with a matrix
 // where references to the underlying data slice has been kept.
 func putWorkspaceVec(v *Vector) {
-	pool[bits(uint64(cap(v.mat.Data)))].Put(v)
+	poolVec[bits(uint64(cap(v.mat.Data)))].Put(v)
 }

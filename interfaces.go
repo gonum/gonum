@@ -8,22 +8,28 @@ package optimize
 //
 // It uses a reverse-communication interface between the optimization method
 // and the caller. Method acts as a client that asks the caller to perform
-// needed operations via RequestType returned from Init and Iterate methods.
+// needed operations via Operation returned from Init and Iterate methods.
 // This provides independence of the optimization algorithm on user-supplied
 // data and their representation, and enables automation of common operations
 // like checking for (various types of) convergence and maintaining statistics.
 //
 // A Method can command an Evaluation, a MajorIteration or NoOperation operations.
+//
 // An evaluation operation is one or more of the Evaluation operations
 // (FuncEvaluation, GradEvaluation, etc.) which can be combined with
-// the bitwise or operator. In an evaluation operation, the requested routines
-// will be evaluated at the point specified in Location.X. The corresponding
-// fields of Location will be filled with the results from the routine and can
-// be retrieved upon the next call to Iterate. Alternatively, a Method can
-// declare a MajorIteration. In a MajorIteration, all values in Location must
-// be valid and consistent, and are interpreted as a new minimum. Convergence
-// of the optimization (GradientThreshold, etc.) will be checked using this new
-// minimum.
+// the bitwise or operator. In an evaluation operation, the requested fields of
+// Problem will be evaluated at the point specified in Location.X.
+// The corresponding fields of Location will be filled with the results that
+// can be retrieved upon the next call to Iterate. The Method interface
+// requires that entries of Location are not modified aside from the commanded
+// evaluations. Thus, the type implementing Method may use multiple Operations
+// to set the Location fields at a particular x value.
+//
+// Instead of an Evaluation, a Method may declare MajorIteration. In
+// a MajorIteration, the values in the fields of Location are treated as
+// a potential optimizer. The convergence of the optimization routine
+// (GradientThreshold, etc.) is checked at this new best point. In
+// a MajorIteration, the fields of Location must be valid and consistent.
 //
 // A Method must not return InitIteration and PostIteration operations. These are
 // reserved for the clients to be passed to Recorders. A Method must also not
@@ -36,8 +42,6 @@ type Method interface {
 
 	// Iterate retrieves data from loc, performs one iteration of the method,
 	// updates loc and returns the next operation.
-	// TODO(vladimir-ch): When decided, say something whether the contents of
-	// Location is preserved between calls to Iterate.
 	Iterate(loc *Location) (Operation, error)
 
 	// Needs specifies information about the objective function needed by the

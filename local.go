@@ -366,18 +366,8 @@ func checkLimits(loc *Location, stats *Stats, settings *Settings) Status {
 }
 
 // evaluate evaluates the routines specified by the Operation at loc.X, storing
-// the answer into loc and updating stats. Unused fields of loc are set to NaN.
-// It is the responsibility of Method to assemble a valid Location before
-// requesting MajorIteration.
+// the answer into loc and updating stats.
 func evaluate(p *Problem, loc *Location, eval Operation, stats *Stats) {
-	loc.F = math.NaN()
-	if loc.Gradient != nil {
-		loc.Gradient[0] = math.NaN()
-	}
-	if loc.Hessian != nil {
-		loc.Hessian.SetSym(0, 0, math.NaN())
-	}
-
 	if eval&FuncEvaluation != 0 {
 		loc.F = p.Func(loc.X)
 		stats.FuncEvaluations++

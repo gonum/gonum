@@ -415,6 +415,9 @@ func (s *S) TestAdd(c *check.C) {
 	}
 
 	method := func(receiver, a, b Matrix) {
+		type Adder interface {
+			Add(a, b Matrix)
+		}
 		rd := receiver.(Adder)
 		rd.Add(a, b)
 	}
@@ -657,6 +660,9 @@ func (s *S) TestMul(c *check.C) {
 	}
 
 	method := func(receiver, a, b Matrix) {
+		type Muler interface {
+			Mul(a, b Matrix)
+		}
 		rd := receiver.(Muler)
 		rd.Mul(a, b)
 	}

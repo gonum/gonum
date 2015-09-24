@@ -18,9 +18,8 @@ const (
 	small   = math.SmallestNonzeroFloat64
 )
 
-// Add adds a and b element-wise, placing the result in the receiver.
-//
-// See the Adder interface for more information.
+// Add adds a and b element-wise, placing the result in the receiver. Add
+// will panic if the two matrices do not have the same shape.
 func (m *Dense) Add(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
@@ -74,9 +73,8 @@ func (m *Dense) Add(a, b Matrix) {
 	}
 }
 
-// Sub subtracts the matrix b from a, placing the result in the receiver.
-//
-// See the Suber interface for more information.
+// Sub subtracts the matrix b from a, placing the result in the receiver. Sub
+// will panic if the two matrices do not have the same shape.
 func (m *Dense) Sub(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
@@ -122,9 +120,8 @@ func (m *Dense) Sub(a, b Matrix) {
 }
 
 // MulElem performs element-wise multiplication of a and b, placing the result
-// in the receiver.
-//
-// See the ElemMuler interface for more information.
+// in the receiver. MulElem will panic if the two matrices do not have the same
+// shape.
 func (m *Dense) MulElem(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
@@ -170,9 +167,8 @@ func (m *Dense) MulElem(a, b Matrix) {
 }
 
 // DivElem performs element-wise division of a by b, placing the result
-// in the receiver.
-//
-// See the ElemDiver interface for more information.
+// in the receiver. DivElem will panic if the two matrices do not have the same
+// shape.
 func (m *Dense) DivElem(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
@@ -218,8 +214,7 @@ func (m *Dense) DivElem(a, b Matrix) {
 }
 
 // Mul takes the matrix product of a and b, placing the result in the receiver.
-//
-// See the Muler interface for more information.
+// If the number of columns in a does not equal the number of rows in b, Mul will panic.
 func (m *Dense) Mul(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
@@ -458,9 +453,7 @@ func strictCopy(m *Dense, a Matrix) {
 }
 
 // Exp calculates the exponential of the matrix a, e^a, placing the result
-// in the receiver.
-//
-// See the Exper interface for more information.
+// in the receiver. Exp will panic with ErrShape if a is not square.
 //
 // Exp uses the scaling and squaring method described in section 3 of
 // http://www.cs.cornell.edu/cv/researchpdf/19ways+.pdf.
@@ -539,9 +532,7 @@ func (m *Dense) Exp(a Matrix) {
 }
 
 // Pow calculates the integral power of the matrix a to n, placing the result
-// in the receiver.
-//
-// See the Power interface for more information.
+// in the receiver. Pow will panic if n is negative or if a is not square.
 func (m *Dense) Pow(a Matrix, n int) {
 	if n < 0 {
 		panic("matrix: illegal power")
@@ -628,9 +619,8 @@ func (m *Dense) Scale(f float64, a Matrix) {
 }
 
 // Apply applies the function fn to each of the elements of a, placing the
-// resulting matrix in the receiver.
-//
-// See the Applyer interface for more information.
+// resulting matrix in the receiver. The function fn takes a row/column
+// index and element value and returns some function of that tuple.
 func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 	ar, ac := a.Dims()
 

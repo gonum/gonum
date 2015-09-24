@@ -27,19 +27,6 @@ var (
 	_ RawRowViewer = matrix
 	_ Grower       = matrix
 
-	_ Adder     = matrix
-	_ Suber     = matrix
-	_ Muler     = matrix
-	_ ElemMuler = matrix
-	_ ElemDiver = matrix
-	_ Exper     = matrix
-
-	_ Scaler  = matrix
-	_ Applyer = matrix
-
-	_ Stacker   = matrix
-	_ Augmenter = matrix
-
 	_ RawMatrixSetter = matrix
 	_ RawMatrixer     = matrix
 
@@ -444,9 +431,9 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 }
 
 // Stack appends the rows of b onto the rows of a, placing the result into the
-// receiver.
-//
-// See the Stacker interface for more information.
+// receiver with b placed in the greater indexed rows. Stack will panic if the
+// two input matrices do not have the same number of columns or the constructed
+// stacked matrix is not the same shape as the receiver.
 func (m *Dense) Stack(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
@@ -462,9 +449,9 @@ func (m *Dense) Stack(a, b Matrix) {
 }
 
 // Augment creates the augmented matrix of a and b, where b is placed in the
-// greater indexed columns.
-//
-// See the Augmenter interface for more information.
+// greater indexed columns. Augment will panic if the two input matrices do
+// not have the same number of rows or the constructed augmented matrix is
+// not the same shape as the receiver.
 func (m *Dense) Augment(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()

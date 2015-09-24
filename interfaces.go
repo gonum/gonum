@@ -13,7 +13,7 @@ package optimize
 // data and their representation, and enables automation of common operations
 // like checking for (various types of) convergence and maintaining statistics.
 //
-// A Method can command an Evaluation or a MajorIteration operation.
+// A Method can command an Evaluation, a MajorIteration or NoOperation operations.
 // An evaluation operation is one or more of the Evaluation operations
 // (FuncEvaluation, GradEvaluation, etc.) which can be combined with
 // the bitwise or operator. In an evaluation operation, the requested routines
@@ -25,8 +25,8 @@ package optimize
 // of the optimization (GradientThreshold, etc.) will be checked using this new
 // minimum.
 //
-// A Method must not return InitIteration and PostIteration requests. These are
-// reserved for the clients to be passed to Recorders. A method must also not
+// A Method must not return InitIteration and PostIteration operations. These are
+// reserved for the clients to be passed to Recorders. A Method must also not
 // combine the Evaluation operations with the Iteration operations.
 type Method interface {
 	// Init initializes the method based on the initial data in loc, updates it

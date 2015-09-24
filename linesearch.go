@@ -64,8 +64,9 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
 
 	case MajorIteration:
 		// We previously requested MajorIteration but since we're here, the
-		// previous location was not good enough to converge. So start the next
-		// linesearch and store the next evaluation point in loc.X.
+		// previous location was not good enough to converge the full
+		// optimization. Start the next linesearch and store the next
+		// evaluation point in loc.X.
 		return ls.initNextLinesearch(loc.X)
 
 	default:

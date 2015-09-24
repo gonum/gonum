@@ -6,6 +6,7 @@ package mat64
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"gopkg.in/check.v1"
@@ -191,6 +192,69 @@ func (s *S) TestMaybe(c *check.C) {
 	} {
 		c.Check(leaksPanic(test.fn), check.Equals, test.panics, check.Commentf("Test %d", i))
 	}
+}
+
+func (s *S) TestNorm(c *check.C) {
+	for i, test := range []struct {
+		a    [][]float64
+		ord  float64
+		norm float64
+	}{
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  1,
+			norm: 30,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  2,
+			norm: 25.495097567963924,
+		},
+		{
+			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
+			ord:  inf,
+			norm: 33,
+		},
+		{
+			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
+			ord:  1,
+			norm: 8,
+		},
+		{
+			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
+			ord:  inf,
+			norm: 15,
+		},
+	} {
+		a := NewDense(flatten(test.a))
+		if math.Abs(Norm(a, test.ord)-test.norm) > 1e-14 {
+			c.Errorf("Mismatch test %d: %v norm = %f", i, test.a, test.norm)
+		}
+	}
+
+	f := func(a Matrix) interface{} {
+		return Norm(a, 1)
+	}
+	denseComparison := func(a *Dense) interface{} {
+		return Norm(a, 1)
+	}
+	testOneInputFunc(c, "Norm_1", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+
+	f = func(a Matrix) interface{} {
+		return Norm(a, 2)
+	}
+	denseComparison = func(a *Dense) interface{} {
+		return Norm(a, 2)
+	}
+	testOneInputFunc(c, "Norm_2", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+
+	f = func(a Matrix) interface{} {
+		return Norm(a, math.Inf(1))
+	}
+	denseComparison = func(a *Dense) interface{} {
+		return Norm(a, math.Inf(1))
+	}
+	testOneInputFunc(c, "Norm_inf", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
 }
 
 func (s *S) TestSum(c *check.C) {

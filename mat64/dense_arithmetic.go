@@ -18,68 +18,6 @@ const (
 	small   = math.SmallestNonzeroFloat64
 )
 
-// Norm returns the specified matrix p-norm of the receiver.
-//
-// See the Normer interface for more information.
-func (m *Dense) Norm(ord float64) float64 {
-	var n float64
-	switch {
-	case ord == 1:
-		col := make([]float64, m.mat.Rows)
-		for i := 0; i < m.mat.Cols; i++ {
-			var s float64
-			for _, e := range Col(col, i, m) {
-				s += math.Abs(e)
-			}
-			n = math.Max(s, n)
-		}
-	case math.IsInf(ord, +1):
-		for i := 0; i < m.mat.Rows; i++ {
-			var s float64
-			for _, e := range m.RawRowView(i) {
-				s += math.Abs(e)
-			}
-			n = math.Max(s, n)
-		}
-	case ord == -1:
-		n = math.MaxFloat64
-		col := make([]float64, m.mat.Rows)
-		for i := 0; i < m.mat.Cols; i++ {
-			var s float64
-			for _, e := range Col(col, i, m) {
-				s += math.Abs(e)
-			}
-			n = math.Min(s, n)
-		}
-	case math.IsInf(ord, -1):
-		n = math.MaxFloat64
-		for i := 0; i < m.mat.Rows; i++ {
-			var s float64
-			for _, e := range m.RawRowView(i) {
-				s += math.Abs(e)
-			}
-			n = math.Min(s, n)
-		}
-	case ord == 0:
-		for i := 0; i < len(m.mat.Data); i += m.mat.Stride {
-			for _, v := range m.mat.Data[i : i+m.mat.Cols] {
-				n = math.Hypot(n, v)
-			}
-		}
-		return n
-	case ord == 2, ord == -2:
-		s := SVD(m, epsilon, small, false, false).Sigma
-		if ord == 2 {
-			return s[0]
-		}
-		return s[len(s)-1]
-	default:
-		panic(ErrNormOrder)
-	}
-
-	return n
-}
-
 // Add adds a and b element-wise, placing the result in the receiver.
 //
 // See the Adder interface for more information.

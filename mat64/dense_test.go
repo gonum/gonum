@@ -154,7 +154,7 @@ func (s *S) TestNewDense(c *check.C) {
 		c.Check(cols, check.Equals, test.cols, check.Commentf("Test %d", i))
 		c.Check(Min(m), check.Equals, test.min, check.Commentf("Test %d", i))
 		c.Check(Max(m), check.Equals, test.max, check.Commentf("Test %d", i))
-		c.Check(m.Norm(0), check.Equals, test.fro, check.Commentf("Test %d", i))
+		c.Check(math.Abs(Norm(m, 2)-test.fro) > 1e-14, check.Equals, false, check.Commentf("Test %d", i))
 		c.Check(m, check.DeepEquals, test.mat, check.Commentf("Test %d", i))
 		c.Check(Equal(m, test.mat), check.Equals, true, check.Commentf("Test %d", i))
 	}
@@ -227,7 +227,11 @@ func (s *S) TestSetRowColumn(c *check.C) {
 			t.Clone(a)
 			a.SetRow(ri, make([]float64, a.mat.Cols))
 			t.Sub(t, a)
-			c.Check(t.Norm(0), check.Equals, floats.Norm(row, 2))
+			nt := Norm(t, 2)
+			nr := floats.Norm(row, 2)
+			if math.Abs(nt-nr) > 1e-14 {
+				c.Errorf("Row %d norm mismatch, want: %g, got: %g", ri, nr, nt)
+			}
 		}
 
 		for ci := range as[0] {
@@ -240,7 +244,11 @@ func (s *S) TestSetRowColumn(c *check.C) {
 				col[j] = float64(ci + 1 + j*a.mat.Cols)
 			}
 			t.Sub(t, a)
-			c.Check(t.Norm(0), check.Equals, floats.Norm(col, 2))
+			nt := Norm(t, 2)
+			nc := floats.Norm(col, 2)
+			if math.Abs(nt-nc) > 1e-14 {
+				c.Errorf("Column %d norm mismatch, want: %g, got: %g", ci, nc, nt)
+			}
 		}
 	}
 }
@@ -932,73 +940,6 @@ func (s *S) TestCopyT(c *check.C) {
 		zero(rr.mat.Data)
 		rr.Copy(r.T())
 		c.Check(Equal(rr, a), check.Equals, true, check.Commentf("Test %d: %v transpose = %v", i, test.a, test.t))
-	}
-}
-
-func (s *S) TestNorm(c *check.C) {
-	for i, test := range []struct {
-		a    [][]float64
-		ord  float64
-		norm float64
-	}{
-		{
-			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  0,
-			norm: 25.49509756796392,
-		},
-		{
-			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  1,
-			norm: 30,
-		},
-		{
-			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  -1,
-			norm: 22,
-		},
-		{
-			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  2,
-			norm: 25.46240743603639,
-		},
-		{
-			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  -2,
-			norm: 9.013990486603544e-16,
-		},
-		{
-			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  inf,
-			norm: 33,
-		},
-		{
-			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  -inf,
-			norm: 6,
-		},
-		{
-			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
-			ord:  1,
-			norm: 8,
-		},
-		{
-			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
-			ord:  -1,
-			norm: 5,
-		},
-		{
-			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
-			ord:  inf,
-			norm: 15,
-		},
-		{
-			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
-			ord:  -inf,
-			norm: 5,
-		},
-	} {
-		a := NewDense(flatten(test.a))
-		c.Check(a.Norm(test.ord), check.Equals, test.norm, check.Commentf("Test %d: %v norm = %f", i, test.a, test.norm))
 	}
 }
 

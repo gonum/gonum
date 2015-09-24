@@ -22,7 +22,7 @@ type LinesearchMethod struct {
 	dir []float64 // Search direction for the current iteration.
 
 	first     bool      // Indicator of the first iteration.
-	nextMajor bool      // Indicates that MajorIteration must be requested at the next call to Iterate.
+	nextMajor bool      // Indicates that MajorIteration must be commanded at the next call to Iterate.
 	eval      Operation // Indicator of valid fields in Location.
 
 	lastStep float64   // Step taken from x in the previous call to Iterate.

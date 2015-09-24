@@ -236,13 +236,13 @@ func (n *NelderMead) Iterate(loc *Location) (Operation, error) {
 }
 
 // returnNext updates the location based on the iteration type and the current
-// simplex, and returns the next request.
+// simplex, and returns the next operation.
 func (n *NelderMead) returnNext(iter nmIterType, loc *Location) (Operation, error) {
 	n.lastIter = iter
 	switch iter {
 	case nmMajor:
 		// Fill loc with the current best point and value,
-		// and request a convergence check.
+		// and command a convergence check.
 		copy(loc.X, n.vertices[0])
 		loc.F = n.values[0]
 		return MajorIteration, nil

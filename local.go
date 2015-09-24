@@ -152,7 +152,7 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 
 	for {
 		// Sequentially call method.Iterate, performing the operations it has
-		// requested, until convergence.
+		// commanded, until convergence.
 
 		switch op {
 		case NoOperation:

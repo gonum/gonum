@@ -153,7 +153,7 @@ func (ls *LinesearchMethod) initNextLinesearch(loc *Location) (Operation, error)
 
 	projGrad := floats.Dot(loc.Gradient, ls.dir)
 	if projGrad >= 0 {
-		return ls.error(ErrNonNegativeStepDirection)
+		return ls.error(ErrNonDescentDirection)
 	}
 
 	op := ls.Linesearcher.Init(loc.F, projGrad, step)

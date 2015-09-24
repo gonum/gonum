@@ -76,7 +76,7 @@ func (b *Backtracking) Iterate(f, _ float64) (Operation, float64, error) {
 	b.stepSize *= b.Decrease
 	if b.stepSize < minimumBacktrackingStepSize {
 		b.lastOp = NoOperation
-		return b.lastOp, b.stepSize, ErrLinesearchFailure
+		return b.lastOp, b.stepSize, ErrLinesearcherFailure
 	}
 	b.lastOp = FuncEvaluation
 	return b.lastOp, b.stepSize, nil

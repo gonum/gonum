@@ -12,6 +12,7 @@ import (
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
 	"github.com/gonum/lapack"
+	"github.com/gonum/lapack/lapack64"
 )
 
 // Matrix is the basic matrix interface type.
@@ -175,21 +176,6 @@ type Viewer interface {
 type Grower interface {
 	Caps() (r, c int)
 	Grow(r, c int) Matrix
-}
-
-// A Normer can return the specified matrix norm, o of the matrix represented by the receiver.
-//
-// Valid order values are:
-//
-//     1 - max of the sum of the absolute values of columns
-//    -1 - min of the sum of the absolute values of columns
-//   Inf - max of the sum of the absolute values of rows
-//  -Inf - min of the sum of the absolute values of rows
-//     0 - Frobenius norm
-//
-// Norm will panic with ErrNormOrder if an illegal norm order is specified.
-type Normer interface {
-	Norm(o float64) float64
 }
 
 // An Inver can calculate the inverse of the matrix represented by a and stored in the receiver.
@@ -779,6 +765,102 @@ func MaybeFloat(fn func() float64) (f float64, err error) {
 		}
 	}()
 	return fn(), nil
+}
+
+// Norm returns the specified (induced) norm of the matrix a. See
+// https://en.wikipedia.org/wiki/Matrix_norm for the definition of an induced norm.
+//
+// Valid norms are:
+//    1 - The maximum absolute column sum
+//    2 - Frobenius norm, the square root of the sum of the squares of the elements.
+//  Inf - The maximum absolute row sum.
+// Norm will panic with ErrNormOrder if an illegal norm order is specified.
+func Norm(a Matrix, norm float64) float64 {
+	r, c := a.Dims()
+	aMat, aTrans := untranspose(a)
+	var work []float64
+	switch rma := aMat.(type) {
+	case RawMatrixer:
+		rm := rma.RawMatrix()
+		n := normLapack(norm, aTrans)
+		if n == lapack.MaxColumnSum {
+			work = make([]float64, rm.Cols)
+		}
+		return lapack64.Lange(n, rm, work)
+	case RawTriangular:
+		rm := rma.RawTriangular()
+		n := normLapack(norm, aTrans)
+		if n == lapack.MaxRowSum || n == lapack.MaxColumnSum {
+			work = make([]float64, rm.N)
+		}
+		return lapack64.Lantr(n, rm, work)
+	case RawSymmetricer:
+		rm := rma.RawSymmetric()
+		n := normLapack(norm, aTrans)
+		if n == lapack.MaxRowSum || n == lapack.MaxColumnSum {
+			work = make([]float64, rm.N)
+		}
+		return lapack64.Lansy(n, rm, work)
+	}
+	switch norm {
+	default:
+		panic("unreachable")
+	case 1:
+		var max float64
+		for j := 0; j < c; j++ {
+			var sum float64
+			for i := 0; i < r; i++ {
+				sum += math.Abs(a.At(i, j))
+			}
+			if sum > max {
+				max = sum
+			}
+		}
+		return max
+	case 2:
+		var sum float64
+		for i := 0; i < r; i++ {
+			for j := 0; j < c; j++ {
+				v := a.At(i, j)
+				sum += v * v
+			}
+		}
+		return math.Sqrt(sum)
+	case math.Inf(1):
+		var max float64
+		for i := 0; i < r; i++ {
+			var sum float64
+			for j := 0; j < c; j++ {
+				sum += math.Abs(a.At(i, j))
+			}
+			if sum > max {
+				max = sum
+			}
+		}
+		return max
+	}
+}
+
+// normLapack converts the float64 norm input in Norm to a lapack.MatrixNorm.
+func normLapack(norm float64, aTrans bool) lapack.MatrixNorm {
+	switch norm {
+	case 1:
+		n := lapack.MaxColumnSum
+		if aTrans {
+			n = lapack.MaxRowSum
+		}
+		return n
+	case 2:
+		return lapack.NormFrob
+	case math.Inf(1):
+		n := lapack.MaxRowSum
+		if aTrans {
+			n = lapack.MaxColumnSum
+		}
+		return n
+	default:
+		panic(ErrNormOrder)
+	}
 }
 
 // Sum returns the sum of the elements of the matrix.

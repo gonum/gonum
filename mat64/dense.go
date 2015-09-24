@@ -37,8 +37,6 @@ var (
 	_ Scaler  = matrix
 	_ Applyer = matrix
 
-	_ Normer = matrix
-
 	_ Stacker   = matrix
 	_ Augmenter = matrix
 

@@ -33,7 +33,7 @@ type Backtracking struct {
 	initG    float64
 }
 
-func (b *Backtracking) Init(f, g float64, step float64) EvaluationType {
+func (b *Backtracking) Init(f, g float64, step float64) Operation {
 	if step <= 0 {
 		panic("backtracking: bad step size")
 	}
@@ -64,10 +64,10 @@ func (b *Backtracking) Finished(f, _ float64) bool {
 	return ArmijoConditionMet(f, b.initF, b.initG, b.stepSize, b.FuncConst)
 }
 
-func (b *Backtracking) Iterate(_, _ float64) (float64, EvaluationType, error) {
+func (b *Backtracking) Iterate(_, _ float64) (float64, Operation, error) {
 	b.stepSize *= b.Decrease
 	if b.stepSize < minimumBacktrackingStepSize {
-		return 0, NoEvaluation, ErrLinesearchFailure
+		return 0, NoOperation, ErrLinesearchFailure
 	}
 	return b.stepSize, FuncEvaluation, nil
 }

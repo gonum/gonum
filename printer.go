@@ -55,20 +55,20 @@ func (p *Printer) Init() error {
 	return nil
 }
 
-func (p *Printer) Record(loc *Location, _ EvaluationType, iter IterationType, stats *Stats) error {
-	if iter != MajorIteration && iter != InitIteration && iter != PostIteration {
+func (p *Printer) Record(loc *Location, op Operation, stats *Stats) error {
+	if op != MajorIteration && op != InitIteration && op != PostIteration {
 		return nil
 	}
 
 	// Print values always on PostIteration or when ValueInterval has elapsed.
-	printValues := time.Since(p.lastValue) > p.ValueInterval || iter == PostIteration
+	printValues := time.Since(p.lastValue) > p.ValueInterval || op == PostIteration
 	if !printValues {
 		// Return early if not printing anything.
 		return nil
 	}
 
 	// Print heading when HeadingInterval lines have been printed, but never on PostIteration.
-	printHeading := p.lastHeading >= p.HeadingInterval && iter != PostIteration
+	printHeading := p.lastHeading >= p.HeadingInterval && op != PostIteration
 	if printHeading {
 		p.lastHeading = 1
 	} else {

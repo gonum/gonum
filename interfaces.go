@@ -5,14 +5,40 @@
 package optimize
 
 // A Method can optimize an objective function.
+//
+// It uses a reverse-communication interface between the optimization method
+// and the caller. Method acts as a client that asks the caller to perform
+// needed operations via RequestType returned from Init and Iterate methods.
+// This provides independence of the optimization algorithm on user-supplied
+// data and their representation, and enables automation of common operations
+// like checking for (various types of) convergence and maintaining statistics.
+//
+// A Method can command an Evaluation, a MajorIteration or NoOperation operations.
+// An evaluation operation is one or more of the Evaluation operations
+// (FuncEvaluation, GradEvaluation, etc.) which can be combined with
+// the bitwise or operator. In an evaluation operation, the requested routines
+// will be evaluated at the point specified in Location.X. The corresponding
+// fields of Location will be filled with the results from the routine and can
+// be retrieved upon the next call to Iterate. Alternatively, a Method can
+// declare a MajorIteration. In a MajorIteration, all values in Location must
+// be valid and consistent, and are interpreted as a new minimum. Convergence
+// of the optimization (GradientThreshold, etc.) will be checked using this new
+// minimum.
+//
+// A Method must not return InitIteration and PostIteration operations. These are
+// reserved for the clients to be passed to Recorders. A Method must also not
+// combine the Evaluation operations with the Iteration operations.
 type Method interface {
-	// Init initializes the method and stores the first location to evaluate
-	// in xNext.
-	Init(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
+	// Init initializes the method based on the initial data in loc, updates it
+	// and returns the first operation to be carried out by the caller.
+	// The initial location must be valid as specified by Needs().
+	Init(loc *Location) (Operation, error)
 
-	// Iterate performs one iteration of the method and stores the next
-	// location to evaluate in xNext.
-	Iterate(loc *Location, xNext []float64) (EvaluationType, IterationType, error)
+	// Iterate retrieves data from loc, performs one iteration of the method,
+	// updates loc and returns the next operation.
+	// TODO(vladimir-ch): When decided, say something whether the contents of
+	// Location is preserved between calls to Iterate().
+	Iterate(loc *Location) (Operation, error)
 
 	// Needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
@@ -22,6 +48,13 @@ type Method interface {
 		Gradient bool
 		Hessian  bool
 	}
+}
+
+// Statuser can report the status and any error. It is intended for methods as
+// an additional error reporting mechanism apart from the errors returned from
+// Init() and Iterate().
+type Statuser interface {
+	Status() (Status, error)
 }
 
 // Linesearcher is a type that can perform a line search. It tries to find an
@@ -36,7 +69,7 @@ type Linesearcher interface {
 	// φ(0) and φ'(0), respectively, and step contains the first trial step
 	// length. It returns the type of evaluation to be performed at
 	// x_0 + step * dir_0.
-	Init(value, derivative float64, step float64) EvaluationType
+	Init(value, derivative float64, step float64) Operation
 
 	// Finished takes in the values of φ and φ' evaluated at the previous step,
 	// and returns whether a sufficiently accurate minimum of φ has been found.
@@ -45,7 +78,7 @@ type Linesearcher interface {
 	// Iterate takes in the values of φ and φ' evaluated at the previous step
 	// and returns the next step size and the type of evaluation to be
 	// performed at x_k + step * dir_k.
-	Iterate(value, derivative float64) (step float64, e EvaluationType, err error)
+	Iterate(value, derivative float64) (step float64, op Operation, err error)
 }
 
 // NextDirectioner implements a strategy for computing a new line search
@@ -72,17 +105,9 @@ type StepSizer interface {
 	StepSize(loc *Location, dir []float64) float64
 }
 
-// Statuser returns the status of the Function being optimized. This can be used
-// by the Function to terminate early, for example with an error. The user can
-// use one of the pre-provided Status constants, or may call NewStatus to create
-// a custom Status value.
-type Statuser interface {
-	Status() (Status, error)
-}
-
 // A Recorder can record the progress of the optimization, for example to print
 // the progress to StdOut or to a log file. A Recorder must not modify any data.
 type Recorder interface {
 	Init() error
-	Record(*Location, EvaluationType, IterationType, *Stats) error
+	Record(*Location, Operation, *Stats) error
 }

@@ -118,7 +118,11 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
 		panic("linesearch: Linesearcher returned invalid operation")
 	}
 
-	if step != ls.lastStep {
+	if step == ls.lastStep {
+		// Linesearcher is requesting another evaluation at the same point
+		// which is stored in ls.loc.X.
+		copy(loc.X, ls.loc.X)
+	} else {
 		// We are moving to a new location.
 
 		// Compute the next evaluation point and store it in loc.X.
@@ -133,10 +137,6 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
 		ls.lastStep = step
 		copy(ls.loc.X, loc.X) // Move ls.loc to the next evaluation point
 		ls.eval = NoOperation // and invalidate all its fields.
-	} else {
-		// Linesearcher is requesting another evaluation at the same point
-		// which is stored in ls.loc.X.
-		copy(loc.X, ls.loc.X)
 	}
 
 	ls.lastOp = op

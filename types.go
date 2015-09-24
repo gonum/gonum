@@ -15,7 +15,7 @@ import (
 
 const defaultGradientAbsTol = 1e-6
 
-// Operation represents the set of operations requested by Method at each
+// Operation represents the set of operations commanded by Method at each
 // iteration. It is a bitmap of various Iteration and Evaluation constants.
 // Individual constants must NOT be combined together by the binary OR operator
 // except for the Evaluation operations.

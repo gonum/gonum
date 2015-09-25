@@ -42,11 +42,11 @@ func (m *Dense) Product(factors ...Matrix) {
 
 	p := newMultiplier(m, factors)
 	p.optimize()
-	p.multiply()
+	result := p.multiply()
 
-	m.reuseAs(p.stack[0].Dims())
-	m.Copy(p.stack[0])
-	putWorkspace(p.stack[0])
+	m.reuseAs(result.Dims())
+	m.Copy(result)
+	putWorkspace(result)
 }
 
 // debugProductWalk enables debugging output for Product.
@@ -131,13 +131,16 @@ func (p *multiplier) optimize() {
 }
 
 // multiply walks the optimal operation tree found by optimize,
-// leaving the final result in the stack.
-func (p *multiplier) multiply() {
+// leaving the final result in the stack. It returns the
+// product, which may be copied but should be returned to
+// the workspace pool.
+func (p *multiplier) multiply() *Dense {
 	p.multiplySubchain(0, len(p.factors)-1)
 	if debugProductWalk {
 		r, c := p.stack[0].Dims()
 		fmt.Printf("\tpop result (%d×%d) cost=%d\n", r, c, p.table.at(0, len(p.factors)-1).cost)
 	}
+	return p.stack[0]
 }
 
 func (p *multiplier) multiplySubchain(i, j int) {

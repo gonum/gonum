@@ -9,6 +9,7 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/lapack/lapack64"
 )
 
 var inf = math.Inf(1)
@@ -211,6 +212,44 @@ func (m *Dense) DivElem(a, b Matrix) {
 			m.set(r, c, a.At(r, c)/b.At(r, c))
 		}
 	}
+}
+
+// Inverse computes the inverse of the matrix a, storing the result into the
+// receiver. If a is ill-conditioned, a Condition error will be returned.
+// Note that matrix inversion is numerically unstable, and should generally
+// be avoided where possible, for example by using the Solve routines.
+func (m *Dense) Inverse(a Matrix) error {
+	// TODO(btracey): Special case for RawTriangular, etc.
+	r, c := a.Dims()
+	if r != c {
+		panic(ErrSquare)
+	}
+	m.reuseAs(a.Dims())
+	aMat, aTrans := untranspose(a)
+	if m != aMat {
+		m.Copy(a)
+	} else if aTrans {
+		tmp := getWorkspace(r, c, false)
+		tmp.Copy(a)
+		m.Copy(tmp)
+		putWorkspace(tmp)
+	}
+	ipiv := make([]int, r)
+	lapack64.Getrf(m.mat, ipiv)
+	work := make([]float64, 1, 4*r) // must be at least 4*r for cond.
+	lapack64.Getri(m.mat, ipiv, work, -1)
+	if int(work[0]) > 4*r {
+		work = make([]float64, int(work[0]))
+	} else {
+		work = work[:4*r]
+	}
+	lapack64.Getri(m.mat, ipiv, work, len(work))
+	norm := lapack64.Lange(condNorm, m.mat, work)
+	cond := lapack64.Gecon(condNorm, m.mat, norm, work, ipiv) // reuse ipiv
+	if cond > condTol {
+		return Condition(cond)
+	}
+	return nil
 }
 
 // Mul takes the matrix product of a and b, placing the result in the receiver.

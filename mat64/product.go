@@ -43,7 +43,6 @@ func (m *Dense) Product(factors ...Matrix) {
 	p := newMultiplier(m, factors)
 	p.optimize()
 	result := p.multiply()
-
 	m.reuseAs(result.Dims())
 	m.Copy(result)
 	putWorkspace(result)
@@ -65,14 +64,6 @@ type multiplier struct {
 	// programming costs and subchain
 	// division indices.
 	table table
-
-	// stack holds intermediate results
-	// in the product tree. onStack
-	// indicates whether a matrix to
-	// be multiplied is on the stack or
-	// in the input factors.
-	stack   []*Dense
-	onStack []bool
 }
 
 func newMultiplier(m *Dense, factors []Matrix) *multiplier {
@@ -106,7 +97,6 @@ func newMultiplier(m *Dense, factors []Matrix) *multiplier {
 		factors: factors,
 		dims:    dims,
 		table:   newTable(len(factors)),
-		onStack: make([]bool, len(factors)),
 	}
 }
 
@@ -135,24 +125,22 @@ func (p *multiplier) optimize() {
 // product, which may be copied but should be returned to
 // the workspace pool.
 func (p *multiplier) multiply() *Dense {
-	p.multiplySubchain(0, len(p.factors)-1)
+	result, _ := p.multiplySubchain(0, len(p.factors)-1)
 	if debugProductWalk {
-		r, c := p.stack[0].Dims()
+		r, c := result.Dims()
 		fmt.Printf("\tpop result (%d×%d) cost=%d\n", r, c, p.table.at(0, len(p.factors)-1).cost)
 	}
-	return p.stack[0]
+	return result.(*Dense)
 }
 
-func (p *multiplier) multiplySubchain(i, j int) {
+func (p *multiplier) multiplySubchain(i, j int) (m Matrix, intermediate bool) {
 	if i == j {
-		return
+		return p.factors[i], false
 	}
 
-	p.multiplySubchain(i, p.table.at(i, j).k)
-	p.multiplySubchain(p.table.at(i, j).k+1, j)
+	a, aTmp := p.multiplySubchain(i, p.table.at(i, j).k)
+	b, bTmp := p.multiplySubchain(p.table.at(i, j).k+1, j)
 
-	b := p.factor(j)
-	a := p.factor(i)
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ac != br {
@@ -162,36 +150,19 @@ func (p *multiplier) multiplySubchain(i, j int) {
 	}
 
 	if debugProductWalk {
-		ar, ac := a.Dims()
-		br, bc := b.Dims()
 		fmt.Printf("\tpush f[%d] (%d×%d)%s * f[%d] (%d×%d)%s\n",
-			i, ar, ac, result(p.onStack[i]), j, br, bc, result(p.onStack[j]))
+			i, ar, ac, result(aTmp), j, br, bc, result(bTmp))
 	}
 
 	r := getWorkspace(ar, bc, false)
 	r.Mul(a, b)
-	if p.onStack[i] {
+	if aTmp {
 		putWorkspace(a.(*Dense))
 	}
-	if p.onStack[j] {
+	if bTmp {
 		putWorkspace(b.(*Dense))
 	}
-	p.push(r, i, j)
-}
-
-func (p *multiplier) push(m *Dense, i, j int) {
-	p.onStack[i] = true
-	p.onStack[j] = true
-	p.stack = append(p.stack, m)
-}
-
-func (p *multiplier) factor(i int) Matrix {
-	if !p.onStack[i] {
-		return p.factors[i]
-	}
-	var m *Dense
-	m, p.stack = p.stack[len(p.stack)-1], p.stack[:len(p.stack)-1]
-	return m
+	return r, true
 }
 
 type entry struct {

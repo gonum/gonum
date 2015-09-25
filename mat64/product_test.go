@@ -54,6 +54,12 @@ var productTests = []struct {
 		product: dims{60, 10},
 		panics:  true,
 	},
+	{
+		n:       3,
+		factors: []dims{{1, 1000}, {1000, 2}, {2, 2}},
+		product: dims{1, 2},
+		panics:  false,
+	},
 
 	// Random chains.
 	{

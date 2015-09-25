@@ -1243,6 +1243,63 @@ func (s *S) TestOuter(c *check.C) {
 	}
 }
 
+func (s *S) TestInverse(c *check.C) {
+	for i, test := range []struct {
+		a    *Dense
+		want *Dense
+		tol  float64
+	}{
+		{
+			a: NewDense(3, 3, []float64{
+				8, 1, 6,
+				3, 5, 7,
+				4, 9, 2,
+			}),
+			want: NewDense(3, 3, []float64{
+				0.147222222222222, -0.144444444444444, 0.063888888888889,
+				-0.061111111111111, 0.022222222222222, 0.105555555555556,
+				-0.019444444444444, 0.188888888888889, -0.102777777777778,
+			}),
+			tol: 1e-14,
+		},
+		{
+			a: NewDense(4, 4, []float64{
+				5, 2, 8, 7,
+				4, 5, 8, 2,
+				8, 5, 3, 2,
+				8, 7, 7, 5,
+			}),
+			want: NewDense(4, 4, []float64{
+				0.100548446069470, 0.021937842778793, 0.334552102376599, -0.283363802559415,
+				-0.226691042047532, -0.067641681901280, -0.281535648994515, 0.457038391224863,
+				0.080438756855576, 0.217550274223035, 0.067641681901280, -0.226691042047532,
+				0.043875685557587, -0.244972577696527, -0.235831809872029, 0.330895795246801,
+			}),
+			tol: 1e-14,
+		},
+	} {
+		var got Dense
+		err := got.Inverse(test.a)
+		if err != nil {
+			c.Errorf("Error computing inverse: %v", err)
+		}
+		if !equalApprox(&got, test.want, test.tol) {
+			c.Errorf("Case %d, inverse mismatch.", i)
+		}
+		var m Dense
+		m.Mul(&got, test.a)
+		r, _ := test.a.Dims()
+		d := make([]float64, r*r)
+		for i := 0; i < r*r; i += r + 1 {
+			d[i] = 1
+		}
+		eye := NewDense(r, r, d)
+		if !equalApprox(eye, &m, 1e-14) {
+			c.Errorf("Case %d, A^-1 * A != I", i)
+		}
+	}
+}
+
 var (
 	wd *Dense
 )

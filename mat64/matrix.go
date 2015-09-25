@@ -475,20 +475,6 @@ func LogDet(a Matrix) (det float64, sign float64) {
 	return lu.LogDet()
 }
 
-// Inverse returns the inverse or pseudoinverse of the matrix a.
-// It returns a nil matrix and ErrSingular if a is singular.
-func Inverse(a Matrix) (*Dense, error) {
-	m, _ := a.Dims()
-	d := make([]float64, m*m)
-	for i := 0; i < m*m; i += m + 1 {
-		d[i] = 1
-	}
-	eye := NewDense(m, m, d)
-	x := &Dense{}
-	err := x.Solve(a, eye)
-	return x, err
-}
-
 // Max returns the largest element value of the matrix A.
 func Max(a Matrix) float64 {
 	r, c := a.Dims()

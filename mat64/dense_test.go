@@ -424,7 +424,7 @@ func (s *S) TestAdd(c *check.C) {
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Add(a, b)
 	}
-	testTwoInput(c, "Add", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameRectangular)
+	testTwoInput(c, "Add", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameRectangular, 1e-14)
 }
 
 func (s *S) TestSub(c *check.C) {
@@ -672,7 +672,7 @@ func (s *S) TestMul(c *check.C) {
 	legalSizeMul := func(ar, ac, br, bc int) bool {
 		return ac == br
 	}
-	testTwoInput(c, "Mul", &Dense{}, method, denseComparison, legalTypesAll, legalSizeMul)
+	testTwoInput(c, "Mul", &Dense{}, method, denseComparison, legalTypesAll, legalSizeMul, 1e-14)
 }
 
 func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {

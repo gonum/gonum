@@ -724,6 +724,9 @@ func testTwoInput(c *check.C,
 
 	// dimsOK returns whether the matrix sizes are valid for the method.
 	legalSize func(ar, ac, br, bc int) bool,
+
+	// tol is the tolerance for equality when comparing method results.
+	tol float64,
 ) {
 	for _, aMat := range testMatrices {
 		for _, bMat := range testMatrices {
@@ -864,7 +867,7 @@ func testTwoInput(c *check.C,
 				if !dimsOK {
 					continue
 				}
-				if !equalApprox(zero, &want, 1e-12) {
+				if !equalApprox(zero, &want, tol) {
 					c.Errorf("Answer mismatch with zero receiver: %s", errStr)
 					continue
 				}
@@ -878,7 +881,7 @@ func testTwoInput(c *check.C,
 				if panicked {
 					c.Errorf("Panicked with non-zero receiver: %s", errStr)
 				}
-				if !equalApprox(nonZero, &want, 1e-12) {
+				if !equalApprox(nonZero, &want, tol) {
 					c.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 				}
 
@@ -931,7 +934,7 @@ func testTwoInput(c *check.C,
 					if panicked {
 						c.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
 					} else {
-						if !equalApprox(receiver, &want, 1e-12) {
+						if !equalApprox(receiver, &want, tol) {
 							c.Errorf("Wrong answer when a maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)
@@ -952,7 +955,7 @@ func testTwoInput(c *check.C,
 					if panicked {
 						c.Errorf("Panics when b maybeSame: %s", errStr)
 					} else {
-						if !equalApprox(receiver, &want, 1e-12) {
+						if !equalApprox(receiver, &want, tol) {
 							c.Errorf("Wrong answer when b maybeSame: %s: %s", errStr, err)
 						}
 						postData := underlyingData(receiver)
@@ -985,7 +988,7 @@ func testTwoInput(c *check.C,
 					if panicked {
 						c.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
 					} else {
-						if !equalApprox(receiver, zero, 1e-12) {
+						if !equalApprox(receiver, zero, tol) {
 							c.Errorf("Wrong answer when both maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)

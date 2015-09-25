@@ -136,7 +136,7 @@ func (s *S) TestSymAdd(c *check.C) {
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Add(a, b)
 	}
-	testTwoInput(c, "AddSym", &SymDense{}, method, denseComparison, legalTypesSym, legalSizeSameSquare)
+	testTwoInput(c, "AddSym", &SymDense{}, method, denseComparison, legalTypesSym, legalSizeSameSquare, 1e-14)
 }
 
 func (s *S) TestCopy(c *check.C) {
@@ -312,5 +312,5 @@ func (s *S) TestSymRankK(c *check.C) {
 		}
 		return br == ar
 	}
-	testTwoInput(c, "SymRankK", &SymDense{}, method, denseComparison, legalTypes, legalSize)
+	testTwoInput(c, "SymRankK", &SymDense{}, method, denseComparison, legalTypes, legalSize, 1e-14)
 }

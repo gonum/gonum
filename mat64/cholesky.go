@@ -141,33 +141,3 @@ func (t *TriDense) LFromCholesky(chol *Cholesky) {
 	t.reuseAs(n, blas.Lower)
 	t.Copy(chol.chol.TTri())
 }
-
-// SolveTri finds the matrix x that solves op(A) * X = B where A is a triangular
-// matrix and op is specified by trans.
-func (m *Dense) SolveTri(a Triangular, trans bool, b Matrix) {
-	n, _ := a.Triangle()
-	bm, bn := b.Dims()
-	if n != bm {
-		panic(ErrShape)
-	}
-
-	m.reuseAs(bm, bn)
-	if b != m {
-		m.Copy(b)
-	}
-
-	// TODO(btracey): Implement an algorithm that doesn't require a copy into
-	// a blas64.Triangular.
-	ta := getBlasTriangular(a)
-
-	t := blas.NoTrans
-	if trans {
-		t = blas.Trans
-	}
-	switch ta.Uplo {
-	case blas.Upper, blas.Lower:
-		blas64.Trsm(blas.Left, t, 1, ta, m.mat)
-	default:
-		panic(badTriangle)
-	}
-}

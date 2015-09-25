@@ -4,6 +4,12 @@
 
 package mat64
 
+import (
+	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
+	"github.com/gonum/lapack/lapack64"
+)
+
 // Solve solves a minimum-norm solution to a system of linear equations defined
 // by the matrices a and b. If a is singular or near-singular a Condition error
 // is returned. Please see the documentation for Condition for more information.
@@ -21,8 +27,38 @@ func (m *Dense) Solve(a, b Matrix) error {
 		panic(ErrShape)
 	}
 	m.reuseAs(ac, bc)
-	// TODO(btracey): Add a test for the condition number of A.
-	// TODO(btracey): Add special cases for TriDense, SymDense, etc.
+
+	// TODO(btracey): Add special cases for SymDense, etc.
+	aMat, aTrans := untranspose(a)
+	bMat, bTrans := untranspose(b)
+	switch rma := aMat.(type) {
+	case RawTriangular:
+		side := blas.Left
+		tA := blas.NoTrans
+		if aTrans {
+			tA = blas.Trans
+		}
+		if m != bMat {
+			m.Copy(b)
+		} else if bTrans {
+			// m and b share data so Copy cannot be used directly.
+			tmp := getWorkspace(br, bc, false)
+			tmp.Copy(b)
+			m.Copy(tmp)
+			putWorkspace(tmp)
+		}
+
+		rm := rma.RawTriangular()
+		blas64.Trsm(side, tA, 1, rm, m.mat)
+		work := make([]float64, 3*rm.N)
+		iwork := make([]int, rm.N)
+		cond := lapack64.Trcon(condNorm, rm, work, iwork)
+		if cond > condTol {
+			return Condition(cond)
+		}
+		return nil
+	}
+
 	switch {
 	case ar == ac:
 		if a == b {

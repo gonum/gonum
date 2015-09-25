@@ -864,7 +864,7 @@ func testTwoInput(c *check.C,
 				if !dimsOK {
 					continue
 				}
-				if !equalApprox(zero, &want, 1e-14) {
+				if !equalApprox(zero, &want, 1e-12) {
 					c.Errorf("Answer mismatch with zero receiver: %s", errStr)
 					continue
 				}
@@ -878,7 +878,7 @@ func testTwoInput(c *check.C,
 				if panicked {
 					c.Errorf("Panicked with non-zero receiver: %s", errStr)
 				}
-				if !equalApprox(nonZero, &want, 1e-14) {
+				if !equalApprox(nonZero, &want, 1e-12) {
 					c.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 				}
 
@@ -931,7 +931,7 @@ func testTwoInput(c *check.C,
 					if panicked {
 						c.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
 					} else {
-						if !equalApprox(receiver, &want, 1e-14) {
+						if !equalApprox(receiver, &want, 1e-12) {
 							c.Errorf("Wrong answer when a maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)
@@ -952,7 +952,7 @@ func testTwoInput(c *check.C,
 					if panicked {
 						c.Errorf("Panics when b maybeSame: %s", errStr)
 					} else {
-						if !equalApprox(receiver, &want, 1e-14) {
+						if !equalApprox(receiver, &want, 1e-12) {
 							c.Errorf("Wrong answer when b maybeSame: %s: %s", errStr, err)
 						}
 						postData := underlyingData(receiver)
@@ -985,7 +985,7 @@ func testTwoInput(c *check.C,
 					if panicked {
 						c.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
 					} else {
-						if !equalApprox(receiver, zero, 1e-14) {
+						if !equalApprox(receiver, zero, 1e-12) {
 							c.Errorf("Wrong answer when both maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)

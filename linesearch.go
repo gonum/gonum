@@ -89,45 +89,46 @@ func (ls *LinesearchMethod) Iterate(loc *Location) (Operation, error) {
 	if ls.eval&GradEvaluation != 0 {
 		projGrad = floats.Dot(loc.Gradient, ls.dir)
 	}
-
-	if ls.Linesearcher.Finished(f, projGrad) {
-		// Form an operation that evaluates invalid fields of loc.
-		ls.lastOp = complementEval(loc, ls.eval)
-		if ls.lastOp == NoOperation {
-			// loc is complete and MajorIteration can be announced directly.
-			ls.lastOp = MajorIteration
-		} else {
-			ls.nextMajor = true
-		}
-		return ls.lastOp, nil
-	}
-
-	step, op, err := ls.Linesearcher.Iterate(f, projGrad)
+	op, step, err := ls.Linesearcher.Iterate(f, projGrad)
 	if err != nil {
 		return ls.error(err)
 	}
-	if !op.isEvaluation() {
+
+	switch op {
+	case MajorIteration:
+		// Linesearch has been finished.
+
+		ls.lastOp = complementEval(loc, ls.eval)
+		if ls.lastOp == NoOperation {
+			// loc is complete, MajorIteration can be declared directly.
+			ls.lastOp = MajorIteration
+		} else {
+			// Declare MajorIteration on the next call to Iterate.
+			ls.nextMajor = true
+		}
+
+	case FuncEvaluation, GradEvaluation, FuncEvaluation | GradEvaluation:
+		if step != ls.lastStep {
+			// We are moving to a new location, and not, say, evaluating extra
+			// information at the current location.
+
+			// Compute the next evaluation point and store it in loc.X.
+			floats.AddScaledTo(loc.X, ls.x, step, ls.dir)
+			if floats.Equal(ls.x, loc.X) {
+				// Step size has become so small that the next evaluation point is
+				// indistinguishable from the starting point for the current
+				// iteration due to rounding errors.
+				return ls.error(ErrNoProgress)
+			}
+			ls.lastStep = step
+			ls.eval = NoOperation // Indicate all invalid fields of loc.
+		}
+		ls.lastOp = op
+
+	default:
 		panic("linesearch: Linesearcher returned invalid operation")
 	}
 
-	if step != ls.lastStep {
-		// We are moving to a new location, and not, say, evaluating extra
-		// information at the current location.
-
-		// Compute the next evaluation point and store it in loc.X.
-		floats.AddScaledTo(loc.X, ls.x, step, ls.dir)
-		if floats.Equal(ls.x, loc.X) {
-			// Step size has become so small that the next evaluation point is
-			// indistinguishable from the starting point for the current
-			// iteration due to rounding errors.
-			return ls.error(ErrNoProgress)
-		}
-
-		ls.lastStep = step
-		ls.eval = NoOperation // Indicate all invalid fields of loc.
-	}
-
-	ls.lastOp = op
 	return ls.lastOp, nil
 }
 
@@ -156,7 +157,9 @@ func (ls *LinesearchMethod) initNextLinesearch(loc *Location) (Operation, error)
 	}
 
 	op := ls.Linesearcher.Init(loc.F, projGrad, step)
-	if !op.isEvaluation() {
+	switch op {
+	case FuncEvaluation, GradEvaluation, FuncEvaluation | GradEvaluation:
+	default:
 		panic("linesearch: Linesearcher returned invalid operation")
 	}
 

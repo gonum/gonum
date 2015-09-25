@@ -131,40 +131,32 @@ func (s *S) TestSolve(c *check.C) {
 			ans:       nil,
 			shouldErr: true,
 		},
-		/*
-			These are commented out because lapack64.Gels returns 0 for the answer
-			instead of a singular.
-			TODO(btracey): Add these back in when there is a test for the condition
-			number.
-				{
-					a: [][]float64{
-						{0, 0},
-						{0, 0},
-						{0, 0},
-					},
-					b: [][]float64{
-						{3},
-						{2},
-					},
-					ans: nil,
-					shouldErr: true,
-				},
-				{
-					name:     "Singular wide",
-					singular: true,
-					a: [][]float64{
-						{0, 0, 0},
-						{0, 0, 0},
-					},
-					b: [][]float64{
-						{3},
-						{2},
-						{1},
-					},
-					ans: nil,
-					shouldErr: true,
-				},
-		*/
+		{
+			a: [][]float64{
+				{0, 0},
+				{0, 0},
+				{0, 0},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+				{1},
+			},
+			ans:       nil,
+			shouldErr: true,
+		},
+		{
+			a: [][]float64{
+				{0, 0, 0},
+				{0, 0, 0},
+			},
+			b: [][]float64{
+				{3},
+				{2},
+			},
+			ans:       nil,
+			shouldErr: true,
+		},
 	} {
 		a := NewDense(flatten(test.a))
 		b := NewDense(flatten(test.b))

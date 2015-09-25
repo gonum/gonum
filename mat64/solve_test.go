@@ -246,7 +246,7 @@ func (s *S) TestSolve(c *check.C) {
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Solve(a, b)
 	}
-	testTwoInput(c, "Solve", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSolve, 1e-12)
+	testTwoInput(c, "Solve", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSolve, 1e-7)
 }
 
 func (s *S) TestSolveVec(c *check.C) {

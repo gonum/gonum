@@ -85,7 +85,7 @@ func TestNormRand(t *testing.T) {
 		}
 		estMean := make([]float64, dim)
 		for i := range estMean {
-			estMean[i] = stat.Mean(samps.Col(nil, i), nil)
+			estMean[i] = stat.Mean(mat64.Col(nil, i, samps), nil)
 		}
 		if !floats.EqualApprox(estMean, test.mean, 1e-2) {
 			t.Errorf("Mean mismatch: want: %v, got %v", test.mean, estMean)

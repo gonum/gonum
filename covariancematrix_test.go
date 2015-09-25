@@ -75,8 +75,8 @@ func TestCovarianceMatrix(t *testing.T) {
 		_, cols := c.Dims()
 		for ci := 0; ci < cols; ci++ {
 			for cj := 0; cj < cols; cj++ {
-				x := test.data.Col(nil, ci)
-				y := test.data.Col(nil, cj)
+				x := mat64.Col(nil, ci, test.data)
+				y := mat64.Col(nil, cj, test.data)
 				cov := Covariance(x, y, test.weights)
 				if math.Abs(cov-c.At(ci, cj)) > 1e-14 {
 					t.Errorf("CovMat does not match at (%v, %v). Want %v, got %v.", ci, cj, cov, c.At(ci, cj))
@@ -169,8 +169,8 @@ func TestCorrelationMatrix(t *testing.T) {
 		_, cols := c.Dims()
 		for ci := 0; ci < cols; ci++ {
 			for cj := 0; cj < cols; cj++ {
-				x := test.data.Col(nil, ci)
-				y := test.data.Col(nil, cj)
+				x := mat64.Col(nil, ci, test.data)
+				y := mat64.Col(nil, cj, test.data)
 				corr := Correlation(x, y, test.weights)
 				if math.Abs(corr-c.At(ci, cj)) > 1e-14 {
 					t.Errorf("CorrMat does not match at (%v, %v). Want %v, got %v.", ci, cj, corr, c.At(ci, cj))

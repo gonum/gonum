@@ -314,3 +314,18 @@ func (s *S) TestSymRankK(c *check.C) {
 	}
 	testTwoInput(c, "SymRankK", &SymDense{}, method, denseComparison, legalTypes, legalSize, 1e-14)
 }
+
+func (s *S) TestScaleSym(c *check.C) {
+	f := 3.0
+	method := func(receiver, a Matrix) {
+		type ScaleSymer interface {
+			ScaleSym(f float64, a Symmetric)
+		}
+		rd := receiver.(ScaleSymer)
+		rd.ScaleSym(f, a.(Symmetric))
+	}
+	denseComparison := func(receiver, a *Dense) {
+		receiver.Scale(f, a)
+	}
+	testOneInput(c, "ScaleSym", &SymDense{}, method, denseComparison, legalTypeSym, isSquare, 1e-14)
+}

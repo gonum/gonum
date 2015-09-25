@@ -24,6 +24,8 @@ type Bisection struct {
 	initGrad float64
 	minGrad  float64
 	maxGrad  float64
+
+	lastOp Operation
 }
 
 func (b *Bisection) Init(f, g float64, step float64) Operation {
@@ -53,27 +55,30 @@ func (b *Bisection) Init(f, g float64, step float64) Operation {
 	b.minGrad = g
 	b.maxGrad = math.NaN()
 
-	return FuncEvaluation | GradEvaluation
+	b.lastOp = FuncEvaluation | GradEvaluation
+	return b.lastOp
 }
 
-func (b *Bisection) Finished(f, g float64) bool {
+func (b *Bisection) Iterate(f, g float64) (Operation, float64, error) {
+	if b.lastOp != FuncEvaluation|GradEvaluation {
+		panic("bisection: Init has not been called")
+	}
+
 	// Don't finish the linesearch until a minimum is found that is better than
 	// the best point found so far. We want to end up in the lowest basin of
 	// attraction
 	minF := b.initF
-	if b.maxF < b.initF {
+	if b.maxF < minF {
 		minF = b.maxF
 	}
 	if b.minF < minF {
 		minF = b.minF
 	}
 	if StrongWolfeConditionsMet(f, g, minF, b.initGrad, b.currStep, 0, b.GradConst) {
-		return true
+		b.lastOp = MajorIteration
+		return b.lastOp, b.currStep, nil
 	}
-	return false
-}
 
-func (b *Bisection) Iterate(f, g float64) (float64, Operation, error) {
 	// Deciding on the next step size
 	if math.IsInf(b.maxStep, 1) {
 		// Have not yet bounded the minimum
@@ -83,7 +88,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, Operation, error) {
 			b.maxStep = b.currStep
 			b.maxF = f
 			b.maxGrad = g
-			return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncEvaluation|GradEvaluation)
+			return b.nextStep((b.minStep + b.maxStep) / 2)
 		case f <= b.minF:
 			// Still haven't found an upper bound, but there is not an increase in
 			// function value and the gradient is still negative, so go more in
@@ -91,7 +96,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, Operation, error) {
 			b.minStep = b.currStep
 			b.minF = f
 			b.minGrad = g
-			return b.checkStepEqual(b.currStep*2, FuncEvaluation|GradEvaluation)
+			return b.nextStep(b.currStep * 2)
 		default:
 			// Increase in function value, but the gradient is still negative.
 			// Means we must have skipped over a local minimum, so set this point
@@ -99,7 +104,7 @@ func (b *Bisection) Iterate(f, g float64) (float64, Operation, error) {
 			b.maxStep = b.currStep
 			b.maxF = f
 			b.maxGrad = g
-			return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncEvaluation|GradEvaluation)
+			return b.nextStep((b.minStep + b.maxStep) / 2)
 		}
 	}
 
@@ -127,18 +132,20 @@ func (b *Bisection) Iterate(f, g float64) (float64, Operation, error) {
 			b.minGrad = g
 		}
 	}
-	return b.checkStepEqual((b.minStep+b.maxStep)/2, FuncEvaluation|GradEvaluation)
+	return b.nextStep((b.minStep + b.maxStep) / 2)
 }
 
-// checkStepEqual checks if the new step is equal to the old step.
-// this can happen if min and max are the same, or if the step size is infinity,
+// nextStep checks if the new step is equal to the old step.
+// This can happen if min and max are the same, or if the step size is infinity,
 // both of which indicate the minimization must stop. If the steps are different,
-// it sets the new step size and returns the step and evaluation type. If the steps
+// it sets the new step size and returns the evaluation type and the step. If the steps
 // are the same, it returns an error.
-func (b *Bisection) checkStepEqual(newStep float64, op Operation) (float64, Operation, error) {
-	if b.currStep == newStep {
-		return b.currStep, NoOperation, ErrLinesearchFailure
+func (b *Bisection) nextStep(step float64) (Operation, float64, error) {
+	if b.currStep == step {
+		b.lastOp = NoOperation
+		return b.lastOp, b.currStep, ErrLinesearchFailure
 	}
-	b.currStep = newStep
-	return newStep, op, nil
+	b.currStep = step
+	b.lastOp = FuncEvaluation | GradEvaluation
+	return b.lastOp, b.currStep, nil
 }

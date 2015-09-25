@@ -46,6 +46,7 @@ func (m *Dense) Product(factors ...Matrix) {
 
 	m.reuseAs(p.stack[0].Dims())
 	m.Copy(p.stack[0])
+	putWorkspace(p.stack[0])
 }
 
 // debugProductWalk enables debugging output for Product.
@@ -149,8 +150,8 @@ func (p *multiplier) multiplySubchain(i, j int) {
 
 	b := p.factor(j)
 	a := p.factor(i)
-	_, ac := a.Dims()
-	br, _ := b.Dims()
+	ar, ac := a.Dims()
+	br, bc := b.Dims()
 	if ac != br {
 		// Panic with a string since this
 		// is not a user-facing panic.
@@ -164,11 +165,15 @@ func (p *multiplier) multiplySubchain(i, j int) {
 			i, ar, ac, result(p.onStack[i]), j, br, bc, result(p.onStack[j]))
 	}
 
-	// TODO(kortschak) Use pool for r. This requires that
-	// we know whether a/b came from factors or the stack.
-	var r Dense
+	r := getWorkspace(ar, bc, false)
 	r.Mul(a, b)
-	p.push(&r, i, j)
+	if p.onStack[i] {
+		putWorkspace(a.(*Dense))
+	}
+	if p.onStack[j] {
+		putWorkspace(b.(*Dense))
+	}
+	p.push(r, i, j)
 }
 
 func (p *multiplier) push(m *Dense, i, j int) {

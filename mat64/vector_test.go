@@ -97,7 +97,7 @@ func (s *S) TestVectorMul(c *check.C) {
 		}
 		return legal
 	}
-	testTwoInput(c, "MulVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec)
+	testTwoInput(c, "MulVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec, 1e-14)
 }
 
 func (s *S) TestVectorAdd(c *check.C) {

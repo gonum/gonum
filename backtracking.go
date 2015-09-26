@@ -31,6 +31,8 @@ type Backtracking struct {
 	stepSize float64
 	initF    float64
 	initG    float64
+
+	lastOp Operation
 }
 
 func (b *Backtracking) Init(f, g float64, step float64) Operation {
@@ -57,17 +59,25 @@ func (b *Backtracking) Init(f, g float64, step float64) Operation {
 	b.stepSize = step
 	b.initF = f
 	b.initG = g
-	return FuncEvaluation
+
+	b.lastOp = FuncEvaluation
+	return b.lastOp
 }
 
-func (b *Backtracking) Finished(f, _ float64) bool {
-	return ArmijoConditionMet(f, b.initF, b.initG, b.stepSize, b.FuncConst)
-}
+func (b *Backtracking) Iterate(f, _ float64) (Operation, float64, error) {
+	if b.lastOp != FuncEvaluation {
+		panic("backtracking: Init has not been called")
+	}
 
-func (b *Backtracking) Iterate(_, _ float64) (float64, Operation, error) {
+	if ArmijoConditionMet(f, b.initF, b.initG, b.stepSize, b.FuncConst) {
+		b.lastOp = MajorIteration
+		return b.lastOp, b.stepSize, nil
+	}
 	b.stepSize *= b.Decrease
 	if b.stepSize < minimumBacktrackingStepSize {
-		return 0, NoOperation, ErrLinesearchFailure
+		b.lastOp = NoOperation
+		return b.lastOp, b.stepSize, ErrLinesearchFailure
 	}
-	return b.stepSize, FuncEvaluation, nil
+	b.lastOp = FuncEvaluation
+	return b.lastOp, b.stepSize, nil
 }

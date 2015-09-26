@@ -69,20 +69,29 @@ type Statuser interface {
 // Typically, a Linesearcher will be used in conjuction with LinesearchMethod
 // for performing gradient-based optimization through sequential line searches.
 type Linesearcher interface {
-	// Init initializes the linesearch method. Value and derivative contain
-	// φ(0) and φ'(0), respectively, and step contains the first trial step
-	// length. It returns the type of evaluation to be performed at
-	// x_0 + step * dir_0.
+	// Init initializes the Linesearcher and a new line search. Value and
+	// derivative contain φ(0) and φ'(0), respectively, and step contains the
+	// first trial step length. It returns an Operation that must be one of
+	// FuncEvaluation, GradEvaluation, FuncEvaluation|GradEvaluation. The
+	// caller must evaluate φ(step), φ'(step), or both, respectively, and pass
+	// the result to Linesearcher in value and derivative arguments to Iterate.
 	Init(value, derivative float64, step float64) Operation
 
-	// Finished takes in the values of φ and φ' evaluated at the previous step,
-	// and returns whether a sufficiently accurate minimum of φ has been found.
-	Finished(value, derivative float64) bool
-
 	// Iterate takes in the values of φ and φ' evaluated at the previous step
-	// and returns the next step size and the type of evaluation to be
-	// performed at x_k + step * dir_k.
-	Iterate(value, derivative float64) (step float64, op Operation, err error)
+	// and returns the next operation.
+	//
+	// If op is one of FuncEvaluation, GradEvaluation,
+	// FuncEvaluation|GradEvaluation, the caller must evaluate φ(step),
+	// φ'(step), or both, respectively, and pass the result to Linesearcher in
+	// value and derivative arguments on the next call to Iterate.
+	//
+	// If op is MajorIteration, a sufficiently accurate minimum of φ has been
+	// found at the previous step and the line search has concluded. Init must
+	// be called again to initialize a new line search.
+	//
+	// If err is nil, op must not specify another operation. If err is not nil,
+	// the values of op and step are undefined.
+	Iterate(value, derivative float64) (op Operation, step float64, err error)
 }
 
 // NextDirectioner implements a strategy for computing a new line search

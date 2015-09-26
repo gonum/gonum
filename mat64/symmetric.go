@@ -12,9 +12,10 @@ import (
 var (
 	symDense *SymDense
 
-	_ Matrix         = symDense
-	_ Symmetric      = symDense
-	_ RawSymmetricer = symDense
+	_ Matrix           = symDense
+	_ Symmetric        = symDense
+	_ RawSymmetricer   = symDense
+	_ MutableSymmetric = symDense
 )
 
 const badSymTriangle = "mat64: blas64.Symmetric not upper"
@@ -35,6 +36,11 @@ type Symmetric interface {
 // A RawSymmetricer can return a view of itself as a BLAS Symmetric matrix.
 type RawSymmetricer interface {
 	RawSymmetric() blas64.Symmetric
+}
+
+type MutableSymmetric interface {
+	Symmetric
+	SetSym(i, j int, v float64)
 }
 
 // NewSymDense constructs an n x n symmetric matrix. If len(mat) == n * n,

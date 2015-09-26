@@ -127,11 +127,11 @@ type Problem struct {
 
 	// Grad evaluates the gradient at x and stores the result in-place in grad.
 	// Grad must not modify x.
-	Grad func(x []float64, grad []float64)
+	Grad func(grad []float64, x []float64)
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
 	// Hess must not modify x.
-	Hess func(x []float64, hess *mat64.SymDense)
+	Hess func(hess mat64.MutableSymmetric, x []float64)
 
 	// Status reports the status of the objective function being optimized and any
 	// error. This can be used to terminate early, for example when the function is
@@ -162,9 +162,9 @@ func (p Problem) satisfies(method Method) error {
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
 	UseInitialData  bool            // Use supplied information about the conditions at the initial x.
-	InitialValue    float64         // Func(x) at the initial x.
-	InitialGradient []float64       // Grad(x) at the initial x.
-	InitialHessian  *mat64.SymDense // Hess(x) at the initial x.
+	InitialValue    float64         // Function value at the initial x.
+	InitialGradient []float64       // Gradient at the initial x.
+	InitialHessian  *mat64.SymDense // Hessian at the initial x.
 
 	// FunctionThreshold is the threshold for acceptably small values of the
 	// objective function. FunctionThreshold status is returned if

@@ -21,7 +21,7 @@ func TestMinimalSurface(t *testing.T) {
 		f := NewMinimalSurface(size[0], size[1])
 		x0 := f.InitX()
 		grad := make([]float64, len(x0))
-		f.Grad(x0, grad)
+		f.Grad(grad, x0)
 		fdGrad := fd.Gradient(nil, f.Func, x0, nil)
 
 		// Test that the numerical and analytical gradients agree.
@@ -38,7 +38,7 @@ func TestMinimalSurface(t *testing.T) {
 		// solving. This is the reason why a relatively loose tolerance 1e-4
 		// must be used.
 		xSol := f.ExactX()
-		f.Grad(xSol, grad)
+		f.Grad(grad, xSol)
 		norm := floats.Norm(grad, math.Inf(1))
 		if norm > 1e-4 {
 			t.Errorf("grid %v x %v: gradient at the minimum not small enough. |grad|_∞ = %v",

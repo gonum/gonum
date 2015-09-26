@@ -75,7 +75,7 @@ func (ms *MinimalSurface) Func(x []float64) (area float64) {
 }
 
 // Grad evaluates the area gradient of the surface represented by the vector.
-func (ms *MinimalSurface) Grad(x, grad []float64) {
+func (ms *MinimalSurface) Grad(grad, x []float64) {
 	nx, ny := ms.Dims()
 	if len(x) != (nx-2)*(ny-2) {
 		panic("functions: problem size mismatch")

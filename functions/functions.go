@@ -36,7 +36,7 @@ func (Beale) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (Beale) Grad(x, grad []float64) {
+func (Beale) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -56,7 +56,7 @@ func (Beale) Grad(x, grad []float64) {
 	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*x[1]*x[1])
 }
 
-func (Beale) Hess(x []float64, hess *mat64.SymDense) {
+func (Beale) Hess(hess mat64.MutableSymmetric, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -113,7 +113,7 @@ func (BiggsEXP2) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP2) Grad(x, grad []float64) {
+func (BiggsEXP2) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -171,7 +171,7 @@ func (BiggsEXP3) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP3) Grad(x, grad []float64) {
+func (BiggsEXP3) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -231,7 +231,7 @@ func (BiggsEXP4) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP4) Grad(x, grad []float64) {
+func (BiggsEXP4) Grad(grad, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -293,7 +293,7 @@ func (BiggsEXP5) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP5) Grad(x, grad []float64) {
+func (BiggsEXP5) Grad(grad, x []float64) {
 	if len(x) != 5 {
 		panic("dimension of the problem must be 5")
 	}
@@ -360,7 +360,7 @@ func (BiggsEXP6) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BiggsEXP6) Grad(x, grad []float64) {
+func (BiggsEXP6) Grad(grad, x []float64) {
 	if len(x) != 6 {
 		panic("dimension of the problem must be 6")
 	}
@@ -440,7 +440,7 @@ func (Box3D) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Box3D) Grad(x, grad []float64) {
+func (Box3D) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -503,7 +503,7 @@ func (BrownBadlyScaled) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (BrownBadlyScaled) Grad(x, grad []float64) {
+func (BrownBadlyScaled) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -518,7 +518,7 @@ func (BrownBadlyScaled) Grad(x, grad []float64) {
 	grad[1] = 2*f2 + 2*f3*x[0]
 }
 
-func (BrownBadlyScaled) Hess(x []float64, hess *mat64.SymDense) {
+func (BrownBadlyScaled) Hess(hess mat64.MutableSymmetric, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -572,7 +572,7 @@ func (BrownAndDennis) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (BrownAndDennis) Grad(x, grad []float64) {
+func (BrownAndDennis) Grad(grad, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -595,7 +595,7 @@ func (BrownAndDennis) Grad(x, grad []float64) {
 	}
 }
 
-func (BrownAndDennis) Hess(x []float64, hess *mat64.SymDense) {
+func (BrownAndDennis) Hess(hess mat64.MutableSymmetric, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -676,7 +676,7 @@ func (ExtendedPowellSingular) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (ExtendedPowellSingular) Grad(x, grad []float64) {
+func (ExtendedPowellSingular) Grad(grad, x []float64) {
 	if len(x)%4 != 0 {
 		panic("dimension of the problem must be a multiple of 4")
 	}
@@ -740,7 +740,7 @@ func (ExtendedRosenbrock) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (ExtendedRosenbrock) Grad(x, grad []float64) {
+func (ExtendedRosenbrock) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -862,7 +862,7 @@ func (g Gaussian) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (g Gaussian) Grad(x, grad []float64) {
+func (g Gaussian) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -924,7 +924,7 @@ func (GulfResearchAndDevelopment) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (GulfResearchAndDevelopment) Grad(x, grad []float64) {
+func (GulfResearchAndDevelopment) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -1002,7 +1002,7 @@ func (HelicalValley) Func(x []float64) float64 {
 	return f1*f1 + f2*f2 + f3*f3
 }
 
-func (HelicalValley) Grad(x, grad []float64) {
+func (HelicalValley) Grad(grad, x []float64) {
 	if len(x) != 3 {
 		panic("dimension of the problem must be 3")
 	}
@@ -1043,7 +1043,7 @@ func (Linear) Func(x []float64) float64 {
 	return floats.Sum(x)
 }
 
-func (Linear) Grad(x, grad []float64) {
+func (Linear) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1080,7 +1080,7 @@ func (PenaltyI) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (PenaltyI) Grad(x, grad []float64) {
+func (PenaltyI) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1145,7 +1145,7 @@ func (PenaltyII) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (PenaltyII) Grad(x, grad []float64) {
+func (PenaltyII) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1214,7 +1214,7 @@ func (PowellBadlyScaled) Func(x []float64) float64 {
 	return f1*f1 + f2*f2
 }
 
-func (PowellBadlyScaled) Grad(x, grad []float64) {
+func (PowellBadlyScaled) Grad(grad, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -1228,7 +1228,7 @@ func (PowellBadlyScaled) Grad(x, grad []float64) {
 	grad[1] = 2 * (1e4*f1*x[0] - f2*math.Exp(-x[1]))
 }
 
-func (PowellBadlyScaled) Hess(x []float64, hess *mat64.SymDense) {
+func (PowellBadlyScaled) Hess(hess mat64.MutableSymmetric, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -1284,7 +1284,7 @@ func (Trigonometric) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Trigonometric) Grad(x, grad []float64) {
+func (Trigonometric) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1356,7 +1356,7 @@ func (VariablyDimensioned) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (VariablyDimensioned) Grad(x, grad []float64) {
+func (VariablyDimensioned) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1440,7 +1440,7 @@ func (Watson) Func(x []float64) (sum float64) {
 	return sum
 }
 
-func (Watson) Grad(x, grad []float64) {
+func (Watson) Grad(grad, x []float64) {
 	if len(x) != len(grad) {
 		panic("incorrect size of the gradient")
 	}
@@ -1478,7 +1478,7 @@ func (Watson) Grad(x, grad []float64) {
 	grad[1] += 2 * t
 }
 
-func (Watson) Hess(x []float64, hess *mat64.SymDense) {
+func (Watson) Hess(hess mat64.MutableSymmetric, x []float64) {
 	dim := len(x)
 	if dim != hess.Symmetric() {
 		panic("incorrect size of the Hessian")
@@ -1578,7 +1578,7 @@ func (Wood) Func(x []float64) (sum float64) {
 	return 100*f1*f1 + f2*f2 + 90*f3*f3 + f4*f4 + 10*f5*f5 + 0.1*f6*f6
 }
 
-func (Wood) Grad(x, grad []float64) {
+func (Wood) Grad(grad, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -1598,7 +1598,7 @@ func (Wood) Grad(x, grad []float64) {
 	grad[3] = 2 * (90*f3 + 10*f5 - 0.1*f6)
 }
 
-func (Wood) Hess(x []float64, hess *mat64.SymDense) {
+func (Wood) Hess(hess mat64.MutableSymmetric, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}

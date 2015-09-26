@@ -373,11 +373,11 @@ func evaluate(p *Problem, loc *Location, eval Operation, stats *Stats) {
 		stats.FuncEvaluations++
 	}
 	if eval&GradEvaluation != 0 {
-		p.Grad(loc.X, loc.Gradient)
+		p.Grad(loc.Gradient, loc.X)
 		stats.GradEvaluations++
 	}
 	if eval&HessEvaluation != 0 {
-		p.Hess(loc.X, loc.Hessian)
+		p.Hess(loc.Hessian, loc.X)
 		stats.HessEvaluations++
 	}
 }

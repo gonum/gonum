@@ -24,11 +24,7 @@ type function interface {
 }
 
 type gradient interface {
-	Grad(x, grad []float64)
-}
-
-type functionGradient interface {
-	FuncGrad(x, grad []float64) float64
+	Grad(grad, x []float64)
 }
 
 // minimumer is an objective function that can also provide information about
@@ -79,18 +75,14 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 	// Get information about the function.
 	fMinima, isMinimumer := f.(minimumer)
 	fGradient, isGradient := f.(gradient)
-	fFunctionGradient, isFunctionGradient := f.(functionGradient)
 
 	// If the function is a Minimumer, append its minima to the tests.
 	if isMinimumer {
 		for _, minimum := range fMinima.Minima() {
 			// Allocate gradient only if the function can evaluate it.
 			var grad []float64
-			if isGradient || isFunctionGradient {
+			if isGradient {
 				grad = make([]float64, len(minimum.X))
-				for i := range grad {
-					grad[i] = 0
-				}
 			}
 			tests = append(tests, funcTest{
 				X:        minimum.X,
@@ -105,7 +97,7 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 
 		// Check that the function value is as expected.
 		if math.Abs(F-test.F) > defaultTol {
-			t.Errorf("Test #%d: function value given by Func() is incorrect. Want: %v, Got: %v",
+			t.Errorf("Test #%d: function value given by Func is incorrect. Want: %v, Got: %v",
 				i, test.F, F)
 		}
 
@@ -126,29 +118,11 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 		// If the function is a Gradient, check that it computes the gradient correctly.
 		if isGradient {
 			grad := make([]float64, len(test.Gradient))
-			fGradient.Grad(test.X, grad)
+			fGradient.Grad(grad, test.X)
 
 			if !floats.EqualApprox(grad, test.Gradient, defaultGradTol) {
 				dist := floats.Distance(grad, test.Gradient, math.Inf(1))
-				t.Errorf("Test #%d: gradient given by Grad() is incorrect. |grad - WantGrad|_∞ = %v",
-					i, dist)
-			}
-		}
-
-		// If the function is a FunctionGradient, check that it computes its
-		// value and the gradient correctly.
-		if isFunctionGradient {
-			grad := make([]float64, len(test.Gradient))
-			F := fFunctionGradient.FuncGrad(test.X, grad)
-
-			if math.Abs(F-test.F) > defaultTol {
-				t.Errorf("Test #%d: function value given by FuncGrad() is incorrect. Want: %v, Got: %v",
-					i, test.F, F)
-			}
-
-			if !floats.EqualApprox(grad, test.Gradient, defaultGradTol) {
-				dist := floats.Distance(grad, test.Gradient, math.Inf(1))
-				t.Errorf("Test #%d: gradient given by FuncGrad() is incorrect. |grad - WantGrad|_∞ = %v",
+				t.Errorf("Test #%d: gradient given by Grad is incorrect. |grad - WantGrad|_∞ = %v",
 					i, dist)
 			}
 		}

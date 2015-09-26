@@ -162,9 +162,9 @@ func (p Problem) satisfies(method Method) error {
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
 	UseInitialData  bool            // Use supplied information about the conditions at the initial x.
-	InitialValue    float64         // Func(x) at the initial x.
-	InitialGradient []float64       // Grad(x) at the initial x.
-	InitialHessian  *mat64.SymDense // Hess(x) at the initial x.
+	InitialValue    float64         // Function value at the initial x.
+	InitialGradient []float64       // Gradient at the initial x.
+	InitialHessian  *mat64.SymDense // Hessian at the initial x.
 
 	// FunctionThreshold is the threshold for acceptably small values of the
 	// objective function. FunctionThreshold status is returned if

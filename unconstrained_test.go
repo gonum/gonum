@@ -1200,7 +1200,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		if result.Gradient != nil {
 			// Evaluate the norm of the gradient at the found optimum location.
 			g := make([]float64, len(test.x))
-			test.p.Grad(result.X, g)
+			test.p.Grad(g, result.X)
 
 			if !floats.Equal(result.Gradient, g) {
 				t.Errorf("Gradient at the optimum location not equal to the returned value for:\n%v", test)
@@ -1234,7 +1234,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		settings.InitialValue = test.p.Func(test.x)
 		if method.Needs().Gradient {
 			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			test.p.Grad(test.x, settings.InitialGradient)
+			test.p.Grad(settings.InitialGradient, test.x)
 		}
 		if method.Needs().Hessian {
 			settings.InitialHessian = mat64.NewSymDense(len(test.x), nil)
@@ -1261,18 +1261,18 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// Check that providing initial data reduces the number of evaluations exactly by one.
 		if result.FuncEvaluations != result2.FuncEvaluations+1 {
-			t.Errorf("Providing initial data does not reduce the number of Func() calls for:\n%v", test)
+			t.Errorf("Providing initial data does not reduce the number of Func calls for:\n%v", test)
 			continue
 		}
 		if method.Needs().Gradient {
 			if result.GradEvaluations != result2.GradEvaluations+1 {
-				t.Errorf("Providing initial data does not reduce the number of Grad() calls for:\n%v", test)
+				t.Errorf("Providing initial data does not reduce the number of Grad calls for:\n%v", test)
 				continue
 			}
 		}
 		if method.Needs().Hessian {
 			if result.HessEvaluations != result2.HessEvaluations+1 {
-				t.Errorf("Providing initial data does not reduce the number of Hess() calls for:\n%v", test)
+				t.Errorf("Providing initial data does not reduce the number of Hess calls for:\n%v", test)
 				continue
 			}
 		}

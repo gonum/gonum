@@ -143,7 +143,7 @@ func (b *Bisection) Iterate(f, g float64) (Operation, float64, error) {
 func (b *Bisection) nextStep(step float64) (Operation, float64, error) {
 	if b.currStep == step {
 		b.lastOp = NoOperation
-		return b.lastOp, b.currStep, ErrLinesearchFailure
+		return b.lastOp, b.currStep, ErrLinesearcherFailure
 	}
 	b.currStep = step
 	b.lastOp = FuncEvaluation | GradEvaluation

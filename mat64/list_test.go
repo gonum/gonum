@@ -101,6 +101,11 @@ func legalTypesAll(a, b Matrix) bool {
 	return true
 }
 
+func legalTypeSym(a Matrix) bool {
+	_, ok := a.(Symmetric)
+	return ok
+}
+
 // legalTypesSym returns whether both input arguments are Symmetric.
 func legalTypesSym(a, b Matrix) bool {
 	if _, ok := a.(Symmetric); !ok {
@@ -703,6 +708,162 @@ func testTwoInputFunc(c *check.C,
 	}
 }
 
+// testOneInput tests a method that has one matrix input argument
+func testOneInput(c *check.C,
+	// name is the name of the method being tested.
+	name string,
+
+	// receiver is a value of the receiver type.
+	receiver Matrix,
+
+	// method is the generalized receiver.Method(a).
+	method func(receiver, a Matrix),
+
+	// denseComparison performs the same operation as method, but with dense
+	// matrices for comparison with the result.
+	denseComparison func(receiver, a *Dense),
+
+	// legalTypes returns whether the concrete types in Matrix are valid for
+	// the method.
+	legalType func(a Matrix) bool,
+
+	// legalSize returns whether the matrix sizes are valid for the method.
+	legalSize func(ar, ac int) bool,
+
+	// tol is the tolerance for equality when comparing method results.
+	tol float64,
+) {
+	for _, aMat := range testMatrices {
+		for _, test := range []struct {
+			ar, ac int
+		}{
+			{1, 1},
+			{1, 3},
+			{3, 1},
+
+			{6, 6},
+			{6, 11},
+			{11, 6},
+		} {
+			// Skip the test if the argument would not be assignable to the
+			// method's corresponding input parameter or it is not possible
+			// to construct an argument of the requested size.
+			if !legalType(aMat) {
+				continue
+			}
+			if !legalDims(aMat, test.ar, test.ac) {
+				continue
+			}
+			a := makeRandOf(aMat, test.ar, test.ac)
+
+			// Compute the true answer if the sizes are legal.
+			dimsOK := legalSize(test.ar, test.ac)
+			var want Dense
+			if dimsOK {
+				var aDense Dense
+				aDense.Clone(a)
+				denseComparison(&want, &aDense)
+			}
+			aCopy := makeCopyOf(a)
+
+			// Test the method for a zero-value of the receiver.
+			aType, aTrans := untranspose(a)
+			errStr := fmt.Sprintf("%T.%s(%T), size: %#v, atrans %v", receiver, name, aType, test, aTrans)
+			zero := makeRandOf(receiver, 0, 0)
+			panicked, err := panics(func() { method(zero, a) })
+			if !dimsOK && !panicked {
+				c.Errorf("Did not panic with illegal size: %s", errStr)
+				continue
+			}
+			if dimsOK && panicked {
+				c.Errorf("Panicked with legal size: %s %s", errStr, err)
+				continue
+			}
+			if !equal(a, aCopy) {
+				c.Errorf("First input argument changed in call: %s", errStr)
+			}
+			if !dimsOK {
+				continue
+			}
+			if !equalApprox(zero, &want, tol) {
+				c.Errorf("Answer mismatch with zero receiver: %s", errStr)
+				continue
+			}
+
+			// Test the method with a non-zero-value of the receiver.
+			// The receiver has been overwritten in place so use its size
+			// to construct a new random matrix.
+			rr, rc := zero.Dims()
+			nonZero := makeRandOf(receiver, rr, rc)
+			panicked, _ = panics(func() { method(nonZero, a) })
+			if panicked {
+				c.Errorf("Panicked with non-zero receiver: %s", errStr)
+			}
+			if !equalApprox(nonZero, &want, tol) {
+				c.Errorf("Answer mismatch non-zero receiver: %s", errStr)
+			}
+
+			// Test with an incorrectly sized matrix.
+			switch receiver.(type) {
+			default:
+				panic("matrix type not coded for incorrect receiver size")
+			case *Dense:
+				wrongSize := makeRandOf(receiver, rr+1, rc)
+				panicked, _ = panics(func() { method(wrongSize, a) })
+				if !panicked {
+					c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+				}
+				wrongSize = makeRandOf(receiver, rr, rc+1)
+				panicked, _ = panics(func() { method(wrongSize, a) })
+				if !panicked {
+					c.Errorf("Did not panic with wrong number of columns: %s", errStr)
+				}
+			case *TriDense, *SymDense:
+				// Add to the square size.
+				wrongSize := makeRandOf(receiver, rr+1, rc+1)
+				panicked, _ = panics(func() { method(wrongSize, a) })
+				if !panicked {
+					c.Errorf("Did not panic with wrong size: %s", errStr)
+				}
+			case *Vector:
+				// Add to the column length.
+				wrongSize := makeRandOf(receiver, rr+1, rc)
+				panicked, _ = panics(func() { method(wrongSize, a) })
+				if !panicked {
+					c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+				}
+			}
+
+			// The receiver and the input may share a matrix pointer
+			// if the type and size of the receiver and one of the
+			// arguments match. Test the method works properly
+			// when this is the case.
+			aMaybeSame := maybeSame(nonZero, a)
+			if aMaybeSame {
+				aSame := makeCopyOf(a)
+				receiver = aSame
+				u, ok := aSame.(Untransposer)
+				if ok {
+					receiver = u.Untranspose()
+				}
+				preData := underlyingData(receiver)
+				panicked, err = panics(func() { method(receiver, aSame) })
+				if panicked {
+					c.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
+				} else {
+					if !equalApprox(receiver, &want, tol) {
+						c.Errorf("Wrong answer when a maybeSame: %s", errStr)
+					}
+					postData := underlyingData(receiver)
+					if !floats.Equal(preData, postData) {
+						c.Errorf("Original data slice not modified when a maybeSame: %s", errStr)
+					}
+				}
+			}
+		}
+	}
+}
+
 // testTwoInput tests a method that has two input arguments.
 func testTwoInput(c *check.C,
 	// name is the name of the method being tested.
@@ -722,7 +883,7 @@ func testTwoInput(c *check.C,
 	// the method.
 	legalTypes func(a, b Matrix) bool,
 
-	// dimsOK returns whether the matrix sizes are valid for the method.
+	// legalSize returns whether the matrix sizes are valid for the method.
 	legalSize func(ar, ac, br, bc int) bool,
 
 	// tol is the tolerance for equality when comparing method results.

@@ -267,3 +267,23 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
 	*s = w
 	return
 }
+
+// ScaleSym multiplies the elements of a by f, placing the result in the receiver.
+func (s *SymDense) ScaleSym(f float64, a Symmetric) {
+	n := a.Symmetric()
+	s.reuseAs(n)
+	if a, ok := a.(RawSymmetricer); ok {
+		amat := a.RawSymmetric()
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				s.mat.Data[i*s.mat.Stride+j] = f * amat.Data[i*amat.Stride+j]
+			}
+		}
+		return
+	}
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			s.mat.Data[i*s.mat.Stride+j] = f * a.At(i, j)
+		}
+	}
+}

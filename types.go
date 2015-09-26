@@ -127,7 +127,7 @@ type Problem struct {
 
 	// Grad evaluates the gradient at x and stores the result in-place in grad.
 	// Grad must not modify x.
-	Grad func(x []float64, grad []float64)
+	Grad func(grad []float64, x []float64)
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
 	// Hess must not modify x.

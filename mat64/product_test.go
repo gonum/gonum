@@ -5,6 +5,7 @@
 package mat64
 
 import (
+	"fmt"
 	"math/rand"
 
 	"gopkg.in/check.v1"
@@ -131,18 +132,121 @@ func (s *S) TestProduct(c *check.C) {
 		})
 		if test.panics {
 			if !panicked {
-				c.Errorf("fail to panic with product chain dimentions: %+v result dimension: %+v",
+				c.Errorf("fail to panic with product chain dimensions: %+v result dimension: %+v",
 					dimensions, test.product)
 			}
 			continue
 		} else if panicked {
-			c.Errorf("unexpected panic %q with product chain dimentions: %+v result dimension: %+v",
+			c.Errorf("unexpected panic %q with product chain dimensions: %+v result dimension: %+v",
 				message, dimensions, test.product)
 			continue
+		}
+
+		if len(factors) > 0 {
+			p := newMultiplier(NewDense(test.product.r, test.product.c, nil), factors)
+			p.optimize()
+			gotCost := p.table.at(0, len(factors)-1).cost
+			expr, wantCost, ok := bestExpressionFor(dimensions)
+			if !ok {
+				c.Fatal("unexpected number of expressions in brute force expression search")
+			}
+			if gotCost != wantCost {
+				c.Errorf("unexpected cost for chain dimensions: %+v got: %d want: %d\n%s",
+					dimensions, got, want, expr)
+			}
 		}
 
 		if !EqualApprox(got, want, 1e-14) {
 			c.Errorf("unexpected result from product chain dimensions: %+v", dimensions)
 		}
 	}
+}
+
+// node is a subexpression node.
+type node struct {
+	dims
+	left, right *node
+}
+
+func (n *node) String() string {
+	if n.left == nil || n.right == nil {
+		rows, cols := n.shape()
+		return fmt.Sprintf("[%d×%d]", rows, cols)
+	}
+	rows, cols := n.shape()
+	return fmt.Sprintf("(%s * %s):[%d×%d]", n.left, n.right, rows, cols)
+}
+
+// shape returns the dimensions of the result of the subexpression.
+func (n *node) shape() (rows, cols int) {
+	if n.left == nil || n.right == nil {
+		return n.r, n.c
+	}
+	rows, _ = n.left.shape()
+	_, cols = n.right.shape()
+	return rows, cols
+}
+
+// cost returns the cost to evaluate the subexpression.
+func (n *node) cost() int {
+	if n.left == nil || n.right == nil {
+		return 0
+	}
+	lr, lc := n.left.shape()
+	_, rc := n.right.shape()
+	return lr*lc*rc + n.left.cost() + n.right.cost()
+}
+
+// expressionsFor returns a channel that can be used to iterate over all
+// expressions of the given factor dimensions.
+func expressionsFor(factors []dims) chan *node {
+	if len(factors) == 1 {
+		c := make(chan *node, 1)
+		c <- &node{dims: factors[0]}
+		close(c)
+		return c
+	}
+	c := make(chan *node)
+	go func() {
+		for i := 1; i < len(factors); i++ {
+			for left := range expressionsFor(factors[:i]) {
+				for right := range expressionsFor(factors[i:]) {
+					c <- &node{left: left, right: right}
+				}
+			}
+		}
+		close(c)
+	}()
+	return c
+}
+
+// catalan returns the nth 0-based Catalan number.
+func catalan(n int) int {
+	p := 1
+	for k := n + 1; k < 2*n+1; k++ {
+		p *= k
+	}
+	for k := 2; k < n+2; k++ {
+		p /= k
+	}
+	return p
+}
+
+// bestExpressonFor returns the lowest cost expression for the given expression
+// factor dimensions, the cost of the expression and whether the number of
+// expressions searched matches the Catalan number for the number of factors.
+func bestExpressionFor(factors []dims) (exp *node, cost int, ok bool) {
+	const maxInt = int(^uint(0) >> 1)
+	min := maxInt
+	var best *node
+	var n int
+	for exp := range expressionsFor(factors) {
+		n++
+		cost := exp.cost()
+		if cost < min {
+			min = cost
+			best = exp
+		}
+	}
+	return best, min, n == catalan(len(factors)-1)
 }

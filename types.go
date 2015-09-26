@@ -131,7 +131,7 @@ type Problem struct {
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
 	// Hess must not modify x.
-	Hess func(x []float64, hess *mat64.SymDense)
+	Hess func(hess *mat64.SymDense, x []float64)
 
 	// Status reports the status of the objective function being optimized and any
 	// error. This can be used to terminate early, for example when the function is

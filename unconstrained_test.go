@@ -1238,7 +1238,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		}
 		if method.Needs().Hessian {
 			settings.InitialHessian = mat64.NewSymDense(len(test.x), nil)
-			test.p.Hess(test.x, settings.InitialHessian)
+			test.p.Hess(settings.InitialHessian, test.x)
 		}
 
 		// Rerun the test again to make sure that it gets the same answer with

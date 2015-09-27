@@ -7,14 +7,14 @@ package optimize
 import "errors"
 
 var (
-	// ErrInf signifies the initial function value is Inf.
-	ErrInf = errors.New("optimize: initial function value is Inf")
+	// ErrInf signifies the initial function value is infinite.
+	ErrInf = errors.New("optimize: initial function value is infinite")
 
 	// ErrNaN signifies the initial function value is NaN.
 	ErrNaN = errors.New("optimize: initial function value is NaN")
 
-	// ErrGradInf signifies that a component of the initial gradient is Inf.
-	ErrGradInf = errors.New("optimize: initial gradient is Inf")
+	// ErrGradInf signifies that a component of the initial gradient is infinite.
+	ErrGradInf = errors.New("optimize: initial gradient is infinite")
 
 	// ErrGradNaN signifies that a component of the initial gradient is NaN.
 	ErrGradNaN = errors.New("optimize: initial gradient is NaN")

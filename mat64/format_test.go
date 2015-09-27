@@ -141,8 +141,11 @@ func (s *S) TestFormat(c *check.C) {
 			},
 		},
 	} {
-		for _, rp := range test.rep {
-			c.Check(fmt.Sprintf(rp.format, test.m), check.Equals, rp.output, check.Commentf("Test %d", i))
+		for j, rp := range test.rep {
+			got := fmt.Sprintf(rp.format, test.m)
+			if got != rp.output {
+				c.Errorf("unexpected format result test %d part %d:\ngot:\n%s\nwant:\n%s", i, j, got, rp.output)
+			}
 		}
 	}
 }

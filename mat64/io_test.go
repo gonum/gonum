@@ -20,16 +20,24 @@ func (s *S) TestDenseRW(c *check.C) {
 		NewDense(3, 3, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}).View(0, 1, 3, 2).(*Dense),
 	} {
 		buf, err := test.MarshalBinary()
-		c.Check(err, check.Equals, nil, check.Commentf("error encoding test #%d: %v\n", i, err))
+		if err != nil {
+			c.Errorf("error encoding test #%d: %v\n", i, err)
+		}
 
 		nrows, ncols := test.Dims()
 		sz := nrows*ncols*sizeFloat64 + 2*sizeInt64
-		c.Check(len(buf), check.Equals, sz, check.Commentf("encoded size test #%d: want=%d got=%d\n", i, sz, len(buf)))
+		if len(buf) != sz {
+			c.Errorf("encoded size test #%d: want=%d got=%d\n", i, sz, len(buf))
+		}
 
 		var got Dense
 		err = got.UnmarshalBinary(buf)
-		c.Check(err, check.Equals, nil, check.Commentf("error decoding test #%d: %v\n", i, err))
+		if err != nil {
+			c.Errorf("error decoding test #%d: %v\n", i, err)
+		}
 
-		c.Check(Equal(&got, test), check.Equals, true, check.Commentf("r/w test #%d failed\nwant=%#v\n got=%#v\n", i, test, &got))
+		if !Equal(&got, test) {
+			c.Errorf("r/w test #%d failed\nwant=%#v\n got=%#v\n", i, test, &got)
+		}
 	}
 }

@@ -75,13 +75,18 @@ func (s *S) TestInner(c *check.C) {
 			cell.Mul(x, &tmp)
 
 			rm, cm := cell.Dims()
-			c.Check(rm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 row", i))
-			c.Check(cm, check.Equals, 1, check.Commentf("Test %v result doesn't have 1 column", i))
+			if rm != 1 {
+				c.Errorf("Test %d result doesn't have 1 row", i)
+			}
+			if cm != 1 {
+				c.Errorf("Test %d result doesn't have 1 column", i)
+			}
 
 			want := cell.At(0, 0)
-
 			got := Inner(makeVectorInc(inc.x, test.x), m, makeVectorInc(inc.y, test.y))
-			c.Check(want, check.Equals, got, check.Commentf("Test %v: want %v, got %v", i, want, got))
+			if got != want {
+				c.Errorf("Test %v: want %v, got %v", i, want, got)
+			}
 		}
 	}
 }

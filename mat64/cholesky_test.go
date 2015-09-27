@@ -13,7 +13,7 @@ import (
 )
 
 func (s *S) TestCholesky(c *check.C) {
-	for _, t := range []struct {
+	for _, test := range []struct {
 		a *SymDense
 
 		cond   float64
@@ -35,74 +35,45 @@ func (s *S) TestCholesky(c *check.C) {
 			posdef: true,
 		},
 	} {
-		_, n := t.a.Dims()
-		// Try with a new cholesky struct
-		var chol Cholesky
-		ok := chol.Factorize(t.a)
-		c.Check(ok, check.Equals, t.posdef)
-		fc := DenseCopyOf(chol.chol)
-		c.Check(Equal(fc, t.want), check.Equals, true)
-		if math.Abs(t.cond-chol.cond) > 1e-13 {
-			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
-		}
-		var U TriDense
-		U.UFromCholesky(&chol)
-		aCopy := DenseCopyOf(t.a)
-		var a Dense
-		a.Mul(U.TTri(), &U)
-		c.Check(EqualApprox(&a, aCopy, 1e-14), check.Equals, true)
+		_, n := test.a.Dims()
+		for _, chol := range []*Cholesky{
+			&Cholesky{},
+			&Cholesky{chol: NewTriDense(n-1, true, nil)},
+			&Cholesky{chol: NewTriDense(n, true, nil)},
+			&Cholesky{chol: NewTriDense(n+1, true, nil)},
+		} {
+			ok := chol.Factorize(test.a)
+			if ok != test.posdef {
+				c.Errorf("unexpected return from Cholesky factorization: got: ok=%t want: ok=%t", ok, test.posdef)
+			}
+			fc := DenseCopyOf(chol.chol)
+			if !Equal(fc, test.want) {
+				c.Error("incorrect Cholesky factorization")
+			}
+			if math.Abs(test.cond-chol.cond) > 1e-13 {
+				c.Errorf("Condition number mismatch: Want %v, got %v", test.cond, chol.cond)
+			}
+			var U TriDense
+			U.UFromCholesky(chol)
+			aCopy := DenseCopyOf(test.a)
+			var a Dense
+			a.Mul(U.TTri(), &U)
+			if !EqualApprox(&a, aCopy, 1e-14) {
+				c.Error("unexpected Cholesky factor product")
+			}
 
-		var L TriDense
-		L.LFromCholesky(&chol)
-		a.Mul(&L, L.TTri())
-		c.Check(EqualApprox(&a, aCopy, 1e-14), check.Equals, true)
-
-		// Try with a cholesky struct that is too small
-		cholSmall := &Cholesky{
-			chol: NewTriDense(n-1, true, nil),
-		}
-		for i := range cholSmall.chol.mat.Data {
-			cholSmall.chol.mat.Data[i] = rand.Float64()
-		}
-		ok = cholSmall.Factorize(t.a)
-		c.Check(ok, check.Equals, t.posdef)
-		c.Check(Equal(fc, t.want), check.Equals, true)
-		if math.Abs(t.cond-cholSmall.cond) > 1e-13 {
-			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
-		}
-
-		// Try with a cholesky struct that is the right size.
-		cholCorrect := &Cholesky{
-			chol: NewTriDense(n, true, nil),
-		}
-		for i := range cholCorrect.chol.mat.Data {
-			cholCorrect.chol.mat.Data[i] = rand.Float64()
-		}
-		ok = cholCorrect.Factorize(t.a)
-		c.Check(ok, check.Equals, t.posdef)
-		c.Check(Equal(fc, t.want), check.Equals, true)
-		if math.Abs(t.cond-cholCorrect.cond) > 1e-13 {
-			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
-		}
-
-		// Try with a cholesky struct that is too large
-		cholLarge := &Cholesky{
-			chol: NewTriDense(n+1, true, nil),
-		}
-		for i := range cholLarge.chol.mat.Data {
-			cholLarge.chol.mat.Data[i] = rand.Float64()
-		}
-		ok = cholLarge.Factorize(t.a)
-		c.Check(ok, check.Equals, t.posdef)
-		c.Check(Equal(fc, t.want), check.Equals, true)
-		if math.Abs(t.cond-cholLarge.cond) > 1e-13 {
-			c.Errorf("Condition number mismatch: Want %v, got %v", t.cond, chol.cond)
+			var L TriDense
+			L.LFromCholesky(chol)
+			a.Mul(&L, L.TTri())
+			if !EqualApprox(&a, aCopy, 1e-14) {
+				c.Error("unexpected Cholesky factor product")
+			}
 		}
 	}
 }
 
 func (s *S) TestCholeskySolve(c *check.C) {
-	for _, t := range []struct {
+	for _, test := range []struct {
 		a   *SymDense
 		b   *Dense
 		ans *Dense
@@ -126,21 +97,27 @@ func (s *S) TestCholeskySolve(c *check.C) {
 		},
 	} {
 		var chol Cholesky
-		ok := chol.Factorize(t.a)
-		c.Assert(ok, check.Equals, true)
+		ok := chol.Factorize(test.a)
+		if !ok {
+			c.Fatal("unexpected Cholesky factorization failure: not positive definite")
+		}
 
 		var x Dense
-		x.SolveCholesky(&chol, t.b)
-		c.Check(EqualApprox(&x, t.ans, 1e-12), check.Equals, true)
+		x.SolveCholesky(&chol, test.b)
+		if !EqualApprox(&x, test.ans, 1e-12) {
+			c.Error("incorrect Cholesky solve solution")
+		}
 
 		var ans Dense
-		ans.Mul(t.a, &x)
-		c.Check(EqualApprox(&ans, t.b, 1e-12), check.Equals, true)
+		ans.Mul(test.a, &x)
+		if !EqualApprox(&ans, test.b, 1e-12) {
+			c.Error("incorrect Cholesky solve solution product")
+		}
 	}
 }
 
 func (s *S) TestCholeskySolveVec(c *check.C) {
-	for _, t := range []struct {
+	for _, test := range []struct {
 		a   *SymDense
 		b   *Vector
 		ans *Vector
@@ -164,16 +141,22 @@ func (s *S) TestCholeskySolveVec(c *check.C) {
 		},
 	} {
 		var chol Cholesky
-		ok := chol.Factorize(t.a)
-		c.Assert(ok, check.Equals, true)
+		ok := chol.Factorize(test.a)
+		if !ok {
+			c.Fatal("unexpected Cholesky factorization failure: not positive definite")
+		}
 
 		var x Vector
-		x.SolveCholeskyVec(&chol, t.b)
-		c.Check(EqualApprox(&x, t.ans, 1e-12), check.Equals, true)
+		x.SolveCholeskyVec(&chol, test.b)
+		if !EqualApprox(&x, test.ans, 1e-12) {
+			c.Error("incorrect Cholesky solve solution")
+		}
 
 		var ans Vector
-		ans.MulVec(t.a, &x)
-		c.Check(EqualApprox(&ans, t.b, 1e-12), check.Equals, true)
+		ans.MulVec(test.a, &x)
+		if !EqualApprox(&ans, test.b, 1e-12) {
+			c.Error("incorrect Cholesky solve solution product")
+		}
 	}
 }
 

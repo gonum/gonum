@@ -6,6 +6,7 @@ package mat64
 
 import (
 	"math/rand"
+	"reflect"
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
@@ -17,7 +18,7 @@ import (
 func (s *S) TestNewSymmetric(c *check.C) {
 	for i, test := range []struct {
 		data []float64
-		N    int
+		n    int
 		mat  *SymDense
 	}{
 		{
@@ -26,7 +27,7 @@ func (s *S) TestNewSymmetric(c *check.C) {
 				4, 5, 6,
 				7, 8, 9,
 			},
-			N: 3,
+			n: 3,
 			mat: &SymDense{blas64.Symmetric{
 				N:      3,
 				Stride: 3,
@@ -35,51 +36,89 @@ func (s *S) TestNewSymmetric(c *check.C) {
 			}},
 		},
 	} {
-		t := NewSymDense(test.N, test.data)
-		rows, cols := t.Dims()
-		c.Check(rows, check.Equals, test.N, check.Commentf("Test %d", i))
-		c.Check(cols, check.Equals, test.N, check.Commentf("Test %d", i))
-		c.Check(t, check.DeepEquals, test.mat, check.Commentf("Test %d", i))
+		sym := NewSymDense(test.n, test.data)
+		rows, cols := sym.Dims()
 
-		m := NewDense(test.N, test.N, test.data)
-		c.Check(t.mat.Data, check.DeepEquals, m.mat.Data, check.Commentf("Test %d", i))
+		if rows != test.n {
+			c.Errorf("unexpected number of rows for test %d: got: %d want: %d", i, rows, test.n)
+		}
+		if cols != test.n {
+			c.Errorf("unexpected number of cols for test %d: got: %d want: %d", i, cols, test.n)
+		}
+		if !reflect.DeepEqual(sym, test.mat) {
+			c.Errorf("unexpected data slice for test %d: got: %v want: %v", i, sym, test.mat)
+		}
 
-		c.Check(func() { NewSymDense(3, []float64{1, 2}) }, check.PanicMatches, ErrShape.Error())
+		m := NewDense(test.n, test.n, test.data)
+		if !reflect.DeepEqual(sym.mat.Data, m.mat.Data) {
+			c.Errorf("unexpected data slice mismatch for test %d: got: %v want: %v", i, sym.mat.Data, m.mat.Data)
+		}
+	}
+
+	panicked, message := panics(func() { NewSymDense(3, []float64{1, 2}) })
+	if !panicked || message != ErrShape.Error() {
+		c.Error("expected panic for invalid data slice length")
 	}
 }
 
 func (s *S) TestSymAtSet(c *check.C) {
-	t := &SymDense{blas64.Symmetric{
+	sym := &SymDense{blas64.Symmetric{
 		N:      3,
 		Stride: 3,
 		Uplo:   blas.Upper,
 		Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
 	}}
-	rows, cols := t.Dims()
+	rows, cols := sym.Dims()
+
 	// Check At out of bounds
-	c.Check(func() { t.At(rows, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.At(0, cols) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.At(rows+1, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.At(0, cols+1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.At(-1, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.At(0, -1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
+	for _, row := range []int{-1, rows, rows + 1} {
+		panicked, message := panics(func() { sym.At(row, 0) })
+		if !panicked || message != ErrRowAccess.Error() {
+			c.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
+		}
+	}
+	for _, col := range []int{-1, cols, cols + 1} {
+		panicked, message := panics(func() { sym.At(0, col) })
+		if !panicked || message != ErrColAccess.Error() {
+			c.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
+		}
+	}
 
 	// Check Set out of bounds
-	c.Check(func() { t.SetSym(rows, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.SetSym(0, cols, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.SetSym(rows+1, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.SetSym(0, cols+1, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.SetSym(-1, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.SetSym(0, -1, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
+	for _, row := range []int{-1, rows, rows + 1} {
+		panicked, message := panics(func() { sym.SetSym(row, 0, 1.2) })
+		if !panicked || message != ErrRowAccess.Error() {
+			c.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
+		}
+	}
+	for _, col := range []int{-1, cols, cols + 1} {
+		panicked, message := panics(func() { sym.SetSym(0, col, 1.2) })
+		if !panicked || message != ErrColAccess.Error() {
+			c.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
+		}
+	}
 
-	c.Check(t.At(2, 1), check.Equals, 6.0)
-	c.Check(t.At(1, 2), check.Equals, 6.0)
-	t.SetSym(1, 2, 15)
-	c.Check(t.At(2, 1), check.Equals, 15.0)
-	c.Check(t.At(1, 2), check.Equals, 15.0)
-	t.SetSym(2, 1, 12)
-	c.Check(t.At(2, 1), check.Equals, 12.0)
-	c.Check(t.At(1, 2), check.Equals, 12.0)
+	for _, st := range []struct {
+		row, col  int
+		orig, new float64
+	}{
+		{row: 1, col: 2, orig: 6, new: 15},
+		{row: 2, col: 1, orig: 15, new: 12},
+	} {
+		if e := sym.At(st.row, st.col); e != st.orig {
+			c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", st.row, st.col, e, st.orig)
+		}
+		if e := sym.At(st.col, st.row); e != st.orig {
+			c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", st.col, st.row, e, st.orig)
+		}
+		sym.SetSym(st.row, st.col, st.new)
+		if e := sym.At(st.row, st.col); e != st.new {
+			c.Errorf("unexpected value for At(%d, %d) after SetSym(%[1]d, %[2]d, %[4]v): got: %[3]v want: %v", st.row, st.col, e, st.new)
+		}
+		if e := sym.At(st.col, st.row); e != st.new {
+			c.Errorf("unexpected value for At(%d, %d) after SetSym(%[2]d, %[1]d, %[4]v): got: %[3]v want: %v", st.col, st.row, e, st.new)
+		}
+	}
 }
 
 func (s *S) TestSymAdd(c *check.C) {
@@ -110,8 +149,10 @@ func (s *S) TestSymAdd(c *check.C) {
 		s.AddSym(a, b)
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				v := m.At(i, j)
-				c.Check(s.At(i, j), check.Equals, v)
+				want := m.At(i, j)
+				if got := s.At(i, j); got != want {
+					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+				}
 			}
 		}
 
@@ -120,8 +161,10 @@ func (s *S) TestSymAdd(c *check.C) {
 		s.AddSym(&s, b)
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				v := m.At(i, j)
-				c.Check(s.At(i, j), check.Equals, v)
+				want := m.At(i, j)
+				if got := s.At(i, j); got != want {
+					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+				}
 			}
 		}
 	}
@@ -159,8 +202,10 @@ func (s *S) TestCopy(c *check.C) {
 		s.CopySym(a)
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				v := a.At(i, j)
-				c.Check(s.At(i, j), check.Equals, v)
+				want := a.At(i, j)
+				if got := s.At(i, j); got != want {
+					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+				}
 			}
 		}
 	}
@@ -174,9 +219,13 @@ func (s *S) TestSymCopyPanic(c *check.C) {
 		n int
 	)
 	m := NewSymDense(1, nil)
-	panicked, _ := panics(func() { n = m.CopySym(&a) })
-	c.Check(panicked, check.Equals, false)
-	c.Check(n, check.Equals, 0)
+	panicked, message := panics(func() { n = m.CopySym(&a) })
+	if panicked {
+		c.Errorf("unexpected panic: %v", message)
+	}
+	if n != 0 {
+		c.Errorf("unexpected n: got: %d want: 0", n)
+	}
 }
 
 func (s *S) TestSymRankOne(c *check.C) {
@@ -212,8 +261,10 @@ func (s *S) TestSymRankOne(c *check.C) {
 		s.SymRankOne(a, alpha, NewVector(len(x), x))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				v := m.At(i, j)
-				c.Check(s.At(i, j), check.Equals, v)
+				want := m.At(i, j)
+				if got := s.At(i, j); got != want {
+					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+				}
 			}
 		}
 
@@ -222,8 +273,10 @@ func (s *S) TestSymRankOne(c *check.C) {
 		s.SymRankOne(s, alpha, NewVector(len(x), x))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				v := m.At(i, j)
-				c.Check(s.At(i, j), check.Equals, v)
+				want := m.At(i, j)
+				if got := s.At(i, j); got != want {
+					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+				}
 			}
 		}
 	}

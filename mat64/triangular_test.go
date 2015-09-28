@@ -1,6 +1,7 @@
 package mat64
 
 import (
+	"math"
 	"math/rand"
 	"reflect"
 
@@ -145,6 +146,10 @@ func (s *S) TestTriDenseCopy(c *check.C) {
 		l := NewTriDense(size, false, nil)
 
 		for _, typ := range []Matrix{r, (*basicVectorer)(r), (*basicMatrix)(r)} {
+			for j := range u.mat.Data {
+				u.mat.Data[j] = math.NaN()
+				l.mat.Data[j] = math.NaN()
+			}
 			u.Copy(typ)
 			l.Copy(typ)
 			for m := 0; m < size; m++ {

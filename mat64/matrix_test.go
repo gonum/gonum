@@ -190,7 +190,10 @@ func (s *S) TestMaybe(c *check.C) {
 			false,
 		},
 	} {
-		c.Check(leaksPanic(test.fn), check.Equals, test.panics, check.Commentf("Test %d", i))
+		if panicked := leaksPanic(test.fn); panicked != test.panics {
+			c.Errorf("unexpected panic state for test %d: got: panicked=%t want panicked=%t",
+				i, panicked, test.panics)
+		}
 	}
 }
 

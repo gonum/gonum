@@ -6,12 +6,13 @@ package mat64
 
 import (
 	"math"
+	"reflect"
 
 	"gopkg.in/check.v1"
 )
 
 func (s *S) TestEigen(c *check.C) {
-	for _, t := range []struct {
+	for i, test := range []struct {
 		a *Dense
 
 		epsilon float64
@@ -84,20 +85,28 @@ func (s *S) TestEigen(c *check.C) {
 			epsilon: math.Pow(2, -52.0),
 		},
 	} {
-		ef := Eigen(DenseCopyOf(t.a), t.epsilon)
-		if t.d != nil {
-			c.Check(ef.d, check.DeepEquals, t.d)
+		ef := Eigen(DenseCopyOf(test.a), test.epsilon)
+		if test.d != nil {
+			if !reflect.DeepEqual(ef.d, test.d) {
+				c.Errorf("unexpected d for test %d", i)
+			}
 		}
-		if t.e != nil {
-			c.Check(ef.e, check.DeepEquals, t.e)
+		if test.e != nil {
+			if !reflect.DeepEqual(ef.e, test.e) {
+				c.Errorf("unexpected e for test %d", i)
+			}
 		}
 
-		if t.v != nil {
-			c.Check(Equal(ef.V, t.v), check.Equals, true)
+		if test.v != nil {
+			if !Equal(ef.V, test.v) {
+				c.Errorf("unexpected v for test %d", i)
+			}
 		}
 
-		t.a.Mul(t.a, ef.V)
+		test.a.Mul(test.a, ef.V)
 		ef.V.Mul(ef.V, ef.D())
-		c.Check(EqualApprox(t.a, ef.V, 1e-12), check.Equals, true)
+		if !EqualApprox(test.a, ef.V, 1e-12) {
+			c.Errorf("unexpected factor product for test %d", i)
+		}
 	}
 }

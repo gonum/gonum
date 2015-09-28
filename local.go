@@ -290,18 +290,12 @@ func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stat
 		evaluate(p, loc, eval, stats)
 	}
 
-	if math.IsNaN(loc.F) {
-		return loc, ErrNaN
+	if math.IsInf(loc.F, 1) || math.IsNaN(loc.F) {
+		return loc, ErrFunc(loc.F)
 	}
-	if math.IsInf(loc.F, 1) {
-		return loc, ErrInf
-	}
-	for _, v := range loc.Gradient {
-		if math.IsInf(v, 0) {
-			return loc, ErrGradInf
-		}
-		if math.IsNaN(v) {
-			return loc, ErrGradNaN
+	for i, v := range loc.Gradient {
+		if math.IsInf(v, 0) || math.IsNaN(v) {
+			return loc, ErrGrad{Grad: v, Index: i}
 		}
 	}
 

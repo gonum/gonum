@@ -7,11 +7,10 @@ package mat64
 import (
 	"math"
 	"reflect"
-
-	"gopkg.in/check.v1"
+	"testing"
 )
 
-func (s *S) TestEigen(c *check.C) {
+func TestEigen(t *testing.T) {
 	for i, test := range []struct {
 		a *Dense
 
@@ -88,25 +87,25 @@ func (s *S) TestEigen(c *check.C) {
 		ef := Eigen(DenseCopyOf(test.a), test.epsilon)
 		if test.d != nil {
 			if !reflect.DeepEqual(ef.d, test.d) {
-				c.Errorf("unexpected d for test %d", i)
+				t.Errorf("unexpected d for test %d", i)
 			}
 		}
 		if test.e != nil {
 			if !reflect.DeepEqual(ef.e, test.e) {
-				c.Errorf("unexpected e for test %d", i)
+				t.Errorf("unexpected e for test %d", i)
 			}
 		}
 
 		if test.v != nil {
 			if !Equal(ef.V, test.v) {
-				c.Errorf("unexpected v for test %d", i)
+				t.Errorf("unexpected v for test %d", i)
 			}
 		}
 
 		test.a.Mul(test.a, ef.V)
 		ef.V.Mul(ef.V, ef.D())
 		if !EqualApprox(test.a, ef.V, 1e-12) {
-			c.Errorf("unexpected factor product for test %d", i)
+			t.Errorf("unexpected factor product for test %d", i)
 		}
 	}
 }

@@ -9,11 +9,9 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
-
-	"gopkg.in/check.v1"
 )
 
-func (s *S) TestPool(c *check.C) {
+func TestPool(t *testing.T) {
 	for i := 1; i < 10; i++ {
 		for j := 1; j < 10; j++ {
 			m := NewDense(i, j, nil)
@@ -22,16 +20,16 @@ func (s *S) TestPool(c *check.C) {
 				for l := range work {
 					w := getWorkspace(i, j, true)
 					if !reflect.DeepEqual(w.mat, m.mat) {
-						c.Error("unexpected non-zeroed matrix returned by getWorkspace")
+						t.Error("unexpected non-zeroed matrix returned by getWorkspace")
 					}
 					if w.capRows != m.capRows {
-						c.Error("unexpected capacity matrix returned by getWorkspace")
+						t.Error("unexpected capacity matrix returned by getWorkspace")
 					}
 					if w.capCols != m.capCols {
-						c.Error("unexpected capacity matrix returned by getWorkspace")
+						t.Error("unexpected capacity matrix returned by getWorkspace")
 					}
 					if cap(w.mat.Data) >= 2*len(w.mat.Data) {
-						c.Errorf("r: %d c: %d -> len: %d cap: %d", i, j, len(w.mat.Data), cap(w.mat.Data))
+						t.Errorf("r: %d c: %d -> len: %d cap: %d", i, j, len(w.mat.Data), cap(w.mat.Data))
 					}
 					w.Set(0, 0, math.NaN())
 					work[l] = w

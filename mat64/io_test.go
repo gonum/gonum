@@ -4,11 +4,9 @@
 
 package mat64
 
-import (
-	"gopkg.in/check.v1"
-)
+import "testing"
 
-func (s *S) TestDenseRW(c *check.C) {
+func TestDenseRW(t *testing.T) {
 	for i, test := range []*Dense{
 		NewDense(0, 0, []float64{}),
 		NewDense(2, 2, []float64{1, 2, 3, 4}),
@@ -21,23 +19,23 @@ func (s *S) TestDenseRW(c *check.C) {
 	} {
 		buf, err := test.MarshalBinary()
 		if err != nil {
-			c.Errorf("error encoding test #%d: %v\n", i, err)
+			t.Errorf("error encoding test #%d: %v\n", i, err)
 		}
 
 		nrows, ncols := test.Dims()
 		sz := nrows*ncols*sizeFloat64 + 2*sizeInt64
 		if len(buf) != sz {
-			c.Errorf("encoded size test #%d: want=%d got=%d\n", i, sz, len(buf))
+			t.Errorf("encoded size test #%d: want=%d got=%d\n", i, sz, len(buf))
 		}
 
 		var got Dense
 		err = got.UnmarshalBinary(buf)
 		if err != nil {
-			c.Errorf("error decoding test #%d: %v\n", i, err)
+			t.Errorf("error decoding test #%d: %v\n", i, err)
 		}
 
 		if !Equal(&got, test) {
-			c.Errorf("r/w test #%d failed\nwant=%#v\n got=%#v\n", i, test, &got)
+			t.Errorf("r/w test #%d failed\nwant=%#v\n got=%#v\n", i, test, &got)
 		}
 	}
 }

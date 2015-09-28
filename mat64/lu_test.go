@@ -6,11 +6,10 @@ package mat64
 
 import (
 	"math/rand"
-
-	"gopkg.in/check.v1"
+	"testing"
 )
 
-func (s *S) TestLUD(c *check.C) {
+func TestLUD(t *testing.T) {
 	for _, n := range []int{1, 5, 10, 11, 50} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {
@@ -34,12 +33,12 @@ func (s *S) TestLUD(c *check.C) {
 		got.Mul(&p, &l)
 		got.Mul(&got, &u)
 		if !EqualApprox(&got, &want, 1e-12) {
-			c.Errorf("PLU does not equal original matrix.\nWant: %v\n Got: %v", want, got)
+			t.Errorf("PLU does not equal original matrix.\nWant: %v\n Got: %v", want, got)
 		}
 	}
 }
 
-func (s *S) TestLURankOne(c *check.C) {
+func TestLURankOne(t *testing.T) {
 	for _, pivoting := range []bool{true} {
 		for _, n := range []int{3, 10, 50} {
 			// Construct a random LU factorization
@@ -82,10 +81,10 @@ func (s *S) TestLURankOne(c *check.C) {
 			aR1 := luReconstruct(lu)
 
 			if !Equal(aR1, aR1New) {
-				c.Error("Different answer when new receiver")
+				t.Error("Different answer when new receiver")
 			}
 			if !EqualApprox(aR1, a, 1e-10) {
-				c.Errorf("Rank one mismatch, pivot %v.\nWant: %v\nGot:%v\n", pivoting, a, aR1)
+				t.Errorf("Rank one mismatch, pivot %v.\nWant: %v\nGot:%v\n", pivoting, a, aR1)
 			}
 		}
 	}
@@ -106,7 +105,7 @@ func luReconstruct(lu *LU) *Dense {
 	return &a
 }
 
-func (s *S) TestSolveLU(c *check.C) {
+func TestSolveLU(t *testing.T) {
 	for _, test := range []struct {
 		n, bc int
 	}{
@@ -137,13 +136,13 @@ func (s *S) TestSolveLU(c *check.C) {
 		var got Dense
 		got.Mul(a, &x)
 		if !EqualApprox(&got, b, 1e-12) {
-			c.Error("Solve mismatch for non-singular matrix. n = %v, bc = %v.\nWant: %v\nGot: %v", n, bc, b, got)
+			t.Error("Solve mismatch for non-singular matrix. n = %v, bc = %v.\nWant: %v\nGot: %v", n, bc, b, got)
 		}
 	}
 	// TODO(btracey): Add testOneInput test when such a function exists.
 }
 
-func (s *S) TestSolveLUCond(c *check.C) {
+func TestSolveLUCond(t *testing.T) {
 	for _, test := range []*Dense{
 		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
 	} {
@@ -153,18 +152,18 @@ func (s *S) TestSolveLUCond(c *check.C) {
 		b := NewDense(m, 2, nil)
 		var x Dense
 		if err := x.SolveLU(&lu, false, b); err == nil {
-			c.Error("No error for near-singular matrix in matrix solve.")
+			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
 		bvec := NewVector(m, nil)
 		var xvec Vector
 		if err := xvec.SolveLUVec(&lu, false, bvec); err == nil {
-			c.Error("No error for near-singular matrix in matrix solve.")
+			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 	}
 }
 
-func (s *S) TestSolveLUVec(c *check.C) {
+func TestSolveLUVec(t *testing.T) {
 	for _, n := range []int{5, 10} {
 		a := NewDense(n, n, nil)
 		for i := 0; i < n; i++ {
@@ -185,7 +184,7 @@ func (s *S) TestSolveLUVec(c *check.C) {
 		var got Vector
 		got.MulVec(a, &x)
 		if !EqualApprox(&got, b, 1e-12) {
-			c.Error("Solve mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)
+			t.Error("Solve mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)
 		}
 	}
 	// TODO(btracey): Add testOneInput test when such a function exists.

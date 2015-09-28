@@ -7,11 +7,10 @@ package mat64
 import (
 	"math"
 	"reflect"
-
-	"gopkg.in/check.v1"
+	"testing"
 )
 
-func (s *S) TestSVD(c *check.C) {
+func TestSVD(t *testing.T) {
 	for i, test := range []struct {
 		a *Dense
 
@@ -174,38 +173,38 @@ func (s *S) TestSVD(c *check.C) {
 		svd := SVD(DenseCopyOf(test.a), test.epsilon, test.small, test.wantu, test.wantv)
 		if test.sigma != nil {
 			if !reflect.DeepEqual(svd.Sigma, test.sigma) {
-				c.Errorf("unexpected sigma for test %d: got: %v want: %v", i, svd.Sigma, test.sigma)
+				t.Errorf("unexpected sigma for test %d: got: %v want: %v", i, svd.Sigma, test.sigma)
 			}
 		}
 		s := svd.S()
 
 		if svd.U != nil {
 			if !Equal(svd.U, test.u) {
-				c.Errorf("unexpected U value for test %d", i)
+				t.Errorf("unexpected U value for test %d", i)
 			}
 		} else if test.wantu || test.u != nil {
-			c.Errorf("unexpectedly did not get U for test %d", i)
+			t.Errorf("unexpectedly did not get U for test %d", i)
 		}
 		if svd.V != nil {
 			if !Equal(svd.V, test.v) {
-				c.Error("unexpected V value")
+				t.Error("unexpected V value")
 			}
 		} else if test.wantv || test.v != nil {
-			c.Errorf("unexpectedly did not get V for test %d", i)
+			t.Errorf("unexpectedly did not get V for test %d", i)
 		}
 
 		if test.wantu && test.wantv {
 			if svd.U == nil {
-				c.Fatalf("unexpect nil U for test %d", i)
+				t.Fatalf("unexpect nil U for test %d", i)
 			}
 			if svd.V == nil {
-				c.Fatalf("unexpect nil V for test %d", i)
+				t.Fatalf("unexpect nil V for test %d", i)
 			}
 			var tmp, got Dense
 			tmp.Mul(svd.U, s)
 			got.Mul(&tmp, svd.V.T())
 			if !EqualApprox(&got, test.a, 1e-12) {
-				c.Errorf("incorrect SVD factor product for test %d", i)
+				t.Errorf("incorrect SVD factor product for test %d", i)
 			}
 		}
 	}

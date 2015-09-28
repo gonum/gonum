@@ -6,11 +6,10 @@ package mat64
 
 import (
 	"math/rand"
-
-	"gopkg.in/check.v1"
+	"testing"
 )
 
-func (s *S) TestSolve(c *check.C) {
+func TestSolve(t *testing.T) {
 	// Hand-coded cases.
 	for _, test := range []struct {
 		a         [][]float64
@@ -170,16 +169,16 @@ func (s *S) TestSolve(c *check.C) {
 		err := x.Solve(a, b)
 		if err != nil {
 			if !test.shouldErr {
-				c.Errorf("Unexpected solve error: %s", err)
+				t.Errorf("Unexpected solve error: %s", err)
 			}
 			continue
 		}
 		if err == nil && test.shouldErr {
-			c.Errorf("Did not error during solve.")
+			t.Errorf("Did not error during solve.")
 			continue
 		}
 		if !EqualApprox(&x, ans, 1e-12) {
-			c.Errorf("Solve answer mismatch. Want %v, got %v", ans, x)
+			t.Errorf("Solve answer mismatch. Want %v, got %v", ans, x)
 		}
 	}
 
@@ -223,7 +222,7 @@ func (s *S) TestSolve(c *check.C) {
 		lhs.Mul(&tmp, &x)
 		rhs.Mul(a.T(), b)
 		if !EqualApprox(&lhs, &rhs, 1e-10) {
-			c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
+			t.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 		}
 	}
 
@@ -238,10 +237,10 @@ func (s *S) TestSolve(c *check.C) {
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Solve(a, b)
 	}
-	testTwoInput(c, "Solve", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSolve, 1e-7)
+	testTwoInput(t, "Solve", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSolve, 1e-7)
 }
 
-func (s *S) TestSolveVec(c *check.C) {
+func TestSolveVec(t *testing.T) {
 	for _, test := range []struct {
 		m, n int
 	}{
@@ -278,7 +277,7 @@ func (s *S) TestSolveVec(c *check.C) {
 		lhs.Mul(&tmp, &x)
 		rhs.Mul(a.T(), b)
 		if !EqualApprox(&lhs, &rhs, 1e-10) {
-			c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
+			t.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 		}
 	}
 
@@ -293,5 +292,5 @@ func (s *S) TestSolveVec(c *check.C) {
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Solve(a, b)
 	}
-	testTwoInput(c, "Solve", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeSolve, 1e-12)
+	testTwoInput(t, "Solve", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeSolve, 1e-12)
 }

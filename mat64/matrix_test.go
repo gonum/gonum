@@ -8,16 +8,7 @@ import (
 	"fmt"
 	"math"
 	"testing"
-
-	"gopkg.in/check.v1"
 )
-
-// Tests
-func Test(t *testing.T) { check.TestingT(t) }
-
-type S struct{}
-
-var _ = check.Suite(&S{})
 
 func leaksPanic(fn func()) (panicked bool) {
 	defer func() {
@@ -70,7 +61,7 @@ func eye() *Dense {
 	})
 }
 
-func (s *S) TestCol(c *check.C) {
+func TestCol(t *testing.T) {
 	f := func(a Matrix) interface{} {
 		_, c := a.Dims()
 		ans := make([][]float64, c)
@@ -87,7 +78,7 @@ func (s *S) TestCol(c *check.C) {
 		}
 		return ans
 	}
-	testOneInputFunc(c, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+	testOneInputFunc(t, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
 	f = func(a Matrix) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, c)
@@ -97,10 +88,10 @@ func (s *S) TestCol(c *check.C) {
 		}
 		return ans
 	}
-	testOneInputFunc(c, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+	testOneInputFunc(t, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
 }
 
-func (s *S) TestRow(c *check.C) {
+func TestRow(t *testing.T) {
 	f := func(a Matrix) interface{} {
 		r, _ := a.Dims()
 		ans := make([][]float64, r)
@@ -117,7 +108,7 @@ func (s *S) TestRow(c *check.C) {
 		}
 		return ans
 	}
-	testOneInputFunc(c, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+	testOneInputFunc(t, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
 	f = func(a Matrix) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, r)
@@ -127,30 +118,30 @@ func (s *S) TestRow(c *check.C) {
 		}
 		return ans
 	}
-	testOneInputFunc(c, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+	testOneInputFunc(t, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
 }
 
-func (s *S) TestDot(c *check.C) {
+func TestDot(t *testing.T) {
 	f := func(a, b Matrix) interface{} {
 		return Dot(a, b)
 	}
 	denseComparison := func(a, b *Dense) interface{} {
 		return Dot(a, b)
 	}
-	testTwoInputFunc(c, "Dot", f, denseComparison, sameAnswerFloatApprox, legalTypesAll, legalSizeSameRectangular)
+	testTwoInputFunc(t, "Dot", f, denseComparison, sameAnswerFloatApprox, legalTypesAll, legalSizeSameRectangular)
 }
 
-func (s *S) TestEqual(c *check.C) {
+func TestEqual(t *testing.T) {
 	f := func(a, b Matrix) interface{} {
 		return Equal(a, b)
 	}
 	denseComparison := func(a, b *Dense) interface{} {
 		return Equal(a, b)
 	}
-	testTwoInputFunc(c, "Equal", f, denseComparison, sameAnswerBool, legalTypesAll, isAnySize2)
+	testTwoInputFunc(t, "Equal", f, denseComparison, sameAnswerBool, legalTypesAll, isAnySize2)
 }
 
-func (s *S) TestMax(c *check.C) {
+func TestMax(t *testing.T) {
 	// A direct test of Max with *Dense arguments is in TestNewDense.
 	f := func(a Matrix) interface{} {
 		return Max(a)
@@ -158,10 +149,10 @@ func (s *S) TestMax(c *check.C) {
 	denseComparison := func(a *Dense) interface{} {
 		return Max(a)
 	}
-	testOneInputFunc(c, "Max", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
+	testOneInputFunc(t, "Max", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
 }
 
-func (s *S) TestMin(c *check.C) {
+func TestMin(t *testing.T) {
 	// A direct test of Min with *Dense arguments is in TestNewDense.
 	f := func(a Matrix) interface{} {
 		return Min(a)
@@ -169,10 +160,10 @@ func (s *S) TestMin(c *check.C) {
 	denseComparison := func(a *Dense) interface{} {
 		return Min(a)
 	}
-	testOneInputFunc(c, "Min", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
+	testOneInputFunc(t, "Min", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
 }
 
-func (s *S) TestMaybe(c *check.C) {
+func TestMaybe(t *testing.T) {
 	for i, test := range []struct {
 		fn     func()
 		panics bool
@@ -191,13 +182,13 @@ func (s *S) TestMaybe(c *check.C) {
 		},
 	} {
 		if panicked := leaksPanic(test.fn); panicked != test.panics {
-			c.Errorf("unexpected panic state for test %d: got: panicked=%t want panicked=%t",
+			t.Errorf("unexpected panic state for test %d: got: panicked=%t want panicked=%t",
 				i, panicked, test.panics)
 		}
 	}
 }
 
-func (s *S) TestNorm(c *check.C) {
+func TestNorm(t *testing.T) {
 	for i, test := range []struct {
 		a    [][]float64
 		ord  float64
@@ -231,7 +222,7 @@ func (s *S) TestNorm(c *check.C) {
 	} {
 		a := NewDense(flatten(test.a))
 		if math.Abs(Norm(a, test.ord)-test.norm) > 1e-14 {
-			c.Errorf("Mismatch test %d: %v norm = %f", i, test.a, test.norm)
+			t.Errorf("Mismatch test %d: %v norm = %f", i, test.a, test.norm)
 		}
 	}
 
@@ -241,7 +232,7 @@ func (s *S) TestNorm(c *check.C) {
 	denseComparison := func(a *Dense) interface{} {
 		return Norm(a, 1)
 	}
-	testOneInputFunc(c, "Norm_1", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+	testOneInputFunc(t, "Norm_1", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
 
 	f = func(a Matrix) interface{} {
 		return Norm(a, 2)
@@ -249,7 +240,7 @@ func (s *S) TestNorm(c *check.C) {
 	denseComparison = func(a *Dense) interface{} {
 		return Norm(a, 2)
 	}
-	testOneInputFunc(c, "Norm_2", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+	testOneInputFunc(t, "Norm_2", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
 
 	f = func(a Matrix) interface{} {
 		return Norm(a, math.Inf(1))
@@ -257,20 +248,20 @@ func (s *S) TestNorm(c *check.C) {
 	denseComparison = func(a *Dense) interface{} {
 		return Norm(a, math.Inf(1))
 	}
-	testOneInputFunc(c, "Norm_inf", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+	testOneInputFunc(t, "Norm_inf", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
 }
 
-func (s *S) TestSum(c *check.C) {
+func TestSum(t *testing.T) {
 	f := func(a Matrix) interface{} {
 		return Sum(a)
 	}
 	denseComparison := func(a *Dense) interface{} {
 		return Sum(a)
 	}
-	testOneInputFunc(c, "Sum", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+	testOneInputFunc(t, "Sum", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
 }
 
-func (s *S) TestTrace(c *check.C) {
+func TestTrace(t *testing.T) {
 	for _, test := range []struct {
 		a     *Dense
 		trace float64
@@ -282,7 +273,7 @@ func (s *S) TestTrace(c *check.C) {
 	} {
 		trace := Trace(test.a)
 		if trace != test.trace {
-			c.Errorf("Trace mismatch. Want %v, got %v", test.trace, trace)
+			t.Errorf("Trace mismatch. Want %v, got %v", test.trace, trace)
 		}
 	}
 	f := func(a Matrix) interface{} {
@@ -291,5 +282,5 @@ func (s *S) TestTrace(c *check.C) {
 	denseComparison := func(a *Dense) interface{} {
 		return Trace(a)
 	}
-	testOneInputFunc(c, "Trace", f, denseComparison, sameAnswerFloat, isAnyType, isSquare)
+	testOneInputFunc(t, "Trace", f, denseComparison, sameAnswerFloat, isAnyType, isSquare)
 }

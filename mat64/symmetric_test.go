@@ -7,15 +7,14 @@ package mat64
 import (
 	"math/rand"
 	"reflect"
+	"testing"
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
-
-	"gopkg.in/check.v1"
 )
 
-func (s *S) TestNewSymmetric(c *check.C) {
+func TestNewSymmetric(t *testing.T) {
 	for i, test := range []struct {
 		data []float64
 		n    int
@@ -40,28 +39,28 @@ func (s *S) TestNewSymmetric(c *check.C) {
 		rows, cols := sym.Dims()
 
 		if rows != test.n {
-			c.Errorf("unexpected number of rows for test %d: got: %d want: %d", i, rows, test.n)
+			t.Errorf("unexpected number of rows for test %d: got: %d want: %d", i, rows, test.n)
 		}
 		if cols != test.n {
-			c.Errorf("unexpected number of cols for test %d: got: %d want: %d", i, cols, test.n)
+			t.Errorf("unexpected number of cols for test %d: got: %d want: %d", i, cols, test.n)
 		}
 		if !reflect.DeepEqual(sym, test.mat) {
-			c.Errorf("unexpected data slice for test %d: got: %v want: %v", i, sym, test.mat)
+			t.Errorf("unexpected data slice for test %d: got: %v want: %v", i, sym, test.mat)
 		}
 
 		m := NewDense(test.n, test.n, test.data)
 		if !reflect.DeepEqual(sym.mat.Data, m.mat.Data) {
-			c.Errorf("unexpected data slice mismatch for test %d: got: %v want: %v", i, sym.mat.Data, m.mat.Data)
+			t.Errorf("unexpected data slice mismatch for test %d: got: %v want: %v", i, sym.mat.Data, m.mat.Data)
 		}
 	}
 
 	panicked, message := panics(func() { NewSymDense(3, []float64{1, 2}) })
 	if !panicked || message != ErrShape.Error() {
-		c.Error("expected panic for invalid data slice length")
+		t.Error("expected panic for invalid data slice length")
 	}
 }
 
-func (s *S) TestSymAtSet(c *check.C) {
+func TestSymAtSet(t *testing.T) {
 	sym := &SymDense{blas64.Symmetric{
 		N:      3,
 		Stride: 3,
@@ -74,13 +73,13 @@ func (s *S) TestSymAtSet(c *check.C) {
 	for _, row := range []int{-1, rows, rows + 1} {
 		panicked, message := panics(func() { sym.At(row, 0) })
 		if !panicked || message != ErrRowAccess.Error() {
-			c.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
+			t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 		}
 	}
 	for _, col := range []int{-1, cols, cols + 1} {
 		panicked, message := panics(func() { sym.At(0, col) })
 		if !panicked || message != ErrColAccess.Error() {
-			c.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
+			t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 		}
 	}
 
@@ -88,13 +87,13 @@ func (s *S) TestSymAtSet(c *check.C) {
 	for _, row := range []int{-1, rows, rows + 1} {
 		panicked, message := panics(func() { sym.SetSym(row, 0, 1.2) })
 		if !panicked || message != ErrRowAccess.Error() {
-			c.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
+			t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 		}
 	}
 	for _, col := range []int{-1, cols, cols + 1} {
 		panicked, message := panics(func() { sym.SetSym(0, col, 1.2) })
 		if !panicked || message != ErrColAccess.Error() {
-			c.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
+			t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 		}
 	}
 
@@ -106,22 +105,22 @@ func (s *S) TestSymAtSet(c *check.C) {
 		{row: 2, col: 1, orig: 15, new: 12},
 	} {
 		if e := sym.At(st.row, st.col); e != st.orig {
-			c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", st.row, st.col, e, st.orig)
+			t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", st.row, st.col, e, st.orig)
 		}
 		if e := sym.At(st.col, st.row); e != st.orig {
-			c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", st.col, st.row, e, st.orig)
+			t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", st.col, st.row, e, st.orig)
 		}
 		sym.SetSym(st.row, st.col, st.new)
 		if e := sym.At(st.row, st.col); e != st.new {
-			c.Errorf("unexpected value for At(%d, %d) after SetSym(%[1]d, %[2]d, %[4]v): got: %[3]v want: %v", st.row, st.col, e, st.new)
+			t.Errorf("unexpected value for At(%d, %d) after SetSym(%[1]d, %[2]d, %[4]v): got: %[3]v want: %v", st.row, st.col, e, st.new)
 		}
 		if e := sym.At(st.col, st.row); e != st.new {
-			c.Errorf("unexpected value for At(%d, %d) after SetSym(%[2]d, %[1]d, %[4]v): got: %[3]v want: %v", st.col, st.row, e, st.new)
+			t.Errorf("unexpected value for At(%d, %d) after SetSym(%[2]d, %[1]d, %[4]v): got: %[3]v want: %v", st.col, st.row, e, st.new)
 		}
 	}
 }
 
-func (s *S) TestSymAdd(c *check.C) {
+func TestSymAdd(t *testing.T) {
 	for _, test := range []struct {
 		n int
 	}{
@@ -151,7 +150,7 @@ func (s *S) TestSymAdd(c *check.C) {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
 				if got := s.At(i, j); got != want {
-					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
 		}
@@ -163,7 +162,7 @@ func (s *S) TestSymAdd(c *check.C) {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
 				if got := s.At(i, j); got != want {
-					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
 		}
@@ -179,10 +178,10 @@ func (s *S) TestSymAdd(c *check.C) {
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Add(a, b)
 	}
-	testTwoInput(c, "AddSym", &SymDense{}, method, denseComparison, legalTypesSym, legalSizeSameSquare, 1e-14)
+	testTwoInput(t, "AddSym", &SymDense{}, method, denseComparison, legalTypesSym, legalSizeSameSquare, 1e-14)
 }
 
-func (s *S) TestCopy(c *check.C) {
+func TestCopy(t *testing.T) {
 	for _, test := range []struct {
 		n int
 	}{
@@ -204,7 +203,7 @@ func (s *S) TestCopy(c *check.C) {
 			for j := i; j < n; j++ {
 				want := a.At(i, j)
 				if got := s.At(i, j); got != want {
-					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
 		}
@@ -213,7 +212,7 @@ func (s *S) TestCopy(c *check.C) {
 
 // TODO(kortschak) Roll this into testOneInput when it exists.
 // https://github.com/gonum/matrix/issues/171
-func (s *S) TestSymCopyPanic(c *check.C) {
+func TestSymCopyPanic(t *testing.T) {
 	var (
 		a SymDense
 		n int
@@ -221,14 +220,14 @@ func (s *S) TestSymCopyPanic(c *check.C) {
 	m := NewSymDense(1, nil)
 	panicked, message := panics(func() { n = m.CopySym(&a) })
 	if panicked {
-		c.Errorf("unexpected panic: %v", message)
+		t.Errorf("unexpected panic: %v", message)
 	}
 	if n != 0 {
-		c.Errorf("unexpected n: got: %d want: 0", n)
+		t.Errorf("unexpected n: got: %d want: 0", n)
 	}
 }
 
-func (s *S) TestSymRankOne(c *check.C) {
+func TestSymRankOne(t *testing.T) {
 	for _, test := range []struct {
 		n int
 	}{
@@ -263,7 +262,7 @@ func (s *S) TestSymRankOne(c *check.C) {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
 				if got := s.At(i, j); got != want {
-					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
 		}
@@ -275,14 +274,14 @@ func (s *S) TestSymRankOne(c *check.C) {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
 				if got := s.At(i, j); got != want {
-					c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
+					t.Errorf("unexpected value for At(%d, %d): got: %v want: %v", i, j, got, want)
 				}
 			}
 		}
 	}
 }
 
-func (s *S) TestRankTwo(c *check.C) {
+func TestRankTwo(t *testing.T) {
 	for _, test := range []struct {
 		n int
 	}{
@@ -322,7 +321,7 @@ func (s *S) TestRankTwo(c *check.C) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
-					c.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
+					t.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
 				}
 			}
 		}
@@ -333,14 +332,14 @@ func (s *S) TestRankTwo(c *check.C) {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
-					c.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
+					t.Errorf("unexpected element value at (%d,%d): got: %f want: %f", i, j, m.At(i, j), s.At(i, j))
 				}
 			}
 		}
 	}
 }
 
-func (s *S) TestSymRankK(c *check.C) {
+func TestSymRankK(t *testing.T) {
 	alpha := 3.0
 	method := func(receiver, a, b Matrix) {
 		type SymRankKer interface {
@@ -365,10 +364,10 @@ func (s *S) TestSymRankK(c *check.C) {
 		}
 		return br == ar
 	}
-	testTwoInput(c, "SymRankK", &SymDense{}, method, denseComparison, legalTypes, legalSize, 1e-14)
+	testTwoInput(t, "SymRankK", &SymDense{}, method, denseComparison, legalTypes, legalSize, 1e-14)
 }
 
-func (s *S) TestScaleSym(c *check.C) {
+func TestScaleSym(t *testing.T) {
 	f := 3.0
 	method := func(receiver, a Matrix) {
 		type ScaleSymer interface {
@@ -380,5 +379,5 @@ func (s *S) TestScaleSym(c *check.C) {
 	denseComparison := func(receiver, a *Dense) {
 		receiver.Scale(f, a)
 	}
-	testOneInput(c, "ScaleSym", &SymDense{}, method, denseComparison, legalTypeSym, isSquare, 1e-14)
+	testOneInput(t, "ScaleSym", &SymDense{}, method, denseComparison, legalTypeSym, isSquare, 1e-14)
 }

@@ -7,11 +7,10 @@ package mat64
 import (
 	"fmt"
 	"math"
-
-	"gopkg.in/check.v1"
+	"testing"
 )
 
-func (s *S) TestFormat(c *check.C) {
+func TestFormat(t *testing.T) {
 	type rp struct {
 		format string
 		output string
@@ -144,7 +143,7 @@ func (s *S) TestFormat(c *check.C) {
 		for j, rp := range test.rep {
 			got := fmt.Sprintf(rp.format, test.m)
 			if got != rp.output {
-				c.Errorf("unexpected format result test %d part %d:\ngot:\n%s\nwant:\n%s", i, j, got, rp.output)
+				t.Errorf("unexpected format result test %d part %d:\ngot:\n%s\nwant:\n%s", i, j, got, rp.output)
 			}
 		}
 	}

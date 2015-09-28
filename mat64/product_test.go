@@ -7,8 +7,7 @@ package mat64
 import (
 	"fmt"
 	"math/rand"
-
-	"gopkg.in/check.v1"
+	"testing"
 )
 
 type dims struct{ r, c int }
@@ -90,7 +89,7 @@ var productTests = []struct {
 	},
 }
 
-func (s *S) TestProduct(c *check.C) {
+func TestProduct(t *testing.T) {
 	for _, test := range productTests {
 		dimensions := test.factors
 		if dimensions == nil && test.n > 0 {
@@ -132,12 +131,12 @@ func (s *S) TestProduct(c *check.C) {
 		})
 		if test.panics {
 			if !panicked {
-				c.Errorf("fail to panic with product chain dimensions: %+v result dimension: %+v",
+				t.Errorf("fail to panic with product chain dimensions: %+v result dimension: %+v",
 					dimensions, test.product)
 			}
 			continue
 		} else if panicked {
-			c.Errorf("unexpected panic %q with product chain dimensions: %+v result dimension: %+v",
+			t.Errorf("unexpected panic %q with product chain dimensions: %+v result dimension: %+v",
 				message, dimensions, test.product)
 			continue
 		}
@@ -148,16 +147,16 @@ func (s *S) TestProduct(c *check.C) {
 			gotCost := p.table.at(0, len(factors)-1).cost
 			expr, wantCost, ok := bestExpressionFor(dimensions)
 			if !ok {
-				c.Fatal("unexpected number of expressions in brute force expression search")
+				t.Fatal("unexpected number of expressions in brute force expression search")
 			}
 			if gotCost != wantCost {
-				c.Errorf("unexpected cost for chain dimensions: %+v got: %d want: %d\n%s",
+				t.Errorf("unexpected cost for chain dimensions: %+v got: %d want: %d\n%s",
 					dimensions, got, want, expr)
 			}
 		}
 
 		if !EqualApprox(got, want, 1e-14) {
-			c.Errorf("unexpected result from product chain dimensions: %+v", dimensions)
+			t.Errorf("unexpected result from product chain dimensions: %+v", dimensions)
 		}
 	}
 }

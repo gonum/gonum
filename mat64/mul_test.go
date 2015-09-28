@@ -14,7 +14,7 @@ import (
 )
 
 // TODO: Need to add tests where one is overwritten.
-func TestMul(t *testing.T) {
+func TestMulTypes(t *testing.T) {
 	for _, test := range []struct {
 		ar     int
 		ac     int
@@ -166,6 +166,7 @@ func TestMul(t *testing.T) {
 		testMul(t, am, bm, d, acomp, bcomp, ccomp, true, "both basic, receiver is full")
 	}
 }
+
 func randomSlice(s []float64) {
 	for i := range s {
 		s[i] = rand.NormFloat64()

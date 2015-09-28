@@ -9,10 +9,9 @@ import (
 	"testing"
 
 	"github.com/gonum/blas/blas64"
-	"gopkg.in/check.v1"
 )
 
-func (s *S) TestInner(c *check.C) {
+func TestInner(t *testing.T) {
 	for i, test := range []struct {
 		x []float64
 		y []float64
@@ -76,22 +75,22 @@ func (s *S) TestInner(c *check.C) {
 
 			rm, cm := cell.Dims()
 			if rm != 1 {
-				c.Errorf("Test %d result doesn't have 1 row", i)
+				t.Errorf("Test %d result doesn't have 1 row", i)
 			}
 			if cm != 1 {
-				c.Errorf("Test %d result doesn't have 1 column", i)
+				t.Errorf("Test %d result doesn't have 1 column", i)
 			}
 
 			want := cell.At(0, 0)
 			got := Inner(makeVectorInc(inc.x, test.x), m, makeVectorInc(inc.y, test.y))
 			if got != want {
-				c.Errorf("Test %v: want %v, got %v", i, want, got)
+				t.Errorf("Test %v: want %v, got %v", i, want, got)
 			}
 		}
 	}
 }
 
-func (s *S) TestInnerSym(c *check.C) {
+func TestInnerSym(t *testing.T) {
 	for _, inc := range []struct{ x, y int }{
 		{1, 1},
 		{1, 2},
@@ -123,7 +122,7 @@ func (s *S) TestInnerSym(c *check.C) {
 		}
 
 		if math.Abs(Inner(x, sym, y)-ans) > 1e-14 {
-			c.Error("inner different symmetric and dense")
+			t.Error("inner different symmetric and dense")
 		}
 	}
 }

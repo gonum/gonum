@@ -7,12 +7,12 @@ package mat64
 import (
 	"math"
 	"math/rand"
+	"testing"
 
 	"github.com/gonum/blas/blas64"
-	"gopkg.in/check.v1"
 )
 
-func (s *S) TestQR(c *check.C) {
+func TestQR(t *testing.T) {
 	for _, test := range []struct {
 		m, n int
 	}{
@@ -36,7 +36,7 @@ func (s *S) TestQR(c *check.C) {
 		q.QFromQR(qr)
 
 		if !isOrthonormal(&q, 1e-10) {
-			c.Errorf("Q is not orthonormal: m = %v, n = %v", m, n)
+			t.Errorf("Q is not orthonormal: m = %v, n = %v", m, n)
 		}
 
 		r.RFromQR(qr)
@@ -44,7 +44,7 @@ func (s *S) TestQR(c *check.C) {
 		var got Dense
 		got.Mul(&q, &r)
 		if !EqualApprox(&got, &want, 1e-12) {
-			c.Errorf("QR does not equal original matrix. \nWant: %v\nGot: %v", want, got)
+			t.Errorf("QR does not equal original matrix. \nWant: %v\nGot: %v", want, got)
 		}
 	}
 }
@@ -72,7 +72,7 @@ func isOrthonormal(q *Dense, tol float64) bool {
 	return true
 }
 
-func (s *S) TestSolveQR(c *check.C) {
+func TestSolveQR(t *testing.T) {
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n, bc int
@@ -123,14 +123,14 @@ func (s *S) TestSolveQR(c *check.C) {
 				rhs.Mul(a.T(), b)
 			}
 			if !EqualApprox(&lhs, &rhs, 1e-10) {
-				c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
+				t.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 			}
 		}
 	}
 	// TODO(btracey): Add in testOneInput when it exists.
 }
 
-func (s *S) TestSolveQRVec(c *check.C) {
+func TestSolveQRVec(t *testing.T) {
 	for _, trans := range []bool{false, true} {
 		for _, test := range []struct {
 			m, n int
@@ -176,14 +176,14 @@ func (s *S) TestSolveQRVec(c *check.C) {
 				rhs.Mul(a.T(), b)
 			}
 			if !EqualApprox(&lhs, &rhs, 1e-10) {
-				c.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
+				t.Errorf("Normal equations do not hold.\nLHS: %v\n, RHS: %v\n", lhs, rhs)
 			}
 		}
 	}
 	// TODO(btracey): Add in testOneInput when it exists.
 }
 
-func (s *S) TestSolveQRCond(c *check.C) {
+func TestSolveQRCond(t *testing.T) {
 	for _, test := range []*Dense{
 		NewDense(2, 2, []float64{1, 0, 0, 1e-20}),
 		NewDense(3, 2, []float64{1, 0, 0, 1e-20, 0, 0}),
@@ -194,13 +194,13 @@ func (s *S) TestSolveQRCond(c *check.C) {
 		b := NewDense(m, 2, nil)
 		var x Dense
 		if err := x.SolveQR(&qr, false, b); err == nil {
-			c.Error("No error for near-singular matrix in matrix solve.")
+			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
 		bvec := NewVector(m, nil)
 		var xvec Vector
 		if err := xvec.SolveQRVec(&qr, false, bvec); err == nil {
-			c.Error("No error for near-singular matrix in matrix solve.")
+			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 	}
 }

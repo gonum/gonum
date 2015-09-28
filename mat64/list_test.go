@@ -9,10 +9,10 @@ import (
 	"math"
 	"math/rand"
 	"reflect"
+	"testing"
 
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
-	"gopkg.in/check.v1"
 )
 
 // legalSizeSameRectangular returns whether the two matrices have the same rectangular shape.
@@ -456,7 +456,7 @@ var testMatrices = []Matrix{
 	Transpose{&basicTriangular{}},
 }
 
-func testOneInputFunc(c *check.C,
+func testOneInputFunc(t *testing.T,
 	// name is the name of the function being tested.
 	name string,
 
@@ -518,27 +518,27 @@ func testOneInputFunc(c *check.C,
 			var got interface{}
 			panicked, err := panics(func() { got = f(a) })
 			if !dimsOK && !panicked {
-				c.Errorf("Did not panic with illegal size: %s", errStr)
+				t.Errorf("Did not panic with illegal size: %s", errStr)
 				continue
 			}
 			if dimsOK && panicked {
-				c.Errorf("Panicked with legal size: %s %s", errStr, err)
+				t.Errorf("Panicked with legal size: %s %s", errStr, err)
 				continue
 			}
 			if !equal(a, aCopy) {
-				c.Errorf("First input argument changed in call: %s", errStr)
+				t.Errorf("First input argument changed in call: %s", errStr)
 			}
 			if !dimsOK {
 				continue
 			}
 			if !sameAnswer(want, got) {
-				c.Errorf("Answer mismatch: %s", errStr)
+				t.Errorf("Answer mismatch: %s", errStr)
 			}
 		}
 	}
 }
 
-func testTwoInputFunc(c *check.C,
+func testTwoInputFunc(t *testing.T,
 	// name is the name of the function being tested.
 	name string,
 
@@ -684,24 +684,24 @@ func testTwoInputFunc(c *check.C,
 				var got interface{}
 				panicked, err := panics(func() { got = f(a, b) })
 				if !dimsOK && !panicked {
-					c.Errorf("Did not panic with illegal size: %s", errStr)
+					t.Errorf("Did not panic with illegal size: %s", errStr)
 					continue
 				}
 				if dimsOK && panicked {
-					c.Errorf("Panicked with legal size: %s %s", errStr, err)
+					t.Errorf("Panicked with legal size: %s %s", errStr, err)
 					continue
 				}
 				if !equal(a, aCopy) {
-					c.Errorf("First input argument changed in call: %s", errStr)
+					t.Errorf("First input argument changed in call: %s", errStr)
 				}
 				if !equal(b, bCopy) {
-					c.Errorf("First input argument changed in call: %s", errStr)
+					t.Errorf("First input argument changed in call: %s", errStr)
 				}
 				if !dimsOK {
 					continue
 				}
 				if !sameAnswer(want, got) {
-					c.Errorf("Answer mismatch: %s", errStr)
+					t.Errorf("Answer mismatch: %s", errStr)
 				}
 			}
 		}
@@ -709,7 +709,7 @@ func testTwoInputFunc(c *check.C,
 }
 
 // testOneInput tests a method that has one matrix input argument
-func testOneInput(c *check.C,
+func testOneInput(t *testing.T,
 	// name is the name of the method being tested.
 	name string,
 
@@ -772,21 +772,21 @@ func testOneInput(c *check.C,
 			zero := makeRandOf(receiver, 0, 0)
 			panicked, err := panics(func() { method(zero, a) })
 			if !dimsOK && !panicked {
-				c.Errorf("Did not panic with illegal size: %s", errStr)
+				t.Errorf("Did not panic with illegal size: %s", errStr)
 				continue
 			}
 			if dimsOK && panicked {
-				c.Errorf("Panicked with legal size: %s %s", errStr, err)
+				t.Errorf("Panicked with legal size: %s %s", errStr, err)
 				continue
 			}
 			if !equal(a, aCopy) {
-				c.Errorf("First input argument changed in call: %s", errStr)
+				t.Errorf("First input argument changed in call: %s", errStr)
 			}
 			if !dimsOK {
 				continue
 			}
 			if !equalApprox(zero, &want, tol) {
-				c.Errorf("Answer mismatch with zero receiver: %s", errStr)
+				t.Errorf("Answer mismatch with zero receiver: %s", errStr)
 				continue
 			}
 
@@ -797,10 +797,10 @@ func testOneInput(c *check.C,
 			nonZero := makeRandOf(receiver, rr, rc)
 			panicked, _ = panics(func() { method(nonZero, a) })
 			if panicked {
-				c.Errorf("Panicked with non-zero receiver: %s", errStr)
+				t.Errorf("Panicked with non-zero receiver: %s", errStr)
 			}
 			if !equalApprox(nonZero, &want, tol) {
-				c.Errorf("Answer mismatch non-zero receiver: %s", errStr)
+				t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 			}
 
 			// Test with an incorrectly sized matrix.
@@ -811,26 +811,26 @@ func testOneInput(c *check.C,
 				wrongSize := makeRandOf(receiver, rr+1, rc)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
-					c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+					t.Errorf("Did not panic with wrong number of rows: %s", errStr)
 				}
 				wrongSize = makeRandOf(receiver, rr, rc+1)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
-					c.Errorf("Did not panic with wrong number of columns: %s", errStr)
+					t.Errorf("Did not panic with wrong number of columns: %s", errStr)
 				}
 			case *TriDense, *SymDense:
 				// Add to the square size.
 				wrongSize := makeRandOf(receiver, rr+1, rc+1)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
-					c.Errorf("Did not panic with wrong size: %s", errStr)
+					t.Errorf("Did not panic with wrong size: %s", errStr)
 				}
 			case *Vector:
 				// Add to the column length.
 				wrongSize := makeRandOf(receiver, rr+1, rc)
 				panicked, _ = panics(func() { method(wrongSize, a) })
 				if !panicked {
-					c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+					t.Errorf("Did not panic with wrong number of rows: %s", errStr)
 				}
 			}
 
@@ -849,14 +849,14 @@ func testOneInput(c *check.C,
 				preData := underlyingData(receiver)
 				panicked, err = panics(func() { method(receiver, aSame) })
 				if panicked {
-					c.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
+					t.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
 				} else {
 					if !equalApprox(receiver, &want, tol) {
-						c.Errorf("Wrong answer when a maybeSame: %s", errStr)
+						t.Errorf("Wrong answer when a maybeSame: %s", errStr)
 					}
 					postData := underlyingData(receiver)
 					if !floats.Equal(preData, postData) {
-						c.Errorf("Original data slice not modified when a maybeSame: %s", errStr)
+						t.Errorf("Original data slice not modified when a maybeSame: %s", errStr)
 					}
 				}
 			}
@@ -865,7 +865,7 @@ func testOneInput(c *check.C,
 }
 
 // testTwoInput tests a method that has two input arguments.
-func testTwoInput(c *check.C,
+func testTwoInput(t *testing.T,
 	// name is the name of the method being tested.
 	name string,
 
@@ -1012,24 +1012,24 @@ func testTwoInput(c *check.C,
 				zero := makeRandOf(receiver, 0, 0)
 				panicked, err := panics(func() { method(zero, a, b) })
 				if !dimsOK && !panicked {
-					c.Errorf("Did not panic with illegal size: %s", errStr)
+					t.Errorf("Did not panic with illegal size: %s", errStr)
 					continue
 				}
 				if dimsOK && panicked {
-					c.Errorf("Panicked with legal size: %s %s", errStr, err)
+					t.Errorf("Panicked with legal size: %s %s", errStr, err)
 					continue
 				}
 				if !equal(a, aCopy) {
-					c.Errorf("First input argument changed in call: %s", errStr)
+					t.Errorf("First input argument changed in call: %s", errStr)
 				}
 				if !equal(b, bCopy) {
-					c.Errorf("Second input argument changed in call: %s", errStr)
+					t.Errorf("Second input argument changed in call: %s", errStr)
 				}
 				if !dimsOK {
 					continue
 				}
 				if !equalApprox(zero, &want, tol) {
-					c.Errorf("Answer mismatch with zero receiver: %s", errStr)
+					t.Errorf("Answer mismatch with zero receiver: %s", errStr)
 					continue
 				}
 
@@ -1040,10 +1040,10 @@ func testTwoInput(c *check.C,
 				nonZero := makeRandOf(receiver, rr, rc)
 				panicked, _ = panics(func() { method(nonZero, a, b) })
 				if panicked {
-					c.Errorf("Panicked with non-zero receiver: %s", errStr)
+					t.Errorf("Panicked with non-zero receiver: %s", errStr)
 				}
 				if !equalApprox(nonZero, &want, tol) {
-					c.Errorf("Answer mismatch non-zero receiver: %s", errStr)
+					t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 				}
 
 				// Test with an incorrectly sized matrix.
@@ -1054,26 +1054,26 @@ func testTwoInput(c *check.C,
 					wrongSize := makeRandOf(receiver, rr+1, rc)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
-						c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+						t.Errorf("Did not panic with wrong number of rows: %s", errStr)
 					}
 					wrongSize = makeRandOf(receiver, rr, rc+1)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
-						c.Errorf("Did not panic with wrong number of columns: %s", errStr)
+						t.Errorf("Did not panic with wrong number of columns: %s", errStr)
 					}
 				case *TriDense, *SymDense:
 					// Add to the square size.
 					wrongSize := makeRandOf(receiver, rr+1, rc+1)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
-						c.Errorf("Did not panic with wrong size: %s", errStr)
+						t.Errorf("Did not panic with wrong size: %s", errStr)
 					}
 				case *Vector:
 					// Add to the column length.
 					wrongSize := makeRandOf(receiver, rr+1, rc)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })
 					if !panicked {
-						c.Errorf("Did not panic with wrong number of rows: %s", errStr)
+						t.Errorf("Did not panic with wrong number of rows: %s", errStr)
 					}
 				}
 
@@ -1093,14 +1093,14 @@ func testTwoInput(c *check.C,
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, aSame, b) })
 					if panicked {
-						c.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
+						t.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
 					} else {
 						if !equalApprox(receiver, &want, tol) {
-							c.Errorf("Wrong answer when a maybeSame: %s", errStr)
+							t.Errorf("Wrong answer when a maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)
 						if !floats.Equal(preData, postData) {
-							c.Errorf("Original data slice not modified when a maybeSame: %s", errStr)
+							t.Errorf("Original data slice not modified when a maybeSame: %s", errStr)
 						}
 					}
 				}
@@ -1114,14 +1114,14 @@ func testTwoInput(c *check.C,
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, a, bSame) })
 					if panicked {
-						c.Errorf("Panics when b maybeSame: %s", errStr)
+						t.Errorf("Panics when b maybeSame: %s", errStr)
 					} else {
 						if !equalApprox(receiver, &want, tol) {
-							c.Errorf("Wrong answer when b maybeSame: %s: %s", errStr, err)
+							t.Errorf("Wrong answer when b maybeSame: %s: %s", errStr, err)
 						}
 						postData := underlyingData(receiver)
 						if !floats.Equal(preData, postData) {
-							c.Errorf("Original data slice not modified when b maybeSame: %s", errStr)
+							t.Errorf("Original data slice not modified when b maybeSame: %s", errStr)
 						}
 					}
 				}
@@ -1147,14 +1147,14 @@ func testTwoInput(c *check.C,
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, aSame, bSame) })
 					if panicked {
-						c.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
+						t.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
 					} else {
 						if !equalApprox(receiver, zero, tol) {
-							c.Errorf("Wrong answer when both maybeSame: %s", errStr)
+							t.Errorf("Wrong answer when both maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)
 						if !floats.Equal(preData, postData) {
-							c.Errorf("Original data slice not modified when both maybeSame: %s", errStr)
+							t.Errorf("Original data slice not modified when both maybeSame: %s", errStr)
 						}
 					}
 				}

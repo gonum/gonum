@@ -2,12 +2,12 @@ package mat64
 
 import (
 	"reflect"
+	"testing"
 
 	"github.com/gonum/blas/blas64"
-	"gopkg.in/check.v1"
 )
 
-func (s *S) TestNewVector(c *check.C) {
+func TestNewVector(t *testing.T) {
 	for i, test := range []struct {
 		n      int
 		data   []float64
@@ -39,18 +39,18 @@ func (s *S) TestNewVector(c *check.C) {
 		v := NewVector(test.n, test.data)
 		rows, cols := v.Dims()
 		if rows != test.n {
-			c.Errorf("unexpected number of rows for test %d: got: %d want: %d", i, rows, test.n)
+			t.Errorf("unexpected number of rows for test %d: got: %d want: %d", i, rows, test.n)
 		}
 		if cols != 1 {
-			c.Errorf("unexpected number of cols for test %d: got: %d want: 1", i, cols)
+			t.Errorf("unexpected number of cols for test %d: got: %d want: 1", i, cols)
 		}
 		if !reflect.DeepEqual(v, test.vector) {
-			c.Errorf("unexpected data slice for test %d: got: %v want: %v", i, v, test.vector)
+			t.Errorf("unexpected data slice for test %d: got: %v want: %v", i, v, test.vector)
 		}
 	}
 }
 
-func (s *S) TestVectorAtSet(c *check.C) {
+func TestVectorAtSet(t *testing.T) {
 	for i, test := range []struct {
 		vector *Vector
 	}{
@@ -79,39 +79,39 @@ func (s *S) TestVectorAtSet(c *check.C) {
 		for _, row := range []int{-1, n} {
 			panicked, message := panics(func() { v.At(row, 0) })
 			if !panicked || message != ErrRowAccess.Error() {
-				c.Errorf("expected panic for invalid row access for test %d n=%d r=%d", i, n, row)
+				t.Errorf("expected panic for invalid row access for test %d n=%d r=%d", i, n, row)
 			}
 		}
 		for _, col := range []int{-1, 1} {
 			panicked, message := panics(func() { v.At(0, col) })
 			if !panicked || message != ErrColAccess.Error() {
-				c.Errorf("expected panic for invalid column access for test %d n=%d c=%d", i, n, col)
+				t.Errorf("expected panic for invalid column access for test %d n=%d c=%d", i, n, col)
 			}
 		}
 
 		for _, row := range []int{0, 1, n - 1} {
 			if e := v.At(row, 0); e != float64(row) {
-				c.Errorf("unexpected value for At(%d, 0) for test %d : got: %v want: %v", row, i, e, float64(row))
+				t.Errorf("unexpected value for At(%d, 0) for test %d : got: %v want: %v", row, i, e, float64(row))
 			}
 		}
 
 		for _, row := range []int{-1, n} {
 			panicked, message := panics(func() { v.SetVec(row, 100) })
 			if !panicked || message != ErrVectorAccess.Error() {
-				c.Errorf("expected panic for invalid row access for test %d n=%d r=%d", i, n, row)
+				t.Errorf("expected panic for invalid row access for test %d n=%d r=%d", i, n, row)
 			}
 		}
 
 		for inc, row := range []int{0, 2} {
 			v.SetVec(row, 100+float64(inc))
 			if e := v.At(row, 0); e != 100+float64(inc) {
-				c.Errorf("unexpected value for At(%d, 0) after SetVec(%[1]d, %v) for test %d: got: %v want: %[2]v", row, 100+float64(inc), i, e)
+				t.Errorf("unexpected value for At(%d, 0) after SetVec(%[1]d, %v) for test %d: got: %v want: %[2]v", row, 100+float64(inc), i, e)
 			}
 		}
 	}
 }
 
-func (s *S) TestVectorMul(c *check.C) {
+func TestVectorMul(t *testing.T) {
 	method := func(receiver, a, b Matrix) {
 		type mulVecer interface {
 			MulVec(a Matrix, b *Vector)
@@ -131,10 +131,10 @@ func (s *S) TestVectorMul(c *check.C) {
 		}
 		return legal
 	}
-	testTwoInput(c, "MulVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec, 1e-14)
+	testTwoInput(t, "MulVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec, 1e-14)
 }
 
-func (s *S) TestVectorAdd(c *check.C) {
+func TestVectorAdd(t *testing.T) {
 	for i, test := range []struct {
 		a, b *Vector
 		want *Vector
@@ -158,12 +158,12 @@ func (s *S) TestVectorAdd(c *check.C) {
 		var v Vector
 		v.AddVec(test.a, test.b)
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
-			c.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 	}
 }
 
-func (s *S) TestVectorSub(c *check.C) {
+func TestVectorSub(t *testing.T) {
 	for i, test := range []struct {
 		a, b *Vector
 		want *Vector
@@ -187,12 +187,12 @@ func (s *S) TestVectorSub(c *check.C) {
 		var v Vector
 		v.SubVec(test.a, test.b)
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
-			c.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 	}
 }
 
-func (s *S) TestVectorMulElem(c *check.C) {
+func TestVectorMulElem(t *testing.T) {
 	for i, test := range []struct {
 		a, b *Vector
 		want *Vector
@@ -216,12 +216,12 @@ func (s *S) TestVectorMulElem(c *check.C) {
 		var v Vector
 		v.MulElemVec(test.a, test.b)
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
-			c.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 	}
 }
 
-func (s *S) TestVectorDivElem(c *check.C) {
+func TestVectorDivElem(t *testing.T) {
 	for i, test := range []struct {
 		a, b *Vector
 		want *Vector
@@ -245,7 +245,7 @@ func (s *S) TestVectorDivElem(c *check.C) {
 		var v Vector
 		v.DivElemVec(test.a, test.b)
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
-			c.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 	}
 }

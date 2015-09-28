@@ -2,6 +2,7 @@ package mat64
 
 import (
 	"math/rand"
+	"reflect"
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
@@ -11,7 +12,7 @@ import (
 func (s *S) TestNewTriangular(c *check.C) {
 	for i, test := range []struct {
 		data  []float64
-		N     int
+		n     int
 		upper bool
 		mat   *TriDense
 	}{
@@ -21,7 +22,7 @@ func (s *S) TestNewTriangular(c *check.C) {
 				4, 5, 6,
 				7, 8, 9,
 			},
-			N:     3,
+			n:     3,
 			upper: true,
 			mat: &TriDense{blas64.Triangular{
 				N:      3,
@@ -32,46 +33,98 @@ func (s *S) TestNewTriangular(c *check.C) {
 			}},
 		},
 	} {
-		t := NewTriDense(test.N, test.upper, test.data)
-		rows, cols := t.Dims()
-		c.Check(rows, check.Equals, test.N, check.Commentf("Test %d", i))
-		c.Check(cols, check.Equals, test.N, check.Commentf("Test %d", i))
-		c.Check(t, check.DeepEquals, test.mat, check.Commentf("Test %d", i))
+		tri := NewTriDense(test.n, test.upper, test.data)
+		rows, cols := tri.Dims()
+
+		if rows != test.n {
+			c.Errorf("unexpected number of rows for test %d: got: %d want: %d", i, rows, test.n)
+		}
+		if cols != test.n {
+			c.Errorf("unexpected number of cols for test %d: got: %d want: %d", i, cols, test.n)
+		}
+		if !reflect.DeepEqual(tri, test.mat) {
+			c.Errorf("unexpected data slice for test %d: got: %v want: %v", i, tri, test.mat)
+		}
+	}
+
+	for _, upper := range []bool{false, true} {
+		panicked, message := panics(func() { NewTriDense(3, upper, []float64{1, 2}) })
+		if !panicked || message != ErrShape.Error() {
+			c.Errorf("expected panic for invalid data slice length for upper=%t", upper)
+		}
 	}
 }
+
 func (s *S) TestTriAtSet(c *check.C) {
-	t := &TriDense{blas64.Triangular{
+	tri := &TriDense{blas64.Triangular{
 		N:      3,
 		Stride: 3,
 		Uplo:   blas.Upper,
 		Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
 		Diag:   blas.NonUnit,
 	}}
-	rows, cols := t.Dims()
+
+	rows, cols := tri.Dims()
+
 	// Check At out of bounds
-	c.Check(func() { t.At(rows, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.At(0, cols) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.At(rows+1, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.At(0, cols+1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.At(-1, 0) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.At(0, -1) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
+	for _, row := range []int{-1, rows, rows + 1} {
+		panicked, message := panics(func() { tri.At(row, 0) })
+		if !panicked || message != ErrRowAccess.Error() {
+			c.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
+		}
+	}
+	for _, col := range []int{-1, cols, cols + 1} {
+		panicked, message := panics(func() { tri.At(0, col) })
+		if !panicked || message != ErrColAccess.Error() {
+			c.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
+		}
+	}
+
 	// Check Set out of bounds
-	c.Check(func() { t.SetTri(rows, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.SetTri(0, cols, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.SetTri(rows+1, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.SetTri(0, cols+1, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.SetTri(-1, 0, 1.2) }, check.PanicMatches, ErrRowAccess.Error(), check.Commentf("Test row out of bounds"))
-	c.Check(func() { t.SetTri(0, -1, 1.2) }, check.PanicMatches, ErrColAccess.Error(), check.Commentf("Test col out of bounds"))
-	c.Check(func() { t.SetTri(2, 1, 1.2) }, check.PanicMatches, "mat64: triangular set out of bounds", check.Commentf("Test lower access"))
-	t.mat.Uplo = blas.Lower
-	c.Check(func() { t.SetTri(1, 2, 1.2) }, check.PanicMatches, "mat64: triangular set out of bounds", check.Commentf("Test upper access"))
-	c.Check(t.At(2, 1), check.Equals, 8.0)
-	t.SetTri(2, 1, 15)
-	c.Check(t.At(2, 1), check.Equals, 15.0)
-	t.mat.Uplo = blas.Upper
-	c.Check(t.At(1, 2), check.Equals, 6.0)
-	t.SetTri(1, 2, 15)
-	c.Check(t.At(1, 2), check.Equals, 15.0)
+	for _, row := range []int{-1, rows, rows + 1} {
+		panicked, message := panics(func() { tri.SetTri(row, 0, 1.2) })
+		if !panicked || message != ErrRowAccess.Error() {
+			c.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
+		}
+	}
+	for _, col := range []int{-1, cols, cols + 1} {
+		panicked, message := panics(func() { tri.SetTri(0, col, 1.2) })
+		if !panicked || message != ErrColAccess.Error() {
+			c.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
+		}
+	}
+
+	for _, st := range []struct {
+		row, col int
+		uplo     blas.Uplo
+	}{
+		{row: 2, col: 1, uplo: blas.Upper},
+		{row: 1, col: 2, uplo: blas.Lower},
+	} {
+		tri.mat.Uplo = st.uplo
+		panicked, message := panics(func() { tri.SetTri(st.row, st.col, 1.2) })
+		if !panicked || message != ErrTriangleSet.Error() {
+			c.Errorf("expected panic for %+v", st)
+		}
+	}
+
+	for _, st := range []struct {
+		row, col  int
+		uplo      blas.Uplo
+		orig, new float64
+	}{
+		{row: 2, col: 1, uplo: blas.Lower, orig: 8, new: 15},
+		{row: 1, col: 2, uplo: blas.Upper, orig: 6, new: 15},
+	} {
+		tri.mat.Uplo = st.uplo
+		if e := tri.At(st.row, st.col); e != st.orig {
+			c.Errorf("unexpected value for At(%d, %d): got: %v want: %v", st.row, st.col, e, st.orig)
+		}
+		tri.SetTri(st.row, st.col, st.new)
+		if e := tri.At(st.row, st.col); e != st.new {
+			c.Errorf("unexpected value for At(%d, %d) after SetTri(%[1]d, %d, %v): got: %v want: %[3]v", st.row, st.col, st.new, e)
+		}
+	}
 }
 
 func (s *S) TestTriDenseCopy(c *check.C) {
@@ -79,61 +132,41 @@ func (s *S) TestTriDenseCopy(c *check.C) {
 		size := rand.Intn(100)
 		r, err := randDense(size, 0.9, rand.NormFloat64)
 		if size == 0 {
-			c.Check(err, check.Equals, ErrZeroLength)
+			if err != ErrZeroLength {
+				c.Fatalf("expected error %v: got: %v", ErrZeroLength, err)
+			}
 			continue
 		}
-		c.Assert(err, check.Equals, nil)
+		if err != nil {
+			c.Fatalf("unexpected error: %v", err)
+		}
 
 		u := NewTriDense(size, true, nil)
 		l := NewTriDense(size, false, nil)
 
-		u.Copy(r)
-		l.Copy(r)
-		for m := 0; m < size; m++ {
-			for n := 0; n < size; n++ {
-				e := r.At(m, n)
-				switch {
-				case m < n: // Upper triangular matrix.
-					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				case m == n: // Diagonal matrix.
-					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				case m < n: // Lower triangular matrix.
-					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				}
-			}
-		}
-
-		u.Copy((*basicVectorer)(r))
-		l.Copy((*basicVectorer)(r))
-		for m := 0; m < size; m++ {
-			for n := 0; n < size; n++ {
-				e := r.At(m, n)
-				switch {
-				case m < n: // Upper triangular matrix.
-					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				case m == n: // Diagonal matrix.
-					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				case m < n: // Lower triangular matrix.
-					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				}
-			}
-		}
-
-		u.Copy((*basicMatrix)(r))
-		l.Copy((*basicMatrix)(r))
-		for m := 0; m < size; m++ {
-			for n := 0; n < size; n++ {
-				e := r.At(m, n)
-				switch {
-				case m < n: // Upper triangular matrix.
-					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				case m == n: // Diagonal matrix.
-					c.Check(u.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
-				case m < n: // Lower triangular matrix.
-					c.Check(l.At(m, n), check.Equals, e, check.Commentf("Test #%d At(%d, %d)", i, m, n))
+		for _, typ := range []Matrix{r, (*basicVectorer)(r), (*basicMatrix)(r)} {
+			u.Copy(typ)
+			l.Copy(typ)
+			for m := 0; m < size; m++ {
+				for n := 0; n < size; n++ {
+					want := typ.At(m, n)
+					switch {
+					case m < n: // Upper triangular matrix.
+						if got := u.At(m, n); got != want {
+							c.Errorf("unexpected upper value for At(%d, %d) for test %d: got: %v want: %v", m, n, i, got, want)
+						}
+					case m == n: // Diagonal matrix.
+						if got := u.At(m, n); got != want {
+							c.Errorf("unexpected upper value for At(%d, %d) for test %d: got: %v want: %v", m, n, i, got, want)
+						}
+						if got := l.At(m, n); got != want {
+							c.Errorf("unexpected diagonal value for At(%d, %d) for test %d: got: %v want: %v", m, n, i, got, want)
+						}
+					case m < n: // Lower triangular matrix.
+						if got := l.At(m, n); got != want {
+							c.Errorf("unexpected lower value for At(%d, %d) for test %d: got: %v want: %v", m, n, i, got, want)
+						}
+					}
 				}
 			}
 		}
@@ -145,10 +178,14 @@ func (s *S) TestTriTriDenseCopy(c *check.C) {
 		size := rand.Intn(100)
 		r, err := randDense(size, 1, rand.NormFloat64)
 		if size == 0 {
-			c.Check(err, check.Equals, ErrZeroLength)
+			if err != ErrZeroLength {
+				c.Fatalf("expected error %v: got: %v", ErrZeroLength, err)
+			}
 			continue
 		}
-		c.Assert(err, check.Equals, nil)
+		if err != nil {
+			c.Fatalf("unexpected error: %v", err)
+		}
 
 		ur := NewTriDense(size, true, nil)
 		lr := NewTriDense(size, false, nil)

@@ -88,7 +88,7 @@ func TestCovarianceMatrix(t *testing.T) {
 	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(5, 2, nil), []float64{}) }) {
 		t.Errorf("CovarianceMatrix did not panic with weight size mismatch")
 	}
-	if !Panics(func() { CovarianceMatrix(mat64.NewDense(1, 1, nil), mat64.NewDense(5, 2, nil), nil) }) {
+	if !Panics(func() { CovarianceMatrix(mat64.NewSymDense(1, nil), mat64.NewDense(5, 2, nil), nil) }) {
 		t.Errorf("CovarianceMatrix did not panic with preallocation size mismatch")
 	}
 	if !Panics(func() { CovarianceMatrix(nil, mat64.NewDense(2, 2, []float64{1, 2, 3, 4}), []float64{1, -1}) }) {
@@ -182,7 +182,7 @@ func TestCorrelationMatrix(t *testing.T) {
 	if !Panics(func() { CorrelationMatrix(nil, mat64.NewDense(5, 2, nil), []float64{}) }) {
 		t.Errorf("CorrelationMatrix did not panic with weight size mismatch")
 	}
-	if !Panics(func() { CorrelationMatrix(mat64.NewDense(1, 1, nil), mat64.NewDense(5, 2, nil), nil) }) {
+	if !Panics(func() { CorrelationMatrix(mat64.NewSymDense(1, nil), mat64.NewDense(5, 2, nil), nil) }) {
 		t.Errorf("CorrelationMatrix did not panic with preallocation size mismatch")
 	}
 	if !Panics(func() { CorrelationMatrix(nil, mat64.NewDense(2, 2, []float64{1, 2, 3, 4}), []float64{1, -1}) }) {
@@ -229,7 +229,7 @@ func TestCorrCov(t *testing.T) {
 		corr := CorrelationMatrix(nil, test.data, test.weights)
 		cov := CovarianceMatrix(nil, test.data, test.weights)
 
-		r, _ := cov.Dims()
+		r := cov.Symmetric()
 
 		// Get the diagonal elements from cov to determine the sigmas.
 		sigmas := make([]float64, r)
@@ -237,9 +237,12 @@ func TestCorrCov(t *testing.T) {
 			sigmas[i] = math.Sqrt(cov.At(i, i))
 		}
 
-		covFromCorr := mat64.DenseCopyOf(corr)
+		covFromCorr := mat64.NewSymDense(corr.Symmetric(), nil)
+		covFromCorr.CopySym(corr)
 		corrToCov(covFromCorr, sigmas)
-		corrFromCov := mat64.DenseCopyOf(cov)
+
+		corrFromCov := mat64.NewSymDense(cov.Symmetric(), nil)
+		corrFromCov.CopySym(cov)
 		covToCorr(corrFromCov)
 
 		if !mat64.EqualApprox(corr, corrFromCov, 1e-14) {
@@ -249,7 +252,7 @@ func TestCorrCov(t *testing.T) {
 			t.Errorf("%d: covToCorr did not match direct Covariance calculation.  Want: %v, got: %v. ", i, cov, covFromCorr)
 		}
 
-		if !Panics(func() { corrToCov(mat64.NewDense(2, 2, nil), []float64{}) }) {
+		if !Panics(func() { corrToCov(mat64.NewSymDense(2, nil), []float64{}) }) {
 			t.Errorf("CorrelationMatrix did not panic with sigma size mismatch")
 		}
 	}
@@ -284,7 +287,7 @@ func benchmarkCovarianceMatrixWeighted(b *testing.B, m mat64.Matrix) {
 }
 func benchmarkCovarianceMatrixInPlace(b *testing.B, m mat64.Matrix) {
 	_, c := m.Dims()
-	res := mat64.NewDense(c, c, nil)
+	res := mat64.NewSymDense(c, nil)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		CovarianceMatrix(res, m, nil)
@@ -397,10 +400,11 @@ func BenchmarkCovToCorr(b *testing.B) {
 	// generate a 10x10 covariance matrix
 	m := randMat(small, small)
 	c := CovarianceMatrix(nil, m, nil)
+	cc := mat64.NewSymDense(c.Symmetric(), nil)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		cc := mat64.DenseCopyOf(c)
+		cc.CopySym(c)
 		b.StartTimer()
 		covToCorr(cc)
 	}
@@ -410,6 +414,7 @@ func BenchmarkCorrToCov(b *testing.B) {
 	// generate a 10x10 correlation matrix
 	m := randMat(small, small)
 	c := CorrelationMatrix(nil, m, nil)
+	cc := mat64.NewSymDense(c.Symmetric(), nil)
 	sigma := make([]float64, small)
 	for i := range sigma {
 		sigma[i] = 2
@@ -417,7 +422,7 @@ func BenchmarkCorrToCov(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		cc := mat64.DenseCopyOf(c)
+		cc.CopySym(c)
 		b.StartTimer()
 		corrToCov(cc, sigma)
 	}

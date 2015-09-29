@@ -13,26 +13,23 @@ import (
 
 // CovarianceMatrix calculates a covariance matrix (also known as a
 // variance-covariance matrix) from a matrix of data, using a two-pass
-// algorithm. The matrix returned will be symmetric and square.
+// algorithm.
 //
-// The weights wts should have the length equal to the number of rows in
-// input data matrix x. If c is nil, then a new matrix with appropriate size will
-// be constructed.  If c is not nil, it should be a square matrix with the same
-// number of columns as the input data matrix x, and it will be used as the receiver
-// for the covariance data.  Weights cannot be negative.
-func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.Dense {
+// The weights must have length equal to the number of rows in
+// input data matrix x. If cov is nil, then a new matrix with appropriate size will
+// be constructed. If cov is not nil, it should have the same number of columns as the
+// input data matrix x, and it will be used as the destination for the covariance
+// data. Weights must not be negative.
+func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *mat64.SymDense {
 	// This is the matrix version of the two-pass algorithm. It doesn't use the
 	// additional floating point error correction that the Covariance function uses
 	// to reduce the impact of rounding during centering.
 
-	// TODO(jonlawlor): indicate that the resulting matrix is symmetric, and change
-	// the returned type from a *mat.Dense to a *mat.Symmetric.
-
 	r, c := x.Dims()
 
 	if cov == nil {
-		cov = mat64.NewDense(c, c, nil)
-	} else if covr, covc := cov.Dims(); covr != covc || covc != c {
+		cov = mat64.NewSymDense(c, nil)
+	} else if n := cov.Symmetric(); n != c {
 		panic(mat64.ErrShape)
 	}
 
@@ -41,27 +38,27 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	// Subtract the mean of each of the columns.
 	for i := 0; i < c; i++ {
 		v := xt.RawRowView(i)
-		// This will panic with ErrShape if len(wts) != len(v), so
+		// This will panic with ErrShape if len(weights) != len(v), so
 		// we don't have to check the size later.
-		mean := Mean(v, wts)
+		mean := Mean(v, weights)
 		floats.AddConst(-mean, v)
 	}
 
 	var n float64
-	if wts == nil {
+	if weights == nil {
 
 		n = float64(r)
 
-		cov.Mul(&xt, (&xt).T())
+		cov.SymOuterK(&xt)
 
 		// Scale by the sample size.
-		cov.Scale(1/(n-1), cov)
+		cov.ScaleSym(1/(n-1), cov)
 		return cov
 	}
 
 	// Multiply by the sqrt of the weights, so that multiplication is symmetric.
 	sqrtwts := make([]float64, r)
-	for i, w := range wts {
+	for i, w := range weights {
 		if w < 0 {
 			panic("stat: negative covariance matrix weights")
 		}
@@ -74,54 +71,43 @@ func CovarianceMatrix(cov *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.De
 	}
 
 	// Calculate the normalization factor.
-	n = floats.Sum(wts)
-	cov.Mul(&xt, (&xt).T())
+	n = floats.Sum(weights)
+	cov.SymOuterK(&xt)
 
 	// Scale by the sample size.
-	cov.Scale(1/(n-1), cov)
+	cov.ScaleSym(1/(n-1), cov)
 	return cov
 }
 
-// CorrelationMatrix calculates a correlation matrix from a matrix of data,
-// using a two-pass algorithm. The matrix returned will be symmetric and square.
+// CorrelationMatrix calculates a correlation matrix from a matrix of data
+// using a two-pass algorithm.
 //
-// The weights wts should have the length equal to the number of rows in
-// input data matrix x. If c is nil, then a new matrix with appropriate size will
-// be constructed.  If c is not nil, it should be a square matrix with the same
-// number of columns as the input data matrix x, and it will be used as the receiver
-// for the correlation data.  Weights cannot be negative.
-func CorrelationMatrix(c *mat64.Dense, x mat64.Matrix, wts []float64) *mat64.Dense {
-
-	// TODO(jonlawlor): indicate that the resulting matrix is symmetric, and change
-	// the returned type from a *mat.Dense to a *mat.Symmetric.
-
-	// This will panic if the sizes don't match, or if wts is the wrong size.
-	c = CovarianceMatrix(c, x, wts)
-	covToCorr(c)
-	return c
+// The weights must have length equal to the number of rows in
+// input data matrix x. If corr is nil, then a new matrix with appropriate size will
+// be constructed. If corr is not nil, it should have the same number of columns
+// as the input data matrix x, and it will be used as the destination for the
+// correlation data. Weights must not be negative.
+func CorrelationMatrix(corr *mat64.SymDense, x mat64.Matrix, weights []float64) *mat64.SymDense {
+	// This will panic if the sizes don't match, or if weights is the wrong size.
+	corr = CovarianceMatrix(corr, x, weights)
+	covToCorr(corr)
+	return corr
 }
 
 // covToCorr converts a covariance matrix to a correlation matrix.
-func covToCorr(c *mat64.Dense) {
-
-	// TODO(jonlawlor): use a *mat64.Symmetric as input.
-
-	r, _ := c.Dims()
+func covToCorr(c *mat64.SymDense) {
+	r := c.Symmetric()
 
 	s := make([]float64, r)
 	for i := 0; i < r; i++ {
 		s[i] = 1 / math.Sqrt(c.At(i, i))
 	}
 	for i, sx := range s {
-		row := c.RawRowView(i)
-		for j, sy := range s {
-			if i == j {
-				// Ensure that the diagonal has exactly ones.
-				row[j] = 1
-				continue
-			}
-			row[j] *= sx
-			row[j] *= sy
+		// Ensure that the diagonal has exactly ones.
+		c.SetSym(i, i, 1)
+		for j := i + 1; j < r; j++ {
+			v := c.At(i, j)
+			c.SetSym(i, j, v*sx*s[j])
 		}
 	}
 }
@@ -130,26 +116,18 @@ func covToCorr(c *mat64.Dense) {
 // The input sigma should be vector of standard deviations corresponding
 // to the covariance.  It will panic if len(sigma) is not equal to the
 // number of rows in the correlation matrix.
-func corrToCov(c *mat64.Dense, sigma []float64) {
-
-	// TODO(jonlawlor): use a *mat64.Symmetric as input.
-
+func corrToCov(c *mat64.SymDense, sigma []float64) {
 	r, _ := c.Dims()
 
 	if r != len(sigma) {
 		panic(mat64.ErrShape)
 	}
-
 	for i, sx := range sigma {
-		row := c.RawRowView(i)
-		for j, sy := range sigma {
-			if i == j {
-				// Ensure that the diagonal has exactly sigma squared.
-				row[j] = sx * sx
-				continue
-			}
-			row[j] *= sx
-			row[j] *= sy
+		// Ensure that the diagonal has exactly sigma squared.
+		c.SetSym(i, i, sx*sx)
+		for j := i + 1; j < r; j++ {
+			v := c.At(i, j)
+			c.SetSym(i, j, v*sx*sigma[j])
 		}
 	}
 }

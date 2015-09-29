@@ -279,6 +279,47 @@ func TestSymRankOne(t *testing.T) {
 			}
 		}
 	}
+
+	alpha := 3.0
+	method := func(receiver, a, b Matrix) {
+		type SymRankOner interface {
+			SymRankOne(a Symmetric, alpha float64, x *Vector)
+		}
+		rd := receiver.(SymRankOner)
+		rd.SymRankOne(a.(Symmetric), alpha, b.(*Vector))
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		var tmp Dense
+		tmp.Mul(b, b.T())
+		tmp.Scale(alpha, &tmp)
+		receiver.Add(a, &tmp)
+	}
+	legalTypes := func(a, b Matrix) bool {
+		_, ok := a.(Symmetric)
+		if !ok {
+			return false
+		}
+		_, ok = b.(*Vector)
+		return ok
+	}
+	legalSize := func(ar, ac, br, bc int) bool {
+		if ar != ac {
+			return false
+		}
+		return br == ar
+	}
+	testTwoInput(t, "SymRankOne", &SymDense{}, method, denseComparison, legalTypes, legalSize, 1e-14)
+}
+
+func TestIssue250SymRankOne(t *testing.T) {
+	x := NewVector(5, []float64{1, 2, 3, 4, 5})
+	var s1, s2 SymDense
+	s1.SymRankOne(NewSymDense(5, nil), 1, x)
+	s2.SymRankOne(NewSymDense(5, nil), 1, x)
+	s2.SymRankOne(NewSymDense(5, nil), 1, x)
+	if !Equal(&s1, &s2) {
+		t.Error("unexpected result from repeat")
+	}
 }
 
 func TestRankTwo(t *testing.T) {
@@ -365,6 +406,31 @@ func TestSymRankK(t *testing.T) {
 		return br == ar
 	}
 	testTwoInput(t, "SymRankK", &SymDense{}, method, denseComparison, legalTypes, legalSize, 1e-14)
+}
+
+func TestSymOuterK(t *testing.T) {
+	method := func(receiver, x Matrix) {
+		type SymOuterKer interface {
+			SymOuterK(x Matrix)
+		}
+		rd := receiver.(SymOuterKer)
+		rd.SymOuterK(x)
+	}
+	denseComparison := func(receiver, x *Dense) {
+		receiver.Mul(x, x.T())
+	}
+	testOneInput(t, "SymOuterK", &SymDense{}, method, denseComparison, isAnyType, isAnySize, 1e-14)
+}
+
+func TestIssue250SymOuterK(t *testing.T) {
+	x := NewVector(5, []float64{1, 2, 3, 4, 5})
+	var s1, s2 SymDense
+	s1.SymOuterK(x)
+	s2.SymOuterK(x)
+	s2.SymOuterK(x)
+	if !Equal(&s1, &s2) {
+		t.Error("unexpected result from repeat")
+	}
 }
 
 func TestScaleSym(t *testing.T) {

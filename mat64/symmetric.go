@@ -177,30 +177,24 @@ func (s *SymDense) CopySym(a Symmetric) int {
 // the result in the receiver
 //  s = a + alpha * x * x'
 func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
-	n := s.mat.N
-	if x.Len() != n {
+	n := x.Len()
+	if a.Symmetric() != n {
 		panic(ErrShape)
 	}
-	var w SymDense
-	if s == a {
-		w = *s
-	}
-	if w.isZero() {
-		w.mat = blas64.Symmetric{
+	if s.isZero() {
+		s.mat = blas64.Symmetric{
 			N:      n,
 			Stride: n,
 			Uplo:   blas.Upper,
-			Data:   use(w.mat.Data, n*n),
+			Data:   use(s.mat.Data, n*n),
 		}
-	} else if n != w.mat.N {
+	} else if n != s.mat.N {
 		panic(ErrShape)
 	}
 	if s != a {
-		w.CopySym(a)
+		s.CopySym(a)
 	}
-	blas64.Syr(alpha, x.mat, w.mat)
-	*s = w
-	return
+	blas64.Syr(alpha, x.mat, s.mat)
 }
 
 // SymRankK performs a symmetric rank-k update to the matrix a and stores the
@@ -236,9 +230,35 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 // SymRankOne
 //  s = x * x'
 func (s *SymDense) SymOuterK(x Matrix) {
-	r, _ := x.Dims()
-	s.reuseAs(r)
-	s.SymRankK(s, 1, x)
+	n, _ := x.Dims()
+	switch {
+	case s.isZero():
+		s.mat = blas64.Symmetric{
+			N:      n,
+			Stride: n,
+			Data:   useZeroed(s.mat.Data, n*n),
+			Uplo:   blas.Upper,
+		}
+		s.SymRankK(s, 1, x)
+	case s.mat.Uplo != blas.Upper:
+		panic(badSymTriangle)
+	case s.mat.N == n:
+		if s == x {
+			w := getWorkspaceSym(n, true)
+			w.SymRankK(w, 1, x)
+			s.CopySym(w)
+			putWorkspaceSym(w)
+		} else {
+			// Only zero the upper triangle.
+			for i := 0; i < n; i++ {
+				ri := i * s.mat.Stride
+				zero(s.mat.Data[ri+i : ri+n])
+			}
+			s.SymRankK(s, 1, x)
+		}
+	default:
+		panic(ErrShape)
+	}
 }
 
 // RankTwo performs a symmmetric rank-two update to the matrix a and stores

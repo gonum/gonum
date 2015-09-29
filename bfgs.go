@@ -117,7 +117,7 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		yDotY := floats.Dot(b.y, b.y)
 		scale := sDotY / yDotY
 		for i := 0; i < len(loc.X); i++ {
-			for j := 0; j < len(loc.X); j++ {
+			for j := i; j < len(loc.X); j++ {
 				if i == j {
 					b.invHess.SetSym(i, i, scale)
 				} else {

@@ -1,4 +1,4 @@
-# Gonum BLAS [![Build Status](https://travis-ci.org/gonum/blas.svg?branch=master)](https://travis-ci.org/gonum/blas)  [![Coverage Status](https://img.shields.io/coveralls/gonum/blas.svg)](https://coveralls.io/r/gonum/blas)
+# Gonum BLAS [![Build Status](https://travis-ci.org/gonum/blas.svg?branch=master)](https://travis-ci.org/gonum/blas)  [![Coverage Status](https://coveralls.io/repos/gonum/blas/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/blas?branch=master)
 
 A collection of packages to provide BLAS functionality for the [Go programming
 language](http://golang.org)

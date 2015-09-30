@@ -721,8 +721,8 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 
 // Outer calculates the outer product of x and y, and stores the result
 // in the receiver. In order to update to an existing matrix, see RankOne.
-//  m = x * y'
-func (m *Dense) Outer(x, y *Vector) {
+//  m = alpha * x * y'
+func (m *Dense) Outer(alpha float64, x, y *Vector) {
 	r := x.Len()
 	c := y.Len()
 
@@ -752,5 +752,5 @@ func (m *Dense) Outer(x, y *Vector) {
 		}
 	}
 
-	blas64.Ger(1, x.mat, y.mat, m.mat)
+	blas64.Ger(alpha, x.mat, y.mat, m.mat)
 }

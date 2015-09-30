@@ -1383,18 +1383,21 @@ func TestOuter(t *testing.T) {
 			y: []float64{8, 9, 9},
 		},
 	} {
-		want := &Dense{}
-		xm := NewDense(len(test.x), 1, test.x)
-		ym := NewDense(1, len(test.y), test.y)
+		for _, f := range []float64{0.5, 1, 3} {
+			want := &Dense{}
+			xm := NewDense(len(test.x), 1, test.x)
+			ym := NewDense(1, len(test.y), test.y)
 
-		want.Mul(xm, ym)
+			want.Mul(xm, ym)
+			want.Scale(f, want)
 
-		var m Dense
-		for j := 0; j < 2; j++ {
-			// Check with a new matrix - and then again.
-			m.Outer(NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
-			if !Equal(&m, want) {
-				t.Errorf("unexpected result for Outer test %d iteration %d: got: %+v want: %+v", i, j, m, want)
+			var m Dense
+			for j := 0; j < 2; j++ {
+				// Check with a new matrix - and then again.
+				m.Outer(f, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
+				if !Equal(&m, want) {
+					t.Errorf("unexpected result for Outer test %d iteration %d scale %v: got: %+v want: %+v", i, j, f, m, want)
+				}
 			}
 		}
 	}

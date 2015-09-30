@@ -409,25 +409,28 @@ func TestSymRankK(t *testing.T) {
 }
 
 func TestSymOuterK(t *testing.T) {
-	method := func(receiver, x Matrix) {
-		type SymOuterKer interface {
-			SymOuterK(x Matrix)
+	for _, f := range []float64{0.5, 1, 3} {
+		method := func(receiver, x Matrix) {
+			type SymOuterKer interface {
+				SymOuterK(alpha float64, x Matrix)
+			}
+			rd := receiver.(SymOuterKer)
+			rd.SymOuterK(f, x)
 		}
-		rd := receiver.(SymOuterKer)
-		rd.SymOuterK(x)
+		denseComparison := func(receiver, x *Dense) {
+			receiver.Mul(x, x.T())
+			receiver.Scale(f, receiver)
+		}
+		testOneInput(t, "SymOuterK", &SymDense{}, method, denseComparison, isAnyType, isAnySize, 1e-14)
 	}
-	denseComparison := func(receiver, x *Dense) {
-		receiver.Mul(x, x.T())
-	}
-	testOneInput(t, "SymOuterK", &SymDense{}, method, denseComparison, isAnyType, isAnySize, 1e-14)
 }
 
 func TestIssue250SymOuterK(t *testing.T) {
 	x := NewVector(5, []float64{1, 2, 3, 4, 5})
 	var s1, s2 SymDense
-	s1.SymOuterK(x)
-	s2.SymOuterK(x)
-	s2.SymOuterK(x)
+	s1.SymOuterK(1, x)
+	s2.SymOuterK(1, x)
+	s2.SymOuterK(1, x)
 	if !Equal(&s1, &s2) {
 		t.Error("unexpected result from repeat")
 	}

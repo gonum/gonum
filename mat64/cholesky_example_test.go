@@ -19,7 +19,7 @@ func ExampleCholesky() {
 		8, -2, -2, 1,
 	})
 	var a mat64.SymDense
-	a.SymOuterK(tmp)
+	a.SymOuterK(1, tmp)
 
 	fmt.Printf("a = %0.4v\n", mat64.Formatted(&a, mat64.Prefix("    ")))
 

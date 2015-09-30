@@ -228,8 +228,8 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 // SymOuterK calculates the outer product of a times its transpose and stores
 // the result into the receiver. In order to update an existing matrix, see
 // SymRankOne
-//  s = x * x'
-func (s *SymDense) SymOuterK(x Matrix) {
+//  s = alpha * x * x'
+func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 	n, _ := x.Dims()
 	switch {
 	case s.isZero():
@@ -239,13 +239,13 @@ func (s *SymDense) SymOuterK(x Matrix) {
 			Data:   useZeroed(s.mat.Data, n*n),
 			Uplo:   blas.Upper,
 		}
-		s.SymRankK(s, 1, x)
+		s.SymRankK(s, alpha, x)
 	case s.mat.Uplo != blas.Upper:
 		panic(badSymTriangle)
 	case s.mat.N == n:
 		if s == x {
 			w := getWorkspaceSym(n, true)
-			w.SymRankK(w, 1, x)
+			w.SymRankK(w, alpha, x)
 			s.CopySym(w)
 			putWorkspaceSym(w)
 		} else {
@@ -254,7 +254,7 @@ func (s *SymDense) SymOuterK(x Matrix) {
 				ri := i * s.mat.Stride
 				zero(s.mat.Data[ri+i : ri+n])
 			}
-			s.SymRankK(s, 1, x)
+			s.SymRankK(s, alpha, x)
 		}
 	default:
 		panic(ErrShape)

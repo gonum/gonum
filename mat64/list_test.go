@@ -793,12 +793,12 @@ func testOneInput(t *testing.T,
 			// The receiver has been overwritten in place so use its size
 			// to construct a new random matrix.
 			rr, rc := zero.Dims()
-			nonZero := makeRandOf(receiver, rr, rc)
-			panicked, _ = panics(func() { method(nonZero, a) })
+			neverZero := makeRandOf(receiver, rr, rc)
+			panicked, _ = panics(func() { method(neverZero, a) })
 			if panicked {
 				t.Errorf("Panicked with non-zero receiver: %s", errStr)
 			}
-			if !equalApprox(nonZero, &want, tol) {
+			if !equalApprox(neverZero, &want, tol) {
 				t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 			}
 
@@ -837,7 +837,7 @@ func testOneInput(t *testing.T,
 			// if the type and size of the receiver and one of the
 			// arguments match. Test the method works properly
 			// when this is the case.
-			aMaybeSame := maybeSame(nonZero, a)
+			aMaybeSame := maybeSame(neverZero, a)
 			if aMaybeSame {
 				aSame := makeCopyOf(a)
 				receiver = aSame
@@ -942,7 +942,8 @@ func testTwoInput(t *testing.T,
 				if !dimsOK {
 					continue
 				}
-				if !equalApprox(zero, &want, tol) {
+				wasZero, zero := zero, nil // Nil-out zero so we detect illegal use.
+				if !equalApprox(wasZero, &want, tol) {
 					t.Errorf("Answer mismatch with zero receiver: %s", errStr)
 					continue
 				}
@@ -950,13 +951,13 @@ func testTwoInput(t *testing.T,
 				// Test the method with a non-zero-value of the receiver.
 				// The receiver has been overwritten in place so use its size
 				// to construct a new random matrix.
-				rr, rc := zero.Dims()
-				nonZero := makeRandOf(receiver, rr, rc)
-				panicked, _ = panics(func() { method(nonZero, a, b) })
+				rr, rc := wasZero.Dims()
+				neverZero := makeRandOf(receiver, rr, rc)
+				panicked, _ = panics(func() { method(neverZero, a, b) })
 				if panicked {
 					t.Errorf("Panicked with non-zero receiver: %s", errStr)
 				}
-				if !equalApprox(nonZero, &want, tol) {
+				if !equalApprox(neverZero, &want, tol) {
 					t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 				}
 
@@ -995,8 +996,8 @@ func testTwoInput(t *testing.T,
 				// if the type and size of the receiver and one of the
 				// arguments match. Test the method works properly
 				// when this is the case.
-				aMaybeSame := maybeSame(nonZero, a)
-				bMaybeSame := maybeSame(nonZero, b)
+				aMaybeSame := maybeSame(neverZero, a)
+				bMaybeSame := maybeSame(neverZero, b)
 				if aMaybeSame {
 					aSame := makeCopyOf(a)
 					receiver = aSame
@@ -1056,14 +1057,15 @@ func testTwoInput(t *testing.T,
 					// Compute the real answer for this case. It is different
 					// from the inital answer since now a and b have the
 					// same data.
-					zero = makeRandOf(zero, 0, 0)
+					zero = makeRandOf(wasZero, 0, 0)
 					method(zero, aSame, bSame)
+					wasZero, zero = zero, nil // Nil-out zero so we detect illegal use.
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, aSame, bSame) })
 					if panicked {
 						t.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
 					} else {
-						if !equalApprox(receiver, zero, tol) {
+						if !equalApprox(receiver, wasZero, tol) {
 							t.Errorf("Wrong answer when both maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)

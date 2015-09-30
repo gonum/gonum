@@ -1,4 +1,4 @@
-# Gonum Stat  [![Build Status](https://travis-ci.org/gonum/stat.svg)](https://travis-ci.org/gonum/stat)  [![Coverage Status](https://img.shields.io/coveralls/gonum/stat.svg)](https://coveralls.io/r/gonum/stat)
+# Gonum Stat  [![Build Status](https://travis-ci.org/gonum/stat.svg)](https://travis-ci.org/gonum/stat)  [![Coverage Status](https://coveralls.io/repos/gonum/stat/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/stat?branch=master)
 
 This is a statistics package for the Go language.
 

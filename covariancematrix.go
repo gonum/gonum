@@ -44,15 +44,10 @@ func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *m
 		floats.AddConst(-mean, v)
 	}
 
-	var n float64
 	if weights == nil {
-
-		n = float64(r)
-
-		cov.SymOuterK(&xt)
-
-		// Scale by the sample size.
-		cov.ScaleSym(1/(n-1), cov)
+		// Calculate the normalization factor
+		// scaled by the sample size.
+		cov.SymOuterK(1/(float64(r)-1), &xt)
 		return cov
 	}
 
@@ -70,12 +65,9 @@ func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *m
 		floats.Mul(v, sqrtwts)
 	}
 
-	// Calculate the normalization factor.
-	n = floats.Sum(weights)
-	cov.SymOuterK(&xt)
-
-	// Scale by the sample size.
-	cov.ScaleSym(1/(n-1), cov)
+	// Calculate the normalization factor
+	// scaled by the weighted sample size.
+	cov.SymOuterK(1/(floats.Sum(weights)-1), &xt)
 	return cov
 }
 

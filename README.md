@@ -1,4 +1,4 @@
-# Gonum Matrix  [![Build Status](https://travis-ci.org/gonum/matrix.svg?branch=master)](https://travis-ci.org/gonum/matrix) [![Coverage Status](https://img.shields.io/coveralls/gonum/matrix.svg)](https://coveralls.io/r/gonum/matrix)
+# Gonum Matrix  [![Build Status](https://travis-ci.org/gonum/matrix.svg?branch=master)](https://travis-ci.org/gonum/matrix) [![Coverage Status](https://coveralls.io/repos/gonum/matrix/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/matrix?branch=master)
 
 This is a matrix package for the Go language.
 

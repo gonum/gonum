@@ -1,3 +1,5 @@
+sudo: false
+
 language: go
 
 # Versions of go that are explicitly supported by gonum.

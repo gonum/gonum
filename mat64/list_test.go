@@ -40,6 +40,16 @@ func legalSizeSameSquare(ar, ac, br, bc int) bool {
 	return true
 }
 
+// legalSizeSameHeight returns whether the two matrices have the same number of rows.
+func legalSizeSameHeight(ar, _, br, _ int) bool {
+	return ar == br
+}
+
+// legalSizeSameWidth returns whether the two matrices have the same number of columns.
+func legalSizeSameWidth(_, ac, _, bc int) bool {
+	return ac == bc
+}
+
 // legalSizeSolve returns whether the two matrices can be used in a linear solve.
 func legalSizeSolve(ar, ac, br, bc int) bool {
 	return ar == br
@@ -346,8 +356,8 @@ func maybeSame(receiver, a Matrix) bool {
 }
 
 // equalApprox returns whether the elements of a and b are the same to within
-// the tolerance.
-func equalApprox(a, b Matrix, tol float64) bool {
+// the tolerance. If ignoreNaN is true the test is relaxed such that NaN == NaN.
+func equalApprox(a, b Matrix, tol float64, ignoreNaN bool) bool {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br {
@@ -359,7 +369,9 @@ func equalApprox(a, b Matrix, tol float64) bool {
 	for i := 0; i < ar; i++ {
 		for j := 0; j < ac; j++ {
 			if !floats.EqualWithinAbsOrRel(a.At(i, j), b.At(i, j), tol, tol) {
-				return false
+				if !ignoreNaN || math.IsNaN(a.At(i, j)) != math.IsNaN(b.At(i, j)) {
+					return false
+				}
 			}
 		}
 	}
@@ -784,7 +796,7 @@ func testOneInput(t *testing.T,
 			if !dimsOK {
 				continue
 			}
-			if !equalApprox(zero, &want, tol) {
+			if !equalApprox(zero, &want, tol, false) {
 				t.Errorf("Answer mismatch with zero receiver: %s", errStr)
 				continue
 			}
@@ -798,7 +810,7 @@ func testOneInput(t *testing.T,
 			if panicked {
 				t.Errorf("Panicked with non-zero receiver: %s", errStr)
 			}
-			if !equalApprox(neverZero, &want, tol) {
+			if !equalApprox(neverZero, &want, tol, false) {
 				t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 			}
 
@@ -850,7 +862,7 @@ func testOneInput(t *testing.T,
 				if panicked {
 					t.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
 				} else {
-					if !equalApprox(receiver, &want, tol) {
+					if !equalApprox(receiver, &want, tol, false) {
 						t.Errorf("Wrong answer when a maybeSame: %s", errStr)
 					}
 					postData := underlyingData(receiver)
@@ -943,7 +955,8 @@ func testTwoInput(t *testing.T,
 					continue
 				}
 				wasZero, zero := zero, nil // Nil-out zero so we detect illegal use.
-				if !equalApprox(wasZero, &want, tol) {
+				// NaN equality is allowed because of 0/0 in DivElem test.
+				if !equalApprox(wasZero, &want, tol, true) {
 					t.Errorf("Answer mismatch with zero receiver: %s", errStr)
 					continue
 				}
@@ -957,7 +970,8 @@ func testTwoInput(t *testing.T,
 				if panicked {
 					t.Errorf("Panicked with non-zero receiver: %s", errStr)
 				}
-				if !equalApprox(neverZero, &want, tol) {
+				// NaN equality is allowed because of 0/0 in DivElem test.
+				if !equalApprox(neverZero, &want, tol, true) {
 					t.Errorf("Answer mismatch non-zero receiver: %s", errStr)
 				}
 
@@ -1010,7 +1024,7 @@ func testTwoInput(t *testing.T,
 					if panicked {
 						t.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
 					} else {
-						if !equalApprox(receiver, &want, tol) {
+						if !equalApprox(receiver, &want, tol, false) {
 							t.Errorf("Wrong answer when a maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)
@@ -1031,7 +1045,7 @@ func testTwoInput(t *testing.T,
 					if panicked {
 						t.Errorf("Panics when b maybeSame: %s", errStr)
 					} else {
-						if !equalApprox(receiver, &want, tol) {
+						if !equalApprox(receiver, &want, tol, false) {
 							t.Errorf("Wrong answer when b maybeSame: %s: %s", errStr, err)
 						}
 						postData := underlyingData(receiver)
@@ -1065,7 +1079,7 @@ func testTwoInput(t *testing.T,
 					if panicked {
 						t.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
 					} else {
-						if !equalApprox(receiver, wasZero, tol) {
+						if !equalApprox(receiver, wasZero, tol, false) {
 							t.Errorf("Wrong answer when both maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)

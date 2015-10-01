@@ -437,16 +437,17 @@ func TestIssue250SymOuterK(t *testing.T) {
 }
 
 func TestScaleSym(t *testing.T) {
-	f := 3.0
-	method := func(receiver, a Matrix) {
-		type ScaleSymer interface {
-			ScaleSym(f float64, a Symmetric)
+	for _, f := range []float64{0.5, 1, 3} {
+		method := func(receiver, a Matrix) {
+			type ScaleSymer interface {
+				ScaleSym(f float64, a Symmetric)
+			}
+			rd := receiver.(ScaleSymer)
+			rd.ScaleSym(f, a.(Symmetric))
 		}
-		rd := receiver.(ScaleSymer)
-		rd.ScaleSym(f, a.(Symmetric))
+		denseComparison := func(receiver, a *Dense) {
+			receiver.Scale(f, a)
+		}
+		testOneInput(t, "ScaleSym", &SymDense{}, method, denseComparison, legalTypeSym, isSquare, 1e-14)
 	}
-	denseComparison := func(receiver, a *Dense) {
-		receiver.Scale(f, a)
-	}
-	testOneInput(t, "ScaleSym", &SymDense{}, method, denseComparison, legalTypeSym, isSquare, 1e-14)
 }

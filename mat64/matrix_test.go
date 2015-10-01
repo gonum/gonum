@@ -10,6 +10,8 @@ import (
 	"testing"
 )
 
+var inf = math.Inf(1)
+
 func leaksPanic(fn func()) (panicked bool) {
 	defer func() {
 		r := recover()

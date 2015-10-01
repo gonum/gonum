@@ -12,8 +12,6 @@ import (
 	"github.com/gonum/lapack/lapack64"
 )
 
-var inf = math.Inf(1)
-
 const (
 	epsilon = 2.2204e-16
 	small   = math.SmallestNonzeroFloat64
@@ -79,12 +77,21 @@ func (m *Dense) Add(a, b Matrix) {
 func (m *Dense) Sub(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
-
 	if ar != br || ac != bc {
 		panic(ErrShape)
 	}
 
+	aMat, _ := untranspose(a)
+	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
+	}
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -126,12 +133,21 @@ func (m *Dense) Sub(a, b Matrix) {
 func (m *Dense) MulElem(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
-
 	if ar != br || ac != bc {
 		panic(ErrShape)
 	}
 
+	aMat, _ := untranspose(a)
+	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
+	}
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -173,12 +189,21 @@ func (m *Dense) MulElem(a, b Matrix) {
 func (m *Dense) DivElem(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
-
 	if ar != br || ac != bc {
 		panic(ErrShape)
 	}
 
+	aMat, _ := untranspose(a)
+	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
+	}
 
 	if a, ok := a.(RawMatrixer); ok {
 		if b, ok := b.(RawMatrixer); ok {
@@ -629,12 +654,24 @@ func (m *Dense) Scale(f float64, a Matrix) {
 
 	m.reuseAs(ar, ac)
 
-	if a, ok := a.(RawMatrixer); ok {
+	aMat, aTrans := untranspose(a)
+	if a, ok := aMat.(RawMatrixer); ok {
 		amat := a.RawMatrix()
-		for ja, jm := 0, 0; ja < ar*amat.Stride; ja, jm = ja+amat.Stride, jm+m.mat.Stride {
-			for i, v := range amat.Data[ja : ja+ac] {
-				m.mat.Data[i+jm] = v * f
+		if !aTrans {
+			for ja, jm := 0, 0; ja < ar*amat.Stride; ja, jm = ja+amat.Stride, jm+m.mat.Stride {
+				for i, v := range amat.Data[ja : ja+ac] {
+					m.mat.Data[i+jm] = v * f
+				}
 			}
+		} else {
+			w := getWorkspace(ar, ac, false)
+			for ja, jm := 0, 0; ja < ac*amat.Stride; ja, jm = ja+amat.Stride, jm+1 {
+				for i, v := range amat.Data[ja : ja+ar] {
+					w.mat.Data[i*m.mat.Stride+jm] = v * f
+				}
+			}
+			m.Copy(w)
+			putWorkspace(w)
 		}
 		return
 	}
@@ -665,12 +702,24 @@ func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 
 	m.reuseAs(ar, ac)
 
-	if a, ok := a.(RawMatrixer); ok {
+	aMat, aTrans := untranspose(a)
+	if a, ok := aMat.(RawMatrixer); ok {
 		amat := a.RawMatrix()
-		for j, ja, jm := 0, 0, 0; ja < ar*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
-			for i, v := range amat.Data[ja : ja+ac] {
-				m.mat.Data[i+jm] = fn(j, i, v)
+		if !aTrans {
+			for j, ja, jm := 0, 0, 0; ja < ar*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
+				for i, v := range amat.Data[ja : ja+ac] {
+					m.mat.Data[i+jm] = fn(j, i, v)
+				}
 			}
+		} else {
+			w := getWorkspace(ar, ac, false)
+			for j, ja, jm := 0, 0, 0; ja < ac*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+1 {
+				for i, v := range amat.Data[ja : ja+ar] {
+					w.mat.Data[i*m.mat.Stride+jm] = fn(i, j, v)
+				}
+			}
+			m.Copy(w)
+			putWorkspace(w)
 		}
 		return
 	}

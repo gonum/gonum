@@ -584,6 +584,18 @@ func TestSub(t *testing.T) {
 				i, test.a, test.b, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data), test.r)
 		}
 	}
+
+	method := func(receiver, a, b Matrix) {
+		type Suber interface {
+			Sub(a, b Matrix)
+		}
+		rd := receiver.(Suber)
+		rd.Sub(a, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Sub(a, b)
+	}
+	testTwoInput(t, "Sub", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameRectangular, 1e-14)
 }
 
 func TestMulElem(t *testing.T) {
@@ -647,6 +659,18 @@ func TestMulElem(t *testing.T) {
 				i, test.a, test.b, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data), test.r)
 		}
 	}
+
+	method := func(receiver, a, b Matrix) {
+		type ElemMuler interface {
+			MulElem(a, b Matrix)
+		}
+		rd := receiver.(ElemMuler)
+		rd.MulElem(a, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.MulElem(a, b)
+	}
+	testTwoInput(t, "MulElem", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameRectangular, 1e-14)
 }
 
 // A comparison that treats NaNs as equal, for testing.
@@ -726,6 +750,18 @@ func TestDivElem(t *testing.T) {
 				i, test.a, test.b, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data), test.r)
 		}
 	}
+
+	method := func(receiver, a, b Matrix) {
+		type ElemDiver interface {
+			DivElem(a, b Matrix)
+		}
+		rd := receiver.(ElemDiver)
+		rd.DivElem(a, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.DivElem(a, b)
+	}
+	testTwoInput(t, "DivElem", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameRectangular, 1e-14)
 }
 
 func TestMul(t *testing.T) {
@@ -950,6 +986,22 @@ func TestPow(t *testing.T) {
 	}
 }
 
+func TestScale(t *testing.T) {
+	for _, f := range []float64{0.5, 1, 3} {
+		method := func(receiver, a Matrix) {
+			type Scaler interface {
+				Scale(f float64, a Matrix)
+			}
+			rd := receiver.(Scaler)
+			rd.Scale(f, a)
+		}
+		denseComparison := func(receiver, a *Dense) {
+			receiver.Scale(f, a)
+		}
+		testOneInput(t, "Scale", &Dense{}, method, denseComparison, isAnyType, isAnySize, 1e-14)
+	}
+}
+
 func TestPowN(t *testing.T) {
 	for i, test := range []struct {
 		a    [][]float64
@@ -1157,6 +1209,36 @@ func TestApply(t *testing.T) {
 			}
 		}
 	}
+
+	for _, fn := range []func(r, c int, v float64) float64{
+		identity,
+		func(r, c int, v float64) float64 {
+			if r < c {
+				return v
+			}
+			return -v
+		},
+		func(r, c int, v float64) float64 {
+			if r%2 == 0 && c%2 == 0 {
+				return v
+			}
+			return -v
+		},
+		func(_, _ int, v float64) float64 { return v * v },
+		func(_, _ int, v float64) float64 { return -v },
+	} {
+		method := func(receiver, x Matrix) {
+			type Applier interface {
+				Apply(func(r, c int, v float64) float64, Matrix)
+			}
+			rd := receiver.(Applier)
+			rd.Apply(fn, x)
+		}
+		denseComparison := func(receiver, x *Dense) {
+			receiver.Apply(fn, x)
+		}
+		testOneInput(t, "Apply", &Dense{}, method, denseComparison, isAnyType, isAnySize, 0)
+	}
 }
 
 func TestClone(t *testing.T) {
@@ -1240,6 +1322,18 @@ func TestStack(t *testing.T) {
 			t.Errorf("unexpected result for Stack test %d: %v stack %v = %v", i, a, b, s)
 		}
 	}
+
+	method := func(receiver, a, b Matrix) {
+		type Stacker interface {
+			Stack(a, b Matrix)
+		}
+		rd := receiver.(Stacker)
+		rd.Stack(a, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Stack(a, b)
+	}
+	testTwoInput(t, "Stack", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameWidth, 0)
 }
 
 func TestAugment(t *testing.T) {
@@ -1272,6 +1366,18 @@ func TestAugment(t *testing.T) {
 			t.Errorf("unexpected result for Augment test %d: %v augment %v = %v", i, a, b, s)
 		}
 	}
+
+	method := func(receiver, a, b Matrix) {
+		type Augmenter interface {
+			Augment(a, b Matrix)
+		}
+		rd := receiver.(Augmenter)
+		rd.Augment(a, b)
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Augment(a, b)
+	}
+	testTwoInput(t, "Augment", &Dense{}, method, denseComparison, legalTypesAll, legalSizeSameHeight, 0)
 }
 
 func TestRankOne(t *testing.T) {
@@ -1443,7 +1549,7 @@ func TestInverse(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error computing inverse: %v", err)
 		}
-		if !equalApprox(&got, test.want, test.tol) {
+		if !equalApprox(&got, test.want, test.tol, false) {
 			t.Errorf("Case %d, inverse mismatch.", i)
 		}
 		var m Dense
@@ -1454,7 +1560,7 @@ func TestInverse(t *testing.T) {
 			d[i] = 1
 		}
 		eye := NewDense(r, r, d)
-		if !equalApprox(eye, &m, 1e-14) {
+		if !equalApprox(eye, &m, 1e-14, false) {
 			t.Errorf("Case %d, A^-1 * A != I", i)
 		}
 	}

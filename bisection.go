@@ -20,10 +20,9 @@ type Bisection struct {
 	initF float64
 	minF  float64
 	maxF  float64
+	lastF float64
 
 	initGrad float64
-	minGrad  float64
-	maxGrad  float64
 
 	lastOp Operation
 }
@@ -52,21 +51,16 @@ func (b *Bisection) Init(f, g float64, step float64) Operation {
 	b.maxF = math.NaN()
 
 	b.initGrad = g
-	b.minGrad = g
-	b.maxGrad = math.NaN()
 
-	b.lastOp = FuncEvaluation | GradEvaluation
+	// Only evaluate the gradient when necessary.
+	b.lastOp = FuncEvaluation
 	return b.lastOp
 }
 
 func (b *Bisection) Iterate(f, g float64) (Operation, float64, error) {
-	if b.lastOp != FuncEvaluation|GradEvaluation {
+	if b.lastOp != FuncEvaluation && b.lastOp != GradEvaluation {
 		panic("bisection: Init has not been called")
 	}
-
-	// Don't finish the linesearch until a minimum is found that is better than
-	// the best point found so far. We want to end up in the lowest basin of
-	// attraction
 	minF := b.initF
 	if b.maxF < minF {
 		minF = b.maxF
@@ -74,63 +68,57 @@ func (b *Bisection) Iterate(f, g float64) (Operation, float64, error) {
 	if b.minF < minF {
 		minF = b.minF
 	}
+	if b.lastOp == FuncEvaluation {
+		// See if the function value is good enough to make progress. If it is,
+		// evaluate the gradient. If not, set it to the upper bound if the bound
+		// has not yet been found, otherwise iterate toward the minimum location.
+		if f <= b.minF {
+			b.lastF = f
+			b.lastOp = GradEvaluation
+			return b.lastOp, b.currStep, nil
+		}
+		if math.IsInf(b.maxStep, 1) {
+			b.maxStep = b.currStep
+			b.maxF = f
+			return b.nextStep((b.minStep + b.maxStep) / 2)
+		}
+		if b.minF <= b.maxF {
+			b.maxStep = b.currStep
+			b.maxF = f
+		} else {
+			b.minStep = b.currStep
+			b.minF = f
+		}
+		return b.nextStep((b.minStep + b.maxStep) / 2)
+	}
+	f = b.lastF
+	// The function value was lower. Check if this location is sufficient to
+	// converge the linesearch, otherwise iterate.
 	if StrongWolfeConditionsMet(f, g, minF, b.initGrad, b.currStep, 0, b.GradConst) {
 		b.lastOp = MajorIteration
 		return b.lastOp, b.currStep, nil
 	}
-
-	// Deciding on the next step size
 	if math.IsInf(b.maxStep, 1) {
-		// Have not yet bounded the minimum
-		switch {
-		case g > 0:
-			// Found a change in derivative sign, so this is the new maximum
+		// The function value is lower. If the gradient is positive, an upper bound
+		// of the minimum been found. If the gradient is negative, search farther
+		// in that direction.
+		if g > 0 {
 			b.maxStep = b.currStep
 			b.maxF = f
-			b.maxGrad = g
-			return b.nextStep((b.minStep + b.maxStep) / 2)
-		case f <= b.minF:
-			// Still haven't found an upper bound, but there is not an increase in
-			// function value and the gradient is still negative, so go more in
-			// that direction.
-			b.minStep = b.currStep
-			b.minF = f
-			b.minGrad = g
-			return b.nextStep(b.currStep * 2)
-		default:
-			// Increase in function value, but the gradient is still negative.
-			// Means we must have skipped over a local minimum, so set this point
-			// as the new maximum
-			b.maxStep = b.currStep
-			b.maxF = f
-			b.maxGrad = g
 			return b.nextStep((b.minStep + b.maxStep) / 2)
 		}
+		b.minStep = b.currStep
+		b.minF = f
+		return b.nextStep(b.currStep * 2)
 	}
-
-	// Already bounded the minimum, but wolfe conditions not met. Need to step to
-	// find minimum.
-	if f <= b.minF && f <= b.maxF {
-		if g < 0 {
-			b.minStep = b.currStep
-			b.minF = f
-			b.minGrad = g
-		} else {
-			b.maxStep = b.currStep
-			b.maxF = f
-			b.maxGrad = g
-		}
+	// The interval has been bounded, and we have found a new lowest value. Use
+	// the gradient to decide which direction.
+	if g < 0 {
+		b.minStep = b.currStep
+		b.minF = f
 	} else {
-		// We found a higher point. Want to push toward the minimal bound
-		if b.minF <= b.maxF {
-			b.maxStep = b.currStep
-			b.maxF = f
-			b.maxGrad = g
-		} else {
-			b.minStep = b.currStep
-			b.minF = f
-			b.minGrad = g
-		}
+		b.maxStep = b.currStep
+		b.maxF = f
 	}
 	return b.nextStep((b.minStep + b.maxStep) / 2)
 }
@@ -146,6 +134,6 @@ func (b *Bisection) nextStep(step float64) (Operation, float64, error) {
 		return b.lastOp, b.currStep, ErrLinesearcherFailure
 	}
 	b.currStep = step
-	b.lastOp = FuncEvaluation | GradEvaluation
+	b.lastOp = FuncEvaluation
 	return b.lastOp, b.currStep, nil
 }

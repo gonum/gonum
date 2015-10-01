@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
 )
@@ -266,7 +267,18 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		if m != n {
 			panic("bad size")
 		}
-		_, upper := t.(Triangular).Triangle()
+
+		// This is necessary because we are making
+		// a triangle from the zero value, which
+		// always returns upper as true.
+		var upper bool
+		switch t := t.(type) {
+		case *TriDense:
+			upper = t.isUpper()
+		case *basicTriangular:
+			upper = (*TriDense)(t).isUpper()
+		}
+
 		mat := NewTriDense(n, upper, nil)
 		if upper {
 			for i := 0; i < m; i++ {
@@ -453,7 +465,8 @@ var testMatrices = []Matrix{
 	&basicMatrix{},
 	&basicVectorer{},
 	&basicSymmetric{},
-	&basicTriangular{},
+	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}},
+	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}},
 
 	Transpose{&Dense{}},
 	Transpose{NewTriDense(0, true, nil)},
@@ -465,7 +478,8 @@ var testMatrices = []Matrix{
 	Transpose{&basicMatrix{}},
 	Transpose{&basicVectorer{}},
 	Transpose{&basicSymmetric{}},
-	Transpose{&basicTriangular{}},
+	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}}},
+	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}}},
 }
 
 var sizes = []struct {

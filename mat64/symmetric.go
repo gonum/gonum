@@ -20,7 +20,8 @@ var (
 
 const badSymTriangle = "mat64: blas64.Symmetric not upper"
 
-// SymDense is a symmetric matrix that uses Dense storage.
+// SymDense is a symmetric matrix that uses dense storage. SymDense
+// matrices are stored in the upper triangle.
 type SymDense struct {
 	mat blas64.Symmetric
 }
@@ -83,6 +84,17 @@ func (s *SymDense) Symmetric() int {
 // value must be stored in upper triangular format.
 func (s *SymDense) RawSymmetric() blas64.Symmetric {
 	return s.mat
+}
+
+// SetRawSymmetric sets the underlying blas64.Symmetric used by the receiver.
+// Changes to elements in the receiver following the call will be reflected
+// in b. SetRawSymmetric will panic if b is not an upper-encoded symmetric
+// matrix.
+func (s *SymDense) SetRawSymmetric(b blas64.Symmetric) {
+	if b.Uplo != blas.Upper {
+		panic(badSymTriangle)
+	}
+	s.mat = b
 }
 
 func (s *SymDense) isZero() bool {

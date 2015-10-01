@@ -522,20 +522,12 @@ func Max(a Matrix) float64 {
 		return max
 	case RawSymmetricer:
 		rm := m.RawSymmetric()
-		if rm.Uplo == blas.Upper {
-			max := math.Inf(-1)
-			for i := 0; i < rm.N; i++ {
-				for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
-					if v > max {
-						max = v
-					}
-				}
-			}
-			return max
+		if rm.Uplo != blas.Upper {
+			panic(badSymTriangle)
 		}
 		max := math.Inf(-1)
 		for i := 0; i < rm.N; i++ {
-			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+i+1] {
+			for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
 				if v > max {
 					max = v
 				}
@@ -604,20 +596,12 @@ func Min(a Matrix) float64 {
 		return min
 	case RawSymmetricer:
 		rm := m.RawSymmetric()
-		if rm.Uplo == blas.Upper {
-			min := math.Inf(1)
-			for i := 0; i < rm.N; i++ {
-				for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
-					if v < min {
-						min = v
-					}
-				}
-			}
-			return min
+		if rm.Uplo != blas.Upper {
+			panic(badSymTriangle)
 		}
 		min := math.Inf(1)
 		for i := 0; i < rm.N; i++ {
-			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+i+1] {
+			for _, v := range rm.Data[i*rm.Stride+i : i*rm.Stride+rm.N] {
 				if v < min {
 					min = v
 				}

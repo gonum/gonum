@@ -225,7 +225,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		mat := NewDense(m, n, nil)
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				mat.Set(i, j, rand.Float64())
+				mat.Set(i, j, rand.NormFloat64())
 			}
 		}
 		matrix = returnAs(mat, t)
@@ -249,7 +249,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			n: length,
 		}
 		for i := 0; i < length; i++ {
-			mat.SetVec(i, rand.Float64())
+			mat.SetVec(i, rand.NormFloat64())
 		}
 		return mat
 	case *SymDense, *basicSymmetric:
@@ -259,7 +259,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		mat := NewSymDense(n, nil)
 		for i := 0; i < m; i++ {
 			for j := i; j < n; j++ {
-				mat.SetSym(i, j, rand.Float64())
+				mat.SetSym(i, j, rand.NormFloat64())
 			}
 		}
 		matrix = returnAs(mat, t)
@@ -283,13 +283,13 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		if upper {
 			for i := 0; i < m; i++ {
 				for j := i; j < n; j++ {
-					mat.SetTri(i, j, rand.Float64())
+					mat.SetTri(i, j, rand.NormFloat64())
 				}
 			}
 		} else {
 			for i := 0; i < m; i++ {
 				for j := 0; j <= i; j++ {
-					mat.SetTri(i, j, rand.Float64())
+					mat.SetTri(i, j, rand.NormFloat64())
 				}
 			}
 		}

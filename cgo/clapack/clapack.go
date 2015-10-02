@@ -2917,6 +2917,8 @@ func Slacpy(ul blas.Uplo, m int, n int, a []float32, lda int, b []float32, ldb i
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
+	case blas.All:
+		ul = 'A'
 	default:
 		panic("lapack: illegal triangle")
 	}
@@ -2930,6 +2932,8 @@ func Dlacpy(ul blas.Uplo, m int, n int, a []float64, lda int, b []float64, ldb i
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
+	case blas.All:
+		ul = 'A'
 	default:
 		panic("lapack: illegal triangle")
 	}
@@ -2943,6 +2947,8 @@ func Clacpy(ul blas.Uplo, m int, n int, a []complex64, lda int, b []complex64, l
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
+	case blas.All:
+		ul = 'A'
 	default:
 		panic("lapack: illegal triangle")
 	}
@@ -2956,6 +2962,8 @@ func Zlacpy(ul blas.Uplo, m int, n int, a []complex128, lda int, b []complex128,
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
+	case blas.All:
+		ul = 'A'
 	default:
 		panic("lapack: illegal triangle")
 	}

@@ -124,6 +124,12 @@ our %typeConv = (
 	"double_return" => "float64"
 );
 
+# allUplo is a list of routines that allow 'A' for their uplo argument.
+# The list keys are truncated by one character to cover all four numeric types.
+our %allUplo = (
+	"lacpy" => undef
+);
+
 foreach my $line (@lines) {
 	process($line);
 }
@@ -225,7 +231,22 @@ EOH
 		};
 		$var eq "uplo" && do {
 			$var = "ul";
-			my $bp = << "EOH";
+			my $bp;
+			if (exists $allUplo{substr($func, 1)}) {
+				$bp = << "EOH";
+switch $var {
+case blas.Upper:
+$var = 'U'
+case blas.Lower:
+$var = 'L'
+case blas.All:
+$var = 'A'
+default:
+panic("lapack: illegal triangle")
+}
+EOH
+			} else {
+				$bp = << "EOH";
 switch $var {
 case blas.Upper:
 $var = 'U'
@@ -235,6 +256,7 @@ default:
 panic("lapack: illegal triangle")
 }
 EOH
+			}
 			push @boilerplate, $bp;
 			push @processed, $var." blas.Uplo"; next;
 		};

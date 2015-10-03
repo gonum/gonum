@@ -29,18 +29,15 @@ func (m *Dense) Add(a, b Matrix) {
 	aMat, _ := untranspose(a)
 	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
-	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
-		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
-		defer restore()
-	}
 
-	if a, ok := a.(RawMatrixer); ok {
-		if b, ok := b.(RawMatrixer); ok {
-			amat, bmat := a.RawMatrix(), b.RawMatrix()
+	if arm, ok := a.(RawMatrixer); ok {
+		if brm, ok := b.(RawMatrixer); ok {
+			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
+			if m != aMat {
+				m.checkOverlap(amat)
+			} else if m != bMat {
+				m.checkOverlap(bmat)
+			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
 				for i, v := range amat.Data[ja : ja+ac] {
 					m.mat.Data[i+jm] = v + bmat.Data[i+jb]
@@ -48,6 +45,15 @@ func (m *Dense) Add(a, b Matrix) {
 			}
 			return
 		}
+	}
+
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
 	}
 
 	if a, ok := a.(Vectorer); ok {
@@ -84,18 +90,15 @@ func (m *Dense) Sub(a, b Matrix) {
 	aMat, _ := untranspose(a)
 	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
-	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
-		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
-		defer restore()
-	}
 
-	if a, ok := a.(RawMatrixer); ok {
-		if b, ok := b.(RawMatrixer); ok {
-			amat, bmat := a.RawMatrix(), b.RawMatrix()
+	if arm, ok := a.(RawMatrixer); ok {
+		if brm, ok := b.(RawMatrixer); ok {
+			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
+			if m != aMat {
+				m.checkOverlap(amat)
+			} else if m != bMat {
+				m.checkOverlap(bmat)
+			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
 				for i, v := range amat.Data[ja : ja+ac] {
 					m.mat.Data[i+jm] = v - bmat.Data[i+jb]
@@ -103,6 +106,15 @@ func (m *Dense) Sub(a, b Matrix) {
 			}
 			return
 		}
+	}
+
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
 	}
 
 	if a, ok := a.(Vectorer); ok {
@@ -140,18 +152,15 @@ func (m *Dense) MulElem(a, b Matrix) {
 	aMat, _ := untranspose(a)
 	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
-	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
-		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
-		defer restore()
-	}
 
-	if a, ok := a.(RawMatrixer); ok {
-		if b, ok := b.(RawMatrixer); ok {
-			amat, bmat := a.RawMatrix(), b.RawMatrix()
+	if arm, ok := a.(RawMatrixer); ok {
+		if brm, ok := b.(RawMatrixer); ok {
+			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
+			if m != aMat {
+				m.checkOverlap(amat)
+			} else if m != bMat {
+				m.checkOverlap(bmat)
+			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
 				for i, v := range amat.Data[ja : ja+ac] {
 					m.mat.Data[i+jm] = v * bmat.Data[i+jb]
@@ -159,6 +168,15 @@ func (m *Dense) MulElem(a, b Matrix) {
 			}
 			return
 		}
+	}
+
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
 	}
 
 	if a, ok := a.(Vectorer); ok {
@@ -196,18 +214,15 @@ func (m *Dense) DivElem(a, b Matrix) {
 	aMat, _ := untranspose(a)
 	bMat, _ := untranspose(b)
 	m.reuseAs(ar, ac)
-	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
-		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
-		defer restore()
-	}
 
-	if a, ok := a.(RawMatrixer); ok {
-		if b, ok := b.(RawMatrixer); ok {
-			amat, bmat := a.RawMatrix(), b.RawMatrix()
+	if arm, ok := a.(RawMatrixer); ok {
+		if brm, ok := b.(RawMatrixer); ok {
+			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
+			if m != aMat {
+				m.checkOverlap(amat)
+			} else if m != bMat {
+				m.checkOverlap(bmat)
+			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
 				for i, v := range amat.Data[ja : ja+ac] {
 					m.mat.Data[i+jm] = v / bmat.Data[i+jb]
@@ -215,6 +230,15 @@ func (m *Dense) DivElem(a, b Matrix) {
 			}
 			return
 		}
+	}
+
+	var restore func()
+	if m == aMat {
+		m, restore = m.isolatedWorkspace(aMat)
+		defer restore()
+	} else if m == bMat {
+		m, restore = m.isolatedWorkspace(bMat)
+		defer restore()
 	}
 
 	if a, ok := a.(Vectorer); ok {

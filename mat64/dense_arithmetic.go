@@ -655,8 +655,13 @@ func (m *Dense) Scale(f float64, a Matrix) {
 	m.reuseAs(ar, ac)
 
 	aMat, aTrans := untranspose(a)
-	if a, ok := aMat.(RawMatrixer); ok {
-		amat := a.RawMatrix()
+	if rm, ok := aMat.(RawMatrixer); ok {
+		amat := rm.RawMatrix()
+		if m == aMat || m.checkOverlap(amat) {
+			var restore func()
+			m, restore = m.isolatedWorkspace(a)
+			defer restore()
+		}
 		if !aTrans {
 			for ja, jm := 0, 0; ja < ar*amat.Stride; ja, jm = ja+amat.Stride, jm+m.mat.Stride {
 				for i, v := range amat.Data[ja : ja+ac] {
@@ -664,14 +669,11 @@ func (m *Dense) Scale(f float64, a Matrix) {
 				}
 			}
 		} else {
-			w := getWorkspace(ar, ac, false)
 			for ja, jm := 0, 0; ja < ac*amat.Stride; ja, jm = ja+amat.Stride, jm+1 {
 				for i, v := range amat.Data[ja : ja+ar] {
-					w.mat.Data[i*m.mat.Stride+jm] = v * f
+					m.mat.Data[i*m.mat.Stride+jm] = v * f
 				}
 			}
-			m.Copy(w)
-			putWorkspace(w)
 		}
 		return
 	}
@@ -703,8 +705,13 @@ func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 	m.reuseAs(ar, ac)
 
 	aMat, aTrans := untranspose(a)
-	if a, ok := aMat.(RawMatrixer); ok {
-		amat := a.RawMatrix()
+	if rm, ok := aMat.(RawMatrixer); ok {
+		amat := rm.RawMatrix()
+		if m == aMat || m.checkOverlap(amat) {
+			var restore func()
+			m, restore = m.isolatedWorkspace(a)
+			defer restore()
+		}
 		if !aTrans {
 			for j, ja, jm := 0, 0, 0; ja < ar*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+m.mat.Stride {
 				for i, v := range amat.Data[ja : ja+ac] {
@@ -712,14 +719,11 @@ func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 				}
 			}
 		} else {
-			w := getWorkspace(ar, ac, false)
 			for j, ja, jm := 0, 0, 0; ja < ac*amat.Stride; j, ja, jm = j+1, ja+amat.Stride, jm+1 {
 				for i, v := range amat.Data[ja : ja+ar] {
-					w.mat.Data[i*m.mat.Stride+jm] = fn(i, j, v)
+					m.mat.Data[i*m.mat.Stride+jm] = fn(i, j, v)
 				}
 			}
-			m.Copy(w)
-			putWorkspace(w)
 		}
 		return
 	}

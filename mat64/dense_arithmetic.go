@@ -275,13 +275,28 @@ func (m *Dense) Inverse(a Matrix) error {
 	}
 	m.reuseAs(a.Dims())
 	aMat, aTrans := untranspose(a)
-	if m != aMat {
-		m.Copy(a)
-	} else if aTrans {
-		tmp := getWorkspace(r, c, false)
-		tmp.Copy(a)
-		m.Copy(tmp)
-		putWorkspace(tmp)
+	switch rm := aMat.(type) {
+	case RawMatrixer:
+		if m != aMat || aTrans {
+			if m == aMat || m.checkOverlap(rm.RawMatrix()) {
+				tmp := getWorkspace(r, c, false)
+				tmp.Copy(a)
+				m.Copy(tmp)
+				putWorkspace(tmp)
+				break
+			}
+			m.Copy(a)
+		}
+	default:
+		if m != aMat {
+			m.Copy(a)
+		} else if aTrans {
+			// m and a share data so Copy cannot be used directly.
+			tmp := getWorkspace(r, c, false)
+			tmp.Copy(a)
+			m.Copy(tmp)
+			putWorkspace(tmp)
+		}
 	}
 	ipiv := make([]int, r)
 	lapack64.Getrf(m.mat, ipiv)

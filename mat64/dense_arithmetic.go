@@ -350,10 +350,16 @@ func (m *Dense) Mul(a, b Matrix) {
 	// temporary memory.
 	// C = A^T * B = (B^T * A)^T
 	// C^T = B^T * A.
-	if aU, ok := aU.(RawMatrixer); ok {
-		amat := aU.RawMatrix()
-		if bU, ok := bU.(RawMatrixer); ok {
-			bmat := bU.RawMatrix()
+	if aUrm, ok := aU.(RawMatrixer); ok {
+		amat := aUrm.RawMatrix()
+		if restore == nil {
+			m.checkOverlap(amat)
+		}
+		if bUrm, ok := bU.(RawMatrixer); ok {
+			bmat := bUrm.RawMatrix()
+			if restore == nil {
+				m.checkOverlap(bmat)
+			}
 			blas64.Gemm(aT, bT, 1, amat, bmat, 0, m.mat)
 			return
 		}
@@ -375,7 +381,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			if aTrans {
 				c := getWorkspace(ac, ar, false)
 				var tmp Dense
-				tmp.SetRawMatrix(aU.RawMatrix())
+				tmp.SetRawMatrix(amat)
 				c.Copy(&tmp)
 				bT := blas.Trans
 				if bTrans {
@@ -412,8 +418,11 @@ func (m *Dense) Mul(a, b Matrix) {
 			return
 		}
 	}
-	if bU, ok := bU.(RawMatrixer); ok {
-		bmat := bU.RawMatrix()
+	if bUrm, ok := bU.(RawMatrixer); ok {
+		bmat := bUrm.RawMatrix()
+		if restore == nil {
+			m.checkOverlap(bmat)
+		}
 		if aU, ok := aU.(RawSymmetricer); ok {
 			amat := aU.RawSymmetric()
 			if bTrans {
@@ -432,7 +441,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			if bTrans {
 				c := getWorkspace(bc, br, false)
 				var tmp Dense
-				tmp.SetRawMatrix(bU.RawMatrix())
+				tmp.SetRawMatrix(bmat)
 				c.Copy(&tmp)
 				aT := blas.Trans
 				if aTrans {

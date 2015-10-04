@@ -120,7 +120,6 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.predecessors, n.ID())
 
-	g.maxID-- // Fun facts: even if this ID doesn't exist this still works!
 	g.freeMap[n.ID()] = struct{}{}
 }
 

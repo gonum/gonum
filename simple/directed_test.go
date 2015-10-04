@@ -40,3 +40,24 @@ func generateDummyGraph() *DirectedGraph {
 
 	return g
 }
+
+// Test for issue #123 https://github.com/gonum/graph/issues/123
+func TestIssue123DirectedGraph(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("unexpected panic: %v", r)
+		}
+	}()
+	g := NewDirectedGraph(0, math.Inf(1))
+
+	n0 := Node(g.NewNodeID())
+	g.AddNode(n0)
+
+	n1 := Node(g.NewNodeID())
+	g.AddNode(n1)
+
+	g.RemoveNode(n0)
+
+	n2 := Node(g.NewNodeID())
+	g.AddNode(n2)
+}

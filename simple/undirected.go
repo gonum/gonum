@@ -108,9 +108,6 @@ func (g *UndirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.neighbors, n.ID())
 
-	if g.maxID != 0 && n.ID() == g.maxID {
-		g.maxID--
-	}
 	g.freeMap[n.ID()] = struct{}{}
 }
 

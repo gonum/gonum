@@ -112,7 +112,47 @@
 // For convenience, a matrix may be used as both a receiver and as an input, i.e.
 //  a.Pow(a, 6)
 //  v.SolveVec(a.T(), v)
-// though in many cases this will cause an allocation. However, mat64 cannot
-// detect arbitrary overlap, and so care should be taken when using matrix views.
+// though in many cases this will cause an allocation (see Element Aliasing).
 // An exception to this rule is Copy, which does not allow a.Copy(a.T()).
+//
+// Element Aliasing
+//
+// Most methods in mat64 modify receiver data. It is forbidden for the modified
+// data region of the receiver to overlap the used data area of the input
+// arguments. The exception to this rule is when the method receiver is equal to one
+// of the input arguments, as in the a.Pow(a, 6) call above, or its implicit transpose.
+//
+// This prohibition is to help avoid subtle mistakes when the method needs to read
+// from and write to the same data region. There are ways to make mistakes using the
+// mat64 API, and mat64 functions will detect and complain about those.
+// There are many ways to make mistakes by excursion from the mat64 API via
+// interaction with raw matrix values.
+//
+// If you need to read the rest of this section to understand the behavior of
+// your program, you are being clever. Don't be clever. If you must be clever,
+// blas64 and lapack64 may be used to call the behavior directly.
+//
+// mat64 will use the following rules to detect overlap between the receiver and one
+// of the inputs:
+//  * the input implements one of the Raw methods, and
+//  * the Raw type matches that of the receiver, and
+//  * the address ranges of the backing data slices overlap, and
+//  * the strides differ or there is an overlap in the used data elements
+// If such an overlap is detected, the method will panic.
+//
+// The following cases will not panic:
+//  * the data slices do not overlap
+//  * there is pointer identity between the receiver and input values after
+//    the value has been untransposed if necessary
+//
+// mat64 will not attempt to detect element overlap if the input does not implement a
+// Raw method or if the Raw method differs from that of the receiver, except when a
+// conversion has ocurred through a mat64 API function. Method behavior is undefined
+// if there is undetected overlap.
+//
+// BUG(kortschak) Currently only RawMatrixer aliasing detection is supported.
 package mat64
+
+// TODO(kortschak) Update docs to indicate the second special case; we
+// will check for Vector/Dense overlap because vector extraction from
+// a matrix is directly supported by the mat64 API via RowView and ColView.

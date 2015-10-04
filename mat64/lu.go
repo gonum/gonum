@@ -250,7 +250,10 @@ func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
 	if m == bMat {
 		m, restore = m.isolatedWorkspace(bMat)
 		defer restore()
+	} else if rm, ok := bMat.(RawMatrixer); ok {
+		m.checkOverlap(rm.RawMatrix())
 	}
+
 	m.Copy(b)
 	t := blas.NoTrans
 	if trans {

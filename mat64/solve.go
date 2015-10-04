@@ -38,14 +38,29 @@ func (m *Dense) Solve(a, b Matrix) error {
 		if aTrans {
 			tA = blas.Trans
 		}
-		if m != bMat {
-			m.Copy(b)
-		} else if bTrans {
-			// m and b share data so Copy cannot be used directly.
-			tmp := getWorkspace(br, bc, false)
-			tmp.Copy(b)
-			m.Copy(tmp)
-			putWorkspace(tmp)
+
+		switch rm := bMat.(type) {
+		case RawMatrixer:
+			if m != bMat || bTrans {
+				if m == bMat || m.checkOverlap(rm.RawMatrix()) {
+					tmp := getWorkspace(br, bc, false)
+					tmp.Copy(b)
+					m.Copy(tmp)
+					putWorkspace(tmp)
+					break
+				}
+				m.Copy(b)
+			}
+		default:
+			if m != bMat {
+				m.Copy(b)
+			} else if bTrans {
+				// m and b share data so Copy cannot be used directly.
+				tmp := getWorkspace(br, bc, false)
+				tmp.Copy(b)
+				m.Copy(tmp)
+				putWorkspace(tmp)
+			}
 		}
 
 		rm := rma.RawTriangular()
@@ -97,6 +112,12 @@ func (v *Vector) SolveVec(a Matrix, b *Vector) error {
 	// instead recast the Vectors as Dense and call the matrix code.
 	v.reuseAs(c)
 	m := vecAsDense(v)
-	bm := vecAsDense(b)
+	// We conditionally create bm as m when b and v are identical
+	// to prevent the overlap detection code from identifying m
+	// and bm as overlapping but not identical.
+	bm := m
+	if v != b {
+		bm = vecAsDense(b)
+	}
 	return m.Solve(a, bm)
 }

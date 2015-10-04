@@ -20,7 +20,7 @@ func (n Node) ID() int {
 	return int(n)
 }
 
-// Edges is a simple graph edge.
+// Edge is a simple graph edge.
 type Edge struct {
 	F, T graph.Node
 	W    float64
@@ -42,13 +42,4 @@ const maxInt int = int(^uint(0) >> 1)
 // are equalable.
 func isSame(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
-}
-
-// max returns the maximum of a and b.
-func max(a, b int) int {
-	if a > b {
-		return a
-	} else {
-		return b
-	}
 }

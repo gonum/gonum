@@ -95,10 +95,12 @@ type NodeRemover interface {
 // EdgeSetter is an interface for adding edges to a graph.
 type EdgeSetter interface {
 	// SetEdge adds an edge from one node to another.
-	// If the nodes do not exist, they are added.
-	// SetEdge will panic if the IDs of the e.From
-	// and e.To are equal.
-	SetEdge(Edge)
+	// If the graph supports node addition the nodes
+	// will be added if they do not exist, otherwise
+	// SetEdge will panic.
+	// If the IDs returned by e.From and e.To are
+	// equal, SetEdge will panic.
+	SetEdge(e Edge)
 }
 
 // EdgeRemover is an interface for removing nodes from a graph.

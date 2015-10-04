@@ -7,72 +7,91 @@ package simple
 import (
 	"fmt"
 
+	"golang.org/x/tools/container/intsets"
+
 	"github.com/gonum/graph"
 )
 
 // UndirectedGraph implements a generalized undirected graph.
 type UndirectedGraph struct {
-	neighbors map[int]map[int]graph.Edge
-	nodeMap   map[int]graph.Node
+	nodes map[int]graph.Node
+	edges map[int]map[int]graph.Edge
 
 	self, absent float64
 
-	// Node add/remove convenience vars
-	maxID   int
-	freeMap map[int]struct{}
+	freeIDs intsets.Sparse
+	usedIDs intsets.Sparse
 }
 
-// NewUndiectedGraph returns an UndirectedGraph with the specified self and absent edge costs.
+// NewUndirectedGraph returns an UndirectedGraph with the specified self and absent
+// edge weight values.
 func NewUndirectedGraph(self, absent float64) *UndirectedGraph {
 	return &UndirectedGraph{
-		neighbors: make(map[int]map[int]graph.Edge),
-		nodeMap:   make(map[int]graph.Node),
+		nodes: make(map[int]graph.Node),
+		edges: make(map[int]map[int]graph.Edge),
 
 		self:   self,
 		absent: absent,
-
-		maxID:   0,
-		freeMap: make(map[int]struct{}),
 	}
 }
 
+// NewNodeID returns a new unique ID for a node to be added to g. The returned ID does
+// not become a valid ID in g until it is added to g.
 func (g *UndirectedGraph) NewNodeID() int {
-	if g.maxID != maxInt {
-		g.maxID++
-		return g.maxID
+	if len(g.nodes) == 0 {
+		return 0
+	}
+	if len(g.nodes) == maxInt {
+		panic(fmt.Sprintf("simple: cannot allocate node: no slot"))
 	}
 
-	// Implicitly checks if len(g.freeMap) == 0
-	for id := range g.freeMap {
+	var id int
+	if g.freeIDs.Len() != 0 && g.freeIDs.TakeMin(&id) {
 		return id
 	}
-
-	// I cannot foresee this ever happening, but just in case, we check.
-	if len(g.nodeMap) == maxInt {
-		panic("cannot allocate node: graph too large")
+	if id = g.usedIDs.Max(); id < maxInt {
+		return id + 1
 	}
-
-	for i := 0; i < maxInt; i++ {
-		if _, ok := g.nodeMap[i]; !ok {
-			return i
+	for id = 0; id < maxInt; id++ {
+		if !g.usedIDs.Has(id) {
+			return id
 		}
 	}
-
-	// Should not happen.
-	panic("cannot allocate node id: no free id found")
+	panic("unreachable")
 }
 
+// AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
 func (g *UndirectedGraph) AddNode(n graph.Node) {
-	if _, exists := g.nodeMap[n.ID()]; exists {
+	if _, exists := g.nodes[n.ID()]; exists {
 		panic(fmt.Sprintf("simple: node ID collision: %d", n.ID()))
 	}
-	g.nodeMap[n.ID()] = n
-	g.neighbors[n.ID()] = make(map[int]graph.Edge)
+	g.nodes[n.ID()] = n
+	g.edges[n.ID()] = make(map[int]graph.Edge)
 
-	delete(g.freeMap, n.ID())
-	g.maxID = max(g.maxID, n.ID())
+	g.freeIDs.Remove(n.ID())
+	g.usedIDs.Insert(n.ID())
 }
 
+// RemoveNode removes n from the graph, as well as any edges attached to it. If the node
+// is not in the graph it is a no-op.
+func (g *UndirectedGraph) RemoveNode(n graph.Node) {
+	if _, ok := g.nodes[n.ID()]; !ok {
+		return
+	}
+	delete(g.nodes, n.ID())
+
+	for from := range g.edges[n.ID()] {
+		delete(g.edges[from], n.ID())
+	}
+	delete(g.edges, n.ID())
+
+	g.freeIDs.Insert(n.ID())
+	g.usedIDs.Remove(n.ID())
+
+}
+
+// SetEdge adds e, an edge from one node to another. If the nodes do not exist, they are added.
+// It will panic if the IDs of the e.From and e.To are equal.
 func (g *UndirectedGraph) SetEdge(e graph.Edge) {
 	var (
 		from = e.From()
@@ -88,96 +107,45 @@ func (g *UndirectedGraph) SetEdge(e graph.Edge) {
 	if !g.Has(from) {
 		g.AddNode(from)
 	}
-
 	if !g.Has(to) {
 		g.AddNode(to)
 	}
 
-	g.neighbors[fid][tid] = e
-	g.neighbors[tid][fid] = e
+	g.edges[fid][tid] = e
+	g.edges[tid][fid] = e
 }
 
-func (g *UndirectedGraph) RemoveNode(n graph.Node) {
-	if _, ok := g.nodeMap[n.ID()]; !ok {
-		return
-	}
-	delete(g.nodeMap, n.ID())
-
-	for neigh := range g.neighbors[n.ID()] {
-		delete(g.neighbors[neigh], n.ID())
-	}
-	delete(g.neighbors, n.ID())
-
-	g.freeMap[n.ID()] = struct{}{}
-}
-
+// RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist
+// it is a no-op.
 func (g *UndirectedGraph) RemoveEdge(e graph.Edge) {
 	from, to := e.From(), e.To()
-	if _, ok := g.nodeMap[from.ID()]; !ok {
-		return
-	} else if _, ok := g.nodeMap[to.ID()]; !ok {
+	if _, ok := g.nodes[from.ID()]; !ok {
 		return
 	}
-
-	delete(g.neighbors[from.ID()], to.ID())
-	delete(g.neighbors[to.ID()], from.ID())
-}
-
-func (g *UndirectedGraph) EmptyGraph() {
-	g.neighbors = make(map[int]map[int]graph.Edge)
-	g.nodeMap = make(map[int]graph.Node)
-}
-
-/* UndirectedGraph implementation */
-
-func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
-	if !g.Has(n) {
-		return nil
+	if _, ok := g.nodes[to.ID()]; !ok {
+		return
 	}
 
-	neighbors := make([]graph.Node, len(g.neighbors[n.ID()]))
-	i := 0
-	for id := range g.neighbors[n.ID()] {
-		neighbors[i] = g.nodeMap[id]
-		i++
-	}
-
-	return neighbors
+	delete(g.edges[from.ID()], to.ID())
+	delete(g.edges[to.ID()], from.ID())
 }
 
-func (g *UndirectedGraph) HasEdgeBetween(n, neigh graph.Node) bool {
-	_, ok := g.neighbors[n.ID()][neigh.ID()]
-	return ok
-}
-
-func (g *UndirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeBetween(u, v)
-}
-
-func (g *UndirectedGraph) EdgeBetween(u, v graph.Node) graph.Edge {
-	// We don't need to check if neigh exists because
-	// it's implicit in the neighbors access.
-	if !g.Has(u) {
-		return nil
-	}
-
-	return g.neighbors[u.ID()][v.ID()]
-}
-
+// Node returns the node in the graph with the given ID.
 func (g *UndirectedGraph) Node(id int) graph.Node {
-	return g.nodeMap[id]
+	return g.nodes[id]
 }
 
+// Has returns whether the node exists within the graph.
 func (g *UndirectedGraph) Has(n graph.Node) bool {
-	_, ok := g.nodeMap[n.ID()]
-
+	_, ok := g.nodes[n.ID()]
 	return ok
 }
 
+// Nodes returns all the nodes in the graph.
 func (g *UndirectedGraph) Nodes() []graph.Node {
-	nodes := make([]graph.Node, len(g.nodeMap))
+	nodes := make([]graph.Node, len(g.nodes))
 	i := 0
-	for _, n := range g.nodeMap {
+	for _, n := range g.nodes {
 		nodes[i] = n
 		i++
 	}
@@ -185,25 +153,12 @@ func (g *UndirectedGraph) Nodes() []graph.Node {
 	return nodes
 }
 
-func (g *UndirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
-	xid := x.ID()
-	yid := y.ID()
-	if xid == yid {
-		return g.self, true
-	}
-	if n, ok := g.neighbors[xid]; ok {
-		if e, ok := n[yid]; ok {
-			return e.Weight(), true
-		}
-	}
-	return g.absent, false
-}
-
+// Edges returns all the edges in the graph.
 func (g *UndirectedGraph) Edges() []graph.Edge {
 	var edges []graph.Edge
 
 	seen := make(map[[2]int]struct{})
-	for _, u := range g.neighbors {
+	for _, u := range g.edges {
 		for _, e := range u {
 			uid := e.From().ID()
 			vid := e.To().ID()
@@ -219,10 +174,68 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 	return edges
 }
 
+// From returns all nodes in g that can be reached directly from n.
+func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
+	if !g.Has(n) {
+		return nil
+	}
+
+	nodes := make([]graph.Node, len(g.edges[n.ID()]))
+	i := 0
+	for from := range g.edges[n.ID()] {
+		nodes[i] = g.nodes[from]
+		i++
+	}
+
+	return nodes
+}
+
+// HasEdgeBetween returns whether an edge exists between nodes x and y.
+func (g *UndirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
+	_, ok := g.edges[x.ID()][y.ID()]
+	return ok
+}
+
+// Edge returns the edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *UndirectedGraph) Edge(u, v graph.Node) graph.Edge {
+	return g.EdgeBetween(u, v)
+}
+
+// EdgeBetween returns the edge between nodes x and y.
+func (g *UndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
+	// We don't need to check if neigh exists because
+	// it's implicit in the edges access.
+	if !g.Has(x) {
+		return nil
+	}
+
+	return g.edges[x.ID()][y.ID()]
+}
+
+// Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
+// If x and y are the same node or there is no joining edge between the two nodes the weight
+// value returned is either the graph's absent or self value. Weight returns true if an edge
+// exists between x and y or if x and y have the same ID, false otherwise.
+func (g *UndirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid {
+		return g.self, true
+	}
+	if n, ok := g.edges[xid]; ok {
+		if e, ok := n[yid]; ok {
+			return e.Weight(), true
+		}
+	}
+	return g.absent, false
+}
+
+// Degree returns the degree of n in g.
 func (g *UndirectedGraph) Degree(n graph.Node) int {
-	if _, ok := g.nodeMap[n.ID()]; !ok {
+	if _, ok := g.nodes[n.ID()]; !ok {
 		return 0
 	}
 
-	return len(g.neighbors[n.ID()])
+	return len(g.edges[n.ID()])
 }

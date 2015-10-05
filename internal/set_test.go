@@ -131,10 +131,10 @@ func TestClear(t *testing.T) {
 	s.Add(node(9))
 	s.Add(node(10))
 
-	s = Clear(s)
+	s.clear()
 
 	if s.count() != 0 {
-		t.Error("Clear did not properly reset set to size 0")
+		t.Error("clear did not properly reset set to size 0")
 	}
 }
 

@@ -67,7 +67,7 @@ func Clear(s Set) Set {
 	return make(Set)
 }
 
-// Copy performs a perfect copy from s1 to dst (meaning the sets will
+// Copy performs a perfect copy from src to dst (meaning the sets will
 // be equal).
 func (dst Set) Copy(src Set) Set {
 	if same(src, dst) {
@@ -87,17 +87,17 @@ func (dst Set) Copy(src Set) Set {
 
 // Equal reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
-func Equal(s1, s2 Set) bool {
-	if same(s1, s2) {
+func Equal(a, b Set) bool {
+	if same(a, b) {
 		return true
 	}
 
-	if len(s1) != len(s2) {
+	if len(a) != len(b) {
 		return false
 	}
 
-	for e := range s1 {
-		if _, ok := s2[e]; !ok {
+	for e := range a {
+		if _, ok := b[e]; !ok {
 			return false
 		}
 	}
@@ -105,9 +105,9 @@ func Equal(s1, s2 Set) bool {
 	return true
 }
 
-// Union takes the union of s1 and s2, and stores it in dst.
+// Union takes the union of a and b, and stores it in dst.
 //
-// The union of two sets, s1 and s2, is the set containing all the
+// The union of two sets, a and b, is the set containing all the
 // elements of each, for instance:
 //
 //     {a,b,c} UNION {d,e,f} = {a,b,c,d,e,f}
@@ -117,23 +117,23 @@ func Equal(s1, s2 Set) bool {
 //
 //     {a,b,c} UNION {b,c,d} = {a,b,c,d}
 //
-func (dst Set) Union(s1, s2 Set) Set {
-	if same(s1, s2) {
-		return dst.Copy(s1)
+func (dst Set) Union(a, b Set) Set {
+	if same(a, b) {
+		return dst.Copy(a)
 	}
 
-	if !same(s1, dst) && !same(s2, dst) {
+	if !same(a, dst) && !same(b, dst) {
 		dst = Clear(dst)
 	}
 
-	if !same(dst, s1) {
-		for e, n := range s1 {
+	if !same(dst, a) {
+		for e, n := range a {
 			dst[e] = n
 		}
 	}
 
-	if !same(dst, s2) {
-		for e, n := range s2 {
+	if !same(dst, b) {
+		for e, n := range b {
 			dst[e] = n
 		}
 	}
@@ -141,9 +141,9 @@ func (dst Set) Union(s1, s2 Set) Set {
 	return dst
 }
 
-// Intersect takes the intersection of s1 and s2, and stores it in dst.
+// Intersect takes the intersection of a and b, and stores it in dst.
 //
-// The intersection of two sets, s1 and s2, is the set containing all
+// The intersection of two sets, a and b, is the set containing all
 // the elements shared between the two sets, for instance:
 //
 //     {a,b,c} INTERSECT {b,c,d} = {b,c}
@@ -158,25 +158,25 @@ func (dst Set) Union(s1, s2 Set) Set {
 //
 //     {a,b,c} INTERSECT {d,e,f} = {}
 //
-func (dst Set) Intersect(s1, s2 Set) Set {
+func (dst Set) Intersect(a, b Set) Set {
 	var swap Set
 
-	if same(s1, s2) {
-		return dst.Copy(s1)
+	if same(a, b) {
+		return dst.Copy(a)
 	}
-	if same(s1, dst) {
-		swap = s2
-	} else if same(s2, dst) {
-		swap = s1
+	if same(a, dst) {
+		swap = b
+	} else if same(b, dst) {
+		swap = a
 	} else {
 		dst = Clear(dst)
 
-		if len(s1) > len(s2) {
-			s1, s2 = s2, s1
+		if len(a) > len(b) {
+			a, b = b, a
 		}
 
-		for e, n := range s1 {
-			if _, ok := s2[e]; ok {
+		for e, n := range a {
+			if _, ok := b[e]; ok {
 				dst[e] = n
 			}
 		}

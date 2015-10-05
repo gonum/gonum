@@ -153,80 +153,80 @@ func TestSelfEqual(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
+	a := make(Set)
+	b := make(Set)
 
-	if !Equal(s1, s2) {
+	if !Equal(a, b) {
 		t.Error("Two different empty sets not equal")
 	}
 
-	s1.Add(node(1))
-	if Equal(s1, s2) {
+	a.Add(node(1))
+	if Equal(a, b) {
 		t.Error("Two different sets with different elements not equal")
 	}
 
-	s2.Add(node(1))
-	if !Equal(s1, s2) {
+	b.Add(node(1))
+	if !Equal(a, b) {
 		t.Error("Two sets with same element not equal")
 	}
 }
 
 func TestCopy(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
+	a := make(Set)
+	b := make(Set)
 
-	s1.Add(node(1))
-	s1.Add(node(2))
-	s1.Add(node(3))
+	a.Add(node(1))
+	a.Add(node(2))
+	a.Add(node(3))
 
-	s2.Copy(s1)
+	b.Copy(a)
 
-	if !Equal(s1, s2) {
+	if !Equal(a, b) {
 		t.Fatalf("Two sets not equal after copy")
 	}
 
-	s2.Remove(node(1))
+	b.Remove(node(1))
 
-	if Equal(s1, s2) {
+	if Equal(a, b) {
 		t.Errorf("Mutating one set mutated another after copy")
 	}
 }
 
 func TestSelfCopy(t *testing.T) {
-	s1 := make(Set)
+	a := make(Set)
 
-	s1.Add(node(1))
-	s1.Add(node(2))
+	a.Add(node(1))
+	a.Add(node(2))
 
-	s1.Copy(s1)
+	a.Copy(a)
 
-	if s1.count() != 2 {
+	if a.count() != 2 {
 		t.Error("Something strange happened when copying into self")
 	}
 }
 
 func TestUnionSame(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
-	s3 := make(Set)
+	a := make(Set)
+	b := make(Set)
+	c := make(Set)
 
-	s1.Add(node(1))
-	s1.Add(node(2))
+	a.Add(node(1))
+	a.Add(node(2))
 
-	s2.Add(node(1))
-	s2.Add(node(2))
+	b.Add(node(1))
+	b.Add(node(2))
 
-	s3.Union(s1, s2)
+	c.Union(a, b)
 
-	if s3.count() != 2 {
+	if c.count() != 2 {
 		t.Error("Union of same sets yields set with wrong len")
 	}
 
-	if !s3.Has(node(1)) || !s3.Has(node(2)) {
+	if !c.Has(node(1)) || !c.Has(node(2)) {
 		t.Error("Union of same sets yields wrong elements")
 	}
 
-	for i, s := range []Set{s1, s2, s3} {
+	for i, s := range []Set{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -236,34 +236,34 @@ func TestUnionSame(t *testing.T) {
 }
 
 func TestUnionDiff(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
-	s3 := make(Set)
+	a := make(Set)
+	b := make(Set)
+	c := make(Set)
 
-	s1.Add(node(1))
-	s1.Add(node(2))
+	a.Add(node(1))
+	a.Add(node(2))
 
-	s2.Add(node(3))
+	b.Add(node(3))
 
-	s3.Union(s1, s2)
+	c.Union(a, b)
 
-	if s3.count() != 3 {
+	if c.count() != 3 {
 		t.Error("Union of different sets yields set with wrong len")
 	}
 
-	if !s3.Has(node(1)) || !s3.Has(node(2)) || !s3.Has(node(3)) {
+	if !c.Has(node(1)) || !c.Has(node(2)) || !c.Has(node(3)) {
 		t.Error("Union of different sets yields set with wrong elements")
 	}
 
-	if s1.Has(node(3)) || !s1.Has(node(2)) || !s1.Has(node(1)) || s1.count() != 2 {
+	if a.Has(node(3)) || !a.Has(node(2)) || !a.Has(node(1)) || a.count() != 2 {
 		t.Error("Union of sets mutates non-destination set (argument 1)")
 	}
 
-	if !s2.Has(node(3)) || s2.Has(node(1)) || s2.Has(node(2)) || s2.count() != 1 {
+	if !b.Has(node(3)) || b.Has(node(1)) || b.Has(node(2)) || b.count() != 1 {
 		t.Error("Union of sets mutates non-destination set (argument 2)")
 	}
 
-	for i, s := range []Set{s1, s2, s3} {
+	for i, s := range []Set{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -273,35 +273,35 @@ func TestUnionDiff(t *testing.T) {
 }
 
 func TestUnionOverlapping(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
-	s3 := make(Set)
+	a := make(Set)
+	b := make(Set)
+	c := make(Set)
 
-	s1.Add(node(1))
-	s1.Add(node(2))
+	a.Add(node(1))
+	a.Add(node(2))
 
-	s2.Add(node(2))
-	s2.Add(node(3))
+	b.Add(node(2))
+	b.Add(node(3))
 
-	s3.Union(s1, s2)
+	c.Union(a, b)
 
-	if s3.count() != 3 {
+	if c.count() != 3 {
 		t.Error("Union of overlapping sets yields set with wrong len")
 	}
 
-	if !s3.Has(node(1)) || !s3.Has(node(2)) || !s3.Has(node(3)) {
+	if !c.Has(node(1)) || !c.Has(node(2)) || !c.Has(node(3)) {
 		t.Error("Union of overlapping sets yields set with wrong elements")
 	}
 
-	if s1.Has(node(3)) || !s1.Has(node(2)) || !s1.Has(node(1)) || s1.count() != 2 {
+	if a.Has(node(3)) || !a.Has(node(2)) || !a.Has(node(1)) || a.count() != 2 {
 		t.Error("Union of sets mutates non-destination set (argument 1)")
 	}
 
-	if !s2.Has(node(3)) || s2.Has(node(1)) || !s2.Has(node(2)) || s2.count() != 2 {
+	if !b.Has(node(3)) || b.Has(node(1)) || !b.Has(node(2)) || b.count() != 2 {
 		t.Error("Union of sets mutates non-destination set (argument 2)")
 	}
 
-	for i, s := range []Set{s1, s2, s3} {
+	for i, s := range []Set{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -311,27 +311,27 @@ func TestUnionOverlapping(t *testing.T) {
 }
 
 func TestIntersectSame(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
-	s3 := make(Set)
+	a := make(Set)
+	b := make(Set)
+	c := make(Set)
 
-	s1.Add(node(2))
-	s1.Add(node(3))
+	a.Add(node(2))
+	a.Add(node(3))
 
-	s2.Add(node(2))
-	s2.Add(node(3))
+	b.Add(node(2))
+	b.Add(node(3))
 
-	s3.Intersect(s1, s2)
+	c.Intersect(a, b)
 
-	if card := s3.count(); card != 2 {
+	if card := c.count(); card != 2 {
 		t.Errorf("Intersection of identical sets yields set of wrong len %d", card)
 	}
 
-	if !s3.Has(node(2)) || !s3.Has(node(3)) {
+	if !c.Has(node(2)) || !c.Has(node(3)) {
 		t.Error("Intersection of identical sets yields set of wrong elements")
 	}
 
-	for i, s := range []Set{s1, s2, s3} {
+	for i, s := range []Set{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -341,31 +341,31 @@ func TestIntersectSame(t *testing.T) {
 }
 
 func TestIntersectDiff(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
-	s3 := make(Set)
+	a := make(Set)
+	b := make(Set)
+	c := make(Set)
 
-	s1.Add(node(2))
-	s1.Add(node(3))
+	a.Add(node(2))
+	a.Add(node(3))
 
-	s2.Add(node(1))
-	s2.Add(node(4))
+	b.Add(node(1))
+	b.Add(node(4))
 
-	s3.Intersect(s1, s2)
+	c.Intersect(a, b)
 
-	if card := s3.count(); card != 0 {
+	if card := c.count(); card != 0 {
 		t.Errorf("Intersection of different yields non-empty set %d", card)
 	}
 
-	if !s1.Has(node(2)) || !s1.Has(node(3)) || s1.Has(node(1)) || s1.Has(node(4)) || s1.count() != 2 {
+	if !a.Has(node(2)) || !a.Has(node(3)) || a.Has(node(1)) || a.Has(node(4)) || a.count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	if s2.Has(node(2)) || s2.Has(node(3)) || !s2.Has(node(1)) || !s2.Has(node(4)) || s2.count() != 2 {
+	if b.Has(node(2)) || b.Has(node(3)) || !b.Has(node(1)) || !b.Has(node(4)) || b.count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	for i, s := range []Set{s1, s2, s3} {
+	for i, s := range []Set{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -375,35 +375,35 @@ func TestIntersectDiff(t *testing.T) {
 }
 
 func TestIntersectOverlapping(t *testing.T) {
-	s1 := make(Set)
-	s2 := make(Set)
-	s3 := make(Set)
+	a := make(Set)
+	b := make(Set)
+	c := make(Set)
 
-	s1.Add(node(2))
-	s1.Add(node(3))
+	a.Add(node(2))
+	a.Add(node(3))
 
-	s2.Add(node(3))
-	s2.Add(node(4))
+	b.Add(node(3))
+	b.Add(node(4))
 
-	s3.Intersect(s1, s2)
+	c.Intersect(a, b)
 
-	if card := s3.count(); card != 1 {
+	if card := c.count(); card != 1 {
 		t.Errorf("Intersection of overlapping sets yields set of incorrect len %d", card)
 	}
 
-	if !s3.Has(node(3)) {
+	if !c.Has(node(3)) {
 		t.Errorf("Intersection of overlapping sets yields set with wrong element")
 	}
 
-	if !s1.Has(node(2)) || !s1.Has(node(3)) || s1.Has(node(4)) || s1.count() != 2 {
+	if !a.Has(node(2)) || !a.Has(node(3)) || a.Has(node(4)) || a.count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	if s2.Has(node(2)) || !s2.Has(node(3)) || !s2.Has(node(4)) || s2.count() != 2 {
+	if b.Has(node(2)) || !b.Has(node(3)) || !b.Has(node(4)) || b.count() != 2 {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	for i, s := range []Set{s1, s2, s3} {
+	for i, s := range []Set{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())

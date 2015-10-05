@@ -13,6 +13,6 @@ import "reflect"
 // hash maps are passed as a pointer to a runtime Hmap struct. A map is
 // not seen by the runtime as a pointer though, so we use reflect to get
 // the maps' pointer values to compare.
-func same(a, b Set) bool {
+func same(a, b Nodes) bool {
 	return reflect.ValueOf(a).Pointer() == reflect.ValueOf(b).Pointer()
 }

@@ -13,10 +13,10 @@ import (
 // prune for strict post-dominators, immediate dominators etc.
 //
 // A dominates B if and only if the only path through B travels through A.
-func Dominators(start graph.Node, g graph.Graph) map[int]set.Set {
-	allNodes := make(set.Set)
+func Dominators(start graph.Node, g graph.Graph) map[int]set.Nodes {
+	allNodes := make(set.Nodes)
 	nlist := g.Nodes()
-	dominators := make(map[int]set.Set, len(nlist))
+	dominators := make(map[int]set.Nodes, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node)
 	}
@@ -30,7 +30,7 @@ func Dominators(start graph.Node, g graph.Graph) map[int]set.Set {
 	}
 
 	for _, node := range nlist {
-		dominators[node.ID()] = make(set.Set)
+		dominators[node.ID()] = make(set.Nodes)
 		if node.ID() == start.ID() {
 			dominators[node.ID()].Add(start)
 		} else {
@@ -48,12 +48,12 @@ func Dominators(start graph.Node, g graph.Graph) map[int]set.Set {
 			if len(preds) == 0 {
 				continue
 			}
-			tmp := make(set.Set).Copy(dominators[preds[0].ID()])
+			tmp := make(set.Nodes).Copy(dominators[preds[0].ID()])
 			for _, pred := range preds[1:] {
 				tmp.Intersect(tmp, dominators[pred.ID()])
 			}
 
-			dom := make(set.Set)
+			dom := make(set.Nodes)
 			dom.Add(node)
 
 			dom.Union(dom, tmp)
@@ -71,16 +71,16 @@ func Dominators(start graph.Node, g graph.Graph) map[int]set.Set {
 // prune for strict post-dominators, immediate post-dominators etc.
 //
 // A post-dominates B if and only if all paths from B travel through A.
-func PostDominators(end graph.Node, g graph.Graph) map[int]set.Set {
-	allNodes := make(set.Set)
+func PostDominators(end graph.Node, g graph.Graph) map[int]set.Nodes {
+	allNodes := make(set.Nodes)
 	nlist := g.Nodes()
-	dominators := make(map[int]set.Set, len(nlist))
+	dominators := make(map[int]set.Nodes, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node)
 	}
 
 	for _, node := range nlist {
-		dominators[node.ID()] = make(set.Set)
+		dominators[node.ID()] = make(set.Nodes)
 		if node.ID() == end.ID() {
 			dominators[node.ID()].Add(end)
 		} else {
@@ -98,12 +98,12 @@ func PostDominators(end graph.Node, g graph.Graph) map[int]set.Set {
 			if len(succs) == 0 {
 				continue
 			}
-			tmp := make(set.Set).Copy(dominators[succs[0].ID()])
+			tmp := make(set.Nodes).Copy(dominators[succs[0].ID()])
 			for _, succ := range succs[1:] {
 				tmp.Intersect(tmp, dominators[succ.ID()])
 			}
 
-			dom := make(set.Set)
+			dom := make(set.Nodes)
 			dom.Add(node)
 
 			dom.Union(dom, tmp)

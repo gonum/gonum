@@ -18,7 +18,7 @@ import (
 // and labels from the paper.
 type johnson struct {
 	adjacent johnsonGraph // SCC adjacency list.
-	b        []set.IntSet // Johnson's "B-list".
+	b        []set.Ints   // Johnson's "B-list".
 	blocked  []bool
 	s        int
 
@@ -32,7 +32,7 @@ func CyclesIn(g graph.Directed) [][]graph.Node {
 	jg := johnsonGraphFrom(g)
 	j := johnson{
 		adjacent: jg,
-		b:        make([]set.IntSet, len(jg.orig)),
+		b:        make([]set.Ints, len(jg.orig)),
 		blocked:  make([]bool, len(jg.orig)),
 	}
 
@@ -57,7 +57,7 @@ func CyclesIn(g graph.Directed) [][]graph.Node {
 			}
 			if len(j.adjacent.succ[v.ID()]) > 0 {
 				j.blocked[i] = false
-				j.b[i] = make(set.IntSet)
+				j.b[i] = make(set.Ints)
 			}
 		}
 		//L3:
@@ -125,8 +125,8 @@ type johnsonGraph struct {
 	orig  []graph.Node
 	index map[int]int
 
-	nodes set.IntSet
-	succ  map[int]set.IntSet
+	nodes set.Ints
+	succ  map[int]set.Ints
 }
 
 // johnsonGraphFrom returns a deep copy of the graph g.
@@ -137,14 +137,14 @@ func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 		orig:  nodes,
 		index: make(map[int]int, len(nodes)),
 
-		nodes: make(set.IntSet, len(nodes)),
-		succ:  make(map[int]set.IntSet),
+		nodes: make(set.Ints, len(nodes)),
+		succ:  make(map[int]set.Ints),
 	}
 	for i, u := range nodes {
 		c.index[u.ID()] = i
 		for _, v := range g.From(u) {
 			if c.succ[u.ID()] == nil {
-				c.succ[u.ID()] = make(set.IntSet)
+				c.succ[u.ID()] = make(set.Ints)
 				c.nodes.Add(u.ID())
 			}
 			c.nodes.Add(v.ID())
@@ -210,8 +210,8 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 	sub := johnsonGraph{
 		orig:  g.orig,
 		index: g.index,
-		nodes: make(set.IntSet),
-		succ:  make(map[int]set.IntSet),
+		nodes: make(set.Ints),
+		succ:  make(map[int]set.Ints),
 	}
 
 	var n int
@@ -224,7 +224,7 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 			for _, v := range scc {
 				if _, ok := g.succ[u.ID()][v.ID()]; ok {
 					if sub.succ[u.ID()] == nil {
-						sub.succ[u.ID()] = make(set.IntSet)
+						sub.succ[u.ID()] = make(set.Ints)
 						sub.nodes.Add(u.ID())
 					}
 					sub.nodes.Add(v.ID())

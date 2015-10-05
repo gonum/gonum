@@ -10,8 +10,8 @@ type node int
 
 func (n node) ID() int { return int(n) }
 
-// count reports the number of elements stored in the set.
-func (s Set) count() int {
+// count reports the number of elements stored in the node set.
+func (s Nodes) count() int {
 	return len(s)
 }
 
@@ -22,8 +22,8 @@ func (s Set) count() int {
 // code to look at (at least for gc) is in runtime/hashmap.{h,goc}.
 func TestSame(t *testing.T) {
 	var (
-		a = make(Set)
-		b = make(Set)
+		a = make(Nodes)
+		b = make(Nodes)
 		c = a
 	)
 
@@ -46,7 +46,7 @@ func TestSame(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	s := make(Set)
+	s := make(Nodes)
 	if s == nil {
 		t.Fatal("Set cannot be created successfully")
 	}
@@ -91,7 +91,7 @@ func TestAdd(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	s := make(Set)
+	s := make(Nodes)
 
 	s.Add(node(1))
 	s.Add(node(3))
@@ -125,7 +125,7 @@ func TestRemove(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	s := make(Set)
+	s := make(Nodes)
 
 	s.Add(node(8))
 	s.Add(node(9))
@@ -139,7 +139,7 @@ func TestClear(t *testing.T) {
 }
 
 func TestSelfEqual(t *testing.T) {
-	s := make(Set)
+	s := make(Nodes)
 
 	if !Equal(s, s) {
 		t.Error("Set is not equal to itself")
@@ -153,8 +153,8 @@ func TestSelfEqual(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
 
 	if !Equal(a, b) {
 		t.Error("Two different empty sets not equal")
@@ -172,8 +172,8 @@ func TestEqual(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -193,7 +193,7 @@ func TestCopy(t *testing.T) {
 }
 
 func TestSelfCopy(t *testing.T) {
-	a := make(Set)
+	a := make(Nodes)
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -206,9 +206,9 @@ func TestSelfCopy(t *testing.T) {
 }
 
 func TestUnionSame(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
-	c := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
+	c := make(Nodes)
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -226,7 +226,7 @@ func TestUnionSame(t *testing.T) {
 		t.Error("Union of same sets yields wrong elements")
 	}
 
-	for i, s := range []Set{a, b, c} {
+	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -236,9 +236,9 @@ func TestUnionSame(t *testing.T) {
 }
 
 func TestUnionDiff(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
-	c := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
+	c := make(Nodes)
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -263,7 +263,7 @@ func TestUnionDiff(t *testing.T) {
 		t.Error("Union of sets mutates non-destination set (argument 2)")
 	}
 
-	for i, s := range []Set{a, b, c} {
+	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -273,9 +273,9 @@ func TestUnionDiff(t *testing.T) {
 }
 
 func TestUnionOverlapping(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
-	c := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
+	c := make(Nodes)
 
 	a.Add(node(1))
 	a.Add(node(2))
@@ -301,7 +301,7 @@ func TestUnionOverlapping(t *testing.T) {
 		t.Error("Union of sets mutates non-destination set (argument 2)")
 	}
 
-	for i, s := range []Set{a, b, c} {
+	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -311,9 +311,9 @@ func TestUnionOverlapping(t *testing.T) {
 }
 
 func TestIntersectSame(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
-	c := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
+	c := make(Nodes)
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -331,7 +331,7 @@ func TestIntersectSame(t *testing.T) {
 		t.Error("Intersection of identical sets yields set of wrong elements")
 	}
 
-	for i, s := range []Set{a, b, c} {
+	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -341,9 +341,9 @@ func TestIntersectSame(t *testing.T) {
 }
 
 func TestIntersectDiff(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
-	c := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
+	c := make(Nodes)
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -365,7 +365,7 @@ func TestIntersectDiff(t *testing.T) {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	for i, s := range []Set{a, b, c} {
+	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
@@ -375,9 +375,9 @@ func TestIntersectDiff(t *testing.T) {
 }
 
 func TestIntersectOverlapping(t *testing.T) {
-	a := make(Set)
-	b := make(Set)
-	c := make(Set)
+	a := make(Nodes)
+	b := make(Nodes)
+	c := make(Nodes)
 
 	a.Add(node(2))
 	a.Add(node(3))
@@ -403,7 +403,7 @@ func TestIntersectOverlapping(t *testing.T) {
 		t.Error("Intersection of sets mutates non-destination set (argument 1)")
 	}
 
-	for i, s := range []Set{a, b, c} {
+	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
 				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())

@@ -7,71 +7,71 @@ package set
 
 import "github.com/gonum/graph"
 
-// IntSet is a set of integer identifiers.
-type IntSet map[int]struct{}
+// Ints is a set of integer identifiers.
+type Ints map[int]struct{}
 
-// The simple accessor methods for Set are provided to allow ease of
+// The simple accessor methods for Ints are provided to allow ease of
 // implementation change should the need arise.
 
 // Add inserts an element into the set.
-func (s IntSet) Add(e int) {
+func (s Ints) Add(e int) {
 	s[e] = struct{}{}
 }
 
 // Has reports the existence of the element in the set.
-func (s IntSet) Has(e int) bool {
+func (s Ints) Has(e int) bool {
 	_, ok := s[e]
 	return ok
 }
 
 // Remove deletes the specified element from the set.
-func (s IntSet) Remove(e int) {
+func (s Ints) Remove(e int) {
 	delete(s, e)
 }
 
 // Count reports the number of elements stored in the set.
-func (s IntSet) Count() int {
+func (s Ints) Count() int {
 	return len(s)
 }
 
-// A set is a set of nodes keyed in their integer identifiers.
-type Set map[int]graph.Node
+// Nodes is a set of nodes keyed in their integer identifiers.
+type Nodes map[int]graph.Node
 
-// The simple accessor methods for Set are provided to allow ease of
+// The simple accessor methods for Nodes are provided to allow ease of
 // implementation change should the need arise.
 
 // Add inserts an element into the set.
-func (s Set) Add(n graph.Node) {
+func (s Nodes) Add(n graph.Node) {
 	s[n.ID()] = n
 }
 
 // Remove deletes the specified element from the set.
-func (s Set) Remove(e graph.Node) {
+func (s Nodes) Remove(e graph.Node) {
 	delete(s, e.ID())
 }
 
 // Has reports the existence of the element in the set.
-func (s Set) Has(n graph.Node) bool {
+func (s Nodes) Has(n graph.Node) bool {
 	_, ok := s[n.ID()]
 	return ok
 }
 
 // clear clears the set, possibly using the same backing store.
-func (s *Set) clear() {
+func (s *Nodes) clear() {
 	if len(*s) != 0 {
-		*s = make(Set)
+		*s = make(Nodes)
 	}
 }
 
 // Copy performs a perfect copy from src to dst (meaning the sets will
 // be equal).
-func (dst Set) Copy(src Set) Set {
+func (dst Nodes) Copy(src Nodes) Nodes {
 	if same(src, dst) {
 		return dst
 	}
 
 	if len(dst) > 0 {
-		dst = make(Set, len(src))
+		dst = make(Nodes, len(src))
 	}
 
 	for e, n := range src {
@@ -83,7 +83,7 @@ func (dst Set) Copy(src Set) Set {
 
 // Equal reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
-func Equal(a, b Set) bool {
+func Equal(a, b Nodes) bool {
 	if same(a, b) {
 		return true
 	}
@@ -113,7 +113,7 @@ func Equal(a, b Set) bool {
 //
 //     {a,b,c} UNION {b,c,d} = {a,b,c,d}
 //
-func (dst Set) Union(a, b Set) Set {
+func (dst Nodes) Union(a, b Nodes) Nodes {
 	if same(a, b) {
 		return dst.Copy(a)
 	}
@@ -154,8 +154,8 @@ func (dst Set) Union(a, b Set) Set {
 //
 //     {a,b,c} INTERSECT {d,e,f} = {}
 //
-func (dst Set) Intersect(a, b Set) Set {
-	var swap Set
+func (dst Nodes) Intersect(a, b Nodes) Nodes {
+	var swap Nodes
 
 	if same(a, b) {
 		return dst.Copy(a)

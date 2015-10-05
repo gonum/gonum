@@ -13,6 +13,6 @@ import "unsafe"
 // hash maps are passed as a pointer to a runtime Hmap struct. A map is
 // not seen by the runtime as a pointer though, so we use unsafe to get
 // the maps' pointer values to compare.
-func same(a, b Set) bool {
+func same(a, b Nodes) bool {
 	return *(*uintptr)(unsafe.Pointer(&a)) == *(*uintptr)(unsafe.Pointer(&b))
 }

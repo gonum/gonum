@@ -52,6 +52,10 @@ func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
 }
 
+func TestDlacpy(t *testing.T) {
+	testlapack.DlacpyTest(t, impl)
+}
+
 func TestDlaev2(t *testing.T) {
 	testlapack.Dlaev2Test(t, impl)
 }

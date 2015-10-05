@@ -67,6 +67,15 @@ type Implementation struct{}
 
 var _ lapack.Float64 = Implementation{}
 
+// Dlacpy copies the elements of A specified by uplo into B. Uplo can specify
+// a triangular portion with blas.Upper or blas.Lower, or can specify all of the
+// elemest with blas.All.
+func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int, b []float64, ldb int) {
+	checkMatrix(m, n, a, lda)
+	checkMatrix(m, n, b, ldb)
+	clapack.Dlacpy(uplo, m, n, a, lda, b, ldb)
+}
+
 // Dlange computes the matrix norm of the general m×n matrix a. The input norm
 // specifies the norm computed.
 //  lapack.MaxAbs: the maximum absolute value of an element.

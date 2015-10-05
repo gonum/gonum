@@ -13,6 +13,10 @@ import (
 
 var impl = Implementation{}
 
+func TestDlacpy(t *testing.T) {
+	testlapack.DlacpyTest(t, impl)
+}
+
 func TestDlange(t *testing.T) {
 	testlapack.DlangeTest(t, impl)
 }

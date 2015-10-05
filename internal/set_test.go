@@ -27,20 +27,20 @@ func TestSame(t *testing.T) {
 		c = a
 	)
 
-	if Same(a, b) {
+	if same(a, b) {
 		t.Error("Independently created sets test as same")
 	}
-	if !Same(a, c) {
+	if !same(a, c) {
 		t.Error("Set copy and original test as not same.")
 	}
 	a.Add(node(1))
-	if !Same(a, c) {
+	if !same(a, c) {
 		t.Error("Set copy and original test as not same after addition.")
 	}
-	if !Same(nil, nil) {
+	if !same(nil, nil) {
 		t.Error("nil sets test as not same.")
 	}
-	if Same(b, nil) {
+	if same(b, nil) {
 		t.Error("nil and empty sets test as same.")
 	}
 }

@@ -4,11 +4,7 @@
 
 package internal
 
-import (
-	"unsafe"
-
-	"github.com/gonum/graph"
-)
+import "github.com/gonum/graph"
 
 // IntSet is a set of integer identifiers.
 type IntSet map[int]struct{}
@@ -35,19 +31,6 @@ func (s IntSet) Remove(e int) {
 // Count reports the number of elements stored in the set.
 func (s IntSet) Count() int {
 	return len(s)
-}
-
-// Same determines whether two sets are backed by the same store. In the
-// current implementation using hash maps it makes use of the fact that
-// hash maps (at least in the gc implementation) are passed as a pointer
-// to a runtime Hmap struct.
-//
-// A map is not seen by the runtime as a pointer though, so we cannot
-// directly compare the sets converted to unsafe.Pointer and need to take
-// the sets' addressed and dereference them as pointers to some comparable
-// type.
-func Same(s1, s2 Set) bool {
-	return *(*uintptr)(unsafe.Pointer(&s1)) == *(*uintptr)(unsafe.Pointer(&s2))
 }
 
 // A set is a set of nodes keyed in their integer identifiers.
@@ -87,7 +70,7 @@ func Clear(s Set) Set {
 // Copy performs a perfect copy from s1 to dst (meaning the sets will
 // be equal).
 func (dst Set) Copy(src Set) Set {
-	if Same(src, dst) {
+	if same(src, dst) {
 		return dst
 	}
 
@@ -105,7 +88,7 @@ func (dst Set) Copy(src Set) Set {
 // Equal reports set equality between the parameters. Sets are equal if
 // and only if they have the same elements.
 func Equal(s1, s2 Set) bool {
-	if Same(s1, s2) {
+	if same(s1, s2) {
 		return true
 	}
 
@@ -135,21 +118,21 @@ func Equal(s1, s2 Set) bool {
 //     {a,b,c} UNION {b,c,d} = {a,b,c,d}
 //
 func (dst Set) Union(s1, s2 Set) Set {
-	if Same(s1, s2) {
+	if same(s1, s2) {
 		return dst.Copy(s1)
 	}
 
-	if !Same(s1, dst) && !Same(s2, dst) {
+	if !same(s1, dst) && !same(s2, dst) {
 		dst = Clear(dst)
 	}
 
-	if !Same(dst, s1) {
+	if !same(dst, s1) {
 		for e, n := range s1 {
 			dst[e] = n
 		}
 	}
 
-	if !Same(dst, s2) {
+	if !same(dst, s2) {
 		for e, n := range s2 {
 			dst[e] = n
 		}
@@ -178,12 +161,12 @@ func (dst Set) Union(s1, s2 Set) Set {
 func (dst Set) Intersect(s1, s2 Set) Set {
 	var swap Set
 
-	if Same(s1, s2) {
+	if same(s1, s2) {
 		return dst.Copy(s1)
 	}
-	if Same(s1, dst) {
+	if same(s1, dst) {
 		swap = s2
-	} else if Same(s2, dst) {
+	} else if same(s2, dst) {
 		swap = s1
 	} else {
 		dst = Clear(dst)

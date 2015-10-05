@@ -11,6 +11,7 @@ import (
 	"golang.org/x/tools/container/intsets"
 
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/internal/ordered"
 )
 
 // Unorderable is an error containing sets of unorderable graph.Nodes.
@@ -41,7 +42,7 @@ func Sort(g graph.Directed) (sorted []graph.Node, err error) {
 	var sc Unorderable
 	for _, s := range sccs {
 		if len(s) != 1 {
-			sort.Sort(byID(s))
+			sort.Sort(ordered.ByID(s))
 			sc = append(sc, s)
 			sorted = append(sorted, nil)
 			continue

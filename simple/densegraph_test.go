@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/internal/ordered"
 )
 
 var (
@@ -110,12 +111,6 @@ func TestUndirectedDenseAddRemove(t *testing.T) {
 	}
 }
 
-type byID []graph.Node
-
-func (n byID) Len() int           { return len(n) }
-func (n byID) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
-func (n byID) Less(i, j int) bool { return n[i].ID() < n[j].ID() }
-
 func TestDenseLists(t *testing.T) {
 	dg := NewDirectedDenseGraph(15, true, 0, math.Inf(1))
 	nodes := dg.Nodes()
@@ -124,7 +119,7 @@ func TestDenseLists(t *testing.T) {
 		t.Fatalf("Wrong number of nodes")
 	}
 
-	sort.Sort(byID(nodes))
+	sort.Sort(ordered.ByID(nodes))
 
 	for i, node := range dg.Nodes() {
 		if i != node.ID() {

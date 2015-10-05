@@ -140,6 +140,7 @@ func Local(p Problem, initX []float64, settings *Settings, method Method) (*Resu
 func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLoc *Location, startTime time.Time) (status Status, err error) {
 	loc := &Location{}
 	copyLocation(loc, optLoc)
+	x := make([]float64, len(loc.X))
 
 	methodStatus, methodIsStatuser := method.(Statuser)
 
@@ -179,7 +180,7 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 					return
 				}
 			}
-			evaluate(p, loc, op, stats)
+			evaluate(p, loc, op, stats, x)
 		}
 
 		if settings.Recorder != nil {
@@ -287,7 +288,8 @@ func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stat
 		if loc.Hessian != nil {
 			eval |= HessEvaluation
 		}
-		evaluate(p, loc, eval, stats)
+		x := make([]float64, len(loc.X))
+		evaluate(p, loc, eval, stats, x)
 	}
 
 	if math.IsInf(loc.F, 1) || math.IsNaN(loc.F) {
@@ -359,19 +361,21 @@ func checkLimits(loc *Location, stats *Stats, settings *Settings) Status {
 	return NotTerminated
 }
 
-// evaluate evaluates the routines specified by the Operation at loc.X, storing
-// the answer into loc and updating stats.
-func evaluate(p *Problem, loc *Location, eval Operation, stats *Stats) {
+// evaluate evaluates the routines specified by the Operation at loc.X, stores
+// the answer into loc and updates stats. loc.X is copied into x before
+// evaluating in order to prevent the routines from modifying it.
+func evaluate(p *Problem, loc *Location, eval Operation, stats *Stats, x []float64) {
+	copy(x, loc.X)
 	if eval&FuncEvaluation != 0 {
-		loc.F = p.Func(loc.X)
+		loc.F = p.Func(x)
 		stats.FuncEvaluations++
 	}
 	if eval&GradEvaluation != 0 {
-		p.Grad(loc.Gradient, loc.X)
+		p.Grad(loc.Gradient, x)
 		stats.GradEvaluations++
 	}
 	if eval&HessEvaluation != 0 {
-		p.Hess(loc.Hessian, loc.X)
+		p.Hess(loc.Hessian, x)
 		stats.HessEvaluations++
 	}
 }

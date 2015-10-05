@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package internal
+// Package ordered provides common sort ordering types.
+package ordered
 
 // BySliceValues implements the sort.Interface sorting a slice of
 // []int lexically by the values of the []int.

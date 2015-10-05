@@ -10,17 +10,17 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/ordered"
 	"github.com/gonum/graph/simple"
 )
 
 var vOrderTests = []struct {
-	g        []set
+	g        []intset
 	wantCore [][]int
 	wantK    int
 }{
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1, 2, 4, 6),
 			1: linksTo(2, 4, 6),
 			2: linksTo(3, 6),
@@ -90,13 +90,13 @@ func TestVertexOrdering(t *testing.T) {
 }
 
 var bronKerboschTests = []struct {
-	g    []set
+	g    []intset
 	want [][]int
 }{
 	{
 		// This is the example given in the Bron-Kerbosch article on wikipedia (renumbered).
 		// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
-		g: []set{
+		g: []intset{
 			0: linksTo(1, 4),
 			1: linksTo(2, 4),
 			2: linksTo(3),
@@ -156,7 +156,7 @@ func TestBronKerbosch(t *testing.T) {
 			sort.Ints(ids)
 			got[j] = ids
 		}
-		sort.Sort(internal.BySliceValues(got))
+		sort.Sort(ordered.BySliceValues(got))
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected cliques for test %d:\ngot: %v\nwant:%v", i, got, test.want)
 		}

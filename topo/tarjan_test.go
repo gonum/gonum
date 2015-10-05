@@ -10,14 +10,14 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/ordered"
 	"github.com/gonum/graph/simple"
 )
 
 type interval struct{ start, end int }
 
 var tarjanTests = []struct {
-	g []set
+	g []intset
 
 	ambiguousOrder []interval
 	want           [][]int
@@ -27,7 +27,7 @@ var tarjanTests = []struct {
 	sortable          bool
 }{
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(2, 7),
 			2: linksTo(3, 6),
@@ -48,7 +48,7 @@ var tarjanTests = []struct {
 		sortable:          false,
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1, 2, 3),
 			1: linksTo(2),
 			2: linksTo(3),
@@ -65,7 +65,7 @@ var tarjanTests = []struct {
 		sortable:          false,
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(0, 2),
 			2: linksTo(1),
@@ -80,7 +80,7 @@ var tarjanTests = []struct {
 		sortable:          false,
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(2, 3),
 			2: linksTo(4, 5),
@@ -104,7 +104,7 @@ var tarjanTests = []struct {
 		sortable:     true,
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(2, 3, 4),
 			2: linksTo(0, 3),
@@ -182,8 +182,8 @@ func TestTarjanSCC(t *testing.T) {
 			sort.Ints(gotIDs[i])
 		}
 		for _, iv := range test.ambiguousOrder {
-			sort.Sort(internal.BySliceValues(test.want[iv.start:iv.end]))
-			sort.Sort(internal.BySliceValues(gotIDs[iv.start:iv.end]))
+			sort.Sort(ordered.BySliceValues(test.want[iv.start:iv.end]))
+			sort.Sort(ordered.BySliceValues(gotIDs[iv.start:iv.end]))
 		}
 		if !reflect.DeepEqual(gotIDs, test.want) {
 			t.Errorf("unexpected Tarjan scc result for %d:\n\tgot:%v\n\twant:%v", i, gotIDs, test.want)

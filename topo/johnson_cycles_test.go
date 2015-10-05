@@ -10,17 +10,17 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/ordered"
 	"github.com/gonum/graph/simple"
 )
 
 var cyclesInTests = []struct {
-	g    []set
+	g    []intset
 	sccs [][]int
 	want [][]int
 }{
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(2, 7),
 			2: linksTo(3, 6),
@@ -36,7 +36,7 @@ var cyclesInTests = []struct {
 		},
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1, 2, 3),
 			1: linksTo(2),
 			2: linksTo(3),
@@ -47,7 +47,7 @@ var cyclesInTests = []struct {
 		},
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(0, 2),
 			2: linksTo(1),
@@ -58,7 +58,7 @@ var cyclesInTests = []struct {
 		},
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(2, 3),
 			2: linksTo(4, 5),
@@ -70,7 +70,7 @@ var cyclesInTests = []struct {
 		want: nil,
 	},
 	{
-		g: []set{
+		g: []intset{
 			0: linksTo(1),
 			1: linksTo(2, 3, 4),
 			2: linksTo(0, 3),
@@ -111,7 +111,7 @@ func TestCyclesIn(t *testing.T) {
 			}
 			got[j] = ids
 		}
-		sort.Sort(internal.BySliceValues(got))
+		sort.Sort(ordered.BySliceValues(got))
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("unexpected johnson result for %d:\n\tgot:%#v\n\twant:%#v", i, got, test.want)
 		}

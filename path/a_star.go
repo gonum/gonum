@@ -8,7 +8,7 @@ import (
 	"container/heap"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/set"
 )
 
 // AStar finds the A*-shortest path from s to t in g using the heuristic h. The path and
@@ -44,7 +44,7 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded
 	path = newShortestFrom(s, g.Nodes())
 	tid := t.ID()
 
-	visited := make(internal.IntSet)
+	visited := make(set.IntSet)
 	open := &aStarQueue{indexOf: make(map[int]int)}
 	heap.Push(open, aStarNode{node: s, gscore: 0, fscore: h(s, t)})
 

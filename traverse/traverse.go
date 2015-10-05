@@ -9,14 +9,14 @@ import (
 	"golang.org/x/tools/container/intsets"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/linear"
 )
 
 // BreadthFirst implements stateful breadth-first graph traversal.
 type BreadthFirst struct {
 	EdgeFilter func(graph.Edge) bool
 	Visit      func(u, v graph.Node)
-	queue      internal.NodeQueue
+	queue      linear.NodeQueue
 	visited    *intsets.Sparse
 }
 
@@ -108,7 +108,7 @@ func (b *BreadthFirst) Reset() {
 type DepthFirst struct {
 	EdgeFilter func(graph.Edge) bool
 	Visit      func(u, v graph.Node)
-	stack      internal.NodeStack
+	stack      linear.NodeStack
 	visited    *intsets.Sparse
 }
 

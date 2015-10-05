@@ -6,7 +6,7 @@ package topo
 
 // batageljZaversnikGraph is the example graph from
 // figure 1 of http://arxiv.org/abs/cs/0310049v1
-var batageljZaversnikGraph = []set{
+var batageljZaversnikGraph = []intset{
 	0: nil,
 
 	1: linksTo(2, 3),
@@ -32,14 +32,14 @@ var batageljZaversnikGraph = []set{
 	20: nil,
 }
 
-// set is an integer set.
-type set map[int]struct{}
+// intset is an integer set.
+type intset map[int]struct{}
 
-func linksTo(i ...int) set {
+func linksTo(i ...int) intset {
 	if len(i) == 0 {
 		return nil
 	}
-	s := make(set)
+	s := make(intset)
 	for _, v := range i {
 		s[v] = struct{}{}
 	}

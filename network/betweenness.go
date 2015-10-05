@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/linear"
 	"github.com/gonum/graph/path"
 )
 
@@ -33,7 +33,7 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	// http://wwwold.iit.cnr.it/staff/marco.pellegrini/papiri/asonam-final.pdf
 
 	cb := make(map[int]float64)
-	brandes(g, func(s graph.Node, stack internal.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
+	brandes(g, func(s graph.Node, stack linear.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
 		for stack.Len() != 0 {
 			w := stack.Pop()
 			for _, v := range p[w.ID()] {
@@ -67,7 +67,7 @@ func EdgeBetweenness(g graph.Graph) map[[2]int]float64 {
 
 	_, isUndirected := g.(graph.Undirected)
 	cb := make(map[[2]int]float64)
-	brandes(g, func(s graph.Node, stack internal.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
+	brandes(g, func(s graph.Node, stack linear.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
 		for stack.Len() != 0 {
 			w := stack.Pop()
 			for _, v := range p[w.ID()] {
@@ -88,15 +88,15 @@ func EdgeBetweenness(g graph.Graph) map[[2]int]float64 {
 // brandes is the common code for Betweenness and EdgeBetweenness. It corresponds
 // to algorithm 1 in http://algo.uni-konstanz.de/publications/b-vspbc-08.pdf with
 // the accumulation loop provided by the accumulate closure.
-func brandes(g graph.Graph, accumulate func(s graph.Node, stack internal.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64)) {
+func brandes(g graph.Graph, accumulate func(s graph.Node, stack linear.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64)) {
 	var (
 		nodes = g.Nodes()
-		stack internal.NodeStack
+		stack linear.NodeStack
 		p     = make(map[int][]graph.Node, len(nodes))
 		sigma = make(map[int]float64, len(nodes))
 		d     = make(map[int]int, len(nodes))
 		delta = make(map[int]float64, len(nodes))
-		queue internal.NodeQueue
+		queue linear.NodeQueue
 	)
 	for _, s := range nodes {
 		stack = stack[:0]

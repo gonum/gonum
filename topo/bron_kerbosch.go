@@ -6,7 +6,7 @@ package topo
 
 import (
 	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/set"
 )
 
 // VertexOrdering returns the vertex ordering and the k-cores of
@@ -115,20 +115,20 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 	// The algorithm used here is essentially BronKerbosch3 as described at
 	// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
 
-	p := make(internal.Set, len(nodes))
+	p := make(set.Set, len(nodes))
 	for _, n := range nodes {
 		p.Add(n)
 	}
-	x := make(internal.Set)
+	x := make(set.Set)
 	var bk bronKerbosch
 	order, _ := VertexOrdering(g)
 	for _, v := range order {
 		neighbours := g.From(v)
-		nv := make(internal.Set, len(neighbours))
+		nv := make(set.Set, len(neighbours))
 		for _, n := range neighbours {
 			nv.Add(n)
 		}
-		bk.maximalCliquePivot(g, []graph.Node{v}, make(internal.Set).Intersect(p, nv), make(internal.Set).Intersect(x, nv))
+		bk.maximalCliquePivot(g, []graph.Node{v}, make(set.Set).Intersect(p, nv), make(set.Set).Intersect(x, nv))
 		p.Remove(v)
 		x.Add(v)
 	}
@@ -137,14 +137,14 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 
 type bronKerbosch [][]graph.Node
 
-func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p, x internal.Set) {
+func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p, x set.Set) {
 	if len(p) == 0 && len(x) == 0 {
 		*bk = append(*bk, r)
 		return
 	}
 
 	neighbours := bk.choosePivotFrom(g, p, x)
-	nu := make(internal.Set, len(neighbours))
+	nu := make(set.Set, len(neighbours))
 	for _, n := range neighbours {
 		nu.Add(n)
 	}
@@ -153,7 +153,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 			continue
 		}
 		neighbours := g.From(v)
-		nv := make(internal.Set, len(neighbours))
+		nv := make(set.Set, len(neighbours))
 		for _, n := range neighbours {
 			nv.Add(n)
 		}
@@ -170,13 +170,13 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 			sr = append(r[:len(r):len(r)], v)
 		}
 
-		bk.maximalCliquePivot(g, sr, make(internal.Set).Intersect(p, nv), make(internal.Set).Intersect(x, nv))
+		bk.maximalCliquePivot(g, sr, make(set.Set).Intersect(p, nv), make(set.Set).Intersect(x, nv))
 		p.Remove(v)
 		x.Add(v)
 	}
 }
 
-func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x internal.Set) (neighbors []graph.Node) {
+func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x set.Set) (neighbors []graph.Node) {
 	// TODO(kortschak): Investigate the impact of pivot choice that maximises
 	// |p ⋂ neighbours(u)| as a function of input size. Until then, leave as
 	// compile time option.
@@ -194,7 +194,7 @@ func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x internal.Set) (nei
 		max   = -1
 		pivot graph.Node
 	)
-	maxNeighbors := func(s internal.Set) {
+	maxNeighbors := func(s set.Set) {
 	outer:
 		for _, u := range s {
 			nb := g.From(u)

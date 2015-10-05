@@ -13,7 +13,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/graphs/gen"
-	"github.com/gonum/graph/internal"
+	"github.com/gonum/graph/internal/ordered"
 	"github.com/gonum/graph/simple"
 )
 
@@ -334,7 +334,7 @@ func TestWalkAll(t *testing.T) {
 				sort.Ints(ids)
 				got[j] = ids
 			}
-			sort.Sort(internal.BySliceValues(got))
+			sort.Sort(ordered.BySliceValues(got))
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected connected components for test %d using %T:\ngot: %v\nwant:%v", i, w, got, test.want)
 			}

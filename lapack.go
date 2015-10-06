@@ -74,3 +74,12 @@ type MatrixType byte
 const (
 	General MatrixType = 'G' // A dense matrix (like blas64.General).
 )
+
+// Pivot specifies the pivot type for plane rotations
+type Pivot byte
+
+const (
+	Variable Pivot = 'V'
+	Top      Pivot = 'T'
+	Bottom   Pivot = 'B'
+)

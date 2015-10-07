@@ -550,7 +550,7 @@ func testOneInputFunc(t *testing.T,
 				continue
 			}
 			if dimsOK && panicked {
-				t.Errorf("Panicked with legal size: %s %s", errStr, err)
+				t.Errorf("Panicked with legal size: %s: %v", errStr, err)
 				continue
 			}
 			if !equal(a, aCopy) {
@@ -723,7 +723,7 @@ func testTwoInputFunc(t *testing.T,
 					continue
 				}
 				if dimsOK && panicked {
-					t.Errorf("Panicked with legal size: %s %s", errStr, err)
+					t.Errorf("Panicked with legal size: %s: %v", errStr, err)
 					continue
 				}
 				if !equal(a, aCopy) {
@@ -801,7 +801,7 @@ func testOneInput(t *testing.T,
 				continue
 			}
 			if dimsOK && panicked {
-				t.Errorf("Panicked with legal size: %s %s", errStr, err)
+				t.Errorf("Panicked with legal size: %s: %v", errStr, err)
 				continue
 			}
 			if !equal(a, aCopy) {
@@ -874,7 +874,7 @@ func testOneInput(t *testing.T,
 				preData := underlyingData(receiver)
 				panicked, err = panics(func() { method(receiver, aSame) })
 				if panicked {
-					t.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
+					t.Errorf("Panics when a maybeSame: %s: %v", errStr, err)
 				} else {
 					if !equalApprox(receiver, &want, tol, false) {
 						t.Errorf("Wrong answer when a maybeSame: %s", errStr)
@@ -956,7 +956,7 @@ func testTwoInput(t *testing.T,
 					continue
 				}
 				if dimsOK && panicked {
-					t.Errorf("Panicked with legal size: %s %s", errStr, err)
+					t.Errorf("Panicked with legal size: %s: %v", errStr, err)
 					continue
 				}
 				if !equal(a, aCopy) {
@@ -1036,7 +1036,7 @@ func testTwoInput(t *testing.T,
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, aSame, b) })
 					if panicked {
-						t.Errorf("Panics when a maybeSame: %s: %s", errStr, err)
+						t.Errorf("Panics when a maybeSame: %s: %v", errStr, err)
 					} else {
 						if !equalApprox(receiver, &want, tol, false) {
 							t.Errorf("Wrong answer when a maybeSame: %s", errStr)
@@ -1057,10 +1057,10 @@ func testTwoInput(t *testing.T,
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, a, bSame) })
 					if panicked {
-						t.Errorf("Panics when b maybeSame: %s", errStr)
+						t.Errorf("Panics when b maybeSame: %s: %v", errStr, err)
 					} else {
 						if !equalApprox(receiver, &want, tol, false) {
-							t.Errorf("Wrong answer when b maybeSame: %s: %s", errStr, err)
+							t.Errorf("Wrong answer when b maybeSame: %s", errStr)
 						}
 						postData := underlyingData(receiver)
 						if !floats.Equal(preData, postData) {
@@ -1091,7 +1091,7 @@ func testTwoInput(t *testing.T,
 					preData := underlyingData(receiver)
 					panicked, err = panics(func() { method(receiver, aSame, bSame) })
 					if panicked {
-						t.Errorf("Panics when both maybeSame: %s: %s", errStr, err)
+						t.Errorf("Panics when both maybeSame: %s: %v", errStr, err)
 					} else {
 						if !equalApprox(receiver, wasZero, tol, false) {
 							t.Errorf("Wrong answer when both maybeSame: %s", errStr)

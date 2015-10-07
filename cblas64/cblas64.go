@@ -147,8 +147,9 @@ func Asum(n int, x Vector) float32 {
 	return cblas64.Scasum(n, x.Data, x.Inc)
 }
 
-// Iamax returns the index of the largest element of x. If there are multiple
-// such indices the earliest is returned. Iamax returns -1 if n == 0.
+// Iamax returns the index of an element of x with the largest absolute value.
+// If there are multiple such indices the earliest is returned.
+// Iamax returns -1 if n == 0.
 //
 // Iamax will panic if the vector increment is negative.
 func Iamax(n int, x Vector) int {

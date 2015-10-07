@@ -115,9 +115,9 @@ func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 	return sum
 }
 
-// Idamax returns the index of the largest element of x. If there are multiple
-// such indices the earliest is returned. Idamax returns -1 if incX is negative or if
-// n == 0.
+// Idamax returns the index of an element of x with the largest absolute value.
+// If there are multiple such indices the earliest is returned.
+// Idamax returns -1 if n == 0.
 func (Implementation) Idamax(n int, x []float64, incX int) int {
 	if incX < 1 {
 		if incX == 0 {

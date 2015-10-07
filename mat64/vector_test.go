@@ -177,16 +177,19 @@ func TestVectorScale(t *testing.T) {
 				6, 7, 8,
 			}).ColView(1),
 			alpha: -2,
-			want: NewDense(3, 3, []float64{
-				0, -2, 2,
-				3, -8, 5,
-				6, -14, 8,
-			}).ColView(1),
+			want:  NewVector(3, []float64{-2, -8, -14}),
 		},
 	} {
-		test.a.Scale(test.alpha)
-		if !reflect.DeepEqual(test.a.RawVector(), test.want.RawVector()) {
-			t.Errorf("unexpected result for test %d: got: %v want: %v", i, test.a.RawVector(), test.want.RawVector())
+		var v Vector
+		v.ScaleVec(test.alpha, test.a)
+		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
+			t.Errorf("test %d: unexpected result for v = alpha * a: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+		}
+
+		v.CopyVec(test.a)
+		v.ScaleVec(test.alpha, &v)
+		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
+			t.Errorf("test %d: unexpected result for v = alpha * v: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 	}
 }

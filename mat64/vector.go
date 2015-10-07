@@ -116,6 +116,11 @@ func (v *Vector) CopyVec(a *Vector) (n int) {
 	return n
 }
 
+// Scale scales the receiver by alpha.
+func (v *Vector) Scale(alpha float64) {
+	blas64.Scal(v.n, alpha, v.mat)
+}
+
 // AddVec adds a and b element-wise, placing the result in the receiver.
 func (v *Vector) AddVec(a, b *Vector) {
 	ar := a.Len()

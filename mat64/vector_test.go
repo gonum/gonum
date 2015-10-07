@@ -134,6 +134,63 @@ func TestVectorMul(t *testing.T) {
 	testTwoInput(t, "MulVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec, 1e-14)
 }
 
+func TestVectorScale(t *testing.T) {
+	for i, test := range []struct {
+		a     *Vector
+		alpha float64
+		want  *Vector
+	}{
+		{
+			a:     NewVector(3, []float64{0, 1, 2}),
+			alpha: 0,
+			want:  NewVector(3, []float64{0, 0, 0}),
+		},
+		{
+			a:     NewVector(3, []float64{0, 1, 2}),
+			alpha: 1,
+			want:  NewVector(3, []float64{0, 1, 2}),
+		},
+		{
+			a:     NewVector(3, []float64{0, 1, 2}),
+			alpha: -2,
+			want:  NewVector(3, []float64{0, -2, -4}),
+		},
+		{
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			alpha: 0,
+			want:  NewVector(3, []float64{0, 0, 0}),
+		},
+		{
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			alpha: 1,
+			want:  NewVector(3, []float64{0, 1, 2}),
+		},
+		{
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			alpha: -2,
+			want:  NewVector(3, []float64{0, -2, -4}),
+		},
+		{
+			a: NewDense(3, 3, []float64{
+				0, 1, 2,
+				3, 4, 5,
+				6, 7, 8,
+			}).ColView(1),
+			alpha: -2,
+			want: NewDense(3, 3, []float64{
+				0, -2, 2,
+				3, -8, 5,
+				6, -14, 8,
+			}).ColView(1),
+		},
+	} {
+		test.a.Scale(test.alpha)
+		if !reflect.DeepEqual(test.a.RawVector(), test.want.RawVector()) {
+			t.Errorf("unexpected result for test %d: got: %v want: %v", i, test.a.RawVector(), test.want.RawVector())
+		}
+	}
+}
+
 func TestVectorAdd(t *testing.T) {
 	for i, test := range []struct {
 		a, b *Vector

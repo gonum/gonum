@@ -694,6 +694,26 @@ func Norm(a Matrix, norm float64) float64 {
 			work = make([]float64, rm.N)
 		}
 		return lapack64.Lansy(n, rm, work)
+	case *Vector:
+		rv := rma.RawVector()
+		switch norm {
+		default:
+			panic("unreachable")
+		case 1:
+			if aTrans {
+				imax := blas64.Iamax(rma.n, rv)
+				return math.Abs(rma.At(imax, 0))
+			}
+			return blas64.Asum(rma.n, rv)
+		case 2:
+			return blas64.Nrm2(rma.n, rv)
+		case math.Inf(1):
+			if aTrans {
+				return blas64.Asum(rma.n, rv)
+			}
+			imax := blas64.Iamax(rma.n, rv)
+			return math.Abs(rma.At(imax, 0))
+		}
 	}
 	switch norm {
 	default:

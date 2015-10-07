@@ -375,7 +375,9 @@ func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	nonUnit := d != blas.Unit
 	if n == 1 {
-		x[0] *= a[0]
+		if nonUnit {
+			x[0] *= a[0]
+		}
 		return
 	}
 	var kx int

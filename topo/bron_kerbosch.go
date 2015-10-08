@@ -49,7 +49,7 @@ func VertexOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Nod
 	k := 0
 	// Repeat n times:
 	s := []int{0}
-	for _ = range nodes { // TODO(kortschak): Remove blank assignment when go1.3.3 is no longer supported.
+	for range nodes {
 		// Scan the array cells D[0], D[1], ... until
 		// finding an i for which D[i] is nonempty.
 		var (

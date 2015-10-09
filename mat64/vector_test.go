@@ -134,6 +134,80 @@ func TestVectorMul(t *testing.T) {
 	testTwoInput(t, "MulVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec, 1e-14)
 }
 
+func TestVectorScale(t *testing.T) {
+	for i, test := range []struct {
+		a     *Vector
+		alpha float64
+		want  *Vector
+	}{
+		{
+			a:     NewVector(3, []float64{0, 1, 2}),
+			alpha: 0,
+			want:  NewVector(3, []float64{0, 0, 0}),
+		},
+		{
+			a:     NewVector(3, []float64{0, 1, 2}),
+			alpha: 1,
+			want:  NewVector(3, []float64{0, 1, 2}),
+		},
+		{
+			a:     NewVector(3, []float64{0, 1, 2}),
+			alpha: -2,
+			want:  NewVector(3, []float64{0, -2, -4}),
+		},
+		{
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			alpha: 0,
+			want:  NewVector(3, []float64{0, 0, 0}),
+		},
+		{
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			alpha: 1,
+			want:  NewVector(3, []float64{0, 1, 2}),
+		},
+		{
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			alpha: -2,
+			want:  NewVector(3, []float64{0, -2, -4}),
+		},
+		{
+			a: NewDense(3, 3, []float64{
+				0, 1, 2,
+				3, 4, 5,
+				6, 7, 8,
+			}).ColView(1),
+			alpha: -2,
+			want:  NewVector(3, []float64{-2, -8, -14}),
+		},
+	} {
+		var v Vector
+		v.ScaleVec(test.alpha, test.a)
+		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
+			t.Errorf("test %d: unexpected result for v = alpha * a: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+		}
+
+		v.CopyVec(test.a)
+		v.ScaleVec(test.alpha, &v)
+		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
+			t.Errorf("test %d: unexpected result for v = alpha * v: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
+		}
+	}
+
+	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
+		method := func(receiver, a Matrix) {
+			type scaleVecer interface {
+				ScaleVec(float64, *Vector)
+			}
+			v := receiver.(scaleVecer)
+			v.ScaleVec(alpha, a.(*Vector))
+		}
+		denseComparison := func(receiver, a *Dense) {
+			receiver.Scale(alpha, a)
+		}
+		testOneInput(t, "ScaleVec", &Vector{}, method, denseComparison, legalTypeVec, isAnyVector, 0)
+	}
+}
+
 func TestVectorAdd(t *testing.T) {
 	for i, test := range []struct {
 		a, b *Vector

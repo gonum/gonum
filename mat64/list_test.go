@@ -66,6 +66,11 @@ func isAnySize2(ar, ac, br, bc int) bool {
 	return true
 }
 
+// isAnyVector returns true for any column vector sizes.
+func isAnyVector(ar, ac int) bool {
+	return ac == 1
+}
+
 // isSquare returns whether the input matrix is square.
 func isSquare(r, c int) bool {
 	return r == c
@@ -112,6 +117,7 @@ func legalTypesAll(a, b Matrix) bool {
 	return true
 }
 
+// legalTypeSym returns whether a is a Symmetric.
 func legalTypeSym(a Matrix) bool {
 	_, ok := a.(Symmetric)
 	return ok
@@ -126,6 +132,12 @@ func legalTypesSym(a, b Matrix) bool {
 		return false
 	}
 	return true
+}
+
+// legalTypeVec returns whether v is a *Vector.
+func legalTypeVec(v Matrix) bool {
+	_, ok := v.(*Vector)
+	return ok
 }
 
 // legalTypesNotVecVec returns whether the first input is an arbitrary Matrix

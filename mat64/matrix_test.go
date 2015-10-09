@@ -11,6 +11,7 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/floats"
 )
 
 var inf = math.Inf(1)
@@ -124,6 +125,85 @@ func TestRow(t *testing.T) {
 		return ans
 	}
 	testOneInputFunc(t, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+}
+
+func TestCond(t *testing.T) {
+	for i, test := range []struct {
+		a       *Dense
+		condOne float64
+		condTwo float64
+		condInf float64
+	}{
+		{
+			a: NewDense(3, 3, []float64{
+				8, 1, 6,
+				3, 5, 7,
+				4, 9, 2,
+			}),
+			condOne: 16.0 / 3.0,
+			condTwo: 4.330127018922192,
+			condInf: 16.0 / 3.0,
+		},
+		{
+			a: NewDense(4, 4, []float64{
+				2, 9, 3, 2,
+				10, 9, 9, 3,
+				1, 1, 5, 2,
+				8, 4, 10, 2,
+			}),
+			condOne: 1 / 0.024740155174938,
+			condTwo: 34.521576567075087,
+			condInf: 1 / 0.012034465570035,
+		},
+		{
+			a: NewDense(3, 3, []float64{
+				5, 6, 7,
+				8, -2, 1,
+				7, 7, 7}),
+			condOne: 30.769230769230749,
+			condTwo: 21.662689498448440,
+			condInf: 31.153846153846136,
+		},
+	} {
+		condOne := Cond(test.a, 1)
+		if !floats.EqualWithinAbsOrRel(test.condOne, condOne, 1e-13, 1e-13) {
+			t.Errorf("Case %d: inf norm mismatch. Want %v, got %v", i, test.condOne, condOne)
+		}
+		condTwo := Cond(test.a, 2)
+		if !floats.EqualWithinAbsOrRel(test.condTwo, condTwo, 1e-13, 1e-13) {
+			t.Errorf("Case %d: inf norm mismatch. Want %v, got %v", i, test.condTwo, condTwo)
+		}
+		condInf := Cond(test.a, math.Inf(1))
+		if !floats.EqualWithinAbsOrRel(test.condInf, condInf, 1e-13, 1e-13) {
+			t.Errorf("Case %d: inf norm mismatch. Want %v, got %v", i, test.condInf, condInf)
+		}
+	}
+
+	for _, test := range []struct {
+		name string
+		norm float64
+	}{
+		{
+			name: "CondOne",
+			norm: 1,
+		},
+		{
+			name: "CondTwo",
+			norm: 2,
+		},
+		{
+			name: "CondInf",
+			norm: math.Inf(1),
+		},
+	} {
+		f := func(a Matrix) interface{} {
+			return Cond(a, test.norm)
+		}
+		denseComparison := func(a *Dense) interface{} {
+			return Cond(a, test.norm)
+		}
+		testOneInputFunc(t, test.name, f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+	}
 }
 
 func TestDot(t *testing.T) {

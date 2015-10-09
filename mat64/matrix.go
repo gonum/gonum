@@ -274,6 +274,81 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 	return dst
 }
 
+// Cond returns the condition number of the given matrix under the given norm.
+// The condition number must be based on the 1-norm, 2-norm or ∞-norm.
+//
+// BUG(btracey): The computation of the 1-norm and ∞-norm for non-square matrices
+// is innacurate, although is typically the right order of magnitude. See
+// https://github.com/xianyi/OpenBLAS/issues/636. While the value returned will
+// change with the resolution of this bug, the result from Cond will match the
+// condition number used internally.
+func Cond(a Matrix, norm float64) float64 {
+	m, n := a.Dims()
+	var lnorm lapack.MatrixNorm
+	switch norm {
+	default:
+		panic("mat64: bad norm value")
+	case 1:
+		lnorm = lapack.MaxColumnSum
+	case 2:
+		// Use SVD to compute the condition number.
+		// TODO(btracey): Replace this with temporary workspace when SVD is fixed.
+		tmp := NewDense(m, n, nil)
+		tmp.Copy(a)
+		svd := SVD(tmp, math.Pow(2, -52.0), math.Pow(2, -966.0), false, false)
+		return svd.Cond()
+	case math.Inf(1):
+		lnorm = lapack.MaxRowSum
+	}
+	if m == n {
+		// Use the LU decomposition to compute the condition number.
+		tmp := getWorkspace(m, n, false)
+		tmp.Copy(a)
+		work := make([]float64, 4*n)
+		aNorm := lapack64.Lange(lnorm, tmp.mat, work)
+		pivot := make([]int, m)
+		lapack64.Getrf(tmp.mat, pivot)
+		iwork := make([]int, n)
+		v := lapack64.Gecon(lnorm, tmp.mat, aNorm, work, iwork)
+		putWorkspace(tmp)
+		return 1 / v
+	}
+	if m > n {
+		// Use the QR factorization to compute the condition number.
+		tmp := getWorkspace(m, n, false)
+		tmp.Copy(a)
+		work := make([]float64, 3*n)
+		tau := make([]float64, min(m, n))
+		lapack64.Geqrf(tmp.mat, tau, work, -1)
+		if int(work[0]) > len(work) {
+			work = make([]float64, int(work[0]))
+		}
+		lapack64.Geqrf(tmp.mat, tau, work, len(work))
+
+		iwork := make([]int, n)
+		r := tmp.asTriDense(n, blas.NonUnit, blas.Upper)
+		v := lapack64.Trcon(lnorm, r.mat, work, iwork)
+		putWorkspace(tmp)
+		return 1 / v
+	}
+	// Use the LQ factorization to compute the condition number.
+	tmp := getWorkspace(m, n, false)
+	tmp.Copy(a)
+	work := make([]float64, 3*m)
+	tau := make([]float64, min(m, n))
+	lapack64.Gelqf(tmp.mat, tau, work, -1)
+	if int(work[0]) > len(work) {
+		work = make([]float64, int(work[0]))
+	}
+	lapack64.Gelqf(tmp.mat, tau, work, len(work))
+
+	iwork := make([]int, m)
+	l := tmp.asTriDense(m, blas.NonUnit, blas.Lower)
+	v := lapack64.Trcon(lnorm, l.mat, work, iwork)
+	putWorkspace(tmp)
+	return 1 / v
+}
+
 // Det returns the determinant of the matrix a. In many expressions using LogDet
 // will be more numerically stable.
 func Det(a Matrix) float64 {

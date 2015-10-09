@@ -102,10 +102,16 @@ func (v *Vector) T() Matrix {
 	return Transpose{v}
 }
 
+// Reset zeros the length of the vector so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
 func (v *Vector) Reset() {
-	v.mat.Data = v.mat.Data[:0]
+	// No change of Inc or n to 0 may be
+	// made unless both are set to 0.
 	v.mat.Inc = 0
 	v.n = 0
+	v.mat.Data = v.mat.Data[:0]
 }
 
 func (v *Vector) RawVector() blas64.Vector {
@@ -329,7 +335,7 @@ func (v *Vector) reuseAs(r int) {
 
 func (v *Vector) isZero() bool {
 	// It must be the case that v.Dims() returns
-	// zeros in this case.
+	// zeros in this case. See comment in Reset().
 	return v.mat.Inc == 0
 }
 

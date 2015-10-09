@@ -195,7 +195,10 @@ func TestVectorScale(t *testing.T) {
 
 	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
 		method := func(receiver, a Matrix) {
-			v := receiver.(*Vector)
+			type scaleVecer interface {
+				ScaleVec(float64, *Vector)
+			}
+			v := receiver.(scaleVecer)
 			v.ScaleVec(alpha, a.(*Vector))
 		}
 		denseComparison := func(receiver, a *Dense) {

@@ -112,6 +112,7 @@ func legalTypesAll(a, b Matrix) bool {
 	return true
 }
 
+// legalTypeSym returns whether a is a Symmetric.
 func legalTypeSym(a Matrix) bool {
 	_, ok := a.(Symmetric)
 	return ok
@@ -126,6 +127,12 @@ func legalTypesSym(a, b Matrix) bool {
 		return false
 	}
 	return true
+}
+
+// legalTypeVec returns whether v is a *Vector.
+func legalTypeVec(v Matrix) bool {
+	_, ok := v.(*Vector)
+	return ok
 }
 
 // legalTypesNotVecVec returns whether the first input is an arbitrary Matrix

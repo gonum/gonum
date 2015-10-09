@@ -192,6 +192,17 @@ func TestVectorScale(t *testing.T) {
 			t.Errorf("test %d: unexpected result for v = alpha * v: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 	}
+
+	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
+		method := func(receiver, a Matrix) {
+			v := receiver.(*Vector)
+			v.ScaleVec(alpha, a.(*Vector))
+		}
+		denseComparison := func(receiver, a *Dense) {
+			receiver.Scale(alpha, a)
+		}
+		testOneInput(t, "ScaleVec", &Vector{}, method, denseComparison, legalTypeVec, isAnySize, 0)
+	}
 }
 
 func TestVectorAdd(t *testing.T) {

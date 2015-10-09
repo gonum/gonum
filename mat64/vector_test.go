@@ -204,7 +204,7 @@ func TestVectorScale(t *testing.T) {
 		denseComparison := func(receiver, a *Dense) {
 			receiver.Scale(alpha, a)
 		}
-		testOneInput(t, "ScaleVec", &Vector{}, method, denseComparison, legalTypeVec, isAnySize, 0)
+		testOneInput(t, "ScaleVec", &Vector{}, method, denseComparison, legalTypeVec, isAnyVector, 0)
 	}
 }
 

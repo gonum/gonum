@@ -66,6 +66,11 @@ func isAnySize2(ar, ac, br, bc int) bool {
 	return true
 }
 
+// isAnyVector returns true for any column vector sizes.
+func isAnyVector(ar, ac int) bool {
+	return ac == 1
+}
+
 // isSquare returns whether the input matrix is square.
 func isSquare(r, c int) bool {
 	return r == c

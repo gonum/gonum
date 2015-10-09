@@ -137,6 +137,31 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 	blas64.Scal(n, alpha, v.mat)
 }
 
+// AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.
+func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
+	ar := a.Len()
+	br := b.Len()
+
+	if ar != br {
+		panic(ErrShape)
+	}
+
+	v.reuseAs(ar)
+
+	switch {
+	case v == a && v == b: // v <- v + alpha * v = (alpha + 1) * v
+		blas64.Scal(ar, alpha+1, v.mat)
+	case v == a && v != b: // v <- v + alpha * b
+		blas64.Axpy(ar, alpha, b.mat, v.mat)
+	case v != a && v == b: // v <- a + alpha * v
+		blas64.Scal(ar, alpha, v.mat)
+		blas64.Axpy(ar, 1, a.mat, v.mat)
+	default: // v <- a + alpha * b
+		blas64.Copy(ar, a.mat, v.mat)
+		blas64.Axpy(ar, alpha, b.mat, v.mat)
+	}
+}
+
 // AddVec adds a and b element-wise, placing the result in the receiver.
 func (v *Vector) AddVec(a, b *Vector) {
 	ar := a.Len()

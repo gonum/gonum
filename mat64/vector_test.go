@@ -208,6 +208,24 @@ func TestVectorScale(t *testing.T) {
 	}
 }
 
+func TestVectorAddScaled(t *testing.T) {
+	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
+		method := func(receiver, a, b Matrix) {
+			type addScaledVecer interface {
+				AddScaledVec(*Vector, float64, *Vector)
+			}
+			v := receiver.(addScaledVecer)
+			v.AddScaledVec(a.(*Vector), alpha, b.(*Vector))
+		}
+		denseComparison := func(receiver, a, b *Dense) {
+			var sb Dense
+			sb.Scale(alpha, b)
+			receiver.Add(a, &sb)
+		}
+		testTwoInput(t, "AddScaledVec", &Vector{}, method, denseComparison, legalTypesVecVec, legalSizeSameVec, 1e-14)
+	}
+}
+
 func TestVectorAdd(t *testing.T) {
 	for i, test := range []struct {
 		a, b *Vector

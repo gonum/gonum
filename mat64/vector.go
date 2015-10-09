@@ -85,7 +85,12 @@ func (v *Vector) ViewVec(i, n int) *Vector {
 	}
 }
 
-func (v *Vector) Dims() (r, c int) { return v.n, 1 }
+func (v *Vector) Dims() (r, c int) {
+	if v.isZero() {
+		return 0, 0
+	}
+	return v.n, 1
+}
 
 // Len returns the length of the vector.
 func (v *Vector) Len() int {
@@ -324,7 +329,7 @@ func (v *Vector) reuseAs(r int) {
 
 func (v *Vector) isZero() bool {
 	// It must be the case that v.Dims() returns
-	// zeros in this case. See comment in Reset().
+	// zeros in this case.
 	return v.mat.Inc == 0
 }
 

@@ -695,6 +695,9 @@ func Norm(a Matrix, norm float64) float64 {
 		}
 		return lapack64.Lansy(n, rm, work)
 	case *Vector:
+		if rma.isZero() {
+			return 0
+		}
 		rv := rma.RawVector()
 		switch norm {
 		default:

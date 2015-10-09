@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"math"
 	"testing"
+
+	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
 )
 
 var inf = math.Inf(1)
@@ -251,6 +254,22 @@ func TestNorm(t *testing.T) {
 		return Norm(a, math.Inf(1))
 	}
 	testOneInputFunc(t, "Norm_inf", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+}
+
+func TestNormZero(t *testing.T) {
+	for _, a := range []Matrix{
+		&Dense{},
+		&SymDense{mat: blas64.Symmetric{Uplo: blas.Upper}},
+		&TriDense{mat: blas64.Triangular{Uplo: blas.Upper, Diag: blas.NonUnit}},
+		&Vector{},
+	} {
+		for _, norm := range []float64{1, 2, math.Inf(1)} {
+			panicked, message := panics(func() { Norm(a, norm) })
+			if panicked {
+				t.Errorf("unexpected panic for Norm(&%T{}, %v): %v", a, norm, message)
+			}
+		}
+	}
 }
 
 func TestSum(t *testing.T) {

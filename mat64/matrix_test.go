@@ -263,10 +263,15 @@ func TestNormZero(t *testing.T) {
 		&TriDense{mat: blas64.Triangular{Uplo: blas.Upper, Diag: blas.NonUnit}},
 		&Vector{},
 	} {
+		want := 0.0
 		for _, norm := range []float64{1, 2, math.Inf(1)} {
-			panicked, message := panics(func() { Norm(a, norm) })
+			var got float64
+			panicked, message := panics(func() { got = Norm(a, norm) })
 			if panicked {
 				t.Errorf("unexpected panic for Norm(&%T{}, %v): %v", a, norm, message)
+			}
+			if got != want {
+				t.Errorf("unexpected result for Norm(&%T{}, %v). Want %v, got %v", a, norm, want, got)
 			}
 		}
 	}

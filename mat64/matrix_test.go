@@ -311,29 +311,22 @@ func TestNorm(t *testing.T) {
 		}
 	}
 
-	f := func(a Matrix) interface{} {
-		return Norm(a, 1)
+	for _, test := range []struct {
+		name string
+		norm float64
+	}{
+		{"NormOne", 1},
+		{"NormTwo", 2},
+		{"NormInf", math.Inf(1)},
+	} {
+		f := func(a Matrix) interface{} {
+			return Norm(a, test.norm)
+		}
+		denseComparison := func(a *Dense) interface{} {
+			return Norm(a, test.norm)
+		}
+		testOneInputFunc(t, test.name, f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
 	}
-	denseComparison := func(a *Dense) interface{} {
-		return Norm(a, 1)
-	}
-	testOneInputFunc(t, "Norm_1", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
-
-	f = func(a Matrix) interface{} {
-		return Norm(a, 2)
-	}
-	denseComparison = func(a *Dense) interface{} {
-		return Norm(a, 2)
-	}
-	testOneInputFunc(t, "Norm_2", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
-
-	f = func(a Matrix) interface{} {
-		return Norm(a, math.Inf(1))
-	}
-	denseComparison = func(a *Dense) interface{} {
-		return Norm(a, math.Inf(1))
-	}
-	testOneInputFunc(t, "Norm_inf", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
 }
 
 func TestNormZero(t *testing.T) {

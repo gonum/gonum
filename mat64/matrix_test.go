@@ -332,19 +332,20 @@ func TestNorm(t *testing.T) {
 func TestNormZero(t *testing.T) {
 	for _, a := range []Matrix{
 		&Dense{},
+		&SymDense{},
 		&SymDense{mat: blas64.Symmetric{Uplo: blas.Upper}},
+		&TriDense{},
 		&TriDense{mat: blas64.Triangular{Uplo: blas.Upper, Diag: blas.NonUnit}},
 		&Vector{},
 	} {
-		want := 0.0
 		for _, norm := range []float64{1, 2, math.Inf(1)} {
-			var got float64
-			panicked, message := panics(func() { got = Norm(a, norm) })
-			if panicked {
-				t.Errorf("unexpected panic for Norm(&%T{}, %v): %v", a, norm, message)
+			panicked, message := panics(func() { Norm(a, norm) })
+			if !panicked {
+				t.Errorf("expected panic for Norm(&%T{}, %v)", a, norm)
 			}
-			if got != want {
-				t.Errorf("unexpected result for Norm(&%T{}, %v). Want %v, got %v", a, norm, want, got)
+			if message != ErrShape.string {
+				t.Errorf("unexpected panic string for Norm(&%T{}, %v): got:%s want:%s",
+					a, norm, message, ErrShape.string)
 			}
 		}
 	}

@@ -276,6 +276,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 
 // Cond returns the condition number of the given matrix under the given norm.
 // The condition number must be based on the 1-norm, 2-norm or ∞-norm.
+// Cond will panic with ErrShape if the matrix has zero size.
 //
 // BUG(btracey): The computation of the 1-norm and ∞-norm for non-square matrices
 // is innacurate, although is typically the right order of magnitude. See
@@ -284,6 +285,9 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 // condition number used internally.
 func Cond(a Matrix, norm float64) float64 {
 	m, n := a.Dims()
+	if m == 0 || n == 0 {
+		panic(ErrShape)
+	}
 	var lnorm lapack.MatrixNorm
 	switch norm {
 	default:
@@ -551,10 +555,11 @@ func LogDet(a Matrix) (det float64, sign float64) {
 }
 
 // Max returns the largest element value of the matrix A.
+// Max will panic with ErrShape if the matrix has zero size.
 func Max(a Matrix) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		return 0
+		panic(ErrShape)
 	}
 	// Max(A) = Max(A^T)
 	aMat, _ := untranspose(a)
@@ -625,10 +630,11 @@ func Max(a Matrix) float64 {
 }
 
 // Min returns the smallest element value of the matrix A.
+// Min will panic with ErrShape if the matrix has zero size.
 func Min(a Matrix) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		return 0
+		panic(ErrShape)
 	}
 	// Min(A) = Min(A^T)
 	aMat, _ := untranspose(a)
@@ -742,9 +748,13 @@ func MaybeFloat(fn func() float64) (f float64, err error) {
 //    1 - The maximum absolute column sum
 //    2 - Frobenius norm, the square root of the sum of the squares of the elements.
 //  Inf - The maximum absolute row sum.
-// Norm will panic with ErrNormOrder if an illegal norm order is specified.
+// Norm will panic with ErrNormOrder if an illegal norm order is specified and
+// with ErrShape if the matrix has zero size.
 func Norm(a Matrix, norm float64) float64 {
 	r, c := a.Dims()
+	if r == 0 || c == 0 {
+		panic(ErrShape)
+	}
 	aMat, aTrans := untranspose(a)
 	var work []float64
 	switch rma := aMat.(type) {
@@ -770,9 +780,6 @@ func Norm(a Matrix, norm float64) float64 {
 		}
 		return lapack64.Lansy(n, rm, work)
 	case *Vector:
-		if rma.isZero() {
-			return 0
-		}
 		rv := rma.RawVector()
 		switch norm {
 		default:

@@ -50,6 +50,14 @@ const (
 	Backward Direct = 'B' // Reflectors are left-multiplied, H_k * ... * H_2 * H_1
 )
 
+// Sort is the sorting order.
+type Sort byte
+
+const (
+	SortIncreasing Sort = 'I'
+	SortDecreasing Sort = 'D'
+)
+
 // StoreV indicates the storage direction of elementary reflectors.
 type StoreV byte
 

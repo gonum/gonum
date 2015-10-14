@@ -88,6 +88,10 @@ func TestDlarft(t *testing.T) {
 	testlapack.DlarftTest(t, impl)
 }
 
+func TestDlartg(t *testing.T) {
+	testlapack.DlartgTest(t, impl)
+}
+
 func TestDorml2(t *testing.T) {
 	testlapack.Dorml2Test(t, impl)
 }

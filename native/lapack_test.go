@@ -96,10 +96,13 @@ func TestDlartg(t *testing.T) {
 	testlapack.DlartgTest(t, impl)
 }
 
+<<<<<<< HEAD
 func TestDlasr(t *testing.T) {
 	testlapack.DlasrTest(t, impl)
 }
 
+=======
+>>>>>>> ad7c1cae92c7d35378da79314ed3416b98e0afb7
 func TestDorml2(t *testing.T) {
 	testlapack.Dorml2Test(t, impl)
 }

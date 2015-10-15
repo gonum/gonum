@@ -92,4 +92,7 @@ var (
 
 	smlnum = dlamchS / dlamchP
 	bignum = 1 / smlnum
+
+	// dlamchB is the radix of the machine (the base of the number system).
+	dlamchB = 2
 )

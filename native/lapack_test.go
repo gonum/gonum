@@ -120,6 +120,14 @@ func TestDorm2r(t *testing.T) {
 	testlapack.Dorm2rTest(t, impl)
 }
 
+func TestDorg2r(t *testing.T) {
+	testlapack.Dorg2rTest(t, impl)
+}
+
+func TestDorgl2(t *testing.T) {
+	testlapack.Dorgl2Test(t, impl)
+}
+
 func TestDpocon(t *testing.T) {
 	testlapack.DpoconTest(t, impl)
 }

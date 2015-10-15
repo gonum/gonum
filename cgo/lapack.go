@@ -28,6 +28,9 @@ const (
 	badUplo       = "lapack: illegal triangle"
 	badWork       = "lapack: insufficient working memory"
 	badWorkStride = "lapack: insufficient working array stride"
+	kGTM          = "lapack: k > m"
+	kGTN          = "lapack: k > n"
+	mLTN          = "lapack: m < n"
 	negDimension  = "lapack: negative matrix dimension"
 	nLT0          = "lapack: n < 0"
 	shortWork     = "lapack: working array shorter than declared"
@@ -460,6 +463,37 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 		ipiv32[i] = int32(v) + 1 // Transform to one-indexed.
 	}
 	clapack.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
+}
+
+func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work []float64) {
+	checkMatrix(m, n, a, lda)
+	if len(tau) < k {
+		panic(badTau)
+	}
+	if k > m {
+		panic(kGTM)
+	}
+	if k > m {
+		panic(kGTM)
+	}
+	clapack.Dorglq(m, n, k, a, lda, tau)
+}
+
+func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64) {
+	checkMatrix(m, n, a, lda)
+	if len(tau) < k {
+		panic(badTau)
+	}
+	if len(work) < n {
+		panic(badWork)
+	}
+	if k > n {
+		panic(kGTN)
+	}
+	if n > m {
+		panic(mLTN)
+	}
+	clapack.Dorgqr(m, n, k, a, lda, tau)
 }
 
 // Dormlq multiplies the matrix C by the othogonal matrix Q defined by the

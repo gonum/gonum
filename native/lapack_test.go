@@ -100,6 +100,10 @@ func TestDlasr(t *testing.T) {
 	testlapack.DlasrTest(t, impl)
 }
 
+func TestDlasv2(t *testing.T) {
+	testlapack.Dlasv2Test(t, impl)
+}
+
 func TestDorml2(t *testing.T) {
 	testlapack.Dorml2Test(t, impl)
 }

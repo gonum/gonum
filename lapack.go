@@ -50,6 +50,14 @@ const (
 	Backward Direct = 'B' // Reflectors are left-multiplied, H_k * ... * H_2 * H_1
 )
 
+// Sort is the sorting order.
+type Sort byte
+
+const (
+	SortIncreasing Sort = 'I'
+	SortDecreasing Sort = 'D'
+)
+
 // StoreV indicates the storage direction of elementary reflectors.
 type StoreV byte
 
@@ -73,4 +81,13 @@ type MatrixType byte
 
 const (
 	General MatrixType = 'G' // A dense matrix (like blas64.General).
+)
+
+// Pivot specifies the pivot type for plane rotations
+type Pivot byte
+
+const (
+	Variable Pivot = 'V'
+	Top      Pivot = 'T'
+	Bottom   Pivot = 'B'
 )

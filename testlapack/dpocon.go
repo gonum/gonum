@@ -1,12 +1,13 @@
 package testlapack
 
 import (
-	"math"
+	"log"
 	"math/rand"
 	"testing"
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/floats"
 	"github.com/gonum/lapack"
 )
 
@@ -44,6 +45,17 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 			n:    3,
 			cond: 0.050052137643379,
 		},
+		// Dgecon does not match Dpocon for this case. https://github.com/xianyi/OpenBLAS/issues/664.
+		{
+			a: []float64{
+				2.9995576045549965, -2.0898894566158663, 3.965560740124006,
+				0, 1.9634729526261008, -2.8681002706874104,
+				0, 0, 5.502416670471008,
+			},
+			uplo: blas.Upper,
+			n:    3,
+			cond: 0.024054837369015203,
+		},
 	} {
 		n := test.n
 		a := make([]float64, len(test.a))
@@ -60,8 +72,11 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 		}
 		iwork := make([]int, n)
 		cond := impl.Dpocon(uplo, n, a, lda, anorm, work, iwork)
-		if math.Abs(cond-test.cond) > 1e-14 {
+		// Error if not the same order, otherwise log the difference.
+		if !floats.EqualWithinAbsOrRel(cond, test.cond, 1e0, 1e0) {
 			t.Errorf("Cond mismatch. Want %v, got %v.", test.cond, cond)
+		} else if !floats.EqualWithinAbsOrRel(cond, test.cond, 1e-14, 1e-14) {
+			log.Printf("Dpocon cond mismatch. Want %v, got %v.", test.cond, cond)
 		}
 	}
 	bi := blas64.Implementation()
@@ -88,6 +103,9 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 				aCopy := make([]float64, len(a))
 				copy(aCopy, a)
 				bi.Dgemm(blas.Trans, blas.NoTrans, n, n, n, 1, aCopy, lda, aCopy, lda, 0, a, lda)
+
+				aDat := make([]float64, len(aCopy))
+				copy(aDat, a)
 
 				aDense := make([]float64, len(a))
 				if uplo == blas.Upper {
@@ -122,8 +140,11 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 				ipiv := make([]int, n)
 				impl.Dgetrf(n, n, aDense, lda, ipiv)
 				want := impl.Dgecon(lapack.MaxColumnSum, n, aDense, lda, denseNorm, work, iwork)
-				if math.Abs(got-want) > 1e-14 {
-					t.Errorf("Cond mismatch. Want %v, got %v.", want, got)
+				// Error if not the same order, otherwise log the difference.
+				if !floats.EqualWithinAbsOrRel(want, got, 1e0, 1e0) {
+					t.Errorf("Dpocon and Dgecon mismatch. Dpocon %v, Dgecon %v.", got, want)
+				} else if !floats.EqualWithinAbsOrRel(want, got, 1e-14, 1e-14) {
+					log.Printf("Dpocon and Dgecon mismatch. Dpocon %v, Dgecon %v.", got, want)
 				}
 			}
 		}

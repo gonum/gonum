@@ -25,7 +25,9 @@ const (
 	badIpiv       = "lapack: insufficient permutation length"
 	badLdA        = "lapack: index of a out of range"
 	badNorm       = "lapack: bad norm"
+	badPivot      = "lapack: bad pivot"
 	badSide       = "lapack: bad side"
+	badSlice      = "lapack: bad input slice length"
 	badStore      = "lapack: bad store"
 	badTau        = "lapack: tau has insufficient length"
 	badTrans      = "lapack: bad trans"
@@ -90,4 +92,7 @@ var (
 
 	smlnum = dlamchS / dlamchP
 	bignum = 1 / smlnum
+
+	// dlamchB is the radix of the machine (the base of the number system).
+	dlamchB = 2
 )

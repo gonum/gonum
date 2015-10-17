@@ -7,6 +7,7 @@ package mat64
 import (
 	"fmt"
 	"math"
+	"runtime"
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
@@ -704,43 +705,6 @@ func Min(a Matrix) float64 {
 	}
 }
 
-// Maybe will recover a panic with a type mat64.Error from fn, and return this error.
-// Any other error is re-panicked.
-func Maybe(fn func()) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			if e, ok := r.(Error); ok {
-				if e.string == "" {
-					panic("mat64: invalid error")
-				}
-				err = e
-				return
-			}
-			panic(r)
-		}
-	}()
-	fn()
-	return
-}
-
-// MaybeFloat will recover a panic with a type mat64.Error from fn, and return this error.
-// Any other error is re-panicked.
-func MaybeFloat(fn func() float64) (f float64, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			if e, ok := r.(Error); ok {
-				if e.string == "" {
-					panic("mat64: invalid error")
-				}
-				err = e
-				return
-			}
-			panic(r)
-		}
-	}()
-	return fn(), nil
-}
-
 // Norm returns the specified (induced) norm of the matrix a. See
 // https://en.wikipedia.org/wiki/Matrix_norm for the definition of an induced norm.
 //
@@ -953,7 +917,52 @@ var condNorm = lapack.MaxRowSum
 // condNorm on A.
 var condNormTrans = lapack.MaxColumnSum
 
-// Type Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.
+const stackTraceBufferSize = 1 << 20
+
+// Maybe will recover a panic with a type mat64.Error from fn, and return this error
+// as the Err field of an ErrorStack. The stack trace for the panicking function will be
+// recovered and placed in the StackTrace field. Any other error is re-panicked.
+func Maybe(fn func()) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(Error); ok {
+				if e.string == "" {
+					panic("mat64: invalid error")
+				}
+				buf := make([]byte, stackTraceBufferSize)
+				n := runtime.Stack(buf, false)
+				err = ErrorStack{Err: e, StackTrace: string(buf[:n])}
+				return
+			}
+			panic(r)
+		}
+	}()
+	fn()
+	return
+}
+
+// MaybeFloat will recover a panic with a type mat64.Error from fn, and return this error
+// as the Err field of an ErrorStack. The stack trace for the panicking function will be
+// recovered and placed in the StackTrace field. Any other error is re-panicked.
+func MaybeFloat(fn func() float64) (f float64, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(Error); ok {
+				if e.string == "" {
+					panic("mat64: invalid error")
+				}
+				buf := make([]byte, stackTraceBufferSize)
+				n := runtime.Stack(buf, false)
+				err = ErrorStack{Err: e, StackTrace: string(buf[:n])}
+				return
+			}
+			panic(r)
+		}
+	}()
+	return fn(), nil
+}
+
+// Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.
 type Error struct{ string }
 
 func (err Error) Error() string { return err.string }
@@ -975,6 +984,17 @@ var (
 	ErrTriangle        = Error{"mat64: triangular storage mismatch"}
 	ErrTriangleSet     = Error{"mat64: triangular set out of bounds"}
 )
+
+// ErrorStack represents matrix handling errors that have been recovered by Maybe wrappers.
+type ErrorStack struct {
+	Err error
+
+	// StackTrace is the stack trace
+	// recovered by Maybe or MaybeFloat.
+	StackTrace string
+}
+
+func (err ErrorStack) Error() string { return err.Err.Error() }
 
 var (
 	badSliceLength = "mat64: improper slice length"

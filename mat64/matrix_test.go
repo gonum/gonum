@@ -252,23 +252,38 @@ func TestMaybe(t *testing.T) {
 	for i, test := range []struct {
 		fn     func()
 		panics bool
+		errors bool
 	}{
 		{
-			func() {},
-			false,
+			fn:     func() {},
+			panics: false,
+			errors: false,
 		},
 		{
-			func() { panic("panic") },
-			true,
+			fn:     func() { panic("panic") },
+			panics: true,
+			errors: false,
 		},
 		{
-			func() { panic(Error{"panic"}) },
-			false,
+			fn:     func() { panic(Error{"panic"}) },
+			panics: false,
+			errors: true,
 		},
 	} {
-		if panicked := leaksPanic(test.fn); panicked != test.panics {
-			t.Errorf("unexpected panic state for test %d: got: panicked=%t want panicked=%t",
+		panicked := leaksPanic(test.fn)
+		if panicked != test.panics {
+			t.Errorf("unexpected panic state for test %d: got: panicked=%t want: panicked=%t",
 				i, panicked, test.panics)
+		}
+		if test.errors {
+			err := Maybe(test.fn)
+			stack, ok := err.(ErrorStack)
+			if !ok {
+				t.Errorf("unexpected error type: got:%T want:%T", stack, ErrorStack{})
+			}
+			if stack.StackTrace == "" {
+				t.Error("expected non-empty stack trace")
+			}
 		}
 	}
 }

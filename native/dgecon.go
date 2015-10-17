@@ -32,9 +32,9 @@ func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, ld
 	}
 
 	if n == 0 {
-		return 0
-	} else if anorm == 0 {
 		return 1
+	} else if anorm == 0 {
+		return 0
 	}
 
 	bi := blas64.Implementation()

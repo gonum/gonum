@@ -510,6 +510,18 @@ func TestAdd(t *testing.T) {
 		}
 	}
 
+	panicked, message := panics(func() {
+		m := NewDense(10, 10, nil)
+		a := NewDense(5, 5, nil)
+		m.View(1, 1, 5, 5).(*Dense).Add(a, m.View(2, 2, 5, 5))
+	})
+	if !panicked {
+		t.Error("expected panic for overlapping matrices")
+	}
+	if message != regionOverlap {
+		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
+	}
+
 	method := func(receiver, a, b Matrix) {
 		type Adder interface {
 			Add(a, b Matrix)
@@ -585,6 +597,18 @@ func TestSub(t *testing.T) {
 		}
 	}
 
+	panicked, message := panics(func() {
+		m := NewDense(10, 10, nil)
+		a := NewDense(5, 5, nil)
+		m.View(1, 1, 5, 5).(*Dense).Sub(a, m.View(2, 2, 5, 5))
+	})
+	if !panicked {
+		t.Error("expected panic for overlapping matrices")
+	}
+	if message != regionOverlap {
+		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
+	}
+
 	method := func(receiver, a, b Matrix) {
 		type Suber interface {
 			Sub(a, b Matrix)
@@ -658,6 +682,18 @@ func TestMulElem(t *testing.T) {
 			t.Errorf("unexpected result from MulElem for test %d %v MulElem %v: got: %v want: %v",
 				i, test.a, test.b, unflatten(a.mat.Rows, a.mat.Cols, a.mat.Data), test.r)
 		}
+	}
+
+	panicked, message := panics(func() {
+		m := NewDense(10, 10, nil)
+		a := NewDense(5, 5, nil)
+		m.View(1, 1, 5, 5).(*Dense).MulElem(a, m.View(2, 2, 5, 5))
+	})
+	if !panicked {
+		t.Error("expected panic for overlapping matrices")
+	}
+	if message != regionOverlap {
+		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
 	}
 
 	method := func(receiver, a, b Matrix) {
@@ -751,6 +787,18 @@ func TestDivElem(t *testing.T) {
 		}
 	}
 
+	panicked, message := panics(func() {
+		m := NewDense(10, 10, nil)
+		a := NewDense(5, 5, nil)
+		m.View(1, 1, 5, 5).(*Dense).DivElem(a, m.View(2, 2, 5, 5))
+	})
+	if !panicked {
+		t.Error("expected panic for overlapping matrices")
+	}
+	if message != regionOverlap {
+		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
+	}
+
 	method := func(receiver, a, b Matrix) {
 		type ElemDiver interface {
 			DivElem(a, b Matrix)
@@ -823,6 +871,18 @@ func TestMul(t *testing.T) {
 		if !panicked || message != "blas: index of c out of range" {
 			t.Error("exected runtime panic for nil data slice")
 		}
+	}
+
+	panicked, message := panics(func() {
+		m := NewDense(10, 10, nil)
+		a := NewDense(5, 5, nil)
+		m.View(1, 1, 5, 5).(*Dense).Mul(a, m.View(2, 2, 5, 5))
+	})
+	if !panicked {
+		t.Error("expected panic for overlapping matrices")
+	}
+	if message != regionOverlap {
+		t.Errorf("unexpected panic message: got: %q want: %q", message, regionOverlap)
 	}
 
 	method := func(receiver, a, b Matrix) {

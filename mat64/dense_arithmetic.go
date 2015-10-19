@@ -35,7 +35,8 @@ func (m *Dense) Add(a, b Matrix) {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
 			if m != aMat {
 				m.checkOverlap(amat)
-			} else if m != bMat {
+			}
+			if m != bMat {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -96,7 +97,8 @@ func (m *Dense) Sub(a, b Matrix) {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
 			if m != aMat {
 				m.checkOverlap(amat)
-			} else if m != bMat {
+			}
+			if m != bMat {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -158,7 +160,8 @@ func (m *Dense) MulElem(a, b Matrix) {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
 			if m != aMat {
 				m.checkOverlap(amat)
-			} else if m != bMat {
+			}
+			if m != bMat {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -220,7 +223,8 @@ func (m *Dense) DivElem(a, b Matrix) {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
 			if m != aMat {
 				m.checkOverlap(amat)
-			} else if m != bMat {
+			}
+			if m != bMat {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {

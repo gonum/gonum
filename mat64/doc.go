@@ -146,7 +146,7 @@
 //    the value has been untransposed if necessary
 //
 // mat64 will not attempt to detect element overlap if the input does not implement a
-// Raw method or if the Raw method differs from that of the receiver, except when a
+// Raw method, or if the Raw method differs from that of the receiver except when a
 // conversion has ocurred through a mat64 API function. Method behavior is undefined
 // if there is undetected overlap.
 //

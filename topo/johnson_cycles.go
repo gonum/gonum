@@ -260,19 +260,19 @@ func (g johnsonGraph) From(n graph.Node) []graph.Node {
 }
 
 func (johnsonGraph) Has(graph.Node) bool {
-	panic("search: unintended use of johnsonGraph")
+	panic("topo: unintended use of johnsonGraph")
 }
 func (johnsonGraph) HasEdgeBetween(_, _ graph.Node) bool {
-	panic("search: unintended use of johnsonGraph")
+	panic("topo: unintended use of johnsonGraph")
 }
 func (johnsonGraph) Edge(_, _ graph.Node) graph.Edge {
-	panic("search: unintended use of johnsonGraph")
+	panic("topo: unintended use of johnsonGraph")
 }
 func (johnsonGraph) HasEdgeFromTo(_, _ graph.Node) bool {
-	panic("search: unintended use of johnsonGraph")
+	panic("topo: unintended use of johnsonGraph")
 }
 func (johnsonGraph) To(graph.Node) []graph.Node {
-	panic("search: unintended use of johnsonGraph")
+	panic("topo: unintended use of johnsonGraph")
 }
 
 type johnsonGraphNode int

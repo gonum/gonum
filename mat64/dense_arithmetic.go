@@ -26,17 +26,17 @@ func (m *Dense) Add(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aMat, _ := untranspose(a)
-	bMat, _ := untranspose(b)
+	aU, _ := untranspose(a)
+	bU, _ := untranspose(b)
 	m.reuseAs(ar, ac)
 
 	if arm, ok := a.(RawMatrixer); ok {
 		if brm, ok := b.(RawMatrixer); ok {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
-			if m != aMat {
+			if m != aU {
 				m.checkOverlap(amat)
 			}
-			if m != bMat {
+			if m != bU {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -49,11 +49,11 @@ func (m *Dense) Add(a, b Matrix) {
 	}
 
 	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
+	if m == aU {
+		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
+	} else if m == bU {
+		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
 
@@ -88,17 +88,17 @@ func (m *Dense) Sub(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aMat, _ := untranspose(a)
-	bMat, _ := untranspose(b)
+	aU, _ := untranspose(a)
+	bU, _ := untranspose(b)
 	m.reuseAs(ar, ac)
 
 	if arm, ok := a.(RawMatrixer); ok {
 		if brm, ok := b.(RawMatrixer); ok {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
-			if m != aMat {
+			if m != aU {
 				m.checkOverlap(amat)
 			}
-			if m != bMat {
+			if m != bU {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -111,11 +111,11 @@ func (m *Dense) Sub(a, b Matrix) {
 	}
 
 	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
+	if m == aU {
+		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
+	} else if m == bU {
+		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
 
@@ -151,17 +151,17 @@ func (m *Dense) MulElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aMat, _ := untranspose(a)
-	bMat, _ := untranspose(b)
+	aU, _ := untranspose(a)
+	bU, _ := untranspose(b)
 	m.reuseAs(ar, ac)
 
 	if arm, ok := a.(RawMatrixer); ok {
 		if brm, ok := b.(RawMatrixer); ok {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
-			if m != aMat {
+			if m != aU {
 				m.checkOverlap(amat)
 			}
-			if m != bMat {
+			if m != bU {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -174,11 +174,11 @@ func (m *Dense) MulElem(a, b Matrix) {
 	}
 
 	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
+	if m == aU {
+		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
+	} else if m == bU {
+		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
 
@@ -214,17 +214,17 @@ func (m *Dense) DivElem(a, b Matrix) {
 		panic(ErrShape)
 	}
 
-	aMat, _ := untranspose(a)
-	bMat, _ := untranspose(b)
+	aU, _ := untranspose(a)
+	bU, _ := untranspose(b)
 	m.reuseAs(ar, ac)
 
 	if arm, ok := a.(RawMatrixer); ok {
 		if brm, ok := b.(RawMatrixer); ok {
 			amat, bmat := arm.RawMatrix(), brm.RawMatrix()
-			if m != aMat {
+			if m != aU {
 				m.checkOverlap(amat)
 			}
-			if m != bMat {
+			if m != bU {
 				m.checkOverlap(bmat)
 			}
 			for ja, jb, jm := 0, 0, 0; ja < ar*amat.Stride; ja, jb, jm = ja+amat.Stride, jb+bmat.Stride, jm+m.mat.Stride {
@@ -237,11 +237,11 @@ func (m *Dense) DivElem(a, b Matrix) {
 	}
 
 	var restore func()
-	if m == aMat {
-		m, restore = m.isolatedWorkspace(aMat)
+	if m == aU {
+		m, restore = m.isolatedWorkspace(aU)
 		defer restore()
-	} else if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
+	} else if m == bU {
+		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
 	}
 
@@ -278,11 +278,11 @@ func (m *Dense) Inverse(a Matrix) error {
 		panic(ErrSquare)
 	}
 	m.reuseAs(a.Dims())
-	aMat, aTrans := untranspose(a)
-	switch rm := aMat.(type) {
+	aU, aTrans := untranspose(a)
+	switch rm := aU.(type) {
 	case RawMatrixer:
-		if m != aMat || aTrans {
-			if m == aMat || m.checkOverlap(rm.RawMatrix()) {
+		if m != aU || aTrans {
+			if m == aU || m.checkOverlap(rm.RawMatrix()) {
 				tmp := getWorkspace(r, c, false)
 				tmp.Copy(a)
 				m.Copy(tmp)
@@ -292,7 +292,7 @@ func (m *Dense) Inverse(a Matrix) error {
 			m.Copy(a)
 		}
 	default:
-		if m != aMat {
+		if m != aU {
 			m.Copy(a)
 		} else if aTrans {
 			// m and a share data so Copy cannot be used directly.
@@ -706,10 +706,10 @@ func (m *Dense) Scale(f float64, a Matrix) {
 
 	m.reuseAs(ar, ac)
 
-	aMat, aTrans := untranspose(a)
-	if rm, ok := aMat.(RawMatrixer); ok {
+	aU, aTrans := untranspose(a)
+	if rm, ok := aU.(RawMatrixer); ok {
 		amat := rm.RawMatrix()
-		if m == aMat || m.checkOverlap(amat) {
+		if m == aU || m.checkOverlap(amat) {
 			var restore func()
 			m, restore = m.isolatedWorkspace(a)
 			defer restore()
@@ -756,10 +756,10 @@ func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 
 	m.reuseAs(ar, ac)
 
-	aMat, aTrans := untranspose(a)
-	if rm, ok := aMat.(RawMatrixer); ok {
+	aU, aTrans := untranspose(a)
+	if rm, ok := aU.(RawMatrixer); ok {
 		amat := rm.RawMatrix()
-		if m == aMat || m.checkOverlap(amat) {
+		if m == aU || m.checkOverlap(amat) {
 			var restore func()
 			m, restore = m.isolatedWorkspace(a)
 			defer restore()

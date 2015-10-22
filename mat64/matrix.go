@@ -222,8 +222,8 @@ func Col(dst []float64, j int, a Matrix) []float64 {
 			panic(ErrRowLength)
 		}
 	}
-	aMat, aTrans := untranspose(a)
-	if rm, ok := aMat.(RawMatrixer); ok {
+	aU, aTrans := untranspose(a)
+	if rm, ok := aU.(RawMatrixer); ok {
 		m := rm.RawMatrix()
 		if aTrans {
 			copy(dst, m.Data[j*m.Stride:j*m.Stride+m.Cols])
@@ -256,8 +256,8 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 			panic(ErrColLength)
 		}
 	}
-	aMat, aTrans := untranspose(a)
-	if rm, ok := aMat.(RawMatrixer); ok {
+	aU, aTrans := untranspose(a)
+	if rm, ok := aU.(RawMatrixer); ok {
 		m := rm.RawMatrix()
 		if aTrans {
 			blas64.Copy(c,
@@ -370,10 +370,10 @@ func Dot(a, b Matrix) float64 {
 		panic(ErrShape)
 	}
 	var sum float64
-	aMat, aTrans := untranspose(a)
-	bMat, bTrans := untranspose(b)
-	if rma, ok := aMat.(RawMatrixer); ok {
-		if rmb, ok := bMat.(RawMatrixer); ok {
+	aU, aTrans := untranspose(a)
+	bU, bTrans := untranspose(b)
+	if rma, ok := aU.(RawMatrixer); ok {
+		if rmb, ok := bU.(RawMatrixer); ok {
 			ra := rma.RawMatrix()
 			rb := rmb.RawMatrix()
 			if aTrans == bTrans {
@@ -410,10 +410,10 @@ func Equal(a, b Matrix) bool {
 	if ar != br || ac != bc {
 		return false
 	}
-	aMat, aTrans := untranspose(a)
-	bMat, bTrans := untranspose(b)
-	if rma, ok := aMat.(RawMatrixer); ok {
-		if rmb, ok := bMat.(RawMatrixer); ok {
+	aU, aTrans := untranspose(a)
+	bU, bTrans := untranspose(b)
+	if rma, ok := aU.(RawMatrixer); ok {
+		if rmb, ok := bU.(RawMatrixer); ok {
 			ra := rma.RawMatrix()
 			rb := rmb.RawMatrix()
 			if aTrans == bTrans {
@@ -436,8 +436,8 @@ func Equal(a, b Matrix) bool {
 			return true
 		}
 	}
-	if rma, ok := aMat.(RawSymmetricer); ok {
-		if rmb, ok := bMat.(RawSymmetricer); ok {
+	if rma, ok := aU.(RawSymmetricer); ok {
+		if rmb, ok := bU.(RawSymmetricer); ok {
 			ra := rma.RawSymmetric()
 			rb := rmb.RawSymmetric()
 			// Symmetric matrices are always upper and equal to their transpose.
@@ -451,8 +451,8 @@ func Equal(a, b Matrix) bool {
 			return true
 		}
 	}
-	if ra, ok := aMat.(*Vector); ok {
-		if rb, ok := bMat.(*Vector); ok {
+	if ra, ok := aU.(*Vector); ok {
+		if rb, ok := bU.(*Vector); ok {
 			// If the raw vectors are the same length they must either both be
 			// transposed or both not transposed (or have length 1).
 			for i := 0; i < ra.n; i++ {
@@ -482,10 +482,10 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 	if ar != br || ac != bc {
 		return false
 	}
-	aMat, aTrans := untranspose(a)
-	bMat, bTrans := untranspose(b)
-	if rma, ok := aMat.(RawMatrixer); ok {
-		if rmb, ok := bMat.(RawMatrixer); ok {
+	aU, aTrans := untranspose(a)
+	bU, bTrans := untranspose(b)
+	if rma, ok := aU.(RawMatrixer); ok {
+		if rmb, ok := bU.(RawMatrixer); ok {
 			ra := rma.RawMatrix()
 			rb := rmb.RawMatrix()
 			if aTrans == bTrans {
@@ -508,8 +508,8 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 			return true
 		}
 	}
-	if rma, ok := aMat.(RawSymmetricer); ok {
-		if rmb, ok := bMat.(RawSymmetricer); ok {
+	if rma, ok := aU.(RawSymmetricer); ok {
+		if rmb, ok := bU.(RawSymmetricer); ok {
 			ra := rma.RawSymmetric()
 			rb := rmb.RawSymmetric()
 			// Symmetric matrices are always upper and equal to their transpose.
@@ -523,8 +523,8 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 			return true
 		}
 	}
-	if ra, ok := aMat.(*Vector); ok {
-		if rb, ok := bMat.(*Vector); ok {
+	if ra, ok := aU.(*Vector); ok {
+		if rb, ok := bU.(*Vector); ok {
 			// If the raw vectors are the same length they must either both be
 			// transposed or both not transposed (or have length 1).
 			for i := 0; i < ra.n; i++ {
@@ -563,8 +563,8 @@ func Max(a Matrix) float64 {
 		panic(ErrShape)
 	}
 	// Max(A) = Max(A^T)
-	aMat, _ := untranspose(a)
-	switch m := aMat.(type) {
+	aU, _ := untranspose(a)
+	switch m := aU.(type) {
 	case RawMatrixer:
 		rm := m.RawMatrix()
 		max := math.Inf(-1)
@@ -616,11 +616,11 @@ func Max(a Matrix) float64 {
 		}
 		return max
 	default:
-		r, c := aMat.Dims()
+		r, c := aU.Dims()
 		max := math.Inf(-1)
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {
-				v := aMat.At(i, j)
+				v := aU.At(i, j)
 				if v > max {
 					max = v
 				}
@@ -638,8 +638,8 @@ func Min(a Matrix) float64 {
 		panic(ErrShape)
 	}
 	// Min(A) = Min(A^T)
-	aMat, _ := untranspose(a)
-	switch m := aMat.(type) {
+	aU, _ := untranspose(a)
+	switch m := aU.(type) {
 	case RawMatrixer:
 		rm := m.RawMatrix()
 		min := math.Inf(1)
@@ -691,11 +691,11 @@ func Min(a Matrix) float64 {
 		}
 		return min
 	default:
-		r, c := aMat.Dims()
+		r, c := aU.Dims()
 		min := math.Inf(1)
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {
-				v := aMat.At(i, j)
+				v := aU.At(i, j)
 				if v < min {
 					min = v
 				}
@@ -719,9 +719,9 @@ func Norm(a Matrix, norm float64) float64 {
 	if r == 0 || c == 0 {
 		panic(ErrShape)
 	}
-	aMat, aTrans := untranspose(a)
+	aU, aTrans := untranspose(a)
 	var work []float64
-	switch rma := aMat.(type) {
+	switch rma := aU.(type) {
 	case RawMatrixer:
 		rm := rma.RawMatrix()
 		n := normLapack(norm, aTrans)
@@ -831,8 +831,8 @@ func Sum(a Matrix) float64 {
 
 	r, c := a.Dims()
 	var sum float64
-	aMat, _ := untranspose(a)
-	if rma, ok := aMat.(RawMatrixer); ok {
+	aU, _ := untranspose(a)
+	if rma, ok := aU.(RawMatrixer); ok {
 		rm := rma.RawMatrix()
 		for i := 0; i < rm.Rows; i++ {
 			for _, v := range rm.Data[i*rm.Stride : i*rm.Stride+rm.Cols] {
@@ -857,8 +857,8 @@ func Trace(a Matrix) float64 {
 		panic(ErrSquare)
 	}
 
-	aMat, _ := untranspose(a)
-	switch m := aMat.(type) {
+	aU, _ := untranspose(a)
+	switch m := aU.(type) {
 	case RawMatrixer:
 		rm := m.RawMatrix()
 		var t float64

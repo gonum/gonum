@@ -245,12 +245,12 @@ func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
 	}
 
 	m.reuseAs(n, bc)
-	bMat, _ := untranspose(b)
+	bU, _ := untranspose(b)
 	var restore func()
-	if m == bMat {
-		m, restore = m.isolatedWorkspace(bMat)
+	if m == bU {
+		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
-	} else if rm, ok := bMat.(RawMatrixer); ok {
+	} else if rm, ok := bU.(RawMatrixer); ok {
 		m.checkOverlap(rm.RawMatrix())
 	}
 

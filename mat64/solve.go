@@ -29,9 +29,9 @@ func (m *Dense) Solve(a, b Matrix) error {
 	m.reuseAs(ac, bc)
 
 	// TODO(btracey): Add special cases for SymDense, etc.
-	aMat, aTrans := untranspose(a)
-	bMat, bTrans := untranspose(b)
-	switch rma := aMat.(type) {
+	aU, aTrans := untranspose(a)
+	bU, bTrans := untranspose(b)
+	switch rma := aU.(type) {
 	case RawTriangular:
 		side := blas.Left
 		tA := blas.NoTrans
@@ -39,10 +39,10 @@ func (m *Dense) Solve(a, b Matrix) error {
 			tA = blas.Trans
 		}
 
-		switch rm := bMat.(type) {
+		switch rm := bU.(type) {
 		case RawMatrixer:
-			if m != bMat || bTrans {
-				if m == bMat || m.checkOverlap(rm.RawMatrix()) {
+			if m != bU || bTrans {
+				if m == bU || m.checkOverlap(rm.RawMatrix()) {
 					tmp := getWorkspace(br, bc, false)
 					tmp.Copy(b)
 					m.Copy(tmp)
@@ -52,7 +52,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 				m.Copy(b)
 			}
 		default:
-			if m != bMat {
+			if m != bU {
 				m.Copy(b)
 			} else if bTrans {
 				// m and b share data so Copy cannot be used directly.

@@ -7,6 +7,7 @@ package mat64
 import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/internal/asm"
 )
 
 var (
@@ -154,9 +155,23 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	case v == a && v != b: // v <- v + alpha * b
 		blas64.Axpy(ar, alpha, b.mat, v.mat)
 	case v != a && v == b: // v <- a + alpha * v
+		if v.mat.Inc == 1 && a.mat.Inc == 1 {
+			// Fast path for a common case.
+			v := v.mat.Data
+			for i, a := range a.mat.Data {
+				v[i] *= alpha
+				v[i] += a
+			}
+			return
+		}
 		blas64.Scal(ar, alpha, v.mat)
 		blas64.Axpy(ar, 1, a.mat, v.mat)
 	default: // v <- a + alpha * b
+		if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
+			// Fast path for a common case.
+			asm.DaxpyUnitary(alpha, b.mat.Data, a.mat.Data, v.mat.Data)
+			return
+		}
 		blas64.Copy(ar, a.mat, v.mat)
 		blas64.Axpy(ar, alpha, b.mat, v.mat)
 	}

@@ -56,6 +56,12 @@ func legalSizeSolve(ar, ac, br, bc int) bool {
 	return ar == br
 }
 
+// legalSizeSameVec returns whether the two matrices are column vectors of the
+// same dimension.
+func legalSizeSameVec(ar, ac, br, bc int) bool {
+	return ac == 1 && bc == 1 && ar == br
+}
+
 // isAnySize returns true for all matrix sizes.
 func isAnySize(ar, ac int) bool {
 	return true
@@ -138,6 +144,17 @@ func legalTypesSym(a, b Matrix) bool {
 func legalTypeVec(v Matrix) bool {
 	_, ok := v.(*Vector)
 	return ok
+}
+
+// legalTypesVecVec returns whether both inputs are *Vector.
+func legalTypesVecVec(a, b Matrix) bool {
+	if _, ok := a.(*Vector); !ok {
+		return false
+	}
+	if _, ok := b.(*Vector); !ok {
+		return false
+	}
+	return true
 }
 
 // legalTypesNotVecVec returns whether the first input is an arbitrary Matrix

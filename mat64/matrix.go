@@ -888,15 +888,13 @@ func Trace(a Matrix) float64 {
 	}
 }
 
-// condNorm describes the matrix norm to use for computing the condition number.
-var condNorm = lapack.MaxRowSum
+const (
+	// condNorm describes the matrix norm to use for computing the condition number.
+	condNorm = lapack.MaxRowSum
 
-// condNormTrans is the norm to compute on A^T to get the same result as computing
-// condNorm on A.
-var condNormTrans = lapack.MaxColumnSum
-
-var (
-	badSliceLength = "mat64: improper slice length"
+	// condNormTrans is the norm to compute on A^T to get the same result as computing
+	// condNorm on A.
+	condNormTrans = lapack.MaxColumnSum
 )
 
 func min(a, b int) int {

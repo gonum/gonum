@@ -15,6 +15,8 @@ import (
 	"github.com/gonum/matrix"
 )
 
+const badSliceLength = "mat64: improper slice length"
+
 // LU is a type for creating and using the LU factorization of a matrix.
 type LU struct {
 	lu    *Dense

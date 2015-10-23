@@ -11,6 +11,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack/lapack64"
+	"github.com/gonum/matrix"
 )
 
 // QR is a type for creating and using the QR factorization of a matrix.
@@ -40,7 +41,7 @@ func (qr *QR) updateCond() {
 func (qr *QR) Factorize(a Matrix) {
 	m, n := a.Dims()
 	if m < n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	k := min(m, n)
 	if qr.qr == nil {
@@ -150,12 +151,12 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	// copy the result into m at the end.
 	if trans {
 		if c != br {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 		m.reuseAs(r, bc)
 	} else {
 		if r != br {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 		m.reuseAs(c, bc)
 	}
@@ -167,7 +168,7 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	if trans {
 		ok := lapack64.Trtrs(blas.Trans, t, x.mat)
 		if !ok {
-			return Condition(math.Inf(1))
+			return matrix.Condition(math.Inf(1))
 		}
 		for i := c; i < r; i++ {
 			zero(x.mat.Data[i*x.mat.Stride : i*x.mat.Stride+bc])
@@ -184,14 +185,14 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 
 		ok := lapack64.Trtrs(blas.NoTrans, t, x.mat)
 		if !ok {
-			return Condition(math.Inf(1))
+			return matrix.Condition(math.Inf(1))
 		}
 	}
 	// M was set above to be the correct size for the result.
 	m.Copy(x)
 	putWorkspace(x)
-	if qr.cond > condTol {
-		return Condition(qr.cond)
+	if qr.cond > matrix.ConditionTolerance {
+		return matrix.Condition(qr.cond)
 	}
 	return nil
 }

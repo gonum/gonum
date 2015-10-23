@@ -8,6 +8,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack/lapack64"
+	"github.com/gonum/matrix"
 )
 
 // Solve solves a minimum-norm solution to a system of linear equations defined
@@ -24,7 +25,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	m.reuseAs(ac, bc)
 
@@ -68,8 +69,8 @@ func (m *Dense) Solve(a, b Matrix) error {
 		work := make([]float64, 3*rm.N)
 		iwork := make([]int, rm.N)
 		cond := lapack64.Trcon(condNorm, rm, work, iwork)
-		if cond > condTol {
-			return Condition(cond)
+		if cond > matrix.ConditionTolerance {
+			return matrix.Condition(cond)
 		}
 		return nil
 	}

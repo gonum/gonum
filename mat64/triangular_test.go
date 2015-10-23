@@ -8,6 +8,7 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/matrix"
 )
 
 func TestNewTriangular(t *testing.T) {
@@ -50,7 +51,7 @@ func TestNewTriangular(t *testing.T) {
 
 	for _, upper := range []bool{false, true} {
 		panicked, message := panics(func() { NewTriDense(3, upper, []float64{1, 2}) })
-		if !panicked || message != ErrShape.Error() {
+		if !panicked || message != matrix.ErrShape.Error() {
 			t.Errorf("expected panic for invalid data slice length for upper=%t", upper)
 		}
 	}
@@ -70,13 +71,13 @@ func TestTriAtSet(t *testing.T) {
 	// Check At out of bounds
 	for _, row := range []int{-1, rows, rows + 1} {
 		panicked, message := panics(func() { tri.At(row, 0) })
-		if !panicked || message != ErrRowAccess.Error() {
+		if !panicked || message != matrix.ErrRowAccess.Error() {
 			t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 		}
 	}
 	for _, col := range []int{-1, cols, cols + 1} {
 		panicked, message := panics(func() { tri.At(0, col) })
-		if !panicked || message != ErrColAccess.Error() {
+		if !panicked || message != matrix.ErrColAccess.Error() {
 			t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 		}
 	}
@@ -84,13 +85,13 @@ func TestTriAtSet(t *testing.T) {
 	// Check Set out of bounds
 	for _, row := range []int{-1, rows, rows + 1} {
 		panicked, message := panics(func() { tri.SetTri(row, 0, 1.2) })
-		if !panicked || message != ErrRowAccess.Error() {
+		if !panicked || message != matrix.ErrRowAccess.Error() {
 			t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 		}
 	}
 	for _, col := range []int{-1, cols, cols + 1} {
 		panicked, message := panics(func() { tri.SetTri(0, col, 1.2) })
-		if !panicked || message != ErrColAccess.Error() {
+		if !panicked || message != matrix.ErrColAccess.Error() {
 			t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 		}
 	}
@@ -104,7 +105,7 @@ func TestTriAtSet(t *testing.T) {
 	} {
 		tri.mat.Uplo = st.uplo
 		panicked, message := panics(func() { tri.SetTri(st.row, st.col, 1.2) })
-		if !panicked || message != ErrTriangleSet.Error() {
+		if !panicked || message != matrix.ErrTriangleSet.Error() {
 			t.Errorf("expected panic for %+v", st)
 		}
 	}
@@ -133,8 +134,8 @@ func TestTriDenseCopy(t *testing.T) {
 		size := rand.Intn(100)
 		r, err := randDense(size, 0.9, rand.NormFloat64)
 		if size == 0 {
-			if err != ErrZeroLength {
-				t.Fatalf("expected error %v: got: %v", ErrZeroLength, err)
+			if err != matrix.ErrZeroLength {
+				t.Fatalf("expected error %v: got: %v", matrix.ErrZeroLength, err)
 			}
 			continue
 		}
@@ -183,8 +184,8 @@ func TestTriTriDenseCopy(t *testing.T) {
 		size := rand.Intn(100)
 		r, err := randDense(size, 1, rand.NormFloat64)
 		if size == 0 {
-			if err != ErrZeroLength {
-				t.Fatalf("expected error %v: got: %v", ErrZeroLength, err)
+			if err != matrix.ErrZeroLength {
+				t.Fatalf("expected error %v: got: %v", matrix.ErrZeroLength, err)
 			}
 			continue
 		}

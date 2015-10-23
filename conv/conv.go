@@ -6,6 +6,7 @@
 package conv
 
 import (
+	"github.com/gonum/matrix"
 	"github.com/gonum/matrix/cmat128"
 	"github.com/gonum/matrix/mat64"
 )
@@ -34,7 +35,7 @@ func NewComplex(r, i mat64.Matrix) Complex {
 		rr, rc := r.Dims()
 		ir, ic := i.Dims()
 		if rr != ir || rc != ic {
-			panic(mat64.ErrShape)
+			panic(matrix.ErrShape)
 		}
 	}
 	return Complex{r: r, i: i}

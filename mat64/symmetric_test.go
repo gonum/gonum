@@ -12,6 +12,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix"
 )
 
 func TestNewSymmetric(t *testing.T) {
@@ -55,7 +56,7 @@ func TestNewSymmetric(t *testing.T) {
 	}
 
 	panicked, message := panics(func() { NewSymDense(3, []float64{1, 2}) })
-	if !panicked || message != ErrShape.Error() {
+	if !panicked || message != matrix.ErrShape.Error() {
 		t.Error("expected panic for invalid data slice length")
 	}
 }
@@ -72,13 +73,13 @@ func TestSymAtSet(t *testing.T) {
 	// Check At out of bounds
 	for _, row := range []int{-1, rows, rows + 1} {
 		panicked, message := panics(func() { sym.At(row, 0) })
-		if !panicked || message != ErrRowAccess.Error() {
+		if !panicked || message != matrix.ErrRowAccess.Error() {
 			t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 		}
 	}
 	for _, col := range []int{-1, cols, cols + 1} {
 		panicked, message := panics(func() { sym.At(0, col) })
-		if !panicked || message != ErrColAccess.Error() {
+		if !panicked || message != matrix.ErrColAccess.Error() {
 			t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 		}
 	}
@@ -86,13 +87,13 @@ func TestSymAtSet(t *testing.T) {
 	// Check Set out of bounds
 	for _, row := range []int{-1, rows, rows + 1} {
 		panicked, message := panics(func() { sym.SetSym(row, 0, 1.2) })
-		if !panicked || message != ErrRowAccess.Error() {
+		if !panicked || message != matrix.ErrRowAccess.Error() {
 			t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 		}
 	}
 	for _, col := range []int{-1, cols, cols + 1} {
 		panicked, message := panics(func() { sym.SetSym(0, col, 1.2) })
-		if !panicked || message != ErrColAccess.Error() {
+		if !panicked || message != matrix.ErrColAccess.Error() {
 			t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 		}
 	}

@@ -12,18 +12,8 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix"
 )
-
-var inf = math.Inf(1)
-
-func leaksPanic(fn func()) (panicked bool) {
-	defer func() {
-		r := recover()
-		panicked = r != nil
-	}()
-	Maybe(fn)
-	return
-}
 
 func panics(fn func()) (panicked bool, message string) {
 	defer func() {
@@ -248,46 +238,6 @@ func TestMin(t *testing.T) {
 	testOneInputFunc(t, "Min", f, denseComparison, sameAnswerFloat, isAnyType, isAnySize)
 }
 
-func TestMaybe(t *testing.T) {
-	for i, test := range []struct {
-		fn     func()
-		panics bool
-		errors bool
-	}{
-		{
-			fn:     func() {},
-			panics: false,
-			errors: false,
-		},
-		{
-			fn:     func() { panic("panic") },
-			panics: true,
-			errors: false,
-		},
-		{
-			fn:     func() { panic(Error{"panic"}) },
-			panics: false,
-			errors: true,
-		},
-	} {
-		panicked := leaksPanic(test.fn)
-		if panicked != test.panics {
-			t.Errorf("unexpected panic state for test %d: got: panicked=%t want: panicked=%t",
-				i, panicked, test.panics)
-		}
-		if test.errors {
-			err := Maybe(test.fn)
-			stack, ok := err.(ErrorStack)
-			if !ok {
-				t.Errorf("unexpected error type: got:%T want:%T", stack, ErrorStack{})
-			}
-			if stack.StackTrace == "" {
-				t.Error("expected non-empty stack trace")
-			}
-		}
-	}
-}
-
 func TestNorm(t *testing.T) {
 	for i, test := range []struct {
 		a    [][]float64
@@ -306,7 +256,7 @@ func TestNorm(t *testing.T) {
 		},
 		{
 			a:    [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-			ord:  inf,
+			ord:  math.Inf(1),
 			norm: 33,
 		},
 		{
@@ -316,7 +266,7 @@ func TestNorm(t *testing.T) {
 		},
 		{
 			a:    [][]float64{{1, -2, -2}, {-4, 5, 6}},
-			ord:  inf,
+			ord:  math.Inf(1),
 			norm: 15,
 		},
 	} {
@@ -358,9 +308,9 @@ func TestNormZero(t *testing.T) {
 			if !panicked {
 				t.Errorf("expected panic for Norm(&%T{}, %v)", a, norm)
 			}
-			if message != ErrShape.string {
+			if message != matrix.ErrShape.Error() {
 				t.Errorf("unexpected panic string for Norm(&%T{}, %v): got:%s want:%s",
-					a, norm, message, ErrShape.string)
+					a, norm, message, matrix.ErrShape.Error())
 			}
 		}
 	}

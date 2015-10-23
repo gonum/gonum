@@ -7,6 +7,8 @@ package mat64
 
 import (
 	"math"
+
+	"github.com/gonum/matrix"
 )
 
 func symmetric(m *Dense) bool {
@@ -41,7 +43,7 @@ type EigenFactors struct {
 func Eigen(a *Dense, epsilon float64) EigenFactors {
 	m, n := a.Dims()
 	if m != n {
-		panic(ErrSquare)
+		panic(matrix.ErrSquare)
 	}
 
 	var v *Dense
@@ -804,7 +806,7 @@ func (f EigenFactors) D() *Dense {
 	d, e := f.d, f.e
 	var n int
 	if n = len(d); n != len(e) {
-		panic(ErrSquare)
+		panic(matrix.ErrSquare)
 	}
 	dm := NewDense(n, n, nil)
 	for i := 0; i < n; i++ {

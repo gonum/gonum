@@ -12,6 +12,7 @@ import (
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
 	"github.com/gonum/lapack/lapack64"
+	"github.com/gonum/matrix"
 )
 
 // LU is a type for creating and using the LU factorization of a matrix.
@@ -53,7 +54,7 @@ func (lu *LU) updateCond(norm float64) {
 func (lu *LU) Factorize(a Matrix) {
 	r, c := a.Dims()
 	if r != c {
-		panic(ErrSquare)
+		panic(matrix.ErrSquare)
 	}
 	if lu.lu == nil {
 		lu.lu = &Dense{}
@@ -127,10 +128,10 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 	// http://web.stanford.edu/group/SOL/dissertations/Linzhong-Deng-thesis.pdf
 	_, n := orig.lu.Dims()
 	if x.Len() != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if y.Len() != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if orig != lu {
 		if len(lu.pivot) == 0 {
@@ -139,7 +140,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 			lu.lu = NewDense(n, n, nil)
 		} else {
 			if len(lu.pivot) != n {
-				panic(ErrShape)
+				panic(matrix.ErrShape)
 			}
 		}
 		copy(lu.pivot, orig.pivot)
@@ -217,7 +218,7 @@ func (m *Dense) Permutation(r int, swaps []int) {
 		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+r])
 		v := swaps[i]
 		if v < 0 || v >= r {
-			panic(ErrRowAccess)
+			panic(matrix.ErrRowAccess)
 		}
 		m.mat.Data[i*m.mat.Stride+v] = 1
 	}
@@ -236,12 +237,12 @@ func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
 	_, n := lu.lu.Dims()
 	br, bc := b.Dims()
 	if br != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	// TODO(btracey): Should test the condition number instead of testing that
 	// the determinant is exactly zero.
 	if lu.Det() == 0 {
-		return Condition(math.Inf(1))
+		return matrix.Condition(math.Inf(1))
 	}
 
 	m.reuseAs(n, bc)
@@ -260,8 +261,8 @@ func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
 		t = blas.Trans
 	}
 	lapack64.Getrs(t, lu.lu.mat, m.mat, lu.pivot)
-	if lu.cond > condTol {
-		return Condition(lu.cond)
+	if lu.cond > matrix.ConditionTolerance {
+		return matrix.Condition(lu.cond)
 	}
 	return nil
 }
@@ -279,12 +280,12 @@ func (v *Vector) SolveLUVec(lu *LU, trans bool, b *Vector) error {
 	_, n := lu.lu.Dims()
 	bn := b.Len()
 	if bn != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	// TODO(btracey): Should test the condition number instead of testing that
 	// the determinant is exactly zero.
 	if lu.Det() == 0 {
-		return Condition(math.Inf(1))
+		return matrix.Condition(math.Inf(1))
 	}
 
 	v.reuseAs(n)
@@ -305,8 +306,8 @@ func (v *Vector) SolveLUVec(lu *LU, trans bool, b *Vector) error {
 		t = blas.Trans
 	}
 	lapack64.Getrs(t, lu.lu.mat, vMat, lu.pivot)
-	if lu.cond > condTol {
-		return Condition(lu.cond)
+	if lu.cond > matrix.ConditionTolerance {
+		return matrix.Condition(lu.cond)
 	}
 	return nil
 }

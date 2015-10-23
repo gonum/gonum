@@ -10,6 +10,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack/lapack64"
+	"github.com/gonum/matrix"
 )
 
 // LQ is a type for creating and using the LQ factorization of a matrix.
@@ -39,7 +40,7 @@ func (lq *LQ) updateCond() {
 func (lq *LQ) Factorize(a Matrix) {
 	m, n := a.Dims()
 	if m > n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	k := min(m, n)
 	if lq.lq == nil {
@@ -151,12 +152,12 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 	// copy the result into m at the end.
 	if trans {
 		if c != br {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 		m.reuseAs(r, bc)
 	} else {
 		if r != br {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 		m.reuseAs(c, bc)
 	}
@@ -173,12 +174,12 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 
 		ok := lapack64.Trtrs(blas.Trans, t, x.mat)
 		if !ok {
-			return Condition(math.Inf(1))
+			return matrix.Condition(math.Inf(1))
 		}
 	} else {
 		ok := lapack64.Trtrs(blas.NoTrans, t, x.mat)
 		if !ok {
-			return Condition(math.Inf(1))
+			return matrix.Condition(math.Inf(1))
 		}
 		for i := r; i < c; i++ {
 			zero(x.mat.Data[i*x.mat.Stride : i*x.mat.Stride+bc])
@@ -191,8 +192,8 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 	// M was set above to be the correct size for the result.
 	m.Copy(x)
 	putWorkspace(x)
-	if lq.cond > condTol {
-		return Condition(lq.cond)
+	if lq.cond > matrix.ConditionTolerance {
+		return matrix.Condition(lq.cond)
 	}
 	return nil
 }

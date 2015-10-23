@@ -5,15 +5,14 @@
 package mat64
 
 import (
-	"fmt"
 	"math"
-	"runtime"
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
 	"github.com/gonum/lapack"
 	"github.com/gonum/lapack/lapack64"
+	"github.com/gonum/matrix"
 )
 
 // Matrix is the basic matrix interface type.
@@ -213,13 +212,13 @@ type RawVectorer interface {
 func Col(dst []float64, j int, a Matrix) []float64 {
 	r, c := a.Dims()
 	if j < 0 || j >= c {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	if dst == nil {
 		dst = make([]float64, r)
 	} else {
 		if len(dst) != r {
-			panic(ErrRowLength)
+			panic(matrix.ErrRowLength)
 		}
 	}
 	aU, aTrans := untranspose(a)
@@ -247,13 +246,13 @@ func Col(dst []float64, j int, a Matrix) []float64 {
 func Row(dst []float64, i int, a Matrix) []float64 {
 	r, c := a.Dims()
 	if i < 0 || i >= r {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	if dst == nil {
 		dst = make([]float64, c)
 	} else {
 		if len(dst) != c {
-			panic(ErrColLength)
+			panic(matrix.ErrColLength)
 		}
 	}
 	aU, aTrans := untranspose(a)
@@ -277,7 +276,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 
 // Cond returns the condition number of the given matrix under the given norm.
 // The condition number must be based on the 1-norm, 2-norm or ∞-norm.
-// Cond will panic with ErrShape if the matrix has zero size.
+// Cond will panic with matrix.ErrShape if the matrix has zero size.
 //
 // BUG(btracey): The computation of the 1-norm and ∞-norm for non-square matrices
 // is innacurate, although is typically the right order of magnitude. See
@@ -287,7 +286,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 func Cond(a Matrix, norm float64) float64 {
 	m, n := a.Dims()
 	if m == 0 || n == 0 {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	var lnorm lapack.MatrixNorm
 	switch norm {
@@ -367,7 +366,7 @@ func Dot(a, b Matrix) float64 {
 	r, c := a.Dims()
 	rb, cb := b.Dims()
 	if r != rb || c != cb {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	var sum float64
 	aU, aTrans := untranspose(a)
@@ -556,11 +555,11 @@ func LogDet(a Matrix) (det float64, sign float64) {
 }
 
 // Max returns the largest element value of the matrix A.
-// Max will panic with ErrShape if the matrix has zero size.
+// Max will panic with matrix.ErrShape if the matrix has zero size.
 func Max(a Matrix) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	// Max(A) = Max(A^T)
 	aU, _ := untranspose(a)
@@ -631,11 +630,11 @@ func Max(a Matrix) float64 {
 }
 
 // Min returns the smallest element value of the matrix A.
-// Min will panic with ErrShape if the matrix has zero size.
+// Min will panic with matrix.ErrShape if the matrix has zero size.
 func Min(a Matrix) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	// Min(A) = Min(A^T)
 	aU, _ := untranspose(a)
@@ -713,11 +712,11 @@ func Min(a Matrix) float64 {
 //    2 - Frobenius norm, the square root of the sum of the squares of the elements.
 //  Inf - The maximum absolute row sum.
 // Norm will panic with ErrNormOrder if an illegal norm order is specified and
-// with ErrShape if the matrix has zero size.
+// with matrix.ErrShape if the matrix has zero size.
 func Norm(a Matrix, norm float64) float64 {
 	r, c := a.Dims()
 	if r == 0 || c == 0 {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	aU, aTrans := untranspose(a)
 	var work []float64
@@ -821,7 +820,7 @@ func normLapack(norm float64, aTrans bool) lapack.MatrixNorm {
 		}
 		return n
 	default:
-		panic(ErrNormOrder)
+		panic(matrix.ErrNormOrder)
 	}
 }
 
@@ -854,7 +853,7 @@ func Sum(a Matrix) float64 {
 func Trace(a Matrix) float64 {
 	r, c := a.Dims()
 	if r != c {
-		panic(ErrSquare)
+		panic(matrix.ErrSquare)
 	}
 
 	aU, _ := untranspose(a)
@@ -889,112 +888,12 @@ func Trace(a Matrix) float64 {
 	}
 }
 
-// Condition is the condition number of a matrix. The condition
-// number is defined as ||A|| * ||A^-1||.
-//
-// One important use of Condition is during linear solve routines (finding x such
-// that A * x = b). The condition number of A indicates the accuracy of
-// the computed solution. A Condition error will be returned if the condition
-// number of A is sufficiently large. If A is exactly singular to working precision,
-// Condition == ∞, and the solve algorithm may have completed early. If Condition
-// is large and finite the solve algorithm will be performed, but the computed
-// solution may be innacurate. Due to the nature of finite precision arithmetic,
-// the value of Condition is only an approximate test of singularity.
-type Condition float64
-
-func (c Condition) Error() string {
-	return fmt.Sprintf("matrix singular or near-singular with inverse condition number %.4e", c)
-}
-
-// condTol describes the limit of the condition number. If the inverse of the
-// condition number is above this value, the matrix is considered singular.
-var condTol float64 = 1e16
-
 // condNorm describes the matrix norm to use for computing the condition number.
 var condNorm = lapack.MaxRowSum
 
 // condNormTrans is the norm to compute on A^T to get the same result as computing
 // condNorm on A.
 var condNormTrans = lapack.MaxColumnSum
-
-const stackTraceBufferSize = 1 << 20
-
-// Maybe will recover a panic with a type mat64.Error from fn, and return this error
-// as the Err field of an ErrorStack. The stack trace for the panicking function will be
-// recovered and placed in the StackTrace field. Any other error is re-panicked.
-func Maybe(fn func()) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			if e, ok := r.(Error); ok {
-				if e.string == "" {
-					panic("mat64: invalid error")
-				}
-				buf := make([]byte, stackTraceBufferSize)
-				n := runtime.Stack(buf, false)
-				err = ErrorStack{Err: e, StackTrace: string(buf[:n])}
-				return
-			}
-			panic(r)
-		}
-	}()
-	fn()
-	return
-}
-
-// MaybeFloat will recover a panic with a type mat64.Error from fn, and return this error
-// as the Err field of an ErrorStack. The stack trace for the panicking function will be
-// recovered and placed in the StackTrace field. Any other error is re-panicked.
-func MaybeFloat(fn func() float64) (f float64, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			if e, ok := r.(Error); ok {
-				if e.string == "" {
-					panic("mat64: invalid error")
-				}
-				buf := make([]byte, stackTraceBufferSize)
-				n := runtime.Stack(buf, false)
-				err = ErrorStack{Err: e, StackTrace: string(buf[:n])}
-				return
-			}
-			panic(r)
-		}
-	}()
-	return fn(), nil
-}
-
-// Error represents matrix handling errors. These errors can be recovered by Maybe wrappers.
-type Error struct{ string }
-
-func (err Error) Error() string { return err.string }
-
-var (
-	ErrIndexOutOfRange = Error{"mat64: index out of range"}
-	ErrRowAccess       = Error{"mat64: row index out of range"}
-	ErrColAccess       = Error{"mat64: column index out of range"}
-	ErrVectorAccess    = Error{"mat64: vector index out of range"}
-	ErrZeroLength      = Error{"mat64: zero length in matrix definition"}
-	ErrRowLength       = Error{"mat64: row length mismatch"}
-	ErrColLength       = Error{"mat64: col length mismatch"}
-	ErrSquare          = Error{"mat64: expect square matrix"}
-	ErrNormOrder       = Error{"mat64: invalid norm order for matrix"}
-	ErrSingular        = Error{"mat64: matrix is singular"}
-	ErrShape           = Error{"mat64: dimension mismatch"}
-	ErrIllegalStride   = Error{"mat64: illegal stride"}
-	ErrPivot           = Error{"mat64: malformed pivot list"}
-	ErrTriangle        = Error{"mat64: triangular storage mismatch"}
-	ErrTriangleSet     = Error{"mat64: triangular set out of bounds"}
-)
-
-// ErrorStack represents matrix handling errors that have been recovered by Maybe wrappers.
-type ErrorStack struct {
-	Err error
-
-	// StackTrace is the stack trace
-	// recovered by Maybe or MaybeFloat.
-	StackTrace string
-}
-
-func (err ErrorStack) Error() string { return err.Err.Error() }
 
 var (
 	badSliceLength = "mat64: improper slice length"

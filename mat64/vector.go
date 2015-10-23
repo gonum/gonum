@@ -8,6 +8,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/internal/asm"
+	"github.com/gonum/matrix"
 )
 
 var (
@@ -55,7 +56,7 @@ type Vector struct {
 // neither of these is true, NewVector will panic.
 func NewVector(n int, data []float64) *Vector {
 	if len(data) != n && data != nil {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if data == nil {
 		data = make([]float64, n)
@@ -75,7 +76,7 @@ func NewVector(n int, data []float64) *Vector {
 // Vector retains reference to the underlying vector.
 func (v *Vector) ViewVec(i, n int) *Vector {
 	if i+n > v.n {
-		panic(ErrIndexOutOfRange)
+		panic(matrix.ErrIndexOutOfRange)
 	}
 	return &Vector{
 		n: n,
@@ -144,7 +145,7 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	br := b.Len()
 
 	if ar != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	v.reuseAs(ar)
@@ -183,7 +184,7 @@ func (v *Vector) AddVec(a, b *Vector) {
 	br := b.Len()
 
 	if ar != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	v.reuseAs(ar)
@@ -200,7 +201,7 @@ func (v *Vector) SubVec(a, b *Vector) {
 	br := b.Len()
 
 	if ar != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	v.reuseAs(ar)
@@ -218,7 +219,7 @@ func (v *Vector) MulElemVec(a, b *Vector) {
 	br := b.Len()
 
 	if ar != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	v.reuseAs(ar)
@@ -236,7 +237,7 @@ func (v *Vector) DivElemVec(a, b *Vector) {
 	br := b.Len()
 
 	if ar != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	v.reuseAs(ar)
@@ -253,7 +254,7 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 	r, c := a.Dims()
 	br := b.Len()
 	if c != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	a, trans := untranspose(a)
 	ar, ac := a.Dims()
@@ -369,7 +370,7 @@ func (v *Vector) reuseAs(r int) {
 		return
 	}
 	if r != v.n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 }
 

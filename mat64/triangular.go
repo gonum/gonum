@@ -3,6 +3,7 @@ package mat64
 import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/matrix"
 )
 
 var (
@@ -92,7 +93,7 @@ func NewTriDense(n int, upper bool, mat []float64) *TriDense {
 		panic("mat64: negative dimension")
 	}
 	if mat != nil && len(mat) != n*n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if mat == nil {
 		mat = make([]float64, n*n)
@@ -186,7 +187,7 @@ func (t *TriDense) reuseAs(n int, ul blas.Uplo) {
 		return
 	}
 	if t.mat.N != n || t.mat.Uplo != ul {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 }
 

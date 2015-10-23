@@ -8,6 +8,8 @@
 
 package mat64
 
+import "github.com/gonum/matrix"
+
 // At returns the element at row r, column c.
 func (m *Dense) At(r, c int) float64 {
 	return m.at(r, c)
@@ -15,10 +17,10 @@ func (m *Dense) At(r, c int) float64 {
 
 func (m *Dense) at(r, c int) float64 {
 	if r >= m.mat.Rows || r < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	if c >= m.mat.Cols || c < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	return m.mat.Data[r*m.mat.Stride+c]
 }
@@ -30,10 +32,10 @@ func (m *Dense) Set(r, c int, v float64) {
 
 func (m *Dense) set(r, c int, v float64) {
 	if r >= m.mat.Rows || r < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	if c >= m.mat.Cols || c < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	m.mat.Data[r*m.mat.Stride+c] = v
 }
@@ -41,14 +43,14 @@ func (m *Dense) set(r, c int, v float64) {
 // At returns the element at row r, column c. It panics if c is not zero.
 func (v *Vector) At(r, c int) float64 {
 	if c != 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	return v.at(r)
 }
 
 func (v *Vector) at(r int) float64 {
 	if r < 0 || r >= v.n {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	return v.mat.Data[r*v.mat.Inc]
 }
@@ -61,7 +63,7 @@ func (v *Vector) SetVec(i int, val float64) {
 
 func (v *Vector) setVec(i int, val float64) {
 	if i < 0 || i >= v.n {
-		panic(ErrVectorAccess)
+		panic(matrix.ErrVectorAccess)
 	}
 	v.mat.Data[i*v.mat.Inc] = val
 }
@@ -73,10 +75,10 @@ func (t *SymDense) At(r, c int) float64 {
 
 func (t *SymDense) at(r, c int) float64 {
 	if r >= t.mat.N || r < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	if c >= t.mat.N || c < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	if r > c {
 		r, c = c, r
@@ -91,10 +93,10 @@ func (t *SymDense) SetSym(r, c int, v float64) {
 
 func (t *SymDense) set(r, c int, v float64) {
 	if r >= t.mat.N || r < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	if c >= t.mat.N || c < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	if r > c {
 		r, c = c, r
@@ -109,10 +111,10 @@ func (t *TriDense) At(r, c int) float64 {
 
 func (t *TriDense) at(r, c int) float64 {
 	if r >= t.mat.N || r < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	if c >= t.mat.N || c < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	isUpper := t.isUpper()
 	if (isUpper && r > c) || (!isUpper && r < c) {
@@ -129,14 +131,14 @@ func (t *TriDense) SetTri(r, c int, v float64) {
 
 func (t *TriDense) set(r, c int, v float64) {
 	if r >= t.mat.N || r < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	if c >= t.mat.N || c < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	isUpper := t.isUpper()
 	if (isUpper && r > c) || (!isUpper && r < c) {
-		panic(ErrTriangleSet)
+		panic(matrix.ErrTriangleSet)
 	}
 	t.mat.Data[r*t.mat.Stride+c] = v
 }

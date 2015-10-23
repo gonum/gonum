@@ -4,7 +4,11 @@
 
 package mat64
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gonum/matrix"
+)
 
 // Product calculates the product of the given factors and places the result in
 // the receiver. The order of multiplication operations is optimized to minimize
@@ -27,7 +31,7 @@ func (m *Dense) Product(factors ...Matrix) {
 	switch len(factors) {
 	case 0:
 		if r != 0 || c != 0 {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 		return
 	case 1:
@@ -73,10 +77,10 @@ func newMultiplier(m *Dense, factors []Matrix) *multiplier {
 	fr, fc := factors[0].Dims() // newMultiplier is only called with len(factors) > 2.
 	if !m.isZero() {
 		if fr != r {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 		if _, lc := factors[len(factors)-1].Dims(); lc != c {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 	}
 
@@ -88,7 +92,7 @@ func newMultiplier(m *Dense, factors []Matrix) *multiplier {
 		cr, cc := f.Dims()
 		dims[i+1] = cr
 		if pc != cr {
-			panic(ErrShape)
+			panic(matrix.ErrShape)
 		}
 		pc = cc
 	}
@@ -146,7 +150,7 @@ func (p *multiplier) multiplySubchain(i, j int) (m Matrix, intermediate bool) {
 	if ac != br {
 		// Panic with a string since this
 		// is not a user-facing panic.
-		panic(ErrShape.string)
+		panic(matrix.ErrShape.Error())
 	}
 
 	if debugProductWalk {

@@ -10,6 +10,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack/lapack64"
+	"github.com/gonum/matrix"
 )
 
 const (
@@ -23,7 +24,7 @@ func (m *Dense) Add(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	aU, _ := untranspose(a)
@@ -85,7 +86,7 @@ func (m *Dense) Sub(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	aU, _ := untranspose(a)
@@ -148,7 +149,7 @@ func (m *Dense) MulElem(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	aU, _ := untranspose(a)
@@ -211,7 +212,7 @@ func (m *Dense) DivElem(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || ac != bc {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	aU, _ := untranspose(a)
@@ -275,7 +276,7 @@ func (m *Dense) Inverse(a Matrix) error {
 	// TODO(btracey): Special case for RawTriangular, etc.
 	r, c := a.Dims()
 	if r != c {
-		panic(ErrSquare)
+		panic(matrix.ErrSquare)
 	}
 	m.reuseAs(a.Dims())
 	aU, aTrans := untranspose(a)
@@ -314,8 +315,8 @@ func (m *Dense) Inverse(a Matrix) error {
 	lapack64.Getri(m.mat, ipiv, work, len(work))
 	norm := lapack64.Lange(condNorm, m.mat, work)
 	cond := lapack64.Gecon(condNorm, m.mat, norm, work, ipiv) // reuse ipiv
-	if cond > condTol {
-		return Condition(cond)
+	if cond > matrix.ConditionTolerance {
+		return matrix.Condition(cond)
 	}
 	return nil
 }
@@ -327,7 +328,7 @@ func (m *Dense) Mul(a, b Matrix) {
 	br, bc := b.Dims()
 
 	if ac != br {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	aU, aTrans := untranspose(a)
@@ -564,19 +565,19 @@ func strictCopy(m *Dense, a Matrix) {
 	if r != m.mat.Rows || c != m.mat.Cols {
 		// Panic with a string since this
 		// is not a user-facing panic.
-		panic(ErrShape.string)
+		panic(matrix.ErrShape.Error())
 	}
 }
 
 // Exp calculates the exponential of the matrix a, e^a, placing the result
-// in the receiver. Exp will panic with ErrShape if a is not square.
+// in the receiver. Exp will panic with matrix.ErrShape if a is not square.
 //
 // Exp uses the scaling and squaring method described in section 3 of
 // http://www.cs.cornell.edu/cv/researchpdf/19ways+.pdf.
 func (m *Dense) Exp(a Matrix) {
 	r, c := a.Dims()
 	if r != c {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	var w *Dense
@@ -600,7 +601,7 @@ func (m *Dense) Exp(a Matrix) {
 			w.mat.Data[i*w.mat.Stride+i] = 1
 		}
 	default:
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	const (
@@ -655,7 +656,7 @@ func (m *Dense) Pow(a Matrix, n int) {
 	}
 	r, c := a.Dims()
 	if r != c {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	m.reuseAs(r, c)
@@ -804,10 +805,10 @@ func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
 func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 	ar, ac := a.Dims()
 	if x.Len() != ar {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if y.Len() != ac {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	var w Dense
@@ -850,7 +851,7 @@ func (m *Dense) Outer(alpha float64, x, y *Vector) {
 		m.capRows = r
 		m.capCols = c
 	} else if r != m.mat.Rows || c != m.mat.Cols {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	} else {
 		for i := 0; i < r; i++ {
 			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])

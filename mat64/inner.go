@@ -7,6 +7,7 @@ package mat64
 import (
 	"github.com/gonum/blas"
 	"github.com/gonum/internal/asm"
+	"github.com/gonum/matrix"
 )
 
 // Inner computes the generalized inner product
@@ -18,10 +19,10 @@ import (
 func Inner(x *Vector, A Matrix, y *Vector) float64 {
 	m, n := A.Dims()
 	if x.Len() != m {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if y.Len() != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if m == 0 || n == 0 {
 		return 0

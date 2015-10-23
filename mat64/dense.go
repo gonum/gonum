@@ -10,27 +10,28 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/matrix"
 )
 
 var (
-	matrix *Dense
+	dense *Dense
 
-	_ Matrix  = matrix
-	_ Mutable = matrix
+	_ Matrix  = dense
+	_ Mutable = dense
 
-	_ VectorSetter = matrix
+	_ VectorSetter = dense
 
-	_ Cloner       = matrix
-	_ Viewer       = matrix
-	_ RowViewer    = matrix
-	_ ColViewer    = matrix
-	_ RawRowViewer = matrix
-	_ Grower       = matrix
+	_ Cloner       = dense
+	_ Viewer       = dense
+	_ RowViewer    = dense
+	_ ColViewer    = dense
+	_ RawRowViewer = dense
+	_ Grower       = dense
 
-	_ RawMatrixSetter = matrix
-	_ RawMatrixer     = matrix
+	_ RawMatrixSetter = dense
+	_ RawMatrixer     = dense
 
-	_ Reseter = matrix
+	_ Reseter = dense
 )
 
 // Dense is a dense matrix representation.
@@ -47,7 +48,7 @@ type Dense struct {
 // element in mat is the {i, j}-th element in the matrix.
 func NewDense(r, c int, mat []float64) *Dense {
 	if mat != nil && r*c != len(mat) {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if mat == nil {
 		mat = make([]float64, r*c)
@@ -83,7 +84,7 @@ func (m *Dense) reuseAs(r, c int) {
 		return
 	}
 	if r != m.mat.Rows || c != m.mat.Cols {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 }
 
@@ -165,7 +166,7 @@ func (m *Dense) T() Matrix {
 // See ColViewer for more information.
 func (m *Dense) ColView(j int) *Vector {
 	if j >= m.mat.Cols || j < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	return &Vector{
 		mat: blas64.Vector{
@@ -180,10 +181,10 @@ func (m *Dense) ColView(j int) *Vector {
 // in src. len(src) must equal the number of rows in the receiver.
 func (m *Dense) SetCol(j int, src []float64) {
 	if j >= m.mat.Cols || j < 0 {
-		panic(ErrColAccess)
+		panic(matrix.ErrColAccess)
 	}
 	if len(src) != m.mat.Rows {
-		panic(ErrColLength)
+		panic(matrix.ErrColLength)
 	}
 
 	blas64.Copy(m.mat.Rows,
@@ -196,10 +197,10 @@ func (m *Dense) SetCol(j int, src []float64) {
 // in src. len(src) must equal the number of columns in the receiver.
 func (m *Dense) SetRow(i int, src []float64) {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	if len(src) != m.mat.Cols {
-		panic(ErrRowLength)
+		panic(matrix.ErrRowLength)
 	}
 
 	copy(m.rowView(i), src)
@@ -211,7 +212,7 @@ func (m *Dense) SetRow(i int, src []float64) {
 // See RowViewer for more information.
 func (m *Dense) RowView(i int) *Vector {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	return &Vector{
 		mat: blas64.Vector{
@@ -226,7 +227,7 @@ func (m *Dense) RowView(i int) *Vector {
 // receiver.
 func (m *Dense) RawRowView(i int) []float64 {
 	if i >= m.mat.Rows || i < 0 {
-		panic(ErrRowAccess)
+		panic(matrix.ErrRowAccess)
 	}
 	return m.rowView(i)
 }
@@ -241,7 +242,7 @@ func (m *Dense) rowView(r int) []float64 {
 func (m *Dense) View(i, j, r, c int) Matrix {
 	mr, mc := m.Dims()
 	if i < 0 || i >= mr || j < 0 || j >= mc || r <= 0 || i+r > mr || c <= 0 || j+c > mc {
-		panic(ErrIndexOutOfRange)
+		panic(matrix.ErrIndexOutOfRange)
 	}
 	t := *m
 	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (i+r-1)*t.mat.Stride+(j+c)]
@@ -257,7 +258,7 @@ func (m *Dense) View(i, j, r, c int) Matrix {
 // the caps of the receiver a new allocation is made, otherwise not.
 func (m *Dense) Grow(r, c int) Matrix {
 	if r < 0 || c < 0 {
-		panic(ErrIndexOutOfRange)
+		panic(matrix.ErrIndexOutOfRange)
 	}
 	if r == 0 && c == 0 {
 		return m
@@ -438,7 +439,7 @@ func (m *Dense) Stack(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ac != bc || m == a || m == b {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	m.reuseAs(ar+br, ac)
@@ -456,7 +457,7 @@ func (m *Dense) Augment(a, b Matrix) {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
 	if ar != br || m == a || m == b {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	m.reuseAs(ar, ac+bc)

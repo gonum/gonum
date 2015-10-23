@@ -11,6 +11,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack/lapack64"
+	"github.com/gonum/matrix"
 )
 
 const badTriangle = "mat64: invalid triangle"
@@ -88,7 +89,7 @@ func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
 	n := chol.chol.mat.N
 	bm, bn := b.Dims()
 	if n != bm {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	m.reuseAs(bm, bn)
@@ -97,8 +98,8 @@ func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
 	}
 	blas64.Trsm(blas.Left, blas.Trans, 1, chol.chol.mat, m.mat)
 	blas64.Trsm(blas.Left, blas.NoTrans, 1, chol.chol.mat, m.mat)
-	if chol.cond > condTol {
-		return Condition(chol.cond)
+	if chol.cond > matrix.ConditionTolerance {
+		return matrix.Condition(chol.cond)
 	}
 	return nil
 }
@@ -109,7 +110,7 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 	n := chol.chol.mat.N
 	vn := b.Len()
 	if vn != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	v.reuseAs(n)
 	if v != b {
@@ -117,8 +118,8 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 	}
 	blas64.Trsv(blas.Trans, chol.chol.mat, v.mat)
 	blas64.Trsv(blas.NoTrans, chol.chol.mat, v.mat)
-	if chol.cond > condTol {
-		return Condition(chol.cond)
+	if chol.cond > matrix.ConditionTolerance {
+		return matrix.Condition(chol.cond)
 	}
 	return nil
 

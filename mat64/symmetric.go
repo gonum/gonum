@@ -7,6 +7,7 @@ package mat64
 import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/matrix"
 )
 
 var (
@@ -53,7 +54,7 @@ func NewSymDense(n int, mat []float64) *SymDense {
 		panic("mat64: negative dimension")
 	}
 	if mat != nil && n*n != len(mat) {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if mat == nil {
 		mat = make([]float64, n*n)
@@ -117,14 +118,14 @@ func (s *SymDense) reuseAs(n int) {
 		panic(badSymTriangle)
 	}
 	if s.mat.N != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 }
 
 func (s *SymDense) AddSym(a, b Symmetric) {
 	n := a.Symmetric()
 	if n != b.Symmetric() {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if s.isZero() {
 		s.mat = blas64.Symmetric{
@@ -134,7 +135,7 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 			Uplo:   blas.Upper,
 		}
 	} else if s.mat.N != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	if a, ok := a.(RawSymmetricer); ok {
@@ -191,7 +192,7 @@ func (s *SymDense) CopySym(a Symmetric) int {
 func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
 	n := x.Len()
 	if a.Symmetric() != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if s.isZero() {
 		s.mat = blas64.Symmetric{
@@ -201,7 +202,7 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
 			Data:   use(s.mat.Data, n*n),
 		}
 	} else if n != s.mat.N {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if s != a {
 		s.CopySym(a)
@@ -216,7 +217,7 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 	n := a.Symmetric()
 	r, _ := x.Dims()
 	if r != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	xMat, aTrans := untranspose(x)
 	var g blas64.General
@@ -269,7 +270,7 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 			s.SymRankK(s, alpha, x)
 		}
 	default:
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 }
 
@@ -279,10 +280,10 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
 	n := s.mat.N
 	if x.Len() != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if y.Len() != n {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	var w SymDense
 	if s == a {
@@ -296,7 +297,7 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
 			Data:   use(w.mat.Data, n*n),
 		}
 	} else if n != w.mat.N {
-		panic(ErrShape)
+		panic(matrix.ErrShape)
 	}
 	if s != a {
 		w.CopySym(a)

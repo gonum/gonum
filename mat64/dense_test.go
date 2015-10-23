@@ -12,6 +12,7 @@ import (
 
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix"
 )
 
 func asDense(d *Dense) Matrix {
@@ -199,13 +200,13 @@ func TestAtSet(t *testing.T) {
 		// Check access out of bounds fails
 		for _, row := range []int{-1, rows, rows + 1} {
 			panicked, message := panics(func() { m.At(row, 0) })
-			if !panicked || message != ErrRowAccess.Error() {
+			if !panicked || message != matrix.ErrRowAccess.Error() {
 				t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 			}
 		}
 		for _, col := range []int{-1, cols, cols + 1} {
 			panicked, message := panics(func() { m.At(0, col) })
-			if !panicked || message != ErrColAccess.Error() {
+			if !panicked || message != matrix.ErrColAccess.Error() {
 				t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 			}
 		}
@@ -213,13 +214,13 @@ func TestAtSet(t *testing.T) {
 		// Check Set out of bounds
 		for _, row := range []int{-1, rows, rows + 1} {
 			panicked, message := panics(func() { m.Set(row, 0, 1.2) })
-			if !panicked || message != ErrRowAccess.Error() {
+			if !panicked || message != matrix.ErrRowAccess.Error() {
 				t.Errorf("expected panic for invalid row access N=%d r=%d", rows, row)
 			}
 		}
 		for _, col := range []int{-1, cols, cols + 1} {
 			panicked, message := panics(func() { m.Set(0, col, 1.2) })
-			if !panicked || message != ErrColAccess.Error() {
+			if !panicked || message != matrix.ErrColAccess.Error() {
 				t.Errorf("expected panic for invalid column access N=%d c=%d", cols, col)
 			}
 		}
@@ -330,13 +331,13 @@ func TestRowColView(t *testing.T) {
 
 		for _, row := range []int{-1, rows, rows + 1} {
 			panicked, message := panics(func() { m.At(row, 0) })
-			if !panicked || message != ErrRowAccess.Error() {
+			if !panicked || message != matrix.ErrRowAccess.Error() {
 				t.Errorf("expected panic for invalid row access rows=%d r=%d", rows, row)
 			}
 		}
 		for _, col := range []int{-1, cols, cols + 1} {
 			panicked, message := panics(func() { m.At(0, col) })
-			if !panicked || message != ErrColAccess.Error() {
+			if !panicked || message != matrix.ErrColAccess.Error() {
 				t.Errorf("expected panic for invalid column access cols=%d c=%d", cols, col)
 			}
 		}
@@ -903,7 +904,7 @@ func TestMul(t *testing.T) {
 
 func randDense(size int, rho float64, rnd func() float64) (*Dense, error) {
 	if size == 0 {
-		return nil, ErrZeroLength
+		return nil, matrix.ErrZeroLength
 	}
 	d := &Dense{
 		mat: blas64.General{

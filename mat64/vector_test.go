@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/matrix"
 )
 
 func TestNewVector(t *testing.T) {
@@ -78,13 +79,13 @@ func TestVectorAtSet(t *testing.T) {
 
 		for _, row := range []int{-1, n} {
 			panicked, message := panics(func() { v.At(row, 0) })
-			if !panicked || message != ErrRowAccess.Error() {
+			if !panicked || message != matrix.ErrRowAccess.Error() {
 				t.Errorf("expected panic for invalid row access for test %d n=%d r=%d", i, n, row)
 			}
 		}
 		for _, col := range []int{-1, 1} {
 			panicked, message := panics(func() { v.At(0, col) })
-			if !panicked || message != ErrColAccess.Error() {
+			if !panicked || message != matrix.ErrColAccess.Error() {
 				t.Errorf("expected panic for invalid column access for test %d n=%d c=%d", i, n, col)
 			}
 		}
@@ -97,7 +98,7 @@ func TestVectorAtSet(t *testing.T) {
 
 		for _, row := range []int{-1, n} {
 			panicked, message := panics(func() { v.SetVec(row, 100) })
-			if !panicked || message != ErrVectorAccess.Error() {
+			if !panicked || message != matrix.ErrVectorAccess.Error() {
 				t.Errorf("expected panic for invalid row access for test %d n=%d r=%d", i, n, row)
 			}
 		}

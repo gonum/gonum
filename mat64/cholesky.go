@@ -36,8 +36,8 @@ func (c *Cholesky) updateCond(norm float64) {
 		// the condition number somewhat.
 		// The norm of the original factorized matrix cannot be stored because of
 		// update possibilites.
-		unorm := lapack64.Lantr(condNorm, c.chol.mat, work)
-		lnorm := lapack64.Lantr(condNormTrans, c.chol.mat, work)
+		unorm := lapack64.Lantr(matrix.CondNorm, c.chol.mat, work)
+		lnorm := lapack64.Lantr(matrix.CondNormTrans, c.chol.mat, work)
 		norm = unorm * lnorm
 	}
 	sym := c.chol.asSymBlas()
@@ -59,7 +59,7 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 
 	sym := c.chol.asSymBlas()
 	work := make([]float64, c.chol.mat.N)
-	norm := lapack64.Lansy(condNorm, sym, work)
+	norm := lapack64.Lansy(matrix.CondNorm, sym, work)
 	_, ok = lapack64.Potrf(sym)
 	if ok {
 		c.updateCond(norm)

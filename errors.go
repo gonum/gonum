@@ -7,6 +7,8 @@ package matrix
 import (
 	"fmt"
 	"runtime"
+
+	"github.com/gonum/lapack"
 )
 
 // Condition is the condition number of a matrix. The condition
@@ -26,9 +28,19 @@ func (c Condition) Error() string {
 	return fmt.Sprintf("matrix singular or near-singular with inverse condition number %.4e", c)
 }
 
-// ConditionTolerance describes the limit of the condition number. If the inverse of the
-// condition number is above this value, the matrix is considered singular.
+// ConditionTolerance is the tolerance limit of the condition number. If the inverse
+// of the condition number is above this value, the matrix is considered singular.
 const ConditionTolerance = 1e16
+
+const (
+	// CondNorm is the matrix norm used for computing the condition number by routines
+	// in the matrix packages.
+	CondNorm = lapack.MaxRowSum
+
+	// CondNormTrans is the norm used to compute on A^T to get the same result as
+	// computing CondNorm on A.
+	CondNormTrans = lapack.MaxColumnSum
+)
 
 const stackTraceBufferSize = 1 << 20
 

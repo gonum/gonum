@@ -38,11 +38,11 @@ func (lu *LU) updateCond(norm float64) {
 		// update possibilites, e.g. RankOne.
 		u := lu.lu.asTriDense(n, blas.NonUnit, blas.Upper)
 		l := lu.lu.asTriDense(n, blas.Unit, blas.Lower)
-		unorm := lapack64.Lantr(condNorm, u.mat, work)
-		lnorm := lapack64.Lantr(condNorm, l.mat, work)
+		unorm := lapack64.Lantr(matrix.CondNorm, u.mat, work)
+		lnorm := lapack64.Lantr(matrix.CondNorm, l.mat, work)
 		norm = unorm * lnorm
 	}
-	v := lapack64.Gecon(condNorm, lu.lu.mat, norm, work, iwork)
+	v := lapack64.Gecon(matrix.CondNorm, lu.lu.mat, norm, work, iwork)
 	lu.cond = 1 / v
 }
 
@@ -67,7 +67,7 @@ func (lu *LU) Factorize(a Matrix) {
 	}
 	lu.pivot = lu.pivot[:r]
 	work := make([]float64, r)
-	anorm := lapack64.Lange(condNorm, lu.lu.mat, work)
+	anorm := lapack64.Lange(matrix.CondNorm, lu.lu.mat, work)
 	lapack64.Getrf(lu.lu.mat, lu.pivot)
 	lu.updateCond(anorm)
 }

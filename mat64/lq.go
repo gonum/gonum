@@ -27,7 +27,7 @@ func (lq *LQ) updateCond() {
 	work := make([]float64, 3*m)
 	iwork := make([]int, m)
 	l := lq.lq.asTriDense(m, blas.NonUnit, blas.Lower)
-	v := lapack64.Trcon(condNorm, l.mat, work, iwork)
+	v := lapack64.Trcon(matrix.CondNorm, l.mat, work, iwork)
 	lq.cond = 1 / v
 }
 

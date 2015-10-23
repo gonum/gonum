@@ -313,8 +313,8 @@ func (m *Dense) Inverse(a Matrix) error {
 		work = work[:4*r]
 	}
 	lapack64.Getri(m.mat, ipiv, work, len(work))
-	norm := lapack64.Lange(condNorm, m.mat, work)
-	cond := lapack64.Gecon(condNorm, m.mat, norm, work, ipiv) // reuse ipiv
+	norm := lapack64.Lange(matrix.CondNorm, m.mat, work)
+	cond := lapack64.Gecon(matrix.CondNorm, m.mat, norm, work, ipiv) // reuse ipiv
 	if cond > matrix.ConditionTolerance {
 		return matrix.Condition(cond)
 	}

@@ -28,7 +28,7 @@ func (qr *QR) updateCond() {
 	work := make([]float64, 3*n)
 	iwork := make([]int, n)
 	r := qr.qr.asTriDense(n, blas.NonUnit, blas.Upper)
-	v := lapack64.Trcon(condNorm, r.mat, work, iwork)
+	v := lapack64.Trcon(matrix.CondNorm, r.mat, work, iwork)
 	qr.cond = 1 / v
 }
 

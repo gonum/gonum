@@ -68,7 +68,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 		blas64.Trsm(side, tA, 1, rm, m.mat)
 		work := make([]float64, 3*rm.N)
 		iwork := make([]int, rm.N)
-		cond := lapack64.Trcon(condNorm, rm, work, iwork)
+		cond := lapack64.Trcon(matrix.CondNorm, rm, work, iwork)
 		if cond > matrix.ConditionTolerance {
 			return matrix.Condition(cond)
 		}

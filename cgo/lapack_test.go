@@ -84,6 +84,22 @@ func (d blockedTranslate) Dorml2(side blas.Side, trans blas.Transpose, m, n, k i
 	impl.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, len(work))
 }
 
+func (d blockedTranslate) Dorg2r(m, n, k int, a []float64, lda int, tau, work []float64) {
+	impl.Dorgqr(m, n, k, a, lda, tau, work)
+}
+
+func (d blockedTranslate) Dorgl2(m, n, k int, a []float64, lda int, tau, work []float64) {
+	impl.Dorglq(m, n, k, a, lda, tau, work)
+}
+
+func TestDorglq(t *testing.T) {
+	testlapack.Dorgl2Test(t, blockedTranslate{impl})
+}
+
+func TestDorgqr(t *testing.T) {
+	testlapack.Dorg2rTest(t, blockedTranslate{impl})
+}
+
 func TestDormqr(t *testing.T) {
 	testlapack.Dorm2rTest(t, blockedTranslate{impl})
 }

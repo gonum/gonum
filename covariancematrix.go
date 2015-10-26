@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix"
 	"github.com/gonum/matrix/mat64"
 )
 
@@ -30,7 +31,7 @@ func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *m
 	if cov == nil {
 		cov = mat64.NewSymDense(c, nil)
 	} else if n := cov.Symmetric(); n != c {
-		panic(mat64.ErrShape)
+		panic(matrix.ErrShape)
 	}
 
 	var xt mat64.Dense
@@ -112,7 +113,7 @@ func corrToCov(c *mat64.SymDense, sigma []float64) {
 	r, _ := c.Dims()
 
 	if r != len(sigma) {
-		panic(mat64.ErrShape)
+		panic(matrix.ErrShape)
 	}
 	for i, sx := range sigma {
 		// Ensure that the diagonal has exactly sigma squared.

@@ -1,6 +1,7 @@
 package mat64
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
 
@@ -340,5 +341,49 @@ func TestVectorDivElem(t *testing.T) {
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
+	}
+}
+
+func BenchmarkAddScaledVec10Inc1(b *testing.B)      { addScaledVecBench(b, 10, 1) }
+func BenchmarkAddScaledVec100Inc1(b *testing.B)     { addScaledVecBench(b, 100, 1) }
+func BenchmarkAddScaledVec1000Inc1(b *testing.B)    { addScaledVecBench(b, 1000, 1) }
+func BenchmarkAddScaledVec10000Inc1(b *testing.B)   { addScaledVecBench(b, 10000, 1) }
+func BenchmarkAddScaledVec100000Inc1(b *testing.B)  { addScaledVecBench(b, 100000, 1) }
+func BenchmarkAddScaledVec10Inc2(b *testing.B)      { addScaledVecBench(b, 10, 2) }
+func BenchmarkAddScaledVec100Inc2(b *testing.B)     { addScaledVecBench(b, 100, 2) }
+func BenchmarkAddScaledVec1000Inc2(b *testing.B)    { addScaledVecBench(b, 1000, 2) }
+func BenchmarkAddScaledVec10000Inc2(b *testing.B)   { addScaledVecBench(b, 10000, 2) }
+func BenchmarkAddScaledVec100000Inc2(b *testing.B)  { addScaledVecBench(b, 100000, 2) }
+func BenchmarkAddScaledVec10Inc20(b *testing.B)     { addScaledVecBench(b, 10, 20) }
+func BenchmarkAddScaledVec100Inc20(b *testing.B)    { addScaledVecBench(b, 100, 20) }
+func BenchmarkAddScaledVec1000Inc20(b *testing.B)   { addScaledVecBench(b, 1000, 20) }
+func BenchmarkAddScaledVec10000Inc20(b *testing.B)  { addScaledVecBench(b, 10000, 20) }
+func BenchmarkAddScaledVec100000Inc20(b *testing.B) { addScaledVecBench(b, 100000, 20) }
+func addScaledVecBench(b *testing.B, size, inc int) {
+	x := randVector(size, inc, 1, rand.NormFloat64)
+	y := randVector(size, inc, 1, rand.NormFloat64)
+	b.ResetTimer()
+	var z Vector
+	for i := 0; i < b.N; i++ {
+		z.AddScaledVec(y, 2, x)
+	}
+}
+
+func randVector(size, inc int, rho float64, rnd func() float64) *Vector {
+	if size <= 0 {
+		panic("bad vector size")
+	}
+	data := make([]float64, size*inc)
+	for i := range data {
+		if rand.Float64() < rho {
+			data[i] = rnd()
+		}
+	}
+	return &Vector{
+		mat: blas64.Vector{
+			Inc:  inc,
+			Data: data,
+		},
+		n: size,
 	}
 }

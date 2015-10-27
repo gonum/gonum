@@ -226,9 +226,15 @@ func constructH(tau []float64, v blas64.General, store lapack.StoreV, direct lap
 	return h
 }
 
-// constructQ constructs the Q matrix from the result of dgeqrf and dgeqr2
+// constructQ constructs the Q matrix from the result of dgeqrf and dgeqr2.
 func constructQ(kind string, m, n int, a []float64, lda int, tau []float64) blas64.General {
 	k := min(m, n)
+	return constructQK(kind, m, n, k, a, lda, tau)
+}
+
+// constructQK constructs the Q matrix from the result of dgeqrf and dgeqr2 using
+// the first k reflectors.
+func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) blas64.General {
 	var sz int
 	switch kind {
 	case "QR":

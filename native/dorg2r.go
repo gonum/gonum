@@ -9,12 +9,11 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-// Dorg2r generates an m×n matrix Q with orthonormal columns defined by the
+// Dorgl2 generates an m×n matrix Q with orthonormal columns defined by the
 // product of elementary reflectors as computed by Dgeqrf.
 //  Q = H(0) * H(2) * ... * H(k-1)
-// The length of tau must be equal to k, and the length of work must be at least n.
-// It also must be that 0 <= k <= n. m >= n >= 0. Dorg2r will panic if these
-// conditions are not met.
+// len(tau) >= k, 0 <= k <= n, 0 <= n <= m, len(work) >= n.
+// Dorg2r will panic if these conditions are not met.
 func (impl Implementation) Dorg2r(m, n, k int, a []float64, lda int, tau []float64, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if len(tau) < k {
@@ -28,6 +27,9 @@ func (impl Implementation) Dorg2r(m, n, k int, a []float64, lda int, tau []float
 	}
 	if n > m {
 		panic(mLTN)
+	}
+	if len(work) < n {
+		panic(badWork)
 	}
 	if n == 0 {
 		return

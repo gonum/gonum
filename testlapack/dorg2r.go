@@ -19,13 +19,17 @@ type Dorg2rer interface {
 
 func Dorg2rTest(t *testing.T, impl Dorg2rer) {
 	for _, test := range []struct {
-		m, n, lda int
+		m, n, k, lda int
 	}{
-		{3, 3, 0},
-		{4, 3, 0},
+		{3, 3, 0, 0},
+		{4, 3, 0, 0},
+		{3, 3, 2, 0},
+		{4, 3, 2, 0},
 
-		{5, 5, 20},
-		{10, 5, 20},
+		{5, 5, 0, 20},
+		{5, 5, 3, 20},
+		{10, 5, 0, 20},
+		{10, 5, 2, 20},
 	} {
 		m := test.m
 		n := test.n
@@ -44,7 +48,11 @@ func Dorg2rTest(t *testing.T, impl Dorg2rer) {
 		work = make([]float64, int(work[0]))
 		impl.Dgeqrf(m, n, a, lda, tau, work, len(work))
 
-		q := constructQ("QR", m, n, a, lda, tau)
+		k = test.k
+		if k == 0 {
+			k = n
+		}
+		q := constructQK("QR", m, n, k, a, lda, tau)
 
 		impl.Dorg2r(m, n, k, a, lda, tau, work)
 

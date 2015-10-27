@@ -10,6 +10,8 @@ import (
 	"math/rand"
 	"sort"
 
+	"golang.org/x/tools/container/intsets"
+
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/internal/ordered"
 )
@@ -405,6 +407,9 @@ type localMover struct {
 	// communities is the current
 	// division of g.
 	communities [][]graph.Node
+	// memberships is a mapping between
+	// node ID and community membership.
+	memberships []int
 
 	// resolution is the Reichardt and
 	// Bornholdt γ parameter as defined
@@ -432,6 +437,7 @@ func newLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution 
 		nodes:        nodes,
 		edgeWeightOf: make([]float64, len(nodes)),
 		communities:  communities,
+		memberships:  make([]int, len(nodes)),
 		resolution:   resolution,
 		weight:       weightFuncFor(g),
 	}
@@ -445,6 +451,13 @@ func newLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution 
 		}
 		l.edgeWeightOf[u.ID()] = w
 		l.m2 += w
+	}
+
+	// Assign membership mappings.
+	for i, c := range communities {
+		for _, u := range c {
+			l.memberships[u.ID()] = i
+		}
 	}
 
 	return &l
@@ -473,7 +486,11 @@ func (l *localMover) move(dst int, src commIdx) {
 	l.changed = true
 
 	srcComm := l.communities[src.community]
-	l.communities[dst] = append(l.communities[dst], srcComm[src.node])
+	n := srcComm[src.node]
+
+	l.memberships[n.ID()] = dst
+
+	l.communities[dst] = append(l.communities[dst], n)
 	srcComm[src.node], srcComm[len(srcComm)-1] = srcComm[len(srcComm)-1], nil
 	l.communities[src.community] = srcComm[:len(srcComm)-1]
 }
@@ -483,26 +500,30 @@ func (l *localMover) move(dst int, src commIdx) {
 // the index of the chosen destination. The index into the localMover's
 // communities field is returned in src if n is in communities.
 func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx) {
-	// FIXME(kortschak) This is linear in |V| of the input graph.
-	// It should not be. We have edge information in the input
-	// graph and that should be used here to avoid testing all
-	// the communities in l. We should be able to make this linear
-	// in the degree of n in the input graph.
-
 	id := n.ID()
 	a_aa := l.weight(n, n)
 	k_a := l.edgeWeightOf[id]
 	m2 := l.m2
 	gamma := l.resolution
 
+	// Find communites connected to n.
+	var connected intsets.Sparse
+	for _, v := range l.g.From(n) {
+		connected.Insert(l.memberships[v.ID()])
+	}
+	// Insert the node's own community.
+	connected.Insert(l.memberships[id])
+
 	// Calculate the highest modularity gain
 	// from moving into another community and
 	// keep the index of that community.
 	var dQremove float64
 	dQadd, dst, src := math.Inf(-1), -1, commIdx{-1, -1}
-	for i, c := range l.communities {
+	var i int
+	for connected.TakeMin(&i) {
+		c := l.communities[i]
 		var k_aC, sigma_totC float64 // C is a substitution for ^𝛼 or ^𝛽.
-		var removal, connected bool
+		var removal bool
 		for j, u := range c {
 			sigma_totC += l.weight(u, u)
 			if u.ID() == id {
@@ -511,9 +532,6 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 				}
 				src = commIdx{i, j}
 				removal = true
-			}
-			if l.g.HasEdgeBetween(n, u) {
-				connected = true
 			}
 
 			k_aC += l.weight(n, u)
@@ -529,11 +547,9 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 			// so calculate the change due to removal.
 			dQremove = 2*(k_aC /*^𝛼*/ -a_aa) - 2*gamma*k_a*(sigma_totC /*^𝛼*/ -k_a)/m2
 
-		case connected:
-			// Only consider communities that are
-			// connected to n. Calculate the change
-			// due to an addition to c and retain
-			// if it is the current best.
+		default:
+			// Otherwise calculate the change due to an addition
+			// to c and retain if it is the current best.
 			dQ := 2*k_aC /*^𝛽*/ - 2*gamma*k_a*sigma_totC /*^𝛽*/ /m2
 			if dQ > dQadd {
 				dQadd = dQ

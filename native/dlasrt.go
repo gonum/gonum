@@ -20,8 +20,8 @@ func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
 	default:
 		panic("lapack: bad sort")
 	case lapack.SortIncreasing:
-		sort.Sort(sort.Reverse(sort.Float64Slice(d)))
-	case lapack.SortDecreasing:
 		sort.Float64s(d)
+	case lapack.SortDecreasing:
+		sort.Sort(sort.Reverse(sort.Float64Slice(d)))
 	}
 }

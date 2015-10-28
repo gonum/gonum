@@ -34,11 +34,13 @@ const (
 	badUplo       = "lapack: illegal triangle"
 	badWork       = "lapack: insufficient working memory"
 	badWorkStride = "lapack: insufficient working array stride"
+	badZ          = "lapack: insufficient z length"
 	kGTM          = "lapack: k > m"
 	kGTN          = "lapack: k > n"
 	kLT0          = "lapack: k < 0"
 	mLTN          = "lapack: m < n"
 	negDimension  = "lapack: negative matrix dimension"
+	negZ          = "lapack: negative z value"
 	nLT0          = "lapack: n < 0"
 	nLTM          = "lapack: n < m"
 	shortWork     = "lapack: working array shorter than declared"
@@ -92,8 +94,9 @@ var (
 
 	// dlamchS is the "safe min", that is, the lowest number such that 1/sfmin does
 	// not overflow. The Netlib code for calculating this number is not correct --
-	// it overflows. Found by trial and error, it is equal to (1/math.MaxFloat64) * (1+ 6*eps)
-	dlamchS = math.Float64frombits(0x4000000000001)
+	// it overflows.
+	// Found from printing out from FORTRAN
+	dlamchS = 2.2250738585072014E-308
 
 	smlnum = dlamchS / dlamchP
 	bignum = 1 / smlnum

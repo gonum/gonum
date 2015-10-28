@@ -145,6 +145,15 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.
 func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
+	if alpha == 1 {
+		v.AddVec(a, b)
+		return
+	}
+	if alpha == -1 {
+		v.SubVec(a, b)
+		return
+	}
+
 	ar := a.Len()
 	br := b.Len()
 
@@ -153,6 +162,11 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	}
 
 	v.reuseAs(ar)
+
+	if alpha == 0 {
+		v.CopyVec(a)
+		return
+	}
 
 	switch {
 	case v == a && v == b: // v <- v + alpha * v = (alpha + 1) * v

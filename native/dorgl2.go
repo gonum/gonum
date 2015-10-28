@@ -12,9 +12,8 @@ import (
 // Dorgl2 generates an m×n matrix Q with orthonormal rows defined by the
 // first m rows product of elementary reflectors as computed by Dgelqf.
 //  Q = H(0) * H(2) * ... * H(k-1)
-// The length of tau must be equal to k, and the length of work must be at least n.
-// It also must be that 0 <= k <= m. n >= m >= 0. Dorgl2 will panic if these
-// conditions are not met.
+// len(tau) >= k, 0 <= k <= m, 0 <= m <= n, len(work) >= m.
+// Dorgl2 will panic if these conditions are not met.
 func (impl Implementation) Dorgl2(m, n, k int, a []float64, lda int, tau, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if len(tau) < k {
@@ -25,6 +24,12 @@ func (impl Implementation) Dorgl2(m, n, k int, a []float64, lda int, tau, work [
 	}
 	if k > m {
 		panic(kGTM)
+	}
+	if m > n {
+		panic(nLTM)
+	}
+	if len(work) < m {
+		panic(badWork)
 	}
 	if m == 0 {
 		return

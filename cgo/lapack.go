@@ -30,9 +30,11 @@ const (
 	badWorkStride = "lapack: insufficient working array stride"
 	kGTM          = "lapack: k > m"
 	kGTN          = "lapack: k > n"
+	kLT0          = "lapack: k < 0"
 	mLTN          = "lapack: m < n"
 	negDimension  = "lapack: negative matrix dimension"
 	nLT0          = "lapack: n < 0"
+	nLTM          = "lapack: n < m"
 	shortWork     = "lapack: working array shorter than declared"
 )
 
@@ -465,33 +467,86 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 	clapack.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
 }
 
-func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work []float64) {
+// Dorglq generates an m×n matrix Q with orthonormal rows defined by the
+// product of elementary reflectors as computed by Dgelqf.
+//  Q = H(0) * H(2) * ... * H(k-1)
+// Dorglq is the blocked version of dorgl2 that makes greater use of level-3 BLAS
+// routines.
+//
+// len(tau) >= k, 0 <= k <= n, and 0 <= m <= n.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dorglq but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic, and at minimum
+// lwork >= m.
+//
+// Dorgqr will panic if the conditions on input values are not met.
+func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
+	if lwork == -1 {
+		work[0] = float64(m)
+		return
+	}
 	checkMatrix(m, n, a, lda)
+	if k < 0 {
+		panic(kLT0)
+	}
+	if k > m {
+		panic(kGTM)
+	}
+	if m > n {
+		panic(nLTM)
+	}
 	if len(tau) < k {
 		panic(badTau)
 	}
-	if k > m {
-		panic(kGTM)
+	if len(work) < lwork {
+		panic(shortWork)
 	}
-	if k > m {
-		panic(kGTM)
+	if lwork < m {
+		panic(badWork)
 	}
 	clapack.Dorglq(m, n, k, a, lda, tau)
 }
 
-func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64) {
-	checkMatrix(m, n, a, lda)
-	if len(tau) < k {
-		panic(badTau)
+// Dorgqr generates an m×n matrix Q with orthonormal columns defined by the
+// product of elementary reflectors as computed by Dgeqrf.
+//  Q = H(0) * H(2) * ... * H(k-1)
+// Dorgqr is the blocked version of dorg2r that makes greater use of level-3 BLAS
+// routines.
+//
+// len(tau) >= k, 0 <= k <= n, and 0 <= n <= m.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dorgqr but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic, and at minimum
+// lwork >= n.
+//
+// Dorgqr will panic if the conditions on input values are not met.
+func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
+	if lwork == -1 {
+		work[0] = float64(n)
+		return
 	}
-	if len(work) < n {
-		panic(badWork)
+	checkMatrix(m, n, a, lda)
+	if k < 0 {
+		panic(kLT0)
 	}
 	if k > n {
 		panic(kGTN)
 	}
 	if n > m {
 		panic(mLTN)
+	}
+	if len(tau) < k {
+		panic(badTau)
+	}
+	if len(work) < lwork {
+		panic(shortWork)
+	}
+	if lwork < n {
+		panic(badWork)
 	}
 	clapack.Dorgqr(m, n, k, a, lda, tau)
 }

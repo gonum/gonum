@@ -104,6 +104,22 @@ func TestDlasv2(t *testing.T) {
 	testlapack.Dlasv2Test(t, impl)
 }
 
+func TestDorg2r(t *testing.T) {
+	testlapack.Dorg2rTest(t, impl)
+}
+
+func TestDorgl2(t *testing.T) {
+	testlapack.Dorgl2Test(t, impl)
+}
+
+func TestDorglq(t *testing.T) {
+	testlapack.DorglqTest(t, impl)
+}
+
+func TestDorgqr(t *testing.T) {
+	testlapack.DorgqrTest(t, impl)
+}
+
 func TestDorml2(t *testing.T) {
 	testlapack.Dorml2Test(t, impl)
 }
@@ -118,14 +134,6 @@ func TestDormqr(t *testing.T) {
 
 func TestDorm2r(t *testing.T) {
 	testlapack.Dorm2rTest(t, impl)
-}
-
-func TestDorg2r(t *testing.T) {
-	testlapack.Dorg2rTest(t, impl)
-}
-
-func TestDorgl2(t *testing.T) {
-	testlapack.Dorgl2Test(t, impl)
 }
 
 func TestDpocon(t *testing.T) {

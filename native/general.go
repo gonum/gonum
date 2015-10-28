@@ -36,9 +36,11 @@ const (
 	badWorkStride = "lapack: insufficient working array stride"
 	kGTM          = "lapack: k > m"
 	kGTN          = "lapack: k > n"
+	kLT0          = "lapack: k < 0"
 	mLTN          = "lapack: m < n"
 	negDimension  = "lapack: negative matrix dimension"
 	nLT0          = "lapack: n < 0"
+	nLTM          = "lapack: n < m"
 	shortWork     = "lapack: working array shorter than declared"
 )
 

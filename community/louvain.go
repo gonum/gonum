@@ -508,8 +508,15 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 
 	// Find communites connected to n.
 	var connected intsets.Sparse
-	for _, v := range l.g.From(n) {
-		connected.Insert(l.memberships[v.ID()])
+	// The following for loop is equivalent to:
+	//
+	//  for _, v := range l.g.From(n) {
+	//  	connected.Insert(l.memberships[v.ID()])
+	//  }
+	//
+	// This is done to avoid an allocation.
+	for _, vid := range l.g.edges[id] {
+		connected.Insert(l.memberships[vid])
 	}
 	// Insert the node's own community.
 	connected.Insert(l.memberships[id])
@@ -535,8 +542,16 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 			}
 
 			k_aC += l.weight(n, u)
-			for _, v := range l.g.From(u) {
-				sigma_totC += l.weight(u, v)
+
+			// The following for loop is equivalent to:
+			//
+			//  for _, v := range l.g.From(u) {
+			//  	sigma_totC += l.weight(u, v)
+			//  }
+			//
+			// This is done to avoid an allocation.
+			for _, vid := range l.g.edges[u.ID()] {
+				sigma_totC += l.weight(u, l.g.nodes[vid])
 			}
 		}
 

@@ -96,7 +96,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 				c[i*ldc:], ldc,
 				work, ldwork)
 		}
-		return
+
 	case left && !notran:
 		for i := 0; i < k; i += nb {
 			ib := min(nb, k-i)
@@ -110,7 +110,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 				c[i*ldc:], ldc,
 				work, ldwork)
 		}
-		return
+
 	case !left && notran:
 		for i := 0; i < k; i += nb {
 			ib := min(nb, k-i)
@@ -124,7 +124,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 				c[i:], ldc,
 				work, ldwork)
 		}
-		return
+
 	case !left && !notran:
 		for i := ((k - 1) / nb) * nb; i >= 0; i -= nb {
 			ib := min(nb, k-i)
@@ -138,6 +138,5 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 				c[i:], ldc,
 				work, ldwork)
 		}
-		return
 	}
 }

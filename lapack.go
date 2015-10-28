@@ -91,3 +91,10 @@ const (
 	Top      Pivot = 'T'
 	Bottom   Pivot = 'B'
 )
+
+type DecompUpdate byte
+
+const (
+	ApplyP DecompUpdate = 'P'
+	ApplyQ DecompUpdate = 'Q'
+)

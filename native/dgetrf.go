@@ -29,7 +29,7 @@ func (impl Implementation) Dgetrf(m, n int, a []float64, lda int, ipiv []int) (o
 		panic(badIpiv)
 	}
 	if m == 0 || n == 0 {
-		return
+		return false
 	}
 	bi := blas64.Implementation()
 	nb := impl.Ilaenv(1, "DGETRF", " ", m, n, -1, -1)

@@ -19,5 +19,4 @@ func (impl Implementation) Dlaswp(n int, a []float64, lda, k1, k2 int, ipiv []in
 	for k := k2; k >= k1; k-- {
 		bi.Dswap(n, a[k*lda:], 1, a[ipiv[k]*lda:], 1)
 	}
-	return
 }

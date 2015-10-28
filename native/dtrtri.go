@@ -20,7 +20,7 @@ func (impl Implementation) Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []flo
 		panic(badDiag)
 	}
 	if n == 0 {
-		return
+		return false
 	}
 	nonUnit := diag == blas.NonUnit
 	if nonUnit {

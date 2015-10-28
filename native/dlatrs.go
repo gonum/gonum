@@ -43,7 +43,7 @@ func (impl Implementation) Dlatrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 	checkVector(n, cnorm, 1)
 
 	if n == 0 {
-		return
+		return 0
 	}
 	scale = 1
 	bi := blas64.Implementation()

@@ -116,6 +116,20 @@ func (v *Vector) Reset() {
 	v.mat.Data = v.mat.Data[:0]
 }
 
+// CloneVec makes a copy of a into the receiver, overwriting the previous value
+// of the receiver.
+func (v *Vector) CloneVec(a *Vector) {
+	if v == a {
+		return
+	}
+	v.n = a.n
+	v.mat = blas64.Vector{
+		Inc:  1,
+		Data: use(v.mat.Data, v.n),
+	}
+	blas64.Copy(v.n, a.mat, v.mat)
+}
+
 func (v *Vector) RawVector() blas64.Vector {
 	return v.mat
 }

@@ -1,0 +1,187 @@
+\documentclass{article}
+
+\usepackage{amsmath,amsfonts}
+\usepackage[margin=4cm]{geometry}
+
+\begin{document}
+
+The algorithm attempts to find communities (highly connected sub-graphs),
+and it does this by minimising the modularity function
+\begin{equation}
+	Q = \frac{1}{2m}\sum_i\sum_j\left[ A_{ij} - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j),
+\end{equation}
+where $A_{ij}$ is the edge weight between nodes $i$ and $j$, 
+$c_i$ is the current community to which node $i$ belongs,
+$\gamma$ is a tuning parameter,
+\begin{equation}
+m = \frac{1}{2}\sum_i\sum_jA_{ij},
+\end{equation}
+\begin{equation}
+k_i = \sum_j{A_{ij}},
+\end{equation}
+and 
+\begin{equation}
+	\delta(c_i,c_j) = \left \{ \begin{array}{ll}
+	1 & \text{if} \quad  c_i = c_j \\
+	0 & \text{otherwise} \end{array} \right ..
+\end{equation}
+
+The algorithm finds a hierarchical community structure by iterating 
+between two phases:
+\begin{enumerate}
+	\item It finds a set of communities that minimise $Q$.
+	\item It constructs a new graph, whose nodes are the communities 
+	found in the preceding phase one step.
+\end{enumerate}
+Each iteration of these two phases is called a `pass'.
+In this way, the algorithm obtains a nested community structure, 
+where at each level $Q$ is minimised for the relevant graph.
+We consider this process in more detail, in particular looking 
+at phase one first in the first pass, when each node is a single
+node, and then how this generalises to later passes when each node 
+is a community.
+
+
+\section{Initial Pass}
+\label{sec:initialPass}
+
+The initial pass is simple as the initial pass uses the original graph, 
+and in all following passes graphs constructed in the previous pass's 
+phase two are used.
+Here we will consider this initial simple formulation for phase one, and
+in Section~\ref{sec:laterPasses} we consider how this generalises for 
+passes two and onwards. 
+Phase one works by initially allocating each node to a separate community,
+and then iterating through each node $a$ and checking if moving it into 
+a different community $\beta$ will reduce $Q$.
+If there are possible moves that will reduce $Q$, $a$ is moved into the 
+the community which will generate the largest reduction in $Q$. 
+This process is continued until there are no moves left to reduce $Q$ 
+further, meaning a local minima for $Q$ has been achieved. 
+Then the algorithm moves to phase two (constructing a new graph where
+each node in the new graph is a community in the old graph). 
+
+Note that we assume the original graph to be simple and undirected.
+First, we introduce some notation that will be useful:
+Let $c_i$ denote the community to which node $i$ currently belongs, 
+and let $\alpha$ be the community that the node $a$ mentioned above
+belongs to ($c_a = \alpha$), i.e.
+\begin{equation}
+	\alpha = \{i | c_i = c_a\}.
+\end{equation}
+Then we define
+\newcommand{\Stot}[1]{\Sigma_{\text{tot}}^{#1}}
+\begin{equation}
+	\Stot{\alpha} = \sum_{i \in \alpha}\sum_{j}A_{ij} = \sum_{i \in \alpha}k_i,
+\end{equation}
+\newcommand{\kin}[2]{k_{#1}^{#2}}
+\begin{equation}
+	\kin{i}{\alpha} = \sum_{j \in \alpha}A_{ij},
+\end{equation}
+and
+\newcommand{\Sin}[1]{\Sigma_{\text{in}}^{#1}}
+\begin{equation}
+	\Sin{\alpha} = \sum_{i \in \alpha}\sum_{j \in \alpha}A_{ij} = \sum_{i \in \alpha}\kin{i}{\alpha}.
+\end{equation}
+
+We are interested in how $Q$ will change if we move a node $a$ from its 
+current community $\alpha$, to a new community $\beta$.
+This will have two effects, it will remove the terms from $Q$ 
+related to $a$ in $\alpha$, which we will call $Q^-$ and it will add terms 
+in $\beta$ related to $a$, which we will call $Q^+$. 
+The total change in $Q$ caused by the movement of $a$ from $\alpha$ to $\beta$ is 
+\begin{equation}
+	\Delta Q = Q^{+} - Q^{-},
+\end{equation}
+where
+\begin{align*}
+Q^- &= \frac{1}{2m}\left[ \left( A_{aa} - \gamma \frac{k_a^2}{2m} \right) 
++ 2\sum_{i \in \alpha, \, i \neq a} \left( A_{ia} - \gamma \frac{k_ik_a}{2m} \right) \right] \\
+	&= \frac{1}{2m}\left[ \left( A_{aa} - \gamma \frac{k_a^2}{2m} \right) 
++ 2 \left( \kin{a}{\alpha} -A_{aa}\right) - \gamma \frac{2k_a}{2m}\sum_{i \in \alpha, \, i \neq a} k_i \right] \\
+	&= \frac{1}{2m}\left[ \left( A_{aa} - \gamma \frac{k_a^2}{2m} \right) 
++ 2 \left( \kin{a}{\alpha} -A_{aa}\right) - \gamma \frac{2k_a}{2m}\left( \Stot{\alpha} - k_a \right)  \right], \\
+\end{align*}
+and
+\begin{align*}
+Q^+ &= \frac{1}{2m}\left[ \left( A_{aa} - \gamma \frac{k_a^2}{2m} \right) 
++ 2\sum_{i \in \beta} \left( A_{ia} - \gamma \frac{k_ik_a}{2m} \right) \right] \\
+		&= \frac{1}{2m}\left[ \left( A_{aa} - \gamma \frac{k_a^2}{2m} \right) 
++ 2\kin{a}{\beta} - \gamma \frac{2k_a}{2m}\sum_{i \in \beta} k_i \right] \\
+		&= \frac{1}{2m}\left[ \left( A_{aa} - \gamma \frac{k_a^2}{2m} \right) 
++ 2\kin{a}{\beta} - \gamma \frac{2k_a\Stot{\beta}}{2m} \right]. \\
+\end{align*}
+The first term in both these expressions ($Q^-$ and $Q^+$) is the same, and so cancels:
+\begin{equation}
+\Delta Q = \frac{1}{2m}\left[ \left( 2\kin{a}{\beta} - \gamma \frac{2k_a\Stot{\beta}}{2m} \right) 
+		- \left( 2 \left( \kin{a}{\alpha} -A_{aa}\right) - \gamma \frac{2k_a}{2m}\left( \Stot{\alpha} - k_a \right) \right) \right]. 
+\end{equation}
+ 
+\section{Later Passes}
+\label{sec:laterPasses}
+
+In phase two a `meta-graph' is constructed where nodes correspond to 
+the communities found in the preceding phase one step, and edge weight
+between two such communities (nodes, in the meta-graph)
+$\alpha$ and $\beta$ are defined to be
+\begin{equation}
+	A_{\alpha \beta}^* = \sum_{i \in \alpha}\sum_{j \in \beta}A_{ij}.
+	\label{eqn:Aij*}
+\end{equation} 
+Note that $i$ and $j$ refer to nodes in the original graph, not nodes 
+in the previous graph, and so holds any meta-graph, not just the first.
+Also note that this definition of $A^*_{\alpha \beta}$ allows for 
+$A^*_{\alpha \alpha}$ to be non-zero, infact
+\begin{equation}
+A_{\alpha \alpha}^* = \sum_{i \in \alpha}\sum_{j \in \alpha}A_{ij} = \Sin{\alpha}.
+\end{equation} 
+
+In this newly constructed graph, $\alpha$ and $\beta$ are nodes, but 
+also refer to communities (sets of nodes) in the original graph, and I 
+use these two interpretations interchangeably.
+This should be the only ambiguous bit of notation in this document, I hope.
+
+The results of Section~\ref{sec:initialPass} generalise to these meta-graphs,
+and the generalised results mirror those of Section~\ref{sec:initialPass} closely
+-- I distinguish the new results from those of Section~\ref{sec:initialPass} by a 
+superscript $*$.
+$i$ and $j$ to denote nodes of the original graph as in Section~\ref{sec:initialPass}, 
+and use $z$ and $w$ to denote nodes of the meta-graph (communities of the original).
+I use the same notation as Section~\ref{sec:initialPass}, $c_z$, to 
+denote the community to which node $z$ of the meta-graph currently belongs, 
+and let $\mathfrak{a}$ be the community that the node $\alpha$ belongs to 
+($c_{\alpha} = \mathfrak{a}$), i.e.
+\begin{equation}
+	\mathfrak{a} = \{z | c_z^* = c_{\alpha}^* \}.
+\end{equation}
+
+Given this notation, we can observe that
+\begin{equation}
+m^* = \frac{1}{2}\sum_{z}\sum_{w}{A_{zw}^*} = \frac{1}{2}\sum_{z}\sum_{w}{\sum_{i \in z}\sum_{j \in w}A_{ij}} = \frac{1}{2}\sum_i\sum_jA_{ij} = m,
+\end{equation}
+\begin{equation}
+k_{z}^* = \sum_{w}{A_{zw}^*} =  \sum_{w}{\sum_{i \in z}\sum_{j \in w}A_{ij}} = \sum_{i \in z}\sum_{j}A_{ij} = \Stot{z},
+\end{equation}
+\begin{equation}
+	\Stot{\mathfrak{a} *} = \sum_{z \in \mathfrak{a}}\sum_{w}A_{zw}^* = \sum_{z \in \mathfrak{a}}k_z^* = \sum_{z \in \mathfrak{a}}\Stot{z},
+\end{equation}
+\begin{equation}
+	\kin{z}{\mathfrak{a} *} = \sum_{w \in \mathfrak{a}}{A_{zw}^*} = \sum_{w \in \mathfrak{a}}{\sum_{i \in z}\sum_{j \in w}A_{ij}},
+\end{equation}
+and
+\begin{equation}
+\Sin{\mathfrak{a} *} = \sum_{z \in \mathfrak{a}}\sum_{w \in \mathfrak{a}}A_{zw}^* = \sum_{z \in \mathfrak{a}}\kin{z}{\mathfrak{a} *} = \sum_{z \in \mathfrak{a}}\sum_{w \in \mathfrak{a}}{\sum_{i \in z}\sum_{j \in w}A_{ij}}.
+	%\label{eqn:Sin}
+\end{equation}
+
+If we let $\mathfrak{b}$ denote the community to which we are considering moving $\alpha$,
+then the expression for $\Delta Q$ from Section~\ref{sec:initialPass} trivially generalises to
+\begin{equation}
+\Delta Q = \frac{1}{2m}\left[ \left( 2 \kin{\alpha}{\mathfrak{b} *} - \gamma \frac{2k_{\alpha}^*\Stot{\mathfrak{b} *}}{2m} \right) 
+		- \left( 2\left( \kin{\alpha}{\mathfrak{a} *} - A_{\alpha \alpha}^* \right) - \gamma \frac{2k_{\alpha}^*}{2m} \left( \Stot{\mathfrak{a} *} - k_{\alpha}^* \right ) \right) \right] \\
+\end{equation}
+
+
+
+
+\end{document}

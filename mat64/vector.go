@@ -136,7 +136,9 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 		v.reuseAs(n)
 		blas64.Copy(n, a.mat, v.mat)
 	}
-	blas64.Scal(n, alpha, v.mat)
+	if alpha != 1 {
+		blas64.Scal(n, alpha, v.mat)
+	}
 }
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.

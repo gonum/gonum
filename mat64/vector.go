@@ -121,11 +121,13 @@ func (v *Vector) RawVector() blas64.Vector {
 }
 
 // CopyVec makes a copy of elements of a into the receiver. It is similar to the
-// built-in copy; it copies as much as the overlap between the two matrices and
-// returns the number of rows and columns it copied.
-func (v *Vector) CopyVec(a *Vector) (n int) {
-	n = min(v.Len(), a.Len())
-	blas64.Copy(n, a.mat, v.mat)
+// built-in copy; it copies as much as the overlap between the two vectors and
+// returns the number of elements it copied.
+func (v *Vector) CopyVec(a *Vector) int {
+	n := min(v.Len(), a.Len())
+	if v != a {
+		blas64.Copy(n, a.mat, v.mat)
+	}
 	return n
 }
 

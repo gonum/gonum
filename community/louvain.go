@@ -135,7 +135,7 @@ func (g *ReducedUndirected) Communities() [][]graph.Node {
 			for j, n := range members {
 				nodes := g.nodes[n.ID()].nodes
 				if len(nodes) != 1 {
-					panic("network: unexpected number of nodes in base graph community")
+					panic("community: unexpected number of nodes in base graph community")
 				}
 				comm[j] = nodes[0]
 			}
@@ -535,7 +535,7 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 			sigma_totC += l.weight(u, u)
 			if u.ID() == id {
 				if src.community != -1 {
-					panic("network: multiple sources")
+					panic("community: multiple sources")
 				}
 				src = commIdx{i, j}
 				removal = true

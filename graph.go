@@ -138,7 +138,8 @@ type DirectedBuilder interface {
 //
 // If the source is a directed graph, the destination is undirected, and a fundamental
 // cycle exists with two nodes where the edge weights differ, the resulting destination
-// graph's edge weight between those nodes is undefined.
+// graph's edge weight between those nodes is undefined. If there is a defined function
+// to resolve such conflicts, an Undirect may be used to do this.
 func Copy(dst Builder, src Graph) {
 	nodes := src.Nodes()
 	for _, n := range nodes {

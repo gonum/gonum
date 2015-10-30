@@ -125,7 +125,7 @@ func (g Undirect) Weight(x, y Node) (w float64, ok bool) {
 	re := g.G.Edge(y, x)
 
 	var f, r float64
-	if wg, ok := g.G.(Weighter); ok {
+	if wg, wOk := g.G.(Weighter); wOk {
 		var fOk, rOK bool
 		f, fOk = wg.Weight(x, y)
 		if !fOk {

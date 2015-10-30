@@ -52,6 +52,39 @@ var communityQTests = []struct {
 }{
 	// The java reference implementation is available from http://www.ludowaltman.nl/slm/.
 	{
+		name: "unconnected",
+		g: []set{
+			/* Nodes 0-4 are implicit .*/ 5: nil,
+		},
+		structures: []structure{
+			{
+				resolution: 1,
+				memberships: []set{
+					0: linksTo(0),
+					1: linksTo(1),
+					2: linksTo(2),
+					3: linksTo(3),
+					4: linksTo(4),
+					5: linksTo(5),
+				},
+				want: math.NaN(),
+			},
+		},
+		wantLevels: []level{
+			{
+				q: math.Inf(-1), // Here math.Inf(-1) is used as a place holder for NaN to allow use of reflect.DeepEqual.
+				communities: [][]graph.Node{
+					{simple.Node(0)},
+					{simple.Node(1)},
+					{simple.Node(2)},
+					{simple.Node(3)},
+					{simple.Node(4)},
+					{simple.Node(5)},
+				},
+			},
+		},
+	},
+	{
 		name: "small_dumbell",
 		g: []set{
 			0: linksTo(1, 2),
@@ -322,7 +355,7 @@ func TestCommunityQ(t *testing.T) {
 				}
 			}
 			got := Q(g, communities, structure.resolution)
-			if !floats.EqualWithinAbsOrRel(got, structure.want, structure.tol, structure.tol) {
+			if !floats.EqualWithinAbsOrRel(got, structure.want, structure.tol, structure.tol) && math.IsNaN(got) != math.IsNaN(structure.want) {
 				for _, c := range communities {
 					sort.Sort(ordered.ByID(c))
 				}
@@ -334,6 +367,7 @@ func TestCommunityQ(t *testing.T) {
 }
 
 func TestCommunityDeltaQ(t *testing.T) {
+tests:
 	for _, test := range communityQTests {
 		g := simple.NewUndirectedGraph(0, 0)
 		for u, e := range test.g {
@@ -361,6 +395,12 @@ func TestCommunityDeltaQ(t *testing.T) {
 			before := Q(g, communities, structure.resolution)
 
 			l := newLocalMover(reduce(g, nil), communities, structure.resolution)
+			if l == nil {
+				if !math.IsNaN(before) {
+					t.Errorf("unexpected nil localMover with non-NaN Q graph: Q=%.4v", before)
+				}
+				continue tests
+			}
 
 			// This is done to avoid run-to-run
 			// variation due to map iteration order.
@@ -430,6 +470,7 @@ func TestCommunityDeltaQ(t *testing.T) {
 }
 
 func TestReduceQConsistency(t *testing.T) {
+tests:
 	for _, test := range communityQTests {
 		g := simple.NewUndirectedGraph(0, 0)
 		for u, e := range test.g {
@@ -443,6 +484,10 @@ func TestReduceQConsistency(t *testing.T) {
 		}
 
 		for _, structure := range test.structures {
+			if math.IsNaN(structure.want) {
+				continue tests
+			}
+
 			communities := make([][]graph.Node, len(structure.memberships))
 			for i, c := range structure.memberships {
 				for n := range c {
@@ -619,9 +664,14 @@ func TestLouvain(t *testing.T) {
 		src := rand.New(rand.NewSource(1))
 		for i := 0; i < louvainIterations; i++ {
 			r := Louvain(g, 1, src)
-			if q := Q(r, nil, 1); q > bestQ {
+			if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
 				bestQ = q
 				got = r
+
+				if math.IsNaN(q) {
+					// Don't try again for non-connected case.
+					break
+				}
 			}
 
 			var qs []float64
@@ -658,7 +708,12 @@ func TestLouvain(t *testing.T) {
 			} else {
 				communities = reduce(g, nil).Communities()
 			}
-			levels = append(levels, level{q: Q(p, nil, 1), communities: communities})
+			q := Q(p, nil, 1)
+			if math.IsNaN(q) {
+				// Use an equalable flag value in place of NaN.
+				q = math.Inf(-1)
+			}
+			levels = append(levels, level{q: q, communities: communities})
 		}
 		if !reflect.DeepEqual(levels, test.wantLevels) {
 			t.Errorf("unexpected level structure:\n\tgot: %v\n\twant:%v", levels, test.wantLevels)

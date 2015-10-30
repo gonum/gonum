@@ -81,6 +81,9 @@ func Louvain(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUnd
 	}
 	for {
 		l := newLocalMover(c, c.communities, resolution)
+		if l == nil {
+			return c
+		}
 		for {
 			l.shuffle(rnd)
 			for _, n := range l.nodes {
@@ -435,6 +438,7 @@ type localMover struct {
 // newLocalMover returns a new localMover initialized with the graph g,
 // a set of communities and a modularity resolution parameter. The node
 // IDs of g must be contiguous in [0,n) where n is the number of nodes.
+// If g has a zero edge weight sum, nil is returned.
 func newLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution float64) *localMover {
 	nodes := g.Nodes()
 	l := localMover{
@@ -456,6 +460,9 @@ func newLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution 
 		}
 		l.edgeWeightOf[u.ID()] = w
 		l.m2 += w
+	}
+	if l.m2 == 0 {
+		return nil
 	}
 
 	// Assign membership mappings.

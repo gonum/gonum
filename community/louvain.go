@@ -20,6 +20,7 @@ import (
 // given communities at the given resolution. If communities is nil, the
 // unclustered modularity score is returned. The resolution parameter
 // is γ as defined in Reichardt and Bornholdt doi:10.1103/PhysRevE.74.016110.
+// Q will panic if g has any edge with negative edge weight.
 //
 // graph.Undirect may be used as a shim to allow calculation of Q for
 // directed graphs.
@@ -67,7 +68,7 @@ func Q(g graph.Undirected, communities [][]graph.Node, resolution float64) float
 
 // Louvain returns the hierarchical modularization of g at the given resolution
 // using the Louvain algorithm. If src is nil, rand.Intn is used as the random
-// generator.
+// generator. Louvain will panic if g has any edge with negative edge weight.
 //
 // graph.Undirect may be used as a shim to allow modularization of directed graphs.
 func Louvain(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUndirected {
@@ -593,6 +594,8 @@ type node int
 
 func (n node) ID() int { return int(n) }
 
+const negativeWeight = "community: negative edge weight"
+
 // weightFuncFor returns a constructed weight function for g.
 func weightFuncFor(g graph.Undirected) func(x, y graph.Node) float64 {
 	if wg, ok := g.(graph.Weighter); ok {
@@ -600,6 +603,9 @@ func weightFuncFor(g graph.Undirected) func(x, y graph.Node) float64 {
 			w, ok := wg.Weight(x, y)
 			if !ok {
 				return 0
+			}
+			if w < 0 {
+				panic(negativeWeight)
 			}
 			return w
 		}
@@ -609,6 +615,10 @@ func weightFuncFor(g graph.Undirected) func(x, y graph.Node) float64 {
 		if e == nil {
 			return 0
 		}
-		return e.Weight()
+		w := e.Weight()
+		if w < 0 {
+			panic(negativeWeight)
+		}
+		return w
 	}
 }

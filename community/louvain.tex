@@ -185,7 +185,60 @@ then the expression for $\Delta Q$ from Section~\ref{sec:initialPass} trivially 
 		- \left( 2\left( \kin{\alpha}{\mathfrak{a} *} - A_{\alpha \alpha}^* \right) - \gamma \frac{2k_{\alpha}^*}{2m} \left( \Stot{\mathfrak{a} *} - k_{\alpha}^* \right ) \right) \right] \\
 \end{equation}
 
+\section{Directed Graphs}
+\label{sec:directedGraphs}
 
+It is of interest to consider how this generalises to directed graphs.
+If we are to treat incoming and outgoing nodes equally, there are two 
+thoughts on how to extend the algorithm to directed graphs: to generalise
+the expressions to allow for directed graphs, or to construct an undirected
+graph by averaging the weights of edges in opposite directions.
+
+The suggested extension to directed graphs is to modify the expressions 
+involved by adding the `from' case and the `to' case for each term. 
+If we let $B_{ij}$ be the edge weight between nodes $i$ and $j$ in 
+the directed graph of interest, these extended expressions look like
+\begin{equation}
+m = \frac{1}{2}\left ( \sum_i\sum_jB_{ij} + \sum_i\sum_jB_{ji}\right)  = \frac{1}{2}\sum_i\sum_j \left( B_{ij} + B_{ji} \right) ,
+\end{equation}
+\begin{equation}
+k_i = \sum_jB_{ij} + \sum_jB_{ji} = \sum_j{\left( B_{ij} + B_{ji} \right)},
+\end{equation}
+and similarly
+\begin{equation}
+	Q = \frac{1}{2m}\sum_i\sum_j\left[ \left( B_{ij} + B_{ji} \right) - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j).
+\end{equation}
+
+Note how this is equivalent to constructing an undirected graph with
+edge weights
+\begin{equation}
+A_{ij} = B_{ij} + B_{ji}.
+\end{equation}
+However the other suggestion is to averaging the directed edges to make
+an undirected graph, i.e. to use
+\begin{equation}
+A_{ij} = \frac{B_{ij} + B_{ji}}{2}.
+\end{equation}
+This raises an important question: does scaling all edge weights across 
+the entire graph by a constant affect the results of the algorithm?
+Hopefully not, but worth checking.
+We can follow this through the results above by applying the 
+substitution $A_{ij}' = pA_{ij}$ ($p \in \mathbb{R}$) and using ${}'$s
+to denote the transformed expressions, we get:
+\begin{equation}
+m' = \frac{1}{2}\sum_i\sum_jpA_{ij}  = p\frac{1}{2}\sum_i\sum_j A_{ij} = pm ,
+\end{equation}
+\begin{equation}
+k_i' = \sum_j{pA_{ij}} = p\sum_j{A_{ij}} = pk_i,
+\end{equation}
+and so
+\begin{align*}
+	Q' &= \frac{1}{2pm}\sum_i\sum_j\left[ pA_{ij} - \gamma \frac{pk_ipk_j}{2pm} \right] \delta(c_i,c_j) \\
+	&= \frac{1}{2m}\sum_i\sum_j\left[ A_{ij} - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j) \\
+	&= Q
+\end{align*}
+Note that as we have shown $Q' = Q$ there is no need to go into the remainder of the terms 
+involved in the algorithm, as they all derive from $Q$.
 
 
 \end{document}

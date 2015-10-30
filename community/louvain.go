@@ -191,8 +191,8 @@ func reduce(g graph.Undirected, communities [][]graph.Node) *ReducedUndirected {
 		// communities in the test sets to the remapped order.
 		sort.Sort(ordered.ByID(nodes))
 		communities = make([][]graph.Node, len(nodes))
-		for i, n := range nodes {
-			communities[i] = []graph.Node{node(n.ID())}
+		for i := range nodes {
+			communities[i] = []graph.Node{node(i)}
 		}
 
 		weight := weightFuncFor(g)

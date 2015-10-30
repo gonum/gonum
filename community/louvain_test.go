@@ -672,6 +672,26 @@ func reverse(f []float64) {
 	}
 }
 
+func TestNonContiguous(t *testing.T) {
+	g := simple.NewUndirectedGraph(0, 0)
+	for _, e := range []simple.Edge{
+		{F: simple.Node(0), T: simple.Node(1), W: 1},
+		{F: simple.Node(4), T: simple.Node(5), W: 1},
+	} {
+		g.SetEdge(e)
+	}
+
+	func() {
+		defer func() {
+			r := recover()
+			if r != nil {
+				t.Error("unexpected panic with non-contiguous ID range")
+			}
+		}()
+		Louvain(g, 1, nil)
+	}()
+}
+
 var dupGraph = simple.NewUndirectedGraph(0, 0)
 
 func init() {

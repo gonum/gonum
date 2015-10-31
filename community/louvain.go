@@ -85,20 +85,7 @@ func Louvain(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUnd
 		if l == nil {
 			return c
 		}
-		for {
-			l.shuffle(rnd)
-			for _, n := range l.nodes {
-				dQ, dst, src := l.deltaQ(n)
-				if dQ <= 0 {
-					continue
-				}
-				l.move(dst, src)
-			}
-			if !l.moved {
-				break
-			}
-		}
-		if !l.changed {
+		if done := l.localMovingHeuristic(rnd); done {
 			return c
 		}
 		c = reduce(c, l.communities)
@@ -474,6 +461,26 @@ func newLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution 
 	}
 
 	return &l
+}
+
+// localMovingHeuristic performs the Louvain local moving heuristic until
+// no further moves can be made. It returns a boolean indicating that the
+// localMover has not made any improvement to the community structure and
+// so the Louvain algorithm is done.
+func (l *localMover) localMovingHeuristic(rnd func(int) int) (done bool) {
+	for {
+		l.shuffle(rnd)
+		for _, n := range l.nodes {
+			dQ, dst, src := l.deltaQ(n)
+			if dQ <= 0 {
+				continue
+			}
+			l.move(dst, src)
+		}
+		if !l.moved {
+			return !l.changed
+		}
+	}
 }
 
 // shuffle performs a Fisher-Yates shuffle on the nodes held by the

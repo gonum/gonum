@@ -210,7 +210,7 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	}
 }
 
-// AddVec adds a and b element-wise, placing the result in the receiver.
+// AddVec adds the vectors a and b, placing the result in the receiver.
 func (v *Vector) AddVec(a, b *Vector) {
 	ar := a.Len()
 	br := b.Len()

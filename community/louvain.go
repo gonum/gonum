@@ -20,6 +20,9 @@ import (
 // given communities at the given resolution. If communities is nil, the
 // unclustered modularity score is returned. The resolution parameter
 // is γ as defined in Reichardt and Bornholdt doi:10.1103/PhysRevE.74.016110.
+//
+// graph.Undirect may be used as a shim to allow calculation of Q for
+// directed graphs.
 func Q(g graph.Undirected, communities [][]graph.Node, resolution float64) float64 {
 	nodes := g.Nodes()
 	weight := weightFuncFor(g)
@@ -65,6 +68,8 @@ func Q(g graph.Undirected, communities [][]graph.Node, resolution float64) float
 // Louvain returns the hierarchical modularization of g at the given resolution
 // using the Louvain algorithm. If src is nil, rand.Intn is used as the random
 // generator.
+//
+// graph.Undirect may be used as a shim to allow modularization of directed graphs.
 func Louvain(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUndirected {
 	// See louvain.tex for a detailed description
 	// of the algorithm used here.

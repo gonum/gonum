@@ -71,18 +71,18 @@ func NewVector(n int, data []float64) *Vector {
 }
 
 // ViewVec returns a sub-vector view of the receiver starting at element i and
-// extending n columns. If i is out of range, or if n is zero or extend beyond the
-// bounds of the Vector ViewVec will panic with ErrIndexOutOfRange. The returned
-// Vector retains reference to the underlying vector.
+// extending n rows. If i is out of range, n is zero, or the view extends
+// beyond the bounds of the Vector, ViewVec will panic with ErrIndexOutOfRange.
+// The returned Vector retains reference to the underlying vector.
 func (v *Vector) ViewVec(i, n int) *Vector {
-	if i+n > v.n {
+	if i < 0 || n <= 0 || i+n > v.n {
 		panic(matrix.ErrIndexOutOfRange)
 	}
 	return &Vector{
 		n: n,
 		mat: blas64.Vector{
 			Inc:  v.mat.Inc,
-			Data: v.mat.Data[i*v.mat.Inc:],
+			Data: v.mat.Data[i*v.mat.Inc : (i+n-1)*v.mat.Inc+1],
 		},
 	}
 }

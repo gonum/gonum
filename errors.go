@@ -25,7 +25,7 @@ import (
 type Condition float64
 
 func (c Condition) Error() string {
-	return fmt.Sprintf("matrix singular or near-singular with inverse condition number %.4e", c)
+	return fmt.Sprintf("matrix singular or near-singular with condition number %.4e", c)
 }
 
 // ConditionTolerance is the tolerance limit of the condition number. If the inverse

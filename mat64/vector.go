@@ -71,18 +71,18 @@ func NewVector(n int, data []float64) *Vector {
 }
 
 // ViewVec returns a sub-vector view of the receiver starting at element i and
-// extending n columns. If i is out of range, or if n is zero or extend beyond the
-// bounds of the Vector ViewVec will panic with ErrIndexOutOfRange. The returned
-// Vector retains reference to the underlying vector.
+// extending n rows. If i is out of range, n is zero, or the view extends
+// beyond the bounds of the Vector, ViewVec will panic with ErrIndexOutOfRange.
+// The returned Vector retains reference to the underlying vector.
 func (v *Vector) ViewVec(i, n int) *Vector {
-	if i+n > v.n {
+	if i < 0 || n <= 0 || i+n > v.n {
 		panic(matrix.ErrIndexOutOfRange)
 	}
 	return &Vector{
 		n: n,
 		mat: blas64.Vector{
 			Inc:  v.mat.Inc,
-			Data: v.mat.Data[i*v.mat.Inc:],
+			Data: v.mat.Data[i*v.mat.Inc : (i+n-1)*v.mat.Inc+1],
 		},
 	}
 }
@@ -116,16 +116,32 @@ func (v *Vector) Reset() {
 	v.mat.Data = v.mat.Data[:0]
 }
 
+// CloneVec makes a copy of a into the receiver, overwriting the previous value
+// of the receiver.
+func (v *Vector) CloneVec(a *Vector) {
+	if v == a {
+		return
+	}
+	v.n = a.n
+	v.mat = blas64.Vector{
+		Inc:  1,
+		Data: use(v.mat.Data, v.n),
+	}
+	blas64.Copy(v.n, a.mat, v.mat)
+}
+
 func (v *Vector) RawVector() blas64.Vector {
 	return v.mat
 }
 
 // CopyVec makes a copy of elements of a into the receiver. It is similar to the
-// built-in copy; it copies as much as the overlap between the two matrices and
-// returns the number of rows and columns it copied.
-func (v *Vector) CopyVec(a *Vector) (n int) {
-	n = min(v.Len(), a.Len())
-	blas64.Copy(n, a.mat, v.mat)
+// built-in copy; it copies as much as the overlap between the two vectors and
+// returns the number of elements it copied.
+func (v *Vector) CopyVec(a *Vector) int {
+	n := min(v.Len(), a.Len())
+	if v != a {
+		blas64.Copy(n, a.mat, v.mat)
+	}
 	return n
 }
 
@@ -136,11 +152,22 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 		v.reuseAs(n)
 		blas64.Copy(n, a.mat, v.mat)
 	}
-	blas64.Scal(n, alpha, v.mat)
+	if alpha != 1 {
+		blas64.Scal(n, alpha, v.mat)
+	}
 }
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.
 func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
+	if alpha == 1 {
+		v.AddVec(a, b)
+		return
+	}
+	if alpha == -1 {
+		v.SubVec(a, b)
+		return
+	}
+
 	ar := a.Len()
 	br := b.Len()
 
@@ -149,6 +176,11 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	}
 
 	v.reuseAs(ar)
+
+	if alpha == 0 {
+		v.CopyVec(a)
+		return
+	}
 
 	switch {
 	case v == a && v == b: // v <- v + alpha * v = (alpha + 1) * v
@@ -178,7 +210,7 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	}
 }
 
-// AddVec adds a and b element-wise, placing the result in the receiver.
+// AddVec adds the vectors a and b, placing the result in the receiver.
 func (v *Vector) AddVec(a, b *Vector) {
 	ar := a.Len()
 	br := b.Len()

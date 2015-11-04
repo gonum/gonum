@@ -16,30 +16,7 @@ var (
 
 	_ Matrix = vector
 
-	// _ Cloner      = vector
-	// _ Viewer      = vector
-	// _ Subvectorer = vector
-
-	// _ Adder     = vector
-	// _ Suber     = vector
-	// _ Muler = vector
-	// _ Dotter    = vector
-	// _ ElemMuler = vector
-
-	// _ Scaler  = vector
-	// _ Applyer = vector
-
-	// _ Normer = vector
-	// _ Sumer  = vector
-
-	// _ Stacker   = vector
-	// _ Augmenter = vector
-
-	// _ Equaler       = vector
-	// _ ApproxEqualer = vector
-
-	// _ RawMatrixLoader = vector
-	// _ RawMatrixer     = vector
+	_ Reseter = vector
 )
 
 // Vector represents a column vector.

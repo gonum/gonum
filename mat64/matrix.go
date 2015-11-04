@@ -218,7 +218,7 @@ func Col(dst []float64, j int, a Matrix) []float64 {
 		dst = make([]float64, r)
 	} else {
 		if len(dst) != r {
-			panic(matrix.ErrRowLength)
+			panic(matrix.ErrColLength)
 		}
 	}
 	aU, aTrans := untranspose(a)
@@ -252,7 +252,7 @@ func Row(dst []float64, i int, a Matrix) []float64 {
 		dst = make([]float64, c)
 	} else {
 		if len(dst) != c {
-			panic(matrix.ErrColLength)
+			panic(matrix.ErrRowLength)
 		}
 	}
 	aU, aTrans := untranspose(a)

@@ -216,9 +216,8 @@ func reduce(g graph.Undirected, communities [][]graph.Node) *ReducedUndirected {
 		return &r
 	}
 
-	// Remove zero length communities destructively and copy.
+	// Remove zero length communities destructively.
 	var commNodes int
-	var condensed [][]graph.Node
 	for i := 0; i < len(communities); {
 		comm := communities[i]
 		if len(comm) == 0 {
@@ -226,18 +225,17 @@ func reduce(g graph.Undirected, communities [][]graph.Node) *ReducedUndirected {
 			communities[len(communities)-1] = nil
 			communities = communities[:len(communities)-1]
 		} else {
-			condensed = append(condensed, comm)
 			commNodes += len(comm)
 			i++
 		}
 	}
 
 	r := ReducedUndirected{
-		nodes:   make([]community, len(condensed)),
-		edges:   make([][]int, len(condensed)),
+		nodes:   make([]community, len(communities)),
+		edges:   make([][]int, len(communities)),
 		weights: make(map[[2]int]float64),
 	}
-	r.communities = make([][]graph.Node, len(condensed))
+	r.communities = make([][]graph.Node, len(communities))
 	for i := range r.communities {
 		r.communities[i] = []graph.Node{node(i)}
 	}
@@ -249,13 +247,13 @@ func reduce(g graph.Undirected, communities [][]graph.Node) *ReducedUndirected {
 	}
 	weight := weightFuncFor(g)
 	communityOf := make(map[int]int, commNodes)
-	for i, comm := range condensed {
+	for i, comm := range communities {
 		r.nodes[i] = community{id: i, nodes: comm}
 		for _, n := range comm {
 			communityOf[n.ID()] = i
 		}
 	}
-	for uid, comm := range condensed {
+	for uid, comm := range communities {
 		var out []int
 		for i, u := range comm {
 			r.nodes[uid].weight += weight(u, u)

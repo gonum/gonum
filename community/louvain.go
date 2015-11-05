@@ -550,8 +550,8 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 		var k_aC, sigma_totC float64 // C is a substitution for ^𝛼 or ^𝛽.
 		var removal bool
 		for j, u := range c {
-			sigma_totC += l.weight(u, u)
-			if u.ID() == id {
+			uid := u.ID()
+			if uid == id {
 				if src.community != -1 {
 					panic("community: multiple sources")
 				}
@@ -560,17 +560,7 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 			}
 
 			k_aC += l.weight(n, u)
-
-			// The following for loop is equivalent to:
-			//
-			//  for _, v := range l.g.From(u) {
-			//  	sigma_totC += l.weight(u, v)
-			//  }
-			//
-			// This is done to avoid an allocation.
-			for _, vid := range l.g.edges[u.ID()] {
-				sigma_totC += l.weight(u, l.g.nodes[vid])
-			}
+			sigma_totC += l.edgeWeightOf[uid]
 		}
 
 		// See louvain.tex for a derivation of these equations.

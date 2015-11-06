@@ -91,13 +91,16 @@ func (lu *LU) LogDet() (det float64, sign float64) {
 		if v < 0 {
 			sign *= -1
 		}
+		if lu.pivot[i] != i {
+			sign *= -1
+		}
 		logDiag[i] = math.Log(math.Abs(v))
 	}
-	return floats.LogSumExp(logDiag), sign
+	return floats.Sum(logDiag), sign
 }
 
 // Pivot returns pivot indices that enable the construction of the permutation
-// matrix P (see Dense.Permutation). If pivot == nil, then new memory will be
+// matrix P (see Dense.Permutation). If swaps == nil, then new memory will be
 // allocated, otherwise the length of the input must be equal to the size of the
 // factorized matrix.
 func (lu *LU) Pivot(swaps []int) []int {

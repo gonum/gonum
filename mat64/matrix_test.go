@@ -196,6 +196,85 @@ func TestCond(t *testing.T) {
 	}
 }
 
+func TestDet(t *testing.T) {
+	for c, test := range []struct {
+		a   *Dense
+		ans float64
+	}{
+		{
+			a:   NewDense(2, 2, []float64{1, 0, 0, 1}),
+			ans: 1,
+		},
+		{
+			a:   NewDense(2, 2, []float64{1, 0, 0, -1}),
+			ans: -1,
+		},
+		{
+			a: NewDense(3, 3, []float64{
+				1, 2, 0,
+				0, 1, 2,
+				0, 2, 1,
+			}),
+			ans: -3,
+		},
+		{
+			a: NewDense(3, 3, []float64{
+				1, 2, 3,
+				5, 7, 9,
+				6, 9, 12,
+			}),
+			ans: 0,
+		},
+	} {
+		a := DenseCopyOf(test.a)
+		det := Det(a)
+		if !Equal(a, test.a) {
+			t.Errorf("Input matrix changed during Det. Case %d.", c)
+		}
+		if !floats.EqualWithinAbsOrRel(det, test.ans, 1e-14, 1e-14) {
+			t.Errorf("Det mismatch case %d. Got %v, want %v", c, det, test.ans)
+		}
+	}
+	// Perform the normal list test to ensure it works for all types.
+	f := func(a Matrix) interface{} {
+		return Det(a)
+	}
+	denseComparison := func(a *Dense) interface{} {
+		return Det(a)
+	}
+	testOneInputFunc(t, "Det", f, denseComparison, sameAnswerFloatApprox, isAnyType, isSquare)
+
+	// Check that it gives approximately the same answer as Cholesky
+	// Ensure the input matrices are wider than tall so they are full rank
+	isWide := func(ar, ac int) bool {
+		return ar <= ac
+	}
+	f = func(a Matrix) interface{} {
+		ar, ac := a.Dims()
+		if !isWide(ar, ac) {
+			panic(matrix.ErrShape)
+		}
+		var tmp Dense
+		tmp.Mul(a, a.T())
+		return Det(&tmp)
+	}
+	denseComparison = func(a *Dense) interface{} {
+		ar, ac := a.Dims()
+		if !isWide(ar, ac) {
+			panic(matrix.ErrShape)
+		}
+		var tmp SymDense
+		tmp.SymOuterK(1, a)
+		var chol Cholesky
+		ok := chol.Factorize(&tmp)
+		if !ok {
+			panic("bad chol test")
+		}
+		return chol.Det()
+	}
+	testOneInputFunc(t, "DetVsChol", f, denseComparison, sameAnswerFloatApprox, isAnyType, isWide)
+}
+
 func TestDot(t *testing.T) {
 	f := func(a, b Matrix) interface{} {
 		return Dot(a, b)

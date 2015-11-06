@@ -9,15 +9,15 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
-// BFGS implements the Method interface to perform the Broyden–Fletcher–Goldfarb–Shanno
-// optimization method with the given linesearch method. If Linesearcher is nil,
-// it will be set to a reasonable default.
-//
-// BFGS is a quasi-Newton method that performs successive rank-one updates to
-// an estimate of the inverse-Hessian of the function. It exhibits super-linear
-// convergence when in proximity to a local minimum. It has memory cost that is
-// O(n^2) relative to the input dimension.
+// BFGS implements the Broyden–Fletcher–Goldfarb–Shanno optimization method. It
+// is a quasi-Newton method that performs successive rank-one updates to an
+// estimate of the inverse Hessian of the objective function. It exhibits
+// super-linear convergence when in proximity to a local minimum. It has memory
+// cost that is O(n^2) relative to the input dimension.
 type BFGS struct {
+	// Linesearcher is used for selecting suitable steps along the descent
+	// direction. Accepted steps should satisfy the strong Wolfe conditions.
+	// If Linesearcher == nil, an appropriate default is chosen.
 	Linesearcher Linesearcher
 
 	ls *LinesearchMethod

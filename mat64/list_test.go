@@ -273,7 +273,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		mat := &Vector{
 			mat: blas64.Vector{
 				Inc:  inc,
-				Data: make([]float64, inc*length),
+				Data: make([]float64, inc*(length-1)+1),
 			},
 			n: length,
 		}
@@ -367,7 +367,7 @@ func makeCopyOf(a Matrix) Matrix {
 		m := &Vector{
 			mat: blas64.Vector{
 				Inc:  t.mat.Inc,
-				Data: make([]float64, len(t.mat.Data)),
+				Data: make([]float64, t.mat.Inc*(t.n-1)+1),
 			},
 			n: t.n,
 		}

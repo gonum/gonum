@@ -368,9 +368,17 @@ func Dot(a, b Matrix) float64 {
 	if r != rb || c != cb {
 		panic(matrix.ErrShape)
 	}
-	var sum float64
 	aU, aTrans := untranspose(a)
 	bU, bTrans := untranspose(b)
+	if rma, ok := aU.(RawVectorer); ok {
+		if rmb, ok := bU.(RawVectorer); ok {
+			if c > r {
+				r = c
+			}
+			return blas64.Dot(r, rma.RawVector(), rmb.RawVector())
+		}
+	}
+	var sum float64
 	if rma, ok := aU.(RawMatrixer); ok {
 		if rmb, ok := bU.(RawMatrixer); ok {
 			ra := rma.RawMatrix()

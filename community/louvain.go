@@ -560,6 +560,12 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 			}
 
 			k_aC += l.weight(n, u)
+			// sigma_totC could be kept for each community
+			// and updated for moves, changing the calculation
+			// of sigma_totC here from O(n_c) to O(1), but
+			// in practice the time savings do not appear
+			// to be compelling and do not make up for the
+			// increase in code complexity and space required.
 			sigma_totC += l.edgeWeightOf[uid]
 		}
 

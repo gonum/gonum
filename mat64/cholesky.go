@@ -142,3 +142,11 @@ func (t *TriDense) LFromCholesky(chol *Cholesky) {
 	t.reuseAs(n, blas.Lower)
 	t.Copy(chol.chol.TTri())
 }
+
+// FromCholesky reconstructs the original positive definite matrix given its
+// Cholesky decomposition.
+func (s *SymDense) FromCholesky(chol *Cholesky) {
+	n := chol.chol.mat.N
+	s.reuseAs(n)
+	s.SymOuterK(1, chol.chol.T())
+}

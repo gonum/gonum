@@ -158,6 +158,28 @@ func TestCholeskySolveVec(t *testing.T) {
 	}
 }
 
+func TestFromCholesky(t *testing.T) {
+	for _, test := range []*SymDense{
+		NewSymDense(3, []float64{
+			53, 59, 37,
+			0, 83, 71,
+			0, 0, 101,
+		}),
+	} {
+		var chol Cholesky
+		ok := chol.Factorize(test)
+		if !ok {
+			t.Fatal("unexpected Cholesky factorization failure: not positive definite")
+		}
+		var s SymDense
+		s.FromCholesky(&chol)
+
+		if !EqualApprox(&s, test, 1e-12) {
+			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(&s))
+		}
+	}
+}
+
 func BenchmarkCholeskySmall(b *testing.B) {
 	benchmarkCholesky(b, 2)
 }

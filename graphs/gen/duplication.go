@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"sort"
 
 	"github.com/gonum/graph"
+	"github.com/gonum/graph/internal/ordered"
 	"github.com/gonum/graph/simple"
 )
 
@@ -54,6 +56,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 	}
 
 	nodes := dst.Nodes()
+	sort.Sort(ordered.ByID(nodes))
 	if len(nodes) == 0 {
 		n--
 		dst.AddNode(simple.Node(0))
@@ -71,6 +74,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 		for {
 			// Add edges to parent's neigbours.
 			to := dst.From(u)
+			sort.Sort(ordered.ByID(to))
 			for _, v := range to {
 				if rnd() < delta || dst.HasEdgeBetween(v, d) {
 					continue

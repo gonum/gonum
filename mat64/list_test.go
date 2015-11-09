@@ -840,7 +840,7 @@ func testOneInput(t *testing.T,
 				continue
 			}
 			if !equalApprox(zero, &want, tol, false) {
-				t.Errorf("Answer mismatch with zero receiver: %s", errStr)
+				t.Errorf("Answer mismatch with zero receiver: %s.\nGot:\n% v\nWant:\n% v\n", errStr, Formatted(zero), Formatted(&want))
 				continue
 			}
 

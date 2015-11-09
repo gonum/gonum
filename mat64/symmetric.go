@@ -122,6 +122,15 @@ func (s *SymDense) reuseAs(n int) {
 	}
 }
 
+func (s *SymDense) isolatedWorkspace(a Symmetric) (w *SymDense, restore func()) {
+	n := a.Symmetric()
+	w = getWorkspaceSym(n, false)
+	return w, func() {
+		s.CopySym(w)
+		putWorkspaceSym(w)
+	}
+}
+
 func (s *SymDense) AddSym(a, b Symmetric) {
 	n := a.Symmetric()
 	if n != b.Symmetric() {
@@ -323,6 +332,45 @@ func (s *SymDense) ScaleSym(f float64, a Symmetric) {
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {
 			s.mat.Data[i*s.mat.Stride+j] = f * a.At(i, j)
+		}
+	}
+}
+
+// SubsetSym extracts a subset of the rows and columns of the matrix a and stores
+// the result in-place into the receiver. The resulting matrix size is
+// len(set)×len(set). Specifically, at the conclusion of SubsetSym,
+// s.At(i, j) equals a.At(set[i], set[j]). Note that the supplied set does not
+// have to be a strict subset, dimension repeats are allowed.
+func (s *SymDense) SubsetSym(a Symmetric, set []int) {
+	n := len(set)
+	na := a.Symmetric()
+	s.reuseAs(n)
+	var restore func()
+	if a == s {
+		s, restore = s.isolatedWorkspace(a)
+		defer restore()
+	}
+
+	if a, ok := a.(RawSymmetricer); ok {
+		raw := a.RawSymmetric()
+		for i := 0; i < n; i++ {
+			ssub := s.mat.Data[i*s.mat.Stride : i*s.mat.Stride+n]
+			r := set[i]
+			rsub := raw.Data[r*raw.Stride : r*raw.Stride+na]
+			for j := i; j < n; j++ {
+				c := set[j]
+				if r <= c {
+					ssub[j] = rsub[c]
+				} else {
+					ssub[j] = raw.Data[c*raw.Stride+r]
+				}
+			}
+		}
+		return
+	}
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			s.mat.Data[i*s.mat.Stride+j] = a.At(set[i], set[j])
 		}
 	}
 }

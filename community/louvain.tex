@@ -189,32 +189,40 @@ then the expression for $\Delta Q$ from Section~\ref{sec:initialPass} trivially 
 \label{sec:directedGraphs}
 
 It is of interest to consider how this generalises to directed graphs.
-If we are to treat incoming and outgoing nodes equally, there are two 
-thoughts on how to extend the algorithm to directed graphs: to generalise
-the expressions to allow for directed graphs, or to construct an undirected
-graph by averaging the weights of edges in opposite directions.
+If we are to treat incoming and outgoing nodes equally, there are several
+thoughts on how to extend the algorithm to directed graphs: 
+\begin{itemize}
+	\item to generalise the expressions to the directed case -- there are
+	two obvious ways one could go about this. 
+	\item to construct an undirected graph by averaging the weights of edges 
+	in opposite directions, and then use the undirected case.
+\end{itemize}
+We will show that two of these three approaches are equivalent, and discuss
+the differences to the third.
 
-The suggested extension to directed graphs is to modify the expressions 
+\subsection{First generalisation of expressions approach}
+One suggested extension to directed graphs is to modify the expressions 
 involved by adding the `from' case and the `to' case for each term. 
 If we let $B_{ij}$ be the edge weight between nodes $i$ and $j$ in 
 the directed graph of interest, these extended expressions look like
 \begin{equation}
-m = \frac{1}{2}\left ( \sum_i\sum_jB_{ij} + \sum_i\sum_jB_{ji}\right)  = \frac{1}{2}\sum_i\sum_j \left( B_{ij} + B_{ji} \right) ,
+m^{(1)} = \frac{1}{2}\left ( \sum_i\sum_jB_{ij} + \sum_i\sum_jB_{ji}\right)  = \frac{1}{2}\sum_i\sum_j \left( B_{ij} + B_{ji} \right) ,
 \end{equation}
 \begin{equation}
-k_i = \sum_jB_{ij} + \sum_jB_{ji} = \sum_j{\left( B_{ij} + B_{ji} \right)},
+k_i^{(1)} = \sum_jB_{ij} + \sum_jB_{ji} = \sum_j{\left( B_{ij} + B_{ji} \right)},
 \end{equation}
 and similarly
 \begin{equation}
-	Q = \frac{1}{2m}\sum_i\sum_j\left[ \left( B_{ij} + B_{ji} \right) - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j).
+	Q^{(1)} = \frac{1}{2m}\sum_i\sum_j\left[ \left( B_{ij} + B_{ji} \right) - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j).
 \end{equation}
 
-Note how this is equivalent to constructing an undirected graph with
-edge weights
+\subsection{Construction of an undirected graph}
+Note how the first suggested generalisation above is equivalent to constructing 
+an undirected graph with edge weights
 \begin{equation}
 A_{ij} = B_{ij} + B_{ji}.
 \end{equation}
-However the other suggestion is to averaging the directed edges to make
+However another suggestion is to average the directed edges to make
 an undirected graph, i.e. to use
 \begin{equation}
 A_{ij} = \frac{B_{ij} + B_{ji}}{2}.
@@ -223,22 +231,56 @@ This raises an important question: does scaling all edge weights across
 the entire graph by a constant affect the results of the algorithm?
 Hopefully not, but worth checking.
 We can follow this through the results above by applying the 
-substitution $A_{ij}' = pA_{ij}$ ($p \in \mathbb{R}$) and using ${}'$s
+substitution $A_{ij}^{(2)} = pA_{ij}$ ($p \in \mathbb{R}$) and using ${}^{(2)}$s
 to denote the transformed expressions, we get:
 \begin{equation}
-m' = \frac{1}{2}\sum_i\sum_jpA_{ij}  = p\frac{1}{2}\sum_i\sum_j A_{ij} = pm ,
+m^{(2)} = \frac{1}{2}\sum_i\sum_jpA_{ij}  = p\frac{1}{2}\sum_i\sum_j A_{ij} = pm ,
 \end{equation}
 \begin{equation}
-k_i' = \sum_j{pA_{ij}} = p\sum_j{A_{ij}} = pk_i,
+k_i^{(2)} = \sum_j{pA_{ij}} = p\sum_j{A_{ij}} = pk_i,
 \end{equation}
 and so
 \begin{align*}
-	Q' &= \frac{1}{2pm}\sum_i\sum_j\left[ pA_{ij} - \gamma \frac{pk_ipk_j}{2pm} \right] \delta(c_i,c_j) \\
+	Q^{(2)} &= \frac{1}{2pm}\sum_i\sum_j\left[ pA_{ij} - \gamma \frac{pk_ipk_j}{2pm} \right] \delta(c_i,c_j) \\
 	&= \frac{1}{2m}\sum_i\sum_j\left[ A_{ij} - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j) \\
 	&= Q
 \end{align*}
-Note that as we have shown $Q' = Q$ there is no need to go into the remainder of the terms 
+Note that as we have shown $Q^{(2)} = Q$ there is no need to go into the remainder of the terms 
 involved in the algorithm, as they all derive from $Q$.
+This is also equivalent to the first generalisation above for $p = 1$, or the averaging suggestion
+for $p = \frac{1}{2}$.
 
+\subsection{Second Generalisation of expressions approach}
+
+Another approach to generalising the expressions to the directed case is to treat 
+incoming and outgoing edges as equally weighted, but seperately.
+There is no need for alternate $m$ as outgoing and incoming edges would both be 
+counted and both versions would be the same as the $m$ from above, but we define 
+seperate $k_i$ terms:
+If instead for the directed case you define $Q$ as 
+\newcommand{\dkin}[1]{k_{#1}^{(3)\text{in}}}
+\newcommand{\dkout}[1]{k_{#1}^{(3)\text{out}}}
+\begin{equation}
+\dkin{i} = \sum_j{B_{ij}}
+\end{equation}
+and
+\begin{equation}
+\dkout{i} = \sum_j{B_{ji}}.
+\end{equation}
+We then propose a generalised modularity expression
+\begin{equation}
+Q^{(3)} = \frac{1}{m}\sum_i\sum_j\left[ B_{ij} - \gamma \frac{\dkin{i}\dkout{j}}{2m} \right] \delta(c_i,c_j). \\
+\end{equation}
+$Q^{(3)}$ will differ from $Q$ in two ways.
+Firstly, as $k_i = \dkin{i} + \dkout{i}$, 
+\begin{align*}
+\gamma \frac{k_i k_j}{2m} &= \gamma \frac{(\dkin{i} + \dkout{i}) (\dkin{j} + \dkout{j})}{2m} \\
+ &= \gamma \frac{\dkin{i}\dkin{j} + \dkout{i}\dkout{j}}{2m} + \gamma \frac{2\dkin{i}\dkout{j}}{2m} \\
+\end{align*}
+so $Q^{(3)}$ will differ from $Q$ by $\frac{\gamma}{(2m)^2}\sum_i\sum_j (\dkin{i}\dkin{j} + \dkout{i}\dkout{j})$.
+Secondly $Q^{(3)}$ weights the $i=j$ terms the same as $Q$, but both $i \neq j$ terms ($i,j$ and $j,i$)
+in $Q^{(3)}$ combined correspond to one of the (symmetric) $i \neq j$ terms in $Q$, so the 
+relative weighting of the self-weights in the second and later passes of the algorithm will differ in
+this implementation. 
 
 \end{document}

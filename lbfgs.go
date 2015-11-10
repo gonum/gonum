@@ -28,8 +28,6 @@ type LBFGS struct {
 	x    []float64 // location at the last major iteration
 	grad []float64 // gradient at the last major iteration
 
-	y []float64 // holds g_{k+1} - g_k
-	s []float64 // holds x_{k+1} - x_k
 	a []float64 // holds cache of hessian updates
 
 	// History
@@ -69,8 +67,6 @@ func (l *LBFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	copy(l.x, loc.X)
 	copy(l.grad, loc.Gradient)
 
-	l.y = resize(l.y, dim)
-	l.s = resize(l.s, dim)
 	l.a = resize(l.a, l.Store)
 	l.rhoHist = resize(l.rhoHist, l.Store)
 
@@ -116,18 +112,18 @@ func (l *LBFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 
 	// Update direction. Uses two-loop correction as described in
 	// Nocedal, Wright (2006), Numerical Optimization (2nd ed.). Chapter 7, page 178.
-	copy(dir, loc.Gradient)
-	floats.SubTo(l.y, loc.Gradient, l.grad)
-	floats.SubTo(l.s, loc.X, l.x)
-	copy(l.sHist[l.oldest], l.s)
-	copy(l.yHist[l.oldest], l.y)
-	sDotY := floats.Dot(l.y, l.s)
+	y := l.yHist[l.oldest]
+	floats.SubTo(y, loc.Gradient, l.grad)
+	s := l.sHist[l.oldest]
+	floats.SubTo(s, loc.X, l.x)
+	sDotY := floats.Dot(s, y)
 	l.rhoHist[l.oldest] = 1 / sDotY
 
-	l.oldest++
-	l.oldest = l.oldest % l.Store
+	l.oldest = (l.oldest + 1) % l.Store
+
 	copy(l.x, loc.X)
 	copy(l.grad, loc.Gradient)
+	copy(dir, loc.Gradient)
 
 	// two loop update. First loop starts with the most recent element
 	// and goes backward, second starts with the oldest element and goes
@@ -143,7 +139,7 @@ func (l *LBFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	}
 
 	// Scale the initial Hessian.
-	gamma := sDotY / floats.Dot(l.y, l.y)
+	gamma := sDotY / floats.Dot(y, y)
 	floats.Scale(gamma, dir)
 
 	for i := 0; i < l.Store; i++ {

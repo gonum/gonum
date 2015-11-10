@@ -7,6 +7,7 @@ package distmv
 import (
 	"math"
 	"math/rand"
+	"sync"
 
 	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
@@ -19,6 +20,9 @@ import (
 // and positive definite. Use NewNormal to construct.
 type Normal struct {
 	mu []float64
+
+	once  sync.Once
+	sigma *mat64.SymDense // only stored if needed
 
 	chol       mat64.Cholesky
 	lower      mat64.TriDense
@@ -117,4 +121,110 @@ func (n *Normal) Rand(x []float64) []float64 {
 	xVec.MulVec(&n.lower, tmpVec)
 	floats.Add(x, n.mu)
 	return x
+}
+
+// ConditionNormal returns the Normal distribution that is the receiver conditioned
+// on the input evidence. The returned multivariate normal has dimension
+// n - len(observed), where n is the dimension of the original receiver. The updated
+// mean and covariance are
+//  mu = mu_un + sigma_{ob,un}^T * sigma_{ob,ob}^-1 (v - mu_ob)
+//  sigma = sigma_{un,un} - sigma_{ob,un}^T * sigma_{ob,ob}^-1 * sigma_{ob,un}
+// where mu_un and mu_ob are the original means of the unobserved and observed
+// variables respectively, sigma_{un,un} is the unobserved subset of the covariance
+// matrix, sigma_{ob,ob} is the observed subset of the covariance matrix, and
+// sigma_{un,ob} are the cross terms. The elements of x_2 have been observed with
+// values v. The dimension order is preserved during conditioning, so if the value
+// of dimension 1 is observed, the returned normal represents dimensions {0, 2, ...}
+// of the original Normal distribution.
+//
+// ConditionNormal returns {nil, false} if there is a failure during the update.
+// Mathematically this is impossible, but can occur with finite precision arithmetic.
+func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Rand) (*Normal, bool) {
+	if len(observed) != len(values) {
+		panic("normal: input slice length mismatch")
+	}
+
+	n.setSigma()
+
+	ob := len(observed)
+	unob := n.Dim() - ob
+	obMap := make(map[int]struct{})
+	for _, v := range observed {
+		if _, ok := obMap[v]; ok {
+			panic("normal: observed dimension occurs twice")
+		}
+		obMap[v] = struct{}{}
+	}
+	unobserved := make([]int, 0, unob)
+	for i := 0; i < n.Dim(); i++ {
+		if _, ok := obMap[i]; !ok {
+			unobserved = append(unobserved, i)
+		}
+	}
+	mu1 := make([]float64, unob)
+	for i, v := range unobserved {
+		mu1[i] = n.mu[v]
+	}
+	mu2 := make([]float64, ob) // really v - mu2
+	for i, v := range observed {
+		mu2[i] = values[i] - n.mu[v]
+	}
+
+	var sigma11, sigma22 mat64.SymDense
+	sigma11.SubsetSym(n.sigma, unobserved)
+	sigma22.SubsetSym(n.sigma, observed)
+
+	sigma21 := mat64.NewDense(ob, unob, nil)
+	for i, r := range observed {
+		for j, c := range unobserved {
+			v := n.sigma.At(r, c)
+			sigma21.Set(i, j, v)
+		}
+	}
+
+	var chol mat64.Cholesky
+	ok := chol.Factorize(&sigma22)
+	if !ok {
+		return nil, ok
+	}
+
+	// Compute sigma_{2,1}^T * sigma_{2,2}^-1 (v - mu_2).
+	v := mat64.NewVector(ob, mu2)
+	var tmp, tmp2 mat64.Vector
+	err := tmp.SolveCholeskyVec(&chol, v)
+	if err != nil {
+		return nil, false
+	}
+	tmp2.MulVec(sigma21.T(), &tmp)
+
+	// Compute sigma_{2,1}^T * sigma_{2,2}^-1 * sigma_{2,1}.
+	// TODO(btracey): Should this be a method of SymDense?
+	var tmp3, tmp4 mat64.Dense
+	err = tmp3.SolveCholesky(&chol, sigma21)
+	if err != nil {
+		return nil, false
+	}
+	tmp4.Mul(sigma21.T(), &tmp3)
+
+	for i := range mu1 {
+		mu1[i] += tmp2.At(i, 0)
+	}
+
+	// TODO(btracey): If tmp2 can constructed with a method, then this can be
+	// replaced with SubSym.
+	for i := 0; i < len(unobserved); i++ {
+		for j := i; j < len(unobserved); j++ {
+			v := sigma11.At(i, j)
+			sigma11.SetSym(i, j, v-tmp4.At(i, j))
+		}
+	}
+	return NewNormal(mu1, &sigma11, src)
+}
+
+// setSigma computes and stores the covariance matrix of the distribution.
+func (n *Normal) setSigma() {
+	n.once.Do(func() {
+		n.sigma = mat64.NewSymDense(n.Dim(), nil)
+		n.sigma.FromCholesky(&n.chol)
+	})
 }

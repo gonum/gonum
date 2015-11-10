@@ -7,7 +7,6 @@ package optimize
 import (
 	"math"
 
-	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
 )
 
@@ -89,6 +88,8 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 	// the Identity) from Nocedal, Wright (2006), 2nd edition.
 
 	dim := len(loc.X)
+	d := mat64.NewVector(dim, dir)
+	grad := mat64.NewVector(dim, loc.Gradient)
 	n.hess.CopySym(loc.Hessian)
 
 	// Find the smallest diagonal entry of the Hesssian.
@@ -120,10 +121,9 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 		// Try to apply the Cholesky factorization.
 		pd := n.chol.Factorize(n.hess)
 		if pd {
-			d := mat64.NewVector(dim, dir)
 			// Store the solution in d's backing array, dir.
-			d.SolveCholeskyVec(&n.chol, mat64.NewVector(dim, loc.Gradient))
-			floats.Scale(-1, dir)
+			d.SolveCholeskyVec(&n.chol, grad)
+			d.ScaleVec(-1, d)
 			return 1
 		}
 		// Modified Hessian is not PD, so increase tau.
@@ -132,8 +132,7 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 
 	// Hessian modification failed to get a PD matrix. Return the negative
 	// gradient as the descent direction.
-	copy(dir, loc.Gradient)
-	floats.Scale(-1, dir)
+	d.ScaleVec(-1, grad)
 	return 1
 }
 

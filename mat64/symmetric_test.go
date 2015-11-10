@@ -452,3 +452,84 @@ func TestScaleSym(t *testing.T) {
 		testOneInput(t, "ScaleSym", &SymDense{}, method, denseComparison, legalTypeSym, isSquare, 1e-14)
 	}
 }
+
+func TestSubsetSym(t *testing.T) {
+	for _, test := range []struct {
+		a    *SymDense
+		dims []int
+		ans  *SymDense
+	}{
+		{
+			a: NewSymDense(3, []float64{
+				1, 2, 3,
+				0, 4, 5,
+				0, 0, 6,
+			}),
+			dims: []int{0, 2},
+			ans: NewSymDense(2, []float64{
+				1, 3,
+				0, 6,
+			}),
+		},
+		{
+			a: NewSymDense(3, []float64{
+				1, 2, 3,
+				0, 4, 5,
+				0, 0, 6,
+			}),
+			dims: []int{2, 0},
+			ans: NewSymDense(2, []float64{
+				6, 3,
+				0, 1,
+			}),
+		},
+		{
+			a: NewSymDense(3, []float64{
+				1, 2, 3,
+				0, 4, 5,
+				0, 0, 6,
+			}),
+			dims: []int{1, 1, 1},
+			ans: NewSymDense(3, []float64{
+				4, 4, 4,
+				0, 4, 4,
+				0, 0, 4,
+			}),
+		},
+	} {
+		var s SymDense
+		s.SubsetSym(test.a, test.dims)
+		if !Equal(&s, test.ans) {
+			t.Errorf("SubsetSym mismatch dims %v\nGot:\n% v\nWant:\n% v\n", test.dims, s, test.ans)
+		}
+	}
+
+	dims := []int{0, 2}
+	maxDim := dims[0]
+	for _, v := range dims {
+		if maxDim < v {
+			maxDim = v
+		}
+	}
+	method := func(receiver, a Matrix) {
+		type SubsetSymer interface {
+			SubsetSym(a Symmetric, set []int)
+		}
+		rd := receiver.(SubsetSymer)
+		rd.SubsetSym(a.(Symmetric), dims)
+	}
+	denseComparison := func(receiver, a *Dense) {
+		*receiver = *NewDense(len(dims), len(dims), nil)
+		sz := len(dims)
+		for i := 0; i < sz; i++ {
+			for j := 0; j < sz; j++ {
+				receiver.Set(i, j, a.At(dims[i], dims[j]))
+			}
+		}
+	}
+	legalSize := func(ar, ac int) bool {
+		return ar == ac && ar > maxDim
+	}
+
+	testOneInput(t, "SubsetSym", &SymDense{}, method, denseComparison, legalTypeSym, legalSize, 0)
+}

@@ -158,22 +158,20 @@ func (cg *CG) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 
 	cg.iterFromRestart++
 	var restart bool
-	// Check if the method should be restarted because too many iterations have
-	// been taken without a restart.
 	if cg.iterFromRestart == cg.restartAfter {
-		restart = true
-	}
-	// Check if the method should be restarted because the angle between
-	// the last two gradients is too large.
-	gDot := floats.Dot(loc.Gradient, cg.gradPrev)
-	gNorm := floats.Norm(loc.Gradient, 2)
-	if gDot <= cg.AngleRestartThreshold*gNorm*cg.gradPrevNorm {
+		// Restart because too many iterations have been taken without a restart.
 		restart = true
 	}
 
-	// Compute the scaling factor β_k according to the given CG variant. Do
-	// this even when restarting, because cg.Variant may be keeping an inner
-	// state that needs to be updated at every iteration.
+	gDot := floats.Dot(loc.Gradient, cg.gradPrev)
+	gNorm := floats.Norm(loc.Gradient, 2)
+	if gDot <= cg.AngleRestartThreshold*gNorm*cg.gradPrevNorm {
+		// Restart because the angle between the last two gradients is too large.
+		restart = true
+	}
+
+	// Compute the scaling factor β_k even when restarting, because cg.Variant
+	// may be keeping an inner state that needs to be updated at every iteration.
 	beta := cg.Variant.Beta(loc.Gradient, cg.gradPrev, cg.dirPrev)
 	if beta == 0 {
 		// β_k == 0 means that the steepest descent direction will be taken, so
@@ -191,7 +189,7 @@ func (cg *CG) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		}
 	}
 
-	// Get the initial line search step size from the StepSizer, even if the
+	// Get the initial line search step size from the StepSizer even if the
 	// method was restarted, because StepSizers need to see every iteration.
 	stepSize = cg.InitialStep.StepSize(loc, dir)
 	if restart {

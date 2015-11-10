@@ -8,21 +8,24 @@ import (
 	"github.com/gonum/floats"
 )
 
-// LBFGS implements the limited-memory BFGS algorithm. While the normal BFGS algorithm
-// makes a full approximation to the inverse hessian, LBFGS instead approximates the
-// hessian from the last Store optimization steps. The Store parameter is a tradeoff
-// between cost of the method and accuracy of the hessian approximation.
-// LBFGS has a cost (both in memory and time) of O(Store * inputDimension).
-// Since BFGS has a cost of O(inputDimension^2), LBFGS is more appropriate
-// for very large problems. This "forgetful" nature of LBFGS may also make it perform
-// better than BFGS for functions with Hessians that vary rapidly spatially.
+// LBFGS implements the limited-memory BFGS method for gradient-based
+// unconstrained minimization.
 //
-// If Store is 0, Store is defaulted to 15.
-// A Linesearcher for LBFGS must satisfy the strong Wolfe conditions at every
-// iteration. If Linesearcher == nil, an appropriate default is chosen.
+// It stores a modified version of the inverse Hessian approximation H
+// implicitly from the last Store iterations while the normal BFGS method
+// stores and manipulates H directly as a dense matrix. Therefore LBFGS is more
+// appropriate than BFGS for large problems as the cost of LBFGS scales as
+// O(Store * dim) while BFGS scales as O(dim^2). The "forgetful" nature of
+// LBFGS may also make it perform better than BFGS for functions with Hessians
+// that vary rapidly spatially.
 type LBFGS struct {
+	// Linesearcher selects suitable steps along the descent direction.
+	// Accepted steps should satisfy the strong Wolfe conditions.
+	// If Linesearcher is nil, a reasonable default will be chosen.
 	Linesearcher Linesearcher
-	Store        int // how many past iterations to store
+	// Store is the size of the limited-memory storage.
+	// If Store is 0, it will be defaulted to 15.
+	Store int
 
 	ls *LinesearchMethod
 

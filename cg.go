@@ -103,7 +103,7 @@ func (cg *CG) Init(loc *Location) (Operation, error) {
 	}
 
 	if cg.Linesearcher == nil {
-		cg.Linesearcher = &Bisection{GradConst: 0.1}
+		cg.Linesearcher = &MoreThuente{CurvatureFactor: 0.1}
 	}
 	if cg.Variant == nil {
 		cg.Variant = &HestenesStiefel{}

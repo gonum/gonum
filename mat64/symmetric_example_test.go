@@ -6,7 +6,7 @@ import (
 	"github.com/gonum/matrix/mat64"
 )
 
-func ExampleSubsetSym() {
+func ExampleSymDense_SubsetSym() {
 	n := 5
 	s := mat64.NewSymDense(5, nil)
 	count := 1.0

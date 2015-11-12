@@ -58,71 +58,6 @@ func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bo
 	return n, true
 }
 
-// Dim returns the dimension of the distribution.
-func (n *Normal) Dim() int {
-	return n.dim
-}
-
-// Entropy returns the differential entropy of the distribution.
-func (n *Normal) Entropy() float64 {
-	return float64(n.dim)/2*(1+logTwoPi) + n.logSqrtDet
-}
-
-// LogProb computes the log of the pdf of the point x.
-func (n *Normal) LogProb(x []float64) float64 {
-	dim := n.dim
-	if len(x) != dim {
-		panic(badSizeMismatch)
-	}
-	// Compute the normalization constant
-	c := -0.5*float64(dim)*logTwoPi - n.logSqrtDet
-
-	// Compute (x-mu)'Sigma^-1 (x-mu)
-	xMinusMu := make([]float64, dim)
-	floats.SubTo(xMinusMu, x, n.mu)
-	d := mat64.NewVector(dim, xMinusMu)
-	tmp := make([]float64, dim)
-	tmpVec := mat64.NewVector(dim, tmp)
-	tmpVec.SolveCholeskyVec(&n.chol, d)
-	return c - 0.5*floats.Dot(tmp, xMinusMu)
-}
-
-// Mean returns the mean of the probability distribution at x. If the
-// input argument is nil, a new slice will be allocated, otherwise the result
-// will be put in-place into the receiver.
-func (n *Normal) Mean(x []float64) []float64 {
-	x = reuseAs(x, n.dim)
-	copy(x, n.mu)
-	return x
-}
-
-// Prob computes the value of the probability density function at x.
-func (n *Normal) Prob(x []float64) float64 {
-	return math.Exp(n.LogProb(x))
-}
-
-// Rand generates a random number according to the distributon.
-// If the input slice is nil, new memory is allocated, otherwise the result is stored
-// in place.
-func (n *Normal) Rand(x []float64) []float64 {
-	x = reuseAs(x, n.dim)
-	tmp := make([]float64, n.dim)
-	if n.src == nil {
-		for i := range x {
-			tmp[i] = rand.NormFloat64()
-		}
-	} else {
-		for i := range x {
-			tmp[i] = n.src.NormFloat64()
-		}
-	}
-	tmpVec := mat64.NewVector(n.dim, tmp)
-	xVec := mat64.NewVector(n.dim, x)
-	xVec.MulVec(&n.lower, tmpVec)
-	floats.Add(x, n.mu)
-	return x
-}
-
 // ConditionNormal returns the Normal distribution that is the receiver conditioned
 // on the input evidence. The returned multivariate normal has dimension
 // n - len(observed), where n is the dimension of the original receiver. The updated
@@ -219,6 +154,106 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Ran
 		}
 	}
 	return NewNormal(mu1, &sigma11, src)
+}
+
+// CovarianceMatrix returns the covariance matrix of the distribution. Upon
+// return, the value at element {i, j} of the covariance matrix is equal to
+// the covariance of the i^th and j^th variables.
+//  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
+// If the input matrix is nil a new matrix is allocated, otherwise the result
+// is stored in-place into the input.
+func (n *Normal) CovarianceMatrix(s *mat64.SymDense) *mat64.SymDense {
+	if s == nil {
+		s = mat64.NewSymDense(n.Dim(), nil)
+	}
+	sn := s.Symmetric()
+	if sn != n.Dim() {
+		panic("normal: input matrix size mismatch")
+	}
+	n.setSigma()
+	s.CopySym(n.sigma)
+	return s
+}
+
+// Dim returns the dimension of the distribution.
+func (n *Normal) Dim() int {
+	return n.dim
+}
+
+// Entropy returns the differential entropy of the distribution.
+func (n *Normal) Entropy() float64 {
+	return float64(n.dim)/2*(1+logTwoPi) + n.logSqrtDet
+}
+
+// LogProb computes the log of the pdf of the point x.
+func (n *Normal) LogProb(x []float64) float64 {
+	dim := n.dim
+	if len(x) != dim {
+		panic(badSizeMismatch)
+	}
+	// Compute the normalization constant
+	c := -0.5*float64(dim)*logTwoPi - n.logSqrtDet
+
+	// Compute (x-mu)'Sigma^-1 (x-mu)
+	xMinusMu := make([]float64, dim)
+	floats.SubTo(xMinusMu, x, n.mu)
+	d := mat64.NewVector(dim, xMinusMu)
+	tmp := make([]float64, dim)
+	tmpVec := mat64.NewVector(dim, tmp)
+	tmpVec.SolveCholeskyVec(&n.chol, d)
+	return c - 0.5*floats.Dot(tmp, xMinusMu)
+}
+
+// MarginalNormal returns the marginal distribution of the given input variables.
+// That is, MarginalNormal returns
+//  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+// where x_i are the dimensions in the input, and x_o are the remaining dimensions.
+// The input src is passed to the call to NewNormal.
+func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
+	newMean := make([]float64, len(vars))
+	for i, v := range vars {
+		newMean[i] = n.mu[v]
+	}
+	n.setSigma()
+	var s mat64.SymDense
+	s.SubsetSym(n.sigma, vars)
+	return NewNormal(newMean, &s, src)
+}
+
+// Mean returns the mean of the probability distribution at x. If the
+// input argument is nil, a new slice will be allocated, otherwise the result
+// will be put in-place into the receiver.
+func (n *Normal) Mean(x []float64) []float64 {
+	x = reuseAs(x, n.dim)
+	copy(x, n.mu)
+	return x
+}
+
+// Prob computes the value of the probability density function at x.
+func (n *Normal) Prob(x []float64) float64 {
+	return math.Exp(n.LogProb(x))
+}
+
+// Rand generates a random number according to the distributon.
+// If the input slice is nil, new memory is allocated, otherwise the result is stored
+// in place.
+func (n *Normal) Rand(x []float64) []float64 {
+	x = reuseAs(x, n.dim)
+	tmp := make([]float64, n.dim)
+	if n.src == nil {
+		for i := range x {
+			tmp[i] = rand.NormFloat64()
+		}
+	} else {
+		for i := range x {
+			tmp[i] = n.src.NormFloat64()
+		}
+	}
+	tmpVec := mat64.NewVector(n.dim, tmp)
+	xVec := mat64.NewVector(n.dim, x)
+	xVec.MulVec(&n.lower, tmpVec)
+	floats.Add(x, n.mu)
+	return x
 }
 
 // setSigma computes and stores the covariance matrix of the distribution.

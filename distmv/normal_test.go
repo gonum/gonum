@@ -310,3 +310,91 @@ func TestConditionNormal(t *testing.T) {
 		}
 	}
 }
+
+func TestCovarianceMatrix(t *testing.T) {
+	for _, test := range []struct {
+		mu    []float64
+		sigma *mat64.SymDense
+	}{
+		{
+			mu:    []float64{2, 3, 4},
+			sigma: mat64.NewSymDense(3, []float64{1, 0.5, 3, 0.5, 8, -1, 3, -1, 15}),
+		},
+	} {
+		normal, ok := NewNormal(test.mu, test.sigma, nil)
+		if !ok {
+			t.Fatalf("Bad test, covariance matrix not positive definite")
+		}
+		cov := normal.CovarianceMatrix(nil)
+		if !mat64.EqualApprox(cov, test.sigma, 1e-14) {
+			t.Errorf("Covariance mismatch with nil input")
+		}
+		dim := test.sigma.Symmetric()
+		cov = mat64.NewSymDense(dim, nil)
+		normal.CovarianceMatrix(cov)
+		if !mat64.EqualApprox(cov, test.sigma, 1e-14) {
+			t.Errorf("Covariance mismatch with supplied input")
+		}
+	}
+}
+
+func TestMarginal(t *testing.T) {
+	for _, test := range []struct {
+		mu       []float64
+		sigma    *mat64.SymDense
+		marginal []int
+	}{
+		{
+			mu:       []float64{2, 3, 4},
+			sigma:    mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			marginal: []int{0},
+		},
+		{
+			mu:       []float64{2, 3, 4},
+			sigma:    mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			marginal: []int{0, 2},
+		},
+		{
+			mu:    []float64{2, 3, 4, 5},
+			sigma: mat64.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+
+			marginal: []int{0, 3},
+		},
+	} {
+		normal, ok := NewNormal(test.mu, test.sigma, nil)
+		if !ok {
+			t.Fatalf("Bad test, covariance matrix not positive definite")
+		}
+		marginal, ok := normal.MarginalNormal(test.marginal, nil)
+		if !ok {
+			t.Fatalf("Bad test, marginal matrix not positive definite")
+		}
+		dim := normal.Dim()
+		nSamples := 1000000
+		samps := mat64.NewDense(nSamples, dim, nil)
+		for i := 0; i < nSamples; i++ {
+			normal.Rand(samps.RawRowView(i))
+		}
+		estMean := make([]float64, dim)
+		for i := range estMean {
+			estMean[i] = stat.Mean(mat64.Col(nil, i, samps), nil)
+		}
+		for i, v := range test.marginal {
+			if math.Abs(marginal.mu[i]-estMean[v]) > 1e-2 {
+				t.Errorf("Mean mismatch: want: %v, got %v", estMean[v], marginal.mu[i])
+			}
+		}
+
+		marginalCov := marginal.CovarianceMatrix(nil)
+		estCov := stat.CovarianceMatrix(nil, samps, nil)
+		for i, v1 := range test.marginal {
+			for j, v2 := range test.marginal {
+				c := marginalCov.At(i, j)
+				ec := estCov.At(v1, v2)
+				if math.Abs(c-ec) > 5e-2 {
+					t.Errorf("Cov mismatch element i = %d, j = %d: want: %v, got %v", i, j, c, ec)
+				}
+			}
+		}
+	}
+}

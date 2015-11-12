@@ -1,52 +1,60 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package optimize
 
 import (
 	"github.com/gonum/floats"
 )
 
-// LBFGS implements the limited-memory BFGS algorithm. While the normal BFGS algorithm
-// makes a full approximation to the inverse hessian, LBFGS instead approximates the
-// hessian from the last Store optimization steps. The Store parameter is a tradeoff
-// between cost of the method and accuracy of the hessian approximation.
-// LBFGS has a cost (both in memory and time) of O(Store * inputDimension).
-// Since BFGS has a cost of O(inputDimension^2), LBFGS is more appropriate
-// for very large problems. This "forgetful" nature of LBFGS may also make it perform
-// better than BFGS for functions with Hessians that vary rapidly spatially.
+// LBFGS implements the limited-memory BFGS method for gradient-based
+// unconstrained minimization.
 //
-// If Store is 0, Store is defaulted to 15.
-// A Linesearcher for LBFGS must satisfy the strong Wolfe conditions at every
-// iteration. If Linesearcher == nil, an appropriate default is chosen.
+// It stores a modified version of the inverse Hessian approximation H
+// implicitly from the last Store iterations while the normal BFGS method
+// stores and manipulates H directly as a dense matrix. Therefore LBFGS is more
+// appropriate than BFGS for large problems as the cost of LBFGS scales as
+// O(Store * dim) while BFGS scales as O(dim^2). The "forgetful" nature of
+// LBFGS may also make it perform better than BFGS for functions with Hessians
+// that vary rapidly spatially.
 type LBFGS struct {
+	// Linesearcher selects suitable steps along the descent direction.
+	// Accepted steps should satisfy the strong Wolfe conditions.
+	// If Linesearcher is nil, a reasonable default will be chosen.
 	Linesearcher Linesearcher
-	Store        int // how many past iterations to store
+	// Store is the size of the limited-memory storage.
+	// If Store is 0, it will be defaulted to 15.
+	Store int
 
 	ls *LinesearchMethod
 
-	dim    int
-	oldest int // element of the history slices that is the oldest
-
-	x    []float64 // location at the last major iteration
-	grad []float64 // gradient at the last major iteration
-
-	y []float64 // holds g_{k+1} - g_k
-	s []float64 // holds x_{k+1} - x_k
-	a []float64 // holds cache of hessian updates
+	dim  int       // Dimension of the problem
+	x    []float64 // Location at the last major iteration
+	grad []float64 // Gradient at the last major iteration
 
 	// History
-	yHist   [][]float64 // last Store iterations of y
-	sHist   [][]float64 // last Store iterations of s
-	rhoHist []float64   // last Store iterations of rho
+	oldest int         // Index of the oldest element of the history
+	y      [][]float64 // Last Store values of y
+	s      [][]float64 // Last Store values of s
+	rho    []float64   // Last Store values of rho
+	a      []float64   // Cache of Hessian updates
 }
 
 func (l *LBFGS) Init(loc *Location) (Operation, error) {
 	if l.Linesearcher == nil {
 		l.Linesearcher = &Bisection{}
 	}
+	if l.Store == 0 {
+		l.Store = 15
+	}
+
 	if l.ls == nil {
 		l.ls = &LinesearchMethod{}
 	}
 	l.ls.Linesearcher = l.Linesearcher
 	l.ls.NextDirectioner = l
+
 	return l.ls.Init(loc)
 }
 
@@ -57,53 +65,44 @@ func (l *LBFGS) Iterate(loc *Location) (Operation, error) {
 func (l *LBFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	dim := len(loc.X)
 	l.dim = dim
+	l.oldest = 0
 
-	if l.Store == 0 {
-		l.Store = 15
-	}
-
-	l.oldest = l.Store - 1 // the first vector will be put in at 0
+	l.a = resize(l.a, l.Store)
+	l.rho = resize(l.rho, l.Store)
+	l.y = l.initHistory(l.y)
+	l.s = l.initHistory(l.s)
 
 	l.x = resize(l.x, dim)
-	l.grad = resize(l.grad, dim)
 	copy(l.x, loc.X)
+
+	l.grad = resize(l.grad, dim)
 	copy(l.grad, loc.Gradient)
-
-	l.y = resize(l.y, dim)
-	l.s = resize(l.s, dim)
-	l.a = resize(l.a, l.Store)
-	l.rhoHist = resize(l.rhoHist, l.Store)
-
-	if cap(l.yHist) < l.Store {
-		n := make([][]float64, l.Store-cap(l.yHist))
-		l.yHist = append(l.yHist, n...)
-	}
-	if cap(l.sHist) < l.Store {
-		n := make([][]float64, l.Store-cap(l.sHist))
-		l.sHist = append(l.sHist, n...)
-	}
-	l.yHist = l.yHist[:l.Store]
-	l.sHist = l.sHist[:l.Store]
-	for i := range l.sHist {
-		l.sHist[i] = resize(l.sHist[i], dim)
-		for j := range l.sHist[i] {
-			l.sHist[i][j] = 0
-		}
-	}
-	for i := range l.yHist {
-		l.yHist[i] = resize(l.yHist[i], dim)
-		for j := range l.yHist[i] {
-			l.yHist[i][j] = 0
-		}
-	}
 
 	copy(dir, loc.Gradient)
 	floats.Scale(-1, dir)
-
 	return 1 / floats.Norm(dir, 2)
 }
 
+func (l *LBFGS) initHistory(hist [][]float64) [][]float64 {
+	c := cap(hist)
+	if c < l.Store {
+		n := make([][]float64, l.Store-c)
+		hist = append(hist[:c], n...)
+	}
+	hist = hist[:l.Store]
+	for i := range hist {
+		hist[i] = resize(hist[i], l.dim)
+		for j := range hist[i] {
+			hist[i][j] = 0
+		}
+	}
+	return hist
+}
+
 func (l *LBFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
+	// Uses two-loop correction as described in
+	// Nocedal, J., Wright, S.: Numerical Optimization (2nd ed). Springer (2006), chapter 7, page 178.
+
 	if len(loc.X) != l.dim {
 		panic("lbfgs: unexpected size mismatch")
 	}
@@ -114,46 +113,44 @@ func (l *LBFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		panic("lbfgs: unexpected size mismatch")
 	}
 
-	// Update direction. Uses two-loop correction as described in
-	// Nocedal, Wright (2006), Numerical Optimization (2nd ed.). Chapter 7, page 178.
-	copy(dir, loc.Gradient)
-	floats.SubTo(l.y, loc.Gradient, l.grad)
-	floats.SubTo(l.s, loc.X, l.x)
-	copy(l.sHist[l.oldest], l.s)
-	copy(l.yHist[l.oldest], l.y)
-	sDotY := floats.Dot(l.y, l.s)
-	l.rhoHist[l.oldest] = 1 / sDotY
+	y := l.y[l.oldest]
+	floats.SubTo(y, loc.Gradient, l.grad)
+	s := l.s[l.oldest]
+	floats.SubTo(s, loc.X, l.x)
+	sDotY := floats.Dot(s, y)
+	l.rho[l.oldest] = 1 / sDotY
 
-	l.oldest++
-	l.oldest = l.oldest % l.Store
+	l.oldest = (l.oldest + 1) % l.Store
+
 	copy(l.x, loc.X)
 	copy(l.grad, loc.Gradient)
+	copy(dir, loc.Gradient)
 
-	// two loop update. First loop starts with the most recent element
-	// and goes backward, second starts with the oldest element and goes
-	// forward. At the end have computed H^-1 * g, so flip the direction for
-	// minimization.
+	// Start with the most recent element and go backward,
 	for i := 0; i < l.Store; i++ {
 		idx := l.oldest - i - 1
 		if idx < 0 {
 			idx += l.Store
 		}
-		l.a[idx] = l.rhoHist[idx] * floats.Dot(l.sHist[idx], dir)
-		floats.AddScaled(dir, -l.a[idx], l.yHist[idx])
+		l.a[idx] = l.rho[idx] * floats.Dot(l.s[idx], dir)
+		floats.AddScaled(dir, -l.a[idx], l.y[idx])
 	}
 
 	// Scale the initial Hessian.
-	gamma := sDotY / floats.Dot(l.y, l.y)
+	gamma := sDotY / floats.Dot(y, y)
 	floats.Scale(gamma, dir)
 
+	// Start with the oldest element and go forward.
 	for i := 0; i < l.Store; i++ {
 		idx := i + l.oldest
 		if idx >= l.Store {
 			idx -= l.Store
 		}
-		beta := l.rhoHist[idx] * floats.Dot(l.yHist[idx], dir)
-		floats.AddScaled(dir, l.a[idx]-beta, l.sHist[idx])
+		beta := l.rho[idx] * floats.Dot(l.y[idx], dir)
+		floats.AddScaled(dir, l.a[idx]-beta, l.s[idx])
 	}
+
+	// dir contains H^{-1} * g, so flip the direction for minimization.
 	floats.Scale(-1, dir)
 
 	return 1

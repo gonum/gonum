@@ -54,7 +54,7 @@ func (impl Implementation) Dorml2(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarf(side, m-i, n, a[i*lda+i:], 1, tau[i], c[i*ldc:], ldc, work)
 			a[i*lda+i] = aii
 		}
-		return
+
 	case left && !notran:
 		for i := k - 1; i >= 0; i-- {
 			aii := a[i*lda+i]
@@ -62,7 +62,7 @@ func (impl Implementation) Dorml2(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarf(side, m-i, n, a[i*lda+i:], 1, tau[i], c[i*ldc:], ldc, work)
 			a[i*lda+i] = aii
 		}
-		return
+
 	case !left && notran:
 		for i := k - 1; i >= 0; i-- {
 			aii := a[i*lda+i]
@@ -70,7 +70,7 @@ func (impl Implementation) Dorml2(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarf(side, m, n-i, a[i*lda+i:], 1, tau[i], c[i:], ldc, work)
 			a[i*lda+i] = aii
 		}
-		return
+
 	case !left && !notran:
 		for i := 0; i < k; i++ {
 			aii := a[i*lda+i]
@@ -78,6 +78,5 @@ func (impl Implementation) Dorml2(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarf(side, m, n-i, a[i*lda+i:], 1, tau[i], c[i:], ldc, work)
 			a[i*lda+i] = aii
 		}
-		return
 	}
 }

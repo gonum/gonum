@@ -21,20 +21,19 @@ func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int
 				b[i*ldb+j] = a[i*lda+j]
 			}
 		}
-		return
+
 	case blas.Lower:
 		for i := 0; i < m; i++ {
 			for j := 0; j < min(i, n); j++ {
 				b[i*ldb+j] = a[i*lda+j]
 			}
 		}
-		return
+
 	case blas.All:
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
 				b[i*ldb+j] = a[i*lda+j]
 			}
 		}
-		return
 	}
 }

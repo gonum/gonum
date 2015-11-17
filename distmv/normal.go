@@ -75,11 +75,17 @@ func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bo
 // ConditionNormal returns {nil, false} if there is a failure during the update.
 // Mathematically this is impossible, but can occur with finite precision arithmetic.
 func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Rand) (*Normal, bool) {
+	if len(observed) == 0 {
+		panic("normal: no observed value")
+	}
 	if len(observed) != len(values) {
 		panic("normal: input slice length mismatch")
 	}
-
-	n.setSigma()
+	for _, v := range observed {
+		if v < 0 || v >= n.Dim() {
+			panic("normal: observed value out of bounds")
+		}
+	}
 
 	ob := len(observed)
 	unob := n.Dim() - ob
@@ -89,6 +95,9 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Ran
 			panic("normal: observed dimension occurs twice")
 		}
 		obMap[v] = struct{}{}
+	}
+	if len(observed) == n.Dim() {
+		panic("normal: all dimensions observed")
 	}
 	unobserved := make([]int, 0, unob)
 	for i := 0; i < n.Dim(); i++ {
@@ -104,6 +113,8 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Ran
 	for i, v := range observed {
 		mu2[i] = values[i] - n.mu[v]
 	}
+
+	n.setSigma()
 
 	var sigma11, sigma22 mat64.SymDense
 	sigma11.SubsetSym(n.sigma, unobserved)

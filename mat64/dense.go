@@ -120,13 +120,14 @@ func (m *Dense) isZero() bool {
 // of the TriDense is the same as the receiver.
 func (m *Dense) asTriDense(n int, diag blas.Diag, uplo blas.Uplo) *TriDense {
 	return &TriDense{
-		blas64.Triangular{
+		mat: blas64.Triangular{
 			N:      n,
 			Stride: m.mat.Stride,
 			Data:   m.mat.Data,
 			Uplo:   uplo,
 			Diag:   diag,
 		},
+		cap: n,
 	}
 }
 
@@ -238,7 +239,7 @@ func (m *Dense) rowView(r int) []float64 {
 
 // View returns a new Matrix that shares backing data with the receiver.
 // The new matrix is located from row i, column j extending r rows and c
-// columns.
+// columns. View panics if the view is outside the bounds of the receiver.
 func (m *Dense) View(i, j, r, c int) Matrix {
 	mr, mc := m.Dims()
 	if i < 0 || i >= mr || j < 0 || j >= mc || r <= 0 || i+r > mr || c <= 0 || j+c > mc {
@@ -253,9 +254,10 @@ func (m *Dense) View(i, j, r, c int) Matrix {
 	return &t
 }
 
-// Grow returns an expanded copy of the receiver. The copy is expanded
-// by r rows and c columns. If the dimensions of the new copy are outside
-// the caps of the receiver a new allocation is made, otherwise not.
+// Grow returns the receiver expanded by r rows and c columns. If the dimensions
+// of the expanded matrix are outside the capacities of the receiver a new
+// allocation is made, otherwise not. Note the receiver itself is not modified
+// during the call to Grow.
 func (m *Dense) Grow(r, c int) Matrix {
 	if r < 0 || c < 0 {
 		panic(matrix.ErrIndexOutOfRange)
@@ -291,10 +293,18 @@ func (m *Dense) Grow(r, c int) Matrix {
 		t.capRows = cr
 		t.capCols = cc
 		// Copy the complete matrix over to the new matrix.
-		// Including elements not currently visible.
-		r, c, m.mat.Rows, m.mat.Cols = m.mat.Rows, m.mat.Cols, m.capRows, m.capCols
-		t.Copy(m)
-		m.mat.Rows, m.mat.Cols = r, c
+		// Including elements not currently visible. Use a temporary structure
+		// to avoid modifying the receiver.
+		var tmp Dense
+		tmp.mat = blas64.General{
+			Rows:   m.mat.Rows,
+			Cols:   m.mat.Cols,
+			Stride: m.mat.Stride,
+			Data:   m.mat.Data,
+		}
+		tmp.capRows = m.capRows
+		tmp.capCols = m.capCols
+		t.Copy(&tmp)
 		return &t
 	default:
 		t.mat = blas64.General{

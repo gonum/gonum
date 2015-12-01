@@ -26,13 +26,16 @@ func TestNewTriangular(t *testing.T) {
 			},
 			n:     3,
 			upper: true,
-			mat: &TriDense{blas64.Triangular{
-				N:      3,
-				Stride: 3,
-				Uplo:   blas.Upper,
-				Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
-				Diag:   blas.NonUnit,
-			}},
+			mat: &TriDense{
+				mat: blas64.Triangular{
+					N:      3,
+					Stride: 3,
+					Uplo:   blas.Upper,
+					Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+					Diag:   blas.NonUnit,
+				},
+				cap: 3,
+			},
 		},
 	} {
 		tri := NewTriDense(test.n, test.upper, test.data)
@@ -58,13 +61,16 @@ func TestNewTriangular(t *testing.T) {
 }
 
 func TestTriAtSet(t *testing.T) {
-	tri := &TriDense{blas64.Triangular{
-		N:      3,
-		Stride: 3,
-		Uplo:   blas.Upper,
-		Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
-		Diag:   blas.NonUnit,
-	}}
+	tri := &TriDense{
+		mat: blas64.Triangular{
+			N:      3,
+			Stride: 3,
+			Uplo:   blas.Upper,
+			Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			Diag:   blas.NonUnit,
+		},
+		cap: 3,
+	}
 
 	rows, cols := tri.Dims()
 

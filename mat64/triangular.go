@@ -13,10 +13,13 @@ var (
 	_        RawTriangular = triDense
 )
 
+const badTriCap = "mat64: bad capacity for TriDense"
+
 // TriDense represents an upper or lower triangular matrix in dense storage
 // format.
 type TriDense struct {
 	mat blas64.Triangular
+	cap int
 }
 
 type Triangular interface {
@@ -102,13 +105,16 @@ func NewTriDense(n int, upper bool, mat []float64) *TriDense {
 	if upper {
 		uplo = blas.Upper
 	}
-	return &TriDense{blas64.Triangular{
-		N:      n,
-		Stride: n,
-		Data:   mat,
-		Uplo:   uplo,
-		Diag:   blas.NonUnit,
-	}}
+	return &TriDense{
+		mat: blas64.Triangular{
+			N:      n,
+			Stride: n,
+			Data:   mat,
+			Uplo:   uplo,
+			Diag:   blas.NonUnit,
+		},
+		cap: n,
+	}
 }
 
 func (t *TriDense) Dims() (r, c int) {
@@ -176,6 +182,9 @@ func (t *TriDense) isZero() bool {
 // orientation. If the receiver is non-zero, reuseAs checks that the receiver
 // is the correct size and orientation.
 func (t *TriDense) reuseAs(n int, ul blas.Uplo) {
+	if t.mat.N > t.cap {
+		panic(badTriCap)
+	}
 	if t.isZero() {
 		t.mat = blas64.Triangular{
 			N:      n,
@@ -184,6 +193,7 @@ func (t *TriDense) reuseAs(n int, ul blas.Uplo) {
 			Data:   use(t.mat.Data, n*n),
 			Uplo:   ul,
 		}
+		t.cap = n
 		return
 	}
 	if t.mat.N != n || t.mat.Uplo != ul {

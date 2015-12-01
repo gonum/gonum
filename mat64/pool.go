@@ -112,6 +112,7 @@ func getWorkspaceSym(n int, clear bool) *SymDense {
 	}
 	s.mat.N = n
 	s.mat.Stride = n
+	s.cap = n
 	return s
 }
 

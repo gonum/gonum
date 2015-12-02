@@ -67,13 +67,14 @@ func (m *Dense) RFromQR(qr *QR) {
 
 	// Disguise the QR as an upper triangular
 	t := &TriDense{
-		blas64.Triangular{
+		mat: blas64.Triangular{
 			N:      c,
 			Stride: qr.qr.mat.Stride,
 			Data:   qr.qr.mat.Data,
 			Uplo:   blas.Upper,
 			Diag:   blas.NonUnit,
 		},
+		cap: qr.qr.capCols,
 	}
 	m.Copy(t)
 

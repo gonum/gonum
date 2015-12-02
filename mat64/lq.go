@@ -65,13 +65,14 @@ func (m *Dense) LFromLQ(lq *LQ) {
 
 	// Disguise the LQ as a lower triangular
 	t := &TriDense{
-		blas64.Triangular{
+		mat: blas64.Triangular{
 			N:      r,
 			Stride: lq.lq.mat.Stride,
 			Data:   lq.lq.mat.Data,
 			Uplo:   blas.Lower,
 			Diag:   blas.NonUnit,
 		},
+		cap: lq.lq.capCols,
 	}
 	m.Copy(t)
 

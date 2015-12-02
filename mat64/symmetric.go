@@ -19,12 +19,16 @@ var (
 	_ MutableSymmetric = symDense
 )
 
-const badSymTriangle = "mat64: blas64.Symmetric not upper"
+const (
+	badSymTriangle = "mat64: blas64.Symmetric not upper"
+	badSymCap      = "mat64: bad capacity for SymDense"
+)
 
 // SymDense is a symmetric matrix that uses dense storage. SymDense
 // matrices are stored in the upper triangle.
 type SymDense struct {
 	mat blas64.Symmetric
+	cap int
 }
 
 // Symmetric represents a symmetric matrix (where the element at {i, j} equals
@@ -59,12 +63,15 @@ func NewSymDense(n int, mat []float64) *SymDense {
 	if mat == nil {
 		mat = make([]float64, n*n)
 	}
-	return &SymDense{blas64.Symmetric{
-		N:      n,
-		Stride: n,
-		Data:   mat,
-		Uplo:   blas.Upper,
-	}}
+	return &SymDense{
+		mat: blas64.Symmetric{
+			N:      n,
+			Stride: n,
+			Data:   mat,
+			Uplo:   blas.Upper,
+		},
+		cap: n,
+	}
 }
 
 func (s *SymDense) Dims() (r, c int) {
@@ -105,6 +112,9 @@ func (s *SymDense) isZero() bool {
 // reuseAs resizes an empty matrix to a n×n matrix,
 // or checks that a non-empty matrix is n×n.
 func (s *SymDense) reuseAs(n int) {
+	if s.mat.N > s.cap {
+		panic(badSymCap)
+	}
 	if s.isZero() {
 		s.mat = blas64.Symmetric{
 			N:      n,
@@ -112,6 +122,7 @@ func (s *SymDense) reuseAs(n int) {
 			Data:   use(s.mat.Data, n*n),
 			Uplo:   blas.Upper,
 		}
+		s.cap = n
 		return
 	}
 	if s.mat.Uplo != blas.Upper {
@@ -136,16 +147,7 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 	if n != b.Symmetric() {
 		panic(matrix.ErrShape)
 	}
-	if s.isZero() {
-		s.mat = blas64.Symmetric{
-			N:      n,
-			Stride: n,
-			Data:   use(s.mat.Data, n*n),
-			Uplo:   blas.Upper,
-		}
-	} else if s.mat.N != n {
-		panic(matrix.ErrShape)
-	}
+	s.reuseAs(n)
 
 	if a, ok := a.(RawSymmetricer); ok {
 		if b, ok := b.(RawSymmetricer); ok {
@@ -203,16 +205,7 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
 	if a.Symmetric() != n {
 		panic(matrix.ErrShape)
 	}
-	if s.isZero() {
-		s.mat = blas64.Symmetric{
-			N:      n,
-			Stride: n,
-			Uplo:   blas.Upper,
-			Data:   use(s.mat.Data, n*n),
-		}
-	} else if n != s.mat.N {
-		panic(matrix.ErrShape)
-	}
+	s.reuseAs(n)
 	if s != a {
 		s.CopySym(a)
 	}
@@ -261,6 +254,7 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 			Data:   useZeroed(s.mat.Data, n*n),
 			Uplo:   blas.Upper,
 		}
+		s.cap = n
 		s.SymRankK(s, alpha, x)
 	case s.mat.Uplo != blas.Upper:
 		panic(badSymTriangle)
@@ -298,16 +292,7 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
 	if s == a {
 		w = *s
 	}
-	if w.isZero() {
-		w.mat = blas64.Symmetric{
-			N:      n,
-			Stride: n,
-			Uplo:   blas.Upper,
-			Data:   use(w.mat.Data, n*n),
-		}
-	} else if n != w.mat.N {
-		panic(matrix.ErrShape)
-	}
+	w.reuseAs(n)
 	if s != a {
 		w.CopySym(a)
 	}
@@ -373,4 +358,63 @@ func (s *SymDense) SubsetSym(a Symmetric, set []int) {
 			s.mat.Data[i*s.mat.Stride+j] = a.At(set[i], set[j])
 		}
 	}
+}
+
+// ViewSquare returns a view of the submatrix starting at {i, i} and extending
+// for n rows and columns. ViewSquare panics if the view is outside the bounds
+// of the receiver.
+func (s *SymDense) ViewSquare(i, n int) Matrix {
+	sz := s.Symmetric()
+	if i < 0 || i > sz || n < 0 || i+n > sz {
+		panic(matrix.ErrIndexOutOfRange)
+	}
+	v := *s
+	v.mat.Data = s.mat.Data[i*s.mat.Stride+i : (i+n-1)*s.mat.Stride+i+n]
+	v.mat.N = n
+	v.cap = s.cap - i
+	return &v
+}
+
+// GrowSquare returns the receiver expanded by n rows and n columns. If the
+// dimensions of the expanded matrix are outside the capacity of the receiver
+// a new allocation is made, otherwise not. Note that the receiver itself is
+// not modified during the call to GrowSquare.
+func (s *SymDense) GrowSquare(n int) Matrix {
+	if n < 0 {
+		panic(matrix.ErrIndexOutOfRange)
+	}
+	if n == 0 {
+		return s
+	}
+	var v SymDense
+	n += s.mat.N
+	if n > s.cap {
+		v.mat = blas64.Symmetric{
+			N:      n,
+			Stride: n,
+			Uplo:   blas.Upper,
+			Data:   make([]float64, n*n),
+		}
+		v.cap = n
+		// Copy elements, including those not currently visible. Use a temporary
+		// structure to avoid modifying the receiver.
+		var tmp SymDense
+		tmp.mat = blas64.Symmetric{
+			N:      s.cap,
+			Stride: s.mat.Stride,
+			Data:   s.mat.Data,
+			Uplo:   s.mat.Uplo,
+		}
+		tmp.cap = s.cap
+		v.CopySym(&tmp)
+		return &v
+	}
+	v.mat = blas64.Symmetric{
+		N:      n,
+		Stride: s.mat.Stride,
+		Uplo:   blas.Upper,
+		Data:   s.mat.Data[:(n-1)*s.mat.Stride+n],
+	}
+	v.cap = s.cap
+	return &v
 }

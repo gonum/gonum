@@ -5,7 +5,9 @@
 package mat64
 
 import (
+	"fmt"
 	"math/rand"
+	"os"
 	"reflect"
 	"testing"
 
@@ -28,12 +30,15 @@ func TestNewSymmetric(t *testing.T) {
 				7, 8, 9,
 			},
 			n: 3,
-			mat: &SymDense{blas64.Symmetric{
-				N:      3,
-				Stride: 3,
-				Uplo:   blas.Upper,
-				Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
-			}},
+			mat: &SymDense{
+				mat: blas64.Symmetric{
+					N:      3,
+					Stride: 3,
+					Uplo:   blas.Upper,
+					Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+				},
+				cap: 3,
+			},
 		},
 	} {
 		sym := NewSymDense(test.n, test.data)
@@ -62,12 +67,15 @@ func TestNewSymmetric(t *testing.T) {
 }
 
 func TestSymAtSet(t *testing.T) {
-	sym := &SymDense{blas64.Symmetric{
-		N:      3,
-		Stride: 3,
-		Uplo:   blas.Upper,
-		Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
-	}}
+	sym := &SymDense{
+		mat: blas64.Symmetric{
+			N:      3,
+			Stride: 3,
+			Uplo:   blas.Upper,
+			Data:   []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		},
+		cap: 3,
+	}
 	rows, cols := sym.Dims()
 
 	// Check At out of bounds
@@ -532,4 +540,86 @@ func TestSubsetSym(t *testing.T) {
 	}
 
 	testOneInput(t, "SubsetSym", &SymDense{}, method, denseComparison, legalTypeSym, legalSize, 0)
+}
+
+func TestViewGrowSquare(t *testing.T) {
+	// n is the size of the original SymDense.
+	// The first view uses start1, span1. The second view uses start2, span2 on
+	// the first view.
+	for _, test := range []struct {
+		n, start1, span1, start2, span2 int
+	}{
+		{10, 0, 10, 0, 10},
+		{10, 0, 8, 0, 8},
+		{10, 2, 8, 0, 6},
+		{10, 2, 7, 4, 2},
+		{10, 2, 6, 0, 5},
+	} {
+		n := test.n
+		s := NewSymDense(n, nil)
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				s.SetSym(i, j, float64((i+1)*n+j+1))
+			}
+		}
+
+		// Take a subset and check the view matches.
+		start1 := test.start1
+		span1 := test.span1
+		v := s.ViewSquare(start1, span1).(*SymDense)
+		for i := 0; i < span1; i++ {
+			for j := i; j < span1; j++ {
+				if v.At(i, j) != s.At(start1+i, start1+j) {
+					t.Errorf("View mismatch")
+				}
+			}
+		}
+
+		start2 := test.start2
+		span2 := test.span2
+		v2 := v.ViewSquare(start2, span2).(*SymDense)
+
+		for i := 0; i < span2; i++ {
+			for j := i; j < span2; j++ {
+				if v2.At(i, j) != s.At(start1+start2+i, start1+start2+j) {
+					t.Errorf("Second view mismatch")
+				}
+			}
+		}
+
+		// Check that a write to the view is reflected in the original.
+		v2.SetSym(0, 0, 1.2)
+		if s.At(start1+start2, start1+start2) != 1.2 {
+			t.Errorf("Write to view not reflected in original")
+		}
+
+		// Grow the matrix back to the original view
+		gn := n - start1 - start2
+		g := v2.GrowSquare(gn - v2.Symmetric()).(*SymDense)
+		g.SetSym(1, 1, 2.2)
+
+		for i := 0; i < gn; i++ {
+			for j := 0; j < gn; j++ {
+				if g.At(i, j) != s.At(start1+start2+i, start1+start2+j) {
+					t.Errorf("Grow mismatch")
+
+					fmt.Printf("g=\n% v\n", Formatted(g))
+					fmt.Printf("s=\n% v\n", Formatted(s))
+					os.Exit(1)
+				}
+			}
+		}
+
+		// View g, then grow it and make sure all the elements were copied.
+		gv := g.ViewSquare(0, gn-1).(*SymDense)
+
+		gg := gv.GrowSquare(2)
+		for i := 0; i < gn; i++ {
+			for j := 0; j < gn; j++ {
+				if g.At(i, j) != gg.At(i, j) {
+					t.Errorf("Expand mismatch")
+				}
+			}
+		}
+	}
 }

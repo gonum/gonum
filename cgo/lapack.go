@@ -28,6 +28,7 @@ const (
 	badUplo       = "lapack: illegal triangle"
 	badWork       = "lapack: insufficient working memory"
 	badWorkStride = "lapack: insufficient working array stride"
+	badZ          = "lapack: insufficient z length"
 	kGTM          = "lapack: k > m"
 	kGTN          = "lapack: k > n"
 	kLT0          = "lapack: k < 0"

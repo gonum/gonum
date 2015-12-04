@@ -96,6 +96,26 @@ func TestDlartg(t *testing.T) {
 	testlapack.DlartgTest(t, impl)
 }
 
+func TestDlasq1(t *testing.T) {
+	testlapack.Dlasq1Test(t, impl)
+}
+
+func TestDlasq2(t *testing.T) {
+	testlapack.Dlasq2Test(t, impl)
+}
+
+func TestDlasq3(t *testing.T) {
+	testlapack.Dlasq3Test(t, impl)
+}
+
+func TestDlasq4(t *testing.T) {
+	testlapack.Dlasq4Test(t, impl)
+}
+
+func TestDlasq5(t *testing.T) {
+	testlapack.Dlasq5Test(t, impl)
+}
+
 func TestDlasr(t *testing.T) {
 	testlapack.DlasrTest(t, impl)
 }

@@ -13,6 +13,33 @@ import (
 
 var impl = Implementation{}
 
+// blockedTranslate transforms some blocked C calls to be the unblocked algorithms
+// for testing, as several of the unblocked algorithms are not defined by the C
+// interface.
+type blockedTranslate struct {
+	Implementation
+}
+
+func (bl blockedTranslate) Dgebd2(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64) {
+	impl.Dgebrd(m, n, a, lda, d, e, tauQ, tauP, work, len(work))
+}
+
+func (bl blockedTranslate) Dorm2r(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64) {
+	impl.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, len(work))
+}
+
+func (bl blockedTranslate) Dorml2(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64) {
+	impl.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, len(work))
+}
+
+func (bl blockedTranslate) Dorg2r(m, n, k int, a []float64, lda int, tau, work []float64) {
+	impl.Dorgqr(m, n, k, a, lda, tau, work, len(work))
+}
+
+func (bl blockedTranslate) Dorgl2(m, n, k int, a []float64, lda int, tau, work []float64) {
+	impl.Dorglq(m, n, k, a, lda, tau, work, len(work))
+}
+
 func TestDlacpy(t *testing.T) {
 	testlapack.DlacpyTest(t, impl)
 }
@@ -27,6 +54,10 @@ func TestDlantr(t *testing.T) {
 
 func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
+}
+
+func TestDgebd2(t *testing.T) {
+	testlapack.Dgebd2Test(t, blockedTranslate{impl})
 }
 
 func TestDgecon(t *testing.T) {
@@ -69,29 +100,6 @@ func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
 }
 
-// blockedTranslate transforms some blocked C calls to be the unblocked algorithms
-// for testing, as several of the unblocked algorithms are not defined by the C
-// interface.
-type blockedTranslate struct {
-	Implementation
-}
-
-func (d blockedTranslate) Dorm2r(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64) {
-	impl.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, len(work))
-}
-
-func (d blockedTranslate) Dorml2(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64) {
-	impl.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, len(work))
-}
-
-func (d blockedTranslate) Dorg2r(m, n, k int, a []float64, lda int, tau, work []float64) {
-	impl.Dorgqr(m, n, k, a, lda, tau, work, len(work))
-}
-
-func (d blockedTranslate) Dorgl2(m, n, k int, a []float64, lda int, tau, work []float64) {
-	impl.Dorglq(m, n, k, a, lda, tau, work, len(work))
-}
-
 func TestDorglq(t *testing.T) {
 	testlapack.DorglqTest(t, blockedTranslate{impl})
 }
@@ -108,12 +116,27 @@ func TestDorg2r(t *testing.T) {
 	testlapack.Dorg2rTest(t, blockedTranslate{impl})
 }
 
+/*
+// Test disabled because of bug in c interface. Leaving stub for easy reproducer.
+//
+// Bug at: https://github.com/xianyi/OpenBLAS/issues/712
+// Fix at: https://github.com/xianyi/OpenBLAS/pull/713
+// Easily copiable fix: https://github.com/gonum/lapack/pull/74#issuecomment-163142140
+func TestDormbr(t *testing.T) {
+	testlapack.DormbrTest(t, blockedTranslate{impl})
+}
+*/
+
 func TestDormqr(t *testing.T) {
 	testlapack.Dorm2rTest(t, blockedTranslate{impl})
 }
 
 /*
 // Test disabled because of bug in c interface. Leaving stub for easy reproducer.
+//
+// Bug at: https://github.com/xianyi/OpenBLAS/issues/615
+// Fix at: https://github.com/xianyi/OpenBLAS/pull/711
+// Easily copiable fix: https://github.com/gonum/lapack/pull/74#issuecomment-163110751
 func TestDormlq(t *testing.T) {
 	testlapack.Dorml2Test(t, blockedTranslate{impl})
 }

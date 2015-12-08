@@ -30,6 +30,7 @@ func Dorml2Test(t *testing.T, impl Dorml2er) {
 				{4, 5, 3, 0, 0},
 				{5, 3, 4, 0, 0},
 				{5, 4, 3, 0, 0},
+
 				{3, 4, 5, 6, 20},
 				{3, 5, 4, 6, 20},
 				{4, 3, 5, 6, 20},
@@ -129,7 +130,9 @@ func Dorml2Test(t *testing.T, impl Dorml2er) {
 					t.Errorf("tau changed in call")
 				}
 				if !floats.EqualApprox(cMat.Data, c, 1e-14) {
-					t.Errorf("Multiplication mismatch.\n Want %v \n got %v.", cMat.Data, c)
+					isLeft := side == blas.Left
+					isTrans := trans == blas.Trans
+					t.Errorf("Multiplication mismatch. IsLeft = %v. IsTrans = %v", isLeft, isTrans)
 				}
 			}
 		}

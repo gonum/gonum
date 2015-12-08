@@ -12,6 +12,14 @@ import (
 
 var impl = Implementation{}
 
+func TestDgebd2(t *testing.T) {
+	testlapack.Dgebd2Test(t, impl)
+}
+
+func TestDgebrd(t *testing.T) {
+	testlapack.DgebrdTest(t, impl)
+}
+
 func TestDgecon(t *testing.T) {
 	testlapack.DgeconTest(t, impl)
 }
@@ -50,6 +58,10 @@ func TestDgetrf(t *testing.T) {
 
 func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
+}
+
+func TestDlabrd(t *testing.T) {
+	testlapack.DlabrdTest(t, impl)
 }
 
 func TestDlacpy(t *testing.T) {

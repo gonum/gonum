@@ -6,6 +6,8 @@ package testlapack
 
 import (
 	"fmt"
+	"math"
+	"testing"
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
@@ -24,6 +26,15 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// nanSlice allocates a new slice of length n filled with NaN.
+func nanSlice(n int) []float64 {
+	s := make([]float64, n)
+	for i := range s {
+		s[i] = math.NaN()
+	}
+	return s
 }
 
 // extractVMat collects the single reflectors from a into a matrix.
@@ -297,6 +308,222 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 		}
 	}
 	return q
+}
+
+// checkBidiagonal checks the bidiagonal decomposition from dlabrd and dgebd2.
+// The input to this function is the answer returned from the routines, stored
+// in a, d, e, tauP, and tauQ. The data of original A matrix (before
+// decomposition) is input in aCopy.
+//
+// checkBidiagonal constructs the V and U matrices, and from them constructs Q
+// and P. Using these constructions, it checks that Q^T * A * P and checks that
+// the result is bidiagonal.
+func checkBidiagonal(t *testing.T, m, n, nb int, a []float64, lda int, d, e, tauP, tauQ, aCopy []float64) {
+	// Check the answer.
+	// Construct V.and U
+	ldv := nb
+	v := blas64.General{
+		Rows:   m,
+		Cols:   nb,
+		Stride: ldv,
+		Data:   make([]float64, m*ldv),
+	}
+	if m >= n {
+		for i := 0; i < m; i++ {
+			for j := 0; j <= min(nb-1, i); j++ {
+				if i == j {
+					v.Data[i*ldv+j] = 1
+					continue
+				}
+				v.Data[i*ldv+j] = a[i*lda+j]
+			}
+		}
+	} else {
+		for i := 1; i < m; i++ {
+			for j := 0; j <= min(nb-1, i-1); j++ {
+				if i-1 == j {
+					v.Data[i*ldv+j] = 1
+					continue
+				}
+				v.Data[i*ldv+j] = a[i*lda+j]
+			}
+		}
+	}
+
+	ldu := n
+	u := blas64.General{
+		Rows:   nb,
+		Cols:   n,
+		Stride: ldu,
+		Data:   make([]float64, nb*ldu),
+	}
+	if m < n {
+		for i := 0; i < nb; i++ {
+			for j := i; j < n; j++ {
+				if i == j {
+					u.Data[i*ldu+j] = 1
+					continue
+				}
+				u.Data[i*ldu+j] = a[i*lda+j]
+			}
+		}
+	} else {
+		for i := 0; i < nb; i++ {
+			for j := i + 1; j < n; j++ {
+				if j-1 == i {
+					u.Data[i*ldu+j] = 1
+					continue
+				}
+				u.Data[i*ldu+j] = a[i*lda+j]
+			}
+		}
+	}
+
+	// Check the reconstruction Q^T * A * P
+	qMat := blas64.General{
+		Rows:   m,
+		Cols:   m,
+		Stride: m,
+		Data:   make([]float64, m*m),
+	}
+	hMat := blas64.General{
+		Rows:   m,
+		Cols:   m,
+		Stride: m,
+		Data:   make([]float64, m*m),
+	}
+	pMat := blas64.General{
+		Rows:   n,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, n*n),
+	}
+	gMat := blas64.General{
+		Rows:   n,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, n*n),
+	}
+	// set Q and P to I
+	for i := 0; i < m; i++ {
+		qMat.Data[i*qMat.Stride+i] = 1
+	}
+	for i := 0; i < n; i++ {
+		pMat.Data[i*pMat.Stride+i] = 1
+	}
+
+	for i := 0; i < nb; i++ {
+		qCopy := blas64.General{Rows: qMat.Rows, Cols: qMat.Cols, Stride: qMat.Stride, Data: make([]float64, len(qMat.Data))}
+		copy(qCopy.Data, qMat.Data)
+		pCopy := blas64.General{Rows: pMat.Rows, Cols: pMat.Cols, Stride: pMat.Stride, Data: make([]float64, len(pMat.Data))}
+		copy(pCopy.Data, pMat.Data)
+
+		// Set g and h to I
+		for i := 0; i < m; i++ {
+			for j := 0; j < m; j++ {
+				if i == j {
+					hMat.Data[i*m+j] = 1
+				} else {
+					hMat.Data[i*m+j] = 0
+				}
+			}
+		}
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				if i == j {
+					gMat.Data[i*n+j] = 1
+				} else {
+					gMat.Data[i*n+j] = 0
+				}
+			}
+		}
+		// H -= tauQ[i] * v[i] * v[i]^t
+		vi := blas64.Vector{
+			Inc:  v.Stride,
+			Data: v.Data[i:],
+		}
+		blas64.Ger(-tauQ[i], vi, vi, hMat)
+		// G -= tauP[i] * u[i] * u[i]^T
+		ui := blas64.Vector{
+			Inc:  1,
+			Data: u.Data[i*u.Stride:],
+		}
+		blas64.Ger(-tauP[i], ui, ui, gMat)
+
+		// Q = Q * G[1]
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qCopy, hMat, 0, qMat)
+		// P = P * G[i]
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, pCopy, gMat, 0, pMat)
+	}
+
+	// Compute Q^T * A * P
+	aMat := blas64.General{
+		Rows:   m,
+		Cols:   n,
+		Stride: lda,
+		Data:   make([]float64, len(aCopy)),
+	}
+	copy(aMat.Data, aCopy)
+
+	tmp1 := blas64.General{
+		Rows:   m,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, m*n),
+	}
+	blas64.Gemm(blas.Trans, blas.NoTrans, 1, qMat, aMat, 0, tmp1)
+	tmp2 := blas64.General{
+		Rows:   m,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, m*n),
+	}
+	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, tmp1, pMat, 0, tmp2)
+
+	// Check that the first nb rows and cols of tm2 are upper bidiagonal
+	// if m >= n, and lower bidiagonal otherwise.
+	correctDiag := true
+	matchD := true
+	matchE := true
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			if i >= nb && j >= nb {
+				continue
+			}
+			v := tmp2.Data[i*tmp2.Stride+j]
+			if i == j {
+				if math.Abs(d[i]-v) > 1e-12 {
+					matchD = false
+				}
+				continue
+			}
+			if m >= n && i == j-1 {
+				if math.Abs(e[j-1]-v) > 1e-12 {
+					matchE = false
+				}
+				continue
+			}
+			if m < n && i-1 == j {
+				if math.Abs(e[i-1]-v) > 1e-12 {
+					matchE = false
+				}
+				continue
+			}
+			if math.Abs(v) > 1e-12 {
+				correctDiag = false
+			}
+		}
+	}
+	if !correctDiag {
+		t.Errorf("Updated A not bi-diagonal")
+	}
+	if !matchD {
+		fmt.Println("d = ", d)
+		t.Errorf("D Mismatch")
+	}
+	if !matchE {
+		t.Errorf("E mismatch")
+	}
 }
 
 // printRowise prints the matrix with one row per line. This is useful for debugging.

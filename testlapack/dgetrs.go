@@ -15,38 +15,30 @@ type Dgetrser interface {
 }
 
 func DgetrsTest(t *testing.T, impl Dgetrser) {
+	// TODO(btracey): Put more thought into creating more regularized matrices
+	// and what correct tolerances should be. Consider also seeding the random
+	// number in this test to make it more robust to code changes in other
+	// parts of the suite.
 	for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans} {
 		for _, test := range []struct {
 			n, nrhs, lda, ldb int
 			tol               float64
 		}{
 			{3, 3, 0, 0, 1e-12},
-			{3, 3, 0, 0, 1e-12},
 			{3, 5, 0, 0, 1e-12},
-			{3, 5, 0, 0, 1e-12},
-			{5, 3, 0, 0, 1e-12},
 			{5, 3, 0, 0, 1e-12},
 
 			{3, 3, 8, 10, 1e-12},
-			{3, 3, 8, 10, 1e-12},
-			{3, 5, 8, 10, 1e-12},
 			{3, 5, 8, 10, 1e-12},
 			{5, 3, 8, 10, 1e-12},
-			{5, 3, 8, 10, 1e-12},
 
-			{300, 300, 0, 0, 1e-10},
-			{300, 300, 0, 0, 1e-10},
-			{300, 500, 0, 0, 1e-10},
-			{300, 500, 0, 0, 1e-10},
-			{500, 300, 0, 0, 1e-10},
-			{500, 300, 0, 0, 1e-10},
+			{300, 300, 0, 0, 1e-8},
+			{300, 500, 0, 0, 1e-8},
+			{500, 300, 0, 0, 1e-8},
 
-			{300, 300, 700, 600, 1e-10},
-			{300, 300, 700, 600, 1e-10},
-			{300, 500, 700, 600, 1e-10},
-			{300, 500, 700, 600, 1e-10},
+			{300, 300, 700, 600, 1e-8},
+			{300, 500, 700, 600, 1e-8},
 			{500, 300, 700, 600, 1e-8},
-			{500, 300, 700, 600, 1e-10},
 		} {
 			n := test.n
 			nrhs := test.nrhs

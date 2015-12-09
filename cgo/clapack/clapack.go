@@ -110,6 +110,32 @@ func Zbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float64, e []fl
 	return isZero(C.LAPACKE_zbdsqr((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(n), (C.lapack_int)(ncvt), (C.lapack_int)(nru), (C.lapack_int)(ncc), (*C.double)(&d[0]), (*C.double)(&e[0]), (*C.lapack_complex_double)(&vt[0]), (C.lapack_int)(ldvt), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&c[0]), (C.lapack_int)(ldc)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sbdsvdx.f.
+func Sbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl int, vu int, il int, iu int, ns int, s []float32, z []float32, ldz int, superb []int32) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_sbdsvdx((C.int)(rowMajor), (C.char)(ul), (C.char)(jobz), (C.char)(rng), (C.lapack_int)(n), (*C.float)(&d[0]), (*C.float)(&e[0]), (C.lapack_int)(vl), (C.lapack_int)(vu), (C.lapack_int)(il), (C.lapack_int)(iu), (C.lapack_int)(ns), (*C.float)(&s[0]), (*C.float)(&z[0]), (C.lapack_int)(ldz), (*C.lapack_int)(&superb[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dbdsvdx.f.
+func Dbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl int, vu int, il int, iu int, ns int, s []float64, z []float64, ldz int, superb []int32) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_dbdsvdx((C.int)(rowMajor), (C.char)(ul), (C.char)(jobz), (C.char)(rng), (C.lapack_int)(n), (*C.double)(&d[0]), (*C.double)(&e[0]), (C.lapack_int)(vl), (C.lapack_int)(vu), (C.lapack_int)(il), (C.lapack_int)(iu), (C.lapack_int)(ns), (*C.double)(&s[0]), (*C.double)(&z[0]), (C.lapack_int)(ldz), (*C.lapack_int)(&superb[0])))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sdisna.f.
 func Sdisna(job lapack.Job, m int, n int, d []float32, sep []float32) bool {
 	return isZero(C.LAPACKE_sdisna((C.char)(job), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&d[0]), (*C.float)(&sep[0])))
@@ -642,6 +668,16 @@ func Dgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, 
 	return isZero(C.LAPACKE_dgejsv((C.int)(rowMajor), (C.char)(joba), (C.char)(jobu), (C.char)(jobv), (C.char)(jobr), (C.char)(jobt), (C.char)(jobp), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&sva[0]), (*C.double)(&u[0]), (C.lapack_int)(ldu), (*C.double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&stat[0]), (*C.lapack_int)(&istat[0])))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgejsv.f.
+func Cgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, jobt lapack.Job, jobp lapack.Job, m int, n int, a []complex64, lda int, sva []float32, u []complex64, ldu int, v []complex64, ldv int, stat []float32, istat []int32) bool {
+	return isZero(C.LAPACKE_cgejsv((C.int)(rowMajor), (C.char)(joba), (C.char)(jobu), (C.char)(jobv), (C.char)(jobr), (C.char)(jobt), (C.char)(jobp), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&sva[0]), (*C.lapack_complex_float)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_float)(&v[0]), (C.lapack_int)(ldv), (*C.float)(&stat[0]), (*C.lapack_int)(&istat[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgejsv.f.
+func Zgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, jobt lapack.Job, jobp lapack.Job, m int, n int, a []complex128, lda int, sva []float64, u []complex128, ldu int, v []complex128, ldv int, stat []float64, istat []int32) bool {
+	return isZero(C.LAPACKE_zgejsv((C.int)(rowMajor), (C.char)(joba), (C.char)(jobu), (C.char)(jobv), (C.char)(jobr), (C.char)(jobt), (C.char)(jobp), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&sva[0]), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&stat[0]), (*C.lapack_int)(&istat[0])))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgelq2.f.
 func Sgelq2(m int, n int, a []float32, lda int, tau []float32) bool {
 	return isZero(C.LAPACKE_sgelq2((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&tau[0])))
@@ -840,26 +876,6 @@ func Cgeqp3(m int, n int, a []complex64, lda int, jpvt []int32, tau []complex64)
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqp3.f.
 func Zgeqp3(m int, n int, a []complex128, lda int, jpvt []int32, tau []complex128) bool {
 	return isZero(C.LAPACKE_zgeqp3((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&jpvt[0]), (*C.lapack_complex_double)(&tau[0])))
-}
-
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqpf.f.
-func Sgeqpf(m int, n int, a []float32, lda int, jpvt []int32, tau []float32) bool {
-	return isZero(C.LAPACKE_sgeqpf((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&jpvt[0]), (*C.float)(&tau[0])))
-}
-
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqpf.f.
-func Dgeqpf(m int, n int, a []float64, lda int, jpvt []int32, tau []float64) bool {
-	return isZero(C.LAPACKE_dgeqpf((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&jpvt[0]), (*C.double)(&tau[0])))
-}
-
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqpf.f.
-func Cgeqpf(m int, n int, a []complex64, lda int, jpvt []int32, tau []complex64) bool {
-	return isZero(C.LAPACKE_cgeqpf((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&jpvt[0]), (*C.lapack_complex_float)(&tau[0])))
-}
-
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqpf.f.
-func Zgeqpf(m int, n int, a []complex128, lda int, jpvt []int32, tau []complex128) bool {
-	return isZero(C.LAPACKE_zgeqpf((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&jpvt[0]), (*C.lapack_complex_double)(&tau[0])))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqr2.f.
@@ -1072,6 +1088,26 @@ func Zgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []complex128, lda
 	return isZero(C.LAPACKE_zgesvd((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobvt), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&s[0]), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&vt[0]), (C.lapack_int)(ldvt), (*C.double)(&superb[0])))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesvdx.f.
+func Sgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []float32, lda int, vl int, vu int, il int, iu int, ns int, s []float32, u []float32, ldu int, vt []float32, ldvt int, superb []int32) bool {
+	return isZero(C.LAPACKE_sgesvdx((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobvt), (C.char)(rng), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (C.lapack_int)(vl), (C.lapack_int)(vu), (C.lapack_int)(il), (C.lapack_int)(iu), (C.lapack_int)(ns), (*C.float)(&s[0]), (*C.float)(&u[0]), (C.lapack_int)(ldu), (*C.float)(&vt[0]), (C.lapack_int)(ldvt), (*C.lapack_int)(&superb[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesvdx.f.
+func Dgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []float64, lda int, vl int, vu int, il int, iu int, ns int, s []float64, u []float64, ldu int, vt []float64, ldvt int, superb []int32) bool {
+	return isZero(C.LAPACKE_dgesvdx((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobvt), (C.char)(rng), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (C.lapack_int)(vl), (C.lapack_int)(vu), (C.lapack_int)(il), (C.lapack_int)(iu), (C.lapack_int)(ns), (*C.double)(&s[0]), (*C.double)(&u[0]), (C.lapack_int)(ldu), (*C.double)(&vt[0]), (C.lapack_int)(ldvt), (*C.lapack_int)(&superb[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesvdx.f.
+func Cgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []complex64, lda int, vl int, vu int, il int, iu int, ns int, s []float32, u []complex64, ldu int, vt []complex64, ldvt int, superb []int32) bool {
+	return isZero(C.LAPACKE_cgesvdx((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobvt), (C.char)(rng), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (C.lapack_int)(vl), (C.lapack_int)(vu), (C.lapack_int)(il), (C.lapack_int)(iu), (C.lapack_int)(ns), (*C.float)(&s[0]), (*C.lapack_complex_float)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_float)(&vt[0]), (C.lapack_int)(ldvt), (*C.lapack_int)(&superb[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesvdx.f.
+func Zgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []complex128, lda int, vl int, vu int, il int, iu int, ns int, s []float64, u []complex128, ldu int, vt []complex128, ldvt int, superb []int32) bool {
+	return isZero(C.LAPACKE_zgesvdx((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobvt), (C.char)(rng), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (C.lapack_int)(vl), (C.lapack_int)(vu), (C.lapack_int)(il), (C.lapack_int)(iu), (C.lapack_int)(ns), (*C.double)(&s[0]), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&vt[0]), (C.lapack_int)(ldvt), (*C.lapack_int)(&superb[0])))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesvj.f.
 func Sgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []float32, lda int, sva []float32, mv int, v []float32, ldv int, stat []float32) bool {
 	return isZero(C.LAPACKE_sgesvj((C.int)(rowMajor), (C.char)(joba), (C.char)(jobu), (C.char)(jobv), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&sva[0]), (C.lapack_int)(mv), (*C.float)(&v[0]), (C.lapack_int)(ldv), (*C.float)(&stat[0])))
@@ -1080,6 +1116,16 @@ func Sgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a [
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesvj.f.
 func Dgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []float64, lda int, sva []float64, mv int, v []float64, ldv int, stat []float64) bool {
 	return isZero(C.LAPACKE_dgesvj((C.int)(rowMajor), (C.char)(joba), (C.char)(jobu), (C.char)(jobv), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&sva[0]), (C.lapack_int)(mv), (*C.double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&stat[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesvj.f.
+func Cgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []complex64, lda int, sva []float32, mv int, v []complex64, ldv int, stat []float32) bool {
+	return isZero(C.LAPACKE_cgesvj((C.int)(rowMajor), (C.char)(joba), (C.char)(jobu), (C.char)(jobv), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&sva[0]), (C.lapack_int)(mv), (*C.lapack_complex_float)(&v[0]), (C.lapack_int)(ldv), (*C.float)(&stat[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesvj.f.
+func Zgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []complex128, lda int, sva []float64, mv int, v []complex128, ldv int, stat []float64) bool {
+	return isZero(C.LAPACKE_zgesvj((C.int)(rowMajor), (C.char)(joba), (C.char)(jobu), (C.char)(jobv), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&sva[0]), (C.lapack_int)(mv), (*C.lapack_complex_double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&stat[0])))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesvx.f.
@@ -1180,6 +1226,26 @@ func Cgetrf(m int, n int, a []complex64, lda int, ipiv []int32) bool {
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgetrf.f.
 func Zgetrf(m int, n int, a []complex128, lda int, ipiv []int32) bool {
 	return isZero(C.LAPACKE_zgetrf((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgetrf2.f.
+func Sgetrf2(m int, n int, a []float32, lda int, ipiv []int32) bool {
+	return isZero(C.LAPACKE_sgetrf2((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgetrf2.f.
+func Dgetrf2(m int, n int, a []float64, lda int, ipiv []int32) bool {
+	return isZero(C.LAPACKE_dgetrf2((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgetrf2.f.
+func Cgetrf2(m int, n int, a []complex64, lda int, ipiv []int32) bool {
+	return isZero(C.LAPACKE_cgetrf2((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgetrf2.f.
+func Zgetrf2(m int, n int, a []complex128, lda int, ipiv []int32) bool {
+	return isZero(C.LAPACKE_zgetrf2((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgetri.f.
@@ -1354,6 +1420,26 @@ func Zggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, b
 	return isZero(C.LAPACKE_zggev((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_double)(&alpha[0]), (*C.lapack_complex_double)(&beta[0]), (*C.lapack_complex_double)(&vl[0]), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(&vr[0]), (C.lapack_int)(ldvr)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggev3.f.
+func Sggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, b []float32, ldb int, alphar []float32, alphai []float32, beta []float32, vl []float32, ldvl int, vr []float32, ldvr int) bool {
+	return isZero(C.LAPACKE_sggev3((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&alphar[0]), (*C.float)(&alphai[0]), (*C.float)(&beta[0]), (*C.float)(&vl[0]), (C.lapack_int)(ldvl), (*C.float)(&vr[0]), (C.lapack_int)(ldvr)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggev3.f.
+func Dggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, b []float64, ldb int, alphar []float64, alphai []float64, beta []float64, vl []float64, ldvl int, vr []float64, ldvr int) bool {
+	return isZero(C.LAPACKE_dggev3((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&b[0]), (C.lapack_int)(ldb), (*C.double)(&alphar[0]), (*C.double)(&alphai[0]), (*C.double)(&beta[0]), (*C.double)(&vl[0]), (C.lapack_int)(ldvl), (*C.double)(&vr[0]), (C.lapack_int)(ldvr)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggev3.f.
+func Cggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, b []complex64, ldb int, alpha []complex64, beta []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int) bool {
+	return isZero(C.LAPACKE_cggev3((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_float)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_float)(&alpha[0]), (*C.lapack_complex_float)(&beta[0]), (*C.lapack_complex_float)(&vl[0]), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(&vr[0]), (C.lapack_int)(ldvr)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggev3.f.
+func Zggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, b []complex128, ldb int, alpha []complex128, beta []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int) bool {
+	return isZero(C.LAPACKE_zggev3((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_double)(&alpha[0]), (*C.lapack_complex_double)(&beta[0]), (*C.lapack_complex_double)(&vl[0]), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(&vr[0]), (C.lapack_int)(ldvr)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggevx.f.
 func Sggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float32, lda int, b []float32, ldb int, alphar []float32, alphai []float32, beta []float32, vl []float32, ldvl int, vr []float32, ldvr int, ilo []int32, ihi []int32, lscale []float32, rscale []float32, abnrm []float32, bbnrm []float32, rconde []float32, rcondv []float32) bool {
 	return isZero(C.LAPACKE_sggevx((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&alphar[0]), (*C.float)(&alphai[0]), (*C.float)(&beta[0]), (*C.float)(&vl[0]), (C.lapack_int)(ldvl), (*C.float)(&vr[0]), (C.lapack_int)(ldvr), (*C.lapack_int)(&ilo[0]), (*C.lapack_int)(&ihi[0]), (*C.float)(&lscale[0]), (*C.float)(&rscale[0]), (*C.float)(&abnrm[0]), (*C.float)(&bbnrm[0]), (*C.float)(&rconde[0]), (*C.float)(&rcondv[0])))
@@ -1412,6 +1498,26 @@ func Cgghrd(compq lapack.CompSV, compz lapack.CompSV, n int, ilo int, ihi int, a
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgghrd.f.
 func Zgghrd(compq lapack.CompSV, compz lapack.CompSV, n int, ilo int, ihi int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz int) bool {
 	return isZero(C.LAPACKE_zgghrd((C.int)(rowMajor), (C.char)(compq), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_double)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_complex_double)(&z[0]), (C.lapack_int)(ldz)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgghd3.f.
+func Sgghd3(compq lapack.CompSV, compz lapack.CompSV, n int, ilo int, ihi int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int) bool {
+	return isZero(C.LAPACKE_sgghd3((C.int)(rowMajor), (C.char)(compq), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&q[0]), (C.lapack_int)(ldq), (*C.float)(&z[0]), (C.lapack_int)(ldz)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgghd3.f.
+func Dgghd3(compq lapack.CompSV, compz lapack.CompSV, n int, ilo int, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int) bool {
+	return isZero(C.LAPACKE_dgghd3((C.int)(rowMajor), (C.char)(compq), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&b[0]), (C.lapack_int)(ldb), (*C.double)(&q[0]), (C.lapack_int)(ldq), (*C.double)(&z[0]), (C.lapack_int)(ldz)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgghd3.f.
+func Cgghd3(compq lapack.CompSV, compz lapack.CompSV, n int, ilo int, ihi int, a []complex64, lda int, b []complex64, ldb int, q []complex64, ldq int, z []complex64, ldz int) bool {
+	return isZero(C.LAPACKE_cgghd3((C.int)(rowMajor), (C.char)(compq), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_float)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_float)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_complex_float)(&z[0]), (C.lapack_int)(ldz)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgghd3.f.
+func Zgghd3(compq lapack.CompSV, compz lapack.CompSV, n int, ilo int, ihi int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz int) bool {
+	return isZero(C.LAPACKE_zgghd3((C.int)(rowMajor), (C.char)(compq), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_double)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_complex_double)(&z[0]), (C.lapack_int)(ldz)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgglse.f.
@@ -1474,44 +1580,44 @@ func Zggrqf(m int, p int, n int, a []complex128, lda int, taua []complex128, b [
 	return isZero(C.LAPACKE_zggrqf((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&taua[0]), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_double)(&taub[0])))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggsvd.f.
-func Sggsvd(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []float32, lda int, b []float32, ldb int, alpha []float32, beta []float32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, iwork []int32) bool {
-	return isZero(C.LAPACKE_sggsvd((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&alpha[0]), (*C.float)(&beta[0]), (*C.float)(&u[0]), (C.lapack_int)(ldu), (*C.float)(&v[0]), (C.lapack_int)(ldv), (*C.float)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggsvd3.f.
+func Sggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []float32, lda int, b []float32, ldb int, alpha []float32, beta []float32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, iwork []int32) bool {
+	return isZero(C.LAPACKE_sggsvd3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&alpha[0]), (*C.float)(&beta[0]), (*C.float)(&u[0]), (C.lapack_int)(ldu), (*C.float)(&v[0]), (C.lapack_int)(ldv), (*C.float)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggsvd.f.
-func Dggsvd(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []float64, lda int, b []float64, ldb int, alpha []float64, beta []float64, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, iwork []int32) bool {
-	return isZero(C.LAPACKE_dggsvd((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&b[0]), (C.lapack_int)(ldb), (*C.double)(&alpha[0]), (*C.double)(&beta[0]), (*C.double)(&u[0]), (C.lapack_int)(ldu), (*C.double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggsvd3.f.
+func Dggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []float64, lda int, b []float64, ldb int, alpha []float64, beta []float64, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, iwork []int32) bool {
+	return isZero(C.LAPACKE_dggsvd3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&b[0]), (C.lapack_int)(ldb), (*C.double)(&alpha[0]), (*C.double)(&beta[0]), (*C.double)(&u[0]), (C.lapack_int)(ldu), (*C.double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggsvd.f.
-func Cggsvd(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []complex64, lda int, b []complex64, ldb int, alpha []float32, beta []float32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, iwork []int32) bool {
-	return isZero(C.LAPACKE_cggsvd((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&alpha[0]), (*C.float)(&beta[0]), (*C.lapack_complex_float)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_float)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_float)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggsvd3.f.
+func Cggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []complex64, lda int, b []complex64, ldb int, alpha []float32, beta []float32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, iwork []int32) bool {
+	return isZero(C.LAPACKE_cggsvd3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&alpha[0]), (*C.float)(&beta[0]), (*C.lapack_complex_float)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_float)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_float)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggsvd.f.
-func Zggsvd(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []complex128, lda int, b []complex128, ldb int, alpha []float64, beta []float64, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, iwork []int32) bool {
-	return isZero(C.LAPACKE_zggsvd((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.double)(&alpha[0]), (*C.double)(&beta[0]), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_double)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggsvd3.f.
+func Zggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []complex128, lda int, b []complex128, ldb int, alpha []float64, beta []float64, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, iwork []int32) bool {
+	return isZero(C.LAPACKE_zggsvd3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(p), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.double)(&alpha[0]), (*C.double)(&beta[0]), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_double)(&q[0]), (C.lapack_int)(ldq), (*C.lapack_int)(&iwork[0])))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggsvp.f.
-func Sggsvp(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []float32, lda int, b []float32, ldb int, tola float32, tolb float32, k []int32, l []int32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int) bool {
-	return isZero(C.LAPACKE_sggsvp((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (C.float)(tola), (C.float)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.float)(&u[0]), (C.lapack_int)(ldu), (*C.float)(&v[0]), (C.lapack_int)(ldv), (*C.float)(&q[0]), (C.lapack_int)(ldq)))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggsvp3.f.
+func Sggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []float32, lda int, b []float32, ldb int, tola float32, tolb float32, k []int32, l []int32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int) bool {
+	return isZero(C.LAPACKE_sggsvp3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (C.float)(tola), (C.float)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.float)(&u[0]), (C.lapack_int)(ldu), (*C.float)(&v[0]), (C.lapack_int)(ldv), (*C.float)(&q[0]), (C.lapack_int)(ldq)))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggsvp.f.
-func Dggsvp(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []float64, lda int, b []float64, ldb int, tola float64, tolb float64, k []int32, l []int32, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int) bool {
-	return isZero(C.LAPACKE_dggsvp((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&b[0]), (C.lapack_int)(ldb), (C.double)(tola), (C.double)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.double)(&u[0]), (C.lapack_int)(ldu), (*C.double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&q[0]), (C.lapack_int)(ldq)))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggsvp3.f.
+func Dggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []float64, lda int, b []float64, ldb int, tola float64, tolb float64, k []int32, l []int32, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int) bool {
+	return isZero(C.LAPACKE_dggsvp3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.double)(&b[0]), (C.lapack_int)(ldb), (C.double)(tola), (C.double)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.double)(&u[0]), (C.lapack_int)(ldu), (*C.double)(&v[0]), (C.lapack_int)(ldv), (*C.double)(&q[0]), (C.lapack_int)(ldq)))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggsvp.f.
-func Cggsvp(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []complex64, lda int, b []complex64, ldb int, tola float32, tolb float32, k []int32, l []int32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int) bool {
-	return isZero(C.LAPACKE_cggsvp((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_float)(&b[0]), (C.lapack_int)(ldb), (C.float)(tola), (C.float)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_float)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_float)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_float)(&q[0]), (C.lapack_int)(ldq)))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggsvp3.f.
+func Cggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []complex64, lda int, b []complex64, ldb int, tola float32, tolb float32, k []int32, l []int32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int) bool {
+	return isZero(C.LAPACKE_cggsvp3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_float)(&b[0]), (C.lapack_int)(ldb), (C.float)(tola), (C.float)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_float)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_float)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_float)(&q[0]), (C.lapack_int)(ldq)))
 }
 
-// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggsvp.f.
-func Zggsvp(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []complex128, lda int, b []complex128, ldb int, tola float64, tolb float64, k []int32, l []int32, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int) bool {
-	return isZero(C.LAPACKE_zggsvp((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (C.double)(tola), (C.double)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_double)(&q[0]), (C.lapack_int)(ldq)))
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggsvp3.f.
+func Zggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []complex128, lda int, b []complex128, ldb int, tola float64, tolb float64, k []int32, l []int32, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int) bool {
+	return isZero(C.LAPACKE_zggsvp3((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (C.double)(tola), (C.double)(tolb), (*C.lapack_int)(&k[0]), (*C.lapack_int)(&l[0]), (*C.lapack_complex_double)(&u[0]), (C.lapack_int)(ldu), (*C.lapack_complex_double)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_double)(&q[0]), (C.lapack_int)(ldq)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgtcon.f.
@@ -2910,6 +3016,26 @@ func Zlacgv(n int, x []complex128, incx int) bool {
 	return isZero(C.LAPACKE_zlacgv((C.lapack_int)(n), (*C.lapack_complex_double)(&x[0]), (C.lapack_int)(incx)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slacn2.f.
+func Slacn2(n int, v []float32, x []float32, isgn []int32, est []float32, kase []int32, isave []int32) bool {
+	return isZero(C.LAPACKE_slacn2((C.lapack_int)(n), (*C.float)(&v[0]), (*C.float)(&x[0]), (*C.lapack_int)(&isgn[0]), (*C.float)(&est[0]), (*C.lapack_int)(&kase[0]), (*C.lapack_int)(&isave[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlacn2.f.
+func Dlacn2(n int, v []float64, x []float64, isgn []int32, est []float64, kase []int32, isave []int32) bool {
+	return isZero(C.LAPACKE_dlacn2((C.lapack_int)(n), (*C.double)(&v[0]), (*C.double)(&x[0]), (*C.lapack_int)(&isgn[0]), (*C.double)(&est[0]), (*C.lapack_int)(&kase[0]), (*C.lapack_int)(&isave[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clacn2.f.
+func Clacn2(n int, v []complex64, x []complex64, est []float32, kase []int32, isave []int32) bool {
+	return isZero(C.LAPACKE_clacn2((C.lapack_int)(n), (*C.lapack_complex_float)(&v[0]), (*C.lapack_complex_float)(&x[0]), (*C.float)(&est[0]), (*C.lapack_int)(&kase[0]), (*C.lapack_int)(&isave[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlacn2.f.
+func Zlacn2(n int, v []complex128, x []complex128, est []float64, kase []int32, isave []int32) bool {
+	return isZero(C.LAPACKE_zlacn2((C.lapack_int)(n), (*C.lapack_complex_double)(&v[0]), (*C.lapack_complex_double)(&x[0]), (*C.double)(&est[0]), (*C.lapack_int)(&kase[0]), (*C.lapack_int)(&isave[0])))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slacpy.f.
 func Slacpy(ul blas.Uplo, m int, n int, a []float32, lda int, b []float32, ldb int) bool {
 	switch ul {
@@ -2968,6 +3094,32 @@ func Zlacpy(ul blas.Uplo, m int, n int, a []complex128, lda int, b []complex128,
 		panic("lapack: illegal triangle")
 	}
 	return isZero(C.LAPACKE_zlacpy((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clacp2.f.
+func Clacp2(ul blas.Uplo, m int, n int, a []float32, lda int, b []complex64, ldb int) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_clacp2((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_float)(&b[0]), (C.lapack_int)(ldb)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlacp2.f.
+func Zlacp2(ul blas.Uplo, m int, n int, a []float64, lda int, b []complex128, ldb int) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_zlacp2((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slamch.f.
@@ -3364,6 +3516,26 @@ func Clarnv(idist int, iseed []int32, n int, x []complex64) bool {
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlarnv.f.
 func Zlarnv(idist int, iseed []int32, n int, x []complex128) bool {
 	return isZero(C.LAPACKE_zlarnv((C.lapack_int)(idist), (*C.lapack_int)(&iseed[0]), (C.lapack_int)(n), (*C.lapack_complex_double)(&x[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slascl.f.
+func Slascl(typ byte, kl int, ku int, cfrom float32, cto float32, m int, n int, a []float32, lda int) bool {
+	return isZero(C.LAPACKE_slascl((C.int)(rowMajor), (C.char)(typ), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.float)(cfrom), (C.float)(cto), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlascl.f.
+func Dlascl(typ byte, kl int, ku int, cfrom float64, cto float64, m int, n int, a []float64, lda int) bool {
+	return isZero(C.LAPACKE_dlascl((C.int)(rowMajor), (C.char)(typ), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.double)(cfrom), (C.double)(cto), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clascl.f.
+func Clascl(typ byte, kl int, ku int, cfrom float32, cto float32, m int, n int, a []complex64, lda int) bool {
+	return isZero(C.LAPACKE_clascl((C.int)(rowMajor), (C.char)(typ), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.float)(cfrom), (C.float)(cto), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlascl.f.
+func Zlascl(typ byte, kl int, ku int, cfrom float64, cto float64, m int, n int, a []complex128, lda int) bool {
+	return isZero(C.LAPACKE_zlascl((C.int)(rowMajor), (C.char)(typ), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.double)(cfrom), (C.double)(cto), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slaset.f.
@@ -5022,6 +5194,58 @@ func Zposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex128, lda int, a
 		panic("lapack: illegal triangle")
 	}
 	return isZero(C.LAPACKE_zposvx((C.int)(rowMajor), (C.char)(fact), (C.char)(ul), (C.lapack_int)(n), (C.lapack_int)(nrhs), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&af[0]), (C.lapack_int)(ldaf), (*C.char)(unsafe.Pointer(&equed[0])), (*C.double)(&s[0]), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb), (*C.lapack_complex_double)(&x[0]), (C.lapack_int)(ldx), (*C.double)(&rcond[0]), (*C.double)(&ferr[0]), (*C.double)(&berr[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spotrf2.f.
+func Spotrf2(ul blas.Uplo, n int, a []float32, lda int) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_spotrf2((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpotrf2.f.
+func Dpotrf2(ul blas.Uplo, n int, a []float64, lda int) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_dpotrf2((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpotrf2.f.
+func Cpotrf2(ul blas.Uplo, n int, a []complex64, lda int) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_cpotrf2((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpotrf2.f.
+func Zpotrf2(ul blas.Uplo, n int, a []complex128, lda int) bool {
+	switch ul {
+	case blas.Upper:
+		ul = 'U'
+	case blas.Lower:
+		ul = 'L'
+	default:
+		panic("lapack: illegal triangle")
+	}
+	return isZero(C.LAPACKE_zpotrf2((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spotrf.f.
@@ -10170,6 +10394,26 @@ func ZlapmrWork(forwrd int32, m int, n int, x []complex128, ldx int, k []int32) 
 	return isZero(C.LAPACKE_zlapmr((C.int)(rowMajor), (C.lapack_logical)(forwrd), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&x[0]), (C.lapack_int)(ldx), (*C.lapack_int)(&k[0])))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slapmt.f.
+func SlapmtWork(forwrd int32, m int, n int, x []float32, ldx int, k []int32) bool {
+	return isZero(C.LAPACKE_slapmt((C.int)(rowMajor), (C.lapack_logical)(forwrd), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(&x[0]), (C.lapack_int)(ldx), (*C.lapack_int)(&k[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlapmt.f.
+func DlapmtWork(forwrd int32, m int, n int, x []float64, ldx int, k []int32) bool {
+	return isZero(C.LAPACKE_dlapmt((C.int)(rowMajor), (C.lapack_logical)(forwrd), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(&x[0]), (C.lapack_int)(ldx), (*C.lapack_int)(&k[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clapmt.f.
+func ClapmtWork(forwrd int32, m int, n int, x []complex64, ldx int, k []int32) bool {
+	return isZero(C.LAPACKE_clapmt((C.int)(rowMajor), (C.lapack_logical)(forwrd), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(&x[0]), (C.lapack_int)(ldx), (*C.lapack_int)(&k[0])))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlapmt.f.
+func ZlapmtWork(forwrd int32, m int, n int, x []complex128, ldx int, k []int32) bool {
+	return isZero(C.LAPACKE_zlapmt((C.int)(rowMajor), (C.lapack_logical)(forwrd), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(&x[0]), (C.lapack_int)(ldx), (*C.lapack_int)(&k[0])))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slartgp.f.
 func SlartgpWork(f float32, g float32, cs []float32, sn []float32, r []float32) bool {
 	return isZero(C.LAPACKE_slartgp((C.float)(f), (C.float)(g), (*C.float)(&cs[0]), (*C.float)(&sn[0]), (*C.float)(&r[0])))
@@ -10278,7 +10522,7 @@ func Chetrs2(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csyconv.f.
-func Csyconv(ul blas.Uplo, way byte, n int, a []complex64, lda int, ipiv []int32) bool {
+func Csyconv(ul blas.Uplo, way byte, n int, a []complex64, lda int, ipiv []int32, work []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10287,7 +10531,7 @@ func Csyconv(ul blas.Uplo, way byte, n int, a []complex64, lda int, ipiv []int32
 	default:
 		panic("lapack: illegal triangle")
 	}
-	return isZero(C.LAPACKE_csyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+	return isZero(C.LAPACKE_csyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.lapack_complex_float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0]), (*C.lapack_complex_float)(&work[0])))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csyswapr.f.
@@ -10372,6 +10616,11 @@ func Cuncsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 	return isZero(C.LAPACKE_cuncsd((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.char)(jobv2t), (C.char)(trans), (C.char)(signs), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.lapack_complex_float)(&x11[0]), (C.lapack_int)(ldx11), (*C.lapack_complex_float)(&x12[0]), (C.lapack_int)(ldx12), (*C.lapack_complex_float)(&x21[0]), (C.lapack_int)(ldx21), (*C.lapack_complex_float)(&x22[0]), (C.lapack_int)(ldx22), (*C.float)(&theta[0]), (*C.lapack_complex_float)(&u1[0]), (C.lapack_int)(ldu1), (*C.lapack_complex_float)(&u2[0]), (C.lapack_int)(ldu2), (*C.lapack_complex_float)(&v1t[0]), (C.lapack_int)(ldv1t), (*C.lapack_complex_float)(&v2t[0]), (C.lapack_int)(ldv2t)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cuncsd2by1.f.
+func Cuncsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []complex64, ldx11 int, x21 []complex64, ldx21 int, theta []complex64, u1 []complex64, ldu1 int, u2 []complex64, ldu2 int, v1t []complex64, ldv1t int) bool {
+	return isZero(C.LAPACKE_cuncsd2by1((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.lapack_complex_float)(&x11[0]), (C.lapack_int)(ldx11), (*C.lapack_complex_float)(&x21[0]), (C.lapack_int)(ldx21), (*C.lapack_complex_float)(&theta[0]), (*C.lapack_complex_float)(&u1[0]), (C.lapack_int)(ldu1), (*C.lapack_complex_float)(&u2[0]), (C.lapack_int)(ldu2), (*C.lapack_complex_float)(&v1t[0]), (C.lapack_int)(ldv1t)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dbbcsd.f.
 func Dbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, m int, p int, q int, theta []float64, phi []float64, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int, v2t []float64, ldv2t int, b11d []float64, b11e []float64, b12d []float64, b12e []float64, b21d []float64, b21e []float64, b22d []float64, b22e []float64) bool {
 	switch trans {
@@ -10417,8 +10666,13 @@ func Dorcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 	return isZero(C.LAPACKE_dorcsd((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.char)(jobv2t), (C.char)(trans), (C.char)(signs), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.double)(&x11[0]), (C.lapack_int)(ldx11), (*C.double)(&x12[0]), (C.lapack_int)(ldx12), (*C.double)(&x21[0]), (C.lapack_int)(ldx21), (*C.double)(&x22[0]), (C.lapack_int)(ldx22), (*C.double)(&theta[0]), (*C.double)(&u1[0]), (C.lapack_int)(ldu1), (*C.double)(&u2[0]), (C.lapack_int)(ldu2), (*C.double)(&v1t[0]), (C.lapack_int)(ldv1t), (*C.double)(&v2t[0]), (C.lapack_int)(ldv2t)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorcsd2by1.f.
+func Dorcsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []float64, ldx11 int, x21 []float64, ldx21 int, theta []float64, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int) bool {
+	return isZero(C.LAPACKE_dorcsd2by1((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.double)(&x11[0]), (C.lapack_int)(ldx11), (*C.double)(&x21[0]), (C.lapack_int)(ldx21), (*C.double)(&theta[0]), (*C.double)(&u1[0]), (C.lapack_int)(ldu1), (*C.double)(&u2[0]), (C.lapack_int)(ldu2), (*C.double)(&v1t[0]), (C.lapack_int)(ldv1t)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyconv.f.
-func Dsyconv(ul blas.Uplo, way byte, n int, a []float64, lda int, ipiv []int32) bool {
+func Dsyconv(ul blas.Uplo, way byte, n int, a []float64, lda int, ipiv []int32, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10427,7 +10681,7 @@ func Dsyconv(ul blas.Uplo, way byte, n int, a []float64, lda int, ipiv []int32) 
 	default:
 		panic("lapack: illegal triangle")
 	}
-	return isZero(C.LAPACKE_dsyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+	return isZero(C.LAPACKE_dsyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0]), (*C.double)(&work[0])))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyswapr.f.
@@ -10527,8 +10781,13 @@ func Sorcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 	return isZero(C.LAPACKE_sorcsd((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.char)(jobv2t), (C.char)(trans), (C.char)(signs), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.float)(&x11[0]), (C.lapack_int)(ldx11), (*C.float)(&x12[0]), (C.lapack_int)(ldx12), (*C.float)(&x21[0]), (C.lapack_int)(ldx21), (*C.float)(&x22[0]), (C.lapack_int)(ldx22), (*C.float)(&theta[0]), (*C.float)(&u1[0]), (C.lapack_int)(ldu1), (*C.float)(&u2[0]), (C.lapack_int)(ldu2), (*C.float)(&v1t[0]), (C.lapack_int)(ldv1t), (*C.float)(&v2t[0]), (C.lapack_int)(ldv2t)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorcsd2by1.f.
+func Sorcsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []float32, ldx11 int, x21 []float32, ldx21 int, theta []float32, u1 []float32, ldu1 int, u2 []float32, ldu2 int, v1t []float32, ldv1t int) bool {
+	return isZero(C.LAPACKE_sorcsd2by1((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.float)(&x11[0]), (C.lapack_int)(ldx11), (*C.float)(&x21[0]), (C.lapack_int)(ldx21), (*C.float)(&theta[0]), (*C.float)(&u1[0]), (C.lapack_int)(ldu1), (*C.float)(&u2[0]), (C.lapack_int)(ldu2), (*C.float)(&v1t[0]), (C.lapack_int)(ldv1t)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyconv.f.
-func Ssyconv(ul blas.Uplo, way byte, n int, a []float32, lda int, ipiv []int32) bool {
+func Ssyconv(ul blas.Uplo, way byte, n int, a []float32, lda int, ipiv []int32, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10537,7 +10796,7 @@ func Ssyconv(ul blas.Uplo, way byte, n int, a []float32, lda int, ipiv []int32) 
 	default:
 		panic("lapack: illegal triangle")
 	}
-	return isZero(C.LAPACKE_ssyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+	return isZero(C.LAPACKE_ssyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0]), (*C.float)(&work[0])))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyswapr.f.
@@ -10660,7 +10919,7 @@ func Zhetrs2(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsyconv.f.
-func Zsyconv(ul blas.Uplo, way byte, n int, a []complex128, lda int, ipiv []int32) bool {
+func Zsyconv(ul blas.Uplo, way byte, n int, a []complex128, lda int, ipiv []int32, work []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10669,7 +10928,7 @@ func Zsyconv(ul blas.Uplo, way byte, n int, a []complex128, lda int, ipiv []int3
 	default:
 		panic("lapack: illegal triangle")
 	}
-	return isZero(C.LAPACKE_zsyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0])))
+	return isZero(C.LAPACKE_zsyconv((C.int)(rowMajor), (C.char)(ul), (C.char)(way), (C.lapack_int)(n), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_int)(&ipiv[0]), (*C.lapack_complex_double)(&work[0])))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsyswapr.f.
@@ -10752,6 +11011,11 @@ func Zuncsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 		panic("lapack: bad trans")
 	}
 	return isZero(C.LAPACKE_zuncsd((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.char)(jobv2t), (C.char)(trans), (C.char)(signs), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.lapack_complex_double)(&x11[0]), (C.lapack_int)(ldx11), (*C.lapack_complex_double)(&x12[0]), (C.lapack_int)(ldx12), (*C.lapack_complex_double)(&x21[0]), (C.lapack_int)(ldx21), (*C.lapack_complex_double)(&x22[0]), (C.lapack_int)(ldx22), (*C.double)(&theta[0]), (*C.lapack_complex_double)(&u1[0]), (C.lapack_int)(ldu1), (*C.lapack_complex_double)(&u2[0]), (C.lapack_int)(ldu2), (*C.lapack_complex_double)(&v1t[0]), (C.lapack_int)(ldv1t), (*C.lapack_complex_double)(&v2t[0]), (C.lapack_int)(ldv2t)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zuncsd2by1.f.
+func Zuncsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []complex128, ldx11 int, x21 []complex128, ldx21 int, theta []complex128, u1 []complex128, ldu1 int, u2 []complex128, ldu2 int, v1t []complex128, ldv1t int) bool {
+	return isZero(C.LAPACKE_zuncsd2by1((C.int)(rowMajor), (C.char)(jobu1), (C.char)(jobu2), (C.char)(jobv1t), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(q), (*C.lapack_complex_double)(&x11[0]), (C.lapack_int)(ldx11), (*C.lapack_complex_double)(&x21[0]), (C.lapack_int)(ldx21), (*C.lapack_complex_double)(&theta[0]), (*C.lapack_complex_double)(&u1[0]), (C.lapack_int)(ldu1), (*C.lapack_complex_double)(&u2[0]), (C.lapack_int)(ldu2), (*C.lapack_complex_double)(&v1t[0]), (C.lapack_int)(ldv1t)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgemqrt.f.
@@ -10996,6 +11260,11 @@ func Ztpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb i
 		panic("lapack: bad trans")
 	}
 	return isZero(C.LAPACKE_ztpmqrt((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.lapack_complex_double)(&v[0]), (C.lapack_int)(ldv), (*C.lapack_complex_double)(&t[0]), (C.lapack_int)(ldt), (*C.lapack_complex_double)(&a[0]), (C.lapack_int)(lda), (*C.lapack_complex_double)(&b[0]), (C.lapack_int)(ldb)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpqrt.f.
+func Stpqrt(m int, n int, l int, nb int, a []float32, lda int, b []float32, ldb int, t []float32, ldt int) bool {
+	return isZero(C.LAPACKE_stpqrt((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.float)(&a[0]), (C.lapack_int)(lda), (*C.float)(&b[0]), (C.lapack_int)(ldb), (*C.float)(&t[0]), (C.lapack_int)(ldt)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpqrt.f.

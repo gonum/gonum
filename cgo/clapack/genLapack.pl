@@ -124,6 +124,34 @@ our %typeConv = (
 	"double_return" => "float64"
 );
 
+# deprecated is a list of functions present in lapacke.h that are deprecated.
+our %deprecated = (
+	"cggsvp"      => 1,
+	"cggsvp_work" => 1,
+	"dggsvp"      => 1,
+	"dggsvp_work" => 1,
+	"sggsvp"      => 1,
+	"sggsvp_work" => 1,
+	"zggsvp"      => 1,
+	"zggsvp_work" => 1,
+	"cggsvd"      => 1,
+	"cggsvd_work" => 1,
+	"dggsvd"      => 1,
+	"dggsvd_work" => 1,
+	"sggsvd"      => 1,
+	"sggsvd_work" => 1,
+	"zggsvd"      => 1,
+	"zggsvd_work" => 1,
+	"cgeqpf"      => 1,
+	"cgeqpf_work" => 1,
+	"dgeqpf"      => 1,
+	"dgeqpf_work" => 1,
+	"sgeqpf"      => 1,
+	"sgeqpf_work" => 1,
+	"zgeqpf"      => 1,
+	"zgeqpf_work" => 1
+);
+
 # allUplo is a list of routines that allow 'A' for their uplo argument.
 # The list keys are truncated by one character to cover all four numeric types.
 our %allUplo = (
@@ -153,7 +181,7 @@ sub processProto {
 	(my $ret, $func) = split ' ', $func;
 	(my $pack, $func, my $tail) = split '_', $func;
 
-	if ($done{$func} or $xobjs{$func}){
+	if ($done{$func} or $xobjs{$func} or $deprecated{$func}){
 		return
 	}
 
@@ -210,7 +238,7 @@ sub processParamToGo {
 	foreach my $param (@params) {
 		$param =~ s/const //g;
 		my ($type,$var) = split ' ', $param;
-		$var eq "matrix_order" && do {
+		$var eq "matrix_layout" && do {
 			next;
 		};
 		$var =~ /trans/ && do {
@@ -306,6 +334,9 @@ EOH
 		$var eq "range" && do {
 			$var = "rng";
 		};
+		$var eq "type" && do {
+			$var = "typ";
+		};
 
 		my $goType = $typeConv{$type};
 
@@ -327,7 +358,7 @@ sub processParamToC {
 		$param =~ s/const //g;
 		my ($type,$var) = split ' ', $param;
 
-		$var eq "matrix_order" && do {
+		$var eq "matrix_layout" && do {
 			$var = "rowMajor";
 		};
 		$var =~ /trans/ && do {
@@ -346,6 +377,9 @@ sub processParamToC {
 		};
 		$var eq "range" && do {
 			$var = "rng";
+		};
+		$var eq "type" && do {
+			$var = "typ";
 		};
 
 		if (substr($type,-1) eq "*") {

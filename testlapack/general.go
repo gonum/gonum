@@ -320,141 +320,9 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 // the result is bidiagonal.
 func checkBidiagonal(t *testing.T, m, n, nb int, a []float64, lda int, d, e, tauP, tauQ, aCopy []float64) {
 	// Check the answer.
-	// Construct V.and U
-	ldv := nb
-	v := blas64.General{
-		Rows:   m,
-		Cols:   nb,
-		Stride: ldv,
-		Data:   make([]float64, m*ldv),
-	}
-	if m >= n {
-		for i := 0; i < m; i++ {
-			for j := 0; j <= min(nb-1, i); j++ {
-				if i == j {
-					v.Data[i*ldv+j] = 1
-					continue
-				}
-				v.Data[i*ldv+j] = a[i*lda+j]
-			}
-		}
-	} else {
-		for i := 1; i < m; i++ {
-			for j := 0; j <= min(nb-1, i-1); j++ {
-				if i-1 == j {
-					v.Data[i*ldv+j] = 1
-					continue
-				}
-				v.Data[i*ldv+j] = a[i*lda+j]
-			}
-		}
-	}
-
-	ldu := n
-	u := blas64.General{
-		Rows:   nb,
-		Cols:   n,
-		Stride: ldu,
-		Data:   make([]float64, nb*ldu),
-	}
-	if m < n {
-		for i := 0; i < nb; i++ {
-			for j := i; j < n; j++ {
-				if i == j {
-					u.Data[i*ldu+j] = 1
-					continue
-				}
-				u.Data[i*ldu+j] = a[i*lda+j]
-			}
-		}
-	} else {
-		for i := 0; i < nb; i++ {
-			for j := i + 1; j < n; j++ {
-				if j-1 == i {
-					u.Data[i*ldu+j] = 1
-					continue
-				}
-				u.Data[i*ldu+j] = a[i*lda+j]
-			}
-		}
-	}
-
-	// Check the reconstruction Q^T * A * P
-	qMat := blas64.General{
-		Rows:   m,
-		Cols:   m,
-		Stride: m,
-		Data:   make([]float64, m*m),
-	}
-	hMat := blas64.General{
-		Rows:   m,
-		Cols:   m,
-		Stride: m,
-		Data:   make([]float64, m*m),
-	}
-	pMat := blas64.General{
-		Rows:   n,
-		Cols:   n,
-		Stride: n,
-		Data:   make([]float64, n*n),
-	}
-	gMat := blas64.General{
-		Rows:   n,
-		Cols:   n,
-		Stride: n,
-		Data:   make([]float64, n*n),
-	}
-	// set Q and P to I
-	for i := 0; i < m; i++ {
-		qMat.Data[i*qMat.Stride+i] = 1
-	}
-	for i := 0; i < n; i++ {
-		pMat.Data[i*pMat.Stride+i] = 1
-	}
-
-	for i := 0; i < nb; i++ {
-		qCopy := blas64.General{Rows: qMat.Rows, Cols: qMat.Cols, Stride: qMat.Stride, Data: make([]float64, len(qMat.Data))}
-		copy(qCopy.Data, qMat.Data)
-		pCopy := blas64.General{Rows: pMat.Rows, Cols: pMat.Cols, Stride: pMat.Stride, Data: make([]float64, len(pMat.Data))}
-		copy(pCopy.Data, pMat.Data)
-
-		// Set g and h to I
-		for i := 0; i < m; i++ {
-			for j := 0; j < m; j++ {
-				if i == j {
-					hMat.Data[i*m+j] = 1
-				} else {
-					hMat.Data[i*m+j] = 0
-				}
-			}
-		}
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				if i == j {
-					gMat.Data[i*n+j] = 1
-				} else {
-					gMat.Data[i*n+j] = 0
-				}
-			}
-		}
-		// H -= tauQ[i] * v[i] * v[i]^t
-		vi := blas64.Vector{
-			Inc:  v.Stride,
-			Data: v.Data[i:],
-		}
-		blas64.Ger(-tauQ[i], vi, vi, hMat)
-		// G -= tauP[i] * u[i] * u[i]^T
-		ui := blas64.Vector{
-			Inc:  1,
-			Data: u.Data[i*u.Stride:],
-		}
-		blas64.Ger(-tauP[i], ui, ui, gMat)
-
-		// Q = Q * G[1]
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qCopy, hMat, 0, qMat)
-		// P = P * G[i]
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, pCopy, gMat, 0, pMat)
-	}
+	// Construct V and U.
+	qMat := constructQPBidiagonal(lapack.ApplyQ, m, n, nb, a, lda, tauQ)
+	pMat := constructQPBidiagonal(lapack.ApplyP, m, n, nb, a, lda, tauP)
 
 	// Compute Q^T * A * P
 	aMat := blas64.General{
@@ -524,6 +392,132 @@ func checkBidiagonal(t *testing.T, m, n, nb int, a []float64, lda int, d, e, tau
 	if !matchE {
 		t.Errorf("E mismatch")
 	}
+}
+
+// constructQPBidiagonal constructs Q or P from the Bidiagonal decomposition
+// computed by dlabrd and bgebd2.
+func constructQPBidiagonal(vect lapack.DecompUpdate, m, n, nb int, a []float64, lda int, tau []float64) blas64.General {
+	sz := n
+	if vect == lapack.ApplyQ {
+		sz = m
+	}
+
+	var ldv int
+	var v blas64.General
+	if vect == lapack.ApplyQ {
+		ldv = nb
+		v = blas64.General{
+			Rows:   m,
+			Cols:   nb,
+			Stride: ldv,
+			Data:   make([]float64, m*ldv),
+		}
+	} else {
+		ldv = n
+		v = blas64.General{
+			Rows:   nb,
+			Cols:   n,
+			Stride: ldv,
+			Data:   make([]float64, m*ldv),
+		}
+	}
+
+	if vect == lapack.ApplyQ {
+		if m >= n {
+			for i := 0; i < m; i++ {
+				for j := 0; j <= min(nb-1, i); j++ {
+					if i == j {
+						v.Data[i*ldv+j] = 1
+						continue
+					}
+					v.Data[i*ldv+j] = a[i*lda+j]
+				}
+			}
+		} else {
+			for i := 1; i < m; i++ {
+				for j := 0; j <= min(nb-1, i-1); j++ {
+					if i-1 == j {
+						v.Data[i*ldv+j] = 1
+						continue
+					}
+					v.Data[i*ldv+j] = a[i*lda+j]
+				}
+			}
+		}
+	} else {
+		if m < n {
+			for i := 0; i < nb; i++ {
+				for j := i; j < n; j++ {
+					if i == j {
+						v.Data[i*ldv+j] = 1
+						continue
+					}
+					v.Data[i*ldv+j] = a[i*lda+j]
+				}
+			}
+		} else {
+			for i := 0; i < nb; i++ {
+				for j := i + 1; j < n; j++ {
+					if j-1 == i {
+						v.Data[i*ldv+j] = 1
+						continue
+					}
+					v.Data[i*ldv+j] = a[i*lda+j]
+				}
+			}
+		}
+	}
+
+	// The variable name is a computation of Q, but the algorithm is mostly the
+	// same for computing P (just with different data).
+	qMat := blas64.General{
+		Rows:   sz,
+		Cols:   sz,
+		Stride: sz,
+		Data:   make([]float64, sz*sz),
+	}
+	hMat := blas64.General{
+		Rows:   sz,
+		Cols:   sz,
+		Stride: sz,
+		Data:   make([]float64, sz*sz),
+	}
+	// set Q to I
+	for i := 0; i < sz; i++ {
+		qMat.Data[i*qMat.Stride+i] = 1
+	}
+	for i := 0; i < nb; i++ {
+		qCopy := blas64.General{Rows: qMat.Rows, Cols: qMat.Cols, Stride: qMat.Stride, Data: make([]float64, len(qMat.Data))}
+		copy(qCopy.Data, qMat.Data)
+
+		// Set g and h to I
+		for i := 0; i < sz; i++ {
+			for j := 0; j < sz; j++ {
+				if i == j {
+					hMat.Data[i*sz+j] = 1
+				} else {
+					hMat.Data[i*sz+j] = 0
+				}
+			}
+		}
+		var vi blas64.Vector
+		// H -= tauQ[i] * v[i] * v[i]^t
+		if vect == lapack.ApplyQ {
+			vi = blas64.Vector{
+				Inc:  v.Stride,
+				Data: v.Data[i:],
+			}
+		} else {
+			vi = blas64.Vector{
+				Inc:  1,
+				Data: v.Data[i*v.Stride:],
+			}
+		}
+		blas64.Ger(-tau[i], vi, vi, hMat)
+		// Q = Q * G[1]
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qCopy, hMat, 0, qMat)
+	}
+	return qMat
 }
 
 // printRowise prints the matrix with one row per line. This is useful for debugging.

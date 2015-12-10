@@ -152,6 +152,10 @@ func TestDorgqr(t *testing.T) {
 	testlapack.DorgqrTest(t, impl)
 }
 
+func TestDormbr(t *testing.T) {
+	testlapack.DormbrTest(t, impl)
+}
+
 func TestDorml2(t *testing.T) {
 	testlapack.Dorml2Test(t, impl)
 }

@@ -15,7 +15,6 @@ import "github.com/gonum/blas"
 // If side == blas.Left, a is a matrix of side k×m, and if side == blas.Right
 // a is of size k×n.
 //
-//
 // Tau contains the householder factors and is of length at least k and this function will
 // panic otherwise.
 //

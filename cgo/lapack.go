@@ -13,35 +13,36 @@ import (
 
 // Copied from lapack/native. Keep in sync.
 const (
-	absIncNotOne  = "lapack: increment not one or negative one"
-	badD          = "lapack: d has insufficient length"
-	badDiag       = "lapack: bad diag"
-	badDirect     = "lapack: bad direct"
-	badE          = "lapack: e has insufficient length"
-	badIpiv       = "lapack: insufficient permutation length"
-	badLdA        = "lapack: index of a out of range"
-	badNorm       = "lapack: bad norm"
-	badPivot      = "lapack: bad pivot"
-	badSide       = "lapack: bad side"
-	badSlice      = "lapack: bad input slice length"
-	badStore      = "lapack: bad store"
-	badTau        = "lapack: tau has insufficient length"
-	badTauQ       = "lapack: tauQ has insufficient length"
-	badTauP       = "lapack: tauP has insufficient length"
-	badTrans      = "lapack: bad trans"
-	badUplo       = "lapack: illegal triangle"
-	badWork       = "lapack: insufficient working memory"
-	badWorkStride = "lapack: insufficient working array stride"
-	badZ          = "lapack: insufficient z length"
-	kGTM          = "lapack: k > m"
-	kGTN          = "lapack: k > n"
-	kLT0          = "lapack: k < 0"
-	mLTN          = "lapack: m < n"
-	negDimension  = "lapack: negative matrix dimension"
-	negZ          = "lapack: negative z value"
-	nLT0          = "lapack: n < 0"
-	nLTM          = "lapack: n < m"
-	shortWork     = "lapack: working array shorter than declared"
+	absIncNotOne    = "lapack: increment not one or negative one"
+	badD            = "lapack: d has insufficient length"
+	badDecompUpdate = "lapack: bad decomp update"
+	badDiag         = "lapack: bad diag"
+	badDirect       = "lapack: bad direct"
+	badE            = "lapack: e has insufficient length"
+	badIpiv         = "lapack: insufficient permutation length"
+	badLdA          = "lapack: index of a out of range"
+	badNorm         = "lapack: bad norm"
+	badPivot        = "lapack: bad pivot"
+	badSide         = "lapack: bad side"
+	badSlice        = "lapack: bad input slice length"
+	badStore        = "lapack: bad store"
+	badTau          = "lapack: tau has insufficient length"
+	badTauQ         = "lapack: tauQ has insufficient length"
+	badTauP         = "lapack: tauP has insufficient length"
+	badTrans        = "lapack: bad trans"
+	badUplo         = "lapack: illegal triangle"
+	badWork         = "lapack: insufficient working memory"
+	badWorkStride   = "lapack: insufficient working array stride"
+	badZ            = "lapack: insufficient z length"
+	kGTM            = "lapack: k > m"
+	kGTN            = "lapack: k > n"
+	kLT0            = "lapack: k < 0"
+	mLTN            = "lapack: m < n"
+	negDimension    = "lapack: negative matrix dimension"
+	negZ            = "lapack: negative z value"
+	nLT0            = "lapack: n < 0"
+	nLTM            = "lapack: n < m"
+	shortWork       = "lapack: working array shorter than declared"
 )
 
 func min(m, n int) int {
@@ -168,6 +169,74 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 		return true
 	}
 	return clapack.Dpotrf(ul, n, a, lda)
+}
+
+// Dgebrd reduces a general m×n matrix A to upper or lower bidiagonal form B by
+// an orthogonal transformation:
+//  Q^T * A * P = B.
+// The diagonal elements of B are stored in d and the off-diagonal elements are
+// stored in e. These are additionally stored along the diagonal of A and the
+// off-diagonal of A. If m >= n B is an upper-bidiagonal matrix, and if m < n B
+// is a lower-bidiagonal matrix.
+//
+// The remaining elements of A store the data needed to construct Q and P.
+// The matrices Q and P are products of elementary reflectors
+//  Q = H_1 * H_2 * ... * H_nb
+//  P = G_1 * G_2 * ... * G_nb
+// where
+//  H_i = I - tauQ[i] * v_i * v_i^T
+//  G_i = I - tauP[i] * u_i * u_i^T
+//
+// As an example, on exit the entries of A when m = 6, and n = 5
+//  (  d   e   u1  u1  u1 )
+//  (  v1  d   e   u2  u2 )
+//  (  v1  v2  d   e   u3 )
+//  (  v1  v2  v3  d   e  )
+//  (  v1  v2  v3  v4  d  )
+//  (  v1  v2  v3  v4  v5 )
+// and when m = 5, n = 6
+//  (  d   u1  u1  u1  u1  u1 )
+//  (  e   d   u2  u2  u2  u2 )
+//  (  v1  e   d   u3  u3  u3 )
+//  (  v1  v2  e   d   u4  u4 )
+//  (  v1  v2  v3  e   d   u5 )
+//
+// d, tauQ, and tauP must all have length at least min(m,n), and e must have
+// length min(m,n) - 1.
+//
+// Work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= max(m,n) and this function will panic otherwise.
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgbrd will panic.
+func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64, lwork int) {
+	checkMatrix(m, n, a, lda)
+	minmn := min(m, n)
+	if len(d) < minmn {
+		panic(badD)
+	}
+	if len(e) < minmn-1 {
+		panic(badE)
+	}
+	if len(tauQ) < minmn {
+		panic(badTauQ)
+	}
+	if len(tauP) < minmn {
+		panic(badTauP)
+	}
+	ws := max(m, n)
+	if lwork == -1 {
+		work[0] = float64(ws)
+		return
+	}
+	if lwork < ws {
+		panic(badWork)
+	}
+	if len(work) < lwork {
+		panic(badWork)
+	}
+
+	clapack.Dgebrd(m, n, a, lda, d, e, tauQ, tauP)
 }
 
 // Dgecon estimates the reciprocal of the condition number of the n×n matrix A
@@ -555,6 +624,53 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 		panic(badWork)
 	}
 	clapack.Dorgqr(m, n, k, a, lda, tau)
+}
+
+// Dormbr applies a multiplicative update to the matrix C based on a
+// decomposition computed by Dgebrd.
+//
+// Dormbr computes
+//  Q * C if vect == lapack.ApplyQ, side == blas.Left, and trans == blas.NoTrans
+//  C * Q if vect == lapack.ApplyQ, side == blas.Right, and trans == blas.NoTrans
+//  Q^T * C if vect == lapack.ApplyQ, side == blas.Left, and trans == blas.Trans
+//  C * Q^T if vect == lapack.ApplyQ, side == blas.Right, and trans == blas.Trans
+//
+//  P * C if vect == lapack.ApplyP, side == blas.Left, and trans == blas.NoTrans
+//  C * P if vect == lapack.ApplyP, side == blas.Left, and trans == blas.NoTrans
+//  P^T * C if vect == lapack.ApplyP, side == blas.Right, and trans == blas.Trans
+//  C * P^T if vect == lapack.ApplyP, side == blas.Right, and trans == blas.Trans
+// where P and Q are the orthogonal matrices determined by Dgebrd, A = Q * B * P^T.
+// See Dgebrd for the definitions of Q and P.
+//
+// If vect == lapack.ApplyQ, A is assumed to have been an nq×k matrix, while if
+// vect == lapack.ApplyP, A is assumed to have been a k×nq matrix. nq = m if
+// side == blas.Left, while nq = n if side == blas.Right.
+//
+// C is an m×n matrix. On exit it is updated by the multiplication listed above.
+//
+// Tau must have length min(nq,k), and Dormbr will panic otherwise. Tau contains
+// the elementary reflectors to construct Q or P depending on the value of
+// vect.
+func (impl Implementation) Dormbr(vect lapack.DecompUpdate, side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
+	if side != blas.Left && side != blas.Right {
+		panic(badSide)
+	}
+	if trans != blas.NoTrans && trans != blas.Trans {
+		panic(badTrans)
+	}
+	if vect != lapack.ApplyP && vect != lapack.ApplyQ {
+		panic(badDecompUpdate)
+	}
+	nq := n
+	if side == blas.Left {
+		nq = m
+	}
+	if vect == lapack.ApplyQ {
+		checkMatrix(nq, min(nq, k), a, lda)
+	} else {
+		checkMatrix(min(nq, k), nq, a, lda)
+	}
+	clapack.Dormbr(byte(vect), side, trans, m, n, k, a, lda, tau, c, ldc)
 }
 
 // Dormlq multiplies the matrix C by the othogonal matrix Q defined by the

@@ -6,6 +6,7 @@ package asm
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
 )
 
@@ -257,5 +258,97 @@ func TestDaxpyInc(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func BenchmarkDaxpyUnitaryN1(b *testing.B)      { daxpyUnitaryBenchmark(b, 1) }
+func BenchmarkDaxpyUnitaryN2(b *testing.B)      { daxpyUnitaryBenchmark(b, 2) }
+func BenchmarkDaxpyUnitaryN3(b *testing.B)      { daxpyUnitaryBenchmark(b, 3) }
+func BenchmarkDaxpyUnitaryN4(b *testing.B)      { daxpyUnitaryBenchmark(b, 4) }
+func BenchmarkDaxpyUnitaryN10(b *testing.B)     { daxpyUnitaryBenchmark(b, 10) }
+func BenchmarkDaxpyUnitaryN100(b *testing.B)    { daxpyUnitaryBenchmark(b, 100) }
+func BenchmarkDaxpyUnitaryN1000(b *testing.B)   { daxpyUnitaryBenchmark(b, 1000) }
+func BenchmarkDaxpyUnitaryN10000(b *testing.B)  { daxpyUnitaryBenchmark(b, 10000) }
+func BenchmarkDaxpyUnitaryN100000(b *testing.B) { daxpyUnitaryBenchmark(b, 100000) }
+
+var gs []float64
+
+func daxpyUnitaryBenchmark(b *testing.B, n int) {
+	x := make([]float64, n)
+	for i := range x {
+		x[i] = rand.Float64()
+	}
+	y := make([]float64, n)
+	for i := range y {
+		y[i] = rand.Float64()
+	}
+	z := make([]float64, n)
+	a := rand.Float64()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DaxpyUnitary(a, x, y, z)
+		gs = z
+	}
+}
+
+func BenchmarkDaxpyIncN1Inc1(b *testing.B) { daxpyIncBenchmark(b, 1, 1) }
+
+func BenchmarkDaxpyIncN2Inc1(b *testing.B)  { daxpyIncBenchmark(b, 2, 1) }
+func BenchmarkDaxpyIncN2Inc2(b *testing.B)  { daxpyIncBenchmark(b, 2, 2) }
+func BenchmarkDaxpyIncN2Inc4(b *testing.B)  { daxpyIncBenchmark(b, 2, 4) }
+func BenchmarkDaxpyIncN2Inc10(b *testing.B) { daxpyIncBenchmark(b, 2, 10) }
+
+func BenchmarkDaxpyIncN3Inc1(b *testing.B)  { daxpyIncBenchmark(b, 3, 1) }
+func BenchmarkDaxpyIncN3Inc2(b *testing.B)  { daxpyIncBenchmark(b, 3, 2) }
+func BenchmarkDaxpyIncN3Inc4(b *testing.B)  { daxpyIncBenchmark(b, 3, 4) }
+func BenchmarkDaxpyIncN3Inc10(b *testing.B) { daxpyIncBenchmark(b, 3, 10) }
+
+func BenchmarkDaxpyIncN4Inc1(b *testing.B)  { daxpyIncBenchmark(b, 4, 1) }
+func BenchmarkDaxpyIncN4Inc2(b *testing.B)  { daxpyIncBenchmark(b, 4, 2) }
+func BenchmarkDaxpyIncN4Inc4(b *testing.B)  { daxpyIncBenchmark(b, 4, 4) }
+func BenchmarkDaxpyIncN4Inc10(b *testing.B) { daxpyIncBenchmark(b, 4, 10) }
+
+func BenchmarkDaxpyIncN10Inc1(b *testing.B)  { daxpyIncBenchmark(b, 10, 1) }
+func BenchmarkDaxpyIncN10Inc2(b *testing.B)  { daxpyIncBenchmark(b, 10, 2) }
+func BenchmarkDaxpyIncN10Inc4(b *testing.B)  { daxpyIncBenchmark(b, 10, 4) }
+func BenchmarkDaxpyIncN10Inc10(b *testing.B) { daxpyIncBenchmark(b, 10, 10) }
+
+func BenchmarkDaxpyIncN1000Inc1(b *testing.B)  { daxpyIncBenchmark(b, 1000, 1) }
+func BenchmarkDaxpyIncN1000Inc2(b *testing.B)  { daxpyIncBenchmark(b, 1000, 2) }
+func BenchmarkDaxpyIncN1000Inc4(b *testing.B)  { daxpyIncBenchmark(b, 1000, 4) }
+func BenchmarkDaxpyIncN1000Inc10(b *testing.B) { daxpyIncBenchmark(b, 1000, 10) }
+
+func BenchmarkDaxpyIncN100000Inc1(b *testing.B)  { daxpyIncBenchmark(b, 100000, 1) }
+func BenchmarkDaxpyIncN100000Inc2(b *testing.B)  { daxpyIncBenchmark(b, 100000, 2) }
+func BenchmarkDaxpyIncN100000Inc4(b *testing.B)  { daxpyIncBenchmark(b, 100000, 4) }
+func BenchmarkDaxpyIncN100000Inc10(b *testing.B) { daxpyIncBenchmark(b, 100000, 10) }
+
+func BenchmarkDaxpyIncN100000IncM1(b *testing.B)  { daxpyIncBenchmark(b, 100000, -1) }
+func BenchmarkDaxpyIncN100000IncM2(b *testing.B)  { daxpyIncBenchmark(b, 100000, -2) }
+func BenchmarkDaxpyIncN100000IncM4(b *testing.B)  { daxpyIncBenchmark(b, 100000, -4) }
+func BenchmarkDaxpyIncN100000IncM10(b *testing.B) { daxpyIncBenchmark(b, 100000, -10) }
+
+func daxpyIncBenchmark(b *testing.B, n, inc int) {
+	absInc := inc
+	if inc < 0 {
+		absInc = -inc
+	}
+	x := make([]float64, (n-1)*absInc+1)
+	for i := range x {
+		x[i] = rand.Float64()
+	}
+	y := make([]float64, (n-1)*absInc+1)
+	for i := range y {
+		y[i] = rand.Float64()
+	}
+	var ini int
+	if inc < 0 {
+		ini = (-n + 1) * inc
+	}
+	a := rand.Float64()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DaxpyInc(a, x, y, uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
+		gs = y
 	}
 }

@@ -5,6 +5,7 @@
 package asm
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
@@ -22,31 +23,60 @@ func TestDdotUnitary(t *testing.T) {
 			want:  -6,
 		},
 		{
+			xData: []float64{2, 3},
+			yData: []float64{-3, 4},
+			want:  6,
+		},
+		{
+			xData: []float64{2, 3, -4},
+			yData: []float64{-3, 4, 5},
+			want:  -14,
+		},
+		{
+			xData: []float64{2, 3, -4, -5},
+			yData: []float64{-3, 4, 5, -6},
+			want:  16,
+		},
+		{
+			xData: []float64{0, 2, 3, -4, -5},
+			yData: []float64{0, -3, 4, 5, -6},
+			want:  16,
+		},
+		{
+			xData: []float64{0, 0, 2, 3, -4, -5},
+			yData: []float64{0, 1, -3, 4, 5, -6},
+			want:  16,
+		},
+		{
 			xData: []float64{0, 0, 1, 1, 2, -3, -4},
 			yData: []float64{0, 1, 0, 3, -4, 5, -6},
 			want:  4,
+		},
+		{
+			xData: []float64{0, 0, 1, 1, 2, -3, -4, 5},
+			yData: []float64{0, 1, 0, 3, -4, 5, -6, 7},
+			want:  39,
 		},
 	} {
 		x, xFront, xBack := newGuardedVector(test.xData, 1)
 		y, yFront, yBack := newGuardedVector(test.yData, 1)
 		got := DdotUnitary(x, y)
 
+		msg := "test %v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 		if !allNaN(xFront) || !allNaN(xBack) {
-			t.Errorf("test %v: out-of-bounds write to first argument\nfront guard: %v\nback guard: %v\n",
-				i, xFront, xBack)
+			t.Errorf(msg, i, "x", xFront, xBack)
 		}
 		if !allNaN(yFront) || !allNaN(yBack) {
-			t.Errorf("test %v: out-of-bounds write to second argument\nfront guard: %v\nback guard: %v\n",
-				i, yFront, yBack)
+			t.Errorf(msg, i, "y", yFront, yBack)
 		}
 		if !equalStrided(test.xData, x, 1) {
-			t.Errorf("test %v: modified first argument", i)
+			t.Errorf("test %v: modified read-only x argument", i)
 		}
 		if !equalStrided(test.yData, y, 1) {
-			t.Errorf("test %v: modified second argument", i)
+			t.Errorf("test %v: modified read-only y argument", i)
 		}
 		if math.IsNaN(got) {
-			t.Errorf("test %v: invalid memory access", i)
+			t.Errorf("test %v: invalid memory read", i)
 			continue
 		}
 
@@ -71,10 +101,46 @@ func TestDdotInc(t *testing.T) {
 			wantRev: -6,
 		},
 		{
+			xData:   []float64{2, 3},
+			yData:   []float64{-3, 4},
+			want:    6,
+			wantRev: -1,
+		},
+		{
+			xData:   []float64{2, 3, -4},
+			yData:   []float64{-3, 4, 5},
+			want:    -14,
+			wantRev: 34,
+		},
+		{
+			xData:   []float64{2, 3, -4, -5},
+			yData:   []float64{-3, 4, 5, -6},
+			want:    16,
+			wantRev: 2,
+		},
+		{
+			xData:   []float64{0, 2, 3, -4, -5},
+			yData:   []float64{0, -3, 4, 5, -6},
+			want:    16,
+			wantRev: 34,
+		},
+		{
+			xData:   []float64{0, 0, 2, 3, -4, -5},
+			yData:   []float64{0, 1, -3, 4, 5, -6},
+			want:    16,
+			wantRev: -5,
+		},
+		{
 			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
 			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
 			want:    4,
 			wantRev: -4,
+		},
+		{
+			xData:   []float64{0, 0, 1, 1, 2, -3, -4, 5},
+			yData:   []float64{0, 1, 0, 3, -4, 5, -6, 7},
+			want:    39,
+			wantRev: 3,
 		},
 	} {
 		for _, incX := range []int{-7, -3, -2, -1, 1, 2, 3, 7} {
@@ -92,22 +158,22 @@ func TestDdotInc(t *testing.T) {
 				}
 				got := DdotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 
+				prefix := fmt.Sprintf("test %v, incX = %v, incY = %v", i, incX, incY)
+				msg := "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 				if !allNaN(xFront) || !allNaN(xBack) {
-					t.Errorf("test %v: out-of-bounds write to first argument. incX = %v, incY = %v\nfront guard: %v\nback guard: %v\n",
-						i, incX, incY, xFront, xBack)
+					t.Errorf(msg, prefix, "x", xFront, xBack)
 				}
 				if !allNaN(yFront) || !allNaN(yBack) {
-					t.Errorf("test %v: out-of-bounds write to second argument. incX = %v, incY = %v\nfront guard: %v\nback guard: %v\n",
-						i, incX, incY, xFront, yBack)
+					t.Errorf(msg, prefix, "y", yFront, yBack)
 				}
-				if !equalStrided(test.xData, x, incX) {
-					t.Errorf("test %v: modified first argument. incX = %v, incY = %v", i, incX, incY)
+				if nonStridedWrite(x, incX) || !equalStrided(test.xData, x, incX) {
+					t.Errorf("%v: modified read-only x argument", prefix)
 				}
-				if !equalStrided(test.yData, y, incY) {
-					t.Errorf("test %v: modified second argument. incX = %v, incY = %v", i, incX, incY)
+				if nonStridedWrite(y, incY) || !equalStrided(test.yData, y, incY) {
+					t.Errorf("%v: modified read-only y argument", prefix)
 				}
 				if math.IsNaN(got) {
-					t.Errorf("test %v: invalid memory read. incX = %v, incY = %v", i, incX, incY)
+					t.Errorf("%v: invalid memory read", prefix)
 					continue
 				}
 
@@ -116,8 +182,7 @@ func TestDdotInc(t *testing.T) {
 					want = test.wantRev
 				}
 				if got != want {
-					t.Errorf("test %v: unexpected result. incX = %v, incY = %v, want %v, got %v",
-						i, incX, incY, want, got)
+					t.Errorf("%v: unexpected result. want %v, got %v", prefix, want, got)
 				}
 			}
 		}
@@ -157,20 +222,29 @@ func allNaN(x []float64) bool {
 }
 
 // equalStrided returns true if the strided vector x contains elements of the
-// dense vector ref at indices i*inc and NaN values elsewhere, false otherwise.
+// dense vector ref at indices i*inc, false otherwise.
 func equalStrided(ref, x []float64, inc int) bool {
 	if inc < 0 {
 		inc = -inc
 	}
 	for i, v := range x {
-		if i%inc == 0 {
-			if ref[i/inc] != v {
-				return false
-
-			}
-		} else if !math.IsNaN(v) {
+		if i%inc == 0 && ref[i/inc] != v {
 			return false
 		}
 	}
 	return true
+}
+
+// nonStridedWrite returns false if all elements of x at non-stride indices are
+// equal to NaN, true otherwise.
+func nonStridedWrite(x []float64, inc int) bool {
+	if inc < 0 {
+		inc = -inc
+	}
+	for i, v := range x {
+		if i%inc != 0 && !math.IsNaN(v) {
+			return true
+		}
+	}
+	return false
 }

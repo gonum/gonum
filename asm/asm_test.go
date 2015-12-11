@@ -44,8 +44,8 @@ func equalStrided(ref, x []float64, inc int) bool {
 	if inc < 0 {
 		inc = -inc
 	}
-	for i, v := range x {
-		if i%inc == 0 && ref[i/inc] != v {
+	for i, v := range ref {
+		if x[i*inc] != v {
 			return false
 		}
 	}

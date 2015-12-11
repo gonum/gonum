@@ -37,6 +37,23 @@ func nanSlice(n int) []float64 {
 	return s
 }
 
+// transposeGeneral returns a new general matrix that is the transpose of the
+// input. Nothing is done with data outside the {rows, cols} limit of the general.
+func transposeGeneral(a blas64.General) blas64.General {
+	ans := blas64.General{
+		Rows:   a.Cols,
+		Cols:   a.Rows,
+		Stride: a.Rows,
+		Data:   make([]float64, a.Cols*a.Rows),
+	}
+	for i := 0; i < a.Rows; i++ {
+		for j := 0; j < a.Cols; j++ {
+			ans.Data[j*ans.Stride+i] = a.Data[i*a.Stride+j]
+		}
+	}
+	return ans
+}
+
 // extractVMat collects the single reflectors from a into a matrix.
 func extractVMat(m, n int, a []float64, lda int, direct lapack.Direct, store lapack.StoreV) blas64.General {
 	k := min(m, n)

@@ -17,6 +17,7 @@ const (
 	badD            = "lapack: d has insufficient length"
 	badDecompUpdate = "lapack: bad decomp update"
 	badDiag         = "lapack: bad diag"
+	badDims         = "lapack: bad input dimensions"
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
 	badIpiv         = "lapack: insufficient permutation length"
@@ -540,6 +541,47 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 		ipiv32[i] = int32(v) + 1 // Transform to one-indexed.
 	}
 	clapack.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
+}
+
+// Dorgbr generates one of the matrices Q or P^T computed by Dgebrd
+// computed from the decomposition Dgebrd. See Dgebd2 for the description of
+// Q and P^T.
+//
+// If vect == lapack.ApplyQ, then a is assumed to have been an m×k matrix and
+// Q is of order m. If m >= k, then Dorgbr returns the first n columns of Q
+// where m >= n >= k. If m < k, then Dorgbr returns Q as an m×m matrix.
+//
+// If vect == lapack.ApplyP, then A is assumed to have been a k×n matrix, and
+// P^T is of order n. If k < n, then Dorgbr returns the first m rows of P^T,
+// where n >= m >= k. If k >= n, then Dorgbr returns P^T as an n×n matrix.
+func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
+	mn := min(m, n)
+	wantq := vect == lapack.ApplyQ
+	if wantq {
+		if m < n || n < min(m, k) || m < min(m, k) {
+			panic(badDims)
+		}
+	} else {
+		if n < m || m < min(n, k) || n < min(n, k) {
+			panic(badDims)
+		}
+	}
+	if wantq {
+		checkMatrix(m, k, a, lda)
+	} else {
+		checkMatrix(k, n, a, lda)
+	}
+	if lwork == -1 {
+		work[0] = float64(mn)
+		return
+	}
+	if len(work) < lwork {
+		panic(badWork)
+	}
+	if lwork < mn {
+		panic(badWork)
+	}
+	clapack.Dorgbr(byte(vect), m, n, k, a, lda, tau)
 }
 
 // Dorglq generates an m×n matrix Q with orthonormal rows defined by the

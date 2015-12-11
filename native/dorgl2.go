@@ -35,7 +35,7 @@ func (impl Implementation) Dorgl2(m, n, k int, a []float64, lda int, tau, work [
 		return
 	}
 	bi := blas64.Implementation()
-	if k < m-1 {
+	if k < m {
 		for i := k; i < m; i++ {
 			for j := 0; j < n; j++ {
 				a[i*lda+j] = 0

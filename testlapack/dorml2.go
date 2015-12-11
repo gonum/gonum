@@ -19,6 +19,9 @@ type Dorml2er interface {
 }
 
 func Dorml2Test(t *testing.T, impl Dorml2er) {
+	// TODO(btracey): This test is not complete, because it
+	// doesn't test individual values of m, n, and k, instead only testing
+	// a specific subset of possible k values.
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
 		for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans} {
 			for _, test := range []struct {

@@ -140,6 +140,10 @@ func TestDorg2r(t *testing.T) {
 	testlapack.Dorg2rTest(t, impl)
 }
 
+func TestDorgbr(t *testing.T) {
+	testlapack.DorgbrTest(t, impl)
+}
+
 func TestDorgl2(t *testing.T) {
 	testlapack.Dorgl2Test(t, impl)
 }

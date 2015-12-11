@@ -92,16 +92,15 @@ func max(a, b int) int {
 
 var (
 	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
-	dlamchE = math.Float64frombits(0x3ca0000000000000)
+	dlamchE = 1.0 / (1 << 53)
 
 	// dlamchP is 2 * eps
-	dlamchP = math.Float64frombits(0x3cb0000000000000)
+	dlamchP = 2 * dlamchE
 
 	// dlamchS is the "safe min", that is, the lowest number such that 1/sfmin does
 	// not overflow. The Netlib code for calculating this number is not correct --
-	// it overflows.
-	// Found from printing out from FORTRAN
-	dlamchS = 2.2250738585072014E-308
+	// it overflows. Found by comparison with the FORTRAN value.
+	dlamchS = math.Nextafter((4 / math.MaxFloat64), 0)
 
 	smlnum = dlamchS / dlamchP
 	bignum = 1 / smlnum

@@ -59,16 +59,17 @@ func TestDdotUnitary(t *testing.T) {
 			want:  39,
 		},
 	} {
+		const msgGuard = "test %v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
+
 		x, xFront, xBack := newGuardedVector(test.xData, 1)
 		y, yFront, yBack := newGuardedVector(test.yData, 1)
 		got := DdotUnitary(x, y)
 
-		msg := "test %v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 		if !allNaN(xFront) || !allNaN(xBack) {
-			t.Errorf(msg, i, "x", xFront, xBack)
+			t.Errorf(msgGuard, i, "x", xFront, xBack)
 		}
 		if !allNaN(yFront) || !allNaN(yBack) {
-			t.Errorf(msg, i, "y", yFront, yBack)
+			t.Errorf(msgGuard, i, "y", yFront, yBack)
 		}
 		if !equalStrided(test.xData, x, 1) {
 			t.Errorf("test %v: modified read-only x argument", i)
@@ -144,6 +145,8 @@ func TestDdotInc(t *testing.T) {
 			wantRev: 3,
 		},
 	} {
+		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
+
 		for _, incX := range []int{-7, -3, -2, -1, 1, 2, 3, 7} {
 			for _, incY := range []int{-7, -3, -2, -1, 1, 2, 3, 7} {
 				n := len(test.xData)
@@ -160,12 +163,11 @@ func TestDdotInc(t *testing.T) {
 				got := DdotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 
 				prefix := fmt.Sprintf("test %v, incX = %v, incY = %v", i, incX, incY)
-				msg := "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 				if !allNaN(xFront) || !allNaN(xBack) {
-					t.Errorf(msg, prefix, "x", xFront, xBack)
+					t.Errorf(msgGuard, prefix, "x", xFront, xBack)
 				}
 				if !allNaN(yFront) || !allNaN(yBack) {
-					t.Errorf(msg, prefix, "y", yFront, yBack)
+					t.Errorf(msgGuard, prefix, "y", yFront, yBack)
 				}
 				if nonStridedWrite(x, incX) || !equalStrided(test.xData, x, incX) {
 					t.Errorf("%v: modified read-only x argument", prefix)

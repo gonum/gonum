@@ -12,6 +12,10 @@ import (
 
 var impl = Implementation{}
 
+func TestDbdsqr(t *testing.T) {
+	testlapack.DbdsqrTest(t, impl)
+}
+
 func TestDgebd2(t *testing.T) {
 	testlapack.Dgebd2Test(t, impl)
 }

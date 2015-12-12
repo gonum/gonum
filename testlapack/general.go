@@ -97,6 +97,28 @@ func extractVMat(m, n int, a []float64, lda int, direct lapack.Direct, store lap
 	}
 }
 
+// constructBidiagonal constructs a bidiagonal matrix with the given diagonal
+// and off-diagonal elements.
+func constructBidiagonal(uplo blas.Uplo, n int, d, e []float64) blas64.General {
+	bMat := blas64.General{
+		Rows:   n,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, n*n),
+	}
+
+	for i := 0; i < n-1; i++ {
+		bMat.Data[i*bMat.Stride+i] = d[i]
+		if uplo == blas.Upper {
+			bMat.Data[i*bMat.Stride+i+1] = e[i]
+		} else {
+			bMat.Data[(i+1)*bMat.Stride+i] = e[i]
+		}
+	}
+	bMat.Data[(n-1)*bMat.Stride+n-1] = d[n-1]
+	return bMat
+}
+
 // constructVMat transforms the v matrix based on the storage.
 func constructVMat(vMat blas64.General, store lapack.StoreV, direct lapack.Direct) blas64.General {
 	m := vMat.Rows

@@ -67,11 +67,11 @@ func DgetriTest(t *testing.T, impl Dgetrier) {
 				if i == j {
 					// This tolerance is so high because computing matrix inverses
 					// is very unstable.
-					if math.Abs(ans[i*lda+j]-1) > 2e-2 {
+					if math.Abs(ans[i*lda+j]-1) > 5e-2 {
 						isEye = false
 					}
 				} else {
-					if math.Abs(ans[i*lda+j]) > 2e-2 {
+					if math.Abs(ans[i*lda+j]) > 5e-2 {
 						isEye = false
 					}
 				}

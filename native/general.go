@@ -23,6 +23,7 @@ const (
 	badD            = "lapack: d has insufficient length"
 	badDecompUpdate = "lapack: bad decomp update"
 	badDiag         = "lapack: bad diag"
+	badDims         = "lapack: bad input dimensions"
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
 	badIpiv         = "lapack: insufficient permutation length"

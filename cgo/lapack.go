@@ -172,6 +172,76 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 	return clapack.Dpotrf(ul, n, a, lda)
 }
 
+// Dbdsqr performs a singular value decomposition of a real n×n bidiagonal matrix.
+//
+// The SVD of the bidiagonal matrix B is
+//  B = Q * S * P^T
+// where S is a diagonal matrix of singular values, Q is an orthogonal matrix of
+// left singular vectors, and P is an orthogonal matrix of right singular vectors.
+//
+// Q and P are only computed if requested. If left singular vectors are requested,
+// this routine returns U * Q instead of Q, and if right singular vectors are
+// requested P^T * VT is returned instead of P^T.
+//
+// Frequently Dbdsqr is used in conjuction with Dgebrd which reduces a general
+// matrix A into bidiagonal form. In this case, the SVD of A is
+//  A = (U * Q) * S * (P^T * VT)
+//
+// This routine may also compute Q^T * C.
+//
+// d and e contain the elements of the bidiagonal matrix b. d must have length at
+// least n, and e must have length at least n-1. Dbdsqr will panic if there is
+// insufficient length. On exit, D contains the singular values of B in decreasing
+// order.
+//
+// VT is a matrix of size n×ncvt whose elements are stored in vt. The elements
+// of vt are modified to contain P^T * VT on exit. VT is not used if ncvt == 0.
+//
+// U is a matrix of size nru×n whose elements are stored in u. The elements
+// of u are modified to contain U * Q on exit. U is not used if nru == 0.
+//
+// C is a matrix of size n×ncc whose elements are stored in c. The elements
+// of c are modified to contain Q^T * C on exit. C is not used if ncc == 0.
+//
+// work contains temporary storage and must have length at least 4*n. Dbdsqr
+// will panic if there is insufficient working memory.
+//
+// Dbdsqr returns whether the decomposition was successful.
+func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, vt []float64, ldvt int, u []float64, ldu int, c []float64, ldc int, work []float64) (ok bool) {
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	if ncvt != 0 {
+		checkMatrix(n, ncvt, vt, ldvt)
+	}
+	if nru != 0 {
+		checkMatrix(nru, n, u, ldu)
+	}
+	if ncc != 0 {
+		checkMatrix(n, ncc, c, ldc)
+	}
+	if len(d) < n {
+		panic(badD)
+	}
+	if len(e) < n-1 {
+		panic(badE)
+	}
+	if len(work) < 4*n {
+		panic(badWork)
+	}
+	// An address must be passed to cgo. If lengths are zero, allocate a slice.
+	if len(vt) == 0 {
+		vt = make([]float64, 1)
+	}
+	if len(u) == 0 {
+		vt = make([]float64, 1)
+	}
+	if len(c) == 0 {
+		c = make([]float64, 1)
+	}
+	return clapack.Dbdsqr(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc)
+}
+
 // Dgebrd reduces a general m×n matrix A to upper or lower bidiagonal form B by
 // an orthogonal transformation:
 //  Q^T * A * P = B.

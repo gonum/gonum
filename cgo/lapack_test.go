@@ -20,6 +20,10 @@ type blockedTranslate struct {
 	Implementation
 }
 
+func TestDbdsqr(t *testing.T) {
+	testlapack.DbdsqrTest(t, impl)
+}
+
 func (bl blockedTranslate) Dgebd2(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64) {
 	impl.Dgebrd(m, n, a, lda, d, e, tauQ, tauP, work, len(work))
 }

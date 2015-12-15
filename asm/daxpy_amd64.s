@@ -41,22 +41,22 @@
 // Don't insert stack check preamble.
 #define NOSPLIT	4
 
-// func DaxpyUnitary(alpha float64, x, y, z []float64)
-// This function assumes len(y) >= len(x).
-TEXT ·DaxpyUnitary(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x_len+16(FP), DI // n = len(x)
-	MOVQ   x+8(FP), R8
-	MOVQ   y+32(FP), R9
-	MOVQ   z+56(FP), R10
+// func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
+// This function assumes len(y) >= len(x) and len(dst) >= len(x).
+TEXT ·DaxpyUnitaryTo(SB), NOSPLIT, $0
+	MOVQ   dst+0(FP), R10
+	MOVHPD alpha+24(FP), X7
+	MOVLPD alpha+24(FP), X7
+	MOVQ   x+32(FP), R8
+	MOVQ   x_len+40(FP), DI // n = len(x)
+	MOVQ   y+56(FP), R9
 
 	MOVQ $0, SI // i = 0
 	SUBQ $2, DI // n -= 2
 	JL   V1     // if n < 0 goto V1
 
 U1:  // n >= 0
-	// y[i] += alpha * x[i] unrolled 2x.
+	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
 	MOVUPD 0(R8)(SI*8), X0
 	MOVUPD 0(R9)(SI*8), X1
 	MULPD  X7, X0
@@ -71,7 +71,7 @@ V1:
 	ADDQ $2, DI // n += 2
 	JLE  E1     // if n <= 0 goto E1
 
-	// y[i] += alpha * x[i] for last iteration if n is odd.
+	// dst[i] = alpha * x[i] + y[i] for last iteration if n is odd.
 	MOVSD 0(R8)(SI*8), X0
 	MOVSD 0(R9)(SI*8), X1
 	MULSD X7, X0

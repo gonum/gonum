@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestDaxpyUnitary(t *testing.T) {
+func TestDaxpyUnitaryTo(t *testing.T) {
 	for i, test := range []struct {
 		alpha float64
 		xData []float64
@@ -75,12 +75,12 @@ func TestDaxpyUnitary(t *testing.T) {
 	} {
 		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 
-		// Test z = alpha * x + y.
-		prefix := fmt.Sprintf("test %v (z=a*x+y)", i)
+		// Test dst = alpha * x + y.
+		prefix := fmt.Sprintf("test %v (dst=a*x+y)", i)
 		x, xFront, xBack := newGuardedVector(test.xData, 1)
 		y, yFront, yBack := newGuardedVector(test.yData, 1)
-		z, zFront, zBack := newGuardedVector(test.xData, 1)
-		DaxpyUnitary(test.alpha, x, y, z)
+		dst, dstFront, dstBack := newGuardedVector(test.xData, 1)
+		DaxpyUnitaryTo(dst, test.alpha, x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -88,8 +88,8 @@ func TestDaxpyUnitary(t *testing.T) {
 		if !allNaN(yFront) || !allNaN(yBack) {
 			t.Errorf(msgGuard, prefix, "y", yFront, yBack)
 		}
-		if !allNaN(zFront) || !allNaN(zBack) {
-			t.Errorf(msgGuard, prefix, "z", zFront, zBack)
+		if !allNaN(dstFront) || !allNaN(dstBack) {
+			t.Errorf(msgGuard, prefix, "dst", dstFront, dstBack)
 		}
 		if !equalStrided(test.xData, x, 1) {
 			t.Errorf("%v: modified read-only x argument", prefix)
@@ -98,15 +98,15 @@ func TestDaxpyUnitary(t *testing.T) {
 			t.Errorf("%v: modified read-only y argument", prefix)
 		}
 
-		if !equalStrided(test.want, z, 1) {
-			t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, z)
+		if !equalStrided(test.want, dst, 1) {
+			t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, dst)
 		}
 
 		// Test y = alpha * x + y.
 		prefix = fmt.Sprintf("test %v (y=a*x+y)", i)
 		x, xFront, xBack = newGuardedVector(test.xData, 1)
 		y, yFront, yBack = newGuardedVector(test.yData, 1)
-		DaxpyUnitary(test.alpha, x, y, y)
+		DaxpyUnitaryTo(y, test.alpha, x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -127,7 +127,7 @@ func TestDaxpyUnitary(t *testing.T) {
 		x, xFront, xBack = newGuardedVector(test.xData, 1)
 		y, yFront, yBack = newGuardedVector(test.yData, 1)
 
-		DaxpyUnitary(test.alpha, x, y, x)
+		DaxpyUnitaryTo(x, test.alpha, x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -261,26 +261,26 @@ func TestDaxpyInc(t *testing.T) {
 	}
 }
 
-func BenchmarkDaxpyUnitaryN1(b *testing.B)      { daxpyUnitaryBenchmark(b, 1) }
-func BenchmarkDaxpyUnitaryN2(b *testing.B)      { daxpyUnitaryBenchmark(b, 2) }
-func BenchmarkDaxpyUnitaryN3(b *testing.B)      { daxpyUnitaryBenchmark(b, 3) }
-func BenchmarkDaxpyUnitaryN4(b *testing.B)      { daxpyUnitaryBenchmark(b, 4) }
-func BenchmarkDaxpyUnitaryN10(b *testing.B)     { daxpyUnitaryBenchmark(b, 10) }
-func BenchmarkDaxpyUnitaryN100(b *testing.B)    { daxpyUnitaryBenchmark(b, 100) }
-func BenchmarkDaxpyUnitaryN1000(b *testing.B)   { daxpyUnitaryBenchmark(b, 1000) }
-func BenchmarkDaxpyUnitaryN10000(b *testing.B)  { daxpyUnitaryBenchmark(b, 10000) }
-func BenchmarkDaxpyUnitaryN100000(b *testing.B) { daxpyUnitaryBenchmark(b, 100000) }
+func BenchmarkDaxpyUnitaryToN1(b *testing.B)      { daxpyUnitaryToBenchmark(b, 1) }
+func BenchmarkDaxpyUnitaryToN2(b *testing.B)      { daxpyUnitaryToBenchmark(b, 2) }
+func BenchmarkDaxpyUnitaryToN3(b *testing.B)      { daxpyUnitaryToBenchmark(b, 3) }
+func BenchmarkDaxpyUnitaryToN4(b *testing.B)      { daxpyUnitaryToBenchmark(b, 4) }
+func BenchmarkDaxpyUnitaryToN10(b *testing.B)     { daxpyUnitaryToBenchmark(b, 10) }
+func BenchmarkDaxpyUnitaryToN100(b *testing.B)    { daxpyUnitaryToBenchmark(b, 100) }
+func BenchmarkDaxpyUnitaryToN1000(b *testing.B)   { daxpyUnitaryToBenchmark(b, 1000) }
+func BenchmarkDaxpyUnitaryToN10000(b *testing.B)  { daxpyUnitaryToBenchmark(b, 10000) }
+func BenchmarkDaxpyUnitaryToN100000(b *testing.B) { daxpyUnitaryToBenchmark(b, 100000) }
 
 var gs []float64
 
-func daxpyUnitaryBenchmark(b *testing.B, n int) {
+func daxpyUnitaryToBenchmark(b *testing.B, n int) {
 	x := randomSlice(n, 1)
 	y := randomSlice(n, 1)
 	dst := randomSlice(n, 1)
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DaxpyUnitary(a, x, y, dst)
+		DaxpyUnitaryTo(dst, a, x, y)
 		gs = dst
 	}
 }

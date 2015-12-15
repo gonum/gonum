@@ -535,6 +535,60 @@ func daxpyIncBenchmark(b *testing.B, n, inc int) {
 	}
 }
 
+func BenchmarkDaxpyIncToN1Inc1(b *testing.B) { daxpyIncToBenchmark(b, 1, 1) }
+
+func BenchmarkDaxpyIncToN2Inc1(b *testing.B)  { daxpyIncToBenchmark(b, 2, 1) }
+func BenchmarkDaxpyIncToN2Inc2(b *testing.B)  { daxpyIncToBenchmark(b, 2, 2) }
+func BenchmarkDaxpyIncToN2Inc4(b *testing.B)  { daxpyIncToBenchmark(b, 2, 4) }
+func BenchmarkDaxpyIncToN2Inc10(b *testing.B) { daxpyIncToBenchmark(b, 2, 10) }
+
+func BenchmarkDaxpyIncToN3Inc1(b *testing.B)  { daxpyIncToBenchmark(b, 3, 1) }
+func BenchmarkDaxpyIncToN3Inc2(b *testing.B)  { daxpyIncToBenchmark(b, 3, 2) }
+func BenchmarkDaxpyIncToN3Inc4(b *testing.B)  { daxpyIncToBenchmark(b, 3, 4) }
+func BenchmarkDaxpyIncToN3Inc10(b *testing.B) { daxpyIncToBenchmark(b, 3, 10) }
+
+func BenchmarkDaxpyIncToN4Inc1(b *testing.B)  { daxpyIncToBenchmark(b, 4, 1) }
+func BenchmarkDaxpyIncToN4Inc2(b *testing.B)  { daxpyIncToBenchmark(b, 4, 2) }
+func BenchmarkDaxpyIncToN4Inc4(b *testing.B)  { daxpyIncToBenchmark(b, 4, 4) }
+func BenchmarkDaxpyIncToN4Inc10(b *testing.B) { daxpyIncToBenchmark(b, 4, 10) }
+
+func BenchmarkDaxpyIncToN10Inc1(b *testing.B)  { daxpyIncToBenchmark(b, 10, 1) }
+func BenchmarkDaxpyIncToN10Inc2(b *testing.B)  { daxpyIncToBenchmark(b, 10, 2) }
+func BenchmarkDaxpyIncToN10Inc4(b *testing.B)  { daxpyIncToBenchmark(b, 10, 4) }
+func BenchmarkDaxpyIncToN10Inc10(b *testing.B) { daxpyIncToBenchmark(b, 10, 10) }
+
+func BenchmarkDaxpyIncToN1000Inc1(b *testing.B)  { daxpyIncToBenchmark(b, 1000, 1) }
+func BenchmarkDaxpyIncToN1000Inc2(b *testing.B)  { daxpyIncToBenchmark(b, 1000, 2) }
+func BenchmarkDaxpyIncToN1000Inc4(b *testing.B)  { daxpyIncToBenchmark(b, 1000, 4) }
+func BenchmarkDaxpyIncToN1000Inc10(b *testing.B) { daxpyIncToBenchmark(b, 1000, 10) }
+
+func BenchmarkDaxpyIncToN100000Inc1(b *testing.B)  { daxpyIncToBenchmark(b, 100000, 1) }
+func BenchmarkDaxpyIncToN100000Inc2(b *testing.B)  { daxpyIncToBenchmark(b, 100000, 2) }
+func BenchmarkDaxpyIncToN100000Inc4(b *testing.B)  { daxpyIncToBenchmark(b, 100000, 4) }
+func BenchmarkDaxpyIncToN100000Inc10(b *testing.B) { daxpyIncToBenchmark(b, 100000, 10) }
+
+func BenchmarkDaxpyIncToN100000IncM1(b *testing.B)  { daxpyIncToBenchmark(b, 100000, -1) }
+func BenchmarkDaxpyIncToN100000IncM2(b *testing.B)  { daxpyIncToBenchmark(b, 100000, -2) }
+func BenchmarkDaxpyIncToN100000IncM4(b *testing.B)  { daxpyIncToBenchmark(b, 100000, -4) }
+func BenchmarkDaxpyIncToN100000IncM10(b *testing.B) { daxpyIncToBenchmark(b, 100000, -10) }
+
+func daxpyIncToBenchmark(b *testing.B, n, inc int) {
+	x := randomSlice(n, inc)
+	y := randomSlice(n, inc)
+	dst := randomSlice(n, inc)
+	var ini int
+	if inc < 0 {
+		ini = (-n + 1) * inc
+	}
+	a := rand.Float64()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DaxpyIncTo(dst, uintptr(inc), uintptr(ini), a, x, y,
+			uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
+		gs = y
+	}
+}
+
 func randomSlice(n, inc int) []float64 {
 	if inc < 0 {
 		inc = -inc

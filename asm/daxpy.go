@@ -19,3 +19,12 @@ func DaxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr) {
 		iy += incY
 	}
 }
+
+func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr) {
+	for i := 0; i < int(n); i++ {
+		dst[idst] = alpha*x[ix] + y[iy]
+		ix += incX
+		iy += incY
+		idst += incDst
+	}
+}

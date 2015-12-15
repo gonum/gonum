@@ -9,3 +9,5 @@ package asm
 func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
 
 func DaxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
+
+func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)

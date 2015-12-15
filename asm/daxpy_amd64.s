@@ -87,7 +87,7 @@ TEXT ·DaxpyInc(SB), NOSPLIT, $0
 	MOVLPD alpha+0(FP), X7
 	MOVQ   x+8(FP), R8
 	MOVQ   y+32(FP), R9
-	MOVQ   n+56(FP), CX
+	MOVQ   n+56(FP), DX
 	MOVQ   incX+64(FP), R11
 	MOVQ   incY+72(FP), R12
 	MOVQ   ix+80(FP), SI
@@ -96,11 +96,11 @@ TEXT ·DaxpyInc(SB), NOSPLIT, $0
 	MOVQ SI, AX  // nextX = ix
 	MOVQ DI, BX  // nextY = iy
 	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incX
-	SHLQ $1, R11 // indX *= 2
-	SHLQ $1, R12 // indY *= 2
+	ADDQ R12, BX // nextY += incY
+	SHLQ $1, R11 // incX *= 2
+	SHLQ $1, R12 // incY *= 2
 
-	SUBQ $2, CX // n -= 2
+	SUBQ $2, DX // n -= 2
 	JL   V2     // if n < 0 goto V2
 
 U2:  // n >= 0
@@ -120,11 +120,11 @@ U2:  // n >= 0
 	ADDQ R11, AX // nextX += incX
 	ADDQ R12, BX // nextY += incY
 
-	SUBQ $2, CX // n -= 2
+	SUBQ $2, DX // n -= 2
 	JGE  U2     // if n >= 0 goto U2
 
 V2:
-	ADDQ $2, CX // n += 2
+	ADDQ $2, DX // n += 2
 	JLE  E2     // if n <= 0 goto E2
 
 	// y[i] += alpha * x[i] for the last iteration if n is odd.
@@ -135,4 +135,68 @@ V2:
 	MOVSD X1, 0(R9)(DI*8)
 
 E2:
+	RET
+
+// func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
+TEXT ·DaxpyIncTo(SB), NOSPLIT, $0
+	MOVQ   dst+0(FP), R10
+	MOVQ   incDst+24(FP), R13
+	MOVQ   idst+32(FP), BP
+	MOVHPD alpha+40(FP), X7
+	MOVLPD alpha+40(FP), X7
+	MOVQ   x+48(FP), R8
+	MOVQ   y+72(FP), R9
+	MOVQ   n+96(FP), DX
+	MOVQ   incX+104(FP), R11
+	MOVQ   incY+112(FP), R12
+	MOVQ   ix+120(FP), SI
+	MOVQ   iy+128(FP), DI
+
+	MOVQ SI, AX  // nextX = ix
+	MOVQ DI, BX  // nextY = iy
+	MOVQ BP, CX  // nextDst = idst
+	ADDQ R11, AX // nextX += incX
+	ADDQ R12, BX // nextY += incY
+	ADDQ R13, CX // nextDst += incDst
+	SHLQ $1, R11 // incX *= 2
+	SHLQ $1, R12 // incY *= 2
+	SHLQ $1, R13 // incDst *= 2
+
+	SUBQ $2, DX // n -= 2
+	JL   V3     // if n < 0 goto V2
+
+U3:  // n >= 0
+	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
+	MOVHPD 0(R8)(SI*8), X0
+	MOVHPD 0(R9)(DI*8), X1
+	MOVLPD 0(R8)(AX*8), X0
+	MOVLPD 0(R9)(BX*8), X1
+
+	MULPD  X7, X0
+	ADDPD  X0, X1
+	MOVHPD X1, 0(R10)(BP*8)
+	MOVLPD X1, 0(R10)(CX*8)
+
+	ADDQ R11, SI // ix += incX
+	ADDQ R12, DI // iy += incY
+	ADDQ R13, BP // idst += incDst
+	ADDQ R11, AX // nextX += incX
+	ADDQ R12, BX // nextY += incY
+	ADDQ R13, CX // nextDst += incDst
+
+	SUBQ $2, DX // n -= 2
+	JGE  U3     // if n >= 0 goto U2
+
+V3:
+	ADDQ $2, DX // n += 2
+	JLE  E3     // if n <= 0 goto E2
+
+	// dst[i] = alpha * x[i] + y[i] for the last iteration if n is odd.
+	MOVSD 0(R8)(SI*8), X0
+	MOVSD 0(R9)(DI*8), X1
+	MULSD X7, X0
+	ADDSD X0, X1
+	MOVSD X1, 0(R10)(BP*8)
+
+E3:
 	RET

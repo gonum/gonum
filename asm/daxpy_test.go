@@ -274,20 +274,14 @@ func BenchmarkDaxpyUnitaryN100000(b *testing.B) { daxpyUnitaryBenchmark(b, 10000
 var gs []float64
 
 func daxpyUnitaryBenchmark(b *testing.B, n int) {
-	x := make([]float64, n)
-	for i := range x {
-		x[i] = rand.Float64()
-	}
-	y := make([]float64, n)
-	for i := range y {
-		y[i] = rand.Float64()
-	}
-	z := make([]float64, n)
+	x := randomSlice(n, 1)
+	y := randomSlice(n, 1)
+	dst := randomSlice(n, 1)
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DaxpyUnitary(a, x, y, z)
-		gs = z
+		DaxpyUnitary(a, x, y, dst)
+		gs = dst
 	}
 }
 
@@ -329,18 +323,8 @@ func BenchmarkDaxpyIncN100000IncM4(b *testing.B)  { daxpyIncBenchmark(b, 100000,
 func BenchmarkDaxpyIncN100000IncM10(b *testing.B) { daxpyIncBenchmark(b, 100000, -10) }
 
 func daxpyIncBenchmark(b *testing.B, n, inc int) {
-	absInc := inc
-	if inc < 0 {
-		absInc = -inc
-	}
-	x := make([]float64, (n-1)*absInc+1)
-	for i := range x {
-		x[i] = rand.Float64()
-	}
-	y := make([]float64, (n-1)*absInc+1)
-	for i := range y {
-		y[i] = rand.Float64()
-	}
+	x := randomSlice(n, inc)
+	y := randomSlice(n, inc)
 	var ini int
 	if inc < 0 {
 		ini = (-n + 1) * inc
@@ -351,4 +335,15 @@ func daxpyIncBenchmark(b *testing.B, n, inc int) {
 		DaxpyInc(a, x, y, uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
 		gs = y
 	}
+}
+
+func randomSlice(n, inc int) []float64 {
+	if inc < 0 {
+		inc = -inc
+	}
+	x := make([]float64, (n-1)*inc+1)
+	for i := range x {
+		x[i] = rand.Float64()
+	}
+	return x
 }

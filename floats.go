@@ -24,9 +24,7 @@ func Add(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of the slices do not match")
 	}
-	for i, val := range s {
-		dst[i] += val
-	}
+	asm.DaxpyUnitaryTo(dst, 1, s, dst)
 }
 
 // AddTo adds, element-wise, the elements of s and t and
@@ -38,9 +36,7 @@ func AddTo(dst, s, t []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of adder")
 	}
-	for i, val := range t {
-		dst[i] = s[i] + val
-	}
+	asm.DaxpyUnitaryTo(dst, 1, s, t)
 	return dst
 }
 

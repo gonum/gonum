@@ -10,69 +10,81 @@ import (
 	"testing"
 )
 
-func TestDaxpyUnitaryTo(t *testing.T) {
-	for i, test := range []struct {
-		alpha float64
-		xData []float64
-		yData []float64
+var daxpyTests = []struct {
+	alpha float64
+	xData []float64
+	yData []float64
 
-		want []float64
-	}{
-		{
-			alpha: 0,
-			xData: []float64{2},
-			yData: []float64{-3},
-			want:  []float64{-3},
-		},
-		{
-			alpha: 1,
-			xData: []float64{2},
-			yData: []float64{-3},
-			want:  []float64{-1},
-		},
-		{
-			alpha: 3,
-			xData: []float64{2},
-			yData: []float64{-3},
-			want:  []float64{3},
-		},
-		{
-			alpha: -3,
-			xData: []float64{2},
-			yData: []float64{-3},
-			want:  []float64{-9},
-		},
-		{
-			alpha: 0,
-			xData: []float64{0, 0, 1, 1, 2, -3, -4},
-			yData: []float64{0, 1, 0, 3, -4, 5, -6},
-			want:  []float64{0, 1, 0, 3, -4, 5, -6},
-		},
-		{
-			alpha: 1,
-			xData: []float64{0, 0, 1, 1, 2, -3, -4},
-			yData: []float64{0, 1, 0, 3, -4, 5, -6},
-			want:  []float64{0, 1, 1, 4, -2, 2, -10},
-		},
-		{
-			alpha: 3,
-			xData: []float64{0, 0, 1, 1, 2, -3, -4},
-			yData: []float64{0, 1, 0, 3, -4, 5, -6},
-			want:  []float64{0, 1, 3, 6, 2, -4, -18},
-		},
-		{
-			alpha: -3,
-			xData: []float64{0, 0, 1, 1, 2, -3, -4},
-			yData: []float64{0, 1, 0, 3, -4, 5, -6},
-			want:  []float64{0, 1, -3, 0, -10, 14, 6},
-		},
-		{
-			alpha: -5,
-			xData: []float64{0, 0, 1, 1, 2, -3, -4, 5},
-			yData: []float64{0, 1, 0, 3, -4, 5, -6, 7},
-			want:  []float64{0, 1, -5, -2, -14, 20, 14, -18},
-		},
-	} {
+	want    []float64
+	wantRev []float64 // Result when x is traversed in reverse direction.
+}{
+	{
+		alpha:   0,
+		xData:   []float64{2},
+		yData:   []float64{-3},
+		want:    []float64{-3},
+		wantRev: []float64{-3},
+	},
+	{
+		alpha:   1,
+		xData:   []float64{2},
+		yData:   []float64{-3},
+		want:    []float64{-1},
+		wantRev: []float64{-1},
+	},
+	{
+		alpha:   3,
+		xData:   []float64{2},
+		yData:   []float64{-3},
+		want:    []float64{3},
+		wantRev: []float64{3},
+	},
+	{
+		alpha:   -3,
+		xData:   []float64{2},
+		yData:   []float64{-3},
+		want:    []float64{-9},
+		wantRev: []float64{-9},
+	},
+	{
+		alpha:   0,
+		xData:   []float64{0, 0, 1, 1, 2, -3, -4},
+		yData:   []float64{0, 1, 0, 3, -4, 5, -6},
+		want:    []float64{0, 1, 0, 3, -4, 5, -6},
+		wantRev: []float64{0, 1, 0, 3, -4, 5, -6},
+	},
+	{
+		alpha:   1,
+		xData:   []float64{0, 0, 1, 1, 2, -3, -4},
+		yData:   []float64{0, 1, 0, 3, -4, 5, -6},
+		want:    []float64{0, 1, 1, 4, -2, 2, -10},
+		wantRev: []float64{-4, -2, 2, 4, -3, 5, -6},
+	},
+	{
+		alpha:   3,
+		xData:   []float64{0, 0, 1, 1, 2, -3, -4},
+		yData:   []float64{0, 1, 0, 3, -4, 5, -6},
+		want:    []float64{0, 1, 3, 6, 2, -4, -18},
+		wantRev: []float64{-12, -8, 6, 6, -1, 5, -6},
+	},
+	{
+		alpha:   -3,
+		xData:   []float64{0, 0, 1, 1, 2, -3, -4},
+		yData:   []float64{0, 1, 0, 3, -4, 5, -6},
+		want:    []float64{0, 1, -3, 0, -10, 14, 6},
+		wantRev: []float64{12, 10, -6, 0, -7, 5, -6},
+	},
+	{
+		alpha:   -5,
+		xData:   []float64{0, 0, 1, 1, 2, -3, -4, 5},
+		yData:   []float64{0, 1, 0, 3, -4, 5, -6, 7},
+		want:    []float64{0, 1, -5, -2, -14, 20, 14, -18},
+		wantRev: []float64{-25, 21, 15, -7, -9, 0, -6, 7},
+	},
+}
+
+func TestDaxpyUnitaryTo(t *testing.T) {
+	for i, test := range daxpyTests {
 		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 
 		// Test dst = alpha * x + y.
@@ -146,78 +158,7 @@ func TestDaxpyUnitaryTo(t *testing.T) {
 }
 
 func TestDaxpyInc(t *testing.T) {
-	for i, test := range []struct {
-		alpha float64
-		xData []float64
-		yData []float64
-
-		want    []float64
-		wantRev []float64 // Result when one vector is traversed in reverse direction.
-	}{
-		{
-			alpha:   0,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{-3},
-			wantRev: []float64{-3},
-		},
-		{
-			alpha:   1,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{-1},
-			wantRev: []float64{-1},
-		},
-		{
-			alpha:   3,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{3},
-			wantRev: []float64{3},
-		},
-		{
-			alpha:   -3,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{-9},
-			wantRev: []float64{-9},
-		},
-		{
-			alpha:   0,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, 0, 3, -4, 5, -6},
-			wantRev: []float64{0, 1, 0, 3, -4, 5, -6},
-		},
-		{
-			alpha:   1,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, 1, 4, -2, 2, -10},
-			wantRev: []float64{-4, -2, 2, 4, -3, 5, -6},
-		},
-		{
-			alpha:   3,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, 3, 6, 2, -4, -18},
-			wantRev: []float64{-12, -8, 6, 6, -1, 5, -6},
-		},
-		{
-			alpha:   -3,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, -3, 0, -10, 14, 6},
-			wantRev: []float64{12, 10, -6, 0, -7, 5, -6},
-		},
-		{
-			alpha:   -5,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4, 5},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6, 7},
-			want:    []float64{0, 1, -5, -2, -14, 20, 14, -18},
-			wantRev: []float64{-25, 21, 15, -7, -9, 0, -6, 7},
-		},
-	} {
+	for i, test := range daxpyTests {
 		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 		n := len(test.xData)
 
@@ -262,78 +203,7 @@ func TestDaxpyInc(t *testing.T) {
 }
 
 func TestDaxpyIncTo(t *testing.T) {
-	for i, test := range []struct {
-		alpha float64
-		xData []float64
-		yData []float64
-
-		want    []float64
-		wantRev []float64 // Result when one vector is traversed in reverse direction.
-	}{
-		{
-			alpha:   0,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{-3},
-			wantRev: []float64{-3},
-		},
-		{
-			alpha:   1,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{-1},
-			wantRev: []float64{-1},
-		},
-		{
-			alpha:   3,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{3},
-			wantRev: []float64{3},
-		},
-		{
-			alpha:   -3,
-			xData:   []float64{2},
-			yData:   []float64{-3},
-			want:    []float64{-9},
-			wantRev: []float64{-9},
-		},
-		{
-			alpha:   0,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, 0, 3, -4, 5, -6},
-			wantRev: []float64{0, 1, 0, 3, -4, 5, -6},
-		},
-		{
-			alpha:   1,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, 1, 4, -2, 2, -10},
-			wantRev: []float64{-4, -2, 2, 4, -3, 5, -6},
-		},
-		{
-			alpha:   3,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, 3, 6, 2, -4, -18},
-			wantRev: []float64{-12, -8, 6, 6, -1, 5, -6},
-		},
-		{
-			alpha:   -3,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6},
-			want:    []float64{0, 1, -3, 0, -10, 14, 6},
-			wantRev: []float64{12, 10, -6, 0, -7, 5, -6},
-		},
-		{
-			alpha:   -5,
-			xData:   []float64{0, 0, 1, 1, 2, -3, -4, 5},
-			yData:   []float64{0, 1, 0, 3, -4, 5, -6, 7},
-			want:    []float64{0, 1, -5, -2, -14, 20, 14, -18},
-			wantRev: []float64{-25, 21, 15, -7, -9, 0, -6, 7},
-		},
-	} {
+	for i, test := range daxpyTests {
 		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
 		n := len(test.xData)
 		want := make([]float64, n)

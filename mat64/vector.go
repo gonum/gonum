@@ -190,10 +190,14 @@ func (v *Vector) AddVec(a, b *Vector) {
 
 	v.reuseAs(ar)
 
-	amat, bmat := a.RawVector(), b.RawVector()
-	for i := 0; i < v.n; i++ {
-		v.mat.Data[i*v.mat.Inc] = amat.Data[i*amat.Inc] + bmat.Data[i*bmat.Inc]
+	if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
+		// Fast path for a common case.
+		asm.DaxpyUnitaryTo(v.mat.Data, 1, b.mat.Data, a.mat.Data)
+		return
 	}
+	asm.DaxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+		1, b.mat.Data, a.mat.Data,
+		uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
 }
 
 // SubVec subtracts the vector b from a, placing the result in the receiver.

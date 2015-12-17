@@ -276,7 +276,7 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 		if len(y) < n {
 			panic(badLenY)
 		}
-		asm.DaxpyUnitary(alpha, x[:n], y, y)
+		asm.DaxpyUnitaryTo(y, alpha, x[:n], y)
 		return
 	}
 	var ix, iy int

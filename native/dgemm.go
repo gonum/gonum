@@ -300,7 +300,7 @@ func dgemmSerialNotNot(a, b, c general64, alpha float64) {
 		for l, v := range a.data[i*a.stride : i*a.stride+a.cols] {
 			tmp := alpha * v
 			if tmp != 0 {
-				asm.DaxpyUnitary(tmp, b.data[l*b.stride:l*b.stride+b.cols], ctmp, ctmp)
+				asm.DaxpyUnitaryTo(ctmp, tmp, b.data[l*b.stride:l*b.stride+b.cols], ctmp)
 			}
 		}
 	}
@@ -329,7 +329,7 @@ func dgemmSerialTransNot(a, b, c general64, alpha float64) {
 			tmp := alpha * v
 			ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 			if tmp != 0 {
-				asm.DaxpyUnitary(tmp, btmp, ctmp, ctmp)
+				asm.DaxpyUnitaryTo(ctmp, tmp, btmp, ctmp)
 			}
 		}
 	}

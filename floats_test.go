@@ -1327,6 +1327,21 @@ func BenchmarkAddHuge(b *testing.B) {
 	benchmarkAdd(b, Huge)
 }
 
+func benchmarkAddTo(b *testing.B, size int) {
+	s1 := randomSlice(size)
+	s2 := randomSlice(size)
+	dst := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		AddTo(dst, s1, s2)
+	}
+}
+
+func BenchmarkAddToSmall(b *testing.B) { benchmarkAddTo(b, Small) }
+func BenchmarkAddToMed(b *testing.B)   { benchmarkAddTo(b, Medium) }
+func BenchmarkAddToLarge(b *testing.B) { benchmarkAddTo(b, Large) }
+func BenchmarkAddToHuge(b *testing.B)  { benchmarkAddTo(b, Huge) }
+
 func benchmarkLogSumExp(b *testing.B, size int) {
 	s := randomSlice(size)
 	b.ResetTimer()

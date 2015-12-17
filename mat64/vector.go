@@ -179,7 +179,7 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	default: // v <- a + alpha * b
 		if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
 			// Fast path for a common case.
-			asm.DaxpyUnitary(alpha, b.mat.Data, a.mat.Data, v.mat.Data)
+			asm.DaxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
 			return
 		}
 		blas64.Copy(ar, a.mat, v.mat)

@@ -1342,6 +1342,35 @@ func BenchmarkAddToMed(b *testing.B)   { benchmarkAddTo(b, Medium) }
 func BenchmarkAddToLarge(b *testing.B) { benchmarkAddTo(b, Large) }
 func BenchmarkAddToHuge(b *testing.B)  { benchmarkAddTo(b, Huge) }
 
+func benchmarkSub(b *testing.B, size int) {
+	s1 := randomSlice(size)
+	s2 := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Sub(s1, s2)
+	}
+}
+
+func BenchmarkSubSmall(b *testing.B) { benchmarkSub(b, Small) }
+func BenchmarkSubMed(b *testing.B)   { benchmarkSub(b, Medium) }
+func BenchmarkSubLarge(b *testing.B) { benchmarkSub(b, Large) }
+func BenchmarkSubHuge(b *testing.B)  { benchmarkSub(b, Huge) }
+
+func benchmarkSubTo(b *testing.B, size int) {
+	s1 := randomSlice(size)
+	s2 := randomSlice(size)
+	dst := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		SubTo(dst, s1, s2)
+	}
+}
+
+func BenchmarkSubToSmall(b *testing.B) { benchmarkSubTo(b, Small) }
+func BenchmarkSubToMed(b *testing.B)   { benchmarkSubTo(b, Medium) }
+func BenchmarkSubToLarge(b *testing.B) { benchmarkSubTo(b, Large) }
+func BenchmarkSubToHuge(b *testing.B)  { benchmarkSubTo(b, Huge) }
+
 func benchmarkLogSumExp(b *testing.B, size int) {
 	s := randomSlice(size)
 	b.ResetTimer()

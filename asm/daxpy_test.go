@@ -349,8 +349,8 @@ func daxpyUnitaryToBenchmark(b *testing.B, n int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		DaxpyUnitaryTo(dst, a, x, y)
-		gs = dst
 	}
+	gs = dst
 }
 
 func BenchmarkDaxpyIncN1Inc1(b *testing.B) { daxpyIncBenchmark(b, 1, 1) }
@@ -401,8 +401,8 @@ func daxpyIncBenchmark(b *testing.B, n, inc int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		DaxpyInc(a, x, y, uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
-		gs = y
 	}
+	gs = y
 }
 
 func BenchmarkDaxpyIncToN1Inc1(b *testing.B) { daxpyIncToBenchmark(b, 1, 1) }
@@ -455,8 +455,8 @@ func daxpyIncToBenchmark(b *testing.B, n, inc int) {
 	for i := 0; i < b.N; i++ {
 		DaxpyIncTo(dst, uintptr(inc), uintptr(ini), a, x, y,
 			uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
-		gs = y
 	}
+	gs = y
 }
 
 func randomSlice(n, inc int) []float64 {

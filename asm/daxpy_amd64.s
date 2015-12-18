@@ -109,7 +109,6 @@ U2:  // n >= 0
 	MOVHPD 0(R9)(DI*8), X1
 	MOVLPD 0(R8)(AX*8), X0
 	MOVLPD 0(R9)(BX*8), X1
-
 	MULPD  X7, X0
 	ADDPD  X0, X1
 	MOVHPD X1, 0(R9)(DI*8)
@@ -139,6 +138,13 @@ E2:
 
 // func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·DaxpyIncTo(SB), NOSPLIT, $0
+	// This code is a copy/paste of DaxpyInc with the following modifications:
+	//  * The preamble is adjusted to accomodate for dst, incDst and idst.
+	//  * BP and CX registers are used to keep track of the current indices for
+	//    the dst slice.
+	//  * Results of the AXPY operation are written into dst instead of y.
+	// TODO(vladimir-ch): Generate DaxpyInc and DaxpyIncTo.
+
 	MOVQ   dst+0(FP), R10
 	MOVQ   incDst+24(FP), R13
 	MOVQ   idst+32(FP), BP
@@ -171,7 +177,6 @@ U3:  // n >= 0
 	MOVHPD 0(R9)(DI*8), X1
 	MOVLPD 0(R8)(AX*8), X0
 	MOVLPD 0(R9)(BX*8), X1
-
 	MULPD  X7, X0
 	ADDPD  X0, X1
 	MOVHPD X1, 0(R10)(BP*8)

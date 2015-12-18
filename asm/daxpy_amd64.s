@@ -43,6 +43,7 @@
 
 // func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
 // This function assumes len(y) >= len(x) and len(dst) >= len(x).
+// TODO(vladimir-ch): Generate DaxpyUnitary and DaxpyUnitaryTo.
 TEXT ·DaxpyUnitaryTo(SB), NOSPLIT, $0
 	MOVQ   dst+0(FP), R10
 	MOVHPD alpha+24(FP), X7

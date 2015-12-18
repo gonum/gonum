@@ -41,47 +41,6 @@
 // Don't insert stack check preamble.
 #define NOSPLIT	4
 
-// func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
-// This function assumes len(y) >= len(x) and len(dst) >= len(x).
-// TODO(vladimir-ch): Generate DaxpyUnitary and DaxpyUnitaryTo.
-TEXT ·DaxpyUnitaryTo(SB), NOSPLIT, $0
-	MOVQ   dst+0(FP), R10
-	MOVHPD alpha+24(FP), X7
-	MOVLPD alpha+24(FP), X7
-	MOVQ   x+32(FP), R8
-	MOVQ   x_len+40(FP), DI // n = len(x)
-	MOVQ   y+56(FP), R9
-
-	MOVQ $0, SI // i = 0
-	SUBQ $2, DI // n -= 2
-	JL   V1     // if n < 0 goto V1
-
-U1:  // n >= 0
-	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
-	MOVUPD 0(R8)(SI*8), X0
-	MOVUPD 0(R9)(SI*8), X1
-	MULPD  X7, X0
-	ADDPD  X0, X1
-	MOVUPD X1, 0(R10)(SI*8)
-
-	ADDQ $2, SI // i += 2
-	SUBQ $2, DI // n -= 2
-	JGE  U1     // if n >= 0 goto U1
-
-V1:
-	ADDQ $2, DI // n += 2
-	JLE  E1     // if n <= 0 goto E1
-
-	// dst[i] = alpha * x[i] + y[i] for last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MOVSD 0(R9)(SI*8), X1
-	MULSD X7, X0
-	ADDSD X0, X1
-	MOVSD X1, 0(R10)(SI*8)
-
-E1:
-	RET
-
 // func DaxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·DaxpyInc(SB), NOSPLIT, $0
 	MOVHPD alpha+0(FP), X7

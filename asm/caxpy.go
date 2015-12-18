@@ -6,6 +6,12 @@
 
 package asm
 
+func CaxpyUnitary(alpha complex64, x, y []complex64) {
+	for i, v := range x {
+		y[i] += alpha * v
+	}
+}
+
 func CaxpyUnitaryTo(dst []complex64, alpha complex64, x, y []complex64) {
 	for i, v := range x {
 		dst[i] = alpha*v + y[i]

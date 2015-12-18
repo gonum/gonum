@@ -6,6 +6,12 @@
 
 package asm
 
+func ZaxpyUnitary(alpha complex128, x, y []complex128) {
+	for i, v := range x {
+		y[i] += alpha * v
+	}
+}
+
 func ZaxpyUnitaryTo(dst []complex128, alpha complex128, x, y []complex128) {
 	for i, v := range x {
 		dst[i] = alpha*v + y[i]

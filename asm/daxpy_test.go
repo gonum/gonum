@@ -83,6 +83,31 @@ var daxpyTests = []struct {
 	},
 }
 
+func TestDaxpyUnitary(t *testing.T) {
+	for i, test := range daxpyTests {
+		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
+
+		prefix := fmt.Sprintf("test %v (y+=a*x)", i)
+		x, xFront, xBack := newGuardedVector(test.xData, 1)
+		y, yFront, yBack := newGuardedVector(test.yData, 1)
+		DaxpyUnitary(test.alpha, x, y)
+
+		if !allNaN(xFront) || !allNaN(xBack) {
+			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
+		}
+		if !allNaN(yFront) || !allNaN(yBack) {
+			t.Errorf(msgGuard, prefix, "y", yFront, yBack)
+		}
+		if !equalStrided(test.xData, x, 1) {
+			t.Errorf("%v: modified read-only x argument", prefix)
+		}
+
+		if !equalStrided(test.want, y, 1) {
+			t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, y)
+		}
+	}
+}
+
 func TestDaxpyUnitaryTo(t *testing.T) {
 	for i, test := range daxpyTests {
 		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"

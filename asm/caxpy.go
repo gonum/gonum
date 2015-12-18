@@ -6,10 +6,9 @@
 
 package asm
 
-// The extra z parameter is needed because of floats.AddScaledTo
-func CaxpyUnitary(alpha complex64, x, y, z []complex64) {
+func CaxpyUnitaryTo(dst []complex64, alpha complex64, x, y []complex64) {
 	for i, v := range x {
-		z[i] = alpha*v + y[i]
+		dst[i] = alpha*v + y[i]
 	}
 }
 
@@ -18,5 +17,14 @@ func CaxpyInc(alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr) 
 		y[iy] += alpha * x[ix]
 		ix += incX
 		iy += incY
+	}
+}
+
+func CaxpyIncTo(dst []complex64, incDst, idst uintptr, alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr) {
+	for i := 0; i < int(n); i++ {
+		dst[idst] = alpha*x[ix] + y[iy]
+		ix += incX
+		iy += incY
+		idst += incDst
 	}
 }

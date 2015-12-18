@@ -1,24 +1,30 @@
-sudo: true
+sudo: false
 
 language: go
 
 # Versions of go that are explicitly supported by gonum.
 go:
+ - 1.3.3
  - 1.4.2
  - 1.5.1
 
-# Required for coverage.
+# Required for coverage, testing and generate.
 before_install:
  - go get golang.org/x/tools/cmd/cover
+ - go get golang.org/x/tools/cmd/goimports
  - go get github.com/mattn/goveralls
 
 # Get deps, build, test, and ensure the code is gofmt'ed.
 # If we are building as gonum, then we have access to the coveralls api key, so we can run coverage as well.
 script:
  - go get -d -t -v ./...
- - go build -v ./...
- - go test -v -a ./...
- - go test -v -a -tags noasm ./...
- - go test -v -a -tags appengine ./...
+ - go build -v -x ./...
+ - go test -v -x -a ./...
+ - go test -v -x -a -tags noasm ./...
+ - go test -v -x -a -tags appengine ./...
  - diff <(gofmt -d .) <("")
+ # TODO(vladimir-ch): Enable asmfmt after its output has stabilized.
+ # diff <(asmfmt -d .) <("")
  - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash ./.travis/test-coverage.sh; fi
+ # This is run last since it alters the tree.
+ - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh

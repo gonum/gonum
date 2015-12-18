@@ -154,36 +154,28 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 
 	v.reuseAs(ar)
 
-	if alpha == 0 {
-		v.CopyVec(a)
-		return
-	}
-
 	switch {
+	case alpha == 0: // v <- a
+		v.CopyVec(a)
 	case v == a && v == b: // v <- v + alpha * v = (alpha + 1) * v
 		blas64.Scal(ar, alpha+1, v.mat)
 	case v == a && v != b: // v <- v + alpha * b
-		blas64.Axpy(ar, alpha, b.mat, v.mat)
-	case v != a && v == b: // v <- a + alpha * v
-		if v.mat.Inc == 1 && a.mat.Inc == 1 {
+		if v.mat.Inc == 1 && b.mat.Inc == 1 {
 			// Fast path for a common case.
-			v := v.mat.Data
-			for i, a := range a.mat.Data {
-				v[i] *= alpha
-				v[i] += a
-			}
-			return
+			asm.DaxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
+		} else {
+			asm.DaxpyInc(alpha, b.mat.Data, v.mat.Data,
+				uintptr(ar), uintptr(b.mat.Inc), uintptr(v.mat.Inc), 0, 0)
 		}
-		blas64.Scal(ar, alpha, v.mat)
-		blas64.Axpy(ar, 1, a.mat, v.mat)
-	default: // v <- a + alpha * b
+	default: // v <- a + alpha * b or v <- a + alpha * v
 		if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
 			// Fast path for a common case.
-			asm.DaxpyUnitary(alpha, b.mat.Data, a.mat.Data, v.mat.Data)
-			return
+			asm.DaxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
+		} else {
+			asm.DaxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+				alpha, b.mat.Data, a.mat.Data,
+				uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
 		}
-		blas64.Copy(ar, a.mat, v.mat)
-		blas64.Axpy(ar, alpha, b.mat, v.mat)
 	}
 }
 
@@ -198,10 +190,14 @@ func (v *Vector) AddVec(a, b *Vector) {
 
 	v.reuseAs(ar)
 
-	amat, bmat := a.RawVector(), b.RawVector()
-	for i := 0; i < v.n; i++ {
-		v.mat.Data[i*v.mat.Inc] = amat.Data[i*amat.Inc] + bmat.Data[i*bmat.Inc]
+	if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
+		// Fast path for a common case.
+		asm.DaxpyUnitaryTo(v.mat.Data, 1, b.mat.Data, a.mat.Data)
+		return
 	}
+	asm.DaxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+		1, b.mat.Data, a.mat.Data,
+		uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
 }
 
 // SubVec subtracts the vector b from a, placing the result in the receiver.
@@ -215,10 +211,14 @@ func (v *Vector) SubVec(a, b *Vector) {
 
 	v.reuseAs(ar)
 
-	amat, bmat := a.RawVector(), b.RawVector()
-	for i := 0; i < v.n; i++ {
-		v.mat.Data[i*v.mat.Inc] = amat.Data[i*amat.Inc] - bmat.Data[i*bmat.Inc]
+	if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
+		// Fast path for a common case.
+		asm.DaxpyUnitaryTo(v.mat.Data, -1, b.mat.Data, a.mat.Data)
+		return
 	}
+	asm.DaxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+		-1, b.mat.Data, a.mat.Data,
+		uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
 }
 
 // MulElemVec performs element-wise multiplication of a and b, placing the result

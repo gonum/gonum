@@ -24,9 +24,7 @@ func Add(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of the slices do not match")
 	}
-	for i, val := range s {
-		dst[i] += val
-	}
+	asm.DaxpyUnitaryTo(dst, 1, s, dst)
 }
 
 // AddTo adds, element-wise, the elements of s and t and
@@ -38,9 +36,7 @@ func AddTo(dst, s, t []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of adder")
 	}
-	for i, val := range t {
-		dst[i] = s[i] + val
-	}
+	asm.DaxpyUnitaryTo(dst, 1, s, t)
 	return dst
 }
 
@@ -57,7 +53,7 @@ func AddScaled(dst []float64, alpha float64, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of destination and source to not match")
 	}
-	asm.DaxpyUnitary(alpha, s, dst, dst)
+	asm.DaxpyUnitaryTo(dst, alpha, s, dst)
 }
 
 // AddScaledTo performs dst = y + alpha * s, where alpha is a scalar,
@@ -69,7 +65,7 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 	if len(dst) != len(s) || len(dst) != len(y) {
 		panic("floats: lengths of slices do not match")
 	}
-	asm.DaxpyUnitary(alpha, s, y, dst)
+	asm.DaxpyUnitaryTo(dst, alpha, s, y)
 	return dst
 }
 
@@ -726,9 +722,7 @@ func Sub(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: length of the slices do not match")
 	}
-	for i, val := range s {
-		dst[i] -= val
-	}
+	asm.DaxpyUnitaryTo(dst, -1, s, dst)
 }
 
 // SubTo subtracts, element-wise, the elements of t from s and
@@ -740,9 +734,7 @@ func SubTo(dst, s, t []float64) []float64 {
 	if len(dst) != len(s) {
 		panic("floats: length of destination does not match length of subtractor")
 	}
-	for i, val := range t {
-		dst[i] = s[i] - val
-	}
+	asm.DaxpyUnitaryTo(dst, -1, t, s)
 	return dst
 }
 

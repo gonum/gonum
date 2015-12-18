@@ -304,7 +304,7 @@ func sgemmSerialNotNot(a, b, c general32, alpha float32) {
 		for l, v := range a.data[i*a.stride : i*a.stride+a.cols] {
 			tmp := alpha * v
 			if tmp != 0 {
-				asm.SaxpyUnitary(tmp, b.data[l*b.stride:l*b.stride+b.cols], ctmp, ctmp)
+				asm.SaxpyUnitaryTo(ctmp, tmp, b.data[l*b.stride:l*b.stride+b.cols], ctmp)
 			}
 		}
 	}
@@ -333,7 +333,7 @@ func sgemmSerialTransNot(a, b, c general32, alpha float32) {
 			tmp := alpha * v
 			ctmp := c.data[i*c.stride : i*c.stride+c.cols]
 			if tmp != 0 {
-				asm.SaxpyUnitary(tmp, btmp, ctmp, ctmp)
+				asm.SaxpyUnitaryTo(ctmp, tmp, btmp, ctmp)
 			}
 		}
 	}

@@ -104,7 +104,7 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 		for i := 0; i < m; i++ {
 			tmp := alpha * x[i]
 			if tmp != 0 {
-				asm.SaxpyUnitary(tmp, a[lda*i:lda*i+n], y, y)
+				asm.SaxpyUnitaryTo(y, tmp, a[lda*i:lda*i+n], y)
 			}
 		}
 		return
@@ -176,7 +176,7 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 			tmp := alpha * xv
 			if tmp != 0 {
 				atmp := a[i*lda : i*lda+n]
-				asm.SaxpyUnitary(tmp, y, atmp, atmp)
+				asm.SaxpyUnitaryTo(atmp, tmp, y, atmp)
 			}
 		}
 		return

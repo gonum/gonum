@@ -19,7 +19,8 @@ cat level1double.go \
 | gofmt -r 'blas.DrotmParams -> blas.SrotmParams' \
 \
 | gofmt -r 'asm.DaxpyInc -> asm.SaxpyInc' \
-| gofmt -r 'asm.DaxpyUnitary -> asm.SaxpyUnitary' \
+| gofmt -r 'asm.DaxpyIncTo -> asm.SaxpyIncTo' \
+| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
 | gofmt -r 'asm.DdotInc -> asm.SdotInc' \
 | gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
 \
@@ -81,7 +82,8 @@ cat level2double.go \
 | gofmt -r 'Dscal -> Sscal' \
 \
 | gofmt -r 'asm.DaxpyInc -> asm.SaxpyInc' \
-| gofmt -r 'asm.DaxpyUnitary -> asm.SaxpyUnitary' \
+| gofmt -r 'asm.DaxpyIncTo -> asm.SaxpyIncTo' \
+| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
 | gofmt -r 'asm.DdotInc -> asm.SdotInc' \
 | gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
 \
@@ -99,7 +101,7 @@ cat level3double.go \
 \
 | gofmt -r 'float64 -> float32' \
 \
-| gofmt -r 'asm.DaxpyUnitary -> asm.SaxpyUnitary' \
+| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
 | gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
@@ -133,7 +135,8 @@ cat dgemm.go \
 | gofmt -r 'dgemmSerialTransTrans -> sgemmSerialTransTrans' \
 \
 | gofmt -r 'asm.DaxpyInc -> asm.SaxpyInc' \
-| gofmt -r 'asm.DaxpyUnitary -> asm.SaxpyUnitary' \
+| gofmt -r 'asm.DaxpyIncTo -> asm.SaxpyIncTo' \
+| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
 | gofmt -r 'asm.DdotInc -> asm.SdotInc' \
 | gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
 \

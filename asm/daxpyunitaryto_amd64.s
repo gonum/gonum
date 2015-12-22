@@ -43,7 +43,7 @@
 // TODO(fhs): use textflag.h after we drop Go 1.3 support
 // #include "textflag.h"
 // Don't insert stack check preamble.
-#define NOSPLIT	4
+#define NOSPLIT 4
 
 // func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
 // This function assumes len(y) >= len(x) and len(dst) >= len(x).
@@ -60,6 +60,7 @@ TEXT ·DaxpyUnitaryTo(SB), NOSPLIT, $0
 	JL   tail   // if n < 0 goto tail
 
 loop:
+	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
 	MOVUPD 0(R8)(SI*8), X0
 	MOVUPD 0(R9)(SI*8), X1
 	MULPD  X7, X0
@@ -74,6 +75,7 @@ tail:
 	ADDQ $2, DI // n += 2
 	JLE  end    // if n <= 0 goto end
 
+	// dst[i] = alpha * x[i] + y[i] for the last iteration if n is odd.
 	MOVSD 0(R8)(SI*8), X0
 	MOVSD 0(R9)(SI*8), X1
 	MULSD X7, X0

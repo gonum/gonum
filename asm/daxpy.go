@@ -6,6 +6,12 @@
 
 package asm
 
+func DaxpyUnitary(alpha float64, x, y []float64) {
+	for i, v := range x {
+		y[i] += alpha * v
+	}
+}
+
 func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64) {
 	for i, v := range x {
 		dst[i] = alpha*v + y[i]

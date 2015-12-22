@@ -6,6 +6,8 @@
 
 package asm
 
+func DaxpyUnitary(alpha float64, x, y []float64)
+
 func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
 
 func DaxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)

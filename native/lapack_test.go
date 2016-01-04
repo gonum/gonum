@@ -72,6 +72,10 @@ func TestDlacpy(t *testing.T) {
 	testlapack.DlacpyTest(t, impl)
 }
 
+func TestDlae2(t *testing.T) {
+	testlapack.Dlae2Test(t, impl)
+}
+
 func TestDlaev2(t *testing.T) {
 	testlapack.Dlaev2Test(t, impl)
 }

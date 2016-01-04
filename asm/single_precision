@@ -28,3 +28,11 @@ cat daxpy.go \
 | gofmt -r 'float64 -> float32' \
 | sed 's/Daxpy/Saxpy/' \
 >> saxpy.go
+
+echo Generating sscal.go
+echo -e '// Generated code do not edit. Run `go generate`.\n' > sscal.go
+cat dscal.go \
+| grep -v '//+build' \
+| gofmt -r 'float64 -> float32' \
+| sed 's/Dscal/Sscal/' \
+>> sscal.go

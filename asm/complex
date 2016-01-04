@@ -30,6 +30,14 @@ cat daxpy.go \
 | sed 's/Daxpy/Zaxpy/' \
 >> zaxpy.go
 
+echo Generating zscal.go
+echo -e '// Generated code do not edit. Run `go generate`.\n' > zscal.go
+cat dscal.go \
+| grep -v '//+build' \
+| gofmt -r 'float64 -> complex128' \
+| sed 's/Dscal/Zscal/' \
+>> zscal.go
+
 echo Generating cdotu.go
 echo -e '// Generated code do not edit. Run `go generate`.\n' > cdotu.go
 cat ddot.go \
@@ -56,3 +64,10 @@ cat daxpy.go \
 | sed 's/Daxpy/Caxpy/' \
 >> caxpy.go
 
+echo Generating cscal.go
+echo -e '// Generated code do not edit. Run `go generate`.\n' > cscal.go
+cat dscal.go \
+| grep -v '//+build' \
+| gofmt -r 'float64 -> complex64' \
+| sed 's/Dscal/Cscal/' \
+>> cscal.go

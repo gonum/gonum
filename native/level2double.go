@@ -691,7 +691,7 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 	if n < 0 {
 		panic(negativeN)
 	}
-	if lda > 1 && lda > n {
+	if lda > 1 && lda < n {
 		panic(badLdA)
 	}
 	if incX == 0 {

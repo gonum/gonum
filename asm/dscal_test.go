@@ -146,3 +146,72 @@ func TestDscalInc(t *testing.T) {
 		}
 	}
 }
+
+func TestDscalIncTo(t *testing.T) {
+	const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
+
+	for i, test := range dscalTests {
+		n := len(test.x)
+		want := make([]float64, n)
+
+		for _, incX := range []int{-10, -7, -4, -3, -2, -1, 1, 2, 3, 4, 7, 10} {
+			var ix int
+			if incX < 0 {
+				ix = (-n + 1) * incX
+			}
+
+			// Test x = alpha * x.
+			prefix := fmt.Sprintf("test %v (x=a*x), incX = %v", i, incX)
+			x, xFront, xBack := newGuardedVector(test.x, incX)
+			DscalIncTo(x, uintptr(incX), uintptr(ix),
+				test.alpha, x, uintptr(n), uintptr(incX), uintptr(ix))
+
+			if !allNaN(xFront) || !allNaN(xBack) {
+				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
+			}
+			if nonStridedWrite(x, incX) {
+				t.Errorf("%v: modified x argument at non-stride position", prefix)
+			}
+			if !equalStrided(test.want, x, incX) {
+				t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, x)
+			}
+
+			for _, incDst := range []int{-10, -7, -4, -3, -2, -1, 1, 2, 3, 4, 7, 10} {
+				var idst int
+				if incDst < 0 {
+					idst = (-n + 1) * incDst
+				}
+
+				// Test dst = alpha * x.
+				prefix = fmt.Sprintf("test %v (dst=a*x), incX = %v, incDst = %v", i, incX, incDst)
+				x, xFront, xBack = newGuardedVector(test.x, incX)
+				dst, dstFront, dstBack := newGuardedVector(test.x, incDst)
+				DscalIncTo(dst, uintptr(incDst), uintptr(idst),
+					test.alpha, x, uintptr(n), uintptr(incX), uintptr(ix))
+
+				if !allNaN(xFront) || !allNaN(xBack) {
+					t.Errorf(msgGuard, prefix, "x", xFront, xBack)
+				}
+				if !allNaN(dstFront) || !allNaN(dstBack) {
+					t.Errorf(msgGuard, prefix, "dst", dstFront, dstBack)
+				}
+				if nonStridedWrite(x, incX) || !equalStrided(test.x, x, incX) {
+					t.Errorf("%v: modified read-only x argument", prefix)
+				}
+				if nonStridedWrite(dst, incDst) {
+					t.Errorf("%v: modified dst argument at non-stride position", prefix)
+				}
+
+				copy(want, test.want)
+				if incX*incDst < 0 {
+					for j := 0; j < n/2; j++ {
+						want[j], want[n-j-1] = want[n-j-1], want[j]
+					}
+				}
+				if !equalStrided(want, dst, incDst) {
+					t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, want, dst)
+				}
+			}
+		}
+	}
+}

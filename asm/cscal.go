@@ -17,3 +17,18 @@ func CscalUnitaryTo(dst []complex64, alpha complex64, x []complex64) {
 		dst[i] = alpha * v
 	}
 }
+
+func CscalInc(alpha complex64, x []complex64, n, incX, ix uintptr) {
+	for i := 0; i < int(n); i++ {
+		x[ix] *= alpha
+		ix += incX
+	}
+}
+
+func CscalIncTo(dst []complex64, incDst, idst uintptr, alpha complex64, x []complex64, n, incX, ix uintptr) {
+	for i := 0; i < int(n); i++ {
+		dst[idst] = alpha * x[ix]
+		ix += incX
+		idst += incDst
+	}
+}

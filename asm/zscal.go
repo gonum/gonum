@@ -17,3 +17,18 @@ func ZscalUnitaryTo(dst []complex128, alpha complex128, x []complex128) {
 		dst[i] = alpha * v
 	}
 }
+
+func ZscalInc(alpha complex128, x []complex128, n, incX, ix uintptr) {
+	for i := 0; i < int(n); i++ {
+		x[ix] *= alpha
+		ix += incX
+	}
+}
+
+func ZscalIncTo(dst []complex128, incDst, idst uintptr, alpha complex128, x []complex128, n, incX, ix uintptr) {
+	for i := 0; i < int(n); i++ {
+		dst[idst] = alpha * x[ix]
+		ix += incX
+		idst += incDst
+	}
+}

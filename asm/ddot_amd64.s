@@ -49,34 +49,45 @@ TEXT ·DdotUnitary(SB), NOSPLIT, $0
 	MOVQ y+24(FP), R9
 
 	MOVSD $(0.0), X7 // sum = 0
+	MOVSD $(0.0), X8 // sum = 0
 
 	MOVQ $0, SI   // i = 0
-	SUBQ $2, DI   // n -= 2
+	SUBQ $4, DI   // n -= 4
 	JL   tail_uni // if n < 0 goto tail_uni
 
 loop_uni:
-	// sum += x[i] * y[i] unrolled 2x.
+	// sum += x[i] * y[i] unrolled 4x.
 	MOVUPD 0(R8)(SI*8), X0
 	MOVUPD 0(R9)(SI*8), X1
+	MOVUPD 16(R8)(SI*8), X2
+	MOVUPD 16(R9)(SI*8), X3
 	MULPD  X1, X0
+	MULPD  X3, X2
 	ADDPD  X0, X7
+	ADDPD  X2, X8
 
-	ADDQ $2, SI   // i += 2
-	SUBQ $2, DI   // n -= 2
+	ADDQ $4, SI   // i += 4
+	SUBQ $4, DI   // n -= 4
 	JGE  loop_uni // if n >= 0 goto loop_uni
 
 tail_uni:
-	ADDQ $2, DI  // n += 2
+	ADDQ $4, DI  // n += 4
 	JLE  end_uni // if n <= 0 goto end_uni
 
-	// sum += x[i] * y[i] for last iteration if n is odd.
+onemore_uni:
+	// sum += x[i] * y[i] for the remaining 1-3 elements.
 	MOVSD 0(R8)(SI*8), X0
 	MOVSD 0(R9)(SI*8), X1
 	MULSD X1, X0
 	ADDSD X0, X7
 
+	ADDQ $1, SI      // i++
+	SUBQ $1, DI      // n--
+	JNZ  onemore_uni // if n != 0 goto onemore_uni
+
 end_uni:
-	// Add the two sums together.
+	// Add the four sums together.
+	ADDPD    X8, X7
 	MOVSD    X7, X0
 	UNPCKHPD X7, X7
 	ADDSD    X0, X7
@@ -135,4 +146,3 @@ end_inc:
 	ADDSD    X0, X7
 	MOVSD    X7, sum+88(FP) // Return final sum.
 	RET
-

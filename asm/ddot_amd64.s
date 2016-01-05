@@ -44,13 +44,13 @@
 // func DdotUnitary(x, y []float64) (sum float64)
 // This function assumes len(y) >= len(x).
 TEXT ·DdotUnitary(SB), NOSPLIT, $0
-	MOVQ x_len+8(FP), DI // n = len(x)
 	MOVQ x+0(FP), R8
+	MOVQ x_len+8(FP), DI // n = len(x)
 	MOVQ y+24(FP), R9
 
-	MOVQ  $0, SI     // i = 0
 	MOVSD $(0.0), X7 // sum = 0
 
+	MOVQ $0, SI   // i = 0
 	SUBQ $2, DI   // n -= 2
 	JL   tail_uni // if n < 0 goto tail_uni
 

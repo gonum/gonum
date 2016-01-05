@@ -117,3 +117,32 @@ func TestDscalUnitaryTo(t *testing.T) {
 		}
 	}
 }
+
+func TestDscalInc(t *testing.T) {
+	const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
+
+	for i, test := range dscalTests {
+		n := len(test.x)
+		for _, incX := range []int{-10, -7, -4, -3, -2, -1, 1, 2, 3, 4, 7, 10} {
+			var ix int
+			if incX < 0 {
+				ix = (-n + 1) * incX
+			}
+
+			prefix := fmt.Sprintf("test %v (x*=a), incX = %v", i, incX)
+			x, xFront, xBack := newGuardedVector(test.x, incX)
+			DscalInc(test.alpha, x, uintptr(n), uintptr(incX), uintptr(ix))
+
+			if !allNaN(xFront) || !allNaN(xBack) {
+				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
+			}
+			if nonStridedWrite(x, incX) {
+				t.Errorf("%v: modified x argument at non-stride position", prefix)
+			}
+
+			if !equalStrided(test.want, x, incX) {
+				t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, x)
+			}
+		}
+	}
+}

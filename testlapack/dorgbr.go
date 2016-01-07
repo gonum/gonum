@@ -62,11 +62,21 @@ func DorgbrTest(t *testing.T, impl Dorgbrer) {
 			// Sizes for Dorgbr.
 			var ma, na int
 			if vect == lapack.ApplyQ {
-				ma = m
-				na = k
+				if m >= k {
+					ma = m
+					na = k
+				} else {
+					ma = m
+					na = m
+				}
 			} else {
-				ma = k
-				na = n
+				if n >= k {
+					ma = k
+					na = n
+				} else {
+					ma = n
+					na = n
+				}
 			}
 			// a eventually needs to store either P or Q, so it must be
 			// sufficiently big.

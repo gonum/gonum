@@ -30,9 +30,17 @@ func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []flo
 		}
 	}
 	if wantq {
-		checkMatrix(m, k, a, lda)
+		if m >= k {
+			checkMatrix(m, k, a, lda)
+		} else {
+			checkMatrix(m, m, a, lda)
+		}
 	} else {
-		checkMatrix(k, n, a, lda)
+		if n >= k {
+			checkMatrix(k, n, a, lda)
+		} else {
+			checkMatrix(n, n, a, lda)
+		}
 	}
 	work[0] = 1
 	if wantq {
@@ -72,9 +80,9 @@ func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []flo
 			// Shift the vectors which define the elementary reflectors one
 			// column to the right, and set the first row and column of Q to
 			// those of the unit matrix.
-			for j := m - 2; j >= 0; j-- {
+			for j := m - 1; j >= 1; j-- {
 				a[j] = 0
-				for i := j; i < m; i++ {
+				for i := j + 1; i < m; i++ {
 					a[i*lda+j] = a[i*lda+j-1]
 				}
 			}

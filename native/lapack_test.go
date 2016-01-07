@@ -48,6 +48,10 @@ func TestDgeqrf(t *testing.T) {
 	testlapack.DgeqrfTest(t, impl)
 }
 
+func TestDgesvd(t *testing.T) {
+	testlapack.DgesvdTest(t, impl)
+}
+
 func TestDgetri(t *testing.T) {
 	testlapack.DgetriTest(t, impl)
 }

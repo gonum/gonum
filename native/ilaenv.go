@@ -355,7 +355,7 @@ func (Implementation) Ilaenv(ispec int, s string, opts string, n1, n2, n3, n4 in
 		return 2
 	case 6:
 		// Used by xGELSS and xGESVD
-		return min(n1, n2) * 1e6
+		return int(float64(min(n1, n2)) * 1.6)
 	case 7:
 		// Not used
 		return 1

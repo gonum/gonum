@@ -123,6 +123,7 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 		for i := 0; i < n-1; i++ {
 			smax = math.Max(smax, math.Abs(e[i]))
 		}
+
 		var sminl float64
 		var thresh float64
 		if tol >= 0 {

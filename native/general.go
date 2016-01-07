@@ -30,6 +30,7 @@ const (
 	badLdA          = "lapack: index of a out of range"
 	badNorm         = "lapack: bad norm"
 	badPivot        = "lapack: bad pivot"
+	badS            = "lapack: s has insufficient length"
 	badSide         = "lapack: bad side"
 	badSlice        = "lapack: bad input slice length"
 	badStore        = "lapack: bad store"

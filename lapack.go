@@ -98,3 +98,13 @@ const (
 	ApplyP DecompUpdate = 'P'
 	ApplyQ DecompUpdate = 'Q'
 )
+
+// SVDJob specifies the singular vector computation type for SVD.
+type SVDJob byte
+
+const (
+	SVDAll       SVDJob = 'A' // Compute all singular vectors
+	SVDInPlace          = 'S' // Compute the first singular vectors and store in provided storage.
+	SVDOverwrite        = 'O' // Compute the singular vectors and store in input matrix
+	SVDNone             = 'N' // Do not compute singular vectors
+)

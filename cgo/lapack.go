@@ -24,6 +24,7 @@ const (
 	badLdA          = "lapack: index of a out of range"
 	badNorm         = "lapack: bad norm"
 	badPivot        = "lapack: bad pivot"
+	badS            = "lapack: s has insufficient length"
 	badSide         = "lapack: bad side"
 	badSlice        = "lapack: bad input slice length"
 	badStore        = "lapack: bad store"
@@ -495,6 +496,83 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 		panic(badWork)
 	}
 	return clapack.Dgels(trans, m, n, nrhs, a, lda, b, ldb)
+}
+
+// Dgesvd computes the singular value decomposition of the input matrix A.
+//
+// The singular value decomposition is
+//  A = U * Sigma * V^T
+// where Sigma is an m×n diagonal matrix containing the singular values of A,
+// U is an m×m orthogonal matrix and V is an n×n orthogonal matrix. The first
+// min(m,n) columns of U and V are the left and right singular vectors of A
+// respectively.
+//
+// jobU and jobVT are options for computing the singular vectors. The behavior
+// is as follows
+//  jobU == lapack.SVDAll		All M columns of U are returned in u
+//  jobU == lapack.SVDInPlace	The first min(m,n) columns are returned in u
+//  jobU == lapack.SVDOverwrite	The first min(m,n) columns of U are written into a
+//	jobU == lapack.SVDNone		The columns of U are not computed.
+// The behavior is the same for jobVT and the rows of V^T. At most one of jobU
+// and jobVT can equal lapack.SVDOverwrite.
+//
+// On entry, a contains the data for the m×n matrix A. During the call to Dgesvd
+// the data is overwritten. On exit, A contains the appropriate singular vectors
+// if either job is lapack.SVDOverwrite.
+//
+// s is a slice of length at least min(m,n) and on exit contains the singular
+// values in decreasing order.
+//
+// u contains the left singular vectors on exit, stored columnwise. If
+// jobU == lapack.SVDAll, u is of size m×m. If jobU == lapack.SVDInPlace u is
+// of size m×min(m,n). If jobU == lapack.SVDOverwrite or lapack.SVDNone, u is
+// not used.
+//
+// vt contains the left singular vectors on exit, stored rowwise. If
+// jobV == lapack.SVDAll, vt is of size n×m. If jobV == lapack.SVDInPlace vt is
+// of size min(m,n)×n. If jobU == lapack.SVDOverwrite or lapack.SVDNone, vt is
+// not used.
+//
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+//
+// Dgesvd returns whether the decomposition successfully completed.
+func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int) (ok bool) {
+	checkMatrix(m, n, a, lda)
+	if jobU == lapack.SVDAll {
+		checkMatrix(m, m, u, ldu)
+	} else if jobU == lapack.SVDInPlace {
+		checkMatrix(m, min(m, n), u, ldu)
+	}
+	if jobVT == lapack.SVDAll {
+		checkMatrix(n, n, vt, ldvt)
+	} else if jobVT == lapack.SVDInPlace {
+		checkMatrix(min(m, n), n, vt, ldvt)
+	}
+	if jobU == lapack.SVDOverwrite && jobVT == lapack.SVDOverwrite {
+		panic("lapack: both jobU and jobVT are lapack.SVDOverwrite")
+	}
+	if len(s) < min(m, n) {
+		panic(badS)
+	}
+	if jobU != lapack.SVDAll || jobVT != lapack.SVDAll {
+		panic("lapack: SVD only coded for SVDAll job inputs")
+	}
+	minWork := max(5*min(m, n), 3*min(m, n)+max(m, n))
+	if lwork != -1 {
+		if len(work) < lwork {
+			panic(badWork)
+		}
+		if lwork < minWork {
+			panic(badWork)
+		}
+	}
+	if lwork == -1 {
+		work[0] = float64(minWork)
+		return true
+	}
+	return clapack.Dgesvd(byte(jobU), byte(jobVT), m, n, a, lda, s, u, ldu, vt, ldvt, work)
 }
 
 // Dgetf2 computes the LU decomposition of the m×n matrix A.

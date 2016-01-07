@@ -90,6 +90,8 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 		return true
 	}
 
+	minmn := min(m, n)
+
 	wantua := jobU == lapack.SVDAll
 	wantus := jobU == lapack.SVDInPlace
 	wantuas := wantua || wantus
@@ -136,7 +138,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 				maxwrk = n + lwork_dgeqrf
 				maxwrk = max(maxwrk, 3*n+lwork_dgebrd)
 				if wantvo || wantvas {
-					maxwrk = max(maxwrk, 3*n+lwork_dorgbr_p)
+					maxWork = max(maxwrk, 3*n+lwork_dorgbr_p)
 				}
 				maxwrk = max(maxwrk, bdspac)
 			} else if wantuo && wantvn {
@@ -223,7 +225,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 			if wantua {
 				impl.Dorgbr(lapack.ApplyQ, m, m, n, a, lda, dum, dum, -1)
 				lwork_dorgbr_q := int(dum[0])
-				maxwrk = max(maxwrk, 3*n+lwork_dorgbr_q)
+				maxwrk = max(maxwrk, 3*n+lwork_dorgbr_p)
 			}
 			if !wantvn {
 				maxwrk = max(maxwrk, 3*n+lwork_dorgbr_p)
@@ -251,7 +253,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 				// Path 1t
 				maxwrk = m + lwork_dgelqf
 				maxwrk = max(maxwrk, 3*m+lwork_dgebrd)
-				if wantuo || wantuas {
+				if wntuo.OR.wntuas {
 					maxwrk = max(maxwrk, 3*m+lwork_dorgbr_q)
 				}
 				maxwrk = max(maxwrk, bdspac)
@@ -347,7 +349,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 		}
 	}
 	maxwrk = max(maxwrk, minWork)
-	work[0] = float64(maxwrk)
+	work[0] = maxwrk
 	if lwork == -1 {
 		return true
 	}
@@ -374,6 +376,13 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 		if m >= mnthr {
 			if wantun {
 				// Path 1
+<<<<<<< HEAD
+				itau = 1
+				iwo
+			}
+		}
+	}
+=======
 				itau := 0
 				iwork := itau + n
 
@@ -708,4 +717,5 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	}
 	work[0] = float64(maxwrk)
 	return ok
+>>>>>>> fd73640... Add a partial implementation of Dgesvd and test
 }

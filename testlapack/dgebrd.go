@@ -46,8 +46,9 @@ func DgebrdTest(t *testing.T, impl Dgebrder) {
 		for i := range a {
 			a[i] = rand.NormFloat64()
 		}
+
 		d := make([]float64, minmn)
-		e := make([]float64, minmn)
+		e := make([]float64, minmn-1)
 		tauP := make([]float64, minmn)
 		tauQ := make([]float64, minmn)
 		work := make([]float64, max(m, n))
@@ -78,6 +79,21 @@ func DgebrdTest(t *testing.T, impl Dgebrder) {
 		impl.Dgebrd(m, n, a, lda, d, e, tauQ, tauP, work, lwork)
 		work = make([]float64, int(work[0]))
 		lwork = len(work)
+		for i := range work {
+			work[i] = math.NaN()
+		}
+		for i := range d {
+			d[i] = math.NaN()
+		}
+		for i := range e {
+			e[i] = math.NaN()
+		}
+		for i := range tauQ {
+			tauQ[i] = math.NaN()
+		}
+		for i := range tauP {
+			tauP[i] = math.NaN()
+		}
 		impl.Dgebrd(m, n, a, lda, d, e, tauQ, tauP, work, lwork)
 
 		// Test answers

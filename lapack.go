@@ -104,7 +104,7 @@ type SVDJob byte
 
 const (
 	SVDAll       SVDJob = 'A' // Compute all singular vectors
-	SVDInPlace          = 'S' // Compute the first singular vectors and store in provided storage.
-	SVDOverwrite        = 'O' // Compute the singular vectors and store in input matrix
+	SVDInPlace          = 'S' // Compute the first singular vectors and store them in provided storage.
+	SVDOverwrite        = 'O' // Compute the singular vectors and store them in input matrix
 	SVDNone             = 'N' // Do not compute singular vectors
 )

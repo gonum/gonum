@@ -20,7 +20,7 @@ func (impl Implementation) Dlaset(uplo blas.Uplo, m, n int, alpha, beta float64,
 		}
 	} else if uplo == blas.Lower {
 		for i := 0; i < m; i++ {
-			for j := 0; j < i; j++ {
+			for j := 0; j < min(i+1, n); j++ {
 				a[i*lda+j] = alpha
 			}
 		}

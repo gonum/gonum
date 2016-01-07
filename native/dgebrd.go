@@ -86,7 +86,7 @@ func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, ta
 				if lwork >= (m+n)*nbmin {
 					nb = lwork / (m + n)
 				} else {
-					nb = 1
+					nb = minmn
 					nx = minmn
 				}
 			}

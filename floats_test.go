@@ -1444,3 +1444,15 @@ func BenchmarkAddScaledToLarge(b *testing.B) {
 func BenchmarkAddScaledToHuge(b *testing.B) {
 	benchmarkAddScaledTo(b, Huge)
 }
+
+func benchmarkScale(b *testing.B, size int) {
+	dst := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Scale(2.0, dst)
+	}
+}
+func BenchmarkScaleSmall(b *testing.B)  { benchmarkScale(b, Small) }
+func BenchmarkScaleMedium(b *testing.B) { benchmarkScale(b, Medium) }
+func BenchmarkScaleLarge(b *testing.B)  { benchmarkScale(b, Large) }
+func BenchmarkScaleHuge(b *testing.B)   { benchmarkScale(b, Huge) }

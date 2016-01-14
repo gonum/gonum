@@ -17,3 +17,18 @@ func DscalUnitaryTo(dst []float64, alpha float64, x []float64) {
 		dst[i] = alpha * v
 	}
 }
+
+func DscalInc(alpha float64, x []float64, n, incX, ix uintptr) {
+	for i := 0; i < int(n); i++ {
+		x[ix] *= alpha
+		ix += incX
+	}
+}
+
+func DscalIncTo(dst []float64, incDst, idst uintptr, alpha float64, x []float64, n, incX, ix uintptr) {
+	for i := 0; i < int(n); i++ {
+		dst[idst] = alpha * x[ix]
+		ix += incX
+		idst += incDst
+	}
+}

@@ -286,6 +286,87 @@ onemore:
 
 end:
 	RET
+{{end}}
+
+{{define "dscalinc_preamble"}}
+{{if not .To}}\
+// func {{.Name}}(alpha float64, x []float64, n, incX, ix uintptr)
+TEXT ·{{.Name}}(SB), NOSPLIT, $0
+	MOVHPD alpha+0(FP), X7
+	MOVLPD alpha+0(FP), X7
+	MOVQ   x+8(FP), R8
+	MOVQ   n+32(FP), DX
+	MOVQ   incX+40(FP), R10
+	MOVQ   ix+48(FP), SI
+{{else}}\
+// func {{.Name}}(dst []float64, incDst, idst uintptr, alpha float64, x []float64, n, incX, ix uintptr)
+TEXT ·{{.Name}}(SB), NOSPLIT, $0
+	MOVQ   dst+0(FP), R9
+	MOVQ   incDst+24(FP), R11
+	MOVQ   idst+32(FP), DI
+	MOVHPD alpha+40(FP), X7
+	MOVLPD alpha+40(FP), X7
+	MOVQ   x+48(FP), R8
+	MOVQ   n+72(FP), DX
+	MOVQ   incX+80(FP), R10
+	MOVQ   ix+88(FP), SI
+{{end}}\
+{{end}}
+
+{{define "dscalinc_body"}}
+	MOVQ SI, AX  // nextX = ix
+{{if .To}}\
+	MOVQ DI, BX  // nextDst = idst
+{{end}}\
+	ADDQ R10, AX // nextX += incX
+{{if .To}}\
+	ADDQ R11, BX // nextDst += incDst
+{{end}}\
+	SHLQ $1, R10 // incX *= 2
+{{if .To}}\
+	SHLQ $1, R11 // incDst *= 2
+{{end}}\
+
+	SUBQ $2, DX // n -= 2
+	JL   tail   // if n < 0
+
+loop:
+{{if .To}}\
+	// dst[i] = alpha * x[i] unrolled 2x.
+{{else}}\
+	// x[i] *= alpha unrolled 2x.
+{{end}}\
+	MOVHPD 0(R8)(SI*8), X0
+	MOVLPD 0(R8)(AX*8), X0
+	MULPD  X7, X0
+	MOVHPD X0, 0({{if .To}}R9)(DI*8{{else}}R8)(SI*8{{end}})
+	MOVLPD X0, 0({{if .To}}R9)(BX*8{{else}}R8)(AX*8{{end}})
+
+	ADDQ R10, SI // ix += incX
+	ADDQ R10, AX // nextX += incX
+{{if .To}}\
+	ADDQ R11, DI // idst += incDst
+	ADDQ R11, BX // nextDst += incDst
+{{end}}\
+
+	SUBQ $2, DX // n -= 2
+	JGE  loop   // if n >= 0 goto loop
+
+tail:
+	ADDQ $2, DX // n += 2
+	JLE  end    // if n <= 0
+
+{{if .To}}\
+	// dst[i] = alpha * x[i] for the last iteration if n is odd.
+{{else}}\
+	// x[i] *= alpha for the last iteration if n is odd.
+{{end}}\
+	MOVSD 0(R8)(SI*8), X0
+	MULSD X7, X0
+	MOVSD X0, 0({{if .To}}R9)(DI*8{{else}}R8)(SI*8{{end}})
+
+end:
+	RET
 {{end}}`
 
 func cont(s string) string {
@@ -338,6 +419,18 @@ var funcs = []Function{
 		To:       true,
 		Year:     2016,
 		template: `{{template "header" .}}{{template "dscalunitary_preamble" .}}{{template "dscalunitary_body" .}}`,
+	},
+	{
+		Name:     "DscalInc",
+		To:       false,
+		Year:     2016,
+		template: `{{template "header" .}}{{template "dscalinc_preamble" .}}{{template "dscalinc_body" .}}`,
+	},
+	{
+		Name:     "DscalIncTo",
+		To:       true,
+		Year:     2016,
+		template: `{{template "header" .}}{{template "dscalinc_preamble" .}}{{template "dscalinc_body" .}}`,
 	},
 }
 

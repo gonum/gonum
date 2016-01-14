@@ -61,12 +61,12 @@ func (u Uniform) MarshalParameters(p []Parameter) {
 
 // Mean returns the mean of the probability distribution.
 func (u Uniform) Mean() float64 {
-	return (u.Max - u.Min) / 2
+	return (u.Max + u.Min) / 2
 }
 
 // Median returns the median of the probability distribution.
 func (u Uniform) Median() float64 {
-	return (u.Max - u.Min) / 2
+	return (u.Max + u.Min) / 2
 }
 
 // Uniform doesn't have a mode because it's any value in the distribution

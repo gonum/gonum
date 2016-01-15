@@ -1,4 +1,4 @@
-# Gonum diff  [![Build Status](https://travis-ci.org/gonum/diff.svg)](https://travis-ci.org/gonum/diff)  [![Coverage Status](https://coveralls.io/repos/gonum/diff/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/diff?branch=master)
+# Gonum diff  [![Build Status](https://travis-ci.org/gonum/diff.svg)](https://travis-ci.org/gonum/diff)  [![Coverage Status](https://coveralls.io/repos/gonum/diff/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/diff?branch=master) [![GoDoc](https://godoc.org/github.com/gonum/diff?status.svg)](https://godoc.org/github.com/gonum/diff)
 
 This is a package for computing derivatives of functions for the Go language.
 

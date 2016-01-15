@@ -1,4 +1,4 @@
-Gonum LAPACK  [![Build Status](https://travis-ci.org/gonum/lapack.svg?branch=master)](https://travis-ci.org/gonum/lapack)  [![Coverage Status](https://coveralls.io/repos/gonum/lapack/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/lapack?branch=master)
+Gonum LAPACK  [![Build Status](https://travis-ci.org/gonum/lapack.svg?branch=master)](https://travis-ci.org/gonum/lapack)  [![Coverage Status](https://coveralls.io/repos/gonum/lapack/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/lapack?branch=master) [![GoDoc](https://godoc.org/github.com/gonum/lapack?status.svg)](https://godoc.org/github.com/gonum/lapack)
 ======
 
 A collection of packages to provide LAPACK functionality for the Go programming

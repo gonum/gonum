@@ -601,10 +601,7 @@ func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
 		return
 	}
 	if incX == 1 {
-		x = x[:n]
-		for i := range x {
-			x[i] *= alpha
-		}
+		asm.DscalUnitary(alpha, x[:n])
 		return
 	}
 	for ix := 0; ix < n*incX; ix += incX {

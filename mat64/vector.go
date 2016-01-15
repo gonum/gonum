@@ -131,15 +131,15 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 			asm.DscalUnitaryTo(v.mat.Data, alpha, a.mat.Data)
 			return
 		}
-		asm.DscalIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
-			alpha, a.mat.Data, uintptr(n), uintptr(a.mat.Inc), 0)
+		asm.DscalIncTo(v.mat.Data, uintptr(v.mat.Inc),
+			alpha, a.mat.Data, uintptr(n), uintptr(a.mat.Inc))
 		return
 	}
 	if v.mat.Inc == 1 {
 		asm.DscalUnitary(alpha, v.mat.Data)
 		return
 	}
-	asm.DscalInc(alpha, v.mat.Data, uintptr(n), uintptr(v.mat.Inc), 0)
+	asm.DscalInc(alpha, v.mat.Data, uintptr(n), uintptr(v.mat.Inc))
 }
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.

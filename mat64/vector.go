@@ -127,11 +127,19 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 	n := a.Len()
 	if v != a {
 		v.reuseAs(n)
-		blas64.Copy(n, a.mat, v.mat)
+		if v.mat.Inc == 1 && a.mat.Inc == 1 {
+			asm.DscalUnitaryTo(v.mat.Data, alpha, a.mat.Data)
+			return
+		}
+		asm.DscalIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+			alpha, a.mat.Data, uintptr(n), uintptr(a.mat.Inc), 0)
+		return
 	}
-	if alpha != 1 {
-		blas64.Scal(n, alpha, v.mat)
+	if v.mat.Inc == 1 {
+		asm.DscalUnitary(alpha, v.mat.Data)
+		return
 	}
+	asm.DscalInc(alpha, v.mat.Data, uintptr(n), uintptr(v.mat.Inc), 0)
 }
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.

@@ -127,7 +127,7 @@ func TestDscalInc(t *testing.T) {
 		for _, incX := range []int{1, 2, 3, 4, 7, 10} {
 			prefix := fmt.Sprintf("test %v (x*=a), incX = %v", i, incX)
 			x, xFront, xBack := newGuardedVector(test.x, incX)
-			DscalInc(test.alpha, x, uintptr(n), uintptr(incX), 0)
+			DscalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
 			if !allNaN(xFront) || !allNaN(xBack) {
 				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -153,8 +153,7 @@ func TestDscalIncTo(t *testing.T) {
 			// Test x = alpha * x.
 			prefix := fmt.Sprintf("test %v (x=a*x), incX = %v", i, incX)
 			x, xFront, xBack := newGuardedVector(test.x, incX)
-			DscalIncTo(x, uintptr(incX), 0,
-				test.alpha, x, uintptr(n), uintptr(incX), 0)
+			DscalIncTo(x, uintptr(incX), test.alpha, x, uintptr(n), uintptr(incX))
 
 			if !allNaN(xFront) || !allNaN(xBack) {
 				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -171,8 +170,7 @@ func TestDscalIncTo(t *testing.T) {
 				prefix = fmt.Sprintf("test %v (dst=a*x), incX = %v, incDst = %v", i, incX, incDst)
 				x, xFront, xBack = newGuardedVector(test.x, incX)
 				dst, dstFront, dstBack := newGuardedVector(test.x, incDst)
-				DscalIncTo(dst, uintptr(incDst), 0,
-					test.alpha, x, uintptr(n), uintptr(incX), 0)
+				DscalIncTo(dst, uintptr(incDst), test.alpha, x, uintptr(n), uintptr(incX))
 
 				if !allNaN(xFront) || !allNaN(xBack) {
 					t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -293,7 +291,7 @@ func benchmarkDscalInc(b *testing.B, n, inc int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DscalInc(a, x, uintptr(n), uintptr(inc), 0)
+		DscalInc(a, x, uintptr(n), uintptr(inc))
 	}
 	gs = x
 }
@@ -336,8 +334,7 @@ func benchmarkDscalIncTo(b *testing.B, n, inc int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DscalIncTo(dst, uintptr(inc), 0,
-			a, x, uintptr(n), uintptr(inc), 0)
+		DscalIncTo(dst, uintptr(inc), a, x, uintptr(n), uintptr(inc))
 	}
 	gs = dst
 }

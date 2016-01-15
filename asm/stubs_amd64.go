@@ -22,6 +22,8 @@ func DscalUnitary(alpha float64, x []float64)
 
 func DscalUnitaryTo(dst []float64, alpha float64, x []float64)
 
+// incX must be positive.
 func DscalInc(alpha float64, x []float64, n, incX uintptr)
 
+// incDst and incX must be positive.
 func DscalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)

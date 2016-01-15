@@ -18,14 +18,18 @@ func ZscalUnitaryTo(dst []complex128, alpha complex128, x []complex128) {
 	}
 }
 
-func ZscalInc(alpha complex128, x []complex128, n, incX, ix uintptr) {
+// incX must be positive.
+func ZscalInc(alpha complex128, x []complex128, n, incX uintptr) {
+	var ix uintptr
 	for i := 0; i < int(n); i++ {
 		x[ix] *= alpha
 		ix += incX
 	}
 }
 
-func ZscalIncTo(dst []complex128, incDst, idst uintptr, alpha complex128, x []complex128, n, incX, ix uintptr) {
+// incDst and incX must be positive.
+func ZscalIncTo(dst []complex128, incDst uintptr, alpha complex128, x []complex128, n, incX uintptr) {
+	var idst, ix uintptr
 	for i := 0; i < int(n); i++ {
 		dst[idst] = alpha * x[ix]
 		ix += incX

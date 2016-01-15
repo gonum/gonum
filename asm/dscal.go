@@ -18,14 +18,18 @@ func DscalUnitaryTo(dst []float64, alpha float64, x []float64) {
 	}
 }
 
-func DscalInc(alpha float64, x []float64, n, incX, ix uintptr) {
+// incX must be positive.
+func DscalInc(alpha float64, x []float64, n, incX uintptr) {
+	var ix uintptr
 	for i := 0; i < int(n); i++ {
 		x[ix] *= alpha
 		ix += incX
 	}
 }
 
-func DscalIncTo(dst []float64, incDst, idst uintptr, alpha float64, x []float64, n, incX, ix uintptr) {
+// incDst and incX must be positive.
+func DscalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr) {
+	var idst, ix uintptr
 	for i := 0; i < int(n); i++ {
 		dst[idst] = alpha * x[ix]
 		ix += incX

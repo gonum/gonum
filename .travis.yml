@@ -6,7 +6,7 @@ language: go
 go:
  - 1.4.2
  - 1.5.2
- - 1.6beta1
+ - 1.6beta2
 
 # Required for coverage.
 before_install:

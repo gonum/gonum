@@ -691,8 +691,8 @@ func Same(s, t []float64) bool {
 
 // Scale multiplies every element in dst by the scalar c.
 func Scale(c float64, dst []float64) {
-	for i := range dst {
-		dst[i] *= c
+	if len(dst) > 0 {
+		asm.DscalUnitary(c, dst)
 	}
 }
 

@@ -45,22 +45,21 @@
 // Don't insert stack check preamble.
 #define NOSPLIT 4
 
-// func DscalIncTo(dst []float64, incDst, idst uintptr, alpha float64, x []float64, n, incX, ix uintptr)
+// func DscalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)
+// This function assumes that incDst and incX are positive.
 TEXT ·DscalIncTo(SB), NOSPLIT, $0
 	MOVQ   dst+0(FP), R9
 	MOVQ   incDst+24(FP), R11
-	MOVQ   idst+32(FP), DI
-	MOVHPD alpha+40(FP), X7
-	MOVLPD alpha+40(FP), X7
-	MOVQ   x+48(FP), R8
-	MOVQ   n+72(FP), DX
-	MOVQ   incX+80(FP), R10
-	MOVQ   ix+88(FP), SI
+	MOVHPD alpha+32(FP), X7
+	MOVLPD alpha+32(FP), X7
+	MOVQ   x+40(FP), R8
+	MOVQ   n+64(FP), DX
+	MOVQ   incX+72(FP), R10
 
-	MOVQ SI, AX  // nextX = ix
-	MOVQ DI, BX  // nextDst = idst
-	ADDQ R10, AX // nextX += incX
-	ADDQ R11, BX // nextDst += incDst
+	MOVQ $0, SI
+	MOVQ $0, DI
+	MOVQ R10, AX // nextX = incX
+	MOVQ R11, BX // nextDst = incDst
 	SHLQ $1, R10 // incX *= 2
 	SHLQ $1, R11 // incDst *= 2
 

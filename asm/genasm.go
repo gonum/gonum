@@ -290,37 +290,36 @@ end:
 
 {{define "dscalinc_preamble"}}
 {{if not .To}}\
-// func {{.Name}}(alpha float64, x []float64, n, incX, ix uintptr)
+// func {{.Name}}(alpha float64, x []float64, n, incX uintptr)
+// This function assumes that incX is positive.
 TEXT ·{{.Name}}(SB), NOSPLIT, $0
 	MOVHPD alpha+0(FP), X7
 	MOVLPD alpha+0(FP), X7
 	MOVQ   x+8(FP), R8
 	MOVQ   n+32(FP), DX
 	MOVQ   incX+40(FP), R10
-	MOVQ   ix+48(FP), SI
 {{else}}\
-// func {{.Name}}(dst []float64, incDst, idst uintptr, alpha float64, x []float64, n, incX, ix uintptr)
+// func {{.Name}}(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)
+// This function assumes that incDst and incX are positive.
 TEXT ·{{.Name}}(SB), NOSPLIT, $0
 	MOVQ   dst+0(FP), R9
 	MOVQ   incDst+24(FP), R11
-	MOVQ   idst+32(FP), DI
-	MOVHPD alpha+40(FP), X7
-	MOVLPD alpha+40(FP), X7
-	MOVQ   x+48(FP), R8
-	MOVQ   n+72(FP), DX
-	MOVQ   incX+80(FP), R10
-	MOVQ   ix+88(FP), SI
+	MOVHPD alpha+32(FP), X7
+	MOVLPD alpha+32(FP), X7
+	MOVQ   x+40(FP), R8
+	MOVQ   n+64(FP), DX
+	MOVQ   incX+72(FP), R10
 {{end}}\
 {{end}}
 
 {{define "dscalinc_body"}}
-	MOVQ SI, AX  // nextX = ix
+	MOVQ $0, SI
 {{if .To}}\
-	MOVQ DI, BX  // nextDst = idst
+	MOVQ $0, DI
 {{end}}\
-	ADDQ R10, AX // nextX += incX
+	MOVQ R10, AX // nextX = incX
 {{if .To}}\
-	ADDQ R11, BX // nextDst += incDst
+	MOVQ R11, BX // nextDst = incDst
 {{end}}\
 	SHLQ $1, R10 // incX *= 2
 {{if .To}}\

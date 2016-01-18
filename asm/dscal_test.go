@@ -124,15 +124,10 @@ func TestDscalInc(t *testing.T) {
 
 	for i, test := range dscalTests {
 		n := len(test.x)
-		for _, incX := range []int{-10, -7, -4, -3, -2, -1, 1, 2, 3, 4, 7, 10} {
-			var ix int
-			if incX < 0 {
-				ix = (-n + 1) * incX
-			}
-
+		for _, incX := range []int{1, 2, 3, 4, 7, 10} {
 			prefix := fmt.Sprintf("test %v (x*=a), incX = %v", i, incX)
 			x, xFront, xBack := newGuardedVector(test.x, incX)
-			DscalInc(test.alpha, x, uintptr(n), uintptr(incX), uintptr(ix))
+			DscalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
 			if !allNaN(xFront) || !allNaN(xBack) {
 				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -153,19 +148,12 @@ func TestDscalIncTo(t *testing.T) {
 
 	for i, test := range dscalTests {
 		n := len(test.x)
-		want := make([]float64, n)
 
-		for _, incX := range []int{-10, -7, -4, -3, -2, -1, 1, 2, 3, 4, 7, 10} {
-			var ix int
-			if incX < 0 {
-				ix = (-n + 1) * incX
-			}
-
+		for _, incX := range []int{1, 2, 3, 4, 7, 10} {
 			// Test x = alpha * x.
 			prefix := fmt.Sprintf("test %v (x=a*x), incX = %v", i, incX)
 			x, xFront, xBack := newGuardedVector(test.x, incX)
-			DscalIncTo(x, uintptr(incX), uintptr(ix),
-				test.alpha, x, uintptr(n), uintptr(incX), uintptr(ix))
+			DscalIncTo(x, uintptr(incX), test.alpha, x, uintptr(n), uintptr(incX))
 
 			if !allNaN(xFront) || !allNaN(xBack) {
 				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -177,18 +165,12 @@ func TestDscalIncTo(t *testing.T) {
 				t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, x)
 			}
 
-			for _, incDst := range []int{-10, -7, -4, -3, -2, -1, 1, 2, 3, 4, 7, 10} {
-				var idst int
-				if incDst < 0 {
-					idst = (-n + 1) * incDst
-				}
-
+			for _, incDst := range []int{1, 2, 3, 4, 7, 10} {
 				// Test dst = alpha * x.
 				prefix = fmt.Sprintf("test %v (dst=a*x), incX = %v, incDst = %v", i, incX, incDst)
 				x, xFront, xBack = newGuardedVector(test.x, incX)
 				dst, dstFront, dstBack := newGuardedVector(test.x, incDst)
-				DscalIncTo(dst, uintptr(incDst), uintptr(idst),
-					test.alpha, x, uintptr(n), uintptr(incX), uintptr(ix))
+				DscalIncTo(dst, uintptr(incDst), test.alpha, x, uintptr(n), uintptr(incX))
 
 				if !allNaN(xFront) || !allNaN(xBack) {
 					t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -203,14 +185,8 @@ func TestDscalIncTo(t *testing.T) {
 					t.Errorf("%v: modified dst argument at non-stride position", prefix)
 				}
 
-				copy(want, test.want)
-				if incX*incDst < 0 {
-					for j := 0; j < n/2; j++ {
-						want[j], want[n-j-1] = want[n-j-1], want[j]
-					}
-				}
-				if !equalStrided(want, dst, incDst) {
-					t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, want, dst)
+				if !equalStrided(test.want, dst, incDst) {
+					t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, dst)
 				}
 			}
 		}
@@ -310,21 +286,12 @@ func BenchmarkDscalIncN100000Inc2(b *testing.B)  { benchmarkDscalInc(b, 100000, 
 func BenchmarkDscalIncN100000Inc4(b *testing.B)  { benchmarkDscalInc(b, 100000, 4) }
 func BenchmarkDscalIncN100000Inc10(b *testing.B) { benchmarkDscalInc(b, 100000, 10) }
 
-func BenchmarkDscalIncN100000IncM1(b *testing.B)  { benchmarkDscalInc(b, 100000, -1) }
-func BenchmarkDscalIncN100000IncM2(b *testing.B)  { benchmarkDscalInc(b, 100000, -2) }
-func BenchmarkDscalIncN100000IncM4(b *testing.B)  { benchmarkDscalInc(b, 100000, -4) }
-func BenchmarkDscalIncN100000IncM10(b *testing.B) { benchmarkDscalInc(b, 100000, -10) }
-
 func benchmarkDscalInc(b *testing.B, n, inc int) {
 	x := randomSlice(n, inc)
-	var ini int
-	if inc < 0 {
-		ini = (-n + 1) * inc
-	}
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DscalInc(a, x, uintptr(n), uintptr(inc), uintptr(ini))
+		DscalInc(a, x, uintptr(n), uintptr(inc))
 	}
 	gs = x
 }
@@ -361,23 +328,13 @@ func BenchmarkDscalIncToN100000Inc2(b *testing.B)  { benchmarkDscalIncTo(b, 1000
 func BenchmarkDscalIncToN100000Inc4(b *testing.B)  { benchmarkDscalIncTo(b, 100000, 4) }
 func BenchmarkDscalIncToN100000Inc10(b *testing.B) { benchmarkDscalIncTo(b, 100000, 10) }
 
-func BenchmarkDscalIncToN100000IncM1(b *testing.B)  { benchmarkDscalIncTo(b, 100000, -1) }
-func BenchmarkDscalIncToN100000IncM2(b *testing.B)  { benchmarkDscalIncTo(b, 100000, -2) }
-func BenchmarkDscalIncToN100000IncM4(b *testing.B)  { benchmarkDscalIncTo(b, 100000, -4) }
-func BenchmarkDscalIncToN100000IncM10(b *testing.B) { benchmarkDscalIncTo(b, 100000, -10) }
-
 func benchmarkDscalIncTo(b *testing.B, n, inc int) {
 	x := randomSlice(n, inc)
 	dst := randomSlice(n, inc)
-	var ini int
-	if inc < 0 {
-		ini = (-n + 1) * inc
-	}
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DscalIncTo(dst, uintptr(inc), uintptr(ini),
-			a, x, uintptr(n), uintptr(inc), uintptr(ini))
+		DscalIncTo(dst, uintptr(inc), a, x, uintptr(n), uintptr(inc))
 	}
 	gs = dst
 }

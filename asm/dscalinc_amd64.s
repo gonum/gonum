@@ -45,17 +45,17 @@
 // Don't insert stack check preamble.
 #define NOSPLIT 4
 
-// func DscalInc(alpha float64, x []float64, n, incX, ix uintptr)
+// func DscalInc(alpha float64, x []float64, n, incX uintptr)
+// This function assumes that incX is positive.
 TEXT ·DscalInc(SB), NOSPLIT, $0
 	MOVHPD alpha+0(FP), X7
 	MOVLPD alpha+0(FP), X7
 	MOVQ   x+8(FP), R8
 	MOVQ   n+32(FP), DX
 	MOVQ   incX+40(FP), R10
-	MOVQ   ix+48(FP), SI
 
-	MOVQ SI, AX  // nextX = ix
-	ADDQ R10, AX // nextX += incX
+	MOVQ $0, SI
+	MOVQ R10, AX // nextX = incX
 	SHLQ $1, R10 // incX *= 2
 
 	SUBQ $2, DX // n -= 2

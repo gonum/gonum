@@ -1733,3 +1733,46 @@ func (f Plassmann) Grad(grad, x []float64) {
 		grad[0] += 1
 	}
 }
+
+// YanaiOzawaKaneko is an univariate convex function where the values of Beta1
+// and Beta2 control the curvature around the minimum. Far away from the
+// minimum the function approximates an absolute value function. Near the
+// minimum, the function can either be sharply curved or flat, controlled by
+// the parameter values.
+//
+// References:
+//  - More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//    ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.4)
+//  - Yanai, H., Ozawa, M., and Kaneko, S.: Interpolation methods in one dimensional
+//    optimization. Computing 27 (1981), 155–163
+type YanaiOzawaKaneko struct {
+	Beta1 float64
+	Beta2 float64
+}
+
+func (f YanaiOzawaKaneko) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	a := x[0]
+	b1 := f.Beta1
+	b2 := f.Beta2
+	g1 := math.Sqrt(1+b1*b1) - b1
+	g2 := math.Sqrt(1+b2*b2) - b2
+	return g1*math.Sqrt((a-1)*(a-1)+b2*b2) + g2*math.Sqrt(a*a+b1*b1)
+}
+
+func (f YanaiOzawaKaneko) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	a := x[0]
+	b1 := f.Beta1
+	b2 := f.Beta2
+	g1 := math.Sqrt(1+b1*b1) - b1
+	g2 := math.Sqrt(1+b2*b2) - b2
+	grad[0] = g1*(a-1)/math.Sqrt(b2*b2+(a-1)*(a-1)) + g2*a/math.Sqrt(b1*b1+a*a)
+}

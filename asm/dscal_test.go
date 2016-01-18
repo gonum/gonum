@@ -205,10 +205,10 @@ func BenchmarkDscalUnitaryN100000(b *testing.B) { benchmarkDscalUnitary(b, 10000
 
 func benchmarkDscalUnitary(b *testing.B, n int) {
 	x := randomSlice(n, 1)
-	a := rand.Float64()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DscalUnitary(a, x)
+	for i := 0; i < b.N; i += 2 {
+		DscalUnitary(2, x)
+		DscalUnitary(0.5, x)
 	}
 	gs = x
 }
@@ -246,10 +246,10 @@ func BenchmarkDscalUnitaryToXN100000(b *testing.B) { benchmarkDscalUnitaryToX(b,
 
 func benchmarkDscalUnitaryToX(b *testing.B, n int) {
 	x := randomSlice(n, 1)
-	a := rand.Float64()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DscalUnitaryTo(x, a, x)
+	for i := 0; i < b.N; i += 2 {
+		DscalUnitaryTo(x, 2, x)
+		DscalUnitaryTo(x, 0.5, x)
 	}
 	gs = x
 }
@@ -288,10 +288,10 @@ func BenchmarkDscalIncN100000Inc10(b *testing.B) { benchmarkDscalInc(b, 100000, 
 
 func benchmarkDscalInc(b *testing.B, n, inc int) {
 	x := randomSlice(n, inc)
-	a := rand.Float64()
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DscalInc(a, x, uintptr(n), uintptr(inc))
+	for i := 0; i < b.N; i += 2 {
+		DscalInc(2, x, uintptr(n), uintptr(inc))
+		DscalInc(0.5, x, uintptr(n), uintptr(inc))
 	}
 	gs = x
 }

@@ -1286,21 +1286,10 @@ func benchmarkMin(b *testing.B, size int) {
 		Min(s)
 	}
 }
-
-func BenchmarkMinSmall(b *testing.B) {
-	benchmarkMin(b, Small)
-}
-
-func BenchmarkMinMed(b *testing.B) {
-	benchmarkMin(b, Medium)
-}
-
-func BenchmarkMinLarge(b *testing.B) {
-	benchmarkMin(b, Large)
-}
-func BenchmarkMinHuge(b *testing.B) {
-	benchmarkMin(b, Huge)
-}
+func BenchmarkMinSmall(b *testing.B) { benchmarkMin(b, Small) }
+func BenchmarkMinMed(b *testing.B)   { benchmarkMin(b, Medium) }
+func BenchmarkMinLarge(b *testing.B) { benchmarkMin(b, Large) }
+func BenchmarkMinHuge(b *testing.B)  { benchmarkMin(b, Huge) }
 
 func benchmarkAdd(b *testing.B, size int) {
 	s1 := randomSlice(size)
@@ -1310,22 +1299,10 @@ func benchmarkAdd(b *testing.B, size int) {
 		Add(s1, s2)
 	}
 }
-
-func BenchmarkAddSmall(b *testing.B) {
-	benchmarkAdd(b, Small)
-}
-
-func BenchmarkAddMed(b *testing.B) {
-	benchmarkAdd(b, Medium)
-}
-
-func BenchmarkAddLarge(b *testing.B) {
-	benchmarkAdd(b, Large)
-}
-
-func BenchmarkAddHuge(b *testing.B) {
-	benchmarkAdd(b, Huge)
-}
+func BenchmarkAddSmall(b *testing.B) { benchmarkAdd(b, Small) }
+func BenchmarkAddMed(b *testing.B)   { benchmarkAdd(b, Medium) }
+func BenchmarkAddLarge(b *testing.B) { benchmarkAdd(b, Large) }
+func BenchmarkAddHuge(b *testing.B)  { benchmarkAdd(b, Huge) }
 
 func benchmarkAddTo(b *testing.B, size int) {
 	s1 := randomSlice(size)
@@ -1336,7 +1313,6 @@ func benchmarkAddTo(b *testing.B, size int) {
 		AddTo(dst, s1, s2)
 	}
 }
-
 func BenchmarkAddToSmall(b *testing.B) { benchmarkAddTo(b, Small) }
 func BenchmarkAddToMed(b *testing.B)   { benchmarkAddTo(b, Medium) }
 func BenchmarkAddToLarge(b *testing.B) { benchmarkAddTo(b, Large) }
@@ -1350,7 +1326,6 @@ func benchmarkSub(b *testing.B, size int) {
 		Sub(s1, s2)
 	}
 }
-
 func BenchmarkSubSmall(b *testing.B) { benchmarkSub(b, Small) }
 func BenchmarkSubMed(b *testing.B)   { benchmarkSub(b, Medium) }
 func BenchmarkSubLarge(b *testing.B) { benchmarkSub(b, Large) }
@@ -1365,7 +1340,6 @@ func benchmarkSubTo(b *testing.B, size int) {
 		SubTo(dst, s1, s2)
 	}
 }
-
 func BenchmarkSubToSmall(b *testing.B) { benchmarkSubTo(b, Small) }
 func BenchmarkSubToMed(b *testing.B)   { benchmarkSubTo(b, Medium) }
 func BenchmarkSubToLarge(b *testing.B) { benchmarkSubTo(b, Large) }
@@ -1378,21 +1352,10 @@ func benchmarkLogSumExp(b *testing.B, size int) {
 		LogSumExp(s)
 	}
 }
-
-func BenchmarkLogSumExpSmall(b *testing.B) {
-	benchmarkLogSumExp(b, Small)
-}
-
-func BenchmarkLogSumExpMed(b *testing.B) {
-	benchmarkLogSumExp(b, Medium)
-}
-
-func BenchmarkLogSumExpLarge(b *testing.B) {
-	benchmarkLogSumExp(b, Large)
-}
-func BenchmarkLogSumExpHuge(b *testing.B) {
-	benchmarkLogSumExp(b, Huge)
-}
+func BenchmarkLogSumExpSmall(b *testing.B) { benchmarkLogSumExp(b, Small) }
+func BenchmarkLogSumExpMed(b *testing.B)   { benchmarkLogSumExp(b, Medium) }
+func BenchmarkLogSumExpLarge(b *testing.B) { benchmarkLogSumExp(b, Large) }
+func BenchmarkLogSumExpHuge(b *testing.B)  { benchmarkLogSumExp(b, Huge) }
 
 func benchmarkDot(b *testing.B, size int) {
 	s1 := randomSlice(size)
@@ -1402,22 +1365,10 @@ func benchmarkDot(b *testing.B, size int) {
 		Dot(s1, s2)
 	}
 }
-
-func BenchmarkDotSmall(b *testing.B) {
-	benchmarkDot(b, Small)
-}
-
-func BenchmarkDotMed(b *testing.B) {
-	benchmarkDot(b, Medium)
-}
-
-func BenchmarkDotLarge(b *testing.B) {
-	benchmarkDot(b, Large)
-}
-
-func BenchmarkDotHuge(b *testing.B) {
-	benchmarkDot(b, Huge)
-}
+func BenchmarkDotSmall(b *testing.B) { benchmarkDot(b, Small) }
+func BenchmarkDotMed(b *testing.B)   { benchmarkDot(b, Medium) }
+func BenchmarkDotLarge(b *testing.B) { benchmarkDot(b, Large) }
+func BenchmarkDotHuge(b *testing.B)  { benchmarkDot(b, Huge) }
 
 func benchmarkAddScaledTo(b *testing.B, size int) {
 	dst := randomSlice(size)
@@ -1428,28 +1379,17 @@ func benchmarkAddScaledTo(b *testing.B, size int) {
 		AddScaledTo(dst, y, 2.3, s)
 	}
 }
-
-func BenchmarkAddScaledToSmall(b *testing.B) {
-	benchmarkAddScaledTo(b, Small)
-}
-
-func BenchmarkAddScaledToMedium(b *testing.B) {
-	benchmarkAddScaledTo(b, Medium)
-}
-
-func BenchmarkAddScaledToLarge(b *testing.B) {
-	benchmarkAddScaledTo(b, Large)
-}
-
-func BenchmarkAddScaledToHuge(b *testing.B) {
-	benchmarkAddScaledTo(b, Huge)
-}
+func BenchmarkAddScaledToSmall(b *testing.B)  { benchmarkAddScaledTo(b, Small) }
+func BenchmarkAddScaledToMedium(b *testing.B) { benchmarkAddScaledTo(b, Medium) }
+func BenchmarkAddScaledToLarge(b *testing.B)  { benchmarkAddScaledTo(b, Large) }
+func BenchmarkAddScaledToHuge(b *testing.B)   { benchmarkAddScaledTo(b, Huge) }
 
 func benchmarkScale(b *testing.B, size int) {
 	dst := randomSlice(size)
 	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for i := 0; i < b.N; i += 2 {
 		Scale(2.0, dst)
+		Scale(0.5, dst)
 	}
 }
 func BenchmarkScaleSmall(b *testing.B)  { benchmarkScale(b, Small) }

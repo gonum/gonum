@@ -1678,3 +1678,58 @@ func (ConcaveLeft) Grad(grad, x []float64) {
 	}
 	grad[0] = math.Pow(x[0]+0.004, 3) * (5*x[0] - 7.98)
 }
+
+// Plassmann implements an univariate oscillatory function where the value of L
+// controls the number of oscillations. The value of Beta controls the size of
+// the derivative at zero and the size of the interval where the strong Wolfe
+// conditions can hold. For small values of Beta this function represents a
+// difficult test problem for linesearchers also because the information based
+// on the derivative is unreliable due to the oscillations.
+//
+// References:
+//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.3)
+type Plassmann struct {
+	L    float64 // Number of oscillations for |x-1| ≥ Beta.
+	Beta float64 // Size of the derivative at zero, f'(0) = -Beta.
+}
+
+func (f Plassmann) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	a := x[0]
+	b := f.Beta
+	l := f.L
+	r := 2 * (1 - b) / l / math.Pi * math.Sin(l*math.Pi/2*a)
+	switch {
+	case a <= 1-b:
+		r += 1 - a
+	case 1-b < a && a <= 1+b:
+		r += 0.5 * ((a-1)*(a-1)/b + b)
+	default: // a > 1+b
+		r += a - 1
+	}
+	return r
+}
+
+func (f Plassmann) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	a := x[0]
+	b := f.Beta
+	l := f.L
+	grad[0] = (1 - b) * math.Cos(l*math.Pi/2*a)
+	switch {
+	case a <= 1-b:
+		grad[0] -= 1
+	case 1-b < a && a <= 1+b:
+		grad[0] += (a - 1) / b
+	default: // a > 1+b
+		grad[0] += 1
+	}
+}

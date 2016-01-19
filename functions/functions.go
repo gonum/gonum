@@ -1627,3 +1627,29 @@ func (Wood) Minima() []Minimum {
 		},
 	}
 }
+
+// ConcaveRight implements an univariate function that is concave to the right
+// of the minimizer which is located at x=sqrt(2).
+//
+// References:
+//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.1)
+type ConcaveRight struct{}
+
+func (ConcaveRight) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	return -x[0] / (x[0]*x[0] + 2)
+}
+
+func (ConcaveRight) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	xSqr := x[0] * x[0]
+	grad[0] = (xSqr - 2) / (xSqr + 2) / (xSqr + 2)
+}

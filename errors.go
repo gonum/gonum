@@ -27,6 +27,10 @@ var (
 	// progress because there is no change in location after Linesearcher step
 	// due to floating-point arithmetic.
 	ErrNoProgress = errors.New("linesearch: no change in location after Linesearcher step")
+
+	// ErrLinesearcherBound signifies that a Linesearcher reached a step that
+	// lies out of allowed bounds.
+	ErrLinesearcherBound = errors.New("linesearch: step out of bounds")
 )
 
 // ErrFunc is returned when an initial function value is invalid. The error

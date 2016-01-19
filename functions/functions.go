@@ -1653,3 +1653,28 @@ func (ConcaveRight) Grad(grad, x []float64) {
 	xSqr := x[0] * x[0]
 	grad[0] = (xSqr - 2) / (xSqr + 2) / (xSqr + 2)
 }
+
+// ConcaveLeft implements an univariate function that is concave to the left of
+// the minimizer which is located at x=399/250=1.596.
+//
+// References:
+//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.2)
+type ConcaveLeft struct{}
+
+func (ConcaveLeft) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	return math.Pow(x[0]+0.004, 4) * (x[0] - 1.996)
+}
+
+func (ConcaveLeft) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	grad[0] = math.Pow(x[0]+0.004, 3) * (5*x[0] - 7.98)
+}

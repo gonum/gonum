@@ -44,6 +44,12 @@ func (Uniform) ExKurtosis() float64 {
 
 // LogProb computes the natural logarithm of the value of the probability density function at x.
 func (u Uniform) LogProb(x float64) float64 {
+	if x < u.Min {
+		return math.Inf(-1)
+	}
+	if x > u.Max {
+		return math.Inf(-1)
+	}
 	return -math.Log(u.Max - u.Min)
 }
 
@@ -78,6 +84,12 @@ func (Uniform) NumParameters() int {
 
 // Prob computes the value of the probability density function at x.
 func (u Uniform) Prob(x float64) float64 {
+	if x < u.Min {
+		return 0
+	}
+	if x > u.Max {
+		return 0
+	}
 	return 1 / (u.Max - u.Min)
 }
 

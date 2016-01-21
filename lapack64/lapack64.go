@@ -142,6 +142,52 @@ func Gelqf(a blas64.General, tau, work []float64, lwork int) {
 	lapack64.Dgelqf(a.Rows, a.Cols, a.Data, a.Stride, tau, work, lwork)
 }
 
+// Gesvd computes the singular value decomposition of the input matrix A.
+//
+// The singular value decomposition is
+//  A = U * Sigma * V^T
+// where Sigma is an m×n diagonal matrix containing the singular values of A,
+// U is an m×m orthogonal matrix and V is an n×n orthogonal matrix. The first
+// min(m,n) columns of U and V are the left and right singular vectors of A
+// respectively.
+//
+// jobU and jobVT are options for computing the singular vectors. The behavior
+// is as follows
+//  jobU == lapack.SVDAll       All m columns of U are returned in u
+//  jobU == lapack.SVDInPlace   The first min(m,n) columns are returned in u
+//  jobU == lapack.SVDOverwrite The first min(m,n) columns of U are written into a
+//  jobU == lapack.SVDNone      The columns of U are not computed.
+// The behavior is the same for jobVT and the rows of V^T. At most one of jobU
+// and jobVT can equal lapack.SVDOverwrite, and Gesvd will panic otherwise.
+//
+// On entry, a contains the data for the m×n matrix A. During the call to Gesvd
+// the data is overwritten. On exit, A contains the appropriate singular vectors
+// if either job is lapack.SVDOverwrite.
+//
+// s is a slice of length at least min(m,n) and on exit contains the singular
+// values in decreasing order.
+//
+// u contains the left singular vectors on exit, stored columnwise. If
+// jobU == lapack.SVDAll, u is of size m×m. If jobU == lapack.SVDInPlace u is
+// of size m×min(m,n). If jobU == lapack.SVDOverwrite or lapack.SVDNone, u is
+// not used.
+//
+// vt contains the left singular vectors on exit, stored rowwise. If
+// jobV == lapack.SVDAll, vt is of size n×m. If jobVT == lapack.SVDInPlace vt is
+// of size min(m,n)×n. If jobVT == lapack.SVDOverwrite or lapack.SVDNone, vt is
+// not used.
+//
+// work is a slice for storing temporary memory, and lwork is the usable size of
+// the slice. lwork must be at least max(5*min(m,n), 3*min(m,n)+max(m,n)).
+// If lwork == -1, instead of performing Gesvd, the optimal work length will be
+// stored into work[0]. Gesvd will panic if the working memory has insufficient
+// storage.
+//
+// Gesvd returns whether the decomposition successfully completed.
+func Gesvd(jobU, jobVT lapack.SVDJob, a, u, vt blas64.General, s, work []float64, lwork int) (ok bool) {
+	return lapack64.Dgesvd(jobU, jobVT, a.Rows, a.Cols, a.Data, a.Stride, s, u.Data, u.Stride, vt.Data, vt.Stride, work, lwork)
+}
+
 // Getrf computes the LU decomposition of the m×n matrix A.
 // The LU decomposition is a factorization of A into
 //  A = P * L * U

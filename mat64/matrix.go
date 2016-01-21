@@ -295,11 +295,11 @@ func Cond(a Matrix, norm float64) float64 {
 	case 1:
 		lnorm = lapack.MaxColumnSum
 	case 2:
-		// Use SVD to compute the condition number.
-		// TODO(btracey): Replace this with temporary workspace when SVD is fixed.
-		tmp := NewDense(m, n, nil)
-		tmp.Copy(a)
-		svd := SVD(tmp, math.Pow(2, -52.0), math.Pow(2, -966.0), false, false)
+		var svd SVD
+		ok := svd.Factorize(a, matrix.SVDNone)
+		if !ok {
+			return math.Inf(1)
+		}
 		return svd.Cond()
 	case math.Inf(1):
 		lnorm = lapack.MaxRowSum

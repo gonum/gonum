@@ -114,21 +114,22 @@ type Error struct{ string }
 func (err Error) Error() string { return err.string }
 
 var (
-	ErrIndexOutOfRange = Error{"matrix: index out of range"}
-	ErrRowAccess       = Error{"matrix: row index out of range"}
-	ErrColAccess       = Error{"matrix: column index out of range"}
-	ErrVectorAccess    = Error{"matrix: vector index out of range"}
-	ErrZeroLength      = Error{"matrix: zero length in matrix definition"}
-	ErrRowLength       = Error{"matrix: row length mismatch"}
-	ErrColLength       = Error{"matrix: col length mismatch"}
-	ErrSquare          = Error{"matrix: expect square matrix"}
-	ErrNormOrder       = Error{"matrix: invalid norm order for matrix"}
-	ErrSingular        = Error{"matrix: matrix is singular"}
-	ErrShape           = Error{"matrix: dimension mismatch"}
-	ErrIllegalStride   = Error{"matrix: illegal stride"}
-	ErrPivot           = Error{"matrix: malformed pivot list"}
-	ErrTriangle        = Error{"matrix: triangular storage mismatch"}
-	ErrTriangleSet     = Error{"matrix: triangular set out of bounds"}
+	ErrIndexOutOfRange     = Error{"matrix: index out of range"}
+	ErrRowAccess           = Error{"matrix: row index out of range"}
+	ErrColAccess           = Error{"matrix: column index out of range"}
+	ErrVectorAccess        = Error{"matrix: vector index out of range"}
+	ErrZeroLength          = Error{"matrix: zero length in matrix definition"}
+	ErrRowLength           = Error{"matrix: row length mismatch"}
+	ErrColLength           = Error{"matrix: col length mismatch"}
+	ErrSquare              = Error{"matrix: expect square matrix"}
+	ErrNormOrder           = Error{"matrix: invalid norm order for matrix"}
+	ErrSingular            = Error{"matrix: matrix is singular"}
+	ErrShape               = Error{"matrix: dimension mismatch"}
+	ErrIllegalStride       = Error{"matrix: illegal stride"}
+	ErrPivot               = Error{"matrix: malformed pivot list"}
+	ErrTriangle            = Error{"matrix: triangular storage mismatch"}
+	ErrTriangleSet         = Error{"matrix: triangular set out of bounds"}
+	ErrSliceLengthMismatch = Error{"matrix: input slice length mismatch"}
 )
 
 // ErrorStack represents matrix handling errors that have been recovered by Maybe wrappers.

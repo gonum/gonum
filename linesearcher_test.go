@@ -34,7 +34,7 @@ func TestBisection(t *testing.T) {
 func TestBacktracking(t *testing.T) {
 	d := 0.001
 	ls := &Backtracking{
-		FuncConst: d,
+		DecreaseFactor: d,
 	}
 	testLinesearcher(t, ls, d, 0, false)
 }

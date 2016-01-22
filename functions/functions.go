@@ -1627,3 +1627,152 @@ func (Wood) Minima() []Minimum {
 		},
 	}
 }
+
+// ConcaveRight implements an univariate function that is concave to the right
+// of the minimizer which is located at x=sqrt(2).
+//
+// References:
+//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.1)
+type ConcaveRight struct{}
+
+func (ConcaveRight) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	return -x[0] / (x[0]*x[0] + 2)
+}
+
+func (ConcaveRight) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	xSqr := x[0] * x[0]
+	grad[0] = (xSqr - 2) / (xSqr + 2) / (xSqr + 2)
+}
+
+// ConcaveLeft implements an univariate function that is concave to the left of
+// the minimizer which is located at x=399/250=1.596.
+//
+// References:
+//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.2)
+type ConcaveLeft struct{}
+
+func (ConcaveLeft) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	return math.Pow(x[0]+0.004, 4) * (x[0] - 1.996)
+}
+
+func (ConcaveLeft) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	grad[0] = math.Pow(x[0]+0.004, 3) * (5*x[0] - 7.98)
+}
+
+// Plassmann implements an univariate oscillatory function where the value of L
+// controls the number of oscillations. The value of Beta controls the size of
+// the derivative at zero and the size of the interval where the strong Wolfe
+// conditions can hold. For small values of Beta this function represents a
+// difficult test problem for linesearchers also because the information based
+// on the derivative is unreliable due to the oscillations.
+//
+// References:
+//  More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//  ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.3)
+type Plassmann struct {
+	L    float64 // Number of oscillations for |x-1| ≥ Beta.
+	Beta float64 // Size of the derivative at zero, f'(0) = -Beta.
+}
+
+func (f Plassmann) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	a := x[0]
+	b := f.Beta
+	l := f.L
+	r := 2 * (1 - b) / l / math.Pi * math.Sin(l*math.Pi/2*a)
+	switch {
+	case a <= 1-b:
+		r += 1 - a
+	case 1-b < a && a <= 1+b:
+		r += 0.5 * ((a-1)*(a-1)/b + b)
+	default: // a > 1+b
+		r += a - 1
+	}
+	return r
+}
+
+func (f Plassmann) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	a := x[0]
+	b := f.Beta
+	l := f.L
+	grad[0] = (1 - b) * math.Cos(l*math.Pi/2*a)
+	switch {
+	case a <= 1-b:
+		grad[0] -= 1
+	case 1-b < a && a <= 1+b:
+		grad[0] += (a - 1) / b
+	default: // a > 1+b
+		grad[0] += 1
+	}
+}
+
+// YanaiOzawaKaneko is an univariate convex function where the values of Beta1
+// and Beta2 control the curvature around the minimum. Far away from the
+// minimum the function approximates an absolute value function. Near the
+// minimum, the function can either be sharply curved or flat, controlled by
+// the parameter values.
+//
+// References:
+//  - More, J.J., and Thuente, D.J.: Line Search Algorithms with Guaranteed Sufficient Decrease.
+//    ACM Transactions on Mathematical Software 20(3) (1994), 286–307, eq. (5.4)
+//  - Yanai, H., Ozawa, M., and Kaneko, S.: Interpolation methods in one dimensional
+//    optimization. Computing 27 (1981), 155–163
+type YanaiOzawaKaneko struct {
+	Beta1 float64
+	Beta2 float64
+}
+
+func (f YanaiOzawaKaneko) Func(x []float64) float64 {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	a := x[0]
+	b1 := f.Beta1
+	b2 := f.Beta2
+	g1 := math.Sqrt(1+b1*b1) - b1
+	g2 := math.Sqrt(1+b2*b2) - b2
+	return g1*math.Sqrt((a-1)*(a-1)+b2*b2) + g2*math.Sqrt(a*a+b1*b1)
+}
+
+func (f YanaiOzawaKaneko) Grad(grad, x []float64) {
+	if len(x) != 1 {
+		panic("dimension of the problem must be 1")
+	}
+	if len(x) != len(grad) {
+		panic("incorrect size of the gradient")
+	}
+	a := x[0]
+	b1 := f.Beta1
+	b2 := f.Beta2
+	g1 := math.Sqrt(1+b1*b1) - b1
+	g2 := math.Sqrt(1+b2*b2) - b2
+	grad[0] = g1*(a-1)/math.Sqrt(b2*b2+(a-1)*(a-1)) + g2*a/math.Sqrt(b1*b1+a*a)
+}

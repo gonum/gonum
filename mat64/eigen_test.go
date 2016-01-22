@@ -84,7 +84,7 @@ func TestEigen(t *testing.T) {
 			epsilon: math.Pow(2, -52.0),
 		},
 	} {
-		ef := Eigen(DenseCopyOf(test.a), test.epsilon)
+		ef := eigen(DenseCopyOf(test.a), test.epsilon)
 		if test.d != nil {
 			if !reflect.DeepEqual(ef.d, test.d) {
 				t.Errorf("unexpected d for test %d", i)

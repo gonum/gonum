@@ -578,16 +578,14 @@ func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
 		}
 		return
 	}
-	if incX > 0 && (n-1)*incX >= len(x) {
+	if (n-1)*incX >= len(x) {
 		panic(badX)
 	}
 	if n < 1 {
 		if n == 0 {
 			return
 		}
-		if n < 1 {
-			panic(negativeN)
-		}
+		panic(negativeN)
 	}
 	if alpha == 0 {
 		if incX == 1 {
@@ -595,20 +593,18 @@ func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
 			for i := range x {
 				x[i] = 0
 			}
+			return
 		}
 		for ix := 0; ix < n*incX; ix += incX {
 			x[ix] = 0
 		}
+		return
 	}
 	if incX == 1 {
-		x = x[:n]
-		for i := range x {
-			x[i] *= alpha
-		}
+		asm.DscalUnitary(alpha, x[:n])
 		return
 	}
 	for ix := 0; ix < n*incX; ix += incX {
 		x[ix] *= alpha
 	}
-	return
 }

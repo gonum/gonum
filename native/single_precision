@@ -23,6 +23,7 @@ cat level1double.go \
 | gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
 | gofmt -r 'asm.DdotInc -> asm.SdotInc' \
 | gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
+| gofmt -r 'asm.DscalUnitary -> asm.SscalUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \

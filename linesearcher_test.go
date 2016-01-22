@@ -26,7 +26,7 @@ func TestMoreThuente(t *testing.T) {
 func TestBisection(t *testing.T) {
 	c := 0.1
 	ls := &Bisection{
-		GradConst: c,
+		CurvatureFactor: c,
 	}
 	testLinesearcher(t, ls, 0, c, true)
 }

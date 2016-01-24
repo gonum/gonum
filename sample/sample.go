@@ -40,17 +40,17 @@ func min(a, b int) int {
 }
 
 // Sampler generates a batch of samples according to the rule specified by the
-// implementing type. The number of samples generated is equal to the length of
-// the input slice, and the samples are stored in-place into the input.
+// implementing type. The number of samples generated is equal to len(batch),
+// and the samples are stored in-place into the input.
 type Sampler interface {
 	Sample(batch []float64)
 }
 
 // WeightedSampler generates a batch of samples and their relative weights
 // according to the rule specified by the implementing type. The number of samples
-// generated is equal to the length of the input slice, and the samples and weights
-// are stored in-place into the inputs. The length of weights must equal the
-// length of batch, otherwise the WeightedSampler will panic.
+// generated is equal to len(batch), and the samples and weights
+// are stored in-place into the inputs. The length of weights must equal
+// len(batch), otherwise SampleWeighted will panic.
 type WeightedSampler interface {
 	SampleWeighted(batch, weights []float64)
 }
@@ -62,8 +62,8 @@ type SampleUniformWeighted struct {
 }
 
 // SampleWeighted generates len(batch) samples from the embedded Sampler type
-// and sets all of the weights equal to 1. If the length of batch and the length
-// of weights are not equal, SampleWeighted will panic.
+// and sets all of the weights equal to 1. If len(batch) and len(weights)
+// are not equal, SampleWeighted will panic.
 func (w SampleUniformWeighted) SampleWeighted(batch, weights []float64) {
 	if len(batch) != len(weights) {
 		panic(badLengthMismatch)
@@ -129,14 +129,14 @@ func (l Importancer) SampleWeighted(batch, weights []float64) {
 //
 // Importance sampling is a variance reduction technique where samples are
 // generated from a proposal distribution, q(x), instead of the target distribution
-// p(x). This allows relatively unlikely samples in p(x) to be generated more frequently
+// p(x). This allows relatively unlikely samples in p(x) to be generated more frequently.
 //
 // The importance sampling weight at x is given by p(x)/q(x). To reduce variance,
 // a good proposal distribution will bound this sampling weight. This implies the
 // support of q(x) should be at least as broad as p(x), and q(x) should be "fatter tailed"
 // than p(x).
 //
-// If weights is nil the weights are not stored. The length of weights must equal
+// If weights is nil, the weights are not stored. The length of weights must equal
 // the length of batch, otherwise Importance will panic.
 func Importance(batch, weights []float64, target dist.LogProber, proposal dist.RandLogProber) {
 	if len(batch) != len(weights) {
@@ -149,6 +149,7 @@ func Importance(batch, weights []float64, target dist.LogProber, proposal dist.R
 	}
 }
 
+// ErrRejection is returned when the constant in Rejection is not sufficiently high.
 var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 
 // Rejectioner is a wrapper around the Rejection sampling generation procedure.
@@ -190,16 +191,16 @@ func (r *Rejectioner) Sample(batch []float64) {
 	r.proposed = proposed
 }
 
-// Rejection generates len(x) samples using the rejection sampling algorithm and
-// stores them in place into samples.
-// Sampling continues until x is filled. Rejection returns the total number of proposed
-// locations and a boolean indicating if the rejection sampling assumption is
-// violated (see details below). If the returned boolean is false, all elements
-// of samples are set to NaN. If src != nil, it will be used to generate random
-// numbers, otherwise rand.Float64 will be used.
+// Rejection generates len(batch) samples using the rejection sampling algorithm
+// and stores them in place into samples. Sampling continues until batch is
+// filled. Rejection returns the total number of proposed locations and a boolean
+// indicating if the rejection sampling assumption is violated (see details
+// below). If the returned boolean is false, all elements of samples are set to
+// NaN. If src is not nil, it will be used to generate random numbers, otherwise
+// rand.Float64 will be used.
 //
 // Rejection sampling generates points from the target distribution by using
-// the proposal distribution. At each step of the algorithm, the proposaed point
+// the proposal distribution. At each step of the algorithm, the proposed point
 // is accepted with probability
 //  p = target(x) / (proposal(x) * c)
 // where target(x) is the probability of the point according to the target distribution
@@ -279,8 +280,8 @@ type MetropolisHastingser struct {
 	Rate   int
 }
 
-// Sample generates len(samples) using the Metropolis Hastings sample generation
-// method. The initial location is NOT updated during the call to Sample.
+// Sample generates len(batch) samples using the Metropolis Hastings sample
+// generation method. The initial location is NOT updated during the call to Sample.
 func (m MetropolisHastingser) Sample(batch []float64) {
 	burnIn := m.BurnIn
 	rate := m.Rate
@@ -318,12 +319,13 @@ func (m MetropolisHastingser) Sample(batch []float64) {
 
 	// Take a single sample from the chain
 	MetropolisHastings(batch[0:1], initial, m.Target, m.Proposal, m.Src)
+	initial = batch[0]
 
 	// For all of the other samples, first generate Rate samples and then actually
 	// accept the last one.
 	for i := 1; i < len(batch); i++ {
 		MetropolisHastings(tmp, initial, m.Target, m.Proposal, m.Src)
-		v := tmp[len(tmp)-1]
+		v := tmp[rate-1]
 		batch[i] = v
 		initial = v
 	}
@@ -346,8 +348,8 @@ func (m MetropolisHastingser) Sample(batch []float64) {
 // is stored into samples. Thus, a location is stored into batch at every iteration.
 //
 // The samples in Metropolis Hastings are correlated with one another through the
-// Markov-Chain. As a result, the initial value can have a significant influence
-// on the early samples, and so typically, the first sapmles generated by the chain.
+// Markov chain. As a result, the initial value can have a significant influence
+// on the early samples, and so, typically, the first samples generated by the chain
 // are ignored. This is known as "burn-in", and can be accomplished with slicing.
 // The best choice for burn-in length will depend on the sampling and target
 // distributions.

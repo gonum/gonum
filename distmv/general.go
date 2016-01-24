@@ -5,9 +5,10 @@
 package distmv
 
 var (
-	badSizeMismatch  = "dist: size mismatch"
-	badZeroDimension = "dist: zero dimensional input"
-	badReceiver      = "dist: input slice is not nil or the correct length"
+	badQuantile      = "distmv: quantile not between 0 and 1"
+	badReceiver      = "distmv: input slice is not nil or the correct length"
+	badSizeMismatch  = "distmv: size mismatch"
+	badZeroDimension = "distmv: zero dimensional input"
 )
 
 const logTwoPi = 1.8378770664093454835606594728112352797227949472755668

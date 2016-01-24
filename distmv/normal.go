@@ -58,6 +58,25 @@ func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bo
 	return n, true
 }
 
+// NewNormalChol creates a new Normal distribution with the given mean and
+// covariance matrix represented by its Cholesky decomposition. NewNormalChol
+// panics if len(mu) is not equal to chol.Size().
+func NewNormalChol(mu []float64, chol *mat64.Cholesky, src *rand.Rand) *Normal {
+	dim := len(mu)
+	if dim != chol.Size() {
+		panic(badSizeMismatch)
+	}
+	n := &Normal{
+		src: src,
+		dim: dim,
+		mu:  make([]float64, dim),
+	}
+	copy(n.mu, mu)
+	n.lower.LFromCholesky(chol)
+	n.logSqrtDet = 0.5 * n.chol.LogDet()
+	return n
+}
+
 // ConditionNormal returns the Normal distribution that is the receiver conditioned
 // on the input evidence. The returned multivariate normal has dimension
 // n - len(observed), where n is the dimension of the original receiver. The updated
@@ -265,6 +284,15 @@ func (n *Normal) Rand(x []float64) []float64 {
 	xVec.MulVec(&n.lower, tmpVec)
 	floats.Add(x, n.mu)
 	return x
+}
+
+// SetMean changes the mean of the normal distribution. SetMean panics if len(mu)
+// does not equal the dimension of the normal distribution.
+func (n *Normal) SetMean(mu []float64) {
+	if len(mu) != n.Dim() {
+		panic(badSizeMismatch)
+	}
+	copy(n.mu, mu)
 }
 
 // setSigma computes and stores the covariance matrix of the distribution.

@@ -1016,7 +1016,7 @@ func TestGradientDescent(t *testing.T) {
 func TestGradientDescentBacktracking(t *testing.T) {
 	testLocal(t, gradientDescentTests, &GradientDescent{
 		Linesearcher: &Backtracking{
-			FuncConst: 0.1,
+			DecreaseFactor: 0.1,
 		},
 	})
 }

@@ -183,9 +183,9 @@ func (ls *LinesearchMethod) initNextLinesearch(loc *Location) (Operation, error)
 // true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 < funcConst < 1
-func ArmijoConditionMet(currObj, initObj, initGrad, step, funcConst float64) bool {
-	return currObj <= initObj+funcConst*step*initGrad
+//  - 0 < decrease < 1
+func ArmijoConditionMet(currObj, initObj, initGrad, step, decrease float64) bool {
+	return currObj <= initObj+decrease*step*initGrad
 }
 
 // StrongWolfeConditionsMet returns true if the strong Wolfe conditions have been met.
@@ -195,12 +195,12 @@ func ArmijoConditionMet(currObj, initObj, initGrad, step, funcConst float64) boo
 // enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 <= funcConst < gradConst < 1
-func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcConst, gradConst float64) bool {
-	if currObj > initObj+funcConst*step*initGrad {
+//  - 0 <= decrease < curvature < 1
+func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, decrease, curvature float64) bool {
+	if currObj > initObj+decrease*step*initGrad {
 		return false
 	}
-	return math.Abs(currGrad) < gradConst*math.Abs(initGrad)
+	return math.Abs(currGrad) < curvature*math.Abs(initGrad)
 }
 
 // WeakWolfeConditionsMet returns true if the weak Wolfe conditions have been met.
@@ -209,10 +209,10 @@ func StrongWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcCo
 // conditions, the following should be true, though this is not enforced:
 //  - initGrad < 0
 //  - step > 0
-//  - 0 <= funcConst < gradConst < 1
-func WeakWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, funcConst, gradConst float64) bool {
-	if currObj > initObj+funcConst*step*initGrad {
+//  - 0 <= decrease < curvature< 1
+func WeakWolfeConditionsMet(currObj, currGrad, initObj, initGrad, step, decrease, curvature float64) bool {
+	if currObj > initObj+decrease*step*initGrad {
 		return false
 	}
-	return currGrad >= gradConst*initGrad
+	return currGrad >= curvature*initGrad
 }

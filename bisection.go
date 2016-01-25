@@ -7,11 +7,14 @@ package optimize
 import "math"
 
 // Bisection is a Linesearcher that uses a bisection to find a point that
-// satisfies the strong Wolfe conditions with the given gradient constant and
-// function constant of zero. If GradConst is zero, it will be set to a reasonable
-// value. Bisection will panic if GradConst is not between zero and one.
+// satisfies the strong Wolfe conditions with the given curvature factor and
+// sufficient decrease factor of zero.
 type Bisection struct {
-	GradConst float64
+	// CurvatureFactor is the constant factor in the curvature condition.
+	// Smaller values result in a more exact line search.
+	// A set value must be in the interval (0, 1), otherwise Init will panic.
+	// If it is zero, it will be defaulted to 0.9.
+	CurvatureFactor float64
 
 	minStep  float64
 	maxStep  float64
@@ -35,11 +38,11 @@ func (b *Bisection) Init(f, g float64, step float64) Operation {
 		panic("bisection: initial derivative is non-negative")
 	}
 
-	if b.GradConst == 0 {
-		b.GradConst = 0.9
+	if b.CurvatureFactor == 0 {
+		b.CurvatureFactor = 0.9
 	}
-	if b.GradConst <= 0 || b.GradConst >= 1 {
-		panic("bisection: GradConst not between 0 and 1")
+	if b.CurvatureFactor <= 0 || b.CurvatureFactor >= 1 {
+		panic("bisection: CurvatureFactor not between 0 and 1")
 	}
 
 	b.minStep = 0
@@ -94,7 +97,7 @@ func (b *Bisection) Iterate(f, g float64) (Operation, float64, error) {
 	f = b.lastF
 	// The function value was lower. Check if this location is sufficient to
 	// converge the linesearch, otherwise iterate.
-	if StrongWolfeConditionsMet(f, g, minF, b.initGrad, b.currStep, 0, b.GradConst) {
+	if StrongWolfeConditionsMet(f, g, minF, b.initGrad, b.currStep, 0, b.CurvatureFactor) {
 		b.lastOp = MajorIteration
 		return b.lastOp, b.currStep, nil
 	}

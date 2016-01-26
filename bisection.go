@@ -6,9 +6,13 @@ package optimize
 
 import "math"
 
+const (
+	defaultBisectionCurvature = 0.9
+)
+
 // Bisection is a Linesearcher that uses a bisection to find a point that
 // satisfies the strong Wolfe conditions with the given curvature factor and
-// sufficient decrease factor of zero.
+// a decrease factor of zero.
 type Bisection struct {
 	// CurvatureFactor is the constant factor in the curvature condition.
 	// Smaller values result in a more exact line search.
@@ -39,7 +43,7 @@ func (b *Bisection) Init(f, g float64, step float64) Operation {
 	}
 
 	if b.CurvatureFactor == 0 {
-		b.CurvatureFactor = 0.9
+		b.CurvatureFactor = defaultBisectionCurvature
 	}
 	if b.CurvatureFactor <= 0 || b.CurvatureFactor >= 1 {
 		panic("bisection: CurvatureFactor not between 0 and 1")
@@ -75,7 +79,7 @@ func (b *Bisection) Iterate(f, g float64) (Operation, float64, error) {
 		// See if the function value is good enough to make progress. If it is,
 		// evaluate the gradient. If not, set it to the upper bound if the bound
 		// has not yet been found, otherwise iterate toward the minimum location.
-		if f <= b.minF {
+		if f <= minF {
 			b.lastF = f
 			b.lastOp = GradEvaluation
 			return b.lastOp, b.currStep, nil

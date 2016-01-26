@@ -44,6 +44,35 @@ func NewUniform(bnds []Bound, src *rand.Source) *Uniform {
 	return u
 }
 
+// CDF returns the multidimensional cumulative distribution function of the
+// probability distribution at the point x. If p is non-nil, the CDF is stored
+// in-place into the first argument, otherwise a new slice is allocated and
+// returned.
+//
+// CDF will panic if len(x) is not equal to the dimension of the distribution,
+// or if p is non-nil and len(p) is not equal to the dimension of the distribution.
+func (u *Uniform) CDF(p, x []float64) []float64 {
+	if len(x) != u.dim {
+		panic(badSizeMismatch)
+	}
+	if p == nil {
+		p = make([]float64, u.dim)
+	}
+	if len(p) != u.dim {
+		panic(badSizeMismatch)
+	}
+	for i, v := range x {
+		if v < u.bounds[i].Min {
+			p[i] = 0
+		} else if v > u.bounds[i].Max {
+			p[i] = 1
+		} else {
+			p[i] = (v - u.bounds[i].Min) / (u.bounds[i].Max - u.bounds[i].Min)
+		}
+	}
+	return p
+}
+
 // Dim returns the dimension of the distribution.
 func (u *Uniform) Dim() int {
 	return u.dim
@@ -56,7 +85,10 @@ func (u *Uniform) LogProb(x []float64) float64 {
 		panic(badSizeMismatch)
 	}
 	var logprob float64
-	for _, b := range u.bounds {
+	for i, b := range u.bounds {
+		if x[i] < b.Min || x[i] > b.Max {
+			return math.Inf(-1)
+		}
 		logprob -= math.Log(b.Max - b.Min)
 	}
 	return logprob
@@ -91,6 +123,30 @@ func (u *Uniform) Rand(x []float64) []float64 {
 	}
 	for i, b := range u.bounds {
 		x[i] = rand.Float64()*(b.Max-b.Min) + b.Min
+	}
+	return x
+}
+
+// Quantile returns the multi-dimensional inverse cumulative distribution function.
+// len(x) must equal len(p), and if x is non-nil, len(x) must also equal len(p).
+// If x is nil, a new slice will be allocated and returned, otherwise the quantile
+// will be stored in-place into x. All of the values of p must be between 0 and 1,
+// or Quantile will panic.
+func (u *Uniform) Quantile(x, p []float64) []float64 {
+	if len(p) != u.dim {
+		panic(badSizeMismatch)
+	}
+	if x == nil {
+		x = make([]float64, u.dim)
+	}
+	if len(x) != u.dim {
+		panic(badSizeMismatch)
+	}
+	for i, v := range p {
+		if v < 0 || v > 1 {
+			panic(badQuantile)
+		}
+		x[i] = v*(u.bounds[i].Max-u.bounds[i].Min) + u.bounds[i].Min
 	}
 	return x
 }

@@ -23,12 +23,63 @@ func symmetric(m *Dense) bool {
 	return true
 }
 
-type EigenFactors struct {
+// Eigen is a type for creating and using the eigenvalue decomposition of a matrix.
+type Eigen struct {
+	vectorsComputed bool
+
+	n int // The size of the factorized matrix.
+
+	ef eigenFactors
+}
+
+// Factorize computes the Eigen decompositon of the input square matrix a.
+// The Eigen decomposition is defined as
+//  A = P * D * P^-1
+// where D is a diagonal matrix containing the eigenvalues of the matrix, and
+// P is a matrix of the eigenvectors of A. If the vectors input argument is
+// false, the eigenvectors are not computed.
+//
+// Factorize returns whether the decomposition succeeded. If the decomposition
+// failed, routines that require a successful factorization will panic.
+//
+// BUG: The current implementation always computes the eigenvectors.
+func (e *Eigen) Factorize(a Matrix, vectors bool) (ok bool) {
+	// TODO(btracey): Replace this with a lapack-based implementation.
+	r, c := a.Dims()
+	if r != c {
+		panic(matrix.ErrShape)
+	}
+	aCopy := DenseCopyOf(a)
+	e.vectorsComputed = vectors
+
+	e.ef = eigen(aCopy, 0)
+	e.n = r
+	return true
+}
+
+// Vectors extracts the eigenvalues of the factorized matrix. If destination is
+// non-nil, the values are stored in-place into the receiver. In this case the
+// destination must have length n, otherwise Values will panic. If destination
+// nil, then a new slice will be allocated of the proper length.
+func (e *Eigen) Values(dst []complex128) []complex128 {
+	if dst == nil {
+		dst = make([]complex128, e.n)
+	}
+	if len(dst) != e.n {
+		panic(matrix.ErrSliceLengthMismatch)
+	}
+	for i := range dst {
+		dst[i] = complex(e.ef.d[i], e.ef.e[i])
+	}
+	return dst
+}
+
+type eigenFactors struct {
 	V    *Dense
 	d, e []float64
 }
 
-// Eigen returns the Eigenvalues and eigenvectors of a square real matrix.
+// eigen returns the eigenvalues and eigenvectors of a square real matrix.
 // The matrix a is overwritten during the decomposition. If a is symmetric,
 // then a = v*D*v' where the eigenvalue matrix D is diagonal and the
 // eigenvector matrix v is orthogonal.
@@ -40,7 +91,7 @@ type EigenFactors struct {
 // i.e. a.v equals v.D. The matrix v may be badly conditioned, or even
 // singular, so the validity of the equation a = v*D*inverse(v) depends
 // upon the 2-norm condition number of v.
-func Eigen(a *Dense, epsilon float64) EigenFactors {
+func eigen(a *Dense, epsilon float64) eigenFactors {
 	m, n := a.Dims()
 	if m != n {
 		panic(matrix.ErrSquare)
@@ -65,7 +116,7 @@ func Eigen(a *Dense, epsilon float64) EigenFactors {
 		hqr2(d, e, hess, v, epsilon)
 	}
 
-	return EigenFactors{v, d, e}
+	return eigenFactors{v, d, e}
 }
 
 // Symmetric Householder reduction to tridiagonal form.
@@ -802,7 +853,7 @@ func hqr2(d, e []float64, hess, v *Dense, epsilon float64) {
 
 // D returns the block diagonal eigenvalue matrix from the real and imaginary
 // components d and e.
-func (f EigenFactors) D() *Dense {
+func (f eigenFactors) D() *Dense {
 	d, e := f.d, f.e
 	var n int
 	if n = len(d); n != len(e) {

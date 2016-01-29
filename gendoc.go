@@ -235,7 +235,7 @@ package {{.Name}}
 //
 // A matrix may be constructed through the corresponding New function. If no
 // backing array is provided the matrix will be initialized to all zeros.
-//  // Allocate a zeroed array of size 3×5
+//  // Allocate a zeroed matrix of size 3×5
 //  zero := mat64.NewDense(3, 5, nil)
 // If a backing data slice is provided, the matrix will have those elements.
 // Matrices are all stored in row-major format.

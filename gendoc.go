@@ -34,7 +34,7 @@ var docs = template.Must(template.New("docs").Funcs(funcs).Parse(`{{define "comm
 //
 {{.Overview}}
 //{{end}}
-{{define "interfaces"}}// The Matrix Interface(s)
+{{define "interfaces"}}// The Matrix Interfaces
 //
 // The Matrix interface is the common link between the concrete types. The Matrix
 // interface is defined by three functions: Dims, which returns the dimensions

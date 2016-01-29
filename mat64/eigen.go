@@ -74,6 +74,18 @@ func (e *Eigen) Values(dst []complex128) []complex128 {
 	return dst
 }
 
+// Vectors returns the eigenvectors of the decomposition.
+//
+// This signature and behavior will change when issue #308 is resolved.
+//
+// The columns of v represent the eigenvectors in the sense that a*v = v*D,
+// i.e. a.v equals v.D. The matrix v may be badly conditioned, or even
+// singular, so the validity of the equation a = v*D*inverse(v) depends
+// upon the 2-norm condition number of v.
+func (e *Eigen) Vectors() *Dense {
+	return DenseCopyOf(e.ef.V)
+}
+
 type eigenFactors struct {
 	V    *Dense
 	d, e []float64

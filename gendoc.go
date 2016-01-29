@@ -34,7 +34,7 @@ var docs = template.Must(template.New("docs").Funcs(funcs).Parse(`{{define "comm
 //
 {{.Overview}}
 //{{end}}
-{{define "interfaces"}}// The Matrix Interface(s)
+{{define "interfaces"}}// The Matrix Interfaces
 //
 // The Matrix interface is the common link between the concrete types. The Matrix
 // interface is defined by three functions: Dims, which returns the dimensions
@@ -127,16 +127,16 @@ var docs = template.Must(template.New("docs").Funcs(funcs).Parse(`{{define "comm
 //
 // {{if .Description}}{{.Description|sentence}}{{else}}{{.Name}}{{end}} will use the following rules to detect overlap between the receiver and one
 // of the inputs:
-//  * the input implements one of the Raw methods, and
-//  * the Raw type matches that of the receiver, and
-//  * the address ranges of the backing data slices overlap, and
-//  * the strides differ or there is an overlap in the used data elements
+//  - the input implements one of the Raw methods, and
+//  - the Raw type matches that of the receiver, and
+//  - the address ranges of the backing data slices overlap, and
+//  - the strides differ or there is an overlap in the used data elements.
 // If such an overlap is detected, the method will panic.
 //
 // The following cases will not panic:
-//  * the data slices do not overlap
-//  * there is pointer identity between the receiver and input values after
-//    the value has been untransposed if necessary
+//  - the data slices do not overlap,
+//  - there is pointer identity between the receiver and input values after
+//    the value has been untransposed if necessary.
 //
 // {{if .Description}}{{.Description|sentence}}{{else}}{{.Name}}{{end}} will not attempt to detect element overlap if the input does not implement a
 // Raw method, or if the Raw method differs from that of the receiver except when a
@@ -235,14 +235,14 @@ package {{.Name}}
 //
 // A matrix may be constructed through the corresponding New function. If no
 // backing array is provided the matrix will be initialized to all zeros.
-//  // Allocate a zeroed array of size 3×5
+//  // Allocate a zeroed matrix of size 3×5
 //  zero := mat64.NewDense(3, 5, nil)
 // If a backing data slice is provided, the matrix will have those elements.
 // Matrices are all stored in row-major format.
 //  // Generate a 6×6 matrix of random values.
 //  data := make([]float64, 36)
 //  for i := range data {
-//		data[i] = rand.NormFloat64()
+//  	data[i] = rand.NormFloat64()
 //  }
 //  a := mat64.NewDense(6, 6, data)
 //

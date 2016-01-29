@@ -28,8 +28,8 @@ func (c Condition) Error() string {
 	return fmt.Sprintf("matrix singular or near-singular with condition number %.4e", c)
 }
 
-// ConditionTolerance is the tolerance limit of the condition number. If the inverse
-// of the condition number is above this value, the matrix is considered singular.
+// ConditionTolerance is the tolerance limit of the condition number. If the
+// condition number is above this value, the matrix is considered singular.
 const ConditionTolerance = 1e16
 
 const (

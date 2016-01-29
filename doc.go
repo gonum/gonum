@@ -83,16 +83,16 @@
 //
 // The matrix packages will use the following rules to detect overlap between the receiver and one
 // of the inputs:
-//  * the input implements one of the Raw methods, and
-//  * the Raw type matches that of the receiver, and
-//  * the address ranges of the backing data slices overlap, and
-//  * the strides differ or there is an overlap in the used data elements
+//  - the input implements one of the Raw methods, and
+//  - the Raw type matches that of the receiver, and
+//  - the address ranges of the backing data slices overlap, and
+//  - the strides differ or there is an overlap in the used data elements.
 // If such an overlap is detected, the method will panic.
 //
 // The following cases will not panic:
-//  * the data slices do not overlap
-//  * there is pointer identity between the receiver and input values after
-//    the value has been untransposed if necessary
+//  - the data slices do not overlap,
+//  - there is pointer identity between the receiver and input values after
+//    the value has been untransposed if necessary.
 //
 // The matrix packages will not attempt to detect element overlap if the input does not implement a
 // Raw method, or if the Raw method differs from that of the receiver except when a

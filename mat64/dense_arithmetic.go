@@ -826,8 +826,9 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 }
 
 // Outer calculates the outer product of x and y, and stores the result
-// in the receiver. In order to update to an existing matrix, see RankOne.
+// in the receiver.
 //  m = alpha * x * y'
+// In order to update an existing matrix, see RankOne.
 func (m *Dense) Outer(alpha float64, x, y *Vector) {
 	r := x.Len()
 	c := y.Len()

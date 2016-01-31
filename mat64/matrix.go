@@ -409,8 +409,8 @@ func Dot(a, b Matrix) float64 {
 	return sum
 }
 
-// Equal returns whether element a and b have the same size and contain all equal
-// elements.
+// Equal returns whether the matrices a and b have the same size
+// and are element-wise equal.
 func Equal(a, b Matrix) bool {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()

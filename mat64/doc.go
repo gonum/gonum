@@ -84,11 +84,11 @@
 //
 // BLAS and LAPACK are the standard APIs for linear algebra routines. Many
 // operations in mat64 are implemented using calls to the wrapper functions
-// in gonum/blas/cblas128 and gonum/lapack/clapack128. By default, cblas128 and
-// clapack128 call the native Go implementations of the routines. Alternatively,
+// in gonum/blas/blas64 and gonum/lapack/lapack64. By default, blas64 and
+// lapack64 call the native Go implementations of the routines. Alternatively,
 // it is possible to use C-based implementations of the APIs through the respective
 // cgo packages and "Use" functions. The Go implementation of LAPACK makes calls
-// through cblas128, so if a cgo BLAS implementation is registered, the clapack128
+// through blas64, so if a cgo BLAS implementation is registered, the lapack64
 // calls will be partially executed in Go and partially executed in C.
 //
 // Type Switching
@@ -98,9 +98,9 @@
 // given the specific concrete types. For example, in
 //  c.Mul(a, b)
 // if a and b both implement RawMatrixer, that is, they can be represented as a
-// cblas128.General, cblas128.Gemm (general matrix multiplication) is called, while
-// instead if b is a RawSymmetricer cblas128.Symm is used (general-symmetric
-// multiplication), and if b is a *Vector cblas128.Gemv is used.
+// blas64.General, blas64.Gemm (general matrix multiplication) is called, while
+// instead if b is a RawSymmetricer blas64.Symm is used (general-symmetric
+// multiplication), and if b is a *Vector blas64.Gemv is used.
 //
 // There are many possible type combinations and special cases. No specific guarantees
 // are made about the performance of any method, and in particular, note that an
@@ -134,7 +134,7 @@
 //
 // If you need to read the rest of this section to understand the behavior of
 // your program, you are being clever. Don't be clever. If you must be clever,
-// cblas128 and clapack128 may be used to call the behavior directly.
+// blas64 and lapack64 may be used to call the behavior directly.
 //
 // mat64 will use the following rules to detect overlap between the receiver and one
 // of the inputs:

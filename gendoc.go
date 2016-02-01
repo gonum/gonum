@@ -258,8 +258,8 @@ package {{.Name}}
 //  var c mat64.Dense // construct a new zero-sized matrix
 //  c.Mul(a, a)       // c is automatically adjusted to be 6×6`,
 
-		BLAS:   []string{"cblas128"},
-		LAPACK: []string{"clapack128"},
+		BLAS:   []string{"blas64"},
+		LAPACK: []string{"lapack64"},
 
 		template: `{{template "common" .}}
 {{template "interfaces" .}}

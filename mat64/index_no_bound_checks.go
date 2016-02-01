@@ -40,23 +40,24 @@ func (m *Dense) set(r, c int, v float64) {
 	m.mat.Data[r*m.mat.Stride+c] = v
 }
 
-// At returns the element at row r, column c. It panics if c is not zero.
-func (v *Vector) At(r, c int) float64 {
-	if r < 0 || r >= v.n {
+// At returns the element at row i.
+// It panics if i is out of bounds or if j is not zero.
+func (v *Vector) At(i, j int) float64 {
+	if i < 0 || i >= v.n {
 		panic(matrix.ErrRowAccess)
 	}
-	if c != 0 {
+	if j != 0 {
 		panic(matrix.ErrColAccess)
 	}
-	return v.at(r)
+	return v.at(i)
 }
 
-func (v *Vector) at(r int) float64 {
-	return v.mat.Data[r*v.mat.Inc]
+func (v *Vector) at(i int) float64 {
+	return v.mat.Data[i*v.mat.Inc]
 }
 
-// Set sets the element at row r to the value val. It panics if r is less than
-// zero or greater than the length.
+// SetVec sets the element at row i to the value val.
+// It panics if i is out of bounds.
 func (v *Vector) SetVec(i int, val float64) {
 	if i < 0 || i >= v.n {
 		panic(matrix.ErrVectorAccess)

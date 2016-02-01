@@ -9,9 +9,9 @@ type Matrix interface {
 	// Dims returns the dimensions of a Matrix.
 	Dims() (r, c int)
 
-	// At returns the value of a matrix element at (r, c). It will panic if r or c are
-	// out of bounds for the matrix.
-	At(r, c int) complex128
+	// At returns the value of a matrix element at row i, column j.
+	// It will panic if i or j are out of bounds for the matrix.
+	At(i, j int) complex128
 
 	// T returns the transpose of the Matrix. Whether T returns a copy of the
 	// underlying data is implementation dependent.

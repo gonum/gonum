@@ -752,7 +752,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 // Apply applies the function fn to each of the elements of a, placing the
 // resulting matrix in the receiver. The function fn takes a row/column
 // index and element value and returns some function of that tuple.
-func (m *Dense) Apply(fn func(r, c int, v float64) float64, a Matrix) {
+func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 	ar, ac := a.Dims()
 
 	m.reuseAs(ar, ac)

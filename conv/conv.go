@@ -49,15 +49,15 @@ func (m Complex) Dims() (r, c int) {
 	return m.r.Dims()
 }
 
-// At returns the element at row r, column c.
-func (m Complex) At(r, c int) complex128 {
+// At returns the element at row i, column j.
+func (m Complex) At(i, j int) complex128 {
 	if m.i == nil {
-		return complex(m.r.At(r, c), 0)
+		return complex(m.r.At(i, j), 0)
 	}
 	if m.r == nil {
-		return complex(0, m.i.At(r, c))
+		return complex(0, m.i.At(i, j))
 	}
-	return complex(m.r.At(r, c), m.i.At(r, c))
+	return complex(m.r.At(i, j), m.i.At(i, j))
 }
 
 // T performs an implicit transpose.
@@ -102,8 +102,8 @@ func NewReal(m cmat128.Matrix) mat64.Matrix {
 // Dims returns the number of rows and columns in the matrix.
 func (m Real) Dims() (r, c int) { return m.Matrix.Dims() }
 
-// At returns the element at row r, column c.
-func (m Real) At(r, c int) float64 { return real(m.Matrix.At(r, c)) }
+// At returns the element at row i, column j.
+func (m Real) At(i, j int) float64 { return real(m.Matrix.At(i, j)) }
 
 // T performs an implicit transpose.
 func (m Real) T() mat64.Matrix { return Real{m.Matrix.T()} }
@@ -123,8 +123,8 @@ func NewImag(m cmat128.Matrix) mat64.Matrix {
 // Dims returns the number of rows and columns in the matrix.
 func (m Imag) Dims() (r, c int) { return m.Matrix.Dims() }
 
-// At returns the element at row r, column c.
-func (m Imag) At(r, c int) float64 { return imag(m.Matrix.At(r, c)) }
+// At returns the element at row i, column j.
+func (m Imag) At(i, j int) float64 { return imag(m.Matrix.At(i, j)) }
 
 // T performs an implicit transpose.
 func (m Imag) T() mat64.Matrix { return Imag{m.Matrix.T()} }

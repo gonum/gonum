@@ -20,9 +20,9 @@ type Matrix interface {
 	// Dims returns the dimensions of a Matrix.
 	Dims() (r, c int)
 
-	// At returns the value of a matrix element at (r, c). It will panic if r or c are
-	// out of bounds for the matrix.
-	At(r, c int) float64
+	// At returns the value of a matrix element at row i, column j.
+	// It will panic if i or j are out of bounds for the matrix.
+	At(i, j int) float64
 
 	// T returns the transpose of the Matrix. Whether T returns a copy of the
 	// underlying data is implementation dependent.
@@ -80,9 +80,9 @@ type Untransposer interface {
 
 // Mutable is a matrix interface type that allows elements to be altered.
 type Mutable interface {
-	// Set alters the matrix element at (r, c) to v. It will panic if r or c are out of
-	// bounds for the matrix.
-	Set(r, c int, v float64)
+	// Set alters the matrix element at row i, column j to v.
+	// It will panic if i or j are out of bounds for the matrix.
+	Set(i, j int, v float64)
 
 	Matrix
 }

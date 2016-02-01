@@ -84,7 +84,7 @@ func (t TransposeTri) Untranspose() Matrix {
 	return t.Triangular
 }
 
-// NewTriangular constructs an n x n triangular matrix. The constructed matrix
+// NewTriDense constructs an n x n triangular matrix. The constructed matrix
 // is upper triangular if upper == true and lower triangular otherwise.
 // If len(mat) == n * n, mat will be used to hold the underlying data, if
 // mat == nil, new data will be allocated, and will panic if neither of these

@@ -162,7 +162,7 @@ func (m *Dense) T() Matrix {
 	return Transpose{m}
 }
 
-// ColView returns a Vector reflecting col j, backed by the matrix data.
+// ColView returns a Vector reflecting the column j, backed by the matrix data.
 //
 // See ColViewer for more information.
 func (m *Dense) ColView(j int) *Vector {

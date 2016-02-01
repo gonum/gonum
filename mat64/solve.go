@@ -11,16 +11,14 @@ import (
 	"github.com/gonum/matrix"
 )
 
-// Solve solves a minimum-norm solution to a system of linear equations defined
-// by the matrices a and b. If a is singular or near-singular a Condition error
+// Solve finds a minimum-norm solution to a system of linear equations defined
+// by the matrices a and b. If A is singular or near-singular, a Condition error
 // is returned. Please see the documentation for Condition for more information.
 //
-// The minimization problem solved depends on the input parameters.
-//  1. If m >= n and trans == false, find X such that ||a*X - b||_2 is minimized.
-//  2. If m < n and trans == false, find the minimum norm solution of a * X = b.
-//  3. If m >= n and trans == true, find the minimum norm solution of a^T * X = b.
-//  4. If m < n and trans == true, find X such that ||a*X - b||_2 is minimized.
-// The solution matrix, X, is stored in place into the receiver.
+// The minimization problem solved depends on the input parameters:
+//  - if m >= n, find X such that ||A*X - B||_2 is minimized,
+//  - if m < n, find the minimum norm solution of A * X = B.
+// The solution matrix, X, is stored in-place into the receiver.
 func (m *Dense) Solve(a, b Matrix) error {
 	ar, ac := a.Dims()
 	br, bc := b.Dims()
@@ -104,9 +102,10 @@ func (m *Dense) Solve(a, b Matrix) error {
 	}
 }
 
-// SolveVec solves a minimum-norm solution to a system of linear equations defined
-// by the matrices A and B. If A is singular or near-singular a Condition error
-// is returned. Please see the documentation for more information.
+// SolveVec finds a minimum-norm solution to a system of linear equations defined
+// by the matrix a and the right-hand side vector b. If A is singular or
+// near-singular, a Condition error is returned. Please see the documentation for
+// Dense.Solve for more information.
 func (v *Vector) SolveVec(a Matrix, b *Vector) error {
 	_, c := a.Dims()
 	// The Solve implementation is non-trivial, so rather than duplicate the code,

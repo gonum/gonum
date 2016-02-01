@@ -134,7 +134,7 @@ func (m *Dense) QFromLQ(lq *LQ) {
 	}
 }
 
-// SolveLQ solves a minimum-norm solution to a system of linear equations defined
+// SolveLQ finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its LQ factorized
 // form. If A is singular or near-singular a Condition error is returned. Please
 // see the documentation for Condition for more information.
@@ -199,7 +199,7 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveLQVec solves a minimum-norm solution to a system of linear equations.
+// SolveLQVec finds a minimum-norm solution to a system of linear equations.
 // Please see Dense.SolveLQ for the full documentation.
 func (v *Vector) SolveLQVec(lq *LQ, trans bool, b *Vector) error {
 	r, c := lq.lq.Dims()

@@ -57,7 +57,7 @@ func (e *Eigen) Factorize(a Matrix, vectors bool) (ok bool) {
 	return true
 }
 
-// Vectors extracts the eigenvalues of the factorized matrix. If destination is
+// Values extracts the eigenvalues of the factorized matrix. If destination is
 // non-nil, the values are stored in-place into the receiver. In this case the
 // destination must have length n, otherwise Values will panic. If destination
 // nil, then a new slice will be allocated of the proper length.

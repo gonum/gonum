@@ -74,7 +74,7 @@ func (c *Cholesky) Det() float64 {
 	return math.Exp(c.LogDet())
 }
 
-// Dim returns the dimension of the factorized matrix.
+// Size returns the dimension of the factorized matrix.
 func (c *Cholesky) Size() int {
 	return c.chol.mat.N
 }

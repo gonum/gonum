@@ -133,7 +133,7 @@ func (m *Dense) QFromQR(qr *QR) {
 	}
 }
 
-// SolveQR solves a minimum-norm solution to a system of linear equations defined
+// SolveQR finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its QR factorized
 // form. If A is singular or near-singular a Condition error is returned. Please
 // see the documentation for Condition for more information.
@@ -198,7 +198,7 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveQRVec solves a minimum-norm solution to a system of linear equations.
+// SolveQRVec finds a minimum-norm solution to a system of linear equations.
 // Please see Dense.SolveQR for the full documentation.
 func (v *Vector) SolveQRVec(qr *QR, trans bool, b *Vector) error {
 	r, c := qr.qr.Dims()

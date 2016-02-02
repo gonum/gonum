@@ -112,20 +112,20 @@ type HermitianPacked SymmetricPacked
 const negInc = "cblas64: negative vector increment"
 
 // Dotu computes the dot product of the two vectors without
-// complex conjugation
+// complex conjugation:
 //  x^T * y
 func Dotu(n int, x, y Vector) complex64 {
 	return cblas64.Cdotu(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Dotu computes the dot product of the two vectors with
-// complex conjugation
-//  x^H * y
+// Dotc computes the dot product of the two vectors with
+// complex conjugation:
+//  x^H * y.
 func Dotc(n int, x, y Vector) complex64 {
 	return cblas64.Cdotc(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Nrm2 computes the Euclidean norm of a vector,
+// Nrm2 computes the Euclidean norm of the vector x:
 //  sqrt(\sum_i x[i] * x[i]).
 //
 // Nrm2 will panic if the vector increment is negative.
@@ -136,8 +136,9 @@ func Nrm2(n int, x Vector) float32 {
 	return cblas64.Scnrm2(n, x.Data, x.Inc)
 }
 
-// Asum computes the sum of the absolute values of the elements of x.
-//  \sum_i |x[i]|
+// Asum computes the sum of magnitudes of the real and imaginary parts of
+// elements of the vector x:
+//  \sum_i (|Re x[i]| + |Im x[i]|).
 //
 // Asum will panic if the vector increment is negative.
 func Asum(n int, x Vector) float32 {
@@ -147,8 +148,10 @@ func Asum(n int, x Vector) float32 {
 	return cblas64.Scasum(n, x.Data, x.Inc)
 }
 
-// Iamax returns the index of an element of x with the largest absolute value.
-// If there are multiple such indices the earliest is returned.
+// Iamax returns the index of an element of x with the largest sum of
+// magnitudes of the real and imaginary parts (|Re x[i]|+|Im x[i]|).
+// If there are multiple such indices, the earliest is returned.
+//
 // Iamax returns -1 if n == 0.
 //
 // Iamax will panic if the vector increment is negative.
@@ -159,28 +162,30 @@ func Iamax(n int, x Vector) int {
 	return cblas64.Icamax(n, x.Data, x.Inc)
 }
 
-// Swap exchanges the elements of two vectors.
-//  x[i], y[i] = y[i], x[i] for all i
+// Swap exchanges the elements of two vectors:
+//  x[i], y[i] = y[i], x[i] for all i.
 func Swap(n int, x, y Vector) {
 	cblas64.Cswap(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Copy copies the elements of x into the elements of y.
-//  y[i] = x[i] for all i
+// Copy copies the elements of x into the elements of y:
+//  y[i] = x[i] for all i.
 func Copy(n int, x, y Vector) {
 	cblas64.Ccopy(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Axpy adds alpha times x to y
-//  y[i] += alpha * x[i] for all i
+// Axpy computes
+//  y = alpha * x + y,
+// where x and y are vectors, and alpha is a scalar.
 func Axpy(n int, alpha complex64, x, y Vector) {
 	cblas64.Caxpy(n, alpha, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Scal scales x by alpha.
-//  x[i] *= alpha
+// Scal computes
+//  x = alpha * x,
+// where x is a vector, and alpha is a scalar.
 //
-// Scal will panic if the vector increment is negative
+// Scal will panic if the vector increment is negative.
 func Scal(n int, alpha complex64, x Vector) {
 	if x.Inc < 0 {
 		panic(negInc)
@@ -188,10 +193,11 @@ func Scal(n int, alpha complex64, x Vector) {
 	cblas64.Cscal(n, alpha, x.Data, x.Inc)
 }
 
-// Dscal scales x by alpha.
-//  x[i] *= alpha
+// Dscal computes
+//  x = alpha * x,
+// where x is a vector, and alpha is a real scalar.
 //
-// Dscal will panic if the vector increment is negative
+// Dscal will panic if the vector increment is negative.
 func Dscal(n int, alpha float32, x Vector) {
 	if x.Inc < 0 {
 		panic(negInc)
@@ -235,8 +241,8 @@ func Trmv(t blas.Transpose, a Triangular, x Vector) {
 //  x = A^T * x, if t == blas.Trans,
 //  x = A^H * x, if t == blas.ConjTrans,
 // where A is an n×n triangular band matrix, and x is a vector.
-func Tbmv(tA blas.Transpose, a TriangularBand, x Vector) {
-	cblas64.Ctbmv(a.Uplo, tA, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
+func Tbmv(t blas.Transpose, a TriangularBand, x Vector) {
+	cblas64.Ctbmv(a.Uplo, t, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tpmv computes
@@ -244,8 +250,8 @@ func Tbmv(tA blas.Transpose, a TriangularBand, x Vector) {
 //  x = A^T * x, if t == blas.Trans,
 //  x = A^H * x, if t == blas.ConjTrans,
 // where A is an n×n triangular matrix in packed format, and x is a vector.
-func Tpmv(tA blas.Transpose, a TriangularPacked, x Vector) {
-	cblas64.Ctpmv(a.Uplo, tA, a.Diag, a.N, a.Data, x.Data, x.Inc)
+func Tpmv(t blas.Transpose, a TriangularPacked, x Vector) {
+	cblas64.Ctpmv(a.Uplo, t, a.Diag, a.N, a.Data, x.Data, x.Inc)
 }
 
 // Trsv solves

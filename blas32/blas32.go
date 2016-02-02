@@ -431,11 +431,11 @@ func Trmm(s blas.Side, tA blas.Transpose, alpha float32, a Triangular, b General
 }
 
 // Trsm solves
-//  A * X = alpha * B if tA == blas.NoTrans side == blas.Left
-//  A^T * X = alpha * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Left
-//  X * A = alpha * B if tA == blas.NoTrans side == blas.Right
-//  X * A^T = alpha * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Right
-// where A is an n×n triangular matrix, x is an m×n matrix, and alpha is a
+//  A * X = alpha * B,   if tA == blas.NoTrans side == blas.Left,
+//  A^T * X = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
+//  X * A = alpha * B,   if tA == blas.NoTrans side == blas.Right,
+//  X * A^T = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
+// where A is an n×n or m×m triangular matrix, X is an m×n matrix, and alpha is a
 // scalar.
 //
 // At entry to the function, X contains the values of B, and the result is

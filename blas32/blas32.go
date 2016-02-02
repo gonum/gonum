@@ -350,8 +350,9 @@ func Syr2(alpha float32, x, y Vector, a Symmetric) {
 }
 
 // Spr2 performs the symmetric rank-2 update
-//  a += alpha * x * y^T + alpha * y * x^T
-// where a is an n×n symmetric matirx in packed format and x and y are vectors.
+//  A += alpha * x * y^T + alpha * y * x^T,
+// where A is an n×n symmetric matrix in packed format, x and y are vectors,
+// and alpha is a scalar.
 func Spr2(alpha float32, x, y Vector, a SymmetricPacked) {
 	blas32.Sspr2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data)
 }

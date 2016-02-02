@@ -2156,8 +2156,9 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 }
 
 // Dspr2 performs the symmetric rank-2 update
-//  a += alpha * x * y^T + alpha * y * x^T
-// where a is an n×n symmetric matrix in packed format and x and y are vectors.
+//  A += alpha * x * y^T + alpha * y * x^T,
+// where A is an n×n symmetric matrix in packed format, x and y are vectors,
+// and alpha is a scalar.
 func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, ap []float64) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)

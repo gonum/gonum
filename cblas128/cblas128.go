@@ -202,106 +202,108 @@ func Dscal(n int, alpha float64, x Vector) {
 // Level 2
 
 // Gemv computes
-//  y = alpha * a * x + beta * y if tA = blas.NoTrans
-//  y = alpha * A^T * x + beta * y if tA = blas.Trans
-//  y = alpha * A^H * x + beta * y if tA = blas.ConjTrans
-// where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
-func Gemv(tA blas.Transpose, alpha complex128, a General, x Vector, beta complex128, y Vector) {
-	cblas128.Zgemv(tA, a.Rows, a.Cols, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
+//  y = alpha * A * x + beta * y,   if t == blas.NoTrans,
+//  y = alpha * A^T * x + beta * y, if t == blas.Trans,
+//  y = alpha * A^H * x + beta * y, if t == blas.ConjTrans,
+// where A is an m×n dense matrix, x and y are vectors, and alpha and beta are
+// scalars.
+func Gemv(t blas.Transpose, alpha complex128, a General, x Vector, beta complex128, y Vector) {
+	cblas128.Zgemv(t, a.Rows, a.Cols, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
 // Gbmv computes
-//  y = alpha * A * x + beta * y if tA == blas.NoTrans
-//  y = alpha * A^T * x + beta * y if tA = blas.Trans
-//  y = alpha * A^H * x + beta * y if tA = blas.ConjTrans
-// where a is an m×n band matrix kL subdiagonals and kU super-diagonals, and
-// m and n refer to the size of the full dense matrix it represents.
-// x and y are vectors, and alpha and beta are scalars.
-func Gbmv(tA blas.Transpose, alpha complex128, a Band, x Vector, beta complex128, y Vector) {
-	cblas128.Zgbmv(tA, a.Rows, a.Cols, a.KL, a.KU, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
+//  y = alpha * A * x + beta * y,   if t == blas.NoTrans,
+//  y = alpha * A^T * x + beta * y, if t == blas.Trans,
+//  y = alpha * A^H * x + beta * y, if t == blas.ConjTrans,
+// where A is an m×n band matrix, x and y are vectors, and alpha and beta are
+// scalars.
+func Gbmv(t blas.Transpose, alpha complex128, a Band, x Vector, beta complex128, y Vector) {
+	cblas128.Zgbmv(t, a.Rows, a.Cols, a.KL, a.KU, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
 // Trmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
-//  x = A^H * x if tA == blas.ConjTrans
-// A is an n×n Triangular matrix and x is a vector.
-func Trmv(tA blas.Transpose, a Triangular, x Vector) {
-	cblas128.Ztrmv(a.Uplo, tA, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
+//  x = A * x,   if t == blas.NoTrans,
+//  x = A^T * x, if t == blas.Trans,
+//  x = A^H * x, if t == blas.ConjTrans,
+// where A is an n×n triangular matrix, and x is a vector.
+func Trmv(t blas.Transpose, a Triangular, x Vector) {
+	cblas128.Ztrmv(a.Uplo, t, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tbmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
-//  x = A^H * x if tA == blas.ConjTrans
-// where A is an n×n triangular banded matrix with k diagonals, and x is a vector.
-func Tbmv(tA blas.Transpose, a TriangularBand, x Vector) {
-	cblas128.Ztbmv(a.Uplo, tA, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
+//  x = A * x,   if t == blas.NoTrans,
+//  x = A^T * x, if t == blas.Trans,
+//  x = A^H * x, if t == blas.ConjTrans,
+// where A is an n×n triangular band matrix, and x is a vector.
+func Tbmv(t blas.Transpose, a TriangularBand, x Vector) {
+	cblas128.Ztbmv(a.Uplo, t, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tpmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans
-//  x = A^H * x if tA == blas.ConjTrans
-// where A is an n×n unit triangular matrix in packed format, and x is a vector.
-func Tpmv(tA blas.Transpose, a TriangularPacked, x Vector) {
-	cblas128.Ztpmv(a.Uplo, tA, a.Diag, a.N, a.Data, x.Data, x.Inc)
+//  x = A * x,   if t == blas.NoTrans,
+//  x = A^T * x, if t == blas.Trans,
+//  x = A^H * x, if t == blas.ConjTrans,
+// where A is an n×n triangular matrix in packed format, and x is a vector.
+func Tpmv(t blas.Transpose, a TriangularPacked, x Vector) {
+	cblas128.Ztpmv(a.Uplo, t, a.Diag, a.N, a.Data, x.Data, x.Inc)
 }
 
 // Trsv solves
-//  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans
-//  A^H * x = b if tA == blas.ConjTrans
-// A is an n×n triangular matrix and x is a vector.
+//  A * x = b,   if t == blas.NoTrans,
+//  A^T * x = b, if t == blas.Trans,
+//  A^H * x = b, if t == blas.ConjTrans,
+// where A is an n×n triangular matrix and x is a vector.
+//
 // At entry to the function, x contains the values of b, and the result is
-// stored in place into x.
+// stored in-place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func Trsv(tA blas.Transpose, a Triangular, x Vector) {
-	cblas128.Ztrsv(a.Uplo, tA, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
+func Trsv(t blas.Transpose, a Triangular, x Vector) {
+	cblas128.Ztrsv(a.Uplo, t, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tbsv solves
-//  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans
-//  A^H * x = b if tA == blas.ConjTrans
-// where A is an n×n triangular banded matrix with k diagonals in packed format,
-// and x is a vector.
+//  A * x = b,   if t == blas.NoTrans,
+//  A^T * x = b, if t == blas.Trans,
+//  A^H * x = b, if t == blas.ConjTrans,
+// where A is an n×n triangular band matrix, and x is a vector.
+//
 // At entry to the function, x contains the values of b, and the result is
-// stored in place into x.
+// stored in-place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func Tbsv(tA blas.Transpose, a TriangularBand, x Vector) {
-	cblas128.Ztbsv(a.Uplo, tA, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
+func Tbsv(t blas.Transpose, a TriangularBand, x Vector) {
+	cblas128.Ztbsv(a.Uplo, t, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tpsv solves
-//  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans
-//  A^H * x = b if tA == blas.ConjTrans
+//  A * x = b,   if t == blas.NoTrans,
+//  A^T * x = b, if t == blas.Trans,
+//  A^H * x = b, if t == blas.ConjTrans,
 // where A is an n×n triangular matrix in packed format and x is a vector.
+//
 // At entry to the function, x contains the values of b, and the result is
-// stored in place into x.
+// stored in-place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func Tpsv(tA blas.Transpose, a TriangularPacked, x Vector) {
-	cblas128.Ztpsv(a.Uplo, tA, a.Diag, a.N, a.Data, x.Data, x.Inc)
+func Tpsv(t blas.Transpose, a TriangularPacked, x Vector) {
+	cblas128.Ztpsv(a.Uplo, t, a.Diag, a.N, a.Data, x.Data, x.Inc)
 }
 
 // Hemv computes
 //  y = alpha * A * x + beta * y,
-// where a is an n×n Hermitian matrix, x and y are vectors, and alpha and
+// where A is an n×n Hermitian matrix, x and y are vectors, and alpha and
 // beta are scalars.
 func Hemv(alpha complex128, a Hermitian, x Vector, beta complex128, y Vector) {
 	cblas128.Zhemv(a.Uplo, a.N, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
 // Hbmv performs
-//  y = alpha * A * x + beta * y
-// where A is an n×n Hermitian banded matrix, x and y are vectors, and alpha
+//  y = alpha * A * x + beta * y,
+// where A is an n×n Hermitian band matrix, x and y are vectors, and alpha
 // and beta are scalars.
 func Hbmv(alpha complex128, a HermitianBand, x Vector, beta complex128, y Vector) {
 	cblas128.Zhbmv(a.Uplo, a.N, a.K, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
@@ -309,51 +311,52 @@ func Hbmv(alpha complex128, a HermitianBand, x Vector, beta complex128, y Vector
 
 // Hpmv performs
 //  y = alpha * A * x + beta * y,
-// where A is an n×n Hermitian matrix in packed format, x and y are vectors
+// where A is an n×n Hermitian matrix in packed format, x and y are vectors,
 // and alpha and beta are scalars.
 func Hpmv(alpha complex128, a HermitianPacked, x Vector, beta complex128, y Vector) {
 	cblas128.Zhpmv(a.Uplo, a.N, alpha, a.Data, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
-// Geru performs the rank-one operation
-//  A += alpha * x * y^T
+// Geru performs a rank-1 update
+//  A += alpha * x * y^T,
 // where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func Geru(alpha complex128, x, y Vector, a General) {
 	cblas128.Zgeru(a.Rows, a.Cols, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-// Gerc performs the rank-one operation
-//  A += alpha * x * y^H
+// Gerc performs a rank-1 update
+//  A += alpha * x * y^H,
 // where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func Gerc(alpha complex128, x, y Vector, a General) {
 	cblas128.Zgerc(a.Rows, a.Cols, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-// Ger performs the rank-one operation
-//  A += alpha * x * y^H
+// Her performs a rank-1 update
+//  A += alpha * x * y^T,
 // where A is an m×n Hermitian matrix, x and y are vectors, and alpha is a scalar.
 func Her(alpha float64, x Vector, a Hermitian) {
 	cblas128.Zher(a.Uplo, a.N, alpha, x.Data, x.Inc, a.Data, a.Stride)
 }
 
-// Hpr computes the rank-one operation
-//  a += alpha * x * x^H
-// where a is an n×n Hermitian matrix in packed format, x is a vector, and
+// Hpr performs a rank-1 update
+//  A += alpha * x * x^H,
+// where A is an n×n Hermitian matrix in packed format, x is a vector, and
 // alpha is a scalar.
 func Hpr(alpha float64, x Vector, a HermitianPacked) {
 	cblas128.Zhpr(a.Uplo, a.N, alpha, x.Data, x.Inc, a.Data)
 }
 
-// Her2 performs the symmetric rank-two update
-//  A += alpha * x * y^H + alpha * y * x^H
-// where A is a symmetric n×n matrix, x and y are vectors, and alpha is a scalar.
+// Her2 performs a rank-2 update
+//  A += alpha * x * y^H + conj(alpha) * y * x^H,
+// where A is an n×n Hermitian matrix, x and y are vectors, and alpha is a scalar.
 func Her2(alpha complex128, x, y Vector, a Hermitian) {
 	cblas128.Zher2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-// Hpr2 performs the symmetric rank-2 update
-//  a += alpha * x * y^H + alpha * y * x^H
-// where a is an n×n symmetric matirx in packed format and x and y are vectors.
+// Hpr2 performs a rank-2 update
+//  A += alpha * x * y^H + conj(alpha) * y * x^H,
+// where A is an n×n Hermitian matrix in packed format, x and y are vectors,
+// and alpha is a scalar.
 func Hpr2(alpha complex128, x, y Vector, a HermitianPacked) {
 	cblas128.Zhpr2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data)
 }

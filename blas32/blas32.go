@@ -378,9 +378,9 @@ func Gemm(tA, tB blas.Transpose, alpha float32, a, b General, beta float32, c Ge
 }
 
 // Symm performs one of
-//  C = alpha * A * B + beta * C if side == blas.Left
-//  C = alpha * B * A + beta * C if side == blas.Right
-// where A is an n×n symmetric matrix, B and C are m×n matrices, and alpha
+//  C = alpha * A * B + beta * C, if side == blas.Left,
+//  C = alpha * B * A + beta * C, if side == blas.Right,
+// where A is an n×n or m×m symmetric matrix, B and C are m×n matrices, and alpha
 // is a scalar.
 func Symm(s blas.Side, alpha float32, a Symmetric, b General, beta float32, c General) {
 	var m, n int

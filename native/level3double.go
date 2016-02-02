@@ -234,9 +234,9 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 }
 
 // Dsymm performs one of
-//  C = alpha * A * B + beta * C if side == blas.Left
-//  C = alpha * B * A + beta * C if side == blas.Right
-// where A is an n×n symmetric matrix, B and C are m×n matrices, and alpha
+//  C = alpha * A * B + beta * C, if side == blas.Left,
+//  C = alpha * B * A + beta * C, if side == blas.Right,
+// where A is an n×n or m×m symmetric matrix, B and C are m×n matrices, and alpha
 // is a scalar.
 func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if s != blas.Right && s != blas.Left {

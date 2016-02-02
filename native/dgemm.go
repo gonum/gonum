@@ -14,9 +14,9 @@ import (
 )
 
 // Dgemm computes
-//  C = beta * C + alpha * A * B.
-// tA and tB specify whether A or B are transposed. A, B, and C are m×n dense
-// matrices.
+//  C = beta * C + alpha * A * B,
+// where A, B, and C are dense matrices, and alpha and beta are scalars.
+// tA and tB specify whether A or B are transposed.
 func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic(badTranspose)

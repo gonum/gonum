@@ -297,11 +297,11 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 
 // Drotg computes the plane rotation
 //   _    _      _ _       _ _
-//  | c  s |    | a |     | r |
+//  |  c s |    | a |     | r |
 //  | -s c |  * | b |   = | 0 |
 //   ‾    ‾      ‾ ‾       ‾ ‾
 // where
-//  r = ±(a^2 + b^2)
+//  r = ±√(a^2 + b^2)
 //  c = a/r, the cosine of the plane rotation
 //  s = b/r, the sine of the plane rotation
 //

@@ -359,9 +359,9 @@ func Spr2(alpha float32, x, y Vector, a SymmetricPacked) {
 // Level 3
 
 // Gemm computes
-//  C = beta * C + alpha * A * B.
-// tA and tB specify whether A or B are transposed. A, B, and C are m×n dense
-// matrices.
+//  C = beta * C + alpha * A * B,
+// where A, B, and C are dense matrices, and alpha and beta are scalars.
+// tA and tB specify whether A or B are transposed.
 func Gemm(tA, tB blas.Transpose, alpha float32, a, b General, beta float32, c General) {
 	var m, n, k int
 	if tA == blas.NoTrans {

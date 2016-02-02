@@ -208,6 +208,10 @@ func TestDrscl(t *testing.T) {
 	testlapack.DrsclTest(t, impl)
 }
 
+func TestDsterf(t *testing.T) {
+	testlapack.DsterfTest(t, impl)
+}
+
 func TestDsytd2(t *testing.T) {
 	testlapack.Dsytd2Test(t, impl)
 }

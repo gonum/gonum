@@ -421,11 +421,11 @@ func Syr2k(t blas.Transpose, alpha float32, a, b General, beta float32, c Symmet
 }
 
 // Trmm performs
-//  B = alpha * A * B if tA == blas.NoTrans and side == blas.Left
-//  B = alpha * A^T * B if tA == blas.Trans or blas.ConjTrans, and side == blas.Left
-//  B = alpha * B * A if tA == blas.NoTrans and side == blas.Right
-//  B = alpha * B * A^T if tA == blas.Trans or blas.ConjTrans, and side == blas.Right
-// where A is an n×n triangular matrix, and B is an m×n matrix.
+//  B = alpha * A * B,   if tA == blas.NoTrans and side == blas.Left,
+//  B = alpha * A^T * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
+//  B = alpha * B * A,   if tA == blas.NoTrans and side == blas.Right,
+//  B = alpha * B * A^T, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
+// where A is an n×n or m×m triangular matrix, and B is an m×n matrix.
 func Trmm(s blas.Side, tA blas.Transpose, alpha float32, a Triangular, b General) {
 	blas32.Strmm(s, a.Uplo, tA, a.Diag, b.Rows, b.Cols, alpha, a.Data, a.Stride, b.Data, b.Stride)
 }

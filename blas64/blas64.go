@@ -209,97 +209,99 @@ func Scal(n int, alpha float64, x Vector) {
 // Level 2
 
 // Gemv computes
-//  y = alpha * a * x + beta * y if tA = blas.NoTrans
-//  y = alpha * A^T * x + beta * y if tA = blas.Trans or blas.ConjTrans
-// where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
-func Gemv(tA blas.Transpose, alpha float64, a General, x Vector, beta float64, y Vector) {
-	blas64.Dgemv(tA, a.Rows, a.Cols, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
+//  y = alpha * A * x + beta * y,   if t == blas.NoTrans,
+//  y = alpha * A^T * x + beta * y, if t == blas.Trans or blas.ConjTrans,
+// where A is an m×n dense matrix, x and y are vectors, and alpha and beta are scalars.
+func Gemv(t blas.Transpose, alpha float64, a General, x Vector, beta float64, y Vector) {
+	blas64.Dgemv(t, a.Rows, a.Cols, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
 // Gbmv computes
-//  y = alpha * A * x + beta * y if tA == blas.NoTrans
-//  y = alpha * A^T * x + beta * y if tA == blas.Trans or blas.ConjTrans
-// where a is an m×n band matrix kL subdiagonals and kU super-diagonals, and
-// m and n refer to the size of the full dense matrix it represents.
-// x and y are vectors, and alpha and beta are scalars.
-func Gbmv(tA blas.Transpose, alpha float64, a Band, x Vector, beta float64, y Vector) {
-	blas64.Dgbmv(tA, a.Rows, a.Cols, a.KL, a.KU, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
+//  y = alpha * A * x + beta * y,   if t == blas.NoTrans,
+//  y = alpha * A^T * x + beta * y, if t == blas.Trans or blas.ConjTrans,
+// where A is an m×n band matrix, x and y are vectors, and alpha and beta are scalars.
+func Gbmv(t blas.Transpose, alpha float64, a Band, x Vector, beta float64, y Vector) {
+	blas64.Dgbmv(t, a.Rows, a.Cols, a.KL, a.KU, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
 // Trmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
-// A is an n×n Triangular matrix and x is a vector.
-func Trmv(tA blas.Transpose, a Triangular, x Vector) {
-	blas64.Dtrmv(a.Uplo, tA, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
+//  x = A * x,   if t == blas.NoTrans,
+//  x = A^T * x, if t == blas.Trans or blas.ConjTrans,
+// where A is an n×n triangular matrix, and x is a vector.
+func Trmv(t blas.Transpose, a Triangular, x Vector) {
+	blas64.Dtrmv(a.Uplo, t, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tbmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
-// where A is an n×n triangular banded matrix with k diagonals, and x is a vector.
-func Tbmv(tA blas.Transpose, a TriangularBand, x Vector) {
-	blas64.Dtbmv(a.Uplo, tA, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
+//  x = A * x,   if t == blas.NoTrans,
+//  x = A^T * x, if t == blas.Trans or blas.ConjTrans,
+// where A is an n×n triangular band matrix, and x is a vector.
+func Tbmv(t blas.Transpose, a TriangularBand, x Vector) {
+	blas64.Dtbmv(a.Uplo, t, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tpmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
-// where A is an n×n unit triangular matrix in packed format, and x is a vector.
-func Tpmv(tA blas.Transpose, a TriangularPacked, x Vector) {
-	blas64.Dtpmv(a.Uplo, tA, a.Diag, a.N, a.Data, x.Data, x.Inc)
+//  x = A * x,   if t == blas.NoTrans,
+//  x = A^T * x, if t == blas.Trans or blas.ConjTrans,
+// where A is an n×n triangular matrix in packed format, and x is a vector.
+func Tpmv(t blas.Transpose, a TriangularPacked, x Vector) {
+	blas64.Dtpmv(a.Uplo, t, a.Diag, a.N, a.Data, x.Data, x.Inc)
 }
 
 // Trsv solves
-//  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
-// A is an n×n triangular matrix and x is a vector.
+//  A * x = b,   if t == blas.NoTrans,
+//  A^T * x = b, if t == blas.Trans or blas.ConjTrans,
+// where A is an n×n triangular matrix, and x and b are vectors.
+//
 // At entry to the function, x contains the values of b, and the result is
-// stored in place into x.
+// stored in-place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func Trsv(tA blas.Transpose, a Triangular, x Vector) {
-	blas64.Dtrsv(a.Uplo, tA, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
+func Trsv(t blas.Transpose, a Triangular, x Vector) {
+	blas64.Dtrsv(a.Uplo, t, a.Diag, a.N, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tbsv solves
-//  A * x = b
-// where A is an n×n triangular banded matrix with k diagonals in packed format,
-// and x is a vector.
+//  A * x = b,   if t == blas.NoTrans,
+//  A^T * x = b, if t == blas.Trans or blas.ConjTrans,
+// where A is an n×n triangular band matrix, and x and b are vectors.
+//
 // At entry to the function, x contains the values of b, and the result is
 // stored in place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func Tbsv(tA blas.Transpose, a TriangularBand, x Vector) {
-	blas64.Dtbsv(a.Uplo, tA, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
+func Tbsv(t blas.Transpose, a TriangularBand, x Vector) {
+	blas64.Dtbsv(a.Uplo, t, a.Diag, a.N, a.K, a.Data, a.Stride, x.Data, x.Inc)
 }
 
 // Tpsv solves
-//  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
-// where A is an n×n triangular matrix in packed format and x is a vector.
+//  A * x = b,   if t == blas.NoTrans,
+//  A^T * x = b, if t == blas.Trans or blas.ConjTrans,
+// where A is an n×n triangular matrix in packed format, and x and b are
+// vectors.
+//
 // At entry to the function, x contains the values of b, and the result is
 // stored in place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
-func Tpsv(tA blas.Transpose, a TriangularPacked, x Vector) {
-	blas64.Dtpsv(a.Uplo, tA, a.Diag, a.N, a.Data, x.Data, x.Inc)
+func Tpsv(t blas.Transpose, a TriangularPacked, x Vector) {
+	blas64.Dtpsv(a.Uplo, t, a.Diag, a.N, a.Data, x.Data, x.Inc)
 }
 
 // Symv computes
 //    y = alpha * A * x + beta * y,
-// where a is an n×n symmetric matrix, x and y are vectors, and alpha and
+// where A is an n×n symmetric matrix, x and y are vectors, and alpha and
 // beta are scalars.
 func Symv(alpha float64, a Symmetric, x Vector, beta float64, y Vector) {
 	blas64.Dsymv(a.Uplo, a.N, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
 // Sbmv performs
-//  y = alpha * A * x + beta * y
-// where A is an n×n symmetric banded matrix, x and y are vectors, and alpha
+//  y = alpha * A * x + beta * y,
+// where A is an n×n symmetric band matrix, x and y are vectors, and alpha
 // and beta are scalars.
 func Sbmv(alpha float64, a SymmetricBand, x Vector, beta float64, y Vector) {
 	blas64.Dsbmv(a.Uplo, a.N, a.K, alpha, a.Data, a.Stride, x.Data, x.Inc, beta, y.Data, y.Inc)
@@ -307,42 +309,42 @@ func Sbmv(alpha float64, a SymmetricBand, x Vector, beta float64, y Vector) {
 
 // Spmv performs
 //    y = alpha * A * x + beta * y,
-// where A is an n×n symmetric matrix in packed format, x and y are vectors
+// where A is an n×n symmetric matrix in packed format, x and y are vectors,
 // and alpha and beta are scalars.
 func Spmv(alpha float64, a SymmetricPacked, x Vector, beta float64, y Vector) {
 	blas64.Dspmv(a.Uplo, a.N, alpha, a.Data, x.Data, x.Inc, beta, y.Data, y.Inc)
 }
 
-// Ger performs the rank-one operation
-//  A += alpha * x * y^T
+// Ger performs a rank-1 update
+//  A += alpha * x * y^T,
 // where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func Ger(alpha float64, x, y Vector, a General) {
 	blas64.Dger(a.Rows, a.Cols, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-// Syr performs the rank-one update
-//  a += alpha * x * x^T
-// where a is an n×n symmetric matrix, and x is a vector.
+// Syr performs a rank-1 update
+//  A += alpha * x * x^T,
+// where A is an n×n symmetric matrix, x is a vector, and alpha is a scalar.
 func Syr(alpha float64, x Vector, a Symmetric) {
 	blas64.Dsyr(a.Uplo, a.N, alpha, x.Data, x.Inc, a.Data, a.Stride)
 }
 
-// Spr computes the rank-one operation
-//  a += alpha * x * x^T
-// where a is an n×n symmetric matrix in packed format, x is a vector, and
+// Spr performs the rank-1 update
+//  A += alpha * x * x^T,
+// where A is an n×n symmetric matrix in packed format, x is a vector, and
 // alpha is a scalar.
 func Spr(alpha float64, x Vector, a SymmetricPacked) {
 	blas64.Dspr(a.Uplo, a.N, alpha, x.Data, x.Inc, a.Data)
 }
 
-// Syr2 performs the symmetric rank-two update
-//  A += alpha * x * y^T + alpha * y * x^T
+// Syr2 performs a rank-2 update
+//  A += alpha * x * y^T + alpha * y * x^T,
 // where A is a symmetric n×n matrix, x and y are vectors, and alpha is a scalar.
 func Syr2(alpha float64, x, y Vector, a Symmetric) {
 	blas64.Dsyr2(a.Uplo, a.N, alpha, x.Data, x.Inc, y.Data, y.Inc, a.Data, a.Stride)
 }
 
-// Spr2 performs the symmetric rank-2 update
+// Spr2 performs a rank-2 update
 //  A += alpha * x * y^T + alpha * y * x^T,
 // where A is an n×n symmetric matrix in packed format, x and y are vectors,
 // and alpha is a scalar.

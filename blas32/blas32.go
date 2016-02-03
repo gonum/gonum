@@ -100,26 +100,26 @@ type SymmetricPacked struct {
 
 const negInc = "blas32: negative vector increment"
 
-// Dot computes the dot product of the two vectors
-//  \sum_i x[i]*y[i]
+// Dot computes the dot product of the two vectors:
+//  \sum_i x[i]*y[i].
 func Dot(n int, x, y Vector) float32 {
 	return blas32.Sdot(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// DDot computes the dot product of the two vectors
-//  \sum_i x[i]*y[i]
+// DDot computes the dot product of the two vectors:
+//  \sum_i x[i]*y[i].
 func DDot(n int, x, y Vector) float64 {
 	return blas32.Dsdot(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// SDDot computes the dot product of the two vectors adding a constant
-//  alpha + \sum_i x[i]*y[i]
+// SDDot computes the dot product of the two vectors adding a constant:
+//  alpha + \sum_i x[i]*y[i].
 func SDDot(n int, alpha float32, x, y Vector) float32 {
 	return blas32.Sdsdot(n, alpha, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Nrm2 computes the Euclidean norm of a vector,
-//  sqrt(\sum_i x[i] * x[i]).
+// Nrm2 computes the Euclidean norm of the vector x:
+//  sqrt(\sum_i x[i]*x[i]).
 //
 // Nrm2 will panic if the vector increment is negative.
 func Nrm2(n int, x Vector) float32 {
@@ -129,8 +129,8 @@ func Nrm2(n int, x Vector) float32 {
 	return blas32.Snrm2(n, x.Data, x.Inc)
 }
 
-// Asum computes the sum of the absolute values of the elements of x.
-//  \sum_i |x[i]|
+// Asum computes the sum of the absolute values of the elements of x:
+//  \sum_i |x[i]|.
 //
 // Asum will panic if the vector increment is negative.
 func Asum(n int, x Vector) float32 {
@@ -152,33 +152,36 @@ func Iamax(n int, x Vector) int {
 	return blas32.Isamax(n, x.Data, x.Inc)
 }
 
-// Swap exchanges the elements of two vectors.
-//  x[i], y[i] = y[i], x[i] for all i
+// Swap exchanges the elements of the two vectors:
+//  x[i], y[i] = y[i], x[i] for all i.
 func Swap(n int, x, y Vector) {
 	blas32.Sswap(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Copy copies the elements of x into the elements of y.
-//  y[i] = x[i] for all i
+// Copy copies the elements of x into the elements of y:
+//  y[i] = x[i] for all i.
 func Copy(n int, x, y Vector) {
 	blas32.Scopy(n, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Axpy adds alpha times x to y
-//  y[i] += alpha * x[i] for all i
+// Axpy adds x scaled by alpha to y:
+//  y[i] += alpha*x[i] for all i.
 func Axpy(n int, alpha float32, x, y Vector) {
 	blas32.Saxpy(n, alpha, x.Data, x.Inc, y.Data, y.Inc)
 }
 
-// Rotg computes the plane rotation
-//   _    _      _ _       _ _
-//  |  c s |    | a |     | r |
-//  | -s c |  * | b |   = | 0 |
-//   ‾    ‾      ‾ ‾       ‾ ‾
-// where
-//  r = ±√(a^2 + b^2)
-//  c = a/r, the cosine of the plane rotation
-//  s = b/r, the sine of the plane rotation
+// Rotg computes the parameters of a Givens plane rotation so that
+//  ⎡ c s⎤   ⎡a⎤   ⎡r⎤
+//  ⎣-s c⎦ * ⎣b⎦ = ⎣0⎦
+// where a and b are the Cartesian coordinates of a given point.
+// c, s, and r are defined as
+//  r = ±Sqrt(a^2 + b^2),
+//  c = a/r, the cosine of the rotation angle,
+//  s = a/r, the sine of the rotation angle,
+// and z is defined such that
+//  if |a| > |b|,        z = s,
+//  otherwise if c != 0, z = 1/c,
+//  otherwise            z = 1.
 func Rotg(a, b float32) (c, s, r, z float32) {
 	return blas32.Srotg(a, b)
 }
@@ -190,22 +193,24 @@ func Rotmg(d1, d2, b1, b2 float32) (p blas.SrotmParams, rd1, rd2, rb1 float32) {
 	return blas32.Srotmg(d1, d2, b1, b2)
 }
 
-// Rot applies a plane transformation.
-//  x[i] = c * x[i] + s * y[i]
-//  y[i] = c * y[i] - s * x[i]
+// Rot applies a plane transformation to n points represented by the vectors x
+// and y:
+//  x[i] =  c*x[i] + s*y[i],
+//  y[i] = -s*x[i] + c*y[i], for all i.
 func Rot(n int, x, y Vector, c, s float32) {
 	blas32.Srot(n, x.Data, x.Inc, y.Data, y.Inc, c, s)
 }
 
-// Rotm applies the modified Givens rotation to the 2×n matrix.
+// Rotm applies the modified Givens rotation to n points represented by the
+// vectors x and y.
 func Rotm(n int, x, y Vector, p blas.SrotmParams) {
 	blas32.Srotm(n, x.Data, x.Inc, y.Data, y.Inc, p)
 }
 
-// Scal scales x by alpha.
-//  x[i] *= alpha
+// Scal scales the vector x by alpha:
+//  x[i] *= alpha for all i.
 //
-// Scal will panic if the vector increment is negative
+// Scal will panic if the vector increment is negative.
 func Scal(n int, alpha float32, x Vector) {
 	if x.Inc < 0 {
 		panic(negInc)

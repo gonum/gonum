@@ -355,7 +355,7 @@ func Spr2(alpha float64, x, y Vector, a SymmetricPacked) {
 // Level 3
 
 // Gemm computes
-//  C = beta * C + alpha * A * B,
+//  C = alpha * A * B + beta * C,
 // where A, B, and C are dense matrices, and alpha and beta are scalars.
 // tA and tB specify whether A or B are transposed.
 func Gemm(tA, tB blas.Transpose, alpha float64, a, b General, beta float64, c General) {
@@ -373,11 +373,11 @@ func Gemm(tA, tB blas.Transpose, alpha float64, a, b General, beta float64, c Ge
 	blas64.Dgemm(tA, tB, m, n, k, alpha, a.Data, a.Stride, b.Data, b.Stride, beta, c.Data, c.Stride)
 }
 
-// Symm performs one of
-//  C = alpha * A * B + beta * C, if side == blas.Left,
-//  C = alpha * B * A + beta * C, if side == blas.Right,
-// where A is an n×n or m×m symmetric matrix, B and C are m×n matrices, and alpha
-// is a scalar.
+// Symm performs
+//  C = alpha * A * B + beta * C, if s == blas.Left,
+//  C = alpha * B * A + beta * C, if s == blas.Right,
+// where A is an n×n or m×m symmetric matrix, B and C are m×n matrices, and
+// alpha is a scalar.
 func Symm(s blas.Side, alpha float64, a Symmetric, b General, beta float64, c General) {
 	var m, n int
 	if s == blas.Left {
@@ -388,10 +388,11 @@ func Symm(s blas.Side, alpha float64, a Symmetric, b General, beta float64, c Ge
 	blas64.Dsymm(s, a.Uplo, m, n, alpha, a.Data, a.Stride, b.Data, b.Stride, beta, c.Data, c.Stride)
 }
 
-// Syrk performs the symmetric rank-k operation
-//  C = alpha * A * A^T + beta*C
-// C is an n×n symmetric matrix. A is an n×k matrix if tA == blas.NoTrans, and
-// a k×n matrix otherwise. alpha and beta are scalars.
+// Syrk performs a symmetric rank-k update
+//  C = alpha * A * A^T + beta * C, if t == blas.NoTrans,
+//  C = alpha * A^T * A + beta * C, if t == blas.Trans or blas.ConjTrans,
+// where C is an n×n symmetric matrix, A is an n×k matrix if t == blas.NoTrans and
+// a k×n matrix otherwise, and alpha and beta are scalars.
 func Syrk(t blas.Transpose, alpha float64, a General, beta float64, c Symmetric) {
 	var n, k int
 	if t == blas.NoTrans {
@@ -402,10 +403,11 @@ func Syrk(t blas.Transpose, alpha float64, a General, beta float64, c Symmetric)
 	blas64.Dsyrk(c.Uplo, t, n, k, alpha, a.Data, a.Stride, beta, c.Data, c.Stride)
 }
 
-// Syr2k performs the symmetric rank 2k operation
-//  C = alpha * A * B^T + alpha * B * A^T + beta * C
-// where C is an n×n symmetric matrix. A and B are n×k matrices if
-// tA == NoTrans and k×n otherwise. alpha and beta are scalars.
+// Syr2k performs a symmetric rank-2k update
+//  C = alpha * A * B^T + alpha * B * A^T + beta * C, if t == blas.NoTrans,
+//  C = alpha * A^T * B + alpha * B^T * A + beta * C, if t == blas.Trans or blas.ConjTrans,
+// where C is an n×n symmetric matrix, A and B are n×k matrices if t == NoTrans
+// and k×n matrices otherwise, and alpha and beta are scalars.
 func Syr2k(t blas.Transpose, alpha float64, a, b General, beta float64, c Symmetric) {
 	var n, k int
 	if t == blas.NoTrans {
@@ -417,25 +419,26 @@ func Syr2k(t blas.Transpose, alpha float64, a, b General, beta float64, c Symmet
 }
 
 // Trmm performs
-//  B = alpha * A * B,   if tA == blas.NoTrans and side == blas.Left,
-//  B = alpha * A^T * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
-//  B = alpha * B * A,   if tA == blas.NoTrans and side == blas.Right,
-//  B = alpha * B * A^T, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
-// where A is an n×n or m×m triangular matrix, and B is an m×n matrix.
+//  B = alpha * A * B,   if tA == blas.NoTrans and s == blas.Left,
+//  B = alpha * A^T * B, if tA == blas.Trans or blas.ConjTrans, and s == blas.Left,
+//  B = alpha * B * A,   if tA == blas.NoTrans and s == blas.Right,
+//  B = alpha * B * A^T, if tA == blas.Trans or blas.ConjTrans, and s == blas.Right,
+// where A is an n×n or m×m triangular matrix, B is an m×n matrix, and alpha is
+// a scalar.
 func Trmm(s blas.Side, tA blas.Transpose, alpha float64, a Triangular, b General) {
 	blas64.Dtrmm(s, a.Uplo, tA, a.Diag, b.Rows, b.Cols, alpha, a.Data, a.Stride, b.Data, b.Stride)
 }
 
 // Trsm solves
-//  A * X = alpha * B,   if tA == blas.NoTrans side == blas.Left,
-//  A^T * X = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
-//  X * A = alpha * B,   if tA == blas.NoTrans side == blas.Right,
-//  X * A^T = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
-// where A is an n×n or m×m triangular matrix, X is an m×n matrix, and alpha is a
-// scalar.
+//  A * X = alpha * B,   if tA == blas.NoTrans and s == blas.Left,
+//  A^T * X = alpha * B, if tA == blas.Trans or blas.ConjTrans, and s == blas.Left,
+//  X * A = alpha * B,   if tA == blas.NoTrans and s == blas.Right,
+//  X * A^T = alpha * B, if tA == blas.Trans or blas.ConjTrans, and s == blas.Right,
+// where A is an n×n or m×m triangular matrix, X and B are m×n matrices, and
+// alpha is a scalar.
 //
 // At entry to the function, X contains the values of B, and the result is
-// stored in place into X.
+// stored in-place into X.
 //
 // No check is made that A is invertible.
 func Trsm(s blas.Side, tA blas.Transpose, alpha float64, a Triangular, b General) {

@@ -17,13 +17,13 @@ env:
   matrix:
   - BLAS_LIB=OpenBLAS
   - BLAS_LIB=gonum
-  - BLAS_LIB=Accellerate
+  - BLAS_LIB=Accelerate
   - BLAS_LIB=ATLAS
 
 matrix:
  exclude:
   - os: linux
-    env: BLAS_LIB=Accellerate
+    env: BLAS_LIB=Accelerate
   - os: linux
     env: BLAS_LIB=ATLAS
   - os: osx

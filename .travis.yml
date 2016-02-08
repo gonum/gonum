@@ -9,14 +9,27 @@ go:
  - 1.5.3
  - 1.6rc2
 
+os:
+ - linux
+ - osx
+
 env:
   matrix:
   - BLAS_LIB=OpenBLAS
   - BLAS_LIB=gonum
-  # at some point, when travis allows builds on darwin
-  #- BLAS_LIB=Accellerate
-  # at some point, when the issue with drotgm is resolved
-  #- BLAS_LIB=ATLAS
+  - BLAS_LIB=Accelerate
+  - BLAS_LIB=ATLAS
+
+matrix:
+ exclude:
+  - os: linux
+    env: BLAS_LIB=Accelerate
+  - os: linux
+    env: BLAS_LIB=ATLAS
+  - os: osx
+    env: BLAS_LIB=OpenBLAS
+  - os: osx
+    env: BLAS_LIB=ATLAS
 
 before_install:
  # Required for coverage.

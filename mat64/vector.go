@@ -328,7 +328,7 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 			t = blas.Trans
 		}
 		blas64.Gemv(t, 1, amat, b.mat, 0, v.mat)
-	case Vectorer:
+	case RowColer:
 		if trans {
 			col := make([]float64, ar)
 			for c := 0; c < ac; c++ {

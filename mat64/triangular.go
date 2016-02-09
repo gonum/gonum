@@ -259,7 +259,7 @@ func (t *TriDense) Copy(a Matrix) (r, c int) {
 				t.set(i, i, amat.Data[i*amat.Stride+i])
 			}
 		}
-	case Vectorer:
+	case RowColer:
 		row := make([]float64, c)
 		if t.isUpper() {
 			for i := 0; i < r; i++ {

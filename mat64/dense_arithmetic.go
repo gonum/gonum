@@ -58,8 +58,8 @@ func (m *Dense) Add(a, b Matrix) {
 		defer restore()
 	}
 
-	if a, ok := a.(Vectorer); ok {
-		if b, ok := b.(Vectorer); ok {
+	if a, ok := a.(RowColer); ok {
+		if b, ok := b.(RowColer); ok {
 			rowa := make([]float64, ac)
 			rowb := make([]float64, bc)
 			for r := 0; r < ar; r++ {
@@ -120,8 +120,8 @@ func (m *Dense) Sub(a, b Matrix) {
 		defer restore()
 	}
 
-	if a, ok := a.(Vectorer); ok {
-		if b, ok := b.(Vectorer); ok {
+	if a, ok := a.(RowColer); ok {
+		if b, ok := b.(RowColer); ok {
 			rowa := make([]float64, ac)
 			rowb := make([]float64, bc)
 			for r := 0; r < ar; r++ {
@@ -183,8 +183,8 @@ func (m *Dense) MulElem(a, b Matrix) {
 		defer restore()
 	}
 
-	if a, ok := a.(Vectorer); ok {
-		if b, ok := b.(Vectorer); ok {
+	if a, ok := a.(RowColer); ok {
+		if b, ok := b.(RowColer); ok {
 			rowa := make([]float64, ac)
 			rowb := make([]float64, bc)
 			for r := 0; r < ar; r++ {
@@ -246,8 +246,8 @@ func (m *Dense) DivElem(a, b Matrix) {
 		defer restore()
 	}
 
-	if a, ok := a.(Vectorer); ok {
-		if b, ok := b.(Vectorer); ok {
+	if a, ok := a.(RowColer); ok {
+		if b, ok := b.(RowColer); ok {
 			rowa := make([]float64, ac)
 			rowb := make([]float64, bc)
 			for r := 0; r < ar; r++ {
@@ -490,8 +490,8 @@ func (m *Dense) Mul(a, b Matrix) {
 		}
 	}
 
-	if aU, ok := aU.(Vectorer); ok {
-		if bU, ok := bU.(Vectorer); ok {
+	if aU, ok := aU.(RowColer); ok {
+		if bU, ok := bU.(RowColer); ok {
 			row := make([]float64, ac)
 			col := make([]float64, br)
 			if aTrans {
@@ -731,7 +731,7 @@ func (m *Dense) Scale(f float64, a Matrix) {
 		return
 	}
 
-	if a, ok := a.(Vectorer); ok {
+	if a, ok := a.(RowColer); ok {
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
 			for i, v := range a.Row(row, r) {
@@ -781,7 +781,7 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 		return
 	}
 
-	if a, ok := a.(Vectorer); ok {
+	if a, ok := a.(RowColer); ok {
 		row := make([]float64, ac)
 		for r := 0; r < ar; r++ {
 			for i, v := range a.Row(row, r) {

@@ -87,28 +87,28 @@ type Mutable interface {
 	Matrix
 }
 
-// A Vectorer can return rows and columns of the represented matrix.
-type Vectorer interface {
+// A RowColer can return rows and columns of the represented matrix.
+type RowColer interface {
 	// Row returns a []float64 for the row specified by the index i. It will
 	// panic if the index is out of bounds. len(dst) must equal the number of
-	// columns unless dst is nil in which case a new slice must be allocated.
+	// columns unless dst is nil in which case a new slice will be allocated.
 	Row(dst []float64, i int) []float64
 
-	// Col returns a []float64 for the row specified by the index i. It will
+	// Col returns a []float64 for the column specified by the index j. It will
 	// panic if the index is out of bounds. len(dst) must equal the number of
-	// rows unless dst is nil in which case a new slice must be allocated.
+	// rows unless dst is nil in which case a new slice will be allocated.
 	Col(dst []float64, j int) []float64
 }
 
-// A VectorSetter can set rows and columns in the represented matrix.
-type VectorSetter interface {
-	// SetRow sets the values in the specified rows of the matrix to the values
+// A RowColSetter can set rows and columns in the represented matrix.
+type RowColSetter interface {
+	// SetRow sets the values in the specified row of the matrix to the values
 	// in src. len(src) must equal the number of columns in the receiver.
 	SetRow(i int, src []float64)
 
 	// SetCol sets the values in the specified column of the matrix to the values
 	// in src. len(src) must equal the number of rows in the receiver.
-	SetCol(i int, src []float64)
+	SetCol(j int, src []float64)
 }
 
 // A RowViewer can return a Vector reflecting a row that is backed by the matrix
@@ -204,7 +204,7 @@ type RawVectorer interface {
 
 // TODO(btracey): Consider adding CopyCol/CopyRow if the behavior seems useful.
 // TODO(btracey): Add in fast paths to Row/Col for the other concrete types
-// (TriDense, etc.) as well as relevant interfaces (Vectorer, RawRowViewer, etc.)
+// (TriDense, etc.) as well as relevant interfaces (RowColer, RawRowViewer, etc.)
 
 // Col copies the elements in the jth column of the matrix into the slice dst.
 // The length of the provided slice must equal the number of rows, unless the

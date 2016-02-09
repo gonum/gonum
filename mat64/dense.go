@@ -19,7 +19,7 @@ var (
 	_ Matrix  = dense
 	_ Mutable = dense
 
-	_ VectorSetter = dense
+	_ RowColSetter = dense
 
 	_ Cloner       = dense
 	_ Viewer       = dense

@@ -100,8 +100,8 @@ type RowColer interface {
 	Col(dst []float64, j int) []float64
 }
 
-// A VectorSetter can set rows and columns in the represented matrix.
-type VectorSetter interface {
+// A RowColSetter can set rows and columns in the represented matrix.
+type RowColSetter interface {
 	// SetRow sets the values in the specified rows of the matrix to the values
 	// in src. len(src) must equal the number of columns in the receiver.
 	SetRow(i int, src []float64)

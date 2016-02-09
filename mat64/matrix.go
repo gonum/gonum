@@ -132,7 +132,7 @@ type ColViewer interface {
 // A RawColViewer can return a slice of float64 reflecting a column that is backed by the matrix
 // data.
 type RawColViewer interface {
-	RawColView(c int) *Vector
+	RawColView(c int) []float64
 }
 
 // A Cloner can make a copy of a into the receiver, overwriting the previous value of the

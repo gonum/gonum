@@ -569,7 +569,7 @@ func (Implementation) Ssyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 		if ul == blas.Upper {
 			for i := 0; i < n; i++ {
 				atmp := a[i*lda : i*lda+k]
-				btmp := b[i*lda : i*lda+k]
+				btmp := b[i*ldb : i*ldb+k]
 				ctmp := c[i*ldc+i : i*ldc+n]
 				for jc := range ctmp {
 					j := i + jc
@@ -587,7 +587,7 @@ func (Implementation) Ssyr2k(ul blas.Uplo, tA blas.Transpose, n, k int, alpha fl
 		}
 		for i := 0; i < n; i++ {
 			atmp := a[i*lda : i*lda+k]
-			btmp := b[i*lda : i*lda+k]
+			btmp := b[i*ldb : i*ldb+k]
 			ctmp := c[i*ldc : i*ldc+i+1]
 			for j := 0; j <= i; j++ {
 				var tmp1, tmp2 float32

@@ -1112,7 +1112,7 @@ func testTwoInput(t *testing.T,
 						bSame = retranspose(bSame, receiver)
 					}
 					// Compute the real answer for this case. It is different
-					// from the inital answer since now a and b have the
+					// from the initial answer since now a and b have the
 					// same data.
 					zero = makeRandOf(wasZero, 0, 0)
 					method(zero, aSame, bSame)

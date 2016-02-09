@@ -31,11 +31,11 @@ func (lu *LU) updateCond(norm float64) {
 	work := make([]float64, 4*n)
 	iwork := make([]int, n)
 	if norm < 0 {
-		// This is an approximation. By the defintion of a norm, ||AB|| <= ||A|| ||B||.
+		// This is an approximation. By the definition of a norm, ||AB|| <= ||A|| ||B||.
 		// The condition number is ||A|| || A^-1||, so this will underestimate
 		// the condition number somewhat.
 		// The norm of the original factorized matrix cannot be stored because of
-		// update possibilites, e.g. RankOne.
+		// update possibilities, e.g. RankOne.
 		u := lu.lu.asTriDense(n, blas.NonUnit, blas.Upper)
 		l := lu.lu.asTriDense(n, blas.Unit, blas.Lower)
 		unorm := lapack64.Lantr(matrix.CondNorm, u.mat, work)
@@ -233,7 +233,7 @@ func (m *Dense) Permutation(r int, swaps []int) {
 // It computes
 //  A * x = b if trans == false
 //  A^T * x = b if trans == true
-// In both cases, A is represeneted in LU factorized form, and the matrix x is
+// In both cases, A is represented in LU factorized form, and the matrix x is
 // stored into the receiver.
 //
 // If A is singular or near-singular a Condition error is returned. Please see
@@ -276,7 +276,7 @@ func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
 // It computes
 //  A * x = b if trans == false
 //  A^T * x = b if trans == true
-// In both cases, A is represeneted in LU factorized form, and the matrix x is
+// In both cases, A is represented in LU factorized form, and the matrix x is
 // stored into the receiver.
 //
 // If A is singular or near-singular a Condition error is returned. Please see

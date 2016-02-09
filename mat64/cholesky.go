@@ -25,7 +25,7 @@ type Cholesky struct {
 
 // updateCond updates the condition number of the Cholesky decomposition. If
 // norm > 0, then that norm is used as the norm of the original matrix A, otherwise
-// the norm is estimated from the decompositon.
+// the norm is estimated from the decomposition.
 func (c *Cholesky) updateCond(norm float64) {
 	n := c.chol.mat.N
 	work := make([]float64, 3*n)
@@ -35,7 +35,7 @@ func (c *Cholesky) updateCond(norm float64) {
 		// The condition number is ||A|| || A^-1||, so this will underestimate
 		// the condition number somewhat.
 		// The norm of the original factorized matrix cannot be stored because of
-		// update possibilites.
+		// update possibilities.
 		unorm := lapack64.Lantr(matrix.CondNorm, c.chol.mat, work)
 		lnorm := lapack64.Lantr(matrix.CondNormTrans, c.chol.mat, work)
 		norm = unorm * lnorm

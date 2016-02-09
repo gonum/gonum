@@ -32,7 +32,7 @@ type Eigen struct {
 	ef eigenFactors
 }
 
-// Factorize computes the Eigen decompositon of the input square matrix a.
+// Factorize computes the Eigen decomposition of the input square matrix a.
 // The Eigen decomposition is defined as
 //  A = P * D * P^-1
 // where D is a diagonal matrix containing the eigenvalues of the matrix, and

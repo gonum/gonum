@@ -436,7 +436,7 @@ func TestGrow(t *testing.T) {
 	// Test grow uses existing data slice when matrix is zero size.
 	v.Reset()
 	p, l := &v.mat.Data[:1][0], cap(v.mat.Data)
-	*p = 1 // This element is at postion (-1, -1) relative to v and so should not be visible.
+	*p = 1 // This element is at position (-1, -1) relative to v and so should not be visible.
 	v = v.Grow(5, 5).(*Dense)
 	if &v.mat.Data[:1][0] != p {
 		t.Error("grow unexpectedly copied slice within cap limit")

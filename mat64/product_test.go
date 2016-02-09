@@ -150,7 +150,7 @@ func TestProduct(t *testing.T) {
 				t.Fatal("unexpected number of expressions in brute force expression search")
 			}
 			if gotCost != wantCost {
-				t.Errorf("unexpected cost for chain dimensions: %+v got: %d want: %d\n%s",
+				t.Errorf("unexpected cost for chain dimensions: %+v got: %v want: %v\n%s",
 					dimensions, got, want, expr)
 			}
 		}

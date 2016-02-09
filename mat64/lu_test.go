@@ -136,7 +136,7 @@ func TestSolveLU(t *testing.T) {
 		var got Dense
 		got.Mul(a, &x)
 		if !EqualApprox(&got, b, 1e-12) {
-			t.Error("Solve mismatch for non-singular matrix. n = %v, bc = %v.\nWant: %v\nGot: %v", n, bc, b, got)
+			t.Errorf("Solve mismatch for non-singular matrix. n = %v, bc = %v.\nWant: %v\nGot: %v", n, bc, b, got)
 		}
 	}
 	// TODO(btracey): Add testOneInput test when such a function exists.
@@ -184,7 +184,7 @@ func TestSolveLUVec(t *testing.T) {
 		var got Vector
 		got.MulVec(a, &x)
 		if !EqualApprox(&got, b, 1e-12) {
-			t.Error("Solve mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)
+			t.Errorf("Solve mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)
 		}
 	}
 	// TODO(btracey): Add testOneInput test when such a function exists.

@@ -186,7 +186,8 @@ func TestAtSet(t *testing.T) {
 		for i := 0; i < rows; i++ {
 			for j := 0; j < cols; j++ {
 				if m.At(i, j) != af[i][j] {
-					t.Errorf("unexpected value for At(%d, %d) for test %d: got: %v want: %v", m.At(i, j), af[i][j])
+					t.Errorf("unexpected value for At(%d, %d) for test %d: got: %v want: %v",
+						i, j, test, m.At(i, j), af[i][j])
 				}
 
 				v := float64(i * j)

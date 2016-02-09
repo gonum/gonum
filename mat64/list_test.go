@@ -171,7 +171,7 @@ func legalDims(a Matrix, m, n int) bool {
 		panic("legal dims type not coded")
 	case Untransposer:
 		return legalDims(t.Untranspose(), n, m)
-	case *Dense, *basicMatrix, *basicVectorer:
+	case *Dense, *basicMatrix, *basicRowColer:
 		if m < 0 || n < 0 {
 			return false
 		}
@@ -203,8 +203,8 @@ func returnAs(a, t Matrix) Matrix {
 			return mat
 		case *basicMatrix:
 			return asBasicMatrix(mat)
-		case *basicVectorer:
-			return asBasicVectorer(mat)
+		case *basicRowColer:
+			return asBasicRowColer(mat)
 		}
 	case *SymDense:
 		switch t.(type) {
@@ -250,7 +250,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		panic("unknown type for make rand of")
 	case Untransposer:
 		matrix = retranspose(a, makeRandOf(t.Untranspose(), n, m))
-	case *Dense, *basicMatrix, *basicVectorer:
+	case *Dense, *basicMatrix, *basicRowColer:
 		mat := NewDense(m, n, nil)
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
@@ -337,7 +337,7 @@ func makeCopyOf(a Matrix) Matrix {
 		panic("unknown type in makeCopyOf")
 	case Untransposer:
 		return retranspose(a, makeCopyOf(t.Untranspose()))
-	case *Dense, *basicMatrix, *basicVectorer:
+	case *Dense, *basicMatrix, *basicRowColer:
 		var m Dense
 		m.Clone(a)
 		return returnAs(&m, t)
@@ -492,7 +492,7 @@ var testMatrices = []Matrix{
 	NewVector(0, nil),
 	&Vector{mat: blas64.Vector{Inc: 10}},
 	&basicMatrix{},
-	&basicVectorer{},
+	&basicRowColer{},
 	&basicSymmetric{},
 	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}},
 	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}},
@@ -505,7 +505,7 @@ var testMatrices = []Matrix{
 	Transpose{NewVector(0, nil)},
 	Transpose{&Vector{mat: blas64.Vector{Inc: 10}}},
 	Transpose{&basicMatrix{}},
-	Transpose{&basicVectorer{}},
+	Transpose{&basicRowColer{}},
 	Transpose{&basicSymmetric{}},
 	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}}},
 	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}}},

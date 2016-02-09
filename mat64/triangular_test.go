@@ -152,7 +152,7 @@ func TestTriDenseCopy(t *testing.T) {
 		u := NewTriDense(size, true, nil)
 		l := NewTriDense(size, false, nil)
 
-		for _, typ := range []Matrix{r, (*basicVectorer)(r), (*basicMatrix)(r)} {
+		for _, typ := range []Matrix{r, (*basicRowColer)(r), (*basicMatrix)(r)} {
 			for j := range u.mat.Data {
 				u.mat.Data[j] = math.NaN()
 				l.mat.Data[j] = math.NaN()

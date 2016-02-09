@@ -21,8 +21,8 @@ func asDense(d *Dense) Matrix {
 func asBasicMatrix(d *Dense) Matrix {
 	return (*basicMatrix)(d)
 }
-func asBasicVectorer(d *Dense) Matrix {
-	return (*basicVectorer)(d)
+func asBasicRowColer(d *Dense) Matrix {
+	return (*basicRowColer)(d)
 }
 
 func asBasicSymmetric(s *SymDense) Matrix {

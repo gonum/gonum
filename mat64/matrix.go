@@ -87,8 +87,8 @@ type Mutable interface {
 	Matrix
 }
 
-// A Vectorer can return rows and columns of the represented matrix.
-type Vectorer interface {
+// A RowColer can return rows and columns of the represented matrix.
+type RowColer interface {
 	// Row returns a []float64 for the row specified by the index i. It will
 	// panic if the index is out of bounds. len(dst) must equal the number of
 	// columns unless dst is nil in which case a new slice must be allocated.
@@ -204,7 +204,7 @@ type RawVectorer interface {
 
 // TODO(btracey): Consider adding CopyCol/CopyRow if the behavior seems useful.
 // TODO(btracey): Add in fast paths to Row/Col for the other concrete types
-// (TriDense, etc.) as well as relevant interfaces (Vectorer, RawRowViewer, etc.)
+// (TriDense, etc.) as well as relevant interfaces (RowColer, RawRowViewer, etc.)
 
 // Col copies the elements in the jth column of the matrix into the slice dst.
 // The length of the provided slice must equal the number of rows, unless the

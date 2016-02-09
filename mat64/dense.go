@@ -365,7 +365,7 @@ func (m *Dense) Clone(a Matrix) {
 				copy(mat.Data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
 			}
 		}
-	case Vectorer:
+	case RowColer:
 		mat.Data = use(m.mat.Data, r*c)
 		if trans {
 			for i := 0; i < r; i++ {
@@ -420,7 +420,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 				copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
 			}
 		}
-	case Vectorer:
+	case RowColer:
 		if trans {
 			for i := 0; i < r; i++ {
 				aU.Col(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], i)

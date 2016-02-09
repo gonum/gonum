@@ -133,21 +133,21 @@ func TestMulTypes(t *testing.T) {
 		randomSlice(cvec)
 		testMul(t, a, b, c, acomp, bcomp, ccomp, false, "existing receiver")
 
-		// Test with vectorers
-		avm := (*basicVectorer)(a)
-		bvm := (*basicVectorer)(b)
+		// Test with RowColers.
+		avm := (*basicRowColer)(a)
+		bvm := (*basicRowColer)(b)
 		d.Reset()
-		testMul(t, avm, b, d, acomp, bcomp, ccomp, true, "a vectoror with zero receiver")
+		testMul(t, avm, b, d, acomp, bcomp, ccomp, true, "a rowcoler with zero receiver")
 		d.Reset()
-		testMul(t, a, bvm, d, acomp, bcomp, ccomp, true, "b vectoror with zero receiver")
+		testMul(t, a, bvm, d, acomp, bcomp, ccomp, true, "b rowcoler with zero receiver")
 		d.Reset()
-		testMul(t, avm, bvm, d, acomp, bcomp, ccomp, true, "both vectoror with zero receiver")
+		testMul(t, avm, bvm, d, acomp, bcomp, ccomp, true, "both rowcoler with zero receiver")
 		randomSlice(cvec)
-		testMul(t, avm, b, c, acomp, bcomp, ccomp, true, "a vectoror with existing receiver")
+		testMul(t, avm, b, c, acomp, bcomp, ccomp, true, "a rowcoler with existing receiver")
 		randomSlice(cvec)
-		testMul(t, a, bvm, c, acomp, bcomp, ccomp, true, "b vectoror with existing receiver")
+		testMul(t, a, bvm, c, acomp, bcomp, ccomp, true, "b rowcoler with existing receiver")
 		randomSlice(cvec)
-		testMul(t, avm, bvm, c, acomp, bcomp, ccomp, true, "both vectoror with existing receiver")
+		testMul(t, avm, bvm, c, acomp, bcomp, ccomp, true, "both rowcoler with existing receiver")
 
 		// Cast a as a basic matrix
 		am := (*basicMatrix)(a)
@@ -186,7 +186,7 @@ func testMul(t *testing.T, a, b Matrix, c *Dense, acomp, bcomp, ccomp matComp, c
 		aDense = t
 	case *basicMatrix:
 		aDense = (*Dense)(t)
-	case *basicVectorer:
+	case *basicRowColer:
 		aDense = (*Dense)(t)
 	}
 
@@ -196,7 +196,7 @@ func testMul(t *testing.T, a, b Matrix, c *Dense, acomp, bcomp, ccomp matComp, c
 		bDense = t
 	case *basicMatrix:
 		bDense = (*Dense)(t)
-	case *basicVectorer:
+	case *basicRowColer:
 		bDense = (*Dense)(t)
 	}
 
@@ -233,25 +233,25 @@ func (m *basicMatrix) T() Matrix {
 	return Transpose{m}
 }
 
-type basicVectorer Dense
+type basicRowColer Dense
 
-func (m *basicVectorer) At(r, c int) float64 {
+func (m *basicRowColer) At(r, c int) float64 {
 	return (*Dense)(m).At(r, c)
 }
 
-func (m *basicVectorer) Dims() (r, c int) {
+func (m *basicRowColer) Dims() (r, c int) {
 	return (*Dense)(m).Dims()
 }
 
-func (m *basicVectorer) T() Matrix {
+func (m *basicRowColer) T() Matrix {
 	return Transpose{m}
 }
 
-func (m *basicVectorer) Row(row []float64, r int) []float64 {
+func (m *basicRowColer) Row(row []float64, r int) []float64 {
 	return Row(row, r, m)
 }
 
-func (m *basicVectorer) Col(row []float64, c int) []float64 {
+func (m *basicRowColer) Col(row []float64, c int) []float64 {
 	return Col(row, c, m)
 }
 

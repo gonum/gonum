@@ -259,19 +259,6 @@ func (t *TriDense) Copy(a Matrix) (r, c int) {
 				t.set(i, i, amat.Data[i*amat.Stride+i])
 			}
 		}
-	case RowColer:
-		row := make([]float64, c)
-		if t.isUpper() {
-			for i := 0; i < r; i++ {
-				a.Row(row, i)
-				copy(t.mat.Data[i*t.mat.Stride+i:i*t.mat.Stride+c], row[i:])
-			}
-		} else {
-			for i := 0; i < r; i++ {
-				a.Row(row, i)
-				copy(t.mat.Data[i*t.mat.Stride:i*t.mat.Stride+i+1], row[:i+1])
-			}
-		}
 	default:
 		isUpper := t.isUpper()
 		for i := 0; i < r; i++ {

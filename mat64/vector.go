@@ -328,24 +328,6 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 			t = blas.Trans
 		}
 		blas64.Gemv(t, 1, amat, b.mat, 0, v.mat)
-	case RowColer:
-		if trans {
-			col := make([]float64, ar)
-			for c := 0; c < ac; c++ {
-				v.mat.Data[c*v.mat.Inc] = blas64.Dot(ar,
-					blas64.Vector{Inc: 1, Data: a.Col(col, c)},
-					b.mat,
-				)
-			}
-		} else {
-			row := make([]float64, ac)
-			for r := 0; r < ar; r++ {
-				v.mat.Data[r*v.mat.Inc] = blas64.Dot(ac,
-					blas64.Vector{Inc: 1, Data: a.Row(row, r)},
-					b.mat,
-				)
-			}
-		}
 	default:
 		if trans {
 			col := make([]float64, ar)

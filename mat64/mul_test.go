@@ -133,22 +133,6 @@ func TestMulTypes(t *testing.T) {
 		randomSlice(cvec)
 		testMul(t, a, b, c, acomp, bcomp, ccomp, false, "existing receiver")
 
-		// Test with RowColers.
-		avm := (*basicRowColer)(a)
-		bvm := (*basicRowColer)(b)
-		d.Reset()
-		testMul(t, avm, b, d, acomp, bcomp, ccomp, true, "a rowcoler with zero receiver")
-		d.Reset()
-		testMul(t, a, bvm, d, acomp, bcomp, ccomp, true, "b rowcoler with zero receiver")
-		d.Reset()
-		testMul(t, avm, bvm, d, acomp, bcomp, ccomp, true, "both rowcoler with zero receiver")
-		randomSlice(cvec)
-		testMul(t, avm, b, c, acomp, bcomp, ccomp, true, "a rowcoler with existing receiver")
-		randomSlice(cvec)
-		testMul(t, a, bvm, c, acomp, bcomp, ccomp, true, "b rowcoler with existing receiver")
-		randomSlice(cvec)
-		testMul(t, avm, bvm, c, acomp, bcomp, ccomp, true, "both rowcoler with existing receiver")
-
 		// Cast a as a basic matrix
 		am := (*basicMatrix)(a)
 		bm := (*basicMatrix)(b)
@@ -186,8 +170,6 @@ func testMul(t *testing.T, a, b Matrix, c *Dense, acomp, bcomp, ccomp matComp, c
 		aDense = t
 	case *basicMatrix:
 		aDense = (*Dense)(t)
-	case *basicRowColer:
-		aDense = (*Dense)(t)
 	}
 
 	var bDense *Dense
@@ -195,8 +177,6 @@ func testMul(t *testing.T, a, b Matrix, c *Dense, acomp, bcomp, ccomp matComp, c
 	case *Dense:
 		bDense = t
 	case *basicMatrix:
-		bDense = (*Dense)(t)
-	case *basicRowColer:
 		bDense = (*Dense)(t)
 	}
 
@@ -231,28 +211,6 @@ func (m *basicMatrix) Dims() (r, c int) {
 
 func (m *basicMatrix) T() Matrix {
 	return Transpose{m}
-}
-
-type basicRowColer Dense
-
-func (m *basicRowColer) At(r, c int) float64 {
-	return (*Dense)(m).At(r, c)
-}
-
-func (m *basicRowColer) Dims() (r, c int) {
-	return (*Dense)(m).Dims()
-}
-
-func (m *basicRowColer) T() Matrix {
-	return Transpose{m}
-}
-
-func (m *basicRowColer) Row(row []float64, r int) []float64 {
-	return Row(row, r, m)
-}
-
-func (m *basicRowColer) Col(row []float64, c int) []float64 {
-	return Col(row, c, m)
 }
 
 type basicSymmetric SymDense

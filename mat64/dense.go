@@ -19,8 +19,6 @@ var (
 	_ Matrix  = dense
 	_ Mutable = dense
 
-	_ RowColSetter = dense
-
 	_ Cloner       = dense
 	_ Viewer       = dense
 	_ RowViewer    = dense
@@ -365,17 +363,6 @@ func (m *Dense) Clone(a Matrix) {
 				copy(mat.Data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
 			}
 		}
-	case RowColer:
-		mat.Data = use(m.mat.Data, r*c)
-		if trans {
-			for i := 0; i < r; i++ {
-				aU.Col(mat.Data[i*c:(i+1)*c], i)
-			}
-		} else {
-			for i := 0; i < r; i++ {
-				aU.Row(mat.Data[i*c:(i+1)*c], i)
-			}
-		}
 	default:
 		mat.Data = use(m.mat.Data, r*c)
 		m.mat = mat
@@ -418,16 +405,6 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 		} else {
 			for i := 0; i < r; i++ {
 				copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
-			}
-		}
-	case RowColer:
-		if trans {
-			for i := 0; i < r; i++ {
-				aU.Col(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], i)
-			}
-		} else {
-			for i := 0; i < r; i++ {
-				aU.Row(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], i)
 			}
 		}
 	default:

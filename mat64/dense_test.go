@@ -15,23 +15,10 @@ import (
 	"github.com/gonum/matrix"
 )
 
-func asDense(d *Dense) Matrix {
-	return d
-}
-func asBasicMatrix(d *Dense) Matrix {
-	return (*basicMatrix)(d)
-}
-func asBasicRowColer(d *Dense) Matrix {
-	return (*basicRowColer)(d)
-}
-
-func asBasicSymmetric(s *SymDense) Matrix {
-	return (*basicSymmetric)(s)
-}
-
-func asBasicTriangular(t *TriDense) Triangular {
-	return (*basicTriangular)(t)
-}
+func asDense(d *Dense) Matrix                  { return d }
+func asBasicMatrix(d *Dense) Matrix            { return (*basicMatrix)(d) }
+func asBasicSymmetric(s *SymDense) Matrix      { return (*basicSymmetric)(s) }
+func asBasicTriangular(t *TriDense) Triangular { return (*basicTriangular)(t) }
 
 func TestNewDense(t *testing.T) {
 	for i, test := range []struct {

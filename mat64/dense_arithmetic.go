@@ -58,21 +58,6 @@ func (m *Dense) Add(a, b Matrix) {
 		defer restore()
 	}
 
-	if a, ok := a.(RowColer); ok {
-		if b, ok := b.(RowColer); ok {
-			rowa := make([]float64, ac)
-			rowb := make([]float64, bc)
-			for r := 0; r < ar; r++ {
-				a.Row(rowa, r)
-				for i, v := range b.Row(rowb, r) {
-					rowa[i] += v
-				}
-				copy(m.rowView(r), rowa)
-			}
-			return
-		}
-	}
-
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
 			m.set(r, c, a.At(r, c)+b.At(r, c))
@@ -118,21 +103,6 @@ func (m *Dense) Sub(a, b Matrix) {
 	} else if m == bU {
 		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
-	}
-
-	if a, ok := a.(RowColer); ok {
-		if b, ok := b.(RowColer); ok {
-			rowa := make([]float64, ac)
-			rowb := make([]float64, bc)
-			for r := 0; r < ar; r++ {
-				a.Row(rowa, r)
-				for i, v := range b.Row(rowb, r) {
-					rowa[i] -= v
-				}
-				copy(m.rowView(r), rowa)
-			}
-			return
-		}
 	}
 
 	for r := 0; r < ar; r++ {
@@ -183,21 +153,6 @@ func (m *Dense) MulElem(a, b Matrix) {
 		defer restore()
 	}
 
-	if a, ok := a.(RowColer); ok {
-		if b, ok := b.(RowColer); ok {
-			rowa := make([]float64, ac)
-			rowb := make([]float64, bc)
-			for r := 0; r < ar; r++ {
-				a.Row(rowa, r)
-				for i, v := range b.Row(rowb, r) {
-					rowa[i] *= v
-				}
-				copy(m.rowView(r), rowa)
-			}
-			return
-		}
-	}
-
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
 			m.set(r, c, a.At(r, c)*b.At(r, c))
@@ -244,21 +199,6 @@ func (m *Dense) DivElem(a, b Matrix) {
 	} else if m == bU {
 		m, restore = m.isolatedWorkspace(bU)
 		defer restore()
-	}
-
-	if a, ok := a.(RowColer); ok {
-		if b, ok := b.(RowColer); ok {
-			rowa := make([]float64, ac)
-			rowb := make([]float64, bc)
-			for r := 0; r < ar; r++ {
-				a.Row(rowa, r)
-				for i, v := range b.Row(rowb, r) {
-					rowa[i] /= v
-				}
-				copy(m.rowView(r), rowa)
-			}
-			return
-		}
 	}
 
 	for r := 0; r < ar; r++ {
@@ -490,60 +430,6 @@ func (m *Dense) Mul(a, b Matrix) {
 		}
 	}
 
-	if aU, ok := aU.(RowColer); ok {
-		if bU, ok := bU.(RowColer); ok {
-			row := make([]float64, ac)
-			col := make([]float64, br)
-			if aTrans {
-				if bTrans {
-					for r := 0; r < ar; r++ {
-						dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
-						for c := 0; c < bc; c++ {
-							dataTmp[c] = blas64.Dot(ac,
-								blas64.Vector{Inc: 1, Data: aU.Col(row, r)},
-								blas64.Vector{Inc: 1, Data: bU.Row(col, c)},
-							)
-						}
-					}
-					return
-				}
-				// TODO(jonlawlor): determine if (b*a)' is more efficient
-				for r := 0; r < ar; r++ {
-					dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
-					for c := 0; c < bc; c++ {
-						dataTmp[c] = blas64.Dot(ac,
-							blas64.Vector{Inc: 1, Data: aU.Col(row, r)},
-							blas64.Vector{Inc: 1, Data: bU.Col(col, c)},
-						)
-					}
-				}
-				return
-			}
-			if bTrans {
-				for r := 0; r < ar; r++ {
-					dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
-					for c := 0; c < bc; c++ {
-						dataTmp[c] = blas64.Dot(ac,
-							blas64.Vector{Inc: 1, Data: aU.Row(row, r)},
-							blas64.Vector{Inc: 1, Data: bU.Row(col, c)},
-						)
-					}
-				}
-				return
-			}
-			for r := 0; r < ar; r++ {
-				dataTmp := m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+bc]
-				for c := 0; c < bc; c++ {
-					dataTmp[c] = blas64.Dot(ac,
-						blas64.Vector{Inc: 1, Data: aU.Row(row, r)},
-						blas64.Vector{Inc: 1, Data: bU.Col(col, c)},
-					)
-				}
-			}
-			return
-		}
-	}
-
 	row := make([]float64, ac)
 	for r := 0; r < ar; r++ {
 		for i := range row {
@@ -731,17 +617,6 @@ func (m *Dense) Scale(f float64, a Matrix) {
 		return
 	}
 
-	if a, ok := a.(RowColer); ok {
-		row := make([]float64, ac)
-		for r := 0; r < ar; r++ {
-			for i, v := range a.Row(row, r) {
-				row[i] = f * v
-			}
-			copy(m.rowView(r), row)
-		}
-		return
-	}
-
 	for r := 0; r < ar; r++ {
 		for c := 0; c < ac; c++ {
 			m.set(r, c, f*a.At(r, c))
@@ -777,17 +652,6 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 					m.mat.Data[i*m.mat.Stride+jm] = fn(i, j, v)
 				}
 			}
-		}
-		return
-	}
-
-	if a, ok := a.(RowColer); ok {
-		row := make([]float64, ac)
-		for r := 0; r < ar; r++ {
-			for i, v := range a.Row(row, r) {
-				row[i] = fn(r, i, v)
-			}
-			copy(m.rowView(r), row)
 		}
 		return
 	}

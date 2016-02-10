@@ -87,30 +87,6 @@ type Mutable interface {
 	Matrix
 }
 
-// A RowColer can return rows and columns of the represented matrix.
-type RowColer interface {
-	// Row returns a []float64 for the row specified by the index i. It will
-	// panic if the index is out of bounds. len(dst) must equal the number of
-	// columns unless dst is nil in which case a new slice will be allocated.
-	Row(dst []float64, i int) []float64
-
-	// Col returns a []float64 for the column specified by the index j. It will
-	// panic if the index is out of bounds. len(dst) must equal the number of
-	// rows unless dst is nil in which case a new slice will be allocated.
-	Col(dst []float64, j int) []float64
-}
-
-// A RowColSetter can set rows and columns in the represented matrix.
-type RowColSetter interface {
-	// SetRow sets the values in the specified row of the matrix to the values
-	// in src. len(src) must equal the number of columns in the receiver.
-	SetRow(i int, src []float64)
-
-	// SetCol sets the values in the specified column of the matrix to the values
-	// in src. len(src) must equal the number of rows in the receiver.
-	SetCol(j int, src []float64)
-}
-
 // A RowViewer can return a Vector reflecting a row that is backed by the matrix
 // data. The Vector returned will have Len() == nCols.
 type RowViewer interface {

@@ -104,7 +104,7 @@ func DlarfgTest(t *testing.T, impl Dlarfger) {
 			}
 		}
 		if !iseye {
-			t.Errorf("H^T * H is not I %V", eye)
+			t.Errorf("H^T * H is not I %v", eye)
 		}
 
 		xVec := blas64.Vector{

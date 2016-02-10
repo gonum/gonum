@@ -72,12 +72,12 @@ func Dgeqr2Test(t *testing.T, impl Dgeqr2er) {
 
 		// Check that q is orthonormal
 		for i := 0; i < m; i++ {
-			nrm := blas64.Nrm2(m, blas64.Vector{1, q.Data[i*m:]})
+			nrm := blas64.Nrm2(m, blas64.Vector{Inc: 1, Data: q.Data[i*m:]})
 			if math.Abs(nrm-1) > 1e-14 {
 				t.Errorf("Case %v, q not normal", c)
 			}
 			for j := 0; j < i; j++ {
-				dot := blas64.Dot(m, blas64.Vector{1, q.Data[i*m:]}, blas64.Vector{1, q.Data[j*m:]})
+				dot := blas64.Dot(m, blas64.Vector{Inc: 1, Data: q.Data[i*m:]}, blas64.Vector{Inc: 1, Data: q.Data[j*m:]})
 				if math.Abs(dot) > 1e-14 {
 					t.Errorf("Case %v, q not orthogonal", i)
 				}

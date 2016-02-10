@@ -60,22 +60,54 @@ func eye(n int) *Dense {
 }
 
 func TestCol(t *testing.T) {
-	for i, af := range [][][]float64{
-		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
-		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-		{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}},
+	for id, af := range [][][]float64{
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+		},
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+			{10, 11, 12},
+		},
+		{
+			{1, 2, 3, 4},
+			{5, 6, 7, 8},
+			{9, 10, 11, 12},
+		},
 	} {
 		a := NewDense(flatten(af))
-		for ci := range af[0] {
-			col := make([]float64, a.mat.Rows)
-			for j := range col {
-				col[j] = float64(ci + 1 + j*a.mat.Cols)
+		col := make([]float64, a.mat.Rows)
+		for j := range af[0] {
+			for i := range col {
+				col[i] = float64(i*a.mat.Cols + j + 1)
 			}
-			if got := Col(nil, ci, a); !reflect.DeepEqual(got, col) {
-				t.Errorf("unexpected col returned for test %d col %d: got: %v want: %v",
-					i, ci, got, col)
+
+			if got := Col(nil, j, a); !reflect.DeepEqual(got, col) {
+				t.Errorf("test %d: unexpected values returned for dense col %d: got: %v want: %v",
+					id, j, got, col)
+			}
+
+			got := make([]float64, a.mat.Rows)
+			if Col(got, j, a); !reflect.DeepEqual(got, col) {
+				t.Errorf("test %d: unexpected values filled for dense col %d: got: %v want: %v",
+					id, j, got, col)
 			}
 		}
+	}
+
+	denseComparison := func(a *Dense) interface{} {
+		r, c := a.Dims()
+		ans := make([][]float64, c)
+		for j := range ans {
+			ans[j] = make([]float64, r)
+			for i := range ans[j] {
+				ans[j][i] = a.At(i, j)
+			}
+		}
+		return ans
 	}
 
 	f := func(a Matrix) interface{} {
@@ -86,15 +118,8 @@ func TestCol(t *testing.T) {
 		}
 		return ans
 	}
-	denseComparison := func(a *Dense) interface{} {
-		_, c := a.Dims()
-		ans := make([][]float64, c)
-		for j := range ans {
-			ans[j] = Col(nil, j, a)
-		}
-		return ans
-	}
 	testOneInputFunc(t, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+
 	f = func(a Matrix) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, c)

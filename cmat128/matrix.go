@@ -13,56 +13,58 @@ type Matrix interface {
 	// It will panic if i or j are out of bounds for the matrix.
 	At(i, j int) complex128
 
-	// T returns the transpose of the Matrix. Whether T returns a copy of the
-	// underlying data is implementation dependent.
-	// This method may be implemented using the Transpose type, which
-	// provides an implicit matrix transpose.
-	T() Matrix
+	// H returns the conjugate transpose of the Matrix. Whether H
+	// returns a copy of the underlying data is implementation dependent.
+	// This method may be implemented using the Conjugate type, which
+	// provides an implicit matrix conjugate transpose.
+	H() Matrix
 }
 
 var (
-	_ Matrix       = Transpose{}
-	_ Untransposer = Transpose{}
+	_ Matrix       = Conjugate{}
+	_ Unconjugator = Conjugate{}
 )
 
-// Transpose is a type for performing an implicit matrix transpose. It implements
-// the Matrix interface, returning values from the transpose of the matrix within.
-type Transpose struct {
+// Conjugate is a type for performing an implicit matrix conjugate transpose.
+// It implements the Matrix interface, returning values from the conjugate
+// transpose of the matrix within.
+type Conjugate struct {
 	Matrix Matrix
 }
 
 // At returns the value of the element at row i and column j of the transposed
 // matrix, that is, row j and column i of the Matrix field.
-func (t Transpose) At(i, j int) complex128 {
-	return t.Matrix.At(j, i)
+func (t Conjugate) At(i, j int) complex128 {
+	return t.Matrix.At(j, i) * complex(1, -1)
 }
 
 // Dims returns the dimensions of the transposed matrix. The number of rows returned
 // is the number of columns in the Matrix field, and the number of columns is
 // the number of rows in the Matrix field.
-func (t Transpose) Dims() (r, c int) {
+func (t Conjugate) Dims() (r, c int) {
 	c, r = t.Matrix.Dims()
 	return r, c
 }
 
-// T performs an implicit transpose by returning the Matrix field.
-func (t Transpose) T() Matrix {
+// H performs an implicit conjugate transpose by returning the Matrix field.
+func (t Conjugate) H() Matrix {
 	return t.Matrix
 }
 
-// Untranspose returns the Matrix field.
-func (t Transpose) Untranspose() Matrix {
+// Unconjugate returns the Matrix field.
+func (t Conjugate) Unconjugate() Matrix {
 	return t.Matrix
 }
 
-// Untransposer is a type that can undo an implicit transpose.
-type Untransposer interface {
-	// Note: This interface is needed to unify all of the Transpose types. In
+// Unconjugator is a type that can undo an implicit conjugate transpose.
+type Unconjugator interface {
+	// Note: This interface is needed to unify all of the Conjugate types. In
 	// the cmat128 methods, we need to test if the Matrix has been implicitly
-	// transposed. If this is checked by testing for the specific Transpose type
-	// then the behavior will be different if the user uses T() or TTri() for a
+	// transposed. If this is checked by testing for the specific Conjugate type
+	// then the behavior will be different if the user uses H() or HTri() for a
 	// triangular matrix.
 
-	// Untranspose returns the underlying Matrix stored for the implicit transpose.
-	Untranspose() Matrix
+	// Unconjugate returns the underlying Matrix stored for the implicit
+	// conjugate transpose.
+	Unconjugate() Matrix
 }

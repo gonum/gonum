@@ -133,18 +133,49 @@ func TestCol(t *testing.T) {
 }
 
 func TestRow(t *testing.T) {
-	for i, af := range [][][]float64{
-		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
-		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-		{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}},
+	for id, af := range [][][]float64{
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+		},
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+			{10, 11, 12},
+		},
+		{
+			{1, 2, 3, 4},
+			{5, 6, 7, 8},
+			{9, 10, 11, 12},
+		},
 	} {
 		a := NewDense(flatten(af))
-		for ri, row := range af {
-			if got := Row(nil, ri, a); !reflect.DeepEqual(got, row) {
-				t.Errorf("unexpected row returned for test %d row %d: got: %v want: %v",
-					i, ri, got, row)
+		for i, row := range af {
+			if got := Row(nil, i, a); !reflect.DeepEqual(got, row) {
+				t.Errorf("test %d: unexpected values returned for dense row %d: got: %v want: %v",
+					id, i, got, row)
+			}
+
+			got := make([]float64, len(row))
+			if Row(got, i, a); !reflect.DeepEqual(got, row) {
+				t.Errorf("test %d: unexpected values filled for dense row %d: got: %v want: %v",
+					id, i, got, row)
 			}
 		}
+	}
+
+	denseComparison := func(a *Dense) interface{} {
+		r, c := a.Dims()
+		ans := make([][]float64, r)
+		for i := range ans {
+			ans[i] = make([]float64, c)
+			for j := range ans[i] {
+				ans[i][j] = a.At(i, j)
+			}
+		}
+		return ans
 	}
 
 	f := func(a Matrix) interface{} {
@@ -155,15 +186,8 @@ func TestRow(t *testing.T) {
 		}
 		return ans
 	}
-	denseComparison := func(a *Dense) interface{} {
-		r, _ := a.Dims()
-		ans := make([][]float64, r)
-		for i := range ans {
-			ans[i] = Row(nil, i, a)
-		}
-		return ans
-	}
 	testOneInputFunc(t, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+
 	f = func(a Matrix) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, r)

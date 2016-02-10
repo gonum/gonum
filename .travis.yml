@@ -27,8 +27,6 @@ matrix:
   - os: linux
     env: BLAS_LIB=ATLAS
   - os: osx
-    env: BLAS_LIB=OpenBLAS
-  - os: osx
     env: BLAS_LIB=ATLAS
 
 before_install:

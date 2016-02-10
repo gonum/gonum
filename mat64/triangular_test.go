@@ -236,3 +236,27 @@ func TestTriTriDenseCopy(t *testing.T) {
 		}
 	}
 }
+
+func TestTriInverse(t *testing.T) {
+	for _, upper := range []bool{true, false} {
+		for _, n := range []int{1, 3, 5, 9} {
+			data := make([]float64, n*n)
+			for i := range data {
+				data[i] = rand.NormFloat64()
+			}
+			a := NewTriDense(n, upper, data)
+			var tr TriDense
+			err := tr.InverseTri(a)
+			if err != nil {
+				t.Errorf("Bad test: %s", err)
+			}
+			var d Dense
+			d.Mul(a, &tr)
+			if !equalApprox(eye(n), &d, 1e-8, false) {
+				var diff Dense
+				diff.Sub(eye(n), &d)
+				t.Errorf("Tri times inverse is not identity. Norm of difference: %v", Norm(&diff, 2))
+			}
+		}
+	}
+}

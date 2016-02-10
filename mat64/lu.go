@@ -188,7 +188,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 // LFromLU extracts the lower triangular matrix from an LU factorization.
 func (t *TriDense) LFromLU(lu *LU) {
 	_, n := lu.lu.Dims()
-	t.reuseAs(n, blas.Lower)
+	t.reuseAs(n, false)
 	// Extract the lower triangular elements.
 	for i := 0; i < n; i++ {
 		for j := 0; j < i; j++ {
@@ -204,7 +204,7 @@ func (t *TriDense) LFromLU(lu *LU) {
 // UFromLU extracts the upper triangular matrix from an LU factorization.
 func (t *TriDense) UFromLU(lu *LU) {
 	_, n := lu.lu.Dims()
-	t.reuseAs(n, blas.Upper)
+	t.reuseAs(n, true)
 	// Extract the upper triangular elements.
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {

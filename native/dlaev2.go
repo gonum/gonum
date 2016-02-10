@@ -6,7 +6,7 @@ package native
 
 import "math"
 
-// Dlaev2 computes the eigendecomposition of a symmetric 2×2 matrix.
+// Dlaev2 computes the Eigen decomposition of a symmetric 2×2 matrix.
 // The matrix is given by
 //  [a b]
 //  [b c]

@@ -9,7 +9,7 @@ import "github.com/gonum/blas"
 // Dgelq2 computes the LQ factorization of the m×n matrix A.
 //
 // In an LQ factorization, L is a lower triangular m×n matrix, and Q is an n×n
-// orthornormal matrix.
+// orthonormal matrix.
 //
 // a is modified to contain the information to construct L and Q.
 // The lower triangle of a contains the matrix L. The upper triangular elements

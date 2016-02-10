@@ -15,7 +15,7 @@ import "github.com/gonum/blas"
 // If side == blas.Left, a is a matrix of size m×k, and if side == blas.Right
 // a is of size n×k.
 //
-// Tau contains the householder factors and is of length at least k and this function
+// Tau contains the Householder factors and is of length at least k and this function
 // will panic otherwise.
 //
 // Work is temporary storage of length at least n if side == blas.Left

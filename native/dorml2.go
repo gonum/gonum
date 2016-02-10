@@ -6,7 +6,7 @@ package native
 
 import "github.com/gonum/blas"
 
-// Dorml2 multiplies a general matrix c by an orthogonal matrix from an LQ factorization
+// Dorml2 multiplies a general matrix C by an orthogonal matrix from an LQ factorization
 // determined by Dgelqf.
 //  C = Q * C    if side == blas.Left and trans == blas.NoTrans
 //  C = Q^T * C  if side == blas.Left and trans == blas.Trans
@@ -15,7 +15,7 @@ import "github.com/gonum/blas"
 // If side == blas.Left, a is a matrix of side k×m, and if side == blas.Right
 // a is of size k×n.
 //
-// Tau contains the householder factors and is of length at least k and this function will
+// Tau contains the Householder factors and is of length at least k and this function will
 // panic otherwise.
 //
 // Work is temporary storage of length at least n if side == blas.Left

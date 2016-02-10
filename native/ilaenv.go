@@ -13,7 +13,7 @@ package native
 //  5: The minumum column dimension for blocking to be used.
 //  6: The crossover point for SVD (to use QR factorization or not).
 //  7: The number of processors.
-//  8: The crossover point for multishift in QR and QZ methods for nonsymmetric eigenvalue problems.
+//  8: The crossover point for multi-shift in QR and QZ methods for non-symmetric eigenvalue problems.
 //  9: Maximum size of the subproblems in divide-and-conquer algorithms.
 //  10: ieee NaN arithmetic can be trusted not to trap.
 //  11: infinity arithmetic can be trusted not to trap.

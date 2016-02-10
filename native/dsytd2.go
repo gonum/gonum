@@ -13,8 +13,8 @@ import (
 // orthogonal similarity transformation
 //  Q^T * A * Q = T
 // On entry, the matrix is contained in the specified triangle of a. On exit,
-// if uplo == blas.Upper, the diagonal and first superdiagonal of a are
-// overwritten with the elements of T. The elements above the first superdiagonal
+// if uplo == blas.Upper, the diagonal and first super-diagonal of a are
+// overwritten with the elements of T. The elements above the first super-diagonal
 // are overwritten with the the elementary reflectors that are used with the
 // elements written to tau in order to construct Q. If uplo == blas.Lower, the
 // elements are written in the lower triangular region.

@@ -154,7 +154,7 @@ func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 	return clapack.Dlantr(byte(norm), uplo, diag, m, n, a, lda)
 }
 
-// Dpotrf computes the cholesky decomposition of the symmetric positive definite
+// Dpotrf computes the Cholesky decomposition of the symmetric positive definite
 // matrix a. If ul == blas.Upper, then a is stored as an upper-triangular matrix,
 // and a = U U^T is stored in place into a. If ul == blas.Lower, then a = L L^T
 // is computed and stored in-place into a. If a is not positive definite, false
@@ -184,7 +184,7 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 // this routine returns U * Q instead of Q, and if right singular vectors are
 // requested P^T * VT is returned instead of P^T.
 //
-// Frequently Dbdsqr is used in conjuction with Dgebrd which reduces a general
+// Frequently Dbdsqr is used in conjunction with Dgebrd which reduces a general
 // matrix A into bidiagonal form. In this case, the SVD of A is
 //  A = (U * Q) * S * (P^T * VT)
 //
@@ -341,7 +341,7 @@ func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, ld
 // Dgelq2 computes the LQ factorization of the m×n matrix A.
 //
 // In an LQ factorization, L is a lower triangular m×n matrix, and Q is an n×n
-// orthornormal matrix.
+// orthonormal matrix.
 //
 // a is modified to contain the information to construct L and Q.
 // The lower triangle of a contains the matrix L. The upper triangular elements
@@ -525,7 +525,7 @@ const noSVDO = "dgesvd: not coded for overwrite"
 // s is a slice of length at least min(m,n) and on exit contains the singular
 // values in decreasing order.
 //
-// u contains the left singular vectors on exit, stored columnwise. If
+// u contains the left singular vectors on exit, stored column-wise. If
 // jobU == lapack.SVDAll, u is of size m×m. If jobU == lapack.SVDInPlace u is
 // of size m×min(m,n). If jobU == lapack.SVDOverwrite or lapack.SVDNone, u is
 // not used.
@@ -865,7 +865,7 @@ func (impl Implementation) Dormbr(vect lapack.DecompUpdate, side blas.Side, tran
 	clapack.Dormbr(byte(vect), side, trans, m, n, k, a, lda, tau, c, ldc)
 }
 
-// Dormlq multiplies the matrix C by the othogonal matrix Q defined by the
+// Dormlq multiplies the matrix C by the orthogonal matrix Q defined by the
 // slices a and tau. A and tau are as returned from Dgelqf.
 //  C = Q * C    if side == blas.Left and trans == blas.NoTrans
 //  C = Q^T * C  if side == blas.Left and trans == blas.Trans
@@ -881,7 +881,7 @@ func (impl Implementation) Dormbr(vect lapack.DecompUpdate, side blas.Side, tran
 // by the temporary space available. If lwork == -1, instead of performing Dormlq,
 // the optimal work length will be stored into work[0].
 //
-// tau contains the householder scales and must have length at least k, and
+// tau contains the Householder scales and must have length at least k, and
 // this function will panic otherwise.
 func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
 	if side != blas.Left && side != blas.Right {
@@ -920,7 +920,7 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 	clapack.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc)
 }
 
-// Dormqr multiplies the matrix C by the othogonal matrix Q defined by the
+// Dormqr multiplies the matrix C by the orthogonal matrix Q defined by the
 // slices a and tau. a and tau are as returned from Dgeqrf.
 //  C = Q * C    if side == blas.Left and trans == blas.NoTrans
 //  C = Q^T * C  if side == blas.Left and trans == blas.Trans
@@ -929,7 +929,7 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 // If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
 // A is of size k×n. This uses a blocked algorithm.
 //
-// tau contains the householder scales and must have length at least k, and
+// tau contains the Householder scales and must have length at least k, and
 // this function will panic otherwise.
 //
 // The C interface does not support providing temporary storage. To provide compatibility
@@ -971,7 +971,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 }
 
 // Dtrcon estimates the reciprocal of the condition number of a positive-definite
-// matrix A given the Cholesky decmposition of A. The condition number computed
+// matrix A given the Cholesky decomposition of A. The condition number computed
 // is based on the 1-norm and the ∞-norm.
 //
 // anorm is the 1-norm and the ∞-norm of the original matrix A.

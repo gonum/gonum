@@ -11,7 +11,7 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-// Dpotf2 computes the cholesky decomposition of the symmetric positive definite
+// Dpotf2 computes the Cholesky decomposition of the symmetric positive definite
 // matrix a. If ul == blas.Upper, then a is stored as an upper-triangular matrix,
 // and a = U^T U is stored in place into a. If ul == blas.Lower, then a = L L^T
 // is computed and stored in-place into a. If a is not positive definite, false

@@ -43,7 +43,7 @@ import (
 //  (  v1  v2  a   a   a   a  )
 //
 // Dlabrd also returns the matrices X and Y which are used with U and V to
-// apply the transformatino to the unreduced part of the matrix
+// apply the transformation to the unreduced part of the matrix
 //  A := A - V*Y^T - X*U^T
 // and returns the matrices X and Y which are needed to apply the
 // transformation to the unreduced part of A.

@@ -29,7 +29,7 @@ func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int, dmin, dmin1, 
 	dmin = d
 	if pp == 0 {
 		for j4loop := 4 * (i0 + 1); j4loop <= 4*((n0+1)-3); j4loop += 4 {
-			j4 := j4loop - 1 // Translate back to zero-indexed
+			j4 := j4loop - 1 // Translate back to zero-indexed.
 			z[j4-2] = d + z[j4-1]
 			if z[j4-2] == 0 {
 				z[j4] = 0
@@ -68,7 +68,7 @@ func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int, dmin, dmin1, 
 			emin = math.Min(emin, z[j4-1])
 		}
 	}
-	// Unroll last two steps
+	// Unroll last two steps.
 	dnm2 = d
 	dmin2 = dmin
 	j4 = 4*(n0-2) - pp - 1

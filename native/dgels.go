@@ -92,7 +92,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 	} else if anrm > bignum {
 		impl.Dlascl(lapack.General, 0, 0, anrm, bignum, m, n, a, lda)
 	} else if anrm == 0 {
-		// Matrix all zeros
+		// Matrix is all zeros.
 		impl.Dlaset(blas.All, max(m, n), nrhs, 0, 0, b, ldb)
 		return true
 	}

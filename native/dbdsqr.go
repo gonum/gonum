@@ -23,7 +23,7 @@ import (
 // this routine returns U * Q instead of Q, and if right singular vectors are
 // requested P^T * VT is returned instead of P^T.
 //
-// Frequently Dbdsqr is used in conjuction with Dgebrd which reduces a general
+// Frequently Dbdsqr is used in conjunction with Dgebrd which reduces a general
 // matrix A into bidiagonal form. In this case, the SVD of A is
 //  A = (U * Q) * S * (P^T * VT)
 //

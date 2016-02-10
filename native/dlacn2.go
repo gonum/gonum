@@ -16,7 +16,7 @@ import (
 // Dlacn2 is called sequentially. In between calls, x should be overwritten by
 //  A * X if kase == 1
 //  A^T * X if kase == 2
-// all other prameters should be unchanged during sequential calls, and the updated
+// all other parameters should be unchanged during sequential calls, and the updated
 // values of est and kase should be used. On the final return (when kase is returned
 // as 0), V = A * W, where est = norm(V) / norm(W).
 //

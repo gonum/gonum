@@ -17,7 +17,7 @@ import (
 // contains the eigenvalues in ascending order on exit. d must have length at
 // least n, or Dsterf will panic.
 //
-// e contains the off-digonal elements of the tridiagonal matrix on entry, and is
+// e contains the off-diagonal elements of the tridiagonal matrix on entry, and is
 // overwritten during the call to Dsterf. e must have length of at least n-1 or
 // Dsterf will panic.
 func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
@@ -36,8 +36,8 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 
 	const (
 		none = 0 // The values are not scaled.
-		down = 1 // The values are scaled below ssfmax threshhold.
-		up   = 2 // The values are scaled below ssfmin threshhold.
+		down = 1 // The values are scaled below ssfmax threshold.
+		up   = 2 // The values are scaled below ssfmin threshold.
 	)
 
 	// Determine the unit roundoff for this environment.
@@ -115,7 +115,7 @@ Thirty:
 	}
 	if lend >= l {
 		// QL Iteration.
-		// Look for small subdiagonal element.
+		// Look for small sub-diagonal element.
 	Fifty:
 		if l != lend {
 			for m = l; m < lend; m++ {
@@ -195,7 +195,7 @@ Thirty:
 	} else {
 	OneHundred:
 		// QR Iteration.
-		// Look for small superdiagonal element.
+		// Look for small super-diagonal element.
 		for m = l; m >= lend+1; m-- {
 			if math.Abs(e[m-1]) <= eps2*math.Abs(d[m]*d[m-1]) {
 				goto OneTwenty

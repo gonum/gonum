@@ -39,12 +39,12 @@ const noSVDO = "dgesvd: not coded for overwrite"
 // s is a slice of length at least min(m,n) and on exit contains the singular
 // values in decreasing order.
 //
-// u contains the left singular vectors on exit, stored columnwise. If
+// u contains the left singular vectors on exit, stored column-wise. If
 // jobU == lapack.SVDAll, u is of size m×m. If jobU == lapack.SVDInPlace u is
 // of size m×min(m,n). If jobU == lapack.SVDOverwrite or lapack.SVDNone, u is
 // not used.
 //
-// vt contains the left singular vectors on exit, stored rowwise. If
+// vt contains the left singular vectors on exit, stored row-wise. If
 // jobV == lapack.SVDAll, vt is of size n×m. If jobVT == lapack.SVDInPlace vt is
 // of size min(m,n)×n. If jobVT == lapack.SVDOverwrite or lapack.SVDNone, vt is
 // not used.
@@ -368,7 +368,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	smlnum := math.Sqrt(dlamchS) / eps
 	bignum := 1 / smlnum
 
-	// Scale A if max element outside range [smlnum, bignum]
+	// Scale A if max element outside range [smlnum, bignum].
 	anrm := impl.Dlange(lapack.MaxAbs, m, n, a, lda, dum)
 	var iscl bool
 	if anrm > 0 && anrm < smlnum {

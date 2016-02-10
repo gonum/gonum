@@ -12,7 +12,7 @@ import (
 )
 
 // Dpocon estimates the reciprocal of the condition number of a positive-definite
-// matrix A given the Cholesky decmposition of A. The condition number computed
+// matrix A given the Cholesky decomposition of A. The condition number computed
 // is based on the 1-norm and the ∞-norm.
 //
 // anorm is the 1-norm and the ∞-norm of the original matrix A.

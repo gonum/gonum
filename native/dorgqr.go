@@ -12,7 +12,7 @@ import (
 // Dorgqr generates an m×n matrix Q with orthonormal columns defined by the
 // product of elementary reflectors as computed by Dgeqrf.
 //  Q = H(0) * H(2) * ... * H(k-1)
-// Dorgqr is the blocked version of dorg2r that makes greater use of level-3 BLAS
+// Dorgqr is the blocked version of Dorg2r that makes greater use of level-3 BLAS
 // routines.
 //
 // The length of tau must be equal to k, and the length of work must be at least n.

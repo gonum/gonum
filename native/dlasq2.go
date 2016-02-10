@@ -16,7 +16,7 @@ import (
 // and overflow.
 //
 // To see the relation of Z to the tridiagonal matrix, let L be a
-// unit lower bidiagonal matrix with subdiagonals Z(2,4,6,,..) and
+// unit lower bidiagonal matrix with sub-diagonals Z(2,4,6,,..) and
 // let U be an upper bidiagonal matrix with 1's above and diagonal
 // Z(1,3,5,,..). The tridiagonal is L*U or, if you prefer, the
 // symmetric tridiagonal to which it is similar.

@@ -9,7 +9,7 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dormlq multiplies the matrix C by the othogonal matrix Q defined by the
+// Dormlq multiplies the matrix C by the orthogonal matrix Q defined by the
 // slices a and tau. A and tau are as returned from Dgelqf.
 //  C = Q * C    if side == blas.Left and trans == blas.NoTrans
 //  C = Q^T * C  if side == blas.Left and trans == blas.Trans
@@ -25,7 +25,7 @@ import (
 // by the temporary space available. If lwork == -1, instead of performing Dormlq,
 // the optimal work length will be stored into work[0].
 //
-// tau contains the householder scales and must have length at least k, and
+// tau contains the Householder scales and must have length at least k, and
 // this function will panic otherwise.
 func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
 	if side != blas.Left && side != blas.Right {
@@ -82,7 +82,7 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 		}
 	}
 	if nb < nbmin || nb >= k {
-		// Call unblocked code
+		// Call unblocked code.
 		impl.Dorml2(side, trans, m, n, k, a, lda, tau, c, ldc, work)
 		return
 	}

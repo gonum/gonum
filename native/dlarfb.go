@@ -16,7 +16,7 @@ import (
 //  c = h * c if side == Left and trans == NoTrans
 //  c = c * h if side == Right and trans == NoTrans
 //  c = h^T * c if side == Left and trans == Trans
-//  c = c * h^t if side == Right and trans == Trans
+//  c = c * h^T if side == Right and trans == Trans
 // h is a product of elementary reflectors. direct sets the direction of multiplication
 //  h = h_1 * h_2 * ... * h_k if direct == Forward
 //  h = h_k * h_k-1 * ... * h_1 if direct == Backward

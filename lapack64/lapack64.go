@@ -283,7 +283,7 @@ func Lantr(norm lapack.MatrixNorm, a blas64.Triangular, work []float64) float64 
 // by the temporary space available. If lwork == -1, instead of performing Ormlq,
 // the optimal work length will be stored into work[0].
 //
-// Tau contains the householder scales and must have length at least k, and
+// Tau contains the Householder scales and must have length at least k, and
 // this function will panic otherwise.
 func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64, c blas64.General, work []float64, lwork int) {
 	lapack64.Dormlq(side, trans, c.Rows, c.Cols, a.Rows, a.Data, a.Stride, tau, c.Data, c.Stride, work, lwork)
@@ -298,7 +298,7 @@ func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 // If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
 // A is of size k×n. This uses a blocked algorithm.
 //
-// tau contains the householder scales and must have length at least k, and
+// tau contains the Householder scales and must have length at least k, and
 // this function will panic otherwise.
 //
 // Work is temporary storage, and lwork specifies the usable memory length.

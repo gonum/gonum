@@ -72,7 +72,7 @@ func (impl Implementation) Dlasq5(i0, n0 int, z []float64, pp int, tau, sigma, d
 		dn = z[j4p2+2]*(dnm1/z[j4-2]) - tau
 		dmin = math.Min(dmin, dn)
 	} else {
-		// This is the version that sets d's to zero if they are small enough
+		// This is the version that sets d's to zero if they are small enough.
 		j4 = 4*(i0+1) + pp - 4
 		emin = z[j4+4]
 		d := z[j4] - tau

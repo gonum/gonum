@@ -31,7 +31,7 @@ func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto
 		var done bool
 		var mul, ctol float64
 		if cfrom1 == cfromc {
-			// cfromc is inf
+			// cfromc is inf.
 			mul = ctoc / cfromc
 			done = true
 			ctol = ctoc

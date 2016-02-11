@@ -118,7 +118,7 @@ type Cloner interface {
 }
 
 // A Reseter can reset the matrix so that it can be reused as the receiver of a dimensionally
-// restricted operation. This is commonly used when the matrix is being used a a workspace
+// restricted operation. This is commonly used when the matrix is being used as a workspace
 // or temporary matrix.
 //
 // If the matrix is a view, using the reset matrix may result in data corruption in elements

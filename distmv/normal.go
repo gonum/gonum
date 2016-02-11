@@ -77,6 +77,34 @@ func NewNormalChol(mu []float64, chol *mat64.Cholesky, src *rand.Rand) *Normal {
 	return n
 }
 
+// NewNormalPrecision creates a new Normal distribution with the given mean and
+// precision matrix (inverse of the covariance matrix). NewNormalPrecision
+// panics if len(mu) is not equal to prec.Symmetric(). If the precision matrix
+// is not positive-definite, NewNormalPrecision returns nil for norm and ok
+// for false.
+func NewNormalPrecision(mu []float64, prec *mat64.SymDense, src *rand.Rand) (norm *Normal, ok bool) {
+	if len(mu) == 0 {
+		panic(badZeroDimension)
+	}
+	dim := prec.Symmetric()
+	if dim != len(mu) {
+		panic(badSizeMismatch)
+	}
+	// TODO(btracey): Computing a matrix inverse is generally numerically instable.
+	// This only has to compute the inverse of a positive definite matrix, which
+	// is much better, but this still loses precision. It is worth considering if
+	// instead the precision matrix should be stored explicitly and used instead
+	// of the Cholesky decomposition of the covariance matrix where appropriate.
+	var chol mat64.Cholesky
+	ok = chol.Factorize(prec)
+	if !ok {
+		return nil, false
+	}
+	var sigma mat64.SymDense
+	sigma.InverseCholesky(&chol)
+	return NewNormal(mu, &sigma, src)
+}
+
 // ConditionNormal returns the Normal distribution that is the receiver conditioned
 // on the input evidence. The returned multivariate normal has dimension
 // n - len(observed), where n is the dimension of the original receiver. The updated

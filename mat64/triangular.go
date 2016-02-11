@@ -1,8 +1,11 @@
 package mat64
 
 import (
+	"math"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/lapack/lapack64"
 	"github.com/gonum/matrix"
 )
 
@@ -181,7 +184,11 @@ func (t *TriDense) isZero() bool {
 // reuseAS resizes a zero receiver to an n×n triangular matrix with the given
 // orientation. If the receiver is non-zero, reuseAs checks that the receiver
 // is the correct size and orientation.
-func (t *TriDense) reuseAs(n int, ul blas.Uplo) {
+func (t *TriDense) reuseAs(n int, upper bool) {
+	ul := blas.Lower
+	if upper {
+		ul = blas.Upper
+	}
 	if t.mat.N > t.cap {
 		panic(badTriCap)
 	}
@@ -275,6 +282,30 @@ func (t *TriDense) Copy(a Matrix) (r, c int) {
 	}
 
 	return r, c
+}
+
+// InverseTri computes the inverse of the triangular matrix a, storing the result
+// into the receiver. If a is ill-conditioned, a Condition error will be returned.
+// Note that matrix inversion is numerically unstable, and should generally be
+// avoided where possible, for example by using the Solve routines.
+func (t *TriDense) InverseTri(a Triangular) error {
+	n, _ := a.Triangle()
+	t.reuseAs(a.Triangle())
+	t.Copy(a)
+	work := make([]float64, 3*n)
+	iwork := make([]int, n)
+	cond := lapack64.Trcon(matrix.CondNorm, t.mat, work, iwork)
+	if math.IsInf(cond, 1) {
+		return matrix.Condition(cond)
+	}
+	ok := lapack64.Trtri(t.mat)
+	if !ok {
+		return matrix.Condition(math.Inf(1))
+	}
+	if cond > matrix.ConditionTolerance {
+		return matrix.Condition(cond)
+	}
+	return nil
 }
 
 // getBlasTriangular transforms t into a blas64.Triangular. If t is a RawTriangular,

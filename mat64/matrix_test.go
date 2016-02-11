@@ -49,12 +49,13 @@ func unflatten(r, c int, d []float64) [][]float64 {
 	return m
 }
 
-func eye() *Dense {
-	return NewDense(3, 3, []float64{
-		1, 0, 0,
-		0, 1, 0,
-		0, 0, 1,
-	})
+// eye returns a new identity matrix of size n×n.
+func eye(n int) *Dense {
+	d := make([]float64, n*n)
+	for i := 0; i < n*n; i += n + 1 {
+		d[i] = 1
+	}
+	return NewDense(n, n, d)
 }
 
 func TestCol(t *testing.T) {

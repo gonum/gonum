@@ -180,6 +180,34 @@ func TestFromCholesky(t *testing.T) {
 	}
 }
 
+func TestInverseCholesky(t *testing.T) {
+	for _, n := range []int{1, 3, 5, 9} {
+		data := make([]float64, n*n)
+		for i := range data {
+			data[i] = rand.NormFloat64()
+		}
+		var s SymDense
+		s.SymOuterK(1, NewDense(n, n, data))
+
+		var chol Cholesky
+		ok := chol.Factorize(&s)
+		if !ok {
+			t.Errorf("Bad test, cholesky decomposition failed")
+		}
+
+		var sInv SymDense
+		sInv.InverseCholesky(&chol)
+
+		var ans Dense
+		ans.Mul(&sInv, &s)
+		if !equalApprox(eye(n), &ans, 1e-8, false) {
+			var diff Dense
+			diff.Sub(eye(n), &ans)
+			t.Errorf("SymDense times Cholesky inverse not identity. Norm diff = %v", Norm(&diff, 2))
+		}
+	}
+}
+
 func BenchmarkCholeskySmall(b *testing.B) {
 	benchmarkCholesky(b, 2)
 }

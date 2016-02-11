@@ -28,6 +28,8 @@ matrix:
     env: BLAS_LIB=ATLAS
   - os: osx
     env: BLAS_LIB=ATLAS
+  - os: osx
+    env: BLAS_LIB=OpenBLAS
 
 before_install:
  # Required for coverage.

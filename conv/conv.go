@@ -18,7 +18,7 @@ type Complex struct {
 	// clients behind our back.
 	r, i mat64.Matrix
 
-	// imagSign hold the sign of the imaginary
+	// imagSign holds the sign of the imaginary
 	// part of the Complex. Valid values are 1 and -1.
 	imagSign float64
 }
@@ -29,7 +29,7 @@ var (
 )
 
 // NewComplex returns a complex matrix constructed from r and i. At least one of
-// r or i must be non-nil otherwise NewComples will panic. If one of the inputs
+// r or i must be non-nil otherwise NewComplex will panic. If one of the inputs
 // is nil, that part of the complex number will be zero when returned by At.
 // If both are non-nil but differ in their sizes, NewComplex will panic.
 func NewComplex(r, i mat64.Matrix) Complex {
@@ -123,7 +123,7 @@ type Imag struct {
 	conjSign float64
 }
 
-// NewImage returns a mat64.Matrix representing the imaginary part of m. If m is an Imager,
+// NewImag returns a mat64.Matrix representing the imaginary part of m. If m is an Imager,
 // the imaginary part is returned.
 func NewImag(m cmat128.Matrix) mat64.Matrix {
 	if m, ok := m.(Imager); ok {

@@ -10,7 +10,7 @@ package native
 //  2: The minimum block size for which the algorithm should be used.
 //  3: The crossover point below which an unblocked routine should be used.
 //  4: The number of shifts.
-//  5: The minumum column dimension for blocking to be used.
+//  5: The minimum column dimension for blocking to be used.
 //  6: The crossover point for SVD (to use QR factorization or not).
 //  7: The number of processors.
 //  8: The crossover point for multi-shift in QR and QZ methods for non-symmetric eigenvalue problems.

@@ -36,6 +36,10 @@ func TestDgelq2(t *testing.T) {
 	testlapack.Dgelq2Test(t, impl)
 }
 
+func TestDgeql2(t *testing.T) {
+	testlapack.Dgeql2Test(t, impl)
+}
+
 func TestDgels(t *testing.T) {
 	testlapack.DgelsTest(t, impl)
 }
@@ -164,12 +168,20 @@ func TestDorgbr(t *testing.T) {
 	testlapack.DorgbrTest(t, impl)
 }
 
+func TestDorg2l(t *testing.T) {
+	testlapack.Dorg2lTest(t, impl)
+}
+
 func TestDorgl2(t *testing.T) {
 	testlapack.Dorgl2Test(t, impl)
 }
 
 func TestDorglq(t *testing.T) {
 	testlapack.DorglqTest(t, impl)
+}
+
+func TestDorgql(t *testing.T) {
+	testlapack.DorgqlTest(t, impl)
 }
 
 func TestDorgqr(t *testing.T) {

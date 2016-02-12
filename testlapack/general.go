@@ -571,3 +571,26 @@ func printRowise(a []float64, m, n, lda int, beyond bool) {
 		fmt.Println(a[i*lda : i*lda+end])
 	}
 }
+
+// isOrthonormal checks that a general matrix is orthonormal.
+func isOrthonormal(q blas64.General) bool {
+	n := q.Rows
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			dot := blas64.Dot(n,
+				blas64.Vector{Inc: 1, Data: q.Data[i*q.Stride:]},
+				blas64.Vector{Inc: 1, Data: q.Data[j*q.Stride:]},
+			)
+			if i == j {
+				if math.Abs(dot-1) > 1e-10 {
+					return false
+				}
+			} else {
+				if math.Abs(dot) > 1e-10 {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}

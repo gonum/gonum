@@ -216,30 +216,6 @@ func dlatrdCheckDecomposition(t *testing.T, uplo blas.Uplo, n, nb int, e, tau, a
 	return true
 }
 
-// isOrthonormal checks that a general matrix is orthonormal.
-// TODO(btracey): Replace other tests with a call to this function.
-func isOrthonormal(q blas64.General) bool {
-	n := q.Rows
-	for i := 0; i < n; i++ {
-		for j := i; j < n; j++ {
-			dot := blas64.Dot(n,
-				blas64.Vector{Inc: 1, Data: q.Data[i*q.Stride:]},
-				blas64.Vector{Inc: 1, Data: q.Data[j*q.Stride:]},
-			)
-			if i == j {
-				if math.Abs(dot-1) > 1e-10 {
-					return false
-				}
-			} else {
-				if math.Abs(dot) > 1e-10 {
-					return false
-				}
-			}
-		}
-	}
-	return true
-}
-
 // genFromSym constructs a (symmetric) general matrix from the data in the
 // symmetric.
 // TODO(btracey): Replace other constructions of this with a call to this function.

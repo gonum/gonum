@@ -135,7 +135,7 @@ func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d
 			// Update the unreduced submatrix A[i+ib:n, i+ib:n], using an update
 			// of the form A = A + V*W^T - W*V^T.
 			bi.Dsyr2k(uplo, blas.NoTrans, n-i-nb, nb, -1, a[(i+nb)*lda+i:], lda,
-				work[nb+i:], ldwork, 1, a[(i+nb)*lda+i+nb:], lda)
+				work[nb*ldwork:], ldwork, 1, a[(i+nb)*lda+i+nb:], lda)
 
 			// Copy subdiagonal elements back into A, and diagonal elements into D.
 			for j := i; j < i+nb; j++ {

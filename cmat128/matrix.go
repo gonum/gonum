@@ -35,7 +35,8 @@ type Conjugate struct {
 // At returns the value of the element at row i and column j of the transposed
 // matrix, that is, row j and column i of the Matrix field.
 func (t Conjugate) At(i, j int) complex128 {
-	return t.Matrix.At(j, i) * complex(1, -1)
+	z := t.Matrix.At(j, i)
+	return complex(real(z), -imag(z))
 }
 
 // Dims returns the dimensions of the transposed matrix. The number of rows returned

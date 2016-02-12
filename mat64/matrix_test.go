@@ -7,6 +7,7 @@ package mat64
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"testing"
 
 	"github.com/gonum/blas"
@@ -59,6 +60,56 @@ func eye(n int) *Dense {
 }
 
 func TestCol(t *testing.T) {
+	for id, af := range [][][]float64{
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+		},
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+			{10, 11, 12},
+		},
+		{
+			{1, 2, 3, 4},
+			{5, 6, 7, 8},
+			{9, 10, 11, 12},
+		},
+	} {
+		a := NewDense(flatten(af))
+		col := make([]float64, a.mat.Rows)
+		for j := range af[0] {
+			for i := range col {
+				col[i] = float64(i*a.mat.Cols + j + 1)
+			}
+
+			if got := Col(nil, j, a); !reflect.DeepEqual(got, col) {
+				t.Errorf("test %d: unexpected values returned for dense col %d: got: %v want: %v",
+					id, j, got, col)
+			}
+
+			got := make([]float64, a.mat.Rows)
+			if Col(got, j, a); !reflect.DeepEqual(got, col) {
+				t.Errorf("test %d: unexpected values filled for dense col %d: got: %v want: %v",
+					id, j, got, col)
+			}
+		}
+	}
+
+	denseComparison := func(a *Dense) interface{} {
+		r, c := a.Dims()
+		ans := make([][]float64, c)
+		for j := range ans {
+			ans[j] = make([]float64, r)
+			for i := range ans[j] {
+				ans[j][i] = a.At(i, j)
+			}
+		}
+		return ans
+	}
+
 	f := func(a Matrix) interface{} {
 		_, c := a.Dims()
 		ans := make([][]float64, c)
@@ -67,15 +118,8 @@ func TestCol(t *testing.T) {
 		}
 		return ans
 	}
-	denseComparison := func(a *Dense) interface{} {
-		_, c := a.Dims()
-		ans := make([][]float64, c)
-		for j := range ans {
-			ans[j] = Col(nil, j, a)
-		}
-		return ans
-	}
 	testOneInputFunc(t, "Col", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+
 	f = func(a Matrix) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, c)
@@ -89,6 +133,51 @@ func TestCol(t *testing.T) {
 }
 
 func TestRow(t *testing.T) {
+	for id, af := range [][][]float64{
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+		},
+		{
+			{1, 2, 3},
+			{4, 5, 6},
+			{7, 8, 9},
+			{10, 11, 12},
+		},
+		{
+			{1, 2, 3, 4},
+			{5, 6, 7, 8},
+			{9, 10, 11, 12},
+		},
+	} {
+		a := NewDense(flatten(af))
+		for i, row := range af {
+			if got := Row(nil, i, a); !reflect.DeepEqual(got, row) {
+				t.Errorf("test %d: unexpected values returned for dense row %d: got: %v want: %v",
+					id, i, got, row)
+			}
+
+			got := make([]float64, len(row))
+			if Row(got, i, a); !reflect.DeepEqual(got, row) {
+				t.Errorf("test %d: unexpected values filled for dense row %d: got: %v want: %v",
+					id, i, got, row)
+			}
+		}
+	}
+
+	denseComparison := func(a *Dense) interface{} {
+		r, c := a.Dims()
+		ans := make([][]float64, r)
+		for i := range ans {
+			ans[i] = make([]float64, c)
+			for j := range ans[i] {
+				ans[i][j] = a.At(i, j)
+			}
+		}
+		return ans
+	}
+
 	f := func(a Matrix) interface{} {
 		r, _ := a.Dims()
 		ans := make([][]float64, r)
@@ -97,15 +186,8 @@ func TestRow(t *testing.T) {
 		}
 		return ans
 	}
-	denseComparison := func(a *Dense) interface{} {
-		r, _ := a.Dims()
-		ans := make([][]float64, r)
-		for i := range ans {
-			ans[i] = Row(nil, i, a)
-		}
-		return ans
-	}
 	testOneInputFunc(t, "Row", f, denseComparison, sameAnswerF64SliceOfSlice, isAnyType, isAnySize)
+
 	f = func(a Matrix) interface{} {
 		r, c := a.Dims()
 		ans := make([][]float64, r)

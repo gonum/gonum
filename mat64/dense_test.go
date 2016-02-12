@@ -215,32 +215,6 @@ func TestAtSet(t *testing.T) {
 	}
 }
 
-func TestRowCol(t *testing.T) {
-	for i, af := range [][][]float64{
-		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
-		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}},
-		{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}},
-	} {
-		a := NewDense(flatten(af))
-		for ri, row := range af {
-			if got := Row(nil, ri, a); !reflect.DeepEqual(got, row) {
-				t.Errorf("unexpected row returned for test %d row %d: got: %v want: %v",
-					i, ri, got, row)
-			}
-		}
-		for ci := range af[0] {
-			col := make([]float64, a.mat.Rows)
-			for j := range col {
-				col[j] = float64(ci + 1 + j*a.mat.Cols)
-			}
-			if got := Col(nil, ci, a); !reflect.DeepEqual(got, col) {
-				t.Errorf("unexpected col returned for test %d col %d: got: %v want: %v",
-					i, ci, got, col)
-			}
-		}
-	}
-}
-
 func TestSetRowColumn(t *testing.T) {
 	for _, as := range [][][]float64{
 		{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},

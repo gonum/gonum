@@ -1,6 +1,8 @@
-sudo apt-get update -qq && sudo apt-get install -qq libatlas-base-dev
-if [ $? != 0 ]; then exit 1; fi
+set -ex
 
+# fetch and install ATLAS libs
+sudo apt-get update -qq && sudo apt-get install -qq libatlas-base-dev
+
+# fetch and install gonum/blas against ATLAS
 export CGO_LDFLAGS="-L/usr/lib -lblas"
 go get github.com/gonum/blas
-if [ $? != 0 ]; then exit 1; fi

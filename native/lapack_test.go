@@ -188,6 +188,10 @@ func TestDorgqr(t *testing.T) {
 	testlapack.DorgqrTest(t, impl)
 }
 
+func TestDorgtr(t *testing.T) {
+	testlapack.DorgtrTest(t, impl)
+}
+
 func TestDormbr(t *testing.T) {
 	testlapack.DormbrTest(t, impl)
 }

@@ -20,6 +20,7 @@ type Dormbrer interface {
 }
 
 func DormbrTest(t *testing.T, impl Dormbrer) {
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	for _, vect := range []lapack.DecompUpdate{lapack.ApplyQ, lapack.ApplyP} {
 		for _, side := range []blas.Side{blas.Left, blas.Right} {
@@ -69,7 +70,7 @@ func DormbrTest(t *testing.T, impl Dormbrer) {
 					}
 					a = make([]float64, ma*lda)
 					for i := range a {
-						a[i] = rand.NormFloat64()
+						a[i] = rnd.NormFloat64()
 					}
 					nTau := min(nq, k)
 					tauP := make([]float64, nTau)
@@ -87,7 +88,7 @@ func DormbrTest(t *testing.T, impl Dormbrer) {
 					// Apply and compare update.
 					c := make([]float64, m*ldc)
 					for i := range c {
-						c[i] = rand.NormFloat64()
+						c[i] = rnd.NormFloat64()
 					}
 
 					cCopy := make([]float64, len(c))

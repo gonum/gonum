@@ -20,6 +20,7 @@ type Dlarfter interface {
 }
 
 func DlarftTest(t *testing.T, impl Dlarfter) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, store := range []lapack.StoreV{lapack.ColumnWise, lapack.RowWise} {
 		for _, direct := range []lapack.Direct{lapack.Forward, lapack.Backward} {
 			for _, test := range []struct {
@@ -46,7 +47,7 @@ func DlarftTest(t *testing.T, impl Dlarfter) {
 				a := make([]float64, m*lda)
 				for i := 0; i < m; i++ {
 					for j := 0; j < lda; j++ {
-						a[i*lda+j] = rand.Float64()
+						a[i*lda+j] = rnd.Float64()
 					}
 				}
 				// Use dgeqr2 to find the v vectors
@@ -70,7 +71,7 @@ func DlarftTest(t *testing.T, impl Dlarfter) {
 				// Find T from the actual function
 				tm := make([]float64, k*ldt)
 				for i := range tm {
-					tm[i] = 100 + rand.Float64()
+					tm[i] = 100 + rnd.Float64()
 				}
 				// The v data has been put into a.
 				impl.Dlarft(direct, store, m, k, v, ldv, tau, tm, ldt)

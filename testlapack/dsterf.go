@@ -53,18 +53,19 @@ func DsterfTest(t *testing.T, impl Dsterfer) {
 		}
 	}
 
+	rnd := rand.New(rand.NewSource(1))
 	// Probabilistic tests.
 	for _, n := range []int{4, 6, 10} {
 		for cas := 0; cas < 10; cas++ {
 			d := make([]float64, n)
 			for i := range d {
-				d[i] = rand.NormFloat64()
+				d[i] = rnd.NormFloat64()
 			}
 			dCopy := make([]float64, len(d))
 			copy(dCopy, d)
 			e := make([]float64, n-1)
 			for i := range e {
-				e[i] = rand.NormFloat64()
+				e[i] = rnd.NormFloat64()
 			}
 			eCopy := make([]float64, len(e))
 			copy(eCopy, e)

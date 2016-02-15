@@ -18,6 +18,7 @@ type Dlarfger interface {
 }
 
 func DlarfgTest(t *testing.T, impl Dlarfger) {
+	rnd := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		alpha float64
 		n     int
@@ -51,7 +52,7 @@ func DlarfgTest(t *testing.T, impl Dlarfger) {
 		if test.x == nil {
 			x = make([]float64, n-1)
 			for i := range x {
-				x[i] = rand.Float64()
+				x[i] = rnd.Float64()
 			}
 		} else {
 			x = make([]float64, n-1)

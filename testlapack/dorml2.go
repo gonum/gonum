@@ -19,6 +19,7 @@ type Dorml2er interface {
 }
 
 func Dorml2Test(t *testing.T, impl Dorml2er) {
+	rnd := rand.New(rand.NewSource(1))
 	// TODO(btracey): This test is not complete, because it
 	// doesn't test individual values of m, n, and k, instead only testing
 	// a specific subset of possible k values.
@@ -66,7 +67,7 @@ func Dorml2Test(t *testing.T, impl Dorml2er) {
 				}
 				a := make([]float64, ma*lda)
 				for i := range a {
-					a[i] = rand.Float64()
+					a[i] = rnd.Float64()
 				}
 				ldc := test.ldc
 				if ldc == 0 {
@@ -75,7 +76,7 @@ func Dorml2Test(t *testing.T, impl Dorml2er) {
 				// Compute random C matrix
 				c := make([]float64, mc*ldc)
 				for i := range c {
-					c[i] = rand.Float64()
+					c[i] = rnd.Float64()
 				}
 
 				// Compute LQ

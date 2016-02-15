@@ -15,6 +15,7 @@ type Dtrtrier interface {
 }
 
 func DtrtriTest(t *testing.T, impl Dtrtrier) {
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	for _, uplo := range []blas.Uplo{blas.Upper} {
 		for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
@@ -35,7 +36,7 @@ func DtrtriTest(t *testing.T, impl Dtrtrier) {
 				}
 				a := make([]float64, n*lda)
 				for i := range a {
-					a[i] = rand.Float64() + 1 // This keeps the matrices well conditioned.
+					a[i] = rnd.Float64() + 1 // This keeps the matrices well conditioned.
 				}
 				aCopy := make([]float64, len(a))
 				copy(aCopy, a)

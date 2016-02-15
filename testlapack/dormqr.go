@@ -19,6 +19,7 @@ type Dormqrer interface {
 }
 
 func DormqrTest(t *testing.T, impl Dormqrer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
 		for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans} {
 			for _, test := range []struct {
@@ -68,7 +69,7 @@ func DormqrTest(t *testing.T, impl Dormqrer) {
 				}
 				a := make([]float64, ma*lda)
 				for i := range a {
-					a[i] = rand.Float64()
+					a[i] = rnd.Float64()
 				}
 				// Compute random C matrix
 				ldc := test.ldc
@@ -77,7 +78,7 @@ func DormqrTest(t *testing.T, impl Dormqrer) {
 				}
 				c := make([]float64, mc*ldc)
 				for i := range c {
-					c[i] = rand.Float64()
+					c[i] = rnd.Float64()
 				}
 
 				// Compute QR
@@ -102,7 +103,7 @@ func DormqrTest(t *testing.T, impl Dormqrer) {
 
 				// Make sure Dorm2r and Dormqr match with small work
 				for i := range work {
-					work[i] = rand.Float64()
+					work[i] = rnd.Float64()
 				}
 				lwork := len(work)
 				copy(c, cCopy)
@@ -117,7 +118,7 @@ func DormqrTest(t *testing.T, impl Dormqrer) {
 				work = make([]float64, int(work[0]))
 				lwork = len(work)
 				for i := range work {
-					work[i] = rand.Float64()
+					work[i] = rnd.Float64()
 				}
 				_ = lwork
 				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, lwork)

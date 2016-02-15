@@ -13,6 +13,7 @@ type Dlacpyer interface {
 }
 
 func DlacpyTest(t *testing.T, impl Dlacpyer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower, blas.All} {
 		for _, test := range []struct {
 			m, n, lda, ldb int
@@ -37,11 +38,11 @@ func DlacpyTest(t *testing.T, impl Dlacpyer) {
 			}
 			a := make([]float64, m*lda)
 			for i := range a {
-				a[i] = rand.Float64()
+				a[i] = rnd.Float64()
 			}
 			b := make([]float64, m*ldb)
 			for i := range b {
-				b[i] = rand.Float64()
+				b[i] = rnd.Float64()
 			}
 			impl.Dlacpy(uplo, m, n, a, lda, b, ldb)
 			equal := true

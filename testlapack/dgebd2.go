@@ -14,6 +14,7 @@ type Dgebd2er interface {
 }
 
 func Dgebd2Test(t *testing.T, impl Dgebd2er) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, lda int
 	}{
@@ -31,7 +32,7 @@ func Dgebd2Test(t *testing.T, impl Dgebd2er) {
 		nb := min(m, n) // 'nb' name parallel with Dlabrd code.
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 		d := nanSlice(nb)
 		e := nanSlice(nb - 1)

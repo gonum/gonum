@@ -18,6 +18,7 @@ type Dgebrder interface {
 }
 
 func DgebrdTest(t *testing.T, impl Dgebrder) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, lda int
 	}{
@@ -44,7 +45,7 @@ func DgebrdTest(t *testing.T, impl Dgebrder) {
 		minmn := min(m, n)
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 
 		d := make([]float64, minmn)

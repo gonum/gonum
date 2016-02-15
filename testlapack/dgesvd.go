@@ -20,6 +20,7 @@ type Dgesvder interface {
 }
 
 func DgesvdTest(t *testing.T, impl Dgesvder) {
+	rnd := rand.New(rand.NewSource(1))
 	// TODO(btracey): Add tests for all of the cases when the SVD implementation
 	// is finished.
 	// TODO(btracey): Add tests for m > mnthr and n > mnthr when other SVD
@@ -73,17 +74,17 @@ func DgesvdTest(t *testing.T, impl Dgesvder) {
 
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 
 		u := make([]float64, m*ldu)
 		for i := range u {
-			u[i] = rand.NormFloat64()
+			u[i] = rnd.NormFloat64()
 		}
 
 		vt := make([]float64, n*ldvt)
 		for i := range vt {
-			vt[i] = rand.NormFloat64()
+			vt[i] = rnd.NormFloat64()
 		}
 
 		uAllOrig := make([]float64, len(u))
@@ -125,6 +126,7 @@ func DgesvdTest(t *testing.T, impl Dgesvder) {
 // svdCheckPartial checks that the singular values and vectors are computed when
 // not all of them are computed.
 func svdCheckPartial(t *testing.T, impl Dgesvder, job lapack.SVDJob, errStr string, uAllOrig, vtAllOrig, aCopy []float64, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, shortWork bool) {
+	rnd := rand.New(rand.NewSource(1))
 	jobU := job
 	jobVT := job
 	// Compare the singular values when computed with {SVDNone, SVDNone.}
@@ -132,7 +134,7 @@ func svdCheckPartial(t *testing.T, impl Dgesvder, job lapack.SVDJob, errStr stri
 	copy(sCopy, s)
 	copy(a, aCopy)
 	for i := range s {
-		s[i] = rand.Float64()
+		s[i] = rnd.Float64()
 	}
 	tmp1 := make([]float64, 1)
 	tmp2 := make([]float64, 1)
@@ -167,7 +169,7 @@ func svdCheckPartial(t *testing.T, impl Dgesvder, job lapack.SVDJob, errStr stri
 	jobVT = lapack.SVDNone
 	copy(a, aCopy)
 	for i := range s {
-		s[i] = rand.Float64()
+		s[i] = rnd.Float64()
 	}
 	impl.Dgesvd(jobU, jobVT, m, n, a, lda, s, u, ldu, tmp2, ldvt, work, -1)
 	work = make([]float64, int(work[0]))
@@ -186,7 +188,7 @@ func svdCheckPartial(t *testing.T, impl Dgesvder, job lapack.SVDJob, errStr stri
 	jobVT = job
 	copy(a, aCopy)
 	for i := range s {
-		s[i] = rand.Float64()
+		s[i] = rnd.Float64()
 	}
 	impl.Dgesvd(jobU, jobVT, m, n, a, lda, s, tmp1, ldu, vt, ldvt, work, -1)
 	work = make([]float64, int(work[0]))
@@ -281,5 +283,4 @@ func svdCheck(t *testing.T, thin bool, errStr string, m, n int, s, a, u []float6
 			}
 		}
 	}
-
 }

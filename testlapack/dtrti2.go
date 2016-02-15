@@ -84,6 +84,7 @@ func Dtrti2Test(t *testing.T, impl Dtrti2er) {
 			t.Errorf("Matrix inverse mismatch. Want %v, got %v.", test.ans, test.a)
 		}
 	}
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	for _, uplo := range []blas.Uplo{blas.Upper} {
 		for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
@@ -100,7 +101,7 @@ func Dtrti2Test(t *testing.T, impl Dtrti2er) {
 				}
 				a := make([]float64, n*lda)
 				for i := range a {
-					a[i] = rand.Float64()
+					a[i] = rnd.Float64()
 				}
 				aCopy := make([]float64, len(a))
 				copy(aCopy, a)

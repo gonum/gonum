@@ -20,6 +20,7 @@ type Dlasrer interface {
 }
 
 func DlasrTest(t *testing.T, impl Dlasrer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
 		for _, pivot := range []lapack.Pivot{lapack.Variable, lapack.Top, lapack.Bottom} {
 			for _, direct := range []lapack.Direct{lapack.Forward, lapack.Backward} {
@@ -42,7 +43,7 @@ func DlasrTest(t *testing.T, impl Dlasrer) {
 					}
 					a := make([]float64, m*lda)
 					for i := range a {
-						a[i] = rand.Float64()
+						a[i] = rnd.Float64()
 					}
 					var s, c []float64
 					if side == blas.Left {
@@ -53,7 +54,7 @@ func DlasrTest(t *testing.T, impl Dlasrer) {
 						c = make([]float64, n-1)
 					}
 					for k := range s {
-						theta := rand.Float64() * 2 * math.Pi
+						theta := rnd.Float64() * 2 * math.Pi
 						s[k] = math.Sin(theta)
 						c[k] = math.Cos(theta)
 					}

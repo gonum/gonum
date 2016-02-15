@@ -19,6 +19,7 @@ type Dorm2rer interface {
 }
 
 func Dorm2rTest(t *testing.T, impl Dorm2rer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, side := range []blas.Side{blas.Left, blas.Right} {
 		for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans} {
 			for _, test := range []struct {
@@ -63,7 +64,7 @@ func Dorm2rTest(t *testing.T, impl Dorm2rer) {
 				}
 				a := make([]float64, ma*lda)
 				for i := range a {
-					a[i] = rand.Float64()
+					a[i] = rnd.Float64()
 				}
 				ldc := test.ldc
 				if ldc == 0 {
@@ -72,7 +73,7 @@ func Dorm2rTest(t *testing.T, impl Dorm2rer) {
 				// Compute random C matrix
 				c := make([]float64, mc*ldc)
 				for i := range c {
-					c[i] = rand.Float64()
+					c[i] = rnd.Float64()
 				}
 
 				// Compute QR

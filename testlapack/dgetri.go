@@ -15,6 +15,7 @@ type Dgetrier interface {
 }
 
 func DgetriTest(t *testing.T, impl Dgetrier) {
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	for _, test := range []struct {
 		n, lda int
@@ -34,13 +35,13 @@ func DgetriTest(t *testing.T, impl Dgetrier) {
 			lda = n
 		}
 		// Generate a random well conditioned matrix
-		perm := rand.Perm(n)
+		perm := rnd.Perm(n)
 		a := make([]float64, n*lda)
 		for i := 0; i < n; i++ {
 			a[i*lda+perm[i]] = 1
 		}
 		for i := range a {
-			a[i] += 0.01 * rand.Float64()
+			a[i] += 0.01 * rnd.Float64()
 		}
 		aCopy := make([]float64, len(a))
 		copy(aCopy, a)

@@ -17,6 +17,7 @@ type Dorgqler interface {
 }
 
 func DorgqlTest(t *testing.T, impl Dorgqler) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, k, lda int
 	}{
@@ -34,7 +35,7 @@ func DorgqlTest(t *testing.T, impl Dorgqler) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 		tau := nanSlice(min(m, n))
 		work := nanSlice(max(m, n))

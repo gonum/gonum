@@ -18,6 +18,7 @@ type Dgeql2er interface {
 }
 
 func Dgeql2Test(t *testing.T, impl Dgeql2er) {
+	rnd := rand.New(rand.NewSource(1))
 	// TODO(btracey): Add tests for m < n.
 	for _, test := range []struct {
 		m, n, lda int
@@ -34,7 +35,7 @@ func Dgeql2Test(t *testing.T, impl Dgeql2er) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 		tau := nanSlice(min(m, n))
 		work := nanSlice(n)

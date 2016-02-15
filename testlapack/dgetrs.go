@@ -15,6 +15,7 @@ type Dgetrser interface {
 }
 
 func DgetrsTest(t *testing.T, impl Dgetrser) {
+	rnd := rand.New(rand.NewSource(1))
 	// TODO(btracey): Put more thought into creating more regularized matrices
 	// and what correct tolerances should be. Consider also seeding the random
 	// number in this test to make it more robust to code changes in other
@@ -52,11 +53,11 @@ func DgetrsTest(t *testing.T, impl Dgetrser) {
 			}
 			a := make([]float64, n*lda)
 			for i := range a {
-				a[i] = rand.Float64()
+				a[i] = rnd.Float64()
 			}
 			b := make([]float64, n*ldb)
 			for i := range b {
-				b[i] = rand.Float64()
+				b[i] = rnd.Float64()
 			}
 			aCopy := make([]float64, len(a))
 			copy(aCopy, a)
@@ -65,7 +66,7 @@ func DgetrsTest(t *testing.T, impl Dgetrser) {
 
 			ipiv := make([]int, n)
 			for i := range ipiv {
-				ipiv[i] = rand.Int()
+				ipiv[i] = rnd.Int()
 			}
 
 			// Compute the LU factorization.

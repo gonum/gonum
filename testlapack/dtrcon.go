@@ -16,6 +16,7 @@ type Dtrconer interface {
 }
 
 func DtrconTest(t *testing.T, impl Dtrconer) {
+	rnd := rand.New(rand.NewSource(1))
 	// Hand crafted tests.
 	for _, test := range []struct {
 		a       []float64
@@ -77,11 +78,11 @@ func DtrconTest(t *testing.T, impl Dtrconer) {
 		lda := test.n
 		work := make([]float64, 3*test.n)
 		for i := range work {
-			work[i] = rand.Float64()
+			work[i] = rnd.Float64()
 		}
 		iwork := make([]int, test.n)
 		for i := range iwork {
-			iwork[i] = rand.Int()
+			iwork[i] = rnd.Int()
 		}
 		aCopy := make([]float64, len(test.a))
 		copy(aCopy, test.a)
@@ -128,7 +129,7 @@ func DtrconTest(t *testing.T, impl Dtrconer) {
 							}
 						} else {
 							for i := range a {
-								a[i] = rand.NormFloat64()
+								a[i] = rnd.NormFloat64()
 							}
 						}
 

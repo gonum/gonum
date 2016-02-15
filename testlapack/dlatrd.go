@@ -19,6 +19,7 @@ type Dlatrder interface {
 }
 
 func DlatrdTest(t *testing.T, impl Dlatrder) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, test := range []struct {
 			n, nb, lda, ldw int
@@ -42,7 +43,7 @@ func DlatrdTest(t *testing.T, impl Dlatrder) {
 
 			a := make([]float64, n*lda)
 			for i := range a {
-				a[i] = rand.NormFloat64()
+				a[i] = rnd.NormFloat64()
 			}
 
 			e := make([]float64, n-1)

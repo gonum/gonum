@@ -19,6 +19,7 @@ type Dgelq2er interface {
 }
 
 func Dgelq2Test(t *testing.T, impl Dgelq2er) {
+	rnd := rand.New(rand.NewSource(1))
 	for c, test := range []struct {
 		m, n, lda int
 	}{
@@ -52,15 +53,15 @@ func Dgelq2Test(t *testing.T, impl Dgelq2er) {
 		k := min(m, n)
 		tau := make([]float64, k)
 		for i := range tau {
-			tau[i] = rand.Float64()
+			tau[i] = rnd.Float64()
 		}
 		work := make([]float64, m)
 		for i := range work {
-			work[i] = rand.Float64()
+			work[i] = rnd.Float64()
 		}
 		a := make([]float64, m*lda)
 		for i := 0; i < m*lda; i++ {
-			a[i] = rand.Float64()
+			a[i] = rnd.Float64()
 		}
 		aCopy := make([]float64, len(a))
 		copy(aCopy, a)

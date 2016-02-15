@@ -11,10 +11,11 @@ type Dlaev2er interface {
 }
 
 func Dlaev2Test(t *testing.T, impl Dlaev2er) {
+	rnd := rand.New(rand.NewSource(1))
 	for trial := 0; trial < 100; trial++ {
-		a := rand.NormFloat64()
-		b := rand.NormFloat64()
-		c := rand.NormFloat64()
+		a := rnd.NormFloat64()
+		b := rnd.NormFloat64()
+		c := rnd.NormFloat64()
 
 		rt1, rt2, cs1, sn1 := impl.Dlaev2(a, b, c)
 		tmp := mul2by2([2][2]float64{{cs1, sn1}, {-sn1, cs1}}, [2][2]float64{{a, b}, {b, c}})

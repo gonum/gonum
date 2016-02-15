@@ -17,6 +17,7 @@ type Dorgl2er interface {
 }
 
 func Dorgl2Test(t *testing.T, impl Dorgl2er) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, lda int
 	}{
@@ -34,7 +35,7 @@ func Dorgl2Test(t *testing.T, impl Dorgl2er) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 		k := min(m, n)
 		tau := make([]float64, k)

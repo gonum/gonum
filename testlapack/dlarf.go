@@ -18,6 +18,7 @@ type Dlarfer interface {
 }
 
 func DlarfTest(t *testing.T, impl Dlarfer) {
+	rnd := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		m, n, ldc    int
 		incv, lastv  int
@@ -94,7 +95,7 @@ func DlarfTest(t *testing.T, impl Dlarfer) {
 		c := make([]float64, test.ldc*test.m)
 		for i := 0; i <= test.lastr; i++ {
 			for j := 0; j <= test.lastc; j++ {
-				c[i*test.ldc+j] = rand.Float64()
+				c[i*test.ldc+j] = rnd.Float64()
 			}
 		}
 		cCopy := make([]float64, len(c))
@@ -107,7 +108,7 @@ func DlarfTest(t *testing.T, impl Dlarfer) {
 		v := make([]float64, test.incv*sz+1)
 		// Fill with nonzero entries up until lastv.
 		for i := 0; i <= test.lastv; i++ {
-			v[i*test.incv] = rand.Float64()
+			v[i*test.incv] = rnd.Float64()
 		}
 		// Construct h explicitly to compare.
 		h := make([]float64, test.n*test.n)

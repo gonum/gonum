@@ -17,6 +17,7 @@ type Dgelqfer interface {
 }
 
 func DgelqfTest(t *testing.T, impl Dgelqfer) {
+	rnd := rand.New(rand.NewSource(1))
 	for c, test := range []struct {
 		m, n, lda int
 	}{
@@ -50,12 +51,12 @@ func DgelqfTest(t *testing.T, impl Dgelqfer) {
 		a := make([]float64, m*lda)
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				a[i*lda+j] = rand.Float64()
+				a[i*lda+j] = rnd.Float64()
 			}
 		}
 		tau := make([]float64, n)
 		for i := 0; i < n; i++ {
-			tau[i] = rand.Float64()
+			tau[i] = rnd.Float64()
 		}
 		aCopy := make([]float64, len(a))
 		copy(aCopy, a)
@@ -63,7 +64,7 @@ func DgelqfTest(t *testing.T, impl Dgelqfer) {
 		copy(ans, a)
 		work := make([]float64, m)
 		for i := range work {
-			work[i] = rand.Float64()
+			work[i] = rnd.Float64()
 		}
 		// Compute unblocked QR.
 		impl.Dgelq2(m, n, ans, lda, tau, work)

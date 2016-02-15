@@ -14,6 +14,7 @@ type Dgetf2er interface {
 }
 
 func Dgetf2Test(t *testing.T, impl Dgetf2er) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, lda int
 	}{
@@ -33,7 +34,7 @@ func Dgetf2Test(t *testing.T, impl Dgetf2er) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.Float64()
+			a[i] = rnd.Float64()
 		}
 		aCopy := make([]float64, len(a))
 		copy(aCopy, a)
@@ -41,7 +42,7 @@ func Dgetf2Test(t *testing.T, impl Dgetf2er) {
 		mn := min(m, n)
 		ipiv := make([]int, mn)
 		for i := range ipiv {
-			ipiv[i] = rand.Int()
+			ipiv[i] = rnd.Int()
 		}
 		ok := impl.Dgetf2(m, n, a, lda, ipiv)
 		checkPLU(t, ok, m, n, lda, ipiv, a, aCopy, 1e-14, true)

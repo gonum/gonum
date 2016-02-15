@@ -645,6 +645,7 @@ func Dlasq2Test(t *testing.T, impl Dlasq2er) {
 		}
 	}
 
+	rnd := rand.New(rand.NewSource(1))
 	// Perform a bunch of random tests to check for access out of bounds or
 	// infinite loops.
 	// TODO(btracey): Implement direct tests.
@@ -653,7 +654,7 @@ func Dlasq2Test(t *testing.T, impl Dlasq2er) {
 		for k := 0; k < 10; k++ {
 			z := make([]float64, 4*n)
 			for i := range z {
-				z[i] = rand.Float64()
+				z[i] = rnd.Float64()
 			}
 			zCopy := make([]float64, len(z))
 			copy(zCopy, z)

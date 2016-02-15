@@ -18,6 +18,7 @@ type Dpotrfer interface {
 }
 
 func DpotrfTest(t *testing.T, impl Dpotrfer) {
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	for i, test := range []struct {
 		n int
@@ -33,7 +34,7 @@ func DpotrfTest(t *testing.T, impl Dpotrfer) {
 		// Construct a positive-definite symmetric matrix
 		base := make([]float64, n*n)
 		for i := range base {
-			base[i] = rand.Float64()
+			base[i] = rnd.Float64()
 		}
 		a := make([]float64, len(base))
 		bi.Dgemm(blas.Trans, blas.NoTrans, n, n, n, 1, base, n, base, n, 0, a, n)

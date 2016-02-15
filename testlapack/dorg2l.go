@@ -18,6 +18,7 @@ type Dorg2ler interface {
 }
 
 func Dorg2lTest(t *testing.T, impl Dorg2ler) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, k, lda int
 	}{
@@ -36,7 +37,7 @@ func Dorg2lTest(t *testing.T, impl Dorg2ler) {
 
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 		tau := nanSlice(max(m, n))
 		work := make([]float64, n)

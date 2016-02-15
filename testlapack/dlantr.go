@@ -15,6 +15,7 @@ type Dlantrer interface {
 }
 
 func DlantrTest(t *testing.T, impl Dlantrer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.NormFrob} {
 		for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
 			for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
@@ -44,7 +45,7 @@ func DlantrTest(t *testing.T, impl Dlantrer) {
 							}
 						} else {
 							for i := range a {
-								a[i] = rand.NormFloat64()
+								a[i] = rnd.NormFloat64()
 							}
 						}
 						aDense := make([]float64, len(a))
@@ -68,7 +69,7 @@ func DlantrTest(t *testing.T, impl Dlantrer) {
 						}
 						work := make([]float64, n+6)
 						for i := range work {
-							work[i] = rand.Float64()
+							work[i] = rnd.Float64()
 						}
 						got := impl.Dlantr(norm, uplo, diag, m, n, a, lda, work)
 						want := impl.Dlange(norm, m, n, aDense, lda, work)

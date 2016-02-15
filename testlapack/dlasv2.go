@@ -16,10 +16,11 @@ type Dlasv2er interface {
 }
 
 func Dlasv2Test(t *testing.T, impl Dlasv2er) {
+	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < 100; i++ {
-		f := rand.NormFloat64()
-		g := rand.NormFloat64()
-		h := rand.NormFloat64()
+		f := rnd.NormFloat64()
+		g := rnd.NormFloat64()
+		h := rnd.NormFloat64()
 
 		ssmin, ssmax, snr, csr, snl, csl := impl.Dlasv2(f, g, h)
 

@@ -20,6 +20,7 @@ type Dbdsqrer interface {
 }
 
 func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	_ = bi
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
@@ -58,11 +59,11 @@ func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
 
 				d := make([]float64, n)
 				for i := range d {
-					d[i] = rand.NormFloat64()
+					d[i] = rnd.NormFloat64()
 				}
 				e := make([]float64, n-1)
 				for i := range e {
-					e[i] = rand.NormFloat64()
+					e[i] = rnd.NormFloat64()
 				}
 				dCopy := make([]float64, len(d))
 				copy(dCopy, d)
@@ -70,7 +71,7 @@ func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
 				copy(eCopy, e)
 				work := make([]float64, 4*n)
 				for i := range work {
-					work[i] = rand.NormFloat64()
+					work[i] = rnd.NormFloat64()
 				}
 
 				// First test the decomposition of the bidiagonal matrix. Set
@@ -141,19 +142,19 @@ func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
 
 				u := make([]float64, nru*ldu)
 				for i := range u {
-					u[i] = rand.NormFloat64()
+					u[i] = rnd.NormFloat64()
 				}
 				uCopy := make([]float64, len(u))
 				copy(uCopy, u)
 				vt := make([]float64, n*ldvt)
 				for i := range vt {
-					vt[i] = rand.NormFloat64()
+					vt[i] = rnd.NormFloat64()
 				}
 				vtCopy := make([]float64, len(vt))
 				copy(vtCopy, vt)
 				c := make([]float64, n*ldc)
 				for i := range c {
-					c[i] = rand.NormFloat64()
+					c[i] = rnd.NormFloat64()
 				}
 				cCopy := make([]float64, len(c))
 				copy(cCopy, c)

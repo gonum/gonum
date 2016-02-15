@@ -17,6 +17,7 @@ type Dgeqrfer interface {
 }
 
 func DgeqrfTest(t *testing.T, impl Dgeqrfer) {
+	rnd := rand.New(rand.NewSource(1))
 	for c, test := range []struct {
 		m, n, lda int
 	}{
@@ -50,12 +51,12 @@ func DgeqrfTest(t *testing.T, impl Dgeqrfer) {
 		a := make([]float64, m*lda)
 		for i := 0; i < m; i++ {
 			for j := 0; j < n; j++ {
-				a[i*lda+j] = rand.Float64()
+				a[i*lda+j] = rnd.Float64()
 			}
 		}
 		tau := make([]float64, n)
 		for i := 0; i < n; i++ {
-			tau[i] = rand.Float64()
+			tau[i] = rnd.Float64()
 		}
 		aCopy := make([]float64, len(a))
 		copy(aCopy, a)

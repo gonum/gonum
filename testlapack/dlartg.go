@@ -15,9 +15,10 @@ type Dlartger interface {
 }
 
 func DlartgTest(t *testing.T, impl Dlartger) {
+	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < 100; i++ {
-		f := rand.NormFloat64()
-		g := rand.NormFloat64()
+		f := rnd.NormFloat64()
+		g := rnd.NormFloat64()
 		cs, sn, r := impl.Dlartg(f, g)
 
 		rTest := cs*f + sn*g

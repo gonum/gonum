@@ -15,6 +15,7 @@ type Dlansyer interface {
 }
 
 func DlansyTest(t *testing.T, impl Dlansyer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.NormFrob} {
 		for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
 			for _, test := range []struct {
@@ -39,7 +40,7 @@ func DlansyTest(t *testing.T, impl Dlansyer) {
 						}
 					} else {
 						for i := range a {
-							a[i] = rand.NormFloat64()
+							a[i] = rnd.NormFloat64()
 						}
 					}
 

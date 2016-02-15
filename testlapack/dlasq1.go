@@ -28,6 +28,7 @@ type Dlasq1er interface {
 }
 
 func Dlasq1Test(t *testing.T, impl Dlasq1er) {
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	// TODO(btracey): Increase the size of this test when we have a more numerically
 	// stable way to test the singular values.
@@ -37,13 +38,13 @@ func Dlasq1Test(t *testing.T, impl Dlasq1er) {
 		e := make([]float64, n-1)
 		for cas := 0; cas < 1; cas++ {
 			for i := range work {
-				work[i] = rand.Float64()
+				work[i] = rnd.Float64()
 			}
 			for i := range d {
-				d[i] = rand.NormFloat64() + 10
+				d[i] = rnd.NormFloat64() + 10
 			}
 			for i := range e {
-				e[i] = rand.NormFloat64()
+				e[i] = rnd.NormFloat64()
 			}
 			ldm := n
 			m := make([]float64, n*ldm)

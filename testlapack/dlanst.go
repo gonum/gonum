@@ -18,16 +18,17 @@ type Dlanster interface {
 }
 
 func DlanstTest(t *testing.T, impl Dlanster) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, norm := range []lapack.MatrixNorm{lapack.MaxAbs, lapack.MaxColumnSum, lapack.MaxRowSum, lapack.NormFrob} {
 		for _, n := range []int{1, 3, 10, 100} {
 			for cas := 0; cas < 100; cas++ {
 				d := make([]float64, n)
 				for i := range d {
-					d[i] = rand.NormFloat64()
+					d[i] = rnd.NormFloat64()
 				}
 				e := make([]float64, n-1)
 				for i := range e {
-					e[i] = rand.NormFloat64()
+					e[i] = rnd.NormFloat64()
 				}
 
 				m := n

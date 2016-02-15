@@ -19,6 +19,7 @@ type Dorgbrer interface {
 }
 
 func DorgbrTest(t *testing.T, impl Dorgbrer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, vect := range []lapack.DecompUpdate{lapack.ApplyQ, lapack.ApplyP} {
 		for _, test := range []struct {
 			m, n, k, lda int
@@ -89,7 +90,7 @@ func DorgbrTest(t *testing.T, impl Dorgbrer) {
 				a = make([]float64, n*lda)
 			}
 			for i := range a {
-				a[i] = rand.NormFloat64()
+				a[i] = rnd.NormFloat64()
 			}
 
 			nTau := min(ma, na)

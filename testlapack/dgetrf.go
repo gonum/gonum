@@ -10,6 +10,7 @@ type Dgetrfer interface {
 }
 
 func DgetrfTest(t *testing.T, impl Dgetrfer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, lda int
 	}{
@@ -42,12 +43,12 @@ func DgetrfTest(t *testing.T, impl Dgetrfer) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.Float64()
+			a[i] = rnd.Float64()
 		}
 		mn := min(m, n)
 		ipiv := make([]int, mn)
 		for i := range ipiv {
-			ipiv[i] = rand.Int()
+			ipiv[i] = rnd.Int()
 		}
 
 		// Cannot compare the outputs of Dgetrf and Dgetf2 because the pivoting may

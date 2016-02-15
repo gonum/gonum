@@ -15,6 +15,7 @@ type Dlabrder interface {
 }
 
 func DlabrdTest(t *testing.T, impl Dlabrder) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, nb, lda, ldx, ldy int
 	}{
@@ -63,7 +64,7 @@ func DlabrdTest(t *testing.T, impl Dlabrder) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 		d := make([]float64, nb)
 		for i := range d {
@@ -83,11 +84,11 @@ func DlabrdTest(t *testing.T, impl Dlabrder) {
 		}
 		x := make([]float64, m*ldx)
 		for i := range x {
-			x[i] = rand.NormFloat64()
+			x[i] = rnd.NormFloat64()
 		}
 		y := make([]float64, n*ldy)
 		for i := range y {
-			y[i] = rand.NormFloat64()
+			y[i] = rnd.NormFloat64()
 		}
 		aCopy := make([]float64, len(a))
 		copy(aCopy, a)

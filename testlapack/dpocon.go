@@ -79,6 +79,7 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 			log.Printf("Dpocon cond mismatch. Want %v, got %v.", test.cond, cond)
 		}
 	}
+	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	// Randomized tests compared against Dgecon.
 	for _, uplo := range []blas.Uplo{blas.Lower, blas.Upper} {
@@ -96,7 +97,7 @@ func DpoconTest(t *testing.T, impl Dpoconer) {
 				}
 				a := make([]float64, n*lda)
 				for i := range a {
-					a[i] = rand.NormFloat64()
+					a[i] = rnd.NormFloat64()
 				}
 
 				// Multiply a by itself to make it symmetric positive definite.

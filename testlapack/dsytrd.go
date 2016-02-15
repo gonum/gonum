@@ -19,6 +19,7 @@ type Dsytrder interface {
 }
 
 func DsytrdTest(t *testing.T, impl Dsytrder) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper} {
 		for _, test := range []struct {
 			n, lda int
@@ -42,7 +43,7 @@ func DsytrdTest(t *testing.T, impl Dsytrder) {
 			}
 			a := make([]float64, n*lda)
 			for i := range a {
-				a[i] = rand.NormFloat64()
+				a[i] = rnd.NormFloat64()
 			}
 			d2 := make([]float64, n)
 			e2 := make([]float64, n)

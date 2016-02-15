@@ -18,6 +18,7 @@ type Dsytd2er interface {
 }
 
 func Dsytd2Test(t *testing.T, impl Dsytd2er) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, test := range []struct {
 			n, lda int
@@ -37,7 +38,7 @@ func Dsytd2Test(t *testing.T, impl Dsytd2er) {
 			}
 			a := make([]float64, n*lda)
 			for i := range a {
-				a[i] = rand.NormFloat64()
+				a[i] = rnd.NormFloat64()
 			}
 			aCopy := make([]float64, len(a))
 			copy(aCopy, a)

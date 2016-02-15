@@ -18,6 +18,7 @@ type Dorglqer interface {
 }
 
 func DorglqTest(t *testing.T, impl Dorglqer) {
+	rnd := rand.New(rand.NewSource(1))
 	// TODO(btracey): Base tests off of nb and nx.
 	for _, test := range []struct{ m, n, k, lda int }{
 		{10, 10, 10, 0},
@@ -52,7 +53,7 @@ func DorglqTest(t *testing.T, impl Dorglqer) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.Float64()
+			a[i] = rnd.Float64()
 		}
 		work := make([]float64, 1)
 		tau := make([]float64, m)

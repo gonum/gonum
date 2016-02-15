@@ -18,6 +18,7 @@ type Dlanger interface {
 }
 
 func DlangeTest(t *testing.T, impl Dlanger) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, lda int
 	}{
@@ -34,11 +35,11 @@ func DlangeTest(t *testing.T, impl Dlanger) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = (rand.Float64() - 0.5)
+			a[i] = rnd.Float64() - 0.5
 		}
 		work := make([]float64, n)
 		for i := range work {
-			work[i] = rand.Float64()
+			work[i] = rnd.Float64()
 		}
 		aCopy := make([]float64, len(a))
 		copy(aCopy, a)

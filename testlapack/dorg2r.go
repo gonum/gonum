@@ -18,6 +18,7 @@ type Dorg2rer interface {
 }
 
 func Dorg2rTest(t *testing.T, impl Dorg2rer) {
+	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		m, n, k, lda int
 	}{
@@ -39,7 +40,7 @@ func Dorg2rTest(t *testing.T, impl Dorg2rer) {
 		}
 		a := make([]float64, m*lda)
 		for i := range a {
-			a[i] = rand.NormFloat64()
+			a[i] = rnd.NormFloat64()
 		}
 		k := min(m, n)
 		tau := make([]float64, k)

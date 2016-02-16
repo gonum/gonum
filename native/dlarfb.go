@@ -24,25 +24,25 @@ import (
 // reflectors. In all cases the ones on the diagonal are implicitly represented.
 //
 // If direct == lapack.Forward and store == lapack.ColumnWise
-//  V = [ 1      ]
-//      [v1  1   ]
-//      [v1 v2  1]
-//      [v1 v2 v3]
-//      [v1 v2 v3]
+//  V = [ 1        ]
+//      [v1   1    ]
+//      [v1  v2   1]
+//      [v1  v2  v3]
+//      [v1  v2  v3]
 // If direct == lapack.Forward and store == lapack.RowWise
-//  V = [ 1 v1 v1 v1 v1]
-//      [    1 v2 v2 v2]
-//      [       1 v3 v3]
+//  V = [ 1  v1  v1  v1  v1]
+//      [     1  v2  v2  v2]
+//      [         1  v3  v3]
 // If direct == lapack.Backward and store == lapack.ColumnWise
-//  V = [v1 v2 v3]
-//      [v1 v2 v3]
-//      [ 1 v2 v3]
-//      [    1 v3]
-//      [       1]
+//  V = [v1  v2  v3]
+//      [v1  v2  v3]
+//      [ 1  v2  v3]
+//      [     1  v3]
+//      [         1]
 // If direct == lapack.Backward and store == lapack.RowWise
-//  V = [v1 v1  1      ]
-//      [v2 v2 v2  1   ]
-//      [v3 v3 v3 v3  1]
+//  V = [v1  v1   1        ]
+//      [v2  v2  v2   1    ]
+//      [v3  v3  v3  v3   1]
 // An elementary reflector can be explicitly constructed by extracting the
 // corresponding elements of v, placing a 1 where the diagonal would be, and
 // placing zeros in the remaining elements.

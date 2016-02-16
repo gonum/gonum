@@ -23,18 +23,18 @@ import (
 // set to 1, and the remaining elements contain the data to construct Q.
 //
 // If uplo == blas.Upper, with n = 5 and nb = 2 on exit a is
-//  [a  a  a v4 v5]
-//  [   a  a v4 v5]
-//  [      a  1 v5]
-//  [         d  1]
-//  [            d]
+//  [ a   a   a  v4  v5]
+//  [     a   a  v4  v5]
+//  [         a   1  v5]
+//  [             d   1]
+//  [                 d]
 //
 // If uplo == blas.Lower, with n = 5 and nb = 2, on exit a is
-//  [d            ]
-//  [1  d         ]
-//  [v1 1  a      ]
-//  [v1 v2 a  a   ]
-//  [v1 v2 a  a  a]
+//  [ d                ]
+//  [ 1   d            ]
+//  [v1   1   a        ]
+//  [v1  v2   a   a    ]
+//  [v1  v2   a   a   a]
 //
 // e contains the superdiagonal elements of the reduced matrix. If uplo == blas.Upper,
 // e[n-nb:n-1] contains the last nb columns of the reduced matrix, while if

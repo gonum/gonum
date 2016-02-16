@@ -260,18 +260,18 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 //  G_i = I - tauP[i] * u_i * u_i^T
 //
 // As an example, on exit the entries of A when m = 6, and n = 5
-//  [d   e   u1  u1  u1]
-//  [v1  d   e   u2  u2]
-//  [v1  v2  d   e   u3]
-//  [v1  v2  v3  d   e ]
-//  [v1  v2  v3  v4  d ]
+//  [ d   e  u1  u1  u1]
+//  [v1   d   e  u2  u2]
+//  [v1  v2   d   e  u3]
+//  [v1  v2  v3   d   e]
+//  [v1  v2  v3  v4   d]
 //  [v1  v2  v3  v4  v5]
 // and when m = 5, n = 6
-//  [d   u1  u1  u1  u1  u1]
-//  [e   d   u2  u2  u2  u2]
-//  [v1  e   d   u3  u3  u3]
-//  [v1  v2  e   d   u4  u4]
-//  [v1  v2  v3  e   d   u5]
+//  [ d  u1  u1  u1  u1  u1]
+//  [ e   d  u2  u2  u2  u2]
+//  [v1   e   d  u3  u3  u3]
+//  [v1  v2   e   d  u4  u4]
+//  [v1  v2  v3   e   d  u5]
 //
 // d, tauQ, and tauP must all have length at least min(m,n), and e must have
 // length min(m,n) - 1.

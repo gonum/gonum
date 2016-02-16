@@ -33,19 +33,19 @@ import (
 //
 // If uplo == blas.Upper, v[0:i-1] is stored in A[0:i-1,i+1], v[i] = 1, and
 // v[i+1:] = 0. The elements of a are
-//  [d  e  v2 v3 v4]
-//  [   d  e  v3 v4]
-//  [      d  e  v4]
-//  [         d  e ]
-//  [            d ]
+//  [ d   e  v2  v3  v4]
+//  [     d   e  v3  v4]
+//  [         d   e  v4]
+//  [             d   e]
+//  [                 d]
 // If uplo == blas.Lower, v[0:i+1] = 0, v[i+1] = 1, and v[i+2:] is stored in
 // A[i+2:n,i].
 // The elements of a are
-//  [d            ]
-//  [e  d         ]
-//  [v1 e  d      ]
-//  [v1 v2 e  d   ]
-//  [v1 v2 v3 e  d]
+//  [ d                ]
+//  [ e   d            ]
+//  [v1   e   d        ]
+//  [v1  v2   e   d    ]
+//  [v1  v2  v3   e   d]
 func (impl Implementation) Dsytd2(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau []float64) {
 	checkMatrix(n, n, a, lda)
 	if len(d) < n {

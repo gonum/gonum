@@ -29,18 +29,18 @@ import (
 //  G_i = I - tauP[i] * u_i * u_i^T
 //
 // As an example, on exit the entries of A when m = 6, n = 5, and nb = 2
-//  (  1   1   u1  u1  u1 )
-//  (  v1  1   1   u2  u2 )
-//  (  v1  v2  a   a   a  )
-//  (  v1  v2  a   a   a  )
-//  (  v1  v2  a   a   a  )
-//  (  v1  v2  a   a   a  )
+//  [1   1   u1  u1  u1]
+//  [v1  1   1   u2  u2]
+//  [v1  v2  a   a   a ]
+//  [v1  v2  a   a   a ]
+//  [v1  v2  a   a   a ]
+//  [v1  v2  a   a   a ]
 // and when m = 5, n = 6, and nb = 2
-//  (  1   u1  u1  u1  u1  u1 )
-//  (  1   1   u2  u2  u2  u2 )
-//  (  v1  1   a   a   a   a  )
-//  (  v1  v2  a   a   a   a  )
-//  (  v1  v2  a   a   a   a  )
+//  [1   u1  u1  u1  u1  u1]
+//  [1   1   u2  u2  u2  u2]
+//  [v1  1   a   a   a   a ]
+//  [v1  v2  a   a   a   a ]
+//  [v1  v2  a   a   a   a ]
 //
 // Dlabrd also returns the matrices X and Y which are used with U and V to
 // apply the transformation to the unreduced part of the matrix

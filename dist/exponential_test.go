@@ -11,25 +11,25 @@ import (
 
 func TestExponentialProb(t *testing.T) {
 	pts := []univariateProbPoint{
-		univariateProbPoint{
+		{
 			loc:     0,
 			prob:    1,
 			cumProb: 0,
 			logProb: 0,
 		},
-		univariateProbPoint{
+		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
 			logProb: math.Inf(-1),
 		},
-		univariateProbPoint{
+		{
 			loc:     1,
 			prob:    1 / (math.E),
 			cumProb: 0.6321205588285576784044762298385391325541888689682321654921631983025385042551001966428527256540803563,
 			logProb: -1,
 		},
-		univariateProbPoint{
+		{
 			loc:     20,
 			prob:    math.Exp(-20),
 			cumProb: 0.999999997938846377561442172034059619844179023624192724400896307027755338370835976215440646720089072,

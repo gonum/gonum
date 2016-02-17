@@ -11,25 +11,25 @@ import (
 
 func TestHalfKStandardWeibullProb(t *testing.T) {
 	pts := []univariateProbPoint{
-		univariateProbPoint{
+		{
 			loc:     0,
 			prob:    math.Inf(1),
 			cumProb: 0,
 			logProb: math.Inf(1),
 		},
-		univariateProbPoint{
+		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
 			logProb: 0,
 		},
-		univariateProbPoint{
+		{
 			loc:     1,
 			prob:    0.183939720585721,
 			cumProb: 0.632120558828558,
 			logProb: -1.693147180559950,
 		},
-		univariateProbPoint{
+		{
 			loc:     20,
 			prob:    0.001277118038048,
 			cumProb: 0.988577109006533,
@@ -41,25 +41,25 @@ func TestHalfKStandardWeibullProb(t *testing.T) {
 
 func TestExponentialStandardWeibullProb(t *testing.T) {
 	pts := []univariateProbPoint{
-		univariateProbPoint{
+		{
 			loc:     0,
 			prob:    1,
 			cumProb: 0,
 			logProb: math.Inf(1),
 		},
-		univariateProbPoint{
+		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
 			logProb: 0,
 		},
-		univariateProbPoint{
+		{
 			loc:     1,
 			prob:    0.367879441171442,
 			cumProb: 0.632120558828558,
 			logProb: -1.0,
 		},
-		univariateProbPoint{
+		{
 			loc:     20,
 			prob:    0.000000002061154,
 			cumProb: 0.999999997938846,
@@ -71,25 +71,25 @@ func TestExponentialStandardWeibullProb(t *testing.T) {
 
 func TestRayleighStandardWeibullProb(t *testing.T) {
 	pts := []univariateProbPoint{
-		univariateProbPoint{
+		{
 			loc:     0,
 			prob:    0,
 			cumProb: 0,
 			logProb: math.Inf(-1),
 		},
-		univariateProbPoint{
+		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
 			logProb: 0,
 		},
-		univariateProbPoint{
+		{
 			loc:     1,
 			prob:    0.735758882342885,
 			cumProb: 0.632120558828558,
 			logProb: -0.306852819440055,
 		},
-		univariateProbPoint{
+		{
 			loc:     20,
 			prob:    0,
 			cumProb: 1,
@@ -101,25 +101,25 @@ func TestRayleighStandardWeibullProb(t *testing.T) {
 
 func TestFiveKStandardWeibullProb(t *testing.T) {
 	pts := []univariateProbPoint{
-		univariateProbPoint{
+		{
 			loc:     0,
 			prob:    0,
 			cumProb: 0,
 			logProb: math.Inf(-1),
 		},
-		univariateProbPoint{
+		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
 			logProb: 0,
 		},
-		univariateProbPoint{
+		{
 			loc:     1,
 			prob:    1.839397205857210,
 			cumProb: 0.632120558828558,
 			logProb: 0.609437912434100,
 		},
-		univariateProbPoint{
+		{
 			loc:     20,
 			prob:    0,
 			cumProb: 1,
@@ -131,25 +131,25 @@ func TestFiveKStandardWeibullProb(t *testing.T) {
 
 func TestScaledUpHalfKStandardWeibullProb(t *testing.T) {
 	pts := []univariateProbPoint{
-		univariateProbPoint{
+		{
 			loc:     0,
 			prob:    math.Inf(1),
 			cumProb: 0,
 			logProb: math.Inf(1),
 		},
-		univariateProbPoint{
+		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
 			logProb: 0,
 		},
-		univariateProbPoint{
+		{
 			loc:     1,
 			prob:    0.180436508682207,
 			cumProb: 0.558022622759326,
 			logProb: -1.712376315541750,
 		},
-		univariateProbPoint{
+		{
 			loc:     20,
 			prob:    0.002369136850928,
 			cumProb: 0.974047406098605,
@@ -161,25 +161,25 @@ func TestScaledUpHalfKStandardWeibullProb(t *testing.T) {
 
 func TestScaledDownHalfKStandardWeibullProb(t *testing.T) {
 	pts := []univariateProbPoint{
-		univariateProbPoint{
+		{
 			loc:     0,
 			prob:    math.Inf(1),
 			cumProb: 0,
 			logProb: math.Inf(1),
 		},
-		univariateProbPoint{
+		{
 			loc:     -1,
 			prob:    0,
 			cumProb: 0,
 			logProb: 0,
 		},
-		univariateProbPoint{
+		{
 			loc:     1,
 			prob:    0.171909491538362,
 			cumProb: 0.756883265565786,
 			logProb: -1.760787152653070,
 		},
-		univariateProbPoint{
+		{
 			loc:     20,
 			prob:    0.000283302579100,
 			cumProb: 0.998208237166091,

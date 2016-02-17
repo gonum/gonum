@@ -1296,9 +1296,9 @@ func TestClone(t *testing.T) {
 // TODO(kortschak) Roll this into testOneInput when it exists.
 func TestCopyPanic(t *testing.T) {
 	for _, a := range []*Dense{
-		&Dense{},
-		&Dense{mat: blas64.General{Rows: 1}},
-		&Dense{mat: blas64.General{Cols: 1}},
+		{},
+		{mat: blas64.General{Rows: 1}},
+		{mat: blas64.General{Cols: 1}},
 	} {
 		var rows, cols int
 		m := NewDense(1, 1, nil)

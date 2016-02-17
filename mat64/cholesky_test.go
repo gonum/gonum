@@ -35,10 +35,10 @@ func TestCholesky(t *testing.T) {
 	} {
 		_, n := test.a.Dims()
 		for _, chol := range []*Cholesky{
-			&Cholesky{},
-			&Cholesky{chol: NewTriDense(n-1, true, nil)},
-			&Cholesky{chol: NewTriDense(n, true, nil)},
-			&Cholesky{chol: NewTriDense(n+1, true, nil)},
+			{},
+			{chol: NewTriDense(n-1, true, nil)},
+			{chol: NewTriDense(n, true, nil)},
+			{chol: NewTriDense(n+1, true, nil)},
 		} {
 			ok := chol.Factorize(test.a)
 			if ok != test.posdef {

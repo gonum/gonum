@@ -36,10 +36,7 @@
 
 //+build !noasm,!appengine
 
-// TODO(fhs): use textflag.h after we drop Go 1.3 support
-// #include "textflag.h"
-// Don't insert stack check preamble.
-#define NOSPLIT	4
+#include "textflag.h"
 
 // func DdotUnitary(x, y []float64) (sum float64)
 // This function assumes len(y) >= len(x).

@@ -40,10 +40,7 @@
 
 //+build !noasm,!appengine
 
-// TODO(fhs): use textflag.h after we drop Go 1.3 support
-// #include "textflag.h"
-// Don't insert stack check preamble.
-#define NOSPLIT 4
+#include "textflag.h"
 
 // func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·DaxpyIncTo(SB), NOSPLIT, $0

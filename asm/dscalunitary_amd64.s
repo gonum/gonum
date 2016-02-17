@@ -40,10 +40,7 @@
 
 //+build !noasm,!appengine
 
-// TODO(fhs): use textflag.h after we drop Go 1.3 support
-// #include "textflag.h"
-// Don't insert stack check preamble.
-#define NOSPLIT 4
+#include "textflag.h"
 
 // func DscalUnitary(alpha float64, x []float64)
 TEXT ·DscalUnitary(SB), NOSPLIT, $0

@@ -26,11 +26,11 @@ import (
 //  H[i] = I - tau * v * v^T
 // v is constructed as v[i+1:n] = 0, v[i] = 1, v[0:i-1] is stored in A[0:i-1, i+1],
 // and tau is in tau[i]. The elements of A are
-//  [ d  e  v2 v3 v4]
-//  [    d  e  v3 v4]
-//  [       d   e v4]
-//  [           d  e]
-//  [              e]
+//  [ d   e  v2  v3  v4]
+//  [     d   e  v3  v4]
+//  [         d   e  v4]
+//  [             d   e]
+//  [                 e]
 //
 // If uplo == blas.Lower, Q is constructed with
 //  Q = H[0] * H[1] * ... * H[n-2]
@@ -38,11 +38,11 @@ import (
 //  H[i] = I - tau * v * v^T
 // v is constructed as v[0:i+1] = 0, v[i+1] = 1, v[i+2:n] is stored in A[i+2:n, i],
 // and tau is in tau[i]. The elements of A are
-//  [ d            ]
-//  [ e  d         ]
-//  [v1  e  d      ]
-//  [v1 v2  e  d   ]
-//  [v1 v2  v3 e  d]
+//  [ d                ]
+//  [ e   d            ]
+//  [v1   e   d        ]
+//  [v1  v2   e   d    ]
+//  [v1  v2  v3   e   d]
 //
 // d must have length n, and e and tau must have length n-1. Dsytrd will panic if
 // these conditions are not met.

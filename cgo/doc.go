@@ -84,11 +84,12 @@ which is given to the BLAS routine as [∗ 1 2 3 4 ...].
 See http://www.crest.iu.edu/research/mtl/reference/html/banded.html
 for more information
 
-BUG(cgo): The cgo package is intrinsically dependent on the underlying C
-implementation. The BLAS standard is silent on a number of behaviors, including
-but not limited to how NaN values are treated. For this reason the result of
-computations performed by the cgo BLAS package may disagree with the results
-produced by the native BLAS package. The cgo package is tested against OpenBLAS;
-use of other backing BLAS C libraries may result in test failure because of this.
 */
 package cgo
+
+// BUG(btracey): The cgo package is intrinsically dependent on the underlying C
+// implementation. The BLAS standard is silent on a number of behaviors, including
+// but not limited to how NaN values are treated. For this reason the result of
+// computations performed by the cgo BLAS package may disagree with the results
+// produced by the native BLAS package. The cgo package is tested against OpenBLAS;
+// use of other backing BLAS C libraries may result in test failure because of this.

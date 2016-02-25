@@ -27,9 +27,9 @@ type TriDense struct {
 
 type Triangular interface {
 	Matrix
-	// Triangular returns the number of rows/columns in the matrix and if it is
-	// an upper triangular matrix.
-	Triangle() (n int, upper bool)
+	// Triangular returns the number of rows/columns in the matrix and its
+	// orientation.
+	Triangle() (n int, kind matrix.TriKind)
 
 	// TTri is the equivalent of the T() method in the Matrix interface but
 	// guarantees the transpose is of triangular type.
@@ -70,9 +70,8 @@ func (t TransposeTri) T() Matrix {
 	return t.Triangular
 }
 
-// Triangle returns the number of rows/columns in the matrix and if it is
-// an upper triangular matrix.
-func (t TransposeTri) Triangle() (int, bool) {
+// Triangle returns the number of rows/columns in the matrix and its orientation.
+func (t TransposeTri) Triangle() (int, matrix.TriKind) {
 	n, upper := t.Triangular.Triangle()
 	return n, !upper
 }
@@ -87,14 +86,14 @@ func (t TransposeTri) Untranspose() Matrix {
 	return t.Triangular
 }
 
-// NewTriDense constructs an n x n triangular matrix. The constructed matrix
-// is upper triangular if upper == true and lower triangular otherwise.
+// NewTriDense constructs an n x n triangular matrix with the orientation
+// specified by kind.
 // If len(mat) == n * n, mat will be used to hold the underlying data, if
 // mat == nil, new data will be allocated, and will panic if neither of these
 // cases is true.
 // The underlying data representation is the same as that of a Dense matrix,
 // except the values of the entries in the opposite half are completely ignored.
-func NewTriDense(n int, upper bool, mat []float64) *TriDense {
+func NewTriDense(n int, kind matrix.TriKind, mat []float64) *TriDense {
 	if n < 0 {
 		panic("mat64: negative dimension")
 	}
@@ -105,7 +104,7 @@ func NewTriDense(n int, upper bool, mat []float64) *TriDense {
 		mat = make([]float64, n*n)
 	}
 	uplo := blas.Lower
-	if upper {
+	if kind == matrix.Upper {
 		uplo = blas.Upper
 	}
 	return &TriDense{
@@ -124,14 +123,18 @@ func (t *TriDense) Dims() (r, c int) {
 	return t.mat.N, t.mat.N
 }
 
-// Triangle returns the dimension of t and whether t is an upper triangular
-// matrix. The returned boolean upper is only valid when n is not zero.
-func (t *TriDense) Triangle() (n int, upper bool) {
-	return t.mat.N, !t.isZero() && t.isUpper()
+// Triangle returns the dimension of t and its orientation. The returned
+// orientation is only valid when n is not zero.
+func (t *TriDense) Triangle() (n int, kind matrix.TriKind) {
+	return t.mat.N, matrix.TriKind(!t.isZero()) && t.triKind()
 }
 
 func (t *TriDense) isUpper() bool {
 	return isUpperUplo(t.mat.Uplo)
+}
+
+func (t *TriDense) triKind() matrix.TriKind {
+	return matrix.TriKind(isUpperUplo(t.mat.Uplo))
 }
 
 func isUpperUplo(u blas.Uplo) bool {
@@ -181,12 +184,12 @@ func (t *TriDense) isZero() bool {
 	return t.mat.Stride == 0
 }
 
-// reuseAS resizes a zero receiver to an n×n triangular matrix with the given
+// reuseAs resizes a zero receiver to an n×n triangular matrix with the given
 // orientation. If the receiver is non-zero, reuseAs checks that the receiver
 // is the correct size and orientation.
-func (t *TriDense) reuseAs(n int, upper bool) {
+func (t *TriDense) reuseAs(n int, kind matrix.TriKind) {
 	ul := blas.Lower
-	if upper {
+	if kind == matrix.Upper {
 		ul = blas.Upper
 	}
 	if t.mat.N > t.cap {

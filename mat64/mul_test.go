@@ -11,6 +11,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix"
 )
 
 // TODO: Need to add tests where one is overwritten.
@@ -247,7 +248,7 @@ func (m *basicTriangular) T() Matrix {
 	return Transpose{m}
 }
 
-func (m *basicTriangular) Triangle() (int, bool) {
+func (m *basicTriangular) Triangle() (int, matrix.TriKind) {
 	return (*TriDense)(m).Triangle()
 }
 

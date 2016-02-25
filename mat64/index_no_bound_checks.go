@@ -117,7 +117,7 @@ func (t *TriDense) At(i, j int) float64 {
 }
 
 func (t *TriDense) at(i, j int) float64 {
-	isUpper := t.isUpper()
+	isUpper := t.triKind()
 	if (isUpper && i > j) || (!isUpper && i < j) {
 		return 0
 	}

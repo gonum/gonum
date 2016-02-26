@@ -8,7 +8,13 @@ package mat64
 import (
 	"math"
 
+	"github.com/gonum/lapack"
+	"github.com/gonum/lapack/lapack64"
 	"github.com/gonum/matrix"
+)
+
+const (
+	badFact = "mat64: use without successful factorization"
 )
 
 func symmetric(m *Dense) bool {
@@ -23,6 +29,91 @@ func symmetric(m *Dense) bool {
 	return true
 }
 
+// EigenSym is a type for creating and manipulating the Eigen decomposition of
+// symmetric matrices.
+type EigenSym struct {
+	vectorsComputed bool
+
+	values  []float64
+	vectors *Dense
+}
+
+// Factorize computes the eigenvalue decomposition of the symmetric matrix a.
+// The Eigen decomposition is defined as
+//  A = P * D * P^-1
+// where D is a diagonal matrix containing the eigenvalues of the matrix, and
+// P is a matrix of the eigenvectors of A. If the vectors input argument is
+// false, the eigenvectors are not computed.
+//
+// Factorize returns whether the decomposition succeeded. If the decomposition
+// failed, methods that require a successful factorization will panic.
+func (s *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
+	n := a.Symmetric()
+	sd := NewSymDense(n, nil)
+	sd.CopySym(a)
+
+	jobz := lapack.EigValueOnly
+	if vectors {
+		jobz = lapack.EigDecomp
+	}
+	w := make([]float64, n)
+	work := make([]float64, 1)
+	lapack64.Syev(jobz, sd.mat, w, work, -1)
+
+	work = make([]float64, int(work[0]))
+	ok = lapack64.Syev(jobz, sd.mat, w, work, len(work))
+	if !ok {
+		s.vectorsComputed = false
+		s.values = nil
+		s.vectors = nil
+		return false
+	}
+	s.vectorsComputed = vectors
+	s.values = w
+	s.vectors = NewDense(n, n, sd.mat.Data)
+	return true
+}
+
+// succFact returns whether the receiver contains a successful factorization.
+func (es *EigenSym) succFact() bool {
+	return len(es.values) != 0
+}
+
+// Values extracts the eigenvalues of the factorized matrix. If dst is
+// non-nil, the values are stored in-place into dst. In this case
+// dst must have length n, otherwise Values will panic. If dst is
+// nil, then a new slice will be allocated of the proper length and filled
+// with the eigenvalues.
+//
+// Values panics if the Eigen decomposition was not successful.
+func (es *EigenSym) Values(dst []float64) []float64 {
+	if !es.succFact() {
+		panic(badFact)
+	}
+	if dst == nil {
+		dst = make([]float64, len(es.values))
+	}
+	if len(dst) != len(es.values) {
+		panic(matrix.ErrSliceLengthMismatch)
+	}
+	copy(dst, es.values)
+	return dst
+}
+
+// EigenvectorsSym extracts the eigenvectors of the factorized matrix and stores
+// them in the reciever. Each eigenvector is a column corresponding to the
+// respective eigenvalue returned by es.Values.
+//
+// EigenvectorsSym panics if the factorization was not successful or if the
+// decomposition did not compute the eigenvectors.
+func (m *Dense) EigenvectorsSym(es *EigenSym) {
+	if !es.succFact() {
+		panic(badFact)
+	}
+	m.reuseAs(len(es.values), len(es.values))
+	m.Copy(es.vectors)
+}
+
 // Eigen is a type for creating and using the eigenvalue decomposition of a matrix.
 type Eigen struct {
 	vectorsComputed bool
@@ -32,7 +123,7 @@ type Eigen struct {
 	ef eigenFactors
 }
 
-// Factorize computes the Eigen decomposition of the input square matrix a.
+// Factorize computes the eigenvalue decomposition of the input square matrix a.
 // The Eigen decomposition is defined as
 //  A = P * D * P^-1
 // where D is a diagonal matrix containing the eigenvalues of the matrix, and
@@ -40,7 +131,7 @@ type Eigen struct {
 // false, the eigenvectors are not computed.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
-// failed, routines that require a successful factorization will panic.
+// failed, methods that require a successful factorization will panic.
 //
 // BUG: The current implementation always computes the eigenvectors.
 func (e *Eigen) Factorize(a Matrix, vectors bool) (ok bool) {
@@ -57,10 +148,11 @@ func (e *Eigen) Factorize(a Matrix, vectors bool) (ok bool) {
 	return true
 }
 
-// Values extracts the eigenvalues of the factorized matrix. If destination is
-// non-nil, the values are stored in-place into the receiver. In this case the
-// destination must have length n, otherwise Values will panic. If destination
-// nil, then a new slice will be allocated of the proper length.
+// Values extracts the eigenvalues of the factorized matrix. If dst is
+// non-nil, the values are stored in-place into dst. In this case
+// dst must have length n, otherwise Values will panic. If dst is
+// nil, then a new slice will be allocated of the proper length and
+// filed with the eigenvalues.
 func (e *Eigen) Values(dst []complex128) []complex128 {
 	if dst == nil {
 		dst = make([]complex128, e.n)

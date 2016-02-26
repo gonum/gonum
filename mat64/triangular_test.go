@@ -13,10 +13,10 @@ import (
 
 func TestNewTriangular(t *testing.T) {
 	for i, test := range []struct {
-		data  []float64
-		n     int
-		upper bool
-		mat   *TriDense
+		data []float64
+		n    int
+		kind matrix.TriKind
+		mat  *TriDense
 	}{
 		{
 			data: []float64{
@@ -24,8 +24,8 @@ func TestNewTriangular(t *testing.T) {
 				4, 5, 6,
 				7, 8, 9,
 			},
-			n:     3,
-			upper: true,
+			n:    3,
+			kind: matrix.Upper,
 			mat: &TriDense{
 				mat: blas64.Triangular{
 					N:      3,
@@ -38,7 +38,7 @@ func TestNewTriangular(t *testing.T) {
 			},
 		},
 	} {
-		tri := NewTriDense(test.n, test.upper, test.data)
+		tri := NewTriDense(test.n, test.kind, test.data)
 		rows, cols := tri.Dims()
 
 		if rows != test.n {
@@ -52,10 +52,10 @@ func TestNewTriangular(t *testing.T) {
 		}
 	}
 
-	for _, upper := range []bool{false, true} {
-		panicked, message := panics(func() { NewTriDense(3, upper, []float64{1, 2}) })
+	for _, kind := range []matrix.TriKind{matrix.Lower, matrix.Upper} {
+		panicked, message := panics(func() { NewTriDense(3, kind, []float64{1, 2}) })
 		if !panicked || message != matrix.ErrShape.Error() {
-			t.Errorf("expected panic for invalid data slice length for upper=%t", upper)
+			t.Errorf("expected panic for invalid data slice length for upper=%t", kind)
 		}
 	}
 }
@@ -238,13 +238,13 @@ func TestTriTriDenseCopy(t *testing.T) {
 }
 
 func TestTriInverse(t *testing.T) {
-	for _, upper := range []bool{true, false} {
+	for _, kind := range []matrix.TriKind{matrix.Upper, matrix.Lower} {
 		for _, n := range []int{1, 3, 5, 9} {
 			data := make([]float64, n*n)
 			for i := range data {
 				data[i] = rand.NormFloat64()
 			}
-			a := NewTriDense(n, upper, data)
+			a := NewTriDense(n, kind, data)
 			var tr TriDense
 			err := tr.InverseTri(a)
 			if err != nil {

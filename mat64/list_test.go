@@ -14,6 +14,7 @@ import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
+	"github.com/gonum/matrix"
 )
 
 // legalSizeSameRectangular returns whether the two matrices have the same rectangular shape.
@@ -242,12 +243,12 @@ func retranspose(a, m Matrix) Matrix {
 
 // makeRandOf returns a new randomly filled m×n matrix of the underlying matrix type.
 func makeRandOf(a Matrix, m, n int) Matrix {
-	var matrix Matrix
+	var rMatrix Matrix
 	switch t := a.(type) {
 	default:
 		panic("unknown type for make rand of")
 	case Untransposer:
-		matrix = retranspose(a, makeRandOf(t.Untranspose(), n, m))
+		rMatrix = retranspose(a, makeRandOf(t.Untranspose(), n, m))
 	case *Dense, *basicMatrix:
 		mat := NewDense(m, n, nil)
 		for i := 0; i < m; i++ {
@@ -255,7 +256,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 				mat.Set(i, j, rand.NormFloat64())
 			}
 		}
-		matrix = returnAs(mat, t)
+		rMatrix = returnAs(mat, t)
 	case *Vector:
 		if m == 0 && n == 0 {
 			return &Vector{}
@@ -289,7 +290,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 				mat.SetSym(i, j, rand.NormFloat64())
 			}
 		}
-		matrix = returnAs(mat, t)
+		rMatrix = returnAs(mat, t)
 	case *TriDense, *basicTriangular:
 		if m != n {
 			panic("bad size")
@@ -298,16 +299,16 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		// This is necessary because we are making
 		// a triangle from the zero value, which
 		// always returns upper as true.
-		var upper bool
+		var triKind matrix.TriKind
 		switch t := t.(type) {
 		case *TriDense:
-			upper = t.isUpper()
+			triKind = t.triKind()
 		case *basicTriangular:
-			upper = (*TriDense)(t).isUpper()
+			triKind = (*TriDense)(t).triKind()
 		}
 
-		mat := NewTriDense(n, upper, nil)
-		if upper {
+		mat := NewTriDense(n, triKind, nil)
+		if triKind == matrix.Upper {
 			for i := 0; i < m; i++ {
 				for j := i; j < n; j++ {
 					mat.SetTri(i, j, rand.NormFloat64())
@@ -320,12 +321,12 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 				}
 			}
 		}
-		matrix = returnAs(mat, t)
+		rMatrix = returnAs(mat, t)
 	}
-	if mr, mc := matrix.Dims(); mr != m || mc != n {
+	if mr, mc := rMatrix.Dims(); mr != m || mc != n {
 		panic(fmt.Sprintf("makeRandOf for %T returns wrong size: %d×%d != %d×%d", a, m, n, mr, mc))
 	}
-	return matrix
+	return rMatrix
 }
 
 // makeCopyOf returns a copy of the matrix.

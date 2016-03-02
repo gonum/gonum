@@ -996,6 +996,35 @@ func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, a
 	return rcond[0]
 }
 
+// Dsyev computes all eigenvalues and, optionally, the eigenvectors of a real
+// symmetric matrix A.
+//
+// w contains the eigenvalues in ascending order upon return. w must have length
+// at least n, and Dsyev will panic otherwise.
+//
+// On entry, a contains the elements of the symmetric matrix A in the triangular
+// portion specified by uplo. If jobz == lapack.EigDecomp a contains the
+// orthonormal eigenvectors of A on exit, otherwise on exit the specified
+// triangular region is overwritten.
+//
+// The C interface does not support providing temporary storage. To provide compatibility
+// with native, lwork == -1 will not run Dsyev but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dsyev will panic.
+func (impl Implementation) Dsyev(jobz lapack.EigComp, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
+	checkMatrix(n, n, a, lda)
+	if lwork == -1 {
+		work[0] = 3*float64(n) - 1
+		return
+	}
+	if len(work) < lwork {
+		panic(badWork)
+	}
+	if lwork < 3*n-1 {
+		panic(badWork)
+	}
+	return clapack.Dsyev(lapack.Job(jobz), uplo, n, a, lda, w)
+}
+
 // Dtrcon estimates the reciprocal of the condition number of a triangular matrix A.
 // The condition number computed may be based on the 1-norm or the ∞-norm.
 //

@@ -236,6 +236,10 @@ func TestDsterf(t *testing.T) {
 	testlapack.DsterfTest(t, impl)
 }
 
+func TestDsyev(t *testing.T) {
+	testlapack.DsyevTest(t, impl)
+}
+
 func TestDsytd2(t *testing.T) {
 	testlapack.Dsytd2Test(t, impl)
 }

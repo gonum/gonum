@@ -5,9 +5,6 @@
 package mat64
 
 import (
-	"bytes"
-	"encoding/binary"
-
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/matrix"
@@ -452,74 +449,4 @@ func (m *Dense) Augment(a, b Matrix) {
 	m.Copy(a)
 	w := m.View(0, ac, br, bc).(*Dense)
 	w.Copy(b)
-}
-
-// MarshalBinary encodes the receiver into a binary form and returns the result.
-//
-// Dense is little-endian encoded as follows:
-//   0 -  8  number of rows    (int64)
-//   8 - 16  number of columns (int64)
-//  16 - ..  matrix data elements (float64)
-//           [0,0] [0,1] ... [0,ncols-1]
-//           [1,0] [1,1] ... [1,ncols-1]
-//           ...
-//           [nrows-1,0] ... [nrows-1,ncols-1]
-func (m Dense) MarshalBinary() ([]byte, error) {
-	buf := bytes.NewBuffer(make([]byte, 0, m.mat.Rows*m.mat.Cols*sizeFloat64+2*sizeInt64))
-	err := binary.Write(buf, defaultEndian, int64(m.mat.Rows))
-	if err != nil {
-		return nil, err
-	}
-	err = binary.Write(buf, defaultEndian, int64(m.mat.Cols))
-	if err != nil {
-		return nil, err
-	}
-
-	for i := 0; i < m.mat.Rows; i++ {
-		for _, v := range m.rowView(i) {
-			err = binary.Write(buf, defaultEndian, v)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return buf.Bytes(), err
-}
-
-// UnmarshalBinary decodes the binary form into the receiver.
-// It panics if the receiver is a non-zero Dense matrix.
-//
-// See MarshalBinary for the on-disk layout.
-func (m *Dense) UnmarshalBinary(data []byte) error {
-	if !m.isZero() {
-		panic("mat64: unmarshal into non-zero matrix")
-	}
-
-	buf := bytes.NewReader(data)
-	var rows int64
-	err := binary.Read(buf, defaultEndian, &rows)
-	if err != nil {
-		return err
-	}
-	var cols int64
-	err = binary.Read(buf, defaultEndian, &cols)
-	if err != nil {
-		return err
-	}
-
-	m.mat.Rows = int(rows)
-	m.mat.Cols = int(cols)
-	m.mat.Stride = int(cols)
-	m.capRows = int(rows)
-	m.capCols = int(cols)
-	m.mat.Data = use(m.mat.Data, m.mat.Rows*m.mat.Cols)
-
-	for i := range m.mat.Data {
-		err = binary.Read(buf, defaultEndian, &m.mat.Data[i])
-		if err != nil {
-			return err
-		}
-	}
-
-	return err
 }

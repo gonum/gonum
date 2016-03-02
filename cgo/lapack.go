@@ -20,6 +20,7 @@ const (
 	badDims         = "lapack: bad input dimensions"
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
+	badEigComp      = "lapack: bad EigComp"
 	badIpiv         = "lapack: insufficient permutation length"
 	badLdA          = "lapack: index of a out of range"
 	badNorm         = "lapack: bad norm"

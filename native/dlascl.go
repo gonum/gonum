@@ -64,6 +64,18 @@ func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto
 					a[i*lda+j] = a[i*lda+j] * mul
 				}
 			}
+		case lapack.UpperTri:
+			for i := 0; i < m; i++ {
+				for j := i; j < n; j++ {
+					a[i*lda+j] = a[i*lda+j] * mul
+				}
+			}
+		case lapack.LowerTri:
+			for i := 0; i < m; i++ {
+				for j := 0; j <= min(i, n-1); j++ {
+					a[i*lda+j] = a[i*lda+j] * mul
+				}
+			}
 		}
 		if done {
 			break

@@ -324,29 +324,6 @@ func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float
 	return lapack64.Dpocon(a.Uplo, a.N, a.Data, a.Stride, anorm, work, iwork)
 }
 
-<<<<<<< HEAD
-=======
-// Syev computes all eigenvalues and, optionally, the eigenvectors of a real
-// symmetric matrix A.
-//
-// w contains the eigenvalues in ascending order upon return. w must have length
-// at least n, and Dsyev will panic otherwise.
-//
-// On entry, a contains the elements of the symmetric matrix A in the triangular
-// portion specified by uplo. If jobz == lapack.EigDecomp a contains the
-// orthonormal eigenvectors of A on exit, otherwise on exit the specified
-// triangular region is overwritten.
-//
-// Work is temporary storage, and lwork specifies the usable memory length. At minimum,
-// lwork >= 3*n-1, and Syev will panic otherwise. The amount of blocking is
-// limited by the usable length.
-// If lwork == -1, instead of computing Dsyev the optimal work length is stored
-// into work[0].
-func Syev(jobz lapack.EigComp, a blas64.Symmetric, w, work []float64, lwork int) (ok bool) {
-	return lapack64.Dsyev(jobz, a.Uplo, a.N, a.Data, a.Stride, w, work, lwork)
-}
-
->>>>>>> f0c9a26... fix comment
 // Trcon estimates the reciprocal of the condition number of a triangular matrix A.
 // The condition number computed may be based on the 1-norm or the ∞-norm.
 //

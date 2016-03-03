@@ -47,7 +47,7 @@ type EigenSym struct {
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
-func (s *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
+func (e *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
 	n := a.Symmetric()
 	sd := NewSymDense(n, nil)
 	sd.CopySym(a)
@@ -63,20 +63,20 @@ func (s *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
 	work = make([]float64, int(work[0]))
 	ok = lapack64.Syev(jobz, sd.mat, w, work, len(work))
 	if !ok {
-		s.vectorsComputed = false
-		s.values = nil
-		s.vectors = nil
+		e.vectorsComputed = false
+		e.values = nil
+		e.vectors = nil
 		return false
 	}
-	s.vectorsComputed = vectors
-	s.values = w
-	s.vectors = NewDense(n, n, sd.mat.Data)
+	e.vectorsComputed = vectors
+	e.values = w
+	e.vectors = NewDense(n, n, sd.mat.Data)
 	return true
 }
 
 // succFact returns whether the receiver contains a successful factorization.
-func (es *EigenSym) succFact() bool {
-	return len(es.values) != 0
+func (e *EigenSym) succFact() bool {
+	return len(e.values) != 0
 }
 
 // Values extracts the eigenvalues of the factorized matrix. If dst is
@@ -86,32 +86,32 @@ func (es *EigenSym) succFact() bool {
 // with the eigenvalues.
 //
 // Values panics if the Eigen decomposition was not successful.
-func (es *EigenSym) Values(dst []float64) []float64 {
-	if !es.succFact() {
+func (e *EigenSym) Values(dst []float64) []float64 {
+	if !e.succFact() {
 		panic(badFact)
 	}
 	if dst == nil {
-		dst = make([]float64, len(es.values))
+		dst = make([]float64, len(e.values))
 	}
-	if len(dst) != len(es.values) {
+	if len(dst) != len(e.values) {
 		panic(matrix.ErrSliceLengthMismatch)
 	}
-	copy(dst, es.values)
+	copy(dst, e.values)
 	return dst
 }
 
 // EigenvectorsSym extracts the eigenvectors of the factorized matrix and stores
 // them in the reciever. Each eigenvector is a column corresponding to the
-// respective eigenvalue returned by es.Values.
+// respective eigenvalue returned by e.Values.
 //
 // EigenvectorsSym panics if the factorization was not successful or if the
 // decomposition did not compute the eigenvectors.
-func (m *Dense) EigenvectorsSym(es *EigenSym) {
-	if !es.succFact() {
+func (m *Dense) EigenvectorsSym(e *EigenSym) {
+	if !e.succFact() {
 		panic(badFact)
 	}
-	m.reuseAs(len(es.values), len(es.values))
-	m.Copy(es.vectors)
+	m.reuseAs(len(e.values), len(e.values))
+	m.Copy(e.vectors)
 }
 
 // Eigen is a type for creating and using the eigenvalue decomposition of a matrix.

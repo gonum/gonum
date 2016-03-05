@@ -13,7 +13,7 @@ import (
 )
 
 // PrincipalComponents returns the principal component direction vectors and
-// the column variances of the principle component scores, vecs * a, computed
+// the column variances of the principal component scores, vecs * a, computed
 // using the singular value decomposition of the input. The input a is an n×d
 // matrix where each row is an observation and each column represents a variable.
 //

@@ -57,9 +57,12 @@ func PrincipalComponents(a mat64.Matrix, weights []float64) (vecs *mat64.Dense, 
 		return nil, nil, false
 	}
 
-	var v mat64.Dense
-	v.VFromSVD(&svd)
-	vecs = v.View(0, 0, d, min(n, d)).(*mat64.Dense)
+	vecs = &mat64.Dense{}
+	vecs.VFromSVD(&svd)
+	if n < d {
+		// Don't retain columns that are not valid direction vectors.
+		vecs.Clone(vecs.View(0, 0, d, n))
+	}
 	vars = svd.Values(nil)
 	var f float64
 	if weights == nil {
@@ -71,11 +74,4 @@ func PrincipalComponents(a mat64.Matrix, weights []float64) (vecs *mat64.Dense, 
 		vars[i] = f * v * v
 	}
 	return vecs, vars, true
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

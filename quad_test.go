@@ -8,7 +8,7 @@ import (
 	"github.com/gonum/stat/dist"
 )
 
-func TestQuad(t *testing.T) {
+func TestFixed(t *testing.T) {
 	for i, test := range []struct {
 		f        func(float64) float64
 		min, max float64
@@ -80,7 +80,7 @@ func (l legendreNonSingle) FixedLocations(x, weight []float64, min, max float64)
 	l.Legendre.FixedLocations(x, weight, min, max)
 }
 
-func TestQuadNonSingle(t *testing.T) {
+func TestFixedNonSingle(t *testing.T) {
 	// TODO(btracey): Add tests with infinite bounds when we have native support
 	// for indefinite integrals.
 	for i, test := range []struct {

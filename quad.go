@@ -32,19 +32,25 @@ type FixedLocationSingler interface {
 // If rule is nil, an acceptable default is chosen, otherwise it is
 // assumed that the properties of the integral match the assumptions of rule.
 // For example, Legendre assumes that the integration bounds are finite. If
-// rule is also a FixedLocationsSingler, the quadrature points are computed
+// rule is also a FixedLocationSingler, the quadrature points are computed
 // individually rather than as a unit.
 //
 // If concurrent <= 0, f is evaluated serially, while if concurrent > 0, f
 // may be evaluated with at most concurrent simultaneous evaluations.
+//
+// min must be less than or equal to max, and n must be positive, otherwise
+// Fixed will panic.
 func Fixed(f func(float64) float64, min, max float64, n int, rule FixedLocationer, concurrent int) float64 {
 	// TODO(btracey): When there are Hermite polynomial quadrature, add an additional
 	// example to the documentation comment that talks about weight functions.
 	if n <= 0 {
 		panic("quad: non-positive number of locations")
 	}
-	if min >= max {
-		panic("quad: min >= max")
+	if min > max {
+		panic("quad: min > max")
+	}
+	if min == max {
+		return 0
 	}
 	intfunc := f
 	// If rule is non-nil it is assumed that the function and the constraints

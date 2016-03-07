@@ -32,7 +32,7 @@ type FixedLocationSingler interface {
 // If rule is nil, an acceptable default is chosen, otherwise it is
 // assumed that the properties of the integral match the assumptions of rule.
 // For example, Legendre assumes that the integration bounds are finite. If
-// rule is also a FixedLocationsSingler, the quadrature points are computed
+// rule is also a FixedLocationSingler, the quadrature points are computed
 // individually rather than as a unit.
 //
 // If concurrent <= 0, f is evaluated serially, while if concurrent > 0, f

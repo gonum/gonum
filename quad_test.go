@@ -71,12 +71,12 @@ func TestQuad(t *testing.T) {
 	}
 }
 
-// legendreNonSingle wraps Lengendre but does not implement FixedLocationSingle.
-type lengendreNonSingle struct {
+// legendreNonSingle wraps Legendre but does not implement FixedLocationSingle.
+type legendreNonSingle struct {
 	Legendre Legendre
 }
 
-func (l lengendreNonSingle) FixedLocations(x, weight []float64, min, max float64) {
+func (l legendreNonSingle) FixedLocations(x, weight []float64, min, max float64) {
 	l.Legendre.FixedLocations(x, weight, min, max)
 }
 
@@ -109,11 +109,11 @@ func TestQuadNonSingle(t *testing.T) {
 		},
 	} {
 		for j, n := range test.n {
-			ans := Fixed(test.f, test.min, test.max, n, lengendreNonSingle{}, 0)
+			ans := Fixed(test.f, test.min, test.max, n, legendreNonSingle{}, 0)
 			if !floats.EqualWithinAbsOrRel(ans, test.ans, test.tol[j], test.tol[j]) {
 				t.Errorf("Case = %d, n = %d: Mismatch. Want %v, got %v", i, n, test.ans, ans)
 			}
-			ans2 := Fixed(test.f, test.min, test.max, n, lengendreNonSingle{}, 3)
+			ans2 := Fixed(test.f, test.min, test.max, n, legendreNonSingle{}, 3)
 			if !floats.EqualWithinAbsOrRel(ans2, test.ans, test.tol[j], test.tol[j]) {
 				t.Errorf("Case = %d, n = %d: Mismatch concurrent. Want %v, got %v", i, n, test.ans, ans)
 			}

@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package sample implements advanced sampling routines from explicit and implicit
+// Package sampleuv implements advanced sampling routines from explicit and implicit
 // probability distributions.
 //
 // Each sampling routine is implemented as a stateless function with a
 // complementary wrapper type. The wrapper types allow the sampling routines
 // to implement interfaces.
-package sample
+package sampleuv
 
 import (
 	"errors"
 	"math"
 	"math/rand"
 
-	"github.com/gonum/stat/dist"
+	"github.com/gonum/stat/distuv"
 )
 
 var (
@@ -77,7 +77,7 @@ func (w SampleUniformWeighted) SampleWeighted(batch, weights []float64) {
 // LatinHypercuber is a wrapper around the LatinHypercube sampling generation
 // method.
 type LatinHypercuber struct {
-	Q   dist.Quantiler
+	Q   distuv.Quantiler
 	Src *rand.Rand
 }
 
@@ -93,9 +93,9 @@ func (l LatinHypercuber) Sample(batch []float64) {
 //
 // Latin hypercube sampling divides the cumulative distribution function into equally
 // spaced bins and guarantees that one sample is generated per bin. Within each bin,
-// the location is randomly sampled. The dist.UnitNormal variable can be used
+// the location is randomly sampled. The distuv.UnitNormal variable can be used
 // for easy generation from the unit interval.
-func LatinHypercube(batch []float64, q dist.Quantiler, src *rand.Rand) {
+func LatinHypercube(batch []float64, q distuv.Quantiler, src *rand.Rand) {
 	n := len(batch)
 	var perm []int
 	var f64 func() float64
@@ -114,8 +114,8 @@ func LatinHypercube(batch []float64, q dist.Quantiler, src *rand.Rand) {
 
 // Importancer is a wrapper around the Importance sampling generation method.
 type Importancer struct {
-	Target   dist.LogProber
-	Proposal dist.RandLogProber
+	Target   distuv.LogProber
+	Proposal distuv.RandLogProber
 }
 
 // Sample generates len(batch) samples using the Importance sampling generation
@@ -138,7 +138,7 @@ func (l Importancer) SampleWeighted(batch, weights []float64) {
 //
 // If weights is nil, the weights are not stored. The length of weights must equal
 // the length of batch, otherwise Importance will panic.
-func Importance(batch, weights []float64, target dist.LogProber, proposal dist.RandLogProber) {
+func Importance(batch, weights []float64, target distuv.LogProber, proposal distuv.RandLogProber) {
 	if len(batch) != len(weights) {
 		panic(badLengthMismatch)
 	}
@@ -157,8 +157,8 @@ var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 // be set to math.NaN() and a call to Err will return a non-nil value.
 type Rejectioner struct {
 	C        float64
-	Target   dist.LogProber
-	Proposal dist.RandLogProber
+	Target   distuv.LogProber
+	Proposal distuv.RandLogProber
 	Src      *rand.Rand
 
 	err      error
@@ -212,7 +212,7 @@ func (r *Rejectioner) Sample(batch []float64) {
 // a value that is proportional to the probability (logprob + constant). This is
 // useful for cases where the probability distribution is only known up to a normalization
 // constant.
-func Rejection(batch []float64, target dist.LogProber, proposal dist.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
+func Rejection(batch []float64, target distuv.LogProber, proposal distuv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
 	if c < 1 {
 		panic("rejection: acceptance constant must be greater than 1")
 	}
@@ -272,7 +272,7 @@ type MHProposal interface {
 // The initial value is NOT changed during calls to Sample.
 type MetropolisHastingser struct {
 	Initial  float64
-	Target   dist.LogProber
+	Target   distuv.LogProber
 	Proposal MHProposal
 	Src      *rand.Rand
 
@@ -358,7 +358,7 @@ func (m MetropolisHastingser) Sample(batch []float64) {
 // are ignored in between each kept sample. This helps decorrelate
 // the samples from one another, but also reduces the number of available samples.
 // A sampling rate can be implemented with successive calls to MetropolisHastings.
-func MetropolisHastings(batch []float64, initial float64, target dist.LogProber, proposal MHProposal, src *rand.Rand) {
+func MetropolisHastings(batch []float64, initial float64, target distuv.LogProber, proposal MHProposal, src *rand.Rand) {
 	f64 := rand.Float64
 	if src != nil {
 		f64 = src.Float64
@@ -382,7 +382,7 @@ func MetropolisHastings(batch []float64, initial float64, target dist.LogProber,
 
 // IIDer is a wrapper around the IID sample generation method.
 type IIDer struct {
-	Dist dist.Rander
+	Dist distuv.Rander
 }
 
 // Sample generates a set of identically and independently distributed samples.
@@ -392,7 +392,7 @@ func (iid IIDer) Sample(batch []float64) {
 
 // IID generates a set of independently and identically distributed samples from
 // the input distribution.
-func IID(batch []float64, d dist.Rander) {
+func IID(batch []float64, d distuv.Rander) {
 	for i := range batch {
 		batch[i] = d.Rand()
 	}

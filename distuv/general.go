@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package dist provides univariate random distribution types.
-package dist
+// Package distuv provides univariate random distribution types.
+package distuv
 
 // Parameter represents a parameter of a probability distribution
 type Parameter struct {

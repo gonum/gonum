@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sample
+package sampleuv
 
-import "github.com/gonum/stat/dist"
+import "github.com/gonum/stat/distuv"
 
 type ProposalDist struct {
 	Sigma float64
 }
 
 func (p ProposalDist) ConditionalRand(y float64) float64 {
-	return dist.Normal{Mu: y, Sigma: p.Sigma}.Rand()
+	return distuv.Normal{Mu: y, Sigma: p.Sigma}.Rand()
 }
 
 func (p ProposalDist) ConditionalLogProb(x, y float64) float64 {
-	return dist.Normal{Mu: y, Sigma: p.Sigma}.LogProb(x)
+	return distuv.Normal{Mu: y, Sigma: p.Sigma}.LogProb(x)
 }
 
 func ExampleMetropolisHastings_burnin() {
@@ -23,7 +23,7 @@ func ExampleMetropolisHastings_burnin() {
 	burnin := 50 // Number of samples to ignore at the start.
 	var initial float64
 	// target is the distribution from which we would like to sample.
-	target := dist.Weibull{K: 5, Lambda: 0.5}
+	target := distuv.Weibull{K: 5, Lambda: 0.5}
 	// proposal is the proposal distribution. Here, we are choosing
 	// a tight Gaussian distribution around the current location. In
 	// typical problems, if Sigma is too small, it takes a lot of samples

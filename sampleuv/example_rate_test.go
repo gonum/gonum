@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package sample
+package sampleuv
 
-import "github.com/gonum/stat/dist"
+import "github.com/gonum/stat/distuv"
 
 func max(a, b int) int {
 	if a < b {
@@ -18,7 +18,7 @@ func ExampleMetropolisHastings_samplingRate() {
 	n := 1000
 	burnin := 300
 	var initial float64
-	target := dist.Weibull{K: 5, Lambda: 0.5}
+	target := distuv.Weibull{K: 5, Lambda: 0.5}
 	proposal := ProposalDist{Sigma: 0.2}
 
 	// Successive samples are correlated with one another through the

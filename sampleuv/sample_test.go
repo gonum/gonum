@@ -1,7 +1,8 @@
 // Copyright ©2015 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-package sample
+
+package sampleuv
 
 import (
 	"math"
@@ -9,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/gonum/stat"
-	"github.com/gonum/stat/dist"
+	"github.com/gonum/stat/distuv"
 )
 
 type lhDist interface {
@@ -21,9 +22,9 @@ func TestLatinHypercube(t *testing.T) {
 	for _, nSamples := range []int{1, 2, 5, 10, 20} {
 		samples := make([]float64, nSamples)
 		for _, dist := range []lhDist{
-			dist.Uniform{Min: 0, Max: 1},
-			dist.Uniform{Min: 0, Max: 10},
-			dist.Normal{Mu: 5, Sigma: 3},
+			distuv.Uniform{Min: 0, Max: 1},
+			distuv.Uniform{Min: 0, Max: 10},
+			distuv.Normal{Mu: 5, Sigma: 3},
 		} {
 			LatinHypercube(samples, dist, nil)
 			sort.Float64s(samples)
@@ -40,8 +41,8 @@ func TestLatinHypercube(t *testing.T) {
 func TestImportance(t *testing.T) {
 	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
-	target := dist.Normal{Mu: trueMean, Sigma: 2}
-	proposal := dist.Normal{Mu: 0, Sigma: 5}
+	target := distuv.Normal{Mu: trueMean, Sigma: 2}
+	proposal := distuv.Normal{Mu: 0, Sigma: 5}
 	nSamples := 100000
 	x := make([]float64, nSamples)
 	weights := make([]float64, nSamples)
@@ -55,8 +56,8 @@ func TestImportance(t *testing.T) {
 func TestRejection(t *testing.T) {
 	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
-	target := dist.Normal{Mu: trueMean, Sigma: 2}
-	proposal := dist.Normal{Mu: 0, Sigma: 5}
+	target := distuv.Normal{Mu: trueMean, Sigma: 2}
+	proposal := distuv.Normal{Mu: 0, Sigma: 5}
 
 	nSamples := 100000
 	x := make([]float64, nSamples)
@@ -72,17 +73,17 @@ type condNorm struct {
 }
 
 func (c condNorm) ConditionalRand(y float64) float64 {
-	return dist.Normal{Mu: y, Sigma: c.Sigma}.Rand()
+	return distuv.Normal{Mu: y, Sigma: c.Sigma}.Rand()
 }
 
 func (c condNorm) ConditionalLogProb(x, y float64) float64 {
-	return dist.Normal{Mu: y, Sigma: c.Sigma}.LogProb(x)
+	return distuv.Normal{Mu: y, Sigma: c.Sigma}.LogProb(x)
 }
 
 func TestMetropolisHastings(t *testing.T) {
 	// Test by finding the expected value of a Normal.
 	trueMean := 3.0
-	target := dist.Normal{Mu: trueMean, Sigma: 2}
+	target := distuv.Normal{Mu: trueMean, Sigma: 2}
 	proposal := condNorm{Sigma: 5}
 
 	burnin := 500

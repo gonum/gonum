@@ -128,7 +128,8 @@ var docs = template.Must(template.New("docs").Funcs(funcs).Parse(`{{define "comm
 // {{if .Description}}{{.Description|sentence}}{{else}}{{.Name}}{{end}} will use the following rules to detect overlap between the receiver and one
 // of the inputs:
 //  - the input implements one of the Raw methods, and
-//  - the Raw type matches that of the receiver, and
+//  - the Raw type matches that of the receiver or
+//    one is a RawMatrixer and the other is a RawVectorer, and
 //  - the address ranges of the backing data slices overlap, and
 //  - the strides differ or there is an overlap in the used data elements.
 // If such an overlap is detected, the method will panic.
@@ -214,10 +215,6 @@ var pkgs = []Package{
 {{template "invariants" .}}
 {{template "aliasing" .}}
 package {{.Name}}
-
-// TODO(kortschak) Update docs to indicate the second special case; we
-// will check for Vector/Dense overlap because vector extraction from
-// a matrix is directly supported by the mat64 API via RowView and ColView.
 `,
 	},
 	{
@@ -271,10 +268,6 @@ package {{.Name}}
 // BUG(kortschak) Currently only RawMatrixer and Vector aliasing detection is supported.
 //
 package {{.Name}}
-
-// TODO(kortschak) Update docs to indicate the second special case; we
-// will check for Vector/Dense overlap because vector extraction from
-// a matrix is directly supported by the mat64 API via RowView and ColView.
 `,
 	},
 	{
@@ -296,10 +289,6 @@ package {{.Name}}
 {{template "invariants" .}}
 {{template "aliasing" .}}
 package {{.Name}}
-
-// TODO(kortschak) Update docs to indicate the second special case; we
-// will check for Vector/Dense overlap because vector extraction from
-// a matrix is directly supported by the mat64 API via RowView and ColView.
 `,
 	},
 }

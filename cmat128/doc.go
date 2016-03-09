@@ -76,7 +76,8 @@
 // cmat128 will use the following rules to detect overlap between the receiver and one
 // of the inputs:
 //  - the input implements one of the Raw methods, and
-//  - the Raw type matches that of the receiver, and
+//  - the Raw type matches that of the receiver or
+//    one is a RawMatrixer and the other is a RawVectorer, and
 //  - the address ranges of the backing data slices overlap, and
 //  - the strides differ or there is an overlap in the used data elements.
 // If such an overlap is detected, the method will panic.
@@ -92,7 +93,3 @@
 // if there is undetected overlap.
 //
 package cmat128
-
-// TODO(kortschak) Update docs to indicate the second special case; we
-// will check for Vector/Dense overlap because vector extraction from
-// a matrix is directly supported by the mat64 API via RowView and ColView.

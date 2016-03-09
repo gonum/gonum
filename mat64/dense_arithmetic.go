@@ -342,6 +342,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			return
 		}
 		if bU, ok := bU.(*Vector); ok {
+			m.checkOverlap(bU.asGeneral())
 			bvec := bU.RawVector()
 			if bTrans {
 				// {ar,1} x {1,bc}, which is not a vector.
@@ -402,6 +403,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			return
 		}
 		if aU, ok := aU.(*Vector); ok {
+			m.checkOverlap(aU.asGeneral())
 			avec := aU.RawVector()
 			if aTrans {
 				// {1,ac} x {ac, bc}
@@ -675,6 +677,9 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 		panic(matrix.ErrShape)
 	}
 
+	m.checkOverlap(x.asGeneral())
+	m.checkOverlap(y.asGeneral())
+
 	var w Dense
 	if m == a {
 		w = *m
@@ -718,6 +723,8 @@ func (m *Dense) Outer(alpha float64, x, y *Vector) {
 	} else if r != m.mat.Rows || c != m.mat.Cols {
 		panic(matrix.ErrShape)
 	} else {
+		m.checkOverlap(x.asGeneral())
+		m.checkOverlap(y.asGeneral())
 		for i := 0; i < r; i++ {
 			zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
 		}

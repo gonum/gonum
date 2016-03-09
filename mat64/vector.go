@@ -367,6 +367,9 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 		blas64.Trmv(ta, amat, v.mat)
 	case RawMatrixer:
 		amat := a.RawMatrix()
+		// We don't know that a is a *Dense, so make
+		// a temporary Dense to check overlap.
+		(&Dense{mat: amat}).checkOverlap(v.asGeneral())
 		t := blas.NoTrans
 		if trans {
 			t = blas.Trans

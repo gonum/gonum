@@ -114,13 +114,13 @@ func (v *Vector) SolveVec(a Matrix, b *Vector) error {
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
 	// instead recast the Vectors as Dense and call the matrix code.
 	v.reuseAs(c)
-	m := vecAsDense(v)
+	m := v.asDense()
 	// We conditionally create bm as m when b and v are identical
 	// to prevent the overlap detection code from identifying m
 	// and bm as overlapping but not identical.
 	bm := m
 	if v != b {
-		bm = vecAsDense(b)
+		bm = b.asDense()
 	}
 	return m.Solve(a, bm)
 }

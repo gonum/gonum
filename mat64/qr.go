@@ -212,21 +212,5 @@ func (v *Vector) SolveQRVec(qr *QR, trans bool, b *Vector) error {
 	} else {
 		v.reuseAs(c)
 	}
-	m := vecAsDense(v)
-	bm := vecAsDense(b)
-	return m.SolveQR(qr, trans, bm)
-}
-
-// vecAsDense returns the vector as a Dense matrix with the same underlying data.
-func vecAsDense(v *Vector) *Dense {
-	return &Dense{
-		mat: blas64.General{
-			Rows:   v.n,
-			Cols:   1,
-			Stride: v.mat.Inc,
-			Data:   v.mat.Data,
-		},
-		capRows: v.n,
-		capCols: 1,
-	}
+	return v.asDense().SolveQR(qr, trans, b.asDense())
 }

@@ -213,7 +213,5 @@ func (v *Vector) SolveLQVec(lq *LQ, trans bool, b *Vector) error {
 	} else {
 		v.reuseAs(c)
 	}
-	m := vecAsDense(v)
-	bm := vecAsDense(b)
-	return m.SolveLQ(lq, trans, bm)
+	return v.asDense().SolveLQ(lq, trans, b.asDense())
 }

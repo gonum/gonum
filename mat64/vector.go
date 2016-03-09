@@ -431,3 +431,24 @@ func (v *Vector) isolatedWorkspace(a *Vector) (n *Vector, restore func()) {
 		putWorkspaceVec(n)
 	}
 }
+
+// asDense returns a Dense representation of the receiver with the same
+// underlying data.
+func (v *Vector) asDense() *Dense {
+	return &Dense{
+		mat:     v.asGeneral(),
+		capRows: v.n,
+		capCols: 1,
+	}
+}
+
+// asGeneral returns a blas64.General representation of the receiver with the
+// same underlying data.
+func (v *Vector) asGeneral() blas64.General {
+	return blas64.General{
+		Rows:   v.n,
+		Cols:   1,
+		Stride: v.mat.Inc,
+		Data:   v.mat.Data,
+	}
+}

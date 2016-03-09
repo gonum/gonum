@@ -107,6 +107,9 @@ func (m *Dense) Solve(a, b Matrix) error {
 // near-singular, a Condition error is returned. Please see the documentation for
 // Dense.Solve for more information.
 func (v *Vector) SolveVec(a Matrix, b *Vector) error {
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
 	_, c := a.Dims()
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
 	// instead recast the Vectors as Dense and call the matrix code.

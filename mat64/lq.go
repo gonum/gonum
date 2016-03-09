@@ -202,6 +202,9 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 // SolveLQVec finds a minimum-norm solution to a system of linear equations.
 // Please see Dense.SolveLQ for the full documentation.
 func (v *Vector) SolveLQVec(lq *LQ, trans bool, b *Vector) error {
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
 	r, c := lq.lq.Dims()
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
 	// instead recast the Vectors as Dense and call the matrix code.

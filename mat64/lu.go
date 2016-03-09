@@ -287,6 +287,9 @@ func (v *Vector) SolveLUVec(lu *LU, trans bool, b *Vector) error {
 	if bn != n {
 		panic(matrix.ErrShape)
 	}
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
 	// TODO(btracey): Should test the condition number instead of testing that
 	// the determinant is exactly zero.
 	if lu.Det() == 0 {

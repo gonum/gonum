@@ -117,6 +117,9 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 	if vn != n {
 		panic(matrix.ErrShape)
 	}
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
 	v.reuseAs(n)
 	if v != b {
 		v.CopyVec(b)

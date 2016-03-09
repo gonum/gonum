@@ -160,6 +160,13 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 		panic(matrix.ErrShape)
 	}
 
+	if v != a {
+		v.checkOverlap(a.mat)
+	}
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
+
 	v.reuseAs(ar)
 
 	switch {
@@ -196,6 +203,13 @@ func (v *Vector) AddVec(a, b *Vector) {
 		panic(matrix.ErrShape)
 	}
 
+	if v != a {
+		v.checkOverlap(a.mat)
+	}
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
+
 	v.reuseAs(ar)
 
 	if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
@@ -215,6 +229,13 @@ func (v *Vector) SubVec(a, b *Vector) {
 
 	if ar != br {
 		panic(matrix.ErrShape)
+	}
+
+	if v != a {
+		v.checkOverlap(a.mat)
+	}
+	if v != b {
+		v.checkOverlap(b.mat)
 	}
 
 	v.reuseAs(ar)
@@ -239,6 +260,13 @@ func (v *Vector) MulElemVec(a, b *Vector) {
 		panic(matrix.ErrShape)
 	}
 
+	if v != a {
+		v.checkOverlap(a.mat)
+	}
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
+
 	v.reuseAs(ar)
 
 	amat, bmat := a.RawVector(), b.RawVector()
@@ -257,6 +285,13 @@ func (v *Vector) DivElemVec(a, b *Vector) {
 		panic(matrix.ErrShape)
 	}
 
+	if v != a {
+		v.checkOverlap(a.mat)
+	}
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
+
 	v.reuseAs(ar)
 
 	amat, bmat := a.RawVector(), b.RawVector()
@@ -273,6 +308,11 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 	if c != br {
 		panic(matrix.ErrShape)
 	}
+
+	if v != b {
+		v.checkOverlap(b.mat)
+	}
+
 	a, trans := untranspose(a)
 	ar, ac := a.Dims()
 	v.reuseAs(r)
@@ -287,6 +327,10 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 
 	switch a := a.(type) {
 	case *Vector:
+		if v != a {
+			v.checkOverlap(a.mat)
+		}
+
 		if a.Len() == 1 {
 			// {1,1} x {1,n}
 			av := a.At(0, 0)

@@ -88,7 +88,7 @@ type Mutable interface {
 }
 
 // A RowViewer can return a Vector reflecting a row that is backed by the matrix
-// data. The Vector returned will have Len() == nCols.
+// data. The Vector returned will have length equal to the number of columns.
 type RowViewer interface {
 	RowView(i int) *Vector
 }
@@ -99,8 +99,8 @@ type RawRowViewer interface {
 	RawRowView(i int) []float64
 }
 
-// A ColViewer can return a Vector reflecting a row that is backed by the matrix
-// data. The Vector returned will have Len() == nRows.
+// A ColViewer can return a Vector reflecting a column that is backed by the matrix
+// data. The Vector returned will have length equal to the number of rows.
 type ColViewer interface {
 	ColView(j int) *Vector
 }

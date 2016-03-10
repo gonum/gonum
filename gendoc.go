@@ -265,8 +265,6 @@ package {{.Name}}
 {{template "switching" .}}
 {{template "invariants" .}}
 {{template "aliasing" .}}
-// BUG(kortschak) Currently only RawMatrixer and Vector aliasing detection is supported.
-//
 package {{.Name}}
 `,
 	},

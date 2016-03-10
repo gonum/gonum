@@ -155,6 +155,4 @@
 // conversion has occurred through a mat64 API function. Method behavior is undefined
 // if there is undetected overlap.
 //
-// BUG(kortschak) Currently only RawMatrixer and Vector aliasing detection is supported.
-//
 package mat64

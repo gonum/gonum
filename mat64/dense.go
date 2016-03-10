@@ -228,8 +228,8 @@ func (m *Dense) RawRowView(i int) []float64 {
 	return m.rowView(i)
 }
 
-func (m *Dense) rowView(r int) []float64 {
-	return m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
+func (m *Dense) rowView(i int) []float64 {
+	return m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+m.mat.Cols]
 }
 
 // View returns a new Matrix that shares backing data with the receiver.

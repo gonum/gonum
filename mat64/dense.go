@@ -213,7 +213,7 @@ func (m *Dense) RowView(i int) *Vector {
 	return &Vector{
 		mat: blas64.Vector{
 			Inc:  1,
-			Data: m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+m.mat.Cols],
+			Data: m.rowView(i),
 		},
 		n: m.mat.Cols,
 	}

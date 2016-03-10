@@ -137,7 +137,8 @@ type ErrorStack struct {
 	Err error
 
 	// StackTrace is the stack trace
-	// recovered by Maybe or MaybeFloat.
+	// recovered by Maybe, MaybeFloat
+	// or MaybeComplex.
 	StackTrace string
 }
 

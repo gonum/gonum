@@ -152,6 +152,12 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 	if a, ok := a.(RawSymmetricer); ok {
 		if b, ok := b.(RawSymmetricer); ok {
 			amat, bmat := a.RawSymmetric(), b.RawSymmetric()
+			if s != a {
+				s.checkOverlap(amat)
+			}
+			if s != b {
+				s.checkOverlap(bmat)
+			}
 			for i := 0; i < n; i++ {
 				btmp := bmat.Data[i*bmat.Stride+i : i*bmat.Stride+n]
 				stmp := s.mat.Data[i*s.mat.Stride+i : i*s.mat.Stride+n]
@@ -207,6 +213,9 @@ func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
 	}
 	s.reuseAs(n)
 	if s != a {
+		if rs, ok := a.(RawSymmetricer); ok {
+			s.checkOverlap(rs.RawSymmetric())
+		}
 		s.CopySym(a)
 	}
 	blas64.Syr(alpha, x.mat, s.mat)
@@ -230,6 +239,9 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 		aTrans = false
 	}
 	if a != s {
+		if rs, ok := a.(RawSymmetricer); ok {
+			s.checkOverlap(rs.RawSymmetric())
+		}
 		s.reuseAs(n)
 		s.CopySym(a)
 	}
@@ -265,6 +277,9 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 			s.CopySym(w)
 			putWorkspaceSym(w)
 		} else {
+			if rs, ok := x.(RawSymmetricer); ok {
+				s.checkOverlap(rs.RawSymmetric())
+			}
 			// Only zero the upper triangle.
 			for i := 0; i < n; i++ {
 				ri := i * s.mat.Stride
@@ -294,6 +309,9 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
 	}
 	w.reuseAs(n)
 	if s != a {
+		if rs, ok := a.(RawSymmetricer); ok {
+			s.checkOverlap(rs.RawSymmetric())
+		}
 		w.CopySym(a)
 	}
 	blas64.Syr2(alpha, x.mat, y.mat, w.mat)
@@ -307,6 +325,9 @@ func (s *SymDense) ScaleSym(f float64, a Symmetric) {
 	s.reuseAs(n)
 	if a, ok := a.(RawSymmetricer); ok {
 		amat := a.RawSymmetric()
+		if s != a {
+			s.checkOverlap(amat)
+		}
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				s.mat.Data[i*s.mat.Stride+j] = f * amat.Data[i*amat.Stride+j]
@@ -338,6 +359,9 @@ func (s *SymDense) SubsetSym(a Symmetric, set []int) {
 
 	if a, ok := a.(RawSymmetricer); ok {
 		raw := a.RawSymmetric()
+		if s != a {
+			s.checkOverlap(raw)
+		}
 		for i := 0; i < n; i++ {
 			ssub := s.mat.Data[i*s.mat.Stride : i*s.mat.Stride+n]
 			r := set[i]

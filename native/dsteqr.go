@@ -88,12 +88,8 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 
 	// Determine where the matrix splits and choose QL or QR iteration for each
 	// block, according to whether top or bottom diagonal element is smaller.
-	// TODO(btracey): Move these variables closer to actual usage when
-	// gotos are removed.
 	l1 := 0
 	nm1 := n - 1
-	var l, lend, lendsv, lsv, m int
-	var anorm, c, g, p, r, s float64
 
 	type scaletype int
 	const (
@@ -132,6 +128,7 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 		if l1 > 0 {
 			e[l1-1] = 0
 		}
+		var m int
 		if l1 <= nm1 {
 			for m = l1; m < nm1; m++ {
 				test := math.Abs(e[m])
@@ -144,17 +141,17 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 				}
 			}
 		}
-		l = l1
-		lsv = l
-		lend = m
-		lendsv = lend
+		l := l1
+		lsv := l
+		lend := m
+		lendsv := lend
 		l1 = m + 1
 		if lend == l {
 			continue
 		}
 
 		// Scale submatrix in rows and columns L to Lend
-		anorm = impl.Dlanst(lapack.MaxAbs, lend-l+1, d[l:], e[l:])
+		anorm := impl.Dlanst(lapack.MaxAbs, lend-l+1, d[l:], e[l:])
 		switch {
 		case anorm == 0:
 			continue
@@ -191,7 +188,7 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 				if m < lend {
 					e[m] = 0
 				}
-				p = d[l]
+				p := d[l]
 				if m == l {
 					// Eigenvalue found.
 					d[l] = p
@@ -225,12 +222,12 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 				jtot++
 
 				// Form shift
-				g = (d[l+1] - p) / (2 * e[l])
-				r = impl.Dlapy2(g, 1)
+				g := (d[l+1] - p) / (2 * e[l])
+				r := impl.Dlapy2(g, 1)
 				g = d[m] - p + e[l]/(g+math.Copysign(r, g))
-				s = 1
-				c = 1
-				p = 0
+				s := 1.0
+				c := 1.0
+				p = 0.0
 
 				// Inner loop
 				for i := m - 1; i >= l; i-- {
@@ -278,7 +275,7 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 				if m > lend {
 					e[m-1] = 0
 				}
-				p = d[l]
+				p := d[l]
 				if m == l {
 					// Eigenvalue found
 					d[l] = p
@@ -311,13 +308,12 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 				jtot++
 
 				// Form shift.
-				g = (d[l-1] - p) / (2 * e[l-1])
-				r = impl.Dlapy2(g, 1)
+				g := (d[l-1] - p) / (2 * e[l-1])
+				r := impl.Dlapy2(g, 1)
 				g = d[m] - p + (e[l-1])/(g+math.Copysign(r, g))
-
-				s = 1
-				c = 1
-				p = 0
+				s := 1.0
+				c := 1.0
+				p = 0.0
 
 				// Inner loop.
 				for i := m; i < l; i++ {

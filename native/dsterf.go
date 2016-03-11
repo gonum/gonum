@@ -55,11 +55,6 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 
 	l1 := 0
 
-	// TODO(btracey): Define these closer to use when gotos are removed.
-	var anorm, c, gamma, r, rte, s, sigma float64
-	var iscale, l, lend, lendsv, lsv, m int
-	var el []float64
-
 	for {
 		if l1 > n-1 {
 			impl.Dlasrt(lapack.SortIncreasing, n, d)
@@ -68,6 +63,7 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 		if l1 > 0 {
 			e[l1-1] = 0
 		}
+		var m int
 		for m = l1; m < n-1; m++ {
 			if math.Abs(e[m]) <= math.Sqrt(math.Abs(d[m]))*math.Sqrt(math.Abs(d[m+1]))*eps {
 				e[m] = 0
@@ -75,18 +71,18 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 			}
 		}
 
-		l = l1
-		lsv = l
-		lend = m
-		lendsv = lend
+		l := l1
+		lsv := l
+		lend := m
+		lendsv := lend
 		l1 = m + 1
 		if lend == 0 {
 			continue
 		}
 
 		// Scale submatrix in rows and columns l to lend.
-		anorm = impl.Dlanst(lapack.MaxAbs, lend-l+1, d[l:], e[l:])
-		iscale = none
+		anorm := impl.Dlanst(lapack.MaxAbs, lend-l+1, d[l:], e[l:])
+		iscale := none
 		if anorm == 0 {
 			continue
 		}
@@ -100,7 +96,7 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l, 1, e[l:], n)
 		}
 
-		el = e[l:lend]
+		el := e[l:lend]
 		for i, v := range el {
 			el[i] *= v
 		}
@@ -138,8 +134,7 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 				}
 				// If remaining matrix is 2 by 2, use Dlae2 to compute its eigenvalues.
 				if m == l+1 {
-					rte = math.Sqrt(e[l])
-					d[l], d[l+1] = impl.Dlae2(d[l], rte, d[l+1])
+					d[l], d[l+1] = impl.Dlae2(d[l], math.Sqrt(e[l]), d[l+1])
 					e[l] = 0
 					l += 2
 					if l > lend {
@@ -153,14 +148,14 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 				jtot++
 
 				// Form shift.
-				rte = math.Sqrt(e[l])
-				sigma = (d[l+1] - p) / (2 * rte)
-				r = impl.Dlapy2(sigma, 1)
+				rte := math.Sqrt(e[l])
+				sigma := (d[l+1] - p) / (2 * rte)
+				r := impl.Dlapy2(sigma, 1)
 				sigma = p - (rte / (sigma + math.Copysign(r, sigma)))
 
-				c = 1
-				s = 0
-				gamma = d[m] - sigma
+				c := 1.0
+				s := 0.0
+				gamma := d[m] - sigma
 				p = gamma * gamma
 
 				// Inner loop.
@@ -211,8 +206,7 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 
 				// If remaining matrix is 2 by 2, use Dlae2 to compute its eigenvalues.
 				if m == l-1 {
-					rte = math.Sqrt(e[l-1])
-					d[l], d[l-1] = impl.Dlae2(d[l], rte, d[l-1])
+					d[l], d[l-1] = impl.Dlae2(d[l], math.Sqrt(e[l-1]), d[l-1])
 					e[l-1] = 0
 					l -= 2
 					if l < lend {
@@ -226,14 +220,14 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 				jtot++
 
 				// Form shift.
-				rte = math.Sqrt(e[l-1])
-				sigma = (d[l-1] - p) / (2 * rte)
-				r = impl.Dlapy2(sigma, 1)
+				rte := math.Sqrt(e[l-1])
+				sigma := (d[l-1] - p) / (2 * rte)
+				r := impl.Dlapy2(sigma, 1)
 				sigma = p - (rte / (sigma + math.Copysign(r, sigma)))
 
-				c = 1
-				s = 0
-				gamma = d[m] - sigma
+				c := 1.0
+				s := 0.0
+				gamma := d[m] - sigma
 				p = gamma * gamma
 
 				// Inner loop.

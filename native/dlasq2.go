@@ -190,11 +190,29 @@ func (impl Implementation) Dlasq2(n int, z []float64) (info int) {
 	var nFail int
 	nDiv := 2 * (n0 - i0)
 	var i4 int
-Whila:
+outer:
 	for iwhila := 1; iwhila <= n+1; iwhila++ {
+		// Test for completion.
 		if n0 < 0 {
-			goto OneSeventy
+			// Move q's to the front.
+			for k := 1; k < n; k++ {
+				z[k] = z[4*k]
+			}
+			// Sort and compute sum of eigenvalues.
+			impl.Dlasrt(lapack.SortDecreasing, n, z)
+			e = 0
+			for k := n - 1; k >= 0; k-- {
+				e += z[k]
+			}
+			// Store trace, sum(eigenvalues) and information on performance.
+			z[2*n] = trace
+			z[2*n+1] = e
+			z[2*n+2] = float64(iter)
+			z[2*n+3] = float64(nDiv) / float64(n*n)
+			z[2*n+4] = 100 * float64(nFail) / float64(iter)
+			return info
 		}
+
 		// While array unfinished do
 		// e[n0] holds the value of sigma when submatrix in i0:n0
 		// splits from the rest of the array, but is negated.
@@ -272,7 +290,7 @@ Whila:
 		nbig := 100 * (n0 - i0 + 1)
 		for iwhilb := 0; iwhilb < nbig; iwhilb++ {
 			if i0 > n0 {
-				continue Whila
+				continue outer
 			}
 
 			// While submatrix unfinished take a good dqds step.
@@ -313,23 +331,24 @@ Whila:
 		info = 2
 		i1 = i0
 		n1 = n0
-	OneFourtyFive:
-		tempq = z[4*i0]
-		z[4*i0] += sigma
-		for k := i0 + 1; k <= n0; k++ {
-			tempe := z[4*(k+1)-6]
-			z[4*(k+1)-6] *= tempq / z[4*(k+1)-8]
-			tempq = z[4*k]
-			z[4*k] += sigma + tempe - z[4*(k+1)-6]
-		}
-		// Prepare to do this on the previous block if there is one.
-		if i1 > 0 {
+		for {
+			tempq = z[4*i0]
+			z[4*i0] += sigma
+			for k := i0 + 1; k <= n0; k++ {
+				tempe := z[4*(k+1)-6]
+				z[4*(k+1)-6] *= tempq / z[4*(k+1)-8]
+				tempq = z[4*k]
+				z[4*k] += sigma + tempe - z[4*(k+1)-6]
+			}
+			// Prepare to do this on the previous block if there is one.
+			if i1 <= 0 {
+				break
+			}
 			n1 = i1 - 1
 			for i1 >= 1 && z[4*(i1+1)-6] >= 0 {
 				i1 -= 1
 			}
 			sigma = -z[4*(n1+1)-2]
-			goto OneFourtyFive
 		}
 		for k := 0; k < n; k++ {
 			z[2*k] = z[4*k]
@@ -345,23 +364,5 @@ Whila:
 		return info
 	}
 	info = 3
-	return
-OneSeventy:
-	// Move q's to the front.
-	for k := 1; k < n; k++ {
-		z[k] = z[4*k]
-	}
-	// Sort and compute sum of eigenvalues.
-	impl.Dlasrt(lapack.SortDecreasing, n, z)
-	e = 0
-	for k := n - 1; k >= 0; k-- {
-		e += z[k]
-	}
-	// Store trace, sum(eigenvalues) and information on performance.
-	z[2*n] = trace
-	z[2*n+1] = e
-	z[2*n+2] = float64(iter)
-	z[2*n+3] = float64(nDiv) / float64(n*n)
-	z[2*n+4] = 100 * float64(nFail) / float64(iter)
 	return info
 }

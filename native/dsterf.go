@@ -125,7 +125,6 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 				p := d[l]
 				if m == l {
 					// Eigenvalue found.
-					d[l] = p
 					l++
 					if l > lend {
 						break
@@ -196,7 +195,6 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 				p := d[l]
 				if m == l {
 					// Eigenvalue found.
-					d[l] = p
 					l--
 					if l < lend {
 						break

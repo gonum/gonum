@@ -24,26 +24,24 @@ func (impl Implementation) Dlasq3(i0, n0 int, z []float64, pp int, dmin, sigma, 
 			return i0, n0, pp, dmin, sigma, desig, qmax, nFail, iter, nDiv, ttype, dmin1, dmin2, dn, dn1, dn2, g, tau
 		}
 		if n0 == i0 {
-			goto Twenty
+			z[4*(n0+1)-4] = z[4*(n0+1)+pp-4] + sigma
+			n0--
+			continue
 		}
 		nn = 4*(n0+1) + pp - 1
-		if n0 == i0+1 {
-			goto Fourty
+		if n0 != i0+1 {
+			// Check whether e[n0-1] is negligible, 1 eigenvalue.
+			if z[nn-5] > tol2*(sigma+z[nn-3]) && z[nn-2*pp-4] > tol2*z[nn-7] {
+				// Check whether e[n0-2] is negligible, 2 eigenvalues.
+				if z[nn-9] > tol2*sigma && z[nn-2*pp-8] > tol2*z[nn-11] {
+					break
+				}
+			} else {
+				z[4*(n0+1)-4] = z[4*(n0+1)+pp-4] + sigma
+				n0--
+				continue
+			}
 		}
-		// Check whether e[n0-1] is negligible, 1 eigenvalue.
-		if z[nn-5] > tol2*(sigma+z[nn-3]) && z[nn-2*pp-4] > tol2*z[nn-7] {
-			goto Thirty
-		}
-	Twenty:
-		z[4*(n0+1)-4] = z[4*(n0+1)+pp-4] + sigma
-		n0--
-		continue
-		// Check whether e[n0-2] is negligible, 2 eigenvalues.
-	Thirty:
-		if z[nn-9] > tol2*sigma && z[nn-2*pp-8] > tol2*z[nn-11] {
-			break
-		}
-	Fourty:
 		if z[nn-3] > z[nn-7] {
 			z[nn-3], z[nn-7] = z[nn-7], z[nn-3]
 		}

@@ -408,6 +408,19 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 				copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
 			}
 		}
+	case *Vector:
+		var n, stride int
+		if trans {
+			n = c
+			stride = 1
+		} else {
+			n = r
+			stride = m.mat.Stride
+		}
+		amat := aU.mat
+		blas64.Copy(n,
+			blas64.Vector{Inc: amat.Inc, Data: amat.Data},
+			blas64.Vector{Inc: stride, Data: m.mat.Data})
 	default:
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {

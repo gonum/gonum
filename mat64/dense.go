@@ -327,7 +327,8 @@ func (m *Dense) Reset() {
 }
 
 // Clone makes a copy of a into the receiver, overwriting the previous value of
-// the receiver. The clone operation does not make any restriction on shape.
+// the receiver. The clone operation does not make any restriction on shape and
+// will not cause shadowing.
 //
 // See the Cloner interface for more information.
 func (m *Dense) Clone(a Matrix) {
@@ -343,11 +344,6 @@ func (m *Dense) Clone(a Matrix) {
 	switch aU := aU.(type) {
 	case RawMatrixer:
 		amat := aU.RawMatrix()
-		// TODO(kortschak): Consider being more precise with determining whether a and m are aliases.
-		// The current approach is that all RawMatrixers are considered potential aliases.
-		// Note that below we assume that non-RawMatrixers are not aliases; this is not necessarily
-		// true, but cases where it is not are not sensible. We should probably fix or document
-		// this though.
 		mat.Data = make([]float64, r*c)
 		if trans {
 			for i := 0; i < r; i++ {
@@ -361,13 +357,15 @@ func (m *Dense) Clone(a Matrix) {
 			}
 		}
 	default:
-		mat.Data = use(m.mat.Data, r*c)
-		m.mat = mat
+		mat.Data = make([]float64, r*c)
+		w := *m
+		w.mat = mat
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {
-				m.set(i, j, a.At(i, j))
+				w.set(i, j, a.At(i, j))
 			}
 		}
+		*m = w
 		return
 	}
 	m.mat = mat

@@ -356,6 +356,12 @@ func (m *Dense) Clone(a Matrix) {
 				copy(mat.Data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
 			}
 		}
+	case *Vector:
+		amat := aU.mat
+		mat.Data = make([]float64, aU.n)
+		blas64.Copy(aU.n,
+			blas64.Vector{Inc: amat.Inc, Data: amat.Data},
+			blas64.Vector{Inc: 1, Data: mat.Data})
 	default:
 		mat.Data = make([]float64, r*c)
 		w := *m

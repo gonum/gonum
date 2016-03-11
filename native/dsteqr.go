@@ -191,7 +191,6 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 				p := d[l]
 				if m == l {
 					// Eigenvalue found.
-					d[l] = p
 					l++
 					if l > lend {
 						break
@@ -278,7 +277,6 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 				p := d[l]
 				if m == l {
 					// Eigenvalue found
-					d[l] = p
 					l--
 					if l < lend {
 						break

@@ -88,27 +88,27 @@ type Mutable interface {
 }
 
 // A RowViewer can return a Vector reflecting a row that is backed by the matrix
-// data. The Vector returned will have Len() == nCols.
+// data. The Vector returned will have length equal to the number of columns.
 type RowViewer interface {
-	RowView(r int) *Vector
+	RowView(i int) *Vector
 }
 
 // A RawRowViewer can return a slice of float64 reflecting a row that is backed by the matrix
 // data.
 type RawRowViewer interface {
-	RawRowView(r int) []float64
+	RawRowView(i int) []float64
 }
 
-// A ColViewer can return a Vector reflecting a row that is backed by the matrix
-// data. The Vector returned will have Len() == nRows.
+// A ColViewer can return a Vector reflecting a column that is backed by the matrix
+// data. The Vector returned will have length equal to the number of rows.
 type ColViewer interface {
-	ColView(c int) *Vector
+	ColView(j int) *Vector
 }
 
 // A RawColViewer can return a slice of float64 reflecting a column that is backed by the matrix
 // data.
 type RawColViewer interface {
-	RawColView(c int) []float64
+	RawColView(j int) []float64
 }
 
 // A Cloner can make a copy of a into the receiver, overwriting the previous value of the

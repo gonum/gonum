@@ -199,7 +199,7 @@ func (m *Dense) SetRow(i int, src []float64) {
 		panic(matrix.ErrRowLength)
 	}
 
-	copy(m.rowView(i), src)
+	copy(m.rawRowView(i), src)
 }
 
 // RowView returns row i of the matrix data represented as a column vector,
@@ -213,7 +213,7 @@ func (m *Dense) RowView(i int) *Vector {
 	return &Vector{
 		mat: blas64.Vector{
 			Inc:  1,
-			Data: m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+m.mat.Cols],
+			Data: m.rawRowView(i),
 		},
 		n: m.mat.Cols,
 	}
@@ -225,11 +225,11 @@ func (m *Dense) RawRowView(i int) []float64 {
 	if i >= m.mat.Rows || i < 0 {
 		panic(matrix.ErrRowAccess)
 	}
-	return m.rowView(i)
+	return m.rawRowView(i)
 }
 
-func (m *Dense) rowView(r int) []float64 {
-	return m.mat.Data[r*m.mat.Stride : r*m.mat.Stride+m.mat.Cols]
+func (m *Dense) rawRowView(i int) []float64 {
+	return m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+m.mat.Cols]
 }
 
 // View returns a new Matrix that shares backing data with the receiver.

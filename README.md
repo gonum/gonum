@@ -8,7 +8,7 @@ and a wrapper using cgo to a c-based implementation.
 ## Installation
 
 ```
-  go get github.com/gonum/blas
+  go get github.com/gonum/lapack
 ```
 
 

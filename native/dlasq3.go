@@ -66,6 +66,7 @@ func (impl Implementation) Dlasq3(i0, n0 int, z []float64, pp int, dmin, sigma, 
 	if pp == 2 {
 		pp = 0
 	}
+
 	// Reverse the qd-array, if warranted.
 	if dmin <= 0 || n0 < n0in {
 		if cbias*z[4*(i0+1)+pp-4] < z[4*(n0+1)+pp-4] {
@@ -90,57 +91,63 @@ func (impl Implementation) Dlasq3(i0, n0 int, z []float64, pp int, dmin, sigma, 
 			dmin = math.Copysign(0, -1) // Fortran code has -zero, but -0 in go is 0
 		}
 	}
+
 	// Choose a shift.
 	tau, ttype, g = impl.Dlasq4(i0, n0, z, pp, n0in, dmin, dmin1, dmin2, dn, dn1, dn2, tau, ttype, g)
+
 	// Call dqds until dmin > 0.
-Seventy:
+loop:
+	for {
+		i0, n0, pp, tau, sigma, dmin, dmin1, dmin2, dn, dn1, dn2 = impl.Dlasq5(i0, n0, z, pp, tau, sigma, dmin, dmin1, dmin2, dn, dn1, dn2)
 
-	i0, n0, pp, tau, sigma, dmin, dmin1, dmin2, dn, dn1, dn2 = impl.Dlasq5(i0, n0, z, pp, tau, sigma, dmin, dmin1, dmin2, dn, dn1, dn2)
+		nDiv += n0 - i0 + 2
+		iter++
+		switch {
+		case dmin >= 0 && dmin1 >= 0:
+			// Success.
+			goto done
 
-	nDiv += n0 - i0 + 2
-	iter++
-	if dmin >= 0 && dmin1 >= 0 {
-		// Success.
-		goto Ninety
-	} else if dmin < 0 && dmin1 > 0 && z[4*n0-pp-1] < tol*(sigma+dn1) && math.Abs(dn) < tol*sigma {
-		// Convergence hidden by negative dn.
-		z[4*n0-pp+1] = 0
-		dmin = 0
-		goto Ninety
-	} else if dmin < 0 {
-		// Tau too big. Select new Tau and try again.
-		nFail++
-		if ttype < -22 {
-			// Failed twice. Play it safe.
+		case dmin < 0 && dmin1 > 0 && z[4*n0-pp-1] < tol*(sigma+dn1) && math.Abs(dn) < tol*sigma:
+			// Convergence hidden by negative dn.
+			z[4*n0-pp+1] = 0
+			dmin = 0
+			goto done
+
+		case dmin < 0:
+			// Tau too big. Select new Tau and try again.
+			nFail++
+			if ttype < -22 {
+				// Failed twice. Play it safe.
+				tau = 0
+			} else if dmin1 > 0 {
+				// Late failure. Gives excellent shift.
+				tau = (tau + dmin) * (1 - 2*eps)
+				ttype -= 11
+			} else {
+				// Early failure. Divide by 4.
+				tau = tau / 4
+				ttype -= 12
+			}
+
+		case math.IsNaN(dmin):
+			if tau == 0 {
+				break loop
+			}
 			tau = 0
-		} else if dmin1 > 0 {
-			// Late failure. Gives excellent shift.
-			tau = (tau + dmin) * (1 - 2*eps)
-			ttype -= 11
-		} else {
-			// Early failure. Divide by 4.
-			tau = tau / 4
-			ttype -= 12
+
+		default:
+			// Possible underflow. Play it safe.
+			break loop
 		}
-		goto Seventy
-	} else if math.IsNaN(dmin) {
-		if tau == 0 {
-			goto Eighty
-		} else {
-			tau = 0
-			goto Seventy
-		}
-	} else {
-		// Possible underflow. Play it safe.
-		goto Eighty
 	}
-Eighty:
+
 	// Risk of underflow.
 	dmin, dmin1, dmin2, dn, dn1, dn2 = impl.Dlasq6(i0, n0, z, pp, dmin, dmin1, dmin2, dn, dn1, dn2)
 	nDiv += n0 - i0 + 2
 	iter++
 	tau = 0
-Ninety:
+
+done:
 	if tau < sigma {
 		desig += tau
 		t = sigma + desig

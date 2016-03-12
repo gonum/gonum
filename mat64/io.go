@@ -5,9 +5,9 @@
 package mat64
 
 import (
-	"bytes"
 	"encoding/binary"
 	"errors"
+	"math"
 )
 
 const (
@@ -20,6 +20,7 @@ var (
 	sizeFloat64 = binary.Size(float64(0))
 
 	errTooBig    = errors.New("mat64: resulting data slice too big")
+	errTooSmall  = errors.New("mat64: input slice too small")
 	errBadBuffer = errors.New("mat64: data buffer size mismatch")
 	errBadSize   = errors.New("mat64: invalid dimension")
 )
@@ -41,27 +42,22 @@ func (m Dense) MarshalBinary() ([]byte, error) {
 		return nil, errTooBig
 	}
 
-	buf := bytes.NewBuffer(make([]byte, 0, bufLen))
-	err := binary.Write(buf, binary.LittleEndian, int64(m.mat.Rows))
-	if err != nil {
-		return nil, err
-	}
-	err = binary.Write(buf, binary.LittleEndian, int64(m.mat.Cols))
-	if err != nil {
-		return nil, err
-	}
+	p := 0
+	buf := make([]byte, bufLen)
+	binary.LittleEndian.PutUint64(buf[p:p+sizeInt64], uint64(m.mat.Rows))
+	p += sizeInt64
+	binary.LittleEndian.PutUint64(buf[p:p+sizeInt64], uint64(m.mat.Cols))
+	p += sizeInt64
 
 	r, c := m.Dims()
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
-			err = binary.Write(buf, binary.LittleEndian, m.at(i, j))
-			if err != nil {
-				return nil, err
-			}
+			binary.LittleEndian.PutUint64(buf[p:p+sizeFloat64], math.Float64bits(m.at(i, j)))
+			p += sizeFloat64
 		}
 	}
 
-	return buf.Bytes(), nil
+	return buf, nil
 }
 
 // UnmarshalBinary decodes the binary form into the receiver.
@@ -81,18 +77,15 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 		panic("mat64: unmarshal into non-zero matrix")
 	}
 
-	buf := bytes.NewReader(data)
-	var rows int64
-	err := binary.Read(buf, binary.LittleEndian, &rows)
-	if err != nil {
-		return err
-	}
-	var cols int64
-	err = binary.Read(buf, binary.LittleEndian, &cols)
-	if err != nil {
-		return err
+	if len(data) < 2*sizeInt64 {
+		return errTooSmall
 	}
 
+	p := 0
+	rows := int64(binary.LittleEndian.Uint64(data[p : p+sizeInt64]))
+	p += sizeInt64
+	cols := int64(binary.LittleEndian.Uint64(data[p : p+sizeInt64]))
+	p += sizeInt64
 	if rows < 0 || cols < 0 {
 		return errBadSize
 	}
@@ -113,7 +106,12 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 	m.capCols = int(cols)
 	m.mat.Data = use(m.mat.Data, int(size))
 
-	return binary.Read(buf, binary.LittleEndian, m.mat.Data)
+	for i := range m.mat.Data {
+		m.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(data[p : p+sizeFloat64]))
+		p += sizeFloat64
+	}
+
+	return nil
 }
 
 // MarshalBinary encodes the receiver into a binary form and returns the result.
@@ -128,20 +126,17 @@ func (v Vector) MarshalBinary() ([]byte, error) {
 		return nil, errTooBig
 	}
 
-	buf := bytes.NewBuffer(make([]byte, 0, bufLen))
-	err := binary.Write(buf, binary.LittleEndian, int64(v.n))
-	if err != nil {
-		return nil, err
-	}
+	p := 0
+	buf := make([]byte, bufLen)
+	binary.LittleEndian.PutUint64(buf[p:p+sizeInt64], uint64(v.n))
+	p += sizeInt64
 
 	for i := 0; i < v.n; i++ {
-		err = binary.Write(buf, binary.LittleEndian, v.at(i))
-		if err != nil {
-			return nil, err
-		}
+		binary.LittleEndian.PutUint64(buf[p:p+sizeFloat64], math.Float64bits(v.at(i)))
+		p += sizeFloat64
 	}
 
-	return buf.Bytes(), nil
+	return buf, nil
 }
 
 // UnmarshalBinary decodes the binary form into the receiver.
@@ -161,13 +156,9 @@ func (v *Vector) UnmarshalBinary(data []byte) error {
 		panic("mat64: unmarshal into non-zero vector")
 	}
 
-	buf := bytes.NewReader(data)
-	var n int64
-	err := binary.Read(buf, binary.LittleEndian, &n)
-	if err != nil {
-		return err
-	}
-
+	p := 0
+	n := int64(binary.LittleEndian.Uint64(data[p : p+sizeInt64]))
+	p += sizeInt64
 	if n < 0 {
 		return errBadSize
 	}
@@ -181,6 +172,10 @@ func (v *Vector) UnmarshalBinary(data []byte) error {
 	v.n = int(n)
 	v.mat.Inc = 1
 	v.mat.Data = use(v.mat.Data, v.n)
+	for i := range v.mat.Data {
+		v.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(data[p : p+sizeFloat64]))
+		p += sizeFloat64
+	}
 
-	return binary.Read(buf, binary.LittleEndian, v.mat.Data)
+	return nil
 }

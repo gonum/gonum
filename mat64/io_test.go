@@ -276,3 +276,83 @@ func TestVectorIORoundTrip(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkMarshalDense10(b *testing.B)    { marshalBinaryBenchDense(b, 10) }
+func BenchmarkMarshalDense100(b *testing.B)   { marshalBinaryBenchDense(b, 100) }
+func BenchmarkMarshalDense1000(b *testing.B)  { marshalBinaryBenchDense(b, 1000) }
+func BenchmarkMarshalDense10000(b *testing.B) { marshalBinaryBenchDense(b, 10000) }
+
+func marshalBinaryBenchDense(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	m := NewDense(1, size, data)
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		m.MarshalBinary()
+	}
+}
+
+func BenchmarkUnmarshalDense10(b *testing.B)    { unmarshalBinaryBenchDense(b, 10) }
+func BenchmarkUnmarshalDense100(b *testing.B)   { unmarshalBinaryBenchDense(b, 100) }
+func BenchmarkUnmarshalDense1000(b *testing.B)  { unmarshalBinaryBenchDense(b, 1000) }
+func BenchmarkUnmarshalDense10000(b *testing.B) { unmarshalBinaryBenchDense(b, 10000) }
+
+func unmarshalBinaryBenchDense(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	buf, err := NewDense(1, size, data).MarshalBinary()
+	if err != nil {
+		b.Fatalf("error creating binary buffer (size=%d): %v\n", size, err)
+	}
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		var m Dense
+		m.UnmarshalBinary(buf)
+	}
+}
+
+func BenchmarkMarshalVector10(b *testing.B)    { marshalBinaryBenchVector(b, 10) }
+func BenchmarkMarshalVector100(b *testing.B)   { marshalBinaryBenchVector(b, 100) }
+func BenchmarkMarshalVector1000(b *testing.B)  { marshalBinaryBenchVector(b, 1000) }
+func BenchmarkMarshalVector10000(b *testing.B) { marshalBinaryBenchVector(b, 10000) }
+
+func marshalBinaryBenchVector(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	vec := NewVector(size, data)
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		vec.MarshalBinary()
+	}
+}
+
+func BenchmarkUnmarshalVector10(b *testing.B)    { unmarshalBinaryBenchVector(b, 10) }
+func BenchmarkUnmarshalVector100(b *testing.B)   { unmarshalBinaryBenchVector(b, 100) }
+func BenchmarkUnmarshalVector1000(b *testing.B)  { unmarshalBinaryBenchVector(b, 1000) }
+func BenchmarkUnmarshalVector10000(b *testing.B) { unmarshalBinaryBenchVector(b, 10000) }
+
+func unmarshalBinaryBenchVector(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	buf, err := NewVector(size, data).MarshalBinary()
+	if err != nil {
+		b.Fatalf("error creating binary buffer (size=%d): %v\n", size, err)
+	}
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		var vec Vector
+		vec.UnmarshalBinary(buf)
+	}
+}

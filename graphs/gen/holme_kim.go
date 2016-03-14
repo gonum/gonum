@@ -11,7 +11,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/simple"
-	"github.com/gonum/stat/sample"
+	"github.com/gonum/stat/sampleuv"
 )
 
 // TunableClusteringScaleFree constructs a graph in the destination, dst, of order n.
@@ -53,7 +53,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 		// adding the first generation of edges.
 		wt[u] = 1
 	}
-	ws := sample.NewWeighted(wt, src)
+	ws := sampleuv.NewWeighted(wt, src)
 	for i := range wt {
 		// These weights will organically grow
 		// after the first growth iteration.
@@ -134,7 +134,7 @@ func PreferentialAttachment(dst graph.UndirectedBuilder, n, m int, src *rand.Ran
 		// adding the first generation of edges.
 		wt[u] = 1
 	}
-	ws := sample.NewWeighted(wt, src)
+	ws := sampleuv.NewWeighted(wt, src)
 	for i := range wt {
 		// These weights will organically grow
 		// after the first growth iteration.

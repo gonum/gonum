@@ -12,7 +12,7 @@ import (
 
 	"github.com/gonum/graph"
 	"github.com/gonum/graph/simple"
-	"github.com/gonum/stat/sample"
+	"github.com/gonum/stat/sampleuv"
 )
 
 // NavigableSmallWorld constructs an N-dimensional grid with guaranteed local connectivity
@@ -89,7 +89,7 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 		}
 	}()
 	w := make([]float64, n)
-	ws := sample.NewWeighted(w, src)
+	ws := sampleuv.NewWeighted(w, src)
 	iterateOver(dims, func(u []int) {
 		uid := idFrom(u, dims)
 		iterateOver(dims, func(v []int) {

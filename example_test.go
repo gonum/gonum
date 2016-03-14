@@ -6,13 +6,13 @@ import (
 	"runtime"
 
 	"github.com/gonum/quad"
-	"github.com/gonum/stat/dist"
+	"github.com/gonum/stat/distuv"
 )
 
 func Example() {
 	fmt.Println("Evaluate the expected value of x^2 + 3 under a Weibull distribution")
 	f := func(x float64) float64 {
-		d := dist.Weibull{Lambda: 1, K: 1.5}
+		d := distuv.Weibull{Lambda: 1, K: 1.5}
 		return (x*x + 3) * d.Prob(x)
 	}
 	ev := quad.Fixed(f, 0, math.Inf(1), 10, nil, 0)

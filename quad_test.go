@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/gonum/floats"
-	"github.com/gonum/stat/dist"
+	"github.com/gonum/stat/distuv"
 )
 
 func TestFixed(t *testing.T) {
@@ -26,7 +26,7 @@ func TestFixed(t *testing.T) {
 			ans: math.Exp(5) - math.Exp(-3),
 		},
 		{
-			f:   dist.UnitNormal.Prob,
+			f:   distuv.UnitNormal.Prob,
 			min: math.Inf(-1),
 			max: math.Inf(1),
 			n:   []int{15, 16, 50, 51, 300, 301},

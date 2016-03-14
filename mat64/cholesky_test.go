@@ -8,6 +8,8 @@ import (
 	"math"
 	"math/rand"
 	"testing"
+
+	"github.com/gonum/blas/testblas"
 )
 
 func TestCholesky(t *testing.T) {
@@ -213,11 +215,11 @@ func BenchmarkCholeskySmall(b *testing.B) {
 }
 
 func BenchmarkCholeskyMedium(b *testing.B) {
-	benchmarkCholesky(b, Med)
+	benchmarkCholesky(b, testblas.MediumMat)
 }
 
 func BenchmarkCholeskyLarge(b *testing.B) {
-	benchmarkCholesky(b, Lg)
+	benchmarkCholesky(b, testblas.LargeMat)
 }
 
 func benchmarkCholesky(b *testing.B, n int) {

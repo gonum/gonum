@@ -15,7 +15,6 @@ import (
 	"github.com/gonum/matrix"
 )
 
-func asDense(d *Dense) Matrix                  { return d }
 func asBasicMatrix(d *Dense) Matrix            { return (*basicMatrix)(d) }
 func asBasicSymmetric(s *SymDense) Matrix      { return (*basicSymmetric)(s) }
 func asBasicTriangular(t *TriDense) Triangular { return (*basicTriangular)(t) }

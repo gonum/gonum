@@ -13,11 +13,6 @@ import (
 	"github.com/gonum/matrix"
 )
 
-const (
-	epsilon = 2.2204e-16
-	small   = math.SmallestNonzeroFloat64
-)
-
 // Add adds a and b element-wise, placing the result in the receiver. Add
 // will panic if the two matrices do not have the same shape.
 func (m *Dense) Add(a, b Matrix) {

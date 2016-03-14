@@ -314,38 +314,6 @@ func (t *TriDense) InverseTri(a Triangular) error {
 	return nil
 }
 
-// getBlasTriangular transforms t into a blas64.Triangular. If t is a RawTriangular,
-// the direct matrix representation is returned, otherwise t is copied into one.
-func getBlasTriangular(t Triangular) blas64.Triangular {
-	n, upper := t.Triangle()
-	rt, ok := t.(RawTriangular)
-	if ok {
-		return rt.RawTriangular()
-	}
-	ta := blas64.Triangular{
-		N:      n,
-		Stride: n,
-		Diag:   blas.NonUnit,
-		Data:   make([]float64, n*n),
-	}
-	if upper {
-		ta.Uplo = blas.Upper
-		for i := 0; i < n; i++ {
-			for j := i; j < n; j++ {
-				ta.Data[i*n+j] = t.At(i, j)
-			}
-		}
-		return ta
-	}
-	ta.Uplo = blas.Lower
-	for i := 0; i < n; i++ {
-		for j := 0; j < i; j++ {
-			ta.Data[i*n+j] = t.At(i, j)
-		}
-	}
-	return ta
-}
-
 // copySymIntoTriangle copies a symmetric matrix into a TriDense
 func copySymIntoTriangle(t *TriDense, s Symmetric) {
 	n, upper := t.Triangle()

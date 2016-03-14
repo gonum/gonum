@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/blas/testblas"
 )
 
 func TestInner(t *testing.T) {
@@ -164,17 +165,17 @@ func benchmarkInner(b *testing.B, m, n int) {
 }
 
 func BenchmarkInnerSmSm(b *testing.B) {
-	benchmarkInner(b, Sm, Sm)
+	benchmarkInner(b, testblas.SmallMat, testblas.SmallMat)
 }
 
 func BenchmarkInnerMedMed(b *testing.B) {
-	benchmarkInner(b, Med, Med)
+	benchmarkInner(b, testblas.MediumMat, testblas.MediumMat)
 }
 
 func BenchmarkInnerLgLg(b *testing.B) {
-	benchmarkInner(b, Lg, Lg)
+	benchmarkInner(b, testblas.LargeMat, testblas.LargeMat)
 }
 
 func BenchmarkInnerLgSm(b *testing.B) {
-	benchmarkInner(b, Lg, Sm)
+	benchmarkInner(b, testblas.LargeMat, testblas.SmallMat)
 }

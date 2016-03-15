@@ -10,6 +10,8 @@ import "math"
 // overflow and underflow. z has length at least 4*(n0+1) and holds the qd array.
 // i0 is the zero-based first index.
 // n0 is the zero-based last index.
+//
+// Dlasq6 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int, dmin, dmin1, dmin2, dn, dnm1, dnm2 float64) (dminOut, dmin1Out, dmin2Out, dnOut, dnm1Out, dnm2Out float64) {
 	// TODO(btracey): It seems like outputs listed in the reference implementation
 	// are actually true outputs, unlike other functions where the value is

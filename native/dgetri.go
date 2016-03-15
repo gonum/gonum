@@ -16,7 +16,7 @@ import (
 // Dgetri will not perform the inversion if the matrix is singular, and returns
 // a boolean indicating whether the inversion was successful.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
+// work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= n and this function will panic otherwise.
 // Dgetri is a blocked inversion, but the block size is limited
 // by the temporary space available. If lwork == -1, instead of performing Dgetri,

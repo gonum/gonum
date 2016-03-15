@@ -6,7 +6,7 @@ package native
 
 import "github.com/gonum/blas"
 
-// Dgeql2 computes the QL factorization of the m×n matrix A. That is, Dgelq2
+// Dgeql2 computes the QL factorization of the m×n matrix A. That is, Dgeql2
 // computes Q and L such that
 //  A = Q * L
 // where Q is an m×m orthonormal matrix and L is a lower trapezoidal matrix.
@@ -21,6 +21,8 @@ import "github.com/gonum/blas"
 // tau must have length at least min(m,n), and Dgeql2 will panic otherwise.
 //
 // work is temporary memory storage and must have length at least n.
+//
+// Dgeql2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgeql2(m, n int, a []float64, lda int, tau, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if len(tau) < min(m, n) {

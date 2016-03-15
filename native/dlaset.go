@@ -10,6 +10,8 @@ import "github.com/gonum/blas"
 // of a to beta. If uplo == blas.Upper, only the upper diagonal elements are set.
 // If uplo == blas.Lower, only the lower diagonal elements are set. If uplo is
 // otherwise, all of the elements of a are set.
+//
+// Dlaset is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlaset(uplo blas.Uplo, m, n int, alpha, beta float64, a []float64, lda int) {
 	checkMatrix(m, n, a, lda)
 	if uplo == blas.Upper {

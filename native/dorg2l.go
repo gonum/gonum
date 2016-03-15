@@ -19,6 +19,8 @@ import (
 //
 // work contains temporary memory, and must have length at least n. Dorg2l will
 // panic otherwise.
+//
+// Dorg2l is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorg2l(m, n, k int, a []float64, lda int, tau, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if len(tau) < k {

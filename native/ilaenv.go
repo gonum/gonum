@@ -17,6 +17,8 @@ package native
 //  9: Maximum size of the subproblems in divide-and-conquer algorithms.
 //  10: ieee NaN arithmetic can be trusted not to trap.
 //  11: infinity arithmetic can be trusted not to trap.
+//
+// Ilaenv is an internal routine. It is exported for testing purposes.
 func (Implementation) Ilaenv(ispec int, s string, opts string, n1, n2, n3, n4 int) int {
 	// TODO(btracey): Replace this with a constant lookup? A list of constants?
 	// TODO: What is the difference between 2 and 3?

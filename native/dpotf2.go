@@ -16,6 +16,8 @@ import (
 // and a = U^T U is stored in place into a. If ul == blas.Lower, then a = L L^T
 // is computed and stored in-place into a. If a is not positive definite, false
 // is returned. This is the unblocked version of the algorithm.
+//
+// Dpotf2 is an internal routine. It is exported for testing purposes.
 func (Implementation) Dpotf2(ul blas.Uplo, n int, a []float64, lda int) (ok bool) {
 	if ul != blas.Upper && ul != blas.Lower {
 		panic(badUplo)

@@ -46,6 +46,8 @@ import (
 //  [v1   e   d        ]
 //  [v1  v2   e   d    ]
 //  [v1  v2  v3   e   d]
+//
+// Dsytd2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsytd2(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau []float64) {
 	checkMatrix(n, n, a, lda)
 	if len(d) < n {

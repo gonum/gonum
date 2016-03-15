@@ -63,6 +63,8 @@ import (
 // The vectors v form the n×nb matrix V which is used with W to apply a
 // symmetric rank-2 update to the unreduced part of A
 //  A = A - V * W^T - W * V^T
+//
+// Dlatrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlatrd(uplo blas.Uplo, n, nb int, a []float64, lda int, e, tau, w []float64, ldw int) {
 	checkMatrix(n, n, a, lda)
 	checkMatrix(n, nb, w, ldw)

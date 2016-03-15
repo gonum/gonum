@@ -12,6 +12,8 @@ import "math"
 // This is a more accurate version of BLAS drotg, with the other differences that
 // if g = 0, then cs = 1 and sn = 0, and if f = 0 and g != 0, then cs = 0 and sn = 1.
 // If abs(f) > abs(g), cs will be positive.
+//
+// Dlartg is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlartg(f, g float64) (cs, sn, r float64) {
 	safmin := dlamchS
 	eps := dlamchE

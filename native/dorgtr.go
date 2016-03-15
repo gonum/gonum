@@ -22,6 +22,8 @@ import "github.com/gonum/blas"
 // is limited by the usable length.
 // If lwork == -1, instead of computing Dorgtr the optimal work length is stored
 // into work[0].
+//
+// Dorgtr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, tau, work []float64, lwork int) {
 	checkMatrix(n, n, a, lda)
 	if len(tau) < n-1 {

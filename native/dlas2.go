@@ -10,6 +10,8 @@ import "math"
 //  [F G]
 //  [0 H]
 // The smaller and larger singular values are returned in that order.
+//
+// Dlas2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlas2(f, g, h float64) (ssmin, ssmax float64) {
 	fa := math.Abs(f)
 	ga := math.Abs(g)

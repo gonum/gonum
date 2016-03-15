@@ -52,6 +52,8 @@ import (
 //         [              1      ]
 //         [       -s[k]     c[k]]
 // s and c have length m - 1 if side == blas.Left, and n - 1 if side == blas.Right.
+//
+// Dlasr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasr(side blas.Side, pivot lapack.Pivot, direct lapack.Direct, m, n int, c, s, a []float64, lda int) {
 	checkMatrix(m, n, a, lda)
 	if side != blas.Left && side != blas.Right {

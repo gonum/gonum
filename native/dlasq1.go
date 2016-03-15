@@ -16,6 +16,8 @@ import (
 // order, and e is overwritten. d must have length at least n, e must have
 // length at least n-1, and the input work must have length at least 4*n. Dlasq1
 // will panic if these conditions are not met.
+//
+// Dlasq1 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasq1(n int, d, e, work []float64) (info int) {
 	// TODO(btracey): replace info with an error.
 	if n < 0 {

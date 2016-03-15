@@ -14,6 +14,8 @@ import (
 //  Q = H(0) * H(2) * ... * H(k-1)
 // len(tau) >= k, 0 <= k <= m, 0 <= m <= n, len(work) >= m.
 // Dorgl2 will panic if these conditions are not met.
+//
+// Dorgl2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgl2(m, n, k int, a []float64, lda int, tau, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if len(tau) < k {

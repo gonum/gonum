@@ -23,7 +23,7 @@ import (
 // orthonormal eigenvectors of A on exit, otherwise on exit the specified
 // triangular region is overwritten.
 //
-// Work is temporary storage, and lwork specifies the usable memory length. At minimum,
+// work is temporary storage, and lwork specifies the usable memory length. At minimum,
 // lwork >= 3*n-1, and Dsyev will panic otherwise. The amount of blocking is
 // limited by the usable length. If lwork == -1, instead of computing Dsyev the
 // optimal work length is stored into work[0].

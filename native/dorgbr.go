@@ -17,6 +17,8 @@ import "github.com/gonum/lapack"
 // If vect == lapack.ApplyP, then A is assumed to have been a k×n matrix, and
 // P^T is of order n. If k < n, then Dorgbr returns the first m rows of P^T,
 // where n >= m >= k. If k >= n, then Dorgbr returns P^T as an n×n matrix.
+//
+// Dorgbr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	mn := min(m, n)
 	wantq := vect == lapack.ApplyQ

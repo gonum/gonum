@@ -52,6 +52,8 @@ import (
 // limited by the usable length.
 // If lwork == -1, instead of computing Dsytrd the optimal work length is stored
 // into work[0].
+//
+// Dsytrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau, work []float64, lwork int) {
 	upper := uplo == blas.Upper
 	opts := "U"

@@ -50,9 +50,11 @@ import (
 // t is a k×k matrix containing the block reflector, and this function will panic
 // if t is not of sufficient size. See Dlarft for more information.
 //
-// Work is a temporary storage matrix with stride ldwork.
-// Work must be of size at least n×k side == Left and m×k if side == Right, and
+// work is a temporary storage matrix with stride ldwork.
+// work must be of size at least n×k side == Left and m×k if side == Right, and
 // this function will panic if this size is not met.
+//
+// Dlarfb is an internal routine. It is exported for testing purposes.
 func (Implementation) Dlarfb(side blas.Side, trans blas.Transpose, direct lapack.Direct,
 	store lapack.StoreV, m, n, k int, v []float64, ldv int, t []float64, ldt int,
 	c []float64, ldc int, work []float64, ldwork int) {

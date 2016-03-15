@@ -9,6 +9,8 @@ import "github.com/gonum/blas"
 // Dlacpy copies the elements of A specified by uplo into B. Uplo can specify
 // a triangular portion with blas.Upper or blas.Lower, or can specify all of the
 // elemest with blas.All.
+//
+// Dlacpy is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int, b []float64, ldb int) {
 	checkMatrix(m, n, a, lda)
 	checkMatrix(m, n, b, ldb)

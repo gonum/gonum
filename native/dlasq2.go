@@ -32,6 +32,8 @@ import (
 //
 // z must have length at least 4*n, and must not contain any negative elements.
 // Dlasq2 will panic otherwise.
+//
+// Dlasq2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasq2(n int, z []float64) (info int) {
 	// TODO(btracey): make info an error.
 	if len(z) < 4*n {

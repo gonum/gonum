@@ -18,7 +18,7 @@ import (
 // If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
 // A is of size k×n. This uses a blocked algorithm.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
+// work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m if side == blas.Left and lwork >= n if side == blas.Right,
 // and this function will panic otherwise.
 // Dormlq uses a block algorithm, but the block size is limited

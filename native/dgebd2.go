@@ -12,6 +12,8 @@ import "github.com/gonum/blas"
 // if m >= n, B is upper diagonal, otherwise B is lower bidiagonal.
 // d is the diagonal, len = min(m,n)
 // e is the off-diagonal len = min(m,n)-1
+//
+// Dgebd2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgebd2(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if len(d) < min(m, n) {

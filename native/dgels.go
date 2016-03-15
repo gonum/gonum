@@ -33,7 +33,7 @@ import (
 // leading submatrix of b contains the solution vectors X. If trans == blas.NoTrans,
 // this submatrix is of size n×nrhs, and of size m×nrhs otherwise.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
+// work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= max(m,n) + max(m,n,nrhs), and this function will panic
 // otherwise. A longer work will enable blocked algorithms to be called.
 // In the special case that lwork == -1, work[0] will be set to the optimal working

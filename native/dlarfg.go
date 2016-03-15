@@ -20,6 +20,8 @@ import (
 // where tau is a real scalar.
 //
 // On entry, x contains the vector x, on exit it contains v.
+//
+// Dlarfg is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlarfg(n int, alpha float64, x []float64, incX int) (beta, tau float64) {
 	if n < 0 {
 		panic(nLT0)

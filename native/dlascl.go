@@ -11,6 +11,8 @@ import (
 )
 
 // Dlascl multiplies a rectangular matrix by a scalar.
+//
+// Dlascl is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {
 	checkMatrix(m, n, a, lda)
 	if cfrom == 0 {

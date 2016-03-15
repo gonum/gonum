@@ -13,7 +13,7 @@ import "github.com/gonum/blas"
 //
 // A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
-// (not including the diagonal) contain the elementary reflectors. Tau is modified
+// (not including the diagonal) contain the elementary reflectors. tau is modified
 // to contain the reflector scales. tau must have length at least min(m,n), and
 // this function will panic otherwise.
 //
@@ -27,7 +27,9 @@ import "github.com/gonum/blas"
 // The orthonormal matrix Q can be constructed from a product of these elementary
 // reflectors, Q = H_1*H_2 ... H_k, where k = min(m,n).
 //
-// Work is temporary storage of length at least n and this function will panic otherwise.
+// work is temporary storage of length at least n and this function will panic otherwise.
+//
+// Dgeqr2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []float64) {
 	// TODO(btracey): This is oriented such that columns of a are eliminated.
 	// This likely could be re-arranged to take better advantage of row-major

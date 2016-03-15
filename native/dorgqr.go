@@ -16,12 +16,14 @@ import (
 // routines.
 //
 // The length of tau must be equal to k, and the length of work must be at least n.
-// It also must be that 0 <= k <= n and 0 <= n <= m. Work is temporary storage,
+// It also must be that 0 <= k <= n and 0 <= n <= m. work is temporary storage,
 // and lwork specifies the usable memory length. At minimum, lwork >= n, and the
 // amount of blocking is limited by the usable length. If lwork == -1, instead of
 // computing Dorgqr the optimal work length is stored into work[0].
 //
 // Dorgqr will panic if the conditions on input values are not met.
+//
+// Dorgqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	nb := impl.Ilaenv(1, "DORGQR", " ", m, n, k, -1)
 	// work is treated as an n×nb matrix

@@ -20,6 +20,8 @@ import (
 // e contains the off-diagonal elements of the tridiagonal matrix on entry, and is
 // overwritten during the call to Dsterf. e must have length of at least n-1 or
 // Dsterf will panic.
+//
+// Dsterf is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 	if n < 0 {
 		panic(nLT0)

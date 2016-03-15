@@ -31,9 +31,11 @@ import (
 //
 // C is an m×n matrix. On exit it is updated by the multiplication listed above.
 //
-// Tau must have length min(nq,k), and Dormbr will panic otherwise. Tau contains
+// tau must have length min(nq,k), and Dormbr will panic otherwise. tau contains
 // the elementary reflectors to construct Q or P depending on the value of
 // vect.
+//
+// Dormbr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dormbr(vect lapack.DecompUpdate, side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
 	if side != blas.Left && side != blas.Right {
 		panic(badSide)

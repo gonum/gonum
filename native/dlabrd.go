@@ -50,6 +50,8 @@ import (
 //
 // X is an m×nb matrix, Y is an n×nb matrix. d, e, taup, and tauq must all have
 // length at least nb. Dlabrd will panic if these size constraints are violated.
+//
+// Dlabrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlabrd(m, n, nb int, a []float64, lda int, d, e, tauQ, tauP, x []float64, ldx int, y []float64, ldy int) {
 	checkMatrix(m, n, a, lda)
 	checkMatrix(m, nb, x, ldx)

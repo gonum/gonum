@@ -26,6 +26,8 @@ import (
 // Dlarfb for a description of layout.
 //
 // tau contains the scalar factor of the elementary reflectors h.
+//
+// Dlarft is an internal routine. It is exported for testing purposes.
 func (Implementation) Dlarft(direct lapack.Direct, store lapack.StoreV, n, k int,
 	v []float64, ldv int, tau []float64, t []float64, ldt int) {
 	if n == 0 {

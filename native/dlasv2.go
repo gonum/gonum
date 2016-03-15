@@ -11,6 +11,8 @@ import "math"
 //  [-snl csl] [0 h] [snr  csr] = [    0 ssmin]
 // ssmax is the larger absolute singular value, and ssmin is the smaller absolute
 // singular value. [cls, snl] and [csr, snr] are the left and right singular vectors.
+//
+// Dlasv2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasv2(f, g, h float64) (ssmin, ssmax, snr, csr, snl, csl float64) {
 	ft := f
 	fa := math.Abs(ft)

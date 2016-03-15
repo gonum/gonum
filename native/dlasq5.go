@@ -8,6 +8,8 @@ import "math"
 
 // Dlasq5 computes one dqds transform in ping-pong form.
 // i0 and n0 are zero-indexed.
+//
+// Dlasq5 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasq5(i0, n0 int, z []float64, pp int, tau, sigma, dmin, dmin1, dmin2, dn, dnm1, dnm2 float64) (i0Out, n0Out, ppOut int, tauOut, sigmaOut, dminOut, dmin1Out, dmin2Out, dnOut, dnm1Out, dnm2Out float64) {
 	// TODO(btracey): It seems like outputs listed in the reference implementation
 	// are actually true outputs, unlike other functions where the value is

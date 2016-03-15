@@ -47,6 +47,8 @@ import (
 // will panic if there is insufficient working memory.
 //
 // Dbdsqr returns whether the decomposition was successful.
+//
+// Dbdsqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, vt []float64, ldvt int, u []float64, ldu int, c []float64, ldc int, work []float64) (ok bool) {
 	if uplo != blas.Upper && uplo != blas.Lower {
 		panic(badUplo)

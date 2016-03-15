@@ -25,6 +25,8 @@ import (
 // than or equal to the infinity norm, and greater than or equal to the one-norm
 // otherwise. If normin == false, then cnorm is treated as an output, and is set
 // to contain the 1-norm of the off-diagonal part of the j^th column of A.
+//
+// Dlatrs is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlatrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, normin bool, n int, a []float64, lda int, x []float64, cnorm []float64) (scale float64) {
 	if uplo != blas.Upper && uplo != blas.Lower {
 		panic(badUplo)

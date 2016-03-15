@@ -15,11 +15,13 @@ import "github.com/gonum/blas"
 // If side == blas.Left, a is a matrix of side k×m, and if side == blas.Right
 // a is of size k×n.
 //
-// Tau contains the Householder factors and is of length at least k and this function will
+// tau contains the Householder factors and is of length at least k and this function will
 // panic otherwise.
 //
-// Work is temporary storage of length at least n if side == blas.Left
+// work is temporary storage of length at least n if side == blas.Left
 // and at least m if side == blas.Right and this function will panic otherwise.
+//
+// Dorml2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorml2(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64) {
 	if side != blas.Left && side != blas.Right {
 		panic(badSide)

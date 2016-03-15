@@ -12,6 +12,8 @@ import (
 
 // Drscl multiplies the vector x by 1/a being careful to avoid overflow or
 // underflow where possible.
+//
+// Drscl is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Drscl(n int, a float64, x []float64, incX int) {
 	checkVector(n, x, incX)
 	bi := blas64.Implementation()

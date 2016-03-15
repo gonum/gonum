@@ -9,6 +9,8 @@ import "math"
 // Dlasq4 computes an approximation to the smallest eigenvalue using values of d
 // from the previous transform.
 // i0, n0, and n0in are zero-indexed.
+//
+// Dlasq4 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasq4(i0, n0 int, z []float64, pp int, n0in int, dmin, dmin1, dmin2, dn, dn1, dn2, tau float64, ttype int, g float64) (tauOut float64, ttypeOut int, gOut float64) {
 	const (
 		cnst1 = 0.563

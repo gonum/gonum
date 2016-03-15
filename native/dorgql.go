@@ -17,11 +17,13 @@ import (
 //
 // tau must have length at least k, and Dorgql will panic otherwise.
 //
-// Work is temporary storage, and lwork specifies the usable memory length. At minimum,
+// work is temporary storage, and lwork specifies the usable memory length. At minimum,
 // lwork >= n, and Dorgql will panic otherwise. The amount of blocking is
 // limited by the usable length.
 // If lwork == -1, instead of computing Dorgql the optimal work length is stored
 // into work[0].
+//
+// Dorgql is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	checkMatrix(m, n, a, lda)
 	if len(tau) < k {

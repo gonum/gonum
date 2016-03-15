@@ -14,6 +14,8 @@ import (
 //  Q = H(0) * H(2) * ... * H(k-1)
 // len(tau) >= k, 0 <= k <= n, 0 <= n <= m, len(work) >= n.
 // Dorg2r will panic if these conditions are not met.
+//
+// Dorg2r is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorg2r(m, n, k int, a []float64, lda int, tau []float64, work []float64) {
 	checkMatrix(m, n, a, lda)
 	if len(tau) < k {

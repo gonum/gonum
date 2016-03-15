@@ -25,6 +25,8 @@ import (
 // be computed regardless of the singularity of A, but division by zero
 // will occur if the false is returned and the result is used to solve a
 // system of equations.
+//
+// Dgetf2 is an internal routine. It is exported for testing purposes.
 func (Implementation) Dgetf2(m, n int, a []float64, lda int, ipiv []int) (ok bool) {
 	mn := min(m, n)
 	checkMatrix(m, n, a, lda)

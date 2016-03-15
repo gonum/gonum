@@ -13,6 +13,8 @@ import (
 // Dlasrt sorts the numbers in the input slice d. If sort == lapack.SortIncreasing,
 // the elements are sorted in increasing order. If sort == lapack.SortDecreasing,
 // the elements are sorted in decreasing order.
+//
+// Dlasrt is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
 	checkVector(n, d, 1)
 	d = d[:n]

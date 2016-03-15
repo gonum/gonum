@@ -13,7 +13,7 @@ import (
 // algorithm. See the documentation for Dgeqr2 for a description of the
 // parameters at entry and exit.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
+// work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.
 // Dgeqrf is a blocked LQ factorization, but the block size is limited
 // by the temporary space available. If lwork == -1, instead of performing Dgelqf,

@@ -34,6 +34,8 @@ import (
 //
 // work must have length at least max(1, 2*n-2) if the eigenvectors are computed,
 // and Dsteqr will panic otherwise.
+//
+// Dsteqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
 	if len(d) < n {
 		panic(badD)

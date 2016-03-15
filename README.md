@@ -1,4 +1,4 @@
-# Gonum quad  [![Build Status](https://travis-ci.org/gonum/quad.svg)](https://travis-ci.org/gonum/quad)  [![Coverage Status](https://img.shields.io/coveralls/gonum/quad.svg)](https://coveralls.io/r/gonum/quad) [![GoDoc](https://godoc.org/github.com/gonum/quad?status.svg)](https://godoc.org/github.com/gonum/quad)
+# Gonum quad  [![Build Status](https://travis-ci.org/gonum/quad.svg?branch=master)](https://travis-ci.org/gonum/quad)  [![Coverage Status](https://coveralls.io/repos/gonum/quad/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/quad?branch=master) [![GoDoc](https://godoc.org/github.com/gonum/quad?status.svg)](https://godoc.org/github.com/gonum/quad)
 
 Package quad provides numerical evaluation of definite integrals of single-variable functions for the Go programming language.
 

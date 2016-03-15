@@ -114,13 +114,13 @@ func BenchmarkAStarUndirectedmallWorld_10_2_2_2_Heur(b *testing.B) {
 	benchmarkAStarHeuristic(b, nswUndirected_10_2_2_2, h)
 }
 func BenchmarkAStarUndirectedmallWorld_10_2_5_2(b *testing.B) {
-	benchmarkAStarHeuristic(b, nswUndirected_10_2_2_2, nil)
+	benchmarkAStarHeuristic(b, nswUndirected_10_2_5_2, nil)
 }
 func BenchmarkAStarUndirectedmallWorld_10_2_5_2_Heur(b *testing.B) {
 	h := func(x, y graph.Node) float64 {
 		return manhattanBetween(coordinatesForID(x, 10, 10), coordinatesForID(y, 10, 10))
 	}
-	benchmarkAStarHeuristic(b, nswUndirected_10_2_2_2, h)
+	benchmarkAStarHeuristic(b, nswUndirected_10_2_5_2, h)
 }
 func BenchmarkAStarUndirectedmallWorld_100_5_10_2(b *testing.B) {
 	benchmarkAStarHeuristic(b, nswUndirected_100_5_10_2, nil)

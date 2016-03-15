@@ -905,6 +905,23 @@ func TestProd(t *testing.T) {
 	}
 }
 
+func TestReverse(t *testing.T) {
+	for _, s := range [][]float64{
+		{0},
+		{1, 0},
+		{2, 1, 0},
+		{3, 2, 1, 0},
+		{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
+	} {
+		Reverse(s)
+		for i, v := range s {
+			if v != float64(i) {
+				t.Errorf("unexpected values for element %d: got:%v want:%v", i, v, i)
+			}
+		}
+	}
+}
+
 func roundFloat(x float64, prec int) float64 {
 	f, _ := strconv.ParseFloat(strconv.FormatFloat(x, 'f', prec, 64), 64)
 	if f == 0 {

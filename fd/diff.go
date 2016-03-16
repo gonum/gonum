@@ -61,6 +61,9 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 		settings = DefaultSettings()
 	}
 	formula := settings.Formula
+	if formula.Stencil == nil {
+		formula = Central
+	}
 	step := settings.Step
 	if step == 0 {
 		step = formula.Step
@@ -121,6 +124,9 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		panic("fd: invalid derivative order")
 	}
 	formula := settings.Formula
+	if formula.Stencil == nil {
+		formula = Central
+	}
 	step := settings.Step
 	if step == 0 {
 		step = formula.Step

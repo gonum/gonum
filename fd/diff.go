@@ -21,8 +21,7 @@ type Point struct {
 
 // Formula represents a finite difference formula that approximates
 // the derivative of order k of a function f at x as
-//  d^k f(x) ≅ (1 / h^k) * \sum_i Coeff_i * f(x + h * Loc_i),
-// where h is a small positive step.
+//  d^k f(x) ≅ (1 / Step^k) * \sum_i Coeff_i * f(x + Step * Loc_i).
 type Formula struct {
 	// Stencil is the set of sampling Points which are used to estimate the
 	// derivative. The locations will be scaled by Step and are relative to x.
@@ -33,10 +32,16 @@ type Formula struct {
 
 // Settings is the settings structure for computing finite differences.
 type Settings struct {
+	// Formula is the finite difference formula used
+	// for approximating the derivative.
+	Formula Formula
+	// Step is the distance between points of the stencil.
+	// If equal to 0, formula's default step will be used.
+	Step float64
+
 	OriginKnown bool    // Flag that the value at the origin x is known
 	OriginValue float64 // Value at the origin (only used if OriginKnown is true)
 	Concurrent  bool    // Should the function calls be executed concurrently.
-	Formula     Formula // Finite difference formula to use
 }
 
 // DefaultSettings is a basic set of settings for computing finite differences.
@@ -55,9 +60,13 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 	if settings == nil {
 		settings = DefaultSettings()
 	}
-	step := settings.Formula.Step
-	var deriv float64
 	formula := settings.Formula
+	step := settings.Step
+	if step == 0 {
+		step = formula.Step
+	}
+
+	var deriv float64
 	if !settings.Concurrent {
 		for _, pt := range formula.Stencil {
 			if settings.OriginKnown && pt.Loc == 0 {
@@ -107,13 +116,18 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	if settings == nil {
 		settings = DefaultSettings()
 	}
-	step := settings.Formula.Step
+	formula := settings.Formula
+	step := settings.Step
+	if step == 0 {
+		step = formula.Step
+	}
+
 	if !settings.Concurrent {
 		xcopy := make([]float64, len(x)) // So that x is not modified during the call
 		copy(xcopy, x)
 		for i := range xcopy {
 			var deriv float64
-			for _, pt := range settings.Formula.Stencil {
+			for _, pt := range formula.Stencil {
 				if settings.OriginKnown && pt.Loc == 0 {
 					deriv += pt.Coeff * settings.OriginValue
 					continue
@@ -122,7 +136,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 				deriv += pt.Coeff * f(xcopy)
 				xcopy[i] = x[i]
 			}
-			dst[i] = deriv / math.Pow(step, float64(settings.Formula.Order))
+			dst[i] = deriv / math.Pow(step, float64(formula.Order))
 		}
 		return dst
 	}
@@ -160,7 +174,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	// Launch the distributor. Distributor sends the cases to be computed
 	go func(sendChan chan<- fdrun, ansChan chan<- fdrun) {
 		for i := range x {
-			for _, pt := range settings.Formula.Stencil {
+			for _, pt := range formula.Stencil {
 				if settings.OriginKnown && pt.Loc == 0 {
 					// Answer already known. Send the answer on the answer channel
 					ansChan <- fdrun{
@@ -187,7 +201,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		run := <-ansChan
 		dst[run.idx] += run.pt.Coeff * run.result
 	}
-	floats.Scale(1/math.Pow(step, float64(settings.Formula.Order)), dst)
+	floats.Scale(1/math.Pow(step, float64(formula.Order)), dst)
 	return dst
 }
 

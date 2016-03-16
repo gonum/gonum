@@ -91,18 +91,18 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 	return deriv / math.Pow(step, float64(method.Order))
 }
 
-// Gradient estimates the derivative of a multivariate function f at the location
-// x. The resulting estimate is stored in-place into gradient. The order of derivative,
-// sample locations, and other options are specified by settings.
-// If the step size is zero, then the step size of the method will
-// be used.
-// Gradient panics if len(deriv) != len(x).
-func Gradient(gradient []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
-	if gradient == nil {
-		gradient = make([]float64, len(x))
+// Gradient estimates the gradient of the multivariate function f at the
+// location x. The result is stored in-place into dst if dst is not nil,
+// otherwise a new slice will be allocated and returned. Finite difference
+// kernel and other options are specified by settings. If settings is nil,
+// default settings will be used.
+// Gradient panics if the length of dst and x is not equal.
+func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
+	if dst == nil {
+		dst = make([]float64, len(x))
 	}
-	if len(gradient) != len(x) {
-		panic("fd: location and gradient length mismatch")
+	if len(dst) != len(x) {
+		panic("fd: slice length mismatch")
 	}
 	if settings == nil {
 		settings = DefaultSettings()
@@ -122,9 +122,9 @@ func Gradient(gradient []float64, f func([]float64) float64, x []float64, settin
 				deriv += pt.Coeff * f(xcopy)
 				xcopy[i] = x[i]
 			}
-			gradient[i] = deriv / math.Pow(step, float64(settings.Method.Order))
+			dst[i] = deriv / math.Pow(step, float64(settings.Method.Order))
 		}
-		return gradient
+		return dst
 	}
 
 	nWorkers := settings.Workers
@@ -179,16 +179,16 @@ func Gradient(gradient []float64, f func([]float64) float64, x []float64, settin
 		}
 	}(sendChan, ansChan)
 
-	for i := range gradient {
-		gradient[i] = 0
+	for i := range dst {
+		dst[i] = 0
 	}
 	// Read in all of the results
 	for i := 0; i < expect; i++ {
 		run := <-ansChan
-		gradient[run.idx] += run.pt.Coeff * run.result
+		dst[run.idx] += run.pt.Coeff * run.result
 	}
-	floats.Scale(1/math.Pow(step, float64(settings.Method.Order)), gradient)
-	return gradient
+	floats.Scale(1/math.Pow(step, float64(settings.Method.Order)), dst)
+	return dst
 }
 
 type fdrun struct {

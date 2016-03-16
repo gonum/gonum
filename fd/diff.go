@@ -13,19 +13,21 @@ import (
 	"github.com/gonum/floats"
 )
 
-// A Point is a stencil location in a difference method.
+// A Point is a stencil location in a finite difference formula.
 type Point struct {
 	Loc   float64
 	Coeff float64
 }
 
-// Method is a specific finite difference method. Method specifies the stencil,
-// that is, the function locations (relative to x) which will be used to estimate
-// the derivative. It also specifies the order of derivative it estimates. Order = 1
-// represents the derivative, Order = 2 represents the curvature, etc.
+// Method represents a finite difference formula that approximates
+// the derivative of order k of a function f at x as
+//  d^k f(x) ≅ (1 / h^k) * \sum_i Coeff_i * f(x + h * Loc_i),
+// where h is a small positive step.
 type Method struct {
+	// Stencil is the set of sampling Points which are used to estimate the
+	// derivative. The locations will be scaled by Step and are relative to x.
 	Stencil []Point
-	Order   int     // The order of the difference method (first derivative, second derivative, etc.)
+	Order   int     // The order of the approximated derivative.
 	Step    float64 // Default step size for the method.
 }
 

@@ -72,11 +72,11 @@ var testsSecond = []testPoint{
 	},
 }
 
-func testDerivative(t *testing.T, method Method, tol float64, tests []testPoint) {
+func testDerivative(t *testing.T, formula Formula, tol float64, tests []testPoint) {
 	for i, test := range tests {
 
 		settings := DefaultSettings()
-		settings.Method = method
+		settings.Formula = formula
 		ans := Derivative(test.f, test.loc, settings)
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("Case %v: ans mismatch serial: expected %v, found %v", i, test.ans, ans)

@@ -42,29 +42,29 @@ func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
 
 func TestGradient(t *testing.T) {
 	for i, test := range []struct {
-		nDim   int
-		tol    float64
-		method Method
+		nDim    int
+		tol     float64
+		formula Formula
 	}{
 		{
-			nDim:   2,
-			tol:    2e-4,
-			method: Forward,
+			nDim:    2,
+			tol:     2e-4,
+			formula: Forward,
 		},
 		{
-			nDim:   2,
-			tol:    1e-6,
-			method: Central,
+			nDim:    2,
+			tol:     1e-6,
+			formula: Central,
 		},
 		{
-			nDim:   40,
-			tol:    2e-4,
-			method: Forward,
+			nDim:    40,
+			tol:     2e-4,
+			formula: Forward,
 		},
 		{
-			nDim:   40,
-			tol:    1e-6,
-			method: Central,
+			nDim:    40,
+			tol:     1e-6,
+			formula: Central,
 		},
 	} {
 		x := make([]float64, test.nDim)
@@ -79,7 +79,7 @@ func TestGradient(t *testing.T) {
 		r.FDf(x, trueGradient)
 
 		settings := DefaultSettings()
-		settings.Method = test.method
+		settings.Formula = test.formula
 
 		// try with gradient nil
 		gradient := Gradient(nil, r.F, x, settings)

@@ -119,7 +119,6 @@ func TestGradient(t *testing.T) {
 		}
 		settings.Concurrent = true
 		settings.OriginKnown = false
-		settings.Workers = 1000
 		Gradient(gradient, r.F, x, settings)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with unknown origin in parallel. Want: %v, Got: %v.", i, trueGradient, gradient)

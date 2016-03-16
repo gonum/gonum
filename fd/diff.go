@@ -35,8 +35,7 @@ type Formula struct {
 type Settings struct {
 	OriginKnown bool    // Flag that the value at the origin x is known
 	OriginValue float64 // Value at the origin (only used if OriginKnown is true)
-	Concurrent  bool    // Should the function calls be executed concurrently
-	Workers     int     // Maximum number of concurrent executions when evaluating concurrently
+	Concurrent  bool    // Should the function calls be executed concurrently.
 	Formula     Formula // Finite difference formula to use
 }
 
@@ -46,7 +45,6 @@ type Settings struct {
 func DefaultSettings() *Settings {
 	return &Settings{
 		Formula: Central,
-		Workers: runtime.GOMAXPROCS(0),
 	}
 }
 
@@ -129,19 +127,19 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		return dst
 	}
 
-	nWorkers := settings.Workers
-	expect := len(settings.Formula.Stencil) * len(x)
-	if nWorkers > expect {
-		nWorkers = expect
-	}
-
 	quit := make(chan struct{})
 	defer close(quit)
+
+	expect := len(settings.Formula.Stencil) * len(x)
 	sendChan := make(chan fdrun, expect)
 	ansChan := make(chan fdrun, expect)
 
 	// Launch workers. Workers receive an index and a step, and compute the answer
-	for i := 0; i < settings.Workers; i++ {
+	nWorkers := runtime.NumCPU()
+	if nWorkers > expect {
+		nWorkers = expect
+	}
+	for i := 0; i < nWorkers; i++ {
 		go func(sendChan <-chan fdrun, ansChan chan<- fdrun, quit <-chan struct{}) {
 			xcopy := make([]float64, len(x))
 			copy(xcopy, x)

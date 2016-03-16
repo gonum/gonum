@@ -49,8 +49,8 @@ func DefaultSettings() *Settings {
 }
 
 // Derivative estimates the derivative of the function f at the given location.
-// The order of derivative, sample locations, and other options are specified
-// by settings.
+// The order of the derivative, sample locations, and other options are
+// specified by settings. If settings is nil, default settings will be used.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
 	if settings == nil {
 		settings = DefaultSettings()

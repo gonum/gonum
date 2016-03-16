@@ -105,7 +105,8 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 // otherwise a new slice will be allocated and returned. Finite difference
 // kernel and other options are specified by settings. If settings is nil,
 // default settings will be used.
-// Gradient panics if the length of dst and x is not equal.
+// Gradient panics if the length of dst and x is not equal, or if the
+// derivative order of the formula is not 1.
 func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
 	if dst == nil {
 		dst = make([]float64, len(x))
@@ -115,6 +116,9 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	}
 	if settings == nil {
 		settings = DefaultSettings()
+	}
+	if settings.Formula.Order != 1 {
+		panic("fd: invalid derivative order")
 	}
 	formula := settings.Formula
 	step := settings.Step
@@ -136,7 +140,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 				deriv += pt.Coeff * f(xcopy)
 				xcopy[i] = x[i]
 			}
-			dst[i] = deriv / math.Pow(step, float64(formula.Order))
+			dst[i] = deriv / step
 		}
 		return dst
 	}
@@ -201,7 +205,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		run := <-ansChan
 		dst[run.idx] += run.pt.Coeff * run.result
 	}
-	floats.Scale(1/math.Pow(step, float64(formula.Order)), dst)
+	floats.Scale(1/step, dst)
 	return dst
 }
 

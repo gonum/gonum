@@ -66,6 +66,10 @@ func (m *Dense) checkOverlap(a blas64.General) bool {
 	return false
 }
 
+// BUG(kortschak): Overlap detection for symmetric and triangular matrices is not
+// precise; currently overlap is detected if the bounding rectangles overlap rather
+// than exact overlap between visible elements.
+
 func (s *SymDense) checkOverlap(a blas64.Symmetric) bool {
 	mat := s.RawSymmetric()
 	if cap(mat.Data) == 0 || cap(a.Data) == 0 {

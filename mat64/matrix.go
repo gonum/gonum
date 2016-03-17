@@ -131,8 +131,9 @@ type Reseter interface {
 // A Copier can make a copy of elements of a into the receiver. The submatrix copied
 // starts at row and column 0 and has dimensions equal to the minimum dimensions of
 // the two matrices. The number of row and columns copied is returned.
-// Note that the behavior of Copy from a Matrix with backing data that aliases the
-// receiver is undefined.
+// Copy will copy from a source that aliases the receiver unless the source is transposed;
+// an aliasing transpose copy will panic with the exception for a special case when
+// the source data has a unitary increment or stride.
 type Copier interface {
 	Copy(a Matrix) (r, c int)
 }

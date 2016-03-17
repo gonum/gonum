@@ -379,7 +379,9 @@ func (m *Dense) Clone(a Matrix) {
 
 // Copy makes a copy of elements of a into the receiver. It is similar to the
 // built-in copy; it copies as much as the overlap between the two matrices and
-// returns the number of rows and columns it copied.
+// returns the number of rows and columns it copied. If a aliases the receiver
+// and is a transposed Dense or Vector, with a non-unitary increment, Copy will
+// panic.
 //
 // See the Copier interface for more information.
 func (m *Dense) Copy(a Matrix) (r, c int) {
@@ -398,29 +400,57 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 	case RawMatrixer:
 		amat := aU.RawMatrix()
 		if trans {
+			if amat.Stride != 1 {
+				m.checkOverlap(amat)
+			}
 			for i := 0; i < r; i++ {
 				blas64.Copy(c,
 					blas64.Vector{Inc: amat.Stride, Data: amat.Data[i : i+(c-1)*amat.Stride+1]},
 					blas64.Vector{Inc: 1, Data: m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c]})
 			}
 		} else {
-			for i := 0; i < r; i++ {
-				copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+			switch o := offset(m.mat.Data, amat.Data); {
+			case o < 0:
+				for i := r - 1; i >= 0; i-- {
+					copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+				}
+			case o > 0:
+				for i := 0; i < r; i++ {
+					copy(m.mat.Data[i*m.mat.Stride:i*m.mat.Stride+c], amat.Data[i*amat.Stride:i*amat.Stride+c])
+				}
+			default:
+				// Nothing to do.
 			}
 		}
 	case *Vector:
 		var n, stride int
+		amat := aU.mat
 		if trans {
+			if amat.Inc != 1 {
+				m.checkOverlap(aU.asGeneral())
+			}
 			n = c
 			stride = 1
 		} else {
 			n = r
 			stride = m.mat.Stride
 		}
-		amat := aU.mat
-		blas64.Copy(n,
-			blas64.Vector{Inc: amat.Inc, Data: amat.Data},
-			blas64.Vector{Inc: stride, Data: m.mat.Data})
+		if amat.Inc == 1 && stride == 1 {
+			copy(m.mat.Data, amat.Data[:n])
+			break
+		}
+		switch o := offset(m.mat.Data, amat.Data); {
+		case o < 0:
+			blas64.Copy(n,
+				blas64.Vector{Inc: -amat.Inc, Data: amat.Data},
+				blas64.Vector{Inc: -stride, Data: m.mat.Data})
+		case o > 0:
+			blas64.Copy(n,
+				blas64.Vector{Inc: amat.Inc, Data: amat.Data},
+				blas64.Vector{Inc: stride, Data: m.mat.Data})
+		default:
+			// Nothing to do.
+		}
 	default:
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {

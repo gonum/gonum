@@ -1161,6 +1161,84 @@ func TestCopyT(t *testing.T) {
 	}
 }
 
+func TestCopyDenseAlias(t *testing.T) {
+	for _, trans := range []bool{false, true} {
+		for di := 0; di < 2; di++ {
+			for dj := 0; dj < 2; dj++ {
+				for si := 0; si < 2; si++ {
+					for sj := 0; sj < 2; sj++ {
+						a := NewDense(3, 3, []float64{
+							1, 2, 3,
+							4, 5, 6,
+							7, 8, 9,
+						})
+						src := a.View(si, sj, 2, 2)
+						want := DenseCopyOf(src)
+						got := a.View(di, dj, 2, 2).(*Dense)
+
+						if trans {
+							panicked, _ := panics(func() { got.Copy(src.T()) })
+							if !panicked {
+								t.Errorf("expected panic for transpose aliased copy with offsets dst(%d,%d) src(%d,%d):\ngot:\n%v\nwant:\n%v",
+									di, dj, si, sj, Formatted(want), Formatted(got),
+								)
+							}
+							continue
+						}
+
+						got.Copy(src)
+						if !Equal(got, want) {
+							t.Errorf("unexpected aliased copy result with offsets dst(%d,%d) src(%d,%d):\ngot:\n%v\nwant:\n%v",
+								di, dj, si, sj, Formatted(want), Formatted(got),
+							)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+func TestCopyVectorAlias(t *testing.T) {
+	for _, horiz := range []bool{false, true} {
+		for do := 0; do < 2; do++ {
+			for di := 0; di < 3; di++ {
+				for si := 0; si < 3; si++ {
+					a := NewDense(3, 3, []float64{
+						1, 2, 3,
+						4, 5, 6,
+						7, 8, 9,
+					})
+					var src *Vector
+					var want *Dense
+					if horiz {
+						src = a.RowView(si)
+						want = DenseCopyOf(a.View(si, 0, 1, 2))
+					} else {
+						src = a.ColView(si)
+						want = DenseCopyOf(a.View(0, si, 2, 1))
+					}
+
+					var got *Dense
+					if horiz {
+						got = a.View(di, do, 1, 2).(*Dense)
+						got.Copy(src.T())
+					} else {
+						got = a.View(do, di, 2, 1).(*Dense)
+						got.Copy(src)
+					}
+
+					if !Equal(got, want) {
+						t.Errorf("unexpected aliased copy result with offsets dst(%d) src(%d):\ngot:\n%v\nwant:\n%v",
+							di, si, Formatted(want), Formatted(got),
+						)
+					}
+				}
+			}
+		}
+	}
+}
+
 func identity(r, c int, v float64) float64 { return v }
 
 func TestApply(t *testing.T) {

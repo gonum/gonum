@@ -21,7 +21,7 @@ type Point struct {
 
 // Formula represents a finite difference formula on a regularly spaced grid
 // that approximates the derivative of order k of a function f at x as
-//  d^k f(x) ≅ (1 / Step^k) * \sum_i Coeff_i * f(x + Step * Loc_i).
+//  d^k f(x) ≈ (1 / Step^k) * \sum_i Coeff_i * f(x + Step * Loc_i).
 type Formula struct {
 	// Stencil is the set of sampling Points which are used to estimate the
 	// derivative. The locations will be scaled by Step and are relative to x.

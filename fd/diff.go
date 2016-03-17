@@ -19,8 +19,8 @@ type Point struct {
 	Coeff float64
 }
 
-// Formula represents a finite difference formula that approximates
-// the derivative of order k of a function f at x as
+// Formula represents a finite difference formula on a regularly spaced grid
+// that approximates the derivative of order k of a function f at x as
 //  d^k f(x) ≅ (1 / Step^k) * \sum_i Coeff_i * f(x + Step * Loc_i).
 type Formula struct {
 	// Stencil is the set of sampling Points which are used to estimate the

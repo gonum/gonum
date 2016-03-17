@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package fd provides functions to approximate derivatives using finite differences.
 package fd
 
 import (
@@ -12,19 +13,21 @@ import (
 	"github.com/gonum/floats"
 )
 
-// A Point is a stencil location in a difference method.
+// A Point is a stencil location in a finite difference formula.
 type Point struct {
 	Loc   float64
 	Coeff float64
 }
 
-// Method is a specific finite difference method. Method specifies the stencil,
-// that is, the function locations (relative to x) which will be used to estimate
-// the derivative. It also specifies the order of derivative it estimates. Order = 1
-// represents the derivative, Order = 2 represents the curvature, etc.
+// Method represents a finite difference formula that approximates
+// the derivative of order k of a function f at x as
+//  d^k f(x) ≅ (1 / h^k) * \sum_i Coeff_i * f(x + h * Loc_i),
+// where h is a small positive step.
 type Method struct {
+	// Stencil is the set of sampling Points which are used to estimate the
+	// derivative. The locations will be scaled by Step and are relative to x.
 	Stencil []Point
-	Order   int     // The order of the difference method (first derivative, second derivative, etc.)
+	Order   int     // The order of the approximated derivative.
 	Step    float64 // Default step size for the method.
 }
 
@@ -48,8 +51,8 @@ func DefaultSettings() *Settings {
 }
 
 // Derivative estimates the derivative of the function f at the given location.
-// The order of derivative, sample locations, and other options are specified
-// by settings.
+// The order of the derivative, sample locations, and other options are
+// specified by settings. If settings is nil, default settings will be used.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
 	if settings == nil {
 		settings = DefaultSettings()
@@ -90,18 +93,18 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 	return deriv / math.Pow(step, float64(method.Order))
 }
 
-// Gradient estimates the derivative of a multivariate function f at the location
-// x. The resulting estimate is stored in-place into gradient. The order of derivative,
-// sample locations, and other options are specified by settings.
-// If the step size is zero, then the step size of the method will
-// be used.
-// Gradient panics if len(deriv) != len(x).
-func Gradient(gradient []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
-	if gradient == nil {
-		gradient = make([]float64, len(x))
+// Gradient estimates the gradient of the multivariate function f at the
+// location x. The result is stored in-place into dst if dst is not nil,
+// otherwise a new slice will be allocated and returned. Finite difference
+// kernel and other options are specified by settings. If settings is nil,
+// default settings will be used.
+// Gradient panics if the length of dst and x is not equal.
+func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
+	if dst == nil {
+		dst = make([]float64, len(x))
 	}
-	if len(gradient) != len(x) {
-		panic("fd: location and gradient length mismatch")
+	if len(dst) != len(x) {
+		panic("fd: slice length mismatch")
 	}
 	if settings == nil {
 		settings = DefaultSettings()
@@ -121,9 +124,9 @@ func Gradient(gradient []float64, f func([]float64) float64, x []float64, settin
 				deriv += pt.Coeff * f(xcopy)
 				xcopy[i] = x[i]
 			}
-			gradient[i] = deriv / math.Pow(step, float64(settings.Method.Order))
+			dst[i] = deriv / math.Pow(step, float64(settings.Method.Order))
 		}
-		return gradient
+		return dst
 	}
 
 	nWorkers := settings.Workers
@@ -178,16 +181,16 @@ func Gradient(gradient []float64, f func([]float64) float64, x []float64, settin
 		}
 	}(sendChan, ansChan)
 
-	for i := range gradient {
-		gradient[i] = 0
+	for i := range dst {
+		dst[i] = 0
 	}
 	// Read in all of the results
 	for i := 0; i < expect; i++ {
 		run := <-ansChan
-		gradient[run.idx] += run.pt.Coeff * run.result
+		dst[run.idx] += run.pt.Coeff * run.result
 	}
-	floats.Scale(1/math.Pow(step, float64(settings.Method.Order)), gradient)
-	return gradient
+	floats.Scale(1/math.Pow(step, float64(settings.Method.Order)), dst)
+	return dst
 }
 
 type fdrun struct {

@@ -147,6 +147,14 @@ func TestGradient(t *testing.T) {
 			t.Errorf("Case %v: gradient mismatch with default settings. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
 
+		// With zero settings
+		for i := range gradient {
+			gradient[i] = rand.Float64()
+		}
+		Gradient(gradient, r.F, x, &Settings{})
+		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
+			t.Errorf("Case %v: gradient mismatch with zero settings. Want: %v, Got: %v.", i, trueGradient, gradient)
+		}
 	}
 }
 

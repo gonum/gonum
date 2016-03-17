@@ -7,6 +7,8 @@ package mat64
 import (
 	"bytes"
 	"encoding"
+	"io"
+	"io/ioutil"
 	"math"
 	"testing"
 
@@ -109,6 +111,32 @@ func TestDenseMarshal(t *testing.T) {
 	}
 }
 
+func TestDenseMarshalTo(t *testing.T) {
+	for i, test := range denseData {
+		buf := new(bytes.Buffer)
+		n, err := test.want.MarshalBinaryTo(buf)
+		if err != nil {
+			t.Errorf("error encoding test-%d: %v\n", i, err)
+			continue
+		}
+
+		nrows, ncols := test.want.Dims()
+		sz := nrows*ncols*sizeFloat64 + 2*sizeInt64
+		if n != sz {
+			t.Errorf("encoded size test-%d: want=%d got=%d\n", i, sz, n)
+		}
+
+		if !bytes.Equal(buf.Bytes(), test.raw) {
+			t.Errorf("error encoding test-%d: bytes mismatch.\n got=%q\nwant=%q\n",
+				i,
+				string(buf.Bytes()),
+				string(test.raw),
+			)
+			continue
+		}
+	}
+}
+
 func TestDenseUnmarshal(t *testing.T) {
 	for i, test := range denseData {
 		var v Dense
@@ -127,6 +155,98 @@ func TestDenseUnmarshal(t *testing.T) {
 	}
 }
 
+func TestDenseUnmarshalFrom(t *testing.T) {
+	for i, test := range denseData {
+		var v Dense
+		buf := bytes.NewReader(test.raw)
+		n, err := v.UnmarshalBinaryFrom(buf)
+		if err != nil {
+			t.Errorf("error decoding test-%d: %v\n", i, err)
+			continue
+		}
+		if n != len(test.raw) {
+			t.Errorf("error decoding test-%d: lengths differ.\n got=%d\nwant=%d\n",
+				i, n, len(test.raw),
+			)
+		}
+		if !test.eq(&v, test.want) {
+			t.Errorf("error decoding test-%d: values differ.\n got=%v\nwant=%v\n",
+				i,
+				&v,
+				test.want,
+			)
+		}
+	}
+}
+
+func TestDenseUnmarshalFromError(t *testing.T) {
+	test := denseData[1]
+	for i, tt := range []struct {
+		beg int
+		end int
+	}{
+		{
+			beg: 0,
+			end: len(test.raw) - 1,
+		},
+		{
+			beg: 0,
+			end: len(test.raw) - sizeFloat64,
+		},
+		{
+			beg: 0,
+			end: 0,
+		},
+		{
+			beg: 0,
+			end: 1,
+		},
+		{
+			beg: 0,
+			end: sizeInt64,
+		},
+		{
+			beg: 0,
+			end: sizeInt64 - 1,
+		},
+		{
+			beg: 0,
+			end: sizeInt64 + 1,
+		},
+		{
+			beg: 0,
+			end: 2*sizeInt64 - 1,
+		},
+		{
+			beg: 0,
+			end: 2 * sizeInt64,
+		},
+		{
+			beg: 0,
+			end: 2*sizeInt64 + 1,
+		},
+		{
+			beg: 0,
+			end: 2*sizeInt64 + sizeFloat64 - 1,
+		},
+		{
+			beg: 0,
+			end: 2*sizeInt64 + sizeFloat64,
+		},
+		{
+			beg: 0,
+			end: 2*sizeInt64 + sizeFloat64 + 1,
+		},
+	} {
+		buf := bytes.NewReader(test.raw[tt.beg:tt.end])
+		var m Dense
+		_, err := m.UnmarshalBinaryFrom(buf)
+		if err != io.ErrUnexpectedEOF {
+			t.Errorf("test #%d: error decoding. got=%v. want=%v\n", i, err, io.ErrUnexpectedEOF)
+		}
+	}
+}
+
 func TestDenseIORoundTrip(t *testing.T) {
 	for i, test := range denseData {
 		buf, err := test.want.MarshalBinary()
@@ -141,7 +261,29 @@ func TestDenseIORoundTrip(t *testing.T) {
 		}
 
 		if !test.eq(&got, test.want) {
-			t.Errorf("r/w test #%d failed\nwant=%#v\n got=%#v\n", i, test.want, &got)
+			t.Errorf("r/w test #%d failed\n got=%#v\nwant=%#v\n", i, &got, test.want)
+		}
+
+		wbuf := new(bytes.Buffer)
+		_, err = test.want.MarshalBinaryTo(wbuf)
+		if err != nil {
+			t.Errorf("error encoding test #%d: %v\n", i, err)
+		}
+
+		if !bytes.Equal(buf, wbuf.Bytes()) {
+			t.Errorf("encoding via MarshalBinary and MarshalBinaryTo differ:\nwith-stream: %q\n  no-stream: %q\n",
+				i, wbuf.Bytes(), buf,
+			)
+		}
+
+		var wgot Dense
+		_, err = wgot.UnmarshalBinaryFrom(wbuf)
+		if err != nil {
+			t.Errorf("error decoding test #%d: %v\n", i, err)
+		}
+
+		if !test.eq(&wgot, test.want) {
+			t.Errorf("r/w test #%d failed\n got=%#v\nwant=%#v\n", i, &wgot, test.want)
 		}
 	}
 }
@@ -241,6 +383,32 @@ func TestVectorMarshal(t *testing.T) {
 	}
 }
 
+func TestVectorMarshalTo(t *testing.T) {
+	for i, test := range vectorData {
+		buf := new(bytes.Buffer)
+		n, err := test.want.MarshalBinaryTo(buf)
+		if err != nil {
+			t.Errorf("error encoding test-%d: %v\n", i, err)
+			continue
+		}
+
+		nrows, ncols := test.want.Dims()
+		sz := nrows*ncols*sizeFloat64 + sizeInt64
+		if n != sz {
+			t.Errorf("encoded size test-%d: want=%d got=%d\n", i, sz, n)
+		}
+
+		if !bytes.Equal(buf.Bytes(), test.raw) {
+			t.Errorf("error encoding test-%d: bytes mismatch.\n got=%q\nwant=%q\n",
+				i,
+				string(buf.Bytes()),
+				string(test.raw),
+			)
+			continue
+		}
+	}
+}
+
 func TestVectorUnmarshal(t *testing.T) {
 	for i, test := range vectorData {
 		var v Vector
@@ -259,6 +427,88 @@ func TestVectorUnmarshal(t *testing.T) {
 	}
 }
 
+func TestVectorUnmarshalFrom(t *testing.T) {
+	for i, test := range vectorData {
+		var v Vector
+		buf := bytes.NewReader(test.raw)
+		n, err := v.UnmarshalBinaryFrom(buf)
+		if err != nil {
+			t.Errorf("error decoding test-%d: %v\n", i, err)
+			continue
+		}
+		if n != len(test.raw) {
+			t.Errorf("error decoding test-%d: lengths differ.\n got=%d\nwant=%d\n",
+				i,
+				n,
+				len(test.raw),
+			)
+		}
+		if !test.eq(&v, test.want) {
+			t.Errorf("error decoding test-%d: values differ.\n got=%v\nwant=%v\n",
+				i,
+				&v,
+				test.want,
+			)
+		}
+	}
+}
+
+func TestVectorUnmarshalFromError(t *testing.T) {
+	test := vectorData[1]
+	for i, tt := range []struct {
+		beg int
+		end int
+	}{
+		{
+			beg: 0,
+			end: len(test.raw) - 1,
+		},
+		{
+			beg: 0,
+			end: len(test.raw) - sizeFloat64,
+		},
+		{
+			beg: 0,
+			end: 0,
+		},
+		{
+			beg: 0,
+			end: 1,
+		},
+		{
+			beg: 0,
+			end: sizeInt64,
+		},
+		{
+			beg: 0,
+			end: sizeInt64 - 1,
+		},
+		{
+			beg: 0,
+			end: sizeInt64 + 1,
+		},
+		{
+			beg: 0,
+			end: sizeInt64 + sizeFloat64 - 1,
+		},
+		{
+			beg: 0,
+			end: sizeInt64 + sizeFloat64,
+		},
+		{
+			beg: 0,
+			end: sizeInt64 + sizeFloat64 + 1,
+		},
+	} {
+		buf := bytes.NewReader(test.raw[tt.beg:tt.end])
+		var v Vector
+		_, err := v.UnmarshalBinaryFrom(buf)
+		if err != io.ErrUnexpectedEOF {
+			t.Errorf("test #%d: error decoding. got=%v. want=%v\n", i, err, io.ErrUnexpectedEOF)
+		}
+	}
+}
+
 func TestVectorIORoundTrip(t *testing.T) {
 	for i, test := range vectorData {
 		buf, err := test.want.MarshalBinary()
@@ -273,6 +523,28 @@ func TestVectorIORoundTrip(t *testing.T) {
 		}
 		if !test.eq(&got, test.want) {
 			t.Errorf("r/w test #%d failed\n got=%#v\nwant=%#v\n", i, &got, test.want)
+		}
+
+		wbuf := new(bytes.Buffer)
+		_, err = test.want.MarshalBinaryTo(wbuf)
+		if err != nil {
+			t.Errorf("error encoding test #%d: %v\n", i, err)
+		}
+
+		if !bytes.Equal(buf, wbuf.Bytes()) {
+			t.Errorf("encoding via MarshalBinary and MarshalBinaryTo differ:\nwith-stream: %q\n  no-stream: %q\n",
+				i, wbuf.Bytes(), buf,
+			)
+		}
+
+		var wgot Vector
+		_, err = wgot.UnmarshalBinaryFrom(wbuf)
+		if err != nil {
+			t.Errorf("error decoding test #%d: %v\n", i, err)
+		}
+
+		if !test.eq(&wgot, test.want) {
+			t.Errorf("r/w test #%d failed\n got=%#v\nwant=%#v\n", i, &wgot, test.want)
 		}
 	}
 }
@@ -317,6 +589,64 @@ func unmarshalBinaryBenchDense(b *testing.B, size int) {
 	}
 }
 
+func BenchmarkMarshalToDense10(b *testing.B)    { marshalBinaryToBenchDense(b, 10) }
+func BenchmarkMarshalToDense100(b *testing.B)   { marshalBinaryToBenchDense(b, 100) }
+func BenchmarkMarshalToDense1000(b *testing.B)  { marshalBinaryToBenchDense(b, 1000) }
+func BenchmarkMarshalToDense10000(b *testing.B) { marshalBinaryToBenchDense(b, 10000) }
+
+func marshalBinaryToBenchDense(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	m := NewDense(1, size, data)
+	w := ioutil.Discard
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		m.MarshalBinaryTo(w)
+	}
+}
+
+type readerTest struct {
+	buf []byte
+	pos int
+}
+
+func (r *readerTest) Read(data []byte) (int, error) {
+	n := copy(data, r.buf[r.pos:r.pos+len(data)])
+	r.pos += n
+	return n, nil
+}
+
+func (r *readerTest) reset() {
+	r.pos = 0
+}
+
+func BenchmarkUnmarshalFromDense10(b *testing.B)    { unmarshalBinaryFromBenchDense(b, 10) }
+func BenchmarkUnmarshalFromDense100(b *testing.B)   { unmarshalBinaryFromBenchDense(b, 100) }
+func BenchmarkUnmarshalFromDense1000(b *testing.B)  { unmarshalBinaryFromBenchDense(b, 1000) }
+func BenchmarkUnmarshalFromDense10000(b *testing.B) { unmarshalBinaryFromBenchDense(b, 10000) }
+
+func unmarshalBinaryFromBenchDense(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	buf, err := NewDense(1, size, data).MarshalBinary()
+	if err != nil {
+		b.Fatalf("error creating binary buffer (size=%d): %v\n", size, err)
+	}
+	r := &readerTest{buf: buf}
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		var m Dense
+		m.UnmarshalBinaryFrom(r)
+		r.reset()
+	}
+}
+
 func BenchmarkMarshalVector10(b *testing.B)    { marshalBinaryBenchVector(b, 10) }
 func BenchmarkMarshalVector100(b *testing.B)   { marshalBinaryBenchVector(b, 100) }
 func BenchmarkMarshalVector1000(b *testing.B)  { marshalBinaryBenchVector(b, 1000) }
@@ -354,5 +684,48 @@ func unmarshalBinaryBenchVector(b *testing.B, size int) {
 	for n := 0; n < b.N; n++ {
 		var vec Vector
 		vec.UnmarshalBinary(buf)
+	}
+}
+
+func BenchmarkMarshalToVector10(b *testing.B)    { marshalBinaryToBenchVector(b, 10) }
+func BenchmarkMarshalToVector100(b *testing.B)   { marshalBinaryToBenchVector(b, 100) }
+func BenchmarkMarshalToVector1000(b *testing.B)  { marshalBinaryToBenchVector(b, 1000) }
+func BenchmarkMarshalToVector10000(b *testing.B) { marshalBinaryToBenchVector(b, 10000) }
+
+func marshalBinaryToBenchVector(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	vec := NewVector(size, data)
+	w := ioutil.Discard
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		vec.MarshalBinaryTo(w)
+	}
+}
+
+func BenchmarkUnmarshalFromVector10(b *testing.B)    { unmarshalBinaryFromBenchVector(b, 10) }
+func BenchmarkUnmarshalFromVector100(b *testing.B)   { unmarshalBinaryFromBenchVector(b, 100) }
+func BenchmarkUnmarshalFromVector1000(b *testing.B)  { unmarshalBinaryFromBenchVector(b, 1000) }
+func BenchmarkUnmarshalFromVector10000(b *testing.B) { unmarshalBinaryFromBenchVector(b, 10000) }
+
+func unmarshalBinaryFromBenchVector(b *testing.B, size int) {
+	data := make([]float64, size)
+	for i := range data {
+		data[i] = float64(i)
+	}
+	buf, err := NewVector(size, data).MarshalBinary()
+	if err != nil {
+		b.Fatalf("error creating binary buffer (size=%d): %v\n", size, err)
+	}
+	r := &readerTest{buf: buf}
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		var vec Vector
+		vec.UnmarshalBinaryFrom(r)
+		r.reset()
 	}
 }

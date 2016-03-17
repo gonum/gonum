@@ -4,7 +4,10 @@
 
 package mat64
 
-import "github.com/gonum/blas/blas64"
+import (
+	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
+)
 
 const (
 	// regionOverlap is the panic string used for the general case
@@ -66,10 +69,6 @@ func (m *Dense) checkOverlap(a blas64.General) bool {
 	return false
 }
 
-// BUG(kortschak): Overlap detection for symmetric and triangular matrices is not
-// precise; currently overlap is detected if the bounding rectangles overlap rather
-// than exact overlap between visible elements.
-
 func (s *SymDense) checkOverlap(a blas64.Symmetric) bool {
 	mat := s.RawSymmetric()
 	if cap(mat.Data) == 0 || cap(a.Data) == 0 {
@@ -100,12 +99,15 @@ func (s *SymDense) checkOverlap(a blas64.Symmetric) bool {
 		panic(mismatchedStrides)
 	}
 
-	// TODO(kortschak) Make this analysis more precise.
-	if off > 0 {
+	if off < 0 {
 		off = -off
 		mat.N, a.N = a.N, mat.N
+		// If we created the matrix it will always
+		// be in the upper triangle, but don't trust
+		// that this is the case.
+		mat.Uplo, a.Uplo = a.Uplo, mat.Uplo
 	}
-	if rectanglesOverlap(off, mat.N, a.N, mat.Stride) {
+	if trianglesOverlap(off, mat.N, a.N, mat.Stride, mat.Uplo == blas.Upper, a.Uplo == blas.Upper) {
 		panic(regionOverlap)
 	}
 	return false
@@ -141,12 +143,12 @@ func (t *TriDense) checkOverlap(a blas64.Triangular) bool {
 		panic(mismatchedStrides)
 	}
 
-	// TODO(kortschak) Make this analysis more precise.
-	if off > 0 {
+	if off < 0 {
 		off = -off
 		mat.N, a.N = a.N, mat.N
+		mat.Uplo, a.Uplo = a.Uplo, mat.Uplo
 	}
-	if rectanglesOverlap(off, mat.N, a.N, mat.Stride) {
+	if trianglesOverlap(off, mat.N, a.N, mat.Stride, mat.Uplo == blas.Upper, a.Uplo == blas.Upper) {
 		panic(regionOverlap)
 	}
 	return false
@@ -190,7 +192,7 @@ func (v *Vector) checkOverlap(a blas64.Vector) bool {
 
 // rectanglesOverlap returns whether the strided rectangles a and b overlap
 // when b is offset by off elements after a but has at least one element before
-// the end of a. a and b have aCols and bCols respectively.
+// the end of a. off must be positive. a and b have aCols and bCols respectively.
 //
 // rectanglesOverlap works by shifting both matrices left such that the left
 // column of a is at 0. The column indexes are flattened by obtaining the shifted
@@ -222,4 +224,58 @@ func rectanglesOverlap(off, aCols, bCols, stride int) bool {
 
 	// b strictly wraps and so must overlap with a.
 	return true
+}
+
+// trianglesOverlap returns whether the strided triangles a and b overlap
+// when b is offset by off elements after a but has at least one element before
+// the end of a. off must be positive. a and b are aSize×aSize and bSize×bSize
+// respectively.
+func trianglesOverlap(off, aSize, bSize, stride int, aUpper, bUpper bool) bool {
+	if !rectanglesOverlap(off, aSize, bSize, stride) {
+		// Fast return if bounding rectangles do not overlap.
+		return false
+	}
+
+	// Find location of b relative to a.
+	rowOffset := off / stride
+	colOffset := off % stride
+	if (off+bSize)%stride < colOffset {
+		// We have wrapped, so readjust offsets.
+		rowOffset++
+		colOffset -= stride
+	}
+
+	if aUpper {
+		// Check whether the upper left of b
+		// is in the triangle of a
+		if rowOffset >= 0 && rowOffset <= colOffset {
+			return true
+		}
+		// Check whether the upper right of b
+		// is in the triangle of a.
+		return bUpper && rowOffset < colOffset+bSize
+	}
+
+	// Check whether the upper left of b
+	// is in the triangle of a
+	if colOffset >= 0 && rowOffset >= colOffset {
+		return true
+	}
+	if bUpper {
+		// Check whether the upper right corner of b
+		// is in a or the upper row of b spans a row
+		// of a.
+		return rowOffset > colOffset+bSize || colOffset < 0
+	}
+	if colOffset < 0 {
+		// Check whether the lower left of a
+		// is in the triangle of b or below
+		// the diagonal of a. This requires a
+		// swap of reference origin.
+		return -rowOffset+aSize > -colOffset
+	}
+	// Check whether the lower left of b
+	// is in the triangle of a or below
+	// the diagonal of a.
+	return rowOffset+bSize > colOffset
 }

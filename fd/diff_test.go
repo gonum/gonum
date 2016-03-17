@@ -75,29 +75,36 @@ var testsSecond = []testPoint{
 func testDerivative(t *testing.T, formula Formula, tol float64, tests []testPoint) {
 	for i, test := range tests {
 
-		settings := DefaultSettings()
-		settings.Formula = formula
-		ans := Derivative(test.f, test.loc, settings)
+		ans := Derivative(test.f, test.loc, &Settings{
+			Formula: formula,
+		})
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("Case %v: ans mismatch serial: expected %v, found %v", i, test.ans, ans)
 		}
 
-		settings.OriginKnown = true
-		settings.OriginValue = test.fofx
-		ans = Derivative(test.f, test.loc, settings)
+		ans = Derivative(test.f, test.loc, &Settings{
+			Formula:     formula,
+			OriginKnown: true,
+			OriginValue: test.fofx,
+		})
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("Case %v: ans mismatch serial origin known: expected %v, found %v", i, test.ans, ans)
 		}
 
-		settings.OriginKnown = false
-		settings.Concurrent = true
-		ans = Derivative(test.f, test.loc, settings)
+		ans = Derivative(test.f, test.loc, &Settings{
+			Formula:    formula,
+			Concurrent: true,
+		})
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("Case %v: ans mismatch concurrent: expected %v, found %v", i, test.ans, ans)
 		}
 
-		settings.OriginKnown = true
-		ans = Derivative(test.f, test.loc, settings)
+		ans = Derivative(test.f, test.loc, &Settings{
+			Formula:     formula,
+			OriginKnown: true,
+			OriginValue: test.fofx,
+			Concurrent:  true,
+		})
 		if math.Abs(test.ans-ans) > tol {
 			t.Errorf("Case %v: ans mismatch concurrent: expected %v, found %v", i, test.ans, ans)
 		}

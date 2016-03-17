@@ -34,6 +34,7 @@ type Formula struct {
 type Settings struct {
 	// Formula is the finite difference formula used
 	// for approximating the derivative.
+	// Zero value will default to the Central formula.
 	Formula Formula
 	// Step is the distance between points of the stencil.
 	// If equal to 0, formula's default step will be used.
@@ -45,21 +46,13 @@ type Settings struct {
 	Concurrent bool // Should the function calls be executed concurrently.
 }
 
-// DefaultSettings is a basic set of settings for computing finite differences.
-// Computes a central difference approximation for the first derivative
-// of the function.
-func DefaultSettings() *Settings {
-	return &Settings{
-		Formula: Central,
-	}
-}
-
 // Derivative estimates the derivative of the function f at the given location.
-// The order of the derivative, sample locations, and other options are
-// specified by settings. If settings is nil, default settings will be used.
+// The finite difference formula, the step size, and other options are
+// specified by settings. If settings is nil, the first derivative will be
+// estimated using the Central formula and a suitable step size.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
 	if settings == nil {
-		settings = DefaultSettings()
+		settings = &Settings{}
 	}
 	formula := settings.Formula
 	if formula.Stencil == nil {
@@ -119,7 +112,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		panic("fd: slice length mismatch")
 	}
 	if settings == nil {
-		settings = DefaultSettings()
+		settings = &Settings{}
 	}
 	formula := settings.Formula
 	if formula.Stencil == nil {

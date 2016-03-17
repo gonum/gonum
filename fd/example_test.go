@@ -34,7 +34,7 @@ func ExampleDerivative() {
 	df = fd.Derivative(f, 0, &fd.Settings{
 		Formula:     fd.Central2nd,
 		Step:        1e-4,
-		Concurrent:  2,
+		Concurrent:  true,
 		OriginKnown: true,
 		OriginValue: f(0),
 	})

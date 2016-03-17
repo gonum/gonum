@@ -78,11 +78,10 @@ func TestGradient(t *testing.T) {
 		trueGradient := make([]float64, len(x))
 		r.FDf(x, trueGradient)
 
-		settings := DefaultSettings()
-		settings.Formula = test.formula
-
-		// try with gradient nil
-		gradient := Gradient(nil, r.F, x, settings)
+		// Try with gradient nil.
+		gradient := Gradient(nil, r.F, x, &Settings{
+			Formula: test.formula,
+		})
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch in serial with nil. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
@@ -90,11 +89,13 @@ func TestGradient(t *testing.T) {
 			t.Errorf("Case %v: x modified during call to gradient in serial with nil.", i)
 		}
 
+		// Try with provided gradient.
 		for i := range gradient {
 			gradient[i] = rand.Float64()
 		}
-
-		Gradient(gradient, r.F, x, settings)
+		Gradient(gradient, r.F, x, &Settings{
+			Formula: test.formula,
+		})
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch in serial. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
@@ -102,24 +103,27 @@ func TestGradient(t *testing.T) {
 			t.Errorf("Case %v: x modified during call to gradient in serial with non-nil.", i)
 		}
 
-		// Try with known value
+		// Try with known value.
 		for i := range gradient {
 			gradient[i] = rand.Float64()
 		}
-		settings.OriginKnown = true
-		settings.OriginValue = r.F(x)
-		Gradient(gradient, r.F, x, settings)
+		Gradient(gradient, r.F, x, &Settings{
+			Formula:     test.formula,
+			OriginKnown: true,
+			OriginValue: r.F(x),
+		})
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with known origin in serial. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
 
-		// Concurrently
+		// Try with concurrent evaluation.
 		for i := range gradient {
 			gradient[i] = rand.Float64()
 		}
-		settings.Concurrent = true
-		settings.OriginKnown = false
-		Gradient(gradient, r.F, x, settings)
+		Gradient(gradient, r.F, x, &Settings{
+			Formula:    test.formula,
+			Concurrent: true,
+		})
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with unknown origin in parallel. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
@@ -127,27 +131,30 @@ func TestGradient(t *testing.T) {
 			t.Errorf("Case %v: x modified during call to gradient in parallel", i)
 		}
 
-		// Concurrently with origin known
+		// Try with concurrent evaluation with origin known.
 		for i := range gradient {
 			gradient[i] = rand.Float64()
 		}
-		settings.OriginKnown = true
-		Gradient(gradient, r.F, x, settings)
+		Gradient(gradient, r.F, x, &Settings{
+			Formula:     test.formula,
+			Concurrent:  true,
+			OriginKnown: true,
+			OriginValue: r.F(x),
+		})
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with known origin in parallel. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
 
-		// With default settings
+		// Try with nil settings.
 		for i := range gradient {
 			gradient[i] = rand.Float64()
 		}
-		settings = nil
-		Gradient(gradient, r.F, x, settings)
+		Gradient(gradient, r.F, x, nil)
 		if !floats.EqualApprox(gradient, trueGradient, test.tol) {
 			t.Errorf("Case %v: gradient mismatch with default settings. Want: %v, Got: %v.", i, trueGradient, gradient)
 		}
 
-		// With zero settings
+		// Try with zero-valued settings.
 		for i := range gradient {
 			gradient[i] = rand.Float64()
 		}

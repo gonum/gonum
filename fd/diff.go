@@ -121,12 +121,12 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	if settings == nil {
 		settings = DefaultSettings()
 	}
-	if settings.Formula.Order != 1 {
-		panic("fd: invalid derivative order")
-	}
 	formula := settings.Formula
 	if formula.Stencil == nil {
 		formula = Central
+	}
+	if formula.Order != 1 {
+		panic("fd: invalid derivative order")
 	}
 	step := settings.Step
 	if step == 0 {

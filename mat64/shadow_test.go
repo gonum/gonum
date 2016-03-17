@@ -89,3 +89,29 @@ type interval struct{ from, to int }
 func intervalsOverlap(a, b interval) bool {
 	return a.to > b.from && b.to > a.from
 }
+
+// See https://github.com/gonum/matrix/issues/359 for details.
+func TestIssue359(t *testing.T) {
+	for xi := 0; xi < 2; xi++ {
+		for xj := 0; xj < 2; xj++ {
+			for yi := 0; yi < 2; yi++ {
+				for yj := 0; yj < 2; yj++ {
+					a := NewDense(3, 3, []float64{
+						1, 2, 3,
+						4, 5, 6,
+						7, 8, 9,
+					})
+					x := a.View(xi, xj, 2, 2).(*Dense)
+					y := a.View(yi, yj, 2, 2).(*Dense)
+
+					panicked, _ := panics(func() { x.checkOverlap(y.mat) })
+					if !panicked {
+						t.Errorf("expected panic for aliased with offsets x(%d,%d) y(%d,%d):\nx:\n%v\ny:\n%v",
+							xi, xj, yi, yj, Formatted(x), Formatted(y),
+						)
+					}
+				}
+			}
+		}
+	}
+}

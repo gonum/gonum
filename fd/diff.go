@@ -39,9 +39,10 @@ type Settings struct {
 	// If equal to 0, formula's default step will be used.
 	Step float64
 
-	OriginKnown bool    // Flag that the value at the origin x is known
-	OriginValue float64 // Value at the origin (only used if OriginKnown is true)
-	Concurrent  bool    // Should the function calls be executed concurrently.
+	OriginKnown bool    // Flag that the value at the origin x is known.
+	OriginValue float64 // Value at the origin (only used if OriginKnown is true).
+
+	Concurrent bool // Should the function calls be executed concurrently.
 }
 
 // DefaultSettings is a basic set of settings for computing finite differences.
@@ -133,7 +134,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	}
 
 	if !settings.Concurrent {
-		xcopy := make([]float64, len(x)) // So that x is not modified during the call
+		xcopy := make([]float64, len(x)) // So that x is not modified during the call.
 		copy(xcopy, x)
 		for i := range xcopy {
 			var deriv float64
@@ -158,7 +159,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	sendChan := make(chan fdrun, expect)
 	ansChan := make(chan fdrun, expect)
 
-	// Launch workers. Workers receive an index and a step, and compute the answer
+	// Launch workers. Workers receive an index and a step, and compute the answer.
 	nWorkers := runtime.NumCPU()
 	if nWorkers > expect {
 		nWorkers = expect
@@ -181,12 +182,12 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		}(sendChan, ansChan, quit)
 	}
 
-	// Launch the distributor. Distributor sends the cases to be computed
+	// Launch the distributor. Distributor sends the cases to be computed.
 	go func(sendChan chan<- fdrun, ansChan chan<- fdrun) {
 		for i := range x {
 			for _, pt := range formula.Stencil {
 				if settings.OriginKnown && pt.Loc == 0 {
-					// Answer already known. Send the answer on the answer channel
+					// Answer already known. Send the answer on the answer channel.
 					ansChan <- fdrun{
 						idx:    i,
 						pt:     pt,
@@ -194,7 +195,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 					}
 					continue
 				}
-				// Answer not known, send the answer to be computed
+				// Answer not known, send the answer to be computed.
 				sendChan <- fdrun{
 					idx: i,
 					pt:  pt,
@@ -206,7 +207,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	for i := range dst {
 		dst[i] = 0
 	}
-	// Read in all of the results
+	// Read in all of the results.
 	for i := 0; i < expect; i++ {
 		run := <-ansChan
 		dst[run.idx] += run.pt.Coeff * run.result

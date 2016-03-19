@@ -101,7 +101,7 @@ func (e *EigenSym) Values(dst []float64) []float64 {
 }
 
 // EigenvectorsSym extracts the eigenvectors of the factorized matrix and stores
-// them in the reciever. Each eigenvector is a column corresponding to the
+// them in the receiver. Each eigenvector is a column corresponding to the
 // respective eigenvalue returned by e.Values.
 //
 // EigenvectorsSym panics if the factorization was not successful or if the

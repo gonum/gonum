@@ -30,6 +30,10 @@ type Formula struct {
 	Step    float64 // Default step size for the formula.
 }
 
+func (f Formula) isZero() bool {
+	return f.Stencil == nil && f.Order == 0 && f.Step == 0
+}
+
 // Settings is the settings structure for computing finite differences.
 type Settings struct {
 	// Formula is the finite difference formula used
@@ -55,8 +59,11 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 		settings = &Settings{}
 	}
 	formula := settings.Formula
-	if formula.Stencil == nil {
+	if formula.isZero() {
 		formula = Central
+	}
+	if formula.Order == 0 || formula.Stencil == nil || formula.Step == 0 {
+		panic("fd: bad formula")
 	}
 	step := settings.Step
 	if step == 0 {
@@ -115,8 +122,11 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		settings = &Settings{}
 	}
 	formula := settings.Formula
-	if formula.Stencil == nil {
+	if formula.isZero() {
 		formula = Central
+	}
+	if formula.Order == 0 || formula.Stencil == nil || formula.Step == 0 {
+		panic("fd: bad formula")
 	}
 	if formula.Order != 1 {
 		panic("fd: invalid derivative order")

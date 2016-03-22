@@ -31,16 +31,12 @@ func TestDenseOverlaps(t *testing.T) {
 				for k := range views {
 					if r > 1 {
 						views[k].i = rand.Intn(r - 1)
-					}
-					if c > 1 {
-						views[k].j = rand.Intn(c - 1)
-					}
-					if r > 1 {
 						views[k].r = rand.Intn(r-views[k].i-1) + 1
 					} else {
 						views[k].r = 1
 					}
 					if c > 1 {
+						views[k].j = rand.Intn(c - 1)
 						views[k].c = rand.Intn(c-views[k].j-1) + 1
 					} else {
 						views[k].c = 1

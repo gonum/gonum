@@ -15,6 +15,8 @@ func TestDenseOverlaps(t *testing.T) {
 		*Dense
 	}
 
+	rnd := rand.New(rand.NewSource(1))
+
 	for r := 1; r < 20; r++ {
 		for c := 1; c < 20; c++ {
 			m := NewDense(r, c, nil)
@@ -30,14 +32,14 @@ func TestDenseOverlaps(t *testing.T) {
 				var views [2]view
 				for k := range views {
 					if r > 1 {
-						views[k].i = rand.Intn(r - 1)
-						views[k].r = rand.Intn(r-views[k].i-1) + 1
+						views[k].i = rnd.Intn(r - 1)
+						views[k].r = rnd.Intn(r-views[k].i-1) + 1
 					} else {
 						views[k].r = 1
 					}
 					if c > 1 {
-						views[k].j = rand.Intn(c - 1)
-						views[k].c = rand.Intn(c-views[k].j-1) + 1
+						views[k].j = rnd.Intn(c - 1)
+						views[k].c = rnd.Intn(c-views[k].j-1) + 1
 					} else {
 						views[k].c = 1
 					}

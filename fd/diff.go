@@ -49,7 +49,7 @@ type Settings struct {
 // Derivative estimates the derivative of the function f at the given location.
 // The finite difference formula, the step size, and other options are
 // specified by settings. If settings is nil, the first derivative will be
-// estimated using the Central formula and a suitable step size.
+// estimated using the Central formula and a default step size.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
 	if settings == nil {
 		settings = &Settings{}

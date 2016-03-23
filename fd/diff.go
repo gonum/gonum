@@ -149,7 +149,6 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 
 	if nWorkers == 1 {
 		xcopy := make([]float64, len(x)) // So that x is not modified during the call.
-		copy(xcopy, x)
 		for i := range xcopy {
 			var deriv float64
 			for _, pt := range formula.Stencil {
@@ -157,9 +156,9 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 					deriv += pt.Coeff * settings.OriginValue
 					continue
 				}
+				copy(xcopy, x)
 				xcopy[i] += pt.Loc * step
 				deriv += pt.Coeff * f(xcopy)
-				xcopy[i] = x[i]
 			}
 			dst[i] = deriv / step
 		}
@@ -175,15 +174,14 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	for i := 0; i < nWorkers; i++ {
 		go func(sendChan <-chan fdrun, ansChan chan<- fdrun, quit <-chan struct{}) {
 			xcopy := make([]float64, len(x))
-			copy(xcopy, x)
 			for {
 				select {
 				case <-quit:
 					return
 				case run := <-sendChan:
+					copy(xcopy, x)
 					xcopy[run.idx] += run.pt.Loc * step
 					run.result = f(xcopy)
-					xcopy[run.idx] = x[run.idx]
 					ansChan <- run
 				}
 			}

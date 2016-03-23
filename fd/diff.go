@@ -121,6 +121,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	if settings == nil {
 		settings = &Settings{}
 	}
+
 	formula := settings.Formula
 	if formula.isZero() {
 		formula = Central
@@ -131,12 +132,22 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	if formula.Order != 1 {
 		panic("fd: invalid derivative order")
 	}
+
 	step := settings.Step
 	if step == 0 {
 		step = formula.Step
 	}
 
-	if !settings.Concurrent {
+	expect := len(formula.Stencil) * len(x)
+	nWorkers := 1
+	if settings.Concurrent {
+		nWorkers = runtime.GOMAXPROCS(0)
+		if nWorkers > expect {
+			nWorkers = expect
+		}
+	}
+
+	if nWorkers == 1 {
 		xcopy := make([]float64, len(x)) // So that x is not modified during the call.
 		copy(xcopy, x)
 		for i := range xcopy {
@@ -155,18 +166,12 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		return dst
 	}
 
+	sendChan := make(chan fdrun, expect)
+	ansChan := make(chan fdrun, expect)
 	quit := make(chan struct{})
 	defer close(quit)
 
-	expect := len(settings.Formula.Stencil) * len(x)
-	sendChan := make(chan fdrun, expect)
-	ansChan := make(chan fdrun, expect)
-
 	// Launch workers. Workers receive an index and a step, and compute the answer.
-	nWorkers := runtime.NumCPU()
-	if nWorkers > expect {
-		nWorkers = expect
-	}
 	for i := 0; i < nWorkers; i++ {
 		go func(sendChan <-chan fdrun, ansChan chan<- fdrun, quit <-chan struct{}) {
 			xcopy := make([]float64, len(x))

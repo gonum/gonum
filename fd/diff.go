@@ -25,13 +25,13 @@ type Point struct {
 type Formula struct {
 	// Stencil is the set of sampling Points which are used to estimate the
 	// derivative. The locations will be scaled by Step and are relative to x.
-	Stencil []Point
-	Order   int     // The order of the approximated derivative.
-	Step    float64 // Default step size for the formula.
+	Stencil    []Point
+	Derivative int     // The order of the approximated derivative.
+	Step       float64 // Default step size for the formula.
 }
 
 func (f Formula) isZero() bool {
-	return f.Stencil == nil && f.Order == 0 && f.Step == 0
+	return f.Stencil == nil && f.Derivative == 0 && f.Step == 0
 }
 
 // Settings is the settings structure for computing finite differences.
@@ -62,7 +62,7 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 	if formula.isZero() {
 		formula = Central
 	}
-	if formula.Order == 0 || formula.Stencil == nil || formula.Step == 0 {
+	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
 		panic("fd: bad formula")
 	}
 	step := settings.Step
@@ -79,7 +79,7 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 			}
 			deriv += pt.Coeff * f(x+step*pt.Loc)
 		}
-		return deriv / math.Pow(step, float64(formula.Order))
+		return deriv / math.Pow(step, float64(formula.Derivative))
 	}
 
 	wg := &sync.WaitGroup{}
@@ -101,7 +101,7 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 		}(pt)
 	}
 	wg.Wait()
-	return deriv / math.Pow(step, float64(formula.Order))
+	return deriv / math.Pow(step, float64(formula.Derivative))
 }
 
 // Gradient estimates the gradient of the multivariate function f at the
@@ -126,10 +126,10 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	if formula.isZero() {
 		formula = Central
 	}
-	if formula.Order == 0 || formula.Stencil == nil || formula.Step == 0 {
+	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
 		panic("fd: bad formula")
 	}
-	if formula.Order != 1 {
+	if formula.Derivative != 1 {
 		panic("fd: invalid derivative order")
 	}
 
@@ -232,28 +232,28 @@ type fdrun struct {
 
 // Forward represents a first-order forward difference.
 var Forward = Formula{
-	Stencil: []Point{{Loc: 0, Coeff: -1}, {Loc: 1, Coeff: 1}},
-	Order:   1,
-	Step:    1e-6,
+	Stencil:    []Point{{Loc: 0, Coeff: -1}, {Loc: 1, Coeff: 1}},
+	Derivative: 1,
+	Step:       1e-6,
 }
 
 // Backward represents a first-order backward difference.
 var Backward = Formula{
-	Stencil: []Point{{Loc: -1, Coeff: -1}, {Loc: 0, Coeff: 1}},
-	Order:   1,
-	Step:    1e-6,
+	Stencil:    []Point{{Loc: -1, Coeff: -1}, {Loc: 0, Coeff: 1}},
+	Derivative: 1,
+	Step:       1e-6,
 }
 
 // Central represents a first-order central difference.
 var Central = Formula{
-	Stencil: []Point{{Loc: -1, Coeff: -0.5}, {Loc: 1, Coeff: 0.5}},
-	Order:   1,
-	Step:    1e-6,
+	Stencil:    []Point{{Loc: -1, Coeff: -0.5}, {Loc: 1, Coeff: 0.5}},
+	Derivative: 1,
+	Step:       1e-6,
 }
 
 // Central2nd represents a secord-order central difference.
 var Central2nd = Formula{
-	Stencil: []Point{{Loc: -1, Coeff: 1}, {Loc: 0, Coeff: -2}, {Loc: 1, Coeff: 1}},
-	Order:   2,
-	Step:    1e-3,
+	Stencil:    []Point{{Loc: -1, Coeff: 1}, {Loc: 0, Coeff: -2}, {Loc: 1, Coeff: 1}},
+	Derivative: 2,
+	Step:       1e-3,
 }

@@ -71,7 +71,7 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 	}
 
 	var deriv float64
-	if !settings.Concurrent {
+	if !settings.Concurrent || runtime.GOMAXPROCS(0) == 1 {
 		for _, pt := range formula.Stencil {
 			if settings.OriginKnown && pt.Loc == 0 {
 				deriv += pt.Coeff * settings.OriginValue

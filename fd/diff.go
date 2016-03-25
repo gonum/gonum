@@ -245,26 +245,26 @@ type fdrun struct {
 var Forward = Formula{
 	Stencil:    []Point{{Loc: 0, Coeff: -1}, {Loc: 1, Coeff: 1}},
 	Derivative: 1,
-	Step:       1e-6,
+	Step:       2e-8,
 }
 
 // Backward represents a first-order backward difference.
 var Backward = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: -1}, {Loc: 0, Coeff: 1}},
 	Derivative: 1,
-	Step:       1e-6,
+	Step:       2e-8,
 }
 
 // Central represents a first-order central difference.
 var Central = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: -0.5}, {Loc: 1, Coeff: 0.5}},
 	Derivative: 1,
-	Step:       1e-6,
+	Step:       6e-6,
 }
 
 // Central2nd represents a secord-order central difference.
 var Central2nd = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: 1}, {Loc: 0, Coeff: -2}, {Loc: 1, Coeff: 1}},
 	Derivative: 2,
-	Step:       1e-3,
+	Step:       1e-4,
 }

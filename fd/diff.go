@@ -147,13 +147,26 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 		}
 	}
 
+	var hasOrigin bool
+	for _, pt := range formula.Stencil {
+		if pt.Loc == 0 {
+			hasOrigin = true
+			break
+		}
+	}
+	xcopy := make([]float64, len(x)) // So that x is not modified during the call.
+	originValue := settings.OriginValue
+	if hasOrigin && !settings.OriginKnown {
+		copy(xcopy, x)
+		originValue = f(xcopy)
+	}
+
 	if nWorkers == 1 {
-		xcopy := make([]float64, len(x)) // So that x is not modified during the call.
 		for i := range xcopy {
 			var deriv float64
 			for _, pt := range formula.Stencil {
-				if settings.OriginKnown && pt.Loc == 0 {
-					deriv += pt.Coeff * settings.OriginValue
+				if pt.Loc == 0 {
+					deriv += pt.Coeff * originValue
 					continue
 				}
 				copy(xcopy, x)
@@ -192,12 +205,12 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	go func(sendChan chan<- fdrun, ansChan chan<- fdrun) {
 		for i := range x {
 			for _, pt := range formula.Stencil {
-				if settings.OriginKnown && pt.Loc == 0 {
+				if pt.Loc == 0 {
 					// Answer already known. Send the answer on the answer channel.
 					ansChan <- fdrun{
 						idx:    i,
 						pt:     pt,
-						result: settings.OriginValue,
+						result: originValue,
 					}
 					continue
 				}

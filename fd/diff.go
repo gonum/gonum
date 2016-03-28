@@ -241,30 +241,34 @@ type fdrun struct {
 	result float64
 }
 
-// Forward represents a first-order forward difference.
+// Forward represents a first-order accurate forward approximation
+// to the first derivative.
 var Forward = Formula{
 	Stencil:    []Point{{Loc: 0, Coeff: -1}, {Loc: 1, Coeff: 1}},
 	Derivative: 1,
-	Step:       1e-6,
+	Step:       2e-8,
 }
 
-// Backward represents a first-order backward difference.
+// Backward represents a first-order accurate backward approximation
+// to the first derivative.
 var Backward = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: -1}, {Loc: 0, Coeff: 1}},
 	Derivative: 1,
-	Step:       1e-6,
+	Step:       2e-8,
 }
 
-// Central represents a first-order central difference.
+// Central represents a second-order accurate centered approximation
+// to the first derivative.
 var Central = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: -0.5}, {Loc: 1, Coeff: 0.5}},
 	Derivative: 1,
-	Step:       1e-6,
+	Step:       6e-6,
 }
 
-// Central2nd represents a secord-order central difference.
+// Central2nd represents a secord-order accurate centered approximation
+// to the second derivative.
 var Central2nd = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: 1}, {Loc: 0, Coeff: -2}, {Loc: 1, Coeff: 1}},
 	Derivative: 2,
-	Step:       1e-3,
+	Step:       1e-4,
 }

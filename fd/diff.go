@@ -105,12 +105,14 @@ func Derivative(f func(float64) float64, x float64, settings *Settings) float64 
 }
 
 // Gradient estimates the gradient of the multivariate function f at the
-// location x. The result is stored in-place into dst if dst is not nil,
-// otherwise a new slice will be allocated and returned. Finite difference
-// kernel and other options are specified by settings. If settings is nil,
-// default settings will be used.
-// Gradient panics if the length of dst and x is not equal, or if the
-// derivative order of the formula is not 1.
+// location x. If dst is not nil, the result will be stored in-place into dst
+// and returned, otherwise a new slice will be allocated first. Finite
+// difference kernel and other options are specified by settings. If settings is
+// nil, the gradient will be estimated using the Forward formula and a default
+// step size.
+//
+// Gradient panics if the length of dst and x is not equal, or if the derivative
+// order of the formula is not 1.
 func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
 	if dst == nil {
 		dst = make([]float64, len(x))

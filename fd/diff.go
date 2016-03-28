@@ -38,7 +38,7 @@ func (f Formula) isZero() bool {
 type Settings struct {
 	// Formula is the finite difference formula used
 	// for approximating the derivative.
-	// Zero value will default to the Central formula.
+	// Zero value indicates a default formula.
 	Formula Formula
 	// Step is the distance between points of the stencil.
 	// If equal to 0, formula's default step will be used.
@@ -53,14 +53,14 @@ type Settings struct {
 // Derivative estimates the derivative of the function f at the given location.
 // The finite difference formula, the step size, and other options are
 // specified by settings. If settings is nil, the first derivative will be
-// estimated using the Central formula and a default step size.
+// estimated using the Forward formula and a default step size.
 func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
 	if settings == nil {
 		settings = &Settings{}
 	}
 	formula := settings.Formula
 	if formula.isZero() {
-		formula = Central
+		formula = Forward
 	}
 	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
 		panic("fd: bad formula")
@@ -124,7 +124,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 
 	formula := settings.Formula
 	if formula.isZero() {
-		formula = Central
+		formula = Forward
 	}
 	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
 		panic("fd: bad formula")

@@ -21,19 +21,18 @@ func ExampleDerivative() {
 	// with a custom step size.
 	df := fd.Derivative(f, 0, &fd.Settings{
 		Formula: fd.Forward,
-		Step:    1e-8,
+		Step:    1e-3,
 	})
 	fmt.Println("f'(0) ≈", df)
 
 	f = func(x float64) float64 {
 		return math.Pow(math.Cos(x), 3)
 	}
-	// Compute the second derivative of f at 0 using the centered
-	// approximation, a custom step size, concurrent evaluation, and a known
-	// function value at x.
+	// Compute the second derivative of f at 0 using
+	// the centered approximation, concurrent evaluation,
+	// and a known function value at x.
 	df = fd.Derivative(f, 0, &fd.Settings{
 		Formula:     fd.Central2nd,
-		Step:        1e-4,
 		Concurrent:  true,
 		OriginKnown: true,
 		OriginValue: f(0),
@@ -41,7 +40,7 @@ func ExampleDerivative() {
 	fmt.Println("f''(0) ≈", df)
 
 	// Output:
-	// f'(0) ≈ 0.999999999994
 	// f'(0) ≈ 1
+	// f'(0) ≈ 0.9999998333333416
 	// f''(0) ≈ -2.999999981767587
 }

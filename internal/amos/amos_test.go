@@ -1,3 +1,7 @@
+// Copyright ©2016 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package amos
 
 import (
@@ -145,16 +149,16 @@ func zs1s2test(t *testing.T, x []float64, is []int) {
 	ZRRamos, ZRIamos, S1Ramos, S1Iamos, S2Ramos, S2Iamos, NZamos, ASCLEamos, ALIMamos, IUFamos :=
 		Zs1s2(ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF)
 
-	SameF64(t, "zs1s2 zrr", ZRRfort, ZRRamos)
-	SameF64(t, "zs1s2 zri", ZRIfort, ZRIamos)
-	SameF64(t, "zs1s2 s1r", S1Rfort, S1Ramos)
-	SameF64(t, "zs1s2 s1i", S1Ifort, S1Iamos)
-	SameF64(t, "zs1s2 s2r", S2Rfort, S2Ramos)
-	SameF64(t, "zs1s2 s2i", S2Ifort, S2Iamos)
-	SameF64(t, "zs1s2 ascle", ASCLEfort, ASCLEamos)
-	SameF64(t, "zs1s2 alim", ALIMfort, ALIMamos)
-	SameInt(t, "iuf", IUFfort, IUFamos)
-	SameInt(t, "nz", NZfort, NZamos)
+	sameF64(t, "zs1s2 zrr", ZRRfort, ZRRamos)
+	sameF64(t, "zs1s2 zri", ZRIfort, ZRIamos)
+	sameF64(t, "zs1s2 s1r", S1Rfort, S1Ramos)
+	sameF64(t, "zs1s2 s1i", S1Ifort, S1Iamos)
+	sameF64(t, "zs1s2 s2r", S2Rfort, S2Ramos)
+	sameF64(t, "zs1s2 s2i", S2Ifort, S2Iamos)
+	sameF64(t, "zs1s2 ascle", ASCLEfort, ASCLEamos)
+	sameF64(t, "zs1s2 alim", ALIMfort, ALIMamos)
+	sameInt(t, "iuf", IUFfort, IUFamos)
+	sameInt(t, "nz", NZfort, NZamos)
 }
 
 func zuchktest(t *testing.T, x []float64, is []int, tol float64) {
@@ -167,11 +171,11 @@ func zuchktest(t *testing.T, x []float64, is []int, tol float64) {
 	YRfort, YIfort, NZfort, ASCLEfort, TOLfort := amoslib.ZuchkFort(YR, YI, NZ, ASCLE, TOL)
 	YRamos, YIamos, NZamos, ASCLEamos, TOLamos := Zuchk(YR, YI, NZ, ASCLE, TOL)
 
-	SameF64(t, "zuchk yr", YRfort, YRamos)
-	SameF64(t, "zuchk yi", YIfort, YIamos)
-	SameInt(t, "zuchk nz", NZfort, NZamos)
-	SameF64(t, "zuchk ascle", ASCLEfort, ASCLEamos)
-	SameF64(t, "zuchk tol", TOLfort, TOLamos)
+	sameF64(t, "zuchk yr", YRfort, YRamos)
+	sameF64(t, "zuchk yi", YIfort, YIamos)
+	sameInt(t, "zuchk nz", NZfort, NZamos)
+	sameF64(t, "zuchk ascle", ASCLEfort, ASCLEamos)
+	sameF64(t, "zuchk tol", TOLfort, TOLamos)
 }
 
 func zkscltest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64) {
@@ -204,19 +208,19 @@ func zkscltest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	ZRRamos, ZRIamos, FNUamos, Namos, YRamos, YIamos, NZamos, RZRamos, RZIamos, ASCLEamos, TOLamos, ELIMamos :=
 		Zkscl(ZRR, ZRI, FNU, n, yramos, yiamos, NZ, RZR, RZI, ASCLE, tol, ELIM)
 
-	SameF64(t, "zkscl zrr", ZRRfort, ZRRamos)
-	SameF64(t, "zkscl zri", ZRIfort, ZRIamos)
-	SameF64(t, "zkscl fnu", FNUfort, FNUamos)
-	SameInt(t, "zkscl n", Nfort, Namos)
-	SameInt(t, "zkscl nz", NZfort, NZamos)
-	SameF64(t, "zkscl rzr", RZRfort, RZRamos)
-	SameF64(t, "zkscl rzi", RZIfort, RZIamos)
-	SameF64(t, "zkscl ascle", ASCLEfort, ASCLEamos)
-	SameF64(t, "zkscl tol", TOLfort, TOLamos)
-	SameF64(t, "zkscl elim", ELIMfort, ELIMamos)
+	sameF64(t, "zkscl zrr", ZRRfort, ZRRamos)
+	sameF64(t, "zkscl zri", ZRIfort, ZRIamos)
+	sameF64(t, "zkscl fnu", FNUfort, FNUamos)
+	sameInt(t, "zkscl n", Nfort, Namos)
+	sameInt(t, "zkscl nz", NZfort, NZamos)
+	sameF64(t, "zkscl rzr", RZRfort, RZRamos)
+	sameF64(t, "zkscl rzi", RZIfort, RZIamos)
+	sameF64(t, "zkscl ascle", ASCLEfort, ASCLEamos)
+	sameF64(t, "zkscl tol", TOLfort, TOLamos)
+	sameF64(t, "zkscl elim", ELIMfort, ELIMamos)
 
-	SameF64S(t, "zkscl yr", YRfort2, YRamos)
-	SameF64S(t, "zkscl yi", YIfort2, YIamos)
+	sameF64S(t, "zkscl yr", YRfort2, YRamos)
+	sameF64S(t, "zkscl yi", YIfort2, YIamos)
 }
 
 func zmlritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -246,16 +250,16 @@ func zmlritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, TOLamos :=
 		Zmlri(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, tol)
 
-	SameF64(t, "zmlri zr", ZRfort, ZRamos)
-	SameF64(t, "zmlri zi", ZIfort, ZIamos)
-	SameF64(t, "zmlri fnu", FNUfort, FNUamos)
-	SameInt(t, "zmlri kode", KODEfort, KODEamos)
-	SameInt(t, "zmlri n", Nfort, Namos)
-	SameInt(t, "zmlri nz", NZfort, NZamos)
-	SameF64(t, "zmlri tol", TOLfort, TOLamos)
+	sameF64(t, "zmlri zr", ZRfort, ZRamos)
+	sameF64(t, "zmlri zi", ZIfort, ZIamos)
+	sameF64(t, "zmlri fnu", FNUfort, FNUamos)
+	sameInt(t, "zmlri kode", KODEfort, KODEamos)
+	sameInt(t, "zmlri n", Nfort, Namos)
+	sameInt(t, "zmlri nz", NZfort, NZamos)
+	sameF64(t, "zmlri tol", TOLfort, TOLamos)
 
-	SameF64S(t, "zmlri yr", YRfort2, YRamos)
-	SameF64S(t, "zmlri yi", YIfort2, YIamos)
+	sameF64S(t, "zmlri yr", YRfort2, YRamos)
+	sameF64S(t, "zmlri yi", YIfort2, YIamos)
 }
 
 func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -287,18 +291,18 @@ func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, TOLamos, ELIMamos, ALIMamos :=
 		Zseri(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, tol, ELIM, ALIM)
 
-	SameF64(t, "zseri zr", ZRfort, ZRamos)
-	SameF64(t, "zseri zi", ZIfort, ZIamos)
-	SameF64(t, "zseri fnu", FNUfort, FNUamos)
-	SameInt(t, "zseri kode", KODEfort, KODEamos)
-	SameInt(t, "zseri n", Nfort, Namos)
-	SameInt(t, "zseri nz", NZfort, NZamos)
-	SameF64(t, "zseri tol", TOLfort, TOLamos)
-	SameF64(t, "zseri elim", ELIMfort, ELIMamos)
-	SameF64(t, "zseri elim", ALIMfort, ALIMamos)
+	sameF64(t, "zseri zr", ZRfort, ZRamos)
+	sameF64(t, "zseri zi", ZIfort, ZIamos)
+	sameF64(t, "zseri fnu", FNUfort, FNUamos)
+	sameInt(t, "zseri kode", KODEfort, KODEamos)
+	sameInt(t, "zseri n", Nfort, Namos)
+	sameInt(t, "zseri nz", NZfort, NZamos)
+	sameF64(t, "zseri tol", TOLfort, TOLamos)
+	sameF64(t, "zseri elim", ELIMfort, ELIMamos)
+	sameF64(t, "zseri elim", ALIMfort, ALIMamos)
 
-	SameF64S(t, "zseri yr", YRfort2, YRamos)
-	SameF64S(t, "zseri yi", YIfort2, YIamos)
+	sameF64S(t, "zseri yr", YRfort2, YRamos)
+	sameF64S(t, "zseri yi", YIfort2, YIamos)
 }
 
 func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -331,19 +335,19 @@ func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, RLamos, TOLamos, ELIMamos, ALIMamos :=
 		Zasyi(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, RL, tol, ELIM, ALIM)
 
-	SameF64(t, "zasyi zr", ZRfort, ZRamos)
-	SameF64(t, "zasyi zr", ZIfort, ZIamos)
-	SameF64(t, "zasyi fnu", FNUfort, FNUamos)
-	SameInt(t, "zasyi kode", KODEfort, KODEamos)
-	SameInt(t, "zasyi n", Nfort, Namos)
-	SameInt(t, "zasyi nz", NZfort, NZamos)
-	SameF64(t, "zasyi rl", RLfort, RLamos)
-	SameF64(t, "zasyi tol", TOLfort, TOLamos)
-	SameF64(t, "zasyi elim", ELIMfort, ELIMamos)
-	SameF64(t, "zasyi alim", ALIMfort, ALIMamos)
+	sameF64(t, "zasyi zr", ZRfort, ZRamos)
+	sameF64(t, "zasyi zr", ZIfort, ZIamos)
+	sameF64(t, "zasyi fnu", FNUfort, FNUamos)
+	sameInt(t, "zasyi kode", KODEfort, KODEamos)
+	sameInt(t, "zasyi n", Nfort, Namos)
+	sameInt(t, "zasyi nz", NZfort, NZamos)
+	sameF64(t, "zasyi rl", RLfort, RLamos)
+	sameF64(t, "zasyi tol", TOLfort, TOLamos)
+	sameF64(t, "zasyi elim", ELIMfort, ELIMamos)
+	sameF64(t, "zasyi alim", ALIMfort, ALIMamos)
 
-	SameF64S(t, "zasyi yr", YRfort2, YRamos)
-	SameF64S(t, "zasyi yi", YIfort2, YIamos)
+	sameF64S(t, "zasyi yr", YRfort2, YRamos)
+	sameF64S(t, "zasyi yi", YIfort2, YIamos)
 }
 
 func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -375,18 +379,18 @@ func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, TOLamos, ELIMamos, ALIMamos :=
 		Zbknu(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, tol, ELIM, ALIM)
 
-	SameF64(t, "zbknu zr", ZRfort, ZRamos)
-	SameF64(t, "zbknu zr", ZIfort, ZIamos)
-	SameF64(t, "zbknu fnu", FNUfort, FNUamos)
-	SameInt(t, "zbknu kode", KODEfort, KODEamos)
-	SameInt(t, "zbknu n", Nfort, Namos)
-	SameInt(t, "zbknu nz", NZfort, NZamos)
-	SameF64(t, "zbknu tol", TOLfort, TOLamos)
-	SameF64(t, "zbknu elim", ELIMfort, ELIMamos)
-	SameF64(t, "zbknu alim", ALIMfort, ALIMamos)
+	sameF64(t, "zbknu zr", ZRfort, ZRamos)
+	sameF64(t, "zbknu zr", ZIfort, ZIamos)
+	sameF64(t, "zbknu fnu", FNUfort, FNUamos)
+	sameInt(t, "zbknu kode", KODEfort, KODEamos)
+	sameInt(t, "zbknu n", Nfort, Namos)
+	sameInt(t, "zbknu nz", NZfort, NZamos)
+	sameF64(t, "zbknu tol", TOLfort, TOLamos)
+	sameF64(t, "zbknu elim", ELIMfort, ELIMamos)
+	sameF64(t, "zbknu alim", ALIMfort, ALIMamos)
 
-	SameF64S(t, "zbknu yr", YRfort2, YRamos)
-	SameF64S(t, "zbknu yi", YIfort2, YIamos)
+	sameF64S(t, "zbknu yr", YRfort2, YRamos)
+	sameF64S(t, "zbknu yi", YIfort2, YIamos)
 }
 
 func zairytest(t *testing.T, x []float64, kode, id int) {
@@ -398,9 +402,9 @@ func zairytest(t *testing.T, x []float64, kode, id int) {
 	AIRfort, AIIfort, NZfort := amoslib.ZairyFort(ZR, ZI, ID, KODE)
 	AIRamos, AIIamos, NZamos := Zairy(ZR, ZI, ID, KODE)
 
-	SameF64(t, "zairy air", AIRfort, AIRamos)
-	SameF64(t, "zairy aii", AIIfort, AIIamos)
-	SameInt(t, "zairy nz", NZfort, NZamos)
+	sameF64(t, "zairy air", AIRfort, AIRamos)
+	sameF64(t, "zairy aii", AIIfort, AIIamos)
+	sameInt(t, "zairy nz", NZfort, NZamos)
 }
 
 func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -434,23 +438,23 @@ func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	ZRamos, ZIamos, FNUamos, KODEamos, MRamos, Namos, YRamos, YIamos, NZamos, RLamos, TOLamos, ELIMamos, ALIMamos :=
 		Zacai(ZR, ZI, FNU, KODE, MR, n, yramos, yiamos, NZ, RL, tol, ELIM, ALIM)
 
-	SameF64(t, "zacai zr", ZRfort, ZRamos)
-	SameF64(t, "zacai zi", ZIfort, ZIamos)
-	SameF64(t, "zacai fnu", FNUfort, FNUamos)
-	SameInt(t, "zacai kode", KODEfort, KODEamos)
-	SameInt(t, "zacai mr", MRfort, MRamos)
-	SameInt(t, "zacai n", Nfort, Namos)
-	SameInt(t, "zacai nz", NZfort, NZamos)
-	SameF64(t, "zacai rl", RLfort, RLamos)
-	SameF64(t, "zacai tol", TOLfort, TOLamos)
-	SameF64(t, "zacai elim", ELIMfort, ELIMamos)
-	SameF64(t, "zacai elim", ALIMfort, ALIMamos)
+	sameF64(t, "zacai zr", ZRfort, ZRamos)
+	sameF64(t, "zacai zi", ZIfort, ZIamos)
+	sameF64(t, "zacai fnu", FNUfort, FNUamos)
+	sameInt(t, "zacai kode", KODEfort, KODEamos)
+	sameInt(t, "zacai mr", MRfort, MRamos)
+	sameInt(t, "zacai n", Nfort, Namos)
+	sameInt(t, "zacai nz", NZfort, NZamos)
+	sameF64(t, "zacai rl", RLfort, RLamos)
+	sameF64(t, "zacai tol", TOLfort, TOLamos)
+	sameF64(t, "zacai elim", ELIMfort, ELIMamos)
+	sameF64(t, "zacai elim", ALIMfort, ALIMamos)
 
-	SameF64S(t, "zacai yr", YRfort2, YRamos)
-	SameF64S(t, "zacai yi", YIfort2, YIamos)
+	sameF64S(t, "zacai yr", YRfort2, YRamos)
+	sameF64S(t, "zacai yi", YIfort2, YIamos)
 }
 
-func SameF64(t *testing.T, str string, c, native float64) {
+func sameF64(t *testing.T, str string, c, native float64) {
 	if math.IsNaN(c) && math.IsNaN(native) {
 		return
 	}
@@ -462,17 +466,17 @@ func SameF64(t *testing.T, str string, c, native float64) {
 	t.Errorf("Case %s: Float64 mismatch. c = %v, native = %v\n cb: %v, nb: %v\n", str, c, native, cb, nb)
 }
 
-func SameInt(t *testing.T, str string, c, native int) {
+func sameInt(t *testing.T, str string, c, native int) {
 	if c != native {
 		t.Errorf("Case %s: Int mismatch. c = %v, native = %v.", str, c, native)
 	}
 }
 
-func SameF64S(t *testing.T, str string, c, native []float64) {
+func sameF64S(t *testing.T, str string, c, native []float64) {
 	if len(c) != len(native) {
 		panic(str)
 	}
 	for i, v := range c {
-		SameF64(t, str+"_idx_"+strconv.Itoa(i), v, native[i])
+		sameF64(t, str+"_idx_"+strconv.Itoa(i), v, native[i])
 	}
 }

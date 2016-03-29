@@ -41,6 +41,7 @@ func (r Rosenbrock) FDf(x []float64, deriv []float64) (sum float64) {
 }
 
 func TestGradient(t *testing.T) {
+	rand.Seed(1)
 	for i, test := range []struct {
 		nDim    int
 		tol     float64

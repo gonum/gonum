@@ -132,33 +132,46 @@ func TestZs1s2(t *testing.T) {
 }
 
 func zs1s2test(t *testing.T, x []float64, is []int) {
-	ZRR := x[0]
-	ZRI := x[1]
-	S1R := x[2]
-	S1I := x[3]
-	S2R := x[4]
-	S2I := x[5]
-	ASCLE := x[6]
-	ALIM := x[7]
 
-	NZ := is[0]
-	IUF := is[1]
+	type data struct {
+		ZRR, ZRI, S1R, S1I, S2R, S2I float64
+		NZ                           int
+		ASCLE, ALIM                  float64
+		IUF                          int
+	}
 
-	ZRRfort, ZRIfort, S1Rfort, S1Ifort, S2Rfort, S2Ifort, NZfort, ASCLEfort, ALIMfort, IUFfort :=
-		amoslib.Zs1s2Fort(ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF)
-	ZRRamos, ZRIamos, S1Ramos, S1Iamos, S2Ramos, S2Iamos, NZamos, ASCLEamos, ALIMamos, IUFamos :=
-		Zs1s2(ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF)
+	input := data{
+		x[0], x[1], x[2], x[3], x[4], x[5],
+		is[0],
+		x[6], x[7],
+		is[1],
+	}
 
-	sameF64(t, "zs1s2 zrr", ZRRfort, ZRRamos)
-	sameF64(t, "zs1s2 zri", ZRIfort, ZRIamos)
-	sameF64(t, "zs1s2 s1r", S1Rfort, S1Ramos)
-	sameF64(t, "zs1s2 s1i", S1Ifort, S1Iamos)
-	sameF64(t, "zs1s2 s2r", S2Rfort, S2Ramos)
-	sameF64(t, "zs1s2 s2i", S2Ifort, S2Iamos)
-	sameF64(t, "zs1s2 ascle", ASCLEfort, ASCLEamos)
-	sameF64(t, "zs1s2 alim", ALIMfort, ALIMamos)
-	sameInt(t, "iuf", IUFfort, IUFamos)
-	sameInt(t, "nz", NZfort, NZamos)
+	impl := func(input data) data {
+		zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf :=
+			Zs1s2(input.ZRR, input.ZRI, input.S1R, input.S1I, input.S2R, input.S2I, input.NZ, input.ASCLE, input.ALIM, input.IUF)
+		return data{zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf}
+	}
+
+	comp := func(input data) data {
+		zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf :=
+			amoslib.Zs1s2Fort(input.ZRR, input.ZRI, input.S1R, input.S1I, input.S2R, input.S2I, input.NZ, input.ASCLE, input.ALIM, input.IUF)
+		return data{zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf}
+	}
+
+	oi := impl(input)
+	oc := comp(input)
+
+	sameF64(t, "zs1s2 zrr", oc.ZRR, oi.ZRR)
+	sameF64(t, "zs1s2 zri", oc.ZRI, oi.ZRI)
+	sameF64(t, "zs1s2 s1r", oc.S1R, oi.S1R)
+	sameF64(t, "zs1s2 s1i", oc.S1I, oi.S1I)
+	sameF64(t, "zs1s2 s2r", oc.S2R, oi.S2R)
+	sameF64(t, "zs1s2 s2i", oc.S2I, oi.S2I)
+	sameF64(t, "zs1s2 ascle", oc.ASCLE, oi.ASCLE)
+	sameF64(t, "zs1s2 alim", oc.ALIM, oi.ALIM)
+	sameInt(t, "iuf", oc.IUF, oi.IUF)
+	sameInt(t, "nz", oc.NZ, oi.NZ)
 }
 
 func zuchktest(t *testing.T, x []float64, is []int, tol float64) {

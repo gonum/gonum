@@ -6,22 +6,22 @@ package mathext
 
 import "github.com/gonum/mathext/internal/amos"
 
-// Airy returns the value of the Airy function at z. The Airy function here,
+// AiryAi returns the value of the Airy function at z. The Airy function here,
 // Ai(z), is one of the two linearly independent solutions to
 //  y'' - y*z = 0.
 // See http://mathworld.wolfram.com/AiryFunctions.html for more detailed information.
-func Airy(z complex128) complex128 {
+func AiryAi(z complex128) complex128 {
 	id := 0
 	kode := 1
 	air, aii, _ := amos.Zairy(real(z), imag(z), id, kode)
 	return complex(air, aii)
 }
 
-// AiryDeriv returns the derivative of the value of the Airy function at z. The
+// AiryAiDeriv returns the value of the derivative of the Airy function at z. The
 // Airy function here, Ai(z), is one of the two linearly independent solutions to
 //  y'' - y*z = 0.
 // See http://mathworld.wolfram.com/AiryFunctions.html for more detailed information.
-func AiryDeriv(z complex128) complex128 {
+func AiryAiDeriv(z complex128) complex128 {
 	id := 1
 	kode := 1
 	air, aii, _ := amos.Zairy(real(z), imag(z), id, kode)

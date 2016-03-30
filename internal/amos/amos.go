@@ -19,10 +19,10 @@ Science and Technology Software Center."
 Mention of AMOS's inclusion in SLATEC goes back at least to this 1985 technical report from Sandia National Labs: http://infoserve.sandia.gov/sand_doc/1985/851018.pdf
 */
 
-// -0 are for padding to keep indexing easy.
+// math.NaN() are for padding to keep indexing easy.
 var imach = []int{-0, 5, 6, 0, 0, 32, 4, 2, 31, 2147483647, 2, 24, -125, 127, 53, -1021, 1023}
 
-var dmach = []float64{-0, 2.23E-308, 1.79E-308, 1.11E-16, 2.22E-16, 0.30103000998497009}
+var dmach = []float64{math.NaN(), 2.23E-308, 1.79E-308, 1.11E-16, 2.22E-16, 0.30103000998497009}
 
 func iabs(a int) int {
 	if a >= 0 {
@@ -185,9 +185,9 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	var IERR, IFLAG, K, K1, K2, MR, NN int
 	var tmp complex128
 
-	// Extra element for indexing.
-	CYR := []float64{-0, 0}
-	CYI := []float64{-0, 0}
+	// Extra element for padding.
+	CYR := []float64{math.NaN(), 0}
+	CYI := []float64{math.NaN(), 0}
 
 	_ = AI
 	_ = CONE
@@ -200,9 +200,6 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	_ = Z
 	_ = ZTA
 	_ = Z3
-	_ = FNU
-	_ = RL
-	_ = MR
 
 	TTH = 6.66666666666666667E-01
 	C1 = 3.55028053887817240E-01
@@ -363,7 +360,7 @@ Seventy:
 
 	// TEST FOR PROPER RANGE.
 	AA = 0.5E0 / TOL
-	BB = float64(float64(imach[9])) * 0.5E0
+	BB = float64(float32(imach[9])) * 0.5E0
 	AA = dmin(AA, BB)
 	AA = math.Pow(AA, TTH)
 	if AZ > AA {
@@ -577,7 +574,7 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	FPI = 1.89769999331517738E0
 	TTH = 6.66666666666666666E-01
 
-	CC := [9]float64{-0, 5.77215664901532861E-01, -4.20026350340952355E-02,
+	CC := [9]float64{math.NaN(), 5.77215664901532861E-01, -4.20026350340952355E-02,
 		-4.21977345555443367E-02, 7.21894324666309954E-03,
 		-2.15241674114950973E-04, -2.01348547807882387E-05,
 		1.13302723198169588E-06, 6.11609510448141582E-09}
@@ -1404,13 +1401,12 @@ func Zuchk(YR, YI float64, NZ int, ASCLE, TOL float64) (YRout, YIout float64, NZ
 // IS CALLED FROM ZAIRY.
 func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, TOL, ELIM, ALIM float64) (
 	ZRout, ZIout, FNUout float64, KODEout, MRout, Nout int, YRout, YIout []float64, NZout int, RLout, TOLout, ELIMout, ALIMout float64) {
-	// COMPLEX CSGN,CSPN,C1,C2,Y,Z,ZN,CY
 	var ARG, ASCLE, AZ, CSGNR, CSGNI, CSPNR,
 		CSPNI, C1R, C1I, C2R, C2I, DFNU, FMR, PI,
 		SGN, YY, ZNR, ZNI float64
 	var INU, IUF, NN, NW int
-	CYR := []float64{-0, 0, 0}
-	CYI := []float64{-0, 0, 0}
+	CYR := []float64{math.NaN(), 0, 0}
+	CYI := []float64{math.NaN(), 0, 0}
 
 	PI = math.Pi
 	NZ = 0
@@ -1491,7 +1487,7 @@ Seventy:
 	return ZR, ZI, FNU, KODE, MR, N, YR, YI, NZ, RL, TOL, ELIM, ALIM
 Eighty:
 	NZ = -1
-	if NW == (-2) {
+	if NW == -2 {
 		NZ = -2
 	}
 	return ZR, ZI, FNU, KODE, MR, N, YR, YI, NZ, RL, TOL, ELIM, ALIM
@@ -2106,7 +2102,6 @@ OneTwenty:
 		YI[K] = CKI
 		AK = AK - 1.0E0
 		K = K - 1
-		zabs(complex(CKR, CKI))
 		if zabs(complex(CKR, CKI)) > ASCLE {
 			goto OneFourty
 		}

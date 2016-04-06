@@ -1180,7 +1180,7 @@ func TestCopyDenseAlias(t *testing.T) {
 							panicked, _ := panics(func() { got.Copy(src.T()) })
 							if !panicked {
 								t.Errorf("expected panic for transpose aliased copy with offsets dst(%d,%d) src(%d,%d):\ngot:\n%v\nwant:\n%v",
-									di, dj, si, sj, Formatted(want), Formatted(got),
+									di, dj, si, sj, Formatted(got), Formatted(want),
 								)
 							}
 							continue
@@ -1189,7 +1189,7 @@ func TestCopyDenseAlias(t *testing.T) {
 						got.Copy(src)
 						if !Equal(got, want) {
 							t.Errorf("unexpected aliased copy result with offsets dst(%d,%d) src(%d,%d):\ngot:\n%v\nwant:\n%v",
-								di, dj, si, sj, Formatted(want), Formatted(got),
+								di, dj, si, sj, Formatted(got), Formatted(want),
 							)
 						}
 					}
@@ -1230,7 +1230,7 @@ func TestCopyVectorAlias(t *testing.T) {
 
 					if !Equal(got, want) {
 						t.Errorf("unexpected aliased copy result with offsets dst(%d) src(%d):\ngot:\n%v\nwant:\n%v",
-							di, si, Formatted(want), Formatted(got),
+							di, si, Formatted(got), Formatted(want),
 						)
 					}
 				}

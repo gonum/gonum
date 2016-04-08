@@ -143,7 +143,7 @@ func (e *Eigen) Factorize(a Matrix, vectors bool) (ok bool) {
 	aCopy := DenseCopyOf(a)
 	e.vectorsComputed = vectors
 
-	e.ef = eigen(aCopy, 1e-16)
+	e.ef = eigen(aCopy, 1e-14)
 	e.n = r
 	return true
 }

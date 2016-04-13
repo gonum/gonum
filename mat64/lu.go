@@ -126,7 +126,7 @@ func (lu *LU) Pivot(swaps []int) []int {
 // RankOne updates an LU factorization as if a rank-one update had been applied to
 // the original matrix A, storing the result into the receiver. That is, if in
 // the original LU decomposition P * L * U = A, in the updated decomposition
-// P * L * U = A + alpha * x^T * y.
+// P * L * U = A + alpha * x * y^T.
 func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 	// RankOne uses algorithm a1 on page 28 of "Multiple-Rank Updates to Matrix
 	// Factorizations for Nonlinear Analysis and Circuit Design" by Linzhong Deng.

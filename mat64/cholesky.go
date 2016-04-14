@@ -89,7 +89,7 @@ func (c *Cholesky) LogDet() float64 {
 }
 
 // SolveCholesky finds the matrix m that solves A * m = b where A is represented
-// by the cholesky decomposition, placing the result in the receiver.
+// by the Cholesky decomposition, placing the result in the receiver.
 func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
 	n := chol.chol.mat.N
 	bm, bn := b.Dims()
@@ -133,7 +133,7 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 
 }
 
-// UFromCholesky extracts the n×n upper triangular matrix U from a Choleksy
+// UFromCholesky extracts the n×n upper triangular matrix U from a Cholesky
 // decomposition
 //  A = U^T * U.
 func (t *TriDense) UFromCholesky(chol *Cholesky) {
@@ -142,7 +142,7 @@ func (t *TriDense) UFromCholesky(chol *Cholesky) {
 	t.Copy(chol.chol)
 }
 
-// LFromCholesky extracts the n×n lower triangular matrix U from a Choleksy
+// LFromCholesky extracts the n×n lower triangular matrix L from a Cholesky
 // decomposition
 //  A = L * L^T.
 func (t *TriDense) LFromCholesky(chol *Cholesky) {

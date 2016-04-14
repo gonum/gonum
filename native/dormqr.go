@@ -53,6 +53,9 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 		work[0] = float64(lworkopt)
 		return
 	}
+	if len(work) < lwork {
+		panic(badWork)
+	}
 	if left {
 		if lwork < n {
 			panic(badWork)

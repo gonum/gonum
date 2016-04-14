@@ -86,7 +86,7 @@ func (m *Dense) RFromQR(qr *QR) {
 
 // QFromQR extracts the m×m orthonormal matrix Q from a QR decomposition.
 func (m *Dense) QFromQR(qr *QR) {
-	r, c := qr.qr.Dims()
+	r, _ := qr.qr.Dims()
 	m.reuseAs(r, r)
 
 	// Set Q = I.
@@ -97,40 +97,10 @@ func (m *Dense) QFromQR(qr *QR) {
 	}
 
 	// Construct Q from the elementary reflectors.
-	h := blas64.General{
-		Rows:   r,
-		Cols:   r,
-		Stride: r,
-		Data:   make([]float64, r*r),
-	}
-	qCopy := getWorkspace(r, r, false)
-	v := blas64.Vector{
-		Inc:  1,
-		Data: make([]float64, r),
-	}
-	for i := 0; i < c; i++ {
-		// Set h = I.
-		zero(h.Data)
-		for j := 0; j < len(h.Data); j += r + 1 {
-			h.Data[j] = 1
-		}
-
-		// Set the vector data as the elementary reflector.
-		for j := 0; j < i; j++ {
-			v.Data[j] = 0
-		}
-		v.Data[i] = 1
-		for j := i + 1; j < r; j++ {
-			v.Data[j] = qr.qr.mat.Data[j*qr.qr.mat.Stride+i]
-		}
-
-		// Compute the multiplication matrix.
-		blas64.Ger(-qr.tau[i], v, v, h)
-		qCopy.Copy(m)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans,
-			1, qCopy.mat, h,
-			0, m.mat)
-	}
+	work := make([]float64, 1)
+	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, m.mat, work, -1)
+	work = make([]float64, int(work[0]))
+	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, m.mat, work, len(work))
 }
 
 // SolveQR finds a minimum-norm solution to a system of linear equations defined

@@ -52,7 +52,7 @@ func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 // given the LU decomposition of the matrix. The condition number computed may
 // be based on the 1-norm or the ∞-norm.
 //
-// The slice a contains the result of the LU decomposition of A as computed by Dgetrf.
+// a contains the result of the LU decomposition of A as computed by Getrf.
 //
 // anorm is the corresponding 1-norm or ∞-norm of the original matrix A.
 //
@@ -64,18 +64,18 @@ func Gecon(norm lapack.MatrixNorm, a blas64.General, anorm float64, work []float
 }
 
 // Gels finds a minimum-norm solution based on the matrices A and B using the
-// QR or LQ factorization. Dgels returns false if the matrix
+// QR or LQ factorization. Gels returns false if the matrix
 // A is singular, and true if this solution was successfully found.
 //
 // The minimization problem solved depends on the input parameters.
 //
-//  1. If m >= n and trans == blas.NoTrans, Dgels finds X such that || A*X - B||_2
+//  1. If m >= n and trans == blas.NoTrans, Gels finds X such that || A*X - B||_2
 //     is minimized.
-//  2. If m < n and trans == blas.NoTrans, Dgels finds the minimum norm solution of
+//  2. If m < n and trans == blas.NoTrans, Gels finds the minimum norm solution of
 //     A * X = B.
-//  3. If m >= n and trans == blas.Trans, Dgels finds the minimum norm solution of
+//  3. If m >= n and trans == blas.Trans, Gels finds the minimum norm solution of
 //     A^T * X = B.
-//  4. If m < n and trans == blas.Trans, Dgels finds X such that || A*X - B||_2
+//  4. If m < n and trans == blas.Trans, Gels finds X such that || A*X - B||_2
 //     is minimized.
 // Note that the least-squares solutions (cases 1 and 3) perform the minimization
 // per column of B. This is not the same as finding the minimum-norm matrix.
@@ -115,19 +115,19 @@ func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.
-// Dgeqrf is a blocked QR factorization, but the block size is limited
+// Geqrf is a blocked QR factorization, but the block size is limited
 // by the temporary space available. If lwork == -1, instead of performing Geqrf,
 // the optimal work length will be stored into work[0].
 func Geqrf(a blas64.General, tau, work []float64, lwork int) {
 	lapack64.Dgeqrf(a.Rows, a.Cols, a.Data, a.Stride, tau, work, lwork)
 }
 
-// Gelqf computes the QR factorization of the m×n matrix A using a blocked
-// algorithm. A is modified to contain the information to construct L and Q.
-// The lower triangle of a contains the matrix L. The lower triangular elements
-// (not including the diagonal) contain the elementary reflectors. Tau is modified
-// to contain the reflector scales. Tau must have length at least min(m,n), and
-// this function will panic otherwise.
+// Gelqf computes the LQ factorization of the m×n matrix A using a blocked
+// algorithm. A is modified to contain the information to construct L and Q. The
+// lower triangle of a contains the matrix L. The elements above the diagonal
+// and the slice tau represent the matrix Q. tau is modified to contain the
+// reflector scales. tau must have length at least min(m,n), and this function
+// will panic otherwise.
 //
 // See Geqrf for a description of the elementary reflectors and orthonormal
 // matrix Q. Q is constructed as a product of these elementary reflectors,
@@ -135,7 +135,7 @@ func Geqrf(a blas64.General, tau, work []float64, lwork int) {
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.
-// Dgeqrf is a blocked LQ factorization, but the block size is limited
+// Gelqf is a blocked LQ factorization, but the block size is limited
 // by the temporary space available. If lwork == -1, instead of performing Gelqf,
 // the optimal work length will be stored into work[0].
 func Gelqf(a blas64.General, tau, work []float64, lwork int) {
@@ -199,9 +199,9 @@ func Gesvd(jobU, jobVT lapack.SVDJob, a, u, vt blas64.General, s, work []float64
 // changed with ipiv[i]. ipiv must have length at least min(m,n), and will panic
 // otherwise. ipiv is zero-indexed.
 //
-// Dgetrf is the blocked version of the algorithm.
+// Getrf is the blocked version of the algorithm.
 //
-// Dgetrf returns whether the matrix A is singular. The LU decomposition will
+// Getrf returns whether the matrix A is singular. The LU decomposition will
 // be computed regardless of the singularity of A, but division by zero
 // will occur if the false is returned and the result is used to solve a
 // system of equations.
@@ -218,14 +218,14 @@ func Getrf(a blas64.General, ipiv []int) bool {
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= n and this function will panic otherwise.
-// Dgetri is a blocked inversion, but the block size is limited
+// Getri is a blocked inversion, but the block size is limited
 // by the temporary space available. If lwork == -1, instead of performing Getri,
 // the optimal work length will be stored into work[0].
 func Getri(a blas64.General, ipiv []int, work []float64, lwork int) (ok bool) {
 	return lapack64.Dgetri(a.Cols, a.Data, a.Stride, ipiv, work, lwork)
 }
 
-// Dgetrs solves a system of equations using an LU factorization.
+// Getrs solves a system of equations using an LU factorization.
 // The system of equations solved is
 //  A * X = B if trans == blas.Trans
 //  A^T * X = B if trans == blas.NoTrans
@@ -328,7 +328,7 @@ func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float
 // symmetric matrix A.
 //
 // w contains the eigenvalues in ascending order upon return. w must have length
-// at least n, and Dsyev will panic otherwise.
+// at least n, and Syev will panic otherwise.
 //
 // On entry, a contains the elements of the symmetric matrix A in the triangular
 // portion specified by uplo. If jobz == lapack.EigDecomp a contains the
@@ -337,7 +337,7 @@ func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float
 //
 // Work is temporary storage, and lwork specifies the usable memory length. At minimum,
 // lwork >= 3*n-1, and Syev will panic otherwise. The amount of blocking is
-// limited by the usable length. If lwork == -1, instead of computing Dsyev the
+// limited by the usable length. If lwork == -1, instead of computing Syev the
 // optimal work length is stored into work[0].
 func Syev(jobz lapack.EigComp, a blas64.Symmetric, w, work []float64, lwork int) (ok bool) {
 	return lapack64.Dsyev(jobz, a.Uplo, a.N, a.Data, a.Stride, w, work, lwork)

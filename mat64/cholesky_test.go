@@ -210,6 +210,123 @@ func TestInverseCholesky(t *testing.T) {
 	}
 }
 
+func TestCholeskySymRankOne(t *testing.T) {
+	rand.Seed(1)
+	for _, n := range []int{1, 2, 3, 4, 5, 7, 10, 20, 50, 100} {
+		for k := 0; k < 10; k++ {
+			data := make([]float64, n*n)
+			for i := range data {
+				data[i] = rand.NormFloat64()
+			}
+
+			var a SymDense
+			a.SymOuterK(1, NewDense(n, n, data))
+
+			xdata := make([]float64, n)
+			for i := range xdata {
+				xdata[i] = rand.NormFloat64()
+			}
+			x := NewVector(n, xdata)
+
+			var chol Cholesky
+			ok := chol.Factorize(&a)
+			if !ok {
+				t.Errorf("Bad random test, Cholesky factorization failed")
+				continue
+			}
+
+			alpha := rand.Float64()
+			ok = chol.SymRankOne(&chol, alpha, x)
+			if !ok {
+				t.Errorf("n=%v, alpha=%v: unexpected failure", n, alpha)
+				continue
+			}
+			a.SymRankOne(&a, alpha, x)
+
+			var achol SymDense
+			achol.FromCholesky(&chol)
+			if !EqualApprox(&achol, &a, 1e-13) {
+				t.Errorf("n=%v, alpha=%v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
+					n, alpha, Formatted(&a), Formatted(&achol))
+			}
+		}
+	}
+
+	for i, test := range []struct {
+		a     *SymDense
+		alpha float64
+		x     []float64
+
+		wantOk bool
+	}{
+		{
+			// Update (to positive definite matrix).
+			a: NewSymDense(4, []float64{
+				1, 1, 1, 1,
+				0, 2, 3, 4,
+				0, 0, 6, 10,
+				0, 0, 0, 20,
+			}),
+			alpha:  1,
+			x:      []float64{0, 0, 0, 1},
+			wantOk: true,
+		},
+		{
+			// Downdate to singular matrix.
+			a: NewSymDense(4, []float64{
+				1, 1, 1, 1,
+				0, 2, 3, 4,
+				0, 0, 6, 10,
+				0, 0, 0, 20,
+			}),
+			alpha:  -1,
+			x:      []float64{0, 0, 0, 1},
+			wantOk: false,
+		},
+		{
+			// Downdate to positive definite matrix.
+			a: NewSymDense(4, []float64{
+				1, 1, 1, 1,
+				0, 2, 3, 4,
+				0, 0, 6, 10,
+				0, 0, 0, 20,
+			}),
+			alpha:  -1 / 2,
+			x:      []float64{0, 0, 0, 1},
+			wantOk: true,
+		},
+	} {
+		var chol Cholesky
+		ok := chol.Factorize(test.a)
+		if !ok {
+			t.Errorf("Case %v: bad test, Cholesky factorization failed", i)
+			continue
+		}
+
+		x := NewVector(len(test.x), test.x)
+		ok = chol.SymRankOne(&chol, test.alpha, x)
+		if !ok {
+			if test.wantOk {
+				t.Errorf("Case %v: unexpected failure from SymRankOne", i)
+			}
+			continue
+		}
+		if ok && !test.wantOk {
+			t.Errorf("Case %v: expected a failure from SymRankOne", i)
+		}
+
+		a := test.a
+		a.SymRankOne(a, test.alpha, x)
+
+		var achol SymDense
+		achol.FromCholesky(&chol)
+		if !EqualApprox(&achol, a, 1e-13) {
+			t.Errorf("Case %v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
+				i, Formatted(a), Formatted(&achol))
+		}
+	}
+}
+
 func BenchmarkCholeskySmall(b *testing.B) {
 	benchmarkCholesky(b, 2)
 }

@@ -953,10 +953,10 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 
 	if lwork == -1 {
 		if left {
-			work[0] = float64(m)
+			work[0] = float64(n)
 			return
 		}
-		work[0] = float64(n)
+		work[0] = float64(m)
 		return
 	}
 	if len(work) < lwork {

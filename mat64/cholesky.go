@@ -51,9 +51,9 @@ func (c *Cholesky) updateCond(norm float64) {
 func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	n := a.Symmetric()
 	if c.chol == nil {
-		c.chol = NewTriDense(n, true, nil)
+		c.chol = NewTriDense(n, matrix.Upper, nil)
 	} else {
-		c.chol = NewTriDense(n, true, use(c.chol.mat.Data, n*n))
+		c.chol = NewTriDense(n, matrix.Upper, use(c.chol.mat.Data, n*n))
 	}
 	copySymIntoTriangle(c.chol, a)
 
@@ -138,7 +138,7 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 //  A = U^T * U.
 func (t *TriDense) UFromCholesky(chol *Cholesky) {
 	n := chol.chol.mat.N
-	t.reuseAs(n, true)
+	t.reuseAs(n, matrix.Upper)
 	t.Copy(chol.chol)
 }
 
@@ -147,7 +147,7 @@ func (t *TriDense) UFromCholesky(chol *Cholesky) {
 //  A = L * L^T.
 func (t *TriDense) LFromCholesky(chol *Cholesky) {
 	n := chol.chol.mat.N
-	t.reuseAs(n, false)
+	t.reuseAs(n, matrix.Lower)
 	t.Copy(chol.chol.TTri())
 }
 

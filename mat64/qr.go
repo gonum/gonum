@@ -87,13 +87,11 @@ func (m *Dense) RFromQR(qr *QR) {
 // QFromQR extracts the m×m orthonormal matrix Q from a QR decomposition.
 func (m *Dense) QFromQR(qr *QR) {
 	r, _ := qr.qr.Dims()
-	m.reuseAs(r, r)
+	m.reuseAsZeroed(r, r)
 
 	// Set Q = I.
-	for i := 0; i < r; i++ {
-		v := m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+r]
-		zero(v)
-		v[i] = 1
+	for i := 0; i < r*r; i += r + 1 {
+		m.mat.Data[i] = 1
 	}
 
 	// Construct Q from the elementary reflectors.

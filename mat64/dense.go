@@ -62,6 +62,8 @@ func NewDense(r, c int, mat []float64) *Dense {
 
 // reuseAs resizes an empty matrix to a r×c matrix,
 // or checks that a non-empty matrix is r×c.
+//
+// reuseAs must be kept in sync with reuseAsZeroed.
 func (m *Dense) reuseAs(r, c int) {
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
 		// Panic as a string, not a mat64.Error.
@@ -80,6 +82,35 @@ func (m *Dense) reuseAs(r, c int) {
 	}
 	if r != m.mat.Rows || c != m.mat.Cols {
 		panic(matrix.ErrShape)
+	}
+}
+
+// reuseAsZeroed resizes an empty matrix to a r×c matrix,
+// or checks that a non-empty matrix is r×c. It zeroes
+// all the elements of the matrix.
+//
+// reuseAsZeroed must be kept in sync with reuseAs.
+func (m *Dense) reuseAsZeroed(r, c int) {
+	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
+		// Panic as a string, not a mat64.Error.
+		panic("mat64: caps not correctly set")
+	}
+	if m.isZero() {
+		m.mat = blas64.General{
+			Rows:   r,
+			Cols:   c,
+			Stride: c,
+			Data:   useZeroed(m.mat.Data, r*c),
+		}
+		m.capRows = r
+		m.capCols = c
+		return
+	}
+	if r != m.mat.Rows || c != m.mat.Cols {
+		panic(matrix.ErrShape)
+	}
+	for i := 0; i < r; i++ {
+		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
 	}
 }
 

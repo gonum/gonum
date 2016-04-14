@@ -464,27 +464,14 @@ func (m *Dense) Exp(a Matrix) {
 	}
 
 	var w *Dense
-	switch {
-	case m.isZero():
-		m.mat = blas64.General{
-			Rows:   r,
-			Cols:   c,
-			Stride: c,
-			Data:   useZeroed(m.mat.Data, r*r),
-		}
-		m.capRows = r
-		m.capCols = c
-		for i := 0; i < r*r; i += r + 1 {
-			m.mat.Data[i] = 1
-		}
+	if m.isZero() {
+		m.reuseAsZeroed(r, r)
 		w = m
-	case r == m.mat.Rows && c == m.mat.Cols:
+	} else {
 		w = getWorkspace(r, r, true)
-		for i := 0; i < r; i++ {
-			w.mat.Data[i*w.mat.Stride+i] = 1
-		}
-	default:
-		panic(matrix.ErrShape)
+	}
+	for i := 0; i < r*r; i += r + 1 {
+		w.mat.Data[i] = 1
 	}
 
 	const (

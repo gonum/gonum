@@ -34,10 +34,14 @@ func Use(l lapack.Float64) {
 	lapack64 = l
 }
 
-// Potrf computes the cholesky factorization of a.
-//  A = U^T * U if ul == blas.Upper
-//  A = L * L^T if ul == blas.Lower
-// The underlying data between the input matrix and output matrix is shared.
+// Potrf computes the Cholesky factorization of a.
+// The factorization has the form
+//  A = U^T * U if a.Uplo == blas.Upper, or
+//  A = L * L^T if a.Uplo == blas.Lower,
+// where U is an upper triangular matrix and L is lower triangular.
+// The triangular matrix is returned in t, and the underlying data between
+// a and t is shared. The returned bool indicates whether a is positive
+// definite and the factorization could be finished.
 func Potrf(a blas64.Symmetric) (t blas64.Triangular, ok bool) {
 	ok = lapack64.Dpotrf(a.Uplo, a.N, a.Data, a.Stride)
 	t.Uplo = a.Uplo

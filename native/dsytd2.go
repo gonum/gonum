@@ -24,9 +24,9 @@ import (
 //
 // Q is represented as a product of elementary reflectors.
 // If uplo == blas.Upper
-//  Q = H(n-1) * ... * H(2) * H(1)
+//  Q = H(n-2) * ... * H(1) * H(0)
 // and if uplo == blas.Lower
-//  Q = H(1) * H(2) * ... * H(n-1)
+//  Q = H(0) * H(1) * ... * H(n-2)
 // where
 //  H(i) = I - tau * v * v^T
 // where tau is stored in tau[i], and v is stored in a.

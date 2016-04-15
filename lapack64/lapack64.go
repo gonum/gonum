@@ -111,7 +111,7 @@ func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float
 // and computing h_i = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constucted from a product of these elementary
-// reflectors, Q = H_1*H_2 ... H_k, where k = min(m,n).
+// reflectors, Q = H(0) * H(1) ... H(k-1), where k = min(m,n).
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.
@@ -131,7 +131,7 @@ func Geqrf(a blas64.General, tau, work []float64, lwork int) {
 //
 // See Geqrf for a description of the elementary reflectors and orthonormal
 // matrix Q. Q is constructed as a product of these elementary reflectors,
-// Q = H_k ... H_2*H_1.
+// Q = H(k-1) ... H(1) * H(0).
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.

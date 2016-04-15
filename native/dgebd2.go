@@ -36,7 +36,7 @@ func (impl Implementation) Dgebd2(m, n int, a []float64, lda int, d, e, tauQ, ta
 			a[i*lda+i], tauQ[i] = impl.Dlarfg(m-i, a[i*lda+i], a[min(i+1, m-1)*lda+i:], lda)
 			d[i] = a[i*lda+i]
 			a[i*lda+i] = 1
-			// Apply H[i] to A[i:m, i+1:n] from the left.
+			// Apply H(i) to A[i:m, i+1:n] from the left.
 			if i < n-1 {
 				impl.Dlarf(blas.Left, m-i, n-i-1, a[i*lda+i:], lda, tauQ[i], a[i*lda+i+1:], lda, work)
 			}

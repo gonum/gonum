@@ -22,8 +22,8 @@ import (
 // elements, and e are the off-diagonal elements.
 //
 // The matrices Q and P are products of elementary reflectors
-//  Q = H(0) * H(1) ... H(nb-1)
-//  P = G(0) * G(1) ... G(nb-1)
+//  Q = H(0) * H(1) * ... * H(nb-1)
+//  P = G(0) * G(1) * ... * G(nb-1)
 // where
 //  H(i) = I - tauQ[i] * v_i * v_i^T
 //  G(i) = I - tauP[i] * u_i * u_i^T

@@ -25,7 +25,7 @@ import "github.com/gonum/blas"
 // and computing H(i) = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constructed from a product of these elementary
-// reflectors, Q = H(0) * H(1) ... H(k-1), where k = min(m,n).
+// reflectors, Q = H(0) * H(1) * ... * H(k-1), where k = min(m,n).
 //
 // work is temporary storage of length at least n and this function will panic otherwise.
 //

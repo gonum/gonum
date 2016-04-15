@@ -11,7 +11,7 @@ import (
 
 // Dorg2l generates an m×n matrix Q with orthonormal columns which is defined
 // as the last n columns of a product of k elementary reflectors of order m.
-//  Q = H[k-1] * ... * H[1] * H[0]
+//  Q = H(k-1) * ... * H(1) * H(0)
 // See Dgelqf for more information. It must be that m >= n >= k.
 //
 // tau contains the scalar reflectors computed by Dgeqlf. tau must have length
@@ -51,7 +51,7 @@ func (impl Implementation) Dorg2l(m, n, k int, a []float64, lda int, tau, work [
 	for i := 0; i < k; i++ {
 		ii := n - k + i
 
-		// Apply H[i] to A[0:m-k+i, 0:n-k+i] from the left.
+		// Apply H(i) to A[0:m-k+i, 0:n-k+i] from the left.
 		a[(m-n+ii)*lda+ii] = 1
 		impl.Dlarf(blas.Left, m-n+ii+1, ii, a[ii:], lda, tau[i], a, lda, work)
 		bi.Dscal(m-n+ii, -tau[i], a[ii:], lda)

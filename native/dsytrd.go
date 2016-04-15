@@ -21,9 +21,9 @@ import (
 // the product of elementary reflectors.
 //
 // If uplo == blas.Upper, Q is constructed with
-//  Q = H[n-2] * ... * H[1] * H[0]
+//  Q = H(n-2) * ... * H(1) * H(0)
 // where
-//  H[i] = I - tau * v * v^T
+//  H(i) = I - tau * v * v^T
 // v is constructed as v[i+1:n] = 0, v[i] = 1, v[0:i-1] is stored in A[0:i-1, i+1],
 // and tau is in tau[i]. The elements of A are
 //  [ d   e  v2  v3  v4]
@@ -33,9 +33,9 @@ import (
 //  [                 e]
 //
 // If uplo == blas.Lower, Q is constructed with
-//  Q = H[0] * H[1] * ... * H[n-2]
+//  Q = H(0) * H(1) * ... * H(n-2)
 // where
-//  H[i] = I - tau * v * v^T
+//  H(i) = I - tau * v * v^T
 // v is constructed as v[0:i+1] = 0, v[i+1] = 1, v[i+2:n] is stored in A[i+2:n, i],
 // and tau is in tau[i]. The elements of A are
 //  [ d                ]

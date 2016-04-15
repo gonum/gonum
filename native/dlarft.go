@@ -15,8 +15,8 @@ import (
 //  H = I - V * T * V^T  if store == lapack.ColumnWise
 //  H = I - V^T * T * V  if store == lapack.RowWise
 // H is defined by a product of the elementary reflectors where
-//  H = H(0) * H(1) ... H(k-1)  if direct == lapack.Forward
-//  H = H(k-1) ... H(1) * H(0)  if direct == lapack.Backward
+//  H = H(0) * H(1) * ... * H(k-1)  if direct == lapack.Forward
+//  H = H(k-1) * ... * H(1) * H(0)  if direct == lapack.Backward
 //
 // t is a k×k triangular matrix. t is upper triangular if direct = lapack.Forward
 // and lower triangular otherwise. This function will panic if t is not of

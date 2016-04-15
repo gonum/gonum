@@ -53,11 +53,11 @@ import (
 // H has the form
 //  I - tau * v * v^T
 // If uplo == blas.Upper,
-//  Q = H[n] * H[n-1] * ... * H[n-nb+1]
+//  Q = H(n) * H(n-1) * ... * H(n-nb+1)
 // where v[:i-1] is stored in A[:i-1,i], v[i-1] = 1, and v[i:n] = 0.
 //
 // If uplo == blas.Lower,
-//  Q = H[1] * H[2] * ... H[nb]
+//  Q = H(1) * H(2) * ... H(nb)
 // where v[1:i+1] = 0, v[i+1] = 1, and v[i+2:n] is stored in A[i+2:n,i].
 //
 // The vectors v form the n×nb matrix V which is used with W to apply a

@@ -254,10 +254,10 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 //
 // The remaining elements of A store the data needed to construct Q and P.
 // The matrices Q and P are products of elementary reflectors
-//  if m >= n, Q = H(0) * H(1) * ... * H(n-2),
-//             P = G(0) * G(1) * ... * G(n-1),
-//  if m < n,  Q = H(0) * H(1) * ... * H(m-1),
-//             P = G(0) * G(1) * ... * G(m-2),
+//  if m >= n, Q = H(0) * H(1) * ... * H(n-1),
+//             P = G(0) * G(1) * ... * G(n-2),
+//  if m < n,  Q = H(0) * H(1) * ... * H(m-2),
+//             P = G(0) * G(1) * ... * G(m-1),
 // where
 //  H(i) = I - tauQ[i] * v_i * v_i^T,
 //  G(i) = I - tauP[i] * u_i * u_i^T.
@@ -410,9 +410,9 @@ func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []fl
 // The ith elementary reflector can be explicitly constructed by first extracting
 // the
 //  v[j] = 0           j < i
-//  v[j] = i           j == i
-//  v[j] = a[i*lda+j]  j > i
-// and computing h_i = I - tau[i] * v * v^T.
+//  v[j] = 1           j == i
+//  v[j] = a[j*lda+i]  j > i
+// and computing H(i) = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constucted from a product of these elementary
 // reflectors, Q = H(0) * H(1) ... H(k-1), where k = min(m,n).

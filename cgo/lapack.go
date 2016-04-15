@@ -254,11 +254,13 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 //
 // The remaining elements of A store the data needed to construct Q and P.
 // The matrices Q and P are products of elementary reflectors
-//  Q = H_1 * H_2 * ... * H_nb
-//  P = G_1 * G_2 * ... * G_nb
+//  if m >= n, Q = H(0) * H(1) * ... * H(n-2),
+//             P = G(0) * G(1) * ... * G(n-1),
+//  if m < n,  Q = H(0) * H(1) * ... * H(m-1),
+//             P = G(0) * G(1) * ... * G(m-2),
 // where
-//  H_i = I - tauQ[i] * v_i * v_i^T
-//  G_i = I - tauP[i] * u_i * u_i^T
+//  H(i) = I - tauQ[i] * v_i * v_i^T,
+//  G(i) = I - tauP[i] * u_i * u_i^T.
 //
 // As an example, on exit the entries of A when m = 6, and n = 5
 //  [ d   e  u1  u1  u1]
@@ -280,8 +282,8 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= max(m,n) and this function will panic otherwise.
 // The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgbrd will panic.
+// with native, lwork == -1 will not run Dgebrd but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgebrd will panic.
 func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64, lwork int) {
 	checkMatrix(m, n, a, lda)
 	minmn := min(m, n)
@@ -352,7 +354,8 @@ func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, ld
 //
 // See Dgeqr2 for a description of the elementary reflectors and orthonormal
 // matrix Q. Q is constructed as a product of these elementary reflectors,
-// Q = H_k ... H_2*H_1.
+//  Q = H(k-1) ... H(1) * H(0),
+// where k = min(m,n).
 //
 // Work is temporary storage of length at least m and this function will panic otherwise.
 func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []float64) {
@@ -371,8 +374,8 @@ func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []fl
 // parameters at entry and exit.
 //
 // The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+// with native, lwork == -1 will not run Dgelqf but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgelqf will panic.
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
@@ -412,7 +415,7 @@ func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []fl
 // and computing h_i = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constucted from a product of these elementary
-// reflectors, Q = H_1*H_2 ... H_k, where k = min(m,n).
+// reflectors, Q = H(0) * H(1) ... H(k-1), where k = min(m,n).
 //
 // Work is temporary storage of length at least n and this function will panic otherwise.
 func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []float64) {
@@ -480,8 +483,8 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 // this submatrix is of size n×nrhs, and of size m×nrhs otherwise.
 //
 // The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+// with native, lwork == -1 will not run Dgels but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dgels will panic.
 func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool {
 	mn := min(m, n)
 	if lwork == -1 {
@@ -538,7 +541,7 @@ const noSVDO = "dgesvd: not coded for overwrite"
 //
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dgesvd but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+// work necessary to work[0]. If len(work) < lwork, Dgesvd will panic.
 //
 // Dgesvd returns whether the decomposition successfully completed.
 func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int) (ok bool) {
@@ -694,9 +697,8 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 	clapack.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
 }
 
-// Dorgbr generates one of the matrices Q or P^T computed by Dgebrd
-// computed from the decomposition Dgebrd. See Dgebd2 for the description of
-// Q and P^T.
+// Dorgbr generates one of the matrices Q or P^T computed by Dgebrd.
+// See Dgebrd for the description of Q and P^T.
 //
 // If vect == lapack.ApplyQ, then a is assumed to have been an m×k matrix and
 // Q is of order m. If m >= k, then Dorgbr returns the first n columns of Q
@@ -735,21 +737,21 @@ func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []flo
 	clapack.Dorgbr(byte(vect), m, n, k, a, lda, tau)
 }
 
-// Dorglq generates an m×n matrix Q with orthonormal rows defined by the
-// product of elementary reflectors as computed by Dgelqf.
-//  Q = H(0) * H(2) * ... * H(k-1)
-// Dorglq is the blocked version of dorgl2 that makes greater use of level-3 BLAS
-// routines.
+// Dorglq generates an m×n matrix Q with orthonormal rows defined by the product
+// of elementary reflectors
+//  Q = H(k-1) ... H(1) * H(0)
+// as computed by Dgelqf. Dorglq is the blocked version of Dorgl2 that makes
+// greater use of level-3 BLAS routines.
 //
 // len(tau) >= k, 0 <= k <= n, and 0 <= m <= n.
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dorglq but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic, and at minimum
+// work necessary to work[0]. If len(work) < lwork, Dorglq will panic, and at minimum
 // lwork >= m.
 //
-// Dorgqr will panic if the conditions on input values are not met.
+// Dorglq will panic if the conditions on input values are not met.
 func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	if lwork == -1 {
 		work[0] = float64(m)
@@ -778,17 +780,17 @@ func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work [
 }
 
 // Dorgqr generates an m×n matrix Q with orthonormal columns defined by the
-// product of elementary reflectors as computed by Dgeqrf.
-//  Q = H(0) * H(2) * ... * H(k-1)
-// Dorgqr is the blocked version of dorg2r that makes greater use of level-3 BLAS
-// routines.
+// product of elementary reflectors
+//  Q = H(0) * H(1) ... H(k-1)
+// as computed by Dgeqrf. Dorgqr is the blocked version of Dorg2r that makes
+// greater use of level-3 BLAS routines.
 //
 // len(tau) >= k, 0 <= k <= n, and 0 <= n <= m.
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dorgqr but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic, and at minimum
+// work necessary to work[0]. If len(work) < lwork, Dorgqr will panic, and at minimum
 // lwork >= n.
 //
 // Dorgqr will panic if the conditions on input values are not met.
@@ -934,8 +936,8 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 // this function will panic otherwise.
 //
 // The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+// with native, lwork == -1 will not run Dormqr but will instead write the minimum
+// work necessary to work[0]. If len(work) < lwork, Dormqr will panic.
 func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
 	left := side == blas.Left
 	if left {
@@ -971,7 +973,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 	clapack.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc)
 }
 
-// Dtrcon estimates the reciprocal of the condition number of a positive-definite
+// Dpocon estimates the reciprocal of the condition number of a positive-definite
 // matrix A given the Cholesky decomposition of A. The condition number computed
 // is based on the 1-norm and the ∞-norm.
 //
@@ -1056,8 +1058,8 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 // into a. This is the BLAS level 3 version of the algorithm which builds upon
 // Dtrti2 to operate on matrix blocks instead of only individual columns.
 //
-// Dtrti returns whether the matrix a is singular or whether it's not singular.
-// If the matrix is singular the inversion is not performed.
+// Dtrtri returns whether the matrix a is singular.
+// If the matrix is singular, the inversion is not performed.
 func (impl Implementation) Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []float64, lda int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if uplo != blas.Upper && uplo != blas.Lower {
@@ -1069,8 +1071,9 @@ func (impl Implementation) Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []flo
 	return clapack.Dtrtri(uplo, diag, n, a, lda)
 }
 
-// Dtrtrs solves a triangular system of the form A * X = B or A^T * X = B. Dtrtrs
-// returns whether the solve completed successfully. If A is singular, no solve is performed.
+// Dtrtrs solves a triangular system of the form A * X = B or A^T * X = B.
+// Dtrtrs returns whether the solve completed successfully.
+// If A is singular, no solve is performed.
 func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int) (ok bool) {
 	return clapack.Dtrtrs(uplo, trans, diag, n, nrhs, a, lda, b, ldb)
 }

@@ -15,8 +15,8 @@ import (
 //
 // work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.
-// Dgeqrf is a blocked LQ factorization, but the block size is limited
-// by the temporary space available. If lwork == -1, instead of performing Dgelqf,
+// Dgeqrf is a blocked QR factorization, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgeqrf,
 // the optimal work length will be stored into work[0].
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.

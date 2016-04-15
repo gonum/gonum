@@ -20,12 +20,12 @@ import "github.com/gonum/blas"
 // The ith elementary reflector can be explicitly constructed by first extracting
 // the
 //  v[j] = 0           j < i
-//  v[j] = i           j == i
-//  v[j] = a[i*lda+j]  j > i
-// and computing h_i = I - tau[i] * v * v^T.
+//  v[j] = 1           j == i
+//  v[j] = a[j*lda+i]  j > i
+// and computing H(i) = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constructed from a product of these elementary
-// reflectors, Q = H_1*H_2 ... H_k, where k = min(m,n).
+// reflectors, Q = H(0) * H(1) ... H(k-1), where k = min(m,n).
 //
 // work is temporary storage of length at least n and this function will panic otherwise.
 //

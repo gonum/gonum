@@ -254,11 +254,13 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 //
 // The remaining elements of A store the data needed to construct Q and P.
 // The matrices Q and P are products of elementary reflectors
-//  Q = H_1 * H_2 * ... * H_nb
-//  P = G_1 * G_2 * ... * G_nb
+//  if m >= n, Q = H(0) * H(1) * ... * H(n-2),
+//             P = G(0) * G(1) * ... * G(n-1),
+//  if m < n,  Q = H(0) * H(1) * ... * H(m-1),
+//             P = G(0) * G(1) * ... * G(m-2),
 // where
-//  H_i = I - tauQ[i] * v_i * v_i^T
-//  G_i = I - tauP[i] * u_i * u_i^T
+//  H(i) = I - tauQ[i] * v_i * v_i^T,
+//  G(i) = I - tauP[i] * u_i * u_i^T.
 //
 // As an example, on exit the entries of A when m = 6, and n = 5
 //  [ d   e  u1  u1  u1]
@@ -352,7 +354,8 @@ func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, ld
 //
 // See Dgeqr2 for a description of the elementary reflectors and orthonormal
 // matrix Q. Q is constructed as a product of these elementary reflectors,
-// Q = H_k ... H_2*H_1.
+//  Q = H(k-1) ... H(1) * H(0),
+// where k = min(m,n).
 //
 // Work is temporary storage of length at least m and this function will panic otherwise.
 func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []float64) {
@@ -412,7 +415,7 @@ func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []fl
 // and computing h_i = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constucted from a product of these elementary
-// reflectors, Q = H_1*H_2 ... H_k, where k = min(m,n).
+// reflectors, Q = H(0) * H(1) ... H(k-1), where k = min(m,n).
 //
 // Work is temporary storage of length at least n and this function will panic otherwise.
 func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []float64) {
@@ -734,11 +737,11 @@ func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []flo
 	clapack.Dorgbr(byte(vect), m, n, k, a, lda, tau)
 }
 
-// Dorglq generates an m×n matrix Q with orthonormal rows defined by the
-// product of elementary reflectors as computed by Dgelqf.
-//  Q = H_k ... H_2 * H_1
-// Dorglq is the blocked version of Dorgl2 that makes greater use of level-3 BLAS
-// routines.
+// Dorglq generates an m×n matrix Q with orthonormal rows defined by the product
+// of elementary reflectors
+//  Q = H(k-1) ... H(1) * H(0)
+// as computed by Dgelqf. Dorglq is the blocked version of Dorgl2 that makes
+// greater use of level-3 BLAS routines.
 //
 // len(tau) >= k, 0 <= k <= n, and 0 <= m <= n.
 //
@@ -777,10 +780,10 @@ func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work [
 }
 
 // Dorgqr generates an m×n matrix Q with orthonormal columns defined by the
-// product of elementary reflectors as computed by Dgeqrf.
-//  Q = H_1 * H_2 ... H_k
-// Dorgqr is the blocked version of Dorg2r that makes greater use of level-3 BLAS
-// routines.
+// product of elementary reflectors
+//  Q = H(0) * H(1) ... H(k-1)
+// as computed by Dgeqrf. Dorgqr is the blocked version of Dorg2r that makes
+// greater use of level-3 BLAS routines.
 //
 // len(tau) >= k, 0 <= k <= n, and 0 <= n <= m.
 //

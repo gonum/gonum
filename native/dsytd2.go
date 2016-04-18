@@ -24,11 +24,11 @@ import (
 //
 // Q is represented as a product of elementary reflectors.
 // If uplo == blas.Upper
-//  Q = H(n-1) ... H(2) H(1)
+//  Q = H_{n-2} * ... * H_1 * H_0
 // and if uplo == blas.Lower
-//  Q = H(1) H(2) ... H(n-1)
+//  Q = H_0 * H_1 * ... * H_{n-2}
 // where
-//  H(i) = I - tau * v * v^T
+//  H_i = I - tau * v * v^T
 // where tau is stored in tau[i], and v is stored in a.
 //
 // If uplo == blas.Upper, v[0:i-1] is stored in A[0:i-1,i+1], v[i] = 1, and
@@ -66,13 +66,13 @@ func (impl Implementation) Dsytd2(uplo blas.Uplo, n int, a []float64, lda int, d
 	if uplo == blas.Upper {
 		// Reduce the upper triangle of A.
 		for i := n - 2; i >= 0; i-- {
-			// Generate elementary reflector H[i] = I - tau * v * v^T to
+			// Generate elementary reflector H_i = I - tau * v * v^T to
 			// annihilate A[i:i-1, i+1].
 			var taui float64
 			a[i*lda+i+1], taui = impl.Dlarfg(i+1, a[i*lda+i+1], a[i+1:], lda)
 			e[i] = a[i*lda+i+1]
 			if taui != 0 {
-				// Apply H[i] from both sides to A[0:i,0:i].
+				// Apply H_i from both sides to A[0:i,0:i].
 				a[i*lda+i+1] = 1
 
 				// Compute x := tau * A * v storing x in tau[0:i].
@@ -95,13 +95,13 @@ func (impl Implementation) Dsytd2(uplo blas.Uplo, n int, a []float64, lda int, d
 	}
 	// Reduce the lower triangle of A.
 	for i := 0; i < n-1; i++ {
-		// Generate elementary reflector H[i] = I - tau * v * v^T to
+		// Generate elementary reflector H_i = I - tau * v * v^T to
 		// annihilate A[i+2:n, i].
 		var taui float64
 		a[(i+1)*lda+i], taui = impl.Dlarfg(n-i-1, a[(i+1)*lda+i], a[min(i+2, n-1)*lda+i:], lda)
 		e[i] = a[(i+1)*lda+i]
 		if taui != 0 {
-			// Apply H[i] from boh sides to A[i+1:n, i+1:n].
+			// Apply H_i from both sides to A[i+1:n, i+1:n].
 			a[(i+1)*lda+i] = 1
 
 			// Compute x := tau * A * v, storing y in tau[i:n-1].

@@ -19,11 +19,13 @@ import (
 //
 // The remaining elements of A store the data needed to construct Q and P.
 // The matrices Q and P are products of elementary reflectors
-//  Q = H_1 * H_2 * ... * H_nb
-//  P = G_1 * G_2 * ... * G_nb
+//  if m >= n, Q = H_0 * H_1 * ... * H_{n-1},
+//             P = G_0 * G_1 * ... * G_{n-2},
+//  if m < n,  Q = H_0 * H_1 * ... * H_{m-2},
+//             P = G_0 * G_1 * ... * G_{m-1},
 // where
-//  H_i = I - tauQ[i] * v_i * v_i^T
-//  G_i = I - tauP[i] * u_i * u_i^T
+//  H_i = I - tauQ[i] * v_i * v_i^T,
+//  G_i = I - tauP[i] * u_i * u_i^T.
 //
 // As an example, on exit the entries of A when m = 6, and n = 5
 //  [ d   e  u1  u1  u1]

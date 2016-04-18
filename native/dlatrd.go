@@ -53,12 +53,12 @@ import (
 // H has the form
 //  I - tau * v * v^T
 // If uplo == blas.Upper,
-//  Q = H[n] * H[n-1] * ... * H[n-nb+1]
+//  Q = H_{n-1} * H_{n-2} * ... * H_{n-nb}
 // where v[:i-1] is stored in A[:i-1,i], v[i-1] = 1, and v[i:n] = 0.
 //
 // If uplo == blas.Lower,
-//  Q = H[1] * H[2] * ... H[nb]
-// where v[1:i+1] = 0, v[i+1] = 1, and v[i+2:n] is stored in A[i+2:n,i].
+//  Q = H_0 * H_1 * ... * H_{nb-1}
+// where v[:i+1] = 0, v[i+1] = 1, and v[i+2:n] is stored in A[i+2:n,i].
 //
 // The vectors v form the n×nb matrix V which is used with W to apply a
 // symmetric rank-2 update to the unreduced part of A
@@ -89,7 +89,7 @@ func (impl Implementation) Dlatrd(uplo blas.Uplo, n, nb int, a []float64, lda in
 					a[i*lda+i+1:], 1, 1, a[i:], lda)
 			}
 			if i > 0 {
-				// Generate elementary reflector H(i) to annihilate A(0:i-2,i).
+				// Generate elementary reflector H_i to annihilate A(0:i-2,i).
 				e[i-1], tau[i-1] = impl.Dlarfg(i, a[(i-1)*lda+i], a[i:], lda)
 				a[(i-1)*lda+i] = 1
 
@@ -119,7 +119,7 @@ func (impl Implementation) Dlatrd(uplo blas.Uplo, n, nb int, a []float64, lda in
 			bi.Dgemv(blas.NoTrans, n-i, i, -1, w[i*ldw:], ldw,
 				a[i*lda:], 1, 1, a[i*lda+i:], lda)
 			if i < n-1 {
-				// Generate elementary reflector H(i) to annihilate A(i+2:n,i).
+				// Generate elementary reflector H_i to annihilate A(i+2:n,i).
 				e[i], tau[i] = impl.Dlarfg(n-i-1, a[(i+1)*lda+i], a[min(i+2, n-1)*lda+i:], lda)
 				a[(i+1)*lda+i] = 1
 

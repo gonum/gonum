@@ -19,7 +19,7 @@ import "github.com/gonum/blas"
 //
 // See Dgeqr2 for a description of the elementary reflectors and orthonormal
 // matrix Q. Q is constructed as a product of these elementary reflectors,
-// Q = H_k ... H_2*H_1.
+// Q = H_{k-1} * ... * H_1 * H_0.
 //
 // work is temporary storage of length at least m and this function will panic otherwise.
 //

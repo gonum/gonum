@@ -103,19 +103,19 @@ func Gels(trans blas.Transpose, a blas64.General, b blas64.General, work []float
 // Geqrf computes the QR factorization of the m×n matrix A using a blocked
 // algorithm. A is modified to contain the information to construct Q and R.
 // The upper triangle of a contains the matrix R. The lower triangular elements
-// (not including the diagonal) contain the elementary reflectors. Tau is modified
-// to contain the reflector scales. Tau must have length at least min(m,n), and
+// (not including the diagonal) contain the elementary reflectors. tau is modified
+// to contain the reflector scales. tau must have length at least min(m,n), and
 // this function will panic otherwise.
 //
 // The ith elementary reflector can be explicitly constructed by first extracting
 // the
 //  v[j] = 0           j < i
-//  v[j] = i           j == i
-//  v[j] = a[i*lda+j]  j > i
-// and computing h_i = I - tau[i] * v * v^T.
+//  v[j] = 1           j == i
+//  v[j] = a[j*lda+i]  j > i
+// and computing H_i = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constucted from a product of these elementary
-// reflectors, Q = H(0) * H(1) ... H(k-1), where k = min(m,n).
+// reflectors, Q = H_0 * H_1 * ... * H_{k-1}, where k = min(m,n).
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.
@@ -135,7 +135,7 @@ func Geqrf(a blas64.General, tau, work []float64, lwork int) {
 //
 // See Geqrf for a description of the elementary reflectors and orthonormal
 // matrix Q. Q is constructed as a product of these elementary reflectors,
-// Q = H(k-1) ... H(1) * H(0).
+// Q = H_{k-1} * ... * H_1 * H_0.
 //
 // Work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= m and this function will panic otherwise.

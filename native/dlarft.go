@@ -10,13 +10,13 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dlarft forms the triangular factor t of a block reflector, storing the answer
+// Dlarft forms the triangular factor T of a block reflector H, storing the answer
 // in t.
-//  H = 1 - V * T * V^T if store == lapack.ColumnWise
-//  H = 1 - V^T * T * V if store == lapack.RowWise
+//  H = I - V * T * V^T  if store == lapack.ColumnWise
+//  H = I - V^T * T * V  if store == lapack.RowWise
 // H is defined by a product of the elementary reflectors where
-//  H = H_1 * H_2 * ... * H_k if direct == lapack.Forward
-//  H = H_k * H_k-1 * ... * H_1 if direct == lapack.Backward
+//  H = H_0 * H_1 * ... * H_{k-1}  if direct == lapack.Forward
+//  H = H_{k-1} * ... * H_1 * H_0  if direct == lapack.Backward
 //
 // t is a k×k triangular matrix. t is upper triangular if direct = lapack.Forward
 // and lower triangular otherwise. This function will panic if t is not of
@@ -25,7 +25,7 @@ import (
 // store describes the storage of the elementary reflectors in v. Please see
 // Dlarfb for a description of layout.
 //
-// tau contains the scalar factor of the elementary reflectors h.
+// tau contains the scalar factors of the elementary reflectors H_i.
 //
 // Dlarft is an internal routine. It is exported for testing purposes.
 func (Implementation) Dlarft(direct lapack.Direct, store lapack.StoreV, n, k int,

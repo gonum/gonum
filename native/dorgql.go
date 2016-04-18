@@ -10,10 +10,9 @@ import (
 )
 
 // Dorgql generates the m×n matrix Q with orthonormal columns defined as the
-// last n columns of a product of k elementary reflectors of order m as returned
-// by Dgelqf. That is,
-//  Q = H[k-1] * ... * H[1] * H[0].
-// See Dgelqf for more information.
+// last n columns of a product of k elementary reflectors of order m
+//  Q = H_{k-1} * ... * H_1 * H_0
+// as returned by Dgelqf. See Dgelqf for more information.
 //
 // tau must have length at least k, and Dorgql will panic otherwise.
 //
@@ -83,7 +82,7 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 			ib := min(nb, k-i)
 			if n-k+i > 0 {
 				// Form the triangular factor of the block reflector
-				// H = H[i+ib-1] * ... * H[i+1] * H[i].
+				// H = H_{i+ib-1} * ... * H_{i+1} * H_i.
 				impl.Dlarft(lapack.Backward, lapack.ColumnWise, m-k+i+ib, ib,
 					a[n-k+i:], lda, tau[i:], work, ldwork)
 

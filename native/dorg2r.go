@@ -9,9 +9,9 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-// Dorgl2 generates an m×n matrix Q with orthonormal columns defined by the
+// Dorg2r generates an m×n matrix Q with orthonormal columns defined by the
 // product of elementary reflectors as computed by Dgeqrf.
-//  Q = H(0) * H(2) * ... * H(k-1)
+//  Q = H_0 * H_1 * ... * H_{k-1}
 // len(tau) >= k, 0 <= k <= n, 0 <= n <= m, len(work) >= n.
 // Dorg2r will panic if these conditions are not met.
 //

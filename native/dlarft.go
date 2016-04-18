@@ -15,8 +15,8 @@ import (
 //  H = I - V * T * V^T  if store == lapack.ColumnWise
 //  H = I - V^T * T * V  if store == lapack.RowWise
 // H is defined by a product of the elementary reflectors where
-//  H = H(0) * H(1) * ... * H(k-1)  if direct == lapack.Forward
-//  H = H(k-1) * ... * H(1) * H(0)  if direct == lapack.Backward
+//  H = H_0 * H_1 * ... * H_{k-1}  if direct == lapack.Forward
+//  H = H_{k-1} * ... * H_1 * H_0  if direct == lapack.Backward
 //
 // t is a k×k triangular matrix. t is upper triangular if direct = lapack.Forward
 // and lower triangular otherwise. This function will panic if t is not of
@@ -25,7 +25,7 @@ import (
 // store describes the storage of the elementary reflectors in v. Please see
 // Dlarfb for a description of layout.
 //
-// tau contains the scalar factors of the elementary reflectors H(i).
+// tau contains the scalar factors of the elementary reflectors H_i.
 //
 // Dlarft is an internal routine. It is exported for testing purposes.
 func (Implementation) Dlarft(direct lapack.Direct, store lapack.StoreV, n, k int,

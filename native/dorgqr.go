@@ -10,8 +10,9 @@ import (
 )
 
 // Dorgqr generates an m×n matrix Q with orthonormal columns defined by the
-// product of elementary reflectors as computed by Dgeqrf.
-//  Q = H(0) * H(2) * ... * H(k-1)
+// product of elementary reflectors
+//  Q = H_0 * H_1 * ... * H_{k-1}
+// as computed by Dgeqrf.
 // Dorgqr is the blocked version of Dorg2r that makes greater use of level-3 BLAS
 // routines.
 //

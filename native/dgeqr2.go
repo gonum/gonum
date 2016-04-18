@@ -22,10 +22,10 @@ import "github.com/gonum/blas"
 //  v[j] = 0           j < i
 //  v[j] = 1           j == i
 //  v[j] = a[j*lda+i]  j > i
-// and computing H(i) = I - tau[i] * v * v^T.
+// and computing H_i = I - tau[i] * v * v^T.
 //
 // The orthonormal matrix Q can be constructed from a product of these elementary
-// reflectors, Q = H(0) * H(1) * ... * H(k-1), where k = min(m,n).
+// reflectors, Q = H_0 * H_1 * ... * H_{k-1}, where k = min(m,n).
 //
 // work is temporary storage of length at least n and this function will panic otherwise.
 //
@@ -43,7 +43,7 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 		panic(badTau)
 	}
 	for i := 0; i < k; i++ {
-		// Generate elementary reflector H(i).
+		// Generate elementary reflector H_i.
 		a[i*lda+i], tau[i] = impl.Dlarfg(m-i, a[i*lda+i], a[min((i+1), m-1)*lda+i:], lda)
 		if i < n-1 {
 			aii := a[i*lda+i]

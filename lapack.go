@@ -48,8 +48,8 @@ type Float64 interface {
 type Direct byte
 
 const (
-	Forward  Direct = 'F' // Reflectors are right-multiplied, H(0) * H(1) * ... * H(k).
-	Backward Direct = 'B' // Reflectors are left-multiplied, H(k) * ... * H(1) * H(0).
+	Forward  Direct = 'F' // Reflectors are right-multiplied, H(0) * H(1) * ... * H(k-1).
+	Backward Direct = 'B' // Reflectors are left-multiplied, H(k-1) * ... * H(1) * H(0).
 )
 
 // Sort is the sorting order.

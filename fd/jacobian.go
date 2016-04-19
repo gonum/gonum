@@ -154,20 +154,17 @@ func jacobianConcurrent(dst *mat64.Dense, f func([]float64, []float64), x, origi
 		wg.Add(1)
 		go worker(jobs)
 	}
-	var (
-		hasOrigin   bool
-		originCoeff float64
-	)
+	var hasOrigin bool
 	for _, pt := range formula.Stencil {
 		if pt.Loc == 0 {
 			hasOrigin = true
-			originCoeff = pt.Coeff
 			continue
 		}
 		for j := 0; j < n; j++ {
 			jobs <- jacJob{j, pt}
 		}
 	}
+	close(jobs)
 	if hasOrigin && origin == nil {
 		wg.Add(1)
 		go func() {
@@ -178,16 +175,22 @@ func jacobianConcurrent(dst *mat64.Dense, f func([]float64, []float64), x, origi
 			f(origin, xcopy)
 		}()
 	}
-	close(jobs)
 	wg.Wait()
 
 	if hasOrigin {
 		// The formula evaluated at x, we need to add scaled origin to
-		// all columns of dst.
+		// all columns of dst. Iterate again over all Formula points
+		// because we don't forbid repeated locations.
+
 		originVec := mat64.NewVector(m, origin)
-		for j := 0; j < n; j++ {
-			col := dst.ColView(j)
-			col.AddScaledVec(col, originCoeff, originVec)
+		for _, pt := range formula.Stencil {
+			if pt.Loc != 0 {
+				continue
+			}
+			for j := 0; j < n; j++ {
+				col := dst.ColView(j)
+				col.AddScaledVec(col, pt.Coeff, originVec)
+			}
 		}
 	}
 

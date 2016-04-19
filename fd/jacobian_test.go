@@ -91,17 +91,9 @@ func TestJacobian(t *testing.T) {
 		want := mat64.NewDense(test.m, test.n, nil)
 		test.jac(want, x)
 
-		got := Jacobian(nil, test.f, test.m, x, nil)
-		if !mat64.EqualApprox(want, got, tol) {
-			t.Errorf("Case %d (nil dst, default settings): unexpected Jacobian.\nwant: %v\ngot:  %v",
-				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
-		}
-		if !floats.Equal(x, xcopy) {
-			t.Errorf("Case %d (nil dst, default settings): x modified", tc)
-		}
-
+		got := mat64.NewDense(test.m, test.n, nil)
 		fillNaNDense(got)
-		Jacobian(got, test.f, test.m, x, nil)
+		Jacobian(got, test.f, x, nil)
 		if !mat64.EqualApprox(want, got, tol) {
 			t.Errorf("Case %d (default settings): unexpected Jacobian.\nwant: %v\ngot:  %v",
 				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
@@ -199,19 +191,9 @@ func TestJacobian(t *testing.T) {
 		want := mat64.NewDense(test.m, test.n, nil)
 		test.jac(want, x)
 
-		got := Jacobian(nil, test.f, test.m, x, &JacobianSettings{
-			Formula: test.formula,
-		})
-		if !mat64.EqualApprox(want, got, test.tol) {
-			t.Errorf("Case %d (nil dst): unexpected Jacobian.\nwant: %v\ngot:  %v",
-				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
-		}
-		if !floats.Equal(x, xcopy) {
-			t.Errorf("Case %d (nil dst): x modified", tc)
-		}
-
+		got := mat64.NewDense(test.m, test.n, nil)
 		fillNaNDense(got)
-		Jacobian(got, test.f, test.m, x, &JacobianSettings{
+		Jacobian(got, test.f, x, &JacobianSettings{
 			Formula: test.formula,
 		})
 		if !mat64.EqualApprox(want, got, test.tol) {
@@ -223,7 +205,7 @@ func TestJacobian(t *testing.T) {
 		}
 
 		fillNaNDense(got)
-		Jacobian(got, test.f, test.m, x, &JacobianSettings{
+		Jacobian(got, test.f, x, &JacobianSettings{
 			Formula:    test.formula,
 			Concurrent: true,
 		})
@@ -238,7 +220,7 @@ func TestJacobian(t *testing.T) {
 		fillNaNDense(got)
 		origin := make([]float64, test.m)
 		test.f(origin, x)
-		Jacobian(got, test.f, test.m, x, &JacobianSettings{
+		Jacobian(got, test.f, x, &JacobianSettings{
 			Formula:     test.formula,
 			OriginValue: origin,
 		})
@@ -251,7 +233,7 @@ func TestJacobian(t *testing.T) {
 		}
 
 		fillNaNDense(got)
-		Jacobian(got, test.f, test.m, x, &JacobianSettings{
+		Jacobian(got, test.f, x, &JacobianSettings{
 			Formula:     test.formula,
 			OriginValue: origin,
 			Concurrent:  true,

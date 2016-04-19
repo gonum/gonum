@@ -53,8 +53,8 @@ func ExampleJacobian() {
 		dst[2] = 4*x[1]*x[1] - 2*x[2]
 		dst[3] = x[2] * math.Sin(x[0])
 	}
-	x := []float64{1, 2, 3}
-	jac := fd.Jacobian(nil, f, 4, x, &fd.JacobianSettings{
+	jac := mat64.NewDense(4, 3, nil)
+	fd.Jacobian(jac, f, []float64{1, 2, 3}, &fd.JacobianSettings{
 		Formula:    fd.Central,
 		Concurrent: true,
 	})

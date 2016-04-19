@@ -20,7 +20,11 @@ type JacobianSettings struct {
 }
 
 // Jacobian approximates the Jacobian matrix of a vector-valued function f at
-// the location x.
+// the location x and stores the result in-place into dst.
+//
+// Finite difference formula and other options are specified by settings. If
+// settings is nil, the Jacobian will be estimated using the Forward formula and
+// a default step size.
 //
 // The Jacobian matrix J is the matrix of all first-order partial derivatives of f.
 // If f maps an n-dimensional vector x to an m-dimensional vector y = f(x), J is
@@ -33,20 +37,15 @@ type JacobianSettings struct {
 //      [     .          .  .     ]
 //      [ ∂f_m/∂x_1 ... ∂f_m/∂x_n ]
 //
-// If dst is not nil, the result will be stored in-place into dst and returned,
-// otherwise a new matrix will be allocated first. Finite difference formula and
-// other options are specified by settings. If settings is nil, the Jacobian
-// will be estimated using the Forward formula and a default step size.
-//
-// Jacobian panics if dst is not nil and its size is not m × len(x), or if the
-// derivative order of the formula is not 1.
-func Jacobian(dst *mat64.Dense, f func(y, x []float64), m int, x []float64, settings *JacobianSettings) *mat64.Dense {
+// dst must be non-nil, the number of its columns must equal the length of x, and
+// the derivative order of the formula must be 1, otherwise Jacobian will panic.
+func Jacobian(dst *mat64.Dense, f func(y, x []float64), x []float64, settings *JacobianSettings) {
 	n := len(x)
-	if dst == nil {
-		dst = mat64.NewDense(m, n, nil)
+	if n == 0 {
+		panic("jacobian: x has zero length")
 	}
-	r, c := dst.Dims()
-	if r != m || c != n {
+	m, c := dst.Dims()
+	if c != n {
 		panic("jacobian: mismatched matrix size")
 	}
 
@@ -92,8 +91,6 @@ func Jacobian(dst *mat64.Dense, f func(y, x []float64), m int, x []float64, sett
 	} else {
 		jacobianConcurrent(dst, f, x, settings.OriginValue, formula, step, nWorkers)
 	}
-
-	return dst
 }
 
 func jacobianSerial(dst *mat64.Dense, f func([]float64, []float64), x, origin []float64, formula Formula, step float64) {

@@ -68,3 +68,56 @@ func ExampleCholesky() {
 	//           ⎢ -4   11   58   17⎥
 	//           ⎣-16  -24   17   73⎦
 }
+
+func ExampleCholeskySymRankOne() {
+	a := mat64.NewSymDense(4, []float64{
+		1, 1, 1, 1,
+		0, 2, 3, 4,
+		0, 0, 6, 10,
+		0, 0, 0, 20,
+	})
+	fmt.Printf("A = %0.4v\n", mat64.Formatted(a, mat64.Prefix("    ")))
+
+	// Compute the Cholesky factorization.
+	var chol mat64.Cholesky
+	if ok := chol.Factorize(a); !ok {
+		fmt.Println("matrix a is not positive definite.")
+	}
+
+	x := mat64.NewVector(4, []float64{0, 0, 0, 1})
+	fmt.Printf("\nx = %0.4v\n", mat64.Formatted(x, mat64.Prefix("    ")))
+
+	// Rank-1 update the factorization.
+	chol.SymRankOne(&chol, 1, x)
+	// Rank-1 update the matrix a.
+	a.SymRankOne(a, 1, x)
+
+	var au mat64.SymDense
+	au.FromCholesky(&chol)
+
+	// Print the matrix that was updated directly.
+	fmt.Printf("\nA' =        %0.4v\n", mat64.Formatted(a, mat64.Prefix("            ")))
+	// Print the matrix recovered from the factorization.
+	fmt.Printf("\nU'^T * U' = %0.4v\n", mat64.Formatted(&au, mat64.Prefix("            ")))
+
+	// Output:
+	// A = ⎡ 1   1   1   1⎤
+	//     ⎢ 1   2   3   4⎥
+	//     ⎢ 1   3   6  10⎥
+	//     ⎣ 1   4  10  20⎦
+	//
+	// x = ⎡0⎤
+	//     ⎢0⎥
+	//     ⎢0⎥
+	//     ⎣1⎦
+	//
+	// A' =        ⎡ 1   1   1   1⎤
+	//             ⎢ 1   2   3   4⎥
+	//             ⎢ 1   3   6  10⎥
+	//             ⎣ 1   4  10  21⎦
+	//
+	// U'^T * U' = ⎡ 1   1   1   1⎤
+	//             ⎢ 1   2   3   4⎥
+	//             ⎢ 1   3   6  10⎥
+	//             ⎣ 1   4  10  21⎦
+}

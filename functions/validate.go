@@ -106,7 +106,10 @@ func testFunction(f function, ftests []funcTest, t *testing.T) {
 		}
 
 		// Evaluate the finite difference gradient.
-		fdGrad := fd.Gradient(nil, f.Func, test.X, nil)
+		fdGrad := fd.Gradient(nil, f.Func, test.X, &fd.Settings{
+			Formula: fd.Central,
+			Step:    1e-6,
+		})
 
 		// Check that the finite difference and expected gradients match.
 		if !floats.EqualApprox(fdGrad, test.Gradient, defaultFDGradTol) {

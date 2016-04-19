@@ -22,7 +22,7 @@ func TestMinimalSurface(t *testing.T) {
 		x0 := f.InitX()
 		grad := make([]float64, len(x0))
 		f.Grad(grad, x0)
-		fdGrad := fd.Gradient(nil, f.Func, x0, nil)
+		fdGrad := fd.Gradient(nil, f.Func, x0, &fd.Settings{Formula: fd.Central})
 
 		// Test that the numerical and analytical gradients agree.
 		dist := floats.Distance(grad, fdGrad, math.Inf(1))

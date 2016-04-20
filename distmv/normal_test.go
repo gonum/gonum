@@ -6,6 +6,7 @@ package distmv
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/gonum/floats"
@@ -398,6 +399,87 @@ func TestMarginal(t *testing.T) {
 				if math.Abs(c-ec) > 5e-2 {
 					t.Errorf("Cov mismatch element i = %d, j = %d: want: %v, got %v", i, j, c, ec)
 				}
+			}
+		}
+	}
+}
+
+func TestMarginalSingle(t *testing.T) {
+	for _, test := range []struct {
+		mu    []float64
+		sigma *mat64.SymDense
+	}{
+		{
+			mu:    []float64{2, 3, 4},
+			sigma: mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+		},
+		{
+			mu:    []float64{2, 3, 4, 5},
+			sigma: mat64.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+		},
+	} {
+		normal, ok := NewNormal(test.mu, test.sigma, nil)
+		if !ok {
+			t.Fatalf("Bad test, covariance matrix not positive definite")
+		}
+		// Verify with nil Sigma.
+		normal.sigma = nil
+		for i, mean := range test.mu {
+			norm := normal.MarginalNormalSingle(i, nil)
+			if norm.Mean() != mean {
+				t.Errorf("Mean mismatch nil Sigma, idx %v: want %v, got %v.", i, mean, norm.Mean())
+			}
+			std := math.Sqrt(test.sigma.At(i, i))
+			if math.Abs(norm.StdDev()-std) > 1e-14 {
+				t.Errorf("StdDev mismatch nil Sigma, idx %v: want %v, got %v.", i, std, norm.StdDev())
+			}
+		}
+
+		// Verify with non-nil Sigma.
+		normal.setSigma()
+		for i, mean := range test.mu {
+			norm := normal.MarginalNormalSingle(i, nil)
+			if norm.Mean() != mean {
+				t.Errorf("Mean mismatch non-nil Sigma, idx %v: want %v, got %v.", i, mean, norm.Mean())
+			}
+			std := math.Sqrt(test.sigma.At(i, i))
+			if math.Abs(norm.StdDev()-std) > 1e-14 {
+				t.Errorf("StdDev mismatch non-nil Sigma, idx %v: want %v, got %v.", i, std, norm.StdDev())
+			}
+		}
+	}
+
+	// Test matching with TestMarginal.
+	rnd := rand.New(rand.NewSource(1))
+	for cas := 0; cas < 10; cas++ {
+		dim := rnd.Intn(10) + 1
+		mu := make([]float64, dim)
+		for i := range mu {
+			mu[i] = rnd.Float64()
+		}
+		x := make([]float64, dim*dim)
+		for i := range x {
+			x[i] = rnd.Float64()
+		}
+		mat := mat64.NewDense(dim, dim, x)
+		var sigma mat64.SymDense
+		sigma.SymOuterK(1, mat)
+
+		normal, ok := NewNormal(mu, &sigma, nil)
+		if !ok {
+			t.Fatal("bad test")
+		}
+		for i := 0; i < dim; i++ {
+			single := normal.MarginalNormalSingle(i, nil)
+			mult, ok := normal.MarginalNormal([]int{i}, nil)
+			if !ok {
+				t.Fatal("bad test")
+			}
+			if math.Abs(single.Mean()-mult.Mean(nil)[0]) > 1e-14 {
+				t.Errorf("Mean mismatch")
+			}
+			if math.Abs(single.Variance()-mult.CovarianceMatrix(nil).At(0, 0)) > 1e-14 {
+				t.Errorf("Variance mismatch")
 			}
 		}
 	}

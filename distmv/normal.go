@@ -11,6 +11,7 @@ import (
 
 	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/stat/distuv"
 )
 
 // Normal is a multivariate normal distribution (also known as the multivariate
@@ -276,6 +277,29 @@ func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 	var s mat64.SymDense
 	s.SubsetSym(n.sigma, vars)
 	return NewNormal(newMean, &s, src)
+}
+
+// MarginalNormalSingle returns the marginal of the given input variable.
+// That is, MarginalNormal returns
+//  p(x_i) = \int_{x_¬i} p(x_i | x_¬i) p(x_¬i) dx_¬i
+// where i is the input index.
+// The input src is passed to the constructed distuv.Normal.
+func (n *Normal) MarginalNormalSingle(i int, src *rand.Rand) distuv.Normal {
+	var std float64
+	if n.sigma != nil {
+		std = n.sigma.At(i, i)
+	} else {
+		// Reconstruct the {i,i} diagonal element of the covariance directly.
+		for j := 0; j <= i; j++ {
+			v := n.lower.At(i, j)
+			std += v * v
+		}
+	}
+	return distuv.Normal{
+		Mu:     n.mu[i],
+		Sigma:  math.Sqrt(std),
+		Source: src,
+	}
 }
 
 // Mean returns the mean of the probability distribution at x. If the

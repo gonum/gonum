@@ -14,13 +14,19 @@ import (
 	"github.com/gonum/matrix"
 )
 
-const badTriangle = "mat64: invalid triangle"
+const (
+	badTriangle = "mat64: invalid triangle"
+	badCholesky = "mat64: invalid Cholesky factorization"
+)
 
 // Cholesky is a type for creating and using the Cholesky factorization of a
 // symmetric positive definite matrix.
 type Cholesky struct {
 	chol *TriDense
 	cond float64
+	// valid indicates whether A is positive definite
+	// and the factorization usable.
+	valid bool
 }
 
 // updateCond updates the condition number of the Cholesky decomposition. If
@@ -47,7 +53,8 @@ func (c *Cholesky) updateCond(norm float64) {
 }
 
 // Factorize calculates the Cholesky decomposition of the matrix A and returns
-// whether the matrix is positive definite.
+// whether the matrix is positive definite. If Factorize returns false, the
+// factorization must not be used.
 func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	n := a.Symmetric()
 	if c.isZero() {
@@ -60,27 +67,37 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	sym := c.chol.asSymBlas()
 	work := make([]float64, c.chol.mat.N)
 	norm := lapack64.Lansy(matrix.CondNorm, sym, work)
-	_, ok = lapack64.Potrf(sym)
-	if ok {
+	_, c.valid = lapack64.Potrf(sym)
+	if c.valid {
 		c.updateCond(norm)
 	} else {
+		c.chol.Reset()
 		c.cond = math.Inf(1)
 	}
-	return ok
-}
-
-// Det returns the determinant of the matrix that has been factorized.
-func (c *Cholesky) Det() float64 {
-	return math.Exp(c.LogDet())
+	return c.valid
 }
 
 // Size returns the dimension of the factorized matrix.
 func (c *Cholesky) Size() int {
+	if !c.valid {
+		panic(badCholesky)
+	}
 	return c.chol.mat.N
+}
+
+// Det returns the determinant of the matrix that has been factorized.
+func (c *Cholesky) Det() float64 {
+	if !c.valid {
+		panic(badCholesky)
+	}
+	return math.Exp(c.LogDet())
 }
 
 // LogDet returns the log of the determinant of the matrix that has been factorized.
 func (c *Cholesky) LogDet() float64 {
+	if !c.valid {
+		panic(badCholesky)
+	}
 	var det float64
 	for i := 0; i < c.chol.mat.N; i++ {
 		det += 2 * math.Log(c.chol.mat.Data[i*c.chol.mat.Stride+i])
@@ -91,6 +108,9 @@ func (c *Cholesky) LogDet() float64 {
 // SolveCholesky finds the matrix m that solves A * m = b where A is represented
 // by the Cholesky decomposition, placing the result in the receiver.
 func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
+	if !chol.valid {
+		panic(badCholesky)
+	}
 	n := chol.chol.mat.N
 	bm, bn := b.Dims()
 	if n != bm {
@@ -112,6 +132,9 @@ func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
 // SolveCholeskyVec finds the vector v that solves A * v = b where A is represented
 // by the Cholesky decomposition, placing the result in the receiver.
 func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
+	if !chol.valid {
+		panic(badCholesky)
+	}
 	n := chol.chol.mat.N
 	vn := b.Len()
 	if vn != n {
@@ -120,6 +143,7 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 	if v != b {
 		v.checkOverlap(b.mat)
 	}
+
 	v.reuseAs(n)
 	if v != b {
 		v.CopyVec(b)
@@ -137,6 +161,9 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 // decomposition
 //  A = U^T * U.
 func (t *TriDense) UFromCholesky(chol *Cholesky) {
+	if !chol.valid {
+		panic(badCholesky)
+	}
 	n := chol.chol.mat.N
 	t.reuseAs(n, matrix.Upper)
 	t.Copy(chol.chol)
@@ -146,6 +173,9 @@ func (t *TriDense) UFromCholesky(chol *Cholesky) {
 // decomposition
 //  A = L * L^T.
 func (t *TriDense) LFromCholesky(chol *Cholesky) {
+	if !chol.valid {
+		panic(badCholesky)
+	}
 	n := chol.chol.mat.N
 	t.reuseAs(n, matrix.Lower)
 	t.Copy(chol.chol.TTri())
@@ -154,6 +184,9 @@ func (t *TriDense) LFromCholesky(chol *Cholesky) {
 // FromCholesky reconstructs the original positive definite matrix given its
 // Cholesky decomposition.
 func (s *SymDense) FromCholesky(chol *Cholesky) {
+	if !chol.valid {
+		panic(badCholesky)
+	}
 	n := chol.chol.mat.N
 	s.reuseAs(n)
 	s.SymOuterK(1, chol.chol.T())
@@ -165,6 +198,9 @@ func (s *SymDense) FromCholesky(chol *Cholesky) {
 // Note that matrix inversion is numerically unstable, and should generally be
 // avoided where possible, for example by using the Solve routines.
 func (s *SymDense) InverseCholesky(chol *Cholesky) error {
+	if !chol.valid {
+		panic(badCholesky)
+	}
 	// TODO(btracey): Replace this code with a direct call to Dpotri when it
 	// is available.
 	s.reuseAs(chol.chol.mat.N)
@@ -194,6 +230,9 @@ func (s *SymDense) InverseCholesky(chol *Cholesky) error {
 // SymRankOne updates a Cholesky factorization in O(n²) time. The Cholesky
 // factorization computation from scratch is O(n³).
 func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool) {
+	if !orig.valid {
+		panic(badCholesky)
+	}
 	n := orig.Size()
 	if x.Len() != n {
 		panic(matrix.ErrShape)
@@ -286,8 +325,9 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool
 		Data:   work,
 	})
 	if !ok {
-		// The original matrix is singular.
-		return false
+		// The original matrix is singular. Should not happen, because
+		// the factorization is valid.
+		panic(badCholesky)
 	}
 	norm := blas64.Nrm2(n, blas64.Vector{1, work})
 	if norm >= 1 {
@@ -309,14 +349,15 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool
 	}
 	umat := c.chol.mat
 	stride := umat.Stride
-	ok = true
 	for i := n - 1; i >= 0; i-- {
 		// Apply Givens matrices to U.
+		// TODO(vladimir-ch): Use workspace to avoid modifying the
+		// receiver in case an invalid factorization is created.
 		blas64.Rot(n-i, blas64.Vector{1, work[i:n]}, blas64.Vector{1, umat.Data[i*stride+i : i*stride+n]}, cos[i], sin[i])
 		if umat.Data[i*stride+i] == 0 {
 			// The matrix is singular (may rarely happen due to
 			// floating-point effects?).
-			ok = false
+			c.valid = false
 		} else if umat.Data[i*stride+i] < 0 {
 			// Diagonal elements should be positive. If it happens
 			// that on the i-th row the diagonal is negative,
@@ -325,12 +366,13 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool
 			blas64.Scal(n-i, -1, blas64.Vector{1, umat.Data[i*stride+i : i*stride+n]})
 		}
 	}
-	if ok {
+	if c.valid {
 		c.updateCond(-1)
 	} else {
+		c.chol.Reset()
 		c.cond = math.Inf(1)
 	}
-	return ok
+	return c.valid
 }
 
 func (c *Cholesky) isZero() bool {

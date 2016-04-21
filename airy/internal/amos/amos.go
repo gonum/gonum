@@ -8,7 +8,7 @@ package amos
 import (
 	"math"
 
-	"github.com/gonum/mathext/internal/amos/amoslib"
+	"github.com/gonum/mathext/airy/internal/amos/amoslib"
 )
 
 /*
@@ -349,7 +349,7 @@ Seventy:
 	R1M5 = dmach[5]
 
 	K = min0(iabs(K1), iabs(K2))
-	ELIM = 2.303E0 * (float64(float64(K))*R1M5 - 3.0E0)
+	ELIM = 2.303E0 * (float64(K)*R1M5 - 3.0E0)
 	K1 = imach[14] - 1
 	AA = R1M5 * float64(K1)
 	DIG = dmin(AA, 18.0E0)

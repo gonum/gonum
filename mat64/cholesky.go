@@ -50,7 +50,7 @@ func (c *Cholesky) updateCond(norm float64) {
 // whether the matrix is positive definite.
 func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	n := a.Symmetric()
-	if c.chol == nil {
+	if c.isZero() {
 		c.chol = NewTriDense(n, matrix.Upper, nil)
 	} else {
 		c.chol = NewTriDense(n, matrix.Upper, use(c.chol.mat.Data, n*n))
@@ -177,4 +177,162 @@ func (s *SymDense) InverseCholesky(chol *Cholesky) error {
 	err := t.InverseTri(chol.chol)
 	s.SymOuterK(1, &t)
 	return err
+}
+
+// SymRankOne performs a rank-1 update of the original matrix A and refactorizes
+// its Cholesky factorization, storing the result into the reciever. That is, if
+// in the original Cholesky factorization
+//  U^T * U = A,
+// in the updated factorization
+//  U'^T * U' = A + alpha * x * x^T = A'.
+//
+// Note that when alpha is negative, the updating problem may be ill-conditioned
+// and the results may be inaccurate, or the updated matrix A' may not be
+// positive definite and not have a Cholesky factorization. SymRankOne returns
+// whether the updated matrix A' is positive definite.
+//
+// SymRankOne updates a Cholesky factorization in O(n²) time. The Cholesky
+// factorization computation from scratch is O(n³).
+func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool) {
+	n := orig.Size()
+	if x.Len() != n {
+		panic(matrix.ErrShape)
+	}
+	if orig != c {
+		if c.isZero() {
+			c.chol = NewTriDense(n, matrix.Upper, nil)
+		} else if c.chol.mat.N != n {
+			panic(matrix.ErrShape)
+		}
+		c.chol.Copy(orig.chol)
+	}
+
+	if alpha == 0 {
+		return true
+	}
+
+	// Algorithms for updating and downdating the Cholesky factorization are
+	// described, for example, in
+	// - J. J. Dongarra, J. R. Bunch, C. B. Moler, G. W. Stewart: LINPACK
+	//   Users' Guide. SIAM (1979), pages 10.10--10.14
+	// or
+	// - P. E. Gill, G. H. Golub, W. Murray, and M. A. Saunders: Methods for
+	//   modifying matrix factorizations. Mathematics of Computation 28(126)
+	//   (1974), Method C3 on page 521
+	//
+	// The implementation is based on LINPACK code
+	// http://www.netlib.org/linpack/dchud.f
+	// http://www.netlib.org/linpack/dchdd.f
+	// and
+	// https://icl.cs.utk.edu/lapack-forum/viewtopic.php?f=2&t=2646
+	//
+	// According to http://icl.cs.utk.edu/lapack-forum/archives/lapack/msg00301.html
+	// LINPACK is released under BSD license.
+	//
+	// See also:
+	// - M. A. Saunders: Large-scale Linear Programming Using the Cholesky
+	//   Factorization. Technical Report Stanford University (1972)
+	//   http://i.stanford.edu/pub/cstr/reports/cs/tr/72/252/CS-TR-72-252.pdf
+	// - Matthias Seeger: Low rank updates for the Cholesky decomposition.
+	//   EPFL Technical Report 161468 (2004)
+	//   http://infoscience.epfl.ch/record/161468
+
+	work := make([]float64, n)
+	blas64.Copy(n, x.RawVector(), blas64.Vector{1, work})
+
+	if alpha > 0 {
+		// Compute rank-1 update.
+		if alpha != 1 {
+			blas64.Scal(n, math.Sqrt(alpha), blas64.Vector{1, work})
+		}
+		umat := c.chol.mat
+		stride := umat.Stride
+		for i := 0; i < n; i++ {
+			// Compute parameters of the Givens matrix that zeroes
+			// the i-th element of x.
+			c, s, r, _ := blas64.Rotg(umat.Data[i*stride+i], work[i])
+			if r < 0 {
+				// Multiply by -1 to have positive diagonal
+				// elemnts.
+				r *= -1
+				c *= -1
+				s *= -1
+			}
+			umat.Data[i*stride+i] = r
+			if i < n-1 {
+				// Multiply the extended factorization matrix by
+				// the Givens matrix from the left. Only
+				// the i-th row and x are modified.
+				blas64.Rot(n-i-1,
+					blas64.Vector{1, umat.Data[i*stride+i+1 : i*stride+n]},
+					blas64.Vector{1, work[i+1 : n]},
+					c, s)
+			}
+		}
+		c.updateCond(-1)
+		return true
+	}
+
+	// Compute rank-1 downdate.
+	alpha = math.Sqrt(-alpha)
+	if alpha != 1 {
+		blas64.Scal(n, alpha, blas64.Vector{1, work})
+	}
+	// Solve U^T * p = x storing the result into work.
+	ok = lapack64.Trtrs(blas.Trans, c.chol.RawTriangular(), blas64.General{
+		Rows:   n,
+		Cols:   1,
+		Stride: 1,
+		Data:   work,
+	})
+	if !ok {
+		// The original matrix is singular.
+		return false
+	}
+	norm := blas64.Nrm2(n, blas64.Vector{1, work})
+	if norm >= 1 {
+		// The updated matrix is not positive definite.
+		return false
+	}
+	norm = math.Sqrt((1 + norm) * (1 - norm))
+	cos := make([]float64, n)
+	sin := make([]float64, n)
+	for i := n - 1; i >= 0; i-- {
+		// Compute parameters of Givens matrices that zero elements of p
+		// backwards.
+		cos[i], sin[i], norm, _ = blas64.Rotg(norm, work[i])
+		if norm < 0 {
+			norm *= -1
+			cos[i] *= -1
+			sin[i] *= -1
+		}
+	}
+	umat := c.chol.mat
+	stride := umat.Stride
+	ok = true
+	for i := n - 1; i >= 0; i-- {
+		// Apply Givens matrices to U.
+		blas64.Rot(n-i, blas64.Vector{1, work[i:n]}, blas64.Vector{1, umat.Data[i*stride+i : i*stride+n]}, cos[i], sin[i])
+		if umat.Data[i*stride+i] == 0 {
+			// The matrix is singular (may rarely happen due to
+			// floating-point effects?).
+			ok = false
+		} else if umat.Data[i*stride+i] < 0 {
+			// Diagonal elements should be positive. If it happens
+			// that on the i-th row the diagonal is negative,
+			// multiply U from the left by an identity matrix that
+			// has -1 on the i-th row.
+			blas64.Scal(n-i, -1, blas64.Vector{1, umat.Data[i*stride+i : i*stride+n]})
+		}
+	}
+	if ok {
+		c.updateCond(-1)
+	} else {
+		c.cond = math.Inf(1)
+	}
+	return ok
+}
+
+func (c *Cholesky) isZero() bool {
+	return c.chol == nil
 }

@@ -2,49 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package amos implements functions originally in the Netlab code by Donald Amos.
 package amos
 
-import (
-	"math"
-	"math/cmplx"
-)
+import "math"
 
-/*
-The AMOS functions are included in SLATEC, and the SLATEC guide (http://www.netlib.org/slatec/guide) explicitly states:
+// These routines are the versions directly modified from the Fortran code.
+// They are used to ensure that code style improvements do not change the
+// code output.
 
-"The Library is in the public domain and distributed by the Energy
-Science and Technology Software Center."
-Mention of AMOS's inclusion in SLATEC goes back at least to this 1985 technical report from Sandia National Labs: http://infoserve.sandia.gov/sand_doc/1985/851018.pdf
-*/
-
-// math.NaN() are for padding to keep indexing easy.
-var imach = []int{-0, 5, 6, 0, 0, 32, 4, 2, 31, 2147483647, 2, 24, -125, 127, 53, -1021, 1023}
-
-var dmach = []float64{math.NaN(), 2.23E-308, 1.79E-308, 1.11E-16, 2.22E-16, 0.30103000998497009}
-
-func iabs(a int) int {
-	if a >= 0 {
-		return a
-	}
-	return -a
-}
-
-func min0(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func max0(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
+func zairyOrig(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	// zairy is adapted from the original Netlib code by Donald Amos.
 	// http://www.netlib.no/netlib/amos/zairy.f
 
@@ -422,7 +388,7 @@ OneHundred:
 	if ZI < 0.0E0 {
 		MR = -1
 	}
-	ZTAR, ZTAI, FNU, KODE, MR, _, CYR, CYI, NN, RL, TOL, ELIM, ALIM = Zacai(ZTAR, ZTAI, FNU, KODE, MR, 1, CYR, CYI, NN, RL, TOL, ELIM, ALIM)
+	ZTAR, ZTAI, FNU, KODE, MR, _, CYR, CYI, NN, RL, TOL, ELIM, ALIM = zacaiOrig(ZTAR, ZTAI, FNU, KODE, MR, 1, CYR, CYI, NN, RL, TOL, ELIM, ALIM)
 	if NN < 0 {
 		goto TwoEighty
 	}
@@ -445,7 +411,7 @@ OneTen:
 		goto TwoTen
 	}
 OneTwenty:
-	ZTAR, ZTAI, FNU, KODE, _, CYR, CYI, NZ, TOL, ELIM, ALIM = Zbknu(ZTAR, ZTAI, FNU, KODE, 1, CYR, CYI, NZ, TOL, ELIM, ALIM)
+	ZTAR, ZTAI, FNU, KODE, _, CYR, CYI, NZ, TOL, ELIM, ALIM = zbknuOrig(ZTAR, ZTAI, FNU, KODE, 1, CYR, CYI, NZ, TOL, ELIM, ALIM)
 
 OneThirty:
 	S1R = CYR[1] * COEF
@@ -534,7 +500,7 @@ TwoSixty:
 }
 
 // sbknu computes the k bessel function in the right half z plane.
-func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM, ALIM float64) (ZRout, ZIout, FNUout float64, KODEout, Nout int, YRout, YIout []float64, NZout int, TOLout, ELIMout, ALIMout float64) {
+func zbknuOrig(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM, ALIM float64) (ZRout, ZIout, FNUout float64, KODEout, Nout int, YRout, YIout []float64, NZout int, TOLout, ELIMout, ALIMout float64) {
 	/* Old dimension comment.
 		DIMENSION YR(N), YI(N), CC(8), CSSR(3), CSRR(3), BRY(3), CYR(2),
 	     * CYI(2)
@@ -618,7 +584,7 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	SMUI = imag(tmp)
 	FMUR = SMUR * DNU
 	FMUI = SMUI * DNU
-	FMUR, FMUI, CSHR, CSHI, CCHR, CCHI = Zshch(FMUR, FMUI, CSHR, CSHI, CCHR, CCHI)
+	FMUR, FMUI, CSHR, CSHI, CCHR, CCHI = zshchOrig(FMUR, FMUI, CSHR, CSHI, CCHR, CCHI)
 	if DNU == 0.0E0 {
 		goto Ten
 	}
@@ -1118,7 +1084,7 @@ TwoSixtyOne:
 		P2M = dexp(P2R) / TOL
 		P1R = P2M * dcos(P2I)
 		P1I = P2M * dsin(P2I)
-		P1R, P1I, NW, ASCLE, TOL = Zuchk(P1R, P1I, NW, ASCLE, TOL)
+		P1R, P1I, NW, ASCLE, TOL = zuchkOrig(P1R, P1I, NW, ASCLE, TOL)
 		if NW != 0 {
 			goto TwoSixtyThree
 		}
@@ -1173,7 +1139,7 @@ TwoSeventy:
 	YI[2] = S2I
 TwoEighty:
 	ASCLE = BRY[1]
-	ZDR, ZDI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM = Zkscl(ZDR, ZDI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM)
+	ZDR, ZDI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM = zksclOrig(ZDR, ZDI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM)
 	INU = N - NZ
 	if INU <= 0 {
 		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
@@ -1224,7 +1190,7 @@ ThreeTen:
 // SET K FUNCTIONS TO ZERO ON UNDERFLOW, CONTINUE RECURRENCE
 // ON SCALED FUNCTIONS UNTIL TWO MEMBERS COME ON SCALE, THEN
 // return WITH MIN(NZ+2,N) VALUES SCALED BY 1/TOL.
-func Zkscl(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASCLE, TOL, ELIM float64) (
+func zksclOrig(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASCLE, TOL, ELIM float64) (
 	ZRRout, ZRIout, FNUout float64, Nout int, YRout, YIout []float64, NZout int, RZRout, RZIout, ASCLEout, TOLout, ELIMout float64) {
 	var ACS, AS, CKI, CKR, CSI, CSR, FN, STR, S1I, S1R, S2I,
 		S2R, ZEROI, ZEROR, ZDR, ZDI, CELMR, ELM, HELIM, ALAS float64
@@ -1260,7 +1226,7 @@ func Zkscl(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASC
 		STR = dexp(CSR) / TOL
 		CSR = STR * dcos(CSI)
 		CSI = STR * dsin(CSI)
-		CSR, CSI, NW, ASCLE, TOL = Zuchk(CSR, CSI, NW, ASCLE, TOL)
+		CSR, CSI, NW, ASCLE, TOL = zuchkOrig(CSR, CSI, NW, ASCLE, TOL)
 		if NW != 0 {
 			continue
 		}
@@ -1327,7 +1293,7 @@ Twenty:
 		STR = dexp(CSR) / TOL
 		CSR = STR * dcos(CSI)
 		CSI = STR * dsin(CSI)
-		CSR, CSI, NW, ASCLE, TOL = Zuchk(CSR, CSI, NW, ASCLE, TOL)
+		CSR, CSI, NW, ASCLE, TOL = zuchkOrig(CSR, CSI, NW, ASCLE, TOL)
 		if NW != 0 {
 			goto TwentyFive
 		}
@@ -1371,7 +1337,7 @@ FourtyFive:
 // if THE UNDERFLOW IS AT LEAST ONE PRECISION BELOW THE MAGNITUDE
 // OF THE LARGEST COMPONENT; OTHERWISE THE PHASE ANGLE DOES NOT HAVE
 // ABSOLUTE ACCURACY AND AN UNDERFLOW IS ASSUMED.
-func Zuchk(YR, YI float64, NZ int, ASCLE, TOL float64) (YRout, YIout float64, NZout int, ASCLEout, TOLout float64) {
+func zuchkOrig(YR, YI float64, NZ int, ASCLE, TOL float64) (YRout, YIout float64, NZout int, ASCLEout, TOLout float64) {
 	var SS, ST, WR, WI float64
 	NZ = 0
 	WR = dabs(YR)
@@ -1398,7 +1364,7 @@ func Zuchk(YR, YI float64, NZ int, ASCLE, TOL float64) (YRout, YIout float64, NZ
 // ZACAI IS THE SAME AS ZACON WITH THE PARTS FOR LARGER ORDERS AND
 // RECURRENCE REMOVED. A RECURSIVE CALL TO ZACON CAN RESULT if ZACON
 // IS CALLED FROM ZAIRY.
-func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, TOL, ELIM, ALIM float64) (
+func zacaiOrig(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, TOL, ELIM, ALIM float64) (
 	ZRout, ZIout, FNUout float64, KODEout, MRout, Nout int, YRout, YIout []float64, NZout int, RLout, TOLout, ELIMout, ALIMout float64) {
 	var ARG, ASCLE, AZ, CSGNR, CSGNI, CSPNR,
 		CSPNI, C1R, C1I, C2R, C2I, DFNU, FMR, PI,
@@ -1422,27 +1388,27 @@ func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, T
 	}
 Ten:
 	// POWER SERIES FOR THE I FUNCTION.
-	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM = Zseri(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM)
+	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM = zseriOrig(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM)
 	goto Fourty
 Twenty:
 	if AZ < RL {
 		goto Thirty
 	}
 	// ASYMPTOTIC EXPANSION FOR LARGE Z FOR THE I FUNCTION.
-	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, RL, TOL, ELIM, ALIM = Zasyi(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, RL, TOL, ELIM, ALIM)
+	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, RL, TOL, ELIM, ALIM = zasyiOrig(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, RL, TOL, ELIM, ALIM)
 	if NW < 0 {
 		goto Eighty
 	}
 	goto Fourty
 Thirty:
 	// MILLER ALGORITHM NORMALIZED BY THE SERIES FOR THE I FUNCTION
-	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL = Zmlri(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL)
+	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL = zmlriOrig(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL)
 	if NW < 0 {
 		goto Eighty
 	}
 Fourty:
 	// ANALYTIC CONTINUATION TO THE LEFT HALF PLANE FOR THE K FUNCTION.
-	ZNR, ZNI, FNU, KODE, _, CYR, CYI, NW, TOL, ELIM, ALIM = Zbknu(ZNR, ZNI, FNU, KODE, 1, CYR, CYI, NW, TOL, ELIM, ALIM)
+	ZNR, ZNI, FNU, KODE, _, CYR, CYI, NW, TOL, ELIM, ALIM = zbknuOrig(ZNR, ZNI, FNU, KODE, 1, CYR, CYI, NW, TOL, ELIM, ALIM)
 	if NW != 0 {
 		goto Eighty
 	}
@@ -1478,7 +1444,7 @@ Sixty:
 	}
 	IUF = 0
 	ASCLE = 1.0E+3 * dmach[1] / TOL
-	ZNR, ZNI, C1R, C1I, C2R, C2I, NW, ASCLE, ALIM, IUF = Zs1s2(ZNR, ZNI, C1R, C1I, C2R, C2I, NW, ASCLE, ALIM, IUF)
+	ZNR, ZNI, C1R, C1I, C2R, C2I, NW, ASCLE, ALIM, IUF = zs1s2Orig(ZNR, ZNI, C1R, C1I, C2R, C2I, NW, ASCLE, ALIM, IUF)
 	NZ = NZ + NW
 Seventy:
 	YR[1] = CSPNR*C1R - CSPNI*C1I + CSGNR*C2R - CSGNI*C2I
@@ -1496,7 +1462,7 @@ Eighty:
 // MEANS OF THE ASYMPTOTIC EXPANSION FOR LARGE CABS(Z) IN THE
 // REGION CABS(Z)>MAX(RL,FNU*FNU/2). NZ=0 IS A NORMAL return.
 // NZ<0 INDICATES AN OVERFLOW ON KODE=1.
-func Zasyi(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, RL, TOL, ELIM, ALIM float64) (
+func zasyiOrig(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, RL, TOL, ELIM, ALIM float64) (
 	ZRout, ZIout, FNUout float64, KODEout, Nout int, YRout, YIout []float64, NZout int, RLout, TOLout, ELIMout, ALIMout float64) {
 	var AA, AEZ, AK, AK1I, AK1R, ARG, ARM, ATOL,
 		AZ, BB, BK, CKI, CKR, CONEI, CONER, CS1I, CS1R, CS2I, CS2R, CZI,
@@ -1696,7 +1662,7 @@ OneTen:
 
 // ZMLRI COMPUTES THE I BESSEL FUNCTION FOR RE(Z)>=0.0 BY THE
 // MILLER ALGORITHM NORMALIZED BY A NEUMANN SERIES.
-func Zmlri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL float64) (
+func zmlriOrig(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL float64) (
 	ZRout, ZIout, FNUout float64, KODEout, Nout int, YRout, YIout []float64, NZout int, TOLout float64) {
 	var ACK, AK, AP, AT, AZ, BK, CKI, CKR, CNORMI,
 		CNORMR, CONEI, CONER, FKAP, FKK, FLAM, FNF, PTI, PTR, P1I,
@@ -1916,7 +1882,7 @@ OneTen:
 // DUE TO UNDERFLOW. NZ<0 MEANS UNDERFLOW OCCURRED, BUT THE
 // CONDITION CABS(Z)<=2*SQRT(FNU+1) WAS VIOLATED AND THE
 // COMPUTATION MUST BE COMPLETED IN ANOTHER ROUTINE WITH N=N-ABS(NZ).
-func Zseri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM, ALIM float64) (
+func zseriOrig(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM, ALIM float64) (
 	ZRout, ZIout, FNUout float64, KODEout, Nout int, YRout, YIout []float64, NZout int, TOLout, ELIMout, ALIMout float64) {
 	var AA, ACZ, AK, AK1I, AK1R, ARM, ASCLE, ATOL,
 		AZ, CKI, CKR, COEFI, COEFR, CONEI, CONER, CRSCR, CZI, CZR, DFNU,
@@ -2040,7 +2006,7 @@ Fifty:
 		if IFLAG == 0 {
 			goto Eighty
 		}
-		S2R, S2I, NW, ASCLE, TOL = Zuchk(S2R, S2I, NW, ASCLE, TOL)
+		S2R, S2I, NW, ASCLE, TOL = zuchkOrig(S2R, S2I, NW, ASCLE, TOL)
 		if NW != 0 {
 			goto Thirty
 		}
@@ -2150,7 +2116,7 @@ OneNinety:
 // MAGNITUDE, BUT FOR KODE=2 THEY CAN BE OF THE SAME ORDER
 // OF MAGNITUDE AND THE MAXIMUM MUST BE AT LEAST ONE
 // PRECISION ABOVE THE UNDERFLOW LIMIT.
-func Zs1s2(ZRR, ZRI, S1R, S1I, S2R, S2I float64, NZ int, ASCLE, ALIM float64, IUF int) (
+func zs1s2Orig(ZRR, ZRI, S1R, S1I, S2R, S2I float64, NZ int, ASCLE, ALIM float64, IUF int) (
 	ZRRout, ZRIout, S1Rout, S1Iout, S2Rout, S2Iout float64, NZout int, ASCLEout, ALIMout float64, IUFout int) {
 	var AA, ALN, AS1, AS2, C1I, C1R, S1DI, S1DR, ZEROI, ZEROR float64
 	var tmp complex128
@@ -2203,7 +2169,7 @@ Ten:
 // ZSHCH COMPUTES THE COMPLEX HYPERBOLIC FUNCTIONS CSH=SINH(X+iY) AND
 // CCH=COSH(X+I*Y), WHERE I**2=-1.
 // TODO(btracey): use cmplx.Sinh and cmplx.Cosh.
-func Zshch(ZR, ZI, CSHR, CSHI, CCHR, CCHI float64) (ZRout, ZIout, CSHRout, CSHIout, CCHRout, CCHIout float64) {
+func zshchOrig(ZR, ZI, CSHR, CSHI, CCHR, CCHI float64) (ZRout, ZIout, CSHRout, CSHIout, CCHRout, CCHIout float64) {
 	var CH, CN, SH, SN float64
 	SH = math.Sinh(ZR)
 	CH = math.Cosh(ZR)
@@ -2214,78 +2180,4 @@ func Zshch(ZR, ZI, CSHR, CSHI, CCHR, CCHI float64) (ZRout, ZIout, CSHRout, CSHIo
 	CCHR = CH * CN
 	CCHI = SH * SN
 	return ZR, ZI, CSHR, CSHI, CCHR, CCHI
-}
-
-func dmax(a, b float64) float64 {
-	return math.Max(a, b)
-}
-
-func dmin(a, b float64) float64 {
-	return math.Min(a, b)
-}
-
-func dabs(a float64) float64 {
-	return math.Abs(a)
-}
-
-func datan(a float64) float64 {
-	return math.Atan(a)
-}
-
-func dtan(a float64) float64 {
-	return math.Tan(a)
-}
-
-func dlog(a float64) float64 {
-	return math.Log(a)
-}
-
-func dsin(a float64) float64 {
-	return math.Sin(a)
-}
-
-func dcos(a float64) float64 {
-	return math.Cos(a)
-}
-
-func dexp(a float64) float64 {
-	return math.Exp(a)
-}
-
-func dsqrt(a float64) float64 {
-	return math.Sqrt(a)
-}
-
-func zmlt(a, b complex128) complex128 {
-	return a * b
-}
-
-func zdiv(a, b complex128) complex128 {
-	return a / b
-}
-
-func zabs(a complex128) float64 {
-	return cmplx.Abs(a)
-}
-
-func zsqrt(a complex128) complex128 {
-	return cmplx.Sqrt(a)
-}
-
-func zexp(a complex128) complex128 {
-	return cmplx.Exp(a)
-}
-
-func zlog(a complex128) complex128 {
-	return cmplx.Log(a)
-}
-
-func dgamln(z float64, ierr int) float64 {
-	//return amoslib.DgamlnFort(z)
-	// Go implementation.
-	if z < 0 {
-		return 0
-	}
-	a2, _ := math.Lgamma(z)
-	return a2
 }

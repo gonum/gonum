@@ -58,9 +58,12 @@ func (lu *LU) Factorize(a Matrix) {
 		panic(matrix.ErrSquare)
 	}
 	if lu.lu == nil {
-		lu.lu = &Dense{}
+		lu.lu = NewDense(r, r, nil)
+	} else {
+		lu.lu.Reset()
+		lu.lu.reuseAs(r, r)
 	}
-	lu.lu.Clone(a)
+	lu.lu.Copy(a)
 	if cap(lu.pivot) < r {
 		lu.pivot = make([]int, r)
 	}

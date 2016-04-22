@@ -71,6 +71,19 @@ func (lu *LU) Factorize(a Matrix) {
 	lu.updateCond(anorm)
 }
 
+// Reset resets the factorization so that it can be reused as the receiver of a
+// dimensionally restricted operation.
+func (lu *LU) Reset() {
+	if lu.lu != nil {
+		lu.lu.Reset()
+	}
+	lu.pivot = lu.pivot[:0]
+}
+
+func (lu *LU) isZero() bool {
+	return len(lu.pivot) == 0
+}
+
 // Det returns the determinant of the matrix that has been factorized. In many
 // expressions, using LogDet will be more numerically stable.
 func (lu *LU) Det() float64 {

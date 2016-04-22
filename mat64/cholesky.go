@@ -68,10 +68,18 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	if ok {
 		c.updateCond(norm)
 	} else {
-		c.chol.Reset()
-		c.cond = math.Inf(1)
+		c.Reset()
 	}
 	return ok
+}
+
+// Reset resets the factorization so that it can be reused as the receiver of a
+// dimensionally restricted operation.
+func (c *Cholesky) Reset() {
+	if !c.isZero() {
+		c.chol.Reset()
+	}
+	c.cond = math.Inf(1)
 }
 
 // Size returns the dimension of the factorized matrix.
@@ -365,8 +373,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool
 	if ok {
 		c.updateCond(-1)
 	} else {
-		c.chol.Reset()
-		c.cond = math.Inf(1)
+		c.Reset()
 	}
 	return ok
 }

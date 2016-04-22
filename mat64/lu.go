@@ -151,14 +151,18 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 		panic(matrix.ErrShape)
 	}
 	if orig != lu {
-		if len(lu.pivot) == 0 {
-			// lu is zero
-			lu.pivot = make([]int, n)
-			lu.lu = NewDense(n, n, nil)
-		} else {
-			if len(lu.pivot) != n {
-				panic(matrix.ErrShape)
+		if lu.isZero() {
+			if cap(lu.pivot) < n {
+				lu.pivot = make([]int, n)
 			}
+			lu.pivot = lu.pivot[:n]
+			if lu.lu == nil {
+				lu.lu = NewDense(n, n, nil)
+			} else {
+				lu.lu.reuseAs(n, n)
+			}
+		} else if len(lu.pivot) != n {
+			panic(matrix.ErrShape)
 		}
 		copy(lu.pivot, orig.pivot)
 		lu.lu.Copy(orig.lu)

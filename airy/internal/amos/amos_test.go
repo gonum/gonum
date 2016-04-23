@@ -9,8 +9,6 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
-
-	"github.com/gonum/mathext/internal/amos/amoslib"
 )
 
 type input struct {
@@ -155,7 +153,7 @@ func zs1s2test(t *testing.T, x []float64, is []int) {
 
 	comp := func(input data) data {
 		zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf :=
-			amoslib.Zs1s2Fort(input.ZRR, input.ZRI, input.S1R, input.S1I, input.S2R, input.S2I, input.NZ, input.ASCLE, input.ALIM, input.IUF)
+			zs1s2Orig(input.ZRR, input.ZRI, input.S1R, input.S1I, input.S2R, input.S2I, input.NZ, input.ASCLE, input.ALIM, input.IUF)
 		return data{zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf}
 	}
 
@@ -181,7 +179,7 @@ func zuchktest(t *testing.T, x []float64, is []int, tol float64) {
 	ASCLE := x[2]
 	TOL := tol
 
-	YRfort, YIfort, NZfort, ASCLEfort, TOLfort := amoslib.ZuchkFort(YR, YI, NZ, ASCLE, TOL)
+	YRfort, YIfort, NZfort, ASCLEfort, TOLfort := zuchkOrig(YR, YI, NZ, ASCLE, TOL)
 	YRamos, YIamos, NZamos, ASCLEamos, TOLamos := Zuchk(YR, YI, NZ, ASCLE, TOL)
 
 	sameF64(t, "zuchk yr", YRfort, YRamos)
@@ -206,13 +204,7 @@ func zkscltest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yifort := make([]float64, len(yi))
 	copy(yifort, yi)
 	ZRRfort, ZRIfort, FNUfort, Nfort, YRfort, YIfort, NZfort, RZRfort, RZIfort, ASCLEfort, TOLfort, ELIMfort :=
-		amoslib.ZksclFort(ZRR, ZRI, FNU, n, yrfort[1:], yifort[1:], NZ, RZR, RZI, ASCLE, tol, ELIM)
-	YRfort2 := make([]float64, len(yrfort))
-	YRfort2[0] = yrfort[0]
-	copy(YRfort2[1:], YRfort)
-	YIfort2 := make([]float64, len(yifort))
-	YIfort2[0] = yifort[0]
-	copy(YIfort2[1:], YIfort)
+		zksclOrig(ZRR, ZRI, FNU, n, yrfort, yifort, NZ, RZR, RZI, ASCLE, tol, ELIM)
 
 	yramos := make([]float64, len(yr))
 	copy(yramos, yr)
@@ -232,8 +224,8 @@ func zkscltest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zkscl tol", TOLfort, TOLamos)
 	sameF64(t, "zkscl elim", ELIMfort, ELIMamos)
 
-	sameF64S(t, "zkscl yr", YRfort2, YRamos)
-	sameF64S(t, "zkscl yi", YIfort2, YIamos)
+	sameF64S(t, "zkscl yr", YRfort, YRamos)
+	sameF64S(t, "zkscl yi", YIfort, YIamos)
 }
 
 func zmlritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -248,13 +240,7 @@ func zmlritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yifort := make([]float64, len(yi))
 	copy(yifort, yi)
 	ZRfort, ZIfort, FNUfort, KODEfort, Nfort, YRfort, YIfort, NZfort, TOLfort :=
-		amoslib.ZmlriFort(ZR, ZI, FNU, KODE, n, yrfort[1:], yifort[1:], NZ, tol)
-	YRfort2 := make([]float64, len(yrfort))
-	YRfort2[0] = yrfort[0]
-	copy(YRfort2[1:], YRfort)
-	YIfort2 := make([]float64, len(yifort))
-	YIfort2[0] = yifort[0]
-	copy(YIfort2[1:], YIfort)
+		zmlriOrig(ZR, ZI, FNU, KODE, n, yrfort, yifort, NZ, tol)
 
 	yramos := make([]float64, len(yr))
 	copy(yramos, yr)
@@ -271,8 +257,8 @@ func zmlritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameInt(t, "zmlri nz", NZfort, NZamos)
 	sameF64(t, "zmlri tol", TOLfort, TOLamos)
 
-	sameF64S(t, "zmlri yr", YRfort2, YRamos)
-	sameF64S(t, "zmlri yi", YIfort2, YIamos)
+	sameF64S(t, "zmlri yr", YRfort, YRamos)
+	sameF64S(t, "zmlri yi", YIfort, YIamos)
 }
 
 func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -289,13 +275,7 @@ func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yifort := make([]float64, len(yi))
 	copy(yifort, yi)
 	ZRfort, ZIfort, FNUfort, KODEfort, Nfort, YRfort, YIfort, NZfort, TOLfort, ELIMfort, ALIMfort :=
-		amoslib.ZseriFort(ZR, ZI, FNU, KODE, n, yrfort[1:], yifort[1:], NZ, tol, ELIM, ALIM)
-	YRfort2 := make([]float64, len(yrfort))
-	YRfort2[0] = yrfort[0]
-	copy(YRfort2[1:], YRfort)
-	YIfort2 := make([]float64, len(yifort))
-	YIfort2[0] = yifort[0]
-	copy(YIfort2[1:], YIfort)
+		zseriOrig(ZR, ZI, FNU, KODE, n, yrfort, yifort, NZ, tol, ELIM, ALIM)
 
 	yramos := make([]float64, len(yr))
 	copy(yramos, yr)
@@ -314,8 +294,8 @@ func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zseri elim", ELIMfort, ELIMamos)
 	sameF64(t, "zseri elim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zseri yr", YRfort2, YRamos)
-	sameF64S(t, "zseri yi", YIfort2, YIamos)
+	sameF64S(t, "zseri yr", YRfort, YRamos)
+	sameF64S(t, "zseri yi", YIfort, YIamos)
 }
 
 func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -333,13 +313,7 @@ func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yifort := make([]float64, len(yi))
 	copy(yifort, yi)
 	ZRfort, ZIfort, FNUfort, KODEfort, Nfort, YRfort, YIfort, NZfort, RLfort, TOLfort, ELIMfort, ALIMfort :=
-		amoslib.ZasyiFort(ZR, ZI, FNU, KODE, n, yrfort[1:], yifort[1:], NZ, RL, tol, ELIM, ALIM)
-	YRfort2 := make([]float64, len(yrfort))
-	YRfort2[0] = yrfort[0]
-	copy(YRfort2[1:], YRfort)
-	YIfort2 := make([]float64, len(yifort))
-	YIfort2[0] = yifort[0]
-	copy(YIfort2[1:], YIfort)
+		zasyiOrig(ZR, ZI, FNU, KODE, n, yrfort, yifort, NZ, RL, tol, ELIM, ALIM)
 
 	yramos := make([]float64, len(yr))
 	copy(yramos, yr)
@@ -359,8 +333,8 @@ func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zasyi elim", ELIMfort, ELIMamos)
 	sameF64(t, "zasyi alim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zasyi yr", YRfort2, YRamos)
-	sameF64S(t, "zasyi yi", YIfort2, YIamos)
+	sameF64S(t, "zasyi yr", YRfort, YRamos)
+	sameF64S(t, "zasyi yi", YIfort, YIamos)
 }
 
 func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -377,13 +351,7 @@ func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yifort := make([]float64, len(yi))
 	copy(yifort, yi)
 	ZRfort, ZIfort, FNUfort, KODEfort, Nfort, YRfort, YIfort, NZfort, TOLfort, ELIMfort, ALIMfort :=
-		amoslib.ZbknuFort(ZR, ZI, FNU, KODE, n, yrfort[1:], yifort[1:], NZ, tol, ELIM, ALIM)
-	YRfort2 := make([]float64, len(yrfort))
-	YRfort2[0] = yrfort[0]
-	copy(YRfort2[1:], YRfort)
-	YIfort2 := make([]float64, len(yifort))
-	YIfort2[0] = yifort[0]
-	copy(YIfort2[1:], YIfort)
+		zbknuOrig(ZR, ZI, FNU, KODE, n, yrfort, yifort, NZ, tol, ELIM, ALIM)
 
 	yramos := make([]float64, len(yr))
 	copy(yramos, yr)
@@ -402,8 +370,8 @@ func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zbknu elim", ELIMfort, ELIMamos)
 	sameF64(t, "zbknu alim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zbknu yr", YRfort2, YRamos)
-	sameF64S(t, "zbknu yi", YIfort2, YIamos)
+	sameF64S(t, "zbknu yr", YRfort, YRamos)
+	sameF64S(t, "zbknu yi", YIfort, YIamos)
 }
 
 func zairytest(t *testing.T, x []float64, kode, id int) {
@@ -412,7 +380,7 @@ func zairytest(t *testing.T, x []float64, kode, id int) {
 	KODE := kode
 	ID := id
 
-	AIRfort, AIIfort, NZfort := amoslib.ZairyFort(ZR, ZI, ID, KODE)
+	AIRfort, AIIfort, NZfort := zairyOrig(ZR, ZI, ID, KODE)
 	AIRamos, AIIamos, NZamos := Zairy(ZR, ZI, ID, KODE)
 
 	sameF64(t, "zairy air", AIRfort, AIRamos)
@@ -436,13 +404,7 @@ func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	yifort := make([]float64, len(yi))
 	copy(yifort, yi)
 	ZRfort, ZIfort, FNUfort, KODEfort, MRfort, Nfort, YRfort, YIfort, NZfort, RLfort, TOLfort, ELIMfort, ALIMfort :=
-		amoslib.ZacaiFort(ZR, ZI, FNU, KODE, MR, n, yrfort[1:], yifort[1:], NZ, RL, tol, ELIM, ALIM)
-	YRfort2 := make([]float64, len(yrfort))
-	YRfort2[0] = yrfort[0]
-	copy(YRfort2[1:], YRfort)
-	YIfort2 := make([]float64, len(yifort))
-	YIfort2[0] = yifort[0]
-	copy(YIfort2[1:], YIfort)
+		zacaiOrig(ZR, ZI, FNU, KODE, MR, n, yrfort, yifort, NZ, RL, tol, ELIM, ALIM)
 
 	yramos := make([]float64, len(yr))
 	copy(yramos, yr)
@@ -463,8 +425,8 @@ func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zacai elim", ELIMfort, ELIMamos)
 	sameF64(t, "zacai elim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zacai yr", YRfort2, YRamos)
-	sameF64S(t, "zacai yi", YIfort2, YIamos)
+	sameF64S(t, "zacai yr", YRfort, YRamos)
+	sameF64S(t, "zacai yi", YIfort, YIamos)
 }
 
 func sameF64(t *testing.T, str string, c, native float64) {

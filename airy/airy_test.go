@@ -17,7 +17,7 @@ func TestAiry(t *testing.T) {
 		{5, 1.08344428136074e-04},
 		{5i, 29.9014823980070 + 21.6778315987835i},
 	} {
-		ans := Airy(test.z)
+		ans := Ai(test.z)
 		if math.Abs(real(ans)-real(test.ans)) > 1e-10 {
 			t.Errorf("Real part mismatch. Got %v, want %v", real(ans), real(test.ans))
 		}

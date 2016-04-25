@@ -20,7 +20,7 @@ type Dsytrder interface {
 
 func DsytrdTest(t *testing.T, impl Dsytrder) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, uplo := range []blas.Uplo{blas.Upper} {
+	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, test := range []struct {
 			n, lda int
 		}{

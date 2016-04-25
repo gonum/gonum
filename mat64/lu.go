@@ -58,9 +58,12 @@ func (lu *LU) Factorize(a Matrix) {
 		panic(matrix.ErrSquare)
 	}
 	if lu.lu == nil {
-		lu.lu = &Dense{}
+		lu.lu = NewDense(r, r, nil)
+	} else {
+		lu.lu.Reset()
+		lu.lu.reuseAs(r, r)
 	}
-	lu.lu.Clone(a)
+	lu.lu.Copy(a)
 	if cap(lu.pivot) < r {
 		lu.pivot = make([]int, r)
 	}
@@ -69,6 +72,19 @@ func (lu *LU) Factorize(a Matrix) {
 	anorm := lapack64.Lange(matrix.CondNorm, lu.lu.mat, work)
 	lapack64.Getrf(lu.lu.mat, lu.pivot)
 	lu.updateCond(anorm)
+}
+
+// Reset resets the factorization so that it can be reused as the receiver of a
+// dimensionally restricted operation.
+func (lu *LU) Reset() {
+	if lu.lu != nil {
+		lu.lu.Reset()
+	}
+	lu.pivot = lu.pivot[:0]
+}
+
+func (lu *LU) isZero() bool {
+	return len(lu.pivot) == 0
 }
 
 // Det returns the determinant of the matrix that has been factorized. In many
@@ -138,14 +154,18 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 		panic(matrix.ErrShape)
 	}
 	if orig != lu {
-		if len(lu.pivot) == 0 {
-			// lu is zero
-			lu.pivot = make([]int, n)
-			lu.lu = NewDense(n, n, nil)
-		} else {
-			if len(lu.pivot) != n {
-				panic(matrix.ErrShape)
+		if lu.isZero() {
+			if cap(lu.pivot) < n {
+				lu.pivot = make([]int, n)
 			}
+			lu.pivot = lu.pivot[:n]
+			if lu.lu == nil {
+				lu.lu = NewDense(n, n, nil)
+			} else {
+				lu.lu.reuseAs(n, n)
+			}
+		} else if len(lu.pivot) != n {
+			panic(matrix.ErrShape)
 		}
 		copy(lu.pivot, orig.pivot)
 		lu.lu.Copy(orig.lu)

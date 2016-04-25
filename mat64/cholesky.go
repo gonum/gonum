@@ -21,6 +21,10 @@ const (
 
 // Cholesky is a type for creating and using the Cholesky factorization of a
 // symmetric positive definite matrix.
+//
+// Cholesky methods may only be called on a value that has been successfully
+// initialized by a call to Factorize that has returned true. Calls to methods
+// of an unsuccessful Cholesky factorization will panic.
 type Cholesky struct {
 	chol *TriDense
 	cond float64

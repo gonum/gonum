@@ -108,6 +108,10 @@ func TestDlantr(t *testing.T) {
 	testlapack.DlantrTest(t, impl)
 }
 
+func TestDlanv2(t *testing.T) {
+	testlapack.Dlanv2Test(t, impl)
+}
+
 func TestDlarfb(t *testing.T) {
 	testlapack.DlarfbTest(t, impl)
 }

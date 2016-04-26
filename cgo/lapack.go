@@ -68,7 +68,7 @@ func checkMatrix(m, n int, a []float64, lda int) {
 	if m < 0 {
 		panic("lapack: has negative number of rows")
 	}
-	if m < 0 {
+	if n < 0 {
 		panic("lapack: has negative number of columns")
 	}
 	if lda < n {

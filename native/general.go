@@ -59,7 +59,7 @@ func checkMatrix(m, n int, a []float64, lda int) {
 	if m < 0 {
 		panic("lapack: has negative number of rows")
 	}
-	if m < 0 {
+	if n < 0 {
 		panic("lapack: has negative number of columns")
 	}
 	if lda < n {
@@ -72,7 +72,7 @@ func checkMatrix(m, n int, a []float64, lda int) {
 
 func checkVector(n int, v []float64, inc int) {
 	if n < 0 {
-		panic("lapack: negative matrix length")
+		panic("lapack: negative vector length")
 	}
 	if (inc > 0 && (n-1)*inc >= len(v)) || (inc < 0 && (1-n)*inc >= len(v)) {
 		panic("lapack: insufficient vector slice length")

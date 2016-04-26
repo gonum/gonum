@@ -864,17 +864,66 @@ type weightSorter struct {
 	w []float64
 }
 
-func (w weightSorter) Less(i, j int) bool {
-	return w.x[i] < w.x[j]
-}
-
+func (w weightSorter) Len() int           { return len(w.x) }
+func (w weightSorter) Less(i, j int) bool { return w.x[i] < w.x[j] }
 func (w weightSorter) Swap(i, j int) {
 	w.x[i], w.x[j] = w.x[j], w.x[i]
 	w.w[i], w.w[j] = w.w[j], w.w[i]
 }
 
-func (w weightSorter) Len() int {
-	return len(w.x)
+// SortWeightedLabeled rearranges the data in x along with their
+// corresponding weights and boolean labels so that the x data are sorted.
+// The data is sorted in place. Weights and labels may be nil, if either
+// is non-nil it must have the same length as x.
+func SortWeightedLabeled(x []float64, labels []bool, weights []float64) {
+	if labels == nil {
+		SortWeighted(x, weights)
+		return
+	}
+	if weights == nil {
+		if len(x) != len(labels) {
+			panic("stat: slice length mismatch")
+		}
+		sort.Sort(labelSorter{
+			x: x,
+			l: labels,
+		})
+		return
+	}
+	if len(x) != len(labels) || len(x) != len(weights) {
+		panic("stat: slice length mismatch")
+	}
+	sort.Sort(weightLabelSorter{
+		x: x,
+		l: labels,
+		w: weights,
+	})
+}
+
+type labelSorter struct {
+	x []float64
+	l []bool
+}
+
+func (a labelSorter) Len() int           { return len(a.x) }
+func (a labelSorter) Less(i, j int) bool { return a.x[i] < a.x[j] }
+func (a labelSorter) Swap(i, j int) {
+	a.x[i], a.x[j] = a.x[j], a.x[i]
+	a.l[i], a.l[j] = a.l[j], a.l[i]
+}
+
+type weightLabelSorter struct {
+	x []float64
+	l []bool
+	w []float64
+}
+
+func (a weightLabelSorter) Len() int           { return len(a.x) }
+func (a weightLabelSorter) Less(i, j int) bool { return a.x[i] < a.x[j] }
+func (a weightLabelSorter) Swap(i, j int) {
+	a.x[i], a.x[j] = a.x[j], a.x[i]
+	a.l[i], a.l[j] = a.l[j], a.l[i]
+	a.w[i], a.w[j] = a.w[j], a.w[i]
 }
 
 // StdDev returns the sample standard deviation.

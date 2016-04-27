@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build fortran
+// TODO(jonlawlor): remove fortran build tag when gonum only supports go 1.7+.
+
 package amoslib
 
 /*

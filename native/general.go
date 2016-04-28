@@ -32,6 +32,7 @@ const (
 	badNorm         = "lapack: bad norm"
 	badPivot        = "lapack: bad pivot"
 	badS            = "lapack: s has insufficient length"
+	badShifts       = "lapack: bad shifts"
 	badSide         = "lapack: bad side"
 	badSlice        = "lapack: bad input slice length"
 	badStore        = "lapack: bad store"

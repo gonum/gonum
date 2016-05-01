@@ -30,25 +30,12 @@ matrix:
   - os: osx
     env: BLAS_LIB=OpenBLAS
 
-before_install:
- # Required for coverage.
- - go get golang.org/x/tools/cmd/cover
- - go get github.com/mattn/goveralls
-
-# Install the appropriate blas library if we are using cgo.
+# Install the appropriate blas library (if any) and associated gonum software.
 install:
- - source .travis/$TRAVIS_OS_NAME/$BLAS_LIB/install.sh
- - go get github.com/gonum/floats
+ - source ${TRAVIS_BUILD_DIR}/.travis/$TRAVIS_OS_NAME/$BLAS_LIB/install.sh
 
-# Get deps, build, test, ensure the code is gofmt'ed and check that go generate was run.
-# Move into the native directory if we aren't using an external blas lib.
-# If we are building as gonum, then we have access to the coveralls api key, so we can run coverage as well.
 script:
- - if [[ "$BLAS_LIB" == "gonum" ]]; then pushd native; fi
- - go get -d -t -v ./...
- - go test -a -v ./...
- - go test -a -tags noasm -v ./...
+ - source ${TRAVIS_BUILD_DIR}/.travis/$TRAVIS_OS_NAME/$BLAS_LIB/test.sh
  - diff <(gofmt -d .) <("")
- - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash -c "${TRAVIS_BUILD_DIR}/.travis/test-coverage.sh"; fi
  # This is run last since it alters the tree.
  - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh

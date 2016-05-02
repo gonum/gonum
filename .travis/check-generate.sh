@@ -2,6 +2,6 @@
 
 go generate github.com/gonum/blas/cgo
 go generate github.com/gonum/blas/native
-if [ -n "$(git diff)" ]; then
+if [ -n "$(git diff -- . ':!.travis')" ]; then
 	exit 1
 fi

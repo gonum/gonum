@@ -6,9 +6,13 @@
 
 package f64
 
-func Add(dst, s []float64)
+func AbsSum(x []float64) (sum float64)
+
+func AbsSumInc(x []float64, n, incX int) (sum float64)
 
 func AddConst(alpha float64, x []float64)
+
+func Add(dst, s []float64)
 
 func AxpyUnitary(alpha float64, x, y []float64)
 

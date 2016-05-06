@@ -51,5 +51,6 @@ func TestAxpyUnitaryTo(t *testing.T) {
 				t.Fail()
 			}
 		}
+		runtime.GC()
 	}
 }

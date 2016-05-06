@@ -6,19 +6,19 @@
 
 package f64
 
-func DaxpyUnitary(alpha float64, x, y []float64) {
+func AxpyUnitary(alpha float64, x, y []float64) {
 	for i, v := range x {
 		y[i] += alpha * v
 	}
 }
 
-func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64) {
+func AxpyUnitaryTo(dst []float64, alpha float64, x, y []float64) {
 	for i, v := range x {
 		dst[i] = alpha*v + y[i]
 	}
 }
 
-func DaxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr) {
+func AxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr) {
 	for i := 0; i < int(n); i++ {
 		y[iy] += alpha * x[ix]
 		ix += incX
@@ -26,7 +26,7 @@ func DaxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr) {
 	}
 }
 
-func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr) {
+func AxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr) {
 	for i := 0; i < int(n); i++ {
 		dst[idst] = alpha*x[ix] + y[iy]
 		ix += incX

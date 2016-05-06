@@ -5,22 +5,25 @@
 //+build !noasm,!appengine
 
 #include "textflag.h"
-	
+
+// func AxpyUnitary(alpha complex64, x, y []complex64)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
-	MOVQ	x_base+8(FP), SI
-	MOVQ	y_base+32(FP), DI
-	MOVQ	x_len+16(FP), DX
-	CMPQ	y_len+40(FP), DX
-	CMOVLEQ	y_len+40(FP), DX
-	CMPQ	DX, $0
-	JE	caxy_end
-	MOVSD	alpha+0(FP), X0 // (0,0,ar,ai)
-	SHUFPD	$0, X0, X0	// (ar,ai,ar,ai)
-	MOVAPS	X0, X1
-	SHUFPS	$0x11, X1, X1	// (ai,ar,ai,ar)
-	XORQ	AX, AX
-	CMPQ	DX, $2
-	JL	caxy_tail
+	MOVQ    x_base+8(FP), SI
+	MOVQ    y_base+32(FP), DI
+	MOVQ    x_len+16(FP), DX
+	CMPQ    y_len+40(FP), DX
+	CMOVLEQ y_len+40(FP), DX
+	CMPQ    DX, $0
+	JE      caxy_end
+	MOVSD   alpha+0(FP), X0   // (0,0,ar,ai)
+	SHUFPD  $0, X0, X0        // (ar,ai,ar,ai)
+	MOVAPS  X0, X1
+	SHUFPS  $0x11, X1, X1     // (ai,ar,ai,ar)
+	XORQ    AX, AX
+	CMPQ    DX, $2
+	JL      caxy_tail
+	DECQ    DX
+
 caxy_loop:
 	// MOVSHDUP (SI)(AX*8), X2	//Load and duplicate real elements (x2r, x2r, x1r, x1r)
 	// MOVSLDUP (SI)(AX*8), X3	//Load and duplicate imag elements (x2i, x2i, x1i, x1i)

@@ -64,5 +64,6 @@ caxy_tail: // Same calculation, but read in values to avoid trampling memory
 	MOVSD (CX)(AX*8), X4
 	ADDPS X4, X3
 	MOVSD X3, (DI)(AX*8)
+
 caxy_end:
 	RET

@@ -12,7 +12,7 @@ import (
 	"github.com/gonum/optimize/functions"
 )
 
-func ExampleLocal_BFGS() {
+func ExampleLocal() {
 	p := optimize.Problem{
 		Func: functions.ExtendedRosenbrock{}.Func,
 		Grad: functions.ExtendedRosenbrock{}.Grad,

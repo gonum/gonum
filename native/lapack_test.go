@@ -88,6 +88,10 @@ func TestDlaev2(t *testing.T) {
 	testlapack.Dlaev2Test(t, impl)
 }
 
+func TestDlahr2(t *testing.T) {
+	testlapack.Dlahr2Test(t, impl)
+}
+
 func TestDlange(t *testing.T) {
 	testlapack.DlangeTest(t, impl)
 }

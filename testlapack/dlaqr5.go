@@ -10,8 +10,6 @@ import (
 	"io"
 	"log"
 	"testing"
-
-	"github.com/gonum/floats"
 )
 
 type Dlaqr5er interface {
@@ -30,7 +28,7 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		wantt, n, nshfts, ktop, kbot, sr, si, hOrig, hwant, zwant := readCase(tc)
+		wantt, n, nshfts, ktop, kbot, sr, si, hOrig, hwant, zwant := readDlaqr5Case(tc)
 		tc.Close()
 
 		v := make([]float64, nshfts/2*3)
@@ -43,7 +41,7 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 		for _, ldh := range []int{n, n + 1, n + 10} {
 			h := make([]float64, (n-1)*ldh+n)
 			for _, kacc22 := range []int{0, 1, 2} {
-				copySquareMatrix(n, h, ldh, hOrig)
+				copyMatrix(n, n, h, ldh, hOrig)
 				z := eye(n, ldh)
 
 				impl.Dlaqr5(wantt, true, kacc22,
@@ -56,10 +54,10 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 					nh, wh, nh,
 					nv, wv, 3*nshfts-3)
 
-				if !equalApprox(n, h, ldh, hwant, 1e-13) {
+				if !equalApprox(n, n, h, ldh, hwant, 1e-13) {
 					t.Errorf("Case %v, kacc22=%v: unexpected matrix H\nh    =%v\nhwant=%v", f.Name, kacc22, h, hwant)
 				}
-				if !equalApprox(n, z, ldh, zwant, 1e-13) {
+				if !equalApprox(n, n, z, ldh, zwant, 1e-13) {
 					t.Errorf("Case %v, kacc22=%v: unexpected matrix Z\nz    =%v\nzwant=%v", f.Name, kacc22, z, zwant)
 				}
 			}
@@ -67,29 +65,8 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 	}
 }
 
-// copySquareMatrix copies a square matrix src of order and stride n into a
-// square matrix dst of order n and stride ldh.
-func copySquareMatrix(n int, dst []float64, ldh int, src []float64) {
-	for i := 0; i < n; i++ {
-		copy(dst[i*ldh:i*ldh+n], src[i*n:i*n+n])
-	}
-}
-
-// equalApprox returns whether the square matrices A and B of order n are
-// approximately equal within given tolerance.
-func equalApprox(n int, a []float64, lda int, b []float64, tol float64) bool {
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			if !floats.EqualWithinAbsOrRel(a[i*lda+j], b[i*n+j], tol, tol) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// readCase reads and returns test data written by internal/testdata/dlaqr5test/main.go.
-func readCase(r io.Reader) (wantt bool, n, nshfts, ktop, kbot int, sr, si []float64, h, hwant, zwant []float64) {
+// readDlaqr5Case reads and returns test data written by internal/testdata/dlaqr5test/main.go.
+func readDlaqr5Case(r io.Reader) (wantt bool, n, nshfts, ktop, kbot int, sr, si []float64, h, hwant, zwant []float64) {
 	_, err := fmt.Fscanln(r, &wantt, &n, &nshfts, &ktop, &kbot)
 	if err != nil {
 		log.Fatal(err)
@@ -139,13 +116,4 @@ func readCase(r io.Reader) (wantt bool, n, nshfts, ktop, kbot int, sr, si []floa
 	}
 
 	return wantt, n, nshfts, ktop, kbot, sr, si, h, hwant, zwant
-}
-
-// eye returns an identity matrix of order n and stride ld.
-func eye(n, ld int) []float64 {
-	m := make([]float64, (n-1)*ld+n)
-	for i := 0; i < n; i++ {
-		m[i*ld+i] = 1
-	}
-	return m
 }

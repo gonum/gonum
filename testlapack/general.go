@@ -594,3 +594,55 @@ func isOrthonormal(q blas64.General) bool {
 	}
 	return true
 }
+
+// copyMatrix copies an m×n matrix src of stride n into an m×n matrix dst of stride ld.
+func copyMatrix(m, n int, dst []float64, ld int, src []float64) {
+	for i := 0; i < m; i++ {
+		copy(dst[i*ld:i*ld+n], src[i*n:i*n+n])
+	}
+}
+
+// equalApprox returns whether the matrices A and B of order n are approximately
+// equal within given tolerance.
+func equalApprox(m, n int, a []float64, lda int, b []float64, tol float64) bool {
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			if math.Abs(a[i*lda+j]-b[i*n+j]) > tol {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// equalApproxTriangular returns whether the triangular matrices A and B of
+// order n are approximately equal within given tolerance.
+func equalApproxTriangular(upper bool, n int, a []float64, lda int, b []float64, tol float64) bool {
+	if upper {
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				if math.Abs(a[i*lda+j]-b[i*n+j]) > tol {
+					return false
+				}
+			}
+		}
+		return true
+	}
+	for i := 0; i < n; i++ {
+		for j := 0; j <= i; j++ {
+			if math.Abs(a[i*lda+j]-b[i*n+j]) > tol {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// eye returns an identity matrix of order n and stride ld.
+func eye(n, ld int) []float64 {
+	m := make([]float64, (n-1)*ld+n)
+	for i := 0; i < n; i++ {
+		m[i*ld+i] = 1
+	}
+	return m
+}

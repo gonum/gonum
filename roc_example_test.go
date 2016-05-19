@@ -7,6 +7,7 @@ package stat_test
 import (
 	"fmt"
 
+	"github.com/gonum/integrate"
 	"github.com/gonum/stat"
 )
 
@@ -35,4 +36,21 @@ func ExampleROC_weighted() {
 	// Output:
 	// true  positive rate: [0 0.5 0.5 1 1 1 1]
 	// false positive rate: [0 0 0.25 0.25 0.5 0.75 1]
+}
+
+func ExampleROC_aUC() {
+	y := []float64{0.1, 0.35, 0.4, 0.8}
+	classes := []bool{true, false, true, false}
+
+	tpr, fpr := stat.ROC(0, y, classes, nil)
+	// compute Area Under Curve
+	auc := integrate.Trapezoidal(fpr, tpr)
+	fmt.Printf("true  positive rate: %v\n", tpr)
+	fmt.Printf("false positive rate: %v\n", fpr)
+	fmt.Printf("auc: %v\n", auc)
+
+	// Output:
+	// true  positive rate: [0 0.5 0.5 1 1]
+	// false positive rate: [0 0 0.5 0.5 1]
+	// auc: 0.75
 }

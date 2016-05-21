@@ -4,8 +4,8 @@
 
 #include "textflag.h"
 	
-//func L1norm(s, t []float64) float64
-TEXT ·L1norm(SB), NOSPLIT, $0
+//func LinfNorm(s, t []float64) float64
+TEXT ·LinfNorm(SB), NOSPLIT, $0
 	MOVQ    s_base+0(FP), DI
 	MOVQ    t_base+24(FP), SI
 	MOVQ    s_len+8(FP), DX
@@ -24,7 +24,7 @@ l1_loop:
 	SUBPD   X1, X0
 	SUBPD   X2, X1
 	MAXPD   X1, X0
-	ADDPD   X0, X3
+	MAXPD   X0, X3
 	ADDQ	$2, AX
 	CMPQ    AX, DX
 	JL	l1_loop
@@ -38,11 +38,10 @@ l1_tail:
 	SUBSD   X1, X0
 	SUBSD   X2, X1
 	MAXSD   X1, X0
-	ADDSD   X0, X3
+	MAXSD   X0, X3
 l1_end:
 	MOVAPS  X3, X2
 	SHUFPD  $1, X2, X2
-	ADDSD   X3, X2
+	MAXSD   X3, X2
 	MOVSD   X2, ret+48(FP)
 	RET
-	

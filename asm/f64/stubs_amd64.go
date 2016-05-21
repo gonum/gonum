@@ -32,6 +32,8 @@ func DotInc(x, y []float64, n, incX, incY, ix, iy uintptr) (sum float64)
 
 func L1norm(s, t []float64) float64
 
+func LinfNorm(s, t []float64) float64
+
 func ScalUnitary(alpha float64, x []float64)
 
 func ScalUnitaryTo(dst []float64, alpha float64, x []float64)

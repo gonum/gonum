@@ -6,19 +6,19 @@
 
 package asm
 
-func ZaxpyUnitary(alpha complex128, x, y []complex128) {
+func AxpyUnitary(alpha complex128, x, y []complex128) {
 	for i, v := range x {
 		y[i] += alpha * v
 	}
 }
 
-func ZaxpyUnitaryTo(dst []complex128, alpha complex128, x, y []complex128) {
+func AxpyUnitaryTo(dst []complex128, alpha complex128, x, y []complex128) {
 	for i, v := range x {
 		dst[i] = alpha*v + y[i]
 	}
 }
 
-func ZaxpyInc(alpha complex128, x, y []complex128, n, incX, incY, ix, iy uintptr) {
+func AxpyInc(alpha complex128, x, y []complex128, n, incX, incY, ix, iy uintptr) {
 	for i := 0; i < int(n); i++ {
 		y[iy] += alpha * x[ix]
 		ix += incX
@@ -26,7 +26,7 @@ func ZaxpyInc(alpha complex128, x, y []complex128, n, incX, incY, ix, iy uintptr
 	}
 }
 
-func ZaxpyIncTo(dst []complex128, incDst, idst uintptr, alpha complex128, x, y []complex128, n, incX, incY, ix, iy uintptr) {
+func AxpyIncTo(dst []complex128, incDst, idst uintptr, alpha complex128, x, y []complex128, n, incX, incY, ix, iy uintptr) {
 	for i := 0; i < int(n); i++ {
 		dst[idst] = alpha*x[ix] + y[iy]
 		ix += incX

@@ -6,20 +6,20 @@
 
 package asm
 
-func ZscalUnitary(alpha complex128, x []complex128) {
+func ScalUnitary(alpha complex128, x []complex128) {
 	for i := range x {
 		x[i] *= alpha
 	}
 }
 
-func ZscalUnitaryTo(dst []complex128, alpha complex128, x []complex128) {
+func ScalUnitaryTo(dst []complex128, alpha complex128, x []complex128) {
 	for i, v := range x {
 		dst[i] = alpha * v
 	}
 }
 
 // incX must be positive.
-func ZscalInc(alpha complex128, x []complex128, n, incX uintptr) {
+func ScalInc(alpha complex128, x []complex128, n, incX uintptr) {
 	var ix uintptr
 	for i := 0; i < int(n); i++ {
 		x[ix] *= alpha
@@ -28,7 +28,7 @@ func ZscalInc(alpha complex128, x []complex128, n, incX uintptr) {
 }
 
 // incDst and incX must be positive.
-func ZscalIncTo(dst []complex128, incDst uintptr, alpha complex128, x []complex128, n, incX uintptr) {
+func ScalIncTo(dst []complex128, incDst uintptr, alpha complex128, x []complex128, n, incX uintptr) {
 	var idst, ix uintptr
 	for i := 0; i < int(n); i++ {
 		dst[idst] = alpha * x[ix]

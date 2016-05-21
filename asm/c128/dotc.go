@@ -8,14 +8,14 @@ package asm
 
 import "math/cmplx"
 
-func ZdotcUnitary(x, y []complex128) (sum complex128) {
+func DotcUnitary(x, y []complex128) (sum complex128) {
 	for i, v := range x {
 		sum += y[i] * cmplx.Conj(v)
 	}
 	return
 }
 
-func ZdotcInc(x, y []complex128, n, incX, incY, ix, iy uintptr) (sum complex128) {
+func DotcInc(x, y []complex128, n, incX, incY, ix, iy uintptr) (sum complex128) {
 	for i := 0; i < int(n); i++ {
 		sum += y[iy] * cmplx.Conj(x[ix])
 		ix += incX

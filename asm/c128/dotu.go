@@ -6,14 +6,14 @@
 
 package asm
 
-func ZdotuUnitary(x, y []complex128) (sum complex128) {
+func DotuUnitary(x, y []complex128) (sum complex128) {
 	for i, v := range x {
 		sum += y[i] * v
 	}
 	return
 }
 
-func ZdotuInc(x, y []complex128, n, incX, incY, ix, iy uintptr) (sum complex128) {
+func DotuInc(x, y []complex128, n, incX, incY, ix, iy uintptr) (sum complex128) {
 	for i := 0; i < int(n); i++ {
 		sum += y[iy] * x[ix]
 		ix += incX

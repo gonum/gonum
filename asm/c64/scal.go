@@ -4,22 +4,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package asm
+package c64
 
-func CscalUnitary(alpha complex64, x []complex64) {
+func ScalUnitary(alpha complex64, x []complex64) {
 	for i := range x {
 		x[i] *= alpha
 	}
 }
 
-func CscalUnitaryTo(dst []complex64, alpha complex64, x []complex64) {
+func ScalUnitaryTo(dst []complex64, alpha complex64, x []complex64) {
 	for i, v := range x {
 		dst[i] = alpha * v
 	}
 }
 
 // incX must be positive.
-func CscalInc(alpha complex64, x []complex64, n, incX uintptr) {
+func ScalInc(alpha complex64, x []complex64, n, incX uintptr) {
 	var ix uintptr
 	for i := 0; i < int(n); i++ {
 		x[ix] *= alpha
@@ -28,7 +28,7 @@ func CscalInc(alpha complex64, x []complex64, n, incX uintptr) {
 }
 
 // incDst and incX must be positive.
-func CscalIncTo(dst []complex64, incDst uintptr, alpha complex64, x []complex64, n, incX uintptr) {
+func ScalIncTo(dst []complex64, incDst uintptr, alpha complex64, x []complex64, n, incX uintptr) {
 	var idst, ix uintptr
 	for i := 0; i < int(n); i++ {
 		dst[idst] = alpha * x[ix]

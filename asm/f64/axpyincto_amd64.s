@@ -2,7 +2,7 @@
 //  go generate github.com/gonum/internal/asm
 // DO NOT EDIT.
 
-// Copyright ©2016 The gonum Authors. All rights reserved.
+// Copyright ©2015 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 //
@@ -42,32 +42,51 @@
 
 #include "textflag.h"
 
-// func DscalInc(alpha float64, x []float64, n, incX uintptr)
-// This function assumes that incX is positive.
-TEXT ·DscalInc(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   n+32(FP), DX
-	MOVQ   incX+40(FP), R10
+// func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
+TEXT ·AxpyIncTo(SB), NOSPLIT, $0
+	MOVQ   dst+0(FP), R10
+	MOVQ   incDst+24(FP), R13
+	MOVQ   idst+32(FP), BP
+	MOVHPD alpha+40(FP), X7
+	MOVLPD alpha+40(FP), X7
+	MOVQ   x+48(FP), R8
+	MOVQ   y+72(FP), R9
+	MOVQ   n+96(FP), DX
+	MOVQ   incX+104(FP), R11
+	MOVQ   incY+112(FP), R12
+	MOVQ   ix+120(FP), SI
+	MOVQ   iy+128(FP), DI
 
-	MOVQ $0, SI
-	MOVQ R10, AX // nextX = incX
-	SHLQ $1, R10 // incX *= 2
+	MOVQ SI, AX  // nextX = ix
+	MOVQ DI, BX  // nextY = iy
+	MOVQ BP, CX  // nextDst = idst
+	ADDQ R11, AX // nextX += incX
+	ADDQ R12, BX // nextY += incY
+	ADDQ R13, CX // nextDst += incDst
+	SHLQ $1, R11 // incX *= 2
+	SHLQ $1, R12 // incY *= 2
+	SHLQ $1, R13 // incDst *= 2
 
 	SUBQ $2, DX // n -= 2
 	JL   tail   // if n < 0
 
-loop:
-	// x[i] *= alpha unrolled 2x.
+loop:  // n >= 0
+	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
 	MOVHPD 0(R8)(SI*8), X0
+	MOVHPD 0(R9)(DI*8), X1
 	MOVLPD 0(R8)(AX*8), X0
+	MOVLPD 0(R9)(BX*8), X1
 	MULPD  X7, X0
-	MOVHPD X0, 0(R8)(SI*8)
-	MOVLPD X0, 0(R8)(AX*8)
+	ADDPD  X0, X1
+	MOVHPD X1, 0(R10)(BP*8)
+	MOVLPD X1, 0(R10)(CX*8)
 
-	ADDQ R10, SI // ix += incX
-	ADDQ R10, AX // nextX += incX
+	ADDQ R11, SI // ix += incX
+	ADDQ R12, DI // iy += incY
+	ADDQ R13, BP // idst += incDst
+	ADDQ R11, AX // nextX += incX
+	ADDQ R12, BX // nextY += incY
+	ADDQ R13, CX // nextDst += incDst
 
 	SUBQ $2, DX // n -= 2
 	JGE  loop   // if n >= 0 goto loop
@@ -76,10 +95,12 @@ tail:
 	ADDQ $2, DX // n += 2
 	JLE  end    // if n <= 0
 
-	// x[i] *= alpha for the last iteration if n is odd.
+	// dst[i] = alpha * x[i] + y[i] for the last iteration if n is odd.
 	MOVSD 0(R8)(SI*8), X0
+	MOVSD 0(R9)(DI*8), X1
 	MULSD X7, X0
-	MOVSD X0, 0(R8)(SI*8)
+	ADDSD X0, X1
+	MOVSD X1, 0(R10)(BP*8)
 
 end:
 	RET

@@ -2,7 +2,7 @@
 //  go generate github.com/gonum/internal/asm
 // DO NOT EDIT.
 
-// Copyright ©2015 The gonum Authors. All rights reserved.
+// Copyright ©2016 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 //
@@ -42,43 +42,32 @@
 
 #include "textflag.h"
 
-// func DaxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
-TEXT ·DaxpyInc(SB), NOSPLIT, $0
+// func DscalInc(alpha float64, x []float64, n, incX uintptr)
+// This function assumes that incX is positive.
+TEXT ·ScalInc(SB), NOSPLIT, $0
 	MOVHPD alpha+0(FP), X7
 	MOVLPD alpha+0(FP), X7
 	MOVQ   x+8(FP), R8
-	MOVQ   y+32(FP), R9
-	MOVQ   n+56(FP), DX
-	MOVQ   incX+64(FP), R11
-	MOVQ   incY+72(FP), R12
-	MOVQ   ix+80(FP), SI
-	MOVQ   iy+88(FP), DI
+	MOVQ   n+32(FP), DX
+	MOVQ   incX+40(FP), R10
 
-	MOVQ SI, AX  // nextX = ix
-	MOVQ DI, BX  // nextY = iy
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
-	SHLQ $1, R11 // incX *= 2
-	SHLQ $1, R12 // incY *= 2
+	MOVQ $0, SI
+	MOVQ R10, AX // nextX = incX
+	SHLQ $1, R10 // incX *= 2
 
 	SUBQ $2, DX // n -= 2
 	JL   tail   // if n < 0
 
-loop:  // n >= 0
-	// y[i] += alpha * x[i] unrolled 2x.
+loop:
+	// x[i] *= alpha unrolled 2x.
 	MOVHPD 0(R8)(SI*8), X0
-	MOVHPD 0(R9)(DI*8), X1
 	MOVLPD 0(R8)(AX*8), X0
-	MOVLPD 0(R9)(BX*8), X1
 	MULPD  X7, X0
-	ADDPD  X0, X1
-	MOVHPD X1, 0(R9)(DI*8)
-	MOVLPD X1, 0(R9)(BX*8)
+	MOVHPD X0, 0(R8)(SI*8)
+	MOVLPD X0, 0(R8)(AX*8)
 
-	ADDQ R11, SI // ix += incX
-	ADDQ R12, DI // iy += incY
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
+	ADDQ R10, SI // ix += incX
+	ADDQ R10, AX // nextX += incX
 
 	SUBQ $2, DX // n -= 2
 	JGE  loop   // if n >= 0 goto loop
@@ -87,12 +76,10 @@ tail:
 	ADDQ $2, DX // n += 2
 	JLE  end    // if n <= 0
 
-	// y[i] += alpha * x[i] for the last iteration if n is odd.
+	// x[i] *= alpha for the last iteration if n is odd.
 	MOVSD 0(R8)(SI*8), X0
-	MOVSD 0(R9)(DI*8), X1
 	MULSD X7, X0
-	ADDSD X0, X1
-	MOVSD X1, 0(R9)(DI*8)
+	MOVSD X0, 0(R8)(SI*8)
 
 end:
 	RET

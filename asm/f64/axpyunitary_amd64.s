@@ -42,65 +42,41 @@
 
 #include "textflag.h"
 
-// func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
-TEXT ·DaxpyIncTo(SB), NOSPLIT, $0
-	MOVQ   dst+0(FP), R10
-	MOVQ   incDst+24(FP), R13
-	MOVQ   idst+32(FP), BP
-	MOVHPD alpha+40(FP), X7
-	MOVLPD alpha+40(FP), X7
-	MOVQ   x+48(FP), R8
-	MOVQ   y+72(FP), R9
-	MOVQ   n+96(FP), DX
-	MOVQ   incX+104(FP), R11
-	MOVQ   incY+112(FP), R12
-	MOVQ   ix+120(FP), SI
-	MOVQ   iy+128(FP), DI
+// func DaxpyUnitary(alpha float64, x, y []float64)
+// This function assumes len(y) >= len(x).
+TEXT ·AxpyUnitary(SB), NOSPLIT, $0
+	MOVHPD alpha+0(FP), X7
+	MOVLPD alpha+0(FP), X7
+	MOVQ   x+8(FP), R8
+	MOVQ   x_len+16(FP), DI // n = len(x)
+	MOVQ   y+32(FP), R9
 
-	MOVQ SI, AX  // nextX = ix
-	MOVQ DI, BX  // nextY = iy
-	MOVQ BP, CX  // nextDst = idst
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
-	ADDQ R13, CX // nextDst += incDst
-	SHLQ $1, R11 // incX *= 2
-	SHLQ $1, R12 // incY *= 2
-	SHLQ $1, R13 // incDst *= 2
+	MOVQ $0, SI // i = 0
+	SUBQ $2, DI // n -= 2
+	JL   tail   // if n < 0 goto tail
 
-	SUBQ $2, DX // n -= 2
-	JL   tail   // if n < 0
-
-loop:  // n >= 0
-	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
-	MOVHPD 0(R8)(SI*8), X0
-	MOVHPD 0(R9)(DI*8), X1
-	MOVLPD 0(R8)(AX*8), X0
-	MOVLPD 0(R9)(BX*8), X1
+loop:
+	// y[i] += alpha * x[i] unrolled 2x.
+	MOVUPD 0(R8)(SI*8), X0
+	MOVUPD 0(R9)(SI*8), X1
 	MULPD  X7, X0
 	ADDPD  X0, X1
-	MOVHPD X1, 0(R10)(BP*8)
-	MOVLPD X1, 0(R10)(CX*8)
+	MOVUPD X1, 0(R9)(SI*8)
 
-	ADDQ R11, SI // ix += incX
-	ADDQ R12, DI // iy += incY
-	ADDQ R13, BP // idst += incDst
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
-	ADDQ R13, CX // nextDst += incDst
-
-	SUBQ $2, DX // n -= 2
+	ADDQ $2, SI // i += 2
+	SUBQ $2, DI // n -= 2
 	JGE  loop   // if n >= 0 goto loop
 
 tail:
-	ADDQ $2, DX // n += 2
-	JLE  end    // if n <= 0
+	ADDQ $2, DI // n += 2
+	JLE  end    // if n <= 0 goto end
 
-	// dst[i] = alpha * x[i] + y[i] for the last iteration if n is odd.
+	// y[i] += alpha * x[i] for the last iteration if n is odd.
 	MOVSD 0(R8)(SI*8), X0
-	MOVSD 0(R9)(DI*8), X1
+	MOVSD 0(R9)(SI*8), X1
 	MULSD X7, X0
 	ADDSD X0, X1
-	MOVSD X1, 0(R10)(BP*8)
+	MOVSD X1, 0(R9)(SI*8)
 
 end:
 	RET

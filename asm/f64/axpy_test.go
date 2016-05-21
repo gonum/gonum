@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package asm
+package f64
 
 import (
 	"fmt"
@@ -90,7 +90,7 @@ func TestDaxpyUnitary(t *testing.T) {
 		prefix := fmt.Sprintf("test %v (y+=a*x)", i)
 		x, xFront, xBack := newGuardedVector(test.xData, 1)
 		y, yFront, yBack := newGuardedVector(test.yData, 1)
-		DaxpyUnitary(test.alpha, x, y)
+		AxpyUnitary(test.alpha, x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -117,7 +117,7 @@ func TestDaxpyUnitaryTo(t *testing.T) {
 		x, xFront, xBack := newGuardedVector(test.xData, 1)
 		y, yFront, yBack := newGuardedVector(test.yData, 1)
 		dst, dstFront, dstBack := newGuardedVector(test.xData, 1)
-		DaxpyUnitaryTo(dst, test.alpha, x, y)
+		AxpyUnitaryTo(dst, test.alpha, x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -143,7 +143,7 @@ func TestDaxpyUnitaryTo(t *testing.T) {
 		prefix = fmt.Sprintf("test %v (y=a*x+y)", i)
 		x, xFront, xBack = newGuardedVector(test.xData, 1)
 		y, yFront, yBack = newGuardedVector(test.yData, 1)
-		DaxpyUnitaryTo(y, test.alpha, x, y)
+		AxpyUnitaryTo(y, test.alpha, x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -164,7 +164,7 @@ func TestDaxpyUnitaryTo(t *testing.T) {
 		x, xFront, xBack = newGuardedVector(test.xData, 1)
 		y, yFront, yBack = newGuardedVector(test.yData, 1)
 
-		DaxpyUnitaryTo(x, test.alpha, x, y)
+		AxpyUnitaryTo(x, test.alpha, x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -200,7 +200,7 @@ func TestDaxpyInc(t *testing.T) {
 				prefix := fmt.Sprintf("test %v, incX = %v, incY = %v", i, incX, incY)
 				x, xFront, xBack := newGuardedVector(test.xData, incX)
 				y, yFront, yBack := newGuardedVector(test.yData, incY)
-				DaxpyInc(test.alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+				AxpyInc(test.alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 
 				if !allNaN(xFront) || !allNaN(xBack) {
 					t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -247,7 +247,7 @@ func TestDaxpyIncTo(t *testing.T) {
 				prefix := fmt.Sprintf("test %v (y=a*x+y), incX = %v, incY = %v", i, incX, incY)
 				x, xFront, xBack := newGuardedVector(test.xData, incX)
 				y, yFront, yBack := newGuardedVector(test.yData, incY)
-				DaxpyIncTo(y, uintptr(incY), uintptr(iy),
+				AxpyIncTo(y, uintptr(incY), uintptr(iy),
 					test.alpha, x, y,
 					uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 
@@ -275,7 +275,7 @@ func TestDaxpyIncTo(t *testing.T) {
 				x, xFront, xBack = newGuardedVector(test.xData, incX)
 				y, yFront, yBack = newGuardedVector(test.yData, incY)
 
-				DaxpyIncTo(x, uintptr(incX), uintptr(ix),
+				AxpyIncTo(x, uintptr(incX), uintptr(ix),
 					test.alpha, x, y,
 					uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 
@@ -312,7 +312,7 @@ func TestDaxpyIncTo(t *testing.T) {
 					x, xFront, xBack = newGuardedVector(test.xData, incX)
 					y, yFront, yBack = newGuardedVector(test.yData, incY)
 					dst, dstFront, dstBack := newGuardedVector(test.xData, incDst)
-					DaxpyIncTo(dst, uintptr(incDst), uintptr(idst),
+					AxpyIncTo(dst, uintptr(incDst), uintptr(idst),
 						test.alpha, x, y,
 						uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 
@@ -372,7 +372,7 @@ func daxpyUnitaryBenchmark(b *testing.B, n int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DaxpyUnitary(a, x, y)
+		AxpyUnitary(a, x, y)
 	}
 	gs = y
 }
@@ -393,7 +393,7 @@ func daxpyUnitaryToYBenchmark(b *testing.B, n int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DaxpyUnitaryTo(y, a, x, y)
+		AxpyUnitaryTo(y, a, x, y)
 	}
 	gs = y
 }
@@ -415,7 +415,7 @@ func daxpyUnitaryToBenchmark(b *testing.B, n int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DaxpyUnitaryTo(dst, a, x, y)
+		AxpyUnitaryTo(dst, a, x, y)
 	}
 	gs = dst
 }
@@ -467,7 +467,7 @@ func daxpyIncBenchmark(b *testing.B, n, inc int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DaxpyInc(a, x, y, uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
+		AxpyInc(a, x, y, uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
 	}
 	gs = y
 }
@@ -520,7 +520,7 @@ func daxpyIncToBenchmark(b *testing.B, n, inc int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DaxpyIncTo(dst, uintptr(inc), uintptr(ini), a, x, y,
+		AxpyIncTo(dst, uintptr(inc), uintptr(ini), a, x, y,
 			uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
 	}
 	gs = y

@@ -42,27 +42,25 @@
 
 #include "textflag.h"
 
-// func DscalUnitaryTo(dst []float64, alpha float64, x []float64)
-// This function assumes len(dst) >= len(x).
-TEXT ·DscalUnitaryTo(SB), NOSPLIT, $0
-	MOVQ   dst+0(FP), R9
-	MOVHPD alpha+24(FP), X7
-	MOVLPD alpha+24(FP), X7
-	MOVQ   x+32(FP), R8
-	MOVQ   x_len+40(FP), DI // n = len(x)
+// func DscalUnitary(alpha float64, x []float64)
+TEXT ·ScalUnitary(SB), NOSPLIT, $0
+	MOVHPD alpha+0(FP), X7
+	MOVLPD alpha+0(FP), X7
+	MOVQ   x+8(FP), R8
+	MOVQ   x_len+16(FP), DI // n = len(x)
 
 	MOVQ $0, SI // i = 0
 	SUBQ $4, DI // n -= 4
 	JL   tail   // if n < 0 goto tail
 
 loop:
-	// dst[i] = alpha * x[i] unrolled 4x.
+	// x[i] *= alpha unrolled 4x.
 	MOVUPD 0(R8)(SI*8), X0
 	MOVUPD 16(R8)(SI*8), X1
 	MULPD  X7, X0
 	MULPD  X7, X1
-	MOVUPD X0, 0(R9)(SI*8)
-	MOVUPD X1, 16(R9)(SI*8)
+	MOVUPD X0, 0(R8)(SI*8)
+	MOVUPD X1, 16(R8)(SI*8)
 
 	ADDQ $4, SI // i += 4
 	SUBQ $4, DI // n -= 4
@@ -73,10 +71,10 @@ tail:
 	JZ   end    // if n == 0 goto end
 
 onemore:
-	// dst[i] = alpha * x[i] for the remaining 1-3 elements.
+	// x[i] *= alpha for the remaining 1-3 elements.
 	MOVSD 0(R8)(SI*8), X0
 	MULSD X7, X0
-	MOVSD X0, 0(R9)(SI*8)
+	MOVSD X0, 0(R8)(SI*8)
 
 	ADDQ $1, SI  // i++
 	SUBQ $1, DI  // n--

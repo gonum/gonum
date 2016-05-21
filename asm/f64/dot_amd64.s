@@ -40,7 +40,7 @@
 
 // func DdotUnitary(x, y []float64) (sum float64)
 // This function assumes len(y) >= len(x).
-TEXT ·DdotUnitary(SB), NOSPLIT, $0
+TEXT ·DotUnitary(SB), NOSPLIT, $0
 	MOVQ x+0(FP), R8
 	MOVQ x_len+8(FP), DI // n = len(x)
 	MOVQ y+24(FP), R9
@@ -92,7 +92,7 @@ end_uni:
 	RET
 
 // func DdotInc(x, y []float64, n, incX, incY, ix, iy uintptr) (sum float64)
-TEXT ·DdotInc(SB), NOSPLIT, $0
+TEXT ·DotInc(SB), NOSPLIT, $0
 	MOVQ x+0(FP), R8
 	MOVQ y+24(FP), R9
 	MOVQ n+48(FP), CX

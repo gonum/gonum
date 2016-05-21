@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package asm
+package f64
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestDdotUnitary(t *testing.T) {
+func TestDotUnitary(t *testing.T) {
 	for i, test := range []struct {
 		xData []float64
 		yData []float64
@@ -63,7 +63,7 @@ func TestDdotUnitary(t *testing.T) {
 
 		x, xFront, xBack := newGuardedVector(test.xData, 1)
 		y, yFront, yBack := newGuardedVector(test.yData, 1)
-		got := DdotUnitary(x, y)
+		got := DotUnitary(x, y)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, i, "x", xFront, xBack)
@@ -88,7 +88,7 @@ func TestDdotUnitary(t *testing.T) {
 	}
 }
 
-func TestDdotInc(t *testing.T) {
+func TestDotInc(t *testing.T) {
 	for i, test := range []struct {
 		xData []float64
 		yData []float64
@@ -160,7 +160,7 @@ func TestDdotInc(t *testing.T) {
 				if incY < 0 {
 					iy = (-n + 1) * incY
 				}
-				got := DdotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+				got := DotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 
 				prefix := fmt.Sprintf("test %v, incX = %v, incY = %v", i, incX, incY)
 				if !allNaN(xFront) || !allNaN(xBack) {
@@ -192,19 +192,19 @@ func TestDdotInc(t *testing.T) {
 	}
 }
 
-func BenchmarkDdotUnitaryN1(b *testing.B)      { ddotUnitaryBenchmark(b, 1) }
-func BenchmarkDdotUnitaryN2(b *testing.B)      { ddotUnitaryBenchmark(b, 2) }
-func BenchmarkDdotUnitaryN3(b *testing.B)      { ddotUnitaryBenchmark(b, 3) }
-func BenchmarkDdotUnitaryN4(b *testing.B)      { ddotUnitaryBenchmark(b, 4) }
-func BenchmarkDdotUnitaryN10(b *testing.B)     { ddotUnitaryBenchmark(b, 10) }
-func BenchmarkDdotUnitaryN100(b *testing.B)    { ddotUnitaryBenchmark(b, 100) }
-func BenchmarkDdotUnitaryN1000(b *testing.B)   { ddotUnitaryBenchmark(b, 1000) }
-func BenchmarkDdotUnitaryN10000(b *testing.B)  { ddotUnitaryBenchmark(b, 10000) }
-func BenchmarkDdotUnitaryN100000(b *testing.B) { ddotUnitaryBenchmark(b, 100000) }
+func BenchmarkDotUnitaryN1(b *testing.B)      { dotUnitaryBenchmark(b, 1) }
+func BenchmarkDotUnitaryN2(b *testing.B)      { dotUnitaryBenchmark(b, 2) }
+func BenchmarkDotUnitaryN3(b *testing.B)      { dotUnitaryBenchmark(b, 3) }
+func BenchmarkDotUnitaryN4(b *testing.B)      { dotUnitaryBenchmark(b, 4) }
+func BenchmarkDotUnitaryN10(b *testing.B)     { dotUnitaryBenchmark(b, 10) }
+func BenchmarkDotUnitaryN100(b *testing.B)    { dotUnitaryBenchmark(b, 100) }
+func BenchmarkDotUnitaryN1000(b *testing.B)   { dotUnitaryBenchmark(b, 1000) }
+func BenchmarkDotUnitaryN10000(b *testing.B)  { dotUnitaryBenchmark(b, 10000) }
+func BenchmarkDotUnitaryN100000(b *testing.B) { dotUnitaryBenchmark(b, 100000) }
 
 var r float64
 
-func ddotUnitaryBenchmark(b *testing.B, n int) {
+func dotUnitaryBenchmark(b *testing.B, n int) {
 	x := make([]float64, n)
 	for i := range x {
 		x[i] = rand.Float64()
@@ -215,48 +215,48 @@ func ddotUnitaryBenchmark(b *testing.B, n int) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		r = DdotUnitary(x, y)
+		r = DotUnitary(x, y)
 	}
 }
 
-func BenchmarkDdotIncN1Inc1(b *testing.B) { ddotIncBenchmark(b, 1, 1) }
+func BenchmarkDotIncN1Inc1(b *testing.B) { dotIncBenchmark(b, 1, 1) }
 
-func BenchmarkDdotIncN2Inc1(b *testing.B)  { ddotIncBenchmark(b, 2, 1) }
-func BenchmarkDdotIncN2Inc2(b *testing.B)  { ddotIncBenchmark(b, 2, 2) }
-func BenchmarkDdotIncN2Inc4(b *testing.B)  { ddotIncBenchmark(b, 2, 4) }
-func BenchmarkDdotIncN2Inc10(b *testing.B) { ddotIncBenchmark(b, 2, 10) }
+func BenchmarkDotIncN2Inc1(b *testing.B)  { dotIncBenchmark(b, 2, 1) }
+func BenchmarkDotIncN2Inc2(b *testing.B)  { dotIncBenchmark(b, 2, 2) }
+func BenchmarkDotIncN2Inc4(b *testing.B)  { dotIncBenchmark(b, 2, 4) }
+func BenchmarkDotIncN2Inc10(b *testing.B) { dotIncBenchmark(b, 2, 10) }
 
-func BenchmarkDdotIncN3Inc1(b *testing.B)  { ddotIncBenchmark(b, 3, 1) }
-func BenchmarkDdotIncN3Inc2(b *testing.B)  { ddotIncBenchmark(b, 3, 2) }
-func BenchmarkDdotIncN3Inc4(b *testing.B)  { ddotIncBenchmark(b, 3, 4) }
-func BenchmarkDdotIncN3Inc10(b *testing.B) { ddotIncBenchmark(b, 3, 10) }
+func BenchmarkDotIncN3Inc1(b *testing.B)  { dotIncBenchmark(b, 3, 1) }
+func BenchmarkDotIncN3Inc2(b *testing.B)  { dotIncBenchmark(b, 3, 2) }
+func BenchmarkDotIncN3Inc4(b *testing.B)  { dotIncBenchmark(b, 3, 4) }
+func BenchmarkDotIncN3Inc10(b *testing.B) { dotIncBenchmark(b, 3, 10) }
 
-func BenchmarkDdotIncN4Inc1(b *testing.B)  { ddotIncBenchmark(b, 4, 1) }
-func BenchmarkDdotIncN4Inc2(b *testing.B)  { ddotIncBenchmark(b, 4, 2) }
-func BenchmarkDdotIncN4Inc4(b *testing.B)  { ddotIncBenchmark(b, 4, 4) }
-func BenchmarkDdotIncN4Inc10(b *testing.B) { ddotIncBenchmark(b, 4, 10) }
+func BenchmarkDotIncN4Inc1(b *testing.B)  { dotIncBenchmark(b, 4, 1) }
+func BenchmarkDotIncN4Inc2(b *testing.B)  { dotIncBenchmark(b, 4, 2) }
+func BenchmarkDotIncN4Inc4(b *testing.B)  { dotIncBenchmark(b, 4, 4) }
+func BenchmarkDotIncN4Inc10(b *testing.B) { dotIncBenchmark(b, 4, 10) }
 
-func BenchmarkDdotIncN10Inc1(b *testing.B)  { ddotIncBenchmark(b, 10, 1) }
-func BenchmarkDdotIncN10Inc2(b *testing.B)  { ddotIncBenchmark(b, 10, 2) }
-func BenchmarkDdotIncN10Inc4(b *testing.B)  { ddotIncBenchmark(b, 10, 4) }
-func BenchmarkDdotIncN10Inc10(b *testing.B) { ddotIncBenchmark(b, 10, 10) }
+func BenchmarkDotIncN10Inc1(b *testing.B)  { dotIncBenchmark(b, 10, 1) }
+func BenchmarkDotIncN10Inc2(b *testing.B)  { dotIncBenchmark(b, 10, 2) }
+func BenchmarkDotIncN10Inc4(b *testing.B)  { dotIncBenchmark(b, 10, 4) }
+func BenchmarkDotIncN10Inc10(b *testing.B) { dotIncBenchmark(b, 10, 10) }
 
-func BenchmarkDdotIncN1000Inc1(b *testing.B)  { ddotIncBenchmark(b, 1000, 1) }
-func BenchmarkDdotIncN1000Inc2(b *testing.B)  { ddotIncBenchmark(b, 1000, 2) }
-func BenchmarkDdotIncN1000Inc4(b *testing.B)  { ddotIncBenchmark(b, 1000, 4) }
-func BenchmarkDdotIncN1000Inc10(b *testing.B) { ddotIncBenchmark(b, 1000, 10) }
+func BenchmarkDotIncN1000Inc1(b *testing.B)  { dotIncBenchmark(b, 1000, 1) }
+func BenchmarkDotIncN1000Inc2(b *testing.B)  { dotIncBenchmark(b, 1000, 2) }
+func BenchmarkDotIncN1000Inc4(b *testing.B)  { dotIncBenchmark(b, 1000, 4) }
+func BenchmarkDotIncN1000Inc10(b *testing.B) { dotIncBenchmark(b, 1000, 10) }
 
-func BenchmarkDdotIncN100000Inc1(b *testing.B)  { ddotIncBenchmark(b, 100000, 1) }
-func BenchmarkDdotIncN100000Inc2(b *testing.B)  { ddotIncBenchmark(b, 100000, 2) }
-func BenchmarkDdotIncN100000Inc4(b *testing.B)  { ddotIncBenchmark(b, 100000, 4) }
-func BenchmarkDdotIncN100000Inc10(b *testing.B) { ddotIncBenchmark(b, 100000, 10) }
+func BenchmarkDotIncN100000Inc1(b *testing.B)  { dotIncBenchmark(b, 100000, 1) }
+func BenchmarkDotIncN100000Inc2(b *testing.B)  { dotIncBenchmark(b, 100000, 2) }
+func BenchmarkDotIncN100000Inc4(b *testing.B)  { dotIncBenchmark(b, 100000, 4) }
+func BenchmarkDotIncN100000Inc10(b *testing.B) { dotIncBenchmark(b, 100000, 10) }
 
-func BenchmarkDdotIncN100000IncM1(b *testing.B)  { ddotIncBenchmark(b, 100000, -1) }
-func BenchmarkDdotIncN100000IncM2(b *testing.B)  { ddotIncBenchmark(b, 100000, -2) }
-func BenchmarkDdotIncN100000IncM4(b *testing.B)  { ddotIncBenchmark(b, 100000, -4) }
-func BenchmarkDdotIncN100000IncM10(b *testing.B) { ddotIncBenchmark(b, 100000, -10) }
+func BenchmarkDotIncN100000IncM1(b *testing.B)  { dotIncBenchmark(b, 100000, -1) }
+func BenchmarkDotIncN100000IncM2(b *testing.B)  { dotIncBenchmark(b, 100000, -2) }
+func BenchmarkDotIncN100000IncM4(b *testing.B)  { dotIncBenchmark(b, 100000, -4) }
+func BenchmarkDotIncN100000IncM10(b *testing.B) { dotIncBenchmark(b, 100000, -10) }
 
-func ddotIncBenchmark(b *testing.B, n, inc int) {
+func dotIncBenchmark(b *testing.B, n, inc int) {
 	absInc := inc
 	if inc < 0 {
 		absInc = -inc
@@ -275,6 +275,6 @@ func ddotIncBenchmark(b *testing.B, n, inc int) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		r = DdotInc(x, y, uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
+		r = DotInc(x, y, uintptr(n), uintptr(inc), uintptr(inc), uintptr(ini), uintptr(ini))
 	}
 }

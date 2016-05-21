@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package asm
+package f64
 
 import (
 	"fmt"
@@ -68,7 +68,7 @@ func TestDscalUnitary(t *testing.T) {
 
 		prefix := fmt.Sprintf("test %v (x*=a)", i)
 		x, xFront, xBack := newGuardedVector(test.x, 1)
-		DscalUnitary(test.alpha, x)
+		ScalUnitary(test.alpha, x)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -88,7 +88,7 @@ func TestDscalUnitaryTo(t *testing.T) {
 		prefix := fmt.Sprintf("test %v (dst=a*x)", i)
 		x, xFront, xBack := newGuardedVector(test.x, 1)
 		dst, dstFront, dstBack := newGuardedVector(test.x, 1)
-		DscalUnitaryTo(dst, test.alpha, x)
+		ScalUnitaryTo(dst, test.alpha, x)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -107,7 +107,7 @@ func TestDscalUnitaryTo(t *testing.T) {
 		// Test x = alpha * x.
 		prefix = fmt.Sprintf("test %v (x=a*x)", i)
 		x, xFront, xBack = newGuardedVector(test.x, 1)
-		DscalUnitaryTo(x, test.alpha, x)
+		ScalUnitaryTo(x, test.alpha, x)
 
 		if !allNaN(xFront) || !allNaN(xBack) {
 			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -127,7 +127,7 @@ func TestDscalInc(t *testing.T) {
 		for _, incX := range []int{1, 2, 3, 4, 7, 10} {
 			prefix := fmt.Sprintf("test %v (x*=a), incX = %v", i, incX)
 			x, xFront, xBack := newGuardedVector(test.x, incX)
-			DscalInc(test.alpha, x, uintptr(n), uintptr(incX))
+			ScalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
 			if !allNaN(xFront) || !allNaN(xBack) {
 				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -153,7 +153,7 @@ func TestDscalIncTo(t *testing.T) {
 			// Test x = alpha * x.
 			prefix := fmt.Sprintf("test %v (x=a*x), incX = %v", i, incX)
 			x, xFront, xBack := newGuardedVector(test.x, incX)
-			DscalIncTo(x, uintptr(incX), test.alpha, x, uintptr(n), uintptr(incX))
+			ScalIncTo(x, uintptr(incX), test.alpha, x, uintptr(n), uintptr(incX))
 
 			if !allNaN(xFront) || !allNaN(xBack) {
 				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -170,7 +170,7 @@ func TestDscalIncTo(t *testing.T) {
 				prefix = fmt.Sprintf("test %v (dst=a*x), incX = %v, incDst = %v", i, incX, incDst)
 				x, xFront, xBack = newGuardedVector(test.x, incX)
 				dst, dstFront, dstBack := newGuardedVector(test.x, incDst)
-				DscalIncTo(dst, uintptr(incDst), test.alpha, x, uintptr(n), uintptr(incX))
+				ScalIncTo(dst, uintptr(incDst), test.alpha, x, uintptr(n), uintptr(incX))
 
 				if !allNaN(xFront) || !allNaN(xBack) {
 					t.Errorf(msgGuard, prefix, "x", xFront, xBack)
@@ -207,8 +207,8 @@ func benchmarkDscalUnitary(b *testing.B, n int) {
 	x := randomSlice(n, 1)
 	b.ResetTimer()
 	for i := 0; i < b.N; i += 2 {
-		DscalUnitary(2, x)
-		DscalUnitary(0.5, x)
+		ScalUnitary(2, x)
+		ScalUnitary(0.5, x)
 	}
 	gs = x
 }
@@ -229,7 +229,7 @@ func benchmarkDscalUnitaryTo(b *testing.B, n int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DscalUnitaryTo(dst, a, x)
+		ScalUnitaryTo(dst, a, x)
 	}
 	gs = dst
 }
@@ -248,8 +248,8 @@ func benchmarkDscalUnitaryToX(b *testing.B, n int) {
 	x := randomSlice(n, 1)
 	b.ResetTimer()
 	for i := 0; i < b.N; i += 2 {
-		DscalUnitaryTo(x, 2, x)
-		DscalUnitaryTo(x, 0.5, x)
+		ScalUnitaryTo(x, 2, x)
+		ScalUnitaryTo(x, 0.5, x)
 	}
 	gs = x
 }
@@ -290,8 +290,8 @@ func benchmarkDscalInc(b *testing.B, n, inc int) {
 	x := randomSlice(n, inc)
 	b.ResetTimer()
 	for i := 0; i < b.N; i += 2 {
-		DscalInc(2, x, uintptr(n), uintptr(inc))
-		DscalInc(0.5, x, uintptr(n), uintptr(inc))
+		ScalInc(2, x, uintptr(n), uintptr(inc))
+		ScalInc(0.5, x, uintptr(n), uintptr(inc))
 	}
 	gs = x
 }
@@ -334,7 +334,7 @@ func benchmarkDscalIncTo(b *testing.B, n, inc int) {
 	a := rand.Float64()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		DscalIncTo(dst, uintptr(inc), a, x, uintptr(n), uintptr(inc))
+		ScalIncTo(dst, uintptr(inc), a, x, uintptr(n), uintptr(inc))
 	}
 	gs = dst
 }

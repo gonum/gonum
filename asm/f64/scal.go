@@ -4,7 +4,7 @@
 
 //+build !amd64 noasm appengine
 
-package asm
+package f64
 
 func DscalUnitary(alpha float64, x []float64) {
 	for i := range x {

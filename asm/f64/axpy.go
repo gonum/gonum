@@ -4,7 +4,7 @@
 
 //+build !amd64 noasm appengine
 
-package asm
+package f64
 
 func DaxpyUnitary(alpha float64, x, y []float64) {
 	for i, v := range x {

@@ -2,7 +2,7 @@
 //  go generate github.com/gonum/internal/asm
 // DO NOT EDIT.
 
-// Copyright ©2016 The gonum Authors. All rights reserved.
+// Copyright ©2015 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 //
@@ -42,51 +42,42 @@
 
 #include "textflag.h"
 
-// func DscalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)
-// This function assumes that incDst and incX are positive.
-TEXT ·DscalIncTo(SB), NOSPLIT, $0
-	MOVQ   dst+0(FP), R9
-	MOVQ   incDst+24(FP), R11
-	MOVHPD alpha+32(FP), X7
-	MOVLPD alpha+32(FP), X7
-	MOVQ   x+40(FP), R8
-	MOVQ   n+64(FP), DX
-	MOVQ   incX+72(FP), R10
+// func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
+// This function assumes len(y) >= len(x) and len(dst) >= len(x).
+TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
+	MOVQ   dst+0(FP), R10
+	MOVHPD alpha+24(FP), X7
+	MOVLPD alpha+24(FP), X7
+	MOVQ   x+32(FP), R8
+	MOVQ   x_len+40(FP), DI // n = len(x)
+	MOVQ   y+56(FP), R9
 
-	MOVQ $0, SI
-	MOVQ $0, DI
-	MOVQ R10, AX // nextX = incX
-	MOVQ R11, BX // nextDst = incDst
-	SHLQ $1, R10 // incX *= 2
-	SHLQ $1, R11 // incDst *= 2
-
-	SUBQ $2, DX // n -= 2
-	JL   tail   // if n < 0
+	MOVQ $0, SI // i = 0
+	SUBQ $2, DI // n -= 2
+	JL   tail   // if n < 0 goto tail
 
 loop:
-	// dst[i] = alpha * x[i] unrolled 2x.
-	MOVHPD 0(R8)(SI*8), X0
-	MOVLPD 0(R8)(AX*8), X0
+	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
+	MOVUPD 0(R8)(SI*8), X0
+	MOVUPD 0(R9)(SI*8), X1
 	MULPD  X7, X0
-	MOVHPD X0, 0(R9)(DI*8)
-	MOVLPD X0, 0(R9)(BX*8)
+	ADDPD  X0, X1
+	MOVUPD X1, 0(R10)(SI*8)
 
-	ADDQ R10, SI // ix += incX
-	ADDQ R10, AX // nextX += incX
-	ADDQ R11, DI // idst += incDst
-	ADDQ R11, BX // nextDst += incDst
-
-	SUBQ $2, DX // n -= 2
+	ADDQ $2, SI // i += 2
+	SUBQ $2, DI // n -= 2
 	JGE  loop   // if n >= 0 goto loop
 
 tail:
-	ADDQ $2, DX // n += 2
-	JLE  end    // if n <= 0
+	ADDQ $2, DI // n += 2
+	JLE  end    // if n <= 0 goto end
 
-	// dst[i] = alpha * x[i] for the last iteration if n is odd.
+	// dst[i] = alpha * x[i] + y[i] for the last iteration if n is odd.
 	MOVSD 0(R8)(SI*8), X0
+	MOVSD 0(R9)(SI*8), X1
 	MULSD X7, X0
-	MOVSD X0, 0(R9)(DI*8)
+	ADDSD X0, X1
+	MOVSD X1, 0(R10)(SI*8)
 
 end:
 	RET

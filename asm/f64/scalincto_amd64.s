@@ -42,43 +42,51 @@
 
 #include "textflag.h"
 
-// func DscalUnitary(alpha float64, x []float64)
-TEXT ·DscalUnitary(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   x_len+16(FP), DI // n = len(x)
+// func DscalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)
+// This function assumes that incDst and incX are positive.
+TEXT ·ScalIncTo(SB), NOSPLIT, $0
+	MOVQ   dst+0(FP), R9
+	MOVQ   incDst+24(FP), R11
+	MOVHPD alpha+32(FP), X7
+	MOVLPD alpha+32(FP), X7
+	MOVQ   x+40(FP), R8
+	MOVQ   n+64(FP), DX
+	MOVQ   incX+72(FP), R10
 
-	MOVQ $0, SI // i = 0
-	SUBQ $4, DI // n -= 4
-	JL   tail   // if n < 0 goto tail
+	MOVQ $0, SI
+	MOVQ $0, DI
+	MOVQ R10, AX // nextX = incX
+	MOVQ R11, BX // nextDst = incDst
+	SHLQ $1, R10 // incX *= 2
+	SHLQ $1, R11 // incDst *= 2
+
+	SUBQ $2, DX // n -= 2
+	JL   tail   // if n < 0
 
 loop:
-	// x[i] *= alpha unrolled 4x.
-	MOVUPD 0(R8)(SI*8), X0
-	MOVUPD 16(R8)(SI*8), X1
+	// dst[i] = alpha * x[i] unrolled 2x.
+	MOVHPD 0(R8)(SI*8), X0
+	MOVLPD 0(R8)(AX*8), X0
 	MULPD  X7, X0
-	MULPD  X7, X1
-	MOVUPD X0, 0(R8)(SI*8)
-	MOVUPD X1, 16(R8)(SI*8)
+	MOVHPD X0, 0(R9)(DI*8)
+	MOVLPD X0, 0(R9)(BX*8)
 
-	ADDQ $4, SI // i += 4
-	SUBQ $4, DI // n -= 4
+	ADDQ R10, SI // ix += incX
+	ADDQ R10, AX // nextX += incX
+	ADDQ R11, DI // idst += incDst
+	ADDQ R11, BX // nextDst += incDst
+
+	SUBQ $2, DX // n -= 2
 	JGE  loop   // if n >= 0 goto loop
 
 tail:
-	ADDQ $4, DI // n += 4
-	JZ   end    // if n == 0 goto end
+	ADDQ $2, DX // n += 2
+	JLE  end    // if n <= 0
 
-onemore:
-	// x[i] *= alpha for the remaining 1-3 elements.
+	// dst[i] = alpha * x[i] for the last iteration if n is odd.
 	MOVSD 0(R8)(SI*8), X0
 	MULSD X7, X0
-	MOVSD X0, 0(R8)(SI*8)
-
-	ADDQ $1, SI  // i++
-	SUBQ $1, DI  // n--
-	JNZ  onemore // if n != 0 goto onemore
+	MOVSD X0, 0(R9)(DI*8)
 
 end:
 	RET

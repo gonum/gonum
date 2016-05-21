@@ -4,7 +4,7 @@
 
 #include "textflag.h"
 
-// func Daddconst(alpha float64, x []float64)
+// func Addconst(alpha float64, x []float64)
 TEXT ·AddConst(SB), NOSPLIT, $0
 	MOVQ    x_base+8(FP), SI
 	MOVQ    x_len+16(FP), CX

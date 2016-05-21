@@ -4,13 +4,13 @@
 
 #include "textflag.h"
 
-// func Daddconst(dst, s []float64)
+// func Add(dst, s []float64)
 TEXT ·Add(SB), NOSPLIT, $0
 	MOVQ 	dst_base+0(FP), DI
 	MOVQ 	dst_len+8(FP), DX
 	MOVQ 	s_base+24(FP), SI
 	CMPQ	s_len+32(FP), DX
-	CMOVLEQ	s_len+32(FP), DX
+	CMOVQLE	s_len+32(FP), DX
 	CMPQ	DX, $0
 	JE	add_end
 	XORQ	AX, AX
@@ -31,7 +31,7 @@ add_loop:
 	JE	add_end
 add_tail:
 	MOVSD	(DI)(AX*8), X0
-	DIVSD	(SI)(AX*8), X0
+	ADDSD	(SI)(AX*8), X0
 	MOVSD	X0, (DI)(AX*8)
 	INCQ	AX
 	DECQ	DX

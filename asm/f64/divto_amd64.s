@@ -11,7 +11,7 @@ TEXT ·DivTo(SB), NOSPLIT, $0
 	MOVQ 	x_base+24(FP), SI
 	MOVQ	y_base+48(FP), BX
 	CMPQ	x_len+32(FP), DX
-	CMOVLEQ	x_len+32(FP), DX
+	CMOVQLE	x_len+32(FP), DX
 	CMPQ	y_len+56(FP), DX
 	CMOVQLE	y_len+56(FP), DX
 	MOVQ	DX, ret_len+80(FP)

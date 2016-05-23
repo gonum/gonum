@@ -23,12 +23,8 @@ func AbsSumInc(x []float64, n, incX int) (sum float64) {
 }
 
 func Add(dst, s []float64) {
-	d := len(dst)
-	if d > len(s) {
-		d = len(s)
-	}
-	for i := 0; i < d; i++ {
-		dst[i] += s[i]
+	for i, v := range s {
+		dst[i] += v
 	}
 }
 
@@ -39,83 +35,56 @@ func AddConst(alpha float64, x []float64) {
 }
 
 func CumSum(dst, s []float64) []float64 {
-	d := len(dst)
-	if d > len(s) {
-		d = len(s)
-	}
-	if d == 0 {
+	if len(s) == 0 {
 		return dst
 	}
 	dst[0] = s[0]
-	for i := 1; i < d; i++ {
-		dst[i] = dst[i-1] + s[i]
+	for i, v := range s[1:] {
+		dst[i+1] = dst[i] + v
 	}
 	return dst
 }
 
 func CumProd(dst, s []float64) []float64 {
-	d := len(dst)
-	if d > len(s) {
-		d = len(s)
-	}
-	if d == 0 {
+	if len(s) == 0 {
 		return dst
 	}
 	dst[0] = s[0]
-	for i := 1; i < d; i++ {
-		dst[i] = dst[i-1] * s[i]
+	for i, v := range s[1:] {
+		dst[i+1] = dst[i] * v
 	}
 	return dst
 }
 
 func Div(dst, s []float64) {
-	d := len(dst)
-	if d > len(s) {
-		d = len(s)
-	}
-	for i := 0; i < d; i++ {
-		dst[i] /= s[i]
+	for i, v := range s {
+		dst[i] /= v
 	}
 }
 
 func DivTo(dst, s, t []float64) []float64 {
-	d := len(dst)
-	if d > len(s) {
-		d = len(s)
-	}
-	if d > len(t) {
-		d = len(t)
-	}
-	for i := 0; i < d; i++ {
-		dst[i] = s[i] / t[i]
+	for i, v := range s {
+		dst[i] = v / t[i]
 	}
 	return dst
 }
 
 func L1norm(s, t []float64) float64 {
 	var norm float64
-	d := len(t)
-	if d > len(s) {
-		d = len(s)
-	}
-	for i := 0; i < d; i++ {
-		norm += math.Abs(t[i] - s[i])
+	for i, v := range s {
+		norm += math.Abs(t[i] - v)
 	}
 	return norm
 }
 
 func LinfNorm(s, t []float64) float64 {
 	var norm float64
-	d := len(t)
-	if d > len(s) {
-		d = len(s)
-	}
-	if d == 0 {
+	if len(s) == 0 {
 		return 0
 	}
 	norm = math.Abs(t[0] - s[0])
-	for i := 1; i < d; i++ {
-		absDiff := math.Abs(t[i] - s[i])
+	for i, v := range s[1:] {
+		absDiff := math.Abs(t[i+1] - v)
 		if absDiff > norm || math.IsNaN(norm) {
 			norm = absDiff
 		}

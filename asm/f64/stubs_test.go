@@ -15,7 +15,7 @@ var (
 )
 
 func same(a, b float64) bool {
-	return !(a != b && !math.IsNaN(a) && !math.IsNaN(b) || (math.IsNaN(a) != math.IsNaN(b)))
+	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
 func TestAdd(t *testing.T) {

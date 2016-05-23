@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f64
+package f32
 
 func SdotUnitary(x, y []float32) (sum float64) {
 	for i, v := range x {

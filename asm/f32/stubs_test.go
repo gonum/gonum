@@ -16,7 +16,7 @@ var (
 
 func same(x, y float32) bool {
 	a, b := float64(x), float64(y)
-	return !(x != y && !math.IsNaN(a) && !math.IsNaN(b) || (math.IsNaN(a) != math.IsNaN(b)))
+	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
 func TestAxpyUnitary(t *testing.T) {

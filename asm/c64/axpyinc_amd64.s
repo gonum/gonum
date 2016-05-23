@@ -36,7 +36,7 @@ axpyi_loop:
 	MULPS X1, X2 // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
 	MULPS X0, X3 // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
 
-	// ADDSUBPS X2, X3  	//(ai*x2r+ar*x2i, ar*x2r-ai*x2i, ai*x1r+ar*x1i, ar*x1r-ai*x1i)
+	// ADDSUBPS X2, X3  	// (ai*x2r+ar*x2i, ar*x2r-ai*x2i, ai*x1r+ar*x1i, ar*x1r-ai*x1i)
 	BYTE $0xF2; BYTE $0x0F; BYTE $0xD0; BYTE $0xDA
 
 	ADDPS (DI), X3

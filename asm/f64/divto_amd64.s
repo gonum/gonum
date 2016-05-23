@@ -6,7 +6,7 @@
 
 #include "textflag.h"
 
-// func Daddconst(dst, s []float64)
+// func DivTo(dst, x, y []float64)
 TEXT ·DivTo(SB), NOSPLIT, $0
 	MOVQ    dst_base+0(FP), DI
 	MOVQ    dst_len+8(FP), DX

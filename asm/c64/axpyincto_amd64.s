@@ -33,15 +33,15 @@ TEXT ·AxpyIncTo(SB), NOSPLIT, $0
 	SHUFPS $0x11, X1, X1      // X1:(ai,ar,ai,ar)
 
 axpyi_loop:
-	// MOVSHDUP (SI), X2	//Load and duplicate real elements (x1r, x1r)
-	// MOVSLDUP (SI), X3	//Load and duplicate imag elements (x1i, x1i)
+	// MOVSHDUP (SI), X2	// Load and duplicate real elements (x1r, x1r)
+	// MOVSLDUP (SI), X3	// Load and duplicate imag elements (x1i, x1i)
 	BYTE $0xF3; BYTE $0x0F; BYTE $0x16; BYTE $0x16
 	BYTE $0xF3; BYTE $0x0F; BYTE $0x12; BYTE $0x1E
 
 	MULPS X1, X2 // (ai*x1r, ar*x1r)
 	MULPS X0, X3 // (ar*x1i, ai*x1i)
 
-	// ADDSUBPS X2, X3  	//(ai*x1r+ar*x1i, ar*x1r-ai*x1i)
+	// ADDSUBPS X2, X3  	// (ai*x1r+ar*x1i, ar*x1r-ai*x1i)
 	BYTE $0xF2; BYTE $0x0F; BYTE $0xD0; BYTE $0xDA
 
 	ADDPS (DI), X3   // Add y to a*x

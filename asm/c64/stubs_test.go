@@ -1,7 +1,6 @@
 // Copyright ©2016 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
 package c64
 
 import (
@@ -24,14 +23,12 @@ func TestAxpyUnitary(t *testing.T) {
 		AxpyUnitary(v.a, v.x, v.y)
 		for i := range v.ex {
 			if v.y[i] != v.ex[i] {
-				t.Log("Test", j, "Unexpected result at", i, "Got:", v.y[i], "Expected:", v.ex[i])
-				t.Fail()
+				t.Error("Test", j, "Unexpected result at", i, "Got:", v.y[i], "Expected:", v.ex[i])
 			}
 		}
 		runtime.GC()
 	}
 }
-
 func TestAxpyUnitaryTo(t *testing.T) {
 	for j, v := range []struct {
 		a         complex64
@@ -47,8 +44,7 @@ func TestAxpyUnitaryTo(t *testing.T) {
 		AxpyUnitaryTo(v.dst, v.a, v.x, v.y)
 		for i := range v.ex {
 			if v.dst[i] != v.ex[i] {
-				t.Log("Test", j, "Unexpected result at", i, "Got:", v.dst[i], "Expected:", v.ex[i])
-				t.Fail()
+				t.Error("Test", j, "Unexpected result at", i, "Got:", v.dst[i], "Expected:", v.ex[i])
 			}
 		}
 		runtime.GC()

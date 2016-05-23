@@ -1,25 +1,22 @@
 // Copyright ©2015 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
 package f32
 
 import (
 	"math"
+	"runtime"
 	"testing"
 )
 
 var (
-	nan, inf, ninf float32
+	nan = float32(math.NaN())
+	inf = float32(math.Inf(1))
 )
 
-func init() {
-	nan, inf, ninf = float32(math.NaN()), float32(math.Inf(1)), float32(math.Inf(-1))
-}
-
-func diff(x, y float32) bool {
+func same(x, y float32) bool {
 	a, b := float64(x), float64(y)
-	return x != y && !math.IsNaN(a) && !math.IsNaN(b) || (math.IsNaN(a) != math.IsNaN(b))
+	return !(x != y && !math.IsNaN(a) && !math.IsNaN(b) || (math.IsNaN(a) != math.IsNaN(b)))
 }
 
 func TestAxpyUnitary(t *testing.T) {
@@ -37,12 +34,12 @@ func TestAxpyUnitary(t *testing.T) {
 	} {
 		AxpyUnitary(v.a, v.x, v.y)
 		for j := range v.ex {
-			if diff(v.ex[j], v.y[j]) {
-				t.Log("Test", i, "Unexpected value at", j, "Got:", v.y[j], "Expected:", v.ex[j])
-				t.Fail()
+			if !same(v.ex[j], v.y[j]) {
+				t.Error("Test", i, "Unexpected value at", j, "Got:", v.y[j], "Expected:", v.ex[j])
 			}
 		}
 	}
+	runtime.GC()
 }
 
 func TestAxpyUnitaryTo(t *testing.T) {
@@ -67,12 +64,12 @@ func TestAxpyUnitaryTo(t *testing.T) {
 	} {
 		AxpyUnitaryTo(v.dst, v.a, v.x, v.y)
 		for j := range v.ex {
-			if diff(v.ex[j], v.dst[j]) {
-				t.Log("Test", i, "Unexpected value at", j, "Got:", v.dst[j], "Expected:", v.ex[j])
-				t.Fail()
+			if !same(v.ex[j], v.dst[j]) {
+				t.Error("Test", i, "Unexpected value at", j, "Got:", v.dst[j], "Expected:", v.ex[j])
 			}
 		}
 	}
+	runtime.GC()
 }
 
 // func AxpyInc(alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr)
@@ -101,10 +98,10 @@ func TestAxpyInc(t *testing.T) {
 	} {
 		AxpyInc(v.a, v.x, v.y, v.n, v.incX, v.incY, v.ix, v.iy)
 		for j, k := v.iy, 0; k < int(v.n); j, k = j+v.incY, k+1 {
-			if diff(v.ex[j], v.y[j]) {
-				t.Log("Test", i, "Unexpected value at", j, "Got:", v.y[j], "Expected:", v.ex[j])
-				t.Fail()
+			if !same(v.ex[j], v.y[j]) {
+				t.Error("Test", i, "Unexpected value at", j, "Got:", v.y[j], "Expected:", v.ex[j])
 			}
 		}
 	}
+	runtime.GC()
 }

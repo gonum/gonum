@@ -14,6 +14,10 @@ import (
 	"github.com/gonum/stat/distuv"
 )
 
+var (
+	badInputLength = "distmv: input slice length mismatch"
+)
+
 // Normal is a multivariate normal distribution (also known as the multivariate
 // Gaussian distribution). Its pdf in k dimensions is given by
 //  (2 π)^(-k/2) |Σ|^(-1/2) exp(-1/2 (x-μ)'Σ^-1(x-μ))
@@ -127,7 +131,7 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Ran
 		panic("normal: no observed value")
 	}
 	if len(observed) != len(values) {
-		panic("normal: input slice length mismatch")
+		panic(badInputLength)
 	}
 	for _, v := range observed {
 		if v < 0 || v >= n.Dim() {
@@ -331,10 +335,7 @@ func (n *Normal) Rand(x []float64) []float64 {
 			tmp[i] = n.src.NormFloat64()
 		}
 	}
-	tmpVec := mat64.NewVector(n.dim, tmp)
-	xVec := mat64.NewVector(n.dim, x)
-	xVec.MulVec(&n.lower, tmpVec)
-	floats.Add(x, n.mu)
+	n.transformNormal(x, tmp)
 	return x
 }
 
@@ -353,4 +354,33 @@ func (n *Normal) setSigma() {
 		n.sigma = mat64.NewSymDense(n.Dim(), nil)
 		n.sigma.FromCholesky(&n.chol)
 	})
+}
+
+// TransformNormal transforms the vector, normal, generated from a standard
+// multidimensional normal into a vector that has been generated under the
+// distribution of the receiver.
+//
+// If dst is non-nil, the result will be stored into dst, otherwise a new slice
+// will be allocated. TransformNormal will panic if the length of normal is not
+// the dimension of the receiver, or if dst is non-nil and len(dist) != len(normal).
+func (n *Normal) TransformNormal(dst, normal []float64) []float64 {
+	if len(normal) != n.dim {
+		panic(badInputLength)
+	}
+	dst = reuseAs(dst, n.dim)
+	if len(dst) != len(normal) {
+		panic(badInputLength)
+	}
+	n.transformNormal(dst, normal)
+	return dst
+}
+
+// transformNormal performs the same operation as TransformNormal except no
+// safety checks are performed and both input slices must be non-nil.
+func (n *Normal) transformNormal(dst, normal []float64) []float64 {
+	srcVec := mat64.NewVector(n.dim, normal)
+	dstVec := mat64.NewVector(n.dim, dst)
+	dstVec.MulVec(&n.lower, srcVec)
+	floats.Add(dst, n.mu)
+	return dst
 }

@@ -32,6 +32,9 @@ func TestAdd(t *testing.T) {
 		{[]float64{0, 1, 2, 3, 4},
 			[]float64{-inf, 4, nan, 8, 9},
 			[]float64{-inf, 5, nan, 11, 13}},
+		{make([]float64, 50)[1:49],
+			make([]float64, 50)[1:49],
+			make([]float64, 50)[1:49]},
 	} {
 		Add(v.dst, v.src)
 		for i := range v.expect {
@@ -70,7 +73,7 @@ func TestCumSum(t *testing.T) {
 	}{
 		{[]float64{0}, []float64{1}, []float64{1}},
 		{[]float64{nan}, []float64{nan}, []float64{nan}},
-		{[]float64{0, 0, 0}, []float64{1, 2, 3, 4}, []float64{1, 3, 6}},
+		{[]float64{0, 0, 0}, []float64{1, 2, 3}, []float64{1, 3, 6}},
 		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3}, []float64{1, 3, 6}},
 		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3, 4}, []float64{1, 3, 6, 10}},
 		{[]float64{1, nan, nan, 1, 1},

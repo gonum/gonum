@@ -60,6 +60,22 @@ func randomGeneral(r, c, stride int, rnd *rand.Rand) blas64.General {
 	return ans
 }
 
+// randomHessenberg allocates a new n×n Hessenberg matrix filled with zeros
+// under the first subdiagonal and with random numbers elsewhere. Out-of-range
+// elements are filled with NaN values.
+func randomHessenberg(n, stride int, rnd *rand.Rand) blas64.General {
+	ans := nanGeneral(n, n, stride)
+	for i := 0; i < n; i++ {
+		for j := 0; j < i-1; j++ {
+			ans.Data[i*ans.Stride+j] = 0
+		}
+		for j := max(0, i-1); j < n; j++ {
+			ans.Data[i*ans.Stride+j] = rnd.NormFloat64()
+		}
+	}
+	return ans
+}
+
 // nanTriangular allocates a new r×c triangular matrix filled with NaN values.
 func nanTriangular(uplo blas.Uplo, n, stride int) blas64.Triangular {
 	return blas64.Triangular{
@@ -751,11 +767,14 @@ func equalApproxTriangular(upper bool, n int, a []float64, lda int, b []float64,
 	return true
 }
 
-// eye returns an identity matrix of order n and stride ld.
-func eye(n, ld int) []float64 {
-	m := make([]float64, (n-1)*ld+n)
+// eye returns an identity matrix of given order and stride.
+func eye(n, stride int) blas64.General {
+	ans := nanGeneral(n, n, stride)
 	for i := 0; i < n; i++ {
-		m[i*ld+i] = 1
+		for j := 0; j < n; j++ {
+			ans.Data[i*ans.Stride+j] = 0
+		}
+		ans.Data[i*ans.Stride+i] = 1
 	}
-	return m
+	return ans
 }

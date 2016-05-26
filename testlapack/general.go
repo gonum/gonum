@@ -7,6 +7,7 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/gonum/blas"
@@ -35,6 +36,118 @@ func nanSlice(n int) []float64 {
 		s[i] = math.NaN()
 	}
 	return s
+}
+
+// nanGeneral allocates a new r×c general matrix filled with NaN values.
+func nanGeneral(r, c, stride int) blas64.General {
+	return blas64.General{
+		Rows:   r,
+		Cols:   c,
+		Stride: stride,
+		Data:   nanSlice((r-1)*stride + c),
+	}
+}
+
+// randomGeneral allocates a new r×c general matrix filled with random
+// numbers. Out-of-range elements are filled with NaN values.
+func randomGeneral(r, c, stride int, rnd *rand.Rand) blas64.General {
+	ans := nanGeneral(r, c, stride)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			ans.Data[i*ans.Stride+j] = rnd.NormFloat64()
+		}
+	}
+	return ans
+}
+
+// nanTriangular allocates a new r×c triangular matrix filled with NaN values.
+func nanTriangular(uplo blas.Uplo, n, stride int) blas64.Triangular {
+	return blas64.Triangular{
+		N:      n,
+		Stride: stride,
+		Data:   nanSlice((n-1)*stride + n),
+		Uplo:   uplo,
+		Diag:   blas.NonUnit,
+	}
+}
+
+// randomTriangular allocates a new r×c triangular matrix filled with random
+// numbers. Out-of-triangle elements are filled with NaN values.
+func randomTriangular(uplo blas.Uplo, n, stride int, rnd *rand.Rand) blas64.Triangular {
+	ans := nanTriangular(uplo, n, stride)
+	if uplo == blas.Upper {
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				ans.Data[i*ans.Stride+j] = rnd.NormFloat64()
+			}
+		}
+		return ans
+	}
+	for i := 0; i < n; i++ {
+		for j := 0; j <= i; j++ {
+			ans.Data[i*ans.Stride+j] = rnd.NormFloat64()
+		}
+	}
+	return ans
+}
+
+// generalOutsideAllNaN returns whether all out-of-range elements have NaN
+// values.
+func generalOutsideAllNaN(a blas64.General) bool {
+	// Check after last column.
+	for i := 0; i < a.Rows-1; i++ {
+		for _, v := range a.Data[i*a.Stride+a.Cols : i*a.Stride+a.Stride] {
+			if !math.IsNaN(v) {
+				return false
+			}
+		}
+	}
+	// Check after last element.
+	for _, v := range a.Data[(a.Rows-1)*a.Stride+a.Cols:] {
+		if !math.IsNaN(v) {
+			return false
+		}
+	}
+	return true
+}
+
+// triangularOutsideAllNaN returns whether all out-of-triangle elements have NaN
+// values.
+func triangularOutsideAllNaN(a blas64.Triangular) bool {
+	if a.Uplo == blas.Upper {
+		// Check below diagonal.
+		for i := 0; i < a.N; i++ {
+			for _, v := range a.Data[i*a.Stride : i*a.Stride+i] {
+				if !math.IsNaN(v) {
+					return false
+				}
+			}
+		}
+		// Check after last column.
+		for i := 0; i < a.N-1; i++ {
+			for _, v := range a.Data[i*a.Stride+a.N : i*a.Stride+a.Stride] {
+				if !math.IsNaN(v) {
+					return false
+				}
+			}
+		}
+	} else {
+		// Check above diagonal.
+		for i := 0; i < a.N-1; i++ {
+			for _, v := range a.Data[i*a.Stride+i+1 : i*a.Stride+a.Stride] {
+				if !math.IsNaN(v) {
+					return false
+				}
+			}
+		}
+	}
+	// Check after last element.
+	for _, v := range a.Data[(a.N-1)*a.Stride+a.N:] {
+		if !math.IsNaN(v) {
+			return false
+		}
+	}
+	return true
 }
 
 // transposeGeneral returns a new general matrix that is the transpose of the

@@ -59,9 +59,9 @@ func (impl Implementation) Dgehd2(n, ilo, ihi int, a []float64, lda int, tau, wo
 	checkMatrix(n, n, a, lda)
 	switch {
 	case ilo < 0 || ilo > max(0, n-1):
-		panic("lapack: invalid value of ilo")
+		panic(badIlo)
 	case ihi < min(ilo, n-1) || ihi >= n:
-		panic("lapack: invalid value of ihi")
+		panic(badIhi)
 	case len(tau) != n-1:
 		panic(badTau)
 	case len(work) < n:

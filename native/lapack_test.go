@@ -32,6 +32,10 @@ func TestDgehd2(t *testing.T) {
 	testlapack.Dgehd2Test(t, impl)
 }
 
+func TestDgehrd(t *testing.T) {
+	testlapack.DgehrdTest(t, impl)
+}
+
 func TestDgelqf(t *testing.T) {
 	testlapack.DgelqfTest(t, impl)
 }

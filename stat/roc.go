@@ -4,36 +4,37 @@
 
 package stat
 
-import "sort"
+import (
+	"math"
+	"sort"
+)
 
 // ROC returns paired false positive rate (FPR) and true positive rate
-// (TPR) values corresponding to n cutoffs spanning the relative
-// (or receiver) operator characteristic (ROC) curve obtained when y is
-// treated as a binary classifier for classes with weights.
+// (TPR) values corresponding to cutoff points on the receiver operator
+// characteristic (ROC) curve obtained when y is treated as a binary
+// classifier for classes with weights.
 //
-// Cutoffs are equally spaced from eps less than the minimum value of y
-// to the maximum value of y, including both endpoints meaning that the
-// resulting ROC curve will always begin at (0,0) and end at (1,1).
-//
-// The input y must be sorted, and SortWeightedLabeled can be used in
-// order to sort y together with classes and weights.
+// The input y and cutoffs must be sorted, and values in y must correspond
+// to values in classes and weights. SortWeightedLabeled can be used to
+// sort y together with classes and weights.
 //
 // For a given cutoff value, observations corresponding to entries in y
 // greater than the cutoff value are classified as false, while those
-// below (or equal to) the cutoff value are classified as true. These
+// less than or equal to the cutoff value are classified as true. These
 // assigned class labels are compared with the true values in the classes
 // slice and used to calculate the FPR and TPR.
 //
 // If weights is nil, all weights are treated as 1.
 //
-// When n is zero all possible cutoffs are calculated, resulting
-// in fpr and tpr having length one greater than the number of unique
-// values in y. When n is greater than one fpr and tpr will be returned
-// with length n. ROC will panic if n is equal to one or less than 0.
+// If cutoffs is nil or empty, all possible cutoffs are calculated,
+// resulting in fpr and tpr having length one greater than the number of
+// unique values in y. Otherwise fpr and tpr will be returned with the
+// same length as cutoffs. floats.Span can be used to generate equally
+// spaced cutoffs.
 //
 // More details about ROC curves are available at
 // https://en.wikipedia.org/wiki/Receiver_operating_characteristic
-func ROC(n int, y []float64, classes []bool, weights []float64) (tpr, fpr []float64) {
+func ROC(cutoffs, y []float64, classes []bool, weights []float64) (tpr, fpr []float64) {
 	if len(y) != len(classes) {
 		panic("stat: slice length mismatch")
 	}
@@ -41,37 +42,48 @@ func ROC(n int, y []float64, classes []bool, weights []float64) (tpr, fpr []floa
 		panic("stat: slice length mismatch")
 	}
 	if !sort.Float64sAreSorted(y) {
-		panic("stat: input must be sorted")
+		panic("stat: input must be sorted ascending")
+	}
+	if !sort.Float64sAreSorted(cutoffs) {
+		panic("stat: cutoff values must be sorted ascending")
+	}
+	if len(y) == 0 {
+		return nil, nil
+	}
+	var bin int
+	if len(cutoffs) == 0 {
+		if cutoffs == nil || cap(cutoffs) < len(y)+1 {
+			cutoffs = make([]float64, len(y)+1)
+		} else {
+			cutoffs = cutoffs[:len(y)+1]
+		}
+		cutoffs[0] = math.Nextafter(y[0], y[0]-1)
+		// Choose all possible cutoffs but remove duplicate values
+		// in y.
+		for i, u := range y {
+			if i != 0 && u != y[i-1] {
+				bin++
+			}
+			cutoffs[bin+1] = u
+		}
+		cutoffs = cutoffs[0 : bin+2]
 	}
 
-	var incWidth, tol float64
-	if n == 0 {
-		if len(y) == 0 {
-			return nil, nil
-		}
-		tpr = make([]float64, len(y)+1)
-		fpr = make([]float64, len(y)+1)
-	} else {
-		if n < 2 {
-			panic("stat: cannot calculate fewer than 2 points on a ROC curve")
-		}
-		if len(y) == 0 {
-			return nil, nil
-		}
-		tpr = make([]float64, n)
-		fpr = make([]float64, n)
-		incWidth = (y[len(y)-1] - y[0]) / float64(n-1)
-		tol = y[0] + incWidth
-		if incWidth == 0 {
-			tpr[n-1] = 1
-			fpr[n-1] = 1
-			return
-		}
-	}
-
-	bin := 1 // the initial bin is known to have 0 fpr and 0 tpr
+	tpr = make([]float64, len(cutoffs))
+	fpr = make([]float64, len(cutoffs))
+	bin = 0
 	var nPos, nNeg float64
 	for i, u := range classes {
+		// Update the bin until it matches the next y value
+		// skipping empty bins.
+		for bin < len(cutoffs) && y[i] > cutoffs[bin] {
+			if bin == len(cutoffs)-1 {
+				break
+			}
+			bin++
+			tpr[bin] = tpr[bin-1]
+			fpr[bin] = fpr[bin-1]
+		}
 		var posWeight, negWeight float64 = 0, 1
 		if weights != nil {
 			negWeight = weights[i]
@@ -81,31 +93,10 @@ func ROC(n int, y []float64, classes []bool, weights []float64) (tpr, fpr []floa
 		}
 		nPos += posWeight
 		nNeg += negWeight
-		tpr[bin] += posWeight
-		fpr[bin] += negWeight
-
-		// Assess if the bin needs to be updated. If n is zero,
-		// the bin is always updated, unless consecutive y values
-		// are equal. Otherwise, the bin must be updated until it
-		// matches the next y value (skipping empty bins).
-		if n == 0 {
-			if i != (len(y)-1) && y[i] != y[i+1] {
-				bin++
-				tpr[bin] = tpr[bin-1]
-				fpr[bin] = fpr[bin-1]
-			}
-		} else {
-			for i != (len(y)-1) && y[i+1] > tol {
-				tol += incWidth
-				bin++
-				tpr[bin] = tpr[bin-1]
-				fpr[bin] = fpr[bin-1]
-			}
+		if y[i] <= cutoffs[bin] {
+			tpr[bin] += posWeight
+			fpr[bin] += negWeight
 		}
-	}
-	if n == 0 {
-		tpr = tpr[:(bin + 1)]
-		fpr = fpr[:(bin + 1)]
 	}
 
 	var invNeg, invPos float64
@@ -119,8 +110,6 @@ func ROC(n int, y []float64, classes []bool, weights []float64) (tpr, fpr []floa
 		tpr[i] *= invPos
 		fpr[i] *= invNeg
 	}
-	tpr[len(tpr)-1] = 1
-	fpr[len(fpr)-1] = 1
 
 	return tpr, fpr
 }

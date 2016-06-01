@@ -5,10 +5,11 @@
 package native
 
 // Ilaenv returns algorithm tuning parameters for the algorithm given by the
-// input string. ispec specifies the parameter to return.
-//  1: The optimal block size
-//  2: The minimum block size for which the algorithm should be used.
-//  3: The crossover point below which an unblocked routine should be used.
+// input string. ispec specifies the parameter to return:
+//  1: The optimal block size for a blocked algorithm.
+//  2: The minimum block size for a blocked algorithm.
+//  3: The block size of unprocessed data at which a blocked algorithm should
+//     crossover to an unblocked version.
 //  4: The number of shifts.
 //  5: The minimum column dimension for blocking to be used.
 //  6: The crossover point for SVD (to use QR factorization or not).
@@ -21,7 +22,6 @@ package native
 // Ilaenv is an internal routine. It is exported for testing purposes.
 func (Implementation) Ilaenv(ispec int, s string, opts string, n1, n2, n3, n4 int) int {
 	// TODO(btracey): Replace this with a constant lookup? A list of constants?
-	// TODO: What is the difference between 2 and 3?
 	sname := s[0] == 'S' || s[0] == 'D'
 	cname := s[0] == 'C' || s[0] == 'Z'
 	if !sname && !cname {

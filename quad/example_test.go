@@ -9,7 +9,7 @@ import (
 	"math"
 	"runtime"
 
-	"github.com/gonum/quad"
+	"github.com/gonum/integrate/quad"
 	"github.com/gonum/stat/distuv"
 )
 

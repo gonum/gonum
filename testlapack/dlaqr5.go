@@ -5,115 +5,210 @@
 package testlapack
 
 import (
-	"archive/zip"
+	"compress/gzip"
+	"encoding/json"
 	"fmt"
-	"io"
 	"log"
+	"math"
+	"math/rand"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
 )
 
 type Dlaqr5er interface {
 	Dlaqr5(wantt, wantz bool, kacc22 int, n, ktop, kbot, nshfts int, sr, si []float64, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, v []float64, ldv int, u []float64, ldu int, nh int, wh []float64, ldwh int, nv int, wv []float64, ldwv int)
 }
 
+type Dlaqr5test struct {
+	WantT          bool
+	N              int
+	NShifts        int
+	KTop, KBot     int
+	ShiftR, ShiftI []float64
+	H              []float64
+
+	HWant []float64
+	ZWant []float64
+}
+
 func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
-	r, err := zip.OpenReader("../internal/testdata/dlaqr5test/dlaqr5data.zip")
+	// Test without using reference data.
+	rnd := rand.New(rand.NewSource(1))
+	for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 30} {
+		for _, extra := range []int{0, 1, 20} {
+			for _, kacc22 := range []int{0, 1, 2} {
+				for cas := 0; cas < 100; cas++ {
+					testDlaqr5(t, impl, n, extra, kacc22, rnd)
+				}
+			}
+		}
+	}
+
+	// Test using reference data computed by the reference netlib
+	// implementation.
+	file, err := os.Open(filepath.FromSlash("../testlapack/testdata/dlaqr5data.json.gz"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	r, err := gzip.NewReader(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer r.Close()
 
-	for _, f := range r.File {
-		tc, err := f.Open()
-		if err != nil {
-			log.Fatal(err)
-		}
-		wantt, n, nshfts, ktop, kbot, sr, si, hOrig, hwant, zwant := readDlaqr5Case(tc)
-		tc.Close()
+	var tests []Dlaqr5test
+	json.NewDecoder(r).Decode(&tests)
+	for _, test := range tests {
+		wantt := test.WantT
+		n := test.N
+		nshfts := test.NShifts
+		ktop := test.KTop
+		kbot := test.KBot
+		sr := test.ShiftR
+		si := test.ShiftI
 
-		v := make([]float64, nshfts/2*3)
-		u := make([]float64, (3*nshfts-3)*(3*nshfts-3))
-		nh := n
-		wh := make([]float64, (3*nshfts-3)*n)
-		nv := n
-		wv := make([]float64, n*(3*nshfts-3))
+		for _, extra := range []int{0, 1, 10} {
+			v := randomGeneral(nshfts/2, 3, 3+extra, rnd)
+			u := randomGeneral(3*nshfts-3, 3*nshfts-3, 3*nshfts-3+extra, rnd)
+			nh := n
+			wh := randomGeneral(3*nshfts-3, n, n+extra, rnd)
+			nv := n
+			wv := randomGeneral(n, 3*nshfts-3, 3*nshfts-3+extra, rnd)
 
-		for _, ldh := range []int{n, n + 1, n + 10} {
-			h := make([]float64, (n-1)*ldh+n)
+			h := nanGeneral(n, n, n+extra)
+
 			for _, kacc22 := range []int{0, 1, 2} {
-				copyMatrix(n, n, h, ldh, hOrig)
-				z := eye(n, ldh)
+				copyMatrix(n, n, h.Data, h.Stride, test.H)
+				z := eye(n, n+extra)
 
 				impl.Dlaqr5(wantt, true, kacc22,
 					n, ktop, kbot,
 					nshfts, sr, si,
-					h, ldh,
-					0, n-1, z, ldh,
-					v, 3,
-					u, 3*nshfts-3,
-					nh, wh, nh,
-					nv, wv, 3*nshfts-3)
+					h.Data, h.Stride,
+					0, n-1, z.Data, z.Stride,
+					v.Data, v.Stride,
+					u.Data, u.Stride,
+					nh, wh.Data, wh.Stride,
+					nv, wv.Data, wv.Stride)
 
-				if !equalApprox(n, n, h, ldh, hwant, 1e-13) {
-					t.Errorf("Case %v, kacc22=%v: unexpected matrix H\nh    =%v\nhwant=%v", f.Name, kacc22, h, hwant)
+				prefix := fmt.Sprintf("wantt=%v, n=%v, nshfts=%v, ktop=%v, kbot=%v, extra=%v, kacc22=%v",
+					wantt, n, nshfts, ktop, kbot, extra, kacc22)
+				if !equalApprox(n, n, h.Data, h.Stride, test.HWant, 1e-13) {
+					t.Errorf("Case %v: unexpected matrix H\nh    =%v\nhwant=%v", prefix, h.Data, test.HWant)
 				}
-				if !equalApprox(n, n, z, ldh, zwant, 1e-13) {
-					t.Errorf("Case %v, kacc22=%v: unexpected matrix Z\nz    =%v\nzwant=%v", f.Name, kacc22, z, zwant)
+				if !equalApprox(n, n, z.Data, z.Stride, test.ZWant, 1e-13) {
+					t.Errorf("Case %v: unexpected matrix Z\nz    =%v\nzwant=%v", prefix, z.Data, test.ZWant)
 				}
 			}
 		}
 	}
 }
 
-// readDlaqr5Case reads and returns test data written by internal/testdata/dlaqr5test/main.go.
-func readDlaqr5Case(r io.Reader) (wantt bool, n, nshfts, ktop, kbot int, sr, si []float64, h, hwant, zwant []float64) {
-	_, err := fmt.Fscanln(r, &wantt, &n, &nshfts, &ktop, &kbot)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sr = make([]float64, nshfts)
-	si = make([]float64, nshfts)
-	h = make([]float64, n*n)
-	hwant = make([]float64, n*n)
-	zwant = make([]float64, n*n)
-
-	for i := range sr {
-		_, err = fmt.Fscanln(r, &sr[i])
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	for i := range si {
-		_, err = fmt.Fscanln(r, &si[i])
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Rand) {
+	wantt := true
+	wantz := true
+	nshfts := 2 * n
+	sr := make([]float64, nshfts)
+	si := make([]float64, nshfts)
 	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			_, err = fmt.Fscanln(r, &h[i*n+j])
-			if err != nil {
-				log.Fatal(err)
+		re := rnd.NormFloat64()
+		im := rnd.NormFloat64()
+		sr[2*i], sr[2*i+1] = re, re
+		si[2*i], si[2*i+1] = im, -im
+	}
+	ktop := rnd.Intn(n)
+	kbot := rnd.Intn(n)
+	if kbot < ktop {
+		ktop, kbot = kbot, ktop
+	}
+
+	v := randomGeneral(nshfts/2, 3, 3+extra, rnd)
+	u := randomGeneral(3*nshfts-3, 3*nshfts-3, 3*nshfts-3+extra, rnd)
+	nh := n
+	wh := randomGeneral(3*nshfts-3, n, n+extra, rnd)
+	nv := n
+	wv := randomGeneral(n, 3*nshfts-3, 3*nshfts-3+extra, rnd)
+
+	h := randomHessenberg(n, n+extra, rnd)
+	if ktop > 0 {
+		h.Data[ktop*h.Stride+ktop-1] = 0
+	}
+	if kbot < n-1 {
+		h.Data[(kbot+1)*h.Stride+kbot] = 0
+	}
+	hCopy := h
+	hCopy.Data = make([]float64, len(h.Data))
+	copy(hCopy.Data, h.Data)
+
+	z := eye(n, n+extra)
+
+	impl.Dlaqr5(wantt, wantz, kacc22,
+		n, ktop, kbot,
+		nshfts, sr, si,
+		h.Data, h.Stride,
+		0, n-1, z.Data, z.Stride,
+		v.Data, v.Stride,
+		u.Data, u.Stride,
+		nh, wh.Data, wh.Stride,
+		nv, wv.Data, wv.Stride)
+
+	prefix := fmt.Sprintf("Case n=%v, extra=%v, kacc22=%v", n, extra, kacc22)
+
+	if !generalOutsideAllNaN(h) {
+		t.Errorf("%v: out-of-range write to H\n%v", prefix, h.Data)
+	}
+	if !generalOutsideAllNaN(z) {
+		t.Errorf("%v: out-of-range write to Z\n%v", prefix, z.Data)
+	}
+	if !generalOutsideAllNaN(u) {
+		t.Errorf("%v: out-of-range write to U\n%v", prefix, u.Data)
+	}
+	if !generalOutsideAllNaN(v) {
+		t.Errorf("%v: out-of-range write to V\n%v", prefix, v.Data)
+	}
+	if !generalOutsideAllNaN(wh) {
+		t.Errorf("%v: out-of-range write to WH\n%v", prefix, wh.Data)
+	}
+	if !generalOutsideAllNaN(wv) {
+		t.Errorf("%v: out-of-range write to WV\n%v", prefix, wv.Data)
+	}
+
+	for i := 0; i < n; i++ {
+		for j := 0; j < i-1; j++ {
+			if h.Data[i*h.Stride+j] != 0 {
+				t.Errorf("%v: H is not Hessenberg, H[%v,%v]!=0", prefix, i, j)
 			}
 		}
 	}
+	if !isOrthonormal(z) {
+		t.Errorf("%v: Z is not orthogonal", prefix)
+	}
+	// Construct Z^T * HOrig * Z and check that it is equal to H from Dlaqr5.
+	hz := blas64.General{
+		Rows:   n,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, n*n),
+	}
+	blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, hCopy, z, 0, hz)
+	zhz := blas64.General{
+		Rows:   n,
+		Cols:   n,
+		Stride: n,
+		Data:   make([]float64, n*n),
+	}
+	blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hz, 0, zhz)
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
-			_, err = fmt.Fscanln(r, &hwant[i*n+j])
-			if err != nil {
-				log.Fatal(err)
+			diff := zhz.Data[i*zhz.Stride+j] - h.Data[i*h.Stride+j]
+			if math.Abs(diff) > 1e-13 {
+				t.Errorf("%v: Z^T*HOrig*Z and H are not equal, diff at [%v,%v]=%v", prefix, i, j, diff)
 			}
 		}
 	}
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			_, err = fmt.Fscanln(r, &zwant[i*n+j])
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-
-	return wantt, n, nshfts, ktop, kbot, sr, si, h, hwant, zwant
 }

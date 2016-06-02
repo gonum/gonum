@@ -75,7 +75,7 @@ const (
 	MaxAbs       MatrixNorm = 'M' // max(abs(A(i,j)))  ('M')
 	MaxColumnSum MatrixNorm = 'O' // Maximum column sum (one norm) ('1', 'O')
 	MaxRowSum    MatrixNorm = 'I' // Maximum row sum (infinity norm) ('I', 'i')
-	NormFrob     MatrixNorm = 'F' // Frobenium norm (sqrt of sum of squares) ('F', 'f', E, 'e')
+	NormFrob     MatrixNorm = 'F' // Frobenius norm (sqrt of sum of squares) ('F', 'f', E, 'e')
 )
 
 // MatrixType represents the kind of matrix represented in the data.

@@ -373,6 +373,17 @@ EOH
 
 		my $goType = $typeConv{$type};
 
+		$goType =~ /^\[\]/ && do {
+			my $typeElem = substr $goType, 2;
+			my $bp = << "EOH";
+var _$var *$typeElem
+if len($var) > 0 {
+_$var = &${var}[0]
+}
+EOH
+			push @boilerplate, $bp;
+		};
+
 		if (not $goType) {
 			die "missed Go parameters from '$func', '$type', '$param'";
 		}
@@ -419,9 +430,9 @@ sub processParamToC {
 			chop $type;
 
 			if ($type eq "char") {
-				push @processed, "(*C.".$type.")(unsafe.Pointer(&".$var."[0]))"; next;
+				push @processed, "(*C.".$type.")(unsafe.Pointer(_".$var."))"; next;
 			} else {
-				push @processed, "(*C.".$type.")(&".$var."[0])"; next;
+				push @processed, "(*C.".$type.")(_".$var.")"; next;
 			}
 		}else{
 			push @processed, "(C.".$type.")(".$var.")"; next;

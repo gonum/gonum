@@ -24,6 +24,7 @@ open(my $clapack, "<", $clapackHeader) or die;
 open(my $golapack, ">", "clapack.go") or die;
 
 my %done;
+my %hasWork;
 
 printf $golapack <<"EOH";
 // Do not manually edit this file. It was created by the genLapack.pl script from ${clapackHeader}.
@@ -159,11 +160,40 @@ our %allUplo = (
 );
 
 foreach my $line (@lines) {
+	assess($line);
+}
+
+foreach my $line (@lines) {
 	process($line);
 }
 
 close($golapack);
 `go fmt .`;
+
+sub assess {
+	my $line = shift;
+	chomp $line;
+	assessWork($line);
+}
+
+sub assessWork {
+	my $proto = shift;
+	if (not($proto =~ /LAPACKE/)) {
+		return
+	}
+	my ($func, $paramList) = split /[()]/, $proto;
+	if ($func =~ /rook/) {
+		return
+	}
+
+	(my $ret, $func) = split ' ', $func;
+	(my $pack, $func, my $tail) = split '_', $func;
+	if (!defined $tail or $tail ne "work") {
+		return
+	}
+
+	$hasWork{$func} = 1;
+}
 
 sub process {
 	my $line = shift;
@@ -173,13 +203,22 @@ sub process {
 
 sub processProto {
 	my $proto = shift;
-	if(not($proto =~ /LAPACKE/)) {
+	if (not($proto =~ /LAPACKE/)) {
 		return
 	}
 	my ($func, $paramList) = split /[()]/, $proto;
 
 	(my $ret, $func) = split ' ', $func;
 	(my $pack, $func, my $tail) = split '_', $func;
+	if ($hasWork{$func} && (!defined $tail || $tail ne "work")) {
+		# This is ilaver only at this stage.
+		return
+	}
+	if (defined $tail) {
+		$tail = "_$tail";
+	} else {
+		$tail = "";
+	}
 
 	if ($done{$func} or $xobjs{$func} or $deprecated{$func}){
 		return
@@ -199,13 +238,7 @@ sub processProto {
 	}
 	$done{$func} = 1;
 
-
-	my $gofunc;
-	if ($tail) {
-		$gofunc = ucfirst $func . ucfirst $tail;
-	}else{
-		$gofunc = ucfirst $func;
-	}
+	my $gofunc = ucfirst $func;
 
 	my $GoRet = $typeConv{$ret."_return"};
 	my $GoRetType = $typeConv{$ret."_return_type"};
@@ -221,7 +254,7 @@ sub processProto {
 	if ($ret ne 'void') {
 		print $golapack $bp."return ".$GoRet."(";
 	}
-	print $golapack "C.LAPACKE_$func(".processParamToC($func, $paramList).")";
+	print $golapack "C.LAPACKE_$func$tail(".processParamToC($func, $paramList).")";
 	if ($ret ne 'void') {
 		print $golapack ")";
 	}

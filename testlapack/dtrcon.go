@@ -82,7 +82,7 @@ func DtrconTest(t *testing.T, impl Dtrconer) {
 		}
 		iwork := make([]int, test.n)
 		for i := range iwork {
-			iwork[i] = rnd.Int()
+			iwork[i] = int(rnd.Int31())
 		}
 		aCopy := make([]float64, len(test.a))
 		copy(aCopy, test.a)

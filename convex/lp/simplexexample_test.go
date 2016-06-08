@@ -12,7 +12,7 @@ import (
 	"github.com/gonum/optimize/convex/lp"
 )
 
-func Example_Simplex() {
+func ExampleSimplex() {
 	c := []float64{-1, -2, 0, 0}
 	A := mat64.NewDense(2, 4, []float64{-1, 2, 1, 0, 3, 1, 0, 1})
 	b := []float64{4, 9}

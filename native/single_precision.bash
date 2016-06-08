@@ -126,6 +126,8 @@ echo -e '// Generated code do not edit. Run `go generate`.\n' > sgemm.go
 cat dgemm.go \
 | gofmt -r 'float64 -> float32' \
 | gofmt -r 'general64 -> general32' \
+| gofmt -r 'sliceView64 -> sliceView32' \
+| gofmt -r 'checkMatrix64 -> checkMatrix32' \
 \
 | gofmt -r 'dgemmParallel -> sgemmParallel' \
 | gofmt -r 'computeNumBlocks64 -> computeNumBlocks32' \

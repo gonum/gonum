@@ -40,6 +40,12 @@ func nanSlice(n int) []float64 {
 
 // nanGeneral allocates a new r×c general matrix filled with NaN values.
 func nanGeneral(r, c, stride int) blas64.General {
+	if r < 0 || c < 0 {
+		panic("bad matrix size")
+	}
+	if r == 0 || c == 0 {
+		return blas64.General{}
+	}
 	return blas64.General{
 		Rows:   r,
 		Cols:   c,

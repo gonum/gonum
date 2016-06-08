@@ -21,6 +21,8 @@ const (
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
 	badEigComp      = "lapack: bad EigComp"
+	badIlo          = "lapack: ilo out of range"
+	badIhi          = "lapack: ihi out of range"
 	badIpiv         = "lapack: insufficient permutation length"
 	badLdA          = "lapack: index of a out of range"
 	badNorm         = "lapack: bad norm"
@@ -468,6 +470,76 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 		panic(badTau)
 	}
 	clapack.Dgeqrf(m, n, a, lda, tau, work, lwork)
+}
+
+// Dgehrd reduces a block of a real n×n general matrix A to upper Hessenberg
+// form H by an orthogonal similarity transformation Q^T * A * Q = H.
+//
+// The matrix Q is represented as a product of (ihi-ilo) elementary
+// reflectors
+//  Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
+// Each H_i has the form
+//  H_i = I - tau[i] * v * v^T
+// where v is a real vector with v[0:i+1] = 0, v[i+1] = 1 and v[ihi+1:n] = 0.
+// v[i+2:ihi+1] is stored on exit in A[i+2:ihi+1,i].
+//
+// On entry, a contains the n×n general matrix to be reduced. On return, the
+// upper triangle and the first subdiagonal of A will be overwritten with the
+// upper Hessenberg matrix H, and the elements below the first subdiagonal, with
+// the slice tau, represent the orthogonal matrix Q as a product of elementary
+// reflectors.
+//
+// The contents of a are illustrated by the following example, with n = 7, ilo =
+// 1 and ihi = 5.
+// On entry,
+//  [ a   a   a   a   a   a   a ]
+//  [     a   a   a   a   a   a ]
+//  [     a   a   a   a   a   a ]
+//  [     a   a   a   a   a   a ]
+//  [     a   a   a   a   a   a ]
+//  [     a   a   a   a   a   a ]
+//  [                         a ]
+// on return,
+//  [ a   a   h   h   h   h   a ]
+//  [     a   h   h   h   h   a ]
+//  [     h   h   h   h   h   h ]
+//  [     v1  h   h   h   h   h ]
+//  [     v1  v2  h   h   h   h ]
+//  [     v1  v2  v3  h   h   h ]
+//  [                         a ]
+// where a denotes an element of the original matrix A, h denotes a
+// modified element of the upper Hessenberg matrix H, and vi denotes an
+// element of the vector defining H_i.
+//
+// ilo and ihi determine the block of A that will be reduced to upper Hessenberg
+// form. It must hold that 0 <= ilo <= ihi < n if n > 0, and ilo == 0 and ihi ==
+// -1 if n == 0, otherwise Dgehrd will panic.
+//
+// On return, tau will contain the scalar factors of the elementary reflectors.
+// Elements tau[:ilo] and tau[ihi:] of tau will be set to zero. It must have
+// length equal to n-1 if n > 1, otherwise Dgehrd will panic.
+//
+// work must have length at least lwork, otherwise Dgehrd will panic, and lwork
+// must be at least max(1,n).
+//
+// The C interface does not support providing temporary storage. To provide
+// compatibility with native, lwork == -1 will not run Dgehrd but will instead
+// write the minimum work necessary to work[0].
+func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int) {
+	checkMatrix(n, n, a, lda)
+	switch {
+	case ilo < 0 || max(0, n-1) < ilo:
+		panic(badIlo)
+	case ihi < min(ilo, n-1) || n <= ihi:
+		panic(badIhi)
+	case len(work) < lwork:
+		panic(shortWork)
+	case lwork < max(1, n) && lwork != -1:
+		panic(badWork)
+	case n > 0 && len(tau) != n-1:
+		panic(badTau)
+	}
+	clapack.Dgehrd(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
 }
 
 // Dgels finds a minimum-norm solution based on the matrices A and B using the

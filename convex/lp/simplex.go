@@ -78,7 +78,7 @@ const (
 // initialBasic can be used to set the initial set of indices for a feasible
 // solution to the LP. If an initial feasible solution is not known, initialBasic
 // may be nil. If initialBasic is non-nil, len(initialBasic) must equal the number
-// of columns of A and must be an actual feasible solution to the LP, otherwise
+// of rows of A and must be an actual feasible solution to the LP, otherwise
 // Simplex will panic.
 //
 // A description of the Simplex algorithm can be found in Ch. 8 of

@@ -69,7 +69,7 @@ TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	MOVSD X3, (DI)(AX*8)
 	INCQ  AX
 	DECQ  CX
-	JZ    caxy_end //*/
+	JZ    caxy_end
 
 caxy_no_trim:
 	MOVAPS X0, X10
@@ -119,17 +119,17 @@ caxy_loop:
 	JE     caxy_end
 
 caxy_tail:
-	MOVSD  (SI)(AX*8), X3
+	MOVSD (SI)(AX*8), X3
 	MOVSHDUP_X3_X2
 	MOVSLDUP_X3_X3
-	MULPS  X1, X2         // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
-	MULPS  X0, X3         // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
-	ADDSUBPS_X2_X3        // (ai*x2r+ar*x2i, ar*x2r-ai*x2i, ai*x1r+ar*x1i, ar*x1r-ai*x1i)
-	MOVSD  (DI)(AX*8), X4
-	ADDPS  X4, X3
-	MOVSD  X3, (DI)(AX*8)
-	INCQ   AX
-	LOOPNE caxy_tail
+	MULPS X1, X2         // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
+	MULPS X0, X3         // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
+	ADDSUBPS_X2_X3       // (ai*x2r+ar*x2i, ar*x2r-ai*x2i, ai*x1r+ar*x1i, ar*x1r-ai*x1i)
+	MOVSD (DI)(AX*8), X4
+	ADDPS X4, X3
+	MOVSD X3, (DI)(AX*8)
+	INCQ  AX
+	LOOP  caxy_tail
 
 caxy_end:
 	RET

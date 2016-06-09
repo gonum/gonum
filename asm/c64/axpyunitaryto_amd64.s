@@ -116,17 +116,17 @@ caxy_loop:
 	JE     caxy_end
 
 caxy_tail: // Same calculation, but read in values to avoid trampling memory
-	MOVSD  (SI)(AX*8), X3
-	MOVSHDUP_X3_X2        // Load and duplicate real elements (x2r, x2r, x1r, x1r)
-	MOVSLDUP_X3_X3        // Load and duplicate imag elements (x2i, x2i, x1i, x1i)
-	MULPS  X1, X2         // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
-	MULPS  X0, X3         // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
-	ADDSUBPS_X2_X3        // Add y2,y1 to a*(x2,x1)
-	MOVSD  (DX)(AX*8), X4
-	ADDPS  X4, X3
-	MOVSD  X3, (DI)(AX*8)
-	INCQ   AX
-	LOOPNE caxy_tail
+	MOVSD (SI)(AX*8), X3
+	MOVSHDUP_X3_X2       // Load and duplicate real elements (x2r, x2r, x1r, x1r)
+	MOVSLDUP_X3_X3       // Load and duplicate imag elements (x2i, x2i, x1i, x1i)
+	MULPS X1, X2         // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
+	MULPS X0, X3         // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
+	ADDSUBPS_X2_X3       // Add y2,y1 to a*(x2,x1)
+	MOVSD (DX)(AX*8), X4
+	ADDPS X4, X3
+	MOVSD X3, (DI)(AX*8)
+	INCQ  AX
+	LOOP  caxy_tail
 
 caxy_end:
 	RET

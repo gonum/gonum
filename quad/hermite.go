@@ -6,7 +6,6 @@ package quad
 
 import (
 	"math"
-	"math/cmplx"
 
 	"github.com/gonum/floats"
 	"github.com/gonum/mathext/airy"
@@ -127,8 +126,9 @@ func (h Hermite) locationsAsy(n int) (x, w []float64) {
 
 func (h Hermite) locationsAsy0(n int) (x, w []float64) {
 	eps := math.Nextafter(1, math.Inf(1)) - 1
+	x0pts := make([]float64, n/2+n%2)
 	// Compute Hermite nodes and weights using asymptotic formula.
-	x0pts := h.hermiteInitialGuesses(n)
+	h.hermiteInitialGuesses(x0pts, n)
 	theta0 := x0pts
 	for i, x0 := range theta0 {
 		t0 := x0 / math.Sqrt(2*float64(n)+1)
@@ -253,7 +253,10 @@ func (h Hermite) hermpolyAsyAiry(n int, theta []float64) (valVec, dvalVec []floa
 	return valVec, dvalVec
 }
 
-func (h Hermite) hermiteInitialGuesses(n int) (guesses []float64) {
+// hermiteInitialGuesses returns a set of initial guesses for the hermite
+// quadrature locations. The results are stored in-place into guessses. Guesses
+// has length of ceil(n/2).
+func (h Hermite) hermiteInitialGuesses(guesses []float64, n int) {
 	// Initial guesses for Hermite zeros.
 	//
 	// [1] L. Gatteschi, Asymptotics and bounds for the zeros of Laguerre
@@ -261,26 +264,16 @@ func (h Hermite) hermiteInitialGuesses(n int) (guesses []float64) {
 	//
 	// [2] F. G. Tricomi, Sugli zeri delle funzioni di cui si conosce una
 	// rappresentazione asintotica, Ann. Mat. Pura Appl. 26 (1947), pp. 283-300.
+	if len(guesses) != n/2+n%2 {
+		panic("hermite: bad guesses length")
+	}
 
 	// Gatteschi formula involving airy roots [1].
 	// These initial guesses are good near x = sqrt(n+1/2).
-	var bess []float64
-	var a float64
-	var m int
+	m := n / 2
+	a := -0.5
 	if n%2 == 1 {
-		m = (n - 1) / 2
-		bess = make([]float64, m)
-		for i := range bess {
-			bess[i] = (float64(i) + 1) * math.Pi
-		}
 		a = 0.5
-	} else {
-		m = n / 2
-		bess = make([]float64, m)
-		for i := range bess {
-			bess[i] = (float64(i) + 0.5) * math.Pi
-		}
-		a = -0.5
 	}
 	nu := 4*float64(m) + 2*a + 2
 	airyrts := make([]float64, m)
@@ -288,45 +281,47 @@ func (h Hermite) hermiteInitialGuesses(n int) (guesses []float64) {
 	for i := len(airyRtsExact); i < len(airyrts); i++ {
 		airyrts[i] = -h.airyT(3.0 / 8 * math.Pi * (4*(float64(i)+1) - 1))
 	}
-
-	xInit := make([]float64, len(airyrts))
+	// Change the airy roots into x locations.
 	for i, ar := range airyrts {
 		r := nu + math.Pow(2, 2.0/3)*ar*math.Pow(nu, 1.0/3) +
 			0.2*math.Pow(2, 4.0/3)*ar*ar*math.Pow(nu, -1.0/3) +
 			(11.0/35-a*a-12.0/175*ar*ar*ar)/nu +
 			(16.0/1575*ar+92.0/7875*math.Pow(ar, 4))*math.Pow(2, 2.0/3)*math.Pow(nu, -5.0/3) -
 			(15152.0/3031875*math.Pow(ar, 5)+1088.0/121275*ar*ar)*math.Pow(2, 1.0/3)*math.Pow(nu, -7.0/3)
-		c := cmplx.Sqrt(complex(r, 0))
-		xInit[i] = real(c)
+		if r < 0 {
+			r = 0
+		}
+		airyrts[i] = math.Sqrt(r)
 	}
 
-	xInitAiry := make([]float64, len(xInit))
-	for i, v := range xInit {
-		xInitAiry[len(xInit)-1-i] = v
+	xInitAiry := make([]float64, len(airyrts))
+	for i, v := range airyrts {
+		xInitAiry[len(airyrts)-1-i] = v
 	}
 
 	// Tricomi initial guesses. Equation (2.1) in [1]. Originally in [2].
 	// These initial guesses are good near x = 0 . Note: zeros of besselj(+/-.5,x)
 	// are integer and half-integer multiples of pi.
-	Tnk0 := make([]float64, m)
-	for i := range Tnk0 {
-		Tnk0[i] = math.Pi / 2
-	}
 	nu = 4*float64(m) + 2*a + 2
 	rhs := make([]float64, m)
 	for i := range rhs {
 		rhs[i] = (4*float64(m) - 4*(float64(i)+1) + 3) / nu * math.Pi
 	}
-	for k := 0; k < 7; k++ {
-		for i, tnk0 := range Tnk0 {
+	tnk := make([]float64, m)
+	for i := range tnk {
+		tnk[i] = math.Pi / 2
+	}
+	for i, tnk0 := range tnk {
+		for k := 0; k < 7; k++ {
 			val := tnk0 - math.Sin(tnk0) - rhs[i]
 			dval := 1 - math.Cos(tnk0)
 			dTnk0 := val / dval
-			Tnk0[i] -= dTnk0
+			tnk0 -= dTnk0
+			// TODO(btracey): Break if the delta is small?
 		}
+		tnk[i] = tnk0
 	}
-	tnk := make([]float64, len(Tnk0))
-	for i, v := range Tnk0 {
+	for i, v := range tnk {
 		vc := math.Cos(v / 2)
 		tnk[i] = vc * vc
 	}
@@ -337,25 +332,14 @@ func (h Hermite) hermiteInitialGuesses(n int) (guesses []float64) {
 	}
 
 	// Patch together.
+	if n%2 == 1 {
+		guesses[0] = 0
+		guesses = guesses[1:]
+	}
 	p := 0.4985 + math.SmallestNonzeroFloat64
 	pidx := int(math.Floor(p * float64(n)))
-	for i := 0; i < pidx; i++ {
-		xInit[i] = xInitSin[i]
-	}
-	for i := pidx; i < len(xInitAiry); i++ {
-		xInit[i] = xInitAiry[i]
-	}
-
-	if n%2 == 1 {
-		tmp := make([]float64, len(xInit)+1)
-		copy(tmp[1:], xInit)
-		guesses = make([]float64, m+1)
-		copy(guesses, tmp)
-	} else {
-		guesses = make([]float64, m)
-		copy(guesses, xInit)
-	}
-	return guesses
+	copy(guesses[:pidx], xInitSin[:pidx])
+	copy(guesses[pidx:], xInitAiry[pidx:])
 }
 
 func (h Hermite) airyT(t float64) float64 {

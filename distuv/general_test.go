@@ -158,7 +158,7 @@ func parametersEqual(p1, p2 []Parameter, tol float64) bool {
 
 type derivParamTester interface {
 	LogProb(x float64) float64
-	DLogProbDParam(x float64, deriv []float64)
+	Score(deriv []float64, x float64) []float64
 	Quantile(p float64) float64
 	NumParameters() int
 	parameters([]Parameter) []Parameter
@@ -183,7 +183,7 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 	for _, v := range quantiles {
 		d.setParameters(initParams)
 		x := d.Quantile(v)
-		d.DLogProbDParam(x, deriv)
+		d.Score(deriv, x)
 		f := func(p []float64) float64 {
 			params := d.parameters(nil)
 			for i, v := range p {
@@ -195,6 +195,11 @@ func testDerivParam(t *testing.T, d derivParamTester) {
 		fd.Gradient(fdDeriv, f, init, nil)
 		if !floats.EqualApprox(deriv, fdDeriv, 1e-6) {
 			t.Fatal("Derivative mismatch. Want", fdDeriv, ", got", deriv, ".")
+		}
+		d.setParameters(initParams)
+		d2 := d.Score(nil, x)
+		if !floats.EqualApprox(d2, deriv, 1e-14) {
+			t.Errorf("Derivative mismatch when input nil Want %v, got %v", d2, deriv)
 		}
 	}
 }

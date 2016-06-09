@@ -42,3 +42,19 @@ func TestExponentialProb(t *testing.T) {
 func TestExponentialFitPrior(t *testing.T) {
 	testConjugateUpdate(t, func() ConjugateUpdater { return &Exponential{Rate: 13.7} })
 }
+
+func TestExponentialScore(t *testing.T) {
+	for _, test := range []*Exponential{
+		{
+			Rate: 1,
+		},
+		{
+			Rate: 0.35,
+		},
+		{
+			Rate: 4.6,
+		},
+	} {
+		testDerivParam(t, test)
+	}
+}

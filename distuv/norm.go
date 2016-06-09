@@ -65,26 +65,6 @@ func (n *Normal) ConjugateUpdate(suffStat []float64, nSamples float64, priorStre
 	floats.AddConst(nSamples, priorStrength)
 }
 
-// DLogProbDX computes the derivative of the log of the probability with respect
-// to the input x.
-func (n Normal) DLogProbDX(x float64) float64 {
-	return -(1 / (2 * n.Sigma * n.Sigma)) * 2 * (x - n.Mu)
-}
-
-// DLogProbDParam returns the derivative of the log of the probability with
-// respect to the parameters of the distribution. The deriv slice must have length
-// equal to the number of parameters of the distribution.
-//
-// The order is first ∂LogProb / ∂Mu and then ∂LogProb / ∂Sigma
-func (n Normal) DLogProbDParam(x float64, deriv []float64) {
-	if len(deriv) != n.NumParameters() {
-		panic("dist: slice length mismatch")
-	}
-	deriv[0] = (x - n.Mu) / (n.Sigma * n.Sigma)
-	deriv[1] = 1 / n.Sigma * (-1 + ((x-n.Mu)/n.Sigma)*((x-n.Mu)/n.Sigma))
-	return
-}
-
 // Entropy returns the differential entropy of the distribution.
 func (n Normal) Entropy() float64 {
 	return 0.5 * (log2Pi + 1 + 2*math.Log(n.Sigma))
@@ -155,6 +135,37 @@ func (n Normal) Rand() float64 {
 		rnd = n.Source.NormFloat64()
 	}
 	return rnd*n.Sigma + n.Mu
+}
+
+// Score returns the score function with respect to the parameters of the
+// distribution at the input location x. The score function is the derivative
+// of the log-likelihood at x with respect to the parameters
+//  (∂/∂θ) log(p(x;θ))
+// If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
+// Score will panic, and the derivative is stored in-place into deriv. If deriv
+// is nil a new slice will be allocated and returned.
+//
+// The order is [∂LogProb / ∂Mu, ∂LogProb / ∂Sigma].
+//
+// For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
+func (n Normal) Score(deriv []float64, x float64) []float64 {
+	if deriv == nil {
+		deriv = make([]float64, n.NumParameters())
+	}
+	if len(deriv) != n.NumParameters() {
+		panic("dist: slice length mismatch")
+	}
+	deriv[0] = (x - n.Mu) / (n.Sigma * n.Sigma)
+	deriv[1] = 1 / n.Sigma * (-1 + ((x-n.Mu)/n.Sigma)*((x-n.Mu)/n.Sigma))
+	return deriv
+}
+
+// ScoreInput returns the score function with respect to the input of the
+// distribution at the input location specified by x. The score function is the
+// derivative of the log-likelihood
+//  (d/dx) log(p(x)) .
+func (n Normal) ScoreInput(x float64) float64 {
+	return -(1 / (2 * n.Sigma * n.Sigma)) * 2 * (x - n.Mu)
 }
 
 // Skewness returns the skewness of the distribution.

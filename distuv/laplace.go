@@ -28,44 +28,6 @@ func (l Laplace) CDF(x float64) float64 {
 	return 1 - 0.5*math.Exp(-(x-l.Mu)/l.Scale)
 }
 
-// DLogProbDX returns the derivative of the log of the probability with
-// respect to the input x. Returns 0 if x == l.Mu.
-func (l Laplace) DLogProbDX(x float64) float64 {
-	diff := x - l.Mu
-	if diff == 0 {
-		return 0
-	}
-	if diff > 0 {
-		return -1 / l.Scale
-	}
-	return 1 / l.Scale
-}
-
-// DLogProbDParam returns the derivative of the log of the probability with
-// respect to the parameters of the distribution. The deriv slice must have length
-// equal to the number of parameters of the distribution.
-//
-// The order is first ∂LogProb / ∂Mu and then ∂LogProb / ∂Scale
-func (l Laplace) DLogProbDParam(x float64, deriv []float64) {
-	if len(deriv) != l.NumParameters() {
-		panic("dist: slice length mismatch")
-	}
-	diff := x - l.Mu
-	if diff > 0 {
-		deriv[0] = 1 / l.Scale
-	} else if diff < 0 {
-		deriv[0] = -1 / l.Scale
-	} else if diff == 0 {
-		deriv[0] = 0
-	} else {
-		// must be NaN
-		deriv[0] = math.NaN()
-	}
-
-	deriv[1] = math.Abs(diff)/(l.Scale*l.Scale) - 0.5/(l.Scale)
-	return
-}
-
 // Entropy returns the entropy of the distribution.
 func (l Laplace) Entropy() float64 {
 	return 1 + math.Log(2*l.Scale)
@@ -195,6 +157,60 @@ func (l Laplace) Rand() float64 {
 		return l.Mu + l.Scale*math.Log(1+2*u)
 	}
 	return l.Mu - l.Scale*math.Log(1-2*u)
+}
+
+// Score returns the score function with respect to the parameters of the
+// distribution at the input location x. The score function is the derivative
+// of the log-likelihood at x with respect to the parameters
+//  (∂/∂θ) log(p(x;θ))
+// If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
+// Score will panic, and the derivative is stored in-place into deriv. If deriv
+// is nil a new slice will be allocated and returned.
+//
+// The order is [∂LogProb / ∂Mu, ∂LogProb / ∂Scale].
+//
+// For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
+//
+// Special cases:
+//  Score(0) = [0, -0.5/l.Scale]
+func (l Laplace) Score(deriv []float64, x float64) []float64 {
+	if deriv == nil {
+		deriv = make([]float64, l.NumParameters())
+	}
+	if len(deriv) != l.NumParameters() {
+		panic("dist: slice length mismatch")
+	}
+	diff := x - l.Mu
+	if diff > 0 {
+		deriv[0] = 1 / l.Scale
+	} else if diff < 0 {
+		deriv[0] = -1 / l.Scale
+	} else if diff == 0 {
+		deriv[0] = 0
+	} else {
+		// must be NaN
+		deriv[0] = math.NaN()
+	}
+
+	deriv[1] = math.Abs(diff)/(l.Scale*l.Scale) - 0.5/(l.Scale)
+	return deriv
+}
+
+// ScoreInput returns the score function with respect to the input of the
+// distribution at the input location specified by x. The score function is the
+// derivative of the log-likelihood
+//  (d/dx) log(p(x)) .
+// Special cases:
+//  ScoreInput(l.Mu) = 0
+func (l Laplace) ScoreInput(x float64) float64 {
+	diff := x - l.Mu
+	if diff == 0 {
+		return 0
+	}
+	if diff > 0 {
+		return -1 / l.Scale
+	}
+	return 1 / l.Scale
 }
 
 // Skewness returns the skewness of the distribution.

@@ -188,3 +188,22 @@ func TestScaledDownHalfKStandardWeibullProb(t *testing.T) {
 	}
 	testDistributionProbs(t, Weibull{K: 0.5, Lambda: 0.5}, "0.5K 0.5λ Weibull", pts)
 }
+
+func TestWeibullScore(t *testing.T) {
+	for _, test := range []*Weibull{
+		{
+			K:      1,
+			Lambda: 1,
+		},
+		{
+			K:      2,
+			Lambda: 3.6,
+		},
+		{
+			K:      3.4,
+			Lambda: 8,
+		},
+	} {
+		testDerivParam(t, test)
+	}
+}

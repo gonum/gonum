@@ -21,10 +21,10 @@ import (
 // isgn must be 1 or -1, and n1 and n2 must be 0, 1, or 2, but these conditions
 // are not checked.
 //
-// Dlasy2 returns a scale factor that is chosen less than or equal to 1 to
-// prevent the solution overflowing, the infinity norm of the solution, and an
-// indicator of success. If ok is false, TL and TR have too close eigenvalues,
-// so TL or TR is perturbed to get a non-singular equation.
+// Dlasy2 returns three values, a scale factor that is chosen less than or equal
+// to 1 to prevent the solution overflowing, the infinity norm of the solution,
+// and an indicator of success. If ok is false, TL and TR have eigenvalues that
+// are too close, so TL or TR is perturbed to get a non-singular equation.
 //
 // Dlasy2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlasy2(tranl, tranr bool, isgn, n1, n2 int, tl []float64, ldtl int, tr []float64, ldtr int, b []float64, ldb int, x []float64, ldx int) (scale, xnorm float64, ok bool) {

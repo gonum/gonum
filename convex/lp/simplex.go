@@ -131,7 +131,8 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 		if len(initialBasic) != m {
 			panic("lp: incorrect number of initial vectors")
 		}
-		ab = extractColumns(A, initialBasic)
+		ab = mat64.NewDense(m, len(initialBasic), nil)
+		extractColumns(ab, A, initialBasic)
 		xb, err = initializeFromBasic(ab, b)
 		if err != nil {
 			panic(err)
@@ -173,7 +174,8 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 	for i, idx := range nonBasicIdx {
 		cn[i] = c[idx]
 	}
-	an := extractColumns(A, nonBasicIdx)
+	an := mat64.NewDense(m, len(nonBasicIdx), nil)
+	extractColumns(an, A, nonBasicIdx)
 
 	bVec := mat64.NewVector(len(b), b)
 	cbVec := mat64.NewVector(len(cb), cb)
@@ -324,6 +326,7 @@ func computeMove(move []float64, minIdx int, A mat64.Matrix, ab *mat64.Dense, xb
 // move is 0. The indices to be swapped are replace and minIdx (following the
 // nomenclature in the main routine).
 func replaceBland(A mat64.Matrix, ab *mat64.Dense, xb []float64, basicIdxs, nonBasicIdx []int, r, move []float64) (replace, minIdx int, err error) {
+	m, _ := A.Dims()
 	// Use the traditional bland rule, except don't replace a constraint which
 	// causes the new ab to be singular.
 	for i, v := range r {
@@ -349,7 +352,8 @@ func replaceBland(A mat64.Matrix, ab *mat64.Dense, xb []float64, basicIdxs, nonB
 			}
 			copy(biCopy, basicIdxs)
 			biCopy[replace] = nonBasicIdx[minIdx]
-			abTmp := extractColumns(A, biCopy)
+			abTmp := mat64.NewDense(m, len(biCopy), nil)
+			extractColumns(abTmp, A, biCopy)
 			// If the condition number is reasonable, use this index.
 			if mat64.Cond(abTmp, 1) < 1e16 {
 				return replace, minIdx, nil
@@ -443,17 +447,21 @@ func initializeFromBasic(ab *mat64.Dense, b []float64) (xb []float64, err error)
 	return xb, nil
 }
 
-// extractColumns creates a new matrix out of the columns of A specified by cols.
-// TODO(btracey): Allow this to take a receiver.
-func extractColumns(A mat64.Matrix, cols []int) *mat64.Dense {
-	r, _ := A.Dims()
-	sub := mat64.NewDense(r, len(cols), nil)
+// extractColumns copies the columns specified by cols into the columns of dst.
+func extractColumns(dst *mat64.Dense, A mat64.Matrix, cols []int) {
+	r, c := dst.Dims()
+	ra, _ := A.Dims()
+	if ra != r {
+		panic("simplex: row mismatch")
+	}
+	if c != len(cols) {
+		panic("simplex: column mismatch")
+	}
 	col := make([]float64, r)
 	for j, idx := range cols {
 		mat64.Col(col, idx, A)
-		sub.SetCol(j, col)
+		dst.SetCol(j, col)
 	}
-	return sub
 }
 
 // findInitialBasic finds an initial basic solution, and returns the basic
@@ -467,7 +475,8 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 
 	// It may be that this linearly independent basis is also a feasible set. If
 	// so, the Phase I problem can be avoided.
-	ab := extractColumns(A, basicIdxs)
+	ab := mat64.NewDense(m, len(basicIdxs), nil)
+	extractColumns(ab, A, basicIdxs)
 	xb, err := initializeFromBasic(ab, b)
 	if err == nil {
 		return basicIdxs, ab, xb, nil
@@ -544,7 +553,7 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 	}
 	if basicIdx == -1 {
 		// Not in the basis.
-		ab = extractColumns(A, newBasic)
+		extractColumns(ab, A, newBasic)
 		return newBasic, ab, xb, nil
 	}
 
@@ -555,7 +564,7 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 			continue
 		}
 		newBasic[basicIdx] = i
-		ab := extractColumns(A, newBasic)
+		extractColumns(ab, A, newBasic)
 		xb, err := initializeFromBasic(ab, b)
 		if err == nil {
 			return newBasic, ab, xb, nil

@@ -38,13 +38,22 @@ func nanSlice(n int) []float64 {
 	return s
 }
 
+// randomSlice allocates a new slice of length n filled with random values.
+func randomSlice(n int, rnd *rand.Rand) []float64 {
+	s := make([]float64, n)
+	for i := range s {
+		s[i] = rnd.NormFloat64()
+	}
+	return s
+}
+
 // nanGeneral allocates a new r×c general matrix filled with NaN values.
 func nanGeneral(r, c, stride int) blas64.General {
 	if r < 0 || c < 0 {
 		panic("bad matrix size")
 	}
 	if r == 0 || c == 0 {
-		return blas64.General{}
+		return blas64.General{Stride: max(1, c)}
 	}
 	return blas64.General{
 		Rows:   r,
@@ -751,6 +760,23 @@ func equalApprox(m, n int, a []float64, lda int, b []float64, tol float64) bool 
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
 			if math.Abs(a[i*lda+j]-b[i*n+j]) > tol {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// equalApproxGeneral returns whether the general matrices a and b are
+// approximately equal within given tolerance.
+func equalApproxGeneral(a, b blas64.General, tol float64) bool {
+	if a.Rows != b.Rows || a.Cols != b.Cols {
+		panic("bad input")
+	}
+	for i := 0; i < a.Rows; i++ {
+		for j := 0; j < a.Cols; j++ {
+			diff := a.Data[i*a.Stride+j] - b.Data[i*b.Stride+j]
+			if math.Abs(diff) > tol {
 				return false
 			}
 		}

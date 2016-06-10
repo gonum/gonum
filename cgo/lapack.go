@@ -82,6 +82,17 @@ func checkMatrix(m, n int, a []float64, lda int) {
 	}
 }
 
+// checkVector verifies the parameters of a vector input.
+// Copied from lapack/native. Keep in sync.
+func checkVector(n int, v []float64, inc int) {
+	if n < 0 {
+		panic("lapack: negative vector length")
+	}
+	if (inc > 0 && (n-1)*inc >= len(v)) || (inc < 0 && (1-n)*inc >= len(v)) {
+		panic("lapack: insufficient vector slice length")
+	}
+}
+
 // Implementation is the cgo-based C implementation of LAPACK routines.
 type Implementation struct{}
 
@@ -156,6 +167,44 @@ func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 		panic(badWork)
 	}
 	return clapack.Dlantr(byte(norm), uplo, diag, m, n, a, lda, work)
+}
+
+// Dlarfx applies an elementary reflector H to a real m×n matrix C, from either
+// the left or the right, with loop unrolling when the reflector has order less
+// than 11.
+//
+// H is represented in the form
+//  H = I - tau * v * v^T,
+// where tau is a real scalar and v is a real vector. If tau = 0, then H is
+// taken to be the identity matrix.
+//
+// v must have length equal to m if side == blas.Left, and equal to n if side ==
+// blas.Right, otherwise Dlarfx will panic.
+//
+// c and ldc represent the m×n matrix C. On return, C is overwritten by the
+// matrix H * C if side == blas.Left, or C * H if side == blas.Right.
+//
+// work must have length at least n if side == blas.Left, and at least m if side
+// == blas.Right, otherwise Dlarfx will panic. work is not referenced if H has
+// order < 11.
+func (impl Implementation) Dlarfx(side blas.Side, m, n int, v []float64, tau float64, c []float64, ldc int, work []float64) {
+	checkMatrix(m, n, c, ldc)
+	switch side {
+	case blas.Left:
+		checkVector(m, v, 1)
+		if len(work) < n && m > 10 {
+			panic(badWork)
+		}
+	case blas.Right:
+		checkVector(n, v, 1)
+		if len(work) < m && n > 10 {
+			panic(badWork)
+		}
+	default:
+		panic(badSide)
+	}
+
+	clapack.Dlarfx(side, m, n, v, tau, c, ldc, work)
 }
 
 // Dpotrf computes the Cholesky decomposition of the symmetric positive definite

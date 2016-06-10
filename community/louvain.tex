@@ -7,15 +7,20 @@
 \usepackage{amsmath,amsfonts}
 \usepackage[margin=4cm]{geometry}
 
+\title{Louvain algorithm for undirected and directed graphs}
+\author{The {\tt gonum} Authors}
+
 \begin{document}
+
+\maketitle
 
 The algorithm attempts to find communities (highly connected sub-graphs),
 and it does this by minimising the modularity function
 \begin{equation}
-	Q = \frac{1}{2m}\sum_i\sum_j\left[ A_{ij} - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j),
+	Q(c) = \frac{1}{2m}\sum_i\sum_j\left[ A_{ij} - \gamma \frac{k_ik_j}{2m} \right] \delta_{ij}(c),
 \end{equation}
-where $A_{ij}$ is the edge weight between nodes $i$ and $j$, 
-$c_i$ is the current community to which node $i$ belongs,
+where $c$ is a partition of nodes into subsets or communities,
+$A_{ij}$ is the edge weight between nodes $i$ and $j$, 
 $\gamma$ is a tuning parameter,
 \begin{equation}
 m = \frac{1}{2}\sum_i\sum_jA_{ij},
@@ -25,16 +30,18 @@ k_i = \sum_j{A_{ij}},
 \end{equation}
 and 
 \begin{equation}
-	\delta(c_i,c_j) = \left \{ \begin{array}{ll}
-	1 & \text{if} \quad  c_i = c_j \\
+	\delta_{ij}(c) = \left \{ \begin{array}{ll}
+	1 & \text{if} \quad  c(i) = c(j) \\
 	0 & \text{otherwise} \end{array} \right ..
 \end{equation}
+Here $c(i)$ denotes the community to which node $i$ belongs 
+in the partitioning $c$.
 
 The algorithm finds a hierarchical community structure by iterating 
 between two phases:
 \begin{enumerate}
-	\item It finds a set of communities that minimise $Q$.
-	\item It constructs a new graph, whose nodes are the communities 
+	\item Find a set of communities that minimise $Q$.
+	\item Construct a new graph, whose nodes are the communities 
 	found in the preceding phase one step.
 \end{enumerate}
 Each iteration of these two phases is called a `pass'.
@@ -45,8 +52,9 @@ at phase one first in the first pass, when each node is a single
 node, and then how this generalises to later passes when each node 
 is a community.
 
+\section{Undirected Graphs}
 
-\section{Initial Pass}
+\subsection{Initial Pass}
 \label{sec:initialPass}
 
 The initial pass is simple as the initial pass uses the original graph, 
@@ -61,18 +69,15 @@ a different community $\beta$ will reduce $Q$.
 If there are possible moves that will reduce $Q$, $a$ is moved into the 
 the community which will generate the largest reduction in $Q$. 
 This process is continued until there are no moves left to reduce $Q$ 
-further, meaning a local minima for $Q$ has been achieved. 
+further, meaning a local minimum for $Q$ has been achieved. 
 Then the algorithm moves to phase two (constructing a new graph where
 each node in the new graph is a community in the old graph). 
 
 Note that we assume the original graph to be simple and undirected.
 First, we introduce some notation that will be useful:
-Let $c_i$ denote the community to which node $i$ currently belongs, 
+Let $c(i)$ denote the community to which node $i$ belongs, 
 and let $\alpha$ be the community that the node $a$ mentioned above
-belongs to ($c_a = \alpha$), i.e.
-\begin{equation}
-	\alpha = \{i | c_i = c_a\}.
-\end{equation}
+belongs to, i.e., $\alpha = c_a$.
 Then we define
 \newcommand{\Stot}[1]{\Sigma_{\text{tot}}^{#1}}
 \begin{equation}
@@ -92,7 +97,7 @@ We are interested in how $Q$ will change if we move a node $a$ from its
 current community $\alpha$, to a new community $\beta$.
 This will have two effects, it will remove the terms from $Q$ 
 related to $a$ in $\alpha$, which we will call $Q^-$ and it will add terms 
-in $\beta$ related to $a$, which we will call $Q^+$. 
+related to $a$ in $\beta$, which we will call $Q^+$. 
 The total change in $Q$ caused by the movement of $a$ from $\alpha$ to $\beta$ is 
 \begin{equation}
 	\Delta Q = Q^{+} - Q^{-},
@@ -121,7 +126,7 @@ The first term in both these expressions ($Q^-$ and $Q^+$) is the same, and so c
 		- \left( 2 \left( \kin{a}{\alpha} -A_{aa}\right) - \gamma \frac{2k_a}{2m}\left( \Stot{\alpha} - k_a \right) \right) \right]. 
 \end{equation}
  
-\section{Later Passes}
+\subsection{Later Passes}
 \label{sec:laterPasses}
 
 In phase two a `meta-graph' is constructed where nodes correspond to 
@@ -135,7 +140,7 @@ $\alpha$ and $\beta$ are defined to be
 Note that $i$ and $j$ refer to nodes in the original graph, not nodes 
 in the previous graph, and so holds any meta-graph, not just the first.
 Also note that this definition of $A^*_{\alpha \beta}$ allows for 
-$A^*_{\alpha \alpha}$ to be non-zero, infact
+$A^*_{\alpha \alpha}$ to be non-zero as
 \begin{equation}
 A_{\alpha \alpha}^* = \sum_{i \in \alpha}\sum_{j \in \alpha}A_{ij} = \Sin{\alpha}.
 \end{equation} 
@@ -149,14 +154,14 @@ The results of Section~\ref{sec:initialPass} generalise to these meta-graphs,
 and the generalised results mirror those of Section~\ref{sec:initialPass} closely
 -- I distinguish the new results from those of Section~\ref{sec:initialPass} by a 
 superscript $*$.
-$i$ and $j$ to denote nodes of the original graph as in Section~\ref{sec:initialPass}, 
+I use $i$ and $j$ to denote nodes of the original graph as in Section~\ref{sec:initialPass}, 
 and use $z$ and $w$ to denote nodes of the meta-graph (communities of the original).
-I use the same notation as Section~\ref{sec:initialPass}, $c_z$, to 
-denote the community to which node $z$ of the meta-graph currently belongs, 
+I use analogous notation to Section~\ref{sec:initialPass}, $c^*(z)$, to 
+denote the community to which node $z$ of the meta-graph belongs, 
 and let $\mathfrak{a}$ be the community that the node $\alpha$ belongs to 
-($c_{\alpha} = \mathfrak{a}$), i.e.
+($c^*(\alpha) = \mathfrak{a}$), i.e.
 \begin{equation}
-	\mathfrak{a} = \{z | c_z^* = c_{\alpha}^* \}.
+	\mathfrak{a} = \{z | c^*(z) = c^*(\alpha) \}.
 \end{equation}
 
 Given this notation, we can observe that
@@ -190,97 +195,272 @@ then the expression for $\Delta Q$ from Section~\ref{sec:initialPass} trivially 
 
 It is of interest to consider how this generalises to directed graphs.
 If we are to treat incoming and outgoing nodes equally, there are several
-thoughts on how to extend the algorithm to directed graphs: 
+thoughts on how to extend the algorithm to directed graphs, of which we 
+will explore three: 
 \begin{itemize}
-	\item to generalise the expressions to the directed case -- there are
-	two obvious ways one could go about this. 
-	\item to construct an undirected graph by averaging the weights of edges 
-	in opposite directions, and then use the undirected case.
+	\item Construct an undirected graph first, and then use the undirected case.
+	\item Generalise the expressions from the undirected case to the directed case, 
+	we will consider two different suggestions for such generalisations. 
 \end{itemize}
-We will show that two of these three approaches are equivalent, and discuss
-the differences to the third.
-
-\subsection{First generalisation of expressions approach}
-One suggested extension to directed graphs is to modify the expressions 
-involved by adding the `from' case and the `to' case for each term. 
-If we let $B_{ij}$ be the edge weight between nodes $i$ and $j$ in 
-the directed graph of interest, these extended expressions look like
-\begin{equation}
-m^{(1)} = \frac{1}{2}\left ( \sum_i\sum_jB_{ij} + \sum_i\sum_jB_{ji}\right)  = \frac{1}{2}\sum_i\sum_j \left( B_{ij} + B_{ji} \right) ,
-\end{equation}
-\begin{equation}
-k_i^{(1)} = \sum_jB_{ij} + \sum_jB_{ji} = \sum_j{\left( B_{ij} + B_{ji} \right)},
-\end{equation}
-and similarly
-\begin{equation}
-	Q^{(1)} = \frac{1}{2m}\sum_i\sum_j\left[ \left( B_{ij} + B_{ji} \right) - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j).
-\end{equation}
+We will show that one of the two `generalisation of expressions' approaches is 
+equivalent to constructing an undirected graph, and the other is not.
 
 \subsection{Construction of an undirected graph}
-Note how the first suggested generalisation above is equivalent to constructing 
+A simple approach to generalising to directed graphs is to construct 
 an undirected graph with edge weights
 \begin{equation}
-A_{ij} = B_{ij} + B_{ji}.
+A_{ij} = B_{ij} + B_{ji},
+\label{eqn:undirectedAB}
 \end{equation}
-However another suggestion is to average the directed edges to make
-an undirected graph, i.e. to use
+and simply use the undirected algorithm.
+Another suggestion is to average the directed edges to make
+an undirected graph, i.e. to use a directed graph with edge weights
 \begin{equation}
 A_{ij} = \frac{B_{ij} + B_{ji}}{2}.
 \end{equation}
 This raises an important question: does scaling all edge weights across 
 the entire graph by a constant affect the results of the algorithm?
 Hopefully not, but worth checking.
-We can follow this through the results above by applying the 
-substitution $A_{ij}^{(2)} = pA_{ij}$ ($p \in \mathbb{R}$) and using ${}^{(2)}$s
-to denote the transformed expressions, we get:
+We can follow this through the results for the undirected graph by 
+substituting $A_{ij}^{(1)} = pA_{ij}$, $p \in \mathbb{R}$, and 
+distinguishing the new expressions by a superscript ${(1)}$. These
+new expressions are:
 \begin{equation}
-m^{(2)} = \frac{1}{2}\sum_i\sum_jpA_{ij}  = p\frac{1}{2}\sum_i\sum_j A_{ij} = pm ,
+m^{(1)} = \frac{1}{2}\sum_i\sum_jpA_{ij}  = p\frac{1}{2}\sum_i\sum_j A_{ij} = pm ,
 \end{equation}
 \begin{equation}
-k_i^{(2)} = \sum_j{pA_{ij}} = p\sum_j{A_{ij}} = pk_i,
+k_i^{(1)} = \sum_j{pA_{ij}} = p\sum_j{A_{ij}} = pk_i,
 \end{equation}
 and so
 \begin{align*}
-	Q^{(2)} &= \frac{1}{2pm}\sum_i\sum_j\left[ pA_{ij} - \gamma \frac{pk_ipk_j}{2pm} \right] \delta(c_i,c_j) \\
-	&= \frac{1}{2m}\sum_i\sum_j\left[ A_{ij} - \gamma \frac{k_ik_j}{2m} \right] \delta(c_i,c_j) \\
-	&= Q
+	Q^{(1)}(c) &= \frac{1}{2pm}\sum_i\sum_j\left[ pA_{ij} - \gamma \frac{pk_ipk_j}{2pm} \right] \delta_{ij}(c) \\
+	&= \frac{1}{2m}\sum_i\sum_j\left[ A_{ij} - \gamma \frac{k_ik_j}{2m} \right] \delta_{ij}(c) \\
+	&= Q(c)
 \end{align*}
-Note that as we have shown $Q^{(2)} = Q$ there is no need to go into the remainder of the terms 
+Note that as we have shown $Q^{(1)} = Q$ there is no need to go into the remainder of the terms 
 involved in the algorithm, as they all derive from $Q$.
-This is also equivalent to the first generalisation above for $p = 1$, or the averaging suggestion
-for $p = \frac{1}{2}$.
 
-\subsection{Second Generalisation of expressions approach}
+\subsection{First generalisation of expressions approach}
 
-Another approach to generalising the expressions to the directed case is to treat 
-incoming and outgoing edges as equally weighted, but seperately.
-There is no need for alternate $m$ as outgoing and incoming edges would both be 
-counted and both versions would be the same as the $m$ from above, but we define 
-seperate $k_i$ terms:
-If instead for the directed case you define $Q$ as 
-\newcommand{\dkin}[1]{k_{#1}^{(3)\text{in}}}
-\newcommand{\dkout}[1]{k_{#1}^{(3)\text{out}}}
+One suggested extension to directed graphs is to modify the expressions 
+involved by adding the `from' case and the `to' case for each term. 
+If we let $B_{ij}$ be the edge weight between nodes $i$ and $j$ in 
+the directed graph, and distinguishing these extended expressions by 
+a superscript $(2)$, the extended expressions become:
 \begin{equation}
-\dkin{i} = \sum_j{B_{ij}}
+m^{(2)} = \frac{1}{2}\left ( \sum_i\sum_jB_{ij} + \sum_i\sum_jB_{ji}\right)  = \frac{1}{2}\sum_i\sum_j \left( B_{ij} + B_{ji} \right) ,
+\end{equation}
+\begin{equation}
+k_i^{(2)} = \sum_jB_{ij} + \sum_jB_{ji} = \sum_j{\left( B_{ij} + B_{ji} \right)},
+\end{equation}
+and similarly
+\begin{equation}
+	Q^{(2)}(c) = \frac{1}{2m}\sum_i\sum_j\left[ \left( B_{ij} + B_{ji} \right) - \gamma \frac{k_i^{(2)}k_j^{(2)}}{2m} \right] \delta_{ij}(c).
+\end{equation}
+
+Note how this is equivalent to the construction of an undirected graph as 
+per Equation~(\ref{eqn:undirectedAB}). Similarly to above, 
+there is no need to go into the remainder of the terms 
+involved in the algorithm, as they all derive from $Q$.
+
+
+\subsection{Second generalisation of expressions approach}
+
+Another approach to generalising the expressions to the 
+directed case, that still treats incoming and outgoing edges 
+as equally important, is to propose an alternative modularity 
+expression:
+\newcommand{\dkin}[1]{k_{#1}^{\text{in}}}
+\newcommand{\dkout}[1]{k_{#1}^{\text{out}}}
+\begin{equation}
+Q^{(3)}(c) = \frac{1}{2m}\sum_i\sum_j\left[ 2B_{ij} - 2\gamma \frac{\dkin{i}\dkout{j}}{2m} \right] \delta_{ij}(c), \\
+\end{equation}
+where 
+\begin{equation}
+\dkout{i} = \sum_j{B_{ij}} 
+\quad \quad \text{and} \quad \quad
+\dkin{i} = \sum_j{B_{ji}},
+\end{equation}
+so $k_i^{(2)} = \dkin{i} + \dkout{i}$.
+Note I leave the factor of two in the expression for $Q^{(3)}$ so that it 
+remains as comparable to that for $Q^{(2)}$ as possible.
+There is no need for alternative $m$, as it will still be the same as above.
+$Q^{(3)}$ will differ from $Q^{(2)}$ in two ways.
+Firstly, as $k_i^{(2)} = \dkin{i} + \dkout{i}$, 
+\begin{align*}
+\sum_i\sum_j k_i^{(2)} k_j^{(2)} \delta_{ij}(c)  &= \sum_i\sum_j  (\dkin{i} + \dkout{i}) (\dkin{j} + \dkout{j}) \delta_{ij}(c) \\
+ &= \sum_i\sum_j \left[ (\dkin{i}\dkin{j} + \dkout{i}\dkout{j}) + (\dkin{i}\dkout{j} + \dkin{j}\dkout{i}) \right] \delta_{ij}(c). \\
+ &= \sum_i\sum_j \left[ (\dkin{i}\dkin{j} + \dkout{i}\dkout{j}) + 2\dkin{i}\dkout{j} \right] \delta_{ij}(c), \\
+\end{align*}
+and similarly,
+\begin{equation}
+\sum_i\sum_j  \left( B_{ij} + B_{ji} \right) \delta_{ij}(c) = 2\sum_i\sum_j B_{ij} \delta_{ij}(c).
+\end{equation}
+From these two expressions, we can see that 
+\begin{equation}
+Q^{(3)} - Q^{(2)} = \frac{1}{2m}\sum_i\sum_j \gamma \frac{\dkin{i}\dkin{j} + \dkout{i}\dkout{j}}{2m} \delta_{ij}(c).
+\end{equation}
+
+
+\section{Directed Graphs in more detail}
+\label{sec:directedGraphsDetail}
+
+In Section \ref{sec:directedGraphs} we essentially showed three 
+things:
+\begin{itemize}
+	\item How an undirected graph could be constructed from a directed
+	graph, thereby allowing the undirected algorithm to be used for 
+	directed graphs.
+	\item How scaling all edge weights by a non-zero constant would not 
+	affect the modularity function.
+	\item An alternative approach to extending the algorithm to 
+	directed graphs that is not equivalent to first reducing it 
+	to an undirected graph.
+\end{itemize}
+It is this third point that we will explore here.
+Analogously to Sections \ref{sec:initialPass} and \ref{sec:laterPasses} we will 
+break this up into the initial pass and the later passes.
+
+\subsection{Initial pass}
+\label{sec:initialPassDirected}
+
+Continuing with the notation of Section \ref{sec:initialPass}, in which 
+$c(i)$ denotes the community to which node $i$ belongs, 
+and $\alpha = c(a)$, we define
+\newcommand{\dinStot}[1]{\Sigma_{\text{tot}}^{\text{in}(#1)}}
+\newcommand{\doutStot}[1]{\Sigma_{\text{tot}}^{\text{out}(#1)}}
+\begin{equation}
+	\doutStot{\alpha} = \sum_{i \in \alpha}\sum_{j}B_{ij} = \sum_{i \in \alpha}\dkout{i}
+	\quad \quad \text{and} \quad \quad
+	\dinStot{\alpha} = \sum_{i \in \alpha}\sum_{j}B_{ji} = \sum_{i \in \alpha}\dkin{i},
+\end{equation}
+\newcommand{\dinkin}[2]{k_{#1}^{\text{in}(#2)}}
+\newcommand{\doutkin}[2]{k_{#1}^{\text{out}(#2)}}
+\begin{equation}
+	\doutkin{i}{\alpha} = \sum_{j \in \alpha}B_{ij}
+	\quad \quad \text{and} \quad \quad
+	\dinkin{i}{\alpha} = \sum_{j \in \alpha}B_{ji},
+\end{equation}
+and we will entertain one more ambiguous notation choice:
+%\newcommand{\Sin}[1]{\Sigma_{\text{in}}^{#1}}
+\begin{equation}
+	\Sin{\alpha} = \sum_{i \in \alpha}\sum_{j \in \alpha}B_{ij} = \sum_{i \in \alpha}\doutkin{i}{\alpha} = \sum_{i \in \alpha}\dinkin{i}{\alpha}.
+\end{equation}
+
+Analogously to Section \ref{sec:initialPass}, we are interested in how 
+$Q^{(3)}$ will change if we move a node $a$ from its 
+current community $\alpha$, to a new community $\beta$, 
+and analogously this will have two effects -- it will remove the terms 
+from $Q^{(3)}$ related to $a$ in $\alpha$, which we will call $Q^{-(3)}$ 
+and it will add terms related to $a$ in $\beta$, which we will call $Q^{+(3)}$. 
+The total change in $Q^{(3)}$ caused by the movement of $a$ from $\alpha$ to $\beta$ is 
+\begin{equation}
+	\Delta Q^{(3)} = Q^{+(3)} - Q^{-(3)},
+\end{equation}
+where
+\begin{align*}
+Q^{-(3)} &= \frac{1}{2m}\left[ \left( 2B_{aa} - 2\gamma \frac{\dkin{a}\dkout{a}}{2m} \right) 
++ \sum_{i \in \alpha, \, i \neq a} \left( 2B_{ia} + 2B_{ai} - 2\gamma \frac{\dkin{i}\dkout{a}}{2m} - 2\gamma \frac{\dkin{a}\dkout{i}}{2m} \right) \right] \\
+				 &= \frac{1}{2m}\left[ \left( 2B_{aa} - 2\gamma \frac{\dkin{a}\dkout{a}}{2m} \right) 
++ 2(\dinkin{a}{\alpha} - B_{aa}) + 2(\doutkin{a}{\alpha} - B_{aa}) \hdots \right . \\
+ & \quad \quad \quad \quad \quad \quad \left .
+- \frac{2\gamma\dkout{a}}{2m} (\dinStot{\alpha} - \dkin{a}) - \frac{2\gamma\dkin{a}}{2m} (\doutStot{\alpha} - \dkout{a}) \right] \\
+\end{align*}
+and
+\begin{align*}
+Q^{+(3)} &= \frac{1}{2m}\left[ \left( 2B_{aa} - 2\gamma \frac{\dkin{a}\dkout{a}}{2m} \right) 
++ \sum_{i \in \beta} \left( 2B_{ia} + 2B_{ai} - 2\gamma \frac{\dkin{i}\dkout{a}}{2m} - 2\gamma \frac{\dkin{a}\dkout{i}}{2m} \right) \right] \\
+				 &= \frac{1}{2m}\left[ \left( 2B_{aa} - 2\gamma \frac{\dkin{a}\dkout{a}}{2m} \right) 
++ 2\dinkin{a}{\beta} + 2\doutkin{a}{\beta} - \frac{2\gamma\dkout{a}}{2m} \dinStot{\beta}  - \frac{2\gamma\dkin{a}}{2m} \doutStot{\beta} \right] \\
+\end{align*}
+Similarly to Section \ref{sec:initialPass}, the first term in both these expressions is the same, and so cancels, leaving:
+\begin{align*}
+\Delta Q^{(3)} &= \frac{2}{2m}\left[ 
+\left( \dinkin{a}{\beta} + \doutkin{a}{\beta} - \frac{\gamma\dkout{a}}{2m} \dinStot{\beta}  - \frac{\gamma\dkin{a}}{2m} \doutStot{\beta} \right) \right. \\
+& \hspace{-1cm}
+- \left. \left( (\dinkin{a}{\alpha} - B_{aa}) + (\doutkin{a}{\alpha} - B_{aa}) - \frac{\gamma\dkout{a}}{2m} (\dinStot{\alpha} - \dkin{a}) - \frac{\gamma\dkin{a}}{2m} (\doutStot{\alpha} - \dkout{a})  \right) \right] \\
+ &= \frac{2}{2m}\left[ (\dinkin{a}{\beta}-\dinkin{a}{\alpha}) + (\doutkin{a}{\beta}-\doutkin{a}{\alpha}) + 2B_{aa} \right. \\
+& \hspace{-1cm} \left.
+- \frac{\gamma\dkout{a}}{2m} (\dinStot{\beta}-\dinStot{\alpha}) - \frac{\gamma\dkin{a}}{2m} (\doutStot{\beta} - \doutStot{\alpha}) - \frac{2\gamma\dkin{a}\dkout{a}}{2m} \right]
+\end{align*}
+
+
+
+\subsection{Later passes}
+\label{sec:laterPassesDirected}
+
+In phase two a `meta-graph' is constructed where nodes correspond to 
+the communities found in the preceding phase one step, and edge weight
+between two such communities (nodes, in the meta-graph)
+$\alpha$ and $\beta$ are defined to be
+\begin{equation}
+	B_{\alpha \beta}^* = \sum_{i \in \alpha}\sum_{j \in \beta}B_{ij}.
+	\label{eqn:Bij*}
+\end{equation} 
+Note that $i$ and $j$ refer to nodes in the original graph, not nodes 
+in the previous graph, and so holds any meta-graph, not just the first.
+Also note that this definition of $B^*_{\alpha \beta}$ allows for 
+$B^*_{\alpha \alpha}$ to be non-zero, in fact
+\begin{equation}
+B_{\alpha \alpha}^* = \sum_{i \in \alpha}\sum_{j \in \alpha}B_{ij} = \Sin{\alpha}.
+\end{equation} 
+
+In this newly constructed graph, $\alpha$ and $\beta$ are nodes, but 
+also refer to communities (sets of nodes) in the original graph, and I 
+use these two interpretations interchangeably, completely analogously to 
+Section \ref{sec:laterPasses}.
+
+The results of Section~\ref{sec:initialPassDirected} generalise to these meta-graphs,
+and the generalised results mirror those of Section~\ref{sec:initialPassDirected} closely
+-- I distinguish the new results from those of Section~\ref{sec:initialPassDirected} by a 
+superscript $*$.
+I use $i$ and $j$ to denote nodes of the original graph as in Sections~\ref{sec:initialPass}
+and \ref{sec:initialPassDirected}, 
+and use $z$ and $w$ to denote nodes of the meta-graph (communities of the original).
+I use analogous notation to Section~\ref{sec:initialPass}, $c^*(z)$, to 
+denote the community to which node $z$ of the meta-graph belongs, 
+and let $\mathfrak{a}$ be the community that the node $\alpha$ belongs to, 
+i.e., $\mathfrak{a} = c^*(\alpha) $.
+
+Given this notation, we get all the same results as in \ref{sec:laterPasses}, but 
+each split into two cases `out' and `in', separating by direction, essentially, so
+\newcommand{\dkinStar}[1]{k_{#1}^{\text{in} *}}
+\newcommand{\dkoutStar}[1]{k_{#1}^{\text{out} *}}
+\begin{equation}
+\dkoutStar{z} = \sum_w{B_{zw}^*} = \sum_w\sum_{i \in z}\sum_{j \in w}B_{ij} = \sum_{i \in z}\sum_jB_{ij} = \doutStot{z},
+\end{equation}
+\begin{equation}
+\dkinStar{z}  = \sum_w{B_{wz}^*} = \sum_w\sum_{i \in z}\sum_{j \in w}B_{ji} = \sum_{i \in z}\sum_jB_{ji} = \dinStot{z},
+\end{equation}
+\newcommand{\dinStotStar}[1]{\Sigma_{\text{tot}}^{\text{in}(#1) *}}
+\newcommand{\doutStotStar}[1]{\Sigma_{\text{tot}}^{\text{out}(#1) *}}
+\begin{equation}
+	\doutStotStar{\mathfrak{a}} = \sum_{z \in \mathfrak{a}}\sum_{w}B_{zw}^* = \sum_{z \in \mathfrak{a}}\dkoutStar{z} = \sum_{z \in \mathfrak{a}}\doutStot{z},
+\end{equation}
+\begin{equation}
+	\dinStotStar{\mathfrak{a}}  = \sum_{z \in \mathfrak{a}}\sum_{w}B_{wz}^* = \sum_{z \in \mathfrak{a}}\dkinStar{z}  = \sum_{z \in \mathfrak{a}}\dinStot{z},
+\end{equation}
+\newcommand{\dinkinStar}[2]{k_{#1}^{\text{in}(#2) *}}
+\newcommand{\doutkinStar}[2]{k_{#1}^{\text{out}(#2) *}}
+\begin{equation}
+	\doutkinStar{z}{\mathfrak{a}} = \sum_{w \in \mathfrak{a}}{B_{zw}^*} = \sum_{w \in \mathfrak{a}}{\sum_{i \in z}\sum_{j \in w}B_{ij}},
+\end{equation}
+\begin{equation}
+	\dinkinStar{z}{\mathfrak{a}}  = \sum_{w \in \mathfrak{a}}{B_{wz}^*} = \sum_{w \in \mathfrak{a}}{\sum_{i \in z}\sum_{j \in w}B_{ji}},
 \end{equation}
 and
 \begin{equation}
-\dkout{i} = \sum_j{B_{ji}}.
+\Sin{\mathfrak{a} *} = \sum_{z \in \mathfrak{a}}\sum_{w \in \mathfrak{a}}A_{zw}^* = \sum_{z \in \mathfrak{a}}\kin{z}{\mathfrak{a} *} = \sum_{z \in \mathfrak{a}}\sum_{w \in \mathfrak{a}}{\sum_{i \in z}\sum_{j \in w}A_{ij}}.
+	%\label{eqn:Sin}
 \end{equation}
-We then propose a generalised modularity expression
-\begin{equation}
-Q^{(3)} = \frac{1}{m}\sum_i\sum_j\left[ B_{ij} - \gamma \frac{\dkin{i}\dkout{j}}{2m} \right] \delta(c_i,c_j). \\
-\end{equation}
-$Q^{(3)}$ will differ from $Q$ in two ways.
-Firstly, as $k_i = \dkin{i} + \dkout{i}$, 
+
+If we let $\mathfrak{b}$ denote the community to which we are considering moving $\alpha$,
+then the expression for $\Delta Q$ from Section~\ref{sec:initialPassDirected} simply generalises as
 \begin{align*}
-\gamma \frac{k_i k_j}{2m} &= \gamma \frac{(\dkin{i} + \dkout{i}) (\dkin{j} + \dkout{j})}{2m} \\
- &= \gamma \frac{\dkin{i}\dkin{j} + \dkout{i}\dkout{j}}{2m} + \gamma \frac{2\dkin{i}\dkout{j}}{2m} \\
+\Delta Q^{(3)} &= \frac{2}{2m}\left[ (\dinkinStar{\alpha}{\mathfrak{b}}-\dinkinStar{\alpha}{\mathfrak{a}}) + (\doutkinStar{\alpha}{\mathfrak{b}}-\doutkinStar{\alpha}{\mathfrak{a}}) + 2B_{\alpha\alpha}^* \right. \\
+& \hspace{-1cm} \left.
+- \frac{\gamma\dkoutStar{\alpha}}{2m} (\dinStotStar{\mathfrak{b}}-\dinStotStar{\mathfrak{a}}) - \frac{\gamma\dkinStar{\alpha}}{2m} (\doutStotStar{\mathfrak{b}} - \doutStotStar{\mathfrak{a}}) - \frac{2\gamma\dkinStar{\alpha}\dkoutStar{\alpha}}{2m} \right]
 \end{align*}
-so $Q^{(3)}$ will differ from $Q$ by $\frac{\gamma}{(2m)^2}\sum_i\sum_j (\dkin{i}\dkin{j} + \dkout{i}\dkout{j})$.
-Secondly $Q^{(3)}$ weights the $i=j$ terms the same as $Q$, but both $i \neq j$ terms ($i,j$ and $j,i$)
-in $Q^{(3)}$ combined correspond to one of the (symmetric) $i \neq j$ terms in $Q$, so the 
-relative weighting of the self-weights in the second and later passes of the algorithm will differ in
-this implementation. 
+
 
 \end{document}

@@ -31,48 +31,6 @@ func (w Weibull) CDF(x float64) float64 {
 	}
 }
 
-// DLogProbDX returns the derivative of the log of the probability with
-// respect to the input x.
-//
-// Special cases are:
-//  DLogProbDX(0) = NaN
-func (w Weibull) DLogProbDX(x float64) float64 {
-	if x > 0 {
-		return (-w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x
-	}
-	if x < 0 {
-		return 0
-	}
-	return math.NaN()
-}
-
-// DLogProbDParam returns the derivative of the log of the probability with
-// respect to the parameters of the distribution. The deriv slice must have length
-// equal to the number of parameters of the distribution.
-//
-// The order is ∂LogProb / ∂K and then ∂LogProb / ∂λ.
-//
-// Special cases are:
-//  The derivative at 0 is NaN.
-func (w Weibull) DLogProbDParam(x float64, deriv []float64) {
-	if len(deriv) != w.NumParameters() {
-		panic("weibull: slice length mismatch")
-	}
-	if x > 0 {
-		deriv[0] = 1/w.K + math.Log(x) - math.Log(w.Lambda) - (math.Log(x)-math.Log(w.Lambda))*math.Pow(x/w.Lambda, w.K)
-		deriv[1] = (w.K * (math.Pow(x/w.Lambda, w.K) - 1)) / w.Lambda
-		return
-	}
-	if x < 0 {
-		deriv[0] = 0
-		deriv[1] = 0
-		return
-	}
-	deriv[0] = math.NaN()
-	deriv[0] = math.NaN()
-	return
-}
-
 // Entropy returns the entropy of the distribution.
 func (w Weibull) Entropy() float64 {
 	return eulerGamma*(1-1/w.K) + math.Log(w.Lambda/w.K) + 1
@@ -177,6 +135,59 @@ func (w Weibull) Rand() float64 {
 		rnd = w.Source.Float64()
 	}
 	return w.Quantile(rnd)
+}
+
+// Score returns the score function with respect to the parameters of the
+// distribution at the input location x. The score function is the derivative
+// of the log-likelihood at x with respect to the parameters
+//  (∂/∂θ) log(p(x;θ))
+// If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
+// Score will panic, and the derivative is stored in-place into deriv. If deriv
+// is nil a new slice will be allocated and returned.
+//
+// The order is [∂LogProb / ∂K, ∂LogProb / ∂λ].
+//
+// For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
+//
+// Special cases:
+//  Score(0) = [NaN, NaN]
+func (w Weibull) Score(deriv []float64, x float64) []float64 {
+	if deriv == nil {
+		deriv = make([]float64, w.NumParameters())
+	}
+	if len(deriv) != w.NumParameters() {
+		panic("weibull: slice length mismatch")
+	}
+	if x > 0 {
+		deriv[0] = 1/w.K + math.Log(x) - math.Log(w.Lambda) - (math.Log(x)-math.Log(w.Lambda))*math.Pow(x/w.Lambda, w.K)
+		deriv[1] = (w.K * (math.Pow(x/w.Lambda, w.K) - 1)) / w.Lambda
+		return deriv
+	}
+	if x < 0 {
+		deriv[0] = 0
+		deriv[1] = 0
+		return deriv
+	}
+	deriv[0] = math.NaN()
+	deriv[0] = math.NaN()
+	return deriv
+}
+
+// ScoreInput returns the score function with respect to the input of the
+// distribution at the input location specified by x. The score function is the
+// derivative of the log-likelihood
+//  (d/dx) log(p(x)) .
+//
+// Special cases:
+//  ScoreInput(0) = NaN
+func (w Weibull) ScoreInput(x float64) float64 {
+	if x > 0 {
+		return (-w.K*math.Pow(x/w.Lambda, w.K) + w.K - 1) / x
+	}
+	if x < 0 {
+		return 0
+	}
+	return math.NaN()
 }
 
 // Skewness returns the skewness of the distribution.

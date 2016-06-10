@@ -84,7 +84,7 @@ func TestNormFitPrior(t *testing.T) {
 	testConjugateUpdate(t, func() ConjugateUpdater { return &Normal{Mu: -10, Sigma: 6} })
 }
 
-func TestNormDerivParam(t *testing.T) {
+func TestNormScore(t *testing.T) {
 	for _, test := range []*Normal{
 		{
 			Mu:    0,

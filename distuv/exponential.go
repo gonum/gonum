@@ -56,45 +56,6 @@ func (e *Exponential) ConjugateUpdate(suffStat []float64, nSamples float64, prio
 	priorStrength[0] = totalSamples
 }
 
-// DLogProbDX returns the derivative of the log of the probability with
-// respect to the input x.
-//
-// Special cases are:
-//  DLogProbDX(0) = NaN
-func (e Exponential) DLogProbDX(x float64) float64 {
-	if x > 0 {
-		return -e.Rate
-	}
-	if x < 0 {
-		return 0
-	}
-	return math.NaN()
-}
-
-// DLogProbDParam returns the derivative of the log of the probability with
-// respect to the parameters of the distribution. The deriv slice must have length
-// equal to the number of parameters of the distribution.
-//
-// The order is ∂LogProb / ∂Rate
-//
-// Special cases are:
-//  The derivative at 0 is NaN.
-func (e Exponential) DLogProbDParam(x float64, deriv []float64) {
-	if len(deriv) != e.NumParameters() {
-		panic("dist: slice length mismatch")
-	}
-	if x > 0 {
-		deriv[0] = 1/e.Rate - x
-		return
-	}
-	if x < 0 {
-		deriv[0] = 0
-		return
-	}
-	deriv[0] = math.NaN()
-	return
-}
-
 // Entropy returns the entropy of the distribution.
 func (e Exponential) Entropy() float64 {
 	return 1 - math.Log(e.Rate)
@@ -169,6 +130,55 @@ func (e Exponential) Rand() float64 {
 		rnd = e.Source.ExpFloat64()
 	}
 	return rnd / e.Rate
+}
+
+// Score returns the score function with respect to the parameters of the
+// distribution at the input location x. The score function is the derivative
+// of the log-likelihood at x with respect to the parameters
+//  (∂/∂θ) log(p(x;θ))
+// If deriv is non-nil, len(deriv) must equal the number of parameters otherwise
+// Score will panic, and the derivative is stored in-place into deriv. If deriv
+// is nil a new slice will be allocated and returned.
+//
+// The order is [∂LogProb / ∂Rate].
+//
+// For more information, see https://en.wikipedia.org/wiki/Score_%28statistics%29.
+//
+// Special cases:
+//  Score(0) = [NaN]
+func (e Exponential) Score(deriv []float64, x float64) []float64 {
+	if deriv == nil {
+		deriv = make([]float64, e.NumParameters())
+	}
+	if len(deriv) != e.NumParameters() {
+		panic("dist: slice length mismatch")
+	}
+	if x > 0 {
+		deriv[0] = 1/e.Rate - x
+		return deriv
+	}
+	if x < 0 {
+		deriv[0] = 0
+		return deriv
+	}
+	deriv[0] = math.NaN()
+	return deriv
+}
+
+// ScoreInput returns the score function with respect to the input of the
+// distribution at the input location specified by x. The score function is the
+// derivative of the log-likelihood
+//  (d/dx) log(p(x)) .
+// Special cases:
+//  ScoreInput(0) = NaN
+func (e Exponential) ScoreInput(x float64) float64 {
+	if x > 0 {
+		return -e.Rate
+	}
+	if x < 0 {
+		return 0
+	}
+	return math.NaN()
 }
 
 // Skewness returns the skewness of the distribution.

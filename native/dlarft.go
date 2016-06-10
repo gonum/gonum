@@ -123,7 +123,7 @@ func (Implementation) Dlarft(direct lapack.Direct, store lapack.StoreV, n, k int
 					-tau[i], v[j*ldv+i+1:], ldv, v[j*ldv+i:], ldv,
 					1, t[(i+1)*ldt+i:], ldt)
 			} else {
-				for lastv := 0; lastv < i; lastv++ {
+				for lastv = 0; lastv < i; lastv++ {
 					if v[i*ldv+lastv] != 0 {
 						break
 					}

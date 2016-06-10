@@ -136,12 +136,12 @@ func TestDlaqr5(t *testing.T) {
 	testlapack.Dlaqr5Test(t, impl)
 }
 
-func TestDlarfb(t *testing.T) {
-	testlapack.DlarfbTest(t, impl)
-}
-
 func TestDlarf(t *testing.T) {
 	testlapack.DlarfTest(t, impl)
+}
+
+func TestDlarfb(t *testing.T) {
+	testlapack.DlarfbTest(t, impl)
 }
 
 func TestDlarfg(t *testing.T) {

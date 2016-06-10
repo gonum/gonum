@@ -578,32 +578,18 @@ func findLinearlyIndependent(A mat64.Matrix) []int {
 			break
 		}
 		mat64.Col(newCol, i, A)
+		columns.SetCol(len(idxs), newCol)
 		if len(idxs) == 0 {
 			// A column is linearly independent from the null set.
-			// This is what needs to be changed if zero columns are allowed, as
-			// a column of all zeros is not linearly independent from itself.
-			columns.SetCol(len(idxs), newCol)
+			// If all-zero column of A are allowed, this code needs to be adjusted.
 			idxs = append(idxs, i)
 			continue
 		}
-		if linearlyDependent(mat64.NewVector(m, newCol), columns.View(0, 0, m, len(idxs))) {
+		if mat64.Cond(columns.View(0, 0, m, len(idxs)+1), 1) > 1e12 {
+			// Not linearly independent.
 			continue
 		}
-		columns.SetCol(len(idxs), newCol)
 		idxs = append(idxs, i)
 	}
 	return idxs
-}
-
-// linearlyDependent returns whether the vector is linearly dependent
-// with the columns of A. It assumes that A is a full-rank matrix.
-func linearlyDependent(vec *mat64.Vector, A mat64.Matrix) bool {
-	// Add vec to the columns of A, and see if the condition number is reasonable.
-	m, n := A.Dims()
-	aNew := mat64.NewDense(m, n+1, nil)
-	aNew.Copy(A)
-	col := mat64.Col(nil, 0, vec)
-	aNew.SetCol(n, col)
-	cond := mat64.Cond(aNew, 1)
-	return cond > 1e12
 }

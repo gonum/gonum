@@ -52,6 +52,18 @@ func TestDlange(t *testing.T) {
 	testlapack.DlangeTest(t, impl)
 }
 
+func TestDlarfb(t *testing.T) {
+	testlapack.DlarfbTest(t, impl)
+}
+
+func TestDlarfg(t *testing.T) {
+	testlapack.DlarfgTest(t, impl)
+}
+
+func TestDlarft(t *testing.T) {
+	testlapack.DlarftTest(t, impl)
+}
+
 func TestDlantr(t *testing.T) {
 	testlapack.DlantrTest(t, impl)
 }

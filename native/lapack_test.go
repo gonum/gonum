@@ -152,6 +152,10 @@ func TestDlarft(t *testing.T) {
 	testlapack.DlarftTest(t, impl)
 }
 
+func TestDlarfx(t *testing.T) {
+	testlapack.DlarfxTest(t, impl)
+}
+
 func TestDlartg(t *testing.T) {
 	testlapack.DlartgTest(t, impl)
 }

@@ -133,7 +133,8 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 		}
 		ab = mat64.NewDense(m, len(initialBasic), nil)
 		extractColumns(ab, A, initialBasic)
-		xb, err = initializeFromBasic(ab, b)
+		xb = make([]float64, m)
+		err = initializeFromBasic(xb, ab, b)
 		if err != nil {
 			panic(err)
 		}
@@ -421,16 +422,20 @@ func verifyInputs(initialBasic []int, c []float64, A mat64.Matrix, b []float64) 
 
 // initializeFromBasic initializes the basic feasible solution given a set of
 // basic indices. It extracts the columns of A specified by basicIdxs and finds
-// the x values at that location. If the columns of A are not linearly independent
-// or if the initial set is not feasible, valid is false.
-func initializeFromBasic(ab *mat64.Dense, b []float64) (xb []float64, err error) {
+// the x values at that location. These are stored into xb.
+//
+// If the columns of A are not linearly independent or if the initial set is not
+// feasible, an error is returned.
+func initializeFromBasic(xb []float64, ab *mat64.Dense, b []float64) error {
 	m, _ := ab.Dims()
-	xb = make([]float64, m)
+	if len(xb) != m {
+		panic("simplex: bad xb length")
+	}
 	xbMat := mat64.NewVector(m, xb)
 
-	err = xbMat.SolveVec(ab, mat64.NewVector(m, b))
+	err := xbMat.SolveVec(ab, mat64.NewVector(m, b))
 	if err != nil {
-		return nil, errors.New("lp: subcolumns of A for supplied initial basic singular")
+		return errors.New("lp: subcolumns of A for supplied initial basic singular")
 	}
 	// The solve ensures that the equality constraints are met (ab * xb = b).
 	// Thus, the solution is feasible if and only if all of the x's are positive.
@@ -442,9 +447,9 @@ func initializeFromBasic(ab *mat64.Dense, b []float64) (xb []float64, err error)
 		}
 	}
 	if !allPos {
-		return xb, errors.New("lp: supplied subcolumns not a feasible solution")
+		return errors.New("lp: supplied subcolumns not a feasible solution")
 	}
-	return xb, nil
+	return nil
 }
 
 // extractColumns copies the columns specified by cols into the columns of dst.
@@ -477,7 +482,8 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 	// so, the Phase I problem can be avoided.
 	ab := mat64.NewDense(m, len(basicIdxs), nil)
 	extractColumns(ab, A, basicIdxs)
-	xb, err := initializeFromBasic(ab, b)
+	xb := make([]float64, m)
+	err := initializeFromBasic(xb, ab, b)
 	if err == nil {
 		return basicIdxs, ab, xb, nil
 	}
@@ -528,44 +534,53 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 	c := make([]float64, n+1)
 	c[n] = 1
 
-	// Solve the Phase 2 linear program.
+	// Solve the Phase I linear program.
 	_, xOpt, newBasic, err := simplex(basicIdxs, c, aNew, b, 1e-10)
 	if err != nil {
 		return nil, nil, nil, errors.New(fmt.Sprintf("lp: error finding feasible basis: %s", err))
 	}
 
-	// If n+1 is part of the solution basis then the problem is infeasible. If
-	// not, then the problem is feasible and newBasic is an initial feasible
-	// solution.
+	// The original LP is infeasible if the added variable has non-zero value
+	// in the optimal solution to the Phase I problem.
 	if math.Abs(xOpt[n]) > phaseIZeroTol {
 		return nil, nil, nil, ErrInfeasible
 	}
 
-	// The value is zero. First, see if it's not in the basis (feasible solution).
-	basicIdx := -1
-	basicMap := make(map[int]struct{})
+	// The basis found in Phase I is a feasible solution to the original LP if
+	// the added variable is not in the basis.
+	addedIdx := -1
 	for i, v := range newBasic {
 		if v == n {
-			basicIdx = i
+			addedIdx = i
 		}
-		basicMap[v] = struct{}{}
 		xb[i] = xOpt[v]
 	}
-	if basicIdx == -1 {
-		// Not in the basis.
+	if addedIdx == -1 {
 		extractColumns(ab, A, newBasic)
 		return newBasic, ab, xb, nil
 	}
 
-	// The value is zero, but it's in the basis. See if swapping in another column
-	// finds a feasible solution.
+	// The value of the added variable is in the basis, but it has a zero value.
+	// See if exchanging another variable into the basic set finds a feasible
+	// solution.
+	basicMap := make(map[int]struct{})
+	for _, v := range newBasic {
+		basicMap[v] = struct{}{}
+	}
+	var set bool
 	for i := range xOpt {
 		if _, inBasic := basicMap[i]; inBasic {
 			continue
 		}
-		newBasic[basicIdx] = i
-		extractColumns(ab, A, newBasic)
-		xb, err := initializeFromBasic(ab, b)
+		newBasic[addedIdx] = i
+		if set {
+			mat64.Col(col, i, A)
+			ab.SetCol(addedIdx, col)
+		} else {
+			extractColumns(ab, A, newBasic)
+			set = true
+		}
+		err := initializeFromBasic(xb, ab, b)
 		if err == nil {
 			return newBasic, ab, xb, nil
 		}

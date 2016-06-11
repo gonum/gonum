@@ -258,97 +258,83 @@ func (h Hermite) hermpolyAsyAiry(n int, theta []float64) (valVec, dvalVec []floa
 // has length of ceil(n/2).
 func (h Hermite) hermiteInitialGuesses(guesses []float64, n int) {
 	// Initial guesses for Hermite zeros.
-	//
-	// [1] L. Gatteschi, Asymptotics and bounds for the zeros of Laguerre
-	// polynomials: a survey, J. Comput. Appl. Math., 144 (2002), pp. 7-27.
-	//
-	// [2] F. G. Tricomi, Sugli zeri delle funzioni di cui si conosce una
-	// rappresentazione asintotica, Ann. Mat. Pura Appl. 26 (1947), pp. 283-300.
 	if len(guesses) != n/2+n%2 {
 		panic("hermite: bad guesses length")
 	}
 
-	// Gatteschi formula involving airy roots [1].
-	// These initial guesses are good near x = sqrt(n+1/2).
+	// There are two different formulas for the initial guesses of the hermite
+	// quadrature locations. The first uses the Gatteschi formula and is good
+	// near x = sqrt(n+0.5)
+	//  [1] L. Gatteschi, Asymptotics and bounds for the zeros of Laguerre
+	//  polynomials: a survey, J. Comput. Appl. Math., 144 (2002), pp. 7-27.
+	// The second is the Tricomi initial guesses, good near x = 0. This is
+	// equation 2.1 in [1] and is originally from
+	//  [2] F. G. Tricomi, Sugli zeri delle funzioni di cui si conosce una
+	//  rappresentazione asintotica, Ann. Mat. Pura Appl. 26 (1947), pp. 283-300.
+
+	// If the number of points is odd, there is a quadrature point at 1, which
+	// has an initial guess of 0.
+	if n%2 == 1 {
+		guesses[0] = 0
+		guesses = guesses[1:]
+	}
+
 	m := n / 2
 	a := -0.5
 	if n%2 == 1 {
 		a = 0.5
 	}
 	nu := 4*float64(m) + 2*a + 2
-	airyrts := make([]float64, m)
-	copy(airyrts, airyRtsExact)
-	for i := len(airyRtsExact); i < len(airyrts); i++ {
-		airyrts[i] = -h.airyT(3.0 / 8 * math.Pi * (4*(float64(i)+1) - 1))
+
+	// Find the split between Gatteschi guesses and Tricomi guesses.
+	p := 0.4985 + math.SmallestNonzeroFloat64
+	pidx := int(math.Floor(p * float64(n)))
+
+	// Use the Tricomi initial guesses in the first half where x is nearer to zero.
+	// Note: zeros of besselj(+/-.5,x) are integer and half-integer multiples of pi.
+	for i := 0; i < pidx; i++ {
+		rhs := math.Pi * (4*float64(m) - 4*(float64(i)+1) + 3) / nu
+		tnk := math.Pi / 2
+		for k := 0; k < 7; k++ {
+			val := tnk - math.Sin(tnk) - rhs
+			dval := 1 - math.Cos(tnk)
+			dTnk := val / dval
+			tnk -= dTnk
+			if math.Abs(dTnk) < 1e-14 {
+				break
+			}
+		}
+		vc := math.Cos(tnk / 2)
+		t := vc * vc
+		guesses[i] = math.Sqrt(nu*t - (5.0/(4.0*(1-t)*(1-t))-1.0/(1-t)-1+3*a*a)/3/nu)
 	}
-	// Change the airy roots into x locations.
-	for i, ar := range airyrts {
+
+	// Use Gatteschi guesses in the second half where x is nearer to sqrt(n+0.5)
+	for i := 0; i < m-pidx; i++ {
+		var ar float64
+		if i < len(airyRtsExact) {
+			ar = airyRtsExact[i]
+		} else {
+			t := 3.0 / 8 * math.Pi * (4*(float64(i)+1) - 1)
+			ar = math.Pow(t, 2.0/3) * (1 +
+				5.0/48*math.Pow(t, -2) -
+				5.0/36*math.Pow(t, -4) +
+				77125.0/82944*math.Pow(t, -6) -
+				108056875.0/6967296*math.Pow(t, -8) +
+				162375596875.0/334430208*math.Pow(t, -10))
+		}
 		r := nu + math.Pow(2, 2.0/3)*ar*math.Pow(nu, 1.0/3) +
 			0.2*math.Pow(2, 4.0/3)*ar*ar*math.Pow(nu, -1.0/3) +
 			(11.0/35-a*a-12.0/175*ar*ar*ar)/nu +
 			(16.0/1575*ar+92.0/7875*math.Pow(ar, 4))*math.Pow(2, 2.0/3)*math.Pow(nu, -5.0/3) -
 			(15152.0/3031875*math.Pow(ar, 5)+1088.0/121275*ar*ar)*math.Pow(2, 1.0/3)*math.Pow(nu, -7.0/3)
 		if r < 0 {
-			r = 0
+			ar = 0
+		} else {
+			ar = math.Sqrt(r)
 		}
-		airyrts[i] = math.Sqrt(r)
+		guesses[m-1-i] = ar
 	}
-
-	xInitAiry := make([]float64, len(airyrts))
-	for i, v := range airyrts {
-		xInitAiry[len(airyrts)-1-i] = v
-	}
-
-	// Tricomi initial guesses. Equation (2.1) in [1]. Originally in [2].
-	// These initial guesses are good near x = 0 . Note: zeros of besselj(+/-.5,x)
-	// are integer and half-integer multiples of pi.
-	nu = 4*float64(m) + 2*a + 2
-	rhs := make([]float64, m)
-	for i := range rhs {
-		rhs[i] = (4*float64(m) - 4*(float64(i)+1) + 3) / nu * math.Pi
-	}
-	tnk := make([]float64, m)
-	for i := range tnk {
-		tnk[i] = math.Pi / 2
-	}
-	for i, tnk0 := range tnk {
-		for k := 0; k < 7; k++ {
-			val := tnk0 - math.Sin(tnk0) - rhs[i]
-			dval := 1 - math.Cos(tnk0)
-			dTnk0 := val / dval
-			tnk0 -= dTnk0
-			// TODO(btracey): Break if the delta is small?
-		}
-		tnk[i] = tnk0
-	}
-	for i, v := range tnk {
-		vc := math.Cos(v / 2)
-		tnk[i] = vc * vc
-	}
-
-	xInitSin := make([]float64, len(tnk))
-	for i, t := range tnk {
-		xInitSin[i] = math.Sqrt(nu*t - (5.0/(4.0*(1-t)*(1-t))-1.0/(1-t)-1+3*a*a)/3/nu)
-	}
-
-	// Patch together.
-	if n%2 == 1 {
-		guesses[0] = 0
-		guesses = guesses[1:]
-	}
-	p := 0.4985 + math.SmallestNonzeroFloat64
-	pidx := int(math.Floor(p * float64(n)))
-	copy(guesses[:pidx], xInitSin[:pidx])
-	copy(guesses[pidx:], xInitAiry[pidx:])
-}
-
-func (h Hermite) airyT(t float64) float64 {
-	return math.Pow(t, 2.0/3) * (1 +
-		5.0/48*math.Pow(t, -2) -
-		5.0/36*math.Pow(t, -4) +
-		77125.0/82944*math.Pow(t, -6) -
-		108056875.0/6967296*math.Pow(t, -8) +
-		162375596875.0/334430208*math.Pow(t, -10))
 }
 
 // airyRtsExact are the first airy roots.

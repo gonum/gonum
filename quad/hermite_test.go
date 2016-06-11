@@ -154,7 +154,9 @@ func TestHermiteInitialGuesses(t *testing.T) {
 		},
 	} {
 		got := make([]float64, test.n/2+test.n%2)
-		Hermite{}.hermiteInitialGuesses(got, test.n)
+		for i := range got {
+			got[i] = Hermite{}.hermiteInitialGuess(i, test.n)
+		}
 		if !floats.EqualApprox(got, test.want, 1e-14) {
 			t.Errorf("n = %v, hermite initial guesses mismatch", test.n)
 		}

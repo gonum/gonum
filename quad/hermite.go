@@ -137,9 +137,12 @@ func (h Hermite) locationsAsy0(n int) (x, w []float64) {
 		theta0[i] = math.Acos(t0)
 	}
 	dts := make([]float64, len(theta0))
-	var val, dval []float64
+	val := make([]float64, len(theta0))
+	dval := make([]float64, len(theta0))
 	for k := 0; k < 20; k++ {
-		val, dval = h.hermpolyAsyAiry(n, theta0)
+		for i := range val {
+			val[i], dval[i] = h.hermpolyAsyAiry(n, i, theta0[i])
+		}
 		for i, t0 := range theta0 {
 			dt := -val[i] / (math.Sqrt2 * math.Sqrt(2*float64(n)+1) * dval[i] * math.Sin(t0))
 			theta0[i] = t0 - dt
@@ -164,95 +167,79 @@ func (h Hermite) locationsAsy0(n int) (x, w []float64) {
 
 // hermpolyAsyAiry evaluates the Hermite polynomials using the Airy asymptotic
 // formula in theta-space.
-func (h Hermite) hermpolyAsyAiry(n int, theta []float64) (valVec, dvalVec []float64) {
-	valVec = make([]float64, len(theta))
-	dvalVec = make([]float64, len(theta))
+func (h Hermite) hermpolyAsyAiry(n, i int, t float64) (valVec, dvalVec float64) {
 	musq := 2*float64(n) + 1
+	cosT := math.Cos(t)
+	sinT := math.Sin(t)
+	sin2T := 2 * cosT * sinT
+	eta := 0.5*t - 0.25*sin2T
+	chi := -math.Pow(3*eta/2, 2.0/3)
+	phi := math.Pow(-chi/(sinT*sinT), 1.0/4)
+	cnst := 2 * math.SqrtPi * math.Pow(musq, 1.0/6) * phi
+	airy0 := real(airy.Ai(complex(math.Pow(musq, 2.0/3)*chi, 0)))
+	airy1 := real(airy.AiDeriv(complex(math.Pow(musq, 2.0/3)*chi, 0)))
 
-	for i, t := range theta {
-		cosT := math.Cos(t)
-		sinT := math.Sin(t)
-		sin2T := 2 * cosT * sinT
-		eta := 0.5*t - 0.25*sin2T
-		chi := -math.Pow(3*eta/2, 2.0/3)
-		phi := math.Pow(-chi/(sinT*sinT), 1.0/4)
-		cnst := 2 * math.SqrtPi * math.Pow(musq, 1.0/6) * phi
-		airy0 := real(airy.Ai(complex(math.Pow(musq, 2.0/3)*chi, 0)))
-		airy1 := real(airy.AiDeriv(complex(math.Pow(musq, 2.0/3)*chi, 0)))
-		// Terms in 12.10.43:
-		const (
-			a0 = 1.0
-			b0 = 1.0
-			a1 = 15.0 / 144
-			b1 = -7.0 / 5 * a1
-			a2 = 5.0 * 7 * 9 * 11.0 / 2.0 / 144.0 / 144.0
-			b2 = -13.0 / 11 * a2
-			a3 = 7.0 * 9 * 11 * 13 * 15 * 17 / 6.0 / 144.0 / 144.0 / 144.0
-			b3 = -19.0 / 17 * a3
-		)
+	// Terms in 12.10.43:
+	const (
+		a1 = 15.0 / 144
+		b1 = -7.0 / 5 * a1
+		a2 = 5.0 * 7 * 9 * 11.0 / 2.0 / 144.0 / 144.0
+		b2 = -13.0 / 11 * a2
+		a3 = 7.0 * 9 * 11 * 13 * 15 * 17 / 6.0 / 144.0 / 144.0 / 144.0
+		b3 = -19.0 / 17 * a3
+	)
 
-		// u polynomials in 12.10.9.
-		u0 := 1.0
-		u1 := (cosT*cosT*cosT - 6*cosT) / 24.0
-		u2 := (-9*cosT*cosT*cosT*cosT + 249*cosT*cosT + 145) / 1152.0
-		u3 := (-4042*math.Pow(cosT, 9) + 18189*math.Pow(cosT, 7) -
-			28287*math.Pow(cosT, 5) - 151995*math.Pow(cosT, 3) -
-			259290*cosT) / 414720.0
+	// Pre-compute terms.
+	cos2T := cosT * cosT
+	cos3T := cos2T * cosT
+	cos4T := cos3T * cosT
+	cos5T := cos4T * cosT
+	cos7T := cos5T * cos2T
+	cos9T := cos7T * cos2T
 
-		// First term.
-		A0 := 1.0
-		val := A0 * airy0
+	chi2 := chi * chi
+	chi3 := chi2 * chi
+	chi4 := chi3 * chi
+	chi5 := chi4 * chi
 
-		// Second term.
-		B0 := -(a0*math.Pow(phi, 6)*u1 + a1*u0) / (chi * chi)
-		val += B0 * airy1 / math.Pow(musq, 4.0/3)
+	phi6 := math.Pow(phi, 6)
+	phi12 := phi6 * phi6
+	phi18 := phi12 * phi6
 
-		// Third term.
-		A1 := (b0*math.Pow(phi, 12)*u2 + b1*math.Pow(phi, 6)*u1 + b2*u0) / (chi * chi * chi)
-		val += A1 * airy0 / (musq * musq)
+	// u polynomials in 12.10.9.
+	u1 := (cos3T - 6*cosT) / 24.0
+	u2 := (-9*cos4T + 249*cos2T + 145) / 1152.0
+	u3 := (-4042*cos9T + 18189*cos7T - 28287*cos5T - 151995*cos3T - 259290*cosT) / 414720.0
 
-		// Fourth term.
-		B1 := -(math.Pow(phi, 18)*u3 + a1*math.Pow(phi, 12)*u2 +
-			a2*math.Pow(phi, 6)*u1 + a3*u0) / math.Pow(chi, 5)
+	val := airy0
+	B0 := -(phi6*u1 + a1) / chi2
+	val += B0 * airy1 / math.Pow(musq, 4.0/3)
+	A1 := (phi12*u2 + b1*phi6*u1 + b2) / chi3
+	val += A1 * airy0 / (musq * musq)
+	B1 := -(phi18*u3 + a1*phi12*u2 + a2*phi6*u1 + a3) / chi5
+	val += B1 * airy1 / math.Pow(musq, 4.0/3+2)
+	val *= cnst
 
-		val += B1 * airy1 / math.Pow(musq, 4.0/3+2)
-		val *= cnst
+	// Derivative.
+	eta = 0.5*t - 0.25*sin2T
+	chi = -math.Pow(3*eta/2, 2.0/3)
+	phi = math.Pow(-chi/(sinT*sinT), 1.0/4)
+	cnst = math.Sqrt2 * math.SqrtPi * math.Pow(musq, 1.0/3) / phi
 
-		// Derivative.
-		eta = 0.5*t - 0.25*sin2T
-		chi = -math.Pow(3*eta/2, 2.0/3)
-		phi = math.Pow(-chi/(sinT*sinT), 1.0/4)
-		cnst = math.Sqrt2 * math.SqrtPi * math.Pow(musq, 1.0/3) / phi
+	// v polynomials in 12.10.10.
+	v1 := (cos3T + 6*cosT) / 24
+	v2 := (15*cos4T - 327*cos2T - 143) / 1152
+	v3 := (259290*cosT + 238425*cos3T - 36387*cos5T + 18189*cos7T - 4042*cos9T) / 414720
 
-		// v polynomials in 12.10.10.
-		v0 := 1.0
-		v1 := (cosT*cosT*cosT + 6*cosT) / 24
-		v2 := (15*cosT*cosT*cosT*cosT - 327*cosT*cosT - 143) / 1152
-		v3 := (259290*cosT + 238425*cosT*cosT*cosT - 36387*math.Pow(cosT, 5) +
-			18189*math.Pow(cosT, 7) - 4042*math.Pow(cosT, 9)) / 414720
-
-		// First term.
-		C0 := -(b0*math.Pow(phi, 6)*v1 + b1*v0) / chi
-		dval := C0 * airy0 / math.Pow(musq, 2.0/3)
-
-		// Second term.
-		D0 := a0 * v0
-		dval += D0 * airy1
-
-		// Third term.
-		C1 := -(math.Pow(phi, 18)*v3 + b1*math.Pow(phi, 12)*v2 +
-			b2*math.Pow(phi, 6)*v1 + b3*v0) / math.Pow(chi, 4)
-		dval += C1 * airy0 / math.Pow(musq, 2.0/3+2)
-
-		// Fourth term.
-		D1 := (a0*math.Pow(phi, 12)*v2 + a1*math.Pow(phi, 6)*v1 + a2*v0) / math.Pow(chi, 3)
-		dval += D1 * airy1 / (musq * musq)
-		dval *= cnst
-
-		valVec[i] = val
-		dvalVec[i] = dval
-	}
-	return valVec, dvalVec
+	C0 := -(phi6*v1 + b1) / chi
+	dval := C0 * airy0 / math.Pow(musq, 2.0/3)
+	dval += airy1
+	C1 := -(phi18*v3 + b1*phi12*v2 + b2*phi6*v1 + b3) / chi4
+	dval += C1 * airy0 / math.Pow(musq, 2.0/3+2)
+	D1 := (phi12*v2 + a1*phi6*v1 + a2) / chi3
+	dval += D1 * airy1 / (musq * musq)
+	dval *= cnst
+	return val, dval
 }
 
 // hermiteInitialGuess returns the initial guess for node i in an n-point Hermite

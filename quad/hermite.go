@@ -128,7 +128,9 @@ func (h Hermite) locationsAsy0(n int) (x, w []float64) {
 	eps := math.Nextafter(1, math.Inf(1)) - 1
 	x0pts := make([]float64, n/2+n%2)
 	// Compute Hermite nodes and weights using asymptotic formula.
-	h.hermiteInitialGuesses(x0pts, n)
+	for i := range x0pts {
+		x0pts[i] = h.hermiteInitialGuess(i, n)
+	}
 	theta0 := x0pts
 	for i, x0 := range theta0 {
 		t0 := x0 / math.Sqrt(2*float64(n)+1)
@@ -253,15 +255,9 @@ func (h Hermite) hermpolyAsyAiry(n int, theta []float64) (valVec, dvalVec []floa
 	return valVec, dvalVec
 }
 
-// hermiteInitialGuesses returns a set of initial guesses for the hermite
-// quadrature locations. The results are stored in-place into guessses. Guesses
-// has length of ceil(n/2).
-func (h Hermite) hermiteInitialGuesses(guesses []float64, n int) {
-	// Initial guesses for Hermite zeros.
-	if len(guesses) != n/2+n%2 {
-		panic("hermite: bad guesses length")
-	}
-
+// hermiteInitialGuess returns the initial guess for node i in an n-point Hermite
+// quadrature rule.
+func (h Hermite) hermiteInitialGuess(i, n int) float64 {
 	// There are two different formulas for the initial guesses of the hermite
 	// quadrature locations. The first uses the Gatteschi formula and is good
 	// near x = sqrt(n+0.5)
@@ -275,8 +271,10 @@ func (h Hermite) hermiteInitialGuesses(guesses []float64, n int) {
 	// If the number of points is odd, there is a quadrature point at 1, which
 	// has an initial guess of 0.
 	if n%2 == 1 {
-		guesses[0] = 0
-		guesses = guesses[1:]
+		if i == 0 {
+			return 0
+		}
+		i--
 	}
 
 	m := n / 2
@@ -292,7 +290,7 @@ func (h Hermite) hermiteInitialGuesses(guesses []float64, n int) {
 
 	// Use the Tricomi initial guesses in the first half where x is nearer to zero.
 	// Note: zeros of besselj(+/-.5,x) are integer and half-integer multiples of pi.
-	for i := 0; i < pidx; i++ {
+	if i < pidx {
 		rhs := math.Pi * (4*float64(m) - 4*(float64(i)+1) + 3) / nu
 		tnk := math.Pi / 2
 		for k := 0; k < 7; k++ {
@@ -306,35 +304,34 @@ func (h Hermite) hermiteInitialGuesses(guesses []float64, n int) {
 		}
 		vc := math.Cos(tnk / 2)
 		t := vc * vc
-		guesses[i] = math.Sqrt(nu*t - (5.0/(4.0*(1-t)*(1-t))-1.0/(1-t)-1+3*a*a)/3/nu)
+		return math.Sqrt(nu*t - (5.0/(4.0*(1-t)*(1-t))-1.0/(1-t)-1+3*a*a)/3/nu)
 	}
 
 	// Use Gatteschi guesses in the second half where x is nearer to sqrt(n+0.5)
-	for i := 0; i < m-pidx; i++ {
-		var ar float64
-		if i < len(airyRtsExact) {
-			ar = airyRtsExact[i]
-		} else {
-			t := 3.0 / 8 * math.Pi * (4*(float64(i)+1) - 1)
-			ar = math.Pow(t, 2.0/3) * (1 +
-				5.0/48*math.Pow(t, -2) -
-				5.0/36*math.Pow(t, -4) +
-				77125.0/82944*math.Pow(t, -6) -
-				108056875.0/6967296*math.Pow(t, -8) +
-				162375596875.0/334430208*math.Pow(t, -10))
-		}
-		r := nu + math.Pow(2, 2.0/3)*ar*math.Pow(nu, 1.0/3) +
-			0.2*math.Pow(2, 4.0/3)*ar*ar*math.Pow(nu, -1.0/3) +
-			(11.0/35-a*a-12.0/175*ar*ar*ar)/nu +
-			(16.0/1575*ar+92.0/7875*math.Pow(ar, 4))*math.Pow(2, 2.0/3)*math.Pow(nu, -5.0/3) -
-			(15152.0/3031875*math.Pow(ar, 5)+1088.0/121275*ar*ar)*math.Pow(2, 1.0/3)*math.Pow(nu, -7.0/3)
-		if r < 0 {
-			ar = 0
-		} else {
-			ar = math.Sqrt(r)
-		}
-		guesses[m-1-i] = ar
+	i = i + 1 - m
+	var ar float64
+	if i < len(airyRtsExact) {
+		ar = airyRtsExact[i]
+	} else {
+		t := 3.0 / 8 * math.Pi * (4*(float64(i)+1) - 1)
+		ar = math.Pow(t, 2.0/3) * (1 +
+			5.0/48*math.Pow(t, -2) -
+			5.0/36*math.Pow(t, -4) +
+			77125.0/82944*math.Pow(t, -6) -
+			108056875.0/6967296*math.Pow(t, -8) +
+			162375596875.0/334430208*math.Pow(t, -10))
 	}
+	r := nu + math.Pow(2, 2.0/3)*ar*math.Pow(nu, 1.0/3) +
+		0.2*math.Pow(2, 4.0/3)*ar*ar*math.Pow(nu, -1.0/3) +
+		(11.0/35-a*a-12.0/175*ar*ar*ar)/nu +
+		(16.0/1575*ar+92.0/7875*math.Pow(ar, 4))*math.Pow(2, 2.0/3)*math.Pow(nu, -5.0/3) -
+		(15152.0/3031875*math.Pow(ar, 5)+1088.0/121275*ar*ar)*math.Pow(2, 1.0/3)*math.Pow(nu, -7.0/3)
+	if r < 0 {
+		ar = 0
+	} else {
+		ar = math.Sqrt(r)
+	}
+	return ar
 }
 
 // airyRtsExact are the first airy roots.

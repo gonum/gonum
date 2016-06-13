@@ -20,6 +20,8 @@ func (h Hermite) FixedLocations(x, weight []float64, min, max float64) {
 	// TODO(btracey): Implement the case where x > 20, x < 200 so that we don't
 	// need to store all of that data.
 
+	// Algorithm adapted from Chebfun http://www.chebfun.org/.
+	//
 	// References:
 	// Algorithm:
 	// G. H. Golub and J. A. Welsch, "Calculation of Gauss quadrature rules",
@@ -30,8 +32,6 @@ func (h Hermite) FixedLocations(x, weight []float64, min, max float64) {
 	// A. Townsend, T. Trogdon, and S.Olver, Fast computation of Gauss quadrature
 	// nodes and weights on the whole real line, IMA J. Numer. Anal., 36: 337–358,
 	// 2016. http://arxiv.org/abs/1410.5286
-	//
-	// Algorithm adapted from Chubfun http://www.chebfun.org/.
 
 	if len(x) != len(weight) {
 		panic("hermite: slice length mismatch")
@@ -52,9 +52,7 @@ func (h Hermite) locations(x, weights []float64) {
 		copy(x, xCacheHermite[n-1])
 		copy(weights, wCacheHermite[n-1])
 	case n > 200:
-		xasy, weightsasy := h.locationsAsy(n)
-		copy(x, xasy)
-		copy(weights, weightsasy)
+		h.locationsAsy(x, weights)
 	}
 }
 
@@ -90,57 +88,52 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-func (h Hermite) locationsAsy(n int) (x, w []float64) {
+// locationAsy returns the node locations and weights of a Hermite quadrature rule
+// with len(x) points.
+func (h Hermite) locationsAsy(x, w []float64) {
 	// A. Townsend, T. Trogdon, and S.Olver, Fast computation of Gauss quadrature
 	// nodes and weights the whole real line, IMA J. Numer. Anal.,
 	// 36: 337–358, 2016. http://arxiv.org/abs/1410.5286
-	xa := make([]float64, n/2+n%2)
-	wa := make([]float64, n/2+n%2)
+
+	// Find the positive locations and weights.
+	n := len(x)
+	l := n / 2
+	xa := x[l:]
+	wa := w[l:]
 	for i := range xa {
 		xa[i], wa[i] = h.locationsAsy0(i, n)
 	}
-	if n%2 == 1 {
-		for i := len(xa) - 1; i >= 0; i-- {
-			x = append(x, -xa[i])
-			w = append(w, wa[i])
-		}
-		for i := 1; i < len(xa); i++ {
-			x = append(x, xa[i])
-			w = append(w, wa[i])
-		}
-	} else {
-		lxa := len(xa)
-		x = make([]float64, 2*lxa)
-		for i, v := range xa {
-			x[lxa-1-i] = -v
-			x[lxa+i] = v
-		}
-		lwa := len(wa)
-		w = make([]float64, 2*lwa)
-		for i, v := range wa {
-			w[lwa-1-i] = v
-			w[lwa+i] = v
-		}
+	// Flip around zero -- copy the negative x locations with the corresponding
+	// weights.
+	if n%2 == 0 {
+		l--
+	}
+	for i, v := range xa {
+		x[l-i] = -v
+	}
+	for i, v := range wa {
+		w[l-i] = v
 	}
 	sumW := floats.Sum(w)
 	c := math.SqrtPi / sumW
 	floats.Scale(c, w)
-	return x, w
 }
 
 // locationsAsy0 returns the location and weight for location i in an n-point
 // quadrature rule. The rule is symmetric, so i should be <= n/2 + n%2.
 func (h Hermite) locationsAsy0(i, n int) (x, w float64) {
+	const convTol = 1e-16
+	const convIter = 20
 	theta0 := h.hermiteInitialGuess(i, n)
 	t0 := theta0 / math.Sqrt(2*float64(n)+1)
 	theta0 = math.Acos(t0)
 	sqrt2np1 := math.Sqrt(2*float64(n) + 1)
 	var vali, dvali float64
-	for k := 0; k < 20; k++ {
+	for k := 0; k < convIter; k++ {
 		vali, dvali = h.hermpolyAsyAiry(i, n, theta0)
 		dt := -vali / (math.Sqrt2 * sqrt2np1 * dvali * math.Sin(theta0))
 		theta0 -= dt
-		if math.Abs(theta0) < 1e-9 {
+		if math.Abs(theta0) < convTol {
 			break
 		}
 	}

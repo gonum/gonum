@@ -94,7 +94,11 @@ func (h Hermite) locationsAsy(n int) (x, w []float64) {
 	// A. Townsend, T. Trogdon, and S.Olver, Fast computation of Gauss quadrature
 	// nodes and weights the whole real line, IMA J. Numer. Anal.,
 	// 36: 337–358, 2016. http://arxiv.org/abs/1410.5286
-	xa, wa := h.locationsAsy0(n)
+	xa := make([]float64, n/2+n%2)
+	wa := make([]float64, n/2+n%2)
+	for i := range xa {
+		xa[i], wa[i] = h.locationsAsy0(i, n)
+	}
 	if n%2 == 1 {
 		for i := len(xa) - 1; i >= 0; i-- {
 			x = append(x, -xa[i])
@@ -124,50 +128,31 @@ func (h Hermite) locationsAsy(n int) (x, w []float64) {
 	return x, w
 }
 
-func (h Hermite) locationsAsy0(n int) (x, w []float64) {
-	eps := math.Nextafter(1, math.Inf(1)) - 1
-	x0pts := make([]float64, n/2+n%2)
-	// Compute Hermite nodes and weights using asymptotic formula.
-	for i := range x0pts {
-		x0pts[i] = h.hermiteInitialGuess(i, n)
-	}
-	theta0 := x0pts
-	for i, x0 := range theta0 {
-		t0 := x0 / math.Sqrt(2*float64(n)+1)
-		theta0[i] = math.Acos(t0)
-	}
-	dts := make([]float64, len(theta0))
-	val := make([]float64, len(theta0))
-	dval := make([]float64, len(theta0))
+// locationsAsy0 returns the location and weight for location i in an n-point
+// quadrature rule. The rule is symmetric, so i should be <= n/2 + n%2.
+func (h Hermite) locationsAsy0(i, n int) (x, w float64) {
+	theta0 := h.hermiteInitialGuess(i, n)
+	t0 := theta0 / math.Sqrt(2*float64(n)+1)
+	theta0 = math.Acos(t0)
+	sqrt2np1 := math.Sqrt(2*float64(n) + 1)
+	var vali, dvali float64
 	for k := 0; k < 20; k++ {
-		for i := range val {
-			val[i], dval[i] = h.hermpolyAsyAiry(n, i, theta0[i])
-		}
-		for i, t0 := range theta0 {
-			dt := -val[i] / (math.Sqrt2 * math.Sqrt(2*float64(n)+1) * dval[i] * math.Sin(t0))
-			theta0[i] = t0 - dt
-			dts[i] = dt
-		}
-		if floats.Norm(dts, math.Inf(1)) < math.Sqrt(eps)/10 {
+		vali, dvali = h.hermpolyAsyAiry(i, n, theta0)
+		dt := -vali / (math.Sqrt2 * sqrt2np1 * dvali * math.Sin(theta0))
+		theta0 -= dt
+		if math.Abs(theta0) < 1e-9 {
 			break
 		}
 	}
-
-	x = make([]float64, len(theta0))
-	w = make([]float64, len(theta0))
-	for i, t := range theta0 {
-		t0 := math.Cos(t)
-		xi := math.Sqrt(2*float64(n)+1) * t0
-		x[i] = xi
-		ders := xi*val[i] + math.Sqrt2*dval[i]
-		w[i] = math.Exp(-xi*xi) / (ders * ders)
-	}
+	x = sqrt2np1 * math.Cos(theta0)
+	ders := x*vali + math.Sqrt2*dvali
+	w = math.Exp(-x*x) / (ders * ders)
 	return x, w
 }
 
 // hermpolyAsyAiry evaluates the Hermite polynomials using the Airy asymptotic
 // formula in theta-space.
-func (h Hermite) hermpolyAsyAiry(n, i int, t float64) (valVec, dvalVec float64) {
+func (h Hermite) hermpolyAsyAiry(i, n int, t float64) (valVec, dvalVec float64) {
 	musq := 2*float64(n) + 1
 	cosT := math.Cos(t)
 	sinT := math.Sin(t)
@@ -243,7 +228,7 @@ func (h Hermite) hermpolyAsyAiry(n, i int, t float64) (valVec, dvalVec float64) 
 }
 
 // hermiteInitialGuess returns the initial guess for node i in an n-point Hermite
-// quadrature rule.
+// quadrature rule. The rule is symmetric, so i should be <= n/2 + n%2.
 func (h Hermite) hermiteInitialGuess(i, n int) float64 {
 	// There are two different formulas for the initial guesses of the hermite
 	// quadrature locations. The first uses the Gatteschi formula and is good

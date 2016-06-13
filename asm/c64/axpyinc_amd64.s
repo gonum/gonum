@@ -111,9 +111,9 @@ axpyi_tail:
 	MOVSLDUP_X3_X3   // Load and duplicate imag elements (x2i, x2i, x1i, x1i)
 	MULPS X1, X2     // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
 	MULPS X0, X3     // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
-	ADDSUBPS_X2_X3   // Add y2,y1 to a*(x2,x1)
+	ADDSUBPS_X2_X3   // (ai*x1r+ar*x1i, ar*x1r-ai*x1i)
 	MOVSD (DI), X4
-	ADDPS X4, X3
+	ADDPS X4, X3     // Add y2,y1 to a*(x2,x1)
 	MOVSD X3, (DI)
 	ADDQ  R8, SI
 	ADDQ  R9, DI

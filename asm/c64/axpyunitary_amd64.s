@@ -100,7 +100,7 @@ caxy_loop:
 	MULPS  X0, X7
 	MULPS  X11, X8
 	MULPS  X10, X9
-	ADDSUBPS_X2_X3          // Add y2,y1 to a*(x2,x1)
+	ADDSUBPS_X2_X3          // (ai*x2r+ar*x2i, ar*x2r-ai*x2i, ai*x1r+ar*x1i, ar*x1r-ai*x1i)
 	ADDSUBPS_X4_X5
 	ADDSUBPS_X6_X7
 	ADDSUBPS_X8_X9

@@ -11,3 +11,5 @@ func AxpyUnitary(alpha float32, x, y []float32)
 func AxpyUnitaryTo(dst []float32, alpha float32, x, y []float32)
 
 func AxpyInc(alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr)
+
+func AxpyIncTo(dst []float32, incDst, idst uintptr, alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr)

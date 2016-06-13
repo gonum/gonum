@@ -12,31 +12,42 @@ TEXT ·AddConst(SB), NOSPLIT, $0
 	MOVQ   x_len+16(FP), CX
 	CMPQ   CX, $0
 	JE     ac_end
-	MOVSD  alpha+0(FP), X0
-	SHUFPD $0, X0, X0
-	SUBQ   $4, CX
-	JL     ac_tail
+	MOVSD  alpha+0(FP), X4
+	SHUFPD $0, X4, X4
+	MOVUPS X4, X5
+	XORQ   AX, AX
+	MOVQ   CX, BX
+	ANDQ   $7, BX
+	SHRQ   $3, CX
+	JZ     ac_tail_start
 
 ac_loop:
-	MOVUPS (SI), X1
-	MOVUPS 16(SI), X2
-	ADDPD  X0, X1
-	ADDPD  X0, X2
-	MOVUPS X1, (SI)
-	MOVUPS X2, 16(SI)
-	ADDQ   $32, SI
-	SUBQ   $4, CX
-	JGE    ac_loop
-	ADDQ   $4, CX
+	MOVUPS (SI)(AX*8), X0
+	MOVUPS 16(SI)(AX*8), X1
+	MOVUPS 32(SI)(AX*8), X2
+	MOVUPS 48(SI)(AX*8), X3
+	ADDPD  X4, X0
+	ADDPD  X5, X1
+	ADDPD  X4, X2
+	ADDPD  X5, X3
+	MOVUPS X0, (SI)(AX*8)
+	MOVUPS X1, 16(SI)(AX*8)
+	MOVUPS X2, 32(SI)(AX*8)
+	MOVUPS X3, 48(SI)(AX*8)
+	ADDQ   $8, AX
+	LOOP   ac_loop
+	CMPQ   BX, $0
 	JE     ac_end
 
+ac_tail_start:
+	MOVQ BX, CX
+
 ac_tail:
-	MOVSD (SI), X1
-	ADDSD X0, X1
-	MOVSD X1, (SI)
-	ADDQ  $8, SI
-	SUBQ  $1, CX
-	JG    ac_tail
+	MOVSD (SI)(AX*8), X0
+	ADDSD X4, X0
+	MOVSD X0, (SI)(AX*8)
+	INCQ  AX
+	LOOP  ac_tail
 
 ac_end:
 	RET

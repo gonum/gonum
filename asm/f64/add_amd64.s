@@ -26,7 +26,7 @@ TEXT ·Add(SB), NOSPLIT, $0
 	MOVSD X0, (DI)(AX*8)
 	INCQ  AX
 	DECQ  CX
-	JE    add_end        // */
+	JE    add_end
 
 add_no_trim:
 	MOVQ CX, BX

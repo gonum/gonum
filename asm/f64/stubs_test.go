@@ -119,6 +119,9 @@ func TestCumSum(t *testing.T) {
 		{[]float64{nan, 4, inf, -inf, 9},
 			[]float64{inf, 4, nan, -inf, 9},
 			[]float64{inf, inf, nan, nan, nan}},
+		{make([]float64, 16),
+			[]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			[]float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}},
 	} {
 		g_ln := 4 + j%2
 		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
@@ -127,6 +130,7 @@ func TestCumSum(t *testing.T) {
 		for i := range v.expect {
 			if !same(ret[i], v.expect[i]) {
 				t.Error("Test", j, "CumSum error at", i, "Got:", ret[i], "Expected:", v.expect[i])
+				t.Error(ret, v.expect)
 			}
 			if !same(ret[i], dst[i]) {
 				t.Error("Test", j, "CumSum ret/dst mismatch", i, "Ret:", ret[i], "Dst:", dst[i])
@@ -158,6 +162,9 @@ func TestCumProd(t *testing.T) {
 		{[]float64{nan, 4, nan, -inf, 9},
 			[]float64{inf, 4, nan, -inf, 9},
 			[]float64{inf, inf, nan, nan, nan}},
+		{make([]float64, 18),
+			[]float64{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+			[]float64{2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536}},
 	} {
 		g_ln := 4 + j%2
 		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
@@ -213,8 +220,8 @@ func TestDiv(t *testing.T) {
 		if !validGuard(v.dst, dst_gd, g_ln) {
 			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
+		runtime.GC()
 	}
-	runtime.GC()
 }
 
 func TestDivTo(t *testing.T) {

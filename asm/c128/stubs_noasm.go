@@ -1,10 +1,10 @@
-// Generated code do not edit. Run `go generate`.
-
-// Copyright ©2015 The gonum Authors. All rights reserved.
+// Copyright ©2016 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package asm
+//+build !amd64 noasm appengine
+
+package c128
 
 func AxpyUnitary(alpha complex128, x, y []complex128) {
 	for i, v := range x {

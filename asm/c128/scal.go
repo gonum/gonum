@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package asm
+package c128
 
 func ScalUnitary(alpha complex128, x []complex128) {
 	for i := range x {

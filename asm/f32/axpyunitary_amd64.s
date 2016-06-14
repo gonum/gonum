@@ -17,15 +17,16 @@ TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	JE      axpy_end
 	MOVSS   alpha+0(FP), X0
 	SHUFPS  $0, X0, X0        // Load alpha into X0 4 times
-	MOVUPS  X0, X2            // Copy to X2 for pipelining
 	XORQ    AX, AX            // i = 0
-	PXOR    X1, X1            // 2 NOP instructions (PXOR) to align
+	PXOR    X2, X2            // 2 NOP instructions (PXOR) to align
 	PXOR    X3, X3            // loop to cache line
-	XORQ    AX, AX            // i = 0
 	MOVQ    DI, CX
 	ANDQ    $0xF, CX          // Align on 16-byte boundary for ADDPS
 	JZ      axpy_no_trim
-	SHRQ    $2, CX
+
+	XORQ $0xF, CX
+	INCQ CX
+	SHRQ $2, CX
 
 axpy_align: // Trim first value(s) in unaligned buffer
 	MOVSS (SI)(AX*4), X2
@@ -38,11 +39,11 @@ axpy_align: // Trim first value(s) in unaligned buffer
 	LOOP  axpy_align
 
 axpy_no_trim:
-	MOVUPS X0, X1          // Copy to X1 for pipelining
+	MOVUPS X0, X1           // Copy to X1 for pipelining
 	MOVQ   BX, CX
-	ANDQ   $0xF, BX        // BX = len % 16
-	SHRQ   $4, CX          // CX = int(len / 16)
-	JZ     axpy_tail_start
+	ANDQ   $0xF, BX         // BX = len % 16
+	SHRQ   $4, CX           // CX = int(len / 16)
+	JZ     axpy_tail4_start
 
 axpy_loop:
 	MOVUPS (SI)(AX*4), X2   // xmm = x[i:i+4]
@@ -66,8 +67,23 @@ axpy_loop:
 	CMPQ   BX, $0
 	JE     axpy_end
 
+axpy_tail4_start:
+	MOVQ BX, CX
+	SHRQ $2, CX
+	JZ   axpy_tail_start
+
+axpy_tail4:
+	MOVUPS (SI)(AX*4), X2
+	MULPS  X0, X2
+	ADDPS  (DI)(AX*4), X2
+	MOVUPS X2, (DI)(AX*4)
+	ADDQ   $4, AX
+	LOOP   axpy_tail4
+
 axpy_tail_start:
 	MOVQ BX, CX
+	ANDQ $3, CX
+	JZ   axpy_end
 
 axpy_tail:
 	MOVSS (SI)(AX*4), X1

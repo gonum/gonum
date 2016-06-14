@@ -821,6 +821,46 @@ func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []flo
 	clapack.Dorgbr(byte(vect), m, n, k, a, lda, tau, work, lwork)
 }
 
+// Dorghr generates an n×n orthogonal matrix Q which is defined as the product
+// of ihi-ilo elementary reflectors, as returned by Dgehrd:
+//  Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
+// ilo and ihi must have the same values as in the previous call of Dgehrd. Q
+// will be equal to the identity matrix except in the submatrix
+// Q[ilo+1:ihi+1,ilo+1:ihi+1]. It must hold that
+//  0 <= ilo <= ihi < n,  if n > 0,
+//  ilo = 0, ihi = -1,    if n == 0.
+//
+// a and lda represent an n×n matrix that contains the elementary reflectors and
+// tau contains their scalar factors, both as returned by Dgehrd. tau must have
+// length n-1. On return, a is overwritten by the n×n orthogonal matrix Q.
+//
+// work must have length at least max(1,lwork) and lwork must be at least
+// ihi-ilo. For optimum performance lwork must be at least (ihi-ilo)*nb where nb
+// is the optimal blocksize. On return, work[0] will contain the optimal value
+// of lwork.
+//
+// If lwork == -1, instead of performing Dorghr, only the optimal value of lwork
+// will be stored into work[0].
+//
+// If any requirement on input sizes is not met, Dorghr will panic.
+//
+// Dorghr is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dorghr(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int) {
+	checkMatrix(n, n, a, lda)
+	nh := ihi - ilo
+	switch {
+	case ilo < 0 || max(1, n) <= ilo:
+		panic(badIlo)
+	case ihi < min(ilo, n-1) || n <= ihi:
+		panic(badIhi)
+	case lwork < max(1, nh) && lwork != -1:
+		panic(badWork)
+	case len(work) < max(1, lwork):
+		panic(shortWork)
+	}
+	clapack.Dorghr(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
+}
+
 // Dorglq generates an m×n matrix Q with orthonormal rows defined by the product
 // of elementary reflectors
 //  Q = H_{k-1} * ... * H_1 * H_0

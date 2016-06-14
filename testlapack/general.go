@@ -737,6 +737,14 @@ func copyMatrix(m, n int, dst []float64, ld int, src []float64) {
 	}
 }
 
+// cloneGeneral allocates and returns an exact copy of the given general matrix.
+func cloneGeneral(a blas64.General) blas64.General {
+	c := a
+	c.Data = make([]float64, len(a.Data))
+	copy(c.Data, a.Data)
+	return c
+}
+
 // equalApprox returns whether the matrices A and B of order n are approximately
 // equal within given tolerance.
 func equalApprox(m, n int, a []float64, lda int, b []float64, tol float64) bool {

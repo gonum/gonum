@@ -17,3 +17,10 @@ cat c64/bench_test.go \
     | sed 's/C64/F64/g' \
     | sed 's/c64/f64/g' \
     > f64/bench_test.go
+
+cat c64/bench_test.go \
+    | gofmt -r 'float32 -> float64' \
+    | gofmt -r 'complex64 -> complex128' \
+    | sed 's/C64/C128/g' \
+    | sed 's/c64/c128/g' \
+    > c128/bench_test.go

@@ -139,6 +139,10 @@ func TestDormbr(t *testing.T) {
 }
 */
 
+func TestDormhr(t *testing.T) {
+	testlapack.DormhrTest(t, impl)
+}
+
 func TestDorgbr(t *testing.T) {
 	testlapack.DorgbrTest(t, blockedTranslate{impl})
 }

@@ -228,6 +228,10 @@ func TestDormbr(t *testing.T) {
 	testlapack.DormbrTest(t, impl)
 }
 
+func TestDormhr(t *testing.T) {
+	testlapack.DormhrTest(t, impl)
+}
+
 func TestDorml2(t *testing.T) {
 	testlapack.Dorml2Test(t, impl)
 }

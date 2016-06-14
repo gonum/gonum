@@ -822,17 +822,21 @@ func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []flo
 }
 
 // Dorghr generates an n×n orthogonal matrix Q which is defined as the product
-// of ihi-ilo elementary reflectors, as returned by Dgehrd:
+// of ihi-ilo elementary reflectors:
 //  Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
-// ilo and ihi must have the same values as in the previous call of Dgehrd. Q
-// will be equal to the identity matrix except in the submatrix
-// Q[ilo+1:ihi+1,ilo+1:ihi+1]. It must hold that
+//
+// a and lda represent an n×n matrix that contains the elementary reflectors, as
+// returned by Dgehrd. On return, a is overwritten by the n×n orthogonal matrix
+// Q. Q will be equal to the identity matrix except in the submatrix
+// Q[ilo+1:ihi+1,ilo+1:ihi+1].
+//
+// ilo and ihi must have the same values as in the previous call of Dgehrd. It
+// must hold that
 //  0 <= ilo <= ihi < n,  if n > 0,
 //  ilo = 0, ihi = -1,    if n == 0.
 //
-// a and lda represent an n×n matrix that contains the elementary reflectors and
-// tau contains their scalar factors, both as returned by Dgehrd. tau must have
-// length n-1. On return, a is overwritten by the n×n orthogonal matrix Q.
+// tau contains the scalar factors of the elementary reflectors, as returned by
+// Dgehrd. tau must have length n-1.
 //
 // work must have length at least max(1,lwork) and lwork must be at least
 // ihi-ilo. For optimum performance lwork must be at least (ihi-ilo)*nb where nb

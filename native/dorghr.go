@@ -7,7 +7,7 @@ package native
 // Dorghr generates an n×n orthogonal matrix Q which is defined as the product
 // of ihi-ilo elementary reflectors:
 //  Q = H_{ilo} H_{ilo+1} ... H_{ihi-1}.
-/
+//
 // a and lda represent an n×n matrix that contains the elementary reflectors, as
 // returned by Dgehrd. On return, a is overwritten by the n×n orthogonal matrix
 // Q. Q will be equal to the identity matrix except in the submatrix

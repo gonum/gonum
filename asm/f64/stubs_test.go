@@ -1,6 +1,7 @@
 // Copyright ©2016 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+
 package f64
 
 import (
@@ -26,15 +27,107 @@ func guardVector(v []float64, g float64, g_ln int) (guarded []float64) {
 
 func validGuard(v []float64, g float64, g_ln int) bool {
 	for i := 0; i < g_ln; i++ {
-		if v[i] != g || v[len(v)-1-i] != g {
+		if !same(v[i], g) || v[len(v)-1-i] != g {
 			return false
 		}
 	}
 	return true
 }
 
+func guardIncVector(v []float64, g float64, inc, g_ln int) (guarded []float64) {
+	s_ln := len(v) * inc
+	guarded = make([]float64, s_ln+g_ln*2)
+	for i, j := 0, 0; i < len(guarded); i++ {
+		switch {
+		case i < g_ln, i > g_ln+s_ln:
+			guarded[i] = g
+		case (i-g_ln)%(inc) == 0 && j < len(v):
+			guarded[i] = v[j]
+			j++
+		default:
+			guarded[i] = g
+		}
+	}
+	return guarded
+}
+
+func validIncGuard(t *testing.T, v []float64, g float64, inc, g_ln int) {
+	s_ln := len(v) - 2*g_ln
+	for i := range v {
+		switch {
+		case same(v[i], g):
+			// Correct value
+		case i < g_ln:
+			t.Error("Front guard violated at", i, v[:g_ln])
+		case i > g_ln+s_ln:
+			t.Error("Back guard violated at", i-g_ln-s_ln, v[g_ln+s_ln:])
+		case (i-g_ln)%inc == 0 && (i-g_ln)/inc < len(v):
+			// Ignore input values
+		default:
+			t.Error("Internal guard violated at", i-g_ln, v[g_ln:g_ln+s_ln])
+		}
+	}
+}
+
 func same(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
+}
+
+func TestAbsSum(t *testing.T) {
+	var src_gd float64 = 1
+	for j, v := range []struct {
+		ex  float64
+		src []float64
+	}{
+		{0, []float64{}},
+		{2, []float64{2}},
+		{6, []float64{1, 2, 3}},
+		{6, []float64{-1, -2, -3}},
+		{nan, []float64{nan}},
+		{40, []float64{8, -8, 8, -8, 8}},
+		{5, []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
+	} {
+		g_ln := 4 + j%2
+		v.src = guardVector(v.src, src_gd, g_ln)
+		src := v.src[g_ln : len(v.src)-g_ln]
+		ret := AbsSum(src)
+		if !same(ret, v.ex) {
+			t.Error("Test", j, "AbsSum error Got:", ret, "Expected:", v.ex)
+			t.Error(src)
+		}
+		if !validGuard(v.src, src_gd, g_ln) {
+			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		}
+		runtime.GC()
+	}
+}
+
+func TestAbsSumInc(t *testing.T) {
+	var src_gd float64 = 1
+	for j, v := range []struct {
+		inc int
+		ex  float64
+		src []float64
+	}{
+		{2, 0, []float64{}},
+		{3, 2, []float64{2}},
+		{10, 6, []float64{1, 2, 3}},
+		{5, 6, []float64{-1, -2, -3}},
+		{3, nan, []float64{nan}},
+		{15, 40, []float64{8, -8, 8, -8, 8}},
+		{1, 5, []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
+	} {
+		g_ln, ln := 4+j%2, len(v.src)
+		v.src = guardIncVector(v.src, src_gd, v.inc, g_ln)
+		src := v.src[g_ln : len(v.src)-g_ln]
+		ret := AbsSumInc(src, ln, v.inc)
+		if !same(ret, v.ex) {
+			t.Error("Test", j, "AbsSum error Got:", ret, "Expected:", v.ex)
+			t.Error(src)
+		}
+		validIncGuard(t, v.src, src_gd, v.inc, g_ln)
+		runtime.GC()
+	}
 }
 
 func TestAdd(t *testing.T) {
@@ -108,6 +201,7 @@ func TestCumSum(t *testing.T) {
 	for j, v := range []struct {
 		dst, src, expect []float64
 	}{
+		{[]float64{}, []float64{}, []float64{}},
 		{[]float64{0}, []float64{1}, []float64{1}},
 		{[]float64{nan}, []float64{nan}, []float64{nan}},
 		{[]float64{0, 0, 0}, []float64{1, 2, 3}, []float64{1, 3, 6}},
@@ -151,6 +245,7 @@ func TestCumProd(t *testing.T) {
 	for j, v := range []struct {
 		dst, src, expect []float64
 	}{
+		{[]float64{}, []float64{}, []float64{}},
 		{[]float64{1}, []float64{1}, []float64{1}},
 		{[]float64{nan}, []float64{nan}, []float64{nan}},
 		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3, 4}, []float64{1, 2, 6, 24}},
@@ -269,7 +364,7 @@ func TestDivTo(t *testing.T) {
 	runtime.GC()
 }
 
-func TestL1norm(t *testing.T) {
+func TestL1Norm(t *testing.T) {
 	var t_gd, s_gd float64 = -inf, inf
 	for j, v := range []struct {
 		s, t   []float64
@@ -287,9 +382,9 @@ func TestL1norm(t *testing.T) {
 		g_ln := 4 + j%2
 		v.s, v.t = guardVector(v.s, s_gd, g_ln), guardVector(v.t, t_gd, g_ln)
 		s_lc, t_lc := v.s[g_ln:len(v.s)-g_ln], v.t[g_ln:len(v.t)-g_ln]
-		ret := L1norm(s_lc, t_lc)
+		ret := L1Norm(s_lc, t_lc)
 		if !same(ret, v.expect) {
-			t.Error("Test", j, "L1norm error. Got:", ret, "Expected:", v.expect)
+			t.Error("Test", j, "L1Norm error. Got:", ret, "Expected:", v.expect)
 		}
 		if !validGuard(v.s, s_gd, g_ln) {
 			t.Error("Test", j, "Guard violated in s vector", v.s[:g_ln], v.s[len(v.s)-g_ln:])
@@ -307,6 +402,7 @@ func TestLinfNorm(t *testing.T) {
 		s, t   []float64
 		expect float64
 	}{
+		{[]float64{}, []float64{}, 0},
 		{[]float64{1}, []float64{1}, 0},
 		{[]float64{nan}, []float64{nan}, nan},
 		{[]float64{1, 2, 3, 4}, []float64{1, 2, 3, 4}, 0},

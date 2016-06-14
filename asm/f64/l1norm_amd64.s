@@ -6,8 +6,8 @@
 
 #include "textflag.h"
 
-// func L1norm(s, t []float64) float64
-TEXT ·L1norm(SB), NOSPLIT, $0
+// func L1Norm(s, t []float64) float64
+TEXT ·L1Norm(SB), NOSPLIT, $0
 	MOVQ    s_base+0(FP), DI
 	MOVQ    t_base+24(FP), SI
 	MOVQ    s_len+8(FP), DX

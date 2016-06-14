@@ -69,7 +69,7 @@ func DivTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
-func L1norm(s, t []float64) float64 {
+func L1Norm(s, t []float64) float64 {
 	var norm float64
 	for i, v := range s {
 		norm += math.Abs(t[i] - v)

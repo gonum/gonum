@@ -61,10 +61,10 @@ var tests = []struct {
 	// Run big test twice, once aligned once unaligned.
 	{2, 2, 3, 0, 0, 0,
 		16.5,
-		make([]float32, 10),
-		[]float32{.5, .5, .5, .5, .5, .5, .5, .5, .5, .5},
-		[]float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		[]float32{9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25}},
+		make([]float32, 20),
+		[]float32{.5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5},
+		[]float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		[]float32{9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25, 9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25}},
 	{2, 2, 3, 0, 0, 0,
 		16.5,
 		make([]float32, 10),
@@ -105,7 +105,7 @@ func TestAxpyUnitary(t *testing.T) {
 		AxpyUnitary(v.a, x, y)
 		for i := range v.ex {
 			if !same(y[i], v.ex[i]) {
-				t.Error("Test", j, "Unexpected result at", i, "Got:", y[i], "Expected:", v.ex[i])
+				t.Error("Test", j, "Unexpected result at", i, "Got:", int(y[i]), "Expected:", v.ex[i])
 			}
 		}
 		if !validGuard(v.x, 1, g_ln) {

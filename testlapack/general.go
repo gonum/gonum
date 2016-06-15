@@ -193,7 +193,7 @@ func triangularOutsideAllNaN(a blas64.Triangular) bool {
 		}
 	}
 	// Check after last element.
-	for _, v := range a.Data[(a.N-1)*a.Stride+a.N:] {
+	for _, v := range a.Data[max(0, a.N-1)*a.Stride+a.N:] {
 		if !math.IsNaN(v) {
 			return false
 		}

@@ -6,7 +6,6 @@ package f32
 
 import (
 	"math"
-	"runtime"
 	"testing"
 )
 
@@ -22,55 +21,54 @@ var tests = []struct {
 	dst, x, y          []float32
 	ex                 []float32
 }{
-	{2, 2, 3, 0, 0, 0,
-		3,
-		[]float32{5},
-		[]float32{2},
-		[]float32{1},
-		[]float32{7}},
-	{2, 2, 3, 0, 0, 0,
-		5,
-		[]float32{0, 0, 0},
-		[]float32{0, 0, 0},
-		[]float32{1, 1, 1},
-		[]float32{1, 1, 1}},
-	{2, 2, 3, 0, 0, 0,
-		5,
-		[]float32{0, 0, 0},
-		[]float32{0, 0},
-		[]float32{1, 1, 1},
-		[]float32{1, 1}},
-	{2, 2, 3, 0, 0, 0,
-		-1,
-		[]float32{-1, -1, -1},
-		[]float32{1, 1, 1},
-		[]float32{1, 2, 1},
-		[]float32{0, 1, 0}},
-	{2, 2, 3, 0, 0, 0,
-		-1,
-		[]float32{1, 1, 1},
-		[]float32{1, 2, 1},
-		[]float32{-1, -2, -1},
-		[]float32{-2, -4, -2}},
-	{2, 2, 3, 0, 0, 0,
-		2.5,
-		[]float32{1, 1, 1, 1, 1},
-		[]float32{1, 2, 3, 2, 1},
-		[]float32{0, 0, 0, 0, 0},
-		[]float32{2.5, 5, 7.5, 5, 2.5}},
-	// Run big test twice, once aligned once unaligned.
-	{2, 2, 3, 0, 0, 0,
-		16.5,
-		make([]float32, 20),
-		[]float32{.5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5},
-		[]float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		[]float32{9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25, 9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25}},
-	{2, 2, 3, 0, 0, 0,
-		16.5,
-		make([]float32, 10),
-		[]float32{.5, .5, .5, .5, .5, .5, .5, .5, .5, .5},
-		[]float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		[]float32{9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   3,
+		dst: []float32{5},
+		x:   []float32{2},
+		y:   []float32{1},
+		ex:  []float32{7}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   5,
+		dst: []float32{0, 0, 0},
+		x:   []float32{0, 0, 0},
+		y:   []float32{1, 1, 1},
+		ex:  []float32{1, 1, 1}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   5,
+		dst: []float32{0, 0, 0},
+		x:   []float32{0, 0},
+		y:   []float32{1, 1, 1},
+		ex:  []float32{1, 1}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   -1,
+		dst: []float32{-1, -1, -1},
+		x:   []float32{1, 1, 1},
+		y:   []float32{1, 2, 1},
+		ex:  []float32{0, 1, 0}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   -1,
+		dst: []float32{1, 1, 1},
+		x:   []float32{1, 2, 1},
+		y:   []float32{-1, -2, -1},
+		ex:  []float32{-2, -4, -2}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   2.5,
+		dst: []float32{1, 1, 1, 1, 1},
+		x:   []float32{1, 2, 3, 2, 1},
+		y:   []float32{0, 0, 0, 0, 0},
+		ex:  []float32{2.5, 5, 7.5, 5, 2.5}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0, // Run big test twice, once aligned once unaligned.
+		a:   16.5,
+		dst: make([]float32, 20),
+		x:   []float32{.5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5},
+		y:   []float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		ex:  []float32{9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25, 9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   16.5,
+		dst: make([]float32, 10),
+		x:   []float32{.5, .5, .5, .5, .5, .5, .5, .5, .5, .5},
+		y:   []float32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		ex:  []float32{9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25}},
 }
 
 func guardVector(v []float32, g float32, g_ln int) (guarded []float32) {
@@ -114,7 +112,6 @@ func TestAxpyUnitary(t *testing.T) {
 		if !validGuard(v.y, 1, g_ln) {
 			t.Error("Test", j, "Guard violated in y vector", v.y[:g_ln], v.y[len(v.x)-g_ln:])
 		}
-		runtime.GC()
 	}
 }
 
@@ -140,7 +137,6 @@ func TestAxpyUnitaryTo(t *testing.T) {
 		if !validGuard(v.dst, 0, g_ln) {
 			t.Error("Test", j, "Guard violated in x vector", v.x[:g_ln], v.x[len(v.x)-g_ln:])
 		}
-		runtime.GC()
 	}
 }
 
@@ -195,7 +191,6 @@ func TestAxpyInc(t *testing.T) {
 		}
 		validIncGuard(t, v.x, 1, v.incX, g_ln)
 		validIncGuard(t, v.y, 1, v.incY, g_ln)
-		runtime.GC()
 	}
 }
 
@@ -217,6 +212,5 @@ func TestAxpyIncTo(t *testing.T) {
 		validIncGuard(t, v.x, 1, v.incX, g_ln)
 		validIncGuard(t, v.y, 1, v.incY, g_ln)
 		validIncGuard(t, v.dst, 0, v.incDst, g_ln)
-		runtime.GC()
 	}
 }

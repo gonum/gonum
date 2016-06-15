@@ -6,7 +6,6 @@ package f64
 
 import (
 	"math"
-	"runtime"
 	"testing"
 )
 
@@ -79,13 +78,34 @@ func TestAbsSum(t *testing.T) {
 		ex  float64
 		src []float64
 	}{
-		{0, []float64{}},
-		{2, []float64{2}},
-		{6, []float64{1, 2, 3}},
-		{6, []float64{-1, -2, -3}},
-		{nan, []float64{nan}},
-		{40, []float64{8, -8, 8, -8, 8}},
-		{5, []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
+		{
+			ex:  0,
+			src: []float64{},
+		},
+		{
+			ex:  2,
+			src: []float64{2},
+		},
+		{
+			ex:  6,
+			src: []float64{1, 2, 3},
+		},
+		{
+			ex:  6,
+			src: []float64{-1, -2, -3},
+		},
+		{
+			ex:  nan,
+			src: []float64{nan},
+		},
+		{
+			ex:  40,
+			src: []float64{8, -8, 8, -8, 8},
+		},
+		{
+			ex:  5,
+			src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1},
+		},
 	} {
 		g_ln := 4 + j%2
 		v.src = guardVector(v.src, src_gd, g_ln)
@@ -98,7 +118,6 @@ func TestAbsSum(t *testing.T) {
 		if !validGuard(v.src, src_gd, g_ln) {
 			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
-		runtime.GC()
 	}
 }
 
@@ -109,13 +128,41 @@ func TestAbsSumInc(t *testing.T) {
 		ex  float64
 		src []float64
 	}{
-		{2, 0, []float64{}},
-		{3, 2, []float64{2}},
-		{10, 6, []float64{1, 2, 3}},
-		{5, 6, []float64{-1, -2, -3}},
-		{3, nan, []float64{nan}},
-		{15, 40, []float64{8, -8, 8, -8, 8}},
-		{1, 5, []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
+		{
+			inc: 2,
+			ex:  0,
+			src: []float64{},
+		},
+		{
+			inc: 3,
+			ex:  2,
+			src: []float64{2},
+		},
+		{
+			inc: 10,
+			ex:  6,
+			src: []float64{1, 2, 3},
+		},
+		{
+			inc: 5,
+			ex:  6,
+			src: []float64{-1, -2, -3},
+		},
+		{
+			inc: 3,
+			ex:  nan,
+			src: []float64{nan},
+		},
+		{
+			inc: 15,
+			ex:  40,
+			src: []float64{8, -8, 8, -8, 8},
+		},
+		{
+			inc: 1,
+			ex:  5,
+			src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1},
+		},
 	} {
 		g_ln, ln := 4+j%2, len(v.src)
 		v.src = guardIncVector(v.src, src_gd, v.inc, g_ln)
@@ -126,7 +173,6 @@ func TestAbsSumInc(t *testing.T) {
 			t.Error(src)
 		}
 		validIncGuard(t, v.src, src_gd, v.inc, g_ln)
-		runtime.GC()
 	}
 }
 
@@ -135,19 +181,41 @@ func TestAdd(t *testing.T) {
 	for j, v := range []struct {
 		dst, src, expect []float64
 	}{
-		{[]float64{1}, []float64{0}, []float64{1}},
-		{[]float64{1, 2, 3}, []float64{1}, []float64{2, 2, 3}},
-		{[]float64{}, []float64{}, []float64{}},
-		{[]float64{1}, []float64{nan}, []float64{nan}},
-		{[]float64{8, 8, 8, 8, 8},
-			[]float64{2, 4, nan, 8, 9},
-			[]float64{10, 12, nan, 16, 17}},
-		{[]float64{0, 1, 2, 3, 4},
-			[]float64{-inf, 4, nan, 8, 9},
-			[]float64{-inf, 5, nan, 11, 13}},
-		{make([]float64, 50)[1:49],
-			make([]float64, 50)[1:49],
-			make([]float64, 50)[1:49]},
+		{
+			dst:    []float64{1},
+			src:    []float64{0},
+			expect: []float64{1},
+		},
+		{
+			dst:    []float64{1, 2, 3},
+			src:    []float64{1},
+			expect: []float64{2, 2, 3},
+		},
+		{
+			dst:    []float64{},
+			src:    []float64{},
+			expect: []float64{},
+		},
+		{
+			dst:    []float64{1},
+			src:    []float64{nan},
+			expect: []float64{nan},
+		},
+		{
+			dst:    []float64{8, 8, 8, 8, 8},
+			src:    []float64{2, 4, nan, 8, 9},
+			expect: []float64{10, 12, nan, 16, 17},
+		},
+		{
+			dst:    []float64{0, 1, 2, 3, 4},
+			src:    []float64{-inf, 4, nan, 8, 9},
+			expect: []float64{-inf, 5, nan, 11, 13},
+		},
+		{
+			dst:    make([]float64, 50)[1:49],
+			src:    make([]float64, 50)[1:49],
+			expect: make([]float64, 50)[1:49],
+		},
 	} {
 		g_ln := 4 + j%2
 		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
@@ -165,7 +233,6 @@ func TestAdd(t *testing.T) {
 			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
-	runtime.GC()
 }
 
 func TestAddConst(t *testing.T) {
@@ -174,11 +241,31 @@ func TestAddConst(t *testing.T) {
 		alpha       float64
 		src, expect []float64
 	}{
-		{1, []float64{0}, []float64{1}},
-		{5, []float64{}, []float64{}},
-		{1, []float64{nan}, []float64{nan}},
-		{8, []float64{2, 4, nan, 8, 9}, []float64{10, 12, nan, 16, 17}},
-		{inf, []float64{-inf, 4, nan, 8, 9}, []float64{nan, inf, nan, inf, inf}},
+		{
+			alpha:  1,
+			src:    []float64{0},
+			expect: []float64{1},
+		},
+		{
+			alpha:  5,
+			src:    []float64{},
+			expect: []float64{},
+		},
+		{
+			alpha:  1,
+			src:    []float64{nan},
+			expect: []float64{nan},
+		},
+		{
+			alpha:  8,
+			src:    []float64{2, 4, nan, 8, 9},
+			expect: []float64{10, 12, nan, 16, 17},
+		},
+		{
+			alpha:  inf,
+			src:    []float64{-inf, 4, nan, 8, 9},
+			expect: []float64{nan, inf, nan, inf, inf},
+		},
 	} {
 		g_ln := 4 + j%2
 		v.src = guardVector(v.src, src_gd, g_ln)
@@ -193,7 +280,6 @@ func TestAddConst(t *testing.T) {
 			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
 	}
-	runtime.GC()
 }
 
 func TestCumSum(t *testing.T) {
@@ -201,21 +287,51 @@ func TestCumSum(t *testing.T) {
 	for j, v := range []struct {
 		dst, src, expect []float64
 	}{
-		{[]float64{}, []float64{}, []float64{}},
-		{[]float64{0}, []float64{1}, []float64{1}},
-		{[]float64{nan}, []float64{nan}, []float64{nan}},
-		{[]float64{0, 0, 0}, []float64{1, 2, 3}, []float64{1, 3, 6}},
-		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3}, []float64{1, 3, 6}},
-		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3, 4}, []float64{1, 3, 6, 10}},
-		{[]float64{1, nan, nan, 1, 1},
-			[]float64{1, 1, nan, 1, 1},
-			[]float64{1, 2, nan, nan, nan}},
-		{[]float64{nan, 4, inf, -inf, 9},
-			[]float64{inf, 4, nan, -inf, 9},
-			[]float64{inf, inf, nan, nan, nan}},
-		{make([]float64, 16),
-			[]float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-			[]float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}},
+		{
+			dst:    []float64{},
+			src:    []float64{},
+			expect: []float64{},
+		},
+		{
+			dst:    []float64{0},
+			src:    []float64{1},
+			expect: []float64{1},
+		},
+		{
+			dst:    []float64{nan},
+			src:    []float64{nan},
+			expect: []float64{nan},
+		},
+		{
+			dst:    []float64{0, 0, 0},
+			src:    []float64{1, 2, 3},
+			expect: []float64{1, 3, 6},
+		},
+		{
+			dst:    []float64{0, 0, 0, 0},
+			src:    []float64{1, 2, 3},
+			expect: []float64{1, 3, 6},
+		},
+		{
+			dst:    []float64{0, 0, 0, 0},
+			src:    []float64{1, 2, 3, 4},
+			expect: []float64{1, 3, 6, 10},
+		},
+		{
+			dst:    []float64{1, nan, nan, 1, 1},
+			src:    []float64{1, 1, nan, 1, 1},
+			expect: []float64{1, 2, nan, nan, nan},
+		},
+		{
+			dst:    []float64{nan, 4, inf, -inf, 9},
+			src:    []float64{inf, 4, nan, -inf, 9},
+			expect: []float64{inf, inf, nan, nan, nan},
+		},
+		{
+			dst:    make([]float64, 16),
+			src:    []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+			expect: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+		},
 	} {
 		g_ln := 4 + j%2
 		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
@@ -237,7 +353,6 @@ func TestCumSum(t *testing.T) {
 			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
-	runtime.GC()
 }
 
 func TestCumProd(t *testing.T) {
@@ -245,21 +360,51 @@ func TestCumProd(t *testing.T) {
 	for j, v := range []struct {
 		dst, src, expect []float64
 	}{
-		{[]float64{}, []float64{}, []float64{}},
-		{[]float64{1}, []float64{1}, []float64{1}},
-		{[]float64{nan}, []float64{nan}, []float64{nan}},
-		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3, 4}, []float64{1, 2, 6, 24}},
-		{[]float64{0, 0, 0}, []float64{1, 2, 3}, []float64{1, 2, 6}},
-		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3}, []float64{1, 2, 6}},
-		{[]float64{nan, 1, nan, 1, 0},
-			[]float64{1, 1, nan, 1, 1},
-			[]float64{1, 1, nan, nan, nan}},
-		{[]float64{nan, 4, nan, -inf, 9},
-			[]float64{inf, 4, nan, -inf, 9},
-			[]float64{inf, inf, nan, nan, nan}},
-		{make([]float64, 18),
-			[]float64{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
-			[]float64{2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536}},
+		{
+			dst:    []float64{},
+			src:    []float64{},
+			expect: []float64{},
+		},
+		{
+			dst:    []float64{1},
+			src:    []float64{1},
+			expect: []float64{1},
+		},
+		{
+			dst:    []float64{nan},
+			src:    []float64{nan},
+			expect: []float64{nan},
+		},
+		{
+			dst:    []float64{0, 0, 0, 0},
+			src:    []float64{1, 2, 3, 4},
+			expect: []float64{1, 2, 6, 24},
+		},
+		{
+			dst:    []float64{0, 0, 0},
+			src:    []float64{1, 2, 3},
+			expect: []float64{1, 2, 6},
+		},
+		{
+			dst:    []float64{0, 0, 0, 0},
+			src:    []float64{1, 2, 3},
+			expect: []float64{1, 2, 6},
+		},
+		{
+			dst:    []float64{nan, 1, nan, 1, 0},
+			src:    []float64{1, 1, nan, 1, 1},
+			expect: []float64{1, 1, nan, nan, nan},
+		},
+		{
+			dst:    []float64{nan, 4, nan, -inf, 9},
+			src:    []float64{inf, 4, nan, -inf, 9},
+			expect: []float64{inf, inf, nan, nan, nan},
+		},
+		{
+			dst:    make([]float64, 18),
+			src:    []float64{2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2},
+			expect: []float64{2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536},
+		},
 	} {
 		g_ln := 4 + j%2
 		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
@@ -280,7 +425,6 @@ func TestCumProd(t *testing.T) {
 			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
-	runtime.GC()
 }
 
 func TestDiv(t *testing.T) {
@@ -288,17 +432,41 @@ func TestDiv(t *testing.T) {
 	for j, v := range []struct {
 		dst, src, expect []float64
 	}{
-		{[]float64{1}, []float64{1}, []float64{1}},
-		{[]float64{nan}, []float64{nan}, []float64{nan}},
-		{[]float64{1, 2, 3, 4}, []float64{1, 2, 3, 4}, []float64{1, 1, 1, 1}},
-		{[]float64{2, 4, 6}, []float64{1, 2, 3}, []float64{2, 2, 2}},
-		{[]float64{0, 0, 0, 0}, []float64{1, 2, 3}, []float64{0, 0, 0}},
-		{[]float64{nan, 1, nan, 1, 0},
-			[]float64{1, 1, nan, 1, 1},
-			[]float64{nan, 1, nan, 1, 0}},
-		{[]float64{inf, 4, nan, -inf, 9},
-			[]float64{inf, 4, nan, -inf, 3},
-			[]float64{nan, 1, nan, nan, 3}},
+		{
+			dst:    []float64{1},
+			src:    []float64{1},
+			expect: []float64{1},
+		},
+		{
+			dst:    []float64{nan},
+			src:    []float64{nan},
+			expect: []float64{nan},
+		},
+		{
+			dst:    []float64{1, 2, 3, 4},
+			src:    []float64{1, 2, 3, 4},
+			expect: []float64{1, 1, 1, 1},
+		},
+		{
+			dst:    []float64{2, 4, 6},
+			src:    []float64{1, 2, 3},
+			expect: []float64{2, 2, 2},
+		},
+		{
+			dst:    []float64{0, 0, 0, 0},
+			src:    []float64{1, 2, 3},
+			expect: []float64{0, 0, 0},
+		},
+		{
+			dst:    []float64{nan, 1, nan, 1, 0},
+			src:    []float64{1, 1, nan, 1, 1},
+			expect: []float64{nan, 1, nan, 1, 0},
+		},
+		{
+			dst:    []float64{inf, 4, nan, -inf, 9},
+			src:    []float64{inf, 4, nan, -inf, 3},
+			expect: []float64{nan, 1, nan, nan, 3},
+		},
 	} {
 		g_ln := 4 + j%2
 		v.src, v.dst = guardVector(v.src, src_gd, g_ln), guardVector(v.dst, dst_gd, g_ln)
@@ -315,7 +483,6 @@ func TestDiv(t *testing.T) {
 		if !validGuard(v.dst, dst_gd, g_ln) {
 			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
-		runtime.GC()
 	}
 }
 
@@ -324,18 +491,48 @@ func TestDivTo(t *testing.T) {
 	for j, v := range []struct {
 		dst, x, y, expect []float64
 	}{
-		{[]float64{1}, []float64{1}, []float64{1}, []float64{1}},
-		{[]float64{1}, []float64{nan}, []float64{nan}, []float64{nan}},
-		{[]float64{-2, -2, -2}, []float64{1, 2, 3},
-			[]float64{1, 2, 3}, []float64{1, 1, 1}},
-		{[]float64{0, 0, 0}, []float64{2, 4, 6},
-			[]float64{1, 2, 3, 4}, []float64{2, 2, 2}},
-		{[]float64{-1, -1, -1}, []float64{0, 0, 0},
-			[]float64{1, 2, 3}, []float64{0, 0, 0}},
-		{[]float64{inf, inf, inf, inf, inf}, []float64{nan, 1, nan, 1, 0},
-			[]float64{1, 1, nan, 1, 1}, []float64{nan, 1, nan, 1, 0}},
-		{[]float64{0, 0, 0, 0, 0}, []float64{inf, 4, nan, -inf, 9},
-			[]float64{inf, 4, nan, -inf, 3}, []float64{nan, 1, nan, nan, 3}},
+		{
+			dst:    []float64{1},
+			x:      []float64{1},
+			y:      []float64{1},
+			expect: []float64{1},
+		},
+		{
+			dst:    []float64{1},
+			x:      []float64{nan},
+			y:      []float64{nan},
+			expect: []float64{nan},
+		},
+		{
+			dst:    []float64{-2, -2, -2},
+			x:      []float64{1, 2, 3},
+			y:      []float64{1, 2, 3},
+			expect: []float64{1, 1, 1},
+		},
+		{
+			dst:    []float64{0, 0, 0},
+			x:      []float64{2, 4, 6},
+			y:      []float64{1, 2, 3, 4},
+			expect: []float64{2, 2, 2},
+		},
+		{
+			dst:    []float64{-1, -1, -1},
+			x:      []float64{0, 0, 0},
+			y:      []float64{1, 2, 3},
+			expect: []float64{0, 0, 0},
+		},
+		{
+			dst:    []float64{inf, inf, inf, inf, inf},
+			x:      []float64{nan, 1, nan, 1, 0},
+			y:      []float64{1, 1, nan, 1, 1},
+			expect: []float64{nan, 1, nan, 1, 0},
+		},
+		{
+			dst:    []float64{0, 0, 0, 0, 0},
+			x:      []float64{inf, 4, nan, -inf, 9},
+			y:      []float64{inf, 4, nan, -inf, 3},
+			expect: []float64{nan, 1, nan, nan, 3},
+		},
 	} {
 		g_ln := 4 + j%2
 		v.y, v.x = guardVector(v.y, y_gd, g_ln), guardVector(v.x, x_gd, g_ln)
@@ -361,7 +558,6 @@ func TestDivTo(t *testing.T) {
 			t.Error("Test", j, "Guard violated in dst vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
-	runtime.GC()
 }
 
 func TestL1Norm(t *testing.T) {
@@ -370,14 +566,46 @@ func TestL1Norm(t *testing.T) {
 		s, t   []float64
 		expect float64
 	}{
-		{[]float64{1}, []float64{1}, 0},
-		{[]float64{nan}, []float64{nan}, nan},
-		{[]float64{1, 2, 3, 4}, []float64{1, 2, 3, 4}, 0},
-		{[]float64{2, 4, 6}, []float64{1, 2, 3, 4}, 6},
-		{[]float64{0, 0, 0}, []float64{1, 2, 3}, 6},
-		{[]float64{0, -4, -10}, []float64{1, 2, 3}, 20},
-		{[]float64{0, 1, 0, 1, 0}, []float64{1, 1, inf, 1, 1}, inf},
-		{[]float64{inf, 4, nan, -inf, 9}, []float64{inf, 4, nan, -inf, 3}, nan},
+		{
+			s:      []float64{1},
+			t:      []float64{1},
+			expect: 0,
+		},
+		{
+			s:      []float64{nan},
+			t:      []float64{nan},
+			expect: nan,
+		},
+		{
+			s:      []float64{1, 2, 3, 4},
+			t:      []float64{1, 2, 3, 4},
+			expect: 0,
+		},
+		{
+			s:      []float64{2, 4, 6},
+			t:      []float64{1, 2, 3, 4},
+			expect: 6,
+		},
+		{
+			s:      []float64{0, 0, 0},
+			t:      []float64{1, 2, 3},
+			expect: 6,
+		},
+		{
+			s:      []float64{0, -4, -10},
+			t:      []float64{1, 2, 3},
+			expect: 20,
+		},
+		{
+			s:      []float64{0, 1, 0, 1, 0},
+			t:      []float64{1, 1, inf, 1, 1},
+			expect: inf,
+		},
+		{
+			s:      []float64{inf, 4, nan, -inf, 9},
+			t:      []float64{inf, 4, nan, -inf, 3},
+			expect: nan,
+		},
 	} {
 		g_ln := 4 + j%2
 		v.s, v.t = guardVector(v.s, s_gd, g_ln), guardVector(v.t, t_gd, g_ln)
@@ -393,7 +621,6 @@ func TestL1Norm(t *testing.T) {
 			t.Error("Test", j, "Guard violated in t vector", v.t[:g_ln], v.t[len(v.t)-g_ln:])
 		}
 	}
-	runtime.GC()
 }
 
 func TestLinfNorm(t *testing.T) {
@@ -402,14 +629,46 @@ func TestLinfNorm(t *testing.T) {
 		s, t   []float64
 		expect float64
 	}{
-		{[]float64{}, []float64{}, 0},
-		{[]float64{1}, []float64{1}, 0},
-		{[]float64{nan}, []float64{nan}, nan},
-		{[]float64{1, 2, 3, 4}, []float64{1, 2, 3, 4}, 0},
-		{[]float64{2, 4, 6}, []float64{1, 2, 3, 4}, 3},
-		{[]float64{0, 0, 0}, []float64{1, 2, 3}, 3},
-		{[]float64{0, 1, 0, 1, 0}, []float64{1, 1, inf, 1, 1}, inf},
-		{[]float64{inf, 4, nan, -inf, 9}, []float64{inf, 4, nan, -inf, 3}, 6},
+		{
+			s:      []float64{},
+			t:      []float64{},
+			expect: 0,
+		},
+		{
+			s:      []float64{1},
+			t:      []float64{1},
+			expect: 0,
+		},
+		{
+			s:      []float64{nan},
+			t:      []float64{nan},
+			expect: nan,
+		},
+		{
+			s:      []float64{1, 2, 3, 4},
+			t:      []float64{1, 2, 3, 4},
+			expect: 0,
+		},
+		{
+			s:      []float64{2, 4, 6},
+			t:      []float64{1, 2, 3, 4},
+			expect: 3,
+		},
+		{
+			s:      []float64{0, 0, 0},
+			t:      []float64{1, 2, 3},
+			expect: 3,
+		},
+		{
+			s:      []float64{0, 1, 0, 1, 0},
+			t:      []float64{1, 1, inf, 1, 1},
+			expect: inf,
+		},
+		{
+			s:      []float64{inf, 4, nan, -inf, 9},
+			t:      []float64{inf, 4, nan, -inf, 3},
+			expect: 6,
+		},
 	} {
 		g_ln := 4 + j%2
 		v.s, v.t = guardVector(v.s, s_gd, g_ln), guardVector(v.t, t_gd, g_ln)
@@ -425,5 +684,4 @@ func TestLinfNorm(t *testing.T) {
 			t.Error("Test", j, "Guard violated in t vector", v.t[:g_ln], v.t[len(v.t)-g_ln:])
 		}
 	}
-	runtime.GC()
 }

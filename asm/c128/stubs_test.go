@@ -4,10 +4,7 @@
 
 package c128
 
-import (
-	"runtime"
-	"testing"
-)
+import "testing"
 
 var tests = []struct {
 	incX, incY, incDst int
@@ -16,67 +13,67 @@ var tests = []struct {
 	dst, x, y          []complex128
 	ex                 []complex128
 }{
-	{2, 2, 3, 0, 0, 0,
-		1 + 1i,
-		[]complex128{5},
-		[]complex128{1},
-		[]complex128{1i},
-		[]complex128{1 + 2i}},
-	{2, 2, 3, 0, 0, 0,
-		1 + 2i,
-		[]complex128{0, 0, 0},
-		[]complex128{0, 0, 0},
-		[]complex128{1, 1, 1},
-		[]complex128{1, 1, 1}},
-	{2, 2, 3, 0, 0, 0,
-		1 + 2i,
-		[]complex128{0, 0, 0},
-		[]complex128{0, 0},
-		[]complex128{1, 1, 1},
-		[]complex128{1, 1}},
-	{2, 2, 3, 0, 0, 0,
-		1 + 2i,
-		[]complex128{1i, 1i, 1i},
-		[]complex128{1i, 1i, 1i},
-		[]complex128{1, 2, 1},
-		[]complex128{-1 + 1i, 1i, -1 + 1i}},
-	{2, 2, 3, 0, 0, 0,
-		-1i,
-		[]complex128{1i, 1i, 1i},
-		[]complex128{1i, 1i, 1i},
-		[]complex128{1, 2, 1},
-		[]complex128{2, 3, 2}},
-	{2, 2, 3, 0, 0, 0,
-		-1i,
-		[]complex128{1i, 1i, 1i},
-		[]complex128{1i, 1i, 1i, 1i, 1i}[1:4],
-		[]complex128{1, 1, 2, 1, 1}[1:4],
-		[]complex128{2, 3, 2}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   1 + 1i,
+		dst: []complex128{5},
+		x:   []complex128{1},
+		y:   []complex128{1i},
+		ex:  []complex128{1 + 2i}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   1 + 2i,
+		dst: []complex128{0, 0, 0},
+		x:   []complex128{0, 0, 0},
+		y:   []complex128{1, 1, 1},
+		ex:  []complex128{1, 1, 1}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   1 + 2i,
+		dst: []complex128{0, 0, 0},
+		x:   []complex128{0, 0},
+		y:   []complex128{1, 1, 1},
+		ex:  []complex128{1, 1}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   1 + 2i,
+		dst: []complex128{1i, 1i, 1i},
+		x:   []complex128{1i, 1i, 1i},
+		y:   []complex128{1, 2, 1},
+		ex:  []complex128{-1 + 1i, 1i, -1 + 1i}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   -1i,
+		dst: []complex128{1i, 1i, 1i},
+		x:   []complex128{1i, 1i, 1i},
+		y:   []complex128{1, 2, 1},
+		ex:  []complex128{2, 3, 2}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   -1i,
+		dst: []complex128{1i, 1i, 1i},
+		x:   []complex128{1i, 1i, 1i, 1i, 1i}[1:4],
+		y:   []complex128{1, 1, 2, 1, 1}[1:4],
+		ex:  []complex128{2, 3, 2}},
 	// Run big test twice, once aligned once unaligned.
-	{2, 2, 3, 0, 0, 0,
-		1 - 1i,
-		make([]complex128, 10),
-		[]complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
-		[]complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
-		[]complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
-	{2, 2, 3, 0, 0, 0,
-		1 - 1i,
-		make([]complex128, 10),
-		[]complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
-		[]complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
-		[]complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
-	{-2, -2, -3, 18, 18, 27,
-		1 - 1i,
-		make([]complex128, 10),
-		[]complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
-		[]complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
-		[]complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
-	{-2, 2, -3, 18, 0, 27,
-		1 - 1i,
-		make([]complex128, 10),
-		[]complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
-		[]complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
-		[]complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   1 - 1i,
+		dst: make([]complex128, 10),
+		x:   []complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
+		y:   []complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
+		ex:  []complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
+	{incX: 2, incY: 2, incDst: 3, ix: 0, iy: 0, idst: 0,
+		a:   1 - 1i,
+		dst: make([]complex128, 10),
+		x:   []complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
+		y:   []complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
+		ex:  []complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
+	{incX: -2, incY: -2, incDst: -3, ix: 18, iy: 18, idst: 27,
+		a:   1 - 1i,
+		dst: make([]complex128, 10),
+		x:   []complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
+		y:   []complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
+		ex:  []complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
+	{incX: -2, incY: 2, incDst: -3, ix: 18, iy: 0, idst: 27,
+		a:   1 - 1i,
+		dst: make([]complex128, 10),
+		x:   []complex128{1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i, 1i},
+		y:   []complex128{1, 1, 2, 1, 1, 1, 1, 2, 1, 1},
+		ex:  []complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
 }
 
 func guardVector(v []complex128, g complex128, g_ln int) (guarded []complex128) {
@@ -117,7 +114,6 @@ func TestAxpyUnitary(t *testing.T) {
 		if !validGuard(v.y, 1, g_ln) {
 			t.Error("Test", j, "Guard violated in y vector", v.y[:g_ln], v.y[len(v.x)-g_ln:])
 		}
-		runtime.GC()
 	}
 }
 
@@ -143,7 +139,6 @@ func TestAxpyUnitaryTo(t *testing.T) {
 		if !validGuard(v.dst, 0, g_ln) {
 			t.Error("Test", j, "Guard violated in x vector", v.x[:g_ln], v.x[len(v.x)-g_ln:])
 		}
-		runtime.GC()
 	}
 }
 
@@ -206,7 +201,6 @@ func TestAxpyInc(t *testing.T) {
 		}
 		validIncGuard(t, v.x, 1, uintptr(v.incX), g_ln)
 		validIncGuard(t, v.y, 1, uintptr(v.incY), g_ln)
-		runtime.GC()
 	}
 }
 
@@ -226,6 +220,5 @@ func TestAxpyIncTo(t *testing.T) {
 		validIncGuard(t, v.x, 1, uintptr(v.incX), g_ln)
 		validIncGuard(t, v.y, 1, uintptr(v.incY), g_ln)
 		validIncGuard(t, v.dst, 0, uintptr(v.incDst), g_ln)
-		runtime.GC()
 	}
 }

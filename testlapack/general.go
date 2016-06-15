@@ -53,7 +53,10 @@ func nanGeneral(r, c, stride int) blas64.General {
 		panic("bad matrix size")
 	}
 	if r == 0 || c == 0 {
-		return blas64.General{Stride: max(1, c)}
+		return blas64.General{Stride: max(1, stride)}
+	}
+	if stride < c {
+		panic("bad stride")
 	}
 	return blas64.General{
 		Rows:   r,

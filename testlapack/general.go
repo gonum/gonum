@@ -96,6 +96,19 @@ func randomHessenberg(n, stride int, rnd *rand.Rand) blas64.General {
 
 // nanTriangular allocates a new r×c triangular matrix filled with NaN values.
 func nanTriangular(uplo blas.Uplo, n, stride int) blas64.Triangular {
+	if n < 0 {
+		panic("bad matrix size")
+	}
+	if n == 0 {
+		return blas64.Triangular{
+			Stride: max(1, stride),
+			Uplo:   uplo,
+			Diag:   blas.NonUnit,
+		}
+	}
+	if stride < n {
+		panic("bad stride")
+	}
 	return blas64.Triangular{
 		N:      n,
 		Stride: stride,

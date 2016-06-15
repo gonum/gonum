@@ -250,6 +250,7 @@ func (impl Implementation) Dlasy2(tranl, tranr bool, isgn, n1, n2 int, tl []floa
 		}
 	}
 	if math.Abs(t[3][3]) < smin {
+		ok = false
 		t[3][3] = smin
 	}
 	scale = 1

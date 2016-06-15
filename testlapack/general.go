@@ -134,7 +134,11 @@ func generalOutsideAllNaN(a blas64.General) bool {
 		}
 	}
 	// Check after last element.
-	for _, v := range a.Data[(a.Rows-1)*a.Stride+a.Cols:] {
+	last := (a.Rows-1)*a.Stride + a.Cols
+	if a.Rows == 0 || a.Cols == 0 {
+		last = 0
+	}
+	for _, v := range a.Data[last:] {
 		if !math.IsNaN(v) {
 			return false
 		}

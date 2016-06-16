@@ -21,6 +21,6 @@ func TestLognormal(t *testing.T) {
 			Sigma: 0.01,
 		},
 	} {
-		testFullDist(t, dist, i)
+		testFullDist(t, dist, i, true)
 	}
 }

@@ -108,7 +108,7 @@ func testConjugateUpdate(t *testing.T, newFittable func() ConjugateUpdater) {
 			allDist := newFittable()
 			nsAll := allDist.SuffStat(test.samps[0:j+1], allWeights, stats)
 			allDist.ConjugateUpdate(stats, nsAll, make([]float64, allDist.NumParameters()))
-			if !parametersEqual(incDist.parameters(nil), allDist.parameters(nil), 1e-14) {
+			if !parametersEqual(incDist.parameters(nil), allDist.parameters(nil), 1e-12) {
 				t.Errorf("prior doesn't match after incremental update for (%d, %d). Incremental is %v, all at once is %v", i, j, incDist, allDist)
 			}
 

@@ -96,7 +96,7 @@ func (u Uniform) Prob(x float64) float64 {
 // Quantile returns the inverse of the cumulative probability distribution.
 func (u Uniform) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
-		panic("dist: percentile out of bounds")
+		panic(badPercentile)
 	}
 	return p*(u.Max-u.Min) + u.Min
 }

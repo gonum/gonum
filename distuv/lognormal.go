@@ -72,7 +72,7 @@ func (l LogNormal) Prob(x float64) float64 {
 // Quantile returns the inverse of the cumulative probability distribution.
 func (l LogNormal) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
-		panic("dist: percentile out of bounds")
+		panic(badPercentile)
 	}
 	// Formula from http://www.math.uah.edu/stat/special/LogNormal.html.
 	return math.Exp(l.Mu + l.Sigma*UnitNormal.Quantile(p))

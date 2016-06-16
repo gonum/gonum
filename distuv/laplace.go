@@ -47,11 +47,11 @@ func (l Laplace) ExKurtosis() float64 {
 // statistics.
 func (l *Laplace) Fit(samples, weights []float64) {
 	if len(samples) != len(weights) {
-		panic("dist: length of samples and weights must match")
+		panic(badLength)
 	}
 
 	if len(samples) == 0 {
-		panic("dist: must have at least one sample")
+		panic(badNoSamples)
 	}
 	if len(samples) == 1 {
 		l.Mu = samples[0]
@@ -99,7 +99,7 @@ func (l Laplace) LogProb(x float64) float64 {
 // MarshalParameters implements the ParameterMarshaler interface
 func (l Laplace) MarshalParameters(p []Parameter) {
 	if len(p) != l.NumParameters() {
-		panic("dist: slice length mismatch")
+		panic(badLength)
 	}
 	p[0].Name = "Mu"
 	p[0].Value = l.Mu
@@ -131,7 +131,7 @@ func (l Laplace) NumParameters() int {
 // Quantile returns the inverse of the cumulative probability distribution.
 func (l Laplace) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
-		panic("dist: percentile out of bounds")
+		panic(badPercentile)
 	}
 	if p < 0.5 {
 		return l.Mu + l.Scale*math.Log(1+2*(p-0.5))
@@ -178,7 +178,7 @@ func (l Laplace) Score(deriv []float64, x float64) []float64 {
 		deriv = make([]float64, l.NumParameters())
 	}
 	if len(deriv) != l.NumParameters() {
-		panic("dist: slice length mismatch")
+		panic(badLength)
 	}
 	diff := x - l.Mu
 	if diff > 0 {
@@ -234,7 +234,7 @@ func (l Laplace) Survival(x float64) float64 {
 // UnmarshalParameters implements the ParameterMarshaler interface
 func (l *Laplace) UnmarshalParameters(p []Parameter) {
 	if len(p) != l.NumParameters() {
-		panic("dist: slice length mismatch")
+		panic(badLength)
 	}
 	if p[0].Name != "Mu" {
 		panic("laplace: " + panicNameMismatch)

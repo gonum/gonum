@@ -116,7 +116,7 @@ func (e Exponential) Prob(x float64) float64 {
 // Quantile returns the inverse of the cumulative probability distribution.
 func (e Exponential) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
-		panic("dist: percentile out of bounds")
+		panic(badPercentile)
 	}
 	return -math.Log(1-p) / e.Rate
 }
@@ -151,7 +151,7 @@ func (e Exponential) Score(deriv []float64, x float64) []float64 {
 		deriv = make([]float64, e.NumParameters())
 	}
 	if len(deriv) != e.NumParameters() {
-		panic("dist: slice length mismatch")
+		panic(badLength)
 	}
 	if x > 0 {
 		deriv[0] = 1/e.Rate - x
@@ -202,11 +202,11 @@ func (e Exponential) StdDev() float64 {
 // len(samples) != len(weights). Panics if len(suffStat) != 1.
 func (Exponential) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
 	if len(weights) != 0 && len(samples) != len(weights) {
-		panic("dist: slice size mismatch")
+		panic(badLength)
 	}
 
 	if len(suffStat) != 1 {
-		panic("exponential: wrong suffStat length")
+		panic(badSuffStat)
 	}
 
 	if len(weights) == 0 {

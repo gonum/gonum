@@ -121,7 +121,7 @@ func (n Normal) Prob(x float64) float64 {
 // Quantile returns the inverse of the cumulative probability distribution.
 func (n Normal) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
-		panic("dist: percentile out of bounds")
+		panic(badPercentile)
 	}
 	return n.Mu + n.Sigma*zQuantile(p)
 }
@@ -153,7 +153,7 @@ func (n Normal) Score(deriv []float64, x float64) []float64 {
 		deriv = make([]float64, n.NumParameters())
 	}
 	if len(deriv) != n.NumParameters() {
-		panic("dist: slice length mismatch")
+		panic(badLength)
 	}
 	deriv[0] = (x - n.Mu) / (n.Sigma * n.Sigma)
 	deriv[1] = 1 / n.Sigma * (-1 + ((x-n.Mu)/n.Sigma)*((x-n.Mu)/n.Sigma))
@@ -190,10 +190,10 @@ func (n Normal) StdDev() float64 {
 func (Normal) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
 	lenSamp := len(samples)
 	if len(weights) != 0 && len(samples) != len(weights) {
-		panic("dist: slice size mismatch")
+		panic(badLength)
 	}
 	if len(suffStat) != 2 {
-		panic("dist: incorrect suffStat length")
+		panic(badSuffStat)
 	}
 
 	if len(weights) == 0 {

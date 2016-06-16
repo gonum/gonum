@@ -65,11 +65,10 @@ func (b Bernoulli) Mean() float64 {
 // Median returns the median of the probability distribution.
 func (b Bernoulli) Median() float64 {
 	p := b.P
-	q := 1 - p
 	switch {
-	case p < q:
+	case p < 0.5:
 		return 0
-	case p > q:
+	case p > 0.5:
 		return 1
 	default:
 		return 0.5
@@ -88,8 +87,8 @@ func (b Bernoulli) Prob(x float64) float64 {
 
 // Quantile returns the inverse of the cumulative probability distribution.
 func (b Bernoulli) Quantile(p float64) float64 {
-	if p < 0 || p > 1 {
-		panic("dist: percentile out of bounds")
+	if p < 0 || 1 < p {
+		panic(badPercentile)
 	}
 	if p < 1-b.P {
 		return 0

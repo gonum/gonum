@@ -8,46 +8,46 @@
 
 // func Addconst(alpha float64, x []float64)
 TEXT ·AddConst(SB), NOSPLIT, $0
-	MOVQ   x_base+8(FP), SI
-	MOVQ   x_len+16(FP), CX
-	CMPQ   CX, $0
+	MOVQ   x_base+8(FP), SI // SI := &x
+	MOVQ   x_len+16(FP), CX // CX := len(x)
+	CMPQ   CX, $0           // if len(x) == 0 { return }
 	JE     ac_end
-	MOVSD  alpha+0(FP), X4
+	MOVSD  alpha+0(FP), X4  // X4 = { a, a }
 	SHUFPD $0, X4, X4
-	MOVUPS X4, X5
-	XORQ   AX, AX
+	MOVUPS X4, X5           // X5 = X4
+	XORQ   AX, AX           // i = 0
 	MOVQ   CX, BX
-	ANDQ   $7, BX
-	SHRQ   $3, CX
-	JZ     ac_tail_start
+	ANDQ   $7, BX           // BX := len(x) % 16
+	SHRQ   $3, CX           // CX := floor( CX / 16 )
+	JZ     ac_tail_start    // if CX == 0 { goto ac_tail_start }
 
-ac_loop:
-	MOVUPS (SI)(AX*8), X0
+ac_loop: // Loop unrolled 8x   do {
+	MOVUPS (SI)(AX*8), X0   // X_i = s[i:i+1]
 	MOVUPS 16(SI)(AX*8), X1
 	MOVUPS 32(SI)(AX*8), X2
 	MOVUPS 48(SI)(AX*8), X3
-	ADDPD  X4, X0
+	ADDPD  X4, X0           // X_i += a
 	ADDPD  X5, X1
 	ADDPD  X4, X2
 	ADDPD  X5, X3
-	MOVUPS X0, (SI)(AX*8)
+	MOVUPS X0, (SI)(AX*8)   // s[i:i+1] = X_i
 	MOVUPS X1, 16(SI)(AX*8)
 	MOVUPS X2, 32(SI)(AX*8)
 	MOVUPS X3, 48(SI)(AX*8)
-	ADDQ   $8, AX
-	LOOP   ac_loop
-	CMPQ   BX, $0
+	ADDQ   $8, AX           // i += 8
+	LOOP   ac_loop          // } while --CX > 0
+	CMPQ   BX, $0           // if BX == 0 { return }
 	JE     ac_end
 
-ac_tail_start:
-	MOVQ BX, CX
+ac_tail_start: // Reset loop counters
+	MOVQ BX, CX // Loop counter: CX = BX
 
-ac_tail:
-	MOVSD (SI)(AX*8), X0
-	ADDSD X4, X0
-	MOVSD X0, (SI)(AX*8)
-	INCQ  AX
-	LOOP  ac_tail
+ac_tail: // do {
+	MOVSD (SI)(AX*8), X0 // X0 = s[i]
+	ADDSD X4, X0         // X0 += a
+	MOVSD X0, (SI)(AX*8) // s[i] = X0
+	INCQ  AX             // ++i
+	LOOP  ac_tail        // } while --CX > 0
 
 ac_end:
 	RET

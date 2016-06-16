@@ -448,6 +448,11 @@ func TestDiv(t *testing.T) {
 			expect: []float64{1, 1, 1, 1},
 		},
 		{
+			dst:    []float64{1, 2, 3, 4, 2, 4, 6, 8},
+			src:    []float64{1, 2, 3, 4, 1, 2, 3, 4},
+			expect: []float64{1, 1, 1, 1, 2, 2, 2, 2},
+		},
+		{
 			dst:    []float64{2, 4, 6},
 			src:    []float64{1, 2, 3},
 			expect: []float64{2, 2, 2},

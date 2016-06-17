@@ -8,66 +8,66 @@
 
 // func AxpyInc(alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
-	MOVQ  n+56(FP), CX
-	CMPQ  CX, $0            // if n==0, return
+	MOVQ  n+56(FP), CX      // CX := n
+	CMPQ  CX, $0            // if n==0 { return }
 	JLE   axpyi_end
-	MOVQ  x_base+8(FP), SI
-	MOVQ  y_base+32(FP), DI // Write pointer for y
-	MOVQ  ix+80(FP), R8     // Load the first index
-	MOVQ  iy+88(FP), R9
-	LEAQ  (SI)(R8*4), SI
-	LEAQ  (DI)(R9*4), DI
-	MOVQ  DI, DX            // Read Pointer for y
+	MOVQ  x_base+8(FP), SI  // SI := &x
+	MOVQ  y_base+32(FP), DI // DI := &y
+	MOVQ  ix+80(FP), R8     // R8 := ix
+	MOVQ  iy+88(FP), R9     // R9 := iy
+	LEAQ  (SI)(R8*4), SI    // SI = &(x[ix])
+	LEAQ  (DI)(R9*4), DI    // DI = &(y[iy])
+	MOVQ  DI, DX            // DX := DI   Read Pointer for y
 	MOVQ  incX+64(FP), R8   // Incrementors*4 for easy iteration (ADDQ)
 	SHLQ  $2, R8
 	MOVQ  incY+72(FP), R9
 	SHLQ  $2, R9
-	MOVSS alpha+0(FP), X0
+	MOVSS alpha+0(FP), X0   // X0 = alpha
 	MOVSS X0, X1
 	MOVQ  CX, BX
-	ANDQ  $3, BX
-	SHRQ  $2, CX
-	JZ    axpyi_tail_start
+	ANDQ  $3, BX            // BX = CX % 4
+	SHRQ  $2, CX            // CX = floor( CX / 4 )
+	JZ    axpyi_tail_start  // if CX == 0 { goto axpyi_tail_start }
 
-axpyi_loop:
-	MOVSS (SI), X2
+axpyi_loop: // Loop unrolled 4x   do {
+	MOVSS (SI), X2       // X_i = x[i]
 	MOVSS (SI)(R8*1), X3
-	LEAQ  (SI)(R8*2), SI
+	LEAQ  (SI)(R8*2), SI // SI = &(x[i+2])
 	MOVSS (SI), X4
 	MOVSS (SI)(R8*1), X5
-	MULSS X1, X2         // (a*x)
+	MULSS X1, X2         // X_i *= a
 	MULSS X0, X3
 	MULSS X1, X4
 	MULSS X0, X5
-	ADDSS (DX), X2       // (a*x+y)
+	ADDSS (DX), X2       // X_i += y[i]
 	ADDSS (DX)(R9*1), X3
-	LEAQ  (DX)(R9*2), DX
+	LEAQ  (DX)(R9*2), DX // DX = &(y[i+2])
 	ADDSS (DX), X4
 	ADDSS (DX)(R9*1), X5
-	MOVSS X2, (DI)       // Write result back to dst
+	MOVSS X2, (DI)       // y[i] = X_i
 	MOVSS X3, (DI)(R9*1)
-	LEAQ  (DI)(R9*2), DI
+	LEAQ  (DI)(R9*2), DI // DI = &(y[i+2])
 	MOVSS X4, (DI)
 	MOVSS X5, (DI)(R9*1)
 	LEAQ  (SI)(R8*2), SI // Increment addresses
 	LEAQ  (DX)(R9*2), DX
 	LEAQ  (DI)(R9*2), DI
-	LOOP  axpyi_loop
-	CMPQ  BX, $0
+	LOOP  axpyi_loop     // } while --CX > 0
+	CMPQ  BX, $0         // if BX == 0 { return }
 	JE    axpyi_end
 
-axpyi_tail_start:
-	MOVQ BX, CX
+axpyi_tail_start: // Reset loop registers
+	MOVQ BX, CX // Loop counter: CX = BX
 
-axpyi_tail:
-	MOVSS (SI), X2
-	MULSS X1, X2
-	ADDSS (DX), X2
-	MOVSS X2, (DI)
-	LEAQ  (SI)(R8*1), SI
-	LEAQ  (DX)(R9*1), DX
-	LEAQ  (DI)(R9*1), DI
-	LOOP  axpyi_tail
+axpyi_tail: // do {
+	MOVSS (SI), X2       // X2 = x[i]
+	MULSS X1, X2         // X2 *= a
+	ADDSS (DX), X2       // X2 += y[i]
+	MOVSS X2, (DI)       // y[i] = X2
+	LEAQ  (SI)(R8*1), SI // SI = &(x[incX])
+	LEAQ  (DX)(R9*1), DX // DX = &(y[incY])
+	LEAQ  (DI)(R9*1), DI // DI = &(y[incY])
+	LOOP  axpyi_tail     // } while --CX > 0
 
 axpyi_end:
 	RET

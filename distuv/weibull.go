@@ -121,7 +121,7 @@ func (w Weibull) Prob(x float64) float64 {
 // Quantile returns the inverse of the cumulative probability distribution.
 func (w Weibull) Quantile(p float64) float64 {
 	if p < 0 || p > 1 {
-		panic("weibull: percentile out of bounds")
+		panic(badPercentile)
 	}
 	return w.Lambda * math.Pow(-math.Log(1-p), 1/w.K)
 }
@@ -156,7 +156,7 @@ func (w Weibull) Score(deriv []float64, x float64) []float64 {
 		deriv = make([]float64, w.NumParameters())
 	}
 	if len(deriv) != w.NumParameters() {
-		panic("weibull: slice length mismatch")
+		panic(badLength)
 	}
 	if x > 0 {
 		deriv[0] = 1/w.K + math.Log(x) - math.Log(w.Lambda) - (math.Log(x)-math.Log(w.Lambda))*math.Pow(x/w.Lambda, w.K)
@@ -213,7 +213,7 @@ func (w Weibull) Survival(x float64) float64 {
 // setParameters modifies the parameters of the distribution.
 func (w *Weibull) setParameters(p []Parameter) {
 	if len(p) != w.NumParameters() {
-		panic("normal: incorrect number of parameters to set")
+		panic("weibull: incorrect number of parameters to set")
 	}
 	if p[0].Name != "K" {
 		panic("weibull: " + panicNameMismatch)

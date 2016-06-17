@@ -65,8 +65,13 @@ type probLogprober interface {
 	LogProb(x float64) float64
 }
 
+type cumulantProber interface {
+	cumulanter
+	probLogprober
+}
+
 func checkMean(t *testing.T, i int, x []float64, m meaner, tol float64) {
-	mean := m.Mean()
+	mean := stat.Mean(x, nil)
 	if !floats.EqualWithinAbsOrRel(mean, m.Mean(), tol, tol) {
 		t.Errorf("Mean mismatch case %v: want: %v, got: %v", i, mean, m.Mean())
 	}
@@ -147,11 +152,14 @@ func checkQuantileCDFSurvival(t *testing.T, i int, xs []float64, c cumulanter, t
 	}
 }
 
-func checkPDFContinuous(t *testing.T, i int, x []float64, p probLogprober) {
+func checkProbContinuous(t *testing.T, i int, x []float64, p probLogprober) {
+	// Check that the PDF is consistent (integrates to 1).
 	q := quad.Fixed(p.Prob, math.Inf(-1), math.Inf(1), 100000, nil, 0)
 	if math.Abs(q-1) > 1e-10 {
 		t.Errorf("Probability distribution doesn't integrate to 1. Got %v", q)
 	}
+
+	// Check that PDF and LogPDF are consistent.
 	for i, v := range x {
 		if math.Abs(math.Log(p.Prob(v))-p.LogProb(v)) > 1e-14 {
 			t.Errorf("Prob and LogProb mismatch case %v at %v: want %v, got %v", i, v, math.Log(v), p.LogProb(v))
@@ -160,7 +168,51 @@ func checkPDFContinuous(t *testing.T, i int, x []float64, p probLogprober) {
 	}
 }
 
-func checkPDFDiscrete(t *testing.T, i int, xs []float64, p probLogprober, tol float64) {
+// checkProbQuantContinuous checks that the Prob, Rand, and Quantile are all consistent.
+// checkProbContinuous only checks that Prob is a valid distribution (integrates
+// to 1 and greater than 0). However, this is also true if the PDF of a different
+// distribution is used. This checks that PDF is also consistent with the
+// CDF implementation and the random samples.
+func checkProbQuantContinuous(t *testing.T, i int, xs []float64, c cumulantProber, tol float64) {
+	ps := make([]float64, 101)
+	floats.Span(ps, 0, 1)
+
+	var xp, x float64
+	for i, p := range ps {
+		x = c.Quantile(p)
+		if p == 0 {
+			xp = x
+			if floats.Min(xs) < x {
+				t.Errorf("Sample of x less than Quantile(0). Case %v.", i)
+				break
+			}
+			continue
+		}
+		if p == 1 {
+			if floats.Max(xs) > x {
+				t.Errorf("Sample of x greater than Quantile(1). Case %v.", i)
+				break
+			}
+		}
+
+		// The integral of the PDF between xp and x should be the difference in
+		// the quantiles.
+		q := quad.Fixed(c.Prob, xp, x, 1000, nil, 0)
+		if math.Abs(q-(p-ps[i-1])) > 1e-10 {
+			t.Errorf("Integral of PDF doesn't match quantile. Case %v. Want %v, got %v.", i, p-ps[i-1], q)
+			break
+		}
+
+		pEst := stat.CDF(x, stat.Empirical, xs, nil)
+		if math.Abs(pEst-p) > tol {
+			t.Errorf("Empirical CDF doesn't match quantile. Case %v.", i)
+		}
+		xp = x
+	}
+}
+
+// checkProbDiscrete confirms that PDF and Rand are consistent for discrete distributions.
+func checkProbDiscrete(t *testing.T, i int, xs []float64, p probLogprober, tol float64) {
 	// Make a map of all of the unique samples.
 	m := make(map[float64]int)
 	for _, v := range xs {
@@ -214,9 +266,10 @@ func testFullDist(t *testing.T, f fullDist, i int, continuous bool) {
 		// In a discrete distribution, the CDF and Quantile may not be perfect mappings.
 		checkQuantileCDFSurvival(t, i, x, f, tol)
 		// Integrate over the PDF
-		checkPDFContinuous(t, i, x, f)
+		checkProbContinuous(t, i, x, f)
+		checkProbQuantContinuous(t, i, x, f, tol)
 	} else {
 		// Check against empirical PDF.
-		checkPDFDiscrete(t, i, x, f, tol)
+		checkProbDiscrete(t, i, x, f, tol)
 	}
 }

@@ -53,7 +53,10 @@ func nanGeneral(r, c, stride int) blas64.General {
 		panic("bad matrix size")
 	}
 	if r == 0 || c == 0 {
-		return blas64.General{Stride: max(1, c)}
+		return blas64.General{Stride: max(1, stride)}
+	}
+	if stride < c {
+		panic("bad stride")
 	}
 	return blas64.General{
 		Rows:   r,
@@ -93,6 +96,19 @@ func randomHessenberg(n, stride int, rnd *rand.Rand) blas64.General {
 
 // nanTriangular allocates a new r×c triangular matrix filled with NaN values.
 func nanTriangular(uplo blas.Uplo, n, stride int) blas64.Triangular {
+	if n < 0 {
+		panic("bad matrix size")
+	}
+	if n == 0 {
+		return blas64.Triangular{
+			Stride: max(1, stride),
+			Uplo:   uplo,
+			Diag:   blas.NonUnit,
+		}
+	}
+	if stride < n {
+		panic("bad stride")
+	}
 	return blas64.Triangular{
 		N:      n,
 		Stride: stride,
@@ -134,7 +150,11 @@ func generalOutsideAllNaN(a blas64.General) bool {
 		}
 	}
 	// Check after last element.
-	for _, v := range a.Data[(a.Rows-1)*a.Stride+a.Cols:] {
+	last := (a.Rows-1)*a.Stride + a.Cols
+	if a.Rows == 0 || a.Cols == 0 {
+		last = 0
+	}
+	for _, v := range a.Data[last:] {
 		if !math.IsNaN(v) {
 			return false
 		}
@@ -173,7 +193,7 @@ func triangularOutsideAllNaN(a blas64.Triangular) bool {
 		}
 	}
 	// Check after last element.
-	for _, v := range a.Data[(a.N-1)*a.Stride+a.N:] {
+	for _, v := range a.Data[max(0, a.N-1)*a.Stride+a.N:] {
 		if !math.IsNaN(v) {
 			return false
 		}

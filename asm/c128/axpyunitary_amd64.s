@@ -26,76 +26,97 @@
 
 // func AxpyUnitary(alpha complex128, x, y []complex128)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
-	MOVQ    x_base+16(FP), SI
-	MOVQ    y_base+40(FP), DI
-	MOVQ    x_len+24(FP), CX
+	MOVQ    x_base+16(FP), SI // SI := &x
+	MOVQ    y_base+40(FP), DI // DI := &y
+	MOVQ    x_len+24(FP), CX  // CX := min( len(x), len(y) )
 	CMPQ    y_len+48(FP), CX
 	CMOVQLE y_len+48(FP), CX
-	CMPQ    CX, $0
+	CMPQ    CX, $0            // if CX == 0 { return }
 	JE      caxy_end
 	PXOR    X0, X0            // Clear work registers and cache-align loop
 	PXOR    X1, X1
-	MOVUPS  alpha+0(FP), X0   // (ar,ai)
+	MOVUPS  alpha+0(FP), X0   // X0 := { imag(a), real(a) }
 	MOVAPS  X0, X1
-	SHUFPD  $0x1, X1, X1      // (ai,ar)
-	XORQ    AX, AX
-	MOVAPS  X0, X10
+	SHUFPD  $0x1, X1, X1      // X1 := { real(a), imag(a) }
+	XORQ    AX, AX            // i := 0
+	MOVAPS  X0, X10           // Copy X0 and X1 for pipelining
 	MOVAPS  X1, X11
 	MOVQ    CX, BX
-	ANDQ    $3, CX
-	SHRQ    $2, BX
-	JZ      caxy_tail
+	ANDQ    $3, CX            // CX = floor( CX / 4 )
+	SHRQ    $2, BX            // BX = CX % 4
+	JZ      caxy_tail         // if BX == 0 { goto caxy_tail }
 
-caxy_loop:
-	MOVUPS (SI)(AX*8), X2
+caxy_loop: // do {
+	MOVUPS (SI)(AX*8), X2   // X_i = { imag(x[i]), real(x[i]) }
 	MOVUPS 16(SI)(AX*8), X4
 	MOVUPS 32(SI)(AX*8), X6
 	MOVUPS 48(SI)(AX*8), X8
-	MOVDDUP_X2_X3           // Load and duplicate imag elements (xi, xi)
-	SHUFPD $0x3, X2, X2     // duplicate real elements (xr, xr)
+
+	// X_(i+1) = { real(x[i], real(x[i]) }
+	MOVDDUP_X2_X3
 	MOVDDUP_X4_X5
-	SHUFPD $0x3, X4, X4
 	MOVDDUP_X6_X7
-	SHUFPD $0x3, X6, X6
 	MOVDDUP_X8_X9
+
+	// X_i = { imag(x[i]), imag(x[i]) }
+	SHUFPD $0x3, X2, X2
+	SHUFPD $0x3, X4, X4
+	SHUFPD $0x3, X6, X6
 	SHUFPD $0x3, X8, X8
-	MULPD  X1, X2           // (ai*xr, ar*xr)
-	MULPD  X0, X3           // (ar*xi, ai*xi)
-	MULPD  X11, X4
-	MULPD  X10, X5
-	MULPD  X1, X6
-	MULPD  X0, X7
-	MULPD  X11, X8
-	MULPD  X10, X9
-	ADDSUBPD_X2_X3          // Add/Sub to (ai*xr + ar*xi , ar*xr - (ai*xi))
+
+	// X_i     = { real(a) * imag(x[i]), imag(a) * imag(x[i])  }
+	// X_(i+1) = { imag(a) * real(x[i]), real(a) * real(x[i])  }
+	MULPD X1, X2
+	MULPD X0, X3
+	MULPD X11, X4
+	MULPD X10, X5
+	MULPD X1, X6
+	MULPD X0, X7
+	MULPD X11, X8
+	MULPD X10, X9
+
+	// X_(i+1) = {
+	//	imag(result[i]):  imag(a)*real(x[i]) + real(a)*imag(x[i]),
+	//	real(result[i]):  real(a)*real(x[i]) - imag(a)*imag(x[i])
+	//  }
+	ADDSUBPD_X2_X3
 	ADDSUBPD_X4_X5
 	ADDSUBPD_X6_X7
 	ADDSUBPD_X8_X9
-	ADDPD  (DI)(AX*8), X3   // Add y2,y1 to a*(x2,x1)
+
+	// X_(i+1) = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
+	ADDPD  (DI)(AX*8), X3
 	ADDPD  16(DI)(AX*8), X5
 	ADDPD  32(DI)(AX*8), X7
 	ADDPD  48(DI)(AX*8), X9
-	MOVUPS X3, (DI)(AX*8)   // Write result back to y2,y1
+	MOVUPS X3, (DI)(AX*8)   // y[i] = X_(i+1)
 	MOVUPS X5, 16(DI)(AX*8)
 	MOVUPS X7, 32(DI)(AX*8)
 	MOVUPS X9, 48(DI)(AX*8)
-	ADDQ   $8, AX
+	ADDQ   $8, AX           // i += 8
 	DECQ   BX
-	JNZ    caxy_loop
-	CMPQ   CX, $0
+	JNZ    caxy_loop        // } while --BX > 0
+	CMPQ   CX, $0           // if CX == 0 { return }
 	JE     caxy_end
 
-caxy_tail:
-	MOVUPS (SI)(AX*8), X2
-	MOVDDUP_X2_X3         // Load and duplicate imag elements (xi, xi)
-	SHUFPD $0x3, X2, X2   // duplicate real elements (xr, xr)
-	MULPD  X1, X2         // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
-	MULPD  X0, X3         // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
-	ADDSUBPD_X2_X3        // (ai*x2r+ar*x2i, ar*x2r-ai*x2i, ai*x1r+ar*x1i, ar*x1r-ai*x1i)
-	ADDPD  (DI)(AX*8), X3 // */
-	MOVUPS X3, (DI)(AX*8)
-	ADDQ   $2, AX
-	LOOP   caxy_tail
+caxy_tail: // do {
+	MOVUPS (SI)(AX*8), X2 // X_i = { imag(x[i]), real(x[i]) }
+	MOVDDUP_X2_X3         // X_(i+1) = { real(x[i], real(x[i]) }
+	SHUFPD $0x3, X2, X2   // X_i = { imag(x[i]), imag(x[i]) }
+	MULPD  X1, X2         // X_i     = { real(a) * imag(x[i]), imag(a) * imag(x[i])  }
+	MULPD  X0, X3         // X_(i+1) = { imag(a) * real(x[i]), real(a) * real(x[i])  }
+
+	// X_(i+1) = {
+	//	imag(result[i]):  imag(a)*real(x[i]) + real(a)*imag(x[i]),
+	//	real(result[i]):  real(a)*real(x[i]) - imag(a)*imag(x[i])
+	//  }
+	ADDSUBPD_X2_X3
+
+	// X_(i+1) = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
+	ADDPD  (DI)(AX*8), X3
+	MOVUPS X3, (DI)(AX*8) // y[i] = X_(i+1)
+	ADDQ   $2, AX         // i += 2
+	LOOP   caxy_tail      // }  while --CX > 0
 
 caxy_end:
 	RET

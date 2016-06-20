@@ -36,96 +36,121 @@
 
 // func AxpyIncTo(dst []complex64, incDst, idst uintptr, alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyIncTo(SB), NOSPLIT, $0
-	MOVQ   dst_base+0(FP), DI
-	MOVQ   x_base+48(FP), SI
-	MOVQ   y_base+72(FP), DX
-	MOVQ   n+96(FP), CX
-	CMPQ   CX, $0             // if n==0, return
+	MOVQ   dst_base+0(FP), DI // DI := &dst
+	MOVQ   x_base+48(FP), SI  // SI := &x
+	MOVQ   y_base+72(FP), DX  // DX := &y
+	MOVQ   n+96(FP), CX       // CX := n
+	CMPQ   CX, $0             // if n==0 { return }
 	JE     axpyi_end
-	MOVQ   ix+120(FP), R8     // Load the first indicies
+	MOVQ   ix+120(FP), R8     // Load the first index
 	MOVQ   iy+128(FP), R9
 	MOVQ   idst+32(FP), R10
-	LEAQ   (SI)(R8*8), SI     // Calculate addrress of first indicies
-	LEAQ   (DX)(R9*8), DX
-	LEAQ   (DI)(R10*8), DI
+	LEAQ   (SI)(R8*8), SI     // SI = &(x[ix])
+	LEAQ   (DX)(R9*8), DX     // DX = &(y[iy])
+	LEAQ   (DI)(R10*8), DI    // DI = &(dst[idst])
 	MOVQ   incX+104(FP), R8   // Incrementors*8 for easy iteration (ADDQ)
 	SHLQ   $3, R8
 	MOVQ   incY+112(FP), R9
 	SHLQ   $3, R9
 	MOVQ   incDst+24(FP), R10
 	SHLQ   $3, R10
-	MOVSD  alpha+40(FP), X0   // XO:(0,0,ar,ai)
+	MOVSD  alpha+40(FP), X0   // X0 := { 0, 0, imag(a), real(a) }
 	MOVAPS X0, X1
-	SHUFPS $0x11, X1, X1      // X1:(0,0,ai,ar)
-	MOVAPS X0, X10
+	SHUFPS $0x11, X1, X1      // X1 := { 0, 0, real(a), imag(a) }
+	MOVAPS X0, X10            // Copy X0 and X1 for pipelining
 	MOVAPS X1, X11
 	MOVQ   CX, BX
-	ANDQ   $3, CX
-	SHRQ   $2, BX
-	JZ     axpyi_tail
+	ANDQ   $3, CX             // CX = n %4
+	SHRQ   $2, BX             // BX = floor( n / 4 )
+	JZ     axpyi_tail         // if BX == 0 { goto axpyi_tail }
 
-axpyi_loop:
-	MOVSD (SI), X3
+axpyi_loop: // do {
+	MOVSD (SI), X3       // X_i = { imag(x[i]), real(x[i]) }
 	MOVSD (SI)(R8*1), X5
 	LEAQ  (SI)(R8*2), SI
 	MOVSD (SI), X7
 	MOVSD (SI)(R8*1), X9
-	MOVSHDUP_X3_X2        // Load and duplicate real elements (x2r, x2r, x1r, x1r)
-	MOVSLDUP_X3_X3        // Load and duplicate imag elements (x2i, x2i, x1i, x1i)
+
+	// X_(i-1) = { imag(x[i]), imag(x[i]) }
+	MOVSHDUP_X3_X2
 	MOVSHDUP_X5_X4
-	MOVSLDUP_X5_X5
 	MOVSHDUP_X7_X6
-	MOVSLDUP_X7_X7
 	MOVSHDUP_X9_X8
+
+	// X_i = { real(x[i]), real(x[i]) }
+	MOVSLDUP_X3_X3
+	MOVSLDUP_X5_X5
+	MOVSLDUP_X7_X7
 	MOVSLDUP_X9_X9
-	MULPS X1, X2          // (ai*xr, ar*xr)
-	MULPS X0, X3          // (ar*xi, ai*xi)
+
+	// X_(i-1) = {  real(a) * imag(x[i]),   imag(a) * imag(x[i]) }
+	// X_i     = {  imag(a) * real(x[i]),   real(a) * real(x[i])  }
+	MULPS X1, X2
+	MULPS X0, X3
 	MULPS X11, X4
 	MULPS X10, X5
 	MULPS X1, X6
 	MULPS X0, X7
 	MULPS X11, X8
 	MULPS X10, X9
-	ADDSUBPS_X2_X3        // (ai*x1r+ar*x1i, ar*x1r-ai*x1i)
+
+	// X_i = {
+	//	imag(result[i]):   imag(a)*real(x[i]) + real(a)*imag(x[i]),
+	//	real(result[i]):   real(a)*real(x[i]) - imag(a)*imag(x[i]),
+	//  }
+	ADDSUBPS_X2_X3
 	ADDSUBPS_X4_X5
 	ADDSUBPS_X6_X7
 	ADDSUBPS_X8_X9
+
+	// X_i = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
 	MOVSD (DX), X2
 	MOVSD (DX)(R9*1), X4
 	LEAQ  (DX)(R9*2), DX
 	MOVSD (DX), X6
 	MOVSD (DX)(R9*1), X8
-	ADDPS X2, X3          // Add y to a*x
+	ADDPS X2, X3
 	ADDPS X4, X5
 	ADDPS X6, X7
 	ADDPS X8, X9
-	MOVSD X3, (DI)        // Write result back to dst
+
+	MOVSD X3, (DI)        // y[i] = X_i
 	MOVSD X5, (DI)(R10*1)
 	LEAQ  (DI)(R10*2), DI
 	MOVSD X7, (DI)
 	MOVSD X9, (DI)(R10*1)
-	LEAQ  (SI)(R8*2), SI  // Increment addresses
-	LEAQ  (DX)(R9*2), DX
-	LEAQ  (DI)(R10*2), DI
+	LEAQ  (SI)(R8*2), SI  // SI = &(SI[incX*2])
+	LEAQ  (DX)(R9*2), DX  // DX = &(DX[incY*2])
+	LEAQ  (DI)(R10*2), DI // DI = &(DI[incDst])
 	DECQ  BX
-	JNZ   axpyi_loop
-	CMPQ  CX, $0
+	JNZ   axpyi_loop      // } while --BX > 0
+	CMPQ  CX, $0          // if CX == 0 { return }
 	JE    axpyi_end
 
 axpyi_tail:
-	MOVSD (SI), X3
-	MOVSHDUP_X3_X2   // Load and duplicate real elements (x2r, x2r, x1r, x1r)
-	MOVSLDUP_X3_X3   // Load and duplicate imag elements (x2i, x2i, x1i, x1i)
-	MULPS X1, X2     // (ai*x2r, ar*x2r, ai*x1r, ar*x1r)
-	MULPS X0, X3     // (ar*x2i, ai*x2i, ar*x1i, ai*x1i)
-	ADDSUBPS_X2_X3   // (ai*x1r+ar*x1i, ar*x1r-ai*x1i)
+	MOVSD (SI), X3 // X_i     = { imag(x[i]), real(x[i]) }
+	MOVSHDUP_X3_X2 // X_(i-1) = { imag(x[i]), imag(x[i]) }
+	MOVSLDUP_X3_X3 // X_i     = { real(x[i]), real(x[i]) }
+
+	// X_i     = { imag(a) * real(x[i]),  real(a) * real(x[i]) }
+	// X_(i-1) = { real(a) * imag(x[i]),  imag(a) * imag(x[i]) }
+	MULPS X1, X2
+	MULPS X0, X3
+
+	// X_i = {
+	//	imag(result[i]):   imag(a)*real(x[i]) + real(a)*imag(x[i]),
+	//	real(result[i]):   real(a)*real(x[i]) - imag(a)*imag(x[i]),
+	//  }
+	ADDSUBPS_X2_X3
+
+	// X_i = { imag(result[i]) + imag(y[i]),  real(result[i]) + real(y[i])  }
 	MOVSD (DX), X4
-	ADDPS X4, X3     // Add y2,y1 to a*(x2,x1)
-	MOVSD X3, (DI)
-	ADDQ  R8, SI
-	ADDQ  R9, DX
-	ADDQ  R10, DI
-	LOOP  axpyi_tail
+	ADDPS X4, X3
+	MOVSD X3, (DI)   // y[i] = X_i
+	ADDQ  R8, SI     // SI += incX
+	ADDQ  R9, DX     // DX += incY
+	ADDQ  R10, DI    // DI += incDst
+	LOOP  axpyi_tail // } while --CX > 0
 
 axpyi_end:
 	RET

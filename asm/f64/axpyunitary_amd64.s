@@ -42,41 +42,75 @@
 
 #include "textflag.h"
 
-// func DaxpyUnitary(alpha float64, x, y []float64)
-// This function assumes len(y) >= len(x).
+// func AxpyUnitary(alpha float64, x, y []float64)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   x_len+16(FP), DI // n = len(x)
-	MOVQ   y+32(FP), R9
+	MOVQ    x_base+8(FP), SI  // SI := &x
+	MOVQ    y_base+32(FP), DI // DI := &x
+	MOVQ    x_len+16(FP), CX  // CX = min( len(x), len(y) )
+	CMPQ    y_len+40(FP), CX
+	CMOVQLE y_len+40(FP), CX
+	CMPQ    CX, $0            // if CX == 0 { return }
+	JE      end
+	XORQ    AX, AX
+	MOVSD   alpha+0(FP), X0   // X0 := { alpha, alpha }
+	SHUFPD  $0, X0, X0
+	MOVUPS  X0, X1            // X1 := X0   for pipelining
+	MOVQ    DI, BX            // BX = DI % 16
+	ANDQ    $15, BX
+	JZ      no_trim
 
-	MOVQ $0, SI // i = 0
-	SUBQ $2, DI // n -= 2
-	JL   tail   // if n < 0 goto tail
+	// Align on 16-bit boundary
+	MOVSD (SI), X2 // X2 := x[0]
+	MULSD X0, X2   // X2 *= a
+	ADDSD (DX), X2 // X2 += y[0]
+	MOVSD X2, (DI) // y[0] = X2
+	INCQ  AX       // i++
+	DECQ  CX       // CX--
+	JZ    end      // if CX == 0 { return }
 
-loop:
+no_trim:
+	MOVQ CX, BX
+	ANDQ $7, BX     // BX := CX % 8
+	SHRQ $3, CX     // CX = floor( CX / 8 )
+	JZ   tail_start // if CX == 0 { goto tail_start }
+
+loop:  // do {
 	// y[i] += alpha * x[i] unrolled 2x.
-	MOVUPD 0(R8)(SI*8), X0
-	MOVUPD 0(R9)(SI*8), X1
-	MULPD  X7, X0
-	ADDPD  X0, X1
-	MOVUPD X1, 0(R9)(SI*8)
+	MOVUPS (SI)(AX*8), X2   // X_i = x[i]
+	MOVUPS 16(SI)(AX*8), X3
+	MOVUPS 32(SI)(AX*8), X4
+	MOVUPS 48(SI)(AX*8), X5
 
-	ADDQ $2, SI // i += 2
-	SUBQ $2, DI // n -= 2
-	JGE  loop   // if n >= 0 goto loop
+	MULPD X0, X2 // X_i *= a
+	MULPD X1, X3
+	MULPD X0, X4
+	MULPD X1, X5
 
-tail:
-	ADDQ $2, DI // n += 2
-	JLE  end    // if n <= 0 goto end
+	ADDPD (DI)(AX*8), X2   // X_i += y[i]
+	ADDPD 16(DI)(AX*8), X3
+	ADDPD 32(DI)(AX*8), X4
+	ADDPD 48(DI)(AX*8), X5
 
-	// y[i] += alpha * x[i] for the last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MOVSD 0(R9)(SI*8), X1
-	MULSD X7, X0
-	ADDSD X0, X1
-	MOVSD X1, 0(R9)(SI*8)
+	MOVUPD X2, (DI)(AX*8)   // y[i] = X_i
+	MOVUPD X3, 16(DI)(AX*8)
+	MOVUPD X4, 32(DI)(AX*8)
+	MOVUPD X5, 48(DI)(AX*8)
+
+	ADDQ $8, AX // i += 2
+	LOOP loop   // } while --CX > 0
+	CMPQ BX, $0 // if BX == 0 { return }
+	JE   end
+
+tail_start: // Reset loop registers
+	MOVQ BX, CX // Loop counter: CX = BX
+
+tail:  // do {
+	MOVSD (SI)(AX*8), X2 // X2 = x[i]
+	MULSD X0, X2         // X2 *= a
+	ADDSD (DI)(AX*8), X2 // X2 += y[i]
+	MOVSD X2, (DI)(AX*8) // y[i] = X2
+	INCQ  AX             // i++
+	LOOP  tail           // } while --CX > 0
 
 end:
 	RET

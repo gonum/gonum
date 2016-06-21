@@ -54,7 +54,7 @@ import (
 //
 // z and ldz represent the matrix Z of size n×n. If wantz is true, the QR sweep
 // orthogonal similarity transformation is accumulated into
-// z[iloz:ihiz,ilo:ihi] from the right, otherwise z not referenced.
+// z[iloz:ihiz,iloz:ihiz] from the right, otherwise z not referenced.
 //
 // v and ldv represent an auxiliary matrix V of size (nshfts/2)×3. Note that V
 // is transposed with respect to the reference netlib implementation.

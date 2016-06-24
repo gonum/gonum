@@ -96,6 +96,10 @@ func TestDlaev2(t *testing.T) {
 	testlapack.Dlaev2Test(t, impl)
 }
 
+func TestDlahqr(t *testing.T) {
+	testlapack.DlahqrTest(t, impl)
+}
+
 func TestDlahr2(t *testing.T) {
 	testlapack.Dlahr2Test(t, impl)
 }

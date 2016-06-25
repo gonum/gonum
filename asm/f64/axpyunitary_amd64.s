@@ -42,6 +42,9 @@
 
 #include "textflag.h"
 
+// Hardware NOP, used to avoid splitting instructions across cache lines
+#define NOP7 BYTE $0x0F; BYTE $0x1F; BYTE $0x80; BYTE $0x00; BYTE $0x00; BYTE $0x00; BYTE $0x00
+
 // func AxpyUnitary(alpha float64, x, y []float64)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	MOVQ    x_base+8(FP), SI  // SI := &x
@@ -69,10 +72,11 @@ TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	JZ    end      // if CX == 0 { return }
 
 no_trim:
+	NOP7             // j
 	MOVQ CX, BX
-	ANDQ $7, BX     // BX := CX % 8
-	SHRQ $3, CX     // CX = floor( CX / 8 )
-	JZ   tail_start // if CX == 0 { goto tail_start }
+	ANDQ $7, BX      // BX := CX % 8
+	SHRQ $3, CX      // CX = floor( CX / 8 )
+	JZ   tail2_start // if CX == 0 { goto tail_start }
 
 loop:  // do {
 	// y[i] += alpha * x[i] unrolled 2x.
@@ -91,26 +95,37 @@ loop:  // do {
 	ADDPD 32(DI)(AX*8), X4
 	ADDPD 48(DI)(AX*8), X5
 
-	MOVUPD X2, (DI)(AX*8)   // y[i] = X_i
-	MOVUPD X3, 16(DI)(AX*8)
-	MOVUPD X4, 32(DI)(AX*8)
-	MOVUPD X5, 48(DI)(AX*8)
+	MOVUPS X2, (DI)(AX*8)   // y[i] = X_i
+	MOVUPS X3, 16(DI)(AX*8)
+	MOVUPS X4, 32(DI)(AX*8)
+	MOVUPS X5, 48(DI)(AX*8)
 
 	ADDQ $8, AX // i += 2
 	LOOP loop   // } while --CX > 0
 	CMPQ BX, $0 // if BX == 0 { return }
 	JE   end
 
-tail_start: // Reset loop registers
+tail2_start: // Reset loop registers
 	MOVQ BX, CX // Loop counter: CX = BX
+	SHRQ $1, CX // CX = floor( BX / 2 )
+	JZ   tail
 
-tail:  // do {
+tail2:  // do {
+	MOVUPS (SI)(AX*8), X2 // X2 = x[i]
+	MULPD  X0, X2         // X2 *= a
+	ADDPD  (DI)(AX*8), X2 // X2 += y[i]
+	MOVUPS X2, (DI)(AX*8) // y[i] = X2
+	ADDQ   $2, AX         // i += 2
+	LOOP   tail2          // } while --CX > 0
+
+tail:
+	ANDQ $1, BX // BX = BX % 2
+	JZ   end    // if BX % 2 == 0 { return }
+
 	MOVSD (SI)(AX*8), X2 // X2 = x[i]
 	MULSD X0, X2         // X2 *= a
 	ADDSD (DI)(AX*8), X2 // X2 += y[i]
 	MOVSD X2, (DI)(AX*8) // y[i] = X2
-	INCQ  AX             // i++
-	LOOP  tail           // } while --CX > 0
 
 end:
 	RET

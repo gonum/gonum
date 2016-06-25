@@ -71,9 +71,9 @@ TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
 
 no_trim:
 	MOVQ CX, BX
-	ANDQ $7, BX     // BX := CX % 8
-	SHRQ $3, CX     // CX = floor( CX / 8 )
-	JZ   tail_start // if CX == 0 { goto tail_start }
+	ANDQ $7, BX      // BX := CX % 8
+	SHRQ $3, CX      // CX = floor( CX / 8 )
+	JZ   tail2_start // if CX == 0 { goto tail_start }
 
 loop:  // do {
 	// y[i] += alpha * x[i] unrolled 2x.
@@ -102,16 +102,27 @@ loop:  // do {
 	CMPQ BX, $0 // if BX == 0 { return }
 	JE   end
 
-tail_start: // Reset loop registers
+tail2_start: // Reset loop registers
 	MOVQ BX, CX // Loop counter: CX = BX
+	SHRQ $1, CX // CX = floor( BX / 2 )
+	JZ   tail
 
-tail:  // do {
+tail2:  // do {
+	MOVUPS (SI)(AX*8), X2 // X2 = x[i]
+	MULPD  X0, X2         // X2 *= a
+	ADDPD  (DX)(AX*8), X2 // X2 += y[i]
+	MOVUPS X2, (DI)(AX*8) // y[i] = X2
+	ADDQ   $2, AX         // i += 2
+	LOOP   tail2          // } while --CX > 0
+
+tail:
+	ANDQ $1, BX // BX = BX % 2
+	JZ   end    // if BX % 2 == 0 { return }
+
 	MOVSD (SI)(AX*8), X2 // X2 = x[i]
 	MULSD X0, X2         // X2 *= a
 	ADDSD (DX)(AX*8), X2 // X2 += y[i]
 	MOVSD X2, (DI)(AX*8) // y[i] = X2
-	INCQ  AX             // i++
-	LOOP  tail           // } while --CX > 0
 
 end:
 	RET

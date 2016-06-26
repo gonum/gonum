@@ -27,7 +27,7 @@
 // func AxpyInc(alpha complex128, x, y []complex128, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
 	MOVQ   x_base+16(FP), SI // SI := &x
-	MOVQ   y_base+40(FP), DI // DI := y
+	MOVQ   y_base+40(FP), DI // DI := &y
 	MOVQ   n+64(FP), CX      // CX := n
 	CMPQ   CX, $0            // if n==0 { return }
 	JE     axpyi_end

@@ -51,7 +51,7 @@ TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
 	MOVAPS  X0, X1
 	SHUFPS  $0x11, X1, X1      // X1 := { real(a), imag(a), real(a), imag(a) }
 	XORQ    AX, AX             // i := 0
-	MOVQ    DI, BX             // Align on 16-byte boundary for ADDPS
+	MOVQ    DX, BX             // Align on 16-byte boundary for ADDPS
 	ANDQ    $15, BX            // BX := &y & 15
 	JZ      caxy_no_trim       // if BX == 0 { goto caxy_no_trim }
 

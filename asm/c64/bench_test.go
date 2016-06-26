@@ -4,10 +4,7 @@
 
 package c64
 
-import (
-	"runtime"
-	"testing"
-)
+import "testing"
 
 var (
 	a = complex64(2 + 2i)
@@ -25,13 +22,9 @@ func init() {
 
 func benchaxpyu(t *testing.B, n int, f func(a complex64, x, y []complex64)) {
 	x, y := x[:n], y[:n]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, x, y)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyu(a complex64, x, y []complex64) {
@@ -66,13 +59,9 @@ func BenchmarkLC64AxpyUnitary50000(t *testing.B) { benchaxpyu(t, 50000, naiveaxp
 
 func benchaxpyut(t *testing.B, n int, f func(d []complex64, a complex64, x, y []complex64)) {
 	x, y, z := x[:n], y[:n], z[:n]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(z, a, x, y)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyut(d []complex64, a complex64, x, y []complex64) {
@@ -111,13 +100,9 @@ func benchaxpyinc(t *testing.B, ln, t_inc int, f func(alpha complex64, x, y []co
 	if t_inc < 0 {
 		idx = (-ln + 1) * t_inc
 	}
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(1+1i, x, y, n, inc, inc, uintptr(idx), uintptr(idx))
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyinc(alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr) {
@@ -208,13 +193,9 @@ func benchaxpyincto(t *testing.B, ln, t_inc int, f func(dst []complex64, incDst,
 	if t_inc < 0 {
 		idx = (-ln + 1) * t_inc
 	}
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(z, inc, uintptr(idx), 1+1i, x, y, n, inc, inc, uintptr(idx), uintptr(idx))
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyincto(dst []complex64, incDst, idst uintptr, alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr) {

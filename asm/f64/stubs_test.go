@@ -24,7 +24,7 @@ func guardVector(v []float64, g float64, g_ln int) (guarded []float64) {
 	return guarded
 }
 
-func validGuard(v []float64, g float64, g_ln int) bool {
+func isValidGuard(v []float64, g float64, g_ln int) bool {
 	for i := 0; i < g_ln; i++ {
 		if !same(v[i], g) || v[len(v)-1-i] != g {
 			return false
@@ -50,20 +50,20 @@ func guardIncVector(v []float64, g float64, inc, g_ln int) (guarded []float64) {
 	return guarded
 }
 
-func validIncGuard(t *testing.T, v []float64, g float64, inc, g_ln int) {
+func checkValidIncGuard(t *testing.T, v []float64, g float64, inc, g_ln int) {
 	s_ln := len(v) - 2*g_ln
 	for i := range v {
 		switch {
 		case same(v[i], g):
 			// Correct value
 		case i < g_ln:
-			t.Error("Front guard violated at", i, v[:g_ln])
+			t.Errorf("Front guard violated at %d %v", i, v[:g_ln])
 		case i > g_ln+s_ln:
-			t.Error("Back guard violated at", i-g_ln-s_ln, v[g_ln+s_ln:])
+			t.Errorf("Back guard violated at %d %v", i-g_ln-s_ln, v[g_ln+s_ln:])
 		case (i-g_ln)%inc == 0 && (i-g_ln)/inc < len(v):
 			// Ignore input values
 		default:
-			t.Error("Internal guard violated at", i-g_ln, v[g_ln:g_ln+s_ln])
+			t.Errorf("Internal guard violated at %d %v", i-g_ln, v[g_ln:g_ln+s_ln])
 		}
 	}
 }
@@ -112,11 +112,10 @@ func TestAbsSum(t *testing.T) {
 		src := v.src[g_ln : len(v.src)-g_ln]
 		ret := AbsSum(src)
 		if !same(ret, v.ex) {
-			t.Error("Test", j, "AbsSum error Got:", ret, "Expected:", v.ex)
-			t.Error(src)
+			t.Errorf("Test %d AbsSum error Got: %f Expected: %f", j, ret, v.ex)
 		}
-		if !validGuard(v.src, src_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
 	}
 }
@@ -169,10 +168,9 @@ func TestAbsSumInc(t *testing.T) {
 		src := v.src[g_ln : len(v.src)-g_ln]
 		ret := AbsSumInc(src, ln, v.inc)
 		if !same(ret, v.ex) {
-			t.Error("Test", j, "AbsSum error Got:", ret, "Expected:", v.ex)
-			t.Error(src)
+			t.Errorf("Test %d AbsSumInc error Got: %f Expected: %f", j, ret, v.ex)
 		}
-		validIncGuard(t, v.src, src_gd, v.inc, g_ln)
+		checkValidIncGuard(t, v.src, src_gd, v.inc, g_ln)
 	}
 }
 
@@ -223,14 +221,14 @@ func TestAdd(t *testing.T) {
 		Add(dst, src)
 		for i := range v.expect {
 			if !same(dst[i], v.expect[i]) {
-				t.Error("Test", j, "Add error at", i, "Got:", dst[i], "Expected:", v.expect[i])
+				t.Errorf("Test %d Add error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
 			}
 		}
-		if !validGuard(v.src, src_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
-		if !validGuard(v.dst, dst_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
+		if !isValidGuard(v.dst, dst_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
 }
@@ -273,11 +271,11 @@ func TestAddConst(t *testing.T) {
 		AddConst(v.alpha, src)
 		for i := range v.expect {
 			if !same(src[i], v.expect[i]) {
-				t.Error("Test", j, "AddConst error at", i, "Got:", src[i], "Expected:", v.expect[i])
+				t.Errorf("Test %d AddConst error at %d Got: %v Expected: %v", j, i, src[i], v.expect[i])
 			}
 		}
-		if !validGuard(v.src, src_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
 	}
 }
@@ -339,18 +337,17 @@ func TestCumSum(t *testing.T) {
 		ret := CumSum(dst, src)
 		for i := range v.expect {
 			if !same(ret[i], v.expect[i]) {
-				t.Error("Test", j, "CumSum error at", i, "Got:", ret[i], "Expected:", v.expect[i])
-				t.Error(ret, v.expect)
+				t.Errorf("Test %d CumSum error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
 			if !same(ret[i], dst[i]) {
-				t.Error("Test", j, "CumSum ret/dst mismatch", i, "Ret:", ret[i], "Dst:", dst[i])
+				t.Errorf("Test %d CumSum ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
-		if !validGuard(v.src, src_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
-		if !validGuard(v.dst, dst_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
+		if !isValidGuard(v.dst, dst_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
 }
@@ -412,17 +409,17 @@ func TestCumProd(t *testing.T) {
 		ret := CumProd(dst, src)
 		for i := range v.expect {
 			if !same(ret[i], v.expect[i]) {
-				t.Error("Test", j, "CumProd error at", i, "Got:", ret[i], "Expected:", v.expect[i])
+				t.Errorf("Test %d CumProd error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
 			if !same(ret[i], dst[i]) {
-				t.Error("Test", j, "CumProd ret/dst mismatch", i, "Ret:", ret[i], "Dst:", dst[i])
+				t.Errorf("Test %d CumProd ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
-		if !validGuard(v.src, src_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
-		if !validGuard(v.dst, dst_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
+		if !isValidGuard(v.dst, dst_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
 }
@@ -479,14 +476,14 @@ func TestDiv(t *testing.T) {
 		Div(dst, src)
 		for i := range v.expect {
 			if !same(dst[i], v.expect[i]) {
-				t.Error("Test", j, "Div error at", i, "Got:", dst[i], "Expected:", v.expect[i])
+				t.Errorf("Test %d Div error at %d Got: %v Expected: %v", j, i, dst[i], v.expect[i])
 			}
 		}
-		if !validGuard(v.src, src_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		if !isValidGuard(v.src, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
 		}
-		if !validGuard(v.dst, dst_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in y vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
+		if !isValidGuard(v.dst, dst_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
 }
@@ -547,20 +544,20 @@ func TestDivTo(t *testing.T) {
 		ret := DivTo(dst, x, y)
 		for i := range v.expect {
 			if !same(ret[i], v.expect[i]) {
-				t.Error("Test", j, "DivTo error at", i, "Got:", x[i], "Expected:", v.expect[i])
+				t.Errorf("Test %d DivTo error at %d Got: %v Expected: %v", j, i, ret[i], v.expect[i])
 			}
 			if !same(ret[i], dst[i]) {
-				t.Error("Test", j, "DivTo ret/dst mismatch", i, "Ret:", ret[i], "X:", dst[i])
+				t.Errorf("Test %d DivTo ret/dst mismatch %d Ret: %v Dst: %v", j, i, ret[i], dst[i])
 			}
 		}
-		if !validGuard(v.y, y_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.y[:g_ln], v.y[len(v.y)-g_ln:])
+		if !isValidGuard(v.y, y_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", j, v.y[:g_ln], v.y[len(v.y)-g_ln:])
 		}
-		if !validGuard(v.x, x_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in y vector", v.x[:g_ln], v.x[len(v.x)-g_ln:])
+		if !isValidGuard(v.x, x_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", j, v.x[:g_ln], v.x[len(v.x)-g_ln:])
 		}
-		if !validGuard(v.dst, dst_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in dst vector", v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
+		if !isValidGuard(v.dst, dst_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:g_ln], v.dst[len(v.dst)-g_ln:])
 		}
 	}
 }
@@ -617,13 +614,13 @@ func TestL1Norm(t *testing.T) {
 		s_lc, t_lc := v.s[g_ln:len(v.s)-g_ln], v.t[g_ln:len(v.t)-g_ln]
 		ret := L1Norm(s_lc, t_lc)
 		if !same(ret, v.expect) {
-			t.Error("Test", j, "L1Norm error. Got:", ret, "Expected:", v.expect)
+			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.expect)
 		}
-		if !validGuard(v.s, s_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in s vector", v.s[:g_ln], v.s[len(v.s)-g_ln:])
+		if !isValidGuard(v.s, s_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:g_ln], v.s[len(v.s)-g_ln:])
 		}
-		if !validGuard(v.t, t_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in t vector", v.t[:g_ln], v.t[len(v.t)-g_ln:])
+		if !isValidGuard(v.t, t_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in t vector %v %v", j, v.t[:g_ln], v.t[len(v.t)-g_ln:])
 		}
 	}
 }
@@ -680,13 +677,13 @@ func TestLinfNorm(t *testing.T) {
 		s_lc, t_lc := v.s[g_ln:len(v.s)-g_ln], v.t[g_ln:len(v.t)-g_ln]
 		ret := LinfNorm(s_lc, t_lc)
 		if !same(ret, v.expect) {
-			t.Error("Test", j, "LinfNorm error. Got:", ret, "Expected:", v.expect)
+			t.Errorf("Test %d LinfNorm error Got: %f Expected: %f", j, ret, v.expect)
 		}
-		if !validGuard(v.s, s_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in s vector", v.s[:g_ln], v.s[len(v.s)-g_ln:])
+		if !isValidGuard(v.s, s_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:g_ln], v.s[len(v.s)-g_ln:])
 		}
-		if !validGuard(v.t, t_gd, g_ln) {
-			t.Error("Test", j, "Guard violated in t vector", v.t[:g_ln], v.t[len(v.t)-g_ln:])
+		if !isValidGuard(v.t, t_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in t vector %v %v", j, v.t[:g_ln], v.t[len(v.t)-g_ln:])
 		}
 	}
 }

@@ -6,19 +6,14 @@ package f64
 
 import (
 	"math"
-	"runtime"
 	"testing"
 )
 
 func benchAbsSum(f func(x []float64) float64, sz int, t *testing.B) {
 	dst := y[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(dst)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveAbsSum = func(x []float64) (sum float64) {
@@ -53,12 +48,9 @@ func BenchmarkLAbsSum100000(t *testing.B) { benchAbsSum(naiveAbsSum, 100000, t) 
 func BenchmarkLAbsSum500000(t *testing.B) { benchAbsSum(naiveAbsSum, 500000, t) }
 
 func benchAbsSumInc(t *testing.B, ln, inc int, f func(x []float64, n, incX int) float64) {
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(x, ln, inc)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveAbsSumInc = func(x []float64, n, incX int) (sum float64) {
@@ -134,13 +126,9 @@ func BenchmarkLF64AbsSumIncN100000Inc10(b *testing.B) { benchAbsSumInc(b, 100000
 
 func benchAdd(f func(dst, s []float64), sz int, t *testing.B) {
 	dst, s := y[:sz], x[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(dst, s)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveAdd = func(dst, s []float64) {
@@ -175,13 +163,9 @@ func BenchmarkLAdd500000(t *testing.B) { benchAdd(naiveAdd, 500000, t) }
 
 func benchAddConst(f func(a float64, x []float64), sz int, t *testing.B) {
 	a, x := 1., x[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, x)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveAddConst = func(a float64, x []float64) {
@@ -216,13 +200,9 @@ func BenchmarkLAddConst500000(t *testing.B) { benchAddConst(naiveAddConst, 50000
 
 func benchCumSum(f func(a, b []float64) []float64, sz int, t *testing.B) {
 	a, b := x[:sz], y[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, b)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveCumSum = func(dst, s []float64) []float64 {
@@ -262,13 +242,9 @@ func BenchmarkLCumSum500000(t *testing.B) { benchCumSum(naiveCumSum, 500000, t) 
 
 func benchCumProd(f func(a, b []float64) []float64, sz int, t *testing.B) {
 	a, b := x[:sz], y[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, b)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveCumProd = func(dst, s []float64) []float64 {
@@ -308,13 +284,9 @@ func BenchmarkLCumProd500000(t *testing.B) { benchCumProd(naiveCumProd, 500000, 
 
 func benchDiv(f func(a, b []float64), sz int, t *testing.B) {
 	a, b := x[:sz], y[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, b)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveDiv = func(a, b []float64) {
@@ -349,13 +321,9 @@ func BenchmarkLDiv500000(t *testing.B) { benchDiv(naiveDiv, 500000, t) }
 
 func benchDivTo(f func(dst, a, b []float64) []float64, sz int, t *testing.B) {
 	dst, a, b := z[:sz], x[:sz], y[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(dst, a, b)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveDivTo = func(dst, s, t []float64) []float64 {
@@ -391,13 +359,9 @@ func BenchmarkLDivTo500000(t *testing.B) { benchDivTo(naiveDivTo, 500000, t) }
 
 func benchL1Norm(f func(a, b []float64) float64, sz int, t *testing.B) {
 	a, b := x[:sz], y[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, b)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveL1Norm = func(s, t []float64) float64 {
@@ -434,13 +398,9 @@ func BenchmarkLL1Norm500000(t *testing.B) { benchL1Norm(naiveL1Norm, 500000, t) 
 
 func benchLinfNorm(f func(a, b []float64) float64, sz int, t *testing.B) {
 	a, b := x[:sz], y[:sz]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, b)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 var naiveLinfNorm = func(s, t []float64) float64 {

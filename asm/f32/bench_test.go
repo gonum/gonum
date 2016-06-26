@@ -4,10 +4,7 @@
 
 package f32
 
-import (
-	"runtime"
-	"testing"
-)
+import "testing"
 
 var (
 	a = float32(2)
@@ -25,13 +22,9 @@ func init() {
 
 func benchaxpyu(t *testing.B, n int, f func(a float32, x, y []float32)) {
 	x, y := x[:n], y[:n]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(a, x, y)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyu(a float32, x, y []float32) {
@@ -66,13 +59,9 @@ func BenchmarkLF32AxpyUnitary50000(t *testing.B) { benchaxpyu(t, 50000, naiveaxp
 
 func benchaxpyut(t *testing.B, n int, f func(d []float32, a float32, x, y []float32)) {
 	x, y, z := x[:n], y[:n], z[:n]
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(z, a, x, y)
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyut(d []float32, a float32, x, y []float32) {
@@ -111,13 +100,9 @@ func benchaxpyinc(t *testing.B, ln, t_inc int, f func(alpha float32, x, y []floa
 	if t_inc < 0 {
 		idx = (-ln + 1) * t_inc
 	}
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(1, x, y, n, inc, inc, uintptr(idx), uintptr(idx))
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyinc(alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr) {
@@ -208,13 +193,9 @@ func benchaxpyincto(t *testing.B, ln, t_inc int, f func(dst []float32, incDst, i
 	if t_inc < 0 {
 		idx = (-ln + 1) * t_inc
 	}
-
-	t.ResetTimer()
 	for i := 0; i < t.N; i++ {
 		f(z, inc, uintptr(idx), 1, x, y, n, inc, inc, uintptr(idx), uintptr(idx))
 	}
-	t.StopTimer()
-	runtime.GC()
 }
 
 func naiveaxpyincto(dst []float32, incDst, idst uintptr, alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr) {

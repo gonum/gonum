@@ -81,7 +81,7 @@ func guardVector(v []float32, g float32, g_ln int) (guarded []float32) {
 	return guarded
 }
 
-func validGuard(v []float32, g float32, g_ln int) bool {
+func isValidGuard(v []float32, g float32, g_ln int) bool {
 	for i := 0; i < g_ln; i++ {
 		if v[i] != g || v[len(v)-1-i] != g {
 			return false
@@ -96,46 +96,48 @@ func same(x, y float32) bool {
 }
 
 func TestAxpyUnitary(t *testing.T) {
+	var x_gd, y_gd float32 = 1, 1
 	for j, v := range tests {
-		g_ln := 4 + j%2
-		v.x, v.y = guardVector(v.x, 1, g_ln), guardVector(v.y, 1, g_ln)
-		x, y := v.x[g_ln:len(v.x)-g_ln], v.y[g_ln:len(v.y)-g_ln]
+		xg_ln, yg_ln := 4+j%2, 4+j%3
+		v.x, v.y = guardVector(v.x, x_gd, xg_ln), guardVector(v.y, y_gd, yg_ln)
+		x, y := v.x[xg_ln:len(v.x)-xg_ln], v.y[yg_ln:len(v.y)-yg_ln]
 		AxpyUnitary(v.a, x, y)
 		for i := range v.ex {
 			if !same(y[i], v.ex[i]) {
-				t.Error("Test", j, "Unexpected result at", i, "Got:", int(y[i]), "Expected:", v.ex[i])
+				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", j, i, y[i], v.ex[i])
 			}
 		}
-		if !validGuard(v.x, 1, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.x[:g_ln], v.x[len(v.x)-g_ln:])
+		if !isValidGuard(v.x, x_gd, xg_ln) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", j, v.x[:xg_ln], v.x[len(v.x)-xg_ln:])
 		}
-		if !validGuard(v.y, 1, g_ln) {
-			t.Error("Test", j, "Guard violated in y vector", v.y[:g_ln], v.y[len(v.x)-g_ln:])
+		if !isValidGuard(v.y, y_gd, yg_ln) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", j, v.y[:yg_ln], v.y[len(v.y)-yg_ln:])
 		}
 	}
 }
 
 func TestAxpyUnitaryTo(t *testing.T) {
+	var x_gd, y_gd, dst_gd float32 = 1, 1, 0
 	for j, v := range tests {
-		g_ln := 4 + j%2
-		v.x, v.y = guardVector(v.x, 1, g_ln), guardVector(v.y, 1, g_ln)
-		v.dst = guardVector(v.dst, 0, g_ln)
-		x, y := v.x[g_ln:len(v.x)-g_ln], v.y[g_ln:len(v.y)-g_ln]
-		dst := v.dst[g_ln : len(v.dst)-g_ln]
+		xg_ln, yg_ln := 4+j%2, 4+j%3
+		v.x, v.y = guardVector(v.x, x_gd, xg_ln), guardVector(v.y, y_gd, yg_ln)
+		v.dst = guardVector(v.dst, dst_gd, xg_ln)
+		x, y := v.x[xg_ln:len(v.x)-xg_ln], v.y[yg_ln:len(v.y)-yg_ln]
+		dst := v.dst[xg_ln : len(v.dst)-xg_ln]
 		AxpyUnitaryTo(dst, v.a, x, y)
 		for i := range v.ex {
 			if !same(v.ex[i], dst[i]) {
-				t.Error("Test", j, "Unexpected result at", i, "Got:", dst[i], "Expected:", v.ex[i])
+				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", j, i, dst[i], v.ex[i])
 			}
 		}
-		if !validGuard(v.x, 1, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.x[:g_ln], v.x[len(v.x)-g_ln:])
+		if !isValidGuard(v.x, x_gd, xg_ln) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", j, v.x[:xg_ln], v.x[len(v.x)-xg_ln:])
 		}
-		if !validGuard(v.y, 1, g_ln) {
-			t.Error("Test", j, "Guard violated in y vector", v.y[:g_ln], v.y[len(v.x)-g_ln:])
+		if !isValidGuard(v.y, y_gd, yg_ln) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", j, v.y[:yg_ln], v.y[len(v.y)-yg_ln:])
 		}
-		if !validGuard(v.dst, 0, g_ln) {
-			t.Error("Test", j, "Guard violated in x vector", v.x[:g_ln], v.x[len(v.x)-g_ln:])
+		if !isValidGuard(v.dst, dst_gd, xg_ln) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", j, v.dst[:xg_ln], v.dst[len(v.dst)-xg_ln:])
 		}
 	}
 }
@@ -158,7 +160,7 @@ func guardIncVector(v []float32, g float32, incV uintptr, g_ln int) (guarded []f
 	return guarded
 }
 
-func validIncGuard(t *testing.T, v []float32, g float32, incV uintptr, g_ln int) {
+func checkValidIncGuard(t *testing.T, v []float32, g float32, incV uintptr, g_ln int) {
 	inc := int(incV)
 	s_ln := len(v) - 2*g_ln
 	for i := range v {
@@ -166,51 +168,50 @@ func validIncGuard(t *testing.T, v []float32, g float32, incV uintptr, g_ln int)
 		case same(v[i], g):
 			// Correct value
 		case i < g_ln:
-			t.Error("Front guard violated at", i, v[:g_ln])
+			t.Errorf("Front guard violated at %d %v", i, v[:g_ln])
 		case i > g_ln+s_ln:
-			t.Error("Back guard violated at", i-g_ln-s_ln, v[g_ln+s_ln:])
+			t.Errorf("Back guard violated at %d %v", i-g_ln-s_ln, v[g_ln+s_ln:])
 		case (i-g_ln)%inc == 0 && (i-g_ln)/inc < len(v):
+			// Ignore input values
 		default:
-			t.Error("Internal guard violated at", i-g_ln, v[g_ln:g_ln+s_ln])
+			t.Errorf("Internal guard violated at %d %v", i-g_ln, v[g_ln:g_ln+s_ln])
 		}
 	}
 }
 
 func TestAxpyInc(t *testing.T) {
+	var x_gd, y_gd float32 = 1, 1
 	for j, v := range tests {
-		g_ln := 4 + j%2
-		v.x, v.y = guardIncVector(v.x, 1, v.incX, g_ln), guardIncVector(v.y, 1, v.incY, g_ln)
-		x, y := v.x[g_ln:len(v.x)-g_ln], v.y[g_ln:len(v.y)-g_ln]
+		xg_ln, yg_ln := 4+j%2, 4+j%3
+		v.x, v.y = guardIncVector(v.x, x_gd, uintptr(v.incX), xg_ln), guardIncVector(v.y, y_gd, uintptr(v.incY), yg_ln)
+		x, y := v.x[xg_ln:len(v.x)-xg_ln], v.y[yg_ln:len(v.y)-yg_ln]
 		AxpyInc(v.a, x, y, uintptr(len(v.ex)), v.incX, v.incY, v.ix, v.iy)
 		for i := range v.ex {
 			if !same(y[i*int(v.incY)], v.ex[i]) {
-				t.Error("Test", j, "Unexpected result at", i, "Got:", y[i*int(v.incY)], "Expected:", v.ex[i])
-				t.Error("Result:", y)
-				t.Error("Expect:", v.ex)
+				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", j, i, y[i*int(v.incY)], v.ex[i])
 			}
 		}
-		validIncGuard(t, v.x, 1, v.incX, g_ln)
-		validIncGuard(t, v.y, 1, v.incY, g_ln)
+		checkValidIncGuard(t, v.x, x_gd, uintptr(v.incX), xg_ln)
+		checkValidIncGuard(t, v.y, y_gd, uintptr(v.incY), yg_ln)
 	}
 }
 
 func TestAxpyIncTo(t *testing.T) {
+	var x_gd, y_gd, dst_gd float32 = 1, 1, 0
 	for j, v := range tests {
-		g_ln := 4 + j%2
-		v.x, v.y = guardIncVector(v.x, 1, v.incX, g_ln), guardIncVector(v.y, 1, v.incY, g_ln)
-		v.dst = guardIncVector(v.dst, 0, v.incDst, g_ln)
-		x, y := v.x[g_ln:len(v.x)-g_ln], v.y[g_ln:len(v.y)-g_ln]
-		dst := v.dst[g_ln : len(v.dst)-g_ln]
+		xg_ln, yg_ln := 4+j%2, 4+j%3
+		v.x, v.y = guardIncVector(v.x, x_gd, uintptr(v.incX), xg_ln), guardIncVector(v.y, y_gd, uintptr(v.incY), yg_ln)
+		v.dst = guardIncVector(v.dst, dst_gd, uintptr(v.incDst), xg_ln)
+		x, y := v.x[xg_ln:len(v.x)-xg_ln], v.y[yg_ln:len(v.y)-yg_ln]
+		dst := v.dst[xg_ln : len(v.dst)-xg_ln]
 		AxpyIncTo(dst, v.incDst, v.idst, v.a, x, y, uintptr(len(v.ex)), v.incX, v.incY, v.ix, v.iy)
 		for i := range v.ex {
 			if !same(dst[i*int(v.incDst)], v.ex[i]) {
-				t.Error("Test", j, "Unexpected result at", i, "Got:", dst[i*int(v.incDst)], "Expected:", v.ex[i])
-				t.Error(v.dst)
-				t.Error(v.ex)
+				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", j, i, dst[i*int(v.incDst)], v.ex[i])
 			}
 		}
-		validIncGuard(t, v.x, 1, v.incX, g_ln)
-		validIncGuard(t, v.y, 1, v.incY, g_ln)
-		validIncGuard(t, v.dst, 0, v.incDst, g_ln)
+		checkValidIncGuard(t, v.x, x_gd, uintptr(v.incX), xg_ln)
+		checkValidIncGuard(t, v.y, y_gd, uintptr(v.incY), yg_ln)
+		checkValidIncGuard(t, v.dst, dst_gd, uintptr(v.incDst), xg_ln)
 	}
 }

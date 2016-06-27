@@ -67,7 +67,7 @@ TEXT ·AxpyIncTo(SB), NOSPLIT, $0
 axpyi_loop: // do {
 	MOVSD (SI), X3       // X_i = { imag(x[i]), real(x[i]) }
 	MOVSD (SI)(R8*1), X5
-	LEAQ  (SI)(R8*2), SI
+	LEAQ  (SI)(R8*2), SI // SI = &(SI[incX*2])
 	MOVSD (SI), X7
 	MOVSD (SI)(R8*1), X9
 
@@ -106,7 +106,7 @@ axpyi_loop: // do {
 	// X_i = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
 	MOVSD (DX), X2
 	MOVSD (DX)(R9*1), X4
-	LEAQ  (DX)(R9*2), DX
+	LEAQ  (DX)(R9*2), DX // DX = &(DX[incY*2])
 	MOVSD (DX), X6
 	MOVSD (DX)(R9*1), X8
 	ADDPS X2, X3
@@ -116,7 +116,7 @@ axpyi_loop: // do {
 
 	MOVSD X3, (DI)        // y[i] = X_i
 	MOVSD X5, (DI)(R10*1)
-	LEAQ  (DI)(R10*2), DI
+	LEAQ  (DI)(R10*2), DI // DI = &(DI[incDst])
 	MOVSD X7, (DI)
 	MOVSD X9, (DI)(R10*1)
 	LEAQ  (SI)(R8*2), SI  // SI = &(SI[incX*2])

@@ -18,12 +18,12 @@ TEXT ·AxpyInc(SB), NOSPLIT, $0
 	LEAQ  (SI)(R8*4), SI    // SI = &(x[ix])
 	LEAQ  (DI)(R9*4), DI    // DI = &(y[iy])
 	MOVQ  DI, DX            // DX := DI   Read Pointer for y
-	MOVQ  incX+64(FP), R8   // Incrementors*4 for easy iteration (ADDQ)
-	SHLQ  $2, R8
-	MOVQ  incY+72(FP), R9
-	SHLQ  $2, R9
+	MOVQ  incX+64(FP), R8   // R8 := incX
+	SHLQ  $2, R8            // R8 *= sizeof(float32)
+	MOVQ  incY+72(FP), R9   // R9 := incY
+	SHLQ  $2, R9            // R9 *= sizeof(float32)
 	MOVSS alpha+0(FP), X0   // X0 = alpha
-	MOVSS X0, X1
+	MOVSS X0, X1            // X1 := X0  // for pipelining
 	MOVQ  CX, BX
 	ANDQ  $3, BX            // BX = CX % 4
 	SHRQ  $2, CX            // CX = floor( CX / 4 )
@@ -32,7 +32,7 @@ TEXT ·AxpyInc(SB), NOSPLIT, $0
 axpyi_loop: // Loop unrolled 4x   do {
 	MOVSS (SI), X2       // X_i = x[i]
 	MOVSS (SI)(R8*1), X3
-	LEAQ  (SI)(R8*2), SI // SI = &(x[i+2])
+	LEAQ  (SI)(R8*2), SI // SI = &(SI[incX*2])
 	MOVSS (SI), X4
 	MOVSS (SI)(R8*1), X5
 	MULSS X1, X2         // X_i *= a
@@ -41,17 +41,17 @@ axpyi_loop: // Loop unrolled 4x   do {
 	MULSS X0, X5
 	ADDSS (DX), X2       // X_i += y[i]
 	ADDSS (DX)(R9*1), X3
-	LEAQ  (DX)(R9*2), DX // DX = &(y[i+2])
+	LEAQ  (DX)(R9*2), DX // DX = &(DX[incY*2])
 	ADDSS (DX), X4
 	ADDSS (DX)(R9*1), X5
 	MOVSS X2, (DI)       // y[i] = X_i
 	MOVSS X3, (DI)(R9*1)
-	LEAQ  (DI)(R9*2), DI // DI = &(y[i+2])
+	LEAQ  (DI)(R9*2), DI // DI = &(DI[incY*2])
 	MOVSS X4, (DI)
 	MOVSS X5, (DI)(R9*1)
-	LEAQ  (SI)(R8*2), SI // Increment addresses
-	LEAQ  (DX)(R9*2), DX
-	LEAQ  (DI)(R9*2), DI
+	LEAQ  (SI)(R8*2), SI // SI = &(SI[incX*2])  // Increment addresses
+	LEAQ  (DX)(R9*2), DX // DX = &(DX[incY*2])
+	LEAQ  (DI)(R9*2), DI // DI = &(DI[incY*2])
 	LOOP  axpyi_loop     // } while --CX > 0
 	CMPQ  BX, $0         // if BX == 0 { return }
 	JE    axpyi_end
@@ -60,14 +60,13 @@ axpyi_tail_start: // Reset loop registers
 	MOVQ BX, CX // Loop counter: CX = BX
 
 axpyi_tail: // do {
-	MOVSS (SI), X2       // X2 = x[i]
-	MULSS X1, X2         // X2 *= a
-	ADDSS (DX), X2       // X2 += y[i]
-	MOVSS X2, (DI)       // y[i] = X2
-	LEAQ  (SI)(R8*1), SI // SI = &(x[incX])
-	LEAQ  (DX)(R9*1), DX // DX = &(y[incY])
-	LEAQ  (DI)(R9*1), DI // DI = &(y[incY])
-	LOOP  axpyi_tail     // } while --CX > 0
+	MOVSS (SI), X2   // X2 = x[i]
+	MULSS X1, X2     // X2 *= a
+	ADDSS (DI), X2   // X2 += y[i]
+	MOVSS X2, (DI)   // y[i] = X2
+	ADDQ  R8, SI     // SI = &(SI[incX])
+	ADDQ  R9, DI     // DI = &(DI[incY])
+	LOOP  axpyi_tail // } while --CX > 0
 
 axpyi_end:
 	RET

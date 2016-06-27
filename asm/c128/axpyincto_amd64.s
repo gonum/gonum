@@ -32,21 +32,21 @@ TEXT ·AxpyIncTo(SB), NOSPLIT, $0
 	MOVQ   n+104(FP), CX      // CX = n
 	CMPQ   CX, $0             // if n==0 { return }
 	JE     axpyi_end
-	MOVQ   ix+128(FP), R8     // Load the first index
-	SHLQ   $1, R8             // Double to adjust for 16-byte size
-	MOVQ   iy+136(FP), R9
-	SHLQ   $1, R9
-	MOVQ   idst+32(FP), R10
-	SHLQ   $1, R10
-	LEAQ   (SI)(R8*8), SI     // SI = &(x[ix])
-	LEAQ   (DX)(R9*8), DX     // DX = &(y[iy])
-	LEAQ   (DI)(R10*8), DI    // DI = &(dst[idst])
-	MOVQ   incX+112(FP), R8   // R8 = incX * sizeof(complex128)
-	SHLQ   $4, R8             // Incrementors*16 for easy iteration (ADDQ)
-	MOVQ   incY+120(FP), R9
-	SHLQ   $4, R9
-	MOVQ   incDst+24(FP), R10
-	SHLQ   $4, R10
+	MOVQ   ix+128(FP), R8     // R8 := ix  // Load the first index
+	SHLQ   $4, R8             // R8 *= sizeof(complex128)
+	MOVQ   iy+136(FP), R9     // R9 := iy
+	SHLQ   $4, R9             // R9 *= sizeof(complex128)
+	MOVQ   idst+32(FP), R10   // R10 := idst
+	SHLQ   $4, R10            // R10 *= sizeof(complex128)
+	LEAQ   (SI)(R8*1), SI     // SI = &(x[ix])
+	LEAQ   (DX)(R9*1), DX     // DX = &(y[iy])
+	LEAQ   (DI)(R10*1), DI    // DI = &(dst[idst])
+	MOVQ   incX+112(FP), R8   // R8 := incX
+	SHLQ   $4, R8             // R8 *= sizeof(complex128)
+	MOVQ   incY+120(FP), R9   // R9 := incY
+	SHLQ   $4, R9             // R9 *= sizeof(complex128)
+	MOVQ   incDst+24(FP), R10 // R10 := incDst
+	SHLQ   $4, R10            // R10 *= sizeof(complex128)
 	MOVUPS alpha+40(FP), X0   // X0 := { imag(a), real(a) }
 	MOVAPS X0, X1
 	SHUFPD $0x1, X1, X1       // X1 := { real(a), imag(a) }

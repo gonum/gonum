@@ -31,16 +31,17 @@ TEXT ·AxpyInc(SB), NOSPLIT, $0
 	MOVQ   n+64(FP), CX      // CX := n
 	CMPQ   CX, $0            // if n==0 { return }
 	JE     axpyi_end
-	MOVQ   ix+88(FP), R8     // Load the first index
-	SHLQ   $1, R8            // Double to adjust for 16-byte size
-	MOVQ   iy+96(FP), R9
-	SHLQ   $1, R9
-	LEAQ   (SI)(R8*8), SI    // SI = &(x[ix])
-	LEAQ   (DI)(R9*8), DI    // DI = &(y[iy])
-	MOVQ   incX+72(FP), R8   // Incrementors*16 for easy iteration (ADDQ)
-	SHLQ   $4, R8
-	MOVQ   incY+80(FP), R9
-	SHLQ   $4, R9
+	MOVQ   ix+88(FP), R8     // R8 := ix  // Load the first index
+	SHLQ   $4, R8            // R8 *= sizeof(complex128)
+	MOVQ   iy+96(FP), R9     // R9 := iy
+	SHLQ   $4, R9            // R9 *= sizeof(complex128)
+	LEAQ   (SI)(R8*1), SI    // SI = &(x[ix])
+	LEAQ   (DI)(R9*1), DI    // DI = &(y[iy])
+	MOVQ   DI, DX            // DX := DI      // Separate Read/Write pointers
+	MOVQ   incX+72(FP), R8   // R8 := incX
+	SHLQ   $4, R8            // R8 *= sizeof(complex128)
+	MOVQ   incY+80(FP), R9   // R9 := iy
+	SHLQ   $4, R9            // R9 *= sizeof(complex128)
 	MOVUPS alpha+0(FP), X0   // X0 := { imag(a), real(a) }
 	MOVAPS X0, X1
 	SHUFPD $0x1, X1, X1      // X1 := { real(a), imag(a) }
@@ -91,16 +92,18 @@ axpyi_loop: // do {
 	ADDSUBPD_X8_X9
 
 	// X_(i+1) = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
-	ADDPD  (DI), X3
-	ADDPD  (DI)(R9*1), X5
-	MOVUPS X3, (DI)       // y[i] = X_(i+1)
+	ADDPD  (DX), X3
+	ADDPD  (DX)(R9*1), X5
+	LEAQ   (DX)(R9*2), DX // DX = &(DX[incY*2])
+	ADDPD  (DX), X7
+	ADDPD  (DX)(R9*1), X9
+	MOVUPS X3, (DI)       // dst[i] = X_(i+1)
 	MOVUPS X5, (DI)(R9*1)
-	LEAQ   (DI)(R9*2), DI // DI = &(DI[incY*2])
-	ADDPD  (DI), X7
-	ADDPD  (DI)(R9*1), X9
+	LEAQ   (DI)(R9*2), DI
 	MOVUPS X7, (DI)
 	MOVUPS X9, (DI)(R9*1)
 	LEAQ   (SI)(R8*2), SI // SI = &(SI[incX*2])
+	LEAQ   (DX)(R9*2), DX // DX = &(DX[incY*2])
 	LEAQ   (DI)(R9*2), DI // DI = &(DI[incY*2])
 	DECQ   BX
 	JNZ    axpyi_loop     // } while --BX > 0

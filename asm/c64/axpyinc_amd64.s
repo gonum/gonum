@@ -41,14 +41,15 @@ TEXT ·AxpyInc(SB), NOSPLIT, $0
 	MOVQ   n+56(FP), CX      // CX := n
 	CMPQ   CX, $0            // if n==0 { return }
 	JE     axpyi_end
-	MOVQ   ix+80(FP), R8     // Load the first index
-	MOVQ   iy+88(FP), R9
+	MOVQ   ix+80(FP), R8     // R8 := ix
+	MOVQ   iy+88(FP), R9     // R9 := iy
 	LEAQ   (SI)(R8*8), SI    // SI = &(x[ix])
 	LEAQ   (DI)(R9*8), DI    // DI = &(y[iy])
-	MOVQ   incX+64(FP), R8   // Incrementors*8 for easy iteration (ADDQ)
-	SHLQ   $3, R8
-	MOVQ   incY+72(FP), R9
-	SHLQ   $3, R9
+	MOVQ   DI, DX            // DX := DI    // Read/Write pointers
+	MOVQ   incX+64(FP), R8   // R8 := incX
+	SHLQ   $3, R8            // R8 *= sizeof(complex64)
+	MOVQ   incY+72(FP), R9   // R9 := incY
+	SHLQ   $3, R9            // R9 *= sizeof(complex64)
 	MOVSD  alpha+0(FP), X0   // X0 := { 0, 0, imag(a), real(a) }
 	MOVAPS X0, X1
 	SHUFPS $0x11, X1, X1     // X1 := { 0, 0, real(a), imag(a) }
@@ -62,7 +63,7 @@ TEXT ·AxpyInc(SB), NOSPLIT, $0
 axpyi_loop: // do {
 	MOVSD (SI), X3       // X_i = { imag(x[i+1]), real(x[i+1]) }
 	MOVSD (SI)(R8*1), X5
-	LEAQ  (SI)(R8*2), SI
+	LEAQ  (SI)(R8*2), SI // SI = &(SI[incX*2])
 	MOVSD (SI), X7
 	MOVSD (SI)(R8*1), X9
 
@@ -98,22 +99,25 @@ axpyi_loop: // do {
 	ADDSUBPS_X6_X7
 	ADDSUBPS_X8_X9
 
-	// X_i = { imag(result[i])   + imag(y[i]),   real(result[i])   + real(y[i])  }
-	MOVSD (DI), X2
-	MOVSD (DI)(R9*1), X4
+	// X_i = { imag(result[i]) + imag(y[i]), real(result[i]) + real(y[i]) }
+	MOVSD (DX), X2
+	MOVSD (DX)(R9*1), X4
+	LEAQ  (DX)(R9*2), DX // DX = &(DX[incY*2])
+	MOVSD (DX), X6
+	MOVSD (DX)(R9*1), X8
 	ADDPS X2, X3
 	ADDPS X4, X5
-	MOVSD X3, (DI)       // y[i] = X_i
-	MOVSD X5, (DI)(R9*1)
-	LEAQ  (DI)(R9*2), DI
-	MOVSD (DI), X6
-	MOVSD (DI)(R9*1), X8
 	ADDPS X6, X7
 	ADDPS X8, X9
-	MOVSD X7, (DI)       // Write result back to dst
+
+	MOVSD X3, (DI)       // y[i] = X_i
+	MOVSD X5, (DI)(R9*1)
+	LEAQ  (DI)(R9*2), DI // DI = &(DI[incDst])
+	MOVSD X7, (DI)
 	MOVSD X9, (DI)(R9*1)
 	LEAQ  (SI)(R8*2), SI // SI = &(SI[incX*2])
-	LEAQ  (DI)(R9*2), DI // DI = &(DI[incY*2])
+	LEAQ  (DX)(R9*2), DX // DX = &(DX[incY*2])
+	LEAQ  (DI)(R9*2), DI // DI = &(DI[incDst])
 	DECQ  BX
 	JNZ   axpyi_loop     // }  while --BX > 0
 	CMPQ  CX, $0         // if CX == 0 { return }

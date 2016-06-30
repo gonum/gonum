@@ -17,131 +17,75 @@ import (
 	"github.com/gonum/graph/simple"
 )
 
-var communityUndirectedQTests = []struct {
+var communityDirectedQTests = []struct {
 	name       string
 	g          []set
 	structures []structure
 
 	wantLevels []level
 }{
-	// The java reference implementation is available from http://www.ludowaltman.nl/slm/.
 	{
-		name: "unconnected",
-		g:    unconnected,
+		name: "simple_directed",
+		g: []set{
+			0: linksTo(1),
+			1: linksTo(0, 4),
+			2: linksTo(1),
+			3: linksTo(0, 4),
+			4: linksTo(2),
+		},
+		// community structure and modularity calculated by C++ implementation: louvain igraph.
+		// Note that louvain igraph returns Q as an unscaled value.
 		structures: []structure{
 			{
 				resolution: 1,
 				memberships: []set{
-					0: linksTo(0),
-					1: linksTo(1),
-					2: linksTo(2),
-					3: linksTo(3),
-					4: linksTo(4),
-					5: linksTo(5),
+					0: linksTo(0, 1),
+					1: linksTo(2, 3, 4),
 				},
-				want: math.NaN(),
+				want: 0.5714285714285716 / 7,
+				tol:  1e-10,
 			},
 		},
 		wantLevels: []level{
 			{
-				q: math.Inf(-1), // Here math.Inf(-1) is used as a place holder for NaN to allow use of reflect.DeepEqual.
+				communities: [][]graph.Node{
+					{simple.Node(0), simple.Node(1)},
+					{simple.Node(2), simple.Node(3), simple.Node(4)},
+				},
+				q: 0.5714285714285716 / 7,
+			},
+			{
 				communities: [][]graph.Node{
 					{simple.Node(0)},
 					{simple.Node(1)},
 					{simple.Node(2)},
 					{simple.Node(3)},
 					{simple.Node(4)},
-					{simple.Node(5)},
 				},
-			},
-		},
-	},
-	{
-		name: "small_dumbell",
-		g:    smallDumbell,
-		structures: []structure{
-			{
-				resolution: 1,
-				// community structure and modularity calculated by java reference implementation.
-				memberships: []set{
-					0: linksTo(0, 1, 2),
-					1: linksTo(3, 4, 5),
-				},
-				want: 0.357, tol: 1e-3,
-			},
-			{
-				resolution: 1,
-				memberships: []set{
-					0: linksTo(0, 1, 2, 3, 4, 5),
-				},
-				// theoretical expectation.
-				want: 0, tol: 1e-14,
-			},
-		},
-		wantLevels: []level{
-			{
-				q: 0.35714285714285715,
-				communities: [][]graph.Node{
-					{simple.Node(0), simple.Node(1), simple.Node(2)},
-					{simple.Node(3), simple.Node(4), simple.Node(5)},
-				},
-			},
-			{
-				q: -0.17346938775510204,
-				communities: [][]graph.Node{
-					{simple.Node(0)},
-					{simple.Node(1)},
-					{simple.Node(2)},
-					{simple.Node(3)},
-					{simple.Node(4)},
-					{simple.Node(5)},
-				},
+				q: -1.2857142857142856 / 7,
 			},
 		},
 	},
 	{
 		name: "zachary",
 		g:    zachary,
+		// community structure and modularity calculated by C++ implementation: louvain igraph.
+		// Note that louvain igraph returns Q as an unscaled value.
 		structures: []structure{
 			{
 				resolution: 1,
-				// community structure and modularity from doi: 10.1140/epjb/e2013-40829-0
 				memberships: []set{
 					0: linksTo(0, 1, 2, 3, 7, 11, 12, 13, 17, 19, 21),
 					1: linksTo(4, 5, 6, 10, 16),
 					2: linksTo(8, 9, 14, 15, 18, 20, 22, 26, 29, 30, 32, 33),
 					3: linksTo(23, 24, 25, 27, 28, 31),
 				},
-				// Noted to be the optimal modularisation in the paper above.
-				want: 0.4198, tol: 1e-4,
-			},
-			{
-				resolution: 0.5,
-				// community structure and modularity calculated by java reference implementation.
-				memberships: []set{
-					0: linksTo(0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 16, 17, 19, 21),
-					1: linksTo(8, 14, 15, 18, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33),
-				},
-				want: 0.6218, tol: 1e-3,
-			},
-			{
-				resolution: 2,
-				// community structure and modularity calculated by java reference implementation.
-				memberships: []set{
-					0: linksTo(14, 18, 20, 22, 32, 33, 15),
-					1: linksTo(0, 1, 11, 17, 19, 21),
-					2: linksTo(2, 3, 7, 9, 12, 13),
-					3: linksTo(4, 5, 6, 10, 16),
-					4: linksTo(24, 25, 28, 31),
-					5: linksTo(23, 26, 27, 29),
-					6: linksTo(8, 30),
-				},
-				want: 0.1645, tol: 1e-3,
+				want: 34.3417721519 / 79 /* 5->6 and 6->5 because of co-equal rank */, tol: 1e-4,
 			},
 		},
 		wantLevels: []level{
 			{
-				q: 0.4197896120973044,
+				q: 0.43470597660631316,
 				communities: [][]graph.Node{
 					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(7), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(17), simple.Node(19), simple.Node(21)},
 					{simple.Node(4), simple.Node(5), simple.Node(6), simple.Node(10), simple.Node(16)},
@@ -150,17 +94,19 @@ var communityUndirectedQTests = []struct {
 				},
 			},
 			{
-				q: 0.39907955292570674,
+				q: 0.3911232174331037,
 				communities: [][]graph.Node{
 					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(7), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(17), simple.Node(19), simple.Node(21)},
 					{simple.Node(4), simple.Node(10)},
 					{simple.Node(5), simple.Node(6), simple.Node(16)},
-					{simple.Node(8), simple.Node(9), simple.Node(14), simple.Node(15), simple.Node(18), simple.Node(20), simple.Node(22), simple.Node(26), simple.Node(29), simple.Node(30), simple.Node(32), simple.Node(33)},
+					{simple.Node(8), simple.Node(30)},
+					{simple.Node(9), simple.Node(14), simple.Node(15), simple.Node(18), simple.Node(20), simple.Node(22), simple.Node(32), simple.Node(33)},
 					{simple.Node(23), simple.Node(24), simple.Node(25), simple.Node(27), simple.Node(28), simple.Node(31)},
+					{simple.Node(26), simple.Node(29)},
 				},
 			},
 			{
-				q: -0.04980276134122286,
+				q: -0.014580996635154624,
 				communities: [][]graph.Node{
 					{simple.Node(0)},
 					{simple.Node(1)},
@@ -203,36 +149,37 @@ var communityUndirectedQTests = []struct {
 	{
 		name: "blondel",
 		g:    blondel,
+		// community structure and modularity calculated by C++ implementation: louvain igraph.
+		// Note that louvain igraph returns Q as an unscaled value.
 		structures: []structure{
 			{
 				resolution: 1,
-				// community structure and modularity calculated by java reference implementation.
 				memberships: []set{
 					0: linksTo(0, 1, 2, 3, 4, 5, 6, 7),
 					1: linksTo(8, 9, 10, 11, 12, 13, 14, 15),
 				},
-				want: 0.3922, tol: 1e-4,
+				want: 11.1428571429 / 28, tol: 1e-4,
 			},
 		},
 		wantLevels: []level{
 			{
-				q: 0.39221938775510207,
+				q: 0.3979591836734694,
 				communities: [][]graph.Node{
 					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(4), simple.Node(5), simple.Node(6), simple.Node(7)},
 					{simple.Node(8), simple.Node(9), simple.Node(10), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(14), simple.Node(15)},
 				},
 			},
 			{
-				q: 0.34630102040816324,
+				q: 0.32525510204081637,
 				communities: [][]graph.Node{
-					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(4), simple.Node(5)},
-					{simple.Node(3), simple.Node(6), simple.Node(7)},
-					{simple.Node(8), simple.Node(9), simple.Node(10), simple.Node(12), simple.Node(14), simple.Node(15)},
-					{simple.Node(11), simple.Node(13)},
+					{simple.Node(0), simple.Node(3), simple.Node(5), simple.Node(7)},
+					{simple.Node(1), simple.Node(2), simple.Node(4), simple.Node(6)},
+					{simple.Node(8), simple.Node(10), simple.Node(11), simple.Node(13), simple.Node(15)},
+					{simple.Node(9), simple.Node(12), simple.Node(14)},
 				},
 			},
 			{
-				q: -0.07142857142857144,
+				q: -0.022959183673469385,
 				communities: [][]graph.Node{
 					{simple.Node(0)},
 					{simple.Node(1)},
@@ -256,9 +203,9 @@ var communityUndirectedQTests = []struct {
 	},
 }
 
-func TestCommunityQUndirected(t *testing.T) {
-	for _, test := range communityUndirectedQTests {
-		g := simple.NewUndirectedGraph(0, 0)
+func TestCommunityQDirected(t *testing.T) {
+	for _, test := range communityDirectedQTests {
+		g := simple.NewDirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -287,10 +234,10 @@ func TestCommunityQUndirected(t *testing.T) {
 	}
 }
 
-func TestCommunityDeltaQUndirected(t *testing.T) {
+func TestCommunityDeltaQDirected(t *testing.T) {
 tests:
-	for _, test := range communityUndirectedQTests {
-		g := simple.NewUndirectedGraph(0, 0)
+	for _, test := range communityDirectedQTests {
+		g := simple.NewDirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -315,7 +262,7 @@ tests:
 
 			before := Q(g, communities, structure.resolution)
 
-			l := newUndirectedLocalMover(reduceUndirected(g, nil), communities, structure.resolution)
+			l := newDirectedLocalMover(reduceDirected(g, nil), communities, structure.resolution)
 			if l == nil {
 				if !math.IsNaN(before) {
 					t.Errorf("unexpected nil localMover with non-NaN Q graph: Q=%.4v", before)
@@ -390,10 +337,10 @@ tests:
 	}
 }
 
-func TestReduceQConsistencyUndirected(t *testing.T) {
+func TestReduceQConsistencyDirected(t *testing.T) {
 tests:
-	for _, test := range communityUndirectedQTests {
-		g := simple.NewUndirectedGraph(0, 0)
+	for _, test := range communityDirectedQTests {
+		g := simple.NewDirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -420,7 +367,7 @@ tests:
 			gQ := Q(g, communities, structure.resolution)
 			gQnull := Q(g, nil, 1)
 
-			cg0 := reduceUndirected(g, nil)
+			cg0 := reduceDirected(g, nil)
 			cg0Qnull := Q(cg0, cg0.Structure(), 1)
 			if !floats.EqualWithinAbsOrRel(gQnull, cg0Qnull, structure.tol, structure.tol) {
 				t.Errorf("disgagreement between null Q from method: %v and function: %v", cg0Qnull, gQnull)
@@ -430,7 +377,7 @@ tests:
 				t.Errorf("unexpected Q result after initial conversion: got: %v want :%v", gQ, cg0Q)
 			}
 
-			cg1 := reduceUndirected(cg0, communities)
+			cg1 := reduceDirected(cg0, communities)
 			cg1Q := Q(cg1, cg1.Structure(), structure.resolution)
 			if !floats.EqualWithinAbsOrRel(gQ, cg1Q, structure.tol, structure.tol) {
 				t.Errorf("unexpected Q result after initial condensation: got: %v want :%v", gQ, cg1Q)
@@ -439,7 +386,7 @@ tests:
 	}
 }
 
-var localUndirectedMoveTests = []struct {
+var localDirectedMoveTests = []struct {
 	name       string
 	g          []set
 	structures []moveStructures
@@ -486,9 +433,9 @@ var localUndirectedMoveTests = []struct {
 	},
 }
 
-func TestMoveLocalUndirected(t *testing.T) {
+func TestMoveLocalDirected(t *testing.T) {
 	for _, test := range localUndirectedMoveTests {
-		g := simple.NewUndirectedGraph(0, 0)
+		g := simple.NewDirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -508,9 +455,9 @@ func TestMoveLocalUndirected(t *testing.T) {
 				sort.Sort(ordered.ByID(communities[i]))
 			}
 
-			r := reduceUndirected(reduceUndirected(g, nil), communities)
+			r := reduceDirected(reduceDirected(g, nil), communities)
 
-			l := newUndirectedLocalMover(r, r.communities, structure.resolution)
+			l := newDirectedLocalMover(r, r.communities, structure.resolution)
 			for _, n := range structure.targetNodes {
 				dQ, dst, src := l.deltaQ(n)
 				if dQ > 0 {
@@ -527,11 +474,11 @@ func TestMoveLocalUndirected(t *testing.T) {
 	}
 }
 
-func TestLouvain(t *testing.T) {
+func TestLouvainDirected(t *testing.T) {
 	const louvainIterations = 20
 
-	for _, test := range communityUndirectedQTests {
-		g := simple.NewUndirectedGraph(0, 0)
+	for _, test := range communityDirectedQTests {
+		g := simple.NewDirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -555,14 +502,14 @@ func TestLouvain(t *testing.T) {
 		sort.Sort(ordered.BySliceIDs(want))
 
 		var (
-			got   *ReducedUndirected
+			got   *ReducedDirected
 			bestQ = math.Inf(-1)
 		)
 		// Louvain is randomised so we do this to
 		// ensure the level tests are consistent.
 		src := rand.New(rand.NewSource(1))
 		for i := 0; i < louvainIterations; i++ {
-			r := Louvain(g, 1, src)
+			r := LouvainDirected(g, 1, src)
 			if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
 				bestQ = q
 				got = r
@@ -605,7 +552,7 @@ func TestLouvain(t *testing.T) {
 				}
 				sort.Sort(ordered.BySliceIDs(communities))
 			} else {
-				communities = reduceUndirected(g, nil).Communities()
+				communities = reduceDirected(g, nil).Communities()
 			}
 			q := Q(p, nil, 1)
 			if math.IsNaN(q) {
@@ -620,8 +567,8 @@ func TestLouvain(t *testing.T) {
 	}
 }
 
-func TestNonContiguousUndirected(t *testing.T) {
-	g := simple.NewUndirectedGraph(0, 0)
+func TestNonContiguousDirected(t *testing.T) {
+	g := simple.NewDirectedGraph(0, 0)
 	for _, e := range []simple.Edge{
 		{F: simple.Node(0), T: simple.Node(1), W: 1},
 		{F: simple.Node(4), T: simple.Node(5), W: 1},
@@ -636,13 +583,13 @@ func TestNonContiguousUndirected(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		Louvain(g, 1, nil)
+		LouvainDirected(g, 1, nil)
 	}()
 }
 
-func BenchmarkLouvain(b *testing.B) {
+func BenchmarkLouvainDirected(b *testing.B) {
 	src := rand.New(rand.NewSource(1))
 	for i := 0; i < b.N; i++ {
-		Louvain(dupGraph, 1, src)
+		LouvainDirected(dupGraphDirected, 1, src)
 	}
 }

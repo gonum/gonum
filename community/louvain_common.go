@@ -5,7 +5,35 @@
 // Package community provides graph community detection functions.
 package community
 
-import "github.com/gonum/graph"
+import (
+	"fmt"
+
+	"github.com/gonum/graph"
+)
+
+// Q returns the modularity Q score of the graph g subdivided into the
+// given communities at the given resolution. If communities is nil, the
+// unclustered modularity score is returned. The resolution parameter
+// is γ as defined in Reichardt and Bornholdt doi:10.1103/PhysRevE.74.016110.
+// Q will panic if g has any edge with negative edge weight.
+//
+// If g is undirected, Q is calculated according to
+//  Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j),
+// If g is directed, it is calculated according to
+//  Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j).
+//
+// graph.Undirect may be used as a shim to allow calculation of Q for
+// directed graphs with the undirected modularity function.
+func Q(g graph.Graph, communities [][]graph.Node, resolution float64) float64 {
+	switch g := g.(type) {
+	case graph.Undirected:
+		return qUndirected(g, communities, resolution)
+	case graph.Directed:
+		return qDirected(g, communities, resolution)
+	default:
+		panic(fmt.Sprintf("community: invalid graph type: %T", g))
+	}
+}
 
 // community is a reduced graph node describing its membership.
 type community struct {

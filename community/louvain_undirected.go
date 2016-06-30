@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package community provides graph community detection functions.
 package community
 
 import (
@@ -75,20 +74,20 @@ func Louvain(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUnd
 	// See louvain.tex for a detailed description
 	// of the algorithm used here.
 
-	c := reduce(g, nil)
+	c := reduceUndirected(g, nil)
 	rnd := rand.Intn
 	if src != nil {
 		rnd = src.Intn
 	}
 	for {
-		l := newLocalMover(c, c.communities, resolution)
+		l := newUndirectedLocalMover(c, c.communities, resolution)
 		if l == nil {
 			return c
 		}
 		if done := l.localMovingHeuristic(rnd); done {
 			return c
 		}
-		c = reduce(c, l.communities)
+		c = reduceUndirected(c, l.communities)
 	}
 }
 
@@ -164,11 +163,11 @@ func (g *ReducedUndirected) Expanded() *ReducedUndirected {
 	return g.parent
 }
 
-// reduce returns a reduced graph constructed from g divided
+// reduceUndirected returns a reduced graph constructed from g divided
 // into the given communities. The communities value is mutated
-// by the call to reduce. If communities is nil and g is a
+// by the call to reduceUndirected. If communities is nil and g is a
 // ReducedUndirected, it is returned unaltered.
-func reduce(g graph.Undirected, communities [][]graph.Node) *ReducedUndirected {
+func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUndirected {
 	if communities == nil {
 		if r, ok := g.(*ReducedUndirected); ok {
 			return r
@@ -359,26 +358,8 @@ func (g *ReducedUndirected) Weight(x, y graph.Node) (w float64, ok bool) {
 	return w, ok
 }
 
-type community struct {
-	id int
-
-	nodes  []graph.Node
-	weight float64
-}
-
-func (n community) ID() int { return n.id }
-
-type edge struct {
-	from, to community
-	weight   float64
-}
-
-func (e edge) From() graph.Node { return e.from }
-func (e edge) To() graph.Node   { return e.to }
-func (e edge) Weight() float64  { return e.weight }
-
-// localMover is a step in graph modularity optimization.
-type localMover struct {
+// undirectedLocalMover is a step in graph modularity optimization.
+type undirectedLocalMover struct {
 	g *ReducedUndirected
 
 	// nodes is the set of working nodes.
@@ -421,13 +402,13 @@ type localMover struct {
 	changed bool
 }
 
-// newLocalMover returns a new localMover initialized with the graph g,
-// a set of communities and a modularity resolution parameter. The node
-// IDs of g must be contiguous in [0,n) where n is the number of nodes.
+// newUndirectedLocalMover returns a new undirectedLocalMover initialized with
+// the graph g, a set of communities and a modularity resolution parameter. The
+// node IDs of g must be contiguous in [0,n) where n is the number of nodes.
 // If g has a zero edge weight sum, nil is returned.
-func newLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution float64) *localMover {
+func newUndirectedLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution float64) *undirectedLocalMover {
 	nodes := g.Nodes()
-	l := localMover{
+	l := undirectedLocalMover{
 		g:            g,
 		nodes:        nodes,
 		edgeWeightOf: make([]float64, len(nodes)),
@@ -463,9 +444,9 @@ func newLocalMover(g *ReducedUndirected, communities [][]graph.Node, resolution 
 
 // localMovingHeuristic performs the Louvain local moving heuristic until
 // no further moves can be made. It returns a boolean indicating that the
-// localMover has not made any improvement to the community structure and
-// so the Louvain algorithm is done.
-func (l *localMover) localMovingHeuristic(rnd func(int) int) (done bool) {
+// undirectedLocalMover has not made any improvement to the community
+// structure and so the Louvain algorithm is done.
+func (l *undirectedLocalMover) localMovingHeuristic(rnd func(int) int) (done bool) {
 	for {
 		l.shuffle(rnd)
 		for _, n := range l.nodes {
@@ -482,9 +463,9 @@ func (l *localMover) localMovingHeuristic(rnd func(int) int) (done bool) {
 }
 
 // shuffle performs a Fisher-Yates shuffle on the nodes held by the
-// localMover using the random source rnd which should return an
-// integer in the range [0,n).
-func (l *localMover) shuffle(rnd func(n int) int) {
+// undirectedLocalMover using the random source rnd which should return
+// an integer in the range [0,n).
+func (l *undirectedLocalMover) shuffle(rnd func(n int) int) {
 	l.moved = false
 	for i := range l.nodes[:len(l.nodes)-1] {
 		j := i + rnd(len(l.nodes)-i)
@@ -492,14 +473,8 @@ func (l *localMover) shuffle(rnd func(n int) int) {
 	}
 }
 
-// commIdx is an index of a node in a community held by a localMover.
-type commIdx struct {
-	community int
-	node      int
-}
-
 // move moves the node at src to the community at dst.
-func (l *localMover) move(dst int, src commIdx) {
+func (l *undirectedLocalMover) move(dst int, src commIdx) {
 	l.moved = true
 	l.changed = true
 
@@ -515,9 +490,10 @@ func (l *localMover) move(dst int, src commIdx) {
 
 // deltaQ returns the highest gain in modularity attainable by moving
 // n from its current community to another connected community and
-// the index of the chosen destination. The index into the localMover's
-// communities field is returned in src if n is in communities.
-func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx) {
+// the index of the chosen destination. The index into the
+// undirectedLocalMover's communities field is returned in src if n
+// is in communities.
+func (l *undirectedLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx) {
 	id := n.ID()
 	a_aa := l.weight(n, n)
 	k_a := l.edgeWeightOf[id]
@@ -588,38 +564,4 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 	}
 
 	return 2 * (dQadd - dQremove) / m2, dst, src
-}
-
-// node is defined to avoid an import of .../graph/simple.
-type node int
-
-func (n node) ID() int { return int(n) }
-
-const negativeWeight = "community: negative edge weight"
-
-// weightFuncFor returns a constructed weight function for g.
-func weightFuncFor(g graph.Undirected) func(x, y graph.Node) float64 {
-	if wg, ok := g.(graph.Weighter); ok {
-		return func(x, y graph.Node) float64 {
-			w, ok := wg.Weight(x, y)
-			if !ok {
-				return 0
-			}
-			if w < 0 {
-				panic(negativeWeight)
-			}
-			return w
-		}
-	}
-	return func(x, y graph.Node) float64 {
-		e := g.Edge(x, y)
-		if e == nil {
-			return 0
-		}
-		w := e.Weight()
-		if w < 0 {
-			panic(negativeWeight)
-		}
-		return w
-	}
 }

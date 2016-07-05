@@ -227,8 +227,8 @@ var communityQTests = []struct {
 			{
 				q: -0.04980276134122286,
 				communities: [][]graph.Node{
-					[]graph.Node{simple.Node(0)},
-					[]graph.Node{simple.Node(1)},
+					{simple.Node(0)},
+					{simple.Node(1)},
 					{simple.Node(2)},
 					{simple.Node(3)},
 					{simple.Node(4)},
@@ -297,8 +297,8 @@ var communityQTests = []struct {
 			{
 				q: 0.39221938775510207,
 				communities: [][]graph.Node{
-					[]graph.Node{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(4), simple.Node(5), simple.Node(6), simple.Node(7)},
-					[]graph.Node{simple.Node(8), simple.Node(9), simple.Node(10), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(14), simple.Node(15)},
+					{simple.Node(0), simple.Node(1), simple.Node(2), simple.Node(3), simple.Node(4), simple.Node(5), simple.Node(6), simple.Node(7)},
+					{simple.Node(8), simple.Node(9), simple.Node(10), simple.Node(11), simple.Node(12), simple.Node(13), simple.Node(14), simple.Node(15)},
 				},
 			},
 			{

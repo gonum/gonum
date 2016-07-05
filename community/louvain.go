@@ -574,12 +574,12 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 		case removal:
 			// The community c was the current community,
 			// so calculate the change due to removal.
-			dQremove = 2*(k_aC /*^𝛼*/ -a_aa) - 2*gamma*k_a*(sigma_totC /*^𝛼*/ -k_a)/m2
+			dQremove = k_aC /*^𝛼*/ - a_aa - gamma*k_a*(sigma_totC /*^𝛼*/ -k_a)/m2
 
 		default:
 			// Otherwise calculate the change due to an addition
 			// to c and retain if it is the current best.
-			dQ := 2*k_aC /*^𝛽*/ - 2*gamma*k_a*sigma_totC /*^𝛽*/ /m2
+			dQ := k_aC /*^𝛽*/ - gamma*k_a*sigma_totC /*^𝛽*/ /m2
 			if dQ > dQadd {
 				dQadd = dQ
 				dst = i
@@ -587,7 +587,7 @@ func (l *localMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx)
 		}
 	}
 
-	return (dQadd - dQremove) / m2, dst, src
+	return 2 * (dQadd - dQremove) / m2, dst, src
 }
 
 // node is defined to avoid an import of .../graph/simple.

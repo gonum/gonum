@@ -25,7 +25,7 @@ func TestEdgeOvercounting(t *testing.T) {
 }
 
 func generateDummyGraph() *DirectedGraph {
-	nodes := [4]struct{ srcId, targetId int }{
+	nodes := [4]struct{ srcID, targetID int }{
 		{2, 1},
 		{1, 0},
 		{2, 0},
@@ -35,7 +35,7 @@ func generateDummyGraph() *DirectedGraph {
 	g := NewDirectedGraph(0, math.Inf(1))
 
 	for _, n := range nodes {
-		g.SetEdge(Edge{F: Node(n.srcId), T: Node(n.targetId), W: 1})
+		g.SetEdge(Edge{F: Node(n.srcID), T: Node(n.targetID), W: 1})
 	}
 
 	return g

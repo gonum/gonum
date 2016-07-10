@@ -9,7 +9,7 @@ import (
 	"github.com/gonum/graph/internal/set"
 )
 
-// PostDominatores returns all dominators for all nodes in g. It does not
+// Dominators returns all dominators for all nodes in g. It does not
 // prune for strict post-dominators, immediate dominators etc.
 //
 // A dominates B if and only if the only path through B travels through A.
@@ -67,7 +67,7 @@ func Dominators(start graph.Node, g graph.Graph) map[int]set.Nodes {
 	return dominators
 }
 
-// PostDominatores returns all post-dominators for all nodes in g. It does not
+// PostDominators returns all post-dominators for all nodes in g. It does not
 // prune for strict post-dominators, immediate post-dominators etc.
 //
 // A post-dominates B if and only if all paths from B travel through A.

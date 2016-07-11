@@ -130,7 +130,7 @@ func (g johnsonWeightAdjuster) Weight(x, y graph.Node) (w float64, ok bool) {
 }
 
 func (johnsonWeightAdjuster) HasEdgeBetween(_, _ graph.Node) bool {
-	panic("search: unintended use of johnsonWeightAdjuster")
+	panic("path: unintended use of johnsonWeightAdjuster")
 }
 
 type johnsonGraphNode int

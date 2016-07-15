@@ -33,37 +33,37 @@ func isValidGuard(v []float64, g float64, g_ln int) bool {
 	return true
 }
 
-func guardIncVector(v []float64, g float64, inc, g_ln int) (guarded []float64) {
-	s_ln := len(v) * inc
-	guarded = make([]float64, s_ln+g_ln*2)
+func guardIncVector(vec []float64, guard_val float64, inc, guard_len int) (guarded []float64) {
+	s_ln := len(vec) * inc
+	guarded = make([]float64, s_ln+guard_len*2)
 	for i, j := 0, 0; i < len(guarded); i++ {
 		switch {
-		case i < g_ln, i > g_ln+s_ln:
-			guarded[i] = g
-		case (i-g_ln)%(inc) == 0 && j < len(v):
-			guarded[i] = v[j]
+		case i < guard_len, i > guard_len+s_ln:
+			guarded[i] = guard_val
+		case (i-guard_len)%(inc) == 0 && j < len(vec):
+			guarded[i] = vec[j]
 			j++
 		default:
-			guarded[i] = g
+			guarded[i] = guard_val
 		}
 	}
 	return guarded
 }
 
-func checkValidIncGuard(t *testing.T, v []float64, g float64, inc, g_ln int) {
-	s_ln := len(v) - 2*g_ln
-	for i := range v {
+func checkValidIncGuard(t *testing.T, vec []float64, guard_val float64, inc, guard_len int) {
+	s_ln := len(vec) - 2*guard_len
+	for i := range vec {
 		switch {
-		case same(v[i], g):
+		case same(vec[i], guard_val):
 			// Correct value
-		case i < g_ln:
-			t.Errorf("Front guard violated at %d %v", i, v[:g_ln])
-		case i > g_ln+s_ln:
-			t.Errorf("Back guard violated at %d %v", i-g_ln-s_ln, v[g_ln+s_ln:])
-		case (i-g_ln)%inc == 0 && (i-g_ln)/inc < len(v):
+		case i < guard_len:
+			t.Errorf("Front guard violated at %d %v", i, vec[:guard_len])
+		case i > guard_len+s_ln:
+			t.Errorf("Back guard violated at %d %v", i-guard_len-s_ln, vec[guard_len+s_ln:])
+		case (i-guard_len)%inc == 0 && (i-guard_len)/inc < len(vec):
 			// Ignore input values
 		default:
-			t.Errorf("Internal guard violated at %d %v", i-g_ln, v[g_ln:g_ln+s_ln])
+			t.Errorf("Internal guard violated at %d %v", i-guard_len, vec[guard_len:guard_len+s_ln])
 		}
 	}
 }

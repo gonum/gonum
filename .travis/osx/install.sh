@@ -1,4 +1,4 @@
-set -e
+set -ex
 
 #!/bin/bash
 
@@ -7,3 +7,5 @@ set -e
 go get golang.org/x/tools/cmd/cover
 go get github.com/mattn/goveralls
 go get github.com/gonum/floats
+
+set +ex

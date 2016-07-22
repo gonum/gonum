@@ -9,3 +9,5 @@ go get github.com/gonum/blas
 
 # run the OS common installation script
 source ${TRAVIS_BUILD_DIR}/.travis/$TRAVIS_OS_NAME/install.sh
+
+set +ex

@@ -5,3 +5,5 @@ set -ex
 go get golang.org/x/tools/cmd/cover
 go get github.com/mattn/goveralls
 go get github.com/gonum/floats
+
+set +ex

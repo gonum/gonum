@@ -34,7 +34,7 @@ matrix:
 # Cache used to persist the compiled BLAS library between CI calls.
 cache:
   directories:
-  - OpenBLAS.cache
+  - .travis/OpenBLAS.cache
 
 # Install the appropriate blas library (if any) and associated gonum software.
 install:

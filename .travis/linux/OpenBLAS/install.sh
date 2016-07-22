@@ -1,6 +1,6 @@
 set -ex
 
-CACHE_DIR=${TRAVIS_BUILD_DIR}/${BLAS_LIB}.cache
+CACHE_DIR=${TRAVIS_BUILD_DIR}/.travis/${BLAS_LIB}.cache
 
 # fetch fortran to build OpenBLAS
 sudo apt-get update -qq && sudo apt-get install -qq gfortran

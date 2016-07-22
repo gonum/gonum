@@ -1,5 +1,6 @@
+set -e
+
 #!/bin/bash
-set -ex
 
 # This script contains common installation commands for osx.  It should be run
 # prior to more specific installation commands for a particular blas library.

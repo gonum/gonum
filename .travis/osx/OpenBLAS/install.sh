@@ -1,4 +1,4 @@
-set -ex
+set -e
 
 # fetch and install OpenBLAS using homebrew
 brew install homebrew/science/openblas

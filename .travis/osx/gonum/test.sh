@@ -1,4 +1,4 @@
-set -ex
+set -e
 
 go env
 go get -d -t -v ./...

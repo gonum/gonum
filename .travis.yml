@@ -7,10 +7,10 @@ env:
   - BLAS_LIB=OpenBLAS
   - BLAS_LIB=gonum
   # Does not currently link correctly.  Note that there is an issue with drotgm in ATLAS.
-  # - BLAS_LIB=ATLAS 
+  # - BLAS_LIB=ATLAS
   # If we can get multiarch builds on travis.
   # There are some issues with the Accellerate implementation.
-  #- BLAS_LIB=Accellerate 
+  #- BLAS_LIB=Accellerate
 
 # Versions of go that are explicitly supported by gonum.
 go:
@@ -19,6 +19,10 @@ go:
  - 1.6.3
  - 1.7rc3
 
+# Cache used to persist the compiled BLAS library between CI calls.
+cache:
+  directories:
+  - .travis/OpenBLAS.cache
 
 # Required for coverage.
 before_install:

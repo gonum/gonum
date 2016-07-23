@@ -14,3 +14,5 @@ go get github.com/gonum/matrix/mat64
 pushd cgo/clapack
 go install -v -x
 popd
+
+set +ex

@@ -8,13 +8,15 @@ sudo apt-get update -qq && sudo apt-get install -qq gfortran
 # check if cache exists
 if [ -e ${CACHE_DIR}/last_commit_id ]; then
     echo "Cache $CACHE_DIR hit"
+    LAST_COMMIT="$(git ls-remote git://github.com/xianyi/OpenBLAS HEAD | grep -o '^\S*')"
+    CACHED_COMMIT="$(cat ${CACHE_DIR}/last_commit_id)"
     # determine current OpenBLAS master commit id and compare
     # with commit id in cache directory
-    if [ diff <(cat ${CACHE_DIR}/last_commit_id) <(git ls-remote git://github.com/xianyi/OpenBLAS HEAD | grep -o '^\S*') ]; then
-	    echo "Cache Directory $CACHE_DIR has stale commit"
-	    # if commit is different, delete the cache
-		rm -rf ${CACHE_DIR}
-	fi
+    if [ "$LAST_COMMIT" != "$CACHED_COMMIT" ]; then
+        echo "Cache Directory $CACHE_DIR has stale commit"
+        # if commit is different, delete the cache
+        rm -rf ${CACHE_DIR}
+    fi
 fi
 
 # check if cache directory exists
@@ -22,28 +24,28 @@ if [ ! -e ${CACHE_DIR}/last_commit_id ]; then
     if [ -d ${CACHE_DIR} ]; then
         # Travis automatically creates the cache directory if it does not exist,
         # so this is needed for initialization.
-	    rm -rf ${CACHE_DIR}
-	fi
+        rm -rf ${CACHE_DIR}
+    fi
 
     # cache generation
-  	echo "Building cache at $CACHE_DIR"
-	mkdir ${CACHE_DIR}
-	sudo git clone --depth=1 git://github.com/xianyi/OpenBLAS
+    echo "Building cache at $CACHE_DIR"
+    mkdir ${CACHE_DIR}
+    sudo git clone --depth=1 git://github.com/xianyi/OpenBLAS
 
-	pushd OpenBLAS
-	echo OpenBLAS $(git rev-parse HEAD)
-	# write commit id to cache location
-	echo $(git rev-parse HEAD) > ${CACHE_DIR}/last_commit_id
-	sudo make FC=gfortran &> /dev/null && sudo make PREFIX=${CACHE_DIR} install
-	popd
+    pushd OpenBLAS
+    echo OpenBLAS $(git rev-parse HEAD)
+    # write commit id to cache location
+    echo $(git rev-parse HEAD) > ${CACHE_DIR}/last_commit_id
+    sudo make FC=gfortran &> /dev/null && sudo make PREFIX=${CACHE_DIR} install
+    popd
 	
-	curl http://www.netlib.org/blas/blast-forum/cblas.tgz | tar -zx
+    curl http://www.netlib.org/blas/blast-forum/cblas.tgz | tar -zx
 	
-	pushd CBLAS
-	sudo mv Makefile.LINUX Makefile.in
-	sudo BLLIB=${CACHE_DIR}/lib/libopenblas.a make alllib
-	sudo mv lib/cblas_LINUX.a ${CACHE_DIR}/lib/libcblas.a
-	popd
+    pushd CBLAS
+    sudo mv Makefile.LINUX Makefile.in
+    sudo BLLIB=${CACHE_DIR}/lib/libopenblas.a make alllib
+    sudo mv lib/cblas_LINUX.a ${CACHE_DIR}/lib/libcblas.a
+    popd
 
 fi
 

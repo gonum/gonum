@@ -19,7 +19,6 @@ if [ -e ${CACHE_DIR}/last_commit_id ]; then
     fi
 fi
 
-# check if cache directory exists
 if [ ! -e ${CACHE_DIR}/last_commit_id ]; then
     if [ -d ${CACHE_DIR} ]; then
         # Travis automatically creates the cache directory if it does not exist,

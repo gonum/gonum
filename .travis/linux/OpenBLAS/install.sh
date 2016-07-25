@@ -29,7 +29,6 @@ if [ ! -e ${CACHE_DIR}/last_commit_id ]; then
     sudo git clone --depth=1 git://github.com/xianyi/OpenBLAS
 
     pushd OpenBLAS
-    # write commit id to cache location
     sudo make FC=gfortran &> /dev/null && sudo make PREFIX=${CACHE_DIR} install
     popd
 	

@@ -20,11 +20,8 @@ if [ -e ${CACHE_DIR}/last_commit_id ]; then
 fi
 
 if [ ! -e ${CACHE_DIR}/last_commit_id ]; then
-    if [ -d ${CACHE_DIR} ]; then
-        # Travis automatically creates the cache directory if it does not exist,
-        # so this is needed for initialization.
-        rm -rf ${CACHE_DIR}
-    fi
+    # Clear cache.
+    rm -rf ${CACHE_DIR}
 
     # cache generation
     echo "Building cache at $CACHE_DIR"

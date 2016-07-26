@@ -219,7 +219,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 
 			if !havePrintedEdgeHeader {
 				p.buf.WriteByte('\n')
-				p.buf.WriteString(strings.TrimRight(p.prefix, " \t\xa0")) // Trim whitespace suffix.
+				p.buf.WriteString(strings.TrimRight(p.prefix, " \t\n")) // Trim whitespace suffix.
 				p.newline()
 				p.buf.WriteString("// Edge definitions.")
 				havePrintedEdgeHeader = true

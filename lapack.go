@@ -108,9 +108,9 @@ type SVDJob byte
 
 const (
 	SVDAll       SVDJob = 'A' // Compute all singular vectors
-	SVDInPlace          = 'S' // Compute the first singular vectors and store them in provided storage.
-	SVDOverwrite        = 'O' // Compute the singular vectors and store them in input matrix
-	SVDNone             = 'N' // Do not compute singular vectors
+	SVDInPlace   SVDJob = 'S' // Compute the first singular vectors and store them in provided storage.
+	SVDOverwrite SVDJob = 'O' // Compute the singular vectors and store them in input matrix
+	SVDNone      SVDJob = 'N' // Do not compute singular vectors
 )
 
 // EigComp specifies the type of eigenvalue decomposition.
@@ -121,8 +121,8 @@ const (
 	EigValueOnly EigComp = 'N'
 	// EigDecomp specifies to compute the eigenvalues and eigenvectors of the
 	// full symmetric matrix.
-	EigDecomp = 'V'
+	EigDecomp EigComp = 'V'
 	// EigBoth specifies to compute both the eigenvalues and eigenvectors of the
 	// input tridiagonal matrix.
-	EigBoth = 'I'
+	EigBoth EigComp = 'I'
 )

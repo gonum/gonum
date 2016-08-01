@@ -80,10 +80,10 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 	prefix := fmt.Sprintf("Case n=%v, j1=%v, n1=%v, n2=%v, wantq=%v, extra=%v", n, j1, n1, n2, wantq, extra)
 
 	if !generalOutsideAllNaN(tmat) {
-		t.Errorf("%v: out-of-range write to T\n", prefix)
+		t.Errorf("%v: out-of-range write to T", prefix)
 	}
 	if wantq && !generalOutsideAllNaN(q) {
-		t.Errorf("%v: out-of-range write to Q\n", prefix)
+		t.Errorf("%v: out-of-range write to Q", prefix)
 	}
 
 	if !ok {
@@ -99,7 +99,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 		for i := 0; i < n; i++ {
 			for j := 0; j < n; j++ {
 				if tmat.Data[i*tmat.Stride+j] != tmatCopy.Data[i*tmatCopy.Stride+j] {
-					t.Errorf("%v: ok == false but T[%v,%v] modified\n", prefix, i, j)
+					t.Errorf("%v: ok == false but T[%v,%v] modified", prefix, i, j)
 				}
 			}
 		}
@@ -110,7 +110,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 		for i := 0; i < n; i++ {
 			for j := 0; j < n; j++ {
 				if q.Data[i*q.Stride+j] != qCopy.Data[i*qCopy.Stride+j] {
-					t.Errorf("%v: ok == false but Q[%v,%v] modified\n", prefix, i, j)
+					t.Errorf("%v: ok == false but Q[%v,%v] modified", prefix, i, j)
 				}
 			}
 		}
@@ -128,16 +128,17 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 			}
 			diff := tmat.Data[i*tmat.Stride+j] - tmatCopy.Data[i*tmatCopy.Stride+j]
 			if diff != 0 {
-				t.Errorf("%v: unexpected modification of T[%v,%v]\n", prefix, i, j)
+				t.Errorf("%v: unexpected modification of T[%v,%v]", prefix, i, j)
 			}
 		}
 	}
+
 	if n1 == 1 {
 		// 1×1 blocks are swapped exactly.
 		got := tmat.Data[(j1+n2)*tmat.Stride+j1+n2]
 		want := tmatCopy.Data[j1*tmatCopy.Stride+j1]
 		if want != got {
-			t.Errorf("%v: unexpected value of T[%v,%v]. want %v, got %v\n", prefix, j1+n2, j1+n2, want, got)
+			t.Errorf("%v: unexpected value of T[%v,%v]. Want %v, got %v", prefix, j1+n2, j1+n2, want, got)
 		}
 	} else {
 		// Check that the swapped 2×2 block is in Schur canonical form.
@@ -166,7 +167,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 		got := tmat.Data[j1*tmat.Stride+j1]
 		want := tmatCopy.Data[(j1+n1)*tmatCopy.Stride+j1+n1]
 		if want != got {
-			t.Errorf("%v: unexpected value of T[%v,%v]. want %v, got %v\n", prefix, j1, j1, want, got)
+			t.Errorf("%v: unexpected value of T[%v,%v]. Want %v, got %v", prefix, j1, j1, want, got)
 		}
 	} else {
 		// Check that the swapped 2×2 block is in Schur canonical form.
@@ -196,7 +197,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 	}
 
 	if !isOrthonormal(q) {
-		t.Errorf("%v: Q is not orthogonal\n", prefix)
+		t.Errorf("%v: Q is not orthogonal", prefix)
 	}
 	// Check that Q is unchanged outside of columns [j1:j1+n1+n2].
 	for i := 0; i < n; i++ {
@@ -206,7 +207,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 			}
 			diff := q.Data[i*q.Stride+j] - qCopy.Data[i*qCopy.Stride+j]
 			if diff != 0 {
-				t.Errorf("%v: unexpected modification of Q[%v,%v]\n", prefix, i, j)
+				t.Errorf("%v: unexpected modification of Q[%v,%v]", prefix, i, j)
 			}
 		}
 	}
@@ -219,7 +220,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 		for j := 0; j < n; j++ {
 			diff := qtq.Data[i*qtq.Stride+j] - tmat.Data[i*tmat.Stride+j]
 			if math.Abs(diff) > tol {
-				t.Errorf("%v: unexpected value of T[%v,%v]\n", prefix, i, j)
+				t.Errorf("%v: unexpected value of T[%v,%v]", prefix, i, j)
 			}
 		}
 	}

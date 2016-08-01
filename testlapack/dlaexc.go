@@ -87,8 +87,13 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 	}
 
 	if !ok {
-		t.Logf("%v: Dlaexc returned false")
+		if n1 == 1 && n2 == 1 {
+			t.Errorf("%v: unexpected failure", prefix)
+		} else {
+			t.Logf("%v: Dlaexc returned false")
+		}
 	}
+
 	if !ok || n1 == 0 || n2 == 0 || j1+n1 >= n {
 		// Check that T is not modified.
 		for i := 0; i < n; i++ {

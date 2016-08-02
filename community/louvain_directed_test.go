@@ -26,13 +26,7 @@ var communityDirectedQTests = []struct {
 }{
 	{
 		name: "simple_directed",
-		g: []set{
-			0: linksTo(1),
-			1: linksTo(0, 4),
-			2: linksTo(1),
-			3: linksTo(0, 4),
-			4: linksTo(2),
-		},
+		g:    simpleDirected,
 		// community structure and modularity calculated by C++ implementation: louvain igraph.
 		// Note that louvain igraph returns Q as an unscaled value.
 		structures: []structure{
@@ -370,17 +364,17 @@ tests:
 			cg0 := reduceDirected(g, nil)
 			cg0Qnull := Q(cg0, cg0.Structure(), 1)
 			if !floats.EqualWithinAbsOrRel(gQnull, cg0Qnull, structure.tol, structure.tol) {
-				t.Errorf("disgagreement between null Q from method: %v and function: %v", cg0Qnull, gQnull)
+				t.Errorf("disagreement between null Q from method: %v and function: %v", cg0Qnull, gQnull)
 			}
 			cg0Q := Q(cg0, communities, structure.resolution)
 			if !floats.EqualWithinAbsOrRel(gQ, cg0Q, structure.tol, structure.tol) {
-				t.Errorf("unexpected Q result after initial conversion: got: %v want :%v", gQ, cg0Q)
+				t.Errorf("unexpected Q result after initial reduction: got: %v want :%v", cg0Q, gQ)
 			}
 
 			cg1 := reduceDirected(cg0, communities)
 			cg1Q := Q(cg1, cg1.Structure(), structure.resolution)
 			if !floats.EqualWithinAbsOrRel(gQ, cg1Q, structure.tol, structure.tol) {
-				t.Errorf("unexpected Q result after initial condensation: got: %v want :%v", gQ, cg1Q)
+				t.Errorf("unexpected Q result after second reduction: got: %v want :%v", cg1Q, gQ)
 			}
 		}
 	}
@@ -434,7 +428,7 @@ var localDirectedMoveTests = []struct {
 }
 
 func TestMoveLocalDirected(t *testing.T) {
-	for _, test := range localUndirectedMoveTests {
+	for _, test := range localDirectedMoveTests {
 		g := simple.NewDirectedGraph(0, 0)
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.

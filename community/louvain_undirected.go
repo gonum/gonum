@@ -27,7 +27,7 @@ import (
 // directed graphs.
 func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution float64) float64 {
 	nodes := g.Nodes()
-	weight := weightFuncFor(g)
+	weight := positiveWeightFuncFor(g)
 
 	// Calculate the total edge weight of the graph
 	// and the table of penetrating edge weight sums.
@@ -101,14 +101,7 @@ type ReducedUndirected struct {
 	// the node ID is the index into
 	// nodes.
 	nodes []community
-
-	// edges and weights is the set
-	// of edges between nodes.
-	// weights is keyed such that
-	// the first element of the key
-	// is less than the second.
-	edges   [][]int
-	weights map[[2]int]float64
+	undirectedEdges
 
 	// communities is the community
 	// structure of the graph.
@@ -187,11 +180,13 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 			communities[i] = []graph.Node{node(i)}
 		}
 
-		weight := weightFuncFor(g)
+		weight := positiveWeightFuncFor(g)
 		r := ReducedUndirected{
-			nodes:       make([]community, len(nodes)),
-			edges:       make([][]int, len(nodes)),
-			weights:     make(map[[2]int]float64),
+			nodes: make([]community, len(nodes)),
+			undirectedEdges: undirectedEdges{
+				edges:   make([][]int, len(nodes)),
+				weights: make(map[[2]int]float64),
+			},
 			communities: communities,
 		}
 		communityOf := make(map[int]int, len(nodes))
@@ -232,9 +227,11 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 	}
 
 	r := ReducedUndirected{
-		nodes:   make([]community, len(communities)),
-		edges:   make([][]int, len(communities)),
-		weights: make(map[[2]int]float64),
+		nodes: make([]community, len(communities)),
+		undirectedEdges: undirectedEdges{
+			edges:   make([][]int, len(communities)),
+			weights: make(map[[2]int]float64),
+		},
 	}
 	r.communities = make([][]graph.Node, len(communities))
 	for i := range r.communities {
@@ -246,7 +243,7 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 		g.communities = communities
 		r.parent = g
 	}
-	weight := weightFuncFor(g)
+	weight := positiveWeightFuncFor(g)
 	communityOf := make(map[int]int, commNodes)
 	for i, comm := range communities {
 		r.nodes[i] = community{id: i, nodes: comm}
@@ -417,7 +414,7 @@ func newUndirectedLocalMover(g *ReducedUndirected, communities [][]graph.Node, r
 		communities:  communities,
 		memberships:  make([]int, len(nodes)),
 		resolution:   resolution,
-		weight:       weightFuncFor(g),
+		weight:       positiveWeightFuncFor(g),
 	}
 
 	// Calculate the total edge weight of the graph

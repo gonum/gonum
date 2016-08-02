@@ -25,7 +25,7 @@ import (
 //
 func qDirected(g graph.Directed, communities [][]graph.Node, resolution float64) float64 {
 	nodes := g.Nodes()
-	weight := weightFuncFor(g)
+	weight := positiveWeightFuncFor(g)
 
 	// Calculate the total edge weight of the graph
 	// and the table of penetrating edge weight sums.
@@ -102,12 +102,7 @@ type ReducedDirected struct {
 	// the node ID is the index into
 	// nodes.
 	nodes []community
-
-	// edgesFrom, edgesTo and weights
-	// is the set of edges between nodes.
-	edgesFrom [][]int
-	edgesTo   [][]int
-	weights   map[[2]int]float64
+	directedEdges
 
 	// communities is the community
 	// structure of the graph.
@@ -186,12 +181,14 @@ func reduceDirected(g graph.Directed, communities [][]graph.Node) *ReducedDirect
 			communities[i] = []graph.Node{node(i)}
 		}
 
-		weight := weightFuncFor(g)
+		weight := positiveWeightFuncFor(g)
 		r := ReducedDirected{
-			nodes:       make([]community, len(nodes)),
-			edgesFrom:   make([][]int, len(nodes)),
-			edgesTo:     make([][]int, len(nodes)),
-			weights:     make(map[[2]int]float64),
+			nodes: make([]community, len(nodes)),
+			directedEdges: directedEdges{
+				edgesFrom: make([][]int, len(nodes)),
+				edgesTo:   make([][]int, len(nodes)),
+				weights:   make(map[[2]int]float64),
+			},
 			communities: communities,
 		}
 		communityOf := make(map[int]int, len(nodes))
@@ -242,10 +239,12 @@ func reduceDirected(g graph.Directed, communities [][]graph.Node) *ReducedDirect
 	}
 
 	r := ReducedDirected{
-		nodes:     make([]community, len(communities)),
-		edgesFrom: make([][]int, len(communities)),
-		edgesTo:   make([][]int, len(communities)),
-		weights:   make(map[[2]int]float64),
+		nodes: make([]community, len(communities)),
+		directedEdges: directedEdges{
+			edgesFrom: make([][]int, len(communities)),
+			edgesTo:   make([][]int, len(communities)),
+			weights:   make(map[[2]int]float64),
+		},
 	}
 	r.communities = make([][]graph.Node, len(communities))
 	for i := range r.communities {
@@ -257,7 +256,7 @@ func reduceDirected(g graph.Directed, communities [][]graph.Node) *ReducedDirect
 		g.communities = communities
 		r.parent = g
 	}
-	weight := weightFuncFor(g)
+	weight := positiveWeightFuncFor(g)
 	communityOf := make(map[int]int, commNodes)
 	for i, comm := range communities {
 		r.nodes[i] = community{id: i, nodes: comm}
@@ -406,9 +405,8 @@ type directedLocalMover struct {
 
 	// nodes is the set of working nodes.
 	nodes []graph.Node
-	// edgeWeightsOf is the weighted in-
-	// and out-degree of each node
-	// indexed by ID.
+	// edgeWeightOf is the weighted degree
+	// of each node indexed by ID.
 	edgeWeightsOf []directedWeights
 
 	// m is the total sum of edge
@@ -463,7 +461,7 @@ func newDirectedLocalMover(g *ReducedDirected, communities [][]graph.Node, resol
 		communities:   communities,
 		memberships:   make([]int, len(nodes)),
 		resolution:    resolution,
-		weight:        weightFuncFor(g),
+		weight:        positiveWeightFuncFor(g),
 	}
 
 	// Calculate the total edge weight of the graph

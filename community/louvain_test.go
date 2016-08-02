@@ -5,6 +5,7 @@
 package community
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/gonum/graph"
@@ -26,6 +27,12 @@ func linksTo(i ...int) set {
 	return s
 }
 
+type layer struct {
+	g          []set
+	edgeWeight float64 // Zero edge weight is interpretted as 1.0.
+	weight     float64
+}
+
 var (
 	unconnected = []set{ /* Nodes 0-4 are implicit .*/ 5: nil}
 
@@ -36,6 +43,85 @@ var (
 		3: linksTo(4, 5),
 		4: linksTo(5),
 		5: nil,
+	}
+	dumbellRepulsion = []set{
+		0: linksTo(4),
+		1: linksTo(5),
+		2: nil,
+		3: nil,
+		4: nil,
+		5: nil,
+	}
+
+	repulsion = []set{
+		0: linksTo(3, 4, 5),
+		1: linksTo(3, 4, 5),
+		2: linksTo(3, 4, 5),
+		3: linksTo(0, 1, 2),
+		4: linksTo(0, 1, 2),
+		5: linksTo(0, 1, 2),
+	}
+
+	simpleDirected = []set{
+		0: linksTo(1),
+		1: linksTo(0, 4),
+		2: linksTo(1),
+		3: linksTo(0, 4),
+		4: linksTo(2),
+	}
+
+	// http://www.slate.com/blogs/the_world_/2014/07/17/the_middle_east_friendship_chart.html
+	middleEast = struct{ friends, complicated, enemies []set }{
+		// green cells
+		friends: []set{
+			0:  nil,
+			1:  linksTo(5, 7, 9, 12),
+			2:  linksTo(11),
+			3:  linksTo(4, 5, 10),
+			4:  linksTo(3, 5, 10),
+			5:  linksTo(1, 3, 4, 8, 10, 12),
+			6:  nil,
+			7:  linksTo(1, 12),
+			8:  linksTo(5, 9, 11),
+			9:  linksTo(1, 8, 12),
+			10: linksTo(3, 4, 5),
+			11: linksTo(2, 8),
+			12: linksTo(1, 5, 7, 9),
+		},
+
+		// yellow cells
+		complicated: []set{
+			0:  linksTo(2, 4),
+			1:  linksTo(4, 8),
+			2:  linksTo(0, 3, 4, 5, 8, 9),
+			3:  linksTo(2, 8, 11),
+			4:  linksTo(0, 1, 2, 8),
+			5:  linksTo(2),
+			6:  nil,
+			7:  linksTo(9, 11),
+			8:  linksTo(1, 2, 3, 4, 10, 12),
+			9:  linksTo(2, 7, 11),
+			10: linksTo(8),
+			11: linksTo(3, 7, 9, 12),
+			12: linksTo(8, 11),
+		},
+
+		// red cells
+		enemies: []set{
+			0:  linksTo(1, 3, 5, 6, 7, 8, 9, 10, 11, 12),
+			1:  linksTo(0, 2, 3, 6, 10, 11),
+			2:  linksTo(1, 6, 7, 10, 12),
+			3:  linksTo(0, 1, 6, 7, 9, 12),
+			4:  linksTo(6, 7, 9, 11, 12),
+			5:  linksTo(0, 6, 7, 9, 11),
+			6:  linksTo(0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12),
+			7:  linksTo(0, 2, 3, 4, 5, 6, 8, 10),
+			8:  linksTo(0, 6, 7),
+			9:  linksTo(0, 3, 4, 5, 6, 10),
+			10: linksTo(0, 1, 2, 6, 7, 9, 11, 12),
+			11: linksTo(0, 1, 4, 5, 6, 10),
+			12: linksTo(0, 2, 3, 4, 6, 10),
+		},
 	}
 
 	// W. W. Zachary, An information flow model for conflict and fission in small groups,
@@ -133,6 +219,15 @@ func reverse(f []float64) {
 	}
 }
 
+func hasNegative(f []float64) bool {
+	for _, v := range f {
+		if v < 0 {
+			return true
+		}
+	}
+	return false
+}
+
 var (
 	dupGraph         = simple.NewUndirectedGraph(0, 0)
 	dupGraphDirected = simple.NewDirectedGraph(0, 0)
@@ -155,5 +250,28 @@ func init() {
 			e = se
 		}
 		dupGraphDirected.SetEdge(e)
+	}
+}
+
+// This init function checks the Middle East relationship data.
+func init() {
+	world := make([]set, len(middleEast.friends))
+	for i := range world {
+		world[i] = make(set)
+	}
+	for _, relationships := range [][]set{middleEast.friends, middleEast.complicated, middleEast.enemies} {
+		for i, rel := range relationships {
+			for inter := range rel {
+				if _, ok := world[i][inter]; ok {
+					panic(fmt.Sprintf("unexpected relationship: %v--%v", i, inter))
+				}
+				world[i][inter] = struct{}{}
+			}
+		}
+	}
+	for i := range world {
+		if len(world[i]) != len(middleEast.friends)-1 {
+			panic(fmt.Sprintf("missing relationship in %v: %v", i, world[i]))
+		}
 	}
 }

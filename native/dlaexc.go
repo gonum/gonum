@@ -111,7 +111,7 @@ func (impl Implementation) Dlaexc(wantq bool, n int, t []float64, ldt int, q []f
 	// Solve T11*X - X*T22 = scale*T12 for X.
 	var x [4]float64
 	const ldx = 2
-	scale, _, _ := impl.Dlasy2(false, false, -1, n1, n2, d[:], ldd, d[n1*ldd+n1:], ldd, d[n1+1:], ldd, x[:], ldx)
+	scale, _, _ := impl.Dlasy2(false, false, -1, n1, n2, d[:], ldd, d[n1*ldd+n1:], ldd, d[n1:], ldd, x[:], ldx)
 
 	// Swap the adjacent diagonal blocks.
 	switch {

@@ -30,6 +30,8 @@ import (
 //
 // If ok is false, the transformed matrix T would be too far from Schur form.
 // The blocks are not swapped, and T and Q are not modified.
+//
+// Dlaexc is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlaexc(wantq bool, n int, t []float64, ldt int, q []float64, ldq int, j1, n1, n2 int, work []float64) (ok bool) {
 	checkMatrix(n, n, t, ldt)
 	if wantq {

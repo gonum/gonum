@@ -7,6 +7,7 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/cmplx"
 	"math/rand"
 	"testing"
 
@@ -47,12 +48,24 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 	}
 	// Make any 2x2 diagonal block to be in Schur canonical form.
 	if n1 == 2 {
+		// Diagonal elements equal.
 		tmat.Data[(j1+1)*tmat.Stride+j1+1] = tmat.Data[j1*tmat.Stride+j1]
-		tmat.Data[(j1+1)*tmat.Stride+j1] = tmat.Data[j1*tmat.Stride+j1+1]
+		// Off-diagonal elements of opposite sign.
+		c := rnd.NormFloat64()
+		if math.Signbit(c) == math.Signbit(tmat.Data[j1*tmat.Stride+j1+1]) {
+			c *= -1
+		}
+		tmat.Data[(j1+1)*tmat.Stride+j1] = c
 	}
 	if n2 == 2 {
+		// Diagonal elements equal.
 		tmat.Data[(j1+n1+1)*tmat.Stride+j1+n1+1] = tmat.Data[(j1+n1)*tmat.Stride+j1+n1]
-		tmat.Data[(j1+n1+1)*tmat.Stride+j1+n1] = tmat.Data[(j1+n1)*tmat.Stride+j1+n1+1]
+		// Off-diagonal elements of opposite sign.
+		c := rnd.NormFloat64()
+		if math.Signbit(c) == math.Signbit(tmat.Data[(j1+n1)*tmat.Stride+j1+n1+1]) {
+			c *= -1
+		}
+		tmat.Data[(j1+n1+1)*tmat.Stride+j1+n1] = c
 	}
 	tmatCopy := cloneGeneral(tmat)
 	var q, qCopy blas64.General
@@ -65,6 +78,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 	ok := impl.Dlaexc(wantq, n, tmat.Data, tmat.Stride, q.Data, q.Stride, j1, n1, n2, work)
 
 	prefix := fmt.Sprintf("Case n=%v, j1=%v, n1=%v, n2=%v, wantq=%v, extra=%v", n, j1, n1, n2, wantq, extra)
+
 	if !generalOutsideAllNaN(tmat) {
 		t.Errorf("%v: out-of-range write to T\n", prefix)
 	}
@@ -72,6 +86,9 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 		t.Errorf("%v: out-of-range write to Q\n", prefix)
 	}
 
+	if !ok {
+		t.Logf("%v: Dlaexc returned false")
+	}
 	if !ok || n1 == 0 || n2 == 0 || j1+n1 >= n {
 		// Check that T is not modified.
 		for i := 0; i < n; i++ {
@@ -110,23 +127,62 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 			}
 		}
 	}
-	// Check that T is modified at the diagonal as expected.
-	for i := 0; i < n1; i++ {
-		for j := 0; j < n1; j++ {
-			got := tmat.Data[(j1+i)*tmat.Stride+j1+j]
-			want := tmatCopy.Data[(j1+n1+i)*tmatCopy.Stride+j1+n1+j]
-			if want != got {
-				t.Errorf("%v: unexpected value of T[%v,%v]. want %v, got %v\n", prefix, j1+i, j1+j, want, got)
-			}
+	if n1 == 1 {
+		// 1×1 blocks are swapped exactly.
+		got := tmat.Data[(j1+n2)*tmat.Stride+j1+n2]
+		want := tmatCopy.Data[j1*tmatCopy.Stride+j1]
+		if want != got {
+			t.Errorf("%v: unexpected value of T[%v,%v]. want %v, got %v\n", prefix, j1+n2, j1+n2, want, got)
+		}
+	} else {
+		// Check that the swapped 2×2 block is in Schur canonical form.
+		// The n1×n1 block is now located at T[j1+n2,j1+n2].
+		a, b, c, d := extract2x2Block(tmat.Data[(j1+n2)*tmat.Stride+j1+n2:], tmat.Stride)
+		if !isSchurCanonical(a, b, c, d) {
+			t.Errorf("%v: 2×2 block at T[%v,%v] not in Schur canonical form", prefix, j1+n2, j1+n2)
+		}
+		ev1Got, ev2Got := schurBlockEigenvalues(a, b, c, d)
+
+		// Check that the swapped 2×2 block has the same eigenvalues.
+		// The n1×n1 block was originally located at T[j1,j1].
+		a, b, c, d = extract2x2Block(tmatCopy.Data[j1*tmatCopy.Stride+j1:], tmatCopy.Stride)
+		ev1Want, ev2Want := schurBlockEigenvalues(a, b, c, d)
+		if cmplx.Abs(ev1Got-ev1Want) > tol {
+			t.Errorf("%v: unexpected first eigenvalue of 2×2 block at T[%v,%v]. Want %v, got %v",
+				prefix, j1+n2, j1+n2, ev1Want, ev1Got)
+		}
+		if cmplx.Abs(ev2Got-ev2Want) > tol {
+			t.Errorf("%v: unexpected second eigenvalue of 2×2 block at T[%v,%v]. Want %v, got %v",
+				prefix, j1+n2, j1+n2, ev2Want, ev2Got)
 		}
 	}
-	for i := 0; i < n2; i++ {
-		for j := 0; j < n2; j++ {
-			got := tmat.Data[(j1+n1+i)*tmat.Stride+j1+n1+j]
-			want := tmatCopy.Data[(j1+i)*tmatCopy.Stride+j1+j]
-			if want != got {
-				t.Errorf("%v: unexpected value of T[%v,%v]. want %v, got %v\n", prefix, j1+n1+i, j1+n1+j, want, got)
-			}
+	if n2 == 1 {
+		// 1×1 blocks are swapped exactly.
+		got := tmat.Data[j1*tmat.Stride+j1]
+		want := tmatCopy.Data[(j1+n1)*tmatCopy.Stride+j1+n1]
+		if want != got {
+			t.Errorf("%v: unexpected value of T[%v,%v]. want %v, got %v\n", prefix, j1, j1, want, got)
+		}
+	} else {
+		// Check that the swapped 2×2 block is in Schur canonical form.
+		// The n2×n2 block is now located at T[j1,j1].
+		a, b, c, d := extract2x2Block(tmat.Data[j1*tmat.Stride+j1:], tmat.Stride)
+		if !isSchurCanonical(a, b, c, d) {
+			t.Errorf("%v: 2×2 block at T[%v,%v] not in Schur canonical form", prefix, j1, j1)
+		}
+		ev1Got, ev2Got := schurBlockEigenvalues(a, b, c, d)
+
+		// Check that the swapped 2×2 block has the same eigenvalues.
+		// The n2×n2 block was originally located at T[j1+n1,j1+n1].
+		a, b, c, d = extract2x2Block(tmatCopy.Data[(j1+n1)*tmatCopy.Stride+j1+n1:], tmatCopy.Stride)
+		ev1Want, ev2Want := schurBlockEigenvalues(a, b, c, d)
+		if cmplx.Abs(ev1Got-ev1Want) > tol {
+			t.Errorf("%v: unexpected first eigenvalue of 2×2 block at T[%v,%v]. Want %v, got %v",
+				prefix, j1, j1, ev1Want, ev1Got)
+		}
+		if cmplx.Abs(ev2Got-ev2Want) > tol {
+			t.Errorf("%v: unexpected second eigenvalue of 2×2 block at T[%v,%v]. Want %v, got %v",
+				prefix, j1, j1, ev2Want, ev2Got)
 		}
 	}
 

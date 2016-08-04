@@ -838,3 +838,27 @@ func eye(n, stride int) blas64.General {
 	}
 	return ans
 }
+
+// extract2x2Block returns the elements of T at [0,0], [0,1], [1,0], and [1,1].
+func extract2x2Block(t []float64, ldt int) (a, b, c, d float64) {
+	return t[0], t[1], t[ldt], t[ldt+1]
+}
+
+// isSchurCanonical returns whether the 2×2 matrix [a b; c d] is in Schur
+// canonical form.
+func isSchurCanonical(a, b, c, d float64) bool {
+	return c == 0 || (a == d && math.Signbit(b) != math.Signbit(c))
+}
+
+// schurBlockEigenvalues returns the two eigenvalues of the 2×2 matrix [a b; c d]
+// that must be in Schur canonical form.
+func schurBlockEigenvalues(a, b, c, d float64) (ev1, ev2 complex128) {
+	if !isSchurCanonical(a, b, c, d) {
+		panic("block not in Schur canonical form")
+	}
+	if c == 0 {
+		return complex(a, 0), complex(d, 0)
+	}
+	im := math.Sqrt(-b * c)
+	return complex(a, im), complex(a, -im)
+}

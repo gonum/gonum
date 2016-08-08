@@ -13,8 +13,8 @@ import (
 // Dlahqr computes the eigenvalues and Schur factorization of a block of an n×n
 // upper Hessenberg matrix H, using the double-shift/single-shift QR algorithm.
 //
-// h and ldh represent the matrix H. Its contents on return depends on the value
-// of info. Dlahqr works primarily with the Hessenberg submatrix
+// h and ldh represent the matrix H. The contents of h on return depends on the
+// value of converged. Dlahqr works primarily with the Hessenberg submatrix
 // H[ilo:ihi+1,ilo:ihi+1], but applies transformations to all of H if wantt is
 // true. It is assumed that H[ihi+1:n,ihi+1:n] is already upper
 // quasi-triangular, although this is not checked.
@@ -25,14 +25,14 @@ import (
 //  H[ilo,ilo-1] == 0,  if ilo > 0,
 // otherwise Dlahqr will panic.
 //
-// wr[ilo:ihi+1] and wi[ilo:ihi+1] will contain, on return, the real and
-// imaginary parts, respectively, of the computed eigenvalues ilo to ihi. If two
-// eigenvalues are computed as a complex conjugate pair, they are stored in
-// consecutive elements of wr and wi, say the i-th and (i+1)th, with wi[i] > 0
-// and wi[i+1] < 0. If wantt is true, the eigenvalues are stored in the same
-// order as on the diagonal of the Schur form returned in H, with wr[i] =
-// H[i,i], and, if H[i:i+2,i:i+2) is a 2×2 diagonal block, wi[i] =
-// sqrt(abs(H[i+1,i]*H[i,i+1])) and wi[i+1] = -wi[i].
+// wr[ilo:ihi+1] and wi[ilo:ihi+1] will contain, on return if converged is true,
+// the real and imaginary parts, respectively, of the computed eigenvalues ilo
+// to ihi. If two eigenvalues are computed as a complex conjugate pair, they are
+// stored in consecutive elements of wr and wi, say the i-th and (i+1)th, with
+// wi[i] > 0 and wi[i+1] < 0. If wantt is true, the eigenvalues are stored in
+// the same order as on the diagonal of the Schur form returned in H, with
+// wr[i] = H[i,i], and, if H[i:i+2,i:i+2] is a 2×2 diagonal block,
+// wi[i] = sqrt(abs(H[i+1,i]*H[i,i+1])) and wi[i+1] = -wi[i].
 //
 // wr and wi must have length n.
 //
@@ -40,32 +40,34 @@ import (
 // will be applied to the submatrix Z[iloz:ihiz+1,ilo:ihi+1]. If wantz is false,
 // z is not referenced. It must hold that
 //  0 <= iloz <= ilo; ihi <= ihiz < n.
-//
-// If info == 0 and wantt is true, on return H[ilo:ihi+1,ilo:ihi+1] will be
-// overwritten by upper quasi-triangular full Schur form with any 2×2 diagonal
-// blocks in standard form.
-//
-// If info == 0 and wantt is false, the contents of h on return is unspecified.
-//
-// If info > 0, Dlahqr failed to compute all the eigenvalues ilo to ihi in a
-// total of 30 iterations per eigenvalue. wr[info+1:ihi+1] and wi[info+1:ihi+1]
+
+// converged indicates whether Dlahqr computed all the eigenvalues ilo to ihi in
+// a total of 30 iterations per eigenvalue. If converged is false, some
+// eigenvalues have not converged, and wr[index+1:ihi+1] and wi[index+1:ihi+1]
 // contain those eigenvalues which have been successfully computed.
 //
-// If info > 0 and wantt is false, on return, the remaining unconverged
-// eigenvalues are the eigenvalues of the upper Hessenberg matrix
-// H[ilo:info+1,ilo:info+1].
+// If converged is true and wantt is true, on return H[ilo:ihi+1,ilo:ihi+1] will
+// be overwritten by upper quasi-triangular full Schur form with any 2×2
+// diagonal blocks in standard form.
 //
-// If info > 0 and wantt is true, then on return
+// If converged is true and wantt is false, the contents of h on return is
+// unspecified.
+//
+// If converged is false and wantt is false, on return, the remaining
+// unconverged eigenvalues are the eigenvalues of the upper Hessenberg matrix
+// H[ilo:index+1,ilo:index+1].
+//
+// If converged is false and wantt is true, then on return
 //  (initial H)*U = U*(final H),   (*)
 // where U is an orthogonal matrix. The final H is upper Hessenberg and
-// H[info+1:ihi+1,info+1:ihi+1] is upper triangular.
+// H[index+1:ihi+1,index+1:ihi+1] is upper triangular.
 //
-// If info > 0 and wantz is true, then on return
+// If converged is false and wantz is true, then on return
 //  (final Z) = (initial Z)*U,
 // where U is the orthogonal matrix in (*) regardless of the value of wantt.
 //
 // Dlahqr is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) (info int) {
+func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) (index int, converged bool) {
 	checkMatrix(n, n, h, ldh)
 	switch {
 	case ilo < 0 || max(0, ihi) < ilo:
@@ -91,12 +93,12 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 
 	// Quick return if possible.
 	if n == 0 {
-		return info
+		return 0, true
 	}
 	if ilo == ihi {
 		wr[ilo] = h[ilo*ldh+ilo]
 		wi[ilo] = 0
-		return info
+		return 0, true
 	}
 
 	// Clear out the trash.
@@ -377,8 +379,7 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 		if converged == false {
 			// The QR iteration finished without splitting off a
 			// submatrix of order 1 or 2.
-			info = i
-			return info
+			return i, false
 		}
 
 		if l == i {
@@ -414,5 +415,5 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 		// Return to start of the main loop with new value of i.
 		i = l - 1
 	}
-	return info
+	return 0, true
 }

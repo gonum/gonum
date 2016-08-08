@@ -14,7 +14,7 @@ import (
 )
 
 type Dlahqrer interface {
-	Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) int
+	Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) (int, bool)
 }
 
 func DlahqrTest(t *testing.T, impl Dlahqrer) {
@@ -137,7 +137,7 @@ func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, ilo
 	wr := nanSlice(n)
 	wi := nanSlice(n)
 
-	info := impl.Dlahqr(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride)
+	idx, converged := impl.Dlahqr(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride)
 
 	prefix := fmt.Sprintf("Case n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, wantt=%v, wantz=%v, extra=%v", n, ilo, ihi, iloz, ihiz, wantt, wantz, extra)
 
@@ -154,7 +154,7 @@ func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, ilo
 			t.Errorf("%v: Z is not orthogonal", prefix)
 		}
 		// Z should have been modified only in the
-		// [iloz:ihiz+1:ilo:ihi+1] block.
+		// [iloz:ihiz+1,ilo:ihi+1] block.
 		for i := 0; i < n; i++ {
 			for j := 0; j < n; j++ {
 				if iloz <= i && i <= ihiz && ilo <= j && j <= ihi {
@@ -168,25 +168,25 @@ func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, ilo
 	}
 
 	start := ilo // Index of the first computed eigenvalue.
-	if info > 0 {
-		start = info + 1
+	if !converged {
+		start = idx + 1
 	}
 
 	// Check that wr and wi have not been modified outside [start:ihi+1].
 	for i := 0; i < start; i++ {
 		if !math.IsNaN(wr[i]) {
-			t.Errorf("%v: wr modified before [ilo:ihiz+1] block", prefix)
+			t.Errorf("%v: wr modified before [ilo:ihi+1] block", prefix)
 		}
 		if !math.IsNaN(wi[i]) {
-			t.Errorf("%v: wi modified before [ilo:ihiz+1] block", prefix)
+			t.Errorf("%v: wi modified before [ilo:ihi+1] block", prefix)
 		}
 	}
 	for i := ihi + 1; i < n; i++ {
 		if !math.IsNaN(wr[i]) {
-			t.Errorf("%v: wr modified after [ilo:ihiz+1] block", prefix)
+			t.Errorf("%v: wr modified after [ilo:ihi+1] block", prefix)
 		}
 		if !math.IsNaN(wi[i]) {
-			t.Errorf("%v: wi modified after [ilo:ihiz+1] block", prefix)
+			t.Errorf("%v: wi modified after [ilo:ihi+1] block", prefix)
 		}
 	}
 

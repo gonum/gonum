@@ -468,7 +468,7 @@ func TestMoveLocalDirected(t *testing.T) {
 	}
 }
 
-func TestLouvainDirected(t *testing.T) {
+func TestModularizeDirected(t *testing.T) {
 	const louvainIterations = 20
 
 	for _, test := range communityDirectedQTests {
@@ -499,11 +499,11 @@ func TestLouvainDirected(t *testing.T) {
 			got   *ReducedDirected
 			bestQ = math.Inf(-1)
 		)
-		// Louvain is randomised so we do this to
+		// Modularize is randomised so we do this to
 		// ensure the level tests are consistent.
 		src := rand.New(rand.NewSource(1))
 		for i := 0; i < louvainIterations; i++ {
-			r := LouvainDirected(g, 1, src)
+			r := Modularize(g, 1, src).(*ReducedDirected)
 			if q := Q(r, nil, 1); q > bestQ || math.IsNaN(q) {
 				bestQ = q
 				got = r
@@ -515,7 +515,7 @@ func TestLouvainDirected(t *testing.T) {
 			}
 
 			var qs []float64
-			for p := r; p != nil; p = p.Expanded() {
+			for p := r; p != nil; p = p.Expanded().(*ReducedDirected) {
 				qs = append(qs, Q(p, nil, 1))
 			}
 
@@ -537,7 +537,7 @@ func TestLouvainDirected(t *testing.T) {
 		}
 
 		var levels []level
-		for p := got; p != nil; p = p.Expanded() {
+		for p := got; p != nil; p = p.Expanded().(*ReducedDirected) {
 			var communities [][]graph.Node
 			if p.parent != nil {
 				communities = p.parent.Communities()
@@ -577,13 +577,13 @@ func TestNonContiguousDirected(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		LouvainDirected(g, 1, nil)
+		Modularize(g, 1, nil)
 	}()
 }
 
 func BenchmarkLouvainDirected(b *testing.B) {
 	src := rand.New(rand.NewSource(1))
 	for i := 0; i < b.N; i++ {
-		LouvainDirected(dupGraphDirected, 1, src)
+		Modularize(dupGraphDirected, 1, src)
 	}
 }

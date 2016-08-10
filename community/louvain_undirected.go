@@ -67,12 +67,13 @@ func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution floa
 	return q / m2
 }
 
-// Louvain returns the hierarchical modularization of g at the given resolution
-// using the Louvain algorithm. If src is nil, rand.Intn is used as the random
-// generator. Louvain will panic if g has any edge with negative edge weight.
+// louvainUndirected returns the hierarchical modularization of g at the given
+// resolution using the Louvain algorithm. If src is nil, rand.Intn is used as
+// the random generator. Louvain will panic if g has any edge with negative edge
+// weight.
 //
 // graph.Undirect may be used as a shim to allow modularization of directed graphs.
-func Louvain(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUndirected {
+func louvainUndirected(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUndirected {
 	// See louvain.tex for a detailed description
 	// of the algorithm used here.
 
@@ -113,6 +114,7 @@ type ReducedUndirected struct {
 var (
 	_ graph.Undirected = (*ReducedUndirected)(nil)
 	_ graph.Weighter   = (*ReducedUndirected)(nil)
+	_ ReducedGraph     = (*ReducedUndirected)(nil)
 )
 
 // Communities returns the community memberships of the nodes in the
@@ -154,7 +156,7 @@ func (g *ReducedUndirected) Structure() [][]graph.Node {
 
 // Expanded returns the next lower level of the module clustering or nil
 // if at the lowest level.
-func (g *ReducedUndirected) Expanded() *ReducedUndirected {
+func (g *ReducedUndirected) Expanded() ReducedGraph {
 	return g.parent
 }
 

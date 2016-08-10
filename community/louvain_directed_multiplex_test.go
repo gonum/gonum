@@ -586,7 +586,7 @@ func TestLouvainDirectedMultiplex(t *testing.T) {
 		// ensure the level tests are consistent.
 		src := rand.New(rand.NewSource(1))
 		for i := 0; i < louvainIterations; i++ {
-			r := LouvainDirectedMultiplex(g, weights, nil, true, src)
+			r := ModularizeMultiplex(g, weights, nil, true, src).(*ReducedDirectedMultiplex)
 			if q := floats.Sum(QMultiplex(r, nil, weights, nil)); q > bestQ || math.IsNaN(q) {
 				bestQ = q
 				got = r
@@ -598,7 +598,7 @@ func TestLouvainDirectedMultiplex(t *testing.T) {
 			}
 
 			var qs []float64
-			for p := r; p != nil; p = p.Expanded() {
+			for p := r; p != nil; p = p.Expanded().(*ReducedDirectedMultiplex) {
 				qs = append(qs, floats.Sum(QMultiplex(p, nil, weights, nil)))
 			}
 
@@ -620,7 +620,7 @@ func TestLouvainDirectedMultiplex(t *testing.T) {
 		}
 
 		var levels []level
-		for p := got; p != nil; p = p.Expanded() {
+		for p := got; p != nil; p = p.Expanded().(*ReducedDirectedMultiplex) {
 			var communities [][]graph.Node
 			if p.parent != nil {
 				communities = p.parent.Communities()
@@ -660,14 +660,14 @@ func TestNonContiguousDirectedMultiplex(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		LouvainDirectedMultiplex(DirectedLayers{g}, nil, nil, true, nil)
+		ModularizeMultiplex(DirectedLayers{g}, nil, nil, true, nil)
 	}()
 }
 
 func BenchmarkLouvainDirectedMultiplex(b *testing.B) {
 	src := rand.New(rand.NewSource(1))
 	for i := 0; i < b.N; i++ {
-		LouvainDirectedMultiplex(DirectedLayers{dupGraphDirected}, nil, nil, true, src)
+		ModularizeMultiplex(DirectedLayers{dupGraphDirected}, nil, nil, true, src)
 	}
 }
 

@@ -7,6 +7,7 @@ package community
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/gonum/graph"
 )
@@ -30,6 +31,56 @@ func Q(g graph.Graph, communities [][]graph.Node, resolution float64) float64 {
 		return qUndirected(g, communities, resolution)
 	case graph.Directed:
 		return qDirected(g, communities, resolution)
+	default:
+		panic(fmt.Sprintf("community: invalid graph type: %T", g))
+	}
+}
+
+// ReducedGraph is a modularised graph.
+type ReducedGraph interface {
+	graph.Graph
+
+	// Communities returns the community memberships
+	// of the nodes in the graph used to generate
+	// the reduced graph.
+	Communities() [][]graph.Node
+
+	// Structure returns the community structure of
+	// the current level of the module clustering.
+	// The first index of the returned value
+	// corresponds to the index of the nodes in the
+	// next higher level if it exists. The returned
+	// value should not be mutated.
+	Structure() [][]graph.Node
+
+	// Expanded returns the next lower level of the
+	// module clustering or nil if at the lowest level.
+	//
+	// The returned ReducedGraph will be the same
+	// concrete type as the receiver.
+	Expanded() ReducedGraph
+}
+
+// Modularize returns the hierarchical modularization of g at the given resolution
+// using the Louvain algorithm. If src is nil, rand.Intn is used as the random
+// generator. Modularize will panic if g has any edge with negative edge weight.
+//
+// If g is undirected it is modularised to minimise
+//  Q = 1/2m \sum_{ij} [ A_{ij} - (\gamma k_i k_j)/2m ] \delta(c_i,c_j),
+// If g is directed it is modularised to minimise
+//  Q = 1/m \sum_{ij} [ A_{ij} - (\gamma k_i^in k_j^out)/m ] \delta(c_i,c_j).
+//
+// The concrete type of the ReducedGraph will be a pointer to either a
+// ReducedUndirected or a ReducedDirected depending on the type of g.
+//
+// graph.Undirect may be used as a shim to allow modularization of
+// directed graphs with the undirected modularity function.
+func Modularize(g graph.Graph, resolution float64, src *rand.Rand) ReducedGraph {
+	switch g := g.(type) {
+	case graph.Undirected:
+		return louvainUndirected(g, resolution, src)
+	case graph.Directed:
+		return louvainDirected(g, resolution, src)
 	default:
 		panic(fmt.Sprintf("community: invalid graph type: %T", g))
 	}
@@ -62,9 +113,9 @@ type Multiplex interface {
 // negative edge weight.
 //
 // If g is undirected, Q is calculated according to
-//  Q = \sum_{layer} w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m_{layer} ] \delta(c_i,c_j),
+//  Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m_{layer} ] \delta(c_i,c_j),
 // If g is directed, it is calculated according to
-//  Q = \sum_{layer} w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i^in k_j^out)/m_{layer} ] \delta(c_i,c_j).
+//  Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i^in k_j^out)/m_{layer} ] \delta(c_i,c_j).
 //
 // Note that Q values for multiplex graphs are not scaled by the total layer edge weight.
 //
@@ -83,6 +134,65 @@ func QMultiplex(g Multiplex, communities [][]graph.Node, weights, resolutions []
 		return qUndirectedMultiplex(g, communities, weights, resolutions)
 	case DirectedMultiplex:
 		return qDirectedMultiplex(g, communities, weights, resolutions)
+	default:
+		panic(fmt.Sprintf("community: invalid graph type: %T", g))
+	}
+}
+
+// ReducedMultiplex is a modularised multiplex graph.
+type ReducedMultiplex interface {
+	Multiplex
+
+	// Communities returns the community memberships
+	// of the nodes in the graph used to generate
+	// the reduced graph.
+	Communities() [][]graph.Node
+
+	// Structure returns the community structure of
+	// the current level of the module clustering.
+	// The first index of the returned value
+	// corresponds to the index of the nodes in the
+	// next higher level if it exists. The returned
+	// value should not be mutated.
+	Structure() [][]graph.Node
+
+	// Expanded returns the next lower level of the
+	// module clustering or nil if at the lowest level.
+	//
+	// The returned ReducedGraph will be the same
+	// concrete type as the receiver.
+	Expanded() ReducedMultiplex
+}
+
+// ModularizeMultiplex returns the hierarchical modularization of g at the given resolution
+// using the Louvain algorithm. If all is true and g have negatively weighted layers, all
+// communities will be searched during the modularization. If src is nil, rand.Intn is
+// used as the random generator. ModularizeMultiplex will panic if g has any edge with
+// edge weight that does not sign-match the layer weight.
+//
+// If g is undirected it is modularised to minimise
+//  Q = \sum w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m ] \delta(c_i,c_j).
+// If g is directed it is modularised to minimise
+//  Q = \sum w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i^in k_j^out)/m_{layer} ] \delta(c_i,c_j).
+//
+// The concrete type of the ReducedMultiplex will be a pointer to a
+// ReducedUndirectedMultiplex.
+//
+// graph.Undirect may be used as a shim to allow modularization of
+// directed graphs with the undirected modularity function.
+func ModularizeMultiplex(g Multiplex, weights, resolutions []float64, all bool, src *rand.Rand) ReducedMultiplex {
+	if weights != nil && len(weights) != g.Depth() {
+		panic("community: weights vector length mismatch")
+	}
+	if resolutions != nil && len(resolutions) != 1 && len(resolutions) != g.Depth() {
+		panic("community: resolutions vector length mismatch")
+	}
+
+	switch g := g.(type) {
+	case UndirectedMultiplex:
+		return louvainUndirectedMultiplex(g, weights, resolutions, all, src)
+	case DirectedMultiplex:
+		return louvainDirectedMultiplex(g, weights, resolutions, all, src)
 	default:
 		panic(fmt.Sprintf("community: invalid graph type: %T", g))
 	}

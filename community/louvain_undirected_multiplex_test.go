@@ -551,11 +551,11 @@ func TestLouvainMultiplex(t *testing.T) {
 			got   *ReducedUndirectedMultiplex
 			bestQ = math.Inf(-1)
 		)
-		// Louvain is randomised so we do this to
+		// Modularize is randomised so we do this to
 		// ensure the level tests are consistent.
 		src := rand.New(rand.NewSource(1))
 		for i := 0; i < louvainIterations; i++ {
-			r := LouvainMultiplex(g, weights, nil, true, src)
+			r := ModularizeMultiplex(g, weights, nil, true, src).(*ReducedUndirectedMultiplex)
 			if q := floats.Sum(QMultiplex(r, nil, weights, nil)); q > bestQ || math.IsNaN(q) {
 				bestQ = q
 				got = r
@@ -567,7 +567,7 @@ func TestLouvainMultiplex(t *testing.T) {
 			}
 
 			var qs []float64
-			for p := r; p != nil; p = p.Expanded() {
+			for p := r; p != nil; p = p.Expanded().(*ReducedUndirectedMultiplex) {
 				qs = append(qs, floats.Sum(QMultiplex(p, nil, weights, nil)))
 			}
 
@@ -589,7 +589,7 @@ func TestLouvainMultiplex(t *testing.T) {
 		}
 
 		var levels []level
-		for p := got; p != nil; p = p.Expanded() {
+		for p := got; p != nil; p = p.Expanded().(*ReducedUndirectedMultiplex) {
 			var communities [][]graph.Node
 			if p.parent != nil {
 				communities = p.parent.Communities()
@@ -629,14 +629,14 @@ func TestNonContiguousUndirectedMultiplex(t *testing.T) {
 				t.Error("unexpected panic with non-contiguous ID range")
 			}
 		}()
-		LouvainMultiplex(UndirectedLayers{g}, nil, nil, true, nil)
+		ModularizeMultiplex(UndirectedLayers{g}, nil, nil, true, nil)
 	}()
 }
 
 func BenchmarkLouvainMultiplex(b *testing.B) {
 	src := rand.New(rand.NewSource(1))
 	for i := 0; i < b.N; i++ {
-		LouvainMultiplex(UndirectedLayers{dupGraph}, nil, nil, true, src)
+		ModularizeMultiplex(UndirectedLayers{dupGraph}, nil, nil, true, src)
 	}
 }
 

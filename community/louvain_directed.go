@@ -69,11 +69,11 @@ func qDirected(g graph.Directed, communities [][]graph.Node, resolution float64)
 	return q / m
 }
 
-// LouvainDirected returns the hierarchical modularization of g at the given
+// louvainDirected returns the hierarchical modularization of g at the given
 // resolution using the Louvain algorithm. If src is nil, rand.Intn is used
 // as the random generator. Louvain will panic if g has any edge with negative
 // edge weight.
-func LouvainDirected(g graph.Directed, resolution float64, src *rand.Rand) *ReducedDirected {
+func louvainDirected(g graph.Directed, resolution float64, src *rand.Rand) ReducedGraph {
 	// See louvain.tex for a detailed description
 	// of the algorithm used here.
 
@@ -114,6 +114,7 @@ type ReducedDirected struct {
 var (
 	_ graph.Directed = (*ReducedDirected)(nil)
 	_ graph.Weighter = (*ReducedDirected)(nil)
+	_ ReducedGraph   = (*ReducedUndirected)(nil)
 )
 
 // Communities returns the community memberships of the nodes in the
@@ -155,7 +156,7 @@ func (g *ReducedDirected) Structure() [][]graph.Node {
 
 // Expanded returns the next lower level of the module clustering or nil
 // if at the lowest level.
-func (g *ReducedDirected) Expanded() *ReducedDirected {
+func (g *ReducedDirected) Expanded() ReducedGraph {
 	return g.parent
 }
 

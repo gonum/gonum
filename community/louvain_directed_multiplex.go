@@ -38,7 +38,7 @@ type DirectedMultiplex interface {
 // qUndirectedMultiplex will panic if the graph has any layer weight-scaled edge with
 // negative edge weight.
 //
-//  Q = \sum_{layer} w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m ] \delta(c_i,c_j)
+//  Q_{layer} = w_{layer} \sum_{ij} [ A_{layer}*_{ij} - (\gamma_{layer} k_i k_j)/2m ] \delta(c_i,c_j)
 //
 // Note that Q values for multiplex graphs are not scaled by the total layer edge weight.
 func qDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, weights, resolutions []float64) []float64 {
@@ -162,7 +162,7 @@ func (g DirectedLayers) Layer(l int) graph.Directed { return g[l] }
 // edge weight that does not sign-match the layer weight.
 //
 // graph.Undirect may be used as a shim to allow modularization of directed graphs.
-func LouvainDirectedMultiplex(g DirectedMultiplex, weights, resolutions []float64, all bool, src *rand.Rand) *ReducedDirectedMultiplex {
+func louvainDirectedMultiplex(g DirectedMultiplex, weights, resolutions []float64, all bool, src *rand.Rand) *ReducedDirectedMultiplex {
 	if weights != nil && len(weights) != g.Depth() {
 		panic("community: weights vector length mismatch")
 	}
@@ -269,7 +269,7 @@ func (g *ReducedDirectedMultiplex) Structure() [][]graph.Node {
 
 // Expanded returns the next lower level of the module clustering or nil
 // if at the lowest level.
-func (g *ReducedDirectedMultiplex) Expanded() *ReducedDirectedMultiplex {
+func (g *ReducedDirectedMultiplex) Expanded() ReducedMultiplex {
 	return g.parent
 }
 

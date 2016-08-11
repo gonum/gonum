@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package airy
+package mathext
 
 import (
 	"math"
@@ -17,7 +17,7 @@ func TestAiry(t *testing.T) {
 		{5, 1.08344428136074e-04},
 		{5i, 29.9014823980070 + 21.6778315987835i},
 	} {
-		ans := Ai(test.z)
+		ans := AiryAi(test.z)
 		if math.Abs(real(ans)-real(test.ans)) > 1e-10 {
 			t.Errorf("Real part mismatch. Got %v, want %v", real(ans), real(test.ans))
 		}

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package airy
+package mathext
 
-import "github.com/gonum/mathext/airy/internal/amos"
+import "github.com/gonum/mathext/internal/amos"
 
-// Ai returns the value of the Airy function at z. The Airy function here,
+// AiryAi returns the value of the Airy function at z. The Airy function here,
 // Ai(z), is one of the two linearly independent solutions to
 //  y'' - y*z = 0.
 // See http://mathworld.wolfram.com/AiryFunctions.html for more detailed information.
-func Ai(z complex128) complex128 {
+func AiryAi(z complex128) complex128 {
 	// id specifies the order of the derivative to compute,
 	// 0 for the function itself and 1 for the derivative.
 	// kode specifies the scaling option. See the function
@@ -21,11 +21,11 @@ func Ai(z complex128) complex128 {
 	return complex(air, aii)
 }
 
-// AiDeriv returns the value of the derivative of the Airy function at z. The
+// AiryAiDeriv returns the value of the derivative of the Airy function at z. The
 // Airy function here, Ai(z), is one of the two linearly independent solutions to
 //  y'' - y*z = 0.
 // See http://mathworld.wolfram.com/AiryFunctions.html for more detailed information.
-func AiDeriv(z complex128) complex128 {
+func AiryAiDeriv(z complex128) complex128 {
 	// id specifies the order of the derivative to compute,
 	// 0 for the function itself and 1 for the derivative.
 	// kode specifies the scaling option. See the function

@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"github.com/gonum/floats"
-	"github.com/gonum/mathext/airy"
+	"github.com/gonum/mathext"
 )
 
 // Hermite generates sample locations and weights for performing quadrature with
@@ -154,8 +154,8 @@ func (h Hermite) hermpolyAsyAiry(i, n int, t float64) (valVec, dvalVec float64) 
 	chi := -math.Pow(3*eta/2, 2.0/3)
 	phi := math.Pow(-chi/(sinT*sinT), 1.0/4)
 	cnst := 2 * math.SqrtPi * math.Pow(musq, 1.0/6) * phi
-	airy0 := real(airy.Ai(complex(math.Pow(musq, 2.0/3)*chi, 0)))
-	airy1 := real(airy.AiDeriv(complex(math.Pow(musq, 2.0/3)*chi, 0)))
+	airy0 := real(mathext.AiryAi(complex(math.Pow(musq, 2.0/3)*chi, 0)))
+	airy1 := real(mathext.AiryAiDeriv(complex(math.Pow(musq, 2.0/3)*chi, 0)))
 
 	// Terms in 12.10.43:
 	const (

@@ -22,21 +22,21 @@ var imach = []int{-0, 5, 6, 0, 0, 32, 4, 2, 31, 2147483647, 2, 24, -125, 127, 53
 
 var dmach = []float64{math.NaN(), 2.23E-308, 1.79E-308, 1.11E-16, 2.22E-16, 0.30103000998497009}
 
-func iabs(a int) int {
+func abs(a int) int {
 	if a >= 0 {
 		return a
 	}
 	return -a
 }
 
-func min0(a, b int) int {
+func min(a, b int) int {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-func max0(a, b int) int {
+func max(a, b int) int {
 	if a > b {
 		return a
 	}
@@ -121,7 +121,7 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 		C         OF SIGNIFICANCE BY ARGUMENT REDUCTION OCCUR. CONSEQUENTLY, IF
 		C         THE MAGNITUDE OF ZETA=(2/3)*Z**1.5 EXCEEDS U1=SQRT(0.5/UR),
 		C         THEN LOSSES EXCEEDING HALF PRECISION ARE LIKELY AND AN ERROR
-		C         FLAG IERR=3 IS TRIGGERED WHERE UR=dmax(dmach[4),1.0D-18) IS
+		C         FLAG IERR=3 IS TRIGGERED WHERE UR=math.Max(dmach[4),1.0D-18) IS
 		C         DOUBLE PRECISION UNIT ROUNDOFF LIMITED TO 18 DIGITS PRECISION.
 		C         ALSO, if THE MAGNITUDE OF ZETA IS LARGER THAN U2=0.5/UR, THEN
 		C         ALL SIGNIFICANCE IS LOST AND IERR=4. IN ORDER TO USE THE INT
@@ -218,8 +218,8 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	if IERR != 0 {
 		return
 	}
-	AZ = zabs(complex(ZR, ZI))
-	TOL = dmax(dmach[4], 1.0E-18)
+	AZ = cmplx.Abs(complex(ZR, ZI))
+	TOL = math.Max(dmach[4], 1.0E-18)
 	FID = float64(ID)
 	if AZ > 1.0E0 {
 		goto Seventy
@@ -253,7 +253,7 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	DK = 3.0E0 + FID + FID
 	D1 = AK * DK
 	D2 = BK * CK
-	AD = dmin(D1, D2)
+	AD = math.Min(D1, D2)
 	AK = 24.0E0 + 9.0E0*FID
 	BK = 30.0E0 - 9.0E0*FID
 	for K = 1; K <= 25; K++ {
@@ -270,7 +270,7 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 		ATRM = ATRM * AZ3 / AD
 		D1 = D1 + AK
 		D2 = D2 + BK
-		AD = dmin(D1, D2)
+		AD = math.Min(D1, D2)
 		if ATRM < TOL*AD {
 			goto Fourty
 		}
@@ -286,12 +286,12 @@ Fourty:
 	if KODE == 1 {
 		return
 	}
-	tmp = zsqrt(complex(ZR, ZI))
+	tmp = cmplx.Sqrt(complex(ZR, ZI))
 	STR = real(tmp)
 	STI = imag(tmp)
 	ZTAR = TTH * (ZR*STR - ZI*STI)
 	ZTAI = TTH * (ZR*STI + ZI*STR)
-	tmp = zexp(complex(ZTAR, ZTAI))
+	tmp = cmplx.Exp(complex(ZTAR, ZTAI))
 	STR = real(tmp)
 	STI = imag(tmp)
 	PTR = AIR*STR - AII*STI
@@ -315,12 +315,12 @@ Sixty:
 	if KODE == 1 {
 		return
 	}
-	tmp = zsqrt(complex(ZR, ZI))
+	tmp = cmplx.Sqrt(complex(ZR, ZI))
 	STR = real(tmp)
 	STI = imag(tmp)
 	ZTAR = TTH * (ZR*STR - ZI*STI)
 	ZTAI = TTH * (ZR*STI + ZI*STR)
-	tmp = zexp(complex(ZTAR, ZTAI))
+	tmp = cmplx.Exp(complex(ZTAR, ZTAI))
 	STR = real(tmp)
 	STI = imag(tmp)
 	PTR = STR*AIR - STI*AII
@@ -346,29 +346,29 @@ Seventy:
 	K2 = imach[16]
 	R1M5 = dmach[5]
 
-	K = min0(iabs(K1), iabs(K2))
+	K = min(abs(K1), abs(K2))
 	ELIM = 2.303E0 * (float64(K)*R1M5 - 3.0E0)
 	K1 = imach[14] - 1
 	AA = R1M5 * float64(K1)
-	DIG = dmin(AA, 18.0E0)
+	DIG = math.Min(AA, 18.0E0)
 	AA = AA * 2.303E0
-	ALIM = ELIM + dmax(-AA, -41.45E0)
+	ALIM = ELIM + math.Max(-AA, -41.45E0)
 	RL = 1.2E0*DIG + 3.0E0
-	ALAZ = dlog(AZ)
+	ALAZ = math.Log(AZ)
 
 	// TEST FOR PROPER RANGE.
 	AA = 0.5E0 / TOL
 	BB = float64(float32(imach[9])) * 0.5E0
-	AA = dmin(AA, BB)
+	AA = math.Min(AA, BB)
 	AA = math.Pow(AA, TTH)
 	if AZ > AA {
 		goto TwoSixty
 	}
-	AA = dsqrt(AA)
+	AA = math.Sqrt(AA)
 	if AZ > AA {
 		IERR = 3
 	}
-	tmp = zsqrt(complex(ZR, ZI))
+	tmp = cmplx.Sqrt(complex(ZR, ZI))
 	CSQR = real(tmp)
 	CSQI = imag(tmp)
 	ZTAR = TTH * (ZR*CSQR - ZI*CSQI)
@@ -382,7 +382,7 @@ Seventy:
 		goto Eighty
 	}
 	BK = ZTAR
-	CK = -dabs(BK)
+	CK = -math.Abs(BK)
 	ZTAR = CK
 	ZTAI = AK
 
@@ -500,7 +500,7 @@ OneEighty:
 OneNinety:
 	AIR = -C2
 	AII = 0.0E0
-	AA = dsqrt(AA)
+	AA = math.Sqrt(AA)
 	if AZ <= AA {
 		goto TwoHundred
 	}
@@ -554,6 +554,7 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	var I, IFLAG, INU, K, KFLAG, KK, KMAX, KODED, IDUM, J, IC, INUB, NW int
 
 	var sinh, cosh complex128
+	//var sin, cos float64
 
 	var tmp complex128
 	var CSSR, CSRR, BRY [4]float64
@@ -579,7 +580,7 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 		-2.15241674114950973E-04, -2.01348547807882387E-05,
 		1.13302723198169588E-06, 6.11609510448141582E-09}
 
-	CAZ = zabs(complex(ZR, ZI))
+	CAZ = cmplx.Abs(complex(ZR, ZI))
 	CSCLR = 1.0E0 / TOL
 	CRSCR = TOL
 	CSSR[1] = CSCLR
@@ -601,11 +602,11 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	RZI = (STI + STI) * RCAZ
 	INU = int(float32(FNU + 0.5))
 	DNU = FNU - float64(INU)
-	if dabs(DNU) == 0.5E0 {
+	if math.Abs(DNU) == 0.5E0 {
 		goto OneTen
 	}
 	DNU2 = 0.0E0
-	if dabs(DNU) > TOL {
+	if math.Abs(DNU) > TOL {
 		DNU2 = DNU * DNU
 	}
 	if CAZ > R1 {
@@ -614,12 +615,14 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 
 	// SERIES FOR CABS(Z)<=R1.
 	FC = 1.0E0
-	tmp = zlog(complex(RZR, RZI))
+	tmp = cmplx.Log(complex(RZR, RZI))
 	SMUR = real(tmp)
 	SMUI = imag(tmp)
 	FMUR = SMUR * DNU
 	FMUI = SMUI * DNU
-	sinh, cosh = Zshch(complex(FMUR, FMUI))
+	tmp = complex(FMUR, FMUI)
+	sinh = cmplx.Sinh(tmp)
+	cosh = cmplx.Cosh(tmp)
 	CSHR = real(sinh)
 	CSHI = imag(sinh)
 	CCHR = real(cosh)
@@ -628,16 +631,16 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 		goto Ten
 	}
 	FC = DNU * DPI
-	FC = FC / dsin(FC)
+	FC = FC / math.Sin(FC)
 	SMUR = CSHR / DNU
 	SMUI = CSHI / DNU
 Ten:
 	A2 = 1.0E0 + DNU
 
 	// GAM(1-Z)*GAM(1+Z)=PI*Z/SIN(PI*Z), T1=1/GAM(1-DNU), T2=1/GAM(1+DNU).
-	T2 = dexp(-dgamln(A2, IDUM))
+	T2 = math.Exp(-dgamln(A2, IDUM))
 	T1 = 1.0E0 / (T2 * FC)
-	if dabs(DNU) > 0.1E0 {
+	if math.Abs(DNU) > 0.1E0 {
 		goto Fourty
 	}
 
@@ -648,7 +651,7 @@ Ten:
 		AK = AK * DNU2
 		TM = CC[K] * AK
 		S = S + TM
-		if dabs(TM) < TOL {
+		if math.Abs(TM) < TOL {
 			goto Thirty
 		}
 	}
@@ -661,12 +664,12 @@ Fifty:
 	G2 = (T1 + T2) * 0.5E0
 	FR = FC * (CCHR*G1 + SMUR*G2)
 	FI = FC * (CCHI*G1 + SMUI*G2)
-	tmp = zexp(complex(FMUR, FMUI))
+	tmp = cmplx.Exp(complex(FMUR, FMUI))
 	STR = real(tmp)
 	STI = imag(tmp)
 	PR = 0.5E0 * STR / T2
 	PI = 0.5E0 * STI / T2
-	tmp = zdiv(complex(0.5, 0), complex(STR, STI))
+	tmp = complex(0.5, 0) / complex(STR, STI)
 	PTR = real(tmp)
 	PTI = imag(tmp)
 	QR = PTR / T1
@@ -688,7 +691,7 @@ Fifty:
 	if CAZ < TOL {
 		goto Seventy
 	}
-	tmp = zmlt(complex(ZR, ZI), complex(ZR, ZI))
+	tmp = complex(ZR, ZI) * complex(ZR, ZI)
 	CZR = real(tmp)
 	CZI = imag(tmp)
 	CZR = 0.25E0 * CZR
@@ -721,10 +724,10 @@ Seventy:
 	if KODED == 1 {
 		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
 	}
-	tmp = zexp(complex(ZR, ZI))
+	tmp = cmplx.Exp(complex(ZR, ZI))
 	STR = real(tmp)
 	STI = imag(tmp)
-	tmp = zmlt(complex(S1R, S1I), complex(STR, STI))
+	tmp = complex(S1R, S1I) * complex(STR, STI)
 	YR[1] = real(tmp)
 	YI[1] = imag(tmp)
 	return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
@@ -734,7 +737,7 @@ Eighty:
 	if CAZ < TOL {
 		goto OneHundred
 	}
-	tmp = zmlt(complex(ZR, ZI), complex(ZR, ZI))
+	tmp = complex(ZR, ZI) * complex(ZR, ZI)
 	CZR = real(tmp)
 	CZI = imag(tmp)
 	CZR = 0.25E0 * CZR
@@ -768,14 +771,14 @@ Ninety:
 OneHundred:
 	KFLAG = 2
 	A1 = FNU + 1.0E0
-	AK = A1 * dabs(SMUR)
+	AK = A1 * math.Abs(SMUR)
 	if AK > ALIM {
 		KFLAG = 3
 	}
 	STR = CSSR[KFLAG]
 	P2R = S2R * STR
 	P2I = S2I * STR
-	tmp = zmlt(complex(P2R, P2I), complex(RZR, RZI))
+	tmp = complex(P2R, P2I) * complex(RZR, RZI)
 	S2R = real(tmp)
 	S2I = imag(tmp)
 	S1R = S1R * STR
@@ -783,13 +786,13 @@ OneHundred:
 	if KODED == 1 {
 		goto TwoTen
 	}
-	tmp = zexp(complex(ZR, ZI))
+	tmp = cmplx.Exp(complex(ZR, ZI))
 	FR = real(tmp)
 	FI = imag(tmp)
-	tmp = zmlt(complex(S1R, S1I), complex(FR, FI))
+	tmp = complex(S1R, S1I) * complex(FR, FI)
 	S1R = real(tmp)
 	S1I = imag(tmp)
-	tmp = zmlt(complex(S2R, S2I), complex(FR, FI))
+	tmp = complex(S2R, S2I) * complex(FR, FI)
 	S2R = real(tmp)
 	S2I = imag(tmp)
 	goto TwoTen
@@ -798,10 +801,10 @@ OneHundred:
 	// IFLAG=1 MEANS AN UNDERFLOW OCCURRED- COMPUTATION PROCEEDS WITH
 	// KODED=2 AND A TEST FOR ON SCALE VALUES IS MADE DURING FORWARD RECURSION
 OneTen:
-	tmp = zsqrt(complex(ZR, ZI))
+	tmp = cmplx.Sqrt(complex(ZR, ZI))
 	STR = real(tmp)
 	STI = imag(tmp)
-	tmp = zdiv(complex(RTHPI, CZEROI), complex(STR, STI))
+	tmp = complex(RTHPI, CZEROI) / complex(STR, STI)
 	COEFR = real(tmp)
 	COEFI = imag(tmp)
 	KFLAG = 2
@@ -812,23 +815,24 @@ OneTen:
 		goto TwoNinety
 	}
 
-	STR = dexp(-ZR) * CSSR[KFLAG]
-	STI = -STR * dsin(ZI)
-	STR = STR * dcos(ZI)
-	tmp = zmlt(complex(COEFR, COEFI), complex(STR, STI))
+	STR = math.Exp(-ZR) * CSSR[KFLAG]
+	//sin, cos = math.Sincos(ZI)
+	STI = -STR * math.Sin(ZI)
+	STR = STR * math.Cos(ZI)
+	tmp = complex(COEFR, COEFI) * complex(STR, STI)
 	COEFR = real(tmp)
 	COEFI = imag(tmp)
 OneTwenty:
-	if dabs(DNU) == 0.5E0 {
+	if math.Abs(DNU) == 0.5E0 {
 		goto ThreeHundred
 	}
 	// MILLER ALGORITHM FOR CABS(Z)>R1.
-	AK = dcos(DPI * DNU)
-	AK = dabs(AK)
+	AK = math.Cos(DPI * DNU)
+	AK = math.Abs(AK)
 	if AK == CZEROR {
 		goto ThreeHundred
 	}
-	FHS = dabs(0.25E0 - DNU2)
+	FHS = math.Abs(0.25E0 - DNU2)
 	if FHS == CZEROR {
 		goto ThreeHundred
 	}
@@ -839,8 +843,8 @@ OneTwenty:
 	// TOL WHERE B IS THE BASE OF THE ARITHMETIC.
 	T1 = float64(imach[14] - 1)
 	T1 = T1 * dmach[5] * 3.321928094E0
-	T1 = dmax(T1, 12.0E0)
-	T1 = dmin(T1, 60.0E0)
+	T1 = math.Max(T1, 12.0E0)
+	T1 = math.Min(T1, 60.0E0)
 	T2 = TTH*T1 - 6.0E0
 	if ZR != 0.0E0 {
 		goto OneThirty
@@ -848,8 +852,8 @@ OneTwenty:
 	T1 = HPI
 	goto OneFourty
 OneThirty:
-	T1 = datan(ZI / ZR)
-	T1 = dabs(T1)
+	T1 = math.Atan(ZI / ZR)
+	T1 = math.Abs(T1)
 OneFourty:
 	if T2 > CAZ {
 		goto OneSeventy
@@ -874,23 +878,23 @@ OneFourty:
 		FKS = FKS + FK + FK + CTWOR
 		FHS = FHS + FK + FK
 		FK = FK + CONER
-		STR = dabs(P2R) * FK
+		STR = math.Abs(P2R) * FK
 		if ETEST < STR {
 			goto OneSixty
 		}
 	}
 	goto ThreeTen
 OneSixty:
-	FK = FK + SPI*T1*dsqrt(T2/CAZ)
-	FHS = dabs(0.25 - DNU2)
+	FK = FK + SPI*T1*math.Sqrt(T2/CAZ)
+	FHS = math.Abs(0.25 - DNU2)
 	goto OneEighty
 OneSeventy:
 	// COMPUTE BACKWARD INDEX K FOR CABS(Z)<R2.
-	A2 = dsqrt(CAZ)
-	AK = FPI * AK / (TOL * dsqrt(A2))
+	A2 = math.Sqrt(CAZ)
+	AK = FPI * AK / (TOL * math.Sqrt(A2))
 	AA = 3.0E0 * T1 / (1.0E0 + CAZ)
 	BB = 14.7E0 * T1 / (28.0E0 + CAZ)
-	AK = (dlog(AK) + CAZ*dcos(AA)/(1.0E0+0.008E0*CAZ)) / dcos(BB)
+	AK = (math.Log(AK) + CAZ*math.Cos(AA)/(1.0E0+0.008E0*CAZ)) / math.Cos(BB)
 	FK = 0.12125E0*AK*AK/CAZ + 1.5E0
 OneEighty:
 	// BACKWARD RECURRENCE LOOP FOR MILLER ALGORITHM.
@@ -921,16 +925,16 @@ OneEighty:
 		FK = FK - CONER
 	}
 	// COMPUTE (P2/CS)=(P2/CABS(CS))*(CONJG(CS)/CABS(CS)) FOR BETTER SCALING.
-	TM = zabs(complex(CSR, CSI))
+	TM = cmplx.Abs(complex(CSR, CSI))
 	PTR = 1.0E0 / TM
 	S1R = P2R * PTR
 	S1I = P2I * PTR
 	CSR = CSR * PTR
 	CSI = -CSI * PTR
-	tmp = zmlt(complex(COEFR, COEFI), complex(S1R, S1I))
+	tmp = complex(COEFR, COEFI) * complex(S1R, S1I)
 	STR = real(tmp)
 	STI = imag(tmp)
-	tmp = zmlt(complex(STR, STI), complex(CSR, CSI))
+	tmp = complex(STR, STI) * complex(CSR, CSI)
 	S1R = real(tmp)
 	S1I = imag(tmp)
 	if INU > 0 || N > 1 {
@@ -944,22 +948,22 @@ OneEighty:
 	goto TwoFourty
 TwoHundred:
 	// COMPUTE P1/P2=(P1/CABS(P2)*CONJG(P2)/CABS(P2) FOR SCALING.
-	TM = zabs(complex(P2R, P2I))
+	TM = cmplx.Abs(complex(P2R, P2I))
 	PTR = 1.0E0 / TM
 	P1R = P1R * PTR
 	P1I = P1I * PTR
 	P2R = P2R * PTR
 	P2I = -P2I * PTR
-	tmp = zmlt(complex(P1R, P1I), complex(P2R, P2I))
+	tmp = complex(P1R, P1I) * complex(P2R, P2I)
 	PTR = real(tmp)
 	PTI = imag(tmp)
 	STR = DNU + 0.5E0 - PTR
 	STI = -PTI
-	tmp = zdiv(complex(STR, STI), complex(ZR, ZI))
+	tmp = complex(STR, STI) / complex(ZR, ZI)
 	STR = real(tmp)
 	STI = imag(tmp)
 	STR = STR + 1.0E0
-	tmp = zmlt(complex(STR, STI), complex(S1R, S1I))
+	tmp = complex(STR, STI) * complex(S1R, S1I)
 	S2R = real(tmp)
 	S2I = imag(tmp)
 
@@ -1009,9 +1013,9 @@ TwoTwentyFive:
 		}
 		P2R = S2R * P1R
 		P2I = S2I * P1R
-		STR = dabs(P2R)
-		STI = dabs(P2I)
-		P2M = dmax(STR, STI)
+		STR = math.Abs(P2R)
+		STI = math.Abs(P2I)
+		P2M = math.Max(STR, STI)
 		if P2M <= ASCLE {
 			continue
 		}
@@ -1069,9 +1073,9 @@ TwoFifty:
 		if KFLAG >= 3 {
 			continue
 		}
-		STR = dabs(P2R)
-		STI = dabs(P2I)
-		P2M = dmax(STR, STI)
+		STR = math.Abs(P2R)
+		STI = math.Abs(P2I)
+		P2M = math.Max(STR, STI)
 		if P2M <= ASCLE {
 			continue
 		}
@@ -1093,7 +1097,7 @@ TwoFifty:
 	// IFLAG=1 CASES, FORWARD RECURRENCE ON SCALED VALUES ON UNDERFLOW.
 TwoSixtyOne:
 	HELIM = 0.5E0 * ELIM
-	ELM = dexp(-ELIM)
+	ELM = math.Exp(-ELIM)
 	CELMR = ELM
 	ASCLE = BRY[1]
 	ZDR = ZR
@@ -1109,20 +1113,21 @@ TwoSixtyOne:
 		S1I = STI
 		CKR = CKR + RZR
 		CKI = CKI + RZI
-		AS = zabs(complex(S2R, S2I))
-		ALAS = dlog(AS)
+		AS = cmplx.Abs(complex(S2R, S2I))
+		ALAS = math.Log(AS)
 		P2R = -ZDR + ALAS
 		if P2R < (-ELIM) {
 			goto TwoSixtyThree
 		}
-		tmp = zlog(complex(S2R, S2I))
+		tmp = cmplx.Log(complex(S2R, S2I))
 		STR = real(tmp)
 		STI = imag(tmp)
 		P2R = -ZDR + STR
 		P2I = -ZDI + STI
-		P2M = dexp(P2R) / TOL
-		P1R = P2M * dcos(P2I)
-		P1I = P2M * dsin(P2I)
+		P2M = math.Exp(P2R) / TOL
+		// sin, cos = math.Sincos(P2I)
+		P1R = P2M * math.Cos(P2I)
+		P1I = P2M * math.Sin(P2I)
 		P1R, P1I, NW, ASCLE, TOL = Zuchk(P1R, P1I, NW, ASCLE, TOL)
 		if NW != 0 {
 			goto TwoSixtyThree
@@ -1206,7 +1211,7 @@ TwoEighty:
 	goto TwoFifty
 TwoNinety:
 
-	// SCALE BY dexp(Z), IFLAG = 1 CASES.
+	// SCALE BY math.Exp(Z), IFLAG = 1 CASES.
 
 	KODED = 2
 	IFLAG = 1
@@ -1237,19 +1242,21 @@ func Zkscl(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASC
 	var I, IC, KK, NN, NW int
 	var tmp complex128
 	var CYR, CYI [3]float64
+	var sin, cos float64
+
 	// DIMENSION YR(N), YI(N), CYR(2), CYI(2)
 	ZEROR = 0
 	ZEROI = 0
 	NZ = 0
 	IC = 0
-	NN = min0(2, N)
+	NN = min(2, N)
 	for I = 1; I <= NN; I++ {
 		S1R = YR[I]
 		S1I = YI[I]
 		CYR[I] = S1R
 		CYI[I] = S1I
-		AS = zabs(complex(S1R, S1I))
-		ACS = -ZRR + dlog(AS)
+		AS = cmplx.Abs(complex(S1R, S1I))
+		ACS = -ZRR + math.Log(AS)
 		NZ = NZ + 1
 		YR[I] = ZEROR
 		YI[I] = ZEROI
@@ -1257,14 +1264,15 @@ func Zkscl(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASC
 			continue
 		}
 
-		tmp = zlog(complex(S1R, S1I))
+		tmp = cmplx.Log(complex(S1R, S1I))
 		CSR = real(tmp)
 		CSI = imag(tmp)
 		CSR = CSR - ZRR
 		CSI = CSI - ZRI
-		STR = dexp(CSR) / TOL
-		CSR = STR * dcos(CSI)
-		CSI = STR * dsin(CSI)
+		STR = math.Exp(CSR) / TOL
+		// sin, cos = math.Sincos(CSI)
+		CSR = STR * math.Cos(CSI)
+		CSI = STR * math.Sin(CSI)
 		CSR, CSI, NW, ASCLE, TOL = Zuchk(CSR, CSI, NW, ASCLE, TOL)
 		if NW != 0 {
 			continue
@@ -1298,7 +1306,7 @@ Twenty:
 	S2R = CYR[2]
 	S2I = CYI[2]
 	HELIM = 0.5E0 * ELIM
-	ELM = dexp(-ELIM)
+	ELM = math.Exp(-ELIM)
 	CELMR = ELM
 	ZDR = ZRR
 	ZDI = ZRI
@@ -1315,8 +1323,8 @@ Twenty:
 		S1I = CSI
 		CKR = CKR + RZR
 		CKI = CKI + RZI
-		AS = zabs(complex(S2R, S2I))
-		ALAS = dlog(AS)
+		AS = cmplx.Abs(complex(S2R, S2I))
+		ALAS = math.Log(AS)
 		ACS = -ZDR + ALAS
 		NZ = NZ + 1
 		YR[I] = ZEROR
@@ -1324,14 +1332,15 @@ Twenty:
 		if ACS < (-ELIM) {
 			goto TwentyFive
 		}
-		tmp = zlog(complex(S2R, S2I))
+		tmp = cmplx.Log(complex(S2R, S2I))
 		CSR = real(tmp)
 		CSI = imag(tmp)
 		CSR = CSR - ZDR
 		CSI = CSI - ZDI
-		STR = dexp(CSR) / TOL
-		CSR = STR * dcos(CSI)
-		CSI = STR * dsin(CSI)
+		STR = math.Exp(CSR) / TOL
+		sin, cos = math.Sincos(CSI)
+		CSR = STR * cos
+		CSI = STR * sin
 		CSR, CSI, NW, ASCLE, TOL = Zuchk(CSR, CSI, NW, ASCLE, TOL)
 		if NW != 0 {
 			goto TwentyFive
@@ -1379,13 +1388,13 @@ FourtyFive:
 func Zuchk(YR, YI float64, NZ int, ASCLE, TOL float64) (YRout, YIout float64, NZout int, ASCLEout, TOLout float64) {
 	var SS, ST, WR, WI float64
 	NZ = 0
-	WR = dabs(YR)
-	WI = dabs(YI)
-	ST = dmin(WR, WI)
+	WR = math.Abs(YR)
+	WI = math.Abs(YI)
+	ST = math.Min(WR, WI)
 	if ST > ASCLE {
 		return YR, YI, NZ, ASCLE, TOL
 	}
-	SS = dmax(WR, WI)
+	SS = math.Max(WR, WI)
 	ST = ST / TOL
 	if SS < ST {
 		NZ = 1
@@ -1409,6 +1418,8 @@ func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, T
 		CSPNI, C1R, C1I, C2R, C2I, DFNU, FMR, PI,
 		SGN, YY, ZNR, ZNI float64
 	var INU, IUF, NN, NW int
+	//var sin, cos float64
+
 	CYR := []float64{math.NaN(), 0, 0}
 	CYI := []float64{math.NaN(), 0, 0}
 
@@ -1416,7 +1427,7 @@ func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, T
 	NZ = 0
 	ZNR = -ZR
 	ZNI = -ZI
-	AZ = zabs(complex(ZR, ZI))
+	AZ = cmplx.Abs(complex(ZR, ZI))
 	NN = N
 	DFNU = FNU + float64(float32(N-1))
 	if AZ <= 2.0E0 {
@@ -1459,15 +1470,17 @@ Fourty:
 		goto Fifty
 	}
 	YY = -ZNI
-	CSGNR = -CSGNI * dsin(YY)
-	CSGNI = CSGNI * dcos(YY)
+	//sin, cos = math.Sincos(YY)
+	CSGNR = -CSGNI * math.Sin(YY)
+	CSGNI = CSGNI * math.Cos(YY)
 Fifty:
 	// CALCULATE CSPN=EXP(FNU*PI*I) TO MINIMIZE LOSSES OF SIGNIFICANCE
 	// WHEN FNU IS LARGE
 	INU = int(float32(FNU))
 	ARG = (FNU - float64(float32(INU))) * SGN
-	CSPNR = dcos(ARG)
-	CSPNI = dsin(ARG)
+	//sin, cos = math.Sincos(ARG)
+	CSPNR = math.Cos(ARG)
+	CSPNI = math.Sin(ARG)
 	if INU%2 == 0 {
 		goto Sixty
 	}
@@ -1511,6 +1524,7 @@ func Zasyi(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, RL, TOL, 
 
 	var I, IB, IL, INU, J, JL, K, KODED, M, NN int
 	var tmp complex128
+	// var sin, cos float64
 
 	PI = math.Pi
 	RTPI = 0.159154943091895336E0
@@ -1520,10 +1534,10 @@ func Zasyi(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, RL, TOL, 
 	CONEI = 0
 
 	NZ = 0
-	AZ = zabs(complex(ZR, ZI))
+	AZ = cmplx.Abs(complex(ZR, ZI))
 	ARM = 1.0E3 * dmach[1]
-	RTR1 = dsqrt(ARM)
-	IL = min0(2, N)
+	RTR1 = math.Sqrt(ARM)
+	IL = min(2, N)
 	DFNU = FNU + float64(float32(N-IL))
 
 	// OVERFLOW TEST
@@ -1532,7 +1546,7 @@ func Zasyi(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, RL, TOL, 
 	STI = -ZI * RAZ
 	AK1R = RTPI * STR * RAZ
 	AK1I = RTPI * STI * RAZ
-	tmp = zsqrt(complex(AK1R, AK1I))
+	tmp = cmplx.Sqrt(complex(AK1R, AK1I))
 	AK1R = real(tmp)
 	AK1I = imag(tmp)
 	CZR = ZR
@@ -1543,19 +1557,19 @@ func Zasyi(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, RL, TOL, 
 	CZR = ZEROR
 	CZI = ZI
 Ten:
-	if dabs(CZR) > ELIM {
+	if math.Abs(CZR) > ELIM {
 		goto OneHundred
 	}
 	DNU2 = DFNU + DFNU
 	KODED = 1
-	if (dabs(CZR) > ALIM) && (N > 2) {
+	if (math.Abs(CZR) > ALIM) && (N > 2) {
 		goto Twenty
 	}
 	KODED = 0
-	tmp = zexp(complex(CZR, CZI))
+	tmp = cmplx.Exp(complex(CZR, CZI))
 	STR = real(tmp)
 	STI = imag(tmp)
-	tmp = zmlt(complex(AK1R, AK1I), complex(STR, STI))
+	tmp = complex(AK1R, AK1I) * complex(STR, STI)
 	AK1R = real(tmp)
 	AK1I = imag(tmp)
 Twenty:
@@ -1583,8 +1597,9 @@ Twenty:
 	INU = int(float32(FNU))
 	ARG = (FNU - float64(float32(INU))) * PI
 	INU = INU + N - IL
-	AK = -dsin(ARG)
-	BK = dcos(ARG)
+	//sin, cos = math.Sincos(ARG)
+	AK = -math.Sin(ARG)
+	BK = math.Cos(ARG)
 	if ZI < 0.0E0 {
 		BK = -BK
 	}
@@ -1598,7 +1613,7 @@ Twenty:
 Thirty:
 	for K = 1; K <= IL; K++ {
 		SQK = FDN - 1.0E0
-		ATOL = S * dabs(SQK)
+		ATOL = S * math.Abs(SQK)
 		SGN = 1.0E0
 		CS1R = CONER
 		CS1I = CONEI
@@ -1614,7 +1629,7 @@ Thirty:
 		// TODO(btracey): This loop is executed tens of thousands of times. Why?
 		// is that really necessary?
 		for J = 1; J <= JL; J++ {
-			tmp = zdiv(complex(CKR, CKI), complex(DKR, DKI))
+			tmp = complex(CKR, CKI) / complex(DKR, DKI)
 			STR = real(tmp)
 			STI = imag(tmp)
 			CKR = STR * SQK
@@ -1626,7 +1641,7 @@ Thirty:
 			CS1I = CS1I + CKI*SGN
 			DKR = DKR + EZR
 			DKI = DKI + EZI
-			AA = AA * dabs(SQK) / BB
+			AA = AA * math.Abs(SQK) / BB
 			BB = BB + AEZ
 			AK = AK + 8.0E0
 			SQK = SQK - AK
@@ -1643,13 +1658,13 @@ Thirty:
 		}
 		TZR = ZR + ZR
 		TZI = ZI + ZI
-		tmp = zexp(complex(-TZR, -TZI))
+		tmp = cmplx.Exp(complex(-TZR, -TZI))
 		STR = real(tmp)
 		STI = imag(tmp)
-		tmp = zmlt(complex(STR, STI), complex(P1R, P1I))
+		tmp = complex(STR, STI) * complex(P1R, P1I)
 		STR = real(tmp)
 		STI = imag(tmp)
-		tmp = zmlt(complex(STR, STI), complex(CS2R, CS2I))
+		tmp = complex(STR, STI) * complex(CS2R, CS2I)
 		STR = real(tmp)
 		STI = imag(tmp)
 		S2R = S2R + STR
@@ -1682,7 +1697,7 @@ Thirty:
 	if KODED == 0 {
 		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, RL, TOL, ELIM, ALIM
 	}
-	tmp = zexp(complex(CZR, CZI))
+	tmp = cmplx.Exp(complex(CZR, CZI))
 	CKR = real(tmp)
 	CKI = imag(tmp)
 	for I = 1; I <= NN; I++ {
@@ -1716,7 +1731,7 @@ func Zmlri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL float
 
 	SCLE = dmach[1] / TOL
 	NZ = 0
-	AZ = zabs(complex(ZR, ZI))
+	AZ = cmplx.Abs(complex(ZR, ZI))
 	IAZ = int(float32(AZ))
 	IFNU = int(float32(FNU))
 	INU = IFNU + N - 1
@@ -1733,7 +1748,7 @@ func Zmlri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL float
 	P2R = CONER
 	P2I = CONEI
 	ACK = (AT + 1.0E0) * RAZ
-	RHO = ACK + dsqrt(ACK*ACK-1.0E0)
+	RHO = ACK + math.Sqrt(ACK*ACK-1.0E0)
 	RHO2 = RHO * RHO
 	TST = (RHO2 + RHO2) / ((RHO2 - 1.0E0) * (RHO - 1.0E0))
 	TST = TST / TOL
@@ -1750,7 +1765,7 @@ func Zmlri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL float
 		P1I = PTI
 		CKR = CKR + RZR
 		CKI = CKI + RZI
-		AP = zabs(complex(P2R, P2I))
+		AP = cmplx.Abs(complex(P2R, P2I))
 		if AP > TST*AK*AK {
 			goto Twenty
 		}
@@ -1774,7 +1789,7 @@ Twenty:
 	CKR = STR * AT * RAZ
 	CKI = STI * AT * RAZ
 	ACK = AT * RAZ
-	TST = dsqrt(ACK / TOL)
+	TST = math.Sqrt(ACK / TOL)
 	ITIME = 1
 	for K = 1; K <= 80; K++ {
 		PTR = P2R
@@ -1785,25 +1800,25 @@ Twenty:
 		P1I = PTI
 		CKR = CKR + RZR
 		CKI = CKI + RZI
-		AP = zabs(complex(P2R, P2I))
+		AP = cmplx.Abs(complex(P2R, P2I))
 		if AP < TST {
 			continue
 		}
 		if ITIME == 2 {
 			goto Fourty
 		}
-		ACK = zabs(complex(CKR, CKI))
-		FLAM = ACK + dsqrt(ACK*ACK-1.0E0)
-		FKAP = AP / zabs(complex(P1R, P1I))
-		RHO = dmin(FLAM, FKAP)
-		TST = TST * dsqrt(RHO/(RHO*RHO-1.0E0))
+		ACK = cmplx.Abs(complex(CKR, CKI))
+		FLAM = ACK + math.Sqrt(ACK*ACK-1.0E0)
+		FKAP = AP / cmplx.Abs(complex(P1R, P1I))
+		RHO = math.Min(FLAM, FKAP)
+		TST = TST * math.Sqrt(RHO/(RHO*RHO-1.0E0))
 		ITIME = 2
 	}
 	goto OneTen
 Fourty:
 	// BACKWARD RECURRENCE AND SUM NORMALIZING RELATION.
 	K = K + 1
-	KK = max0(I+IAZ, K+INU)
+	KK = max(I+IAZ, K+INU)
 	FKK = float64(float32(KK))
 	P1R = ZEROR
 	P1I = ZEROI
@@ -1814,7 +1829,7 @@ Fourty:
 	FNF = FNU - float64(float32(IFNU))
 	TFNF = FNF + FNF
 	BK = dgamln(FKK+TFNF+1.0E0, IDUM) - dgamln(FKK+1.0E0, IDUM) - dgamln(TFNF+1.0E0, IDUM)
-	BK = dexp(BK)
+	BK = math.Exp(BK)
 	SUMR = ZEROR
 	SUMI = ZEROI
 	KM = KK - INU
@@ -1878,7 +1893,7 @@ Ninety:
 	if KODE == 2 {
 		PTR = ZEROR
 	}
-	tmp = zlog(complex(RZR, RZI))
+	tmp = cmplx.Log(complex(RZR, RZI))
 	STR = real(tmp)
 	STI = imag(tmp)
 	P1R = -FNF*STR + PTR
@@ -1891,16 +1906,16 @@ Ninety:
 	// IN THE DENOMINATOR BY SQUARING LARGE QUANTITIES.
 	P2R = P2R + SUMR
 	P2I = P2I + SUMI
-	AP = zabs(complex(P2R, P2I))
+	AP = cmplx.Abs(complex(P2R, P2I))
 	P1R = 1.0E0 / AP
-	tmp = zexp(complex(PTR, PTI))
+	tmp = cmplx.Exp(complex(PTR, PTI))
 	STR = real(tmp)
 	STI = imag(tmp)
 	CKR = STR * P1R
 	CKI = STI * P1R
 	PTR = P2R * P1R
 	PTI = -P2I * P1R
-	tmp = zmlt(complex(CKR, CKI), complex(PTR, PTI))
+	tmp = complex(CKR, CKI) * complex(PTR, PTI)
 	CNORMR = real(tmp)
 	CNORMI = imag(tmp)
 	for I = 1; I <= N; I++ {
@@ -1930,10 +1945,11 @@ func Zseri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	var I, IB, IDUM, IFLAG, IL, K, L, M, NN, NW int
 	var WR, WI [3]float64
 	var tmp complex128
+	var sin, cos float64
 
 	CONER = 1.0
 	NZ = 0
-	AZ = zabs(complex(ZR, ZI))
+	AZ = cmplx.Abs(complex(ZR, ZI))
 	if AZ == 0.0E0 {
 		goto OneSixty
 	}
@@ -1944,7 +1960,7 @@ func Zseri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	//ARM = 1.0E0 + 3*dmach[1]
 	//math.Pow(1, 3*dmach[1])
 	ARM = 1000 * dmach[1]
-	RTR1 = dsqrt(ARM)
+	RTR1 = math.Sqrt(ARM)
 	CRSCR = 1.0E0
 	IFLAG = 0
 	if AZ < ARM {
@@ -1957,13 +1973,13 @@ func Zseri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	if AZ <= RTR1 {
 		goto Ten
 	}
-	tmp = zmlt(complex(HZR, HZI), complex(HZR, HZI))
+	tmp = complex(HZR, HZI) * complex(HZR, HZI)
 	CZR = real(tmp)
 	CZI = imag(tmp)
 Ten:
-	ACZ = zabs(complex(CZR, CZI))
+	ACZ = cmplx.Abs(complex(CZR, CZI))
 	NN = N
-	tmp = zlog(complex(HZR, HZI))
+	tmp = cmplx.Log(complex(HZR, HZI))
 	CKR = real(tmp)
 	CKI = imag(tmp)
 Twenty:
@@ -2002,14 +2018,15 @@ Fourty:
 	CRSCR = TOL
 	ASCLE = ARM * SS
 Fifty:
-	AA = dexp(AK1R)
+	AA = math.Exp(AK1R)
 	if IFLAG == 1 {
 		AA = AA * SS
 	}
-	COEFR = AA * dcos(AK1I)
-	COEFI = AA * dsin(AK1I)
+	sin, cos = math.Sincos(AK1I)
+	COEFR = AA * cos
+	COEFI = AA * sin
 	ATOL = TOL * ACZ / FNUP
-	IL = min0(2, NN)
+	IL = min(2, NN)
 	for I = 1; I <= IL; I++ {
 		DFNU = FNU + float64(float32(NN-I))
 		FNUP = DFNU + 1.0E0
@@ -2056,7 +2073,7 @@ Fifty:
 		if I == IL {
 			continue
 		}
-		tmp = zdiv(complex(COEFR, COEFI), complex(HZR, HZI))
+		tmp = complex(COEFR, COEFI) / complex(HZR, HZI)
 		STR = real(tmp)
 		STI = imag(tmp)
 		COEFR = STR * DFNU
@@ -2106,7 +2123,7 @@ OneTwenty:
 		YI[K] = CKI
 		AK = AK - 1.0E0
 		K = K - 1
-		if zabs(complex(CKR, CKI)) > ASCLE {
+		if cmplx.Abs(complex(CKR, CKI)) > ASCLE {
 			goto OneFourty
 		}
 	}
@@ -2163,15 +2180,15 @@ func Zs1s2(ZRR, ZRI, S1R, S1I, S2R, S2I float64, NZ int, ASCLE, ALIM float64, IU
 	ZEROR = 0
 	ZEROI = 0
 	NZ = 0
-	AS1 = zabs(complex(S1R, S1I))
-	AS2 = zabs(complex(S2R, S2I))
+	AS1 = cmplx.Abs(complex(S1R, S1I))
+	AS2 = cmplx.Abs(complex(S2R, S2I))
 	if S1R == 0.0E0 && S1I == 0.0E0 {
 		goto Ten
 	}
 	if AS1 == 0.0E0 {
 		goto Ten
 	}
-	ALN = -ZRR - ZRR + dlog(AS1)
+	ALN = -ZRR - ZRR + math.Log(AS1)
 	S1DR = S1R
 	S1DI = S1I
 	S1R = ZEROR
@@ -2180,19 +2197,19 @@ func Zs1s2(ZRR, ZRI, S1R, S1I, S2R, S2I float64, NZ int, ASCLE, ALIM float64, IU
 	if ALN < (-ALIM) {
 		goto Ten
 	}
-	tmp = zlog(complex(S1DR, S1DI))
+	tmp = cmplx.Log(complex(S1DR, S1DI))
 	C1R = real(tmp)
 	C1I = imag(tmp)
 
 	C1R = C1R - ZRR - ZRR
 	C1I = C1I - ZRI - ZRI
-	tmp = zexp(complex(C1R, C1I))
+	tmp = cmplx.Exp(complex(C1R, C1I))
 	S1R = real(tmp)
 	S1I = imag(tmp)
-	AS1 = zabs(complex(S1R, S1I))
+	AS1 = cmplx.Abs(complex(S1R, S1I))
 	IUF = IUF + 1
 Ten:
-	AA = dmax(AS1, AS2)
+	AA = math.Max(AS1, AS2)
 	if AA > ASCLE {
 		return ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF
 	}
@@ -2203,75 +2220,6 @@ Ten:
 	NZ = 1
 	IUF = 0
 	return ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF
-}
-
-// Zshch computes the hyperbolic sin and cosine of the input z.
-func Zshch(z complex128) (sinh, cosh complex128) {
-	return cmplx.Sinh(z), cmplx.Cosh(z)
-}
-
-func dmax(a, b float64) float64 {
-	return math.Max(a, b)
-}
-
-func dmin(a, b float64) float64 {
-	return math.Min(a, b)
-}
-
-func dabs(a float64) float64 {
-	return math.Abs(a)
-}
-
-func datan(a float64) float64 {
-	return math.Atan(a)
-}
-
-func dtan(a float64) float64 {
-	return math.Tan(a)
-}
-
-func dlog(a float64) float64 {
-	return math.Log(a)
-}
-
-func dsin(a float64) float64 {
-	return math.Sin(a)
-}
-
-func dcos(a float64) float64 {
-	return math.Cos(a)
-}
-
-func dexp(a float64) float64 {
-	return math.Exp(a)
-}
-
-func dsqrt(a float64) float64 {
-	return math.Sqrt(a)
-}
-
-func zmlt(a, b complex128) complex128 {
-	return a * b
-}
-
-func zdiv(a, b complex128) complex128 {
-	return a / b
-}
-
-func zabs(a complex128) float64 {
-	return cmplx.Abs(a)
-}
-
-func zsqrt(a complex128) complex128 {
-	return cmplx.Sqrt(a)
-}
-
-func zexp(a complex128) complex128 {
-	return cmplx.Exp(a)
-}
-
-func zlog(a complex128) complex128 {
-	return cmplx.Log(a)
 }
 
 func dgamln(z float64, ierr int) float64 {

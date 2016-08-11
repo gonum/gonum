@@ -4,11 +4,35 @@
 
 package amos
 
-import "math"
+import (
+	"math"
+	"math/cmplx"
+)
 
 // These routines are the versions directly modified from the Fortran code.
 // They are used to ensure that code style improvements do not change the
 // code output.
+
+func iabs(a int) int {
+	if a >= 0 {
+		return a
+	}
+	return -a
+}
+
+func min0(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max0(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
 
 func zairyOrig(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	// zairy is adapted from the original Netlib code by Donald Amos.
@@ -2180,4 +2204,73 @@ func zshchOrig(ZR, ZI, CSHR, CSHI, CCHR, CCHI float64) (ZRout, ZIout, CSHRout, C
 	CCHR = CH * CN
 	CCHI = SH * SN
 	return ZR, ZI, CSHR, CSHI, CCHR, CCHI
+}
+
+func dmax(a, b float64) float64 {
+	return math.Max(a, b)
+}
+
+func dmin(a, b float64) float64 {
+	return math.Min(a, b)
+}
+
+func dabs(a float64) float64 {
+	return math.Abs(a)
+}
+
+func datan(a float64) float64 {
+	return math.Atan(a)
+}
+
+func dtan(a float64) float64 {
+	return math.Tan(a)
+}
+
+func dlog(a float64) float64 {
+	return math.Log(a)
+}
+
+func dsin(a float64) float64 {
+	return math.Sin(a)
+}
+
+func dcos(a float64) float64 {
+	return math.Cos(a)
+}
+
+func dexp(a float64) float64 {
+	return math.Exp(a)
+}
+
+func dsqrt(a float64) float64 {
+	return math.Sqrt(a)
+}
+
+func zmlt(a, b complex128) complex128 {
+	return a * b
+}
+
+func zdiv(a, b complex128) complex128 {
+	return a / b
+}
+
+func zabs(a complex128) float64 {
+	return cmplx.Abs(a)
+}
+
+func zsqrt(a complex128) complex128 {
+	return cmplx.Sqrt(a)
+}
+
+func zexp(a complex128) complex128 {
+	return cmplx.Exp(a)
+}
+
+func zlog(a complex128) complex128 {
+	return cmplx.Log(a)
+}
+
+// Zshch computes the hyperbolic sin and cosine of the input z.
+func Zshch(z complex128) (sinh, cosh complex128) {
+	return cmplx.Sinh(z), cmplx.Cosh(z)
 }

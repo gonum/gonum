@@ -65,3 +65,8 @@ func (err ErrGrad) Error() string {
 		panic("optimize: bad ErrGrad")
 	}
 }
+
+// List of shared panic strings
+var (
+	badProblem = "optimize: objective function is undefined"
+)

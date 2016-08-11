@@ -44,6 +44,10 @@ type Method interface {
 	// updates loc and returns the next operation.
 	Iterate(loc *Location) (Operation, error)
 
+	Needser
+}
+
+type Needser interface {
 	// Needs specifies information about the objective function needed by the
 	// optimizer beyond just the function value. The information is used
 	// internally for initialization and must match evaluation types returned

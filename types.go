@@ -142,7 +142,7 @@ type Problem struct {
 
 // TODO(btracey): Think about making this an exported function when the
 // constraint interface is designed.
-func (p Problem) satisfies(method Method) error {
+func (p Problem) satisfies(method Needser) error {
 	if method.Needs().Gradient && p.Grad == nil {
 		return errors.New("optimize: problem does not provide needed Grad function")
 	}
@@ -228,6 +228,9 @@ type Settings struct {
 	HessEvaluations int
 
 	Recorder Recorder
+
+	// Concurrent represents how many concurrent evaluations are possible.
+	Concurrent int
 }
 
 // DefaultSettings returns a new Settings struct containing the default settings.

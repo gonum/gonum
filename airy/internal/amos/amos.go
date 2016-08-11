@@ -12,7 +12,6 @@ import (
 
 /*
 The AMOS functions are included in SLATEC, and the SLATEC guide (http://www.netlib.org/slatec/guide) explicitly states:
-
 "The Library is in the public domain and distributed by the Energy
 Science and Technology Software Center."
 Mention of AMOS's inclusion in SLATEC goes back at least to this 1985 technical report from Sandia National Labs: http://infoserve.sandia.gov/sand_doc/1985/851018.pdf
@@ -554,6 +553,8 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 
 	var I, IFLAG, INU, K, KFLAG, KK, KMAX, KODED, IDUM, J, IC, INUB, NW int
 
+	var sinh, cosh complex128
+
 	var tmp complex128
 	var CSSR, CSRR, BRY [4]float64
 	var CYR, CYI [3]float64
@@ -618,7 +619,11 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	SMUI = imag(tmp)
 	FMUR = SMUR * DNU
 	FMUI = SMUI * DNU
-	FMUR, FMUI, CSHR, CSHI, CCHR, CCHI = Zshch(FMUR, FMUI, CSHR, CSHI, CCHR, CCHI)
+	sinh, cosh = Zshch(complex(FMUR, FMUI))
+	CSHR = real(sinh)
+	CSHI = imag(sinh)
+	CCHR = real(cosh)
+	CCHI = imag(cosh)
 	if DNU == 0.0E0 {
 		goto Ten
 	}
@@ -2200,20 +2205,9 @@ Ten:
 	return ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF
 }
 
-// ZSHCH COMPUTES THE COMPLEX HYPERBOLIC FUNCTIONS CSH=SINH(X+iY) AND
-// CCH=COSH(X+I*Y), WHERE I**2=-1.
-// TODO(btracey): use cmplx.Sinh and cmplx.Cosh.
-func Zshch(ZR, ZI, CSHR, CSHI, CCHR, CCHI float64) (ZRout, ZIout, CSHRout, CSHIout, CCHRout, CCHIout float64) {
-	var CH, CN, SH, SN float64
-	SH = math.Sinh(ZR)
-	CH = math.Cosh(ZR)
-	SN = dsin(ZI)
-	CN = dcos(ZI)
-	CSHR = SH * CN
-	CSHI = CH * SN
-	CCHR = CH * CN
-	CCHI = SH * SN
-	return ZR, ZI, CSHR, CSHI, CCHR, CCHI
+// Zshch computes the hyperbolic sin and cosine of the input z.
+func Zshch(z complex128) (sinh, cosh complex128) {
+	return cmplx.Sinh(z), cmplx.Cosh(z)
 }
 
 func dmax(a, b float64) float64 {

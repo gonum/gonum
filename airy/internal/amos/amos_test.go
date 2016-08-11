@@ -9,6 +9,8 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/gonum/floats"
 )
 
 type input struct {
@@ -370,8 +372,8 @@ func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zbknu elim", ELIMfort, ELIMamos)
 	sameF64(t, "zbknu alim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zbknu yr", YRfort, YRamos)
-	sameF64S(t, "zbknu yi", YIfort, YIamos)
+	sameF64SApprox(t, "zbknu yr", YRfort, YRamos, 1e-12)
+	sameF64SApprox(t, "zbknu yi", YIfort, YIamos, 1e-12)
 }
 
 func zairytest(t *testing.T, x []float64, kode, id int) {
@@ -383,8 +385,8 @@ func zairytest(t *testing.T, x []float64, kode, id int) {
 	AIRfort, AIIfort, NZfort := zairyOrig(ZR, ZI, ID, KODE)
 	AIRamos, AIIamos, NZamos := Zairy(ZR, ZI, ID, KODE)
 
-	sameF64(t, "zairy air", AIRfort, AIRamos)
-	sameF64(t, "zairy aii", AIIfort, AIIamos)
+	sameF64Approx(t, "zairy air", AIRfort, AIRamos, 1e-12)
+	sameF64Approx(t, "zairy aii", AIIfort, AIIamos, 1e-12)
 	sameInt(t, "zairy nz", NZfort, NZamos)
 }
 
@@ -425,8 +427,8 @@ func zacaitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zacai elim", ELIMfort, ELIMamos)
 	sameF64(t, "zacai elim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zacai yr", YRfort, YRamos)
-	sameF64S(t, "zacai yi", YIfort, YIamos)
+	sameF64SApprox(t, "zacai yr", YRfort, YRamos, 1e-12)
+	sameF64SApprox(t, "zacai yi", YIfort, YIamos, 1e-12)
 }
 
 func sameF64(t *testing.T, str string, c, native float64) {
@@ -434,6 +436,24 @@ func sameF64(t *testing.T, str string, c, native float64) {
 		return
 	}
 	if c == native {
+		return
+	}
+	cb := math.Float64bits(c)
+	nb := math.Float64bits(native)
+	t.Errorf("Case %s: Float64 mismatch. c = %v, native = %v\n cb: %v, nb: %v\n", str, c, native, cb, nb)
+}
+
+func sameF64Approx(t *testing.T, str string, c, native, tol float64) {
+	if math.IsNaN(c) && math.IsNaN(native) {
+		return
+	}
+	if floats.EqualWithinAbsOrRel(c, native, tol, tol) {
+		return
+	}
+	// Have a much looser tolerance for correctness when the values are large.
+	// Floating point noise makes the relative tolerance difference greater for
+	// higher values.
+	if c > 1e200 && floats.EqualWithinAbsOrRel(c, native, 10, 10) {
 		return
 	}
 	cb := math.Float64bits(c)
@@ -453,5 +473,14 @@ func sameF64S(t *testing.T, str string, c, native []float64) {
 	}
 	for i, v := range c {
 		sameF64(t, str+"_idx_"+strconv.Itoa(i), v, native[i])
+	}
+}
+
+func sameF64SApprox(t *testing.T, str string, c, native []float64, tol float64) {
+	if len(c) != len(native) {
+		panic(str)
+	}
+	for i, v := range c {
+		sameF64Approx(t, str+"_idx_"+strconv.Itoa(i), v, native[i], tol)
 	}
 }

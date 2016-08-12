@@ -226,8 +226,8 @@ func zkscltest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zkscl tol", TOLfort, TOLamos)
 	sameF64(t, "zkscl elim", ELIMfort, ELIMamos)
 
-	sameF64S(t, "zkscl yr", YRfort, YRamos)
-	sameF64S(t, "zkscl yi", YIfort, YIamos)
+	sameF64SApprox(t, "zkscl yr", YRfort, YRamos, 1e-14)
+	sameF64SApprox(t, "zkscl yi", YIfort, YIamos, 1e-14)
 }
 
 func zmlritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -296,8 +296,8 @@ func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zseri elim", ELIMfort, ELIMamos)
 	sameF64(t, "zseri elim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zseri yr", YRfort, YRamos)
-	sameF64S(t, "zseri yi", YIfort, YIamos)
+	sameF64SApprox(t, "zseri yr", YRfort, YRamos, 1e-10)
+	sameF64SApprox(t, "zseri yi", YIfort, YIamos, 1e-10)
 }
 
 func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {
@@ -335,8 +335,8 @@ func zasyitest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	sameF64(t, "zasyi elim", ELIMfort, ELIMamos)
 	sameF64(t, "zasyi alim", ALIMfort, ALIMamos)
 
-	sameF64S(t, "zasyi yr", YRfort, YRamos)
-	sameF64S(t, "zasyi yi", YIfort, YIamos)
+	sameF64SApprox(t, "zasyi yr", YRfort, YRamos, 1e-12)
+	sameF64SApprox(t, "zasyi yi", YIfort, YIamos, 1e-12)
 }
 
 func zbknutest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi []float64, kode int) {

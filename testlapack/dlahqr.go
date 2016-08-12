@@ -60,7 +60,7 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 							wantt: wantt,
 							wantz: wantz,
 						}
-						testDlahqr(t, impl, test, rnd)
+						testDlahqr(t, impl, test)
 					}
 				}
 			}
@@ -144,7 +144,7 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 					}
 					test.wantt = wantt
 					test.wantz = wantz
-					testDlahqr(t, impl, test, rnd)
+					testDlahqr(t, impl, test)
 				}
 			}
 		}
@@ -262,11 +262,11 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 	} {
 		test.wantt = true
 		test.wantz = true
-		testDlahqr(t, impl, test, rnd)
+		testDlahqr(t, impl, test)
 	}
 }
 
-func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest, rnd *rand.Rand) {
+func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 	const tol = 1e-14
 
 	h := cloneGeneral(test.h)

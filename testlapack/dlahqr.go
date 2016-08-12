@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 )
 
@@ -199,6 +200,15 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest, rnd *rand.Rand) {
 				if z.Data[i*z.Stride+j] != zCopy.Data[i*zCopy.Stride+j] {
 					t.Errorf("%v: Z modified outside of [iloz:ihiz+1,ilo:ihi+1] block", prefix)
 				}
+			}
+		}
+		if wantt {
+			hu := eye(n, n)
+			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hu)
+			uhu := eye(n, n)
+			blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hu, 0, uhu)
+			if !equalApproxGeneral(uhu, h, 10*tol) {
+				t.Errorf("%v: Z^T*(initial H)*Z and (final H) are not equal", prefix)
 			}
 		}
 	}

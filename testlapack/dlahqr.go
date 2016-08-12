@@ -24,8 +24,7 @@ type dlahqrTest struct {
 	iloz, ihiz   int
 	wantt, wantz bool
 
-	wrWant []float64 // Optional slices holding known eigenvalues.
-	wiWant []float64
+	evWant []complex128 // Optional slice holding known eigenvalues.
 }
 
 func DlahqrTest(t *testing.T, impl Dlahqrer) {
@@ -149,6 +148,121 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 				}
 			}
 		}
+	}
+
+	// Tests with explicit eigenvalues computed by Octave.
+	for _, test := range []dlahqrTest{
+		{
+			h: blas64.General{
+				Rows:   1,
+				Cols:   1,
+				Stride: 1,
+				Data:   []float64{7.09965484086874e-1},
+			},
+			ilo:    0,
+			ihi:    0,
+			iloz:   0,
+			ihiz:   0,
+			evWant: []complex128{7.09965484086874e-1},
+		},
+		{
+			h: blas64.General{
+				Rows:   2,
+				Cols:   2,
+				Stride: 2,
+				Data: []float64{
+					0, -1,
+					1, 0,
+				},
+			},
+			ilo:    0,
+			ihi:    1,
+			iloz:   0,
+			ihiz:   1,
+			evWant: []complex128{1i, -1i},
+		},
+		{
+			h: blas64.General{
+				Rows:   2,
+				Cols:   2,
+				Stride: 2,
+				Data: []float64{
+					6.25219991450918e-1, 8.17510791994361e-1,
+					3.31218891622294e-1, 1.24103744878131e-1,
+				},
+			},
+			ilo:    0,
+			ihi:    1,
+			iloz:   0,
+			ihiz:   1,
+			evWant: []complex128{9.52203547663447e-1, -2.02879811334398e-1},
+		},
+		{
+			h: blas64.General{
+				Rows:   4,
+				Cols:   4,
+				Stride: 4,
+				Data: []float64{
+					1, 0, 0, 0,
+					0, 6.25219991450918e-1, 8.17510791994361e-1, 0,
+					0, 3.31218891622294e-1, 1.24103744878131e-1, 0,
+					0, 0, 0, 1,
+				},
+			},
+			ilo:    1,
+			ihi:    2,
+			iloz:   0,
+			ihiz:   3,
+			evWant: []complex128{9.52203547663447e-1, -2.02879811334398e-1},
+		},
+		{
+			h: blas64.General{
+				Rows:   2,
+				Cols:   2,
+				Stride: 2,
+				Data: []float64{
+					-1.1219562276608, 6.85473513349362e-1,
+					-8.19951061145131e-1, 1.93728523178888e-1,
+				},
+			},
+			ilo:  0,
+			ihi:  1,
+			iloz: 0,
+			ihiz: 1,
+			evWant: []complex128{
+				-4.64113852240958e-1 + 3.59580510817350e-1i,
+				-4.64113852240958e-1 - 3.59580510817350e-1i,
+			},
+		},
+		{
+			h: blas64.General{
+				Rows:   5,
+				Cols:   5,
+				Stride: 5,
+				Data: []float64{
+					9.57590178533658e-1, -5.10651295522708e-1, 9.24974510015869e-1, -1.30016306879522e-1, 2.92601986926954e-2,
+					-1.08084756637964, 1.77529701001213, -1.36480197632509, 2.23196371219601e-1, 1.12912853063308e-1,
+					0, -8.44075612174676e-1, 1.067867614486, -2.55782915176399e-1, -2.00598563137468e-1,
+					0, 0, -5.67097237165410e-1, 2.07205057427341e-1, 6.54998340743380e-1,
+					0, 0, 0, -1.89441413886041e-1, -4.18125416021786e-1,
+				},
+			},
+			ilo:  0,
+			ihi:  4,
+			iloz: 0,
+			ihiz: 4,
+			evWant: []complex128{
+				2.94393309555622,
+				4.97029793606701e-1 + 3.63041654992384e-1i,
+				4.97029793606701e-1 - 3.63041654992384e-1i,
+				-1.74079119166145e-1 + 2.01570009462092e-1i,
+				-1.74079119166145e-1 - 2.01570009462092e-1i,
+			},
+		},
+	} {
+		test.wantt = true
+		test.wantz = true
+		testDlahqr(t, impl, test, rnd)
 	}
 }
 
@@ -312,9 +426,19 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest, rnd *rand.Rand) {
 		}
 		i += 2
 	}
-
 	// If the number of found eigenvalues is odd, at least one must be real.
 	if (ihi+1-start)%2 != 0 && !hasReal {
 		t.Errorf("%v: expected at least one real eigenvalue", prefix)
+	}
+
+	// Compare found eigenvalues to the reference, if known.
+	if test.evWant != nil {
+		for i := start; i <= ihi; i++ {
+			ev := complex(wr[i], wi[i])
+			if !containsComplex(test.evWant, ev, tol) {
+				t.Log(test.evWant, ev)
+				t.Errorf("%v: unexpected eigenvalue %v", prefix, ev)
+			}
+		}
 	}
 }

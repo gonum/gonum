@@ -7,6 +7,7 @@ package testlapack
 import (
 	"fmt"
 	"math"
+	"math/cmplx"
 	"math/rand"
 	"testing"
 
@@ -949,4 +950,48 @@ func schurBlockSize(t blas64.General, i int) (size int, first bool) {
 		size = 2
 	}
 	return size, first
+}
+
+// containsComplex returns whether z is approximately equal to one of the complex
+// numbers in v.
+func containsComplex(v []complex128, z complex128, tol float64) bool {
+	for i := range v {
+		if cmplx.Abs(v[i]-z) < tol {
+			return true
+		}
+	}
+	return false
+}
+
+func isAllNaN(x []float64) bool {
+	for _, v := range x {
+		if !math.IsNaN(v) {
+			return false
+		}
+	}
+	return true
+}
+
+func isAnyNaN(x []float64) bool {
+	for _, v := range x {
+		if math.IsNaN(v) {
+			return true
+		}
+	}
+	return false
+}
+
+func isHessenberg(h blas64.General) bool {
+	if h.Rows != h.Cols {
+		panic("matrix not square")
+	}
+	n := h.Rows
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if i > j+1 && h.Data[i*h.Stride+j] != 0 {
+				return false
+			}
+		}
+	}
+	return true
 }

@@ -304,6 +304,10 @@ func TestDtrcon(t *testing.T) {
 	testlapack.DtrconTest(t, impl)
 }
 
+func TestDtrexc(t *testing.T) {
+	testlapack.DtrexcTest(t, impl)
+}
+
 func TestDtrti2(t *testing.T) {
 	testlapack.Dtrti2Test(t, impl)
 }

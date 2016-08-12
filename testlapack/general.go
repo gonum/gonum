@@ -94,6 +94,39 @@ func randomHessenberg(n, stride int, rnd *rand.Rand) blas64.General {
 	return ans
 }
 
+// randomSchurCanonical returns a random, general matrix in Schur canonical
+// form, that is, block upper triangular with 1×1 and 2×2 diagonal blocks where
+// each 2×2 diagonal block has its diagonal elements equal and its off-diagonal
+// elements of opposite sign.
+func randomSchurCanonical(n, stride int, rnd *rand.Rand) blas64.General {
+	t := randomGeneral(n, n, stride, rnd)
+	// Zero out the lower triangle.
+	for i := 0; i < t.Rows; i++ {
+		for j := 0; j < i; j++ {
+			t.Data[i*t.Stride+j] = 0
+		}
+	}
+	// Randomly create 2×2 diagonal blocks.
+	for i := 0; i < t.Rows; {
+		if i == t.Rows-1 || rnd.Float64() < 0.5 {
+			// 1×1 block.
+			i++
+			continue
+		}
+		// 2×2 block.
+		// Diagonal elements equal.
+		t.Data[(i+1)*t.Stride+i+1] = t.Data[i*t.Stride+i]
+		// Off-diagonal elements of opposite sign.
+		c := rnd.NormFloat64()
+		if math.Signbit(c) == math.Signbit(t.Data[i*t.Stride+i+1]) {
+			c *= -1
+		}
+		t.Data[(i+1)*t.Stride+i] = c
+		i += 2
+	}
+	return t
+}
+
 // nanTriangular allocates a new r×c triangular matrix filled with NaN values.
 func nanTriangular(uplo blas.Uplo, n, stride int) blas64.Triangular {
 	if n < 0 {
@@ -850,6 +883,30 @@ func isSchurCanonical(a, b, c, d float64) bool {
 	return c == 0 || (a == d && math.Signbit(b) != math.Signbit(c))
 }
 
+// isSchurCanonicalGeneral returns whether T is block upper triangular with 1×1
+// and 2×2 diagonal blocks, each 2×2 block in Schur canonical form. The function
+// checks only along the diagonal and the first subdiagonal, otherwise the lower
+// triangle is not accessed.
+func isSchurCanonicalGeneral(t blas64.General) bool {
+	if t.Rows != t.Cols {
+		panic("invalid matrix")
+	}
+	for i := 0; i < t.Rows-1; {
+		if t.Data[(i+1)*t.Stride+i] == 0 {
+			// 1×1 block.
+			i++
+			continue
+		}
+		// 2×2 block.
+		a, b, c, d := extract2x2Block(t.Data[i*t.Stride+i:], t.Stride)
+		if !isSchurCanonical(a, b, c, d) {
+			return false
+		}
+		i += 2
+	}
+	return true
+}
+
 // schurBlockEigenvalues returns the two eigenvalues of the 2×2 matrix [a b; c d]
 // that must be in Schur canonical form.
 func schurBlockEigenvalues(a, b, c, d float64) (ev1, ev2 complex128) {
@@ -861,4 +918,35 @@ func schurBlockEigenvalues(a, b, c, d float64) (ev1, ev2 complex128) {
 	}
 	im := math.Sqrt(-b * c)
 	return complex(a, im), complex(a, -im)
+}
+
+// schurBlockSize returns the size of the diagonal block at i-th row in the
+// upper quasi-triangular matrix t in Schur canonical form, and whether i points
+// to the first row of the block. For zero-sized matrices the function returns 0
+// and true.
+func schurBlockSize(t blas64.General, i int) (size int, first bool) {
+	if t.Rows != t.Cols {
+		panic("matrix not square")
+	}
+	if t.Rows == 0 {
+		return 0, true
+	}
+	if i < 0 || t.Rows <= i {
+		panic("index out of range")
+	}
+
+	first = true
+	if i > 0 && t.Data[i*t.Stride+i-1] != 0 {
+		// There is a non-zero element to the left, therefore i must
+		// point to the second row in a 2×2 diagonal block.
+		first = false
+		i--
+	}
+	size = 1
+	if i+1 < t.Rows && t.Data[(i+1)*t.Stride+i] != 0 {
+		// There is a non-zero element below, this must be a 2×2
+		// diagonal block.
+		size = 2
+	}
+	return size, first
 }

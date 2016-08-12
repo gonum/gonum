@@ -1332,6 +1332,79 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 	return rcond[0]
 }
 
+// Dtrexc reorders the real Schur factorization of a n×n real matrix
+//  A = Q*T*Q^T
+// so that the diagonal block of T with row index ifst is moved to row ilst.
+//
+// On entry, T must be in Schur canonical form, that is, block upper triangular
+// with 1×1 and 2×2 diagonal blocks; each 2×2 diagonal block has its diagonal
+// elements equal and its off-diagonal elements of opposite sign.
+//
+// On return, T will be reordered by an orthogonal similarity transformation Z
+// as Z^T*T*Z, and will be again in Schur canonical form.
+//
+// If compq is lapack.EigDecomp, on return the matrix Q of Schur vectors will be
+// updated by postmultiplying it with Z. If compq is lapack.EigValueOnly, the
+// matrix Q is not referenced and will not be updated. For other values of compq
+// Dtrexc will panic.
+//
+// ifst and ilst specify the reordering of the diagonal blocks of T. The block
+// with row index ifst is moved to row ilst, by a sequence of transpositions
+// between adjacent blocks.
+//
+// If ifst points to the second row of a 2×2 block, ifstOut will point to the
+// first row, otherwise it will be equal to ifst.
+//
+// ilstOut will point to the first row of the block in its final position. If ok
+// is true, ilstOut may differ from ilst by +1 or -1.
+//
+// It must hold that
+//  0 <= ifst < n, and  0 <= ilst < n,
+// otherwise Dtrexc will panic.
+//
+// If ok is false, two adjacent blocks were too close to swap because the
+// problem is very ill-conditioned. T may have been partially reordered, and
+// ilstOut will point to the first row of the block at the position to which it
+// has been moved.
+//
+// work must have length at least n, otherwise Dtrexc will panic.
+//
+// Dtrexc is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dtrexc(compq lapack.EigComp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool) {
+	checkMatrix(n, n, t, ldt)
+	switch compq {
+	default:
+		panic(badEigComp)
+	case lapack.EigValueOnly:
+		// q is not referenced but LAPACKE checks that ldq >= n always.
+		q = nil
+		ldq = max(1, n)
+	case lapack.EigDecomp:
+		checkMatrix(n, n, q, ldq)
+	}
+	if (ifst < 0 || n <= ifst) && n > 0 {
+		panic("lapack: ifst out of range")
+	}
+	if (ilst < 0 || n <= ilst) && n > 0 {
+		panic("lapack: ilst out of range")
+	}
+	if len(work) < n {
+		panic(badWork)
+	}
+
+	// Quick return if possible.
+	if n <= 1 {
+		return ifst, ilst, true
+	}
+
+	ifst32 := []int32{int32(ifst + 1)}
+	ilst32 := []int32{int32(ilst + 1)}
+	ok = clapack.Dtrexc(lapack.CompSV(compq), n, t, ldt, q, ldq, ifst32, ilst32, work)
+	ifst = int(ifst32[0] - 1)
+	ilst = int(ilst32[0] - 1)
+	return ifst, ilst, ok
+}
+
 // Dtrtri computes the inverse of a triangular matrix, storing the result in place
 // into a. This is the BLAS level 3 version of the algorithm which builds upon
 // Dtrti2 to operate on matrix blocks instead of only individual columns.

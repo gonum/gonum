@@ -17,6 +17,16 @@ type Dlahqrer interface {
 	Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) int
 }
 
+type dlahqrTest struct {
+	h            blas64.General
+	ilo, ihi     int
+	iloz, ihiz   int
+	wantt, wantz bool
+
+	wrWant []float64 // Optional slices holding known eigenvalues.
+	wiWant []float64
+}
+
 func DlahqrTest(t *testing.T, impl Dlahqrer) {
 	rnd := rand.New(rand.NewSource(1))
 
@@ -34,7 +44,23 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 						}
 						iloz := rnd.Intn(ilo + 1)
 						ihiz := ihi + rnd.Intn(n-ihi)
-						testDlahqr(t, impl, wantt, wantz, n, ilo, ihi, iloz, ihiz, extra, rnd)
+						h := randomHessenberg(n, n+extra, rnd)
+						if ilo-1 >= 0 {
+							h.Data[ilo*h.Stride+ilo-1] = 0
+						}
+						if ihi+1 < n {
+							h.Data[(ihi+1)*h.Stride+ihi] = 0
+						}
+						test := dlahqrTest{
+							h:     h,
+							ilo:   ilo,
+							ihi:   ihi,
+							iloz:  iloz,
+							ihiz:  ihiz,
+							wantt: wantt,
+							wantz: wantz,
+						}
+						testDlahqr(t, impl, test, rnd)
 					}
 				}
 			}
@@ -45,101 +71,111 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
 			for _, extra := range []int{0, 1, 11} {
-				for _, test := range []struct {
-					n, ilo, ihi, iloz, ihiz int
-				}{
+				for _, test := range []dlahqrTest{
 					{
-						n:    0,
+						h:    randomHessenberg(0, extra, rnd),
 						ilo:  0,
 						ihi:  -1,
 						iloz: 0,
 						ihiz: -1,
 					},
 					{
-						n:    1,
+						h:    randomHessenberg(1, 1+extra, rnd),
 						ilo:  0,
 						ihi:  0,
 						iloz: 0,
 						ihiz: 0,
 					},
 					{
-						n:    2,
+						h:    randomHessenberg(2, 2+extra, rnd),
 						ilo:  1,
 						ihi:  1,
 						iloz: 1,
 						ihiz: 1,
 					},
 					{
-						n:    2,
+						h:    randomHessenberg(2, 2+extra, rnd),
 						ilo:  0,
 						ihi:  1,
 						iloz: 0,
 						ihiz: 1,
 					},
 					{
-						n:    10,
+						h:    randomHessenberg(10, 10+extra, rnd),
 						ilo:  0,
 						ihi:  0,
 						iloz: 0,
 						ihiz: 0,
 					},
 					{
-						n:    10,
+						h:    randomHessenberg(10, 10+extra, rnd),
 						ilo:  0,
 						ihi:  9,
 						iloz: 0,
 						ihiz: 9,
 					},
 					{
-						n:    10,
+						h:    randomHessenberg(10, 10+extra, rnd),
 						ilo:  0,
 						ihi:  1,
 						iloz: 0,
 						ihiz: 1,
 					},
 					{
-						n:    10,
+						h:    randomHessenberg(10, 10+extra, rnd),
 						ilo:  0,
 						ihi:  1,
 						iloz: 0,
 						ihiz: 9,
 					},
 					{
-						n:    10,
+						h:    randomHessenberg(10, 10+extra, rnd),
 						ilo:  9,
 						ihi:  9,
 						iloz: 0,
 						ihiz: 9,
 					},
 				} {
-					testDlahqr(t, impl, wantt, wantz, test.n, test.ilo, test.ihi, test.iloz, test.ihiz, extra, rnd)
+					if test.ilo-1 >= 0 {
+						test.h.Data[test.ilo*test.h.Stride+test.ilo-1] = 0
+					}
+					if test.ihi+1 < test.h.Rows {
+						test.h.Data[(test.ihi+1)*test.h.Stride+test.ihi] = 0
+					}
+					test.wantt = wantt
+					test.wantz = wantz
+					testDlahqr(t, impl, test, rnd)
 				}
 			}
 		}
 	}
 }
 
-func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, iloz, ihiz, extra int, rnd *rand.Rand) {
+func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest, rnd *rand.Rand) {
 	const tol = 1e-14
+
+	h := cloneGeneral(test.h)
+	n := h.Cols
+	extra := h.Stride - h.Cols
+	wantt := test.wantt
+	wantz := test.wantz
+	ilo := test.ilo
+	ihi := test.ihi
+	iloz := test.iloz
+	ihiz := test.ihiz
 
 	var z, zCopy blas64.General
 	if wantz {
 		z = eye(n, n+extra)
 		zCopy = cloneGeneral(z)
 	}
-	h := randomHessenberg(n, n+extra, rnd)
-	if ilo > 0 {
-		h.Data[ilo*h.Stride+ilo-1] = 0
-	}
-	if ihi < n-1 {
-		h.Data[(ihi+1)*h.Stride+ihi] = 0
-	}
+
 	wr := nanSlice(n)
 	wi := nanSlice(n)
 
 	unconverged := impl.Dlahqr(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride)
 
-	prefix := fmt.Sprintf("Case n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, wantt=%v, wantz=%v, extra=%v", n, ilo, ihi, iloz, ihiz, wantt, wantz, extra)
+	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, extra=%v", n, ilo, ihi, iloz, ihiz, wantt, wantz, extra)
 
 	if !generalOutsideAllNaN(h) {
 		t.Errorf("%v: out-of-range write to H\n%v", prefix, h.Data)
@@ -197,7 +233,6 @@ func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, ilo
 	for i := start; i <= ihi; {
 		if wi[i] == 0 { // Real eigenvalue.
 			hasReal = true
-
 			// Check that the eigenvalue corresponds to a 1×1 block
 			// on the diagonal of H.
 			if wantt {
@@ -217,7 +252,6 @@ func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, ilo
 					}
 				}
 			}
-
 			i++
 			continue
 		}

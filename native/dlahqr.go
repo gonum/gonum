@@ -24,8 +24,8 @@ import (
 //  H[ilo,ilo-1] == 0,  if ilo > 0,
 // otherwise Dlahqr will panic.
 //
-// If unconverged is zero, wr[ilo:ihi+1] and wi[ilo:ihi+1] will contain on return
-// the real and imaginary parts, respectively, of the computed eigenvalues ilo
+// If unconverged is zero on return, wr[ilo:ihi+1] and wi[ilo:ihi+1] will contain
+// respectively the real and imaginary parts of the computed eigenvalues ilo
 // to ihi. If two eigenvalues are computed as a complex conjugate pair, they are
 // stored in consecutive elements of wr and wi, say the i-th and (i+1)th, with
 // wi[i] > 0 and wi[i+1] < 0. If wantt is true, the eigenvalues are stored in

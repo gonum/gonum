@@ -67,7 +67,7 @@ import (
 // where U is the orthogonal matrix in (*) regardless of the value of wantt.
 //
 // Dlahqr is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) (index int, converged bool) {
+func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) (unconverged int) {
 	checkMatrix(n, n, h, ldh)
 	switch {
 	case ilo < 0 || max(0, ihi) < ilo:
@@ -93,12 +93,12 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 
 	// Quick return if possible.
 	if n == 0 {
-		return 0, true
+		return 0
 	}
 	if ilo == ihi {
 		wr[ilo] = h[ilo*ldh+ilo]
 		wi[ilo] = 0
-		return 0, true
+		return 0
 	}
 
 	// Clear out the trash.
@@ -379,7 +379,7 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 		if converged == false {
 			// The QR iteration finished without splitting off a
 			// submatrix of order 1 or 2.
-			return i, false
+			return i + 1
 		}
 
 		if l == i {
@@ -415,5 +415,5 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 		// Return to start of the main loop with new value of i.
 		i = l - 1
 	}
-	return 0, true
+	return 0
 }

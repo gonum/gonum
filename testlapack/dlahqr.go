@@ -14,7 +14,7 @@ import (
 )
 
 type Dlahqrer interface {
-	Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) (int, bool)
+	Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) int
 }
 
 func DlahqrTest(t *testing.T, impl Dlahqrer) {
@@ -137,7 +137,7 @@ func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, ilo
 	wr := nanSlice(n)
 	wi := nanSlice(n)
 
-	idx, converged := impl.Dlahqr(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride)
+	unconverged := impl.Dlahqr(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride)
 
 	prefix := fmt.Sprintf("Case n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, wantt=%v, wantz=%v, extra=%v", n, ilo, ihi, iloz, ihiz, wantt, wantz, extra)
 
@@ -168,8 +168,11 @@ func testDlahqr(t *testing.T, impl Dlahqrer, wantt, wantz bool, n, ilo, ihi, ilo
 	}
 
 	start := ilo // Index of the first computed eigenvalue.
-	if !converged {
-		start = idx + 1
+	if unconverged != 0 {
+		start = unconverged
+		if start == ihi+1 {
+			t.Logf("%v: no eigenvalue has converged", prefix)
+		}
 	}
 
 	// Check that wr and wi have not been modified outside [start:ihi+1].

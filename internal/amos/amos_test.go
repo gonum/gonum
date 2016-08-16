@@ -147,9 +147,20 @@ func zs1s2test(t *testing.T, x []float64, is []int) {
 		is[1],
 	}
 
+	zr := complex(input.ZRR, input.ZRI)
+	s1 := complex(input.S1R, input.S1I)
+	s2 := complex(input.S2R, input.S2I)
 	impl := func(input data) data {
-		zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf :=
-			Zs1s2(input.ZRR, input.ZRI, input.S1R, input.S1I, input.S2R, input.S2I, input.NZ, input.ASCLE, input.ALIM, input.IUF)
+		s1, s2, nz, iuf :=
+			Zs1s2(zr, s1, s2, input.ASCLE, input.ALIM, input.IUF)
+		zrr := real(zr)
+		zri := imag(zr)
+		s1r := real(s1)
+		s1i := imag(s1)
+		s2r := real(s2)
+		s2i := imag(s2)
+		alim := input.ALIM
+		ascle := input.ASCLE
 		return data{zrr, zri, s1r, s1i, s2r, s2i, nz, ascle, alim, iuf}
 	}
 

@@ -2165,61 +2165,47 @@ OneNinety:
 	return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
 }
 
-// ZS1S2 TESTS FOR A POSSIBLE UNDERFLOW RESULTING FROM THE
-// ADDITION OF THE I AND K FUNCTIONS IN THE ANALYTIC CON-
-// TINUATION FORMULA WHERE S1=K FUNCTION AND S2=I FUNCTION.
-// ON KODE=1 THE I AND K FUNCTIONS ARE DIFFERENT ORDERS OF
-// MAGNITUDE, BUT FOR KODE=2 THEY CAN BE OF THE SAME ORDER
-// OF MAGNITUDE AND THE MAXIMUM MUST BE AT LEAST ONE
-// PRECISION ABOVE THE UNDERFLOW LIMIT.
+// Zs1s2 tests for a possible underflow resulting from the addition of the I and
+// K functions in the analytic continuation formula where s1 == K function and
+// s2 == I function.
+//
+// On kode == 1, the I and K functions are different orders of magnitude.
+//
+// On kode == 2, they may both be of the same order of magnitude, but the maximum
+// must be at least one precision above the underflow limit.
 func Zs1s2(ZRR, ZRI, S1R, S1I, S2R, S2I float64, NZ int, ASCLE, ALIM float64, IUF int) (
 	ZRRout, ZRIout, S1Rout, S1Iout, S2Rout, S2Iout float64, NZout int, ASCLEout, ALIMout float64, IUFout int) {
-	var AA, ALN, AS1, AS2, C1I, C1R, S1DI, S1DR, ZEROI, ZEROR float64
-	var tmp complex128
 
-	ZEROR = 0
-	ZEROI = 0
 	NZ = 0
-	AS1 = cmplx.Abs(complex(S1R, S1I))
-	AS2 = cmplx.Abs(complex(S2R, S2I))
-	if S1R == 0.0E0 && S1I == 0.0E0 {
-		goto Ten
+	zr := complex(ZRR, ZRI)
+	s1 := complex(S1R, S1I)
+	s2 := complex(S2R, S2I)
+	as1 := cmplx.Abs(s1)
+	as2 := cmplx.Abs(s2)
+	if s1 != 0 {
+		aln := math.Log(as1) - 2*real(zr)
+		if aln >= -ALIM {
+			c1 := cmplx.Log(s1)
+			// TODO(btracey): Written like this for numerical rounding reasons.
+			// fix once we're sure other changes are correct.
+			c1 -= zr
+			c1 -= zr
+			s1 = cmplx.Exp(c1)
+			as1 = cmplx.Abs(s1)
+			IUF++
+		} else {
+			s1 = 0
+			as1 = 0
+		}
 	}
-	if AS1 == 0.0E0 {
-		goto Ten
+	if math.Max(as1, as2) > ASCLE {
+		return real(zr), imag(zr), real(s1), imag(s1), real(s2), imag(s2), NZ, ASCLE, ALIM, IUF
 	}
-	ALN = -ZRR - ZRR + math.Log(AS1)
-	S1DR = S1R
-	S1DI = S1I
-	S1R = ZEROR
-	S1I = ZEROI
-	AS1 = ZEROR
-	if ALN < (-ALIM) {
-		goto Ten
-	}
-	tmp = cmplx.Log(complex(S1DR, S1DI))
-	C1R = real(tmp)
-	C1I = imag(tmp)
-
-	C1R = C1R - ZRR - ZRR
-	C1I = C1I - ZRI - ZRI
-	tmp = cmplx.Exp(complex(C1R, C1I))
-	S1R = real(tmp)
-	S1I = imag(tmp)
-	AS1 = cmplx.Abs(complex(S1R, S1I))
-	IUF = IUF + 1
-Ten:
-	AA = math.Max(AS1, AS2)
-	if AA > ASCLE {
-		return ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF
-	}
-	S1R = ZEROR
-	S1I = ZEROI
-	S2R = ZEROR
-	S2I = ZEROI
+	s1 = 0
+	s2 = 0
 	NZ = 1
 	IUF = 0
-	return ZRR, ZRI, S1R, S1I, S2R, S2I, NZ, ASCLE, ALIM, IUF
+	return real(zr), imag(zr), real(s1), imag(s1), real(s2), imag(s2), NZ, ASCLE, ALIM, IUF
 }
 
 func dgamln(z float64, ierr int) float64 {

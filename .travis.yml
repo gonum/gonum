@@ -14,10 +14,9 @@ env:
 
 # Versions of go that are explicitly supported by gonum.
 go:
- - 1.4.2
  - 1.5.4
  - 1.6.3
- - 1.7rc3
+ - 1.7
 
 # Cache used to persist the compiled BLAS library between CI calls.
 cache:

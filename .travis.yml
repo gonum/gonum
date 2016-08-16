@@ -4,10 +4,9 @@ language: go
 
 # Versions of go that are explicitly supported by gonum.
 go:
- - 1.4.2
  - 1.5.4
  - 1.6.3
- - 1.7rc3
+ - 1.7
 
 # Required for coverage.
 before_install:

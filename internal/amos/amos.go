@@ -1418,6 +1418,7 @@ func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, T
 		CSPNI, C1R, C1I, C2R, C2I, DFNU, FMR, PI,
 		SGN, YY, ZNR, ZNI float64
 	var INU, IUF, NN, NW int
+	var zn, c1, c2 complex128
 	//var sin, cos float64
 
 	CYR := []float64{math.NaN(), 0, 0}
@@ -1496,7 +1497,14 @@ Sixty:
 	}
 	IUF = 0
 	ASCLE = 1.0E+3 * dmach[1] / TOL
-	ZNR, ZNI, C1R, C1I, C2R, C2I, NW, ASCLE, ALIM, IUF = Zs1s2(ZNR, ZNI, C1R, C1I, C2R, C2I, NW, ASCLE, ALIM, IUF)
+	zn = complex(ZNR, ZNI)
+	c1 = complex(C1R, C1I)
+	c2 = complex(C2R, C2I)
+	c1, c2, NW, IUF = Zs1s2(zn, c1, c2, ASCLE, ALIM, IUF)
+	C1R = real(c1)
+	C1I = imag(c1)
+	C2R = real(c2)
+	C2I = imag(c2)
 	NZ = NZ + NW
 Seventy:
 	YR[1] = CSPNR*C1R - CSPNI*C1I + CSGNR*C2R - CSGNI*C2I
@@ -2169,43 +2177,24 @@ OneNinety:
 // K functions in the analytic continuation formula where s1 == K function and
 // s2 == I function.
 //
-// On kode == 1, the I and K functions are different orders of magnitude.
+// When kode == 1, the I and K functions are different orders of magnitude.
 //
-// On kode == 2, they may both be of the same order of magnitude, but the maximum
+// When kode == 2, they may both be of the same order of magnitude, but the maximum
 // must be at least one precision above the underflow limit.
-func Zs1s2(ZRR, ZRI, S1R, S1I, S2R, S2I float64, NZ int, ASCLE, ALIM float64, IUF int) (
-	ZRRout, ZRIout, S1Rout, S1Iout, S2Rout, S2Iout float64, NZout int, ASCLEout, ALIMout float64, IUFout int) {
-
-	NZ = 0
-	zr := complex(ZRR, ZRI)
-	s1 := complex(S1R, S1I)
-	s2 := complex(S2R, S2I)
-	as1 := cmplx.Abs(s1)
-	as2 := cmplx.Abs(s2)
-	if s1 != 0 {
-		aln := math.Log(as1) - 2*real(zr)
-		if aln >= -ALIM {
-			c1 := cmplx.Log(s1)
-			// TODO(btracey): Written like this for numerical rounding reasons.
-			// fix once we're sure other changes are correct.
-			c1 -= zr
-			c1 -= zr
-			s1 = cmplx.Exp(c1)
-			as1 = cmplx.Abs(s1)
-			IUF++
-		} else {
-			s1 = 0
-			as1 = 0
+func Zs1s2(zr, s1, s2 complex128, scale, lim float64, iuf int) (s1o, s2o complex128, nz, iufo int) {
+	if s1 == 0 || math.Log(cmplx.Abs(s1))-2*real(zr) < -lim {
+		if cmplx.Abs(s2) > scale {
+			return 0, s2, 0, iuf
 		}
+		return 0, 0, 1, 0
 	}
-	if math.Max(as1, as2) > ASCLE {
-		return real(zr), imag(zr), real(s1), imag(s1), real(s2), imag(s2), NZ, ASCLE, ALIM, IUF
+	// TODO(btracey): Written like this for numerical rounding reasons.
+	// Fix once we're sure other changes are correct.
+	s1 = cmplx.Exp(cmplx.Log(s1) - zr - zr)
+	if math.Max(cmplx.Abs(s1), cmplx.Abs(s2)) > scale {
+		return s1, s2, 0, iuf + 1
 	}
-	s1 = 0
-	s2 = 0
-	NZ = 1
-	IUF = 0
-	return real(zr), imag(zr), real(s1), imag(s1), real(s2), imag(s2), NZ, ASCLE, ALIM, IUF
+	return 0, 0, 1, 0
 }
 
 func dgamln(z float64, ierr int) float64 {

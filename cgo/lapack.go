@@ -565,15 +565,17 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 // -1 if n == 0, otherwise Dgehrd will panic.
 //
 // On return, tau will contain the scalar factors of the elementary reflectors.
-// Elements tau[:ilo] and tau[ihi:] of tau will be set to zero. It must have
-// length equal to n-1 if n > 1, otherwise Dgehrd will panic.
+// Elements tau[:ilo] and tau[ihi:] will be set to zero. tau must have length
+// equal to n-1 if n > 0, otherwise Dgehrd will panic.
 //
-// work must have length at least lwork, otherwise Dgehrd will panic, and lwork
-// must be at least max(1,n).
+// work must have length at least lwork and lwork must be at least max(1,n),
+// otherwise Dgehrd will panic. On return, work[0] contains the optimal value of
+// lwork.
 //
-// The C interface does not support providing temporary storage. To provide
-// compatibility with native, lwork == -1 will not run Dgehrd but will instead
-// write the minimum work necessary to work[0].
+// If lwork == -1, instead of performing Dgehrd, only the optimal value of lwork
+// will be stored in work[0].
+//
+// Dgehrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int) {
 	checkMatrix(n, n, a, lda)
 	switch {
@@ -585,7 +587,7 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 		panic(shortWork)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
-	case n > 0 && len(tau) != n-1:
+	case n > 0 && len(tau) != n-1 && lwork != -1:
 		panic(badTau)
 	}
 	clapack.Dgehrd(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
@@ -1112,7 +1114,7 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 		panic(badIlo)
 	case ihi < min(ilo, nq-1) || nq <= ihi:
 		panic(badIhi)
-	case nq > 0 && len(tau) != nq-1:
+	case nq > 0 && len(tau) != nq-1 && lwork != -1:
 		panic(badTau)
 	case lwork < max(1, nw) && lwork != -1:
 		panic(badWork)

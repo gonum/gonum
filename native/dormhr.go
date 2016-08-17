@@ -73,7 +73,7 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 		panic(badIlo)
 	case ihi < min(ilo, nq-1) || nq <= ihi:
 		panic(badIhi)
-	case nq > 0 && len(tau) != nq-1:
+	case nq > 0 && len(tau) != nq-1 && lwork != -1:
 		panic(badTau)
 	case lwork < max(1, nw) && lwork != -1:
 		panic(badWork)

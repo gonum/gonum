@@ -972,15 +972,6 @@ func isAllNaN(x []float64) bool {
 	return true
 }
 
-func isAnyNaN(x []float64) bool {
-	for _, v := range x {
-		if math.IsNaN(v) {
-			return true
-		}
-	}
-	return false
-}
-
 func isHessenberg(h blas64.General) bool {
 	if h.Rows != h.Cols {
 		panic("matrix not square")

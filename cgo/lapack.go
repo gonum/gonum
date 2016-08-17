@@ -585,7 +585,7 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 		panic(shortWork)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
-	case n > 0 && len(tau) != n-1:
+	case n > 0 && len(tau) != n-1 && lwork != -1:
 		panic(badTau)
 	}
 	clapack.Dgehrd(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
@@ -1112,7 +1112,7 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 		panic(badIlo)
 	case ihi < min(ilo, nq-1) || nq <= ihi:
 		panic(badIhi)
-	case nq > 0 && len(tau) != nq-1:
+	case nq > 0 && len(tau) != nq-1 && lwork != -1:
 		panic(badTau)
 	case lwork < max(1, nw) && lwork != -1:
 		panic(badWork)

@@ -73,7 +73,7 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 		panic(shortWork)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
-	case n > 0 && len(tau) != n-1:
+	case n > 0 && len(tau) != n-1 && lwork != -1:
 		panic(badTau)
 	}
 

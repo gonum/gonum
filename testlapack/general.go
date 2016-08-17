@@ -972,7 +972,7 @@ func isAllNaN(x []float64) bool {
 	return true
 }
 
-func isHessenberg(h blas64.General) bool {
+func isUpperHessenberg(h blas64.General) bool {
 	if h.Rows != h.Cols {
 		panic("matrix not square")
 	}

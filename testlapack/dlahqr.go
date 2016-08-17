@@ -299,7 +299,7 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 		t.Errorf("%v: out-of-range write to Z\n%v", prefix, z.Data)
 	}
 
-	if !isHessenberg(h) {
+	if !isUpperHessenberg(h) {
 		t.Logf("%v: H is not Hessenberg", prefix)
 	}
 

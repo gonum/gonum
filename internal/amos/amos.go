@@ -556,7 +556,7 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	var sinh, cosh complex128
 	//var sin, cos float64
 
-	var tmp complex128
+	var tmp, p complex128
 	var CSSR, CSRR, BRY [4]float64
 	var CYR, CYI [3]float64
 
@@ -1128,7 +1128,8 @@ TwoSixtyOne:
 		// sin, cos = math.Sincos(P2I)
 		P1R = P2M * math.Cos(P2I)
 		P1I = P2M * math.Sin(P2I)
-		P1R, P1I, NW, ASCLE, TOL = Zuchk(P1R, P1I, NW, ASCLE, TOL)
+		p = complex(P1R, P1I)
+		NW = Zuchk(p, ASCLE, TOL)
 		if NW != 0 {
 			goto TwoSixtyThree
 		}
@@ -1240,7 +1241,7 @@ func Zkscl(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASC
 		S2R, ZEROI, ZEROR, ZDR, ZDI, CELMR, ELM, HELIM, ALAS float64
 
 	var I, IC, KK, NN, NW int
-	var tmp complex128
+	var tmp, c complex128
 	var CYR, CYI [3]float64
 	var sin, cos float64
 
@@ -1273,7 +1274,8 @@ func Zkscl(ZRR, ZRI, FNU float64, N int, YR, YI []float64, NZ int, RZR, RZI, ASC
 		// sin, cos = math.Sincos(CSI)
 		CSR = STR * math.Cos(CSI)
 		CSI = STR * math.Sin(CSI)
-		CSR, CSI, NW, ASCLE, TOL = Zuchk(CSR, CSI, NW, ASCLE, TOL)
+		c = complex(CSR, CSI)
+		NW = Zuchk(c, ASCLE, TOL)
 		if NW != 0 {
 			continue
 		}
@@ -1341,7 +1343,8 @@ Twenty:
 		sin, cos = math.Sincos(CSI)
 		CSR = STR * cos
 		CSI = STR * sin
-		CSR, CSI, NW, ASCLE, TOL = Zuchk(CSR, CSI, NW, ASCLE, TOL)
+		c = complex(CSR, CSI)
+		NW = Zuchk(c, ASCLE, TOL)
 		if NW != 0 {
 			goto TwentyFive
 		}
@@ -1378,28 +1381,27 @@ FourtyFive:
 	return ZRR, ZRI, FNU, N, YR, YI, NZ, RZR, RZI, ASCLE, TOL, ELIM
 }
 
-// Y ENTERS AS A SCALED QUANTITY WHOSE MAGNITUDE IS GREATER THAN
-// EXP(-ALIM)=ASCLE=1.0E+3*dmach[1)/TOL. THE TEST IS MADE TO SEE
-// if THE MAGNITUDE OF THE REAL OR IMAGINARY PART WOULD UNDERFLOW
-// WHEN Y IS SCALED (BY TOL) TO ITS PROPER VALUE. Y IS ACCEPTED
-// if THE UNDERFLOW IS AT LEAST ONE PRECISION BELOW THE MAGNITUDE
-// OF THE LARGEST COMPONENT; OTHERWISE THE PHASE ANGLE DOES NOT HAVE
-// ABSOLUTE ACCURACY AND AN UNDERFLOW IS ASSUMED.
-func Zuchk(YR, YI float64, NZ int, ASCLE, TOL float64) (YRout, YIout float64, NZout int, ASCLEout, TOLout float64) {
-	var SS, ST, WR, WI float64
-	NZ = 0
-	WR = math.Abs(YR)
-	WI = math.Abs(YI)
-	ST = math.Min(WR, WI)
-	if ST > ASCLE {
-		return YR, YI, NZ, ASCLE, TOL
+// Zuchk tests whether the magnitude of the real or imaginary part would
+// underflow when y is scaled by tol.
+//
+// y enters as a scaled quantity whose magnitude is greater than
+//  1e3 + 3*dmach(1)/tol
+// y is accepted if the underflow is at least one precision below the magnitude
+// of the largest component. Otherwise an underflow is assumed as the phase angle
+// does not have sufficient accuracy.
+func Zuchk(y complex128, scale, tol float64) int {
+	absR := math.Abs(real(y))
+	absI := math.Abs(imag(y))
+	minAbs := math.Min(absR, absI)
+	if minAbs > scale {
+		return 0
 	}
-	SS = math.Max(WR, WI)
-	ST = ST / TOL
-	if SS < ST {
-		NZ = 1
+	maxAbs := math.Max(absR, absI)
+	minAbs /= tol
+	if maxAbs < minAbs {
+		return 1
 	}
-	return YR, YI, NZ, ASCLE, TOL
+	return 0
 }
 
 // ZACAI APPLIES THE ANALYTIC CONTINUATION FORMULA
@@ -1952,7 +1954,7 @@ func Zseri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 		STR, S1I, S1R, S2I, S2R, ZEROI, ZEROR float64
 	var I, IB, IDUM, IFLAG, IL, K, L, M, NN, NW int
 	var WR, WI [3]float64
-	var tmp complex128
+	var tmp, s2 complex128
 	var sin, cos float64
 
 	CONER = 1.0
@@ -2070,7 +2072,8 @@ Fifty:
 		if IFLAG == 0 {
 			goto Eighty
 		}
-		S2R, S2I, NW, ASCLE, TOL = Zuchk(S2R, S2I, NW, ASCLE, TOL)
+		s2 = complex(S2R, S2I)
+		NW = Zuchk(s2, ASCLE, TOL)
 		if NW != 0 {
 			goto Thirty
 		}

@@ -151,8 +151,7 @@ func zs1s2test(t *testing.T, x []float64, is []int) {
 	s1 := complex(input.S1R, input.S1I)
 	s2 := complex(input.S2R, input.S2I)
 	impl := func(input data) data {
-		s1, s2, nz, iuf :=
-			Zs1s2(zr, s1, s2, input.ASCLE, input.ALIM, input.IUF)
+		s1, s2, nz, iuf := Zs1s2(zr, s1, s2, input.ASCLE, input.ALIM, input.IUF)
 		zrr := real(zr)
 		zri := imag(zr)
 		s1r := real(s1)
@@ -193,7 +192,12 @@ func zuchktest(t *testing.T, x []float64, is []int, tol float64) {
 	TOL := tol
 
 	YRfort, YIfort, NZfort, ASCLEfort, TOLfort := zuchkOrig(YR, YI, NZ, ASCLE, TOL)
-	YRamos, YIamos, NZamos, ASCLEamos, TOLamos := Zuchk(YR, YI, NZ, ASCLE, TOL)
+	y := complex(YR, YI)
+	NZamos := Zuchk(y, ASCLE, TOL)
+	YRamos := real(y)
+	YIamos := imag(y)
+	ASCLEamos := ASCLE
+	TOLamos := TOL
 
 	sameF64(t, "zuchk yr", YRfort, YRamos)
 	sameF64(t, "zuchk yi", YIfort, YIamos)

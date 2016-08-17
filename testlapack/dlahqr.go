@@ -299,32 +299,8 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 		t.Errorf("%v: out-of-range write to Z\n%v", prefix, z.Data)
 	}
 
-	if wantz {
-		// Z should contain the orthogonal matrix U.
-		if !isOrthonormal(z) {
-			t.Errorf("%v: Z is not orthogonal", prefix)
-		}
-		// Z should have been modified only in the
-		// [iloz:ihiz+1,ilo:ihi+1] block.
-		for i := 0; i < n; i++ {
-			for j := 0; j < n; j++ {
-				if iloz <= i && i <= ihiz && ilo <= j && j <= ihi {
-					continue
-				}
-				if z.Data[i*z.Stride+j] != zCopy.Data[i*zCopy.Stride+j] {
-					t.Errorf("%v: Z modified outside of [iloz:ihiz+1,ilo:ihi+1] block", prefix)
-				}
-			}
-		}
-		if wantt {
-			hu := eye(n, n)
-			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hu)
-			uhu := eye(n, n)
-			blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hu, 0, uhu)
-			if !equalApproxGeneral(uhu, h, 10*tol) {
-				t.Errorf("%v: Z^T*(initial H)*Z and (final H) are not equal", prefix)
-			}
-		}
+	if !isHessenberg(h) {
+		t.Logf("%v: H is not Hessenberg", prefix)
 	}
 
 	start := ilo // Index of the first computed eigenvalue.
@@ -336,21 +312,11 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 	}
 
 	// Check that wr and wi have not been modified outside [start:ihi+1].
-	for i := 0; i < start; i++ {
-		if !math.IsNaN(wr[i]) {
-			t.Errorf("%v: wr modified before [ilo:ihi+1] block", prefix)
-		}
-		if !math.IsNaN(wi[i]) {
-			t.Errorf("%v: wi modified before [ilo:ihi+1] block", prefix)
-		}
+	if !isAllNaN(wr[:start]) || !isAllNaN(wr[ihi+1:]) {
+		t.Errorf("%v: unexpected modification of wr", prefix)
 	}
-	for i := ihi + 1; i < n; i++ {
-		if !math.IsNaN(wr[i]) {
-			t.Errorf("%v: wr modified after [ilo:ihi+1] block", prefix)
-		}
-		if !math.IsNaN(wi[i]) {
-			t.Errorf("%v: wi modified after [ilo:ihi+1] block", prefix)
-		}
+	if !isAllNaN(wi[:start]) || !isAllNaN(wi[ihi+1:]) {
+		t.Errorf("%v: unexpected modification of wi", prefix)
 	}
 
 	var hasReal bool
@@ -439,6 +405,36 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 				t.Log(test.evWant, ev)
 				t.Errorf("%v: unexpected eigenvalue %v", prefix, ev)
 			}
+		}
+	}
+
+	if !wantz {
+		return
+	}
+
+	// Z should contain the orthogonal matrix U.
+	if !isOrthonormal(z) {
+		t.Errorf("%v: Z is not orthogonal", prefix)
+	}
+	// Z should have been modified only in the
+	// [iloz:ihiz+1,ilo:ihi+1] block.
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			if iloz <= i && i <= ihiz && ilo <= j && j <= ihi {
+				continue
+			}
+			if z.Data[i*z.Stride+j] != zCopy.Data[i*zCopy.Stride+j] {
+				t.Errorf("%v: Z modified outside of [iloz:ihiz+1,ilo:ihi+1] block", prefix)
+			}
+		}
+	}
+	if wantt {
+		hu := eye(n, n)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hu)
+		uhu := eye(n, n)
+		blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hu, 0, uhu)
+		if !equalApproxGeneral(uhu, h, 10*tol) {
+			t.Errorf("%v: Z^T*(initial H)*Z and (final H) are not equal", prefix)
 		}
 	}
 }

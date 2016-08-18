@@ -48,14 +48,8 @@ import (
 // sr and si must have length kbot+1, otherwise Dlaqr2 will panic.
 //
 // v and ldv represent an nw×nw work matrix.
-//
-// t and ldt represent an nw×nw work matrix T. nh is the number of columns of T
-// available for workspace. It must hold that nh <= nw, otherwise Dlaqr2 will
-// panic.
-//
-// wv and ldwv represent an nw×nw work matrix W. nv is the number of rows of W
-// available for workspace. It must hold that nv <= nw, otherwise Dlaqr2 will
-// panic.
+// t and ldt represent an nw×nh work matrix, and nh must be at least nw.
+// wv and ldwv represent an nv×nw work matrix.
 //
 // work must have length at least lwork and lwork must be at least max(1,2*nw),
 // otherwise Dlaqr2 will panic. Larger values of lwork may result in greater
@@ -105,13 +99,11 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 		}
 	}
 	checkMatrix(nw, nw, v, ldv)
-	checkMatrix(nw, nw, t, ldt)
-	checkMatrix(nw, nw, wv, ldwv)
+	checkMatrix(nw, nh, t, ldt)
+	checkMatrix(nv, nw, wv, ldwv)
 	switch {
-	case nh > nw:
+	case nh < nw:
 		panic("lapack: invalid value of nh")
-	case nv > nw:
-		panic("lapack: invalid value of nv")
 	case len(sr) != kbot+1:
 		panic("lapack: bad length of sr")
 	case len(si) != kbot+1:

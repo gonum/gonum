@@ -232,27 +232,27 @@ func testDlaqr2(t *testing.T, impl Dlaqr2er, test dlaqr2Test, opt bool, rnd *ran
 	v := randomGeneral(nw, nw, nw+extra, rnd)
 	var nh int
 	if nw > 0 {
-		nh = rnd.Intn(nw) + 1
+		nh = nw + rnd.Intn(nw) // nh must be at least nw.
 	}
-	tmat := randomGeneral(nw, nw, nw+extra, rnd)
+	tmat := randomGeneral(nw, nh, nh+extra, rnd)
 	var nv int
 	if nw > 0 {
 		nv = rnd.Intn(nw) + 1
 	}
-	wv := randomGeneral(nw, nw, nw+extra, rnd)
+	wv := randomGeneral(nv, nw, nw+extra, rnd)
 
 	var work []float64
 	if opt {
 		work = nanSlice(1)
 		impl.Dlaqr2(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, z.Stride,
-			sr, si, v.Data, v.Stride, nh, tmat.Data, tmat.Stride, nv, wv.Data, wv.Stride, work, -1)
+			sr, si, v.Data, v.Stride, tmat.Cols, tmat.Data, tmat.Stride, wv.Rows, wv.Data, wv.Stride, work, -1)
 		work = nanSlice(int(work[0]))
 	} else {
 		work = nanSlice(max(1, 2*nw))
 	}
 
 	ns, nd := impl.Dlaqr2(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, z.Stride,
-		sr, si, v.Data, v.Stride, nh, tmat.Data, tmat.Stride, nv, wv.Data, wv.Stride, work, len(work))
+		sr, si, v.Data, v.Stride, tmat.Cols, tmat.Data, tmat.Stride, wv.Rows, wv.Data, wv.Stride, work, len(work))
 
 	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ktop=%v, kbot=%v, nw=%v, iloz=%v, ihiz=%v, extra=%v",
 		wantt, wantz, n, ktop, kbot, nw, iloz, ihiz, extra)

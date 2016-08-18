@@ -12,13 +12,13 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dlaqr2 performs the orthogonal similarity transformation of a n×n upper
+// Dlaqr2 performs the orthogonal similarity transformation of an n×n upper
 // Hessenberg matrix to detect and deflate fully converged eigenvalues from a
 // trailing principal submatrix using aggressive early deflation [1].
 //
 // On return, H will be overwritten by a new Hessenberg matrix that is a
-// perturbation of an orthogonal similarity transformation of H. It is to be
-// hoped that on output H will have many zero subdiagonal entries.
+// perturbation of an orthogonal similarity transformation of H. It is hoped
+// that on output H will have many zero subdiagonal entries.
 //
 // If wantt is true, the matrix H will be fully updated so that the
 // quasi-triangular Schur factor can be computed. If wantt is false, then only
@@ -27,14 +27,17 @@ import (
 // If wantz is true, the orthogonal similarity transformation will be
 // accumulated into Z[iloz:ihiz+1,ktop:kbot+1], otherwise Z is not referenced.
 //
-// ktop and kbot determine an block [ktop:kbot+1,ktop:kbot+1] along the diagonal
-// of H. The block must be isolated, that is, it must hold that
-//  ktop == 0   or H[ktop,ktop-1] == 0,  and
+// ktop and kbot determine a block [ktop:kbot+1,ktop:kbot+1] along the diagonal
+// of H. It must hold that
+//  0 <= ilo <= ihi < n,     if n > 0,
+//  ilo == 0 and ihi == -1,  if n == 0,
+// and the block must be isolated, that is, it must hold that
+//  ktop == 0   or H[ktop,ktop-1] == 0,
 //  kbot == n-1 or H[kbot+1,kbot] == 0,
 // otherwise Dlaqr2 will panic.
 //
 // nw is the deflation window size. It must hold that
-//  1 <= nw <= kbot-ktop+1,
+//  0 <= nw <= kbot-ktop+1,
 // otherwise Dlaqr2 will panic.
 //
 // iloz and ihiz specify the rows of the n×n matrix Z to which transformations
@@ -81,11 +84,11 @@ import (
 func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int) (ns, nd int) {
 	checkMatrix(n, n, h, ldh)
 	switch {
-	case ktop < 0 || ktop > max(0, n-1):
+	case ktop < 0 || max(0, n-1) < ktop:
 		panic("lapack: invalid value of ktop")
 	case kbot < min(ktop, n-1) || n <= kbot:
 		panic("lapack: invalid value of kbot")
-	case ktop >= 1 && h[ktop*ldh+ktop-1] != 0:
+	case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
 		panic("lapack: block not isolated")
 	case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
 		panic("lapack: block not isolated")
@@ -198,7 +201,7 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 	ilst := infqr
 	// Deflation detection loop.
 	for ilst < ns {
-		var bulge bool
+		bulge := false
 		if ns >= 2 {
 			bulge = t[(ns-1)*ldt+ns-2] != 0
 		}
@@ -320,7 +323,7 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 		}
 
 		// Copy updated reduced window into place.
-		if kwtop >= 1 {
+		if kwtop > 0 {
 			h[kwtop*ldh+kwtop-1] = s * v[0]
 		}
 		impl.Dlacpy(blas.Upper, jw, jw, t, ldt, h[kwtop*ldh+kwtop:], ldh)
@@ -331,7 +334,8 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 		if ns > 1 && s != 0 {
 			// work[:ns-1] contains the elementary reflectors stored
 			// by a call to Dgehrd above.
-			impl.Dormhr(blas.Right, blas.NoTrans, jw, ns, 0, ns-1, t, ldt, work[:ns-1], v, ldv, work[jw:], lwork-jw)
+			impl.Dormhr(blas.Right, blas.NoTrans, jw, ns, 0, ns-1,
+				t, ldt, work[:ns-1], v, ldv, work[jw:], lwork-jw)
 		}
 
 		// Update vertical slab in H.

@@ -18,9 +18,11 @@ package native
 //  9: Maximum size of the subproblems in divide-and-conquer algorithms.
 //  10: ieee NaN arithmetic can be trusted not to trap.
 //  11: infinity arithmetic can be trusted not to trap.
+//  12...16: parameters for Dhseqr and related functions. See Iparmq for more
+//           information.
 //
 // Ilaenv is an internal routine. It is exported for testing purposes.
-func (Implementation) Ilaenv(ispec int, s string, opts string, n1, n2, n3, n4 int) int {
+func (impl Implementation) Ilaenv(ispec int, s string, opts string, n1, n2, n3, n4 int) int {
 	// TODO(btracey): Replace this with a constant lookup? A list of constants?
 	sname := s[0] == 'S' || s[0] == 'D'
 	cname := s[0] == 'C' || s[0] == 'Z'
@@ -373,5 +375,8 @@ func (Implementation) Ilaenv(ispec int, s string, opts string, n1, n2, n3, n4 in
 	case 11:
 		// Go guarantees ieee
 		return 1
+	case 12, 13, 14, 15, 16:
+		// Dhseqr and related functions for eigenvalue problems.
+		return impl.Iparmq(ispec, s, opts, n1, n2, n3, n4)
 	}
 }

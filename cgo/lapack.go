@@ -577,18 +577,21 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 //
 // Dgehrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int) {
-	checkMatrix(n, n, a, lda)
 	switch {
 	case ilo < 0 || max(0, n-1) < ilo:
 		panic(badIlo)
 	case ihi < min(ilo, n-1) || n <= ihi:
 		panic(badIhi)
-	case len(work) < lwork:
-		panic(shortWork)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
-	case n > 0 && len(tau) != n-1 && lwork != -1:
-		panic(badTau)
+	case len(work) < lwork:
+		panic(shortWork)
+	}
+	if lwork != -1 {
+		checkMatrix(n, n, a, lda)
+		if len(tau) != n-1 && n > 0 {
+			panic(badTau)
+		}
 	}
 	clapack.Dgehrd(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
 }
@@ -1105,8 +1108,6 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 	default:
 		panic(badSide)
 	}
-	checkMatrix(m, n, c, ldc)
-	checkMatrix(nq, nq, a, lda)
 	switch {
 	case trans != blas.NoTrans && trans != blas.Trans:
 		panic(badTrans)
@@ -1114,12 +1115,17 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 		panic(badIlo)
 	case ihi < min(ilo, nq-1) || nq <= ihi:
 		panic(badIhi)
-	case nq > 0 && len(tau) != nq-1 && lwork != -1:
-		panic(badTau)
 	case lwork < max(1, nw) && lwork != -1:
 		panic(badWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
+	}
+	if lwork != -1 {
+		checkMatrix(m, n, c, ldc)
+		checkMatrix(nq, nq, a, lda)
+		if len(tau) != nq-1 && nq > 0 {
+			panic(badTau)
+		}
 	}
 	clapack.Dormhr(side, trans, m, n, ilo+1, ihi+1, a, lda, tau, c, ldc, work, lwork)
 }

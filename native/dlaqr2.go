@@ -76,42 +76,27 @@ import (
 //      URL: http://dx.doi.org/10.1137/S0895479801384585
 //
 func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int) (ns, nd int) {
-	checkMatrix(n, n, h, ldh)
 	switch {
 	case ktop < 0 || max(0, n-1) < ktop:
 		panic("lapack: invalid value of ktop")
 	case kbot < min(ktop, n-1) || n <= kbot:
 		panic("lapack: invalid value of kbot")
-	case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
-		panic("lapack: block not isolated")
-	case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
-		panic("lapack: block not isolated")
 	case nw < 0 || kbot-ktop+1 < nw:
 		panic("lapack: invalid value of nw")
+	case nh < nw:
+		panic("lapack: invalid value of nh")
+	case lwork < max(1, 2*nw) && lwork != -1:
+		panic(badWork)
+	case len(work) < lwork:
+		panic(shortWork)
 	}
 	if wantz {
-		checkMatrix(n, n, z, ldz)
 		switch {
 		case iloz < 0 || ktop < iloz:
 			panic("lapack: invalid value of iloz")
 		case ihiz < kbot || n <= ihiz:
 			panic("lapack: invalid value of ihiz")
 		}
-	}
-	checkMatrix(nw, nw, v, ldv)
-	checkMatrix(nw, nh, t, ldt)
-	checkMatrix(nv, nw, wv, ldwv)
-	switch {
-	case nh < nw:
-		panic("lapack: invalid value of nh")
-	case len(sr) != kbot+1:
-		panic("lapack: bad length of sr")
-	case len(si) != kbot+1:
-		panic("lapack: bad length of si")
-	case len(work) < lwork:
-		panic(shortWork)
-	case lwork != -1 && lwork < max(1, 2*nw):
-		panic(badWork)
 	}
 
 	// LAPACK code does not enforce the documented behavior
@@ -136,8 +121,27 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 		return 0, 0
 	}
 
+	// Check input slices only after workspace query has been handled.
+	checkMatrix(n, n, h, ldh)
+	checkMatrix(nw, nw, v, ldv)
+	checkMatrix(nw, nh, t, ldt)
+	checkMatrix(nv, nw, wv, ldwv)
+	if wantz {
+		checkMatrix(n, n, z, ldz)
+	}
+	switch {
+	case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
+		panic("lapack: block not isolated")
+	case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
+		panic("lapack: block not isolated")
+	case len(sr) != kbot+1:
+		panic("lapack: bad length of sr")
+	case len(si) != kbot+1:
+		panic("lapack: bad length of si")
+	}
+
 	if nw == 0 {
-		return
+		return 0, 0
 	}
 
 	// Machine constants.

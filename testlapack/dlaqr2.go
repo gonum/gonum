@@ -244,8 +244,8 @@ func testDlaqr2(t *testing.T, impl Dlaqr2er, test dlaqr2Test, opt bool, rnd *ran
 	var work []float64
 	if opt {
 		work = nanSlice(1)
-		impl.Dlaqr2(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, z.Stride,
-			sr, si, v.Data, v.Stride, tmat.Cols, tmat.Data, tmat.Stride, wv.Rows, wv.Data, wv.Stride, work, -1)
+		impl.Dlaqr2(wantt, wantz, n, ktop, kbot, nw, nil, h.Stride, iloz, ihiz, nil, z.Stride,
+			nil, nil, nil, v.Stride, tmat.Cols, nil, tmat.Stride, wv.Rows, nil, wv.Stride, work, -1)
 		work = nanSlice(int(work[0]))
 	} else {
 		work = nanSlice(max(1, 2*nw))

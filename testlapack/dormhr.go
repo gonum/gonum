@@ -107,7 +107,7 @@ func testDormhr(t *testing.T, impl Dormhrer, side blas.Side, trans blas.Transpos
 	// Compute the product of Q and C using Dormhr.
 	if optwork {
 		work = nanSlice(1)
-		impl.Dormhr(side, trans, m, n, ilo, ihi, a.Data, a.Stride, tau, c.Data, c.Stride, work, -1)
+		impl.Dormhr(side, trans, m, n, ilo, ihi, nil, a.Stride, nil, nil, c.Stride, work, -1)
 		work = nanSlice(int(work[0]))
 	} else {
 		work = nanSlice(max(1, nw))

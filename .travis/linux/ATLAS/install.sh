@@ -11,7 +11,7 @@ go get github.com/gonum/blas
 go get github.com/gonum/matrix/mat64
 
 # install lapack against ATLAS
-pushd cgo/clapack
+pushd cgo/lapacke
 go install -v -x
 popd
 

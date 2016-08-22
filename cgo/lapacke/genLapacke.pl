@@ -6,7 +6,7 @@
 use strict;
 use warnings;
 
-my $clapackHeader = "lapacke.h";
+my $lapackeHeader = "lapacke.h";
 my $lib = join " ", @ARGV;
 
 my $excludeComplex = 0;
@@ -20,23 +20,23 @@ foreach my $obj (@lapack_extendedprecision_objs) {
 	$xobjs{$obj} = 1;
 }
 
-open(my $clapack, "<", $clapackHeader) or die;
-open(my $golapack, ">", "clapack.go") or die;
+open(my $lapacke, "<", $lapackeHeader) or die;
+open(my $golapack, ">", "lapacke.go") or die;
 
 my %done;
 my %hasWork;
 
 printf $golapack <<"EOH";
-// Do not manually edit this file. It was created by the genLapack.pl script from ${clapackHeader}.
+// Do not manually edit this file. It was created by the genLapack.pl script from ${lapackeHeader}.
 
 // Copyright ©2014 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package clapack provides bindings to a C LAPACK library.
+// Package lapacke provides bindings to the LAPACKE C Interface to LAPACK.
 //
 // Links are provided to the NETLIB fortran implementation/dependencies for each function.
-package clapack
+package lapacke
 
 /*
 #cgo CFLAGS: -g -O2
@@ -47,7 +47,7 @@ if ($lib) {
 }
 
 printf $golapack <<"EOH";
-#include "${clapackHeader}"
+#include "${lapackeHeader}"
 */
 import "C"
 
@@ -71,7 +71,7 @@ func isZero(ret C.int) bool { return ret == 0 }
 EOH
 
 $/ = undef;
-my $header = <$clapack>;
+my $header = <$lapacke>;
 
 # horrible munging of text...
 $header =~ s/#[^\n\r]*//g;                 # delete cpp lines

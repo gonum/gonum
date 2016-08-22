@@ -8,7 +8,7 @@ package cgo
 import (
 	"github.com/gonum/blas"
 	"github.com/gonum/lapack"
-	"github.com/gonum/lapack/cgo/clapack"
+	"github.com/gonum/lapack/cgo/lapacke"
 )
 
 // Copied from lapack/native. Keep in sync.
@@ -104,7 +104,7 @@ var _ lapack.Float64 = Implementation{}
 func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int, b []float64, ldb int) {
 	checkMatrix(m, n, a, lda)
 	checkMatrix(m, n, b, ldb)
-	clapack.Dlacpy(uplo, m, n, a, lda, b, ldb)
+	lapacke.Dlacpy(uplo, m, n, a, lda, b, ldb)
 }
 
 // Dlange computes the matrix norm of the general m×n matrix a. The input norm
@@ -125,7 +125,7 @@ func (impl Implementation) Dlange(norm lapack.MatrixNorm, m, n int, a []float64,
 	if norm == lapack.MaxColumnSum && len(work) < n {
 		panic(badWork)
 	}
-	return clapack.Dlange(byte(norm), m, n, a, lda, work)
+	return lapacke.Dlange(byte(norm), m, n, a, lda, work)
 }
 
 // Dlansy computes the specified norm of an n×n symmetric matrix. If
@@ -144,7 +144,7 @@ func (impl Implementation) Dlansy(norm lapack.MatrixNorm, uplo blas.Uplo, n int,
 	if uplo != blas.Upper && uplo != blas.Lower {
 		panic(badUplo)
 	}
-	return clapack.Dlansy(byte(norm), uplo, n, a, lda, work)
+	return lapacke.Dlansy(byte(norm), uplo, n, a, lda, work)
 }
 
 // Dlantr computes the specified norm of an m×n trapezoidal matrix A. If
@@ -166,7 +166,7 @@ func (impl Implementation) Dlantr(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 	if norm == lapack.MaxColumnSum && len(work) < n {
 		panic(badWork)
 	}
-	return clapack.Dlantr(byte(norm), uplo, diag, m, n, a, lda, work)
+	return lapacke.Dlantr(byte(norm), uplo, diag, m, n, a, lda, work)
 }
 
 // Dlarfx applies an elementary reflector H to a real m×n matrix C, from either
@@ -204,7 +204,7 @@ func (impl Implementation) Dlarfx(side blas.Side, m, n int, v []float64, tau flo
 		panic(badSide)
 	}
 
-	clapack.Dlarfx(side, m, n, v, tau, c, ldc, work)
+	lapacke.Dlarfx(side, m, n, v, tau, c, ldc, work)
 }
 
 // Dpotrf computes the Cholesky decomposition of the symmetric positive definite
@@ -213,7 +213,7 @@ func (impl Implementation) Dlarfx(side blas.Side, m, n int, v []float64, tau flo
 // is computed and stored in-place into a. If a is not positive definite, false
 // is returned. This is the blocked version of the algorithm.
 func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok bool) {
-	// ul is checked in clapack.Dpotrf.
+	// ul is checked in lapacke.Dpotrf.
 	if n < 0 {
 		panic(nLT0)
 	}
@@ -223,7 +223,7 @@ func (impl Implementation) Dpotrf(ul blas.Uplo, n int, a []float64, lda int) (ok
 	if n == 0 {
 		return true
 	}
-	return clapack.Dpotrf(ul, n, a, lda)
+	return lapacke.Dpotrf(ul, n, a, lda)
 }
 
 // Dbdsqr performs a singular value decomposition of a real n×n bidiagonal matrix.
@@ -293,7 +293,7 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 	if len(c) == 0 {
 		c = make([]float64, 1)
 	}
-	return clapack.Dbdsqr(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, work)
+	return lapacke.Dbdsqr(uplo, n, ncvt, nru, ncc, d, e, vt, ldvt, u, ldu, c, ldc, work)
 }
 
 // Dgebrd reduces a general m×n matrix A to upper or lower bidiagonal form B by
@@ -363,7 +363,7 @@ func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, ta
 		panic(badWork)
 	}
 
-	clapack.Dgebrd(m, n, a, lda, d, e, tauQ, tauP, work, lwork)
+	lapacke.Dgebrd(m, n, a, lda, d, e, tauQ, tauP, work, lwork)
 }
 
 // Dgecon estimates the reciprocal of the condition number of the n×n matrix A
@@ -397,7 +397,7 @@ func (impl Implementation) Dgecon(norm lapack.MatrixNorm, n int, a []float64, ld
 		}
 		_iwork[i] = int32(v)
 	}
-	clapack.Dgecon(byte(norm), n, a, lda, anorm, rcond, work, _iwork)
+	lapacke.Dgecon(byte(norm), n, a, lda, anorm, rcond, work, _iwork)
 	for i, v := range _iwork {
 		iwork[i] = int(v)
 	}
@@ -429,7 +429,7 @@ func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []fl
 	if len(work) < m {
 		panic(badWork)
 	}
-	clapack.Dgelq2(m, n, a, lda, tau, work)
+	lapacke.Dgelq2(m, n, a, lda, tau, work)
 }
 
 // Dgelqf computes the LQ factorization of the m×n matrix A using a blocked
@@ -456,7 +456,7 @@ func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []fl
 	if len(tau) < min(m, n) {
 		panic(badTau)
 	}
-	clapack.Dgelqf(m, n, a, lda, tau, work, lwork)
+	lapacke.Dgelqf(m, n, a, lda, tau, work, lwork)
 }
 
 // Dgeqr2 computes a QR factorization of the m×n matrix A.
@@ -490,7 +490,7 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 	if len(tau) < k {
 		panic(badTau)
 	}
-	clapack.Dgeqr2(m, n, a, lda, tau, work)
+	lapacke.Dgeqr2(m, n, a, lda, tau, work)
 }
 
 // Dgeqrf computes the QR factorization of the m×n matrix A using a blocked
@@ -518,7 +518,7 @@ func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []fl
 	if len(tau) < k {
 		panic(badTau)
 	}
-	clapack.Dgeqrf(m, n, a, lda, tau, work, lwork)
+	lapacke.Dgeqrf(m, n, a, lda, tau, work, lwork)
 }
 
 // Dgehrd reduces a block of a real n×n general matrix A to upper Hessenberg
@@ -593,7 +593,7 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 			panic(badTau)
 		}
 	}
-	clapack.Dgehrd(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
+	lapacke.Dgehrd(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
 }
 
 // Dgels finds a minimum-norm solution based on the matrices A and B using the
@@ -637,7 +637,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 	if lwork < mn+max(mn, nrhs) {
 		panic(badWork)
 	}
-	return clapack.Dgels(trans, m, n, nrhs, a, lda, b, ldb, work, lwork)
+	return lapacke.Dgels(trans, m, n, nrhs, a, lda, b, ldb, work, lwork)
 }
 
 const noSVDO = "dgesvd: not coded for overwrite"
@@ -716,7 +716,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 		work[0] = float64(minWork)
 		return true
 	}
-	return clapack.Dgesvd(lapack.Job(jobU), lapack.Job(jobVT), m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork)
+	return lapacke.Dgesvd(lapack.Job(jobU), lapack.Job(jobVT), m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork)
 }
 
 // Dgetf2 computes the LU decomposition of the m×n matrix A.
@@ -741,7 +741,7 @@ func (Implementation) Dgetf2(m, n int, a []float64, lda int, ipiv []int) (ok boo
 		panic(badIpiv)
 	}
 	ipiv32 := make([]int32, len(ipiv))
-	ok = clapack.Dgetf2(m, n, a, lda, ipiv32)
+	ok = lapacke.Dgetf2(m, n, a, lda, ipiv32)
 	for i, v := range ipiv32 {
 		ipiv[i] = int(v) - 1 // Transform to zero-indexed.
 	}
@@ -772,7 +772,7 @@ func (impl Implementation) Dgetrf(m, n int, a []float64, lda int, ipiv []int) (o
 		panic(badIpiv)
 	}
 	ipiv32 := make([]int32, len(ipiv))
-	ok = clapack.Dgetrf(m, n, a, lda, ipiv32)
+	ok = lapacke.Dgetrf(m, n, a, lda, ipiv32)
 	for i, v := range ipiv32 {
 		ipiv[i] = int(v) - 1 // Transform to zero-indexed.
 	}
@@ -808,7 +808,7 @@ func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work 
 	for i, v := range ipiv {
 		ipiv32[i] = int32(v) + 1 // Transform to one-indexed.
 	}
-	return clapack.Dgetri(n, a, lda, ipiv32, work, lwork)
+	return lapacke.Dgetri(n, a, lda, ipiv32, work, lwork)
 }
 
 // Dgetrs solves a system of equations using an LU factorization.
@@ -832,7 +832,7 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 	for i, v := range ipiv {
 		ipiv32[i] = int32(v) + 1 // Transform to one-indexed.
 	}
-	clapack.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
+	lapacke.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
 }
 
 // Dorgbr generates one of the matrices Q or P^T computed by Dgebrd.
@@ -872,7 +872,7 @@ func (impl Implementation) Dorgbr(vect lapack.DecompUpdate, m, n, k int, a []flo
 	if lwork < mn {
 		panic(badWork)
 	}
-	clapack.Dorgbr(byte(vect), m, n, k, a, lda, tau, work, lwork)
+	lapacke.Dorgbr(byte(vect), m, n, k, a, lda, tau, work, lwork)
 }
 
 // Dorghr generates an n×n orthogonal matrix Q which is defined as the product
@@ -916,7 +916,7 @@ func (impl Implementation) Dorghr(n, ilo, ihi int, a []float64, lda int, tau, wo
 	case len(work) < max(1, lwork):
 		panic(shortWork)
 	}
-	clapack.Dorghr(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
+	lapacke.Dorghr(n, ilo+1, ihi+1, a, lda, tau, work, lwork)
 }
 
 // Dorglq generates an m×n matrix Q with orthonormal rows defined by the product
@@ -958,7 +958,7 @@ func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work [
 	if lwork < m {
 		panic(badWork)
 	}
-	clapack.Dorglq(m, n, k, a, lda, tau, work, lwork)
+	lapacke.Dorglq(m, n, k, a, lda, tau, work, lwork)
 }
 
 // Dorgqr generates an m×n matrix Q with orthonormal columns defined by the
@@ -1000,7 +1000,7 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 	if lwork < n {
 		panic(badWork)
 	}
-	clapack.Dorgqr(m, n, k, a, lda, tau, work, lwork)
+	lapacke.Dorgqr(m, n, k, a, lda, tau, work, lwork)
 }
 
 // Dormbr applies a multiplicative update to the matrix C based on a
@@ -1047,7 +1047,7 @@ func (impl Implementation) Dormbr(vect lapack.DecompUpdate, side blas.Side, tran
 	} else {
 		checkMatrix(min(nq, k), nq, a, lda)
 	}
-	clapack.Dormbr(byte(vect), side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
+	lapacke.Dormbr(byte(vect), side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
 }
 
 // Dormhr multiplies an m×n general matrix C with an nq×nq orthogonal matrix Q
@@ -1127,7 +1127,7 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 			panic(badTau)
 		}
 	}
-	clapack.Dormhr(side, trans, m, n, ilo+1, ihi+1, a, lda, tau, c, ldc, work, lwork)
+	lapacke.Dormhr(side, trans, m, n, ilo+1, ihi+1, a, lda, tau, c, ldc, work, lwork)
 }
 
 // Dormlq multiplies the matrix C by the orthogonal matrix Q defined by the
@@ -1182,7 +1182,7 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 			panic(badWork)
 		}
 	}
-	clapack.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
+	lapacke.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
 }
 
 // Dormqr multiplies the matrix C by the orthogonal matrix Q defined by the
@@ -1234,7 +1234,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 		}
 	}
 
-	clapack.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
+	lapacke.Dormqr(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
 }
 
 // Dpocon estimates the reciprocal of the condition number of a positive-definite
@@ -1266,7 +1266,7 @@ func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, a
 		}
 		_iwork[i] = int32(v)
 	}
-	clapack.Dpocon(uplo, n, a, lda, anorm, rcond, work, _iwork)
+	lapacke.Dpocon(uplo, n, a, lda, anorm, rcond, work, _iwork)
 	for i, v := range _iwork {
 		iwork[i] = int(v)
 	}
@@ -1299,7 +1299,7 @@ func (impl Implementation) Dsyev(jobz lapack.EigComp, uplo blas.Uplo, n int, a [
 	if lwork < 3*n-1 {
 		panic(badWork)
 	}
-	return clapack.Dsyev(lapack.Job(jobz), uplo, n, a, lda, w, work, lwork)
+	return lapacke.Dsyev(lapack.Job(jobz), uplo, n, a, lda, w, work, lwork)
 }
 
 // Dtrcon estimates the reciprocal of the condition number of a triangular matrix A.
@@ -1333,7 +1333,7 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 		}
 		_iwork[i] = int32(v)
 	}
-	clapack.Dtrcon(byte(norm), uplo, diag, n, a, lda, rcond, work, _iwork)
+	lapacke.Dtrcon(byte(norm), uplo, diag, n, a, lda, rcond, work, _iwork)
 	for i, v := range _iwork {
 		iwork[i] = int(v)
 	}
@@ -1407,7 +1407,7 @@ func (impl Implementation) Dtrexc(compq lapack.EigComp, n int, t []float64, ldt 
 
 	ifst32 := []int32{int32(ifst + 1)}
 	ilst32 := []int32{int32(ilst + 1)}
-	ok = clapack.Dtrexc(lapack.Comp(compq), n, t, ldt, q, ldq, ifst32, ilst32, work)
+	ok = lapacke.Dtrexc(lapack.Comp(compq), n, t, ldt, q, ldq, ifst32, ilst32, work)
 	ifst = int(ifst32[0] - 1)
 	ilst = int(ilst32[0] - 1)
 	return ifst, ilst, ok
@@ -1427,12 +1427,12 @@ func (impl Implementation) Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []flo
 	if diag != blas.NonUnit && diag != blas.Unit {
 		panic(badDiag)
 	}
-	return clapack.Dtrtri(uplo, diag, n, a, lda)
+	return lapacke.Dtrtri(uplo, diag, n, a, lda)
 }
 
 // Dtrtrs solves a triangular system of the form A * X = B or A^T * X = B.
 // Dtrtrs returns whether the solve completed successfully.
 // If A is singular, no solve is performed.
 func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int) (ok bool) {
-	return clapack.Dtrtrs(uplo, trans, diag, n, nrhs, a, lda, b, ldb)
+	return lapacke.Dtrtrs(uplo, trans, diag, n, nrhs, a, lda, b, ldb)
 }

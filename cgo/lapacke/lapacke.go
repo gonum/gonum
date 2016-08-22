@@ -4,10 +4,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package clapack provides bindings to a C LAPACK library.
+// Package lapacke provides bindings to the LAPACKE C Interface to LAPACK.
 //
 // Links are provided to the NETLIB fortran implementation/dependencies for each function.
-package clapack
+package lapacke
 
 /*
 #cgo CFLAGS: -g -O2

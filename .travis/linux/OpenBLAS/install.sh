@@ -56,8 +56,8 @@ export CGO_LDFLAGS="-L/usr/lib -lopenblas"
 go get github.com/gonum/blas
 go get github.com/gonum/matrix/mat64
 
-# install clapack against OpenBLAS
-pushd cgo/clapack
+# install lapacke against OpenBLAS
+pushd cgo/lapacke
 go install -v -x
 popd
 

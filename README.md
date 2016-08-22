@@ -39,7 +39,7 @@ adjust the `CGO_LDFLAGS` variable:
 
 Defines the LAPACK API based on http://www.netlib.org/lapack/lapacke.html
 
-### lapack/clapack
+### lapack/lapacke
 
 Binding to a C implementation of the lapacke interface (e.g. OpenBLAS or intel MKL)
 

@@ -10,13 +10,7 @@ const None = 'N'
 
 type Job byte
 
-// CompSV determines if the singular values are to be computed in compact form.
-type CompSV byte
-
-const (
-	Compact  CompSV = 'P'
-	Explicit CompSV = 'I'
-)
+type Comp byte
 
 // Complex128 defines the public complex128 LAPACK API supported by gonum/lapack.
 type Complex128 interface{}

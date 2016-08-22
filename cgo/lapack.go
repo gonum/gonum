@@ -1407,7 +1407,7 @@ func (impl Implementation) Dtrexc(compq lapack.EigComp, n int, t []float64, ldt 
 
 	ifst32 := []int32{int32(ifst + 1)}
 	ilst32 := []int32{int32(ilst + 1)}
-	ok = clapack.Dtrexc(lapack.CompSV(compq), n, t, ldt, q, ldq, ifst32, ilst32, work)
+	ok = clapack.Dtrexc(lapack.Comp(compq), n, t, ldt, q, ldq, ifst32, ilst32, work)
 	ifst = int(ifst32[0] - 1)
 	ilst = int(ilst32[0] - 1)
 	return ifst, ilst, ok

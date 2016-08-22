@@ -352,7 +352,7 @@ EOH
 			push @processed, $var." blas.Side"; next;
 		};
 		$var =~ /^comp./ && do {
-			push @processed, $var." lapack.CompSV"; next;
+			push @processed, $var." lapack.Comp"; next;
 		};
 		$var =~ /job/ && do {
 			push @processed, $var." lapack.Job"; next;

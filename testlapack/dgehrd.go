@@ -90,7 +90,7 @@ func testDgehrd(t *testing.T, impl Dgehrder, n, ilo, ihi, extra int, optwork boo
 	var work []float64
 	if optwork {
 		work = nanSlice(1)
-		impl.Dgehrd(n, ilo, ihi, a.Data, a.Stride, tau, work, -1)
+		impl.Dgehrd(n, ilo, ihi, nil, a.Stride, nil, work, -1)
 		work = nanSlice(int(work[0]))
 	} else {
 		work = nanSlice(max(1, n))

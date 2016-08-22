@@ -66,18 +66,21 @@ import (
 //
 // Dgehrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int) {
-	checkMatrix(n, n, a, lda)
 	switch {
 	case ilo < 0 || max(0, n-1) < ilo:
 		panic(badIlo)
 	case ihi < min(ilo, n-1) || n <= ihi:
 		panic(badIhi)
-	case len(work) < lwork:
-		panic(shortWork)
 	case lwork < max(1, n) && lwork != -1:
 		panic(badWork)
-	case n > 0 && len(tau) != n-1 && lwork != -1:
-		panic(badTau)
+	case len(work) < lwork:
+		panic(shortWork)
+	}
+	if lwork != -1 {
+		checkMatrix(n, n, a, lda)
+		if len(tau) != n-1 && n > 0 {
+			panic(badTau)
+		}
 	}
 
 	const (

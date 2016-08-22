@@ -64,8 +64,6 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 	default:
 		panic(badSide)
 	}
-	checkMatrix(m, n, c, ldc)
-	checkMatrix(nq, nq, a, lda)
 	switch {
 	case trans != blas.NoTrans && trans != blas.Trans:
 		panic(badTrans)
@@ -73,12 +71,18 @@ func (impl Implementation) Dormhr(side blas.Side, trans blas.Transpose, m, n, il
 		panic(badIlo)
 	case ihi < min(ilo, nq-1) || nq <= ihi:
 		panic(badIhi)
-	case nq > 0 && len(tau) != nq-1 && lwork != -1:
-		panic(badTau)
 	case lwork < max(1, nw) && lwork != -1:
 		panic(badWork)
 	case len(work) < max(1, lwork):
 		panic(shortWork)
+	}
+	if lwork != -1 {
+		checkMatrix(m, n, c, ldc)
+		checkMatrix(nq, nq, a, lda)
+		if len(tau) != nq-1 && nq > 0 {
+			panic(badTau)
+		}
+
 	}
 
 	nh := ihi - ilo

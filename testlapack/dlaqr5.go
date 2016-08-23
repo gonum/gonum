@@ -93,8 +93,8 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 					0, n-1, z.Data, z.Stride,
 					v.Data, v.Stride,
 					u.Data, u.Stride,
-					nh, wh.Data, wh.Stride,
-					nv, wv.Data, wv.Stride)
+					nv, wv.Data, wv.Stride,
+					nh, wh.Data, wh.Stride)
 
 				prefix := fmt.Sprintf("wantt=%v, n=%v, nshfts=%v, ktop=%v, kbot=%v, extra=%v, kacc22=%v",
 					wantt, n, nshfts, ktop, kbot, extra, kacc22)
@@ -154,8 +154,8 @@ func testDlaqr5(t *testing.T, impl Dlaqr5er, n, extra, kacc22 int, rnd *rand.Ran
 		0, n-1, z.Data, z.Stride,
 		v.Data, v.Stride,
 		u.Data, u.Stride,
-		nh, wh.Data, wh.Stride,
-		nv, wv.Data, wv.Stride)
+		nv, wv.Data, wv.Stride,
+		nh, wh.Data, wh.Stride)
 
 	prefix := fmt.Sprintf("Case n=%v, extra=%v, kacc22=%v", n, extra, kacc22)
 

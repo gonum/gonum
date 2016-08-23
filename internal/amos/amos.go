@@ -1420,7 +1420,8 @@ func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, T
 		CSPNI, C1R, C1I, C2R, C2I, DFNU, FMR, PI,
 		SGN, YY, ZNR, ZNI float64
 	var INU, IUF, NN, NW int
-	var zn, c1, c2 complex128
+	var zn, c1, c2, z complex128
+	var y []complex128
 	//var sin, cos float64
 
 	CYR := []float64{math.NaN(), 0, 0}
@@ -1441,7 +1442,16 @@ func Zacai(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, RL, T
 	}
 Ten:
 	// POWER SERIES FOR THE I FUNCTION.
-	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM = Zseri(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM)
+	z = complex(ZNR, ZNI)
+	y = make([]complex128, len(YR))
+	for i, v := range YR {
+		y[i] = complex(v, YI[i])
+	}
+	NW = Zseri(z, FNU, KODE, NN, y[1:], TOL, ELIM, ALIM)
+	for i, v := range y {
+		YR[i] = real(v)
+		YI[i] = imag(v)
+	}
 	goto Fourty
 Twenty:
 	if AZ < RL {
@@ -1939,241 +1949,175 @@ OneTen:
 	return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL
 }
 
-// ZSERI COMPUTES THE I BESSEL FUNCTION FOR REAL(Z)>=0.0 BY
-// MEANS OF THE POWER SERIES FOR LARGE CABS(Z) IN THE
-// REGION CABS(Z)<=2*SQRT(FNU+1). NZ=0 IS A NORMAL return.
-// NZ>0 MEANS THAT THE LAST NZ COMPONENTS WERE SET TO ZERO
-// DUE TO UNDERFLOW. NZ<0 MEANS UNDERFLOW OCCURRED, BUT THE
-// CONDITION CABS(Z)<=2*SQRT(FNU+1) WAS VIOLATED AND THE
-// COMPUTATION MUST BE COMPLETED IN ANOTHER ROUTINE WITH N=N-ABS(NZ).
-func Zseri(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM, ALIM float64) (
-	ZRout, ZIout, FNUout float64, KODEout, Nout int, YRout, YIout []float64, NZout int, TOLout, ELIMout, ALIMout float64) {
-	var AA, ACZ, AK, AK1I, AK1R, ARM, ASCLE, ATOL,
-		AZ, CKI, CKR, COEFI, COEFR, CONEI, CONER, CRSCR, CZI, CZR, DFNU,
-		FNUP, HZI, HZR, RAZ, RS, RTR1, RZI, RZR, S, SS, STI,
-		STR, S1I, S1R, S2I, S2R, ZEROI, ZEROR float64
-	var I, IB, IDUM, IFLAG, IL, K, L, M, NN, NW int
-	var WR, WI [3]float64
-	var tmp, s2 complex128
-	var sin, cos float64
-
-	CONER = 1.0
-	NZ = 0
-	AZ = cmplx.Abs(complex(ZR, ZI))
-	if AZ == 0.0E0 {
-		goto OneSixty
-	}
-	// TODO(btracey)
-	// The original fortran line is "ARM = 1.0D+3*D1MACH(1)". Evidently, in Fortran
+// Zseri computes the I bessel function for real(z) >= 0 by means of the power
+// series for large |z| in the region |z| <= 2*sqrt(fnu+1).
+//
+// nz = 0 is a normal return. nz > 0 means that the last nz components were set
+// to zero due to underflow. nz < 0 means that underflow occurred, but the
+// condition |z| <= 2*sqrt(fnu+1) was violated and the computation must be
+// completed in another routine with n -= abs(nz).
+func Zseri(z complex128, fnu float64, kode, n int, y []complex128, tol, elim, alim float64) (nz int) {
+	// TOOD(btracey): The original fortran line is "ARM = 1.0D+3*D1MACH(1)". Evidently, in Fortran
 	// this is interpreted as one to the power of +3*D1MACH(1). While it is possible
 	// this was intentional, it seems unlikely.
-	//ARM = 1.0E0 + 3*dmach[1]
-	//math.Pow(1, 3*dmach[1])
-	ARM = 1000 * dmach[1]
-	RTR1 = math.Sqrt(ARM)
-	CRSCR = 1.0E0
-	IFLAG = 0
-	if AZ < ARM {
-		goto OneFifty
-	}
-	HZR = 0.5E0 * ZR
-	HZI = 0.5E0 * ZI
-	CZR = ZEROR
-	CZI = ZEROI
-	if AZ <= RTR1 {
-		goto Ten
-	}
-	tmp = complex(HZR, HZI) * complex(HZR, HZI)
-	CZR = real(tmp)
-	CZI = imag(tmp)
-Ten:
-	ACZ = cmplx.Abs(complex(CZR, CZI))
-	NN = N
-	tmp = cmplx.Log(complex(HZR, HZI))
-	CKR = real(tmp)
-	CKI = imag(tmp)
-Twenty:
-	DFNU = FNU + float64(float32(NN-1))
-	FNUP = DFNU + 1.0E0
-
-	// UNDERFLOW TEST.
-	AK1R = CKR * DFNU
-	AK1I = CKI * DFNU
-	AK = dgamln(FNUP, IDUM)
-	AK1R = AK1R - AK
-	if KODE == 2 {
-		AK1R = AK1R - ZR
-	}
-	if AK1R > (-ELIM) {
-		goto Fourty
-	}
-Thirty:
-	NZ = NZ + 1
-	YR[NN] = ZEROR
-	YI[NN] = ZEROI
-	if ACZ > DFNU {
-		goto OneNinety
-	}
-	NN = NN - 1
-	if NN == 0 {
-		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
-	}
-	goto Twenty
-Fourty:
-	if AK1R > (-ALIM) {
-		goto Fifty
-	}
-	IFLAG = 1
-	SS = 1.0E0 / TOL
-	CRSCR = TOL
-	ASCLE = ARM * SS
-Fifty:
-	AA = math.Exp(AK1R)
-	if IFLAG == 1 {
-		AA = AA * SS
-	}
-	sin, cos = math.Sincos(AK1I)
-	COEFR = AA * cos
-	COEFI = AA * sin
-	ATOL = TOL * ACZ / FNUP
-	IL = min(2, NN)
-	for I = 1; I <= IL; I++ {
-		DFNU = FNU + float64(float32(NN-I))
-		FNUP = DFNU + 1.0E0
-		S1R = CONER
-		S1I = CONEI
-		if ACZ < TOL*FNUP {
-			goto Seventy
+	arm := 1000 * dmach[1]
+	az := cmplx.Abs(z)
+	if az < arm {
+		for i := 0; i < n; i++ {
+			y[i] = 0
 		}
-		AK1R = CONER
-		AK1I = CONEI
-		AK = FNUP + 2.0E0
-		S = FNUP
-		AA = 2.0E0
-	Sixty:
-		RS = 1.0E0 / S
-		STR = AK1R*CZR - AK1I*CZI
-		STI = AK1R*CZI + AK1I*CZR
-		AK1R = STR * RS
-		AK1I = STI * RS
-		S1R = S1R + AK1R
-		S1I = S1I + AK1I
-		S = S + AK
-		AK = AK + 2.0E0
-		AA = AA * ACZ * RS
-		if AA > ATOL {
-			goto Sixty
+		if fnu == 0 {
+			y[0] = 1
+			n--
 		}
-	Seventy:
-		S2R = S1R*COEFR - S1I*COEFI
-		S2I = S1R*COEFI + S1I*COEFR
-		WR[I] = S2R
-		WI[I] = S2I
-		if IFLAG == 0 {
-			goto Eighty
+		if az == 0 {
+			return 0
 		}
-		s2 = complex(S2R, S2I)
-		NW = Zuchk(s2, ASCLE, TOL)
-		if NW != 0 {
-			goto Thirty
+		return n
+	}
+	hz := 0.5 * z
+	var cz complex128
+	var acz float64
+	if az > math.Sqrt(arm) {
+		cz = hz * hz
+		acz = cmplx.Abs(cz)
+	}
+	NN := n
+	ck := cmplx.Log(hz)
+	var ak1 complex128
+	for {
+		dfnu := fnu + float64(NN-1)
+		// Underflow test.
+		ak1 = ck * complex(dfnu, 0)
+		ak := dgamln(dfnu+1, 0)
+		ak1 -= complex(ak, 0)
+		if kode == 2 {
+			ak1 -= complex(real(z), 0)
 		}
-	Eighty:
-		M = NN - I + 1
-		YR[M] = S2R * CRSCR
-		YI[M] = S2I * CRSCR
-		if I == IL {
-			continue
+		if real(ak1) > -elim {
+			break
 		}
-		tmp = complex(COEFR, COEFI) / complex(HZR, HZI)
-		STR = real(tmp)
-		STI = imag(tmp)
-		COEFR = STR * DFNU
-		COEFI = STI * DFNU
+		nz++
+		y[NN-1] = 0
+		if acz > dfnu {
+			// Return with nz < 0 if abs(Z*Z/4)>fnu+u-nz-1 complete the calculation
+			// in cbinu with n = n - abs(nz).
+			nz *= -1
+			return nz
+		}
+		NN--
+		if NN == 0 {
+			return nz
+		}
+	}
+	crscr := 1.0
+	var flag int
+	var scale float64
+	aa := real(ak1)
+	if aa <= -alim {
+		flag = 1
+		crscr = tol
+		scale = arm / tol
+		aa -= math.Log(tol)
+	}
+	var w [2]complex128
+	for {
+		coef := cmplx.Exp(complex(aa, imag(ak1)))
+		atol := tol * acz / (fnu + float64(NN))
+		for i := 0; i < min(2, NN); i++ {
+			FNUP := fnu + float64(NN-i)
+			s1 := 1 + 0i
+			if acz >= tol*FNUP {
+				ak2 := 1 + 0i
+				ak := FNUP + 2
+				S := FNUP
+				scl := 2.0
+				first := true
+				for first || scl > atol {
+					ak2 = ak2 * cz * complex(1/S, 0)
+					scl *= acz / S
+					s1 += ak2
+					S += ak
+					ak += 2
+					first = false
+				}
+			}
+			s2 := s1 * coef
+			w[i] = s2
+			if flag == 1 {
+				if Zuchk(s2, scale, tol) != 0 {
+					var full bool
+					var dfnu float64
+					// This code is similar to the code that exists above. The
+					// code copying is here because the original Fortran used
+					// a goto to solve the loop-and-a-half problem. Removing the
+					// goto makes the behavior of the function and variable scoping
+					// much clearer, but requires copying this code due to Go's
+					// goto rules.
+					for {
+						if full {
+							dfnu = fnu + float64(NN-1)
+							// Underflow test.
+							ak1 = ck * complex(dfnu, 0)
+							ak1 -= complex(dgamln(dfnu+1, 0), 0)
+							if kode == 2 {
+								ak1 -= complex(real(z), 0)
+							}
+							if real(ak1) > -elim {
+								break
+							}
+						} else {
+							full = true
+						}
+						nz++
+						y[NN-1] = 0
+						if acz > dfnu {
+							// Return with nz < 0 if abs(Z*Z/4)>fnu+u-nz-1 complete the calculation
+							// in cbinu with n = n - abs(nz).
+							nz *= -1
+							return nz
+						}
+						NN--
+						if NN == 0 {
+							return nz
+						}
+					}
+					continue
+				}
+			}
+			y[NN-i-1] = s2 * complex(crscr, 0)
+			coef /= hz
+			coef *= complex(FNUP-1, 0)
+		}
+		break
 	}
 	if NN <= 2 {
-		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
+		return nz
 	}
-	K = NN - 2
-	AK = float64(float32(K))
-	RAZ = 1.0E0 / AZ
-	STR = ZR * RAZ
-	STI = -ZI * RAZ
-	RZR = (STR + STR) * RAZ
-	RZI = (STI + STI) * RAZ
-	if IFLAG == 1 {
-		goto OneTwenty
+	rz := complex(2*real(z)/(az*az), -2*imag(z)/(az*az))
+	if flag == 0 {
+		for i := NN - 3; i >= 0; i-- {
+			y[i] = complex(float64(i+1)+fnu, 0)*rz*y[i+1] + y[i+2]
+		}
+		return nz
 	}
-	IB = 3
-OneHundred:
-	for I = IB; I <= NN; I++ {
-		YR[K] = (AK+FNU)*(RZR*YR[K+1]-RZI*YI[K+1]) + YR[K+2]
-		YI[K] = (AK+FNU)*(RZR*YI[K+1]+RZI*YR[K+1]) + YI[K+2]
-		AK = AK - 1.0E0
-		K = K - 1
-	}
-	return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
 
-	// RECUR BACKWARD WITH SCALED VALUES.
-OneTwenty:
-	// EXP(-ALIM)=EXP(-ELIM)/TOL=APPROX. ONE PRECISION ABOVE THE
-	// UNDERFLOW LIMIT = ASCLE = dmach[1)*SS*1.0D+3.
-	S1R = WR[1]
-	S1I = WI[1]
-	S2R = WR[2]
-	S2I = WI[2]
-	for L = 3; L <= NN; L++ {
-		CKR = S2R
-		CKI = S2I
-		S2R = S1R + (AK+FNU)*(RZR*CKR-RZI*CKI)
-		S2I = S1I + (AK+FNU)*(RZR*CKI+RZI*CKR)
-		S1R = CKR
-		S1I = CKI
-		CKR = S2R * CRSCR
-		CKI = S2I * CRSCR
-		YR[K] = CKR
-		YI[K] = CKI
-		AK = AK - 1.0E0
-		K = K - 1
-		if cmplx.Abs(complex(CKR, CKI)) > ASCLE {
-			goto OneFourty
+	// exp(-alim)=exp(-elim)/tol=approximately one digit of precision above the
+	// underflow limit, which equals scale = dmach[1)*SS*1e3.
+	s1 := w[0]
+	s2 := w[1]
+	for K := NN - 3; K >= 0; K-- {
+		s1, s2 = s2, s1+complex(float64(K+1)+fnu, 0)*(rz*s2)
+		ck := s2 * complex(crscr, 0)
+		y[K] = ck
+		if cmplx.Abs(ck) > scale {
+			for ; K >= 0; K-- {
+				y[K] = complex(float64(K+1)+fnu, 0)*rz*y[K+1] + y[K+2]
+			}
+			return nz
 		}
 	}
-	return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
-OneFourty:
-	IB = L + 1
-	if IB > NN {
-		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
-	}
-	goto OneHundred
-OneFifty:
-	NZ = N
-	if FNU == 0.0E0 {
-		NZ = NZ - 1
-	}
-OneSixty:
-	YR[1] = ZEROR
-	YI[1] = ZEROI
-	if FNU != 0.0E0 {
-		goto OneSeventy
-	}
-	YR[1] = CONER
-	YI[1] = CONEI
-OneSeventy:
-	if N == 1 {
-		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
-	}
-	for I = 2; I <= N; I++ {
-		YR[I] = ZEROR
-		YI[I] = ZEROI
-	}
-	return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
-
-	// return WITH NZ<0 if CABS(Z*Z/4)>FNU+N-NZ-1 COMPLETE
-	// THE CALCULATION IN CBINU WITH N=N-IABS(NZ)
-
-OneNinety:
-	NZ = -NZ
-	return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
+	return nz
 }
 
 // Zs1s2 tests for a possible underflow resulting from the addition of the I and

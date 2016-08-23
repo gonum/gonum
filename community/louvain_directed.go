@@ -356,10 +356,11 @@ func (g *ReducedDirected) HasEdgeBetween(x, y graph.Node) bool {
 	if xid == yid {
 		return false
 	}
-	if xid > yid {
-		xid, yid = yid, xid
-	}
 	_, ok := g.weights[[2]int{xid, yid}]
+	if ok {
+		return true
+	}
+	_, ok = g.weights[[2]int{yid, xid}]
 	return ok
 }
 

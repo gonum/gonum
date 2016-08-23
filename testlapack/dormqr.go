@@ -105,9 +105,8 @@ func DormqrTest(t *testing.T, impl Dormqrer) {
 				for i := range work {
 					work[i] = rnd.Float64()
 				}
-				lwork := len(work)
 				copy(c, cCopy)
-				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, lwork)
+				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, len(work))
 				if !floats.EqualApprox(c, ans, 1e-12) {
 					t.Errorf("Dormqr and Dorm2r mismatch for small work")
 				}
@@ -116,12 +115,10 @@ func DormqrTest(t *testing.T, impl Dormqrer) {
 				copy(c, cCopy)
 				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, -1)
 				work = make([]float64, int(work[0]))
-				lwork = len(work)
 				for i := range work {
 					work[i] = rnd.Float64()
 				}
-				_ = lwork
-				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, lwork)
+				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, len(work))
 				if !floats.EqualApprox(c, ans, 1e-12) {
 					t.Errorf("Dormqr and Dorm2r mismatch for full work")
 					fmt.Println("ccopy")
@@ -137,11 +134,17 @@ func DormqrTest(t *testing.T, impl Dormqrer) {
 						fmt.Println(c[i*ldc : (i+1)*ldc])
 					}
 				}
-				// Try with less than the optimum amount of work
+
+				// Try with amount of work that is less than
+				// optimal but still long enough to use the
+				// blocked code.
 				copy(c, cCopy)
-				work = work[1:]
-				lwork--
-				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, lwork)
+				if side == blas.Left {
+					work = make([]float64, 3*nc)
+				} else {
+					work = make([]float64, 3*mc)
+				}
+				impl.Dormqr(side, trans, mc, nc, k, a, lda, tau, c, ldc, work, len(work))
 				if !floats.EqualApprox(c, ans, 1e-12) {
 					t.Errorf("Dormqr and Dorm2r mismatch for medium work")
 				}

@@ -75,6 +75,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 		iws := nw * nb
 		if lwork < iws {
 			nb = lwork / nw
+			ldwork = nb
 			nbmin = max(2, impl.Ilaenv(2, "DORMQR", opts, m, n, k, -1))
 		}
 	}

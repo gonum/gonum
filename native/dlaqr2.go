@@ -81,7 +81,7 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 		panic("lapack: invalid value of ktop")
 	case kbot < min(ktop, n-1) || n <= kbot:
 		panic("lapack: invalid value of kbot")
-	case nw < 0 || kbot-ktop+1 < nw:
+	case (nw < 0 || kbot-ktop+1 < nw) && lwork != -1:
 		panic("lapack: invalid value of nw")
 	case nh < nw:
 		panic("lapack: invalid value of nh")

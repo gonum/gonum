@@ -285,12 +285,13 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 		zCopy = cloneGeneral(z)
 	}
 
-	wr := nanSlice(n)
-	wi := nanSlice(n)
+	wr := nanSlice(ihi + 1)
+	wi := nanSlice(ihi + 1)
 
 	unconverged := impl.Dlahqr(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride)
 
-	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, extra=%v", n, ilo, ihi, iloz, ihiz, wantt, wantz, extra)
+	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, extra=%v",
+		wantt, wantz, n, ilo, ihi, iloz, ihiz, extra)
 
 	if !generalOutsideAllNaN(h) {
 		t.Errorf("%v: out-of-range write to H\n%v", prefix, h.Data)

@@ -33,7 +33,7 @@ import (
 // wr[i] = H[i,i], and, if H[i:i+2,i:i+2] is a 2×2 diagonal block,
 // wi[i] = sqrt(abs(H[i+1,i]*H[i,i+1])) and wi[i+1] = -wi[i].
 //
-// wr and wi must have length n.
+// wr and wi must have length ihi+1.
 //
 // z and ldz represent an n×n matrix Z. If wantz is true, the transformations
 // will be applied to the submatrix Z[iloz:ihiz+1,ilo:ihi+1] and it must hold that
@@ -78,9 +78,9 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 		panic(badIlo)
 	case n <= ihi:
 		panic(badIhi)
-	case len(wr) != n:
+	case len(wr) != ihi+1:
 		panic("lapack: bad length of wr")
-	case len(wi) != n:
+	case len(wi) != ihi+1:
 		panic("lapack: bad length of wi")
 	case ilo > 0 && h[ilo*ldh+ilo-1] != 0:
 		panic("lapack: block is not isolated")

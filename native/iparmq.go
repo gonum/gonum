@@ -12,7 +12,7 @@ import "math"
 // ispec specifies the parameter to return:
 //  12: Crossover point between Dlahqr and Dlaqr0. Will be at least 11.
 //  13: Deflation window size.
-//  14: Nibble crossover point.
+//  14: Nibble crossover point. Determines when to skip a multi-shift QR sweep.
 //  15: Number of simultaneous shifts in a multishift QR iteration.
 //  16: Select structured matrix multiply.
 // For other values of ispec Iparmq will panic.
@@ -68,9 +68,12 @@ func (Implementation) Iparmq(ispec int, name, opts string, n, ilo, ihi, lwork in
 		return 3 * ns / 2
 
 	case 14:
-		// Skip a multi-shift QR iteration whenever aggressive early
-		// deflation finds at least (nibble*(window size)/100)
-		// deflations.
+		// Skip a computationally expensive multi-shift QR sweep with
+		// Dlaqr5 whenever aggressive early deflation finds at least
+		// nibble*(window size)/100 deflations. The default, small,
+		// value reflects the expectation that the cost of looking
+		// through the deflation window with Dlaqr3 will be
+		// substantially smaller.
 		const nibble = 14
 		return nibble
 

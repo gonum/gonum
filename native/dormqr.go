@@ -41,14 +41,18 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 		panic(badTau)
 	}
 
-	const nbmax = 64
+	const (
+		nbmax = 64
+		ldt   = nbmax
+		tsize = nbmax * nbmax
+	)
 	nw := n
 	if side == blas.Right {
 		nw = m
 	}
 	opts := string(side) + string(trans)
 	nb := min(nbmax, impl.Ilaenv(1, "DORMQR", opts, m, n, k, -1))
-	lworkopt := max(1, nw) * nb
+	lworkopt := max(1, nw)*nb + tsize
 	if lwork == -1 {
 		work[0] = float64(lworkopt)
 		return
@@ -70,12 +74,9 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 	}
 	nbmin := 2
 
-	ldwork := nb
 	if nb > 1 && nb < k {
-		iws := nw * nb
-		if lwork < iws {
-			nb = lwork / nw
-			ldwork = nb
+		if lwork < nw*nb+tsize {
+			nb = (lwork - tsize) / nw
 			nbmin = max(2, impl.Ilaenv(2, "DORMQR", opts, m, n, k, -1))
 		}
 	}
@@ -84,8 +85,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 		impl.Dorm2r(side, trans, m, n, k, a, lda, tau, c, ldc, work)
 		return
 	}
-	ldt := nb
-	t := make([]float64, nb*ldt)
+	ldwork := nb
 	switch {
 	case left && notran:
 		for i := ((k - 1) / nb) * nb; i >= 0; i -= nb {
@@ -93,12 +93,12 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarft(lapack.Forward, lapack.ColumnWise, m-i, ib,
 				a[i*lda+i:], lda,
 				tau[i:],
-				t, ldt)
+				work[:tsize], ldt)
 			impl.Dlarfb(side, trans, lapack.Forward, lapack.ColumnWise, m-i, n, ib,
 				a[i*lda+i:], lda,
-				t, ldt,
+				work[:tsize], ldt,
 				c[i*ldc:], ldc,
-				work, ldwork)
+				work[tsize:], ldwork)
 		}
 
 	case left && !notran:
@@ -107,12 +107,12 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarft(lapack.Forward, lapack.ColumnWise, m-i, ib,
 				a[i*lda+i:], lda,
 				tau[i:],
-				t, ldt)
+				work[:tsize], ldt)
 			impl.Dlarfb(side, trans, lapack.Forward, lapack.ColumnWise, m-i, n, ib,
 				a[i*lda+i:], lda,
-				t, ldt,
+				work[:tsize], ldt,
 				c[i*ldc:], ldc,
-				work, ldwork)
+				work[tsize:], ldwork)
 		}
 
 	case !left && notran:
@@ -121,12 +121,12 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarft(lapack.Forward, lapack.ColumnWise, n-i, ib,
 				a[i*lda+i:], lda,
 				tau[i:],
-				t, ldt)
+				work[:tsize], ldt)
 			impl.Dlarfb(side, trans, lapack.Forward, lapack.ColumnWise, m, n-i, ib,
 				a[i*lda+i:], lda,
-				t, ldt,
+				work[:tsize], ldt,
 				c[i:], ldc,
-				work, ldwork)
+				work[tsize:], ldwork)
 		}
 
 	case !left && !notran:
@@ -135,12 +135,12 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 			impl.Dlarft(lapack.Forward, lapack.ColumnWise, n-i, ib,
 				a[i*lda+i:], lda,
 				tau[i:],
-				t, ldt)
+				work[:tsize], ldt)
 			impl.Dlarfb(side, trans, lapack.Forward, lapack.ColumnWise, m, n-i, ib,
 				a[i*lda+i:], lda,
-				t, ldt,
+				work[:tsize], ldt,
 				c[i:], ldc,
-				work, ldwork)
+				work[tsize:], ldwork)
 		}
 	}
 }

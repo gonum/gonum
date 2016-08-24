@@ -54,7 +54,7 @@ func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k 
 	if lwork != -1 {
 		checkMatrix(nq, k, a, lda)
 		checkMatrix(m, n, c, ldc)
-		if len(tau) < k {
+		if len(tau) != k {
 			panic(badTau)
 		}
 	}

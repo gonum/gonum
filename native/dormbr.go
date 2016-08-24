@@ -109,7 +109,7 @@ func (impl Implementation) Dormbr(vect lapack.DecompUpdate, side blas.Side, tran
 				i1 = 1
 				i2 = 0
 			}
-			impl.Dormqr(side, trans, mi, ni, nq-1, a[1*lda:], lda, tau, c[i1*ldc+i2:], ldc, work, lwork)
+			impl.Dormqr(side, trans, mi, ni, nq-1, a[1*lda:], lda, tau[:nq-1], c[i1*ldc+i2:], ldc, work, lwork)
 		}
 		return
 	}

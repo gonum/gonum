@@ -9,24 +9,33 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dormqr multiplies the matrix C by the orthogonal matrix Q defined by the
-// slices a and tau. A and tau are as returned from Dgeqrf.
-//  C = Q * C    if side == blas.Left and trans == blas.NoTrans
-//  C = Q^T * C  if side == blas.Left and trans == blas.Trans
-//  C = C * Q    if side == blas.Right and trans == blas.NoTrans
-//  C = C * Q^T  if side == blas.Right and trans == blas.Trans
-// If side == blas.Left, A is a matrix of side m×k, and if side == blas.Right
-// A is of size n×k. This uses a blocked algorithm.
+// Dormqr multiplies an m×n matrix C by an orthogonal matrix Q as
+//  C = Q * C,    if side == blas.Left  and trans == blas.NoTrans,
+//  C = Q^T * C,  if side == blas.Left  and trans == blas.Trans,
+//  C = C * Q,    if side == blas.Right and trans == blas.NoTrans,
+//  C = C * Q^T,  if side == blas.Right and trans == blas.Trans,
+// where Q is defined as the product of k elementary reflectors
+//  Q = H_0 * H_1 * ... * H_{k-1}.
 //
-// work is temporary storage, and lwork specifies the usable memory length.
-// At minimum, lwork >= m if side == blas.Left and lwork >= n if side == blas.Right,
-// and this function will panic otherwise.
-// Dormqr uses a block algorithm, but the block size is limited
-// by the temporary space available. If lwork == -1, instead of performing Dormqr,
-// the optimal work length will be stored into work[0].
+// If side == blas.Left, A is an m×k matrix and 0 <= k <= m.
+// If side == blas.Right, A is an n×k matrix and 0 <= k <= n.
+// The ith column of A contains the vector which defines the elementary
+// reflector H_i and tau[i] contains its scalar factor. tau must have length k
+// and Dormqr will panic otherwise. Dgeqrf returns A and tau in the required
+// form.
 //
-// tau contains the Householder scales and must have length at least k, and
-// this function will panic otherwise.
+// work must have length at least max(1,lwork), and lwork must be at least n if
+// side == blas.Left and at least m if side == blas.Right, otherwise Dormqr will
+// panic.
+//
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= m if side == blas.Left and lwork >= n if side ==
+// blas.Right, and this function will panic otherwise. Larger values of lwork
+// will generally give better performance. On return, work[0] will contain the
+// optimal value of lwork.
+//
+// If lwork is -1, instead of performing Dormqr, the optimal workspace size will
+// be stored into work[0].
 func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
 	var nq, nw int
 	switch side {

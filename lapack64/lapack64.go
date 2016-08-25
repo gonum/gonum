@@ -293,24 +293,33 @@ func Ormlq(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64
 	lapack64.Dormlq(side, trans, c.Rows, c.Cols, a.Rows, a.Data, a.Stride, tau, c.Data, c.Stride, work, lwork)
 }
 
-// Ormqr multiplies the matrix C by the othogonal matrix Q defined by
-// A and tau. A and tau are as returned from Geqrf.
-//  C = Q * C    if side == blas.Left and trans == blas.NoTrans
-//  C = Q^T * C  if side == blas.Left and trans == blas.Trans
-//  C = C * Q    if side == blas.Right and trans == blas.NoTrans
-//  C = C * Q^T  if side == blas.Right and trans == blas.Trans
-// If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
-// A is of size k×n. This uses a blocked algorithm.
+// Ormqr multiplies an m×n matrix C by an orthogonal matrix Q as
+//  C = Q * C,    if side == blas.Left  and trans == blas.NoTrans,
+//  C = Q^T * C,  if side == blas.Left  and trans == blas.Trans,
+//  C = C * Q,    if side == blas.Right and trans == blas.NoTrans,
+//  C = C * Q^T,  if side == blas.Right and trans == blas.Trans,
+// where Q is defined as the product of k elementary reflectors
+//  Q = H_0 * H_1 * ... * H_{k-1}.
 //
-// tau contains the Householder scales and must have length at least k, and
-// this function will panic otherwise.
+// If side == blas.Left, A is an m×k matrix and 0 <= k <= m.
+// If side == blas.Right, A is an n×k matrix and 0 <= k <= n.
+// The ith column of A contains the vector which defines the elementary
+// reflector H_i and tau[i] contains its scalar factor. tau must have length k
+// and Ormqr will panic otherwise. Geqrf returns A and tau in the required
+// form.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
-// At minimum, lwork >= m if side == blas.Left and lwork >= n if side == blas.Right,
-// and this function will panic otherwise.
-// Ormqr uses a block algorithm, but the block size is limited
-// by the temporary space available. If lwork == -1, instead of performing Ormqr,
-// the optimal work length will be stored into work[0].
+// work must have length at least max(1,lwork), and lwork must be at least n if
+// side == blas.Left and at least m if side == blas.Right, otherwise Ormqr will
+// panic.
+//
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= m if side == blas.Left and lwork >= n if side ==
+// blas.Right, and this function will panic otherwise. Larger values of lwork
+// will generally give better performance. On return, work[0] will contain the
+// optimal value of lwork.
+//
+// If lwork is -1, instead of performing Ormqr, the optimal workspace size will
+// be stored into work[0].
 func Ormqr(side blas.Side, trans blas.Transpose, a blas64.General, tau []float64, c blas64.General, work []float64, lwork int) {
 	lapack64.Dormqr(side, trans, c.Rows, c.Cols, a.Cols, a.Data, a.Stride, tau, c.Data, c.Stride, work, lwork)
 }

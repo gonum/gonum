@@ -69,7 +69,7 @@ func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution floa
 
 // louvainUndirected returns the hierarchical modularization of g at the given
 // resolution using the Louvain algorithm. If src is nil, rand.Intn is used as
-// the random generator. Louvain will panic if g has any edge with negative edge
+// the random generator. louvainUndirected will panic if g has any edge with negative edge
 // weight.
 //
 // graph.Undirect may be used as a shim to allow modularization of directed graphs.

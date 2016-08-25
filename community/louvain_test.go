@@ -29,7 +29,7 @@ func linksTo(i ...int) set {
 
 type layer struct {
 	g          []set
-	edgeWeight float64 // Zero edge weight is interpretted as 1.0.
+	edgeWeight float64 // Zero edge weight is interpreted as 1.0.
 	weight     float64
 }
 

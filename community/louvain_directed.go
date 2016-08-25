@@ -71,7 +71,7 @@ func qDirected(g graph.Directed, communities [][]graph.Node, resolution float64)
 
 // louvainDirected returns the hierarchical modularization of g at the given
 // resolution using the Louvain algorithm. If src is nil, rand.Intn is used
-// as the random generator. Louvain will panic if g has any edge with negative
+// as the random generator. louvainDirected will panic if g has any edge with negative
 // edge weight.
 func louvainDirected(g graph.Directed, resolution float64, src *rand.Rand) ReducedGraph {
 	// See louvain.tex for a detailed description
@@ -407,7 +407,7 @@ type directedLocalMover struct {
 
 	// nodes is the set of working nodes.
 	nodes []graph.Node
-	// edgeWeightOf is the weighted degree
+	// edgeWeightsOf is the weighted degree
 	// of each node indexed by ID.
 	edgeWeightsOf []directedWeights
 

@@ -47,10 +47,15 @@ type ReducedGraph interface {
 
 	// Structure returns the community structure of
 	// the current level of the module clustering.
-	// The first index of the returned value
-	// corresponds to the index of the nodes in the
-	// next higher level if it exists. The returned
-	// value should not be mutated.
+	// Each slice in the returned value recursively
+	// describes the membership of a community at
+	// the current level by indexing via the node
+	// ID into the structure of the non-nil
+	// ReducedGraph returned by Expanded, or when the
+	// ReducedGraph is nil, by containing nodes
+	// from the original input graph.
+	//
+	// The returned value should not be mutated.
 	Structure() [][]graph.Node
 
 	// Expanded returns the next lower level of the
@@ -150,10 +155,15 @@ type ReducedMultiplex interface {
 
 	// Structure returns the community structure of
 	// the current level of the module clustering.
-	// The first index of the returned value
-	// corresponds to the index of the nodes in the
-	// next higher level if it exists. The returned
-	// value should not be mutated.
+	// Each slice in the returned value recursively
+	// describes the membership of a community at
+	// the current level by indexing via the node
+	// ID into the structure of the non-nil
+	// ReducedGraph returned by Expanded, or when the
+	// ReducedGraph is nil, by containing nodes
+	// from the original input graph.
+	//
+	// The returned value should not be mutated.
 	Structure() [][]graph.Node
 
 	// Expanded returns the next lower level of the

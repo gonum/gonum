@@ -24,6 +24,7 @@ const (
 	badIlo          = "lapack: ilo out of range"
 	badIhi          = "lapack: ihi out of range"
 	badIpiv         = "lapack: insufficient permutation length"
+	badJob          = "lapack: bad Job"
 	badLdA          = "lapack: index of a out of range"
 	badNorm         = "lapack: bad norm"
 	badPivot        = "lapack: bad pivot"

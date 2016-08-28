@@ -338,53 +338,15 @@ func Det(a Matrix) float64 {
 	return math.Exp(det) * sign
 }
 
-// Dot returns the sum of the element-wise products of the elements of a and b.
+// Dot returns the sum of the element-wise product of a and b.
 // Dot panics if the matrix sizes are unequal.
-func Dot(a, b Matrix) float64 {
-	r, c := a.Dims()
-	rb, cb := b.Dims()
-	if r != rb || c != cb {
+func Dot(a, b *Vector) float64 {
+	la := a.Len()
+	lb := b.Len()
+	if la != lb {
 		panic(matrix.ErrShape)
 	}
-	aU, aTrans := untranspose(a)
-	bU, bTrans := untranspose(b)
-	if rma, ok := aU.(RawVectorer); ok {
-		if rmb, ok := bU.(RawVectorer); ok {
-			if c > r {
-				r = c
-			}
-			return blas64.Dot(r, rma.RawVector(), rmb.RawVector())
-		}
-	}
-	var sum float64
-	if rma, ok := aU.(RawMatrixer); ok {
-		if rmb, ok := bU.(RawMatrixer); ok {
-			ra := rma.RawMatrix()
-			rb := rmb.RawMatrix()
-			if aTrans == bTrans {
-				for i := 0; i < ra.Rows; i++ {
-					sum += blas64.Dot(ra.Cols,
-						blas64.Vector{Inc: 1, Data: ra.Data[i*ra.Stride:]},
-						blas64.Vector{Inc: 1, Data: rb.Data[i*rb.Stride:]},
-					)
-				}
-				return sum
-			}
-			for i := 0; i < ra.Rows; i++ {
-				sum += blas64.Dot(ra.Cols,
-					blas64.Vector{Inc: 1, Data: ra.Data[i*ra.Stride:]},
-					blas64.Vector{Inc: rb.Stride, Data: rb.Data[i:]},
-				)
-			}
-			return sum
-		}
-	}
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			sum += a.At(i, j) * b.At(i, j)
-		}
-	}
-	return sum
+	return blas64.Dot(la, a.mat, b.mat)
 }
 
 // Equal returns whether the matrices a and b have the same size

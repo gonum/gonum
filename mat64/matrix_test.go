@@ -360,12 +360,23 @@ func TestDet(t *testing.T) {
 
 func TestDot(t *testing.T) {
 	f := func(a, b Matrix) interface{} {
-		return Dot(a, b)
+		return Dot(a.(*Vector), b.(*Vector))
 	}
 	denseComparison := func(a, b *Dense) interface{} {
-		return Dot(a, b)
+		ra, ca := a.Dims()
+		rb, cb := b.Dims()
+		if ra != rb || ca != cb {
+			panic(matrix.ErrShape)
+		}
+		var sum float64
+		for i := 0; i < ra; i++ {
+			for j := 0; j < ca; j++ {
+				sum += a.At(i, j) * b.At(i, j)
+			}
+		}
+		return sum
 	}
-	testTwoInputFunc(t, "Dot", f, denseComparison, sameAnswerFloatApprox, legalTypesAll, legalSizeSameRectangular)
+	testTwoInputFunc(t, "Dot", f, denseComparison, sameAnswerFloatApprox, legalTypesVecVec, legalSizeSameVec)
 }
 
 func TestEqual(t *testing.T) {

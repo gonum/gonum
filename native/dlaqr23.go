@@ -12,7 +12,7 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dlaqr2 performs the orthogonal similarity transformation of an n×n upper
+// Dlaqr23 performs the orthogonal similarity transformation of an n×n upper
 // Hessenberg matrix to detect and deflate fully converged eigenvalues from a
 // trailing principal submatrix using aggressive early deflation [1].
 //
@@ -34,28 +34,31 @@ import (
 // and the block must be isolated, that is, it must hold that
 //  ktop == 0   or H[ktop,ktop-1] == 0,
 //  kbot == n-1 or H[kbot+1,kbot] == 0,
-// otherwise Dlaqr2 will panic.
+// otherwise Dlaqr23 will panic.
 //
 // nw is the deflation window size. It must hold that
 //  0 <= nw <= kbot-ktop+1,
-// otherwise Dlaqr2 will panic.
+// otherwise Dlaqr23 will panic.
 //
 // iloz and ihiz specify the rows of the n×n matrix Z to which transformations
 // will be applied if wantz is true. It must hold that
 //  0 <= iloz <= ktop,  and  kbot <= ihiz < n,
-// otherwise Dlaqr2 will panic.
+// otherwise Dlaqr23 will panic.
 //
-// sr and si must have length kbot+1, otherwise Dlaqr2 will panic.
+// sr and si must have length kbot+1, otherwise Dlaqr23 will panic.
 //
 // v and ldv represent an nw×nw work matrix.
 // t and ldt represent an nw×nh work matrix, and nh must be at least nw.
 // wv and ldwv represent an nv×nw work matrix.
 //
 // work must have length at least lwork and lwork must be at least max(1,2*nw),
-// otherwise Dlaqr2 will panic. Larger values of lwork may result in greater
+// otherwise Dlaqr23 will panic. Larger values of lwork may result in greater
 // efficiency. On return, work[0] will contain the optimal value of lwork.
 //
-// If lwork is -1, instead of performing Dlaqr2, the function only estimates the
+// recur is the non-negative recursion depth. For recur > 0, Dlaqr23 behaves
+// as DLAQR3, for recur == 0 it behaves as DLAQR2.
+//
+// If lwork is -1, instead of performing Dlaqr23, the function only estimates the
 // optimal workspace size and stores it into work[0]. Neither h nor z are
 // accessed.
 //
@@ -75,7 +78,7 @@ import (
 //      Aggressive Early Deflation. SIAM J. Matrix Anal. Appl 23(4) (2002), pp. 948—973
 //      URL: http://dx.doi.org/10.1137/S0895479801384585
 //
-func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int) (ns, nd int) {
+func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int, recur int) (ns, nd int) {
 	switch {
 	case ktop < 0 || max(0, n-1) < ktop:
 		panic("lapack: invalid value of ktop")
@@ -98,6 +101,9 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 			panic("lapack: invalid value of ihiz")
 		}
 	}
+	if recur < 0 {
+		panic("lapack: invalid value of recur")
+	}
 
 	// LAPACK code does not enforce the documented behavior
 	//  nw <= kbot-ktop+1
@@ -106,13 +112,21 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 	lwkopt := max(1, 2*nw)
 	if jw > 2 {
 		// Workspace query call to Dgehrd.
-		impl.Dgehrd(jw, 0, jw-2, t, ldt, nil, work, -1)
+		impl.Dgehrd(jw, 0, jw-2, nil, 0, nil, work, -1)
 		lwk1 := int(work[0])
 		// Workspace query call to Dormhr.
-		impl.Dormhr(blas.Right, blas.NoTrans, jw, jw, 0, jw-2, t, ldt, work, v, ldv, work, -1)
+		impl.Dormhr(blas.Right, blas.NoTrans, jw, jw, 0, jw-2, nil, 0, nil, nil, 0, work, -1)
 		lwk2 := int(work[0])
-		// Optimal workspace.
-		lwkopt = jw + max(lwk1, lwk2)
+		if recur > 0 {
+			// Workspace query call to Dlaqr4.
+			impl.Dlaqr4(true, true, jw, 0, jw-1, nil, 0, nil, nil, 0, jw-1, nil, 0, work, -1)
+			lwk3 := int(work[0])
+			// Optimal workspace.
+			lwkopt = max(jw+max(lwk1, lwk2), lwk3)
+		} else {
+			// Optimal workspace.
+			lwkopt = jw + max(lwk1, lwk2)
+		}
 	}
 
 	// Quick return in case of workspace query.
@@ -179,7 +193,13 @@ func (impl Implementation) Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []
 	bi := blas64.Implementation()
 	bi.Dcopy(jw-1, h[(kwtop+1)*ldh+kwtop:], ldh+1, t[ldt:], ldt+1)
 	impl.Dlaset(blas.All, jw, jw, 0, 1, v, ldv)
-	infqr := impl.Dlahqr(true, true, jw, 0, jw-1, t, ldt, sr[kwtop:], si[kwtop:], 0, jw-1, v, ldv)
+	nmin := impl.Ilaenv(12, "DLAQR3", "SV", jw, 0, jw-1, lwork)
+	var infqr int
+	if recur > 0 && jw > nmin {
+		infqr = impl.Dlaqr4(true, true, jw, 0, jw-1, t, ldt, sr[kwtop:], si[kwtop:], 0, jw-1, v, ldv, work, lwork)
+	} else {
+		infqr = impl.Dlahqr(true, true, jw, 0, jw-1, t, ldt, sr[kwtop:], si[kwtop:], 0, jw-1, v, ldv)
+	}
 	// Note that ilo == 0 which conveniently coincides with the success
 	// value of infqr, that is, infqr as an index always points to the first
 	// converged eigenvalue.

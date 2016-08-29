@@ -13,11 +13,11 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-type Dlaqr2er interface {
-	Dlaqr2(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int) (ns, nd int)
+type Dlaqr23er interface {
+	Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h []float64, ldh int, iloz, ihiz int, z []float64, ldz int, sr, si []float64, v []float64, ldv int, nh int, t []float64, ldt int, nv int, wv []float64, ldwv int, work []float64, lwork int, recur int) (ns, nd int)
 }
 
-type dlaqr2Test struct {
+type dlaqr23Test struct {
 	wantt, wantz bool
 	ktop, kbot   int
 	nw           int
@@ -27,20 +27,23 @@ type dlaqr2Test struct {
 	evWant []complex128 // Optional slice with known eigenvalues.
 }
 
-func Dlaqr2Test(t *testing.T, impl Dlaqr2er) {
+func Dlaqr23Test(t *testing.T, impl Dlaqr23er) {
 	rnd := rand.New(rand.NewSource(1))
 
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
-			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
-				for _, extra := range []int{0, 1, 11} {
-					for cas := 0; cas < 100; cas++ {
-						ktop := rnd.Intn(n)
-						kbot := rnd.Intn(n)
-						if ktop > kbot {
-							ktop, kbot = kbot, ktop
+			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 100} {
+				for _, extra := range []int{0, 11} {
+					for cas := 0; cas < 30; cas++ {
+						var nw int
+						if nw <= 75 {
+							nw = rnd.Intn(n) + 1
+						} else {
+							nw = 76 + rnd.Intn(n-75)
 						}
-						nw := rnd.Intn(kbot-ktop+1) + 1
+						ktop := rnd.Intn(n - nw + 1)
+						kbot := ktop + nw - 1
+						kbot += rnd.Intn(n - kbot)
 						h := randomHessenberg(n, n+extra, rnd)
 						if ktop-1 >= 0 {
 							h.Data[ktop*h.Stride+ktop-1] = 0
@@ -50,7 +53,7 @@ func Dlaqr2Test(t *testing.T, impl Dlaqr2er) {
 						}
 						iloz := rnd.Intn(ktop + 1)
 						ihiz := kbot + rnd.Intn(n-kbot)
-						test := dlaqr2Test{
+						test := dlaqr23Test{
 							wantt: wantt,
 							wantz: wantz,
 							ktop:  ktop,
@@ -60,8 +63,10 @@ func Dlaqr2Test(t *testing.T, impl Dlaqr2er) {
 							iloz:  iloz,
 							ihiz:  ihiz,
 						}
-						testDlaqr2(t, impl, test, false, rnd)
-						testDlaqr2(t, impl, test, true, rnd)
+						testDlaqr23(t, impl, test, false, 1, rnd)
+						testDlaqr23(t, impl, test, true, 1, rnd)
+						testDlaqr23(t, impl, test, false, 0, rnd)
+						testDlaqr23(t, impl, test, true, 0, rnd)
 					}
 				}
 			}
@@ -72,7 +77,7 @@ func Dlaqr2Test(t *testing.T, impl Dlaqr2er) {
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
 			for _, extra := range []int{0, 1, 11} {
-				test := dlaqr2Test{
+				test := dlaqr23Test{
 					wantt: wantt,
 					wantz: wantz,
 					h:     randomHessenberg(0, extra, rnd),
@@ -82,14 +87,16 @@ func Dlaqr2Test(t *testing.T, impl Dlaqr2er) {
 					ihiz:  -1,
 					nw:    0,
 				}
-				testDlaqr2(t, impl, test, true, rnd)
-				testDlaqr2(t, impl, test, false, rnd)
+				testDlaqr23(t, impl, test, true, 1, rnd)
+				testDlaqr23(t, impl, test, false, 1, rnd)
+				testDlaqr23(t, impl, test, true, 0, rnd)
+				testDlaqr23(t, impl, test, false, 0, rnd)
 			}
 		}
 	}
 
 	// Tests with explicit eigenvalues computed by Octave.
-	for _, test := range []dlaqr2Test{
+	for _, test := range []dlaqr23Test{
 		{
 			h: blas64.General{
 				Rows:   1,
@@ -201,12 +208,14 @@ func Dlaqr2Test(t *testing.T, impl Dlaqr2er) {
 		test.wantt = true
 		test.wantz = true
 		test.nw = test.kbot - test.ktop + 1
-		testDlaqr2(t, impl, test, true, rnd)
-		testDlaqr2(t, impl, test, false, rnd)
+		testDlaqr23(t, impl, test, true, 1, rnd)
+		testDlaqr23(t, impl, test, false, 1, rnd)
+		testDlaqr23(t, impl, test, true, 0, rnd)
+		testDlaqr23(t, impl, test, false, 0, rnd)
 	}
 }
 
-func testDlaqr2(t *testing.T, impl Dlaqr2er, test dlaqr2Test, opt bool, rnd *rand.Rand) {
+func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur int, rnd *rand.Rand) {
 	const tol = 1e-14
 
 	h := cloneGeneral(test.h)
@@ -244,15 +253,15 @@ func testDlaqr2(t *testing.T, impl Dlaqr2er, test dlaqr2Test, opt bool, rnd *ran
 	var work []float64
 	if opt {
 		work = nanSlice(1)
-		impl.Dlaqr2(wantt, wantz, n, ktop, kbot, nw, nil, h.Stride, iloz, ihiz, nil, z.Stride,
-			nil, nil, nil, v.Stride, tmat.Cols, nil, tmat.Stride, wv.Rows, nil, wv.Stride, work, -1)
+		impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw, nil, h.Stride, iloz, ihiz, nil, z.Stride,
+			nil, nil, nil, v.Stride, tmat.Cols, nil, tmat.Stride, wv.Rows, nil, wv.Stride, work, -1, recur)
 		work = nanSlice(int(work[0]))
 	} else {
 		work = nanSlice(max(1, 2*nw))
 	}
 
-	ns, nd := impl.Dlaqr2(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, z.Stride,
-		sr, si, v.Data, v.Stride, tmat.Cols, tmat.Data, tmat.Stride, wv.Rows, wv.Data, wv.Stride, work, len(work))
+	ns, nd := impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw, h.Data, h.Stride, iloz, ihiz, z.Data, z.Stride,
+		sr, si, v.Data, v.Stride, tmat.Cols, tmat.Data, tmat.Stride, wv.Rows, wv.Data, wv.Stride, work, len(work), recur)
 
 	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ktop=%v, kbot=%v, nw=%v, iloz=%v, ihiz=%v, extra=%v",
 		wantt, wantz, n, ktop, kbot, nw, iloz, ihiz, extra)

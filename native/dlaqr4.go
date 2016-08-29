@@ -128,7 +128,7 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 		panic(badWork)
 	// TODO(vladimir-ch): Enable if and when we figure out what the minimum
 	// necessary lwork value is. Dlaqr4 says that the minimum is n which
-	// clashes with Dlaqr2's opinion about optimal work when nw <= 2
+	// clashes with Dlaqr23's opinion about optimal work when nw <= 2
 	// (independent of n).
 	// case lwork < n && n > ntiny && lwork != -1:
 	// 	panic(badWork)
@@ -205,10 +205,10 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 	nsr = min(nsr, min((n+6)/9, ihi-ilo))
 	nsr = max(2, nsr&^1)
 
-	// Workspace query call to Dlaqr2.
-	impl.Dlaqr2(wantt, wantz, n, ilo, ihi, nwr+1, nil, 0, iloz, ihiz, nil, 0,
-		nil, nil, nil, 0, n, nil, 0, n, nil, 0, work, -1)
-	// Optimal workspace is max(Dlaqr5, Dlaqr2).
+	// Workspace query call to Dlaqr23.
+	impl.Dlaqr23(wantt, wantz, n, ilo, ihi, nwr+1, nil, 0, iloz, ihiz, nil, 0,
+		nil, nil, nil, 0, n, nil, 0, n, nil, 0, work, -1, 0)
+	// Optimal workspace is max(Dlaqr5, Dlaqr23).
 	lwkopt := max(3*nsr/2, int(work[0]))
 	// Quick return in case of workspace query.
 	if lwork == -1 {
@@ -313,9 +313,9 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 		kwv := nw + 1
 		nhv := n - kwv - kt
 		// Aggressive early deflation.
-		ls, ld := impl.Dlaqr2(wantt, wantz, n, ktop, kbot, nw,
+		ls, ld := impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw,
 			h, ldh, iloz, ihiz, z, ldz, wr[:kbot+1], wi[:kbot+1],
-			h[kv*ldh:], ldh, nhv, h[kv*ldh+kt:], ldh, nhv, h[kwv*ldh:], ldh, work, lwork)
+			h[kv*ldh:], ldh, nhv, h[kv*ldh+kt:], ldh, nhv, h[kwv*ldh:], ldh, work, lwork, 0)
 
 		// Adjust kbot accounting for new deflations.
 		kbot -= ld
@@ -333,13 +333,13 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 		}
 
 		// ns is the nominal number of simultaneous shifts. This may be
-		// lowered (slightly) if Dlaqr2 did not provide that many
+		// lowered (slightly) if Dlaqr23 did not provide that many
 		// shifts.
 		ns := min(min(nsmax, nsr), max(2, kbot-ktop)) &^ 1
 
 		// If there have been no deflations in a multiple of kexsh
 		// iterations, then try exceptional shifts. Otherwise use shifts
-		// provided by Dlaqr2 above or from the eigenvalues of a
+		// provided by Dlaqr23 above or from the eigenvalues of a
 		// trailing principal submatrix.
 		if ndfl%kexsh == 0 {
 			ks = kbot - ns + 1

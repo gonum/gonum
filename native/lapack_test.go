@@ -148,6 +148,10 @@ func TestDlaqr2(t *testing.T) {
 	testlapack.Dlaqr2Test(t, impl)
 }
 
+func TestDlaqr4(t *testing.T) {
+	testlapack.Dlaqr4Test(t, impl)
+}
+
 func TestDlaqr5(t *testing.T) {
 	testlapack.Dlaqr5Test(t, impl)
 }

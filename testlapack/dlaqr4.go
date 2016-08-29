@@ -14,11 +14,13 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-type Dlahqrer interface {
-	Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int) int
+type Dlaqr4er interface {
+	Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int, work []float64, lwork int) int
+
+	Dlahqrer
 }
 
-type dlahqrTest struct {
+type dlaqr4Test struct {
 	h            blas64.General
 	ilo, ihi     int
 	iloz, ihiz   int
@@ -27,16 +29,16 @@ type dlahqrTest struct {
 	evWant []complex128 // Optional slice holding known eigenvalues.
 }
 
-func DlahqrTest(t *testing.T, impl Dlahqrer) {
+func Dlaqr4Test(t *testing.T, impl Dlaqr4er) {
 	rnd := rand.New(rand.NewSource(1))
 
 	// Tests that choose the [ilo:ihi+1,ilo:ihi+1] and
 	// [iloz:ihiz+1,ilo:ihi+1] blocks randomly.
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
-			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
-				for _, extra := range []int{0, 1, 11} {
-					for cas := 0; cas < 100; cas++ {
+			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 11, 12, 18, 29, 75, 76, 100} {
+				for _, extra := range []int{0, 11} {
+					for cas := 0; cas < min(30, n); cas++ {
 						ilo := rnd.Intn(n)
 						ihi := rnd.Intn(n)
 						if ilo > ihi {
@@ -51,7 +53,7 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 						if ihi+1 < n {
 							h.Data[(ihi+1)*h.Stride+ihi] = 0
 						}
-						test := dlahqrTest{
+						test := dlaqr4Test{
 							h:     h,
 							ilo:   ilo,
 							ihi:   ihi,
@@ -60,7 +62,8 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 							wantt: wantt,
 							wantz: wantz,
 						}
-						testDlahqr(t, impl, test)
+						testDlaqr4(t, impl, test, false)
+						testDlaqr4(t, impl, test, true)
 					}
 				}
 			}
@@ -71,7 +74,7 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
 			for _, extra := range []int{0, 1, 11} {
-				for _, test := range []dlahqrTest{
+				for _, test := range []dlaqr4Test{
 					{
 						h:    randomHessenberg(0, extra, rnd),
 						ilo:  0,
@@ -144,14 +147,15 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 					}
 					test.wantt = wantt
 					test.wantz = wantz
-					testDlahqr(t, impl, test)
+					testDlaqr4(t, impl, test, false)
+					testDlaqr4(t, impl, test, true)
 				}
 			}
 		}
 	}
 
-	// Tests with explicit eigenvalues computed by Octave.
-	for _, test := range []dlahqrTest{
+	// Tests with known eigenvalues computed by Octave.
+	for _, test := range []dlaqr4Test{
 		{
 			h: blas64.General{
 				Rows:   1,
@@ -262,11 +266,12 @@ func DlahqrTest(t *testing.T, impl Dlahqrer) {
 	} {
 		test.wantt = true
 		test.wantz = true
-		testDlahqr(t, impl, test)
+		testDlaqr4(t, impl, test, false)
+		testDlaqr4(t, impl, test, true)
 	}
 }
 
-func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
+func testDlaqr4(t *testing.T, impl Dlaqr4er, test dlaqr4Test, optwork bool) {
 	const tol = 1e-14
 
 	h := cloneGeneral(test.h)
@@ -288,20 +293,25 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 	wr := nanSlice(ihi + 1)
 	wi := nanSlice(ihi + 1)
 
-	unconverged := impl.Dlahqr(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride)
+	var work []float64
+	if optwork {
+		work = nanSlice(1)
+		impl.Dlaqr4(wantt, wantz, n, ilo, ihi, nil, 0, nil, nil, iloz, ihiz, nil, 0, work, -1)
+		work = nanSlice(int(work[0]))
+	} else {
+		work = nanSlice(max(1, n))
+	}
 
-	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, extra=%v",
-		wantt, wantz, n, ilo, ihi, iloz, ihiz, extra)
+	unconverged := impl.Dlaqr4(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride, work, len(work))
+
+	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, extra=%v, opt=%v",
+		wantt, wantz, n, ilo, ihi, iloz, ihiz, extra, optwork)
 
 	if !generalOutsideAllNaN(h) {
 		t.Errorf("%v: out-of-range write to H\n%v", prefix, h.Data)
 	}
 	if !generalOutsideAllNaN(z) {
 		t.Errorf("%v: out-of-range write to Z\n%v", prefix, z.Data)
-	}
-
-	if !isUpperHessenberg(h) {
-		t.Logf("%v: H is not Hessenberg", prefix)
 	}
 
 	start := ilo // Index of the first computed eigenvalue.
@@ -312,11 +322,11 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 		}
 	}
 
-	// Check that wr and wi have not been modified outside [start:ihi+1].
-	if !isAllNaN(wr[:start]) || !isAllNaN(wr[ihi+1:]) {
+	// Check that wr and wi have not been modified within [:start].
+	if !isAllNaN(wr[:start]) {
 		t.Errorf("%v: unexpected modification of wr", prefix)
 	}
-	if !isAllNaN(wi[:start]) || !isAllNaN(wi[ihi+1:]) {
+	if !isAllNaN(wi[:start]) {
 		t.Errorf("%v: unexpected modification of wi", prefix)
 	}
 
@@ -326,22 +336,8 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 			hasReal = true
 			// Check that the eigenvalue corresponds to a 1×1 block
 			// on the diagonal of H.
-			if wantt {
-				if wr[i] != h.Data[i*h.Stride+i] {
-					t.Errorf("%v: wr[%v] != H[%v,%v]", prefix, i, i, i)
-				}
-				for _, index := range []struct{ r, c int }{
-					{i, i - 1},     // h   h   h
-					{i + 1, i - 1}, // 0 wr[i] h
-					{i + 1, i},     // 0   0   h
-				} {
-					if index.r >= n || index.c < 0 {
-						continue
-					}
-					if h.Data[index.r*h.Stride+index.c] != 0 {
-						t.Errorf("%v: H[%v,%v] != 0", prefix, index.r, index.c)
-					}
-				}
+			if wantt && wr[i] != h.Data[i*h.Stride+i] {
+				t.Errorf("%v: wr[%v] != H[%v,%v]", prefix, i, i, i)
 			}
 			i++
 			continue
@@ -370,25 +366,9 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 			if wr[i] != h.Data[(i+1)*h.Stride+i+1] {
 				t.Errorf("%v: wr[%v] != H[%v,%v]", prefix, i, i+1, i+1)
 			}
-			prod := math.Abs(h.Data[(i+1)*h.Stride+i] * h.Data[i*h.Stride+i+1])
-			if math.Abs(math.Sqrt(prod)-wi[i]) > tol {
-				t.Errorf("%v: unexpected value of wi[%v]: want %v, got %v", prefix, i, math.Sqrt(prod), wi[i])
-			}
-
-			// Check that the corresponding diagonal block is 2×2.
-			for _, index := range []struct{ r, c int }{
-				{i, i - 1},     //     i
-				{i + 1, i - 1}, // h   h      h    h
-				{i + 2, i - 1}, // 0 wr[i]    b    h   i
-				{i + 2, i},     // 0   c   wr[i+1] h
-				{i + 2, i + 1}, // 0   0      0    h
-			} {
-				if index.r >= n || index.c < 0 {
-					continue
-				}
-				if h.Data[index.r*h.Stride+index.c] != 0 {
-					t.Errorf("%v: H[%v,%v] != 0", prefix, index.r, index.c)
-				}
+			im := math.Sqrt(math.Abs(h.Data[(i+1)*h.Stride+i])) * math.Sqrt(math.Abs(h.Data[i*h.Stride+i+1]))
+			if math.Abs(im-wi[i]) > tol {
+				t.Errorf("%v: unexpected value of wi[%v]: want %v, got %v", prefix, i, im, wi[i])
 			}
 		}
 		i += 2
@@ -430,11 +410,18 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 		}
 	}
 	if wantt {
-		hu := eye(n, n)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hu)
-		uhu := eye(n, n)
-		blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hu, 0, uhu)
-		if !equalApproxGeneral(uhu, h, 10*tol) {
+		// Zero out h under the subdiagonal because Dlaqr4 uses it as
+		// workspace.
+		for i := 2; i < n; i++ {
+			for j := 0; j < i-1; j++ {
+				h.Data[i*h.Stride+j] = 0
+			}
+		}
+		hz := eye(n, n)
+		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hz)
+		zhz := eye(n, n)
+		blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hz, 0, zhz)
+		if !equalApproxGeneral(zhz, h, 10*tol) {
 			t.Errorf("%v: Z^T*(initial H)*Z and (final H) are not equal", prefix)
 		}
 	}

@@ -117,7 +117,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 		if !tpsd {
 			impl.Dormqr(blas.Left, blas.Trans, m, nrhs, n,
 				a, lda,
-				work,
+				work[:n],
 				b, ldb,
 				work[mn:], lwork-mn)
 			ok := impl.Dtrtrs(blas.Upper, blas.NoTrans, blas.NonUnit, n, nrhs,
@@ -141,7 +141,7 @@ func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float
 			}
 			impl.Dormqr(blas.Left, blas.NoTrans, m, nrhs, n,
 				a, lda,
-				work,
+				work[:n],
 				b, ldb,
 				work[mn:], lwork-mn)
 			scllen = m

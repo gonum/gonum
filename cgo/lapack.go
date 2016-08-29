@@ -1185,52 +1185,62 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 	lapacke.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
 }
 
-// Dormqr multiplies the matrix C by the orthogonal matrix Q defined by the
-// slices a and tau. a and tau are as returned from Dgeqrf.
-//  C = Q * C    if side == blas.Left and trans == blas.NoTrans
-//  C = Q^T * C  if side == blas.Left and trans == blas.Trans
-//  C = C * Q    if side == blas.Right and trans == blas.NoTrans
-//  C = C * Q^T  if side == blas.Right and trans == blas.Trans
-// If side == blas.Left, A is a matrix of side k×m, and if side == blas.Right
-// A is of size k×n. This uses a blocked algorithm.
+// Dormqr multiplies an m×n matrix C by an orthogonal matrix Q as
+//  C = Q * C,    if side == blas.Left  and trans == blas.NoTrans,
+//  C = Q^T * C,  if side == blas.Left  and trans == blas.Trans,
+//  C = C * Q,    if side == blas.Right and trans == blas.NoTrans,
+//  C = C * Q^T,  if side == blas.Right and trans == blas.Trans,
+// where Q is defined as the product of k elementary reflectors
+//  Q = H_0 * H_1 * ... * H_{k-1}.
 //
-// tau contains the Householder scales and must have length at least k, and
-// this function will panic otherwise.
+// If side == blas.Left, A is an m×k matrix and 0 <= k <= m.
+// If side == blas.Right, A is an n×k matrix and 0 <= k <= n.
+// The ith column of A contains the vector which defines the elementary
+// reflector H_i and tau[i] contains its scalar factor. tau must have length k
+// and Dormqr will panic otherwise. Dgeqrf returns A and tau in the required
+// form.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dormqr but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dormqr will panic.
+// work must have length at least max(1,lwork), and lwork must be at least n if
+// side == blas.Left and at least m if side == blas.Right, otherwise Dormqr will
+// panic.
+//
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= m if side == blas.Left and lwork >= n if side ==
+// blas.Right, and this function will panic otherwise. Larger values of lwork
+// will generally give better performance. On return, work[0] will contain the
+// optimal value of lwork.
+//
+// If lwork is -1, instead of performing Dormqr, the optimal workspace size will
+// be stored into work[0].
 func (impl Implementation) Dormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) {
-	left := side == blas.Left
-	if left {
-		checkMatrix(m, k, a, lda)
-	} else {
-		checkMatrix(n, k, a, lda)
+	var nq, nw int
+	switch side {
+	default:
+		panic(badSide)
+	case blas.Left:
+		nq = m
+		nw = n
+	case blas.Right:
+		nq = n
+		nw = m
 	}
-	checkMatrix(m, n, c, ldc)
-
-	if len(tau) < k {
-		panic(badTau)
-	}
-
-	if lwork == -1 {
-		if left {
-			work[0] = float64(n)
-			return
-		}
-		work[0] = float64(m)
-		return
-	}
-	if len(work) < lwork {
+	switch {
+	case trans != blas.NoTrans && trans != blas.Trans:
+		panic(badTrans)
+	case m < 0 || n < 0:
+		panic(negDimension)
+	case k < 0 || nq < k:
+		panic("lapack: invalid value of k")
+	case len(work) < lwork:
+		panic(shortWork)
+	case lwork < max(1, nw) && lwork != -1:
 		panic(badWork)
 	}
-	if left {
-		if lwork < n {
-			panic(badWork)
-		}
-	} else {
-		if lwork < m {
-			panic(badWork)
+	if lwork != -1 {
+		checkMatrix(nq, k, a, lda)
+		checkMatrix(m, n, c, ldc)
+		if len(tau) != k {
+			panic(badTau)
 		}
 	}
 

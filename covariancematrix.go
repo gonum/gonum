@@ -19,10 +19,10 @@ import (
 // If weights is not nil the weighted covariance of x is calculated. weights
 // must have length equal to the number of rows in input data matrix and
 // must not contain negative elements.
-// If cov is nil, a new matrix with appropriate size will be constructed.
-// If cov is not nil, it must have the same number of columns as the input
-// data matrix, and it will be used as the destination for the covariance
-// data.
+// If cov is not nil it must either be zero-sized or have the same number of
+// columns as the input data matrix. cov will be used as the destination for
+// the covariance data. If cov is nil, a new mat64.SymDense is allocated for
+// the destination.
 func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *mat64.SymDense {
 	// This is the matrix version of the two-pass algorithm. It doesn't use the
 	// additional floating point error correction that the Covariance function uses
@@ -32,7 +32,7 @@ func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *m
 
 	if cov == nil {
 		cov = mat64.NewSymDense(c, nil)
-	} else if n := cov.Symmetric(); n != c {
+	} else if n := cov.Symmetric(); n != c && n != 0 {
 		panic(matrix.ErrShape)
 	}
 
@@ -80,10 +80,10 @@ func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *m
 // If weights is not nil the weighted correlation of x is calculated. weights
 // must have length equal to the number of rows in input data matrix and
 // must not contain negative elements.
-// If corr is nil, a new matrix with appropriate size will be constructed.
-// If corr is not nil, it must have the same number of columns as the input
-// data matrix, and will be used as the destination for the correlation
-// data.
+// If corr is not nil it must either be zero-sized or have the same number of
+// columns as the input data matrix. corr will be used as the destination for
+// the correlation data. If corr is nil, a new mat64.SymDense is allocated for
+// the destination.
 func CorrelationMatrix(corr *mat64.SymDense, x mat64.Matrix, weights []float64) *mat64.SymDense {
 	// This will panic if the sizes don't match, or if weights is the wrong size.
 	corr = CovarianceMatrix(corr, x, weights)

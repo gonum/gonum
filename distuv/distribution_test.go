@@ -152,11 +152,11 @@ func checkQuantileCDFSurvival(t *testing.T, i int, xs []float64, c cumulanter, t
 	}
 }
 
-func checkProbContinuous(t *testing.T, i int, x []float64, p probLogprober) {
+func checkProbContinuous(t *testing.T, i int, x []float64, p probLogprober, tol float64) {
 	// Check that the PDF is consistent (integrates to 1).
-	q := quad.Fixed(p.Prob, math.Inf(-1), math.Inf(1), 100000, nil, 0)
-	if math.Abs(q-1) > 1e-10 {
-		t.Errorf("Probability distribution doesn't integrate to 1. Got %v", q)
+	q := quad.Fixed(p.Prob, math.Inf(-1), math.Inf(1), 1000000, nil, 0)
+	if math.Abs(q-1) > tol {
+		t.Errorf("Probability distribution doesn't integrate to 1. Case %v: Got %v", i, q)
 	}
 
 	// Check that PDF and LogPDF are consistent.
@@ -266,10 +266,28 @@ func testFullDist(t *testing.T, f fullDist, i int, continuous bool) {
 		// In a discrete distribution, the CDF and Quantile may not be perfect mappings.
 		checkQuantileCDFSurvival(t, i, x, f, tol)
 		// Integrate over the PDF
-		checkProbContinuous(t, i, x, f)
+		checkProbContinuous(t, i, x, f, 1e-10)
 		checkProbQuantContinuous(t, i, x, f, tol)
 	} else {
 		// Check against empirical PDF.
 		checkProbDiscrete(t, i, x, f, tol)
+	}
+}
+
+// testRandLogProb tests that LogProb and Rand give consistent results. This
+// can be used when the distribution does not implement CDF.
+func testRandLogProbContinuous(t *testing.T, i int, x []float64, f LogProber, tol float64, bins int) {
+	for cdf := 1 / float64(bins); cdf <= 1-1/float64(bins); cdf += 1 / float64(bins) {
+		// Get the estimated CDF from the samples
+		pt := stat.Quantile(cdf, stat.Empirical, x, nil)
+
+		prob := func(x float64) float64 {
+			return math.Exp(f.LogProb(x))
+		}
+		// Integrate the PDF to find the CDF
+		estCDF := quad.Fixed(prob, 0, pt, 1000, nil, 0)
+		if !floats.EqualWithinAbsOrRel(cdf, estCDF, tol, tol) {
+			t.Errorf("Mismatch between integral of PDF and empirical CDF. Case %v. Want %v, got %v", i, cdf, estCDF)
+		}
 	}
 }

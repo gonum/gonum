@@ -873,6 +873,17 @@ func eye(n, stride int) blas64.General {
 	return ans
 }
 
+// zeros returns an m×n matrix with given stride filled with zeros.
+func zeros(m, n, stride int) blas64.General {
+	a := nanGeneral(m, n, stride)
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			a.Data[i*a.Stride+j] = 0
+		}
+	}
+	return a
+}
+
 // extract2x2Block returns the elements of T at [0,0], [0,1], [1,0], and [1,1].
 func extract2x2Block(t []float64, ldt int) (a, b, c, d float64) {
 	return t[0], t[1], t[ldt], t[ldt+1]
@@ -963,6 +974,7 @@ func containsComplex(v []complex128, z complex128, tol float64) bool {
 	return false
 }
 
+// isAllNaN returns whether x contains only NaN values.
 func isAllNaN(x []float64) bool {
 	for _, v := range x {
 		if !math.IsNaN(v) {
@@ -972,6 +984,8 @@ func isAllNaN(x []float64) bool {
 	return true
 }
 
+// isUpperHessenberg returns whether h contains only zeros below the
+// subdiagonal.
 func isUpperHessenberg(h blas64.General) bool {
 	if h.Rows != h.Cols {
 		panic("matrix not square")
@@ -985,4 +999,33 @@ func isUpperHessenberg(h blas64.General) bool {
 		}
 	}
 	return true
+}
+
+// isUpperTriangular returns whether a contains only zeros below the diagonal.
+func isUpperTriangular(a blas64.General) bool {
+	n := a.Rows
+	for i := 1; i < n; i++ {
+		for j := 0; j < i; j++ {
+			if a.Data[i*a.Stride+j] != 0 {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// randomSparseGeneral returns an m×n general matrix whose each element is set
+// to a non-zero value with probability p.
+func randomSparseGeneral(m, n, stride int, p float64, rnd *rand.Rand) blas64.General {
+	a := nanGeneral(m, n, stride)
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			if rnd.NormFloat64() < p {
+				a.Data[i*stride+j] = rnd.NormFloat64()
+			} else {
+				a.Data[i*stride+j] = 0
+			}
+		}
+	}
+	return a
 }

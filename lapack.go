@@ -120,3 +120,10 @@ const (
 	// input tridiagonal matrix.
 	EigBoth EigComp = 'I'
 )
+
+// Jobs for Dgebal.
+const (
+	Permute      Job = 'P'
+	Scale        Job = 'S'
+	PermuteScale Job = 'B'
+)

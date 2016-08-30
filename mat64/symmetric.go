@@ -105,7 +105,20 @@ func (s *SymDense) SetRawSymmetric(b blas64.Symmetric) {
 	s.mat = b
 }
 
+// Reset zeros the dimensions of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
+func (s *SymDense) Reset() {
+	// No change of Stride and N to 0
+	// may be made unless both are set to 0.
+	s.mat.N, s.mat.Stride = 0, 0
+	s.mat.Data = s.mat.Data[:0]
+}
+
 func (s *SymDense) isZero() bool {
+	// It must be the case that m.Dims() returns
+	// zeros in this case. See comment in Reset().
 	return s.mat.N == 0
 }
 

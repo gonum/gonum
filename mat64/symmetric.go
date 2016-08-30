@@ -252,10 +252,11 @@ func (s *SymDense) SymRankK(a Symmetric, alpha float64, x Matrix) {
 	blas64.Syrk(t, alpha, g, 1, s.mat)
 }
 
-// SymOuterK calculates the outer product of a times its transpose and stores
-// the result into the receiver. In order to update an existing matrix, see
-// SymRankOne
-//  s = alpha * x * x'
+// SymOuterK calculates the outer product of x with itself and stores
+// the result into the receiver. It is equivalent to the matrix
+// multiplication
+//  s = alpha * x * x'.
+// In order to update an existing matrix, see SymRankOne.
 func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 	n, _ := x.Dims()
 	switch {

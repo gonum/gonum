@@ -178,6 +178,19 @@ func (t *TriDense) RawTriangular() blas64.Triangular {
 	return t.mat
 }
 
+// Reset zeros the dimensions of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
+func (t *TriDense) Reset() {
+	// N and Stride must be zeroed in unison.
+	t.mat.N, t.mat.Stride = 0, 0
+	// Defensively zero Uplo to ensure
+	// it is set correctly later.
+	t.mat.Uplo = 0
+	t.mat.Data = t.mat.Data[:0]
+}
+
 func (t *TriDense) isZero() bool {
 	// It must be the case that t.Dims() returns
 	// zeros in this case. See comment in Reset().
@@ -209,20 +222,6 @@ func (t *TriDense) reuseAs(n int, kind matrix.TriKind) {
 	if t.mat.N != n || t.mat.Uplo != ul {
 		panic(matrix.ErrShape)
 	}
-}
-
-// Reset zeros the dimensions of the matrix so that it can be reused as the
-// receiver of a dimensionally restricted operation.
-//
-// See the Reseter interface for more information.
-func (t *TriDense) Reset() {
-	// No change of Stride, N to 0 may
-	// be made unless both are set to 0.
-	t.mat.N, t.mat.Stride = 0, 0
-	// Defensively zero Uplo to ensure
-	// it is set correctly later.
-	t.mat.Uplo = 0
-	t.mat.Data = t.mat.Data[:0]
 }
 
 // Copy makes a copy of elements of a into the receiver. It is similar to the

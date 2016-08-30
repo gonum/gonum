@@ -136,6 +136,17 @@ func (m *Dense) isolatedWorkspace(a Matrix) (w *Dense, restore func()) {
 	}
 }
 
+// Reset zeros the dimensions of the matrix so that it can be reused as the
+// receiver of a dimensionally restricted operation.
+//
+// See the Reseter interface for more information.
+func (m *Dense) Reset() {
+	// Row, Cols and Stride must be zeroed in unison.
+	m.mat.Rows, m.mat.Cols, m.mat.Stride = 0, 0, 0
+	m.capRows, m.capCols = 0, 0
+	m.mat.Data = m.mat.Data[:0]
+}
+
 func (m *Dense) isZero() bool {
 	// It must be the case that m.Dims() returns
 	// zeros in this case. See comment in Reset().
@@ -343,18 +354,6 @@ func (m *Dense) Grow(r, c int) Matrix {
 	t.capRows = r
 	t.capCols = c
 	return &t
-}
-
-// Reset zeros the dimensions of the matrix so that it can be reused as the
-// receiver of a dimensionally restricted operation.
-//
-// See the Reseter interface for more information.
-func (m *Dense) Reset() {
-	// No change of Stride, Rows and Cols to 0
-	// may be made unless all are set to 0.
-	m.mat.Rows, m.mat.Cols, m.mat.Stride = 0, 0, 0
-	m.capRows, m.capCols = 0, 0
-	m.mat.Data = m.mat.Data[:0]
 }
 
 // Clone makes a copy of a into the receiver, overwriting the previous value of

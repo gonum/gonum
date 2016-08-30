@@ -110,8 +110,7 @@ func (s *SymDense) SetRawSymmetric(b blas64.Symmetric) {
 //
 // See the Reseter interface for more information.
 func (s *SymDense) Reset() {
-	// No change of Stride and N to 0
-	// may be made unless both are set to 0.
+	// N and Stride must be zeroed in unison.
 	s.mat.N, s.mat.Stride = 0, 0
 	s.mat.Data = s.mat.Data[:0]
 }

@@ -6,7 +6,6 @@ package testlapack
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"testing"
 
@@ -24,15 +23,9 @@ func DgebalTest(t *testing.T, impl Dgebaler) {
 
 	for _, job := range []lapack.Job{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53, 100} {
-			var pNonzero float64
-			if n == 0 || n == 1 {
-				pNonzero = 0.5
-			} else {
-				pNonzero = math.Ceil(0.02*float64(n)) / float64(n)
-			}
 			for _, extra := range []int{0, 11} {
 				for cas := 0; cas < 100; cas++ {
-					a := randomSparseGeneral(n, n, n+extra, pNonzero, rnd)
+					a := unbalancedSparseGeneral(n, n, n+extra, 2*n, rnd)
 					testDgebal(t, impl, job, a)
 				}
 			}
@@ -56,6 +49,10 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.Job, a blas64.General) {
 	ilo, ihi := impl.Dgebal(job, n, a.Data, a.Stride, scale)
 
 	prefix := fmt.Sprintf("Case job=%v, n=%v, extra=%v", job, n, extra)
+
+	if !generalOutsideAllNaN(a) {
+		t.Errorf("%v: out-of-range write to A\n%v", prefix, a.Data)
+	}
 
 	if n == 0 {
 		if ilo != 0 {

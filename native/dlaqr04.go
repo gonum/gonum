@@ -10,7 +10,7 @@ import (
 	"github.com/gonum/blas"
 )
 
-// Dlaqr4 computes the eigenvalues of a block of an n×n upper Hessenberg matrix
+// Dlaqr04 computes the eigenvalues of a block of an n×n upper Hessenberg matrix
 // H, and optionally the matrices T and Z from the Schur decomposition
 //  H = Z T Z^T
 // where T is an upper quasi-triangular matrix (the Schur form), and Z is the
@@ -23,38 +23,41 @@ import (
 // is true, the orthogonal similarity transformation will be accumulated into
 // Z[iloz:ihiz+1,ilo:ihi+1], otherwise Z will not be referenced.
 //
-// ilo and ihi determine the block of H on which Dlaqr4 operates. It must hold that
+// ilo and ihi determine the block of H on which Dlaqr04 operates. It must hold that
 //  0 <= ilo <= ihi < n,     if n > 0,
 //  ilo == 0 and ihi == -1,  if n == 0,
 // and the block must be isolated, that is,
 //  ilo == 0   or H[ilo,ilo-1] == 0,
 //  ihi == n-1 or H[ihi+1,ihi] == 0,
-// otherwise Dlaqr4 will panic.
+// otherwise Dlaqr04 will panic.
 //
 // wr and wi must have length ihi+1.
 //
 // iloz and ihiz specify the rows of Z to which transformations will be applied
 // if wantz is true. It must hold that
 //  0 <= iloz <= ilo,  and  ihi <= ihiz < n,
-// otherwise Dlaqr4 will panic.
+// otherwise Dlaqr04 will panic.
 //
 // work must have length at least lwork and lwork must be
 //  lwork >= 1,  if n <= 11,
 //  lwork >= n,  if n > 11,
-// otherwise Dlaqr4 will panic. lwork as large as 6*n may be required for
+// otherwise Dlaqr04 will panic. lwork as large as 6*n may be required for
 // optimal performance. On return, work[0] will contain the optimal value of
 // lwork.
 //
-// If lwork is -1, instead of performing Dlaqr4, the function only estimates the
+// If lwork is -1, instead of performing Dlaqr04, the function only estimates the
 // optimal workspace size and stores it into work[0]. Neither h nor z are
 // accessed.
 //
-// unconverged indicates whether Dlaqr4 computed all the eigenvalues of H[ilo:ihi+1,ilo:ihi+1].
+// recur is the non-negative recursion depth. For recur > 0, Dlaqr04 behaves
+// as DLAQR0, for recur == 0 it behaves as DLAQR4.
+//
+// unconverged indicates whether Dlaqr04 computed all the eigenvalues of H[ilo:ihi+1,ilo:ihi+1].
 //
 // If unconverged is zero and wantt is true, H will contain on return the upper
 // quasi-triangular matrix T from the Schur decomposition. 2×2 diagonal blocks
 // (corresponding to complex conjugate pairs of eigenvalues) will be returned in
-// standard form, with H[i,i] = H[i+1,i+1] and H[i+1,i]*H[i,i+1] < 0.
+// standard form, with H[i,i] == H[i+1,i+1] and H[i+1,i]*H[i,i+1] < 0.
 //
 // If unconverged is zero and if wantt is false, the contents of h on return is
 // unspecified.
@@ -94,8 +97,8 @@ import (
 //      Aggressive Early Deflation. SIAM J. Matrix Anal. Appl. 23(4) (2002), pp. 948—973
 //      URL: http://dx.doi.org/10.1137/S0895479801384585
 //
-// Dlaqr4 is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
+// Dlaqr04 is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int, work []float64, lwork int, recur int) (unconverged int) {
 	const (
 		// Matrices of order ntiny or smaller must be processed by
 		// Dlahqr because of insufficient subdiagonal scratch space.
@@ -127,13 +130,15 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 	case lwork < 1 && n <= ntiny && lwork != -1:
 		panic(badWork)
 	// TODO(vladimir-ch): Enable if and when we figure out what the minimum
-	// necessary lwork value is. Dlaqr4 says that the minimum is n which
+	// necessary lwork value is. Dlaqr04 says that the minimum is n which
 	// clashes with Dlaqr23's opinion about optimal work when nw <= 2
 	// (independent of n).
 	// case lwork < n && n > ntiny && lwork != -1:
 	// 	panic(badWork)
 	case len(work) < lwork:
 		panic(shortWork)
+	case recur < 0:
+		panic("lapack: recur is negative")
 	}
 	if wantz {
 		if iloz < 0 || ilo < iloz {
@@ -160,7 +165,7 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 		}
 	}
 
-	// Quick return for n=0.
+	// Quick return.
 	if n == 0 {
 		work[0] = 1
 		return 0
@@ -189,25 +194,31 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 		jbcmpz += "N"
 	}
 
+	var fname string
+	if recur > 0 {
+		fname = "DLAQR0"
+	} else {
+		fname = "DLAQR4"
+	}
 	// nwr is the recommended deflation window size. n is greater than 11,
 	// so there is enough subdiagonal workspace for nwr >= 2 as required.
 	// (In fact, there is enough subdiagonal space for nwr >= 3.)
 	// TODO(vladimir-ch): If there is enough space for nwr >= 3, should we
 	// use it?
-	nwr := impl.Ilaenv(13, "DLAQR4", jbcmpz, n, ilo, ihi, lwork)
+	nwr := impl.Ilaenv(13, fname, jbcmpz, n, ilo, ihi, lwork)
 	nwr = max(2, nwr)
 	nwr = min(ihi-ilo+1, min((n-1)/3, nwr))
 
 	// nsr is the recommended number of simultaneous shifts. n is greater
 	// than 11, so there is enough subdiagonal workspace for nsr to be even
 	// and greater than or equal to two as required.
-	nsr := impl.Ilaenv(15, "DLAQR4", jbcmpz, n, ilo, ihi, lwork)
+	nsr := impl.Ilaenv(15, fname, jbcmpz, n, ilo, ihi, lwork)
 	nsr = min(nsr, min((n+6)/9, ihi-ilo))
 	nsr = max(2, nsr&^1)
 
 	// Workspace query call to Dlaqr23.
 	impl.Dlaqr23(wantt, wantz, n, ilo, ihi, nwr+1, nil, 0, iloz, ihiz, nil, 0,
-		nil, nil, nil, 0, n, nil, 0, n, nil, 0, work, -1, 0)
+		nil, nil, nil, 0, n, nil, 0, n, nil, 0, work, -1, recur)
 	// Optimal workspace is max(Dlaqr5, Dlaqr23).
 	lwkopt := max(3*nsr/2, int(work[0]))
 	// Quick return in case of workspace query.
@@ -216,16 +227,16 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 		return 0
 	}
 
-	// Dlahqr/Dlaqr4 crossover point.
-	nmin := impl.Ilaenv(12, "DLAQR4", jbcmpz, n, ilo, ihi, lwork)
+	// Dlahqr/Dlaqr04 crossover point.
+	nmin := impl.Ilaenv(12, fname, jbcmpz, n, ilo, ihi, lwork)
 	nmin = max(ntiny, nmin)
 
 	// Nibble determines when to skip a multi-shift QR sweep (Dlaqr5).
-	nibble := impl.Ilaenv(14, "DLAQR4", jbcmpz, n, ilo, ihi, lwork)
+	nibble := impl.Ilaenv(14, fname, jbcmpz, n, ilo, ihi, lwork)
 	nibble = max(0, nibble)
 
 	// Computation mode of far-from-diagonal orthogonal updates in Dlaqr5.
-	kacc22 := impl.Ilaenv(16, "DLAQR4", jbcmpz, n, ilo, ihi, lwork)
+	kacc22 := impl.Ilaenv(16, fname, jbcmpz, n, ilo, ihi, lwork)
 	kacc22 = max(0, min(kacc22, 2))
 
 	// nwmax is the largest possible deflation window for which there is
@@ -315,7 +326,7 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 		// Aggressive early deflation.
 		ls, ld := impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw,
 			h, ldh, iloz, ihiz, z, ldz, wr[:kbot+1], wi[:kbot+1],
-			h[kv*ldh:], ldh, nhv, h[kv*ldh+kt:], ldh, nhv, h[kwv*ldh:], ldh, work, lwork, 0)
+			h[kv*ldh:], ldh, nhv, h[kv*ldh+kt:], ldh, nhv, h[kwv*ldh:], ldh, work, lwork, recur)
 
 		// Adjust kbot accounting for new deflations.
 		kbot -= ld
@@ -356,16 +367,22 @@ func (impl Implementation) Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float6
 				wi[ks] = wi[ks+1]
 			}
 		} else {
-			// If we got ns/2 or fewer shifts, use Dlahqr on a
-			// trailing principal submatrix to get more. Since
-			// ns <= nsmax <=(n+6)/9, there is enough space below
-			// the subdiagonal to fit an ns×ns scratch array.
+			// If we got ns/2 or fewer shifts, use Dlahqr or recur
+			// into Dlaqr04 on a trailing principal submatrix to get
+			// more. Since ns <= nsmax <=(n+6)/9, there is enough
+			// space below the subdiagonal to fit an ns×ns scratch
+			// array.
 			if kbot-ks+1 <= ns/2 {
 				ks = kbot - ns + 1
 				kt = n - ns
 				impl.Dlacpy(blas.All, ns, ns, h[ks*ldh+ks:], ldh, h[kt*ldh:], ldh)
-				ks += impl.Dlahqr(false, false, ns, 0, ns-1, h[kt*ldh:], ldh,
-					wr[ks:ks+ns], wi[ks:ks+ns], 0, 0, nil, 0)
+				if ns > nmin && recur > 0 {
+					ks += impl.Dlaqr04(false, false, ns, 1, ns-1, h[kt*ldh:], ldh,
+						wr[ks:ks+ns], wi[ks:ks+ns], 0, 0, nil, 0, work, lwork, recur-1)
+				} else {
+					ks += impl.Dlahqr(false, false, ns, 0, ns-1, h[kt*ldh:], ldh,
+						wr[ks:ks+ns], wi[ks:ks+ns], 0, 0, nil, 0)
+				}
 				// In case of a rare QR failure use eigenvalues
 				// of the trailing 2×2 principal submatrix.
 				if ks >= kbot {

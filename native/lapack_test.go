@@ -144,16 +144,16 @@ func TestDlanv2(t *testing.T) {
 	testlapack.Dlanv2Test(t, impl)
 }
 
+func TestDlaqr04(t *testing.T) {
+	testlapack.Dlaqr04Test(t, impl)
+}
+
 func TestDlaqr1(t *testing.T) {
 	testlapack.Dlaqr1Test(t, impl)
 }
 
 func TestDlaqr23(t *testing.T) {
 	testlapack.Dlaqr23Test(t, impl)
-}
-
-func TestDlaqr4(t *testing.T) {
-	testlapack.Dlaqr4Test(t, impl)
 }
 
 func TestDlaqr5(t *testing.T) {

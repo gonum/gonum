@@ -55,12 +55,12 @@ import (
 // otherwise Dlaqr23 will panic. Larger values of lwork may result in greater
 // efficiency. On return, work[0] will contain the optimal value of lwork.
 //
-// recur is the non-negative recursion depth. For recur > 0, Dlaqr23 behaves
-// as DLAQR3, for recur == 0 it behaves as DLAQR2.
-//
 // If lwork is -1, instead of performing Dlaqr23, the function only estimates the
 // optimal workspace size and stores it into work[0]. Neither h nor z are
 // accessed.
+//
+// recur is the non-negative recursion depth. For recur > 0, Dlaqr23 behaves
+// as DLAQR3, for recur == 0 it behaves as DLAQR2.
 //
 // On return, ns and nd will contain respectively the number of unconverged
 // (i.e., approximate) eigenvalues and converged eigenvalues that are stored in
@@ -92,6 +92,8 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 		panic(badWork)
 	case len(work) < lwork:
 		panic(shortWork)
+	case recur < 0:
+		panic("lapack: recur is negative")
 	}
 	if wantz {
 		switch {
@@ -101,8 +103,31 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 			panic("lapack: invalid value of ihiz")
 		}
 	}
-	if recur < 0 {
-		panic("lapack: invalid value of recur")
+	if lwork != -1 {
+		// Check input slices only if not doing workspace query.
+		checkMatrix(n, n, h, ldh)
+		checkMatrix(nw, nw, v, ldv)
+		checkMatrix(nw, nh, t, ldt)
+		checkMatrix(nv, nw, wv, ldwv)
+		if wantz {
+			checkMatrix(n, n, z, ldz)
+		}
+		switch {
+		case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
+			panic("lapack: block not isolated")
+		case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
+			panic("lapack: block not isolated")
+		case len(sr) != kbot+1:
+			panic("lapack: bad length of sr")
+		case len(si) != kbot+1:
+			panic("lapack: bad length of si")
+		}
+	}
+
+	// Quick return for zero window size.
+	if nw == 0 {
+		work[0] = 1
+		return 0, 0
 	}
 
 	// LAPACK code does not enforce the documented behavior
@@ -118,8 +143,8 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 		impl.Dormhr(blas.Right, blas.NoTrans, jw, jw, 0, jw-2, nil, 0, nil, nil, 0, work, -1)
 		lwk2 := int(work[0])
 		if recur > 0 {
-			// Workspace query call to Dlaqr4.
-			impl.Dlaqr4(true, true, jw, 0, jw-1, nil, 0, nil, nil, 0, jw-1, nil, 0, work, -1)
+			// Workspace query call to Dlaqr04.
+			impl.Dlaqr04(true, true, jw, 0, jw-1, nil, 0, nil, nil, 0, jw-1, nil, 0, work, -1, recur-1)
 			lwk3 := int(work[0])
 			// Optimal workspace.
 			lwkopt = max(jw+max(lwk1, lwk2), lwk3)
@@ -128,33 +153,9 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 			lwkopt = jw + max(lwk1, lwk2)
 		}
 	}
-
 	// Quick return in case of workspace query.
 	if lwork == -1 {
 		work[0] = float64(lwkopt)
-		return 0, 0
-	}
-
-	// Check input slices only after workspace query has been handled.
-	checkMatrix(n, n, h, ldh)
-	checkMatrix(nw, nw, v, ldv)
-	checkMatrix(nw, nh, t, ldt)
-	checkMatrix(nv, nw, wv, ldwv)
-	if wantz {
-		checkMatrix(n, n, z, ldz)
-	}
-	switch {
-	case ktop > 0 && h[ktop*ldh+ktop-1] != 0:
-		panic("lapack: block not isolated")
-	case kbot+1 < n && h[(kbot+1)*ldh+kbot] != 0:
-		panic("lapack: block not isolated")
-	case len(sr) != kbot+1:
-		panic("lapack: bad length of sr")
-	case len(si) != kbot+1:
-		panic("lapack: bad length of si")
-	}
-
-	if nw == 0 {
 		return 0, 0
 	}
 
@@ -196,7 +197,7 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 	nmin := impl.Ilaenv(12, "DLAQR3", "SV", jw, 0, jw-1, lwork)
 	var infqr int
 	if recur > 0 && jw > nmin {
-		infqr = impl.Dlaqr4(true, true, jw, 0, jw-1, t, ldt, sr[kwtop:], si[kwtop:], 0, jw-1, v, ldv, work, lwork)
+		infqr = impl.Dlaqr04(true, true, jw, 0, jw-1, t, ldt, sr[kwtop:], si[kwtop:], 0, jw-1, v, ldv, work, lwork, recur-1)
 	} else {
 		infqr = impl.Dlahqr(true, true, jw, 0, jw-1, t, ldt, sr[kwtop:], si[kwtop:], 0, jw-1, v, ldv)
 	}

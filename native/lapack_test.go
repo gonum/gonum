@@ -16,6 +16,10 @@ func TestDbdsqr(t *testing.T) {
 	testlapack.DbdsqrTest(t, impl)
 }
 
+func TestDgebak(t *testing.T) {
+	testlapack.DgebakTest(t, impl)
+}
+
 func TestDgebal(t *testing.T) {
 	testlapack.DgebalTest(t, impl)
 }

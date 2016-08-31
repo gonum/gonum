@@ -64,6 +64,10 @@ func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }
 
+func TestDgebak(t *testing.T) {
+	testlapack.DgebakTest(t, impl)
+}
+
 func TestDgebal(t *testing.T) {
 	testlapack.DgebalTest(t, impl)
 }

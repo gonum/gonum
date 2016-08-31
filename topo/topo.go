@@ -38,6 +38,16 @@ func IsPathIn(g graph.Graph, path []graph.Node) bool {
 	}
 }
 
+// PathExistsIn returns whether there is a path in g starting at from extending
+// to to.
+//
+// PathExistsIn exists as a helper function. If many tests for path existence
+// are being performed, other approaches will be more efficient.
+func PathExistsIn(g graph.Graph, from, to graph.Node) bool {
+	var t traverse.BreadthFirst
+	return t.Walk(g, from, func(n graph.Node, _ int) bool { return n.ID() == to.ID() }) != nil
+}
+
 // ConnectedComponents returns the connected components of the undirected graph g.
 func ConnectedComponents(g graph.Undirected) [][]graph.Node {
 	var (

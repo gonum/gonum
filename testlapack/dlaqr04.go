@@ -14,13 +14,13 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-type Dlaqr4er interface {
-	Dlaqr4(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int, work []float64, lwork int) int
+type Dlaqr04er interface {
+	Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, iloz, ihiz int, z []float64, ldz int, work []float64, lwork int, recur int) int
 
 	Dlahqrer
 }
 
-type dlaqr4Test struct {
+type dlaqr04Test struct {
 	h            blas64.General
 	ilo, ihi     int
 	iloz, ihiz   int
@@ -29,52 +29,73 @@ type dlaqr4Test struct {
 	evWant []complex128 // Optional slice holding known eigenvalues.
 }
 
-func Dlaqr4Test(t *testing.T, impl Dlaqr4er) {
+func Dlaqr04Test(t *testing.T, impl Dlaqr04er) {
 	rnd := rand.New(rand.NewSource(1))
 
-	// Tests that choose the [ilo:ihi+1,ilo:ihi+1] and
-	// [iloz:ihiz+1,ilo:ihi+1] blocks randomly.
+	// Tests for small matrices that choose the ilo,ihi and iloz,ihiz pairs
+	// randomly.
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
-			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 11, 12, 18, 29, 75, 76, 100} {
+			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 11, 12, 18, 29} {
 				for _, extra := range []int{0, 11} {
-					for cas := 0; cas < min(30, n); cas++ {
-						ilo := rnd.Intn(n)
-						ihi := rnd.Intn(n)
-						if ilo > ihi {
-							ilo, ihi = ihi, ilo
+					for recur := 0; recur <= 2; recur++ {
+						for cas := 0; cas < n; cas++ {
+							ilo := rnd.Intn(n)
+							ihi := rnd.Intn(n)
+							if ilo > ihi {
+								ilo, ihi = ihi, ilo
+							}
+							iloz := rnd.Intn(ilo + 1)
+							ihiz := ihi + rnd.Intn(n-ihi)
+							h := randomHessenberg(n, n+extra, rnd)
+							if ilo-1 >= 0 {
+								h.Data[ilo*h.Stride+ilo-1] = 0
+							}
+							if ihi+1 < n {
+								h.Data[(ihi+1)*h.Stride+ihi] = 0
+							}
+							test := dlaqr04Test{
+								h:     h,
+								ilo:   ilo,
+								ihi:   ihi,
+								iloz:  iloz,
+								ihiz:  ihiz,
+								wantt: wantt,
+								wantz: wantz,
+							}
+							testDlaqr04(t, impl, test, false, recur)
+							testDlaqr04(t, impl, test, true, recur)
 						}
-						iloz := rnd.Intn(ilo + 1)
-						ihiz := ihi + rnd.Intn(n-ihi)
-						h := randomHessenberg(n, n+extra, rnd)
-						if ilo-1 >= 0 {
-							h.Data[ilo*h.Stride+ilo-1] = 0
-						}
-						if ihi+1 < n {
-							h.Data[(ihi+1)*h.Stride+ihi] = 0
-						}
-						test := dlaqr4Test{
-							h:     h,
-							ilo:   ilo,
-							ihi:   ihi,
-							iloz:  iloz,
-							ihiz:  ihiz,
-							wantt: wantt,
-							wantz: wantz,
-						}
-						testDlaqr4(t, impl, test, false)
-						testDlaqr4(t, impl, test, true)
 					}
 				}
 			}
 		}
 	}
+
+	// Tests for matrices large enough to possibly use the recursion (but it
+	// doesn't seem to be the case).
+	for _, n := range []int{100, 500} {
+		for cas := 0; cas < 5; cas++ {
+			h := randomHessenberg(n, n, rnd)
+			test := dlaqr04Test{
+				h:     h,
+				ilo:   0,
+				ihi:   n - 1,
+				iloz:  0,
+				ihiz:  n - 1,
+				wantt: true,
+				wantz: true,
+			}
+			testDlaqr04(t, impl, test, true, 1)
+		}
+	}
+
 	// Tests that make sure that some potentially problematic corner cases,
 	// like zero-sized matrix, are covered.
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
 			for _, extra := range []int{0, 1, 11} {
-				for _, test := range []dlaqr4Test{
+				for _, test := range []dlaqr04Test{
 					{
 						h:    randomHessenberg(0, extra, rnd),
 						ilo:  0,
@@ -147,15 +168,15 @@ func Dlaqr4Test(t *testing.T, impl Dlaqr4er) {
 					}
 					test.wantt = wantt
 					test.wantz = wantz
-					testDlaqr4(t, impl, test, false)
-					testDlaqr4(t, impl, test, true)
+					testDlaqr04(t, impl, test, false, 1)
+					testDlaqr04(t, impl, test, true, 1)
 				}
 			}
 		}
 	}
 
 	// Tests with known eigenvalues computed by Octave.
-	for _, test := range []dlaqr4Test{
+	for _, test := range []dlaqr04Test{
 		{
 			h: blas64.General{
 				Rows:   1,
@@ -266,12 +287,12 @@ func Dlaqr4Test(t *testing.T, impl Dlaqr4er) {
 	} {
 		test.wantt = true
 		test.wantz = true
-		testDlaqr4(t, impl, test, false)
-		testDlaqr4(t, impl, test, true)
+		testDlaqr04(t, impl, test, false, 1)
+		testDlaqr04(t, impl, test, true, 1)
 	}
 }
 
-func testDlaqr4(t *testing.T, impl Dlaqr4er, test dlaqr4Test, optwork bool) {
+func testDlaqr04(t *testing.T, impl Dlaqr04er, test dlaqr04Test, optwork bool, recur int) {
 	const tol = 1e-14
 
 	h := cloneGeneral(test.h)
@@ -296,13 +317,13 @@ func testDlaqr4(t *testing.T, impl Dlaqr4er, test dlaqr4Test, optwork bool) {
 	var work []float64
 	if optwork {
 		work = nanSlice(1)
-		impl.Dlaqr4(wantt, wantz, n, ilo, ihi, nil, 0, nil, nil, iloz, ihiz, nil, 0, work, -1)
+		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, nil, 0, nil, nil, iloz, ihiz, nil, 0, work, -1, recur)
 		work = nanSlice(int(work[0]))
 	} else {
 		work = nanSlice(max(1, n))
 	}
 
-	unconverged := impl.Dlaqr4(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride, work, len(work))
+	unconverged := impl.Dlaqr04(wantt, wantz, n, ilo, ihi, h.Data, h.Stride, wr, wi, iloz, ihiz, z.Data, z.Stride, work, len(work), recur)
 
 	prefix := fmt.Sprintf("Case wantt=%v, wantz=%v, n=%v, ilo=%v, ihi=%v, iloz=%v, ihiz=%v, extra=%v, opt=%v",
 		wantt, wantz, n, ilo, ihi, iloz, ihiz, extra, optwork)
@@ -410,7 +431,7 @@ func testDlaqr4(t *testing.T, impl Dlaqr4er, test dlaqr4Test, optwork bool) {
 		}
 	}
 	if wantt {
-		// Zero out h under the subdiagonal because Dlaqr4 uses it as
+		// Zero out h under the subdiagonal because Dlaqr04 uses it as
 		// workspace.
 		for i := 2; i < n; i++ {
 			for j := 0; j < i-1; j++ {

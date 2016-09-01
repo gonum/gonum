@@ -127,3 +127,12 @@ const (
 	Scale        Job = 'S'
 	PermuteScale Job = 'B'
 )
+
+// Jobs and Comps for Dhseqr.
+const (
+	EigenvaluesOnly     Job = 'E'
+	EigenvaluesAndSchur Job = 'S'
+
+	InitZ   Comp = 'I'
+	UpdateZ Comp = 'V'
+)

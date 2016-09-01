@@ -1014,17 +1014,18 @@ func isUpperTriangular(a blas64.General) bool {
 	return true
 }
 
-// randomSparseGeneral returns an m×n general matrix whose each element is set
-// to a non-zero value with probability p.
-func randomSparseGeneral(m, n, stride int, p float64, rnd *rand.Rand) blas64.General {
-	a := nanGeneral(m, n, stride)
-	for i := 0; i < m; i++ {
-		for j := 0; j < n; j++ {
-			if rnd.NormFloat64() < p {
-				a.Data[i*stride+j] = rnd.NormFloat64()
-			} else {
-				a.Data[i*stride+j] = 0
-			}
+// unbalancedSparseGeneral returns an m×n dense matrix with a random sparse
+// structure consisting of nz nonzero elements. The matrix will be unbalanced by
+// multiplying each element randomly by its row or column index.
+func unbalancedSparseGeneral(m, n, stride int, nonzeros int, rnd *rand.Rand) blas64.General {
+	a := zeros(m, n, stride)
+	for k := 0; k < nonzeros; k++ {
+		i := rnd.Intn(n)
+		j := rnd.Intn(n)
+		if rnd.Float64() < 0.5 {
+			a.Data[i*stride+j] = float64(i+1) * rnd.NormFloat64()
+		} else {
+			a.Data[i*stride+j] = float64(j+1) * rnd.NormFloat64()
 		}
 	}
 	return a

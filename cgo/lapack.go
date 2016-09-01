@@ -295,6 +295,53 @@ func (impl Implementation) Dgebal(job lapack.Job, n int, a []float64, lda int, s
 	return ilo, ihi
 }
 
+// Dgebak transforms an n×m matrix V as
+//  V = P D V,        if side == blas.Right,
+//  V = P D^{-1} V,   if side == blas.Left,
+// where P and D are n×n permutation and scaling matrices, respectively,
+// implicitly represented by job, scale, ilo and ihi as returned by Dgebal.
+//
+// Typically, columns of the matrix V contain the right or left (determined by
+// side) eigenvectors of the balanced matrix output by Dgebal, and Dgebak forms
+// the eigenvectors of the original matrix.
+//
+// Dgebak is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
+	switch job {
+	default:
+		panic(badJob)
+	case lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale:
+	}
+	switch side {
+	default:
+		panic(badSide)
+	case blas.Left, blas.Right:
+	}
+	checkMatrix(n, m, v, ldv)
+	switch {
+	case ilo < 0 || max(0, n-1) < ilo:
+		panic(badIlo)
+	case ihi < min(ilo, n-1) || n <= ihi:
+		panic(badIhi)
+	}
+
+	// Convert permutation indices to 1-based.
+	for j := 0; j < ilo; j++ {
+		scale[j]++
+	}
+	for j := ihi + 1; j < n; j++ {
+		scale[j]++
+	}
+	lapacke.Dgebak(job, side, n, ilo+1, ihi+1, scale, m, v, ldv)
+	// Convert permutation indices back to 0-based.
+	for j := 0; j < ilo; j++ {
+		scale[j]--
+	}
+	for j := ihi + 1; j < n; j++ {
+		scale[j]--
+	}
+}
+
 // Dbdsqr performs a singular value decomposition of a real n×n bidiagonal matrix.
 //
 // The SVD of the bidiagonal matrix B is

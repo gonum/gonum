@@ -800,6 +800,14 @@ func copyMatrix(m, n int, dst []float64, ld int, src []float64) {
 	}
 }
 
+func copyGeneral(dst, src blas64.General) {
+	r := min(dst.Rows, src.Rows)
+	c := min(dst.Cols, src.Cols)
+	for i := 0; i < r; i++ {
+		copy(dst.Data[i*dst.Stride:i*dst.Stride+c], src.Data[i*src.Stride:i*src.Stride+c])
+	}
+}
+
 // cloneGeneral allocates and returns an exact copy of the given general matrix.
 func cloneGeneral(a blas64.General) blas64.General {
 	c := a

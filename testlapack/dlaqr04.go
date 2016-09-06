@@ -403,8 +403,8 @@ func testDlaqr04(t *testing.T, impl Dlaqr04er, test dlaqr04Test, optwork bool, r
 	if test.evWant != nil {
 		for i := start; i <= ihi; i++ {
 			ev := complex(wr[i], wi[i])
-			if !containsComplex(test.evWant, ev, tol) {
-				t.Log(test.evWant, ev)
+			found, _ := containsComplex(test.evWant, ev, tol)
+			if !found {
 				t.Errorf("%v: unexpected eigenvalue %v", prefix, ev)
 			}
 		}

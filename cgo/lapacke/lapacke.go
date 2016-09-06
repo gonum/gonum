@@ -11071,7 +11071,7 @@ func Zhptrs(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []co
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/shseqr.f.
-func Shseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []float32, ldh int, wr []float32, wi []float32, z []float32, ldz int, work []float32, lwork int) bool {
+func Shseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []float32, ldh int, wr []float32, wi []float32, z []float32, ldz int, work []float32, lwork int) int {
 	var _h *float32
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11092,11 +11092,11 @@ func Shseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []floa
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_shseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_h), (C.lapack_int)(ldh), (*C.float)(_wr), (*C.float)(_wi), (*C.float)(_z), (C.lapack_int)(ldz), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return int(C.LAPACKE_shseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_h), (C.lapack_int)(ldh), (*C.float)(_wr), (*C.float)(_wi), (*C.float)(_z), (C.lapack_int)(ldz), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dhseqr.f.
-func Dhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []float64, ldh int, wr []float64, wi []float64, z []float64, ldz int, work []float64, lwork int) bool {
+func Dhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []float64, ldh int, wr []float64, wi []float64, z []float64, ldz int, work []float64, lwork int) int {
 	var _h *float64
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11117,11 +11117,11 @@ func Dhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []floa
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dhseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_h), (C.lapack_int)(ldh), (*C.double)(_wr), (*C.double)(_wi), (*C.double)(_z), (C.lapack_int)(ldz), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return int(C.LAPACKE_dhseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_h), (C.lapack_int)(ldh), (*C.double)(_wr), (*C.double)(_wi), (*C.double)(_z), (C.lapack_int)(ldz), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chseqr.f.
-func Chseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []complex64, ldh int, w []complex64, z []complex64, ldz int, work []complex64, lwork int) bool {
+func Chseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []complex64, ldh int, w []complex64, z []complex64, ldz int, work []complex64, lwork int) int {
 	var _h *complex64
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11138,11 +11138,11 @@ func Chseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []comp
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_chseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_float)(_h), (C.lapack_int)(ldh), (*C.lapack_complex_float)(_w), (*C.lapack_complex_float)(_z), (C.lapack_int)(ldz), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return int(C.LAPACKE_chseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_float)(_h), (C.lapack_int)(ldh), (*C.lapack_complex_float)(_w), (*C.lapack_complex_float)(_z), (C.lapack_int)(ldz), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhseqr.f.
-func Zhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []complex128, ldh int, w []complex128, z []complex128, ldz int, work []complex128, lwork int) bool {
+func Zhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []complex128, ldh int, w []complex128, z []complex128, ldz int, work []complex128, lwork int) int {
 	var _h *complex128
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11159,7 +11159,7 @@ func Zhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []comp
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zhseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_double)(_h), (C.lapack_int)(ldh), (*C.lapack_complex_double)(_w), (*C.lapack_complex_double)(_z), (C.lapack_int)(ldz), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return int(C.LAPACKE_zhseqr_work((C.int)(rowMajor), (C.char)(job), (C.char)(compz), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_double)(_h), (C.lapack_int)(ldh), (*C.lapack_complex_double)(_w), (*C.lapack_complex_double)(_z), (C.lapack_int)(ldz), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clacgv.f.

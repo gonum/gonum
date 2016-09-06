@@ -117,6 +117,8 @@ our %typeConv = (
 	"LAPACK_Z_SELECT2" => "Select2Complex128",
 	"void" => "",
 
+	"lapack_int_must_return_type" => "int",
+	"lapack_int_must_return" => "int",
 	"lapack_int_return_type" => "bool",
 	"lapack_int_return" => "isZero",
 	"float_return_type" => "float32",
@@ -157,6 +159,12 @@ our %deprecated = (
 # The list keys are truncated by one character to cover all four numeric types.
 our %allUplo = (
 	"lacpy" => undef
+);
+
+# needsInt is a list of routines that need to return the integer info value and
+# and cannot convert to a success boolean.
+our %needsInt = (
+	"hseqr" => 1
 );
 
 foreach my $line (@lines) {
@@ -239,6 +247,10 @@ sub processProto {
 	$done{$func} = 1;
 
 	my $gofunc = ucfirst $func;
+
+	if (exists $needsInt{substr($func, 1)}) {
+		$ret .= "_must";
+	}
 
 	my $GoRet = $typeConv{$ret."_return"};
 	my $GoRetType = $typeConv{$ret."_return_type"};

@@ -136,3 +136,23 @@ const (
 	InitZ   Comp = 'I'
 	UpdateZ Comp = 'V'
 )
+
+// EigVecSide specifies what eigenvectors will be computed.
+type EigVecSide byte
+
+// EigVecSide constants for Dtrevc3.
+const (
+	RightEigVec     EigVecSide = 'R' // Compute right eigenvectors only.
+	LeftEigVec      EigVecSide = 'L' // Compute left eigenvectors only.
+	RightLeftEigVec EigVecSide = 'B' // Compute both right and left eigenvectors.
+)
+
+// HowMany specifies which eigenvectors will be computed.
+type HowMany byte
+
+// HowMany constants for Dhseqr.
+const (
+	AllEigVec      HowMany = 'A' // Compute all right and/or left eigenvectors.
+	AllEigVecMulQ  HowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
+	SelectedEigVec HowMany = 'S' // Compute selected right and/or left eigenvectors.
+)

@@ -5,6 +5,8 @@
 package native
 
 import (
+	"math"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/lapack"
 )
@@ -178,10 +180,9 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 	}
 
 	// Quick return in case of a workspace query.
-	impl.Dlaqr04(wantt, wantz, n, ilo, ihi, nil, 0, nil, nil, ilo, ihi, nil, 0, work, -1, 1)
-	lwkopt := max(max(1, n), int(work[0]))
 	if lwork == -1 {
-		work[0] = float64(lwkopt)
+		impl.Dlaqr04(wantt, wantz, n, ilo, ihi, nil, 0, nil, nil, ilo, ihi, nil, 0, work, -1, 1)
+		work[0] = math.Max(float64(n), work[0])
 		return 0
 	}
 
@@ -239,6 +240,7 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 				var workl [nl]float64
 				unconverged = impl.Dlaqr04(wantt, wantz, nl, ilo, kbot, hl[:], nl,
 					wr[:ihi+1], wi[:ihi+1], ilo, ihi, z, ldz, workl[:], nl, 1)
+				work[0] = workl[0]
 				if wantt || unconverged > 0 {
 					impl.Dlacpy(blas.All, n, n, hl[:], nl, h, ldh)
 				}
@@ -250,6 +252,6 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 		impl.Dlaset(blas.Lower, n-2, n-2, 0, 0, h[2*ldh:], ldh)
 	}
 
-	work[0] = float64(lwkopt)
+	work[0] = math.Max(float64(n), work[0])
 	return unconverged
 }

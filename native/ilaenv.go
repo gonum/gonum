@@ -184,6 +184,11 @@ func (impl Implementation) Ilaenv(ispec int, s string, opts string, n1, n2, n3, 
 					return 64
 				}
 				return 64
+			case "EVC":
+				if sname {
+					return 64
+				}
+				return 64
 			}
 		case "LA":
 			switch c3 {

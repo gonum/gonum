@@ -312,11 +312,11 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 		}
 	}
 
-	// Check that wr and wi have not been modified outside [start:ihi+1].
-	if !isAllNaN(wr[:start]) || !isAllNaN(wr[ihi+1:]) {
+	// Check that wr and wi have not been modified in [:start].
+	if !isAllNaN(wr[:start]) {
 		t.Errorf("%v: unexpected modification of wr", prefix)
 	}
-	if !isAllNaN(wi[:start]) || !isAllNaN(wi[ihi+1:]) {
+	if !isAllNaN(wi[:start]) {
 		t.Errorf("%v: unexpected modification of wi", prefix)
 	}
 
@@ -360,7 +360,7 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 		// The second imaginary part must be negative with the same
 		// magnitude.
 		if wi[i] != -wi[i+1] {
-			t.Errorf("%v: wi[%v] != wi[%v]", prefix, i, i+1)
+			t.Errorf("%v: wi[%v] != -wi[%v]", prefix, i, i+1)
 		}
 		if wantt {
 			// Check that wi[i] has the correct value.
@@ -402,8 +402,8 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 	if test.evWant != nil {
 		for i := start; i <= ihi; i++ {
 			ev := complex(wr[i], wi[i])
-			if !containsComplex(test.evWant, ev, tol) {
-				t.Log(test.evWant, ev)
+			found, _ := containsComplex(test.evWant, ev, tol)
+			if !found {
 				t.Errorf("%v: unexpected eigenvalue %v", prefix, ev)
 			}
 		}

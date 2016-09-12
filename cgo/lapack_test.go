@@ -124,6 +124,10 @@ func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
 }
 
+func TestDhseqr(t *testing.T) {
+	testlapack.DhseqrTest(t, impl)
+}
+
 func TestDorglq(t *testing.T) {
 	testlapack.DorglqTest(t, blockedTranslate{impl})
 }

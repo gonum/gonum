@@ -800,6 +800,14 @@ func copyMatrix(m, n int, dst []float64, ld int, src []float64) {
 	}
 }
 
+func copyGeneral(dst, src blas64.General) {
+	r := min(dst.Rows, src.Rows)
+	c := min(dst.Cols, src.Cols)
+	for i := 0; i < r; i++ {
+		copy(dst.Data[i*dst.Stride:i*dst.Stride+c], src.Data[i*src.Stride:i*src.Stride+c])
+	}
+}
+
 // cloneGeneral allocates and returns an exact copy of the given general matrix.
 func cloneGeneral(a blas64.General) blas64.General {
 	c := a
@@ -964,14 +972,14 @@ func schurBlockSize(t blas64.General, i int) (size int, first bool) {
 }
 
 // containsComplex returns whether z is approximately equal to one of the complex
-// numbers in v.
-func containsComplex(v []complex128, z complex128, tol float64) bool {
+// numbers in v. If z is found, its index in v will be also returned.
+func containsComplex(v []complex128, z complex128, tol float64) (found bool, index int) {
 	for i := range v {
 		if cmplx.Abs(v[i]-z) < tol {
-			return true
+			return true, i
 		}
 	}
-	return false
+	return false, -1
 }
 
 // isAllNaN returns whether x contains only NaN values.

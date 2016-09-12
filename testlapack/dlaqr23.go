@@ -295,7 +295,8 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 	if test.evWant != nil {
 		for i := kbot - nd + 1; i <= kbot; i++ {
 			ev := complex(sr[i], si[i])
-			if !containsComplex(test.evWant, ev, tol) {
+			found, _ := containsComplex(test.evWant, ev, tol)
+			if !found {
 				t.Errorf("%v: unexpected eigenvalue %v", prefix, ev)
 			}
 		}

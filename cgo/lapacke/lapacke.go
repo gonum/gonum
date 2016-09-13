@@ -2143,7 +2143,7 @@ func Zgeequb(m int, n int, a []complex128, lda int, r []float64, c []float64, ro
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeev.f.
-func Sgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, wr []float32, wi []float32, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) bool {
+func Sgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, wr []float32, wi []float32, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) int {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2168,11 +2168,11 @@ func Sgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, wr [
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_wr), (*C.float)(_wi), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return int(C.LAPACKE_sgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_wr), (*C.float)(_wi), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeev.f.
-func Dgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, wr []float64, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) bool {
+func Dgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, wr []float64, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) int {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2197,11 +2197,11 @@ func Dgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, wr [
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_wr), (*C.double)(_wi), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return int(C.LAPACKE_dgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_wr), (*C.double)(_wi), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeev.f.
-func Cgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, w []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) bool {
+func Cgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, w []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) int {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2226,11 +2226,11 @@ func Cgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, w 
 	if len(rwork) > 0 {
 		_rwork = &rwork[0]
 	}
-	return isZero(C.LAPACKE_cgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_w), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork), (*C.float)(_rwork)))
+	return int(C.LAPACKE_cgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_w), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork), (*C.float)(_rwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeev.f.
-func Zgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, w []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) bool {
+func Zgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, w []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) int {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2255,11 +2255,11 @@ func Zgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, w
 	if len(rwork) > 0 {
 		_rwork = &rwork[0]
 	}
-	return isZero(C.LAPACKE_zgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_w), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork), (*C.double)(_rwork)))
+	return int(C.LAPACKE_zgeev_work((C.int)(rowMajor), (C.char)(jobvl), (C.char)(jobvr), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_w), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork), (*C.double)(_rwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeevx.f.
-func Sgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float32, lda int, wr []float32, wi []float32, vl []float32, ldvl int, vr []float32, ldvr int, ilo []int32, ihi []int32, scale []float32, abnrm []float32, rconde []float32, rcondv []float32, work []float32, lwork int, iwork []int32) bool {
+func Sgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float32, lda int, wr []float32, wi []float32, vl []float32, ldvl int, vr []float32, ldvr int, ilo []int32, ihi []int32, scale []float32, abnrm []float32, rconde []float32, rcondv []float32, work []float32, lwork int, iwork []int32) int {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2312,11 +2312,11 @@ func Sgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 	if len(iwork) > 0 {
 		_iwork = &iwork[0]
 	}
-	return isZero(C.LAPACKE_sgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_wr), (*C.float)(_wi), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.float)(_scale), (*C.float)(_abnrm), (*C.float)(_rconde), (*C.float)(_rcondv), (*C.float)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
+	return int(C.LAPACKE_sgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_wr), (*C.float)(_wi), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.float)(_scale), (*C.float)(_abnrm), (*C.float)(_rconde), (*C.float)(_rcondv), (*C.float)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeevx.f.
-func Dgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float64, lda int, wr []float64, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, ilo []int32, ihi []int32, scale []float64, abnrm []float64, rconde []float64, rcondv []float64, work []float64, lwork int, iwork []int32) bool {
+func Dgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float64, lda int, wr []float64, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, ilo []int32, ihi []int32, scale []float64, abnrm []float64, rconde []float64, rcondv []float64, work []float64, lwork int, iwork []int32) int {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2369,11 +2369,11 @@ func Dgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 	if len(iwork) > 0 {
 		_iwork = &iwork[0]
 	}
-	return isZero(C.LAPACKE_dgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_wr), (*C.double)(_wi), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.double)(_scale), (*C.double)(_abnrm), (*C.double)(_rconde), (*C.double)(_rcondv), (*C.double)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
+	return int(C.LAPACKE_dgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_wr), (*C.double)(_wi), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.double)(_scale), (*C.double)(_abnrm), (*C.double)(_rconde), (*C.double)(_rcondv), (*C.double)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeevx.f.
-func Cgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex64, lda int, w []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, ilo []int32, ihi []int32, scale []float32, abnrm []float32, rconde []float32, rcondv []float32, work []complex64, lwork int, rwork []float32) bool {
+func Cgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex64, lda int, w []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, ilo []int32, ihi []int32, scale []float32, abnrm []float32, rconde []float32, rcondv []float32, work []complex64, lwork int, rwork []float32) int {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2422,11 +2422,11 @@ func Cgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 	if len(rwork) > 0 {
 		_rwork = &rwork[0]
 	}
-	return isZero(C.LAPACKE_cgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_w), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.float)(_scale), (*C.float)(_abnrm), (*C.float)(_rconde), (*C.float)(_rcondv), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork), (*C.float)(_rwork)))
+	return int(C.LAPACKE_cgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_w), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.float)(_scale), (*C.float)(_abnrm), (*C.float)(_rconde), (*C.float)(_rcondv), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork), (*C.float)(_rwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeevx.f.
-func Zgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex128, lda int, w []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, ilo []int32, ihi []int32, scale []float64, abnrm []float64, rconde []float64, rcondv []float64, work []complex128, lwork int, rwork []float64) bool {
+func Zgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex128, lda int, w []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, ilo []int32, ihi []int32, scale []float64, abnrm []float64, rconde []float64, rcondv []float64, work []complex128, lwork int, rwork []float64) int {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2475,7 +2475,7 @@ func Zgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 	if len(rwork) > 0 {
 		_rwork = &rwork[0]
 	}
-	return isZero(C.LAPACKE_zgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_w), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.double)(_scale), (*C.double)(_abnrm), (*C.double)(_rconde), (*C.double)(_rcondv), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork), (*C.double)(_rwork)))
+	return int(C.LAPACKE_zgeevx_work((C.int)(rowMajor), (C.char)(balanc), (C.char)(jobvl), (C.char)(jobvr), (C.char)(sense), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_w), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (*C.lapack_int)(_ilo), (*C.lapack_int)(_ihi), (*C.double)(_scale), (*C.double)(_abnrm), (*C.double)(_rconde), (*C.double)(_rcondv), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork), (*C.double)(_rwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgehrd.f.

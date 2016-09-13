@@ -164,7 +164,9 @@ our %allUplo = (
 # needsInt is a list of routines that need to return the integer info value and
 # and cannot convert to a success boolean.
 our %needsInt = (
-	"hseqr" => 1
+	"hseqr" => 1,
+	"geev"  => 1,
+	"geevx" => 1
 );
 
 foreach my $line (@lines) {

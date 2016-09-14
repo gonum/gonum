@@ -156,3 +156,15 @@ const (
 	AllEigVecMulQ  HowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
 	SelectedEigVec HowMany = 'S' // Compute selected right and/or left eigenvectors.
 )
+
+// Job types for Dgeev.
+type (
+	JobLeftEV  byte
+	JobRightEV byte
+)
+
+// Job constants for Dgeev.
+const (
+	ComputeLeftEV  JobLeftEV  = 'V'
+	ComputeRightEV JobRightEV = 'V'
+)

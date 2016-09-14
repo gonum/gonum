@@ -12,10 +12,10 @@ import "github.com/gonum/matrix"
 
 // At returns the element at row i, column j.
 func (m *Dense) At(i, j int) float64 {
-	if i >= m.mat.Rows || i < 0 {
+	if uint(i) >= uint(m.mat.Rows) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= m.mat.Cols || j < 0 {
+	if uint(j) >= uint(m.mat.Cols) {
 		panic(matrix.ErrColAccess)
 	}
 	return m.at(i, j)
@@ -27,10 +27,10 @@ func (m *Dense) at(i, j int) float64 {
 
 // Set sets the element at row i, column j to the value v.
 func (m *Dense) Set(i, j int, v float64) {
-	if i >= m.mat.Rows || i < 0 {
+	if uint(i) >= uint(m.mat.Rows) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= m.mat.Cols || j < 0 {
+	if uint(j) >= uint(m.mat.Cols) {
 		panic(matrix.ErrColAccess)
 	}
 	m.set(i, j, v)
@@ -43,7 +43,7 @@ func (m *Dense) set(i, j int, v float64) {
 // At returns the element at row i.
 // It panics if i is out of bounds or if j is not zero.
 func (v *Vector) At(i, j int) float64 {
-	if i < 0 || i >= v.n {
+	if uint(i) >= uint(v.n) {
 		panic(matrix.ErrRowAccess)
 	}
 	if j != 0 {
@@ -59,7 +59,7 @@ func (v *Vector) at(i int) float64 {
 // SetVec sets the element at row i to the value val.
 // It panics if i is out of bounds.
 func (v *Vector) SetVec(i int, val float64) {
-	if i < 0 || i >= v.n {
+	if uint(i) >= uint(v.n) {
 		panic(matrix.ErrVectorAccess)
 	}
 	v.setVec(i, val)
@@ -71,10 +71,10 @@ func (v *Vector) setVec(i int, val float64) {
 
 // At returns the element at row i and column j.
 func (s *SymDense) At(i, j int) float64 {
-	if i >= s.mat.N || i < 0 {
+	if uint(i) >= uint(s.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= s.mat.N || j < 0 {
+	if uint(j) >= uint(s.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	return s.at(i, j)
@@ -89,10 +89,10 @@ func (s *SymDense) at(i, j int) float64 {
 
 // SetSym sets the elements at (i,j) and (j,i) to the value v.
 func (s *SymDense) SetSym(i, j int, v float64) {
-	if i >= s.mat.N || i < 0 {
+	if uint(i) >= uint(s.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= s.mat.N || j < 0 {
+	if uint(j) >= uint(s.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	s.set(i, j, v)
@@ -107,10 +107,10 @@ func (s *SymDense) set(i, j int, v float64) {
 
 // At returns the element at row i, column j.
 func (t *TriDense) At(i, j int) float64 {
-	if i >= t.mat.N || i < 0 {
+	if uint(i) >= uint(t.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= t.mat.N || j < 0 {
+	if uint(j) >= uint(t.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	return t.at(i, j)
@@ -127,10 +127,10 @@ func (t *TriDense) at(i, j int) float64 {
 // SetTri sets the element at row i, column j to the value v.
 // It panics if the location is outside the appropriate half of the matrix.
 func (t *TriDense) SetTri(i, j int, v float64) {
-	if i >= t.mat.N || i < 0 {
+	if uint(i) >= uint(t.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= t.mat.N || j < 0 {
+	if uint(j) >= uint(t.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	isUpper := t.isUpper()

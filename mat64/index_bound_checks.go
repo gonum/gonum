@@ -16,10 +16,10 @@ func (m *Dense) At(i, j int) float64 {
 }
 
 func (m *Dense) at(i, j int) float64 {
-	if i >= m.mat.Rows || i < 0 {
+	if uint(i) >= uint(m.mat.Rows) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= m.mat.Cols || j < 0 {
+	if uint(j) >= uint(m.mat.Cols) {
 		panic(matrix.ErrColAccess)
 	}
 	return m.mat.Data[i*m.mat.Stride+j]
@@ -31,10 +31,10 @@ func (m *Dense) Set(i, j int, v float64) {
 }
 
 func (m *Dense) set(i, j int, v float64) {
-	if i >= m.mat.Rows || i < 0 {
+	if uint(i) >= uint(m.mat.Rows) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= m.mat.Cols || j < 0 {
+	if uint(j) >= uint(m.mat.Cols) {
 		panic(matrix.ErrColAccess)
 	}
 	m.mat.Data[i*m.mat.Stride+j] = v
@@ -50,7 +50,7 @@ func (v *Vector) At(i, j int) float64 {
 }
 
 func (v *Vector) at(i int) float64 {
-	if i < 0 || i >= v.n {
+	if uint(i) >= uint(v.n) {
 		panic(matrix.ErrRowAccess)
 	}
 	return v.mat.Data[i*v.mat.Inc]
@@ -63,7 +63,7 @@ func (v *Vector) SetVec(i int, val float64) {
 }
 
 func (v *Vector) setVec(i int, val float64) {
-	if i < 0 || i >= v.n {
+	if uint(i) >= uint(v.n) {
 		panic(matrix.ErrVectorAccess)
 	}
 	v.mat.Data[i*v.mat.Inc] = val
@@ -75,10 +75,10 @@ func (t *SymDense) At(i, j int) float64 {
 }
 
 func (t *SymDense) at(i, j int) float64 {
-	if i >= t.mat.N || i < 0 {
+	if uint(i) >= uint(t.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= t.mat.N || j < 0 {
+	if uint(j) >= uint(t.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	if i > j {
@@ -93,10 +93,10 @@ func (t *SymDense) SetSym(i, j int, v float64) {
 }
 
 func (t *SymDense) set(i, j int, v float64) {
-	if i >= t.mat.N || i < 0 {
+	if uint(i) >= uint(t.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= t.mat.N || j < 0 {
+	if uint(j) >= uint(t.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	if i > j {
@@ -111,10 +111,10 @@ func (t *TriDense) At(i, j int) float64 {
 }
 
 func (t *TriDense) at(i, j int) float64 {
-	if i >= t.mat.N || i < 0 {
+	if uint(i) >= uint(t.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= t.mat.N || j < 0 {
+	if uint(j) >= uint(t.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	isUpper := t.isUpper()
@@ -131,10 +131,10 @@ func (t *TriDense) SetTri(i, j int, v float64) {
 }
 
 func (t *TriDense) set(i, j int, v float64) {
-	if i >= t.mat.N || i < 0 {
+	if uint(i) >= uint(t.mat.N) {
 		panic(matrix.ErrRowAccess)
 	}
-	if j >= t.mat.N || j < 0 {
+	if uint(j) >= uint(t.mat.N) {
 		panic(matrix.ErrColAccess)
 	}
 	isUpper := t.isUpper()

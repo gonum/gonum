@@ -308,16 +308,20 @@ func (impl Implementation) Dgebal(job lapack.Job, n int, a []float64, lda int, s
 // the eigenvectors of the original matrix.
 //
 // Dgebak is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
+func (impl Implementation) Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
 	switch job {
 	default:
 		panic(badJob)
 	case lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale:
 	}
+	var bside blas.Side
 	switch side {
 	default:
 		panic(badSide)
-	case blas.Left, blas.Right:
+	case lapack.LeftEigVec:
+		bside = blas.Left
+	case lapack.RightEigVec:
+		bside = blas.Right
 	}
 	checkMatrix(n, m, v, ldv)
 	switch {
@@ -334,7 +338,7 @@ func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi in
 	for j := ihi + 1; j < n; j++ {
 		scale[j]++
 	}
-	lapacke.Dgebak(job, side, n, ilo+1, ihi+1, scale, m, v, ldv)
+	lapacke.Dgebak(job, bside, n, ilo+1, ihi+1, scale, m, v, ldv)
 	// Convert permutation indices back to 0-based.
 	for j := 0; j < ilo; j++ {
 		scale[j]--

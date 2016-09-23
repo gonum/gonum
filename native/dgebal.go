@@ -104,11 +104,11 @@ func (impl Implementation) Dgebal(job lapack.Job, n int, a []float64, lda int, s
 				bi.Dswap(ihi+1, a[i:], lda, a[ihi:], lda)
 				bi.Dswap(n, a[i*lda:], 1, a[ihi*lda:], 1)
 			}
-			ihi--
 			if ihi == 0 {
 				scale[0] = 1
 				return ilo, ihi
 			}
+			ihi--
 			swapped = true
 			break
 		}

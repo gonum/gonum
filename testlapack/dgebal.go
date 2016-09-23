@@ -87,6 +87,10 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.Job, a blas64.General) {
 		return
 	}
 
+	if ilo < 0 || ihi < ilo || n <= ihi {
+		t.Errorf("%v: invalid ordering of ilo=%v and ihi=%v", prefix, ilo, ihi)
+	}
+
 	if ilo >= 2 && !isUpperTriangular(blas64.General{ilo - 1, ilo - 1, a.Stride, a.Data}) {
 		t.Errorf("%v: T1 is not upper triangular", prefix)
 	}

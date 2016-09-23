@@ -1170,3 +1170,13 @@ func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128
 	}
 	return true
 }
+
+// rootsOfUnity returns the n complex numbers whose n-th power is equal to 1.
+func rootsOfUnity(n int) []complex128 {
+	w := make([]complex128, n)
+	for i := 0; i < n; i++ {
+		angle := math.Pi * float64(2*i) / float64(n)
+		w[i] = complex(math.Cos(angle), math.Sin(angle))
+	}
+	return w
+}

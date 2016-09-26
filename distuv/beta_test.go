@@ -22,6 +22,7 @@ func TestBetaProb(t *testing.T) {
 		{0.5, 1, 5.1, 0.29740426605235754},
 		{0.1, 0.5, 0.5, 1.0610329539459691},
 		{1, 0.5, 0.5, math.Inf(1)},
+		{-1, 0.5, 0.5, 0},
 	} {
 		pdf := Beta{Alpha: test.alpha, Beta: test.beta}.Prob(test.x)
 		if !floats.EqualWithinAbsOrRel(pdf, test.want, 1e-10, 1e-10) {
@@ -31,7 +32,6 @@ func TestBetaProb(t *testing.T) {
 }
 
 func TestBetaRand(t *testing.T) {
-
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []Beta{
 		{Alpha: 0.5, Beta: 0.5, Source: src},

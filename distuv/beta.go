@@ -28,72 +28,67 @@ type Beta struct {
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.
-func (be Beta) ExKurtosis() float64 {
-	a := be.Alpha
-	b := be.Beta
-	num := 6 * (math.Pow(a-b, 2)*(a+b+1) - a*b*(a+b+2))
-	den := a * b * (a + b + 2) * (a + b + 3)
+func (b Beta) ExKurtosis() float64 {
+	num := 6 * ((b.Alpha-b.Beta)*(b.Alpha-b.Beta)*(b.Alpha+b.Beta+1) - b.Alpha*b.Beta*(b.Alpha+b.Beta+2))
+	den := b.Alpha * b.Beta * (b.Alpha + b.Beta + 2) * (b.Alpha + b.Beta + 3)
 	return num / den
 }
 
 // LogProb computes the natural logarithm of the value of the probability
 // density function at x.
-func (be Beta) LogProb(x float64) float64 {
+func (b Beta) LogProb(x float64) float64 {
 	if x < 0 || x > 1 {
-		return math.NaN()
+		return math.Inf(-1)
 	}
-	a := be.Alpha
-	b := be.Beta
-	lgab, sign := math.Lgamma(a + b)
-	lgab = lgab * float64(sign)
-	lga, sign := math.Lgamma(a)
-	lga = lga * float64(sign)
-	lgb, sign := math.Lgamma(b)
-	lgb = lgb * float64(sign)
-	return lgab - lga - lgb + (a-1)*math.Log(x) + (b-1)*math.Log(1-x)
+
+	if b.Alpha <= 0 || b.Beta <= 0 {
+		panic("beta: negative parameters")
+	}
+
+	lab, _ := math.Lgamma(b.Alpha + b.Beta)
+	la, _ := math.Lgamma(b.Alpha)
+	lb, _ := math.Lgamma(b.Beta)
+	return lab - la - lb + (b.Alpha-1)*math.Log(x) + (b.Beta-1)*math.Log(1-x)
 }
 
 // Mean returns the mean of the probability distribution.
-func (be Beta) Mean() float64 {
-	return be.Alpha / (be.Alpha + be.Beta)
+func (b Beta) Mean() float64 {
+	return b.Alpha / (b.Alpha + b.Beta)
 }
 
 // Mode returns the mode of the distribution.
 //
-// The mode is NaN in the special case where one parameter is less than or
-// equal to 1.
-func (be Beta) Mode() float64 {
-	if be.Alpha <= 1 || be.Beta <= 1 {
+// Mode returns NaN if either parameter is less than or equal to 1 as a special case.
+func (b Beta) Mode() float64 {
+	if b.Alpha <= 1 || b.Beta <= 1 {
 		return math.NaN()
 	}
-	return (be.Alpha - 1) / (be.Alpha + be.Beta - 2)
+	return (b.Alpha - 1) / (b.Alpha + b.Beta - 2)
 }
 
 // NumParameters returns the number of parameters in the distribution.
-func (be Beta) NumParameters() int {
+func (b Beta) NumParameters() int {
 	return 2
 }
 
 // Prob computes the value of the probability density function at x.
-func (be Beta) Prob(x float64) float64 {
-	return math.Exp(be.LogProb(x))
+func (b Beta) Prob(x float64) float64 {
+	return math.Exp(b.LogProb(x))
 }
 
 // Rand returns a random sample drawn from the distribution.
-func (be Beta) Rand() float64 {
-	ga := Gamma{Alpha: be.Alpha, Beta: 1, Source: be.Source}
-	gb := Gamma{Alpha: be.Beta, Beta: 1, Source: be.Source}
-	gaRand := ga.Rand()
-	gbRand := gb.Rand()
-	return gaRand / (gaRand + gbRand)
+func (b Beta) Rand() float64 {
+	ga := Gamma{Alpha: b.Alpha, Beta: 1, Source: b.Source}.Rand()
+	gb := Gamma{Alpha: b.Beta, Beta: 1, Source: b.Source}.Rand()
+	return ga / (ga + gb)
 }
 
 // StdDev returns the standard deviation of the probability distribution.
-func (be Beta) StdDev() float64 {
-	return math.Sqrt(be.Variance())
+func (b Beta) StdDev() float64 {
+	return math.Sqrt(b.Variance())
 }
 
 // Variance returns the variance of the probability distribution.
-func (be Beta) Variance() float64 {
-	return be.Alpha * be.Beta / (math.Pow(be.Alpha+be.Beta, 2) * (be.Alpha + be.Beta + 1))
+func (b Beta) Variance() float64 {
+	return b.Alpha * b.Beta / ((b.Alpha + b.Beta) * (b.Alpha + b.Beta) * (b.Alpha + b.Beta + 1))
 }

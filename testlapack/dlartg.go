@@ -29,5 +29,26 @@ func DlartgTest(t *testing.T, impl Dlartger) {
 		if math.Abs(zeroTest) > 1e-14 {
 			t.Errorf("Zero result mismatch. Found %v", zeroTest)
 		}
+		if math.Abs(f) > math.Abs(g) && cs < 0 {
+			t.Errorf("Unexpected negative cs %v", cs)
+		}
+	}
+	for i := 0; i < 100; i++ {
+		cs, sn, _ := impl.Dlartg(rnd.NormFloat64(), 0)
+		if cs != 1 {
+			t.Errorf("Unexpected cs for g=0. Want 1, got %v", cs)
+		}
+		if sn != 0 {
+			t.Errorf("Unexpected sn for g=0. Want 0, got %v", sn)
+		}
+	}
+	for i := 0; i < 100; i++ {
+		cs, sn, _ := impl.Dlartg(0, rnd.NormFloat64())
+		if cs != 0 {
+			t.Errorf("Unexpected cs for f=0. Want 0, got %v", cs)
+		}
+		if sn != 1 {
+			t.Errorf("Unexpected sn for f=0. Want 1, got %v", sn)
+		}
 	}
 }

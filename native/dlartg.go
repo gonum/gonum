@@ -21,7 +21,7 @@ func (impl Implementation) Dlartg(f, g float64) (cs, sn, r float64) {
 	safmx2 := 1 / safmn2
 	if g == 0 {
 		cs = 1
-		sn = 1
+		sn = 0
 		r = f
 		return cs, sn, r
 	}

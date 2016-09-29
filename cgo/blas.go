@@ -1,4 +1,4 @@
-// Do not manually edit this file. It was created by the genBlas.pl script from cblas.h.
+// Do not manually edit this file. It was created by the generate_blas.go from cblas.h.
 
 // Copyright ©2014 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -1958,11 +1958,11 @@ func (Implementation) Sspr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
@@ -2003,14 +2003,14 @@ func (Implementation) Sspr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
 		panic("blas: zero y index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
@@ -2150,11 +2150,11 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
@@ -2195,14 +2195,14 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
 		panic("blas: zero y index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
@@ -2366,11 +2366,11 @@ func (Implementation) Chpr(ul blas.Uplo, n int, alpha float32, x []complex64, in
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
@@ -2411,14 +2411,14 @@ func (Implementation) Chpr2(ul blas.Uplo, n int, alpha complex64, x []complex64,
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
 		panic("blas: zero y index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
@@ -2582,11 +2582,11 @@ func (Implementation) Zhpr(ul blas.Uplo, n int, alpha float64, x []complex128, i
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")
@@ -2627,14 +2627,14 @@ func (Implementation) Zhpr2(ul blas.Uplo, n int, alpha complex128, x []complex12
 	if n < 0 {
 		panic("blas: n < 0")
 	}
-	if n*(n+1)/2 > len(ap) {
-		panic("blas: index of ap out of range")
-	}
 	if incX == 0 {
 		panic("blas: zero x index increment")
 	}
 	if incY == 0 {
 		panic("blas: zero y index increment")
+	}
+	if n*(n+1)/2 > len(ap) {
+		panic("blas: index of ap out of range")
 	}
 	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
 		panic("blas: x index out of range")

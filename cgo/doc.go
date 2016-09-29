@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate ./genBlas.pl
+//go:generate go run generate_blas.go
 
 // Ensure changes made to blas/cgo are reflected in blas/native where relevant.
 

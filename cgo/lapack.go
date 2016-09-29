@@ -183,7 +183,13 @@ func (Implementation) Dlarfb(side blas.Side, trans blas.Transpose, direct lapack
 	if side == blas.Right {
 		rowsWork = m
 	}
-	checkMatrix(rowsWork, k, work, ldwork)
+	// TODO(vladimir-ch): Replace the following two lines with
+	//  checkMatrix(rowsWork, k, work, ldwork)
+	// if and when the issue
+	//  https://github.com/Reference-LAPACK/lapack/issues/37
+	// has been resolved.
+	ldwork = rowsWork
+	work = make([]float64, ldwork*k)
 
 	lapacke.Dlarfb(side, trans, byte(direct), byte(store), m, n, k, v, ldv, t, ldt, c, ldc, work, ldwork)
 }

@@ -79,6 +79,15 @@ func TestCorrelation(t *testing.T) {
 			t.Errorf("Correlation mismatch case %d. Expected %v, Found %v", i, test.ans, c)
 		}
 	}
+	if !Panics(func() { Correlation(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
+		t.Errorf("Correlation did not panic with length mismatch")
+	}
+	if !Panics(func() { Correlation(make([]float64, 2), make([]float64, 3), nil) }) {
+		t.Errorf("Correlation did not panic with length mismatch")
+	}
+	if !Panics(func() { Correlation(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Correlation did not panic with weights length mismatch")
+	}
 }
 
 func ExampleCovariance() {

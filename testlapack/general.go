@@ -13,6 +13,7 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/floats"
 	"github.com/gonum/lapack"
 )
 
@@ -1037,4 +1038,135 @@ func unbalancedSparseGeneral(m, n, stride int, nonzeros int, rnd *rand.Rand) bla
 		}
 	}
 	return a
+}
+
+// columnOf returns a copy of the j-th column of a.
+func columnOf(a blas64.General, j int) []float64 {
+	if j < 0 || a.Cols <= j {
+		panic("bad column index")
+	}
+	col := make([]float64, a.Rows)
+	for i := range col {
+		col[i] = a.Data[i*a.Stride+j]
+	}
+	return col
+}
+
+// isRightEigenvectorOf returns whether the vector xRe+i*xIm, where i is the
+// imaginary unit, is the right eigenvector of A corresponding to the eigenvalue
+// lambda.
+//
+// A right eigenvector corresponding to a complex eigenvalue λ is a complex
+// non-zero vector x such that
+//  A x = λ x.
+func isRightEigenvectorOf(a blas64.General, xRe, xIm []float64, lambda complex128, tol float64) bool {
+	if a.Rows != a.Cols {
+		panic("matrix not square")
+	}
+
+	if imag(lambda) != 0 && xIm == nil {
+		// Complex eigenvalue of a real matrix cannot have a real
+		// eigenvector.
+		return false
+	}
+
+	n := a.Rows
+
+	// Compute A real(x) and store the result into xReAns.
+	xReAns := make([]float64, n)
+	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{1, xRe}, 0, blas64.Vector{1, xReAns})
+
+	if imag(lambda) == 0 && xIm == nil {
+		// Real eigenvalue and eigenvector.
+
+		// Compute λx and store the result into lambdax.
+		lambdax := make([]float64, n)
+		floats.AddScaled(lambdax, real(lambda), xRe)
+
+		if floats.Distance(xReAns, lambdax, math.Inf(1)) > tol {
+			return false
+		}
+		return true
+	}
+
+	// Complex eigenvector, and real or complex eigenvalue.
+
+	// Compute A imag(x) and store the result into xImAns.
+	xImAns := make([]float64, n)
+	blas64.Gemv(blas.NoTrans, 1, a, blas64.Vector{1, xIm}, 0, blas64.Vector{1, xImAns})
+
+	// Compute λx and store the result into lambdax.
+	lambdax := make([]complex128, n)
+	for i := range lambdax {
+		lambdax[i] = lambda * complex(xRe[i], xIm[i])
+	}
+
+	for i, v := range lambdax {
+		ax := complex(xReAns[i], xImAns[i])
+		if cmplx.Abs(v-ax) > tol {
+			return false
+		}
+	}
+	return true
+}
+
+// isLeftEigenvectorOf returns whether the vector yRe+i*yIm, where i is the
+// imaginary unit, is the left eigenvector of A corresponding to the eigenvalue
+// lambda.
+//
+// A left eigenvector corresponding to a complex eigenvalue λ is a complex
+// non-zero vector y such that
+//  y^H A = λ y^H,
+// which is equivalent for real A to
+//  A^T y = conj(λ) y,
+func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128, tol float64) bool {
+	if a.Rows != a.Cols {
+		panic("matrix not square")
+	}
+
+	if imag(lambda) != 0 && yIm == nil {
+		// Complex eigenvalue of a real matrix cannot have a real
+		// eigenvector.
+		return false
+	}
+
+	n := a.Rows
+
+	// Compute A^T real(y) and store the result into yReAns.
+	yReAns := make([]float64, n)
+	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{1, yRe}, 0, blas64.Vector{1, yReAns})
+
+	if imag(lambda) == 0 && yIm == nil {
+		// Real eigenvalue and eigenvector.
+
+		// Compute λy and store the result into lambday.
+		lambday := make([]float64, n)
+		floats.AddScaled(lambday, real(lambda), yRe)
+
+		if floats.Distance(yReAns, lambday, math.Inf(1)) > tol {
+			return false
+		}
+		return true
+	}
+
+	// Complex eigenvector, and real or complex eigenvalue.
+
+	// Compute A^T imag(y) and store the result into yImAns.
+	yImAns := make([]float64, n)
+	blas64.Gemv(blas.Trans, 1, a, blas64.Vector{1, yIm}, 0, blas64.Vector{1, yImAns})
+
+	// Compute conj(λ)y and store the result into lambday.
+	lambda = cmplx.Conj(lambda)
+	lambday := make([]complex128, n)
+	for i := range lambday {
+		lambday[i] = lambda * complex(yRe[i], yIm[i])
+	}
+
+	for i, v := range lambday {
+		ay := complex(yReAns[i], yImAns[i])
+		if cmplx.Abs(v-ay) > tol {
+			return false
+		}
+	}
+	return true
 }

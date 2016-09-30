@@ -154,8 +154,8 @@ var cgoTypes = map[TypeKey]*template.Template{
 	{Kind: cc.DoubleComplex, IsPointer: true}: template.Must(template.New("doublecomplex*").Parse("unsafe.Pointer(&{{.}}[0])")),
 }
 
-// GoTypeFor returns a string representation of the given type using a mapping in
-// types. GoTypeFor will panic if no type mapping is found after searching the
+// CgoConversionFor returns a string representation of the given type using a mapping in
+// types. CgoConversionFor will panic if no type mapping is found after searching the
 // user-provided types mappings and then the following mapping:
 //  {Kind: cc.Void, IsPointer: true}:          "unsafe.Pointer(&{{.}}[0])",
 //  {Kind: cc.Int}:                            "C.int({{.}})",
@@ -283,7 +283,7 @@ func DocComments(path string) (docs map[string]map[string][]*ast.Comment, err er
 	return docs, nil
 }
 
-// Declaration is a description os a C function declaration.
+// Declaration is a description of a C function declaration.
 type Declaration struct {
 	Pos         token.Pos
 	Name        string
@@ -324,7 +324,7 @@ func (d *Declaration) Parameters() []Parameter {
 func Declarations(paths ...string) ([]Declaration, error) {
 	predefined, includePaths, sysIncludePaths, err := cc.HostConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get host config: %v", err)
+		return nil, fmt.Errorf("binding: failed to get host config: %v", err)
 	}
 
 	t, err := cc.Parse(
@@ -343,7 +343,7 @@ unsigned long long __builtin_bswap64 (unsigned long long x);
 		cc.SysIncludePaths(sysIncludePaths),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse %q: %v", paths, err)
+		return nil, fmt.Errorf("binding: failed to parse %q: %v", paths, err)
 	}
 
 	var decls []Declaration

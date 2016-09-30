@@ -12,6 +12,17 @@ type GraphBuilder interface {
 	graph.Builder
 }
 
+type DirectedBuilder interface {
+	GraphBuilder
+	HasEdgeFromTo(x, y graph.Node) bool
+}
+
+type DirectedMutator interface {
+	DirectedBuilder
+	graph.EdgeRemover
+	Edge(from, to graph.Node) graph.Edge
+}
+
 func abs(a int) int {
 	if a < 0 {
 		return -a

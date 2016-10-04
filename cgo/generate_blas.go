@@ -37,7 +37,7 @@ const (
 
 const (
 	cribDocs      = false
-	elideRepeat   = false
+	elideRepeat   = true
 	noteOrigin    = false
 	separateFuncs = false
 )

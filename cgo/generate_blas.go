@@ -36,9 +36,9 @@ const (
 )
 
 const (
-	cribDocs      = false
+	cribDocs      = true
 	elideRepeat   = true
-	noteOrigin    = false
+	noteOrigin    = true
 	separateFuncs = false
 )
 
@@ -154,7 +154,7 @@ func main() {
 		n++
 		goSignature(&buf, d, docs[typ])
 		if noteOrigin {
-			fmt.Fprintf(&buf, "\t// %s %s %s ...\n\n", d.Position(), d.Return, d.Name)
+			fmt.Fprintf(&buf, "\t// declared at %s %s %s ...\n\n", d.Position(), d.Return, d.Name)
 		}
 		parameterChecks(&buf, d, parameterCheckRules)
 		buf.WriteByte('\t')

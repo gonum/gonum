@@ -220,7 +220,11 @@ func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, inc
 
 // Generated cases ...
 
+// Sdsdot computes the dot product of the two vectors plus a constant
+//  alpha + \sum_i x[i]*y[i]
 func (Implementation) Sdsdot(n int, alpha float32, x []float32, incX int, y []float32, incY int) float32 {
+	// declared at cblas.h:24:8 float cblas_sdsdot ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -241,7 +245,12 @@ func (Implementation) Sdsdot(n int, alpha float32, x []float32, incX int, y []fl
 	}
 	return float32(C.cblas_sdsdot(C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY)))
 }
+
+// Dsdot computes the dot product of the two vectors
+//  \sum_i x[i]*y[i]
 func (Implementation) Dsdot(n int, x []float32, incX int, y []float32, incY int) float64 {
+	// declared at cblas.h:26:8 double cblas_dsdot ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -262,7 +271,12 @@ func (Implementation) Dsdot(n int, x []float32, incX int, y []float32, incY int)
 	}
 	return float64(C.cblas_dsdot(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY)))
 }
+
+// Sdot computes the dot product of the two vectors
+//  \sum_i x[i]*y[i]
 func (Implementation) Sdot(n int, x []float32, incX int, y []float32, incY int) float32 {
+	// declared at cblas.h:28:8 float cblas_sdot ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -283,7 +297,12 @@ func (Implementation) Sdot(n int, x []float32, incX int, y []float32, incY int) 
 	}
 	return float32(C.cblas_sdot(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY)))
 }
+
+// Ddot computes the dot product of the two vectors
+//  \sum_i x[i]*y[i]
 func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) float64 {
+	// declared at cblas.h:30:8 double cblas_ddot ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -304,7 +323,13 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 	}
 	return float64(C.cblas_ddot(C.int(n), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY)))
 }
+
+// Snrm2 computes the Euclidean norm of a vector,
+//  sqrt(\sum_i x[i] * x[i]).
+// This function returns 0 if incX is negative.
 func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
+	// declared at cblas.h:49:8 float cblas_snrm2 ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -322,7 +347,13 @@ func (Implementation) Snrm2(n int, x []float32, incX int) float32 {
 	}
 	return float32(C.cblas_snrm2(C.int(n), (*C.float)(&x[0]), C.int(incX)))
 }
+
+// Sasum computes the sum of the absolute values of the elements of x.
+//  \sum_i |x[i]|
+// Sasum returns 0 if incX is negative.
 func (Implementation) Sasum(n int, x []float32, incX int) float32 {
+	// declared at cblas.h:50:8 float cblas_sasum ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -340,7 +371,13 @@ func (Implementation) Sasum(n int, x []float32, incX int) float32 {
 	}
 	return float32(C.cblas_sasum(C.int(n), (*C.float)(&x[0]), C.int(incX)))
 }
+
+// Dnrm2 computes the Euclidean norm of a vector,
+//  sqrt(\sum_i x[i] * x[i]).
+// This function returns 0 if incX is negative.
 func (Implementation) Dnrm2(n int, x []float64, incX int) float64 {
+	// declared at cblas.h:52:8 double cblas_dnrm2 ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -358,7 +395,13 @@ func (Implementation) Dnrm2(n int, x []float64, incX int) float64 {
 	}
 	return float64(C.cblas_dnrm2(C.int(n), (*C.double)(&x[0]), C.int(incX)))
 }
+
+// Dasum computes the sum of the absolute values of the elements of x.
+//  \sum_i |x[i]|
+// Dasum returns 0 if incX is negative.
 func (Implementation) Dasum(n int, x []float64, incX int) float64 {
+	// declared at cblas.h:53:8 double cblas_dasum ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -376,7 +419,10 @@ func (Implementation) Dasum(n int, x []float64, incX int) float64 {
 	}
 	return float64(C.cblas_dasum(C.int(n), (*C.double)(&x[0]), C.int(incX)))
 }
+
 func (Implementation) Scnrm2(n int, x []complex64, incX int) float32 {
+	// declared at cblas.h:55:8 float cblas_scnrm2 ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -394,7 +440,10 @@ func (Implementation) Scnrm2(n int, x []complex64, incX int) float32 {
 	}
 	return float32(C.cblas_scnrm2(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
 }
+
 func (Implementation) Scasum(n int, x []complex64, incX int) float32 {
+	// declared at cblas.h:56:8 float cblas_scasum ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -412,7 +461,10 @@ func (Implementation) Scasum(n int, x []complex64, incX int) float32 {
 	}
 	return float32(C.cblas_scasum(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
 }
+
 func (Implementation) Dznrm2(n int, x []complex128, incX int) float64 {
+	// declared at cblas.h:58:8 double cblas_dznrm2 ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -430,7 +482,10 @@ func (Implementation) Dznrm2(n int, x []complex128, incX int) float64 {
 	}
 	return float64(C.cblas_dznrm2(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
 }
+
 func (Implementation) Dzasum(n int, x []complex128, incX int) float64 {
+	// declared at cblas.h:59:8 double cblas_dzasum ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -448,7 +503,13 @@ func (Implementation) Dzasum(n int, x []complex128, incX int) float64 {
 	}
 	return float64(C.cblas_dzasum(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
 }
+
+// Isamax returns the index of an element of x with the largest absolute value.
+// If there are multiple such indices the earliest is returned.
+// Isamax returns -1 if n == 0.
 func (Implementation) Isamax(n int, x []float32, incX int) int {
+	// declared at cblas.h:65:13 int cblas_isamax ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -466,7 +527,13 @@ func (Implementation) Isamax(n int, x []float32, incX int) int {
 	}
 	return int(C.cblas_isamax(C.int(n), (*C.float)(&x[0]), C.int(incX)))
 }
+
+// Idamax returns the index of an element of x with the largest absolute value.
+// If there are multiple such indices the earliest is returned.
+// Idamax returns -1 if n == 0.
 func (Implementation) Idamax(n int, x []float64, incX int) int {
+	// declared at cblas.h:66:13 int cblas_idamax ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -484,7 +551,10 @@ func (Implementation) Idamax(n int, x []float64, incX int) int {
 	}
 	return int(C.cblas_idamax(C.int(n), (*C.double)(&x[0]), C.int(incX)))
 }
+
 func (Implementation) Icamax(n int, x []complex64, incX int) int {
+	// declared at cblas.h:67:13 int cblas_icamax ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -502,7 +572,10 @@ func (Implementation) Icamax(n int, x []complex64, incX int) int {
 	}
 	return int(C.cblas_icamax(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
 }
+
 func (Implementation) Izamax(n int, x []complex128, incX int) int {
+	// declared at cblas.h:68:13 int cblas_izamax ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -520,7 +593,12 @@ func (Implementation) Izamax(n int, x []complex128, incX int) int {
 	}
 	return int(C.cblas_izamax(C.int(n), unsafe.Pointer(&x[0]), C.int(incX)))
 }
+
+// Sswap exchanges the elements of two vectors.
+//  x[i], y[i] = y[i], x[i] for all i
 func (Implementation) Sswap(n int, x []float32, incX int, y []float32, incY int) {
+	// declared at cblas.h:79:6 void cblas_sswap ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -541,7 +619,12 @@ func (Implementation) Sswap(n int, x []float32, incX int, y []float32, incY int)
 	}
 	C.cblas_sswap(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Scopy copies the elements of x into the elements of y.
+//  y[i] = x[i] for all i
 func (Implementation) Scopy(n int, x []float32, incX int, y []float32, incY int) {
+	// declared at cblas.h:81:6 void cblas_scopy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -562,7 +645,12 @@ func (Implementation) Scopy(n int, x []float32, incX int, y []float32, incY int)
 	}
 	C.cblas_scopy(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Saxpy adds alpha times x to y
+//  y[i] += alpha * x[i] for all i
 func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []float32, incY int) {
+	// declared at cblas.h:83:6 void cblas_saxpy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -583,7 +671,12 @@ func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []flo
 	}
 	C.cblas_saxpy(C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Dswap exchanges the elements of two vectors.
+//  x[i], y[i] = y[i], x[i] for all i
 func (Implementation) Dswap(n int, x []float64, incX int, y []float64, incY int) {
+	// declared at cblas.h:90:6 void cblas_dswap ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -604,7 +697,12 @@ func (Implementation) Dswap(n int, x []float64, incX int, y []float64, incY int)
 	}
 	C.cblas_dswap(C.int(n), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY))
 }
+
+// Dcopy copies the elements of x into the elements of y.
+//  y[i] = x[i] for all i
 func (Implementation) Dcopy(n int, x []float64, incX int, y []float64, incY int) {
+	// declared at cblas.h:92:6 void cblas_dcopy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -625,7 +723,12 @@ func (Implementation) Dcopy(n int, x []float64, incX int, y []float64, incY int)
 	}
 	C.cblas_dcopy(C.int(n), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY))
 }
+
+// Daxpy adds alpha times x to y
+//  y[i] += alpha * x[i] for all i
 func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []float64, incY int) {
+	// declared at cblas.h:94:6 void cblas_daxpy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -646,7 +749,10 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 	}
 	C.cblas_daxpy(C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY))
 }
+
 func (Implementation) Cswap(n int, x []complex64, incX int, y []complex64, incY int) {
+	// declared at cblas.h:101:6 void cblas_cswap ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -667,7 +773,10 @@ func (Implementation) Cswap(n int, x []complex64, incX int, y []complex64, incY 
 	}
 	C.cblas_cswap(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Ccopy(n int, x []complex64, incX int, y []complex64, incY int) {
+	// declared at cblas.h:103:6 void cblas_ccopy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -688,7 +797,10 @@ func (Implementation) Ccopy(n int, x []complex64, incX int, y []complex64, incY 
 	}
 	C.cblas_ccopy(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Caxpy(n int, alpha complex64, x []complex64, incX int, y []complex64, incY int) {
+	// declared at cblas.h:105:6 void cblas_caxpy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -709,7 +821,10 @@ func (Implementation) Caxpy(n int, alpha complex64, x []complex64, incX int, y [
 	}
 	C.cblas_caxpy(C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, incY int) {
+	// declared at cblas.h:112:6 void cblas_zswap ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -730,7 +845,10 @@ func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, inc
 	}
 	C.cblas_zswap(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Zcopy(n int, x []complex128, incX int, y []complex128, incY int) {
+	// declared at cblas.h:114:6 void cblas_zcopy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -751,7 +869,10 @@ func (Implementation) Zcopy(n int, x []complex128, incX int, y []complex128, inc
 	}
 	C.cblas_zcopy(C.int(n), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Zaxpy(n int, alpha complex128, x []complex128, incX int, y []complex128, incY int) {
+	// declared at cblas.h:116:6 void cblas_zaxpy ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -772,7 +893,13 @@ func (Implementation) Zaxpy(n int, alpha complex128, x []complex128, incX int, y
 	}
 	C.cblas_zaxpy(C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
+// Srot applies a plane transformation.
+//  x[i] = c * x[i] + s * y[i]
+//  y[i] = c * y[i] - s * x[i]
 func (Implementation) Srot(n int, x []float32, incX int, y []float32, incY int, c, s float32) {
+	// declared at cblas.h:129:6 void cblas_srot ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -793,7 +920,13 @@ func (Implementation) Srot(n int, x []float32, incX int, y []float32, incY int, 
 	}
 	C.cblas_srot(C.int(n), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), C.float(c), C.float(s))
 }
+
+// Drot applies a plane transformation.
+//  x[i] = c * x[i] + s * y[i]
+//  y[i] = c * y[i] - s * x[i]
 func (Implementation) Drot(n int, x []float64, incX int, y []float64, incY int, c, s float64) {
+	// declared at cblas.h:136:6 void cblas_drot ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -814,7 +947,13 @@ func (Implementation) Drot(n int, x []float64, incX int, y []float64, incY int, 
 	}
 	C.cblas_drot(C.int(n), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), C.double(c), C.double(s))
 }
+
+// Sscal scales x by alpha.
+//  x[i] *= alpha
+// Sscal has no effect if incX < 0.
 func (Implementation) Sscal(n int, alpha float32, x []float32, incX int) {
+	// declared at cblas.h:145:6 void cblas_sscal ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -832,7 +971,13 @@ func (Implementation) Sscal(n int, alpha float32, x []float32, incX int) {
 	}
 	C.cblas_sscal(C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX))
 }
+
+// Dscal scales x by alpha.
+//  x[i] *= alpha
+// Dscal has no effect if incX < 0.
 func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
+	// declared at cblas.h:146:6 void cblas_dscal ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -850,7 +995,10 @@ func (Implementation) Dscal(n int, alpha float64, x []float64, incX int) {
 	}
 	C.cblas_dscal(C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX))
 }
+
 func (Implementation) Cscal(n int, alpha complex64, x []complex64, incX int) {
+	// declared at cblas.h:147:6 void cblas_cscal ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -868,7 +1016,10 @@ func (Implementation) Cscal(n int, alpha complex64, x []complex64, incX int) {
 	}
 	C.cblas_cscal(C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Zscal(n int, alpha complex128, x []complex128, incX int) {
+	// declared at cblas.h:148:6 void cblas_zscal ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -886,7 +1037,10 @@ func (Implementation) Zscal(n int, alpha complex128, x []complex128, incX int) {
 	}
 	C.cblas_zscal(C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Csscal(n int, alpha float32, x []complex64, incX int) {
+	// declared at cblas.h:149:6 void cblas_csscal ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -904,7 +1058,10 @@ func (Implementation) Csscal(n int, alpha float32, x []complex64, incX int) {
 	}
 	C.cblas_csscal(C.int(n), C.float(alpha), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Zdscal(n int, alpha float64, x []complex128, incX int) {
+	// declared at cblas.h:150:6 void cblas_zdscal ...
+
 	if n < 0 {
 		panic("blas: n < 0")
 	}
@@ -919,7 +1076,14 @@ func (Implementation) Zdscal(n int, alpha float64, x []complex128, incX int) {
 	}
 	C.cblas_zdscal(C.int(n), C.double(alpha), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
+// Sgemv computes
+//  y = alpha * a * x + beta * y if tA = blas.NoTrans
+//  y = alpha * A^T * x + beta * y if tA = blas.Trans or blas.ConjTrans
+// where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []float32, lda int, x []float32, incX int, beta float32, y []float32, incY int) {
+	// declared at cblas.h:171:6 void cblas_sgemv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -952,7 +1116,16 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 	}
 	C.cblas_sgemv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Sgbmv computes
+//  y = alpha * A * x + beta * y if tA == blas.NoTrans
+//  y = alpha * A^T * x + beta * y if tA == blas.Trans or blas.ConjTrans
+// where a is an m×n band matrix kL subdiagonals and kU super-diagonals, and
+// m and n refer to the size of the full dense matrix it represents.
+// x and y are vectors, and alpha and beta are scalars.
 func (Implementation) Sgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float32, a []float32, lda int, x []float32, incX int, beta float32, y []float32, incY int) {
+	// declared at cblas.h:176:6 void cblas_sgbmv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -991,7 +1164,14 @@ func (Implementation) Sgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float32, 
 	}
 	C.cblas_sgbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Strmv computes
+//  x = A * x if tA == blas.NoTrans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
+// A is an n×n Triangular matrix and x is a vector.
 func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float32, lda int, x []float32, incX int) {
+	// declared at cblas.h:181:6 void cblas_strmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1015,7 +1195,14 @@ func (Implementation) Strmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_strmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
 }
+
+// Stbmv computes
+//  x = A * x if tA == blas.NoTrans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular banded matrix with k diagonals, and x is a vector.
 func (Implementation) Stbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float32, lda int, x []float32, incX int) {
+	// declared at cblas.h:185:6 void cblas_stbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1042,7 +1229,14 @@ func (Implementation) Stbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_stbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
 }
+
+// Stpmv computes
+//  x = A * x if tA == blas.NoTrans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n unit triangular matrix in packed format, and x is a vector.
 func (Implementation) Stpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []float32, incX int) {
+	// declared at cblas.h:189:6 void cblas_stpmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1069,7 +1263,19 @@ func (Implementation) Stpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_stpmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.float)(&ap[0]), (*C.float)(&x[0]), C.int(incX))
 }
+
+// Strsv solves
+//  A * x = b if tA == blas.NoTrans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
+// A is an n×n triangular matrix and x is a vector.
+// At entry to the function, x contains the values of b, and the result is
+// stored in place into x.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
 func (Implementation) Strsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float32, lda int, x []float32, incX int) {
+	// declared at cblas.h:192:6 void cblas_strsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1093,7 +1299,19 @@ func (Implementation) Strsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_strsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
 }
+
+// Stbsv solves
+//  A * x = b
+// where A is an n×n triangular banded matrix with k diagonals in packed format,
+// and x is a vector.
+// At entry to the function, x contains the values of b, and the result is
+// stored in place into x.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
 func (Implementation) Stbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float32, lda int, x []float32, incX int) {
+	// declared at cblas.h:196:6 void cblas_stbsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1120,7 +1338,19 @@ func (Implementation) Stbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_stbsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX))
 }
+
+// Stpsv solves
+//  A * x = b if tA == blas.NoTrans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular matrix in packed format and x is a vector.
+// At entry to the function, x contains the values of b, and the result is
+// stored in place into x.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
 func (Implementation) Stpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []float32, incX int) {
+	// declared at cblas.h:200:6 void cblas_stpsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1147,7 +1377,14 @@ func (Implementation) Stpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_stpsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.float)(&ap[0]), (*C.float)(&x[0]), C.int(incX))
 }
+
+// Dgemv computes
+//  y = alpha * a * x + beta * y if tA = blas.NoTrans
+//  y = alpha * A^T * x + beta * y if tA = blas.Trans or blas.ConjTrans
+// where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	// declared at cblas.h:204:6 void cblas_dgemv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -1180,7 +1417,16 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 	}
 	C.cblas_dgemv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
 }
+
+// Dgbmv computes
+//  y = alpha * A * x + beta * y if tA == blas.NoTrans
+//  y = alpha * A^T * x + beta * y if tA == blas.Trans or blas.ConjTrans
+// where a is an m×n band matrix kL subdiagonals and kU super-diagonals, and
+// m and n refer to the size of the full dense matrix it represents.
+// x and y are vectors, and alpha and beta are scalars.
 func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	// declared at cblas.h:209:6 void cblas_dgbmv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -1219,7 +1465,14 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	}
 	C.cblas_dgbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
 }
+
+// Dtrmv computes
+//  x = A * x if tA == blas.NoTrans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
+// A is an n×n Triangular matrix and x is a vector.
 func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
+	// declared at cblas.h:214:6 void cblas_dtrmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1243,7 +1496,14 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_dtrmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
 }
+
+// Dtbmv computes
+//  x = A * x if tA == blas.NoTrans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular banded matrix with k diagonals, and x is a vector.
 func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+	// declared at cblas.h:218:6 void cblas_dtbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1270,7 +1530,14 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_dtbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
 }
+
+// Dtpmv computes
+//  x = A * x if tA == blas.NoTrans
+//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n unit triangular matrix in packed format, and x is a vector.
 func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []float64, incX int) {
+	// declared at cblas.h:222:6 void cblas_dtpmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1297,7 +1564,19 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_dtpmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.double)(&ap[0]), (*C.double)(&x[0]), C.int(incX))
 }
+
+// Dtrsv solves
+//  A * x = b if tA == blas.NoTrans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
+// A is an n×n triangular matrix and x is a vector.
+// At entry to the function, x contains the values of b, and the result is
+// stored in place into x.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
 func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
+	// declared at cblas.h:225:6 void cblas_dtrsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1321,7 +1600,19 @@ func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_dtrsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
 }
+
+// Dtbsv solves
+//  A * x = b
+// where A is an n×n triangular banded matrix with k diagonals in packed format,
+// and x is a vector.
+// At entry to the function, x contains the values of b, and the result is
+// stored in place into x.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
 func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
+	// declared at cblas.h:229:6 void cblas_dtbsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1348,7 +1639,19 @@ func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_dtbsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX))
 }
+
+// Dtpsv solves
+//  A * x = b if tA == blas.NoTrans
+//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular matrix in packed format and x is a vector.
+// At entry to the function, x contains the values of b, and the result is
+// stored in place into x.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
 func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []float64, incX int) {
+	// declared at cblas.h:233:6 void cblas_dtpsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1375,7 +1678,10 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_dtpsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), (*C.double)(&ap[0]), (*C.double)(&x[0]), C.int(incX))
 }
+
 func (Implementation) Cgemv(tA blas.Transpose, m, n int, alpha complex64, a []complex64, lda int, x []complex64, incX int, beta complex64, y []complex64, incY int) {
+	// declared at cblas.h:237:6 void cblas_cgemv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -1408,7 +1714,10 @@ func (Implementation) Cgemv(tA blas.Transpose, m, n int, alpha complex64, a []co
 	}
 	C.cblas_cgemv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Cgbmv(tA blas.Transpose, m, n, kL, kU int, alpha complex64, a []complex64, lda int, x []complex64, incX int, beta complex64, y []complex64, incY int) {
+	// declared at cblas.h:242:6 void cblas_cgbmv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -1447,7 +1756,10 @@ func (Implementation) Cgbmv(tA blas.Transpose, m, n, kL, kU int, alpha complex64
 	}
 	C.cblas_cgbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Ctrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []complex64, lda int, x []complex64, incX int) {
+	// declared at cblas.h:247:6 void cblas_ctrmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1471,7 +1783,10 @@ func (Implementation) Ctrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ctrmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ctbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []complex64, lda int, x []complex64, incX int) {
+	// declared at cblas.h:251:6 void cblas_ctbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1498,7 +1813,10 @@ func (Implementation) Ctbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_ctbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ctpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []complex64, incX int) {
+	// declared at cblas.h:255:6 void cblas_ctpmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1525,7 +1843,10 @@ func (Implementation) Ctpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ctpmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&ap[0]), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ctrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []complex64, lda int, x []complex64, incX int) {
+	// declared at cblas.h:258:6 void cblas_ctrsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1549,7 +1870,10 @@ func (Implementation) Ctrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ctrsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ctbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []complex64, lda int, x []complex64, incX int) {
+	// declared at cblas.h:262:6 void cblas_ctbsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1576,7 +1900,10 @@ func (Implementation) Ctbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_ctbsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ctpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []complex64, incX int) {
+	// declared at cblas.h:266:6 void cblas_ctpsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1603,7 +1930,10 @@ func (Implementation) Ctpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ctpsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&ap[0]), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Zgemv(tA blas.Transpose, m, n int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	// declared at cblas.h:270:6 void cblas_zgemv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -1636,7 +1966,10 @@ func (Implementation) Zgemv(tA blas.Transpose, m, n int, alpha complex128, a []c
 	}
 	C.cblas_zgemv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Zgbmv(tA blas.Transpose, m, n, kL, kU int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	// declared at cblas.h:275:6 void cblas_zgbmv ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -1675,7 +2008,10 @@ func (Implementation) Zgbmv(tA blas.Transpose, m, n, kL, kU int, alpha complex12
 	}
 	C.cblas_zgbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.int(m), C.int(n), C.int(kL), C.int(kU), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Ztrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []complex128, lda int, x []complex128, incX int) {
+	// declared at cblas.h:280:6 void cblas_ztrmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1699,7 +2035,10 @@ func (Implementation) Ztrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ztrmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ztbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []complex128, lda int, x []complex128, incX int) {
+	// declared at cblas.h:284:6 void cblas_ztbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1726,7 +2065,10 @@ func (Implementation) Ztbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_ztbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ztpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []complex128, incX int) {
+	// declared at cblas.h:288:6 void cblas_ztpmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1753,7 +2095,10 @@ func (Implementation) Ztpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ztpmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&ap[0]), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ztrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []complex128, lda int, x []complex128, incX int) {
+	// declared at cblas.h:291:6 void cblas_ztrsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1777,7 +2122,10 @@ func (Implementation) Ztrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ztrsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ztbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []complex128, lda int, x []complex128, incX int) {
+	// declared at cblas.h:295:6 void cblas_ztbsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1804,7 +2152,10 @@ func (Implementation) Ztbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 	C.cblas_ztbsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), C.int(k), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
 func (Implementation) Ztpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap, x []complex128, incX int) {
+	// declared at cblas.h:299:6 void cblas_ztpsv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1831,7 +2182,14 @@ func (Implementation) Ztpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	C.cblas_ztpsv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(n), unsafe.Pointer(&ap[0]), unsafe.Pointer(&x[0]), C.int(incX))
 }
+
+// Ssymv computes
+//    y = alpha * A * x + beta * y,
+// where a is an n×n symmetric matrix, x and y are vectors, and alpha and
+// beta are scalars.
 func (Implementation) Ssymv(ul blas.Uplo, n int, alpha float32, a []float32, lda int, x []float32, incX int, beta float32, y []float32, incY int) {
+	// declared at cblas.h:307:6 void cblas_ssymv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1855,7 +2213,14 @@ func (Implementation) Ssymv(ul blas.Uplo, n int, alpha float32, a []float32, lda
 	}
 	C.cblas_ssymv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Ssbmv performs
+//  y = alpha * A * x + beta * y
+// where A is an n×n symmetric banded matrix, x and y are vectors, and alpha
+// and beta are scalars.
 func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, lda int, x []float32, incX int, beta float32, y []float32, incY int) {
+	// declared at cblas.h:311:6 void cblas_ssbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1882,7 +2247,14 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 	}
 	C.cblas_ssbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Sspmv performs
+//    y = alpha * A * x + beta * y,
+// where A is an n×n symmetric matrix in packed format, x and y are vectors
+// and alpha and beta are scalars.
 func (Implementation) Sspmv(ul blas.Uplo, n int, alpha float32, ap, x []float32, incX int, beta float32, y []float32, incY int) {
+	// declared at cblas.h:315:6 void cblas_sspmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1909,7 +2281,13 @@ func (Implementation) Sspmv(ul blas.Uplo, n int, alpha float32, ap, x []float32,
 	}
 	C.cblas_sspmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&ap[0]), (*C.float)(&x[0]), C.int(incX), C.float(beta), (*C.float)(&y[0]), C.int(incY))
 }
+
+// Sger performs the rank-one operation
+//  A += alpha * x * y^T
+// where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []float32, incY int, a []float32, lda int) {
+	// declared at cblas.h:319:6 void cblas_sger ...
+
 	if m < 0 {
 		panic("blas: m < 0")
 	}
@@ -1933,7 +2311,13 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 	}
 	C.cblas_sger(C.enum_CBLAS_ORDER(rowMajor), C.int(m), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(&a[0]), C.int(lda))
 }
+
+// Ssyr performs the rank-one update
+//  a += alpha * x * x^T
+// where a is an n×n symmetric matrix, and x is a vector.
 func (Implementation) Ssyr(ul blas.Uplo, n int, alpha float32, x []float32, incX int, a []float32, lda int) {
+	// declared at cblas.h:322:6 void cblas_ssyr ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1951,7 +2335,14 @@ func (Implementation) Ssyr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 	}
 	C.cblas_ssyr(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&a[0]), C.int(lda))
 }
+
+// Sspr computes the rank-one operation
+//  a += alpha * x * x^T
+// where a is an n×n symmetric matrix in packed format, x is a vector, and
+// alpha is a scalar.
 func (Implementation) Sspr(ul blas.Uplo, n int, alpha float32, x []float32, incX int, ap []float32) {
+	// declared at cblas.h:325:6 void cblas_sspr ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1972,7 +2363,13 @@ func (Implementation) Sspr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 	}
 	C.cblas_sspr(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&ap[0]))
 }
+
+// Ssyr2 performs the symmetric rank-two update
+//  A += alpha * x * y^T + alpha * y * x^T
+// where A is a symmetric n×n matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Ssyr2(ul blas.Uplo, n int, alpha float32, x []float32, incX int, y []float32, incY int, a []float32, lda int) {
+	// declared at cblas.h:328:6 void cblas_ssyr2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -1996,7 +2393,14 @@ func (Implementation) Ssyr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 	}
 	C.cblas_ssyr2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(&a[0]), C.int(lda))
 }
+
+// Sspr2 performs the symmetric rank-2 update
+//  A += alpha * x * y^T + alpha * y * x^T,
+// where A is an n×n symmetric matrix in packed format, x and y are vectors,
+// and alpha is a scalar.
 func (Implementation) Sspr2(ul blas.Uplo, n int, alpha float32, x []float32, incX int, y []float32, incY int, ap []float32) {
+	// declared at cblas.h:332:6 void cblas_sspr2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2023,7 +2427,14 @@ func (Implementation) Sspr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 	}
 	C.cblas_sspr2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), (*C.float)(&x[0]), C.int(incX), (*C.float)(&y[0]), C.int(incY), (*C.float)(&ap[0]))
 }
+
+// Dsymv computes
+//    y = alpha * A * x + beta * y,
+// where a is an n×n symmetric matrix, x and y are vectors, and alpha and
+// beta are scalars.
 func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	// declared at cblas.h:336:6 void cblas_dsymv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2047,7 +2458,14 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 	}
 	C.cblas_dsymv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
 }
+
+// Dsbmv performs
+//  y = alpha * A * x + beta * y
+// where A is an n×n symmetric banded matrix, x and y are vectors, and alpha
+// and beta are scalars.
 func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
+	// declared at cblas.h:340:6 void cblas_dsbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2074,7 +2492,14 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 	}
 	C.cblas_dsbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
 }
+
+// Dspmv performs
+//    y = alpha * A * x + beta * y,
+// where A is an n×n symmetric matrix in packed format, x and y are vectors
+// and alpha and beta are scalars.
 func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, ap, x []float64, incX int, beta float64, y []float64, incY int) {
+	// declared at cblas.h:344:6 void cblas_dspmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2101,7 +2526,13 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, ap, x []float64,
 	}
 	C.cblas_dspmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&ap[0]), (*C.double)(&x[0]), C.int(incX), C.double(beta), (*C.double)(&y[0]), C.int(incY))
 }
+
+// Dger performs the rank-one operation
+//  A += alpha * x * y^T
+// where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+	// declared at cblas.h:348:6 void cblas_dger ...
+
 	if m < 0 {
 		panic("blas: m < 0")
 	}
@@ -2125,7 +2556,13 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 	}
 	C.cblas_dger(C.enum_CBLAS_ORDER(rowMajor), C.int(m), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(&a[0]), C.int(lda))
 }
+
+// Dsyr performs the rank-one update
+//  a += alpha * x * x^T
+// where a is an n×n symmetric matrix, and x is a vector.
 func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
+	// declared at cblas.h:351:6 void cblas_dsyr ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2143,7 +2580,14 @@ func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 	}
 	C.cblas_dsyr(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&a[0]), C.int(lda))
 }
+
+// Dspr computes the rank-one operation
+//  a += alpha * x * x^T
+// where a is an n×n symmetric matrix in packed format, x is a vector, and
+// alpha is a scalar.
 func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, ap []float64) {
+	// declared at cblas.h:354:6 void cblas_dspr ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2164,7 +2608,13 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 	}
 	C.cblas_dspr(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&ap[0]))
 }
+
+// Dsyr2 performs the symmetric rank-two update
+//  A += alpha * x * y^T + alpha * y * x^T
+// where A is a symmetric n×n matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
+	// declared at cblas.h:357:6 void cblas_dsyr2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2188,7 +2638,14 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	}
 	C.cblas_dsyr2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(&a[0]), C.int(lda))
 }
+
+// Dspr2 performs the symmetric rank-2 update
+//  A += alpha * x * y^T + alpha * y * x^T,
+// where A is an n×n symmetric matrix in packed format, x and y are vectors,
+// and alpha is a scalar.
 func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, ap []float64) {
+	// declared at cblas.h:361:6 void cblas_dspr2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2215,7 +2672,10 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	}
 	C.cblas_dspr2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), (*C.double)(&x[0]), C.int(incX), (*C.double)(&y[0]), C.int(incY), (*C.double)(&ap[0]))
 }
+
 func (Implementation) Chemv(ul blas.Uplo, n int, alpha complex64, a []complex64, lda int, x []complex64, incX int, beta complex64, y []complex64, incY int) {
+	// declared at cblas.h:369:6 void cblas_chemv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2239,7 +2699,10 @@ func (Implementation) Chemv(ul blas.Uplo, n int, alpha complex64, a []complex64,
 	}
 	C.cblas_chemv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Chbmv(ul blas.Uplo, n, k int, alpha complex64, a []complex64, lda int, x []complex64, incX int, beta complex64, y []complex64, incY int) {
+	// declared at cblas.h:373:6 void cblas_chbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2266,7 +2729,10 @@ func (Implementation) Chbmv(ul blas.Uplo, n, k int, alpha complex64, a []complex
 	}
 	C.cblas_chbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Chpmv(ul blas.Uplo, n int, alpha complex64, ap, x []complex64, incX int, beta complex64, y []complex64, incY int) {
+	// declared at cblas.h:377:6 void cblas_chpmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2293,7 +2759,10 @@ func (Implementation) Chpmv(ul blas.Uplo, n int, alpha complex64, ap, x []comple
 	}
 	C.cblas_chpmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&ap[0]), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Cgeru(m, n int, alpha complex64, x []complex64, incX int, y []complex64, incY int, a []complex64, lda int) {
+	// declared at cblas.h:381:6 void cblas_cgeru ...
+
 	if m < 0 {
 		panic("blas: m < 0")
 	}
@@ -2317,7 +2786,10 @@ func (Implementation) Cgeru(m, n int, alpha complex64, x []complex64, incX int, 
 	}
 	C.cblas_cgeru(C.enum_CBLAS_ORDER(rowMajor), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Cgerc(m, n int, alpha complex64, x []complex64, incX int, y []complex64, incY int, a []complex64, lda int) {
+	// declared at cblas.h:384:6 void cblas_cgerc ...
+
 	if m < 0 {
 		panic("blas: m < 0")
 	}
@@ -2341,7 +2813,10 @@ func (Implementation) Cgerc(m, n int, alpha complex64, x []complex64, incX int, 
 	}
 	C.cblas_cgerc(C.enum_CBLAS_ORDER(rowMajor), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Cher(ul blas.Uplo, n int, alpha float32, x []complex64, incX int, a []complex64, lda int) {
+	// declared at cblas.h:387:6 void cblas_cher ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2359,7 +2834,10 @@ func (Implementation) Cher(ul blas.Uplo, n int, alpha float32, x []complex64, in
 	}
 	C.cblas_cher(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Chpr(ul blas.Uplo, n int, alpha float32, x []complex64, incX int, ap []complex64) {
+	// declared at cblas.h:390:6 void cblas_chpr ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2380,7 +2858,10 @@ func (Implementation) Chpr(ul blas.Uplo, n int, alpha float32, x []complex64, in
 	}
 	C.cblas_chpr(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.float(alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&ap[0]))
 }
+
 func (Implementation) Cher2(ul blas.Uplo, n int, alpha complex64, x []complex64, incX int, y []complex64, incY int, a []complex64, lda int) {
+	// declared at cblas.h:393:6 void cblas_cher2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2404,7 +2885,10 @@ func (Implementation) Cher2(ul blas.Uplo, n int, alpha complex64, x []complex64,
 	}
 	C.cblas_cher2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Chpr2(ul blas.Uplo, n int, alpha complex64, x []complex64, incX int, y []complex64, incY int, ap []complex64) {
+	// declared at cblas.h:396:6 void cblas_chpr2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2431,7 +2915,10 @@ func (Implementation) Chpr2(ul blas.Uplo, n int, alpha complex64, x []complex64,
 	}
 	C.cblas_chpr2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&ap[0]))
 }
+
 func (Implementation) Zhemv(ul blas.Uplo, n int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	// declared at cblas.h:400:6 void cblas_zhemv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2455,7 +2942,10 @@ func (Implementation) Zhemv(ul blas.Uplo, n int, alpha complex128, a []complex12
 	}
 	C.cblas_zhemv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Zhbmv(ul blas.Uplo, n, k int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	// declared at cblas.h:404:6 void cblas_zhbmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2482,7 +2972,10 @@ func (Implementation) Zhbmv(ul blas.Uplo, n, k int, alpha complex128, a []comple
 	}
 	C.cblas_zhbmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Zhpmv(ul blas.Uplo, n int, alpha complex128, ap, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	// declared at cblas.h:408:6 void cblas_zhpmv ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2509,7 +3002,10 @@ func (Implementation) Zhpmv(ul blas.Uplo, n int, alpha complex128, ap, x []compl
 	}
 	C.cblas_zhpmv(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&ap[0]), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&beta), unsafe.Pointer(&y[0]), C.int(incY))
 }
+
 func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, a []complex128, lda int) {
+	// declared at cblas.h:412:6 void cblas_zgeru ...
+
 	if m < 0 {
 		panic("blas: m < 0")
 	}
@@ -2533,7 +3029,10 @@ func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int
 	}
 	C.cblas_zgeru(C.enum_CBLAS_ORDER(rowMajor), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Zgerc(m, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, a []complex128, lda int) {
+	// declared at cblas.h:415:6 void cblas_zgerc ...
+
 	if m < 0 {
 		panic("blas: m < 0")
 	}
@@ -2557,7 +3056,10 @@ func (Implementation) Zgerc(m, n int, alpha complex128, x []complex128, incX int
 	}
 	C.cblas_zgerc(C.enum_CBLAS_ORDER(rowMajor), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Zher(ul blas.Uplo, n int, alpha float64, x []complex128, incX int, a []complex128, lda int) {
+	// declared at cblas.h:418:6 void cblas_zher ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2575,7 +3077,10 @@ func (Implementation) Zher(ul blas.Uplo, n int, alpha float64, x []complex128, i
 	}
 	C.cblas_zher(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Zhpr(ul blas.Uplo, n int, alpha float64, x []complex128, incX int, ap []complex128) {
+	// declared at cblas.h:421:6 void cblas_zhpr ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2596,7 +3101,10 @@ func (Implementation) Zhpr(ul blas.Uplo, n int, alpha float64, x []complex128, i
 	}
 	C.cblas_zhpr(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), C.double(alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&ap[0]))
 }
+
 func (Implementation) Zher2(ul blas.Uplo, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, a []complex128, lda int) {
+	// declared at cblas.h:424:6 void cblas_zher2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2620,7 +3128,10 @@ func (Implementation) Zher2(ul blas.Uplo, n int, alpha complex128, x []complex12
 	}
 	C.cblas_zher2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&a[0]), C.int(lda))
 }
+
 func (Implementation) Zhpr2(ul blas.Uplo, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, ap []complex128) {
+	// declared at cblas.h:427:6 void cblas_zhpr2 ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2647,7 +3158,14 @@ func (Implementation) Zhpr2(ul blas.Uplo, n int, alpha complex128, x []complex12
 	}
 	C.cblas_zhpr2(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&x[0]), C.int(incX), unsafe.Pointer(&y[0]), C.int(incY), unsafe.Pointer(&ap[0]))
 }
+
+// Sgemm computes
+//  C = beta * C + alpha * A * B,
+// where A, B, and C are dense matrices, and alpha and beta are scalars.
+// tA and tB specify whether A or B are transposed.
 func (Implementation) Sgemm(tA, tB blas.Transpose, m, n, k int, alpha float32, a []float32, lda int, b []float32, ldb int, beta float32, c []float32, ldc int) {
+	// declared at cblas.h:440:6 void cblas_sgemm ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -2685,7 +3203,15 @@ func (Implementation) Sgemm(tA, tB blas.Transpose, m, n, k int, alpha float32, a
 	}
 	C.cblas_sgemm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_TRANSPOSE(tB), C.int(m), C.int(n), C.int(k), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb), C.float(beta), (*C.float)(&c[0]), C.int(ldc))
 }
+
+// Ssymm performs one of
+//  C = alpha * A * B + beta * C, if side == blas.Left,
+//  C = alpha * B * A + beta * C, if side == blas.Right,
+// where A is an n×n or m×m symmetric matrix, B and C are m×n matrices, and alpha
+// is a scalar.
 func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, a []float32, lda int, b []float32, ldb int, beta float32, c []float32, ldc int) {
+	// declared at cblas.h:445:6 void cblas_ssymm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -2715,7 +3241,14 @@ func (Implementation) Ssymm(s blas.Side, ul blas.Uplo, m, n int, alpha float32, 
 	}
 	C.cblas_ssymm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb), C.float(beta), (*C.float)(&c[0]), C.int(ldc))
 }
+
+// Ssyrk performs the symmetric rank-k operation
+//  C = alpha * A * A^T + beta*C
+// C is an n×n symmetric matrix. A is an n×k matrix if tA == blas.NoTrans, and
+// a k×n matrix otherwise. alpha and beta are scalars.
 func (Implementation) Ssyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha float32, a []float32, lda int, beta float32, c []float32, ldc int) {
+	// declared at cblas.h:450:6 void cblas_ssyrk ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2742,7 +3275,14 @@ func (Implementation) Ssyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha floa
 	}
 	C.cblas_ssyrk(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.float(alpha), (*C.float)(&a[0]), C.int(lda), C.float(beta), (*C.float)(&c[0]), C.int(ldc))
 }
+
+// Ssyr2k performs the symmetric rank 2k operation
+//  C = alpha * A * B^T + alpha * B * A^T + beta * C
+// where C is an n×n symmetric matrix. A and B are n×k matrices if
+// tA == NoTrans and k×n otherwise. alpha and beta are scalars.
 func (Implementation) Ssyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha float32, a []float32, lda int, b []float32, ldb int, beta float32, c []float32, ldc int) {
+	// declared at cblas.h:454:6 void cblas_ssyr2k ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2772,7 +3312,16 @@ func (Implementation) Ssyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha flo
 	}
 	C.cblas_ssyr2k(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb), C.float(beta), (*C.float)(&c[0]), C.int(ldc))
 }
+
+// Strmm performs
+//  B = alpha * A * B,   if tA == blas.NoTrans and side == blas.Left,
+//  B = alpha * A^T * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
+//  B = alpha * B * A,   if tA == blas.NoTrans and side == blas.Right,
+//  B = alpha * B * A^T, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
+// where A is an n×n or m×m triangular matrix, and B is an m×n matrix.
 func (Implementation) Strmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float32, a []float32, lda int, b []float32, ldb int) {
+	// declared at cblas.h:459:6 void cblas_strmm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -2805,7 +3354,22 @@ func (Implementation) Strmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_strmm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb))
 }
+
+// Strsm solves
+//  A * X = alpha * B,   if tA == blas.NoTrans side == blas.Left,
+//  A^T * X = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
+//  X * A = alpha * B,   if tA == blas.NoTrans side == blas.Right,
+//  X * A^T = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
+// where A is an n×n or m×m triangular matrix, X is an m×n matrix, and alpha is a
+// scalar.
+//
+// At entry to the function, X contains the values of B, and the result is
+// stored in place into X.
+//
+// No check is made that A is invertible.
 func (Implementation) Strsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float32, a []float32, lda int, b []float32, ldb int) {
+	// declared at cblas.h:464:6 void cblas_strsm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -2838,7 +3402,14 @@ func (Implementation) Strsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_strsm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.float(alpha), (*C.float)(&a[0]), C.int(lda), (*C.float)(&b[0]), C.int(ldb))
 }
+
+// Dgemm computes
+//  C = beta * C + alpha * A * B,
+// where A, B, and C are dense matrices, and alpha and beta are scalars.
+// tA and tB specify whether A or B are transposed.
 func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+	// declared at cblas.h:470:6 void cblas_dgemm ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -2876,7 +3447,15 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 	}
 	C.cblas_dgemm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_TRANSPOSE(tB), C.int(m), C.int(n), C.int(k), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb), C.double(beta), (*C.double)(&c[0]), C.int(ldc))
 }
+
+// Dsymm performs one of
+//  C = alpha * A * B + beta * C, if side == blas.Left,
+//  C = alpha * B * A + beta * C, if side == blas.Right,
+// where A is an n×n or m×m symmetric matrix, B and C are m×n matrices, and alpha
+// is a scalar.
 func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+	// declared at cblas.h:475:6 void cblas_dsymm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -2906,7 +3485,14 @@ func (Implementation) Dsymm(s blas.Side, ul blas.Uplo, m, n int, alpha float64, 
 	}
 	C.cblas_dsymm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb), C.double(beta), (*C.double)(&c[0]), C.int(ldc))
 }
+
+// Dsyrk performs the symmetric rank-k operation
+//  C = alpha * A * A^T + beta*C
+// C is an n×n symmetric matrix. A is an n×k matrix if tA == blas.NoTrans, and
+// a k×n matrix otherwise. alpha and beta are scalars.
 func (Implementation) Dsyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64, ldc int) {
+	// declared at cblas.h:480:6 void cblas_dsyrk ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2933,7 +3519,14 @@ func (Implementation) Dsyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha floa
 	}
 	C.cblas_dsyrk(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.double(alpha), (*C.double)(&a[0]), C.int(lda), C.double(beta), (*C.double)(&c[0]), C.int(ldc))
 }
+
+// Dsyr2k performs the symmetric rank 2k operation
+//  C = alpha * A * B^T + alpha * B * A^T + beta * C
+// where C is an n×n symmetric matrix. A and B are n×k matrices if
+// tA == NoTrans and k×n otherwise. alpha and beta are scalars.
 func (Implementation) Dsyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []float64, lda int, b []float64, ldb int, beta float64, c []float64, ldc int) {
+	// declared at cblas.h:484:6 void cblas_dsyr2k ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -2963,7 +3556,16 @@ func (Implementation) Dsyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha flo
 	}
 	C.cblas_dsyr2k(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb), C.double(beta), (*C.double)(&c[0]), C.int(ldc))
 }
+
+// Dtrmm performs
+//  B = alpha * A * B,   if tA == blas.NoTrans and side == blas.Left,
+//  B = alpha * A^T * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
+//  B = alpha * B * A,   if tA == blas.NoTrans and side == blas.Right,
+//  B = alpha * B * A^T, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
+// where A is an n×n or m×m triangular matrix, and B is an m×n matrix.
 func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
+	// declared at cblas.h:489:6 void cblas_dtrmm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -2996,7 +3598,22 @@ func (Implementation) Dtrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_dtrmm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb))
 }
+
+// Dtrsm solves
+//  A * X = alpha * B,   if tA == blas.NoTrans side == blas.Left,
+//  A^T * X = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Left,
+//  X * A = alpha * B,   if tA == blas.NoTrans side == blas.Right,
+//  X * A^T = alpha * B, if tA == blas.Trans or blas.ConjTrans, and side == blas.Right,
+// where A is an n×n or m×m triangular matrix, X is an m×n matrix, and alpha is a
+// scalar.
+//
+// At entry to the function, X contains the values of B, and the result is
+// stored in place into X.
+//
+// No check is made that A is invertible.
 func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha float64, a []float64, lda int, b []float64, ldb int) {
+	// declared at cblas.h:494:6 void cblas_dtrsm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3029,7 +3646,10 @@ func (Implementation) Dtrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_dtrsm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), C.double(alpha), (*C.double)(&a[0]), C.int(lda), (*C.double)(&b[0]), C.int(ldb))
 }
+
 func (Implementation) Cgemm(tA, tB blas.Transpose, m, n, k int, alpha complex64, a []complex64, lda int, b []complex64, ldb int, beta complex64, c []complex64, ldc int) {
+	// declared at cblas.h:500:6 void cblas_cgemm ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -3067,7 +3687,10 @@ func (Implementation) Cgemm(tA, tB blas.Transpose, m, n, k int, alpha complex64,
 	}
 	C.cblas_cgemm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_TRANSPOSE(tB), C.int(m), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Csymm(s blas.Side, ul blas.Uplo, m, n int, alpha complex64, a []complex64, lda int, b []complex64, ldb int, beta complex64, c []complex64, ldc int) {
+	// declared at cblas.h:505:6 void cblas_csymm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3097,7 +3720,10 @@ func (Implementation) Csymm(s blas.Side, ul blas.Uplo, m, n int, alpha complex64
 	}
 	C.cblas_csymm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Csyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha complex64, a []complex64, lda int, beta complex64, c []complex64, ldc int) {
+	// declared at cblas.h:510:6 void cblas_csyrk ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -3124,7 +3750,10 @@ func (Implementation) Csyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha comp
 	}
 	C.cblas_csyrk(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Csyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha complex64, a []complex64, lda int, b []complex64, ldb int, beta complex64, c []complex64, ldc int) {
+	// declared at cblas.h:514:6 void cblas_csyr2k ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -3154,7 +3783,10 @@ func (Implementation) Csyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha com
 	}
 	C.cblas_csyr2k(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Ctrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha complex64, a []complex64, lda int, b []complex64, ldb int) {
+	// declared at cblas.h:519:6 void cblas_ctrmm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3187,7 +3819,10 @@ func (Implementation) Ctrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_ctrmm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))
 }
+
 func (Implementation) Ctrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha complex64, a []complex64, lda int, b []complex64, ldb int) {
+	// declared at cblas.h:524:6 void cblas_ctrsm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3220,7 +3855,10 @@ func (Implementation) Ctrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_ctrsm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))
 }
+
 func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
+	// declared at cblas.h:530:6 void cblas_zgemm ...
+
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic("blas: illegal transpose")
 	}
@@ -3258,7 +3896,10 @@ func (Implementation) Zgemm(tA, tB blas.Transpose, m, n, k int, alpha complex128
 	}
 	C.cblas_zgemm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_TRANSPOSE(tB), C.int(m), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Zsymm(s blas.Side, ul blas.Uplo, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
+	// declared at cblas.h:535:6 void cblas_zsymm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3288,7 +3929,10 @@ func (Implementation) Zsymm(s blas.Side, ul blas.Uplo, m, n int, alpha complex12
 	}
 	C.cblas_zsymm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Zsyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha complex128, a []complex128, lda int, beta complex128, c []complex128, ldc int) {
+	// declared at cblas.h:540:6 void cblas_zsyrk ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -3315,7 +3959,10 @@ func (Implementation) Zsyrk(ul blas.Uplo, t blas.Transpose, n, k int, alpha comp
 	}
 	C.cblas_zsyrk(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Zsyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
+	// declared at cblas.h:544:6 void cblas_zsyr2k ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -3345,7 +3992,10 @@ func (Implementation) Zsyr2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha com
 	}
 	C.cblas_zsyr2k(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Ztrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int) {
+	// declared at cblas.h:549:6 void cblas_ztrmm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3378,7 +4028,10 @@ func (Implementation) Ztrmm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_ztrmm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))
 }
+
 func (Implementation) Ztrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas.Diag, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int) {
+	// declared at cblas.h:554:6 void cblas_ztrsm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3411,7 +4064,10 @@ func (Implementation) Ztrsm(s blas.Side, ul blas.Uplo, tA blas.Transpose, d blas
 	}
 	C.cblas_ztrsm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(tA), C.enum_CBLAS_DIAG(d), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb))
 }
+
 func (Implementation) Chemm(s blas.Side, ul blas.Uplo, m, n int, alpha complex64, a []complex64, lda int, b []complex64, ldb int, beta complex64, c []complex64, ldc int) {
+	// declared at cblas.h:564:6 void cblas_chemm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3441,7 +4097,10 @@ func (Implementation) Chemm(s blas.Side, ul blas.Uplo, m, n int, alpha complex64
 	}
 	C.cblas_chemm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Cherk(ul blas.Uplo, t blas.Transpose, n, k int, alpha float32, a []complex64, lda int, beta float32, c []complex64, ldc int) {
+	// declared at cblas.h:569:6 void cblas_cherk ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -3468,7 +4127,10 @@ func (Implementation) Cherk(ul blas.Uplo, t blas.Transpose, n, k int, alpha floa
 	}
 	C.cblas_cherk(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.float(alpha), unsafe.Pointer(&a[0]), C.int(lda), C.float(beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Cher2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha complex64, a []complex64, lda int, b []complex64, ldb int, beta float32, c []complex64, ldc int) {
+	// declared at cblas.h:573:6 void cblas_cher2k ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -3498,7 +4160,10 @@ func (Implementation) Cher2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha com
 	}
 	C.cblas_cher2k(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), C.float(beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Zhemm(s blas.Side, ul blas.Uplo, m, n int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta complex128, c []complex128, ldc int) {
+	// declared at cblas.h:578:6 void cblas_zhemm ...
+
 	if s != blas.Left && s != blas.Right {
 		panic("blas: illegal side")
 	}
@@ -3528,7 +4193,10 @@ func (Implementation) Zhemm(s blas.Side, ul blas.Uplo, m, n int, alpha complex12
 	}
 	C.cblas_zhemm(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_SIDE(s), C.enum_CBLAS_UPLO(ul), C.int(m), C.int(n), unsafe.Pointer(&alpha), unsafe.Pointer(&a[0]), C.int(lda), unsafe.Pointer(&b[0]), C.int(ldb), unsafe.Pointer(&beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Zherk(ul blas.Uplo, t blas.Transpose, n, k int, alpha float64, a []complex128, lda int, beta float64, c []complex128, ldc int) {
+	// declared at cblas.h:583:6 void cblas_zherk ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}
@@ -3555,7 +4223,10 @@ func (Implementation) Zherk(ul blas.Uplo, t blas.Transpose, n, k int, alpha floa
 	}
 	C.cblas_zherk(C.enum_CBLAS_ORDER(rowMajor), C.enum_CBLAS_UPLO(ul), C.enum_CBLAS_TRANSPOSE(t), C.int(n), C.int(k), C.double(alpha), unsafe.Pointer(&a[0]), C.int(lda), C.double(beta), unsafe.Pointer(&c[0]), C.int(ldc))
 }
+
 func (Implementation) Zher2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha complex128, a []complex128, lda int, b []complex128, ldb int, beta float64, c []complex128, ldc int) {
+	// declared at cblas.h:587:6 void cblas_zher2k ...
+
 	if ul != blas.Upper && ul != blas.Lower {
 		panic("blas: illegal triangle")
 	}

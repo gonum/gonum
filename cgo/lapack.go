@@ -308,16 +308,20 @@ func (impl Implementation) Dgebal(job lapack.Job, n int, a []float64, lda int, s
 // the eigenvectors of the original matrix.
 //
 // Dgebak is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
+func (impl Implementation) Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
 	switch job {
 	default:
 		panic(badJob)
 	case lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale:
 	}
+	var bside blas.Side
 	switch side {
 	default:
 		panic(badSide)
-	case blas.Left, blas.Right:
+	case lapack.LeftEigVec:
+		bside = blas.Left
+	case lapack.RightEigVec:
+		bside = blas.Right
 	}
 	checkMatrix(n, m, v, ldv)
 	switch {
@@ -334,7 +338,7 @@ func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi in
 	for j := ihi + 1; j < n; j++ {
 		scale[j]++
 	}
-	lapacke.Dgebak(job, side, n, ilo+1, ihi+1, scale, m, v, ldv)
+	lapacke.Dgebak(job, bside, n, ilo+1, ihi+1, scale, m, v, ldv)
 	// Convert permutation indices back to 0-based.
 	for j := 0; j < ilo; j++ {
 		scale[j]--
@@ -1711,4 +1715,114 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 	}
 
 	return lapacke.Dhseqr(job, compz, n, ilo+1, ihi+1, h, ldh, wr, wi, z, ldz, work, lwork)
+}
+
+// Dgeev computes the eigenvalues and, optionally, the left and/or right
+// eigenvectors for an n×n real nonsymmetric matrix A.
+//
+// The right eigenvector v_j of A corresponding to an eigenvalue λ_j
+// is defined by
+//  A v_j = λ_j v_j,
+// and the left eigenvector u_j corresponding to an eigenvalue λ_j is defined by
+//  u_j^H A = λ_j u_j^H,
+// where u_j^H is the conjugate transpose of u_j.
+//
+// On return, A will be overwritten and the left and right eigenvectors will be
+// stored, respectively, in the columns of the n×n matrices VL and VR in the
+// same order as their eigenvalues. If the j-th eigenvalue is real, then
+//  u_j = VL[:,j],
+//  v_j = VR[:,j],
+// and if it is not real, then j and j+1 form a complex conjugate pair and the
+// eigenvectors can be recovered as
+//  u_j     = VL[:,j] + i*VL[:,j+1],
+//  u_{j+1} = VL[:,j] - i*VL[:,j+1],
+//  v_j     = VR[:,j] + i*VR[:,j+1],
+//  v_{j+1} = VR[:,j] - i*VR[:,j+1].
+// where i is the imaginary unit. The computed eigenvectors are normalized to
+// have Euclidean norm equal to 1 and largest component real.
+//
+// Left eigenvectors will be computed only if jobvl == lapack.ComputeLeftEV,
+// otherwise jobvl must be lapack.None. Right eigenvectors will be computed
+// only if jobvr == lapack.ComputeRightEV, otherwise jobvr must be lapack.None.
+// For other values of jobvl and jobvr Dgeev will panic.
+//
+// wr and wi contain the real and imaginary parts, respectively, of the computed
+// eigenvalues. Complex conjugate pairs of eigenvalues appear consecutively with
+// the eigenvalue having the positive imaginary part first.
+// wr and wi must have length n, and Dgeev will panic otherwise.
+//
+// work must have length at least lwork and lwork must be at least max(1,4*n) if
+// the left or right eigenvectors are computed, and at least max(1,3*n) if no
+// eigenvectors are computed. For good performance, lwork must generally be
+// larger.  On return, optimal value of lwork will be stored in work[0].
+//
+// If lwork == -1, instead of performing Dgeev, the function only calculates the
+// optimal vaule of lwork and stores it into work[0].
+//
+// On return, first is the index of the first valid eigenvalue. If first == 0,
+// all eigenvalues and eigenvectors have been computed. If first is positive,
+// Dgeev failed to compute all the eigenvalues, no eigenvectors have been
+// computed and wr[first:] and wi[first:] contain those eigenvalues which have
+// converged.
+func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int) {
+	var wantvl bool
+	switch jobvl {
+	default:
+		panic("lapack: invalid JobLeftEV")
+	case lapack.ComputeLeftEV:
+		wantvl = true
+	case lapack.None:
+		wantvl = false
+	}
+	var wantvr bool
+	switch jobvr {
+	default:
+		panic("lapack: invalid JobRightEV")
+	case lapack.ComputeRightEV:
+		wantvr = true
+	case lapack.None:
+		wantvr = false
+	}
+	switch {
+	case n < 0:
+		panic(nLT0)
+	case len(work) < lwork:
+		panic(shortWork)
+	}
+	var minwrk int
+	if wantvl || wantvr {
+		minwrk = max(1, 4*n)
+	} else {
+		minwrk = max(1, 3*n)
+	}
+	if lwork != -1 {
+		checkMatrix(n, n, a, lda)
+		if wantvl {
+			checkMatrix(n, n, vl, ldvl)
+		}
+		if wantvr {
+			checkMatrix(n, n, vr, ldvr)
+		}
+		switch {
+		case len(wr) != n:
+			panic("lapack: bad length of wr")
+		case len(wi) != n:
+			panic("lapack: bad length of wi")
+		case lwork < minwrk:
+			panic(badWork)
+		}
+	}
+
+	// Quick return if possible.
+	if n == 0 {
+		work[0] = 1
+		return 0
+	}
+
+	first = lapacke.Dgeev(lapack.Job(jobvl), lapack.Job(jobvr), n, a, max(n, lda), wr, wi,
+		vl, max(n, ldvl), vr, max(n, ldvr), work, lwork)
+	if lwork == -1 && int(work[0]) < minwrk {
+		work[0] = float64(minwrk)
+	}
+	return first
 }

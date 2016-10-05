@@ -15,14 +15,14 @@ import (
 )
 
 type Dgebaker interface {
-	Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int)
+	Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int)
 }
 
 func DgebakTest(t *testing.T, impl Dgebaker) {
 	rnd := rand.New(rand.NewSource(1))
 
 	for _, job := range []lapack.Job{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
-		for _, side := range []blas.Side{blas.Right, blas.Left} {
+		for _, side := range []lapack.EigVecSide{lapack.LeftEigVec, lapack.RightEigVec} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 				for _, extra := range []int{0, 11} {
 					for cas := 0; cas < 100; cas++ {
@@ -43,7 +43,7 @@ func DgebakTest(t *testing.T, impl Dgebaker) {
 	}
 }
 
-func testDgebak(t *testing.T, impl Dgebaker, job lapack.Job, side blas.Side, ilo, ihi int, v blas64.General, rnd *rand.Rand) {
+func testDgebak(t *testing.T, impl Dgebaker, job lapack.Job, side lapack.EigVecSide, ilo, ihi int, v blas64.General, rnd *rand.Rand) {
 	const tol = 1e-15
 	n := v.Rows
 	m := v.Cols
@@ -95,7 +95,7 @@ func testDgebak(t *testing.T, impl Dgebaker, job lapack.Job, side blas.Side, ilo
 
 	// Compute D*V or D^{-1}*V and store into dv.
 	dv := zeros(n, m, m)
-	if side == blas.Right {
+	if side == lapack.RightEigVec {
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d, v, 0, dv)
 	} else {
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, dinv, v, 0, dv)

@@ -380,3 +380,65 @@ func Trtri(a blas64.Triangular) (ok bool) {
 func Trtrs(trans blas.Transpose, a blas64.Triangular, b blas64.General) (ok bool) {
 	return lapack64.Dtrtrs(a.Uplo, trans, a.Diag, a.N, b.Cols, a.Data, a.Stride, b.Data, b.Stride)
 }
+
+// Geev computes the eigenvalues and, optionally, the left and/or right
+// eigenvectors for an n×n real nonsymmetric matrix A.
+//
+// The right eigenvector v_j of A corresponding to an eigenvalue λ_j
+// is defined by
+//  A v_j = λ_j v_j,
+// and the left eigenvector u_j corresponding to an eigenvalue λ_j is defined by
+//  u_j^H A = λ_j u_j^H,
+// where u_j^H is the conjugate transpose of u_j.
+//
+// On return, A will be overwritten and the left and right eigenvectors will be
+// stored, respectively, in the columns of the n×n matrices VL and VR in the
+// same order as their eigenvalues. If the j-th eigenvalue is real, then
+//  u_j = VL[:,j],
+//  v_j = VR[:,j],
+// and if it is not real, then j and j+1 form a complex conjugate pair and the
+// eigenvectors can be recovered as
+//  u_j     = VL[:,j] + i*VL[:,j+1],
+//  u_{j+1} = VL[:,j] - i*VL[:,j+1],
+//  v_j     = VR[:,j] + i*VR[:,j+1],
+//  v_{j+1} = VR[:,j] - i*VR[:,j+1],
+// where i is the imaginary unit. The computed eigenvectors are normalized to
+// have Euclidean norm equal to 1 and largest component real.
+//
+// Left eigenvectors will be computed only if jobvl == lapack.ComputeLeftEV,
+// otherwise jobvl must be lapack.None.
+// Right eigenvectors will be computed only if jobvr == lapack.ComputeRightEV,
+// otherwise jobvr must be lapack.None.
+// For other values of jobvl and jobvr Geev will panic.
+//
+// On return, wr and wi will contain the real and imaginary parts, respectively,
+// of the computed eigenvalues. Complex conjugate pairs of eigenvalues appear
+// consecutively with the eigenvalue having the positive imaginary part first.
+// wr and wi must have length n, and Geev will panic otherwise.
+//
+// work must have length at least lwork and lwork must be at least max(1,4*n) if
+// the left or right eigenvectors are computed, and at least max(1,3*n) if no
+// eigenvectors are computed. For good performance, lwork must generally be
+// larger. On return, optimal value of lwork will be stored in work[0].
+//
+// If lwork == -1, instead of performing Geev, the function only calculates the
+// optimal vaule of lwork and stores it into work[0].
+//
+// On return, first will be the index of the first valid eigenvalue.
+// If first == 0, all eigenvalues and eigenvectors have been computed.
+// If first is positive, Geev failed to compute all the eigenvalues, no
+// eigenvectors have been computed and wr[first:] and wi[first:] contain those
+// eigenvalues which have converged.
+func Geev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, a blas64.General, wr, wi []float64, vl, vr blas64.General, work []float64, lwork int) (first int) {
+	n := a.Rows
+	if a.Cols != n {
+		panic("lapack64: matrix not square")
+	}
+	if jobvl == lapack.ComputeLeftEV && (vl.Rows != n || vl.Cols != n) {
+		panic("lapack64: bad size of VL")
+	}
+	if jobvr == lapack.ComputeRightEV && (vr.Rows != n || vr.Cols != n) {
+		panic("lapack64: bad size of VR")
+	}
+	return lapack64.Dgeev(jobvl, jobvr, n, a.Data, a.Stride, wr, wi, vl.Data, vl.Stride, vr.Data, vr.Stride, work, lwork)
+}

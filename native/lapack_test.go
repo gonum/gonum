@@ -40,6 +40,10 @@ func TestDgecon(t *testing.T) {
 	testlapack.DgeconTest(t, impl)
 }
 
+func TestDgeev(t *testing.T) {
+	testlapack.DgeevTest(t, impl)
+}
+
 func TestDgehd2(t *testing.T) {
 	testlapack.Dgehd2Test(t, impl)
 }

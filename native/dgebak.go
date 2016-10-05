@@ -5,14 +5,13 @@
 package native
 
 import (
-	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/lapack"
 )
 
 // Dgebak updates an n×m matrix V as
-//  V = P D V,        if side == blas.Right,
-//  V = P D^{-1} V,   if side == blas.Left,
+//  V = P D V,        if side == lapack.RightEigVec,
+//  V = P D^{-1} V,   if side == lapack.LeftEigVec,
 // where P and D are n×n permutation and scaling matrices, respectively,
 // implicitly represented by job, scale, ilo and ihi as returned by Dgebal.
 //
@@ -21,7 +20,7 @@ import (
 // the eigenvectors of the original matrix.
 //
 // Dgebak is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
+func (impl Implementation) Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
 	switch job {
 	default:
 		panic(badJob)
@@ -30,7 +29,7 @@ func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi in
 	switch side {
 	default:
 		panic(badSide)
-	case blas.Left, blas.Right:
+	case lapack.LeftEigVec, lapack.RightEigVec:
 	}
 	checkMatrix(n, m, v, ldv)
 	switch {
@@ -48,7 +47,7 @@ func (impl Implementation) Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi in
 	bi := blas64.Implementation()
 	if ilo != ihi && job != lapack.Permute {
 		// Backward balance.
-		if side == blas.Right {
+		if side == lapack.RightEigVec {
 			for i := ilo; i <= ihi; i++ {
 				bi.Dscal(m, scale[i], v[i*ldv:], 1)
 			}

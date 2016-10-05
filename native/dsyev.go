@@ -19,7 +19,7 @@ import (
 // at least n, and Dsyev will panic otherwise.
 //
 // On entry, a contains the elements of the symmetric matrix A in the triangular
-// portion specified by uplo. If jobz == lapack.EigDecomp a contains the
+// portion specified by uplo. If jobz == lapack.ComputeEV a contains the
 // orthonormal eigenvectors of A on exit, otherwise on exit the specified
 // triangular region is overwritten.
 //
@@ -27,10 +27,10 @@ import (
 // lwork >= 3*n-1, and Dsyev will panic otherwise. The amount of blocking is
 // limited by the usable length. If lwork == -1, instead of computing Dsyev the
 // optimal work length is stored into work[0].
-func (impl Implementation) Dsyev(jobz lapack.EigComp, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
+func (impl Implementation) Dsyev(jobz lapack.JobEV, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	upper := uplo == blas.Upper
-	wantz := jobz == lapack.EigDecomp
+	wantz := jobz == lapack.ComputeEV
 	var opts string
 	if upper {
 		opts = "U"
@@ -97,7 +97,7 @@ func (impl Implementation) Dsyev(jobz lapack.EigComp, uplo blas.Uplo, n int, a [
 		ok = impl.Dsterf(n, w, work[inde:])
 	} else {
 		impl.Dorgtr(uplo, n, a, lda, work[indtau:], work[indwork:], llwork)
-		ok = impl.Dsteqr(jobz, n, w, work[inde:], a, lda, work[indtau:])
+		ok = impl.Dsteqr(lapack.EigComp(jobz), n, w, work[inde:], a, lda, work[indtau:])
 	}
 	if !ok {
 		return false

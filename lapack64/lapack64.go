@@ -344,7 +344,7 @@ func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float
 // at least n, and Syev will panic otherwise.
 //
 // On entry, a contains the elements of the symmetric matrix A in the triangular
-// portion specified by uplo. If jobz == lapack.EigDecomp a contains the
+// portion specified by uplo. If jobz == lapack.ComputeEV a contains the
 // orthonormal eigenvectors of A on exit, otherwise on exit the specified
 // triangular region is overwritten.
 //
@@ -352,7 +352,7 @@ func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float
 // lwork >= 3*n-1, and Syev will panic otherwise. The amount of blocking is
 // limited by the usable length. If lwork == -1, instead of computing Syev the
 // optimal work length is stored into work[0].
-func Syev(jobz lapack.EigComp, a blas64.Symmetric, w, work []float64, lwork int) (ok bool) {
+func Syev(jobz lapack.JobEV, a blas64.Symmetric, w, work []float64, lwork int) (ok bool) {
 	return lapack64.Dsyev(jobz, a.Uplo, a.N, a.Data, a.Stride, w, work, lwork)
 }
 

@@ -122,6 +122,12 @@ const (
 	EigBoth EigComp = 'I'
 )
 
+// JobEV specifies whether eigenvectors will be computed in Dsyev.
+type JobEV byte
+
+// ComputeEV specifies that eigenvectors will be computed in Dsyev.
+const ComputeEV JobEV = 'V'
+
 // Jobs for Dgebal.
 const (
 	Permute      Job = 'P'

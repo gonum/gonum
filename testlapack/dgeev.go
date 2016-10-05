@@ -477,8 +477,8 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 		for _, jobvl := range []lapack.JobLeftEV{lapack.ComputeLeftEV, lapack.None} {
 			for _, jobvr := range []lapack.JobRightEV{lapack.ComputeRightEV, lapack.None} {
 				for _, extra := range []int{0, 11} {
-					for _, optwork := range []bool{false, true} {
-						testDgeev(t, impl, strconv.Itoa(i), test, jobvl, jobvr, extra, optwork)
+					for _, wl := range []worklen{minimumWork, mediumWork, optimumWork} {
+						testDgeev(t, impl, strconv.Itoa(i), test, jobvl, jobvr, extra, wl)
 					}
 				}
 			}
@@ -534,14 +534,14 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 						valTol: 1e-12,
 						vecTol: 1e-8,
 					}
-					testDgeev(t, impl, "random", test, jobvl, jobvr, 0, true)
+					testDgeev(t, impl, "random", test, jobvl, jobvr, 0, optimumWork)
 				}
 			}
 		}
 	}
 }
 
-func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, extra int, optwork bool) {
+func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, extra int, wl worklen) {
 	const defaultTol = 1e-13
 	valTol := test.valTol
 	if valTol == 0 {
@@ -568,11 +568,23 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 	wr := make([]float64, n)
 	wi := make([]float64, n)
 
-	lwork := max(1, 3*n)
-	if jobvl == lapack.ComputeLeftEV || jobvr == lapack.ComputeRightEV {
-		lwork = max(1, 4*n)
-	}
-	if optwork {
+	var lwork int
+	switch wl {
+	case minimumWork:
+		lwork = max(1, 3*n)
+		if jobvl == lapack.ComputeLeftEV || jobvr == lapack.ComputeRightEV {
+			lwork = max(1, 4*n)
+		}
+	case mediumWork:
+		work := make([]float64, 1)
+		impl.Dgeev(jobvl, jobvr, n, nil, 1, nil, nil, nil, 1, nil, 1, work, -1)
+		lwork = int(work[0])
+		lwork = (lwork + 3*n) / 2
+		if jobvl == lapack.ComputeLeftEV || jobvr == lapack.ComputeRightEV {
+			lwork = (lwork + 4*n) / 2
+		}
+		lwork = max(1, lwork)
+	case optimumWork:
 		work := make([]float64, 1)
 		impl.Dgeev(jobvl, jobvr, n, nil, 1, nil, nil, nil, 1, nil, 1, work, -1)
 		lwork = int(work[0])
@@ -582,8 +594,8 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 	first := impl.Dgeev(jobvl, jobvr, n, a.Data, a.Stride, wr, wi,
 		vl.Data, vl.Stride, vr.Data, vr.Stride, work, len(work))
 
-	prefix := fmt.Sprintf("Case #%v: n=%v, jobvl=%v, jobvr=%v, extra=%v, optwk=%v",
-		tc, n, jobvl, jobvr, extra, optwork)
+	prefix := fmt.Sprintf("Case #%v: n=%v, jobvl=%v, jobvr=%v, extra=%v, work=%v",
+		tc, n, jobvl, jobvr, extra, wl)
 
 	if !generalOutsideAllNaN(vl) {
 		t.Errorf("%v: out-of-range write to VL", prefix)

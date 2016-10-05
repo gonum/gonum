@@ -31,6 +31,15 @@ func min(a, b int) int {
 	return b
 }
 
+// worklen describes how much workspace a test should use.
+type worklen int
+
+const (
+	minimumWork worklen = iota
+	mediumWork
+	optimumWork
+)
+
 // nanSlice allocates a new slice of length n filled with NaN.
 func nanSlice(n int) []float64 {
 	s := make([]float64, n)

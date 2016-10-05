@@ -21,7 +21,7 @@ const (
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
 	badEigComp      = "lapack: bad EigComp"
-	badEigVecSide   = "lapack: bad EigVecSide"
+	badEVSide       = "lapack: bad EVSide"
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"
 	badIhi          = "lapack: ihi out of range"
@@ -308,7 +308,7 @@ func (impl Implementation) Dgebal(job lapack.Job, n int, a []float64, lda int, s
 // the eigenvectors of the original matrix.
 //
 // Dgebak is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
+func (impl Implementation) Dgebak(job lapack.Job, side lapack.EVSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
 	switch job {
 	default:
 		panic(badJob)
@@ -318,9 +318,9 @@ func (impl Implementation) Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo
 	switch side {
 	default:
 		panic(badSide)
-	case lapack.LeftEigVec:
+	case lapack.LeftEV:
 		bside = blas.Left
-	case lapack.RightEigVec:
+	case lapack.RightEV:
 		bside = blas.Right
 	}
 	checkMatrix(n, m, v, ldv)

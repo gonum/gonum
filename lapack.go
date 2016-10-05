@@ -138,14 +138,14 @@ const (
 	UpdateZ Comp = 'V'
 )
 
-// EigVecSide specifies what eigenvectors will be computed.
-type EigVecSide byte
+// EVSide specifies what eigenvectors will be computed.
+type EVSide byte
 
-// EigVecSide constants for Dtrevc3.
+// EVSide constants for Dtrevc3.
 const (
-	RightEigVec     EigVecSide = 'R' // Compute right eigenvectors only.
-	LeftEigVec      EigVecSide = 'L' // Compute left eigenvectors only.
-	RightLeftEigVec EigVecSide = 'B' // Compute both right and left eigenvectors.
+	RightEV     EVSide = 'R' // Compute right eigenvectors only.
+	LeftEV      EVSide = 'L' // Compute left eigenvectors only.
+	RightLeftEV EVSide = 'B' // Compute both right and left eigenvectors.
 )
 
 // HowMany specifies which eigenvectors will be computed.
@@ -153,9 +153,9 @@ type HowMany byte
 
 // HowMany constants for Dhseqr.
 const (
-	AllEigVec      HowMany = 'A' // Compute all right and/or left eigenvectors.
-	AllEigVecMulQ  HowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
-	SelectedEigVec HowMany = 'S' // Compute selected right and/or left eigenvectors.
+	AllEV      HowMany = 'A' // Compute all right and/or left eigenvectors.
+	AllEVMulQ  HowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
+	SelectedEV HowMany = 'S' // Compute selected right and/or left eigenvectors.
 )
 
 // Job types for Dgeev.

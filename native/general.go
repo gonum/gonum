@@ -27,7 +27,7 @@ const (
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
 	badEigComp      = "lapack: bad EigComp"
-	badEigVecSide   = "lapack: bad EigVecSide"
+	badEVSide       = "lapack: bad EVSide"
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"
 	badIhi          = "lapack: ihi out of range"

@@ -118,11 +118,11 @@ func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV
 		impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.UpdateZ, n, 0, n-1,
 			nil, 1, nil, nil, nil, 1, work, -1)
 		maxwrk = max(maxwrk, max(n+1, n+int(work[0])))
-		side := lapack.LeftEigVec
+		side := lapack.LeftEV
 		if wantvr {
-			side = lapack.RightEigVec
+			side = lapack.RightEV
 		}
-		impl.Dtrevc3(side, lapack.AllEigVecMulQ, nil, n, nil, 1, nil, 1, nil, 1,
+		impl.Dtrevc3(side, lapack.AllEVMulQ, nil, n, nil, 1, nil, 1, nil, 1,
 			n, work, -1)
 		maxwrk = max(maxwrk, n+int(work[0]))
 		maxwrk = max(maxwrk, 4*n)
@@ -166,9 +166,9 @@ func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV
 	tau := work[n : iwrk-1]
 	impl.Dgehrd(n, ilo, ihi, a, lda, tau, work[iwrk:], lwork-iwrk)
 
-	var side lapack.EigVecSide
+	var side lapack.EVSide
 	if wantvl {
-		side = lapack.LeftEigVec
+		side = lapack.LeftEV
 		// Copy Householder vectors to VL.
 		impl.Dlacpy(blas.Lower, n, n, a, lda, vl, ldvl)
 		// Generate orthogonal matrix in VL.
@@ -180,11 +180,11 @@ func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV
 		if wantvr {
 			// Want left and right eigenvectors.
 			// Copy Schur vectors to VR.
-			side = lapack.RightLeftEigVec
+			side = lapack.RightLeftEV
 			impl.Dlacpy(blas.All, n, n, vl, ldvl, vr, ldvr)
 		}
 	} else if wantvr {
-		side = lapack.RightEigVec
+		side = lapack.RightEV
 		// Copy Householder vectors to VR.
 		impl.Dlacpy(blas.Lower, n, n, a, lda, vr, ldvr)
 		// Generate orthogonal matrix in VR.
@@ -214,13 +214,13 @@ func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV
 
 	if wantvl || wantvr {
 		// Compute left and/or right eigenvectors.
-		impl.Dtrevc3(side, lapack.AllEigVecMulQ, nil, n,
+		impl.Dtrevc3(side, lapack.AllEVMulQ, nil, n,
 			a, lda, vl, ldvl, vr, ldvr, n, work[iwrk:], lwork-iwrk)
 	}
 	bi := blas64.Implementation()
 	if wantvl {
 		// Undo balancing of left eigenvectors.
-		impl.Dgebak(lapack.PermuteScale, lapack.LeftEigVec, n, ilo, ihi, workbal, n, vl, ldvl)
+		impl.Dgebak(lapack.PermuteScale, lapack.LeftEV, n, ilo, ihi, workbal, n, vl, ldvl)
 		// Normalize left eigenvectors and make largest component real.
 		for i, wii := range wi {
 			if wii < 0 {
@@ -247,7 +247,7 @@ func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV
 	}
 	if wantvr {
 		// Undo balancing of right eigenvectors.
-		impl.Dgebak(lapack.PermuteScale, lapack.RightEigVec, n, ilo, ihi, workbal, n, vr, ldvr)
+		impl.Dgebak(lapack.PermuteScale, lapack.RightEV, n, ilo, ihi, workbal, n, vr, ldvr)
 		// Normalize right eigenvectors and make largest component real.
 		for i, wii := range wi {
 			if wii < 0 {

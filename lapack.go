@@ -18,6 +18,7 @@ type Complex128 interface{}
 // Float64 defines the public float64 LAPACK API supported by gonum/lapack.
 type Float64 interface {
 	Dgecon(norm MatrixNorm, n int, a []float64, lda int, anorm float64, work []float64, iwork []int) float64
+	Dgeev(jobvl JobLeftEV, jobvr JobRightEV, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int)
 	Dgels(trans blas.Transpose, m, n, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool
 	Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
 	Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int)

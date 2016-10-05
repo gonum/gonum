@@ -17,10 +17,11 @@ import "github.com/gonum/lapack"
 // On return, T will be reordered by an orthogonal similarity transformation Z
 // as Z^T*T*Z, and will be again in Schur canonical form.
 //
-// If compq is lapack.EigDecomp, on return the matrix Q of Schur vectors will be
-// updated by postmultiplying it with Z. If compq is lapack.EigValueOnly, the
-// matrix Q is not referenced and will not be updated. For other values of compq
-// Dtrexc will panic.
+// If compq is lapack.UpdateQ, on return the matrix Q of Schur vectors will be
+// updated by postmultiplying it with Z.
+// If compq is lapack.None, the matrix Q is not referenced and will not be
+// updated.
+// For other values of compq Dtrexc will panic.
 //
 // ifst and ilst specify the reordering of the diagonal blocks of T. The block
 // with row index ifst is moved to row ilst, by a sequence of transpositions
@@ -44,15 +45,15 @@ import "github.com/gonum/lapack"
 // work must have length at least n, otherwise Dtrexc will panic.
 //
 // Dtrexc is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dtrexc(compq lapack.EigComp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool) {
+func (impl Implementation) Dtrexc(compq lapack.Comp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool) {
 	checkMatrix(n, n, t, ldt)
 	var wantq bool
 	switch compq {
 	default:
-		panic(badEigComp)
-	case lapack.EigValueOnly:
+		panic("lapack: bad value of compq")
+	case lapack.None:
 		// Nothing to do because wantq is already false.
-	case lapack.EigDecomp:
+	case lapack.UpdateQ:
 		wantq = true
 		checkMatrix(n, n, q, ldq)
 	}

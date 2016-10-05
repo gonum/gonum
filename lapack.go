@@ -144,6 +144,9 @@ const (
 	UpdateZ Comp = 'V'
 )
 
+// UpdateQ specifies that the matrix Q will be updated.
+const UpdateQ Comp = 'V'
+
 // EVSide specifies what eigenvectors will be computed.
 type EVSide byte
 

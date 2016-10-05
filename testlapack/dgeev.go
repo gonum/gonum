@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/floats"
 	"github.com/gonum/lapack"
@@ -479,6 +480,61 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 					for _, optwork := range []bool{false, true} {
 						testDgeev(t, impl, strconv.Itoa(i), test, jobvl, jobvr, extra, optwork)
 					}
+				}
+			}
+		}
+	}
+
+	for _, n := range []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 50, 51, 100, 101} {
+		for _, jobvl := range []lapack.JobLeftEV{lapack.ComputeLeftEV, lapack.None} {
+			for _, jobvr := range []lapack.JobRightEV{lapack.ComputeRightEV, lapack.None} {
+				for cas := 0; cas < 10; cas++ {
+					// Create a block diagonal matrix with
+					// random eigenvalues of random multiplicity.
+					ev := make([]complex128, n)
+					tmat := zeros(n, n, n)
+					for i := 0; i < n; {
+						re := rnd.NormFloat64()
+						if i == n-1 || rnd.Float64() < 0.5 {
+							// Real eigenvalue.
+							nb := rnd.Intn(min(4, n-i)) + 1
+							for k := 0; k < nb; k++ {
+								tmat.Data[i*tmat.Stride+i] = re
+								ev[i] = complex(re, 0)
+								i++
+							}
+							continue
+						}
+						// Complex eigenvalue.
+						im := rnd.NormFloat64()
+						nb := rnd.Intn(min(4, (n-i)/2)) + 1
+						for k := 0; k < nb; k++ {
+							// 2×2 block for the complex eigenvalue.
+							tmat.Data[i*tmat.Stride+i] = re
+							tmat.Data[(i+1)*tmat.Stride+i+1] = re
+							tmat.Data[(i+1)*tmat.Stride+i] = -im
+							tmat.Data[i*tmat.Stride+i+1] = im
+							ev[i] = complex(re, im)
+							ev[i+1] = complex(re, -im)
+							i += 2
+						}
+					}
+
+					// Compute A = Q T Q^T where Q is an
+					// orthogonal matrix.
+					q := randomOrthogonal(n, rnd)
+					tq := zeros(n, n, n)
+					blas64.Gemm(blas.NoTrans, blas.Trans, 1, tmat, q, 0, tq)
+					a := zeros(n, n, n)
+					blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, q, tq, 0, a)
+
+					test := dgeevTest{
+						a:      a,
+						evWant: ev,
+						valTol: 1e-12,
+						vecTol: 1e-8,
+					}
+					testDgeev(t, impl, "random", test, jobvl, jobvr, 0, true)
 				}
 			}
 		}

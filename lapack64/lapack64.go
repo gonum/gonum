@@ -352,7 +352,7 @@ func Pocon(a blas64.Symmetric, anorm float64, work []float64, iwork []int) float
 // lwork >= 3*n-1, and Syev will panic otherwise. The amount of blocking is
 // limited by the usable length. If lwork == -1, instead of computing Syev the
 // optimal work length is stored into work[0].
-func Syev(jobz lapack.JobEV, a blas64.Symmetric, w, work []float64, lwork int) (ok bool) {
+func Syev(jobz lapack.EVJob, a blas64.Symmetric, w, work []float64, lwork int) (ok bool) {
 	return lapack64.Dsyev(jobz, a.Uplo, a.N, a.Data, a.Stride, w, work, lwork)
 }
 

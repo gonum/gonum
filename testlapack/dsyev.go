@@ -15,7 +15,7 @@ import (
 )
 
 type Dsyever interface {
-	Dsyev(jobz lapack.JobEV, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool)
+	Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool)
 }
 
 func DsyevTest(t *testing.T, impl Dsyever) {

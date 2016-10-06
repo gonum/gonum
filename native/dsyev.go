@@ -27,7 +27,7 @@ import (
 // lwork >= 3*n-1, and Dsyev will panic otherwise. The amount of blocking is
 // limited by the usable length. If lwork == -1, instead of computing Dsyev the
 // optimal work length is stored into work[0].
-func (impl Implementation) Dsyev(jobz lapack.JobEV, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
+func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	upper := uplo == blas.Upper
 	wantz := jobz == lapack.ComputeEV

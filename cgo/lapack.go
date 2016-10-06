@@ -1419,7 +1419,7 @@ func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, a
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dsyev but will instead write the minimum
 // work necessary to work[0]. If len(work) < lwork, Dsyev will panic.
-func (impl Implementation) Dsyev(jobz lapack.JobEV, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
+func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if lwork == -1 {
 		work[0] = 3*float64(n) - 1

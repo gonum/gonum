@@ -18,7 +18,7 @@ type Complex128 interface{}
 // Float64 defines the public float64 LAPACK API supported by gonum/lapack.
 type Float64 interface {
 	Dgecon(norm MatrixNorm, n int, a []float64, lda int, anorm float64, work []float64, iwork []int) float64
-	Dgeev(jobvl JobLeftEV, jobvr JobRightEV, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int)
+	Dgeev(jobvl LeftEVJob, jobvr RightEVJob, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int)
 	Dgels(trans blas.Transpose, m, n, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool
 	Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
 	Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int)
@@ -122,11 +122,19 @@ const (
 	EigBoth EigComp = 'I'
 )
 
-// EVJob specifies whether eigenvectors will be computed in Dsyev.
-type EVJob byte
+// Job types for computation of eigenvectors.
+type (
+	EVJob      byte
+	LeftEVJob  byte
+	RightEVJob byte
+)
 
-// ComputeEV specifies that eigenvectors will be computed in Dsyev.
-const ComputeEV EVJob = 'V'
+// Job constants for computation of eigenvectors.
+const (
+	ComputeEV      EVJob      = 'V' // Compute eigenvectors in Dsyev.
+	ComputeLeftEV  LeftEVJob  = 'V' // Compute left eigenvectors.
+	ComputeRightEV RightEVJob = 'V' // Compute right eigenvectors.
+)
 
 // Jobs for Dgebal.
 const (
@@ -165,16 +173,4 @@ const (
 	AllEV      HowMany = 'A' // Compute all right and/or left eigenvectors.
 	AllEVMulQ  HowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
 	SelectedEV HowMany = 'S' // Compute selected right and/or left eigenvectors.
-)
-
-// Job types for Dgeev.
-type (
-	JobLeftEV  byte
-	JobRightEV byte
-)
-
-// Job constants for Dgeev.
-const (
-	ComputeLeftEV  JobLeftEV  = 'V'
-	ComputeRightEV JobRightEV = 'V'
 )

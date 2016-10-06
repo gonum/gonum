@@ -1765,11 +1765,11 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 // Dgeev failed to compute all the eigenvalues, no eigenvectors have been
 // computed and wr[first:] and wi[first:] contain those eigenvalues which have
 // converged.
-func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int) {
+func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int) {
 	var wantvl bool
 	switch jobvl {
 	default:
-		panic("lapack: invalid JobLeftEV")
+		panic("lapack: invalid LeftEVJob")
 	case lapack.ComputeLeftEV:
 		wantvl = true
 	case lapack.None:
@@ -1778,7 +1778,7 @@ func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV
 	var wantvr bool
 	switch jobvr {
 	default:
-		panic("lapack: invalid JobRightEV")
+		panic("lapack: invalid RightEVJob")
 	case lapack.ComputeRightEV:
 		wantvr = true
 	case lapack.None:

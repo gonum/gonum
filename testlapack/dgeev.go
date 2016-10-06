@@ -19,7 +19,7 @@ import (
 )
 
 type Dgeever interface {
-	Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, n int, a []float64, lda int,
+	Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, n int, a []float64, lda int,
 		wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) int
 }
 
@@ -474,8 +474,8 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 			evWant: Zero(100).Eigenvalues(),
 		},
 	} {
-		for _, jobvl := range []lapack.JobLeftEV{lapack.ComputeLeftEV, lapack.None} {
-			for _, jobvr := range []lapack.JobRightEV{lapack.ComputeRightEV, lapack.None} {
+		for _, jobvl := range []lapack.LeftEVJob{lapack.ComputeLeftEV, lapack.None} {
+			for _, jobvr := range []lapack.RightEVJob{lapack.ComputeRightEV, lapack.None} {
 				for _, extra := range []int{0, 11} {
 					for _, wl := range []worklen{minimumWork, mediumWork, optimumWork} {
 						testDgeev(t, impl, strconv.Itoa(i), test, jobvl, jobvr, extra, wl)
@@ -486,8 +486,8 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 	}
 
 	for _, n := range []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 20, 50, 51, 100, 101} {
-		for _, jobvl := range []lapack.JobLeftEV{lapack.ComputeLeftEV, lapack.None} {
-			for _, jobvr := range []lapack.JobRightEV{lapack.ComputeRightEV, lapack.None} {
+		for _, jobvl := range []lapack.LeftEVJob{lapack.ComputeLeftEV, lapack.None} {
+			for _, jobvr := range []lapack.RightEVJob{lapack.ComputeRightEV, lapack.None} {
 				for cas := 0; cas < 10; cas++ {
 					// Create a block diagonal matrix with
 					// random eigenvalues of random multiplicity.
@@ -541,7 +541,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 	}
 }
 
-func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, extra int, wl worklen) {
+func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, extra int, wl worklen) {
 	const defaultTol = 1e-13
 	valTol := test.valTol
 	if valTol == 0 {

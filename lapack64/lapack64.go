@@ -429,7 +429,7 @@ func Trtrs(trans blas.Transpose, a blas64.Triangular, b blas64.General) (ok bool
 // If first is positive, Geev failed to compute all the eigenvalues, no
 // eigenvectors have been computed and wr[first:] and wi[first:] contain those
 // eigenvalues which have converged.
-func Geev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, a blas64.General, wr, wi []float64, vl, vr blas64.General, work []float64, lwork int) (first int) {
+func Geev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, a blas64.General, wr, wi []float64, vl, vr blas64.General, work []float64, lwork int) (first int) {
 	n := a.Rows
 	if a.Cols != n {
 		panic("lapack64: matrix not square")

@@ -733,3 +733,29 @@ func dgeevTestForAntisymRandom(n int, rnd *rand.Rand) dgeevTest {
 		evWant: a.Eigenvalues(),
 	}
 }
+
+var resultGeneral blas64.General
+
+func DgeevBenchmark(b *testing.B, impl Dgeever, a blas64.General) {
+	n := a.Rows
+	if n != a.Cols {
+		panic("testlapack: matrix not square")
+	}
+	aComp := zeros(n, n, n)
+	vl := zeros(n, n, n)
+	vr := zeros(n, n, n)
+	work := make([]float64, 1)
+	impl.Dgeev(lapack.ComputeLeftEV, lapack.ComputeRightEV, n, nil, n, nil, nil, nil, n, nil, n, work, -1)
+	work = make([]float64, int(work[0]))
+	wr := make([]float64, n)
+	wi := make([]float64, n)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		copyGeneral(aComp, a)
+		b.StartTimer()
+		impl.Dgeev(lapack.ComputeLeftEV, lapack.ComputeRightEV, n, aComp.Data, aComp.Stride, wr, wi,
+			vl.Data, vl.Stride, vr.Data, vr.Stride, work, len(work))
+		b.StopTimer()
+	}
+	resultGeneral = aComp
+}

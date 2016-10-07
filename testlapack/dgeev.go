@@ -571,17 +571,18 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 	var lwork int
 	switch wl {
 	case minimumWork:
-		lwork = max(1, 3*n)
 		if jobvl == lapack.ComputeLeftEV || jobvr == lapack.ComputeRightEV {
 			lwork = max(1, 4*n)
+		} else {
+			lwork = max(1, 3*n)
 		}
 	case mediumWork:
 		work := make([]float64, 1)
 		impl.Dgeev(jobvl, jobvr, n, nil, 1, nil, nil, nil, 1, nil, 1, work, -1)
-		lwork = int(work[0])
-		lwork = (lwork + 3*n) / 2
 		if jobvl == lapack.ComputeLeftEV || jobvr == lapack.ComputeRightEV {
-			lwork = (lwork + 4*n) / 2
+			lwork = (int(work[0]) + 4*n) / 2
+		} else {
+			lwork = (int(work[0]) + 3*n) / 2
 		}
 		lwork = max(1, lwork)
 	case optimumWork:

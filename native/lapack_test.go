@@ -381,6 +381,10 @@ func BenchmarkDgeevAntisymRandomN200(b *testing.B) {
 	rnd := rand.New(rand.NewSource(1))
 	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(200, rnd).Matrix())
 }
+func BenchmarkDgeevAntisymRandomN500(b *testing.B) {
+	rnd := rand.New(rand.NewSource(1))
+	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(500, rnd).Matrix())
+}
 
 func BenchmarkDgeevCirculantN3(b *testing.B) {
 	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(3).Matrix())
@@ -402,4 +406,7 @@ func BenchmarkDgeevCirculantN100(b *testing.B) {
 }
 func BenchmarkDgeevCirculantN200(b *testing.B) {
 	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(200).Matrix())
+}
+func BenchmarkDgeevCirculantN500(b *testing.B) {
+	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(500).Matrix())
 }

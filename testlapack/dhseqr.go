@@ -16,7 +16,7 @@ import (
 )
 
 type Dhseqrer interface {
-	Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64,
+	Dhseqr(job lapack.EVJob, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64,
 		z []float64, ldz int, work []float64, lwork int) int
 }
 
@@ -32,7 +32,7 @@ type dhseqrTest struct {
 
 func DhseqrTest(t *testing.T, impl Dhseqrer) {
 	for i, tc := range dhseqrTests {
-		for _, job := range []lapack.Job{lapack.EigenvaluesOnly, lapack.EigenvaluesAndSchur} {
+		for _, job := range []lapack.EVJob{lapack.EigenvaluesOnly, lapack.EigenvaluesAndSchur} {
 			for _, wantz := range []bool{false, true} {
 				for _, extra := range []int{0, 11} {
 					testDhseqr(t, impl, i, tc, job, wantz, extra, true)
@@ -43,7 +43,7 @@ func DhseqrTest(t *testing.T, impl Dhseqrer) {
 	}
 }
 
-func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.Job, wantz bool, extra int, optwork bool) {
+func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.EVJob, wantz bool, extra int, optwork bool) {
 	const tol = 1e-14
 	evTol := test.tol
 	if evTol == 0 {

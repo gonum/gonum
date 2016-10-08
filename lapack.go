@@ -143,8 +143,8 @@ const (
 
 // Jobs and Comps for Dhseqr.
 const (
-	EigenvaluesOnly     Job = 'E'
-	EigenvaluesAndSchur Job = 'S'
+	EigenvaluesOnly     EVJob = 'E'
+	EigenvaluesAndSchur EVJob = 'S'
 
 	InitZ   Comp = 'I'
 	UpdateZ Comp = 'V'

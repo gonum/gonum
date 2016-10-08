@@ -21,6 +21,7 @@ const (
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
 	badEVComp       = "lapack: bad EVComp"
+	badEVJob        = "lapack: bad EVJob"
 	badEVSide       = "lapack: bad EVSide"
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"
@@ -1827,10 +1828,10 @@ func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 //      URL: http://dx.doi.org/10.1137/S0895479801384585
 //
 // Dhseqr is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
+func (impl Implementation) Dhseqr(job lapack.EVJob, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
 	switch job {
 	default:
-		panic(badJob)
+		panic(badEVJob)
 	case lapack.EigenvaluesOnly, lapack.EigenvaluesAndSchur:
 	}
 	var wantz bool
@@ -1865,7 +1866,7 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 		}
 	}
 
-	return lapacke.Dhseqr(job, compz, n, ilo+1, ihi+1, h, ldh, wr, wi, z, ldz, work, lwork)
+	return lapacke.Dhseqr(lapack.Job(job), compz, n, ilo+1, ihi+1, h, ldh, wr, wi, z, ldz, work, lwork)
 }
 
 // Dgeev computes the eigenvalues and, optionally, the left and/or right

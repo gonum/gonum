@@ -21,7 +21,7 @@ const (
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
 	badEigComp      = "lapack: bad EigComp"
-	badEigVecSide   = "lapack: bad EigVecSide"
+	badEVSide       = "lapack: bad EVSide"
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"
 	badIhi          = "lapack: ihi out of range"
@@ -308,7 +308,7 @@ func (impl Implementation) Dgebal(job lapack.Job, n int, a []float64, lda int, s
 // the eigenvectors of the original matrix.
 //
 // Dgebak is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
+func (impl Implementation) Dgebak(job lapack.Job, side lapack.EVSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
 	switch job {
 	default:
 		panic(badJob)
@@ -318,9 +318,9 @@ func (impl Implementation) Dgebak(job lapack.Job, side lapack.EigVecSide, n, ilo
 	switch side {
 	default:
 		panic(badSide)
-	case lapack.LeftEigVec:
+	case lapack.LeftEV:
 		bside = blas.Left
-	case lapack.RightEigVec:
+	case lapack.RightEV:
 		bside = blas.Right
 	}
 	checkMatrix(n, m, v, ldv)
@@ -1412,14 +1412,14 @@ func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, a
 // at least n, and Dsyev will panic otherwise.
 //
 // On entry, a contains the elements of the symmetric matrix A in the triangular
-// portion specified by uplo. If jobz == lapack.EigDecomp a contains the
+// portion specified by uplo. If jobz == lapack.ComputeEV a contains the
 // orthonormal eigenvectors of A on exit, otherwise on exit the specified
 // triangular region is overwritten.
 //
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dsyev but will instead write the minimum
 // work necessary to work[0]. If len(work) < lwork, Dsyev will panic.
-func (impl Implementation) Dsyev(jobz lapack.EigComp, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
+func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if lwork == -1 {
 		work[0] = 3*float64(n) - 1
@@ -1483,10 +1483,11 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 // On return, T will be reordered by an orthogonal similarity transformation Z
 // as Z^T*T*Z, and will be again in Schur canonical form.
 //
-// If compq is lapack.EigDecomp, on return the matrix Q of Schur vectors will be
-// updated by postmultiplying it with Z. If compq is lapack.EigValueOnly, the
-// matrix Q is not referenced and will not be updated. For other values of compq
-// Dtrexc will panic.
+// If compq is lapack.UpdateQ, on return the matrix Q of Schur vectors will be
+// updated by postmultiplying it with Z.
+// If compq is lapack.None, the matrix Q is not referenced and will not be
+// updated.
+// For other values of compq Dtrexc will panic.
 //
 // ifst and ilst specify the reordering of the diagonal blocks of T. The block
 // with row index ifst is moved to row ilst, by a sequence of transpositions
@@ -1510,16 +1511,16 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 // work must have length at least n, otherwise Dtrexc will panic.
 //
 // Dtrexc is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dtrexc(compq lapack.EigComp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool) {
+func (impl Implementation) Dtrexc(compq lapack.Comp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool) {
 	checkMatrix(n, n, t, ldt)
 	switch compq {
 	default:
-		panic(badEigComp)
-	case lapack.EigValueOnly:
+		panic("lapack: bad value of compq")
+	case lapack.None:
 		// q is not referenced but LAPACKE checks that ldq >= n always.
 		q = nil
 		ldq = max(1, n)
-	case lapack.EigDecomp:
+	case lapack.UpdateQ:
 		checkMatrix(n, n, q, ldq)
 	}
 	if (ifst < 0 || n <= ifst) && n > 0 {
@@ -1539,7 +1540,7 @@ func (impl Implementation) Dtrexc(compq lapack.EigComp, n int, t []float64, ldt 
 
 	ifst32 := []int32{int32(ifst + 1)}
 	ilst32 := []int32{int32(ilst + 1)}
-	ok = lapacke.Dtrexc(lapack.Comp(compq), n, t, ldt, q, ldq, ifst32, ilst32, work)
+	ok = lapacke.Dtrexc(compq, n, t, ldt, q, ldq, ifst32, ilst32, work)
 	ifst = int(ifst32[0] - 1)
 	ilst = int(ilst32[0] - 1)
 	return ifst, ilst, ok
@@ -1764,11 +1765,11 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 // Dgeev failed to compute all the eigenvalues, no eigenvectors have been
 // computed and wr[first:] and wi[first:] contain those eigenvalues which have
 // converged.
-func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int) {
+func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int) {
 	var wantvl bool
 	switch jobvl {
 	default:
-		panic("lapack: invalid JobLeftEV")
+		panic("lapack: invalid LeftEVJob")
 	case lapack.ComputeLeftEV:
 		wantvl = true
 	case lapack.None:
@@ -1777,7 +1778,7 @@ func (impl Implementation) Dgeev(jobvl lapack.JobLeftEV, jobvr lapack.JobRightEV
 	var wantvr bool
 	switch jobvr {
 	default:
-		panic("lapack: invalid JobRightEV")
+		panic("lapack: invalid RightEVJob")
 	case lapack.ComputeRightEV:
 		wantvr = true
 	case lapack.None:

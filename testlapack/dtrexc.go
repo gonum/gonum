@@ -16,13 +16,13 @@ import (
 )
 
 type Dtrexcer interface {
-	Dtrexc(compq lapack.EigComp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool)
+	Dtrexc(compq lapack.Comp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool)
 }
 
 func DtrexcTest(t *testing.T, impl Dtrexcer) {
 	rnd := rand.New(rand.NewSource(1))
 
-	for _, compq := range []lapack.EigComp{lapack.EigValueOnly, lapack.EigDecomp} {
+	for _, compq := range []lapack.Comp{lapack.None, lapack.UpdateQ} {
 		for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 			for _, extra := range []int{0, 1, 11} {
 				for cas := 0; cas < 100; cas++ {
@@ -35,7 +35,7 @@ func DtrexcTest(t *testing.T, impl Dtrexcer) {
 		}
 	}
 
-	for _, compq := range []lapack.EigComp{lapack.EigValueOnly, lapack.EigDecomp} {
+	for _, compq := range []lapack.Comp{lapack.None, lapack.UpdateQ} {
 		for _, extra := range []int{0, 1, 11} {
 			tmat := randomSchurCanonical(0, extra, rnd)
 			testDtrexc(t, impl, compq, tmat, 0, 0, extra, rnd)
@@ -43,7 +43,7 @@ func DtrexcTest(t *testing.T, impl Dtrexcer) {
 	}
 }
 
-func testDtrexc(t *testing.T, impl Dtrexcer, compq lapack.EigComp, tmat blas64.General, ifst, ilst, extra int, rnd *rand.Rand) {
+func testDtrexc(t *testing.T, impl Dtrexcer, compq lapack.Comp, tmat blas64.General, ifst, ilst, extra int, rnd *rand.Rand) {
 	const tol = 1e-13
 
 	n := tmat.Rows
@@ -54,7 +54,7 @@ func testDtrexc(t *testing.T, impl Dtrexcer, compq lapack.EigComp, tmat blas64.G
 
 	var wantq bool
 	var q, qCopy blas64.General
-	if compq == lapack.EigDecomp {
+	if compq == lapack.UpdateQ {
 		wantq = true
 		q = eye(n, n+extra)
 		qCopy = cloneGeneral(q)

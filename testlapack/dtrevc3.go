@@ -16,13 +16,13 @@ import (
 )
 
 type Dtrevc3er interface {
-	Dtrevc3(side lapack.EigVecSide, howmny lapack.HowMany, selected []bool, n int, t []float64, ldt int, vl []float64, ldvl int, vr []float64, ldvr int, mm int, work []float64, lwork int) int
+	Dtrevc3(side lapack.EVSide, howmny lapack.HowMany, selected []bool, n int, t []float64, ldt int, vl []float64, ldvl int, vr []float64, ldvr int, mm int, work []float64, lwork int) int
 }
 
 func Dtrevc3Test(t *testing.T, impl Dtrevc3er) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, side := range []lapack.EigVecSide{lapack.RightEigVec, lapack.LeftEigVec, lapack.RightLeftEigVec} {
-		for _, howmny := range []lapack.HowMany{lapack.AllEigVec, lapack.AllEigVecMulQ, lapack.SelectedEigVec} {
+	for _, side := range []lapack.EVSide{lapack.RightEV, lapack.LeftEV, lapack.RightLeftEV} {
+		for _, howmny := range []lapack.HowMany{lapack.AllEV, lapack.AllEVMulQ, lapack.SelectedEV} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 34, 100} {
 				for _, extra := range []int{0, 11} {
 					for _, optwork := range []bool{true, false} {
@@ -37,17 +37,17 @@ func Dtrevc3Test(t *testing.T, impl Dtrevc3er) {
 	}
 }
 
-func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EigVecSide, howmny lapack.HowMany, tmat blas64.General, optwork bool, rnd *rand.Rand) {
+func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EVSide, howmny lapack.HowMany, tmat blas64.General, optwork bool, rnd *rand.Rand) {
 	const tol = 1e-14
 
 	n := tmat.Rows
 	extra := tmat.Stride - tmat.Cols
-	right := side != lapack.LeftEigVec
-	left := side != lapack.RightEigVec
+	right := side != lapack.LeftEV
+	left := side != lapack.RightEV
 
 	var selected, selectedWant []bool
 	var mWant int // How many columns will the eigenvectors occupy.
-	if howmny == lapack.SelectedEigVec {
+	if howmny == lapack.SelectedEV {
 		selected = make([]bool, n)
 		selectedWant = make([]bool, n)
 		// Dtrevc3 will compute only selected eigenvectors. Pick them
@@ -87,7 +87,7 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EigVecSide, howmny la
 
 	var vr blas64.General
 	if right {
-		if howmny == lapack.AllEigVecMulQ {
+		if howmny == lapack.AllEVMulQ {
 			vr = eye(n, n+extra)
 		} else {
 			// VR will be overwritten.
@@ -97,7 +97,7 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EigVecSide, howmny la
 
 	var vl blas64.General
 	if left {
-		if howmny == lapack.AllEigVecMulQ {
+		if howmny == lapack.AllEVMulQ {
 			vl = eye(n, n+extra)
 		} else {
 			// VL will be overwritten.
@@ -131,7 +131,7 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EigVecSide, howmny la
 		t.Errorf("%v: unexpected value of m. Want %v, got %v", prefix, mWant, m)
 	}
 
-	if howmny == lapack.SelectedEigVec {
+	if howmny == lapack.SelectedEV {
 		for i := range selected {
 			if selected[i] != selectedWant[i] {
 				t.Errorf("%v: unexpected selected[%v]", prefix, i)
@@ -145,7 +145,7 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EigVecSide, howmny la
 	for j := 0; j < n; {
 		re := tmat.Data[j*tmat.Stride+j]
 		if j == n-1 || tmat.Data[(j+1)*tmat.Stride+j] == 0 {
-			if howmny == lapack.SelectedEigVec && !selected[j] {
+			if howmny == lapack.SelectedEV && !selected[j] {
 				j++
 				continue
 			}
@@ -173,7 +173,7 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EigVecSide, howmny la
 			j++
 			continue
 		}
-		if howmny == lapack.SelectedEigVec && !selected[j] {
+		if howmny == lapack.SelectedEV && !selected[j] {
 			j += 2
 			continue
 		}

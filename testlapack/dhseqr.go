@@ -16,7 +16,7 @@ import (
 )
 
 type Dhseqrer interface {
-	Dhseqr(job lapack.EVJob, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64,
+	Dhseqr(job lapack.EVJob, compz lapack.EVComp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64,
 		z []float64, ldz int, work []float64, lwork int) int
 }
 
@@ -57,7 +57,7 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 	copyGeneral(h, blas64.General{Rows: n, Cols: n, Stride: max(1, n), Data: test.h})
 	hCopy := cloneGeneral(h)
 
-	var compz lapack.Comp = lapack.None
+	var compz lapack.EVComp = lapack.None
 	z := blas64.General{Stride: max(1, n)}
 	if wantz {
 		// First, let Dhseqr initialize Z to the identity matrix.

@@ -146,8 +146,8 @@ const (
 	EigenvaluesOnly     EVJob = 'E'
 	EigenvaluesAndSchur EVJob = 'S'
 
-	InitZ   Comp = 'I'
-	UpdateZ Comp = 'V'
+	InitZ   EVComp = 'I'
+	UpdateZ EVComp = 'V'
 )
 
 // UpdateQ specifies that the matrix Q will be updated.

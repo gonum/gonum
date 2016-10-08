@@ -108,16 +108,16 @@ const (
 	SVDNone      SVDJob = 'N' // Do not compute singular vectors
 )
 
-// EigComp specifies the type of eigenvalue decomposition.
-type EigComp byte
+// EVComp specifies how eigenvectors are computed.
+type EVComp byte
 
 const (
 	// EigDecomp specifies to compute the eigenvalues and eigenvectors of the
 	// full symmetric matrix.
-	EigDecomp EigComp = 'V'
+	EigDecomp EVComp = 'V'
 	// EigBoth specifies to compute both the eigenvalues and eigenvectors of the
 	// input tridiagonal matrix.
-	EigBoth EigComp = 'I'
+	EigBoth EVComp = 'I'
 )
 
 // Job types for computation of eigenvectors.

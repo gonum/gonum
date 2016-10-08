@@ -20,7 +20,7 @@ const (
 	badDims         = "lapack: bad input dimensions"
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
-	badEigComp      = "lapack: bad EigComp"
+	badEVComp       = "lapack: bad EVComp"
 	badEVSide       = "lapack: bad EVSide"
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"

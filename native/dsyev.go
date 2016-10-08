@@ -97,7 +97,7 @@ func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []f
 		ok = impl.Dsterf(n, w, work[inde:])
 	} else {
 		impl.Dorgtr(uplo, n, a, lda, work[indtau:], work[indwork:], llwork)
-		ok = impl.Dsteqr(lapack.EigComp(jobz), n, w, work[inde:], a, lda, work[indtau:])
+		ok = impl.Dsteqr(lapack.EVComp(jobz), n, w, work[inde:], a, lda, work[indtau:])
 	}
 	if !ok {
 		return false

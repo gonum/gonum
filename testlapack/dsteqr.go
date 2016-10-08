@@ -15,13 +15,13 @@ import (
 )
 
 type Dsteqrer interface {
-	Dsteqr(compz lapack.EigComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool)
+	Dsteqr(compz lapack.EVComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool)
 	Dorgtrer
 }
 
 func DsteqrTest(t *testing.T, impl Dsteqrer) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, compz := range []lapack.EigComp{lapack.EigDecomp, lapack.EigBoth} {
+	for _, compz := range []lapack.EVComp{lapack.EigDecomp, lapack.EigBoth} {
 		for _, test := range []struct {
 			n, lda int
 		}{

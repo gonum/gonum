@@ -36,7 +36,7 @@ import (
 // and Dsteqr will panic otherwise.
 //
 // Dsteqr is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
+func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
 	if len(d) < n {
 		panic(badD)
 	}
@@ -44,7 +44,7 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 		panic(badE)
 	}
 	if compz != lapack.None && compz != lapack.EigBoth && compz != lapack.EigDecomp {
-		panic(badEigComp)
+		panic(badEVComp)
 	}
 	if compz != lapack.None {
 		if len(work) < max(1, 2*n-2) {

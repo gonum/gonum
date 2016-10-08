@@ -121,6 +121,10 @@ const (
 	// HessEV specifies to compute both the eigenvectors of the input upper
 	// Hessenberg matrix.
 	HessEV EVComp = 'I'
+
+	// UpdateSchur specifies that the matrix of Schur vectors will be
+	// updated by Dtrexc.
+	UpdateSchur EVComp = 'V'
 )
 
 // Job types for computation of eigenvectors.
@@ -149,9 +153,6 @@ const (
 	EigenvaluesOnly     EVJob = 'E'
 	EigenvaluesAndSchur EVJob = 'S'
 )
-
-// UpdateQ specifies that the matrix Q will be updated.
-const UpdateQ Comp = 'V'
 
 // EVSide specifies what eigenvectors will be computed.
 type EVSide byte

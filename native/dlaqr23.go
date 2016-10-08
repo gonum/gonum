@@ -234,7 +234,7 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 			} else {
 				// Undeflatable, move it up out of the way.
 				// Dtrexc can not fail in this case.
-				_, ilst, _ = impl.Dtrexc(lapack.UpdateQ, jw, t, ldt, v, ldv, ns-1, ilst, work)
+				_, ilst, _ = impl.Dtrexc(lapack.UpdateSchur, jw, t, ldt, v, ldv, ns-1, ilst, work)
 				ilst++
 			}
 			continue
@@ -251,7 +251,7 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 			// Undeflatable, move them up out of the way.
 			// Dtrexc does the right thing with ilst in case of a
 			// rare exchange failure.
-			_, ilst, _ = impl.Dtrexc(lapack.UpdateQ, jw, t, ldt, v, ldv, ns-1, ilst, work)
+			_, ilst, _ = impl.Dtrexc(lapack.UpdateSchur, jw, t, ldt, v, ldv, ns-1, ilst, work)
 			ilst += 2
 		}
 	}
@@ -294,7 +294,7 @@ func (impl Implementation) Dlaqr23(wantt, wantz bool, n, ktop, kbot, nw int, h [
 					i = k
 				} else {
 					sorted = false
-					_, ilst, ok := impl.Dtrexc(lapack.UpdateQ, jw, t, ldt, v, ldv, i, k, work)
+					_, ilst, ok := impl.Dtrexc(lapack.UpdateSchur, jw, t, ldt, v, ldv, i, k, work)
 					if ok {
 						i = ilst
 					} else {

@@ -1739,9 +1739,9 @@ func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 //
 // If compz == lapack.None, no Schur vectors will be computed and Z will not be
 // referenced.
-// If compz == lapack.InitZ, on return Z will contain the matrix of Schur
+// If compz == lapack.HessEV, on return Z will contain the matrix of Schur
 // vectors of H.
-// If compz == lapack.UpdateZ, on entry z is assumed to contain the orthogonal
+// If compz == lapack.OriginalEV, on entry z is assumed to contain the orthogonal
 // matrix Q that is the identity except for the submatrix
 // Q[ilo:ihi+1,ilo:ihi+1]. On return z will be updated to the product Q*Z.
 //
@@ -1806,7 +1806,7 @@ func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 // where U is an orthogonal matrix. The final H is upper Hessenberg and
 // H[unconverged:ihi+1,unconverged:ihi+1] is upper quasi-triangular.
 //
-// If unconverged > 0 and compz == lapack.UpdateZ, then on return
+// If unconverged > 0 and compz == lapack.OriginalEV, then on return
 //  (final Z) = (initial Z) U,
 // where U is the orthogonal matrix in (*) regardless of the value of job.
 //
@@ -1839,7 +1839,7 @@ func (impl Implementation) Dhseqr(job lapack.EVJob, compz lapack.EVComp, n, ilo,
 	default:
 		panic(badEVComp)
 	case lapack.None:
-	case lapack.InitZ, lapack.UpdateZ:
+	case lapack.HessEV, lapack.OriginalEV:
 		wantz = true
 	}
 	switch {

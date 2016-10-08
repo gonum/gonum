@@ -115,7 +115,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	maxwrk := 2*n + n*impl.Ilaenv(1, "DGEHRD", " ", n, 1, n, 0)
 	if wantvl || wantvr {
 		maxwrk = max(maxwrk, 2*n+(n-1)*impl.Ilaenv(1, "DORGHR", " ", n, 1, n, -1))
-		impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.UpdateZ, n, 0, n-1,
+		impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.OriginalEV, n, 0, n-1,
 			nil, 1, nil, nil, nil, 1, work, -1)
 		maxwrk = max(maxwrk, max(n+1, n+int(work[0])))
 		side := lapack.LeftEV
@@ -175,7 +175,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 		impl.Dorghr(n, ilo, ihi, vl, ldvl, tau, work[iwrk:], lwork-iwrk)
 		// Perform QR iteration, accumulating Schur vectors in VL.
 		iwrk = n
-		first = impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.UpdateZ, n, ilo, ihi,
+		first = impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.OriginalEV, n, ilo, ihi,
 			a, lda, wr, wi, vl, ldvl, work[iwrk:], lwork-iwrk)
 		if wantvr {
 			// Want left and right eigenvectors.
@@ -191,7 +191,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 		impl.Dorghr(n, ilo, ihi, vr, ldvr, tau, work[iwrk:], lwork-iwrk)
 		// Perform QR iteration, accumulating Schur vectors in VR.
 		iwrk = n
-		first = impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.UpdateZ, n, ilo, ihi,
+		first = impl.Dhseqr(lapack.EigenvaluesAndSchur, lapack.OriginalEV, n, ilo, ihi,
 			a, lda, wr, wi, vr, ldvr, work[iwrk:], lwork-iwrk)
 	} else {
 		// Compute eigenvalues only.

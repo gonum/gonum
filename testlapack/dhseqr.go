@@ -61,7 +61,7 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 	z := blas64.General{Stride: max(1, n)}
 	if wantz {
 		// First, let Dhseqr initialize Z to the identity matrix.
-		compz = lapack.InitZ
+		compz = lapack.HessEV
 		z = nanGeneral(n, n, n+extra)
 	}
 
@@ -70,7 +70,7 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 
 	work := nanSlice(max(1, n))
 	if optwork {
-		impl.Dhseqr(job, lapack.InitZ, n, ilo, ihi, nil, h.Stride, nil, nil, nil, z.Stride, work, -1)
+		impl.Dhseqr(job, lapack.HessEV, n, ilo, ihi, nil, h.Stride, nil, nil, nil, z.Stride, work, -1)
 		work = nanSlice(int(work[0]))
 	}
 
@@ -196,7 +196,7 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 	copyGeneral(h, hCopy)
 	// Call Dhseqr again with the identity matrix given explicitly in Q.
 	q := eye(n, n+extra)
-	impl.Dhseqr(job, lapack.UpdateZ, n, ilo, ihi, h.Data, h.Stride, wr, wi, q.Data, q.Stride, work, len(work))
+	impl.Dhseqr(job, lapack.OriginalEV, n, ilo, ihi, h.Data, h.Stride, wr, wi, q.Data, q.Stride, work, len(work))
 	if !equalApproxGeneral(z, q, 0) {
 		t.Errorf("%v: Z and Q are not equal", prefix)
 	}

@@ -118,6 +118,9 @@ const (
 	// TridiagEV specifies to compute both the eigenvectors of the input
 	// tridiagonal matrix.
 	TridiagEV EVComp = 'I'
+	// HessEV specifies to compute both the eigenvectors of the input upper
+	// Hessenberg matrix.
+	HessEV EVComp = 'I'
 )
 
 // Job types for computation of eigenvectors.
@@ -141,13 +144,10 @@ const (
 	PermuteScale Job = 'B'
 )
 
-// Jobs and Comps for Dhseqr.
+// Job constants for Dhseqr.
 const (
 	EigenvaluesOnly     EVJob = 'E'
 	EigenvaluesAndSchur EVJob = 'S'
-
-	InitZ   EVComp = 'I'
-	UpdateZ EVComp = 'V'
 )
 
 // UpdateQ specifies that the matrix Q will be updated.

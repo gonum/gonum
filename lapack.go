@@ -112,12 +112,12 @@ const (
 type EVComp byte
 
 const (
-	// EigDecomp specifies to compute the eigenvalues and eigenvectors of the
-	// full symmetric matrix.
-	EigDecomp EVComp = 'V'
-	// EigBoth specifies to compute both the eigenvalues and eigenvectors of the
-	// input tridiagonal matrix.
-	EigBoth EVComp = 'I'
+	// OriginalEV specifies to compute the eigenvectors of the original
+	// matrix.
+	OriginalEV EVComp = 'V'
+	// TridiagEV specifies to compute both the eigenvectors of the input
+	// tridiagonal matrix.
+	TridiagEV EVComp = 'I'
 )
 
 // Job types for computation of eigenvectors.

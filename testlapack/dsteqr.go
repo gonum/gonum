@@ -134,7 +134,7 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 				for i := range work {
 					work[i] = rnd.Float64()
 				}
-				impl.Dsteqr(lapack.EigValueOnly, n, dDecomp, eDecomp, aDecomp, lda, work)
+				impl.Dsteqr(lapack.None, n, dDecomp, eDecomp, aDecomp, lda, work)
 				if !floats.EqualApprox(d, dAns, 1e-8) {
 					t.Errorf("Eigenvalue mismatch when eigenvectors not computed")
 				}

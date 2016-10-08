@@ -30,7 +30,7 @@ import (
 // compz == lapack.EigBoth, z contains the orthonormal eigenvectors of the
 // original symmetric matrix, and if compz == lapack.EigDecomp, z contains the
 // orthonormal eigenvectors of the symmetric tridiagonal matrix. z is not used
-// if compz == lapack.EigValueOnly.
+// if compz == lapack.None.
 //
 // work must have length at least max(1, 2*n-2) if the eigenvectors are computed,
 // and Dsteqr will panic otherwise.
@@ -43,10 +43,10 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 	if len(e) < n-1 {
 		panic(badE)
 	}
-	if compz != lapack.EigValueOnly && compz != lapack.EigBoth && compz != lapack.EigDecomp {
+	if compz != lapack.None && compz != lapack.EigBoth && compz != lapack.EigDecomp {
 		panic(badEigComp)
 	}
-	if compz != lapack.EigValueOnly {
+	if compz != lapack.None {
 		if len(work) < max(1, 2*n-2) {
 			panic(badWork)
 		}

@@ -112,8 +112,6 @@ const (
 type EigComp byte
 
 const (
-	// EigValueOnly specifies to compute only the eigenvalues of the input matrix.
-	EigValueOnly EigComp = 'N'
 	// EigDecomp specifies to compute the eigenvalues and eigenvectors of the
 	// full symmetric matrix.
 	EigDecomp EigComp = 'V'

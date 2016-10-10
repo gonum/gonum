@@ -5,7 +5,6 @@
 package cgo
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/gonum/blas"
@@ -219,60 +218,6 @@ func TestDtrtri(t *testing.T) {
 	testlapack.DtrtriTest(t, impl)
 }
 
-func BenchmarkDgeevAntisymRandomN3(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(3, rnd).Matrix())
-}
-func BenchmarkDgeevAntisymRandomN4(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(4, rnd).Matrix())
-}
-func BenchmarkDgeevAntisymRandomN5(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(5, rnd).Matrix())
-}
-func BenchmarkDgeevAntisymRandomN10(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(10, rnd).Matrix())
-}
-func BenchmarkDgeevAntisymRandomN50(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(50, rnd).Matrix())
-}
-func BenchmarkDgeevAntisymRandomN100(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(100, rnd).Matrix())
-}
-func BenchmarkDgeevAntisymRandomN200(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(200, rnd).Matrix())
-}
-func BenchmarkDgeevAntisymRandomN500(b *testing.B) {
-	rnd := rand.New(rand.NewSource(1))
-	testlapack.DgeevBenchmark(b, impl, testlapack.NewAntisymRandom(500, rnd).Matrix())
-}
-
-func BenchmarkDgeevCirculantN3(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(3).Matrix())
-}
-func BenchmarkDgeevCirculantN4(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(4).Matrix())
-}
-func BenchmarkDgeevCirculantN5(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(5).Matrix())
-}
-func BenchmarkDgeevCirculantN10(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(10).Matrix())
-}
-func BenchmarkDgeevCirculantN50(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(50).Matrix())
-}
-func BenchmarkDgeevCirculantN100(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(100).Matrix())
-}
-func BenchmarkDgeevCirculantN200(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(200).Matrix())
-}
-func BenchmarkDgeevCirculantN500(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl, testlapack.Circulant(500).Matrix())
+func BenchmarkDgeev(b *testing.B) {
+	testlapack.DgeevBenchmark(b, impl)
 }

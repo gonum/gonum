@@ -1,4 +1,4 @@
-// Do not manually edit this file. It was created by the genLapack.pl script from lapacke.h.
+// Do not manually edit this file. It was created by the generate_lapacke.go from lapacke.h.
 
 // Copyright ©2014 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -16,9 +16,10 @@ package lapacke
 import "C"
 
 import (
+	"unsafe"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/lapack"
-	"unsafe"
 )
 
 // Type order is used to specify the matrix storage format. We still interact with

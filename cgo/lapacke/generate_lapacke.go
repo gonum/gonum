@@ -37,24 +37,6 @@ const (
 )
 
 var skip = map[string]bool{
-	// Extended Precision.
-	"LAPACKE_zposvxx_work":  true,
-	"LAPACKE_clagge_work":   true,
-	"LAPACKE_clatms_work":   true,
-	"LAPACKE_chesvxx_work":  true,
-	"LAPACKE_cposvxx_work":  true,
-	"LAPACKE_cgesvxx_work":  true,
-	"LAPACKE_ssyrfssx_work": true,
-	"LAPACKE_csyrfsx_work":  true,
-	"LAPACKE_dlagsy_work":   true,
-	"LAPACKE_dsysvxx_work":  true,
-	"LAPACKE_sporfsx_work":  true,
-	"LAPACKE_slatms_work":   true,
-	"LAPACKE_zlatms_work":   true,
-	"LAPACKE_zherfsx_work":  true,
-	"LAPACKE_csysvxx_work":  true,
-	"LAPACKE_dlatms_work":   true,
-
 	// Deprecated.
 	"LAPACKE_cggsvp_work": true,
 	"LAPACKE_dggsvp_work": true,
@@ -68,36 +50,6 @@ var skip = map[string]bool{
 	"LAPACKE_dgeqpf_work": true,
 	"LAPACKE_sgeqpf_work": true,
 	"LAPACKE_zgeqpf_work": true,
-
-	// Previously incorrectly excluded because of a select parameter name. TODO(kortschak): Remove these.
-	"LAPACKE_shsein_work": true,
-	"LAPACKE_dhsein_work": true,
-	"LAPACKE_chsein_work": true,
-	"LAPACKE_zhsein_work": true,
-	"LAPACKE_stgevc_work": true,
-	"LAPACKE_dtgevc_work": true,
-	"LAPACKE_ctgevc_work": true,
-	"LAPACKE_ztgevc_work": true,
-	"LAPACKE_strevc_work": true,
-	"LAPACKE_dtrevc_work": true,
-	"LAPACKE_ctrevc_work": true,
-	"LAPACKE_ztrevc_work": true,
-	"LAPACKE_stgsen_work": true,
-	"LAPACKE_dtgsen_work": true,
-	"LAPACKE_ctgsen_work": true,
-	"LAPACKE_ztgsen_work": true,
-	"LAPACKE_strsen_work": true,
-	"LAPACKE_dtrsen_work": true,
-	"LAPACKE_ctrsen_work": true,
-	"LAPACKE_ztrsen_work": true,
-	"LAPACKE_stgsna_work": true,
-	"LAPACKE_dtgsna_work": true,
-	"LAPACKE_ctgsna_work": true,
-	"LAPACKE_ztgsna_work": true,
-	"LAPACKE_strsna_work": true,
-	"LAPACKE_dtrsna_work": true,
-	"LAPACKE_ctrsna_work": true,
-	"LAPACKE_ztrsna_work": true,
 }
 
 // needsInt is a list of routines that need to return the integer info value and
@@ -159,7 +111,7 @@ var byteTypes = map[string]string{
 	"jobvt":  "lapack.Job",
 	"jobz":   "lapack.Job",
 
-	"s": "blas.Side",
+	"side": "blas.Side",
 
 	"trans":  "blas.Transpose",
 	"trana":  "blas.Transpose",
@@ -172,6 +124,7 @@ var byteTypes = map[string]string{
 	"cmach":  "byte",
 	"direct": "byte",
 	"dist":   "byte",
+	"equed":  "byte",
 	"eigsrc": "byte",
 	"fact":   "byte",
 	"howmny": "byte",
@@ -179,6 +132,7 @@ var byteTypes = map[string]string{
 	"initv":  "byte",
 	"norm":   "byte",
 	"order":  "byte",
+	"pack":   "byte",
 	"sense":  "byte",
 	"signs":  "byte",
 	"storev": "byte",
@@ -266,7 +220,6 @@ var names = map[string]string{
 	"uplo":          "ul",
 	"range":         "rng",
 	"diag":          "d",
-	"side":          "s",
 	"select":        "sel",
 	"type":          "typ",
 }
@@ -314,9 +267,11 @@ func main() {
 		}
 		lapackeName := strings.TrimSuffix(strings.TrimPrefix(d.Name, prefix), suffix)
 		switch {
-		case strings.HasSuffix(lapackeName, "xx"), strings.HasSuffix(lapackeName, "fsx"), strings.HasSuffix(lapackeName, "rook"):
+		case strings.HasSuffix(lapackeName, "fsx"):
 			continue
-		case strings.HasPrefix(lapackeName[1:], "lag"):
+		case strings.HasSuffix(lapackeName, "vxx"):
+			continue
+		case strings.HasSuffix(lapackeName, "rook"):
 			continue
 		}
 		if hasFuncParameter(d) {
@@ -507,11 +462,11 @@ func side(buf *bytes.Buffer, d binding.Declaration, p binding.Parameter) bool {
 	if p.Name() != "side" {
 		return false
 	}
-	fmt.Fprint(buf, `	switch s {
+	fmt.Fprint(buf, `	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}

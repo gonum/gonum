@@ -1544,12 +1544,12 @@ func Zgbtrs(trans blas.Transpose, n, kl, ku, nrhs int, ab []complex128, ldab int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgebak.f.
-func Sgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float32, m int, v []float32, ldv int) bool {
-	switch s {
+func Sgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float32, m int, v []float32, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -1561,16 +1561,16 @@ func Sgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float32, m int
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_sgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_scale), (C.lapack_int)(m), (*C.float)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_sgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_scale), (C.lapack_int)(m), (*C.float)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgebak.f.
-func Dgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) bool {
-	switch s {
+func Dgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -1582,16 +1582,16 @@ func Dgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float64, m int
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_dgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_scale), (C.lapack_int)(m), (*C.double)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_dgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_scale), (C.lapack_int)(m), (*C.double)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgebak.f.
-func Cgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float32, m int, v []complex64, ldv int) bool {
-	switch s {
+func Cgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float32, m int, v []complex64, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -1603,16 +1603,16 @@ func Cgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float32, m int
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_cgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_scale), (C.lapack_int)(m), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_cgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_scale), (C.lapack_int)(m), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgebak.f.
-func Zgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float64, m int, v []complex128, ldv int) bool {
-	switch s {
+func Zgebak(job lapack.Job, side blas.Side, n, ilo, ihi int, scale []float64, m int, v []complex128, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -1624,7 +1624,7 @@ func Zgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float64, m int
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_zgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_scale), (C.lapack_int)(m), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_zgebak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_scale), (C.lapack_int)(m), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgebal.f.
@@ -5078,12 +5078,12 @@ func Zgetrs(trans blas.Transpose, n, nrhs int, a []complex128, lda int, ipiv []i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggbak.f.
-func Sggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float32, m int, v []float32, ldv int) bool {
-	switch s {
+func Sggbak(job lapack.Job, side blas.Side, n, ilo, ihi int, lscale, rscale []float32, m int, v []float32, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -5099,16 +5099,16 @@ func Sggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_sggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_lscale), (*C.float)(_rscale), (C.lapack_int)(m), (*C.float)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_sggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_lscale), (*C.float)(_rscale), (C.lapack_int)(m), (*C.float)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggbak.f.
-func Dggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float64, m int, v []float64, ldv int) bool {
-	switch s {
+func Dggbak(job lapack.Job, side blas.Side, n, ilo, ihi int, lscale, rscale []float64, m int, v []float64, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -5124,16 +5124,16 @@ func Dggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_dggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_lscale), (*C.double)(_rscale), (C.lapack_int)(m), (*C.double)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_dggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_lscale), (*C.double)(_rscale), (C.lapack_int)(m), (*C.double)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggbak.f.
-func Cggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float32, m int, v []complex64, ldv int) bool {
-	switch s {
+func Cggbak(job lapack.Job, side blas.Side, n, ilo, ihi int, lscale, rscale []float32, m int, v []complex64, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -5149,16 +5149,16 @@ func Cggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_cggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_lscale), (*C.float)(_rscale), (C.lapack_int)(m), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_cggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_lscale), (*C.float)(_rscale), (C.lapack_int)(m), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggbak.f.
-func Zggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float64, m int, v []complex128, ldv int) bool {
-	switch s {
+func Zggbak(job lapack.Job, side blas.Side, n, ilo, ihi int, lscale, rscale []float64, m int, v []complex128, ldv int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -5174,7 +5174,7 @@ func Zggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float
 	if len(v) > 0 {
 		_v = &v[0]
 	}
-	return isZero(C.LAPACKE_zggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(s), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_lscale), (*C.double)(_rscale), (C.lapack_int)(m), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv)))
+	return isZero(C.LAPACKE_zggbak_work((C.int)(rowMajor), (C.char)(job), (C.char)(side), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_lscale), (*C.double)(_rscale), (C.lapack_int)(m), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggbal.f.
@@ -11071,6 +11071,186 @@ func Zhptrs(ul blas.Uplo, n, nrhs int, ap []complex128, ipiv []int32, b []comple
 	return isZero(C.LAPACKE_zhptrs_work((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(n), (C.lapack_int)(nrhs), (*C.lapack_complex_double)(_ap), (*C.lapack_int)(_ipiv), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/shsein.f.
+func Shsein(job lapack.Job, eigsrc, initv byte, sel []int32, n int, h []float32, ldh int, wr, wi, vl []float32, ldvl int, vr []float32, ldvr, mm int, m []int32, work []float32, ifaill, ifailr []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _h *float32
+	if len(h) > 0 {
+		_h = &h[0]
+	}
+	var _wr *float32
+	if len(wr) > 0 {
+		_wr = &wr[0]
+	}
+	var _wi *float32
+	if len(wi) > 0 {
+		_wi = &wi[0]
+	}
+	var _vl *float32
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float32
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _ifaill *int32
+	if len(ifaill) > 0 {
+		_ifaill = &ifaill[0]
+	}
+	var _ifailr *int32
+	if len(ifailr) > 0 {
+		_ifailr = &ifailr[0]
+	}
+	return isZero(C.LAPACKE_shsein_work((C.int)(rowMajor), (C.char)(job), (C.char)(eigsrc), (C.char)(initv), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.float)(_h), (C.lapack_int)(ldh), (*C.float)(_wr), (*C.float)(_wi), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.float)(_work), (*C.lapack_int)(_ifaill), (*C.lapack_int)(_ifailr)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dhsein.f.
+func Dhsein(job lapack.Job, eigsrc, initv byte, sel []int32, n int, h []float64, ldh int, wr, wi, vl []float64, ldvl int, vr []float64, ldvr, mm int, m []int32, work []float64, ifaill, ifailr []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _h *float64
+	if len(h) > 0 {
+		_h = &h[0]
+	}
+	var _wr *float64
+	if len(wr) > 0 {
+		_wr = &wr[0]
+	}
+	var _wi *float64
+	if len(wi) > 0 {
+		_wi = &wi[0]
+	}
+	var _vl *float64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _ifaill *int32
+	if len(ifaill) > 0 {
+		_ifaill = &ifaill[0]
+	}
+	var _ifailr *int32
+	if len(ifailr) > 0 {
+		_ifailr = &ifailr[0]
+	}
+	return isZero(C.LAPACKE_dhsein_work((C.int)(rowMajor), (C.char)(job), (C.char)(eigsrc), (C.char)(initv), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.double)(_h), (C.lapack_int)(ldh), (*C.double)(_wr), (*C.double)(_wi), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.double)(_work), (*C.lapack_int)(_ifaill), (*C.lapack_int)(_ifailr)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chsein.f.
+func Chsein(job lapack.Job, eigsrc, initv byte, sel []int32, n int, h []complex64, ldh int, w, vl []complex64, ldvl int, vr []complex64, ldvr, mm int, m []int32, work []complex64, rwork []float32, ifaill, ifailr []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _h *complex64
+	if len(h) > 0 {
+		_h = &h[0]
+	}
+	var _w *complex64
+	if len(w) > 0 {
+		_w = &w[0]
+	}
+	var _vl *complex64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float32
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	var _ifaill *int32
+	if len(ifaill) > 0 {
+		_ifaill = &ifaill[0]
+	}
+	var _ifailr *int32
+	if len(ifailr) > 0 {
+		_ifailr = &ifailr[0]
+	}
+	return isZero(C.LAPACKE_chsein_work((C.int)(rowMajor), (C.char)(job), (C.char)(eigsrc), (C.char)(initv), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_float)(_h), (C.lapack_int)(ldh), (*C.lapack_complex_float)(_w), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_float)(_work), (*C.float)(_rwork), (*C.lapack_int)(_ifaill), (*C.lapack_int)(_ifailr)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhsein.f.
+func Zhsein(job lapack.Job, eigsrc, initv byte, sel []int32, n int, h []complex128, ldh int, w, vl []complex128, ldvl int, vr []complex128, ldvr, mm int, m []int32, work []complex128, rwork []float64, ifaill, ifailr []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _h *complex128
+	if len(h) > 0 {
+		_h = &h[0]
+	}
+	var _w *complex128
+	if len(w) > 0 {
+		_w = &w[0]
+	}
+	var _vl *complex128
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex128
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float64
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	var _ifaill *int32
+	if len(ifaill) > 0 {
+		_ifaill = &ifaill[0]
+	}
+	var _ifailr *int32
+	if len(ifailr) > 0 {
+		_ifailr = &ifailr[0]
+	}
+	return isZero(C.LAPACKE_zhsein_work((C.int)(rowMajor), (C.char)(job), (C.char)(eigsrc), (C.char)(initv), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_double)(_h), (C.lapack_int)(ldh), (*C.lapack_complex_double)(_w), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_double)(_work), (*C.double)(_rwork), (*C.lapack_int)(_ifaill), (*C.lapack_int)(_ifailr)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/shseqr.f.
 func Shseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []float32, ldh int, wr, wi, z []float32, ldz int, work []float32, lwork int) int {
 	var _h *float32
@@ -11421,6 +11601,268 @@ func Zlacp2(ul blas.Uplo, m, n int, a []float64, lda int, b []complex128, ldb in
 		_b = &b[0]
 	}
 	return isZero(C.LAPACKE_zlacp2_work((C.int)(rowMajor), (C.char)(ul), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlag2c.f.
+func Zlag2c(m, n int, a []complex128, lda int, sa []complex64, ldsa int) bool {
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _sa *complex64
+	if len(sa) > 0 {
+		_sa = &sa[0]
+	}
+	return isZero(C.LAPACKE_zlag2c_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_sa), (C.lapack_int)(ldsa)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slag2d.f.
+func Slag2d(m, n int, sa []float32, ldsa int, a []float64, lda int) bool {
+	var _sa *float32
+	if len(sa) > 0 {
+		_sa = &sa[0]
+	}
+	var _a *float64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	return isZero(C.LAPACKE_slag2d_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(_sa), (C.lapack_int)(ldsa), (*C.double)(_a), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlag2s.f.
+func Dlag2s(m, n int, a []float64, lda int, sa []float32, ldsa int) bool {
+	var _a *float64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _sa *float32
+	if len(sa) > 0 {
+		_sa = &sa[0]
+	}
+	return isZero(C.LAPACKE_dlag2s_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.float)(_sa), (C.lapack_int)(ldsa)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clag2z.f.
+func Clag2z(m, n int, sa []complex64, ldsa int, a []complex128, lda int) bool {
+	var _sa *complex64
+	if len(sa) > 0 {
+		_sa = &sa[0]
+	}
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	return isZero(C.LAPACKE_clag2z_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(_sa), (C.lapack_int)(ldsa), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slagge.f.
+func Slagge(m, n, kl, ku int, d, a []float32, lda int, iseed []int32, work []float32) bool {
+	var _d *float32
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *float32
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_slagge_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(kl), (C.lapack_int)(ku), (*C.float)(_d), (*C.float)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlagge.f.
+func Dlagge(m, n, kl, ku int, d, a []float64, lda int, iseed []int32, work []float64) bool {
+	var _d *float64
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *float64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_dlagge_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(kl), (C.lapack_int)(ku), (*C.double)(_d), (*C.double)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.double)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clagge.f.
+func Clagge(m, n, kl, ku int, d []float32, a []complex64, lda int, iseed []int32, work []complex64) bool {
+	var _d *float32
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_clagge_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(kl), (C.lapack_int)(ku), (*C.float)(_d), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.lapack_complex_float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlagge.f.
+func Zlagge(m, n, kl, ku int, d []float64, a []complex128, lda int, iseed []int32, work []complex128) bool {
+	var _d *float64
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_zlagge_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(kl), (C.lapack_int)(ku), (*C.double)(_d), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.lapack_complex_double)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/claghe.f.
+func Claghe(n, k int, d []float32, a []complex64, lda int, iseed []int32, work []complex64) bool {
+	var _d *float32
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_claghe_work((C.int)(rowMajor), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_d), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.lapack_complex_float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlaghe.f.
+func Zlaghe(n, k int, d []float64, a []complex128, lda int, iseed []int32, work []complex128) bool {
+	var _d *float64
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_zlaghe_work((C.int)(rowMajor), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_d), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.lapack_complex_double)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slagsy.f.
+func Slagsy(n, k int, d, a []float32, lda int, iseed []int32, work []float32) bool {
+	var _d *float32
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *float32
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_slagsy_work((C.int)(rowMajor), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_d), (*C.float)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlagsy.f.
+func Dlagsy(n, k int, d, a []float64, lda int, iseed []int32, work []float64) bool {
+	var _d *float64
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *float64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_dlagsy_work((C.int)(rowMajor), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_d), (*C.double)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.double)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clagsy.f.
+func Clagsy(n, k int, d []float32, a []complex64, lda int, iseed []int32, work []complex64) bool {
+	var _d *float32
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_clagsy_work((C.int)(rowMajor), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_d), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.lapack_complex_float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlagsy.f.
+func Zlagsy(n, k int, d []float64, a []complex128, lda int, iseed []int32, work []complex128) bool {
+	var _d *float64
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_zlagsy_work((C.int)(rowMajor), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_d), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_int)(_iseed), (*C.lapack_complex_double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slapmr.f.
@@ -11912,12 +12354,12 @@ func Zlantr(norm byte, ul blas.Uplo, d blas.Diag, m, n int, a []complex128, lda 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarfb.f.
-func Slarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32, ldwork int) bool {
-	switch s {
+func Slarfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -11947,16 +12389,16 @@ func Slarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int,
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_slarfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_slarfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlarfb.f.
-func Dlarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64, ldwork int) bool {
-	switch s {
+func Dlarfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -11986,16 +12428,16 @@ func Dlarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int,
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dlarfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_dlarfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clarfb.f.
-func Clarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64, ldwork int) bool {
-	switch s {
+func Clarfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12025,16 +12467,16 @@ func Clarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int,
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_clarfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_clarfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlarfb.f.
-func Zlarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128, ldwork int) bool {
-	switch s {
+func Zlarfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12064,7 +12506,7 @@ func Zlarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int,
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zlarfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_zlarfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarfg.f.
@@ -12204,12 +12646,12 @@ func Zlarft(direct, storev byte, n, k int, v []complex128, ldv int, tau, t []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarfx.f.
-func Slarfx(s blas.Side, m, n int, v []float32, tau float32, c []float32, ldc int, work []float32) bool {
-	switch s {
+func Slarfx(side blas.Side, m, n int, v []float32, tau float32, c []float32, ldc int, work []float32) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12225,16 +12667,16 @@ func Slarfx(s blas.Side, m, n int, v []float32, tau float32, c []float32, ldc in
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_slarfx_work((C.int)(rowMajor), (C.char)(s), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(_v), (C.float)(tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work)))
+	return isZero(C.LAPACKE_slarfx_work((C.int)(rowMajor), (C.char)(side), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(_v), (C.float)(tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlarfx.f.
-func Dlarfx(s blas.Side, m, n int, v []float64, tau float64, c []float64, ldc int, work []float64) bool {
-	switch s {
+func Dlarfx(side blas.Side, m, n int, v []float64, tau float64, c []float64, ldc int, work []float64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12250,16 +12692,16 @@ func Dlarfx(s blas.Side, m, n int, v []float64, tau float64, c []float64, ldc in
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dlarfx_work((C.int)(rowMajor), (C.char)(s), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_v), (C.double)(tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work)))
+	return isZero(C.LAPACKE_dlarfx_work((C.int)(rowMajor), (C.char)(side), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_v), (C.double)(tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clarfx.f.
-func Clarfx(s blas.Side, m, n int, v []complex64, tau complex64, c []complex64, ldc int, work []complex64) bool {
-	switch s {
+func Clarfx(side blas.Side, m, n int, v []complex64, tau complex64, c []complex64, ldc int, work []complex64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12275,16 +12717,16 @@ func Clarfx(s blas.Side, m, n int, v []complex64, tau complex64, c []complex64, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_clarfx_work((C.int)(rowMajor), (C.char)(s), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(_v), (C.lapack_complex_float)(tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work)))
+	return isZero(C.LAPACKE_clarfx_work((C.int)(rowMajor), (C.char)(side), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(_v), (C.lapack_complex_float)(tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlarfx.f.
-func Zlarfx(s blas.Side, m, n int, v []complex128, tau complex128, c []complex128, ldc int, work []complex128) bool {
-	switch s {
+func Zlarfx(side blas.Side, m, n int, v []complex128, tau complex128, c []complex128, ldc int, work []complex128) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12300,7 +12742,7 @@ func Zlarfx(s blas.Side, m, n int, v []complex128, tau complex128, c []complex12
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zlarfx_work((C.int)(rowMajor), (C.char)(s), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(_v), (C.lapack_complex_double)(tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work)))
+	return isZero(C.LAPACKE_zlarfx_work((C.int)(rowMajor), (C.char)(side), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(_v), (C.lapack_complex_double)(tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarnv.f.
@@ -12529,6 +12971,90 @@ func Zlaswp(n int, a []complex128, lda, k1, k2 int, ipiv []int32, incx int) bool
 	return isZero(C.LAPACKE_zlaswp_work((C.int)(rowMajor), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (C.lapack_int)(k1), (C.lapack_int)(k2), (*C.lapack_int)(_ipiv), (C.lapack_int)(incx)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slatms.f.
+func Slatms(m, n int, dist byte, iseed []int32, sym byte, d []float32, mode int, cond, dmax float32, kl, ku int, pack byte, a []float32, lda int, work []float32) bool {
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _d *float32
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *float32
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_slatms_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.char)(dist), (*C.lapack_int)(_iseed), (C.char)(sym), (*C.float)(_d), (C.lapack_int)(mode), (C.float)(cond), (C.float)(dmax), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.char)(pack), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlatms.f.
+func Dlatms(m, n int, dist byte, iseed []int32, sym byte, d []float64, mode int, cond, dmax float64, kl, ku int, pack byte, a []float64, lda int, work []float64) bool {
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _d *float64
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *float64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_dlatms_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.char)(dist), (*C.lapack_int)(_iseed), (C.char)(sym), (*C.double)(_d), (C.lapack_int)(mode), (C.double)(cond), (C.double)(dmax), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.char)(pack), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clatms.f.
+func Clatms(m, n int, dist byte, iseed []int32, sym byte, d []float32, mode int, cond, dmax float32, kl, ku int, pack byte, a []complex64, lda int, work []complex64) bool {
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _d *float32
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_clatms_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.char)(dist), (*C.lapack_int)(_iseed), (C.char)(sym), (*C.float)(_d), (C.lapack_int)(mode), (C.float)(cond), (C.float)(dmax), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.char)(pack), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlatms.f.
+func Zlatms(m, n int, dist byte, iseed []int32, sym byte, d []float64, mode int, cond, dmax float64, kl, ku int, pack byte, a []complex128, lda int, work []complex128) bool {
+	var _iseed *int32
+	if len(iseed) > 0 {
+		_iseed = &iseed[0]
+	}
+	var _d *float64
+	if len(d) > 0 {
+		_d = &d[0]
+	}
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_zlatms_work((C.int)(rowMajor), (C.lapack_int)(m), (C.lapack_int)(n), (C.char)(dist), (*C.lapack_int)(_iseed), (C.char)(sym), (*C.double)(_d), (C.lapack_int)(mode), (C.double)(cond), (C.double)(dmax), (C.lapack_int)(kl), (C.lapack_int)(ku), (C.char)(pack), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_work)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slauum.f.
 func Slauum(ul blas.Uplo, n int, a []float32, lda int) bool {
 	switch ul {
@@ -12656,12 +13182,12 @@ func Dopgtr(ul blas.Uplo, n int, ap, tau, q []float64, ldq int, work []float64) 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sopmtr.f.
-func Sopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []float32, ldc int, work []float32) bool {
-	switch s {
+func Sopmtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []float32, ldc int, work []float32) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12699,16 +13225,16 @@ func Sopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sopmtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(_ap), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work)))
+	return isZero(C.LAPACKE_sopmtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(_ap), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dopmtr.f.
-func Dopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []float64, ldc int, work []float64) bool {
-	switch s {
+func Dopmtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []float64, ldc int, work []float64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -12746,7 +13272,7 @@ func Dopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dopmtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_ap), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work)))
+	return isZero(C.LAPACKE_dopmtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_ap), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorgbr.f.
@@ -13004,12 +13530,12 @@ func Dorgtr(ul blas.Uplo, n int, a []float64, lda int, tau, work []float64, lwor
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormbr.f.
-func Sormbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormbr(vect byte, side blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13039,16 +13565,16 @@ func Sormbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []float
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormbr.f.
-func Dormbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormbr(vect byte, side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13078,16 +13604,16 @@ func Dormbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []float
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormhr.f.
-func Sormhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormhr(side blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13117,16 +13643,16 @@ func Sormhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float32, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormhr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormhr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormhr.f.
-func Dormhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormhr(side blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13156,16 +13682,16 @@ func Dormhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float64, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormhr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormhr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormlq.f.
-func Sormlq(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormlq(side blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13195,16 +13721,16 @@ func Sormlq(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormlq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormlq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormlq.f.
-func Dormlq(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormlq(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13234,16 +13760,16 @@ func Dormlq(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormlq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormlq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormql.f.
-func Sormql(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormql(side blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13273,16 +13799,16 @@ func Sormql(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormql_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormql_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormql.f.
-func Dormql(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormql(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13312,16 +13838,16 @@ func Dormql(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormql_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormql_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormqr.f.
-func Sormqr(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13351,16 +13877,16 @@ func Sormqr(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormqr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormqr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormqr.f.
-func Dormqr(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormqr(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13390,16 +13916,16 @@ func Dormqr(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormqr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormqr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormrq.f.
-func Sormrq(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormrq(side blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13429,16 +13955,16 @@ func Sormrq(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormrq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormrq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormrq.f.
-func Dormrq(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormrq(side blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13468,16 +13994,16 @@ func Dormrq(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormrq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormrq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormrz.f.
-func Sormrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormrz(side blas.Side, trans blas.Transpose, m, n, k, l int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13507,16 +14033,16 @@ func Sormrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []float32, lda 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormrz_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormrz_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormrz.f.
-func Dormrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormrz(side blas.Side, trans blas.Transpose, m, n, k, l int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13546,16 +14072,16 @@ func Dormrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []float64, lda 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormrz_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormrz_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormtr.f.
-func Sormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
-	switch s {
+func Sormtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13593,16 +14119,16 @@ func Sormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sormtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_sormtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_tau), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormtr.f.
-func Dormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
-	switch s {
+func Dormtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -13640,7 +14166,7 @@ func Dormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dormtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_dormtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_tau), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbcon.f.
@@ -23218,7 +23744,7 @@ func Ztbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stfsm.f.
-func Stfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha float32, a, b []float32, ldb int) bool {
+func Stfsm(transr blas.Transpose, side blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha float32, a, b []float32, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23229,11 +23755,11 @@ func Stfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	default:
 		panic("lapack: bad trans")
 	}
-	switch s {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -23271,11 +23797,11 @@ func Stfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	if len(b) > 0 {
 		_b = &b[0]
 	}
-	return isZero(C.LAPACKE_stfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.float)(alpha), (*C.float)(_a), (*C.float)(_b), (C.lapack_int)(ldb)))
+	return isZero(C.LAPACKE_stfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.float)(alpha), (*C.float)(_a), (*C.float)(_b), (C.lapack_int)(ldb)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtfsm.f.
-func Dtfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha float64, a, b []float64, ldb int) bool {
+func Dtfsm(transr blas.Transpose, side blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha float64, a, b []float64, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23286,11 +23812,11 @@ func Dtfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	default:
 		panic("lapack: bad trans")
 	}
-	switch s {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -23328,11 +23854,11 @@ func Dtfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	if len(b) > 0 {
 		_b = &b[0]
 	}
-	return isZero(C.LAPACKE_dtfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.double)(alpha), (*C.double)(_a), (*C.double)(_b), (C.lapack_int)(ldb)))
+	return isZero(C.LAPACKE_dtfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.double)(alpha), (*C.double)(_a), (*C.double)(_b), (C.lapack_int)(ldb)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctfsm.f.
-func Ctfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha complex64, a, b []complex64, ldb int) bool {
+func Ctfsm(transr blas.Transpose, side blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha complex64, a, b []complex64, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23343,11 +23869,11 @@ func Ctfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	default:
 		panic("lapack: bad trans")
 	}
-	switch s {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -23385,11 +23911,11 @@ func Ctfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	if len(b) > 0 {
 		_b = &b[0]
 	}
-	return isZero(C.LAPACKE_ctfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_complex_float)(alpha), (*C.lapack_complex_float)(_a), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb)))
+	return isZero(C.LAPACKE_ctfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_complex_float)(alpha), (*C.lapack_complex_float)(_a), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztfsm.f.
-func Ztfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha complex128, a, b []complex128, ldb int) bool {
+func Ztfsm(transr blas.Transpose, side blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha complex128, a, b []complex128, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23400,11 +23926,11 @@ func Ztfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	default:
 		panic("lapack: bad trans")
 	}
-	switch s {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -23442,7 +23968,7 @@ func Ztfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 	if len(b) > 0 {
 		_b = &b[0]
 	}
-	return isZero(C.LAPACKE_ztfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_complex_double)(alpha), (*C.lapack_complex_double)(_a), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb)))
+	return isZero(C.LAPACKE_ztfsm_work((C.int)(rowMajor), (C.char)(transr), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_complex_double)(alpha), (*C.lapack_complex_double)(_a), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stftri.f.
@@ -23833,6 +24359,178 @@ func Ztfttr(transr blas.Transpose, ul blas.Uplo, n int, arf, a []complex128, lda
 	return isZero(C.LAPACKE_ztfttr_work((C.int)(rowMajor), (C.char)(transr), (C.char)(ul), (C.lapack_int)(n), (*C.lapack_complex_double)(_arf), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgevc.f.
+func Stgevc(side blas.Side, howmny byte, sel []int32, n int, s []float32, lds int, p []float32, ldp int, vl []float32, ldvl int, vr []float32, ldvr, mm int, m []int32, work []float32) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _s *float32
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _p *float32
+	if len(p) > 0 {
+		_p = &p[0]
+	}
+	var _vl *float32
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float32
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_stgevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.float)(_s), (C.lapack_int)(lds), (*C.float)(_p), (C.lapack_int)(ldp), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtgevc.f.
+func Dtgevc(side blas.Side, howmny byte, sel []int32, n int, s []float64, lds int, p []float64, ldp int, vl []float64, ldvl int, vr []float64, ldvr, mm int, m []int32, work []float64) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _s *float64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _p *float64
+	if len(p) > 0 {
+		_p = &p[0]
+	}
+	var _vl *float64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_dtgevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.double)(_s), (C.lapack_int)(lds), (*C.double)(_p), (C.lapack_int)(ldp), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.double)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctgevc.f.
+func Ctgevc(side blas.Side, howmny byte, sel []int32, n int, s []complex64, lds int, p []complex64, ldp int, vl []complex64, ldvl int, vr []complex64, ldvr, mm int, m []int32, work []complex64, rwork []float32) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _s *complex64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _p *complex64
+	if len(p) > 0 {
+		_p = &p[0]
+	}
+	var _vl *complex64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float32
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	return isZero(C.LAPACKE_ctgevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_float)(_s), (C.lapack_int)(lds), (*C.lapack_complex_float)(_p), (C.lapack_int)(ldp), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_float)(_work), (*C.float)(_rwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztgevc.f.
+func Ztgevc(side blas.Side, howmny byte, sel []int32, n int, s []complex128, lds int, p []complex128, ldp int, vl []complex128, ldvl int, vr []complex128, ldvr, mm int, m []int32, work []complex128, rwork []float64) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _s *complex128
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _p *complex128
+	if len(p) > 0 {
+		_p = &p[0]
+	}
+	var _vl *complex128
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex128
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float64
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	return isZero(C.LAPACKE_ztgevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_double)(_s), (C.lapack_int)(lds), (*C.lapack_complex_double)(_p), (C.lapack_int)(ldp), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_double)(_work), (*C.double)(_rwork)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgexc.f.
 func Stgexc(wantq, wantz int32, n int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int, ifst, ilst []int32, work []float32, lwork int) bool {
 	var _a *float32
@@ -23939,6 +24637,242 @@ func Ztgexc(wantq, wantz int32, n int, a []complex128, lda int, b []complex128, 
 		_z = &z[0]
 	}
 	return isZero(C.LAPACKE_ztgexc_work((C.int)(rowMajor), (C.lapack_logical)(wantq), (C.lapack_logical)(wantz), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_q), (C.lapack_int)(ldq), (*C.lapack_complex_double)(_z), (C.lapack_int)(ldz), (C.lapack_int)(ifst), (C.lapack_int)(ilst)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgsen.f.
+func Stgsen(ijob lapack.Job, wantq, wantz int32, sel []int32, n int, a []float32, lda int, b []float32, ldb int, alphar, alphai, beta, q []float32, ldq int, z []float32, ldz int, m []int32, pl, pr, dif, work []float32, lwork int, iwork []int32, liwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *float32
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *float32
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _alphar *float32
+	if len(alphar) > 0 {
+		_alphar = &alphar[0]
+	}
+	var _alphai *float32
+	if len(alphai) > 0 {
+		_alphai = &alphai[0]
+	}
+	var _beta *float32
+	if len(beta) > 0 {
+		_beta = &beta[0]
+	}
+	var _q *float32
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _z *float32
+	if len(z) > 0 {
+		_z = &z[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _pl *float32
+	if len(pl) > 0 {
+		_pl = &pl[0]
+	}
+	var _pr *float32
+	if len(pr) > 0 {
+		_pr = &pr[0]
+	}
+	var _dif *float32
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_stgsen_work((C.int)(rowMajor), (C.lapack_int)(ijob), (C.lapack_logical)(wantq), (C.lapack_logical)(wantz), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_b), (C.lapack_int)(ldb), (*C.float)(_alphar), (*C.float)(_alphai), (*C.float)(_beta), (*C.float)(_q), (C.lapack_int)(ldq), (*C.float)(_z), (C.lapack_int)(ldz), (*C.lapack_int)(_m), (*C.float)(_pl), (*C.float)(_pr), (*C.float)(_dif), (*C.float)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork), (C.lapack_int)(liwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtgsen.f.
+func Dtgsen(ijob lapack.Job, wantq, wantz int32, sel []int32, n int, a []float64, lda int, b []float64, ldb int, alphar, alphai, beta, q []float64, ldq int, z []float64, ldz int, m []int32, pl, pr, dif, work []float64, lwork int, iwork []int32, liwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *float64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *float64
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _alphar *float64
+	if len(alphar) > 0 {
+		_alphar = &alphar[0]
+	}
+	var _alphai *float64
+	if len(alphai) > 0 {
+		_alphai = &alphai[0]
+	}
+	var _beta *float64
+	if len(beta) > 0 {
+		_beta = &beta[0]
+	}
+	var _q *float64
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _z *float64
+	if len(z) > 0 {
+		_z = &z[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _pl *float64
+	if len(pl) > 0 {
+		_pl = &pl[0]
+	}
+	var _pr *float64
+	if len(pr) > 0 {
+		_pr = &pr[0]
+	}
+	var _dif *float64
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_dtgsen_work((C.int)(rowMajor), (C.lapack_int)(ijob), (C.lapack_logical)(wantq), (C.lapack_logical)(wantz), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_b), (C.lapack_int)(ldb), (*C.double)(_alphar), (*C.double)(_alphai), (*C.double)(_beta), (*C.double)(_q), (C.lapack_int)(ldq), (*C.double)(_z), (C.lapack_int)(ldz), (*C.lapack_int)(_m), (*C.double)(_pl), (*C.double)(_pr), (*C.double)(_dif), (*C.double)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork), (C.lapack_int)(liwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctgsen.f.
+func Ctgsen(ijob lapack.Job, wantq, wantz int32, sel []int32, n int, a []complex64, lda int, b []complex64, ldb int, alpha, beta, q []complex64, ldq int, z []complex64, ldz int, m []int32, pl, pr, dif []float32, work []complex64, lwork int, iwork []int32, liwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *complex64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *complex64
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _alpha *complex64
+	if len(alpha) > 0 {
+		_alpha = &alpha[0]
+	}
+	var _beta *complex64
+	if len(beta) > 0 {
+		_beta = &beta[0]
+	}
+	var _q *complex64
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _z *complex64
+	if len(z) > 0 {
+		_z = &z[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _pl *float32
+	if len(pl) > 0 {
+		_pl = &pl[0]
+	}
+	var _pr *float32
+	if len(pr) > 0 {
+		_pr = &pr[0]
+	}
+	var _dif *float32
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_ctgsen_work((C.int)(rowMajor), (C.lapack_int)(ijob), (C.lapack_logical)(wantq), (C.lapack_logical)(wantz), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_float)(_alpha), (*C.lapack_complex_float)(_beta), (*C.lapack_complex_float)(_q), (C.lapack_int)(ldq), (*C.lapack_complex_float)(_z), (C.lapack_int)(ldz), (*C.lapack_int)(_m), (*C.float)(_pl), (*C.float)(_pr), (*C.float)(_dif), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork), (C.lapack_int)(liwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztgsen.f.
+func Ztgsen(ijob lapack.Job, wantq, wantz int32, sel []int32, n int, a []complex128, lda int, b []complex128, ldb int, alpha, beta, q []complex128, ldq int, z []complex128, ldz int, m []int32, pl, pr, dif []float64, work []complex128, lwork int, iwork []int32, liwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *complex128
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _alpha *complex128
+	if len(alpha) > 0 {
+		_alpha = &alpha[0]
+	}
+	var _beta *complex128
+	if len(beta) > 0 {
+		_beta = &beta[0]
+	}
+	var _q *complex128
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _z *complex128
+	if len(z) > 0 {
+		_z = &z[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _pl *float64
+	if len(pl) > 0 {
+		_pl = &pl[0]
+	}
+	var _pr *float64
+	if len(pr) > 0 {
+		_pr = &pr[0]
+	}
+	var _dif *float64
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_ztgsen_work((C.int)(rowMajor), (C.lapack_int)(ijob), (C.lapack_logical)(wantq), (C.lapack_logical)(wantz), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_alpha), (*C.lapack_complex_double)(_beta), (*C.lapack_complex_double)(_q), (C.lapack_int)(ldq), (*C.lapack_complex_double)(_z), (C.lapack_int)(ldz), (*C.lapack_int)(_m), (*C.double)(_pl), (*C.double)(_pr), (*C.double)(_dif), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork), (C.lapack_int)(liwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgsja.f.
@@ -24103,6 +25037,186 @@ func Ztgsja(jobu, jobv, jobq lapack.Job, m, p, n, k, l int, a []complex128, lda 
 		_ncycle = &ncycle[0]
 	}
 	return isZero(C.LAPACKE_ztgsja_work((C.int)(rowMajor), (C.char)(jobu), (C.char)(jobv), (C.char)(jobq), (C.lapack_int)(m), (C.lapack_int)(p), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (C.double)(tola), (C.double)(tolb), (*C.double)(_alpha), (*C.double)(_beta), (*C.lapack_complex_double)(_u), (C.lapack_int)(ldu), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_q), (C.lapack_int)(ldq), (*C.lapack_complex_double)(_work), (*C.lapack_int)(_ncycle)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgsna.f.
+func Stgsna(job lapack.Job, howmny byte, sel []int32, n int, a []float32, lda int, b []float32, ldb int, vl []float32, ldvl int, vr []float32, ldvr int, s, dif []float32, mm int, m []int32, work []float32, lwork int, iwork []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *float32
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *float32
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _vl *float32
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float32
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float32
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _dif *float32
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_stgsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_b), (C.lapack_int)(ldb), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (*C.float)(_s), (*C.float)(_dif), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.float)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtgsna.f.
+func Dtgsna(job lapack.Job, howmny byte, sel []int32, n int, a []float64, lda int, b []float64, ldb int, vl []float64, ldvl int, vr []float64, ldvr int, s, dif []float64, mm int, m []int32, work []float64, lwork int, iwork []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *float64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *float64
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _vl *float64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _dif *float64
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_dtgsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_b), (C.lapack_int)(ldb), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (*C.double)(_s), (*C.double)(_dif), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.double)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctgsna.f.
+func Ctgsna(job lapack.Job, howmny byte, sel []int32, n int, a []complex64, lda int, b []complex64, ldb int, vl []complex64, ldvl int, vr []complex64, ldvr int, s, dif []float32, mm int, m []int32, work []complex64, lwork int, iwork []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *complex64
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *complex64
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _vl *complex64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float32
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _dif *float32
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_ctgsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (*C.float)(_s), (*C.float)(_dif), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztgsna.f.
+func Ztgsna(job lapack.Job, howmny byte, sel []int32, n int, a []complex128, lda int, b []complex128, ldb int, vl []complex128, ldvl int, vr []complex128, ldvr int, s, dif []float64, mm int, m []int32, work []complex128, lwork int, iwork []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _a *complex128
+	if len(a) > 0 {
+		_a = &a[0]
+	}
+	var _b *complex128
+	if len(b) > 0 {
+		_b = &b[0]
+	}
+	var _vl *complex128
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex128
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _dif *float64
+	if len(dif) > 0 {
+		_dif = &dif[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_ztgsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (*C.double)(_s), (*C.double)(_dif), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgsyl.f.
@@ -25321,6 +26435,162 @@ func Ztrcon(norm byte, ul blas.Uplo, d blas.Diag, n int, a []complex128, lda int
 	return isZero(C.LAPACKE_ztrcon_work((C.int)(rowMajor), (C.char)(norm), (C.char)(ul), (C.char)(d), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.double)(_rcond), (*C.lapack_complex_double)(_work), (*C.double)(_rwork)))
 }
 
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strevc.f.
+func Strevc(side blas.Side, howmny byte, sel []int32, n int, t []float32, ldt int, vl []float32, ldvl int, vr []float32, ldvr, mm int, m []int32, work []float32) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *float32
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *float32
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float32
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_strevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.float)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrevc.f.
+func Dtrevc(side blas.Side, howmny byte, sel []int32, n int, t []float64, ldt int, vl []float64, ldvl int, vr []float64, ldvr, mm int, m []int32, work []float64) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *float64
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *float64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_dtrevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.double)(_work)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrevc.f.
+func Ctrevc(side blas.Side, howmny byte, sel []int32, n int, t []complex64, ldt int, vl []complex64, ldvl int, vr []complex64, ldvr, mm int, m []int32, work []complex64, rwork []float32) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *complex64
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *complex64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float32
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	return isZero(C.LAPACKE_ctrevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_float)(_work), (*C.float)(_rwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrevc.f.
+func Ztrevc(side blas.Side, howmny byte, sel []int32, n int, t []complex128, ldt int, vl []complex128, ldvl int, vr []complex128, ldvr, mm int, m []int32, work []complex128, rwork []float64) bool {
+	switch side {
+	case blas.Left:
+		side = 'L'
+	case blas.Right:
+		side = 'R'
+	default:
+		panic("lapack: bad side")
+	}
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *complex128
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *complex128
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex128
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float64
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	return isZero(C.LAPACKE_ztrevc_work((C.int)(rowMajor), (C.char)(side), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_double)(_work), (*C.double)(_rwork)))
+}
+
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strexc.f.
 func Strexc(compq lapack.Comp, n int, t []float32, ldt int, q []float32, ldq int, ifst, ilst []int32, work []float32) bool {
 	var _t *float32
@@ -25631,6 +26901,334 @@ func Ztrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []co
 		_rwork = &rwork[0]
 	}
 	return isZero(C.LAPACKE_ztrrfs_work((C.int)(rowMajor), (C.char)(ul), (C.char)(trans), (C.char)(d), (C.lapack_int)(n), (C.lapack_int)(nrhs), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_x), (C.lapack_int)(ldx), (*C.double)(_ferr), (*C.double)(_berr), (*C.lapack_complex_double)(_work), (*C.double)(_rwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strsen.f.
+func Strsen(job lapack.Job, compq lapack.Comp, sel []int32, n int, t []float32, ldt int, q []float32, ldq int, wr, wi []float32, m []int32, s, sep, work []float32, lwork int, iwork []int32, liwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *float32
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _q *float32
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _wr *float32
+	if len(wr) > 0 {
+		_wr = &wr[0]
+	}
+	var _wi *float32
+	if len(wi) > 0 {
+		_wi = &wi[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _s *float32
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float32
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_strsen_work((C.int)(rowMajor), (C.char)(job), (C.char)(compq), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_q), (C.lapack_int)(ldq), (*C.float)(_wr), (*C.float)(_wi), (*C.lapack_int)(_m), (*C.float)(_s), (*C.float)(_sep), (*C.float)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork), (C.lapack_int)(liwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrsen.f.
+func Dtrsen(job lapack.Job, compq lapack.Comp, sel []int32, n int, t []float64, ldt int, q []float64, ldq int, wr, wi []float64, m []int32, s, sep, work []float64, lwork int, iwork []int32, liwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *float64
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _q *float64
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _wr *float64
+	if len(wr) > 0 {
+		_wr = &wr[0]
+	}
+	var _wi *float64
+	if len(wi) > 0 {
+		_wi = &wi[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _s *float64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float64
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_dtrsen_work((C.int)(rowMajor), (C.char)(job), (C.char)(compq), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_q), (C.lapack_int)(ldq), (*C.double)(_wr), (*C.double)(_wi), (*C.lapack_int)(_m), (*C.double)(_s), (*C.double)(_sep), (*C.double)(_work), (C.lapack_int)(lwork), (*C.lapack_int)(_iwork), (C.lapack_int)(liwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrsen.f.
+func Ctrsen(job lapack.Job, compq lapack.Comp, sel []int32, n int, t []complex64, ldt int, q []complex64, ldq int, w []complex64, m []int32, s, sep []float32, work []complex64, lwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *complex64
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _q *complex64
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _w *complex64
+	if len(w) > 0 {
+		_w = &w[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _s *float32
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float32
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_ctrsen_work((C.int)(rowMajor), (C.char)(job), (C.char)(compq), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_q), (C.lapack_int)(ldq), (*C.lapack_complex_float)(_w), (*C.lapack_int)(_m), (*C.float)(_s), (*C.float)(_sep), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrsen.f.
+func Ztrsen(job lapack.Job, compq lapack.Comp, sel []int32, n int, t []complex128, ldt int, q []complex128, ldq int, w []complex128, m []int32, s, sep []float64, work []complex128, lwork int) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *complex128
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _q *complex128
+	if len(q) > 0 {
+		_q = &q[0]
+	}
+	var _w *complex128
+	if len(w) > 0 {
+		_w = &w[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _s *float64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float64
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	return isZero(C.LAPACKE_ztrsen_work((C.int)(rowMajor), (C.char)(job), (C.char)(compq), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_q), (C.lapack_int)(ldq), (*C.lapack_complex_double)(_w), (*C.lapack_int)(_m), (*C.double)(_s), (*C.double)(_sep), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strsna.f.
+func Strsna(job lapack.Job, howmny byte, sel []int32, n int, t []float32, ldt int, vl []float32, ldvl int, vr []float32, ldvr int, s, sep []float32, mm int, m []int32, work []float32, ldwork int, iwork []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *float32
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *float32
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float32
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float32
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float32
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float32
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_strsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_vl), (C.lapack_int)(ldvl), (*C.float)(_vr), (C.lapack_int)(ldvr), (*C.float)(_s), (*C.float)(_sep), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.float)(_work), (C.lapack_int)(ldwork), (*C.lapack_int)(_iwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrsna.f.
+func Dtrsna(job lapack.Job, howmny byte, sel []int32, n int, t []float64, ldt int, vl []float64, ldvl int, vr []float64, ldvr int, s, sep []float64, mm int, m []int32, work []float64, ldwork int, iwork []int32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *float64
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *float64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *float64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float64
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *float64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _iwork *int32
+	if len(iwork) > 0 {
+		_iwork = &iwork[0]
+	}
+	return isZero(C.LAPACKE_dtrsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_vl), (C.lapack_int)(ldvl), (*C.double)(_vr), (C.lapack_int)(ldvr), (*C.double)(_s), (*C.double)(_sep), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.double)(_work), (C.lapack_int)(ldwork), (*C.lapack_int)(_iwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrsna.f.
+func Ctrsna(job lapack.Job, howmny byte, sel []int32, n int, t []complex64, ldt int, vl []complex64, ldvl int, vr []complex64, ldvr int, s, sep []float32, mm int, m []int32, work []complex64, ldwork int, rwork []float32) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *complex64
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *complex64
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex64
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float32
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float32
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex64
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float32
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	return isZero(C.LAPACKE_ctrsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_float)(_vr), (C.lapack_int)(ldvr), (*C.float)(_s), (*C.float)(_sep), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_float)(_work), (C.lapack_int)(ldwork), (*C.float)(_rwork)))
+}
+
+// See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrsna.f.
+func Ztrsna(job lapack.Job, howmny byte, sel []int32, n int, t []complex128, ldt int, vl []complex128, ldvl int, vr []complex128, ldvr int, s, sep []float64, mm int, m []int32, work []complex128, ldwork int, rwork []float64) bool {
+	var _sel *int32
+	if len(sel) > 0 {
+		_sel = &sel[0]
+	}
+	var _t *complex128
+	if len(t) > 0 {
+		_t = &t[0]
+	}
+	var _vl *complex128
+	if len(vl) > 0 {
+		_vl = &vl[0]
+	}
+	var _vr *complex128
+	if len(vr) > 0 {
+		_vr = &vr[0]
+	}
+	var _s *float64
+	if len(s) > 0 {
+		_s = &s[0]
+	}
+	var _sep *float64
+	if len(sep) > 0 {
+		_sep = &sep[0]
+	}
+	var _m *int32
+	if len(m) > 0 {
+		_m = &m[0]
+	}
+	var _work *complex128
+	if len(work) > 0 {
+		_work = &work[0]
+	}
+	var _rwork *float64
+	if len(rwork) > 0 {
+		_rwork = &rwork[0]
+	}
+	return isZero(C.LAPACKE_ztrsna_work((C.int)(rowMajor), (C.char)(job), (C.char)(howmny), (*C.lapack_int)(_sel), (C.lapack_int)(n), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_vl), (C.lapack_int)(ldvl), (*C.lapack_complex_double)(_vr), (C.lapack_int)(ldvr), (*C.double)(_s), (*C.double)(_sep), (C.lapack_int)(mm), (*C.lapack_int)(_m), (*C.lapack_complex_double)(_work), (C.lapack_int)(ldwork), (*C.double)(_rwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strsyl.f.
@@ -26584,12 +28182,12 @@ func Zungtr(ul blas.Uplo, n int, a []complex128, lda int, tau, work []complex128
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmbr.f.
-func Cunmbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmbr(vect byte, side blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26619,16 +28217,16 @@ func Cunmbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []compl
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmbr.f.
-func Zunmbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmbr(vect byte, side blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26658,16 +28256,16 @@ func Zunmbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []compl
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmbr_work((C.int)(rowMajor), (C.char)(vect), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmhr.f.
-func Cunmhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmhr(side blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26697,16 +28295,16 @@ func Cunmhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex64
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmhr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmhr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmhr.f.
-func Zunmhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmhr(side blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26736,16 +28334,16 @@ func Zunmhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex12
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmhr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmhr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(ilo), (C.lapack_int)(ihi), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmlq.f.
-func Cunmlq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmlq(side blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26775,16 +28373,16 @@ func Cunmlq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmlq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmlq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmlq.f.
-func Zunmlq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmlq(side blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26814,16 +28412,16 @@ func Zunmlq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmlq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmlq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmql.f.
-func Cunmql(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmql(side blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26853,16 +28451,16 @@ func Cunmql(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmql_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmql_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmql.f.
-func Zunmql(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmql(side blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26892,16 +28490,16 @@ func Zunmql(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmql_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmql_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmqr.f.
-func Cunmqr(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmqr(side blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26931,16 +28529,16 @@ func Cunmqr(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmqr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmqr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmqr.f.
-func Zunmqr(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmqr(side blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -26970,16 +28568,16 @@ func Zunmqr(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmqr_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmqr_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmrq.f.
-func Cunmrq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmrq(side blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27009,16 +28607,16 @@ func Cunmrq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmrq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmrq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmrq.f.
-func Zunmrq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmrq(side blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27048,16 +28646,16 @@ func Zunmrq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmrq_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmrq_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmrz.f.
-func Cunmrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmrz(side blas.Side, trans blas.Transpose, m, n, k, l int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27087,16 +28685,16 @@ func Cunmrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []complex64, ld
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmrz_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmrz_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmrz.f.
-func Zunmrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmrz(side blas.Side, trans blas.Transpose, m, n, k, l int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27126,16 +28724,16 @@ func Zunmrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []complex128, l
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmrz_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmrz_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmtr.f.
-func Cunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
-	switch s {
+func Cunmtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27173,16 +28771,16 @@ func Cunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []compl
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cunmtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_cunmtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmtr.f.
-func Zunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
-	switch s {
+func Zunmtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27220,7 +28818,7 @@ func Zunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []compl
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zunmtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
+	return isZero(C.LAPACKE_zunmtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work), (C.lapack_int)(lwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cupgtr.f.
@@ -27282,12 +28880,12 @@ func Zupgtr(ul blas.Uplo, n int, ap, tau, q []complex128, ldq int, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cupmtr.f.
-func Cupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []complex64, ldc int, work []complex64) bool {
-	switch s {
+func Cupmtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []complex64, ldc int, work []complex64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27325,16 +28923,16 @@ func Cupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cupmtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(_ap), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work)))
+	return isZero(C.LAPACKE_cupmtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_float)(_ap), (*C.lapack_complex_float)(_tau), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zupmtr.f.
-func Zupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []complex128, ldc int, work []complex128) bool {
-	switch s {
+func Zupmtr(side blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []complex128, ldc int, work []complex128) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -27372,7 +28970,7 @@ func Zupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zupmtr_work((C.int)(rowMajor), (C.char)(s), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(_ap), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work)))
+	return isZero(C.LAPACKE_zupmtr_work((C.int)(rowMajor), (C.char)(side), (C.char)(ul), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (*C.lapack_complex_double)(_ap), (*C.lapack_complex_double)(_tau), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cbbcsd.f.
@@ -28988,12 +30586,12 @@ func Zuncsd2by1(jobu1, jobu2, jobv1t lapack.Job, m, p, q int, x11 []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgemqrt.f.
-func Sgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32) bool {
-	switch s {
+func Sgemqrt(side blas.Side, trans blas.Transpose, m, n, k, nb int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29023,16 +30621,16 @@ func Sgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []float32, ld
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_sgemqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work)))
+	return isZero(C.LAPACKE_sgemqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_c), (C.lapack_int)(ldc), (*C.float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgemqrt.f.
-func Dgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64) bool {
-	switch s {
+func Dgemqrt(side blas.Side, trans blas.Transpose, m, n, k, nb int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29062,16 +30660,16 @@ func Dgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []float64, ld
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dgemqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work)))
+	return isZero(C.LAPACKE_dgemqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_c), (C.lapack_int)(ldc), (*C.double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgemqrt.f.
-func Cgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64) bool {
-	switch s {
+func Cgemqrt(side blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29101,16 +30699,16 @@ func Cgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex64, 
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_cgemqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work)))
+	return isZero(C.LAPACKE_cgemqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgemqrt.f.
-func Zgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128) bool {
-	switch s {
+func Zgemqrt(side blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29140,7 +30738,7 @@ func Zgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex128,
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_zgemqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work)))
+	return isZero(C.LAPACKE_zgemqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(nb), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_c), (C.lapack_int)(ldc), (*C.lapack_complex_double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqrt.f.
@@ -29316,12 +30914,12 @@ func Zgeqrt3(m, n int, a []complex128, lda int, t []complex128, ldt int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpmqrt.f.
-func Stpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32) bool {
-	switch s {
+func Stpmqrt(side blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29355,16 +30953,16 @@ func Stpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float32,
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_stpmqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_b), (C.lapack_int)(ldb), (*C.float)(_work)))
+	return isZero(C.LAPACKE_stpmqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_b), (C.lapack_int)(ldb), (*C.float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpmqrt.f.
-func Dtpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64) bool {
-	switch s {
+func Dtpmqrt(side blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29398,16 +30996,16 @@ func Dtpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float64,
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dtpmqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_b), (C.lapack_int)(ldb), (*C.double)(_work)))
+	return isZero(C.LAPACKE_dtpmqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_b), (C.lapack_int)(ldb), (*C.double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctpmqrt.f.
-func Ctpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64) bool {
-	switch s {
+func Ctpmqrt(side blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29441,16 +31039,16 @@ func Ctpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex6
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_ctpmqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_float)(_work)))
+	return isZero(C.LAPACKE_ctpmqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_float)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztpmqrt.f.
-func Ztpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128) bool {
-	switch s {
+func Ztpmqrt(side blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29484,7 +31082,7 @@ func Ztpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex1
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_ztpmqrt_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_work)))
+	return isZero(C.LAPACKE_ztpmqrt_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (C.lapack_int)(nb), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_work)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpqrt.f.
@@ -29640,12 +31238,12 @@ func Ztpqrt2(m, n, l int, a []complex128, lda int, b []complex128, ldb int, t []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stprfb.f.
-func Stprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32, ldwork int) bool {
-	switch s {
+func Stprfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29679,16 +31277,16 @@ func Stprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_stprfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_b), (C.lapack_int)(ldb), (*C.float)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_stprfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.float)(_v), (C.lapack_int)(ldv), (*C.float)(_t), (C.lapack_int)(ldt), (*C.float)(_a), (C.lapack_int)(lda), (*C.float)(_b), (C.lapack_int)(ldb), (*C.float)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtprfb.f.
-func Dtprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64, ldwork int) bool {
-	switch s {
+func Dtprfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29722,16 +31320,16 @@ func Dtprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_dtprfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_b), (C.lapack_int)(ldb), (*C.double)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_dtprfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.double)(_v), (C.lapack_int)(ldv), (*C.double)(_t), (C.lapack_int)(ldt), (*C.double)(_a), (C.lapack_int)(lda), (*C.double)(_b), (C.lapack_int)(ldb), (*C.double)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctprfb.f.
-func Ctprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64, ldwork int) bool {
-	switch s {
+func Ctprfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29765,16 +31363,16 @@ func Ctprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_ctprfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_float)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_ctprfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_float)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_float)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_float)(_a), (C.lapack_int)(lda), (*C.lapack_complex_float)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_float)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztprfb.f.
-func Ztprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128, ldwork int) bool {
-	switch s {
+func Ztprfb(side blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128, ldwork int) bool {
+	switch side {
 	case blas.Left:
-		s = 'L'
+		side = 'L'
 	case blas.Right:
-		s = 'R'
+		side = 'R'
 	default:
 		panic("lapack: bad side")
 	}
@@ -29808,7 +31406,7 @@ func Ztprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l i
 	if len(work) > 0 {
 		_work = &work[0]
 	}
-	return isZero(C.LAPACKE_ztprfb_work((C.int)(rowMajor), (C.char)(s), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_work), (C.lapack_int)(ldwork)))
+	return isZero(C.LAPACKE_ztprfb_work((C.int)(rowMajor), (C.char)(side), (C.char)(trans), (C.char)(direct), (C.char)(storev), (C.lapack_int)(m), (C.lapack_int)(n), (C.lapack_int)(k), (C.lapack_int)(l), (*C.lapack_complex_double)(_v), (C.lapack_int)(ldv), (*C.lapack_complex_double)(_t), (C.lapack_int)(ldt), (*C.lapack_complex_double)(_a), (C.lapack_int)(lda), (*C.lapack_complex_double)(_b), (C.lapack_int)(ldb), (*C.lapack_complex_double)(_work), (C.lapack_int)(ldwork)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csyr.f.

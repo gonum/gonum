@@ -32,7 +32,7 @@ const (
 )
 
 const (
-	elideRepeat = false
+	elideRepeat = true
 	noteOrigin  = false
 )
 

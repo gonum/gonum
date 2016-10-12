@@ -34,7 +34,7 @@ const (
 func isZero(ret C.int) bool { return ret == 0 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sbdsdc.f.
-func Sbdsdc(ul blas.Uplo, compq lapack.Comp, n int, d []float32, e []float32, u []float32, ldu int, vt []float32, ldvt int, q []float32, iq []int32, work []float32, iwork []int32) bool {
+func Sbdsdc(ul blas.Uplo, compq lapack.Comp, n int, d, e, u []float32, ldu int, vt []float32, ldvt int, q []float32, iq []int32, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -79,7 +79,7 @@ func Sbdsdc(ul blas.Uplo, compq lapack.Comp, n int, d []float32, e []float32, u 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dbdsdc.f.
-func Dbdsdc(ul blas.Uplo, compq lapack.Comp, n int, d []float64, e []float64, u []float64, ldu int, vt []float64, ldvt int, q []float64, iq []int32, work []float64, iwork []int32) bool {
+func Dbdsdc(ul blas.Uplo, compq lapack.Comp, n int, d, e, u []float64, ldu int, vt []float64, ldvt int, q []float64, iq []int32, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -124,7 +124,7 @@ func Dbdsdc(ul blas.Uplo, compq lapack.Comp, n int, d []float64, e []float64, u 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sbdsvdx.f.
-func Sbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl int, vu int, il int, iu int, ns int, s []float32, z []float32, ldz int, work []float32, iwork []int32) bool {
+func Sbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d, e []float32, vl, vu, il, iu, ns int, s, z []float32, ldz int, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -161,7 +161,7 @@ func Sbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d []float32, e []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dbdsvdx.f.
-func Dbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl int, vu int, il int, iu int, ns int, s []float64, z []float64, ldz int, work []float64, iwork []int32) bool {
+func Dbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d, e []float64, vl, vu, il, iu, ns int, s, z []float64, ldz int, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -198,7 +198,7 @@ func Dbdsvdx(ul blas.Uplo, jobz lapack.Job, rng byte, n int, d []float64, e []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sbdsqr.f.
-func Sbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float32, e []float32, vt []float32, ldvt int, u []float32, ldu int, c []float32, ldc int, work []float32) bool {
+func Sbdsqr(ul blas.Uplo, n, ncvt, nru, ncc int, d, e, vt []float32, ldvt int, u []float32, ldu int, c []float32, ldc int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -235,7 +235,7 @@ func Sbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float32, e []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dbdsqr.f.
-func Dbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float64, e []float64, vt []float64, ldvt int, u []float64, ldu int, c []float64, ldc int, work []float64) bool {
+func Dbdsqr(ul blas.Uplo, n, ncvt, nru, ncc int, d, e, vt []float64, ldvt int, u []float64, ldu int, c []float64, ldc int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -272,7 +272,7 @@ func Dbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float64, e []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cbdsqr.f.
-func Cbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float32, e []float32, vt []complex64, ldvt int, u []complex64, ldu int, c []complex64, ldc int, work []float32) bool {
+func Cbdsqr(ul blas.Uplo, n, ncvt, nru, ncc int, d, e []float32, vt []complex64, ldvt int, u []complex64, ldu int, c []complex64, ldc int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -309,7 +309,7 @@ func Cbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float32, e []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zbdsqr.f.
-func Zbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float64, e []float64, vt []complex128, ldvt int, u []complex128, ldu int, c []complex128, ldc int, work []float64) bool {
+func Zbdsqr(ul blas.Uplo, n, ncvt, nru, ncc int, d, e []float64, vt []complex128, ldvt int, u []complex128, ldu int, c []complex128, ldc int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -346,7 +346,7 @@ func Zbdsqr(ul blas.Uplo, n int, ncvt int, nru int, ncc int, d []float64, e []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sdisna.f.
-func Sdisna(job lapack.Job, m int, n int, d []float32, sep []float32) bool {
+func Sdisna(job lapack.Job, m, n int, d, sep []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -359,7 +359,7 @@ func Sdisna(job lapack.Job, m int, n int, d []float32, sep []float32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ddisna.f.
-func Ddisna(job lapack.Job, m int, n int, d []float64, sep []float64) bool {
+func Ddisna(job lapack.Job, m, n int, d, sep []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -372,7 +372,7 @@ func Ddisna(job lapack.Job, m int, n int, d []float64, sep []float64) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbbrd.f.
-func Sgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []float32, ldab int, d []float32, e []float32, q []float32, ldq int, pt []float32, ldpt int, c []float32, ldc int, work []float32) bool {
+func Sgbbrd(vect byte, m, n, ncc, kl, ku int, ab []float32, ldab int, d, e, q []float32, ldq int, pt []float32, ldpt int, c []float32, ldc int, work []float32) bool {
 	var _ab *float32
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -405,7 +405,7 @@ func Sgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []float32, ldab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbbrd.f.
-func Dgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []float64, ldab int, d []float64, e []float64, q []float64, ldq int, pt []float64, ldpt int, c []float64, ldc int, work []float64) bool {
+func Dgbbrd(vect byte, m, n, ncc, kl, ku int, ab []float64, ldab int, d, e, q []float64, ldq int, pt []float64, ldpt int, c []float64, ldc int, work []float64) bool {
 	var _ab *float64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -438,7 +438,7 @@ func Dgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []float64, ldab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbbrd.f.
-func Cgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []complex64, ldab int, d []float32, e []float32, q []complex64, ldq int, pt []complex64, ldpt int, c []complex64, ldc int, work []complex64, rwork []float32) bool {
+func Cgbbrd(vect byte, m, n, ncc, kl, ku int, ab []complex64, ldab int, d, e []float32, q []complex64, ldq int, pt []complex64, ldpt int, c []complex64, ldc int, work []complex64, rwork []float32) bool {
 	var _ab *complex64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -475,7 +475,7 @@ func Cgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []complex64, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbbrd.f.
-func Zgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []complex128, ldab int, d []float64, e []float64, q []complex128, ldq int, pt []complex128, ldpt int, c []complex128, ldc int, work []complex128, rwork []float64) bool {
+func Zgbbrd(vect byte, m, n, ncc, kl, ku int, ab []complex128, ldab int, d, e []float64, q []complex128, ldq int, pt []complex128, ldpt int, c []complex128, ldc int, work []complex128, rwork []float64) bool {
 	var _ab *complex128
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -512,7 +512,7 @@ func Zgbbrd(vect byte, m int, n int, ncc int, kl int, ku int, ab []complex128, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbcon.f.
-func Sgbcon(norm byte, n int, kl int, ku int, ab []float32, ldab int, ipiv []int32, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Sgbcon(norm byte, n, kl, ku int, ab []float32, ldab int, ipiv []int32, anorm float32, rcond, work []float32, iwork []int32) bool {
 	var _ab *float32
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -537,7 +537,7 @@ func Sgbcon(norm byte, n int, kl int, ku int, ab []float32, ldab int, ipiv []int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbcon.f.
-func Dgbcon(norm byte, n int, kl int, ku int, ab []float64, ldab int, ipiv []int32, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dgbcon(norm byte, n, kl, ku int, ab []float64, ldab int, ipiv []int32, anorm float64, rcond, work []float64, iwork []int32) bool {
 	var _ab *float64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -562,7 +562,7 @@ func Dgbcon(norm byte, n int, kl int, ku int, ab []float64, ldab int, ipiv []int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbcon.f.
-func Cgbcon(norm byte, n int, kl int, ku int, ab []complex64, ldab int, ipiv []int32, anorm float32, rcond []float32, work []complex64, rwork []float32) bool {
+func Cgbcon(norm byte, n, kl, ku int, ab []complex64, ldab int, ipiv []int32, anorm float32, rcond []float32, work []complex64, rwork []float32) bool {
 	var _ab *complex64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -587,7 +587,7 @@ func Cgbcon(norm byte, n int, kl int, ku int, ab []complex64, ldab int, ipiv []i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbcon.f.
-func Zgbcon(norm byte, n int, kl int, ku int, ab []complex128, ldab int, ipiv []int32, anorm float64, rcond []float64, work []complex128, rwork []float64) bool {
+func Zgbcon(norm byte, n, kl, ku int, ab []complex128, ldab int, ipiv []int32, anorm float64, rcond []float64, work []complex128, rwork []float64) bool {
 	var _ab *complex128
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -612,7 +612,7 @@ func Zgbcon(norm byte, n int, kl int, ku int, ab []complex128, ldab int, ipiv []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbequ.f.
-func Sgbequ(m int, n int, kl int, ku int, ab []float32, ldab int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Sgbequ(m, n, kl, ku int, ab []float32, ldab int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _ab *float32
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -641,7 +641,7 @@ func Sgbequ(m int, n int, kl int, ku int, ab []float32, ldab int, r []float32, c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbequ.f.
-func Dgbequ(m int, n int, kl int, ku int, ab []float64, ldab int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Dgbequ(m, n, kl, ku int, ab []float64, ldab int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _ab *float64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -670,7 +670,7 @@ func Dgbequ(m int, n int, kl int, ku int, ab []float64, ldab int, r []float64, c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbequ.f.
-func Cgbequ(m int, n int, kl int, ku int, ab []complex64, ldab int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Cgbequ(m, n, kl, ku int, ab []complex64, ldab int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _ab *complex64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -699,7 +699,7 @@ func Cgbequ(m int, n int, kl int, ku int, ab []complex64, ldab int, r []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbequ.f.
-func Zgbequ(m int, n int, kl int, ku int, ab []complex128, ldab int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Zgbequ(m, n, kl, ku int, ab []complex128, ldab int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _ab *complex128
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -728,7 +728,7 @@ func Zgbequ(m int, n int, kl int, ku int, ab []complex128, ldab int, r []float64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbequb.f.
-func Sgbequb(m int, n int, kl int, ku int, ab []float32, ldab int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Sgbequb(m, n, kl, ku int, ab []float32, ldab int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _ab *float32
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -757,7 +757,7 @@ func Sgbequb(m int, n int, kl int, ku int, ab []float32, ldab int, r []float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbequb.f.
-func Dgbequb(m int, n int, kl int, ku int, ab []float64, ldab int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Dgbequb(m, n, kl, ku int, ab []float64, ldab int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _ab *float64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -786,7 +786,7 @@ func Dgbequb(m int, n int, kl int, ku int, ab []float64, ldab int, r []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbequb.f.
-func Cgbequb(m int, n int, kl int, ku int, ab []complex64, ldab int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Cgbequb(m, n, kl, ku int, ab []complex64, ldab int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _ab *complex64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -815,7 +815,7 @@ func Cgbequb(m int, n int, kl int, ku int, ab []complex64, ldab int, r []float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbequb.f.
-func Zgbequb(m int, n int, kl int, ku int, ab []complex128, ldab int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Zgbequb(m, n, kl, ku int, ab []complex128, ldab int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _ab *complex128
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -844,7 +844,7 @@ func Zgbequb(m int, n int, kl int, ku int, ab []complex128, ldab int, r []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbrfs.f.
-func Sgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sgbrfs(trans blas.Transpose, n, kl, ku, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -895,7 +895,7 @@ func Sgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbrfs.f.
-func Dgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dgbrfs(trans blas.Transpose, n, kl, ku, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -946,7 +946,7 @@ func Dgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbrfs.f.
-func Cgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cgbrfs(trans blas.Transpose, n, kl, ku, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -997,7 +997,7 @@ func Cgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbrfs.f.
-func Zgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zgbrfs(trans blas.Transpose, n, kl, ku, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1048,7 +1048,7 @@ func Zgbrfs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbsv.f.
-func Sgbsv(n int, kl int, ku int, nrhs int, ab []float32, ldab int, ipiv []int32, b []float32, ldb int) bool {
+func Sgbsv(n, kl, ku, nrhs int, ab []float32, ldab int, ipiv []int32, b []float32, ldb int) bool {
 	var _ab *float32
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1065,7 +1065,7 @@ func Sgbsv(n int, kl int, ku int, nrhs int, ab []float32, ldab int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbsv.f.
-func Dgbsv(n int, kl int, ku int, nrhs int, ab []float64, ldab int, ipiv []int32, b []float64, ldb int) bool {
+func Dgbsv(n, kl, ku, nrhs int, ab []float64, ldab int, ipiv []int32, b []float64, ldb int) bool {
 	var _ab *float64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1082,7 +1082,7 @@ func Dgbsv(n int, kl int, ku int, nrhs int, ab []float64, ldab int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbsv.f.
-func Cgbsv(n int, kl int, ku int, nrhs int, ab []complex64, ldab int, ipiv []int32, b []complex64, ldb int) bool {
+func Cgbsv(n, kl, ku, nrhs int, ab []complex64, ldab int, ipiv []int32, b []complex64, ldb int) bool {
 	var _ab *complex64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1099,7 +1099,7 @@ func Cgbsv(n int, kl int, ku int, nrhs int, ab []complex64, ldab int, ipiv []int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbsv.f.
-func Zgbsv(n int, kl int, ku int, nrhs int, ab []complex128, ldab int, ipiv []int32, b []complex128, ldb int) bool {
+func Zgbsv(n, kl, ku, nrhs int, ab []complex128, ldab int, ipiv []int32, b []complex128, ldb int) bool {
 	var _ab *complex128
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1116,7 +1116,7 @@ func Zgbsv(n int, kl int, ku int, nrhs int, ab []complex128, ldab int, ipiv []in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbsvx.f.
-func Sgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, ipiv []int32, equed []byte, r []float32, c []float32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sgbsvx(fact byte, trans blas.Transpose, n, kl, ku, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, ipiv []int32, equed []byte, r, c, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1183,7 +1183,7 @@ func Sgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbsvx.f.
-func Dgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, ipiv []int32, equed []byte, r []float64, c []float64, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dgbsvx(fact byte, trans blas.Transpose, n, kl, ku, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, ipiv []int32, equed []byte, r, c, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1250,7 +1250,7 @@ func Dgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbsvx.f.
-func Cgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, ipiv []int32, equed []byte, r []float32, c []float32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cgbsvx(fact byte, trans blas.Transpose, n, kl, ku, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, ipiv []int32, equed []byte, r, c []float32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1317,7 +1317,7 @@ func Cgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbsvx.f.
-func Zgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, ipiv []int32, equed []byte, r []float64, c []float64, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zgbsvx(fact byte, trans blas.Transpose, n, kl, ku, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, ipiv []int32, equed []byte, r, c []float64, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1384,7 +1384,7 @@ func Zgbsvx(fact byte, trans blas.Transpose, n int, kl int, ku int, nrhs int, ab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbtrf.f.
-func Sgbtrf(m int, n int, kl int, ku int, ab []float32, ldab int, ipiv []int32) bool {
+func Sgbtrf(m, n, kl, ku int, ab []float32, ldab int, ipiv []int32) bool {
 	var _ab *float32
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1397,7 +1397,7 @@ func Sgbtrf(m int, n int, kl int, ku int, ab []float32, ldab int, ipiv []int32) 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbtrf.f.
-func Dgbtrf(m int, n int, kl int, ku int, ab []float64, ldab int, ipiv []int32) bool {
+func Dgbtrf(m, n, kl, ku int, ab []float64, ldab int, ipiv []int32) bool {
 	var _ab *float64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1410,7 +1410,7 @@ func Dgbtrf(m int, n int, kl int, ku int, ab []float64, ldab int, ipiv []int32) 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbtrf.f.
-func Cgbtrf(m int, n int, kl int, ku int, ab []complex64, ldab int, ipiv []int32) bool {
+func Cgbtrf(m, n, kl, ku int, ab []complex64, ldab int, ipiv []int32) bool {
 	var _ab *complex64
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1423,7 +1423,7 @@ func Cgbtrf(m int, n int, kl int, ku int, ab []complex64, ldab int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbtrf.f.
-func Zgbtrf(m int, n int, kl int, ku int, ab []complex128, ldab int, ipiv []int32) bool {
+func Zgbtrf(m, n, kl, ku int, ab []complex128, ldab int, ipiv []int32) bool {
 	var _ab *complex128
 	if len(ab) > 0 {
 		_ab = &ab[0]
@@ -1436,7 +1436,7 @@ func Zgbtrf(m int, n int, kl int, ku int, ab []complex128, ldab int, ipiv []int3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgbtrs.f.
-func Sgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float32, ldab int, ipiv []int32, b []float32, ldb int) bool {
+func Sgbtrs(trans blas.Transpose, n, kl, ku, nrhs int, ab []float32, ldab int, ipiv []int32, b []float32, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1463,7 +1463,7 @@ func Sgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgbtrs.f.
-func Dgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float64, ldab int, ipiv []int32, b []float64, ldb int) bool {
+func Dgbtrs(trans blas.Transpose, n, kl, ku, nrhs int, ab []float64, ldab int, ipiv []int32, b []float64, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1490,7 +1490,7 @@ func Dgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgbtrs.f.
-func Cgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex64, ldab int, ipiv []int32, b []complex64, ldb int) bool {
+func Cgbtrs(trans blas.Transpose, n, kl, ku, nrhs int, ab []complex64, ldab int, ipiv []int32, b []complex64, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1517,7 +1517,7 @@ func Cgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgbtrs.f.
-func Zgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex128, ldab int, ipiv []int32, b []complex128, ldb int) bool {
+func Zgbtrs(trans blas.Transpose, n, kl, ku, nrhs int, ab []complex128, ldab int, ipiv []int32, b []complex128, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -1544,7 +1544,7 @@ func Zgbtrs(trans blas.Transpose, n int, kl int, ku int, nrhs int, ab []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgebak.f.
-func Sgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float32, m int, v []float32, ldv int) bool {
+func Sgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float32, m int, v []float32, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -1565,7 +1565,7 @@ func Sgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgebak.f.
-func Dgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float64, m int, v []float64, ldv int) bool {
+func Dgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -1586,7 +1586,7 @@ func Dgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgebak.f.
-func Cgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float32, m int, v []complex64, ldv int) bool {
+func Cgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float32, m int, v []complex64, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -1607,7 +1607,7 @@ func Cgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgebak.f.
-func Zgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float64, m int, v []complex128, ldv int) bool {
+func Zgebak(job lapack.Job, s blas.Side, n, ilo, ihi int, scale []float64, m int, v []complex128, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -1628,7 +1628,7 @@ func Zgebak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, scale []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgebal.f.
-func Sgebal(job lapack.Job, n int, a []float32, lda int, ilo []int32, ihi []int32, scale []float32) bool {
+func Sgebal(job lapack.Job, n int, a []float32, lda int, ilo, ihi []int32, scale []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1649,7 +1649,7 @@ func Sgebal(job lapack.Job, n int, a []float32, lda int, ilo []int32, ihi []int3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgebal.f.
-func Dgebal(job lapack.Job, n int, a []float64, lda int, ilo []int32, ihi []int32, scale []float64) bool {
+func Dgebal(job lapack.Job, n int, a []float64, lda int, ilo, ihi []int32, scale []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1670,7 +1670,7 @@ func Dgebal(job lapack.Job, n int, a []float64, lda int, ilo []int32, ihi []int3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgebal.f.
-func Cgebal(job lapack.Job, n int, a []complex64, lda int, ilo []int32, ihi []int32, scale []float32) bool {
+func Cgebal(job lapack.Job, n int, a []complex64, lda int, ilo, ihi []int32, scale []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1691,7 +1691,7 @@ func Cgebal(job lapack.Job, n int, a []complex64, lda int, ilo []int32, ihi []in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgebal.f.
-func Zgebal(job lapack.Job, n int, a []complex128, lda int, ilo []int32, ihi []int32, scale []float64) bool {
+func Zgebal(job lapack.Job, n int, a []complex128, lda int, ilo, ihi []int32, scale []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1712,7 +1712,7 @@ func Zgebal(job lapack.Job, n int, a []complex128, lda int, ilo []int32, ihi []i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgebrd.f.
-func Sgebrd(m int, n int, a []float32, lda int, d []float32, e []float32, tauq []float32, taup []float32, work []float32, lwork int) bool {
+func Sgebrd(m, n int, a []float32, lda int, d, e, tauq, taup, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1741,7 +1741,7 @@ func Sgebrd(m int, n int, a []float32, lda int, d []float32, e []float32, tauq [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgebrd.f.
-func Dgebrd(m int, n int, a []float64, lda int, d []float64, e []float64, tauq []float64, taup []float64, work []float64, lwork int) bool {
+func Dgebrd(m, n int, a []float64, lda int, d, e, tauq, taup, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1770,7 +1770,7 @@ func Dgebrd(m int, n int, a []float64, lda int, d []float64, e []float64, tauq [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgebrd.f.
-func Cgebrd(m int, n int, a []complex64, lda int, d []float32, e []float32, tauq []complex64, taup []complex64, work []complex64, lwork int) bool {
+func Cgebrd(m, n int, a []complex64, lda int, d, e []float32, tauq, taup, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1799,7 +1799,7 @@ func Cgebrd(m int, n int, a []complex64, lda int, d []float32, e []float32, tauq
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgebrd.f.
-func Zgebrd(m int, n int, a []complex128, lda int, d []float64, e []float64, tauq []complex128, taup []complex128, work []complex128, lwork int) bool {
+func Zgebrd(m, n int, a []complex128, lda int, d, e []float64, tauq, taup, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1828,7 +1828,7 @@ func Zgebrd(m int, n int, a []complex128, lda int, d []float64, e []float64, tau
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgecon.f.
-func Sgecon(norm byte, n int, a []float32, lda int, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Sgecon(norm byte, n int, a []float32, lda int, anorm float32, rcond, work []float32, iwork []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1849,7 +1849,7 @@ func Sgecon(norm byte, n int, a []float32, lda int, anorm float32, rcond []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgecon.f.
-func Dgecon(norm byte, n int, a []float64, lda int, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dgecon(norm byte, n int, a []float64, lda int, anorm float64, rcond, work []float64, iwork []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1912,7 +1912,7 @@ func Zgecon(norm byte, n int, a []complex128, lda int, anorm float64, rcond []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeequ.f.
-func Sgeequ(m int, n int, a []float32, lda int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Sgeequ(m, n int, a []float32, lda int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1941,7 +1941,7 @@ func Sgeequ(m int, n int, a []float32, lda int, r []float32, c []float32, rowcnd
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeequ.f.
-func Dgeequ(m int, n int, a []float64, lda int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Dgeequ(m, n int, a []float64, lda int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1970,7 +1970,7 @@ func Dgeequ(m int, n int, a []float64, lda int, r []float64, c []float64, rowcnd
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeequ.f.
-func Cgeequ(m int, n int, a []complex64, lda int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Cgeequ(m, n int, a []complex64, lda int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -1999,7 +1999,7 @@ func Cgeequ(m int, n int, a []complex64, lda int, r []float32, c []float32, rowc
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeequ.f.
-func Zgeequ(m int, n int, a []complex128, lda int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Zgeequ(m, n int, a []complex128, lda int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2028,7 +2028,7 @@ func Zgeequ(m int, n int, a []complex128, lda int, r []float64, c []float64, row
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeequb.f.
-func Sgeequb(m int, n int, a []float32, lda int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Sgeequb(m, n int, a []float32, lda int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2057,7 +2057,7 @@ func Sgeequb(m int, n int, a []float32, lda int, r []float32, c []float32, rowcn
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeequb.f.
-func Dgeequb(m int, n int, a []float64, lda int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Dgeequb(m, n int, a []float64, lda int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2086,7 +2086,7 @@ func Dgeequb(m int, n int, a []float64, lda int, r []float64, c []float64, rowcn
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeequb.f.
-func Cgeequb(m int, n int, a []complex64, lda int, r []float32, c []float32, rowcnd []float32, colcnd []float32, amax []float32) bool {
+func Cgeequb(m, n int, a []complex64, lda int, r, c, rowcnd, colcnd, amax []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2115,7 +2115,7 @@ func Cgeequb(m int, n int, a []complex64, lda int, r []float32, c []float32, row
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeequb.f.
-func Zgeequb(m int, n int, a []complex128, lda int, r []float64, c []float64, rowcnd []float64, colcnd []float64, amax []float64) bool {
+func Zgeequb(m, n int, a []complex128, lda int, r, c, rowcnd, colcnd, amax []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2144,7 +2144,7 @@ func Zgeequb(m int, n int, a []complex128, lda int, r []float64, c []float64, ro
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeev.f.
-func Sgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, wr []float32, wi []float32, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) int {
+func Sgeev(jobvl, jobvr lapack.Job, n int, a []float32, lda int, wr, wi, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) int {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2173,7 +2173,7 @@ func Sgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, wr [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeev.f.
-func Dgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, wr []float64, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) int {
+func Dgeev(jobvl, jobvr lapack.Job, n int, a []float64, lda int, wr, wi, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) int {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2202,7 +2202,7 @@ func Dgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, wr [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeev.f.
-func Cgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, w []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) int {
+func Cgeev(jobvl, jobvr lapack.Job, n int, a []complex64, lda int, w, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) int {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2231,7 +2231,7 @@ func Cgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, w 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeev.f.
-func Zgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, w []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) int {
+func Zgeev(jobvl, jobvr lapack.Job, n int, a []complex128, lda int, w, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) int {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2260,7 +2260,7 @@ func Zgeev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, w
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeevx.f.
-func Sgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float32, lda int, wr []float32, wi []float32, vl []float32, ldvl int, vr []float32, ldvr int, ilo []int32, ihi []int32, scale []float32, abnrm []float32, rconde []float32, rcondv []float32, work []float32, lwork int, iwork []int32) int {
+func Sgeevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []float32, lda int, wr, wi, vl []float32, ldvl int, vr []float32, ldvr int, ilo, ihi []int32, scale, abnrm, rconde, rcondv, work []float32, lwork int, iwork []int32) int {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2317,7 +2317,7 @@ func Sgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeevx.f.
-func Dgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float64, lda int, wr []float64, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, ilo []int32, ihi []int32, scale []float64, abnrm []float64, rconde []float64, rcondv []float64, work []float64, lwork int, iwork []int32) int {
+func Dgeevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []float64, lda int, wr, wi, vl []float64, ldvl int, vr []float64, ldvr int, ilo, ihi []int32, scale, abnrm, rconde, rcondv, work []float64, lwork int, iwork []int32) int {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2374,7 +2374,7 @@ func Dgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeevx.f.
-func Cgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex64, lda int, w []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, ilo []int32, ihi []int32, scale []float32, abnrm []float32, rconde []float32, rcondv []float32, work []complex64, lwork int, rwork []float32) int {
+func Cgeevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []complex64, lda int, w, vl []complex64, ldvl int, vr []complex64, ldvr int, ilo, ihi []int32, scale, abnrm, rconde, rcondv []float32, work []complex64, lwork int, rwork []float32) int {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2427,7 +2427,7 @@ func Cgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeevx.f.
-func Zgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex128, lda int, w []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, ilo []int32, ihi []int32, scale []float64, abnrm []float64, rconde []float64, rcondv []float64, work []complex128, lwork int, rwork []float64) int {
+func Zgeevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []complex128, lda int, w, vl []complex128, ldvl int, vr []complex128, ldvr int, ilo, ihi []int32, scale, abnrm, rconde, rcondv []float64, work []complex128, lwork int, rwork []float64) int {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2480,7 +2480,7 @@ func Zgeevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgehrd.f.
-func Sgehrd(n int, ilo int, ihi int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sgehrd(n, ilo, ihi int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2497,7 +2497,7 @@ func Sgehrd(n int, ilo int, ihi int, a []float32, lda int, tau []float32, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgehrd.f.
-func Dgehrd(n int, ilo int, ihi int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2514,7 +2514,7 @@ func Dgehrd(n int, ilo int, ihi int, a []float64, lda int, tau []float64, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgehrd.f.
-func Cgehrd(n int, ilo int, ihi int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cgehrd(n, ilo, ihi int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2531,7 +2531,7 @@ func Cgehrd(n int, ilo int, ihi int, a []complex64, lda int, tau []complex64, wo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgehrd.f.
-func Zgehrd(n int, ilo int, ihi int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zgehrd(n, ilo, ihi int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2548,7 +2548,7 @@ func Zgehrd(n int, ilo int, ihi int, a []complex128, lda int, tau []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgejsv.f.
-func Sgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, jobt lapack.Job, jobp lapack.Job, m int, n int, a []float32, lda int, sva []float32, u []float32, ldu int, v []float32, ldv int, work []float32, lwork int, iwork []int32) bool {
+func Sgejsv(joba, jobu, jobv, jobr, jobt, jobp lapack.Job, m, n int, a []float32, lda int, sva, u []float32, ldu int, v []float32, ldv int, work []float32, lwork int, iwork []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2577,7 +2577,7 @@ func Sgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgejsv.f.
-func Dgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, jobt lapack.Job, jobp lapack.Job, m int, n int, a []float64, lda int, sva []float64, u []float64, ldu int, v []float64, ldv int, work []float64, lwork int, iwork []int32) bool {
+func Dgejsv(joba, jobu, jobv, jobr, jobt, jobp lapack.Job, m, n int, a []float64, lda int, sva, u []float64, ldu int, v []float64, ldv int, work []float64, lwork int, iwork []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2606,7 +2606,7 @@ func Dgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgejsv.f.
-func Cgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, jobt lapack.Job, jobp lapack.Job, m int, n int, a []complex64, lda int, sva []float32, u []complex64, ldu int, v []complex64, ldv int, cwork []complex64, lwork int, work []float32, lrwork int, iwork []int32) bool {
+func Cgejsv(joba, jobu, jobv, jobr, jobt, jobp lapack.Job, m, n int, a []complex64, lda int, sva []float32, u []complex64, ldu int, v []complex64, ldv int, cwork []complex64, lwork int, work []float32, lrwork int, iwork []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2639,7 +2639,7 @@ func Cgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgejsv.f.
-func Zgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, jobt lapack.Job, jobp lapack.Job, m int, n int, a []complex128, lda int, sva []float64, u []complex128, ldu int, v []complex128, ldv int, cwork []complex128, lwork int, work []float64, lrwork int, iwork []int32) bool {
+func Zgejsv(joba, jobu, jobv, jobr, jobt, jobp lapack.Job, m, n int, a []complex128, lda int, sva []float64, u []complex128, ldu int, v []complex128, ldv int, cwork []complex128, lwork int, work []float64, lrwork int, iwork []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2672,7 +2672,7 @@ func Zgejsv(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, jobr lapack.Job, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgelq2.f.
-func Sgelq2(m int, n int, a []float32, lda int, tau []float32, work []float32) bool {
+func Sgelq2(m, n int, a []float32, lda int, tau, work []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2689,7 +2689,7 @@ func Sgelq2(m int, n int, a []float32, lda int, tau []float32, work []float32) b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgelq2.f.
-func Dgelq2(m int, n int, a []float64, lda int, tau []float64, work []float64) bool {
+func Dgelq2(m, n int, a []float64, lda int, tau, work []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2706,7 +2706,7 @@ func Dgelq2(m int, n int, a []float64, lda int, tau []float64, work []float64) b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgelq2.f.
-func Cgelq2(m int, n int, a []complex64, lda int, tau []complex64, work []complex64) bool {
+func Cgelq2(m, n int, a []complex64, lda int, tau, work []complex64) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2723,7 +2723,7 @@ func Cgelq2(m int, n int, a []complex64, lda int, tau []complex64, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgelq2.f.
-func Zgelq2(m int, n int, a []complex128, lda int, tau []complex128, work []complex128) bool {
+func Zgelq2(m, n int, a []complex128, lda int, tau, work []complex128) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2740,7 +2740,7 @@ func Zgelq2(m int, n int, a []complex128, lda int, tau []complex128, work []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgelqf.f.
-func Sgelqf(m int, n int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sgelqf(m, n int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2757,7 +2757,7 @@ func Sgelqf(m int, n int, a []float32, lda int, tau []float32, work []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgelqf.f.
-func Dgelqf(m int, n int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2774,7 +2774,7 @@ func Dgelqf(m int, n int, a []float64, lda int, tau []float64, work []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgelqf.f.
-func Cgelqf(m int, n int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cgelqf(m, n int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2791,7 +2791,7 @@ func Cgelqf(m int, n int, a []complex64, lda int, tau []complex64, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgelqf.f.
-func Zgelqf(m int, n int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zgelqf(m, n int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2808,7 +2808,7 @@ func Zgelqf(m int, n int, a []complex128, lda int, tau []complex128, work []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgels.f.
-func Sgels(trans blas.Transpose, m int, n int, nrhs int, a []float32, lda int, b []float32, ldb int, work []float32, lwork int) bool {
+func Sgels(trans blas.Transpose, m, n, nrhs int, a []float32, lda int, b []float32, ldb int, work []float32, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -2835,7 +2835,7 @@ func Sgels(trans blas.Transpose, m int, n int, nrhs int, a []float32, lda int, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgels.f.
-func Dgels(trans blas.Transpose, m int, n int, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool {
+func Dgels(trans blas.Transpose, m, n, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -2862,7 +2862,7 @@ func Dgels(trans blas.Transpose, m int, n int, nrhs int, a []float64, lda int, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgels.f.
-func Cgels(trans blas.Transpose, m int, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int, work []complex64, lwork int) bool {
+func Cgels(trans blas.Transpose, m, n, nrhs int, a []complex64, lda int, b []complex64, ldb int, work []complex64, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -2889,7 +2889,7 @@ func Cgels(trans blas.Transpose, m int, n int, nrhs int, a []complex64, lda int,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgels.f.
-func Zgels(trans blas.Transpose, m int, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int, work []complex128, lwork int) bool {
+func Zgels(trans blas.Transpose, m, n, nrhs int, a []complex128, lda int, b []complex128, ldb int, work []complex128, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -2916,7 +2916,7 @@ func Zgels(trans blas.Transpose, m int, n int, nrhs int, a []complex128, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgelsd.f.
-func Sgelsd(m int, n int, nrhs int, a []float32, lda int, b []float32, ldb int, s []float32, rcond float32, rank []int32, work []float32, lwork int, iwork []int32) bool {
+func Sgelsd(m, n, nrhs int, a []float32, lda int, b []float32, ldb int, s []float32, rcond float32, rank []int32, work []float32, lwork int, iwork []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2945,7 +2945,7 @@ func Sgelsd(m int, n int, nrhs int, a []float32, lda int, b []float32, ldb int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgelsd.f.
-func Dgelsd(m int, n int, nrhs int, a []float64, lda int, b []float64, ldb int, s []float64, rcond float64, rank []int32, work []float64, lwork int, iwork []int32) bool {
+func Dgelsd(m, n, nrhs int, a []float64, lda int, b []float64, ldb int, s []float64, rcond float64, rank []int32, work []float64, lwork int, iwork []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -2974,7 +2974,7 @@ func Dgelsd(m int, n int, nrhs int, a []float64, lda int, b []float64, ldb int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgelsd.f.
-func Cgelsd(m int, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int, s []float32, rcond float32, rank []int32, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
+func Cgelsd(m, n, nrhs int, a []complex64, lda int, b []complex64, ldb int, s []float32, rcond float32, rank []int32, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3007,7 +3007,7 @@ func Cgelsd(m int, n int, nrhs int, a []complex64, lda int, b []complex64, ldb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgelsd.f.
-func Zgelsd(m int, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int, s []float64, rcond float64, rank []int32, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
+func Zgelsd(m, n, nrhs int, a []complex128, lda int, b []complex128, ldb int, s []float64, rcond float64, rank []int32, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3040,7 +3040,7 @@ func Zgelsd(m int, n int, nrhs int, a []complex128, lda int, b []complex128, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgelss.f.
-func Sgelss(m int, n int, nrhs int, a []float32, lda int, b []float32, ldb int, s []float32, rcond float32, rank []int32, work []float32, lwork int) bool {
+func Sgelss(m, n, nrhs int, a []float32, lda int, b []float32, ldb int, s []float32, rcond float32, rank []int32, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3065,7 +3065,7 @@ func Sgelss(m int, n int, nrhs int, a []float32, lda int, b []float32, ldb int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgelss.f.
-func Dgelss(m int, n int, nrhs int, a []float64, lda int, b []float64, ldb int, s []float64, rcond float64, rank []int32, work []float64, lwork int) bool {
+func Dgelss(m, n, nrhs int, a []float64, lda int, b []float64, ldb int, s []float64, rcond float64, rank []int32, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3090,7 +3090,7 @@ func Dgelss(m int, n int, nrhs int, a []float64, lda int, b []float64, ldb int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgelss.f.
-func Cgelss(m int, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int, s []float32, rcond float32, rank []int32, work []complex64, lwork int, rwork []float32) bool {
+func Cgelss(m, n, nrhs int, a []complex64, lda int, b []complex64, ldb int, s []float32, rcond float32, rank []int32, work []complex64, lwork int, rwork []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3119,7 +3119,7 @@ func Cgelss(m int, n int, nrhs int, a []complex64, lda int, b []complex64, ldb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgelss.f.
-func Zgelss(m int, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int, s []float64, rcond float64, rank []int32, work []complex128, lwork int, rwork []float64) bool {
+func Zgelss(m, n, nrhs int, a []complex128, lda int, b []complex128, ldb int, s []float64, rcond float64, rank []int32, work []complex128, lwork int, rwork []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3148,7 +3148,7 @@ func Zgelss(m int, n int, nrhs int, a []complex128, lda int, b []complex128, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgelsy.f.
-func Sgelsy(m int, n int, nrhs int, a []float32, lda int, b []float32, ldb int, jpvt []int32, rcond float32, rank []int32, work []float32, lwork int) bool {
+func Sgelsy(m, n, nrhs int, a []float32, lda int, b []float32, ldb int, jpvt []int32, rcond float32, rank []int32, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3173,7 +3173,7 @@ func Sgelsy(m int, n int, nrhs int, a []float32, lda int, b []float32, ldb int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgelsy.f.
-func Dgelsy(m int, n int, nrhs int, a []float64, lda int, b []float64, ldb int, jpvt []int32, rcond float64, rank []int32, work []float64, lwork int) bool {
+func Dgelsy(m, n, nrhs int, a []float64, lda int, b []float64, ldb int, jpvt []int32, rcond float64, rank []int32, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3198,7 +3198,7 @@ func Dgelsy(m int, n int, nrhs int, a []float64, lda int, b []float64, ldb int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgelsy.f.
-func Cgelsy(m int, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int, jpvt []int32, rcond float32, rank []int32, work []complex64, lwork int, rwork []float32) bool {
+func Cgelsy(m, n, nrhs int, a []complex64, lda int, b []complex64, ldb int, jpvt []int32, rcond float32, rank []int32, work []complex64, lwork int, rwork []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3227,7 +3227,7 @@ func Cgelsy(m int, n int, nrhs int, a []complex64, lda int, b []complex64, ldb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgelsy.f.
-func Zgelsy(m int, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int, jpvt []int32, rcond float64, rank []int32, work []complex128, lwork int, rwork []float64) bool {
+func Zgelsy(m, n, nrhs int, a []complex128, lda int, b []complex128, ldb int, jpvt []int32, rcond float64, rank []int32, work []complex128, lwork int, rwork []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3256,7 +3256,7 @@ func Zgelsy(m int, n int, nrhs int, a []complex128, lda int, b []complex128, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqlf.f.
-func Sgeqlf(m int, n int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sgeqlf(m, n int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3273,7 +3273,7 @@ func Sgeqlf(m int, n int, a []float32, lda int, tau []float32, work []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqlf.f.
-func Dgeqlf(m int, n int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dgeqlf(m, n int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3290,7 +3290,7 @@ func Dgeqlf(m int, n int, a []float64, lda int, tau []float64, work []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqlf.f.
-func Cgeqlf(m int, n int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cgeqlf(m, n int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3307,7 +3307,7 @@ func Cgeqlf(m int, n int, a []complex64, lda int, tau []complex64, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqlf.f.
-func Zgeqlf(m int, n int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zgeqlf(m, n int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3324,7 +3324,7 @@ func Zgeqlf(m int, n int, a []complex128, lda int, tau []complex128, work []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqp3.f.
-func Sgeqp3(m int, n int, a []float32, lda int, jpvt []int32, tau []float32, work []float32, lwork int) bool {
+func Sgeqp3(m, n int, a []float32, lda int, jpvt []int32, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3345,7 +3345,7 @@ func Sgeqp3(m int, n int, a []float32, lda int, jpvt []int32, tau []float32, wor
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqp3.f.
-func Dgeqp3(m int, n int, a []float64, lda int, jpvt []int32, tau []float64, work []float64, lwork int) bool {
+func Dgeqp3(m, n int, a []float64, lda int, jpvt []int32, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3366,7 +3366,7 @@ func Dgeqp3(m int, n int, a []float64, lda int, jpvt []int32, tau []float64, wor
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqp3.f.
-func Cgeqp3(m int, n int, a []complex64, lda int, jpvt []int32, tau []complex64, work []complex64, lwork int, rwork []float32) bool {
+func Cgeqp3(m, n int, a []complex64, lda int, jpvt []int32, tau, work []complex64, lwork int, rwork []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3391,7 +3391,7 @@ func Cgeqp3(m int, n int, a []complex64, lda int, jpvt []int32, tau []complex64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqp3.f.
-func Zgeqp3(m int, n int, a []complex128, lda int, jpvt []int32, tau []complex128, work []complex128, lwork int, rwork []float64) bool {
+func Zgeqp3(m, n int, a []complex128, lda int, jpvt []int32, tau, work []complex128, lwork int, rwork []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3416,7 +3416,7 @@ func Zgeqp3(m int, n int, a []complex128, lda int, jpvt []int32, tau []complex12
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqr2.f.
-func Sgeqr2(m int, n int, a []float32, lda int, tau []float32, work []float32) bool {
+func Sgeqr2(m, n int, a []float32, lda int, tau, work []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3433,7 +3433,7 @@ func Sgeqr2(m int, n int, a []float32, lda int, tau []float32, work []float32) b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqr2.f.
-func Dgeqr2(m int, n int, a []float64, lda int, tau []float64, work []float64) bool {
+func Dgeqr2(m, n int, a []float64, lda int, tau, work []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3450,7 +3450,7 @@ func Dgeqr2(m int, n int, a []float64, lda int, tau []float64, work []float64) b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqr2.f.
-func Cgeqr2(m int, n int, a []complex64, lda int, tau []complex64, work []complex64) bool {
+func Cgeqr2(m, n int, a []complex64, lda int, tau, work []complex64) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3467,7 +3467,7 @@ func Cgeqr2(m int, n int, a []complex64, lda int, tau []complex64, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqr2.f.
-func Zgeqr2(m int, n int, a []complex128, lda int, tau []complex128, work []complex128) bool {
+func Zgeqr2(m, n int, a []complex128, lda int, tau, work []complex128) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3484,7 +3484,7 @@ func Zgeqr2(m int, n int, a []complex128, lda int, tau []complex128, work []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqrf.f.
-func Sgeqrf(m int, n int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sgeqrf(m, n int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3501,7 +3501,7 @@ func Sgeqrf(m int, n int, a []float32, lda int, tau []float32, work []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqrf.f.
-func Dgeqrf(m int, n int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3518,7 +3518,7 @@ func Dgeqrf(m int, n int, a []float64, lda int, tau []float64, work []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqrf.f.
-func Cgeqrf(m int, n int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cgeqrf(m, n int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3535,7 +3535,7 @@ func Cgeqrf(m int, n int, a []complex64, lda int, tau []complex64, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqrf.f.
-func Zgeqrf(m int, n int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zgeqrf(m, n int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3552,7 +3552,7 @@ func Zgeqrf(m int, n int, a []complex128, lda int, tau []complex128, work []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqrfp.f.
-func Sgeqrfp(m int, n int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sgeqrfp(m, n int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3569,7 +3569,7 @@ func Sgeqrfp(m int, n int, a []float32, lda int, tau []float32, work []float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqrfp.f.
-func Dgeqrfp(m int, n int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dgeqrfp(m, n int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3586,7 +3586,7 @@ func Dgeqrfp(m int, n int, a []float64, lda int, tau []float64, work []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqrfp.f.
-func Cgeqrfp(m int, n int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cgeqrfp(m, n int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3603,7 +3603,7 @@ func Cgeqrfp(m int, n int, a []complex64, lda int, tau []complex64, work []compl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqrfp.f.
-func Zgeqrfp(m int, n int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zgeqrfp(m, n int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3620,7 +3620,7 @@ func Zgeqrfp(m int, n int, a []complex128, lda int, tau []complex128, work []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgerfs.f.
-func Sgerfs(trans blas.Transpose, n int, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sgerfs(trans blas.Transpose, n, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -3671,7 +3671,7 @@ func Sgerfs(trans blas.Transpose, n int, nrhs int, a []float32, lda int, af []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgerfs.f.
-func Dgerfs(trans blas.Transpose, n int, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dgerfs(trans blas.Transpose, n, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -3722,7 +3722,7 @@ func Dgerfs(trans blas.Transpose, n int, nrhs int, a []float64, lda int, af []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgerfs.f.
-func Cgerfs(trans blas.Transpose, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cgerfs(trans blas.Transpose, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -3773,7 +3773,7 @@ func Cgerfs(trans blas.Transpose, n int, nrhs int, a []complex64, lda int, af []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgerfs.f.
-func Zgerfs(trans blas.Transpose, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zgerfs(trans blas.Transpose, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -3824,7 +3824,7 @@ func Zgerfs(trans blas.Transpose, n int, nrhs int, a []complex128, lda int, af [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgerqf.f.
-func Sgerqf(m int, n int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sgerqf(m, n int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3841,7 +3841,7 @@ func Sgerqf(m int, n int, a []float32, lda int, tau []float32, work []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgerqf.f.
-func Dgerqf(m int, n int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dgerqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3858,7 +3858,7 @@ func Dgerqf(m int, n int, a []float64, lda int, tau []float64, work []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgerqf.f.
-func Cgerqf(m int, n int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cgerqf(m, n int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3875,7 +3875,7 @@ func Cgerqf(m int, n int, a []complex64, lda int, tau []complex64, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgerqf.f.
-func Zgerqf(m int, n int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zgerqf(m, n int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3892,7 +3892,7 @@ func Zgerqf(m int, n int, a []complex128, lda int, tau []complex128, work []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesdd.f.
-func Sgesdd(jobz lapack.Job, m int, n int, a []float32, lda int, s []float32, u []float32, ldu int, vt []float32, ldvt int, work []float32, lwork int, iwork []int32) bool {
+func Sgesdd(jobz lapack.Job, m, n int, a []float32, lda int, s, u []float32, ldu int, vt []float32, ldvt int, work []float32, lwork int, iwork []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3921,7 +3921,7 @@ func Sgesdd(jobz lapack.Job, m int, n int, a []float32, lda int, s []float32, u 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesdd.f.
-func Dgesdd(jobz lapack.Job, m int, n int, a []float64, lda int, s []float64, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int, iwork []int32) bool {
+func Dgesdd(jobz lapack.Job, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int, iwork []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3950,7 +3950,7 @@ func Dgesdd(jobz lapack.Job, m int, n int, a []float64, lda int, s []float64, u 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesdd.f.
-func Cgesdd(jobz lapack.Job, m int, n int, a []complex64, lda int, s []float32, u []complex64, ldu int, vt []complex64, ldvt int, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
+func Cgesdd(jobz lapack.Job, m, n int, a []complex64, lda int, s []float32, u []complex64, ldu int, vt []complex64, ldvt int, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -3983,7 +3983,7 @@ func Cgesdd(jobz lapack.Job, m int, n int, a []complex64, lda int, s []float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesdd.f.
-func Zgesdd(jobz lapack.Job, m int, n int, a []complex128, lda int, s []float64, u []complex128, ldu int, vt []complex128, ldvt int, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
+func Zgesdd(jobz lapack.Job, m, n int, a []complex128, lda int, s []float64, u []complex128, ldu int, vt []complex128, ldvt int, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4016,7 +4016,7 @@ func Zgesdd(jobz lapack.Job, m int, n int, a []complex128, lda int, s []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesv.f.
-func Sgesv(n int, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int) bool {
+func Sgesv(n, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4033,7 +4033,7 @@ func Sgesv(n int, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesv.f.
-func Dgesv(n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int) bool {
+func Dgesv(n, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4050,7 +4050,7 @@ func Dgesv(n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesv.f.
-func Cgesv(n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
+func Cgesv(n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4067,7 +4067,7 @@ func Cgesv(n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesv.f.
-func Zgesv(n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
+func Zgesv(n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4084,7 +4084,7 @@ func Zgesv(n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex12
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsgesv.f.
-func Dsgesv(n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, work []float64, swork []float32, iter []int32) bool {
+func Dsgesv(n, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, work []float64, swork []float32, iter []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4117,7 +4117,7 @@ func Dsgesv(n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zcgesv.f.
-func Zcgesv(n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, work []complex128, swork []complex64, rwork []float64, iter []int32) bool {
+func Zcgesv(n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, work []complex128, swork []complex64, rwork []float64, iter []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4154,7 +4154,7 @@ func Zcgesv(n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesvd.f.
-func Sgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []float32, lda int, s []float32, u []float32, ldu int, vt []float32, ldvt int, work []float32, lwork int) bool {
+func Sgesvd(jobu, jobvt lapack.Job, m, n int, a []float32, lda int, s, u []float32, ldu int, vt []float32, ldvt int, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4179,7 +4179,7 @@ func Sgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []float32, lda in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesvd.f.
-func Dgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []float64, lda int, s []float64, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int) bool {
+func Dgesvd(jobu, jobvt lapack.Job, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4204,7 +4204,7 @@ func Dgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []float64, lda in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesvd.f.
-func Cgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []complex64, lda int, s []float32, u []complex64, ldu int, vt []complex64, ldvt int, work []complex64, lwork int, rwork []float32) bool {
+func Cgesvd(jobu, jobvt lapack.Job, m, n int, a []complex64, lda int, s []float32, u []complex64, ldu int, vt []complex64, ldvt int, work []complex64, lwork int, rwork []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4233,7 +4233,7 @@ func Cgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []complex64, lda 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesvd.f.
-func Zgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []complex128, lda int, s []float64, u []complex128, ldu int, vt []complex128, ldvt int, work []complex128, lwork int, rwork []float64) bool {
+func Zgesvd(jobu, jobvt lapack.Job, m, n int, a []complex128, lda int, s []float64, u []complex128, ldu int, vt []complex128, ldvt int, work []complex128, lwork int, rwork []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4262,7 +4262,7 @@ func Zgesvd(jobu lapack.Job, jobvt lapack.Job, m int, n int, a []complex128, lda
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesvdx.f.
-func Sgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []float32, lda int, vl int, vu int, il int, iu int, ns int, s []float32, u []float32, ldu int, vt []float32, ldvt int, work []float32, lwork int, iwork []int32) bool {
+func Sgesvdx(jobu, jobvt lapack.Job, rng byte, m, n int, a []float32, lda, vl, vu, il, iu, ns int, s, u []float32, ldu int, vt []float32, ldvt int, work []float32, lwork int, iwork []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4291,7 +4291,7 @@ func Sgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesvdx.f.
-func Dgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []float64, lda int, vl int, vu int, il int, iu int, ns int, s []float64, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int, iwork []int32) bool {
+func Dgesvdx(jobu, jobvt lapack.Job, rng byte, m, n int, a []float64, lda, vl, vu, il, iu, ns int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int, iwork []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4320,7 +4320,7 @@ func Dgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesvdx.f.
-func Cgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []complex64, lda int, vl int, vu int, il int, iu int, ns int, s []float32, u []complex64, ldu int, vt []complex64, ldvt int, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
+func Cgesvdx(jobu, jobvt lapack.Job, rng byte, m, n int, a []complex64, lda, vl, vu, il, iu, ns int, s []float32, u []complex64, ldu int, vt []complex64, ldvt int, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4353,7 +4353,7 @@ func Cgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesvdx.f.
-func Zgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []complex128, lda int, vl int, vu int, il int, iu int, ns int, s []float64, u []complex128, ldu int, vt []complex128, ldvt int, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
+func Zgesvdx(jobu, jobvt lapack.Job, rng byte, m, n int, a []complex128, lda, vl, vu, il, iu, ns int, s []float64, u []complex128, ldu int, vt []complex128, ldvt int, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4386,7 +4386,7 @@ func Zgesvdx(jobu lapack.Job, jobvt lapack.Job, rng byte, m int, n int, a []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesvj.f.
-func Sgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []float32, lda int, sva []float32, mv int, v []float32, ldv int, work []float32, lwork int) bool {
+func Sgesvj(joba, jobu, jobv lapack.Job, m, n int, a []float32, lda int, sva []float32, mv int, v []float32, ldv int, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4407,7 +4407,7 @@ func Sgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesvj.f.
-func Dgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []float64, lda int, sva []float64, mv int, v []float64, ldv int, work []float64, lwork int) bool {
+func Dgesvj(joba, jobu, jobv lapack.Job, m, n int, a []float64, lda int, sva []float64, mv int, v []float64, ldv int, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4428,7 +4428,7 @@ func Dgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesvj.f.
-func Cgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []complex64, lda int, sva []float32, mv int, v []complex64, ldv int, cwork []complex64, lwork int, rwork []float32, lrwork int) bool {
+func Cgesvj(joba, jobu, jobv lapack.Job, m, n int, a []complex64, lda int, sva []float32, mv int, v []complex64, ldv int, cwork []complex64, lwork int, rwork []float32, lrwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4453,7 +4453,7 @@ func Cgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesvj.f.
-func Zgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a []complex128, lda int, sva []float64, mv int, v []complex128, ldv int, cwork []complex128, lwork int, rwork []float64, lrwork int) bool {
+func Zgesvj(joba, jobu, jobv lapack.Job, m, n int, a []complex128, lda int, sva []float64, mv int, v []complex128, ldv int, cwork []complex128, lwork int, rwork []float64, lrwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4478,7 +4478,7 @@ func Zgesvj(joba lapack.Job, jobu lapack.Job, jobv lapack.Job, m int, n int, a [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgesvx.f.
-func Sgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, equed []byte, r []float32, c []float32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sgesvx(fact byte, trans blas.Transpose, n, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, equed []byte, r, c, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -4545,7 +4545,7 @@ func Sgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []float32, lda i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgesvx.f.
-func Dgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, equed []byte, r []float64, c []float64, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dgesvx(fact byte, trans blas.Transpose, n, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, equed []byte, r, c, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -4612,7 +4612,7 @@ func Dgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []float64, lda i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgesvx.f.
-func Cgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, equed []byte, r []float32, c []float32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cgesvx(fact byte, trans blas.Transpose, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, equed []byte, r, c []float32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -4679,7 +4679,7 @@ func Cgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []complex64, lda
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgesvx.f.
-func Zgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, equed []byte, r []float64, c []float64, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zgesvx(fact byte, trans blas.Transpose, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, equed []byte, r, c []float64, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -4746,7 +4746,7 @@ func Zgesvx(fact byte, trans blas.Transpose, n int, nrhs int, a []complex128, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgetf2.f.
-func Sgetf2(m int, n int, a []float32, lda int, ipiv []int32) bool {
+func Sgetf2(m, n int, a []float32, lda int, ipiv []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4759,7 +4759,7 @@ func Sgetf2(m int, n int, a []float32, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgetf2.f.
-func Dgetf2(m int, n int, a []float64, lda int, ipiv []int32) bool {
+func Dgetf2(m, n int, a []float64, lda int, ipiv []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4772,7 +4772,7 @@ func Dgetf2(m int, n int, a []float64, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgetf2.f.
-func Cgetf2(m int, n int, a []complex64, lda int, ipiv []int32) bool {
+func Cgetf2(m, n int, a []complex64, lda int, ipiv []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4785,7 +4785,7 @@ func Cgetf2(m int, n int, a []complex64, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgetf2.f.
-func Zgetf2(m int, n int, a []complex128, lda int, ipiv []int32) bool {
+func Zgetf2(m, n int, a []complex128, lda int, ipiv []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4798,7 +4798,7 @@ func Zgetf2(m int, n int, a []complex128, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgetrf.f.
-func Sgetrf(m int, n int, a []float32, lda int, ipiv []int32) bool {
+func Sgetrf(m, n int, a []float32, lda int, ipiv []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4811,7 +4811,7 @@ func Sgetrf(m int, n int, a []float32, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgetrf.f.
-func Dgetrf(m int, n int, a []float64, lda int, ipiv []int32) bool {
+func Dgetrf(m, n int, a []float64, lda int, ipiv []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4824,7 +4824,7 @@ func Dgetrf(m int, n int, a []float64, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgetrf.f.
-func Cgetrf(m int, n int, a []complex64, lda int, ipiv []int32) bool {
+func Cgetrf(m, n int, a []complex64, lda int, ipiv []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4837,7 +4837,7 @@ func Cgetrf(m int, n int, a []complex64, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgetrf.f.
-func Zgetrf(m int, n int, a []complex128, lda int, ipiv []int32) bool {
+func Zgetrf(m, n int, a []complex128, lda int, ipiv []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4850,7 +4850,7 @@ func Zgetrf(m int, n int, a []complex128, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgetrf2.f.
-func Sgetrf2(m int, n int, a []float32, lda int, ipiv []int32) bool {
+func Sgetrf2(m, n int, a []float32, lda int, ipiv []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4863,7 +4863,7 @@ func Sgetrf2(m int, n int, a []float32, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgetrf2.f.
-func Dgetrf2(m int, n int, a []float64, lda int, ipiv []int32) bool {
+func Dgetrf2(m, n int, a []float64, lda int, ipiv []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4876,7 +4876,7 @@ func Dgetrf2(m int, n int, a []float64, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgetrf2.f.
-func Cgetrf2(m int, n int, a []complex64, lda int, ipiv []int32) bool {
+func Cgetrf2(m, n int, a []complex64, lda int, ipiv []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4889,7 +4889,7 @@ func Cgetrf2(m int, n int, a []complex64, lda int, ipiv []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgetrf2.f.
-func Zgetrf2(m int, n int, a []complex128, lda int, ipiv []int32) bool {
+func Zgetrf2(m, n int, a []complex128, lda int, ipiv []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -4970,7 +4970,7 @@ func Zgetri(n int, a []complex128, lda int, ipiv []int32, work []complex128, lwo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgetrs.f.
-func Sgetrs(trans blas.Transpose, n int, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int) bool {
+func Sgetrs(trans blas.Transpose, n, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -4997,7 +4997,7 @@ func Sgetrs(trans blas.Transpose, n int, nrhs int, a []float32, lda int, ipiv []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgetrs.f.
-func Dgetrs(trans blas.Transpose, n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int) bool {
+func Dgetrs(trans blas.Transpose, n, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -5024,7 +5024,7 @@ func Dgetrs(trans blas.Transpose, n int, nrhs int, a []float64, lda int, ipiv []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgetrs.f.
-func Cgetrs(trans blas.Transpose, n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
+func Cgetrs(trans blas.Transpose, n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -5051,7 +5051,7 @@ func Cgetrs(trans blas.Transpose, n int, nrhs int, a []complex64, lda int, ipiv 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgetrs.f.
-func Zgetrs(trans blas.Transpose, n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
+func Zgetrs(trans blas.Transpose, n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -5078,7 +5078,7 @@ func Zgetrs(trans blas.Transpose, n int, nrhs int, a []complex128, lda int, ipiv
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggbak.f.
-func Sggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float32, rscale []float32, m int, v []float32, ldv int) bool {
+func Sggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float32, m int, v []float32, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -5103,7 +5103,7 @@ func Sggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggbak.f.
-func Dggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float64, rscale []float64, m int, v []float64, ldv int) bool {
+func Dggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float64, m int, v []float64, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -5128,7 +5128,7 @@ func Dggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggbak.f.
-func Cggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float32, rscale []float32, m int, v []complex64, ldv int) bool {
+func Cggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float32, m int, v []complex64, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -5153,7 +5153,7 @@ func Cggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggbak.f.
-func Zggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float64, rscale []float64, m int, v []complex128, ldv int) bool {
+func Zggbak(job lapack.Job, s blas.Side, n, ilo, ihi int, lscale, rscale []float64, m int, v []complex128, ldv int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -5178,7 +5178,7 @@ func Zggbak(job lapack.Job, s blas.Side, n int, ilo int, ihi int, lscale []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggbal.f.
-func Sggbal(job lapack.Job, n int, a []float32, lda int, b []float32, ldb int, ilo []int32, ihi []int32, lscale []float32, rscale []float32, work []float32) bool {
+func Sggbal(job lapack.Job, n int, a []float32, lda int, b []float32, ldb int, ilo, ihi []int32, lscale, rscale, work []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5211,7 +5211,7 @@ func Sggbal(job lapack.Job, n int, a []float32, lda int, b []float32, ldb int, i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggbal.f.
-func Dggbal(job lapack.Job, n int, a []float64, lda int, b []float64, ldb int, ilo []int32, ihi []int32, lscale []float64, rscale []float64, work []float64) bool {
+func Dggbal(job lapack.Job, n int, a []float64, lda int, b []float64, ldb int, ilo, ihi []int32, lscale, rscale, work []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5244,7 +5244,7 @@ func Dggbal(job lapack.Job, n int, a []float64, lda int, b []float64, ldb int, i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggbal.f.
-func Cggbal(job lapack.Job, n int, a []complex64, lda int, b []complex64, ldb int, ilo []int32, ihi []int32, lscale []float32, rscale []float32, work []float32) bool {
+func Cggbal(job lapack.Job, n int, a []complex64, lda int, b []complex64, ldb int, ilo, ihi []int32, lscale, rscale, work []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5277,7 +5277,7 @@ func Cggbal(job lapack.Job, n int, a []complex64, lda int, b []complex64, ldb in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggbal.f.
-func Zggbal(job lapack.Job, n int, a []complex128, lda int, b []complex128, ldb int, ilo []int32, ihi []int32, lscale []float64, rscale []float64, work []float64) bool {
+func Zggbal(job lapack.Job, n int, a []complex128, lda int, b []complex128, ldb int, ilo, ihi []int32, lscale, rscale, work []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5310,7 +5310,7 @@ func Zggbal(job lapack.Job, n int, a []complex128, lda int, b []complex128, ldb 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggev.f.
-func Sggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, b []float32, ldb int, alphar []float32, alphai []float32, beta []float32, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) bool {
+func Sggev(jobvl, jobvr lapack.Job, n int, a []float32, lda int, b []float32, ldb int, alphar, alphai, beta, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5347,7 +5347,7 @@ func Sggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, b []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggev.f.
-func Dggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, b []float64, ldb int, alphar []float64, alphai []float64, beta []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) bool {
+func Dggev(jobvl, jobvr lapack.Job, n int, a []float64, lda int, b []float64, ldb int, alphar, alphai, beta, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5384,7 +5384,7 @@ func Dggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, b []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggev.f.
-func Cggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, b []complex64, ldb int, alpha []complex64, beta []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) bool {
+func Cggev(jobvl, jobvr lapack.Job, n int, a []complex64, lda int, b []complex64, ldb int, alpha, beta, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5421,7 +5421,7 @@ func Cggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, b 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggev.f.
-func Zggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, b []complex128, ldb int, alpha []complex128, beta []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) bool {
+func Zggev(jobvl, jobvr lapack.Job, n int, a []complex128, lda int, b []complex128, ldb int, alpha, beta, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5458,7 +5458,7 @@ func Zggev(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggev3.f.
-func Sggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, b []float32, ldb int, alphar []float32, alphai []float32, beta []float32, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) bool {
+func Sggev3(jobvl, jobvr lapack.Job, n int, a []float32, lda int, b []float32, ldb int, alphar, alphai, beta, vl []float32, ldvl int, vr []float32, ldvr int, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5495,7 +5495,7 @@ func Sggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []float32, lda int, b [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggev3.f.
-func Dggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, b []float64, ldb int, alphar []float64, alphai []float64, beta []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) bool {
+func Dggev3(jobvl, jobvr lapack.Job, n int, a []float64, lda int, b []float64, ldb int, alphar, alphai, beta, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5532,7 +5532,7 @@ func Dggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []float64, lda int, b [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggev3.f.
-func Cggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, b []complex64, ldb int, alpha []complex64, beta []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) bool {
+func Cggev3(jobvl, jobvr lapack.Job, n int, a []complex64, lda int, b []complex64, ldb int, alpha, beta, vl []complex64, ldvl int, vr []complex64, ldvr int, work []complex64, lwork int, rwork []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5569,7 +5569,7 @@ func Cggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex64, lda int, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggev3.f.
-func Zggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, b []complex128, ldb int, alpha []complex128, beta []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) bool {
+func Zggev3(jobvl, jobvr lapack.Job, n int, a []complex128, lda int, b []complex128, ldb int, alpha, beta, vl []complex128, ldvl int, vr []complex128, ldvr int, work []complex128, lwork int, rwork []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5606,7 +5606,7 @@ func Zggev3(jobvl lapack.Job, jobvr lapack.Job, n int, a []complex128, lda int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggevx.f.
-func Sggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float32, lda int, b []float32, ldb int, alphar []float32, alphai []float32, beta []float32, vl []float32, ldvl int, vr []float32, ldvr int, ilo []int32, ihi []int32, lscale []float32, rscale []float32, abnrm []float32, bbnrm []float32, rconde []float32, rcondv []float32, work []float32, lwork int, iwork []int32, bwork []int32) bool {
+func Sggevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []float32, lda int, b []float32, ldb int, alphar, alphai, beta, vl []float32, ldvl int, vr []float32, ldvr int, ilo, ihi []int32, lscale, rscale, abnrm, bbnrm, rconde, rcondv, work []float32, lwork int, iwork, bwork []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5683,7 +5683,7 @@ func Sggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggevx.f.
-func Dggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []float64, lda int, b []float64, ldb int, alphar []float64, alphai []float64, beta []float64, vl []float64, ldvl int, vr []float64, ldvr int, ilo []int32, ihi []int32, lscale []float64, rscale []float64, abnrm []float64, bbnrm []float64, rconde []float64, rcondv []float64, work []float64, lwork int, iwork []int32, bwork []int32) bool {
+func Dggevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []float64, lda int, b []float64, ldb int, alphar, alphai, beta, vl []float64, ldvl int, vr []float64, ldvr int, ilo, ihi []int32, lscale, rscale, abnrm, bbnrm, rconde, rcondv, work []float64, lwork int, iwork, bwork []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5760,7 +5760,7 @@ func Dggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggevx.f.
-func Cggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex64, lda int, b []complex64, ldb int, alpha []complex64, beta []complex64, vl []complex64, ldvl int, vr []complex64, ldvr int, ilo []int32, ihi []int32, lscale []float32, rscale []float32, abnrm []float32, bbnrm []float32, rconde []float32, rcondv []float32, work []complex64, lwork int, rwork []float32, iwork []int32, bwork []int32) bool {
+func Cggevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []complex64, lda int, b []complex64, ldb int, alpha, beta, vl []complex64, ldvl int, vr []complex64, ldvr int, ilo, ihi []int32, lscale, rscale, abnrm, bbnrm, rconde, rcondv []float32, work []complex64, lwork int, rwork []float32, iwork, bwork []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5837,7 +5837,7 @@ func Cggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggevx.f.
-func Zggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, a []complex128, lda int, b []complex128, ldb int, alpha []complex128, beta []complex128, vl []complex128, ldvl int, vr []complex128, ldvr int, ilo []int32, ihi []int32, lscale []float64, rscale []float64, abnrm []float64, bbnrm []float64, rconde []float64, rcondv []float64, work []complex128, lwork int, rwork []float64, iwork []int32, bwork []int32) bool {
+func Zggevx(balanc byte, jobvl, jobvr lapack.Job, sense byte, n int, a []complex128, lda int, b []complex128, ldb int, alpha, beta, vl []complex128, ldvl int, vr []complex128, ldvr int, ilo, ihi []int32, lscale, rscale, abnrm, bbnrm, rconde, rcondv []float64, work []complex128, lwork int, rwork []float64, iwork, bwork []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5914,7 +5914,7 @@ func Zggevx(balanc byte, jobvl lapack.Job, jobvr lapack.Job, sense byte, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggglm.f.
-func Sggglm(n int, m int, p int, a []float32, lda int, b []float32, ldb int, d []float32, x []float32, y []float32, work []float32, lwork int) bool {
+func Sggglm(n, m, p int, a []float32, lda int, b []float32, ldb int, d, x, y, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5943,7 +5943,7 @@ func Sggglm(n int, m int, p int, a []float32, lda int, b []float32, ldb int, d [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggglm.f.
-func Dggglm(n int, m int, p int, a []float64, lda int, b []float64, ldb int, d []float64, x []float64, y []float64, work []float64, lwork int) bool {
+func Dggglm(n, m, p int, a []float64, lda int, b []float64, ldb int, d, x, y, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -5972,7 +5972,7 @@ func Dggglm(n int, m int, p int, a []float64, lda int, b []float64, ldb int, d [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggglm.f.
-func Cggglm(n int, m int, p int, a []complex64, lda int, b []complex64, ldb int, d []complex64, x []complex64, y []complex64, work []complex64, lwork int) bool {
+func Cggglm(n, m, p int, a []complex64, lda int, b []complex64, ldb int, d, x, y, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6001,7 +6001,7 @@ func Cggglm(n int, m int, p int, a []complex64, lda int, b []complex64, ldb int,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggglm.f.
-func Zggglm(n int, m int, p int, a []complex128, lda int, b []complex128, ldb int, d []complex128, x []complex128, y []complex128, work []complex128, lwork int) bool {
+func Zggglm(n, m, p int, a []complex128, lda int, b []complex128, ldb int, d, x, y, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6030,7 +6030,7 @@ func Zggglm(n int, m int, p int, a []complex128, lda int, b []complex128, ldb in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgghrd.f.
-func Sgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int) bool {
+func Sgghrd(compq, compz lapack.Comp, n, ilo, ihi int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6051,7 +6051,7 @@ func Sgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgghrd.f.
-func Dgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int) bool {
+func Dgghrd(compq, compz lapack.Comp, n, ilo, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6072,7 +6072,7 @@ func Dgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgghrd.f.
-func Cgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []complex64, lda int, b []complex64, ldb int, q []complex64, ldq int, z []complex64, ldz int) bool {
+func Cgghrd(compq, compz lapack.Comp, n, ilo, ihi int, a []complex64, lda int, b []complex64, ldb int, q []complex64, ldq int, z []complex64, ldz int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6093,7 +6093,7 @@ func Cgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgghrd.f.
-func Zgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz int) bool {
+func Zgghrd(compq, compz lapack.Comp, n, ilo, ihi int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6114,7 +6114,7 @@ func Zgghrd(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgghd3.f.
-func Sgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int, work []float32, lwork int) bool {
+func Sgghd3(compq, compz lapack.Comp, n, ilo, ihi int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6139,7 +6139,7 @@ func Sgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgghd3.f.
-func Dgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int, work []float64, lwork int) bool {
+func Dgghd3(compq, compz lapack.Comp, n, ilo, ihi int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6164,7 +6164,7 @@ func Dgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgghd3.f.
-func Cgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []complex64, lda int, b []complex64, ldb int, q []complex64, ldq int, z []complex64, ldz int, work []complex64, lwork int) bool {
+func Cgghd3(compq, compz lapack.Comp, n, ilo, ihi int, a []complex64, lda int, b []complex64, ldb int, q []complex64, ldq int, z []complex64, ldz int, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6189,7 +6189,7 @@ func Cgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgghd3.f.
-func Zgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz int, work []complex128, lwork int) bool {
+func Zgghd3(compq, compz lapack.Comp, n, ilo, ihi int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz int, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6214,7 +6214,7 @@ func Zgghd3(compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgglse.f.
-func Sgglse(m int, n int, p int, a []float32, lda int, b []float32, ldb int, c []float32, d []float32, x []float32, work []float32, lwork int) bool {
+func Sgglse(m, n, p int, a []float32, lda int, b []float32, ldb int, c, d, x, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6243,7 +6243,7 @@ func Sgglse(m int, n int, p int, a []float32, lda int, b []float32, ldb int, c [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgglse.f.
-func Dgglse(m int, n int, p int, a []float64, lda int, b []float64, ldb int, c []float64, d []float64, x []float64, work []float64, lwork int) bool {
+func Dgglse(m, n, p int, a []float64, lda int, b []float64, ldb int, c, d, x, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6272,7 +6272,7 @@ func Dgglse(m int, n int, p int, a []float64, lda int, b []float64, ldb int, c [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgglse.f.
-func Cgglse(m int, n int, p int, a []complex64, lda int, b []complex64, ldb int, c []complex64, d []complex64, x []complex64, work []complex64, lwork int) bool {
+func Cgglse(m, n, p int, a []complex64, lda int, b []complex64, ldb int, c, d, x, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6301,7 +6301,7 @@ func Cgglse(m int, n int, p int, a []complex64, lda int, b []complex64, ldb int,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgglse.f.
-func Zgglse(m int, n int, p int, a []complex128, lda int, b []complex128, ldb int, c []complex128, d []complex128, x []complex128, work []complex128, lwork int) bool {
+func Zgglse(m, n, p int, a []complex128, lda int, b []complex128, ldb int, c, d, x, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6330,7 +6330,7 @@ func Zgglse(m int, n int, p int, a []complex128, lda int, b []complex128, ldb in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggqrf.f.
-func Sggqrf(n int, m int, p int, a []float32, lda int, taua []float32, b []float32, ldb int, taub []float32, work []float32, lwork int) bool {
+func Sggqrf(n, m, p int, a []float32, lda int, taua, b []float32, ldb int, taub, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6355,7 +6355,7 @@ func Sggqrf(n int, m int, p int, a []float32, lda int, taua []float32, b []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggqrf.f.
-func Dggqrf(n int, m int, p int, a []float64, lda int, taua []float64, b []float64, ldb int, taub []float64, work []float64, lwork int) bool {
+func Dggqrf(n, m, p int, a []float64, lda int, taua, b []float64, ldb int, taub, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6380,7 +6380,7 @@ func Dggqrf(n int, m int, p int, a []float64, lda int, taua []float64, b []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggqrf.f.
-func Cggqrf(n int, m int, p int, a []complex64, lda int, taua []complex64, b []complex64, ldb int, taub []complex64, work []complex64, lwork int) bool {
+func Cggqrf(n, m, p int, a []complex64, lda int, taua, b []complex64, ldb int, taub, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6405,7 +6405,7 @@ func Cggqrf(n int, m int, p int, a []complex64, lda int, taua []complex64, b []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggqrf.f.
-func Zggqrf(n int, m int, p int, a []complex128, lda int, taua []complex128, b []complex128, ldb int, taub []complex128, work []complex128, lwork int) bool {
+func Zggqrf(n, m, p int, a []complex128, lda int, taua, b []complex128, ldb int, taub, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6430,7 +6430,7 @@ func Zggqrf(n int, m int, p int, a []complex128, lda int, taua []complex128, b [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggrqf.f.
-func Sggrqf(m int, p int, n int, a []float32, lda int, taua []float32, b []float32, ldb int, taub []float32, work []float32, lwork int) bool {
+func Sggrqf(m, p, n int, a []float32, lda int, taua, b []float32, ldb int, taub, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6455,7 +6455,7 @@ func Sggrqf(m int, p int, n int, a []float32, lda int, taua []float32, b []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggrqf.f.
-func Dggrqf(m int, p int, n int, a []float64, lda int, taua []float64, b []float64, ldb int, taub []float64, work []float64, lwork int) bool {
+func Dggrqf(m, p, n int, a []float64, lda int, taua, b []float64, ldb int, taub, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6480,7 +6480,7 @@ func Dggrqf(m int, p int, n int, a []float64, lda int, taua []float64, b []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggrqf.f.
-func Cggrqf(m int, p int, n int, a []complex64, lda int, taua []complex64, b []complex64, ldb int, taub []complex64, work []complex64, lwork int) bool {
+func Cggrqf(m, p, n int, a []complex64, lda int, taua, b []complex64, ldb int, taub, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6505,7 +6505,7 @@ func Cggrqf(m int, p int, n int, a []complex64, lda int, taua []complex64, b []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggrqf.f.
-func Zggrqf(m int, p int, n int, a []complex128, lda int, taua []complex128, b []complex128, ldb int, taub []complex128, work []complex128, lwork int) bool {
+func Zggrqf(m, p, n int, a []complex128, lda int, taua, b []complex128, ldb int, taub, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6530,7 +6530,7 @@ func Zggrqf(m int, p int, n int, a []complex128, lda int, taua []complex128, b [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggsvd3.f.
-func Sggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []float32, lda int, b []float32, ldb int, alpha []float32, beta []float32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, work []float32, lwork int, iwork []int32) bool {
+func Sggsvd3(jobu, jobv, jobq lapack.Job, m, n, p int, k, l []int32, a []float32, lda int, b []float32, ldb int, alpha, beta, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, work []float32, lwork int, iwork []int32) bool {
 	var _k *int32
 	if len(k) > 0 {
 		_k = &k[0]
@@ -6579,7 +6579,7 @@ func Sggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggsvd3.f.
-func Dggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []float64, lda int, b []float64, ldb int, alpha []float64, beta []float64, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, work []float64, lwork int, iwork []int32) bool {
+func Dggsvd3(jobu, jobv, jobq lapack.Job, m, n, p int, k, l []int32, a []float64, lda int, b []float64, ldb int, alpha, beta, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, work []float64, lwork int, iwork []int32) bool {
 	var _k *int32
 	if len(k) > 0 {
 		_k = &k[0]
@@ -6628,7 +6628,7 @@ func Dggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggsvd3.f.
-func Cggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []complex64, lda int, b []complex64, ldb int, alpha []float32, beta []float32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
+func Cggsvd3(jobu, jobv, jobq lapack.Job, m, n, p int, k, l []int32, a []complex64, lda int, b []complex64, ldb int, alpha, beta []float32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, work []complex64, lwork int, rwork []float32, iwork []int32) bool {
 	var _k *int32
 	if len(k) > 0 {
 		_k = &k[0]
@@ -6681,7 +6681,7 @@ func Cggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggsvd3.f.
-func Zggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p int, k []int32, l []int32, a []complex128, lda int, b []complex128, ldb int, alpha []float64, beta []float64, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
+func Zggsvd3(jobu, jobv, jobq lapack.Job, m, n, p int, k, l []int32, a []complex128, lda int, b []complex128, ldb int, alpha, beta []float64, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, work []complex128, lwork int, rwork []float64, iwork []int32) bool {
 	var _k *int32
 	if len(k) > 0 {
 		_k = &k[0]
@@ -6734,7 +6734,7 @@ func Zggsvd3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, n int, p 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sggsvp3.f.
-func Sggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []float32, lda int, b []float32, ldb int, tola float32, tolb float32, k []int32, l []int32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, iwork []int32, tau []float32, work []float32, lwork int) bool {
+func Sggsvp3(jobu, jobv, jobq lapack.Job, m, p, n int, a []float32, lda int, b []float32, ldb int, tola, tolb float32, k, l []int32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, iwork []int32, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6779,7 +6779,7 @@ func Sggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dggsvp3.f.
-func Dggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []float64, lda int, b []float64, ldb int, tola float64, tolb float64, k []int32, l []int32, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, iwork []int32, tau []float64, work []float64, lwork int) bool {
+func Dggsvp3(jobu, jobv, jobq lapack.Job, m, p, n int, a []float64, lda int, b []float64, ldb int, tola, tolb float64, k, l []int32, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, iwork []int32, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6824,7 +6824,7 @@ func Dggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cggsvp3.f.
-func Cggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []complex64, lda int, b []complex64, ldb int, tola float32, tolb float32, k []int32, l []int32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, iwork []int32, rwork []float32, tau []complex64, work []complex64, lwork int) bool {
+func Cggsvp3(jobu, jobv, jobq lapack.Job, m, p, n int, a []complex64, lda int, b []complex64, ldb int, tola, tolb float32, k, l []int32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, iwork []int32, rwork []float32, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6873,7 +6873,7 @@ func Cggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zggsvp3.f.
-func Zggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, a []complex128, lda int, b []complex128, ldb int, tola float64, tolb float64, k []int32, l []int32, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, iwork []int32, rwork []float64, tau []complex128, work []complex128, lwork int) bool {
+func Zggsvp3(jobu, jobv, jobq lapack.Job, m, p, n int, a []complex128, lda int, b []complex128, ldb int, tola, tolb float64, k, l []int32, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, iwork []int32, rwork []float64, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -6922,7 +6922,7 @@ func Zggsvp3(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgtcon.f.
-func Sgtcon(norm byte, n int, dl []float32, d []float32, du []float32, du2 []float32, ipiv []int32, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Sgtcon(norm byte, n int, dl, d, du, du2 []float32, ipiv []int32, anorm float32, rcond, work []float32, iwork []int32) bool {
 	var _dl *float32
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -6959,7 +6959,7 @@ func Sgtcon(norm byte, n int, dl []float32, d []float32, du []float32, du2 []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgtcon.f.
-func Dgtcon(norm byte, n int, dl []float64, d []float64, du []float64, du2 []float64, ipiv []int32, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dgtcon(norm byte, n int, dl, d, du, du2 []float64, ipiv []int32, anorm float64, rcond, work []float64, iwork []int32) bool {
 	var _dl *float64
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -6996,7 +6996,7 @@ func Dgtcon(norm byte, n int, dl []float64, d []float64, du []float64, du2 []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgtcon.f.
-func Cgtcon(norm byte, n int, dl []complex64, d []complex64, du []complex64, du2 []complex64, ipiv []int32, anorm float32, rcond []float32, work []complex64) bool {
+func Cgtcon(norm byte, n int, dl, d, du, du2 []complex64, ipiv []int32, anorm float32, rcond []float32, work []complex64) bool {
 	var _dl *complex64
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7029,7 +7029,7 @@ func Cgtcon(norm byte, n int, dl []complex64, d []complex64, du []complex64, du2
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgtcon.f.
-func Zgtcon(norm byte, n int, dl []complex128, d []complex128, du []complex128, du2 []complex128, ipiv []int32, anorm float64, rcond []float64, work []complex128) bool {
+func Zgtcon(norm byte, n int, dl, d, du, du2 []complex128, ipiv []int32, anorm float64, rcond []float64, work []complex128) bool {
 	var _dl *complex128
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7062,7 +7062,7 @@ func Zgtcon(norm byte, n int, dl []complex128, d []complex128, du []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgtrfs.f.
-func Sgtrfs(trans blas.Transpose, n int, nrhs int, dl []float32, d []float32, du []float32, dlf []float32, df []float32, duf []float32, du2 []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sgtrfs(trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7133,7 +7133,7 @@ func Sgtrfs(trans blas.Transpose, n int, nrhs int, dl []float32, d []float32, du
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgtrfs.f.
-func Dgtrfs(trans blas.Transpose, n int, nrhs int, dl []float64, d []float64, du []float64, dlf []float64, df []float64, duf []float64, du2 []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dgtrfs(trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7204,7 +7204,7 @@ func Dgtrfs(trans blas.Transpose, n int, nrhs int, dl []float64, d []float64, du
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgtrfs.f.
-func Cgtrfs(trans blas.Transpose, n int, nrhs int, dl []complex64, d []complex64, du []complex64, dlf []complex64, df []complex64, duf []complex64, du2 []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cgtrfs(trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7275,7 +7275,7 @@ func Cgtrfs(trans blas.Transpose, n int, nrhs int, dl []complex64, d []complex64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgtrfs.f.
-func Zgtrfs(trans blas.Transpose, n int, nrhs int, dl []complex128, d []complex128, du []complex128, dlf []complex128, df []complex128, duf []complex128, du2 []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zgtrfs(trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7346,7 +7346,7 @@ func Zgtrfs(trans blas.Transpose, n int, nrhs int, dl []complex128, d []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgtsv.f.
-func Sgtsv(n int, nrhs int, dl []float32, d []float32, du []float32, b []float32, ldb int) bool {
+func Sgtsv(n, nrhs int, dl, d, du, b []float32, ldb int) bool {
 	var _dl *float32
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7367,7 +7367,7 @@ func Sgtsv(n int, nrhs int, dl []float32, d []float32, du []float32, b []float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgtsv.f.
-func Dgtsv(n int, nrhs int, dl []float64, d []float64, du []float64, b []float64, ldb int) bool {
+func Dgtsv(n, nrhs int, dl, d, du, b []float64, ldb int) bool {
 	var _dl *float64
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7388,7 +7388,7 @@ func Dgtsv(n int, nrhs int, dl []float64, d []float64, du []float64, b []float64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgtsv.f.
-func Cgtsv(n int, nrhs int, dl []complex64, d []complex64, du []complex64, b []complex64, ldb int) bool {
+func Cgtsv(n, nrhs int, dl, d, du, b []complex64, ldb int) bool {
 	var _dl *complex64
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7409,7 +7409,7 @@ func Cgtsv(n int, nrhs int, dl []complex64, d []complex64, du []complex64, b []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgtsv.f.
-func Zgtsv(n int, nrhs int, dl []complex128, d []complex128, du []complex128, b []complex128, ldb int) bool {
+func Zgtsv(n, nrhs int, dl, d, du, b []complex128, ldb int) bool {
 	var _dl *complex128
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7430,7 +7430,7 @@ func Zgtsv(n int, nrhs int, dl []complex128, d []complex128, du []complex128, b 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgtsvx.f.
-func Sgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []float32, d []float32, du []float32, dlf []float32, df []float32, duf []float32, du2 []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sgtsvx(fact byte, trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7505,7 +7505,7 @@ func Sgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []float32, d []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgtsvx.f.
-func Dgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []float64, d []float64, du []float64, dlf []float64, df []float64, duf []float64, du2 []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dgtsvx(fact byte, trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7580,7 +7580,7 @@ func Dgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []float64, d []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgtsvx.f.
-func Cgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []complex64, d []complex64, du []complex64, dlf []complex64, df []complex64, duf []complex64, du2 []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cgtsvx(fact byte, trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7655,7 +7655,7 @@ func Cgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []complex64, d 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgtsvx.f.
-func Zgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []complex128, d []complex128, du []complex128, dlf []complex128, df []complex128, duf []complex128, du2 []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zgtsvx(fact byte, trans blas.Transpose, n, nrhs int, dl, d, du, dlf, df, duf, du2 []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7730,7 +7730,7 @@ func Zgtsvx(fact byte, trans blas.Transpose, n int, nrhs int, dl []complex128, d
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgttrf.f.
-func Sgttrf(n int, dl []float32, d []float32, du []float32, du2 []float32, ipiv []int32) bool {
+func Sgttrf(n int, dl, d, du, du2 []float32, ipiv []int32) bool {
 	var _dl *float32
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7755,7 +7755,7 @@ func Sgttrf(n int, dl []float32, d []float32, du []float32, du2 []float32, ipiv 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgttrf.f.
-func Dgttrf(n int, dl []float64, d []float64, du []float64, du2 []float64, ipiv []int32) bool {
+func Dgttrf(n int, dl, d, du, du2 []float64, ipiv []int32) bool {
 	var _dl *float64
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7780,7 +7780,7 @@ func Dgttrf(n int, dl []float64, d []float64, du []float64, du2 []float64, ipiv 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgttrf.f.
-func Cgttrf(n int, dl []complex64, d []complex64, du []complex64, du2 []complex64, ipiv []int32) bool {
+func Cgttrf(n int, dl, d, du, du2 []complex64, ipiv []int32) bool {
 	var _dl *complex64
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7805,7 +7805,7 @@ func Cgttrf(n int, dl []complex64, d []complex64, du []complex64, du2 []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgttrf.f.
-func Zgttrf(n int, dl []complex128, d []complex128, du []complex128, du2 []complex128, ipiv []int32) bool {
+func Zgttrf(n int, dl, d, du, du2 []complex128, ipiv []int32) bool {
 	var _dl *complex128
 	if len(dl) > 0 {
 		_dl = &dl[0]
@@ -7830,7 +7830,7 @@ func Zgttrf(n int, dl []complex128, d []complex128, du []complex128, du2 []compl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgttrs.f.
-func Sgttrs(trans blas.Transpose, n int, nrhs int, dl []float32, d []float32, du []float32, du2 []float32, ipiv []int32, b []float32, ldb int) bool {
+func Sgttrs(trans blas.Transpose, n, nrhs int, dl, d, du, du2 []float32, ipiv []int32, b []float32, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7869,7 +7869,7 @@ func Sgttrs(trans blas.Transpose, n int, nrhs int, dl []float32, d []float32, du
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgttrs.f.
-func Dgttrs(trans blas.Transpose, n int, nrhs int, dl []float64, d []float64, du []float64, du2 []float64, ipiv []int32, b []float64, ldb int) bool {
+func Dgttrs(trans blas.Transpose, n, nrhs int, dl, d, du, du2 []float64, ipiv []int32, b []float64, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7908,7 +7908,7 @@ func Dgttrs(trans blas.Transpose, n int, nrhs int, dl []float64, d []float64, du
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgttrs.f.
-func Cgttrs(trans blas.Transpose, n int, nrhs int, dl []complex64, d []complex64, du []complex64, du2 []complex64, ipiv []int32, b []complex64, ldb int) bool {
+func Cgttrs(trans blas.Transpose, n, nrhs int, dl, d, du, du2 []complex64, ipiv []int32, b []complex64, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7947,7 +7947,7 @@ func Cgttrs(trans blas.Transpose, n int, nrhs int, dl []complex64, d []complex64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgttrs.f.
-func Zgttrs(trans blas.Transpose, n int, nrhs int, dl []complex128, d []complex128, du []complex128, du2 []complex128, ipiv []int32, b []complex128, ldb int) bool {
+func Zgttrs(trans blas.Transpose, n, nrhs int, dl, d, du, du2 []complex128, ipiv []int32, b []complex128, ldb int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -7986,7 +7986,7 @@ func Zgttrs(trans blas.Transpose, n int, nrhs int, dl []complex128, d []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbev.f.
-func Chbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex64, ldab int, w []float32, z []complex64, ldz int, work []complex64, rwork []float32) bool {
+func Chbev(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []complex64, ldab int, w []float32, z []complex64, ldz int, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8019,7 +8019,7 @@ func Chbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex64, ldab in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbev.f.
-func Zhbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex128, ldab int, w []float64, z []complex128, ldz int, work []complex128, rwork []float64) bool {
+func Zhbev(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []complex128, ldab int, w []float64, z []complex128, ldz int, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8052,7 +8052,7 @@ func Zhbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex128, ldab i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbevd.f.
-func Chbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex64, ldab int, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
+func Chbevd(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []complex64, ldab int, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8089,7 +8089,7 @@ func Chbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex64, ldab i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbevd.f.
-func Zhbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex128, ldab int, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
+func Zhbevd(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []complex128, ldab int, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8126,7 +8126,7 @@ func Zhbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []complex128, ldab 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbevx.f.
-func Chbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []complex64, ldab int, q []complex64, ldq int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork []int32, ifail []int32) bool {
+func Chbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n, kd int, ab []complex64, ldab int, q []complex64, ldq int, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8175,7 +8175,7 @@ func Chbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbevx.f.
-func Zhbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []complex128, ldab int, q []complex128, ldq int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork []int32, ifail []int32) bool {
+func Zhbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n, kd int, ab []complex128, ldab int, q []complex128, ldq int, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8224,7 +8224,7 @@ func Zhbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbgst.f.
-func Chbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, x []complex64, ldx int, work []complex64, rwork []float32) bool {
+func Chbgst(vect byte, ul blas.Uplo, n, ka, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, x []complex64, ldx int, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8257,7 +8257,7 @@ func Chbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []complex64, ldab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbgst.f.
-func Zhbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, x []complex128, ldx int, work []complex128, rwork []float64) bool {
+func Zhbgst(vect byte, ul blas.Uplo, n, ka, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, x []complex128, ldx int, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8290,7 +8290,7 @@ func Zhbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []complex128, lda
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbgv.f.
-func Chbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, w []float32, z []complex64, ldz int, work []complex64, rwork []float32) bool {
+func Chbgv(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, w []float32, z []complex64, ldz int, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8327,7 +8327,7 @@ func Chbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbgv.f.
-func Zhbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, w []float64, z []complex128, ldz int, work []complex128, rwork []float64) bool {
+func Zhbgv(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, w []float64, z []complex128, ldz int, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8364,7 +8364,7 @@ func Zhbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex128
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbgvd.f.
-func Chbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
+func Chbgvd(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8405,7 +8405,7 @@ func Chbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbgvd.f.
-func Zhbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
+func Zhbgvd(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8446,7 +8446,7 @@ func Zhbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []complex12
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbgvx.f.
-func Chbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, q []complex64, ldq int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork []int32, ifail []int32) bool {
+func Chbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n, ka, kb int, ab []complex64, ldab int, bb []complex64, ldbb int, q []complex64, ldq int, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8499,7 +8499,7 @@ func Chbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbgvx.f.
-func Zhbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, q []complex128, ldq int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork []int32, ifail []int32) bool {
+func Zhbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n, ka, kb int, ab []complex128, ldab int, bb []complex128, ldbb int, q []complex128, ldq int, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8552,7 +8552,7 @@ func Zhbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chbtrd.f.
-func Chbtrd(vect byte, ul blas.Uplo, n int, kd int, ab []complex64, ldab int, d []float32, e []float32, q []complex64, ldq int, work []complex64) bool {
+func Chbtrd(vect byte, ul blas.Uplo, n, kd int, ab []complex64, ldab int, d, e []float32, q []complex64, ldq int, work []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8585,7 +8585,7 @@ func Chbtrd(vect byte, ul blas.Uplo, n int, kd int, ab []complex64, ldab int, d 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhbtrd.f.
-func Zhbtrd(vect byte, ul blas.Uplo, n int, kd int, ab []complex128, ldab int, d []float64, e []float64, q []complex128, ldq int, work []complex128) bool {
+func Zhbtrd(vect byte, ul blas.Uplo, n, kd int, ab []complex128, ldab int, d, e []float64, q []complex128, ldq int, work []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8676,7 +8676,7 @@ func Zhecon(ul blas.Uplo, n int, a []complex128, lda int, ipiv []int32, anorm fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cheequb.f.
-func Cheequb(ul blas.Uplo, n int, a []complex64, lda int, s []float32, scond []float32, amax []float32, work []complex64) bool {
+func Cheequb(ul blas.Uplo, n int, a []complex64, lda int, s, scond, amax []float32, work []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8709,7 +8709,7 @@ func Cheequb(ul blas.Uplo, n int, a []complex64, lda int, s []float32, scond []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zheequb.f.
-func Zheequb(ul blas.Uplo, n int, a []complex128, lda int, s []float64, scond []float64, amax []float64, work []complex128) bool {
+func Zheequb(ul blas.Uplo, n int, a []complex128, lda int, s, scond, amax []float64, work []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8866,7 +8866,7 @@ func Zheevd(jobz lapack.Job, ul blas.Uplo, n int, a []complex128, lda int, w []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cheevr.f.
-func Cheevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, isuppz []int32, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
+func Cheevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda int, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, isuppz []int32, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8911,7 +8911,7 @@ func Cheevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zheevr.f.
-func Zheevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex128, lda int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, isuppz []int32, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
+func Zheevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex128, lda int, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, isuppz []int32, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -8956,7 +8956,7 @@ func Zheevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex128, lda 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cheevx.f.
-func Cheevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, iwork []int32, ifail []int32) bool {
+func Cheevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda int, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9001,7 +9001,7 @@ func Cheevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zheevx.f.
-func Zheevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex128, lda int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, iwork []int32, ifail []int32) bool {
+func Zheevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex128, lda int, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9228,7 +9228,7 @@ func Zhegvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []complex128, lda
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chegvx.f.
-func Chegvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda int, b []complex64, ldb int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, iwork []int32, ifail []int32) bool {
+func Chegvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex64, lda int, b []complex64, ldb int, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9277,7 +9277,7 @@ func Chegvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []compl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhegvx.f.
-func Zhegvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex128, lda int, b []complex128, ldb int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, iwork []int32, ifail []int32) bool {
+func Zhegvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []complex128, lda int, b []complex128, ldb int, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9326,7 +9326,7 @@ func Zhegvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []compl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cherfs.f.
-func Cherfs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cherfs(ul blas.Uplo, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9375,7 +9375,7 @@ func Cherfs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zherfs.f.
-func Zherfs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zherfs(ul blas.Uplo, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9424,7 +9424,7 @@ func Zherfs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chesv.f.
-func Chesv(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64, lwork int) bool {
+func Chesv(ul blas.Uplo, n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9453,7 +9453,7 @@ func Chesv(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhesv.f.
-func Zhesv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128, lwork int) bool {
+func Zhesv(ul blas.Uplo, n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9482,7 +9482,7 @@ func Zhesv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chesvx.f.
-func Chesvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, lwork int, rwork []float32) bool {
+func Chesvx(fact byte, ul blas.Uplo, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, lwork int, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9535,7 +9535,7 @@ func Chesvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhesvx.f.
-func Zhesvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, lwork int, rwork []float64) bool {
+func Zhesvx(fact byte, ul blas.Uplo, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, lwork int, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9588,7 +9588,7 @@ func Zhesvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex128, lda int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chetrd.f.
-func Chetrd(ul blas.Uplo, n int, a []complex64, lda int, d []float32, e []float32, tau []complex64, work []complex64, lwork int) bool {
+func Chetrd(ul blas.Uplo, n int, a []complex64, lda int, d, e []float32, tau, work []complex64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9621,7 +9621,7 @@ func Chetrd(ul blas.Uplo, n int, a []complex64, lda int, d []float32, e []float3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhetrd.f.
-func Zhetrd(ul blas.Uplo, n int, a []complex128, lda int, d []float64, e []float64, tau []complex128, work []complex128, lwork int) bool {
+func Zhetrd(ul blas.Uplo, n int, a []complex128, lda int, d, e []float64, tau, work []complex128, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9754,7 +9754,7 @@ func Zhetri(ul blas.Uplo, n int, a []complex128, lda int, ipiv []int32, work []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chetrs.f.
-func Chetrs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
+func Chetrs(ul blas.Uplo, n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9779,7 +9779,7 @@ func Chetrs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhetrs.f.
-func Zhetrs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
+func Zhetrs(ul blas.Uplo, n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -9804,7 +9804,7 @@ func Zhetrs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chfrk.f.
-func Chfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k int, alpha float32, a []complex64, lda int, beta float32, c []complex64) bool {
+func Chfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n, k int, alpha float32, a []complex64, lda int, beta float32, c []complex64) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -9845,7 +9845,7 @@ func Chfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhfrk.f.
-func Zhfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k int, alpha float64, a []complex128, lda int, beta float64, c []complex128) bool {
+func Zhfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n, k int, alpha float64, a []complex128, lda int, beta float64, c []complex128) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -9886,7 +9886,7 @@ func Zhfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/shgeqz.f.
-func Shgeqz(job lapack.Job, compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, h []float32, ldh int, t []float32, ldt int, alphar []float32, alphai []float32, beta []float32, q []float32, ldq int, z []float32, ldz int, work []float32, lwork int) bool {
+func Shgeqz(job lapack.Job, compq, compz lapack.Comp, n, ilo, ihi int, h []float32, ldh int, t []float32, ldt int, alphar, alphai, beta, q []float32, ldq int, z []float32, ldz int, work []float32, lwork int) bool {
 	var _h *float32
 	if len(h) > 0 {
 		_h = &h[0]
@@ -9923,7 +9923,7 @@ func Shgeqz(job lapack.Job, compq lapack.Comp, compz lapack.Comp, n int, ilo int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dhgeqz.f.
-func Dhgeqz(job lapack.Job, compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, h []float64, ldh int, t []float64, ldt int, alphar []float64, alphai []float64, beta []float64, q []float64, ldq int, z []float64, ldz int, work []float64, lwork int) bool {
+func Dhgeqz(job lapack.Job, compq, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, t []float64, ldt int, alphar, alphai, beta, q []float64, ldq int, z []float64, ldz int, work []float64, lwork int) bool {
 	var _h *float64
 	if len(h) > 0 {
 		_h = &h[0]
@@ -9960,7 +9960,7 @@ func Dhgeqz(job lapack.Job, compq lapack.Comp, compz lapack.Comp, n int, ilo int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chgeqz.f.
-func Chgeqz(job lapack.Job, compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, h []complex64, ldh int, t []complex64, ldt int, alpha []complex64, beta []complex64, q []complex64, ldq int, z []complex64, ldz int, work []complex64, lwork int, rwork []float32) bool {
+func Chgeqz(job lapack.Job, compq, compz lapack.Comp, n, ilo, ihi int, h []complex64, ldh int, t []complex64, ldt int, alpha, beta, q []complex64, ldq int, z []complex64, ldz int, work []complex64, lwork int, rwork []float32) bool {
 	var _h *complex64
 	if len(h) > 0 {
 		_h = &h[0]
@@ -9997,7 +9997,7 @@ func Chgeqz(job lapack.Job, compq lapack.Comp, compz lapack.Comp, n int, ilo int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhgeqz.f.
-func Zhgeqz(job lapack.Job, compq lapack.Comp, compz lapack.Comp, n int, ilo int, ihi int, h []complex128, ldh int, t []complex128, ldt int, alpha []complex128, beta []complex128, q []complex128, ldq int, z []complex128, ldz int, work []complex128, lwork int, rwork []float64) bool {
+func Zhgeqz(job lapack.Job, compq, compz lapack.Comp, n, ilo, ihi int, h []complex128, ldh int, t []complex128, ldt int, alpha, beta, q []complex128, ldq int, z []complex128, ldz int, work []complex128, lwork int, rwork []float64) bool {
 	var _h *complex128
 	if len(h) > 0 {
 		_h = &h[0]
@@ -10232,7 +10232,7 @@ func Zhpevd(jobz lapack.Job, ul blas.Uplo, n int, ap []complex128, w []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chpevx.f.
-func Chpevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex64, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork []int32, ifail []int32) bool {
+func Chpevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex64, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10277,7 +10277,7 @@ func Chpevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex64, vl f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhpevx.f.
-func Zhpevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex128, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork []int32, ifail []int32) bool {
+func Zhpevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex128, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10322,7 +10322,7 @@ func Zhpevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex128, vl 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chpgst.f.
-func Chpgst(itype int, ul blas.Uplo, n int, ap []complex64, bp []complex64) bool {
+func Chpgst(itype int, ul blas.Uplo, n int, ap, bp []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10343,7 +10343,7 @@ func Chpgst(itype int, ul blas.Uplo, n int, ap []complex64, bp []complex64) bool
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhpgst.f.
-func Zhpgst(itype int, ul blas.Uplo, n int, ap []complex128, bp []complex128) bool {
+func Zhpgst(itype int, ul blas.Uplo, n int, ap, bp []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10364,7 +10364,7 @@ func Zhpgst(itype int, ul blas.Uplo, n int, ap []complex128, bp []complex128) bo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chpgv.f.
-func Chpgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex64, bp []complex64, w []float32, z []complex64, ldz int, work []complex64, rwork []float32) bool {
+func Chpgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp []complex64, w []float32, z []complex64, ldz int, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10401,7 +10401,7 @@ func Chpgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex64, bp [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhpgv.f.
-func Zhpgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex128, bp []complex128, w []float64, z []complex128, ldz int, work []complex128, rwork []float64) bool {
+func Zhpgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp []complex128, w []float64, z []complex128, ldz int, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10438,7 +10438,7 @@ func Zhpgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex128, bp 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chpgvd.f.
-func Chpgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex64, bp []complex64, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
+func Chpgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp []complex64, w []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10479,7 +10479,7 @@ func Chpgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex64, bp 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhpgvd.f.
-func Zhpgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex128, bp []complex128, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
+func Zhpgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp []complex128, w []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10520,7 +10520,7 @@ func Zhpgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []complex128, bp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chpgvx.f.
-func Chpgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex64, bp []complex64, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork []int32, ifail []int32) bool {
+func Chpgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap, bp []complex64, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, work []complex64, rwork []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10569,7 +10569,7 @@ func Chpgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhpgvx.f.
-func Zhpgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []complex128, bp []complex128, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork []int32, ifail []int32) bool {
+func Zhpgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap, bp []complex128, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, work []complex128, rwork []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10618,7 +10618,7 @@ func Zhpgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chprfs.f.
-func Chprfs(ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Chprfs(ul blas.Uplo, n, nrhs int, ap, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10667,7 +10667,7 @@ func Chprfs(ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, ipiv
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhprfs.f.
-func Zhprfs(ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zhprfs(ul blas.Uplo, n, nrhs int, ap, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10716,7 +10716,7 @@ func Zhprfs(ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, ip
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chpsv.f.
-func Chpsv(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
+func Chpsv(ul blas.Uplo, n, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10741,7 +10741,7 @@ func Chpsv(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhpsv.f.
-func Zhpsv(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
+func Zhpsv(ul blas.Uplo, n, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10766,7 +10766,7 @@ func Zhpsv(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chpsvx.f.
-func Chpsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Chpsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10819,7 +10819,7 @@ func Chpsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex64, afp []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhpsvx.f.
-func Zhpsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zhpsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10872,7 +10872,7 @@ func Zhpsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex128, afp []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chptrd.f.
-func Chptrd(ul blas.Uplo, n int, ap []complex64, d []float32, e []float32, tau []complex64) bool {
+func Chptrd(ul blas.Uplo, n int, ap []complex64, d, e []float32, tau []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -10901,7 +10901,7 @@ func Chptrd(ul blas.Uplo, n int, ap []complex64, d []float32, e []float32, tau [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhptrd.f.
-func Zhptrd(ul blas.Uplo, n int, ap []complex128, d []float64, e []float64, tau []complex128) bool {
+func Zhptrd(ul blas.Uplo, n int, ap []complex128, d, e []float64, tau []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11022,7 +11022,7 @@ func Zhptri(ul blas.Uplo, n int, ap []complex128, ipiv []int32, work []complex12
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chptrs.f.
-func Chptrs(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
+func Chptrs(ul blas.Uplo, n, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11047,7 +11047,7 @@ func Chptrs(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhptrs.f.
-func Zhptrs(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
+func Zhptrs(ul blas.Uplo, n, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11072,7 +11072,7 @@ func Zhptrs(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []co
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/shseqr.f.
-func Shseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []float32, ldh int, wr []float32, wi []float32, z []float32, ldz int, work []float32, lwork int) int {
+func Shseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []float32, ldh int, wr, wi, z []float32, ldz int, work []float32, lwork int) int {
 	var _h *float32
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11097,7 +11097,7 @@ func Shseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dhseqr.f.
-func Dhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []float64, ldh int, wr []float64, wi []float64, z []float64, ldz int, work []float64, lwork int) int {
+func Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, wr, wi, z []float64, ldz int, work []float64, lwork int) int {
 	var _h *float64
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11122,7 +11122,7 @@ func Dhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chseqr.f.
-func Chseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []complex64, ldh int, w []complex64, z []complex64, ldz int, work []complex64, lwork int) int {
+func Chseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []complex64, ldh int, w, z []complex64, ldz int, work []complex64, lwork int) int {
 	var _h *complex64
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11143,7 +11143,7 @@ func Chseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhseqr.f.
-func Zhseqr(job lapack.Job, compz lapack.Comp, n int, ilo int, ihi int, h []complex128, ldh int, w []complex128, z []complex128, ldz int, work []complex128, lwork int) int {
+func Zhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []complex128, ldh int, w, z []complex128, ldz int, work []complex128, lwork int) int {
 	var _h *complex128
 	if len(h) > 0 {
 		_h = &h[0]
@@ -11182,7 +11182,7 @@ func Zlacgv(n int, x []complex128, incx int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slacn2.f.
-func Slacn2(n int, v []float32, x []float32, isgn []int32, est []float32, kase []int32, isave []int32) bool {
+func Slacn2(n int, v, x []float32, isgn []int32, est []float32, kase, isave []int32) bool {
 	var _v *float32
 	if len(v) > 0 {
 		_v = &v[0]
@@ -11211,7 +11211,7 @@ func Slacn2(n int, v []float32, x []float32, isgn []int32, est []float32, kase [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlacn2.f.
-func Dlacn2(n int, v []float64, x []float64, isgn []int32, est []float64, kase []int32, isave []int32) bool {
+func Dlacn2(n int, v, x []float64, isgn []int32, est []float64, kase, isave []int32) bool {
 	var _v *float64
 	if len(v) > 0 {
 		_v = &v[0]
@@ -11240,7 +11240,7 @@ func Dlacn2(n int, v []float64, x []float64, isgn []int32, est []float64, kase [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clacn2.f.
-func Clacn2(n int, v []complex64, x []complex64, est []float32, kase []int32, isave []int32) bool {
+func Clacn2(n int, v, x []complex64, est []float32, kase, isave []int32) bool {
 	var _v *complex64
 	if len(v) > 0 {
 		_v = &v[0]
@@ -11265,7 +11265,7 @@ func Clacn2(n int, v []complex64, x []complex64, est []float32, kase []int32, is
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlacn2.f.
-func Zlacn2(n int, v []complex128, x []complex128, est []float64, kase []int32, isave []int32) bool {
+func Zlacn2(n int, v, x []complex128, est []float64, kase, isave []int32) bool {
 	var _v *complex128
 	if len(v) > 0 {
 		_v = &v[0]
@@ -11290,7 +11290,7 @@ func Zlacn2(n int, v []complex128, x []complex128, est []float64, kase []int32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slacpy.f.
-func Slacpy(ul blas.Uplo, m int, n int, a []float32, lda int, b []float32, ldb int) bool {
+func Slacpy(ul blas.Uplo, m, n int, a []float32, lda int, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11313,7 +11313,7 @@ func Slacpy(ul blas.Uplo, m int, n int, a []float32, lda int, b []float32, ldb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlacpy.f.
-func Dlacpy(ul blas.Uplo, m int, n int, a []float64, lda int, b []float64, ldb int) bool {
+func Dlacpy(ul blas.Uplo, m, n int, a []float64, lda int, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11336,7 +11336,7 @@ func Dlacpy(ul blas.Uplo, m int, n int, a []float64, lda int, b []float64, ldb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clacpy.f.
-func Clacpy(ul blas.Uplo, m int, n int, a []complex64, lda int, b []complex64, ldb int) bool {
+func Clacpy(ul blas.Uplo, m, n int, a []complex64, lda int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11359,7 +11359,7 @@ func Clacpy(ul blas.Uplo, m int, n int, a []complex64, lda int, b []complex64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlacpy.f.
-func Zlacpy(ul blas.Uplo, m int, n int, a []complex128, lda int, b []complex128, ldb int) bool {
+func Zlacpy(ul blas.Uplo, m, n int, a []complex128, lda int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11382,7 +11382,7 @@ func Zlacpy(ul blas.Uplo, m int, n int, a []complex128, lda int, b []complex128,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clacp2.f.
-func Clacp2(ul blas.Uplo, m int, n int, a []float32, lda int, b []complex64, ldb int) bool {
+func Clacp2(ul blas.Uplo, m, n int, a []float32, lda int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11403,7 +11403,7 @@ func Clacp2(ul blas.Uplo, m int, n int, a []float32, lda int, b []complex64, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlacp2.f.
-func Zlacp2(ul blas.Uplo, m int, n int, a []float64, lda int, b []complex128, ldb int) bool {
+func Zlacp2(ul blas.Uplo, m, n int, a []float64, lda int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11424,7 +11424,7 @@ func Zlacp2(ul blas.Uplo, m int, n int, a []float64, lda int, b []complex128, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slapmr.f.
-func Slapmr(forwrd int32, m int, n int, x []float32, ldx int, k []int32) bool {
+func Slapmr(forwrd int32, m, n int, x []float32, ldx int, k []int32) bool {
 	var _x *float32
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11437,7 +11437,7 @@ func Slapmr(forwrd int32, m int, n int, x []float32, ldx int, k []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlapmr.f.
-func Dlapmr(forwrd int32, m int, n int, x []float64, ldx int, k []int32) bool {
+func Dlapmr(forwrd int32, m, n int, x []float64, ldx int, k []int32) bool {
 	var _x *float64
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11450,7 +11450,7 @@ func Dlapmr(forwrd int32, m int, n int, x []float64, ldx int, k []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clapmr.f.
-func Clapmr(forwrd int32, m int, n int, x []complex64, ldx int, k []int32) bool {
+func Clapmr(forwrd int32, m, n int, x []complex64, ldx int, k []int32) bool {
 	var _x *complex64
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11463,7 +11463,7 @@ func Clapmr(forwrd int32, m int, n int, x []complex64, ldx int, k []int32) bool 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlapmr.f.
-func Zlapmr(forwrd int32, m int, n int, x []complex128, ldx int, k []int32) bool {
+func Zlapmr(forwrd int32, m, n int, x []complex128, ldx int, k []int32) bool {
 	var _x *complex128
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11476,7 +11476,7 @@ func Zlapmr(forwrd int32, m int, n int, x []complex128, ldx int, k []int32) bool
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slapmt.f.
-func Slapmt(forwrd int32, m int, n int, x []float32, ldx int, k []int32) bool {
+func Slapmt(forwrd int32, m, n int, x []float32, ldx int, k []int32) bool {
 	var _x *float32
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11489,7 +11489,7 @@ func Slapmt(forwrd int32, m int, n int, x []float32, ldx int, k []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlapmt.f.
-func Dlapmt(forwrd int32, m int, n int, x []float64, ldx int, k []int32) bool {
+func Dlapmt(forwrd int32, m, n int, x []float64, ldx int, k []int32) bool {
 	var _x *float64
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11502,7 +11502,7 @@ func Dlapmt(forwrd int32, m int, n int, x []float64, ldx int, k []int32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clapmt.f.
-func Clapmt(forwrd int32, m int, n int, x []complex64, ldx int, k []int32) bool {
+func Clapmt(forwrd int32, m, n int, x []complex64, ldx int, k []int32) bool {
 	var _x *complex64
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11515,7 +11515,7 @@ func Clapmt(forwrd int32, m int, n int, x []complex64, ldx int, k []int32) bool 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlapmt.f.
-func Zlapmt(forwrd int32, m int, n int, x []complex128, ldx int, k []int32) bool {
+func Zlapmt(forwrd int32, m, n int, x []complex128, ldx int, k []int32) bool {
 	var _x *complex128
 	if len(x) > 0 {
 		_x = &x[0]
@@ -11528,7 +11528,7 @@ func Zlapmt(forwrd int32, m int, n int, x []complex128, ldx int, k []int32) bool
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slartgp.f.
-func Slartgp(f float32, g float32, cs []float32, sn []float32, r []float32) bool {
+func Slartgp(f, g float32, cs, sn, r []float32) bool {
 	var _cs *float32
 	if len(cs) > 0 {
 		_cs = &cs[0]
@@ -11545,7 +11545,7 @@ func Slartgp(f float32, g float32, cs []float32, sn []float32, r []float32) bool
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlartgp.f.
-func Dlartgp(f float64, g float64, cs []float64, sn []float64, r []float64) bool {
+func Dlartgp(f, g float64, cs, sn, r []float64) bool {
 	var _cs *float64
 	if len(cs) > 0 {
 		_cs = &cs[0]
@@ -11562,7 +11562,7 @@ func Dlartgp(f float64, g float64, cs []float64, sn []float64, r []float64) bool
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slartgs.f.
-func Slartgs(x float32, y float32, sigma float32, cs []float32, sn []float32) bool {
+func Slartgs(x, y, sigma float32, cs, sn []float32) bool {
 	var _cs *float32
 	if len(cs) > 0 {
 		_cs = &cs[0]
@@ -11575,7 +11575,7 @@ func Slartgs(x float32, y float32, sigma float32, cs []float32, sn []float32) bo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlartgs.f.
-func Dlartgs(x float64, y float64, sigma float64, cs []float64, sn []float64) bool {
+func Dlartgs(x, y, sigma float64, cs, sn []float64) bool {
 	var _cs *float64
 	if len(cs) > 0 {
 		_cs = &cs[0]
@@ -11588,22 +11588,22 @@ func Dlartgs(x float64, y float64, sigma float64, cs []float64, sn []float64) bo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slapy2.f.
-func Slapy2(x float32, y float32) float32 {
+func Slapy2(x, y float32) float32 {
 	return float32(C.LAPACKE_slapy2_work((C.float)(x), (C.float)(y)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlapy2.f.
-func Dlapy2(x float64, y float64) float64 {
+func Dlapy2(x, y float64) float64 {
 	return float64(C.LAPACKE_dlapy2_work((C.double)(x), (C.double)(y)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slapy3.f.
-func Slapy3(x float32, y float32, z float32) float32 {
+func Slapy3(x, y, z float32) float32 {
 	return float32(C.LAPACKE_slapy3_work((C.float)(x), (C.float)(y), (C.float)(z)))
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlapy3.f.
-func Dlapy3(x float64, y float64, z float64) float64 {
+func Dlapy3(x, y, z float64) float64 {
 	return float64(C.LAPACKE_dlapy3_work((C.double)(x), (C.double)(y), (C.double)(z)))
 }
 
@@ -11618,7 +11618,7 @@ func Dlamch(cmach byte) float64 {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slange.f.
-func Slange(norm byte, m int, n int, a []float32, lda int, work []float32) float32 {
+func Slange(norm byte, m, n int, a []float32, lda int, work []float32) float32 {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -11631,7 +11631,7 @@ func Slange(norm byte, m int, n int, a []float32, lda int, work []float32) float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlange.f.
-func Dlange(norm byte, m int, n int, a []float64, lda int, work []float64) float64 {
+func Dlange(norm byte, m, n int, a []float64, lda int, work []float64) float64 {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -11644,7 +11644,7 @@ func Dlange(norm byte, m int, n int, a []float64, lda int, work []float64) float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clange.f.
-func Clange(norm byte, m int, n int, a []complex64, lda int, work []float32) float32 {
+func Clange(norm byte, m, n int, a []complex64, lda int, work []float32) float32 {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -11657,7 +11657,7 @@ func Clange(norm byte, m int, n int, a []complex64, lda int, work []float32) flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlange.f.
-func Zlange(norm byte, m int, n int, a []complex128, lda int, work []float64) float64 {
+func Zlange(norm byte, m, n int, a []complex128, lda int, work []float64) float64 {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -11796,7 +11796,7 @@ func Zlansy(norm byte, ul blas.Uplo, n int, a []complex128, lda int, work []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slantr.f.
-func Slantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []float32, lda int, work []float32) float32 {
+func Slantr(norm byte, ul blas.Uplo, d blas.Diag, m, n int, a []float32, lda int, work []float32) float32 {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11825,7 +11825,7 @@ func Slantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []float32, lda
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlantr.f.
-func Dlantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []float64, lda int, work []float64) float64 {
+func Dlantr(norm byte, ul blas.Uplo, d blas.Diag, m, n int, a []float64, lda int, work []float64) float64 {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11854,7 +11854,7 @@ func Dlantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []float64, lda
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clantr.f.
-func Clantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []complex64, lda int, work []float32) float32 {
+func Clantr(norm byte, ul blas.Uplo, d blas.Diag, m, n int, a []complex64, lda int, work []float32) float32 {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11883,7 +11883,7 @@ func Clantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []complex64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlantr.f.
-func Zlantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []complex128, lda int, work []float64) float64 {
+func Zlantr(norm byte, ul blas.Uplo, d blas.Diag, m, n int, a []complex128, lda int, work []float64) float64 {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -11912,7 +11912,7 @@ func Zlantr(norm byte, ul blas.Uplo, d blas.Diag, m int, n int, a []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarfb.f.
-func Slarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32, ldwork int) bool {
+func Slarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -11951,7 +11951,7 @@ func Slarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlarfb.f.
-func Dlarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64, ldwork int) bool {
+func Dlarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -11990,7 +11990,7 @@ func Dlarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clarfb.f.
-func Clarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64, ldwork int) bool {
+func Clarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12029,7 +12029,7 @@ func Clarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlarfb.f.
-func Zlarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128, ldwork int) bool {
+func Zlarfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12068,7 +12068,7 @@ func Zlarfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarfg.f.
-func Slarfg(n int, alpha []float32, x []float32, incx int, tau []float32) bool {
+func Slarfg(n int, alpha, x []float32, incx int, tau []float32) bool {
 	var _alpha *float32
 	if len(alpha) > 0 {
 		_alpha = &alpha[0]
@@ -12085,7 +12085,7 @@ func Slarfg(n int, alpha []float32, x []float32, incx int, tau []float32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlarfg.f.
-func Dlarfg(n int, alpha []float64, x []float64, incx int, tau []float64) bool {
+func Dlarfg(n int, alpha, x []float64, incx int, tau []float64) bool {
 	var _alpha *float64
 	if len(alpha) > 0 {
 		_alpha = &alpha[0]
@@ -12102,7 +12102,7 @@ func Dlarfg(n int, alpha []float64, x []float64, incx int, tau []float64) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clarfg.f.
-func Clarfg(n int, alpha []complex64, x []complex64, incx int, tau []complex64) bool {
+func Clarfg(n int, alpha, x []complex64, incx int, tau []complex64) bool {
 	var _alpha *complex64
 	if len(alpha) > 0 {
 		_alpha = &alpha[0]
@@ -12119,7 +12119,7 @@ func Clarfg(n int, alpha []complex64, x []complex64, incx int, tau []complex64) 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlarfg.f.
-func Zlarfg(n int, alpha []complex128, x []complex128, incx int, tau []complex128) bool {
+func Zlarfg(n int, alpha, x []complex128, incx int, tau []complex128) bool {
 	var _alpha *complex128
 	if len(alpha) > 0 {
 		_alpha = &alpha[0]
@@ -12136,7 +12136,7 @@ func Zlarfg(n int, alpha []complex128, x []complex128, incx int, tau []complex12
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarft.f.
-func Slarft(direct byte, storev byte, n int, k int, v []float32, ldv int, tau []float32, t []float32, ldt int) bool {
+func Slarft(direct, storev byte, n, k int, v []float32, ldv int, tau, t []float32, ldt int) bool {
 	var _v *float32
 	if len(v) > 0 {
 		_v = &v[0]
@@ -12153,7 +12153,7 @@ func Slarft(direct byte, storev byte, n int, k int, v []float32, ldv int, tau []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlarft.f.
-func Dlarft(direct byte, storev byte, n int, k int, v []float64, ldv int, tau []float64, t []float64, ldt int) bool {
+func Dlarft(direct, storev byte, n, k int, v []float64, ldv int, tau, t []float64, ldt int) bool {
 	var _v *float64
 	if len(v) > 0 {
 		_v = &v[0]
@@ -12170,7 +12170,7 @@ func Dlarft(direct byte, storev byte, n int, k int, v []float64, ldv int, tau []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clarft.f.
-func Clarft(direct byte, storev byte, n int, k int, v []complex64, ldv int, tau []complex64, t []complex64, ldt int) bool {
+func Clarft(direct, storev byte, n, k int, v []complex64, ldv int, tau, t []complex64, ldt int) bool {
 	var _v *complex64
 	if len(v) > 0 {
 		_v = &v[0]
@@ -12187,7 +12187,7 @@ func Clarft(direct byte, storev byte, n int, k int, v []complex64, ldv int, tau 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlarft.f.
-func Zlarft(direct byte, storev byte, n int, k int, v []complex128, ldv int, tau []complex128, t []complex128, ldt int) bool {
+func Zlarft(direct, storev byte, n, k int, v []complex128, ldv int, tau, t []complex128, ldt int) bool {
 	var _v *complex128
 	if len(v) > 0 {
 		_v = &v[0]
@@ -12204,7 +12204,7 @@ func Zlarft(direct byte, storev byte, n int, k int, v []complex128, ldv int, tau
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slarfx.f.
-func Slarfx(s blas.Side, m int, n int, v []float32, tau float32, c []float32, ldc int, work []float32) bool {
+func Slarfx(s blas.Side, m, n int, v []float32, tau float32, c []float32, ldc int, work []float32) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12229,7 +12229,7 @@ func Slarfx(s blas.Side, m int, n int, v []float32, tau float32, c []float32, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlarfx.f.
-func Dlarfx(s blas.Side, m int, n int, v []float64, tau float64, c []float64, ldc int, work []float64) bool {
+func Dlarfx(s blas.Side, m, n int, v []float64, tau float64, c []float64, ldc int, work []float64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12254,7 +12254,7 @@ func Dlarfx(s blas.Side, m int, n int, v []float64, tau float64, c []float64, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clarfx.f.
-func Clarfx(s blas.Side, m int, n int, v []complex64, tau complex64, c []complex64, ldc int, work []complex64) bool {
+func Clarfx(s blas.Side, m, n int, v []complex64, tau complex64, c []complex64, ldc int, work []complex64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12279,7 +12279,7 @@ func Clarfx(s blas.Side, m int, n int, v []complex64, tau complex64, c []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlarfx.f.
-func Zlarfx(s blas.Side, m int, n int, v []complex128, tau complex128, c []complex128, ldc int, work []complex128) bool {
+func Zlarfx(s blas.Side, m, n int, v []complex128, tau complex128, c []complex128, ldc int, work []complex128) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12356,7 +12356,7 @@ func Zlarnv(idist int, iseed []int32, n int, x []complex128) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slascl.f.
-func Slascl(typ byte, kl int, ku int, cfrom float32, cto float32, m int, n int, a []float32, lda int) bool {
+func Slascl(typ byte, kl, ku int, cfrom, cto float32, m, n int, a []float32, lda int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12365,7 +12365,7 @@ func Slascl(typ byte, kl int, ku int, cfrom float32, cto float32, m int, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlascl.f.
-func Dlascl(typ byte, kl int, ku int, cfrom float64, cto float64, m int, n int, a []float64, lda int) bool {
+func Dlascl(typ byte, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12374,7 +12374,7 @@ func Dlascl(typ byte, kl int, ku int, cfrom float64, cto float64, m int, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/clascl.f.
-func Clascl(typ byte, kl int, ku int, cfrom float32, cto float32, m int, n int, a []complex64, lda int) bool {
+func Clascl(typ byte, kl, ku int, cfrom, cto float32, m, n int, a []complex64, lda int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12383,7 +12383,7 @@ func Clascl(typ byte, kl int, ku int, cfrom float32, cto float32, m int, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlascl.f.
-func Zlascl(typ byte, kl int, ku int, cfrom float64, cto float64, m int, n int, a []complex128, lda int) bool {
+func Zlascl(typ byte, kl, ku int, cfrom, cto float64, m, n int, a []complex128, lda int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12392,7 +12392,7 @@ func Zlascl(typ byte, kl int, ku int, cfrom float64, cto float64, m int, n int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slaset.f.
-func Slaset(ul blas.Uplo, m int, n int, alpha float32, beta float32, a []float32, lda int) bool {
+func Slaset(ul blas.Uplo, m, n int, alpha, beta float32, a []float32, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -12409,7 +12409,7 @@ func Slaset(ul blas.Uplo, m int, n int, alpha float32, beta float32, a []float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlaset.f.
-func Dlaset(ul blas.Uplo, m int, n int, alpha float64, beta float64, a []float64, lda int) bool {
+func Dlaset(ul blas.Uplo, m, n int, alpha, beta float64, a []float64, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -12426,7 +12426,7 @@ func Dlaset(ul blas.Uplo, m int, n int, alpha float64, beta float64, a []float64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/claset.f.
-func Claset(ul blas.Uplo, m int, n int, alpha complex64, beta complex64, a []complex64, lda int) bool {
+func Claset(ul blas.Uplo, m, n int, alpha, beta complex64, a []complex64, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -12443,7 +12443,7 @@ func Claset(ul blas.Uplo, m int, n int, alpha complex64, beta complex64, a []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlaset.f.
-func Zlaset(ul blas.Uplo, m int, n int, alpha complex128, beta complex128, a []complex128, lda int) bool {
+func Zlaset(ul blas.Uplo, m, n int, alpha, beta complex128, a []complex128, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -12478,7 +12478,7 @@ func Dlasrt(id byte, n int, d []float64) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/slaswp.f.
-func Slaswp(n int, a []float32, lda int, k1 int, k2 int, ipiv []int32, incx int) bool {
+func Slaswp(n int, a []float32, lda, k1, k2 int, ipiv []int32, incx int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12491,7 +12491,7 @@ func Slaswp(n int, a []float32, lda int, k1 int, k2 int, ipiv []int32, incx int)
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dlaswp.f.
-func Dlaswp(n int, a []float64, lda int, k1 int, k2 int, ipiv []int32, incx int) bool {
+func Dlaswp(n int, a []float64, lda, k1, k2 int, ipiv []int32, incx int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12504,7 +12504,7 @@ func Dlaswp(n int, a []float64, lda int, k1 int, k2 int, ipiv []int32, incx int)
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/claswp.f.
-func Claswp(n int, a []complex64, lda int, k1 int, k2 int, ipiv []int32, incx int) bool {
+func Claswp(n int, a []complex64, lda, k1, k2 int, ipiv []int32, incx int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12517,7 +12517,7 @@ func Claswp(n int, a []complex64, lda int, k1 int, k2 int, ipiv []int32, incx in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlaswp.f.
-func Zlaswp(n int, a []complex128, lda int, k1 int, k2 int, ipiv []int32, incx int) bool {
+func Zlaswp(n int, a []complex128, lda, k1, k2 int, ipiv []int32, incx int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12598,7 +12598,7 @@ func Zlauum(ul blas.Uplo, n int, a []complex128, lda int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sopgtr.f.
-func Sopgtr(ul blas.Uplo, n int, ap []float32, tau []float32, q []float32, ldq int, work []float32) bool {
+func Sopgtr(ul blas.Uplo, n int, ap, tau, q []float32, ldq int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -12627,7 +12627,7 @@ func Sopgtr(ul blas.Uplo, n int, ap []float32, tau []float32, q []float32, ldq i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dopgtr.f.
-func Dopgtr(ul blas.Uplo, n int, ap []float64, tau []float64, q []float64, ldq int, work []float64) bool {
+func Dopgtr(ul blas.Uplo, n int, ap, tau, q []float64, ldq int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -12656,7 +12656,7 @@ func Dopgtr(ul blas.Uplo, n int, ap []float64, tau []float64, q []float64, ldq i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sopmtr.f.
-func Sopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []float32, tau []float32, c []float32, ldc int, work []float32) bool {
+func Sopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []float32, ldc int, work []float32) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12703,7 +12703,7 @@ func Sopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dopmtr.f.
-func Dopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []float64, tau []float64, c []float64, ldc int, work []float64) bool {
+func Dopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []float64, ldc int, work []float64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -12750,7 +12750,7 @@ func Dopmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorgbr.f.
-func Sorgbr(vect byte, m int, n int, k int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sorgbr(vect byte, m, n, k int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12767,7 +12767,7 @@ func Sorgbr(vect byte, m int, n int, k int, a []float32, lda int, tau []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorgbr.f.
-func Dorgbr(vect byte, m int, n int, k int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dorgbr(vect byte, m, n, k int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12784,7 +12784,7 @@ func Dorgbr(vect byte, m int, n int, k int, a []float64, lda int, tau []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorghr.f.
-func Sorghr(n int, ilo int, ihi int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sorghr(n, ilo, ihi int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12801,7 +12801,7 @@ func Sorghr(n int, ilo int, ihi int, a []float32, lda int, tau []float32, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorghr.f.
-func Dorghr(n int, ilo int, ihi int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dorghr(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12818,7 +12818,7 @@ func Dorghr(n int, ilo int, ihi int, a []float64, lda int, tau []float64, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorglq.f.
-func Sorglq(m int, n int, k int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sorglq(m, n, k int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12835,7 +12835,7 @@ func Sorglq(m int, n int, k int, a []float32, lda int, tau []float32, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorglq.f.
-func Dorglq(m int, n int, k int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dorglq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12852,7 +12852,7 @@ func Dorglq(m int, n int, k int, a []float64, lda int, tau []float64, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorgql.f.
-func Sorgql(m int, n int, k int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sorgql(m, n, k int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12869,7 +12869,7 @@ func Sorgql(m int, n int, k int, a []float32, lda int, tau []float32, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorgql.f.
-func Dorgql(m int, n int, k int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dorgql(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12886,7 +12886,7 @@ func Dorgql(m int, n int, k int, a []float64, lda int, tau []float64, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorgqr.f.
-func Sorgqr(m int, n int, k int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sorgqr(m, n, k int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12903,7 +12903,7 @@ func Sorgqr(m int, n int, k int, a []float32, lda int, tau []float32, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorgqr.f.
-func Dorgqr(m int, n int, k int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12920,7 +12920,7 @@ func Dorgqr(m int, n int, k int, a []float64, lda int, tau []float64, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorgrq.f.
-func Sorgrq(m int, n int, k int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sorgrq(m, n, k int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12937,7 +12937,7 @@ func Sorgrq(m int, n int, k int, a []float32, lda int, tau []float32, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorgrq.f.
-func Dorgrq(m int, n int, k int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dorgrq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -12954,7 +12954,7 @@ func Dorgrq(m int, n int, k int, a []float64, lda int, tau []float64, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorgtr.f.
-func Sorgtr(ul blas.Uplo, n int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Sorgtr(ul blas.Uplo, n int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -12979,7 +12979,7 @@ func Sorgtr(ul blas.Uplo, n int, a []float32, lda int, tau []float32, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorgtr.f.
-func Dorgtr(ul blas.Uplo, n int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dorgtr(ul blas.Uplo, n int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13004,7 +13004,7 @@ func Dorgtr(ul blas.Uplo, n int, a []float64, lda int, tau []float64, work []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormbr.f.
-func Sormbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13043,7 +13043,7 @@ func Sormbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormbr.f.
-func Dormbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13082,7 +13082,7 @@ func Dormbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormhr.f.
-func Sormhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13121,7 +13121,7 @@ func Sormhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormhr.f.
-func Dormhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13160,7 +13160,7 @@ func Dormhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormlq.f.
-func Sormlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormlq(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13199,7 +13199,7 @@ func Sormlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormlq.f.
-func Dormlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormlq(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13238,7 +13238,7 @@ func Dormlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormql.f.
-func Sormql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormql(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13277,7 +13277,7 @@ func Sormql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormql.f.
-func Dormql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormql(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13316,7 +13316,7 @@ func Dormql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormqr.f.
-func Sormqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormqr(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13355,7 +13355,7 @@ func Sormqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormqr.f.
-func Dormqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormqr(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13394,7 +13394,7 @@ func Dormqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormrq.f.
-func Sormrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormrq(s blas.Side, trans blas.Transpose, m, n, k int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13433,7 +13433,7 @@ func Sormrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormrq.f.
-func Dormrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormrq(s blas.Side, trans blas.Transpose, m, n, k int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13472,7 +13472,7 @@ func Dormrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormrz.f.
-func Sormrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13511,7 +13511,7 @@ func Sormrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormrz.f.
-func Dormrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13550,7 +13550,7 @@ func Dormrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sormtr.f.
-func Sormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []float32, lda int, tau []float32, c []float32, ldc int, work []float32, lwork int) bool {
+func Sormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float32, lda int, tau, c []float32, ldc int, work []float32, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13597,7 +13597,7 @@ func Sormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dormtr.f.
-func Dormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []float64, lda int, tau []float64, c []float64, ldc int, work []float64, lwork int) bool {
+func Dormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []float64, lda int, tau, c []float64, ldc int, work []float64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -13644,7 +13644,7 @@ func Dormtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbcon.f.
-func Spbcon(ul blas.Uplo, n int, kd int, ab []float32, ldab int, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Spbcon(ul blas.Uplo, n, kd int, ab []float32, ldab int, anorm float32, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13673,7 +13673,7 @@ func Spbcon(ul blas.Uplo, n int, kd int, ab []float32, ldab int, anorm float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbcon.f.
-func Dpbcon(ul blas.Uplo, n int, kd int, ab []float64, ldab int, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dpbcon(ul blas.Uplo, n, kd int, ab []float64, ldab int, anorm float64, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13702,7 +13702,7 @@ func Dpbcon(ul blas.Uplo, n int, kd int, ab []float64, ldab int, anorm float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbcon.f.
-func Cpbcon(ul blas.Uplo, n int, kd int, ab []complex64, ldab int, anorm float32, rcond []float32, work []complex64, rwork []float32) bool {
+func Cpbcon(ul blas.Uplo, n, kd int, ab []complex64, ldab int, anorm float32, rcond []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13731,7 +13731,7 @@ func Cpbcon(ul blas.Uplo, n int, kd int, ab []complex64, ldab int, anorm float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbcon.f.
-func Zpbcon(ul blas.Uplo, n int, kd int, ab []complex128, ldab int, anorm float64, rcond []float64, work []complex128, rwork []float64) bool {
+func Zpbcon(ul blas.Uplo, n, kd int, ab []complex128, ldab int, anorm float64, rcond []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13760,7 +13760,7 @@ func Zpbcon(ul blas.Uplo, n int, kd int, ab []complex128, ldab int, anorm float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbequ.f.
-func Spbequ(ul blas.Uplo, n int, kd int, ab []float32, ldab int, s []float32, scond []float32, amax []float32) bool {
+func Spbequ(ul blas.Uplo, n, kd int, ab []float32, ldab int, s, scond, amax []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13789,7 +13789,7 @@ func Spbequ(ul blas.Uplo, n int, kd int, ab []float32, ldab int, s []float32, sc
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbequ.f.
-func Dpbequ(ul blas.Uplo, n int, kd int, ab []float64, ldab int, s []float64, scond []float64, amax []float64) bool {
+func Dpbequ(ul blas.Uplo, n, kd int, ab []float64, ldab int, s, scond, amax []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13818,7 +13818,7 @@ func Dpbequ(ul blas.Uplo, n int, kd int, ab []float64, ldab int, s []float64, sc
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbequ.f.
-func Cpbequ(ul blas.Uplo, n int, kd int, ab []complex64, ldab int, s []float32, scond []float32, amax []float32) bool {
+func Cpbequ(ul blas.Uplo, n, kd int, ab []complex64, ldab int, s, scond, amax []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13847,7 +13847,7 @@ func Cpbequ(ul blas.Uplo, n int, kd int, ab []complex64, ldab int, s []float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbequ.f.
-func Zpbequ(ul blas.Uplo, n int, kd int, ab []complex128, ldab int, s []float64, scond []float64, amax []float64) bool {
+func Zpbequ(ul blas.Uplo, n, kd int, ab []complex128, ldab int, s, scond, amax []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13876,7 +13876,7 @@ func Zpbequ(ul blas.Uplo, n int, kd int, ab []complex128, ldab int, s []float64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbrfs.f.
-func Spbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Spbrfs(ul blas.Uplo, n, kd, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13921,7 +13921,7 @@ func Spbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab int, afb [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbrfs.f.
-func Dpbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dpbrfs(ul blas.Uplo, n, kd, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -13966,7 +13966,7 @@ func Dpbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab int, afb [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbrfs.f.
-func Cpbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cpbrfs(ul blas.Uplo, n, kd, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14011,7 +14011,7 @@ func Cpbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ldab int, afb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbrfs.f.
-func Zpbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zpbrfs(ul blas.Uplo, n, kd, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14056,7 +14056,7 @@ func Zpbrfs(ul blas.Uplo, n int, kd int, nrhs int, ab []complex128, ldab int, af
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbstf.f.
-func Spbstf(ul blas.Uplo, n int, kb int, bb []float32, ldbb int) bool {
+func Spbstf(ul blas.Uplo, n, kb int, bb []float32, ldbb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14073,7 +14073,7 @@ func Spbstf(ul blas.Uplo, n int, kb int, bb []float32, ldbb int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbstf.f.
-func Dpbstf(ul blas.Uplo, n int, kb int, bb []float64, ldbb int) bool {
+func Dpbstf(ul blas.Uplo, n, kb int, bb []float64, ldbb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14090,7 +14090,7 @@ func Dpbstf(ul blas.Uplo, n int, kb int, bb []float64, ldbb int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbstf.f.
-func Cpbstf(ul blas.Uplo, n int, kb int, bb []complex64, ldbb int) bool {
+func Cpbstf(ul blas.Uplo, n, kb int, bb []complex64, ldbb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14107,7 +14107,7 @@ func Cpbstf(ul blas.Uplo, n int, kb int, bb []complex64, ldbb int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbstf.f.
-func Zpbstf(ul blas.Uplo, n int, kb int, bb []complex128, ldbb int) bool {
+func Zpbstf(ul blas.Uplo, n, kb int, bb []complex128, ldbb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14124,7 +14124,7 @@ func Zpbstf(ul blas.Uplo, n int, kb int, bb []complex128, ldbb int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbsv.f.
-func Spbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab int, b []float32, ldb int) bool {
+func Spbsv(ul blas.Uplo, n, kd, nrhs int, ab []float32, ldab int, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14145,7 +14145,7 @@ func Spbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab int, b []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbsv.f.
-func Dpbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab int, b []float64, ldb int) bool {
+func Dpbsv(ul blas.Uplo, n, kd, nrhs int, ab []float64, ldab int, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14166,7 +14166,7 @@ func Dpbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab int, b []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbsv.f.
-func Cpbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ldab int, b []complex64, ldb int) bool {
+func Cpbsv(ul blas.Uplo, n, kd, nrhs int, ab []complex64, ldab int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14187,7 +14187,7 @@ func Cpbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ldab int, b []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbsv.f.
-func Zpbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []complex128, ldab int, b []complex128, ldb int) bool {
+func Zpbsv(ul blas.Uplo, n, kd, nrhs int, ab []complex128, ldab int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14208,7 +14208,7 @@ func Zpbsv(ul blas.Uplo, n int, kd int, nrhs int, ab []complex128, ldab int, b [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbsvx.f.
-func Spbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, equed []byte, s []float32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Spbsvx(fact byte, ul blas.Uplo, n, kd, nrhs int, ab []float32, ldab int, afb []float32, ldafb int, equed []byte, s, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14265,7 +14265,7 @@ func Spbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbsvx.f.
-func Dpbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, equed []byte, s []float64, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dpbsvx(fact byte, ul blas.Uplo, n, kd, nrhs int, ab []float64, ldab int, afb []float64, ldafb int, equed []byte, s, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14322,7 +14322,7 @@ func Dpbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbsvx.f.
-func Cpbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, equed []byte, s []float32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cpbsvx(fact byte, ul blas.Uplo, n, kd, nrhs int, ab []complex64, ldab int, afb []complex64, ldafb int, equed []byte, s []float32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14379,7 +14379,7 @@ func Cpbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbsvx.f.
-func Zpbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, equed []byte, s []float64, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zpbsvx(fact byte, ul blas.Uplo, n, kd, nrhs int, ab []complex128, ldab int, afb []complex128, ldafb int, equed []byte, s []float64, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14436,7 +14436,7 @@ func Zpbsvx(fact byte, ul blas.Uplo, n int, kd int, nrhs int, ab []complex128, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbtrf.f.
-func Spbtrf(ul blas.Uplo, n int, kd int, ab []float32, ldab int) bool {
+func Spbtrf(ul blas.Uplo, n, kd int, ab []float32, ldab int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14453,7 +14453,7 @@ func Spbtrf(ul blas.Uplo, n int, kd int, ab []float32, ldab int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbtrf.f.
-func Dpbtrf(ul blas.Uplo, n int, kd int, ab []float64, ldab int) bool {
+func Dpbtrf(ul blas.Uplo, n, kd int, ab []float64, ldab int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14470,7 +14470,7 @@ func Dpbtrf(ul blas.Uplo, n int, kd int, ab []float64, ldab int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbtrf.f.
-func Cpbtrf(ul blas.Uplo, n int, kd int, ab []complex64, ldab int) bool {
+func Cpbtrf(ul blas.Uplo, n, kd int, ab []complex64, ldab int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14487,7 +14487,7 @@ func Cpbtrf(ul blas.Uplo, n int, kd int, ab []complex64, ldab int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbtrf.f.
-func Zpbtrf(ul blas.Uplo, n int, kd int, ab []complex128, ldab int) bool {
+func Zpbtrf(ul blas.Uplo, n, kd int, ab []complex128, ldab int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14504,7 +14504,7 @@ func Zpbtrf(ul blas.Uplo, n int, kd int, ab []complex128, ldab int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spbtrs.f.
-func Spbtrs(ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab int, b []float32, ldb int) bool {
+func Spbtrs(ul blas.Uplo, n, kd, nrhs int, ab []float32, ldab int, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14525,7 +14525,7 @@ func Spbtrs(ul blas.Uplo, n int, kd int, nrhs int, ab []float32, ldab int, b []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpbtrs.f.
-func Dpbtrs(ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab int, b []float64, ldb int) bool {
+func Dpbtrs(ul blas.Uplo, n, kd, nrhs int, ab []float64, ldab int, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14546,7 +14546,7 @@ func Dpbtrs(ul blas.Uplo, n int, kd int, nrhs int, ab []float64, ldab int, b []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpbtrs.f.
-func Cpbtrs(ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ldab int, b []complex64, ldb int) bool {
+func Cpbtrs(ul blas.Uplo, n, kd, nrhs int, ab []complex64, ldab int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14567,7 +14567,7 @@ func Cpbtrs(ul blas.Uplo, n int, kd int, nrhs int, ab []complex64, ldab int, b [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpbtrs.f.
-func Zpbtrs(ul blas.Uplo, n int, kd int, nrhs int, ab []complex128, ldab int, b []complex128, ldb int) bool {
+func Zpbtrs(ul blas.Uplo, n, kd, nrhs int, ab []complex128, ldab int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14804,7 +14804,7 @@ func Zpftri(transr blas.Transpose, ul blas.Uplo, n int, a []complex128) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spftrs.f.
-func Spftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []float32, b []float32, ldb int) bool {
+func Spftrs(transr blas.Transpose, ul blas.Uplo, n, nrhs int, a, b []float32, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -14835,7 +14835,7 @@ func Spftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []float32, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpftrs.f.
-func Dpftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []float64, b []float64, ldb int) bool {
+func Dpftrs(transr blas.Transpose, ul blas.Uplo, n, nrhs int, a, b []float64, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -14866,7 +14866,7 @@ func Dpftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []float64, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpftrs.f.
-func Cpftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []complex64, b []complex64, ldb int) bool {
+func Cpftrs(transr blas.Transpose, ul blas.Uplo, n, nrhs int, a, b []complex64, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -14897,7 +14897,7 @@ func Cpftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []complex64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpftrs.f.
-func Zpftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []complex128, b []complex128, ldb int) bool {
+func Zpftrs(transr blas.Transpose, ul blas.Uplo, n, nrhs int, a, b []complex128, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -14928,7 +14928,7 @@ func Zpftrs(transr blas.Transpose, ul blas.Uplo, n int, nrhs int, a []complex128
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spocon.f.
-func Spocon(ul blas.Uplo, n int, a []float32, lda int, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Spocon(ul blas.Uplo, n int, a []float32, lda int, anorm float32, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -14957,7 +14957,7 @@ func Spocon(ul blas.Uplo, n int, a []float32, lda int, anorm float32, rcond []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpocon.f.
-func Dpocon(ul blas.Uplo, n int, a []float64, lda int, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dpocon(ul blas.Uplo, n int, a []float64, lda int, anorm float64, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15044,7 +15044,7 @@ func Zpocon(ul blas.Uplo, n int, a []complex128, lda int, anorm float64, rcond [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spoequ.f.
-func Spoequ(n int, a []float32, lda int, s []float32, scond []float32, amax []float32) bool {
+func Spoequ(n int, a []float32, lda int, s, scond, amax []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15065,7 +15065,7 @@ func Spoequ(n int, a []float32, lda int, s []float32, scond []float32, amax []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpoequ.f.
-func Dpoequ(n int, a []float64, lda int, s []float64, scond []float64, amax []float64) bool {
+func Dpoequ(n int, a []float64, lda int, s, scond, amax []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15086,7 +15086,7 @@ func Dpoequ(n int, a []float64, lda int, s []float64, scond []float64, amax []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpoequ.f.
-func Cpoequ(n int, a []complex64, lda int, s []float32, scond []float32, amax []float32) bool {
+func Cpoequ(n int, a []complex64, lda int, s, scond, amax []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15107,7 +15107,7 @@ func Cpoequ(n int, a []complex64, lda int, s []float32, scond []float32, amax []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpoequ.f.
-func Zpoequ(n int, a []complex128, lda int, s []float64, scond []float64, amax []float64) bool {
+func Zpoequ(n int, a []complex128, lda int, s, scond, amax []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15128,7 +15128,7 @@ func Zpoequ(n int, a []complex128, lda int, s []float64, scond []float64, amax [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spoequb.f.
-func Spoequb(n int, a []float32, lda int, s []float32, scond []float32, amax []float32) bool {
+func Spoequb(n int, a []float32, lda int, s, scond, amax []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15149,7 +15149,7 @@ func Spoequb(n int, a []float32, lda int, s []float32, scond []float32, amax []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpoequb.f.
-func Dpoequb(n int, a []float64, lda int, s []float64, scond []float64, amax []float64) bool {
+func Dpoequb(n int, a []float64, lda int, s, scond, amax []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15170,7 +15170,7 @@ func Dpoequb(n int, a []float64, lda int, s []float64, scond []float64, amax []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpoequb.f.
-func Cpoequb(n int, a []complex64, lda int, s []float32, scond []float32, amax []float32) bool {
+func Cpoequb(n int, a []complex64, lda int, s, scond, amax []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15191,7 +15191,7 @@ func Cpoequb(n int, a []complex64, lda int, s []float32, scond []float32, amax [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpoequb.f.
-func Zpoequb(n int, a []complex128, lda int, s []float64, scond []float64, amax []float64) bool {
+func Zpoequb(n int, a []complex128, lda int, s, scond, amax []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -15212,7 +15212,7 @@ func Zpoequb(n int, a []complex128, lda int, s []float64, scond []float64, amax 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sporfs.f.
-func Sporfs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, af []float32, ldaf int, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sporfs(ul blas.Uplo, n, nrhs int, a []float32, lda int, af []float32, ldaf int, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15257,7 +15257,7 @@ func Sporfs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, af []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dporfs.f.
-func Dporfs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, af []float64, ldaf int, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dporfs(ul blas.Uplo, n, nrhs int, a []float64, lda int, af []float64, ldaf int, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15302,7 +15302,7 @@ func Dporfs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, af []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cporfs.f.
-func Cporfs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cporfs(ul blas.Uplo, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15347,7 +15347,7 @@ func Cporfs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zporfs.f.
-func Zporfs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zporfs(ul blas.Uplo, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15392,7 +15392,7 @@ func Zporfs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sposv.f.
-func Sposv(ul blas.Uplo, n int, nrhs int, a []float32, lda int, b []float32, ldb int) bool {
+func Sposv(ul blas.Uplo, n, nrhs int, a []float32, lda int, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15413,7 +15413,7 @@ func Sposv(ul blas.Uplo, n int, nrhs int, a []float32, lda int, b []float32, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dposv.f.
-func Dposv(ul blas.Uplo, n int, nrhs int, a []float64, lda int, b []float64, ldb int) bool {
+func Dposv(ul blas.Uplo, n, nrhs int, a []float64, lda int, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15434,7 +15434,7 @@ func Dposv(ul blas.Uplo, n int, nrhs int, a []float64, lda int, b []float64, ldb
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cposv.f.
-func Cposv(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int) bool {
+func Cposv(ul blas.Uplo, n, nrhs int, a []complex64, lda int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15455,7 +15455,7 @@ func Cposv(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, b []complex64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zposv.f.
-func Zposv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int) bool {
+func Zposv(ul blas.Uplo, n, nrhs int, a []complex128, lda int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15476,7 +15476,7 @@ func Zposv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, b []complex12
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsposv.f.
-func Dsposv(ul blas.Uplo, n int, nrhs int, a []float64, lda int, b []float64, ldb int, x []float64, ldx int, work []float64, swork []float32, iter []int32) bool {
+func Dsposv(ul blas.Uplo, n, nrhs int, a []float64, lda int, b []float64, ldb int, x []float64, ldx int, work []float64, swork []float32, iter []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15513,7 +15513,7 @@ func Dsposv(ul blas.Uplo, n int, nrhs int, a []float64, lda int, b []float64, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zcposv.f.
-func Zcposv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int, x []complex128, ldx int, work []complex128, swork []complex64, rwork []float64, iter []int32) bool {
+func Zcposv(ul blas.Uplo, n, nrhs int, a []complex128, lda int, b []complex128, ldb int, x []complex128, ldx int, work []complex128, swork []complex64, rwork []float64, iter []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15554,7 +15554,7 @@ func Zcposv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, b []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sposvx.f.
-func Sposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float32, lda int, af []float32, ldaf int, equed []byte, s []float32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sposvx(fact byte, ul blas.Uplo, n, nrhs int, a []float32, lda int, af []float32, ldaf int, equed []byte, s, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15611,7 +15611,7 @@ func Sposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float32, lda int, af [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dposvx.f.
-func Dposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float64, lda int, af []float64, ldaf int, equed []byte, s []float64, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dposvx(fact byte, ul blas.Uplo, n, nrhs int, a []float64, lda int, af []float64, ldaf int, equed []byte, s, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15668,7 +15668,7 @@ func Dposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float64, lda int, af [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cposvx.f.
-func Cposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, equed []byte, s []float32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cposvx(fact byte, ul blas.Uplo, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, equed []byte, s []float32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15725,7 +15725,7 @@ func Cposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zposvx.f.
-func Zposvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, equed []byte, s []float64, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zposvx(fact byte, ul blas.Uplo, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, equed []byte, s []float64, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -15986,7 +15986,7 @@ func Zpotri(ul blas.Uplo, n int, a []complex128, lda int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spotrs.f.
-func Spotrs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, b []float32, ldb int) bool {
+func Spotrs(ul blas.Uplo, n, nrhs int, a []float32, lda int, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16007,7 +16007,7 @@ func Spotrs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, b []float32, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpotrs.f.
-func Dpotrs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, b []float64, ldb int) bool {
+func Dpotrs(ul blas.Uplo, n, nrhs int, a []float64, lda int, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16028,7 +16028,7 @@ func Dpotrs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, b []float64, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpotrs.f.
-func Cpotrs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int) bool {
+func Cpotrs(ul blas.Uplo, n, nrhs int, a []complex64, lda int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16049,7 +16049,7 @@ func Cpotrs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, b []complex64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpotrs.f.
-func Zpotrs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int) bool {
+func Zpotrs(ul blas.Uplo, n, nrhs int, a []complex128, lda int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16070,7 +16070,7 @@ func Zpotrs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, b []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sppcon.f.
-func Sppcon(ul blas.Uplo, n int, ap []float32, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Sppcon(ul blas.Uplo, n int, ap []float32, anorm float32, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16099,7 +16099,7 @@ func Sppcon(ul blas.Uplo, n int, ap []float32, anorm float32, rcond []float32, w
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dppcon.f.
-func Dppcon(ul blas.Uplo, n int, ap []float64, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dppcon(ul blas.Uplo, n int, ap []float64, anorm float64, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16186,7 +16186,7 @@ func Zppcon(ul blas.Uplo, n int, ap []complex128, anorm float64, rcond []float64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sppequ.f.
-func Sppequ(ul blas.Uplo, n int, ap []float32, s []float32, scond []float32, amax []float32) bool {
+func Sppequ(ul blas.Uplo, n int, ap, s, scond, amax []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16215,7 +16215,7 @@ func Sppequ(ul blas.Uplo, n int, ap []float32, s []float32, scond []float32, ama
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dppequ.f.
-func Dppequ(ul blas.Uplo, n int, ap []float64, s []float64, scond []float64, amax []float64) bool {
+func Dppequ(ul blas.Uplo, n int, ap, s, scond, amax []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16244,7 +16244,7 @@ func Dppequ(ul blas.Uplo, n int, ap []float64, s []float64, scond []float64, ama
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cppequ.f.
-func Cppequ(ul blas.Uplo, n int, ap []complex64, s []float32, scond []float32, amax []float32) bool {
+func Cppequ(ul blas.Uplo, n int, ap []complex64, s, scond, amax []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16273,7 +16273,7 @@ func Cppequ(ul blas.Uplo, n int, ap []complex64, s []float32, scond []float32, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zppequ.f.
-func Zppequ(ul blas.Uplo, n int, ap []complex128, s []float64, scond []float64, amax []float64) bool {
+func Zppequ(ul blas.Uplo, n int, ap []complex128, s, scond, amax []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16302,7 +16302,7 @@ func Zppequ(ul blas.Uplo, n int, ap []complex128, s []float64, scond []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spprfs.f.
-func Spprfs(ul blas.Uplo, n int, nrhs int, ap []float32, afp []float32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Spprfs(ul blas.Uplo, n, nrhs int, ap, afp, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16347,7 +16347,7 @@ func Spprfs(ul blas.Uplo, n int, nrhs int, ap []float32, afp []float32, b []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpprfs.f.
-func Dpprfs(ul blas.Uplo, n int, nrhs int, ap []float64, afp []float64, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dpprfs(ul blas.Uplo, n, nrhs int, ap, afp, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16392,7 +16392,7 @@ func Dpprfs(ul blas.Uplo, n int, nrhs int, ap []float64, afp []float64, b []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpprfs.f.
-func Cpprfs(ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cpprfs(ul blas.Uplo, n, nrhs int, ap, afp, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16437,7 +16437,7 @@ func Cpprfs(ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, b []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpprfs.f.
-func Zpprfs(ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zpprfs(ul blas.Uplo, n, nrhs int, ap, afp, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16482,7 +16482,7 @@ func Zpprfs(ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, b 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sppsv.f.
-func Sppsv(ul blas.Uplo, n int, nrhs int, ap []float32, b []float32, ldb int) bool {
+func Sppsv(ul blas.Uplo, n, nrhs int, ap, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16503,7 +16503,7 @@ func Sppsv(ul blas.Uplo, n int, nrhs int, ap []float32, b []float32, ldb int) bo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dppsv.f.
-func Dppsv(ul blas.Uplo, n int, nrhs int, ap []float64, b []float64, ldb int) bool {
+func Dppsv(ul blas.Uplo, n, nrhs int, ap, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16524,7 +16524,7 @@ func Dppsv(ul blas.Uplo, n int, nrhs int, ap []float64, b []float64, ldb int) bo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cppsv.f.
-func Cppsv(ul blas.Uplo, n int, nrhs int, ap []complex64, b []complex64, ldb int) bool {
+func Cppsv(ul blas.Uplo, n, nrhs int, ap, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16545,7 +16545,7 @@ func Cppsv(ul blas.Uplo, n int, nrhs int, ap []complex64, b []complex64, ldb int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zppsv.f.
-func Zppsv(ul blas.Uplo, n int, nrhs int, ap []complex128, b []complex128, ldb int) bool {
+func Zppsv(ul blas.Uplo, n, nrhs int, ap, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16566,7 +16566,7 @@ func Zppsv(ul blas.Uplo, n int, nrhs int, ap []complex128, b []complex128, ldb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sppsvx.f.
-func Sppsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float32, afp []float32, equed []byte, s []float32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sppsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []float32, equed []byte, s, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16623,7 +16623,7 @@ func Sppsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float32, afp []float3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dppsvx.f.
-func Dppsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float64, afp []float64, equed []byte, s []float64, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dppsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []float64, equed []byte, s, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16680,7 +16680,7 @@ func Dppsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float64, afp []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cppsvx.f.
-func Cppsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, equed []byte, s []float32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cppsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []complex64, equed []byte, s []float32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16737,7 +16737,7 @@ func Cppsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex64, afp []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zppsvx.f.
-func Zppsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, equed []byte, s []float64, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zppsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []complex128, equed []byte, s []float64, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16930,7 +16930,7 @@ func Zpptri(ul blas.Uplo, n int, ap []complex128) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spptrs.f.
-func Spptrs(ul blas.Uplo, n int, nrhs int, ap []float32, b []float32, ldb int) bool {
+func Spptrs(ul blas.Uplo, n, nrhs int, ap, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16951,7 +16951,7 @@ func Spptrs(ul blas.Uplo, n int, nrhs int, ap []float32, b []float32, ldb int) b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpptrs.f.
-func Dpptrs(ul blas.Uplo, n int, nrhs int, ap []float64, b []float64, ldb int) bool {
+func Dpptrs(ul blas.Uplo, n, nrhs int, ap, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16972,7 +16972,7 @@ func Dpptrs(ul blas.Uplo, n int, nrhs int, ap []float64, b []float64, ldb int) b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpptrs.f.
-func Cpptrs(ul blas.Uplo, n int, nrhs int, ap []complex64, b []complex64, ldb int) bool {
+func Cpptrs(ul blas.Uplo, n, nrhs int, ap, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -16993,7 +16993,7 @@ func Cpptrs(ul blas.Uplo, n int, nrhs int, ap []complex64, b []complex64, ldb in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpptrs.f.
-func Zpptrs(ul blas.Uplo, n int, nrhs int, ap []complex128, b []complex128, ldb int) bool {
+func Zpptrs(ul blas.Uplo, n, nrhs int, ap, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17014,7 +17014,7 @@ func Zpptrs(ul blas.Uplo, n int, nrhs int, ap []complex128, b []complex128, ldb 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spstrf.f.
-func Spstrf(ul blas.Uplo, n int, a []float32, lda int, piv []int32, rank []int32, tol float32, work []float32) bool {
+func Spstrf(ul blas.Uplo, n int, a []float32, lda int, piv, rank []int32, tol float32, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17043,7 +17043,7 @@ func Spstrf(ul blas.Uplo, n int, a []float32, lda int, piv []int32, rank []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpstrf.f.
-func Dpstrf(ul blas.Uplo, n int, a []float64, lda int, piv []int32, rank []int32, tol float64, work []float64) bool {
+func Dpstrf(ul blas.Uplo, n int, a []float64, lda int, piv, rank []int32, tol float64, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17072,7 +17072,7 @@ func Dpstrf(ul blas.Uplo, n int, a []float64, lda int, piv []int32, rank []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpstrf.f.
-func Cpstrf(ul blas.Uplo, n int, a []complex64, lda int, piv []int32, rank []int32, tol float32, work []float32) bool {
+func Cpstrf(ul blas.Uplo, n int, a []complex64, lda int, piv, rank []int32, tol float32, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17101,7 +17101,7 @@ func Cpstrf(ul blas.Uplo, n int, a []complex64, lda int, piv []int32, rank []int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpstrf.f.
-func Zpstrf(ul blas.Uplo, n int, a []complex128, lda int, piv []int32, rank []int32, tol float64, work []float64) bool {
+func Zpstrf(ul blas.Uplo, n int, a []complex128, lda int, piv, rank []int32, tol float64, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17130,7 +17130,7 @@ func Zpstrf(ul blas.Uplo, n int, a []complex128, lda int, piv []int32, rank []in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sptcon.f.
-func Sptcon(n int, d []float32, e []float32, anorm float32, rcond []float32, work []float32) bool {
+func Sptcon(n int, d, e []float32, anorm float32, rcond, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17151,7 +17151,7 @@ func Sptcon(n int, d []float32, e []float32, anorm float32, rcond []float32, wor
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dptcon.f.
-func Dptcon(n int, d []float64, e []float64, anorm float64, rcond []float64, work []float64) bool {
+func Dptcon(n int, d, e []float64, anorm float64, rcond, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17172,7 +17172,7 @@ func Dptcon(n int, d []float64, e []float64, anorm float64, rcond []float64, wor
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cptcon.f.
-func Cptcon(n int, d []float32, e []complex64, anorm float32, rcond []float32, work []float32) bool {
+func Cptcon(n int, d []float32, e []complex64, anorm float32, rcond, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17193,7 +17193,7 @@ func Cptcon(n int, d []float32, e []complex64, anorm float32, rcond []float32, w
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zptcon.f.
-func Zptcon(n int, d []float64, e []complex128, anorm float64, rcond []float64, work []float64) bool {
+func Zptcon(n int, d []float64, e []complex128, anorm float64, rcond, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17214,7 +17214,7 @@ func Zptcon(n int, d []float64, e []complex128, anorm float64, rcond []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spteqr.f.
-func Spteqr(compz lapack.Comp, n int, d []float32, e []float32, z []float32, ldz int, work []float32) bool {
+func Spteqr(compz lapack.Comp, n int, d, e, z []float32, ldz int, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17235,7 +17235,7 @@ func Spteqr(compz lapack.Comp, n int, d []float32, e []float32, z []float32, ldz
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpteqr.f.
-func Dpteqr(compz lapack.Comp, n int, d []float64, e []float64, z []float64, ldz int, work []float64) bool {
+func Dpteqr(compz lapack.Comp, n int, d, e, z []float64, ldz int, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17256,7 +17256,7 @@ func Dpteqr(compz lapack.Comp, n int, d []float64, e []float64, z []float64, ldz
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpteqr.f.
-func Cpteqr(compz lapack.Comp, n int, d []float32, e []float32, z []complex64, ldz int, work []float32) bool {
+func Cpteqr(compz lapack.Comp, n int, d, e []float32, z []complex64, ldz int, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17277,7 +17277,7 @@ func Cpteqr(compz lapack.Comp, n int, d []float32, e []float32, z []complex64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpteqr.f.
-func Zpteqr(compz lapack.Comp, n int, d []float64, e []float64, z []complex128, ldz int, work []float64) bool {
+func Zpteqr(compz lapack.Comp, n int, d, e []float64, z []complex128, ldz int, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17298,7 +17298,7 @@ func Zpteqr(compz lapack.Comp, n int, d []float64, e []float64, z []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sptrfs.f.
-func Sptrfs(n int, nrhs int, d []float32, e []float32, df []float32, ef []float32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32) bool {
+func Sptrfs(n, nrhs int, d, e, df, ef, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17339,7 +17339,7 @@ func Sptrfs(n int, nrhs int, d []float32, e []float32, df []float32, ef []float3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dptrfs.f.
-func Dptrfs(n int, nrhs int, d []float64, e []float64, df []float64, ef []float64, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64) bool {
+func Dptrfs(n, nrhs int, d, e, df, ef, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17380,7 +17380,7 @@ func Dptrfs(n int, nrhs int, d []float64, e []float64, df []float64, ef []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cptrfs.f.
-func Cptrfs(ul blas.Uplo, n int, nrhs int, d []float32, e []complex64, df []float32, ef []complex64, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cptrfs(ul blas.Uplo, n, nrhs int, d []float32, e []complex64, df []float32, ef, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17433,7 +17433,7 @@ func Cptrfs(ul blas.Uplo, n int, nrhs int, d []float32, e []complex64, df []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zptrfs.f.
-func Zptrfs(ul blas.Uplo, n int, nrhs int, d []float64, e []complex128, df []float64, ef []complex128, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zptrfs(ul blas.Uplo, n, nrhs int, d []float64, e []complex128, df []float64, ef, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17486,7 +17486,7 @@ func Zptrfs(ul blas.Uplo, n int, nrhs int, d []float64, e []complex128, df []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sptsv.f.
-func Sptsv(n int, nrhs int, d []float32, e []float32, b []float32, ldb int) bool {
+func Sptsv(n, nrhs int, d, e, b []float32, ldb int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17503,7 +17503,7 @@ func Sptsv(n int, nrhs int, d []float32, e []float32, b []float32, ldb int) bool
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dptsv.f.
-func Dptsv(n int, nrhs int, d []float64, e []float64, b []float64, ldb int) bool {
+func Dptsv(n, nrhs int, d, e, b []float64, ldb int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17520,7 +17520,7 @@ func Dptsv(n int, nrhs int, d []float64, e []float64, b []float64, ldb int) bool
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cptsv.f.
-func Cptsv(n int, nrhs int, d []float32, e []complex64, b []complex64, ldb int) bool {
+func Cptsv(n, nrhs int, d []float32, e, b []complex64, ldb int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17537,7 +17537,7 @@ func Cptsv(n int, nrhs int, d []float32, e []complex64, b []complex64, ldb int) 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zptsv.f.
-func Zptsv(n int, nrhs int, d []float64, e []complex128, b []complex128, ldb int) bool {
+func Zptsv(n, nrhs int, d []float64, e, b []complex128, ldb int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17554,7 +17554,7 @@ func Zptsv(n int, nrhs int, d []float64, e []complex128, b []complex128, ldb int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sptsvx.f.
-func Sptsvx(fact byte, n int, nrhs int, d []float32, e []float32, df []float32, ef []float32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32) bool {
+func Sptsvx(fact byte, n, nrhs int, d, e, df, ef, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17599,7 +17599,7 @@ func Sptsvx(fact byte, n int, nrhs int, d []float32, e []float32, df []float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dptsvx.f.
-func Dptsvx(fact byte, n int, nrhs int, d []float64, e []float64, df []float64, ef []float64, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64) bool {
+func Dptsvx(fact byte, n, nrhs int, d, e, df, ef, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17644,7 +17644,7 @@ func Dptsvx(fact byte, n int, nrhs int, d []float64, e []float64, df []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cptsvx.f.
-func Cptsvx(fact byte, n int, nrhs int, d []float32, e []complex64, df []float32, ef []complex64, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cptsvx(fact byte, n, nrhs int, d []float32, e []complex64, df []float32, ef, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17693,7 +17693,7 @@ func Cptsvx(fact byte, n int, nrhs int, d []float32, e []complex64, df []float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zptsvx.f.
-func Zptsvx(fact byte, n int, nrhs int, d []float64, e []complex128, df []float64, ef []complex128, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zptsvx(fact byte, n, nrhs int, d []float64, e []complex128, df []float64, ef, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17742,7 +17742,7 @@ func Zptsvx(fact byte, n int, nrhs int, d []float64, e []complex128, df []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spttrf.f.
-func Spttrf(n int, d []float32, e []float32) bool {
+func Spttrf(n int, d, e []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17755,7 +17755,7 @@ func Spttrf(n int, d []float32, e []float32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpttrf.f.
-func Dpttrf(n int, d []float64, e []float64) bool {
+func Dpttrf(n int, d, e []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17794,7 +17794,7 @@ func Zpttrf(n int, d []float64, e []complex128) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/spttrs.f.
-func Spttrs(n int, nrhs int, d []float32, e []float32, b []float32, ldb int) bool {
+func Spttrs(n, nrhs int, d, e, b []float32, ldb int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17811,7 +17811,7 @@ func Spttrs(n int, nrhs int, d []float32, e []float32, b []float32, ldb int) boo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dpttrs.f.
-func Dpttrs(n int, nrhs int, d []float64, e []float64, b []float64, ldb int) bool {
+func Dpttrs(n, nrhs int, d, e, b []float64, ldb int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -17828,7 +17828,7 @@ func Dpttrs(n int, nrhs int, d []float64, e []float64, b []float64, ldb int) boo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cpttrs.f.
-func Cpttrs(ul blas.Uplo, n int, nrhs int, d []float32, e []complex64, b []complex64, ldb int) bool {
+func Cpttrs(ul blas.Uplo, n, nrhs int, d []float32, e, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17853,7 +17853,7 @@ func Cpttrs(ul blas.Uplo, n int, nrhs int, d []float32, e []complex64, b []compl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zpttrs.f.
-func Zpttrs(ul blas.Uplo, n int, nrhs int, d []float64, e []complex128, b []complex128, ldb int) bool {
+func Zpttrs(ul blas.Uplo, n, nrhs int, d []float64, e, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17878,7 +17878,7 @@ func Zpttrs(ul blas.Uplo, n int, nrhs int, d []float64, e []complex128, b []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbev.f.
-func Ssbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float32, ldab int, w []float32, z []float32, ldz int, work []float32) bool {
+func Ssbev(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []float32, ldab int, w, z []float32, ldz int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17907,7 +17907,7 @@ func Ssbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float32, ldab int,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbev.f.
-func Dsbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float64, ldab int, w []float64, z []float64, ldz int, work []float64) bool {
+func Dsbev(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []float64, ldab int, w, z []float64, ldz int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17936,7 +17936,7 @@ func Dsbev(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float64, ldab int,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbevd.f.
-func Ssbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float32, ldab int, w []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Ssbevd(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []float32, ldab int, w, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -17969,7 +17969,7 @@ func Ssbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float32, ldab int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbevd.f.
-func Dsbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float64, ldab int, w []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dsbevd(jobz lapack.Job, ul blas.Uplo, n, kd int, ab []float64, ldab int, w, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18002,7 +18002,7 @@ func Dsbevd(jobz lapack.Job, ul blas.Uplo, n int, kd int, ab []float64, ldab int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbevx.f.
-func Ssbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []float32, ldab int, q []float32, ldq int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, work []float32, iwork []int32, ifail []int32) bool {
+func Ssbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n, kd int, ab []float32, ldab int, q []float32, ldq int, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, work []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18047,7 +18047,7 @@ func Ssbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbevx.f.
-func Dsbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []float64, ldab int, q []float64, ldq int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, work []float64, iwork []int32, ifail []int32) bool {
+func Dsbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n, kd int, ab []float64, ldab int, q []float64, ldq int, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, work []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18092,7 +18092,7 @@ func Dsbevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, kd int, ab []float64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbgst.f.
-func Ssbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []float32, ldab int, bb []float32, ldbb int, x []float32, ldx int, work []float32) bool {
+func Ssbgst(vect byte, ul blas.Uplo, n, ka, kb int, ab []float32, ldab int, bb []float32, ldbb int, x []float32, ldx int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18121,7 +18121,7 @@ func Ssbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []float32, ldab i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbgst.f.
-func Dsbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []float64, ldab int, bb []float64, ldbb int, x []float64, ldx int, work []float64) bool {
+func Dsbgst(vect byte, ul blas.Uplo, n, ka, kb int, ab []float64, ldab int, bb []float64, ldbb int, x []float64, ldx int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18150,7 +18150,7 @@ func Dsbgst(vect byte, ul blas.Uplo, n int, ka int, kb int, ab []float64, ldab i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbgv.f.
-func Ssbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float32, ldab int, bb []float32, ldbb int, w []float32, z []float32, ldz int, work []float32) bool {
+func Ssbgv(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []float32, ldab int, bb []float32, ldbb int, w, z []float32, ldz int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18183,7 +18183,7 @@ func Ssbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbgv.f.
-func Dsbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float64, ldab int, bb []float64, ldbb int, w []float64, z []float64, ldz int, work []float64) bool {
+func Dsbgv(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []float64, ldab int, bb []float64, ldbb int, w, z []float64, ldz int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18216,7 +18216,7 @@ func Dsbgv(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbgvd.f.
-func Ssbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float32, ldab int, bb []float32, ldbb int, w []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Ssbgvd(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []float32, ldab int, bb []float32, ldbb int, w, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18253,7 +18253,7 @@ func Ssbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbgvd.f.
-func Dsbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float64, ldab int, bb []float64, ldbb int, w []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dsbgvd(jobz lapack.Job, ul blas.Uplo, n, ka, kb int, ab []float64, ldab int, bb []float64, ldbb int, w, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18290,7 +18290,7 @@ func Dsbgvd(jobz lapack.Job, ul blas.Uplo, n int, ka int, kb int, ab []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbgvx.f.
-func Ssbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab []float32, ldab int, bb []float32, ldbb int, q []float32, ldq int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, work []float32, iwork []int32, ifail []int32) bool {
+func Ssbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n, ka, kb int, ab []float32, ldab int, bb []float32, ldbb int, q []float32, ldq int, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, work []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18339,7 +18339,7 @@ func Ssbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbgvx.f.
-func Dsbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab []float64, ldab int, bb []float64, ldbb int, q []float64, ldq int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, work []float64, iwork []int32, ifail []int32) bool {
+func Dsbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n, ka, kb int, ab []float64, ldab int, bb []float64, ldbb int, q []float64, ldq int, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, work []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18388,7 +18388,7 @@ func Dsbgvx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ka int, kb int, ab [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssbtrd.f.
-func Ssbtrd(vect byte, ul blas.Uplo, n int, kd int, ab []float32, ldab int, d []float32, e []float32, q []float32, ldq int, work []float32) bool {
+func Ssbtrd(vect byte, ul blas.Uplo, n, kd int, ab []float32, ldab int, d, e, q []float32, ldq int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18421,7 +18421,7 @@ func Ssbtrd(vect byte, ul blas.Uplo, n int, kd int, ab []float32, ldab int, d []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsbtrd.f.
-func Dsbtrd(vect byte, ul blas.Uplo, n int, kd int, ab []float64, ldab int, d []float64, e []float64, q []float64, ldq int, work []float64) bool {
+func Dsbtrd(vect byte, ul blas.Uplo, n, kd int, ab []float64, ldab int, d, e, q []float64, ldq int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18454,7 +18454,7 @@ func Dsbtrd(vect byte, ul blas.Uplo, n int, kd int, ab []float64, ldab int, d []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssfrk.f.
-func Ssfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k int, alpha float32, a []float32, lda int, beta float32, c []float32) bool {
+func Ssfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n, k int, alpha float32, a []float32, lda int, beta float32, c []float32) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -18495,7 +18495,7 @@ func Ssfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsfrk.f.
-func Dsfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k int, alpha float64, a []float64, lda int, beta float64, c []float64) bool {
+func Dsfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n, k int, alpha float64, a []float64, lda int, beta float64, c []float64) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -18536,7 +18536,7 @@ func Dsfrk(transr blas.Transpose, ul blas.Uplo, trans blas.Transpose, n int, k i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspcon.f.
-func Sspcon(ul blas.Uplo, n int, ap []float32, ipiv []int32, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Sspcon(ul blas.Uplo, n int, ap []float32, ipiv []int32, anorm float32, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18569,7 +18569,7 @@ func Sspcon(ul blas.Uplo, n int, ap []float32, ipiv []int32, anorm float32, rcon
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspcon.f.
-func Dspcon(ul blas.Uplo, n int, ap []float64, ipiv []int32, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dspcon(ul blas.Uplo, n int, ap []float64, ipiv []int32, anorm float64, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18660,7 +18660,7 @@ func Zspcon(ul blas.Uplo, n int, ap []complex128, ipiv []int32, anorm float64, r
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspev.f.
-func Sspev(jobz lapack.Job, ul blas.Uplo, n int, ap []float32, w []float32, z []float32, ldz int, work []float32) bool {
+func Sspev(jobz lapack.Job, ul blas.Uplo, n int, ap, w, z []float32, ldz int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18689,7 +18689,7 @@ func Sspev(jobz lapack.Job, ul blas.Uplo, n int, ap []float32, w []float32, z []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspev.f.
-func Dspev(jobz lapack.Job, ul blas.Uplo, n int, ap []float64, w []float64, z []float64, ldz int, work []float64) bool {
+func Dspev(jobz lapack.Job, ul blas.Uplo, n int, ap, w, z []float64, ldz int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18718,7 +18718,7 @@ func Dspev(jobz lapack.Job, ul blas.Uplo, n int, ap []float64, w []float64, z []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspevd.f.
-func Sspevd(jobz lapack.Job, ul blas.Uplo, n int, ap []float32, w []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Sspevd(jobz lapack.Job, ul blas.Uplo, n int, ap, w, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18751,7 +18751,7 @@ func Sspevd(jobz lapack.Job, ul blas.Uplo, n int, ap []float32, w []float32, z [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspevd.f.
-func Dspevd(jobz lapack.Job, ul blas.Uplo, n int, ap []float64, w []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dspevd(jobz lapack.Job, ul blas.Uplo, n int, ap, w, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18784,7 +18784,7 @@ func Dspevd(jobz lapack.Job, ul blas.Uplo, n int, ap []float64, w []float64, z [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspevx.f.
-func Sspevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float32, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, work []float32, iwork []int32, ifail []int32) bool {
+func Sspevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float32, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, work []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18825,7 +18825,7 @@ func Sspevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float32, vl flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspevx.f.
-func Dspevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float64, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, work []float64, iwork []int32, ifail []int32) bool {
+func Dspevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float64, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, work []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18866,7 +18866,7 @@ func Dspevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float64, vl flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspgst.f.
-func Sspgst(itype int, ul blas.Uplo, n int, ap []float32, bp []float32) bool {
+func Sspgst(itype int, ul blas.Uplo, n int, ap, bp []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18887,7 +18887,7 @@ func Sspgst(itype int, ul blas.Uplo, n int, ap []float32, bp []float32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspgst.f.
-func Dspgst(itype int, ul blas.Uplo, n int, ap []float64, bp []float64) bool {
+func Dspgst(itype int, ul blas.Uplo, n int, ap, bp []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18908,7 +18908,7 @@ func Dspgst(itype int, ul blas.Uplo, n int, ap []float64, bp []float64) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspgv.f.
-func Sspgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float32, bp []float32, w []float32, z []float32, ldz int, work []float32) bool {
+func Sspgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp, w, z []float32, ldz int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18941,7 +18941,7 @@ func Sspgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float32, bp []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspgv.f.
-func Dspgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float64, bp []float64, w []float64, z []float64, ldz int, work []float64) bool {
+func Dspgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp, w, z []float64, ldz int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -18974,7 +18974,7 @@ func Dspgv(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float64, bp []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspgvd.f.
-func Sspgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float32, bp []float32, w []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Sspgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp, w, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19011,7 +19011,7 @@ func Sspgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float32, bp []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspgvd.f.
-func Dspgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float64, bp []float64, w []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dspgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap, bp, w, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19048,7 +19048,7 @@ func Dspgvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, ap []float64, bp []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspgvx.f.
-func Sspgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float32, bp []float32, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, work []float32, iwork []int32, ifail []int32) bool {
+func Sspgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap, bp []float32, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, work []float32, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19093,7 +19093,7 @@ func Sspgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspgvx.f.
-func Dspgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []float64, bp []float64, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, work []float64, iwork []int32, ifail []int32) bool {
+func Dspgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap, bp []float64, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, work []float64, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19138,7 +19138,7 @@ func Dspgvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, ap []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssprfs.f.
-func Ssprfs(ul blas.Uplo, n int, nrhs int, ap []float32, afp []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Ssprfs(ul blas.Uplo, n, nrhs int, ap, afp []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19187,7 +19187,7 @@ func Ssprfs(ul blas.Uplo, n int, nrhs int, ap []float32, afp []float32, ipiv []i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsprfs.f.
-func Dsprfs(ul blas.Uplo, n int, nrhs int, ap []float64, afp []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dsprfs(ul blas.Uplo, n, nrhs int, ap, afp []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19236,7 +19236,7 @@ func Dsprfs(ul blas.Uplo, n int, nrhs int, ap []float64, afp []float64, ipiv []i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csprfs.f.
-func Csprfs(ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Csprfs(ul blas.Uplo, n, nrhs int, ap, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19285,7 +19285,7 @@ func Csprfs(ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, ipiv
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsprfs.f.
-func Zsprfs(ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zsprfs(ul blas.Uplo, n, nrhs int, ap, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19334,7 +19334,7 @@ func Zsprfs(ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, ip
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspsv.f.
-func Sspsv(ul blas.Uplo, n int, nrhs int, ap []float32, ipiv []int32, b []float32, ldb int) bool {
+func Sspsv(ul blas.Uplo, n, nrhs int, ap []float32, ipiv []int32, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19359,7 +19359,7 @@ func Sspsv(ul blas.Uplo, n int, nrhs int, ap []float32, ipiv []int32, b []float3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspsv.f.
-func Dspsv(ul blas.Uplo, n int, nrhs int, ap []float64, ipiv []int32, b []float64, ldb int) bool {
+func Dspsv(ul blas.Uplo, n, nrhs int, ap []float64, ipiv []int32, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19384,7 +19384,7 @@ func Dspsv(ul blas.Uplo, n int, nrhs int, ap []float64, ipiv []int32, b []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cspsv.f.
-func Cspsv(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
+func Cspsv(ul blas.Uplo, n, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19409,7 +19409,7 @@ func Cspsv(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zspsv.f.
-func Zspsv(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
+func Zspsv(ul blas.Uplo, n, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19434,7 +19434,7 @@ func Zspsv(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sspsvx.f.
-func Sspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float32, afp []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Sspsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []float32, ipiv []int32, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19487,7 +19487,7 @@ func Sspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float32, afp []float3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dspsvx.f.
-func Dspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float64, afp []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dspsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []float64, ipiv []int32, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19540,7 +19540,7 @@ func Dspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []float64, afp []float6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cspsvx.f.
-func Cspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex64, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Cspsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []complex64, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19593,7 +19593,7 @@ func Cspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex64, afp []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zspsvx.f.
-func Zspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex128, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zspsvx(fact byte, ul blas.Uplo, n, nrhs int, ap, afp []complex128, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19646,7 +19646,7 @@ func Zspsvx(fact byte, ul blas.Uplo, n int, nrhs int, ap []complex128, afp []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssptrd.f.
-func Ssptrd(ul blas.Uplo, n int, ap []float32, d []float32, e []float32, tau []float32) bool {
+func Ssptrd(ul blas.Uplo, n int, ap, d, e, tau []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19675,7 +19675,7 @@ func Ssptrd(ul blas.Uplo, n int, ap []float32, d []float32, e []float32, tau []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsptrd.f.
-func Dsptrd(ul blas.Uplo, n int, ap []float64, d []float64, e []float64, tau []float64) bool {
+func Dsptrd(ul blas.Uplo, n int, ap, d, e, tau []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19888,7 +19888,7 @@ func Zsptri(ul blas.Uplo, n int, ap []complex128, ipiv []int32, work []complex12
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssptrs.f.
-func Ssptrs(ul blas.Uplo, n int, nrhs int, ap []float32, ipiv []int32, b []float32, ldb int) bool {
+func Ssptrs(ul blas.Uplo, n, nrhs int, ap []float32, ipiv []int32, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19913,7 +19913,7 @@ func Ssptrs(ul blas.Uplo, n int, nrhs int, ap []float32, ipiv []int32, b []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsptrs.f.
-func Dsptrs(ul blas.Uplo, n int, nrhs int, ap []float64, ipiv []int32, b []float64, ldb int) bool {
+func Dsptrs(ul blas.Uplo, n, nrhs int, ap []float64, ipiv []int32, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19938,7 +19938,7 @@ func Dsptrs(ul blas.Uplo, n int, nrhs int, ap []float64, ipiv []int32, b []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csptrs.f.
-func Csptrs(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
+func Csptrs(ul blas.Uplo, n, nrhs int, ap []complex64, ipiv []int32, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19963,7 +19963,7 @@ func Csptrs(ul blas.Uplo, n int, nrhs int, ap []complex64, ipiv []int32, b []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsptrs.f.
-func Zsptrs(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
+func Zsptrs(ul blas.Uplo, n, nrhs int, ap []complex128, ipiv []int32, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -19988,7 +19988,7 @@ func Zsptrs(ul blas.Uplo, n int, nrhs int, ap []complex128, ipiv []int32, b []co
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstebz.f.
-func Sstebz(rng byte, order byte, n int, vl float32, vu float32, il int, iu int, abstol float32, d []float32, e []float32, m []int32, nsplit []int32, w []float32, iblock []int32, isplit []int32, work []float32, iwork []int32) bool {
+func Sstebz(rng, order byte, n int, vl, vu float32, il, iu int, abstol float32, d, e []float32, m, nsplit []int32, w []float32, iblock, isplit []int32, work []float32, iwork []int32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20029,7 +20029,7 @@ func Sstebz(rng byte, order byte, n int, vl float32, vu float32, il int, iu int,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstebz.f.
-func Dstebz(rng byte, order byte, n int, vl float64, vu float64, il int, iu int, abstol float64, d []float64, e []float64, m []int32, nsplit []int32, w []float64, iblock []int32, isplit []int32, work []float64, iwork []int32) bool {
+func Dstebz(rng, order byte, n int, vl, vu float64, il, iu int, abstol float64, d, e []float64, m, nsplit []int32, w []float64, iblock, isplit []int32, work []float64, iwork []int32) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20070,7 +20070,7 @@ func Dstebz(rng byte, order byte, n int, vl float64, vu float64, il int, iu int,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstedc.f.
-func Sstedc(compz lapack.Comp, n int, d []float32, e []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Sstedc(compz lapack.Comp, n int, d, e, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20095,7 +20095,7 @@ func Sstedc(compz lapack.Comp, n int, d []float32, e []float32, z []float32, ldz
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstedc.f.
-func Dstedc(compz lapack.Comp, n int, d []float64, e []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dstedc(compz lapack.Comp, n int, d, e, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20120,7 +20120,7 @@ func Dstedc(compz lapack.Comp, n int, d []float64, e []float64, z []float64, ldz
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cstedc.f.
-func Cstedc(compz lapack.Comp, n int, d []float32, e []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
+func Cstedc(compz lapack.Comp, n int, d, e []float32, z []complex64, ldz int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20149,7 +20149,7 @@ func Cstedc(compz lapack.Comp, n int, d []float32, e []float32, z []complex64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zstedc.f.
-func Zstedc(compz lapack.Comp, n int, d []float64, e []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
+func Zstedc(compz lapack.Comp, n int, d, e []float64, z []complex128, ldz int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20178,7 +20178,7 @@ func Zstedc(compz lapack.Comp, n int, d []float64, e []float64, z []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstegr.f.
-func Sstegr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Sstegr(jobz lapack.Job, rng byte, n int, d, e []float32, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20215,7 +20215,7 @@ func Sstegr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstegr.f.
-func Dstegr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dstegr(jobz lapack.Job, rng byte, n int, d, e []float64, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20252,7 +20252,7 @@ func Dstegr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cstegr.f.
-func Cstegr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Cstegr(jobz lapack.Job, rng byte, n int, d, e []float32, vl, vu float32, il, iu int, abstol float32, m []int32, w []float32, z []complex64, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20289,7 +20289,7 @@ func Cstegr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zstegr.f.
-func Zstegr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Zstegr(jobz lapack.Job, rng byte, n int, d, e []float64, vl, vu float64, il, iu int, abstol float64, m []int32, w []float64, z []complex128, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20326,7 +20326,7 @@ func Zstegr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstein.f.
-func Sstein(n int, d []float32, e []float32, m int, w []float32, iblock []int32, isplit []int32, z []float32, ldz int, work []float32, iwork []int32, ifailv []int32) bool {
+func Sstein(n int, d, e []float32, m int, w []float32, iblock, isplit []int32, z []float32, ldz int, work []float32, iwork, ifailv []int32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20367,7 +20367,7 @@ func Sstein(n int, d []float32, e []float32, m int, w []float32, iblock []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstein.f.
-func Dstein(n int, d []float64, e []float64, m int, w []float64, iblock []int32, isplit []int32, z []float64, ldz int, work []float64, iwork []int32, ifailv []int32) bool {
+func Dstein(n int, d, e []float64, m int, w []float64, iblock, isplit []int32, z []float64, ldz int, work []float64, iwork, ifailv []int32) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20408,7 +20408,7 @@ func Dstein(n int, d []float64, e []float64, m int, w []float64, iblock []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cstein.f.
-func Cstein(n int, d []float32, e []float32, m int, w []float32, iblock []int32, isplit []int32, z []complex64, ldz int, work []float32, iwork []int32, ifailv []int32) bool {
+func Cstein(n int, d, e []float32, m int, w []float32, iblock, isplit []int32, z []complex64, ldz int, work []float32, iwork, ifailv []int32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20449,7 +20449,7 @@ func Cstein(n int, d []float32, e []float32, m int, w []float32, iblock []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zstein.f.
-func Zstein(n int, d []float64, e []float64, m int, w []float64, iblock []int32, isplit []int32, z []complex128, ldz int, work []float64, iwork []int32, ifailv []int32) bool {
+func Zstein(n int, d, e []float64, m int, w []float64, iblock, isplit []int32, z []complex128, ldz int, work []float64, iwork, ifailv []int32) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20490,7 +20490,7 @@ func Zstein(n int, d []float64, e []float64, m int, w []float64, iblock []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstemr.f.
-func Sstemr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float32, vu float32, il int, iu int, m []int32, w []float32, z []float32, ldz int, nzc int, isuppz []int32, tryrac []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Sstemr(jobz lapack.Job, rng byte, n int, d, e []float32, vl, vu float32, il, iu int, m []int32, w, z []float32, ldz, nzc int, isuppz, tryrac []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20531,7 +20531,7 @@ func Sstemr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstemr.f.
-func Dstemr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float64, vu float64, il int, iu int, m []int32, w []float64, z []float64, ldz int, nzc int, isuppz []int32, tryrac []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dstemr(jobz lapack.Job, rng byte, n int, d, e []float64, vl, vu float64, il, iu int, m []int32, w, z []float64, ldz, nzc int, isuppz, tryrac []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20572,7 +20572,7 @@ func Dstemr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cstemr.f.
-func Cstemr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float32, vu float32, il int, iu int, m []int32, w []float32, z []complex64, ldz int, nzc int, isuppz []int32, tryrac []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Cstemr(jobz lapack.Job, rng byte, n int, d, e []float32, vl, vu float32, il, iu int, m []int32, w []float32, z []complex64, ldz, nzc int, isuppz, tryrac []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20613,7 +20613,7 @@ func Cstemr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zstemr.f.
-func Zstemr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float64, vu float64, il int, iu int, m []int32, w []float64, z []complex128, ldz int, nzc int, isuppz []int32, tryrac []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Zstemr(jobz lapack.Job, rng byte, n int, d, e []float64, vl, vu float64, il, iu int, m []int32, w []float64, z []complex128, ldz, nzc int, isuppz, tryrac []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20654,7 +20654,7 @@ func Zstemr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssteqr.f.
-func Ssteqr(compz lapack.Comp, n int, d []float32, e []float32, z []float32, ldz int, work []float32) bool {
+func Ssteqr(compz lapack.Comp, n int, d, e, z []float32, ldz int, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20675,7 +20675,7 @@ func Ssteqr(compz lapack.Comp, n int, d []float32, e []float32, z []float32, ldz
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsteqr.f.
-func Dsteqr(compz lapack.Comp, n int, d []float64, e []float64, z []float64, ldz int, work []float64) bool {
+func Dsteqr(compz lapack.Comp, n int, d, e, z []float64, ldz int, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20696,7 +20696,7 @@ func Dsteqr(compz lapack.Comp, n int, d []float64, e []float64, z []float64, ldz
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csteqr.f.
-func Csteqr(compz lapack.Comp, n int, d []float32, e []float32, z []complex64, ldz int, work []float32) bool {
+func Csteqr(compz lapack.Comp, n int, d, e []float32, z []complex64, ldz int, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20717,7 +20717,7 @@ func Csteqr(compz lapack.Comp, n int, d []float32, e []float32, z []complex64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsteqr.f.
-func Zsteqr(compz lapack.Comp, n int, d []float64, e []float64, z []complex128, ldz int, work []float64) bool {
+func Zsteqr(compz lapack.Comp, n int, d, e []float64, z []complex128, ldz int, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20738,7 +20738,7 @@ func Zsteqr(compz lapack.Comp, n int, d []float64, e []float64, z []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssterf.f.
-func Ssterf(n int, d []float32, e []float32) bool {
+func Ssterf(n int, d, e []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20751,7 +20751,7 @@ func Ssterf(n int, d []float32, e []float32) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsterf.f.
-func Dsterf(n int, d []float64, e []float64) bool {
+func Dsterf(n int, d, e []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20764,7 +20764,7 @@ func Dsterf(n int, d []float64, e []float64) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstev.f.
-func Sstev(jobz lapack.Job, n int, d []float32, e []float32, z []float32, ldz int, work []float32) bool {
+func Sstev(jobz lapack.Job, n int, d, e, z []float32, ldz int, work []float32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20785,7 +20785,7 @@ func Sstev(jobz lapack.Job, n int, d []float32, e []float32, z []float32, ldz in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstev.f.
-func Dstev(jobz lapack.Job, n int, d []float64, e []float64, z []float64, ldz int, work []float64) bool {
+func Dstev(jobz lapack.Job, n int, d, e, z []float64, ldz int, work []float64) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20806,7 +20806,7 @@ func Dstev(jobz lapack.Job, n int, d []float64, e []float64, z []float64, ldz in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstevd.f.
-func Sstevd(jobz lapack.Job, n int, d []float32, e []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Sstevd(jobz lapack.Job, n int, d, e, z []float32, ldz int, work []float32, lwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20831,7 +20831,7 @@ func Sstevd(jobz lapack.Job, n int, d []float32, e []float32, z []float32, ldz i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstevd.f.
-func Dstevd(jobz lapack.Job, n int, d []float64, e []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dstevd(jobz lapack.Job, n int, d, e, z []float64, ldz int, work []float64, lwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20856,7 +20856,7 @@ func Dstevd(jobz lapack.Job, n int, d []float64, e []float64, z []float64, ldz i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstevr.f.
-func Sstevr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Sstevr(jobz lapack.Job, rng byte, n int, d, e []float32, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20893,7 +20893,7 @@ func Sstevr(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstevr.f.
-func Dstevr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dstevr(jobz lapack.Job, rng byte, n int, d, e []float64, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20930,7 +20930,7 @@ func Dstevr(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sstevx.f.
-func Sstevx(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, work []float32, iwork []int32, ifail []int32) bool {
+func Sstevx(jobz lapack.Job, rng byte, n int, d, e []float32, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, work []float32, iwork, ifail []int32) bool {
 	var _d *float32
 	if len(d) > 0 {
 		_d = &d[0]
@@ -20967,7 +20967,7 @@ func Sstevx(jobz lapack.Job, rng byte, n int, d []float32, e []float32, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dstevx.f.
-func Dstevx(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, work []float64, iwork []int32, ifail []int32) bool {
+func Dstevx(jobz lapack.Job, rng byte, n int, d, e []float64, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, work []float64, iwork, ifail []int32) bool {
 	var _d *float64
 	if len(d) > 0 {
 		_d = &d[0]
@@ -21004,7 +21004,7 @@ func Dstevx(jobz lapack.Job, rng byte, n int, d []float64, e []float64, vl float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssycon.f.
-func Ssycon(ul blas.Uplo, n int, a []float32, lda int, ipiv []int32, anorm float32, rcond []float32, work []float32, iwork []int32) bool {
+func Ssycon(ul blas.Uplo, n int, a []float32, lda int, ipiv []int32, anorm float32, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21037,7 +21037,7 @@ func Ssycon(ul blas.Uplo, n int, a []float32, lda int, ipiv []int32, anorm float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsycon.f.
-func Dsycon(ul blas.Uplo, n int, a []float64, lda int, ipiv []int32, anorm float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dsycon(ul blas.Uplo, n int, a []float64, lda int, ipiv []int32, anorm float64, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21128,7 +21128,7 @@ func Zsycon(ul blas.Uplo, n int, a []complex128, lda int, ipiv []int32, anorm fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyequb.f.
-func Ssyequb(ul blas.Uplo, n int, a []float32, lda int, s []float32, scond []float32, amax []float32, work []float32) bool {
+func Ssyequb(ul blas.Uplo, n int, a []float32, lda int, s, scond, amax, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21161,7 +21161,7 @@ func Ssyequb(ul blas.Uplo, n int, a []float32, lda int, s []float32, scond []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyequb.f.
-func Dsyequb(ul blas.Uplo, n int, a []float64, lda int, s []float64, scond []float64, amax []float64, work []float64) bool {
+func Dsyequb(ul blas.Uplo, n int, a []float64, lda int, s, scond, amax, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21194,7 +21194,7 @@ func Dsyequb(ul blas.Uplo, n int, a []float64, lda int, s []float64, scond []flo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csyequb.f.
-func Csyequb(ul blas.Uplo, n int, a []complex64, lda int, s []float32, scond []float32, amax []float32, work []complex64) bool {
+func Csyequb(ul blas.Uplo, n int, a []complex64, lda int, s, scond, amax []float32, work []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21227,7 +21227,7 @@ func Csyequb(ul blas.Uplo, n int, a []complex64, lda int, s []float32, scond []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsyequb.f.
-func Zsyequb(ul blas.Uplo, n int, a []complex128, lda int, s []float64, scond []float64, amax []float64, work []complex128) bool {
+func Zsyequb(ul blas.Uplo, n int, a []complex128, lda int, s, scond, amax []float64, work []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21260,7 +21260,7 @@ func Zsyequb(ul blas.Uplo, n int, a []complex128, lda int, s []float64, scond []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyev.f.
-func Ssyev(jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, w []float32, work []float32, lwork int) bool {
+func Ssyev(jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, w, work []float32, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21285,7 +21285,7 @@ func Ssyev(jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, w []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyev.f.
-func Dsyev(jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, w []float64, work []float64, lwork int) bool {
+func Dsyev(jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21310,7 +21310,7 @@ func Dsyev(jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, w []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyevd.f.
-func Ssyevd(jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, w []float32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Ssyevd(jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, w, work []float32, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21339,7 +21339,7 @@ func Ssyevd(jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, w []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyevd.f.
-func Dsyevd(jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, w []float64, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dsyevd(jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21368,7 +21368,7 @@ func Dsyevd(jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, w []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyevr.f.
-func Ssyevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Ssyevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, isuppz []int32, work []float32, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21409,7 +21409,7 @@ func Ssyevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyevr.f.
-func Dsyevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float64, lda int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dsyevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float64, lda int, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, isuppz []int32, work []float64, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21450,7 +21450,7 @@ func Dsyevr(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float64, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyevx.f.
-func Ssyevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, ifail []int32) bool {
+func Ssyevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, work []float32, lwork int, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21491,7 +21491,7 @@ func Ssyevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyevx.f.
-func Dsyevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float64, lda int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, ifail []int32) bool {
+func Dsyevx(jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float64, lda int, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, work []float64, lwork int, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21574,7 +21574,7 @@ func Dsygst(itype int, ul blas.Uplo, n int, a []float64, lda int, b []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssygv.f.
-func Ssygv(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, b []float32, ldb int, w []float32, work []float32, lwork int) bool {
+func Ssygv(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, b []float32, ldb int, w, work []float32, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21603,7 +21603,7 @@ func Ssygv(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsygv.f.
-func Dsygv(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, b []float64, ldb int, w []float64, work []float64, lwork int) bool {
+func Dsygv(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, b []float64, ldb int, w, work []float64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21632,7 +21632,7 @@ func Dsygv(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssygvd.f.
-func Ssygvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, b []float32, ldb int, w []float32, work []float32, lwork int, iwork []int32, liwork int) bool {
+func Ssygvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda int, b []float32, ldb int, w, work []float32, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21665,7 +21665,7 @@ func Ssygvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float32, lda in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsygvd.f.
-func Dsygvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, b []float64, ldb int, w []float64, work []float64, lwork int, iwork []int32, liwork int) bool {
+func Dsygvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda int, b []float64, ldb int, w, work []float64, lwork int, iwork []int32, liwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21698,7 +21698,7 @@ func Dsygvd(itype int, jobz lapack.Job, ul blas.Uplo, n int, a []float64, lda in
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssygvx.f.
-func Ssygvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int, b []float32, ldb int, vl float32, vu float32, il int, iu int, abstol float32, m []int32, w []float32, z []float32, ldz int, work []float32, lwork int, iwork []int32, ifail []int32) bool {
+func Ssygvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float32, lda int, b []float32, ldb int, vl, vu float32, il, iu int, abstol float32, m []int32, w, z []float32, ldz int, work []float32, lwork int, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21743,7 +21743,7 @@ func Ssygvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsygvx.f.
-func Dsygvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float64, lda int, b []float64, ldb int, vl float64, vu float64, il int, iu int, abstol float64, m []int32, w []float64, z []float64, ldz int, work []float64, lwork int, iwork []int32, ifail []int32) bool {
+func Dsygvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float64, lda int, b []float64, ldb int, vl, vu float64, il, iu int, abstol float64, m []int32, w, z []float64, ldz int, work []float64, lwork int, iwork, ifail []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21788,7 +21788,7 @@ func Dsygvx(itype int, jobz lapack.Job, rng byte, ul blas.Uplo, n int, a []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyrfs.f.
-func Ssyrfs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Ssyrfs(ul blas.Uplo, n, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21837,7 +21837,7 @@ func Ssyrfs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, af []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyrfs.f.
-func Dsyrfs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dsyrfs(ul blas.Uplo, n, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21886,7 +21886,7 @@ func Dsyrfs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, af []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csyrfs.f.
-func Csyrfs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Csyrfs(ul blas.Uplo, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21935,7 +21935,7 @@ func Csyrfs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsyrfs.f.
-func Zsyrfs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Zsyrfs(ul blas.Uplo, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -21984,7 +21984,7 @@ func Zsyrfs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssysv.f.
-func Ssysv(ul blas.Uplo, n int, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int, work []float32, lwork int) bool {
+func Ssysv(ul blas.Uplo, n, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int, work []float32, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22013,7 +22013,7 @@ func Ssysv(ul blas.Uplo, n int, nrhs int, a []float32, lda int, ipiv []int32, b 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsysv.f.
-func Dsysv(ul blas.Uplo, n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int, work []float64, lwork int) bool {
+func Dsysv(ul blas.Uplo, n, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int, work []float64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22042,7 +22042,7 @@ func Dsysv(ul blas.Uplo, n int, nrhs int, a []float64, lda int, ipiv []int32, b 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csysv.f.
-func Csysv(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64, lwork int) bool {
+func Csysv(ul blas.Uplo, n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22071,7 +22071,7 @@ func Csysv(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsysv.f.
-func Zsysv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128, lwork int) bool {
+func Zsysv(ul blas.Uplo, n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22100,7 +22100,7 @@ func Zsysv(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssysvx.f.
-func Ssysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, rcond []float32, ferr []float32, berr []float32, work []float32, lwork int, iwork []int32) bool {
+func Ssysvx(fact byte, ul blas.Uplo, n, nrhs int, a []float32, lda int, af []float32, ldaf int, ipiv []int32, b []float32, ldb int, x []float32, ldx int, rcond, ferr, berr, work []float32, lwork int, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22153,7 +22153,7 @@ func Ssysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float32, lda int, af [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsysvx.f.
-func Dsysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, rcond []float64, ferr []float64, berr []float64, work []float64, lwork int, iwork []int32) bool {
+func Dsysvx(fact byte, ul blas.Uplo, n, nrhs int, a []float64, lda int, af []float64, ldaf int, ipiv []int32, b []float64, ldb int, x []float64, ldx int, rcond, ferr, berr, work []float64, lwork int, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22206,7 +22206,7 @@ func Dsysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []float64, lda int, af [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csysvx.f.
-func Csysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond []float32, ferr []float32, berr []float32, work []complex64, lwork int, rwork []float32) bool {
+func Csysvx(fact byte, ul blas.Uplo, n, nrhs int, a []complex64, lda int, af []complex64, ldaf int, ipiv []int32, b []complex64, ldb int, x []complex64, ldx int, rcond, ferr, berr []float32, work []complex64, lwork int, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22259,7 +22259,7 @@ func Csysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex64, lda int, af
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsysvx.f.
-func Zsysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond []float64, ferr []float64, berr []float64, work []complex128, lwork int, rwork []float64) bool {
+func Zsysvx(fact byte, ul blas.Uplo, n, nrhs int, a []complex128, lda int, af []complex128, ldaf int, ipiv []int32, b []complex128, ldb int, x []complex128, ldx int, rcond, ferr, berr []float64, work []complex128, lwork int, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22312,7 +22312,7 @@ func Zsysvx(fact byte, ul blas.Uplo, n int, nrhs int, a []complex128, lda int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssytrd.f.
-func Ssytrd(ul blas.Uplo, n int, a []float32, lda int, d []float32, e []float32, tau []float32, work []float32, lwork int) bool {
+func Ssytrd(ul blas.Uplo, n int, a []float32, lda int, d, e, tau, work []float32, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22345,7 +22345,7 @@ func Ssytrd(ul blas.Uplo, n int, a []float32, lda int, d []float32, e []float32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsytrd.f.
-func Dsytrd(ul blas.Uplo, n int, a []float64, lda int, d []float64, e []float64, tau []float64, work []float64, lwork int) bool {
+func Dsytrd(ul blas.Uplo, n int, a []float64, lda int, d, e, tau, work []float64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22578,7 +22578,7 @@ func Zsytri(ul blas.Uplo, n int, a []complex128, lda int, ipiv []int32, work []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssytrs.f.
-func Ssytrs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int) bool {
+func Ssytrs(ul blas.Uplo, n, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22603,7 +22603,7 @@ func Ssytrs(ul blas.Uplo, n int, nrhs int, a []float32, lda int, ipiv []int32, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsytrs.f.
-func Dsytrs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int) bool {
+func Dsytrs(ul blas.Uplo, n, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22628,7 +22628,7 @@ func Dsytrs(ul blas.Uplo, n int, nrhs int, a []float64, lda int, ipiv []int32, b
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csytrs.f.
-func Csytrs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
+func Csytrs(ul blas.Uplo, n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22653,7 +22653,7 @@ func Csytrs(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsytrs.f.
-func Zsytrs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
+func Zsytrs(ul blas.Uplo, n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22678,7 +22678,7 @@ func Zsytrs(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stbcon.f.
-func Stbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []float32, ldab int, rcond []float32, work []float32, iwork []int32) bool {
+func Stbcon(norm byte, ul blas.Uplo, d blas.Diag, n, kd int, ab []float32, ldab int, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22715,7 +22715,7 @@ func Stbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtbcon.f.
-func Dtbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []float64, ldab int, rcond []float64, work []float64, iwork []int32) bool {
+func Dtbcon(norm byte, ul blas.Uplo, d blas.Diag, n, kd int, ab []float64, ldab int, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22752,7 +22752,7 @@ func Dtbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctbcon.f.
-func Ctbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []complex64, ldab int, rcond []float32, work []complex64, rwork []float32) bool {
+func Ctbcon(norm byte, ul blas.Uplo, d blas.Diag, n, kd int, ab []complex64, ldab int, rcond []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22789,7 +22789,7 @@ func Ctbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []complex64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztbcon.f.
-func Ztbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []complex128, ldab int, rcond []float64, work []complex128, rwork []float64) bool {
+func Ztbcon(norm byte, ul blas.Uplo, d blas.Diag, n, kd int, ab []complex128, ldab int, rcond []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22826,7 +22826,7 @@ func Ztbcon(norm byte, ul blas.Uplo, d blas.Diag, n int, kd int, ab []complex128
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stbrfs.f.
-func Stbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []float32, ldab int, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Stbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []float32, ldab int, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22885,7 +22885,7 @@ func Stbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtbrfs.f.
-func Dtbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []float64, ldab int, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dtbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []float64, ldab int, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -22944,7 +22944,7 @@ func Dtbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctbrfs.f.
-func Ctbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []complex64, ldab int, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Ctbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []complex64, ldab int, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -23003,7 +23003,7 @@ func Ctbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztbrfs.f.
-func Ztbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []complex128, ldab int, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Ztbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []complex128, ldab int, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -23062,7 +23062,7 @@ func Ztbrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stbtrs.f.
-func Stbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []float32, ldab int, b []float32, ldb int) bool {
+func Stbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []float32, ldab int, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -23101,7 +23101,7 @@ func Stbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtbtrs.f.
-func Dtbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []float64, ldab int, b []float64, ldb int) bool {
+func Dtbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []float64, ldab int, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -23140,7 +23140,7 @@ func Dtbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctbtrs.f.
-func Ctbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []complex64, ldab int, b []complex64, ldb int) bool {
+func Ctbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []complex64, ldab int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -23179,7 +23179,7 @@ func Ctbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztbtrs.f.
-func Ztbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs int, ab []complex128, ldab int, b []complex128, ldb int) bool {
+func Ztbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, kd, nrhs int, ab []complex128, ldab int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -23218,7 +23218,7 @@ func Ztbtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, kd int, nrhs
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stfsm.f.
-func Stfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m int, n int, alpha float32, a []float32, b []float32, ldb int) bool {
+func Stfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha float32, a, b []float32, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23275,7 +23275,7 @@ func Stfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtfsm.f.
-func Dtfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m int, n int, alpha float64, a []float64, b []float64, ldb int) bool {
+func Dtfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha float64, a, b []float64, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23332,7 +23332,7 @@ func Dtfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctfsm.f.
-func Ctfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m int, n int, alpha complex64, a []complex64, b []complex64, ldb int) bool {
+func Ctfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha complex64, a, b []complex64, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23389,7 +23389,7 @@ func Ctfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpos
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztfsm.f.
-func Ztfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m int, n int, alpha complex128, a []complex128, b []complex128, ldb int) bool {
+func Ztfsm(transr blas.Transpose, s blas.Side, ul blas.Uplo, trans blas.Transpose, d blas.Diag, m, n int, alpha complex128, a, b []complex128, ldb int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23586,7 +23586,7 @@ func Ztftri(transr blas.Transpose, ul blas.Uplo, d blas.Diag, n int, a []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stfttp.f.
-func Stfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []float32, ap []float32) bool {
+func Stfttp(transr blas.Transpose, ul blas.Uplo, n int, arf, ap []float32) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23617,7 +23617,7 @@ func Stfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []float32, ap []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtfttp.f.
-func Dtfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []float64, ap []float64) bool {
+func Dtfttp(transr blas.Transpose, ul blas.Uplo, n int, arf, ap []float64) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23648,7 +23648,7 @@ func Dtfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []float64, ap []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctfttp.f.
-func Ctfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []complex64, ap []complex64) bool {
+func Ctfttp(transr blas.Transpose, ul blas.Uplo, n int, arf, ap []complex64) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23679,7 +23679,7 @@ func Ctfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []complex64, ap []co
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztfttp.f.
-func Ztfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []complex128, ap []complex128) bool {
+func Ztfttp(transr blas.Transpose, ul blas.Uplo, n int, arf, ap []complex128) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23710,7 +23710,7 @@ func Ztfttp(transr blas.Transpose, ul blas.Uplo, n int, arf []complex128, ap []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stfttr.f.
-func Stfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []float32, a []float32, lda int) bool {
+func Stfttr(transr blas.Transpose, ul blas.Uplo, n int, arf, a []float32, lda int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23741,7 +23741,7 @@ func Stfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []float32, a []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtfttr.f.
-func Dtfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []float64, a []float64, lda int) bool {
+func Dtfttr(transr blas.Transpose, ul blas.Uplo, n int, arf, a []float64, lda int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23772,7 +23772,7 @@ func Dtfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []float64, a []float
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctfttr.f.
-func Ctfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []complex64, a []complex64, lda int) bool {
+func Ctfttr(transr blas.Transpose, ul blas.Uplo, n int, arf, a []complex64, lda int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23803,7 +23803,7 @@ func Ctfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []complex64, a []com
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztfttr.f.
-func Ztfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []complex128, a []complex128, lda int) bool {
+func Ztfttr(transr blas.Transpose, ul blas.Uplo, n int, arf, a []complex128, lda int) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -23834,7 +23834,7 @@ func Ztfttr(transr blas.Transpose, ul blas.Uplo, n int, arf []complex128, a []co
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgexc.f.
-func Stgexc(wantq int32, wantz int32, n int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int, ifst []int32, ilst []int32, work []float32, lwork int) bool {
+func Stgexc(wantq, wantz int32, n int, a []float32, lda int, b []float32, ldb int, q []float32, ldq int, z []float32, ldz int, ifst, ilst []int32, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -23867,7 +23867,7 @@ func Stgexc(wantq int32, wantz int32, n int, a []float32, lda int, b []float32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtgexc.f.
-func Dtgexc(wantq int32, wantz int32, n int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int, ifst []int32, ilst []int32, work []float64, lwork int) bool {
+func Dtgexc(wantq, wantz int32, n int, a []float64, lda int, b []float64, ldb int, q []float64, ldq int, z []float64, ldz int, ifst, ilst []int32, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -23900,7 +23900,7 @@ func Dtgexc(wantq int32, wantz int32, n int, a []float64, lda int, b []float64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctgexc.f.
-func Ctgexc(wantq int32, wantz int32, n int, a []complex64, lda int, b []complex64, ldb int, q []complex64, ldq int, z []complex64, ldz int, ifst int, ilst int) bool {
+func Ctgexc(wantq, wantz int32, n int, a []complex64, lda int, b []complex64, ldb int, q []complex64, ldq int, z []complex64, ldz, ifst, ilst int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -23921,7 +23921,7 @@ func Ctgexc(wantq int32, wantz int32, n int, a []complex64, lda int, b []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztgexc.f.
-func Ztgexc(wantq int32, wantz int32, n int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz int, ifst int, ilst int) bool {
+func Ztgexc(wantq, wantz int32, n int, a []complex128, lda int, b []complex128, ldb int, q []complex128, ldq int, z []complex128, ldz, ifst, ilst int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -23942,7 +23942,7 @@ func Ztgexc(wantq int32, wantz int32, n int, a []complex128, lda int, b []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgsja.f.
-func Stgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, k int, l int, a []float32, lda int, b []float32, ldb int, tola float32, tolb float32, alpha []float32, beta []float32, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, work []float32, ncycle []int32) bool {
+func Stgsja(jobu, jobv, jobq lapack.Job, m, p, n, k, l int, a []float32, lda int, b []float32, ldb int, tola, tolb float32, alpha, beta, u []float32, ldu int, v []float32, ldv int, q []float32, ldq int, work []float32, ncycle []int32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -23983,7 +23983,7 @@ func Stgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtgsja.f.
-func Dtgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, k int, l int, a []float64, lda int, b []float64, ldb int, tola float64, tolb float64, alpha []float64, beta []float64, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, work []float64, ncycle []int32) bool {
+func Dtgsja(jobu, jobv, jobq lapack.Job, m, p, n, k, l int, a []float64, lda int, b []float64, ldb int, tola, tolb float64, alpha, beta, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, work []float64, ncycle []int32) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -24024,7 +24024,7 @@ func Dtgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctgsja.f.
-func Ctgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, k int, l int, a []complex64, lda int, b []complex64, ldb int, tola float32, tolb float32, alpha []float32, beta []float32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, work []complex64, ncycle []int32) bool {
+func Ctgsja(jobu, jobv, jobq lapack.Job, m, p, n, k, l int, a []complex64, lda int, b []complex64, ldb int, tola, tolb float32, alpha, beta []float32, u []complex64, ldu int, v []complex64, ldv int, q []complex64, ldq int, work []complex64, ncycle []int32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -24065,7 +24065,7 @@ func Ctgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztgsja.f.
-func Ztgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n int, k int, l int, a []complex128, lda int, b []complex128, ldb int, tola float64, tolb float64, alpha []float64, beta []float64, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, work []complex128, ncycle []int32) bool {
+func Ztgsja(jobu, jobv, jobq lapack.Job, m, p, n, k, l int, a []complex128, lda int, b []complex128, ldb int, tola, tolb float64, alpha, beta []float64, u []complex128, ldu int, v []complex128, ldv int, q []complex128, ldq int, work []complex128, ncycle []int32) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -24106,7 +24106,7 @@ func Ztgsja(jobu lapack.Job, jobv lapack.Job, jobq lapack.Job, m int, p int, n i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stgsyl.f.
-func Stgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []float32, lda int, b []float32, ldb int, c []float32, ldc int, d []float32, ldd int, e []float32, lde int, f []float32, ldf int, scale []float32, dif []float32, work []float32, lwork int, iwork []int32) bool {
+func Stgsyl(trans blas.Transpose, ijob lapack.Job, m, n int, a []float32, lda int, b []float32, ldb int, c []float32, ldc int, d []float32, ldd int, e []float32, lde int, f []float32, ldf int, scale, dif, work []float32, lwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -24161,7 +24161,7 @@ func Stgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []float32, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtgsyl.f.
-func Dtgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, d []float64, ldd int, e []float64, lde int, f []float64, ldf int, scale []float64, dif []float64, work []float64, lwork int, iwork []int32) bool {
+func Dtgsyl(trans blas.Transpose, ijob lapack.Job, m, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, d []float64, ldd int, e []float64, lde int, f []float64, ldf int, scale, dif, work []float64, lwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -24216,7 +24216,7 @@ func Dtgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []float64, ld
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctgsyl.f.
-func Ctgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []complex64, lda int, b []complex64, ldb int, c []complex64, ldc int, d []complex64, ldd int, e []complex64, lde int, f []complex64, ldf int, scale []float32, dif []float32, work []complex64, lwork int, iwork []int32) bool {
+func Ctgsyl(trans blas.Transpose, ijob lapack.Job, m, n int, a []complex64, lda int, b []complex64, ldb int, c []complex64, ldc int, d []complex64, ldd int, e []complex64, lde int, f []complex64, ldf int, scale, dif []float32, work []complex64, lwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -24271,7 +24271,7 @@ func Ctgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []complex64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztgsyl.f.
-func Ztgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []complex128, lda int, b []complex128, ldb int, c []complex128, ldc int, d []complex128, ldd int, e []complex128, lde int, f []complex128, ldf int, scale []float64, dif []float64, work []complex128, lwork int, iwork []int32) bool {
+func Ztgsyl(trans blas.Transpose, ijob lapack.Job, m, n int, a []complex128, lda int, b []complex128, ldb int, c []complex128, ldc int, d []complex128, ldd int, e []complex128, lde int, f []complex128, ldf int, scale, dif []float64, work []complex128, lwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -24326,7 +24326,7 @@ func Ztgsyl(trans blas.Transpose, ijob lapack.Job, m int, n int, a []complex128,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpcon.f.
-func Stpcon(norm byte, ul blas.Uplo, d blas.Diag, n int, ap []float32, rcond []float32, work []float32, iwork []int32) bool {
+func Stpcon(norm byte, ul blas.Uplo, d blas.Diag, n int, ap, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24363,7 +24363,7 @@ func Stpcon(norm byte, ul blas.Uplo, d blas.Diag, n int, ap []float32, rcond []f
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpcon.f.
-func Dtpcon(norm byte, ul blas.Uplo, d blas.Diag, n int, ap []float64, rcond []float64, work []float64, iwork []int32) bool {
+func Dtpcon(norm byte, ul blas.Uplo, d blas.Diag, n int, ap, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24474,7 +24474,7 @@ func Ztpcon(norm byte, ul blas.Uplo, d blas.Diag, n int, ap []complex128, rcond 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stprfs.f.
-func Stprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []float32, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Stprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24533,7 +24533,7 @@ func Stprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtprfs.f.
-func Dtprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []float64, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dtprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24592,7 +24592,7 @@ func Dtprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctprfs.f.
-func Ctprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []complex64, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Ctprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24651,7 +24651,7 @@ func Ctprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztprfs.f.
-func Ztprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []complex128, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Ztprfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24810,7 +24810,7 @@ func Ztptri(ul blas.Uplo, d blas.Diag, n int, ap []complex128) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stptrs.f.
-func Stptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []float32, b []float32, ldb int) bool {
+func Stptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24849,7 +24849,7 @@ func Stptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtptrs.f.
-func Dtptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []float64, b []float64, ldb int) bool {
+func Dtptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24888,7 +24888,7 @@ func Dtptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctptrs.f.
-func Ctptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []complex64, b []complex64, ldb int) bool {
+func Ctptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24927,7 +24927,7 @@ func Ctptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztptrs.f.
-func Ztptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap []complex128, b []complex128, ldb int) bool {
+func Ztptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, ap, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -24966,7 +24966,7 @@ func Ztptrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, ap
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpttf.f.
-func Stpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []float32, arf []float32) bool {
+func Stpttf(transr blas.Transpose, ul blas.Uplo, n int, ap, arf []float32) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -24997,7 +24997,7 @@ func Stpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []float32, arf []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpttf.f.
-func Dtpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []float64, arf []float64) bool {
+func Dtpttf(transr blas.Transpose, ul blas.Uplo, n int, ap, arf []float64) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -25028,7 +25028,7 @@ func Dtpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []float64, arf []floa
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctpttf.f.
-func Ctpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []complex64, arf []complex64) bool {
+func Ctpttf(transr blas.Transpose, ul blas.Uplo, n int, ap, arf []complex64) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -25059,7 +25059,7 @@ func Ctpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []complex64, arf []co
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztpttf.f.
-func Ztpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []complex128, arf []complex128) bool {
+func Ztpttf(transr blas.Transpose, ul blas.Uplo, n int, ap, arf []complex128) bool {
 	switch transr {
 	case blas.NoTrans:
 		transr = 'N'
@@ -25090,7 +25090,7 @@ func Ztpttf(transr blas.Transpose, ul blas.Uplo, n int, ap []complex128, arf []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpttr.f.
-func Stpttr(ul blas.Uplo, n int, ap []float32, a []float32, lda int) bool {
+func Stpttr(ul blas.Uplo, n int, ap, a []float32, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25111,7 +25111,7 @@ func Stpttr(ul blas.Uplo, n int, ap []float32, a []float32, lda int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpttr.f.
-func Dtpttr(ul blas.Uplo, n int, ap []float64, a []float64, lda int) bool {
+func Dtpttr(ul blas.Uplo, n int, ap, a []float64, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25132,7 +25132,7 @@ func Dtpttr(ul blas.Uplo, n int, ap []float64, a []float64, lda int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctpttr.f.
-func Ctpttr(ul blas.Uplo, n int, ap []complex64, a []complex64, lda int) bool {
+func Ctpttr(ul blas.Uplo, n int, ap, a []complex64, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25153,7 +25153,7 @@ func Ctpttr(ul blas.Uplo, n int, ap []complex64, a []complex64, lda int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztpttr.f.
-func Ztpttr(ul blas.Uplo, n int, ap []complex128, a []complex128, lda int) bool {
+func Ztpttr(ul blas.Uplo, n int, ap, a []complex128, lda int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25174,7 +25174,7 @@ func Ztpttr(ul blas.Uplo, n int, ap []complex128, a []complex128, lda int) bool 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strcon.f.
-func Strcon(norm byte, ul blas.Uplo, d blas.Diag, n int, a []float32, lda int, rcond []float32, work []float32, iwork []int32) bool {
+func Strcon(norm byte, ul blas.Uplo, d blas.Diag, n int, a []float32, lda int, rcond, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25211,7 +25211,7 @@ func Strcon(norm byte, ul blas.Uplo, d blas.Diag, n int, a []float32, lda int, r
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrcon.f.
-func Dtrcon(norm byte, ul blas.Uplo, d blas.Diag, n int, a []float64, lda int, rcond []float64, work []float64, iwork []int32) bool {
+func Dtrcon(norm byte, ul blas.Uplo, d blas.Diag, n int, a []float64, lda int, rcond, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25322,7 +25322,7 @@ func Ztrcon(norm byte, ul blas.Uplo, d blas.Diag, n int, a []complex128, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strexc.f.
-func Strexc(compq lapack.Comp, n int, t []float32, ldt int, q []float32, ldq int, ifst []int32, ilst []int32, work []float32) bool {
+func Strexc(compq lapack.Comp, n int, t []float32, ldt int, q []float32, ldq int, ifst, ilst []int32, work []float32) bool {
 	var _t *float32
 	if len(t) > 0 {
 		_t = &t[0]
@@ -25347,7 +25347,7 @@ func Strexc(compq lapack.Comp, n int, t []float32, ldt int, q []float32, ldq int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrexc.f.
-func Dtrexc(compq lapack.Comp, n int, t []float64, ldt int, q []float64, ldq int, ifst []int32, ilst []int32, work []float64) bool {
+func Dtrexc(compq lapack.Comp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst []int32, work []float64) bool {
 	var _t *float64
 	if len(t) > 0 {
 		_t = &t[0]
@@ -25372,7 +25372,7 @@ func Dtrexc(compq lapack.Comp, n int, t []float64, ldt int, q []float64, ldq int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrexc.f.
-func Ctrexc(compq lapack.Comp, n int, t []complex64, ldt int, q []complex64, ldq int, ifst int, ilst int) bool {
+func Ctrexc(compq lapack.Comp, n int, t []complex64, ldt int, q []complex64, ldq, ifst, ilst int) bool {
 	var _t *complex64
 	if len(t) > 0 {
 		_t = &t[0]
@@ -25385,7 +25385,7 @@ func Ctrexc(compq lapack.Comp, n int, t []complex64, ldt int, q []complex64, ldq
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrexc.f.
-func Ztrexc(compq lapack.Comp, n int, t []complex128, ldt int, q []complex128, ldq int, ifst int, ilst int) bool {
+func Ztrexc(compq lapack.Comp, n int, t []complex128, ldt int, q []complex128, ldq, ifst, ilst int) bool {
 	var _t *complex128
 	if len(t) > 0 {
 		_t = &t[0]
@@ -25398,7 +25398,7 @@ func Ztrexc(compq lapack.Comp, n int, t []complex128, ldt int, q []complex128, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strrfs.f.
-func Strrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []float32, lda int, b []float32, ldb int, x []float32, ldx int, ferr []float32, berr []float32, work []float32, iwork []int32) bool {
+func Strrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []float32, lda int, b []float32, ldb int, x []float32, ldx int, ferr, berr, work []float32, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25457,7 +25457,7 @@ func Strrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrrfs.f.
-func Dtrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []float64, lda int, b []float64, ldb int, x []float64, ldx int, ferr []float64, berr []float64, work []float64, iwork []int32) bool {
+func Dtrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int, x []float64, ldx int, ferr, berr, work []float64, iwork []int32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25516,7 +25516,7 @@ func Dtrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrrfs.f.
-func Ctrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int, x []complex64, ldx int, ferr []float32, berr []float32, work []complex64, rwork []float32) bool {
+func Ctrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []complex64, lda int, b []complex64, ldb int, x []complex64, ldx int, ferr, berr []float32, work []complex64, rwork []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25575,7 +25575,7 @@ func Ctrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrrfs.f.
-func Ztrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int, x []complex128, ldx int, ferr []float64, berr []float64, work []complex128, rwork []float64) bool {
+func Ztrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []complex128, lda int, b []complex128, ldb int, x []complex128, ldx int, ferr, berr []float64, work []complex128, rwork []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25634,7 +25634,7 @@ func Ztrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strsyl.f.
-func Strsyl(trana byte, tranb byte, isgn int, m int, n int, a []float32, lda int, b []float32, ldb int, c []float32, ldc int, scale []float32) bool {
+func Strsyl(trana, tranb byte, isgn, m, n int, a []float32, lda int, b []float32, ldb int, c []float32, ldc int, scale []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -25655,7 +25655,7 @@ func Strsyl(trana byte, tranb byte, isgn int, m int, n int, a []float32, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrsyl.f.
-func Dtrsyl(trana byte, tranb byte, isgn int, m int, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, scale []float64) bool {
+func Dtrsyl(trana, tranb byte, isgn, m, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, scale []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -25676,7 +25676,7 @@ func Dtrsyl(trana byte, tranb byte, isgn int, m int, n int, a []float64, lda int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrsyl.f.
-func Ctrsyl(trana byte, tranb byte, isgn int, m int, n int, a []complex64, lda int, b []complex64, ldb int, c []complex64, ldc int, scale []float32) bool {
+func Ctrsyl(trana, tranb byte, isgn, m, n int, a []complex64, lda int, b []complex64, ldb int, c []complex64, ldc int, scale []float32) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -25697,7 +25697,7 @@ func Ctrsyl(trana byte, tranb byte, isgn int, m int, n int, a []complex64, lda i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrsyl.f.
-func Ztrsyl(trana byte, tranb byte, isgn int, m int, n int, a []complex128, lda int, b []complex128, ldb int, c []complex128, ldc int, scale []float64) bool {
+func Ztrsyl(trana, tranb byte, isgn, m, n int, a []complex128, lda int, b []complex128, ldb int, c []complex128, ldc int, scale []float64) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -25818,7 +25818,7 @@ func Ztrtri(ul blas.Uplo, d blas.Diag, n int, a []complex128, lda int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strtrs.f.
-func Strtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []float32, lda int, b []float32, ldb int) bool {
+func Strtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []float32, lda int, b []float32, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25857,7 +25857,7 @@ func Strtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrtrs.f.
-func Dtrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []float64, lda int, b []float64, ldb int) bool {
+func Dtrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []float64, lda int, b []float64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25896,7 +25896,7 @@ func Dtrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrtrs.f.
-func Ctrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []complex64, lda int, b []complex64, ldb int) bool {
+func Ctrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []complex64, lda int, b []complex64, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -25935,7 +25935,7 @@ func Ctrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrtrs.f.
-func Ztrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n int, nrhs int, a []complex128, lda int, b []complex128, ldb int) bool {
+func Ztrtrs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []complex128, lda int, b []complex128, ldb int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -26182,7 +26182,7 @@ func Ztrttp(ul blas.Uplo, n int, a []complex128, lda int, ap []complex128) bool 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stzrzf.f.
-func Stzrzf(m int, n int, a []float32, lda int, tau []float32, work []float32, lwork int) bool {
+func Stzrzf(m, n int, a []float32, lda int, tau, work []float32, lwork int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26199,7 +26199,7 @@ func Stzrzf(m int, n int, a []float32, lda int, tau []float32, work []float32, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtzrzf.f.
-func Dtzrzf(m int, n int, a []float64, lda int, tau []float64, work []float64, lwork int) bool {
+func Dtzrzf(m, n int, a []float64, lda int, tau, work []float64, lwork int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26216,7 +26216,7 @@ func Dtzrzf(m int, n int, a []float64, lda int, tau []float64, work []float64, l
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctzrzf.f.
-func Ctzrzf(m int, n int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Ctzrzf(m, n int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26233,7 +26233,7 @@ func Ctzrzf(m int, n int, a []complex64, lda int, tau []complex64, work []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztzrzf.f.
-func Ztzrzf(m int, n int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Ztzrzf(m, n int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26250,7 +26250,7 @@ func Ztzrzf(m int, n int, a []complex128, lda int, tau []complex128, work []comp
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cungbr.f.
-func Cungbr(vect byte, m int, n int, k int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cungbr(vect byte, m, n, k int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26267,7 +26267,7 @@ func Cungbr(vect byte, m int, n int, k int, a []complex64, lda int, tau []comple
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zungbr.f.
-func Zungbr(vect byte, m int, n int, k int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zungbr(vect byte, m, n, k int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26284,7 +26284,7 @@ func Zungbr(vect byte, m int, n int, k int, a []complex128, lda int, tau []compl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunghr.f.
-func Cunghr(n int, ilo int, ihi int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cunghr(n, ilo, ihi int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26301,7 +26301,7 @@ func Cunghr(n int, ilo int, ihi int, a []complex64, lda int, tau []complex64, wo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunghr.f.
-func Zunghr(n int, ilo int, ihi int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zunghr(n, ilo, ihi int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26318,7 +26318,7 @@ func Zunghr(n int, ilo int, ihi int, a []complex128, lda int, tau []complex128, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunglq.f.
-func Cunglq(m int, n int, k int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cunglq(m, n, k int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26335,7 +26335,7 @@ func Cunglq(m int, n int, k int, a []complex64, lda int, tau []complex64, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunglq.f.
-func Zunglq(m int, n int, k int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zunglq(m, n, k int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26352,7 +26352,7 @@ func Zunglq(m int, n int, k int, a []complex128, lda int, tau []complex128, work
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cungql.f.
-func Cungql(m int, n int, k int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cungql(m, n, k int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26369,7 +26369,7 @@ func Cungql(m int, n int, k int, a []complex64, lda int, tau []complex64, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zungql.f.
-func Zungql(m int, n int, k int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zungql(m, n, k int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26386,7 +26386,7 @@ func Zungql(m int, n int, k int, a []complex128, lda int, tau []complex128, work
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cungqr.f.
-func Cungqr(m int, n int, k int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cungqr(m, n, k int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26403,7 +26403,7 @@ func Cungqr(m int, n int, k int, a []complex64, lda int, tau []complex64, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zungqr.f.
-func Zungqr(m int, n int, k int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zungqr(m, n, k int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26420,7 +26420,7 @@ func Zungqr(m int, n int, k int, a []complex128, lda int, tau []complex128, work
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cungrq.f.
-func Cungrq(m int, n int, k int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cungrq(m, n, k int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26437,7 +26437,7 @@ func Cungrq(m int, n int, k int, a []complex64, lda int, tau []complex64, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zungrq.f.
-func Zungrq(m int, n int, k int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zungrq(m, n, k int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -26454,7 +26454,7 @@ func Zungrq(m int, n int, k int, a []complex128, lda int, tau []complex128, work
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cungtr.f.
-func Cungtr(ul blas.Uplo, n int, a []complex64, lda int, tau []complex64, work []complex64, lwork int) bool {
+func Cungtr(ul blas.Uplo, n int, a []complex64, lda int, tau, work []complex64, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -26479,7 +26479,7 @@ func Cungtr(ul blas.Uplo, n int, a []complex64, lda int, tau []complex64, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zungtr.f.
-func Zungtr(ul blas.Uplo, n int, a []complex128, lda int, tau []complex128, work []complex128, lwork int) bool {
+func Zungtr(ul blas.Uplo, n int, a []complex128, lda int, tau, work []complex128, lwork int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -26504,7 +26504,7 @@ func Zungtr(ul blas.Uplo, n int, a []complex128, lda int, tau []complex128, work
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmbr.f.
-func Cunmbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26543,7 +26543,7 @@ func Cunmbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmbr.f.
-func Zunmbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmbr(vect byte, s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26582,7 +26582,7 @@ func Zunmbr(vect byte, s blas.Side, trans blas.Transpose, m int, n int, k int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmhr.f.
-func Cunmhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26621,7 +26621,7 @@ func Cunmhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmhr.f.
-func Zunmhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmhr(s blas.Side, trans blas.Transpose, m, n, ilo, ihi int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26660,7 +26660,7 @@ func Zunmhr(s blas.Side, trans blas.Transpose, m int, n int, ilo int, ihi int, a
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmlq.f.
-func Cunmlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmlq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26699,7 +26699,7 @@ func Cunmlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmlq.f.
-func Zunmlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmlq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26738,7 +26738,7 @@ func Zunmlq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmql.f.
-func Cunmql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmql(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26777,7 +26777,7 @@ func Cunmql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmql.f.
-func Zunmql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmql(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26816,7 +26816,7 @@ func Zunmql(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmqr.f.
-func Cunmqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmqr(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26855,7 +26855,7 @@ func Cunmqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmqr.f.
-func Zunmqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmqr(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26894,7 +26894,7 @@ func Zunmqr(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmrq.f.
-func Cunmrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmrq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26933,7 +26933,7 @@ func Cunmrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex6
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmrq.f.
-func Zunmrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmrq(s blas.Side, trans blas.Transpose, m, n, k int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -26972,7 +26972,7 @@ func Zunmrq(s blas.Side, trans blas.Transpose, m int, n int, k int, a []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmrz.f.
-func Cunmrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -27011,7 +27011,7 @@ func Cunmrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmrz.f.
-func Zunmrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmrz(s blas.Side, trans blas.Transpose, m, n, k, l int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -27050,7 +27050,7 @@ func Zunmrz(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunmtr.f.
-func Cunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []complex64, lda int, tau []complex64, c []complex64, ldc int, work []complex64, lwork int) bool {
+func Cunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []complex64, lda int, tau, c []complex64, ldc int, work []complex64, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -27097,7 +27097,7 @@ func Cunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunmtr.f.
-func Zunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []complex128, lda int, tau []complex128, c []complex128, ldc int, work []complex128, lwork int) bool {
+func Zunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, a []complex128, lda int, tau, c []complex128, ldc int, work []complex128, lwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -27144,7 +27144,7 @@ func Zunmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, a []c
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cupgtr.f.
-func Cupgtr(ul blas.Uplo, n int, ap []complex64, tau []complex64, q []complex64, ldq int, work []complex64) bool {
+func Cupgtr(ul blas.Uplo, n int, ap, tau, q []complex64, ldq int, work []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -27173,7 +27173,7 @@ func Cupgtr(ul blas.Uplo, n int, ap []complex64, tau []complex64, q []complex64,
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zupgtr.f.
-func Zupgtr(ul blas.Uplo, n int, ap []complex128, tau []complex128, q []complex128, ldq int, work []complex128) bool {
+func Zupgtr(ul blas.Uplo, n int, ap, tau, q []complex128, ldq int, work []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -27202,7 +27202,7 @@ func Zupgtr(ul blas.Uplo, n int, ap []complex128, tau []complex128, q []complex1
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cupmtr.f.
-func Cupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []complex64, tau []complex64, c []complex64, ldc int, work []complex64) bool {
+func Cupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []complex64, ldc int, work []complex64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -27249,7 +27249,7 @@ func Cupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zupmtr.f.
-func Zupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []complex128, tau []complex128, c []complex128, ldc int, work []complex128) bool {
+func Zupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m, n int, ap, tau, c []complex128, ldc int, work []complex128) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -27296,7 +27296,7 @@ func Zupmtr(s blas.Side, ul blas.Uplo, trans blas.Transpose, m int, n int, ap []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cbbcsd.f.
-func Cbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, m int, p int, q int, theta []float32, phi []float32, u1 []complex64, ldu1 int, u2 []complex64, ldu2 int, v1t []complex64, ldv1t int, v2t []complex64, ldv2t int, b11d []float32, b11e []float32, b12d []float32, b12e []float32, b21d []float32, b21e []float32, b22d []float32, b22e []float32, rwork []float32, lrwork int) bool {
+func Cbbcsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, m, p, q int, theta, phi []float32, u1 []complex64, ldu1 int, u2 []complex64, ldu2 int, v1t []complex64, ldv1t int, v2t []complex64, ldv2t int, b11d, b11e, b12d, b12e, b21d, b21e, b22d, b22e, rwork []float32, lrwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -27371,7 +27371,7 @@ func Cbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cheswapr.f.
-func Cheswapr(ul blas.Uplo, n int, a []complex64, i1 int, i2 int) bool {
+func Cheswapr(ul blas.Uplo, n int, a []complex64, i1, i2 int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -27438,7 +27438,7 @@ func Chetri2x(ul blas.Uplo, n int, a []complex64, lda int, ipiv []int32, work []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/chetrs2.f.
-func Chetrs2(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64) bool {
+func Chetrs2(ul blas.Uplo, n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -27492,7 +27492,7 @@ func Csyconv(ul blas.Uplo, way byte, n int, a []complex64, lda int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csyswapr.f.
-func Csyswapr(ul blas.Uplo, n int, a []complex64, i1 int, i2 int) bool {
+func Csyswapr(ul blas.Uplo, n int, a []complex64, i1, i2 int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -27559,7 +27559,7 @@ func Csytri2x(ul blas.Uplo, n int, a []complex64, lda int, ipiv []int32, work []
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/csytrs2.f.
-func Csytrs2(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64) bool {
+func Csytrs2(ul blas.Uplo, n, nrhs int, a []complex64, lda int, ipiv []int32, b []complex64, ldb int, work []complex64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -27588,7 +27588,7 @@ func Csytrs2(ul blas.Uplo, n int, nrhs int, a []complex64, lda int, ipiv []int32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cunbdb.f.
-func Cunbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []complex64, ldx11 int, x12 []complex64, ldx12 int, x21 []complex64, ldx21 int, x22 []complex64, ldx22 int, theta []float32, phi []float32, taup1 []complex64, taup2 []complex64, tauq1 []complex64, tauq2 []complex64, work []complex64, lwork int) bool {
+func Cunbdb(trans blas.Transpose, signs byte, m, p, q int, x11 []complex64, ldx11 int, x12 []complex64, ldx12 int, x21 []complex64, ldx21 int, x22 []complex64, ldx22 int, theta, phi []float32, taup1, taup2, tauq1, tauq2, work []complex64, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -27647,7 +27647,7 @@ func Cunbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cuncsd.f.
-func Cuncsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, signs byte, m int, p int, q int, x11 []complex64, ldx11 int, x12 []complex64, ldx12 int, x21 []complex64, ldx21 int, x22 []complex64, ldx22 int, theta []float32, u1 []complex64, ldu1 int, u2 []complex64, ldu2 int, v1t []complex64, ldv1t int, v2t []complex64, ldv2t int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32) bool {
+func Cuncsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, signs byte, m, p, q int, x11 []complex64, ldx11 int, x12 []complex64, ldx12 int, x21 []complex64, ldx21 int, x22 []complex64, ldx22 int, theta []float32, u1 []complex64, ldu1 int, u2 []complex64, ldu2 int, v1t []complex64, ldv1t int, v2t []complex64, ldv2t int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -27710,7 +27710,7 @@ func Cuncsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cuncsd2by1.f.
-func Cuncsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []complex64, ldx11 int, x21 []complex64, ldx21 int, theta []complex64, u1 []complex64, ldu1 int, u2 []complex64, ldu2 int, v1t []complex64, ldv1t int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32) bool {
+func Cuncsd2by1(jobu1, jobu2, jobv1t lapack.Job, m, p, q int, x11 []complex64, ldx11 int, x21 []complex64, ldx21 int, theta, u1 []complex64, ldu1 int, u2 []complex64, ldu2 int, v1t []complex64, ldv1t int, work []complex64, lwork int, rwork []float32, lrwork int, iwork []int32) bool {
 	var _x11 *complex64
 	if len(x11) > 0 {
 		_x11 = &x11[0]
@@ -27751,7 +27751,7 @@ func Cuncsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dbbcsd.f.
-func Dbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, m int, p int, q int, theta []float64, phi []float64, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int, v2t []float64, ldv2t int, b11d []float64, b11e []float64, b12d []float64, b12e []float64, b21d []float64, b21e []float64, b22d []float64, b22e []float64, work []float64, lwork int) bool {
+func Dbbcsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, m, p, q int, theta, phi, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int, v2t []float64, ldv2t int, b11d, b11e, b12d, b12e, b21d, b21e, b22d, b22e, work []float64, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -27826,7 +27826,7 @@ func Dbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorbdb.f.
-func Dorbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []float64, ldx11 int, x12 []float64, ldx12 int, x21 []float64, ldx21 int, x22 []float64, ldx22 int, theta []float64, phi []float64, taup1 []float64, taup2 []float64, tauq1 []float64, tauq2 []float64, work []float64, lwork int) bool {
+func Dorbdb(trans blas.Transpose, signs byte, m, p, q int, x11 []float64, ldx11 int, x12 []float64, ldx12 int, x21 []float64, ldx21 int, x22 []float64, ldx22 int, theta, phi, taup1, taup2, tauq1, tauq2, work []float64, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -27885,7 +27885,7 @@ func Dorbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []float64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorcsd.f.
-func Dorcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, signs byte, m int, p int, q int, x11 []float64, ldx11 int, x12 []float64, ldx12 int, x21 []float64, ldx21 int, x22 []float64, ldx22 int, theta []float64, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int, v2t []float64, ldv2t int, work []float64, lwork int, iwork []int32) bool {
+func Dorcsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, signs byte, m, p, q int, x11 []float64, ldx11 int, x12 []float64, ldx12 int, x21 []float64, ldx21 int, x22 []float64, ldx22 int, theta, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int, v2t []float64, ldv2t int, work []float64, lwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -27944,7 +27944,7 @@ func Dorcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dorcsd2by1.f.
-func Dorcsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []float64, ldx11 int, x21 []float64, ldx21 int, theta []float64, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int, work []float64, lwork int, iwork []int32) bool {
+func Dorcsd2by1(jobu1, jobu2, jobv1t lapack.Job, m, p, q int, x11 []float64, ldx11 int, x21 []float64, ldx21 int, theta, u1 []float64, ldu1 int, u2 []float64, ldu2 int, v1t []float64, ldv1t int, work []float64, lwork int, iwork []int32) bool {
 	var _x11 *float64
 	if len(x11) > 0 {
 		_x11 = &x11[0]
@@ -28006,7 +28006,7 @@ func Dsyconv(ul blas.Uplo, way byte, n int, a []float64, lda int, ipiv []int32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsyswapr.f.
-func Dsyswapr(ul blas.Uplo, n int, a []float64, i1 int, i2 int) bool {
+func Dsyswapr(ul blas.Uplo, n int, a []float64, i1, i2 int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28073,7 +28073,7 @@ func Dsytri2x(ul blas.Uplo, n int, a []float64, lda int, ipiv []int32, work []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dsytrs2.f.
-func Dsytrs2(ul blas.Uplo, n int, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int, work []float64) bool {
+func Dsytrs2(ul blas.Uplo, n, nrhs int, a []float64, lda int, ipiv []int32, b []float64, ldb int, work []float64) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28102,7 +28102,7 @@ func Dsytrs2(ul blas.Uplo, n int, nrhs int, a []float64, lda int, ipiv []int32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sbbcsd.f.
-func Sbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, m int, p int, q int, theta []float32, phi []float32, u1 []float32, ldu1 int, u2 []float32, ldu2 int, v1t []float32, ldv1t int, v2t []float32, ldv2t int, b11d []float32, b11e []float32, b12d []float32, b12e []float32, b21d []float32, b21e []float32, b22d []float32, b22e []float32, work []float32, lwork int) bool {
+func Sbbcsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, m, p, q int, theta, phi, u1 []float32, ldu1 int, u2 []float32, ldu2 int, v1t []float32, ldv1t int, v2t []float32, ldv2t int, b11d, b11e, b12d, b12e, b21d, b21e, b22d, b22e, work []float32, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -28177,7 +28177,7 @@ func Sbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorbdb.f.
-func Sorbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []float32, ldx11 int, x12 []float32, ldx12 int, x21 []float32, ldx21 int, x22 []float32, ldx22 int, theta []float32, phi []float32, taup1 []float32, taup2 []float32, tauq1 []float32, tauq2 []float32, work []float32, lwork int) bool {
+func Sorbdb(trans blas.Transpose, signs byte, m, p, q int, x11 []float32, ldx11 int, x12 []float32, ldx12 int, x21 []float32, ldx21 int, x22 []float32, ldx22 int, theta, phi, taup1, taup2, tauq1, tauq2, work []float32, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -28236,7 +28236,7 @@ func Sorbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorcsd.f.
-func Sorcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, signs byte, m int, p int, q int, x11 []float32, ldx11 int, x12 []float32, ldx12 int, x21 []float32, ldx21 int, x22 []float32, ldx22 int, theta []float32, u1 []float32, ldu1 int, u2 []float32, ldu2 int, v1t []float32, ldv1t int, v2t []float32, ldv2t int, work []float32, lwork int, iwork []int32) bool {
+func Sorcsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, signs byte, m, p, q int, x11 []float32, ldx11 int, x12 []float32, ldx12 int, x21 []float32, ldx21 int, x22 []float32, ldx22 int, theta, u1 []float32, ldu1 int, u2 []float32, ldu2 int, v1t []float32, ldv1t int, v2t []float32, ldv2t int, work []float32, lwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -28295,7 +28295,7 @@ func Sorcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sorcsd2by1.f.
-func Sorcsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []float32, ldx11 int, x21 []float32, ldx21 int, theta []float32, u1 []float32, ldu1 int, u2 []float32, ldu2 int, v1t []float32, ldv1t int, work []float32, lwork int, iwork []int32) bool {
+func Sorcsd2by1(jobu1, jobu2, jobv1t lapack.Job, m, p, q int, x11 []float32, ldx11 int, x21 []float32, ldx21 int, theta, u1 []float32, ldu1 int, u2 []float32, ldu2 int, v1t []float32, ldv1t int, work []float32, lwork int, iwork []int32) bool {
 	var _x11 *float32
 	if len(x11) > 0 {
 		_x11 = &x11[0]
@@ -28357,7 +28357,7 @@ func Ssyconv(ul blas.Uplo, way byte, n int, a []float32, lda int, ipiv []int32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssyswapr.f.
-func Ssyswapr(ul blas.Uplo, n int, a []float32, i1 int, i2 int) bool {
+func Ssyswapr(ul blas.Uplo, n int, a []float32, i1, i2 int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28424,7 +28424,7 @@ func Ssytri2x(ul blas.Uplo, n int, a []float32, lda int, ipiv []int32, work []fl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ssytrs2.f.
-func Ssytrs2(ul blas.Uplo, n int, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int, work []float32) bool {
+func Ssytrs2(ul blas.Uplo, n, nrhs int, a []float32, lda int, ipiv []int32, b []float32, ldb int, work []float32) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28453,7 +28453,7 @@ func Ssytrs2(ul blas.Uplo, n int, nrhs int, a []float32, lda int, ipiv []int32, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zbbcsd.f.
-func Zbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, m int, p int, q int, theta []float64, phi []float64, u1 []complex128, ldu1 int, u2 []complex128, ldu2 int, v1t []complex128, ldv1t int, v2t []complex128, ldv2t int, b11d []float64, b11e []float64, b12d []float64, b12e []float64, b21d []float64, b21e []float64, b22d []float64, b22e []float64, rwork []float64, lrwork int) bool {
+func Zbbcsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, m, p, q int, theta, phi []float64, u1 []complex128, ldu1 int, u2 []complex128, ldu2 int, v1t []complex128, ldv1t int, v2t []complex128, ldv2t int, b11d, b11e, b12d, b12e, b21d, b21e, b22d, b22e, rwork []float64, lrwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -28528,7 +28528,7 @@ func Zbbcsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zheswapr.f.
-func Zheswapr(ul blas.Uplo, n int, a []complex128, i1 int, i2 int) bool {
+func Zheswapr(ul blas.Uplo, n int, a []complex128, i1, i2 int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28595,7 +28595,7 @@ func Zhetri2x(ul blas.Uplo, n int, a []complex128, lda int, ipiv []int32, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zhetrs2.f.
-func Zhetrs2(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128) bool {
+func Zhetrs2(ul blas.Uplo, n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28649,7 +28649,7 @@ func Zsyconv(ul blas.Uplo, way byte, n int, a []complex128, lda int, ipiv []int3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsyswapr.f.
-func Zsyswapr(ul blas.Uplo, n int, a []complex128, i1 int, i2 int) bool {
+func Zsyswapr(ul blas.Uplo, n int, a []complex128, i1, i2 int) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28716,7 +28716,7 @@ func Zsytri2x(ul blas.Uplo, n int, a []complex128, lda int, ipiv []int32, work [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zsytrs2.f.
-func Zsytrs2(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128) bool {
+func Zsytrs2(ul blas.Uplo, n, nrhs int, a []complex128, lda int, ipiv []int32, b []complex128, ldb int, work []complex128) bool {
 	switch ul {
 	case blas.Upper:
 		ul = 'U'
@@ -28745,7 +28745,7 @@ func Zsytrs2(ul blas.Uplo, n int, nrhs int, a []complex128, lda int, ipiv []int3
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zunbdb.f.
-func Zunbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []complex128, ldx11 int, x12 []complex128, ldx12 int, x21 []complex128, ldx21 int, x22 []complex128, ldx22 int, theta []float64, phi []float64, taup1 []complex128, taup2 []complex128, tauq1 []complex128, tauq2 []complex128, work []complex128, lwork int) bool {
+func Zunbdb(trans blas.Transpose, signs byte, m, p, q int, x11 []complex128, ldx11 int, x12 []complex128, ldx12 int, x21 []complex128, ldx21 int, x22 []complex128, ldx22 int, theta, phi []float64, taup1, taup2, tauq1, tauq2, work []complex128, lwork int) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -28804,7 +28804,7 @@ func Zunbdb(trans blas.Transpose, signs byte, m int, p int, q int, x11 []complex
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zuncsd.f.
-func Zuncsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack.Job, trans blas.Transpose, signs byte, m int, p int, q int, x11 []complex128, ldx11 int, x12 []complex128, ldx12 int, x21 []complex128, ldx21 int, x22 []complex128, ldx22 int, theta []float64, u1 []complex128, ldu1 int, u2 []complex128, ldu2 int, v1t []complex128, ldv1t int, v2t []complex128, ldv2t int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32) bool {
+func Zuncsd(jobu1, jobu2, jobv1t, jobv2t lapack.Job, trans blas.Transpose, signs byte, m, p, q int, x11 []complex128, ldx11 int, x12 []complex128, ldx12 int, x21 []complex128, ldx21 int, x22 []complex128, ldx22 int, theta []float64, u1 []complex128, ldu1 int, u2 []complex128, ldu2 int, v1t []complex128, ldv1t int, v2t []complex128, ldv2t int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32) bool {
 	switch trans {
 	case blas.NoTrans:
 		trans = 'N'
@@ -28867,7 +28867,7 @@ func Zuncsd(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, jobv2t lapack
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zuncsd2by1.f.
-func Zuncsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p int, q int, x11 []complex128, ldx11 int, x21 []complex128, ldx21 int, theta []complex128, u1 []complex128, ldu1 int, u2 []complex128, ldu2 int, v1t []complex128, ldv1t int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32) bool {
+func Zuncsd2by1(jobu1, jobu2, jobv1t lapack.Job, m, p, q int, x11 []complex128, ldx11 int, x21 []complex128, ldx21 int, theta, u1 []complex128, ldu1 int, u2 []complex128, ldu2 int, v1t []complex128, ldv1t int, work []complex128, lwork int, rwork []float64, lrwork int, iwork []int32) bool {
 	var _x11 *complex128
 	if len(x11) > 0 {
 		_x11 = &x11[0]
@@ -28908,7 +28908,7 @@ func Zuncsd2by1(jobu1 lapack.Job, jobu2 lapack.Job, jobv1t lapack.Job, m int, p 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgemqrt.f.
-func Sgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32) bool {
+func Sgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []float32, ldv int, t []float32, ldt int, c []float32, ldc int, work []float32) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -28947,7 +28947,7 @@ func Sgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgemqrt.f.
-func Dgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64) bool {
+func Dgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -28986,7 +28986,7 @@ func Dgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgemqrt.f.
-func Cgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64) bool {
+func Cgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex64, ldv int, t []complex64, ldt int, c []complex64, ldc int, work []complex64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29025,7 +29025,7 @@ func Cgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgemqrt.f.
-func Zgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128) bool {
+func Zgemqrt(s blas.Side, trans blas.Transpose, m, n, k, nb int, v []complex128, ldv int, t []complex128, ldt int, c []complex128, ldc int, work []complex128) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29064,7 +29064,7 @@ func Zgemqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, nb int, v [
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqrt.f.
-func Sgeqrt(m int, n int, nb int, a []float32, lda int, t []float32, ldt int, work []float32) bool {
+func Sgeqrt(m, n, nb int, a []float32, lda int, t []float32, ldt int, work []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29081,7 +29081,7 @@ func Sgeqrt(m int, n int, nb int, a []float32, lda int, t []float32, ldt int, wo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqrt.f.
-func Dgeqrt(m int, n int, nb int, a []float64, lda int, t []float64, ldt int, work []float64) bool {
+func Dgeqrt(m, n, nb int, a []float64, lda int, t []float64, ldt int, work []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29098,7 +29098,7 @@ func Dgeqrt(m int, n int, nb int, a []float64, lda int, t []float64, ldt int, wo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqrt.f.
-func Cgeqrt(m int, n int, nb int, a []complex64, lda int, t []complex64, ldt int, work []complex64) bool {
+func Cgeqrt(m, n, nb int, a []complex64, lda int, t []complex64, ldt int, work []complex64) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29115,7 +29115,7 @@ func Cgeqrt(m int, n int, nb int, a []complex64, lda int, t []complex64, ldt int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqrt.f.
-func Zgeqrt(m int, n int, nb int, a []complex128, lda int, t []complex128, ldt int, work []complex128) bool {
+func Zgeqrt(m, n, nb int, a []complex128, lda int, t []complex128, ldt int, work []complex128) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29132,7 +29132,7 @@ func Zgeqrt(m int, n int, nb int, a []complex128, lda int, t []complex128, ldt i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqrt2.f.
-func Sgeqrt2(m int, n int, a []float32, lda int, t []float32, ldt int) bool {
+func Sgeqrt2(m, n int, a []float32, lda int, t []float32, ldt int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29145,7 +29145,7 @@ func Sgeqrt2(m int, n int, a []float32, lda int, t []float32, ldt int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqrt2.f.
-func Dgeqrt2(m int, n int, a []float64, lda int, t []float64, ldt int) bool {
+func Dgeqrt2(m, n int, a []float64, lda int, t []float64, ldt int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29158,7 +29158,7 @@ func Dgeqrt2(m int, n int, a []float64, lda int, t []float64, ldt int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqrt2.f.
-func Cgeqrt2(m int, n int, a []complex64, lda int, t []complex64, ldt int) bool {
+func Cgeqrt2(m, n int, a []complex64, lda int, t []complex64, ldt int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29171,7 +29171,7 @@ func Cgeqrt2(m int, n int, a []complex64, lda int, t []complex64, ldt int) bool 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqrt2.f.
-func Zgeqrt2(m int, n int, a []complex128, lda int, t []complex128, ldt int) bool {
+func Zgeqrt2(m, n int, a []complex128, lda int, t []complex128, ldt int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29184,7 +29184,7 @@ func Zgeqrt2(m int, n int, a []complex128, lda int, t []complex128, ldt int) boo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/sgeqrt3.f.
-func Sgeqrt3(m int, n int, a []float32, lda int, t []float32, ldt int) bool {
+func Sgeqrt3(m, n int, a []float32, lda int, t []float32, ldt int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29197,7 +29197,7 @@ func Sgeqrt3(m int, n int, a []float32, lda int, t []float32, ldt int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dgeqrt3.f.
-func Dgeqrt3(m int, n int, a []float64, lda int, t []float64, ldt int) bool {
+func Dgeqrt3(m, n int, a []float64, lda int, t []float64, ldt int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29210,7 +29210,7 @@ func Dgeqrt3(m int, n int, a []float64, lda int, t []float64, ldt int) bool {
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/cgeqrt3.f.
-func Cgeqrt3(m int, n int, a []complex64, lda int, t []complex64, ldt int) bool {
+func Cgeqrt3(m, n int, a []complex64, lda int, t []complex64, ldt int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29223,7 +29223,7 @@ func Cgeqrt3(m int, n int, a []complex64, lda int, t []complex64, ldt int) bool 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zgeqrt3.f.
-func Zgeqrt3(m int, n int, a []complex128, lda int, t []complex128, ldt int) bool {
+func Zgeqrt3(m, n int, a []complex128, lda int, t []complex128, ldt int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29236,7 +29236,7 @@ func Zgeqrt3(m int, n int, a []complex128, lda int, t []complex128, ldt int) boo
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpmqrt.f.
-func Stpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32) bool {
+func Stpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29279,7 +29279,7 @@ func Stpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpmqrt.f.
-func Dtpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64) bool {
+func Dtpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29322,7 +29322,7 @@ func Dtpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctpmqrt.f.
-func Ctpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64) bool {
+func Ctpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29365,7 +29365,7 @@ func Ctpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztpmqrt.f.
-func Ztpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128) bool {
+func Ztpmqrt(s blas.Side, trans blas.Transpose, m, n, k, l, nb int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29408,7 +29408,7 @@ func Ztpmqrt(s blas.Side, trans blas.Transpose, m int, n int, k int, l int, nb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpqrt.f.
-func Stpqrt(m int, n int, l int, nb int, a []float32, lda int, b []float32, ldb int, t []float32, ldt int, work []float32) bool {
+func Stpqrt(m, n, l, nb int, a []float32, lda int, b []float32, ldb int, t []float32, ldt int, work []float32) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29429,7 +29429,7 @@ func Stpqrt(m int, n int, l int, nb int, a []float32, lda int, b []float32, ldb 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpqrt.f.
-func Dtpqrt(m int, n int, l int, nb int, a []float64, lda int, b []float64, ldb int, t []float64, ldt int, work []float64) bool {
+func Dtpqrt(m, n, l, nb int, a []float64, lda int, b []float64, ldb int, t []float64, ldt int, work []float64) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29450,7 +29450,7 @@ func Dtpqrt(m int, n int, l int, nb int, a []float64, lda int, b []float64, ldb 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctpqrt.f.
-func Ctpqrt(m int, n int, l int, nb int, a []complex64, lda int, b []complex64, ldb int, t []complex64, ldt int, work []complex64) bool {
+func Ctpqrt(m, n, l, nb int, a []complex64, lda int, b []complex64, ldb int, t []complex64, ldt int, work []complex64) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29471,7 +29471,7 @@ func Ctpqrt(m int, n int, l int, nb int, a []complex64, lda int, b []complex64, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztpqrt.f.
-func Ztpqrt(m int, n int, l int, nb int, a []complex128, lda int, b []complex128, ldb int, t []complex128, ldt int, work []complex128) bool {
+func Ztpqrt(m, n, l, nb int, a []complex128, lda int, b []complex128, ldb int, t []complex128, ldt int, work []complex128) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29492,7 +29492,7 @@ func Ztpqrt(m int, n int, l int, nb int, a []complex128, lda int, b []complex128
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stpqrt2.f.
-func Stpqrt2(m int, n int, l int, a []float32, lda int, b []float32, ldb int, t []float32, ldt int) bool {
+func Stpqrt2(m, n, l int, a []float32, lda int, b []float32, ldb int, t []float32, ldt int) bool {
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29509,7 +29509,7 @@ func Stpqrt2(m int, n int, l int, a []float32, lda int, b []float32, ldb int, t 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtpqrt2.f.
-func Dtpqrt2(m int, n int, l int, a []float64, lda int, b []float64, ldb int, t []float64, ldt int) bool {
+func Dtpqrt2(m, n, l int, a []float64, lda int, b []float64, ldb int, t []float64, ldt int) bool {
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29526,7 +29526,7 @@ func Dtpqrt2(m int, n int, l int, a []float64, lda int, b []float64, ldb int, t 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctpqrt2.f.
-func Ctpqrt2(m int, n int, l int, a []complex64, lda int, b []complex64, ldb int, t []complex64, ldt int) bool {
+func Ctpqrt2(m, n, l int, a []complex64, lda int, b []complex64, ldb int, t []complex64, ldt int) bool {
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29543,7 +29543,7 @@ func Ctpqrt2(m int, n int, l int, a []complex64, lda int, b []complex64, ldb int
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztpqrt2.f.
-func Ztpqrt2(m int, n int, l int, a []complex128, lda int, b []complex128, ldb int, t []complex128, ldt int) bool {
+func Ztpqrt2(m, n, l int, a []complex128, lda int, b []complex128, ldb int, t []complex128, ldt int) bool {
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]
@@ -29560,7 +29560,7 @@ func Ztpqrt2(m int, n int, l int, a []complex128, lda int, b []complex128, ldb i
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/stprfb.f.
-func Stprfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, l int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32, ldwork int) bool {
+func Stprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []float32, ldv int, t []float32, ldt int, a []float32, lda int, b []float32, ldb int, work []float32, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29603,7 +29603,7 @@ func Stprfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtprfb.f.
-func Dtprfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, l int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64, ldwork int) bool {
+func Dtprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []float64, ldv int, t []float64, ldt int, a []float64, lda int, b []float64, ldb int, work []float64, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29646,7 +29646,7 @@ func Dtprfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctprfb.f.
-func Ctprfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, l int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64, ldwork int) bool {
+func Ctprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []complex64, ldv int, t []complex64, ldt int, a []complex64, lda int, b []complex64, ldb int, work []complex64, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'
@@ -29689,7 +29689,7 @@ func Ctprfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, 
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztprfb.f.
-func Ztprfb(s blas.Side, trans blas.Transpose, direct byte, storev byte, m int, n int, k int, l int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128, ldwork int) bool {
+func Ztprfb(s blas.Side, trans blas.Transpose, direct, storev byte, m, n, k, l int, v []complex128, ldv int, t []complex128, ldt int, a []complex128, lda int, b []complex128, ldb int, work []complex128, ldwork int) bool {
 	switch s {
 	case blas.Left:
 		s = 'L'

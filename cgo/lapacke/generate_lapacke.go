@@ -161,11 +161,9 @@ var byteTypes = map[string]string{
 
 	"s": "blas.Side",
 
-	// FIXME(kortschak): These were missed previously.
-	"trana": "byte",
-	"tranb": "byte",
-
 	"trans":  "blas.Transpose",
+	"trana":  "blas.Transpose",
+	"tranb":  "blas.Transpose",
 	"transr": "blas.Transpose",
 
 	"ul": "blas.Uplo",
@@ -523,7 +521,7 @@ func side(buf *bytes.Buffer, d binding.Declaration, p binding.Parameter) bool {
 
 func trans(buf *bytes.Buffer, d binding.Declaration, p binding.Parameter) bool {
 	n := shorten(binding.LowerCaseFirst(p.Name()))
-	if !strings.HasPrefix(n, "trans") {
+	if !strings.HasPrefix(n, "tran") {
 		return false
 	}
 	fmt.Fprintf(buf, `	switch %[1]s {

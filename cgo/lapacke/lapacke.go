@@ -25634,7 +25634,27 @@ func Ztrrfs(ul blas.Uplo, trans blas.Transpose, d blas.Diag, n, nrhs int, a []co
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/strsyl.f.
-func Strsyl(trana, tranb byte, isgn, m, n int, a []float32, lda int, b []float32, ldb int, c []float32, ldc int, scale []float32) bool {
+func Strsyl(trana, tranb blas.Transpose, isgn, m, n int, a []float32, lda int, b []float32, ldb int, c []float32, ldc int, scale []float32) bool {
+	switch trana {
+	case blas.NoTrans:
+		trana = 'N'
+	case blas.Trans:
+		trana = 'T'
+	case blas.ConjTrans:
+		trana = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
+	switch tranb {
+	case blas.NoTrans:
+		tranb = 'N'
+	case blas.Trans:
+		tranb = 'T'
+	case blas.ConjTrans:
+		tranb = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
 	var _a *float32
 	if len(a) > 0 {
 		_a = &a[0]
@@ -25655,7 +25675,27 @@ func Strsyl(trana, tranb byte, isgn, m, n int, a []float32, lda int, b []float32
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/dtrsyl.f.
-func Dtrsyl(trana, tranb byte, isgn, m, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, scale []float64) bool {
+func Dtrsyl(trana, tranb blas.Transpose, isgn, m, n int, a []float64, lda int, b []float64, ldb int, c []float64, ldc int, scale []float64) bool {
+	switch trana {
+	case blas.NoTrans:
+		trana = 'N'
+	case blas.Trans:
+		trana = 'T'
+	case blas.ConjTrans:
+		trana = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
+	switch tranb {
+	case blas.NoTrans:
+		tranb = 'N'
+	case blas.Trans:
+		tranb = 'T'
+	case blas.ConjTrans:
+		tranb = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
 	var _a *float64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -25676,7 +25716,27 @@ func Dtrsyl(trana, tranb byte, isgn, m, n int, a []float64, lda int, b []float64
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ctrsyl.f.
-func Ctrsyl(trana, tranb byte, isgn, m, n int, a []complex64, lda int, b []complex64, ldb int, c []complex64, ldc int, scale []float32) bool {
+func Ctrsyl(trana, tranb blas.Transpose, isgn, m, n int, a []complex64, lda int, b []complex64, ldb int, c []complex64, ldc int, scale []float32) bool {
+	switch trana {
+	case blas.NoTrans:
+		trana = 'N'
+	case blas.Trans:
+		trana = 'T'
+	case blas.ConjTrans:
+		trana = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
+	switch tranb {
+	case blas.NoTrans:
+		tranb = 'N'
+	case blas.Trans:
+		tranb = 'T'
+	case blas.ConjTrans:
+		tranb = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
 	var _a *complex64
 	if len(a) > 0 {
 		_a = &a[0]
@@ -25697,7 +25757,27 @@ func Ctrsyl(trana, tranb byte, isgn, m, n int, a []complex64, lda int, b []compl
 }
 
 // See http://www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/ztrsyl.f.
-func Ztrsyl(trana, tranb byte, isgn, m, n int, a []complex128, lda int, b []complex128, ldb int, c []complex128, ldc int, scale []float64) bool {
+func Ztrsyl(trana, tranb blas.Transpose, isgn, m, n int, a []complex128, lda int, b []complex128, ldb int, c []complex128, ldc int, scale []float64) bool {
+	switch trana {
+	case blas.NoTrans:
+		trana = 'N'
+	case blas.Trans:
+		trana = 'T'
+	case blas.ConjTrans:
+		trana = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
+	switch tranb {
+	case blas.NoTrans:
+		tranb = 'N'
+	case blas.Trans:
+		tranb = 'T'
+	case blas.ConjTrans:
+		tranb = 'C'
+	default:
+		panic("lapack: bad trans")
+	}
 	var _a *complex128
 	if len(a) > 0 {
 		_a = &a[0]

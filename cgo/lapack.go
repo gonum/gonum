@@ -20,7 +20,8 @@ const (
 	badDims         = "lapack: bad input dimensions"
 	badDirect       = "lapack: bad direct"
 	badE            = "lapack: e has insufficient length"
-	badEigComp      = "lapack: bad EigComp"
+	badEVComp       = "lapack: bad EVComp"
+	badEVJob        = "lapack: bad EVJob"
 	badEVSide       = "lapack: bad EVSide"
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"
@@ -1633,7 +1634,7 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 // On return, T will be reordered by an orthogonal similarity transformation Z
 // as Z^T*T*Z, and will be again in Schur canonical form.
 //
-// If compq is lapack.UpdateQ, on return the matrix Q of Schur vectors will be
+// If compq is lapack.UpdateSchur, on return the matrix Q of Schur vectors will be
 // updated by postmultiplying it with Z.
 // If compq is lapack.None, the matrix Q is not referenced and will not be
 // updated.
@@ -1661,7 +1662,7 @@ func (impl Implementation) Dtrcon(norm lapack.MatrixNorm, uplo blas.Uplo, diag b
 // work must have length at least n, otherwise Dtrexc will panic.
 //
 // Dtrexc is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dtrexc(compq lapack.Comp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool) {
+func (impl Implementation) Dtrexc(compq lapack.EVComp, n int, t []float64, ldt int, q []float64, ldq int, ifst, ilst int, work []float64) (ifstOut, ilstOut int, ok bool) {
 	checkMatrix(n, n, t, ldt)
 	switch compq {
 	default:
@@ -1670,7 +1671,7 @@ func (impl Implementation) Dtrexc(compq lapack.Comp, n int, t []float64, ldt int
 		// q is not referenced but LAPACKE checks that ldq >= n always.
 		q = nil
 		ldq = max(1, n)
-	case lapack.UpdateQ:
+	case lapack.UpdateSchur:
 		checkMatrix(n, n, q, ldq)
 	}
 	if (ifst < 0 || n <= ifst) && n > 0 {
@@ -1690,7 +1691,7 @@ func (impl Implementation) Dtrexc(compq lapack.Comp, n int, t []float64, ldt int
 
 	ifst32 := []int32{int32(ifst + 1)}
 	ilst32 := []int32{int32(ilst + 1)}
-	ok = lapacke.Dtrexc(compq, n, t, ldt, q, ldq, ifst32, ilst32, work)
+	ok = lapacke.Dtrexc(lapack.Comp(compq), n, t, ldt, q, ldq, ifst32, ilst32, work)
 	ifst = int(ifst32[0] - 1)
 	ilst = int(ilst32[0] - 1)
 	return ifst, ilst, ok
@@ -1738,9 +1739,9 @@ func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 //
 // If compz == lapack.None, no Schur vectors will be computed and Z will not be
 // referenced.
-// If compz == lapack.InitZ, on return Z will contain the matrix of Schur
+// If compz == lapack.HessEV, on return Z will contain the matrix of Schur
 // vectors of H.
-// If compz == lapack.UpdateZ, on entry z is assumed to contain the orthogonal
+// If compz == lapack.OriginalEV, on entry z is assumed to contain the orthogonal
 // matrix Q that is the identity except for the submatrix
 // Q[ilo:ihi+1,ilo:ihi+1]. On return z will be updated to the product Q*Z.
 //
@@ -1805,7 +1806,7 @@ func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 // where U is an orthogonal matrix. The final H is upper Hessenberg and
 // H[unconverged:ihi+1,unconverged:ihi+1] is upper quasi-triangular.
 //
-// If unconverged > 0 and compz == lapack.UpdateZ, then on return
+// If unconverged > 0 and compz == lapack.OriginalEV, then on return
 //  (final Z) = (initial Z) U,
 // where U is the orthogonal matrix in (*) regardless of the value of job.
 //
@@ -1827,18 +1828,18 @@ func (impl Implementation) Dtrtrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 //      URL: http://dx.doi.org/10.1137/S0895479801384585
 //
 // Dhseqr is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
+func (impl Implementation) Dhseqr(job lapack.EVJob, compz lapack.EVComp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
 	switch job {
 	default:
-		panic(badJob)
+		panic(badEVJob)
 	case lapack.EigenvaluesOnly, lapack.EigenvaluesAndSchur:
 	}
 	var wantz bool
 	switch compz {
 	default:
-		panic("lapack: bad compz")
+		panic(badEVComp)
 	case lapack.None:
-	case lapack.InitZ, lapack.UpdateZ:
+	case lapack.HessEV, lapack.OriginalEV:
 		wantz = true
 	}
 	switch {
@@ -1865,7 +1866,8 @@ func (impl Implementation) Dhseqr(job lapack.Job, compz lapack.Comp, n, ilo, ihi
 		}
 	}
 
-	return lapacke.Dhseqr(job, compz, n, ilo+1, ihi+1, h, ldh, wr, wi, z, ldz, work, lwork)
+	return lapacke.Dhseqr(lapack.Job(job), lapack.Comp(compz), n, ilo+1, ihi+1,
+		h, ldh, wr, wi, z, ldz, work, lwork)
 }
 
 // Dgeev computes the eigenvalues and, optionally, the left and/or right

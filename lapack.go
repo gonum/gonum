@@ -108,18 +108,23 @@ const (
 	SVDNone      SVDJob = 'N' // Do not compute singular vectors
 )
 
-// EigComp specifies the type of eigenvalue decomposition.
-type EigComp byte
+// EVComp specifies how eigenvectors are computed.
+type EVComp byte
 
 const (
-	// EigValueOnly specifies to compute only the eigenvalues of the input matrix.
-	EigValueOnly EigComp = 'N'
-	// EigDecomp specifies to compute the eigenvalues and eigenvectors of the
-	// full symmetric matrix.
-	EigDecomp EigComp = 'V'
-	// EigBoth specifies to compute both the eigenvalues and eigenvectors of the
-	// input tridiagonal matrix.
-	EigBoth EigComp = 'I'
+	// OriginalEV specifies to compute the eigenvectors of the original
+	// matrix.
+	OriginalEV EVComp = 'V'
+	// TridiagEV specifies to compute both the eigenvectors of the input
+	// tridiagonal matrix.
+	TridiagEV EVComp = 'I'
+	// HessEV specifies to compute both the eigenvectors of the input upper
+	// Hessenberg matrix.
+	HessEV EVComp = 'I'
+
+	// UpdateSchur specifies that the matrix of Schur vectors will be
+	// updated by Dtrexc.
+	UpdateSchur EVComp = 'V'
 )
 
 // Job types for computation of eigenvectors.
@@ -143,17 +148,11 @@ const (
 	PermuteScale Job = 'B'
 )
 
-// Jobs and Comps for Dhseqr.
+// Job constants for Dhseqr.
 const (
-	EigenvaluesOnly     Job = 'E'
-	EigenvaluesAndSchur Job = 'S'
-
-	InitZ   Comp = 'I'
-	UpdateZ Comp = 'V'
+	EigenvaluesOnly     EVJob = 'E'
+	EigenvaluesAndSchur EVJob = 'S'
 )
-
-// UpdateQ specifies that the matrix Q will be updated.
-const UpdateQ Comp = 'V'
 
 // EVSide specifies what eigenvectors will be computed.
 type EVSide byte

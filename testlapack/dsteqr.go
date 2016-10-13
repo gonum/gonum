@@ -15,13 +15,13 @@ import (
 )
 
 type Dsteqrer interface {
-	Dsteqr(compz lapack.EigComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool)
+	Dsteqr(compz lapack.EVComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool)
 	Dorgtrer
 }
 
 func DsteqrTest(t *testing.T, impl Dsteqrer) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, compz := range []lapack.EigComp{lapack.EigDecomp, lapack.EigBoth} {
+	for _, compz := range []lapack.EVComp{lapack.OriginalEV, lapack.TridiagEV} {
 		for _, test := range []struct {
 			n, lda int
 		}{
@@ -58,7 +58,7 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 				copy(eCopy, e)
 				aCopy := make([]float64, len(a))
 				copy(aCopy, a)
-				if compz == lapack.EigDecomp {
+				if compz == lapack.OriginalEV {
 					// Compute triangular decomposition and orthonormal matrix.
 					uplo := blas.Upper
 					tau := make([]float64, n)
@@ -90,7 +90,7 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 				copy(dAns, d)
 
 				var truth blas64.General
-				if compz == lapack.EigDecomp {
+				if compz == lapack.OriginalEV {
 					truth = blas64.General{
 						Rows:   n,
 						Cols:   n,
@@ -127,14 +127,15 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 					Data:   a,
 				}
 				if !eigenDecompCorrect(d, truth, V) {
-					t.Errorf("Eigen reconstruction mismatch. fromFull = %v, n = %v", compz == lapack.EigDecomp, n)
+					t.Errorf("Eigen reconstruction mismatch. fromFull = %v, n = %v",
+						compz == lapack.OriginalEV, n)
 				}
 
 				// Compare eigenvalues when not computing eigenvectors.
 				for i := range work {
 					work[i] = rnd.Float64()
 				}
-				impl.Dsteqr(lapack.EigValueOnly, n, dDecomp, eDecomp, aDecomp, lda, work)
+				impl.Dsteqr(lapack.None, n, dDecomp, eDecomp, aDecomp, lda, work)
 				if !floats.EqualApprox(d, dAns, 1e-8) {
 					t.Errorf("Eigenvalue mismatch when eigenvectors not computed")
 				}

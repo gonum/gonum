@@ -26,27 +26,27 @@ import (
 // Dsteqr will panic otherwise.
 //
 // z, on entry, contains the n×n orthogonal matrix used in the reduction to
-// tridiagonal form if compz == lapack.EigDecomp. On exit, if
-// compz == lapack.EigBoth, z contains the orthonormal eigenvectors of the
-// original symmetric matrix, and if compz == lapack.EigDecomp, z contains the
+// tridiagonal form if compz == lapack.OriginalEV. On exit, if
+// compz == lapack.OriginalEV, z contains the orthonormal eigenvectors of the
+// original symmetric matrix, and if compz == lapack.TridiagEV, z contains the
 // orthonormal eigenvectors of the symmetric tridiagonal matrix. z is not used
-// if compz == lapack.EigValueOnly.
+// if compz == lapack.None.
 //
 // work must have length at least max(1, 2*n-2) if the eigenvectors are computed,
 // and Dsteqr will panic otherwise.
 //
 // Dsteqr is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
+func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
 	if len(d) < n {
 		panic(badD)
 	}
 	if len(e) < n-1 {
 		panic(badE)
 	}
-	if compz != lapack.EigValueOnly && compz != lapack.EigBoth && compz != lapack.EigDecomp {
-		panic(badEigComp)
+	if compz != lapack.None && compz != lapack.TridiagEV && compz != lapack.OriginalEV {
+		panic(badEVComp)
 	}
-	if compz != lapack.EigValueOnly {
+	if compz != lapack.None {
 		if len(work) < max(1, 2*n-2) {
 			panic(badWork)
 		}
@@ -54,9 +54,9 @@ func (impl Implementation) Dsteqr(compz lapack.EigComp, n int, d, e, z []float64
 	}
 
 	var icompz int
-	if compz == lapack.EigDecomp {
+	if compz == lapack.OriginalEV {
 		icompz = 1
-	} else if compz == lapack.EigBoth {
+	} else if compz == lapack.TridiagEV {
 		icompz = 2
 	}
 

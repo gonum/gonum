@@ -110,6 +110,156 @@ func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int
 	lapacke.Dlacpy(uplo, m, n, a, lda, b, ldb)
 }
 
+// Dlarfb applies a block reflector to a matrix.
+//
+// In the call to Dlarfb, the mxn c is multiplied by the implicitly defined matrix h as follows:
+//  c = h * c if side == Left and trans == NoTrans
+//  c = c * h if side == Right and trans == NoTrans
+//  c = h^T * c if side == Left and trans == Trans
+//  c = c * h^T if side == Right and trans == Trans
+// h is a product of elementary reflectors. direct sets the direction of multiplication
+//  h = h_1 * h_2 * ... * h_k if direct == Forward
+//  h = h_k * h_k-1 * ... * h_1 if direct == Backward
+// The combination of direct and store defines the orientation of the elementary
+// reflectors. In all cases the ones on the diagonal are implicitly represented.
+//
+// If direct == lapack.Forward and store == lapack.ColumnWise
+//  V = [ 1        ]
+//      [v1   1    ]
+//      [v1  v2   1]
+//      [v1  v2  v3]
+//      [v1  v2  v3]
+// If direct == lapack.Forward and store == lapack.RowWise
+//  V = [ 1  v1  v1  v1  v1]
+//      [     1  v2  v2  v2]
+//      [         1  v3  v3]
+// If direct == lapack.Backward and store == lapack.ColumnWise
+//  V = [v1  v2  v3]
+//      [v1  v2  v3]
+//      [ 1  v2  v3]
+//      [     1  v3]
+//      [         1]
+// If direct == lapack.Backward and store == lapack.RowWise
+//  V = [v1  v1   1        ]
+//      [v2  v2  v2   1    ]
+//      [v3  v3  v3  v3   1]
+// An elementary reflector can be explicitly constructed by extracting the
+// corresponding elements of v, placing a 1 where the diagonal would be, and
+// placing zeros in the remaining elements.
+//
+// t is a k×k matrix containing the block reflector, and this function will panic
+// if t is not of sufficient size. See Dlarft for more information.
+//
+// work is a temporary storage matrix with stride ldwork.
+// work must be of size at least n×k side == Left and m×k if side == Right, and
+// this function will panic if this size is not met.
+//
+// Dlarfb is an internal routine. It is exported for testing purposes.
+func (Implementation) Dlarfb(side blas.Side, trans blas.Transpose, direct lapack.Direct,
+	store lapack.StoreV, m, n, k int, v []float64, ldv int, t []float64, ldt int,
+	c []float64, ldc int, work []float64, ldwork int) {
+
+	checkMatrix(m, n, c, ldc)
+	if m == 0 || n == 0 {
+		return
+	}
+	if k < 0 {
+		panic("lapack: negative number of transforms")
+	}
+	if side != blas.Left && side != blas.Right {
+		panic(badSide)
+	}
+	if trans != blas.Trans && trans != blas.NoTrans {
+		panic(badTrans)
+	}
+	if direct != lapack.Forward && direct != lapack.Backward {
+		panic(badDirect)
+	}
+	if store != lapack.ColumnWise && store != lapack.RowWise {
+		panic(badStore)
+	}
+
+	rowsWork := n
+	if side == blas.Right {
+		rowsWork = m
+	}
+	// TODO(vladimir-ch): Replace the following two lines with
+	//  checkMatrix(rowsWork, k, work, ldwork)
+	// if and when the issue
+	//  https://github.com/Reference-LAPACK/lapack/issues/37
+	// has been resolved.
+	ldwork = rowsWork
+	work = make([]float64, ldwork*k)
+
+	lapacke.Dlarfb(side, trans, byte(direct), byte(store), m, n, k, v, ldv, t, ldt, c, ldc, work, ldwork)
+}
+
+// Dlarfg generates an elementary reflector for a Householder matrix. It creates
+// a real elementary reflector of order n such that
+//  H * (alpha) = (beta)
+//      (    x)   (   0)
+//  H^T * H = I
+// H is represented in the form
+//  H = 1 - tau * (1; v) * (1 v^T)
+// where tau is a real scalar.
+//
+// On entry, x contains the vector x, on exit it contains v.
+//
+// Dlarfg is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlarfg(n int, alpha float64, x []float64, incX int) (beta, tau float64) {
+	if n < 0 {
+		panic(nLT0)
+	}
+	if n <= 1 {
+		return alpha, 0
+	}
+	checkVector(n-1, x, incX)
+	_alpha := []float64{alpha}
+	_tau := []float64{0}
+	lapacke.Dlarfg(n, _alpha, x, incX, _tau)
+	return _alpha[0], _tau[0]
+}
+
+// Dlarft forms the triangular factor T of a block reflector H, storing the answer
+// in t.
+//  H = I - V * T * V^T  if store == lapack.ColumnWise
+//  H = I - V^T * T * V  if store == lapack.RowWise
+// H is defined by a product of the elementary reflectors where
+//  H = H_0 * H_1 * ... * H_{k-1}  if direct == lapack.Forward
+//  H = H_{k-1} * ... * H_1 * H_0  if direct == lapack.Backward
+//
+// t is a k×k triangular matrix. t is upper triangular if direct = lapack.Forward
+// and lower triangular otherwise. This function will panic if t is not of
+// sufficient size.
+//
+// store describes the storage of the elementary reflectors in v. Please see
+// Dlarfb for a description of layout.
+//
+// tau contains the scalar factors of the elementary reflectors H_i.
+//
+// Dlarft is an internal routine. It is exported for testing purposes.
+func (Implementation) Dlarft(direct lapack.Direct, store lapack.StoreV, n, k int,
+	v []float64, ldv int, tau []float64, t []float64, ldt int) {
+	if n == 0 {
+		return
+	}
+	if n < 0 || k < 0 {
+		panic(negDimension)
+	}
+	if direct != lapack.Forward && direct != lapack.Backward {
+		panic(badDirect)
+	}
+	if store != lapack.RowWise && store != lapack.ColumnWise {
+		panic(badStore)
+	}
+	if len(tau) < k {
+		panic(badTau)
+	}
+	checkMatrix(k, k, t, ldt)
+
+	lapacke.Dlarft(byte(direct), byte(store), n, k, v, ldv, tau, t, ldt)
+}
+
 // Dlange computes the matrix norm of the general m×n matrix a. The input norm
 // specifies the norm computed.
 //  lapack.MaxAbs: the maximum absolute value of an element.

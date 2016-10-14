@@ -10,7 +10,7 @@ import (
 )
 
 // Beta implements the Beta distribution, a two-parameter continuous distribution
-// with support over the positive real numbers.
+// with support between 0 and 1.
 //
 // The beta distribution has density function
 //  x^(α-1) * (1-x)^(β-1) * Γ(α+β) / (Γ(α)*Γ(β))

@@ -285,7 +285,7 @@ func testRandLogProbContinuous(t *testing.T, i int, x []float64, f LogProber, to
 			return math.Exp(f.LogProb(x))
 		}
 		// Integrate the PDF to find the CDF
-		estCDF := quad.Fixed(prob, 0, pt, 1000, nil, 0)
+		estCDF := quad.Fixed(prob, math.Inf(-1), pt, 1000, nil, 0)
 		if !floats.EqualWithinAbsOrRel(cdf, estCDF, tol, tol) {
 			t.Errorf("Mismatch between integral of PDF and empirical CDF. Case %v. Want %v, got %v", i, cdf, estCDF)
 		}

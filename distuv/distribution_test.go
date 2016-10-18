@@ -276,7 +276,7 @@ func testFullDist(t *testing.T, f fullDist, i int, continuous bool) {
 
 // testRandLogProb tests that LogProb and Rand give consistent results. This
 // can be used when the distribution does not implement CDF.
-func testRandLogProbContinuous(t *testing.T, i int, x []float64, f LogProber, tol float64, bins int) {
+func testRandLogProbContinuous(t *testing.T, i int, min float64, x []float64, f LogProber, tol float64, bins int) {
 	for cdf := 1 / float64(bins); cdf <= 1-1/float64(bins); cdf += 1 / float64(bins) {
 		// Get the estimated CDF from the samples
 		pt := stat.Quantile(cdf, stat.Empirical, x, nil)
@@ -285,7 +285,7 @@ func testRandLogProbContinuous(t *testing.T, i int, x []float64, f LogProber, to
 			return math.Exp(f.LogProb(x))
 		}
 		// Integrate the PDF to find the CDF
-		estCDF := quad.Fixed(prob, math.Inf(-1), pt, 1000, nil, 0)
+		estCDF := quad.Fixed(prob, min, pt, 1000, nil, 0)
 		if !floats.EqualWithinAbsOrRel(cdf, estCDF, tol, tol) {
 			t.Errorf("Mismatch between integral of PDF and empirical CDF. Case %v. Want %v, got %v", i, cdf, estCDF)
 		}

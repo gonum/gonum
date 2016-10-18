@@ -40,13 +40,13 @@ func TestChiSquared(t *testing.T) {
 
 func testChiSquared(t *testing.T, c ChiSquared, i int) {
 	tol := 1e-2
-	const n = 1e6
-	const bins = 10
+	const n = 2e6
+	const bins = 50
 	x := make([]float64, n)
 	generateSamples(x, c)
 	sort.Float64s(x)
 
-	testRandLogProbContinuous(t, i, x, c, tol, bins)
+	testRandLogProbContinuous(t, i, 0, x, c, tol, bins)
 	checkMean(t, i, x, c, tol)
 	checkVarAndStd(t, i, x, c, tol)
 	checkExKurtosis(t, i, x, c, 5e-2)

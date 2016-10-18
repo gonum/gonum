@@ -51,7 +51,7 @@ func testBeta(t *testing.T, b Beta, i int) {
 	generateSamples(x, b)
 	sort.Float64s(x)
 
-	testRandLogProbContinuous(t, i, x, b, tol, bins)
+	testRandLogProbContinuous(t, i, 0, x, b, tol, bins)
 	checkMean(t, i, x, b, tol)
 	checkVarAndStd(t, i, x, b, tol)
 	checkExKurtosis(t, i, x, b, 5e-2)

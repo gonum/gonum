@@ -351,7 +351,3 @@ func TestIladlc(t *testing.T) {
 func TestIladlr(t *testing.T) {
 	testlapack.IladlrTest(t, impl)
 }
-
-func BenchmarkDgeev(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl)
-}

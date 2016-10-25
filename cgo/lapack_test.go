@@ -217,7 +217,3 @@ func TestDtrcon(t *testing.T) {
 func TestDtrtri(t *testing.T) {
 	testlapack.DtrtriTest(t, impl)
 }
-
-func BenchmarkDgeev(b *testing.B) {
-	testlapack.DgeevBenchmark(b, impl)
-}

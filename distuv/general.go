@@ -5,6 +5,8 @@
 // Package distuv provides univariate random distribution types.
 package distuv
 
+import "math"
+
 // Parameter represents a parameter of a probability distribution
 type Parameter struct {
 	Name  string
@@ -16,4 +18,8 @@ var (
 	badLength     = "distuv: slice length mismatch"
 	badSuffStat   = "distuv: wrong suffStat length"
 	badNoSamples  = "distuv: must have at least one sample"
+)
+
+var (
+	expNegOneHalf = math.Exp(-0.5)
 )

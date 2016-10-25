@@ -5,6 +5,7 @@
 package distuv
 
 import (
+	"math"
 	"math/rand"
 	"sort"
 	"testing"
@@ -43,12 +44,12 @@ func TestStudentsT(t *testing.T) {
 func testStudentsT(t *testing.T, c StudentsT, i int) {
 	tol := 1e-2
 	const n = 1e6
-	const bins = 10
+	const bins = 50
 	x := make([]float64, n)
 	generateSamples(x, c)
 	sort.Float64s(x)
 
-	testRandLogProbContinuous(t, i, x, c, tol, bins)
+	testRandLogProbContinuous(t, i, math.Inf(-1), x, c, tol, bins)
 	checkMean(t, i, x, c, tol)
 	if c.Nu > 2 {
 		checkVarAndStd(t, i, x, c, tol)

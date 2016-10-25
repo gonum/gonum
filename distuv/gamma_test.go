@@ -28,10 +28,13 @@ func TestGamma(t *testing.T) {
 	}
 	src := rand.New(rand.NewSource(1))
 	for i, g := range []Gamma{
+
+		{Alpha: 0.5, Beta: 0.8, Source: src},
 		{Alpha: 0.9, Beta: 6, Source: src},
 		{Alpha: 0.9, Beta: 500, Source: src},
-		{Alpha: 0.5, Beta: 0.8, Source: src},
+
 		{Alpha: 1, Beta: 1, Source: src},
+
 		{Alpha: 1.6, Beta: 0.4, Source: src},
 		{Alpha: 2.6, Beta: 1.5, Source: src},
 		{Alpha: 5.6, Beta: 0.5, Source: src},
@@ -44,16 +47,16 @@ func TestGamma(t *testing.T) {
 
 func testGamma(t *testing.T, f Gamma, i int) {
 	// TODO(btracey): Replace this when Gamma implements FullDist.
-	tol := 1e-2
+	tol := 2e-3
 	const n = 1e6
-	const bins = 10
+	const bins = 50
 	x := make([]float64, n)
 	generateSamples(x, f)
 	sort.Float64s(x)
 
-	testRandLogProbContinuous(t, i, x, f, tol, bins)
+	testRandLogProbContinuous(t, i, 0, x, f, tol, bins)
 	checkMean(t, i, x, f, tol)
-	checkVarAndStd(t, i, x, f, tol)
+	checkVarAndStd(t, i, x, f, 2e-2)
 	checkExKurtosis(t, i, x, f, 5e-2)
 	checkProbContinuous(t, i, x, f, 1e-3)
 }

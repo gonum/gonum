@@ -139,84 +139,13 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Ran
 		}
 	}
 
-	ob := len(observed)
-	unob := n.Dim() - ob
-	obMap := make(map[int]struct{})
-	for _, v := range observed {
-		if _, ok := obMap[v]; ok {
-			panic("normal: observed dimension occurs twice")
-		}
-		obMap[v] = struct{}{}
-	}
-	if len(observed) == n.Dim() {
-		panic("normal: all dimensions observed")
-	}
-	unobserved := make([]int, 0, unob)
-	for i := 0; i < n.Dim(); i++ {
-		if _, ok := obMap[i]; !ok {
-			unobserved = append(unobserved, i)
-		}
-	}
-	mu1 := make([]float64, unob)
-	for i, v := range unobserved {
-		mu1[i] = n.mu[v]
-	}
-	mu2 := make([]float64, ob) // really v - mu2
-	for i, v := range observed {
-		mu2[i] = values[i] - n.mu[v]
-	}
-
 	n.setSigma()
 
-	var sigma11, sigma22 mat64.SymDense
-	sigma11.SubsetSym(n.sigma, unobserved)
-	sigma22.SubsetSym(n.sigma, observed)
-
-	sigma21 := mat64.NewDense(ob, unob, nil)
-	for i, r := range observed {
-		for j, c := range unobserved {
-			v := n.sigma.At(r, c)
-			sigma21.Set(i, j, v)
-		}
-	}
-
-	var chol mat64.Cholesky
-	ok := chol.Factorize(&sigma22)
-	if !ok {
-		return nil, ok
-	}
-
-	// Compute sigma_{2,1}^T * sigma_{2,2}^-1 (v - mu_2).
-	v := mat64.NewVector(ob, mu2)
-	var tmp, tmp2 mat64.Vector
-	err := tmp.SolveCholeskyVec(&chol, v)
-	if err != nil {
+	_, mu1, sigma11 := studentsTConditional(observed, values, math.Inf(1), n.mu, n.sigma)
+	if mu1 == nil {
 		return nil, false
 	}
-	tmp2.MulVec(sigma21.T(), &tmp)
-
-	// Compute sigma_{2,1}^T * sigma_{2,2}^-1 * sigma_{2,1}.
-	// TODO(btracey): Should this be a method of SymDense?
-	var tmp3, tmp4 mat64.Dense
-	err = tmp3.SolveCholesky(&chol, sigma21)
-	if err != nil {
-		return nil, false
-	}
-	tmp4.Mul(sigma21.T(), &tmp3)
-
-	for i := range mu1 {
-		mu1[i] += tmp2.At(i, 0)
-	}
-
-	// TODO(btracey): If tmp2 can constructed with a method, then this can be
-	// replaced with SubSym.
-	for i := 0; i < len(unobserved); i++ {
-		for j := i; j < len(unobserved); j++ {
-			v := sigma11.At(i, j)
-			sigma11.SetSym(i, j, v-tmp4.At(i, j))
-		}
-	}
-	return NewNormal(mu1, &sigma11, src)
+	return NewNormal(mu1, sigma11, src)
 }
 
 // CovarianceMatrix returns the covariance matrix of the distribution. Upon

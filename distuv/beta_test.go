@@ -56,4 +56,6 @@ func testBeta(t *testing.T, b Beta, i int) {
 	checkVarAndStd(t, i, x, b, tol)
 	checkExKurtosis(t, i, x, b, 5e-2)
 	checkProbContinuous(t, i, x, b, 1e-3)
+	checkQuantileCDFSurvival(t, i, x, b, tol)
+	checkProbQuantContinuous(t, i, x, b, tol)
 }

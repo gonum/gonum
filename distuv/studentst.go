@@ -7,6 +7,8 @@ package distuv
 import (
 	"math"
 	"math/rand"
+
+	"github.com/gonum/mathext"
 )
 
 const logPi = 1.1447298858494001741 // http://oeis.org/A053510
@@ -40,6 +42,24 @@ type StudentsT struct {
 	Src *rand.Rand
 }
 
+// CDF computes the value of the cumulative distribution function at x.
+func (s StudentsT) CDF(x float64) float64 {
+	// transform to standard normal
+	y := (x - s.Mu) / s.Sigma
+	if y == 0 {
+		return 0.5
+	}
+	// For t > 0
+	// F(y) = 1 - 0.5 * I_t(y)(nu/2, 1/2)
+	// t(y) = nu/(y^2 + nu)
+	// and 1 - F(y) for t < 0
+	t := s.Nu / (y*y + s.Nu)
+	if y > 0 {
+		return 1 - 0.5*mathext.RegIncBeta(0.5*s.Nu, 0.5, t)
+	}
+	return 0.5 * mathext.RegIncBeta(s.Nu/2, 0.5, t)
+}
+
 // LogProb computes the natural logarithm of the value of the probability
 // density function at x.
 func (s StudentsT) LogProb(x float64) float64 {
@@ -69,6 +89,29 @@ func (s StudentsT) Prob(x float64) float64 {
 	return math.Exp(s.LogProb(x))
 }
 
+// Quantile returns the inverse of the cumulative distribution function.
+func (s StudentsT) Quantile(p float64) float64 {
+	if p < 0 || p > 1 {
+		panic(badPercentile)
+	}
+	// F(x) = 1 - 0.5 * I_t(x)(nu/2, 1/2)
+	// t(x) = nu/(t^2 + nu)
+	if p == 0.5 {
+		return s.Mu
+	}
+	var y float64
+	if p > 0.5 {
+		// Know t > 0
+		t := mathext.InvRegIncBeta(s.Nu/2, 0.5, 2*(1-p))
+		y = math.Sqrt(s.Nu * (1 - t) / t)
+	} else {
+		t := mathext.InvRegIncBeta(s.Nu/2, 0.5, 2*p)
+		y = -math.Sqrt(s.Nu * (1 - t) / t)
+	}
+	// Convert out of standard normal
+	return y*s.Sigma + s.Mu
+}
+
 // Rand returns a random sample drawn from the distribution.
 func (s StudentsT) Rand() float64 {
 	// http://www.math.uah.edu/stat/special/Student.html
@@ -83,6 +126,24 @@ func (s StudentsT) Rand() float64 {
 // The standard deviation is undefined for ν <= 1, and this returns math.NaN().
 func (s StudentsT) StdDev() float64 {
 	return math.Sqrt(s.Variance())
+}
+
+// Survival returns the survival function (complementary CDF) at x.
+func (s StudentsT) Survival(x float64) float64 {
+	// transform to standard normal
+	y := (x - s.Mu) / s.Sigma
+	if y == 0 {
+		return 0.5
+	}
+	// For t > 0
+	// F(y) = 1 - 0.5 * I_t(y)(nu/2, 1/2)
+	// t(y) = nu/(y^2 + nu)
+	// and 1 - F(y) for t < 0
+	t := s.Nu / (y*y + s.Nu)
+	if y > 0 {
+		return 0.5 * mathext.RegIncBeta(s.Nu/2, 0.5, t)
+	}
+	return 1 - 0.5*mathext.RegIncBeta(s.Nu/2, 0.5, t)
 }
 
 // Variance returns the variance of the probability distribution.

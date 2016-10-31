@@ -57,4 +57,27 @@ func testStudentsT(t *testing.T, c StudentsT, i int) {
 		checkVarAndStd(t, i, x, c, tol)
 	}
 	checkProbContinuous(t, i, x, c, 1e-3)
+	checkQuantileCDFSurvival(t, i, x, c, tol)
+	checkProbQuantContinuous(t, i, x, c, tol)
+}
+
+func TestStudentsTQuantile(t *testing.T) {
+	nSteps := 101
+	probs := make([]float64, nSteps)
+	floats.Span(probs, 0, 1)
+	for i, b := range []StudentsT{
+		{0, 1, 3.3, nil},
+		{0, 1, 7.2, nil},
+		{0, 1, 12, nil},
+		{0.9, 0.8, 6, nil},
+	} {
+		for _, p := range probs {
+			x := b.Quantile(p)
+			p2 := b.CDF(x)
+			if !floats.EqualWithinAbsOrRel(p, p2, 1e-10, 1e-10) {
+				t.Errorf("mismatch between CDF and Quantile. Case %v. Want %v, got %v", i, p, p2)
+				break
+			}
+		}
+	}
 }

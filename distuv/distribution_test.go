@@ -198,7 +198,7 @@ func checkProbQuantContinuous(t *testing.T, i int, xs []float64, c cumulantProbe
 		// The integral of the PDF between xp and x should be the difference in
 		// the quantiles.
 		q := quad.Fixed(c.Prob, xp, x, 1000, nil, 0)
-		if math.Abs(q-(p-ps[i-1])) > 1e-10 {
+		if math.Abs(q-(p-ps[i-1])) > 1e-5 {
 			t.Errorf("Integral of PDF doesn't match quantile. Case %v. Want %v, got %v.", i, p-ps[i-1], q)
 			break
 		}

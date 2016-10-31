@@ -7,6 +7,8 @@ package distuv
 import (
 	"math"
 	"math/rand"
+
+	"github.com/gonum/mathext"
 )
 
 // Beta implements the Beta distribution, a two-parameter continuous distribution
@@ -25,6 +27,17 @@ type Beta struct {
 	Beta float64
 
 	Source *rand.Rand
+}
+
+// CDF computes the value of the cumulative distribution function at x.
+func (b Beta) CDF(x float64) float64 {
+	if x <= 0 {
+		return 0
+	}
+	if x >= 1 {
+		return 1
+	}
+	return mathext.RegIncBeta(b.Alpha, b.Beta, x)
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.
@@ -76,6 +89,14 @@ func (b Beta) Prob(x float64) float64 {
 	return math.Exp(b.LogProb(x))
 }
 
+// Quantile returns the inverse of the cumulative distribution function.
+func (b Beta) Quantile(p float64) float64 {
+	if p < 0 || p > 1 {
+		panic(badPercentile)
+	}
+	return mathext.InvRegIncBeta(b.Alpha, b.Beta, p)
+}
+
 // Rand returns a random sample drawn from the distribution.
 func (b Beta) Rand() float64 {
 	ga := Gamma{Alpha: b.Alpha, Beta: 1, Source: b.Source}.Rand()
@@ -86,6 +107,17 @@ func (b Beta) Rand() float64 {
 // StdDev returns the standard deviation of the probability distribution.
 func (b Beta) StdDev() float64 {
 	return math.Sqrt(b.Variance())
+}
+
+// Survival returns the survival function (complementary CDF) at x.
+func (b Beta) Survival(x float64) float64 {
+	switch {
+	case x <= 0:
+		return 1
+	case x >= 1:
+		return 0
+	}
+	return mathext.RegIncBeta(b.Beta, b.Alpha, 1-x)
 }
 
 // Variance returns the variance of the probability distribution.

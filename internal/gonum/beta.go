@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package mathext
+package gonum
 
-import "github.com/gonum/mathext/internal/gonum"
+import (
+	"math"
+)
 
 // Beta returns the value of the complete beta function B(a, b). It is defined as
 //  Γ(a)Γ(b) / Γ(a+b)
@@ -15,9 +17,9 @@ import "github.com/gonum/mathext/internal/gonum"
 //  B(a,b) returns NaN if a or b is < 0
 //  B(a,b) returns +Inf if a xor b is 0.
 //
-// See http://mathworld.wolfram.com/BetaFunction.html for more detailed informations.
+// See http://mathworld.wolfram.com/BetaFunction.html for more detailed information.
 func Beta(a, b float64) float64 {
-	return gonum.Beta(a, b)
+	return math.Exp(Lbeta(a, b))
 }
 
 // Lbeta returns the natural logarithm of the complete beta function B(a,b).
@@ -30,5 +32,21 @@ func Beta(a, b float64) float64 {
 //  Lbeta(a,b) returns NaN if a or b is < 0
 //  Lbeta(a,b) returns +Inf if a xor b is 0.
 func Lbeta(a, b float64) float64 {
-	return gonum.Lbeta(a, b)
+	switch {
+	case math.IsInf(a, +1) || math.IsInf(b, +1):
+		return math.NaN()
+	case a == 0 && b == 0:
+		return math.NaN()
+	case a < 0 || b < 0:
+		return math.NaN()
+	case math.IsNaN(a) || math.IsNaN(b):
+		return math.NaN()
+	case a == 0 || b == 0:
+		return math.Inf(+1)
+	}
+
+	la, _ := math.Lgamma(a)
+	lb, _ := math.Lgamma(b)
+	lab, _ := math.Lgamma(a + b)
+	return la + lb - lab
 }

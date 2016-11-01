@@ -125,6 +125,31 @@ func ChiSquare(obs, exp []float64) float64 {
 	return result
 }
 
+// CircularMean returns the circular mean of the dataset.
+//	atan2(\sum_i w_i * sin(alpha_i), \sum_i w_i * cos(alpha_i))
+// If weights is nil then all of the weights are 1. If weights is not nil, then
+// len(x) must equal len(weights).
+func CircularMean(x, weights []float64) float64 {
+	if weights != nil && len(x) != len(weights) {
+		panic("stat: slice length mismatch")
+	}
+
+	var aX, aY float64
+	if weights != nil {
+		for i, v := range x {
+			aX += weights[i] * math.Cos(v)
+			aY += weights[i] * math.Sin(v)
+		}
+	} else {
+		for _, v := range x {
+			aX += math.Cos(v)
+			aY += math.Sin(v)
+		}
+	}
+
+	return math.Atan2(aY, aX)
+}
+
 // Correlation returns the weighted correlation between the samples of x and y
 // with the given means.
 //  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (stdX * stdY)

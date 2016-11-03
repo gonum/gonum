@@ -13,6 +13,52 @@ import (
 	"github.com/gonum/floats"
 )
 
+func ExampleCircularMean() {
+	x := []float64{0, 0.25 * math.Pi, 0.75 * math.Pi}
+	weights := []float64{1, 2, 2.5}
+	cmean := CircularMean(x, weights)
+
+	fmt.Printf("The circular mean is %.5f.\n", cmean)
+	// Output:
+	// The circular mean is 1.37037.
+}
+
+func TestCircularMean(t *testing.T) {
+	for i, test := range []struct {
+		x   []float64
+		wts []float64
+		ans float64
+	}{
+		// Values compared against scipy.
+		{
+			x:   []float64{0, 2 * math.Pi},
+			ans: 0,
+		},
+		{
+			x:   []float64{0, 0.5 * math.Pi},
+			ans: 0.78539816339744,
+		},
+		{
+			x:   []float64{-1.5 * math.Pi, 0.5 * math.Pi, 2.5 * math.Pi},
+			wts: []float64{1, 2, 3},
+			ans: 0.5 * math.Pi,
+		},
+		{
+			x:   []float64{0, 0.5 * math.Pi},
+			wts: []float64{1, 2},
+			ans: 1.10714871779409,
+		},
+	} {
+		c := CircularMean(test.x, test.wts)
+		if math.Abs(c-test.ans) > 1e-14 {
+			t.Errorf("Circular mean mismatch case %d: Expected %v, Found %v", i, test.ans, c)
+		}
+	}
+	if !Panics(func() { CircularMean(make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("CircularMean did not panic with x, wts length mismatch")
+	}
+}
+
 func ExampleCorrelation() {
 	x := []float64{8, -3, 7, 8, -4}
 	y := []float64{10, 5, 6, 3, -1}

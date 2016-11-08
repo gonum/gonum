@@ -100,6 +100,10 @@ func TestDlabrd(t *testing.T) {
 	testlapack.DlabrdTest(t, impl)
 }
 
+func TestDlacn2(t *testing.T) {
+	testlapack.Dlacn2Test(t, impl)
+}
+
 func TestDlacpy(t *testing.T) {
 	testlapack.DlacpyTest(t, impl)
 }

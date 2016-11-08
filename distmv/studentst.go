@@ -17,9 +17,9 @@ import (
 	"github.com/gonum/stat/distuv"
 )
 
-// StudentsT is a multi-variate Student's T distribution. It is a distribution over
+// StudentsT is a multivariate Student's T distribution. It is a distribution over
 // ℝ^n with the probability density
-//  p(y) = (Γ((ν+d)/2) / Γ(ν/2)) * (νπ)^(-n/2) * |Ʃ|^(-1/2) *
+//  p(y) = (Γ((ν+n)/2) / Γ(ν/2)) * (νπ)^(-n/2) * |Ʃ|^(-1/2) *
 //             (1 + 1/ν * (y-μ)^T * Ʃ^-1 * (y-μ))^(-(ν+n)/2)
 // where ν is a scalar greater than 2, μ is a vector in ℝ^n, and Ʃ is an n×n
 // symmetric positive definite matrix.
@@ -50,7 +50,7 @@ type StudentsT struct {
 //
 // NewStudentsT panics if len(mu) == 0, or if len(mu) != sigma.Symmetric(). If
 // the covariance matrix is not positive-definite, nil is returned and ok is false.
-func NewStudentsT(nu float64, mu []float64, sigma mat64.Symmetric, src *rand.Rand) (dist *StudentsT, ok bool) {
+func NewStudentsT(mu []float64, sigma mat64.Symmetric, nu float64, src *rand.Rand) (dist *StudentsT, ok bool) {
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
@@ -103,12 +103,12 @@ func (s *StudentsT) ConditionStudentsT(observed []int, values []float64, src *ra
 
 	s.setSigma()
 
-	newNu, newPhi, newK := studentsTConditional(observed, values, s.nu, s.mu, s.sigma)
-	if newPhi == nil {
+	newNu, newMean, newSigma := studentsTConditional(observed, values, s.nu, s.mu, s.sigma)
+	if newMean == nil {
 		return nil, false
 	}
 
-	return NewStudentsT(newNu, newPhi, newK, src)
+	return NewStudentsT(newMean, newSigma, newNu, src)
 
 }
 
@@ -166,7 +166,7 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 		mu1[i] += tmp2.At(i, 0)
 	}
 
-	// Compute sigma_{1,1} - sigma_{2,1}^T * sigma_{2,2}^-1 * sigma_{2,1}.
+	// Compute tmp4 = sigma_{2,1}^T * sigma_{2,2}^-1 * sigma_{2,1}.
 	// TODO(btracey): Should this be a method of SymDense?
 	var tmp3, tmp4 mat64.Dense
 	err = tmp3.SolveCholesky(&chol, sigma21)
@@ -175,6 +175,7 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 	}
 	tmp4.Mul(sigma21.T(), &tmp3)
 
+	// Compute sigma_{1,1} - tmp4
 	// TODO(btracey): If tmp4 can constructed with a method, then this can be
 	// replaced with SubSym.
 	for i := 0; i < len(unobserved); i++ {
@@ -273,7 +274,9 @@ func (s *StudentsT) LogProb(y []float64) float64 {
 // That is, MarginalStudentsT returns
 //  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
 // where x_i are the dimensions in the input, and x_o are the remaining dimensions.
-// The input src is passed to the call to NewStudentsT.
+// See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
+//
+// The input src is passed to the created StudentsT.
 //
 // ok indicates whether there was a failure during the marginalization. If ok is false
 // the operation failed and dist is not usable.
@@ -284,9 +287,36 @@ func (s *StudentsT) MarginalStudentsT(vars []int, src *rand.Rand) (dist *Student
 		newMean[i] = s.mu[v]
 	}
 	s.setSigma()
-	var newK mat64.SymDense
-	newK.SubsetSym(s.sigma, vars)
-	return NewStudentsT(s.nu, newMean, &newK, src)
+	var newSigma mat64.SymDense
+	newSigma.SubsetSym(s.sigma, vars)
+	return NewStudentsT(newMean, &newSigma, s.nu, src)
+}
+
+// MarginalStudentsT returns the marginal distribution of the given input variable.
+// That is, MarginalStudentsT returns
+//  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
+// where i is the input index, and x_o are the remaining dimensions.
+// See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
+//
+// The input src is passed to the call to NewStudentsT.
+func (s *StudentsT) MarginalStudentsTSingle(i int, src *rand.Rand) distuv.StudentsT {
+	var std float64
+	if s.sigma != nil {
+		std = s.sigma.At(i, i)
+	} else {
+		// Reconstruct the {i,i} diagonal element of the covariance directly.
+		for j := 0; j <= i; j++ {
+			v := s.lower.At(i, j)
+			std += v * v
+		}
+	}
+
+	return distuv.StudentsT{
+		Mu:    s.mu[i],
+		Sigma: math.Sqrt(std),
+		Nu:    s.nu,
+		Src:   src,
+	}
 }
 
 // TODO(btracey): Implement marginal single. Need to modify univariate StudentsT

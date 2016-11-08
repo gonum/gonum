@@ -200,6 +200,8 @@ func (n *Normal) LogProb(x []float64) float64 {
 // That is, MarginalNormal returns
 //  p(x_i) = \int_{x_o} p(x_i | x_o) p(x_o) dx_o
 // where x_i are the dimensions in the input, and x_o are the remaining dimensions.
+// See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
+//
 // The input src is passed to the call to NewNormal.
 func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 	newMean := make([]float64, len(vars))
@@ -216,6 +218,8 @@ func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 // That is, MarginalNormal returns
 //  p(x_i) = \int_{x_¬i} p(x_i | x_¬i) p(x_¬i) dx_¬i
 // where i is the input index.
+// See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
+//
 // The input src is passed to the constructed distuv.Normal.
 func (n *Normal) MarginalNormalSingle(i int, src *rand.Rand) distuv.Normal {
 	var std float64

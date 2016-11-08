@@ -5,6 +5,7 @@
 package distmv
 
 import (
+	"math"
 	"math/rand"
 	"testing"
 
@@ -64,7 +65,7 @@ func TestStudentTProbs(t *testing.T) {
 			},
 		},
 	} {
-		s, ok := NewStudentsT(test.nu, test.mu, test.sigma, src)
+		s, ok := NewStudentsT(test.mu, test.sigma, test.nu, src)
 		if !ok {
 			t.Fatal("bad test")
 		}
@@ -109,7 +110,7 @@ func TestStudentsTRand(t *testing.T) {
 			tolcov: 1e-2,
 		},
 	} {
-		s, ok := NewStudentsT(test.nu, test.mean, test.cov, src)
+		s, ok := NewStudentsT(test.mean, test.cov, test.nu, src)
 		if !ok {
 			t.Fatal("bad test")
 		}
@@ -156,7 +157,7 @@ func TestStudentsTConditional(t *testing.T) {
 			tolcov: 1e-2,
 		},
 	} {
-		s, ok := NewStudentsT(test.nu, test.mean, test.cov, src)
+		s, ok := NewStudentsT(test.mean, test.cov, test.nu, src)
 		if !ok {
 			t.Fatal("bad test")
 		}
@@ -222,6 +223,58 @@ func TestStudentsTConditional(t *testing.T) {
 		tmp3.Scale((test.nu+dot)/(test.nu+float64(len(ob))), &tmp3)
 		if !mat64.EqualApprox(&tmp3, sUp.sigma, 1e-10) {
 			t.Errorf("Sigma mismatch")
+		}
+	}
+}
+
+func TestStudentsTMarginalSingle(t *testing.T) {
+	for _, test := range []struct {
+		mu    []float64
+		sigma *mat64.SymDense
+		nu    float64
+	}{
+		{
+			mu:    []float64{2, 3, 4},
+			sigma: mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			nu:    5,
+		},
+		{
+			mu:    []float64{2, 3, 4, 5},
+			sigma: mat64.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+			nu:    6,
+		},
+	} {
+		studentst, ok := NewStudentsT(test.mu, test.sigma, test.nu, nil)
+		if !ok {
+			t.Fatalf("Bad test, covariance matrix not positive definite")
+		}
+		// Verify with nil Sigma.
+		studentst.sigma = nil
+		for i, mean := range test.mu {
+			st := studentst.MarginalStudentsTSingle(i, nil)
+			if st.Mean() != mean {
+				t.Errorf("Mean mismatch nil Sigma, idx %v: want %v, got %v.", i, mean, st.Mean())
+			}
+			std := math.Sqrt(test.sigma.At(i, i))
+			if math.Abs(st.Sigma-std) > 1e-14 {
+				t.Errorf("StdDev mismatch nil Sigma, idx %v: want %v, got %v.", i, std, st.StdDev())
+			}
+			if st.Nu != test.nu {
+				t.Errorf("Nu mismatch nil Sigma, idx %v: want %v, got %v ", i, test.nu, st.Nu)
+			}
+		}
+
+		// Verify with non-nil Sigma.
+		studentst.setSigma()
+		for i, mean := range test.mu {
+			st := studentst.MarginalStudentsTSingle(i, nil)
+			if st.Mean() != mean {
+				t.Errorf("Mean mismatch non-nil Sigma, idx %v: want %v, got %v.", i, mean, st.Mean())
+			}
+			std := math.Sqrt(test.sigma.At(i, i))
+			if math.Abs(st.Sigma-std) > 1e-14 {
+				t.Errorf("StdDev mismatch non-nil Sigma, idx %v: want %v, got %v.", i, std, st.StdDev())
+			}
 		}
 	}
 }

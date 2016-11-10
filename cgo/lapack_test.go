@@ -44,6 +44,10 @@ func (bl blockedTranslate) Dorgl2(m, n, k int, a []float64, lda int, tau, work [
 	impl.Dorglq(m, n, k, a, lda, tau, work, len(work))
 }
 
+func TestDlacn2(t *testing.T) {
+	testlapack.Dlacn2Test(t, impl)
+}
+
 func TestDlacpy(t *testing.T) {
 	testlapack.DlacpyTest(t, impl)
 }

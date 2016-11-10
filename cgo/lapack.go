@@ -102,6 +102,54 @@ type Implementation struct{}
 
 var _ lapack.Float64 = Implementation{}
 
+// Dlacn2 estimates the 1-norm of an n×n matrix A using sequential updates with
+// matrix-vector products provided externally.
+//
+// Dlacn2 is called sequentially. In between calls, x should be overwritten by
+//  A * X if kase == 1
+//  A^T * X if kase == 2
+// all other parameters should be unchanged during sequential calls, and the updated
+// values of est and kase should be used. On the final return (when kase is returned
+// as 0), V = A * W, where est = norm(V) / norm(W).
+//
+// isign, v, and x must all have length n and will panic otherwise. isave is used
+// for temporary storage.
+//
+// Dlacn2 is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlacn2(n int, v, x []float64, isgn []int, est float64, kase int, isave *[3]int) (float64, int) {
+	if n < 1 {
+		panic("lapack: non-positive n")
+	}
+	checkVector(n, x, 1)
+	checkVector(n, v, 1)
+	if len(isgn) < n {
+		panic("lapack: insufficient isgn length")
+	}
+	if isave[0] < 0 || isave[0] > 5 {
+		panic("lapack: bad isave value")
+	}
+	if isave[0] == 0 && kase != 0 {
+		panic("lapack: bad isave value")
+	}
+
+	isgn32 := make([]int32, n)
+	for i, v := range isgn {
+		isgn32[i] = int32(v)
+	}
+	pest := []float64{est}
+	// Save one allocation by putting isave and kase into the same slice.
+	isavekase := []int32{ int32(isave[0]),int32(isave[1]),int32(isave[2]),int32(kase)}
+	lapacke.Dlacn2(n, v, x, isgn32, pest, isavekase[3:], isavekase[:3])
+	for i, v := range isgn32 {
+		isgn[i] = int(v)
+	}
+	isave[0] = int(isavekase[0])
+	isave[1] = int(isavekase[1])
+	isave[2] = int(isavekase[2])
+
+	return pest[0], int(isavekase[3])
+}
+
 // Dlacpy copies the elements of A specified by uplo into B. Uplo can specify
 // a triangular portion with blas.Upper or blas.Lower, or can specify all of the
 // elemest with blas.All.

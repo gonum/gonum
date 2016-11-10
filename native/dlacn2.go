@@ -13,18 +13,24 @@ import (
 // Dlacn2 estimates the 1-norm of an n×n matrix A using sequential updates with
 // matrix-vector products provided externally.
 //
-// Dlacn2 is called sequentially. In between calls, x should be overwritten by
-//  A * X if kase == 1
-//  A^T * X if kase == 2
-// all other parameters should be unchanged during sequential calls, and the updated
-// values of est and kase should be used. On the final return (when kase is returned
-// as 0), V = A * W, where est = norm(V) / norm(W).
+// Dlacn2 is called sequentially and it returns the value of est and kase to be
+// used on the next call.
+// On the initial call, kase must be 0.
+// In between calls, x must be overwritten by
+//  A * X    if kase was returned as 1,
+//  A^T * X  if kase was returned as 2,
+// and all other parameters must not be changed.
+// On the final return, kase is returned as 0, v contains A*W where W is a
+// vector, and est = norm(V)/norm(W) is a lower bound for 1-norm of A.
 //
-// isign, v, and x must all have length n and will panic otherwise. isave is used
-// for temporary storage.
+// v, x, and isgn must all have length n and n must be at least 1, otherwise
+// Dlacn2 will panic. isave is used for temporary storage.
 //
 // Dlacn2 is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlacn2(n int, v, x []float64, isgn []int, est float64, kase int, isave *[3]int) (float64, int) {
+	if n < 1 {
+		panic("lapack: non-positive n")
+	}
 	checkVector(n, x, 1)
 	checkVector(n, v, 1)
 	if len(isgn) < n {

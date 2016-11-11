@@ -10,7 +10,10 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// Dlascl multiplies a rectangular matrix by a scalar.
+// Dlascl multiplies an m×n matrix by the scalar cto/cfrom.
+//
+// cfrom must not be zero, and cto and cfrom must not be NaN, otherwise Dlascl
+// will panic.
 //
 // Dlascl is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {

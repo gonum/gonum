@@ -439,6 +439,17 @@ func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto
 	lapacke.Dlascl(byte(kind), kl, ku, cfrom, cto, m, n, a, lda)
 }
 
+// Dlaset sets the off-diagonal elements of a to alpha, and the diagonal elements
+// of a to beta. If uplo == blas.Upper, only the upper diagonal elements are set.
+// If uplo == blas.Lower, only the lower diagonal elements are set. If uplo is
+// otherwise, all of the elements of a are set.
+//
+// Dlaset is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlaset(uplo blas.Uplo, m, n int, alpha, beta float64, a []float64, lda int) {
+	checkMatrix(m, n, a, lda)
+	lapacke.Dlaset(uplo, m, n, alpha, beta, a, lda)
+}
+
 // Dpotrf computes the Cholesky decomposition of the symmetric positive definite
 // matrix a. If ul == blas.Upper, then a is stored as an upper-triangular matrix,
 // and a = U U^T is stored in place into a. If ul == blas.Lower, then a = L L^T

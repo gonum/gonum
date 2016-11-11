@@ -6,6 +6,8 @@
 package cgo
 
 import (
+	"math"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/lapack"
 	"github.com/gonum/lapack/cgo/lapacke"
@@ -418,6 +420,20 @@ func (impl Implementation) Dlarfx(side blas.Side, m, n int, v []float64, tau flo
 	}
 
 	lapacke.Dlarfx(side, m, n, v, tau, c, ldc, work)
+}
+
+// Dlascl multiplies a rectangular matrix by a scalar.
+//
+// Dlascl is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {
+	checkMatrix(m, n, a, lda)
+	if cfrom == 0 {
+		panic("dlascl: zero divisor")
+	}
+	if math.IsNaN(cfrom) || math.IsNaN(cto) {
+		panic("dlascl: NaN scale factor")
+	}
+	lapacke.Dlascl(byte(kind), kl, ku, cfrom, cto, m, n, a, lda)
 }
 
 // Dpotrf computes the Cholesky decomposition of the symmetric positive definite

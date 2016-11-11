@@ -163,6 +163,13 @@ func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int
 	lapacke.Dlacpy(uplo, m, n, a, lda, b, ldb)
 }
 
+// Dlapy2 is the LAPACK version of math.Hypot.
+//
+// Dlapy2 is an internal routine. It is exported for testing purposes.
+func (Implementation) Dlapy2(x, y float64) float64 {
+	return lapacke.Dlapy2(x, y)
+}
+
 // Dlarfb applies a block reflector to a matrix.
 //
 // In the call to Dlarfb, the mxn c is multiplied by the implicitly defined matrix h as follows:

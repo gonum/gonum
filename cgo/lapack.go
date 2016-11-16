@@ -451,6 +451,21 @@ func (impl Implementation) Dlaset(uplo blas.Uplo, m, n int, alpha, beta float64,
 	lapacke.Dlaset(uplo, m, n, alpha, beta, a, lda)
 }
 
+// Dlasrt sorts the numbers in the input slice d. If sort == lapack.SortIncreasing,
+// the elements are sorted in increasing order. If sort == lapack.SortDecreasing,
+// the elements are sorted in decreasing order.
+//
+// Dlasrt is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
+	checkVector(n, d, 1)
+	switch s {
+	default:
+		panic("lapack: bad sort")
+	case lapack.SortIncreasing, lapack.SortDecreasing:
+	}
+	lapacke.Dlasrt(byte(s), n, d[:n])
+}
+
 // Dpotrf computes the Cholesky decomposition of the symmetric positive definite
 // matrix a. If ul == blas.Upper, then a is stored as an upper-triangular matrix,
 // and a = U U^T is stored in place into a. If ul == blas.Lower, then a = L L^T

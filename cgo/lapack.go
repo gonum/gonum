@@ -466,6 +466,19 @@ func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
 	lapacke.Dlasrt(byte(s), n, d[:n])
 }
 
+// Dlaswp swaps the rows k1 to k2 of a according to the indices in ipiv.
+// a is a matrix with n columns and stride lda. incX is the increment for ipiv.
+// k1 and k2 are zero-indexed. If incX is negative, then loops from k2 to k1
+//
+// Dlaswp is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlaswp(n int, a []float64, lda, k1, k2 int, ipiv []int, incX int) {
+	ipiv32 := make([]int32, len(ipiv))
+	for i, v := range ipiv {
+		ipiv32[i] = int32(v + 1)
+	}
+	lapacke.Dlaswp(n, a, lda, k1+1, k2+1, ipiv32, incX)
+}
+
 // Dpotrf computes the Cholesky decomposition of the symmetric positive definite
 // matrix a. If ul == blas.Upper, then a is stored as an upper-triangular matrix,
 // and a = U U^T is stored in place into a. If ul == blas.Lower, then a = L L^T

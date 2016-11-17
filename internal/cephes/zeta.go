@@ -13,22 +13,10 @@ package cephes
 import "math"
 
 /*
- *
  *     Riemann zeta function of two arguments
  *
  *
- *
- * SYNOPSIS:
- *
- * double x, q, y, zeta();
- *
- * y = zeta( x, q );
- *
- *
- *
  * DESCRIPTION:
- *
- *
  *
  *                 inf.
  *                  -        -x
@@ -56,11 +44,6 @@ import "math"
  * zeta(x,1) = zetac(x) + 1.
  *
  *
- *
- * ACCURACY:
- *
- *
- *
  * REFERENCE:
  *
  * Gradshteyn, I. S., and I. M. Ryzhik, Tables of Integrals,
@@ -68,18 +51,12 @@ import "math"
  *
  */
 
-/*
- * Cephes Math Library Release 2.0:  April, 1987
- * Copyright 1984, 1987 by Stephen L. Moshier
- * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
- */
-
 /* Expansion coefficients
  * for Euler-Maclaurin summation formula
  * (2k)! / B2k
  * where B2k are Bernoulli numbers
  */
-var A = []float64{
+var zetaCoefs = []float64{
 	12.0,
 	-720.0,
 	30240.0,
@@ -115,18 +92,18 @@ func Zeta(x, q float64) float64 {
 	}
 
 	/* Asymptotic expansion
-	* http://dlmf.nist.gov/25.11#E43
+	 * http://dlmf.nist.gov/25.11#E43
 	 */
 	if q > 1e8 {
 		return (1/(x-1) + 1/(2*q)) * math.Pow(q, 1-x)
 	}
 
-	/* Euler-Maclaurin summation formula */
+	// Euler-Maclaurin summation formula
 
 	/* Permit negative q but continue sum until n+q > +9 .
-	* This case should be handled by a reflection formula.
-	* If q<0 and x is an integer, there is a relation to
-	* the polyGamma function.
+	 * This case should be handled by a reflection formula.
+	 * If q<0 and x is an integer, there is a relation to
+	 * the polyGamma function.
 	 */
 	s := math.Pow(q, -x)
 	a := q
@@ -150,7 +127,7 @@ func Zeta(x, q float64) float64 {
 	for i = 0; i < 12; i++ {
 		a *= x + k
 		b /= w
-		t := a * b / A[i]
+		t := a * b / zetaCoefs[i]
 		s = s + t
 		t = math.Abs(t / s)
 		if t < machEp {

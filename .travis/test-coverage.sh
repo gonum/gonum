@@ -4,14 +4,14 @@ PROFILE_OUT=`pwd`/profile.out
 ACC_OUT=`pwd`/acc.out
 
 testCover() {
-	# set the return value to 1 (succesful)
+	# set the return value to 0 (succesful)
 	retval=0
 	# get the directory to check from the parameter. Default to '.'
 	d=${1:-.}
 	# skip if there are no Go files here
 	ls $d/*.go &> /dev/null || return $retval
 	# switch to the directory to check
-        pushd $d > /dev/null
+	pushd $d > /dev/null
 	# create the coverage profile
 	coverageresult=`go test -v -coverprofile=$PROFILE_OUT`
 	# output the result so we can check the shell output

@@ -14,8 +14,73 @@ import (
 )
 
 type UniformGenerator interface {
+	// Modify adjusts the graph based on the proposed edge. See the documentation
+	// for UniformEdges to see the required properties of Modify.
 	Modify(g GraphBuilder, from, to graph.Node)
-	Start() graph.Directed
+	// DefaultStart provides a default starting graph for the class if no graph
+	// has been provided.
+	DefaultStart() graph.Directed
+}
+
+// UniformEdges generates the edges of a directed graph uniformly at random across
+// the class of graphs specified by class.
+//
+// UniformEdges runs a Markov chain starting with the graph specified by start
+// and running a number of steps equal to steps. Each step in the markov chain
+// proposes an edge from from to to. The class function modifies the graph
+// according to the generation procedure. If start is nil, the initial graph
+// will be that specified in class.DefaultStart().
+//
+// class cannot be an arbitrary function, it must obey specific properties in
+// order for the generation probability to be uniform over the class of possible
+// graphs. class must ensure that the implicit Markov chain is irreducible,
+// aperiodic, and, importantly, doubly stochastic. Furthermore, every graph
+// in the desired class must be reachable from the starting graph through
+// individual edge modifications.
+//
+// step specifies the number of steps in the Markov chain. step should be
+// sufficiently high to allow for convergence of the chain.
+//
+// src specifies the random number generator. If src is nil, math/rand is used.
+//
+// More information can be found in
+//  Ide, Jaime S., and Fabio G. Cozman. "Random generation of Bayesian networks."
+//  Brazilian symposium on artificial intelligence. Springer Berlin Heidelberg, 2002.
+func UniformEdges(dst DirectedMutator, start graph.Directed, class UniformGenerator, steps int, src *rand.Rand) {
+	if steps <= 0 {
+		panic("gen: number of steps must be positive")
+	}
+	if start == nil {
+		start = class.DefaultStart()
+	}
+	var rnd func(int) int
+	if src == nil {
+		rnd = rand.Intn
+	} else {
+		rnd = src.Intn
+	}
+
+	// Copy the starting graph into the graph builder.
+	nodes := start.Nodes()
+	for _, node := range nodes {
+		dst.AddNode(node)
+		tos := start.From(node)
+		for _, to := range tos {
+			edge := start.Edge(node, to)
+			dst.SetEdge(edge)
+		}
+	}
+	nNodes := len(nodes)
+
+	// Run the MarkovChain, choosing an edge at random in each step.
+	for step := 0; step < steps; step++ {
+		i := rnd(nNodes)
+		j := rnd(nNodes - 1)
+		if j >= i {
+			j++
+		}
+		class.Modify(dst, nodes[i], nodes[j])
+	}
 }
 
 // UniformDAG generates a graph uniformly at random over the set of directed
@@ -27,7 +92,7 @@ type UniformDAG struct {
 	EdgeGen func(from, to graph.Node) graph.Edge
 }
 
-func (u UniformDAG) Start() graph.Directed {
+func (u UniformDAG) DefaultStart() graph.Directed {
 	if u.N == 0 {
 		panic("uniformdag: number of edges must be positive")
 	}
@@ -68,65 +133,5 @@ func (u UniformDAG) Modify(g DirectedMutator, from, to graph.Node) {
 			}
 			g.SetEdge(e)
 		}
-	}
-}
-
-// UniformEdges generates the edges of a graph uniformly at random across the
-// class of graphs specified by class.
-//
-// UniformEdges runs a Markov chain starting with the graph specified by start
-// and running a number of steps equal to steps. Each step in the markov chain
-// proposes an edge from from to to. The class function modifies the graph
-// according to the generation procedure. If start is nil, the initial graph
-// will be that specified in class.DefaultStart().
-//
-// class cannot be an arbitrary function, it must obey specific properties in
-// order for the generation probability to be uniform over the class of possible
-// graphs. class must ensure that the implicit Markov chain is irreducible,
-// aperiodic, and, importantly, doubly stochastic. Furthermore, it must be that
-// the starting graph
-//
-// step specifies the number of steps in the Markov chain. step should be
-// sufficiently high to allow for convergence of the Markov chain.
-//
-// src specifies the random number generator. If src is nil, math/rand is used.
-//
-// More information can be found in
-//  Ide, Jaime S., and Fabio G. Cozman. "Random generation of Bayesian networks."
-//  Brazilian symposium on artificial intelligence. Springer Berlin Heidelberg, 2002.
-func UniformEdges(dst DirectedMutator, start graph.Directed, class UniformGenerator, steps int, src *rand.Rand) {
-	if steps <= 0 {
-		panic("gen: number of steps must be positive")
-	}
-	if start == nil {
-		start = class.Start()
-	}
-	var rnd func(int) int
-	if src == nil {
-		rnd = rand.Intn
-	} else {
-		rnd = src.Intn
-	}
-
-	// Copy the starting graph into the graph builder.
-	nodes := start.Nodes()
-	for _, node := range nodes {
-		dst.AddNode(node)
-		tos := start.From(node)
-		for _, to := range tos {
-			edge := start.Edge(node, to)
-			dst.SetEdge(edge)
-		}
-	}
-	nNodes := len(nodes)
-
-	// Run the MarkovChain, choosing an edge at random in each step.
-	for step := 0; step < steps; step++ {
-		i := rand.Intn(nNodes)
-		j := rand.Intn(nNodes - 1)
-		if j >= i {
-			j++
-		}
-		class.Modify(dst, nodes[i], nodes[j])
 	}
 }

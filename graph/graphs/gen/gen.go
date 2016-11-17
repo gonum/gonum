@@ -21,6 +21,9 @@ type DirectedMutator interface {
 	DirectedBuilder
 	graph.EdgeRemover
 	Edge(from, to graph.Node) graph.Edge
+	From(graph.Node) []graph.Node
+	Nodes() []graph.Node
+	To(graph.Node) []graph.Node
 }
 
 func abs(a int) int {

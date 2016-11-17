@@ -41,6 +41,6 @@ install:
 
 script:
  - source ${TRAVIS_BUILD_DIR}/.travis/$TRAVIS_OS_NAME/$BLAS_LIB/test.sh
- - diff <(gofmt -d .) <("")
+ - test -z "`gofmt -d .`"
  # This is run last since it alters the tree.
  - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh

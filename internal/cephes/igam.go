@@ -15,6 +15,10 @@ import (
 )
 
 /*
+ * Adapted from scipy's cephes igam.c
+ */
+
+/*
  *     Incomplete Gamma integral
  *
  *

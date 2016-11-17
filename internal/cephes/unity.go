@@ -7,6 +7,10 @@
  * Copyright 1984, 1996 by Stephen L. Moshier
  */
 
+/*
+ * Adapted from scipy's cephes unity.c
+ */
+
 package cephes
 
 import "math"

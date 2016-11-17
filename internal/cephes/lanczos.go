@@ -8,6 +8,10 @@
  * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 
+/*
+ * Adapted from scipy's cephes lanczos.c
+ */
+
 /* Both lanczos.h and lanczos.c were formed from Boost's lanczos.hpp
  *
  * Scipy changes:

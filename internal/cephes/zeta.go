@@ -13,6 +13,10 @@ package cephes
 import "math"
 
 /*
+ * Adapted from scipy's cephes zeta.c
+ */
+
+/*
  *     Riemann zeta function of two arguments
  *
  *

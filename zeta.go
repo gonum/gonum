@@ -4,7 +4,7 @@
 
 package mathext
 
-import "github.com/zeroviscosity/mathext/internal/cephes"
+import "github.com/gonum/mathext/internal/cephes"
 
 // Zeta computes the Riemann zeta function of two arguments
 func Zeta(x, q float64) float64 {

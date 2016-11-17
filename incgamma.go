@@ -4,7 +4,7 @@
 
 package mathext
 
-import "github.com/zeroviscosity/mathext/internal/cephes"
+import "github.com/gonum/mathext/internal/cephes"
 
 // IncGamma computes the incomplete Gamma integral
 // In this implementation both arguments must be positive.

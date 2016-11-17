@@ -11,14 +11,22 @@ import (
 
 // Dorgql generates the m×n matrix Q with orthonormal columns defined as the
 // last n columns of a product of k elementary reflectors of order m
-//  Q = H_{k-1} * ... * H_1 * H_0
-// as returned by Dgelqf. See Dgelqf for more information.
+//  Q = H_{k-1} * ... * H_1 * H_0.
+//
+// It must hold that
+//  0 <= k <= n <= m,
+// and Dorgql will panic otherwise.
+//
+// On entry, the (n-k+i)-th column of A must contain the vector which defines
+// the elementary reflector H_i, for i=0,...,k-1, and tau[i] must contain its
+// scalar factor. On return, a contains the m×n matrix Q.
 //
 // tau must have length at least k, and Dorgql will panic otherwise.
 //
-// work is temporary storage, and lwork specifies the usable memory length. At minimum,
-// lwork >= n, and Dorgql will panic otherwise. The amount of blocking is
-// limited by the usable length.
+// work must have length at least max(1,lwork), and lwork must be at least
+// max(1,n), otherwise Dorgql will panic. For optimum performance lwork must
+// be a sufficiently large multiple of n.
+//
 // If lwork == -1, instead of computing Dorgql the optimal work length is stored
 // into work[0].
 //

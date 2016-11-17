@@ -53,6 +53,7 @@ const (
 	kGTM            = "lapack: k > m"
 	kGTN            = "lapack: k > n"
 	kLT0            = "lapack: k < 0"
+	mLT0            = "lapack: m < 0"
 	mLTN            = "lapack: m < n"
 	negDimension    = "lapack: negative matrix dimension"
 	negZ            = "lapack: negative z value"

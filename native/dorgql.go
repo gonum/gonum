@@ -24,20 +24,35 @@ import (
 //
 // Dorgql is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
-	checkMatrix(m, n, a, lda)
-	if len(tau) < k {
-		panic(badTau)
+	switch {
+	case n < 0:
+		panic(nLT0)
+	case m < n:
+		panic(mLTN)
+	case k < 0:
+		panic(kLT0)
+	case k > n:
+		panic(kGTN)
+	case lwork < max(1, n) && lwork != -1:
+		panic(badWork)
+	case len(work) < lwork:
+		panic(shortWork)
 	}
-	nb := impl.Ilaenv(1, "DORGQL", " ", m, n, k, -1)
-	lworkopt := n * nb
-	work[0] = float64(lworkopt)
-	if lwork == -1 {
+	if lwork != -1 {
+		checkMatrix(m, n, a, lda)
+		if len(tau) < k {
+			panic(badTau)
+		}
+	}
+
+	if n == 0 {
+		work[0] = 1
 		return
 	}
-	if lwork < n {
-		panic(badWork)
-	}
-	if n == 0 {
+
+	nb := impl.Ilaenv(1, "DORGQL", " ", m, n, k, -1)
+	if lwork == -1 {
+		work[0] = float64(n * nb)
 		return
 	}
 
@@ -103,4 +118,5 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 			}
 		}
 	}
+	work[0] = float64(iws)
 }

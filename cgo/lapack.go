@@ -47,6 +47,7 @@ const (
 	kGTM            = "lapack: k > m"
 	kGTN            = "lapack: k > n"
 	kLT0            = "lapack: k < 0"
+	mLT0            = "lapack: m < 0"
 	mLTN            = "lapack: m < n"
 	negDimension    = "lapack: negative matrix dimension"
 	negZ            = "lapack: negative z value"
@@ -1283,6 +1284,53 @@ func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work [
 		panic(badWork)
 	}
 	lapacke.Dorglq(m, n, k, a, lda, tau, work, lwork)
+}
+
+// Dorgql generates the m×n matrix Q with orthonormal columns defined as the
+// last n columns of a product of k elementary reflectors of order m
+//  Q = H_{k-1} * ... * H_1 * H_0.
+//
+// It must hold that
+//  0 <= k <= n <= m,
+// and Dorgql will panic otherwise.
+//
+// On entry, the (n-k+i)-th column of A must contain the vector which defines
+// the elementary reflector H_i, for i=0,...,k-1, and tau[i] must contain its
+// scalar factor. On return, a contains the m×n matrix Q.
+//
+// tau must have length at least k, and Dorgql will panic otherwise.
+//
+// work must have length at least max(1,lwork), and lwork must be at least
+// max(1,n), otherwise Dorgql will panic. For optimum performance lwork must
+// be a sufficiently large multiple of n.
+//
+// If lwork == -1, instead of computing Dorgql the optimal work length is stored
+// into work[0].
+//
+// Dorgql is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
+	switch {
+	case n < 0:
+		panic(nLT0)
+	case m < n:
+		panic(mLTN)
+	case k < 0:
+		panic(kLT0)
+	case k > n:
+		panic(kGTN)
+	case lwork < max(1, n) && lwork != -1:
+		panic(badWork)
+	case len(work) < lwork:
+		panic(shortWork)
+	}
+	if lwork != -1 {
+		checkMatrix(m, n, a, lda)
+		if len(tau) < k {
+			panic(badTau)
+		}
+	}
+
+	lapacke.Dorgql(m, n, k, a, lda, tau, work, lwork)
 }
 
 // Dorgqr generates an m×n matrix Q with orthonormal columns defined by the

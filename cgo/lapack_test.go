@@ -152,6 +152,10 @@ func TestDorglq(t *testing.T) {
 	testlapack.DorglqTest(t, blockedTranslate{impl})
 }
 
+func TestDorgql(t *testing.T) {
+	testlapack.DorgqlTest(t, impl)
+}
+
 func TestDorgqr(t *testing.T) {
 	testlapack.DorgqrTest(t, blockedTranslate{impl})
 }

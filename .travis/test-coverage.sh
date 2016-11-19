@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PROFILE_OUT=`pwd`/profile.out
-ACC_OUT=`pwd`/acc.out
+PROFILE_OUT=$PWD/profile.out
+ACC_OUT=$PWD/acc.out
 
 testCover() {
 	# set the return value to 0 (succesful)

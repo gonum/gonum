@@ -76,6 +76,10 @@ func TestDlarfx(t *testing.T) {
 	testlapack.DlarfxTest(t, impl)
 }
 
+func TestDlasrt(t *testing.T) {
+	testlapack.DlasrtTest(t, impl)
+}
+
 func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }

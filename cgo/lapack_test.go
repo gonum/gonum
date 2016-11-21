@@ -48,6 +48,10 @@ func TestDlacn2(t *testing.T) {
 	testlapack.Dlacn2Test(t, impl)
 }
 
+func TestDlascl(t *testing.T) {
+	testlapack.DlasclTest(t, impl)
+}
+
 func TestDlacpy(t *testing.T) {
 	testlapack.DlacpyTest(t, impl)
 }

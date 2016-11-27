@@ -28,8 +28,10 @@ const (
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"
 	badIhi          = "lapack: ihi out of range"
-	badIpiv         = "lapack: insufficient permutation length"
+	badIpiv         = "lapack: bad permutation length"
 	badJob          = "lapack: bad Job"
+	badK1           = "lapack: k1 out of range"
+	badK2           = "lapack: k2 out of range"
 	badKperm        = "lapack: incorrect permutation length"
 	badLdA          = "lapack: index of a out of range"
 	badNorm         = "lapack: bad norm"
@@ -511,12 +513,31 @@ func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
 	lapacke.Dlasrt(byte(s), n, d[:n])
 }
 
-// Dlaswp swaps the rows k1 to k2 of a according to the indices in ipiv.
-// a is a matrix with n columns and stride lda. incX is the increment for ipiv.
-// k1 and k2 are zero-indexed. If incX is negative, then loops from k2 to k1
+// Dlaswp swaps the rows k1 to k2 of a rectangular matrix A according to the
+// indices in ipiv so that row k is swapped with ipiv[k].
+//
+// n is the number of columns of A and incX is the increment for ipiv. If incX
+// is 1, the swaps are applied from k1 to k2. If incX is -1, the swaps are
+// applied in reverse order from k2 to k1. For other values of incX Dlaswp will
+// panic. ipiv must have length k2+1, otherwise Dlaswp will panic.
+//
+// The indices k1, k2, and the elements of ipiv are zero-based.
 //
 // Dlaswp is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlaswp(n int, a []float64, lda, k1, k2 int, ipiv []int, incX int) {
+	switch {
+	case n < 0:
+		panic(nLT0)
+	case k2 < 0:
+		panic(badK2)
+	case k1 < 0 || k2 < k1:
+		panic(badK1)
+	case len(ipiv) != k2+1:
+		panic(badIpiv)
+	case incX != 1 && incX != -1:
+		panic(absIncNotOne)
+	}
+
 	ipiv32 := make([]int32, len(ipiv))
 	for i, v := range ipiv {
 		ipiv32[i] = int32(v + 1)

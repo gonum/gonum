@@ -55,11 +55,13 @@ const (
 	kLT0            = "lapack: k < 0"
 	mLT0            = "lapack: m < 0"
 	mLTN            = "lapack: m < n"
+	nanScale        = "lapack: NaN scale factor"
 	negDimension    = "lapack: negative matrix dimension"
 	negZ            = "lapack: negative z value"
 	nLT0            = "lapack: n < 0"
 	nLTM            = "lapack: n < m"
 	shortWork       = "lapack: working array shorter than declared"
+	zeroDiv         = "lapack: zero divisor"
 )
 
 // checkMatrix verifies the parameters of a matrix input.

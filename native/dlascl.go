@@ -19,10 +19,10 @@ import (
 func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {
 	checkMatrix(m, n, a, lda)
 	if cfrom == 0 {
-		panic("dlascl: zero divisor")
+		panic(zeroDiv)
 	}
 	if math.IsNaN(cfrom) || math.IsNaN(cto) {
-		panic("dlascl: NaN scale factor")
+		panic(nanScale)
 	}
 	if n == 0 || m == 0 {
 		return

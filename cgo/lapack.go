@@ -51,11 +51,13 @@ const (
 	kLT0            = "lapack: k < 0"
 	mLT0            = "lapack: m < 0"
 	mLTN            = "lapack: m < n"
+	nanScale        = "lapack: NaN scale factor"
 	negDimension    = "lapack: negative matrix dimension"
 	negZ            = "lapack: negative z value"
 	nLT0            = "lapack: n < 0"
 	nLTM            = "lapack: n < m"
 	shortWork       = "lapack: working array shorter than declared"
+	zeroDiv         = "lapack: zero divisor"
 )
 
 func min(m, n int) int {
@@ -431,10 +433,10 @@ func (impl Implementation) Dlarfx(side blas.Side, m, n int, v []float64, tau flo
 func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {
 	checkMatrix(m, n, a, lda)
 	if cfrom == 0 {
-		panic("dlascl: zero divisor")
+		panic(zeroDiv)
 	}
 	if math.IsNaN(cfrom) || math.IsNaN(cto) {
-		panic("dlascl: NaN scale factor")
+		panic(nanScale)
 	}
 	lapacke.Dlascl(byte(kind), kl, ku, cfrom, cto, m, n, a, lda)
 }

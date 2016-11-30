@@ -37,6 +37,7 @@ const (
 	badShifts       = "lapack: bad shifts"
 	badSide         = "lapack: bad side"
 	badSlice        = "lapack: bad input slice length"
+	badSort         = "lapack: bad Sort"
 	badStore        = "lapack: bad store"
 	badTau          = "lapack: tau has insufficient length"
 	badTauQ         = "lapack: tauQ has insufficient length"
@@ -462,7 +463,7 @@ func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
 	checkVector(n, d, 1)
 	switch s {
 	default:
-		panic("lapack: bad sort")
+		panic(badSort)
 	case lapack.SortIncreasing, lapack.SortDecreasing:
 	}
 	lapacke.Dlasrt(byte(s), n, d[:n])

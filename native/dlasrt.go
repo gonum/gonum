@@ -20,7 +20,7 @@ func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
 	d = d[:n]
 	switch s {
 	default:
-		panic("lapack: bad sort")
+		panic(badSort)
 	case lapack.SortIncreasing:
 		sort.Float64s(d)
 	case lapack.SortDecreasing:

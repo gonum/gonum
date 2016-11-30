@@ -41,6 +41,7 @@ const (
 	badShifts       = "lapack: bad shifts"
 	badSide         = "lapack: bad side"
 	badSlice        = "lapack: bad input slice length"
+	badSort         = "lapack: bad Sort"
 	badStore        = "lapack: bad store"
 	badTau          = "lapack: tau has insufficient length"
 	badTauQ         = "lapack: tauQ has insufficient length"

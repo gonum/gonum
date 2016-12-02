@@ -64,6 +64,7 @@ var needsInt = map[string]bool{
 // The list keys are truncated by one character to cover all four numeric types.
 var allUplo = map[string]bool{
 	"lacpy": true,
+	"laset": true,
 }
 
 var cToGoType = map[string]string{
@@ -421,13 +422,10 @@ func uplo(buf *bytes.Buffer, d binding.Declaration, p binding.Parameter) bool {
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
-	case blas.All:
-		ul = 'A'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 `)
-
 	} else {
 		fmt.Fprint(buf, `	switch ul {
 	case blas.Upper:

@@ -83,7 +83,7 @@ func edgeNodesFor(i int) (v, w simple.Node) {
 }
 
 // Gnm constructs a graph in the destination, dst, of order n and size m. If src is not
-// nil it is used as the random source, otherwise rand.Float64 is used. The graph is
+// nil it is used as the random source, otherwise rand.Intn is used. The graph is
 // constructed in O(m) expected time for m ≤ (n choose 2)/2.
 func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 	if m == 0 {

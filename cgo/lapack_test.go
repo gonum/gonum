@@ -48,6 +48,10 @@ func TestDlacn2(t *testing.T) {
 	testlapack.Dlacn2Test(t, impl)
 }
 
+func TestDlascl(t *testing.T) {
+	testlapack.DlasclTest(t, impl)
+}
+
 func TestDlacpy(t *testing.T) {
 	testlapack.DlacpyTest(t, impl)
 }
@@ -72,8 +76,20 @@ func TestDlantr(t *testing.T) {
 	testlapack.DlantrTest(t, impl)
 }
 
+func TestDlapy2(t *testing.T) {
+	testlapack.Dlapy2Test(t, impl)
+}
+
 func TestDlarfx(t *testing.T) {
 	testlapack.DlarfxTest(t, impl)
+}
+
+func TestDlaset(t *testing.T) {
+	testlapack.DlasetTest(t, impl)
+}
+
+func TestDlasrt(t *testing.T) {
+	testlapack.DlasrtTest(t, impl)
 }
 
 func TestDpotrf(t *testing.T) {

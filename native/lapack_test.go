@@ -136,8 +136,24 @@ func TestDlange(t *testing.T) {
 	testlapack.DlangeTest(t, impl)
 }
 
+func TestDlapy2(t *testing.T) {
+	testlapack.Dlapy2Test(t, impl)
+}
+
 func TestDlas2(t *testing.T) {
 	testlapack.Dlas2Test(t, impl)
+}
+
+func TestDlascl(t *testing.T) {
+	testlapack.DlasclTest(t, impl)
+}
+
+func TestDlaset(t *testing.T) {
+	testlapack.DlasetTest(t, impl)
+}
+
+func TestDlasrt(t *testing.T) {
+	testlapack.DlasrtTest(t, impl)
 }
 
 func TestDlasy2(t *testing.T) {

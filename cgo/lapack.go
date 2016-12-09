@@ -6,6 +6,8 @@
 package cgo
 
 import (
+	"math"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/lapack"
 	"github.com/gonum/lapack/cgo/lapacke"
@@ -35,6 +37,7 @@ const (
 	badShifts       = "lapack: bad shifts"
 	badSide         = "lapack: bad side"
 	badSlice        = "lapack: bad input slice length"
+	badSort         = "lapack: bad Sort"
 	badStore        = "lapack: bad store"
 	badTau          = "lapack: tau has insufficient length"
 	badTauQ         = "lapack: tauQ has insufficient length"
@@ -49,11 +52,13 @@ const (
 	kLT0            = "lapack: k < 0"
 	mLT0            = "lapack: m < 0"
 	mLTN            = "lapack: m < n"
+	nanScale        = "lapack: NaN scale factor"
 	negDimension    = "lapack: negative matrix dimension"
 	negZ            = "lapack: negative z value"
 	nLT0            = "lapack: n < 0"
 	nLTM            = "lapack: n < m"
 	shortWork       = "lapack: working array shorter than declared"
+	zeroDiv         = "lapack: zero divisor"
 )
 
 func min(m, n int) int {
@@ -161,6 +166,13 @@ func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int
 	checkMatrix(m, n, a, lda)
 	checkMatrix(m, n, b, ldb)
 	lapacke.Dlacpy(uplo, m, n, a, lda, b, ldb)
+}
+
+// Dlapy2 is the LAPACK version of math.Hypot.
+//
+// Dlapy2 is an internal routine. It is exported for testing purposes.
+func (Implementation) Dlapy2(x, y float64) float64 {
+	return lapacke.Dlapy2(x, y)
 }
 
 // Dlarfb applies a block reflector to a matrix.
@@ -411,6 +423,64 @@ func (impl Implementation) Dlarfx(side blas.Side, m, n int, v []float64, tau flo
 	}
 
 	lapacke.Dlarfx(side, m, n, v, tau, c, ldc, work)
+}
+
+// Dlascl multiplies an m×n matrix by the scalar cto/cfrom.
+//
+// cfrom must not be zero, and cto and cfrom must not be NaN, otherwise Dlascl
+// will panic.
+//
+// Dlascl is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlascl(kind lapack.MatrixType, kl, ku int, cfrom, cto float64, m, n int, a []float64, lda int) {
+	checkMatrix(m, n, a, lda)
+	if cfrom == 0 {
+		panic(zeroDiv)
+	}
+	if math.IsNaN(cfrom) || math.IsNaN(cto) {
+		panic(nanScale)
+	}
+	lapacke.Dlascl(byte(kind), kl, ku, cfrom, cto, m, n, a, lda)
+}
+
+// Dlaset sets the off-diagonal elements of A to alpha, and the diagonal
+// elements to beta. If uplo == blas.Upper, only the elements in the upper
+// triangular part are set. If uplo == blas.Lower, only the elements in the
+// lower triangular part are set. If uplo is otherwise, all of the elements of A
+// are set.
+//
+// Dlaset is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlaset(uplo blas.Uplo, m, n int, alpha, beta float64, a []float64, lda int) {
+	checkMatrix(m, n, a, lda)
+	lapacke.Dlaset(uplo, m, n, alpha, beta, a, lda)
+}
+
+// Dlasrt sorts the numbers in the input slice d. If s == lapack.SortIncreasing,
+// the elements are sorted in increasing order. If s == lapack.SortDecreasing,
+// the elements are sorted in decreasing order. For other values of s Dlasrt
+// will panic.
+//
+// Dlasrt is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlasrt(s lapack.Sort, n int, d []float64) {
+	checkVector(n, d, 1)
+	switch s {
+	default:
+		panic(badSort)
+	case lapack.SortIncreasing, lapack.SortDecreasing:
+	}
+	lapacke.Dlasrt(byte(s), n, d[:n])
+}
+
+// Dlaswp swaps the rows k1 to k2 of a according to the indices in ipiv.
+// a is a matrix with n columns and stride lda. incX is the increment for ipiv.
+// k1 and k2 are zero-indexed. If incX is negative, then loops from k2 to k1
+//
+// Dlaswp is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlaswp(n int, a []float64, lda, k1, k2 int, ipiv []int, incX int) {
+	ipiv32 := make([]int32, len(ipiv))
+	for i, v := range ipiv {
+		ipiv32[i] = int32(v + 1)
+	}
+	lapacke.Dlaswp(n, a, lda, k1+1, k2+1, ipiv32, incX)
 }
 
 // Dpotrf computes the Cholesky decomposition of the symmetric positive definite

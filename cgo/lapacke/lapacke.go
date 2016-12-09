@@ -11476,10 +11476,8 @@ func Slacpy(ul blas.Uplo, m, n int, a []float32, lda int, b []float32, ldb int) 
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
-	case blas.All:
-		ul = 'A'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *float32
 	if len(a) > 0 {
@@ -11499,10 +11497,8 @@ func Dlacpy(ul blas.Uplo, m, n int, a []float64, lda int, b []float64, ldb int) 
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
-	case blas.All:
-		ul = 'A'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *float64
 	if len(a) > 0 {
@@ -11522,10 +11518,8 @@ func Clacpy(ul blas.Uplo, m, n int, a []complex64, lda int, b []complex64, ldb i
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
-	case blas.All:
-		ul = 'A'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *complex64
 	if len(a) > 0 {
@@ -11545,10 +11539,8 @@ func Zlacpy(ul blas.Uplo, m, n int, a []complex128, lda int, b []complex128, ldb
 		ul = 'U'
 	case blas.Lower:
 		ul = 'L'
-	case blas.All:
-		ul = 'A'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *complex128
 	if len(a) > 0 {
@@ -12841,7 +12833,7 @@ func Slaset(ul blas.Uplo, m, n int, alpha, beta float32, a []float32, lda int) b
 	case blas.Lower:
 		ul = 'L'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *float32
 	if len(a) > 0 {
@@ -12858,7 +12850,7 @@ func Dlaset(ul blas.Uplo, m, n int, alpha, beta float64, a []float64, lda int) b
 	case blas.Lower:
 		ul = 'L'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *float64
 	if len(a) > 0 {
@@ -12875,7 +12867,7 @@ func Claset(ul blas.Uplo, m, n int, alpha, beta complex64, a []complex64, lda in
 	case blas.Lower:
 		ul = 'L'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *complex64
 	if len(a) > 0 {
@@ -12892,7 +12884,7 @@ func Zlaset(ul blas.Uplo, m, n int, alpha, beta complex128, a []complex128, lda 
 	case blas.Lower:
 		ul = 'L'
 	default:
-		panic("lapack: illegal triangle")
+		ul = 'A'
 	}
 	var _a *complex128
 	if len(a) > 0 {

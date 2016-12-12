@@ -5,6 +5,7 @@
 package mat64
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"reflect"
@@ -1615,8 +1616,8 @@ func TestOuter(t *testing.T) {
 
 func TestInverse(t *testing.T) {
 	for i, test := range []struct {
-		a    *Dense
-		want *Dense
+		a    Matrix
+		want Matrix
 		tol  float64
 	}{
 		{
@@ -1632,6 +1633,60 @@ func TestInverse(t *testing.T) {
 			}),
 			tol: 1e-14,
 		},
+		{
+			a: NewDense(3, 3, []float64{
+				8, 1, 6,
+				3, 5, 7,
+				4, 9, 2,
+			}).T(),
+			want: NewDense(3, 3, []float64{
+				0.147222222222222, -0.144444444444444, 0.063888888888889,
+				-0.061111111111111, 0.022222222222222, 0.105555555555556,
+				-0.019444444444444, 0.188888888888889, -0.102777777777778,
+			}).T(),
+			tol: 1e-14,
+		},
+
+		// This case does not fail, but we do not guarantee that. The success
+		// is because the receiver and the input are aligned in the call to
+		// inverse. If there was a misalignment, the result would likely be
+		// incorrect and no shadowing panic would occur.
+		{
+			a: asBasicMatrix(NewDense(3, 3, []float64{
+				8, 1, 6,
+				3, 5, 7,
+				4, 9, 2,
+			})),
+			want: NewDense(3, 3, []float64{
+				0.147222222222222, -0.144444444444444, 0.063888888888889,
+				-0.061111111111111, 0.022222222222222, 0.105555555555556,
+				-0.019444444444444, 0.188888888888889, -0.102777777777778,
+			}),
+			tol: 1e-14,
+		},
+
+		// The following case fails as it does not follow the shadowing rules.
+		// Specifically, the test extracts the underlying *Dense, and uses
+		// it as a receiver with the basicMatrix as input. The basicMatrix type
+		// allows shadowing of the input data without providing the Raw method
+		// required for detection of shadowing.
+		//
+		// We specifically state we do not check this case.
+		//
+		// {
+		// 	a: asBasicMatrix(NewDense(3, 3, []float64{
+		// 		8, 1, 6,
+		// 		3, 5, 7,
+		// 		4, 9, 2,
+		// 	})).T(),
+		// 	want: NewDense(3, 3, []float64{
+		// 		0.147222222222222, -0.144444444444444, 0.063888888888889,
+		// 		-0.061111111111111, 0.022222222222222, 0.105555555555556,
+		// 		-0.019444444444444, 0.188888888888889, -0.102777777777778,
+		// 	}).T(),
+		// 	tol: 1e-14,
+		// },
+
 		{
 			a: NewDense(4, 4, []float64{
 				5, 2, 8, 7,
@@ -1666,6 +1721,39 @@ func TestInverse(t *testing.T) {
 		eye := NewDense(r, r, d)
 		if !equalApprox(eye, &m, 1e-14, false) {
 			t.Errorf("Case %d, A^-1 * A != I", i)
+		}
+
+		var tmp Dense
+		tmp.Clone(test.a)
+		aU, transposed := untranspose(test.a)
+		if transposed {
+			switch aU := aU.(type) {
+			case *Dense:
+				err = aU.Inverse(test.a)
+			case *basicMatrix:
+				err = (*Dense)(aU).Inverse(test.a)
+			default:
+				continue
+			}
+			m.Mul(aU, &tmp)
+		} else {
+			switch a := test.a.(type) {
+			case *Dense:
+				err = a.Inverse(test.a)
+				m.Mul(a, &tmp)
+			case *basicMatrix:
+				err = (*Dense)(a).Inverse(test.a)
+				m.Mul(a, &tmp)
+			default:
+				continue
+			}
+		}
+		if err != nil {
+			t.Errorf("Error computing inverse: %v", err)
+		}
+		if !equalApprox(eye, &m, 1e-14, false) {
+			t.Errorf("Case %d, A^-1 * A != I", i)
+			fmt.Println(Formatted(&m))
 		}
 	}
 }

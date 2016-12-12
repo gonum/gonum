@@ -228,15 +228,7 @@ func (m *Dense) Inverse(a Matrix) error {
 			m.Copy(a)
 		}
 	default:
-		if m != aU {
-			m.Copy(a)
-		} else if aTrans {
-			// m and a share data so Copy cannot be used directly.
-			tmp := getWorkspace(r, c, false)
-			tmp.Copy(a)
-			m.Copy(tmp)
-			putWorkspace(tmp)
-		}
+		m.Copy(a)
 	}
 	ipiv := make([]int, r)
 	lapack64.Getrf(m.mat, ipiv)

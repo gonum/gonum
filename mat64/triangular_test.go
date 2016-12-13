@@ -260,3 +260,58 @@ func TestTriInverse(t *testing.T) {
 		}
 	}
 }
+
+func TestTriMul(t *testing.T) {
+	method := func(receiver, a, b Matrix) {
+		type MulTrier interface {
+			MulTri(a, b Triangular)
+		}
+		receiver.(MulTrier).MulTri(a.(Triangular), b.(Triangular))
+	}
+	denseComparison := func(receiver, a, b *Dense) {
+		receiver.Mul(a, b)
+	}
+	legalSizeTriMul := func(ar, ac, br, bc int) bool {
+		// Need both to be square and the sizes to be the same
+		return ar == ac && br == bc && ar == br
+	}
+
+	// The legal types are triangles with the same TriKind.
+	// legalTypesTri returns whether both input arguments are Triangular.
+	legalTypes := func(a, b Matrix) bool {
+		at, ok := a.(Triangular)
+		if !ok {
+			return false
+		}
+		bt, ok := b.(Triangular)
+		if !ok {
+			return false
+		}
+		_, ak := at.Triangle()
+		_, bk := bt.Triangle()
+		return ak == bk
+	}
+	legalTypesLower := func(a, b Matrix) bool {
+		legal := legalTypes(a, b)
+		if !legal {
+			return false
+		}
+		_, kind := a.(Triangular).Triangle()
+		r := kind == matrix.Lower
+		return r
+	}
+	receiver := NewTriDense(3, matrix.Lower, nil)
+	testTwoInput(t, "TriMul", receiver, method, denseComparison, legalTypesLower, legalSizeTriMul, 1e-14)
+
+	legalTypesUpper := func(a, b Matrix) bool {
+		legal := legalTypes(a, b)
+		if !legal {
+			return false
+		}
+		_, kind := a.(Triangular).Triangle()
+		r := kind == matrix.Upper
+		return r
+	}
+	receiver = NewTriDense(3, matrix.Upper, nil)
+	testTwoInput(t, "TriMul", receiver, method, denseComparison, legalTypesUpper, legalSizeTriMul, 1e-14)
+}

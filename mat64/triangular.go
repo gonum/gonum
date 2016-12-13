@@ -41,8 +41,9 @@ type RawTriangular interface {
 }
 
 var (
-	_ Matrix     = TransposeTri{}
-	_ Triangular = TransposeTri{}
+	_ Matrix           = TransposeTri{}
+	_ Triangular       = TransposeTri{}
+	_ UntransposeTrier = TransposeTri{}
 )
 
 // TransposeTri is a type for performing an implicit transpose of a Triangular
@@ -83,6 +84,10 @@ func (t TransposeTri) TTri() Triangular {
 
 // Untranspose returns the Triangular field.
 func (t TransposeTri) Untranspose() Matrix {
+	return t.Triangular
+}
+
+func (t TransposeTri) UntransposeTri() Triangular {
 	return t.Triangular
 }
 
@@ -197,6 +202,16 @@ func (t *TriDense) isZero() bool {
 	return t.mat.Stride == 0
 }
 
+// untranspose untransposes a matrix if applicable. If a is an Untransposer, then
+// untranspose returns the underlying matrix and true. If it is not, then it returns
+// the input matrix and false.
+func untransposeTri(a Triangular) (Triangular, bool) {
+	if ut, ok := a.(UntransposeTrier); ok {
+		return ut.UntransposeTri(), true
+	}
+	return a, false
+}
+
 // reuseAs resizes a zero receiver to an n×n triangular matrix with the given
 // orientation. If the receiver is non-zero, reuseAs checks that the receiver
 // is the correct size and orientation.
@@ -219,8 +234,26 @@ func (t *TriDense) reuseAs(n int, kind matrix.TriKind) {
 		t.cap = n
 		return
 	}
-	if t.mat.N != n || t.mat.Uplo != ul {
+	if t.mat.N != n {
 		panic(matrix.ErrShape)
+	}
+	if t.mat.Uplo != ul {
+		panic(matrix.ErrTriangle)
+	}
+}
+
+// isolatedWorkspace returns a new TriDense matrix w with the size of a and
+// returns a callback to defer which performs cleanup at the return of the call.
+// This should be used when a method receiver is the same pointer as an input argument.
+func (t *TriDense) isolatedWorkspace(a Triangular) (w *TriDense, restore func()) {
+	n, kind := a.Triangle()
+	if n == 0 {
+		panic("zero size")
+	}
+	w = getWorkspaceTri(n, kind, false)
+	return w, func() {
+		t.Copy(w)
+		putWorkspaceTri(w)
 	}
 }
 
@@ -311,6 +344,55 @@ func (t *TriDense) InverseTri(a Triangular) error {
 		return matrix.Condition(cond)
 	}
 	return nil
+}
+
+// MulTri takes the product of triangular matrices a and b and places the result
+// in the receiver. The size of a and b must match, and they both must have the
+// same TriKind, or Mul will panic.
+func (t *TriDense) MulTri(a, b Triangular) {
+	n, kind := a.Triangle()
+	nb, kindb := b.Triangle()
+	if n != nb {
+		panic(matrix.ErrShape)
+	}
+	if kind != kindb {
+		panic(matrix.ErrTriangle)
+	}
+
+	aU, _ := untransposeTri(a)
+	bU, _ := untransposeTri(b)
+	t.reuseAs(n, kind)
+	var restore func()
+	if t == aU {
+		t, restore = t.isolatedWorkspace(aU)
+		defer restore()
+	} else if t == bU {
+		t, restore = t.isolatedWorkspace(bU)
+		defer restore()
+	}
+
+	// TODO(btracey): Improve the set of fast-paths.
+	if kind == matrix.Upper {
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				var v float64
+				for k := i; k <= j; k++ {
+					v += a.At(i, k) * b.At(k, j)
+				}
+				t.SetTri(i, j, v)
+			}
+		}
+		return
+	}
+	for i := 0; i < n; i++ {
+		for j := 0; j <= i; j++ {
+			var v float64
+			for k := j; k <= i; k++ {
+				v += a.At(i, k) * b.At(k, j)
+			}
+			t.SetTri(i, j, v)
+		}
+	}
 }
 
 // copySymIntoTriangle copies a symmetric matrix into a TriDense

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
+	"github.com/gonum/matrix"
 )
 
 var tab64 = [64]byte{
@@ -48,6 +49,9 @@ var (
 	// poolSym is the SymDense equivalent of pool.
 	poolSym [63]sync.Pool
 
+	// poolTri is the TriDense equivalent of pool.
+	poolTri [63]sync.Pool
+
 	// poolVec is the Vector equivalent of pool.
 	poolVec [63]sync.Pool
 )
@@ -63,6 +67,11 @@ func init() {
 		poolSym[i].New = func() interface{} {
 			return &SymDense{mat: blas64.Symmetric{
 				Uplo: blas.Upper,
+				Data: make([]float64, l),
+			}}
+		}
+		poolTri[i].New = func() interface{} {
+			return &TriDense{mat: blas64.Triangular{
 				Data: make([]float64, l),
 			}}
 		}
@@ -116,11 +125,42 @@ func getWorkspaceSym(n int, clear bool) *SymDense {
 	return s
 }
 
+// getWorkspaceTri returns a *TriDense of size n and a cap that is less than 2*n.
+// If clear is true, the data slice visible through the Matrix interface is zeroed.
+func getWorkspaceTri(n int, kind matrix.TriKind, clear bool) *TriDense {
+	l := uint64(n)
+	l *= l
+	t := poolTri[bits(l)].Get().(*TriDense)
+	t.mat.Data = t.mat.Data[:l]
+	if clear {
+		zero(t.mat.Data)
+	}
+	t.mat.N = n
+	t.mat.Stride = n
+	if kind == matrix.Upper {
+		t.mat.Uplo = blas.Upper
+	} else if kind == matrix.Lower {
+		t.mat.Uplo = blas.Lower
+	} else {
+		panic(matrix.ErrTriangle)
+	}
+	t.mat.Diag = blas.NonUnit
+	t.cap = n
+	return t
+}
+
 // putWorkspaceSym replaces a used *SymDense into the appropriate size
 // workspace pool. putWorkspaceSym must not be called with a matrix
 // where references to the underlying data slice has been kept.
 func putWorkspaceSym(s *SymDense) {
 	poolSym[bits(uint64(cap(s.mat.Data)))].Put(s)
+}
+
+// putWorkspaceTri replaces a used *TriDense into the appropriate size
+// workspace pool. putWorkspaceTri must not be called with a matrix
+// where references to the underlying data slice has been kept.
+func putWorkspaceTri(t *TriDense) {
+	poolTri[bits(uint64(cap(t.mat.Data)))].Put(t)
 }
 
 // getWorkspaceVec returns a *Vector of length n and a cap that is less than 2*n. If clear is true, the

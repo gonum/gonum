@@ -230,10 +230,10 @@ func returnAs(a, t Matrix) Matrix {
 // of a.
 func retranspose(a, m Matrix) Matrix {
 	switch a.(type) {
-	case Transpose:
-		return Transpose{m}
 	case TransposeTri:
 		return TransposeTri{m.(Triangular)}
+	case Transpose:
+		return Transpose{m}
 	case Untransposer:
 		panic("unknown transposer type")
 	default:
@@ -384,15 +384,26 @@ func sameType(a, b Matrix) bool {
 // pointer.
 func maybeSame(receiver, a Matrix) bool {
 	rr, rc := receiver.Dims()
-	u, ok := a.(Untransposer)
-	if ok {
+	u, trans := a.(Untransposer)
+	if trans {
 		a = u.Untranspose()
 	}
-	ar, ac := a.Dims()
 	if !sameType(receiver, a) {
 		return false
 	}
-	return rr == ar && rc == ac
+	ar, ac := a.Dims()
+	if rr != ar || rc != ac {
+		return false
+	}
+	if _, ok := a.(Triangular); ok {
+		// They are both triangular types. The TriType needs to match
+		_, aKind := a.(Triangular).Triangle()
+		_, rKind := receiver.(Triangular).Triangle()
+		if aKind != rKind {
+			return false
+		}
+	}
+	return true
 }
 
 // equalApprox returns whether the elements of a and b are the same to within
@@ -477,35 +488,39 @@ func underlyingData(a Matrix) []float64 {
 		return t.mat.Data
 	case *SymDense:
 		return t.mat.Data
+	case *TriDense:
+		return t.mat.Data
 	case *Vector:
 		return t.mat.Data
 	}
 }
 
 // testMatrices is a list of matrix types to test.
+// The TriDense types have actual sizes because the return from Triangular is
+// only valid when n == 0.
 var testMatrices = []Matrix{
 	&Dense{},
 	&SymDense{},
-	NewTriDense(0, true, nil),
-	NewTriDense(0, false, nil),
+	NewTriDense(3, true, nil),
+	NewTriDense(3, false, nil),
 	NewVector(0, nil),
 	&Vector{mat: blas64.Vector{Inc: 10}},
 	&basicMatrix{},
 	&basicSymmetric{},
-	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}},
-	&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}},
+	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}},
+	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Lower}},
 
 	Transpose{&Dense{}},
-	Transpose{NewTriDense(0, true, nil)},
-	TransposeTri{NewTriDense(0, true, nil)},
-	Transpose{NewTriDense(0, false, nil)},
-	TransposeTri{NewTriDense(0, false, nil)},
+	Transpose{NewTriDense(3, true, nil)},
+	TransposeTri{NewTriDense(3, true, nil)},
+	Transpose{NewTriDense(3, false, nil)},
+	TransposeTri{NewTriDense(3, false, nil)},
 	Transpose{NewVector(0, nil)},
 	Transpose{&Vector{mat: blas64.Vector{Inc: 10}}},
 	Transpose{&basicMatrix{}},
 	Transpose{&basicSymmetric{}},
-	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Upper}}},
-	Transpose{&basicTriangular{mat: blas64.Triangular{Uplo: blas.Lower}}},
+	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}}},
+	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Lower}}},
 }
 
 var sizes = []struct {
@@ -1006,9 +1021,9 @@ func testTwoInput(t *testing.T,
 				// to construct a new random matrix.
 				rr, rc := wasZero.Dims()
 				neverZero := makeRandOf(receiver, rr, rc)
-				panicked, _ = panics(func() { method(neverZero, a, b) })
+				panicked, message := panics(func() { method(neverZero, a, b) })
 				if panicked {
-					t.Errorf("Panicked with non-zero receiver: %s", errStr)
+					t.Errorf("Panicked with non-zero receiver: %s: %s", errStr, message)
 				}
 				// NaN equality is allowed because of 0/0 in DivElem test.
 				if !equalApprox(neverZero, &want, tol, true) {
@@ -1104,9 +1119,9 @@ func testTwoInput(t *testing.T,
 					// Ensure that b is the correct transpose type if applicable.
 					// The receiver is always a concrete type so use it.
 					bSame := receiver
-					u, ok = bSame.(Untransposer)
+					u, ok = b.(Untransposer)
 					if ok {
-						bSame = retranspose(bSame, receiver)
+						bSame = retranspose(b, receiver)
 					}
 					// Compute the real answer for this case. It is different
 					// from the initial answer since now a and b have the

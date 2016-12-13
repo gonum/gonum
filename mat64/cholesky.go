@@ -86,6 +86,23 @@ func (c *Cholesky) Reset() {
 	c.cond = math.Inf(1)
 }
 
+// SetFromU sets the Cholesky decomposition from the given triangular matrix.
+// SetFromU panics if t is not upper triangular. Note that t is copied into,
+// not stored inside, the receiver.
+func (c *Cholesky) SetFromU(t *TriDense) {
+	n, kind := t.Triangle()
+	if kind != matrix.Upper {
+		panic("cholesky: matrix must be upper triangular")
+	}
+	if c.isZero() {
+		c.chol = NewTriDense(n, matrix.Upper, nil)
+	} else {
+		c.chol = NewTriDense(n, matrix.Upper, use(c.chol.mat.Data, n*n))
+	}
+	c.chol.Copy(t)
+	c.updateCond(-1)
+}
+
 // Size returns the dimension of the factorized matrix.
 func (c *Cholesky) Size() int {
 	if !c.valid() {

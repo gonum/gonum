@@ -20,8 +20,9 @@ import (
 // definite matrix V.
 //
 // The Wishart PDF is given by
-//  p(X) = [|X|^((ν-d-1)/2) * exp(-tr(V^-1 * X)/2)] / [2^(n*d/2) * |V|^(n/2) * Γ(d, ν/2)]
-// where X is a d×d PSD matrix, ν > d-1, tr is the trace and Γ is the multivariate gamma function.
+//  p(X) = [|X|^((ν-d-1)/2) * exp(-tr(V^-1 * X)/2)] / [2^(ν*d/2) * |V|^(ν/2) * Γ_d(ν/2)]
+// where X is a d×d PSD matrix, ν > d-1, |·| denotes the determinant, tr is the
+// trace and Γ_d is the multivariate gamma function.
 //
 // See https://en.wikipedia.org/wiki/Wishart_distribution for more information.
 type Wishart struct {
@@ -41,7 +42,7 @@ type Wishart struct {
 // degrees of freedom parameter. NewWishart returns whether the creation was
 // successful.
 //
-// NewWishart panics if nu <= p - 1.
+// NewWishart panics if nu <= d - 1 where d is the order of v.
 func NewWishart(v mat64.Symmetric, nu float64, src *rand.Rand) (*Wishart, bool) {
 	dim := v.Symmetric()
 	if nu <= float64(dim-1) {
@@ -70,7 +71,8 @@ func NewWishart(v mat64.Symmetric, nu float64, src *rand.Rand) (*Wishart, bool) 
 
 // MeanSym returns the mean matrix of the distribution as a symmetric matrix.
 // If x is nil, a new matrix is allocated and returned. If x is not nil, the
-// result is stored in-place into x. It must have size d×d or MeanSym will panic.
+// result is stored in-place into x and MeanSym will panic if the order of x
+// is not equal to the order of the receiver.
 func (w *Wishart) MeanSym(x *mat64.SymDense) *mat64.SymDense {
 	if x == nil {
 		x = mat64.NewSymDense(w.dim, nil)
@@ -98,7 +100,7 @@ func (w *Wishart) ProbSym(x mat64.Symmetric) float64 {
 func (w *Wishart) LogProbSym(x mat64.Symmetric) float64 {
 	dim := x.Symmetric()
 	if dim != w.dim {
-		panic("dimension mismatch")
+		panic(badDim)
 	}
 	var chol mat64.Cholesky
 	ok := chol.Factorize(x)
@@ -120,9 +122,9 @@ func (w *Wishart) LogProbSymChol(cholX *mat64.Cholesky) float64 {
 
 func (w *Wishart) logProbSymChol(cholX *mat64.Cholesky) float64 {
 	// The PDF is
-	//  p(X) = [|X|^((ν-d-1)/2) * exp(-tr(V^-1 * X)/2)] / [2^(n*d/2) * |V|^(n/2) * Γ(d, ν/2)]
+	//  p(X) = [|X|^((ν-d-1)/2) * exp(-tr(V^-1 * X)/2)] / [2^(ν*d/2) * |V|^(ν/2) * Γ_d(ν/2)]
 	// The LogPDF is thus
-	// (ν-d-1)/2 * logdet(X) - tr(V^-1 * X)/2  - (ν*d/2)*log(2) - ν/2 * logdet(V) - loggamma(d, ν/2)
+	//  (ν-d-1)/2 * log(|X|) - tr(V^-1 * X)/2  - (ν*d/2)*log(2) - ν/2 * log(|V|) - log(Γ_d(ν/2))
 	logdetx := cholX.LogDet()
 
 	// Compute tr(V^-1 * X), using the fact that X = U^T * U.

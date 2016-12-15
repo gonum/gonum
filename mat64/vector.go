@@ -51,15 +51,25 @@ func NewVector(n int, data []float64) *Vector {
 // extending n rows. If i is out of range, n is zero, or the view extends
 // beyond the bounds of the Vector, ViewVec will panic with ErrIndexOutOfRange.
 // The returned Vector retains reference to the underlying vector.
+//
+// ViewVec is deprecated and should not be used. It will be removed at a later date.
 func (v *Vector) ViewVec(i, n int) *Vector {
-	if i < 0 || n <= 0 || i+n > v.n {
+	return v.SliceVec(i, i+n)
+}
+
+// SliceVec returns a new Vector that shares backing data with the receiver.
+// The returned matrix starts at i of the recevier and extends k-i elements.
+// SliceVec panics with ErrIndexOutOfRange if the slice is outside the bounds
+// of the receiver.
+func (v *Vector) SliceVec(i, k int) *Vector {
+	if i < 0 || k <= i || v.n < k {
 		panic(matrix.ErrIndexOutOfRange)
 	}
 	return &Vector{
-		n: n,
+		n: k - i,
 		mat: blas64.Vector{
 			Inc:  v.mat.Inc,
-			Data: v.mat.Data[i*v.mat.Inc : (i+n-1)*v.mat.Inc+1],
+			Data: v.mat.Data[i*v.mat.Inc : (k-1)*v.mat.Inc+1],
 		},
 	}
 }

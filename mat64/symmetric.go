@@ -400,14 +400,25 @@ func (s *SymDense) SubsetSym(a Symmetric, set []int) {
 // ViewSquare returns a view of the submatrix starting at {i, i} and extending
 // for n rows and columns. ViewSquare panics if the view is outside the bounds
 // of the receiver.
+//
+// ViewSquare is deprecated and should not be used. It will be removed at a later date.
 func (s *SymDense) ViewSquare(i, n int) Matrix {
+	return s.SliceSquare(i, i+n)
+}
+
+// SliceSquare returns a new Matrix that shares backing data with the receiver.
+// The returned matrix starts at {i,i} of the recevier and extends k-i rows
+// and columns. The final row and column in the resulting matrix is k-1.
+// SliceSquare panics with ErrIndexOutOfRange if the slice is outside the bounds
+// of the receiver.
+func (s *SymDense) SliceSquare(i, k int) Matrix {
 	sz := s.Symmetric()
-	if i < 0 || i > sz || n < 0 || i+n > sz {
+	if i < 0 || sz < i || k < i || sz < k {
 		panic(matrix.ErrIndexOutOfRange)
 	}
 	v := *s
-	v.mat.Data = s.mat.Data[i*s.mat.Stride+i : (i+n-1)*s.mat.Stride+i+n]
-	v.mat.N = n
+	v.mat.Data = s.mat.Data[i*s.mat.Stride+i : (k-1)*s.mat.Stride+k]
+	v.mat.N = k - i
 	v.cap = s.cap - i
 	return &v
 }

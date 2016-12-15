@@ -47,7 +47,7 @@ func TestDenseOverlaps(t *testing.T) {
 					} else {
 						views[k].c = 1
 					}
-					views[k].Dense = m.View(views[k].i, views[k].j, views[k].r, views[k].c).(*Dense)
+					views[k].Dense = m.Slice(views[k].i, views[k].i+views[k].r, views[k].j, views[k].j+views[k].c).(*Dense)
 
 					panicked, _ = panics(func() { m.checkOverlap(views[k].RawMatrix()) })
 					if !panicked {
@@ -122,7 +122,7 @@ func TestTriDenseOverlaps(t *testing.T) {
 					}
 					viewKind := []matrix.TriKind{matrix.Upper, matrix.Lower}[rnd.Intn(2)]
 					views[k].TriDense = denseAsTriDense(
-						m.View(views[k].i, views[k].j, views[k].n, views[k].n).(*Dense),
+						m.Slice(views[k].i, views[k].i+views[k].n, views[k].j, views[k].j+views[k].n).(*Dense),
 						viewKind)
 
 					wantPanick := overlapsParentTriangle(views[k].i, views[k].j, views[k].n, parentKind, viewKind)
@@ -242,8 +242,8 @@ func TestIssue359(t *testing.T) {
 						4, 5, 6,
 						7, 8, 9,
 					})
-					x := a.View(xi, xj, 2, 2).(*Dense)
-					y := a.View(yi, yj, 2, 2).(*Dense)
+					x := a.Slice(xi, xi+2, xj, xj+2).(*Dense)
+					y := a.Slice(yi, yi+2, yj, yj+2).(*Dense)
 
 					panicked, _ := panics(func() { x.checkOverlap(y.mat) })
 					if !panicked {

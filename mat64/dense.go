@@ -277,15 +277,27 @@ func (m *Dense) rawRowView(i int) []float64 {
 // View returns a new Matrix that shares backing data with the receiver.
 // The new matrix is located from row i, column j extending r rows and c
 // columns. View panics if the view is outside the bounds of the receiver.
+//
+// View is deprecated and should not be used. It will be removed at a later date.
 func (m *Dense) View(i, j, r, c int) Matrix {
+	return m.Slice(i, i+r, j, j+c)
+}
+
+// Slice returns a new Matrix that shares backing data with the receiver.
+// The returned matrix starts at {i,j} of the recevier and extends k-i rows
+// and l-j columns. The final row in the resulting matrix is k-1 and the
+// final column is l-1.
+// Slice panics with ErrIndexOutOfRange if the slice is outside the bounds
+// of the receiver.
+func (m *Dense) Slice(i, k, j, l int) Matrix {
 	mr, mc := m.Dims()
-	if i < 0 || i >= mr || j < 0 || j >= mc || r <= 0 || i+r > mr || c <= 0 || j+c > mc {
+	if i < 0 || mr <= i || j < 0 || mc <= j || k <= i || mr < k || l <= j || mc < l {
 		panic(matrix.ErrIndexOutOfRange)
 	}
 	t := *m
-	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (i+r-1)*t.mat.Stride+(j+c)]
-	t.mat.Rows = r
-	t.mat.Cols = c
+	t.mat.Data = t.mat.Data[i*t.mat.Stride+j : (k-1)*t.mat.Stride+l]
+	t.mat.Rows = k - i
+	t.mat.Cols = l - j
 	t.capRows -= i
 	t.capCols -= j
 	return &t
@@ -506,7 +518,7 @@ func (m *Dense) Stack(a, b Matrix) {
 	m.reuseAs(ar+br, ac)
 
 	m.Copy(a)
-	w := m.View(ar, 0, br, bc).(*Dense)
+	w := m.Slice(ar, ar+br, 0, bc).(*Dense)
 	w.Copy(b)
 }
 
@@ -524,6 +536,6 @@ func (m *Dense) Augment(a, b Matrix) {
 	m.reuseAs(ar, ac+bc)
 
 	m.Copy(a)
-	w := m.View(0, ac, br, bc).(*Dense)
+	w := m.Slice(0, br, ac, ac+bc).(*Dense)
 	w.Copy(b)
 }

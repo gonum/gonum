@@ -328,7 +328,7 @@ func TestRowColView(t *testing.T) {
 				}
 			}
 		}
-		m = m.View(1, 1, rows-2, cols-2).(*Dense)
+		m = m.Slice(1, rows-1, 1, cols-1).(*Dense)
 		for i := 1; i < rows-1; i++ {
 			vr := m.RowView(i - 1)
 			if vr.Len() != cols-2 {
@@ -376,22 +376,22 @@ func TestGrow(t *testing.T) {
 
 	// Test grow within caps is in-place.
 	m.Set(1, 1, 1)
-	v := m.View(1, 1, 4, 4).(*Dense)
+	v := m.Slice(1, 5, 1, 5).(*Dense)
 	if v.At(0, 0) != m.At(1, 1) {
 		t.Errorf("unexpected viewed element value: got: %v want: %v", v.At(0, 0), m.At(1, 1))
 	}
 	v = v.Grow(5, 5).(*Dense)
-	if !Equal(v, m.View(1, 1, 9, 9)) {
+	if !Equal(v, m.Slice(1, 10, 1, 10)) {
 		t.Error("unexpected view value after grow")
 	}
 
 	// Test grow bigger than caps copies.
 	v = v.Grow(5, 5).(*Dense)
-	if !Equal(v.View(0, 0, 9, 9), m.View(1, 1, 9, 9)) {
+	if !Equal(v.Slice(0, 9, 0, 9), m.Slice(1, 10, 1, 10)) {
 		t.Error("unexpected mismatched common view value after grow")
 	}
 	v.Set(0, 0, 0)
-	if Equal(v.View(0, 0, 9, 9), m.View(1, 1, 9, 9)) {
+	if Equal(v.Slice(0, 9, 0, 9), m.Slice(1, 10, 1, 10)) {
 		t.Error("unexpected matching view value after grow past capacity")
 	}
 
@@ -476,7 +476,7 @@ func TestAdd(t *testing.T) {
 	panicked, message := panics(func() {
 		m := NewDense(10, 10, nil)
 		a := NewDense(5, 5, nil)
-		m.View(1, 1, 5, 5).(*Dense).Add(a, m.View(2, 2, 5, 5))
+		m.Slice(1, 6, 1, 6).(*Dense).Add(a, m.Slice(2, 7, 2, 7))
 	})
 	if !panicked {
 		t.Error("expected panic for overlapping matrices")
@@ -563,7 +563,7 @@ func TestSub(t *testing.T) {
 	panicked, message := panics(func() {
 		m := NewDense(10, 10, nil)
 		a := NewDense(5, 5, nil)
-		m.View(1, 1, 5, 5).(*Dense).Sub(a, m.View(2, 2, 5, 5))
+		m.Slice(1, 6, 1, 6).(*Dense).Sub(a, m.Slice(2, 7, 2, 7))
 	})
 	if !panicked {
 		t.Error("expected panic for overlapping matrices")
@@ -650,7 +650,7 @@ func TestMulElem(t *testing.T) {
 	panicked, message := panics(func() {
 		m := NewDense(10, 10, nil)
 		a := NewDense(5, 5, nil)
-		m.View(1, 1, 5, 5).(*Dense).MulElem(a, m.View(2, 2, 5, 5))
+		m.Slice(1, 6, 1, 6).(*Dense).MulElem(a, m.Slice(2, 7, 2, 7))
 	})
 	if !panicked {
 		t.Error("expected panic for overlapping matrices")
@@ -753,7 +753,7 @@ func TestDivElem(t *testing.T) {
 	panicked, message := panics(func() {
 		m := NewDense(10, 10, nil)
 		a := NewDense(5, 5, nil)
-		m.View(1, 1, 5, 5).(*Dense).DivElem(a, m.View(2, 2, 5, 5))
+		m.Slice(1, 6, 1, 6).(*Dense).DivElem(a, m.Slice(2, 7, 2, 7))
 	})
 	if !panicked {
 		t.Error("expected panic for overlapping matrices")
@@ -843,7 +843,7 @@ func TestMul(t *testing.T) {
 	panicked, message := panics(func() {
 		m := NewDense(10, 10, nil)
 		a := NewDense(5, 5, nil)
-		m.View(1, 1, 5, 5).(*Dense).Mul(a, m.View(2, 2, 5, 5))
+		m.Slice(1, 6, 1, 6).(*Dense).Mul(a, m.Slice(2, 7, 2, 7))
 	})
 	if !panicked {
 		t.Error("expected panic for overlapping matrices")
@@ -907,7 +907,7 @@ func TestExp(t *testing.T) {
 				for i := range d {
 					d[i] = math.NaN()
 				}
-				*a = *NewDense(10, 10, d).View(1, 1, 2, 2).(*Dense)
+				*a = *NewDense(10, 10, d).Slice(1, 3, 1, 3).(*Dense)
 			},
 		},
 		{
@@ -947,7 +947,7 @@ func TestPow(t *testing.T) {
 				for i := range d {
 					d[i] = math.NaN()
 				}
-				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+				*a = *NewDense(10, 10, d).Slice(1, 4, 1, 4).(*Dense)
 			},
 		},
 		{
@@ -964,7 +964,7 @@ func TestPow(t *testing.T) {
 				for i := range d {
 					d[i] = math.NaN()
 				}
-				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+				*a = *NewDense(10, 10, d).Slice(1, 4, 1, 4).(*Dense)
 			},
 		},
 		{
@@ -981,7 +981,7 @@ func TestPow(t *testing.T) {
 				for i := range d {
 					d[i] = math.NaN()
 				}
-				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+				*a = *NewDense(10, 10, d).Slice(1, 4, 1, 4).(*Dense)
 			},
 		},
 		{
@@ -998,7 +998,7 @@ func TestPow(t *testing.T) {
 				for i := range d {
 					d[i] = math.NaN()
 				}
-				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+				*a = *NewDense(10, 10, d).Slice(1, 4, 1, 4).(*Dense)
 			},
 		},
 	} {
@@ -1045,7 +1045,7 @@ func TestPowN(t *testing.T) {
 				for i := range d {
 					d[i] = math.NaN()
 				}
-				*a = *NewDense(10, 10, d).View(1, 1, 3, 3).(*Dense)
+				*a = *NewDense(10, 10, d).Slice(1, 4, 1, 4).(*Dense)
 			},
 		},
 	} {
@@ -1177,9 +1177,9 @@ func TestCopyDenseAlias(t *testing.T) {
 							4, 5, 6,
 							7, 8, 9,
 						})
-						src := a.View(si, sj, 2, 2)
+						src := a.Slice(si, si+2, sj, sj+2)
 						want := DenseCopyOf(src)
-						got := a.View(di, dj, 2, 2).(*Dense)
+						got := a.Slice(di, di+2, dj, dj+2).(*Dense)
 
 						if trans {
 							panicked, _ := panics(func() { got.Copy(src.T()) })
@@ -1218,18 +1218,18 @@ func TestCopyVectorAlias(t *testing.T) {
 					var want *Dense
 					if horiz {
 						src = a.RowView(si)
-						want = DenseCopyOf(a.View(si, 0, 1, 2))
+						want = DenseCopyOf(a.Slice(si, si+1, 0, 2))
 					} else {
 						src = a.ColView(si)
-						want = DenseCopyOf(a.View(0, si, 2, 1))
+						want = DenseCopyOf(a.Slice(0, 2, si, si+1))
 					}
 
 					var got *Dense
 					if horiz {
-						got = a.View(di, do, 1, 2).(*Dense)
+						got = a.Slice(di, di+1, do, do+2).(*Dense)
 						got.Copy(src.T())
 					} else {
-						got = a.View(do, di, 2, 1).(*Dense)
+						got = a.Slice(do, do+2, di, di+1).(*Dense)
 						got.Copy(src)
 					}
 

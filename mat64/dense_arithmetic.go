@@ -231,7 +231,10 @@ func (m *Dense) Inverse(a Matrix) error {
 		m.Copy(a)
 	}
 	ipiv := make([]int, r)
-	lapack64.Getrf(m.mat, ipiv)
+	ok := lapack64.Getrf(m.mat, ipiv)
+	if !ok {
+		return matrix.Condition(math.Inf(1))
+	}
 	work := make([]float64, 1, 4*r) // must be at least 4*r for cond.
 	lapack64.Getri(m.mat, ipiv, work, -1)
 	if int(work[0]) > 4*r {
@@ -241,7 +244,11 @@ func (m *Dense) Inverse(a Matrix) error {
 	}
 	lapack64.Getri(m.mat, ipiv, work, len(work))
 	norm := lapack64.Lange(matrix.CondNorm, m.mat, work)
-	cond := lapack64.Gecon(matrix.CondNorm, m.mat, norm, work, ipiv) // reuse ipiv
+	rcond := lapack64.Gecon(matrix.CondNorm, m.mat, norm, work, ipiv) // reuse ipiv
+	if rcond == 0 {
+		return matrix.Condition(math.Inf(1))
+	}
+	cond := 1 / rcond
 	if cond > matrix.ConditionTolerance {
 		return matrix.Condition(cond)
 	}

@@ -1617,7 +1617,7 @@ func TestOuter(t *testing.T) {
 func TestInverse(t *testing.T) {
 	for i, test := range []struct {
 		a    Matrix
-		want Matrix
+		want Matrix // nil indicates that a is singular.
 		tol  float64
 	}{
 		{
@@ -1702,11 +1702,124 @@ func TestInverse(t *testing.T) {
 			}),
 			tol: 1e-14,
 		},
+
+		// Tests with singular matrix.
+		{
+			a: NewDense(1, 1, []float64{
+				0,
+			}),
+		},
+		{
+			a: NewDense(2, 2, []float64{
+				0, 0,
+				0, 0,
+			}),
+		},
+		{
+			a: NewDense(2, 2, []float64{
+				0, 0,
+				0, 1,
+			}),
+		},
+		{
+			a: NewDense(3, 3, []float64{
+				0, 0, 0,
+				0, 0, 0,
+				0, 0, 0,
+			}),
+		},
+		{
+			a: NewDense(4, 4, []float64{
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+			}),
+		},
+		{
+			a: NewDense(4, 4, []float64{
+				0, 0, 0, 0,
+				0, 0, 0, 0,
+				0, 0, 20, 20,
+				0, 0, 20, 20,
+			}),
+		},
+		{
+			a: NewDense(4, 4, []float64{
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1,
+				0, 0, 0, 0,
+			}),
+		},
+		{
+			a: NewDense(4, 4, []float64{
+				1, 1, 1, 1,
+				1, 1, 1, 1,
+				1, 1, 1, 1,
+				1, 1, 1, 1,
+			}),
+		},
+		{
+			a: NewDense(5, 5, []float64{
+				0, 1, 0, 0, 0,
+				4, 0, 2, 0, 0,
+				0, 3, 0, 3, 0,
+				0, 0, 2, 0, 4,
+				0, 0, 0, 1, 0,
+			}),
+		},
+		{
+			a: NewDense(5, 5, []float64{
+				4, -1, -1, -1, -1,
+				-1, 4, -1, -1, -1,
+				-1, -1, 4, -1, -1,
+				-1, -1, -1, 4, -1,
+				-1, -1, -1, -1, 4,
+			}),
+		},
+		{
+			a: NewDense(5, 5, []float64{
+				2, -1, 0, 0, -1,
+				-1, 2, -1, 0, 0,
+				0, -1, 2, -1, 0,
+				0, 0, -1, 2, -1,
+				-1, 0, 0, -1, 2,
+			}),
+		},
+		{
+			a: NewDense(5, 5, []float64{
+				1, 2, 3, 5, 8,
+				2, 3, 5, 8, 13,
+				3, 5, 8, 13, 21,
+				5, 8, 13, 21, 34,
+				8, 13, 21, 34, 55,
+			}),
+		},
+		{
+			a: NewDense(8, 8, []float64{
+				611, 196, -192, 407, -8, -52, -49, 29,
+				196, 899, 113, -192, -71, -43, -8, -44,
+				-192, 113, 899, 196, 61, 49, 8, 52,
+				407, -192, 196, 611, 8, 44, 59, -23,
+				-8, -71, 61, 8, 411, -599, 208, 208,
+				-52, -43, 49, 44, -599, 411, 208, 208,
+				-49, -8, 8, 59, 208, 208, 99, -911,
+				29, -44, 52, -23, 208, 208, -911, 99,
+			}),
+		},
 	} {
 		var got Dense
 		err := got.Inverse(test.a)
+		if test.want == nil {
+			if err == nil {
+				t.Errorf("Case %d: expected error for singular matrix", i)
+			}
+			continue
+		}
 		if err != nil {
-			t.Errorf("Error computing inverse: %v", err)
+			t.Errorf("Case %d: unexpected error: %v", i, err)
+			continue
 		}
 		if !equalApprox(&got, test.want, test.tol, false) {
 			t.Errorf("Case %d, inverse mismatch.", i)

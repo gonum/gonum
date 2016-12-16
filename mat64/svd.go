@@ -57,13 +57,13 @@ func (svd *SVD) Factorize(a Matrix, kind matrix.SVDKind) (ok bool) {
 			Rows:   m,
 			Cols:   m,
 			Stride: m,
-			Data:   make([]float64, m*m),
+			Data:   use(svd.u.Data, m*m),
 		}
 		svd.vt = blas64.General{
 			Rows:   n,
 			Cols:   n,
 			Stride: n,
-			Data:   make([]float64, n*n),
+			Data:   use(svd.vt.Data, n*n),
 		}
 		jobU = lapack.SVDAll
 		jobVT = lapack.SVDAll
@@ -75,13 +75,13 @@ func (svd *SVD) Factorize(a Matrix, kind matrix.SVDKind) (ok bool) {
 			Rows:   m,
 			Cols:   min(m, n),
 			Stride: min(m, n),
-			Data:   make([]float64, m*min(m, n)),
+			Data:   use(svd.u.Data, m*min(m, n)),
 		}
 		svd.vt = blas64.General{
 			Rows:   min(m, n),
 			Cols:   n,
 			Stride: n,
-			Data:   make([]float64, min(m, n)*n),
+			Data:   use(svd.vt.Data, min(m, n)*n),
 		}
 		jobU = lapack.SVDInPlace
 		jobVT = lapack.SVDInPlace
@@ -90,7 +90,7 @@ func (svd *SVD) Factorize(a Matrix, kind matrix.SVDKind) (ok bool) {
 	// A is destroyed on call, so copy the matrix.
 	aCopy := DenseCopyOf(a)
 	svd.kind = kind
-	svd.s = make([]float64, min(m, n))
+	svd.s = use(svd.s, min(m, n))
 
 	work := make([]float64, 1)
 	lapack64.Gesvd(jobU, jobVT, aCopy.mat, svd.u, svd.vt, svd.s, work, -1)

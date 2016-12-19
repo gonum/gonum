@@ -13,6 +13,7 @@ import (
 )
 
 func TestCanonicalCorrelations(t *testing.T) {
+tests:
 	for i, test := range []struct {
 		xdata     mat64.Matrix
 		ydata     mat64.Matrix
@@ -148,36 +149,43 @@ func TestCanonicalCorrelations(t *testing.T) {
 			epsilon: 1e-12,
 		},
 	} {
-		cc, err := stat.CanonicalCorrelations(test.xdata, test.ydata, test.weights)
-		if err != nil {
-			t.Errorf("%d: unexpected error: %v", i, err)
-			continue
-		}
+		var cc stat.CC
+		var corrs []float64
+		var pVecs, qVecs *mat64.Dense
+		var phiVs, psiVs *mat64.Dense
+		for j := 0; j < 2; j++ {
+			err := cc.CanonicalCorrelations(test.xdata, test.ydata, test.weights)
+			if err != nil {
+				t.Errorf("%d use %d: unexpected error: %v", i, j, err)
+				continue tests
+			}
 
-		corrs := cc.Corrs(nil)
-		pVecs := cc.Left(true)
-		qVecs := cc.Right(true)
-		phiVs := cc.Left(false)
-		psiVs := cc.Right(false)
+			corrs = cc.Corrs(corrs)
+			pVecs = cc.Left(pVecs, true)
+			qVecs = cc.Right(qVecs, true)
+			phiVs = cc.Left(phiVs, false)
+			psiVs = cc.Right(psiVs, false)
 
-		if !floats.EqualApprox(corrs, test.wantCorrs, test.epsilon) {
-			t.Errorf("%d: unexpected variance result got:%v, want:%v", i, corrs, test.wantCorrs)
-		}
-		if !mat64.EqualApprox(pVecs, test.wantpVecs, test.epsilon) {
-			t.Errorf("%d: unexpected CCA result got:\n%v\nwant:\n%v",
-				i, mat64.Formatted(pVecs), mat64.Formatted(test.wantpVecs))
-		}
-		if !mat64.EqualApprox(qVecs, test.wantqVecs, test.epsilon) {
-			t.Errorf("%d: unexpected CCA result got:\n%v\nwant:\n%v",
-				i, mat64.Formatted(qVecs), mat64.Formatted(test.wantqVecs))
-		}
-		if !mat64.EqualApprox(phiVs, test.wantphiVs, test.epsilon) {
-			t.Errorf("%d: unexpected CCA result got:\n%v\nwant:\n%v",
-				i, mat64.Formatted(phiVs), mat64.Formatted(test.wantphiVs))
-		}
-		if !mat64.EqualApprox(psiVs, test.wantpsiVs, test.epsilon) {
-			t.Errorf("%d: unexpected CCA result got:\n%v\nwant:\n%v",
-				i, mat64.Formatted(psiVs), mat64.Formatted(test.wantpsiVs))
+			if !floats.EqualApprox(corrs, test.wantCorrs, test.epsilon) {
+				t.Errorf("%d use %d: unexpected variance result got:%v, want:%v",
+					i, j, corrs, test.wantCorrs)
+			}
+			if !mat64.EqualApprox(pVecs, test.wantpVecs, test.epsilon) {
+				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
+					i, j, mat64.Formatted(pVecs), mat64.Formatted(test.wantpVecs))
+			}
+			if !mat64.EqualApprox(qVecs, test.wantqVecs, test.epsilon) {
+				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
+					i, j, mat64.Formatted(qVecs), mat64.Formatted(test.wantqVecs))
+			}
+			if !mat64.EqualApprox(phiVs, test.wantphiVs, test.epsilon) {
+				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
+					i, j, mat64.Formatted(phiVs), mat64.Formatted(test.wantphiVs))
+			}
+			if !mat64.EqualApprox(psiVs, test.wantpsiVs, test.epsilon) {
+				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
+					i, j, mat64.Formatted(psiVs), mat64.Formatted(test.wantpsiVs))
+			}
 		}
 	}
 }

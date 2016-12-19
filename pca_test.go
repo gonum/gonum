@@ -12,6 +12,7 @@ import (
 )
 
 func TestPrincipalComponents(t *testing.T) {
+tests:
 	for i, test := range []struct {
 		data     mat64.Matrix
 		weights  []float64
@@ -54,6 +55,21 @@ func TestPrincipalComponents(t *testing.T) {
 				-0.11415613655453069, -0.2714141920887426, 0.35664028439226514, -0.8866286823515034,
 			}),
 			wantVars: []float64{0.1665786313282786, 0.02065509475412993, 0.007944620317765855, 0.0019327647109368329},
+			epsilon:  1e-12,
+		},
+		{ // Truncated iris data to form wide matrix.
+			data: mat64.NewDense(3, 4, []float64{
+				5.1, 3.5, 1.4, 0.2,
+				4.9, 3.0, 1.4, 0.2,
+				4.7, 3.2, 1.3, 0.2,
+			}),
+			wantVecs: mat64.NewDense(4, 3, []float64{
+				-0.5705187254552365, -0.7505979435049239, 0.08084520834544455,
+				-0.8166537769529318, 0.5615147645527523, -0.032338083338177705,
+				-0.08709186238359454, -0.3482870890450082, -0.22636658336724505,
+				0, 0, -0.9701425001453315,
+			}),
+			wantVars: []float64{0.0844692361537822, 0.022197430512884326, 0},
 			epsilon:  1e-12,
 		},
 		{ // Truncated iris data transposed to check for operation on fat input.
@@ -131,17 +147,25 @@ func TestPrincipalComponents(t *testing.T) {
 			epsilon:  1e-12,
 		},
 	} {
-		vecs, vars, ok := PrincipalComponents(test.data, test.weights)
-		if !ok {
-			t.Errorf("unexpected SVD failure for test %d", i)
-			continue
-		}
-		if !mat64.EqualApprox(vecs, test.wantVecs, test.epsilon) {
-			t.Errorf("%d: unexpected PCA result got:\n%v\nwant:\n%v",
-				i, mat64.Formatted(vecs), mat64.Formatted(test.wantVecs))
-		}
-		if !approxEqual(vars, test.wantVars, test.epsilon) {
-			t.Errorf("%d: unexpected variance result got:%v, want:%v", i, vars, test.wantVars)
+		var pc PC
+		var vecs *mat64.Dense
+		var vars []float64
+		for j := 0; j < 2; j++ {
+			ok := pc.PrincipalComponents(test.data, test.weights)
+			vecs = pc.Vectors(vecs)
+			vars = pc.Vars(vars)
+			if !ok {
+				t.Errorf("unexpected SVD failure for test %d use %d", i, j)
+				continue tests
+			}
+			if !mat64.EqualApprox(vecs, test.wantVecs, test.epsilon) {
+				t.Errorf("%d use %d: unexpected PCA result got:\n%v\nwant:\n%v",
+					i, j, mat64.Formatted(vecs), mat64.Formatted(test.wantVecs))
+			}
+			if !approxEqual(vars, test.wantVars, test.epsilon) {
+				t.Errorf("%d use %d: unexpected variance result got:%v, want:%v",
+					i, j, vars, test.wantVars)
+			}
 		}
 	}
 }

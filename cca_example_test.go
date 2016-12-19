@@ -78,17 +78,18 @@ func ExampleCanonicalCorrelations() {
 	fmt.Printf("corRaw = %.4f", mat64.Formatted(corRaw, mat64.Prefix("         ")))
 
 	// Calculate the canonical correlations.
-	cc, err := stat.CanonicalCorrelations(xdata, ydata, nil)
+	var cc stat.CC
+	err := cc.CanonicalCorrelations(xdata, ydata, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Unpack cc.
 	ccors := cc.Corrs(nil)
-	pVecs := cc.Left(true)
-	qVecs := cc.Right(true)
-	phiVs := cc.Left(false)
-	psiVs := cc.Right(false)
+	pVecs := cc.Left(nil, true)
+	qVecs := cc.Right(nil, true)
+	phiVs := cc.Left(nil, false)
+	psiVs := cc.Right(nil, false)
 
 	// Canonical Correlation Matrix, or the correlations between the sphered
 	// data.

@@ -30,16 +30,17 @@ func ExamplePrincipalComponents() {
 
 	// Calculate the principal component direction vectors
 	// and variances.
-	vecs, vars, ok := stat.PrincipalComponents(iris, nil)
+	var pc stat.PC
+	ok := pc.PrincipalComponents(iris, nil)
 	if !ok {
 		return
 	}
-	fmt.Printf("variances = %.4f\n\n", vars)
+	fmt.Printf("variances = %.4f\n\n", pc.Vars(nil))
 
 	// Project the data onto the first 2 principal components.
 	k := 2
 	var proj mat64.Dense
-	proj.Mul(iris, vecs.View(0, 0, d, k))
+	proj.Mul(iris, pc.Vectors(nil).Slice(0, d, 0, k))
 
 	fmt.Printf("proj = %.4f", mat64.Formatted(&proj, mat64.Prefix("       ")))
 

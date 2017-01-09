@@ -16,10 +16,10 @@ import (
 	"github.com/gonum/graph/simple"
 )
 
-// Gnp constructs a graph in the destination, dst, of order n. Edges between nodes
-// are formed with the probability, p. If src is not nil it is used as the random
-// source, otherwise rand.Float64 is used. The graph is constructed in O(n+m) time
-// where m is the number of edges added.
+// Gnp constructs a Gilbert’s model graph in the destination, dst, of order n. Edges
+// between nodes are formed with the probability, p. If src is not nil it is used
+// as the random source, otherwise rand.Float64 is used. The graph is constructed
+// in O(n+m) time where m is the number of edges added.
 func Gnp(dst GraphBuilder, n int, p float64, src *rand.Rand) error {
 	if p == 0 {
 		return nil
@@ -82,9 +82,10 @@ func edgeNodesFor(i int) (v, w simple.Node) {
 	return v, w
 }
 
-// Gnm constructs a graph in the destination, dst, of order n and size m. If src is not
-// nil it is used as the random source, otherwise rand.Intn is used. The graph is
-// constructed in O(m) expected time for m ≤ (n choose 2)/2.
+// Gnm constructs a Erdős-Rényi model graph in the destination, dst, of
+// order n and size m. If src is not nil it is used as the random source,
+// otherwise rand.Intn is used. The graph is constructed in O(m) expected
+// time for m ≤ (n choose 2)/2.
 func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 	if m == 0 {
 		return nil

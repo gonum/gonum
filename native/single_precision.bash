@@ -18,17 +18,18 @@ cat level1double.go \
 | gofmt -r 'float64 -> float32' \
 | gofmt -r 'blas.DrotmParams -> blas.SrotmParams' \
 \
-| gofmt -r 'asm.DaxpyInc -> asm.SaxpyInc' \
-| gofmt -r 'asm.DaxpyIncTo -> asm.SaxpyIncTo' \
-| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
-| gofmt -r 'asm.DdotInc -> asm.SdotInc' \
-| gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
-| gofmt -r 'asm.DscalUnitary -> asm.SscalUnitary' \
+| gofmt -r 'f64.AxpyInc -> f32.AxpyInc' \
+| gofmt -r 'f64.AxpyIncTo -> f32.AxpyIncTo' \
+| gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
+| gofmt -r 'asm.DdotInc -> f32.DotInc' \
+| gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
+| gofmt -r 'f64.ScalUnitary -> f32.ScalUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \
       -e "s_^\(func (Implementation) \)Id\(.*\)\$_$WARNING\1Is\2_" \
       -e 's_^// Id_// Is_' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
       -e 's_"math"_math "github.com/gonum/blas/native/internal/math32"_' \
 >> level1single.go
 
@@ -37,11 +38,12 @@ echo -e '// Generated code do not edit. Run `go generate`.\n' > level1single_sdo
 cat level1double_ddot.go \
 | gofmt -r 'float64 -> float32' \
 \
-| gofmt -r 'asm.DdotInc -> asm.SdotInc' \
-| gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
+| gofmt -r 'f64.DotInc -> f32.DotInc' \
+| gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
 >> level1single_sdot.go
 
 echo Generating level1single_dsdot.go
@@ -49,11 +51,12 @@ echo -e '// Generated code do not edit. Run `go generate`.\n' > level1single_dsd
 cat level1double_ddot.go \
 | gofmt -r '[]float64 -> []float32' \
 \
-| gofmt -r 'asm.DdotInc -> asm.DsdotInc' \
-| gofmt -r 'asm.DdotUnitary -> asm.DsdotUnitary' \
+| gofmt -r 'f64.DotInc -> f32.DdotInc' \
+| gofmt -r 'f64.DotUnitary -> f32.DdotUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1Ds\2_" \
       -e 's_^// D_// Ds_' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
 >> level1single_dsdot.go
 
 echo Generating level1single_sdsdot.go
@@ -61,13 +64,14 @@ echo -e '// Generated code do not edit. Run `go generate`.\n' > level1single_sds
 cat level1double_ddot.go \
 | gofmt -r 'float64 -> float32' \
 \
-| gofmt -r 'asm.DdotInc(x, y, f(n), f(incX), f(incY), f(ix), f(iy)) -> alpha + float32(asm.DsdotInc(x, y, f(n), f(incX), f(incY), f(ix), f(iy)))' \
-| gofmt -r 'asm.DdotUnitary(a, b) -> alpha + float32(asm.DsdotUnitary(a, b))' \
+| gofmt -r 'f64.DotInc(x, y, f(n), f(incX), f(incY), f(ix), f(iy)) -> alpha + float32(f32.DdotInc(x, y, f(n), f(incX), f(incY), f(ix), f(iy)))' \
+| gofmt -r 'f64.DotUnitary(a, b) -> alpha + float32(f32.DdotUnitary(a, b))' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1Sds\2_" \
       -e 's_^// D\(.*\)$_// Sds\1 plus a constant_' \
       -e 's_\\sum_alpha + \\sum_' \
       -e 's/n int/n int, alpha float32/' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
 >> level1single_sdsdot.go
 
 
@@ -82,14 +86,15 @@ cat level2double.go \
 \
 | gofmt -r 'Dscal -> Sscal' \
 \
-| gofmt -r 'asm.DaxpyInc -> asm.SaxpyInc' \
-| gofmt -r 'asm.DaxpyIncTo -> asm.SaxpyIncTo' \
-| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
-| gofmt -r 'asm.DdotInc -> asm.SdotInc' \
-| gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
+| gofmt -r 'f64.AxpyInc -> f32.AxpyInc' \
+| gofmt -r 'f64.AxpyIncTo -> f32.AxpyIncTo' \
+| gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
+| gofmt -r 'f64.DotInc -> f32.DotInc' \
+| gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
 >> level2single.go
 
 
@@ -102,11 +107,12 @@ cat level3double.go \
 \
 | gofmt -r 'float64 -> float32' \
 \
-| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
-| gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
+| gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
+| gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
 >> level3single.go
 
 echo Generating general_single.go
@@ -119,6 +125,7 @@ cat general_double.go \
 \
 | sed -e 's/(g general64) print()/(g general32) print()/' \
       -e 's_"math"_math "github.com/gonum/blas/native/internal/math32"_' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
 >> general_single.go
 
 echo Generating sgemm.go
@@ -137,13 +144,14 @@ cat dgemm.go \
 | gofmt -r 'dgemmSerialNotTrans -> sgemmSerialNotTrans' \
 | gofmt -r 'dgemmSerialTransTrans -> sgemmSerialTransTrans' \
 \
-| gofmt -r 'asm.DaxpyInc -> asm.SaxpyInc' \
-| gofmt -r 'asm.DaxpyIncTo -> asm.SaxpyIncTo' \
-| gofmt -r 'asm.DaxpyUnitaryTo -> asm.SaxpyUnitaryTo' \
-| gofmt -r 'asm.DdotInc -> asm.SdotInc' \
-| gofmt -r 'asm.DdotUnitary -> asm.SdotUnitary' \
+| gofmt -r 'f64.AxpyInc -> f32.AxpyInc' \
+| gofmt -r 'f64.AxpyIncTo -> f32.AxpyIncTo' \
+| gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
+| gofmt -r 'asm.DdotInc -> f32.DotInc' \
+| gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \
       -e 's_^// d_// s_' \
+      -e 's_"github.com/gonum/internal/asm/f64"_"github.com/gonum/internal/asm/f32"_' \
 >> sgemm.go

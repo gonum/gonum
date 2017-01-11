@@ -5,7 +5,7 @@
 package native
 
 import (
-	"github.com/gonum/internal/asm"
+	"github.com/gonum/internal/asm/f64"
 )
 
 // Ddot computes the dot product of the two vectors
@@ -30,7 +30,7 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 		if len(y) < n {
 			panic(badLenY)
 		}
-		return asm.DdotUnitary(x[:n], y)
+		return f64.DotUnitary(x[:n], y)
 	}
 	var ix, iy int
 	if incX < 0 {
@@ -45,5 +45,5 @@ func (Implementation) Ddot(n int, x []float64, incX int, y []float64, incY int) 
 	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
 		panic(badLenY)
 	}
-	return asm.DdotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+	return f64.DotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }

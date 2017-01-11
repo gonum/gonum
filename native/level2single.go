@@ -8,7 +8,7 @@ package native
 
 import (
 	"github.com/gonum/blas"
-	"github.com/gonum/internal/asm"
+	"github.com/gonum/internal/asm/f32"
 )
 
 var _ blas.Float32Level2 = Implementation{}
@@ -88,13 +88,13 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 	if tA == blas.NoTrans {
 		if incX == 1 && incY == 1 {
 			for i := 0; i < m; i++ {
-				y[i] += alpha * asm.SdotUnitary(a[lda*i:lda*i+n], x)
+				y[i] += alpha * f32.DotUnitary(a[lda*i:lda*i+n], x)
 			}
 			return
 		}
 		iy := ky
 		for i := 0; i < m; i++ {
-			y[iy] += alpha * asm.SdotInc(x, a[lda*i:lda*i+n], uintptr(n), uintptr(incX), 1, uintptr(kx), 0)
+			y[iy] += alpha * f32.DotInc(x, a[lda*i:lda*i+n], uintptr(n), uintptr(incX), 1, uintptr(kx), 0)
 			iy += incY
 		}
 		return
@@ -104,7 +104,7 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 		for i := 0; i < m; i++ {
 			tmp := alpha * x[i]
 			if tmp != 0 {
-				asm.SaxpyUnitaryTo(y, tmp, a[lda*i:lda*i+n], y)
+				f32.AxpyUnitaryTo(y, tmp, a[lda*i:lda*i+n], y)
 			}
 		}
 		return
@@ -113,7 +113,7 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 	for i := 0; i < m; i++ {
 		tmp := alpha * x[ix]
 		if tmp != 0 {
-			asm.SaxpyInc(tmp, a[lda*i:lda*i+n], y, uintptr(n), 1, uintptr(incY), 0, uintptr(ky))
+			f32.AxpyInc(tmp, a[lda*i:lda*i+n], y, uintptr(n), 1, uintptr(incY), 0, uintptr(ky))
 		}
 		ix += incX
 	}
@@ -176,7 +176,7 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 			tmp := alpha * xv
 			if tmp != 0 {
 				atmp := a[i*lda : i*lda+n]
-				asm.SaxpyUnitaryTo(atmp, tmp, y, atmp)
+				f32.AxpyUnitaryTo(atmp, tmp, y, atmp)
 			}
 		}
 		return
@@ -186,7 +186,7 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 	for i := 0; i < m; i++ {
 		tmp := alpha * x[ix]
 		if tmp != 0 {
-			asm.SaxpyInc(tmp, y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
+			f32.AxpyInc(tmp, y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
 		}
 		ix += incX
 	}

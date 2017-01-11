@@ -10,7 +10,7 @@ import (
 	math "github.com/gonum/blas/native/internal/math32"
 
 	"github.com/gonum/blas"
-	"github.com/gonum/internal/asm"
+	"github.com/gonum/internal/asm/f32"
 )
 
 var _ blas.Float32Level1 = Implementation{}
@@ -290,7 +290,7 @@ func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []flo
 		if len(y) < n {
 			panic(badLenY)
 		}
-		asm.SaxpyUnitaryTo(y, alpha, x[:n], y)
+		f32.AxpyUnitaryTo(y, alpha, x[:n], y)
 		return
 	}
 	var ix, iy int
@@ -306,7 +306,7 @@ func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []flo
 	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
 		panic(badLenY)
 	}
-	asm.SaxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+	f32.AxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
 
 // Srotg computes the plane rotation
@@ -625,7 +625,7 @@ func (Implementation) Sscal(n int, alpha float32, x []float32, incX int) {
 		return
 	}
 	if incX == 1 {
-		asm.SscalUnitary(alpha, x[:n])
+		f32.ScalUnitary(alpha, x[:n])
 		return
 	}
 	for ix := 0; ix < n*incX; ix += incX {

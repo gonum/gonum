@@ -7,7 +7,7 @@
 package native
 
 import (
-	"github.com/gonum/internal/asm"
+	"github.com/gonum/internal/asm/f32"
 )
 
 // Dsdot computes the dot product of the two vectors
@@ -34,7 +34,7 @@ func (Implementation) Dsdot(n int, x []float32, incX int, y []float32, incY int)
 		if len(y) < n {
 			panic(badLenY)
 		}
-		return asm.DsdotUnitary(x[:n], y)
+		return f32.DdotUnitary(x[:n], y)
 	}
 	var ix, iy int
 	if incX < 0 {
@@ -49,5 +49,5 @@ func (Implementation) Dsdot(n int, x []float32, incX int, y []float32, incY int)
 	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
 		panic(badLenY)
 	}
-	return asm.DsdotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+	return f32.DdotInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }

@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"github.com/gonum/blas"
-	"github.com/gonum/internal/asm"
+	"github.com/gonum/internal/asm/f32"
 )
 
 // Sgemm computes
@@ -210,7 +210,7 @@ func sgemmSerialNotNot(m, n, k int, a []float32, lda int, b []float32, ldb int, 
 		for l, v := range a[i*lda : i*lda+k] {
 			tmp := alpha * v
 			if tmp != 0 {
-				asm.SaxpyUnitaryTo(ctmp, tmp, b[l*ldb:l*ldb+n], ctmp)
+				f32.AxpyUnitaryTo(ctmp, tmp, b[l*ldb:l*ldb+n], ctmp)
 			}
 		}
 	}
@@ -226,7 +226,7 @@ func sgemmSerialTransNot(m, n, k int, a []float32, lda int, b []float32, ldb int
 			tmp := alpha * v
 			if tmp != 0 {
 				ctmp := c[i*ldc : i*ldc+n]
-				asm.SaxpyUnitaryTo(ctmp, tmp, btmp, ctmp)
+				f32.AxpyUnitaryTo(ctmp, tmp, btmp, ctmp)
 			}
 		}
 	}
@@ -240,7 +240,7 @@ func sgemmSerialNotTrans(m, n, k int, a []float32, lda int, b []float32, ldb int
 		atmp := a[i*lda : i*lda+k]
 		ctmp := c[i*ldc : i*ldc+n]
 		for j := 0; j < n; j++ {
-			ctmp[j] += alpha * asm.SdotUnitary(atmp, b[j*ldb:j*ldb+k])
+			ctmp[j] += alpha * f32.DotUnitary(atmp, b[j*ldb:j*ldb+k])
 		}
 	}
 }
@@ -254,7 +254,7 @@ func sgemmSerialTransTrans(m, n, k int, a []float32, lda int, b []float32, ldb i
 			tmp := alpha * v
 			if tmp != 0 {
 				ctmp := c[i*ldc : i*ldc+n]
-				asm.SaxpyInc(tmp, b[l:], ctmp, uintptr(n), uintptr(ldb), 1, 0, 0)
+				f32.AxpyInc(tmp, b[l:], ctmp, uintptr(n), uintptr(ldb), 1, 0, 0)
 			}
 		}
 	}

@@ -7,7 +7,7 @@ package mat64
 import (
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
-	"github.com/gonum/internal/asm"
+	"github.com/gonum/internal/asm/f64"
 	"github.com/gonum/matrix"
 )
 
@@ -138,18 +138,18 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 	if v != a {
 		v.reuseAs(n)
 		if v.mat.Inc == 1 && a.mat.Inc == 1 {
-			asm.DscalUnitaryTo(v.mat.Data, alpha, a.mat.Data)
+			f64.ScalUnitaryTo(v.mat.Data, alpha, a.mat.Data)
 			return
 		}
-		asm.DscalIncTo(v.mat.Data, uintptr(v.mat.Inc),
+		f64.ScalIncTo(v.mat.Data, uintptr(v.mat.Inc),
 			alpha, a.mat.Data, uintptr(n), uintptr(a.mat.Inc))
 		return
 	}
 	if v.mat.Inc == 1 {
-		asm.DscalUnitary(alpha, v.mat.Data)
+		f64.ScalUnitary(alpha, v.mat.Data)
 		return
 	}
-	asm.DscalInc(alpha, v.mat.Data, uintptr(n), uintptr(v.mat.Inc))
+	f64.ScalInc(alpha, v.mat.Data, uintptr(n), uintptr(v.mat.Inc))
 }
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.
@@ -187,17 +187,17 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 	case v == a && v != b: // v <- v + alpha * b
 		if v.mat.Inc == 1 && b.mat.Inc == 1 {
 			// Fast path for a common case.
-			asm.DaxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
+			f64.AxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
 		} else {
-			asm.DaxpyInc(alpha, b.mat.Data, v.mat.Data,
+			f64.AxpyInc(alpha, b.mat.Data, v.mat.Data,
 				uintptr(ar), uintptr(b.mat.Inc), uintptr(v.mat.Inc), 0, 0)
 		}
 	default: // v <- a + alpha * b or v <- a + alpha * v
 		if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
 			// Fast path for a common case.
-			asm.DaxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
+			f64.AxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
 		} else {
-			asm.DaxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+			f64.AxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
 				alpha, b.mat.Data, a.mat.Data,
 				uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
 		}
@@ -224,10 +224,10 @@ func (v *Vector) AddVec(a, b *Vector) {
 
 	if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
 		// Fast path for a common case.
-		asm.DaxpyUnitaryTo(v.mat.Data, 1, b.mat.Data, a.mat.Data)
+		f64.AxpyUnitaryTo(v.mat.Data, 1, b.mat.Data, a.mat.Data)
 		return
 	}
-	asm.DaxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+	f64.AxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
 		1, b.mat.Data, a.mat.Data,
 		uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
 }
@@ -252,10 +252,10 @@ func (v *Vector) SubVec(a, b *Vector) {
 
 	if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
 		// Fast path for a common case.
-		asm.DaxpyUnitaryTo(v.mat.Data, -1, b.mat.Data, a.mat.Data)
+		f64.AxpyUnitaryTo(v.mat.Data, -1, b.mat.Data, a.mat.Data)
 		return
 	}
-	asm.DaxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
+	f64.AxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
 		-1, b.mat.Data, a.mat.Data,
 		uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
 }

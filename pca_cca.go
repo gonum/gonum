@@ -211,7 +211,7 @@ func (c *CC) Corrs(dst []float64) []float64 {
 	}
 
 	if dst != nil && len(dst) != c.yd {
-		panic("floats: length of destination does not match input dimension")
+		panic("stat: length of destination does not match input dimension")
 	}
 	return c.c.Values(dst)
 }

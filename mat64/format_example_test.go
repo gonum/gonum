@@ -13,8 +13,9 @@ import (
 func ExampleFormatted() {
 	a := mat64.NewDense(3, 3, []float64{1, 2, 3, 0, 4, 5, 0, 0, 6})
 
-	// Create a matrix formatting value with a prefix ...
-	fa := mat64.Formatted(a, mat64.Prefix("    "))
+	// Create a matrix formatting value with a prefix and calculating each column
+	// width individually...
+	fa := mat64.Formatted(a, mat64.Prefix("    "), mat64.Squeeze())
 
 	// and then print with and without zero value elements.
 	fmt.Printf("with all values:\na = %v\n\n", fa)
@@ -25,6 +26,13 @@ func ExampleFormatted() {
 
 	// and print it without zero value elements.
 	fmt.Printf("after modification with only non-zero values:\na = % v\n\n", fa)
+
+	// Modify the matrix again...
+	a.Set(0, 2, 123.456)
+
+	// and print it using scientific notation for large exponents.
+	fmt.Printf("after modification with scientific notation:\na = %.2g\n\n", fa)
+	// See golang.org/pkg/fmt/ floating-point verbs for a comprehensive list.
 
 	// Output:
 	// with all values:
@@ -41,6 +49,11 @@ func ExampleFormatted() {
 	// a = ⎡1  2  .⎤
 	//     ⎢.  4  5⎥
 	//     ⎣.  .  6⎦
+	//
+	// after modification with scientific notation:
+	// a = ⎡1  2  1.2e+02⎤
+	//     ⎢0  4        5⎥
+	//     ⎣0  0        6⎦
 }
 
 func ExampleExcerpt() {

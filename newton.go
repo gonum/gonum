@@ -92,7 +92,7 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 	grad := mat64.NewVector(dim, loc.Gradient)
 	n.hess.CopySym(loc.Hessian)
 
-	// Find the smallest diagonal entry of the Hesssian.
+	// Find the smallest diagonal entry of the Hessian.
 	minA := n.hess.At(0, 0)
 	for i := 1; i < dim; i++ {
 		a := n.hess.At(i, i)

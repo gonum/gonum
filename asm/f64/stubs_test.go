@@ -38,7 +38,7 @@ func guardIncVector(vec []float64, guard_val float64, inc, guard_len int) (guard
 	guarded = make([]float64, s_ln+guard_len*2)
 	for i, j := 0, 0; i < len(guarded); i++ {
 		switch {
-		case i < guard_len, i > guard_len+s_ln:
+		case i < guard_len, guard_len+s_ln < i:
 			guarded[i] = guard_val
 		case (i-guard_len)%(inc) == 0 && j < len(vec):
 			guarded[i] = vec[j]

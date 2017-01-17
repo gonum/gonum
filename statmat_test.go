@@ -262,6 +262,36 @@ func TestCorrCov(t *testing.T) {
 	}
 }
 
+func TestMahalanobis(t *testing.T) {
+	// Comparison with scipy.
+	for cas, test := range []struct {
+		x, y  *mat64.Vector
+		Sigma *mat64.SymDense
+		ans   float64
+	}{
+		{
+			x: mat64.NewVector(3, []float64{1, 2, 3}),
+			y: mat64.NewVector(3, []float64{0.8, 1.1, -1}),
+			Sigma: mat64.NewSymDense(3,
+				[]float64{
+					0.8, 0.3, 0.1,
+					0.3, 0.7, -0.1,
+					0.1, -0.1, 7}),
+			ans: 1.9251757377680914,
+		},
+	} {
+		var chol mat64.Cholesky
+		ok := chol.Factorize(test.Sigma)
+		if !ok {
+			panic("bad test")
+		}
+		ans := Mahalanobis(test.x, test.y, &chol)
+		if math.Abs(ans-test.ans) > 1e-14 {
+			t.Errorf("Cas %d: got %v, want %v", cas, ans, test.ans)
+		}
+	}
+}
+
 // benchmarks
 
 func randMat(r, c int) mat64.Matrix {

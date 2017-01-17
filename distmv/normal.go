@@ -11,6 +11,7 @@ import (
 
 	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/stat"
 	"github.com/gonum/stat/distuv"
 )
 
@@ -183,17 +184,9 @@ func (n *Normal) LogProb(x []float64) float64 {
 	if len(x) != dim {
 		panic(badSizeMismatch)
 	}
-	// Compute the normalization constant
 	c := -0.5*float64(dim)*logTwoPi - n.logSqrtDet
-
-	// Compute (x-mu)'Sigma^-1 (x-mu)
-	xMinusMu := make([]float64, dim)
-	floats.SubTo(xMinusMu, x, n.mu)
-	d := mat64.NewVector(dim, xMinusMu)
-	tmp := make([]float64, dim)
-	tmpVec := mat64.NewVector(dim, tmp)
-	tmpVec.SolveCholeskyVec(&n.chol, d)
-	return c - 0.5*floats.Dot(tmp, xMinusMu)
+	dst := stat.Mahalanobis(mat64.NewVector(dim, x), mat64.NewVector(dim, n.mu), &n.chol)
+	return c - 0.5*dst*dst
 }
 
 // MarginalNormal returns the marginal distribution of the given input variables.

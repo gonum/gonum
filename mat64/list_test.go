@@ -420,9 +420,10 @@ func equalApprox(a, b Matrix, tol float64, ignoreNaN bool) bool {
 	for i := 0; i < ar; i++ {
 		for j := 0; j < ac; j++ {
 			if !floats.EqualWithinAbsOrRel(a.At(i, j), b.At(i, j), tol, tol) {
-				if !ignoreNaN || math.IsNaN(a.At(i, j)) != math.IsNaN(b.At(i, j)) {
-					return false
+				if ignoreNaN && math.IsNaN(a.At(i, j)) && math.IsNaN(b.At(i, j)) {
+					continue
 				}
+				return false
 			}
 		}
 	}

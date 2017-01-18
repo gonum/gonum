@@ -51,9 +51,9 @@ func (impl Implementation) Dgetrf(m, n int, a []float64, lda int, ipiv []int) (o
 		for i := j; i <= min(m-1, j+jb-1); i++ {
 			ipiv[i] = j + ipiv[i]
 		}
-		impl.Dlaswp(j, a, lda, j, j+jb-1, ipiv, 1)
+		impl.Dlaswp(j, a, lda, j, j+jb-1, ipiv[:j+jb], 1)
 		if j+jb < n {
-			impl.Dlaswp(n-j-jb, a[j+jb:], lda, j, j+jb-1, ipiv, 1)
+			impl.Dlaswp(n-j-jb, a[j+jb:], lda, j, j+jb-1, ipiv[:j+jb], 1)
 			bi.Dtrsm(blas.Left, blas.Lower, blas.NoTrans, blas.Unit,
 				jb, n-j-jb, 1,
 				a[j*lda+j:], lda,

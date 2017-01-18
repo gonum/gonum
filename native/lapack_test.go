@@ -140,6 +140,14 @@ func TestDlapy2(t *testing.T) {
 	testlapack.Dlapy2Test(t, impl)
 }
 
+func TestDlapll(t *testing.T) {
+	testlapack.DlapllTest(t, impl)
+}
+
+func TestDlapmt(t *testing.T) {
+	testlapack.DlapmtTest(t, impl)
+}
+
 func TestDlas2(t *testing.T) {
 	testlapack.Dlas2Test(t, impl)
 }

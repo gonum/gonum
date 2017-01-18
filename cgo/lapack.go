@@ -30,6 +30,7 @@ const (
 	badIhi          = "lapack: ihi out of range"
 	badIpiv         = "lapack: insufficient permutation length"
 	badJob          = "lapack: bad Job"
+	badKperm        = "lapack: incorrect permutation length"
 	badLdA          = "lapack: index of a out of range"
 	badNorm         = "lapack: bad norm"
 	badPivot        = "lapack: bad pivot"
@@ -166,6 +167,46 @@ func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int
 	checkMatrix(m, n, a, lda)
 	checkMatrix(m, n, b, ldb)
 	lapacke.Dlacpy(uplo, m, n, a, lda, b, ldb)
+}
+
+// Dlapmt rearranges the columns of the m×n matrix X as specified by the
+// permutation k_0, k_1, ..., k_n-1 of the integers 0, ..., n-1.
+//
+// If forward is true a forward permutation is performed:
+//
+//  X[0:m, k[j]] is moved to X[0:m, j] for j = 0, 1, ..., n-1.
+//
+// otherwise a backward permutation is performed:
+//
+//  X[0:m, j] is moved to X[0:m, k[j]] for j = 0, 1, ..., n-1.
+//
+// k must have length n, otherwise Dlapmt will panic. k is zero-indexed.
+//
+// Dlapmt is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dlapmt(forward bool, m, n int, x []float64, ldx int, k []int) {
+	checkMatrix(m, n, x, ldx)
+	if len(k) != n {
+		panic(badKperm)
+	}
+
+	if n <= 1 {
+		return
+	}
+
+	var forwrd int32
+	if forward {
+		forwrd = 1
+	}
+	k32 := make([]int32, len(k))
+	for i, v := range k {
+		v++ // Convert to 1-based indexing.
+		if v != int(int32(v)) {
+			panic("lapack: k element out of range")
+		}
+		k32[i] = int32(v)
+	}
+
+	lapacke.Dlapmt(forwrd, m, n, x, ldx, k32)
 }
 
 // Dlapy2 is the LAPACK version of math.Hypot.

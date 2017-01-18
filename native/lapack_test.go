@@ -340,6 +340,10 @@ func TestDormqr(t *testing.T) {
 	testlapack.DormqrTest(t, impl)
 }
 
+func TestDormr2(t *testing.T) {
+	testlapack.Dormr2Test(t, impl)
+}
+
 func TestDorm2r(t *testing.T) {
 	testlapack.Dorm2rTest(t, impl)
 }

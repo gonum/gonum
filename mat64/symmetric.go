@@ -5,6 +5,8 @@
 package mat64
 
 import (
+	"math"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/matrix"
@@ -465,4 +467,34 @@ func (s *SymDense) GrowSquare(n int) Matrix {
 	}
 	v.cap = s.cap
 	return &v
+}
+
+// PowPSD computes a^pow where a is a positive symmetric definite matrix.
+//
+// PowPSD returns an error if the matrix is not  not positive symmetric definite
+// or the Eigendecomposition is not successful.
+func (s *SymDense) PowPSD(a Symmetric, pow float64) error {
+	dim := a.Symmetric()
+	s.reuseAs(dim)
+
+	var eigen EigenSym
+	ok := eigen.Factorize(a, true)
+	if !ok {
+		return matrix.ErrFailedEigen
+	}
+	values := eigen.Values(nil)
+	for i, v := range values {
+		if v <= 0 {
+			return matrix.ErrNotPSD
+		}
+		values[i] = math.Pow(v, pow)
+	}
+	var u Dense
+	u.EigenvectorsSym(&eigen)
+
+	s.SymOuterK(values[0], u.ColView(0))
+	for i := 1; i < dim; i++ {
+		s.SymRankOne(s, values[i], u.ColView(i))
+	}
+	return nil
 }

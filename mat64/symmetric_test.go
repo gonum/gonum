@@ -623,3 +623,73 @@ func TestViewGrowSquare(t *testing.T) {
 		}
 	}
 }
+
+func TestPowPSD(t *testing.T) {
+	for cas, test := range []struct {
+		a   *SymDense
+		pow float64
+		ans *SymDense
+	}{
+		// Comparison with Matlab.
+		{
+			a:   NewSymDense(2, []float64{10, 5, 5, 12}),
+			pow: 0.5,
+			ans: NewSymDense(2, []float64{3.065533767740645, 0.776210486171016, 0.776210486171016, 3.376017962209052}),
+		},
+		{
+			a:   NewSymDense(2, []float64{11, -1, -1, 8}),
+			pow: 0.5,
+			ans: NewSymDense(2, []float64{3.312618742210524, -0.162963396980939, -0.162963396980939, 2.823728551267709}),
+		},
+		{
+			a:   NewSymDense(2, []float64{10, 5, 5, 12}),
+			pow: -0.5,
+			ans: NewSymDense(2, []float64{0.346372134547712, -0.079637515547296, -0.079637515547296, 0.314517128328794}),
+		},
+		{
+			a:   NewSymDense(3, []float64{15, -1, -3, -1, 8, 6, -3, 6, 14}),
+			pow: 0.6,
+			ans: NewSymDense(3, []float64{
+				5.051214323034288, -0.163162161893975, -0.612153996497505,
+				-0.163162161893976, 3.283474884617009, 1.432842761381493,
+				-0.612153996497505, 1.432842761381494, 4.695873060862573,
+			}),
+		},
+	} {
+		var s SymDense
+		err := s.PowPSD(test.a, test.pow)
+		if err != nil {
+			panic("bad test")
+		}
+		if !EqualApprox(&s, test.ans, 1e-10) {
+			t.Errorf("Case %d, pow mismatch", cas)
+			fmt.Println(Formatted(&s))
+			fmt.Println(Formatted(test.ans))
+		}
+	}
+
+	// Compare with Dense.Pow
+	rnd := rand.New(rand.NewSource(1))
+	for dim := 2; dim < 10; dim++ {
+		for pow := 2; pow < 6; pow++ {
+			a := NewDense(dim, dim, nil)
+			for i := 0; i < dim; i++ {
+				for j := 0; j < dim; j++ {
+					a.Set(i, j, rnd.Float64())
+				}
+			}
+			var mat SymDense
+			mat.SymOuterK(1, a)
+
+			var sym SymDense
+			sym.PowPSD(&mat, float64(pow))
+
+			var dense Dense
+			dense.Pow(&mat, pow)
+
+			if !EqualApprox(&sym, &dense, 1e-10) {
+				t.Errorf("Dim %d: pow mismatch")
+			}
+		}
+	}
+}

@@ -16,6 +16,7 @@ import (
 // Copied from lapack/native. Keep in sync.
 const (
 	absIncNotOne    = "lapack: increment not one or negative one"
+	badAuxv         = "lapack: auxv has insufficient length"
 	badD            = "lapack: d has insufficient length"
 	badDecompUpdate = "lapack: bad decomp update"
 	badDiag         = "lapack: bad diag"
@@ -34,6 +35,7 @@ const (
 	badK2           = "lapack: k2 out of range"
 	badKperm        = "lapack: incorrect permutation length"
 	badLdA          = "lapack: index of a out of range"
+	badNb           = "lapack: nb out of range"
 	badNorm         = "lapack: bad norm"
 	badPivot        = "lapack: bad pivot"
 	badS            = "lapack: s has insufficient length"
@@ -46,6 +48,8 @@ const (
 	badTauQ         = "lapack: tauQ has insufficient length"
 	badTauP         = "lapack: tauP has insufficient length"
 	badTrans        = "lapack: bad trans"
+	badVn1          = "lapack: vn1 has insufficient length"
+	badVn2          = "lapack: vn2 has insufficient length"
 	badUplo         = "lapack: illegal triangle"
 	badWork         = "lapack: insufficient working memory"
 	badWorkStride   = "lapack: insufficient working array stride"
@@ -60,6 +64,7 @@ const (
 	negZ            = "lapack: negative z value"
 	nLT0            = "lapack: n < 0"
 	nLTM            = "lapack: n < m"
+	offsetGTM       = "lapack: offset > m"
 	shortWork       = "lapack: working array shorter than declared"
 	zeroDiv         = "lapack: zero divisor"
 )

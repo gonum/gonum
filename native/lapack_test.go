@@ -192,6 +192,10 @@ func TestDlaqr04(t *testing.T) {
 	testlapack.Dlaqr04Test(t, impl)
 }
 
+func TestDlaqp2(t *testing.T) {
+	testlapack.Dlaqp2Test(t, impl)
+}
+
 func TestDlaqr1(t *testing.T) {
 	testlapack.Dlaqr1Test(t, impl)
 }

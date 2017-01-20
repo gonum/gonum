@@ -262,6 +262,16 @@ func transposeGeneral(a blas64.General) blas64.General {
 	return ans
 }
 
+// columnNorms returns the column norms of a.
+func columnNorms(m, n int, a []float64, lda int) []float64 {
+	bi := blas64.Implementation()
+	norms := make([]float64, n)
+	for j := 0; j < n; j++ {
+		norms[j] = bi.Dnrm2(m, a[j:], lda)
+	}
+	return norms
+}
+
 // extractVMat collects the single reflectors from a into a matrix.
 func extractVMat(m, n int, a []float64, lda int, direct lapack.Direct, store lapack.StoreV) blas64.General {
 	k := min(m, n)

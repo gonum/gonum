@@ -60,7 +60,7 @@ TEXT ·AxpyIncTo(SB), NOSPLIT, $0
 	MOVAPS X0, X10            // Copy X0 and X1 for pipelining
 	MOVAPS X1, X11
 	MOVQ   CX, BX
-	ANDQ   $3, CX             // CX = n %4
+	ANDQ   $3, CX             // CX = n % 4
 	SHRQ   $2, BX             // BX = floor( n / 4 )
 	JZ     axpyi_tail         // if BX == 0 { goto axpyi_tail }
 

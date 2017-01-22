@@ -77,8 +77,8 @@ caxy_no_trim:
 	MOVAPS X0, X10   // Copy X0 and X1 for pipelineing
 	MOVAPS X1, X11
 	MOVQ   CX, BX
-	ANDQ   $7, CX    // CX = CX % 8
-	SHRQ   $3, BX    // BX = floor( CX / 8 )
+	ANDQ   $7, CX    // CX = n % 8
+	SHRQ   $3, BX    // BX = floor( n / 8 )
 	JZ     caxy_tail // if BX == 0 { goto caxy_tail }
 
 caxy_loop: // do {

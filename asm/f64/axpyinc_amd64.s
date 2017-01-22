@@ -44,55 +44,71 @@
 
 // func AxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   y+32(FP), R9
-	MOVQ   n+56(FP), DX
-	MOVQ   incX+64(FP), R11
-	MOVQ   incY+72(FP), R12
-	MOVQ   ix+80(FP), SI
-	MOVQ   iy+88(FP), DI
+	MOVQ   x_base+8(FP), SI  // SI := &x
+	MOVQ   y_base+32(FP), DI // DI := &y
+	MOVQ   n+56(FP), CX      // CX := n
+	CMPQ   CX, $0            // if CX == 0 { return }
+	JE     end
+	MOVQ   ix+80(FP), R8
+	MOVQ   iy+88(FP), R9
+	LEAQ   (SI)(R8*8), SI    // SI = &(x[ix])
+	LEAQ   (DI)(R9*8), DI    // DI = &(y[iy])
+	MOVQ   DI, DX
+	MOVQ   incX+64(FP), R8   // R8 := incX * sizeof(float64)
+	SHLQ   $3, R8
+	MOVQ   incY+72(FP), R9   // R9 := incY * sizeof(float64)
+	SHLQ   $3, R9
+	MOVSD  alpha+0(FP), X0   // X0 := { alpha, alpha }
+	MOVAPS X0, X1            // X1 := X0  for pipelining
+	MOVQ   CX, BX
+	ANDQ   $3, BX            // BX := n % 4
+	SHRQ   $2, CX            // CX := floor( n / 4 )
+	JZ     tail_start        // if CX == 0 { goto tail_start }
 
-	MOVQ SI, AX  // nextX = ix
-	MOVQ DI, BX  // nextY = iy
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
-	SHLQ $1, R11 // incX *= 2
-	SHLQ $1, R12 // incY *= 2
+loop:  // do {
+	// y[i] += alpha * x[i] unrolled 4x.
+	MOVSD (SI), X2       // X_i = x[i]
+	MOVSD (SI)(R8*1), X3
+	LEAQ  (SI)(R8*2), SI // SI = &(SI[incX*2])
+	MOVSD (SI), X4
+	MOVSD (SI)(R8*1), X5
 
-	SUBQ $2, DX // n -= 2
-	JL   tail   // if n < 0
+	MULPD X0, X2 // X_i *= a
+	MULPD X1, X3
+	MULPD X0, X4
+	MULPD X1, X5
 
-loop:  // n >= 0
-	// y[i] += alpha * x[i] unrolled 2x.
-	MOVHPD 0(R8)(SI*8), X0
-	MOVHPD 0(R9)(DI*8), X1
-	MOVLPD 0(R8)(AX*8), X0
-	MOVLPD 0(R9)(BX*8), X1
-	MULPD  X7, X0
-	ADDPD  X0, X1
-	MOVHPD X1, 0(R9)(DI*8)
-	MOVLPD X1, 0(R9)(BX*8)
+	ADDSD (DX), X2       // X_i += y[i]
+	ADDSD (DX)(R9*1), X3
+	LEAQ  (DX)(R9*2), DX // DX = &(DX[incY*2])
+	ADDSD (DX), X4
+	ADDSD (DX)(R9*1), X5
 
-	ADDQ R11, SI // ix += incX
-	ADDQ R12, DI // iy += incY
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
+	MOVSD X2, (DI)       // y[i] = X_i
+	MOVSD X3, (DI)(R9*1)
+	LEAQ  (DI)(R9*2), DI // DI = &(DI[incY*2])
+	MOVSD X4, (DI)
+	MOVSD X5, (DI)(R9*1)
 
-	SUBQ $2, DX // n -= 2
-	JGE  loop   // if n >= 0 goto loop
+	LEAQ (SI)(R8*2), SI // SI = &(SI[incX*2])
+	LEAQ (DX)(R9*2), DX // DX = &(DX[incY*2]
+	LEAQ (DI)(R9*2), DI // DI = &(DI[incY*2])
+	LOOP loop           // } while --CX > 0
+	CMPQ BX, $0         // if BX == 0 { return }
+	JE   end
 
-tail:
-	ADDQ $2, DX // n += 2
-	JLE  end    // if n <= 0
+tail_start: // Reset Loop registers
+	MOVQ BX, CX // Loop counter: CX = BX
 
-	// y[i] += alpha * x[i] for the last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MOVSD 0(R9)(DI*8), X1
-	MULSD X7, X0
-	ADDSD X0, X1
-	MOVSD X1, 0(R9)(DI*8)
+tail:  // do {
+	// y[i] += alpha * x[i] for the last n % 4 iterations.
+	MOVSD (SI), X2 // X2 = x[i]
+	MULPD X0, X2   // X2 *= a
+	ADDSD (DI), X2 // X2 += y[i]
+	MOVSD X2, (DI) // y[i] = X2
+	ADDQ  R8, SI   // SI += incX
+	ADDQ  R9, DI   // DI += incY
+	LOOP  tail     // } while --CX > 0
 
 end:
 	RET

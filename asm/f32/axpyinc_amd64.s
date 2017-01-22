@@ -25,8 +25,8 @@ TEXT ·AxpyInc(SB), NOSPLIT, $0
 	MOVSS alpha+0(FP), X0   // X0 = alpha
 	MOVSS X0, X1            // X1 := X0  // for pipelining
 	MOVQ  CX, BX
-	ANDQ  $3, BX            // BX = CX % 4
-	SHRQ  $2, CX            // CX = floor( CX / 4 )
+	ANDQ  $3, BX            // BX = n % 4
+	SHRQ  $2, CX            // CX = floor( n / 4 )
 	JZ    axpyi_tail_start  // if CX == 0 { goto axpyi_tail_start }
 
 axpyi_loop: // Loop unrolled 4x   do {

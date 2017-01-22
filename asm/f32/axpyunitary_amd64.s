@@ -42,7 +42,7 @@ axpy_no_trim:
 	MOVUPS X0, X1           // Copy X0 to X1 for pipelining
 	MOVQ   BX, CX
 	ANDQ   $0xF, BX         // BX = len % 16
-	SHRQ   $4, CX           // CX = int(len / 16)
+	SHRQ   $4, CX           // CX = int( len / 16 )
 	JZ     axpy_tail4_start // if CX == 0 { return }
 
 axpy_loop: // Loop unrolled 16x   do {

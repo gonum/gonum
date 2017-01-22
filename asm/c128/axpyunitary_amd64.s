@@ -42,8 +42,8 @@ TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	MOVAPS  X0, X10           // Copy X0 and X1 for pipelining
 	MOVAPS  X1, X11
 	MOVQ    CX, BX
-	ANDQ    $3, CX            // CX = floor( CX / 4 )
-	SHRQ    $2, BX            // BX = CX % 4
+	ANDQ    $3, CX            // BX = n % 4
+	SHRQ    $2, BX            // CX = floor( n / 4 )
 	JZ      caxy_tail         // if BX == 0 { goto caxy_tail }
 
 caxy_loop: // do {

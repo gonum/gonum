@@ -17,8 +17,8 @@ TEXT ·AddConst(SB), NOSPLIT, $0
 	MOVUPS X4, X5           // X5 = X4
 	XORQ   AX, AX           // i = 0
 	MOVQ   CX, BX
-	ANDQ   $7, BX           // BX := len(x) % 16
-	SHRQ   $3, CX           // CX := floor( CX / 16 )
+	ANDQ   $7, BX           // BX := len(x) % 8
+	SHRQ   $3, CX           // CX := floor( len(x) / 8 )
 	JZ     ac_tail_start    // if CX == 0 { goto ac_tail_start }
 
 ac_loop: // Loop unrolled 8x   do {

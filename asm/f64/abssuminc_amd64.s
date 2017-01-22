@@ -9,7 +9,7 @@
 // func AbsSumInc(x []float64, n, incX int) (sum float64)
 TEXT ·AbsSumInc(SB), NOSPLIT, $0
 	MOVQ  x_base+0(FP), SI // SI := &x
-	MOVQ  n+24(FP), CX     // CX := len(x)
+	MOVQ  n+24(FP), CX     // CX := n
 	MOVQ  incX+32(FP), AX  // AX :=  increment * sizeof( float64 )
 	SHLQ  $3, AX
 	MOVQ  AX, DX           // DX := AX * 3
@@ -25,8 +25,8 @@ TEXT ·AbsSumInc(SB), NOSPLIT, $0
 	CMPQ  CX, $0           // if CX == 0 { return 0 }
 	JE    absum_end
 	MOVQ  CX, BX
-	ANDQ  $7, BX           // BX := CX % 16
-	SHRQ  $3, CX           // CX = floor( CX / 16 )
+	ANDQ  $7, BX           // BX := n % 8
+	SHRQ  $3, CX           // CX = floor( n / 8 )
 	JZ    absum_tail_start // if CX == 0 { goto absum_tail_start }
 
 absum_loop: // do {

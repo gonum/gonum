@@ -22,8 +22,8 @@ TEXT ·AbsSum(SB), NOSPLIT, $0
 	CMPQ CX, $0           // if CX == 0 { return 0 }
 	JE   absum_end
 	MOVQ CX, BX
-	ANDQ $7, BX           // BX := CX % 16
-	SHRQ $3, CX           // CX = floor( CX / 16 )
+	ANDQ $7, BX           // BX := len(x) % 8
+	SHRQ $3, CX           // CX = floor( len(x) / 8 )
 	JZ   absum_tail_start // if CX == 0 { goto absum_tail_start }
 
 absum_loop: // do {

@@ -34,8 +34,8 @@ TEXT ·DivTo(SB), NOSPLIT, $0
 
 div_no_trim:
 	MOVQ CX, BX
-	ANDQ $7, BX         // BX = CX % 16
-	SHRQ $3, CX         // CX = floor( CX / 16 )
+	ANDQ $7, BX         // BX = len(dst) % 8
+	SHRQ $3, CX         // CX = floor( len(dst) / 8 )
 	JZ   div_tail_start // if CX == 0 { goto div_tail_start }
 
 div_loop: // Loop unrolled 8x   do {

@@ -80,7 +80,7 @@ func Dgeqr2Test(t *testing.T, impl Dgeqr2er) {
 			for j := 0; j < i; j++ {
 				dot := blas64.Dot(m, blas64.Vector{Inc: 1, Data: q.Data[i*m:]}, blas64.Vector{Inc: 1, Data: q.Data[j*m:]})
 				if math.Abs(dot) > 1e-14 {
-					t.Errorf("Case %v, q not orthogonal", i)
+					t.Errorf("Case %v, q not orthogonal", c)
 				}
 			}
 		}

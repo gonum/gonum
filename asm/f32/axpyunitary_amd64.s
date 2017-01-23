@@ -16,8 +16,8 @@ TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	CMPQ    BX, $0            // if BX == 0 { return }
 	JE      axpy_end
 	MOVSS   alpha+0(FP), X0
-	SHUFPS  $0, X0, X0        // X0 := { a, a, a, a }
-	XORQ    AX, AX            // i := 0
+	SHUFPS  $0, X0, X0        // X0 = { a, a, a, a }
+	XORQ    AX, AX            // i = 0
 	PXOR    X2, X2            // 2 NOP instructions (PXOR) to align
 	PXOR    X3, X3            // loop to cache line
 	MOVQ    DI, CX

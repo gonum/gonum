@@ -36,10 +36,10 @@
 
 // func AxpyIncTo(dst []complex64, incDst, idst uintptr, alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyIncTo(SB), NOSPLIT, $0
-	MOVQ   dst_base+0(FP), DI // DI := &dst
-	MOVQ   x_base+48(FP), SI  // SI := &x
-	MOVQ   y_base+72(FP), DX  // DX := &y
-	MOVQ   n+96(FP), CX       // CX := n
+	MOVQ   dst_base+0(FP), DI // DI = &dst
+	MOVQ   x_base+48(FP), SI  // SI = &x
+	MOVQ   y_base+72(FP), DX  // DX = &y
+	MOVQ   n+96(FP), CX       // CX = n
 	CMPQ   CX, $0             // if n==0 { return }
 	JE     axpyi_end
 	MOVQ   ix+120(FP), R8     // Load the first index
@@ -54,9 +54,9 @@ TEXT ·AxpyIncTo(SB), NOSPLIT, $0
 	SHLQ   $3, R9
 	MOVQ   incDst+24(FP), R10
 	SHLQ   $3, R10
-	MOVSD  alpha+40(FP), X0   // X0 := { 0, 0, imag(a), real(a) }
+	MOVSD  alpha+40(FP), X0   // X0 = { 0, 0, imag(a), real(a) }
 	MOVAPS X0, X1
-	SHUFPS $0x11, X1, X1      // X1 := { 0, 0, real(a), imag(a) }
+	SHUFPS $0x11, X1, X1      // X1 = { 0, 0, real(a), imag(a) }
 	MOVAPS X0, X10            // Copy X0 and X1 for pipelining
 	MOVAPS X1, X11
 	MOVQ   CX, BX

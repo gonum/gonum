@@ -8,10 +8,10 @@
 
 // func AbsSum(x []float64) float64
 TEXT ·AbsSum(SB), NOSPLIT, $0
-	MOVQ x_base+0(FP), SI // SI := &x
-	MOVQ x_len+8(FP), CX  // CX := len(x)
-	XORQ AX, AX           // i := 0
-	PXOR X0, X0           // p_sum_i := 0
+	MOVQ x_base+0(FP), SI // SI = &x
+	MOVQ x_len+8(FP), CX  // CX = len(x)
+	XORQ AX, AX           // i = 0
+	PXOR X0, X0           // p_sum_i = 0
 	PXOR X1, X1
 	PXOR X2, X2
 	PXOR X3, X3
@@ -22,7 +22,7 @@ TEXT ·AbsSum(SB), NOSPLIT, $0
 	CMPQ CX, $0           // if CX == 0 { return 0 }
 	JE   absum_end
 	MOVQ CX, BX
-	ANDQ $7, BX           // BX := len(x) % 8
+	ANDQ $7, BX           // BX = len(x) % 8
 	SHRQ $3, CX           // CX = floor( len(x) / 8 )
 	JZ   absum_tail_start // if CX == 0 { goto absum_tail_start }
 

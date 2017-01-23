@@ -8,18 +8,18 @@
 
 // func L1Norm(s, t []float64) float64
 TEXT ·L1Norm(SB), NOSPLIT, $0
-	MOVQ    s_base+0(FP), DI  // DI := &s
-	MOVQ    t_base+24(FP), SI // SI := &t
-	MOVQ    s_len+8(FP), CX   // CX := len(s)
+	MOVQ    s_base+0(FP), DI  // DI = &s
+	MOVQ    t_base+24(FP), SI // SI = &t
+	MOVQ    s_len+8(FP), CX   // CX = len(s)
 	CMPQ    t_len+32(FP), CX  // CX = max( CX, len(t) )
 	CMOVQLE t_len+32(FP), CX
-	PXOR    X3, X3            // norm := 0
+	PXOR    X3, X3            // norm = 0
 	CMPQ    CX, $0            // if CX == 0 { return 0 }
 	JE      l1_end
-	XORQ    AX, AX            // i := 0
+	XORQ    AX, AX            // i = 0
 	MOVQ    CX, BX
-	ANDQ    $1, BX            // BX := CX % 2
-	SHRQ    $1, CX            // CX := floor( CX / 2 )
+	ANDQ    $1, BX            // BX = CX % 2
+	SHRQ    $1, CX            // CX = floor( CX / 2 )
 	JZ      l1_tail_start     // if CX == 0 { return 0 }
 
 l1_loop: // Loop unrolled 2x  do {

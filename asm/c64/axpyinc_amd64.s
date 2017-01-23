@@ -36,23 +36,23 @@
 
 // func AxpyInc(alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
-	MOVQ   x_base+8(FP), SI  // SI := &x
-	MOVQ   y_base+32(FP), DI // DI := &y
-	MOVQ   n+56(FP), CX      // CX := n
+	MOVQ   x_base+8(FP), SI  // SI = &x
+	MOVQ   y_base+32(FP), DI // DI = &y
+	MOVQ   n+56(FP), CX      // CX = n
 	CMPQ   CX, $0            // if n==0 { return }
 	JE     axpyi_end
-	MOVQ   ix+80(FP), R8     // R8 := ix
-	MOVQ   iy+88(FP), R9     // R9 := iy
+	MOVQ   ix+80(FP), R8     // R8 = ix
+	MOVQ   iy+88(FP), R9     // R9 = iy
 	LEAQ   (SI)(R8*8), SI    // SI = &(x[ix])
 	LEAQ   (DI)(R9*8), DI    // DI = &(y[iy])
-	MOVQ   DI, DX            // DX := DI    // Read/Write pointers
-	MOVQ   incX+64(FP), R8   // R8 := incX
+	MOVQ   DI, DX            // DX = DI    // Read/Write pointers
+	MOVQ   incX+64(FP), R8   // R8 = incX
 	SHLQ   $3, R8            // R8 *= sizeof(complex64)
-	MOVQ   incY+72(FP), R9   // R9 := incY
+	MOVQ   incY+72(FP), R9   // R9 = incY
 	SHLQ   $3, R9            // R9 *= sizeof(complex64)
-	MOVSD  alpha+0(FP), X0   // X0 := { 0, 0, imag(a), real(a) }
+	MOVSD  alpha+0(FP), X0   // X0 = { 0, 0, imag(a), real(a) }
 	MOVAPS X0, X1
-	SHUFPS $0x11, X1, X1     // X1 := { 0, 0, real(a), imag(a) }
+	SHUFPS $0x11, X1, X1     // X1 = { 0, 0, real(a), imag(a) }
 	MOVAPS X0, X10           // Copy X0 and X1 for pipelining
 	MOVAPS X1, X11
 	MOVQ   CX, BX

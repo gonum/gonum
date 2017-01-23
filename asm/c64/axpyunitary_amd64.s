@@ -36,22 +36,22 @@
 
 // func AxpyUnitary(alpha complex64, x, y []complex64)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
-	MOVQ    x_base+8(FP), SI  // SI := &x
-	MOVQ    y_base+32(FP), DI // DI := &y
-	MOVQ    x_len+16(FP), CX  // CX := min( len(x), len(y) )
+	MOVQ    x_base+8(FP), SI  // SI = &x
+	MOVQ    y_base+32(FP), DI // DI = &y
+	MOVQ    x_len+16(FP), CX  // CX = min( len(x), len(y) )
 	CMPQ    y_len+40(FP), CX
 	CMOVQLE y_len+40(FP), CX
 	CMPQ    CX, $0            // if CX == 0 { return }
 	JE      caxy_end
 	PXOR    X0, X0            // Clear work registers and cache-align loop
 	PXOR    X1, X1
-	MOVSD   alpha+0(FP), X0   // X0 := { 0, 0, imag(a), real(a) }
+	MOVSD   alpha+0(FP), X0   // X0 = { 0, 0, imag(a), real(a) }
 	SHUFPD  $0, X0, X0        // X0  = { imag(a), real(a), imag(a), real(a) }
 	MOVAPS  X0, X1
-	SHUFPS  $0x11, X1, X1     // X1 := { real(a), imag(a), real(a), imag(a) }
-	XORQ    AX, AX            // i := 0
+	SHUFPS  $0x11, X1, X1     // X1 = { real(a), imag(a), real(a), imag(a) }
+	XORQ    AX, AX            // i = 0
 	MOVQ    DI, BX            // Align on 16-byte boundary for ADDPS
-	ANDQ    $15, BX           // BX := &y & 15
+	ANDQ    $15, BX           // BX = &y & 15
 	JZ      caxy_no_trim      // if BX == 0 { goto caxy_no_trim }
 
 	// Trim first value in unaligned buffer

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//+build !amd64 noasm appengine
-
 package f32
 
 func ScalUnitary(alpha float32, x []float32) {

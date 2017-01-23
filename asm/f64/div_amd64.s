@@ -8,20 +8,20 @@
 
 // func Div(dst, s []float64)
 TEXT ·Div(SB), NOSPLIT, $0
-	MOVQ    dst_base+0(FP), DI // DI := &dst
-	MOVQ    dst_len+8(FP), CX  // CX := len(dst)
-	MOVQ    s_base+24(FP), SI  // SI := &s
+	MOVQ    dst_base+0(FP), DI // DI = &dst
+	MOVQ    dst_len+8(FP), CX  // CX = len(dst)
+	MOVQ    s_base+24(FP), SI  // SI = &s
 	CMPQ    s_len+32(FP), CX   // CX = max( CX, len(s) )
 	CMOVQLE s_len+32(FP), CX
 	CMPQ    CX, $0             // if CX == 0 { return }
 	JE      div_end
-	XORQ    AX, AX             // i := 0
+	XORQ    AX, AX             // i = 0
 	MOVQ    SI, BX
-	ANDQ    $15, BX            // BX := &s & 15
+	ANDQ    $15, BX            // BX = &s & 15
 	JZ      div_no_trim        // if BX == 0 { goto div_no_trim }
 
 	// Align on 16-bit boundary
-	MOVSD (DI)(AX*8), X0 // X0 := dst[i]
+	MOVSD (DI)(AX*8), X0 // X0 = dst[i]
 	DIVSD (SI)(AX*8), X0 // X0 /= s[i]
 	MOVSD X0, (DI)(AX*8) // dst[i] = X0
 	INCQ  AX             // ++i
@@ -35,7 +35,7 @@ div_no_trim:
 	JZ   div_tail_start // if CX == 0 { goto div_tail_start }
 
 div_loop: // Loop unrolled 8x   do {
-	MOVUPS (DI)(AX*8), X0   // X0 := dst[i:i+1]
+	MOVUPS (DI)(AX*8), X0   // X0 = dst[i:i+1]
 	MOVUPS 16(DI)(AX*8), X1
 	MOVUPS 32(DI)(AX*8), X2
 	MOVUPS 48(DI)(AX*8), X3

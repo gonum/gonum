@@ -36,23 +36,23 @@
 
 // func AxpyUnitaryTo(dst []complex64, alpha complex64, x, y []complex64)
 TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
-	MOVQ    dst_base+0(FP), DI // DI := &dst
-	MOVQ    x_base+32(FP), SI  // SI := &x
-	MOVQ    y_base+56(FP), DX  // DX := &y
+	MOVQ    dst_base+0(FP), DI // DI = &dst
+	MOVQ    x_base+32(FP), SI  // SI = &x
+	MOVQ    y_base+56(FP), DX  // DX = &y
 	MOVQ    x_len+40(FP), CX
-	CMPQ    y_len+64(FP), CX   // CX := min( len(x), len(y), len(dst) )
+	CMPQ    y_len+64(FP), CX   // CX = min( len(x), len(y), len(dst) )
 	CMOVQLE y_len+64(FP), CX
 	CMPQ    dst_len+8(FP), CX
 	CMOVQLE dst_len+8(FP), CX
 	CMPQ    CX, $0             // if CX == 0 { return }
 	JE      caxy_end
-	MOVSD   alpha+24(FP), X0   // X0 := { 0, 0, imag(a), real(a) }
+	MOVSD   alpha+24(FP), X0   // X0 = { 0, 0, imag(a), real(a) }
 	SHUFPD  $0, X0, X0         // X0  = { imag(a), real(a), imag(a), real(a) }
 	MOVAPS  X0, X1
-	SHUFPS  $0x11, X1, X1      // X1 := { real(a), imag(a), real(a), imag(a) }
-	XORQ    AX, AX             // i := 0
+	SHUFPS  $0x11, X1, X1      // X1 = { real(a), imag(a), real(a), imag(a) }
+	XORQ    AX, AX             // i = 0
 	MOVQ    DX, BX             // Align on 16-byte boundary for ADDPS
-	ANDQ    $15, BX            // BX := &y & 15
+	ANDQ    $15, BX            // BX = &y & 15
 	JZ      caxy_no_trim       // if BX == 0 { goto caxy_no_trim }
 
 	MOVSD (SI)(AX*8), X3 // X3 = { imag(x[i]), real(x[i]) }

@@ -8,22 +8,22 @@
 
 // func AxpyInc(alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
-	MOVQ  n+56(FP), CX      // CX := n
+	MOVQ  n+56(FP), CX      // CX = n
 	CMPQ  CX, $0            // if n==0 { return }
 	JLE   axpyi_end
-	MOVQ  x_base+8(FP), SI  // SI := &x
-	MOVQ  y_base+32(FP), DI // DI := &y
-	MOVQ  ix+80(FP), R8     // R8 := ix
-	MOVQ  iy+88(FP), R9     // R9 := iy
+	MOVQ  x_base+8(FP), SI  // SI = &x
+	MOVQ  y_base+32(FP), DI // DI = &y
+	MOVQ  ix+80(FP), R8     // R8 = ix
+	MOVQ  iy+88(FP), R9     // R9 = iy
 	LEAQ  (SI)(R8*4), SI    // SI = &(x[ix])
 	LEAQ  (DI)(R9*4), DI    // DI = &(y[iy])
-	MOVQ  DI, DX            // DX := DI   Read Pointer for y
-	MOVQ  incX+64(FP), R8   // R8 := incX
+	MOVQ  DI, DX            // DX = DI   Read Pointer for y
+	MOVQ  incX+64(FP), R8   // R8 = incX
 	SHLQ  $2, R8            // R8 *= sizeof(float32)
-	MOVQ  incY+72(FP), R9   // R9 := incY
+	MOVQ  incY+72(FP), R9   // R9 = incY
 	SHLQ  $2, R9            // R9 *= sizeof(float32)
 	MOVSS alpha+0(FP), X0   // X0 = alpha
-	MOVSS X0, X1            // X1 := X0  // for pipelining
+	MOVSS X0, X1            // X1 = X0  // for pipelining
 	MOVQ  CX, BX
 	ANDQ  $3, BX            // BX = n % 4
 	SHRQ  $2, CX            // CX = floor( n / 4 )

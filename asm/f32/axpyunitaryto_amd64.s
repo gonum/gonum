@@ -8,9 +8,9 @@
 
 // func AxpyUnitaryTo(dst []float32, alpha float32, x, y []float32)
 TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
-	MOVQ    dst_base+0(FP), DI // DI := &dst
-	MOVQ    x_base+32(FP), SI  // SI := &x
-	MOVQ    y_base+56(FP), DX  // DX := &y
+	MOVQ    dst_base+0(FP), DI // DI = &dst
+	MOVQ    x_base+32(FP), SI  // SI = &x
+	MOVQ    y_base+56(FP), DX  // DX = &y
 	MOVQ    x_len+40(FP), BX   // BX = min( len(x), len(y), len(dst) )
 	CMPQ    y_len+64(FP), BX
 	CMOVQLE y_len+64(FP), BX
@@ -20,7 +20,7 @@ TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
 	JE      axpy_end
 	MOVSS   alpha+24(FP), X0
 	SHUFPS  $0, X0, X0         // X0 = { a, a, a, a, }
-	XORQ    AX, AX             // i := 0
+	XORQ    AX, AX             // i = 0
 	MOVQ    DX, CX
 	ANDQ    $0xF, CX           // Align on 16-byte boundary for ADDPS
 	JZ      axpy_no_trim       // if CX == 0 { goto axpy_no_trim }

@@ -7,18 +7,18 @@
 #include "textflag.h"
 
 TEXT ·CumSum(SB), NOSPLIT, $0
-	MOVQ    dst_base+0(FP), DI // DI := &dst
-	MOVQ    dst_len+8(FP), CX  // CX := len(dst)
-	MOVQ    s_base+24(FP), SI  // SI := &s
-	CMPQ    s_len+32(FP), CX   // CX := max( CX, len(s) )
+	MOVQ    dst_base+0(FP), DI // DI = &dst
+	MOVQ    dst_len+8(FP), CX  // CX = len(dst)
+	MOVQ    s_base+24(FP), SI  // SI = &s
+	CMPQ    s_len+32(FP), CX   // CX = max( CX, len(s) )
 	CMOVQLE s_len+32(FP), CX
 	MOVQ    CX, ret_len+56(FP) // len(ret) = CX
 	CMPQ    CX, $0             // if CX == 0 { return }
 	JE      cs_end
-	XORQ    AX, AX             // i := 0
+	XORQ    AX, AX             // i = 0
 	PXOR    X5, X5             // p_sum = 0
 	MOVQ    CX, BX
-	ANDQ    $3, BX             // BX := CX % 4
+	ANDQ    $3, BX             // BX = CX % 4
 	SHRQ    $2, CX             // CX = floor( CX / 4 )
 	JZ      cs_tail_start      // if CX == 0 { goto cs_tail_start }
 

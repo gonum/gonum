@@ -26,24 +26,24 @@
 
 // func AxpyUnitary(alpha complex128, x, y []complex128)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
-	MOVQ    x_base+16(FP), SI // SI := &x
-	MOVQ    y_base+40(FP), DI // DI := &y
-	MOVQ    x_len+24(FP), CX  // CX := min( len(x), len(y) )
+	MOVQ    x_base+16(FP), SI // SI = &x
+	MOVQ    y_base+40(FP), DI // DI = &y
+	MOVQ    x_len+24(FP), CX  // CX = min( len(x), len(y) )
 	CMPQ    y_len+48(FP), CX
 	CMOVQLE y_len+48(FP), CX
 	CMPQ    CX, $0            // if CX == 0 { return }
 	JE      caxy_end
 	PXOR    X0, X0            // Clear work registers and cache-align loop
 	PXOR    X1, X1
-	MOVUPS  alpha+0(FP), X0   // X0 := { imag(a), real(a) }
+	MOVUPS  alpha+0(FP), X0   // X0 = { imag(a), real(a) }
 	MOVAPS  X0, X1
-	SHUFPD  $0x1, X1, X1      // X1 := { real(a), imag(a) }
-	XORQ    AX, AX            // i := 0
+	SHUFPD  $0x1, X1, X1      // X1 = { real(a), imag(a) }
+	XORQ    AX, AX            // i = 0
 	MOVAPS  X0, X10           // Copy X0 and X1 for pipelining
 	MOVAPS  X1, X11
 	MOVQ    CX, BX
-	ANDQ    $3, CX            // BX = n % 4
-	SHRQ    $2, BX            // CX = floor( n / 4 )
+	ANDQ    $3, CX            // CX = n % 4
+	SHRQ    $2, BX            // BX = floor( n / 4 )
 	JZ      caxy_tail         // if BX == 0 { goto caxy_tail }
 
 caxy_loop: // do {

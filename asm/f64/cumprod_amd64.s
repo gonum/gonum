@@ -7,15 +7,15 @@
 #include "textflag.h"
 
 TEXT ·CumProd(SB), NOSPLIT, $0
-	MOVQ    dst_base+0(FP), DI // DI := &dst
-	MOVQ    dst_len+8(FP), CX  // CX := len(dst)
-	MOVQ    s_base+24(FP), SI  // SI := &s
-	CMPQ    s_len+32(FP), CX   // CX := max( CX, len(s) )
+	MOVQ    dst_base+0(FP), DI // DI = &dst
+	MOVQ    dst_len+8(FP), CX  // CX = len(dst)
+	MOVQ    s_base+24(FP), SI  // SI = &s
+	CMPQ    s_len+32(FP), CX   // CX = max( CX, len(s) )
 	CMOVQLE s_len+32(FP), CX
 	MOVQ    CX, ret_len+56(FP) // len(ret) = CX
 	CMPQ    CX, $0             // if CX == 0 { return }
 	JE      cp_end
-	XORQ    AX, AX             // i := 0
+	XORQ    AX, AX             // i = 0
 
 	MOVSD  (SI), X5   // p_prod = { s[0], s[0] }
 	SHUFPD $0, X5, X5
@@ -25,7 +25,7 @@ TEXT ·CumProd(SB), NOSPLIT, $0
 	JZ     cp_end     // if CX == 0 { return }
 
 	MOVQ CX, BX
-	ANDQ $3, BX        // BX := CX % 4
+	ANDQ $3, BX        // BX = CX % 4
 	SHRQ $2, CX        // CX = floor( CX / 4 )
 	JZ   cp_tail_start // if CX == 0 { goto cp_tail_start }
 

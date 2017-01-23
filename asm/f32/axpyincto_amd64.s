@@ -8,26 +8,26 @@
 
 // func AxpyIncTo(dst []float32, incDst, idst uintptr, alpha float32, x, y []float32, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyIncTo(SB), NOSPLIT, $0
-	MOVQ  n+96(FP), CX       // CX := n
+	MOVQ  n+96(FP), CX       // CX = n
 	CMPQ  CX, $0             // if n==0 { return }
 	JLE   axpyi_end
-	MOVQ  dst_base+0(FP), DI // DI := &dst
-	MOVQ  x_base+48(FP), SI  // SI := &x
-	MOVQ  y_base+72(FP), DX  // DX := &y
-	MOVQ  ix+120(FP), R8     // R8 := ix  // Load the first index
-	MOVQ  iy+128(FP), R9     // R9 := iy
-	MOVQ  idst+32(FP), R10   // R10 := idst
+	MOVQ  dst_base+0(FP), DI // DI = &dst
+	MOVQ  x_base+48(FP), SI  // SI = &x
+	MOVQ  y_base+72(FP), DX  // DX = &y
+	MOVQ  ix+120(FP), R8     // R8 = ix  // Load the first index
+	MOVQ  iy+128(FP), R9     // R9 = iy
+	MOVQ  idst+32(FP), R10   // R10 = idst
 	LEAQ  (SI)(R8*4), SI     // SI = &(x[ix])
 	LEAQ  (DX)(R9*4), DX     // DX = &(y[iy])
 	LEAQ  (DI)(R10*4), DI    // DI = &(dst[idst])
-	MOVQ  incX+104(FP), R8   // R8 := incX
+	MOVQ  incX+104(FP), R8   // R8 = incX
 	SHLQ  $2, R8             // R8 *= sizeof(float32)
-	MOVQ  incY+112(FP), R9   // R9 := incY
+	MOVQ  incY+112(FP), R9   // R9 = incY
 	SHLQ  $2, R9             // R9 *= sizeof(float32)
-	MOVQ  incDst+24(FP), R10 // R10 := incDst
+	MOVQ  incDst+24(FP), R10 // R10 = incDst
 	SHLQ  $2, R10            // R10 *= sizeof(float32)
 	MOVSS alpha+40(FP), X0   // X0 = alpha
-	MOVSS X0, X1             // X1 := X0  // for pipelining
+	MOVSS X0, X1             // X1 = X0  // for pipelining
 	MOVQ  CX, BX
 	ANDQ  $3, BX             // BX = n % 4
 	SHRQ  $2, CX             // CX = floor( n / 4 )

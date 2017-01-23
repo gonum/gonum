@@ -8,16 +8,16 @@
 
 // func Add(dst, s []float64)
 TEXT ·Add(SB), NOSPLIT, $0
-	MOVQ    dst_base+0(FP), DI // DI := &dst
-	MOVQ    dst_len+8(FP), CX  // CX := len(dst)
-	MOVQ    s_base+24(FP), SI  // SI := &s
-	CMPQ    s_len+32(FP), CX   // CX := max( CX, len(s) )
+	MOVQ    dst_base+0(FP), DI // DI = &dst
+	MOVQ    dst_len+8(FP), CX  // CX = len(dst)
+	MOVQ    s_base+24(FP), SI  // SI = &s
+	CMPQ    s_len+32(FP), CX   // CX = max( CX, len(s) )
 	CMOVQLE s_len+32(FP), CX
 	CMPQ    CX, $0             // if CX == 0 { return }
 	JE      add_end
 	XORQ    AX, AX
 	MOVQ    DI, BX
-	ANDQ    $0x0F, BX          // BX := &dst & 15
+	ANDQ    $0x0F, BX          // BX = &dst & 15
 	JZ      add_no_trim        // if BX == 0 { goto add_no_trim }
 
 	// Align on 16-bit boundary
@@ -30,7 +30,7 @@ TEXT ·Add(SB), NOSPLIT, $0
 
 add_no_trim:
 	MOVQ CX, BX
-	ANDQ $7, BX         // BX := len(dst) % 8
+	ANDQ $7, BX         // BX = len(dst) % 8
 	SHRQ $3, CX         // CX = floor( len(dst) / 8 )
 	JZ   add_tail_start // if CX == 0 { goto add_tail_start }
 

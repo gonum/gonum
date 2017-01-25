@@ -894,18 +894,18 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 //
 // The C interface does not support providing temporary storage. To provide compatibility
 // with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgeqrf will panic.
+// work necessary to work[0]. If len(work) < max(1, lwork), Dgeqrf will panic.
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
+	if len(work) < max(1, lwork) {
+		panic(shortWork)
+	}
 	if lwork == -1 {
 		work[0] = float64(n)
 		return
 	}
 	checkMatrix(m, n, a, lda)
-	if len(work) < lwork {
-		panic(shortWork)
-	}
 	if lwork < n {
 		panic(badWork)
 	}

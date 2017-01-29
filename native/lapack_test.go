@@ -372,6 +372,10 @@ func TestDsytrd(t *testing.T) {
 	testlapack.DsytrdTest(t, impl)
 }
 
+func TestDtgsja(t *testing.T) {
+	testlapack.DtgsjaTest(t, impl)
+}
+
 func TestDtrcon(t *testing.T) {
 	testlapack.DtrconTest(t, impl)
 }

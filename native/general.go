@@ -20,7 +20,9 @@ var _ lapack.Float64 = Implementation{}
 // This list is duplicated in lapack/cgo. Keep in sync.
 const (
 	absIncNotOne    = "lapack: increment not one or negative one"
+	badAlpha        = "lapack: bad alpha length"
 	badAuxv         = "lapack: auxv has insufficient length"
+	badBeta         = "lapack: bad beta length"
 	badD            = "lapack: d has insufficient length"
 	badDecompUpdate = "lapack: bad decomp update"
 	badDiag         = "lapack: bad diag"
@@ -30,6 +32,7 @@ const (
 	badEVComp       = "lapack: bad EVComp"
 	badEVJob        = "lapack: bad EVJob"
 	badEVSide       = "lapack: bad EVSide"
+	badGSVDJob      = "lapack: bad GSVDJob"
 	badHowMany      = "lapack: bad HowMany"
 	badIlo          = "lapack: ilo out of range"
 	badIhi          = "lapack: ihi out of range"

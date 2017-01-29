@@ -108,6 +108,17 @@ const (
 	SVDNone      SVDJob = 'N' // Do not compute singular vectors
 )
 
+// GSVDJob specifies the singular vector computation type for Generalized SVD.
+type GSVDJob byte
+
+const (
+	GSVDU    GSVDJob = 'U' // Compute orthogonal matrix U
+	GSVDV    GSVDJob = 'V' // Compute orthogonal matrix V
+	GSVDQ    GSVDJob = 'Q' // Compute orthogonal matrix Q
+	GSVDUnit GSVDJob = 'I' // Use unit-initialized matrix
+	GSVDNone GSVDJob = 'N' // Do not compute orthogonal matrix
+)
+
 // EVComp specifies how eigenvectors are computed.
 type EVComp byte
 

@@ -17,6 +17,9 @@ import (
 	"github.com/gonum/lapack"
 )
 
+// dlamchE is the machine epsilon. For IEEE this is 2^-53.
+const dlamchE = 1.0 / (1 << 53)
+
 func max(a, b int) int {
 	if a > b {
 		return a
@@ -136,6 +139,41 @@ func randomSchurCanonical(n, stride int, rnd *rand.Rand) blas64.General {
 		i += 2
 	}
 	return t
+}
+
+// blockedUpperTriGeneral returns a normal random, general matrix in the form
+//
+//            c-k-l  k    l
+//  A =    k [  0   A12  A13 ] if r-k-l >= 0;
+//         l [  0    0   A23 ]
+//     r-k-l [  0    0    0  ]
+//
+//          c-k-l  k    l
+//  A =  k [  0   A12  A13 ] if r-k-l < 0;
+//     r-k [  0    0   A23 ]
+//
+// where the k×k matrix A12 and l×l matrix is non-singular
+// upper triangular. A23 is l×l upper triangular if r-k-l >= 0,
+// otherwise A23 is (r-k)×l upper trapezoidal.
+func blockedUpperTriGeneral(r, c, k, l, stride int, kblock bool, rnd *rand.Rand) blas64.General {
+	t := l
+	if kblock {
+		t += k
+	}
+	ans := zeros(r, c, stride)
+	for i := 0; i < min(r, t); i++ {
+		var v float64
+		for v == 0 {
+			v = rnd.NormFloat64()
+		}
+		ans.Data[i*ans.Stride+i+(c-t)] = v
+	}
+	for i := 0; i < min(r, t); i++ {
+		for j := i + (c - t) + 1; j < c; j++ {
+			ans.Data[i*ans.Stride+j] = rnd.NormFloat64()
+		}
+	}
+	return ans
 }
 
 // nanTriangular allocates a new r×c triangular matrix filled with NaN values.
@@ -1290,4 +1328,73 @@ func applyReflector(qh blas64.General, q blas64.General, v []float64) {
 			qh.Data[i*qh.Stride+j] *= norm2inv
 		}
 	}
+}
+
+// constructGSVDresults returns the matrices [ 0 R ], D1 and D2 described
+// in the documentation of Dtgsja and Dggsvd3, and the result matrix in
+// the documentation for Dggsvp3.
+func constructGSVDresults(n, p, m, k, l int, a, b blas64.General, alpha, beta []float64) (zeroR, d1, d2 blas64.General) {
+	zeroR = zeros(k+l, n, n)
+	d1 = zeros(m, k+l, k+l)
+	d2 = zeros(p, k+l, k+l)
+	if m-k-l >= 0 {
+		// [ 0 R ]
+		dst := zeroR
+		dst.Cols = k + l
+		dst.Data = zeroR.Data[n-k-l:]
+		src := a
+		src.Cols = k + l
+		src.Data = a.Data[n-k-l:]
+		copyGeneral(dst, src)
+
+		// D1
+		for i := 0; i < k; i++ {
+			d1.Data[i*d1.Stride+i] = 1
+		}
+		for i := k; i < k+l; i++ {
+			d1.Data[i*d1.Stride+i] = alpha[i]
+		}
+
+		// D2
+		for i := 0; i < l; i++ {
+			d2.Data[i*d2.Stride+i+k] = beta[k+i]
+		}
+	} else {
+		// [ 0 R ]
+		dst := zeroR
+		dst.Rows = m
+		dst.Cols = k + l
+		dst.Data = zeroR.Data[n-k-l:]
+		src := a
+		src.Rows = m
+		src.Cols = k + l
+		src.Data = a.Data[n-k-l:]
+		copyGeneral(dst, src)
+		dst.Rows = k + l - m
+		dst.Cols = k + l - m
+		dst.Data = zeroR.Data[m*zeroR.Stride+n-(k+l-m):]
+		src = b
+		src.Rows = k + l - m
+		src.Cols = k + l - m
+		src.Data = b.Data[(m-k)*b.Stride+n+m-k-l:]
+		copyGeneral(dst, src)
+
+		// D1
+		for i := 0; i < k; i++ {
+			d1.Data[i*d1.Stride+i] = 1
+		}
+		for i := k; i < m; i++ {
+			d1.Data[i*d1.Stride+i] = alpha[i]
+		}
+
+		// D2
+		for i := 0; i < m-k; i++ {
+			d2.Data[i*d2.Stride+i+k] = beta[k+i]
+		}
+		for i := m - k; i < l; i++ {
+			d2.Data[i*d2.Stride+i+k] = 1
+		}
+	}
+
+	return zeroR, d1, d2
 }

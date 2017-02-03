@@ -55,25 +55,51 @@ import (
 //
 // Dsytrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau, work []float64, lwork int) {
-	upper := uplo == blas.Upper
-	opts := "U"
-	if !upper {
+	checkMatrix(n, n, a, lda)
+	if len(d) < n {
+		panic(badD)
+	}
+	if len(e) < n-1 {
+		panic(badE)
+	}
+	if len(tau) < n-1 {
+		panic(badTau)
+	}
+	if len(work) < lwork {
+		panic(shortWork)
+	}
+	if lwork != -1 && lwork < 1 {
+		panic(badWork)
+	}
+
+	var upper bool
+	var opts string
+	switch uplo {
+	case blas.Upper:
+		upper = true
+		opts = "U"
+	case blas.Lower:
 		opts = "L"
+	default:
+		panic(badUplo)
 	}
-	nb := impl.Ilaenv(1, "DSYTRD", opts, n, -1, -1, -1)
-	lworkopt := n * nb
-	work[0] = float64(lworkopt)
-	if lwork == -1 {
-		return
-	}
+
 	if n == 0 {
 		work[0] = 1
+		return
 	}
-	nx := n
 
+	nb := impl.Ilaenv(1, "DSYTRD", opts, n, -1, -1, -1)
+	lworkopt := n * nb
+	if lwork == -1 {
+		work[0] = float64(lworkopt)
+		return
+	}
+
+	nx := n
 	bi := blas64.Implementation()
 	var ldwork int
-	if nb > 1 && nb < n {
+	if 1 < nb && nb < n {
 		// Determine when to cross over from blocked to unblocked code. The last
 		// block is always handled by unblocked code.
 		opts := "L"

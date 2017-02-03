@@ -1766,6 +1766,35 @@ func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, a
 	return rcond[0]
 }
 
+// Dsterf computes all eigenvalues of a symmetric tridiagonal matrix using the
+// Pal-Walker-Kahan variant of the QL or QR algorithm.
+//
+// d contains the diagonal elements of the tridiagonal matrix on entry, and
+// contains the eigenvalues in ascending order on exit. d must have length at
+// least n, or Dsterf will panic.
+//
+// e contains the off-diagonal elements of the tridiagonal matrix on entry, and is
+// overwritten during the call to Dsterf. e must have length of at least n-1 or
+// Dsterf will panic.
+//
+// Dsterf is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
+	if n < 0 {
+		panic(nLT0)
+	}
+	if n == 0 {
+		return true
+	}
+	if len(d) < n {
+		panic(badD)
+	}
+	if len(e) < n-1 {
+		panic(badE)
+	}
+
+	return lapacke.Dsterf(n, d, e)
+}
+
 // Dsyev computes all eigenvalues and, optionally, the eigenvectors of a real
 // symmetric matrix A.
 //

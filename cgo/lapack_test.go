@@ -230,6 +230,10 @@ func TestDpocon(t *testing.T) {
 	testlapack.DpoconTest(t, impl)
 }
 
+func TestDsterf(t *testing.T) {
+	testlapack.DsterfTest(t, impl)
+}
+
 func TestDsyev(t *testing.T) {
 	testlapack.DsyevTest(t, impl)
 }

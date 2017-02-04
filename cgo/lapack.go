@@ -1824,6 +1824,75 @@ func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []f
 	return lapacke.Dsyev(lapack.Job(jobz), uplo, n, a, lda, w, work, lwork)
 }
 
+// Dsytrd reduces a symmetric n×n matrix A to symmetric tridiagonal form by an
+// orthogonal similarity transformation
+//  Q^T * A * Q = T
+// where Q is an orthonormal matrix and T is symmetric and tridiagonal.
+//
+// On entry, a contains the elements of the input matrix in the triangle specified
+// by uplo. On exit, the diagonal and sub/super-diagonal are overwritten by the
+// corresponding elements of the tridiagonal matrix T. The remaining elements in
+// the triangle, along with the array tau, contain the data to construct Q as
+// the product of elementary reflectors.
+//
+// If uplo == blas.Upper, Q is constructed with
+//  Q = H_{n-2} * ... * H_1 * H_0
+// where
+//  H_i = I - tau_i * v * v^T
+// v is constructed as v[i+1:n] = 0, v[i] = 1, v[0:i-1] is stored in A[0:i-1, i+1].
+// The elements of A are
+//  [ d   e  v1  v2  v3]
+//  [     d   e  v2  v3]
+//  [         d   e  v3]
+//  [             d   e]
+//  [                 e]
+//
+// If uplo == blas.Lower, Q is constructed with
+//  Q = H_0 * H_1 * ... * H_{n-2}
+// where
+//  H_i = I - tau_i * v * v^T
+// v is constructed as v[0:i+1] = 0, v[i+1] = 1, v[i+2:n] is stored in A[i+2:n, i].
+// The elements of A are
+//  [ d                ]
+//  [ e   d            ]
+//  [v0   e   d        ]
+//  [v0  v1   e   d    ]
+//  [v0  v1  v2   e   d]
+//
+// d must have length n, and e and tau must have length n-1. Dsytrd will panic if
+// these conditions are not met.
+//
+// work is temporary storage, and lwork specifies the usable memory length. At minimum,
+// lwork >= 1, and Dsytrd will panic otherwise. The amount of blocking is
+// limited by the usable length.
+// If lwork == -1, instead of computing Dsytrd the optimal work length is stored
+// into work[0].
+//
+// Dsytrd is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dsytrd(uplo blas.Uplo, n int, a []float64, lda int, d, e, tau, work []float64, lwork int) {
+	checkMatrix(n, n, a, lda)
+	if len(d) < n {
+		panic(badD)
+	}
+	if len(e) < n-1 {
+		panic(badE)
+	}
+	if len(tau) < n-1 {
+		panic(badTau)
+	}
+	if len(work) < lwork {
+		panic(shortWork)
+	}
+	if lwork != -1 && lwork < 1 {
+		panic(badWork)
+	}
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+
+	lapacke.Dsytrd(uplo, n, a, lda, d, e, tau, work, lwork)
+}
+
 // Dtrcon estimates the reciprocal of the condition number of a triangular matrix A.
 // The condition number computed may be based on the 1-norm or the ∞-norm.
 //

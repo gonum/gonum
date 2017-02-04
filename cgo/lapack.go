@@ -116,6 +116,70 @@ type Implementation struct{}
 
 var _ lapack.Float64 = Implementation{}
 
+// Dgeqp3 computes a QR factorization with column pivoting of the
+// m×n matrix A: A*P = Q*R using Level 3 BLAS.
+//
+// The matrix Q is represented as a product of elementary reflectors
+//  Q = H_0 H_1 . . . H_{k-1}, where k = min(m,n).
+// Each H_i has the form
+//  H_i = I - tau * v * v^T
+// where tau and v are real vectors with v[0:i-1] = 0 and v[i] = 1;
+// v[i:m] is stored on exit in A[i:m, i], and tau in tau[i].
+//
+// jpvt specifies a column pivot to be applied to A. If
+// jpvt[j] is at least zero, the jth column of A is permuted
+// to the front of A*P (a leading column), if jpvt[j] is -1
+// the jth column of A is a free column. If jpvt[j] < -1, Dgeqp3
+// will panic. On return, jpvt holds the permutation that was
+// applied; the jth column of A*P was the jpvt[j] column of A.
+// jpvt must have length n or Dgeqp3 will panic.
+//
+// tau holds the scalar factors of the elementary reflectors.
+// It must have length min(m, n), otherwise Dgeqp3 will panic.
+//
+// work must have length at least max(1,lwork), and lwork must be at least
+// 3*n+1, otherwise Dgeqp3 will panic. For optimal performance lwork must
+// be at least 2*n+(n+1)*nb, where nb is the optimal blocksize. On return,
+// work[0] will contain the optimal value of lwork.
+//
+// If lwork == -1, instead of performing Dgeqp3, only the optimal value of lwork
+// will be stored in work[0].
+//
+// Dgeqp3 is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dgeqp3(m, n int, a []float64, lda int, jpvt []int, tau, work []float64, lwork int) {
+	checkMatrix(m, n, a, lda)
+	if len(jpvt) != n {
+		panic(badIpiv)
+	}
+	if len(tau) != min(m, n) {
+		panic(badTau)
+	}
+	if len(work) < max(1, lwork) {
+		panic(badWork)
+	}
+
+	// Don't update jpvt if querying lwkopt.
+	if lwork == -1 {
+		lapacke.Dgeqp3(m, n, a, lda, nil, nil, work, -1)
+		return
+	}
+
+	jpvt32 := make([]int32, len(jpvt))
+	for i, v := range jpvt {
+		v++
+		if v != int(int32(v)) || v < 0 || n < v {
+			panic("lapack: jpvt element out of range")
+		}
+		jpvt32[i] = int32(v)
+	}
+
+	lapacke.Dgeqp3(m, n, a, lda, jpvt32, tau, work, lwork)
+
+	for i, v := range jpvt32 {
+		jpvt[i] = int(v - 1)
+	}
+}
+
 // Dlacn2 estimates the 1-norm of an n×n matrix A using sequential updates with
 // matrix-vector products provided externally.
 //

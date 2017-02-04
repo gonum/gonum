@@ -44,6 +44,10 @@ func (bl blockedTranslate) Dorgl2(m, n, k int, a []float64, lda int, tau, work [
 	impl.Dorglq(m, n, k, a, lda, tau, work, len(work))
 }
 
+func TestDgeqp3(t *testing.T) {
+	testlapack.Dgeqp3Test(t, impl)
+}
+
 func TestDlacn2(t *testing.T) {
 	testlapack.Dlacn2Test(t, impl)
 }

@@ -1335,6 +1335,59 @@ func BenchmarkAddToMed(b *testing.B)   { benchmarkAddTo(b, Medium) }
 func BenchmarkAddToLarge(b *testing.B) { benchmarkAddTo(b, Large) }
 func BenchmarkAddToHuge(b *testing.B)  { benchmarkAddTo(b, Huge) }
 
+func benchmarkCumProd(b *testing.B, size int) {
+	s := randomSlice(size)
+	dst := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CumProd(dst, s)
+	}
+}
+func BenchmarkCumProdSmall(b *testing.B) { benchmarkCumProd(b, Small) }
+func BenchmarkCumProdMed(b *testing.B)   { benchmarkCumProd(b, Medium) }
+func BenchmarkCumProdLarge(b *testing.B) { benchmarkCumProd(b, Large) }
+func BenchmarkCumProdHuge(b *testing.B)  { benchmarkCumProd(b, Huge) }
+
+func benchmarkCumSum(b *testing.B, size int) {
+	s := randomSlice(size)
+	dst := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CumSum(dst, s)
+	}
+}
+func BenchmarkCumSumSmall(b *testing.B) { benchmarkCumSum(b, Small) }
+func BenchmarkCumSumMed(b *testing.B)   { benchmarkCumSum(b, Medium) }
+func BenchmarkCumSumLarge(b *testing.B) { benchmarkCumSum(b, Large) }
+func BenchmarkCumSumHuge(b *testing.B)  { benchmarkCumSum(b, Huge) }
+
+func benchmarkDiv(b *testing.B, size int) {
+	s := randomSlice(size)
+	dst := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Div(dst, s)
+	}
+}
+func BenchmarkDivSmall(b *testing.B) { benchmarkDiv(b, Small) }
+func BenchmarkDivMed(b *testing.B)   { benchmarkDiv(b, Medium) }
+func BenchmarkDivLarge(b *testing.B) { benchmarkDiv(b, Large) }
+func BenchmarkDivHuge(b *testing.B)  { benchmarkDiv(b, Huge) }
+
+func benchmarkDivTo(b *testing.B, size int) {
+	s1 := randomSlice(size)
+	s2 := randomSlice(size)
+	dst := randomSlice(size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DivTo(dst, s1, s2)
+	}
+}
+func BenchmarkDivToSmall(b *testing.B) { benchmarkDivTo(b, Small) }
+func BenchmarkDivToMed(b *testing.B)   { benchmarkDivTo(b, Medium) }
+func BenchmarkDivToLarge(b *testing.B) { benchmarkDivTo(b, Large) }
+func BenchmarkDivToHuge(b *testing.B)  { benchmarkDivTo(b, Huge) }
+
 func benchmarkSub(b *testing.B, size int) {
 	s1 := randomSlice(size)
 	s2 := randomSlice(size)

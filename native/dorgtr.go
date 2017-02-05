@@ -18,7 +18,7 @@ import "github.com/gonum/blas"
 // tau must have length at least n-1, and Dorgtr will panic otherwise.
 //
 // work is temporary storage, and lwork specifies the usable memory length. At
-// minimum, lwork >= n-1, and Dorgtr will panic otherwise. The amount of blocking
+// minimum, lwork >= max(1,n-1), and Dorgtr will panic otherwise. The amount of blocking
 // is limited by the usable length.
 // If lwork == -1, instead of computing Dorgtr the optimal work length is stored
 // into work[0].

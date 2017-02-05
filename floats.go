@@ -131,11 +131,7 @@ func CumProd(dst, s []float64) []float64 {
 	if len(dst) == 0 {
 		return dst
 	}
-	dst[0] = s[0]
-	for i := 1; i < len(s); i++ {
-		dst[i] = dst[i-1] * s[i]
-	}
-	return dst
+	return f64.CumProd(dst, s)
 }
 
 // CumSum finds the cumulative sum of the first i elements in
@@ -151,11 +147,7 @@ func CumSum(dst, s []float64) []float64 {
 	if len(dst) == 0 {
 		return dst
 	}
-	dst[0] = s[0]
-	for i := 1; i < len(s); i++ {
-		dst[i] = dst[i-1] + s[i]
-	}
-	return dst
+	return f64.CumSum(dst, s)
 }
 
 // Distance computes the L-norm of s - t. See Norm for special cases.
@@ -203,9 +195,7 @@ func Div(dst, s []float64) {
 	if len(dst) != len(s) {
 		panic("floats: slice lengths do not match")
 	}
-	for i, val := range s {
-		dst[i] /= val
-	}
+	f64.Div(dst, s)
 }
 
 // DivTo performs element-wise division s / t
@@ -215,10 +205,7 @@ func DivTo(dst, s, t []float64) []float64 {
 	if len(s) != len(t) || len(dst) != len(t) {
 		panic("floats: slice lengths do not match")
 	}
-	for i, val := range t {
-		dst[i] = s[i] / val
-	}
-	return dst
+	return f64.DivTo(dst, s, t)
 }
 
 // Dot computes the dot product of s1 and s2, i.e.

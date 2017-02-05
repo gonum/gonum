@@ -95,4 +95,5 @@ func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, t
 			impl.Dorgqr(n-1, n-1, n-1, a[lda+1:], lda, tau, work, lwork)
 		}
 	}
+	work[0] = float64(lworkopt)
 }

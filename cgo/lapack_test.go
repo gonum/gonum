@@ -180,6 +180,10 @@ func TestDorgqr(t *testing.T) {
 	testlapack.DorgqrTest(t, blockedTranslate{impl})
 }
 
+func TestDorgtr(t *testing.T) {
+	testlapack.DorgtrTest(t, impl)
+}
+
 func TestDorgl2(t *testing.T) {
 	testlapack.Dorgl2Test(t, blockedTranslate{impl})
 }

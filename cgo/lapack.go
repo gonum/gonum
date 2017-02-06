@@ -1414,6 +1414,264 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 	lapacke.Dgetrs(trans, n, nrhs, a, lda, ipiv32, b, ldb)
 }
 
+// Dggsvd3 computes the generalized singular value decomposition (GSVD)
+// of an m×n matrix A and p×n matrix B:
+//  U^T*A*Q = D1*[ 0 R ]
+//
+//  V^T*B*Q = D2*[ 0 R ]
+// where U, V and Q are orthogonal matrices.
+//
+// Dggsvd3 returns k and l, the dimensions of the sub-blocks. k+l
+// is the effective numerical rank of the (m+p)×n matrix [ A^T B^T ]^T.
+// R is a (k+l)×(k+l) nonsingular upper triangular matrix, D1 and
+// D2 are m×(k+l) and p×(k+l) diagonal matrices and of the following
+// structures, respectively:
+//
+// If m-k-l >= 0,
+//
+//                    k  l
+//       D1 =     k [ I  0 ]
+//                l [ 0  C ]
+//            m-k-l [ 0  0 ]
+//
+//                  k  l
+//       D2 = l   [ 0  S ]
+//            p-l [ 0  0 ]
+//
+//               n-k-l  k    l
+//  [ 0 R ] = k [  0   R11  R12 ] k
+//            l [  0    0   R22 ] l
+//
+// where
+//
+//  C = diag( alpha_k, ... , alpha_{k+l} ),
+//  S = diag( beta_k,  ... , beta_{k+l} ),
+//  C^2 + S^2 = I.
+//
+// R is stored in
+//  A[0:k+l, n-k-l:n]
+// on exit.
+//
+// If m-k-l < 0,
+//
+//                 k m-k k+l-m
+//      D1 =   k [ I  0    0  ]
+//           m-k [ 0  C    0  ]
+//
+//                   k m-k k+l-m
+//      D2 =   m-k [ 0  S    0  ]
+//           k+l-m [ 0  0    I  ]
+//             p-l [ 0  0    0  ]
+//
+//                 n-k-l  k   m-k  k+l-m
+//  [ 0 R ] =    k [ 0    R11  R12  R13 ]
+//             m-k [ 0     0   R22  R23 ]
+//           k+l-m [ 0     0    0   R33 ]
+//
+// where
+//  C = diag( alpha_k, ... , alpha_m ),
+//  S = diag( beta_k,  ... , beta_m ),
+//  C^2 + S^2 = I.
+//
+//  R = [ R11 R12 R13 ] is stored in A[1:m, n-k-l+1:n]
+//      [  0  R22 R23 ]
+// and R33 is stored in
+//  B[m-k:l, n+m-k-l:n] on exit.
+//
+// Dggsvd3 computes C, S, R, and optionally the orthogonal transformation
+// matrices U, V and Q.
+//
+// jobU, jobV and jobQ are options for computing the orthogonal matrices. The behavior
+// is as follows
+//  jobU == lapack.GSVDU        Compute orthogonal matrix U
+//  jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+// The behavior is the same for jobV and jobQ with the exception that instead of
+// lapack.GSVDU these accept lapack.GSVDV and lapack.GSVDQ respectively.
+// The matrices U, V and Q must be m×m, p×p and n×n respectively unless the
+// relevant job parameter is lapack.GSVDNone.
+//
+// alpha and beta must have length n or Dggsvd3 will panic. On exit, alpha and
+// beta contain the generalized singular value pairs of A and B
+//   alpha[0:k] = 1,
+//   beta[0:k]  = 0,
+// if m-k-l >= 0,
+//   alpha[k:k+l] = diag(C),
+//   beta[k:k+l]  = diag(S),
+// if m-k-l < 0,
+//   alpha[k:m]= C, alpha[m:k+l]= 0
+//   beta[k:m] = S, beta[m:k+l] = 1.
+// if k+l < n,
+//   alpha[k+l:n] = 0 and
+//   beta[k+l:n]  = 0.
+//
+// On exit, iwork contains the permutation required to sort alpha descending.
+//
+// iwork must have length n, work must have length at least max(1, lwork), and
+// lwork must be -1 or greater than zero, otherwise Dggsvd3 will panic. If
+// lwork is -1, work[0] holds the optimal lwork on return, but Dggsvd3 does
+// not perform the GSVD.
+func (impl Implementation) Dggsvd3(jobU, jobV, jobQ lapack.GSVDJob, m, n, p int, a []float64, lda int, b []float64, ldb int, alpha, beta, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, work []float64, lwork int, iwork []int) (k, l int, ok bool) {
+	checkMatrix(m, n, a, lda)
+	checkMatrix(p, n, b, ldb)
+
+	switch jobU {
+	case lapack.GSVDU:
+		checkMatrix(m, m, u, ldu)
+	case lapack.GSVDNone:
+	default:
+		panic(badGSVDJob + "U")
+	}
+	switch jobV {
+	case lapack.GSVDV:
+		checkMatrix(p, p, v, ldv)
+	case lapack.GSVDNone:
+	default:
+		panic(badGSVDJob + "V")
+	}
+	switch jobQ {
+	case lapack.GSVDQ:
+		checkMatrix(n, n, q, ldq)
+	case lapack.GSVDNone:
+	default:
+		panic(badGSVDJob + "Q")
+	}
+
+	if len(alpha) != n {
+		panic(badAlpha)
+	}
+	if len(beta) != n {
+		panic(badBeta)
+	}
+
+	if lwork != -1 && lwork < 1 {
+		panic(badWork)
+	}
+	if len(work) < max(1, lwork) {
+		panic(badWork)
+	}
+	if len(iwork) < n {
+		panic(badWork)
+	}
+
+	_k := []int32{0}
+	_l := []int32{0}
+	_iwork := make([]int32, len(iwork))
+	for i, v := range iwork {
+		v++
+		if v != int(int32(v)) {
+			panic("lapack: iwork element out of range")
+		}
+		_iwork[i] = int32(v)
+	}
+	ok = lapacke.Dggsvd3(lapack.Job(jobU), lapack.Job(jobV), lapack.Job(jobQ), m, n, p, _k, _l, a, lda, b, ldb, alpha, beta, u, ldu, v, ldv, q, ldq, work, lwork, _iwork)
+	for i, v := range _iwork {
+		iwork[i] = int(v - 1)
+	}
+
+	return int(_k[0]), int(_l[0]), ok
+}
+
+// Dggsvp3 computes orthogonal matrices U, V and Q such that
+//
+//                  n-k-l  k    l
+//  U^T*A*Q =    k [ 0    A12  A13 ] if m-k-l >= 0;
+//               l [ 0     0   A23 ]
+//           m-k-l [ 0     0    0  ]
+//
+//                  n-k-l  k    l
+//  U^T*A*Q =    k [ 0    A12  A13 ] if m-k-l < 0;
+//             m-k [ 0     0   A23 ]
+//
+//                  n-k-l  k    l
+//  V^T*B*Q =    l [ 0     0   B13 ]
+//             p-l [ 0     0    0  ]
+//
+// where the k×k matrix A12 and l×l matrix B13 are non-singular
+// upper triangular. A23 is l×l upper triangular if m-k-l >= 0,
+// otherwise A23 is (m-k)×l upper trapezoidal.
+//
+// Dggsvp3 returns k and l, the dimensions of the sub-blocks. k+l
+// is the effective numerical rank of the (m+p)×n matrix [ A^T B^T ]^T.
+//
+// jobU, jobV and jobQ are options for computing the orthogonal matrices. The behavior
+// is as follows
+//  jobU == lapack.GSVDU        Compute orthogonal matrix U
+//  jobU == lapack.GSVDNone     Do not compute orthogonal matrix.
+// The behavior is the same for jobV and jobQ with the exception that instead of
+// lapack.GSVDU these accept lapack.GSVDV and lapack.GSVDQ respectively.
+// The matrices U, V and Q must be m×m, p×p and n×n respectively unless the
+// relevant job parameter is lapack.GSVDNone.
+//
+// tola and tolb are the convergence criteria for the Jacobi-Kogbetliantz
+// iteration procedure. Generally, they are the same as used in the preprocessing
+// step, for example,
+//  tola = max(m, n)*norm(A)*eps,
+//  tolb = max(p, n)*norm(B)*eps.
+// Where eps is the machine epsilon.
+//
+// iwork must have length n, work must have length at least max(1, lwork), and
+// lwork must be -1 or greater than zero, otherwise Dggsvp3 will panic.
+//
+// Dggsvp3 is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int, a []float64, lda int, b []float64, ldb int, tola, tolb float64, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, iwork []int, tau, work []float64, lwork int) (k, l int) {
+	checkMatrix(m, n, a, lda)
+	checkMatrix(p, n, b, ldb)
+
+	wantu := jobU == lapack.GSVDU
+	if !wantu && jobU != lapack.GSVDNone {
+		panic(badGSVDJob + "U")
+	}
+	if jobU != lapack.GSVDNone {
+		checkMatrix(m, m, u, ldu)
+	}
+
+	wantv := jobV == lapack.GSVDV
+	if !wantv && jobV != lapack.GSVDNone {
+		panic(badGSVDJob + "V")
+	}
+	if jobV != lapack.GSVDNone {
+		checkMatrix(p, p, v, ldv)
+	}
+
+	wantq := jobQ == lapack.GSVDQ
+	if !wantq && jobQ != lapack.GSVDNone {
+		panic(badGSVDJob + "Q")
+	}
+	if jobQ != lapack.GSVDNone {
+		checkMatrix(n, n, q, ldq)
+	}
+
+	if len(tau) < n {
+		panic(badTau)
+	}
+	if len(iwork) != n {
+		panic(badWork)
+	}
+	if lwork != -1 && lwork < 1 {
+		panic(badWork)
+	}
+	if len(work) < max(1, lwork) {
+		panic(shortWork)
+	}
+
+	_k := []int32{0}
+	_l := []int32{0}
+	_iwork := make([]int32, len(iwork))
+	for i, v := range iwork {
+		v++
+		if v != int(int32(v)) {
+			panic("lapack: iwork element out of range")
+		}
+		_iwork[i] = int32(v)
+	}
+	lapacke.Dggsvp3(lapack.Job(jobU), lapack.Job(jobV), lapack.Job(jobQ), m, p, n, a, lda, b, ldb, tola, tolb, _k, _l, u, ldu, v, ldv, q, ldq, _iwork, tau, work, lwork)
+	for i, v := range _iwork {
+		iwork[i] = int(v - 1)
+	}
+
+	return int(_k[0]), int(_l[0])
+}
+
 // Dorgbr generates one of the matrices Q or P^T computed by Dgebrd.
 // See Dgebrd for the description of Q and P^T.
 //

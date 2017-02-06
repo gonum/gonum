@@ -176,6 +176,14 @@ func TestDgetrs(t *testing.T) {
 	testlapack.DgetrsTest(t, impl)
 }
 
+func TestDggsvd3(t *testing.T) {
+	testlapack.Dggsvd3Test(t, impl)
+}
+
+func TestDggsvp3(t *testing.T) {
+	testlapack.Dggsvp3Test(t, impl)
+}
+
 func TestDhseqr(t *testing.T) {
 	testlapack.DhseqrTest(t, impl)
 }

@@ -1401,3 +1401,29 @@ func constructGSVDresults(n, p, m, k, l int, a, b blas64.General, alpha, beta []
 
 	return zeroR, d1, d2
 }
+
+func constructGSVPresults(n, p, m, k, l int, a, b blas64.General) (zeroA, zeroB blas64.General) {
+	zeroA = zeros(m, n, n)
+	dst := zeroA
+	dst.Rows = min(m, k+l)
+	dst.Cols = k + l
+	dst.Data = zeroA.Data[n-k-l:]
+	src := a
+	dst.Rows = min(m, k+l)
+	src.Cols = k + l
+	src.Data = a.Data[n-k-l:]
+	copyGeneral(dst, src)
+
+	zeroB = zeros(p, n, n)
+	dst = zeroB
+	dst.Rows = l
+	dst.Cols = l
+	dst.Data = zeroB.Data[n-l:]
+	src = b
+	dst.Rows = l
+	src.Cols = l
+	src.Data = b.Data[n-l:]
+	copyGeneral(dst, src)
+
+	return zeroA, zeroB
+}

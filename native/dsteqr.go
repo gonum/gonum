@@ -37,6 +37,9 @@ import (
 //
 // Dsteqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
+	if n < 0 {
+		panic(nLT0)
+	}
 	if len(d) < n {
 		panic(badD)
 	}

@@ -18,7 +18,7 @@ import "github.com/gonum/blas"
 // tau must have length at least n-1, and Dorgtr will panic otherwise.
 //
 // work is temporary storage, and lwork specifies the usable memory length. At
-// minimum, lwork >= n-1, and Dorgtr will panic otherwise. The amount of blocking
+// minimum, lwork >= max(1,n-1), and Dorgtr will panic otherwise. The amount of blocking
 // is limited by the usable length.
 // If lwork == -1, instead of computing Dorgtr the optimal work length is stored
 // into work[0].
@@ -29,7 +29,22 @@ func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, t
 	if len(tau) < n-1 {
 		panic(badTau)
 	}
+	if len(work) < lwork {
+		panic(badWork)
+	}
+	if lwork < n-1 && lwork != -1 {
+		panic(badWork)
+	}
 	upper := uplo == blas.Upper
+	if !upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+
+	if n == 0 {
+		work[0] = 1
+		return
+	}
+
 	var nb int
 	if upper {
 		nb = impl.Ilaenv(1, "DORGQL", " ", n-1, n-1, n-1, -1)
@@ -37,19 +52,11 @@ func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, t
 		nb = impl.Ilaenv(1, "DORGQR", " ", n-1, n-1, n-1, -1)
 	}
 	lworkopt := max(1, n-1) * nb
-	work[0] = float64(lworkopt)
 	if lwork == -1 {
+		work[0] = float64(lworkopt)
 		return
 	}
-	if len(work) < lwork {
-		panic(badWork)
-	}
-	if lwork < n-1 {
-		panic(badWork)
-	}
-	if n == 0 {
-		return
-	}
+
 	if upper {
 		// Q was determined by a call to Dsytrd with uplo == blas.Upper.
 		// Shift the vectors which define the elementary reflectors one column
@@ -88,4 +95,5 @@ func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, t
 			impl.Dorgqr(n-1, n-1, n-1, a[lda+1:], lda, tau, work, lwork)
 		}
 	}
+	work[0] = float64(lworkopt)
 }

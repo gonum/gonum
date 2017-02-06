@@ -1486,6 +1486,42 @@ func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work [
 	lapacke.Dorgqr(m, n, k, a, lda, tau, work, lwork)
 }
 
+// Dorgtr generates a real orthogonal matrix Q which is defined as the product
+// of n-1 elementary reflectors of order n as returned by Dsytrd.
+//
+// The construction of Q depends on the value of uplo:
+//  Q = H_{n-1} * ... * H_1 * H_0  if uplo == blas.Upper
+//  Q = H_0 * H_1 * ... * H_{n-1}  if uplo == blas.Lower
+// where H_i is constructed from the elementary reflectors as computed by Dsytrd.
+// See the documentation for Dsytrd for more information.
+//
+// tau must have length at least n-1, and Dorgtr will panic otherwise.
+//
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= max(1,n-1), and Dorgtr will panic otherwise. The amount of blocking
+// is limited by the usable length.
+// If lwork == -1, instead of computing Dorgtr the optimal work length is stored
+// into work[0].
+//
+// Dorgtr is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dorgtr(uplo blas.Uplo, n int, a []float64, lda int, tau, work []float64, lwork int) {
+	checkMatrix(n, n, a, lda)
+	if len(tau) < n-1 {
+		panic(badTau)
+	}
+	if len(work) < lwork {
+		panic(badWork)
+	}
+	if lwork < n-1 && lwork != -1 {
+		panic(badWork)
+	}
+	upper := uplo == blas.Upper
+	if !upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	lapacke.Dorgtr(uplo, n, a, lda, tau, work, lwork)
+}
+
 // Dormbr applies a multiplicative update to the matrix C based on a
 // decomposition computed by Dgebrd.
 //

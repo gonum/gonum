@@ -15,7 +15,7 @@ import (
 //  lapack.MaxAbs: the maximum absolute value of an element.
 //  lapack.MaxColumnSum: the maximum column sum of the absolute values of the entries.
 //  lapack.MaxRowSum: the maximum row sum of the absolute values of the entries.
-//  lapack.Frobenius: the square root of the sum of the squares of the entries.
+//  lapack.NormFrob: the square root of the sum of the squares of the entries.
 // If norm == lapack.MaxColumnSum, work must be of length n, and this function will panic otherwise.
 // There are no restrictions on work for the other matrix norms.
 func (impl Implementation) Dlange(norm lapack.MatrixNorm, m, n int, a []float64, lda int, work []float64) float64 {

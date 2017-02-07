@@ -1802,6 +1802,53 @@ func (impl Implementation) Dpocon(uplo blas.Uplo, n int, a []float64, lda int, a
 	return rcond[0]
 }
 
+// Dsteqr computes the eigenvalues and optionally the eigenvectors of a symmetric
+// tridiagonal matrix using the implicit QL or QR method. The eigenvectors of a
+// full or band symmetric matrix can also be found if Dsytrd, Dsptrd, or Dsbtrd
+// have been used to reduce this matrix to tridiagonal form.
+//
+// d, on entry, contains the diagonal elements of the tridiagonal matrix. On exit,
+// d contains the eigenvalues in ascending order. d must have length n and
+// Dsteqr will panic otherwise.
+//
+// e, on entry, contains the off-diagonal elements of the tridiagonal matrix on
+// entry, and is overwritten during the call to Dsteqr. e must have length n-1 and
+// Dsteqr will panic otherwise.
+//
+// z, on entry, contains the n×n orthogonal matrix used in the reduction to
+// tridiagonal form if compz == lapack.OriginalEV. On exit, if
+// compz == lapack.OriginalEV, z contains the orthonormal eigenvectors of the
+// original symmetric matrix, and if compz == lapack.TridiagEV, z contains the
+// orthonormal eigenvectors of the symmetric tridiagonal matrix. z is not used
+// if compz == lapack.None.
+//
+// work must have length at least max(1, 2*n-2) if the eigenvectors are computed,
+// and Dsteqr will panic otherwise.
+//
+// Dsteqr is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64, ldz int, work []float64) (ok bool) {
+	if n < 0 {
+		panic(nLT0)
+	}
+	if len(d) < n {
+		panic(badD)
+	}
+	if len(e) < n-1 {
+		panic(badE)
+	}
+	if compz != lapack.None && compz != lapack.TridiagEV && compz != lapack.OriginalEV {
+		panic(badEVComp)
+	}
+	if compz != lapack.None {
+		if len(work) < max(1, 2*n-2) {
+			panic(badWork)
+		}
+		checkMatrix(n, n, z, ldz)
+	}
+
+	return lapacke.Dsteqr(lapack.Comp(compz), n, d, e, z, ldz, work)
+}
+
 // Dsterf computes all eigenvalues of a symmetric tridiagonal matrix using the
 // Pal-Walker-Kahan variant of the QL or QR algorithm.
 //

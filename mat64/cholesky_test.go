@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/gonum/blas/testblas"
+	"github.com/gonum/matrix"
 )
 
 func TestCholesky(t *testing.T) {
@@ -178,6 +179,42 @@ func TestFromCholesky(t *testing.T) {
 
 		if !EqualApprox(&s, test, 1e-12) {
 			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(&s))
+		}
+	}
+}
+
+func TestCloneCholesky(t *testing.T) {
+	for _, test := range []*SymDense{
+		NewSymDense(3, []float64{
+			53, 59, 37,
+			0, 83, 71,
+			0, 0, 101,
+		}),
+	} {
+		var chol Cholesky
+		ok := chol.Factorize(test)
+		if !ok {
+			panic("bad test")
+		}
+		var chol2 Cholesky
+		chol2.Clone(&chol)
+
+		if chol.cond != chol2.cond {
+			t.Errorf("condition number mismatch from zero")
+		}
+		if !Equal(chol.chol, chol2.chol) {
+			t.Errorf("chol mismatch from zero")
+		}
+
+		// Corrupt chol2 and try again
+		chol2.cond = math.NaN()
+		chol2.chol = NewTriDense(2, matrix.Upper, nil)
+		chol2.Clone(&chol)
+		if chol.cond != chol2.cond {
+			t.Errorf("condition number mismatch from non-zero")
+		}
+		if !Equal(chol.chol, chol2.chol) {
+			t.Errorf("chol mismatch from non-zero")
 		}
 	}
 }

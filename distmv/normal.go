@@ -77,6 +77,7 @@ func NewNormalChol(mu []float64, chol *mat64.Cholesky, src *rand.Rand) *Normal {
 		dim: dim,
 		mu:  make([]float64, dim),
 	}
+	n.chol.Clone(chol)
 	copy(n.mu, mu)
 	n.lower.LFromCholesky(chol)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()

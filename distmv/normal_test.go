@@ -50,6 +50,29 @@ func TestNormProbs(t *testing.T) {
 	})
 }
 
+func TestNewNormalChol(t *testing.T) {
+	for _, test := range []struct {
+		mean []float64
+		cov  *mat64.SymDense
+	}{
+		{
+			mean: []float64{2, 3},
+			cov:  mat64.NewSymDense(2, []float64{1, 0.1, 0.1, 1}),
+		},
+	} {
+		var chol mat64.Cholesky
+		ok := chol.Factorize(test.cov)
+		if !ok {
+			panic("bad test")
+		}
+		n := NewNormalChol(test.mean, &chol, nil)
+		// Generate a random number and calculate probability to ensure things
+		// have been set properly. See issue #426.
+		x := n.Rand(nil)
+		_ = n.Prob(x)
+	}
+}
+
 func TestNormRand(t *testing.T) {
 	for _, test := range []struct {
 		mean []float64

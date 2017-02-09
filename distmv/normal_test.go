@@ -126,6 +126,50 @@ func TestNormRand(t *testing.T) {
 	}
 }
 
+func TestNormalQuantile(t *testing.T) {
+	for _, test := range []struct {
+		mean []float64
+		cov  []float64
+	}{
+		{
+			mean: []float64{6, 7},
+			cov: []float64{
+				5, 0.9,
+				0.9, 2,
+			},
+		},
+	} {
+		dim := len(test.mean)
+		cov := mat64.NewSymDense(dim, test.cov)
+		n, ok := NewNormal(test.mean, cov, nil)
+		if !ok {
+			t.Errorf("bad covariance matrix")
+		}
+
+		nSamples := 1000000
+		rnd := rand.New(rand.NewSource(1))
+		samps := mat64.NewDense(nSamples, dim, nil)
+		tmp := make([]float64, dim)
+		for i := 0; i < nSamples; i++ {
+			for j := range tmp {
+				tmp[j] = rnd.Float64()
+			}
+			n.Quantile(samps.RawRowView(i), tmp)
+		}
+		estMean := make([]float64, dim)
+		for i := range estMean {
+			estMean[i] = stat.Mean(mat64.Col(nil, i, samps), nil)
+		}
+		if !floats.EqualApprox(estMean, test.mean, 1e-2) {
+			t.Errorf("Mean mismatch: want: %v, got %v", test.mean, estMean)
+		}
+		estCov := stat.CovarianceMatrix(nil, samps, nil)
+		if !mat64.EqualApprox(estCov, cov, 1e-2) {
+			t.Errorf("Cov mismatch: want: %v, got %v", cov, estCov)
+		}
+	}
+}
+
 func TestConditionNormal(t *testing.T) {
 	// Uncorrelated values shouldn't influence the updated values.
 	for _, test := range []struct {

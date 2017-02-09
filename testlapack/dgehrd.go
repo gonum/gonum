@@ -16,6 +16,8 @@ import (
 
 type Dgehrder interface {
 	Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, work []float64, lwork int)
+
+	Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64, lwork int)
 }
 
 func DgehrdTest(t *testing.T, impl Dgehrder) {
@@ -24,9 +26,9 @@ func DgehrdTest(t *testing.T, impl Dgehrder) {
 	// Randomized tests for small matrix sizes that will most likely
 	// use the unblocked algorithm.
 	for _, n := range []int{1, 2, 3, 4, 5, 10, 34} {
-		for _, extra := range []int{0, 1, 13} {
+		for _, extra := range []int{0, 13} {
 			for _, optwork := range []bool{true, false} {
-				for cas := 0; cas < 100; cas++ {
+				for cas := 0; cas < 10; cas++ {
 					ilo := rnd.Intn(n)
 					ihi := rnd.Intn(n)
 					if ilo > ihi {
@@ -68,7 +70,7 @@ func DgehrdTest(t *testing.T, impl Dgehrder) {
 		{260, 0, 258},
 		{260, 0, 259},
 	} {
-		for _, extra := range []int{0, 1, 13} {
+		for _, extra := range []int{0, 13} {
 			for _, optwork := range []bool{true, false} {
 				testDgehrd(t, impl, test.n, test.ilo, test.ihi, extra, optwork, rnd)
 			}
@@ -151,38 +153,15 @@ func testDgehrd(t *testing.T, impl Dgehrder, n, ilo, ihi, extra int, optwork boo
 	}
 
 	// Extract Q and check that it is orthogonal.
-	q := blas64.General{
-		Rows:   n,
-		Cols:   n,
-		Stride: n,
-		Data:   make([]float64, n*n),
-	}
-	for i := 0; i < q.Rows; i++ {
-		q.Data[i*q.Stride+i] = 1
-	}
-	qCopy := q
-	qCopy.Data = make([]float64, len(q.Data))
-	for j := ilo; j < ihi; j++ {
-		h := blas64.General{
-			Rows:   n,
-			Cols:   n,
-			Stride: n,
-			Data:   make([]float64, n*n),
+	q := eye(n, n)
+	if ilo != ihi {
+		for i := ilo + 2; i <= ihi; i++ {
+			for j := ilo + 1; j < ihi; j++ {
+				q.Data[i*q.Stride+j] = a.Data[i*a.Stride+j-1]
+			}
 		}
-		for i := 0; i < h.Rows; i++ {
-			h.Data[i*h.Stride+i] = 1
-		}
-		v := blas64.Vector{
-			Inc:  1,
-			Data: make([]float64, n),
-		}
-		v.Data[j+1] = 1
-		for i := j + 2; i < ihi+1; i++ {
-			v.Data[i] = a.Data[i*a.Stride+j]
-		}
-		blas64.Ger(-tau[j], v, v, h)
-		copy(qCopy.Data, q.Data)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qCopy, h, 0, q)
+		nh := ihi - ilo
+		impl.Dorgqr(nh, nh, nh, q.Data[(ilo+1)*q.Stride+ilo+1:], q.Stride, tau[ilo:ihi], work, len(work))
 	}
 	if !isOrthonormal(q) {
 		t.Errorf("%v: Q is not orthogonal\nQ=%v", prefix, q)

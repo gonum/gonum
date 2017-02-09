@@ -1337,42 +1337,19 @@ func applyReflector(qh blas64.General, q blas64.General, v []float64) {
 // in the documentation of Dtgsja and Dggsvd3, and the result matrix in
 // the documentation for Dggsvp3.
 func constructGSVDresults(n, p, m, k, l int, a, b blas64.General, alpha, beta []float64) (zeroR, d1, d2 blas64.General) {
+	// [ 0 R ]
 	zeroR = zeros(k+l, n, n)
-	d1 = zeros(m, k+l, k+l)
-	d2 = zeros(p, k+l, k+l)
-	if m-k-l >= 0 {
+	dst := zeroR
+	dst.Rows = min(m, k+l)
+	dst.Cols = k + l
+	dst.Data = zeroR.Data[n-k-l:]
+	src := a
+	src.Rows = min(m, k+l)
+	src.Cols = k + l
+	src.Data = a.Data[n-k-l:]
+	copyGeneral(dst, src)
+	if m < k+l {
 		// [ 0 R ]
-		dst := zeroR
-		dst.Cols = k + l
-		dst.Data = zeroR.Data[n-k-l:]
-		src := a
-		src.Cols = k + l
-		src.Data = a.Data[n-k-l:]
-		copyGeneral(dst, src)
-
-		// D1
-		for i := 0; i < k; i++ {
-			d1.Data[i*d1.Stride+i] = 1
-		}
-		for i := k; i < k+l; i++ {
-			d1.Data[i*d1.Stride+i] = alpha[i]
-		}
-
-		// D2
-		for i := 0; i < l; i++ {
-			d2.Data[i*d2.Stride+i+k] = beta[k+i]
-		}
-	} else {
-		// [ 0 R ]
-		dst := zeroR
-		dst.Rows = m
-		dst.Cols = k + l
-		dst.Data = zeroR.Data[n-k-l:]
-		src := a
-		src.Rows = m
-		src.Cols = k + l
-		src.Data = a.Data[n-k-l:]
-		copyGeneral(dst, src)
 		dst.Rows = k + l - m
 		dst.Cols = k + l - m
 		dst.Data = zeroR.Data[m*zeroR.Stride+n-(k+l-m):]
@@ -1381,22 +1358,24 @@ func constructGSVDresults(n, p, m, k, l int, a, b blas64.General, alpha, beta []
 		src.Cols = k + l - m
 		src.Data = b.Data[(m-k)*b.Stride+n+m-k-l:]
 		copyGeneral(dst, src)
+	}
 
-		// D1
-		for i := 0; i < k; i++ {
-			d1.Data[i*d1.Stride+i] = 1
-		}
-		for i := k; i < m; i++ {
-			d1.Data[i*d1.Stride+i] = alpha[i]
-		}
+	// D1
+	d1 = zeros(m, k+l, k+l)
+	for i := 0; i < k; i++ {
+		d1.Data[i*d1.Stride+i] = 1
+	}
+	for i := k; i < min(m, k+l); i++ {
+		d1.Data[i*d1.Stride+i] = alpha[i]
+	}
 
-		// D2
-		for i := 0; i < m-k; i++ {
-			d2.Data[i*d2.Stride+i+k] = beta[k+i]
-		}
-		for i := m - k; i < l; i++ {
-			d2.Data[i*d2.Stride+i+k] = 1
-		}
+	// D2
+	d2 = zeros(p, k+l, k+l)
+	for i := 0; i < min(l, m-k); i++ {
+		d2.Data[i*d2.Stride+i+k] = beta[k+i]
+	}
+	for i := m - k; i < l; i++ {
+		d2.Data[i*d2.Stride+i+k] = 1
 	}
 
 	return zeroR, d1, d2

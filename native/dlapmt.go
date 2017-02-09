@@ -52,20 +52,23 @@ func (impl Implementation) Dlapmt(forward bool, m, n int, x []float64, ldx int, 
 				i = k[i] - 1
 			}
 		}
-		return
+	} else {
+		for i, v := range k {
+			if v >= 0 {
+				continue
+			}
+			k[i] = -v
+			j := -v - 1
+			for j != i {
+				bi.Dswap(m, x[j:], ldx, x[i:], ldx)
+
+				k[j] = -k[j]
+				j = k[j] - 1
+			}
+		}
 	}
 
-	for i, v := range k {
-		if v >= 0 {
-			continue
-		}
-		k[i] = -v
-		j := -v - 1
-		for j != i {
-			bi.Dswap(m, x[j:], ldx, x[i:], ldx)
-
-			k[j] = -k[j]
-			j = k[j] - 1
-		}
+	for i := range k {
+		k[i]--
 	}
 }

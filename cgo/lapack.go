@@ -1507,7 +1507,7 @@ func (impl Implementation) Dgetrs(trans blas.Transpose, n, nrhs int, a []float64
 // On exit, iwork contains the permutation required to sort alpha descending.
 //
 // iwork must have length n, work must have length at least max(1, lwork), and
-// lwork must be -1 or greater than zero, otherwise Dggsvd3 will panic. If
+// lwork must be -1 or greater than n, otherwise Dggsvd3 will panic. If
 // lwork is -1, work[0] holds the optimal lwork on return, but Dggsvd3 does
 // not perform the GSVD.
 func (impl Implementation) Dggsvd3(jobU, jobV, jobQ lapack.GSVDJob, m, n, p int, a []float64, lda int, b []float64, ldb int, alpha, beta, u []float64, ldu int, v []float64, ldv int, q []float64, ldq int, work []float64, lwork int, iwork []int) (k, l int, ok bool) {
@@ -1543,11 +1543,11 @@ func (impl Implementation) Dggsvd3(jobU, jobV, jobQ lapack.GSVDJob, m, n, p int,
 		panic(badBeta)
 	}
 
-	if lwork != -1 && lwork < 1 {
+	if lwork != -1 && lwork <= n {
 		panic(badWork)
 	}
 	if len(work) < max(1, lwork) {
-		panic(badWork)
+		panic(shortWork)
 	}
 	if len(iwork) < n {
 		panic(badWork)

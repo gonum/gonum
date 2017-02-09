@@ -26,6 +26,10 @@ const (
 // initialized by a call to Factorize that has returned true. Calls to methods
 // of an unsuccessful Cholesky factorization will panic.
 type Cholesky struct {
+	// The chol pointer must never be retained as a pointer outside the Cholesky
+	// struct, either by returning chol outside the struct or by setting it to
+	// a pointer coming from outside. The same prohibition applies to the data
+	// slice within chol.
 	chol *TriDense
 	cond float64
 }
@@ -101,6 +105,23 @@ func (c *Cholesky) SetFromU(t *TriDense) {
 	}
 	c.chol.Copy(t)
 	c.updateCond(-1)
+}
+
+// Clone makes a copy of the input Cholesky into the receiver, overwriting the
+// previous value of the receiver. Clone does not place any restrictions on receiver
+// shape. Clone panics if the input Cholesky is not the result of a valid decomposition.
+func (c *Cholesky) Clone(chol *Cholesky) {
+	if !chol.valid() {
+		panic(badCholesky)
+	}
+	n := chol.Size()
+	if c.isZero() {
+		c.chol = NewTriDense(n, matrix.Upper, nil)
+	} else {
+		c.chol = NewTriDense(n, matrix.Upper, use(c.chol.mat.Data, n*n))
+	}
+	c.chol.Copy(chol.chol)
+	c.cond = chol.cond
 }
 
 // Size returns the dimension of the factorized matrix.

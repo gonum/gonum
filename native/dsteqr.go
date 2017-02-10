@@ -162,14 +162,13 @@ func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64,
 			continue
 		case anorm > ssfmax:
 			iscale = down
-			// TODO(btracey): Why is lda n?
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l+1, 1, d[l:], n)
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l, 1, e[l:], n)
+			// Pretend that d and e are matrices with 1 column.
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l+1, 1, d[l:], 1)
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmax, lend-l, 1, e[l:], 1)
 		case anorm < ssfmin:
 			iscale = up
-			// TODO(btracey): Why is lda n?
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l+1, 1, d[l:], n)
-			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l, 1, e[l:], n)
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l+1, 1, d[l:], 1)
+			impl.Dlascl(lapack.General, 0, 0, anorm, ssfmin, lend-l, 1, e[l:], 1)
 		}
 
 		// Choose between QL and QR.
@@ -353,11 +352,12 @@ func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64,
 		// Undo scaling if necessary.
 		switch iscale {
 		case down:
-			impl.Dlascl(lapack.General, 0, 0, ssfmax, anorm, lendsv-lsv+1, 1, d[lsv:], n)
-			impl.Dlascl(lapack.General, 0, 0, ssfmax, anorm, lendsv-lsv, 1, e[lsv:], n)
+			// Pretend that d and e are matrices with 1 column.
+			impl.Dlascl(lapack.General, 0, 0, ssfmax, anorm, lendsv-lsv+1, 1, d[lsv:], 1)
+			impl.Dlascl(lapack.General, 0, 0, ssfmax, anorm, lendsv-lsv, 1, e[lsv:], 1)
 		case up:
-			impl.Dlascl(lapack.General, 0, 0, ssfmin, anorm, lendsv-lsv+1, 1, d[lsv:], n)
-			impl.Dlascl(lapack.General, 0, 0, ssfmin, anorm, lendsv-lsv, 1, e[lsv:], n)
+			impl.Dlascl(lapack.General, 0, 0, ssfmin, anorm, lendsv-lsv+1, 1, d[lsv:], 1)
+			impl.Dlascl(lapack.General, 0, 0, ssfmin, anorm, lendsv-lsv, 1, e[lsv:], 1)
 		}
 
 		// Check for no convergence to an eigenvalue after a total of n*maxit iterations.

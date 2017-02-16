@@ -116,7 +116,7 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 		}
 		// Compute singular values to a relative accuracy of tol. If tol is negative
 		// the values will be computed to an absolute accuracy of math.Abs(tol) * norm(b)
-		tolmul := math.Max(10, math.Min(100, eps*(-1.0/8)))
+		tolmul := math.Max(10, math.Min(100, math.Pow(eps, -1.0/8)))
 		tol := tolmul * eps
 		var smax float64
 		for i := 0; i < n; i++ {

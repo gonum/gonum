@@ -93,7 +93,7 @@ func (l LatinHypercuber) Sample(batch []float64) {
 //
 // Latin hypercube sampling divides the cumulative distribution function into equally
 // spaced bins and guarantees that one sample is generated per bin. Within each bin,
-// the location is randomly sampled. The distuv.UnitNormal variable can be used
+// the location is randomly sampled. The distuv.UnitUniform variable can be used
 // for easy generation from the unit interval.
 func LatinHypercube(batch []float64, q distuv.Quantiler, src *rand.Rand) {
 	n := len(batch)

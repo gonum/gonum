@@ -44,6 +44,25 @@ func NewUniform(bnds []Bound, src *rand.Source) *Uniform {
 	return u
 }
 
+// NewUnitUniform creates a new Uniform distribution over the dim-dimensional
+// unit hypercube. That is, a uniform distribution where each dimension has
+// Min = 0 and Max = 1.
+func NewUnitUniform(dim int, src *rand.Source) *Uniform {
+	if dim <= 0 {
+		panic(nonPosDimension)
+	}
+	bounds := make([]Bound, dim)
+	for i := range bounds {
+		bounds[i].Min = 0
+		bounds[i].Max = 1
+	}
+	return &Uniform{
+		bounds: bounds,
+		dim:    dim,
+		src:    src,
+	}
+}
+
 // CDF returns the multidimensional cumulative distribution function of the
 // probability distribution at the point x. If p is non-nil, the CDF is stored
 // in-place into the first argument, otherwise a new slice is allocated and

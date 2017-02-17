@@ -9,6 +9,10 @@ import (
 	"math/rand"
 )
 
+// UnitUniform is an instantiation of the uniform distribution with Min = 0
+// and Max = 1.
+var UnitUniform = Uniform{Min: 0, Max: 1}
+
 // Uniform represents a continuous uniform distribution (https://en.wikipedia.org/wiki/Uniform_distribution_%28continuous%29).
 type Uniform struct {
 	Min    float64

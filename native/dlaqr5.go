@@ -124,9 +124,8 @@ func (impl Implementation) Dlaqr5(wantt, wantz bool, kacc22 int, n, ktop, kbot, 
 	}
 
 	// Note: lapack says that nshfts must be even but allows it to be odd
-	// anyway. At the moment, we panic above if nshfts is not even, so
-	// reducing it by one is unnecessary (it seems that Dlaqr0 and Dlaqr4
-	// indeed use only even nshfts).
+	// anyway. We panic above if nshfts is not even, so reducing it by one
+	// is unnecessary. The only caller Dlaqr04 uses only even nshfts.
 	//
 	// The original comment and code from lapack-3.6.0/SRC/dlaqr5.f:341:
 	// *     ==== NSHFTS is supposed to be even, but if it is odd,

@@ -419,9 +419,9 @@ func (impl Implementation) Dlaqr04(wantt, wantz bool, n, ilo, ihi int, h []float
 			// Shuffle shifts into pairs of real shifts and pairs of
 			// complex conjugate shifts using the fact that complex
 			// conjugate shifts are already adjacent to one another.
-			// TODO(vladimir-ch): Dlaqr5 also does this shuffling.
-			// It seems that the one in Dlaqr5 is redundant but
-			// check.
+			// TODO(vladimir-ch): The shuffling here could probably
+			// be removed but I'm not sure right now and it's safer
+			// to leave it.
 			for i := kbot; i > ks+1; i -= 2 {
 				if wi[i] == -wi[i-1] {
 					continue

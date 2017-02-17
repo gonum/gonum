@@ -91,22 +91,23 @@ func (t TransposeTri) UntransposeTri() Triangular {
 	return t.Triangular
 }
 
-// NewTriDense constructs an n x n triangular matrix with the orientation
-// specified by kind.
-// If len(mat) == n * n, mat will be used to hold the underlying data, if
-// mat == nil, new data will be allocated, and will panic if neither of these
-// cases is true.
-// The underlying data representation is the same as that of a Dense matrix,
-// except the values of the entries in the opposite half are completely ignored.
-func NewTriDense(n int, kind matrix.TriKind, mat []float64) *TriDense {
+// NewTriDense creates a new Triangular matrix with n rows and columns. If data == nil,
+// a new slice is allocated for the backing slice. If len(data) == n*n, data is
+// used as the backing slice, and changes to the elements of the returned TriDense
+// will be reflected in data. If neither of these is true, NewTriDense will panic.
+//
+// The data must be arranged in row-major order, i.e. the (i*c + j)-th
+// element in the data slice is the {i, j}-th element in the matrix.
+// Only the values in the triangular portion corresponding to kind are used.
+func NewTriDense(n int, kind matrix.TriKind, data []float64) *TriDense {
 	if n < 0 {
 		panic("mat64: negative dimension")
 	}
-	if mat != nil && len(mat) != n*n {
+	if data != nil && len(data) != n*n {
 		panic(matrix.ErrShape)
 	}
-	if mat == nil {
-		mat = make([]float64, n*n)
+	if data == nil {
+		data = make([]float64, n*n)
 	}
 	uplo := blas.Lower
 	if kind == matrix.Upper {
@@ -116,7 +117,7 @@ func NewTriDense(n int, kind matrix.TriKind, mat []float64) *TriDense {
 		mat: blas64.Triangular{
 			N:      n,
 			Stride: n,
-			Data:   mat,
+			Data:   data,
 			Uplo:   uplo,
 			Diag:   blas.NonUnit,
 		},

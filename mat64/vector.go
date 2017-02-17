@@ -28,9 +28,10 @@ type Vector struct {
 	// Vector must have positive increment in this package.
 }
 
-// NewVector creates a new Vector of length n. If len(data) == n, data is used
-// as the backing data slice. If data == nil, a new slice is allocated. If
-// neither of these is true, NewVector will panic.
+// NewVector creates a new Vector of length n. If data == nil,
+// a new slice is allocated for the backing slice. If len(data) == n, data is
+// used as the backing slice, and changes to the elements of the returned Vector
+// will be reflected in data. If neither of these is true, NewVector will panic.
 func NewVector(n int, data []float64) *Vector {
 	if len(data) != n && data != nil {
 		panic(matrix.ErrShape)

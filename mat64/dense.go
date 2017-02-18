@@ -36,24 +36,26 @@ type Dense struct {
 	capRows, capCols int
 }
 
-// NewDense creates a new matrix of type Dense with dimensions r and c.
-// If the mat argument is nil, a new data slice is allocated.
+// NewDense creates a new Dense matrix with r rows and c columns. If data == nil,
+// a new slice is allocated for the backing slice. If len(data) == r*c, data is
+// used as the backing slice, and changes to the elements of the returned Dense
+// will be reflected in data. If neither of these is true, NewDense will panic.
 //
 // The data must be arranged in row-major order, i.e. the (i*c + j)-th
-// element in mat is the {i, j}-th element in the matrix.
-func NewDense(r, c int, mat []float64) *Dense {
-	if mat != nil && r*c != len(mat) {
+// element in the data slice is the {i, j}-th element in the matrix.
+func NewDense(r, c int, data []float64) *Dense {
+	if data != nil && r*c != len(data) {
 		panic(matrix.ErrShape)
 	}
-	if mat == nil {
-		mat = make([]float64, r*c)
+	if data == nil {
+		data = make([]float64, r*c)
 	}
 	return &Dense{
 		mat: blas64.General{
 			Rows:   r,
 			Cols:   c,
 			Stride: c,
-			Data:   mat,
+			Data:   data,
 		},
 		capRows: r,
 		capCols: c,

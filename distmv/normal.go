@@ -247,6 +247,31 @@ func (n *Normal) Prob(x []float64) float64 {
 	return math.Exp(n.LogProb(x))
 }
 
+// Quantile returns the multi-dimensional inverse cumulative distribution function.
+// If x is nil, a new slice will be allocated and returned. If x is non-nil,
+// len(x) must equal len(p) and the quantile will be stored in-place into x.
+// All of the values of p must be between 0 and 1, inclusive, or Quantile will panic.
+func (n *Normal) Quantile(x, p []float64) []float64 {
+	dim := n.Dim()
+	if len(p) != dim {
+		panic(badInputLength)
+	}
+	if x == nil {
+		x = make([]float64, dim)
+	}
+	if len(x) != len(p) {
+		panic(badInputLength)
+	}
+
+	// Transform to a standard normal and then transform to a multivariate Gaussian.
+	tmp := make([]float64, len(x))
+	for i, v := range p {
+		tmp[i] = distuv.UnitNormal.Quantile(v)
+	}
+	n.TransformNormal(x, tmp)
+	return x
+}
+
 // Rand generates a random number according to the distributon.
 // If the input slice is nil, new memory is allocated, otherwise the result is stored
 // in place.

@@ -10,6 +10,7 @@ var (
 	badReceiver      = "distmv: input slice is not nil or the correct length"
 	badSizeMismatch  = "distmv: size mismatch"
 	badZeroDimension = "distmv: zero dimensional input"
+	nonPosDimension  = "distmv: non-positive dimension input"
 )
 
 const logTwoPi = 1.8378770664093454835606594728112352797227949472755668

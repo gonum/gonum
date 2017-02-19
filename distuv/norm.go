@@ -12,7 +12,7 @@ import (
 	"github.com/gonum/stat"
 )
 
-// UnitNormal is an instantiation of the standard normal distribution
+// UnitNormal is an instantiation of the normal distribution with Mu = 0 and Sigma = 1.
 var UnitNormal = Normal{Mu: 0, Sigma: 1}
 
 // Normal respresents a normal (Gaussian) distribution (https://en.wikipedia.org/wiki/Normal_distribution).

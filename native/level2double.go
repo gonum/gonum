@@ -378,67 +378,55 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		if ul == blas.Upper {
 			if incX == 1 {
 				for i := 0; i < n; i++ {
+					ilda := i * lda
 					var tmp float64
 					if nonUnit {
-						tmp = a[i*lda+i] * x[i]
+						tmp = a[ilda+i] * x[i]
 					} else {
 						tmp = x[i]
 					}
 					xtmp := x[i+1:]
-					for j, v := range a[i*lda+i+1 : i*lda+n] {
-						tmp += v * xtmp[j]
-					}
-					x[i] = tmp
+					x[i] = tmp + f64.DotUnitary(a[ilda+i+1:ilda+n], xtmp)
 				}
 				return
 			}
 			ix := kx
 			for i := 0; i < n; i++ {
+				ilda := i * lda
 				var tmp float64
 				if nonUnit {
-					tmp = a[i*lda+i] * x[ix]
+					tmp = a[ilda+i] * x[ix]
 				} else {
 					tmp = x[ix]
 				}
-				jx := ix + incX
-				for _, v := range a[i*lda+i+1 : i*lda+n] {
-					tmp += v * x[jx]
-					jx += incX
-				}
-				x[ix] = tmp
+				x[ix] = tmp + f64.DotInc(x, a[ilda+i+1:ilda+n], uintptr(n-i-1), uintptr(incX), 1, uintptr(ix+incX), 0)
 				ix += incX
 			}
 			return
 		}
 		if incX == 1 {
 			for i := n - 1; i >= 0; i-- {
+				ilda := i * lda
 				var tmp float64
 				if nonUnit {
-					tmp += a[i*lda+i] * x[i]
+					tmp += a[ilda+i] * x[i]
 				} else {
 					tmp = x[i]
 				}
-				for j, v := range a[i*lda : i*lda+i] {
-					tmp += v * x[j]
-				}
-				x[i] = tmp
+				x[i] = tmp + f64.DotUnitary(a[ilda:ilda+i], x)
 			}
 			return
 		}
 		ix := kx + (n-1)*incX
 		for i := n - 1; i >= 0; i-- {
+			ilda := i * lda
 			var tmp float64
 			if nonUnit {
-				tmp += a[i*lda+i] * x[ix]
+				tmp = a[ilda+i] * x[ix]
 			} else {
 				tmp = x[ix]
 			}
-			jx := kx
-			for _, v := range a[i*lda : i*lda+i] {
-				tmp += v * x[jx]
-				jx += incX
-			}
-			x[ix] = tmp
+			x[ix] = tmp + f64.DotInc(x, a[ilda:ilda+i], uintptr(i), uintptr(incX), 1, uintptr(kx), 0)
 			ix -= incX
 		}
 		return
@@ -447,29 +435,22 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	if ul == blas.Upper {
 		if incX == 1 {
 			for i := n - 1; i >= 0; i-- {
+				ilda := i * lda
 				xi := x[i]
-				atmp := a[i*lda+i+1 : i*lda+n]
-				xtmp := x[i+1 : n]
-				for j, v := range atmp {
-					xtmp[j] += xi * v
-				}
+				f64.AxpyUnitary(xi, a[ilda+i+1:ilda+n], x[i+1:n])
 				if nonUnit {
-					x[i] *= a[i*lda+i]
+					x[i] *= a[ilda+i]
 				}
 			}
 			return
 		}
 		ix := kx + (n-1)*incX
 		for i := n - 1; i >= 0; i-- {
+			ilda := i * lda
 			xi := x[ix]
-			jx := kx + (i+1)*incX
-			atmp := a[i*lda+i+1 : i*lda+n]
-			for _, v := range atmp {
-				x[jx] += xi * v
-				jx += incX
-			}
+			f64.AxpyInc(xi, a[ilda+i+1:ilda+n], x, uintptr(n-i-1), 1, uintptr(incX), 0, uintptr(kx+(i+1)*incX))
 			if nonUnit {
-				x[ix] *= a[i*lda+i]
+				x[ix] *= a[ilda+i]
 			}
 			ix -= incX
 		}
@@ -477,11 +458,9 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	if incX == 1 {
 		for i := 0; i < n; i++ {
+			ilda := i * lda
 			xi := x[i]
-			atmp := a[i*lda : i*lda+i]
-			for j, v := range atmp {
-				x[j] += xi * v
-			}
+			f64.AxpyUnitary(xi, a[ilda:ilda+i], x)
 			if nonUnit {
 				x[i] *= a[i*lda+i]
 			}
@@ -490,15 +469,11 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 	ix := kx
 	for i := 0; i < n; i++ {
+		ilda := i * lda
 		xi := x[ix]
-		jx := kx
-		atmp := a[i*lda : i*lda+i]
-		for _, v := range atmp {
-			x[jx] += xi * v
-			jx += incX
-		}
+		f64.AxpyInc(xi, a[ilda:ilda+i], x, uintptr(i), 1, uintptr(incX), 0, uintptr(kx))
 		if nonUnit {
-			x[ix] *= a[i*lda+i]
+			x[ix] *= a[ilda+i]
 		}
 		ix += incX
 	}

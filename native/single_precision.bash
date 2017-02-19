@@ -88,6 +88,7 @@ cat level2double.go \
 \
 | gofmt -r 'f64.AxpyInc -> f32.AxpyInc' \
 | gofmt -r 'f64.AxpyIncTo -> f32.AxpyIncTo' \
+| gofmt -r 'f64.AxpyUnitary -> f32.AxpyUnitary' \
 | gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
 | gofmt -r 'f64.DotInc -> f32.DotInc' \
 | gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \

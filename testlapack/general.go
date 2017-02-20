@@ -789,6 +789,9 @@ func isOrthonormal(q blas64.General) bool {
 				blas64.Vector{Inc: 1, Data: q.Data[i*q.Stride:]},
 				blas64.Vector{Inc: 1, Data: q.Data[j*q.Stride:]},
 			)
+			if math.IsNaN(dot) {
+				return false
+			}
 			if i == j {
 				if math.Abs(dot-1) > 1e-10 {
 					return false
@@ -831,7 +834,8 @@ func cloneGeneral(a blas64.General) blas64.General {
 func equalApprox(m, n int, a []float64, lda int, b []float64, tol float64) bool {
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
-			if math.Abs(a[i*lda+j]-b[i*n+j]) > tol {
+			diff := a[i*lda+j] - b[i*n+j]
+			if math.IsNaN(diff) || math.Abs(diff) > tol {
 				return false
 			}
 		}
@@ -848,7 +852,7 @@ func equalApproxGeneral(a, b blas64.General, tol float64) bool {
 	for i := 0; i < a.Rows; i++ {
 		for j := 0; j < a.Cols; j++ {
 			diff := a.Data[i*a.Stride+j] - b.Data[i*b.Stride+j]
-			if math.Abs(diff) > tol {
+			if math.IsNaN(diff) || math.Abs(diff) > tol {
 				return false
 			}
 		}
@@ -862,7 +866,8 @@ func equalApproxTriangular(upper bool, n int, a []float64, lda int, b []float64,
 	if upper {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
-				if math.Abs(a[i*lda+j]-b[i*n+j]) > tol {
+				diff := a[i*lda+j] - b[i*n+j]
+				if math.IsNaN(diff) || math.Abs(diff) > tol {
 					return false
 				}
 			}
@@ -871,7 +876,8 @@ func equalApproxTriangular(upper bool, n int, a []float64, lda int, b []float64,
 	}
 	for i := 0; i < n; i++ {
 		for j := 0; j <= i; j++ {
-			if math.Abs(a[i*lda+j]-b[i*n+j]) > tol {
+			diff := a[i*lda+j] - b[i*n+j]
+			if math.IsNaN(diff) || math.Abs(diff) > tol {
 				return false
 			}
 		}

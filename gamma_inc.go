@@ -6,10 +6,10 @@ package mathext
 
 import "github.com/gonum/mathext/internal/cephes"
 
-// IncGamma computes the incomplete Gamma integral.
+// GammaInc computes the incomplete Gamma integral.
 //
 //                   1    x   -t  a-1
-// IncGamma(a,x) = -----  ∫  e   t    dt
+// GammaInc(a,x) = -----  ∫  e   t    dt
 //                  Γ(a)  0
 //
 // In this implementation both arguments must be positive.
@@ -19,13 +19,13 @@ import "github.com/gonum/mathext/internal/cephes"
 // See the following for more information:
 // - http://mathworld.wolfram.com/IncompleteGammaFunction.html
 // - https://en.wikipedia.org/wiki/Incomplete_gamma_function
-func IncGamma(a, x float64) float64 {
+func GammaInc(a, x float64) float64 {
 	return cephes.Igam(a, x)
 }
 
-// IncGammaComp computes the complemented incomplete Gamma integral.
+// GammaIncC computes the complemented incomplete Gamma integral.
 //
-// IncGammaComp(a,x) = 1 - IncGamma(a,x)
+// GammaIncC(a,x) = 1 - GammaInc(a,x)
 //
 //                   =   1    ∞   -t  a-1
 //                     -----  ∫  e   t    dt
@@ -35,6 +35,15 @@ func IncGamma(a, x float64) float64 {
 // The integral is evaluated by either a power series or
 // continued fraction expansion, depending on the relative
 // values of a and x.
-func IncGammaComp(a, x float64) float64 {
+func GammaIncC(a, x float64) float64 {
 	return cephes.IgamC(a, x)
+}
+
+// GammaIncCInv returns x such that:
+//
+//  GammaIncC(a, x) = y
+//
+// for positive a and p between 0 and 1.
+func GammaIncCInv(a, y float64) float64 {
+	return cephes.IgamI(a, y)
 }

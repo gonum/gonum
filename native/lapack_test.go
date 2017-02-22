@@ -68,6 +68,10 @@ func TestDgels(t *testing.T) {
 	testlapack.DgelsTest(t, impl)
 }
 
+func TestDgerq2(t *testing.T) {
+	testlapack.Dgerq2Test(t, impl)
+}
+
 func TestDgeqp3(t *testing.T) {
 	testlapack.Dgeqp3Test(t, impl)
 }
@@ -78,6 +82,10 @@ func TestDgeqr2(t *testing.T) {
 
 func TestDgeqrf(t *testing.T) {
 	testlapack.DgeqrfTest(t, impl)
+}
+
+func TestDgerqf(t *testing.T) {
+	testlapack.DgerqfTest(t, impl)
 }
 
 func TestDgesvd(t *testing.T) {

@@ -545,7 +545,7 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 	switch kind {
 	case "QR":
 		sz = m
-	case "LQ":
+	case "LQ", "RQ":
 		sz = n
 	}
 
@@ -578,25 +578,28 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 			Inc:  1,
 			Data: make([]float64, sz),
 		}
-		for j := 0; j < i; j++ {
-			vVec.Data[j] = 0
-		}
-		vVec.Data[i] = 1
 		switch kind {
 		case "QR":
+			vVec.Data[i] = 1
 			for j := i + 1; j < sz; j++ {
 				vVec.Data[j] = a[lda*j+i]
 			}
 		case "LQ":
+			vVec.Data[i] = 1
 			for j := i + 1; j < sz; j++ {
 				vVec.Data[j] = a[i*lda+j]
 			}
+		case "RQ":
+			for j := 0; j < n-k+i; j++ {
+				vVec.Data[j] = a[(m-k+i)*lda+j]
+			}
+			vVec.Data[n-k+i] = 1
 		}
 		blas64.Ger(-tau[i], vVec, vVec, h)
 		copy(qCopy.Data, q.Data)
 		// Mulitply q by the new h
 		switch kind {
-		case "QR":
+		case "QR", "RQ":
 			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qCopy, h, 0, q)
 		case "LQ":
 			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, h, qCopy, 0, q)

@@ -152,6 +152,10 @@ func TestDgeqrf(t *testing.T) {
 	testlapack.DgeqrfTest(t, impl)
 }
 
+func TestDgerqf(t *testing.T) {
+	testlapack.DgerqfTest(t, impl)
+}
+
 func TestDgesvd(t *testing.T) {
 	testlapack.DgesvdTest(t, impl)
 }

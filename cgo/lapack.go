@@ -183,6 +183,46 @@ func (impl Implementation) Dgeqp3(m, n int, a []float64, lda int, jpvt []int, ta
 	}
 }
 
+// Dgerqf computes an RQ factorization of the m×n matrix A,
+//  A = R * Q.
+// On exit, if m <= n, the upper triangle of the subarray
+// A[0:m, n-m:n] contains the m×m upper triangular matrix R.
+// If m >= n, the elements on and above the (m-n)-th subdiagonal
+// contain the m×n upper trapezoidal matrix R.
+// The remaining elements, with tau, represent the
+// orthogonal matrix Q as a product of min(m,n) elementary
+// reflectors.
+//
+// The matrix Q is represented as a product of elementary reflectors
+//  Q = H_0 H_1 . . . H_{min(m,n)-1}.
+// Each H(i) has the form
+//  H_i = I - tau_i * v * v^T
+// where v is a vector with v[0:n-k+i-1] stored in A[m-k+i, 0:n-k+i-1],
+// v[n-k+i:n] = 0 and v[n-k+i] = 1.
+//
+// tau must have length min(m,n), work must have length max(1, lwork),
+// and lwork must be -1 or at least max(1, m), otherwise Dgerqf will panic.
+// On exit, work[0] will contain the optimal length for work.
+//
+// Dgerqf is an internal routine. It is exported for testing purposes.
+func (impl Implementation) Dgerqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
+	checkMatrix(m, n, a, lda)
+
+	if len(work) < max(1, lwork) {
+		panic(shortWork)
+	}
+	if lwork != -1 && lwork < max(1, m) {
+		panic(badWork)
+	}
+
+	k := min(m, n)
+	if len(tau) != k {
+		panic(badTau)
+	}
+
+	lapacke.Dgerqf(m, n, a, lda, tau, work, lwork)
+}
+
 // Dlacn2 estimates the 1-norm of an n×n matrix A using sequential updates with
 // matrix-vector products provided externally.
 //

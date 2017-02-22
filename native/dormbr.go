@@ -65,6 +65,16 @@ func (impl Implementation) Dormbr(vect lapack.DecompUpdate, side blas.Side, tran
 	} else {
 		checkMatrix(min(nq, k), nq, a, lda)
 	}
+	if len(tau) < min(nq, k) {
+		panic(badTau)
+	}
+	checkMatrix(m, n, c, ldc)
+	if len(work) < lwork {
+		panic(shortWork)
+	}
+	if lwork < max(1, nw) && lwork != -1 {
+		panic(badWork)
+	}
 
 	applyQ := vect == lapack.ApplyQ
 	left := side == blas.Left

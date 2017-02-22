@@ -138,6 +138,7 @@ var igamCoefs = [igamDimK][igamDimN]float64{
 	[igamDimN]float64{-9.8959643098322368e+2, 2.1925555360905233e+3, -1.9283586782723356e+3, -1.5925738122215253e-1, 1.9569985945919857e+3, -2.4072514765081556e+3, 1.3756149959336496e+3, 1.2920735237496668e-3, -7.525941715948055e+2, 7.3171668742208716e+2, -3.4137023466220065e+2, -9.9857390260608043e-6, 1.3356313181291573e+2, -1.1276295161252794e+2, 4.6310396098204458e+1, -7.9237387133614756e-6, -1.4510726927018646e+1, 1.1111771248100563e+1, -4.1690817945270892, 3.1008219800117808e-3, 1.1220095449981468, -7.6052379926149916e-1, 3.6262236505085254e-1, 2.216867741940747e-1, 4.8683443692930507e-1},
 }
 
+// Igam computes the incomplete Gamma integral
 func Igam(a, x float64) float64 {
 	// Check zero integration limit first
 	if x == 0 {
@@ -162,6 +163,7 @@ func Igam(a, x float64) float64 {
 	return igamSeries(a, x)
 }
 
+// IgamC computes the complemented incomplete Gamma integral
 func IgamC(a, x float64) float64 {
 	if x < 0 || a <= 0 {
 		panic("IgamC: Domain error")
@@ -350,7 +352,7 @@ func asymptoticSeries(a, x float64, fun int) float64 {
 		for n := 1; n < igamDimN; n++ {
 			if n > maxpow {
 				etapow[n] = eta * etapow[n-1]
-				maxpow += 1
+				maxpow++
 			}
 			ckterm := igamCoefs[k][n] * etapow[n]
 			ck += ckterm

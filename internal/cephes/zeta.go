@@ -77,6 +77,7 @@ var zetaCoefs = []float64{
 
 /* 30 Nov 86 -- error in third coefficient fixed */
 
+// Zeta calculates the Riemann zeta function of two arguments
 func Zeta(x, q float64) float64 {
 	if x == 1 {
 		return math.MaxFloat64
@@ -114,7 +115,7 @@ func Zeta(x, q float64) float64 {
 	i := 0
 	b := 0.0
 	for i < 9 || a <= 9 {
-		i += 1
+		i++
 		a += 1.0
 		b = math.Pow(a, -x)
 		s += b

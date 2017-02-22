@@ -78,7 +78,7 @@ func IgamI(a, y0 float64) float64 {
 	dithresh := 5.0 * machEp
 
 	if y0 < 0 || y0 > 1 || a <= 0 {
-		panic("IgamI: Domain error")
+		panic(badParamOutOfBounds)
 	}
 
 	if y0 == 0 {
@@ -195,7 +195,7 @@ func IgamI(a, y0 float64) float64 {
 	}
 
 	if x == 0 {
-		panic("IgamI: Underflow error")
+		panic(badParamUnderflow)
 	}
 
 	return x

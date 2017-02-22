@@ -84,15 +84,15 @@ func Zeta(x, q float64) float64 {
 	}
 
 	if x < 1 {
-		panic("Zeta: domain")
+		panic(badParamOutOfBounds)
 	}
 
 	if q <= 0 {
 		if q == math.Floor(q) {
-			panic("Zeta: sing")
+			panic(badParamFunctionSingularity)
 		}
 		if x != math.Floor(x) {
-			panic("Zeta: domain") // because q^-x not defined
+			panic(badParamOutOfBounds) // because q^-x not defined
 		}
 	}
 

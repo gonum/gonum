@@ -146,7 +146,7 @@ func Igam(a, x float64) float64 {
 	}
 
 	if x < 0 || a <= 0 {
-		panic("Igam: Domain error")
+		panic(badParamOutOfBounds)
 	}
 
 	// Asymptotic regime where a ~ x; see [2].
@@ -166,7 +166,7 @@ func Igam(a, x float64) float64 {
 // IgamC computes the complemented incomplete Gamma integral
 func IgamC(a, x float64) float64 {
 	if x < 0 || a <= 0 {
-		panic("IgamC: Domain error")
+		panic(badParamOutOfBounds)
 	} else if x == 0 {
 		return 1
 	} else if x == math.MaxFloat64 || x == -math.SmallestNonzeroFloat64 {
@@ -208,7 +208,7 @@ func igamFac(a, x float64) float64 {
 	if math.Abs(a-x) > 0.4*math.Abs(a) {
 		ax := a*math.Log(x) - x - lgam(a)
 		if ax < -maxLog {
-			panic("igamFac: Underflow error")
+			panic(badParamUnderflow)
 		}
 		return math.Exp(ax)
 	}

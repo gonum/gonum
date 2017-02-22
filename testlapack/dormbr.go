@@ -146,7 +146,7 @@ func DormbrTest(t *testing.T, impl Dormbrer) {
 							bi.Dgemm(blas.NoTrans, mulTrans, m, n, n, 1, cOrig.Data, cOrig.Stride, mulMat.Data, mulMat.Stride, 0, cAns.Data, cAns.Stride)
 						}
 
-						if !floats.EqualApprox(cAns.Data, c, 1e-8) {
+						if !floats.EqualApprox(cAns.Data, c, 1e-13) {
 							isApplyQ := vect == lapack.ApplyQ
 							isLeft := side == blas.Left
 							isTrans := trans == blas.Trans

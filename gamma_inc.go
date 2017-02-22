@@ -43,7 +43,7 @@ func GammaIncC(a, x float64) float64 {
 //
 //  GammaIncC(a, x) = y
 //
-// for positive a and p between 0 and 1.
+// for a > 0 and 0 <= y <= 1.
 func GammaIncCInv(a, y float64) float64 {
 	return cephes.IgamI(a, y)
 }

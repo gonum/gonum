@@ -16,9 +16,9 @@ package cephes
 import "math"
 
 const (
-	invSqrt2 float64 = 1 / math.Sqrt2
-	pi4      float64 = math.Pi / 4
-	euler    float64 = 0.577215664901532860606512090082402431 // Euler constant
+	invSqrt2 = 1 / math.Sqrt2
+	pi4      = math.Pi / 4
+	euler    = 0.577215664901532860606512090082402431 // Euler constant
 )
 
 /* Coefficients for log(1+x) = x - x**2/2 + x**3 P(x)/Q(x)

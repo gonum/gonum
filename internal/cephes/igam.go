@@ -89,14 +89,14 @@ import (
  */
 
 const (
-	igamDimK       int     = 25
-	igamDimN       int     = 25
-	igam           int     = 1
-	igamC          int     = 0
-	igamSmall      float64 = 20
-	igamLarge      float64 = 200
-	igamSmallRatio float64 = 0.3
-	igamLargeRatio float64 = 4.5
+	igamDimK       = 25
+	igamDimN       = 25
+	igam           = 1
+	igamC          = 0
+	igamSmall      = 20
+	igamLarge      = 200
+	igamSmallRatio = 0.3
+	igamLargeRatio = 4.5
 )
 
 var igamCoefs = [igamDimK][igamDimN]float64{

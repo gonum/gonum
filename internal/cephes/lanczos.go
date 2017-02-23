@@ -40,7 +40,7 @@
 
 package cephes
 
-var lanczosNum = []float64{
+var lanczosNum = [...]float64{
 	2.506628274631000270164908177133837338626,
 	210.8242777515793458725097339207133627117,
 	8071.672002365816210638002902272250613822,
@@ -56,7 +56,7 @@ var lanczosNum = []float64{
 	23531376880.41075968857200767445163675473,
 }
 
-var lanczosDenom = []float64{
+var lanczosDenom = [...]float64{
 	1,
 	66,
 	1925,
@@ -72,7 +72,7 @@ var lanczosDenom = []float64{
 	0,
 }
 
-var lanczosSumExpgScaledNum = []float64{
+var lanczosSumExpgScaledNum = [...]float64{
 	0.006061842346248906525783753964555936883222,
 	0.5098416655656676188125178644804694509993,
 	19.51992788247617482847860966235652136208,
@@ -88,7 +88,7 @@ var lanczosSumExpgScaledNum = []float64{
 	56906521.91347156388090791033559122686859,
 }
 
-var lanczosSumExpgScaledDenom = []float64{
+var lanczosSumExpgScaledDenom = [...]float64{
 	1,
 	66,
 	1925,
@@ -104,7 +104,7 @@ var lanczosSumExpgScaledDenom = []float64{
 	0,
 }
 
-var lanczosSumNear1D = []float64{
+var lanczosSumNear1D = [...]float64{
 	0.3394643171893132535170101292240837927725e-9,
 	-0.2499505151487868335680273909354071938387e-8,
 	0.8690926181038057039526127422002498960172e-8,
@@ -119,7 +119,7 @@ var lanczosSumNear1D = []float64{
 	2.208709979316623790862569924861841433016,
 }
 
-var lanczosSumNear2D = []float64{
+var lanczosSumNear2D = [...]float64{
 	0.1009141566987569892221439918230042368112e-8,
 	-0.7430396708998719707642735577238449585822e-8,
 	0.2583592566524439230844378948704262291927e-7,
@@ -139,18 +139,18 @@ const lanczosG = 6.024680040776729583740234375
 //
 func lanczosSum(x float64) float64 {
 	return ratevl(x,
-		lanczosNum,
+		lanczosNum[:],
 		len(lanczosNum)-1,
-		lanczosDenom,
+		lanczosDenom[:],
 		len(lanczosDenom)-1)
 }
 
 //
 func lanczosSumExpgScaled(x float64) float64 {
 	return ratevl(x,
-		lanczosSumExpgScaledNum,
+		lanczosSumExpgScaledNum[:],
 		len(lanczosSumExpgScaledNum)-1,
-		lanczosSumExpgScaledDenom,
+		lanczosSumExpgScaledDenom[:],
 		len(lanczosSumExpgScaledDenom)-1)
 }
 

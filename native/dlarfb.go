@@ -55,17 +55,7 @@ import (
 // this function will panic if this size is not met.
 //
 // Dlarfb is an internal routine. It is exported for testing purposes.
-func (Implementation) Dlarfb(side blas.Side, trans blas.Transpose, direct lapack.Direct,
-	store lapack.StoreV, m, n, k int, v []float64, ldv int, t []float64, ldt int,
-	c []float64, ldc int, work []float64, ldwork int) {
-
-	checkMatrix(m, n, c, ldc)
-	if m == 0 || n == 0 {
-		return
-	}
-	if k < 0 {
-		panic("lapack: negative number of transforms")
-	}
+func (Implementation) Dlarfb(side blas.Side, trans blas.Transpose, direct lapack.Direct, store lapack.StoreV, m, n, k int, v []float64, ldv int, t []float64, ldt int, c []float64, ldc int, work []float64, ldwork int) {
 	if side != blas.Left && side != blas.Right {
 		panic(badSide)
 	}
@@ -78,12 +68,27 @@ func (Implementation) Dlarfb(side blas.Side, trans blas.Transpose, direct lapack
 	if store != lapack.ColumnWise && store != lapack.RowWise {
 		panic(badStore)
 	}
-
-	rowsWork := n
-	if side == blas.Right {
-		rowsWork = m
+	checkMatrix(m, n, c, ldc)
+	if k < 0 {
+		panic(kLT0)
 	}
-	checkMatrix(rowsWork, k, work, ldwork)
+	checkMatrix(k, k, t, ldt)
+	nv := m
+	nw := n
+	if side == blas.Right {
+		nv = n
+		nw = m
+	}
+	if store == lapack.ColumnWise {
+		checkMatrix(nv, k, v, ldv)
+	} else {
+		checkMatrix(k, nv, v, ldv)
+	}
+	checkMatrix(nw, k, work, ldwork)
+
+	if m == 0 || n == 0 {
+		return
+	}
 
 	bi := blas64.Implementation()
 

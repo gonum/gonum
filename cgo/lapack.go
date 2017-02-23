@@ -1799,23 +1799,17 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 	if len(tau) < k {
 		panic(badTau)
 	}
-	if lwork == -1 {
-		if left {
-			work[0] = float64(n)
-			return
-		}
-		work[0] = float64(m)
-		return
+	if len(work) < lwork {
+		panic(shortWork)
 	}
+	nw := m
 	if left {
-		if lwork < n {
-			panic(badWork)
-		}
-	} else {
-		if lwork < m {
-			panic(badWork)
-		}
+		nw = n
 	}
+	if lwork < max(1, nw) && lwork != -1 {
+		panic(badWork)
+	}
+
 	lapacke.Dormlq(side, trans, m, n, k, a, lda, tau, c, ldc, work, lwork)
 }
 

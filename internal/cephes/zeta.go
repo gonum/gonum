@@ -82,7 +82,7 @@ func Zeta(x, q float64) float64 {
 	}
 
 	if x < 1 {
-		panic(paramOutOfBounds)
+		panic(badParamOutOfBounds)
 	}
 
 	if q <= 0 {
@@ -90,7 +90,7 @@ func Zeta(x, q float64) float64 {
 			panic(badParamFunctionSingularity)
 		}
 		if x != math.Floor(x) {
-			panic(paramOutOfBounds) // because q^-x not defined
+			panic(badParamOutOfBounds) // because q^-x not defined
 		}
 	}
 

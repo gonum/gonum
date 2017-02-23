@@ -108,13 +108,13 @@ func Ndtri(y0 float64) float64 {
 
 	if y0 <= 0.0 {
 		if y0 < 0 {
-			panic(paramOutOfBounds)
+			panic(badParamOutOfBounds)
 		}
 		return math.Inf(-1)
 	}
 	if y0 >= 1.0 {
 		if y0 > 1 {
-			panic(paramOutOfBounds)
+			panic(badParamOutOfBounds)
 		}
 		return math.Inf(1)
 	}

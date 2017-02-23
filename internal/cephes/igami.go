@@ -78,7 +78,7 @@ func IgamI(a, y0 float64) float64 {
 	dithresh := 5.0 * machEp
 
 	if y0 < 0 || y0 > 1 || a <= 0 {
-		panic(paramOutOfBounds)
+		panic(badParamOutOfBounds)
 	}
 
 	if y0 == 0 {

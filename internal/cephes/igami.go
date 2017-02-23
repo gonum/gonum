@@ -68,7 +68,9 @@ import (
  * Copyright 1984, 1987, 1995 by Stephen L. Moshier
  */
 
-// IgamI calculates the inverse of complemented incomplete Gamma integral
+// IgamI calculates the inverse of the complement of the incomplete Gamma
+// integral. It should return a positive number, but can return 0 even with
+// non-zero y because of underflow.
 func IgamI(a, y0 float64) float64 {
 	// bound the solution
 	x0 := math.MaxFloat64
@@ -192,10 +194,6 @@ func IgamI(a, y0 float64) float64 {
 			}
 			dir--
 		}
-	}
-
-	if x == 0 {
-		panic(badParamUnderflow)
 	}
 
 	return x

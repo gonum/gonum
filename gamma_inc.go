@@ -31,7 +31,8 @@ func GammaIncComp(a, x float64) float64 {
 // is, it returns the x such that:
 //  GammaIncComp(a, x) = y
 // The input argument a must be positive and y must be between 0 and 1
-// inclusive or GammaIncCompInv will panic.
+// inclusive or GammaIncCompInv will panic. It should return a positive number,
+// but can return 0 even with non-zero y because of underflow.
 func GammaIncCompInv(a, y float64) float64 {
 	return cephes.IgamI(a, y)
 }

@@ -73,7 +73,6 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 	}
 	nbmin := 2
 
-	ldwork := nb
 	if nb > 1 && nb < k {
 		iws := nw * nb
 		if lwork < iws {
@@ -81,6 +80,7 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 			nbmin = max(2, impl.Ilaenv(2, "DORMLQ", opts, m, n, k, -1))
 		}
 	}
+	ldwork := nb
 	if nb < nbmin || nb >= k {
 		// Call unblocked code.
 		impl.Dorml2(side, trans, m, n, k, a, lda, tau, c, ldc, work)

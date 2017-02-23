@@ -42,6 +42,8 @@ func DormbrTest(t *testing.T, impl Dormbrer) {
 						{4, 5, 3, 10, 12},
 						{5, 3, 4, 10, 12},
 						{5, 4, 3, 10, 12},
+
+						{150, 140, 130, 0, 0},
 					} {
 						m := test.m
 						n := test.n

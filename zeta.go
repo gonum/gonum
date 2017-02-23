@@ -7,15 +7,12 @@ package mathext
 import "github.com/gonum/mathext/internal/cephes"
 
 // Zeta computes the Riemann zeta function of two arguments.
-//
-//             ∞      -x
-// Zeta(x,q) = ∑ (k+q)
-//            k=0
-//
+//  Zeta(x,q) = \sum_{k=0}^{\infty} (k+q)^{-x}
 // where x > 1 and q is not a negative integer or zero.
-// See the following for more information:
-// - http://mathworld.wolfram.com/HurwitzZetaFunction.html
-// - https://en.wikipedia.org/wiki/Multiple_zeta_function#Two_parameters_case
+//
+// See http://mathworld.wolfram.com/HurwitzZetaFunction.html
+// or https://en.wikipedia.org/wiki/Multiple_zeta_function#Two_parameters_case
+// for more detailed information.
 func Zeta(x, q float64) float64 {
 	return cephes.Zeta(x, q)
 }

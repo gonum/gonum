@@ -88,16 +88,6 @@ import (
  *     http://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/sf_gamma/igamma.html
  */
 
-/* Scipy changes:
- * - 05-01-2016: added asymptotic expansion for Igam to improve the
- *   a ~ x regime.
- * - 06-19-2016: additional series expansion added for IgamC to
- *   improve accuracy at small arguments.
- * - 06-24-2016: better choice of domain for the asymptotic series;
- *   improvements in accuracy for the asymptotic series when a and x
- *   are very close.
- */
-
 const (
 	igamDimK   int     = 25
 	igamDimN   int     = 25
@@ -163,13 +153,13 @@ func Igam(a, x float64) float64 {
 	return igamSeries(a, x)
 }
 
-// IgamC computes the complemented incomplete Gamma integral
+// IgamC computes the complement of the incomplete Gamma integral
 func IgamC(a, x float64) float64 {
 	if x < 0 || a <= 0 {
 		panic(badParamOutOfBounds)
 	} else if x == 0 {
 		return 1
-	} else if x == math.MaxFloat64 || x == -math.SmallestNonzeroFloat64 {
+	} else if math.IsInf(x, 0) {
 		return 0
 	}
 
@@ -185,7 +175,7 @@ func IgamC(a, x float64) float64 {
 		if x < a {
 			return 1 - igamSeries(a, x)
 		}
-		return IgamCContinuedFraction(a, x)
+		return igamCContinuedFraction(a, x)
 	} else if x <= 0.5 {
 		if -0.4/math.Log(x) < a {
 			return 1 - igamSeries(a, x)
@@ -200,9 +190,7 @@ func IgamC(a, x float64) float64 {
 }
 
 // igamFac computes
-//
-// x^a * exp(-x) / gamma(a)
-//
+//  x^a * exp(-x) / gamma(a)
 // corrected from (15) and (16) in [2] by replacing exp(x - a) with exp(a - x)
 func igamFac(a, x float64) float64 {
 	if math.Abs(a-x) > 0.4*math.Abs(a) {
@@ -226,8 +214,8 @@ func igamFac(a, x float64) float64 {
 	return res
 }
 
-// IgamCContinuedFraction computes IgamC using DLMF 8.9.2.
-func IgamCContinuedFraction(a, x float64) float64 {
+// igamCContinuedFraction computes IgamC using DLMF 8.9.2.
+func igamCContinuedFraction(a, x float64) float64 {
 	ax := igamFac(a, x)
 	if ax == 0 {
 		return 0

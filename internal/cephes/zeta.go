@@ -75,8 +75,6 @@ var zetaCoefs = []float64{
 	-7.1661652561756670113e18, /*1.6938241367317436694528e27/236364091 */
 }
 
-/* 30 Nov 86 -- error in third coefficient fixed */
-
 // Zeta calculates the Riemann zeta function of two arguments
 func Zeta(x, q float64) float64 {
 	if x == 1 {

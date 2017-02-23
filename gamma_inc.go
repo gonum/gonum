@@ -7,43 +7,31 @@ package mathext
 import "github.com/gonum/mathext/internal/cephes"
 
 // GammaInc computes the incomplete Gamma integral.
+//  GammaInc(a,x) = (1/ Γ(a)) \int_0^x e^(-t) t^(a-1) dt
+// The input argument a must be positive and x must be non-negative or GammaInc
+// will panic.
 //
-//                   1    x   -t  a-1
-// GammaInc(a,x) = -----  ∫  e   t    dt
-//                  Γ(a)  0
-//
-// In this implementation both arguments must be positive.
-// The integral is evaluated by either a power series or
-// continued fraction expansion, depending on the relative
-// values of a and x.
-// See the following for more information:
-// - http://mathworld.wolfram.com/IncompleteGammaFunction.html
-// - https://en.wikipedia.org/wiki/Incomplete_gamma_function
+// See  http://mathworld.wolfram.com/IncompleteGammaFunction.html
+// or https://en.wikipedia.org/wiki/Incomplete_gamma_function for more detailed
+// information.
 func GammaInc(a, x float64) float64 {
 	return cephes.Igam(a, x)
 }
 
-// GammaIncC computes the complemented incomplete Gamma integral.
-//
-// GammaIncC(a,x) = 1 - GammaInc(a,x)
-//
-//                   =   1    ∞   -t  a-1
-//                     -----  ∫  e   t    dt
-//                      Γ(a)  x
-//
-// In this implementation both arguments must be positive.
-// The integral is evaluated by either a power series or
-// continued fraction expansion, depending on the relative
-// values of a and x.
-func GammaIncC(a, x float64) float64 {
+// GammaIncComp computes the complemented incomplete Gamma integral.
+//  GammaIncComp(a,x) = 1 - GammaInc(a,x)
+//								    = (1/ Γ(a)) \int_0^\infty e^(-t) t^(a-1) dt
+// The input argument a must be positive and x must be non-negative or
+// GammaIncComp will panic.
+func GammaIncComp(a, x float64) float64 {
 	return cephes.IgamC(a, x)
 }
 
-// GammaIncCInv returns x such that:
-//
-//  GammaIncC(a, x) = y
-//
-// for a > 0 and 0 <= y <= 1.
-func GammaIncCInv(a, y float64) float64 {
+// GammaIncCompInv computes the inverse of the incomplete Gamma function. That
+// is, it returns the x such that:
+//  GammaIncComp(a, x) = y
+// The input argument a must be positive and y must be between 0 and 1
+// inclusive or GammaIncCompInv will panic.
+func GammaIncCompInv(a, y float64) float64 {
 	return cephes.IgamI(a, y)
 }

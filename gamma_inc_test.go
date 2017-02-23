@@ -33,7 +33,7 @@ func TestGammaInc(t *testing.T) {
 	}
 }
 
-func TestGammaIncC(t *testing.T) {
+func TestGammaIncComp(t *testing.T) {
 	for i, test := range []struct {
 		a, x, want float64
 	}{
@@ -51,13 +51,13 @@ func TestGammaIncC(t *testing.T) {
 		{5, 10, 0.029252688076961127},
 		{100, 10, 1},
 	} {
-		if got := GammaIncC(test.a, test.x); math.Abs(got-test.want) > 1e-10 {
-			t.Errorf("test %d GammaIncC(%g, %g) failed: got %g want %g", i, test.a, test.x, got, test.want)
+		if got := GammaIncComp(test.a, test.x); math.Abs(got-test.want) > 1e-10 {
+			t.Errorf("test %d GammaIncComp(%g, %g) failed: got %g want %g", i, test.a, test.x, got, test.want)
 		}
 	}
 }
 
-func TestGammaIncCInv(t *testing.T) {
+func TestGammaIncCompInv(t *testing.T) {
 	for i, test := range []struct {
 		a, x, want float64
 	}{
@@ -75,8 +75,8 @@ func TestGammaIncCInv(t *testing.T) {
 		{100, 0.25, 106.5510925269767},
 		{1000, 0.01, 1075.0328320864389},
 	} {
-		if got := GammaIncCInv(test.a, test.x); math.Abs(got-test.want) > 1e-10 {
-			t.Errorf("test %d GammaIncCInv(%g, %g) failed: got %g want %g", i, test.a, test.x, got, test.want)
+		if got := GammaIncCompInv(test.a, test.x); math.Abs(got-test.want) > 1e-10 {
+			t.Errorf("test %d GammaIncCompInv(%g, %g) failed: got %g want %g", i, test.a, test.x, got, test.want)
 		}
 	}
 }

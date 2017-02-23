@@ -15,7 +15,7 @@ https://lists.debian.org/debian-legal/2004/12/msg00295.html
 */
 
 var (
-	badParamOutOfBounds         = "cephes: parameter out of bounds"
+	paramOutOfBounds            = "cephes: parameter out of bounds"
 	badParamUnderflow           = "cephes: underflow error"
 	badParamFunctionSingularity = "cephes: function singularity"
 )

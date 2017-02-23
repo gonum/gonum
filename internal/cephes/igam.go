@@ -135,7 +135,7 @@ func Igam(a, x float64) float64 {
 	}
 
 	if x < 0 || a <= 0 {
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	}
 
 	// Asymptotic regime where a ~ x; see [2].
@@ -155,7 +155,7 @@ func Igam(a, x float64) float64 {
 // IgamC computes the complement of the incomplete Gamma integral
 func IgamC(a, x float64) float64 {
 	if x < 0 || a <= 0 {
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	} else if x == 0 {
 		return 1
 	} else if math.IsInf(x, 0) {

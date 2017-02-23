@@ -24,7 +24,7 @@ const (
 // Incbet computes the regularized incomplete beta function.
 func Incbet(aa, bb, xx float64) float64 {
 	if aa <= 0 || bb <= 0 {
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	}
 	if xx <= 0 || xx >= 1 {
 		if xx == 0 {
@@ -33,7 +33,7 @@ func Incbet(aa, bb, xx float64) float64 {
 		if xx == 1 {
 			return 1
 		}
-		panic(badParamOutOfBounds)
+		panic(paramOutOfBounds)
 	}
 
 	var flag int

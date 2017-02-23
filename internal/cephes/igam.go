@@ -89,15 +89,14 @@ import (
  */
 
 const (
-	igamDimK   int     = 25
-	igamDimN   int     = 25
-	maxIter    int     = 2000
-	igam       int     = 1
-	igamC      int     = 0
-	small      float64 = 20
-	large      float64 = 200
-	smallRatio float64 = 0.3
-	largeRatio float64 = 4.5
+	igamDimK       int     = 25
+	igamDimN       int     = 25
+	igam           int     = 1
+	igamC          int     = 0
+	igamSmall      float64 = 20
+	igamLarge      float64 = 200
+	igamSmallRatio float64 = 0.3
+	igamLargeRatio float64 = 4.5
 )
 
 var igamCoefs = [igamDimK][igamDimN]float64{
@@ -141,8 +140,8 @@ func Igam(a, x float64) float64 {
 
 	// Asymptotic regime where a ~ x; see [2].
 	absxmaA := math.Abs(x-a) / a
-	if (a > small && a < large && absxmaA < smallRatio) ||
-		(a > large && absxmaA < largeRatio/math.Sqrt(a)) {
+	if (a > igamSmall && a < igamLarge && absxmaA < igamSmallRatio) ||
+		(a > igamLarge && absxmaA < igamLargeRatio/math.Sqrt(a)) {
 		return asymptoticSeries(a, x, igam)
 	}
 
@@ -165,8 +164,8 @@ func IgamC(a, x float64) float64 {
 
 	// Asymptotic regime where a ~ x; see [2].
 	absxmaA := math.Abs(x-a) / a
-	if (a > small && a < large && absxmaA < smallRatio) ||
-		(a > large && absxmaA < largeRatio/math.Sqrt(a)) {
+	if (a > igamSmall && a < igamLarge && absxmaA < igamSmallRatio) ||
+		(a > igamLarge && absxmaA < igamLargeRatio/math.Sqrt(a)) {
 		return asymptoticSeries(a, x, igamC)
 	}
 

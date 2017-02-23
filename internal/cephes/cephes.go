@@ -5,6 +5,8 @@
 // package cephes implements functions originally in the Netlib code by Stephen Mosher
 package cephes
 
+import "math"
+
 /*
 Additional copyright information:
 
@@ -21,8 +23,8 @@ var (
 )
 
 const (
-	machEp  = 1.11022302462515654042e-16 // 2^-53
-	maxLog  = 7.09782712893383996732e2   // log(2^127)
-	minLog  = -7.451332191019412076235e2 // log(2^-128)
+	machEp  = 1.0 / (1 << 53)
+	maxLog  = 1024 * math.Ln2
+	minLog  = -1075 * math.Ln2
 	maxIter = 2000
 )

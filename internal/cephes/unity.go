@@ -16,10 +16,8 @@ package cephes
 import "math"
 
 const (
-	sqrt2    float64 = 1.414213562373095048801688724209698079 // sqrt(2)
-	invSqrt2 float64 = 0.707106781186547524400844362104849039 // 1/sqrt(2)
-	pi4      float64 = 0.785398163397448309615660845819875721 // pi/4
-	euler    float64 = 0.577215664901532860606512090082402431 // Euler constant
+	invSqrt2 float64 = 1 / math.Sqrt2
+	pi4      float64 = math.Pi / 4
 )
 
 /* Coefficients for log(1+x) = x - x**2/2 + x**3 P(x)/Q(x)
@@ -48,7 +46,7 @@ var lQ = []float64{
 // log1p computes log(1 + x)
 func log1p(x float64) float64 {
 	z := 1 + x
-	if z < invSqrt2 || z > sqrt2 {
+	if z < invSqrt2 || z > math.Sqrt2 {
 		return math.Log(z)
 	}
 	z = x * x
@@ -135,7 +133,7 @@ func lgam1pTaylor(x float64) float64 {
 	if x == 0 {
 		return 0
 	}
-	res := -euler * x
+	res := -math.E * x
 	xfac := -x
 	for n := 2; n < 42; n++ {
 		nf := float64(n)

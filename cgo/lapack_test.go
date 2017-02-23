@@ -200,16 +200,9 @@ func TestDorg2r(t *testing.T) {
 	testlapack.Dorg2rTest(t, blockedTranslate{impl})
 }
 
-/*
-// Test disabled because of bug in c interface. Leaving stub for easy reproducer.
-//
-// Bug at: https://github.com/xianyi/OpenBLAS/issues/712
-// Fix at: https://github.com/xianyi/OpenBLAS/pull/713
-// Easily copiable fix: https://github.com/gonum/lapack/pull/74#issuecomment-163142140
 func TestDormbr(t *testing.T) {
 	testlapack.DormbrTest(t, blockedTranslate{impl})
 }
-*/
 
 func TestDormhr(t *testing.T) {
 	testlapack.DormhrTest(t, impl)
@@ -227,16 +220,9 @@ func TestDormqr(t *testing.T) {
 	testlapack.Dorm2rTest(t, blockedTranslate{impl})
 }
 
-/*
-// Test disabled because of bug in c interface. Leaving stub for easy reproducer.
-//
-// Bug at: https://github.com/xianyi/OpenBLAS/issues/615
-// Fix at: https://github.com/xianyi/OpenBLAS/pull/711
-// Easily copiable fix: https://github.com/gonum/lapack/pull/74#issuecomment-163110751
 func TestDormlq(t *testing.T) {
 	testlapack.Dorml2Test(t, blockedTranslate{impl})
 }
-*/
 
 func TestDpocon(t *testing.T) {
 	testlapack.DpoconTest(t, impl)

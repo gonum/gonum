@@ -35,7 +35,6 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 		panic(badTrans)
 	}
 	left := side == blas.Left
-	notran := trans == blas.NoTrans
 	if left {
 		checkMatrix(k, m, a, lda)
 	} else {
@@ -45,12 +44,23 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 	if len(tau) < k {
 		panic(badTau)
 	}
+	if len(work) < lwork {
+		panic(shortWork)
+	}
+	nw := m
+	if left {
+		nw = n
+	}
+	if lwork < max(1, nw) && lwork != -1 {
+		panic(badWork)
+	}
+
+	if m == 0 || n == 0 || k == 0 {
+		work[0] = 1
+		return
+	}
 
 	const nbmax = 64
-	nw := n
-	if !left {
-		nw = m
-	}
 	opts := string(side) + string(trans)
 	nb := min(nbmax, impl.Ilaenv(1, "DORMLQ", opts, m, n, k, -1))
 	lworkopt := max(1, nw) * nb
@@ -58,37 +68,26 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 		work[0] = float64(lworkopt)
 		return
 	}
-	if left {
-		if lwork < n {
-			panic(badWork)
-		}
-	} else {
-		if lwork < m {
-			panic(badWork)
-		}
-	}
 
-	if m == 0 || n == 0 || k == 0 {
-		return
-	}
 	nbmin := 2
-
-	ldwork := nb
-	if nb > 1 && nb < k {
+	if 1 < nb && nb < k {
 		iws := nw * nb
 		if lwork < iws {
 			nb = lwork / nw
 			nbmin = max(2, impl.Ilaenv(2, "DORMLQ", opts, m, n, k, -1))
 		}
 	}
-	if nb < nbmin || nb >= k {
+	ldwork := nb
+	if nb < nbmin || k <= nb {
 		// Call unblocked code.
 		impl.Dorml2(side, trans, m, n, k, a, lda, tau, c, ldc, work)
+		work[0] = float64(lworkopt)
 		return
 	}
 	ldt := nb
 	t := make([]float64, nb*ldt)
 
+	notran := trans == blas.NoTrans
 	transt := blas.NoTrans
 	if notran {
 		transt = blas.Trans
@@ -151,4 +150,5 @@ func (impl Implementation) Dormlq(side blas.Side, trans blas.Transpose, m, n, k 
 				work, ldwork)
 		}
 	}
+	work[0] = float64(lworkopt)
 }

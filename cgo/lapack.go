@@ -295,8 +295,6 @@ func (impl Implementation) Dlacpy(uplo blas.Uplo, m, n int, a []float64, lda int
 //  X[0:m, j] is moved to X[0:m, k[j]] for j = 0, 1, ..., n-1.
 //
 // k must have length n, otherwise Dlapmt will panic. k is zero-indexed.
-//
-// Dlapmt is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlapmt(forward bool, m, n int, x []float64, ldx int, k []int) {
 	checkMatrix(m, n, x, ldx)
 	if len(k) != n {

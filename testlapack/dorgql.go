@@ -31,8 +31,16 @@ func DorgqlTest(t *testing.T, impl Dorgqler) {
 	for _, m := range []int{0, 1, 2, 3, 4, 5, 7, 10, 15, 30, 50, 150} {
 		for _, extra := range []int{0, 11} {
 			for _, wl := range []worklen{minimumWork, mediumWork, optimumWork} {
-				n := rnd.Intn(m + 1)
-				k := rnd.Intn(n + 1)
+				var k int
+				if m >= 129 {
+					// For large matrices make sure that k
+					// is large enough to trigger blocked
+					// path.
+					k = 129 + rnd.Intn(m-129+1)
+				} else {
+					k = rnd.Intn(m + 1)
+				}
+				n := k + rnd.Intn(m-k+1)
 				if m == 0 || n == 0 {
 					m = 0
 					n = 0

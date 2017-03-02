@@ -56,7 +56,7 @@ func (impl Implementation) Dtrtri(uplo blas.Uplo, diag blas.Diag, n int, a []flo
 		jb := min(nb, n-j)
 		if j+jb <= n-1 {
 			bi.Dtrmm(blas.Left, blas.Lower, blas.NoTrans, diag, n-j-jb, jb, 1, a[(j+jb)*lda+j+jb:], lda, a[(j+jb)*lda+j:], lda)
-			bi.Dtrmm(blas.Right, blas.Lower, blas.NoTrans, diag, n-j-jb, jb, -1, a[j*lda+j:], lda, a[(j+jb)*lda+j:], lda)
+			bi.Dtrsm(blas.Right, blas.Lower, blas.NoTrans, diag, n-j-jb, jb, -1, a[j*lda+j:], lda, a[(j+jb)*lda+j:], lda)
 		}
 		impl.Dtrti2(blas.Lower, diag, jb, a[j*lda+j:], lda)
 	}

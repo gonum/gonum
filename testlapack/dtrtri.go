@@ -19,9 +19,10 @@ type Dtrtrier interface {
 }
 
 func DtrtriTest(t *testing.T, impl Dtrtrier) {
+	const tol = 1e-6
 	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
-	for _, uplo := range []blas.Uplo{blas.Upper} {
+	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
 			for _, test := range []struct {
 				n, lda int
@@ -53,7 +54,7 @@ func DtrtriTest(t *testing.T, impl Dtrtrier) {
 						}
 					}
 				} else {
-					for i := 1; i < n; i++ {
+					for i := 0; i < n; i++ {
 						for j := i + 1; j < n; j++ {
 							aCopy[i*lda+j] = 0
 							a[i*lda+j] = 0
@@ -72,12 +73,12 @@ func DtrtriTest(t *testing.T, impl Dtrtrier) {
 				for i := 0; i < n; i++ {
 					for j := 0; j < n; j++ {
 						if i == j {
-							if math.Abs(ans[i*lda+i]-1) > 1e-4 {
+							if math.Abs(ans[i*lda+i]-1) > tol {
 								iseye = false
 								break
 							}
 						} else {
-							if math.Abs(ans[i*lda+j]) > 1e-4 {
+							if math.Abs(ans[i*lda+j]) > tol {
 								iseye = false
 								break
 							}

@@ -34,7 +34,7 @@ type SVD struct {
 // It is frequently not necessary to compute the full SVD. Computation time and
 // storage costs can be reduced using the appropriate kind. Only the singular
 // values can be computed (kind == SVDNone), or a "thin" representation of the
-// singular values (kind = SVDThin). The thin representation can save a significant
+// singular vectors (kind = SVDThin). The thin representation can save a significant
 // amount of memory if m >> n. See the documentation for the lapack.SVDKind values
 // for more information.
 //

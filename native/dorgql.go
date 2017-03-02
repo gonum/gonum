@@ -72,7 +72,6 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 		nx = max(0, impl.Ilaenv(3, "DORGQL", " ", m, n, k, -1))
 		if nx < k {
 			// Determine if workspace is large enough for blocked code.
-			ldwork = nb
 			iws = n * nb
 			if lwork < iws {
 				// Not enough workspace to use optimal nb: reduce nb and determine
@@ -80,6 +79,7 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 				nb = lwork / n
 				nbmin = max(2, impl.Ilaenv(2, "DORGQL", " ", m, n, k, -1))
 			}
+			ldwork = nb
 		}
 	}
 

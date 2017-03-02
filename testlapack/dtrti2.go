@@ -19,6 +19,7 @@ type Dtrti2er interface {
 }
 
 func Dtrti2Test(t *testing.T, impl Dtrti2er) {
+	const tol = 1e-14
 	for _, test := range []struct {
 		a    []float64
 		n    int
@@ -84,18 +85,22 @@ func Dtrti2Test(t *testing.T, impl Dtrti2er) {
 		},
 	} {
 		impl.Dtrti2(test.uplo, test.diag, test.n, test.a, test.n)
-		if !floats.EqualApprox(test.ans, test.a, 1e-14) {
+		if !floats.EqualApprox(test.ans, test.a, tol) {
 			t.Errorf("Matrix inverse mismatch. Want %v, got %v.", test.ans, test.a)
 		}
 	}
 	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
-	for _, uplo := range []blas.Uplo{blas.Upper} {
+	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, diag := range []blas.Diag{blas.NonUnit, blas.Unit} {
 			for _, test := range []struct {
 				n, lda int
 			}{
+				{1, 0},
+				{2, 0},
 				{3, 0},
+				{1, 5},
+				{2, 5},
 				{3, 5},
 			} {
 				n := test.n
@@ -118,7 +123,7 @@ func Dtrti2Test(t *testing.T, impl Dtrti2er) {
 						}
 					}
 				} else {
-					for i := 1; i < n; i++ {
+					for i := 0; i < n; i++ {
 						for j := i + 1; j < n; j++ {
 							aCopy[i*lda+j] = 0
 							a[i*lda+j] = 0
@@ -137,12 +142,12 @@ func Dtrti2Test(t *testing.T, impl Dtrti2er) {
 				for i := 0; i < n; i++ {
 					for j := 0; j < n; j++ {
 						if i == j {
-							if math.Abs(ans[i*lda+i]-1) > 1e-14 {
+							if math.Abs(ans[i*lda+i]-1) > tol {
 								iseye = false
 								break
 							}
 						} else {
-							if math.Abs(ans[i*lda+j]) > 1e-14 {
+							if math.Abs(ans[i*lda+j]) > tol {
 								iseye = false
 								break
 							}

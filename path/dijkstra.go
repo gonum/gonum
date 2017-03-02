@@ -14,7 +14,7 @@ import (
 // the graph g. If the graph does not implement graph.Weighter, UniformCost is used.
 // DijkstraFrom will panic if g has a u-reachable negative edge weight.
 //
-// The time complexity of DijkstrFrom is O(|E|+|V|.log|V|).
+// The time complexity of DijkstrFrom is O(|E|.log|V|).
 func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 	if !g.Has(u) {
 		return Shortest{from: u}

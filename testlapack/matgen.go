@@ -189,6 +189,100 @@ func Dlagsy(n, k int, d []float64, a []float64, lda int, rnd *rand.Rand, work []
 	}
 }
 
+// Dlagge generates a real general m×n matrix A, by pre- and post-multiplying
+// a real diagonal matrix D with random orthogonal matrices:
+//  A = U*D*V.
+//
+// d must have length min(m,n), and work must have length m+n, otherwise Dlagge
+// will panic.
+//
+// The parameters ku and kl are unused but they must satisfy
+//  0 <= kl <= m-1,
+//  0 <= ku <= n-1.
+func Dlagge(m, n, kl, ku int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
+	checkMatrix(m, n, a, lda)
+	if kl < 0 || m-1 < kl {
+		panic("testlapack: invalid value of kl")
+	}
+	if ku < 0 || n-1 < ku {
+		panic("testlapack: invalid value of ku")
+	}
+	if len(d) != min(m, n) {
+		panic("testlapack: bad length of d")
+	}
+	if len(work) < m+n {
+		panic("testlapack: insufficient work length")
+	}
+
+	// Initialize A to diagonal matrix.
+	for i := 0; i < m; i++ {
+		for j := 0; j < n; j++ {
+			a[i*lda+j] = 0
+		}
+	}
+	for i := 0; i < min(m, n); i++ {
+		a[i*lda+i] = d[i]
+	}
+
+	// Quick exit if the user wants a diagonal matrix.
+	// if kl == 0 && ku == 0 {
+	// 	return
+	// }
+
+	bi := blas64.Implementation()
+
+	// Pre- and post-multiply A by random orthogonal matrices.
+	for i := min(m, n) - 1; i >= 0; i-- {
+		if i < m-1 {
+			for j := 0; j < m-i; j++ {
+				work[j] = rnd.NormFloat64()
+			}
+			wn := bi.Dnrm2(m-i, work[:m-i], 1)
+			wa := math.Copysign(wn, work[0])
+			var tau float64
+			if wn != 0 {
+				wb := work[0] + wa
+				bi.Dscal(m-i-1, 1/wb, work[1:m-i], 1)
+				work[0] = 1
+				tau = wb / wa
+			}
+
+			// Multiply A[i:m,i:n] by random reflection from the left.
+			bi.Dgemv(blas.Trans, m-i, n-i,
+				1, a[i*lda+i:], lda, work[:m-i], 1,
+				0, work[m:m+n-i], 1)
+			bi.Dger(m-i, n-i,
+				-tau, work[:m-i], 1, work[m:m+n-i], 1,
+				a[i*lda+i:], lda)
+		}
+		if i < n-1 {
+			for j := 0; j < n-i; j++ {
+				work[j] = rnd.NormFloat64()
+			}
+			wn := bi.Dnrm2(n-i, work[:n-i], 1)
+			wa := math.Copysign(wn, work[0])
+			var tau float64
+			if wn != 0 {
+				wb := work[0] + wa
+				bi.Dscal(n-i-1, 1/wb, work[1:n-i], 1)
+				work[0] = 1
+				tau = wb / wa
+			}
+
+			// Multiply A[i:m,i:n] by random reflection from the right.
+			bi.Dgemv(blas.NoTrans, m-i, n-i,
+				1, a[i*lda+i:], lda, work[:n-i], 1,
+				0, work[n:n+m-i], 1)
+			bi.Dger(m-i, n-i,
+				-tau, work[n:n+m-i], 1, work[:n-i], 1,
+				a[i*lda+i:], lda)
+		}
+	}
+
+	// TODO(vladimir-ch): Reduce number of subdiagonals to kl and number of
+	// superdiagonals to ku.
+}
+
 func checkMatrix(m, n int, a []float64, lda int) {
 	if m < 0 {
 		panic("testlapack: m < 0")

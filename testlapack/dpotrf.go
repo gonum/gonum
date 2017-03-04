@@ -48,28 +48,25 @@ func DpotrfTest(t *testing.T, impl Dpotrfer) {
 			{500, 600},
 		} {
 			n := test.n
+
+			// Random diagonal matrix D with positive entries.
+			d := make([]float64, n)
+			Dlatm1(d, 4, 10000, false, 1, rnd)
+
+			// Construct a positive definite matrix A as
+			//  A = U * D * U^T
+			// where U is a random orthogonal matrix.
 			lda := test.lda
 			if lda == 0 {
 				lda = n
 			}
-			// Construct a diagonally-dominant symmetric matrix.
-			// Such a matrix is positive definite.
 			a := make([]float64, n*lda)
-			for i := range a {
-				a[i] = rnd.Float64()
-			}
-			for i := 0; i < n; i++ {
-				a[i*lda+i] += float64(n)
-				for j := 0; j < i; j++ {
-					a[i*lda+j] = a[j*lda+i]
-				}
-			}
+			Dlagsy(n, d, a, lda, rnd, make([]float64, 2*n))
 
 			aCopy := make([]float64, len(a))
 			copy(aCopy, a)
 
 			ok := impl.Dpotrf(uplo, n, a, lda)
-
 			if !ok {
 				t.Errorf("Case %v: unexpected failure for positive definite matrix", tc)
 				continue
@@ -122,7 +119,16 @@ func DpotrfTest(t *testing.T, impl Dpotrfer) {
 				}
 			}
 			if !match {
-				t.Errorf("Case %v (uplo=%v,n=%v,lda=%v): unexpected result\n%v\n%v", tc, uplo, n, lda, ans, aCopy)
+				t.Errorf("Case %v (uplo=%v,n=%v,lda=%v): unexpected result", tc, uplo, n, lda)
+			}
+
+			// Make one element of D negative so that A is not
+			// positive definite, and check that Dpotrf fails.
+			d[0] *= -1
+			Dlagsy(n, d, a, lda, rnd, make([]float64, 2*n))
+			ok = impl.Dpotrf(uplo, n, a, lda)
+			if ok {
+				t.Errorf("Case %v: unexpected success for not positive definite matrix", tc)
 			}
 		}
 	}

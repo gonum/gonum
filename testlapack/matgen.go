@@ -7,6 +7,9 @@ package testlapack
 import (
 	"math"
 	"math/rand"
+
+	"github.com/gonum/blas"
+	"github.com/gonum/blas/blas64"
 )
 
 // Dlatm1 computes the entries of dst as specified by mode, cond and rsign.
@@ -114,5 +117,83 @@ func Dlatm1(dst []float64, mode int, cond float64, rsign bool, dist int, rnd *ra
 		for i := 0; i < n/2; i++ {
 			dst[i], dst[n-i-1] = dst[n-i-1], dst[i]
 		}
+	}
+}
+
+// Dlagsy generates an n×n symmetric matrix A, by pre- and post- multiplying a
+// real diagonal matrix D with a random orthogonal matrix:
+//  A = U * D * U^T.
+//
+// work must have length at least 2*n, otherwise Dlagsy will panic.
+func Dlagsy(n int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
+	checkMatrix(n, n, a, lda)
+	if len(d) != n {
+		panic("testlapack: bad length of d")
+	}
+	if len(work) < 2*n {
+		panic("testlapack: insufficient work length")
+	}
+
+	// Initialize lower triangle of A to diagonal matrix.
+	for i := 1; i < n; i++ {
+		for j := 0; j < i; j++ {
+			a[i*lda+j] = 0
+		}
+	}
+	for i := 0; i < n; i++ {
+		a[i*lda+i] = d[i]
+	}
+
+	bi := blas64.Implementation()
+
+	// Generate lower triangle of symmetric matrix.
+	for i := n - 2; i >= 0; i-- {
+		for j := 0; j < n-i; j++ {
+			work[j] = rnd.NormFloat64()
+		}
+		wn := bi.Dnrm2(n-i, work[:n-i], 1)
+		wa := math.Copysign(wn, work[0])
+		var tau float64
+		if wn != 0 {
+			wb := work[0] + wa
+			bi.Dscal(n-i-1, 1/wb, work[1:n-i], 1)
+			work[0] = 1
+			tau = wb / wa
+		}
+
+		// Apply random reflection to A[i:n,i:n] from the left and the
+		// right.
+		//
+		// Compute y := tau * A * u.
+		bi.Dsymv(blas.Lower, n-i, tau, a[i*lda+i:], lda, work[:n-i], 1, 0, work[n:2*n-i], 1)
+
+		// Compute v := y - 1/2 * tau * ( y, u ) * u.
+		alpha := -0.5 * tau * bi.Ddot(n-i, work[n:2*n-i], 1, work[:n-i], 1)
+		bi.Daxpy(n-i, alpha, work[:n-i], 1, work[n:2*n-i], 1)
+
+		// Apply the transformation as a rank-2 update to A[i:n,i:n].
+		bi.Dsyr2(blas.Lower, n-i, -1, work[:n-i], 1, work[n:2*n-i], 1, a[i*lda+i:], lda)
+	}
+
+	// Store full symmetric matrix.
+	for i := 1; i < n; i++ {
+		for j := 0; j < i; j++ {
+			a[j*lda+i] = a[i*lda+j]
+		}
+	}
+}
+
+func checkMatrix(m, n int, a []float64, lda int) {
+	if m < 0 {
+		panic("testlapack: m < 0")
+	}
+	if n < 0 {
+		panic("testlapack: n < 0")
+	}
+	if lda < max(1, n) {
+		panic("testlapack: lda < max(1, n)")
+	}
+	if len(a) < (m-1)*lda+n {
+		panic("testlapack: insufficient matrix slice length")
 	}
 }

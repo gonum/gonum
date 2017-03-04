@@ -61,7 +61,7 @@ func DpotrfTest(t *testing.T, impl Dpotrfer) {
 				lda = n
 			}
 			a := make([]float64, n*lda)
-			Dlagsy(n, d, a, lda, rnd, make([]float64, 2*n))
+			Dlagsy(n, 0, d, a, lda, rnd, make([]float64, 2*n))
 
 			aCopy := make([]float64, len(a))
 			copy(aCopy, a)
@@ -125,7 +125,7 @@ func DpotrfTest(t *testing.T, impl Dpotrfer) {
 			// Make one element of D negative so that A is not
 			// positive definite, and check that Dpotrf fails.
 			d[0] *= -1
-			Dlagsy(n, d, a, lda, rnd, make([]float64, 2*n))
+			Dlagsy(n, 0, d, a, lda, rnd, make([]float64, 2*n))
 			ok = impl.Dpotrf(uplo, n, a, lda)
 			if ok {
 				t.Errorf("Case %v: unexpected success for not positive definite matrix", tc)

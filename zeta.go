@@ -8,7 +8,9 @@ import "github.com/gonum/mathext/internal/cephes"
 
 // Zeta computes the Riemann zeta function of two arguments.
 //  Zeta(x,q) = \sum_{k=0}^{\infty} (k+q)^{-x}
-// where x > 1 and q is not a negative integer or zero.
+// Note that Zeta returns +Inf if x is 1 and will panic if x is less than 1,
+// q is either zero or a negative integer, or q is negative and x is not an
+// integer.
 //
 // See http://mathworld.wolfram.com/HurwitzZetaFunction.html
 // or https://en.wikipedia.org/wiki/Multiple_zeta_function#Two_parameters_case

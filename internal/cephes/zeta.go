@@ -1,5 +1,6 @@
 // Derived from SciPy's special/cephes/zeta.c
 // https://github.com/scipy/scipy/blob/master/scipy/special/cephes/zeta.c
+// Made freely available by Stephen L. Moshier without support or guarantee.
 
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.

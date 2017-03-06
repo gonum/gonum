@@ -33,13 +33,18 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 	// described in Function B.2 in figure 6 of UTCS Technical
 	// Report TR-07-54.
 	//
+	// This implementation deviates from the report as follows:
+	// - the value of path.dist for the start vertex u is initialized to 0;
+	// - outdated elements from the priority queue (i.e. with respect to the dist value)
+	//   are skipped.
+	//
 	// http://www.cs.utexas.edu/ftp/techreports/tr07-54.pdf
 	Q := priorityQueue{{node: u, dist: 0}}
 	for Q.Len() != 0 {
 		mid := heap.Pop(&Q).(distanceNode)
 		k := path.indexOf[mid.node.ID()]
-		if mid.dist < path.dist[k] {
-			path.dist[k] = mid.dist
+		if mid.dist > path.dist[k] {
+			continue
 		}
 		for _, v := range g.From(mid.node) {
 			j := path.indexOf[v.ID()]

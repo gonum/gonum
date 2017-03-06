@@ -1,15 +1,11 @@
-// Copyright ©2016 The gonum Authors. All rights reserved.
+// Derived from SciPy's special/cephes/unity.c
+// https://github.com/scipy/scipy/blob/master/scipy/special/cephes/unity.c
+// Made freely available by Stephen L. Moshier without support or guarantee.
+
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-/*
- * Cephes Math Library Release 2.4:  March,1996
- * Copyright 1984, 1996 by Stephen L. Moshier
- */
-
-/*
- * Adapted from scipy's cephes unity.c
- */
+// Copyright ©1984, ©1996 by Stephen L. Moshier
+// Portions Copyright ©2016 The gonum Authors. All rights reserved.
 
 package cephes
 
@@ -21,10 +17,11 @@ const (
 	euler    = 0.577215664901532860606512090082402431 // Euler constant
 )
 
-/* Coefficients for log(1+x) = x - x**2/2 + x**3 P(x)/Q(x)
- * 1/sqrt(2) <= x < sqrt(2)
- * Theoretical peak relative error = 2.32e-20
- */
+// Coefficients for
+//  log(1+x) = x - \frac{x^2}{2} + \frac{x^3 lP(x)}{lQ(x)}
+// for
+//  \frac{1}{\sqrt{2}} <= x < \sqrt{2}
+// Theoretical peak relative error = 2.32e-20
 var lP = []float64{
 	4.5270000862445199635215E-5,
 	4.9854102823193375972212E-1,
@@ -44,7 +41,8 @@ var lQ = []float64{
 	6.0118660497603843919306E1,
 }
 
-// log1p computes log(1 + x)
+// log1p computes
+//  log(1 + x)
 func log1p(x float64) float64 {
 	z := 1 + x
 	if z < invSqrt2 || z > math.Sqrt2 {
@@ -55,7 +53,8 @@ func log1p(x float64) float64 {
 	return x + z
 }
 
-// log1pmx computes log(1 + x) - x
+// log1pmx computes
+//  log(1 + x) - x
 func log1pmx(x float64) float64 {
 	if math.Abs(x) < 0.5 {
 		xfac := x
@@ -75,10 +74,10 @@ func log1pmx(x float64) float64 {
 	return log1p(x) - x
 }
 
-/*  e^x =  1 + 2x P(x^2)/( Q(x^2) - P(x^2) )
- * -0.5 <= x <= 0.5
- */
-
+// Coefficients for
+//  e^x = 1 + \frac{2x eP(x^2)}{eQ(x^2) - eP(x^2)}
+// for
+//  -0.5 <= x <= 0.5
 var eP = []float64{
 	1.2617719307481059087798E-4,
 	3.0299440770744196129956E-2,
@@ -92,7 +91,8 @@ var eQ = []float64{
 	2.0000000000000000000897E0,
 }
 
-// expm1 computes expm1(x) = exp(x) - 1
+// expm1 computes
+//  expm1(x) = e^x - 1
 func expm1(x float64) float64 {
 	if math.IsInf(x, 0) {
 		if math.IsNaN(x) || x > 0 {
@@ -119,7 +119,8 @@ var coscof = []float64{
 	4.1666666666666666609054E-2,
 }
 
-// cosm1 computes cosm1(x) = cos(x) - 1
+// cosm1 computes
+//  cosm1(x) = cos(x) - 1
 func cosm1(x float64) float64 {
 	if x < -pi4 || x > pi4 {
 		return math.Cos(x) - 1
@@ -129,7 +130,9 @@ func cosm1(x float64) float64 {
 	return xx
 }
 
-// lgam1pTayler computes lgam(x + 1) around x = 0 using its Taylor series.
+// lgam1pTayler computes
+//  lgam(x + 1)
+//around x = 0 using its Taylor series.
 func lgam1pTaylor(x float64) float64 {
 	if x == 0 {
 		return 0
@@ -149,7 +152,8 @@ func lgam1pTaylor(x float64) float64 {
 	return res
 }
 
-// lgam1p computes lgam(x + 1).
+// lgam1p computes
+//  lgam(x + 1)
 func lgam1p(x float64) float64 {
 	if math.Abs(x) <= 0.5 {
 		return lgam1pTaylor(x)

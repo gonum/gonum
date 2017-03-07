@@ -125,8 +125,14 @@ func Dlatm1(dst []float64, mode int, cond float64, rsign bool, dist int, rnd *ra
 //  A = U * D * U^T.
 //
 // work must have length at least 2*n, otherwise Dlagsy will panic.
-func Dlagsy(n int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
+//
+// The parameter k is unused but it must satisfy
+//  0 <= k <= n-1.
+func Dlagsy(n, k int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
 	checkMatrix(n, n, a, lda)
+	if k < 0 || n-1 < k {
+		panic("testlapack: invalid value of k")
+	}
 	if len(d) != n {
 		panic("testlapack: bad length of d")
 	}

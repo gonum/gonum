@@ -182,12 +182,9 @@ func TestStudentsTConditional(t *testing.T) {
 			muOb[i] = test.mean[v]
 		}
 
-		s.setSigma()
-		sUp.setSigma()
-
 		var sig11, sig22 mat64.SymDense
-		sig11.SubsetSym(s.sigma, unob)
-		sig22.SubsetSym(s.sigma, ob)
+		sig11.SubsetSym(&s.sigma, unob)
+		sig22.SubsetSym(&s.sigma, ob)
 
 		sig12 := mat64.NewDense(len(unob), len(ob), nil)
 		for i := range unob {
@@ -221,7 +218,7 @@ func TestStudentsTConditional(t *testing.T) {
 
 		dot := mat64.Dot(shiftVec, &tmp)
 		tmp3.Scale((test.nu+dot)/(test.nu+float64(len(ob))), &tmp3)
-		if !mat64.EqualApprox(&tmp3, sUp.sigma, 1e-10) {
+		if !mat64.EqualApprox(&tmp3, &sUp.sigma, 1e-10) {
 			t.Errorf("Sigma mismatch")
 		}
 	}
@@ -248,8 +245,6 @@ func TestStudentsTMarginalSingle(t *testing.T) {
 		if !ok {
 			t.Fatalf("Bad test, covariance matrix not positive definite")
 		}
-		// Verify with nil Sigma.
-		studentst.sigma = nil
 		for i, mean := range test.mu {
 			st := studentst.MarginalStudentsTSingle(i, nil)
 			if st.Mean() != mean {
@@ -261,19 +256,6 @@ func TestStudentsTMarginalSingle(t *testing.T) {
 			}
 			if st.Nu != test.nu {
 				t.Errorf("Nu mismatch nil Sigma, idx %v: want %v, got %v ", i, test.nu, st.Nu)
-			}
-		}
-
-		// Verify with non-nil Sigma.
-		studentst.setSigma()
-		for i, mean := range test.mu {
-			st := studentst.MarginalStudentsTSingle(i, nil)
-			if st.Mean() != mean {
-				t.Errorf("Mean mismatch non-nil Sigma, idx %v: want %v, got %v.", i, mean, st.Mean())
-			}
-			std := math.Sqrt(test.sigma.At(i, i))
-			if math.Abs(st.Sigma-std) > 1e-14 {
-				t.Errorf("StdDev mismatch non-nil Sigma, idx %v: want %v, got %v.", i, std, st.StdDev())
 			}
 		}
 	}

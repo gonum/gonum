@@ -7,7 +7,6 @@ package distmv
 import (
 	"math"
 	"math/rand"
-	"sync"
 
 	"github.com/gonum/floats"
 	"github.com/gonum/matrix/mat64"
@@ -27,8 +26,7 @@ var (
 type Normal struct {
 	mu []float64
 
-	once  sync.Once
-	sigma *mat64.SymDense // only stored if needed
+	sigma mat64.SymDense
 
 	chol       mat64.Cholesky
 	lower      mat64.TriDense
@@ -59,6 +57,8 @@ func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bo
 	if !ok {
 		return nil, false
 	}
+	n.sigma = *mat64.NewSymDense(dim, nil)
+	n.sigma.CopySym(sigma)
 	n.lower.LFromCholesky(&n.chol)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()
 	return n, true
@@ -141,9 +141,7 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Ran
 		}
 	}
 
-	n.setSigma()
-
-	_, mu1, sigma11 := studentsTConditional(observed, values, math.Inf(1), n.mu, n.sigma)
+	_, mu1, sigma11 := studentsTConditional(observed, values, math.Inf(1), n.mu, &n.sigma)
 	if mu1 == nil {
 		return nil, false
 	}
@@ -164,8 +162,7 @@ func (n *Normal) CovarianceMatrix(s *mat64.SymDense) *mat64.SymDense {
 	if sn != n.Dim() {
 		panic("normal: input matrix size mismatch")
 	}
-	n.setSigma()
-	s.CopySym(n.sigma)
+	s.CopySym(&n.sigma)
 	return s
 }
 
@@ -202,9 +199,8 @@ func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 	for i, v := range vars {
 		newMean[i] = n.mu[v]
 	}
-	n.setSigma()
 	var s mat64.SymDense
-	s.SubsetSym(n.sigma, vars)
+	s.SubsetSym(&n.sigma, vars)
 	return NewNormal(newMean, &s, src)
 }
 
@@ -216,19 +212,9 @@ func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 //
 // The input src is passed to the constructed distuv.Normal.
 func (n *Normal) MarginalNormalSingle(i int, src *rand.Rand) distuv.Normal {
-	var std float64
-	if n.sigma != nil {
-		std = n.sigma.At(i, i)
-	} else {
-		// Reconstruct the {i,i} diagonal element of the covariance directly.
-		for j := 0; j <= i; j++ {
-			v := n.lower.At(i, j)
-			std += v * v
-		}
-	}
 	return distuv.Normal{
 		Mu:     n.mu[i],
-		Sigma:  math.Sqrt(std),
+		Sigma:  math.Sqrt(n.sigma.At(i, i)),
 		Source: src,
 	}
 }
@@ -298,14 +284,6 @@ func (n *Normal) SetMean(mu []float64) {
 		panic(badSizeMismatch)
 	}
 	copy(n.mu, mu)
-}
-
-// setSigma computes and stores the covariance matrix of the distribution.
-func (n *Normal) setSigma() {
-	n.once.Do(func() {
-		n.sigma = mat64.NewSymDense(n.Dim(), nil)
-		n.sigma.FromCholesky(&n.chol)
-	})
 }
 
 // TransformNormal transforms the vector, normal, generated from a standard

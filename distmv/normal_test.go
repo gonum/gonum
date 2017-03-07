@@ -489,8 +489,6 @@ func TestMarginalSingle(t *testing.T) {
 		if !ok {
 			t.Fatalf("Bad test, covariance matrix not positive definite")
 		}
-		// Verify with nil Sigma.
-		normal.sigma = nil
 		for i, mean := range test.mu {
 			norm := normal.MarginalNormalSingle(i, nil)
 			if norm.Mean() != mean {
@@ -499,19 +497,6 @@ func TestMarginalSingle(t *testing.T) {
 			std := math.Sqrt(test.sigma.At(i, i))
 			if math.Abs(norm.StdDev()-std) > 1e-14 {
 				t.Errorf("StdDev mismatch nil Sigma, idx %v: want %v, got %v.", i, std, norm.StdDev())
-			}
-		}
-
-		// Verify with non-nil Sigma.
-		normal.setSigma()
-		for i, mean := range test.mu {
-			norm := normal.MarginalNormalSingle(i, nil)
-			if norm.Mean() != mean {
-				t.Errorf("Mean mismatch non-nil Sigma, idx %v: want %v, got %v.", i, mean, norm.Mean())
-			}
-			std := math.Sqrt(test.sigma.At(i, i))
-			if math.Abs(norm.StdDev()-std) > 1e-14 {
-				t.Errorf("StdDev mismatch non-nil Sigma, idx %v: want %v, got %v.", i, std, norm.StdDev())
 			}
 		}
 	}

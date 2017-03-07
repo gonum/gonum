@@ -7,7 +7,6 @@ package distmv
 import (
 	"log"
 	"math/rand"
-	"sync"
 	"testing"
 
 	"github.com/gonum/matrix/mat64"
@@ -38,8 +37,6 @@ func BenchmarkMarginalNormalReset10(b *testing.B) {
 		if !ok {
 			b.Error("bad test")
 		}
-		normal.sigma = nil
-		normal.once = sync.Once{}
 		_ = marg
 	}
 }

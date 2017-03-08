@@ -130,7 +130,7 @@ func Dlatm1(dst []float64, mode int, cond float64, rsign bool, dist int, rnd *ra
 //  0 <= k <= n-1.
 func Dlagsy(n, k int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
 	checkMatrix(n, n, a, lda)
-	if k < 0 || n-1 < k {
+	if k < 0 || max(0, n-1) < k {
 		panic("testlapack: invalid value of k")
 	}
 	if len(d) != n {
@@ -201,10 +201,10 @@ func Dlagsy(n, k int, d []float64, a []float64, lda int, rnd *rand.Rand, work []
 //  0 <= ku <= n-1.
 func Dlagge(m, n, kl, ku int, d []float64, a []float64, lda int, rnd *rand.Rand, work []float64) {
 	checkMatrix(m, n, a, lda)
-	if kl < 0 || m-1 < kl {
+	if kl < 0 || max(0, m-1) < kl {
 		panic("testlapack: invalid value of kl")
 	}
-	if ku < 0 || n-1 < ku {
+	if ku < 0 || max(0, n-1) < ku {
 		panic("testlapack: invalid value of ku")
 	}
 	if len(d) != min(m, n) {

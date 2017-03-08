@@ -45,7 +45,7 @@ var zetaCoefs = []float64{
 // and Products, p. 1073; Academic Press, 1980.
 func Zeta(x, q float64) float64 {
 	if x == 1 {
-		return math.MaxFloat64
+		return math.Inf(1)
 	}
 
 	if x < 1 {

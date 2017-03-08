@@ -14,7 +14,7 @@ func TestZeta(t *testing.T) {
 		x, q, want float64
 	}{
 		// Results computed using scipy.special.zeta
-		{1, 1, math.MaxFloat64},
+		{1, 1, math.Inf(1)},
 		{10, 0.5, 1024.0174503557578},
 		{5, 2.5, 0.013073166646113805},
 		{1.5, 2, 1.6123753486854886},

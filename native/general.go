@@ -115,13 +115,18 @@ func max(a, b int) int {
 	return b
 }
 
-var (
+const (
 	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
 	dlamchE = 1.0 / (1 << 53)
 
 	// dlamchP is 2 * eps
 	dlamchP = 2 * dlamchE
 
+	// dlamchB is the radix of the machine (the base of the number system).
+	dlamchB = 2
+)
+
+var (
 	// dlamchS is the "safe min", that is, the lowest number such that 1/sfmin does
 	// not overflow. The Netlib code for calculating this number is not correct --
 	// it overflows. Found by comparison with the FORTRAN value.
@@ -129,7 +134,4 @@ var (
 
 	smlnum = dlamchS / dlamchP
 	bignum = 1 / smlnum
-
-	// dlamchB is the radix of the machine (the base of the number system).
-	dlamchB = 2
 )

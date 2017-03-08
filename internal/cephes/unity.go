@@ -11,6 +11,12 @@ package cephes
 
 import "math"
 
+// Relative error approximations for function arguments near unity.
+//  log1p(x) = log(1+x)
+//  expm1(x) = exp(x) - 1
+//  cosm1(x) = cos(x) - 1
+//  lgam1p(x) = lgam(1+x)
+
 const (
 	invSqrt2 = 1 / math.Sqrt2
 	pi4      = math.Pi / 4

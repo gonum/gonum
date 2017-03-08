@@ -38,12 +38,6 @@ var zetaCoefs = []float64{
 // q is either zero or a negative integer, or q is negative and x is not an
 // integer.
 //
-// The Euler-Maclaurin summation formula is used to obtain the expansion:
-//  Zeta(x,q) = \sum_{k=1}^n (k+q)^{-x} + \frac{(n+q)^{1-x}}{x-1} - \frac{1}{2(n+q)^x} + \sum_{j=1}^{\infty} \frac{B_{2j}x(x+1)...(x+2j)}{(2j)! (n+q)^{x+2j+1}}
-// where
-//  B_{2j}
-// are Bernoulli numbers.
-//
 // Note that:
 //  zeta(x,1) = zetac(x) + 1
 //
@@ -63,7 +57,7 @@ func Zeta(x, q float64) float64 {
 			panic(badParamFunctionSingularity)
 		}
 		if x != math.Floor(x) {
-			panic(badParamOutOfBounds) // because q^-x not defined
+			panic(badParamOutOfBounds) // Because q^-x not defined
 		}
 	}
 
@@ -72,8 +66,11 @@ func Zeta(x, q float64) float64 {
 		return (1/(x-1) + 1/(2*q)) * math.Pow(q, 1-x)
 	}
 
-	// Euler-Maclaurin summation formula
-
+	// The Euler-Maclaurin summation formula is used to obtain the expansion:
+	//  Zeta(x,q) = \sum_{k=1}^n (k+q)^{-x} + \frac{(n+q)^{1-x}}{x-1} - \frac{1}{2(n+q)^x} + \sum_{j=1}^{\infty} \frac{B_{2j}x(x+1)...(x+2j)}{(2j)! (n+q)^{x+2j+1}}
+	// where
+	//  B_{2j}
+	// are Bernoulli numbers.
 	// Permit negative q but continue sum until n+q > 9. This case should be
 	// handled by a reflection formula. If q<0 and x is an integer, there is a
 	// relation to the polyGamma function.

@@ -47,9 +47,9 @@ func TestGammaIncComp(t *testing.T) {
 		{1, 0, 1},
 		{1, 1, 0.36787944117144233},
 		{1, 10, 4.5399929762484861e-05},
-		{5, 1, 0.99634015317265634},
 		{5, 10, 0.029252688076961127},
 		{100, 10, 1},
+		{1, math.Inf(1), 0},
 	} {
 		if got := GammaIncComp(test.a, test.x); math.Abs(got-test.want) > 1e-10 {
 			t.Errorf("test %d GammaIncComp(%g, %g) failed: got %g want %g", i, test.a, test.x, got, test.want)
@@ -69,7 +69,7 @@ func TestGammaIncCompInv(t *testing.T) {
 		{0.5, 0.5, 0.22746821155978625},
 		{0.75, 0.25, 1.0340914067758025},
 		{1, 0.5, 0.69314718055994529},
-		{1, 0, math.MaxFloat64},
+		{1, 0, math.Inf(1)},
 		{1, 1, 0},
 		{10, 0.5, 9.6687146147141299},
 		{100, 0.25, 106.5510925269767},

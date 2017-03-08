@@ -1,44 +1,21 @@
-// Copyright ©2016 The gonum Authors. All rights reserved.
+// Derived from SciPy's special/cephes/lanczos.c
+// https://github.com/scipy/scipy/blob/master/scipy/special/cephes/lanczos.c
+
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-/*
- * Cephes Math Library Release 2.1:  December, 1988
- * Copyright 1984, 1987, 1988 by Stephen L. Moshier
- * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
- */
-
-/*
- * Adapted from scipy's cephes lanczos.c
- */
-
-/* Both lanczos.h and lanczos.c were formed from Boost's lanczos.hpp
- *
- * Scipy changes:
- * - 06-22-2016: Removed all code not related to double precision and
- *   ported to c for use in Cephes. Note that the order of the
- *   coefficients is reversed to match the behavior of polevl.
- */
-
-/*
- * Optimal values for G for each N are taken from
- * http://web.mala.bc.ca/pughg/phdThesis/phdThesis.pdf,
- * as are the theoretical error bounds.
- *
- * Constants calculated using the method described by Godfrey
- * http://my.fit.edu/~gabdo/gamma.txt and elaborated by Toth at
- * http://www.rskey.org/gamma.htm using NTL::RR at 1000 bit precision.
- */
-
-/*
- * Lanczos Coefficients for N=13 G=6.024680040776729583740234375
- * Max experimental error (with arbitary precision arithmetic) 1.196214e-17
- * Generated with compiler: Microsoft Visual C++ version 8.0 on Win32 at Mar 23 2006
- *
- * Use for double precision.
- */
+// Copyright ©2006 John Maddock
+// Portions Copyright ©2003 Boost
+// Portions Copyright ©2016 The gonum Authors. All rights reserved.
 
 package cephes
+
+// Optimal values for G for each N are taken from
+// http://web.mala.bc.ca/pughg/phdThesis/phdThesis.pdf,
+// as are the theoretical error bounds.
+
+// Constants calculated using the method described by Godfrey
+// http://my.fit.edu/~gabdo/gamma.txt and elaborated by Toth at
+// http://www.rskey.org/gamma.htm using NTL::RR at 1000 bit precision.
 
 var lanczosNum = [...]float64{
 	2.506628274631000270164908177133837338626,
@@ -136,7 +113,6 @@ var lanczosSumNear2D = [...]float64{
 
 const lanczosG = 6.024680040776729583740234375
 
-//
 func lanczosSum(x float64) float64 {
 	return ratevl(x,
 		lanczosNum[:],
@@ -145,7 +121,6 @@ func lanczosSum(x float64) float64 {
 		len(lanczosDenom)-1)
 }
 
-//
 func lanczosSumExpgScaled(x float64) float64 {
 	return ratevl(x,
 		lanczosSumExpgScaledNum[:],
@@ -154,7 +129,6 @@ func lanczosSumExpgScaled(x float64) float64 {
 		len(lanczosSumExpgScaledDenom)-1)
 }
 
-//
 func lanczosSumNear1(dx float64) float64 {
 	var result float64
 
@@ -166,7 +140,6 @@ func lanczosSumNear1(dx float64) float64 {
 	return result
 }
 
-//
 func lanczosSumNear2(dx float64) float64 {
 	var result float64
 	x := dx + 2

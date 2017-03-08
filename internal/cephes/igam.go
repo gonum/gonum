@@ -1,92 +1,16 @@
-// Copyright ©2016 The gonum Authors. All rights reserved.
+// Derived from SciPy's special/cephes/igam.c and special/cephes/igam.h
+// https://github.com/scipy/scipy/blob/master/scipy/special/cephes/igam.c
+// https://github.com/scipy/scipy/blob/master/scipy/special/cephes/igam.h
+// Made freely available by Stephen L. Moshier without support or guarantee.
+
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-/*
- * Cephes Math Library Release 2.0:  April, 1987
- * Copyright 1985, 1987 by Stephen L. Moshier
- * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
- */
+// Copyright ©1985, ©1987 by Stephen L. Moshier
+// Portions Copyright ©2016 The gonum Authors. All rights reserved.
 
 package cephes
 
-import (
-	"math"
-)
-
-/*
- * Adapted from scipy's cephes igam.c
- */
-
-/*
- *     Incomplete Gamma integral
- *
- *
- * DESCRIPTION:
- *
- * The function is defined by
- *
- *                           x
- *                            -
- *                   1       | |  -t  a-1
- *  Igam(a,x)  =   -----     |   e   t   dt.
- *                  -      | |
- *                 | (a)    -
- *                           0
- *
- *
- * In this implementation both arguments must be positive.
- * The integral is evaluated by either a power series or
- * continued fraction expansion, depending on the relative
- * values of a and x.
- *
- * ACCURACY:
- *
- *                      Relative error:
- * arithmetic   domain     # trials      peak         rms
- *    IEEE      0,30       200000       3.6e-14     2.9e-15
- *    IEEE      0,100      300000       9.9e-14     1.5e-14
- */
-/*							IgamC()
- *
- *	Complemented incomplete Gamma integral
- *
- *
- * DESCRIPTION:
- *
- * The function is defined by
- *
- *
- *  IgamC(a,x)   =   1 - Igam(a,x)
- *
- *                            inf.
- *                              -
- *                     1       | |  -t  a-1
- *               =   -----     |   e   t   dt.
- *                    -      | |
- *                   | (a)    -
- *                             x
- *
- *
- * In this implementation both arguments must be positive.
- * The integral is evaluated by either a power series or
- * continued fraction expansion, depending on the relative
- * values of a and x.
- *
- * ACCURACY:
- *
- * Tested at random a, x.
- *                a         x                      Relative error:
- * arithmetic   domain   domain     # trials      peak         rms
- *    IEEE     0.5,100   0,100      200000       1.9e-14     1.7e-15
- *    IEEE     0.01,0.5  0,100      200000       1.4e-13     1.6e-15
- */
-
-/* Sources
- * [1] "The Digital Library of Mathematical Functions", dlmf.nist.gov
- * [2] Maddock et. al., "Incomplete Gamma Functions",
- *     http://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/sf_gamma/igamma.html
- */
+import "math"
 
 const (
 	igamDimK       = 25
@@ -127,8 +51,18 @@ var igamCoefs = [igamDimK][igamDimN]float64{
 	[igamDimN]float64{-9.8959643098322368e+2, 2.1925555360905233e+3, -1.9283586782723356e+3, -1.5925738122215253e-1, 1.9569985945919857e+3, -2.4072514765081556e+3, 1.3756149959336496e+3, 1.2920735237496668e-3, -7.525941715948055e+2, 7.3171668742208716e+2, -3.4137023466220065e+2, -9.9857390260608043e-6, 1.3356313181291573e+2, -1.1276295161252794e+2, 4.6310396098204458e+1, -7.9237387133614756e-6, -1.4510726927018646e+1, 1.1111771248100563e+1, -4.1690817945270892, 3.1008219800117808e-3, 1.1220095449981468, -7.6052379926149916e-1, 3.6262236505085254e-1, 2.216867741940747e-1, 4.8683443692930507e-1},
 }
 
-// Igam computes the incomplete Gamma integral
+// Igam computes the incomplete Gamma integral.
+//  Igam(a,x) = (1/ Γ(a)) \int_0^x e^{-t} t^{a-1} dt
+// The input argument a must be positive and x must be non-negative or Igam
+// will panic.
 func Igam(a, x float64) float64 {
+	// The integral is evaluated by either a power series or continued fraction
+	// expansion, depending on the relative values of a and x.
+	// Sources:
+	// [1] "The Digital Library of Mathematical Functions", dlmf.nist.gov
+	// [2] Maddock et. al., "Incomplete Gamma Functions",
+	// http://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/sf_gamma/igamma.html
+
 	// Check zero integration limit first
 	if x == 0 {
 		return 0
@@ -152,8 +86,19 @@ func Igam(a, x float64) float64 {
 	return igamSeries(a, x)
 }
 
-// IgamC computes the complement of the incomplete Gamma integral
+// IgamC computes the complemented incomplete Gamma integral.
+//  IgamC(a,x) = 1 - Igam(a,x)
+//             = (1/ Γ(a)) \int_0^\infty e^{-t} t^{a-1} dt
+// The input argument a must be positive and x must be non-negative or
+// IgamC will panic.
 func IgamC(a, x float64) float64 {
+	// The integral is evaluated by either a power series or continued fraction
+	// expansion, depending on the relative values of a and x.
+	// Sources:
+	// [1] "The Digital Library of Mathematical Functions", dlmf.nist.gov
+	// [2] Maddock et. al., "Incomplete Gamma Functions",
+	// http://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/sf_gamma/igamma.html
+
 	if x < 0 || a <= 0 {
 		panic(badParamOutOfBounds)
 	} else if x == 0 {
@@ -189,8 +134,11 @@ func IgamC(a, x float64) float64 {
 }
 
 // igamFac computes
-//  x^a * exp(-x) / gamma(a)
-// corrected from (15) and (16) in [2] by replacing exp(x - a) with exp(a - x)
+//  x^a * e^{-x} / Γ(a)
+// corrected from (15) and (16) in [2] by replacing
+//  e^{x - a}
+// with
+//  e^{a - x}
 func igamFac(a, x float64) float64 {
 	if math.Abs(a-x) > 0.4*math.Abs(a) {
 		ax := a*math.Log(x) - x - lgam(a)
@@ -220,7 +168,7 @@ func igamCContinuedFraction(a, x float64) float64 {
 		return 0
 	}
 
-	// continued fraction
+	// Continued fraction
 	y := 1 - a
 	z := x + y + 1
 	c := 0.0
@@ -270,7 +218,7 @@ func igamSeries(a, x float64) float64 {
 		return 0
 	}
 
-	// power series
+	// Power series
 	r := a
 	c := 1.0
 	ans := 1.0

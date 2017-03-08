@@ -7,11 +7,11 @@ package mathext
 import "github.com/gonum/mathext/internal/cephes"
 
 // GammaInc computes the incomplete Gamma integral.
-//  GammaInc(a,x) = (1/ Γ(a)) \int_0^x e^(-t) t^(a-1) dt
+//  GammaInc(a,x) = (1/ Γ(a)) \int_0^x e^{-t} t^{a-1} dt
 // The input argument a must be positive and x must be non-negative or GammaInc
 // will panic.
 //
-// See  http://mathworld.wolfram.com/IncompleteGammaFunction.html
+// See http://mathworld.wolfram.com/IncompleteGammaFunction.html
 // or https://en.wikipedia.org/wiki/Incomplete_gamma_function for more detailed
 // information.
 func GammaInc(a, x float64) float64 {
@@ -20,7 +20,7 @@ func GammaInc(a, x float64) float64 {
 
 // GammaIncComp computes the complemented incomplete Gamma integral.
 //  GammaIncComp(a,x) = 1 - GammaInc(a,x)
-//								    = (1/ Γ(a)) \int_0^\infty e^(-t) t^(a-1) dt
+//                    = (1/ Γ(a)) \int_0^\infty e^{-t} t^{a-1} dt
 // The input argument a must be positive and x must be non-negative or
 // GammaIncComp will panic.
 func GammaIncComp(a, x float64) float64 {
@@ -29,10 +29,10 @@ func GammaIncComp(a, x float64) float64 {
 
 // GammaIncCompInv computes the inverse of the incomplete Gamma function. That
 // is, it returns the x such that:
-//  GammaIncComp(a, x) = y
-// The input argument a must be positive and y must be between 0 and 1
-// inclusive or GammaIncCompInv will panic. It should return a positive number,
-// but can return 0 even with non-zero y because of underflow.
-func GammaIncCompInv(a, y float64) float64 {
-	return cephes.IgamI(a, y)
+//  GammaIncComp(a, x) = p
+// The input argument a must be positive and p must be between 0 and 1
+// inclusive or GammaIncCompInv will panic. GammaIncCompInv should return a
+// positive number, but can return 0 even with non-zero p due to underflow.
+func GammaIncCompInv(a, p float64) float64 {
+	return cephes.IgamI(a, p)
 }

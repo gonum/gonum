@@ -883,3 +883,12 @@ func zero(f []float64) {
 		f[i] = 0
 	}
 }
+
+// useInt returns an int slice with l elements, using i if it
+// has the necessary capacity, otherwise creating a new slice.
+func useInt(i []int, l int) []int {
+	if l <= cap(i) {
+		return i[:l]
+	}
+	return make([]int, l)
+}

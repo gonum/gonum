@@ -14,7 +14,7 @@ const (
 	Lower TriKind = false
 )
 
-// SVDKind specifies the treatment of singular vectors during the
+// SVDKind specifies the treatment of singular vectors during an SVD
 // factorization.
 type SVDKind int
 
@@ -31,4 +31,24 @@ const (
 	//  A = U * Σ * V^T
 	// where U is of size m×m, Σ is an m×n diagonal matrix, and V is an n×n matrix.
 	SVDFull
+)
+
+// GSVDKind specifies the treatment of singular vectors during a GSVD
+// factorization.
+type GSVDKind int
+
+const (
+	// GSVDU specifies that the U singular vectors should be computed during
+	// the decomposition.
+	GSVDU GSVDKind = 1 << iota
+	// GSVDV specifies that the V singular vectors should be computed during
+	// the decomposition.
+	GSVDV
+	// GSVDQ specifies that the Q singular vectors should be computed during
+	// the decomposition.
+	GSVDQ
+
+	// GSVDNone specifies that no singular vector should be computed during
+	// the decomposition.
+	GSVDNone
 )

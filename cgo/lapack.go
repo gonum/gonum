@@ -2015,9 +2015,10 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 // orthonormal eigenvectors of A on exit, otherwise on exit the specified
 // triangular region is overwritten.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dsyev but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dsyev will panic.
+// work is temporary storage, and lwork specifies the usable memory length. At minimum,
+// lwork >= 3*n-1, and Dsyev will panic otherwise. The amount of blocking is
+// limited by the usable length. If lwork == -1, instead of computing Dsyev the
+// optimal work length is stored into work[0].
 func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if lwork == -1 {

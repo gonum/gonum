@@ -861,11 +861,13 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 // d, tauQ, and tauP must all have length at least min(m,n), and e must have
 // length min(m,n) - 1.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
+// work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= max(m,n) and this function will panic otherwise.
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgebrd but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgebrd will panic.
+// Dgebrd is blocked decomposition, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgebrd,
+// the optimal work length will be stored into work[0].
+//
+// Dgebrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64, lwork int) {
 	checkMatrix(m, n, a, lda)
 	minmn := min(m, n)

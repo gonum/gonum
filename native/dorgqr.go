@@ -16,11 +16,13 @@ import (
 // Dorgqr is the blocked version of Dorg2r that makes greater use of level-3 BLAS
 // routines.
 //
-// The length of tau must be equal to k, and the length of work must be at least n.
-// It also must be that 0 <= k <= n and 0 <= n <= m. work is temporary storage,
-// and lwork specifies the usable memory length. At minimum, lwork >= n, and the
-// amount of blocking is limited by the usable length. If lwork == -1, instead of
-// computing Dorgqr the optimal work length is stored into work[0].
+// The length of tau must be at least k, and the length of work must be at least n.
+// It also must be that 0 <= k <= n and 0 <= n <= m.
+//
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= n, and the amount of blocking is limited by the usable
+// length. If lwork == -1, instead of computing Dorgqr the optimal work length
+// is stored into work[0].
 //
 // Dorgqr will panic if the conditions on input values are not met.
 //

@@ -1558,15 +1558,17 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 // as computed by Dgeqrf. Dorgqr is the blocked version of Dorg2r that makes
 // greater use of level-3 BLAS routines.
 //
-// len(tau) >= k, 0 <= k <= n, and 0 <= n <= m.
+// The length of tau must be at least k, and the length of work must be at least n.
+// It also must be that 0 <= k <= n and 0 <= n <= m.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dorgqr but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dorgqr will panic, and at minimum
-// lwork >= n.
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= n, and the amount of blocking is limited by the usable
+// length. If lwork == -1, instead of computing Dorgqr the optimal work length
+// is stored into work[0].
 //
 // Dorgqr will panic if the conditions on input values are not met.
+//
+// Dorgqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	if lwork == -1 {
 		work[0] = float64(n)

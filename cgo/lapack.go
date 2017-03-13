@@ -1470,13 +1470,14 @@ func (impl Implementation) Dorghr(n, ilo, ihi int, a []float64, lda int, tau, wo
 //
 // len(tau) >= k, 0 <= k <= n, and 0 <= m <= n.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dorglq but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dorglq will panic, and at minimum
-// lwork >= m.
+// work is temporary storage, and lwork specifies the usable memory length. At minimum,
+// lwork >= m, and the amount of blocking is limited by the usable length.
+// If lwork == -1, instead of computing Dorglq the optimal work length is stored
+// into work[0].
 //
 // Dorglq will panic if the conditions on input values are not met.
+//
+// Dorglq is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	if lwork == -1 {
 		work[0] = float64(m)

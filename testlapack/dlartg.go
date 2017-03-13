@@ -8,6 +8,8 @@ import (
 	"math"
 	"math/rand"
 	"testing"
+
+	"github.com/gonum/floats"
 )
 
 type Dlartger interface {
@@ -15,22 +17,65 @@ type Dlartger interface {
 }
 
 func DlartgTest(t *testing.T, impl Dlartger) {
+	const (
+		tol   = 1e-14
+		safmn = 2.002083095183101e-146 // math.Pow(dlamchB, math.Floor(math.Log(safmin/eps)/math.Log(dlamchB)/2))
+		safmx = 4.994797680505588e+145 // 1 / safmn
+	)
 	rnd := rand.New(rand.NewSource(1))
-	for i := 0; i < 100; i++ {
-		f := rnd.NormFloat64()
-		g := rnd.NormFloat64()
+	for i := 0; i < 1000; i++ {
+		var f float64
+		var fHuge bool
+		switch rnd.Intn(3) {
+		case 0:
+			// Huge f.
+			fHuge = true
+			f = math.Pow(10, 10-20*rnd.Float64()) * safmx
+		case 1:
+			// Tiny f.
+			f = math.Pow(10, 10-20*rnd.Float64()) * safmn
+		default:
+			f = rnd.NormFloat64()
+		}
+		if rnd.Intn(2) == 0 {
+			f *= -1
+		}
+
+		var g float64
+		var gHuge bool
+		switch rnd.Intn(3) {
+		case 0:
+			// Huge g.
+			gHuge = true
+			g = math.Pow(10, 10-20*rnd.Float64()) * safmx
+		case 1:
+			// Tiny g.
+			g = math.Pow(10, 10-20*rnd.Float64()) * safmn
+		default:
+			g = rnd.NormFloat64()
+		}
+		if rnd.Intn(2) == 0 {
+			g *= -1
+		}
+
 		cs, sn, r := impl.Dlartg(f, g)
 
-		rTest := cs*f + sn*g
-		zeroTest := -sn*f + cs*g
-		if math.Abs(rTest-r) > 1e-14 {
-			t.Errorf("R result mismatch. Computed %v, found %v", r, rTest)
+		rWant := cs*f + sn*g
+		if !floats.EqualWithinAbsOrRel(math.Abs(rWant), math.Abs(r), tol, tol) {
+			t.Errorf("Case f=%v,g=%v: unexpected r. Want %v, got %v", f, g, rWant, r)
 		}
-		if math.Abs(zeroTest) > 1e-14 {
-			t.Errorf("Zero result mismatch. Found %v", zeroTest)
+		oneTest := cs*cs + sn*sn
+		if math.Abs(oneTest-1) > tol {
+			t.Errorf("Case f=%v,g=%v: expected cs^2+sn^2==1, got %v", f, g, oneTest)
+		}
+		if !fHuge && !gHuge {
+			zeroTest := -sn*f + cs*g
+			if math.Abs(zeroTest) > tol {
+				t.Errorf("Case f=%v,g=%v: expected zero, got %v", f, g, zeroTest)
+			}
 		}
 		if math.Abs(f) > math.Abs(g) && cs < 0 {
-			t.Errorf("Unexpected negative cs %v", cs)
+			t.Errorf("Case f=%v,g=%v: unexpected negative cs %v", f, g, cs)
 		}
 	}
 	for i := 0; i < 100; i++ {

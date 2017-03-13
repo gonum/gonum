@@ -17,7 +17,7 @@ import "math"
 func (impl Implementation) Dlartg(f, g float64) (cs, sn, r float64) {
 	safmin := dlamchS
 	eps := dlamchE
-	safmn2 := math.Pow(float64(dlamchB), math.Log(safmin/eps))
+	safmn2 := math.Pow(dlamchB, math.Trunc(math.Log(safmin/eps)/math.Log(dlamchB)/2))
 	safmx2 := 1 / safmn2
 	if g == 0 {
 		cs = 1

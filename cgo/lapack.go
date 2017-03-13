@@ -1031,9 +1031,12 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 // algorithm. See the documentation for Dgeqr2 for a description of the
 // parameters at entry and exit.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < max(1, lwork), Dgeqrf will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// The length of work must be at least max(1, lwork) and lwork must be -1
+// or at least n, otherwise this function will panic.
+// Dgeqrf is a blocked QR factorization, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgeqrf,
+// the optimal work length will be stored into work[0].
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {

@@ -1324,12 +1324,14 @@ func (impl Implementation) Dgetrf(m, n int, a []float64, lda int, ipiv []int) (o
 // by Dgetrf. On entry, a contains the PLU decomposition of A as computed by
 // Dgetrf and on exit contains the reciprocal of the original matrix.
 //
-// Dtrtri will not perform the inversion if the matrix is singular, and returns
+// Dgetri will not perform the inversion if the matrix is singular, and returns
 // a boolean indicating whether the inversion was successful.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgetri but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgetri will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= n and this function will panic otherwise.
+// Dgetri is a blocked inversion, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgetri,
+// the optimal work length will be stored into work[0].
 func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if len(ipiv) < n {

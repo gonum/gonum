@@ -1157,9 +1157,11 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 // leading submatrix of b contains the solution vectors X. If trans == blas.NoTrans,
 // this submatrix is of size n×nrhs, and of size m×nrhs otherwise.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgels but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgels will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= max(m,n) + max(m,n,nrhs), and this function will panic
+// otherwise. A longer work will enable blocked algorithms to be called.
+// In the special case that lwork == -1, work[0] will be set to the optimal working
+// length.
 func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool {
 	mn := min(m, n)
 	if lwork == -1 {

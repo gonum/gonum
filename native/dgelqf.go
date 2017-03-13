@@ -10,7 +10,7 @@ import (
 )
 
 // Dgelqf computes the LQ factorization of the m×n matrix A using a blocked
-// algorithm. Please see the documentation for Dgelq2 for a description of the
+// algorithm. See the documentation for Dgelq2 for a description of the
 // parameters at entry and exit.
 //
 // work is temporary storage, and lwork specifies the usable memory length.
@@ -20,8 +20,6 @@ import (
 // the optimal work length will be stored into work[0].
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
-//
-// Dgelqf is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
 	nb := impl.Ilaenv(1, "DGELQF", " ", m, n, -1, -1)
 	lworkopt := m * max(nb, 1)

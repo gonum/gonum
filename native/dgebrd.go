@@ -12,7 +12,7 @@ import (
 // Dgebrd reduces a general m×n matrix A to upper or lower bidiagonal form B by
 // an orthogonal transformation:
 //  Q^T * A * P = B.
-// The diagonal elements of B are stored in d and the off diagonal elements stored
+// The diagonal elements of B are stored in d and the off-diagonal elements are stored
 // in e. These are additionally stored along the diagonal of A and the off-diagonal
 // of A. If m >= n B is an upper-bidiagonal matrix, and if m < n B is a
 // lower-bidiagonal matrix.

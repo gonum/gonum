@@ -861,11 +861,13 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 // d, tauQ, and tauP must all have length at least min(m,n), and e must have
 // length min(m,n) - 1.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
+// work is temporary storage, and lwork specifies the usable memory length.
 // At minimum, lwork >= max(m,n) and this function will panic otherwise.
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgebrd but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgebrd will panic.
+// Dgebrd is blocked decomposition, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgebrd,
+// the optimal work length will be stored into work[0].
+//
+// Dgebrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64, lwork int) {
 	checkMatrix(m, n, a, lda)
 	minmn := min(m, n)
@@ -966,9 +968,11 @@ func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []fl
 // algorithm. See the documentation for Dgelq2 for a description of the
 // parameters at entry and exit.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgelqf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgelqf will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= m, and this function will panic otherwise.
+// Dgelqf is a blocked LQ factorization, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgelqf,
+// the optimal work length will be stored into work[0].
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
@@ -1027,9 +1031,12 @@ func (impl Implementation) Dgeqr2(m, n int, a []float64, lda int, tau, work []fl
 // algorithm. See the documentation for Dgeqr2 for a description of the
 // parameters at entry and exit.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgeqrf but will instead write the minimum
-// work necessary to work[0]. If len(work) < max(1, lwork), Dgeqrf will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// The length of work must be at least max(1, lwork) and lwork must be -1
+// or at least n, otherwise this function will panic.
+// Dgeqrf is a blocked QR factorization, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgeqrf,
+// the optimal work length will be stored into work[0].
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgeqrf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {
@@ -1150,9 +1157,11 @@ func (impl Implementation) Dgehrd(n, ilo, ihi int, a []float64, lda int, tau, wo
 // leading submatrix of b contains the solution vectors X. If trans == blas.NoTrans,
 // this submatrix is of size n×nrhs, and of size m×nrhs otherwise.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgels but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgels will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= max(m,n) + max(m,n,nrhs), and this function will panic
+// otherwise. A longer work will enable blocked algorithms to be called.
+// In the special case that lwork == -1, work[0] will be set to the optimal working
+// length.
 func (impl Implementation) Dgels(trans blas.Transpose, m, n, nrhs int, a []float64, lda int, b []float64, ldb int, work []float64, lwork int) bool {
 	mn := min(m, n)
 	if lwork == -1 {
@@ -1207,9 +1216,11 @@ const noSVDO = "dgesvd: not coded for overwrite"
 // of size min(m,n)×n. If jobVT == lapack.SVDOverwrite or lapack.SVDNone, vt is
 // not used.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgesvd but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgesvd will panic.
+// work is a slice for storing temporary memory, and lwork is the usable size of
+// the slice. lwork must be at least max(5*min(m,n), 3*min(m,n)+max(m,n)).
+// If lwork == -1, instead of performing Dgesvd, the optimal work length will be
+// stored into work[0]. Dgesvd will panic if the working memory has insufficient
+// storage.
 //
 // Dgesvd returns whether the decomposition successfully completed.
 func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int) (ok bool) {
@@ -1313,12 +1324,14 @@ func (impl Implementation) Dgetrf(m, n int, a []float64, lda int, ipiv []int) (o
 // by Dgetrf. On entry, a contains the PLU decomposition of A as computed by
 // Dgetrf and on exit contains the reciprocal of the original matrix.
 //
-// Dtrtri will not perform the inversion if the matrix is singular, and returns
+// Dgetri will not perform the inversion if the matrix is singular, and returns
 // a boolean indicating whether the inversion was successful.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgetri but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgetri will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= n and this function will panic otherwise.
+// Dgetri is a blocked inversion, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgetri,
+// the optimal work length will be stored into work[0].
 func (impl Implementation) Dgetri(n int, a []float64, lda int, ipiv []int, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if len(ipiv) < n {
@@ -1457,13 +1470,14 @@ func (impl Implementation) Dorghr(n, ilo, ihi int, a []float64, lda int, tau, wo
 //
 // len(tau) >= k, 0 <= k <= n, and 0 <= m <= n.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dorglq but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dorglq will panic, and at minimum
-// lwork >= m.
+// work is temporary storage, and lwork specifies the usable memory length. At minimum,
+// lwork >= m, and the amount of blocking is limited by the usable length.
+// If lwork == -1, instead of computing Dorglq the optimal work length is stored
+// into work[0].
 //
 // Dorglq will panic if the conditions on input values are not met.
+//
+// Dorglq is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorglq(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	if lwork == -1 {
 		work[0] = float64(m)
@@ -1544,15 +1558,17 @@ func (impl Implementation) Dorgql(m, n, k int, a []float64, lda int, tau, work [
 // as computed by Dgeqrf. Dorgqr is the blocked version of Dorg2r that makes
 // greater use of level-3 BLAS routines.
 //
-// len(tau) >= k, 0 <= k <= n, and 0 <= n <= m.
+// The length of tau must be at least k, and the length of work must be at least n.
+// It also must be that 0 <= k <= n and 0 <= n <= m.
 //
-// Work is temporary storage, and lwork specifies the usable memory length.
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dorgqr but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dorgqr will panic, and at minimum
-// lwork >= n.
+// work is temporary storage, and lwork specifies the usable memory length. At
+// minimum, lwork >= n, and the amount of blocking is limited by the usable
+// length. If lwork == -1, instead of computing Dorgqr the optimal work length
+// is stored into work[0].
 //
 // Dorgqr will panic if the conditions on input values are not met.
+//
+// Dorgqr is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dorgqr(m, n, k int, a []float64, lda int, tau, work []float64, lwork int) {
 	if lwork == -1 {
 		work[0] = float64(n)
@@ -1999,9 +2015,10 @@ func (impl Implementation) Dsterf(n int, d, e []float64) (ok bool) {
 // orthonormal eigenvectors of A on exit, otherwise on exit the specified
 // triangular region is overwritten.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dsyev but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dsyev will panic.
+// work is temporary storage, and lwork specifies the usable memory length. At minimum,
+// lwork >= 3*n-1, and Dsyev will panic otherwise. The amount of blocking is
+// limited by the usable length. If lwork == -1, instead of computing Dsyev the
+// optimal work length is stored into work[0].
 func (impl Implementation) Dsyev(jobz lapack.EVJob, uplo blas.Uplo, n int, a []float64, lda int, w, work []float64, lwork int) (ok bool) {
 	checkMatrix(n, n, a, lda)
 	if lwork == -1 {

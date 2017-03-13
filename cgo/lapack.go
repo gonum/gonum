@@ -968,9 +968,11 @@ func (impl Implementation) Dgelq2(m, n int, a []float64, lda int, tau, work []fl
 // algorithm. See the documentation for Dgelq2 for a description of the
 // parameters at entry and exit.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgelqf but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgelqf will panic.
+// work is temporary storage, and lwork specifies the usable memory length.
+// At minimum, lwork >= m, and this function will panic otherwise.
+// Dgelqf is a blocked LQ factorization, but the block size is limited
+// by the temporary space available. If lwork == -1, instead of performing Dgelqf,
+// the optimal work length will be stored into work[0].
 //
 // tau must have length at least min(m,n), and this function will panic otherwise.
 func (impl Implementation) Dgelqf(m, n int, a []float64, lda int, tau, work []float64, lwork int) {

@@ -1216,9 +1216,11 @@ const noSVDO = "dgesvd: not coded for overwrite"
 // of size min(m,n)×n. If jobVT == lapack.SVDOverwrite or lapack.SVDNone, vt is
 // not used.
 //
-// The C interface does not support providing temporary storage. To provide compatibility
-// with native, lwork == -1 will not run Dgesvd but will instead write the minimum
-// work necessary to work[0]. If len(work) < lwork, Dgesvd will panic.
+// work is a slice for storing temporary memory, and lwork is the usable size of
+// the slice. lwork must be at least max(5*min(m,n), 3*min(m,n)+max(m,n)).
+// If lwork == -1, instead of performing Dgesvd, the optimal work length will be
+// stored into work[0]. Dgesvd will panic if the working memory has insufficient
+// storage.
 //
 // Dgesvd returns whether the decomposition successfully completed.
 func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float64, lda int, s, u []float64, ldu int, vt []float64, ldvt int, work []float64, lwork int) (ok bool) {

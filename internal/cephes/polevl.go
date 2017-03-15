@@ -1,17 +1,11 @@
-// Copyright ©2016 The gonum Authors. All rights reserved.
+// Derived from SciPy's special/cephes/polevl.h
+// https://github.com/scipy/scipy/blob/master/scipy/special/cephes/polevl.h
+// Made freely available by Stephen L. Moshier without support or guarantee.
+
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-/*
- * Cephes Math Library Release 2.1:  December, 1988
- * Copyright 1984, 1987, 1988 by Stephen L. Moshier
- * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
- */
-
-/* Sources:
- * [1] Holin et. al., "Polynomial and Rational Function Evaluation",
- *     http://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/roots/rational.html
- */
+// Copyright ©1984, ©1987, ©1988 by Stephen L. Moshier
+// Portions Copyright ©2016 The gonum Authors. All rights reserved.
 
 package cephes
 
@@ -39,8 +33,10 @@ func p1evl(x float64, coef []float64, n int) float64 {
 	return ans
 }
 
-// ratevl evaluates a rational function. See [1].
+// ratevl evaluates a rational function
 func ratevl(x float64, num []float64, m int, denom []float64, n int) float64 {
+	// Source: Holin et. al., "Polynomial and Rational Function Evaluation",
+	// http://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/roots/rational.html
 	absx := math.Abs(x)
 
 	var dir, idx int

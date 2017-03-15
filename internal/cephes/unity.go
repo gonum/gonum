@@ -84,13 +84,13 @@ func log1pmx(x float64) float64 {
 //  e^x = 1 + \frac{2x eP(x^2)}{eQ(x^2) - eP(x^2)}
 // for
 //  -0.5 <= x <= 0.5
-var eP = []float64{
+var eP = [...]float64{
 	1.2617719307481059087798E-4,
 	3.0299440770744196129956E-2,
 	9.9999999999999999991025E-1,
 }
 
-var eQ = []float64{
+var eQ = [...]float64{
 	3.0019850513866445504159E-6,
 	2.5244834034968410419224E-3,
 	2.2726554820815502876593E-1,
@@ -110,12 +110,12 @@ func expm1(x float64) float64 {
 		return math.Exp(x) - 1
 	}
 	xx := x * x
-	r := x * polevl(xx, eP, 2)
-	r = r / (polevl(xx, eQ, 3) - r)
+	r := x * polevl(xx, eP[:], 2)
+	r = r / (polevl(xx, eQ[:], 3) - r)
 	return r + r
 }
 
-var coscof = []float64{
+var coscof = [...]float64{
 	4.7377507964246204691685E-14,
 	-1.1470284843425359765671E-11,
 	2.0876754287081521758361E-9,
@@ -132,7 +132,7 @@ func cosm1(x float64) float64 {
 		return math.Cos(x) - 1
 	}
 	xx := x * x
-	xx = -0.5*xx + xx*xx*polevl(xx, coscof, 6)
+	xx = -0.5*xx + xx*xx*polevl(xx, coscof[:], 6)
 	return xx
 }
 

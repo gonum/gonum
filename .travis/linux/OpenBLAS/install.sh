@@ -51,10 +51,9 @@ fi
 sudo cp -r ${CACHE_DIR}/* /usr/
 
 # install gonum/blas against OpenBLAS
-# fetch and install gonum/blas and gonum/matrix
+# fetch and install gonum/blas
 export CGO_LDFLAGS="-L/usr/lib -lopenblas"
 go get github.com/gonum/blas
-go get github.com/gonum/matrix/mat64
 
 # install lapacke against OpenBLAS
 pushd cgo/lapacke

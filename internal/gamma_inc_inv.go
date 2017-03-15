@@ -10,7 +10,7 @@ package internal
 import (
 	"math"
 
-	"github.com/zeroviscosity/mathext/internal/cephes"
+	"github.com/gonum/mathext/internal/cephes"
 )
 
 const (

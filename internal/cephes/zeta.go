@@ -40,10 +40,9 @@ var zetaCoefs = []float64{
 //
 // Note that:
 //  zeta(x,1) = zetac(x) + 1
-//
-// REFERENCE: Gradshteyn, I. S., and I. M. Ryzhik, Tables of Integrals, Series,
-// and Products, p. 1073; Academic Press, 1980.
 func Zeta(x, q float64) float64 {
+	// REFERENCE: Gradshteyn, I. S., and I. M. Ryzhik, Tables of Integrals, Series,
+	// and Products, p. 1073; Academic Press, 1980.
 	if x == 1 {
 		return math.Inf(1)
 	}

@@ -17,7 +17,7 @@ import "math"
 // where
 //  B_{2k}
 // are Bernoulli numbers.
-var zetaCoefs = []float64{
+var zetaCoefs = [...]float64{
 	12.0,
 	-720.0,
 	30240.0,
@@ -92,10 +92,10 @@ func Zeta(x, q float64) float64 {
 	s -= 0.5 * b
 	a = 1.0
 	k := 0.0
-	for i = 0; i < 12; i++ {
+	for _, coef := range zetaCoefs {
 		a *= x + k
 		b /= w
-		t := a * b / zetaCoefs[i]
+		t := a * b / coef
 		s = s + t
 		t = math.Abs(t / s)
 		if t < machEp {

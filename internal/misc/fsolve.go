@@ -67,10 +67,11 @@ func falsePosition(x1, x2, f1, f2, absErr, relErr, bisectTil float64, f objectiv
 	}
 
 	gamma := 1.0
-	nFalseP := 0
+
 	w := math.Abs(x2 - x1)
 	lastBisectWidth := w
 
+	var nFalseP int
 	var x3, f3, bestX, bestF float64
 	for i := 0; i < maxIterations; i++ {
 		switch state {

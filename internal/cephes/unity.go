@@ -28,7 +28,7 @@ const (
 // for
 //  \frac{1}{\sqrt{2}} <= x < \sqrt{2}
 // Theoretical peak relative error = 2.32e-20
-var lP = []float64{
+var lP = [...]float64{
 	4.5270000862445199635215E-5,
 	4.9854102823193375972212E-1,
 	6.5787325942061044846969E0,
@@ -38,7 +38,7 @@ var lP = []float64{
 	2.0039553499201281259648E1,
 }
 
-var lQ = []float64{
+var lQ = [...]float64{
 	1.5062909083469192043167E1,
 	8.3047565967967209469434E1,
 	2.2176239823732856465394E2,
@@ -55,7 +55,7 @@ func log1p(x float64) float64 {
 		return math.Log(z)
 	}
 	z = x * x
-	z = -0.5*z + x*(z*polevl(x, lP, 6)/p1evl(x, lQ, 6))
+	z = -0.5*z + x*(z*polevl(x, lP[:], 6)/p1evl(x, lQ[:], 6))
 	return x + z
 }
 

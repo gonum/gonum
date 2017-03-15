@@ -1,16 +1,16 @@
 // Derived from SciPy's special/c_misc/gammaincinv.c
 // https://github.com/scipy/scipy/blob/master/scipy/special/c_misc/gammaincinv.c
 
-// Copyright ©2016 The gonum Authors. All rights reserved.
+// Copyright ©2017 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package misc
+package internal
 
 import (
 	"math"
 
-	"github.com/gonum/mathext/internal/cephes"
+	"github.com/zeroviscosity/mathext/internal/cephes"
 )
 
 const (

@@ -5,7 +5,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package special
+package mathext
 
 import (
 	"math"
@@ -22,13 +22,13 @@ func gammaInc(x float64, params []float64) float64 {
 	return cephes.Igam(params[0], x) - params[1]
 }
 
-// GammaIncInv is the inverse of the incomplete Gamma integral. That is, it
+// gammaIncInv is the inverse of the incomplete Gamma integral. That is, it
 // returns x such that:
 //  Igam(a, x) = y
 // The input argument a must be positive and y must be between 0 and 1
-// inclusive or GammaIncInv will panic. GammaIncInv should return a
+// inclusive or gammaIncInv will panic. gammaIncInv should return a
 // positive number, but can return NaN if there is a failure to converge.
-func GammaIncInv(a, y float64) float64 {
+func gammaIncInv(a, y float64) float64 {
 	// For y not small, we just use
 	//  IgamI(a, 1-y)
 	// (inverse of the complemented incomplete Gamma integral). For y small,

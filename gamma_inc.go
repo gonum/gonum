@@ -6,7 +6,6 @@ package mathext
 
 import (
 	"github.com/gonum/mathext/internal/cephes"
-	"github.com/gonum/mathext/internal/special"
 )
 
 // GammaInc computes the incomplete Gamma integral.
@@ -37,7 +36,7 @@ func GammaIncComp(a, x float64) float64 {
 // inclusive or GammaIncInv will panic. GammaIncInv should return a positive
 // number, but can return NaN if there is a failure to converge.
 func GammaIncInv(a, y float64) float64 {
-	return special.GammaIncInv(a, y)
+	return gammaIncInv(a, y)
 }
 
 // GammaIncCompInv computes the inverse of the complemented incomplete Gamma

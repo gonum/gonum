@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package mathext_test
+package mathext
 
 import (
 	"math"
 	"testing"
-
-	. "github.com/gonum/mathext"
 )
 
 func TestGammaInc(t *testing.T) {

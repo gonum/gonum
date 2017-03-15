@@ -142,9 +142,6 @@ func IgamC(a, x float64) float64 {
 func igamFac(a, x float64) float64 {
 	if math.Abs(a-x) > 0.4*math.Abs(a) {
 		ax := a*math.Log(x) - x - lgam(a)
-		if ax < -maxLog {
-			panic(badParamUnderflow)
-		}
 		return math.Exp(ax)
 	}
 

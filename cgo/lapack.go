@@ -859,10 +859,11 @@ func (impl Implementation) Dbdsqr(uplo blas.Uplo, n, ncvt, nru, ncc int, d, e, v
 //  [v1  v2  v3   e   d  u5]
 //
 // d, tauQ, and tauP must all have length at least min(m,n), and e must have
-// length min(m,n) - 1.
+// length min(m,n) - 1, unless lwork is -1 when there is no check except for
+// work which must have a length of at least one.
 //
 // work is temporary storage, and lwork specifies the usable memory length.
-// At minimum, lwork >= max(m,n) and this function will panic otherwise.
+// At minimum, lwork >= max(1,m,n) or be -1 and this function will panic otherwise.
 // Dgebrd is blocked decomposition, but the block size is limited
 // by the temporary space available. If lwork == -1, instead of performing Dgebrd,
 // the optimal work length will be stored into work[0].
@@ -883,15 +884,10 @@ func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, ta
 	if len(tauP) < minmn {
 		panic(badTauP)
 	}
-	ws := max(m, n)
-	if lwork == -1 {
-		work[0] = float64(ws)
-		return
-	}
-	if lwork < ws {
+	if lwork != -1 && lwork < max(1, max(m, n)) {
 		panic(badWork)
 	}
-	if len(work) < lwork {
+	if len(work) < max(1, lwork) {
 		panic(badWork)
 	}
 

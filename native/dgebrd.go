@@ -42,10 +42,11 @@ import (
 //  [v1  v2  v3   e   d  u5]
 //
 // d, tauQ, and tauP must all have length at least min(m,n), and e must have
-// length min(m,n) - 1.
+// length min(m,n) - 1, unless lwork is -1 when there is no check except for
+// work which must have a length of at least one.
 //
 // work is temporary storage, and lwork specifies the usable memory length.
-// At minimum, lwork >= max(m,n) and this function will panic otherwise.
+// At minimum, lwork >= max(1,m,n) or be -1 and this function will panic otherwise.
 // Dgebrd is blocked decomposition, but the block size is limited
 // by the temporary space available. If lwork == -1, instead of performing Dgebrd,
 // the optimal work length will be stored into work[0].
@@ -53,6 +54,17 @@ import (
 // Dgebrd is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, tauP, work []float64, lwork int) {
 	checkMatrix(m, n, a, lda)
+	// Calculate optimal work.
+	nb := impl.Ilaenv(1, "DGEBRD", " ", m, n, -1, -1)
+	var lworkOpt int
+	if lwork == -1 {
+		if len(work) < 1 {
+			panic(badWork)
+		}
+		lworkOpt = ((m + n) * nb)
+		work[0] = float64(max(1, lworkOpt))
+		return
+	}
 	minmn := min(m, n)
 	if len(d) < minmn {
 		panic(badD)
@@ -66,15 +78,8 @@ func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, ta
 	if len(tauP) < minmn {
 		panic(badTauP)
 	}
-	// Calculate optimal work.
-	nb := impl.Ilaenv(1, "DGEBRD", " ", m, n, -1, -1)
-	if lwork == -1 {
-		lworkOpt := (m + n) * nb
-		work[0] = float64(lworkOpt)
-		return
-	}
 	ws := max(m, n)
-	if lwork < ws {
+	if lwork < max(1, ws) {
 		panic(badWork)
 	}
 	if len(work) < lwork {
@@ -141,4 +146,5 @@ func (impl Implementation) Dgebrd(m, n int, a []float64, lda int, d, e, tauQ, ta
 	}
 	// Use unblocked code to reduce the remainder of the matrix.
 	impl.Dgebd2(m-i, n-i, a[i*lda+i:], lda, d[i:], e[i:], tauQ[i:], tauP[i:], work)
+	work[0] = float64(lworkOpt)
 }

@@ -27,8 +27,8 @@ testCover() {
 # Init acc.out
 echo "mode: set" > $ACC_OUT
 
-# Run test coverage on all directories containing go files
-find . -maxdepth 10 -type d | while read d; do testCover $d || exit; done
+# Run test coverage on all directories containing go files except testlapack.
+find . -maxdepth 10 -type d -not -path './testlapack*' | while read d; do testCover $d || exit; done
 
 # Upload the coverage profile to coveralls.io
 [ -n "$COVERALLS_TOKEN" ] && goveralls -coverprofile=$ACC_OUT -service=travis-ci -repotoken $COVERALLS_TOKEN

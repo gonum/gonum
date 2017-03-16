@@ -1,8 +1,7 @@
 set -ex
 
-# fetch gonum/blas and gonum/matrix
-go get github.com/gonum/blas
-go get github.com/gonum/matrix/mat64
+# fetch gonum/blas
+go get github.com/gonum/blas/native
 
 # travis compiles commands in script and then executes in bash.  By adding
 # set -e we are changing the travis build script's behavior, and the set

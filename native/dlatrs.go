@@ -85,11 +85,11 @@ func (impl Implementation) Dlatrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 	if noTrans {
 		if upper {
 			jfirst = n - 1
-			jlast = 0
+			jlast = -1
 			jinc = -1
 		} else {
 			jfirst = 0
-			jlast = n - 1
+			jlast = n
 			jinc = 1
 		}
 		// Compute the growth in A * x = b.
@@ -125,11 +125,11 @@ func (impl Implementation) Dlatrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 	} else {
 		if upper {
 			jfirst = 0
-			jlast = n - 1
+			jlast = n
 			jinc = 1
 		} else {
 			jfirst = n - 1
-			jlast = 0
+			jlast = -1
 			jinc = -1
 		}
 		if tscal != 1 {
@@ -176,16 +176,16 @@ Finish:
 		if noTrans {
 			for j := jfirst; j != jlast; j += jinc {
 				xj := math.Abs(x[j])
-				var tjjs float64
+				var tjj, tjjs float64
 				if nonUnit {
 					tjjs = a[j*lda+j] * tscal
 				} else {
 					tjjs = tscal
 					if tscal == 1 {
-						break
+						goto Skip1
 					}
 				}
-				tjj := math.Abs(tjjs)
+				tjj = math.Abs(tjjs)
 				if tjj > smlnum {
 					if tjj < 1 {
 						if xj > tjj*bignum {
@@ -218,6 +218,7 @@ Finish:
 					scale = 0
 					xmax = 0
 				}
+			Skip1:
 				if xj > 1 {
 					rec := 1 / xj
 					if cnorm[j] > (bignum-xmax)*rec {
@@ -294,7 +295,7 @@ Finish:
 					} else {
 						tjjs = tscal
 						if tscal == 1 {
-							goto Out2
+							goto Skip2
 						}
 					}
 					tjj := math.Abs(tjjs)
@@ -327,7 +328,7 @@ Finish:
 				} else {
 					x[j] = x[j]/tjjs - sumj
 				}
-			Out2:
+			Skip2:
 				xmax = math.Max(xmax, math.Abs(x[j]))
 			}
 		}

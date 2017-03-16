@@ -97,11 +97,6 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	bi := blas64.Implementation()
 	var mnthr int
 
-	// TODO(btracey): The netlib implementation checks have this at only length 1.
-	// Our implementation checks all input sizes before examining the l == -1 case.
-	// Fix the failing cases to reduce the needed memory here.
-	dum := make([]float64, m*n)
-
 	// Compute optimal space for subroutines.
 	maxwrk := 1
 	opts := string(jobU) + string(jobVT)
@@ -109,18 +104,18 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	if m >= n {
 		mnthr = impl.Ilaenv(6, "DGESVD", opts, m, n, 0, 0)
 		bdspac = 5 * n
-		impl.Dgeqrf(m, n, a, lda, dum, dum, -1)
-		lwork_dgeqrf := int(dum[0])
-		impl.Dorgqr(m, n, n, a, lda, dum, dum, -1)
-		lwork_dorgqr_n := int(dum[0])
-		impl.Dorgqr(m, m, n, a, lda, dum, dum, -1)
-		lwork_dorgqr_m := int(dum[0])
-		impl.Dgebrd(n, n, a, lda, s, dum, dum, dum, dum, -1)
-		lwork_dgebrd := int(dum[0])
-		impl.Dorgbr(lapack.ApplyP, n, n, n, a, lda, dum, dum, -1)
-		lwork_dorgbr_p := int(dum[0])
-		impl.Dorgbr(lapack.ApplyQ, n, n, n, a, lda, dum, dum, -1)
-		lwork_dorgbr_q := int(dum[0])
+		impl.Dgeqrf(m, n, a, lda, nil, work, -1)
+		lwork_dgeqrf := int(work[0])
+		impl.Dorgqr(m, n, n, a, lda, nil, work, -1)
+		lwork_dorgqr_n := int(work[0])
+		impl.Dorgqr(m, m, n, a, lda, nil, work, -1)
+		lwork_dorgqr_m := int(work[0])
+		impl.Dgebrd(n, n, a, lda, s, nil, nil, nil, work, -1)
+		lwork_dgebrd := int(work[0])
+		impl.Dorgbr(lapack.ApplyP, n, n, n, a, lda, nil, work, -1)
+		lwork_dorgbr_p := int(work[0])
+		impl.Dorgbr(lapack.ApplyQ, n, n, n, a, lda, nil, work, -1)
+		lwork_dorgbr_q := int(work[0])
 
 		if m >= mnthr {
 			// m >> n
@@ -204,17 +199,17 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 			}
 		} else {
 			// Path 10: m > n
-			impl.Dgebrd(m, n, a, lda, s, dum, dum, dum, dum, -1)
-			lwork_dgebrd := int(dum[0])
+			impl.Dgebrd(m, n, a, lda, s, nil, nil, nil, work, -1)
+			lwork_dgebrd := int(work[0])
 			maxwrk = 3*n + lwork_dgebrd
 			if wantus || wantuo {
-				impl.Dorgbr(lapack.ApplyQ, m, n, n, a, lda, dum, dum, -1)
-				lwork_dorgbr_q = int(dum[0])
+				impl.Dorgbr(lapack.ApplyQ, m, n, n, a, lda, nil, work, -1)
+				lwork_dorgbr_q = int(work[0])
 				maxwrk = max(maxwrk, 3*n+lwork_dorgbr_q)
 			}
 			if wantua {
-				impl.Dorgbr(lapack.ApplyQ, m, m, n, a, lda, dum, dum, -1)
-				lwork_dorgbr_q := int(dum[0])
+				impl.Dorgbr(lapack.ApplyQ, m, m, n, a, lda, nil, work, -1)
+				lwork_dorgbr_q := int(work[0])
 				maxwrk = max(maxwrk, 3*n+lwork_dorgbr_q)
 			}
 			if !wantvn {
@@ -226,18 +221,18 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 		mnthr = impl.Ilaenv(6, "DGESVD", opts, m, n, 0, 0)
 
 		bdspac = 5 * m
-		impl.Dgelqf(m, n, a, lda, dum, dum, -1)
-		lwork_dgelqf := int(dum[0])
-		impl.Dorglq(n, n, m, dum, n, dum, dum, -1)
-		lwork_dorglq_n := int(dum[0])
-		impl.Dorglq(m, n, m, a, lda, dum, dum, -1)
-		lwork_dorglq_m := int(dum[0])
-		impl.Dgebrd(m, m, a, lda, s, dum, dum, dum, dum, -1)
-		lwork_dgebrd := int(dum[0])
-		impl.Dorgbr(lapack.ApplyP, m, m, m, a, n, dum, dum, -1)
-		lwork_dorgbr_p := int(dum[0])
-		impl.Dorgbr(lapack.ApplyQ, m, m, m, a, n, dum, dum, -1)
-		lwork_dorgbr_q := int(dum[0])
+		impl.Dgelqf(m, n, a, lda, nil, work, -1)
+		lwork_dgelqf := int(work[0])
+		impl.Dorglq(n, n, m, nil, n, nil, work, -1)
+		lwork_dorglq_n := int(work[0])
+		impl.Dorglq(m, n, m, a, lda, nil, work, -1)
+		lwork_dorglq_m := int(work[0])
+		impl.Dgebrd(m, m, a, lda, s, nil, nil, nil, work, -1)
+		lwork_dgebrd := int(work[0])
+		impl.Dorgbr(lapack.ApplyP, m, m, m, a, n, nil, work, -1)
+		lwork_dorgbr_p := int(work[0])
+		impl.Dorgbr(lapack.ApplyQ, m, m, m, a, n, nil, work, -1)
+		lwork_dorgbr_q := int(work[0])
 		if n >= mnthr {
 			// n >> m
 			if wantvn {
@@ -320,17 +315,17 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 			}
 		} else {
 			// Path 10t, n > m
-			impl.Dgebrd(m, n, a, lda, s, dum, dum, dum, dum, -1)
-			lwork_dgebrd = int(dum[0])
+			impl.Dgebrd(m, n, a, lda, s, nil, nil, nil, work, -1)
+			lwork_dgebrd = int(work[0])
 			maxwrk := 3*m + lwork_dgebrd
 			if wantvs || wantvo {
-				impl.Dorgbr(lapack.ApplyP, m, n, m, a, n, dum, dum, -1)
-				lwork_dorgbr_p = int(dum[0])
+				impl.Dorgbr(lapack.ApplyP, m, n, m, a, n, nil, work, -1)
+				lwork_dorgbr_p = int(work[0])
 				maxwrk = max(maxwrk, 3*m+lwork_dorgbr_p)
 			}
 			if wantva {
-				impl.Dorgbr(lapack.ApplyP, n, n, m, a, n, dum, dum, -1)
-				lwork_dorgbr_p = int(dum[0])
+				impl.Dorgbr(lapack.ApplyP, n, n, m, a, n, nil, work, -1)
+				lwork_dorgbr_p = int(work[0])
 				maxwrk = max(maxwrk, 3*m+lwork_dorgbr_p)
 			}
 			if !wantun {
@@ -369,7 +364,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 	bignum := 1 / smlnum
 
 	// Scale A if max element outside range [smlnum, bignum].
-	anrm := impl.Dlange(lapack.MaxAbs, m, n, a, lda, dum)
+	anrm := impl.Dlange(lapack.MaxAbs, m, n, a, lda, nil)
 	var iscl bool
 	if anrm > 0 && anrm < smlnum {
 		iscl = true
@@ -413,7 +408,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 				// Perform bidiagonal QR iteration computing right singular vectors
 				// of A in A if desired.
 				ok = impl.Dbdsqr(blas.Upper, n, ncvt, 0, 0, s, work[ie:],
-					a, lda, dum, 1, dum, 1, work[iwork:])
+					a, lda, work, 1, work, 1, work[iwork:])
 
 				// If right singular vectors desired in VT, copy them there.
 				if wantvas {
@@ -464,8 +459,8 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 
 						// Perform bidiagonal QR iteration, compuing left singular
 						// vectors of R in work[ir:].
-						ok = impl.Dbdsqr(blas.Upper, n, 0, n, 0, s, work[ie:], dum, 1,
-							work[ir:], ldworkr, dum, 1, work[iwork:])
+						ok = impl.Dbdsqr(blas.Upper, n, 0, n, 0, s, work[ie:], work, 1,
+							work[ir:], ldworkr, work, 1, work[iwork:])
 
 						// Multiply Q in A by left singular vectors of R in
 						// work[ir:], storing result in U.
@@ -501,8 +496,8 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 
 						// Perform bidiagonal QR iteration, computing left
 						// singular vectors of A in U.
-						ok = impl.Dbdsqr(blas.Upper, n, 0, m, 0, s, work[ie:], dum, 1,
-							u, ldu, dum, 1, work[iwork:])
+						ok = impl.Dbdsqr(blas.Upper, n, 0, m, 0, s, work[ie:], work, 1,
+							u, ldu, work, 1, work[iwork:])
 					}
 				} else if wantvo {
 					// Path 5
@@ -553,7 +548,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of R in work[iu:], and computing right singular
 						// vectors of R in VT.
 						ok = impl.Dbdsqr(blas.Upper, n, n, n, 0, s, work[ie:],
-							vt, ldvt, work[iu:], ldworku, dum, 1, work[iwork:])
+							vt, ldvt, work[iu:], ldworku, work, 1, work[iwork:])
 
 						// Multiply Q in A by left singular vectors of R in
 						// work[iu:], storing result in U.
@@ -597,7 +592,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of A in U and computing right singular vectors
 						// of A in VT.
 						ok = impl.Dbdsqr(blas.Upper, n, n, m, 0, s, work[ie:],
-							vt, ldvt, u, ldu, dum, 1, work[iwork:])
+							vt, ldvt, u, ldu, work, 1, work[iwork:])
 					}
 				}
 			} else if wantua {
@@ -641,8 +636,8 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 
 						// Perform bidiagonal QR iteration, computing left singular
 						// vectors of R in work[ir:].
-						ok = impl.Dbdsqr(blas.Upper, n, 0, n, 0, s, work[ie:], dum, 1,
-							work[ir:], ldworkr, dum, 1, work[iwork:])
+						ok = impl.Dbdsqr(blas.Upper, n, 0, n, 0, s, work[ie:], work, 1,
+							work[ir:], ldworkr, work, 1, work[iwork:])
 
 						// Multiply Q in U by left singular vectors of R in
 						// work[ir:], storing result in A.
@@ -682,7 +677,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// Perform bidiagonal QR iteration, computing left
 						// singular vectors of A in U.
 						ok = impl.Dbdsqr(blas.Upper, n, 0, m, 0, s, work[ie:],
-							dum, 1, u, ldu, dum, 1, work[iwork:])
+							work, 1, u, ldu, work, 1, work[iwork:])
 					}
 				} else if wantvo {
 					// Path 8.
@@ -735,7 +730,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of R in work[iu:] and computing right
 						// singular vectors of R in VT.
 						ok = impl.Dbdsqr(blas.Upper, n, n, n, 0, s, work[ie:],
-							vt, ldvt, work[iu:], ldworku, dum, 1, work[iwork:])
+							vt, ldvt, work[iu:], ldworku, work, 1, work[iwork:])
 
 						// Multiply Q in U by left singular vectors of R in
 						// work[iu:], storing result in A.
@@ -763,7 +758,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 							// vectors of A in U and computing right singular vectors
 							// of A in VT.
 							ok = impl.Dbdsqr(blas.Upper, n, n, m, 0, s, work[ie:],
-								vt, ldvt, u, ldu, dum, 1, work[iwork:])
+								vt, ldvt, u, ldu, work, 1, work[iwork:])
 						*/
 					} else {
 						// Insufficient workspace for a fast algorithm.
@@ -803,7 +798,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of A in U and computing right singular vectors
 						// of A in VT.
 						impl.Dbdsqr(blas.Upper, n, n, m, 0, s, work[ie:],
-							vt, ldvt, u, ldu, dum, 1, work[iwork:])
+							vt, ldvt, u, ldu, work, 1, work[iwork:])
 					}
 				}
 			}
@@ -861,7 +856,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 				// Perform bidiagonal QR iteration, if desired, computing left
 				// singular vectors in U and right singular vectors in VT.
 				ok = impl.Dbdsqr(blas.Upper, n, ncvt, nru, 0, s, work[ie:],
-					vt, ldvt, u, ldu, dum, 1, work[iwork:])
+					vt, ldvt, u, ldu, work, 1, work[iwork:])
 			} else {
 				// There will be two branches when the implementation is complete.
 				panic(noSVDO)
@@ -903,7 +898,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 				// Perform bidiagonal QR iteration, computing left singular vectors
 				// of A in A if desired.
 				ok = impl.Dbdsqr(blas.Upper, m, 0, nru, 0, s, work[ie:],
-					dum, 1, a, lda, dum, 1, work[iwork:])
+					work, 1, a, lda, work, 1, work[iwork:])
 
 				// If left singular vectors desired in U, copy them there.
 				if wantuas {
@@ -956,7 +951,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// Perform bidiagonal QR iteration, computing right singular
 						// vectors of L in work[ir:].
 						ok = impl.Dbdsqr(blas.Upper, m, m, 0, 0, s, work[ie:],
-							work[ir:], ldworkr, dum, 1, dum, 1, work[iwork:])
+							work[ir:], ldworkr, work, 1, work, 1, work[iwork:])
 
 						// Multiply right singular vectors of L in work[ir:] by
 						// Q in A, storing result in VT.
@@ -995,7 +990,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// Perform bidiagonal QR iteration, computing right
 						// singular vectors of A in VT.
 						ok = impl.Dbdsqr(blas.Upper, m, n, 0, 0, s, work[ie:],
-							vt, ldvt, dum, 1, dum, 1, work[iwork:])
+							vt, ldvt, work, 1, work, 1, work[iwork:])
 					}
 				} else if wantuo {
 					// Path 5t.
@@ -1045,7 +1040,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of L in U and computing right singular vectors of
 						// L in work[iu:].
 						ok = impl.Dbdsqr(blas.Upper, m, m, m, 0, s, work[ie:],
-							work[iu:], ldworku, u, ldu, dum, 1, work[iwork:])
+							work[iu:], ldworku, u, ldu, work, 1, work[iwork:])
 
 						// Multiply right singular vectors of L in work[iu:] by
 						// Q in A, storing result in VT.
@@ -1088,7 +1083,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of A in U and computing right singular vectors
 						// of A in VT.
 						impl.Dbdsqr(blas.Upper, m, n, m, 0, s, work[ie:], vt, ldvt,
-							u, ldu, dum, 1, work[iwork:])
+							u, ldu, work, 1, work[iwork:])
 					}
 				}
 			} else if wantva {
@@ -1134,7 +1129,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// Perform bidiagonal QR iteration, computing right
 						// singular vectors of L in work[ir:].
 						ok = impl.Dbdsqr(blas.Upper, m, m, 0, 0, s, work[ie:],
-							work[ir:], ldworkr, dum, 1, dum, 1, work[iwork:])
+							work[ir:], ldworkr, work, 1, work, 1, work[iwork:])
 
 						// Multiply right singular vectors of L in work[ir:] by
 						// Q in VT, storing result in A.
@@ -1174,7 +1169,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// Perform bidiagonal QR iteration, computing right singular
 						// vectors of A in VT.
 						ok = impl.Dbdsqr(blas.Upper, m, n, 0, 0, s, work[ie:],
-							vt, ldvt, dum, 1, dum, 1, work[iwork:])
+							vt, ldvt, work, 1, work, 1, work[iwork:])
 					}
 				} else if wantuo {
 					panic(noSVDO)
@@ -1225,7 +1220,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of L in U and computing right singular vectors
 						// of L in work[iu:].
 						ok = impl.Dbdsqr(blas.Upper, m, m, m, 0, s, work[ie:],
-							work[iu:], ldworku, u, ldu, dum, 1, work[iwork:])
+							work[iu:], ldworku, u, ldu, work, 1, work[iwork:])
 
 						// Multiply right singular vectors of L in work[iu:]
 						// Q in VT, storing result in A.
@@ -1271,7 +1266,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 						// vectors of A in U and computing right singular vectors
 						// of A in VT.
 						ok = impl.Dbdsqr(blas.Upper, m, n, m, 0, s, work[ie:],
-							vt, ldvt, u, ldu, dum, 1, work[iwork:])
+							vt, ldvt, u, ldu, work, 1, work[iwork:])
 					}
 				}
 			}
@@ -1322,7 +1317,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 				// singular vectors in U and computing right singular vectors in
 				// VT.
 				ok = impl.Dbdsqr(blas.Lower, m, ncvt, nru, 0, s, work[ie:],
-					vt, ldvt, u, ldu, dum, 1, work[iwork:])
+					vt, ldvt, u, ldu, work, 1, work[iwork:])
 			} else {
 				// There will be two branches when the implementation is complete.
 				panic(noSVDO)

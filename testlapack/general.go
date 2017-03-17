@@ -17,9 +17,6 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// dlamchE is the machine epsilon. For IEEE this is 2^-53.
-const dlamchE = 1.0 / (1 << 53)
-
 func max(a, b int) int {
 	if a > b {
 		return a

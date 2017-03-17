@@ -34,7 +34,7 @@ func (s symView) At(i, j int) float64 {
 
 func (s symView) T() mat64.Matrix { return mat64.Transpose{s} }
 
-func ExampleCanonicalCorrelations() {
+func ExampleCC() {
 	// This example is directly analogous to Example 3.5 on page 87 of
 	// Koch, Inge. Analysis of multivariate and high-dimensional data.
 	// Vol. 32. Cambridge University Press, 2013. ISBN: 9780521887939

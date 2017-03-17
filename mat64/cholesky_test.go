@@ -117,6 +117,67 @@ func TestCholeskySolve(t *testing.T) {
 	}
 }
 
+func TestSolveTwoChol(t *testing.T) {
+	for _, test := range []struct {
+		a, b *SymDense
+	}{
+		{
+			a: NewSymDense(2, []float64{
+				1, 0,
+				0, 1,
+			}),
+			b: NewSymDense(2, []float64{
+				1, 0,
+				0, 1,
+			}),
+		},
+		{
+			a: NewSymDense(2, []float64{
+				1, 0,
+				0, 1,
+			}),
+			b: NewSymDense(2, []float64{
+				2, 0,
+				0, 2,
+			}),
+		},
+		{
+			a: NewSymDense(3, []float64{
+				53, 59, 37,
+				59, 83, 71,
+				37, 71, 101,
+			}),
+			b: NewSymDense(3, []float64{
+				2, -1, 0,
+				-1, 2, -1,
+				0, -1, 2,
+			}),
+		},
+	} {
+		var chola, cholb Cholesky
+		ok := chola.Factorize(test.a)
+		if !ok {
+			t.Fatal("unexpected Cholesky factorization failure for a: not positive definite")
+		}
+		ok = cholb.Factorize(test.b)
+		if !ok {
+			t.Fatal("unexpected Cholesky factorization failure for b: not positive definite")
+		}
+
+		var x Dense
+		x.solveTwoChol(&chola, &cholb)
+
+		var ans Dense
+		ans.Mul(test.a, &x)
+		if !EqualApprox(&ans, test.b, 1e-12) {
+			var y Dense
+			y.Solve(test.a, test.b)
+			t.Errorf("incorrect Cholesky solve solution product\ngot solution:\n%.4v\nwant solution\n%.4v",
+				Formatted(&x), Formatted(&y))
+		}
+	}
+}
+
 func TestCholeskySolveVec(t *testing.T) {
 	for _, test := range []struct {
 		a   *SymDense

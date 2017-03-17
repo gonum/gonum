@@ -176,6 +176,29 @@ func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
 	return nil
 }
 
+// TODO(kortschak): Export this as SolveTwoChol.
+// solveTwoChol finds the matrix m that solves A * m = B where A and B are represented
+// by their Cholesky decompositions a and b, placing the result in the receiver.
+func (m *Dense) solveTwoChol(a, b *Cholesky) error {
+	if !a.valid() || !b.valid() {
+		panic(badCholesky)
+	}
+	bn := b.chol.mat.N
+	if a.chol.mat.N != bn {
+		panic(matrix.ErrShape)
+	}
+
+	m.reuseAsZeroed(bn, bn)
+	m.Copy(b.chol.T())
+	blas64.Trsm(blas.Left, blas.Trans, 1, a.chol.mat, m.mat)
+	blas64.Trsm(blas.Left, blas.NoTrans, 1, a.chol.mat, m.mat)
+	blas64.Trmm(blas.Right, blas.NoTrans, 1, b.chol.mat, m.mat)
+	if a.cond > matrix.ConditionTolerance {
+		return matrix.Condition(a.cond)
+	}
+	return nil
+}
+
 // SolveCholeskyVec finds the vector v that solves A * v = b where A is represented
 // by the Cholesky decomposition, placing the result in the receiver.
 func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {

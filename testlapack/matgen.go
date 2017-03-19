@@ -283,6 +283,31 @@ func Dlagge(m, n, kl, ku int, d []float64, a []float64, lda int, rnd *rand.Rand,
 	// superdiagonals to ku.
 }
 
+// dlarnv fills dst with random numbers from a uniform or normal distribution
+// specified by dist:
+//  dist=1: uniform[0,1),
+//  dist=2: uniform[-1,1),
+//  dist=3: normal(0,1).
+// For other values of dist dlarnv will panic.
+func dlarnv(dst []float64, dist int, rnd *rand.Rand) {
+	switch dist {
+	default:
+		panic("testlapack: invalid dist")
+	case 1:
+		for i := range dst {
+			dst[i] = rnd.Float64()
+		}
+	case 2:
+		for i := range dst {
+			dst[i] = 2*rnd.Float64() - 1
+		}
+	case 3:
+		for i := range dst {
+			dst[i] = rnd.NormFloat64()
+		}
+	}
+}
+
 func checkMatrix(m, n int, a []float64, lda int) {
 	if m < 0 {
 		panic("testlapack: m < 0")

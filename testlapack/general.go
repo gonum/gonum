@@ -17,6 +17,15 @@ import (
 	"github.com/gonum/lapack"
 )
 
+const (
+	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
+	dlamchE = 1.0 / (1 << 53)
+	dlamchP = 2 * dlamchE
+	dlamchB = 2
+)
+
+var dlamchS = math.Nextafter((4 / math.MaxFloat64), 0)
+
 func max(a, b int) int {
 	if a > b {
 		return a

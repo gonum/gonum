@@ -12,15 +12,6 @@ import (
 	"github.com/gonum/blas/blas64"
 )
 
-const (
-	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
-	dlamchE = 1.0 / (1 << 53)
-	dlamchP = 2 * dlamchE
-	dlamchB = 2
-)
-
-var dlamchS = math.Nextafter((4 / math.MaxFloat64), 0)
-
 // Dlatm1 computes the entries of dst as specified by mode, cond and rsign.
 //
 // mode describes how dst will be computed:

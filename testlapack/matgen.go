@@ -285,8 +285,8 @@ func Dlagge(m, n, kl, ku int, d []float64, a []float64, lda int, rnd *rand.Rand,
 
 // dlarnv fills dst with random numbers from a uniform or normal distribution
 // specified by dist:
-//  dist=1: uniform[0,1),
-//  dist=2: uniform[-1,1),
+//  dist=1: uniform(0,1),
+//  dist=2: uniform(-1,1),
 //  dist=3: normal(0,1).
 // For other values of dist dlarnv will panic.
 func dlarnv(dst []float64, dist int, rnd *rand.Rand) {

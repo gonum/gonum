@@ -110,8 +110,8 @@ func IgamC(a, x float64) float64 {
 
 	// Asymptotic regime where a ~ x; see [2].
 	absxmaA := math.Abs(x-a) / a
-	if (a > igamSmall && a < igamLarge && absxmaA < igamSmallRatio) ||
-		(a > igamLarge && absxmaA < igamLargeRatio/math.Sqrt(a)) {
+	if (igamSmall < a && a < igamLarge && absxmaA < igamSmallRatio) ||
+		(igamLarge < a && absxmaA < igamLargeRatio/math.Sqrt(a)) {
 		return asymptoticSeries(a, x, igamC)
 	}
 

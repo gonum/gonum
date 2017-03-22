@@ -74,8 +74,8 @@ func Igam(a, x float64) float64 {
 
 	// Asymptotic regime where a ~ x; see [2].
 	absxmaA := math.Abs(x-a) / a
-	if (a > igamSmall && a < igamLarge && absxmaA < igamSmallRatio) ||
-		(a > igamLarge && absxmaA < igamLargeRatio/math.Sqrt(a)) {
+	if (igamSmall < a && a < igamLarge && absxmaA < igamSmallRatio) ||
+		(igamLarge < a && absxmaA < igamLargeRatio/math.Sqrt(a)) {
 		return asymptoticSeries(a, x, igam)
 	}
 
@@ -99,11 +99,12 @@ func IgamC(a, x float64) float64 {
 	// [2] Maddock et. al., "Incomplete Gamma Functions",
 	// http://www.boost.org/doc/libs/1_61_0/libs/math/doc/html/math_toolkit/sf_gamma/igamma.html
 
-	if x < 0 || a <= 0 {
+	switch {
+	case x < 0, a <= 0:
 		panic(badParamOutOfBounds)
-	} else if x == 0 {
+	case x == 0:
 		return 1
-	} else if math.IsInf(x, 0) {
+	case math.IsInf(x, 0):
 		return 0
 	}
 

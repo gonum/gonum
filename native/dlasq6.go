@@ -73,7 +73,7 @@ func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int, dmin, dmin1, 
 	// Unroll last two steps.
 	dnm2 = d
 	dmin2 = dmin
-	j4 = 4*(n0-2) - pp - 1
+	j4 = 4*(n0-1) - pp - 1
 	j4p2 := j4 + 2*pp - 1
 	z[j4-2] = dnm2 + z[j4p2]
 	if z[j4-2] == 0 {
@@ -87,7 +87,7 @@ func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int, dmin, dmin1, 
 		dnm1 = dnm2 * tmp
 	} else {
 		z[j4] = z[j4p2+2] * (z[j4p2] / z[j4-2])
-		dnm1 = z[j4p2] * (dnm2 / z[j4-2])
+		dnm1 = z[j4p2+2] * (dnm2 / z[j4-2])
 	}
 	dmin = math.Min(dmin, dnm1)
 	dmin1 = dmin
@@ -105,7 +105,7 @@ func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int, dmin, dmin1, 
 		dn = dnm1 * tmp
 	} else {
 		z[j4] = z[j4p2+2] * (z[j4p2] / z[j4-2])
-		dn = z[j4p2] * (dnm2 / z[j4-2])
+		dn = z[j4p2+2] * (dnm1 / z[j4-2])
 	}
 	dmin = math.Min(dmin, dn)
 	z[j4+2] = dn

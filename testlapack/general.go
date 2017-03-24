@@ -20,11 +20,11 @@ import (
 const (
 	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
 	dlamchE = 1.0 / (1 << 53)
-	dlamchP = 2 * dlamchE
 	dlamchB = 2
+	dlamchP = dlamchB * dlamchE
+	// dlamchS is the smallest normal number. For IEEE this is 2^{-1022}.
+	dlamchS = 1.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254)
 )
-
-var dlamchS = math.Nextafter((4 / math.MaxFloat64), 0)
 
 func max(a, b int) int {
 	if a > b {

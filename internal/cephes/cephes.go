@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cephes implements functions originally in the Netlib code by Stephen Mosher
+// Package cephes implements functions originally in the Netlib code by Stephen Mosher.
 package cephes
+
+import "math"
 
 /*
 Additional copyright information:
@@ -15,11 +17,13 @@ https://lists.debian.org/debian-legal/2004/12/msg00295.html
 */
 
 var (
-	badParamOutOfBounds = "cephes: parameter out of bounds"
+	badParamOutOfBounds         = "cephes: parameter out of bounds"
+	badParamFunctionSingularity = "cephes: function singularity"
 )
 
 const (
-	machEp = 1.11022302462515654042e-16 // 2^-53
-	maxLog = 7.09782712893383996732e2   // log(2^127)
-	minLog = -7.451332191019412076235e2 // log(2^-128)
+	machEp  = 1.0 / (1 << 53)
+	maxLog  = 1024 * math.Ln2
+	minLog  = -1075 * math.Ln2
+	maxIter = 2000
 )

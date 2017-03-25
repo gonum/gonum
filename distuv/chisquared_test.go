@@ -31,6 +31,7 @@ func TestChiSquaredCDF(t *testing.T) {
 	for _, test := range []struct {
 		x, k, want float64
 	}{
+		// Values calculated with scipy.stats.chi2.cdf
 		{0, 1, 0},
 		{0.01, 5, 5.3002700426865167e-07},
 		{0.05, 3, 0.002929332764619924},

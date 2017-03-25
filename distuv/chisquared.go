@@ -7,6 +7,8 @@ package distuv
 import (
 	"math"
 	"math/rand"
+
+	"github.com/gonum/mathext"
 )
 
 // ChiSquared implements the χ² distribution, a one parameter distribution
@@ -23,6 +25,11 @@ type ChiSquared struct {
 	K float64
 
 	Src *rand.Rand
+}
+
+// CDF computes the value of the cumulative density function at x.
+func (c ChiSquared) CDF(x float64) float64 {
+	return mathext.GammaInc(c.K/2, x/2)
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.

@@ -27,6 +27,29 @@ func TestChiSquaredProb(t *testing.T) {
 	}
 }
 
+func TestChiSquaredCDF(t *testing.T) {
+	for _, test := range []struct {
+		x, k, want float64
+	}{
+		// Values calculated with scipy.stats.chi2.cdf
+		{0, 1, 0},
+		{0.01, 5, 5.3002700426865167e-07},
+		{0.05, 3, 0.002929332764619924},
+		{0.5, 2, 0.22119921692859512},
+		{0.95, 3, 0.1866520918701263},
+		{0.99, 5, 0.036631697220869196},
+		{1, 1, 0.68268949213708596},
+		{1.5, 4, 0.17335853270322427},
+		{10, 10, 0.55950671493478743},
+		{25, 15, 0.95005656637357172},
+	} {
+		cdf := ChiSquared{test.k, nil}.CDF(test.x)
+		if !floats.EqualWithinAbsOrRel(cdf, test.want, 1e-10, 1e-10) {
+			t.Errorf("CDF mismatch, x = %v, K = %v. Got %v, want %v", test.x, test.k, cdf, test.want)
+		}
+	}
+}
+
 func TestChiSquared(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []ChiSquared{

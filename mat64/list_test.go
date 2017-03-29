@@ -91,13 +91,15 @@ func sameAnswerFloat(a, b interface{}) bool {
 	return a.(float64) == b.(float64)
 }
 
-// sameAnswerFloatApprox returns whether the two inputs are both NaN or within tol
-// of each other.
-func sameAnswerFloatApprox(a, b interface{}) bool {
-	if math.IsNaN(a.(float64)) {
-		return math.IsNaN(b.(float64))
+// sameAnswerFloatApproxTol returns a function that determines whether its two
+// inputs are both NaN or within tol of each other.
+func sameAnswerFloatApproxTol(tol float64) func(a, b interface{}) bool {
+	return func(a, b interface{}) bool {
+		if math.IsNaN(a.(float64)) {
+			return math.IsNaN(b.(float64))
+		}
+		return floats.EqualWithinAbsOrRel(a.(float64), b.(float64), tol, tol)
 	}
-	return floats.EqualWithinAbsOrRel(a.(float64), b.(float64), 1e-12, 1e-12)
 }
 
 func sameAnswerF64SliceOfSlice(a, b interface{}) bool {

@@ -275,7 +275,7 @@ func TestCond(t *testing.T) {
 		denseComparison := func(a *Dense) interface{} {
 			return Cond(a, test.norm)
 		}
-		testOneInputFunc(t, test.name, f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+		testOneInputFunc(t, test.name, f, denseComparison, sameAnswerFloatApproxTol(1e-12), isAnyType, isAnySize)
 	}
 }
 
@@ -325,7 +325,7 @@ func TestDet(t *testing.T) {
 	denseComparison := func(a *Dense) interface{} {
 		return Det(a)
 	}
-	testOneInputFunc(t, "Det", f, denseComparison, sameAnswerFloatApprox, isAnyType, isSquare)
+	testOneInputFunc(t, "Det", f, denseComparison, sameAnswerFloatApproxTol(1e-12), isAnyType, isSquare)
 
 	// Check that it gives approximately the same answer as Cholesky
 	// Ensure the input matrices are wider than tall so they are full rank
@@ -355,7 +355,7 @@ func TestDet(t *testing.T) {
 		}
 		return chol.Det()
 	}
-	testOneInputFunc(t, "DetVsChol", f, denseComparison, sameAnswerFloatApprox, isAnyType, isWide)
+	testOneInputFunc(t, "DetVsChol", f, denseComparison, sameAnswerFloatApproxTol(1e-10), isAnyType, isWide)
 }
 
 func TestDot(t *testing.T) {
@@ -376,7 +376,7 @@ func TestDot(t *testing.T) {
 		}
 		return sum
 	}
-	testTwoInputFunc(t, "Dot", f, denseComparison, sameAnswerFloatApprox, legalTypesVecVec, legalSizeSameVec)
+	testTwoInputFunc(t, "Dot", f, denseComparison, sameAnswerFloatApproxTol(1e-12), legalTypesVecVec, legalSizeSameVec)
 }
 
 func TestEqual(t *testing.T) {
@@ -463,7 +463,7 @@ func TestNorm(t *testing.T) {
 		denseComparison := func(a *Dense) interface{} {
 			return Norm(a, test.norm)
 		}
-		testOneInputFunc(t, test.name, f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+		testOneInputFunc(t, test.name, f, denseComparison, sameAnswerFloatApproxTol(1e-12), isAnyType, isAnySize)
 	}
 }
 
@@ -496,7 +496,7 @@ func TestSum(t *testing.T) {
 	denseComparison := func(a *Dense) interface{} {
 		return Sum(a)
 	}
-	testOneInputFunc(t, "Sum", f, denseComparison, sameAnswerFloatApprox, isAnyType, isAnySize)
+	testOneInputFunc(t, "Sum", f, denseComparison, sameAnswerFloatApproxTol(1e-12), isAnyType, isAnySize)
 }
 
 func TestTrace(t *testing.T) {

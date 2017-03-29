@@ -17,8 +17,14 @@ import (
 	"github.com/gonum/lapack"
 )
 
-// dlamchE is the machine epsilon. For IEEE this is 2^-53.
-const dlamchE = 1.0 / (1 << 53)
+const (
+	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
+	dlamchE = 1.0 / (1 << 53)
+	dlamchB = 2
+	dlamchP = dlamchB * dlamchE
+	// dlamchS is the smallest normal number. For IEEE this is 2^{-1022}.
+	dlamchS = 1.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254)
+)
 
 func max(a, b int) int {
 	if a > b {

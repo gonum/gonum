@@ -283,6 +283,362 @@ func Dlagge(m, n, kl, ku int, d []float64, a []float64, lda int, rnd *rand.Rand,
 	// superdiagonals to ku.
 }
 
+// dlarnv fills dst with random numbers from a uniform or normal distribution
+// specified by dist:
+//  dist=1: uniform(0,1),
+//  dist=2: uniform(-1,1),
+//  dist=3: normal(0,1).
+// For other values of dist dlarnv will panic.
+func dlarnv(dst []float64, dist int, rnd *rand.Rand) {
+	switch dist {
+	default:
+		panic("testlapack: invalid dist")
+	case 1:
+		for i := range dst {
+			dst[i] = rnd.Float64()
+		}
+	case 2:
+		for i := range dst {
+			dst[i] = 2*rnd.Float64() - 1
+		}
+	case 3:
+		for i := range dst {
+			dst[i] = rnd.NormFloat64()
+		}
+	}
+}
+
+// dlattr generates an n×n triangular test matrix A with its properties uniquely
+// determined by imat and uplo, and returns whether A has unit diagonal. If diag
+// is blas.Unit, the diagonal elements are set so that A[k,k]=k.
+//
+// trans specifies whether the matrix A or its transpose will be used.
+//
+// If imat is greater than 10, dlattr also generates the right hand side of the
+// linear system A*x=b, or A^T*x=b. Valid values of imat are 7, and all between 11
+// and 19, inclusive.
+//
+// b mush have length n, and work must have length 3*n, and dlattr will panic
+// otherwise.
+func dlattr(imat int, uplo blas.Uplo, trans blas.Transpose, n int, a []float64, lda int, b, work []float64, rnd *rand.Rand) (diag blas.Diag) {
+	checkMatrix(n, n, a, lda)
+	if len(b) != n {
+		panic("testlapack: bad length of b")
+	}
+	if len(work) < 3*n {
+		panic("testlapack: insufficient length of work")
+	}
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic("testlapack: bad uplo")
+	}
+	if trans != blas.Trans && trans != blas.NoTrans {
+		panic("testlapack: bad trans")
+	}
+
+	if n == 0 {
+		return blas.NonUnit
+	}
+
+	ulp := dlamchE * dlamchB
+	smlnum := dlamchS
+	bignum := (1 - ulp) / smlnum
+
+	bi := blas64.Implementation()
+
+	switch imat {
+	default:
+		// TODO(vladimir-ch): Implement the remaining cases.
+		panic("testlapack: invalid or unimplemented imat")
+	case 7:
+		// Identity matrix. The diagonal is set to NaN.
+		diag = blas.Unit
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				a[i*lda+i] = math.NaN()
+				for j := i + 1; j < n; j++ {
+					a[i*lda+j] = 0
+				}
+			}
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				for j := 0; j < i; j++ {
+					a[i*lda+j] = 0
+				}
+				a[i*lda+i] = math.NaN()
+			}
+		}
+	case 11:
+		// Generate a triangular matrix with elements between -1 and 1,
+		// give the diagonal norm 2 to make it well-conditioned, and
+		// make the right hand side large so that it requires scaling.
+		diag = blas.NonUnit
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n-1; i++ {
+				dlarnv(a[i*lda+i:i*lda+n], 2, rnd)
+			}
+		case blas.Lower:
+			for i := 1; i < n; i++ {
+				dlarnv(a[i*lda:i*lda+i+1], 2, rnd)
+			}
+		}
+		for i := 0; i < n; i++ {
+			a[i*lda+i] = math.Copysign(2, a[i*lda+i])
+		}
+		// Set the right hand side so that the largest value is bignum.
+		dlarnv(b, 2, rnd)
+		imax := bi.Idamax(n, b, 1)
+		bscal := bignum / math.Max(1, b[imax])
+		bi.Dscal(n, bscal, b, 1)
+	case 12:
+		// Make the first diagonal element in the solve small to cause
+		// immediate overflow when dividing by T[j,j]. The off-diagonal
+		// elements are small (cnorm[j] < 1).
+		diag = blas.NonUnit
+		tscal := 1 / math.Max(1, float64(n-1))
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda+i:i*lda+n], 2, rnd)
+				bi.Dscal(n-i-1, tscal, a[i*lda+i+1:], 1)
+				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
+			}
+			a[(n-1)*lda+n-1] *= smlnum
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda:i*lda+i+1], 2, rnd)
+				bi.Dscal(i, tscal, a[i*lda:], 1)
+				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
+			}
+			a[0] *= smlnum
+		}
+		dlarnv(b, 2, rnd)
+	case 13:
+		// Make the first diagonal element in the solve small to cause
+		// immediate overflow when dividing by T[j,j]. The off-diagonal
+		// elements are O(1) (cnorm[j] > 1).
+		diag = blas.NonUnit
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda+i:i*lda+n], 2, rnd)
+				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
+			}
+			a[(n-1)*lda+n-1] *= smlnum
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda:i*lda+i+1], 2, rnd)
+				a[i*lda+i] = math.Copysign(1, a[i*lda+i])
+			}
+			a[0] *= smlnum
+		}
+		dlarnv(b, 2, rnd)
+	case 14:
+		// T is diagonal with small numbers on the diagonal to
+		// make the growth factor underflow, but a small right hand side
+		// chosen so that the solution does not overflow.
+		diag = blas.NonUnit
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				for j := i + 1; j < n; j++ {
+					a[i*lda+j] = 0
+				}
+				if (n-1-i)&0x2 == 0 {
+					a[i*lda+i] = smlnum
+				} else {
+					a[i*lda+i] = 1
+				}
+			}
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				for j := 0; j < i; j++ {
+					a[i*lda+j] = 0
+				}
+				if i&0x2 == 0 {
+					a[i*lda+i] = smlnum
+				} else {
+					a[i*lda+i] = 1
+				}
+			}
+		}
+		// Set the right hand side alternately zero and small.
+		switch uplo {
+		case blas.Upper:
+			b[0] = 0
+			for i := n - 1; i > 0; i -= 2 {
+				b[i] = 0
+				b[i-1] = smlnum
+			}
+		case blas.Lower:
+			for i := 0; i < n-1; i += 2 {
+				b[i] = 0
+				b[i+1] = smlnum
+			}
+			b[n-1] = 0
+		}
+	case 15:
+		// Make the diagonal elements small to cause gradual overflow
+		// when dividing by T[j,j]. To control the amount of scaling
+		// needed, the matrix is bidiagonal.
+		diag = blas.NonUnit
+		texp := 1 / math.Max(1, float64(n-1))
+		tscal := math.Pow(smlnum, texp)
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				a[i*lda+i] = tscal
+				if i < n-1 {
+					a[i*lda+i+1] = -1
+				}
+				for j := i + 2; j < n; j++ {
+					a[i*lda+j] = 0
+				}
+			}
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				for j := 0; j < i-1; j++ {
+					a[i*lda+j] = 0
+				}
+				if i > 0 {
+					a[i*lda+i-1] = -1
+				}
+				a[i*lda+i] = tscal
+			}
+		}
+		dlarnv(b, 2, rnd)
+	case 16:
+		// One zero diagonal element.
+		diag = blas.NonUnit
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda+i:i*lda+n], 2, rnd)
+				a[i*lda+i] = math.Copysign(2, a[i*lda+i])
+			}
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda:i*lda+i+1], 2, rnd)
+				a[i*lda+i] = math.Copysign(2, a[i*lda+i])
+			}
+		}
+		iy := n / 2
+		a[iy*lda+iy] = 0
+		dlarnv(b, 2, rnd)
+		bi.Dscal(n, 2, b, 1)
+	case 17:
+		// Make the offdiagonal elements large to cause overflow when
+		// adding a column of T. In the non-transposed case, the matrix
+		// is constructed to cause overflow when adding a column in
+		// every other step.
+		diag = blas.NonUnit
+		tscal := (1 - ulp) / (dlamchS / ulp)
+		texp := 1.0
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				for j := i; j < n; j++ {
+					a[i*lda+j] = 0
+				}
+			}
+			for j := n - 1; j >= 1; j -= 2 {
+				a[j] = -tscal / float64(n+1)
+				a[j*lda+j] = 1
+				b[j] = texp * (1 - ulp)
+				a[j-1] = -tscal / float64(n+1) / float64(n+2)
+				a[(j-1)*lda+j-1] = 1
+				b[j-1] = texp * float64(n*n+n-1)
+				texp *= 2
+			}
+			b[0] = float64(n+1) / float64(n+2) * tscal
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				for j := 0; j <= i; j++ {
+					a[i*lda+j] = 0
+				}
+			}
+			for j := 0; j < n-1; j += 2 {
+				a[(n-1)*lda+j] = -tscal / float64(n+1)
+				a[j*lda+j] = 1
+				b[j] = texp * (1 - ulp)
+				a[(n-1)*lda+j+1] = -tscal / float64(n+1) / float64(n+2)
+				a[(j+1)*lda+j+1] = 1
+				b[j+1] = texp * float64(n*n+n-1)
+				texp *= 2
+			}
+			b[n-1] = float64(n+1) / float64(n+2) * tscal
+		}
+	case 18:
+		// Generate a unit triangular matrix with elements between -1
+		// and 1, and make the right hand side large so that it requires
+		// scaling. The diagonal is set to NaN.
+		diag = blas.Unit
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				a[i*lda+i] = math.NaN()
+				dlarnv(a[i*lda+i+1:i*lda+n], 2, rnd)
+			}
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda:i*lda+i], 2, rnd)
+				a[i*lda+i] = math.NaN()
+			}
+		}
+		// Set the right hand side so that the largest value is bignum.
+		dlarnv(b, 2, rnd)
+		iy := bi.Idamax(n, b, 1)
+		bnorm := math.Abs(b[iy])
+		bscal := bignum / math.Max(1, bnorm)
+		bi.Dscal(n, bscal, b, 1)
+	case 19:
+		// Generate a triangular matrix with elements between
+		// bignum/(n-1) and bignum so that at least one of the column
+		// norms will exceed bignum.
+		// Dlatrs cannot handle this case for (typically) n>5.
+		diag = blas.NonUnit
+		tleft := bignum / math.Max(1, float64(n-1))
+		tscal := bignum * (float64(n-1) / math.Max(1, float64(n)))
+		switch uplo {
+		case blas.Upper:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda+i:i*lda+n], 2, rnd)
+				for j := i; j < n; j++ {
+					aij := a[i*lda+j]
+					a[i*lda+j] = math.Copysign(tleft, aij) + tscal*aij
+				}
+			}
+		case blas.Lower:
+			for i := 0; i < n; i++ {
+				dlarnv(a[i*lda:i*lda+i+1], 2, rnd)
+				for j := 0; j <= i; j++ {
+					aij := a[i*lda+j]
+					a[i*lda+j] = math.Copysign(tleft, aij) + tscal*aij
+				}
+			}
+		}
+		dlarnv(b, 2, rnd)
+		bi.Dscal(n, 2, b, 1)
+	}
+
+	// Flip the matrix if the transpose will be used.
+	if trans == blas.Trans {
+		switch uplo {
+		case blas.Upper:
+			for j := 0; j < n/2; j++ {
+				bi.Dswap(n-2*j-1, a[j*lda+j:], 1, a[(j+1)*lda+n-j-1:], -lda)
+			}
+		case blas.Lower:
+			for j := 0; j < n/2; j++ {
+				bi.Dswap(n-2*j-1, a[j*lda+j:], lda, a[(n-j-1)*lda+j+1:], -1)
+			}
+		}
+	}
+
+	return diag
+}
+
 func checkMatrix(m, n int, a []float64, lda int) {
 	if m < 0 {
 		panic("testlapack: m < 0")

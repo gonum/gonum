@@ -292,6 +292,10 @@ func TestDlatrd(t *testing.T) {
 	testlapack.DlatrdTest(t, impl)
 }
 
+func TestDlatrs(t *testing.T) {
+	testlapack.DlatrsTest(t, impl)
+}
+
 func TestDorg2r(t *testing.T) {
 	testlapack.Dorg2rTest(t, impl)
 }

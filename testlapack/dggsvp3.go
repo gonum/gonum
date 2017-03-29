@@ -23,6 +23,7 @@ func Dggsvp3Test(t *testing.T, impl Dggsvp3er) {
 	for cas, test := range []struct {
 		m, p, n, lda, ldb, ldu, ldv, ldq int
 	}{
+		{m: 3, p: 3, n: 5, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},
 		{m: 5, p: 5, n: 5, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},
 		{m: 5, p: 5, n: 5, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},
 		{m: 5, p: 5, n: 10, lda: 0, ldb: 0, ldu: 0, ldv: 0, ldq: 0},

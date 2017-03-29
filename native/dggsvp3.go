@@ -260,8 +260,8 @@ func (impl Implementation) Dggsvp3(jobU, jobV, jobQ lapack.GSVDJob, m, p, n int,
 		}
 
 		// Clean up A.
-		for i := k + 1; i < k+l; i++ {
-			r := a[i*lda+n-l : i*lda+i-k+n-l]
+		for i := k + 1; i < m; i++ {
+			r := a[i*lda+n-l : i*lda+min(n-l+i-k, n)]
 			for j := range r {
 				r[j] = 0
 			}

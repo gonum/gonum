@@ -25,6 +25,7 @@ func DormlqTest(t *testing.T, impl Dormlqer) {
 				for _, test := range []struct {
 					common, adim, cdim, lda, ldc int
 				}{
+					{0, 0, 0, 0, 0},
 					{6, 7, 8, 0, 0},
 					{6, 8, 7, 0, 0},
 					{7, 6, 8, 0, 0},
@@ -100,7 +101,7 @@ func DormlqTest(t *testing.T, impl Dormlqer) {
 					} else {
 						nw = mc
 					}
-					work = make([]float64, nw)
+					work = make([]float64, max(1, nw))
 					impl.Dorml2(side, trans, mc, nc, k, a, lda, tau, ans, ldc, work)
 
 					var lwork int

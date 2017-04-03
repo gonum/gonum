@@ -9,8 +9,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/stat"
-	"github.com/gonum/stat/distuv"
+	"github.com/gonum/gonum/stat"
+	"github.com/gonum/gonum/stat/distuv"
 )
 
 type lhDist interface {

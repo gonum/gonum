@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 var prob = flag.Bool("prob", false, "enables probabilistic testing of the random weighted sampler")

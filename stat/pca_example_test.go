@@ -7,8 +7,8 @@ package stat_test
 import (
 	"fmt"
 
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat"
+	"github.com/gonum/gonum/matrix/mat64"
+	"github.com/gonum/gonum/stat"
 )
 
 func ExamplePrincipalComponents() {

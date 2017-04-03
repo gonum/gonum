@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 type Dorgl2er interface {

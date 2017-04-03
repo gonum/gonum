@@ -9,8 +9,8 @@ import (
 	"math"
 	"sort"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/simple"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/simple"
 )
 
 // UndirectedWeighter is an undirected graph that returns edge weights.

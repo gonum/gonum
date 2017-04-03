@@ -6,9 +6,9 @@
 package conv
 
 import (
-	"github.com/gonum/matrix"
-	"github.com/gonum/matrix/cmat128"
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/matrix"
+	"github.com/gonum/gonum/matrix/cmat128"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 // Complex is a complex matrix constructed from two real matrices.

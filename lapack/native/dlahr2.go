@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Dlahr2 reduces the first nb columns of a real general n×(n-k+1) matrix A so

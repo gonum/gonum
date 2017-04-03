@@ -7,7 +7,7 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Dlarfg generates an elementary reflector for a Householder matrix. It creates

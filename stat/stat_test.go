@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 func ExampleCircularMean() {

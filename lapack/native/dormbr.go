@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dormbr applies a multiplicative update to the matrix C based on a

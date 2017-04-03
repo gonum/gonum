@@ -8,9 +8,9 @@ package cgo
 import (
 	"math"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
-	"github.com/gonum/lapack/cgo/lapacke"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/lapack"
+	"github.com/gonum/gonum/lapack/cgo/lapacke"
 )
 
 // Copied from lapack/native. Keep in sync.

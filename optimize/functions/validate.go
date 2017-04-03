@@ -14,8 +14,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/diff/fd"
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/diff/fd"
+	"github.com/gonum/gonum/floats"
 )
 
 // function represents an objective function.

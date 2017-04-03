@@ -7,7 +7,7 @@ package native
 import (
 	"testing"
 
-	"github.com/gonum/blas/testblas"
+	"github.com/gonum/gonum/blas/testblas"
 )
 
 func TestDgemv(t *testing.T) {

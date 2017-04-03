@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Dgetrf computes the LU decomposition of the m×n matrix A.

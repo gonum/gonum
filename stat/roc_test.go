@@ -7,7 +7,7 @@ package stat
 import (
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 // Test cases where calculated manually.

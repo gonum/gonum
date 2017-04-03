@@ -15,7 +15,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/stat/distuv"
+	"github.com/gonum/gonum/stat/distuv"
 )
 
 var (

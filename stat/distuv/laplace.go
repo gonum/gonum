@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"sort"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/stat"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/stat"
 )
 
 // Laplace represents the Laplace distribution (https://en.wikipedia.org/wiki/Laplace_distribution).

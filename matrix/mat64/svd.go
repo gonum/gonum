@@ -6,10 +6,10 @@
 package mat64
 
 import (
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack"
-	"github.com/gonum/lapack/lapack64"
-	"github.com/gonum/matrix"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/lapack"
+	"github.com/gonum/gonum/lapack/lapack64"
+	"github.com/gonum/gonum/matrix"
 )
 
 // SVD is a type for creating and using the Singular Value Decomposition (SVD)

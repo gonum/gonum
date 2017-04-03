@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "github.com/gonum/gonum/blas"
 
 // Dgeqr2 computes a QR factorization of the m×n matrix A.
 //

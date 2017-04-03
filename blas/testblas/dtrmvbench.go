@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
+	"github.com/gonum/gonum/blas"
 )
 
 func DtrmvBenchmark(b *testing.B, dtrmv Dtrmver, n, lda, incX int, ul blas.Uplo, tA blas.Transpose, d blas.Diag) {

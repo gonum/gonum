@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gonum/optimize/functions"
+	"github.com/gonum/gonum/optimize/functions"
 )
 
 func TestMoreThuente(t *testing.T) {

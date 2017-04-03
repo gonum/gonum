@@ -11,10 +11,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/matrix"
 )
 
 // legalSizeSameRectangular returns whether the two matrices have the same rectangular shape.

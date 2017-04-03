@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/tools/container/intsets"
 
-	"github.com/gonum/graph"
+	"github.com/gonum/gonum/graph"
 )
 
 // UndirectedGraph implements a generalized undirected graph.

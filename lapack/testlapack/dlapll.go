@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/lapack"
 )
 
 type Dlapller interface {

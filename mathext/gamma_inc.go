@@ -5,7 +5,7 @@
 package mathext
 
 import (
-	"github.com/gonum/mathext/internal/cephes"
+	"github.com/gonum/gonum/mathext/internal/cephes"
 )
 
 // GammaInc computes the incomplete Gamma integral.

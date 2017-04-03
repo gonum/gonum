@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 func TestDirichlet(t *testing.T) {

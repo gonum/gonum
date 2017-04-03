@@ -4,8 +4,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/floats"
 )
 
 func TestFlattenBanded(t *testing.T) {

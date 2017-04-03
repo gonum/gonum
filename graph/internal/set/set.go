@@ -5,7 +5,7 @@
 // Package set provides integer and graph.Node sets.
 package set
 
-import "github.com/gonum/graph"
+import "github.com/gonum/gonum/graph"
 
 // Ints is a set of integer identifiers.
 type Ints map[int]struct{}

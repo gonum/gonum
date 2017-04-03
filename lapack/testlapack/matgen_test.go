@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 func TestDlagsy(t *testing.T) {

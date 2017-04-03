@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dlasr applies a sequence of plane rotations to the m×n matrix A. This series

@@ -8,7 +8,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/mathext"
+	"github.com/gonum/gonum/mathext"
 )
 
 // Beta implements the Beta distribution, a two-parameter continuous distribution

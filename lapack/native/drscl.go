@@ -7,7 +7,7 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Drscl multiplies the vector x by 1/a being careful to avoid overflow or

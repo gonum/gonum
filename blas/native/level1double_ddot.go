@@ -5,7 +5,7 @@
 package native
 
 import (
-	"github.com/gonum/internal/asm/f64"
+	"github.com/gonum/gonum/internal/asm/f64"
 )
 
 // Ddot computes the dot product of the two vectors

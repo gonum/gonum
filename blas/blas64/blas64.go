@@ -6,8 +6,8 @@
 package blas64
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/native"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/native"
 )
 
 var blas64 blas.Float64 = native.Implementation{}

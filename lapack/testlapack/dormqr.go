@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/floats"
 )
 
 type Dormqrer interface {

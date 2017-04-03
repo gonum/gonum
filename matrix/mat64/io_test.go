@@ -12,7 +12,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 var (

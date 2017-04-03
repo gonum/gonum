@@ -16,7 +16,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/gonum/graph/formats/dot/internal/token"
+	"github.com/gonum/gonum/graph/formats/dot/internal/token"
 )
 
 type ErrorSymbol interface {

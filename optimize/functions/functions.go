@@ -7,8 +7,8 @@ package functions
 import (
 	"math"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 // Beale implements the Beale's function.

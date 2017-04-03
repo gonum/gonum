@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
+	"github.com/gonum/gonum/blas"
 )
 
 func DgemvBenchmark(b *testing.B, blasser Dgemver, tA blas.Transpose, m, n, incX, incY int) {

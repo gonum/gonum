@@ -8,8 +8,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/mathext"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/mathext"
 )
 
 var betaTests = []struct {

@@ -8,10 +8,10 @@ package mat64
 import (
 	"math"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack/lapack64"
-	"github.com/gonum/matrix"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/lapack/lapack64"
+	"github.com/gonum/gonum/matrix"
 )
 
 const (

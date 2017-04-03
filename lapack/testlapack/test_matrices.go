@@ -8,7 +8,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // A123 is the non-symmetric singular matrix

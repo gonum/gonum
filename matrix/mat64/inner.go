@@ -5,9 +5,9 @@
 package mat64
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/internal/asm/f64"
-	"github.com/gonum/matrix"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/internal/asm/f64"
+	"github.com/gonum/gonum/matrix"
 )
 
 // Inner computes the generalized inner product

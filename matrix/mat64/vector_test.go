@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/matrix"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/matrix"
 )
 
 func TestNewVector(t *testing.T) {

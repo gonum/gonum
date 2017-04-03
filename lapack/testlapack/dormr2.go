@@ -8,9 +8,9 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/floats"
 )
 
 type Dormr2er interface {

@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 var printerHeadings = [...]string{

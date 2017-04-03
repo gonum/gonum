@@ -5,8 +5,8 @@
 package path
 
 import (
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/set"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/set"
 )
 
 // Dominators returns all dominators for all nodes in g. It does not

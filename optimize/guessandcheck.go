@@ -8,7 +8,7 @@ import (
 	"math"
 	"sync"
 
-	"github.com/gonum/stat/distmv"
+	"github.com/gonum/gonum/stat/distmv"
 )
 
 // GuessAndCheck is a global optimizer that evaluates the function at random

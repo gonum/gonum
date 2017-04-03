@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/topo"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/topo"
 )
 
 func main() {

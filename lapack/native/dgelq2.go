@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "github.com/gonum/gonum/blas"
 
 // Dgelq2 computes the LQ factorization of the m×n matrix A.
 //

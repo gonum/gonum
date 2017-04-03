@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Dtrtrs solves a triangular system of the form A * X = B or A^T * X = B. Dtrtrs

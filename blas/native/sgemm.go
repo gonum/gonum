@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/internal/asm/f32"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/internal/asm/f32"
 )
 
 // Sgemm computes

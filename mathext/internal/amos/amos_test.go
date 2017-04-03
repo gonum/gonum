@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 type input struct {

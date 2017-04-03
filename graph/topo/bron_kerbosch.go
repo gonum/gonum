@@ -5,8 +5,8 @@
 package topo
 
 import (
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/set"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/set"
 )
 
 // VertexOrdering returns the vertex ordering and the k-cores of

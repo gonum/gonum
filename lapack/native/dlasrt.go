@@ -7,7 +7,7 @@ package native
 import (
 	"sort"
 
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dlasrt sorts the numbers in the input slice d. If s == lapack.SortIncreasing,

@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Dorg2r generates an m×n matrix Q with orthonormal columns defined by the

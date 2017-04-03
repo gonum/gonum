@@ -6,8 +6,8 @@
 package cblas128
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/cgo"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/cgo"
 )
 
 // TODO(kortschak): Change this and the comment below to native.Implementation

@@ -10,9 +10,9 @@ import (
 	"math/rand"
 	"sort"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/ordered"
-	"github.com/gonum/graph/simple"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/ordered"
+	"github.com/gonum/gonum/graph/simple"
 )
 
 // UndirectedMutator is an undirected graph builder that can remove edges.

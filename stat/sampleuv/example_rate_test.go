@@ -4,7 +4,7 @@
 
 package sampleuv
 
-import "github.com/gonum/stat/distuv"
+import "github.com/gonum/gonum/stat/distuv"
 
 func max(a, b int) int {
 	if a < b {

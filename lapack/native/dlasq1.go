@@ -7,8 +7,8 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dlasq1 computes the singular values of an n×n bidiagonal matrix with diagonal

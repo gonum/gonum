@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/graphs/gen"
-	"github.com/gonum/graph/simple"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/graphs/gen"
+	"github.com/gonum/gonum/graph/simple"
 )
 
 // set is an integer set.

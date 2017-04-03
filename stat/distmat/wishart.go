@@ -9,10 +9,10 @@ import (
 	"math/rand"
 	"sync"
 
-	"github.com/gonum/mathext"
-	"github.com/gonum/matrix"
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat/distuv"
+	"github.com/gonum/gonum/mathext"
+	"github.com/gonum/gonum/matrix"
+	"github.com/gonum/gonum/matrix/mat64"
+	"github.com/gonum/gonum/stat/distuv"
 )
 
 // Wishart is a distribution over d×d positive symmetric definite matrices. It

@@ -10,8 +10,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/graph/simple"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/graph/simple"
 )
 
 var pageRankTests = []struct {

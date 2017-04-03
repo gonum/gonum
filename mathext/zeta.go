@@ -4,7 +4,7 @@
 
 package mathext
 
-import "github.com/gonum/mathext/internal/cephes"
+import "github.com/gonum/gonum/mathext/internal/cephes"
 
 // Zeta computes the Riemann zeta function of two arguments.
 //  Zeta(x,q) = \sum_{k=0}^{\infty} (k+q)^{-x}

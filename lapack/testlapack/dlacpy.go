@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
+	"github.com/gonum/gonum/blas"
 )
 
 type Dlacpyer interface {

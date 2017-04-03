@@ -7,9 +7,9 @@ package stat_test
 import (
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/matrix/mat64"
+	"github.com/gonum/gonum/stat"
 )
 
 func TestCanonicalCorrelations(t *testing.T) {

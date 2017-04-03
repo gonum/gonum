@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Dgetri computes the inverse of the matrix A using the LU factorization computed

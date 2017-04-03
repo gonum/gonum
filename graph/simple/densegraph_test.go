@@ -9,8 +9,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/ordered"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/ordered"
 )
 
 var (

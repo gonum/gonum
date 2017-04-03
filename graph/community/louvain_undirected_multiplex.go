@@ -12,8 +12,8 @@ import (
 
 	"golang.org/x/tools/container/intsets"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/ordered"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/ordered"
 )
 
 // UndirectedMultiplex is an undirected multiplex graph.

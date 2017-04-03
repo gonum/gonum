@@ -16,8 +16,8 @@ import (
 	"bytes"
 	"fmt"
 
-	parseError "github.com/gonum/graph/formats/dot/internal/errors"
-	"github.com/gonum/graph/formats/dot/internal/token"
+	parseError "github.com/gonum/gonum/graph/formats/dot/internal/errors"
+	"github.com/gonum/gonum/graph/formats/dot/internal/token"
 )
 
 const (

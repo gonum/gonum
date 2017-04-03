@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dormlq multiplies the matrix C by the orthogonal matrix Q defined by the

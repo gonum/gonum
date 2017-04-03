@@ -5,7 +5,7 @@
 // Package gen provides random graph generation functions.
 package gen
 
-import "github.com/gonum/graph"
+import "github.com/gonum/gonum/graph"
 
 // GraphBuilder is a graph that can have nodes and edges added.
 type GraphBuilder interface {

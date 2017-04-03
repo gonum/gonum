@@ -7,8 +7,8 @@
 package mat64
 
 import (
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/blas/cgo"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas/cgo"
 )
 
 func init() {

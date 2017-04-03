@@ -8,8 +8,8 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/stat"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/stat"
 )
 
 // Exponential represents the exponential distribution (https://en.wikipedia.org/wiki/Exponential_distribution).

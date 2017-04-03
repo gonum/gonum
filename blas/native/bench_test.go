@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/testblas"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/testblas"
 )
 
 const (

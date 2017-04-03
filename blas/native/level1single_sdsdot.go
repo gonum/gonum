@@ -7,7 +7,7 @@
 package native
 
 import (
-	"github.com/gonum/internal/asm/f32"
+	"github.com/gonum/gonum/internal/asm/f32"
 )
 
 // Sdsdot computes the dot product of the two vectors plus a constant

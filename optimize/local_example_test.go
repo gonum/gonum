@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gonum/optimize"
-	"github.com/gonum/optimize/functions"
+	"github.com/gonum/gonum/optimize"
+	"github.com/gonum/gonum/optimize/functions"
 )
 
 func ExampleLocal() {

@@ -10,7 +10,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 func printDlasq2FortranInput(z []float64, n int) {

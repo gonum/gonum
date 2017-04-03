@@ -20,10 +20,10 @@
 package lapack64
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack"
-	"github.com/gonum/lapack/native"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/lapack"
+	"github.com/gonum/gonum/lapack/native"
 )
 
 var lapack64 lapack.Float64 = native.Implementation{}

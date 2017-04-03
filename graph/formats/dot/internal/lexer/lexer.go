@@ -18,7 +18,7 @@ import (
 	"unicode/utf8"
 
 	// "github.com/gonum/graph/formats/dot/internal/util"
-	"github.com/gonum/graph/formats/dot/internal/token"
+	"github.com/gonum/gonum/graph/formats/dot/internal/token"
 )
 
 const (

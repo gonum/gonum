@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 type dlasq4teststruct struct {

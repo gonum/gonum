@@ -3,8 +3,8 @@ package testblas
 import (
 	"testing"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/floats"
 )
 
 type Dsyr2er interface {

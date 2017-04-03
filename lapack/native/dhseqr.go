@@ -7,8 +7,8 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dhseqr computes the eigenvalues of an n×n Hessenberg matrix H and,

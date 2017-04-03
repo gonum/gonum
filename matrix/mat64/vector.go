@@ -5,10 +5,10 @@
 package mat64
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/internal/asm/f64"
-	"github.com/gonum/matrix"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/internal/asm/f64"
+	"github.com/gonum/gonum/matrix"
 )
 
 var (

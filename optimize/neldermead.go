@@ -7,7 +7,7 @@ package optimize
 import (
 	"sort"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 // nmIterType is a Nelder-Mead evaluation kind

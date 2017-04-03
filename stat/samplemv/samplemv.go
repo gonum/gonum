@@ -15,8 +15,8 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat/distmv"
+	"github.com/gonum/gonum/matrix/mat64"
+	"github.com/gonum/gonum/stat/distmv"
 )
 
 var (

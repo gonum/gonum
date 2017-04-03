@@ -7,9 +7,9 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dgecon estimates the reciprocal of the condition number of the n×n matrix A

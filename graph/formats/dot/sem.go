@@ -7,7 +7,7 @@ package dot
 import (
 	"fmt"
 
-	"github.com/gonum/graph/formats/dot/ast"
+	"github.com/gonum/gonum/graph/formats/dot/ast"
 )
 
 // check validates the semantics of the given DOT file.

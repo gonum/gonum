@@ -10,7 +10,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 const defaultGradientAbsTol = 1e-6

@@ -7,10 +7,10 @@
 package native
 
 import (
-	math "github.com/gonum/blas/native/internal/math32"
+	math "github.com/gonum/gonum/blas/native/internal/math32"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/internal/asm/f32"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/internal/asm/f32"
 )
 
 var _ blas.Float32Level1 = Implementation{}

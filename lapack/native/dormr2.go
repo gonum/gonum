@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "github.com/gonum/gonum/blas"
 
 // Dormr2 multiplies a general matrix C by an orthogonal matrix from a RQ factorization
 // determined by Dgerqf.

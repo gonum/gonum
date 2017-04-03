@@ -7,7 +7,7 @@ package native
 import (
 	"testing"
 
-	"github.com/gonum/lapack/testlapack"
+	"github.com/gonum/gonum/lapack/testlapack"
 )
 
 var impl = Implementation{}

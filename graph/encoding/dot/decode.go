@@ -7,9 +7,9 @@ package dot
 import (
 	"fmt"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/formats/dot"
-	"github.com/gonum/graph/formats/dot/ast"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/formats/dot"
+	"github.com/gonum/gonum/graph/formats/dot/ast"
 	"golang.org/x/tools/container/intsets"
 )
 

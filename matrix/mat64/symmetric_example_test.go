@@ -3,7 +3,7 @@ package mat64_test
 import (
 	"fmt"
 
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 func ExampleSymDense_SubsetSym() {

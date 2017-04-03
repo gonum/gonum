@@ -3,7 +3,7 @@ package testblas
 import (
 	"testing"
 
-	"github.com/gonum/blas"
+	"github.com/gonum/gonum/blas"
 )
 
 type Dtxmver interface {

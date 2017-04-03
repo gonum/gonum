@@ -10,9 +10,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/ordered"
-	"github.com/gonum/graph/simple"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/ordered"
+	"github.com/gonum/gonum/graph/simple"
 )
 
 func TestIsPath(t *testing.T) {

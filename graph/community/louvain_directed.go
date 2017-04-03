@@ -11,8 +11,8 @@ import (
 
 	"golang.org/x/tools/container/intsets"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/ordered"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/ordered"
 )
 
 // qDirected returns the modularity Q score of the graph g subdivided into the

@@ -7,7 +7,7 @@ package combin
 import (
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 // intSosMatch returns true if the two slices of slices are equal.

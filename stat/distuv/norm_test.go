@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 // TestNormalProbs tests LogProb, Prob, CumProb, and Quantile

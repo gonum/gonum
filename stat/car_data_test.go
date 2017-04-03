@@ -4,7 +4,7 @@
 
 package stat_test
 
-import "github.com/gonum/matrix/mat64"
+import "github.com/gonum/gonum/matrix/mat64"
 
 // ASA Car Exposition Data of Ramos and Donoho (1983)
 // http://lib.stat.cmu.edu/datasets/cars.desc

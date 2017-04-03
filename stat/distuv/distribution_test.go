@@ -9,9 +9,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/integrate/quad"
-	"github.com/gonum/stat"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/integrate/quad"
+	"github.com/gonum/gonum/stat"
 )
 
 type meaner interface {

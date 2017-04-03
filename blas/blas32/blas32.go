@@ -6,8 +6,8 @@
 package blas32
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/native"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/native"
 )
 
 var blas32 blas.Float32 = native.Implementation{}

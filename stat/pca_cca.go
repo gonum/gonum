@@ -8,9 +8,9 @@ import (
 	"errors"
 	"math"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix"
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/matrix"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 // PC is a type for computing and extracting the principal components of a

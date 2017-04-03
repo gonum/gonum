@@ -8,8 +8,8 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/blas/blas64"
 )
 
 // Dlatm1 computes the entries of dst as specified by mode, cond and rsign.

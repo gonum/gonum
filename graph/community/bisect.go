@@ -10,7 +10,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/graph"
+	"github.com/gonum/gonum/graph"
 )
 
 // Interval is an interval of resolutions with a common score.

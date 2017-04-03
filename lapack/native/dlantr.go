@@ -7,8 +7,8 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/lapack"
 )
 
 // Dlantr computes the specified norm of an m×n trapezoidal matrix A. If

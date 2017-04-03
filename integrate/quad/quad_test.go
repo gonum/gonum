@@ -8,8 +8,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/stat/distuv"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/stat/distuv"
 )
 
 func TestFixed(t *testing.T) {

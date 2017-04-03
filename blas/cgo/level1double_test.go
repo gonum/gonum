@@ -3,7 +3,7 @@ package cgo
 import (
 	"testing"
 
-	"github.com/gonum/blas/testblas"
+	"github.com/gonum/gonum/blas/testblas"
 )
 
 var impl Implementation

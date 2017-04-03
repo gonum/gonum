@@ -9,7 +9,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 // CumulantKind specifies the behavior for calculating the empirical CDF or Quantile

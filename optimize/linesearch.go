@@ -7,7 +7,7 @@ package optimize
 import (
 	"math"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 // LinesearchMethod represents an abstract optimization method in which a

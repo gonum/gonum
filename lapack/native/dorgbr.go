@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/lapack"
+import "github.com/gonum/gonum/lapack"
 
 // Dorgbr generates one of the matrices Q or P^T computed by Dgebrd
 // computed from the decomposition Dgebrd. See Dgebd2 for the description of

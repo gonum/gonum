@@ -9,8 +9,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 // newLocation allocates a new locatian structure of the appropriate size. It

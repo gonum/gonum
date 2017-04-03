@@ -8,10 +8,10 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat"
-	"github.com/gonum/stat/distuv"
+	"github.com/gonum/gonum/floats"
+	"github.com/gonum/gonum/matrix/mat64"
+	"github.com/gonum/gonum/stat"
+	"github.com/gonum/gonum/stat/distuv"
 )
 
 var (

@@ -9,7 +9,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 func TestHermite(t *testing.T) {

@@ -10,9 +10,9 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/gonum/graph/formats/dot/ast"
-	"github.com/gonum/graph/formats/dot/internal/lexer"
-	"github.com/gonum/graph/formats/dot/internal/parser"
+	"github.com/gonum/gonum/graph/formats/dot/ast"
+	"github.com/gonum/gonum/graph/formats/dot/internal/lexer"
+	"github.com/gonum/gonum/graph/formats/dot/internal/parser"
 )
 
 // ParseFile parses the given Graphviz DOT file into an AST.

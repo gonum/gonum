@@ -9,7 +9,7 @@ package cgo
 import (
 	"testing"
 
-	"github.com/gonum/lapack/testlapack"
+	"github.com/gonum/gonum/lapack/testlapack"
 )
 
 func BenchmarkDgeev(b *testing.B) { testlapack.DgeevBenchmark(b, impl) }

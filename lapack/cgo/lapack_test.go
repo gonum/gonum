@@ -7,8 +7,8 @@ package cgo
 import (
 	"testing"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack/testlapack"
+	"github.com/gonum/gonum/blas"
+	"github.com/gonum/gonum/lapack/testlapack"
 )
 
 var impl = Implementation{}

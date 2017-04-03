@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/gonum/floats"
+	"github.com/gonum/gonum/floats"
 )
 
 // A Point is a stencil location in a finite difference formula.

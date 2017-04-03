@@ -15,7 +15,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gonum/blas"
+	"github.com/gonum/gonum/blas"
 )
 
 // Type check assertions:

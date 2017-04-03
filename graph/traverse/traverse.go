@@ -8,8 +8,8 @@ package traverse
 import (
 	"golang.org/x/tools/container/intsets"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/linear"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/graph/internal/linear"
 )
 
 // BreadthFirst implements stateful breadth-first graph traversal.

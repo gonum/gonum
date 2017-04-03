@@ -8,8 +8,8 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/matrix/mat64"
+	"github.com/gonum/gonum/graph"
+	"github.com/gonum/gonum/matrix/mat64"
 )
 
 // Shortest is a shortest-path tree created by the BellmanFordFrom or DijkstraFrom

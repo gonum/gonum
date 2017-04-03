@@ -298,8 +298,28 @@ func zseritest(t *testing.T, x []float64, is []int, tol float64, n int, yr, yi [
 	copy(yramos, yr)
 	yiamos := make([]float64, len(yi))
 	copy(yiamos, yi)
-	ZRamos, ZIamos, FNUamos, KODEamos, Namos, YRamos, YIamos, NZamos, TOLamos, ELIMamos, ALIMamos :=
-		Zseri(ZR, ZI, FNU, KODE, n, yramos, yiamos, NZ, tol, ELIM, ALIM)
+	y := make([]complex128, len(yramos))
+	for i, v := range yramos {
+		y[i] = complex(v, yiamos[i])
+	}
+	z := complex(ZR, ZI)
+
+	NZamos := Zseri(z, FNU, KODE, n, y[1:], tol, ELIM, ALIM)
+
+	ZRamos := real(z)
+	ZIamos := imag(z)
+	FNUamos := FNU
+	KODEamos := KODE
+	Namos := n
+	TOLamos := tol
+	ELIMamos := ELIM
+	ALIMamos := ALIM
+	YRamos := make([]float64, len(y))
+	YIamos := make([]float64, len(y))
+	for i, v := range y {
+		YRamos[i] = real(v)
+		YIamos[i] = imag(v)
+	}
 
 	sameF64(t, "zseri zr", ZRfort, ZRamos)
 	sameF64(t, "zseri zi", ZIfort, ZIamos)

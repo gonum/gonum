@@ -14,12 +14,29 @@ import (
 func TestEigen(t *testing.T) {
 	for i, test := range []struct {
 		a *Dense
+
+		values []complex128
+		left   *Dense
+		right  *Dense
 	}{
-		{a: NewDense(3, 3, []float64{
-			1, 0, 0,
-			0, 1, 0,
-			0, 0, 1,
-		})},
+		{
+			a: NewDense(3, 3, []float64{
+				1, 0, 0,
+				0, 1, 0,
+				0, 0, 1,
+			}),
+			values: []complex128{1, 1, 1},
+			left: NewDense(3, 3, []float64{
+				1, 0, 0,
+				0, 1, 0,
+				0, 0, 1,
+			}),
+			right: NewDense(3, 3, []float64{
+				1, 0, 0,
+				0, 1, 0,
+				0, 0, 1,
+			}),
+		},
 	} {
 		var e1, e2, e3, e4 Eigen
 		ok := e1.Factorize(test.a, true, true)
@@ -30,8 +47,18 @@ func TestEigen(t *testing.T) {
 		e3.Factorize(test.a, true, false)
 		e4.Factorize(test.a, false, false)
 
-		// Check that the eigenvectors and values are the same in all combinations.
 		v1 := e1.Values(nil)
+		if !cmplxEqual(v1, test.values) {
+			t.Errorf("eigenvector mismatch. Case %v", i)
+		}
+		if !Equal(e1.LeftVectors(), test.left) {
+			t.Errorf("left eigenvector mismatch. Case %v", i)
+		}
+		if !Equal(e1.Vectors(), test.right) {
+			t.Errorf("right eigenvector mismatch. Case %v", i)
+		}
+
+		// Check that the eigenvectors and values are the same in all combinations.
 		if !cmplxEqual(v1, e2.Values(nil)) {
 			t.Errorf("eigenvector mismatch. Case %v", i)
 		}

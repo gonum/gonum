@@ -183,7 +183,7 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 	work := make([]float64, 1)
 	lapack64.Geev(jobvl, jobvr, sd.mat, wr, wi, vl.mat, vr.mat, work, -1)
 	work = make([]float64, int(work[0]))
-	first := lapack64.Geev(jobvl, jobvr, sd.mat, wr, wi, vl.mat, vr.mat, work, -1)
+	first := lapack64.Geev(jobvl, jobvr, sd.mat, wr, wi, vl.mat, vr.mat, work, len(work))
 
 	if first != 0 {
 		e.values = nil

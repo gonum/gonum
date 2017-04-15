@@ -20,8 +20,8 @@ TEXT ·DivTo(SB), NOSPLIT, $0
 	CMPQ    CX, $0             // if CX == 0 { return }
 	JE      div_end
 	XORQ    AX, AX             // i = 0
-	MOVQ    DI, BX
-	ANDQ    $15, BX            // BX = &dst & OxF
+	MOVQ    DX, BX
+	ANDQ    $15, BX            // BX = &y & OxF
 	JZ      div_no_trim        // if BX == 0 { goto div_no_trim }
 
 	// Align on 16-bit boundary

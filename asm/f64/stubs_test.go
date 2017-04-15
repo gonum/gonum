@@ -460,14 +460,14 @@ func TestDiv(t *testing.T) {
 			expect: []float64{0, 0, 0},
 		},
 		{
-			dst:    []float64{nan, 1, nan, 1, 0},
-			src:    []float64{1, 1, nan, 1, 1},
-			expect: []float64{nan, 1, nan, 1, 0},
+			dst:    []float64{nan, 1, nan, 1, 0, nan, 1, nan, 1, 0},
+			src:    []float64{1, 1, nan, 1, 1, 1, 1, nan, 1, 1},
+			expect: []float64{nan, 1, nan, 1, 0, nan, 1, nan, 1, 0},
 		},
 		{
-			dst:    []float64{inf, 4, nan, -inf, 9},
-			src:    []float64{inf, 4, nan, -inf, 3},
-			expect: []float64{nan, 1, nan, nan, 3},
+			dst:    []float64{inf, 4, nan, -inf, 9, inf, 4, nan, -inf, 9},
+			src:    []float64{inf, 4, nan, -inf, 3, inf, 4, nan, -inf, 3},
+			expect: []float64{nan, 1, nan, nan, 3, nan, 1, nan, nan, 3},
 		},
 	} {
 		sg_ln, dg_ln := 4+j%2, 4+j%3
@@ -524,16 +524,16 @@ func TestDivTo(t *testing.T) {
 			expect: []float64{0, 0, 0},
 		},
 		{
-			dst:    []float64{inf, inf, inf, inf, inf},
-			x:      []float64{nan, 1, nan, 1, 0},
-			y:      []float64{1, 1, nan, 1, 1},
-			expect: []float64{nan, 1, nan, 1, 0},
+			dst:    []float64{inf, inf, inf, inf, inf, inf, inf, inf, inf, inf},
+			x:      []float64{nan, 1, nan, 1, 0, nan, 1, nan, 1, 0},
+			y:      []float64{1, 1, nan, 1, 1, 1, 1, nan, 1, 1},
+			expect: []float64{nan, 1, nan, 1, 0, nan, 1, nan, 1, 0},
 		},
 		{
-			dst:    []float64{0, 0, 0, 0, 0},
-			x:      []float64{inf, 4, nan, -inf, 9},
-			y:      []float64{inf, 4, nan, -inf, 3},
-			expect: []float64{nan, 1, nan, nan, 3},
+			dst:    []float64{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			x:      []float64{inf, 4, nan, -inf, 9, inf, 4, nan, -inf, 9},
+			y:      []float64{inf, 4, nan, -inf, 3, inf, 4, nan, -inf, 3},
+			expect: []float64{nan, 1, nan, nan, 3, nan, 1, nan, nan, 3},
 		},
 	} {
 		xg_ln, yg_ln := 4+j%2, 4+j%3

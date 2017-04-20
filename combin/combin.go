@@ -35,15 +35,11 @@ func Binomial(n, k int) int {
 	if k > n/2 {
 		k = n - k
 	}
-	kfact := 1
-	for i := 2; i <= k; i++ {
-		kfact *= i
+	b := 1
+	for i := 1; i <= k; i++ {
+		b = (n - k + i) * b / i
 	}
-	num := 1
-	for i := n; i > n-k; i-- {
-		num *= i
-	}
-	return num / kfact
+	return b
 }
 
 // GeneralizedBinomial returns the generalized binomial coefficient of (n, k),

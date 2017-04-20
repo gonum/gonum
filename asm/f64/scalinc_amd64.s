@@ -39,7 +39,6 @@
 #include "textflag.h"
 
 // func DscalInc(alpha float64, x []float64, n, incX uintptr)
-// This function assumes that incX is positive.
 TEXT ·ScalInc(SB), NOSPLIT, $0
 	MOVHPD alpha+0(FP), X7
 	MOVLPD alpha+0(FP), X7

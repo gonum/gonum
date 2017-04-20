@@ -18,7 +18,6 @@ func ScalUnitaryTo(dst []float64, alpha float64, x []float64) {
 	}
 }
 
-// incX must be positive.
 func ScalInc(alpha float64, x []float64, n, incX uintptr) {
 	var ix uintptr
 	for i := 0; i < int(n); i++ {
@@ -27,7 +26,6 @@ func ScalInc(alpha float64, x []float64, n, incX uintptr) {
 	}
 }
 
-// incDst and incX must be positive.
 func ScalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr) {
 	var idst, ix uintptr
 	for i := 0; i < int(n); i++ {

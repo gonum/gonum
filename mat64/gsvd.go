@@ -14,7 +14,11 @@ import (
 )
 
 // GSVD is a type for creating and using the Generalized Singular Value Decomposition
-// (GSVD) of a matrix. See Factorize for a description of the decomposition.
+// (GSVD) of a matrix.
+//
+// The factorization is a linear transformation of the data sets from the given
+// variable×sample spaces to reduced and diagonalized "eigenvariable"×"eigensample"
+// spaces.
 type GSVD struct {
 	kind matrix.GSVDKind
 

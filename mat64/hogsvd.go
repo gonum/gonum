@@ -13,8 +13,11 @@ import (
 )
 
 // HOGSVD is a type for creating and using the Higher Order Generalized Singular Value
-// Decomposition (HOGSVD) of a set of matrices. See Factorize for a description of the
-// decomposition.
+// Decomposition (HOGSVD) of a set of matrices.
+//
+// The factorization is a linear transformation of the data sets from the given
+// variable×sample spaces to reduced and diagonalized "eigenvariable"×"eigensample"
+// spaces.
 type HOGSVD struct {
 	n int
 	v *Dense

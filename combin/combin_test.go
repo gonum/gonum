@@ -5,6 +5,7 @@
 package combin
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/gonum/floats"
@@ -75,6 +76,18 @@ func TestBinomial(t *testing.T) {
 		ans := Binomial(test.n, test.k)
 		if ans != test.ans {
 			t.Errorf("Case %v: Binomial mismatch. Got %v, want %v.", cas, ans, test.ans)
+		}
+	}
+	var (
+		n    = 61
+		want big.Int
+		got  big.Int
+	)
+	for k := 0; k <= n; k++ {
+		want.Binomial(int64(n), int64(k))
+		got.SetInt64(int64(Binomial(n, k)))
+		if want.Cmp(&got) != 0 {
+			t.Errorf("Case n=%v,k=%v: Binomial mismatch for large n. Got %v, want %v.", n, k, got, want)
 		}
 	}
 }

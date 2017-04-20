@@ -39,7 +39,6 @@
 #include "textflag.h"
 
 // func DscalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)
-// This function assumes that incDst and incX are positive.
 TEXT ·ScalIncTo(SB), NOSPLIT, $0
 	MOVQ   dst+0(FP), R9
 	MOVQ   incDst+24(FP), R11

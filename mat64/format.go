@@ -187,7 +187,7 @@ func format(m Matrix, prefix string, margin int, dot byte, squeeze bool, fs fmt.
 
 		if i >= printed-1 && i < rows-printed && 2*printed < rows {
 			i = rows - printed - 1
-			fmt.Fprint(fs, " .\n .\n .\n")
+			fmt.Fprintf(fs, "%s .\n%[1]s .\n%[1]s .\n", prefix)
 			continue
 		}
 	}

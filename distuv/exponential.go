@@ -71,9 +71,9 @@ func (Exponential) ExKurtosis() float64 {
 // If weights is nil, then all the weights are 1.
 // If weights is not nil, then the len(weights) must equal len(samples).
 func (e *Exponential) Fit(samples, weights []float64) {
-	suffStat := make([]float64, 1)
+	suffStat := make([]float64, e.NumSuffStat())
 	nSamples := e.SuffStat(samples, weights, suffStat)
-	e.ConjugateUpdate(suffStat, nSamples, []float64{0})
+	e.ConjugateUpdate(suffStat, nSamples, make([]float64, e.NumSuffStat()))
 }
 
 // LogProb computes the natural logarithm of the value of the probability density function at x.
@@ -104,6 +104,7 @@ func (Exponential) NumParameters() int {
 	return 1
 }
 
+// NumSuffStat returns the number of sufficient statistics for the distribution.
 func (Exponential) NumSuffStat() int {
 	return 1
 }
@@ -199,13 +200,13 @@ func (e Exponential) StdDev() float64 {
 // of the samples.
 //
 // If weights is nil, the weights are assumed to be 1, otherwise panics if
-// len(samples) != len(weights). Panics if len(suffStat) != 1.
+// len(samples) != len(weights). Panics if len(suffStat) != NumSuffStat().
 func (Exponential) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
 	if len(weights) != 0 && len(samples) != len(weights) {
 		panic(badLength)
 	}
 
-	if len(suffStat) != 1 {
+	if len(suffStat) != (Exponential{}).NumSuffStat() {
 		panic(badSuffStat)
 	}
 

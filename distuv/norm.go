@@ -80,9 +80,9 @@ func (Normal) ExKurtosis() float64 {
 // data samples x with relative weights w. If weights is nil, then all the weights
 // are 1. If weights is not nil, then the len(weights) must equal len(samples).
 func (n *Normal) Fit(samples, weights []float64) {
-	suffStat := make([]float64, 1)
+	suffStat := make([]float64, n.NumSuffStat())
 	nSamples := n.SuffStat(samples, weights, suffStat)
-	n.ConjugateUpdate(suffStat, nSamples, []float64{0, 0})
+	n.ConjugateUpdate(suffStat, nSamples, make([]float64, n.NumSuffStat()))
 }
 
 // LogProb computes the natural logarithm of the value of the probability density function at x.
@@ -110,6 +110,7 @@ func (Normal) NumParameters() int {
 	return 2
 }
 
+// NumSuffStat returns the number of sufficient statistics for the distribution.
 func (Normal) NumSuffStat() int {
 	return 2
 }
@@ -187,13 +188,13 @@ func (n Normal) StdDev() float64 {
 // and the standard deviation of the samples.
 //
 // If weights is nil, the weights are assumed to be 1, otherwise panics if
-// len(samples) != len(weights). Panics if len(suffStat) != 2.
+// len(samples) != len(weights). Panics if len(suffStat) != NumSuffStat().
 func (Normal) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
 	lenSamp := len(samples)
 	if len(weights) != 0 && len(samples) != len(weights) {
 		panic(badLength)
 	}
-	if len(suffStat) != 2 {
+	if len(suffStat) != (Normal{}).NumSuffStat() {
 		panic(badSuffStat)
 	}
 

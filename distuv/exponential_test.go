@@ -58,3 +58,14 @@ func TestExponentialScore(t *testing.T) {
 		testDerivParam(t, test)
 	}
 }
+
+func TestExponentialFitPanic(t *testing.T) {
+	e := Exponential{Rate: 2}
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic for Fit call: %v", r)
+		}
+	}()
+	e.Fit(make([]float64, 10), nil)
+}

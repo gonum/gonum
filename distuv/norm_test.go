@@ -5,7 +5,6 @@
 package distuv
 
 import (
-	"fmt"
 	"math"
 	"testing"
 
@@ -142,11 +141,21 @@ func TestNormalQuantile(t *testing.T) {
 	}
 	for i, v := range p {
 		got := UnitNormal.Quantile(v)
-		fmt.Println(math.Abs(got - ans[i]))
 		if !floats.EqualWithinAbsOrRel(got, ans[i], 1e-10, 1e-10) {
 			t.Errorf("Quantile mismatch. Case %d, want: %v, got: %v", i, ans[i], got)
 		}
 	}
+}
+
+func TestNormFitPanic(t *testing.T) {
+	n := Normal{Mu: 0, Sigma: 1}
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Errorf("unexpected panic for Fit call: %v", r)
+		}
+	}()
+	n.Fit(make([]float64, 10), nil)
 }
 
 func BenchmarkNormalQuantile(b *testing.B) {

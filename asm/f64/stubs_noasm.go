@@ -8,6 +8,11 @@ package f64
 
 import "math"
 
+// AbsSum is
+//  for _, v := range x {
+//  	sum += math.Abs(v)
+//  }
+//  return sum
 func AbsSum(x []float64) (sum float64) {
 	for _, v := range x {
 		sum += math.Abs(v)
@@ -15,6 +20,11 @@ func AbsSum(x []float64) (sum float64) {
 	return sum
 }
 
+// AbsSumInc is
+//  for i := 0; i < n*incX; i += incX {
+//  	sum += math.Abs(x[i])
+//  }
+//  return sum
 func AbsSumInc(x []float64, n, incX int) (sum float64) {
 	for i := 0; i < n*incX; i += incX {
 		sum += math.Abs(x[i])
@@ -22,18 +32,35 @@ func AbsSumInc(x []float64, n, incX int) (sum float64) {
 	return sum
 }
 
+// Add is
+//  for i, v := range s {
+//  	dst[i] += v
+//  }
 func Add(dst, s []float64) {
 	for i, v := range s {
 		dst[i] += v
 	}
 }
 
+// AddConst is
+//  for i := range x {
+//  	x[i] += alpha
+//  }
 func AddConst(alpha float64, x []float64) {
 	for i := range x {
 		x[i] += alpha
 	}
 }
 
+// CumSum is
+//  if len(s) == 0 {
+//  	return dst
+//  }
+//  dst[0] = s[0]
+//  for i, v := range s[1:] {
+//  	dst[i+1] = dst[i] + v
+//  }
+//  return dst
 func CumSum(dst, s []float64) []float64 {
 	if len(s) == 0 {
 		return dst
@@ -45,6 +72,15 @@ func CumSum(dst, s []float64) []float64 {
 	return dst
 }
 
+// CumProd is
+//  if len(s) == 0 {
+//  	return dst
+//  }
+//  dst[0] = s[0]
+//  for i, v := range s[1:] {
+//  	dst[i+1] = dst[i] * v
+//  }
+//  return dst
 func CumProd(dst, s []float64) []float64 {
 	if len(s) == 0 {
 		return dst
@@ -56,12 +92,21 @@ func CumProd(dst, s []float64) []float64 {
 	return dst
 }
 
+// Div is
+//  for i, v := range s {
+//  	dst[i] /= v
+//  }
 func Div(dst, s []float64) {
 	for i, v := range s {
 		dst[i] /= v
 	}
 }
 
+// DivTo is
+//  for i, v := range s {
+//  	dst[i] = v / t[i]
+//  }
+//  return dst
 func DivTo(dst, s, t []float64) []float64 {
 	for i, v := range s {
 		dst[i] = v / t[i]
@@ -69,6 +114,12 @@ func DivTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
+// L1Norm is
+//  var norm float64
+//  for i, v := range s {
+//  	norm += math.Abs(t[i] - v)
+//  }
+//  return norm
 func L1Norm(s, t []float64) float64 {
 	var norm float64
 	for i, v := range s {
@@ -77,6 +128,19 @@ func L1Norm(s, t []float64) float64 {
 	return norm
 }
 
+// LinfNorm is
+//  var norm float64
+//  if len(s) == 0 {
+//  	return 0
+//  }
+//  norm = math.Abs(t[0] - s[0])
+//  for i, v := range s[1:] {
+//  	absDiff := math.Abs(t[i+1] - v)
+//  	if absDiff > norm || math.IsNaN(norm) {
+//  		norm = absDiff
+//  	}
+//  }
+//  return norm
 func LinfNorm(s, t []float64) float64 {
 	var norm float64
 	if len(s) == 0 {

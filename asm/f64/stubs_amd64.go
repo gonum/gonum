@@ -6,19 +6,19 @@
 
 package f64
 
-// AbsSum is
+// L1Norm is
 //  for _, v := range x {
 //  	sum += math.Abs(v)
 //  }
 //  return sum
-func AbsSum(x []float64) (sum float64)
+func L1Norm(x []float64) (sum float64)
 
-// AbsSumInc is
+// L1NormInc is
 //  for i := 0; i < n*incX; i += incX {
 //  	sum += math.Abs(x[i])
 //  }
 //  return sum
-func AbsSumInc(x []float64, n, incX int) (sum float64)
+func L1NormInc(x []float64, n, incX int) (sum float64)
 
 // AddConst is
 //  for i := range x {
@@ -112,15 +112,15 @@ func DotUnitary(x, y []float64) (sum float64)
 //  return sum
 func DotInc(x, y []float64, n, incX, incY, ix, iy uintptr) (sum float64)
 
-// L1Norm is
+// L1Dist is
 //  var norm float64
 //  for i, v := range s {
 //  	norm += math.Abs(t[i] - v)
 //  }
 //  return norm
-func L1Norm(s, t []float64) float64
+func L1Dist(s, t []float64) float64
 
-// LinfNorm is
+// LinfDist is
 //  var norm float64
 //  if len(s) == 0 {
 //  	return 0
@@ -133,7 +133,7 @@ func L1Norm(s, t []float64) float64
 //  	}
 //  }
 //  return norm
-func LinfNorm(s, t []float64) float64
+func LinfDist(s, t []float64) float64
 
 // ScalUnitary is
 //  for i := range x {

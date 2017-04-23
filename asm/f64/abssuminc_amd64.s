@@ -6,8 +6,8 @@
 
 #include "textflag.h"
 
-// func AbsSumInc(x []float64, n, incX int) (sum float64)
-TEXT ·AbsSumInc(SB), NOSPLIT, $0
+// func L1NormInc(x []float64, n, incX int) (sum float64)
+TEXT ·L1NormInc(SB), NOSPLIT, $0
 	MOVQ  x_base+0(FP), SI // SI = &x
 	MOVQ  n+24(FP), CX     // CX = n
 	MOVQ  incX+32(FP), AX  // AX =  increment * sizeof( float64 )

@@ -72,7 +72,7 @@ func same(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
-func TestAbsSum(t *testing.T) {
+func TestL1Norm(t *testing.T) {
 	var src_gd float64 = 1
 	for j, v := range []struct {
 		ex  float64
@@ -110,9 +110,9 @@ func TestAbsSum(t *testing.T) {
 		g_ln := 4 + j%2
 		v.src = guardVector(v.src, src_gd, g_ln)
 		src := v.src[g_ln : len(v.src)-g_ln]
-		ret := AbsSum(src)
+		ret := L1Norm(src)
 		if !same(ret, v.ex) {
-			t.Errorf("Test %d AbsSum error Got: %f Expected: %f", j, ret, v.ex)
+			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.ex)
 		}
 		if !isValidGuard(v.src, src_gd, g_ln) {
 			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
@@ -120,7 +120,7 @@ func TestAbsSum(t *testing.T) {
 	}
 }
 
-func TestAbsSumInc(t *testing.T) {
+func TestL1NormInc(t *testing.T) {
 	var src_gd float64 = 1
 	for j, v := range []struct {
 		inc int
@@ -166,9 +166,9 @@ func TestAbsSumInc(t *testing.T) {
 		g_ln, ln := 4+j%2, len(v.src)
 		v.src = guardIncVector(v.src, src_gd, v.inc, g_ln)
 		src := v.src[g_ln : len(v.src)-g_ln]
-		ret := AbsSumInc(src, ln, v.inc)
+		ret := L1NormInc(src, ln, v.inc)
 		if !same(ret, v.ex) {
-			t.Errorf("Test %d AbsSumInc error Got: %f Expected: %f", j, ret, v.ex)
+			t.Errorf("Test %d L1NormInc error Got: %f Expected: %f", j, ret, v.ex)
 		}
 		checkValidIncGuard(t, v.src, src_gd, v.inc, g_ln)
 	}
@@ -562,7 +562,7 @@ func TestDivTo(t *testing.T) {
 	}
 }
 
-func TestL1Norm(t *testing.T) {
+func TestL1Dist(t *testing.T) {
 	var t_gd, s_gd float64 = -inf, inf
 	for j, v := range []struct {
 		s, t   []float64
@@ -612,9 +612,9 @@ func TestL1Norm(t *testing.T) {
 		sg_ln, tg_ln := 4+j%2, 4+j%3
 		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
 		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
-		ret := L1Norm(s_lc, t_lc)
+		ret := L1Dist(s_lc, t_lc)
 		if !same(ret, v.expect) {
-			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.expect)
+			t.Errorf("Test %d L1Dist error Got: %f Expected: %f", j, ret, v.expect)
 		}
 		if !isValidGuard(v.s, s_gd, sg_ln) {
 			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:sg_ln], v.s[len(v.s)-sg_ln:])
@@ -625,7 +625,7 @@ func TestL1Norm(t *testing.T) {
 	}
 }
 
-func TestLinfNorm(t *testing.T) {
+func TestLinfDist(t *testing.T) {
 	var t_gd, s_gd float64 = 0, inf
 	for j, v := range []struct {
 		s, t   []float64
@@ -675,9 +675,9 @@ func TestLinfNorm(t *testing.T) {
 		sg_ln, tg_ln := 4+j%2, 4+j%3
 		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
 		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
-		ret := LinfNorm(s_lc, t_lc)
+		ret := LinfDist(s_lc, t_lc)
 		if !same(ret, v.expect) {
-			t.Errorf("Test %d LinfNorm error Got: %f Expected: %f", j, ret, v.expect)
+			t.Errorf("Test %d LinfDist error Got: %f Expected: %f", j, ret, v.expect)
 		}
 		if !isValidGuard(v.s, s_gd, sg_ln) {
 			t.Errorf("Test %d Guard violated in s vector %v %v", j, v.s[:sg_ln], v.s[len(v.s)-sg_ln:])

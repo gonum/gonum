@@ -8,24 +8,24 @@ package f64
 
 import "math"
 
-// AbsSum is
+// L1Norm is
 //  for _, v := range x {
 //  	sum += math.Abs(v)
 //  }
 //  return sum
-func AbsSum(x []float64) (sum float64) {
+func L1Norm(x []float64) (sum float64) {
 	for _, v := range x {
 		sum += math.Abs(v)
 	}
 	return sum
 }
 
-// AbsSumInc is
+// L1NormInc is
 //  for i := 0; i < n*incX; i += incX {
 //  	sum += math.Abs(x[i])
 //  }
 //  return sum
-func AbsSumInc(x []float64, n, incX int) (sum float64) {
+func L1NormInc(x []float64, n, incX int) (sum float64) {
 	for i := 0; i < n*incX; i += incX {
 		sum += math.Abs(x[i])
 	}
@@ -114,13 +114,13 @@ func DivTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
-// L1Norm is
+// L1Dist is
 //  var norm float64
 //  for i, v := range s {
 //  	norm += math.Abs(t[i] - v)
 //  }
 //  return norm
-func L1Norm(s, t []float64) float64 {
+func L1Dist(s, t []float64) float64 {
 	var norm float64
 	for i, v := range s {
 		norm += math.Abs(t[i] - v)
@@ -128,7 +128,7 @@ func L1Norm(s, t []float64) float64 {
 	return norm
 }
 
-// LinfNorm is
+// LinfDist is
 //  var norm float64
 //  if len(s) == 0 {
 //  	return 0
@@ -141,7 +141,7 @@ func L1Norm(s, t []float64) float64 {
 //  	}
 //  }
 //  return norm
-func LinfNorm(s, t []float64) float64 {
+func LinfDist(s, t []float64) float64 {
 	var norm float64
 	if len(s) == 0 {
 		return 0

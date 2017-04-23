@@ -6,8 +6,8 @@
 
 #include "textflag.h"
 
-// func LinfNorm(s, t []float64) float64
-TEXT ·LinfNorm(SB), NOSPLIT, $0
+// func LinfDist(s, t []float64) float64
+TEXT ·LinfDist(SB), NOSPLIT, $0
 	MOVQ    s_base+0(FP), DI  // DI = &s
 	MOVQ    t_base+24(FP), SI // SI = &t
 	MOVQ    s_len+8(FP), CX   // CX = len(s)

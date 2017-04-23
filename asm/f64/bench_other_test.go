@@ -9,120 +9,120 @@ import (
 	"testing"
 )
 
-func benchAbsSum(f func(x []float64) float64, sz int, t *testing.B) {
+func benchL1Norm(f func(x []float64) float64, sz int, t *testing.B) {
 	dst := y[:sz]
 	for i := 0; i < t.N; i++ {
 		f(dst)
 	}
 }
 
-var naiveAbsSum = func(x []float64) (sum float64) {
+var naiveL1Norm = func(x []float64) (sum float64) {
 	for _, v := range x {
 		sum += math.Abs(v)
 	}
 	return sum
 }
 
-func BenchmarkAbsSum1(t *testing.B)      { benchAbsSum(AbsSum, 1, t) }
-func BenchmarkAbsSum2(t *testing.B)      { benchAbsSum(AbsSum, 2, t) }
-func BenchmarkAbsSum3(t *testing.B)      { benchAbsSum(AbsSum, 3, t) }
-func BenchmarkAbsSum4(t *testing.B)      { benchAbsSum(AbsSum, 4, t) }
-func BenchmarkAbsSum5(t *testing.B)      { benchAbsSum(AbsSum, 5, t) }
-func BenchmarkAbsSum10(t *testing.B)     { benchAbsSum(AbsSum, 10, t) }
-func BenchmarkAbsSum100(t *testing.B)    { benchAbsSum(AbsSum, 100, t) }
-func BenchmarkAbsSum1000(t *testing.B)   { benchAbsSum(AbsSum, 1000, t) }
-func BenchmarkAbsSum10000(t *testing.B)  { benchAbsSum(AbsSum, 10000, t) }
-func BenchmarkAbsSum100000(t *testing.B) { benchAbsSum(AbsSum, 100000, t) }
-func BenchmarkAbsSum500000(t *testing.B) { benchAbsSum(AbsSum, 500000, t) }
+func BenchmarkL1Norm1(t *testing.B)      { benchL1Norm(L1Norm, 1, t) }
+func BenchmarkL1Norm2(t *testing.B)      { benchL1Norm(L1Norm, 2, t) }
+func BenchmarkL1Norm3(t *testing.B)      { benchL1Norm(L1Norm, 3, t) }
+func BenchmarkL1Norm4(t *testing.B)      { benchL1Norm(L1Norm, 4, t) }
+func BenchmarkL1Norm5(t *testing.B)      { benchL1Norm(L1Norm, 5, t) }
+func BenchmarkL1Norm10(t *testing.B)     { benchL1Norm(L1Norm, 10, t) }
+func BenchmarkL1Norm100(t *testing.B)    { benchL1Norm(L1Norm, 100, t) }
+func BenchmarkL1Norm1000(t *testing.B)   { benchL1Norm(L1Norm, 1000, t) }
+func BenchmarkL1Norm10000(t *testing.B)  { benchL1Norm(L1Norm, 10000, t) }
+func BenchmarkL1Norm100000(t *testing.B) { benchL1Norm(L1Norm, 100000, t) }
+func BenchmarkL1Norm500000(t *testing.B) { benchL1Norm(L1Norm, 500000, t) }
 
-func BenchmarkLAbsSum1(t *testing.B)      { benchAbsSum(naiveAbsSum, 1, t) }
-func BenchmarkLAbsSum2(t *testing.B)      { benchAbsSum(naiveAbsSum, 2, t) }
-func BenchmarkLAbsSum3(t *testing.B)      { benchAbsSum(naiveAbsSum, 3, t) }
-func BenchmarkLAbsSum4(t *testing.B)      { benchAbsSum(naiveAbsSum, 4, t) }
-func BenchmarkLAbsSum5(t *testing.B)      { benchAbsSum(naiveAbsSum, 5, t) }
-func BenchmarkLAbsSum10(t *testing.B)     { benchAbsSum(naiveAbsSum, 10, t) }
-func BenchmarkLAbsSum100(t *testing.B)    { benchAbsSum(naiveAbsSum, 100, t) }
-func BenchmarkLAbsSum1000(t *testing.B)   { benchAbsSum(naiveAbsSum, 1000, t) }
-func BenchmarkLAbsSum10000(t *testing.B)  { benchAbsSum(naiveAbsSum, 10000, t) }
-func BenchmarkLAbsSum100000(t *testing.B) { benchAbsSum(naiveAbsSum, 100000, t) }
-func BenchmarkLAbsSum500000(t *testing.B) { benchAbsSum(naiveAbsSum, 500000, t) }
+func BenchmarkLL1Norm1(t *testing.B)      { benchL1Norm(naiveL1Norm, 1, t) }
+func BenchmarkLL1Norm2(t *testing.B)      { benchL1Norm(naiveL1Norm, 2, t) }
+func BenchmarkLL1Norm3(t *testing.B)      { benchL1Norm(naiveL1Norm, 3, t) }
+func BenchmarkLL1Norm4(t *testing.B)      { benchL1Norm(naiveL1Norm, 4, t) }
+func BenchmarkLL1Norm5(t *testing.B)      { benchL1Norm(naiveL1Norm, 5, t) }
+func BenchmarkLL1Norm10(t *testing.B)     { benchL1Norm(naiveL1Norm, 10, t) }
+func BenchmarkLL1Norm100(t *testing.B)    { benchL1Norm(naiveL1Norm, 100, t) }
+func BenchmarkLL1Norm1000(t *testing.B)   { benchL1Norm(naiveL1Norm, 1000, t) }
+func BenchmarkLL1Norm10000(t *testing.B)  { benchL1Norm(naiveL1Norm, 10000, t) }
+func BenchmarkLL1Norm100000(t *testing.B) { benchL1Norm(naiveL1Norm, 100000, t) }
+func BenchmarkLL1Norm500000(t *testing.B) { benchL1Norm(naiveL1Norm, 500000, t) }
 
-func benchAbsSumInc(t *testing.B, ln, inc int, f func(x []float64, n, incX int) float64) {
+func benchL1NormInc(t *testing.B, ln, inc int, f func(x []float64, n, incX int) float64) {
 	for i := 0; i < t.N; i++ {
 		f(x, ln, inc)
 	}
 }
 
-var naiveAbsSumInc = func(x []float64, n, incX int) (sum float64) {
+var naiveL1NormInc = func(x []float64, n, incX int) (sum float64) {
 	for i := 0; i < n*incX; i += incX {
 		sum += math.Abs(x[i])
 	}
 	return sum
 }
 
-func BenchmarkF64AbsSumIncN1Inc1(b *testing.B) { benchAbsSumInc(b, 1, 1, AbsSumInc) }
+func BenchmarkF64L1NormIncN1Inc1(b *testing.B) { benchL1NormInc(b, 1, 1, L1NormInc) }
 
-func BenchmarkF64AbsSumIncN2Inc1(b *testing.B)  { benchAbsSumInc(b, 2, 1, AbsSumInc) }
-func BenchmarkF64AbsSumIncN2Inc2(b *testing.B)  { benchAbsSumInc(b, 2, 2, AbsSumInc) }
-func BenchmarkF64AbsSumIncN2Inc4(b *testing.B)  { benchAbsSumInc(b, 2, 4, AbsSumInc) }
-func BenchmarkF64AbsSumIncN2Inc10(b *testing.B) { benchAbsSumInc(b, 2, 10, AbsSumInc) }
+func BenchmarkF64L1NormIncN2Inc1(b *testing.B)  { benchL1NormInc(b, 2, 1, L1NormInc) }
+func BenchmarkF64L1NormIncN2Inc2(b *testing.B)  { benchL1NormInc(b, 2, 2, L1NormInc) }
+func BenchmarkF64L1NormIncN2Inc4(b *testing.B)  { benchL1NormInc(b, 2, 4, L1NormInc) }
+func BenchmarkF64L1NormIncN2Inc10(b *testing.B) { benchL1NormInc(b, 2, 10, L1NormInc) }
 
-func BenchmarkF64AbsSumIncN3Inc1(b *testing.B)  { benchAbsSumInc(b, 3, 1, AbsSumInc) }
-func BenchmarkF64AbsSumIncN3Inc2(b *testing.B)  { benchAbsSumInc(b, 3, 2, AbsSumInc) }
-func BenchmarkF64AbsSumIncN3Inc4(b *testing.B)  { benchAbsSumInc(b, 3, 4, AbsSumInc) }
-func BenchmarkF64AbsSumIncN3Inc10(b *testing.B) { benchAbsSumInc(b, 3, 10, AbsSumInc) }
+func BenchmarkF64L1NormIncN3Inc1(b *testing.B)  { benchL1NormInc(b, 3, 1, L1NormInc) }
+func BenchmarkF64L1NormIncN3Inc2(b *testing.B)  { benchL1NormInc(b, 3, 2, L1NormInc) }
+func BenchmarkF64L1NormIncN3Inc4(b *testing.B)  { benchL1NormInc(b, 3, 4, L1NormInc) }
+func BenchmarkF64L1NormIncN3Inc10(b *testing.B) { benchL1NormInc(b, 3, 10, L1NormInc) }
 
-func BenchmarkF64AbsSumIncN4Inc1(b *testing.B)  { benchAbsSumInc(b, 4, 1, AbsSumInc) }
-func BenchmarkF64AbsSumIncN4Inc2(b *testing.B)  { benchAbsSumInc(b, 4, 2, AbsSumInc) }
-func BenchmarkF64AbsSumIncN4Inc4(b *testing.B)  { benchAbsSumInc(b, 4, 4, AbsSumInc) }
-func BenchmarkF64AbsSumIncN4Inc10(b *testing.B) { benchAbsSumInc(b, 4, 10, AbsSumInc) }
+func BenchmarkF64L1NormIncN4Inc1(b *testing.B)  { benchL1NormInc(b, 4, 1, L1NormInc) }
+func BenchmarkF64L1NormIncN4Inc2(b *testing.B)  { benchL1NormInc(b, 4, 2, L1NormInc) }
+func BenchmarkF64L1NormIncN4Inc4(b *testing.B)  { benchL1NormInc(b, 4, 4, L1NormInc) }
+func BenchmarkF64L1NormIncN4Inc10(b *testing.B) { benchL1NormInc(b, 4, 10, L1NormInc) }
 
-func BenchmarkF64AbsSumIncN10Inc1(b *testing.B)  { benchAbsSumInc(b, 10, 1, AbsSumInc) }
-func BenchmarkF64AbsSumIncN10Inc2(b *testing.B)  { benchAbsSumInc(b, 10, 2, AbsSumInc) }
-func BenchmarkF64AbsSumIncN10Inc4(b *testing.B)  { benchAbsSumInc(b, 10, 4, AbsSumInc) }
-func BenchmarkF64AbsSumIncN10Inc10(b *testing.B) { benchAbsSumInc(b, 10, 10, AbsSumInc) }
+func BenchmarkF64L1NormIncN10Inc1(b *testing.B)  { benchL1NormInc(b, 10, 1, L1NormInc) }
+func BenchmarkF64L1NormIncN10Inc2(b *testing.B)  { benchL1NormInc(b, 10, 2, L1NormInc) }
+func BenchmarkF64L1NormIncN10Inc4(b *testing.B)  { benchL1NormInc(b, 10, 4, L1NormInc) }
+func BenchmarkF64L1NormIncN10Inc10(b *testing.B) { benchL1NormInc(b, 10, 10, L1NormInc) }
 
-func BenchmarkF64AbsSumIncN1000Inc1(b *testing.B)  { benchAbsSumInc(b, 1000, 1, AbsSumInc) }
-func BenchmarkF64AbsSumIncN1000Inc2(b *testing.B)  { benchAbsSumInc(b, 1000, 2, AbsSumInc) }
-func BenchmarkF64AbsSumIncN1000Inc4(b *testing.B)  { benchAbsSumInc(b, 1000, 4, AbsSumInc) }
-func BenchmarkF64AbsSumIncN1000Inc10(b *testing.B) { benchAbsSumInc(b, 1000, 10, AbsSumInc) }
+func BenchmarkF64L1NormIncN1000Inc1(b *testing.B)  { benchL1NormInc(b, 1000, 1, L1NormInc) }
+func BenchmarkF64L1NormIncN1000Inc2(b *testing.B)  { benchL1NormInc(b, 1000, 2, L1NormInc) }
+func BenchmarkF64L1NormIncN1000Inc4(b *testing.B)  { benchL1NormInc(b, 1000, 4, L1NormInc) }
+func BenchmarkF64L1NormIncN1000Inc10(b *testing.B) { benchL1NormInc(b, 1000, 10, L1NormInc) }
 
-func BenchmarkF64AbsSumIncN100000Inc1(b *testing.B)  { benchAbsSumInc(b, 100000, 1, AbsSumInc) }
-func BenchmarkF64AbsSumIncN100000Inc2(b *testing.B)  { benchAbsSumInc(b, 100000, 2, AbsSumInc) }
-func BenchmarkF64AbsSumIncN100000Inc4(b *testing.B)  { benchAbsSumInc(b, 100000, 4, AbsSumInc) }
-func BenchmarkF64AbsSumIncN100000Inc10(b *testing.B) { benchAbsSumInc(b, 100000, 10, AbsSumInc) }
+func BenchmarkF64L1NormIncN100000Inc1(b *testing.B)  { benchL1NormInc(b, 100000, 1, L1NormInc) }
+func BenchmarkF64L1NormIncN100000Inc2(b *testing.B)  { benchL1NormInc(b, 100000, 2, L1NormInc) }
+func BenchmarkF64L1NormIncN100000Inc4(b *testing.B)  { benchL1NormInc(b, 100000, 4, L1NormInc) }
+func BenchmarkF64L1NormIncN100000Inc10(b *testing.B) { benchL1NormInc(b, 100000, 10, L1NormInc) }
 
-func BenchmarkLF64AbsSumIncN1Inc1(b *testing.B) { benchAbsSumInc(b, 1, 1, naiveAbsSumInc) }
+func BenchmarkLF64L1NormIncN1Inc1(b *testing.B) { benchL1NormInc(b, 1, 1, naiveL1NormInc) }
 
-func BenchmarkLF64AbsSumIncN2Inc1(b *testing.B)  { benchAbsSumInc(b, 2, 1, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN2Inc2(b *testing.B)  { benchAbsSumInc(b, 2, 2, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN2Inc4(b *testing.B)  { benchAbsSumInc(b, 2, 4, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN2Inc10(b *testing.B) { benchAbsSumInc(b, 2, 10, naiveAbsSumInc) }
+func BenchmarkLF64L1NormIncN2Inc1(b *testing.B)  { benchL1NormInc(b, 2, 1, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN2Inc2(b *testing.B)  { benchL1NormInc(b, 2, 2, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN2Inc4(b *testing.B)  { benchL1NormInc(b, 2, 4, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN2Inc10(b *testing.B) { benchL1NormInc(b, 2, 10, naiveL1NormInc) }
 
-func BenchmarkLF64AbsSumIncN3Inc1(b *testing.B)  { benchAbsSumInc(b, 3, 1, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN3Inc2(b *testing.B)  { benchAbsSumInc(b, 3, 2, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN3Inc4(b *testing.B)  { benchAbsSumInc(b, 3, 4, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN3Inc10(b *testing.B) { benchAbsSumInc(b, 3, 10, naiveAbsSumInc) }
+func BenchmarkLF64L1NormIncN3Inc1(b *testing.B)  { benchL1NormInc(b, 3, 1, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN3Inc2(b *testing.B)  { benchL1NormInc(b, 3, 2, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN3Inc4(b *testing.B)  { benchL1NormInc(b, 3, 4, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN3Inc10(b *testing.B) { benchL1NormInc(b, 3, 10, naiveL1NormInc) }
 
-func BenchmarkLF64AbsSumIncN4Inc1(b *testing.B)  { benchAbsSumInc(b, 4, 1, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN4Inc2(b *testing.B)  { benchAbsSumInc(b, 4, 2, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN4Inc4(b *testing.B)  { benchAbsSumInc(b, 4, 4, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN4Inc10(b *testing.B) { benchAbsSumInc(b, 4, 10, naiveAbsSumInc) }
+func BenchmarkLF64L1NormIncN4Inc1(b *testing.B)  { benchL1NormInc(b, 4, 1, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN4Inc2(b *testing.B)  { benchL1NormInc(b, 4, 2, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN4Inc4(b *testing.B)  { benchL1NormInc(b, 4, 4, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN4Inc10(b *testing.B) { benchL1NormInc(b, 4, 10, naiveL1NormInc) }
 
-func BenchmarkLF64AbsSumIncN10Inc1(b *testing.B)  { benchAbsSumInc(b, 10, 1, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN10Inc2(b *testing.B)  { benchAbsSumInc(b, 10, 2, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN10Inc4(b *testing.B)  { benchAbsSumInc(b, 10, 4, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN10Inc10(b *testing.B) { benchAbsSumInc(b, 10, 10, naiveAbsSumInc) }
+func BenchmarkLF64L1NormIncN10Inc1(b *testing.B)  { benchL1NormInc(b, 10, 1, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN10Inc2(b *testing.B)  { benchL1NormInc(b, 10, 2, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN10Inc4(b *testing.B)  { benchL1NormInc(b, 10, 4, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN10Inc10(b *testing.B) { benchL1NormInc(b, 10, 10, naiveL1NormInc) }
 
-func BenchmarkLF64AbsSumIncN1000Inc1(b *testing.B)  { benchAbsSumInc(b, 1000, 1, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN1000Inc2(b *testing.B)  { benchAbsSumInc(b, 1000, 2, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN1000Inc4(b *testing.B)  { benchAbsSumInc(b, 1000, 4, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN1000Inc10(b *testing.B) { benchAbsSumInc(b, 1000, 10, naiveAbsSumInc) }
+func BenchmarkLF64L1NormIncN1000Inc1(b *testing.B)  { benchL1NormInc(b, 1000, 1, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN1000Inc2(b *testing.B)  { benchL1NormInc(b, 1000, 2, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN1000Inc4(b *testing.B)  { benchL1NormInc(b, 1000, 4, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN1000Inc10(b *testing.B) { benchL1NormInc(b, 1000, 10, naiveL1NormInc) }
 
-func BenchmarkLF64AbsSumIncN100000Inc1(b *testing.B)  { benchAbsSumInc(b, 100000, 1, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN100000Inc2(b *testing.B)  { benchAbsSumInc(b, 100000, 2, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN100000Inc4(b *testing.B)  { benchAbsSumInc(b, 100000, 4, naiveAbsSumInc) }
-func BenchmarkLF64AbsSumIncN100000Inc10(b *testing.B) { benchAbsSumInc(b, 100000, 10, naiveAbsSumInc) }
+func BenchmarkLF64L1NormIncN100000Inc1(b *testing.B)  { benchL1NormInc(b, 100000, 1, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN100000Inc2(b *testing.B)  { benchL1NormInc(b, 100000, 2, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN100000Inc4(b *testing.B)  { benchL1NormInc(b, 100000, 4, naiveL1NormInc) }
+func BenchmarkLF64L1NormIncN100000Inc10(b *testing.B) { benchL1NormInc(b, 100000, 10, naiveL1NormInc) }
 
 func benchAdd(f func(dst, s []float64), sz int, t *testing.B) {
 	dst, s := y[:sz], x[:sz]
@@ -357,14 +357,14 @@ func BenchmarkLDivTo10000(t *testing.B)  { benchDivTo(naiveDivTo, 10000, t) }
 func BenchmarkLDivTo100000(t *testing.B) { benchDivTo(naiveDivTo, 100000, t) }
 func BenchmarkLDivTo500000(t *testing.B) { benchDivTo(naiveDivTo, 500000, t) }
 
-func benchL1Norm(f func(a, b []float64) float64, sz int, t *testing.B) {
+func benchL1Dist(f func(a, b []float64) float64, sz int, t *testing.B) {
 	a, b := x[:sz], y[:sz]
 	for i := 0; i < t.N; i++ {
 		f(a, b)
 	}
 }
 
-var naiveL1Norm = func(s, t []float64) float64 {
+var naiveL1Dist = func(s, t []float64) float64 {
 	var norm float64
 	for i, v := range s {
 		norm += math.Abs(t[i] - v)
@@ -372,38 +372,38 @@ var naiveL1Norm = func(s, t []float64) float64 {
 	return norm
 }
 
-func BenchmarkL1Norm1(t *testing.B)      { benchL1Norm(L1Norm, 1, t) }
-func BenchmarkL1Norm2(t *testing.B)      { benchL1Norm(L1Norm, 2, t) }
-func BenchmarkL1Norm3(t *testing.B)      { benchL1Norm(L1Norm, 3, t) }
-func BenchmarkL1Norm4(t *testing.B)      { benchL1Norm(L1Norm, 4, t) }
-func BenchmarkL1Norm5(t *testing.B)      { benchL1Norm(L1Norm, 5, t) }
-func BenchmarkL1Norm10(t *testing.B)     { benchL1Norm(L1Norm, 10, t) }
-func BenchmarkL1Norm100(t *testing.B)    { benchL1Norm(L1Norm, 100, t) }
-func BenchmarkL1Norm1000(t *testing.B)   { benchL1Norm(L1Norm, 1000, t) }
-func BenchmarkL1Norm10000(t *testing.B)  { benchL1Norm(L1Norm, 10000, t) }
-func BenchmarkL1Norm100000(t *testing.B) { benchL1Norm(L1Norm, 100000, t) }
-func BenchmarkL1Norm500000(t *testing.B) { benchL1Norm(L1Norm, 500000, t) }
+func BenchmarkL1Dist1(t *testing.B)      { benchL1Dist(L1Dist, 1, t) }
+func BenchmarkL1Dist2(t *testing.B)      { benchL1Dist(L1Dist, 2, t) }
+func BenchmarkL1Dist3(t *testing.B)      { benchL1Dist(L1Dist, 3, t) }
+func BenchmarkL1Dist4(t *testing.B)      { benchL1Dist(L1Dist, 4, t) }
+func BenchmarkL1Dist5(t *testing.B)      { benchL1Dist(L1Dist, 5, t) }
+func BenchmarkL1Dist10(t *testing.B)     { benchL1Dist(L1Dist, 10, t) }
+func BenchmarkL1Dist100(t *testing.B)    { benchL1Dist(L1Dist, 100, t) }
+func BenchmarkL1Dist1000(t *testing.B)   { benchL1Dist(L1Dist, 1000, t) }
+func BenchmarkL1Dist10000(t *testing.B)  { benchL1Dist(L1Dist, 10000, t) }
+func BenchmarkL1Dist100000(t *testing.B) { benchL1Dist(L1Dist, 100000, t) }
+func BenchmarkL1Dist500000(t *testing.B) { benchL1Dist(L1Dist, 500000, t) }
 
-func BenchmarkLL1Norm1(t *testing.B)      { benchL1Norm(naiveL1Norm, 1, t) }
-func BenchmarkLL1Norm2(t *testing.B)      { benchL1Norm(naiveL1Norm, 2, t) }
-func BenchmarkLL1Norm3(t *testing.B)      { benchL1Norm(naiveL1Norm, 3, t) }
-func BenchmarkLL1Norm4(t *testing.B)      { benchL1Norm(naiveL1Norm, 4, t) }
-func BenchmarkLL1Norm5(t *testing.B)      { benchL1Norm(naiveL1Norm, 5, t) }
-func BenchmarkLL1Norm10(t *testing.B)     { benchL1Norm(naiveL1Norm, 10, t) }
-func BenchmarkLL1Norm100(t *testing.B)    { benchL1Norm(naiveL1Norm, 100, t) }
-func BenchmarkLL1Norm1000(t *testing.B)   { benchL1Norm(naiveL1Norm, 1000, t) }
-func BenchmarkLL1Norm10000(t *testing.B)  { benchL1Norm(naiveL1Norm, 10000, t) }
-func BenchmarkLL1Norm100000(t *testing.B) { benchL1Norm(naiveL1Norm, 100000, t) }
-func BenchmarkLL1Norm500000(t *testing.B) { benchL1Norm(naiveL1Norm, 500000, t) }
+func BenchmarkLL1Dist1(t *testing.B)      { benchL1Dist(naiveL1Dist, 1, t) }
+func BenchmarkLL1Dist2(t *testing.B)      { benchL1Dist(naiveL1Dist, 2, t) }
+func BenchmarkLL1Dist3(t *testing.B)      { benchL1Dist(naiveL1Dist, 3, t) }
+func BenchmarkLL1Dist4(t *testing.B)      { benchL1Dist(naiveL1Dist, 4, t) }
+func BenchmarkLL1Dist5(t *testing.B)      { benchL1Dist(naiveL1Dist, 5, t) }
+func BenchmarkLL1Dist10(t *testing.B)     { benchL1Dist(naiveL1Dist, 10, t) }
+func BenchmarkLL1Dist100(t *testing.B)    { benchL1Dist(naiveL1Dist, 100, t) }
+func BenchmarkLL1Dist1000(t *testing.B)   { benchL1Dist(naiveL1Dist, 1000, t) }
+func BenchmarkLL1Dist10000(t *testing.B)  { benchL1Dist(naiveL1Dist, 10000, t) }
+func BenchmarkLL1Dist100000(t *testing.B) { benchL1Dist(naiveL1Dist, 100000, t) }
+func BenchmarkLL1Dist500000(t *testing.B) { benchL1Dist(naiveL1Dist, 500000, t) }
 
-func benchLinfNorm(f func(a, b []float64) float64, sz int, t *testing.B) {
+func benchLinfDist(f func(a, b []float64) float64, sz int, t *testing.B) {
 	a, b := x[:sz], y[:sz]
 	for i := 0; i < t.N; i++ {
 		f(a, b)
 	}
 }
 
-var naiveLinfNorm = func(s, t []float64) float64 {
+var naiveLinfDist = func(s, t []float64) float64 {
 	var norm float64
 	if len(s) == 0 {
 		return 0
@@ -418,26 +418,26 @@ var naiveLinfNorm = func(s, t []float64) float64 {
 	return norm
 }
 
-func BenchmarkLinfNorm1(t *testing.B)      { benchLinfNorm(LinfNorm, 1, t) }
-func BenchmarkLinfNorm2(t *testing.B)      { benchLinfNorm(LinfNorm, 2, t) }
-func BenchmarkLinfNorm3(t *testing.B)      { benchLinfNorm(LinfNorm, 3, t) }
-func BenchmarkLinfNorm4(t *testing.B)      { benchLinfNorm(LinfNorm, 4, t) }
-func BenchmarkLinfNorm5(t *testing.B)      { benchLinfNorm(LinfNorm, 5, t) }
-func BenchmarkLinfNorm10(t *testing.B)     { benchLinfNorm(LinfNorm, 10, t) }
-func BenchmarkLinfNorm100(t *testing.B)    { benchLinfNorm(LinfNorm, 100, t) }
-func BenchmarkLinfNorm1000(t *testing.B)   { benchLinfNorm(LinfNorm, 1000, t) }
-func BenchmarkLinfNorm10000(t *testing.B)  { benchLinfNorm(LinfNorm, 10000, t) }
-func BenchmarkLinfNorm100000(t *testing.B) { benchLinfNorm(LinfNorm, 100000, t) }
-func BenchmarkLinfNorm500000(t *testing.B) { benchLinfNorm(LinfNorm, 500000, t) }
+func BenchmarkLinfDist1(t *testing.B)      { benchLinfDist(LinfDist, 1, t) }
+func BenchmarkLinfDist2(t *testing.B)      { benchLinfDist(LinfDist, 2, t) }
+func BenchmarkLinfDist3(t *testing.B)      { benchLinfDist(LinfDist, 3, t) }
+func BenchmarkLinfDist4(t *testing.B)      { benchLinfDist(LinfDist, 4, t) }
+func BenchmarkLinfDist5(t *testing.B)      { benchLinfDist(LinfDist, 5, t) }
+func BenchmarkLinfDist10(t *testing.B)     { benchLinfDist(LinfDist, 10, t) }
+func BenchmarkLinfDist100(t *testing.B)    { benchLinfDist(LinfDist, 100, t) }
+func BenchmarkLinfDist1000(t *testing.B)   { benchLinfDist(LinfDist, 1000, t) }
+func BenchmarkLinfDist10000(t *testing.B)  { benchLinfDist(LinfDist, 10000, t) }
+func BenchmarkLinfDist100000(t *testing.B) { benchLinfDist(LinfDist, 100000, t) }
+func BenchmarkLinfDist500000(t *testing.B) { benchLinfDist(LinfDist, 500000, t) }
 
-func BenchmarkLLinfNorm1(t *testing.B)      { benchLinfNorm(naiveLinfNorm, 1, t) }
-func BenchmarkLLinfNorm2(t *testing.B)      { benchLinfNorm(naiveLinfNorm, 2, t) }
-func BenchmarkLLinfNorm3(t *testing.B)      { benchLinfNorm(naiveLinfNorm, 3, t) }
-func BenchmarkLLinfNorm4(t *testing.B)      { benchLinfNorm(naiveLinfNorm, 4, t) }
-func BenchmarkLLinfNorm5(t *testing.B)      { benchLinfNorm(naiveLinfNorm, 5, t) }
-func BenchmarkLLinfNorm10(t *testing.B)     { benchLinfNorm(naiveLinfNorm, 10, t) }
-func BenchmarkLLinfNorm100(t *testing.B)    { benchLinfNorm(naiveLinfNorm, 100, t) }
-func BenchmarkLLinfNorm1000(t *testing.B)   { benchLinfNorm(naiveLinfNorm, 1000, t) }
-func BenchmarkLLinfNorm10000(t *testing.B)  { benchLinfNorm(naiveLinfNorm, 10000, t) }
-func BenchmarkLLinfNorm100000(t *testing.B) { benchLinfNorm(naiveLinfNorm, 100000, t) }
-func BenchmarkLLinfNorm500000(t *testing.B) { benchLinfNorm(naiveLinfNorm, 500000, t) }
+func BenchmarkLLinfDist1(t *testing.B)      { benchLinfDist(naiveLinfDist, 1, t) }
+func BenchmarkLLinfDist2(t *testing.B)      { benchLinfDist(naiveLinfDist, 2, t) }
+func BenchmarkLLinfDist3(t *testing.B)      { benchLinfDist(naiveLinfDist, 3, t) }
+func BenchmarkLLinfDist4(t *testing.B)      { benchLinfDist(naiveLinfDist, 4, t) }
+func BenchmarkLLinfDist5(t *testing.B)      { benchLinfDist(naiveLinfDist, 5, t) }
+func BenchmarkLLinfDist10(t *testing.B)     { benchLinfDist(naiveLinfDist, 10, t) }
+func BenchmarkLLinfDist100(t *testing.B)    { benchLinfDist(naiveLinfDist, 100, t) }
+func BenchmarkLLinfDist1000(t *testing.B)   { benchLinfDist(naiveLinfDist, 1000, t) }
+func BenchmarkLLinfDist10000(t *testing.B)  { benchLinfDist(naiveLinfDist, 10000, t) }
+func BenchmarkLLinfDist100000(t *testing.B) { benchLinfDist(naiveLinfDist, 100000, t) }
+func BenchmarkLLinfDist500000(t *testing.B) { benchLinfDist(naiveLinfDist, 500000, t) }

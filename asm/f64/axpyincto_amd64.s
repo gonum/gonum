@@ -42,78 +42,107 @@
 
 #include "textflag.h"
 
-// func DaxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
-TEXT ·AxpyIncTo(SB), NOSPLIT, $0
-	MOVQ  dst_base+0(FP), DI // DI := &dst
-	MOVQ  x_base+48(FP), SI  // SI := &x
-	MOVQ  y_base+72(FP), DX  // DX := &y
-	MOVQ  n+96(FP), CX       // CX := n
-	CMPQ  CX, $0             // if CX == 0 { return }
-	JE    end
-	MOVQ  ix+120(FP), R8
-	MOVQ  iy+128(FP), R9
-	MOVQ  idst+32(FP), R10
-	LEAQ  (SI)(R8*8), SI     // SI = &(x[ix])
-	LEAQ  (DX)(R9*8), DX     // DX = &(y[iy])
-	LEAQ  (DI)(R10*8), DI    // DI = &(dst[idst])
-	MOVQ  incX+104(FP), R8   // R8 = incX * sizeof(float64)
-	SHLQ  $3, R8
-	MOVQ  incY+112(FP), R9   // R9 = incY * sizeof(float64)
-	SHLQ  $3, R9
-	MOVQ  incDst+24(FP), R10 // R10 = incDst * sizeof(float64)
-	SHLQ  $3, R10
-	MOVSD alpha+40(FP), X0
-	MOVSD X0, X1
-	MOVQ  CX, BX
-	ANDQ  $3, BX             // BX = n % 4
-	SHRQ  $2, CX             // CX = floor( n / 4 )
-	JZ    tail_start         // if CX == 0 { goto tail_start }
+#define X_PTR SI
+#define Y_PTR DI
+#define DST_PTR DX
+#define IDX AX
+#define LEN CX
+#define TAIL BX
+#define INC_X R8
+#define INCx3_X R11
+#define INC_Y R9
+#define INCx3_Y R12
+#define INC_DST R10
+#define INCx3_DST R13
 
-loop:  // do {
-	// y[i] += alpha * x[i] unrolled 2x.
-	MOVSD (SI), X2       // X_i = x[i]
-	MOVSD (SI)(R8*1), X3
-	LEAQ  (SI)(R8*2), SI // SI = &(SI[incX*2])
-	MOVSD (SI), X4
-	MOVSD (SI)(R8*1), X5
+// func AxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
+TEXT ·AxpyIncTo(SB), NOSPLIT, $0
+	MOVQ dst_base+0(FP), DST_PTR // DST_PTR := &dst
+	MOVQ x_base+48(FP), X_PTR    // X_PTR := &x
+	MOVQ y_base+72(FP), Y_PTR    // Y_PTR := &y
+	MOVQ n+96(FP), LEN           // LEN := n
+	CMPQ LEN, $0                 // if LEN == 0 { return }
+	JE   end
+
+	MOVQ ix+120(FP), INC_X
+	LEAQ (X_PTR)(INC_X*8), X_PTR       // X_PTR = &(x[ix])
+	MOVQ iy+128(FP), INC_Y
+	LEAQ (Y_PTR)(INC_Y*8), Y_PTR       // Y_PTR = &(dst[idst])
+	MOVQ idst+32(FP), INC_DST
+	LEAQ (DST_PTR)(INC_DST*8), DST_PTR // DST_PTR = &(y[iy])
+
+	MOVQ  incX+104(FP), INC_X    // INC_X = incX * sizeof(float64)
+	SHLQ  $3, INC_X
+	MOVQ  incY+112(FP), INC_Y    // INC_Y = incY * sizeof(float64)
+	SHLQ  $3, INC_Y
+	MOVQ  incDst+24(FP), INC_DST // INC_DST = incDst * sizeof(float64)
+	SHLQ  $3, INC_DST
+	MOVSD alpha+40(FP), X0
+
+	MOVQ LEN, TAIL
+	ANDQ $3, TAIL   // TAIL = n % 4
+	SHRQ $2, LEN    // LEN = floor( n / 4 )
+	JZ   tail_start // if LEN == 0 { goto tail_start }
+
+	MOVSD X0, X1                          // X1 = X0 for pipelining
+	LEAQ  (INC_X)(INC_X*2), INCx3_X       // INCx3_X = INC_X * 3
+	LEAQ  (INC_Y)(INC_Y*2), INCx3_Y       // INCx3_Y = INC_Y * 3
+	LEAQ  (INC_DST)(INC_DST*2), INCx3_DST // INCx3_DST = INC_DST * 3
+
+loop:  // do {  // y[i] += alpha * x[i] unrolled 2x.
+	MOVSD (X_PTR), X2            // X_i = x[i]
+	MOVSD (X_PTR)(INC_X*1), X3
+	MOVSD (X_PTR)(INC_X*2), X4
+	MOVSD (X_PTR)(INCx3_X*1), X5
 
 	MULPD X0, X2 // X_i *= a
 	MULPD X1, X3
 	MULPD X0, X4
 	MULPD X1, X5
 
-	ADDSD (DX), X2       // X_i += y[i]
-	ADDSD (DX)(R9*1), X3
-	LEAQ  (DX)(R9*2), DX // DX = &(DX[incY*2])
-	ADDSD (DX), X4
-	ADDSD (DX)(R9*1), X5
+	ADDSD (Y_PTR), X2            // X_i += y[i]
+	ADDSD (Y_PTR)(INC_Y*1), X3
+	ADDSD (Y_PTR)(INC_Y*2), X4
+	ADDSD (Y_PTR)(INCx3_Y*1), X5
 
-	MOVSD X2, (DI)        // y[i] = X_i
-	MOVSD X3, (DI)(R10*1)
-	LEAQ  (DI)(R10*2), DI // DI = &(DI[incDst*2])
-	MOVSD X4, (DI)
-	MOVSD X5, (DI)(R10*1)
+	MOVSD X2, (DST_PTR)              // y[i] = X_i
+	MOVSD X3, (DST_PTR)(INC_DST*1)
+	MOVSD X4, (DST_PTR)(INC_DST*2)
+	MOVSD X5, (DST_PTR)(INCx3_DST*1)
 
-	LEAQ (SI)(R8*2), SI  // SI = &(SI[incX*2])
-	LEAQ (DX)(R9*2), DX  // DX = &(DX[incY*2]
-	LEAQ (DI)(R10*2), DI // DI = &(DI[incDst*2])
-	LOOP loop            // } while --CX > 0
-	CMPQ BX, $0          // if BX == 0 { return }
+	LEAQ (X_PTR)(INC_X*4), X_PTR       // X_PTR = &(X_PTR[incX*4])
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR       // Y_PTR = &(Y_PTR[incY*4])
+	LEAQ (DST_PTR)(INC_DST*4), DST_PTR // DST_PTR = &(DST_PTR[incDst*4]
+	LOOP loop                          // } while --LEN > 0
+	CMPQ TAIL, $0                      // if TAIL == 0 { return }
 	JE   end
 
 tail_start: // Reset Loop registers
-	MOVQ BX, CX // Loop counter: CX = BX
+	MOVQ TAIL, LEN // Loop counter: LEN = TAIL
+	SHRQ $1, LEN   // LEN = floor( LEN / 2 )
+	JZ   tail_one
 
-tail:  // do {
-	// y[i] += alpha * x[i] for the last n % 4 iterations.
-	MOVSD (SI), X2 // X2 = x[i]
-	MULPD X0, X2   // X2 *= a
-	ADDSD (DX), X2 // X2 += y[i]
-	MOVSD X2, (DI) // y[i] = X2
-	ADDQ  R8, SI   // SI += incX
-	ADDQ  R9, DX   // DX += incY
-	ADDQ  R10, DI  // DI += incDst
-	LOOP  tail     // } while --CX > 0
+tail_two: // do {
+	MOVSD (X_PTR), X2              // X_i = x[i]
+	MOVSD (X_PTR)(INC_X*1), X3
+	MULPD X0, X2                   // X_i *= a
+	MULPD X0, X3
+	ADDSD (Y_PTR), X2              // X_i += y[i]
+	ADDSD (Y_PTR)(INC_Y*1), X3
+	MOVSD X2, (DST_PTR)            // y[i] = X_i
+	MOVSD X3, (DST_PTR)(INC_DST*1)
+
+	LEAQ (X_PTR)(INC_X*2), X_PTR       // X_PTR = &(X_PTR[incX*2])
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR       // Y_PTR = &(Y_PTR[incY*2])
+	LEAQ (DST_PTR)(INC_DST*2), DST_PTR // DST_PTR = &(DST_PTR[incY*2]
+	DECQ LEN
+	JNZ  tail_two                      // } while --LEN > 0
+
+tail_one:
+	MOVSD (X_PTR), X2   // X2 = x[i]
+	MULPD X0, X2        // X2 *= a
+	ADDSD (Y_PTR), X2   // X2 += y[i]
+	MOVSD X2, (DST_PTR) // y[i] = X2
 
 end:
 	RET

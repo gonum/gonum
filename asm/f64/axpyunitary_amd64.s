@@ -42,86 +42,98 @@
 
 #include "textflag.h"
 
+#define X_PTR SI
+#define Y_PTR DI
+#define DST_PTR DI
+#define IDX AX
+#define LEN CX
+#define TAIL BX
+#define INC_X R8
+#define INCx3_X R10
+#define INC_Y R9
+#define INCx3_Y R11
+#define INC_DST R9
+#define INCx3_DST R11
+
 // func AxpyUnitary(alpha float64, x, y []float64)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
-	MOVQ    x_base+8(FP), SI  // SI := &x
-	MOVQ    y_base+32(FP), DI // DI := &y
-	MOVQ    x_len+16(FP), CX  // CX = min( len(x), len(y) )
-	CMPQ    y_len+40(FP), CX
-	CMOVQLE y_len+40(FP), CX
-	CMPQ    CX, $0            // if CX == 0 { return }
+	MOVQ    x_base+8(FP), X_PTR  // X_PTR := &x
+	MOVQ    y_base+32(FP), Y_PTR // Y_PTR := &y
+	MOVQ    x_len+16(FP), LEN    // LEN = min( len(x), len(y) )
+	CMPQ    y_len+40(FP), LEN
+	CMOVQLE y_len+40(FP), LEN
+	CMPQ    LEN, $0              // if LEN == 0 { return }
 	JE      end
-	XORQ    AX, AX
-	MOVSD   alpha+0(FP), X0   // X0 := { alpha, alpha }
+	XORQ    IDX, IDX
+	MOVSD   alpha+0(FP), X0      // X0 := { alpha, alpha }
 	SHUFPD  $0, X0, X0
-	MOVUPS  X0, X1            // X1 := X0   for pipelining
-	MOVQ    DI, BX            // Check memory alignment
-	ANDQ    $15, BX           // BX = &y % 16
-	JZ      no_trim           // if BX == 0 { goto no_trim }
+	MOVUPS  X0, X1               // X1 := X0   for pipelining
+	MOVQ    Y_PTR, TAIL          // Check memory alignment
+	ANDQ    $15, TAIL            // TAIL = &y % 16
+	JZ      no_trim              // if TAIL == 0 { goto no_trim }
 
 	// Align on 16-bit boundary
-	MOVSD (SI), X2 // X2 := x[0]
-	MULSD X0, X2   // X2 *= a
-	ADDSD (DX), X2 // X2 += y[0]
-	MOVSD X2, (DI) // y[0] = X2
-	INCQ  AX       // i++
-	DECQ  CX       // CX--
-	JZ    end      // if CX == 0 { return }
+	MOVSD (X_PTR), X2   // X2 := x[0]
+	MULSD X0, X2        // X2 *= a
+	ADDSD (Y_PTR), X2   // X2 += y[0]
+	MOVSD X2, (DST_PTR) // y[0] = X2
+	INCQ  IDX           // i++
+	DECQ  LEN           // LEN--
+	JZ    end           // if LEN == 0 { return }
 
 no_trim:
-	MOVQ CX, BX
-	ANDQ $7, BX      // BX := n % 8
-	SHRQ $3, CX      // CX = floor( n / 8 )
-	JZ   tail2_start // if CX == 0 { goto tail2_start }
+	MOVQ LEN, TAIL
+	ANDQ $7, TAIL   // TAIL := n % 8
+	SHRQ $3, LEN    // LEN = floor( n / 8 )
+	JZ   tail_start // if LEN == 0 { goto tail2_start }
 
 loop:  // do {
 	// y[i] += alpha * x[i] unrolled 8x.
-	MOVUPS (SI)(AX*8), X2   // X_i = x[i]
-	MOVUPS 16(SI)(AX*8), X3
-	MOVUPS 32(SI)(AX*8), X4
-	MOVUPS 48(SI)(AX*8), X5
+	MOVUPS (X_PTR)(IDX*8), X2   // X_i = x[i]
+	MOVUPS 16(X_PTR)(IDX*8), X3
+	MOVUPS 32(X_PTR)(IDX*8), X4
+	MOVUPS 48(X_PTR)(IDX*8), X5
 
 	MULPD X0, X2 // X_i *= a
 	MULPD X1, X3
 	MULPD X0, X4
 	MULPD X1, X5
 
-	ADDPD (DI)(AX*8), X2   // X_i += y[i]
-	ADDPD 16(DI)(AX*8), X3
-	ADDPD 32(DI)(AX*8), X4
-	ADDPD 48(DI)(AX*8), X5
+	ADDPD (Y_PTR)(IDX*8), X2   // X_i += y[i]
+	ADDPD 16(Y_PTR)(IDX*8), X3
+	ADDPD 32(Y_PTR)(IDX*8), X4
+	ADDPD 48(Y_PTR)(IDX*8), X5
 
-	MOVUPS X2, (DI)(AX*8)   // y[i] = X_i
-	MOVUPS X3, 16(DI)(AX*8)
-	MOVUPS X4, 32(DI)(AX*8)
-	MOVUPS X5, 48(DI)(AX*8)
+	MOVUPS X2, (DST_PTR)(IDX*8)   // y[i] = X_i
+	MOVUPS X3, 16(DST_PTR)(IDX*8)
+	MOVUPS X4, 32(DST_PTR)(IDX*8)
+	MOVUPS X5, 48(DST_PTR)(IDX*8)
 
-	ADDQ $8, AX // i += 2
-	LOOP loop   // } while --CX > 0
-	CMPQ BX, $0 // if BX == 0 { return }
+	ADDQ $8, IDX  // i += 8
+	DECQ LEN
+	JNZ  loop     // } while --LEN > 0
+	CMPQ TAIL, $0 // if TAIL == 0 { return }
 	JE   end
 
-tail2_start: // Reset loop registers
-	MOVQ BX, CX // Loop counter: CX = BX
-	SHRQ $1, CX // CX = floor( BX / 2 )
-	JZ   tail   // if CX == 0 { goto tail }
+tail_start: // Reset loop registers
+	MOVQ TAIL, LEN // Loop counter: LEN = TAIL
+	SHRQ $1, LEN   // LEN = floor( TAIL / 2 )
+	JZ   tail_one  // if TAIL == 0 { goto tail }
 
-tail2:  // do {
-	MOVUPS (SI)(AX*8), X2 // X2 = x[i]
-	MULPD  X0, X2         // X2 *= a
-	ADDPD  (DI)(AX*8), X2 // X2 += y[i]
-	MOVUPS X2, (DI)(AX*8) // y[i] = X2
-	ADDQ   $2, AX         // i += 2
-	LOOP   tail2          // } while --CX > 0
+tail_two: // do {
+	MOVUPS (X_PTR)(IDX*8), X2   // X2 = x[i]
+	MULPD  X0, X2               // X2 *= a
+	ADDPD  (Y_PTR)(IDX*8), X2   // X2 += y[i]
+	MOVUPS X2, (DST_PTR)(IDX*8) // y[i] = X2
+	ADDQ   $2, IDX              // i += 2
+	DECQ   LEN
+	JNZ    tail_two             // } while --LEN > 0
 
-tail:
-	ANDQ $1, BX // BX = BX % 2
-	JZ   end    // if BX % 2 == 0 { return }
-
-	MOVSD (SI)(AX*8), X2 // X2 = x[i]
-	MULSD X0, X2         // X2 *= a
-	ADDSD (DI)(AX*8), X2 // X2 += y[i]
-	MOVSD X2, (DI)(AX*8) // y[i] = X2
+tail_one:
+	MOVSD (X_PTR)(IDX*8), X2   // X2 = x[i]
+	MULSD X0, X2               // X2 *= a
+	ADDSD (Y_PTR)(IDX*8), X2   // X2 += y[i]
+	MOVSD X2, (DST_PTR)(IDX*8) // y[i] = X2
 
 end:
 	RET

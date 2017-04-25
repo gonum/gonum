@@ -54,6 +54,8 @@
 #define INCx3_Y R11
 #define INC_DST R9
 #define INCx3_DST R11
+#define ALPHA X0
+#define ALPHA_2 X1
 
 // func AxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
@@ -74,13 +76,13 @@ TEXT ·AxpyInc(SB), NOSPLIT, $0
 	MOVQ incY+72(FP), INC_Y // INC_Y = incY * sizeof(float64)
 	SHLQ $3, INC_Y
 
-	MOVSD alpha+0(FP), X0 // X0 = { alpha, alpha }
+	MOVSD alpha+0(FP), ALPHA // ALPHA = { alpha, alpha }
 	MOVQ  LEN, TAIL
-	ANDQ  $3, TAIL        // TAIL = n % 4
-	SHRQ  $2, LEN         // LEN = floor( n / 4 )
-	JZ    tail_start      // if LEN == 0 { goto tail_start }
+	ANDQ  $3, TAIL           // TAIL = n % 4
+	SHRQ  $2, LEN            // LEN = floor( n / 4 )
+	JZ    tail_start         // if LEN == 0 { goto tail_start }
 
-	MOVAPS X0, X1                    // X1 = X0  for pipelining
+	MOVAPS ALPHA, ALPHA_2            // ALPHA_2 = ALPHA  for pipelining
 	LEAQ   (INC_X)(INC_X*2), INCx3_X // INCx3_X = INC_X * 3
 	LEAQ   (INC_Y)(INC_Y*2), INCx3_Y // INCx3_Y = INC_Y * 3
 
@@ -90,10 +92,10 @@ loop:  // do {  // y[i] += alpha * x[i] unrolled 4x.
 	MOVSD (X_PTR)(INC_X*2), X4
 	MOVSD (X_PTR)(INCx3_X*1), X5
 
-	MULPD X0, X2 // X_i *= a
-	MULPD X1, X3
-	MULPD X0, X4
-	MULPD X1, X5
+	MULPD ALPHA, X2   // X_i *= a
+	MULPD ALPHA_2, X3
+	MULPD ALPHA, X4
+	MULPD ALPHA_2, X5
 
 	ADDSD (Y_PTR), X2            // X_i += y[i]
 	ADDSD (Y_PTR)(INC_Y*1), X3
@@ -121,8 +123,8 @@ tail_start: // Reset Loop registers
 tail_two: // do {
 	MOVSD (X_PTR), X2              // X_i = x[i]
 	MOVSD (X_PTR)(INC_X*1), X3
-	MULPD X0, X2                   // X_i *= a
-	MULPD X0, X3
+	MULPD ALPHA, X2                // X_i *= a
+	MULPD ALPHA, X3
 	ADDSD (Y_PTR), X2              // X_i += y[i]
 	ADDSD (Y_PTR)(INC_Y*1), X3
 	MOVSD X2, (DST_PTR)            // y[i] = X_i
@@ -134,10 +136,13 @@ tail_two: // do {
 	DECQ LEN
 	JNZ  tail_two                      // } while --LEN > 0
 
+	CMPQ TAIL, $0
+	JE   end      // if TAIL == 0 { goto end }
+
 tail_one:
 	// y[i] += alpha * x[i] for the last n % 4 iterations.
 	MOVSD (X_PTR), X2   // X2 = x[i]
-	MULPD X0, X2        // X2 *= a
+	MULPD ALPHA, X2     // X2 *= a
 	ADDSD (Y_PTR), X2   // X2 += y[i]
 	MOVSD X2, (DST_PTR) // y[i] = X2
 

@@ -54,6 +54,8 @@
 #define INCx3_Y R11
 #define INC_DST R9
 #define INCx3_DST R11
+#define ALPHA X0
+#define ALPHA_2 X1
 
 // func AxpyUnitary(alpha float64, x, y []float64)
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
@@ -65,16 +67,16 @@ TEXT ·AxpyUnitary(SB), NOSPLIT, $0
 	CMPQ    LEN, $0              // if LEN == 0 { return }
 	JE      end
 	XORQ    IDX, IDX
-	MOVSD   alpha+0(FP), X0      // X0 := { alpha, alpha }
-	SHUFPD  $0, X0, X0
-	MOVUPS  X0, X1               // X1 := X0   for pipelining
+	MOVSD   alpha+0(FP), ALPHA   // ALPHA := { alpha, alpha }
+	SHUFPD  $0, ALPHA, ALPHA
+	MOVUPS  ALPHA, ALPHA_2       // ALPHA_2 := ALPHA   for pipelining
 	MOVQ    Y_PTR, TAIL          // Check memory alignment
 	ANDQ    $15, TAIL            // TAIL = &y % 16
 	JZ      no_trim              // if TAIL == 0 { goto no_trim }
 
 	// Align on 16-bit boundary
 	MOVSD (X_PTR), X2   // X2 := x[0]
-	MULSD X0, X2        // X2 *= a
+	MULSD ALPHA, X2     // X2 *= a
 	ADDSD (Y_PTR), X2   // X2 += y[0]
 	MOVSD X2, (DST_PTR) // y[0] = X2
 	INCQ  IDX           // i++
@@ -94,10 +96,10 @@ loop:  // do {
 	MOVUPS 32(X_PTR)(IDX*8), X4
 	MOVUPS 48(X_PTR)(IDX*8), X5
 
-	MULPD X0, X2 // X_i *= a
-	MULPD X1, X3
-	MULPD X0, X4
-	MULPD X1, X5
+	MULPD ALPHA, X2   // X_i *= a
+	MULPD ALPHA_2, X3
+	MULPD ALPHA, X4
+	MULPD ALPHA_2, X5
 
 	ADDPD (Y_PTR)(IDX*8), X2   // X_i += y[i]
 	ADDPD 16(Y_PTR)(IDX*8), X3
@@ -122,16 +124,19 @@ tail_start: // Reset loop registers
 
 tail_two: // do {
 	MOVUPS (X_PTR)(IDX*8), X2   // X2 = x[i]
-	MULPD  X0, X2               // X2 *= a
+	MULPD  ALPHA, X2            // X2 *= a
 	ADDPD  (Y_PTR)(IDX*8), X2   // X2 += y[i]
 	MOVUPS X2, (DST_PTR)(IDX*8) // y[i] = X2
 	ADDQ   $2, IDX              // i += 2
 	DECQ   LEN
 	JNZ    tail_two             // } while --LEN > 0
 
+	CMPQ TAIL, $0
+	JE   end      // if TAIL == 0 { goto end }
+
 tail_one:
 	MOVSD (X_PTR)(IDX*8), X2   // X2 = x[i]
-	MULSD X0, X2               // X2 *= a
+	MULSD ALPHA, X2            // X2 *= a
 	ADDSD (Y_PTR)(IDX*8), X2   // X2 += y[i]
 	MOVSD X2, (DST_PTR)(IDX*8) // y[i] = X2
 

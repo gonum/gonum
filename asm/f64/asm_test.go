@@ -69,6 +69,10 @@ func nonStridedWrite(x []float64, inc int) bool {
 	return false
 }
 
+var align2 = []struct{ x, y int }{{0, 0}, {0, 1}, {1, 0}, {1, 1}}
+var align3 = []struct{ x, y, z int }{
+	{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {1, 0, 0}, {0, 1, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 1}}
+
 type incSet struct {
 	x, y int
 }

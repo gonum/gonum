@@ -4,71 +4,7 @@
 
 package f64
 
-import (
-	"math"
-	"testing"
-)
-
-var (
-	nan = math.NaN()
-	inf = math.Inf(1)
-)
-
-func guardVector(v []float64, g float64, g_ln int) (guarded []float64) {
-	guarded = make([]float64, len(v)+g_ln*2)
-	copy(guarded[g_ln:], v)
-	for i := 0; i < g_ln; i++ {
-		guarded[i] = g
-		guarded[len(guarded)-1-i] = g
-	}
-	return guarded
-}
-
-func isValidGuard(v []float64, g float64, g_ln int) bool {
-	for i := 0; i < g_ln; i++ {
-		if !same(v[i], g) || v[len(v)-1-i] != g {
-			return false
-		}
-	}
-	return true
-}
-
-func guardIncVector(vec []float64, gdVal float64, inc, gdLen int) (guarded []float64) {
-	if inc < 0 {
-		inc = -inc
-	}
-	inrLen := len(vec) * inc
-	guarded = make([]float64, inrLen+gdLen*2)
-	for i := range guarded {
-		guarded[i] = gdVal
-	}
-	for i, v := range vec {
-		guarded[gdLen+i*inc] = v
-	}
-	return guarded
-}
-
-func checkValidIncGuard(t *testing.T, vec []float64, guard_val float64, inc, guard_len int) {
-	s_ln := len(vec) - 2*guard_len
-	for i := range vec {
-		switch {
-		case same(vec[i], guard_val):
-			// Correct value
-		case i < guard_len:
-			t.Errorf("Front guard violated at %d %v", i, vec[:guard_len])
-		case i > guard_len+s_ln:
-			t.Errorf("Back guard violated at %d %v", i-guard_len-s_ln, vec[guard_len+s_ln:])
-		case (i-guard_len)%inc == 0 && (i-guard_len)/inc < len(vec):
-			// Ignore input values
-		default:
-			t.Errorf("Internal guard violated at %d %v", i-guard_len, vec[guard_len:guard_len+s_ln])
-		}
-	}
-}
-
-func same(a, b float64) bool {
-	return a == b || (math.IsNaN(a) && math.IsNaN(b))
-}
+import "testing"
 
 func TestAbsSum(t *testing.T) {
 	var src_gd float64 = 1
@@ -76,34 +12,13 @@ func TestAbsSum(t *testing.T) {
 		ex  float64
 		src []float64
 	}{
-		{
-			ex:  0,
-			src: []float64{},
-		},
-		{
-			ex:  2,
-			src: []float64{2},
-		},
-		{
-			ex:  6,
-			src: []float64{1, 2, 3},
-		},
-		{
-			ex:  6,
-			src: []float64{-1, -2, -3},
-		},
-		{
-			ex:  nan,
-			src: []float64{nan},
-		},
-		{
-			ex:  40,
-			src: []float64{8, -8, 8, -8, 8},
-		},
-		{
-			ex:  5,
-			src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1},
-		},
+		{ex: 0, src: []float64{}},
+		{ex: 2, src: []float64{2}},
+		{ex: 6, src: []float64{1, 2, 3}},
+		{ex: 6, src: []float64{-1, -2, -3}},
+		{ex: nan, src: []float64{nan}},
+		{ex: 40, src: []float64{8, -8, 8, -8, 8}},
+		{ex: 5, src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
 	} {
 		g_ln := 4 + j%2
 		v.src = guardVector(v.src, src_gd, g_ln)
@@ -125,41 +40,13 @@ func TestAbsSumInc(t *testing.T) {
 		ex  float64
 		src []float64
 	}{
-		{
-			inc: 2,
-			ex:  0,
-			src: []float64{},
-		},
-		{
-			inc: 3,
-			ex:  2,
-			src: []float64{2},
-		},
-		{
-			inc: 10,
-			ex:  6,
-			src: []float64{1, 2, 3},
-		},
-		{
-			inc: 5,
-			ex:  6,
-			src: []float64{-1, -2, -3},
-		},
-		{
-			inc: 3,
-			ex:  nan,
-			src: []float64{nan},
-		},
-		{
-			inc: 15,
-			ex:  40,
-			src: []float64{8, -8, 8, -8, 8},
-		},
-		{
-			inc: 1,
-			ex:  5,
-			src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1},
-		},
+		{inc: 2, ex: 0, src: []float64{}},
+		{inc: 3, ex: 2, src: []float64{2}},
+		{inc: 10, ex: 6, src: []float64{1, 2, 3}},
+		{inc: 5, ex: 6, src: []float64{-1, -2, -3}},
+		{inc: 3, ex: nan, src: []float64{nan}},
+		{inc: 15, ex: 40, src: []float64{8, -8, 8, -8, 8}},
+		{inc: 1, ex: 5, src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
 	} {
 		g_ln, ln := 4+j%2, len(v.src)
 		v.src = guardIncVector(v.src, src_gd, v.inc, g_ln)

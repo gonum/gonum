@@ -33,19 +33,17 @@ func isValidGuard(v []float64, g float64, g_ln int) bool {
 	return true
 }
 
-func guardIncVector(vec []float64, guard_val float64, inc, guard_len int) (guarded []float64) {
-	s_ln := len(vec) * inc
-	guarded = make([]float64, s_ln+guard_len*2)
-	for i, j := 0, 0; i < len(guarded); i++ {
-		switch {
-		case i < guard_len, guard_len+s_ln < i:
-			guarded[i] = guard_val
-		case (i-guard_len)%(inc) == 0 && j < len(vec):
-			guarded[i] = vec[j]
-			j++
-		default:
-			guarded[i] = guard_val
-		}
+func guardIncVector(vec []float64, gdVal float64, inc, gdLen int) (guarded []float64) {
+	if inc < 0 {
+		inc = -inc
+	}
+	inrLen := len(vec) * inc
+	guarded = make([]float64, inrLen+gdLen*2)
+	for i := range guarded {
+		guarded[i] = gdVal
+	}
+	for i, v := range vec {
+		guarded[gdLen+i*inc] = v
 	}
 	return guarded
 }

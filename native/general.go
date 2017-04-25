@@ -127,7 +127,4 @@ const (
 	// 1/dlamchS does not overflow, or also the smallest normal number.
 	// For IEEE this is 2^{-1022}.
 	dlamchS = 1.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254)
-
-	smlnum = dlamchS / dlamchP
-	bignum = 1 / smlnum
 )

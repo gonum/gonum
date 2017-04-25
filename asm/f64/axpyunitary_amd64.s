@@ -131,8 +131,8 @@ tail_two: // do {
 	DECQ   LEN
 	JNZ    tail_two             // } while --LEN > 0
 
-	CMPQ TAIL, $0
-	JE   end      // if TAIL == 0 { goto end }
+	ANDQ $1, TAIL
+	JZ   end      // if TAIL == 0 { goto end }
 
 tail_one:
 	MOVSD (X_PTR)(IDX*8), X2   // X2 = x[i]

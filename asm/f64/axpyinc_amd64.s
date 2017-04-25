@@ -136,8 +136,8 @@ tail_two: // do {
 	DECQ LEN
 	JNZ  tail_two                      // } while --LEN > 0
 
-	CMPQ TAIL, $0
-	JE   end      // if TAIL == 0 { goto end }
+	ANDQ $1, TAIL
+	JZ   end      // if TAIL == 0 { goto end }
 
 tail_one:
 	// y[i] += alpha * x[i] for the last n % 4 iterations.

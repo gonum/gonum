@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
+	// dlamchE is the machine epsilon. For IEEE this is 2^{-53}.
 	dlamchE = 1.0 / (1 << 53)
 	dlamchB = 2
 	dlamchP = dlamchB * dlamchE

@@ -5,8 +5,6 @@
 package native
 
 import (
-	"math"
-
 	"github.com/gonum/lapack"
 )
 
@@ -116,22 +114,17 @@ func max(a, b int) int {
 }
 
 const (
-	// dlamchE is the machine epsilon. For IEEE this is 2^-53.
+	// dlamchE is the machine epsilon. For IEEE this is 2^{-53}.
 	dlamchE = 1.0 / (1 << 53)
-
-	// dlamchP is 2 * eps
-	dlamchP = 2 * dlamchE
 
 	// dlamchB is the radix of the machine (the base of the number system).
 	dlamchB = 2
-)
 
-var (
-	// dlamchS is the "safe min", that is, the lowest number such that 1/sfmin does
-	// not overflow. The Netlib code for calculating this number is not correct --
-	// it overflows. Found by comparison with the FORTRAN value.
-	dlamchS = math.Nextafter((4 / math.MaxFloat64), 0)
+	// dlamchP is base * eps.
+	dlamchP = dlamchB * dlamchE
 
-	smlnum = dlamchS / dlamchP
-	bignum = 1 / smlnum
+	// dlamchS is the "safe minimum", that is, the lowest number such that
+	// 1/dlamchS does not overflow, or also the smallest normal number.
+	// For IEEE this is 2^{-1022}.
+	dlamchS = 1.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254)
 )

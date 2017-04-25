@@ -51,6 +51,8 @@ func (impl Implementation) Dlatrs(uplo blas.Uplo, trans blas.Transpose, diag bla
 	if n == 0 {
 		return 0
 	}
+	smlnum := dlamchS / dlamchP
+	bignum := 1 / smlnum
 	scale = 1
 	bi := blas64.Implementation()
 	if !normin {

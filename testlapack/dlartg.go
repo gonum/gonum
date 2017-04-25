@@ -17,11 +17,10 @@ type Dlartger interface {
 }
 
 func DlartgTest(t *testing.T, impl Dlartger) {
-	const (
-		tol   = 1e-14
-		safmn = 2.002083095183101e-146 // math.Pow(dlamchB, math.Floor(math.Log(safmin/eps)/math.Log(dlamchB)/2))
-		safmx = 4.994797680505588e+145 // 1 / safmn
-	)
+	const tol = 1e-14
+	// safmn2 and safmx2 are copied from native.Dlartg.
+	safmn2 := math.Pow(dlamchB, math.Trunc(math.Log(dlamchS/dlamchE)/math.Log(dlamchB)/2))
+	safmx2 := 1 / safmn2
 	rnd := rand.New(rand.NewSource(1))
 	for i := 0; i < 1000; i++ {
 		var f float64
@@ -30,10 +29,10 @@ func DlartgTest(t *testing.T, impl Dlartger) {
 		case 0:
 			// Huge f.
 			fHuge = true
-			f = math.Pow(10, 10-20*rnd.Float64()) * safmx
+			f = math.Pow(10, 10-20*rnd.Float64()) * safmx2
 		case 1:
 			// Tiny f.
-			f = math.Pow(10, 10-20*rnd.Float64()) * safmn
+			f = math.Pow(10, 10-20*rnd.Float64()) * safmn2
 		default:
 			f = rnd.NormFloat64()
 		}
@@ -47,10 +46,10 @@ func DlartgTest(t *testing.T, impl Dlartger) {
 		case 0:
 			// Huge g.
 			gHuge = true
-			g = math.Pow(10, 10-20*rnd.Float64()) * safmx
+			g = math.Pow(10, 10-20*rnd.Float64()) * safmx2
 		case 1:
 			// Tiny g.
-			g = math.Pow(10, 10-20*rnd.Float64()) * safmn
+			g = math.Pow(10, 10-20*rnd.Float64()) * safmn2
 		default:
 			g = rnd.NormFloat64()
 		}

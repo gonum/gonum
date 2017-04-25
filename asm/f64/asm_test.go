@@ -4,7 +4,10 @@
 
 package f64
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 // newGuardedVector allocates a new slice and returns it as three subslices.
 // v is a strided vector that contains elements of data at indices i*inc and
@@ -45,7 +48,7 @@ func equalStrided(ref, x []float64, inc int) bool {
 		inc = -inc
 	}
 	for i, v := range ref {
-		if x[i*inc] != v {
+		if !same(x[i*inc], v) {
 			return false
 		}
 	}
@@ -64,4 +67,55 @@ func nonStridedWrite(x []float64, inc int) bool {
 		}
 	}
 	return false
+}
+
+var ( // Offset sets for testing alignment handling in Unitary assembly functions.
+	align2 = []struct{ x, y int }{{0, 0}, {0, 1}, {1, 0}, {1, 1}}
+	align3 = []struct{ x, y, z int }{
+		{0, 0, 0}, {0, 0, 1}, {0, 1, 0}, {1, 0, 0}, {0, 1, 1}, {1, 0, 1}, {1, 1, 0}, {1, 1, 1}}
+)
+
+type incSet struct {
+	x, y int
+}
+
+func genInc(inc []int) []incSet {
+	n := len(inc)
+	is := make([]incSet, n*n)
+	for x := range inc {
+		for y := range inc {
+			is[x*n+y] = incSet{inc[x], inc[y]}
+		}
+	}
+	return is
+}
+
+type incToSet struct {
+	dst, x, y int
+}
+
+func genIncTo(inc []int) []incToSet {
+	n := len(inc)
+	is := make([]incToSet, n*n)
+	for dst := range inc {
+		for x := range inc {
+			for y := range inc {
+				is[x*n+y] = incToSet{inc[dst], inc[x], inc[y]}
+			}
+		}
+	}
+	return is
+}
+
+var gs []float64
+
+func randomSlice(n, inc int) []float64 {
+	if inc < 0 {
+		inc = -inc
+	}
+	x := make([]float64, (n-1)*inc+1)
+	for i := range x {
+		x[i] = rand.Float64()
+	}
+	return x
 }

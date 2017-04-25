@@ -210,7 +210,7 @@ func benchmarkDscalUnitary(b *testing.B, n int) {
 		ScalUnitary(2, x)
 		ScalUnitary(0.5, x)
 	}
-	gs = x
+	benchSink = x
 }
 
 func BenchmarkDscalUnitaryToN1(b *testing.B)      { benchmarkDscalUnitaryTo(b, 1) }
@@ -231,7 +231,7 @@ func benchmarkDscalUnitaryTo(b *testing.B, n int) {
 	for i := 0; i < b.N; i++ {
 		ScalUnitaryTo(dst, a, x)
 	}
-	gs = dst
+	benchSink = dst
 }
 
 func BenchmarkDscalUnitaryToXN1(b *testing.B)      { benchmarkDscalUnitaryToX(b, 1) }
@@ -251,7 +251,7 @@ func benchmarkDscalUnitaryToX(b *testing.B, n int) {
 		ScalUnitaryTo(x, 2, x)
 		ScalUnitaryTo(x, 0.5, x)
 	}
-	gs = x
+	benchSink = x
 }
 
 func BenchmarkDscalIncN1Inc1(b *testing.B) { benchmarkDscalInc(b, 1, 1) }
@@ -293,7 +293,7 @@ func benchmarkDscalInc(b *testing.B, n, inc int) {
 		ScalInc(2, x, uintptr(n), uintptr(inc))
 		ScalInc(0.5, x, uintptr(n), uintptr(inc))
 	}
-	gs = x
+	benchSink = x
 }
 
 func BenchmarkDscalIncToN1Inc1(b *testing.B) { benchmarkDscalIncTo(b, 1, 1) }
@@ -336,5 +336,5 @@ func benchmarkDscalIncTo(b *testing.B, n, inc int) {
 	for i := 0; i < b.N; i++ {
 		ScalIncTo(dst, uintptr(inc), a, x, uintptr(n), uintptr(inc))
 	}
-	gs = dst
+	benchSink = dst
 }

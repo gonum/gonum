@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	testLen = 1000000
+	testLen = 1e5
 )
 
 var (
-	a = float64(2)
+	a = 2.0
 	x = make([]float64, testLen)
 	y = make([]float64, testLen)
 	z = make([]float64, testLen)
@@ -43,7 +43,7 @@ func BenchmarkAxpyUnitary(t *testing.B) {
 		{"NaiveAxpyUnitary", naiveaxpyu},
 	}
 	for _, test := range tests {
-		for _, ln := range []uintptr{1, 3, 10, 30, 1e2, 3e2, 1e3, 3e3, 1e4, 3e4} {
+		for _, ln := range []uintptr{1, 3, 10, 30, 1e2, 3e2, 1e3, 3e3, 1e4, 3e4, 1e5} {
 			t.Run(fmt.Sprintf("%s-%d", test.name, ln), func(b *testing.B) {
 				b.SetBytes(int64(64 * ln))
 				x, y := x[:ln], y[:ln]
@@ -70,7 +70,7 @@ func BenchmarkAxpyUnitaryTo(t *testing.B) {
 		{"NaiveAxpyUnitaryTo", naiveaxpyut},
 	}
 	for _, test := range tests {
-		for _, ln := range []uintptr{1, 3, 10, 30, 1e2, 3e2, 1e3, 3e3, 1e4, 3e4} {
+		for _, ln := range []uintptr{1, 3, 10, 30, 1e2, 3e2, 1e3, 3e3, 1e4, 3e4, 1e5} {
 			t.Run(fmt.Sprintf("%s-%d", test.name, ln), func(b *testing.B) {
 				b.SetBytes(int64(64 * ln))
 				x, y, z := x[:ln], y[:ln], z[:ln]

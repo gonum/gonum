@@ -15,9 +15,7 @@ import "math"
 //
 // Dlartg is an internal routine. It is exported for testing purposes.
 func (impl Implementation) Dlartg(f, g float64) (cs, sn, r float64) {
-	safmin := dlamchS
-	eps := dlamchE
-	safmn2 := math.Pow(dlamchB, math.Trunc(math.Log(safmin/eps)/math.Log(dlamchB)/2))
+	safmn2 := math.Pow(dlamchB, math.Trunc(math.Log(dlamchS/dlamchE)/math.Log(dlamchB)/2))
 	safmx2 := 1 / safmn2
 	if g == 0 {
 		cs = 1

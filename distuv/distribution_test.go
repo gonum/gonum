@@ -130,7 +130,7 @@ func checkSkewness(t *testing.T, i int, x []float64, s skewnesser, tol float64) 
 	mu3 := stat.Mean(tmp, nil)
 	skewness := mu3 / math.Pow(std, 3)
 	if !floats.EqualWithinAbsOrRel(skewness, s.Skewness(), tol, tol) {
-		t.Errorf("ExKurtosis mismatch case %v: want: %v, got: %v", i, skewness, s.Skewness())
+		t.Errorf("Skewness mismatch case %v: want: %v, got: %v", i, skewness, s.Skewness())
 	}
 }
 

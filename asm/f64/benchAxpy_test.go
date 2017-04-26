@@ -39,7 +39,7 @@ func BenchmarkAxpyUnitary(t *testing.B) {
 		{"NaiveAxpyUnitary", naiveaxpyu},
 	}
 	for _, tst := range tests {
-		for _, ln := range []uintptr{1, 2, 3, 4, 5, 10, 100, 1e4, 5e4, 1e5, 5e5} {
+		for _, ln := range []uintptr{1, 2, 3, 4, 5, 10, 100, 500, 1e3, 5e3, 1e4, 5e4} {
 			t.Run(fmt.Sprintf("%s-%d", tst.name, ln), func(b *testing.B) {
 				b.SetBytes(int64(64 * ln))
 				x, y := x[:ln], y[:ln]
@@ -66,7 +66,7 @@ func BenchmarkAxpyUnitaryTo(t *testing.B) {
 		{"NaiveAxpyUnitaryTo", naiveaxpyut},
 	}
 	for _, tst := range tests {
-		for _, ln := range []uintptr{1, 2, 3, 4, 5, 10, 100, 1e4, 5e4, 1e5, 5e5} {
+		for _, ln := range []uintptr{1, 2, 3, 4, 5, 10, 100, 500, 1e3, 5e3, 1e4, 5e4} {
 			t.Run(fmt.Sprintf("%s-%d", tst.name, ln), func(b *testing.B) {
 				b.SetBytes(int64(64 * ln))
 				x, y, z := x[:ln], y[:ln], z[:ln]
@@ -89,8 +89,9 @@ var increments = []struct {
 	{4, []int{1, 2, 4, 10}},
 	{5, []int{1, 2, 4, 10}},
 	{10, []int{1, 2, 4, 10}},
-	{1e4, []int{1, 2, 4, 10}},
-	{1e5, []int{1, 2, 4, 10, -1, -2, -4, -10}},
+	{500, []int{1, 2, 4, 10}},
+	{1e3, []int{1, 2, 4, 10}},
+	{1e4, []int{1, 2, 4, 10, -1, -2, -4, -10}},
 }
 
 func BenchmarkAxpyInc(t *testing.B) {

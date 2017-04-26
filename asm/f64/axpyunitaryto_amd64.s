@@ -38,106 +38,42 @@
 
 #include "textflag.h"
 
-#define X_PTR SI
-#define Y_PTR DI
-#define DST_PTR DX
-#define IDX AX
-#define LEN CX
-#define TAIL BX
-#define INC_X R8
-#define INCx3_X R10
-#define INC_Y R9
-#define INCx3_Y R11
-#define INC_DST R9
-#define INCx3_DST R11
-#define ALPHA X0
-#define ALPHA_2 X1
-
-// func AxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
+// func DaxpyUnitaryTo(dst []float64, alpha float64, x, y []float64)
+// This function assumes len(y) >= len(x) and len(dst) >= len(x).
 TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
-	MOVQ    dst_base+0(FP), DST_PTR // DST_PTR := &dst
-	MOVQ    x_base+32(FP), X_PTR    // X_PTR := &x
-	MOVQ    y_base+56(FP), Y_PTR    // Y_PTR := &y
-	MOVQ    x_len+40(FP), LEN       // LEN = min( len(x), len(y), len(dst) )
-	CMPQ    y_len+64(FP), LEN
-	CMOVQLE y_len+64(FP), LEN
-	CMPQ    dst_len+8(FP), LEN
-	CMOVQLE dst_len+8(FP), LEN
+	MOVQ   dst+0(FP), R10
+	MOVHPD alpha+24(FP), X7
+	MOVLPD alpha+24(FP), X7
+	MOVQ   x+32(FP), R8
+	MOVQ   x_len+40(FP), DI // n = len(x)
+	MOVQ   y+56(FP), R9
 
-	XORQ   IDX, IDX            // IDX = 0
-	MOVSD  alpha+24(FP), ALPHA
-	SHUFPD $0, ALPHA, ALPHA    // ALPHA := { alpha, alpha }
-	MOVQ   Y_PTR, TAIL         // Check memory alignment
-	ANDQ   $15, TAIL           // TAIL = &y % 16
-	JZ     no_trim             // if TAIL == 0 { goto no_trim }
+	MOVQ $0, SI // i = 0
+	SUBQ $2, DI // n -= 2
+	JL   tail   // if n < 0 goto tail
 
-	// Align on 16-bit boundary
-	MOVSD (X_PTR), X2   // X2 := x[0]
-	MULSD ALPHA, X2     // X2 *= a
-	ADDSD (Y_PTR), X2   // X2 += y[0]
-	MOVSD X2, (DST_PTR) // y[0] = X2
-	INCQ  IDX           // i++
-	DECQ  LEN           // LEN--
-	JZ    end           // if LEN == 0 { return }
+loop:
+	// dst[i] = alpha * x[i] + y[i] unrolled 2x.
+	MOVUPD 0(R8)(SI*8), X0
+	MOVUPD 0(R9)(SI*8), X1
+	MULPD  X7, X0
+	ADDPD  X0, X1
+	MOVUPD X1, 0(R10)(SI*8)
 
-no_trim:
-	MOVQ LEN, TAIL
-	ANDQ $7, TAIL   // TAIL := n % 8
-	SHRQ $3, LEN    // LEN = floor( n / 8 )
-	JZ   tail_start // if LEN == 0 { goto tail_start }
+	ADDQ $2, SI // i += 2
+	SUBQ $2, DI // n -= 2
+	JGE  loop   // if n >= 0 goto loop
 
-	MOVUPS ALPHA, ALPHA_2 // ALPHA_2 := ALPHA  for pipelining
+tail:
+	ADDQ $2, DI // n += 2
+	JLE  end    // if n <= 0 goto end
 
-loop:  // do {
-	// y[i] += alpha * x[i] unrolled 8x.
-	MOVUPS (X_PTR)(IDX*8), X2   // X_i = x[i]
-	MOVUPS 16(X_PTR)(IDX*8), X3
-	MOVUPS 32(X_PTR)(IDX*8), X4
-	MOVUPS 48(X_PTR)(IDX*8), X5
-
-	MULPD ALPHA, X2   // X_i *= alpha
-	MULPD ALPHA_2, X3
-	MULPD ALPHA, X4
-	MULPD ALPHA_2, X5
-
-	ADDPD (Y_PTR)(IDX*8), X2   // X_i += y[i]
-	ADDPD 16(Y_PTR)(IDX*8), X3
-	ADDPD 32(Y_PTR)(IDX*8), X4
-	ADDPD 48(Y_PTR)(IDX*8), X5
-
-	MOVUPS X2, (DST_PTR)(IDX*8)   // y[i] = X_i
-	MOVUPS X3, 16(DST_PTR)(IDX*8)
-	MOVUPS X4, 32(DST_PTR)(IDX*8)
-	MOVUPS X5, 48(DST_PTR)(IDX*8)
-
-	ADDQ $8, IDX  // i += 2
-	DECQ LEN
-	JNZ  loop     // } while --LEN > 0
-	CMPQ TAIL, $0 // if TAIL == 0 { return }
-	JE   end
-
-tail_start: // Reset loop registers
-	MOVQ TAIL, LEN // Loop counter: LEN = TAIL
-	SHRQ $1, LEN   // LEN = floor( TAIL / 2 )
-	JZ   tail_one  // if LEN == 0 { goto tail }
-
-tail_two: // do {
-	MOVUPS (X_PTR)(IDX*8), X2   // X2 = x[i]
-	MULPD  ALPHA, X2            // X2 *= alpha
-	ADDPD  (Y_PTR)(IDX*8), X2   // X2 += y[i]
-	MOVUPS X2, (DST_PTR)(IDX*8) // y[i] = X2
-	ADDQ   $2, IDX              // i += 2
-	DECQ   LEN
-	JNZ    tail_two             // } while --LEN > 0
-
-	ANDQ $1, TAIL
-	JZ   end      // if TAIL == 0 { goto end }
-
-tail_one:
-	MOVSD (X_PTR)(IDX*8), X2   // X2 = x[i]
-	MULSD ALPHA, X2            // X2 *= a
-	ADDSD (Y_PTR)(IDX*8), X2   // X2 += y[i]
-	MOVSD X2, (DST_PTR)(IDX*8) // y[i] = X2
+	// dst[i] = alpha * x[i] + y[i] for the last iteration if n is odd.
+	MOVSD 0(R8)(SI*8), X0
+	MOVSD 0(R9)(SI*8), X1
+	MULSD X7, X0
+	ADDSD X0, X1
+	MOVSD X1, 0(R10)(SI*8)
 
 end:
 	RET

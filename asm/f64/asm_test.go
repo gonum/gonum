@@ -140,6 +140,7 @@ func same(a, b float64) bool {
 }
 
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.
+	align1 = []int{0, 1}
 	align2 = newIncSet(0, 1)
 	align3 = newIncToSet(0, 1)
 )
@@ -187,6 +188,17 @@ func randomSlice(n, inc int) []float64 {
 	x := make([]float64, (n-1)*inc+1)
 	for i := range x {
 		x[i] = rand.Float64()
+	}
+	return x
+}
+
+func randSlice(n, inc int, r *rand.Rand) []float64 {
+	if inc < 0 {
+		inc = -inc
+	}
+	x := make([]float64, (n-1)*inc+1)
+	for i := range x {
+		x[i] = r.Float64()
 	}
 	return x
 }

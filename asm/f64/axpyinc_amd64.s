@@ -39,9 +39,8 @@
 #include "textflag.h"
 
 #define X_PTR SI
-#define Y_PTR DI
-#define DST_PTR DX
-#define IDX AX
+#define Y_PTR DX
+#define DST_PTR DI
 #define LEN CX
 #define TAIL BX
 #define INC_X R8

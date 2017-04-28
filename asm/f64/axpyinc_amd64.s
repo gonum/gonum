@@ -38,71 +38,105 @@
 
 #include "textflag.h"
 
-#define X_PTR R8
-#define Y_PTR R9
+#define X_PTR SI
+#define Y_PTR DI
 #define DST_PTR DI
-#define LEN DX
+#define IDX AX
+#define LEN CX
 #define TAIL BX
-#define INC_X R11
-#define INCx3_X R10
-#define INC_Y R12
-#define INCx3_Y R11
+#define INC_X R8
+#define INCx3_X R11
+#define INC_Y R9
+#define INCx3_Y R12
 #define INC_DST R9
-#define INCx3_DST R11
-#define ALPHA X7
+#define INCx3_DST R12
+#define ALPHA X0
 #define ALPHA_2 X1
 
 // func AxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), ALPHA
-	MOVLPD alpha+0(FP), ALPHA
-	MOVQ   x+8(FP), X_PTR
-	MOVQ   y+32(FP), Y_PTR
-	MOVQ   n+56(FP), LEN
-	MOVQ   incX+64(FP), INC_X
-	MOVQ   incY+72(FP), INC_Y
-	MOVQ   ix+80(FP), SI
-	MOVQ   iy+88(FP), DI
+	MOVQ x_base+8(FP), X_PTR  // X_PTR = &x
+	MOVQ y_base+32(FP), Y_PTR // Y_PTR = &y
+	MOVQ n+56(FP), LEN        // LEN = n
+	CMPQ LEN, $0              // if LEN == 0 { return }
+	JE   end
 
-	MOVQ SI, AX    // nextX = ix
-	MOVQ DI, BX    // nextY = iy
-	ADDQ INC_X, AX // nextX += incX
-	ADDQ INC_Y, BX // nextY += incY
-	SHLQ $1, INC_X // incX *= 2
-	SHLQ $1, INC_Y // incY *= 2
+	MOVQ ix+80(FP), INC_X
+	MOVQ iy+88(FP), INC_Y
+	LEAQ (X_PTR)(INC_X*8), X_PTR // X_PTR = &(x[ix])
+	LEAQ (Y_PTR)(INC_Y*8), Y_PTR // Y_PTR = &(y[iy])
+	MOVQ Y_PTR, DST_PTR          // DST_PTR = Y_PTR  // Write pointer
 
-	SUBQ $2, LEN // n -= 2
-	JL   tail    // if n < 0
+	MOVQ incX+64(FP), INC_X // INC_X = incX * sizeof(float64)
+	SHLQ $3, INC_X
+	MOVQ incY+72(FP), INC_Y // INC_Y = incY * sizeof(float64)
+	SHLQ $3, INC_Y
 
-loop:  // n >= 0
-	// y[i] += alpha * x[i] unrolled 2x.
-	MOVHPD 0(X_PTR)(SI*8), X0
-	MOVHPD 0(Y_PTR)(DI*8), X1
-	MOVLPD 0(X_PTR)(AX*8), X0
-	MOVLPD 0(Y_PTR)(BX*8), X1
-	MULPD  ALPHA, X0
-	ADDPD  X0, X1
-	MOVHPD X1, 0(Y_PTR)(DI*8)
-	MOVLPD X1, 0(Y_PTR)(BX*8)
+	MOVSD alpha+0(FP), ALPHA // ALPHA = alpha
+	MOVQ  LEN, TAIL
+	ANDQ  $3, TAIL           // TAIL = n % 4
+	SHRQ  $2, LEN            // LEN = floor( n / 4 )
+	JZ    tail_start         // if LEN == 0 { goto tail_start }
 
-	ADDQ INC_X, SI // ix += incX
-	ADDQ INC_Y, DI // iy += incY
-	ADDQ INC_X, AX // nextX += incX
-	ADDQ INC_Y, BX // nextY += incY
+	MOVAPS ALPHA, ALPHA_2            // ALPHA_2 = ALPHA  for pipelining
+	LEAQ   (INC_X)(INC_X*2), INCx3_X // INCx3_X = INC_X * 3
+	LEAQ   (INC_Y)(INC_Y*2), INCx3_Y // INCx3_Y = INC_Y * 3
 
-	SUBQ $2, LEN // n -= 2
-	JGE  loop    // if n >= 0 goto loop
+loop:  // do {  // y[i] += alpha * x[i] unrolled 4x.
+	MOVSD (X_PTR), X2            // X_i = x[i]
+	MOVSD (X_PTR)(INC_X*1), X3
+	MOVSD (X_PTR)(INC_X*2), X4
+	MOVSD (X_PTR)(INCx3_X*1), X5
 
-tail:
-	ADDQ $2, LEN // n += 2
-	JLE  end     // if n <= 0
+	MULSD ALPHA, X2   // X_i *= a
+	MULSD ALPHA_2, X3
+	MULSD ALPHA, X4
+	MULSD ALPHA_2, X5
 
-	// y[i] += alpha * x[i] for the last iteration if n is odd.
-	MOVSD 0(X_PTR)(SI*8), X0
-	MOVSD 0(Y_PTR)(DI*8), X1
-	MULSD ALPHA, X0
-	ADDSD X0, X1
-	MOVSD X1, 0(Y_PTR)(DI*8)
+	ADDSD (Y_PTR), X2            // X_i += y[i]
+	ADDSD (Y_PTR)(INC_Y*1), X3
+	ADDSD (Y_PTR)(INC_Y*2), X4
+	ADDSD (Y_PTR)(INCx3_Y*1), X5
+
+	MOVSD X2, (DST_PTR)              // y[i] = X_i
+	MOVSD X3, (DST_PTR)(INC_DST*1)
+	MOVSD X4, (DST_PTR)(INC_DST*2)
+	MOVSD X5, (DST_PTR)(INCx3_DST*1)
+
+	LEAQ (X_PTR)(INC_X*4), X_PTR // X_PTR = &(X_PTR[incX*4])
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR // Y_PTR = &(Y_PTR[incY*4])
+	DECQ LEN
+	JNZ  loop                    // } while --LEN > 0
+	CMPQ TAIL, $0                // if TAIL == 0 { return }
+	JE   end
+
+tail_start: // Reset Loop registers
+	MOVQ TAIL, LEN // Loop counter: LEN = TAIL
+	SHRQ $1, LEN   // LEN = floor( LEN / 2 )
+	JZ   tail_one
+
+tail_two:
+	MOVSD (X_PTR), X2              // X_i = x[i]
+	MOVSD (X_PTR)(INC_X*1), X3
+	MULSD ALPHA, X2                // X_i *= a
+	MULSD ALPHA, X3
+	ADDSD (Y_PTR), X2              // X_i += y[i]
+	ADDSD (Y_PTR)(INC_Y*1), X3
+	MOVSD X2, (DST_PTR)            // y[i] = X_i
+	MOVSD X3, (DST_PTR)(INC_DST*1)
+
+	LEAQ (X_PTR)(INC_X*2), X_PTR // X_PTR = &(X_PTR[incX*2])
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR // Y_PTR = &(Y_PTR[incY*2])
+
+	ANDQ $1, TAIL
+	JZ   end      // if TAIL == 0 { goto end }
+
+tail_one:
+	// y[i] += alpha * x[i] for the last n % 4 iterations.
+	MOVSD (X_PTR), X2   // X2 = x[i]
+	MULSD ALPHA, X2     // X2 *= a
+	ADDSD (Y_PTR), X2   // X2 += y[i]
+	MOVSD X2, (DST_PTR) // y[i] = X2
 
 end:
 	RET

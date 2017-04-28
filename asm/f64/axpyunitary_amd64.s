@@ -38,41 +38,50 @@
 
 #include "textflag.h"
 
+#define X_PTR R8
+#define Y_PTR R9
+#define DST_PTR DI
+#define IDX SI
+#define LEN DI
+#define TAIL BX
+#define ALPHA X7
+#define ALPHA_2 X1
+
 // func DaxpyUnitary(alpha float64, x, y []float64)
 // This function assumes len(y) >= len(x).
 TEXT ·AxpyUnitary(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   x_len+16(FP), DI // n = len(x)
-	MOVQ   y+32(FP), R9
+	MOVHPD alpha+0(FP), ALPHA
+	MOVLPD alpha+0(FP), ALPHA
+	MOVQ   x+8(FP), X_PTR
+	MOVQ   x_len+16(FP), LEN  // n = len(x)
+	MOVQ   y+32(FP), Y_PTR
 
-	MOVQ $0, SI // i = 0
-	SUBQ $2, DI // n -= 2
-	JL   tail   // if n < 0 goto tail
+	MOVQ $0, IDX // i = 0
+	SUBQ $2, LEN // n -= 2
+	JL   tail    // if n < 0 goto tail
 
 loop:
 	// y[i] += alpha * x[i] unrolled 2x.
-	MOVUPD 0(R8)(SI*8), X0
-	MOVUPD 0(R9)(SI*8), X1
-	MULPD  X7, X0
+	MOVUPD 0(X_PTR)(IDX*8), X0
+	MOVUPD 0(Y_PTR)(IDX*8), X1
+	MULPD  ALPHA, X0
 	ADDPD  X0, X1
-	MOVUPD X1, 0(R9)(SI*8)
+	MOVUPD X1, 0(Y_PTR)(IDX*8)
 
-	ADDQ $2, SI // i += 2
-	SUBQ $2, DI // n -= 2
-	JGE  loop   // if n >= 0 goto loop
+	ADDQ $2, IDX // i += 2
+	SUBQ $2, LEN // n -= 2
+	JGE  loop    // if n >= 0 goto loop
 
 tail:
-	ADDQ $2, DI // n += 2
-	JLE  end    // if n <= 0 goto end
+	ADDQ $2, LEN // n += 2
+	JLE  end     // if n <= 0 goto end
 
 	// y[i] += alpha * x[i] for the last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MOVSD 0(R9)(SI*8), X1
-	MULSD X7, X0
+	MOVSD 0(X_PTR)(IDX*8), X0
+	MOVSD 0(Y_PTR)(IDX*8), X1
+	MULSD ALPHA, X0
 	ADDSD X0, X1
-	MOVSD X1, 0(R9)(SI*8)
+	MOVSD X1, 0(Y_PTR)(IDX*8)
 
 end:
 	RET

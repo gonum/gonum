@@ -38,57 +38,71 @@
 
 #include "textflag.h"
 
+#define X_PTR R8
+#define Y_PTR R9
+#define DST_PTR DI
+#define LEN DX
+#define TAIL BX
+#define INC_X R11
+#define INCx3_X R10
+#define INC_Y R12
+#define INCx3_Y R11
+#define INC_DST R9
+#define INCx3_DST R11
+#define ALPHA X7
+#define ALPHA_2 X1
+
 // func AxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyInc(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   y+32(FP), R9
-	MOVQ   n+56(FP), DX
-	MOVQ   incX+64(FP), R11
-	MOVQ   incY+72(FP), R12
+	MOVHPD alpha+0(FP), ALPHA
+	MOVLPD alpha+0(FP), ALPHA
+	MOVQ   x+8(FP), X_PTR
+	MOVQ   y+32(FP), Y_PTR
+	MOVQ   n+56(FP), LEN
+	MOVQ   incX+64(FP), INC_X
+	MOVQ   incY+72(FP), INC_Y
 	MOVQ   ix+80(FP), SI
 	MOVQ   iy+88(FP), DI
 
-	MOVQ SI, AX  // nextX = ix
-	MOVQ DI, BX  // nextY = iy
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
-	SHLQ $1, R11 // incX *= 2
-	SHLQ $1, R12 // incY *= 2
+	MOVQ SI, AX    // nextX = ix
+	MOVQ DI, BX    // nextY = iy
+	ADDQ INC_X, AX // nextX += incX
+	ADDQ INC_Y, BX // nextY += incY
+	SHLQ $1, INC_X // incX *= 2
+	SHLQ $1, INC_Y // incY *= 2
 
-	SUBQ $2, DX // n -= 2
-	JL   tail   // if n < 0
+	SUBQ $2, LEN // n -= 2
+	JL   tail    // if n < 0
 
 loop:  // n >= 0
 	// y[i] += alpha * x[i] unrolled 2x.
-	MOVHPD 0(R8)(SI*8), X0
-	MOVHPD 0(R9)(DI*8), X1
-	MOVLPD 0(R8)(AX*8), X0
-	MOVLPD 0(R9)(BX*8), X1
-	MULPD  X7, X0
+	MOVHPD 0(X_PTR)(SI*8), X0
+	MOVHPD 0(Y_PTR)(DI*8), X1
+	MOVLPD 0(X_PTR)(AX*8), X0
+	MOVLPD 0(Y_PTR)(BX*8), X1
+	MULPD  ALPHA, X0
 	ADDPD  X0, X1
-	MOVHPD X1, 0(R9)(DI*8)
-	MOVLPD X1, 0(R9)(BX*8)
+	MOVHPD X1, 0(Y_PTR)(DI*8)
+	MOVLPD X1, 0(Y_PTR)(BX*8)
 
-	ADDQ R11, SI // ix += incX
-	ADDQ R12, DI // iy += incY
-	ADDQ R11, AX // nextX += incX
-	ADDQ R12, BX // nextY += incY
+	ADDQ INC_X, SI // ix += incX
+	ADDQ INC_Y, DI // iy += incY
+	ADDQ INC_X, AX // nextX += incX
+	ADDQ INC_Y, BX // nextY += incY
 
-	SUBQ $2, DX // n -= 2
-	JGE  loop   // if n >= 0 goto loop
+	SUBQ $2, LEN // n -= 2
+	JGE  loop    // if n >= 0 goto loop
 
 tail:
-	ADDQ $2, DX // n += 2
-	JLE  end    // if n <= 0
+	ADDQ $2, LEN // n += 2
+	JLE  end     // if n <= 0
 
 	// y[i] += alpha * x[i] for the last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MOVSD 0(R9)(DI*8), X1
-	MULSD X7, X0
+	MOVSD 0(X_PTR)(SI*8), X0
+	MOVSD 0(Y_PTR)(DI*8), X1
+	MULSD ALPHA, X0
 	ADDSD X0, X1
-	MOVSD X1, 0(R9)(DI*8)
+	MOVSD X1, 0(Y_PTR)(DI*8)
 
 end:
 	RET

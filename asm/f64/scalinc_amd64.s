@@ -38,43 +38,52 @@
 
 #include "textflag.h"
 
-// func DscalInc(alpha float64, x []float64, n, incX uintptr)
+#define X_PTR R8
+#define DST_PTR R9
+#define LEN DX
+#define TAIL BX
+#define INC_X R10
+#define INCx3_X R11
+#define ALPHA X7
+#define ALPHA_2 X1
+
+// func ScalInc(alpha float64, x []float64, n, incX uintptr)
 TEXT ·ScalInc(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   n+32(FP), DX
-	MOVQ   incX+40(FP), R10
+	MOVHPD alpha+0(FP), ALPHA
+	MOVLPD alpha+0(FP), ALPHA
+	MOVQ   x+8(FP), X_PTR
+	MOVQ   n+32(FP), LEN
+	MOVQ   incX+40(FP), INC_X
 
 	MOVQ $0, SI
-	MOVQ R10, AX // nextX = incX
-	SHLQ $1, R10 // incX *= 2
+	MOVQ INC_X, AX // nextX = incX
+	SHLQ $1, INC_X // incX *= 2
 
-	SUBQ $2, DX // n -= 2
-	JL   tail   // if n < 0
+	SUBQ $2, LEN // n -= 2
+	JL   tail    // if n < 0
 
 loop:
 	// x[i] *= alpha unrolled 2x.
-	MOVHPD 0(R8)(SI*8), X0
-	MOVLPD 0(R8)(AX*8), X0
-	MULPD  X7, X0
-	MOVHPD X0, 0(R8)(SI*8)
-	MOVLPD X0, 0(R8)(AX*8)
+	MOVHPD 0(X_PTR)(SI*8), X0
+	MOVLPD 0(X_PTR)(AX*8), X0
+	MULPD  ALPHA, X0
+	MOVHPD X0, 0(X_PTR)(SI*8)
+	MOVLPD X0, 0(X_PTR)(AX*8)
 
-	ADDQ R10, SI // ix += incX
-	ADDQ R10, AX // nextX += incX
+	ADDQ INC_X, SI // ix += incX
+	ADDQ INC_X, AX // nextX += incX
 
-	SUBQ $2, DX // n -= 2
-	JGE  loop   // if n >= 0 goto loop
+	SUBQ $2, LEN // n -= 2
+	JGE  loop    // if n >= 0 goto loop
 
 tail:
-	ADDQ $2, DX // n += 2
-	JLE  end    // if n <= 0
+	ADDQ $2, LEN // n += 2
+	JLE  end     // if n <= 0
 
 	// x[i] *= alpha for the last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MULSD X7, X0
-	MOVSD X0, 0(R8)(SI*8)
+	MOVSD 0(X_PTR)(SI*8), X0
+	MULSD ALPHA, X0
+	MOVSD X0, 0(X_PTR)(SI*8)
 
 end:
 	RET

@@ -38,42 +38,50 @@
 
 #include "textflag.h"
 
-// func DscalUnitary(alpha float64, x []float64)
-TEXT ·ScalUnitary(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   x_len+16(FP), DI // n = len(x)
+#define X_PTR R8
+#define DST_PTR DX
+#define IDX SI
+#define LEN DI
+#define TAIL BX
+#define ALPHA X7
+#define ALPHA_2 X1
 
-	MOVQ $0, SI // i = 0
-	SUBQ $4, DI // n -= 4
-	JL   tail   // if n < 0 goto tail
+// func ScalUnitary(alpha float64, x []float64)
+TEXT ·ScalUnitary(SB), NOSPLIT, $0
+	MOVHPD alpha+0(FP), ALPHA
+	MOVLPD alpha+0(FP), ALPHA
+	MOVQ   x+8(FP), X_PTR
+	MOVQ   x_len+16(FP), LEN  // n = len(x)
+
+	MOVQ $0, IDX // i = 0
+	SUBQ $4, LEN // n -= 4
+	JL   tail    // if n < 0 goto tail
 
 loop:
 	// x[i] *= alpha unrolled 4x.
-	MOVUPD 0(R8)(SI*8), X0
-	MOVUPD 16(R8)(SI*8), X1
-	MULPD  X7, X0
-	MULPD  X7, X1
-	MOVUPD X0, 0(R8)(SI*8)
-	MOVUPD X1, 16(R8)(SI*8)
+	MOVUPD 0(X_PTR)(IDX*8), X0
+	MOVUPD 16(X_PTR)(IDX*8), X1
+	MULPD  ALPHA, X0
+	MULPD  ALPHA, X1
+	MOVUPD X0, 0(X_PTR)(IDX*8)
+	MOVUPD X1, 16(X_PTR)(IDX*8)
 
-	ADDQ $4, SI // i += 4
-	SUBQ $4, DI // n -= 4
-	JGE  loop   // if n >= 0 goto loop
+	ADDQ $4, IDX // i += 4
+	SUBQ $4, LEN // n -= 4
+	JGE  loop    // if n >= 0 goto loop
 
 tail:
-	ADDQ $4, DI // n += 4
-	JZ   end    // if n == 0 goto end
+	ADDQ $4, LEN // n += 4
+	JZ   end     // if n == 0 goto end
 
 onemore:
 	// x[i] *= alpha for the remaining 1-3 elements.
-	MOVSD 0(R8)(SI*8), X0
-	MULSD X7, X0
-	MOVSD X0, 0(R8)(SI*8)
+	MOVSD 0(X_PTR)(IDX*8), X0
+	MULSD ALPHA, X0
+	MOVSD X0, 0(X_PTR)(IDX*8)
 
-	ADDQ $1, SI  // i++
-	SUBQ $1, DI  // n--
+	ADDQ $1, IDX // i++
+	SUBQ $1, LEN // n--
 	JNZ  onemore // if n != 0 goto onemore
 
 end:

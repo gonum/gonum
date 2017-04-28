@@ -38,50 +38,61 @@
 
 #include "textflag.h"
 
-// func DscalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)
+#define X_PTR R8
+#define DST_PTR R9
+#define LEN DX
+#define TAIL BX
+#define INC_X R10
+#define INCx3_X R11
+#define INC_DST R11
+#define INCx3_DST R11
+#define ALPHA X7
+#define ALPHA_2 X1
+
+// func ScalIncTo(dst []float64, incDst uintptr, alpha float64, x []float64, n, incX uintptr)
 TEXT ·ScalIncTo(SB), NOSPLIT, $0
-	MOVQ   dst+0(FP), R9
-	MOVQ   incDst+24(FP), R11
-	MOVHPD alpha+32(FP), X7
-	MOVLPD alpha+32(FP), X7
-	MOVQ   x+40(FP), R8
-	MOVQ   n+64(FP), DX
-	MOVQ   incX+72(FP), R10
+	MOVQ   dst+0(FP), DST_PTR
+	MOVQ   incDst+24(FP), INC_DST
+	MOVHPD alpha+32(FP), ALPHA
+	MOVLPD alpha+32(FP), ALPHA
+	MOVQ   x+40(FP), X_PTR
+	MOVQ   n+64(FP), LEN
+	MOVQ   incX+72(FP), INC_X
 
 	MOVQ $0, SI
 	MOVQ $0, DI
-	MOVQ R10, AX // nextX = incX
-	MOVQ R11, BX // nextDst = incDst
-	SHLQ $1, R10 // incX *= 2
-	SHLQ $1, R11 // incDst *= 2
+	MOVQ INC_X, AX   // nextX = incX
+	MOVQ INC_DST, BX // nextDst = incDst
+	SHLQ $1, INC_X   // incX *= 2
+	SHLQ $1, INC_DST // incDst *= 2
 
-	SUBQ $2, DX // n -= 2
-	JL   tail   // if n < 0
+	SUBQ $2, LEN // n -= 2
+	JL   tail    // if n < 0
 
 loop:
 	// dst[i] = alpha * x[i] unrolled 2x.
-	MOVHPD 0(R8)(SI*8), X0
-	MOVLPD 0(R8)(AX*8), X0
-	MULPD  X7, X0
-	MOVHPD X0, 0(R9)(DI*8)
-	MOVLPD X0, 0(R9)(BX*8)
+	MOVHPD 0(X_PTR)(SI*8), X0
+	MOVLPD 0(X_PTR)(AX*8), X0
+	MULPD  ALPHA, X0
+	MOVHPD X0, 0(DST_PTR)(DI*8)
+	MOVLPD X0, 0(DST_PTR)(BX*8)
 
-	ADDQ R10, SI // ix += incX
-	ADDQ R10, AX // nextX += incX
-	ADDQ R11, DI // idst += incDst
-	ADDQ R11, BX // nextDst += incDst
+	ADDQ INC_X, SI   // ix += incX
+	ADDQ INC_X, AX   // nextX += incX
+	ADDQ INC_DST, DI // idst += incDst
+	ADDQ INC_DST, BX // nextDst += incDst
 
-	SUBQ $2, DX // n -= 2
-	JGE  loop   // if n >= 0 goto loop
+	SUBQ $2, LEN // n -= 2
+	JGE  loop    // if n >= 0 goto loop
 
 tail:
-	ADDQ $2, DX // n += 2
-	JLE  end    // if n <= 0
+	ADDQ $2, LEN // n += 2
+	JLE  end     // if n <= 0
 
 	// dst[i] = alpha * x[i] for the last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MULSD X7, X0
-	MOVSD X0, 0(R9)(DI*8)
+	MOVSD 0(X_PTR)(SI*8), X0
+	MULSD ALPHA, X0
+	MOVSD X0, 0(DST_PTR)(DI*8)
 
 end:
 	RET

@@ -39,17 +39,11 @@
 #include "textflag.h"
 
 #define X_PTR SI
-#define Y_PTR DI
-#define DST_PTR DX
+#define Y_PTR DX
+#define DST_PTR DI
 #define IDX AX
 #define LEN CX
 #define TAIL BX
-#define INC_X R8
-#define INCx3_X R10
-#define INC_Y R9
-#define INCx3_Y R11
-#define INC_DST R9
-#define INCx3_DST R11
 #define ALPHA X0
 #define ALPHA_2 X1
 

@@ -10,11 +10,16 @@ import (
 	"testing"
 )
 
-var dscalTests = []struct {
+var scalTests = []struct {
 	alpha float64
 	x     []float64
 	want  []float64
 }{
+	{
+		alpha: 0,
+		x:     []float64{},
+		want:  []float64{},
+	},
 	{
 		alpha: 0,
 		x:     []float64{1},
@@ -60,281 +65,115 @@ var dscalTests = []struct {
 		x:     []float64{0, 1, -2, 3, 4, -5, 6, -7, 8, 9},
 		want:  []float64{0, 2, -4, 6, 8, -10, 12, -14, 16, 18},
 	},
+	{
+		alpha: 3,
+		x:     []float64{0, 1, -2, 3, 4, -5, 6, -7, 8, 9, 12},
+		want:  []float64{0, 3, -6, 9, 12, -15, 18, -21, 24, 27, 36},
+	},
 }
 
-func TestDscalUnitary(t *testing.T) {
-	for i, test := range dscalTests {
-		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
+func TestScalUnitary(t *testing.T) {
+	const xGdVal = -0.5
+	for i, test := range scalTests {
+		for _, align := range align1 {
+			prefix := fmt.Sprintf("Test %v (x:%v)", i, align)
+			xgLn := 4 + align
+			xg := guardVector(test.x, xGdVal, xgLn)
+			x := xg[xgLn : len(xg)-xgLn]
 
-		prefix := fmt.Sprintf("test %v (x*=a)", i)
-		x, xFront, xBack := newGuardedVector(test.x, 1)
-		ScalUnitary(test.alpha, x)
+			ScalUnitary(test.alpha, x)
 
-		if !allNaN(xFront) || !allNaN(xBack) {
-			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
-		}
-
-		if !equalStrided(test.want, x, 1) {
-			t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, x)
+			for i := range test.want {
+				if !same(x[i], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
+				}
+			}
+			if !isValidGuard(xg, xGdVal, xgLn) {
+				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
+			}
 		}
 	}
 }
 
-func TestDscalUnitaryTo(t *testing.T) {
-	for i, test := range dscalTests {
-		const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
+func TestScalUnitaryTo(t *testing.T) {
+	const xGdVal, dstGdVal = -1, 0.5
+	rng := rand.New(rand.NewSource(42))
+	for i, test := range scalTests {
+		n := len(test.x)
+		for _, align := range align2 {
+			prefix := fmt.Sprintf("Test %v (x:%v dst:%v)", i, align.x, align.y)
+			xgLn, dgLn := 4+align.x, 4+align.y
+			xg := guardVector(test.x, xGdVal, xgLn)
+			dg := guardVector(randSlice(n, 1, rng), dstGdVal, dgLn)
+			x, dst := xg[xgLn:len(xg)-xgLn], dg[dgLn:len(dg)-dgLn]
 
-		// Test dst = alpha * x.
-		prefix := fmt.Sprintf("test %v (dst=a*x)", i)
-		x, xFront, xBack := newGuardedVector(test.x, 1)
-		dst, dstFront, dstBack := newGuardedVector(test.x, 1)
-		ScalUnitaryTo(dst, test.alpha, x)
+			ScalUnitaryTo(dst, test.alpha, x)
 
-		if !allNaN(xFront) || !allNaN(xBack) {
-			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
-		}
-		if !allNaN(dstFront) || !allNaN(dstBack) {
-			t.Errorf(msgGuard, prefix, "dst", dstFront, dstBack)
-		}
-		if !equalStrided(test.x, x, 1) {
-			t.Errorf("%v: modified read-only x argument", prefix)
-		}
-
-		if !equalStrided(test.want, dst, 1) {
-			t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, dst)
-		}
-
-		// Test x = alpha * x.
-		prefix = fmt.Sprintf("test %v (x=a*x)", i)
-		x, xFront, xBack = newGuardedVector(test.x, 1)
-		ScalUnitaryTo(x, test.alpha, x)
-
-		if !allNaN(xFront) || !allNaN(xBack) {
-			t.Errorf(msgGuard, prefix, "x", xFront, xBack)
-		}
-
-		if !equalStrided(test.want, x, 1) {
-			t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, x)
+			for i := range test.want {
+				if !same(dst[i], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, dst[i], test.want[i])
+				}
+			}
+			if !isValidGuard(xg, xGdVal, xgLn) {
+				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
+			}
+			if !isValidGuard(dg, dstGdVal, dgLn) {
+				t.Errorf(msgGuard, prefix, "y", dg[:dgLn], dg[len(dg)-dgLn:])
+			}
+			if !equalStrided(test.x, x, 1) {
+				t.Errorf("%v: modified read-only x argument", prefix)
+			}
 		}
 	}
 }
 
-func TestDscalInc(t *testing.T) {
-	const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
-
-	for i, test := range dscalTests {
+func TestScalInc(t *testing.T) {
+	const xGdVal = -0.5
+	gdLn := 4
+	for i, test := range scalTests {
 		n := len(test.x)
 		for _, incX := range []int{1, 2, 3, 4, 7, 10} {
-			prefix := fmt.Sprintf("test %v (x*=a), incX = %v", i, incX)
-			x, xFront, xBack := newGuardedVector(test.x, incX)
+			prefix := fmt.Sprintf("Test %v (x:%v)", i, incX)
+			xg := guardIncVector(test.x, xGdVal, incX, gdLn)
+			x := xg[gdLn : len(xg)-gdLn]
+
 			ScalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
-			if !allNaN(xFront) || !allNaN(xBack) {
-				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
+			for i := range test.want {
+				if !same(x[i*incX], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, x[i*incX], test.want[i])
+				}
 			}
-			if nonStridedWrite(x, incX) {
-				t.Errorf("%v: modified x argument at non-stride position", prefix)
-			}
-
-			if !equalStrided(test.want, x, incX) {
-				t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, x)
-			}
+			checkValidIncGuard(t, xg, xGdVal, incX, gdLn)
 		}
 	}
 }
 
-func TestDscalIncTo(t *testing.T) {
-	const msgGuard = "%v: out-of-bounds write to %v argument\nfront guard: %v\nback guard: %v"
-
-	for i, test := range dscalTests {
+func TestScalIncTo(t *testing.T) {
+	const xGdVal, dstGdVal = -1, 0.5
+	gdLn := 4
+	rng := rand.New(rand.NewSource(42))
+	for i, test := range scalTests {
 		n := len(test.x)
+		for _, inc := range newIncSet(1, 2, 3, 4, 7, 10) {
+			prefix := fmt.Sprintf("test %v (x:%v dst:%v)", i, inc.x, inc.y)
+			xg := guardIncVector(test.x, xGdVal, inc.x, gdLn)
+			dg := guardIncVector(randSlice(n, 1, rng), dstGdVal, inc.y, gdLn)
+			x, dst := xg[gdLn:len(xg)-gdLn], dg[gdLn:len(dg)-gdLn]
 
-		for _, incX := range []int{1, 2, 3, 4, 7, 10} {
-			// Test x = alpha * x.
-			prefix := fmt.Sprintf("test %v (x=a*x), incX = %v", i, incX)
-			x, xFront, xBack := newGuardedVector(test.x, incX)
-			ScalIncTo(x, uintptr(incX), test.alpha, x, uintptr(n), uintptr(incX))
+			ScalIncTo(dst, uintptr(inc.y), test.alpha, x, uintptr(n), uintptr(inc.x))
 
-			if !allNaN(xFront) || !allNaN(xBack) {
-				t.Errorf(msgGuard, prefix, "x", xFront, xBack)
-			}
-			if nonStridedWrite(x, incX) {
-				t.Errorf("%v: modified x argument at non-stride position", prefix)
-			}
-			if !equalStrided(test.want, x, incX) {
-				t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, x)
-			}
-
-			for _, incDst := range []int{1, 2, 3, 4, 7, 10} {
-				// Test dst = alpha * x.
-				prefix = fmt.Sprintf("test %v (dst=a*x), incX = %v, incDst = %v", i, incX, incDst)
-				x, xFront, xBack = newGuardedVector(test.x, incX)
-				dst, dstFront, dstBack := newGuardedVector(test.x, incDst)
-				ScalIncTo(dst, uintptr(incDst), test.alpha, x, uintptr(n), uintptr(incX))
-
-				if !allNaN(xFront) || !allNaN(xBack) {
-					t.Errorf(msgGuard, prefix, "x", xFront, xBack)
-				}
-				if !allNaN(dstFront) || !allNaN(dstBack) {
-					t.Errorf(msgGuard, prefix, "dst", dstFront, dstBack)
-				}
-				if nonStridedWrite(x, incX) || !equalStrided(test.x, x, incX) {
-					t.Errorf("%v: modified read-only x argument", prefix)
-				}
-				if nonStridedWrite(dst, incDst) {
-					t.Errorf("%v: modified dst argument at non-stride position", prefix)
-				}
-
-				if !equalStrided(test.want, dst, incDst) {
-					t.Errorf("%v: unexpected result:\nwant: %v\ngot: %v", prefix, test.want, dst)
+			for i := range test.want {
+				if !same(dst[i*inc.y], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, dst[i*inc.y], test.want[i])
 				}
 			}
+			checkValidIncGuard(t, xg, xGdVal, inc.x, gdLn)
+			checkValidIncGuard(t, dg, dstGdVal, inc.y, gdLn)
+			if !equalStrided(test.x, x, inc.x) {
+				t.Errorf("%v: modified read-only x argument", prefix)
+			}
+
 		}
 	}
-}
-
-func BenchmarkDscalUnitaryN1(b *testing.B)      { benchmarkDscalUnitary(b, 1) }
-func BenchmarkDscalUnitaryN2(b *testing.B)      { benchmarkDscalUnitary(b, 2) }
-func BenchmarkDscalUnitaryN3(b *testing.B)      { benchmarkDscalUnitary(b, 3) }
-func BenchmarkDscalUnitaryN4(b *testing.B)      { benchmarkDscalUnitary(b, 4) }
-func BenchmarkDscalUnitaryN10(b *testing.B)     { benchmarkDscalUnitary(b, 10) }
-func BenchmarkDscalUnitaryN100(b *testing.B)    { benchmarkDscalUnitary(b, 100) }
-func BenchmarkDscalUnitaryN1000(b *testing.B)   { benchmarkDscalUnitary(b, 1000) }
-func BenchmarkDscalUnitaryN10000(b *testing.B)  { benchmarkDscalUnitary(b, 10000) }
-func BenchmarkDscalUnitaryN100000(b *testing.B) { benchmarkDscalUnitary(b, 100000) }
-
-func benchmarkDscalUnitary(b *testing.B, n int) {
-	x := randomSlice(n, 1)
-	b.ResetTimer()
-	for i := 0; i < b.N; i += 2 {
-		ScalUnitary(2, x)
-		ScalUnitary(0.5, x)
-	}
-	benchSink = x
-}
-
-func BenchmarkDscalUnitaryToN1(b *testing.B)      { benchmarkDscalUnitaryTo(b, 1) }
-func BenchmarkDscalUnitaryToN2(b *testing.B)      { benchmarkDscalUnitaryTo(b, 2) }
-func BenchmarkDscalUnitaryToN3(b *testing.B)      { benchmarkDscalUnitaryTo(b, 3) }
-func BenchmarkDscalUnitaryToN4(b *testing.B)      { benchmarkDscalUnitaryTo(b, 4) }
-func BenchmarkDscalUnitaryToN10(b *testing.B)     { benchmarkDscalUnitaryTo(b, 10) }
-func BenchmarkDscalUnitaryToN100(b *testing.B)    { benchmarkDscalUnitaryTo(b, 100) }
-func BenchmarkDscalUnitaryToN1000(b *testing.B)   { benchmarkDscalUnitaryTo(b, 1000) }
-func BenchmarkDscalUnitaryToN10000(b *testing.B)  { benchmarkDscalUnitaryTo(b, 10000) }
-func BenchmarkDscalUnitaryToN100000(b *testing.B) { benchmarkDscalUnitaryTo(b, 100000) }
-
-func benchmarkDscalUnitaryTo(b *testing.B, n int) {
-	x := randomSlice(n, 1)
-	dst := randomSlice(n, 1)
-	a := rand.Float64()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		ScalUnitaryTo(dst, a, x)
-	}
-	benchSink = dst
-}
-
-func BenchmarkDscalUnitaryToXN1(b *testing.B)      { benchmarkDscalUnitaryToX(b, 1) }
-func BenchmarkDscalUnitaryToXN2(b *testing.B)      { benchmarkDscalUnitaryToX(b, 2) }
-func BenchmarkDscalUnitaryToXN3(b *testing.B)      { benchmarkDscalUnitaryToX(b, 3) }
-func BenchmarkDscalUnitaryToXN4(b *testing.B)      { benchmarkDscalUnitaryToX(b, 4) }
-func BenchmarkDscalUnitaryToXN10(b *testing.B)     { benchmarkDscalUnitaryToX(b, 10) }
-func BenchmarkDscalUnitaryToXN100(b *testing.B)    { benchmarkDscalUnitaryToX(b, 100) }
-func BenchmarkDscalUnitaryToXN1000(b *testing.B)   { benchmarkDscalUnitaryToX(b, 1000) }
-func BenchmarkDscalUnitaryToXN10000(b *testing.B)  { benchmarkDscalUnitaryToX(b, 10000) }
-func BenchmarkDscalUnitaryToXN100000(b *testing.B) { benchmarkDscalUnitaryToX(b, 100000) }
-
-func benchmarkDscalUnitaryToX(b *testing.B, n int) {
-	x := randomSlice(n, 1)
-	b.ResetTimer()
-	for i := 0; i < b.N; i += 2 {
-		ScalUnitaryTo(x, 2, x)
-		ScalUnitaryTo(x, 0.5, x)
-	}
-	benchSink = x
-}
-
-func BenchmarkDscalIncN1Inc1(b *testing.B) { benchmarkDscalInc(b, 1, 1) }
-
-func BenchmarkDscalIncN2Inc1(b *testing.B)  { benchmarkDscalInc(b, 2, 1) }
-func BenchmarkDscalIncN2Inc2(b *testing.B)  { benchmarkDscalInc(b, 2, 2) }
-func BenchmarkDscalIncN2Inc4(b *testing.B)  { benchmarkDscalInc(b, 2, 4) }
-func BenchmarkDscalIncN2Inc10(b *testing.B) { benchmarkDscalInc(b, 2, 10) }
-
-func BenchmarkDscalIncN3Inc1(b *testing.B)  { benchmarkDscalInc(b, 3, 1) }
-func BenchmarkDscalIncN3Inc2(b *testing.B)  { benchmarkDscalInc(b, 3, 2) }
-func BenchmarkDscalIncN3Inc4(b *testing.B)  { benchmarkDscalInc(b, 3, 4) }
-func BenchmarkDscalIncN3Inc10(b *testing.B) { benchmarkDscalInc(b, 3, 10) }
-
-func BenchmarkDscalIncN4Inc1(b *testing.B)  { benchmarkDscalInc(b, 4, 1) }
-func BenchmarkDscalIncN4Inc2(b *testing.B)  { benchmarkDscalInc(b, 4, 2) }
-func BenchmarkDscalIncN4Inc4(b *testing.B)  { benchmarkDscalInc(b, 4, 4) }
-func BenchmarkDscalIncN4Inc10(b *testing.B) { benchmarkDscalInc(b, 4, 10) }
-
-func BenchmarkDscalIncN10Inc1(b *testing.B)  { benchmarkDscalInc(b, 10, 1) }
-func BenchmarkDscalIncN10Inc2(b *testing.B)  { benchmarkDscalInc(b, 10, 2) }
-func BenchmarkDscalIncN10Inc4(b *testing.B)  { benchmarkDscalInc(b, 10, 4) }
-func BenchmarkDscalIncN10Inc10(b *testing.B) { benchmarkDscalInc(b, 10, 10) }
-
-func BenchmarkDscalIncN1000Inc1(b *testing.B)  { benchmarkDscalInc(b, 1000, 1) }
-func BenchmarkDscalIncN1000Inc2(b *testing.B)  { benchmarkDscalInc(b, 1000, 2) }
-func BenchmarkDscalIncN1000Inc4(b *testing.B)  { benchmarkDscalInc(b, 1000, 4) }
-func BenchmarkDscalIncN1000Inc10(b *testing.B) { benchmarkDscalInc(b, 1000, 10) }
-
-func BenchmarkDscalIncN100000Inc1(b *testing.B)  { benchmarkDscalInc(b, 100000, 1) }
-func BenchmarkDscalIncN100000Inc2(b *testing.B)  { benchmarkDscalInc(b, 100000, 2) }
-func BenchmarkDscalIncN100000Inc4(b *testing.B)  { benchmarkDscalInc(b, 100000, 4) }
-func BenchmarkDscalIncN100000Inc10(b *testing.B) { benchmarkDscalInc(b, 100000, 10) }
-
-func benchmarkDscalInc(b *testing.B, n, inc int) {
-	x := randomSlice(n, inc)
-	b.ResetTimer()
-	for i := 0; i < b.N; i += 2 {
-		ScalInc(2, x, uintptr(n), uintptr(inc))
-		ScalInc(0.5, x, uintptr(n), uintptr(inc))
-	}
-	benchSink = x
-}
-
-func BenchmarkDscalIncToN1Inc1(b *testing.B) { benchmarkDscalIncTo(b, 1, 1) }
-
-func BenchmarkDscalIncToN2Inc1(b *testing.B)  { benchmarkDscalIncTo(b, 2, 1) }
-func BenchmarkDscalIncToN2Inc2(b *testing.B)  { benchmarkDscalIncTo(b, 2, 2) }
-func BenchmarkDscalIncToN2Inc4(b *testing.B)  { benchmarkDscalIncTo(b, 2, 4) }
-func BenchmarkDscalIncToN2Inc10(b *testing.B) { benchmarkDscalIncTo(b, 2, 10) }
-
-func BenchmarkDscalIncToN3Inc1(b *testing.B)  { benchmarkDscalIncTo(b, 3, 1) }
-func BenchmarkDscalIncToN3Inc2(b *testing.B)  { benchmarkDscalIncTo(b, 3, 2) }
-func BenchmarkDscalIncToN3Inc4(b *testing.B)  { benchmarkDscalIncTo(b, 3, 4) }
-func BenchmarkDscalIncToN3Inc10(b *testing.B) { benchmarkDscalIncTo(b, 3, 10) }
-
-func BenchmarkDscalIncToN4Inc1(b *testing.B)  { benchmarkDscalIncTo(b, 4, 1) }
-func BenchmarkDscalIncToN4Inc2(b *testing.B)  { benchmarkDscalIncTo(b, 4, 2) }
-func BenchmarkDscalIncToN4Inc4(b *testing.B)  { benchmarkDscalIncTo(b, 4, 4) }
-func BenchmarkDscalIncToN4Inc10(b *testing.B) { benchmarkDscalIncTo(b, 4, 10) }
-
-func BenchmarkDscalIncToN10Inc1(b *testing.B)  { benchmarkDscalIncTo(b, 10, 1) }
-func BenchmarkDscalIncToN10Inc2(b *testing.B)  { benchmarkDscalIncTo(b, 10, 2) }
-func BenchmarkDscalIncToN10Inc4(b *testing.B)  { benchmarkDscalIncTo(b, 10, 4) }
-func BenchmarkDscalIncToN10Inc10(b *testing.B) { benchmarkDscalIncTo(b, 10, 10) }
-
-func BenchmarkDscalIncToN1000Inc1(b *testing.B)  { benchmarkDscalIncTo(b, 1000, 1) }
-func BenchmarkDscalIncToN1000Inc2(b *testing.B)  { benchmarkDscalIncTo(b, 1000, 2) }
-func BenchmarkDscalIncToN1000Inc4(b *testing.B)  { benchmarkDscalIncTo(b, 1000, 4) }
-func BenchmarkDscalIncToN1000Inc10(b *testing.B) { benchmarkDscalIncTo(b, 1000, 10) }
-
-func BenchmarkDscalIncToN100000Inc1(b *testing.B)  { benchmarkDscalIncTo(b, 100000, 1) }
-func BenchmarkDscalIncToN100000Inc2(b *testing.B)  { benchmarkDscalIncTo(b, 100000, 2) }
-func BenchmarkDscalIncToN100000Inc4(b *testing.B)  { benchmarkDscalIncTo(b, 100000, 4) }
-func BenchmarkDscalIncToN100000Inc10(b *testing.B) { benchmarkDscalIncTo(b, 100000, 10) }
-
-func benchmarkDscalIncTo(b *testing.B, n, inc int) {
-	x := randomSlice(n, inc)
-	dst := randomSlice(n, inc)
-	a := rand.Float64()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		ScalIncTo(dst, uintptr(inc), a, x, uintptr(n), uintptr(inc))
-	}
-	benchSink = dst
 }

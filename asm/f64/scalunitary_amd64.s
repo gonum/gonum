@@ -38,51 +38,75 @@
 
 #include "textflag.h"
 
-#define X_PTR R8
-#define DST_PTR DX
-#define IDX SI
-#define LEN DI
+#define MOVDDUP_ALPHA    LONG $0x44120FF2; WORD $0x0824 // @ MOVDDUP XMM0, 8[RSP]
+
+#define X_PTR SI
+#define DST_PTR DI
+#define IDX AX
+#define LEN CX
 #define TAIL BX
-#define ALPHA X7
+#define ALPHA X0
 #define ALPHA_2 X1
 
 // func ScalUnitary(alpha float64, x []float64)
 TEXT ·ScalUnitary(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), ALPHA
-	MOVLPD alpha+0(FP), ALPHA
-	MOVQ   x+8(FP), X_PTR
-	MOVQ   x_len+16(FP), LEN  // n = len(x)
+	MOVDDUP_ALPHA            // ALPHA = { alpha, alpha }
+	MOVQ x_base+8(FP), X_PTR // X_PTR = &x
+	MOVQ x_len+16(FP), LEN   // LEN = len(x)
+	CMPQ LEN, $0
+	JE   end                 // if LEN == 0 { return }
+	XORQ IDX, IDX            // IDX = 0
 
-	MOVQ $0, IDX // i = 0
-	SUBQ $4, LEN // n -= 4
-	JL   tail    // if n < 0 goto tail
+	MOVQ LEN, TAIL
+	ANDQ $7, TAIL   // TAIL = LEN % 8
+	SHRQ $3, LEN    // LEN = floor( LEN / 8 )
+	JZ   tail_start // if LEN == 0 { goto tail_start }
 
-loop:
-	// x[i] *= alpha unrolled 4x.
-	MOVUPD 0(X_PTR)(IDX*8), X0
-	MOVUPD 16(X_PTR)(IDX*8), X1
-	MULPD  ALPHA, X0
-	MULPD  ALPHA, X1
-	MOVUPD X0, 0(X_PTR)(IDX*8)
-	MOVUPD X1, 16(X_PTR)(IDX*8)
+	MOVUPS ALPHA, ALPHA_2
 
-	ADDQ $4, IDX // i += 4
-	SUBQ $4, LEN // n -= 4
-	JGE  loop    // if n >= 0 goto loop
+loop:  // do {  // x[i] *= alpha unrolled 8x.
+	MOVUPS (X_PTR)(IDX*8), X2   // X_i = x[i]
+	MOVUPS 16(X_PTR)(IDX*8), X3
+	MOVUPS 32(X_PTR)(IDX*8), X4
+	MOVUPS 48(X_PTR)(IDX*8), X5
 
-tail:
-	ADDQ $4, LEN // n += 4
-	JZ   end     // if n == 0 goto end
+	MULPD ALPHA, X2   // X_i *= ALPHA
+	MULPD ALPHA_2, X3
+	MULPD ALPHA, X4
+	MULPD ALPHA_2, X5
 
-onemore:
-	// x[i] *= alpha for the remaining 1-3 elements.
-	MOVSD 0(X_PTR)(IDX*8), X0
-	MULSD ALPHA, X0
-	MOVSD X0, 0(X_PTR)(IDX*8)
+	MOVUPS X2, (X_PTR)(IDX*8)   // x[i] = X_i
+	MOVUPS X3, 16(X_PTR)(IDX*8)
+	MOVUPS X4, 32(X_PTR)(IDX*8)
+	MOVUPS X5, 48(X_PTR)(IDX*8)
 
-	ADDQ $1, IDX // i++
-	SUBQ $1, LEN // n--
-	JNZ  onemore // if n != 0 goto onemore
+	ADDQ $8, IDX  // i += 8
+	DECQ LEN
+	JNZ  loop     // while --LEN > 0
+	CMPQ TAIL, $0
+	JE   end      // if TAIL == 0 { return }
+
+tail_start: // Reset loop registers
+	MOVQ TAIL, LEN // Loop counter: LEN = TAIL
+	SHRQ $1, LEN   // LEN = floor( TAIL / 2 )
+	JZ   tail_one  // if n == 0 goto end
+
+tail_two: // do {
+	MOVUPS (X_PTR)(IDX*8), X2 // X_i = x[i]
+	MULPD  ALPHA, X2          // X_i *= ALPHA
+	MOVUPS X2, (X_PTR)(IDX*8) // x[i] = X_i
+	ADDQ   $2, IDX            // i += 2
+	DECQ   LEN
+	JNZ    tail_two           // while --LEN > 0
+
+	ANDQ $1, TAIL
+	JZ   end      // if TAIL == 0 { return }
+
+tail_one:
+	// x[i] *= alpha for the remaining element.
+	MOVSD (X_PTR)(IDX*8), X2
+	MULSD ALPHA, X2
+	MOVSD X2, (X_PTR)(IDX*8)
 
 end:
 	RET

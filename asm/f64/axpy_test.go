@@ -23,6 +23,13 @@ var axpyTests = []struct {
 }{
 	{
 		alpha:   0,
+		x:       []float64{},
+		y:       []float64{},
+		want:    []float64{},
+		wantRev: []float64{},
+	},
+	{
+		alpha:   0,
 		x:       []float64{2},
 		y:       []float64{-3},
 		want:    []float64{-3},

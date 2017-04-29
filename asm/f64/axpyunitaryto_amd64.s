@@ -58,6 +58,9 @@ TEXT ·AxpyUnitaryTo(SB), NOSPLIT, $0
 	CMPQ    dst_len+8(FP), LEN
 	CMOVQLE dst_len+8(FP), LEN
 
+	CMPQ LEN, $0
+	JE   end     // if LEN == 0 { return }
+
 	XORQ   IDX, IDX            // IDX = 0
 	MOVSD  alpha+24(FP), ALPHA
 	SHUFPD $0, ALPHA, ALPHA    // ALPHA := { alpha, alpha }

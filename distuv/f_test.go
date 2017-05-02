@@ -85,4 +85,5 @@ func testF(t *testing.T, f F, i int) {
 	checkVarAndStd(t, i, x, f, tol)
 	checkExKurtosis(t, i, x, f, 5e-2)
 	checkSkewness(t, i, x, f, tol)
+	checkQuantileCDFSurvival(t, i, x, f, 1e-3)
 }

@@ -74,4 +74,5 @@ func testChiSquared(t *testing.T, c ChiSquared, i int) {
 	checkVarAndStd(t, i, x, c, tol)
 	checkExKurtosis(t, i, x, c, 5e-2)
 	checkProbContinuous(t, i, x, c, 1e-3)
+	checkQuantileCDFSurvival(t, i, x, c, 1e-3)
 }

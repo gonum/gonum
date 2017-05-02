@@ -76,6 +76,15 @@ func (f F) Prob(x float64) float64 {
 	return math.Exp(f.LogProb(x))
 }
 
+// Quantile returns the inverse of the cumulative distribution function.
+func (f F) Quantile(p float64) float64 {
+	if p < 0 || p > 1 {
+		panic(badPercentile)
+	}
+	y := mathext.InvRegIncBeta(0.5*f.D1, 0.5*f.D2, p)
+	return f.D2 * y / (f.D1 * (1 - y))
+}
+
 // Rand returns a random sample drawn from the distribution.
 func (f F) Rand() float64 {
 	u1 := ChiSquared{f.D1, f.Source}.Rand()
@@ -103,6 +112,11 @@ func (f F) StdDev() float64 {
 		return math.NaN()
 	}
 	return math.Sqrt(f.Variance())
+}
+
+// Survival returns the survival function (complementary CDF) at x.
+func (f F) Survival(x float64) float64 {
+	return 1 - f.CDF(x)
 }
 
 // Variance returns the variance of the probability distribution.

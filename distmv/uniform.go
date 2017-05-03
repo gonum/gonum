@@ -97,6 +97,16 @@ func (u *Uniform) Dim() int {
 	return u.dim
 }
 
+// Entropy returns the differential entropy of the distribution.
+func (u *Uniform) Entropy() float64 {
+	// Entropy is log of the volume.
+	var logVol float64
+	for _, b := range u.bounds {
+		logVol += math.Log(b.Max - b.Min)
+	}
+	return logVol
+}
+
 // LogProb computes the log of the pdf of the point x.
 func (u *Uniform) LogProb(x []float64) float64 {
 	dim := u.dim

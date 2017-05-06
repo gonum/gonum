@@ -63,6 +63,21 @@ func NewUnitUniform(dim int, src *rand.Source) *Uniform {
 	}
 }
 
+// Bounds returns the bounds on the variables of the distribution. If the input
+// is nil, a new slice is allocated and returned. If the input is non-nil, then
+// the bounds are stored in-place into the input argument, and Bounds will panic
+// if len(bounds) != u.Dim().
+func (u *Uniform) Bounds(bounds []Bound) []Bound {
+	if bounds == nil {
+		bounds = make([]Bound, u.Dim())
+	}
+	if len(bounds) != u.Dim() {
+		panic(badInputLength)
+	}
+	copy(bounds, u.bounds)
+	return bounds
+}
+
 // CDF returns the multidimensional cumulative distribution function of the
 // probability distribution at the point x. If p is non-nil, the CDF is stored
 // in-place into the first argument, otherwise a new slice is allocated and

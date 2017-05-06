@@ -38,22 +38,68 @@ func TestBhattacharyyaNormal(t *testing.T) {
 		if !ok {
 			panic("bad test")
 		}
-		lBhatt := make([]float64, test.samples)
-		x := make([]float64, a.Dim())
-		for i := 0; i < test.samples; i++ {
-			// Do importance sampling over a: \int sqrt(a*b)/a * a dx
-			a.Rand(x)
-			pa := a.LogProb(x)
-			pb := b.LogProb(x)
-			lBhatt[i] = 0.5*pb - 0.5*pa
-		}
-		logBc := floats.LogSumExp(lBhatt) - math.Log(float64(test.samples))
-		db := -logBc
+		want := bhattacharyyaSample(a.Dim(), test.samples, a, b)
 		got := Bhattacharyya{}.DistNormal(a, b)
-		if math.Abs(db-got) > test.tol {
-			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, db)
+		if math.Abs(want-got) > test.tol {
+			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
+		}
+
+		// Bhattacharyya should by symmetric
+		got2 := Bhattacharyya{}.DistNormal(b, a)
+		if math.Abs(got-got2) > 1e-14 {
+			t.Errorf("Bhattacharyya distance not symmetric")
 		}
 	}
+}
+
+func TestBhattacharyyaUniform(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for cas, test := range []struct {
+		a, b    *Uniform
+		samples int
+		tol     float64
+	}{
+		{
+			a:       NewUniform([]Bound{{-3, 2}, {-5, 8}}, rnd),
+			b:       NewUniform([]Bound{{-4, 1}, {-7, 10}}, rnd),
+			samples: 100000,
+			tol:     1e-2,
+		},
+		{
+			a:       NewUniform([]Bound{{-3, 2}, {-5, 8}}, rnd),
+			b:       NewUniform([]Bound{{-5, -4}, {-7, 10}}, rnd),
+			samples: 100000,
+			tol:     1e-2,
+		},
+	} {
+		a, b := test.a, test.b
+		want := bhattacharyyaSample(a.Dim(), test.samples, a, b)
+		got := Bhattacharyya{}.DistUniform(a, b)
+		if math.Abs(want-got) > test.tol {
+			t.Errorf("Bhattacharyya mismatch, case %d: got %v, want %v", cas, got, want)
+		}
+		// Bhattacharyya should by symmetric
+		got2 := Bhattacharyya{}.DistUniform(b, a)
+		if math.Abs(got-got2) > 1e-14 {
+			t.Errorf("Bhattacharyya distance not symmetric")
+		}
+	}
+}
+
+// bhattacharyyaSample finds an estimate of the Bhattacharyya coefficient through
+// sampling.
+func bhattacharyyaSample(dim, samples int, l RandLogProber, r LogProber) float64 {
+	lBhatt := make([]float64, samples)
+	x := make([]float64, dim)
+	for i := 0; i < samples; i++ {
+		// Do importance sampling over a: \int sqrt(a*b)/a * a dx
+		l.Rand(x)
+		pa := l.LogProb(x)
+		pb := r.LogProb(x)
+		lBhatt[i] = 0.5*pb - 0.5*pa
+	}
+	logBc := floats.LogSumExp(lBhatt) - math.Log(float64(samples))
+	return -logBc
 }
 
 func TestCrossEntropyNormal(t *testing.T) {
@@ -139,7 +185,7 @@ func TestHellingerNormal(t *testing.T) {
 	}
 }
 
-func TestKullbackLieblerNormal(t *testing.T) {
+func TestKullbackLeiblerNormal(t *testing.T) {
 	for cas, test := range []struct {
 		am, bm  []float64
 		ac, bc  *mat64.SymDense
@@ -164,18 +210,52 @@ func TestKullbackLieblerNormal(t *testing.T) {
 		if !ok {
 			panic("bad test")
 		}
-		var klmc float64
-		x := make([]float64, a.Dim())
-		for i := 0; i < test.samples; i++ {
-			a.Rand(x)
-			pa := a.LogProb(x)
-			pb := b.LogProb(x)
-			klmc += pa - pb
-		}
-		klmc /= float64(test.samples)
-		kl := KullbackLeibler{}.DistNormal(a, b)
-		if !floats.EqualWithinAbsOrRel(kl, klmc, test.tol, test.tol) {
-			t.Errorf("Case %d, KL mismatch: got %v, want %v", cas, kl, klmc)
+		want := klSample(a.Dim(), test.samples, a, b)
+		got := KullbackLeibler{}.DistNormal(a, b)
+		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+			t.Errorf("Case %d, KL mismatch: got %v, want %v", cas, got, want)
 		}
 	}
+}
+
+func TestKullbackLeiblerUniform(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for cas, test := range []struct {
+		a, b    *Uniform
+		samples int
+		tol     float64
+	}{
+		{
+			a:       NewUniform([]Bound{{-5, 2}, {-7, 12}}, rnd),
+			b:       NewUniform([]Bound{{-4, 1}, {-7, 10}}, rnd),
+			samples: 100000,
+			tol:     1e-2,
+		},
+		{
+			a:       NewUniform([]Bound{{-5, 2}, {-7, 12}}, rnd),
+			b:       NewUniform([]Bound{{-9, -6}, {-7, 10}}, rnd),
+			samples: 100000,
+			tol:     1e-2,
+		},
+	} {
+		a, b := test.a, test.b
+		want := klSample(a.Dim(), test.samples, a, b)
+		got := KullbackLeibler{}.DistUniform(a, b)
+		if math.Abs(want-got) > test.tol {
+			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
+		}
+	}
+}
+
+// klSample finds an estimate of the Kullback-Leibler Divergence through sampling.
+func klSample(dim, samples int, l RandLogProber, r LogProber) float64 {
+	var klmc float64
+	x := make([]float64, dim)
+	for i := 0; i < samples; i++ {
+		l.Rand(x)
+		pa := l.LogProb(x)
+		pb := r.LogProb(x)
+		klmc += pa - pb
+	}
+	return klmc / float64(samples)
 }

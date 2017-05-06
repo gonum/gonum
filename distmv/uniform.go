@@ -18,11 +18,11 @@ type Bound struct {
 type Uniform struct {
 	bounds []Bound
 	dim    int
-	src    *rand.Source
+	src    *rand.Rand
 }
 
 // NewUniform creates a new uniform distribution with the given bounds.
-func NewUniform(bnds []Bound, src *rand.Source) *Uniform {
+func NewUniform(bnds []Bound, src *rand.Rand) *Uniform {
 	dim := len(bnds)
 	if dim == 0 {
 		panic(badZeroDimension)
@@ -47,7 +47,7 @@ func NewUniform(bnds []Bound, src *rand.Source) *Uniform {
 // NewUnitUniform creates a new Uniform distribution over the dim-dimensional
 // unit hypercube. That is, a uniform distribution where each dimension has
 // Min = 0 and Max = 1.
-func NewUnitUniform(dim int, src *rand.Source) *Uniform {
+func NewUnitUniform(dim int, src *rand.Rand) *Uniform {
 	if dim <= 0 {
 		panic(nonPosDimension)
 	}

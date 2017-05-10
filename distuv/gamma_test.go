@@ -59,4 +59,5 @@ func testGamma(t *testing.T, f Gamma, i int) {
 	checkVarAndStd(t, i, x, f, 2e-2)
 	checkExKurtosis(t, i, x, f, 5e-2)
 	checkProbContinuous(t, i, x, f, 1e-3)
+	checkQuantileCDFSurvival(t, i, x, f, 1e-2)
 }

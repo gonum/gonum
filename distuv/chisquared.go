@@ -72,9 +72,25 @@ func (c ChiSquared) Rand() float64 {
 	return Gamma{c.K / 2, 0.5, c.Src}.Rand()
 }
 
+// Quantile returns the inverse of the cumulative distribution function.
+func (c ChiSquared) Quantile(p float64) float64 {
+	if p < 0 || p > 1 {
+		panic(badPercentile)
+	}
+	return mathext.GammaIncInv(0.5*c.K, p) * 2
+}
+
 // StdDev returns the standard deviation of the probability distribution.
 func (c ChiSquared) StdDev() float64 {
 	return math.Sqrt(c.Variance())
+}
+
+// Survival returns the survival function (complementary CDF) at x.
+func (c ChiSquared) Survival(x float64) float64 {
+	if x < 0 {
+		return 1
+	}
+	return mathext.GammaIncComp(0.5*c.K, 0.5*x)
 }
 
 // Variance returns the variance of the probability distribution.

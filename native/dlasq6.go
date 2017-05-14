@@ -12,12 +12,7 @@ import "math"
 // n0 is the zero-based last index.
 //
 // Dlasq6 is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int, dmin, dmin1, dmin2, dn, dnm1, dnm2 float64) (dminOut, dmin1Out, dmin2Out, dnOut, dnm1Out, dnm2Out float64) {
-	// TODO(btracey): It seems like outputs listed in the reference implementation
-	// are actually true outputs, unlike other functions where the value is
-	// preserved through the call. When a more full test suite exists, make them
-	// true outputs if it turns out the value does not need to be preserved through
-	// the call.
+func (impl Implementation) Dlasq6(i0, n0 int, z []float64, pp int) (dmin, dmin1, dmin2, dn, dnm1, dnm2 float64) {
 	if len(z) < 4*(n0+1) {
 		panic(badZ)
 	}

@@ -142,7 +142,7 @@ loop:
 	}
 
 	// Risk of underflow.
-	dmin, dmin1, dmin2, dn, dn1, dn2 = impl.Dlasq6(i0, n0, z, pp, dmin, dmin1, dmin2, dn, dn1, dn2)
+	dmin, dmin1, dmin2, dn, dn1, dn2 = impl.Dlasq6(i0, n0, z, pp)
 	nDiv += n0 - i0 + 2
 	iter++
 	tau = 0

@@ -98,7 +98,7 @@ func (impl Implementation) Dlasq3(i0, n0 int, z []float64, pp int, dmin, sigma, 
 	// Call dqds until dmin > 0.
 loop:
 	for {
-		i0, n0, pp, tau, sigma, dmin, dmin1, dmin2, dn, dn1, dn2 = impl.Dlasq5(i0, n0, z, pp, tau, sigma, dmin, dmin1, dmin2, dn, dn1, dn2)
+		i0, n0, pp, tau, sigma, dmin, dmin1, dmin2, dn, dn1, dn2 = impl.Dlasq5(i0, n0, z, pp, tau, sigma)
 
 		nDiv += n0 - i0 + 2
 		iter++

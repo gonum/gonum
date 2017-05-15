@@ -10,13 +10,7 @@ import "math"
 // i0 and n0 are zero-indexed.
 //
 // Dlasq5 is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dlasq5(i0, n0 int, z []float64, pp int, tau, sigma, dmin, dmin1, dmin2, dn, dnm1, dnm2 float64) (i0Out, n0Out, ppOut int, tauOut, sigmaOut, dminOut, dmin1Out, dmin2Out, dnOut, dnm1Out, dnm2Out float64) {
-	// TODO(btracey): It seems like outputs listed in the reference implementation
-	// are actually true outputs, unlike other functions where the value is
-	// preserved through the call. When a more full test suite exists, make them
-	// true outputs if it turns out the value does not need to be preserved through
-	// the call.
-
+func (impl Implementation) Dlasq5(i0, n0 int, z []float64, pp int, tau, sigma float64) (i0Out, n0Out, ppOut int, tauOut, sigmaOut, dmin, dmin1, dmin2, dn, dnm1, dnm2 float64) {
 	// The lapack function has inputs for ieee and eps, but Go requires ieee so
 	// these are unnecessary.
 	if n0-i0-1 <= 0 {

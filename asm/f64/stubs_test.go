@@ -9,26 +9,26 @@ import "testing"
 func TestL1Norm(t *testing.T) {
 	var src_gd float64 = 1
 	for j, v := range []struct {
-		ex  float64
-		src []float64
+		want float64
+		x    []float64
 	}{
-		{ex: 0, src: []float64{}},
-		{ex: 2, src: []float64{2}},
-		{ex: 6, src: []float64{1, 2, 3}},
-		{ex: 6, src: []float64{-1, -2, -3}},
-		{ex: nan, src: []float64{nan}},
-		{ex: 40, src: []float64{8, -8, 8, -8, 8}},
-		{ex: 5, src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
+		{want: 0, x: []float64{}},
+		{want: 2, x: []float64{2}},
+		{want: 6, x: []float64{1, 2, 3}},
+		{want: 6, x: []float64{-1, -2, -3}},
+		{want: nan, x: []float64{nan}},
+		{want: 40, x: []float64{8, -8, 8, -8, 8}},
+		{want: 5, x: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
 	} {
 		g_ln := 4 + j%2
-		v.src = guardVector(v.src, src_gd, g_ln)
-		src := v.src[g_ln : len(v.src)-g_ln]
+		v.x = guardVector(v.x, src_gd, g_ln)
+		src := v.x[g_ln : len(v.x)-g_ln]
 		ret := L1Norm(src)
-		if !same(ret, v.ex) {
-			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.ex)
+		if !same(ret, v.want) {
+			t.Errorf("Test %d L1Norm error Got: %f Expected: %f", j, ret, v.want)
 		}
-		if !isValidGuard(v.src, src_gd, g_ln) {
-			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		if !isValidGuard(v.x, src_gd, g_ln) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.x[:g_ln], v.x[len(v.x)-g_ln:])
 		}
 	}
 }
@@ -36,26 +36,26 @@ func TestL1Norm(t *testing.T) {
 func TestL1NormInc(t *testing.T) {
 	var src_gd float64 = 1
 	for j, v := range []struct {
-		inc int
-		ex  float64
-		src []float64
+		inc  int
+		want float64
+		x    []float64
 	}{
-		{inc: 2, ex: 0, src: []float64{}},
-		{inc: 3, ex: 2, src: []float64{2}},
-		{inc: 10, ex: 6, src: []float64{1, 2, 3}},
-		{inc: 5, ex: 6, src: []float64{-1, -2, -3}},
-		{inc: 3, ex: nan, src: []float64{nan}},
-		{inc: 15, ex: 40, src: []float64{8, -8, 8, -8, 8}},
-		{inc: 1, ex: 5, src: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
+		{inc: 2, want: 0, x: []float64{}},
+		{inc: 3, want: 2, x: []float64{2}},
+		{inc: 10, want: 6, x: []float64{1, 2, 3}},
+		{inc: 5, want: 6, x: []float64{-1, -2, -3}},
+		{inc: 3, want: nan, x: []float64{nan}},
+		{inc: 15, want: 40, x: []float64{8, -8, 8, -8, 8}},
+		{inc: 1, want: 5, x: []float64{0, 1, 0, -1, 0, 1, 0, -1, 0, 1}},
 	} {
-		g_ln, ln := 4+j%2, len(v.src)
-		v.src = guardIncVector(v.src, src_gd, v.inc, g_ln)
-		src := v.src[g_ln : len(v.src)-g_ln]
+		g_ln, ln := 4+j%2, len(v.x)
+		v.x = guardIncVector(v.x, src_gd, v.inc, g_ln)
+		src := v.x[g_ln : len(v.x)-g_ln]
 		ret := L1NormInc(src, ln, v.inc)
-		if !same(ret, v.ex) {
-			t.Errorf("Test %d L1NormInc error Got: %f Expected: %f", j, ret, v.ex)
+		if !same(ret, v.want) {
+			t.Errorf("Test %d L1NormInc error Got: %f Expected: %f", j, ret, v.want)
 		}
-		checkValidIncGuard(t, v.src, src_gd, v.inc, g_ln)
+		checkValidIncGuard(t, v.x, src_gd, v.inc, g_ln)
 	}
 }
 

@@ -38,43 +38,76 @@
 
 #include "textflag.h"
 
-// func DscalInc(alpha float64, x []float64, n, incX uintptr)
+#define X_PTR SI
+#define LEN CX
+#define TAIL BX
+#define INC_X R8
+#define INCx3_X R9
+#define ALPHA X0
+#define ALPHA_2 X1
+
+// func ScalInc(alpha float64, x []float64, n, incX uintptr)
 TEXT ·ScalInc(SB), NOSPLIT, $0
-	MOVHPD alpha+0(FP), X7
-	MOVLPD alpha+0(FP), X7
-	MOVQ   x+8(FP), R8
-	MOVQ   n+32(FP), DX
-	MOVQ   incX+40(FP), R10
+	MOVSD alpha+0(FP), ALPHA  // ALPHA = alpha
+	MOVQ  x_base+8(FP), X_PTR // X_PTR = &x
+	MOVQ  incX+40(FP), INC_X  // INC_X = incX
+	SHLQ  $3, INC_X           // INC_X *= sizeof(float64)
+	MOVQ  n+32(FP), LEN       // LEN = n
+	CMPQ  LEN, $0
+	JE    end                 // if LEN == 0 { return }
 
-	MOVQ $0, SI
-	MOVQ R10, AX // nextX = incX
-	SHLQ $1, R10 // incX *= 2
+	MOVQ LEN, TAIL
+	ANDQ $3, TAIL   // TAIL = LEN % 4
+	SHRQ $2, LEN    // LEN = floor( LEN / 4 )
+	JZ   tail_start // if LEN == 0 { goto tail_start }
 
-	SUBQ $2, DX // n -= 2
-	JL   tail   // if n < 0
+	MOVUPS ALPHA, ALPHA_2            // ALPHA_2 = ALPHA for pipelining
+	LEAQ   (INC_X)(INC_X*2), INCx3_X // INCx3_X = INC_X * 3
 
-loop:
-	// x[i] *= alpha unrolled 2x.
-	MOVHPD 0(R8)(SI*8), X0
-	MOVLPD 0(R8)(AX*8), X0
-	MULPD  X7, X0
-	MOVHPD X0, 0(R8)(SI*8)
-	MOVLPD X0, 0(R8)(AX*8)
+loop:  // do { // x[i] *= alpha unrolled 4x.
+	MOVSD (X_PTR), X2            // X_i = x[i]
+	MOVSD (X_PTR)(INC_X*1), X3
+	MOVSD (X_PTR)(INC_X*2), X4
+	MOVSD (X_PTR)(INCx3_X*1), X5
 
-	ADDQ R10, SI // ix += incX
-	ADDQ R10, AX // nextX += incX
+	MULSD ALPHA, X2   // X_i *= a
+	MULSD ALPHA_2, X3
+	MULSD ALPHA, X4
+	MULSD ALPHA_2, X5
 
-	SUBQ $2, DX // n -= 2
-	JGE  loop   // if n >= 0 goto loop
+	MOVSD X2, (X_PTR)            // x[i] = X_i
+	MOVSD X3, (X_PTR)(INC_X*1)
+	MOVSD X4, (X_PTR)(INC_X*2)
+	MOVSD X5, (X_PTR)(INCx3_X*1)
 
-tail:
-	ADDQ $2, DX // n += 2
-	JLE  end    // if n <= 0
+	LEAQ (X_PTR)(INC_X*4), X_PTR // X_PTR = &(X_PTR[incX*4])
+	DECQ LEN
+	JNZ  loop                    // } while --LEN > 0
+	CMPQ TAIL, $0
+	JE   end                     // if TAIL == 0 { return }
 
-	// x[i] *= alpha for the last iteration if n is odd.
-	MOVSD 0(R8)(SI*8), X0
-	MULSD X7, X0
-	MOVSD X0, 0(R8)(SI*8)
+tail_start: // Reset loop registers
+	MOVQ TAIL, LEN // Loop counter: LEN = TAIL
+	SHRQ $1, LEN   // LEN = floor( LEN / 2 )
+	JZ   tail_one
+
+tail_two: // do {
+	MOVSD (X_PTR), X2          // X_i = x[i]
+	MOVSD (X_PTR)(INC_X*1), X3
+	MULSD ALPHA, X2            // X_i *= a
+	MULSD ALPHA, X3
+	MOVSD X2, (X_PTR)          // x[i] = X_i
+	MOVSD X3, (X_PTR)(INC_X*1)
+
+	LEAQ (X_PTR)(INC_X*2), X_PTR // X_PTR = &(X_PTR[incX*2])
+
+	ANDQ $1, TAIL
+	JZ   end
+
+tail_one:
+	MOVSD (X_PTR), X2 // X_i = x[i]
+	MULSD ALPHA, X2   // X_i *= ALPHA
+	MOVSD X2, (X_PTR) // x[i] = X_i
 
 end:
 	RET

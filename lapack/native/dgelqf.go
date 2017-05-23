@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/lapack"
 )
 
 // Dgelqf computes the LQ factorization of the m×n matrix A using a blocked

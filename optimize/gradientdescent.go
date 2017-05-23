@@ -4,7 +4,7 @@
 
 package optimize
 
-import "github.com/gonum/floats"
+import "gonum.org/v1/gonum/floats"
 
 // GradientDescent implements the steepest descent optimization method that
 // performs successive steps along the direction of the negative gradient.

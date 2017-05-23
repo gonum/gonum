@@ -6,11 +6,11 @@
 package mat64
 
 import (
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/floats"
-	"github.com/gonum/lapack"
-	"github.com/gonum/lapack/lapack64"
-	"github.com/gonum/matrix"
+	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/lapack"
+	"gonum.org/v1/gonum/lapack/lapack64"
+	"gonum.org/v1/gonum/matrix"
 )
 
 // GSVD is a type for creating and using the Generalized Singular Value Decomposition

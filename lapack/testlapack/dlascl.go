@@ -10,7 +10,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/lapack"
+	"gonum.org/v1/gonum/lapack"
 )
 
 type Dlascler interface {

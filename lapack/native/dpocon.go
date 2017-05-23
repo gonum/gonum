@@ -7,8 +7,8 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/blas/blas64"
 )
 
 // Dpocon estimates the reciprocal of the condition number of a positive-definite

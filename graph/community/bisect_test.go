@@ -10,9 +10,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 
-	"github.com/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 func ExampleProfile_simple() {

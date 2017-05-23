@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/matrix/mat64"
 )
 
 func BenchmarkMarginalNormal10(b *testing.B) {

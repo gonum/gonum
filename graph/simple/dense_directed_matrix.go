@@ -7,9 +7,9 @@ package simple
 import (
 	"sort"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/ordered"
-	"github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/matrix/mat64"
 )
 
 // DirectedMatrix represents a directed graph using an adjacency

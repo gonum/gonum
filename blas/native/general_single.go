@@ -9,7 +9,7 @@ package native
 import (
 	"errors"
 	"fmt"
-	math "github.com/gonum/blas/native/internal/math32"
+	math "gonum.org/v1/gonum/blas/native/internal/math32"
 )
 
 func newGeneral32(r, c int) general32 {

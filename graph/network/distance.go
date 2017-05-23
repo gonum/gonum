@@ -7,8 +7,8 @@ package network
 import (
 	"math"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/path"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/path"
 )
 
 // Closeness returns the closeness centrality for nodes in the graph g used to

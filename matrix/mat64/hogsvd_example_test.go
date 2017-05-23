@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/matrix/mat64"
 )
 
 func ExampleHOGSVD() {

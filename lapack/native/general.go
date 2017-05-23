@@ -5,7 +5,7 @@
 package native
 
 import (
-	"github.com/gonum/lapack"
+	"gonum.org/v1/gonum/lapack"
 )
 
 // Implementation is the native Go implementation of LAPACK routines. It

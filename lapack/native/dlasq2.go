@@ -7,7 +7,7 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/lapack"
+	"gonum.org/v1/gonum/lapack"
 )
 
 // Dlasq2 computes all the eigenvalues of the symmetric positive

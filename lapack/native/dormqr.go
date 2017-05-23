@@ -5,8 +5,8 @@
 package native
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/lapack"
 )
 
 // Dormqr multiplies an m×n matrix C by an orthogonal matrix Q as

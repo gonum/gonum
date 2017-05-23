@@ -8,8 +8,8 @@ package mat64
 import (
 	"errors"
 
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/matrix"
+	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/matrix"
 )
 
 // HOGSVD is a type for creating and using the Higher Order Generalized Singular Value

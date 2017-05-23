@@ -8,9 +8,9 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/graph"
-	"github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/matrix/mat64"
 )
 
 // PageRank returns the PageRank weights for nodes of the directed graph g

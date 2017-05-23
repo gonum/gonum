@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "gonum.org/v1/gonum/blas"
 
 // Dgehd2 reduces a block of a general n×n matrix A to upper Hessenberg form H
 // by an orthogonal similarity transformation Q^T * A * Q = H.

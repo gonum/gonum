@@ -7,8 +7,8 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack"
+	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 )
 
 // Dgebal balances an n×n matrix A. Balancing consists of two stages, permuting

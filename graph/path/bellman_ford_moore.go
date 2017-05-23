@@ -4,7 +4,7 @@
 
 package path
 
-import "github.com/gonum/graph"
+import "gonum.org/v1/gonum/graph"
 
 // BellmanFordFrom returns a shortest-path tree for a shortest path from u to all nodes in
 // the graph g, or false indicating that a negative cycle exists in the graph. If the graph

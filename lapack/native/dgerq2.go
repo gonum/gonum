@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "gonum.org/v1/gonum/blas"
 
 // Dgerq2 computes an RQ factorization of the m×n matrix A,
 //  A = R * Q.

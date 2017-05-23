@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
+	"gonum.org/v1/gonum/blas"
 )
 
 type Dlaseter interface {

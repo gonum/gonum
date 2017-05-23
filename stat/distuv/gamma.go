@@ -8,7 +8,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/mathext"
+	"gonum.org/v1/gonum/mathext"
 )
 
 // Gamma implements the Gamma distribution, a two-parameter continuous distribution

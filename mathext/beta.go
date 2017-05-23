@@ -4,7 +4,7 @@
 
 package mathext
 
-import "github.com/gonum/mathext/internal/gonum"
+import "gonum.org/v1/gonum/mathext/internal/gonum"
 
 // Beta returns the value of the complete beta function B(a, b). It is defined as
 //  Γ(a)Γ(b) / Γ(a+b)

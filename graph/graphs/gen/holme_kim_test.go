@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 func TestTunableClusteringScaleFree(t *testing.T) {

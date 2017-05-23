@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gonum/blas/blas64"
+	"gonum.org/v1/gonum/blas/blas64"
 )
 
 type Dlaswper interface {

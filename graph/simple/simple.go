@@ -9,7 +9,7 @@ package simple
 import (
 	"math"
 
-	"github.com/gonum/graph"
+	"gonum.org/v1/gonum/graph"
 )
 
 // Node is a simple graph node.

@@ -7,8 +7,8 @@ package testlapack
 import (
 	"testing"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/floats"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/floats"
 )
 
 type Dpotf2er interface {

@@ -8,8 +8,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/matrix"
 )
 
 func TestGSVD(t *testing.T) {

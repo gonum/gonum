@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/path/internal/testgraphs"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
 )
 
 func TestBellmanFordFrom(t *testing.T) {

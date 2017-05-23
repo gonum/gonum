@@ -9,7 +9,7 @@ import (
 	"testing"
 	"testing/quick"
 
-	"github.com/gonum/floats"
+	"gonum.org/v1/gonum/floats"
 )
 
 const tol = 1e-7

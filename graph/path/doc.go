@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE file.
 
 // Package path provides graph path finding functions.
-package path
+package path // import "golang.org/v1/gonum/graph/path"

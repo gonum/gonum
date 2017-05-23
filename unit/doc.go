@@ -90,4 +90,4 @@
 // torque are both expressed as force times distance (Newton-meters in SI),
 // but it is wrong to say that a torque of 10 N-m is the same as 10 J, even
 // though the dimensions agree.
-package unit
+package unit // import "gonum.org/v1/gonum/unit"

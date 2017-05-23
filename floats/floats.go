@@ -8,7 +8,7 @@
 //
 // The convention used is that when a slice is being modified in place, it has
 // the name dst.
-package floats
+package floats // import "golang.org/v1/gonum/floats"
 
 import (
 	"errors"

@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE file.
 
 // Package c64 provides complex64 vector primitives.
-package c64
+package c64 // import "golang.org/v1/gonum/internal/asm/c64"

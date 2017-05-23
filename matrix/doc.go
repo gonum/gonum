@@ -100,4 +100,4 @@
 // conversion has occurred through a matrix API function. Method behavior is undefined
 // if there is undetected overlap.
 //
-package matrix
+package matrix // import "gonum.org/v1/gonum/matrix"

@@ -8,7 +8,7 @@
 // Each sampling routine is implemented as a stateless function with a
 // complementary wrapper type. The wrapper types allow the sampling routines
 // to implement interfaces.
-package sampleuv
+package sampleuv // import "gonum.org/v1/gonum/stat/sampleuv"
 
 import (
 	"errors"

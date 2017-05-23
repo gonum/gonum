@@ -2,5 +2,4 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package dynamic provides incremental heuristic graph path finding functions.
-package dynamic // import "golang.org/v1/gonum/graph/path/dynamic"
+package community // import "golang.org/v1/gonum/graph/community"

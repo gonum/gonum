@@ -7,7 +7,7 @@ package mat64
 import (
 	"fmt"
 
-	"github.com/gonum/matrix"
+	"gonum.org/v1/gonum/matrix"
 )
 
 // Product calculates the product of the given factors and places the result in

@@ -18,8 +18,8 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/lapack"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/lapack"
 )
 
 // Type order is used to specify the matrix storage format. We still interact with

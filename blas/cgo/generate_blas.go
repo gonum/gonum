@@ -20,7 +20,7 @@ import (
 
 	"github.com/cznic/cc"
 
-	"github.com/gonum/internal/binding"
+	"gonum.org/v1/gonum/internal/binding"
 )
 
 const (

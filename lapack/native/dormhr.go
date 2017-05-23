@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "gonum.org/v1/gonum/blas"
 
 // Dormhr multiplies an m×n general matrix C with an nq×nq orthogonal matrix Q
 //  Q * C,    if side == blas.Left and trans == blas.NoTrans,

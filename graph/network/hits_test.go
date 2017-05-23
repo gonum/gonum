@@ -10,8 +10,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/graph/simple"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 var hitsTests = []struct {

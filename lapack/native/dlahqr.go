@@ -7,7 +7,7 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas/blas64"
+	"gonum.org/v1/gonum/blas/blas64"
 )
 
 // Dlahqr computes the eigenvalues and Schur factorization of a block of an n×n

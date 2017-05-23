@@ -8,7 +8,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/gonum/floats"
+	"gonum.org/v1/gonum/floats"
 )
 
 // intSosMatch returns true if the two slices of slices are equal.

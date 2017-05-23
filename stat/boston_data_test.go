@@ -4,7 +4,7 @@
 
 package stat_test
 
-import "github.com/gonum/matrix/mat64"
+import "gonum.org/v1/gonum/matrix/mat64"
 
 // Boston Housing Data of Harrison and Rubinfeld (1978)
 // http://dx.doi.org/10.1016/0095-0696(78)90006-2

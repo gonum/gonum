@@ -4,7 +4,7 @@
 
 package lapack
 
-import "github.com/gonum/blas"
+import "gonum.org/v1/gonum/blas"
 
 const None = 'N'
 

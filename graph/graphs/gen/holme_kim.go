@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/simple"
-	"github.com/gonum/stat/sampleuv"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/stat/sampleuv"
 )
 
 // TunableClusteringScaleFree constructs a graph in the destination, dst, of order n.

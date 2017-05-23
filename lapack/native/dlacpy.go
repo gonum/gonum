@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "gonum.org/v1/gonum/blas"
 
 // Dlacpy copies the elements of A specified by uplo into B. Uplo can specify
 // a triangular portion with blas.Upper or blas.Lower, or can specify all of the

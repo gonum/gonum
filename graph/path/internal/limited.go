@@ -8,8 +8,8 @@ import (
 	"errors"
 	"math"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 // LimitedVisionGrid is a 2D grid planar undirected graph where the capacity

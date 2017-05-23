@@ -3,7 +3,7 @@ package cgo
 import (
 	"testing"
 
-	"github.com/gonum/blas/testblas"
+	"gonum.org/v1/gonum/blas/testblas"
 )
 
 func BenchmarkDgerSmSmInc1(b *testing.B) {

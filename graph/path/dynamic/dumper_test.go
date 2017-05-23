@@ -11,8 +11,8 @@ import (
 	"sort"
 	"text/tabwriter"
 
-	"github.com/gonum/graph/path/internal"
-	"github.com/gonum/graph/simple"
+	"gonum.org/v1/gonum/graph/path/internal"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 // dumper implements a grid D* Lite statistics dump.

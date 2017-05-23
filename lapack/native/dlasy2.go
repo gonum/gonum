@@ -7,7 +7,7 @@ package native
 import (
 	"math"
 
-	"github.com/gonum/blas/blas64"
+	"gonum.org/v1/gonum/blas/blas64"
 )
 
 // Dlasy2 solves the Sylvester matrix equation where the matrices are of order 1

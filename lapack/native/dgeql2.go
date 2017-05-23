@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "gonum.org/v1/gonum/blas"
 
 // Dgeql2 computes the QL factorization of the m×n matrix A. That is, Dgeql2
 // computes Q and L such that

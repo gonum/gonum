@@ -1,8 +1,8 @@
 package cgo
 
 import (
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/testblas"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/blas/testblas"
 )
 
 const (

@@ -7,10 +7,10 @@ package mat64
 import (
 	"math"
 
-	"github.com/gonum/blas"
-	"github.com/gonum/blas/blas64"
-	"github.com/gonum/lapack/lapack64"
-	"github.com/gonum/matrix"
+	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack/lapack64"
+	"gonum.org/v1/gonum/matrix"
 )
 
 // LQ is a type for creating and using the LQ factorization of a matrix.

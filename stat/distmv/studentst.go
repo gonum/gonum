@@ -11,9 +11,9 @@ import (
 
 	"golang.org/x/tools/container/intsets"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat/distuv"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/stat/distuv"
 )
 
 // StudentsT is a multivariate Student's T distribution. It is a distribution over

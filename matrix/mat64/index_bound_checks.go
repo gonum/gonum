@@ -8,7 +8,7 @@
 
 package mat64
 
-import "github.com/gonum/matrix"
+import "gonum.org/v1/gonum/matrix"
 
 // At returns the element at row i, column j.
 func (m *Dense) At(i, j int) float64 {

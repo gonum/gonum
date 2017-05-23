@@ -7,9 +7,9 @@ package network
 import (
 	"math"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/internal/linear"
-	"github.com/gonum/graph/path"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/linear"
+	"gonum.org/v1/gonum/graph/path"
 )
 
 // Betweenness returns the non-zero betweenness centrality for nodes in the unweighted graph g.

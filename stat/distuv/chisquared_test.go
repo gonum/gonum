@@ -9,7 +9,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/floats"
+	"gonum.org/v1/gonum/floats"
 )
 
 func TestChiSquaredProb(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/graph"
+	"gonum.org/v1/gonum/graph"
 )
 
 var _ graph.Graph = (*UndirectedGraph)(nil)

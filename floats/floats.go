@@ -15,7 +15,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/gonum/internal/asm/f64"
+	"gonum.org/v1/gonum/internal/asm/f64"
 )
 
 // Add adds, element-wise, the elements of s and dst, and stores in dst.

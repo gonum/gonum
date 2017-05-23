@@ -8,7 +8,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/mathext"
+	"gonum.org/v1/gonum/mathext"
 )
 
 // ChiSquared implements the χ² distribution, a one parameter distribution

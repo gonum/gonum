@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas/testblas"
-	"github.com/gonum/matrix"
+	"gonum.org/v1/gonum/blas/testblas"
+	"gonum.org/v1/gonum/matrix"
 )
 
 func TestCholesky(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 	"math"
 	"runtime"
 
-	"github.com/gonum/integrate/quad"
-	"github.com/gonum/stat/distuv"
+	"gonum.org/v1/gonum/integrate/quad"
+	"gonum.org/v1/gonum/stat/distuv"
 )
 
 func Example() {

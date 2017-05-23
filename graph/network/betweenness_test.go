@@ -10,9 +10,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/graph/path"
-	"github.com/gonum/graph/simple"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/graph/path"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 var betweennessTests = []struct {

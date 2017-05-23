@@ -8,7 +8,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gonum/blas"
+	"gonum.org/v1/gonum/blas"
 )
 
 func TestDgemmParallel(t *testing.T) {

@@ -6,9 +6,9 @@
 package mat64
 
 import (
-	"github.com/gonum/lapack"
-	"github.com/gonum/lapack/lapack64"
-	"github.com/gonum/matrix"
+	"gonum.org/v1/gonum/lapack"
+	"gonum.org/v1/gonum/lapack/lapack64"
+	"gonum.org/v1/gonum/matrix"
 )
 
 const (

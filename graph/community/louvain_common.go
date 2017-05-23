@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/gonum/graph"
+	"gonum.org/v1/gonum/graph"
 )
 
 // Q returns the modularity Q score of the graph g subdivided into the

@@ -8,8 +8,8 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat/distmv"
+	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/stat/distmv"
 )
 
 var _ Sampler = MetropolisHastingser{}

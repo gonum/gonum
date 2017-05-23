@@ -5,8 +5,8 @@
 package lp
 
 import (
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/matrix/mat64"
 )
 
 // TODO(btracey): Have some sort of preprocessing step for helping to fix A to make it

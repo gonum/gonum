@@ -7,9 +7,9 @@ package distmv
 import (
 	"math"
 
-	"github.com/gonum/floats"
-	"github.com/gonum/matrix/mat64"
-	"github.com/gonum/stat"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/stat"
 )
 
 // Bhattacharyya is a type for computing the Bhattacharyya distance between

@@ -9,7 +9,7 @@ package native
 import (
 	"testing"
 
-	"github.com/gonum/lapack/testlapack"
+	"gonum.org/v1/gonum/lapack/testlapack"
 )
 
 func BenchmarkDgeev(b *testing.B) { testlapack.DgeevBenchmark(b, impl) }

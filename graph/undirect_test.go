@@ -8,9 +8,9 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gonum/graph"
-	"github.com/gonum/graph/simple"
-	"github.com/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/matrix/mat64"
 )
 
 var directedGraphs = []struct {

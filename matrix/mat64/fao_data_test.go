@@ -4,7 +4,7 @@
 
 package mat64_test
 
-import "github.com/gonum/matrix/mat64"
+import "gonum.org/v1/gonum/matrix/mat64"
 
 // FAO is a dataset extracted from Food and Agriculture Organization of the
 // United Nations "FAO Statistical Pocketbook: World Food and Agriculture 2015".

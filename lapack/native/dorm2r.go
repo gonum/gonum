@@ -4,7 +4,7 @@
 
 package native
 
-import "github.com/gonum/blas"
+import "gonum.org/v1/gonum/blas"
 
 // Dorm2r multiplies a general matrix C by an orthogonal matrix from a QR factorization
 // determined by Dgeqrf.

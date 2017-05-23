@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package distuv provides univariate random distribution types.
-package distuv
+package distuv // import "gonum.org/v1/gonum/stat/distuv"
 
 import "math"
 

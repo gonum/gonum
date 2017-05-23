@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package conv provides matrix type interconversion utilities.
-package conv
+package conv // import "gonum.org/v1/gonum/matrix/conv"
 
 import (
 	"gonum.org/v1/gonum/matrix"

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package traverse provides basic graph traversal primitives.
-package traverse
+package traverse // import "golang.org/v1/gonum/graph/traverse"
 
 import (
 	"golang.org/x/tools/container/intsets"

@@ -4,7 +4,7 @@
 
 // Package simple provides a suite of simple graph implementations satisfying
 // the gonum/graph interfaces.
-package simple
+package simple // import "golang.org/v1/gonum/graph/simple"
 
 import (
 	"math"

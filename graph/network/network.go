@@ -11,4 +11,4 @@
 // * other centrality measures
 
 // Package network provides network analysis functions.
-package network
+package network // import "golang.org/v1/gonum/graph/network"

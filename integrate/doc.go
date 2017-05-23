@@ -4,4 +4,4 @@
 
 // Package integrate provides functions to compute an integral given a
 // specific list of evaluations.
-package integrate // "github.com/gonum/integrate"
+package integrate // import "golang.org/v1/gonum/integrate"

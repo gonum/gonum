@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package cgo provides an interface to bindings for a C LAPACK library.
-package cgo
+package cgo // import "gonum.org/v1/gonum/lapack/cgo"
 
 import (
 	"math"

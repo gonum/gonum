@@ -7,7 +7,7 @@
 // Portions Copyright ©2003 Boost
 // Portions Copyright ©2016 The gonum Authors. All rights reserved.
 
-package cephes
+package cephes // import "gonum.org/v1/gonum/mathext/internal/cephes"
 
 // Optimal values for G for each N are taken from
 // http://web.mala.bc.ca/pughg/phdThesis/phdThesis.pdf,

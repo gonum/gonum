@@ -5,7 +5,7 @@
 // The functions in this file are random graph generators from the paper
 // by Batagelj and Brandes http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf
 
-package gen
+package gen // import "gonum.org/v1/gonum/graph/graphs/gen"
 
 import (
 	"fmt"

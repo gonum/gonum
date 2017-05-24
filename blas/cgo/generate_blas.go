@@ -759,7 +759,7 @@ const handwritten = `// Do not manually edit this file. It was created by the ge
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package cgo
+package cgo // import "gonum.org/v1/gonum/cgo"
 
 /*
 #cgo CFLAGS: -g -O2

@@ -4,7 +4,7 @@
 
 //+build !amd64 noasm appengine
 
-package math32
+package math32 // import "gonum.org/v1/gonum/blas/native/internal/math32"
 
 import (
 	"math"

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 // Based on the SingularValueDecomposition class from Jama 1.0.3.
 
-package mat64
+package mat64 // import "gonum.org/v1/gonum/matrix/mat64"
 
 import (
 	"errors"

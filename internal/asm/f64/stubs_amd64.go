@@ -4,7 +4,7 @@
 
 //+build !noasm,!appengine
 
-package f64
+package f64 // import "gonum.org/v1/gonum/internal/asm/f64"
 
 // L1Norm is
 //  for _, v := range x {

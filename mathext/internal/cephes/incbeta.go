@@ -7,7 +7,7 @@
  * Copyright 1984, 1995 by Stephen L. Moshier
  */
 
-package cephes
+package cephes // import "gonum.org/v1/gonum/mathext/internal/cephes"
 
 import (
 	"math"

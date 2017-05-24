@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package f32
+package f32 // import "gonum.org/v1/gonum/internal/asm/f32"
 
 // ScalUnitary is
 //  for i := range x {

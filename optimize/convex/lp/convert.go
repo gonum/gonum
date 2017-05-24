@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package lp
+package lp // import "gonum.org/v1/gonum/optimize/convex/lp"
 
 import (
 	"gonum.org/v1/gonum/floats"

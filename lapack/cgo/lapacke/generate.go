@@ -4,4 +4,4 @@
 
 //go:generate go run generate_lapacke.go
 
-package lapacke
+package lapacke // import "gonum.org/v1/gonum/lapack/cgo/lapacke"

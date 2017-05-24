@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package native
+package native // import "gonum.org/v1/gonum/lapack/native"
 
 // Iladlr scans a matrix for its last non-zero row. Returns -1 if the matrix
 // is all zeros.

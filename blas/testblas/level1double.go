@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package testblas provides tests for blas implementations.
-package testblas
+package testblas // import "gonum.org/v1/gonum/blas/testblas"
 
 import (
 	"fmt"

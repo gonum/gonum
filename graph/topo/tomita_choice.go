@@ -4,6 +4,6 @@
 
 //+build tomita
 
-package topo
+package topo // import "gonum.org/v1/gonum/graph/topo"
 
 const tomitaTanakaTakahashi = true

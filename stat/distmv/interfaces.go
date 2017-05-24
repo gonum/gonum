@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package distmv
+package distmv // import "gonum.org/v1/gonum/stat/distmv"
 
 // Quantiler returns the multi-dimensional inverse cumulative distribution function.
 // len(x) must equal len(p), and if x is non-nil, len(x) must also equal len(p).

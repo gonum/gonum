@@ -8,7 +8,7 @@
 
 //+build !noasm,!appengine
 
-package math32
+package math32 // import "gonum.org/v1/gonum/blas/native/internal/math32"
 
 // Sqrt returns the square root of x.
 //

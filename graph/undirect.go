@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package graph
+package graph // import "gonum.org/v1/gonum/graph"
 
 import (
 	"golang.org/x/tools/container/intsets"

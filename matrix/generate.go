@@ -4,4 +4,4 @@
 
 //go:generate go run gendoc.go
 
-package matrix
+package matrix // import "gonum.org/v1/gonum/matrix"

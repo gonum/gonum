@@ -1,4 +1,4 @@
-package testblas
+package testblas // import "gonum.org/v1/gonum/blas/testblas"
 
 import (
 	"testing"

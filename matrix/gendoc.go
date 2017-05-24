@@ -214,7 +214,7 @@ var pkgs = []Package{
 		template: `{{template "common" .}}
 {{template "invariants" .}}
 {{template "aliasing" .}}
-package {{.Name}}
+package {{.Name}} // import "gonum.org/v1/gonum/{{.Name}}"
 `,
 	},
 	{
@@ -265,7 +265,7 @@ package {{.Name}}
 {{template "switching" .}}
 {{template "invariants" .}}
 {{template "aliasing" .}}
-package {{.Name}}
+package {{.Name}} // import "gonum.org/v1/gonum/matrix/{{.Name}}"
 `,
 	},
 	{
@@ -286,7 +286,7 @@ package {{.Name}}
 {{template "switching" .}}
 {{template "invariants" .}}
 {{template "aliasing" .}}
-package {{.Name}}
+package {{.Name}} // import "gonum.org/v1/gonum/matrix/{{.Name}}"
 `,
 	},
 }

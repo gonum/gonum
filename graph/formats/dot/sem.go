@@ -8,7 +8,7 @@
 // This file is made available under a Creative Commons CC0 1.0
 // Universal Public Domain Dedication.
 
-package dot
+package dot // import "gonum.org/v1/gonum/graph/formats/dot"
 
 import (
 	"fmt"

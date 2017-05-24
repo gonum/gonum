@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package native
+package native // import "gonum.org/v1/gonum/blas/native"
 
 import (
 	"gonum.org/v1/gonum/internal/asm/f32"

@@ -4,7 +4,7 @@
 
 //+build !amd64 noasm appengine
 
-package c64
+package c64 // import "gonum.org/v1/gonum/internal/asm/c64"
 
 // AxpyUnitary is
 //  for i, v := range x {

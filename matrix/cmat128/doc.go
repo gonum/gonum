@@ -92,4 +92,4 @@
 // conversion has occurred through a cmat128 API function. Method behavior is undefined
 // if there is undetected overlap.
 //
-package cmat128
+package cmat128 // import "gonum.org/v1/gonum/matrix/cmat128"

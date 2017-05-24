@@ -4,7 +4,7 @@
 
 //+build !amd64 noasm appengine
 
-package f64
+package f64 // import "gonum.org/v1/gonum/internal/asm/f64"
 
 // ScalUnitary is
 //  for i := range x {

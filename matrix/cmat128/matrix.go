@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package cmat128
+package cmat128 // import "gonum.org/v1/gonum/matrix/cmat128"
 
 // Matrix is the basic matrix interface type.
 type Matrix interface {

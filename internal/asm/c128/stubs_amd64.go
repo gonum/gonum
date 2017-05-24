@@ -4,7 +4,7 @@
 
 //+build !noasm,!appengine
 
-package c128
+package c128 // import "gonum.org/v1/gonum/internal/asm/c128"
 
 // AxpyUnitary is
 //  for i, v := range x {

@@ -1,4 +1,4 @@
-package optimize
+package optimize // import "gonum.org/v1/gonum/optimize"
 
 import (
 	"math"

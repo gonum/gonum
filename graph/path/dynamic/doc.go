@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE file.
 
 // Package dynamic provides incremental heuristic graph path finding functions.
-package dynamic
+package dynamic // import "gonum.org/v1/gonum/graph/path/dynamic"

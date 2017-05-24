@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package netlib
+package netlib // import "gonum.org/v1/gonum/lapack/internal/testdata/netlib"
 
 // void dlahr2_(int* n, int* k, int* nb, double* a, int* lda, double* tau, double* t, int* ldt, double* y, int* ldy);
 //

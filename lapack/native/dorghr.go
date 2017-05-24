@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package native
+package native // import "gonum.org/v1/gonum/lapack/native"
 
 // Dorghr generates an n×n orthogonal matrix Q which is defined as the product
 // of ihi-ilo elementary reflectors:

@@ -4,7 +4,7 @@
 
 //go:generate ./single_precision.bash
 
-package native
+package native // import "gonum.org/v1/gonum/blas/native"
 
 type Implementation struct{}
 

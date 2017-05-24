@@ -4,7 +4,7 @@
 
 // +build go1.7
 
-package testlapack
+package testlapack // import "gonum.org/v1/gonum/lapack/testlapack"
 
 import (
 	"math/rand"

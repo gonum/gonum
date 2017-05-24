@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package network
+package network // import "gonum.org/v1/gonum/graph/network"
 
 import (
 	"math"

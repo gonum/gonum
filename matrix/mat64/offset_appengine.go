@@ -4,7 +4,7 @@
 
 //+build appengine
 
-package mat64
+package mat64 // import "gonum.org/v1/gonum/matrix/mat64"
 
 import "reflect"
 

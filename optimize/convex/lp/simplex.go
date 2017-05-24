@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // package lp implements routines for solving linear programs.
-package lp
+package lp // import "gonum.org/v1/gonum/optimize/convex/lp"
 
 import (
 	"errors"

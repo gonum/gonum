@@ -4,7 +4,7 @@
 
 //+build appengine
 
-package set
+package set // import "gonum.org/v1/gonum/graph/internal/set"
 
 import "reflect"
 

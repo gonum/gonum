@@ -7,7 +7,7 @@
 // Package lapacke provides bindings to the LAPACKE C Interface to LAPACK.
 //
 // Links are provided to the NETLIB fortran implementation/dependencies for each function.
-package lapacke
+package lapacke // import "gonum.org/v1/gonum/lapack/cgo/lapacke"
 
 /*
 #cgo CFLAGS: -g -O2

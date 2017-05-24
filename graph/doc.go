@@ -35,4 +35,4 @@ list or node list.  It also guarantees that any nodes passed back to the user wi
 nodes returned to it -- that is, it will never take a Node's ID and then wrap the ID in a new
 struct and return that. You'll always get back your original data.
 */
-package graph
+package graph // import "gonum.org/v1/gonum/graph"

@@ -3,4 +3,4 @@
 // license that can be found in the LICENSE file.
 
 // Package optimize implements algorithms for finding the optimum value of functions.
-package optimize
+package optimize // import "gonum.org/v1/gonum/optimize"

@@ -8,7 +8,7 @@
 // Copyright ©1985, ©1987 by Stephen L. Moshier
 // Portions Copyright ©2016 The gonum Authors. All rights reserved.
 
-package cephes
+package cephes // import "gonum.org/v1/gonum/mathext/internal/cephes"
 
 import "math"
 

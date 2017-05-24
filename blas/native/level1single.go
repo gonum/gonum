@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package native
+package native // import "gonum.org/v1/gonum/blas/native"
 
 import (
 	math "gonum.org/v1/gonum/blas/native/internal/math32"

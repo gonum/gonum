@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package distuv
+package distuv // import "gonum.org/v1/gonum/stat/distuv"
 
 const (
 	// oneOverRoot2Pi is the value of 1/(2Pi)^(1/2)

@@ -5,7 +5,7 @@
 // +build fortran
 // TODO(jonlawlor): remove fortran build tag when gonum only supports go 1.7+.
 
-package amoslib
+package amoslib // import "gonum.org/v1/gonum/mathext/internal/amos/amoslib"
 
 /*
 double mzabs_(double * ar, double * ai);

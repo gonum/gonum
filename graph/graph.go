@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package graph
+package graph // import "gonum.org/v1/gonum/graph"
 
 // Node is a graph node. It returns a graph-unique integer ID.
 type Node interface {

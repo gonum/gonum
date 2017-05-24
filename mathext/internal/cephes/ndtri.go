@@ -8,7 +8,7 @@
  * Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 
-package cephes
+package cephes // import "gonum.org/v1/gonum/mathext/internal/cephes"
 
 import "math"
 

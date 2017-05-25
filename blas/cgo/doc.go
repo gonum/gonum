@@ -85,7 +85,7 @@ See http://www.crest.iu.edu/research/mtl/reference/html/banded.html
 for more information
 
 */
-package cgo
+package cgo // import "gonum.org/v1/gonum/blas/cgo"
 
 // BUG(btracey): The cgo package is intrinsically dependent on the underlying C
 // implementation. The BLAS standard is silent on a number of behaviors, including

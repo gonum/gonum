@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package gen provides random graph generation functions.
-package gen
+package gen // import "gonum.org/v1/gonum/graph/graphs/gen"
 
 import "gonum.org/v1/gonum/graph"
 

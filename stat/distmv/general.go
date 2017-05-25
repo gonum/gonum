@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package distmv provides multivariate random distribution types.
-package distmv
+package distmv // import "gonum.org/v1/gonum/stat/distmv"
 
 var (
 	badQuantile      = "distmv: quantile not between 0 and 1"

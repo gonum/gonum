@@ -155,4 +155,4 @@
 // conversion has occurred through a mat64 API function. Method behavior is undefined
 // if there is undetected overlap.
 //
-package mat64
+package mat64 // import "gonum.org/v1/gonum/matrix/mat64"

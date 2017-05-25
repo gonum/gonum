@@ -11,7 +11,7 @@
 //
 // DOT grammar: http://www.graphviz.org/doc/info/lang.html
 //
-package dot
+package dot // import "gonum.org/v1/gonum/graph/encoding/dot"
 
 import (
 	"bytes"

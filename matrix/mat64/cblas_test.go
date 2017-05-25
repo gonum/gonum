@@ -8,9 +8,9 @@ package mat64
 
 import (
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/gonum/blas/cgo"
+	"gonum.org/v1/netlib/blas"
 )
 
 func init() {
-	blas64.Use(cgo.Implementation{})
+	blas64.Use(blas.Implementation{})
 }

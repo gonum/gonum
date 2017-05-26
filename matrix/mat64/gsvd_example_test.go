@@ -26,8 +26,8 @@ func ExampleGSVD() {
 	}
 
 	var u, v mat64.Dense
-	u.UFromGSVD(&gsvd)
-	v.VFromGSVD(&gsvd)
+	gsvd.UTo(&u)
+	gsvd.VTo(&v)
 
 	s1 := gsvd.ValuesA(nil)
 	s2 := gsvd.ValuesB(nil)
@@ -38,8 +38,8 @@ func ExampleGSVD() {
 		s2, mat64.Formatted(&v, mat64.Prefix("\t    "), mat64.Excerpt(2)))
 
 	var zeroR, q mat64.Dense
-	zeroR.ZeroRFromGSVD(&gsvd)
-	q.QFromGSVD(&gsvd)
+	gsvd.ZeroRTo(&zeroR)
+	gsvd.QTo(&q)
 	q.Mul(&zeroR, &q)
 	fmt.Printf("\nCommon basis vectors\n\n\tQ^T = %.4f\n",
 		mat64.Formatted(q.T(), mat64.Prefix("\t      ")))

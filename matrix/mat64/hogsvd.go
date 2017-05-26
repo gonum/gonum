@@ -141,11 +141,11 @@ func (gsvd *HOGSVD) Len() int {
 	return gsvd.n
 }
 
-// UFromHOGSVD extracts the matrix U_n from the singular value decomposition, storing
-// the result in-place into the receiver. U_n is size r×c.
+// UTo extracts the matrix U_n from the singular value decomposition, storing
+// the result in-place into dst. U_n is size r×c.
 //
-// UFromHOGSVD will panic if the receiver does not contain a successful factorization.
-func (m *Dense) UFromHOGSVD(gsvd *HOGSVD, n int) {
+// UTo will panic if the receiver does not contain a successful factorization.
+func (gsvd *HOGSVD) UTo(dst *Dense, n int) {
 	if gsvd.n == 0 {
 		panic("hogsvd: unsuccessful factorization")
 	}
@@ -153,10 +153,10 @@ func (m *Dense) UFromHOGSVD(gsvd *HOGSVD, n int) {
 		panic("hogsvd: invalid index")
 	}
 
-	m.reuseAs(gsvd.b[n].Dims())
-	m.Copy(&gsvd.b[n])
+	dst.reuseAs(gsvd.b[n].Dims())
+	dst.Copy(&gsvd.b[n])
 	for j, f := range gsvd.Values(nil, n) {
-		v := m.ColView(j)
+		v := dst.ColView(j)
 		v.ScaleVec(1/f, v)
 	}
 }
@@ -188,13 +188,14 @@ func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
 	return s
 }
 
-// VFromHOGSVD extracts the matrix V from the singular value decomposition, storing
-// the result in-place into the receiver. V is size c×c.
+// VTo extracts the matrix V from the singular value decomposition, storing
+// the result in-place into dst. V is size c×c.
 //
-// VFromHOGSVD will panic if the receiver does not contain a successful factorization.
-func (m *Dense) VFromHOGSVD(gsvd *HOGSVD) {
+// VTo will panic if the receiver does not contain a successful factorization.
+func (gsvd *HOGSVD) VTo(dst *Dense) {
 	if gsvd.n == 0 {
 		panic("hogsvd: unsuccessful factorization")
 	}
-	*m = *DenseCopyOf(gsvd.v)
+	dst.reuseAs(gsvd.v.Dims())
+	dst.Copy(gsvd.v)
 }

@@ -203,9 +203,9 @@ func (gsvd *GSVD) ValuesB(s []float64) []float64 {
 	return s
 }
 
-// ZeroRFromGSVD extracts the matrix [ 0 R ] from the singular value decomposition, storing
-// the result in-place into the receiver. [ 0 R ] is size (k+l)×c.
-func (m *Dense) ZeroRFromGSVD(gsvd *GSVD) {
+// ZeroRTo extracts the matrix [ 0 R ] from the singular value decomposition, storing
+// the result in-place into dst. [ 0 R ] is size (k+l)×c.
+func (gsvd *GSVD) ZeroRTo(dst *Dense) {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
 	}
@@ -214,13 +214,13 @@ func (m *Dense) ZeroRFromGSVD(gsvd *GSVD) {
 	k := gsvd.k
 	l := gsvd.l
 	h := min(k+l, r)
-	m.reuseAsZeroed(k+l, c)
+	dst.reuseAsZeroed(k+l, c)
 	a := Dense{
 		mat:     gsvd.a,
 		capRows: r,
 		capCols: c,
 	}
-	m.Slice(0, h, c-k-l, c).(*Dense).
+	dst.Slice(0, h, c-k-l, c).(*Dense).
 		Copy(a.Slice(0, h, c-k-l, c))
 	if r < k+l {
 		b := Dense{
@@ -228,32 +228,32 @@ func (m *Dense) ZeroRFromGSVD(gsvd *GSVD) {
 			capRows: gsvd.p,
 			capCols: c,
 		}
-		m.Slice(r, k+l, c+r-k-l, c).(*Dense).
+		dst.Slice(r, k+l, c+r-k-l, c).(*Dense).
 			Copy(b.Slice(r-k, l, c+r-k-l, c))
 	}
 }
 
-// SigmaAFromGSVD extracts the matrix Σ₁ from the singular value decomposition, storing
-// the result in-place into the receiver. Σ₁ is size r×(k+l).
-func (m *Dense) SigmaAFromGSVD(gsvd *GSVD) {
+// SigmaATo extracts the matrix Σ₁ from the singular value decomposition, storing
+// the result in-place into dst. Σ₁ is size r×(k+l).
+func (gsvd *GSVD) SigmaATo(dst *Dense) {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
 	}
 	r := gsvd.r
 	k := gsvd.k
 	l := gsvd.l
-	m.reuseAsZeroed(r, k+l)
+	dst.reuseAsZeroed(r, k+l)
 	for i := 0; i < k; i++ {
-		m.set(i, i, 1)
+		dst.set(i, i, 1)
 	}
 	for i := k; i < min(r, k+l); i++ {
-		m.set(i, i, gsvd.s1[i])
+		dst.set(i, i, gsvd.s1[i])
 	}
 }
 
-// SigmaBFromGSVD extracts the matrix Σ₂ from the singular value decomposition, storing
-// the result in-place into the receiver. Σ₂ is size p×(k+l).
-func (m *Dense) SigmaBFromGSVD(gsvd *GSVD) {
+// SigmaBTo extracts the matrix Σ₂ from the singular value decomposition, storing
+// the result in-place into dst. Σ₂ is size p×(k+l).
+func (gsvd *GSVD) SigmaBTo(dst *Dense) {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
 	}
@@ -261,65 +261,65 @@ func (m *Dense) SigmaBFromGSVD(gsvd *GSVD) {
 	p := gsvd.p
 	k := gsvd.k
 	l := gsvd.l
-	m.reuseAsZeroed(p, k+l)
+	dst.reuseAsZeroed(p, k+l)
 	for i := 0; i < min(l, r-k); i++ {
-		m.set(i, i+k, gsvd.s2[k+i])
+		dst.set(i, i+k, gsvd.s2[k+i])
 	}
 	for i := r - k; i < l; i++ {
-		m.set(i, i+k, 1)
+		dst.set(i, i+k, 1)
 	}
 }
 
-// UFromGSVD extracts the matrix U from the singular value decomposition, storing
-// the result in-place into the receiver. U is size r×r.
-func (m *Dense) UFromGSVD(gsvd *GSVD) {
+// UTo extracts the matrix U from the singular value decomposition, storing
+// the result in-place into dst. U is size r×r.
+func (gsvd *GSVD) UTo(dst *Dense) {
 	if gsvd.kind&matrix.GSVDU == 0 {
 		panic("mat64: improper GSVD kind")
 	}
 	r := gsvd.u.Rows
 	c := gsvd.u.Cols
-	m.reuseAs(r, c)
+	dst.reuseAs(r, c)
 
 	tmp := &Dense{
 		mat:     gsvd.u,
 		capRows: r,
 		capCols: c,
 	}
-	m.Copy(tmp)
+	dst.Copy(tmp)
 }
 
-// VFromGSVD extracts the matrix V from the singular value decomposition, storing
-// the result in-place into the receiver. V is size p×p.
-func (m *Dense) VFromGSVD(gsvd *GSVD) {
+// VTo extracts the matrix V from the singular value decomposition, storing
+// the result in-place into dst. V is size p×p.
+func (gsvd *GSVD) VTo(dst *Dense) {
 	if gsvd.kind&matrix.GSVDV == 0 {
 		panic("mat64: improper GSVD kind")
 	}
 	r := gsvd.v.Rows
 	c := gsvd.v.Cols
-	m.reuseAs(r, c)
+	dst.reuseAs(r, c)
 
 	tmp := &Dense{
 		mat:     gsvd.v,
 		capRows: r,
 		capCols: c,
 	}
-	m.Copy(tmp)
+	dst.Copy(tmp)
 }
 
-// QFromGSVD extracts the matrix Q from the singular value decomposition, storing
-// the result in-place into the receiver. Q is size c×c.
-func (m *Dense) QFromGSVD(gsvd *GSVD) {
+// QTo extracts the matrix Q from the singular value decomposition, storing
+// the result in-place into dst. Q is size c×c.
+func (gsvd *GSVD) QTo(dst *Dense) {
 	if gsvd.kind&matrix.GSVDQ == 0 {
 		panic("mat64: improper GSVD kind")
 	}
 	r := gsvd.q.Rows
 	c := gsvd.q.Cols
-	m.reuseAs(r, c)
+	dst.reuseAs(r, c)
 
 	tmp := &Dense{
 		mat:     gsvd.q,
 		capRows: r,
 		capCols: c,
 	}
-	m.Copy(tmp)
+	dst.Copy(tmp)
 }

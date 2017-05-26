@@ -36,7 +36,7 @@ func (lq *LQ) updateCond() {
 //
 // The LQ decomposition is a factorization of the matrix A such that A = L * Q.
 // The matrix Q is an orthonormal n×n matrix, and L is an m×n upper triangular matrix.
-// L and Q can be extracted from the LFromLQ and QFromLQ methods on Dense.
+// L and Q can be extracted from the LTo and QTo methods.
 func (lq *LQ) Factorize(a Matrix) {
 	m, n := a.Dims()
 	if m > n {
@@ -58,10 +58,10 @@ func (lq *LQ) Factorize(a Matrix) {
 // TODO(btracey): Add in the "Reduced" forms for extracting the m×m orthogonal
 // and upper triangular matrices.
 
-// LFromLQ extracts the m×n lower trapezoidal matrix from a LQ decomposition.
-func (m *Dense) LFromLQ(lq *LQ) {
+// LTo extracts the m×n lower trapezoidal matrix from a LQ decomposition.
+func (lq *LQ) LTo(dst *Dense) {
 	r, c := lq.lq.Dims()
-	m.reuseAs(r, c)
+	dst.reuseAs(r, c)
 
 	// Disguise the LQ as a lower triangular
 	t := &TriDense{
@@ -74,25 +74,25 @@ func (m *Dense) LFromLQ(lq *LQ) {
 		},
 		cap: lq.lq.capCols,
 	}
-	m.Copy(t)
+	dst.Copy(t)
 
 	if r == c {
 		return
 	}
 	// Zero right of the triangular.
 	for i := 0; i < r; i++ {
-		zero(m.mat.Data[i*m.mat.Stride+r : i*m.mat.Stride+c])
+		zero(dst.mat.Data[i*dst.mat.Stride+r : i*dst.mat.Stride+c])
 	}
 }
 
-// QFromLQ extracts the n×n orthonormal matrix Q from an LQ decomposition.
-func (m *Dense) QFromLQ(lq *LQ) {
+// QTo extracts the n×n orthonormal matrix Q from an LQ decomposition.
+func (lq *LQ) QTo(dst *Dense) {
 	r, c := lq.lq.Dims()
-	m.reuseAs(c, c)
+	dst.reuseAs(c, c)
 
 	// Set Q = I.
 	for i := 0; i < c; i++ {
-		v := m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c]
+		v := dst.mat.Data[i*dst.mat.Stride : i*dst.mat.Stride+c]
 		zero(v)
 		v[i] = 1
 	}
@@ -127,10 +127,10 @@ func (m *Dense) QFromLQ(lq *LQ) {
 
 		// Compute the multiplication matrix.
 		blas64.Ger(-lq.tau[i], v, v, h)
-		qCopy.Copy(m)
+		qCopy.Copy(dst)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans,
 			1, h, qCopy.mat,
-			0, m.mat)
+			0, dst.mat)
 	}
 }
 

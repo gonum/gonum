@@ -20,12 +20,12 @@ func TestLUD(t *testing.T) {
 		var want Dense
 		want.Clone(a)
 
-		lu := &LU{}
+		var lu LU
 		lu.Factorize(a)
 
 		var l, u TriDense
-		l.LFromLU(lu)
-		u.UFromLU(lu)
+		lu.LTo(&l)
+		lu.UTo(&u)
 		var p Dense
 		pivot := lu.Pivot(nil)
 		p.Permutation(n, pivot)
@@ -93,8 +93,8 @@ func TestLURankOne(t *testing.T) {
 // luReconstruct reconstructs the original A matrix from an LU decomposition.
 func luReconstruct(lu *LU) *Dense {
 	var L, U TriDense
-	L.LFromLU(lu)
-	U.UFromLU(lu)
+	lu.LTo(&L)
+	lu.UTo(&U)
 	var P Dense
 	pivot := lu.Pivot(nil)
 	P.Permutation(len(pivot), pivot)

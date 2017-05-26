@@ -7,10 +7,11 @@ package dot
 import (
 	"fmt"
 
+	"golang.org/x/tools/container/intsets"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/formats/dot"
 	"gonum.org/v1/gonum/graph/formats/dot/ast"
-	"golang.org/x/tools/container/intsets"
 )
 
 // Builder is a graph that can have user-defined nodes and edges added.

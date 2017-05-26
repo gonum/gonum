@@ -19,7 +19,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gonum/lapack/internal/testdata/netlib"
+	"gonum.org/v1/gonum/lapack/internal/testdata/netlib"
 )
 
 type Dlahr2Test struct {

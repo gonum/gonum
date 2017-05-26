@@ -17,7 +17,7 @@ import (
 	"io/ioutil"
 	"unicode/utf8"
 
-	// "github.com/gonum/graph/formats/dot/internal/util"
+	// "gonum.org/v1/gonum/graph/formats/dot/internal/util"
 	"gonum.org/v1/gonum/graph/formats/dot/internal/token"
 )
 

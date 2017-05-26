@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package lapack // import "gonum.org/v1/gonum/lapack"
+package lapack
 
 import "gonum.org/v1/gonum/blas"
 
@@ -12,10 +12,10 @@ type Job byte
 
 type Comp byte
 
-// Complex128 defines the public complex128 LAPACK API supported by gonum/lapack.
+// Complex128 defines the public complex128 LAPACK API supported by gonum/
 type Complex128 interface{}
 
-// Float64 defines the public float64 LAPACK API supported by gonum/lapack.
+// Float64 defines the public float64 LAPACK API supported by gonum/
 type Float64 interface {
 	Dgecon(norm MatrixNorm, n int, a []float64, lda int, anorm float64, work []float64, iwork []int) float64
 	Dgeev(jobvl LeftEVJob, jobvr RightEVJob, n int, a []float64, lda int, wr, wi []float64, vl []float64, ldvl int, vr []float64, ldvr int, work []float64, lwork int) (first int)

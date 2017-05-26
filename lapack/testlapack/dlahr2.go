@@ -8,11 +8,9 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -34,7 +32,7 @@ type Dlahr2test struct {
 	TauWant []float64
 }
 
-func Dlahr2Test(t *testing.T, impl Dlahr2er) {
+func Dlahr2Test(t *testing.T, impl Dlahr2er, dlahr2data string) {
 	rnd := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		n, k, nb int
@@ -188,16 +186,14 @@ func Dlahr2Test(t *testing.T, impl Dlahr2er) {
 		}
 	}
 
-	// Go runs tests from the source directory, so unfortunately we need to
-	// include the "../testlapack" part.
-	file, err := os.Open(filepath.FromSlash("../testlapack/testdata/dlahr2data.json.gz"))
+	file, err := os.Open(dlahr2data)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("failed to read testdata: %v", err)
 	}
 	defer file.Close()
 	r, err := gzip.NewReader(file)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("failed to decompress testdata: %v", err)
 	}
 	defer r.Close()
 

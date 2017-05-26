@@ -61,9 +61,14 @@ func (qr *QR) Factorize(a Matrix) {
 // and upper triangular matrices.
 
 // RTo extracts the m×n upper trapezoidal matrix from a QR decomposition.
-func (qr *QR) RTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting dst matrix is returned.
+func (qr *QR) RTo(dst *Dense) *Dense {
 	r, c := qr.qr.Dims()
-	dst.reuseAs(r, c)
+	if dst == nil {
+		dst = NewDense(r, c, nil)
+	} else {
+		dst.reuseAs(r, c)
+	}
 
 	// Disguise the QR as an upper triangular
 	t := &TriDense{
@@ -82,12 +87,19 @@ func (qr *QR) RTo(dst *Dense) {
 	for i := r; i < c; i++ {
 		zero(dst.mat.Data[i*dst.mat.Stride : i*dst.mat.Stride+c])
 	}
+
+	return dst
 }
 
 // QTo extracts the m×m orthonormal matrix Q from a QR decomposition.
-func (qr *QR) QTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
+func (qr *QR) QTo(dst *Dense) *Dense {
 	r, _ := qr.qr.Dims()
-	dst.reuseAsZeroed(r, r)
+	if dst == nil {
+		dst = NewDense(r, r, nil)
+	} else {
+		dst.reuseAsZeroed(r, r)
+	}
 
 	// Set Q = I.
 	for i := 0; i < r*r; i += r + 1 {
@@ -99,6 +111,8 @@ func (qr *QR) QTo(dst *Dense) {
 	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, -1)
 	work = make([]float64, int(work[0]))
 	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, len(work))
+
+	return dst
 }
 
 // SolveQR finds a minimum-norm solution to a system of linear equations defined

@@ -23,15 +23,13 @@ func TestLUD(t *testing.T) {
 		var lu LU
 		lu.Factorize(a)
 
-		var l, u TriDense
-		lu.LTo(&l)
-		lu.UTo(&u)
+		l := lu.LTo(nil)
+		u := lu.UTo(nil)
 		var p Dense
 		pivot := lu.Pivot(nil)
 		p.Permutation(n, pivot)
 		var got Dense
-		got.Mul(&p, &l)
-		got.Mul(&got, &u)
+		got.Product(&p, l, u)
 		if !EqualApprox(&got, &want, 1e-12) {
 			t.Errorf("PLU does not equal original matrix.\nWant: %v\n Got: %v", want, got)
 		}

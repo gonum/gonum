@@ -59,11 +59,16 @@ func (lq *LQ) Factorize(a Matrix) {
 // and upper triangular matrices.
 
 // LTo extracts the m×n lower trapezoidal matrix from a LQ decomposition.
-func (lq *LQ) LTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting L matrix is returned.
+func (lq *LQ) LTo(dst *Dense) *Dense {
 	r, c := lq.lq.Dims()
-	dst.reuseAs(r, c)
+	if dst == nil {
+		dst = NewDense(r, c, nil)
+	} else {
+		dst.reuseAs(r, c)
+	}
 
-	// Disguise the LQ as a lower triangular
+	// Disguise the LQ as a lower triangular.
 	t := &TriDense{
 		mat: blas64.Triangular{
 			N:      r,
@@ -77,18 +82,25 @@ func (lq *LQ) LTo(dst *Dense) {
 	dst.Copy(t)
 
 	if r == c {
-		return
+		return dst
 	}
 	// Zero right of the triangular.
 	for i := 0; i < r; i++ {
 		zero(dst.mat.Data[i*dst.mat.Stride+r : i*dst.mat.Stride+c])
 	}
+
+	return dst
 }
 
 // QTo extracts the n×n orthonormal matrix Q from an LQ decomposition.
-func (lq *LQ) QTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
+func (lq *LQ) QTo(dst *Dense) *Dense {
 	r, c := lq.lq.Dims()
-	dst.reuseAs(c, c)
+	if dst == nil {
+		dst = NewDense(c, c, nil)
+	} else {
+		dst.reuseAs(c, c)
+	}
 
 	// Set Q = I.
 	for i := 0; i < c; i++ {
@@ -132,6 +144,8 @@ func (lq *LQ) QTo(dst *Dense) {
 			1, h, qCopy.mat,
 			0, dst.mat)
 	}
+
+	return dst
 }
 
 // SolveLQ finds a minimum-norm solution to a system of linear equations defined

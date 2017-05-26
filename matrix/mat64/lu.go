@@ -205,9 +205,14 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 }
 
 // LTo extracts the lower triangular matrix from an LU factorization.
-func (lu *LU) LTo(dst *TriDense) {
+// If dst is nil, a new matrix is allocated. The resulting L matrix is returned.
+func (lu *LU) LTo(dst *TriDense) *TriDense {
 	_, n := lu.lu.Dims()
-	dst.reuseAs(n, false)
+	if dst == nil {
+		dst = NewTriDense(n, matrix.Lower, nil)
+	} else {
+		dst.reuseAs(n, matrix.Lower)
+	}
 	// Extract the lower triangular elements.
 	for i := 0; i < n; i++ {
 		for j := 0; j < i; j++ {
@@ -218,18 +223,25 @@ func (lu *LU) LTo(dst *TriDense) {
 	for i := 0; i < n; i++ {
 		dst.mat.Data[i*dst.mat.Stride+i] = 1
 	}
+	return dst
 }
 
 // UTo extracts the upper triangular matrix from an LU factorization.
-func (lu *LU) UTo(dst *TriDense) {
+// If dst is nil, a new matrix is allocated. The resulting U matrix is returned.
+func (lu *LU) UTo(dst *TriDense) *TriDense {
 	_, n := lu.lu.Dims()
-	dst.reuseAs(n, true)
+	if dst == nil {
+		dst = NewTriDense(n, matrix.Upper, nil)
+	} else {
+		dst.reuseAs(n, matrix.Upper)
+	}
 	// Extract the upper triangular elements.
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {
 			dst.mat.Data[i*dst.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
 		}
 	}
+	return dst
 }
 
 // Permutation constructs an r×r permutation matrix with the given row swaps.

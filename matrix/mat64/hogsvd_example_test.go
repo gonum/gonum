@@ -24,15 +24,13 @@ func ExampleHOGSVD() {
 	}
 
 	for i, n := range []string{"Africa", "Asia", "Latin America/Caribbean", "Oceania"} {
-		var u mat64.Dense
-		gsvd.UTo(&u, i)
+		u := gsvd.UTo(nil, i)
 		s := gsvd.Values(nil, i)
 		fmt.Printf("%s\n\ts_%d = %.4f\n\n\tU_%[2]d = %.4[4]f\n",
-			n, i, s, mat64.Formatted(&u, mat64.Prefix("\t      ")))
+			n, i, s, mat64.Formatted(u, mat64.Prefix("\t      ")))
 	}
 
-	var v mat64.Dense
-	gsvd.VTo(&v)
+	v := gsvd.VTo(nil)
 	fmt.Printf("\nCommon basis vectors\n\n\tV^T = %.4f",
 		mat64.Formatted(v.T(), mat64.Prefix("\t      ")))
 

@@ -205,7 +205,8 @@ func (gsvd *GSVD) ValuesB(s []float64) []float64 {
 
 // ZeroRTo extracts the matrix [ 0 R ] from the singular value decomposition, storing
 // the result in-place into dst. [ 0 R ] is size (k+l)×c.
-func (gsvd *GSVD) ZeroRTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting ZeroR matrix is returned.
+func (gsvd *GSVD) ZeroRTo(dst *Dense) *Dense {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
 	}
@@ -214,7 +215,11 @@ func (gsvd *GSVD) ZeroRTo(dst *Dense) {
 	k := gsvd.k
 	l := gsvd.l
 	h := min(k+l, r)
-	dst.reuseAsZeroed(k+l, c)
+	if dst == nil {
+		dst = NewDense(k+l, c, nil)
+	} else {
+		dst.reuseAsZeroed(k+l, c)
+	}
 	a := Dense{
 		mat:     gsvd.a,
 		capRows: r,
@@ -231,29 +236,37 @@ func (gsvd *GSVD) ZeroRTo(dst *Dense) {
 		dst.Slice(r, k+l, c+r-k-l, c).(*Dense).
 			Copy(b.Slice(r-k, l, c+r-k-l, c))
 	}
+	return dst
 }
 
 // SigmaATo extracts the matrix Σ₁ from the singular value decomposition, storing
 // the result in-place into dst. Σ₁ is size r×(k+l).
-func (gsvd *GSVD) SigmaATo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting SigmaA matrix is returned.
+func (gsvd *GSVD) SigmaATo(dst *Dense) *Dense {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
 	}
 	r := gsvd.r
 	k := gsvd.k
 	l := gsvd.l
-	dst.reuseAsZeroed(r, k+l)
+	if dst == nil {
+		dst = NewDense(r, k+l, nil)
+	} else {
+		dst.reuseAsZeroed(r, k+l)
+	}
 	for i := 0; i < k; i++ {
 		dst.set(i, i, 1)
 	}
 	for i := k; i < min(r, k+l); i++ {
 		dst.set(i, i, gsvd.s1[i])
 	}
+	return dst
 }
 
 // SigmaBTo extracts the matrix Σ₂ from the singular value decomposition, storing
 // the result in-place into dst. Σ₂ is size p×(k+l).
-func (gsvd *GSVD) SigmaBTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting SigmaB matrix is returned.
+func (gsvd *GSVD) SigmaBTo(dst *Dense) *Dense {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
 	}
@@ -261,24 +274,34 @@ func (gsvd *GSVD) SigmaBTo(dst *Dense) {
 	p := gsvd.p
 	k := gsvd.k
 	l := gsvd.l
-	dst.reuseAsZeroed(p, k+l)
+	if dst == nil {
+		dst = NewDense(p, k+l, nil)
+	} else {
+		dst.reuseAsZeroed(p, k+l)
+	}
 	for i := 0; i < min(l, r-k); i++ {
 		dst.set(i, i+k, gsvd.s2[k+i])
 	}
 	for i := r - k; i < l; i++ {
 		dst.set(i, i+k, 1)
 	}
+	return dst
 }
 
 // UTo extracts the matrix U from the singular value decomposition, storing
 // the result in-place into dst. U is size r×r.
-func (gsvd *GSVD) UTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting U matrix is returned.
+func (gsvd *GSVD) UTo(dst *Dense) *Dense {
 	if gsvd.kind&matrix.GSVDU == 0 {
 		panic("mat64: improper GSVD kind")
 	}
 	r := gsvd.u.Rows
 	c := gsvd.u.Cols
-	dst.reuseAs(r, c)
+	if dst == nil {
+		dst = NewDense(r, c, nil)
+	} else {
+		dst.reuseAs(r, c)
+	}
 
 	tmp := &Dense{
 		mat:     gsvd.u,
@@ -286,17 +309,23 @@ func (gsvd *GSVD) UTo(dst *Dense) {
 		capCols: c,
 	}
 	dst.Copy(tmp)
+	return dst
 }
 
 // VTo extracts the matrix V from the singular value decomposition, storing
 // the result in-place into dst. V is size p×p.
-func (gsvd *GSVD) VTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting V matrix is returned.
+func (gsvd *GSVD) VTo(dst *Dense) *Dense {
 	if gsvd.kind&matrix.GSVDV == 0 {
 		panic("mat64: improper GSVD kind")
 	}
 	r := gsvd.v.Rows
 	c := gsvd.v.Cols
-	dst.reuseAs(r, c)
+	if dst == nil {
+		dst = NewDense(r, c, nil)
+	} else {
+		dst.reuseAs(r, c)
+	}
 
 	tmp := &Dense{
 		mat:     gsvd.v,
@@ -304,17 +333,23 @@ func (gsvd *GSVD) VTo(dst *Dense) {
 		capCols: c,
 	}
 	dst.Copy(tmp)
+	return dst
 }
 
 // QTo extracts the matrix Q from the singular value decomposition, storing
 // the result in-place into dst. Q is size c×c.
-func (gsvd *GSVD) QTo(dst *Dense) {
+// If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
+func (gsvd *GSVD) QTo(dst *Dense) *Dense {
 	if gsvd.kind&matrix.GSVDQ == 0 {
 		panic("mat64: improper GSVD kind")
 	}
 	r := gsvd.q.Rows
 	c := gsvd.q.Cols
-	dst.reuseAs(r, c)
+	if dst == nil {
+		dst = NewDense(r, c, nil)
+	} else {
+		dst.reuseAs(r, c)
+	}
 
 	tmp := &Dense{
 		mat:     gsvd.q,
@@ -322,4 +357,5 @@ func (gsvd *GSVD) QTo(dst *Dense) {
 		capCols: c,
 	}
 	dst.Copy(tmp)
+	return dst
 }

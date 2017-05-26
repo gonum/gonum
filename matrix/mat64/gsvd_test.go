@@ -106,14 +106,13 @@ func TestGSVD(t *testing.T) {
 }
 
 func extractGSVD(gsvd *GSVD) (c, s []float64, s1, s2, zR, u, v, q *Dense) {
-	var s1m, s2m, zeroR, um, vm, qm Dense
-	gsvd.SigmaATo(&s1m)
-	gsvd.SigmaBTo(&s2m)
-	gsvd.ZeroRTo(&zeroR)
-	gsvd.UTo(&um)
-	gsvd.VTo(&vm)
-	gsvd.QTo(&qm)
+	s1 = gsvd.SigmaATo(nil)
+	s2 = gsvd.SigmaBTo(nil)
+	zR = gsvd.ZeroRTo(nil)
+	u = gsvd.UTo(nil)
+	v = gsvd.VTo(nil)
+	q = gsvd.QTo(nil)
 	c = gsvd.ValuesA(nil)
 	s = gsvd.ValuesB(nil)
-	return c, s, &s1m, &s2m, &zeroR, &um, &vm, &qm
+	return c, s, s1, s2, zR, u, v, q
 }

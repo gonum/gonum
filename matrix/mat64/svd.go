@@ -141,14 +141,18 @@ func (svd *SVD) Values(s []float64) []float64 {
 // UTo extracts the matrix U from the singular value decomposition, storing
 // the result in-place into dst. U is size m×m if svd.Kind() == SVDFull,
 // of size m×min(m,n) if svd.Kind() == SVDThin, and UTo panics otherwise.
-func (svd *SVD) UTo(dst *Dense) {
+func (svd *SVD) UTo(dst *Dense) *Dense {
 	kind := svd.kind
 	if kind != matrix.SVDFull && kind != matrix.SVDThin {
 		panic("mat64: improper SVD kind")
 	}
 	r := svd.u.Rows
 	c := svd.u.Cols
-	dst.reuseAs(r, c)
+	if dst == nil {
+		dst = NewDense(r, c, nil)
+	} else {
+		dst.reuseAs(r, c)
+	}
 
 	tmp := &Dense{
 		mat:     svd.u,
@@ -156,19 +160,25 @@ func (svd *SVD) UTo(dst *Dense) {
 		capCols: c,
 	}
 	dst.Copy(tmp)
+
+	return dst
 }
 
 // VTo extracts the matrix V from the singular value decomposition, storing
 // the result in-place into dst. V is size n×n if svd.Kind() == SVDFull,
 // of size n×min(m,n) if svd.Kind() == SVDThin, and VTo panics otherwise.
-func (svd *SVD) VTo(dst *Dense) {
+func (svd *SVD) VTo(dst *Dense) *Dense {
 	kind := svd.kind
 	if kind != matrix.SVDFull && kind != matrix.SVDThin {
 		panic("mat64: improper SVD kind")
 	}
 	r := svd.vt.Rows
 	c := svd.vt.Cols
-	dst.reuseAs(c, r)
+	if dst == nil {
+		dst = NewDense(c, r, nil)
+	} else {
+		dst.reuseAs(c, r)
+	}
 
 	tmp := &Dense{
 		mat:     svd.vt,
@@ -176,4 +186,6 @@ func (svd *SVD) VTo(dst *Dense) {
 		capCols: c,
 	}
 	dst.Copy(tmp.T())
+
+	return dst
 }

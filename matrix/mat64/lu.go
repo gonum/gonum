@@ -51,7 +51,7 @@ func (lu *LU) updateCond(norm float64) {
 // The LU factorization is computed with pivoting, and so really the decomposition
 // is a PLU decomposition where P is a permutation matrix. The individual matrix
 // factors can be extracted from the factorization using the Permutation method
-// on Dense, and the LFrom and UFrom methods on TriDense.
+// on Dense, and the LU LTo and UTo methods.
 func (lu *LU) Factorize(a Matrix) {
 	r, c := a.Dims()
 	if r != c {
@@ -204,30 +204,30 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 	lu.updateCond(-1)
 }
 
-// LFromLU extracts the lower triangular matrix from an LU factorization.
-func (t *TriDense) LFromLU(lu *LU) {
+// LTo extracts the lower triangular matrix from an LU factorization.
+func (lu *LU) LTo(dst *TriDense) {
 	_, n := lu.lu.Dims()
-	t.reuseAs(n, false)
+	dst.reuseAs(n, false)
 	// Extract the lower triangular elements.
 	for i := 0; i < n; i++ {
 		for j := 0; j < i; j++ {
-			t.mat.Data[i*t.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
+			dst.mat.Data[i*dst.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
 		}
 	}
 	// Set ones on the diagonal.
 	for i := 0; i < n; i++ {
-		t.mat.Data[i*t.mat.Stride+i] = 1
+		dst.mat.Data[i*dst.mat.Stride+i] = 1
 	}
 }
 
-// UFromLU extracts the upper triangular matrix from an LU factorization.
-func (t *TriDense) UFromLU(lu *LU) {
+// UTo extracts the upper triangular matrix from an LU factorization.
+func (lu *LU) UTo(dst *TriDense) {
 	_, n := lu.lu.Dims()
-	t.reuseAs(n, true)
+	dst.reuseAs(n, true)
 	// Extract the upper triangular elements.
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {
-			t.mat.Data[i*t.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
+			dst.mat.Data[i*dst.mat.Stride+j] = lu.lu.mat.Data[i*lu.lu.mat.Stride+j]
 		}
 	}
 }

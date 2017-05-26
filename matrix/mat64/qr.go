@@ -37,7 +37,7 @@ func (qr *QR) updateCond() {
 //
 // The QR decomposition is a factorization of the matrix A such that A = Q * R.
 // The matrix Q is an orthonormal m×m matrix, and R is an m×n upper triangular matrix.
-// Q and R can be extracted from the QFromQR and RFromQR methods on Dense.
+// Q and R can be extracted using the QTo and RTo methods.
 func (qr *QR) Factorize(a Matrix) {
 	m, n := a.Dims()
 	if m < n {
@@ -60,10 +60,10 @@ func (qr *QR) Factorize(a Matrix) {
 // TODO(btracey): Add in the "Reduced" forms for extracting the n×n orthogonal
 // and upper triangular matrices.
 
-// RFromQR extracts the m×n upper trapezoidal matrix from a QR decomposition.
-func (m *Dense) RFromQR(qr *QR) {
+// RTo extracts the m×n upper trapezoidal matrix from a QR decomposition.
+func (qr *QR) RTo(dst *Dense) {
 	r, c := qr.qr.Dims()
-	m.reuseAs(r, c)
+	dst.reuseAs(r, c)
 
 	// Disguise the QR as an upper triangular
 	t := &TriDense{
@@ -76,29 +76,29 @@ func (m *Dense) RFromQR(qr *QR) {
 		},
 		cap: qr.qr.capCols,
 	}
-	m.Copy(t)
+	dst.Copy(t)
 
 	// Zero below the triangular.
 	for i := r; i < c; i++ {
-		zero(m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+c])
+		zero(dst.mat.Data[i*dst.mat.Stride : i*dst.mat.Stride+c])
 	}
 }
 
-// QFromQR extracts the m×m orthonormal matrix Q from a QR decomposition.
-func (m *Dense) QFromQR(qr *QR) {
+// QTo extracts the m×m orthonormal matrix Q from a QR decomposition.
+func (qr *QR) QTo(dst *Dense) {
 	r, _ := qr.qr.Dims()
-	m.reuseAsZeroed(r, r)
+	dst.reuseAsZeroed(r, r)
 
 	// Set Q = I.
 	for i := 0; i < r*r; i += r + 1 {
-		m.mat.Data[i] = 1
+		dst.mat.Data[i] = 1
 	}
 
 	// Construct Q from the elementary reflectors.
 	work := make([]float64, 1)
-	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, m.mat, work, -1)
+	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, -1)
 	work = make([]float64, int(work[0]))
-	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, m.mat, work, len(work))
+	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, len(work))
 }
 
 // SolveQR finds a minimum-norm solution to a system of linear equations defined

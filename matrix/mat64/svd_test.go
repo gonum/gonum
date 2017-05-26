@@ -170,8 +170,8 @@ func TestSVD(t *testing.T) {
 
 func extractSVD(svd *SVD) (s []float64, u, v *Dense) {
 	var um, vm Dense
-	um.UFromSVD(svd)
-	vm.VFromSVD(svd)
+	svd.UTo(&um)
+	svd.VTo(&vm)
 	s = svd.Values(nil)
 	return s, &um, &vm
 }

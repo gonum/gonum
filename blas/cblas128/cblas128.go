@@ -7,12 +7,10 @@ package cblas128 // import "gonum.org/v1/gonum/blas/cblas128"
 
 import (
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/blas/cgo"
+	"gonum.org/v1/gonum/blas/native"
 )
 
-// TODO(kortschak): Change this and the comment below to native.Implementation
-// when blas/native covers the complex BLAS API.
-var cblas128 blas.Complex128 = cgo.Implementation{}
+var cblas128 blas.Complex128 = native.Implementation{}
 
 // Use sets the BLAS complex128 implementation to be used by subsequent BLAS calls.
 // The default implementation is cgo.Implementation.

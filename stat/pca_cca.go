@@ -57,13 +57,12 @@ func (c *PC) Vectors(dst *mat64.Dense) *mat64.Dense {
 		panic("stat: use of unsuccessful principal components analysis")
 	}
 
-	if dst == nil {
-		dst = &mat64.Dense{}
-	} else if d, n := dst.Dims(); (n != 0 || d != 0) && (d != c.d || n != min(c.n, c.d)) {
-		panic(matrix.ErrShape)
+	if dst != nil {
+		if d, n := dst.Dims(); (n != 0 || d != 0) && (d != c.d || n != min(c.n, c.d)) {
+			panic(matrix.ErrShape)
+		}
 	}
-	dst.VFromSVD(c.svd)
-	return dst
+	return c.svd.VTo(dst)
 }
 
 // Vars returns the column variances of the principal component scores,
@@ -183,15 +182,14 @@ func (c *CC) CanonicalCorrelations(x, y mat64.Matrix, weights []float64) error {
 	if !c.ok {
 		return errors.New("stat: failed to factorize y")
 	}
-	var xu, xv, yu, yv mat64.Dense
-	xu.UFromSVD(c.x)
-	xv.VFromSVD(c.x)
-	yu.UFromSVD(c.y)
-	yv.VFromSVD(c.y)
+	xu := c.x.UTo(nil)
+	xv := c.x.VTo(nil)
+	yu := c.y.UTo(nil)
+	yv := c.y.VTo(nil)
 
 	// Calculate and factorise the canonical correlation matrix.
 	var ccor mat64.Dense
-	ccor.Product(&xv, xu.T(), &yu, yv.T())
+	ccor.Product(xv, xu.T(), yu, yv.T())
 	if c.c == nil {
 		c.c = &mat64.SVD{}
 	}
@@ -228,23 +226,22 @@ func (c *CC) Left(dst *mat64.Dense, spheredSpace bool) *mat64.Dense {
 		panic("stat: canonical correlations missing or invalid")
 	}
 
-	if dst == nil {
-		dst = &mat64.Dense{}
-	} else if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.xd) {
-		panic(matrix.ErrShape)
+	if dst != nil {
+		if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.xd) {
+			panic(matrix.ErrShape)
+		}
 	}
-	dst.UFromSVD(c.c)
+	dst = c.c.UTo(dst)
 	if spheredSpace {
 		return dst
 	}
 
-	var xv mat64.Dense
 	xs := c.x.Values(nil)
-	xv.VFromSVD(c.x)
+	xv := c.x.VTo(nil)
 
-	scaleColsReciSqrt(&xv, xs)
+	scaleColsReciSqrt(xv, xs)
 
-	dst.Product(&xv, xv.T(), dst)
+	dst.Product(xv, xv.T(), dst)
 	dst.Scale(math.Sqrt(float64(c.n-1)), dst)
 	return dst
 }
@@ -261,23 +258,22 @@ func (c *CC) Right(dst *mat64.Dense, spheredSpace bool) *mat64.Dense {
 		panic("stat: canonical correlations missing or invalid")
 	}
 
-	if dst == nil {
-		dst = &mat64.Dense{}
-	} else if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.yd) {
-		panic(matrix.ErrShape)
+	if dst != nil {
+		if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.yd) {
+			panic(matrix.ErrShape)
+		}
 	}
-	dst.VFromSVD(c.c)
+	dst = c.c.VTo(dst)
 	if spheredSpace {
 		return dst
 	}
 
-	var yv mat64.Dense
 	ys := c.y.Values(nil)
-	yv.VFromSVD(c.y)
+	yv := c.y.VTo(nil)
 
-	scaleColsReciSqrt(&yv, ys)
+	scaleColsReciSqrt(yv, ys)
 
-	dst.Product(&yv, yv.T(), dst)
+	dst.Product(yv, yv.T(), dst)
 	dst.Scale(math.Sqrt(float64(c.n-1)), dst)
 	return dst
 }

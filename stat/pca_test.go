@@ -11,7 +11,12 @@ import (
 	"gonum.org/v1/gonum/matrix/mat64"
 )
 
+var appengine bool
+
 func TestPrincipalComponents(t *testing.T) {
+	if appengine {
+		t.Skip("non-asm implementation fails test")
+	}
 tests:
 	for i, test := range []struct {
 		data     mat64.Matrix

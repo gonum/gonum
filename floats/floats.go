@@ -69,6 +69,20 @@ func AddScaledTo(dst, y []float64, alpha float64, s []float64) []float64 {
 	return dst
 }
 
+// AreUnique returns true if all elements of the slice are unique.
+// Elements are compared using normal float64 equality, so NaN values are
+// considered unique.
+func AreUnique(s []float64) bool {
+	m := make(map[float64]bool, len(s))
+	for _, val := range s {
+		if m[val] {
+			return false
+		}
+		m[val] = true
+	}
+	return true
+}
+
 // argsort is a helper that implements sort.Interface, as used by
 // Argsort.
 type argsort struct {

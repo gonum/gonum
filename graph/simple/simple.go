@@ -9,6 +9,8 @@ package simple // import "gonum.org/v1/gonum/graph/simple"
 import (
 	"math"
 
+	"golang.org/x/tools/container/intsets"
+
 	"gonum.org/v1/gonum/graph"
 )
 
@@ -42,4 +44,38 @@ const maxInt int = int(^uint(0) >> 1)
 // are equalable.
 func isSame(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
+}
+
+// idSet implements available ID storage.
+type idSet struct {
+	used, free intsets.Sparse
+}
+
+// newID returns a new unique ID.
+func (s *idSet) newID() int {
+	var id int
+	if s.free.TakeMin(&id) {
+		return id
+	}
+	if id = s.used.Max(); id < maxInt {
+		return id + 1
+	}
+	for id = 0; id < maxInt; id++ {
+		if !s.used.Has(id) {
+			return id
+		}
+	}
+	panic("unreachable")
+}
+
+// use adds the id to the used IDs in the idSet.
+func (s *idSet) use(id int) {
+	s.free.Remove(id)
+	s.used.Insert(id)
+}
+
+// free frees the id for reuse.
+func (s *idSet) release(id int) {
+	s.free.Insert(id)
+	s.used.Remove(id)
 }

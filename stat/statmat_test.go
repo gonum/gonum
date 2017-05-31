@@ -60,7 +60,7 @@ func TestCovarianceMatrix(t *testing.T) {
 		if test.weights != nil {
 			copy(w, test.weights)
 		}
-		for _, cov := range []*mat64.SymDense{nil, &mat64.SymDense{}} {
+		for _, cov := range []*mat64.SymDense{nil, {}} {
 			c := CovarianceMatrix(cov, test.data, test.weights)
 			if !mat64.Equal(c, test.ans) {
 				t.Errorf("%d: expected cov %v, found %v", i, test.ans, c)
@@ -156,7 +156,7 @@ func TestCorrelationMatrix(t *testing.T) {
 		if test.weights != nil {
 			copy(w, test.weights)
 		}
-		for _, corr := range []*mat64.SymDense{nil, &mat64.SymDense{}} {
+		for _, corr := range []*mat64.SymDense{nil, {}} {
 			c := CorrelationMatrix(corr, test.data, test.weights)
 			if !mat64.Equal(c, test.ans) {
 				t.Errorf("%d: expected corr %v, found %v", i, test.ans, c)

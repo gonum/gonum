@@ -16,7 +16,7 @@ func (g *GraphNode) Has(n graph.Node) bool {
 		return true
 	}
 
-	visited := map[int]struct{}{g.id: struct{}{}}
+	visited := map[int]struct{}{g.id: {}}
 	for _, root := range g.roots {
 		if root.ID() == n.ID() {
 			return true
@@ -82,7 +82,7 @@ func (g *GraphNode) has(n graph.Node, visited map[int]struct{}) bool {
 
 func (g *GraphNode) Nodes() []graph.Node {
 	toReturn := []graph.Node{g}
-	visited := map[int]struct{}{g.id: struct{}{}}
+	visited := map[int]struct{}{g.id: {}}
 
 	for _, root := range g.roots {
 		toReturn = append(toReturn, root)
@@ -133,7 +133,7 @@ func (g *GraphNode) From(n graph.Node) []graph.Node {
 		return g.neighbors
 	}
 
-	visited := map[int]struct{}{g.id: struct{}{}}
+	visited := map[int]struct{}{g.id: {}}
 	for _, root := range g.roots {
 		visited[root.ID()] = struct{}{}
 
@@ -205,7 +205,7 @@ func (g *GraphNode) EdgeBetween(u, v graph.Node) graph.Edge {
 		return nil
 	}
 
-	visited := map[int]struct{}{g.id: struct{}{}}
+	visited := map[int]struct{}{g.id: {}}
 	for _, root := range g.roots {
 		visited[root.ID()] = struct{}{}
 		if result := root.edgeBetween(u, v, visited); result != nil {

@@ -43,9 +43,6 @@ const (
 	buffMul     = 4  // how big is the buffer relative to the number of workers
 )
 
-// [SD]gemm debugging constant.
-const debug = false
-
 // subMul is a common type shared by [SD]gemm.
 type subMul struct {
 	i, j int // index of block

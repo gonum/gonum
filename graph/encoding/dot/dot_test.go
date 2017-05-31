@@ -891,9 +891,9 @@ var encodeTests = []struct {
 	},
 	{
 		g: directedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
-			edge{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
-			edge{from: 2, to: 4}: {},
-			edge{from: 3, to: 4}: {{"color", "red"}},
+			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 2, to: 4}: {},
+			{from: 3, to: 4}: {{"color", "red"}},
 		}),
 
 		want: `digraph {
@@ -919,9 +919,9 @@ var encodeTests = []struct {
 	},
 	{
 		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
-			edge{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
-			edge{from: 2, to: 4}: {},
-			edge{from: 3, to: 4}: {{"color", "red"}},
+			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 2, to: 4}: {},
+			{from: 3, to: 4}: {{"color", "red"}},
 		}),
 
 		want: `graph {
@@ -996,12 +996,12 @@ var encodeTests = []struct {
 				4: {{"shape", "record"}, {"label", `"<Four>English|<Vier>German"`}},
 			},
 			map[edge]portedEdge{
-				edge{from: 0, to: 1}: {fromCompass: "s"},
-				edge{from: 0, to: 2}: {fromCompass: "s", toPort: "Zwei", toCompass: "e"},
-				edge{from: 2, to: 3}: {fromPort: "Zwei", fromCompass: "e"},
-				edge{from: 2, to: 4}: {fromPort: "Two", fromCompass: "w", toPort: "Four", toCompass: "w"},
-				edge{from: 3, to: 4}: {toPort: "Four", toCompass: "w"},
-				edge{from: 4, to: 0}: {fromPort: "Four", fromCompass: "_", toCompass: "s"},
+				{from: 0, to: 1}: {fromCompass: "s"},
+				{from: 0, to: 2}: {fromCompass: "s", toPort: "Zwei", toCompass: "e"},
+				{from: 2, to: 3}: {fromPort: "Zwei", fromCompass: "e"},
+				{from: 2, to: 4}: {fromPort: "Two", fromCompass: "w", toPort: "Four", toCompass: "w"},
+				{from: 3, to: 4}: {toPort: "Four", toCompass: "w"},
+				{from: 4, to: 0}: {fromPort: "Four", fromCompass: "_", toCompass: "s"},
 			},
 		),
 
@@ -1036,11 +1036,11 @@ var encodeTests = []struct {
 				4: {{"shape", "record"}, {"label", `"<Four>English|<Vier>German"`}},
 			},
 			map[edge]portedEdge{
-				edge{from: 0, to: 1}: {fromCompass: "s"},
-				edge{from: 0, to: 2}: {fromCompass: "s", toPort: "Zwei", toCompass: "e"},
-				edge{from: 2, to: 3}: {fromPort: "Zwei", fromCompass: "e"},
-				edge{from: 2, to: 4}: {fromPort: "Two", fromCompass: "w", toPort: "Four", toCompass: "w"},
-				edge{from: 3, to: 4}: {toPort: "Four", toCompass: "w"},
+				{from: 0, to: 1}: {fromCompass: "s"},
+				{from: 0, to: 2}: {fromCompass: "s", toPort: "Zwei", toCompass: "e"},
+				{from: 2, to: 3}: {fromPort: "Zwei", fromCompass: "e"},
+				{from: 2, to: 4}: {fromPort: "Two", fromCompass: "w", toPort: "Four", toCompass: "w"},
+				{from: 3, to: 4}: {toPort: "Four", toCompass: "w"},
 
 				// This definition is reversed (see comment above at portedEdge
 				// definition) so that 4 gets the from port. This is a result
@@ -1048,7 +1048,7 @@ var encodeTests = []struct {
 				// will be always be printed first when the graph is undirected,
 				// thus becoming the from port, but we define the edges here
 				// from a directed adjacency list.
-				edge{from: 4, to: 0}: {fromCompass: "s", toPort: "Four", toCompass: "_"},
+				{from: 4, to: 0}: {fromCompass: "s", toPort: "Four", toCompass: "_"},
 			},
 		),
 
@@ -1080,9 +1080,9 @@ var encodeTests = []struct {
 	// Handling graph attributes.
 	{
 		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
-			edge{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
-			edge{from: 2, to: 4}: {},
-			edge{from: 3, to: 4}: {{"color", "red"}},
+			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 2, to: 4}: {},
+			{from: 3, to: 4}: {{"color", "red"}},
 		})},
 
 		want: `graph {
@@ -1108,9 +1108,9 @@ var encodeTests = []struct {
 	},
 	{
 		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
-			edge{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
-			edge{from: 2, to: 4}: {},
-			edge{from: 3, to: 4}: {{"color", "red"}},
+			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
+			{from: 2, to: 4}: {},
+			{from: 3, to: 4}: {{"color", "red"}},
 		}),
 			graph: []Attribute{{"rankdir", `"LR"`}},
 			node:  []Attribute{{"fontsize", "16"}, {"shape", "ellipse"}},

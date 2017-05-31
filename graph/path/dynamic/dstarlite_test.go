@@ -168,7 +168,7 @@ var dynamicDStarLiteTests = []struct {
 		},
 		weight: 7.242640687119285,
 		wantedPaths: map[int][]graph.Node{
-			12: []graph.Node{simple.Node(12), simple.Node(7), simple.Node(3), simple.Node(9), simple.Node(14)},
+			12: {simple.Node(12), simple.Node(7), simple.Node(3), simple.Node(9), simple.Node(14)},
 		},
 	},
 	{

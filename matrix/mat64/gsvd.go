@@ -206,6 +206,8 @@ func (gsvd *GSVD) ValuesB(s []float64) []float64 {
 // ZeroRTo extracts the matrix [ 0 R ] from the singular value decomposition, storing
 // the result in-place into dst. [ 0 R ] is size (k+l)×c.
 // If dst is nil, a new matrix is allocated. The resulting ZeroR matrix is returned.
+//
+// ZeroRTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) ZeroRTo(dst *Dense) *Dense {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
@@ -242,6 +244,8 @@ func (gsvd *GSVD) ZeroRTo(dst *Dense) *Dense {
 // SigmaATo extracts the matrix Σ₁ from the singular value decomposition, storing
 // the result in-place into dst. Σ₁ is size r×(k+l).
 // If dst is nil, a new matrix is allocated. The resulting SigmaA matrix is returned.
+//
+// SigmaATo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) SigmaATo(dst *Dense) *Dense {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
@@ -266,6 +270,8 @@ func (gsvd *GSVD) SigmaATo(dst *Dense) *Dense {
 // SigmaBTo extracts the matrix Σ₂ from the singular value decomposition, storing
 // the result in-place into dst. Σ₂ is size p×(k+l).
 // If dst is nil, a new matrix is allocated. The resulting SigmaB matrix is returned.
+//
+// SigmaBTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) SigmaBTo(dst *Dense) *Dense {
 	if gsvd.kind == 0 {
 		panic("gsvd: no decomposition computed")
@@ -291,6 +297,8 @@ func (gsvd *GSVD) SigmaBTo(dst *Dense) *Dense {
 // UTo extracts the matrix U from the singular value decomposition, storing
 // the result in-place into dst. U is size r×r.
 // If dst is nil, a new matrix is allocated. The resulting U matrix is returned.
+//
+// UTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) UTo(dst *Dense) *Dense {
 	if gsvd.kind&matrix.GSVDU == 0 {
 		panic("mat64: improper GSVD kind")
@@ -315,6 +323,8 @@ func (gsvd *GSVD) UTo(dst *Dense) *Dense {
 // VTo extracts the matrix V from the singular value decomposition, storing
 // the result in-place into dst. V is size p×p.
 // If dst is nil, a new matrix is allocated. The resulting V matrix is returned.
+//
+// VTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) VTo(dst *Dense) *Dense {
 	if gsvd.kind&matrix.GSVDV == 0 {
 		panic("mat64: improper GSVD kind")
@@ -339,6 +349,8 @@ func (gsvd *GSVD) VTo(dst *Dense) *Dense {
 // QTo extracts the matrix Q from the singular value decomposition, storing
 // the result in-place into dst. Q is size c×c.
 // If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
+//
+// QTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) QTo(dst *Dense) *Dense {
 	if gsvd.kind&matrix.GSVDQ == 0 {
 		panic("mat64: improper GSVD kind")

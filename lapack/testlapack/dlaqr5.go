@@ -8,11 +8,9 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -35,7 +33,7 @@ type Dlaqr5test struct {
 	ZWant []float64
 }
 
-func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
+func Dlaqr5Test(t *testing.T, impl Dlaqr5er, dlaqr5data string) {
 	// Test without using reference data.
 	rnd := rand.New(rand.NewSource(1))
 	for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 30} {
@@ -50,14 +48,14 @@ func Dlaqr5Test(t *testing.T, impl Dlaqr5er) {
 
 	// Test using reference data computed by the reference netlib
 	// implementation.
-	file, err := os.Open(filepath.FromSlash("../testlapack/testdata/dlaqr5data.json.gz"))
+	file, err := os.Open(dlaqr5data)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("failed to read testdata: %v", err)
 	}
 	defer file.Close()
 	r, err := gzip.NewReader(file)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("failed to decomporess testdata: %v", err)
 	}
 	defer r.Close()
 

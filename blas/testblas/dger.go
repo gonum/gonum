@@ -8,15 +8,14 @@ type Dgerer interface {
 
 func DgerTest(t *testing.T, blasser Dgerer) {
 	for _, test := range []struct {
-		name        string
-		a           [][]float64
-		m           int
-		n           int
-		x           []float64
-		y           []float64
-		incX        int
-		incY        int
-		ansAlphaEq1 []float64
+		name string
+		a    [][]float64
+		m    int
+		n    int
+		x    []float64
+		y    []float64
+		incX int
+		incY int
 
 		trueAns [][]float64
 	}{

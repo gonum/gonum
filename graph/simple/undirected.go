@@ -29,6 +29,8 @@ func NewUndirectedGraph(self, absent float64) *UndirectedGraph {
 
 		self:   self,
 		absent: absent,
+
+		nodeIDs: newIDSet(),
 	}
 }
 

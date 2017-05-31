@@ -31,6 +31,8 @@ func NewDirectedGraph(self, absent float64) *DirectedGraph {
 
 		self:   self,
 		absent: absent,
+
+		nodeIDs: newIDSet(),
 	}
 }
 

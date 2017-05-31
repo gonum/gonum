@@ -11,11 +11,9 @@ type Dgemmer interface {
 }
 
 type DgemmCase struct {
-	isATrans    bool
 	m, n, k     int
 	alpha, beta float64
 	a           [][]float64
-	aTrans      [][]float64 // transpose of a
 	b           [][]float64
 	c           [][]float64
 	ans         [][]float64
@@ -24,12 +22,11 @@ type DgemmCase struct {
 var DgemmCases = []DgemmCase{
 
 	{
-		m:        4,
-		n:        3,
-		k:        2,
-		isATrans: false,
-		alpha:    2,
-		beta:     0.5,
+		m:     4,
+		n:     3,
+		k:     2,
+		alpha: 2,
+		beta:  0.5,
 		a: [][]float64{
 			{1, 2},
 			{4, 5},
@@ -54,12 +51,11 @@ var DgemmCases = []DgemmCase{
 		},
 	},
 	{
-		m:        4,
-		n:        2,
-		k:        3,
-		isATrans: false,
-		alpha:    2,
-		beta:     0.5,
+		m:     4,
+		n:     2,
+		k:     3,
+		alpha: 2,
+		beta:  0.5,
 		a: [][]float64{
 			{1, 2, 3},
 			{4, 5, 6},
@@ -85,12 +81,11 @@ var DgemmCases = []DgemmCase{
 		},
 	},
 	{
-		m:        3,
-		n:        2,
-		k:        4,
-		isATrans: false,
-		alpha:    2,
-		beta:     0.5,
+		m:     3,
+		n:     2,
+		k:     4,
+		alpha: 2,
+		beta:  0.5,
 		a: [][]float64{
 			{1, 2, 3, 4},
 			{4, 5, 6, 7},
@@ -114,12 +109,11 @@ var DgemmCases = []DgemmCase{
 		},
 	},
 	{
-		m:        3,
-		n:        4,
-		k:        2,
-		isATrans: false,
-		alpha:    2,
-		beta:     0.5,
+		m:     3,
+		n:     4,
+		k:     2,
+		alpha: 2,
+		beta:  0.5,
 		a: [][]float64{
 			{1, 2},
 			{4, 5},
@@ -141,12 +135,11 @@ var DgemmCases = []DgemmCase{
 		},
 	},
 	{
-		m:        2,
-		n:        4,
-		k:        3,
-		isATrans: false,
-		alpha:    2,
-		beta:     0.5,
+		m:     2,
+		n:     4,
+		k:     3,
+		alpha: 2,
+		beta:  0.5,
 		a: [][]float64{
 			{1, 2, 3},
 			{4, 5, 6},
@@ -166,12 +159,11 @@ var DgemmCases = []DgemmCase{
 		},
 	},
 	{
-		m:        2,
-		n:        3,
-		k:        4,
-		isATrans: false,
-		alpha:    2,
-		beta:     0.5,
+		m:     2,
+		n:     3,
+		k:     4,
+		alpha: 2,
+		beta:  0.5,
 		a: [][]float64{
 			{1, 2, 3, 4},
 			{4, 5, 6, 7},

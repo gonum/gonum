@@ -7,17 +7,15 @@ import (
 )
 
 type DgemvCase struct {
-	Name  string
-	m     int
-	n     int
-	A     [][]float64
-	tA    blas.Transpose
-	x     []float64
-	incX  int
-	y     []float64
-	incY  int
-	xCopy []float64
-	yCopy []float64
+	Name string
+	m    int
+	n    int
+	A    [][]float64
+	tA   blas.Transpose
+	x    []float64
+	incX int
+	y    []float64
+	incY int
 
 	Subcases []DgemvSubcase
 }

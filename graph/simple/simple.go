@@ -9,9 +9,8 @@ package simple // import "gonum.org/v1/gonum/graph/simple"
 import (
 	"math"
 
-	"golang.org/x/tools/container/intsets"
-
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // Node is a simple graph node.
@@ -37,30 +36,37 @@ func (e Edge) To() graph.Node { return e.T }
 // Weight returns the weight of the edge.
 func (e Edge) Weight() float64 { return e.W }
 
-// maxInt is the maximum value of the machine-dependent int type.
-const maxInt int = int(^uint(0) >> 1)
-
 // isSame returns whether two float64 values are the same where NaN values
 // are equalable.
 func isSame(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
+// maxInt is the maximum value of the machine-dependent int type.
+const maxInt int = int(^uint(0) >> 1)
+
 // idSet implements available ID storage.
 type idSet struct {
-	used, free intsets.Sparse
+	maxID      int
+	used, free set.Ints
 }
 
-// newID returns a new unique ID.
+// newIDSet returns a new idSet. The returned value should not be passed
+// except by pointer.
+func newIDSet() idSet {
+	return idSet{maxID: -1, used: make(set.Ints), free: make(set.Ints)}
+}
+
+// newID returns a new unique ID. The ID returned is not considered used
+// until passed in a call to use.
 func (s *idSet) newID() int {
-	var id int
-	if s.free.TakeMin(&id) {
+	for id := range s.free {
 		return id
 	}
-	if id = s.used.Max(); id < maxInt {
-		return id + 1
+	if s.maxID != maxInt {
+		return s.maxID + 1
 	}
-	for id = 0; id < maxInt; id++ {
+	for id := 0; id <= s.maxID+1; id++ {
 		if !s.used.Has(id) {
 			return id
 		}
@@ -70,12 +76,15 @@ func (s *idSet) newID() int {
 
 // use adds the id to the used IDs in the idSet.
 func (s *idSet) use(id int) {
+	s.used.Add(id)
 	s.free.Remove(id)
-	s.used.Insert(id)
+	if id > s.maxID {
+		s.maxID = id
+	}
 }
 
 // free frees the id for reuse.
 func (s *idSet) release(id int) {
-	s.free.Insert(id)
+	s.free.Add(id)
 	s.used.Remove(id)
 }

@@ -208,7 +208,6 @@ func rectanglesOverlap(off, aCols, bCols, stride int) bool {
 
 	// Flatten the shifted matrix column positions
 	// so a starts at 0, modulo the common stride.
-	const aFrom = 0
 	aTo := aCols
 	// The mod stride operations here make the from
 	// and to indexes comparable between a and b when

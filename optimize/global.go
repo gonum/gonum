@@ -156,7 +156,6 @@ type globalStatus struct {
 	startTime time.Time
 	optLoc    *Location
 	settings  *Settings
-	method    GlobalMethod
 	statuser  Statuser
 	err       error
 }

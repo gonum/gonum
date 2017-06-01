@@ -998,7 +998,7 @@ func TestLocal(t *testing.T) {
 	// Mix of functions with and without Grad method.
 	tests = append(tests, gradFreeTests...)
 	tests = append(tests, gradientDescentTests...)
-	testLocal(t, gradientDescentTests, nil)
+	testLocal(t, tests, nil)
 }
 
 func TestNelderMead(t *testing.T) {

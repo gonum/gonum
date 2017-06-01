@@ -537,7 +537,7 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 	// Solve the Phase I linear program.
 	_, xOpt, newBasic, err := simplex(basicIdxs, c, aNew, b, 1e-10)
 	if err != nil {
-		return nil, nil, nil, errors.New(fmt.Sprintf("lp: error finding feasible basis: %s", err))
+		return nil, nil, nil, fmt.Errorf("lp: error finding feasible basis: %s", err)
 	}
 
 	// The original LP is infeasible if the added variable has non-zero value

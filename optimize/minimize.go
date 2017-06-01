@@ -50,7 +50,7 @@ func copyLocation(dst, src *Location) {
 
 func checkOptimization(p Problem, dim int, method Needser, recorder Recorder) error {
 	if p.Func == nil {
-		panic("optimize: objective function is undefined")
+		panic(badProblem)
 	}
 	if dim <= 0 {
 		panic("optimize: impossible problem dimension")

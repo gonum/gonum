@@ -16,18 +16,6 @@ const (
 	badNoVect = "mat64: eigenvectors not computed"
 )
 
-func symmetric(m *Dense) bool {
-	n, _ := m.Dims()
-	for i := 0; i < n; i++ {
-		for j := 0; j < i; j++ {
-			if m.at(i, j) != m.at(j, i) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // EigenSym is a type for creating and manipulating the Eigen decomposition of
 // symmetric matrices.
 type EigenSym struct {

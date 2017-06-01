@@ -217,13 +217,6 @@ func overlapSiblingTriangles(ai, aj, an int, aKind matrix.TriKind, bi, bj, bn in
 	return false
 }
 
-func abs(a int) int {
-	if a < 0 {
-		return -a
-	}
-	return a
-}
-
 func kindString(k matrix.TriKind) string {
 	if k == matrix.Upper {
 		return "U"

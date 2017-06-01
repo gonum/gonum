@@ -1552,7 +1552,6 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 		ix += incX
 		iy += incY
 	}
-	return
 }
 
 // Ssyr performs the rank-one update
@@ -1744,7 +1743,6 @@ func (Implementation) Ssyr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		ix += incX
 		iy += incY
 	}
-	return
 }
 
 // Stpsv solves

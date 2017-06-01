@@ -95,55 +95,25 @@ func (lq *LQ) LTo(dst *Dense) *Dense {
 // QTo extracts the n×n orthonormal matrix Q from an LQ decomposition.
 // If dst is nil, a new matrix is allocated. The resulting Q matrix is returned.
 func (lq *LQ) QTo(dst *Dense) *Dense {
-	r, c := lq.lq.Dims()
+	_, c := lq.lq.Dims()
 	if dst == nil {
 		dst = NewDense(c, c, nil)
 	} else {
-		dst.reuseAs(c, c)
+		dst.reuseAsZeroed(c, c)
 	}
+	q := dst.mat
 
 	// Set Q = I.
+	ldq := q.Stride
 	for i := 0; i < c; i++ {
-		v := dst.mat.Data[i*dst.mat.Stride : i*dst.mat.Stride+c]
-		zero(v)
-		v[i] = 1
+		q.Data[i*ldq+i] = 1
 	}
 
 	// Construct Q from the elementary reflectors.
-	h := blas64.General{
-		Rows:   c,
-		Cols:   c,
-		Stride: c,
-		Data:   make([]float64, c*c),
-	}
-	qCopy := getWorkspace(c, c, false)
-	v := blas64.Vector{
-		Inc:  1,
-		Data: make([]float64, c),
-	}
-	for i := 0; i < r; i++ {
-		// Set h = I.
-		zero(h.Data)
-		for j := 0; j < len(h.Data); j += c + 1 {
-			h.Data[j] = 1
-		}
-
-		// Set the vector data as the elementary reflector.
-		for j := 0; j < i; j++ {
-			v.Data[j] = 0
-		}
-		v.Data[i] = 1
-		for j := i + 1; j < c; j++ {
-			v.Data[j] = lq.lq.mat.Data[i*lq.lq.mat.Stride+j]
-		}
-
-		// Compute the multiplication matrix.
-		blas64.Ger(-lq.tau[i], v, v, h)
-		qCopy.Copy(dst)
-		blas64.Gemm(blas.NoTrans, blas.NoTrans,
-			1, h, qCopy.mat,
-			0, dst.mat)
-	}
+	work := make([]float64, 1)
+	lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, q, work, -1)
+	work = make([]float64, int(work[0]))
+	lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, q, work, len(work))
 
 	return dst
 }

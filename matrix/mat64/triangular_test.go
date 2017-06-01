@@ -315,3 +315,121 @@ func TestTriMul(t *testing.T) {
 	receiver = NewTriDense(3, matrix.Upper, nil)
 	testTwoInput(t, "TriMul", receiver, method, denseComparison, legalTypesUpper, legalSizeTriMul, 1e-14)
 }
+
+func TestCopySymIntoTriangle(t *testing.T) {
+	nan := math.NaN()
+	for tc, test := range []struct {
+		n     int
+		sUplo blas.Uplo
+		s     []float64
+
+		tUplo matrix.TriKind
+		want  []float64
+	}{
+		{
+			n:     3,
+			sUplo: blas.Upper,
+			s: []float64{
+				1, 2, 3,
+				nan, 4, 5,
+				nan, nan, 6,
+			},
+			tUplo: matrix.Upper,
+			want: []float64{
+				1, 2, 3,
+				0, 4, 5,
+				0, 0, 6,
+			},
+		},
+		{
+			n:     3,
+			sUplo: blas.Lower,
+			s: []float64{
+				1, nan, nan,
+				2, 3, nan,
+				4, 5, 6,
+			},
+			tUplo: matrix.Upper,
+			want: []float64{
+				1, 2, 4,
+				0, 3, 5,
+				0, 0, 6,
+			},
+		},
+		{
+			n:     3,
+			sUplo: blas.Upper,
+			s: []float64{
+				1, 2, 3,
+				nan, 4, 5,
+				nan, nan, 6,
+			},
+			tUplo: matrix.Lower,
+			want: []float64{
+				1, 0, 0,
+				2, 4, 0,
+				3, 5, 6,
+			},
+		},
+		{
+			n:     3,
+			sUplo: blas.Lower,
+			s: []float64{
+				1, nan, nan,
+				2, 3, nan,
+				4, 5, 6,
+			},
+			tUplo: matrix.Lower,
+			want: []float64{
+				1, 0, 0,
+				2, 3, 0,
+				4, 5, 6,
+			},
+		},
+	} {
+		n := test.n
+		s := NewSymDense(n, test.s)
+		// For the purpose of the test, break the assumption that
+		// symmetric is stored in the upper triangle (only when S is
+		// RawSymmetricer).
+		s.mat.Uplo = test.sUplo
+
+		t1 := NewTriDense(n, test.tUplo, nil)
+		copySymIntoTriangle(t1, s)
+
+		equal := true
+	loop1:
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				if t1.At(i, j) != test.want[i*n+j] {
+					equal = false
+					break loop1
+				}
+			}
+		}
+		if !equal {
+			t.Errorf("Case %v: unexpected T when S is RawSymmetricer", tc)
+		}
+
+		if test.sUplo == blas.Lower {
+			continue
+		}
+
+		sb := (basicSymmetric)(*s)
+		t2 := NewTriDense(n, test.tUplo, nil)
+		copySymIntoTriangle(t2, &sb)
+		equal = true
+	loop2:
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				if t1.At(i, j) != test.want[i*n+j] {
+					equal = false
+					break loop2
+				}
+			}
+		}
+		if !equal {
+			t.Errorf("Case %v: unexpected T when S is not RawSymmetricer", tc)
+		}
+	}
+}

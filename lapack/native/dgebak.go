@@ -28,7 +28,7 @@ func (impl Implementation) Dgebak(job lapack.Job, side lapack.EVSide, n, ilo, ih
 	}
 	switch side {
 	default:
-		panic(badSide)
+		panic(badEVSide)
 	case lapack.LeftEV, lapack.RightEV:
 	}
 	checkMatrix(n, m, v, ldv)

@@ -565,7 +565,6 @@ func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int,
 		ix += incX
 		iy += incY
 	}
-	return
 }
 
 // Dscal scales x by alpha.

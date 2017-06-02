@@ -587,7 +587,6 @@ func (Implementation) Srotm(n int, x []float32, incX int, y []float32, incY int,
 		ix += incX
 		iy += incY
 	}
-	return
 }
 
 // Sscal scales x by alpha.

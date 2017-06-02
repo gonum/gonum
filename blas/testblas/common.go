@@ -78,12 +78,8 @@ func dCopyTwoTmp(x, xTmp, y, yTmp []float64) {
 	if len(y) != len(yTmp) {
 		panic("y size mismatch")
 	}
-	for i, val := range x {
-		xTmp[i] = val
-	}
-	for i, val := range y {
-		yTmp[i] = val
-	}
+	copy(xTmp, x)
+	copy(yTmp, y)
 }
 
 // returns true if the function panics

@@ -18,7 +18,6 @@ func DtbsvTest(t *testing.T, blasser Dtbsver) {
 		d    blas.Diag
 		n, k int
 		a    [][]float64
-		lda  int
 		x    []float64
 		incX int
 		ans  []float64

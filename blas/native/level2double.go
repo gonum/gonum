@@ -1530,7 +1530,6 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 		ix += incX
 		iy += incY
 	}
-	return
 }
 
 // Dsyr performs the rank-one update
@@ -1718,7 +1717,6 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		ix += incX
 		iy += incY
 	}
-	return
 }
 
 // Dtpsv solves

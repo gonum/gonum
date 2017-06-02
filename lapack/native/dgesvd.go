@@ -317,7 +317,7 @@ func (impl Implementation) Dgesvd(jobU, jobVT lapack.SVDJob, m, n int, a []float
 			// Path 10t, n > m
 			impl.Dgebrd(m, n, a, lda, s, nil, nil, nil, work, -1)
 			lwork_dgebrd = int(work[0])
-			maxwrk := 3*m + lwork_dgebrd
+			maxwrk = 3*m + lwork_dgebrd
 			if wantvs || wantvo {
 				impl.Dorgbr(lapack.ApplyP, m, n, m, a, n, nil, work, -1)
 				lwork_dorgbr_p = int(work[0])

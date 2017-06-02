@@ -28,7 +28,8 @@ func (impl Implementation) Dlasq5(i0, n0 int, z []float64, pp int, tau, sigma fl
 		emin = z[j4+4]
 		d := z[j4] - tau
 		dmin = d
-		dmin1 = -z[j4]
+		// In the reference there are code paths that actually return this value.
+		// dmin1 = -z[j4]
 		if pp == 0 {
 			for j4loop := 4 * (i0 + 1); j4loop <= 4*((n0+1)-3); j4loop += 4 {
 				j4 := j4loop - 1
@@ -73,7 +74,8 @@ func (impl Implementation) Dlasq5(i0, n0 int, z []float64, pp int, tau, sigma fl
 		emin = z[j4+4]
 		d := z[j4] - tau
 		dmin = d
-		dmin1 = -z[j4]
+		// In the reference there are code paths that actually return this value.
+		// dmin1 = -z[j4]
 		if pp == 0 {
 			for j4loop := 4 * (i0 + 1); j4loop <= 4*((n0+1)-3); j4loop += 4 {
 				j4 := j4loop - 1

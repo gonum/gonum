@@ -206,26 +206,6 @@ func nanTriangular(uplo blas.Uplo, n, stride int) blas64.Triangular {
 	}
 }
 
-// randomTriangular allocates a new r×c triangular matrix filled with random
-// numbers. Out-of-triangle elements are filled with NaN values.
-func randomTriangular(uplo blas.Uplo, n, stride int, rnd *rand.Rand) blas64.Triangular {
-	ans := nanTriangular(uplo, n, stride)
-	if uplo == blas.Upper {
-		for i := 0; i < n; i++ {
-			for j := i; j < n; j++ {
-				ans.Data[i*ans.Stride+j] = rnd.NormFloat64()
-			}
-		}
-		return ans
-	}
-	for i := 0; i < n; i++ {
-		for j := 0; j <= i; j++ {
-			ans.Data[i*ans.Stride+j] = rnd.NormFloat64()
-		}
-	}
-	return ans
-}
-
 // generalOutsideAllNaN returns whether all out-of-range elements have NaN
 // values.
 func generalOutsideAllNaN(a blas64.General) bool {

@@ -5,7 +5,6 @@
 package testlapack
 
 import (
-	"fmt"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -14,30 +13,6 @@ import (
 type Dlasq3er interface {
 	Dlasq3(i0, n0 int, z []float64, pp int, dmin, sigma, desig, qmax float64, nFail, iter, nDiv int, ttype int, dmin1, dmin2, dn, dn1, dn2, g, tau float64) (
 		i0Out, n0Out, ppOut int, dminOut, sigmaOut, desigOut, qmaxOut float64, nFailOut, iterOut, nDivOut, ttypeOut int, dmin1Out, dmin2Out, dnOut, dn1Out, dn2Out, gOut, tauOut float64)
-}
-
-func printDlasq3FortranInput(d dlasq3teststruct) {
-	z := d.z
-	printFortranArray(z, "z")
-	fmt.Println("i0 =", d.i0)
-	fmt.Println("n0 =", d.n0)
-	fmt.Println("pp =", d.pp)
-
-	fmt.Println("dmin =", fortran64(d.dmin))
-	fmt.Println("sigma =", fortran64(d.sigma))
-	fmt.Println("desig =", fortran64(d.desig))
-	fmt.Println("qmax =", fortran64(d.qmax))
-	fmt.Println("nFail =", d.nFail)
-	fmt.Println("iter =", d.iter)
-	fmt.Println("nDiv =", d.nDiv)
-	fmt.Println("ttype =", d.ttype)
-	fmt.Println("dmin1 =", fortran64(d.dmin1))
-	fmt.Println("dmin2 =", fortran64(d.dmin2))
-	fmt.Println("dn =", fortran64(d.dn))
-	fmt.Println("dn1 =", fortran64(d.dn1))
-	fmt.Println("dn2 =", fortran64(d.dn2))
-	fmt.Println("g =", fortran64(d.g))
-	fmt.Println("tau =", fortran64(d.tau))
 }
 
 type dlasq3teststruct struct {

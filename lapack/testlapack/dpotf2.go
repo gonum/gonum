@@ -18,7 +18,6 @@ type Dpotf2er interface {
 func Dpotf2Test(t *testing.T, impl Dpotf2er) {
 	for _, test := range []struct {
 		a   [][]float64
-		ul  blas.Uplo
 		pos bool
 		U   [][]float64
 	}{

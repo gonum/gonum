@@ -418,8 +418,8 @@ func copySymIntoTriangle(t *TriDense, s Symmetric) {
 				for j := i; j < n; j++ {
 					t.mat.Data[i*ts+j] = sd.Data[j*ss+i]
 				}
-				return
 			}
+			return
 		}
 		if sd.Uplo == blas.Upper {
 			for i := 0; i < n; i++ {

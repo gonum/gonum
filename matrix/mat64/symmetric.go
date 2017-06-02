@@ -335,7 +335,6 @@ func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
 	}
 	blas64.Syr2(alpha, x.mat, y.mat, w.mat)
 	*s = w
-	return
 }
 
 // ScaleSym multiplies the elements of a by f, placing the result in the receiver.

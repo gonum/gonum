@@ -197,7 +197,6 @@ func testMul(t *testing.T, a, b Matrix, c *Dense, acomp, bcomp, ccomp matComp, c
 	if !denseEqual(c, ccomp) {
 		t.Errorf("mul answer not equal for %v", name)
 	}
-	return
 }
 
 type basicMatrix Dense

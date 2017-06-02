@@ -1031,9 +1031,8 @@ func TestScale(t *testing.T) {
 
 func TestPowN(t *testing.T) {
 	for i, test := range []struct {
-		a    [][]float64
-		mod  func(*Dense)
-		want [][]float64
+		a   [][]float64
+		mod func(*Dense)
 	}{
 		{
 			a: [][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},

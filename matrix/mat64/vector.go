@@ -59,7 +59,7 @@ func (v *Vector) ViewVec(i, n int) *Vector {
 }
 
 // SliceVec returns a new Vector that shares backing data with the receiver.
-// The returned matrix starts at i of the recevier and extends k-i elements.
+// The returned matrix starts at i of the receiver and extends k-i elements.
 // SliceVec panics with ErrIndexOutOfRange if the slice is outside the bounds
 // of the receiver.
 func (v *Vector) SliceVec(i, k int) *Vector {

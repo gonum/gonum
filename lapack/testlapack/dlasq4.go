@@ -5,7 +5,6 @@
 package testlapack
 
 import (
-	"fmt"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -22,25 +21,6 @@ type dlasq4teststruct struct {
 	tauOut   float64
 	ttypeOut int
 	gOut     float64
-}
-
-func printDlasq4FortranInput(d dlasq4teststruct) {
-	z := d.z
-	printFortranArray(z, "z")
-	fmt.Println("i0 =", d.i0)
-	fmt.Println("n0 =", d.n0)
-	fmt.Println("pp =", d.pp)
-	fmt.Println("n0in =", d.n0in)
-
-	fmt.Println("dmin =", fortran64(d.dmin))
-	fmt.Println("dmin1 =", fortran64(d.dmin1))
-	fmt.Println("dmin2 =", fortran64(d.dmin2))
-	fmt.Println("dn =", fortran64(d.dn))
-	fmt.Println("dn1 =", fortran64(d.dn1))
-	fmt.Println("dn2 =", fortran64(d.dn2))
-	fmt.Println("g =", fortran64(d.g))
-	fmt.Println("tau =", fortran64(d.tau))
-	fmt.Println("ttype =", d.ttype)
 }
 
 type Dlasq4er interface {

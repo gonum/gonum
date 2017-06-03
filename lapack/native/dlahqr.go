@@ -380,7 +380,7 @@ func (impl Implementation) Dlahqr(wantt, wantz bool, n, ilo, ihi int, h []float6
 			}
 		}
 
-		if converged == false {
+		if !converged {
 			// The QR iteration finished without splitting off a
 			// submatrix of order 1 or 2.
 			return i + 1

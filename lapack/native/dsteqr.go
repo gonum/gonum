@@ -98,8 +98,7 @@ func (impl Implementation) Dsteqr(compz lapack.EVComp, n int, d, e, z []float64,
 
 	type scaletype int
 	const (
-		none scaletype = iota
-		down
+		down scaletype = iota + 1
 		up
 	)
 	var iscale scaletype

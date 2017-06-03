@@ -83,7 +83,7 @@ func (impl Implementation) Dlasq2(n int, z []float64) (info int) {
 	// Check for negative data and compute sums of q's and e's.
 	z[2*n-1] = 0
 	emin := z[1]
-	var d, e, qmax, zmax float64
+	var d, e, qmax float64
 	var i1, n1 int
 	for k := 0; k < 2*(n-1); k += 2 {
 		if z[k] < 0 || z[k+1] < 0 {
@@ -93,14 +93,12 @@ func (impl Implementation) Dlasq2(n int, z []float64) (info int) {
 		e += z[k+1]
 		qmax = math.Max(qmax, z[k])
 		emin = math.Min(emin, z[k+1])
-		zmax = math.Max(math.Max(qmax, zmax), z[k+1])
 	}
 	if z[2*(n-1)] < 0 {
 		panic("lapack: bad z value")
 	}
 	d += z[2*(n-1)]
 	qmax = math.Max(qmax, z[2*(n-1)])
-	zmax = math.Max(qmax, zmax)
 	// Check for diagonality.
 	if e == 0 {
 		for k := 1; k < n; k++ {

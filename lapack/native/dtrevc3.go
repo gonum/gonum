@@ -109,7 +109,7 @@ import (
 func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.HowMany, selected []bool, n int, t []float64, ldt int, vl []float64, ldvl int, vr []float64, ldvr int, mm int, work []float64, lwork int) (m int) {
 	switch side {
 	default:
-		panic(badSide)
+		panic(badEVSide)
 	case lapack.RightEV, lapack.LeftEV, lapack.RightLeftEV:
 	}
 	switch howmny {

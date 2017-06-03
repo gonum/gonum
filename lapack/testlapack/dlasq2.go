@@ -5,19 +5,12 @@
 package testlapack
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 )
-
-func printDlasq2FortranInput(z []float64, n int) {
-	printFortranArray(z, "z")
-	fmt.Println("n = ", n)
-	fmt.Println("info = 0")
-}
 
 type Dlasq2er interface {
 	Dgetrfer

@@ -23,10 +23,10 @@ import (
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/lapack"
-	"gonum.org/v1/gonum/lapack/native"
+	"gonum.org/v1/gonum/lapack/gonum"
 )
 
-var lapack64 lapack.Float64 = native.Implementation{}
+var lapack64 lapack.Float64 = gonum.Implementation{}
 
 // Use sets the LAPACK float64 implementation to be used by subsequent BLAS calls.
 // The default implementation is native.Implementation.

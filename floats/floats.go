@@ -14,6 +14,7 @@ import (
 	"errors"
 	"math"
 	"sort"
+	"strconv"
 
 	"gonum.org/v1/gonum/internal/asm/f64"
 )
@@ -565,6 +566,19 @@ func Norm(s []float64, L float64) float64 {
 		norm += math.Pow(math.Abs(val), L)
 	}
 	return math.Pow(norm, 1/L)
+}
+
+// ParseWithNA converts the string s to a float64 in v.
+// If s equals missing, w is returned as 0, otherwise 1.
+func ParseWithNA(s, missing string) (v, w float64, err error) {
+	if s == missing {
+		return 0, 0, nil
+	}
+	v, err = strconv.ParseFloat(s, 64)
+	if err == nil {
+		w = 1
+	}
+	return v, w, err
 }
 
 // Prod returns the product of the elements of the slice.

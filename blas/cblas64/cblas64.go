@@ -7,10 +7,10 @@ package cblas64 // import "gonum.org/v1/gonum/blas/cblas64"
 
 import (
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/blas/native"
+	"gonum.org/v1/gonum/blas/gonum"
 )
 
-var cblas64 blas.Complex64 = native.Implementation{}
+var cblas64 blas.Complex64 = gonum.Implementation{}
 
 // Use sets the BLAS complex64 implementation to be used by subsequent BLAS calls.
 // The default implementation is cgo.Implementation.

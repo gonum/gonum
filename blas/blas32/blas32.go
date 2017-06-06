@@ -7,10 +7,10 @@ package blas32 // import "gonum.org/v1/gonum/blas/blas32"
 
 import (
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/blas/native"
+	"gonum.org/v1/gonum/blas/gonum"
 )
 
-var blas32 blas.Float32 = native.Implementation{}
+var blas32 blas.Float32 = gonum.Implementation{}
 
 // Use sets the BLAS float32 implementation to be used by subsequent BLAS calls.
 // The default implementation is native.Implementation.

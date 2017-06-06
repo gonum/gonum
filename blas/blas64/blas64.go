@@ -7,10 +7,10 @@ package blas64 // import "gonum.org/v1/gonum/blas/blas64"
 
 import (
 	"gonum.org/v1/gonum/blas"
-	"gonum.org/v1/gonum/blas/native"
+	"gonum.org/v1/gonum/blas/gonum"
 )
 
-var blas64 blas.Float64 = native.Implementation{}
+var blas64 blas.Float64 = gonum.Implementation{}
 
 // Use sets the BLAS float64 implementation to be used by subsequent BLAS calls.
 // The default implementation is native.Implementation.

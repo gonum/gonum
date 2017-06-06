@@ -1871,6 +1871,37 @@ func TestInverse(t *testing.T) {
 	}
 }
 
+func TestSliceRows(t *testing.T) {
+	m := NewDense(3, 3, []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0})
+	m = m.SliceRows([]int{0, 2}).(*Dense)
+	rows, cols := m.Dims()
+	capRows, capCols := m.Caps()
+	if rows != 2 {
+		t.Errorf("unexpected value for rows: got: %d want: 2", rows)
+	}
+	if cols != 3 {
+		t.Errorf("unexpected value for cols: got: %d want: 3", cols)
+	}
+	if capRows != 2 {
+		t.Errorf("unexpected value for capRows: got: %d want: 2", capRows)
+	}
+	if capCols != 3 {
+		t.Errorf("unexpected value for capCols: got: %d want: 3", capCols)
+	}
+	want := []float64{0.0, 1.0, 2.0, 6.0, 7.0, 8.0}
+	if len(want) != len(m.mat.Data) {
+		t.Errorf("unexpected value for mat.Data: got: %d want: %v", m.mat.Data, want)
+	} else {
+		for i, w := range want {
+			if w != m.mat.Data[i] {
+				t.Errorf("unexpected value for mat.Data: got: %d want: %v", m.mat.Data, want)
+				break
+			}
+		}
+	}
+
+}
+
 var (
 	wd *Dense
 )

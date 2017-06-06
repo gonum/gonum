@@ -5,6 +5,8 @@
 package mat64
 
 import (
+	"sort"
+
 	"github.com/gonum/blas"
 	"github.com/gonum/blas/blas64"
 	"github.com/gonum/matrix"
@@ -302,6 +304,27 @@ func (m *Dense) Slice(i, k, j, l int) Matrix {
 	t.mat.Cols = l - j
 	t.capRows -= i
 	t.capCols -= j
+	return &t
+}
+
+// SliceRows returns a new Matrix with the rows specified in the indices array.
+// SliceRows panics with ErrIndexOutOfRange if any index from the indices array
+// is outside the bounds of the receiver.
+func (m *Dense) SliceRows(indices []int) Matrix {
+	mr, _ := m.Dims()
+	t := *m
+	sliced := []float64{}
+	sort.Ints(indices)
+	for _, i := range indices {
+		if i < 0 || i >= mr {
+			panic(matrix.ErrIndexOutOfRange)
+		}
+		sliced = append(sliced, t.mat.Data[i*t.mat.Stride:(i+1)*t.mat.Stride]...)
+	}
+
+	t.mat.Data = sliced
+	t.mat.Rows = len(indices)
+	t.capRows = len(indices)
 	return &t
 }
 

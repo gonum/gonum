@@ -27,8 +27,10 @@ type LU struct {
 // norm of the original matrix. If norm is negative it will be estimated.
 func (lu *LU) updateCond(norm float64) {
 	n := lu.lu.mat.Cols
-	work := make([]float64, 4*n)
-	iwork := make([]int, n)
+	work := getFloats(4*n, false)
+	defer putFloats(work)
+	iwork := getInts(n, false)
+	defer putInts(iwork)
 	if norm < 0 {
 		// This is an approximation. By the definition of a norm, ||AB|| <= ||A|| ||B||.
 		// The condition number is ||A|| || A^-1||, so this will underestimate
@@ -68,8 +70,9 @@ func (lu *LU) Factorize(a Matrix) {
 		lu.pivot = make([]int, r)
 	}
 	lu.pivot = lu.pivot[:r]
-	work := make([]float64, r)
+	work := getFloats(r, false)
 	anorm := lapack64.Lange(matrix.CondNorm, lu.lu.mat, work)
+	putFloats(work)
 	lapack64.Getrf(lu.lu.mat, lu.pivot)
 	lu.updateCond(anorm)
 }
@@ -99,7 +102,8 @@ func (lu *LU) Det() float64 {
 // division expressions is generally improved by working in log space.
 func (lu *LU) LogDet() (det float64, sign float64) {
 	_, n := lu.lu.Dims()
-	logDiag := make([]float64, n)
+	logDiag := getFloats(n, false)
+	defer putFloats(logDiag)
 	sign = 1.0
 	for i := 0; i < n; i++ {
 		v := lu.lu.at(i, i)
@@ -171,8 +175,10 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
 		lu.lu.Copy(orig.lu)
 	}
 
-	xs := make([]float64, n)
-	ys := make([]float64, n)
+	xs := getFloats(n, false)
+	defer putFloats(xs)
+	ys := getFloats(n, false)
+	defer putFloats(ys)
 	for i := 0; i < n; i++ {
 		xs[i] = x.at(i)
 		ys[i] = y.at(i)

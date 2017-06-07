@@ -54,6 +54,12 @@ var (
 
 	// poolVec is the Vector equivalent of pool.
 	poolVec [63]sync.Pool
+
+	// poolFloats is the []float64 equivalent of pool.
+	poolFloats [63]sync.Pool
+
+	// poolInts is the []int equivalent of pool.
+	poolInts [63]sync.Pool
 )
 
 func init() {
@@ -80,6 +86,12 @@ func init() {
 				Inc:  1,
 				Data: make([]float64, l),
 			}}
+		}
+		poolFloats[i].New = func() interface{} {
+			return make([]float64, l)
+		}
+		poolInts[i].New = func() interface{} {
+			return make([]int, l)
 		}
 	}
 }
@@ -181,4 +193,42 @@ func getWorkspaceVec(n int, clear bool) *Vector {
 // where references to the underlying data slice has been kept.
 func putWorkspaceVec(v *Vector) {
 	poolVec[bits(uint64(cap(v.mat.Data)))].Put(v)
+}
+
+// getFloats returns a []float64 of length l and a cap that is
+// less than 2*l. If clear is true, the slice visible is zeroed.
+func getFloats(l int, clear bool) []float64 {
+	w := poolFloats[bits(uint64(l))].Get().([]float64)
+	w = w[:l]
+	if clear {
+		zero(w)
+	}
+	return w
+}
+
+// putFloats replaces a used []float64 into the appropriate size
+// workspace pool. putFloats must not be called with a slice
+// where references to the underlying data have been kept.
+func putFloats(w []float64) {
+	poolFloats[bits(uint64(cap(w)))].Put(w)
+}
+
+// getInts returns a []ints of length l and a cap that is
+// less than 2*l. If clear is true, the slice visible is zeroed.
+func getInts(l int, clear bool) []int {
+	w := poolInts[bits(uint64(l))].Get().([]int)
+	w = w[:l]
+	if clear {
+		for i := range w {
+			w[i] = 0
+		}
+	}
+	return w
+}
+
+// putInts replaces a used []int into the appropriate size
+// workspace pool. putInts must not be called with a slice
+// where references to the underlying data have been kept.
+func putInts(w []int) {
+	poolInts[bits(uint64(cap(w)))].Put(w)
 }

@@ -44,11 +44,12 @@ func (e *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
 		jobz = lapack.ComputeEV
 	}
 	w := make([]float64, n)
-	work := make([]float64, 1)
+	work := []float64{0}
 	lapack64.Syev(jobz, sd.mat, w, work, -1)
 
-	work = make([]float64, int(work[0]))
+	work = getFloats(int(work[0]), false)
 	ok = lapack64.Syev(jobz, sd.mat, w, work, len(work))
+	putFloats(work)
 	if !ok {
 		e.vectorsComputed = false
 		e.values = nil
@@ -165,13 +166,16 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 		jobvr = lapack.ComputeRightEV
 	}
 
-	wr := make([]float64, c)
-	wi := make([]float64, c)
+	wr := getFloats(c, false)
+	defer putFloats(wr)
+	wi := getFloats(c, false)
+	defer putFloats(wi)
 
-	work := make([]float64, 1)
+	work := []float64{0}
 	lapack64.Geev(jobvl, jobvr, sd.mat, wr, wi, vl.mat, vr.mat, work, -1)
-	work = make([]float64, int(work[0]))
+	work = getFloats(int(work[0]), false)
 	first := lapack64.Geev(jobvl, jobvr, sd.mat, wr, wi, vl.mat, vr.mat, work, len(work))
+	putFloats(work)
 
 	if first != 0 {
 		e.values = nil

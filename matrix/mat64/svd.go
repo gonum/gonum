@@ -92,10 +92,11 @@ func (svd *SVD) Factorize(a Matrix, kind matrix.SVDKind) (ok bool) {
 	svd.kind = kind
 	svd.s = use(svd.s, min(m, n))
 
-	work := make([]float64, 1)
+	work := []float64{0}
 	lapack64.Gesvd(jobU, jobVT, aCopy.mat, svd.u, svd.vt, svd.s, work, -1)
-	work = make([]float64, int(work[0]))
+	work = getFloats(int(work[0]), false)
 	ok = lapack64.Gesvd(jobU, jobVT, aCopy.mat, svd.u, svd.vt, svd.s, work, len(work))
+	putFloats(work)
 	if !ok {
 		svd.kind = 0
 	}

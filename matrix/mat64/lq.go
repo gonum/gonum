@@ -24,11 +24,13 @@ func (lq *LQ) updateCond() {
 	// A = LQ, where Q is orthonormal. Orthonormal multiplications do not change
 	// the condition number. Thus, ||A|| = ||L|| ||Q|| = ||Q||.
 	m := lq.lq.mat.Rows
-	work := make([]float64, 3*m)
-	iwork := make([]int, m)
+	work := getFloats(3*m, false)
+	iwork := getInts(m, false)
 	l := lq.lq.asTriDense(m, blas.NonUnit, blas.Lower)
 	v := lapack64.Trcon(matrix.CondNorm, l.mat, work, iwork)
 	lq.cond = 1 / v
+	putFloats(work)
+	putInts(iwork)
 }
 
 // Factorize computes the LQ factorization of an m×n matrix a where n <= m. The LQ
@@ -47,11 +49,12 @@ func (lq *LQ) Factorize(a Matrix) {
 		lq.lq = &Dense{}
 	}
 	lq.lq.Clone(a)
-	work := make([]float64, 1)
+	work := []float64{0}
 	lq.tau = make([]float64, k)
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, -1)
-	work = make([]float64, int(work[0]))
+	work = getFloats(int(work[0]), false)
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, len(work))
+	putFloats(work)
 	lq.updateCond()
 }
 
@@ -110,10 +113,11 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 	}
 
 	// Construct Q from the elementary reflectors.
-	work := make([]float64, 1)
+	work := []float64{0}
 	lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, q, work, -1)
-	work = make([]float64, int(work[0]))
+	work = getFloats(int(work[0]), false)
 	lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, q, work, len(work))
+	putFloats(work)
 
 	return dst
 }
@@ -152,10 +156,11 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 	x.Copy(b)
 	t := lq.lq.asTriDense(lq.lq.mat.Rows, blas.NonUnit, blas.Lower).mat
 	if trans {
-		work := make([]float64, 1)
+		work := []float64{0}
 		lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, x.mat, work, -1)
-		work = make([]float64, int(work[0]))
+		work = getFloats(int(work[0]), false)
 		lapack64.Ormlq(blas.Left, blas.NoTrans, lq.lq.mat, lq.tau, x.mat, work, len(work))
+		putFloats(work)
 
 		ok := lapack64.Trtrs(blas.Trans, t, x.mat)
 		if !ok {
@@ -169,10 +174,11 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 		for i := r; i < c; i++ {
 			zero(x.mat.Data[i*x.mat.Stride : i*x.mat.Stride+bc])
 		}
-		work := make([]float64, 1)
+		work := []float64{0}
 		lapack64.Ormlq(blas.Left, blas.Trans, lq.lq.mat, lq.tau, x.mat, work, -1)
-		work = make([]float64, int(work[0]))
+		work = getFloats(int(work[0]), false)
 		lapack64.Ormlq(blas.Left, blas.Trans, lq.lq.mat, lq.tau, x.mat, work, len(work))
+		putFloats(work)
 	}
 	// M was set above to be the correct size for the result.
 	m.Copy(x)

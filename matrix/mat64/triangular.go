@@ -331,9 +331,11 @@ func (t *TriDense) InverseTri(a Triangular) error {
 	n, _ := a.Triangle()
 	t.reuseAs(a.Triangle())
 	t.Copy(a)
-	work := make([]float64, 3*n)
-	iwork := make([]int, n)
+	work := getFloats(3*n, false)
+	iwork := getInts(n, false)
 	cond := lapack64.Trcon(matrix.CondNorm, t.mat, work, iwork)
+	putFloats(work)
+	putInts(iwork)
 	if math.IsInf(cond, 1) {
 		return matrix.Condition(cond)
 	}

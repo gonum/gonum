@@ -292,48 +292,58 @@ func Cond(a Matrix, norm float64) float64 {
 		// Use the LU decomposition to compute the condition number.
 		tmp := getWorkspace(m, n, false)
 		tmp.Copy(a)
-		work := make([]float64, 4*n)
+		work := getFloats(4*n, false)
 		aNorm := lapack64.Lange(lnorm, tmp.mat, work)
-		pivot := make([]int, m)
+		pivot := getInts(m, false)
 		lapack64.Getrf(tmp.mat, pivot)
 		iwork := make([]int, n)
 		v := lapack64.Gecon(lnorm, tmp.mat, aNorm, work, iwork)
 		putWorkspace(tmp)
+		putFloats(work)
+		putInts(pivot)
 		return 1 / v
 	}
 	if m > n {
 		// Use the QR factorization to compute the condition number.
 		tmp := getWorkspace(m, n, false)
 		tmp.Copy(a)
-		work := make([]float64, 3*n)
-		tau := make([]float64, min(m, n))
+		work := getFloats(3*n, false)
+		tau := getFloats(min(m, n), false)
 		lapack64.Geqrf(tmp.mat, tau, work, -1)
-		if int(work[0]) > len(work) {
-			work = make([]float64, int(work[0]))
+		if l := int(work[0]); l > len(work) {
+			putFloats(work)
+			work = getFloats(l, false)
 		}
 		lapack64.Geqrf(tmp.mat, tau, work, len(work))
 
-		iwork := make([]int, n)
+		iwork := getInts(n, false)
 		r := tmp.asTriDense(n, blas.NonUnit, blas.Upper)
 		v := lapack64.Trcon(lnorm, r.mat, work, iwork)
 		putWorkspace(tmp)
+		putFloats(work)
+		putFloats(tau)
+		putInts(iwork)
 		return 1 / v
 	}
 	// Use the LQ factorization to compute the condition number.
 	tmp := getWorkspace(m, n, false)
 	tmp.Copy(a)
-	work := make([]float64, 3*m)
-	tau := make([]float64, min(m, n))
+	work := getFloats(3*m, false)
+	tau := getFloats(min(m, n), false)
 	lapack64.Gelqf(tmp.mat, tau, work, -1)
-	if int(work[0]) > len(work) {
-		work = make([]float64, int(work[0]))
+	if l := int(work[0]); l > len(work) {
+		putFloats(work)
+		work = getFloats(l, false)
 	}
 	lapack64.Gelqf(tmp.mat, tau, work, len(work))
 
-	iwork := make([]int, m)
+	iwork := getInts(m, false)
 	l := tmp.asTriDense(m, blas.NonUnit, blas.Lower)
 	v := lapack64.Trcon(lnorm, l.mat, work, iwork)
 	putWorkspace(tmp)
+	putFloats(work)
+	putFloats(tau)
+	putInts(iwork)
 	return 1 / v
 }
 
@@ -679,21 +689,24 @@ func Norm(a Matrix, norm float64) float64 {
 		rm := rma.RawMatrix()
 		n := normLapack(norm, aTrans)
 		if n == lapack.MaxColumnSum {
-			work = make([]float64, rm.Cols)
+			work = getFloats(rm.Cols, false)
+			defer putFloats(work)
 		}
 		return lapack64.Lange(n, rm, work)
 	case RawTriangular:
 		rm := rma.RawTriangular()
 		n := normLapack(norm, aTrans)
 		if n == lapack.MaxRowSum || n == lapack.MaxColumnSum {
-			work = make([]float64, rm.N)
+			work = getFloats(rm.N, false)
+			defer putFloats(work)
 		}
 		return lapack64.Lantr(n, rm, work)
 	case RawSymmetricer:
 		rm := rma.RawSymmetric()
 		n := normLapack(norm, aTrans)
 		if n == lapack.MaxRowSum || n == lapack.MaxColumnSum {
-			work = make([]float64, rm.N)
+			work = getFloats(rm.N, false)
+			defer putFloats(work)
 		}
 		return lapack64.Lansy(n, rm, work)
 	case *Vector:

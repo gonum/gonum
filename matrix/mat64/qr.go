@@ -25,10 +25,12 @@ func (qr *QR) updateCond() {
 	// A = QR, where Q is orthonormal. Orthonormal multiplications do not change
 	// the condition number. Thus, ||A|| = ||Q|| ||R|| = ||R||.
 	n := qr.qr.mat.Cols
-	work := make([]float64, 3*n)
-	iwork := make([]int, n)
+	work := getFloats(3*n, false)
+	iwork := getInts(n, false)
 	r := qr.qr.asTriDense(n, blas.NonUnit, blas.Upper)
 	v := lapack64.Trcon(matrix.CondNorm, r.mat, work, iwork)
+	putFloats(work)
+	putInts(iwork)
 	qr.cond = 1 / v
 }
 
@@ -48,12 +50,13 @@ func (qr *QR) Factorize(a Matrix) {
 		qr.qr = &Dense{}
 	}
 	qr.qr.Clone(a)
-	work := make([]float64, 1)
+	work := []float64{0}
 	qr.tau = make([]float64, k)
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, -1)
 
-	work = make([]float64, int(work[0]))
+	work = getFloats(int(work[0]), false)
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, len(work))
+	putFloats(work)
 	qr.updateCond()
 }
 
@@ -107,10 +110,11 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 	}
 
 	// Construct Q from the elementary reflectors.
-	work := make([]float64, 1)
+	work := []float64{0}
 	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, -1)
-	work = make([]float64, int(work[0]))
+	work = getFloats(int(work[0]), false)
 	lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, dst.mat, work, len(work))
+	putFloats(work)
 
 	return dst
 }
@@ -156,15 +160,17 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 		for i := c; i < r; i++ {
 			zero(x.mat.Data[i*x.mat.Stride : i*x.mat.Stride+bc])
 		}
-		work := make([]float64, 1)
+		work := []float64{0}
 		lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, x.mat, work, -1)
-		work = make([]float64, int(work[0]))
+		work = getFloats(int(work[0]), false)
 		lapack64.Ormqr(blas.Left, blas.NoTrans, qr.qr.mat, qr.tau, x.mat, work, len(work))
+		putFloats(work)
 	} else {
-		work := make([]float64, 1)
+		work := []float64{0}
 		lapack64.Ormqr(blas.Left, blas.Trans, qr.qr.mat, qr.tau, x.mat, work, -1)
-		work = make([]float64, int(work[0]))
+		work = getFloats(int(work[0]), false)
 		lapack64.Ormqr(blas.Left, blas.Trans, qr.qr.mat, qr.tau, x.mat, work, len(work))
+		putFloats(work)
 
 		ok := lapack64.Trtrs(blas.NoTrans, t, x.mat)
 		if !ok {

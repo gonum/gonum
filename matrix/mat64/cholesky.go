@@ -39,7 +39,8 @@ type Cholesky struct {
 // the norm is estimated from the decomposition.
 func (c *Cholesky) updateCond(norm float64) {
 	n := c.chol.mat.N
-	work := make([]float64, 3*n)
+	work := getFloats(3*n, false)
+	defer putFloats(work)
 	if norm < 0 {
 		// This is an approximation. By the definition of a norm, ||AB|| <= ||A|| ||B||.
 		// Here, A = U^T * U.
@@ -52,8 +53,9 @@ func (c *Cholesky) updateCond(norm float64) {
 		norm = unorm * lnorm
 	}
 	sym := c.chol.asSymBlas()
-	iwork := make([]int, n)
+	iwork := getInts(n, false)
 	v := lapack64.Pocon(sym, norm, work, iwork)
+	putInts(iwork)
 	c.cond = 1 / v
 }
 
@@ -70,8 +72,9 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	copySymIntoTriangle(c.chol, a)
 
 	sym := c.chol.asSymBlas()
-	work := make([]float64, c.chol.mat.N)
+	work := getFloats(c.chol.mat.N, false)
 	norm := lapack64.Lansy(matrix.CondNorm, sym, work)
+	putFloats(work)
 	_, ok = lapack64.Potrf(sym)
 	if ok {
 		c.updateCond(norm)
@@ -345,7 +348,8 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool
 	//   EPFL Technical Report 161468 (2004)
 	//   http://infoscience.epfl.ch/record/161468
 
-	work := make([]float64, n)
+	work := getFloats(n, false)
+	defer putFloats(work)
 	blas64.Copy(n, x.RawVector(), blas64.Vector{1, work})
 
 	if alpha > 0 {
@@ -404,8 +408,10 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool
 		return false
 	}
 	norm = math.Sqrt((1 + norm) * (1 - norm))
-	cos := make([]float64, n)
-	sin := make([]float64, n)
+	cos := getFloats(n, false)
+	defer putFloats(cos)
+	sin := getFloats(n, false)
+	defer putFloats(sin)
 	for i := n - 1; i >= 0; i-- {
 		// Compute parameters of Givens matrices that zero elements of p
 		// backwards.

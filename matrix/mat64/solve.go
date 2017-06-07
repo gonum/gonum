@@ -64,9 +64,11 @@ func (m *Dense) Solve(a, b Matrix) error {
 
 		rm := rma.RawTriangular()
 		blas64.Trsm(side, tA, 1, rm, m.mat)
-		work := make([]float64, 3*rm.N)
-		iwork := make([]int, rm.N)
+		work := getFloats(3*rm.N, false)
+		iwork := getInts(rm.N, false)
 		cond := lapack64.Trcon(matrix.CondNorm, rm, work, iwork)
+		putFloats(work)
+		putInts(iwork)
 		if cond > matrix.ConditionTolerance {
 			return matrix.Condition(cond)
 		}

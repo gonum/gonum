@@ -230,18 +230,22 @@ func (m *Dense) Inverse(a Matrix) error {
 	default:
 		m.Copy(a)
 	}
-	ipiv := make([]int, r)
+	ipiv := getInts(r, false)
+	defer putInts(ipiv)
 	ok := lapack64.Getrf(m.mat, ipiv)
 	if !ok {
 		return matrix.Condition(math.Inf(1))
 	}
-	work := make([]float64, 1, 4*r) // must be at least 4*r for cond.
+	work := getFloats(4*r, false) // must be at least 4*r for cond.
 	lapack64.Getri(m.mat, ipiv, work, -1)
 	if int(work[0]) > 4*r {
-		work = make([]float64, int(work[0]))
+		l := int(work[0])
+		putFloats(work)
+		work = getFloats(l, false)
 	} else {
 		work = work[:4*r]
 	}
+	defer putFloats(work)
 	lapack64.Getri(m.mat, ipiv, work, len(work))
 	norm := lapack64.Lange(matrix.CondNorm, m.mat, work)
 	rcond := lapack64.Gecon(matrix.CondNorm, m.mat, norm, work, ipiv) // reuse ipiv
@@ -426,7 +430,8 @@ func (m *Dense) Mul(a, b Matrix) {
 		}
 	}
 
-	row := make([]float64, ac)
+	row := getFloats(ac, false)
+	defer putFloats(row)
 	for r := 0; r < ar; r++ {
 		for i := range row {
 			row[i] = a.At(r, i)

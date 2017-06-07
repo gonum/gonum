@@ -116,13 +116,14 @@ func getWorkspace(r, c int, clear bool) *Dense {
 
 // putWorkspace replaces a used *Dense into the appropriate size
 // workspace pool. putWorkspace must not be called with a matrix
-// where references to the underlying data slice has been kept.
+// where references to the underlying data slice have been kept.
 func putWorkspace(w *Dense) {
 	pool[bits(uint64(cap(w.mat.Data)))].Put(w)
 }
 
-// getWorkspaceSym returns a *SymDense of size n and a cap that is less than 2*n. If clear is true, the
-// data slice visible through the Matrix interface is zeroed.
+// getWorkspaceSym returns a *SymDense of size n and a cap that
+// is less than 2*n. If clear is true, the data slice visible
+// through the Matrix interface is zeroed.
 func getWorkspaceSym(n int, clear bool) *SymDense {
 	l := uint64(n)
 	l *= l
@@ -137,8 +138,16 @@ func getWorkspaceSym(n int, clear bool) *SymDense {
 	return s
 }
 
-// getWorkspaceTri returns a *TriDense of size n and a cap that is less than 2*n.
-// If clear is true, the data slice visible through the Matrix interface is zeroed.
+// putWorkspaceSym replaces a used *SymDense into the appropriate size
+// workspace pool. putWorkspaceSym must not be called with a matrix
+// where references to the underlying data slice have been kept.
+func putWorkspaceSym(s *SymDense) {
+	poolSym[bits(uint64(cap(s.mat.Data)))].Put(s)
+}
+
+// getWorkspaceTri returns a *TriDense of size n and a cap that
+// is less than 2*n. If clear is true, the data slice visible
+// through the Matrix interface is zeroed.
 func getWorkspaceTri(n int, kind matrix.TriKind, clear bool) *TriDense {
 	l := uint64(n)
 	l *= l
@@ -161,22 +170,16 @@ func getWorkspaceTri(n int, kind matrix.TriKind, clear bool) *TriDense {
 	return t
 }
 
-// putWorkspaceSym replaces a used *SymDense into the appropriate size
-// workspace pool. putWorkspaceSym must not be called with a matrix
-// where references to the underlying data slice has been kept.
-func putWorkspaceSym(s *SymDense) {
-	poolSym[bits(uint64(cap(s.mat.Data)))].Put(s)
-}
-
 // putWorkspaceTri replaces a used *TriDense into the appropriate size
 // workspace pool. putWorkspaceTri must not be called with a matrix
-// where references to the underlying data slice has been kept.
+// where references to the underlying data slice have been kept.
 func putWorkspaceTri(t *TriDense) {
 	poolTri[bits(uint64(cap(t.mat.Data)))].Put(t)
 }
 
-// getWorkspaceVec returns a *Vector of length n and a cap that is less than 2*n. If clear is true, the
-// data slice visible through the Matrix interface is zeroed.
+// getWorkspaceVec returns a *Vector of length n and a cap that
+// is less than 2*n. If clear is true, the data slice visible
+// through the Matrix interface is zeroed.
 func getWorkspaceVec(n int, clear bool) *Vector {
 	l := uint64(n)
 	v := poolVec[bits(l)].Get().(*Vector)
@@ -190,7 +193,7 @@ func getWorkspaceVec(n int, clear bool) *Vector {
 
 // putWorkspaceVec replaces a used *Vector into the appropriate size
 // workspace pool. putWorkspaceVec must not be called with a matrix
-// where references to the underlying data slice has been kept.
+// where references to the underlying data slice have been kept.
 func putWorkspaceVec(v *Vector) {
 	poolVec[bits(uint64(cap(v.mat.Data)))].Put(v)
 }

@@ -25,8 +25,8 @@ type Builder interface {
 	NewEdge(from, to graph.Node) graph.Edge
 }
 
-// UnmarshalerAttr is the interface implemented by objects that can unmarshal a
-// DOT attribute description of themselves.
+// UnmarshalerAttr is implemented by types that can unmarshal a DOT
+// attribute description of themselves.
 type UnmarshalerAttr interface {
 	// UnmarshalDOTAttr decodes a single DOT attribute.
 	UnmarshalDOTAttr(attr Attribute) error
@@ -103,16 +103,17 @@ func (gen *generator) node(dst Builder, id string) graph.Node {
 func (gen *generator) addStmt(dst Builder, stmt ast.Stmt) {
 	switch stmt := stmt.(type) {
 	case *ast.NodeStmt:
-		n := gen.node(dst, stmt.Node.ID)
-		if n, ok := n.(UnmarshalerAttr); ok {
-			for _, attr := range stmt.Attrs {
-				a := Attribute{
-					Key:   attr.Key,
-					Value: attr.Val,
-				}
-				if err := n.UnmarshalDOTAttr(a); err != nil {
-					panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s)", a.Key, a.Value))
-				}
+		n, ok := gen.node(dst, stmt.Node.ID).(UnmarshalerAttr)
+		if !ok {
+			return
+		}
+		for _, attr := range stmt.Attrs {
+			a := Attribute{
+				Key:   attr.Key,
+				Value: attr.Val,
+			}
+			if err := n.UnmarshalDOTAttr(a); err != nil {
+				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s)", a.Key, a.Value))
 			}
 		}
 	case *ast.EdgeStmt:
@@ -136,16 +137,17 @@ func (gen *generator) addEdgeStmt(dst Builder, e *ast.EdgeStmt) {
 	ts := gen.addEdge(dst, e.To)
 	for _, f := range fs {
 		for _, t := range ts {
-			edge := dst.NewEdge(f, t)
-			if edge, ok := edge.(UnmarshalerAttr); ok {
-				for _, attr := range e.Attrs {
-					a := Attribute{
-						Key:   attr.Key,
-						Value: attr.Val,
-					}
-					if err := edge.UnmarshalDOTAttr(a); err != nil {
-						panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
-					}
+			edge, ok := dst.NewEdge(f, t).(UnmarshalerAttr)
+			if !ok {
+				continue
+			}
+			for _, attr := range e.Attrs {
+				a := Attribute{
+					Key:   attr.Key,
+					Value: attr.Val,
+				}
+				if err := edge.UnmarshalDOTAttr(a); err != nil {
+					panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
 				}
 			}
 		}

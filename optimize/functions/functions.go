@@ -482,6 +482,46 @@ func (Box3D) Minima() []Minimum {
 	}
 }
 
+// BraninHoo implements the Branin-Hoo function. BraninHoo is a 2-dimensional
+// test function with three global minima. It is typically evaluated in the domain
+// x_0 ∈ [-5, 10], x_1 ∈ [0, 15].
+//  f(x) = (x_1 - (5.1/(4π^2))*x_0^2 + (5/π)*x_0 - 6)^2 + 10*(1-1/(8π))cos(x_0) + 10
+// It has a minimum value of 0.397887 at x^* = {(-π, 12.275), (π, 2.275), (9.424778, 2.475)}
+//
+// Reference:
+//  https://www.sfu.ca/~ssurjano/branin.html (obtained June 2017)
+type BraninHoo struct{}
+
+func (BraninHoo) Func(x []float64) float64 {
+	if len(x) != 2 {
+		panic("functions: dimension of the problem must be 2")
+	}
+	a, b, c, r, s, t := 1.0, 5.1/(4*math.Pi*math.Pi), 5/math.Pi, 6.0, 10.0, 1/(8*math.Pi)
+
+	term := x[1] - b*x[0]*x[0] + c*x[0] - r
+	return a*term*term + s*(1-t)*math.Cos(x[0]) + s
+}
+
+func (BraninHoo) Minima() []Minimum {
+	return []Minimum{
+		{
+			X:      []float64{-math.Pi, 12.275},
+			F:      0.397887,
+			Global: true,
+		},
+		{
+			X:      []float64{math.Pi, 2.275},
+			F:      0.397887,
+			Global: true,
+		},
+		{
+			X:      []float64{9.424778, 2.475},
+			F:      0.397887,
+			Global: true,
+		},
+	}
+}
+
 // BrownBadlyScaled implements the Brown's badly scaled function.
 //
 // Standard starting point:

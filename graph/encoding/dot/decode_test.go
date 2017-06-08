@@ -45,13 +45,25 @@ func TestRoundTrip(t *testing.T) {
 		}
 		got := string(buf)
 		if got != g.want {
-			t.Errorf("i=%d: graph content mismatch; expected `%s`, got `%s`", i, g.want, got)
+			t.Errorf("i=%d: graph content mismatch; want:\n%s\n\ngot:\n%s", i, g.want, got)
 			continue
 		}
 	}
 }
 
 const directed = `digraph {
+	graph [
+		outputorder=edgesfirst
+	];
+	node [
+		shape=circle
+		style=filled
+	];
+	edge [
+		penwidth=5
+		color=gray
+	];
+
 	// Node definitions.
 	0 [label="foo 2"];
 	1 [label="bar 2"];
@@ -61,6 +73,18 @@ const directed = `digraph {
 }`
 
 const undirected = `graph {
+	graph [
+		outputorder=edgesfirst
+	];
+	node [
+		shape=circle
+		style=filled
+	];
+	edge [
+		penwidth=5
+		color=gray
+	];
+
 	// Node definitions.
 	0 [label="foo 2"];
 	1 [label="bar 2"];
@@ -79,6 +103,7 @@ const undirected = `graph {
 // dotDirectedGraph implements the dot.Builder interface.
 type dotDirectedGraph struct {
 	*simple.DirectedGraph
+	graph, node, edge attributes
 }
 
 // newDotDirectedGraph returns a new directed capable of creating user-defined
@@ -105,12 +130,23 @@ func (g *dotDirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
 	return e
 }
 
+// DOTAttributers implements the dot.Attributers interface.
+func (g *dotDirectedGraph) DOTAttributers() (graph, node, edge Attributer) {
+	return g.graph, g.node, g.edge
+}
+
+// DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
+func (g *dotDirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge UnmarshalerAttr) {
+	return &g.graph, &g.node, &g.edge
+}
+
 // dotUndirectedGraph extends simple.UndirectedGraph to add NewNode and NewEdge
 // methods for creating user-defined nodes and edges.
 //
 // dotUndirectedGraph implements the dot.Builder interface.
 type dotUndirectedGraph struct {
 	*simple.UndirectedGraph
+	graph, node, edge attributes
 }
 
 // newDotUndirectedGraph returns a new undirected capable of creating user-
@@ -135,6 +171,16 @@ func (g *dotUndirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
 	e := &dotEdge{Edge: simple.Edge{F: from, T: to}}
 	g.SetEdge(e)
 	return e
+}
+
+// DOTAttributers implements the dot.Attributers interface.
+func (g *dotUndirectedGraph) DOTAttributers() (graph, node, edge Attributer) {
+	return g.graph, g.node, g.edge
+}
+
+// DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
+func (g *dotUndirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge UnmarshalerAttr) {
+	return &g.graph, &g.node, &g.edge
 }
 
 // dotNode extends simple.Node with a label field to test round-trip encoding
@@ -193,4 +239,15 @@ func (e *dotEdge) DOTAttributes() []Attribute {
 		Value: e.Label,
 	}
 	return []Attribute{attr}
+}
+
+// attributes is a helper for global attributes.
+type attributes []Attribute
+
+func (a attributes) DOTAttributes() []Attribute {
+	return []Attribute(a)
+}
+func (a *attributes) UnmarshalDOTAttr(attr Attribute) error {
+	*a = append(*a, attr)
+	return nil
 }

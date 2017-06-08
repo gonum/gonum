@@ -25,6 +25,13 @@ type Builder interface {
 	NewEdge(from, to graph.Node) graph.Edge
 }
 
+// UnmashalerAttrs is implemented by graph values that can unmarshal global
+// DOT attributes.
+type UnmarshalerAttrs interface {
+	// DOTUnmarshalerAttrs returns the global attribute unmarshalers.
+	DOTUnmarshalerAttrs() (graph, node, edge UnmarshalerAttr)
+}
+
 // UnmarshalerAttr is implemented by types that can unmarshal a DOT
 // attribute description of themselves.
 type UnmarshalerAttr interface {
@@ -60,6 +67,9 @@ func copyGraph(dst Builder, src *ast.Graph) (err error) {
 		directed: src.Directed,
 		ids:      make(map[string]graph.Node),
 	}
+	if a, ok := dst.(UnmarshalerAttrs); ok {
+		gen.graphAttr, gen.nodeAttr, gen.edgeAttr = a.DOTUnmarshalerAttrs()
+	}
 	for _, stmt := range src.Stmts {
 		gen.addStmt(dst, stmt)
 	}
@@ -79,6 +89,8 @@ type generator struct {
 	// Stack of start indices into the subgraph node slice. The top element
 	// corresponds to the start index of the active (or inner-most) subgraph.
 	subStart []int
+	// graphAttr, nodeAttr and edgeAttr are global graph attributes.
+	graphAttr, nodeAttr, edgeAttr UnmarshalerAttr
 }
 
 // node returns the gonum node corresponding to the given dot AST node ID,
@@ -119,7 +131,39 @@ func (gen *generator) addStmt(dst Builder, stmt ast.Stmt) {
 	case *ast.EdgeStmt:
 		gen.addEdgeStmt(dst, stmt)
 	case *ast.AttrStmt:
-		// ignore.
+		var n UnmarshalerAttr
+		var dst string
+		switch stmt.Kind {
+		case ast.KindGraph:
+			if gen.graphAttr == nil {
+				return
+			}
+			n = gen.graphAttr
+			dst = "graph"
+		case ast.KindNode:
+			if gen.nodeAttr == nil {
+				return
+			}
+			n = gen.nodeAttr
+			dst = "node"
+		case ast.KindEdge:
+			if gen.edgeAttr == nil {
+				return
+			}
+			n = gen.edgeAttr
+			dst = "edge"
+		default:
+			panic("unreachable")
+		}
+		for _, attr := range stmt.Attrs {
+			a := Attribute{
+				Key:   attr.Key,
+				Value: attr.Val,
+			}
+			if err := n.UnmarshalDOTAttr(a); err != nil {
+				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s)", dst, a.Key, a.Value))
+			}
+		}
 	case *ast.Attr:
 		// ignore.
 	case *ast.Subgraph:

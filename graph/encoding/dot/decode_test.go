@@ -198,9 +198,8 @@ func (n *dotNode) DOTID() string {
 }
 
 // UnmarshalDOTID decodes a DOT ID.
-func (n *dotNode) UnmarshalDOTID(id string) error {
+func (n *dotNode) UnmarshalDOTID(id string) {
 	n.dotID = id
-	return nil
 }
 
 // UnmarshalDOTAttr decodes a single DOT attribute.

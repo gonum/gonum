@@ -65,11 +65,11 @@ const directed = `digraph {
 	];
 
 	// Node definitions.
-	0 [label="foo 2"];
-	1 [label="bar 2"];
+	A [label="foo 2"];
+	B [label="bar 2"];
 
 	// Edge definitions.
-	0 -> 1 [label="baz 2"];
+	A -> B [label="baz 2"];
 }`
 
 const undirected = `graph {
@@ -86,11 +86,11 @@ const undirected = `graph {
 	];
 
 	// Node definitions.
-	0 [label="foo 2"];
-	1 [label="bar 2"];
+	A [label="foo 2"];
+	B [label="bar 2"];
 
 	// Edge definitions.
-	0 -- 1 [label="baz 2"];
+	A -- B [label="baz 2"];
 }`
 
 // Below follows a minimal implementation of a graph capable of validating the
@@ -187,8 +187,20 @@ func (g *dotUndirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge Unmarshale
 // and decoding of node DOT label attributes.
 type dotNode struct {
 	simple.Node
+	dotID string
 	// Node label.
 	Label string
+}
+
+// DOTID returns the node's DOT ID.
+func (n *dotNode) DOTID() string {
+	return n.dotID
+}
+
+// UnmarshalDOTID decodes a DOT ID.
+func (n *dotNode) UnmarshalDOTID(id string) error {
+	n.dotID = id
+	return nil
 }
 
 // UnmarshalDOTAttr decodes a single DOT attribute.

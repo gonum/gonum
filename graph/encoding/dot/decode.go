@@ -39,6 +39,12 @@ type UnmarshalerAttr interface {
 	UnmarshalDOTAttr(attr Attribute) error
 }
 
+// UnmarshalerID is implemented by types that can unmarshal a DOT ID.
+type UnmarshalerID interface {
+	// UnmarshalDOTID decodes a single DOT ID.
+	UnmarshalDOTID(id string)
+}
+
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
 func Unmarshal(data []byte, dst Builder) error {
 	file, err := dot.ParseBytes(data)
@@ -100,6 +106,9 @@ func (gen *generator) node(dst Builder, id string) graph.Node {
 		return n
 	}
 	n := dst.NewNode()
+	if n, ok := n.(UnmarshalerID); ok {
+		n.UnmarshalDOTID(id)
+	}
 	gen.ids[id] = n
 	// Check if within the context of a subgraph, that is to be used as a vertex
 	// of an edge.

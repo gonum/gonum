@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // newLocation allocates a new locatian structure of the appropriate size. It
@@ -26,7 +26,7 @@ func newLocation(dim int, method Needser) *Location {
 		loc.Gradient = make([]float64, dim)
 	}
 	if method.Needs().Hessian {
-		loc.Hessian = mat64.NewSymDense(dim, nil)
+		loc.Hessian = mat.NewSymDense(dim, nil)
 	}
 	return loc
 }
@@ -42,7 +42,7 @@ func copyLocation(dst, src *Location) {
 
 	if src.Hessian != nil {
 		if dst.Hessian == nil || dst.Hessian.Symmetric() != len(src.X) {
-			dst.Hessian = mat64.NewSymDense(len(src.X), nil)
+			dst.Hessian = mat.NewSymDense(len(src.X), nil)
 		}
 		dst.Hessian.CopySym(src.Hessian)
 	}

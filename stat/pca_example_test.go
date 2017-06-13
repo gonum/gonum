@@ -7,7 +7,7 @@ package stat_test
 import (
 	"fmt"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -15,7 +15,7 @@ func ExamplePrincipalComponents() {
 	// iris is a truncated sample of the Fisher's Iris dataset.
 	n := 10
 	d := 4
-	iris := mat64.NewDense(n, d, []float64{
+	iris := mat.NewDense(n, d, []float64{
 		5.1, 3.5, 1.4, 0.2,
 		4.9, 3.0, 1.4, 0.2,
 		4.7, 3.2, 1.3, 0.2,
@@ -39,10 +39,10 @@ func ExamplePrincipalComponents() {
 
 	// Project the data onto the first 2 principal components.
 	k := 2
-	var proj mat64.Dense
+	var proj mat.Dense
 	proj.Mul(iris, pc.Vectors(nil).Slice(0, d, 0, k))
 
-	fmt.Printf("proj = %.4f", mat64.Formatted(&proj, mat64.Prefix("       ")))
+	fmt.Printf("proj = %.4f", mat.Formatted(&proj, mat.Prefix("       ")))
 
 	// Output:
 	// variances = [0.1666 0.0207 0.0079 0.0019]

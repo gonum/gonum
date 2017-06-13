@@ -9,7 +9,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/diff/fd"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 func ExampleDerivative() {
@@ -53,12 +53,12 @@ func ExampleJacobian() {
 		dst[2] = 4*x[1]*x[1] - 2*x[2]
 		dst[3] = x[2] * math.Sin(x[0])
 	}
-	jac := mat64.NewDense(4, 3, nil)
+	jac := mat.NewDense(4, 3, nil)
 	fd.Jacobian(jac, f, []float64{1, 2, 3}, &fd.JacobianSettings{
 		Formula:    fd.Central,
 		Concurrent: true,
 	})
-	fmt.Printf("J ≈ %.6v\n", mat64.Formatted(jac, mat64.Prefix("    ")))
+	fmt.Printf("J ≈ %.6v\n", mat.Formatted(jac, mat.Prefix("    ")))
 
 	// Output:
 	// J ≈ ⎡       1         0         0⎤

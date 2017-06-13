@@ -9,13 +9,13 @@ import (
 	"log"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
 
 // symView is a helper for getting a View of a SymDense.
 type symView struct {
-	sym *mat64.SymDense
+	sym *mat.SymDense
 
 	i, j, r, c int
 }
@@ -32,7 +32,7 @@ func (s symView) At(i, j int) float64 {
 	return s.sym.At(s.i+i, s.j+j)
 }
 
-func (s symView) T() mat64.Matrix { return mat64.Transpose{s} }
+func (s symView) T() mat.Matrix { return mat.Transpose{s} }
 
 func ExampleCC() {
 	// This example is directly analogous to Example 3.5 on page 87 of
@@ -65,7 +65,7 @@ func ExampleCC() {
 	ydata := bostonData.Slice(0, n, xd, xd+yd)
 
 	// For comparison, calculate the correlation matrix for the original data.
-	var cor mat64.SymDense
+	var cor mat.SymDense
 	stat.CorrelationMatrix(&cor, bostonData, nil)
 
 	// Extract just those correlations that are between xdata and ydata.
@@ -75,7 +75,7 @@ func ExampleCC() {
 	// between the 5th variable of xdata (index of accessibility to radial
 	// highways) and the 3rd variable of ydata (full-value property-tax rate per
 	// $10000).
-	fmt.Printf("corRaw = %.4f", mat64.Formatted(corRaw, mat64.Prefix("         ")))
+	fmt.Printf("corRaw = %.4f", mat.Formatted(corRaw, mat.Prefix("         ")))
 
 	// Calculate the canonical correlations.
 	var cc stat.CC
@@ -93,16 +93,16 @@ func ExampleCC() {
 
 	// Canonical Correlation Matrix, or the correlations between the sphered
 	// data.
-	var corSph mat64.Dense
+	var corSph mat.Dense
 	corSph.Clone(pVecs)
 	col := make([]float64, xd)
 	for j := 0; j < yd; j++ {
-		mat64.Col(col, j, &corSph)
+		mat.Col(col, j, &corSph)
 		floats.Scale(ccors[j], col)
 		corSph.SetCol(j, col)
 	}
 	corSph.Product(&corSph, qVecs.T())
-	fmt.Printf("\n\ncorSph = %.4f", mat64.Formatted(&corSph, mat64.Prefix("         ")))
+	fmt.Printf("\n\ncorSph = %.4f", mat.Formatted(&corSph, mat.Prefix("         ")))
 
 	// Canonical Correlations. Note that the first canonical correlation is
 	// 0.95, stronger than the greatest correlation in the original data, and
@@ -110,13 +110,13 @@ func ExampleCC() {
 	fmt.Printf("\n\nccors = %.4f", ccors)
 
 	// Left and right eigenvectors of the canonical correlation matrix.
-	fmt.Printf("\n\npVecs = %.4f", mat64.Formatted(pVecs, mat64.Prefix("        ")))
-	fmt.Printf("\n\nqVecs = %.4f", mat64.Formatted(qVecs, mat64.Prefix("        ")))
+	fmt.Printf("\n\npVecs = %.4f", mat.Formatted(pVecs, mat.Prefix("        ")))
+	fmt.Printf("\n\nqVecs = %.4f", mat.Formatted(qVecs, mat.Prefix("        ")))
 
 	// Canonical Correlation Transforms. These can be useful as they represent
 	// the canonical variables as linear combinations of the original variables.
-	fmt.Printf("\n\nphiVs = %.4f", mat64.Formatted(phiVs, mat64.Prefix("        ")))
-	fmt.Printf("\n\npsiVs = %.4f", mat64.Formatted(psiVs, mat64.Prefix("        ")))
+	fmt.Printf("\n\nphiVs = %.4f", mat.Formatted(phiVs, mat.Prefix("        ")))
+	fmt.Printf("\n\npsiVs = %.4f", mat.Formatted(psiVs, mat.Prefix("        ")))
 
 	// Output:
 	// corRaw = ⎡-0.2192   0.3527   0.5828  -0.3883⎤

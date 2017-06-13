@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 var appengine bool
@@ -19,20 +19,20 @@ func TestPrincipalComponents(t *testing.T) {
 	}
 tests:
 	for i, test := range []struct {
-		data     mat64.Matrix
+		data     mat.Matrix
 		weights  []float64
-		wantVecs *mat64.Dense
+		wantVecs *mat.Dense
 		wantVars []float64
 		epsilon  float64
 	}{
 		// Test results verified using R.
 		{
-			data: mat64.NewDense(3, 3, []float64{
+			data: mat.NewDense(3, 3, []float64{
 				1, 2, 3,
 				4, 5, 6,
 				7, 8, 9,
 			}),
-			wantVecs: mat64.NewDense(3, 3, []float64{
+			wantVecs: mat.NewDense(3, 3, []float64{
 				0.5773502691896258, 0.8164965809277261, 0,
 				0.577350269189626, -0.4082482904638632, -0.7071067811865476,
 				0.5773502691896258, -0.4082482904638631, 0.7071067811865475,
@@ -41,7 +41,7 @@ tests:
 			epsilon:  1e-12,
 		},
 		{ // Truncated iris data.
-			data: mat64.NewDense(10, 4, []float64{
+			data: mat.NewDense(10, 4, []float64{
 				5.1, 3.5, 1.4, 0.2,
 				4.9, 3.0, 1.4, 0.2,
 				4.7, 3.2, 1.3, 0.2,
@@ -53,7 +53,7 @@ tests:
 				4.4, 2.9, 1.4, 0.2,
 				4.9, 3.1, 1.5, 0.1,
 			}),
-			wantVecs: mat64.NewDense(4, 4, []float64{
+			wantVecs: mat.NewDense(4, 4, []float64{
 				-0.6681110197952722, 0.7064764857539533, -0.14026590216895132, -0.18666578956412125,
 				-0.7166344774801547, -0.6427036135482664, -0.135650285905254, 0.23444848208629923,
 				-0.164411275166307, 0.11898477441068218, 0.9136367900709548, 0.35224901970831746,
@@ -63,12 +63,12 @@ tests:
 			epsilon:  1e-12,
 		},
 		{ // Truncated iris data to form wide matrix.
-			data: mat64.NewDense(3, 4, []float64{
+			data: mat.NewDense(3, 4, []float64{
 				5.1, 3.5, 1.4, 0.2,
 				4.9, 3.0, 1.4, 0.2,
 				4.7, 3.2, 1.3, 0.2,
 			}),
-			wantVecs: mat64.NewDense(4, 3, []float64{
+			wantVecs: mat.NewDense(4, 3, []float64{
 				-0.5705187254552365, -0.7505979435049239, 0.08084520834544455,
 				-0.8166537769529318, 0.5615147645527523, -0.032338083338177705,
 				-0.08709186238359454, -0.3482870890450082, -0.22636658336724505,
@@ -78,7 +78,7 @@ tests:
 			epsilon:  1e-12,
 		},
 		{ // Truncated iris data transposed to check for operation on fat input.
-			data: mat64.NewDense(10, 4, []float64{
+			data: mat.NewDense(10, 4, []float64{
 				5.1, 3.5, 1.4, 0.2,
 				4.9, 3.0, 1.4, 0.2,
 				4.7, 3.2, 1.3, 0.2,
@@ -90,7 +90,7 @@ tests:
 				4.4, 2.9, 1.4, 0.2,
 				4.9, 3.1, 1.5, 0.1,
 			}).T(),
-			wantVecs: mat64.NewDense(10, 4, []float64{
+			wantVecs: mat.NewDense(10, 4, []float64{
 				-0.3366602459946619, -0.1373634006401213, 0.3465102523547623, -0.10290179303893479,
 				-0.31381852053861975, 0.5197145790632827, 0.5567296129086686, -0.15923062170153618,
 				-0.30857197637565165, -0.07670930360819002, 0.36159923003337235, 0.3342301027853355,
@@ -106,7 +106,7 @@ tests:
 			epsilon:  1e-12,
 		},
 		{ // Truncated iris data unitary weights.
-			data: mat64.NewDense(10, 4, []float64{
+			data: mat.NewDense(10, 4, []float64{
 				5.1, 3.5, 1.4, 0.2,
 				4.9, 3.0, 1.4, 0.2,
 				4.7, 3.2, 1.3, 0.2,
@@ -119,7 +119,7 @@ tests:
 				4.9, 3.1, 1.5, 0.1,
 			}),
 			weights: []float64{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-			wantVecs: mat64.NewDense(4, 4, []float64{
+			wantVecs: mat.NewDense(4, 4, []float64{
 				-0.6681110197952722, 0.7064764857539533, -0.14026590216895132, -0.18666578956412125,
 				-0.7166344774801547, -0.6427036135482664, -0.135650285905254, 0.23444848208629923,
 				-0.164411275166307, 0.11898477441068218, 0.9136367900709548, 0.35224901970831746,
@@ -129,7 +129,7 @@ tests:
 			epsilon:  1e-12,
 		},
 		{ // Truncated iris data non-unitary weights.
-			data: mat64.NewDense(10, 4, []float64{
+			data: mat.NewDense(10, 4, []float64{
 				5.1, 3.5, 1.4, 0.2,
 				4.9, 3.0, 1.4, 0.2,
 				4.7, 3.2, 1.3, 0.2,
@@ -142,7 +142,7 @@ tests:
 				4.9, 3.1, 1.5, 0.1,
 			}),
 			weights: []float64{2, 3, 1, 1, 1, 1, 1, 1, 1, 2},
-			wantVecs: mat64.NewDense(4, 4, []float64{
+			wantVecs: mat.NewDense(4, 4, []float64{
 				-0.618936145422414, 0.763069301531647, 0.124857741232537, 0.138035623677211,
 				-0.763958271606519, -0.603881770702898, 0.118267155321333, -0.194184052457746,
 				-0.143552119754944, 0.090014599564871, -0.942209377020044, -0.289018426115945,
@@ -153,7 +153,7 @@ tests:
 		},
 	} {
 		var pc PC
-		var vecs *mat64.Dense
+		var vecs *mat.Dense
 		var vars []float64
 		for j := 0; j < 2; j++ {
 			ok := pc.PrincipalComponents(test.data, test.weights)
@@ -163,9 +163,9 @@ tests:
 				t.Errorf("unexpected SVD failure for test %d use %d", i, j)
 				continue tests
 			}
-			if !mat64.EqualApprox(vecs, test.wantVecs, test.epsilon) {
+			if !mat.EqualApprox(vecs, test.wantVecs, test.epsilon) {
 				t.Errorf("%d use %d: unexpected PCA result got:\n%v\nwant:\n%v",
-					i, j, mat64.Formatted(vecs), mat64.Formatted(test.wantVecs))
+					i, j, mat.Formatted(vecs), mat.Formatted(test.wantVecs))
 			}
 			if !approxEqual(vars, test.wantVars, test.epsilon) {
 				t.Errorf("%d use %d: unexpected variance result got:%v, want:%v",

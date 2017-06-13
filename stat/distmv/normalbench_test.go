@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 func BenchmarkMarginalNormal10(b *testing.B) {
@@ -61,8 +61,8 @@ func randomNormal(sz int, rnd *rand.Rand) *Normal {
 	for i := range data {
 		data[i] = rnd.Float64()
 	}
-	dM := mat64.NewDense(sz, sz, data)
-	var sigma mat64.SymDense
+	dM := mat.NewDense(sz, sz, data)
+	var sigma mat.SymDense
 	sigma.SymOuterK(1, dM)
 
 	normal, ok := NewNormal(mu, &sigma, nil)

@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 type JacobianSettings struct {
@@ -39,7 +39,7 @@ type JacobianSettings struct {
 //
 // dst must be non-nil, the number of its columns must equal the length of x, and
 // the derivative order of the formula must be 1, otherwise Jacobian will panic.
-func Jacobian(dst *mat64.Dense, f func(y, x []float64), x []float64, settings *JacobianSettings) {
+func Jacobian(dst *mat.Dense, f func(y, x []float64), x []float64, settings *JacobianSettings) {
 	n := len(x)
 	if n == 0 {
 		panic("jacobian: x has zero length")
@@ -93,7 +93,7 @@ func Jacobian(dst *mat64.Dense, f func(y, x []float64), x []float64, settings *J
 	}
 }
 
-func jacobianSerial(dst *mat64.Dense, f func([]float64, []float64), x, origin []float64, formula Formula, step float64) {
+func jacobianSerial(dst *mat.Dense, f func([]float64, []float64), x, origin []float64, formula Formula, step float64) {
 	m, n := dst.Dims()
 	xcopy := make([]float64, n)
 	y := make([]float64, m)
@@ -122,7 +122,7 @@ func jacobianSerial(dst *mat64.Dense, f func([]float64, []float64), x, origin []
 	dst.Scale(1/step, dst)
 }
 
-func jacobianConcurrent(dst *mat64.Dense, f func([]float64, []float64), x, origin []float64, formula Formula, step float64, nWorkers int) {
+func jacobianConcurrent(dst *mat.Dense, f func([]float64, []float64), x, origin []float64, formula Formula, step float64, nWorkers int) {
 	m, n := dst.Dims()
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
@@ -138,7 +138,7 @@ func jacobianConcurrent(dst *mat64.Dense, f func([]float64, []float64), x, origi
 		defer wg.Done()
 		xcopy := make([]float64, n)
 		y := make([]float64, m)
-		yVec := mat64.NewVector(m, y)
+		yVec := mat.NewVector(m, y)
 		for job := range jobs {
 			copy(xcopy, x)
 			xcopy[job.j] += job.pt.Loc * step
@@ -182,7 +182,7 @@ func jacobianConcurrent(dst *mat64.Dense, f func([]float64, []float64), x, origi
 		// all columns of dst. Iterate again over all Formula points
 		// because we don't forbid repeated locations.
 
-		originVec := mat64.NewVector(m, origin)
+		originVec := mat.NewVector(m, origin)
 		for _, pt := range formula.Stencil {
 			if pt.Loc != 0 {
 				continue

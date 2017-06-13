@@ -8,8 +8,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // CovarianceMatrix returns the covariance matrix (also known as the
@@ -21,9 +20,9 @@ import (
 // must not contain negative elements.
 // If cov is not nil it must either be zero-sized or have the same number of
 // columns as the input data matrix. cov will be used as the destination for
-// the covariance data. If cov is nil, a new mat64.SymDense is allocated for
+// the covariance data. If cov is nil, a new mat.SymDense is allocated for
 // the destination.
-func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *mat64.SymDense {
+func CovarianceMatrix(cov *mat.SymDense, x mat.Matrix, weights []float64) *mat.SymDense {
 	// This is the matrix version of the two-pass algorithm. It doesn't use the
 	// additional floating point error correction that the Covariance function uses
 	// to reduce the impact of rounding during centering.
@@ -31,12 +30,12 @@ func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *m
 	r, c := x.Dims()
 
 	if cov == nil {
-		cov = mat64.NewSymDense(c, nil)
+		cov = mat.NewSymDense(c, nil)
 	} else if n := cov.Symmetric(); n != c && n != 0 {
-		panic(matrix.ErrShape)
+		panic(mat.ErrShape)
 	}
 
-	var xt mat64.Dense
+	var xt mat.Dense
 	xt.Clone(x.T())
 	// Subtract the mean of each of the columns.
 	for i := 0; i < c; i++ {
@@ -82,9 +81,9 @@ func CovarianceMatrix(cov *mat64.SymDense, x mat64.Matrix, weights []float64) *m
 // must not contain negative elements.
 // If corr is not nil it must either be zero-sized or have the same number of
 // columns as the input data matrix. corr will be used as the destination for
-// the correlation data. If corr is nil, a new mat64.SymDense is allocated for
+// the correlation data. If corr is nil, a new mat.SymDense is allocated for
 // the destination.
-func CorrelationMatrix(corr *mat64.SymDense, x mat64.Matrix, weights []float64) *mat64.SymDense {
+func CorrelationMatrix(corr *mat.SymDense, x mat.Matrix, weights []float64) *mat.SymDense {
 	// This will panic if the sizes don't match, or if weights is the wrong size.
 	corr = CovarianceMatrix(corr, x, weights)
 	covToCorr(corr)
@@ -92,7 +91,7 @@ func CorrelationMatrix(corr *mat64.SymDense, x mat64.Matrix, weights []float64) 
 }
 
 // covToCorr converts a covariance matrix to a correlation matrix.
-func covToCorr(c *mat64.SymDense) {
+func covToCorr(c *mat.SymDense) {
 	r := c.Symmetric()
 
 	s := make([]float64, r)
@@ -113,11 +112,11 @@ func covToCorr(c *mat64.SymDense) {
 // The input sigma should be vector of standard deviations corresponding
 // to the covariance.  It will panic if len(sigma) is not equal to the
 // number of rows in the correlation matrix.
-func corrToCov(c *mat64.SymDense, sigma []float64) {
+func corrToCov(c *mat.SymDense, sigma []float64) {
 	r, _ := c.Dims()
 
 	if r != len(sigma) {
-		panic(matrix.ErrShape)
+		panic(mat.ErrShape)
 	}
 	for i, sx := range sigma {
 		// Ensure that the diagonal has exactly sigma squared.
@@ -135,13 +134,13 @@ func corrToCov(c *mat64.SymDense, sigma []float64) {
 // Mahalanobis returns NaN if the linear solve fails.
 //
 // See https://en.wikipedia.org/wiki/Mahalanobis_distance for more information.
-func Mahalanobis(x, y *mat64.Vector, chol *mat64.Cholesky) float64 {
-	var diff mat64.Vector
+func Mahalanobis(x, y *mat.Vector, chol *mat.Cholesky) float64 {
+	var diff mat.Vector
 	diff.SubVec(x, y)
-	var tmp mat64.Vector
+	var tmp mat.Vector
 	err := tmp.SolveCholeskyVec(chol, &diff)
 	if err != nil {
 		return math.NaN()
 	}
-	return math.Sqrt(mat64.Dot(&tmp, &diff))
+	return math.Sqrt(mat.Dot(&tmp, &diff))
 }

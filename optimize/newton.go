@@ -7,7 +7,7 @@ package optimize
 import (
 	"math"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 const maxNewtonModifications = 20
@@ -48,8 +48,8 @@ type Newton struct {
 
 	ls *LinesearchMethod
 
-	hess *mat64.SymDense // Storage for a copy of the Hessian matrix.
-	chol mat64.Cholesky  // Storage for the Cholesky factorization.
+	hess *mat.SymDense // Storage for a copy of the Hessian matrix.
+	chol mat.Cholesky  // Storage for the Cholesky factorization.
 	tau  float64
 }
 
@@ -88,8 +88,8 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 	// the Identity) from Nocedal, Wright (2006), 2nd edition.
 
 	dim := len(loc.X)
-	d := mat64.NewVector(dim, dir)
-	grad := mat64.NewVector(dim, loc.Gradient)
+	d := mat.NewVector(dim, dir)
+	grad := mat.NewVector(dim, loc.Gradient)
 	n.hess.CopySym(loc.Hessian)
 
 	// Find the smallest diagonal entry of the Hessian.

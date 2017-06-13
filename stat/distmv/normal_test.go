@@ -10,24 +10,24 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
 
 type mvTest struct {
 	Mu      []float64
-	Sigma   *mat64.SymDense
+	Sigma   *mat.SymDense
 	Loc     []float64
 	Logprob float64
 	Prob    float64
 }
 
 func TestNormProbs(t *testing.T) {
-	dist1, ok := NewNormal([]float64{0, 0}, mat64.NewSymDense(2, []float64{1, 0, 0, 1}), nil)
+	dist1, ok := NewNormal([]float64{0, 0}, mat.NewSymDense(2, []float64{1, 0, 0, 1}), nil)
 	if !ok {
 		t.Errorf("bad test")
 	}
-	dist2, ok := NewNormal([]float64{6, 7}, mat64.NewSymDense(2, []float64{8, 2, 0, 4}), nil)
+	dist2, ok := NewNormal([]float64{6, 7}, mat.NewSymDense(2, []float64{8, 2, 0, 4}), nil)
 	if !ok {
 		t.Errorf("bad test")
 	}
@@ -53,14 +53,14 @@ func TestNormProbs(t *testing.T) {
 func TestNewNormalChol(t *testing.T) {
 	for _, test := range []struct {
 		mean []float64
-		cov  *mat64.SymDense
+		cov  *mat.SymDense
 	}{
 		{
 			mean: []float64{2, 3},
-			cov:  mat64.NewSymDense(2, []float64{1, 0.1, 0.1, 1}),
+			cov:  mat.NewSymDense(2, []float64{1, 0.1, 0.1, 1}),
 		},
 	} {
-		var chol mat64.Cholesky
+		var chol mat.Cholesky
 		ok := chol.Factorize(test.cov)
 		if !ok {
 			panic("bad test")
@@ -101,26 +101,26 @@ func TestNormRand(t *testing.T) {
 		},
 	} {
 		dim := len(test.mean)
-		cov := mat64.NewSymDense(dim, test.cov)
+		cov := mat.NewSymDense(dim, test.cov)
 		n, ok := NewNormal(test.mean, cov, nil)
 		if !ok {
 			t.Errorf("bad covariance matrix")
 		}
 
 		nSamples := 1000000
-		samps := mat64.NewDense(nSamples, dim, nil)
+		samps := mat.NewDense(nSamples, dim, nil)
 		for i := 0; i < nSamples; i++ {
 			n.Rand(samps.RawRowView(i))
 		}
 		estMean := make([]float64, dim)
 		for i := range estMean {
-			estMean[i] = stat.Mean(mat64.Col(nil, i, samps), nil)
+			estMean[i] = stat.Mean(mat.Col(nil, i, samps), nil)
 		}
 		if !floats.EqualApprox(estMean, test.mean, 1e-2) {
 			t.Errorf("Mean mismatch: want: %v, got %v", test.mean, estMean)
 		}
 		estCov := stat.CovarianceMatrix(nil, samps, nil)
-		if !mat64.EqualApprox(estCov, cov, 1e-2) {
+		if !mat.EqualApprox(estCov, cov, 1e-2) {
 			t.Errorf("Cov mismatch: want: %v, got %v", cov, estCov)
 		}
 	}
@@ -140,7 +140,7 @@ func TestNormalQuantile(t *testing.T) {
 		},
 	} {
 		dim := len(test.mean)
-		cov := mat64.NewSymDense(dim, test.cov)
+		cov := mat.NewSymDense(dim, test.cov)
 		n, ok := NewNormal(test.mean, cov, nil)
 		if !ok {
 			t.Errorf("bad covariance matrix")
@@ -148,7 +148,7 @@ func TestNormalQuantile(t *testing.T) {
 
 		nSamples := 1000000
 		rnd := rand.New(rand.NewSource(1))
-		samps := mat64.NewDense(nSamples, dim, nil)
+		samps := mat.NewDense(nSamples, dim, nil)
 		tmp := make([]float64, dim)
 		for i := 0; i < nSamples; i++ {
 			for j := range tmp {
@@ -158,13 +158,13 @@ func TestNormalQuantile(t *testing.T) {
 		}
 		estMean := make([]float64, dim)
 		for i := range estMean {
-			estMean[i] = stat.Mean(mat64.Col(nil, i, samps), nil)
+			estMean[i] = stat.Mean(mat.Col(nil, i, samps), nil)
 		}
 		if !floats.EqualApprox(estMean, test.mean, 1e-2) {
 			t.Errorf("Mean mismatch: want: %v, got %v", test.mean, estMean)
 		}
 		estCov := stat.CovarianceMatrix(nil, samps, nil)
-		if !mat64.EqualApprox(estCov, cov, 1e-2) {
+		if !mat.EqualApprox(estCov, cov, 1e-2) {
 			t.Errorf("Cov mismatch: want: %v, got %v", cov, estCov)
 		}
 	}
@@ -174,57 +174,57 @@ func TestConditionNormal(t *testing.T) {
 	// Uncorrelated values shouldn't influence the updated values.
 	for _, test := range []struct {
 		mu       []float64
-		sigma    *mat64.SymDense
+		sigma    *mat.SymDense
 		observed []int
 		values   []float64
 
 		newMu    []float64
-		newSigma *mat64.SymDense
+		newSigma *mat.SymDense
 	}{
 		{
 			mu:       []float64{2, 3},
-			sigma:    mat64.NewSymDense(2, []float64{2, 0, 0, 5}),
+			sigma:    mat.NewSymDense(2, []float64{2, 0, 0, 5}),
 			observed: []int{0},
 			values:   []float64{10},
 
 			newMu:    []float64{3},
-			newSigma: mat64.NewSymDense(1, []float64{5}),
+			newSigma: mat.NewSymDense(1, []float64{5}),
 		},
 		{
 			mu:       []float64{2, 3},
-			sigma:    mat64.NewSymDense(2, []float64{2, 0, 0, 5}),
+			sigma:    mat.NewSymDense(2, []float64{2, 0, 0, 5}),
 			observed: []int{1},
 			values:   []float64{10},
 
 			newMu:    []float64{2},
-			newSigma: mat64.NewSymDense(1, []float64{2}),
+			newSigma: mat.NewSymDense(1, []float64{2}),
 		},
 		{
 			mu:       []float64{2, 3, 4},
-			sigma:    mat64.NewSymDense(3, []float64{2, 0, 0, 0, 5, 0, 0, 0, 10}),
+			sigma:    mat.NewSymDense(3, []float64{2, 0, 0, 0, 5, 0, 0, 0, 10}),
 			observed: []int{1},
 			values:   []float64{10},
 
 			newMu:    []float64{2, 4},
-			newSigma: mat64.NewSymDense(2, []float64{2, 0, 0, 10}),
+			newSigma: mat.NewSymDense(2, []float64{2, 0, 0, 10}),
 		},
 		{
 			mu:       []float64{2, 3, 4},
-			sigma:    mat64.NewSymDense(3, []float64{2, 0, 0, 0, 5, 0, 0, 0, 10}),
+			sigma:    mat.NewSymDense(3, []float64{2, 0, 0, 0, 5, 0, 0, 0, 10}),
 			observed: []int{0, 1},
 			values:   []float64{10, 15},
 
 			newMu:    []float64{4},
-			newSigma: mat64.NewSymDense(1, []float64{10}),
+			newSigma: mat.NewSymDense(1, []float64{10}),
 		},
 		{
 			mu:       []float64{2, 3, 4, 5},
-			sigma:    mat64.NewSymDense(4, []float64{2, 0.5, 0, 0, 0.5, 5, 0, 0, 0, 0, 10, 2, 0, 0, 2, 3}),
+			sigma:    mat.NewSymDense(4, []float64{2, 0.5, 0, 0, 0.5, 5, 0, 0, 0, 0, 10, 2, 0, 0, 2, 3}),
 			observed: []int{0, 1},
 			values:   []float64{10, 15},
 
 			newMu:    []float64{4, 5},
-			newSigma: mat64.NewSymDense(2, []float64{10, 2, 2, 3}),
+			newSigma: mat.NewSymDense(2, []float64{10, 2, 2, 3}),
 		},
 	} {
 		normal, ok := NewNormal(test.mu, test.sigma, nil)
@@ -240,9 +240,9 @@ func TestConditionNormal(t *testing.T) {
 			t.Errorf("Updated mean mismatch. Want %v, got %v.", test.newMu, newNormal.mu)
 		}
 
-		var sigma mat64.SymDense
+		var sigma mat.SymDense
 		sigma.FromCholesky(&newNormal.chol)
-		if !mat64.EqualApprox(test.newSigma, &sigma, 1e-12) {
+		if !mat.EqualApprox(test.newSigma, &sigma, 1e-12) {
 			t.Errorf("Updated sigma mismatch\n.Want:\n% v\nGot:\n% v\n", test.newSigma, sigma)
 		}
 	}
@@ -269,7 +269,7 @@ func TestConditionNormal(t *testing.T) {
 	} {
 		std := test.std
 		rho := test.rho
-		sigma := mat64.NewSymDense(2, []float64{std[0] * std[0], std[0] * std[1] * rho, std[0] * std[1] * rho, std[1] * std[1]})
+		sigma := mat.NewSymDense(2, []float64{std[0] * std[0], std[0] * std[1] * rho, std[0] * std[1] * rho, std[1] * std[1]})
 		normal, ok := NewNormal(test.mu, sigma, nil)
 		if !ok {
 			t.Fatalf("Bad test, original sigma not positive definite")
@@ -278,7 +278,7 @@ func TestConditionNormal(t *testing.T) {
 		if !ok {
 			t.Fatalf("Bad test, update failed")
 		}
-		var newSigma mat64.SymDense
+		var newSigma mat.SymDense
 		newSigma.FromCholesky(&newNormal.chol)
 		trueMean := test.mu[0] + rho*(std[0]/std[1])*(test.value-test.mu[1])
 		if math.Abs(trueMean-newNormal.mu[0]) > 1e-14 {
@@ -293,7 +293,7 @@ func TestConditionNormal(t *testing.T) {
 	// Test via sampling.
 	for _, test := range []struct {
 		mu         []float64
-		sigma      *mat64.SymDense
+		sigma      *mat.SymDense
 		observed   []int
 		unobserved []int
 		value      []float64
@@ -301,7 +301,7 @@ func TestConditionNormal(t *testing.T) {
 		// The indices in unobserved must be in ascending order for this test.
 		{
 			mu:    []float64{2, 3, 4},
-			sigma: mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			sigma: mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
 
 			observed:   []int{0},
 			unobserved: []int{1, 2},
@@ -309,7 +309,7 @@ func TestConditionNormal(t *testing.T) {
 		},
 		{
 			mu:    []float64{2, 3, 4, 5},
-			sigma: mat64.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+			sigma: mat.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
 
 			observed:   []int{0, 3},
 			unobserved: []int{1, 2},
@@ -318,7 +318,7 @@ func TestConditionNormal(t *testing.T) {
 	} {
 		totalSamp := 4000000
 		var nSamp int
-		samples := mat64.NewDense(totalSamp, len(test.mu), nil)
+		samples := mat.NewDense(totalSamp, len(test.mu), nil)
 		normal, ok := NewNormal(test.mu, test.sigma, nil)
 		if !ok {
 			t.Errorf("bad test")
@@ -343,12 +343,12 @@ func TestConditionNormal(t *testing.T) {
 			t.Errorf("bad test, not enough samples")
 			continue
 		}
-		samples = samples.View(0, 0, nSamp, len(test.mu)).(*mat64.Dense)
+		samples = samples.View(0, 0, nSamp, len(test.mu)).(*mat.Dense)
 
 		// Compute mean and covariance matrix.
 		estMean := make([]float64, len(test.mu))
 		for i := range estMean {
-			estMean[i] = stat.Mean(mat64.Col(nil, i, samples), nil)
+			estMean[i] = stat.Mean(mat.Col(nil, i, samples), nil)
 		}
 		estCov := stat.CovarianceMatrix(nil, samples, nil)
 
@@ -363,7 +363,7 @@ func TestConditionNormal(t *testing.T) {
 
 			subEstMean = append(subEstMean, estMean[v])
 		}
-		subEstCov := mat64.NewSymDense(len(test.unobserved), nil)
+		subEstCov := mat.NewSymDense(len(test.unobserved), nil)
 		for i := 0; i < len(test.unobserved); i++ {
 			for j := i; j < len(test.unobserved); j++ {
 				subEstCov.SetSym(i, j, estCov.At(test.unobserved[i], test.unobserved[j]))
@@ -375,9 +375,9 @@ func TestConditionNormal(t *testing.T) {
 				t.Errorf("Mean mismatch. Want %v, got %v.", newNormal.mu[i], v)
 			}
 		}
-		var sigma mat64.SymDense
+		var sigma mat.SymDense
 		sigma.FromCholesky(&newNormal.chol)
-		if !mat64.EqualApprox(&sigma, subEstCov, 1e-1) {
+		if !mat.EqualApprox(&sigma, subEstCov, 1e-1) {
 			t.Errorf("Covariance mismatch. Want:\n%0.8v\nGot:\n%0.8v\n", subEstCov, sigma)
 		}
 	}
@@ -386,11 +386,11 @@ func TestConditionNormal(t *testing.T) {
 func TestCovarianceMatrix(t *testing.T) {
 	for _, test := range []struct {
 		mu    []float64
-		sigma *mat64.SymDense
+		sigma *mat.SymDense
 	}{
 		{
 			mu:    []float64{2, 3, 4},
-			sigma: mat64.NewSymDense(3, []float64{1, 0.5, 3, 0.5, 8, -1, 3, -1, 15}),
+			sigma: mat.NewSymDense(3, []float64{1, 0.5, 3, 0.5, 8, -1, 3, -1, 15}),
 		},
 	} {
 		normal, ok := NewNormal(test.mu, test.sigma, nil)
@@ -398,13 +398,13 @@ func TestCovarianceMatrix(t *testing.T) {
 			t.Fatalf("Bad test, covariance matrix not positive definite")
 		}
 		cov := normal.CovarianceMatrix(nil)
-		if !mat64.EqualApprox(cov, test.sigma, 1e-14) {
+		if !mat.EqualApprox(cov, test.sigma, 1e-14) {
 			t.Errorf("Covariance mismatch with nil input")
 		}
 		dim := test.sigma.Symmetric()
-		cov = mat64.NewSymDense(dim, nil)
+		cov = mat.NewSymDense(dim, nil)
 		normal.CovarianceMatrix(cov)
-		if !mat64.EqualApprox(cov, test.sigma, 1e-14) {
+		if !mat.EqualApprox(cov, test.sigma, 1e-14) {
 			t.Errorf("Covariance mismatch with supplied input")
 		}
 	}
@@ -413,22 +413,22 @@ func TestCovarianceMatrix(t *testing.T) {
 func TestMarginal(t *testing.T) {
 	for _, test := range []struct {
 		mu       []float64
-		sigma    *mat64.SymDense
+		sigma    *mat.SymDense
 		marginal []int
 	}{
 		{
 			mu:       []float64{2, 3, 4},
-			sigma:    mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			sigma:    mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
 			marginal: []int{0},
 		},
 		{
 			mu:       []float64{2, 3, 4},
-			sigma:    mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			sigma:    mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
 			marginal: []int{0, 2},
 		},
 		{
 			mu:    []float64{2, 3, 4, 5},
-			sigma: mat64.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+			sigma: mat.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
 
 			marginal: []int{0, 3},
 		},
@@ -443,13 +443,13 @@ func TestMarginal(t *testing.T) {
 		}
 		dim := normal.Dim()
 		nSamples := 1000000
-		samps := mat64.NewDense(nSamples, dim, nil)
+		samps := mat.NewDense(nSamples, dim, nil)
 		for i := 0; i < nSamples; i++ {
 			normal.Rand(samps.RawRowView(i))
 		}
 		estMean := make([]float64, dim)
 		for i := range estMean {
-			estMean[i] = stat.Mean(mat64.Col(nil, i, samps), nil)
+			estMean[i] = stat.Mean(mat.Col(nil, i, samps), nil)
 		}
 		for i, v := range test.marginal {
 			if math.Abs(marginal.mu[i]-estMean[v]) > 1e-2 {
@@ -474,15 +474,15 @@ func TestMarginal(t *testing.T) {
 func TestMarginalSingle(t *testing.T) {
 	for _, test := range []struct {
 		mu    []float64
-		sigma *mat64.SymDense
+		sigma *mat.SymDense
 	}{
 		{
 			mu:    []float64{2, 3, 4},
-			sigma: mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			sigma: mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
 		},
 		{
 			mu:    []float64{2, 3, 4, 5},
-			sigma: mat64.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+			sigma: mat.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
 		},
 	} {
 		normal, ok := NewNormal(test.mu, test.sigma, nil)
@@ -513,9 +513,9 @@ func TestMarginalSingle(t *testing.T) {
 		for i := range x {
 			x[i] = rnd.Float64()
 		}
-		mat := mat64.NewDense(dim, dim, x)
-		var sigma mat64.SymDense
-		sigma.SymOuterK(1, mat)
+		matrix := mat.NewDense(dim, dim, x)
+		var sigma mat.SymDense
+		sigma.SymOuterK(1, matrix)
 
 		normal, ok := NewNormal(mu, &sigma, nil)
 		if !ok {

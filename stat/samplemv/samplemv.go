@@ -15,7 +15,7 @@ import (
 	"math"
 	"math/rand"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat/distmv"
 )
 
@@ -43,7 +43,7 @@ func min(a, b int) int {
 // implementing type. The number of samples generated is equal to rows(batch),
 // and the samples are stored in-place into the input.
 type Sampler interface {
-	Sample(batch *mat64.Dense)
+	Sample(batch *mat.Dense)
 }
 
 // WeightedSampler generates a batch of samples and their relative weights
@@ -52,7 +52,7 @@ type Sampler interface {
 // are stored in-place into the inputs. The length of weights must equal
 // rows(batch), otherwise SampleWeighted will panic.
 type WeightedSampler interface {
-	SampleWeighted(batch *mat64.Dense, weights []float64)
+	SampleWeighted(batch *mat.Dense, weights []float64)
 }
 
 // SampleUniformWeighted wraps a Sampler type to create a WeightedSampler where all
@@ -64,7 +64,7 @@ type SampleUniformWeighted struct {
 // SampleWeighted generates rows(batch) samples from the embedded Sampler type
 // and sets all of the weights equal to 1. If rows(batch) and len(weights)
 // of weights are not equal, SampleWeighted will panic.
-func (w SampleUniformWeighted) SampleWeighted(batch *mat64.Dense, weights []float64) {
+func (w SampleUniformWeighted) SampleWeighted(batch *mat.Dense, weights []float64) {
 	r, _ := batch.Dims()
 	if r != len(weights) {
 		panic(badLengthMismatch)
@@ -84,7 +84,7 @@ type LatinHypercuber struct {
 
 // Sample generates rows(batch) samples using the LatinHypercube generation
 // procedure.
-func (l LatinHypercuber) Sample(batch *mat64.Dense) {
+func (l LatinHypercuber) Sample(batch *mat.Dense) {
 	LatinHypercube(batch, l.Q, l.Src)
 }
 
@@ -96,7 +96,7 @@ func (l LatinHypercuber) Sample(batch *mat64.Dense) {
 // spaced bins and guarantees that one sample is generated per bin. Within each bin,
 // the location is randomly sampled. The distmv.NewUnitUniform function can be used
 // for easy sampling from the unit hypercube.
-func LatinHypercube(batch *mat64.Dense, q distmv.Quantiler, src *rand.Rand) {
+func LatinHypercube(batch *mat.Dense, q distmv.Quantiler, src *rand.Rand) {
 	r, c := batch.Dims()
 	var f64 func() float64
 	var perm func(int) []int
@@ -132,7 +132,7 @@ type Importancer struct {
 
 // SampleWeighted generates rows(batch) samples using the Importance sampling
 // generation procedure.
-func (l Importancer) SampleWeighted(batch *mat64.Dense, weights []float64) {
+func (l Importancer) SampleWeighted(batch *mat.Dense, weights []float64) {
 	Importance(batch, weights, l.Target, l.Proposal)
 }
 
@@ -150,7 +150,7 @@ func (l Importancer) SampleWeighted(batch *mat64.Dense, weights []float64) {
 //
 // If weights is nil, the weights are not stored. The length of weights must equal
 // the length of batch, otherwise Importance will panic.
-func Importance(batch *mat64.Dense, weights []float64, target distmv.LogProber, proposal distmv.RandLogProber) {
+func Importance(batch *mat.Dense, weights []float64, target distmv.LogProber, proposal distmv.RandLogProber) {
 	r, _ := batch.Dims()
 	if r != len(weights) {
 		panic(badLengthMismatch)
@@ -194,7 +194,7 @@ func (r *Rejectioner) Proposed() int {
 // Rejection sampling may fail if the constant is insufficiently high, as described
 // in the function comment for Rejection. If the generation fails, the samples
 // are set to math.NaN(), and a call to Err will return a non-nil value.
-func (r *Rejectioner) Sample(batch *mat64.Dense) {
+func (r *Rejectioner) Sample(batch *mat.Dense) {
 	r.err = nil
 	r.proposed = 0
 	proposed, ok := Rejection(batch, r.Target, r.Proposal, r.C, r.Src)
@@ -225,7 +225,7 @@ func (r *Rejectioner) Sample(batch *mat64.Dense) {
 // a value that is proportional to the probability (logprob + constant). This is
 // useful for cases where the probability distribution is only known up to a normalization
 // constant.
-func Rejection(batch *mat64.Dense, target distmv.LogProber, proposal distmv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
+func Rejection(batch *mat.Dense, target distmv.LogProber, proposal distmv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
 	if c < 1 {
 		panic("rejection: acceptance constant must be greater than 1")
 	}
@@ -268,13 +268,13 @@ type IIDer struct {
 }
 
 // Sample generates a set of identically and independently distributed samples.
-func (iid IIDer) Sample(batch *mat64.Dense) {
+func (iid IIDer) Sample(batch *mat.Dense) {
 	IID(batch, iid.Dist)
 }
 
 // IID generates a set of independently and identically distributed samples from
 // the input distribution.
-func IID(batch *mat64.Dense, d distmv.Rander) {
+func IID(batch *mat.Dense, d distmv.Rander) {
 	r, _ := batch.Dims()
 	for i := 0; i < r; i++ {
 		d.Rand(batch.RawRowView(i))

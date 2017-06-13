@@ -10,7 +10,7 @@ import (
 	"math"
 	"time"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 const defaultGradientAbsTol = 1e-6
@@ -83,7 +83,7 @@ type Location struct {
 	X        []float64
 	F        float64
 	Gradient []float64
-	Hessian  *mat64.SymDense
+	Hessian  *mat.SymDense
 }
 
 // Result represents the answer of an optimization run. It contains the optimum
@@ -131,7 +131,7 @@ type Problem struct {
 
 	// Hess evaluates the Hessian at x and stores the result in-place in hess.
 	// Hess must not modify x.
-	Hess func(hess mat64.MutableSymmetric, x []float64)
+	Hess func(hess mat.MutableSymmetric, x []float64)
 
 	// Status reports the status of the objective function being optimized and any
 	// error. This can be used to terminate early, for example when the function is
@@ -161,10 +161,10 @@ func (p Problem) satisfies(method Needser) error {
 //
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
-	UseInitialData  bool            // Use supplied information about the conditions at the initial x.
-	InitialValue    float64         // Function value at the initial x.
-	InitialGradient []float64       // Gradient at the initial x.
-	InitialHessian  *mat64.SymDense // Hessian at the initial x.
+	UseInitialData  bool          // Use supplied information about the conditions at the initial x.
+	InitialValue    float64       // Function value at the initial x.
+	InitialGradient []float64     // Gradient at the initial x.
+	InitialHessian  *mat.SymDense // Hessian at the initial x.
 
 	// FunctionThreshold is the threshold for acceptably small values of the
 	// objective function. FunctionThreshold status is returned if
@@ -254,9 +254,9 @@ func resize(x []float64, dim int) []float64 {
 	return x[:dim]
 }
 
-func resizeSymDense(m *mat64.SymDense, dim int) *mat64.SymDense {
+func resizeSymDense(m *mat.SymDense, dim int) *mat.SymDense {
 	if m == nil || cap(m.RawSymmetric().Data) < dim*dim {
-		return mat64.NewSymDense(dim, nil)
+		return mat.NewSymDense(dim, nil)
 	}
-	return mat64.NewSymDense(dim, m.RawSymmetric().Data[:dim*dim])
+	return mat.NewSymDense(dim, m.RawSymmetric().Data[:dim*dim])
 }

@@ -9,7 +9,7 @@ import (
 	"math/rand"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/gonum/stat/distuv"
 )
@@ -26,10 +26,10 @@ var (
 type Normal struct {
 	mu []float64
 
-	sigma mat64.SymDense
+	sigma mat.SymDense
 
-	chol       mat64.Cholesky
-	lower      mat64.TriDense
+	chol       mat.Cholesky
+	lower      mat.TriDense
 	logSqrtDet float64
 	dim        int
 
@@ -39,7 +39,7 @@ type Normal struct {
 // NewNormal creates a new Normal with the given mean and covariance matrix.
 // NewNormal panics if len(mu) == 0, or if len(mu) != sigma.N. If the covariance
 // matrix is not positive-definite, the returned boolean is false.
-func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bool) {
+func NewNormal(mu []float64, sigma mat.Symmetric, src *rand.Rand) (*Normal, bool) {
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
@@ -57,7 +57,7 @@ func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bo
 	if !ok {
 		return nil, false
 	}
-	n.sigma = *mat64.NewSymDense(dim, nil)
+	n.sigma = *mat.NewSymDense(dim, nil)
 	n.sigma.CopySym(sigma)
 	n.lower.LFromCholesky(&n.chol)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()
@@ -67,7 +67,7 @@ func NewNormal(mu []float64, sigma mat64.Symmetric, src *rand.Rand) (*Normal, bo
 // NewNormalChol creates a new Normal distribution with the given mean and
 // covariance matrix represented by its Cholesky decomposition. NewNormalChol
 // panics if len(mu) is not equal to chol.Size().
-func NewNormalChol(mu []float64, chol *mat64.Cholesky, src *rand.Rand) *Normal {
+func NewNormalChol(mu []float64, chol *mat.Cholesky, src *rand.Rand) *Normal {
 	dim := len(mu)
 	if dim != chol.Size() {
 		panic(badSizeMismatch)
@@ -89,7 +89,7 @@ func NewNormalChol(mu []float64, chol *mat64.Cholesky, src *rand.Rand) *Normal {
 // panics if len(mu) is not equal to prec.Symmetric(). If the precision matrix
 // is not positive-definite, NewNormalPrecision returns nil for norm and false
 // for ok.
-func NewNormalPrecision(mu []float64, prec *mat64.SymDense, src *rand.Rand) (norm *Normal, ok bool) {
+func NewNormalPrecision(mu []float64, prec *mat.SymDense, src *rand.Rand) (norm *Normal, ok bool) {
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
@@ -102,12 +102,12 @@ func NewNormalPrecision(mu []float64, prec *mat64.SymDense, src *rand.Rand) (nor
 	// is much better, but this still loses precision. It is worth considering if
 	// instead the precision matrix should be stored explicitly and used instead
 	// of the Cholesky decomposition of the covariance matrix where appropriate.
-	var chol mat64.Cholesky
+	var chol mat.Cholesky
 	ok = chol.Factorize(prec)
 	if !ok {
 		return nil, false
 	}
-	var sigma mat64.SymDense
+	var sigma mat.SymDense
 	sigma.InverseCholesky(&chol)
 	return NewNormal(mu, &sigma, src)
 }
@@ -154,9 +154,9 @@ func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Ran
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
 // If the input matrix is nil a new matrix is allocated, otherwise the result
 // is stored in-place into the input.
-func (n *Normal) CovarianceMatrix(s *mat64.SymDense) *mat64.SymDense {
+func (n *Normal) CovarianceMatrix(s *mat.SymDense) *mat.SymDense {
 	if s == nil {
-		s = mat64.NewSymDense(n.Dim(), nil)
+		s = mat.NewSymDense(n.Dim(), nil)
 	}
 	sn := s.Symmetric()
 	if sn != n.Dim() {
@@ -183,7 +183,7 @@ func (n *Normal) LogProb(x []float64) float64 {
 		panic(badSizeMismatch)
 	}
 	c := -0.5*float64(dim)*logTwoPi - n.logSqrtDet
-	dst := stat.Mahalanobis(mat64.NewVector(dim, x), mat64.NewVector(dim, n.mu), &n.chol)
+	dst := stat.Mahalanobis(mat.NewVector(dim, x), mat.NewVector(dim, n.mu), &n.chol)
 	return c - 0.5*dst*dst
 }
 
@@ -199,7 +199,7 @@ func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 	for i, v := range vars {
 		newMean[i] = n.mu[v]
 	}
-	var s mat64.SymDense
+	var s mat.SymDense
 	s.SubsetSym(&n.sigma, vars)
 	return NewNormal(newMean, &s, src)
 }
@@ -308,8 +308,8 @@ func (n *Normal) TransformNormal(dst, normal []float64) []float64 {
 // transformNormal performs the same operation as TransformNormal except no
 // safety checks are performed and both input slices must be non-nil.
 func (n *Normal) transformNormal(dst, normal []float64) []float64 {
-	srcVec := mat64.NewVector(n.dim, normal)
-	dstVec := mat64.NewVector(n.dim, dst)
+	srcVec := mat.NewVector(n.dim, normal)
+	dstVec := mat.NewVector(n.dim, dst)
 	dstVec.MulVec(&n.lower, srcVec)
 	floats.Add(dst, n.mu)
 	return dst

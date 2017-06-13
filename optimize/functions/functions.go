@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // Beale implements the Beale's function.
@@ -56,7 +56,7 @@ func (Beale) Grad(grad, x []float64) {
 	grad[1] = 2 * x[0] * (f1 + 2*f2*x[1] + 3*f3*x[1]*x[1])
 }
 
-func (Beale) Hess(hess mat64.MutableSymmetric, x []float64) {
+func (Beale) Hess(hess mat.MutableSymmetric, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -518,7 +518,7 @@ func (BrownBadlyScaled) Grad(grad, x []float64) {
 	grad[1] = 2*f2 + 2*f3*x[0]
 }
 
-func (BrownBadlyScaled) Hess(hess mat64.MutableSymmetric, x []float64) {
+func (BrownBadlyScaled) Hess(hess mat.MutableSymmetric, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -595,7 +595,7 @@ func (BrownAndDennis) Grad(grad, x []float64) {
 	}
 }
 
-func (BrownAndDennis) Hess(hess mat64.MutableSymmetric, x []float64) {
+func (BrownAndDennis) Hess(hess mat.MutableSymmetric, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}
@@ -1228,7 +1228,7 @@ func (PowellBadlyScaled) Grad(grad, x []float64) {
 	grad[1] = 2 * (1e4*f1*x[0] - f2*math.Exp(-x[1]))
 }
 
-func (PowellBadlyScaled) Hess(hess mat64.MutableSymmetric, x []float64) {
+func (PowellBadlyScaled) Hess(hess mat.MutableSymmetric, x []float64) {
 	if len(x) != 2 {
 		panic("dimension of the problem must be 2")
 	}
@@ -1478,7 +1478,7 @@ func (Watson) Grad(grad, x []float64) {
 	grad[1] += 2 * t
 }
 
-func (Watson) Hess(hess mat64.MutableSymmetric, x []float64) {
+func (Watson) Hess(hess mat.MutableSymmetric, x []float64) {
 	dim := len(x)
 	if dim != hess.Symmetric() {
 		panic("incorrect size of the Hessian")
@@ -1598,7 +1598,7 @@ func (Wood) Grad(grad, x []float64) {
 	grad[3] = 2 * (90*f3 + 10*f5 - 0.1*f6)
 }
 
-func (Wood) Hess(hess mat64.MutableSymmetric, x []float64) {
+func (Wood) Hess(hess mat.MutableSymmetric, x []float64) {
 	if len(x) != 4 {
 		panic("dimension of the problem must be 4")
 	}

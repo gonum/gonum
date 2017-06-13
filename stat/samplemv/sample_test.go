@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/gonum/stat/distmv"
 )
@@ -28,7 +28,7 @@ func TestLatinHypercube(t *testing.T) {
 			distmv.NewUniform([]distmv.Bound{{0, 3}, {-1, 5}, {-4, -1}}, nil),
 		} {
 			dim := dist.Dim()
-			batch := mat64.NewDense(nSamples, dim, nil)
+			batch := mat.NewDense(nSamples, dim, nil)
 			LatinHypercube(batch, dist, nil)
 			// Latin hypercube should have one entry per hyperrow.
 			present := make([][]bool, nSamples)
@@ -68,7 +68,7 @@ func TestImportance(t *testing.T) {
 	}
 
 	muImp := make([]float64, dim)
-	sigmaImp := mat64.NewSymDense(dim, nil)
+	sigmaImp := mat.NewSymDense(dim, nil)
 	for i := 0; i < dim; i++ {
 		sigmaImp.SetSym(i, i, 3)
 	}
@@ -78,7 +78,7 @@ func TestImportance(t *testing.T) {
 	}
 
 	nSamples := 100000
-	batch := mat64.NewDense(nSamples, dim, nil)
+	batch := mat.NewDense(nSamples, dim, nil)
 	weights := make([]float64, nSamples)
 	Importance(batch, weights, target, proposal)
 
@@ -102,7 +102,7 @@ func TestRejection(t *testing.T) {
 	mu := target.Mean(nil)
 
 	muImp := make([]float64, dim)
-	sigmaImp := mat64.NewSymDense(dim, nil)
+	sigmaImp := mat.NewSymDense(dim, nil)
 	for i := 0; i < dim; i++ {
 		sigmaImp.SetSym(i, i, 6)
 	}
@@ -112,7 +112,7 @@ func TestRejection(t *testing.T) {
 	}
 
 	nSamples := 1000
-	batch := mat64.NewDense(nSamples, dim, nil)
+	batch := mat.NewDense(nSamples, dim, nil)
 	weights := make([]float64, nSamples)
 	_, ok = Rejection(batch, target, proposal, 1000, nil)
 	if !ok {
@@ -120,7 +120,7 @@ func TestRejection(t *testing.T) {
 	}
 
 	for i := 0; i < dim; i++ {
-		col := mat64.Col(nil, i, batch)
+		col := mat.Col(nil, i, batch)
 		ev := stat.Mean(col, weights)
 		if math.Abs(ev-mu[i]) > 1e-2 {
 			t.Errorf("Mean mismatch: Want %v, got %v", mu[i], ev)
@@ -136,7 +136,7 @@ func TestMetropolisHastings(t *testing.T) {
 		t.Fatal("bad test, sigma not pos def")
 	}
 
-	sigmaImp := mat64.NewSymDense(dim, nil)
+	sigmaImp := mat.NewSymDense(dim, nil)
 	for i := 0; i < dim; i++ {
 		sigmaImp.SetSym(i, i, 0.25)
 	}
@@ -147,10 +147,10 @@ func TestMetropolisHastings(t *testing.T) {
 
 	nSamples := 1000000
 	burnin := 5000
-	batch := mat64.NewDense(nSamples, dim, nil)
+	batch := mat.NewDense(nSamples, dim, nil)
 	initial := make([]float64, dim)
 	MetropolisHastings(batch, initial, target, proposal, nil)
-	batch = batch.View(burnin, 0, nSamples-burnin, dim).(*mat64.Dense)
+	batch = batch.View(burnin, 0, nSamples-burnin, dim).(*mat.Dense)
 
 	compareNormal(t, target, batch, nil)
 }
@@ -161,8 +161,8 @@ func randomNormal(dim int) (*distmv.Normal, bool) {
 	for i := range data {
 		data[i] = rand.Float64()
 	}
-	a := mat64.NewDense(dim, dim, data)
-	var sigma mat64.SymDense
+	a := mat.NewDense(dim, dim, data)
+	var sigma mat.SymDense
 	sigma.SymOuterK(1, a)
 	mu := make([]float64, dim)
 	for i := range mu {
@@ -171,7 +171,7 @@ func randomNormal(dim int) (*distmv.Normal, bool) {
 	return distmv.NewNormal(mu, &sigma, nil)
 }
 
-func compareNormal(t *testing.T, want *distmv.Normal, batch *mat64.Dense, weights []float64) {
+func compareNormal(t *testing.T, want *distmv.Normal, batch *mat.Dense, weights []float64) {
 	dim := want.Dim()
 	mu := want.Mean(nil)
 	sigma := want.CovarianceMatrix(nil)
@@ -183,7 +183,7 @@ func compareNormal(t *testing.T, want *distmv.Normal, batch *mat64.Dense, weight
 		}
 	}
 	for i := 0; i < dim; i++ {
-		col := mat64.Col(nil, i, batch)
+		col := mat.Col(nil, i, batch)
 		ev := stat.Mean(col, weights)
 		if math.Abs(ev-mu[i]) > 1e-2 {
 			t.Errorf("Mean mismatch: Want %v, got %v", mu[i], ev)
@@ -191,7 +191,7 @@ func compareNormal(t *testing.T, want *distmv.Normal, batch *mat64.Dense, weight
 	}
 
 	cov := stat.CovarianceMatrix(nil, batch, weights)
-	if !mat64.EqualApprox(cov, sigma, 1.5e-1) {
+	if !mat.EqualApprox(cov, sigma, 1.5e-1) {
 		t.Errorf("Covariance matrix mismatch")
 	}
 }
@@ -222,7 +222,7 @@ func TestMetropolisHastingser(t *testing.T) {
 			t.Fatal("bad test, sigma not pos def")
 		}
 
-		sigmaImp := mat64.NewSymDense(dim, nil)
+		sigmaImp := mat.NewSymDense(dim, nil)
 		for i := 0; i < dim; i++ {
 			sigmaImp.SetSym(i, i, 0.25)
 		}
@@ -245,7 +245,7 @@ func TestMetropolisHastingser(t *testing.T) {
 		samples := test.samples
 		burnin := test.burnin
 		rate := test.rate
-		fullBatch := mat64.NewDense(1+burnin+rate*(samples-1), dim, nil)
+		fullBatch := mat.NewDense(1+burnin+rate*(samples-1), dim, nil)
 		mh.Sample(fullBatch)
 		mh = MetropolisHastingser{
 			Initial:  initial,
@@ -256,7 +256,7 @@ func TestMetropolisHastingser(t *testing.T) {
 			Rate:     rate,
 		}
 		rand.Seed(int64(seed))
-		batch := mat64.NewDense(samples, dim, nil)
+		batch := mat.NewDense(samples, dim, nil)
 		mh.Sample(batch)
 
 		same := true
@@ -271,8 +271,8 @@ func TestMetropolisHastingser(t *testing.T) {
 		}
 
 		if !same {
-			fmt.Printf("%v\n", mat64.Formatted(batch))
-			fmt.Printf("%v\n", mat64.Formatted(fullBatch))
+			fmt.Printf("%v\n", mat.Formatted(batch))
+			fmt.Printf("%v\n", mat.Formatted(fullBatch))
 
 			t.Errorf("sampling mismatch: dim = %v, burnin = %v, rate = %v, samples = %v", dim, burnin, rate, samples)
 		}

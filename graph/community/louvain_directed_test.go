@@ -19,7 +19,7 @@ import (
 
 var communityDirectedQTests = []struct {
 	name       string
-	g          []set
+	g          []intset
 	structures []structure
 
 	wantLevels []level
@@ -32,7 +32,7 @@ var communityDirectedQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1),
 					1: linksTo(2, 3, 4),
 				},
@@ -68,7 +68,7 @@ var communityDirectedQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 7, 11, 12, 13, 17, 19, 21),
 					1: linksTo(4, 5, 6, 10, 16),
 					2: linksTo(8, 9, 14, 15, 18, 20, 22, 26, 29, 30, 32, 33),
@@ -148,7 +148,7 @@ var communityDirectedQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 4, 5, 6, 7),
 					1: linksTo(8, 9, 10, 11, 12, 13, 14, 15),
 				},
@@ -382,7 +382,7 @@ tests:
 
 var localDirectedMoveTests = []struct {
 	name       string
-	g          []set
+	g          []intset
 	structures []moveStructures
 }{
 	{
@@ -390,7 +390,7 @@ var localDirectedMoveTests = []struct {
 		g:    blondel,
 		structures: []moveStructures{
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),
@@ -401,7 +401,7 @@ var localDirectedMoveTests = []struct {
 				tol:         1e-14,
 			},
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),
@@ -412,7 +412,7 @@ var localDirectedMoveTests = []struct {
 				tol:         1e-14,
 			},
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),

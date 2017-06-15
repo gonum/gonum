@@ -8,8 +8,10 @@ package community // import "gonum.org/v1/gonum/graph/community"
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // Q returns the modularity Q score of the graph g subdivided into the
@@ -303,6 +305,36 @@ func (d *dense) TakeMin(p *int) bool {
 	}
 	*p = d.pos
 	d.pos++
+	return true
+}
+
+// slice is a sparse integer set iterator.
+type slice struct {
+	pos   int
+	elems []int
+}
+
+// newSlice returns a new slice of elements from s, sorted ascending.
+func newSlice(s set.Ints) *slice {
+	elems := make([]int, 0, len(s))
+	for i := range s {
+		elems = append(elems, i)
+	}
+	sort.Ints(elems)
+	return &slice{elems: elems}
+}
+
+// TakeMin mimics intsets.Sparse TakeMin for a sorted set. If the set
+// iterator position is less than the iterator size, TakeMin sets *p
+// to the the iterator position's element and increments the position
+// and returns true.
+// Otherwise, it returns false and *p is undefined.
+func (s *slice) TakeMin(p *int) bool {
+	if s.pos >= len(s.elems) {
+		return false
+	}
+	*p = s.elems[s.pos]
+	s.pos++
 	return true
 }
 

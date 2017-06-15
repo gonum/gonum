@@ -9,10 +9,9 @@ import (
 	"math/rand"
 	"sort"
 
-	"golang.org/x/tools/container/intsets"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // qUndirected returns the modularity Q score of the graph g subdivided into the
@@ -502,27 +501,32 @@ func (l *undirectedLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst int, sr
 	gamma := l.resolution
 
 	// Find communites connected to n.
-	var connected intsets.Sparse
+	connected := make(set.Ints)
 	// The following for loop is equivalent to:
 	//
 	//  for _, v := range l.g.From(n) {
-	//  	connected.Insert(l.memberships[v.ID()])
+	//  	connected.Add(l.memberships[v.ID()])
 	//  }
 	//
 	// This is done to avoid an allocation.
 	for _, vid := range l.g.edges[id] {
-		connected.Insert(l.memberships[vid])
+		connected.Add(l.memberships[vid])
 	}
 	// Insert the node's own community.
-	connected.Insert(l.memberships[id])
+	connected.Add(l.memberships[id])
+
+	candidates := make([]int, 0, len(connected))
+	for i := range connected {
+		candidates = append(candidates, i)
+	}
+	sort.Ints(candidates)
 
 	// Calculate the highest modularity gain
 	// from moving into another community and
 	// keep the index of that community.
 	var dQremove float64
 	dQadd, dst, src := math.Inf(-1), -1, commIdx{-1, -1}
-	var i int
-	for connected.TakeMin(&i) {
+	for _, i := range candidates {
 		c := l.communities[i]
 		var k_aC, sigma_totC float64 // C is a substitution for ^𝛼 or ^𝛽.
 		var removal bool

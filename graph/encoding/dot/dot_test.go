@@ -12,14 +12,14 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-// set is an integer set.
-type set map[int]struct{}
+// intset is an integer set.
+type intset map[int]struct{}
 
-func linksTo(i ...int) set {
+func linksTo(i ...int) intset {
 	if len(i) == 0 {
 		return nil
 	}
-	s := make(set)
+	s := make(intset)
 	for _, v := range i {
 		s[v] = struct{}{}
 	}
@@ -29,7 +29,7 @@ func linksTo(i ...int) set {
 var (
 	// Example graph from http://en.wikipedia.org/wiki/File:PageRanks-Example.svg 16:17, 8 July 2009
 	// Node identities are rewritten here to use integers from 0 to match with the DOT output.
-	pageRankGraph = []set{
+	pageRankGraph = []intset{
 		0:  nil,
 		1:  linksTo(2),
 		2:  linksTo(1),
@@ -44,7 +44,7 @@ var (
 	}
 
 	// Example graph from http://en.wikipedia.org/w/index.php?title=PageRank&oldid=659286279#Power_Method
-	powerMethodGraph = []set{
+	powerMethodGraph = []intset{
 		0: linksTo(1, 2),
 		1: linksTo(3),
 		2: linksTo(3, 4),
@@ -53,7 +53,7 @@ var (
 	}
 )
 
-func directedGraphFrom(g []set) graph.Directed {
+func directedGraphFrom(g []intset) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		for v := range e {
@@ -63,7 +63,7 @@ func directedGraphFrom(g []set) graph.Directed {
 	return dg
 }
 
-func undirectedGraphFrom(g []set) graph.Graph {
+func undirectedGraphFrom(g []intset) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		for v := range e {
@@ -83,7 +83,7 @@ type namedNode struct {
 func (n namedNode) ID() int       { return n.id }
 func (n namedNode) DOTID() string { return n.name }
 
-func directedNamedIDGraphFrom(g []set) graph.Directed {
+func directedNamedIDGraphFrom(g []intset) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		nu := namedNode{id: u, name: alpha[u : u+1]}
@@ -95,7 +95,7 @@ func directedNamedIDGraphFrom(g []set) graph.Directed {
 	return dg
 }
 
-func undirectedNamedIDGraphFrom(g []set) graph.Graph {
+func undirectedNamedIDGraphFrom(g []intset) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		nu := namedNode{id: u, name: alpha[u : u+1]}
@@ -116,7 +116,7 @@ type attrNode struct {
 func (n attrNode) ID() int                    { return n.id }
 func (n attrNode) DOTAttributes() []Attribute { return n.attr }
 
-func directedNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Directed {
+func directedNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		var at []Attribute
@@ -135,7 +135,7 @@ func directedNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Directed {
 	return dg
 }
 
-func undirectedNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Graph {
+func undirectedNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		var at []Attribute
@@ -164,7 +164,7 @@ func (n namedAttrNode) ID() int                    { return n.id }
 func (n namedAttrNode) DOTID() string              { return n.name }
 func (n namedAttrNode) DOTAttributes() []Attribute { return n.attr }
 
-func directedNamedIDNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Directed {
+func directedNamedIDNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		var at []Attribute
@@ -183,7 +183,7 @@ func directedNamedIDNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Directe
 	return dg
 }
 
-func undirectedNamedIDNodeAttrGraphFrom(g []set, attr [][]Attribute) graph.Graph {
+func undirectedNamedIDNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		var at []Attribute
@@ -213,7 +213,7 @@ func (e attrEdge) To() graph.Node             { return e.to }
 func (e attrEdge) Weight() float64            { return 0 }
 func (e attrEdge) DOTAttributes() []Attribute { return e.attr }
 
-func directedEdgeAttrGraphFrom(g []set, attr map[edge][]Attribute) graph.Directed {
+func directedEdgeAttrGraphFrom(g []intset, attr map[edge][]Attribute) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		for v := range e {
@@ -223,7 +223,7 @@ func directedEdgeAttrGraphFrom(g []set, attr map[edge][]Attribute) graph.Directe
 	return dg
 }
 
-func undirectedEdgeAttrGraphFrom(g []set, attr map[edge][]Attribute) graph.Graph {
+func undirectedEdgeAttrGraphFrom(g []intset, attr map[edge][]Attribute) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		for v := range e {
@@ -263,7 +263,7 @@ func (e portedEdge) ToPort() (port, compass string) {
 	return e.toPort, e.toCompass
 }
 
-func directedPortedAttrGraphFrom(g []set, attr [][]Attribute, ports map[edge]portedEdge) graph.Directed {
+func directedPortedAttrGraphFrom(g []intset, attr [][]Attribute, ports map[edge]portedEdge) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		var at []Attribute
@@ -284,7 +284,7 @@ func directedPortedAttrGraphFrom(g []set, attr [][]Attribute, ports map[edge]por
 	return dg
 }
 
-func undirectedPortedAttrGraphFrom(g []set, attr [][]Attribute, ports map[edge]portedEdge) graph.Graph {
+func undirectedPortedAttrGraphFrom(g []intset, attr [][]Attribute, ports map[edge]portedEdge) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		var at []Attribute
@@ -325,7 +325,7 @@ type structuredGraph struct {
 	sub []Graph
 }
 
-func undirectedStructuredGraphFrom(c []edge, g ...[]set) graph.Graph {
+func undirectedStructuredGraphFrom(c []edge, g ...[]intset) graph.Graph {
 	s := &structuredGraph{UndirectedGraph: simple.NewUndirectedGraph(0, math.Inf(1))}
 	var base int
 	for i, sg := range g {
@@ -366,7 +366,7 @@ func (g subGraph) Subgraph() graph.Graph {
 	return namedGraph{id: g.id, Graph: g.Graph}
 }
 
-func undirectedSubGraphFrom(g []set, s map[int][]set) graph.Graph {
+func undirectedSubGraphFrom(g []intset, s map[int][]intset) graph.Graph {
 	var base int
 	subs := make(map[int]subGraph)
 	for i, sg := range s {
@@ -1264,7 +1264,7 @@ var encodeTests = []struct {
 
 	// Handling subgraphs.
 	{
-		g: undirectedSubGraphFrom(pageRankGraph, map[int][]set{2: powerMethodGraph}),
+		g: undirectedSubGraphFrom(pageRankGraph, map[int][]intset{2: powerMethodGraph}),
 
 		want: `graph {
 	// Node definitions.
@@ -1315,7 +1315,7 @@ var encodeTests = []struct {
 	},
 	{
 		name:   "H",
-		g:      undirectedSubGraphFrom(pageRankGraph, map[int][]set{1: powerMethodGraph}),
+		g:      undirectedSubGraphFrom(pageRankGraph, map[int][]intset{1: powerMethodGraph}),
 		strict: true,
 
 		want: `strict graph H {

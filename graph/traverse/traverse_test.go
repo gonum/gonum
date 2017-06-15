@@ -20,7 +20,7 @@ import (
 var (
 	// batageljZaversnikGraph is the example graph from
 	// figure 1 of http://arxiv.org/abs/cs/0310049v1
-	batageljZaversnikGraph = []set{
+	batageljZaversnikGraph = []intset{
 		0: nil,
 
 		1: linksTo(2, 3),
@@ -48,7 +48,7 @@ var (
 
 	// wpBronKerboschGraph is the example given in the Bron-Kerbosch article on wikipedia (renumbered).
 	// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
-	wpBronKerboschGraph = []set{
+	wpBronKerboschGraph = []intset{
 		0: linksTo(1, 4),
 		1: linksTo(2, 4),
 		2: linksTo(3),
@@ -59,7 +59,7 @@ var (
 )
 
 var breadthFirstTests = []struct {
-	g     []set
+	g     []intset
 	from  graph.Node
 	edge  func(graph.Edge) bool
 	until func(graph.Node, int) bool
@@ -171,7 +171,7 @@ func TestBreadthFirst(t *testing.T) {
 }
 
 var depthFirstTests = []struct {
-	g     []set
+	g     []intset
 	from  graph.Node
 	edge  func(graph.Edge) bool
 	until func(graph.Node) bool
@@ -254,7 +254,7 @@ func TestDepthFirst(t *testing.T) {
 }
 
 var walkAllTests = []struct {
-	g    []set
+	g    []intset
 	edge func(graph.Edge) bool
 	want [][]int
 }{
@@ -342,14 +342,14 @@ func TestWalkAll(t *testing.T) {
 	}
 }
 
-// set is an integer set.
-type set map[int]struct{}
+// intset is an integer set.
+type intset map[int]struct{}
 
-func linksTo(i ...int) set {
+func linksTo(i ...int) intset {
 	if len(i) == 0 {
 		return nil
 	}
-	s := make(set)
+	s := make(intset)
 	for _, v := range i {
 		s[v] = struct{}{}
 	}
@@ -378,8 +378,8 @@ func benchmarkWalkAllBreadthFirst(b *testing.B, g graph.Undirected) {
 	for i := 0; i < b.N; i++ {
 		bft.WalkAll(g, nil, nil, nil)
 	}
-	if bft.visited.Len() != n {
-		b.Fatalf("unexpected number of nodes visited: want: %d got %d", n, bft.visited.Len())
+	if len(bft.visited) != n {
+		b.Fatalf("unexpected number of nodes visited: want: %d got %d", n, len(bft.visited))
 	}
 }
 
@@ -409,8 +409,8 @@ func benchmarkWalkAllDepthFirst(b *testing.B, g graph.Undirected) {
 	for i := 0; i < b.N; i++ {
 		dft.WalkAll(g, nil, nil, nil)
 	}
-	if dft.visited.Len() != n {
-		b.Fatalf("unexpected number of nodes visited: want: %d got %d", n, dft.visited.Len())
+	if len(dft.visited) != n {
+		b.Fatalf("unexpected number of nodes visited: want: %d got %d", n, len(dft.visited))
 	}
 }
 

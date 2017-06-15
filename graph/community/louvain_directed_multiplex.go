@@ -10,10 +10,9 @@ import (
 	"math/rand"
 	"sort"
 
-	"golang.org/x/tools/container/intsets"
-
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // DirectedMultiplex is a directed multiplex graph.
@@ -125,16 +124,16 @@ func NewDirectedLayers(layers ...graph.Directed) (DirectedLayers, error) {
 	if len(layers) == 0 {
 		return nil, nil
 	}
-	var base, next intsets.Sparse
+	base := make(set.Ints)
 	for _, n := range layers[0].Nodes() {
-		base.Insert(n.ID())
+		base.Add(n.ID())
 	}
 	for i, l := range layers[1:] {
-		next.Clear()
+		next := make(set.Ints)
 		for _, n := range l.Nodes() {
-			next.Insert(n.ID())
+			next.Add(n.ID())
 		}
-		if !next.Equals(&base) {
+		if !set.IntsEqual(base, next) {
 			return nil, fmt.Errorf("community: layer ID mismatch between layers: %d", i+1)
 		}
 	}
@@ -760,15 +759,15 @@ func (l *directedMultiplexLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst 
 		iterator = &dense{n: len(l.communities)}
 	} else {
 		// Find communities connected to n.
-		var connected intsets.Sparse
+		connected := make(set.Ints)
 		// The following for loop is equivalent to:
 		//
 		//  for i := 0; i < l.g.Depth(); i++ {
 		//  	for _, v := range l.g.Layer(i).From(n) {
-		//  		connected.Insert(l.memberships[v.ID()])
+		//  		connected.Add(l.memberships[v.ID()])
 		//  	}
 		//  	for _, v := range l.g.Layer(i).To(n) {
-		//  		connected.Insert(l.memberships[v.ID()])
+		//  		connected.Add(l.memberships[v.ID()])
 		//  	}
 		//  }
 		//
@@ -776,15 +775,15 @@ func (l *directedMultiplexLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst 
 		// each layer.
 		for _, layer := range l.g.layers {
 			for _, vid := range layer.edgesFrom[id] {
-				connected.Insert(l.memberships[vid])
+				connected.Add(l.memberships[vid])
 			}
 			for _, vid := range layer.edgesTo[id] {
-				connected.Insert(l.memberships[vid])
+				connected.Add(l.memberships[vid])
 			}
 		}
 		// Insert the node's own community.
-		connected.Insert(l.memberships[id])
-		iterator = &connected
+		connected.Add(l.memberships[id])
+		iterator = newSlice(connected)
 	}
 
 	// Calculate the highest modularity gain

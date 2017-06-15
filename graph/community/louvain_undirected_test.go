@@ -19,7 +19,7 @@ import (
 
 var communityUndirectedQTests = []struct {
 	name       string
-	g          []set
+	g          []intset
 	structures []structure
 
 	wantLevels []level
@@ -31,7 +31,7 @@ var communityUndirectedQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0),
 					1: linksTo(1),
 					2: linksTo(2),
@@ -63,7 +63,7 @@ var communityUndirectedQTests = []struct {
 			{
 				resolution: 1,
 				// community structure and modularity calculated by java reference implementation.
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2),
 					1: linksTo(3, 4, 5),
 				},
@@ -71,7 +71,7 @@ var communityUndirectedQTests = []struct {
 			},
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 4, 5),
 				},
 				// theoretical expectation.
@@ -106,7 +106,7 @@ var communityUndirectedQTests = []struct {
 			{
 				resolution: 1,
 				// community structure and modularity from doi: 10.1140/epjb/e2013-40829-0
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 7, 11, 12, 13, 17, 19, 21),
 					1: linksTo(4, 5, 6, 10, 16),
 					2: linksTo(8, 9, 14, 15, 18, 20, 22, 26, 29, 30, 32, 33),
@@ -118,7 +118,7 @@ var communityUndirectedQTests = []struct {
 			{
 				resolution: 0.5,
 				// community structure and modularity calculated by java reference implementation.
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 16, 17, 19, 21),
 					1: linksTo(8, 14, 15, 18, 20, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33),
 				},
@@ -127,7 +127,7 @@ var communityUndirectedQTests = []struct {
 			{
 				resolution: 2,
 				// community structure and modularity calculated by java reference implementation.
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(14, 18, 20, 22, 32, 33, 15),
 					1: linksTo(0, 1, 11, 17, 19, 21),
 					2: linksTo(2, 3, 7, 9, 12, 13),
@@ -207,7 +207,7 @@ var communityUndirectedQTests = []struct {
 			{
 				resolution: 1,
 				// community structure and modularity calculated by java reference implementation.
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 4, 5, 6, 7),
 					1: linksTo(8, 9, 10, 11, 12, 13, 14, 15),
 				},
@@ -441,7 +441,7 @@ tests:
 
 var localUndirectedMoveTests = []struct {
 	name       string
-	g          []set
+	g          []intset
 	structures []moveStructures
 }{
 	{
@@ -449,7 +449,7 @@ var localUndirectedMoveTests = []struct {
 		g:    blondel,
 		structures: []moveStructures{
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),
@@ -460,7 +460,7 @@ var localUndirectedMoveTests = []struct {
 				tol:         1e-14,
 			},
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),
@@ -471,7 +471,7 @@ var localUndirectedMoveTests = []struct {
 				tol:         1e-14,
 			},
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),

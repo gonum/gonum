@@ -13,14 +13,14 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-// set is an integer set.
-type set map[int]struct{}
+// intset is an integer set.
+type intset map[int]struct{}
 
-func linksTo(i ...int) set {
+func linksTo(i ...int) intset {
 	if len(i) == 0 {
 		return nil
 	}
-	s := make(set)
+	s := make(intset)
 	for _, v := range i {
 		s[v] = struct{}{}
 	}
@@ -28,15 +28,15 @@ func linksTo(i ...int) set {
 }
 
 type layer struct {
-	g          []set
+	g          []intset
 	edgeWeight float64 // Zero edge weight is interpreted as 1.0.
 	weight     float64
 }
 
 var (
-	unconnected = []set{ /* Nodes 0-4 are implicit .*/ 5: nil}
+	unconnected = []intset{ /* Nodes 0-4 are implicit .*/ 5: nil}
 
-	smallDumbell = []set{
+	smallDumbell = []intset{
 		0: linksTo(1, 2),
 		1: linksTo(2),
 		2: linksTo(3),
@@ -44,7 +44,7 @@ var (
 		4: linksTo(5),
 		5: nil,
 	}
-	dumbellRepulsion = []set{
+	dumbellRepulsion = []intset{
 		0: linksTo(4),
 		1: linksTo(5),
 		2: nil,
@@ -53,7 +53,7 @@ var (
 		5: nil,
 	}
 
-	repulsion = []set{
+	repulsion = []intset{
 		0: linksTo(3, 4, 5),
 		1: linksTo(3, 4, 5),
 		2: linksTo(3, 4, 5),
@@ -62,7 +62,7 @@ var (
 		5: linksTo(0, 1, 2),
 	}
 
-	simpleDirected = []set{
+	simpleDirected = []intset{
 		0: linksTo(1),
 		1: linksTo(0, 4),
 		2: linksTo(1),
@@ -71,9 +71,9 @@ var (
 	}
 
 	// http://www.slate.com/blogs/the_world_/2014/07/17/the_middle_east_friendship_chart.html
-	middleEast = struct{ friends, complicated, enemies []set }{
+	middleEast = struct{ friends, complicated, enemies []intset }{
 		// green cells
-		friends: []set{
+		friends: []intset{
 			0:  nil,
 			1:  linksTo(5, 7, 9, 12),
 			2:  linksTo(11),
@@ -90,7 +90,7 @@ var (
 		},
 
 		// yellow cells
-		complicated: []set{
+		complicated: []intset{
 			0:  linksTo(2, 4),
 			1:  linksTo(4, 8),
 			2:  linksTo(0, 3, 4, 5, 8, 9),
@@ -107,7 +107,7 @@ var (
 		},
 
 		// red cells
-		enemies: []set{
+		enemies: []intset{
 			0:  linksTo(1, 3, 5, 6, 7, 8, 9, 10, 11, 12),
 			1:  linksTo(0, 2, 3, 6, 10, 11),
 			2:  linksTo(1, 6, 7, 10, 12),
@@ -131,7 +131,7 @@ var (
 	// head from a node with lower Page Rank to a node with higher Page
 	// Rank. This has no impact on undirected tests, but allows a sensible
 	// view for directed tests.
-	zachary = []set{
+	zachary = []intset{
 		0:  nil,                     // rank=0.097
 		1:  linksTo(0, 2),           // rank=0.05288
 		2:  linksTo(0, 32),          // rank=0.05708
@@ -174,7 +174,7 @@ var (
 	// head from a node with lower Page Rank to a node with higher Page
 	// Rank. This has no impact on undirected tests, but allows a sensible
 	// view for directed tests.
-	blondel = []set{
+	blondel = []intset{
 		0:  linksTo(2),           // rank=0.06858
 		1:  linksTo(2, 4, 7),     // rank=0.05264
 		2:  nil,                  // rank=0.08249
@@ -196,7 +196,7 @@ var (
 
 type structure struct {
 	resolution  float64
-	memberships []set
+	memberships []intset
 	want, tol   float64
 }
 
@@ -206,7 +206,7 @@ type level struct {
 }
 
 type moveStructures struct {
-	memberships []set
+	memberships []intset
 	targetNodes []graph.Node
 
 	resolution float64
@@ -255,11 +255,11 @@ func init() {
 
 // This init function checks the Middle East relationship data.
 func init() {
-	world := make([]set, len(middleEast.friends))
+	world := make([]intset, len(middleEast.friends))
 	for i := range world {
-		world[i] = make(set)
+		world[i] = make(intset)
 	}
-	for _, relationships := range [][]set{middleEast.friends, middleEast.complicated, middleEast.enemies} {
+	for _, relationships := range [][]intset{middleEast.friends, middleEast.complicated, middleEast.enemies} {
 		for i, rel := range relationships {
 			for inter := range rel {
 				if _, ok := world[i][inter]; ok {

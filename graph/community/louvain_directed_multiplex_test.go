@@ -30,7 +30,7 @@ var communityDirectedMultiplexQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0),
 					1: linksTo(1),
 					2: linksTo(2),
@@ -63,7 +63,7 @@ var communityDirectedMultiplexQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1),
 					1: linksTo(2, 3, 4),
 				},
@@ -102,7 +102,7 @@ var communityDirectedMultiplexQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1),
 					1: linksTo(2, 3, 4),
 				},
@@ -139,7 +139,7 @@ var communityDirectedMultiplexQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2),
 					1: linksTo(3, 4, 5),
 				},
@@ -147,7 +147,7 @@ var communityDirectedMultiplexQTests = []struct {
 			},
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 4, 5),
 				},
 				want: 0, tol: 1e-14,
@@ -180,7 +180,7 @@ var communityDirectedMultiplexQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2),
 					1: linksTo(3, 4, 5),
 				},
@@ -188,7 +188,7 @@ var communityDirectedMultiplexQTests = []struct {
 			},
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0),
 					1: linksTo(1),
 					2: linksTo(2),
@@ -229,7 +229,7 @@ var communityDirectedMultiplexQTests = []struct {
 		structures: []structure{
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 6),
 					1: linksTo(1, 7, 9, 12),
 					2: linksTo(2, 8, 11),
@@ -239,7 +239,7 @@ var communityDirectedMultiplexQTests = []struct {
 			},
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 2, 3, 4, 5, 10),
 					1: linksTo(1, 7, 9, 12),
 					2: linksTo(6),
@@ -249,7 +249,7 @@ var communityDirectedMultiplexQTests = []struct {
 			},
 			{
 				resolution: 1,
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
 				},
 				want: 0, tol: 1e-14,
@@ -483,7 +483,7 @@ var localDirectedMultiplexMoveTests = []struct {
 		layers: []layer{{g: blondel, weight: 1}, {g: blondel, weight: 0.5}},
 		structures: []moveStructures{
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),
@@ -494,7 +494,7 @@ var localDirectedMultiplexMoveTests = []struct {
 				tol:         1e-14,
 			},
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),
@@ -505,7 +505,7 @@ var localDirectedMultiplexMoveTests = []struct {
 				tol:         1e-14,
 			},
 			{
-				memberships: []set{
+				memberships: []intset{
 					0: linksTo(0, 1, 2, 4, 5),
 					1: linksTo(3, 6, 7),
 					2: linksTo(8, 9, 10, 12, 14, 15),

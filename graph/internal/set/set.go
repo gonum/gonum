@@ -34,6 +34,26 @@ func (s Ints) Count() int {
 	return len(s)
 }
 
+// IntsEqual reports set equality between the parameters. Sets are equal if
+// and only if they have the same elements.
+func IntsEqual(a, b Ints) bool {
+	if intsSame(a, b) {
+		return true
+	}
+
+	if len(a) != len(b) {
+		return false
+	}
+
+	for e := range a {
+		if _, ok := b[e]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
 // Nodes is a set of nodes keyed in their integer identifiers.
 type Nodes map[int]graph.Node
 

@@ -19,9 +19,9 @@ const (
 )
 
 // set is an integer set.
-type set map[int]struct{}
+type set map[int64]struct{}
 
-func linksTo(i ...int) set {
+func linksTo(i ...int64) set {
 	if len(i) == 0 {
 		return nil
 	}

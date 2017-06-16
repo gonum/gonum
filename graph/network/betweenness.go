@@ -18,7 +18,7 @@ import (
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
-func Betweenness(g graph.Graph) map[int]float64 {
+func Betweenness(g graph.Graph) map[int64]float64 {
 	// Brandes' algorithm for finding betweenness centrality for nodes in
 	// and unweighted graph:
 	//
@@ -32,8 +32,8 @@ func Betweenness(g graph.Graph) map[int]float64 {
 	// Also note special case for sparse networks:
 	// http://wwwold.iit.cnr.it/staff/marco.pellegrini/papiri/asonam-final.pdf
 
-	cb := make(map[int]float64)
-	brandes(g, func(s graph.Node, stack linear.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
+	cb := make(map[int64]float64)
+	brandes(g, func(s graph.Node, stack linear.NodeStack, p map[int64][]graph.Node, delta, sigma map[int64]float64) {
 		for stack.Len() != 0 {
 			w := stack.Pop()
 			for _, v := range p[w.ID()] {
@@ -59,15 +59,15 @@ func Betweenness(g graph.Graph) map[int]float64 {
 //
 // If g is undirected, edges are retained such that u.ID < v.ID where u and v are
 // the nodes of e.
-func EdgeBetweenness(g graph.Graph) map[[2]int]float64 {
+func EdgeBetweenness(g graph.Graph) map[[2]int64]float64 {
 	// Modified from Brandes' original algorithm as described in Algorithm 7
 	// with the exception that node betweenness is not calculated:
 	//
 	// http://algo.uni-konstanz.de/publications/b-vspbc-08.pdf
 
 	_, isUndirected := g.(graph.Undirected)
-	cb := make(map[[2]int]float64)
-	brandes(g, func(s graph.Node, stack linear.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64) {
+	cb := make(map[[2]int64]float64)
+	brandes(g, func(s graph.Node, stack linear.NodeStack, p map[int64][]graph.Node, delta, sigma map[int64]float64) {
 		for stack.Len() != 0 {
 			w := stack.Pop()
 			for _, v := range p[w.ID()] {
@@ -77,7 +77,7 @@ func EdgeBetweenness(g graph.Graph) map[[2]int]float64 {
 				if isUndirected && wid < vid {
 					vid, wid = wid, vid
 				}
-				cb[[2]int{vid, wid}] += c
+				cb[[2]int64{vid, wid}] += c
 				delta[v.ID()] += c
 			}
 		}
@@ -88,14 +88,14 @@ func EdgeBetweenness(g graph.Graph) map[[2]int]float64 {
 // brandes is the common code for Betweenness and EdgeBetweenness. It corresponds
 // to algorithm 1 in http://algo.uni-konstanz.de/publications/b-vspbc-08.pdf with
 // the accumulation loop provided by the accumulate closure.
-func brandes(g graph.Graph, accumulate func(s graph.Node, stack linear.NodeStack, p map[int][]graph.Node, delta, sigma map[int]float64)) {
+func brandes(g graph.Graph, accumulate func(s graph.Node, stack linear.NodeStack, p map[int64][]graph.Node, delta, sigma map[int64]float64)) {
 	var (
 		nodes = g.Nodes()
 		stack linear.NodeStack
-		p     = make(map[int][]graph.Node, len(nodes))
-		sigma = make(map[int]float64, len(nodes))
-		d     = make(map[int]int, len(nodes))
-		delta = make(map[int]float64, len(nodes))
+		p     = make(map[int64][]graph.Node, len(nodes))
+		sigma = make(map[int64]float64, len(nodes))
+		d     = make(map[int64]int, len(nodes))
+		delta = make(map[int64]float64, len(nodes))
 		queue linear.NodeQueue
 	)
 	for _, s := range nodes {
@@ -152,8 +152,8 @@ type WeightedGraph interface {
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
-func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int]float64 {
-	cb := make(map[int]float64)
+func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int64]float64 {
+	cb := make(map[int64]float64)
 
 	nodes := g.Nodes()
 	for i, s := range nodes {
@@ -203,8 +203,8 @@ func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int]float64 {
 //
 // If g is undirected, edges are retained such that u.ID < v.ID where u and v are
 // the nodes of e.
-func EdgeBetweennessWeighted(g WeightedGraph, p path.AllShortest) map[[2]int]float64 {
-	cb := make(map[[2]int]float64)
+func EdgeBetweennessWeighted(g WeightedGraph, p path.AllShortest) map[[2]int64]float64 {
+	cb := make(map[[2]int64]float64)
 
 	_, isUndirected := g.(graph.Undirected)
 	nodes := g.Nodes()
@@ -231,7 +231,7 @@ func EdgeBetweennessWeighted(g WeightedGraph, p path.AllShortest) map[[2]int]flo
 					if isUndirected && vid < uid {
 						uid, vid = vid, uid
 					}
-					cb[[2]int{uid, vid}]++
+					cb[[2]int64{uid, vid}]++
 				}
 				continue
 			}
@@ -246,7 +246,7 @@ func EdgeBetweennessWeighted(g WeightedGraph, p path.AllShortest) map[[2]int]flo
 					if isUndirected && vid < uid {
 						uid, vid = vid, uid
 					}
-					cb[[2]int{uid, vid}] += stFrac
+					cb[[2]int64{uid, vid}] += stFrac
 				}
 			}
 		}

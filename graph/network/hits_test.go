@@ -19,7 +19,7 @@ var hitsTests = []struct {
 	tol float64
 
 	wantTol float64
-	want    map[int]HubAuthority
+	want    map[int64]HubAuthority
 }{
 	{
 		// Example graph from http://www.cis.hut.fi/Opinnot/T-61.6020/2008/pagerank_hits.pdf page 8.
@@ -32,7 +32,7 @@ var hitsTests = []struct {
 		tol: 1e-4,
 
 		wantTol: 1e-4,
-		want: map[int]HubAuthority{
+		want: map[int64]HubAuthority{
 			A: {Hub: 0.7887, Authority: 0},
 			B: {Hub: 0.5774, Authority: 0.4597},
 			C: {Hub: 0.2113, Authority: 0.6280},
@@ -56,12 +56,12 @@ func TestHITS(t *testing.T) {
 		got := HITS(g, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[n].Hub, test.want[n].Hub, test.wantTol, test.wantTol) {
+			if !floats.EqualWithinAbsOrRel(got[int64(n)].Hub, test.want[int64(n)].Hub, test.wantTol, test.wantTol) {
 				t.Errorf("unexpected HITS result for test %d:\ngot: %v\nwant:%v",
 					i, orderedHubAuth(got, prec), orderedHubAuth(test.want, prec))
 				break
 			}
-			if !floats.EqualWithinAbsOrRel(got[n].Authority, test.want[n].Authority, test.wantTol, test.wantTol) {
+			if !floats.EqualWithinAbsOrRel(got[int64(n)].Authority, test.want[int64(n)].Authority, test.wantTol, test.wantTol) {
 				t.Errorf("unexpected HITS result for test %d:\ngot: %v\nwant:%v",
 					i, orderedHubAuth(got, prec), orderedHubAuth(test.want, prec))
 				break
@@ -70,7 +70,7 @@ func TestHITS(t *testing.T) {
 	}
 }
 
-func orderedHubAuth(w map[int]HubAuthority, prec int) []keyHubAuthVal {
+func orderedHubAuth(w map[int64]HubAuthority, prec int) []keyHubAuthVal {
 	o := make(orderedHubAuthMap, 0, len(w))
 	for k, v := range w {
 		o = append(o, keyHubAuthVal{prec: prec, key: k, val: v})
@@ -81,7 +81,7 @@ func orderedHubAuth(w map[int]HubAuthority, prec int) []keyHubAuthVal {
 
 type keyHubAuthVal struct {
 	prec int
-	key  int
+	key  int64
 	val  HubAuthority
 }
 

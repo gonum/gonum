@@ -17,7 +17,7 @@ import (
 // using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func PageRank(g graph.Directed, damp, tol float64) map[int]float64 {
+func PageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
 	// PageRank is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack".
 	//
@@ -26,7 +26,7 @@ func PageRank(g graph.Directed, damp, tol float64) map[int]float64 {
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
 	nodes := g.Nodes()
-	indexOf := make(map[int]int, len(nodes))
+	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
 	}
@@ -78,7 +78,7 @@ func PageRank(g graph.Directed, damp, tol float64) map[int]float64 {
 		}
 	}
 
-	ranks := make(map[int]float64, len(nodes))
+	ranks := make(map[int64]float64, len(nodes))
 	for i, r := range v.RawVector().Data {
 		ranks[nodes[i].ID()] = r
 	}
@@ -90,7 +90,7 @@ func PageRank(g graph.Directed, damp, tol float64) map[int]float64 {
 // graph g using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func PageRankSparse(g graph.Directed, damp, tol float64) map[int]float64 {
+func PageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
 	// PageRankSparse is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack".
 	//
@@ -99,7 +99,7 @@ func PageRankSparse(g graph.Directed, damp, tol float64) map[int]float64 {
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
 	nodes := g.Nodes()
-	indexOf := make(map[int]int, len(nodes))
+	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
 	}
@@ -151,7 +151,7 @@ func PageRankSparse(g graph.Directed, damp, tol float64) map[int]float64 {
 		}
 	}
 
-	ranks := make(map[int]float64, len(nodes))
+	ranks := make(map[int64]float64, len(nodes))
 	for i, r := range v.RawVector().Data {
 		ranks[nodes[i].ID()] = r
 	}

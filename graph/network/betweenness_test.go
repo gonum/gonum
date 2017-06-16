@@ -19,8 +19,8 @@ var betweennessTests = []struct {
 	g []set
 
 	wantTol   float64
-	want      map[int]float64
-	wantEdges map[[2]int]float64
+	want      map[int64]float64
+	wantEdges map[[2]int64]float64
 }{
 	{
 		// Example graph from http://en.wikipedia.org/wiki/File:PageRanks-Example.svg 16:17, 8 July 2009
@@ -39,12 +39,12 @@ var betweennessTests = []struct {
 		},
 
 		wantTol: 1e-1,
-		want: map[int]float64{
+		want: map[int64]float64{
 			B: 32,
 			D: 18,
 			E: 48,
 		},
-		wantEdges: map[[2]int]float64{
+		wantEdges: map[[2]int64]float64{
 			{A, D}: 20,
 			{B, C}: 20,
 			{B, D}: 16,
@@ -73,14 +73,14 @@ var betweennessTests = []struct {
 		},
 
 		wantTol: 1e-3,
-		want: map[int]float64{
+		want: map[int64]float64{
 			A: 2,
 			B: 0.6667,
 			C: 0.6667,
 			D: 2,
 			E: 0.6667,
 		},
-		wantEdges: map[[2]int]float64{
+		wantEdges: map[[2]int64]float64{
 			{A, B}: 2 + 2/3. + 4/2.,
 			{A, C}: 2 + 2/3. + 2/2.,
 			{A, E}: 2 + 2/3. + 2/2.,
@@ -98,10 +98,10 @@ var betweennessTests = []struct {
 		},
 
 		wantTol: 1e-3,
-		want: map[int]float64{
+		want: map[int64]float64{
 			B: 2,
 		},
-		wantEdges: map[[2]int]float64{
+		wantEdges: map[[2]int64]float64{
 			{A, B}: 4,
 			{B, C}: 4,
 		},
@@ -116,12 +116,12 @@ var betweennessTests = []struct {
 		},
 
 		wantTol: 1e-3,
-		want: map[int]float64{
+		want: map[int64]float64{
 			B: 6,
 			C: 8,
 			D: 6,
 		},
-		wantEdges: map[[2]int]float64{
+		wantEdges: map[[2]int64]float64{
 			{A, B}: 8,
 			{B, C}: 12,
 			{C, D}: 12,
@@ -138,10 +138,10 @@ var betweennessTests = []struct {
 		},
 
 		wantTol: 1e-3,
-		want: map[int]float64{
+		want: map[int64]float64{
 			C: 12,
 		},
-		wantEdges: map[[2]int]float64{
+		wantEdges: map[[2]int64]float64{
 			{A, C}: 8,
 			{B, C}: 8,
 			{C, D}: 8,
@@ -158,8 +158,8 @@ var betweennessTests = []struct {
 		},
 
 		wantTol: 1e-3,
-		want:    map[int]float64{},
-		wantEdges: map[[2]int]float64{
+		want:    map[int64]float64{},
+		wantEdges: map[[2]int64]float64{
 			{A, B}: 2,
 			{A, C}: 2,
 			{A, D}: 2,
@@ -190,8 +190,8 @@ func TestBetweenness(t *testing.T) {
 		got := Betweenness(g)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			wantN, gotOK := got[n]
-			gotN, wantOK := test.want[n]
+			wantN, gotOK := got[int64(n)]
+			gotN, wantOK := test.want[int64(n)]
 			if gotOK != wantOK {
 				t.Errorf("unexpected betweenness result for test %d, node %c", i, n+'A')
 			}
@@ -222,8 +222,8 @@ func TestEdgeBetweenness(t *testing.T) {
 	outer:
 		for u := range test.g {
 			for v := range test.g {
-				wantQ, gotOK := got[[2]int{u, v}]
-				gotQ, wantOK := test.wantEdges[[2]int{u, v}]
+				wantQ, gotOK := got[[2]int64{int64(u), int64(v)}]
+				gotQ, wantOK := test.wantEdges[[2]int64{int64(u), int64(v)}]
 				if gotOK != wantOK {
 					t.Errorf("unexpected betweenness result for test %d, edge (%c,%c)", i, u+'A', v+'A')
 				}
@@ -259,8 +259,8 @@ func TestBetweennessWeighted(t *testing.T) {
 		got := BetweennessWeighted(g, p)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			gotN, gotOK := got[n]
-			wantN, wantOK := test.want[n]
+			gotN, gotOK := got[int64(n)]
+			wantN, wantOK := test.want[int64(n)]
 			if gotOK != wantOK {
 				t.Errorf("unexpected betweenness existence for test %d, node %c", i, n+'A')
 			}
@@ -297,8 +297,8 @@ func TestEdgeBetweennessWeighted(t *testing.T) {
 	outer:
 		for u := range test.g {
 			for v := range test.g {
-				wantQ, gotOK := got[[2]int{u, v}]
-				gotQ, wantOK := test.wantEdges[[2]int{u, v}]
+				wantQ, gotOK := got[[2]int64{int64(u), int64(v)}]
+				gotQ, wantOK := test.wantEdges[[2]int64{int64(u), int64(v)}]
 				if gotOK != wantOK {
 					t.Errorf("unexpected betweenness result for test %d, edge (%c,%c)", i, u+'A', v+'A')
 				}
@@ -312,7 +312,7 @@ func TestEdgeBetweennessWeighted(t *testing.T) {
 	}
 }
 
-func orderedPairFloats(w map[[2]int]float64, prec int) []pairKeyFloatVal {
+func orderedPairFloats(w map[[2]int64]float64, prec int) []pairKeyFloatVal {
 	o := make(orderedPairFloatsMap, 0, len(w))
 	for k, v := range w {
 		o = append(o, pairKeyFloatVal{prec: prec, key: k, val: v})
@@ -323,7 +323,7 @@ func orderedPairFloats(w map[[2]int]float64, prec int) []pairKeyFloatVal {
 
 type pairKeyFloatVal struct {
 	prec int
-	key  [2]int
+	key  [2]int64
 	val  float64
 }
 

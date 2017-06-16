@@ -12,8 +12,8 @@ import (
 
 // UndirectedGraph implements a generalized undirected graph.
 type UndirectedGraph struct {
-	nodes map[int]graph.Node
-	edges map[int]map[int]graph.Edge
+	nodes map[int64]graph.Node
+	edges map[int64]map[int64]graph.Edge
 
 	self, absent float64
 
@@ -24,8 +24,8 @@ type UndirectedGraph struct {
 // edge weight values.
 func NewUndirectedGraph(self, absent float64) *UndirectedGraph {
 	return &UndirectedGraph{
-		nodes: make(map[int]graph.Node),
-		edges: make(map[int]map[int]graph.Edge),
+		nodes: make(map[int64]graph.Node),
+		edges: make(map[int64]map[int64]graph.Edge),
 
 		self:   self,
 		absent: absent,
@@ -36,11 +36,11 @@ func NewUndirectedGraph(self, absent float64) *UndirectedGraph {
 
 // NewNodeID returns a new unique ID for a node to be added to g. The returned ID does
 // not become a valid ID in g until it is added to g.
-func (g *UndirectedGraph) NewNodeID() int {
+func (g *UndirectedGraph) NewNodeID() int64 {
 	if len(g.nodes) == 0 {
 		return 0
 	}
-	if len(g.nodes) == maxInt {
+	if int64(len(g.nodes)) == maxInt {
 		panic("simple: cannot allocate node: no slot")
 	}
 	return g.nodeIDs.newID()
@@ -52,7 +52,7 @@ func (g *UndirectedGraph) AddNode(n graph.Node) {
 		panic(fmt.Sprintf("simple: node ID collision: %d", n.ID()))
 	}
 	g.nodes[n.ID()] = n
-	g.edges[n.ID()] = make(map[int]graph.Edge)
+	g.edges[n.ID()] = make(map[int64]graph.Edge)
 	g.nodeIDs.use(n.ID())
 }
 
@@ -113,7 +113,7 @@ func (g *UndirectedGraph) RemoveEdge(e graph.Edge) {
 }
 
 // Node returns the node in the graph with the given ID.
-func (g *UndirectedGraph) Node(id int) graph.Node {
+func (g *UndirectedGraph) Node(id int64) graph.Node {
 	return g.nodes[id]
 }
 
@@ -139,16 +139,16 @@ func (g *UndirectedGraph) Nodes() []graph.Node {
 func (g *UndirectedGraph) Edges() []graph.Edge {
 	var edges []graph.Edge
 
-	seen := make(map[[2]int]struct{})
+	seen := make(map[[2]int64]struct{})
 	for _, u := range g.edges {
 		for _, e := range u {
 			uid := e.From().ID()
 			vid := e.To().ID()
-			if _, ok := seen[[2]int{uid, vid}]; ok {
+			if _, ok := seen[[2]int64{uid, vid}]; ok {
 				continue
 			}
-			seen[[2]int{uid, vid}] = struct{}{}
-			seen[[2]int{vid, uid}] = struct{}{}
+			seen[[2]int64{uid, vid}] = struct{}{}
+			seen[[2]int64{vid, uid}] = struct{}{}
 			edges = append(edges, e)
 		}
 	}

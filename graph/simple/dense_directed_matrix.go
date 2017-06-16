@@ -54,7 +54,7 @@ func NewDirectedMatrix(n int, init, self, absent float64) *DirectedMatrix {
 func NewDirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *DirectedMatrix {
 	sort.Sort(ordered.ByID(nodes))
 	for i, n := range nodes {
-		if i != n.ID() {
+		if int64(i) != n.ID() {
 			panic("simple: non-contiguous node IDs")
 		}
 	}
@@ -64,7 +64,7 @@ func NewDirectedMatrixFrom(nodes []graph.Node, init, self, absent float64) *Dire
 }
 
 // Node returns the node in the graph with the given ID.
-func (g *DirectedMatrix) Node(id int) graph.Node {
+func (g *DirectedMatrix) Node(id int64) graph.Node {
 	if !g.has(id) {
 		return nil
 	}
@@ -79,9 +79,9 @@ func (g *DirectedMatrix) Has(n graph.Node) bool {
 	return g.has(n.ID())
 }
 
-func (g *DirectedMatrix) has(id int) bool {
+func (g *DirectedMatrix) has(id int64) bool {
 	r, _ := g.mat.Dims()
-	return 0 <= id && id < r
+	return 0 <= id && id < int64(r)
 }
 
 // Nodes returns all the nodes in the graph.
@@ -109,7 +109,7 @@ func (g *DirectedMatrix) Edges() []graph.Edge {
 				continue
 			}
 			if w := g.mat.At(i, j); !isSame(w, g.absent) {
-				edges = append(edges, Edge{F: g.Node(i), T: g.Node(j), W: w})
+				edges = append(edges, Edge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
 			}
 		}
 	}
@@ -125,11 +125,12 @@ func (g *DirectedMatrix) From(n graph.Node) []graph.Node {
 	var neighbors []graph.Node
 	_, c := g.mat.Dims()
 	for j := 0; j < c; j++ {
-		if j == id {
+		if int64(j) == id {
 			continue
 		}
-		if !isSame(g.mat.At(id, j), g.absent) {
-			neighbors = append(neighbors, g.Node(j))
+		// id is not greater than maximum int by this point.
+		if !isSame(g.mat.At(int(id), j), g.absent) {
+			neighbors = append(neighbors, g.Node(int64(j)))
 		}
 	}
 	return neighbors
@@ -144,11 +145,12 @@ func (g *DirectedMatrix) To(n graph.Node) []graph.Node {
 	var neighbors []graph.Node
 	r, _ := g.mat.Dims()
 	for i := 0; i < r; i++ {
-		if i == id {
+		if int64(i) == id {
 			continue
 		}
-		if !isSame(g.mat.At(i, id), g.absent) {
-			neighbors = append(neighbors, g.Node(i))
+		// id is not greater than maximum int by this point.
+		if !isSame(g.mat.At(i, int(id)), g.absent) {
+			neighbors = append(neighbors, g.Node(int64(i)))
 		}
 	}
 	return neighbors
@@ -165,14 +167,16 @@ func (g *DirectedMatrix) HasEdgeBetween(x, y graph.Node) bool {
 	if !g.has(yid) {
 		return false
 	}
-	return xid != yid && (!isSame(g.mat.At(xid, yid), g.absent) || !isSame(g.mat.At(yid, xid), g.absent))
+	// xid and yid are not greater than maximum int by this point.
+	return xid != yid && (!isSame(g.mat.At(int(xid), int(yid)), g.absent) || !isSame(g.mat.At(int(yid), int(xid)), g.absent))
 }
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *DirectedMatrix) Edge(u, v graph.Node) graph.Edge {
 	if g.HasEdgeFromTo(u, v) {
-		return Edge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(u.ID(), v.ID())}
+		// x.ID() and y.ID() are not greater than maximum int by this point.
+		return Edge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}
 	}
 	return nil
 }
@@ -187,7 +191,8 @@ func (g *DirectedMatrix) HasEdgeFromTo(u, v graph.Node) bool {
 	if !g.has(vid) {
 		return false
 	}
-	return uid != vid && !isSame(g.mat.At(uid, vid), g.absent)
+	// uid and vid are not greater than maximum int by this point.
+	return uid != vid && !isSame(g.mat.At(int(uid), int(vid)), g.absent)
 }
 
 // Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
@@ -201,7 +206,8 @@ func (g *DirectedMatrix) Weight(x, y graph.Node) (w float64, ok bool) {
 		return g.self, true
 	}
 	if g.has(xid) && g.has(yid) {
-		return g.mat.At(xid, yid), true
+		// xid and yid are not greater than maximum int by this point.
+		return g.mat.At(int(xid), int(yid)), true
 	}
 	return g.absent, false
 }
@@ -214,7 +220,14 @@ func (g *DirectedMatrix) SetEdge(e graph.Edge) {
 	if fid == tid {
 		panic("simple: set illegal edge")
 	}
-	g.mat.Set(fid, tid, e.Weight())
+	if int64(int(fid)) != fid {
+		panic("simple: unavailable from node ID for dense graph")
+	}
+	if int64(int(tid)) != tid {
+		panic("simple: unavailable to node ID for dense graph")
+	}
+	// fid and tid are not greater than maximum int by this point.
+	g.mat.Set(int(fid), int(tid), e.Weight())
 }
 
 // RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist
@@ -228,27 +241,33 @@ func (g *DirectedMatrix) RemoveEdge(e graph.Edge) {
 	if !g.has(tid) {
 		return
 	}
-	g.mat.Set(fid, tid, g.absent)
+	// fid and tid are not greater than maximum int by this point.
+	g.mat.Set(int(fid), int(tid), g.absent)
 }
 
 // Degree returns the in+out degree of n in g.
 func (g *DirectedMatrix) Degree(n graph.Node) int {
 	id := n.ID()
+	if !g.has(id) {
+		return 0
+	}
 	var deg int
 	r, c := g.mat.Dims()
 	for i := 0; i < r; i++ {
-		if i == id {
+		if int64(i) == id {
 			continue
 		}
-		if !isSame(g.mat.At(id, i), g.absent) {
+		// id is not greater than maximum int by this point.
+		if !isSame(g.mat.At(int(id), i), g.absent) {
 			deg++
 		}
 	}
 	for i := 0; i < c; i++ {
-		if i == id {
+		if int64(i) == id {
 			continue
 		}
-		if !isSame(g.mat.At(i, id), g.absent) {
+		// id is not greater than maximum int by this point.
+		if !isSame(g.mat.At(i, int(id)), g.absent) {
 			deg++
 		}
 	}

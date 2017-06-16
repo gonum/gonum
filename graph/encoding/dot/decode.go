@@ -266,7 +266,7 @@ func (gen *generator) popSubgraph() []graph.Node {
 // unique returns the set of unique nodes contained within ns.
 func unique(ns []graph.Node) []graph.Node {
 	var nodes []graph.Node
-	seen := make(set.Ints)
+	seen := make(set.Int64s)
 	for _, n := range ns {
 		id := n.ID()
 		if seen.Has(id) {

@@ -20,10 +20,10 @@ var (
 	sizeInt64   = binary.Size(int64(0))
 	sizeFloat64 = binary.Size(float64(0))
 
-	errTooBig    = errors.New("mat64: resulting data slice too big")
-	errTooSmall  = errors.New("mat64: input slice too small")
-	errBadBuffer = errors.New("mat64: data buffer size mismatch")
-	errBadSize   = errors.New("mat64: invalid dimension")
+	errTooBig    = errors.New("mat: resulting data slice too big")
+	errTooSmall  = errors.New("mat: input slice too small")
+	errBadBuffer = errors.New("mat: data buffer size mismatch")
+	errBadSize   = errors.New("mat: invalid dimension")
 )
 
 // MarshalBinary encodes the receiver into a binary form and returns the result.
@@ -110,7 +110,7 @@ func (m Dense) MarshalBinaryTo(w io.Writer) (int, error) {
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinary(data []byte) error {
 	if !m.isZero() {
-		panic("mat64: unmarshal into non-zero matrix")
+		panic("mat: unmarshal into non-zero matrix")
 	}
 
 	if len(data) < 2*sizeInt64 {
@@ -159,7 +159,7 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 	if !m.isZero() {
-		panic("mat64: unmarshal into non-zero matrix")
+		panic("mat: unmarshal into non-zero matrix")
 	}
 
 	var (
@@ -269,7 +269,7 @@ func (v Vector) MarshalBinaryTo(w io.Writer) (int, error) {
 // it should not be used on untrusted data.
 func (v *Vector) UnmarshalBinary(data []byte) error {
 	if !v.isZero() {
-		panic("mat64: unmarshal into non-zero vector")
+		panic("mat: unmarshal into non-zero vector")
 	}
 
 	p := 0
@@ -302,7 +302,7 @@ func (v *Vector) UnmarshalBinary(data []byte) error {
 // See UnmarshalBinary for the list of sanity checks performed on the input.
 func (v *Vector) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 	if !v.isZero() {
-		panic("mat64: unmarshal into non-zero vector")
+		panic("mat: unmarshal into non-zero vector")
 	}
 
 	var (

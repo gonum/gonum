@@ -21,8 +21,8 @@ var (
 )
 
 const (
-	badSymTriangle = "mat64: blas64.Symmetric not upper"
-	badSymCap      = "mat64: bad capacity for SymDense"
+	badSymTriangle = "mat: blas64.Symmetric not upper"
+	badSymCap      = "mat: bad capacity for SymDense"
 )
 
 // SymDense is a symmetric matrix that uses dense storage. SymDense
@@ -60,7 +60,7 @@ type MutableSymmetric interface {
 // Only the values in the upper triangular portion of the matrix are used.
 func NewSymDense(n int, data []float64) *SymDense {
 	if n < 0 {
-		panic("mat64: negative dimension")
+		panic("mat: negative dimension")
 	}
 	if data != nil && n*n != len(data) {
 		panic(ErrShape)

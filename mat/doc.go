@@ -28,10 +28,10 @@
 //  for i := range data {
 //  	data[i] = rand.NormFloat64()
 //  }
-//  a := mat64.NewDense(6, 6, data)
+//  a := mat.NewDense(6, 6, data)
 // Operations involving matrix data are implemented as functions when the values
 // of the matrix remain unchanged
-//  tr := mat64.Trace(a)
+//  tr := mat.Trace(a)
 // and are implemented as methods when the operation modifies the receiver.
 //  zero.Copy(a)
 //
@@ -73,7 +73,7 @@
 // Matrix factorizations, such as the LU decomposition, typically have their own
 // specific data storage, and so are each implemented as a specific type. The
 // factorization can be computed through a call to Factorize
-//  var lu mat64.LU
+//  var lu mat.LU
 //  lu.Factorize(a)
 // The elements of the factorization can be extracted through methods on the
 // factorized type, i.e. *LU.UTo. The factorization types can also be used directly,
@@ -130,8 +130,8 @@
 //
 // This prohibition is to help avoid subtle mistakes when the method needs to read
 // from and write to the same data region. There are ways to make mistakes using the
-// mat64 API, and mat64 functions will detect and complain about those.
-// There are many ways to make mistakes by excursion from the mat64 API via
+// mat API, and mat functions will detect and complain about those.
+// There are many ways to make mistakes by excursion from the mat API via
 // interaction with raw matrix values.
 //
 // If you need to read the rest of this section to understand the behavior of

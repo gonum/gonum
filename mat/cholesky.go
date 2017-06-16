@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	badTriangle = "mat64: invalid triangle"
-	badCholesky = "mat64: invalid Cholesky factorization"
+	badTriangle = "mat: invalid triangle"
+	badCholesky = "mat: invalid Cholesky factorization"
 )
 
 // Cholesky is a type for creating and using the Cholesky factorization of a

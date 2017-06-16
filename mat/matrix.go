@@ -68,7 +68,7 @@ func (t Transpose) Untranspose() Matrix {
 // Untransposer is a type that can undo an implicit transpose.
 type Untransposer interface {
 	// Note: This interface is needed to unify all of the Transpose types. In
-	// the mat64 methods, we need to test if the Matrix has been implicitly
+	// the mat methods, we need to test if the Matrix has been implicitly
 	// transposed. If this is checked by testing for the specific Transpose type
 	// then the behavior will be different if the user uses T() or TTri() for a
 	// triangular matrix.
@@ -274,7 +274,7 @@ func Cond(a Matrix, norm float64) float64 {
 	var lnorm lapack.MatrixNorm
 	switch norm {
 	default:
-		panic("mat64: bad norm value")
+		panic("mat: bad norm value")
 	case 1:
 		lnorm = lapack.MaxColumnSum
 	case 2:

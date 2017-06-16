@@ -300,7 +300,7 @@ func (gsvd *GSVD) SigmaBTo(dst *Dense) *Dense {
 // UTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) UTo(dst *Dense) *Dense {
 	if gsvd.kind&GSVDU == 0 {
-		panic("mat64: improper GSVD kind")
+		panic("mat: improper GSVD kind")
 	}
 	r := gsvd.u.Rows
 	c := gsvd.u.Cols
@@ -326,7 +326,7 @@ func (gsvd *GSVD) UTo(dst *Dense) *Dense {
 // VTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) VTo(dst *Dense) *Dense {
 	if gsvd.kind&GSVDV == 0 {
-		panic("mat64: improper GSVD kind")
+		panic("mat: improper GSVD kind")
 	}
 	r := gsvd.v.Rows
 	c := gsvd.v.Cols
@@ -352,7 +352,7 @@ func (gsvd *GSVD) VTo(dst *Dense) *Dense {
 // QTo will panic if the receiver does not contain a successful factorization.
 func (gsvd *GSVD) QTo(dst *Dense) *Dense {
 	if gsvd.kind&GSVDQ == 0 {
-		panic("mat64: improper GSVD kind")
+		panic("mat: improper GSVD kind")
 	}
 	r := gsvd.q.Rows
 	c := gsvd.q.Cols

@@ -12,15 +12,15 @@ import (
 const (
 	// regionOverlap is the panic string used for the general case
 	// of a matrix region overlap between a source and destination.
-	regionOverlap = "mat64: bad region: overlap"
+	regionOverlap = "mat: bad region: overlap"
 
 	// regionIdentity is the panic string used for the specific
 	// case of complete agreement between a source and a destination.
-	regionIdentity = "mat64: bad region: identical"
+	regionIdentity = "mat: bad region: identical"
 
 	// mismatchedStrides is the panic string used for overlapping
 	// data slices with differing strides.
-	mismatchedStrides = "mat64: bad region: different strides"
+	mismatchedStrides = "mat: bad region: different strides"
 )
 
 // checkOverlap returns false if the receiver does not overlap data elements

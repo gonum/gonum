@@ -15,7 +15,7 @@ var (
 	_        RawTriangular = triDense
 )
 
-const badTriCap = "mat64: bad capacity for TriDense"
+const badTriCap = "mat: bad capacity for TriDense"
 
 // TriDense represents an upper or lower triangular matrix in dense storage
 // format.
@@ -100,7 +100,7 @@ func (t TransposeTri) UntransposeTri() Triangular {
 // Only the values in the triangular portion corresponding to kind are used.
 func NewTriDense(n int, kind TriKind, data []float64) *TriDense {
 	if n < 0 {
-		panic("mat64: negative dimension")
+		panic("mat: negative dimension")
 	}
 	if data != nil && len(data) != n*n {
 		panic(ErrShape)
@@ -159,7 +159,7 @@ func isUpperUplo(u blas.Uplo) bool {
 // be upper triangular.
 func (t *TriDense) asSymBlas() blas64.Symmetric {
 	if t.mat.Diag == blas.Unit {
-		panic("mat64: cannot convert unit TriDense into blas64.Symmetric")
+		panic("mat: cannot convert unit TriDense into blas64.Symmetric")
 	}
 	return blas64.Symmetric{
 		N:      t.mat.N,
@@ -402,7 +402,7 @@ func copySymIntoTriangle(t *TriDense, s Symmetric) {
 	n, upper := t.Triangle()
 	ns := s.Symmetric()
 	if n != ns {
-		panic("mat64: triangle size mismatch")
+		panic("mat: triangle size mismatch")
 	}
 	ts := t.mat.Stride
 	if rs, ok := s.(RawSymmetricer); ok {

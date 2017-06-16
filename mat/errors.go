@@ -44,7 +44,7 @@ const (
 
 const stackTraceBufferSize = 1 << 20
 
-// Maybe will recover a panic with a type mat64.Error from fn, and return this error
+// Maybe will recover a panic with a type mat.Error from fn, and return this error
 // as the Err field of an ErrorStack. The stack trace for the panicking function will be
 // recovered and placed in the StackTrace field. Any other error is re-panicked.
 func Maybe(fn func()) (err error) {
@@ -52,7 +52,7 @@ func Maybe(fn func()) (err error) {
 		if r := recover(); r != nil {
 			if e, ok := r.(Error); ok {
 				if e.string == "" {
-					panic("mat64: invalid error")
+					panic("mat: invalid error")
 				}
 				buf := make([]byte, stackTraceBufferSize)
 				n := runtime.Stack(buf, false)
@@ -66,7 +66,7 @@ func Maybe(fn func()) (err error) {
 	return
 }
 
-// MaybeFloat will recover a panic with a type mat64.Error from fn, and return this error
+// MaybeFloat will recover a panic with a type mat.Error from fn, and return this error
 // as the Err field of an ErrorStack. The stack trace for the panicking function will be
 // recovered and placed in the StackTrace field. Any other error is re-panicked.
 func MaybeFloat(fn func() float64) (f float64, err error) {
@@ -74,7 +74,7 @@ func MaybeFloat(fn func() float64) (f float64, err error) {
 		if r := recover(); r != nil {
 			if e, ok := r.(Error); ok {
 				if e.string == "" {
-					panic("mat64: invalid error")
+					panic("mat: invalid error")
 				}
 				buf := make([]byte, stackTraceBufferSize)
 				n := runtime.Stack(buf, false)
@@ -87,7 +87,7 @@ func MaybeFloat(fn func() float64) (f float64, err error) {
 	return fn(), nil
 }
 
-// MaybeComplex will recover a panic with a type mat64.Error from fn, and return this error
+// MaybeComplex will recover a panic with a type mat.Error from fn, and return this error
 // as the Err field of an ErrorStack. The stack trace for the panicking function will be
 // recovered and placed in the StackTrace field. Any other error is re-panicked.
 func MaybeComplex(fn func() complex128) (f complex128, err error) {
@@ -95,7 +95,7 @@ func MaybeComplex(fn func() complex128) (f complex128, err error) {
 		if r := recover(); r != nil {
 			if e, ok := r.(Error); ok {
 				if e.string == "" {
-					panic("mat64: invalid error")
+					panic("mat: invalid error")
 				}
 				buf := make([]byte, stackTraceBufferSize)
 				n := runtime.Stack(buf, false)

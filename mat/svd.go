@@ -144,7 +144,7 @@ func (svd *SVD) Values(s []float64) []float64 {
 func (svd *SVD) UTo(dst *Dense) *Dense {
 	kind := svd.kind
 	if kind != SVDFull && kind != SVDThin {
-		panic("mat64: improper SVD kind")
+		panic("mat: improper SVD kind")
 	}
 	r := svd.u.Rows
 	c := svd.u.Cols
@@ -170,7 +170,7 @@ func (svd *SVD) UTo(dst *Dense) *Dense {
 func (svd *SVD) VTo(dst *Dense) *Dense {
 	kind := svd.kind
 	if kind != SVDFull && kind != SVDThin {
-		panic("mat64: improper SVD kind")
+		panic("mat: improper SVD kind")
 	}
 	r := svd.vt.Rows
 	c := svd.vt.Cols

@@ -33,7 +33,7 @@ func Inner(x *Vector, A Matrix, y *Vector) float64 {
 	case RawSymmetricer:
 		bmat := b.RawSymmetric()
 		if bmat.Uplo != blas.Upper {
-			// Panic as a string not a mat64.Error.
+			// Panic as a string not a mat.Error.
 			panic(badSymTriangle)
 		}
 		for i := 0; i < x.Len(); i++ {

@@ -71,7 +71,6 @@ func (impl Implementation) Dlasq4(i0, n0 int, z []float64, pp int, n0in int, dmi
 					np = nn - 9
 				} else {
 					np = nn - 2*pp
-					b2 = z[np-2]
 					gam = dn1
 					if z[np-4] > z[np-2] {
 						return tau, ttype, g

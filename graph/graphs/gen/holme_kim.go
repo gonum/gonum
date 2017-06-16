@@ -69,7 +69,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 			if i != 0 && rnd() < p {
 				for _, w := range permute(dst.From(simple.Node(u)), rndN) {
 					wid := w.ID()
-					if wid == v || dst.HasEdgeBetween(w, simple.Node(v)) {
+					if wid == int64(v) || dst.HasEdgeBetween(w, simple.Node(v)) {
 						continue
 					}
 					dst.SetEdge(simple.Edge{F: w, T: simple.Node(v), W: 1})

@@ -1766,11 +1766,11 @@ func (f Plassmann) Grad(grad, x []float64) {
 	grad[0] = (1 - b) * math.Cos(l*math.Pi/2*a)
 	switch {
 	case a <= 1-b:
-		grad[0] -= 1
+		grad[0]--
 	case 1-b < a && a <= 1+b:
 		grad[0] += (a - 1) / b
 	default: // a > 1+b
-		grad[0] += 1
+		grad[0]++
 	}
 }
 

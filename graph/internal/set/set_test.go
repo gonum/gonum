@@ -6,9 +6,9 @@ package set
 
 import "testing"
 
-type node int
+type node int64
 
-func (n node) ID() int { return int(n) }
+func (n node) ID() int64 { return int64(n) }
 
 // count reports the number of elements stored in the node set.
 func (s Nodes) count() int {

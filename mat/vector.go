@@ -47,16 +47,6 @@ func NewVector(n int, data []float64) *Vector {
 	}
 }
 
-// ViewVec returns a sub-vector view of the receiver starting at element i and
-// extending n rows. If i is out of range, n is zero, or the view extends
-// beyond the bounds of the Vector, ViewVec will panic with ErrIndexOutOfRange.
-// The returned Vector retains reference to the underlying vector.
-//
-// ViewVec is deprecated and should not be used. It will be removed at a later date.
-func (v *Vector) ViewVec(i, n int) *Vector {
-	return v.SliceVec(i, i+n)
-}
-
 // SliceVec returns a new Vector that shares backing data with the receiver.
 // The returned matrix starts at i of the receiver and extends k-i elements.
 // SliceVec panics with ErrIndexOutOfRange if the slice is outside the bounds

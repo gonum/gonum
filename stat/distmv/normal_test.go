@@ -343,7 +343,7 @@ func TestConditionNormal(t *testing.T) {
 			t.Errorf("bad test, not enough samples")
 			continue
 		}
-		samples = samples.View(0, 0, nSamp, len(test.mu)).(*mat.Dense)
+		samples = samples.Slice(0, nSamp, 0, len(test.mu)).(*mat.Dense)
 
 		// Compute mean and covariance matrix.
 		estMean := make([]float64, len(test.mu))

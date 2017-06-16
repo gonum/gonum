@@ -143,15 +143,6 @@ type Copier interface {
 	Copy(a Matrix) (r, c int)
 }
 
-// A Viewer returns a submatrix view of the Matrix parameter, starting at row i, column j
-// and extending r rows and c columns. If i or j are out of range, or r or c are zero or
-// extend beyond the bounds of the matrix View will panic with ErrIndexOutOfRange. The
-// returned matrix must retain the receiver's reference to the original matrix such that
-// changes in the elements of the submatrix are reflected in the original and vice versa.
-type Viewer interface {
-	View(i, j, r, c int) Matrix
-}
-
 // A Grower can grow the size of the represented matrix by the given number of rows and columns.
 // Growing beyond the size given by the Caps method will result in the allocation of a new
 // matrix and copying of the elements. If Grow is called with negative increments it will

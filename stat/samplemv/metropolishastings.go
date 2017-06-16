@@ -84,7 +84,7 @@ func (m MetropolisHastingser) Sample(batch *mat.Dense) {
 	copy(initial, m.Initial)
 	for remaining != 0 {
 		newSamp := min(rTmp, remaining)
-		MetropolisHastings(tmp.View(0, 0, newSamp, c).(*mat.Dense), initial, m.Target, m.Proposal, m.Src)
+		MetropolisHastings(tmp.Slice(0, newSamp, 0, c).(*mat.Dense), initial, m.Target, m.Proposal, m.Src)
 		copy(initial, tmp.RawRowView(newSamp-1))
 		remaining -= newSamp
 	}
@@ -99,7 +99,7 @@ func (m MetropolisHastingser) Sample(batch *mat.Dense) {
 	}
 
 	// Take a single sample from the chain.
-	MetropolisHastings(batch.View(0, 0, 1, c).(*mat.Dense), initial, m.Target, m.Proposal, m.Src)
+	MetropolisHastings(batch.Slice(0, 1, 0, c).(*mat.Dense), initial, m.Target, m.Proposal, m.Src)
 
 	copy(initial, batch.RawRowView(0))
 	// For all of the other samples, first generate Rate samples and then actually

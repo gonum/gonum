@@ -29,7 +29,7 @@ type LimitedVisionGrid struct {
 
 	// Known holds a store of known
 	// nodes, if not nil.
-	Known map[int]bool
+	Known map[int64]bool
 }
 
 // MoveTo moves to the node n on the grid and returns a slice of newly seen and
@@ -39,7 +39,7 @@ func (l *LimitedVisionGrid) MoveTo(n graph.Node) (new, old []graph.Edge) {
 	row, column := l.RowCol(n.ID())
 	x := float64(column)
 	y := float64(row)
-	seen := make(map[[2]int]bool)
+	seen := make(map[[2]int64]bool)
 	bound := int(l.VisionRadius + 0.5)
 	for r := row - bound; r <= row+bound; r++ {
 		for c := column - bound; c <= column+bound; c++ {
@@ -52,10 +52,10 @@ func (l *LimitedVisionGrid) MoveTo(n graph.Node) (new, old []graph.Edge) {
 				continue
 			}
 			for _, v := range l.allPossibleFrom(u) {
-				if seen[[2]int{u.ID(), v.ID()}] {
+				if seen[[2]int64{u.ID(), v.ID()}] {
 					continue
 				}
-				seen[[2]int{u.ID(), v.ID()}] = true
+				seen[[2]int64{u.ID(), v.ID()}] = true
 
 				vx, vy := l.XY(v)
 				if !l.Known[v.ID()] && math.Hypot(x-vx, y-vy) > l.VisionRadius {
@@ -128,7 +128,7 @@ func (l *LimitedVisionGrid) allPossibleFrom(u graph.Node) []graph.Node {
 
 // RowCol returns the row and column of the id. RowCol will panic if the
 // node id is outside the range of the grid.
-func (l *LimitedVisionGrid) RowCol(id int) (r, c int) {
+func (l *LimitedVisionGrid) RowCol(id int64) (r, c int) {
 	return l.Grid.RowCol(id)
 }
 
@@ -161,8 +161,8 @@ func (l *LimitedVisionGrid) Has(n graph.Node) bool {
 	return l.has(n.ID())
 }
 
-func (l *LimitedVisionGrid) has(id int) bool {
-	return id >= 0 && id < len(l.Grid.open)
+func (l *LimitedVisionGrid) has(id int64) bool {
+	return 0 <= id && id < int64(len(l.Grid.open))
 }
 
 // From returns nodes that are optimistically reachable from u.
@@ -268,7 +268,7 @@ func (l *LimitedVisionGrid) Render(path []graph.Node) ([]byte, error) {
 	b := make([]byte, rows*(cols+1)-1)
 	for r := 0; r < rows; r++ {
 		for c := 0; c < cols; c++ {
-			if !l.Known[r*cols+c] {
+			if !l.Known[int64(r*cols+c)] {
 				b[r*(cols+1)+c] = Unknown
 			} else if l.Grid.open[r*cols+c] {
 				b[r*(cols+1)+c] = Open
@@ -286,7 +286,7 @@ func (l *LimitedVisionGrid) Render(path []graph.Node) ([]byte, error) {
 	for i, n := range path {
 		if !l.Has(n) || (i != 0 && !l.HasEdgeBetween(path[i-1], n)) {
 			id := n.ID()
-			if id >= 0 && id < len(l.Grid.open) {
+			if 0 <= id && id < int64(len(l.Grid.open)) {
 				r, c := l.RowCol(n.ID())
 				b[r*(cols+1)+c] = '!'
 			}

@@ -108,14 +108,14 @@ func (g *Grid) Has(n graph.Node) bool {
 	return g.has(n.ID())
 }
 
-func (g *Grid) has(id int) bool {
-	return id >= 0 && id < len(g.open) && (g.AllVisible || g.open[id])
+func (g *Grid) has(id int64) bool {
+	return 0 <= id && id < int64(len(g.open)) && (g.AllVisible || g.open[id])
 }
 
 // HasOpen returns whether n is an open node in the grid.
 func (g *Grid) HasOpen(n graph.Node) bool {
 	id := n.ID()
-	return id >= 0 && id < len(g.open) && g.open[id]
+	return 0 <= id && id < int64(len(g.open)) && g.open[id]
 }
 
 // Set sets the node at position (r, c) to the specified open state.
@@ -136,11 +136,11 @@ func (g *Grid) Dims() (r, c int) {
 
 // RowCol returns the row and column of the id. RowCol will panic if the
 // node id is outside the range of the grid.
-func (g *Grid) RowCol(id int) (r, c int) {
-	if id < 0 || id >= len(g.open) {
+func (g *Grid) RowCol(id int64) (r, c int) {
+	if id < 0 || int64(len(g.open)) <= id {
 		panic("grid: illegal node id")
 	}
-	return id / g.c, id % g.c
+	return int(id) / g.c, int(id) % g.c
 }
 
 // XY returns the cartesian coordinates of n. If n is not a node
@@ -266,7 +266,7 @@ func (g *Grid) Render(path []graph.Node) ([]byte, error) {
 	for i, n := range path {
 		if !g.Has(n) || (i != 0 && !g.HasEdgeBetween(path[i-1], n)) {
 			id := n.ID()
-			if id >= 0 && id < len(g.open) {
+			if 0 <= id && id < int64(len(g.open)) {
 				r, c := g.RowCol(n.ID())
 				b[r*(g.c+1)+c] = '!'
 			}

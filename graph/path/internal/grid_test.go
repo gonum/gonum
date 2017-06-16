@@ -19,9 +19,9 @@ var _ graph.Graph = (*Grid)(nil)
 
 func join(g ...string) string { return strings.Join(g, "\n") }
 
-type node int
+type node int64
 
-func (n node) ID() int { return int(n) }
+func (n node) ID() int64 { return int64(n) }
 
 func TestGrid(t *testing.T) {
 	g := NewGrid(4, 4, false)
@@ -205,7 +205,7 @@ func TestGrid(t *testing.T) {
 
 	var coords = []struct {
 		r, c int
-		id   int
+		id   int64
 	}{
 		{r: 0, c: 0, id: 0},
 		{r: 0, c: 3, id: 3},

@@ -32,7 +32,7 @@ var ShortestPathTests = []struct {
 
 	Query         simple.Edge
 	Weight        float64
-	WantPaths     [][]int
+	WantPaths     [][]int64
 	HasUniquePath bool
 
 	NoPathFor simple.Edge
@@ -65,7 +65,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		Weight: 1,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1},
 		},
 		HasUniquePath: true,
@@ -81,7 +81,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(0)},
 		Weight: 0,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0},
 		},
 		HasUniquePath: true,
@@ -97,7 +97,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		Weight: 1,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1},
 		},
 		HasUniquePath: true,
@@ -115,7 +115,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(2)},
 		Weight: 2,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2},
 			{0, 2},
 		},
@@ -134,7 +134,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(2)},
 		Weight: 2,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2},
 			{0, 2},
 		},
@@ -167,7 +167,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(5)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 5},
 			{0, 2, 3, 5},
 			{0, 5},
@@ -201,7 +201,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(5)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 5},
 			{0, 2, 3, 5},
 			{0, 5},
@@ -236,7 +236,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(5)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 5},
 			{0, 2, 3, 5},
 			{0, 6, 5},
@@ -271,7 +271,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(5)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 5},
 			{0, 2, 3, 5},
 			{0, 6, 5},
@@ -297,7 +297,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 		},
 		HasUniquePath: false,
@@ -324,7 +324,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 		},
 		HasUniquePath: false,
@@ -353,7 +353,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 			{0, 1, 5, 4},
 		},
@@ -384,7 +384,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 		},
 		HasUniquePath: false,
@@ -417,7 +417,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 			{0, 1, 5, 4},
 			{0, 1, 5, 6, 4},
@@ -453,7 +453,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 			{0, 5, 3, 4},
 			{0, 6, 5, 3, 4},
@@ -489,7 +489,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 		},
 		HasUniquePath: false,
@@ -522,7 +522,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 		},
 		HasUniquePath: false,
@@ -567,7 +567,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(4)},
 		Weight: 4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1, 2, 3, 4},
 			{0, 1, 2, 6, 10, 14, 20, 4},
 		},
@@ -587,7 +587,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		Weight: -1,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{0, 1},
 		},
 		HasUniquePath: true,
@@ -621,7 +621,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node('z'), T: simple.Node('y')},
 		Weight: -4,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{'z', 'x', 'y'},
 		},
 		HasUniquePath: true,
@@ -644,7 +644,7 @@ var ShortestPathTests = []struct {
 
 		Query:  simple.Edge{F: simple.Node('a'), T: simple.Node('y')},
 		Weight: -6,
-		WantPaths: [][]int{
+		WantPaths: [][]int64{
 			{'a', 'b', 'c', 'y'},
 		},
 		HasUniquePath: true,

@@ -49,7 +49,7 @@ func TestJohnsonAllPaths(t *testing.T) {
 					test.Name, unique, test.HasUniquePath)
 			}
 
-			var got []int
+			var got []int64
 			for _, n := range p {
 				got = append(got, n.ID())
 			}
@@ -78,9 +78,9 @@ func TestJohnsonAllPaths(t *testing.T) {
 				test.Name, weight, test.Weight)
 		}
 
-		var got [][]int
+		var got [][]int64
 		if len(paths) != 0 {
-			got = make([][]int, len(paths))
+			got = make([][]int64, len(paths))
 		}
 		for i, p := range paths {
 			for _, v := range p {

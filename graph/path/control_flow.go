@@ -13,10 +13,10 @@ import (
 // prune for strict post-dominators, immediate dominators etc.
 //
 // A dominates B if and only if the only path through B travels through A.
-func Dominators(start graph.Node, g graph.Graph) map[int]set.Nodes {
+func Dominators(start graph.Node, g graph.Graph) map[int64]set.Nodes {
 	allNodes := make(set.Nodes)
 	nlist := g.Nodes()
-	dominators := make(map[int]set.Nodes, len(nlist))
+	dominators := make(map[int64]set.Nodes, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node)
 	}
@@ -71,10 +71,10 @@ func Dominators(start graph.Node, g graph.Graph) map[int]set.Nodes {
 // prune for strict post-dominators, immediate post-dominators etc.
 //
 // A post-dominates B if and only if all paths from B travel through A.
-func PostDominators(end graph.Node, g graph.Graph) map[int]set.Nodes {
+func PostDominators(end graph.Node, g graph.Graph) map[int64]set.Nodes {
 	allNodes := make(set.Nodes)
 	nlist := g.Nodes()
-	dominators := make(map[int]set.Nodes, len(nlist))
+	dominators := make(map[int64]set.Nodes, len(nlist))
 	for _, node := range nlist {
 		allNodes.Add(node)
 	}

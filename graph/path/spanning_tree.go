@@ -32,7 +32,7 @@ func Prim(dst graph.UndirectedBuilder, g UndirectedWeighter) float64 {
 	}
 
 	q := &primQueue{
-		indexOf: make(map[int]int, len(nodes)-1),
+		indexOf: make(map[int64]int, len(nodes)-1),
 		nodes:   make([]simple.Edge, 0, len(nodes)-1),
 	}
 	for _, u := range nodes[1:] {
@@ -77,7 +77,7 @@ func Prim(dst graph.UndirectedBuilder, g UndirectedWeighter) float64 {
 // a node in the set of nodes already connected to the minimum
 // spanning forest.
 type primQueue struct {
-	indexOf map[int]int
+	indexOf map[int64]int
 	nodes   []simple.Edge
 }
 

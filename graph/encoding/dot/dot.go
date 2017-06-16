@@ -119,7 +119,7 @@ type printer struct {
 
 type edge struct {
 	inGraph  string
-	from, to int
+	from, to int64
 }
 
 func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool) error {

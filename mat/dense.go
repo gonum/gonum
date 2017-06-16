@@ -16,7 +16,6 @@ var (
 	_ Mutable = dense
 
 	_ Cloner       = dense
-	_ Viewer       = dense
 	_ RowViewer    = dense
 	_ ColViewer    = dense
 	_ RawRowViewer = dense
@@ -273,15 +272,6 @@ func (m *Dense) RawRowView(i int) []float64 {
 
 func (m *Dense) rawRowView(i int) []float64 {
 	return m.mat.Data[i*m.mat.Stride : i*m.mat.Stride+m.mat.Cols]
-}
-
-// View returns a new Matrix that shares backing data with the receiver.
-// The new matrix is located from row i, column j extending r rows and c
-// columns. View panics if the view is outside the bounds of the receiver.
-//
-// View is deprecated and should not be used. It will be removed at a later date.
-func (m *Dense) View(i, j, r, c int) Matrix {
-	return m.Slice(i, i+r, j, j+c)
 }
 
 // Slice returns a new Matrix that shares backing data with the receiver.

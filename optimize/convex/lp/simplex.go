@@ -609,7 +609,7 @@ func findLinearlyIndependent(A mat.Matrix) []int {
 			idxs = append(idxs, i)
 			continue
 		}
-		if mat.Cond(columns.View(0, 0, m, len(idxs)+1), 1) > 1e12 {
+		if mat.Cond(columns.Slice(0, m, 0, len(idxs)+1), 1) > 1e12 {
 			// Not linearly independent.
 			continue
 		}

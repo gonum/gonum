@@ -150,7 +150,7 @@ func TestMetropolisHastings(t *testing.T) {
 	batch := mat.NewDense(nSamples, dim, nil)
 	initial := make([]float64, dim)
 	MetropolisHastings(batch, initial, target, proposal, nil)
-	batch = batch.View(burnin, 0, nSamples-burnin, dim).(*mat.Dense)
+	batch = batch.Slice(burnin, nSamples, 0, dim).(*mat.Dense)
 
 	compareNormal(t, target, batch, nil)
 }

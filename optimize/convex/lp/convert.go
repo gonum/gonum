@@ -122,20 +122,16 @@ func Convert(c []float64, g mat.Matrix, h []float64, a mat.Matrix, b []float64) 
 	// Construct aNew = [G, -G, I; A, -A, 0].
 	aNew = mat.NewDense(nNewEq, nNewVar, nil)
 	if nIneq != 0 {
-		aView := (aNew.View(0, 0, nIneq, nVar)).(*mat.Dense)
-		aView.Copy(g)
-		aView = (aNew.View(0, nVar, nIneq, nVar)).(*mat.Dense)
-		aView.Scale(-1, g)
-		aView = (aNew.View(0, 2*nVar, nIneq, nIneq)).(*mat.Dense)
+		aNew.Slice(0, nIneq, 0, nVar).(*mat.Dense).Copy(g)
+		aNew.Slice(0, nIneq, nVar, 2*nVar).(*mat.Dense).Scale(-1, g)
+		aView := aNew.Slice(0, nIneq, 2*nVar, 2*nVar+nIneq).(*mat.Dense)
 		for i := 0; i < nIneq; i++ {
 			aView.Set(i, i, 1)
 		}
 	}
 	if nEq != 0 {
-		aView := (aNew.View(nIneq, 0, nEq, nVar)).(*mat.Dense)
-		aView.Copy(a)
-		aView = (aNew.View(nIneq, nVar, nEq, nVar)).(*mat.Dense)
-		aView.Scale(-1, a)
+		aNew.Slice(nIneq, nIneq+nEq, 0, nVar).(*mat.Dense).Copy(a)
+		aNew.Slice(nIneq, nIneq+nEq, nVar, 2*nVar).(*mat.Dense).Scale(-1, a)
 	}
 	return cNew, aNew, bNew
 }

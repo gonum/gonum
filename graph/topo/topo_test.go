@@ -131,11 +131,11 @@ func TestPathExistsInDirected(t *testing.T) {
 
 var connectedComponentTests = []struct {
 	g    []intset
-	want [][]int
+	want [][]int64
 }{
 	{
 		g: batageljZaversnikGraph,
-		want: [][]int{
+		want: [][]int64{
 			{0},
 			{1, 2, 3, 4, 5},
 			{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
@@ -159,13 +159,13 @@ func TestConnectedComponents(t *testing.T) {
 			}
 		}
 		cc := ConnectedComponents(g)
-		got := make([][]int, len(cc))
+		got := make([][]int64, len(cc))
 		for j, c := range cc {
-			ids := make([]int, len(c))
+			ids := make([]int64, len(c))
 			for k, n := range c {
 				ids[k] = n.ID()
 			}
-			sort.Ints(ids)
+			sort.Sort(ordered.Int64s(ids))
 			got[j] = ids
 		}
 		sort.Sort(ordered.BySliceValues(got))

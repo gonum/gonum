@@ -28,8 +28,8 @@ type johnson struct {
 	result [][]graph.Node
 }
 
-// CyclesIn returns the set of elementary cycles in the graph g.
-func CyclesIn(g graph.Directed) [][]graph.Node {
+// DirectedCyclesIn returns the set of elementary cycles in the graph g.
+func DirectedCyclesIn(g graph.Directed) [][]graph.Node {
 	jg := johnsonGraphFrom(g)
 	j := johnson{
 		adjacent: jg,
@@ -78,7 +78,7 @@ func (j *johnson) circuit(v int) bool {
 
 	//L1:
 	for w := range j.adjacent.succ[n.ID()] {
-		w = j.adjacent.indexOf(w)
+		w := j.adjacent.indexOf(w)
 		if w == j.s {
 			// Output circuit composed of stack followed by s.
 			r := make([]graph.Node, len(j.stack)+1)
@@ -124,10 +124,10 @@ type johnsonGraph struct {
 	// look-up to into the non-sparse
 	// collection of potentially sparse IDs.
 	orig  []graph.Node
-	index map[int]int
+	index map[int64]int
 
-	nodes set.Ints
-	succ  map[int]set.Ints
+	nodes set.Int64s
+	succ  map[int64]set.Int64s
 }
 
 // johnsonGraphFrom returns a deep copy of the graph g.
@@ -136,16 +136,16 @@ func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 	sort.Sort(ordered.ByID(nodes))
 	c := johnsonGraph{
 		orig:  nodes,
-		index: make(map[int]int, len(nodes)),
+		index: make(map[int64]int, len(nodes)),
 
-		nodes: make(set.Ints, len(nodes)),
-		succ:  make(map[int]set.Ints),
+		nodes: make(set.Int64s, len(nodes)),
+		succ:  make(map[int64]set.Int64s),
 	}
 	for i, u := range nodes {
 		c.index[u.ID()] = i
 		for _, v := range g.From(u) {
 			if c.succ[u.ID()] == nil {
-				c.succ[u.ID()] = make(set.Ints)
+				c.succ[u.ID()] = make(set.Int64s)
 				c.nodes.Add(u.ID())
 			}
 			c.nodes.Add(v.ID())
@@ -159,7 +159,7 @@ func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 func (g johnsonGraph) order() int { return g.nodes.Count() }
 
 // indexOf returns the index of the retained node for the given node ID.
-func (g johnsonGraph) indexOf(id int) int {
+func (g johnsonGraph) indexOf(id int64) int {
 	return g.index[id]
 }
 
@@ -205,8 +205,8 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 	sub := johnsonGraph{
 		orig:  g.orig,
 		index: g.index,
-		nodes: make(set.Ints),
-		succ:  make(map[int]set.Ints),
+		nodes: make(set.Int64s),
+		succ:  make(map[int64]set.Int64s),
 	}
 
 	var n int
@@ -219,7 +219,7 @@ func (g johnsonGraph) sccSubGraph(sccs [][]graph.Node, min int) johnsonGraph {
 			for _, v := range scc {
 				if _, ok := g.succ[u.ID()][v.ID()]; ok {
 					if sub.succ[u.ID()] == nil {
-						sub.succ[u.ID()] = make(set.Ints)
+						sub.succ[u.ID()] = make(set.Int64s)
 						sub.nodes.Add(u.ID())
 					}
 					sub.nodes.Add(v.ID())
@@ -275,6 +275,6 @@ func (johnsonGraph) To(graph.Node) []graph.Node {
 	panic("topo: unintended use of johnsonGraph")
 }
 
-type johnsonGraphNode int
+type johnsonGraphNode int64
 
-func (n johnsonGraphNode) ID() int { return int(n) }
+func (n johnsonGraphNode) ID() int64 { return int64(n) }

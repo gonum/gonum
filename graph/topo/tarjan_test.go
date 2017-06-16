@@ -21,7 +21,7 @@ var tarjanTests = []struct {
 	g []intset
 
 	ambiguousOrder []interval
-	want           [][]int
+	want           [][]int64
 
 	sortedLength      int
 	unorderableLength int
@@ -38,7 +38,7 @@ var tarjanTests = []struct {
 			7: linksTo(0, 6),
 		},
 
-		want: [][]int{
+		want: [][]int64{
 			{5},
 			{2, 3, 4, 6},
 			{0, 1, 7},
@@ -56,7 +56,7 @@ var tarjanTests = []struct {
 			3: linksTo(1),
 		},
 
-		want: [][]int{
+		want: [][]int64{
 			{1, 2, 3},
 			{0},
 		},
@@ -72,7 +72,7 @@ var tarjanTests = []struct {
 			2: linksTo(1),
 		},
 
-		want: [][]int{
+		want: [][]int64{
 			{0, 1, 2},
 		},
 
@@ -97,7 +97,7 @@ var tarjanTests = []struct {
 			{0, 3}, // This includes node 6 since it only needs to be before 4 in topo sort.
 			{3, 5},
 		},
-		want: [][]int{
+		want: [][]int64{
 			{6}, {5}, {4}, {3}, {2}, {1}, {0},
 		},
 
@@ -117,7 +117,7 @@ var tarjanTests = []struct {
 		ambiguousOrder: []interval{
 			{0, 2},
 		},
-		want: [][]int{
+		want: [][]int64{
 			{0, 1, 2},
 			{3, 4},
 		},
@@ -174,13 +174,13 @@ func TestTarjanSCC(t *testing.T) {
 		gotSCCs := TarjanSCC(g)
 		// tarjan.strongconnect does range iteration over maps,
 		// so sort SCC members to ensure consistent ordering.
-		gotIDs := make([][]int, len(gotSCCs))
+		gotIDs := make([][]int64, len(gotSCCs))
 		for i, scc := range gotSCCs {
-			gotIDs[i] = make([]int, len(scc))
+			gotIDs[i] = make([]int64, len(scc))
 			for j, id := range scc {
 				gotIDs[i][j] = id.ID()
 			}
-			sort.Ints(gotIDs[i])
+			sort.Sort(ordered.Int64s(gotIDs[i]))
 		}
 		for _, iv := range test.ambiguousOrder {
 			sort.Sort(ordered.BySliceValues(test.want[iv.start:iv.end]))

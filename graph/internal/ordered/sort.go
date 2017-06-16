@@ -16,8 +16,8 @@ func (n ByID) Less(i, j int) bool { return n[i].ID() < n[j].ID() }
 func (n ByID) Swap(i, j int)      { n[i], n[j] = n[j], n[i] }
 
 // BySliceValues implements the sort.Interface sorting a slice of
-// []int lexically by the values of the []int.
-type BySliceValues [][]int
+// []int64 lexically by the values of the []int64.
+type BySliceValues [][]int64
 
 func (c BySliceValues) Len() int { return len(c) }
 func (c BySliceValues) Less(i, j int) bool {
@@ -60,3 +60,11 @@ func (c BySliceIDs) Less(i, j int) bool {
 	return len(a) < len(b)
 }
 func (c BySliceIDs) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+
+// Int64s implements the sort.Interface sorting a slice of
+// int64.
+type Int64s []int64
+
+func (s Int64s) Len() int           { return len(s) }
+func (s Int64s) Less(i, j int) bool { return s[i] < s[j] }
+func (s Int64s) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }

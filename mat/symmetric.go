@@ -79,8 +79,14 @@ func NewSymDense(n int, data []float64) *SymDense {
 	}
 }
 
+// Dims returns the number of rows and columns in the matrix.
 func (s *SymDense) Dims() (r, c int) {
 	return s.mat.N, s.mat.N
+}
+
+// Caps returns the number of rows and columns in the backing matrix.
+func (s *SymDense) Caps() (r, c int) {
+	return s.cap, s.cap
 }
 
 // T implements the Matrix interface. Symmetric matrices, by definition, are
@@ -402,12 +408,12 @@ func (s *SymDense) SubsetSym(a Symmetric, set []int) {
 }
 
 // SliceSquare returns a new Matrix that shares backing data with the receiver.
-// The returned matrix starts at {i,i} of the recevier and extends k-i rows
+// The returned matrix starts at {i,i} of the receiver and extends k-i rows
 // and columns. The final row and column in the resulting matrix is k-1.
-// SliceSquare panics with ErrIndexOutOfRange if the slice is outside the bounds
+// SliceSquare panics with ErrIndexOutOfRange if the slice is outside the capacity
 // of the receiver.
 func (s *SymDense) SliceSquare(i, k int) Matrix {
-	sz := s.Symmetric()
+	sz := s.cap
 	if i < 0 || sz < i || k < i || sz < k {
 		panic(ErrIndexOutOfRange)
 	}

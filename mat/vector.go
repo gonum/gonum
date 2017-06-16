@@ -64,6 +64,7 @@ func (v *Vector) SliceVec(i, k int) *Vector {
 	}
 }
 
+// Dims returns the number of rows and columns in the matrix. Columns is always 1.
 func (v *Vector) Dims() (r, c int) {
 	if v.isZero() {
 		return 0, 0

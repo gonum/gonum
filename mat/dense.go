@@ -275,13 +275,13 @@ func (m *Dense) rawRowView(i int) []float64 {
 }
 
 // Slice returns a new Matrix that shares backing data with the receiver.
-// The returned matrix starts at {i,j} of the recevier and extends k-i rows
+// The returned matrix starts at {i,j} of the receiver and extends k-i rows
 // and l-j columns. The final row in the resulting matrix is k-1 and the
 // final column is l-1.
-// Slice panics with ErrIndexOutOfRange if the slice is outside the bounds
+// Slice panics with ErrIndexOutOfRange if the slice is outside the capacity
 // of the receiver.
 func (m *Dense) Slice(i, k, j, l int) Matrix {
-	mr, mc := m.Dims()
+	mr, mc := m.Caps()
 	if i < 0 || mr <= i || j < 0 || mc <= j || k <= i || mr < k || l <= j || mc < l {
 		panic(ErrIndexOutOfRange)
 	}

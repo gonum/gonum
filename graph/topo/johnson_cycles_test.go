@@ -16,7 +16,7 @@ import (
 
 var cyclesInTests = []struct {
 	g    []intset
-	want [][]int
+	want [][]int64
 }{
 	{
 		g: []intset{
@@ -28,7 +28,7 @@ var cyclesInTests = []struct {
 			6: linksTo(3, 5),
 			7: linksTo(0, 6),
 		},
-		want: [][]int{
+		want: [][]int64{
 			{0, 1, 7, 0},
 			{2, 3, 4, 2},
 			{2, 6, 3, 4, 2},
@@ -41,7 +41,7 @@ var cyclesInTests = []struct {
 			2: linksTo(3),
 			3: linksTo(1),
 		},
-		want: [][]int{
+		want: [][]int64{
 			{1, 2, 3, 1},
 		},
 	},
@@ -51,7 +51,7 @@ var cyclesInTests = []struct {
 			1: linksTo(0, 2),
 			2: linksTo(1),
 		},
-		want: [][]int{
+		want: [][]int64{
 			{0, 1, 0},
 			{1, 2, 1},
 		},
@@ -76,14 +76,14 @@ var cyclesInTests = []struct {
 			3: linksTo(4),
 			4: linksTo(3),
 		},
-		want: [][]int{
+		want: [][]int64{
 			{0, 1, 2, 0},
 			{3, 4, 3},
 		},
 	},
 }
 
-func TestCyclesIn(t *testing.T) {
+func TestDirectedCyclesIn(t *testing.T) {
 	for i, test := range cyclesInTests {
 		g := simple.NewDirectedGraph(0, math.Inf(1))
 		g.AddNode(simple.Node(-10)) // Make sure we test graphs with sparse IDs.
@@ -96,15 +96,15 @@ func TestCyclesIn(t *testing.T) {
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
-		cycles := CyclesIn(g)
-		var got [][]int
+		cycles := DirectedCyclesIn(g)
+		var got [][]int64
 		if cycles != nil {
-			got = make([][]int, len(cycles))
+			got = make([][]int64, len(cycles))
 		}
 		// johnson.circuit does range iteration over maps,
 		// so sort to ensure consistent ordering.
 		for j, c := range cycles {
-			ids := make([]int, len(c))
+			ids := make([]int64, len(c))
 			for k, n := range c {
 				ids[k] = n.ID()
 			}

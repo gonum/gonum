@@ -16,7 +16,7 @@ import (
 
 var vOrderTests = []struct {
 	g        []intset
-	wantCore [][]int
+	wantCore [][]int64
 	wantK    int
 }{
 	{
@@ -29,7 +29,7 @@ var vOrderTests = []struct {
 			5: nil,
 			6: nil,
 		},
-		wantCore: [][]int{
+		wantCore: [][]int64{
 			{},
 			{5},
 			{3},
@@ -39,7 +39,7 @@ var vOrderTests = []struct {
 	},
 	{
 		g: batageljZaversnikGraph,
-		wantCore: [][]int{
+		wantCore: [][]int64{
 			{0},
 			{5, 9, 10, 16},
 			{1, 2, 3, 4, 11, 12, 13, 15},
@@ -67,12 +67,12 @@ func TestVertexOrdering(t *testing.T) {
 		}
 		var offset int
 		for k, want := range test.wantCore {
-			sort.Ints(want)
-			got := make([]int, len(want))
+			sort.Sort(ordered.Int64s(want))
+			got := make([]int64, len(want))
 			for j, n := range order[len(order)-len(want)-offset : len(order)-offset] {
 				got[j] = n.ID()
 			}
-			sort.Ints(got)
+			sort.Sort(ordered.Int64s(got))
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", got, test.wantCore)
 			}
@@ -80,7 +80,7 @@ func TestVertexOrdering(t *testing.T) {
 			for j, n := range core[k] {
 				got[j] = n.ID()
 			}
-			sort.Ints(got)
+			sort.Sort(ordered.Int64s(got))
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", got, test.wantCore)
 			}
@@ -91,7 +91,7 @@ func TestVertexOrdering(t *testing.T) {
 
 var bronKerboschTests = []struct {
 	g    []intset
-	want [][]int
+	want [][]int64
 }{
 	{
 		// This is the example given in the Bron-Kerbosch article on wikipedia (renumbered).
@@ -104,7 +104,7 @@ var bronKerboschTests = []struct {
 			4: nil,
 			5: nil,
 		},
-		want: [][]int{
+		want: [][]int64{
 			{0, 1, 4},
 			{1, 2},
 			{2, 3},
@@ -114,7 +114,7 @@ var bronKerboschTests = []struct {
 	},
 	{
 		g: batageljZaversnikGraph,
-		want: [][]int{
+		want: [][]int64{
 			{0},
 			{1, 2},
 			{1, 3},
@@ -147,13 +147,13 @@ func TestBronKerbosch(t *testing.T) {
 			}
 		}
 		cliques := BronKerbosch(g)
-		got := make([][]int, len(cliques))
+		got := make([][]int64, len(cliques))
 		for j, c := range cliques {
-			ids := make([]int, len(c))
+			ids := make([]int64, len(c))
 			for k, n := range c {
 				ids[k] = n.ID()
 			}
-			sort.Ints(ids)
+			sort.Sort(ordered.Int64s(ids))
 			got[j] = ids
 		}
 		sort.Sort(ordered.BySliceValues(got))

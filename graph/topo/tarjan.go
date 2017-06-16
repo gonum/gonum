@@ -119,9 +119,9 @@ func tarjanSCCstabilized(g graph.Directed, order func([]graph.Node)) [][]graph.N
 	t := tarjan{
 		succ: succ,
 
-		indexTable: make(map[int]int, len(nodes)),
-		lowLink:    make(map[int]int, len(nodes)),
-		onStack:    make(set.Ints),
+		indexTable: make(map[int64]int, len(nodes)),
+		lowLink:    make(map[int64]int, len(nodes)),
+		onStack:    make(set.Int64s),
 	}
 	for _, v := range nodes {
 		if t.indexTable[v.ID()] == 0 {
@@ -140,9 +140,9 @@ type tarjan struct {
 	succ func(graph.Node) []graph.Node
 
 	index      int
-	indexTable map[int]int
-	lowLink    map[int]int
-	onStack    set.Ints
+	indexTable map[int64]int
+	lowLink    map[int64]int
+	onStack    set.Int64s
 
 	stack []graph.Node
 

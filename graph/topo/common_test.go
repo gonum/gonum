@@ -33,9 +33,9 @@ var batageljZaversnikGraph = []intset{
 }
 
 // intset is an integer set.
-type intset map[int]struct{}
+type intset map[int64]struct{}
 
-func linksTo(i ...int) intset {
+func linksTo(i ...int64) intset {
 	if len(i) == 0 {
 		return nil
 	}

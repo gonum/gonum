@@ -23,10 +23,10 @@ func VertexOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Nod
 	// Compute a number d_v for each vertex v in G,
 	// the number of neighbors of v that are not already in L.
 	// Initially, these numbers are just the degrees of the vertices.
-	dv := make(map[int]int, len(nodes))
+	dv := make(map[int64]int, len(nodes))
 	var (
 		maxDegree  int
-		neighbours = make(map[int][]graph.Node)
+		neighbours = make(map[int64][]graph.Node)
 	)
 	for _, n := range nodes {
 		adj := g.From(n)
@@ -203,7 +203,7 @@ func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x set.Nodes) (neighb
 				continue
 			}
 			for n := range nb {
-				if _, ok := p[n]; ok {
+				if _, ok := p[int64(n)]; ok {
 					continue
 				}
 				c--

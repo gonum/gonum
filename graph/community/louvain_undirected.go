@@ -31,7 +31,7 @@ func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution floa
 	// Calculate the total edge weight of the graph
 	// and the table of penetrating edge weight sums.
 	var m2 float64
-	k := make(map[int]float64, len(nodes))
+	k := make(map[int64]float64, len(nodes))
 	for _, u := range nodes {
 		w := weight(u, u)
 		for _, v := range g.From(u) {
@@ -190,7 +190,7 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 			},
 			communities: communities,
 		}
-		communityOf := make(map[int]int, len(nodes))
+		communityOf := make(map[int64]int, len(nodes))
 		for i, n := range nodes {
 			r.nodes[i] = community{id: i, nodes: []graph.Node{n}}
 			communityOf[n.ID()] = i
@@ -245,7 +245,7 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 		r.parent = g
 	}
 	weight := positiveWeightFuncFor(g)
-	communityOf := make(map[int]int, commNodes)
+	communityOf := make(map[int64]int, commNodes)
 	for i, comm := range communities {
 		r.nodes[i] = community{id: i, nodes: comm}
 		for _, n := range comm {
@@ -285,7 +285,7 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 // Has returns whether the node exists within the graph.
 func (g *ReducedUndirected) Has(n graph.Node) bool {
 	id := n.ID()
-	return id >= 0 || id < len(g.nodes)
+	return 0 <= id || id < int64(len(g.nodes))
 }
 
 // Nodes returns all the nodes in the graph.
@@ -311,13 +311,13 @@ func (g *ReducedUndirected) From(u graph.Node) []graph.Node {
 func (g *ReducedUndirected) HasEdgeBetween(x, y graph.Node) bool {
 	xid := x.ID()
 	yid := y.ID()
-	if xid == yid {
+	if xid == yid || !isValidID(xid) || !isValidID(yid) {
 		return false
 	}
 	if xid > yid {
 		xid, yid = yid, xid
 	}
-	_, ok := g.weights[[2]int{xid, yid}]
+	_, ok := g.weights[[2]int{int(xid), int(yid)}]
 	return ok
 }
 
@@ -326,10 +326,13 @@ func (g *ReducedUndirected) HasEdgeBetween(x, y graph.Node) bool {
 func (g *ReducedUndirected) Edge(u, v graph.Node) graph.Edge {
 	uid := u.ID()
 	vid := v.ID()
+	if uid == vid || !isValidID(uid) || !isValidID(vid) {
+		return nil
+	}
 	if vid < uid {
 		uid, vid = vid, uid
 	}
-	w, ok := g.weights[[2]int{uid, vid}]
+	w, ok := g.weights[[2]int{int(uid), int(vid)}]
 	if !ok {
 		return nil
 	}
@@ -348,13 +351,16 @@ func (g *ReducedUndirected) EdgeBetween(x, y graph.Node) graph.Edge {
 func (g *ReducedUndirected) Weight(x, y graph.Node) (w float64, ok bool) {
 	xid := x.ID()
 	yid := y.ID()
+	if !isValidID(xid) || !isValidID(yid) {
+		return 0, false
+	}
 	if xid == yid {
 		return g.nodes[xid].weight, true
 	}
 	if xid > yid {
 		xid, yid = yid, xid
 	}
-	w, ok = g.weights[[2]int{xid, yid}]
+	w, ok = g.weights[[2]int{int(xid), int(yid)}]
 	return w, ok
 }
 

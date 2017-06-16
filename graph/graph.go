@@ -6,7 +6,7 @@ package graph
 
 // Node is a graph node. It returns a graph-unique integer ID.
 type Node interface {
-	ID() int
+	ID() int64
 }
 
 // Edge is a graph edge. In directed graphs, the direction of the
@@ -77,7 +77,7 @@ type Weighter interface {
 // NodeAdder is an interface for adding arbitrary nodes to a graph.
 type NodeAdder interface {
 	// NewNodeID returns a new unique arbitrary ID.
-	NewNodeID() int
+	NewNodeID() int64
 
 	// Adds a node to the graph. AddNode panics if
 	// the added node ID matches an existing node ID.

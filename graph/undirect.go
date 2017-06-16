@@ -44,7 +44,7 @@ func (g Undirect) Nodes() []Node { return g.G.Nodes() }
 // From returns all nodes in g that can be reached directly from u.
 func (g Undirect) From(u Node) []Node {
 	var nodes []Node
-	seen := make(map[int]struct{})
+	seen := make(map[int64]struct{})
 	for _, n := range g.G.From(u) {
 		seen[n.ID()] = struct{}{}
 		nodes = append(nodes, n)

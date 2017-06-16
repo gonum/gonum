@@ -29,7 +29,7 @@ func qDirected(g graph.Directed, communities [][]graph.Node, resolution float64)
 	// Calculate the total edge weight of the graph
 	// and the table of penetrating edge weight sums.
 	var m float64
-	k := make(map[int]directedWeights, len(nodes))
+	k := make(map[int64]directedWeights, len(nodes))
 	for _, n := range nodes {
 		var wOut float64
 		u := n
@@ -191,7 +191,7 @@ func reduceDirected(g graph.Directed, communities [][]graph.Node) *ReducedDirect
 			},
 			communities: communities,
 		}
-		communityOf := make(map[int]int, len(nodes))
+		communityOf := make(map[int64]int, len(nodes))
 		for i, n := range nodes {
 			r.nodes[i] = community{id: i, nodes: []graph.Node{n}}
 			communityOf[n.ID()] = i
@@ -257,7 +257,7 @@ func reduceDirected(g graph.Directed, communities [][]graph.Node) *ReducedDirect
 		r.parent = g
 	}
 	weight := positiveWeightFuncFor(g)
-	communityOf := make(map[int]int, commNodes)
+	communityOf := make(map[int64]int, commNodes)
 	for i, comm := range communities {
 		r.nodes[i] = community{id: i, nodes: comm}
 		for _, n := range comm {
@@ -316,7 +316,7 @@ func reduceDirected(g graph.Directed, communities [][]graph.Node) *ReducedDirect
 // Has returns whether the node exists within the graph.
 func (g *ReducedDirected) Has(n graph.Node) bool {
 	id := n.ID()
-	return id >= 0 || id < len(g.nodes)
+	return 0 <= id && id < int64(len(g.nodes))
 }
 
 // Nodes returns all the nodes in the graph.
@@ -352,14 +352,14 @@ func (g *ReducedDirected) To(v graph.Node) []graph.Node {
 func (g *ReducedDirected) HasEdgeBetween(x, y graph.Node) bool {
 	xid := x.ID()
 	yid := y.ID()
-	if xid == yid {
+	if xid == yid || !isValidID(xid) || !isValidID(yid) {
 		return false
 	}
-	_, ok := g.weights[[2]int{xid, yid}]
+	_, ok := g.weights[[2]int{int(xid), int(yid)}]
 	if ok {
 		return true
 	}
-	_, ok = g.weights[[2]int{yid, xid}]
+	_, ok = g.weights[[2]int{int(yid), int(xid)}]
 	return ok
 }
 
@@ -367,10 +367,10 @@ func (g *ReducedDirected) HasEdgeBetween(x, y graph.Node) bool {
 func (g *ReducedDirected) HasEdgeFromTo(u, v graph.Node) bool {
 	uid := u.ID()
 	vid := v.ID()
-	if uid == vid {
+	if uid == vid || !isValidID(uid) || !isValidID(vid) {
 		return false
 	}
-	_, ok := g.weights[[2]int{uid, vid}]
+	_, ok := g.weights[[2]int{int(uid), int(vid)}]
 	return ok
 }
 
@@ -379,7 +379,10 @@ func (g *ReducedDirected) HasEdgeFromTo(u, v graph.Node) bool {
 func (g *ReducedDirected) Edge(u, v graph.Node) graph.Edge {
 	uid := u.ID()
 	vid := v.ID()
-	w, ok := g.weights[[2]int{uid, vid}]
+	if uid == vid || !isValidID(uid) || !isValidID(vid) {
+		return nil
+	}
+	w, ok := g.weights[[2]int{int(uid), int(vid)}]
 	if !ok {
 		return nil
 	}
@@ -393,10 +396,13 @@ func (g *ReducedDirected) Edge(u, v graph.Node) graph.Edge {
 func (g *ReducedDirected) Weight(x, y graph.Node) (w float64, ok bool) {
 	xid := x.ID()
 	yid := y.ID()
+	if !isValidID(xid) || !isValidID(yid) {
+		return 0, false
+	}
 	if xid == yid {
 		return g.nodes[xid].weight, true
 	}
-	w, ok = g.weights[[2]int{xid, yid}]
+	w, ok = g.weights[[2]int{int(xid), int(yid)}]
 	return w, ok
 }
 

@@ -72,7 +72,7 @@ func qDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, weights
 		// Calculate the total edge weight of the layer
 		// and the table of penetrating edge weight sums.
 		var m float64
-		k := make(map[int]directedWeights, len(nodes))
+		k := make(map[int64]directedWeights, len(nodes))
 		for _, n := range nodes {
 			var wOut float64
 			u := n
@@ -124,16 +124,16 @@ func NewDirectedLayers(layers ...graph.Directed) (DirectedLayers, error) {
 	if len(layers) == 0 {
 		return nil, nil
 	}
-	base := make(set.Ints)
+	base := make(set.Int64s)
 	for _, n := range layers[0].Nodes() {
 		base.Add(n.ID())
 	}
 	for i, l := range layers[1:] {
-		next := make(set.Ints)
+		next := make(set.Int64s)
 		for _, n := range l.Nodes() {
 			next.Add(n.ID())
 		}
-		if !set.IntsEqual(base, next) {
+		if !set.Int64sEqual(base, next) {
 			return nil, fmt.Errorf("community: layer ID mismatch between layers: %d", i+1)
 		}
 	}
@@ -299,7 +299,7 @@ func reduceDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, we
 			layers:      make([]directedEdges, g.Depth()),
 			communities: communities,
 		}
-		communityOf := make(map[int]int, len(nodes))
+		communityOf := make(map[int64]int, len(nodes))
 		for i, n := range nodes {
 			r.nodes[i] = multiplexCommunity{id: i, nodes: []graph.Node{n}, weights: make([]float64, depth(weights))}
 			communityOf[n.ID()] = i
@@ -374,7 +374,7 @@ func reduceDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, we
 		nodes:  make([]multiplexCommunity, len(communities)),
 		layers: make([]directedEdges, g.Depth()),
 	}
-	communityOf := make(map[int]int, commNodes)
+	communityOf := make(map[int64]int, commNodes)
 	for i, comm := range communities {
 		r.nodes[i] = multiplexCommunity{id: i, nodes: comm, weights: make([]float64, depth(weights))}
 		for _, n := range comm {
@@ -480,7 +480,7 @@ type directedLayerHandle struct {
 // Has returns whether the node exists within the graph.
 func (g directedLayerHandle) Has(n graph.Node) bool {
 	id := n.ID()
-	return id >= 0 || id < len(g.multiplex.nodes)
+	return 0 <= id && id < int64(len(g.multiplex.nodes))
 }
 
 // Nodes returns all the nodes in the graph.
@@ -519,11 +519,14 @@ func (g directedLayerHandle) HasEdgeBetween(x, y graph.Node) bool {
 	if xid == yid {
 		return false
 	}
-	_, ok := g.multiplex.layers[g.layer].weights[[2]int{xid, yid}]
+	if xid == yid || !isValidID(xid) || !isValidID(yid) {
+		return false
+	}
+	_, ok := g.multiplex.layers[g.layer].weights[[2]int{int(xid), int(yid)}]
 	if ok {
 		return true
 	}
-	_, ok = g.multiplex.layers[g.layer].weights[[2]int{yid, xid}]
+	_, ok = g.multiplex.layers[g.layer].weights[[2]int{int(yid), int(xid)}]
 	return ok
 }
 
@@ -531,10 +534,10 @@ func (g directedLayerHandle) HasEdgeBetween(x, y graph.Node) bool {
 func (g directedLayerHandle) HasEdgeFromTo(u, v graph.Node) bool {
 	uid := u.ID()
 	vid := v.ID()
-	if uid == vid {
+	if uid == vid || !isValidID(uid) || !isValidID(vid) {
 		return false
 	}
-	_, ok := g.multiplex.layers[g.layer].weights[[2]int{uid, vid}]
+	_, ok := g.multiplex.layers[g.layer].weights[[2]int{int(uid), int(vid)}]
 	return ok
 }
 
@@ -543,7 +546,10 @@ func (g directedLayerHandle) HasEdgeFromTo(u, v graph.Node) bool {
 func (g directedLayerHandle) Edge(u, v graph.Node) graph.Edge {
 	uid := u.ID()
 	vid := v.ID()
-	w, ok := g.multiplex.layers[g.layer].weights[[2]int{uid, vid}]
+	if uid == vid || !isValidID(uid) || !isValidID(vid) {
+		return nil
+	}
+	w, ok := g.multiplex.layers[g.layer].weights[[2]int{int(uid), int(vid)}]
 	if !ok {
 		return nil
 	}
@@ -562,10 +568,13 @@ func (g directedLayerHandle) EdgeBetween(x, y graph.Node) graph.Edge {
 func (g directedLayerHandle) Weight(x, y graph.Node) (w float64, ok bool) {
 	xid := x.ID()
 	yid := y.ID()
+	if !isValidID(xid) || !isValidID(yid) {
+		return 0, false
+	}
 	if xid == yid {
 		return g.multiplex.nodes[xid].weights[g.layer], true
 	}
-	w, ok = g.multiplex.layers[g.layer].weights[[2]int{xid, yid}]
+	w, ok = g.multiplex.layers[g.layer].weights[[2]int{int(xid), int(yid)}]
 	return w, ok
 }
 

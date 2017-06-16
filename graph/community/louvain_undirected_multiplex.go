@@ -75,7 +75,7 @@ func qUndirectedMultiplex(g UndirectedMultiplex, communities [][]graph.Node, wei
 		// Calculate the total edge weight of the layer
 		// and the table of penetrating edge weight sums.
 		var m2 float64
-		k := make(map[int]float64, len(nodes))
+		k := make(map[int64]float64, len(nodes))
 		for _, u := range nodes {
 			w := weight(u, u)
 			for _, v := range layer.From(u) {
@@ -123,16 +123,16 @@ func NewUndirectedLayers(layers ...graph.Undirected) (UndirectedLayers, error) {
 	if len(layers) == 0 {
 		return nil, nil
 	}
-	base := make(set.Ints)
+	base := make(set.Int64s)
 	for _, n := range layers[0].Nodes() {
 		base.Add(n.ID())
 	}
 	for i, l := range layers[1:] {
-		next := make(set.Ints)
+		next := make(set.Int64s)
 		for _, n := range l.Nodes() {
 			next.Add(n.ID())
 		}
-		if !set.IntsEqual(next, base) {
+		if !set.Int64sEqual(next, base) {
 			return nil, fmt.Errorf("community: layer ID mismatch between layers: %d", i+1)
 		}
 	}
@@ -298,7 +298,7 @@ func reduceUndirectedMultiplex(g UndirectedMultiplex, communities [][]graph.Node
 			layers:      make([]undirectedEdges, g.Depth()),
 			communities: communities,
 		}
-		communityOf := make(map[int]int, len(nodes))
+		communityOf := make(map[int64]int, len(nodes))
 		for i, n := range nodes {
 			r.nodes[i] = multiplexCommunity{id: i, nodes: []graph.Node{n}, weights: make([]float64, depth(weights))}
 			communityOf[n.ID()] = i
@@ -362,7 +362,7 @@ func reduceUndirectedMultiplex(g UndirectedMultiplex, communities [][]graph.Node
 		nodes:  make([]multiplexCommunity, len(communities)),
 		layers: make([]undirectedEdges, g.Depth()),
 	}
-	communityOf := make(map[int]int, commNodes)
+	communityOf := make(map[int64]int, commNodes)
 	for i, comm := range communities {
 		r.nodes[i] = multiplexCommunity{id: i, nodes: comm, weights: make([]float64, depth(weights))}
 		for _, n := range comm {
@@ -447,7 +447,7 @@ type undirectedLayerHandle struct {
 // Has returns whether the node exists within the graph.
 func (g undirectedLayerHandle) Has(n graph.Node) bool {
 	id := n.ID()
-	return id >= 0 || id < len(g.multiplex.nodes)
+	return 0 <= id && id < int64(len(g.multiplex.nodes))
 }
 
 // Nodes returns all the nodes in the graph.
@@ -473,13 +473,13 @@ func (g undirectedLayerHandle) From(u graph.Node) []graph.Node {
 func (g undirectedLayerHandle) HasEdgeBetween(x, y graph.Node) bool {
 	xid := x.ID()
 	yid := y.ID()
-	if xid == yid {
+	if xid == yid || !isValidID(xid) || !isValidID(yid) {
 		return false
 	}
 	if xid > yid {
 		xid, yid = yid, xid
 	}
-	_, ok := g.multiplex.layers[g.layer].weights[[2]int{xid, yid}]
+	_, ok := g.multiplex.layers[g.layer].weights[[2]int{int(xid), int(yid)}]
 	return ok
 }
 
@@ -488,10 +488,13 @@ func (g undirectedLayerHandle) HasEdgeBetween(x, y graph.Node) bool {
 func (g undirectedLayerHandle) Edge(u, v graph.Node) graph.Edge {
 	uid := u.ID()
 	vid := v.ID()
+	if uid == vid || !isValidID(uid) || !isValidID(vid) {
+		return nil
+	}
 	if vid < uid {
 		uid, vid = vid, uid
 	}
-	w, ok := g.multiplex.layers[g.layer].weights[[2]int{uid, vid}]
+	w, ok := g.multiplex.layers[g.layer].weights[[2]int{int(uid), int(vid)}]
 	if !ok {
 		return nil
 	}
@@ -510,13 +513,16 @@ func (g undirectedLayerHandle) EdgeBetween(x, y graph.Node) graph.Edge {
 func (g undirectedLayerHandle) Weight(x, y graph.Node) (w float64, ok bool) {
 	xid := x.ID()
 	yid := y.ID()
+	if !isValidID(xid) || !isValidID(yid) {
+		return 0, false
+	}
 	if xid == yid {
 		return g.multiplex.nodes[xid].weights[g.layer], true
 	}
 	if xid > yid {
 		xid, yid = yid, xid
 	}
-	w, ok = g.multiplex.layers[g.layer].weights[[2]int{xid, yid}]
+	w, ok = g.multiplex.layers[g.layer].weights[[2]int{int(xid), int(yid)}]
 	return w, ok
 }
 

@@ -326,10 +326,11 @@ tests:
 
 		rnd := rand.New(rand.NewSource(1)).Intn
 		for _, structure := range test.structures {
-			communityOf := make(map[int]int)
+			communityOf := make(map[int64]int)
 			communities := make([][]graph.Node, len(structure.memberships))
 			for i, c := range structure.memberships {
 				for n := range c {
+					n := int64(n)
 					communityOf[n] = i
 					communities[i] = append(communities[i], simple.Node(n))
 				}
@@ -365,6 +366,7 @@ tests:
 				migrated := make([][]graph.Node, len(structure.memberships))
 				for i, c := range structure.memberships {
 					for n := range c {
+						n := int64(n)
 						if n == target.ID() {
 							continue
 						}

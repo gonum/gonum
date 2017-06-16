@@ -20,7 +20,7 @@ var pageRankTests = []struct {
 	tol  float64
 
 	wantTol float64
-	want    map[int]float64
+	want    map[int64]float64
 }{
 	{
 		// Example graph from http://en.wikipedia.org/wiki/File:PageRanks-Example.svg 16:17, 8 July 2009
@@ -41,7 +41,7 @@ var pageRankTests = []struct {
 		tol:  1e-8,
 
 		wantTol: 1e-8,
-		want: map[int]float64{
+		want: map[int64]float64{
 			A: 0.03278149,
 			B: 0.38440095,
 			C: 0.34291029,
@@ -69,7 +69,7 @@ var pageRankTests = []struct {
 		tol:  1e-3,
 
 		wantTol: 1e-3,
-		want: map[int]float64{
+		want: map[int64]float64{
 			A: 0.250,
 			B: 0.140,
 			C: 0.140,
@@ -94,7 +94,7 @@ func TestPageRank(t *testing.T) {
 		got := PageRank(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[n], test.want[n], test.wantTol, test.wantTol) {
+			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
 				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -118,7 +118,7 @@ func TestPageRankSparse(t *testing.T) {
 		got := PageRankSparse(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
-			if !floats.EqualWithinAbsOrRel(got[n], test.want[n], test.wantTol, test.wantTol) {
+			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
 				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
 					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
 				break
@@ -127,7 +127,7 @@ func TestPageRankSparse(t *testing.T) {
 	}
 }
 
-func orderedFloats(w map[int]float64, prec int) []keyFloatVal {
+func orderedFloats(w map[int64]float64, prec int) []keyFloatVal {
 	o := make(orderedFloatsMap, 0, len(w))
 	for k, v := range w {
 		o = append(o, keyFloatVal{prec: prec, key: k, val: v})
@@ -138,7 +138,7 @@ func orderedFloats(w map[int]float64, prec int) []keyFloatVal {
 
 type keyFloatVal struct {
 	prec int
-	key  int
+	key  int64
 	val  float64
 }
 

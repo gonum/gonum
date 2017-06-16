@@ -21,11 +21,11 @@ type HubAuthority struct {
 // nodes of the directed graph g. HITS terminates when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func HITS(g graph.Directed, tol float64) map[int]HubAuthority {
+func HITS(g graph.Directed, tol float64) map[int64]HubAuthority {
 	nodes := g.Nodes()
 
 	// Make a topological copy of g with dense node IDs.
-	indexOf := make(map[int]int, len(nodes))
+	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
 	}
@@ -92,7 +92,7 @@ func HITS(g graph.Directed, tol float64) map[int]HubAuthority {
 		}
 	}
 
-	hubAuth := make(map[int]HubAuthority, len(nodes))
+	hubAuth := make(map[int64]HubAuthority, len(nodes))
 	for i, n := range nodes {
 		hubAuth[n.ID()] = HubAuthority{Hub: hub[i], Authority: auth[i]}
 	}

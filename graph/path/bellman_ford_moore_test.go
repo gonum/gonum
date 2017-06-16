@@ -45,7 +45,7 @@ func TestBellmanFordFrom(t *testing.T) {
 				test.Name, weight, test.Weight)
 		}
 
-		var got []int
+		var got []int64
 		for _, n := range p {
 			got = append(got, n.ID())
 		}

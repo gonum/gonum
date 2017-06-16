@@ -20,9 +20,9 @@ var aStarTests = []struct {
 	name string
 	g    graph.Graph
 
-	s, t      int
+	s, t      int64
 	heuristic Heuristic
-	wantPath  []int
+	wantPath  []int64
 }{
 	{
 		name: "simple path",
@@ -36,7 +36,7 @@ var aStarTests = []struct {
 		}(),
 
 		s: 1, t: 14,
-		wantPath: []int{1, 2, 6, 10, 14},
+		wantPath: []int64{1, 2, 6, 10, 14},
 	},
 	{
 		name: "small open graph",
@@ -143,7 +143,7 @@ func TestAStar(t *testing.T) {
 			t.Errorf("unexpected cost for %q: got:%v want:%v", test.name, cost, want)
 		}
 
-		var got = make([]int, 0, len(p))
+		var got = make([]int64, 0, len(p))
 		for _, n := range p {
 			got = append(got, n.ID())
 		}
@@ -211,11 +211,11 @@ func TestExhaustiveAStar(t *testing.T) {
 }
 
 type locatedNode struct {
-	id   int
+	id   int64
 	x, y float64
 }
 
-func (n locatedNode) ID() int { return n.id }
+func (n locatedNode) ID() int64 { return n.id }
 
 type weightedEdge struct {
 	from, to graph.Node
@@ -285,7 +285,7 @@ func TestAStarNullHeuristic(t *testing.T) {
 				test.Name, weight, test.Weight)
 		}
 
-		var got []int
+		var got []int64
 		for _, n := range p {
 			got = append(got, n.ID())
 		}

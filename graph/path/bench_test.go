@@ -72,10 +72,10 @@ func navigableSmallWorldUndirected(n, p, q int, r float64) graph.Undirected {
 
 func coordinatesForID(n graph.Node, c, r int) [2]int {
 	id := n.ID()
-	if id >= c*r {
+	if id >= int64(c*r) {
 		panic("out of range")
 	}
-	return [2]int{id / r, id % r}
+	return [2]int{int(id) / r, int(id) % r}
 }
 
 // manhattanBetween returns the Manhattan distance between a and b.

@@ -69,7 +69,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 				test.Name, weight, test.Weight)
 		}
 
-		var got []int
+		var got []int64
 		for _, n := range p {
 			got = append(got, n.ID())
 		}
@@ -101,7 +101,7 @@ var dynamicDStarLiteTests = []struct {
 
 	want        []graph.Node
 	weight      float64
-	wantedPaths map[int][]graph.Node
+	wantedPaths map[int64][]graph.Node
 }{
 	{
 		// This is the example shown in figures 6 and 7 of doi:10.1109/tro.2004.838026.
@@ -167,7 +167,7 @@ var dynamicDStarLiteTests = []struct {
 			simple.Node(14),
 		},
 		weight: 7.242640687119285,
-		wantedPaths: map[int][]graph.Node{
+		wantedPaths: map[int64][]graph.Node{
 			12: {simple.Node(12), simple.Node(7), simple.Node(3), simple.Node(9), simple.Node(14)},
 		},
 	},
@@ -558,7 +558,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 				Location:     test.s,
 			}
 			if remember {
-				l.Known = make(map[int]bool)
+				l.Known = make(map[int64]bool)
 			}
 
 			l.Grid.AllVisible = test.all

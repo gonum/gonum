@@ -44,8 +44,8 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded
 	path = newShortestFrom(s, g.Nodes())
 	tid := t.ID()
 
-	visited := make(set.Ints)
-	open := &aStarQueue{indexOf: make(map[int]int)}
+	visited := make(set.Int64s)
+	open := &aStarQueue{indexOf: make(map[int64]int)}
 	heap.Push(open, aStarNode{node: s, gscore: 0, fscore: h(s, t)})
 
 	for open.Len() != 0 {
@@ -101,7 +101,7 @@ type aStarNode struct {
 
 // aStarQueue is an A* priority queue.
 type aStarQueue struct {
-	indexOf map[int]int
+	indexOf map[int64]int
 	nodes   []aStarNode
 }
 
@@ -132,7 +132,7 @@ func (q *aStarQueue) Pop() interface{} {
 	return n
 }
 
-func (q *aStarQueue) update(id int, g, f float64) {
+func (q *aStarQueue) update(id int64, g, f float64) {
 	i, ok := q.indexOf[id]
 	if !ok {
 		return
@@ -142,7 +142,7 @@ func (q *aStarQueue) update(id int, g, f float64) {
 	heap.Fix(q, i)
 }
 
-func (q *aStarQueue) node(id int) (aStarNode, bool) {
+func (q *aStarQueue) node(id int64) (aStarNode, bool) {
 	loc, ok := q.indexOf[id]
 	if ok {
 		return q.nodes[loc], true

@@ -30,11 +30,11 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 
 	paths = newAllShortest(g.Nodes(), false)
 
-	sign := -1
+	sign := int64(-1)
 	for {
 		// Choose a random node ID until we find
 		// one that is not in g.
-		jg.q = sign * rand.Int()
+		jg.q = sign * rand.Int63()
 		if _, exists := paths.indexOf[jg.q]; !exists {
 			break
 		}
@@ -65,7 +65,7 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 }
 
 type johnsonWeightAdjuster struct {
-	q int
+	q int64
 	g graph.Graph
 
 	from   func(graph.Node) []graph.Node
@@ -133,6 +133,6 @@ func (johnsonWeightAdjuster) HasEdgeBetween(_, _ graph.Node) bool {
 	panic("path: unintended use of johnsonWeightAdjuster")
 }
 
-type johnsonGraphNode int
+type johnsonGraphNode int64
 
-func (n johnsonGraphNode) ID() int { return int(n) }
+func (n johnsonGraphNode) ID() int64 { return int64(n) }

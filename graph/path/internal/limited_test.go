@@ -1161,7 +1161,7 @@ func TestLimitedVisionGrid(t *testing.T) {
 			Location:     test.path[0],
 		}
 		if test.remember {
-			l.Known = make(map[int]bool)
+			l.Known = make(map[int64]bool)
 		}
 		l.Grid.AllowDiagonal = test.diag
 

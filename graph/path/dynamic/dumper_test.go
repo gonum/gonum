@@ -30,9 +30,9 @@ func (d *dumper) dump(withpath bool) {
 	if d == nil {
 		return
 	}
-	var pathStep map[int]int
+	var pathStep map[int64]int
 	if withpath {
-		pathStep = make(map[int]int)
+		pathStep = make(map[int64]int)
 		path, _ := d.dStarLite.Path()
 		for i, n := range path {
 			pathStep[n.ID()] = i

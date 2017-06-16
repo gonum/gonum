@@ -26,7 +26,7 @@ type Shortest struct {
 	// the id-dense representation of the
 	// graph and the potentially id-sparse
 	// nodes held in nodes.
-	indexOf map[int]int
+	indexOf map[int64]int
 
 	// dist and next represent the shortest
 	// paths between nodes.
@@ -45,7 +45,7 @@ type Shortest struct {
 }
 
 func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
-	indexOf := make(map[int]int, len(nodes))
+	indexOf := make(map[int64]int, len(nodes))
 	uid := u.ID()
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -115,7 +115,7 @@ type AllShortest struct {
 	// the id-dense representation of the
 	// graph and the potentially id-sparse
 	// nodes held in nodes.
-	indexOf map[int]int
+	indexOf map[int64]int
 
 	// dist, next and forward represent
 	// the shortest paths between nodes.
@@ -147,7 +147,7 @@ type AllShortest struct {
 }
 
 func newAllShortest(nodes []graph.Node, forward bool) AllShortest {
-	indexOf := make(map[int]int, len(nodes))
+	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
 	}

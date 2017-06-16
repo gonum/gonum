@@ -302,15 +302,15 @@ func (Schwefel) Func(x []float64) float64 {
 	return 418.9829*float64(len(x)) - sum
 }
 
-// Schubert implements the Schubert function, a two-dimensional function
+// Shubert implements the Shubert function, a two-dimensional function
 // with many local minima and many global minima. Its typical domain is the
 // square [-10, 10]^2.
 //  f(x) = (sum_{i=1}^5 i cos((i+1)*x_0+i)) * (\sum_{i=1}^5 i cos((i+1)*x_1+i))
 // Reference:
 //  https://www.sfu.ca/~ssurjano/shubert.html (obtained June 2017)
-type Schubert struct{}
+type Shubert struct{}
 
-func (Schubert) Func(x []float64) float64 {
+func (Shubert) Func(x []float64) float64 {
 	if len(x) != 2 {
 		panic(badInputDim)
 	}

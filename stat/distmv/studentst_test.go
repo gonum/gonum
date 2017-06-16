@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -19,7 +19,7 @@ func TestStudentTProbs(t *testing.T) {
 	for _, test := range []struct {
 		nu    float64
 		mu    []float64
-		sigma *mat64.SymDense
+		sigma *mat.SymDense
 
 		x     [][]float64
 		probs []float64
@@ -27,7 +27,7 @@ func TestStudentTProbs(t *testing.T) {
 		{
 			nu:    3,
 			mu:    []float64{0, 0},
-			sigma: mat64.NewSymDense(2, []float64{1, 0, 0, 1}),
+			sigma: mat.NewSymDense(2, []float64{1, 0, 0, 1}),
 
 			x: [][]float64{
 				{0, 0},
@@ -46,7 +46,7 @@ func TestStudentTProbs(t *testing.T) {
 		{
 			nu:    4,
 			mu:    []float64{2, -3},
-			sigma: mat64.NewSymDense(2, []float64{8, -1, -1, 5}),
+			sigma: mat.NewSymDense(2, []float64{8, -1, -1, 5}),
 
 			x: [][]float64{
 				{0, 0},
@@ -87,25 +87,25 @@ func TestStudentsTRand(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		mean   []float64
-		cov    *mat64.SymDense
+		cov    *mat.SymDense
 		nu     float64
 		tolcov float64
 	}{
 		{
 			mean:   []float64{0, 0},
-			cov:    mat64.NewSymDense(2, []float64{1, 0, 0, 1}),
+			cov:    mat.NewSymDense(2, []float64{1, 0, 0, 1}),
 			nu:     3,
 			tolcov: 1e-2,
 		},
 		{
 			mean:   []float64{3, 4},
-			cov:    mat64.NewSymDense(2, []float64{5, 1.2, 1.2, 6}),
+			cov:    mat.NewSymDense(2, []float64{5, 1.2, 1.2, 6}),
 			nu:     8,
 			tolcov: 1e-2,
 		},
 		{
 			mean:   []float64{3, 4, -2},
-			cov:    mat64.NewSymDense(3, []float64{5, 1.2, -0.8, 1.2, 6, 0.4, -0.8, 0.4, 2}),
+			cov:    mat.NewSymDense(3, []float64{5, 1.2, -0.8, 1.2, 6, 0.4, -0.8, 0.4, 2}),
 			nu:     8,
 			tolcov: 1e-2,
 		},
@@ -116,13 +116,13 @@ func TestStudentsTRand(t *testing.T) {
 		}
 		nSamples := 10000000
 		dim := len(test.mean)
-		samps := mat64.NewDense(nSamples, dim, nil)
+		samps := mat.NewDense(nSamples, dim, nil)
 		for i := 0; i < nSamples; i++ {
 			s.Rand(samps.RawRowView(i))
 		}
 		estMean := make([]float64, dim)
 		for i := range estMean {
-			estMean[i] = stat.Mean(mat64.Col(nil, i, samps), nil)
+			estMean[i] = stat.Mean(mat.Col(nil, i, samps), nil)
 		}
 		mean := s.Mean(nil)
 		if !floats.EqualApprox(estMean, mean, 1e-2) {
@@ -130,7 +130,7 @@ func TestStudentsTRand(t *testing.T) {
 		}
 		cov := s.CovarianceMatrix(nil)
 		estCov := stat.CovarianceMatrix(nil, samps, nil)
-		if !mat64.EqualApprox(estCov, cov, test.tolcov) {
+		if !mat.EqualApprox(estCov, cov, test.tolcov) {
 			t.Errorf("Cov mismatch: want: %v, got %v", cov, estCov)
 		}
 	}
@@ -140,7 +140,7 @@ func TestStudentsTConditional(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
 	for _, test := range []struct {
 		mean []float64
-		cov  *mat64.SymDense
+		cov  *mat.SymDense
 		nu   float64
 
 		idx    []int
@@ -149,7 +149,7 @@ func TestStudentsTConditional(t *testing.T) {
 	}{
 		{
 			mean:  []float64{3, 4, -2},
-			cov:   mat64.NewSymDense(3, []float64{5, 1.2, -0.8, 1.2, 6, 0.4, -0.8, 0.4, 2}),
+			cov:   mat.NewSymDense(3, []float64{5, 1.2, -0.8, 1.2, 6, 0.4, -0.8, 0.4, 2}),
 			nu:    8,
 			idx:   []int{0},
 			value: []float64{6},
@@ -182,11 +182,11 @@ func TestStudentsTConditional(t *testing.T) {
 			muOb[i] = test.mean[v]
 		}
 
-		var sig11, sig22 mat64.SymDense
+		var sig11, sig22 mat.SymDense
 		sig11.SubsetSym(&s.sigma, unob)
 		sig22.SubsetSym(&s.sigma, ob)
 
-		sig12 := mat64.NewDense(len(unob), len(ob), nil)
+		sig12 := mat.NewDense(len(unob), len(ob), nil)
 		for i := range unob {
 			for j := range ob {
 				sig12.Set(i, j, s.sigma.At(unob[i], ob[j]))
@@ -198,9 +198,9 @@ func TestStudentsTConditional(t *testing.T) {
 		floats.Sub(shift, muOb)
 
 		newMu := make([]float64, len(muUnob))
-		newMuVec := mat64.NewVector(len(muUnob), newMu)
-		shiftVec := mat64.NewVector(len(shift), shift)
-		var tmp mat64.Vector
+		newMuVec := mat.NewVector(len(muUnob), newMu)
+		shiftVec := mat.NewVector(len(shift), shift)
+		var tmp mat.Vector
 		tmp.SolveVec(&sig22, shiftVec)
 		newMuVec.MulVec(sig12, &tmp)
 		floats.Add(newMu, muUnob)
@@ -209,16 +209,16 @@ func TestStudentsTConditional(t *testing.T) {
 			t.Errorf("Mu mismatch. Got %v, want %v", sUp.mu, newMu)
 		}
 
-		var tmp2 mat64.Dense
+		var tmp2 mat.Dense
 		tmp2.Solve(&sig22, sig12.T())
 
-		var tmp3 mat64.Dense
+		var tmp3 mat.Dense
 		tmp3.Mul(sig12, &tmp2)
 		tmp3.Sub(&sig11, &tmp3)
 
-		dot := mat64.Dot(shiftVec, &tmp)
+		dot := mat.Dot(shiftVec, &tmp)
 		tmp3.Scale((test.nu+dot)/(test.nu+float64(len(ob))), &tmp3)
-		if !mat64.EqualApprox(&tmp3, &sUp.sigma, 1e-10) {
+		if !mat.EqualApprox(&tmp3, &sUp.sigma, 1e-10) {
 			t.Errorf("Sigma mismatch")
 		}
 	}
@@ -227,17 +227,17 @@ func TestStudentsTConditional(t *testing.T) {
 func TestStudentsTMarginalSingle(t *testing.T) {
 	for _, test := range []struct {
 		mu    []float64
-		sigma *mat64.SymDense
+		sigma *mat.SymDense
 		nu    float64
 	}{
 		{
 			mu:    []float64{2, 3, 4},
-			sigma: mat64.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			sigma: mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
 			nu:    5,
 		},
 		{
 			mu:    []float64{2, 3, 4, 5},
-			sigma: mat64.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+			sigma: mat.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
 			nu:    6,
 		},
 	} {

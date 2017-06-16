@@ -7,7 +7,7 @@ package optimize
 import (
 	"math"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // BFGS implements the Broyden–Fletcher–Goldfarb–Shanno optimization method. It
@@ -24,13 +24,13 @@ type BFGS struct {
 	ls *LinesearchMethod
 
 	dim  int
-	x    mat64.Vector // Location of the last major iteration.
-	grad mat64.Vector // Gradient at the last major iteration.
-	s    mat64.Vector // Difference between locations in this and the previous iteration.
-	y    mat64.Vector // Difference between gradients in this and the previous iteration.
-	tmp  mat64.Vector
+	x    mat.Vector // Location of the last major iteration.
+	grad mat.Vector // Gradient at the last major iteration.
+	s    mat.Vector // Difference between locations in this and the previous iteration.
+	y    mat.Vector // Difference between gradients in this and the previous iteration.
+	tmp  mat.Vector
 
-	invHess *mat64.SymDense
+	invHess *mat.SymDense
 
 	first bool // Indicator of the first iteration.
 }
@@ -57,8 +57,8 @@ func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	b.dim = dim
 	b.first = true
 
-	x := mat64.NewVector(dim, loc.X)
-	grad := mat64.NewVector(dim, loc.Gradient)
+	x := mat.NewVector(dim, loc.X)
+	grad := mat.NewVector(dim, loc.Gradient)
 	b.x.CloneVec(x)
 	b.grad.CloneVec(grad)
 
@@ -67,18 +67,18 @@ func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	b.tmp.Reset()
 
 	if b.invHess == nil || cap(b.invHess.RawSymmetric().Data) < dim*dim {
-		b.invHess = mat64.NewSymDense(dim, nil)
+		b.invHess = mat.NewSymDense(dim, nil)
 	} else {
-		b.invHess = mat64.NewSymDense(dim, b.invHess.RawSymmetric().Data[:dim*dim])
+		b.invHess = mat.NewSymDense(dim, b.invHess.RawSymmetric().Data[:dim*dim])
 	}
 	// The values of the inverse Hessian are initialized in the first call to
 	// NextDirection.
 
 	// Initial direction is just negative of the gradient because the Hessian
 	// is an identity matrix.
-	d := mat64.NewVector(dim, dir)
+	d := mat.NewVector(dim, dir)
 	d.ScaleVec(-1, grad)
-	return 1 / mat64.Norm(d, 2)
+	return 1 / mat.Norm(d, 2)
 }
 
 func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
@@ -93,21 +93,21 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		panic("bfgs: unexpected size mismatch")
 	}
 
-	x := mat64.NewVector(dim, loc.X)
-	grad := mat64.NewVector(dim, loc.Gradient)
+	x := mat.NewVector(dim, loc.X)
+	grad := mat.NewVector(dim, loc.Gradient)
 
 	// s = x_{k+1} - x_{k}
 	b.s.SubVec(x, &b.x)
 	// y = g_{k+1} - g_{k}
 	b.y.SubVec(grad, &b.grad)
 
-	sDotY := mat64.Dot(&b.s, &b.y)
+	sDotY := mat.Dot(&b.s, &b.y)
 
 	if b.first {
 		// Rescale the initial Hessian.
 		// From: Nocedal, J., Wright, S.: Numerical Optimization (2nd ed).
 		//       Springer (2006), page 143, eq. 6.20.
-		yDotY := mat64.Dot(&b.y, &b.y)
+		yDotY := mat.Dot(&b.y, &b.y)
 		scale := sDotY / yDotY
 		for i := 0; i < dim; i++ {
 			for j := i; j < dim; j++ {
@@ -130,7 +130,7 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		//
 		// Note that y_k^T B_k^-1 y_k is a scalar, and that the third term is a
 		// rank-two update where B_k^-1 y_k is one vector and s_k is the other.
-		yBy := mat64.Inner(&b.y, b.invHess, &b.y)
+		yBy := mat.Inner(&b.y, b.invHess, &b.y)
 		b.tmp.MulVec(b.invHess, &b.y)
 		scale := (1 + yBy/sDotY) / sDotY
 		b.invHess.SymRankOne(b.invHess, scale, &b.s)
@@ -142,7 +142,7 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	b.grad.CopyVec(grad)
 
 	// New direction is stored in dir.
-	d := mat64.NewVector(dim, dir)
+	d := mat.NewVector(dim, dir)
 	d.MulVec(b.invHess, grad)
 	d.ScaleVec(-1, d)
 

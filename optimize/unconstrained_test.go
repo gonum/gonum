@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize/functions"
 )
 
@@ -1237,7 +1237,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			test.p.Grad(settings.InitialGradient, test.x)
 		}
 		if method.Needs().Hessian {
-			settings.InitialHessian = mat64.NewSymDense(len(test.x), nil)
+			settings.InitialHessian = mat.NewSymDense(len(test.x), nil)
 			test.p.Hess(settings.InitialHessian, test.x)
 		}
 

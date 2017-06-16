@@ -11,7 +11,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // TODO(btracey): Could have a solver structure with an abstract factorizer. With
@@ -85,12 +85,12 @@ const (
 //  Strang, Gilbert. "Linear Algebra and Applications." Academic, New York (1976).
 // For a detailed video introduction, see lectures 11-13 of UC Math 352
 //  https://www.youtube.com/watch?v=ESzYPFkY3og&index=11&list=PLh464gFUoJWOmBYla3zbZbc4nv2AXez6X.
-func Simplex(c []float64, A mat64.Matrix, b []float64, tol float64, initialBasic []int) (optF float64, optX []float64, err error) {
+func Simplex(c []float64, A mat.Matrix, b []float64, tol float64, initialBasic []int) (optF float64, optX []float64, err error) {
 	ans, x, _, err := simplex(initialBasic, c, A, b, tol)
 	return ans, x, err
 }
 
-func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol float64) (float64, []float64, []int, error) {
+func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol float64) (float64, []float64, []int, error) {
 	err := verifyInputs(initialBasic, c, A, b)
 	if err != nil {
 		if err == ErrUnbounded {
@@ -123,7 +123,7 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 	// solution.
 
 	var basicIdxs []int // The indices of the non-zero x values.
-	var ab *mat64.Dense // The subset of columns of A listed in basicIdxs.
+	var ab *mat.Dense   // The subset of columns of A listed in basicIdxs.
 	var xb []float64    // The non-zero elements of x. xb = ab^-1 b
 
 	if initialBasic != nil {
@@ -131,7 +131,7 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 		if len(initialBasic) != m {
 			panic("lp: incorrect number of initial vectors")
 		}
-		ab = mat64.NewDense(m, len(initialBasic), nil)
+		ab = mat.NewDense(m, len(initialBasic), nil)
 		extractColumns(ab, A, initialBasic)
 		xb = make([]float64, m)
 		err = initializeFromBasic(xb, ab, b)
@@ -175,11 +175,11 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 	for i, idx := range nonBasicIdx {
 		cn[i] = c[idx]
 	}
-	an := mat64.NewDense(m, len(nonBasicIdx), nil)
+	an := mat.NewDense(m, len(nonBasicIdx), nil)
 	extractColumns(an, A, nonBasicIdx)
 
-	bVec := mat64.NewVector(len(b), b)
-	cbVec := mat64.NewVector(len(cb), cb)
+	bVec := mat.NewVector(len(b), b)
+	cbVec := mat.NewVector(len(cb), cb)
 
 	// Temporary data needed each iteration. (Described later)
 	r := make([]float64, n-m)
@@ -214,13 +214,13 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 	// of the rule in step 4 to avoid cycling.
 	for {
 		// Compute reduced costs -- r = cn - an^T ab^-T cb
-		var tmp mat64.Vector
+		var tmp mat.Vector
 		err = tmp.SolveVec(ab.T(), cbVec)
 		if err != nil {
 			break
 		}
 		data := make([]float64, n-m)
-		tmp2 := mat64.NewVector(n-m, data)
+		tmp2 := mat.NewVector(n-m, data)
 		tmp2.MulVec(an.T(), &tmp)
 		floats.SubTo(r, cn, data)
 
@@ -261,13 +261,13 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 		// Replace the constrained basicIdx with the newIdx.
 		basicIdxs[replace], nonBasicIdx[minIdx] = nonBasicIdx[minIdx], basicIdxs[replace]
 		cb[replace], cn[minIdx] = cn[minIdx], cb[replace]
-		tmpCol1 := mat64.Col(nil, replace, ab)
-		tmpCol2 := mat64.Col(nil, minIdx, an)
+		tmpCol1 := mat.Col(nil, replace, ab)
+		tmpCol2 := mat.Col(nil, minIdx, an)
 		ab.SetCol(replace, tmpCol2)
 		an.SetCol(minIdx, tmpCol1)
 
 		// Compute the new xb.
-		xbVec := mat64.NewVector(len(xb), xb)
+		xbVec := mat.NewVector(len(xb), xb)
 		err = xbVec.SolveVec(ab, bVec)
 		if err != nil {
 			break
@@ -285,15 +285,15 @@ func simplex(initialBasic []int, c []float64, A mat64.Matrix, b []float64, tol f
 
 // computeMove computes how far can be moved replacing each index. The results
 // are stored into move.
-func computeMove(move []float64, minIdx int, A mat64.Matrix, ab *mat64.Dense, xb []float64, nonBasicIdx []int) error {
+func computeMove(move []float64, minIdx int, A mat.Matrix, ab *mat.Dense, xb []float64, nonBasicIdx []int) error {
 	// Find ae.
-	col := mat64.Col(nil, nonBasicIdx[minIdx], A)
-	aCol := mat64.NewVector(len(col), col)
+	col := mat.Col(nil, nonBasicIdx[minIdx], A)
+	aCol := mat.NewVector(len(col), col)
 
 	// d = - Ab^-1 Ae
 	nb, _ := ab.Dims()
 	d := make([]float64, nb)
-	dVec := mat64.NewVector(nb, d)
+	dVec := mat.NewVector(nb, d)
 	err := dVec.SolveVec(ab, aCol)
 	if err != nil {
 		return ErrLinSolve
@@ -326,7 +326,7 @@ func computeMove(move []float64, minIdx int, A mat64.Matrix, ab *mat64.Dense, xb
 // replaceBland uses the Bland rule to find the indices to swap if the minimum
 // move is 0. The indices to be swapped are replace and minIdx (following the
 // nomenclature in the main routine).
-func replaceBland(A mat64.Matrix, ab *mat64.Dense, xb []float64, basicIdxs, nonBasicIdx []int, r, move []float64) (replace, minIdx int, err error) {
+func replaceBland(A mat.Matrix, ab *mat.Dense, xb []float64, basicIdxs, nonBasicIdx []int, r, move []float64) (replace, minIdx int, err error) {
 	m, _ := A.Dims()
 	// Use the traditional bland rule, except don't replace a constraint which
 	// causes the new ab to be singular.
@@ -353,10 +353,10 @@ func replaceBland(A mat64.Matrix, ab *mat64.Dense, xb []float64, basicIdxs, nonB
 			}
 			copy(biCopy, basicIdxs)
 			biCopy[replace] = nonBasicIdx[minIdx]
-			abTmp := mat64.NewDense(m, len(biCopy), nil)
+			abTmp := mat.NewDense(m, len(biCopy), nil)
 			extractColumns(abTmp, A, biCopy)
 			// If the condition number is reasonable, use this index.
-			if mat64.Cond(abTmp, 1) < 1e16 {
+			if mat.Cond(abTmp, 1) < 1e16 {
 				return replace, minIdx, nil
 			}
 		}
@@ -364,7 +364,7 @@ func replaceBland(A mat64.Matrix, ab *mat64.Dense, xb []float64, basicIdxs, nonB
 	return -1, -1, ErrBland
 }
 
-func verifyInputs(initialBasic []int, c []float64, A mat64.Matrix, b []float64) error {
+func verifyInputs(initialBasic []int, c []float64, A mat.Matrix, b []float64) error {
 	m, n := A.Dims()
 	if len(c) != n {
 		panic("lp: c vector incorrect length")
@@ -426,14 +426,14 @@ func verifyInputs(initialBasic []int, c []float64, A mat64.Matrix, b []float64) 
 //
 // If the columns of A are not linearly independent or if the initial set is not
 // feasible, an error is returned.
-func initializeFromBasic(xb []float64, ab *mat64.Dense, b []float64) error {
+func initializeFromBasic(xb []float64, ab *mat.Dense, b []float64) error {
 	m, _ := ab.Dims()
 	if len(xb) != m {
 		panic("simplex: bad xb length")
 	}
-	xbMat := mat64.NewVector(m, xb)
+	xbMat := mat.NewVector(m, xb)
 
-	err := xbMat.SolveVec(ab, mat64.NewVector(m, b))
+	err := xbMat.SolveVec(ab, mat.NewVector(m, b))
 	if err != nil {
 		return errors.New("lp: subcolumns of A for supplied initial basic singular")
 	}
@@ -453,7 +453,7 @@ func initializeFromBasic(xb []float64, ab *mat64.Dense, b []float64) error {
 }
 
 // extractColumns copies the columns specified by cols into the columns of dst.
-func extractColumns(dst *mat64.Dense, A mat64.Matrix, cols []int) {
+func extractColumns(dst *mat.Dense, A mat.Matrix, cols []int) {
 	r, c := dst.Dims()
 	ra, _ := A.Dims()
 	if ra != r {
@@ -464,14 +464,14 @@ func extractColumns(dst *mat64.Dense, A mat64.Matrix, cols []int) {
 	}
 	col := make([]float64, r)
 	for j, idx := range cols {
-		mat64.Col(col, idx, A)
+		mat.Col(col, idx, A)
 		dst.SetCol(j, col)
 	}
 }
 
 // findInitialBasic finds an initial basic solution, and returns the basic
 // indices, ab, and xb.
-func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float64, error) {
+func findInitialBasic(A mat.Matrix, b []float64) ([]int, *mat.Dense, []float64, error) {
 	m, n := A.Dims()
 	basicIdxs := findLinearlyIndependent(A)
 	if len(basicIdxs) != m {
@@ -480,7 +480,7 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 
 	// It may be that this linearly independent basis is also a feasible set. If
 	// so, the Phase I problem can be avoided.
-	ab := mat64.NewDense(m, len(basicIdxs), nil)
+	ab := mat.NewDense(m, len(basicIdxs), nil)
 	extractColumns(ab, A, basicIdxs)
 	xb := make([]float64, m)
 	err := initializeFromBasic(xb, ab, b)
@@ -519,7 +519,7 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 		if i == minIdx {
 			continue
 		}
-		mat64.Col(col, v, A)
+		mat.Col(col, v, A)
 		floats.Sub(aX1, col)
 	}
 
@@ -527,7 +527,7 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 	// aNew = [A, a_{n+1}]
 	// bNew = b
 	// cNew = 1 for x_{n+1}
-	aNew := mat64.NewDense(m, n+1, nil)
+	aNew := mat.NewDense(m, n+1, nil)
 	aNew.Copy(A)
 	aNew.SetCol(n, aX1)
 	basicIdxs[minIdx] = n // swap minIdx with n in the basic set.
@@ -574,7 +574,7 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 		}
 		newBasic[addedIdx] = i
 		if set {
-			mat64.Col(col, i, A)
+			mat.Col(col, i, A)
 			ab.SetCol(addedIdx, col)
 		} else {
 			extractColumns(ab, A, newBasic)
@@ -590,10 +590,10 @@ func findInitialBasic(A mat64.Matrix, b []float64) ([]int, *mat64.Dense, []float
 
 // findLinearlyIndependnt finds a set of linearly independent columns of A, and
 // returns the column indexes of the linearly independent columns.
-func findLinearlyIndependent(A mat64.Matrix) []int {
+func findLinearlyIndependent(A mat.Matrix) []int {
 	m, n := A.Dims()
 	idxs := make([]int, 0, m)
-	columns := mat64.NewDense(m, m, nil)
+	columns := mat.NewDense(m, m, nil)
 	newCol := make([]float64, m)
 	// Walk in reverse order because slack variables are typically the last columns
 	// of A.
@@ -601,7 +601,7 @@ func findLinearlyIndependent(A mat64.Matrix) []int {
 		if len(idxs) == m {
 			break
 		}
-		mat64.Col(newCol, i, A)
+		mat.Col(newCol, i, A)
 		columns.SetCol(len(idxs), newCol)
 		if len(idxs) == 0 {
 			// A column is linearly independent from the null set.
@@ -609,7 +609,7 @@ func findLinearlyIndependent(A mat64.Matrix) []int {
 			idxs = append(idxs, i)
 			continue
 		}
-		if mat64.Cond(columns.View(0, 0, m, len(idxs)+1), 1) > 1e12 {
+		if mat.Cond(columns.View(0, 0, m, len(idxs)+1), 1) > 1e12 {
 			// Not linearly independent.
 			continue
 		}

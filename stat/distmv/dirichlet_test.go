@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 func TestDirichlet(t *testing.T) {
@@ -64,7 +64,7 @@ func TestDirichlet(t *testing.T) {
 	} {
 		d := test.Dir
 		dim := d.Dim()
-		x := mat64.NewDense(test.N, dim, nil)
+		x := mat.NewDense(test.N, dim, nil)
 		generateSamples(x, d)
 		checkMean(t, cas, x, d, 1e-3)
 		checkCov(t, cas, x, d, 1e-3)

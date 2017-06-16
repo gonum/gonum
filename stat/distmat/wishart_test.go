@@ -10,39 +10,39 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 func TestWishart(t *testing.T) {
 	for c, test := range []struct {
-		v   *mat64.SymDense
+		v   *mat.SymDense
 		nu  float64
-		xs  []*mat64.SymDense
+		xs  []*mat.SymDense
 		lps []float64
 	}{
 		// Logprob data compared with scipy.
 		{
-			v:  mat64.NewSymDense(2, []float64{1, 0, 0, 1}),
+			v:  mat.NewSymDense(2, []float64{1, 0, 0, 1}),
 			nu: 4,
-			xs: []*mat64.SymDense{
-				mat64.NewSymDense(2, []float64{0.9, 0.1, 0.1, 0.9}),
+			xs: []*mat.SymDense{
+				mat.NewSymDense(2, []float64{0.9, 0.1, 0.1, 0.9}),
 			},
 			lps: []float64{-4.2357432031863409},
 		},
 		{
-			v:  mat64.NewSymDense(2, []float64{0.8, -0.2, -0.2, 0.7}),
+			v:  mat.NewSymDense(2, []float64{0.8, -0.2, -0.2, 0.7}),
 			nu: 5,
-			xs: []*mat64.SymDense{
-				mat64.NewSymDense(2, []float64{0.9, 0.1, 0.1, 0.9}),
-				mat64.NewSymDense(2, []float64{0.3, -0.1, -0.1, 0.7}),
+			xs: []*mat.SymDense{
+				mat.NewSymDense(2, []float64{0.9, 0.1, 0.1, 0.9}),
+				mat.NewSymDense(2, []float64{0.3, -0.1, -0.1, 0.7}),
 			},
 			lps: []float64{-4.2476495605333575, -4.9993285370378633},
 		},
 		{
-			v:  mat64.NewSymDense(3, []float64{0.8, 0.3, 0.1, 0.3, 0.7, -0.1, 0.1, -0.1, 7}),
+			v:  mat.NewSymDense(3, []float64{0.8, 0.3, 0.1, 0.3, 0.7, -0.1, 0.1, -0.1, 7}),
 			nu: 5,
-			xs: []*mat64.SymDense{
-				mat64.NewSymDense(3, []float64{1, 0.2, -0.3, 0.2, 0.6, -0.2, -0.3, -0.2, 6}),
+			xs: []*mat.SymDense{
+				mat.NewSymDense(3, []float64{1, 0.2, -0.3, 0.2, 0.6, -0.2, -0.3, -0.2, 6}),
 			},
 			lps: []float64{-11.010982249229421},
 		},
@@ -54,7 +54,7 @@ func TestWishart(t *testing.T) {
 		for i, x := range test.xs {
 			lp := w.LogProbSym(x)
 
-			var chol mat64.Cholesky
+			var chol mat.Cholesky
 			ok := chol.Factorize(x)
 			if !ok {
 				panic("bad test")
@@ -80,25 +80,25 @@ func TestWishart(t *testing.T) {
 
 func TestWishartRand(t *testing.T) {
 	for c, test := range []struct {
-		v       *mat64.SymDense
+		v       *mat.SymDense
 		nu      float64
 		samples int
 		tol     float64
 	}{
 		{
-			v:       mat64.NewSymDense(2, []float64{0.8, -0.2, -0.2, 0.7}),
+			v:       mat.NewSymDense(2, []float64{0.8, -0.2, -0.2, 0.7}),
 			nu:      5,
 			samples: 30000,
 			tol:     3e-2,
 		},
 		{
-			v:       mat64.NewSymDense(3, []float64{0.8, 0.3, 0.1, 0.3, 0.7, -0.1, 0.1, -0.1, 7}),
+			v:       mat.NewSymDense(3, []float64{0.8, 0.3, 0.1, 0.3, 0.7, -0.1, 0.1, -0.1, 7}),
 			nu:      5,
 			samples: 300000,
 			tol:     3e-2,
 		},
 		{
-			v: mat64.NewSymDense(4, []float64{
+			v: mat.NewSymDense(4, []float64{
 				0.8, 0.3, 0.1, -0.2,
 				0.3, 0.7, -0.1, 0.4,
 				0.1, -0.1, 7, 1,
@@ -114,16 +114,16 @@ func TestWishartRand(t *testing.T) {
 		if !ok {
 			panic("bad test")
 		}
-		mean := mat64.NewSymDense(dim, nil)
-		x := mat64.NewSymDense(dim, nil)
+		mean := mat.NewSymDense(dim, nil)
+		x := mat.NewSymDense(dim, nil)
 		for i := 0; i < test.samples; i++ {
 			w.RandSym(x)
 			x.ScaleSym(1/float64(test.samples), x)
 			mean.AddSym(mean, x)
 		}
 		trueMean := w.MeanSym(nil)
-		if !mat64.EqualApprox(trueMean, mean, test.tol) {
-			t.Errorf("Case %d: Mismatch between estimated and true mean. Got\n%0.4v\nWant\n%0.4v\n", c, mat64.Formatted(mean), mat64.Formatted(trueMean))
+		if !mat.EqualApprox(trueMean, mean, test.tol) {
+			t.Errorf("Case %d: Mismatch between estimated and true mean. Got\n%0.4v\nWant\n%0.4v\n", c, mat.Formatted(mean), mat.Formatted(trueMean))
 		}
 	}
 }

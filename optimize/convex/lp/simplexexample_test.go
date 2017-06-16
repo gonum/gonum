@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"log"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize/convex/lp"
 )
 
 func ExampleSimplex() {
 	c := []float64{-1, -2, 0, 0}
-	A := mat64.NewDense(2, 4, []float64{-1, 2, 1, 0, 3, 1, 0, 1})
+	A := mat.NewDense(2, 4, []float64{-1, 2, 1, 0, 3, 1, 0, 1})
 	b := []float64{4, 9}
 
 	opt, x, err := lp.Simplex(c, A, b, 0, nil)

@@ -9,7 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // UndirectedMatrix represents an undirected graph using an adjacency
@@ -17,7 +17,7 @@ import (
 // Edges are stored implicitly as an edge weight, so edges stored in
 // the graph are not recoverable.
 type UndirectedMatrix struct {
-	mat   *mat64.SymDense
+	mat   *mat.SymDense
 	nodes []graph.Node
 
 	self   float64
@@ -29,17 +29,17 @@ type UndirectedMatrix struct {
 // specifies the cost of self connection, and absent specifies the weight
 // returned for absent edges.
 func NewUndirectedMatrix(n int, init, self, absent float64) *UndirectedMatrix {
-	mat := make([]float64, n*n)
+	matrix := make([]float64, n*n)
 	if init != 0 {
-		for i := range mat {
-			mat[i] = init
+		for i := range matrix {
+			matrix[i] = init
 		}
 	}
-	for i := 0; i < len(mat); i += n + 1 {
-		mat[i] = self
+	for i := 0; i < len(matrix); i += n + 1 {
+		matrix[i] = self
 	}
 	return &UndirectedMatrix{
-		mat:    mat64.NewSymDense(n, mat),
+		mat:    mat.NewSymDense(n, matrix),
 		self:   self,
 		absent: absent,
 	}
@@ -216,8 +216,8 @@ func (g *UndirectedMatrix) Degree(n graph.Node) int {
 	return deg
 }
 
-// Matrix returns the mat64.Matrix representation of the graph.
-func (g *UndirectedMatrix) Matrix() mat64.Matrix {
+// Matrix returns the mat.Matrix representation of the graph.
+func (g *UndirectedMatrix) Matrix() mat.Matrix {
 	// Prevent alteration of dimensions of the returned matrix.
 	m := *g.mat
 	return &m

@@ -9,7 +9,7 @@ import (
 	"math/rand"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
@@ -61,11 +61,11 @@ func NewDirichlet(alpha []float64, src *rand.Rand) *Dirichlet {
 //  covariance(i, j) = E[(x_i - E[x_i])(x_j - E[x_j])]
 // If the input matrix is nil a new matrix is allocated, otherwise the result
 // is stored in-place into the input.
-func (d *Dirichlet) CovarianceMatrix(cov *mat64.SymDense) *mat64.SymDense {
+func (d *Dirichlet) CovarianceMatrix(cov *mat.SymDense) *mat.SymDense {
 	if cov == nil {
-		cov = mat64.NewSymDense(d.Dim(), nil)
+		cov = mat.NewSymDense(d.Dim(), nil)
 	} else if cov.Symmetric() == 0 {
-		*cov = *(cov.GrowSquare(d.dim).(*mat64.SymDense))
+		*cov = *(cov.GrowSquare(d.dim).(*mat.SymDense))
 	} else if cov.Symmetric() != d.dim {
 		panic("normal: input matrix size mismatch")
 	}

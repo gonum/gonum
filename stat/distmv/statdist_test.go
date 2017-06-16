@@ -10,21 +10,21 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 func TestBhattacharyyaNormal(t *testing.T) {
 	for cas, test := range []struct {
 		am, bm  []float64
-		ac, bc  *mat64.SymDense
+		ac, bc  *mat.SymDense
 		samples int
 		tol     float64
 	}{
 		{
 			am:      []float64{2, 3},
-			ac:      mat64.NewSymDense(2, []float64{3, -1, -1, 2}),
+			ac:      mat.NewSymDense(2, []float64{3, -1, -1, 2}),
 			bm:      []float64{-1, 1},
-			bc:      mat64.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
+			bc:      mat.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
 			samples: 100000,
 			tol:     1e-2,
 		},
@@ -105,15 +105,15 @@ func bhattacharyyaSample(dim, samples int, l RandLogProber, r LogProber) float64
 func TestCrossEntropyNormal(t *testing.T) {
 	for cas, test := range []struct {
 		am, bm  []float64
-		ac, bc  *mat64.SymDense
+		ac, bc  *mat.SymDense
 		samples int
 		tol     float64
 	}{
 		{
 			am:      []float64{2, 3},
-			ac:      mat64.NewSymDense(2, []float64{3, -1, -1, 2}),
+			ac:      mat.NewSymDense(2, []float64{3, -1, -1, 2}),
 			bm:      []float64{-1, 1},
-			bc:      mat64.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
+			bc:      mat.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
 			samples: 100000,
 			tol:     1e-2,
 		},
@@ -144,15 +144,15 @@ func TestCrossEntropyNormal(t *testing.T) {
 func TestHellingerNormal(t *testing.T) {
 	for cas, test := range []struct {
 		am, bm  []float64
-		ac, bc  *mat64.SymDense
+		ac, bc  *mat.SymDense
 		samples int
 		tol     float64
 	}{
 		{
 			am:      []float64{2, 3},
-			ac:      mat64.NewSymDense(2, []float64{3, -1, -1, 2}),
+			ac:      mat.NewSymDense(2, []float64{3, -1, -1, 2}),
 			bm:      []float64{-1, 1},
-			bc:      mat64.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
+			bc:      mat.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
 			samples: 100000,
 			tol:     5e-1,
 		},
@@ -188,15 +188,15 @@ func TestHellingerNormal(t *testing.T) {
 func TestKullbackLeiblerNormal(t *testing.T) {
 	for cas, test := range []struct {
 		am, bm  []float64
-		ac, bc  *mat64.SymDense
+		ac, bc  *mat.SymDense
 		samples int
 		tol     float64
 	}{
 		{
 			am:      []float64{2, 3},
-			ac:      mat64.NewSymDense(2, []float64{3, -1, -1, 2}),
+			ac:      mat.NewSymDense(2, []float64{3, -1, -1, 2}),
 			bm:      []float64{-1, 1},
-			bc:      mat64.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
+			bc:      mat.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
 			samples: 10000,
 			tol:     1e-2,
 		},

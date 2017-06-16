@@ -4,13 +4,13 @@
 
 package stat_test
 
-import "gonum.org/v1/gonum/matrix/mat64"
+import "gonum.org/v1/gonum/mat"
 
 // ASA Car Exposition Data of Ramos and Donoho (1983)
 // http://lib.stat.cmu.edu/datasets/cars.desc
 // http://lib.stat.cmu.edu/datasets/cars.data
 // Columns are: displacement, horsepower, weight, acceleration, MPG.
-var carData = mat64.NewDense(392, 5, []float64{
+var carData = mat.NewDense(392, 5, []float64{
 	307.0, 130.0, 3504.0, 12.0, 18.0,
 	350.0, 165.0, 3693.0, 11.5, 15.0,
 	318.0, 150.0, 3436.0, 11.0, 18.0,

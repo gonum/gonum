@@ -10,13 +10,13 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 func vecFunc13(y, x []float64) {
 	y[0] = 5*x[0] + x[2]*math.Sin(x[1]) + 1
 }
-func vecFunc13Jac(jac *mat64.Dense, x []float64) {
+func vecFunc13Jac(jac *mat.Dense, x []float64) {
 	jac.Set(0, 0, 5)
 	jac.Set(0, 1, x[2]*math.Cos(x[1]))
 	jac.Set(0, 2, math.Sin(x[1]))
@@ -26,7 +26,7 @@ func vecFunc22(y, x []float64) {
 	y[0] = x[0]*x[0]*x[1] + 1
 	y[1] = 5*x[0] + math.Sin(x[1]) + 1
 }
-func vecFunc22Jac(jac *mat64.Dense, x []float64) {
+func vecFunc22Jac(jac *mat.Dense, x []float64) {
 	jac.Set(0, 0, 2*x[0]*x[1])
 	jac.Set(0, 1, x[0]*x[0])
 	jac.Set(1, 0, 5)
@@ -39,7 +39,7 @@ func vecFunc43(y, x []float64) {
 	y[2] = 4*x[1]*x[1] - 2*x[2] + 1
 	y[3] = x[2]*math.Sin(x[0]) + 1
 }
-func vecFunc43Jac(jac *mat64.Dense, x []float64) {
+func vecFunc43Jac(jac *mat.Dense, x []float64) {
 	jac.Set(0, 0, 1)
 	jac.Set(0, 1, 0)
 	jac.Set(0, 2, 0)
@@ -61,7 +61,7 @@ func TestJacobian(t *testing.T) {
 	for tc, test := range []struct {
 		m, n int
 		f    func([]float64, []float64)
-		jac  func(*mat64.Dense, []float64)
+		jac  func(*mat.Dense, []float64)
 	}{
 		{
 			m:   1,
@@ -88,15 +88,15 @@ func TestJacobian(t *testing.T) {
 		xcopy := make([]float64, test.n)
 		copy(xcopy, x)
 
-		want := mat64.NewDense(test.m, test.n, nil)
+		want := mat.NewDense(test.m, test.n, nil)
 		test.jac(want, x)
 
-		got := mat64.NewDense(test.m, test.n, nil)
+		got := mat.NewDense(test.m, test.n, nil)
 		fillNaNDense(got)
 		Jacobian(got, test.f, x, nil)
-		if !mat64.EqualApprox(want, got, tol) {
+		if !mat.EqualApprox(want, got, tol) {
 			t.Errorf("Case %d (default settings): unexpected Jacobian.\nwant: %v\ngot:  %v",
-				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
+				tc, mat.Formatted(want, mat.Prefix("      ")), mat.Formatted(got, mat.Prefix("      ")))
 		}
 		if !floats.Equal(x, xcopy) {
 			t.Errorf("Case %d (default settings): x modified", tc)
@@ -107,7 +107,7 @@ func TestJacobian(t *testing.T) {
 	for tc, test := range []struct {
 		m, n    int
 		f       func([]float64, []float64)
-		jac     func(*mat64.Dense, []float64)
+		jac     func(*mat.Dense, []float64)
 		tol     float64
 		formula Formula
 	}{
@@ -188,17 +188,17 @@ func TestJacobian(t *testing.T) {
 		xcopy := make([]float64, test.n)
 		copy(xcopy, x)
 
-		want := mat64.NewDense(test.m, test.n, nil)
+		want := mat.NewDense(test.m, test.n, nil)
 		test.jac(want, x)
 
-		got := mat64.NewDense(test.m, test.n, nil)
+		got := mat.NewDense(test.m, test.n, nil)
 		fillNaNDense(got)
 		Jacobian(got, test.f, x, &JacobianSettings{
 			Formula: test.formula,
 		})
-		if !mat64.EqualApprox(want, got, test.tol) {
+		if !mat.EqualApprox(want, got, test.tol) {
 			t.Errorf("Case %d: unexpected Jacobian.\nwant: %v\ngot:  %v",
-				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
+				tc, mat.Formatted(want, mat.Prefix("      ")), mat.Formatted(got, mat.Prefix("      ")))
 		}
 		if !floats.Equal(x, xcopy) {
 			t.Errorf("Case %d: x modified", tc)
@@ -209,9 +209,9 @@ func TestJacobian(t *testing.T) {
 			Formula:    test.formula,
 			Concurrent: true,
 		})
-		if !mat64.EqualApprox(want, got, test.tol) {
+		if !mat.EqualApprox(want, got, test.tol) {
 			t.Errorf("Case %d (concurrent): unexpected Jacobian.\nwant: %v\ngot:  %v",
-				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
+				tc, mat.Formatted(want, mat.Prefix("      ")), mat.Formatted(got, mat.Prefix("      ")))
 		}
 		if !floats.Equal(x, xcopy) {
 			t.Errorf("Case %d (concurrent): x modified", tc)
@@ -224,9 +224,9 @@ func TestJacobian(t *testing.T) {
 			Formula:     test.formula,
 			OriginValue: origin,
 		})
-		if !mat64.EqualApprox(want, got, test.tol) {
+		if !mat.EqualApprox(want, got, test.tol) {
 			t.Errorf("Case %d (origin): unexpected Jacobian.\nwant: %v\ngot:  %v",
-				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
+				tc, mat.Formatted(want, mat.Prefix("      ")), mat.Formatted(got, mat.Prefix("      ")))
 		}
 		if !floats.Equal(x, xcopy) {
 			t.Errorf("Case %d (origin): x modified", tc)
@@ -238,9 +238,9 @@ func TestJacobian(t *testing.T) {
 			OriginValue: origin,
 			Concurrent:  true,
 		})
-		if !mat64.EqualApprox(want, got, test.tol) {
+		if !mat.EqualApprox(want, got, test.tol) {
 			t.Errorf("Case %d (concurrent, origin): unexpected Jacobian.\nwant: %v\ngot:  %v",
-				tc, mat64.Formatted(want, mat64.Prefix("      ")), mat64.Formatted(got, mat64.Prefix("      ")))
+				tc, mat.Formatted(want, mat.Prefix("      ")), mat.Formatted(got, mat.Prefix("      ")))
 		}
 		if !floats.Equal(x, xcopy) {
 			t.Errorf("Case %d (concurrent, origin): x modified", tc)
@@ -258,7 +258,7 @@ func randomSlice(n int, bound float64) []float64 {
 }
 
 // fillNaNDense fills the matrix m with NaN values.
-func fillNaNDense(m *mat64.Dense) {
+func fillNaNDense(m *mat.Dense) {
 	r, c := m.Dims()
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {

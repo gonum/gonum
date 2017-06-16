@@ -8,7 +8,7 @@ import (
 	"math"
 	"math/rand"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat/distmv"
 )
 
@@ -57,7 +57,7 @@ type MetropolisHastingser struct {
 //
 // The number of columns in batch must equal len(m.Initial), otherwise Sample
 // will panic.
-func (m MetropolisHastingser) Sample(batch *mat64.Dense) {
+func (m MetropolisHastingser) Sample(batch *mat.Dense) {
 	burnIn := m.BurnIn
 	rate := m.Rate
 	if rate == 0 {
@@ -74,7 +74,7 @@ func (m MetropolisHastingser) Sample(batch *mat64.Dense) {
 	// during the rate portion.
 	tmp := batch
 	if rate > r {
-		tmp = mat64.NewDense(rate, c, nil)
+		tmp = mat.NewDense(rate, c, nil)
 	}
 	rTmp, _ := tmp.Dims()
 
@@ -84,7 +84,7 @@ func (m MetropolisHastingser) Sample(batch *mat64.Dense) {
 	copy(initial, m.Initial)
 	for remaining != 0 {
 		newSamp := min(rTmp, remaining)
-		MetropolisHastings(tmp.View(0, 0, newSamp, c).(*mat64.Dense), initial, m.Target, m.Proposal, m.Src)
+		MetropolisHastings(tmp.View(0, 0, newSamp, c).(*mat.Dense), initial, m.Target, m.Proposal, m.Src)
 		copy(initial, tmp.RawRowView(newSamp-1))
 		remaining -= newSamp
 	}
@@ -95,11 +95,11 @@ func (m MetropolisHastingser) Sample(batch *mat64.Dense) {
 	}
 
 	if rTmp <= r {
-		tmp = mat64.NewDense(rate, c, nil)
+		tmp = mat.NewDense(rate, c, nil)
 	}
 
 	// Take a single sample from the chain.
-	MetropolisHastings(batch.View(0, 0, 1, c).(*mat64.Dense), initial, m.Target, m.Proposal, m.Src)
+	MetropolisHastings(batch.View(0, 0, 1, c).(*mat.Dense), initial, m.Target, m.Proposal, m.Src)
 
 	copy(initial, batch.RawRowView(0))
 	// For all of the other samples, first generate Rate samples and then actually
@@ -139,7 +139,7 @@ func (m MetropolisHastingser) Sample(batch *mat64.Dense) {
 // are ignored in between each kept sample. This helps decorrelate
 // the samples from one another, but also reduces the number of available samples.
 // A sampling rate can be implemented with successive calls to MetropolisHastings.
-func MetropolisHastings(batch *mat64.Dense, initial []float64, target distmv.LogProber, proposal MHProposal, src *rand.Rand) {
+func MetropolisHastings(batch *mat.Dense, initial []float64, target distmv.LogProber, proposal MHProposal, src *rand.Rand) {
 	f64 := rand.Float64
 	if src != nil {
 		f64 = src.Float64
@@ -180,7 +180,7 @@ type ProposalNormal struct {
 // and the mean of the distribution changes.
 //
 // NewProposalNormal returns {nil, false} if the covariance matrix is not positive-definite.
-func NewProposalNormal(sigma *mat64.SymDense, src *rand.Rand) (*ProposalNormal, bool) {
+func NewProposalNormal(sigma *mat.SymDense, src *rand.Rand) (*ProposalNormal, bool) {
 	mu := make([]float64, sigma.Symmetric())
 	normal, ok := distmv.NewNormal(mu, sigma, src)
 	if !ok {

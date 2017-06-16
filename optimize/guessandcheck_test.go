@@ -7,7 +7,7 @@ package optimize
 import (
 	"testing"
 
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize/functions"
 	"gonum.org/v1/gonum/stat/distmv"
 )
@@ -18,7 +18,7 @@ func TestGuessAndCheck(t *testing.T) {
 		Func: functions.ExtendedRosenbrock{}.Func,
 	}
 	mu := make([]float64, dim)
-	sigma := mat64.NewSymDense(dim, nil)
+	sigma := mat.NewSymDense(dim, nil)
 	for i := 0; i < dim; i++ {
 		sigma.SetSym(i, i, 1)
 	}

@@ -9,7 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // DirectedMatrix represents a directed graph using an adjacency
@@ -17,7 +17,7 @@ import (
 // Edges are stored implicitly as an edge weight, so edges stored in
 // the graph are not recoverable.
 type DirectedMatrix struct {
-	mat   *mat64.Dense
+	mat   *mat.Dense
 	nodes []graph.Node
 
 	self   float64
@@ -29,17 +29,17 @@ type DirectedMatrix struct {
 // specifies the cost of self connection, and absent specifies the weight
 // returned for absent edges.
 func NewDirectedMatrix(n int, init, self, absent float64) *DirectedMatrix {
-	mat := make([]float64, n*n)
+	matrix := make([]float64, n*n)
 	if init != 0 {
-		for i := range mat {
-			mat[i] = init
+		for i := range matrix {
+			matrix[i] = init
 		}
 	}
-	for i := 0; i < len(mat); i += n + 1 {
-		mat[i] = self
+	for i := 0; i < len(matrix); i += n + 1 {
+		matrix[i] = self
 	}
 	return &DirectedMatrix{
-		mat:    mat64.NewDense(n, n, mat),
+		mat:    mat.NewDense(n, n, matrix),
 		self:   self,
 		absent: absent,
 	}
@@ -255,10 +255,10 @@ func (g *DirectedMatrix) Degree(n graph.Node) int {
 	return deg
 }
 
-// Matrix returns the mat64.Matrix representation of the graph. The orientation
+// Matrix returns the mat.Matrix representation of the graph. The orientation
 // of the matrix is such that the matrix entry at G_{ij} is the weight of the edge
 // from node i to node j.
-func (g *DirectedMatrix) Matrix() mat64.Matrix {
+func (g *DirectedMatrix) Matrix() mat.Matrix {
 	// Prevent alteration of dimensions of the returned matrix.
 	m := *g.mat
 	return &m

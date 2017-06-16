@@ -8,7 +8,7 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -37,14 +37,14 @@ func (Bhattacharyya) DistNormal(l, r *Normal) float64 {
 		panic(badSizeMismatch)
 	}
 
-	var sigma mat64.SymDense
+	var sigma mat.SymDense
 	sigma.AddSym(&l.sigma, &r.sigma)
 	sigma.ScaleSym(0.5, &sigma)
 
-	var chol mat64.Cholesky
+	var chol mat.Cholesky
 	chol.Factorize(&sigma)
 
-	mahalanobis := stat.Mahalanobis(mat64.NewVector(dim, l.mu), mat64.NewVector(dim, r.mu), &chol)
+	mahalanobis := stat.Mahalanobis(mat.NewVector(dim, l.mu), mat.NewVector(dim, r.mu), &chol)
 	mahalanobisSq := mahalanobis * mahalanobis
 
 	dl := l.chol.LogDet()
@@ -154,21 +154,21 @@ func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 		panic(badSizeMismatch)
 	}
 
-	mahalanobis := stat.Mahalanobis(mat64.NewVector(dim, l.mu), mat64.NewVector(dim, r.mu), &r.chol)
+	mahalanobis := stat.Mahalanobis(mat.NewVector(dim, l.mu), mat.NewVector(dim, r.mu), &r.chol)
 	mahalanobisSq := mahalanobis * mahalanobis
 
 	// TODO(btracey): Optimize where there is a SolveCholeskySym
 	// TODO(btracey): There may be a more efficient way to just compute the trace
 	// Compute tr(Σ_r^-1*Σ_l) using the fact that Σ_l = U^T * U
-	var u mat64.TriDense
+	var u mat.TriDense
 	u.UFromCholesky(&l.chol)
-	var m mat64.Dense
+	var m mat.Dense
 	err := m.SolveCholesky(&r.chol, u.T())
 	if err != nil {
 		return math.NaN()
 	}
 	m.Mul(&m, &u)
-	tr := mat64.Trace(&m)
+	tr := mat.Trace(&m)
 
 	return r.logSqrtDet - l.logSqrtDet + 0.5*(mahalanobisSq+tr-float64(l.dim))
 }
@@ -233,20 +233,20 @@ func (Wasserstein) DistNormal(l, r *Normal) float64 {
 	d = d * d
 
 	// Compute Σ_l^(1/2)
-	var ssl mat64.SymDense
+	var ssl mat.SymDense
 	ssl.PowPSD(&l.sigma, 0.5)
 	// Compute Σ_l^(1/2)*Σ_r*Σ_l^(1/2)
-	var mean mat64.Dense
+	var mean mat.Dense
 	mean.Mul(&ssl, &r.sigma)
 	mean.Mul(&mean, &ssl)
 
 	// Reinterpret as symdense, and take Σ^(1/2)
-	meanSym := mat64.NewSymDense(dim, mean.RawMatrix().Data)
+	meanSym := mat.NewSymDense(dim, mean.RawMatrix().Data)
 	ssl.PowPSD(meanSym, 0.5)
 
-	tr := mat64.Trace(&r.sigma)
-	tl := mat64.Trace(&l.sigma)
-	tm := mat64.Trace(&ssl)
+	tr := mat.Trace(&r.sigma)
+	tl := mat.Trace(&l.sigma)
+	tm := mat.Trace(&ssl)
 
 	return d + tl + tr - 2*tm
 }

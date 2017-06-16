@@ -8,26 +8,26 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
 )
 
 func TestCanonicalCorrelations(t *testing.T) {
 tests:
 	for i, test := range []struct {
-		xdata     mat64.Matrix
-		ydata     mat64.Matrix
+		xdata     mat.Matrix
+		ydata     mat.Matrix
 		weights   []float64
 		wantCorrs []float64
-		wantpVecs *mat64.Dense
-		wantqVecs *mat64.Dense
-		wantphiVs *mat64.Dense
-		wantpsiVs *mat64.Dense
+		wantpVecs *mat.Dense
+		wantqVecs *mat.Dense
+		wantphiVs *mat.Dense
+		wantpsiVs *mat.Dense
 		epsilon   float64
 	}{
 		// Test results verified using R.
 		{ // Truncated iris data, Sepal vs Petal measurements.
-			xdata: mat64.NewDense(10, 2, []float64{
+			xdata: mat.NewDense(10, 2, []float64{
 				5.1, 3.5,
 				4.9, 3.0,
 				4.7, 3.2,
@@ -39,7 +39,7 @@ tests:
 				4.4, 2.9,
 				4.9, 3.1,
 			}),
-			ydata: mat64.NewDense(10, 2, []float64{
+			ydata: mat.NewDense(10, 2, []float64{
 				1.4, 0.2,
 				1.4, 0.2,
 				1.3, 0.2,
@@ -52,19 +52,19 @@ tests:
 				1.5, 0.1,
 			}),
 			wantCorrs: []float64{0.7250624174504773, 0.5547679185730191},
-			wantpVecs: mat64.NewDense(2, 2, []float64{
+			wantpVecs: mat.NewDense(2, 2, []float64{
 				0.0765914610875867, 0.9970625597666721,
 				0.9970625597666721, -0.0765914610875868,
 			}),
-			wantqVecs: mat64.NewDense(2, 2, []float64{
+			wantqVecs: mat.NewDense(2, 2, []float64{
 				0.3075184850910837, 0.9515421069649439,
 				0.9515421069649439, -0.3075184850910837,
 			}),
-			wantphiVs: mat64.NewDense(2, 2, []float64{
+			wantphiVs: mat.NewDense(2, 2, []float64{
 				-1.9794877596804641, 5.2016325219025124,
 				4.5211829944066553, -2.7263663170835697,
 			}),
-			wantpsiVs: mat64.NewDense(2, 2, []float64{
+			wantpsiVs: mat.NewDense(2, 2, []float64{
 				-0.0613084818030103, 10.8514169865438941,
 				12.7209032660734298, -7.6793888180353775,
 			}),
@@ -79,21 +79,21 @@ tests:
 			// Acceleration, MPG
 			ydata:     carData.Slice(0, 392, 3, 5),
 			wantCorrs: []float64{0.8782187384352336, 0.6328187219216761},
-			wantpVecs: mat64.NewDense(3, 2, []float64{
+			wantpVecs: mat.NewDense(3, 2, []float64{
 				0.3218296374829181, 0.3947540257657075,
 				0.4162807660635797, 0.7573719053303306,
 				0.8503740401982725, -0.5201509936144236,
 			}),
-			wantqVecs: mat64.NewDense(2, 2, []float64{
+			wantqVecs: mat.NewDense(2, 2, []float64{
 				-0.5161984172278830, -0.8564690269072364,
 				-0.8564690269072364, 0.5161984172278830,
 			}),
-			wantphiVs: mat64.NewDense(3, 2, []float64{
+			wantphiVs: mat.NewDense(3, 2, []float64{
 				0.0025033152994308, 0.0047795464118615,
 				0.0201923608080173, 0.0409150208725958,
 				-0.0000247374128745, -0.0026766435161875,
 			}),
-			wantpsiVs: mat64.NewDense(2, 2, []float64{
+			wantpsiVs: mat.NewDense(2, 2, []float64{
 				-0.1666196759760772, -0.3637393866139658,
 				-0.0915512109649727, 0.1077863777929168,
 			}),
@@ -116,7 +116,7 @@ tests:
 			// Median value of owner-occupied homes in $1000s
 			ydata:     bostonData.Slice(0, 506, 7, 11),
 			wantCorrs: []float64{0.9451239443886021, 0.6786622733370654, 0.5714338361583764, 0.2009739704710440},
-			wantpVecs: mat64.NewDense(7, 4, []float64{
+			wantpVecs: mat.NewDense(7, 4, []float64{
 				-0.2574391924541903, 0.0158477516621194, 0.2122169934631024, -0.0945733803894706,
 				-0.4836594430018478, 0.3837101908138468, 0.1474448317415911, 0.6597324886718275,
 				-0.0800776365873296, 0.3493556742809252, 0.3287336458109373, -0.2862040444334655,
@@ -125,13 +125,13 @@ tests:
 				-0.0990903250057199, 0.0503411215453873, 0.6384330631742202, 0.1022367136218303,
 				0.4260459963765036, 0.0323334351308141, -0.2289527516030810, 0.6419232947608805,
 			}),
-			wantqVecs: mat64.NewDense(4, 4, []float64{
+			wantqVecs: mat.NewDense(4, 4, []float64{
 				0.0181660502363264, -0.1583489460479038, -0.0066723577642883, -0.9871935400650649,
 				-0.2347699045986119, 0.9483314614936594, -0.1462420505631345, -0.1554470767919033,
 				-0.9700704038477141, -0.2406071741000039, -0.0251838984227037, 0.0209134074358349,
 				0.0593000682318482, -0.1330460003097728, -0.9889057151969489, 0.0291161494720761,
 			}),
-			wantphiVs: mat64.NewDense(7, 4, []float64{
+			wantphiVs: mat.NewDense(7, 4, []float64{
 				-0.0027462234108197, 0.0093444513500898, 0.0489643932714296, -0.0154967189805819,
 				-0.0428564455279537, -0.0241708702119420, 0.0360723472093996, 0.1838983230588095,
 				-1.2248435648802380, 5.6030921364723980, 5.8094144583797025, -4.7926812190419676,
@@ -140,7 +140,7 @@ tests:
 				-0.0233270323101624, 0.1046330818178399, 0.3853045975077387, -0.0160927870102877,
 				0.0001293051387859, 0.0004540746921446, -0.0030296315865440, 0.0081895477974654,
 			}),
-			wantpsiVs: mat64.NewDense(4, 4, []float64{
+			wantpsiVs: mat.NewDense(4, 4, []float64{
 				0.0301593362017375, -0.3002219289647127, 0.0878217377593682, -1.9583226531517062,
 				-0.0065483104073892, 0.0392212086716247, -0.0117570776209991, -0.0061113064481860,
 				-0.0052075523350125, -0.0045770200452960, -0.0022762313289592, 0.0008441873006821,
@@ -151,8 +151,8 @@ tests:
 	} {
 		var cc stat.CC
 		var corrs []float64
-		var pVecs, qVecs *mat64.Dense
-		var phiVs, psiVs *mat64.Dense
+		var pVecs, qVecs *mat.Dense
+		var phiVs, psiVs *mat.Dense
 		for j := 0; j < 2; j++ {
 			err := cc.CanonicalCorrelations(test.xdata, test.ydata, test.weights)
 			if err != nil {
@@ -170,21 +170,21 @@ tests:
 				t.Errorf("%d use %d: unexpected variance result got:%v, want:%v",
 					i, j, corrs, test.wantCorrs)
 			}
-			if !mat64.EqualApprox(pVecs, test.wantpVecs, test.epsilon) {
+			if !mat.EqualApprox(pVecs, test.wantpVecs, test.epsilon) {
 				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
-					i, j, mat64.Formatted(pVecs), mat64.Formatted(test.wantpVecs))
+					i, j, mat.Formatted(pVecs), mat.Formatted(test.wantpVecs))
 			}
-			if !mat64.EqualApprox(qVecs, test.wantqVecs, test.epsilon) {
+			if !mat.EqualApprox(qVecs, test.wantqVecs, test.epsilon) {
 				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
-					i, j, mat64.Formatted(qVecs), mat64.Formatted(test.wantqVecs))
+					i, j, mat.Formatted(qVecs), mat.Formatted(test.wantqVecs))
 			}
-			if !mat64.EqualApprox(phiVs, test.wantphiVs, test.epsilon) {
+			if !mat.EqualApprox(phiVs, test.wantphiVs, test.epsilon) {
 				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
-					i, j, mat64.Formatted(phiVs), mat64.Formatted(test.wantphiVs))
+					i, j, mat.Formatted(phiVs), mat.Formatted(test.wantphiVs))
 			}
-			if !mat64.EqualApprox(psiVs, test.wantpsiVs, test.epsilon) {
+			if !mat.EqualApprox(psiVs, test.wantpsiVs, test.epsilon) {
 				t.Errorf("%d use %d: unexpected CCA result got:\n%v\nwant:\n%v",
-					i, j, mat64.Formatted(psiVs), mat64.Formatted(test.wantpsiVs))
+					i, j, mat.Formatted(psiVs), mat.Formatted(test.wantpsiVs))
 			}
 		}
 	}

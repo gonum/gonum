@@ -6,7 +6,7 @@ package lp
 
 import (
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // TODO(btracey): Have some sort of preprocessing step for helping to fix A to make it
@@ -27,7 +27,7 @@ import (
 //  s.t      aNew * x = bNew
 //           x >= 0
 // If there are no constraints of the given type, the inputs may be nil.
-func Convert(c []float64, g mat64.Matrix, h []float64, a mat64.Matrix, b []float64) (cNew []float64, aNew *mat64.Dense, bNew []float64) {
+func Convert(c []float64, g mat.Matrix, h []float64, a mat.Matrix, b []float64) (cNew []float64, aNew *mat.Dense, bNew []float64) {
 	nVar := len(c)
 	nIneq := len(h)
 
@@ -120,21 +120,21 @@ func Convert(c []float64, g mat64.Matrix, h []float64, a mat64.Matrix, b []float
 	copy(bNew[nIneq:], b)
 
 	// Construct aNew = [G, -G, I; A, -A, 0].
-	aNew = mat64.NewDense(nNewEq, nNewVar, nil)
+	aNew = mat.NewDense(nNewEq, nNewVar, nil)
 	if nIneq != 0 {
-		aView := (aNew.View(0, 0, nIneq, nVar)).(*mat64.Dense)
+		aView := (aNew.View(0, 0, nIneq, nVar)).(*mat.Dense)
 		aView.Copy(g)
-		aView = (aNew.View(0, nVar, nIneq, nVar)).(*mat64.Dense)
+		aView = (aNew.View(0, nVar, nIneq, nVar)).(*mat.Dense)
 		aView.Scale(-1, g)
-		aView = (aNew.View(0, 2*nVar, nIneq, nIneq)).(*mat64.Dense)
+		aView = (aNew.View(0, 2*nVar, nIneq, nIneq)).(*mat.Dense)
 		for i := 0; i < nIneq; i++ {
 			aView.Set(i, i, 1)
 		}
 	}
 	if nEq != 0 {
-		aView := (aNew.View(nIneq, 0, nEq, nVar)).(*mat64.Dense)
+		aView := (aNew.View(nIneq, 0, nEq, nVar)).(*mat.Dense)
 		aView.Copy(a)
-		aView = (aNew.View(nIneq, nVar, nEq, nVar)).(*mat64.Dense)
+		aView = (aNew.View(nIneq, nVar, nEq, nVar)).(*mat.Dense)
 		aView.Scale(-1, a)
 	}
 	return cNew, aNew, bNew

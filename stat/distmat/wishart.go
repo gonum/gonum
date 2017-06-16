@@ -9,9 +9,8 @@ import (
 	"math/rand"
 	"sync"
 
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/mathext"
-	"gonum.org/v1/gonum/matrix"
-	"gonum.org/v1/gonum/matrix/mat64"
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
@@ -30,12 +29,12 @@ type Wishart struct {
 	src *rand.Rand
 
 	dim     int
-	cholv   mat64.Cholesky
+	cholv   mat.Cholesky
 	logdetv float64
-	upper   mat64.TriDense
+	upper   mat.TriDense
 
 	once sync.Once
-	v    *mat64.SymDense // only stored if needed
+	v    *mat.SymDense // only stored if needed
 }
 
 // NewWishart returns a new Wishart distribution with the given shape matrix and
@@ -43,18 +42,18 @@ type Wishart struct {
 // successful.
 //
 // NewWishart panics if nu <= d - 1 where d is the order of v.
-func NewWishart(v mat64.Symmetric, nu float64, src *rand.Rand) (*Wishart, bool) {
+func NewWishart(v mat.Symmetric, nu float64, src *rand.Rand) (*Wishart, bool) {
 	dim := v.Symmetric()
 	if nu <= float64(dim-1) {
 		panic("wishart: nu must be greater than dim-1")
 	}
-	var chol mat64.Cholesky
+	var chol mat.Cholesky
 	ok := chol.Factorize(v)
 	if !ok {
 		return nil, false
 	}
 
-	var u mat64.TriDense
+	var u mat.TriDense
 	u.UFromCholesky(&chol)
 
 	w := &Wishart{
@@ -73,9 +72,9 @@ func NewWishart(v mat64.Symmetric, nu float64, src *rand.Rand) (*Wishart, bool) 
 // If x is nil, a new matrix is allocated and returned. If x is not nil, the
 // result is stored in-place into x and MeanSym will panic if the order of x
 // is not equal to the order of the receiver.
-func (w *Wishart) MeanSym(x *mat64.SymDense) *mat64.SymDense {
+func (w *Wishart) MeanSym(x *mat.SymDense) *mat.SymDense {
 	if x == nil {
-		x = mat64.NewSymDense(w.dim, nil)
+		x = mat.NewSymDense(w.dim, nil)
 	}
 	d := x.Symmetric()
 	if d != w.dim {
@@ -89,7 +88,7 @@ func (w *Wishart) MeanSym(x *mat64.SymDense) *mat64.SymDense {
 
 // ProbSym returns the probability of the symmetric matrix x. If x is not positive
 // definite (the Cholesky decomposition fails), it has 0 probability.
-func (w *Wishart) ProbSym(x mat64.Symmetric) float64 {
+func (w *Wishart) ProbSym(x mat.Symmetric) float64 {
 	return math.Exp(w.LogProbSym(x))
 }
 
@@ -97,12 +96,12 @@ func (w *Wishart) ProbSym(x mat64.Symmetric) float64 {
 //
 // LogProbSym returns -∞ if the input matrix is not positive definite (the Cholesky
 // decomposition fails).
-func (w *Wishart) LogProbSym(x mat64.Symmetric) float64 {
+func (w *Wishart) LogProbSym(x mat.Symmetric) float64 {
 	dim := x.Symmetric()
 	if dim != w.dim {
 		panic(badDim)
 	}
-	var chol mat64.Cholesky
+	var chol mat.Cholesky
 	ok := chol.Factorize(x)
 	if !ok {
 		return math.Inf(-1)
@@ -112,7 +111,7 @@ func (w *Wishart) LogProbSym(x mat64.Symmetric) float64 {
 
 // LogProbSymChol returns the log of the probability of the input symmetric matrix
 // given its Cholesky decomposition.
-func (w *Wishart) LogProbSymChol(cholX *mat64.Cholesky) float64 {
+func (w *Wishart) LogProbSymChol(cholX *mat.Cholesky) float64 {
 	dim := cholX.Size()
 	if dim != w.dim {
 		panic(badDim)
@@ -120,7 +119,7 @@ func (w *Wishart) LogProbSymChol(cholX *mat64.Cholesky) float64 {
 	return w.logProbSymChol(cholX)
 }
 
-func (w *Wishart) logProbSymChol(cholX *mat64.Cholesky) float64 {
+func (w *Wishart) logProbSymChol(cholX *mat.Cholesky) float64 {
 	// The PDF is
 	//  p(X) = [|X|^((ν-d-1)/2) * exp(-tr(V^-1 * X)/2)] / [2^(ν*d/2) * |V|^(ν/2) * Γ_d(ν/2)]
 	// The LogPDF is thus
@@ -128,16 +127,16 @@ func (w *Wishart) logProbSymChol(cholX *mat64.Cholesky) float64 {
 	logdetx := cholX.LogDet()
 
 	// Compute tr(V^-1 * X), using the fact that X = U^T * U.
-	var u mat64.TriDense
+	var u mat.TriDense
 	u.UFromCholesky(cholX)
 
-	var vinvx mat64.Dense
+	var vinvx mat.Dense
 	err := vinvx.SolveCholesky(&w.cholv, u.T())
 	if err != nil {
 		return math.Inf(-1)
 	}
 	vinvx.Mul(&vinvx, &u)
-	tr := mat64.Trace(&vinvx)
+	tr := mat.Trace(&vinvx)
 
 	fnu := float64(w.nu)
 	fdim := float64(w.dim)
@@ -146,18 +145,18 @@ func (w *Wishart) logProbSymChol(cholX *mat64.Cholesky) float64 {
 }
 
 // RandSym generates a random symmetric matrix from the distribution.
-func (w *Wishart) RandSym(x *mat64.SymDense) *mat64.SymDense {
+func (w *Wishart) RandSym(x *mat.SymDense) *mat.SymDense {
 	if x == nil {
-		x = &mat64.SymDense{}
+		x = &mat.SymDense{}
 	}
-	var c mat64.Cholesky
+	var c mat.Cholesky
 	w.RandChol(&c)
 	x.FromCholesky(&c)
 	return x
 }
 
 // RandChol generates the Cholesky decomposition of a random matrix from the distribution.
-func (w *Wishart) RandChol(c *mat64.Cholesky) *mat64.Cholesky {
+func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
 	// TODO(btracey): Modify the code if the underlying data from c is exposed
 	// to avoid the dim^2 allocation here.
 
@@ -179,7 +178,7 @@ func (w *Wishart) RandChol(c *mat64.Cholesky) *mat64.Cholesky {
 		Source: w.src,
 	}
 
-	t := mat64.NewTriDense(w.dim, matrix.Upper, nil)
+	t := mat.NewTriDense(w.dim, mat.Upper, nil)
 	for i := 0; i < w.dim; i++ {
 		v := distuv.ChiSquared{
 			K:   w.nu - float64(i),
@@ -195,7 +194,7 @@ func (w *Wishart) RandChol(c *mat64.Cholesky) *mat64.Cholesky {
 
 	t.MulTri(t, &w.upper)
 	if c == nil {
-		c = &mat64.Cholesky{}
+		c = &mat.Cholesky{}
 	}
 	c.SetFromU(t)
 	return c
@@ -204,7 +203,7 @@ func (w *Wishart) RandChol(c *mat64.Cholesky) *mat64.Cholesky {
 // setV computes and stores the covariance matrix of the distribution.
 func (w *Wishart) setV() {
 	w.once.Do(func() {
-		w.v = mat64.NewSymDense(w.dim, nil)
+		w.v = mat.NewSymDense(w.dim, nil)
 		w.v.FromCholesky(&w.cholv)
 	})
 }

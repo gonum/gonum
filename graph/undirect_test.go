@@ -10,7 +10,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 var directedGraphs = []struct {
@@ -19,7 +19,7 @@ var directedGraphs = []struct {
 	absent float64
 	merge  func(x, y float64, xe, ye graph.Edge) float64
 
-	want mat64.Matrix
+	want mat.Matrix
 }{
 	{
 		g: func() graph.DirectedBuilder { return simple.NewDirectedGraph(0, 0) },
@@ -28,7 +28,7 @@ var directedGraphs = []struct {
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
 		},
-		want: mat64.NewSymDense(3, []float64{
+		want: mat.NewSymDense(3, []float64{
 			0, (1. + 2.) / 2., 0,
 			(1. + 2.) / 2., 0, 1. / 2.,
 			0, 1. / 2., 0,
@@ -43,7 +43,7 @@ var directedGraphs = []struct {
 		},
 		absent: 1,
 		merge:  func(x, y float64, _, _ graph.Edge) float64 { return math.Sqrt(x * y) },
-		want: mat64.NewSymDense(3, []float64{
+		want: mat.NewSymDense(3, []float64{
 			0, math.Sqrt(1 * 2), 0,
 			math.Sqrt(1 * 2), 0, math.Sqrt(1 * 1),
 			0, math.Sqrt(1 * 1), 0,
@@ -57,7 +57,7 @@ var directedGraphs = []struct {
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
 		},
 		merge: func(x, y float64, _, _ graph.Edge) float64 { return math.Min(x, y) },
-		want: mat64.NewSymDense(3, []float64{
+		want: mat.NewSymDense(3, []float64{
 			0, math.Min(1, 2), 0,
 			math.Min(1, 2), 0, math.Min(1, 0),
 			0, math.Min(1, 0), 0,
@@ -79,7 +79,7 @@ var directedGraphs = []struct {
 			}
 			return math.Min(x, y)
 		},
-		want: mat64.NewSymDense(3, []float64{
+		want: mat.NewSymDense(3, []float64{
 			0, math.Min(1, 2), 0,
 			math.Min(1, 2), 0, 1,
 			0, 1, 0,
@@ -93,7 +93,7 @@ var directedGraphs = []struct {
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
 		},
 		merge: func(x, y float64, _, _ graph.Edge) float64 { return math.Max(x, y) },
-		want: mat64.NewSymDense(3, []float64{
+		want: mat.NewSymDense(3, []float64{
 			0, math.Max(1, 2), 0,
 			math.Max(1, 2), 0, math.Max(1, 0),
 			0, math.Max(1, 0), 0,
@@ -116,10 +116,10 @@ func TestUndirect(t *testing.T) {
 			}
 		}
 
-		if !mat64.Equal(dst.Matrix(), test.want) {
+		if !mat.Equal(dst.Matrix(), test.want) {
 			t.Errorf("unexpected result:\ngot:\n%.4v\nwant:\n%.4v",
-				mat64.Formatted(dst.Matrix()),
-				mat64.Formatted(test.want),
+				mat.Formatted(dst.Matrix()),
+				mat.Formatted(test.want),
 			)
 		}
 	}

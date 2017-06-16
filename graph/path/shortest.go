@@ -9,7 +9,7 @@ import (
 	"math/rand"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/matrix/mat64"
+	"gonum.org/v1/gonum/mat"
 )
 
 // Shortest is a shortest-path tree created by the BellmanFordFrom or DijkstraFrom
@@ -125,7 +125,7 @@ type AllShortest struct {
 	//
 	// dist contains the pairwise
 	// distances between nodes.
-	dist *mat64.Dense
+	dist *mat.Dense
 	// next contains the shortest-path
 	// tree of the graph. The first index
 	// is a linear mapping of from-dense-id
@@ -159,7 +159,7 @@ func newAllShortest(nodes []graph.Node, forward bool) AllShortest {
 		nodes:   nodes,
 		indexOf: indexOf,
 
-		dist:    mat64.NewDense(len(nodes), len(nodes), dist),
+		dist:    mat.NewDense(len(nodes), len(nodes), dist),
 		next:    make([][]int, len(nodes)*len(nodes)),
 		forward: forward,
 	}

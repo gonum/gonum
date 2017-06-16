@@ -23,7 +23,7 @@ type Vector struct {
 	mat blas64.Vector
 	n   int
 	// A BLAS vector can have a negative increment, but allowing this
-	// in the mat64 type complicates a lot of code, and doesn't gain anything.
+	// in the mat type complicates a lot of code, and doesn't gain anything.
 	// Vector must have positive increment in this package.
 }
 

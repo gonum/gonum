@@ -67,8 +67,8 @@ func NewDense(r, c int, data []float64) *Dense {
 // reuseAs must be kept in sync with reuseAsZeroed.
 func (m *Dense) reuseAs(r, c int) {
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
-		// Panic as a string, not a mat64.Error.
-		panic("mat64: caps not correctly set")
+		// Panic as a string, not a mat.Error.
+		panic("mat: caps not correctly set")
 	}
 	if m.isZero() {
 		m.mat = blas64.General{
@@ -93,8 +93,8 @@ func (m *Dense) reuseAs(r, c int) {
 // reuseAsZeroed must be kept in sync with reuseAs.
 func (m *Dense) reuseAsZeroed(r, c int) {
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
-		// Panic as a string, not a mat64.Error.
-		panic("mat64: caps not correctly set")
+		// Panic as a string, not a mat.Error.
+		panic("mat: caps not correctly set")
 	}
 	if m.isZero() {
 		m.mat = blas64.General{

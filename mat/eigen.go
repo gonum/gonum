@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	badFact   = "mat64: use without successful factorization"
-	badNoVect = "mat64: eigenvectors not computed"
+	badFact   = "mat: use without successful factorization"
+	badNoVect = "mat: eigenvectors not computed"
 )
 
 // EigenSym is a type for creating and manipulating the Eigen decomposition of

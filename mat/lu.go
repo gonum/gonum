@@ -13,7 +13,7 @@ import (
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
-const badSliceLength = "mat64: improper slice length"
+const badSliceLength = "mat: improper slice length"
 
 // LU is a type for creating and using the LU factorization of a matrix.
 type LU struct {

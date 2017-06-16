@@ -693,8 +693,8 @@ func (m *Dense) Outer(alpha float64, x, y *Vector) {
 	// TODO(kortschak): Factor out into reuseZeroedAs if
 	// we find another case that needs it.
 	if m.mat.Rows > m.capRows || m.mat.Cols > m.capCols {
-		// Panic as a string, not a mat64.Error.
-		panic("mat64: caps not correctly set")
+		// Panic as a string, not a mat.Error.
+		panic("mat: caps not correctly set")
 	}
 	if m.isZero() {
 		m.mat = blas64.General{

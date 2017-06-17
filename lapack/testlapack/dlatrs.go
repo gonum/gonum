@@ -68,7 +68,7 @@ func testDlatrs(t *testing.T, impl Dlatrser, imat int, uplo blas.Uplo, trans bla
 	if hasNaN {
 		t.Errorf("%v: unexpected NaN (scale=%v,normin=false)", prefix, scale)
 	} else if resid > tol {
-		t.Errorf("%v: residual %v too large (scale=%v,normin=false)", prefix, scale)
+		t.Errorf("%v: residual %v too large (scale=%v,normin=false)", prefix, resid, scale)
 	}
 
 	// Call Dlatrs with normin=true because cnorm has been filled.
@@ -78,7 +78,7 @@ func testDlatrs(t *testing.T, impl Dlatrser, imat int, uplo blas.Uplo, trans bla
 	if hasNaN {
 		t.Errorf("%v: unexpected NaN (scale=%v,normin=true)", prefix, scale)
 	} else if resid > tol {
-		t.Errorf("%v: residual %v too large (scale=%v,normin=true)", prefix, scale)
+		t.Errorf("%v: residual %v too large (scale=%v,normin=true)", prefix, resid, scale)
 	}
 }
 

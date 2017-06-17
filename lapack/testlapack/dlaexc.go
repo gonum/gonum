@@ -90,7 +90,7 @@ func testDlaexc(t *testing.T, impl Dlaexcer, wantq bool, n, j1, n1, n2, extra in
 		if n1 == 1 && n2 == 1 {
 			t.Errorf("%v: unexpected failure", prefix)
 		} else {
-			t.Logf("%v: Dlaexc returned false")
+			t.Logf("%v: Dlaexc returned false", prefix)
 		}
 	}
 

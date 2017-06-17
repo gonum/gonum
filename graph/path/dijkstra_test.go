@@ -44,7 +44,7 @@ func TestDijkstraFrom(t *testing.T) {
 		}
 
 		if pt.From().ID() != test.Query.From().ID() {
-			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", pt.From().ID(), test.Query.From().ID())
+			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", test.Name, pt.From().ID(), test.Query.From().ID())
 		}
 
 		p, weight := pt.To(test.Query.To())

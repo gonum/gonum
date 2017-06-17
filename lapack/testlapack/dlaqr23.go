@@ -282,10 +282,10 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 		t.Errorf("%v: out-of-range write to WV\n%v", prefix, wv.Data)
 	}
 	if !isAllNaN(sr[:kbot-nd-ns+1]) || !isAllNaN(sr[kbot+1:]) {
-		t.Errorf("%v: out-of-range write to sr")
+		t.Errorf("%v: out-of-range write to sr", prefix)
 	}
 	if !isAllNaN(si[:kbot-nd-ns+1]) || !isAllNaN(si[kbot+1:]) {
-		t.Errorf("%v: out-of-range write to si")
+		t.Errorf("%v: out-of-range write to si", prefix)
 	}
 
 	if !isUpperHessenberg(h) {

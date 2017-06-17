@@ -62,7 +62,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 		p, weight := d.Path()
 
 		if !math.IsInf(weight, 1) && p[0].ID() != test.Query.From().ID() {
-			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", p[0].ID(), test.Query.From().ID())
+			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", test.Name, p[0].ID(), test.Query.From().ID())
 		}
 		if weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",

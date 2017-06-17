@@ -56,10 +56,10 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.Job, a blas64.General) {
 
 	if n == 0 {
 		if ilo != 0 {
-			t.Errorf("%v: unexpected ilo when n=0. Want 0, got %v", prefix, n, ilo)
+			t.Errorf("%v: unexpected ilo when n=0. Want 0, got %v", prefix, ilo)
 		}
 		if ihi != -1 {
-			t.Errorf("%v: unexpected ihi when n=0. Want -1, got %v", prefix, n, ihi)
+			t.Errorf("%v: unexpected ihi when n=0. Want -1, got %v", prefix, ihi)
 		}
 		return
 	}

@@ -78,7 +78,7 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 	prefix := fmt.Sprintf("Case %v: job=%v, compz=%v, n=%v, ilo=%v, ihi=%v, extra=%v, optwk=%v",
 		i, job, compz, n, ilo, ihi, extra, optwork)
 	if unconverged > 0 {
-		t.Log("%v: Dhseqr did not compute all eigenvalues. unconverged=%v", prefix, unconverged)
+		t.Logf("%v: Dhseqr did not compute all eigenvalues. unconverged=%v", prefix, unconverged)
 		if unconverged <= ilo {
 			t.Fatalf("%v: 0 < unconverged <= ilo", prefix)
 		}

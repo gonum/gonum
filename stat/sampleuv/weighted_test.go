@@ -162,11 +162,11 @@ func TestWeightZero(t *testing.T) {
 		t.Errorf("unexpected selection rate for zero-weighted item: got: %v want:%v", f[6], 0)
 	}
 	if reflect.DeepEqual(f[:6], obt[:6]) {
-		t.Fatal("unexpected selection: too few elements chosen in range:\ngot: %v\nwant:%v",
+		t.Fatalf("unexpected selection: too few elements chosen in range:\ngot: %v\nwant:%v",
 			f[:6], obt[:6])
 	}
 	if reflect.DeepEqual(f[7:], obt[7:]) {
-		t.Fatal("unexpected selection: too few elements chosen in range:\ngot: %v\nwant:%v",
+		t.Fatalf("unexpected selection: too few elements chosen in range:\ngot: %v\nwant:%v",
 			f[7:], obt[7:])
 	}
 }
@@ -217,11 +217,11 @@ func TestWeightIncrease(t *testing.T) {
 		t.Errorf("unexpected selection rate for re-weighted item: got: %v want:%v", f[6], f[9])
 	}
 	if reflect.DeepEqual(f[:6], obt[:6]) {
-		t.Fatal("unexpected selection: too many elements chosen in range:\ngot: %v\nwant:%v",
+		t.Fatalf("unexpected selection: too many elements chosen in range:\ngot: %v\nwant:%v",
 			f[:6], obt[:6])
 	}
 	if reflect.DeepEqual(f[7:], obt[7:]) {
-		t.Fatal("unexpected selection: too many elements chosen in range:\ngot: %v\nwant:%v",
+		t.Fatalf("unexpected selection: too many elements chosen in range:\ngot: %v\nwant:%v",
 			f[7:], obt[7:])
 	}
 }
@@ -253,7 +253,7 @@ func TestWeightedNoResample(t *testing.T) {
 			item, ok := ts.Take()
 			if !ok {
 				if c != n {
-					t.Errorf("unexpected number of items: got: %d want: %d", c, n)
+					t.Errorf("unexpected number of items: got: %d want: %d", c, int(n))
 				}
 				break
 			}

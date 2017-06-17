@@ -11,7 +11,7 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-func ExamplePrincipalComponents() {
+func ExamplePC() {
 	// iris is a truncated sample of the Fisher's Iris dataset.
 	n := 10
 	d := 4

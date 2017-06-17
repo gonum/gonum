@@ -154,7 +154,7 @@ func TestProfileUndirected(t *testing.T) {
 				t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
 			}
 			if i != 0 && d.Score >= p[i-1].Score {
-				t.Errorf("%s: not monotonically decreasing: ", test.name, p[i-1], d)
+				t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
 			}
 		}
 	}
@@ -192,7 +192,7 @@ func TestProfileDirected(t *testing.T) {
 				t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
 			}
 			if i != 0 && d.Score >= p[i-1].Score {
-				t.Errorf("%s: not monotonically decreasing: ", test.name, p[i-1], d)
+				t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
 			}
 		}
 	}
@@ -227,7 +227,7 @@ func TestProfileUndirectedMultiplex(t *testing.T) {
 				t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
 			}
 			if i != 0 && d.Score >= p[i-1].Score {
-				t.Errorf("%s: not monotonically decreasing: ", test.name, p[i-1], d)
+				t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
 			}
 		}
 	}
@@ -262,7 +262,7 @@ func TestProfileDirectedMultiplex(t *testing.T) {
 				t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
 			}
 			if i != 0 && d.Score >= p[i-1].Score {
-				t.Errorf("%s: not monotonically decreasing: ", test.name, p[i-1], d)
+				t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
 			}
 		}
 	}

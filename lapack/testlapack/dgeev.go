@@ -606,7 +606,7 @@ func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapa
 	}
 
 	if first > 0 {
-		t.Log("%v: all eigenvalues haven't been computed, first=%v", prefix, first)
+		t.Logf("%v: all eigenvalues haven't been computed, first=%v", prefix, first)
 	}
 
 	// Check that conjugate pair eigevalues are ordered correctly.

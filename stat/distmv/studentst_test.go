@@ -163,6 +163,9 @@ func TestStudentsTConditional(t *testing.T) {
 		}
 
 		sUp, ok := s.ConditionStudentsT(test.idx, test.value, src)
+		if !ok {
+			t.Error("unexpected failure of ConditionStudentsT")
+		}
 
 		// Compute the other values by hand the inefficient way to compare
 		newNu := test.nu + float64(len(test.idx))

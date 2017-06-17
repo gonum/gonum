@@ -248,19 +248,21 @@ func (u *UnitMap) Mul(aU UnitMapper) *UnitMap {
 	return u
 }
 
+var sink float64
+
 func BenchmarkAddFloat(b *testing.B) {
-	a := 0.0
+	sink = 0
 	c := 10.0
 	for i := 0; i < b.N; i++ {
-		a += c
+		sink += c
 	}
 }
 
 func BenchmarkMulFloat(b *testing.B) {
-	a := 0.0
+	sink = 0
 	c := 10.0
 	for i := 0; i < b.N; i++ {
-		a *= c
+		sink *= c
 	}
 }
 

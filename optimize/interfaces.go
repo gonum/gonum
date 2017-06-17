@@ -70,7 +70,7 @@ type Statuser interface {
 // dir_k starting at the most recent location x_k, i.e., it tries to minimize
 // the function
 //  φ(step) := f(x_k + step * dir_k) where step > 0.
-// Typically, a Linesearcher will be used in conjuction with LinesearchMethod
+// Typically, a Linesearcher will be used in conjunction with LinesearchMethod
 // for performing gradient-based optimization through sequential line searches.
 type Linesearcher interface {
 	// Init initializes the Linesearcher and a new line search. Value and
@@ -100,7 +100,7 @@ type Linesearcher interface {
 
 // NextDirectioner implements a strategy for computing a new line search
 // direction at each major iteration. Typically, a NextDirectioner will be
-// used in conjuction with LinesearchMethod for performing gradient-based
+// used in conjunction with LinesearchMethod for performing gradient-based
 // optimization through sequential line searches.
 type NextDirectioner interface {
 	// InitDirection initializes the NextDirectioner at the given starting location,

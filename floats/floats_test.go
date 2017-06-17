@@ -186,7 +186,7 @@ func TestCumProd(t *testing.T) {
 	emptyReceiver := make([]float64, 0)
 	truth = []float64{}
 	CumProd(emptyReceiver, emptyReceiver)
-	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with emtpy receiver")
+	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with empty receiver")
 
 }
 
@@ -209,7 +209,7 @@ func TestCumSum(t *testing.T) {
 	emptyReceiver := make([]float64, 0)
 	truth = []float64{}
 	CumSum(emptyReceiver, emptyReceiver)
-	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with emtpy receiver")
+	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with empty receiver")
 
 }
 

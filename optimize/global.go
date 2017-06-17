@@ -24,7 +24,7 @@ type GlobalMethod interface {
 	Done()
 }
 
-// Global uses a global optimizer to search for the gloabl minimum of a
+// Global uses a global optimizer to search for the global minimum of a
 // function. A maximization problem can be transformed into a
 // minimization problem by multiplying the function by -1.
 //

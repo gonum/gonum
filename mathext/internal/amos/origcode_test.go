@@ -226,7 +226,7 @@ func zairyOrig(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	}
 	AA = AZ * AZ
 	if AA < TOL/AZ {
-		goto Fourty
+		goto Forty
 	}
 	TRM1R = CONER
 	TRM1I = CONEI
@@ -263,12 +263,12 @@ func zairyOrig(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 		D2 = D2 + BK
 		AD = dmin(D1, D2)
 		if ATRM < TOL*AD {
-			goto Fourty
+			goto Forty
 		}
 		AK = AK + 18.0E0
 		BK = BK + 18.0E0
 	}
-Fourty:
+Forty:
 	if ID == 1 {
 		goto Fifty
 	}
@@ -530,7 +530,7 @@ func zbknuOrig(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, 
 	     * CYI(2)
 	*/
 
-	// TOOD(btracey): Find which of these are inputs/outputs/both and clean up
+	// TODO(btracey): Find which of these are inputs/outputs/both and clean up
 	// the function call.
 	// YR and YI have length n (but n+1 with better indexing)
 	var AA, AK, ASCLE, A1, A2, BB, BK, CAZ,
@@ -623,7 +623,7 @@ Ten:
 	T2 = dexp(-dgamln(A2, IDUM))
 	T1 = 1.0E0 / (T2 * FC)
 	if dabs(DNU) > 0.1E0 {
-		goto Fourty
+		goto Forty
 	}
 
 	// SERIES FOR F0 TO RESOLVE INDETERMINACY FOR SMALL ABS(DNU).
@@ -640,7 +640,7 @@ Ten:
 Thirty:
 	G1 = -S
 	goto Fifty
-Fourty:
+Forty:
 	G1 = (T1 - T2) / (DNU + DNU)
 Fifty:
 	G2 = (T1 + T2) * 0.5E0
@@ -1325,7 +1325,7 @@ Twenty:
 		YI[I] = CSI
 		NZ = NZ - 1
 		if IC == KK-1 {
-			goto Fourty
+			goto Forty
 		}
 		IC = KK
 		continue
@@ -1344,7 +1344,7 @@ Twenty:
 		NZ = N - 1
 	}
 	goto FourtyFive
-Fourty:
+Forty:
 	NZ = KK - 2
 FourtyFive:
 	for I = 1; I <= NZ; I++ {
@@ -1413,7 +1413,7 @@ func zacaiOrig(ZR, ZI, FNU float64, KODE, MR, N int, YR, YI []float64, NZ int, R
 Ten:
 	// POWER SERIES FOR THE I FUNCTION.
 	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM = zseriOrig(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL, ELIM, ALIM)
-	goto Fourty
+	goto Forty
 Twenty:
 	if AZ < RL {
 		goto Thirty
@@ -1423,14 +1423,14 @@ Twenty:
 	if NW < 0 {
 		goto Eighty
 	}
-	goto Fourty
+	goto Forty
 Thirty:
 	// MILLER ALGORITHM NORMALIZED BY THE SERIES FOR THE I FUNCTION
 	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL = zmlriOrig(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL)
 	if NW < 0 {
 		goto Eighty
 	}
-Fourty:
+Forty:
 	// ANALYTIC CONTINUATION TO THE LEFT HALF PLANE FOR THE K FUNCTION.
 	ZNR, ZNI, FNU, KODE, _, CYR, CYI, NW, TOL, ELIM, ALIM = zbknuOrig(ZNR, ZNI, FNU, KODE, 1, CYR, CYI, NW, TOL, ELIM, ALIM)
 	if NW != 0 {
@@ -1746,7 +1746,7 @@ Twenty:
 	I = I + 1
 	K = 0
 	if INU < IAZ {
-		goto Fourty
+		goto Forty
 	}
 	// COMPUTE RELATIVE TRUNCATION ERROR FOR RATIOS.
 	P1R = ZEROR
@@ -1775,7 +1775,7 @@ Twenty:
 			continue
 		}
 		if ITIME == 2 {
-			goto Fourty
+			goto Forty
 		}
 		ACK = zabs(complex(CKR, CKI))
 		FLAM = ACK + dsqrt(ACK*ACK-1.0E0)
@@ -1785,7 +1785,7 @@ Twenty:
 		ITIME = 2
 	}
 	goto OneTen
-Fourty:
+Forty:
 	// BACKWARD RECURRENCE AND SUM NORMALIZING RELATION.
 	K = K + 1
 	KK = max0(I+IAZ, K+INU)
@@ -1964,7 +1964,7 @@ Twenty:
 		AK1R = AK1R - ZR
 	}
 	if AK1R > (-ELIM) {
-		goto Fourty
+		goto Forty
 	}
 Thirty:
 	NZ = NZ + 1
@@ -1978,7 +1978,7 @@ Thirty:
 		return ZR, ZI, FNU, KODE, N, YR, YI, NZ, TOL, ELIM, ALIM
 	}
 	goto Twenty
-Fourty:
+Forty:
 	if AK1R > (-ALIM) {
 		goto Fifty
 	}

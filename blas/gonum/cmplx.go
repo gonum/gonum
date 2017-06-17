@@ -11,7 +11,7 @@ var (
 	_ blas.Complex128 = Implementation{}
 )
 
-// TOOD(btracey): Replace this as complex routines are added, and instead
+// TODO(btracey): Replace this as complex routines are added, and instead
 // automatically generate the complex64 routines from the complex128 ones.
 
 var noComplex = "native: implementation does not implement this routine, see the cgo wrapper in gonum.org/v1/netlib/blas"

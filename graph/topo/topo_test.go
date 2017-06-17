@@ -85,7 +85,7 @@ func TestPathExistsInUndirected(t *testing.T) {
 
 		got := PathExistsIn(g, simple.Node(test.from), simple.Node(test.to))
 		if got != test.want {
-			t.Errorf("unexpected result for path existance in test %d: got:%t want %t", i, got, test.want)
+			t.Errorf("unexpected result for path existence in test %d: got:%t want %t", i, got, test.want)
 		}
 	}
 }
@@ -124,7 +124,7 @@ func TestPathExistsInDirected(t *testing.T) {
 
 		got := PathExistsIn(g, simple.Node(test.from), simple.Node(test.to))
 		if got != test.want {
-			t.Errorf("unexpected result for path existance in test %d: got:%t want %t", i, got, test.want)
+			t.Errorf("unexpected result for path existence in test %d: got:%t want %t", i, got, test.want)
 		}
 	}
 }

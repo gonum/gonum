@@ -20,7 +20,7 @@ func ExampleHOGSVD() {
 	var gsvd mat.HOGSVD
 	ok := gsvd.Factorize(FAO.Africa, FAO.Asia, FAO.LatinAmericaCaribbean, FAO.Oceania)
 	if !ok {
-		log.Fatal("HOGSVD factorization failed: %v", gsvd.Err())
+		log.Fatalf("HOGSVD factorization failed: %v", gsvd.Err())
 	}
 
 	for i, n := range []string{"Africa", "Asia", "Latin America/Caribbean", "Oceania"} {

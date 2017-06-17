@@ -58,7 +58,7 @@ func TestNavigableSmallWorldDirected(t *testing.T) {
 						n *= d
 					}
 					if err != nil {
-						t.Fatalf("unexpected error: dims=%v n=%d, p=%d, q=%d, r=%v, r=%v: %v", dims, n, p, q, r, err)
+						t.Fatalf("unexpected error: dims=%v n=%d, p=%d, q=%d, r=%v: %v", dims, n, p, q, r, err)
 					}
 					if g.addSelfLoop {
 						t.Errorf("unexpected self edge: dims=%v n=%d, p=%d, q=%d, r=%v", dims, n, p, q, r)

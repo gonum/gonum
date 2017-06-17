@@ -63,7 +63,7 @@ func Dlaqp2Test(t *testing.T, impl Dlaqp2er) {
 
 			impl.Dlaqp2(m, n, test.offset, a.Data, a.Stride, jpiv, tau, vn1, vn2, work)
 
-			prefix := fmt.Sprintf("Case %v (offset=%t,m=%v,n=%v,extra=%v)", ti, test.offset, m, n, extra)
+			prefix := fmt.Sprintf("Case %v (offset=%d,m=%v,n=%v,extra=%v)", ti, test.offset, m, n, extra)
 			if !generalOutsideAllNaN(a) {
 				t.Errorf("%v: out-of-range write to A", prefix)
 			}

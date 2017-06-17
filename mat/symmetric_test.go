@@ -687,7 +687,7 @@ func TestPowPSD(t *testing.T) {
 			dense.Pow(&mat, pow)
 
 			if !EqualApprox(&sym, &dense, 1e-10) {
-				t.Errorf("Dim %d: pow mismatch")
+				t.Errorf("Dim %d: pow mismatch", dim)
 			}
 		}
 	}

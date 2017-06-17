@@ -132,7 +132,7 @@ func TestAStar(t *testing.T) {
 		p, cost := pt.To(simple.Node(test.t))
 
 		if !topo.IsPathIn(test.g, p) {
-			t.Error("got path that is not path in input graph for %q", test.name)
+			t.Errorf("got path that is not path in input graph for %q", test.name)
 		}
 
 		bfp, ok := BellmanFordFrom(simple.Node(test.s), test.g)
@@ -199,7 +199,7 @@ func TestExhaustiveAStar(t *testing.T) {
 			gotPath, gotWeight := pt.To(goal)
 			wantPath, wantWeight, _ := ps.Between(start, goal)
 			if gotWeight != wantWeight {
-				t.Errorf("unexpected path weight from %v to %v result: got:%s want:%s",
+				t.Errorf("unexpected path weight from %v to %v result: got:%f want:%f",
 					start, goal, gotWeight, wantWeight)
 			}
 			if !reflect.DeepEqual(gotPath, wantPath) {
@@ -272,7 +272,7 @@ func TestAStarNullHeuristic(t *testing.T) {
 		}
 
 		if pt.From().ID() != test.Query.From().ID() {
-			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", pt.From().ID(), test.Query.From().ID())
+			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", test.Name, pt.From().ID(), test.Query.From().ID())
 		}
 
 		p, weight := pt.To(test.Query.To())

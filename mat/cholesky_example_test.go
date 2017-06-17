@@ -69,7 +69,7 @@ func ExampleCholesky() {
 	//           ⎣-16  -24   17   73⎦
 }
 
-func ExampleCholeskySymRankOne() {
+func ExampleCholesky_SymRankOne() {
 	a := mat.NewSymDense(4, []float64{
 		1, 1, 1, 1,
 		0, 2, 3, 4,

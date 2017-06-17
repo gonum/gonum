@@ -162,7 +162,6 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 			return
 		}
 	}
-	panic("optimize: unreachable")
 }
 
 func getDefaultMethod(p *Problem) Method {

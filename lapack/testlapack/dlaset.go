@@ -49,14 +49,14 @@ func DlasetTest(t *testing.T, impl Dlaseter) {
 				}
 				for i := 0; i < min(m, n); i++ {
 					if a.Data[i*a.Stride+i] != beta {
-						t.Errorf("%v: unexpected diagonal of A")
+						t.Errorf("%v: unexpected diagonal of A", prefix)
 					}
 				}
 				if uplo == blas.Upper || uplo == blas.All {
 					for i := 0; i < m; i++ {
 						for j := i + 1; j < n; j++ {
 							if a.Data[i*a.Stride+j] != alpha {
-								t.Errorf("%v: unexpected upper triangle of A")
+								t.Errorf("%v: unexpected upper triangle of A", prefix)
 							}
 						}
 					}
@@ -65,7 +65,7 @@ func DlasetTest(t *testing.T, impl Dlaseter) {
 					for i := 1; i < m; i++ {
 						for j := 0; j < min(i, n); j++ {
 							if a.Data[i*a.Stride+j] != alpha {
-								t.Errorf("%v: unexpected lower triangle of A")
+								t.Errorf("%v: unexpected lower triangle of A", prefix)
 							}
 						}
 					}

@@ -271,7 +271,7 @@ func TestDenseIORoundTrip(t *testing.T) {
 		}
 
 		if !bytes.Equal(buf, wbuf.Bytes()) {
-			t.Errorf("encoding via MarshalBinary and MarshalBinaryTo differ:\nwith-stream: %q\n  no-stream: %q\n",
+			t.Errorf("r/w test #%d encoding via MarshalBinary and MarshalBinaryTo differ:\nwith-stream: %q\n  no-stream: %q\n",
 				i, wbuf.Bytes(), buf,
 			)
 		}
@@ -532,7 +532,7 @@ func TestVectorIORoundTrip(t *testing.T) {
 		}
 
 		if !bytes.Equal(buf, wbuf.Bytes()) {
-			t.Errorf("encoding via MarshalBinary and MarshalBinaryTo differ:\nwith-stream: %q\n  no-stream: %q\n",
+			t.Errorf("test #%d encoding via MarshalBinary and MarshalBinaryTo differ:\nwith-stream: %q\n  no-stream: %q\n",
 				i, wbuf.Bytes(), buf,
 			)
 		}

@@ -85,7 +85,7 @@ func TestAdd(t *testing.T) {
 
 	for e, n := range s {
 		if e != n.ID() {
-			t.Error("Element ID did not match key: %d != %d", e, n.ID())
+			t.Errorf("Element ID did not match key: %d != %d", e, n.ID())
 		}
 	}
 }
@@ -229,7 +229,7 @@ func TestUnionSame(t *testing.T) {
 	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
-				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
+				t.Errorf("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
 			}
 		}
 	}
@@ -266,7 +266,7 @@ func TestUnionDiff(t *testing.T) {
 	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
-				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
+				t.Errorf("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
 			}
 		}
 	}
@@ -304,7 +304,7 @@ func TestUnionOverlapping(t *testing.T) {
 	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
-				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
+				t.Errorf("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
 			}
 		}
 	}
@@ -334,7 +334,7 @@ func TestIntersectSame(t *testing.T) {
 	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
-				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
+				t.Errorf("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
 			}
 		}
 	}
@@ -368,7 +368,7 @@ func TestIntersectDiff(t *testing.T) {
 	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
-				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
+				t.Errorf("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
 			}
 		}
 	}
@@ -406,7 +406,7 @@ func TestIntersectOverlapping(t *testing.T) {
 	for i, s := range []Nodes{a, b, c} {
 		for e, n := range s {
 			if e != n.ID() {
-				t.Error("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
+				t.Errorf("Element ID did not match key in s%d: %d != %d", i+1, e, n.ID())
 			}
 		}
 	}

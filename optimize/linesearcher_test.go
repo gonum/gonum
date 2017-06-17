@@ -84,7 +84,7 @@ func testLinesearcher(t *testing.T, ls Linesearcher, decrease, curvature float64
 
 			op := ls.Init(f0, g0, initStep)
 			if !op.isEvaluation() {
-				t.Errorf("%v: Linesearcher.Init returned non-evaluating operation %v", op)
+				t.Errorf("%v: Linesearcher.Init returned non-evaluating operation %v", prefix, op)
 				continue
 			}
 
@@ -115,7 +115,7 @@ func testLinesearcher(t *testing.T, ls Linesearcher, decrease, curvature float64
 					f = prob.f(step)
 					g = prob.g(step)
 				default:
-					t.Errorf("%v: Linesearcher returned an invalid operation %v", op)
+					t.Errorf("%v: Linesearcher returned an invalid operation %v", prefix, op)
 					break loop
 				}
 

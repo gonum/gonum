@@ -5,7 +5,6 @@
 package lp
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 
@@ -241,8 +240,6 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 	// b^T *nu instead of maximizing -b^T*nu), so flip it back.
 	if errPrimal == nil {
 		if errDual != nil {
-			fmt.Println("errDual", errDual)
-			panic("here")
 			t.Errorf("Primal feasible but dual errored: %s", errDual)
 		}
 		dualOpt *= -1

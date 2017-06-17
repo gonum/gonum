@@ -141,7 +141,7 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 		basicIdxs = make([]int, len(initialBasic))
 		copy(basicIdxs, initialBasic)
 	} else {
-		// No inital basis supplied. Solve the PhaseI problem.
+		// No initial basis supplied. Solve the PhaseI problem.
 		basicIdxs, ab, xb, err = findInitialBasic(A, b)
 		if err != nil {
 			return math.NaN(), nil, nil, err

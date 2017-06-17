@@ -138,7 +138,7 @@ var (
 
 // Dimensions represent the dimensionality of the unit in powers
 // of that dimension. If a key is not present, the power of that
-// dimension is zero. Dimensions is used in conjuction with New.
+// dimension is zero. Dimensions is used in conjunction with New.
 type Dimensions map[Dimension]int
 
 func (d Dimensions) String() string {
@@ -253,7 +253,7 @@ func DimensionsMatch(a, b Uniter) bool {
 	return true
 }
 
-// Add adds the function argument to the reciever. Panics if the units of
+// Add adds the function argument to the receiver. Panics if the units of
 // the receiver and the argument don't match.
 func (u *Unit) Add(uniter Uniter) *Unit {
 	a := uniter.Unit()

@@ -9,7 +9,7 @@ import (
 	"math/rand"
 )
 
-// Categorical is an extension of the Bernouilli distribution where x takes
+// Categorical is an extension of the Bernoulli distribution where x takes
 // values {0, 1, ..., len(w)-1} where w is the weight vector. Categorical must
 // be initialized with NewCategorical.
 type Categorical struct {

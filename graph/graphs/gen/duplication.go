@@ -73,7 +73,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 		// Loop until we have connectivity
 		// into the rest of the graph.
 		for {
-			// Add edges to parent's neigbours.
+			// Add edges to parent's neighbours.
 			to := dst.From(u)
 			sort.Sort(ordered.ByID(to))
 			for _, v := range to {

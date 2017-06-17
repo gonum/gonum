@@ -62,7 +62,7 @@ func min(a, b int) int {
 	return a
 }
 
-// blocks returns the number of divisons of the dimension length with the given
+// blocks returns the number of divisions of the dimension length with the given
 // block size.
 func blocks(dim, bsize int) int {
 	return (dim + bsize - 1) / bsize

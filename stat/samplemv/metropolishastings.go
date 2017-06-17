@@ -23,7 +23,7 @@ type MHProposal interface {
 	ConditionalLogProb(x, y []float64) (prob float64)
 
 	// ConditionalRand generates a new random location conditioned being at the
-	// location y. If the first arguement is nil, a new slice is allocated and
+	// location y. If the first argument is nil, a new slice is allocated and
 	// returned. Otherwise, the random location is stored in-place into the first
 	// argument, and ConditionalRand will panic if the input slice lengths differ.
 	ConditionalRand(x, y []float64) []float64
@@ -114,7 +114,7 @@ func (m MetropolisHastingser) Sample(batch *mat.Dense) {
 
 // MetropolisHastings generates rows(batch) samples using the Metropolis Hastings
 // algorithm (http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm),
-// with the given target and proposal distributions, starting at the intial location
+// with the given target and proposal distributions, starting at the initial location
 // and storing the results in-place into samples. If src != nil, it will be used to generate random
 // numbers, otherwise rand.Float64 will be used.
 //
@@ -204,7 +204,7 @@ func (p *ProposalNormal) ConditionalLogProb(x, y []float64) (prob float64) {
 }
 
 // ConditionalRand generates a new random location conditioned being at the
-// location y. If the first arguement is nil, a new slice is allocated and
+// location y. If the first argument is nil, a new slice is allocated and
 // returned. Otherwise, the random location is stored in-place into the first
 // argument, and ConditionalRand will panic if the input slice lengths differ or
 // if they are not equal to the dimension of the covariance matrix.

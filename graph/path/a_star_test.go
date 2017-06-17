@@ -72,7 +72,7 @@ var aStarTests = []struct {
 		g: func() graph.Graph {
 			tg := internal.NewGrid(10, 10, true)
 
-			// Create a partial "wall" accross the middle
+			// Create a partial "wall" across the middle
 			// row with a gap at the left-hand end.
 			tg.Set(4, 1, false)
 			tg.Set(4, 2, false)
@@ -94,7 +94,7 @@ var aStarTests = []struct {
 		g: func() graph.Graph {
 			tg := internal.NewGrid(10, 10, true)
 
-			// Create a partial "wall" accross the middle
+			// Create a partial "wall" across the middle
 			// row with a gap at the left-hand end.
 			tg.Set(4, 1, false)
 			tg.Set(4, 2, false)

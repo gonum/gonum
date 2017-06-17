@@ -46,7 +46,7 @@ func gammaIncInv(a, y float64) float64 {
 
 	// Also, after we generate a small interval by bisection above, false
 	// position will do a large step from an interval of width ~1e-4 to ~1e-14
-	// in one step (a=10, x=0.05, but similiar for other values).
+	// in one step (a=10, x=0.05, but similar for other values).
 	result, bestX, _, errEst := falsePosition(lo, hi, flo, fhi, 2*machEp, 2*machEp, 1e-2*a, gammaInc, params)
 	if result == fSolveMaxIterations && errEst > allowedATol+allowedRTol*math.Abs(bestX) {
 		bestX = math.NaN()

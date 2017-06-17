@@ -287,7 +287,7 @@ func (s *SymDense) InverseCholesky(chol *Cholesky) error {
 }
 
 // SymRankOne performs a rank-1 update of the original matrix A and refactorizes
-// its Cholesky factorization, storing the result into the reciever. That is, if
+// its Cholesky factorization, storing the result into the receiver. That is, if
 // in the original Cholesky factorization
 //  U^T * U = A,
 // in the updated factorization

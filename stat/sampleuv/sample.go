@@ -333,7 +333,7 @@ func (m MetropolisHastingser) Sample(batch []float64) {
 
 // MetropolisHastings generates len(batch) samples using the Metropolis Hastings
 // algorithm (http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm),
-// with the given target and proposal distributions, starting at the intial location
+// with the given target and proposal distributions, starting at the initial location
 // and storing the results in-place into samples. If src != nil, it will be used to generate random
 // numbers, otherwise rand.Float64 will be used.
 //

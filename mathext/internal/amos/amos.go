@@ -235,7 +235,7 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 	}
 	AA = AZ * AZ
 	if AA < TOL/AZ {
-		goto Fourty
+		goto Forty
 	}
 	TRM1R = CONER
 	TRM1I = CONEI
@@ -272,12 +272,12 @@ func Zairy(ZR, ZI float64, ID, KODE int) (AIR, AII float64, NZ int) {
 		D2 = D2 + BK
 		AD = math.Min(D1, D2)
 		if ATRM < TOL*AD {
-			goto Fourty
+			goto Forty
 		}
 		AK = AK + 18.0E0
 		BK = BK + 18.0E0
 	}
-Fourty:
+Forty:
 	if ID == 1 {
 		goto Fifty
 	}
@@ -539,7 +539,7 @@ func Zbknu(ZR, ZI, FNU float64, KODE, N int, YR, YI []float64, NZ int, TOL, ELIM
 	     * CYI(2)
 	*/
 
-	// TOOD(btracey): Find which of these are inputs/outputs/both and clean up
+	// TODO(btracey): Find which of these are inputs/outputs/both and clean up
 	// the function call.
 	// YR and YI have length n (but n+1 with better indexing)
 	var AA, AK, ASCLE, A1, A2, BB, BK, CAZ,
@@ -641,7 +641,7 @@ Ten:
 	T2 = math.Exp(-dgamln(A2, IDUM))
 	T1 = 1.0E0 / (T2 * FC)
 	if math.Abs(DNU) > 0.1E0 {
-		goto Fourty
+		goto Forty
 	}
 
 	// SERIES FOR F0 TO RESOLVE INDETERMINACY FOR SMALL ABS(DNU).
@@ -658,7 +658,7 @@ Ten:
 Thirty:
 	G1 = -S
 	goto Fifty
-Fourty:
+Forty:
 	G1 = (T1 - T2) / (DNU + DNU)
 Fifty:
 	G2 = (T1 + T2) * 0.5E0
@@ -1352,7 +1352,7 @@ Twenty:
 		YI[I] = CSI
 		NZ = NZ - 1
 		if IC == KK-1 {
-			goto Fourty
+			goto Forty
 		}
 		IC = KK
 		continue
@@ -1371,7 +1371,7 @@ Twenty:
 		NZ = N - 1
 	}
 	goto FourtyFive
-Fourty:
+Forty:
 	NZ = KK - 2
 FourtyFive:
 	for I = 1; I <= NZ; I++ {
@@ -1452,7 +1452,7 @@ Ten:
 		YR[i] = real(v)
 		YI[i] = imag(v)
 	}
-	goto Fourty
+	goto Forty
 Twenty:
 	if AZ < RL {
 		goto Thirty
@@ -1462,14 +1462,14 @@ Twenty:
 	if NW < 0 {
 		goto Eighty
 	}
-	goto Fourty
+	goto Forty
 Thirty:
 	// MILLER ALGORITHM NORMALIZED BY THE SERIES FOR THE I FUNCTION
 	ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL = Zmlri(ZNR, ZNI, FNU, KODE, NN, YR, YI, NW, TOL)
 	if NW < 0 {
 		goto Eighty
 	}
-Fourty:
+Forty:
 	// ANALYTIC CONTINUATION TO THE LEFT HALF PLANE FOR THE K FUNCTION.
 	ZNR, ZNI, FNU, KODE, _, CYR, CYI, NW, TOL, ELIM, ALIM = Zbknu(ZNR, ZNI, FNU, KODE, 1, CYR, CYI, NW, TOL, ELIM, ALIM)
 	if NW != 0 {
@@ -1796,7 +1796,7 @@ Twenty:
 	I = I + 1
 	K = 0
 	if INU < IAZ {
-		goto Fourty
+		goto Forty
 	}
 	// COMPUTE RELATIVE TRUNCATION ERROR FOR RATIOS.
 	P1R = ZEROR
@@ -1825,7 +1825,7 @@ Twenty:
 			continue
 		}
 		if ITIME == 2 {
-			goto Fourty
+			goto Forty
 		}
 		ACK = cmplx.Abs(complex(CKR, CKI))
 		FLAM = ACK + math.Sqrt(ACK*ACK-1.0E0)
@@ -1835,7 +1835,7 @@ Twenty:
 		ITIME = 2
 	}
 	goto OneTen
-Fourty:
+Forty:
 	// BACKWARD RECURRENCE AND SUM NORMALIZING RELATION.
 	K = K + 1
 	KK = max(I+IAZ, K+INU)
@@ -1957,7 +1957,7 @@ OneTen:
 // condition |z| <= 2*sqrt(fnu+1) was violated and the computation must be
 // completed in another routine with n -= abs(nz).
 func Zseri(z complex128, fnu float64, kode, n int, y []complex128, tol, elim, alim float64) (nz int) {
-	// TOOD(btracey): The original fortran line is "ARM = 1.0D+3*D1MACH(1)". Evidently, in Fortran
+	// TODO(btracey): The original fortran line is "ARM = 1.0D+3*D1MACH(1)". Evidently, in Fortran
 	// this is interpreted as one to the power of +3*D1MACH(1). While it is possible
 	// this was intentional, it seems unlikely.
 	arm := 1000 * dmach[1]

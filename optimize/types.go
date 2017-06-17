@@ -184,7 +184,7 @@ type Settings struct {
 	//
 	// If f < f_best and
 	//  f_best - f > FunctionConverge.Relative * maxabs(f, f_best) + FunctionConverge.Absolute
-	// then a significant decrease has occured, and f_best is updated.
+	// then a significant decrease has occurred, and f_best is updated.
 	//
 	// If there is no significant decrease for FunctionConverge.Iterations
 	// major iterations, FunctionConvergence status is returned.

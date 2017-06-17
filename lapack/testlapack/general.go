@@ -583,7 +583,7 @@ func constructQK(kind string, m, n, k int, a []float64, lda int, tau []float64) 
 		}
 		blas64.Ger(-tau[i], vVec, vVec, h)
 		copy(qCopy.Data, q.Data)
-		// Mulitply q by the new h
+		// Multiply q by the new h.
 		switch kind {
 		case "QR", "RQ":
 			blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, qCopy, h, 0, q)
@@ -608,7 +608,7 @@ func checkBidiagonal(t *testing.T, m, n, nb int, a []float64, lda int, d, e, tau
 	qMat := constructQPBidiagonal(lapack.ApplyQ, m, n, nb, a, lda, tauQ)
 	pMat := constructQPBidiagonal(lapack.ApplyP, m, n, nb, a, lda, tauP)
 
-	// Compute Q^T * A * P
+	// Compute Q^T * A * P.
 	aMat := blas64.General{
 		Rows:   m,
 		Cols:   n,

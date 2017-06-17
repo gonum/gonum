@@ -121,7 +121,7 @@ func dgemmParallel(aTrans, bTrans bool, m, n, k int, a []float64, lda int, b []f
 		go func() {
 			defer wg.Done()
 			// Make local copies of otherwise global variables to reduce shared memory.
-			// This has a noticable effect on benchmarks in some cases.
+			// This has a noticeable effect on benchmarks in some cases.
 			alpha := alpha
 			aTrans := aTrans
 			bTrans := bTrans

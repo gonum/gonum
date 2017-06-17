@@ -553,7 +553,7 @@ func (l *directedLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src 
 	m := l.m
 	gamma := l.resolution
 
-	// Find communites connected to n.
+	// Find communities connected to n.
 	connected := make(set.Ints)
 	// The following for loop is equivalent to:
 	//

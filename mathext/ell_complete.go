@@ -10,13 +10,9 @@ import (
 
 // CompleteK computes the complete elliptic integral of the 1st kind, 0≤m≤1:
 //
-//	K(m) = ∫dθ/√(1-m∙sin²(θ)), θ from 0 to π/2.
+//	K(m) = \int_{0}^{\pi/2} d\theta / {\sqrt{1-m{\sin^2\theta}}}
 //
-// See: Toshio Fukushima, Precise and fast computation of complete elliptic integrals by
-// piecewise minimax rational function approximation,
-// Journal of Computational and Applied Mathematics, Volume 282, 2015, Pages 71-76.
-//
-// DOI: http://dx.doi.org/10.1016/j.cam.2014.12.038
+// See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
 func CompleteK(m float64) float64 {
 	if !(0 <= m && m <= 1) {
 		return math.NaN()
@@ -91,13 +87,9 @@ func CompleteK(m float64) float64 {
 
 // CompleteE computes the complete elliptic integral of the 2nd kind, 0≤m≤1:
 //
-//	E(m) = ∫√(1-m∙sin²(θ))dθ, θ from 0 to π/2.
+//	E(m) = \int_{0}^{\pi/2} {\sqrt{1-m{\sin^2\theta}}} d\theta
 //
-// See: Toshio Fukushima, Precise and fast computation of complete elliptic integrals by
-// piecewise minimax rational function approximation,
-// Journal of Computational and Applied Mathematics, Volume 282, 2015, Pages 71-76.
-//
-// DOI: http://dx.doi.org/10.1016/j.cam.2014.12.038
+// See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
 func CompleteE(m float64) float64 {
 	if !(0 <= m && m <= 1) {
 		return math.NaN()
@@ -155,7 +147,7 @@ func CompleteE(m float64) float64 {
 		return p / q
 	}
 	if mc > 0 {
-		t = 1.e0 - 206.568890725056806e0*mc
+		t = 1.0e0 - 206.568890725056806e0*mc
 		p = -mc * math.Log(mc*0.0625e0) * (41566.6612602868736e0 + t*(154.034981522913482e0+t*0.0618072471798575991e0)) / (165964.442527585615e0 + t*(917.589668642251803e0+t))
 		q = (132232.803956682877e0 + t*(353.375480007017643e0-t*1.40105837312528026e0)) / (132393.665743088043e0 + t*(192.112635228732532e0-t))
 		return p + q

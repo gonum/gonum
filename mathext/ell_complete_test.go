@@ -21,7 +21,7 @@ func TestCompleteKE(t *testing.T) {
 		E, Ep := CompleteE(mf), CompleteE(mp)
 		legendre := math.Abs(E*Kp + Ep*K - K*Kp - math.Pi/2)
 		if legendre > tol {
-			t.Errorf("legendre > tol: m=%v, legendre=%v, tol=%v", mf, legendre, tol)
+			t.Fatalf("legendre > tol: m=%v, legendre=%v, tol=%v", mf, legendre, tol)
 		}
 	}
 }

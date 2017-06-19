@@ -11,11 +11,11 @@ import (
 // CompleteK computes the complete elliptic integral of the 1st kind, 0≤m≤1.
 // It returns math.NaN() if m is not in [0,1].
 //
-//	K(m) = \int_{0}^{\pi/2} d\theta / {\sqrt{1-m{\sin^2\theta}}}
+//	K(m) = \int_{0}^{\pi/2} 1 / {\sqrt{1-m{\sin^2\theta}}} d\theta
 //
 // See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
 func CompleteK(m float64) float64 {
-	if !(0 <= m && m <= 1) {
+	if m < 0 || 1 < m || math.IsNaN(m) {
 		return math.NaN()
 	}
 
@@ -92,7 +92,7 @@ func CompleteK(m float64) float64 {
 //
 // See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
 func CompleteE(m float64) float64 {
-	if !(0 <= m && m <= 1) {
+	if m < 0 || 1 < m || math.IsNaN(m) {
 		return math.NaN()
 	}
 

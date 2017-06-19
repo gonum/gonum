@@ -16,7 +16,6 @@ import (
 
 var cyclesInTests = []struct {
 	g    []intset
-	sccs [][]int
 	want [][]int
 }{
 	{

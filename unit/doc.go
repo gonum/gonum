@@ -26,7 +26,7 @@
 //		func main(){
 //			t := 300 * unit.Kelvin
 //			p := 5 * unit.Bar
-//			rho := UnitDensity(p, t) // gives compile-time error
+//			rho := UnitDensity(p, t) // compile-time error
 //		}
 // gives a compile-time error (temperature type does not match pressure type)
 // while the corresponding code using float64 runs without error.
@@ -39,11 +39,11 @@
 //			rho := Float64Density(p, t) // no error
 //		}
 // Many types have constants defined representing named SI units (Meter,
-// Kilogram, etc. ) or SI derived units (Bar, Milligram, etc.). These are
-// all defined as multiples of the base unit, so, for example, the following
-// are euqivalent
+// Kilogram, etc. ) or SI derived units (Bar, Hz, etc.). The Unit package
+// additionally provides untyped constants for SI prefixes, so the following
+// are all equivalent.
 //		l := 0.001 * unit.Meter
-//		k := 1 * unit.Millimeter
+//		k := 1 * unit.Milli * unit.Meter
 //		j := unit.Length(0.001)
 //
 // 2)
@@ -72,18 +72,6 @@
 // used, however, to create the unit of 'Slide', because in this case slide
 // is just a measurement of area. Instead, a constant could be defined.
 //		const Slide unit.Area =  0.001875 // m^2
-//		var WhiteBloodCellDim unit.Dimension
-//		func init(){
-//			WhiteBloodCellDim = unit.NewDimension("wbc")
-//		}
-//		type WbcPerArea float64
-//		func (w WbcPerArea) Unit() *Unit{
-//			return unit.New(float64(w), unit.Dimensions{WhiteBloodCellDim: 1, unit.LengthDim: -2})
-//		}
-//		func main(){
-//			v := WbcPerArea(15)
-//			fmt.Println(v.Unit()) // prints: 1.5e+01 m^-2 wbc
-//		}
 // Please note that Unit cannot catch all errors related to dimensionality.
 // Different physical ideas are sometimes expressed with the same dimensions
 // and Unit is incapable of catching these mismatches. For example, energy and

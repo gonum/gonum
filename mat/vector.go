@@ -49,10 +49,10 @@ func NewVector(n int, data []float64) *Vector {
 
 // SliceVec returns a new Vector that shares backing data with the receiver.
 // The returned matrix starts at i of the receiver and extends k-i elements.
-// SliceVec panics with ErrIndexOutOfRange if the slice is outside the bounds
+// SliceVec panics with ErrIndexOutOfRange if the slice is outside the capacity
 // of the receiver.
 func (v *Vector) SliceVec(i, k int) *Vector {
-	if i < 0 || k <= i || v.n < k {
+	if i < 0 || k <= i || v.Cap() < k {
 		panic(ErrIndexOutOfRange)
 	}
 	return &Vector{
@@ -64,7 +64,8 @@ func (v *Vector) SliceVec(i, k int) *Vector {
 	}
 }
 
-// Dims returns the number of rows and columns in the matrix. Columns is always 1.
+// Dims returns the number of rows and columns in the matrix. Columns is always 1
+// for a non-Reset vector.
 func (v *Vector) Dims() (r, c int) {
 	if v.isZero() {
 		return 0, 0
@@ -72,9 +73,26 @@ func (v *Vector) Dims() (r, c int) {
 	return v.n, 1
 }
 
+// Caps returns the number of rows and columns in the backing matrix. Columns is always 1
+// for a non-Reset vector.
+func (v *Vector) Caps() (r, c int) {
+	if v.isZero() {
+		return 0, 0
+	}
+	return v.Cap(), 1
+}
+
 // Len returns the length of the vector.
 func (v *Vector) Len() int {
 	return v.n
+}
+
+// Cap returns the capacity of the vector.
+func (v *Vector) Cap() int {
+	if v.isZero() {
+		return 0
+	}
+	return (cap(v.mat.Data)-1)/v.mat.Inc + 1
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.

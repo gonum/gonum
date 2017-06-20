@@ -29,10 +29,9 @@ type UniProbDist interface {
 }
 
 func absEq(a, b float64) bool {
-	if math.Abs(a-b) > 1e-14 {
-		return false
-	}
-	return true
+	// This is expressed as the inverse to catch the
+	// case a = Inf and b = Inf of the same sign.
+	return !(math.Abs(a-b) > 1e-14)
 }
 
 // TODO: Implement a better test for Quantile

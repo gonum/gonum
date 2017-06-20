@@ -105,7 +105,6 @@ func (l Laplace) MarshalParameters(p []Parameter) {
 	p[0].Value = l.Mu
 	p[1].Name = "Scale"
 	p[1].Value = l.Scale
-	return
 }
 
 // Mean returns the mean of the probability distribution.

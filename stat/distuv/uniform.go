@@ -66,7 +66,6 @@ func (u Uniform) MarshalParameters(p []Parameter) {
 	p[0].Value = u.Min
 	p[1].Name = "Max"
 	p[1].Value = u.Max
-	return
 }
 
 // Mean returns the mean of the probability distribution.

@@ -143,7 +143,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 		}
 
 		np, weight, unique := pt.Between(test.NoPathFor.From(), test.NoPathFor.To())
-		if np != nil || !math.IsInf(weight, 1) || unique != false {
+		if np != nil || !math.IsInf(weight, 1) || unique {
 			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f unique=%t\nwant:path=<nil> weight=+Inf unique=false",
 				test.Name, np, weight, unique)
 		}

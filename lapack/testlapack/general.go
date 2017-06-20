@@ -1135,10 +1135,9 @@ func isRightEigenvectorOf(a blas64.General, xRe, xIm []float64, lambda complex12
 		lambdax := make([]float64, n)
 		floats.AddScaled(lambdax, real(lambda), xRe)
 
-		if floats.Distance(xReAns, lambdax, math.Inf(1)) > tol {
-			return false
-		}
-		return true
+		// This is expressed as the inverse to catch the case
+		// xReAns_i = Inf and lambdax_i = Inf of the same sign.
+		return !(floats.Distance(xReAns, lambdax, math.Inf(1)) > tol)
 	}
 
 	// Complex eigenvector, and real or complex eigenvalue.
@@ -1195,10 +1194,9 @@ func isLeftEigenvectorOf(a blas64.General, yRe, yIm []float64, lambda complex128
 		lambday := make([]float64, n)
 		floats.AddScaled(lambday, real(lambda), yRe)
 
-		if floats.Distance(yReAns, lambday, math.Inf(1)) > tol {
-			return false
-		}
-		return true
+		// This is expressed as the inverse to catch the case
+		// yReAns_i = Inf and lambday_i = Inf of the same sign.
+		return !(floats.Distance(yReAns, lambday, math.Inf(1)) > tol)
 	}
 
 	// Complex eigenvector, and real or complex eigenvalue.

@@ -111,9 +111,7 @@ func LatinHypercube(batch *mat.Dense, q distmv.Quantiler, src *rand.Rand) {
 	for i := 0; i < c; i++ {
 		p := perm(r)
 		for j := 0; j < r; j++ {
-			var v float64
-			v = f64()
-			v = v/r64 + float64(j)/r64
+			v := f64()/r64 + float64(j)/r64
 			batch.Set(p[j], i, v)
 		}
 	}

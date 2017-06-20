@@ -363,7 +363,7 @@ type subGraph struct {
 
 func (g subGraph) ID() int { return g.id }
 func (g subGraph) Subgraph() graph.Graph {
-	return namedGraph{id: g.id, Graph: g.Graph}
+	return namedGraph(g)
 }
 
 func undirectedSubGraphFrom(g []intset, s map[int][]intset) graph.Graph {

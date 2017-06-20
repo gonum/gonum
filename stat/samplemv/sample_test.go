@@ -47,7 +47,7 @@ func TestLatinHypercube(t *testing.T) {
 			allPresent := true
 			for i := 0; i < nSamples; i++ {
 				for j := 0; j < dim; j++ {
-					if present[i][j] == false {
+					if !present[i][j] {
 						allPresent = false
 					}
 				}

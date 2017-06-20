@@ -51,6 +51,70 @@ func TestNewVector(t *testing.T) {
 	}
 }
 
+func TestCap(t *testing.T) {
+	for i, test := range []struct {
+		vector *Vector
+		want   int
+	}{
+		{vector: NewVector(3, nil), want: 3},
+		{
+			vector: &Vector{
+				mat: blas64.Vector{
+					Data: make([]float64, 7, 10),
+					Inc:  3,
+				},
+				n: 3,
+			},
+			want: 4,
+		},
+		{
+			vector: &Vector{
+				mat: blas64.Vector{
+					Data: make([]float64, 10),
+					Inc:  3,
+				},
+				n: 4,
+			},
+			want: 4,
+		},
+		{
+			vector: &Vector{
+				mat: blas64.Vector{
+					Data: make([]float64, 11),
+					Inc:  3,
+				},
+				n: 4,
+			},
+			want: 4,
+		},
+		{
+			vector: &Vector{
+				mat: blas64.Vector{
+					Data: make([]float64, 12),
+					Inc:  3,
+				},
+				n: 4,
+			},
+			want: 4,
+		},
+		{
+			vector: &Vector{
+				mat: blas64.Vector{
+					Data: make([]float64, 13),
+					Inc:  3,
+				},
+				n: 4,
+			},
+			want: 5,
+		},
+	} {
+		got := test.vector.Cap()
+		if got != test.want {
+			t.Errorf("unexpected capacty for test %d: got: %d want: %d", i, got, test.want)
+		}
+	}
+}
+
 func TestVectorAtSet(t *testing.T) {
 	for i, test := range []struct {
 		vector *Vector

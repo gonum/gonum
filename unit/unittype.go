@@ -10,26 +10,17 @@ import (
 	"sort"
 )
 
-// Uniter is an interface representing a type that can be converted
-// to a unit.
+// Uniter is a type that can be converted to a Unit.
 type Uniter interface {
 	Unit() *Unit
 }
 
-// Dimension is a type representing an SI base dimension or other
-// orthogonal dimension. If a new dimension is desired for a
-// domain-specific problem, NewDimension should be used. Integers
-// should never be cast as type dimension
-//	// Good: Create a package constant with an init function
-//	var MyDimension unit.Dimension
-//	init(){
-//		MyDimension = NewDimension("my")
-//	}
-//	main(){
-//		var := MyDimension(28.2)
-//	}
+// Dimension is a type representing an SI base dimension or a distinct
+// orthogonal dimension. Non-SI dimensions can be created using the NewDimension
+// function, typically within an init function.
 type Dimension int
 
+// String returns the string for the dimension.
 func (d Dimension) String() string {
 	switch {
 	case d == reserved:
@@ -65,7 +56,8 @@ var (
 		AngleDim:             "rad",
 	}
 
-	// for guaranteeing there aren't two identical symbols
+	// dimensions guarantees there aren't two identical symbols
+	// SI symbol list from http://lamar.colostate.edu/~hillger/basic.htm
 	dimensions = map[string]Dimension{
 		"A":   CurrentDim,
 		"m":   LengthDim,
@@ -132,10 +124,6 @@ var (
 	}
 )
 
-// TODO: Should we actually reserve "common" SI unit symbols ("N", "J", etc.) so there isn't confusion
-// TODO: If we have a fancier ParseUnit, maybe the 'reserved' symbols should be a different map
-// 		map[string]string which says how they go?
-
 // Dimensions represent the dimensionality of the unit in powers
 // of that dimension. If a key is not present, the power of that
 // dimension is zero. Dimensions is used in conjunction with New.
@@ -178,53 +166,58 @@ func (u unitPrinters) Len() int {
 }
 
 func (u unitPrinters) Less(i, j int) bool {
-	return (u[i].pow > 0 && u[j].pow < 0) || u[i].String() < u[j].String()
+	// Order first by positive powers, then by name.
+	if u[i].pow*u[j].pow < 0 {
+		return u[i].pow > 0
+	}
+	return u[i].String() < u[j].String()
 }
 
 func (u unitPrinters) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
 }
 
-// NewDimension returns a new dimension variable which will have a
-// unique representation across packages to prevent accidental overlap.
-// The input string represents a symbol name which will be used for printing
-// Unit types. This symbol may not overlap with any of the SI base units
-// or other symbols of common use in SI ("kg", "J", "μ", etc.). A list of
-// such symbols can be found at http://lamar.colostate.edu/~hillger/basic.htm or
-// by consulting the package source. Furthermore, the provided symbol is also
-// forbidden from overlapping with other packages calling NewDimension. NewDimension
-// is expecting to be used only during initialization, and as such it will panic
-// if the symbol matching an existing symbol
+// NewDimension creates a new orthogonal dimension with the given symbol, and
+// returns the value of that dimension. The input symbol must not overlap with
+// any of the any of the SI base units or other symbols of common use in SI ("kg",
+// "J", etc.), and must not overlap with any other dimensions created by calls
+// to NewDimension. The SymbolExists function can check if the symbol exists.
+// NewDimension will panic if the input symbol matches an existing symbol.
+//
 // NewDimension should only be called for unit types that are actually orthogonal
 // to the base dimensions defined in this package. Please see the package-level
-// documentation for further explanation. Calls to NewDimension are not thread safe.
+// documentation for further explanation.
 func NewDimension(symbol string) Dimension {
 	_, ok := dimensions[symbol]
 	if ok {
 		panic("unit: dimension string \"" + symbol + "\" already used")
 	}
-	symbols = append(symbols, symbol)
 	d := Dimension(len(symbols))
+	symbols = append(symbols, symbol)
 	dimensions[symbol] = d
 	return d
 }
 
-// Unit is a type a value with generic SI units. Most useful for
-// translating between dimensions, for example, by multiplying
-// an acceleration with a mass to get a force. Please see the
-// package documentation for further explanation.
+// SymoblExists returns whether the given symbol is already in use.
+func SymbolExists(symbol string) bool {
+	_, ok := dimensions[symbol]
+	return ok
+}
+
+// Unit represents a dimensional value. The dimensions will typically be in SI
+// units, but can also include dimensions created with NewDimension. The Unit type
+// is most useful for ensuring dimensional consistency when manipulating types
+// with different units, for example, by multiplying  an acceleration with a
+// mass to get a force. Please see the package documentation for further explanation.
 type Unit struct {
-	dimensions Dimensions // Map for custom dimensions
+	dimensions Dimensions
 	formatted  string
 	value      float64
 }
 
-// New creates a new variable of type Unit which has the value
-// specified by value and the dimensions specified by the
-// base units struct. The value is always in SI Units.
-//
-// Example: To create an acceleration of 3 m/s^2, one could do
-// myvar := CreateUnit(3.0, &Dimensions{unit.LengthDim: 1, unit.TimeDim: -2})
+// New creates a new variable of type Unit which has the value and dimensions
+// specified by the inputs. The built-in dimensions are always in SI units
+// (meters, kilograms, etc.).
 func New(value float64, d Dimensions) *Unit {
 	u := &Unit{
 		dimensions: make(map[Dimension]int),

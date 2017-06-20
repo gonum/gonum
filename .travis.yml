@@ -25,7 +25,7 @@ script:
  - go test -a -tags noasm -x -v ./...
  - go test -a -tags appengine -x -v ./...
  - test -z "$(gofmt -d .)"
- - if [[ -n "$(gofmt -s -l .)" ]]; then echo -e "\e[31mCode not gofmt simplified in:\n\n"; gofmt -s -l .; echo -e "\e[0"; fi
+ - if [[ -n "$(gofmt -s -l .)" ]]; then echo -e '\e[31mCode not gofmt simplified in:\n\n'; gofmt -s -l .; echo -e "\e[0"; fi
  - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash ./.travis/test-coverage.sh; fi
  # This is run last since it alters the tree.
  - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh

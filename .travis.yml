@@ -20,8 +20,7 @@ go_import_path: gonum.org/v1/gonum
 # Get deps, build, test, and ensure the code is gofmt'ed.
 # If we are building as gonum, then we have access to the coveralls api key, so we can run coverage as well.
 script:
- - test -z "$(goimports -d .)"
- - if [[ -n "$(gofmt -s -l .)" ]]; then echo -e '\e[31mCode not gofmt simplified in:\n\n'; gofmt -s -l .; echo -e "\e[0"; fi
+ - ${TRAVIS_BUILD_DIR}/.travis/check-formatting.sh
  - go get -d -t -v ./...
  - go build -v ./...
  - go test -v ./...

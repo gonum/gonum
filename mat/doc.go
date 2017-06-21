@@ -36,10 +36,23 @@
 //  zero.Copy(a)
 //
 // Receivers must be the correct size for the matrix operations, otherwise the
-// operation will panic. As a special case for convenience, a zero-sized matrix
+// operation will panic. As a special case for convenience, a zero-value matrix
 // will be modified to have the correct size, allocating data if necessary.
 //  var c mat.Dense // construct a new zero-sized matrix
-//  c.Mul(a, a)       // c is automatically adjusted to be 6×6
+//  c.Mul(a, a)     // c is automatically adjusted to be 6×6
+//
+// Zero-value of a matrix
+//
+// A zero-value matrix is either the Go language definition of a zero-value or
+// is a zero-sized matrix with zero-length stride. Matrix implementations may have
+// a Reset method to revert the receiver into a zero-valued matrix and an IsZero
+// method that returns whether the matrix is zero-valued.
+// So the following will all result in a zero-value matrix.
+//  - var a mat.Dense
+//  - a := NewDense(0, 0, make([]float64, 0, 100))
+//  - a.Reset()
+// A zero-value matrix can not be sliced even if it does have an adequately sized
+// backing data slice, but can be expanded using its Grow method if it exists.
 //
 // The Matrix Interfaces
 //

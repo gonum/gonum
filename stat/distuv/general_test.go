@@ -101,11 +101,11 @@ func testConjugateUpdate(t *testing.T, newFittable func() ConjugateUpdater) {
 				incWeights = test.weights[j : j+1]
 				allWeights = test.weights[0 : j+1]
 			}
-			nsInc := incDist.SuffStat(test.samps[j:j+1], incWeights, stats)
+			nsInc := incDist.SuffStat(stats, test.samps[j:j+1], incWeights)
 			incDist.ConjugateUpdate(stats, nsInc, prior)
 
 			allDist := newFittable()
-			nsAll := allDist.SuffStat(test.samps[0:j+1], allWeights, stats)
+			nsAll := allDist.SuffStat(stats, test.samps[0:j+1], allWeights)
 			allDist.ConjugateUpdate(stats, nsAll, make([]float64, allDist.NumParameters()))
 			if !parametersEqual(incDist.parameters(nil), allDist.parameters(nil), 1e-12) {
 				t.Errorf("prior doesn't match after incremental update for (%d, %d). Incremental is %v, all at once is %v", i, j, incDist, allDist)
@@ -113,7 +113,7 @@ func testConjugateUpdate(t *testing.T, newFittable func() ConjugateUpdater) {
 
 			if test.weights == nil {
 				onesDist := newFittable()
-				nsOnes := onesDist.SuffStat(test.samps[0:j+1], ones(j+1), stats)
+				nsOnes := onesDist.SuffStat(stats, test.samps[0:j+1], ones(j+1))
 				onesDist.ConjugateUpdate(stats, nsOnes, make([]float64, onesDist.NumParameters()))
 				if !parametersEqual(onesDist.parameters(nil), incDist.parameters(nil), 1e-14) {
 					t.Errorf("nil and uniform weighted prior doesn't match for incremental update for (%d, %d). Uniform weighted is %v, nil is %v", i, j, onesDist, incDist)

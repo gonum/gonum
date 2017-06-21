@@ -46,12 +46,12 @@ func (c *PC) PrincipalComponents(a mat.Matrix, weights []float64) (ok bool) {
 	return c.ok
 }
 
-// Vectors returns the component direction vectors of a principal components
+// VectorsTo returns the component direction vectors of a principal components
 // analysis. The vectors are returned in the columns of a d×min(n, d) matrix.
 // If dst is not nil it must either be zero-sized or be a d×min(n, d) matrix.
 // dst will  be used as the destination for the direction vector data. If dst
 // is nil, a new mat.Dense is allocated for the destination.
-func (c *PC) Vectors(dst *mat.Dense) *mat.Dense {
+func (c *PC) VectorsTo(dst *mat.Dense) *mat.Dense {
 	if !c.ok {
 		panic("stat: use of unsuccessful principal components analysis")
 	}
@@ -64,13 +64,13 @@ func (c *PC) Vectors(dst *mat.Dense) *mat.Dense {
 	return c.svd.VTo(dst)
 }
 
-// Vars returns the column variances of the principal component scores,
+// VarsTo returns the column variances of the principal component scores,
 // b * vecs, where b is a matrix with centered columns. Variances are returned
 // in descending order.
 // If dst is not nil it is used to store the variances and returned.
 // Vars will panic if the receiver has not successfully performed a principal
 // components analysis or dst is not nil and the length of dst is not min(n, d).
-func (c *PC) Vars(dst []float64) []float64 {
+func (c *PC) VarsTo(dst []float64) []float64 {
 	if !c.ok {
 		panic("stat: use of unsuccessful principal components analysis")
 	}
@@ -199,10 +199,10 @@ func (c *CC) CanonicalCorrelations(x, y mat.Matrix, weights []float64) error {
 	return nil
 }
 
-// Corrs returns the canonical correlations, using dst if it is not nil.
+// CorrsTo returns the canonical correlations, using dst if it is not nil.
 // If dst is not nil and len(dst) does not match the number of columns in
 // the y input matrix, Corrs will panic.
-func (c *CC) Corrs(dst []float64) []float64 {
+func (c *CC) CorrsTo(dst []float64) []float64 {
 	if !c.ok {
 		panic("stat: canonical correlations missing or invalid")
 	}
@@ -213,14 +213,14 @@ func (c *CC) Corrs(dst []float64) []float64 {
 	return c.c.Values(dst)
 }
 
-// Left returns the left eigenvectors of the canonical correlation matrix if
+// LeftTo returns the left eigenvectors of the canonical correlation matrix if
 // spheredSpace is true. If spheredSpace is false it returns these eigenvectors
 // back-transformed to the original data space.
 // If dst is not nil it must either be zero-sized or be an xd×yd matrix where xd
 // and yd are the number of variables in the input x and y matrices. dst will
 // be used as the destination for the vector data. If dst is nil, a new
 // mat.Dense is allocated for the destination.
-func (c *CC) Left(dst *mat.Dense, spheredSpace bool) *mat.Dense {
+func (c *CC) LeftTo(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 	if !c.ok || c.n < 2 {
 		panic("stat: canonical correlations missing or invalid")
 	}
@@ -245,14 +245,14 @@ func (c *CC) Left(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 	return dst
 }
 
-// Right returns the right eigenvectors of the canonical correlation matrix if
+// RightTo returns the right eigenvectors of the canonical correlation matrix if
 // spheredSpace is true. If spheredSpace is false it returns these eigenvectors
 // back-transformed to the original data space.
 // If dst is not nil it must either be zero-sized or be an yd×yd matrix where yd
 // is the number of variables in the input y matrix. dst will
 // be used as the destination for the vector data. If dst is nil, a new
 // mat.Dense is allocated for the destination.
-func (c *CC) Right(dst *mat.Dense, spheredSpace bool) *mat.Dense {
+func (c *CC) RightTo(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 	if !c.ok || c.n < 2 {
 		panic("stat: canonical correlations missing or invalid")
 	}

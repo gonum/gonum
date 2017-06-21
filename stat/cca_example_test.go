@@ -85,11 +85,11 @@ func ExampleCC() {
 	}
 
 	// Unpack cc.
-	ccors := cc.Corrs(nil)
-	pVecs := cc.Left(nil, true)
-	qVecs := cc.Right(nil, true)
-	phiVs := cc.Left(nil, false)
-	psiVs := cc.Right(nil, false)
+	ccors := cc.CorrsTo(nil)
+	pVecs := cc.LeftTo(nil, true)
+	qVecs := cc.RightTo(nil, true)
+	phiVs := cc.LeftTo(nil, false)
+	psiVs := cc.RightTo(nil, false)
 
 	// Canonical Correlation Matrix, or the correlations between the sphered
 	// data.

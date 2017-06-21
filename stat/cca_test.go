@@ -160,11 +160,11 @@ tests:
 				continue tests
 			}
 
-			corrs = cc.Corrs(corrs)
-			pVecs = cc.Left(pVecs, true)
-			qVecs = cc.Right(qVecs, true)
-			phiVs = cc.Left(phiVs, false)
-			psiVs = cc.Right(psiVs, false)
+			corrs = cc.CorrsTo(corrs)
+			pVecs = cc.LeftTo(pVecs, true)
+			qVecs = cc.RightTo(qVecs, true)
+			phiVs = cc.LeftTo(phiVs, false)
+			psiVs = cc.RightTo(psiVs, false)
 
 			if !floats.EqualApprox(corrs, test.wantCorrs, test.epsilon) {
 				t.Errorf("%d use %d: unexpected variance result got:%v, want:%v",

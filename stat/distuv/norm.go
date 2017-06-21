@@ -81,7 +81,7 @@ func (Normal) ExKurtosis() float64 {
 // are 1. If weights is not nil, then the len(weights) must equal len(samples).
 func (n *Normal) Fit(samples, weights []float64) {
 	suffStat := make([]float64, n.NumSuffStat())
-	nSamples := n.SuffStat(samples, weights, suffStat)
+	nSamples := n.SuffStat(suffStat, samples, weights)
 	n.ConjugateUpdate(suffStat, nSamples, make([]float64, n.NumSuffStat()))
 }
 
@@ -189,7 +189,7 @@ func (n Normal) StdDev() float64 {
 //
 // If weights is nil, the weights are assumed to be 1, otherwise panics if
 // len(samples) != len(weights). Panics if len(suffStat) != NumSuffStat().
-func (Normal) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
+func (Normal) SuffStat(suffStat, samples, weights []float64) (nSamples float64) {
 	lenSamp := len(samples)
 	if len(weights) != 0 && len(samples) != len(weights) {
 		panic(badLength)

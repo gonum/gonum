@@ -72,7 +72,7 @@ func (Exponential) ExKurtosis() float64 {
 // If weights is not nil, then the len(weights) must equal len(samples).
 func (e *Exponential) Fit(samples, weights []float64) {
 	suffStat := make([]float64, e.NumSuffStat())
-	nSamples := e.SuffStat(samples, weights, suffStat)
+	nSamples := e.SuffStat(suffStat, samples, weights)
 	e.ConjugateUpdate(suffStat, nSamples, make([]float64, e.NumSuffStat()))
 }
 
@@ -201,7 +201,7 @@ func (e Exponential) StdDev() float64 {
 //
 // If weights is nil, the weights are assumed to be 1, otherwise panics if
 // len(samples) != len(weights). Panics if len(suffStat) != NumSuffStat().
-func (Exponential) SuffStat(samples, weights, suffStat []float64) (nSamples float64) {
+func (Exponential) SuffStat(suffStat, samples, weights []float64) (nSamples float64) {
 	if len(weights) != 0 && len(samples) != len(weights) {
 		panic(badLength)
 	}

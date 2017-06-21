@@ -57,7 +57,7 @@ func (c *PC) VectorsTo(dst *mat.Dense) *mat.Dense {
 	}
 
 	if dst != nil {
-		if d, n := dst.Dims(); (n != 0 || d != 0) && (d != c.d || n != min(c.n, c.d)) {
+		if d, n := dst.Dims(); !dst.IsZero() && (d != c.d || n != min(c.n, c.d)) {
 			panic(mat.ErrShape)
 		}
 	}
@@ -226,7 +226,7 @@ func (c *CC) LeftTo(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 	}
 
 	if dst != nil {
-		if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.xd) {
+		if d, n := dst.Dims(); !dst.IsZero() && (n != c.yd || d != c.xd) {
 			panic(mat.ErrShape)
 		}
 	}

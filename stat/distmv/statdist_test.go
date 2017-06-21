@@ -247,7 +247,7 @@ func TestKullbackLeiblerUniform(t *testing.T) {
 	}
 }
 
-// klSample finds an estimate of the Kullback-Leibler Divergence through sampling.
+// klSample finds an estimate of the Kullback-Leibler divergence through sampling.
 func klSample(dim, samples int, l RandLogProber, r LogProber) float64 {
 	var klmc float64
 	x := make([]float64, dim)
@@ -258,4 +258,72 @@ func klSample(dim, samples int, l RandLogProber, r LogProber) float64 {
 		klmc += pa - pb
 	}
 	return klmc / float64(samples)
+}
+
+func TestRenyiNormal(t *testing.T) {
+	for cas, test := range []struct {
+		am, bm  []float64
+		ac, bc  *mat.SymDense
+		alpha   float64
+		samples int
+		tol     float64
+	}{
+		{
+			am:      []float64{2, 3},
+			ac:      mat.NewSymDense(2, []float64{3, -1, -1, 2}),
+			bm:      []float64{-1, 1},
+			bc:      mat.NewSymDense(2, []float64{1.5, 0.2, 0.2, 0.9}),
+			alpha:   0.3,
+			samples: 10000,
+			tol:     1e-2,
+		},
+	} {
+		rnd := rand.New(rand.NewSource(1))
+		a, ok := NewNormal(test.am, test.ac, rnd)
+		if !ok {
+			panic("bad test")
+		}
+		b, ok := NewNormal(test.bm, test.bc, rnd)
+		if !ok {
+			panic("bad test")
+		}
+		want := renyiSample(a.Dim(), test.samples, test.alpha, a, b)
+		got := Renyi{Alpha: test.alpha}.DistNormal(a, b)
+		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+			t.Errorf("Case %d: Renyi sampling mismatch: got %v, want %v", cas, got, want)
+		}
+
+		// Compare with Bhattacharyya.
+		want = 2 * Bhattacharyya{}.DistNormal(a, b)
+		got = Renyi{Alpha: 0.5}.DistNormal(a, b)
+		if math.Abs(want-got) > 1e-10 {
+			t.Errorf("Case %d: Renyi mismatch with Bhattacharyya: got %v, want %v", cas, got, want)
+		}
+
+		// Compare with KL in both directions.
+		want = KullbackLeibler{}.DistNormal(a, b)
+		got = Renyi{Alpha: 0.9999999}.DistNormal(a, b) // very close to 1 but not equal to 1.
+		if math.Abs(want-got) > 1e-6 {
+			t.Errorf("Case %d: Renyi mismatch with KL(a||b): got %v, want %v", cas, got, want)
+		}
+		want = KullbackLeibler{}.DistNormal(b, a)
+		got = Renyi{Alpha: 0.9999999}.DistNormal(b, a) // very close to 1 but not equal to 1.
+		if math.Abs(want-got) > 1e-6 {
+			t.Errorf("Case %d: Renyi mismatch with KL(b||a): got %v, want %v", cas, got, want)
+		}
+	}
+}
+
+// renyiSample finds an estimate of the Rényi divergence through sampling.
+// Note that this sampling procedure only works if l has broader support than r.
+func renyiSample(dim, samples int, alpha float64, l RandLogProber, r LogProber) float64 {
+	rmcs := make([]float64, samples)
+	x := make([]float64, dim)
+	for i := 0; i < samples; i++ {
+		l.Rand(x)
+		pa := l.LogProb(x)
+		pb := r.LogProb(x)
+		rmcs[i] = (alpha-1)*pa + (1-alpha)*pb
+	}
+	return 1 / (alpha - 1) * (floats.LogSumExp(rmcs) - math.Log(float64(samples)))
 }

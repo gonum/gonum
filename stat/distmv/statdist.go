@@ -15,9 +15,9 @@ import (
 // Bhattacharyya is a type for computing the Bhattacharyya distance between
 // probability distributions.
 //
-// The Battachara distance is defined as
+// The Bhattacharyya distance is defined as
 //  D_B = -ln(BC(l,r))
-//  BC = \int_x (p(x)q(x))^(1/2) dx
+//  BC = \int_-∞^∞ (p(x)q(x))^(1/2) dx
 // Where BC is known as the Bhattacharyya coefficient.
 // The Bhattacharyya distance is related to the Hellinger distance by
 //  H = sqrt(1-BC)
@@ -135,7 +135,6 @@ func (Hellinger) DistNormal(l, r *Normal) float64 {
 }
 
 // KullbackLiebler is a type for computing the Kullback-Leibler divergence from l to r.
-// The dimensions of the input distributions must match or the function will panic.
 //
 // The Kullback-Liebler divergence is defined as
 //  D_KL(l || r ) = \int_x p(x) log(p(x)/q(x)) dx
@@ -205,6 +204,75 @@ func (KullbackLeibler) DistUniform(l, r *Uniform) float64 {
 	logPx := -l.Entropy()
 	logQx := -r.Entropy()
 	return logPx - logQx
+}
+
+// Renyi is a type for computing the Rényi divergence of order α from l to r.
+//
+// The Rényi divergence with α > 0, α ≠ 1 is defined as
+//  D_α(l || r) = 1/(α-1) log(\int_-∞^∞ l(x)^α r(x)^(1-α)dx)
+// The Rényi divergence has special forms for α = 0 and α = 1. This type does
+// not implement α = ∞. For α = 0,
+//  D_0(l || r) = -log \int_-∞^∞ r(x)1{p(x)>0} dx
+// that is, the negative log probability under r(x) that l(x) > 0.
+// When α = 1, the Rényi divergence is equal to the Kullback-Leibler divergence.
+// The Rényi divergence is also equal to half the Bhattacharyya distance when α = 0.5.
+//
+// The parameter α must be in 0 ≤ α < ∞ or the distance functions will panic.
+type Renyi struct {
+	Alpha float64
+}
+
+// DistNormal returns the Rényi divergence between normal distributions l and r.
+// The dimensions of the input distributions must match or DistNormal will panic.
+//
+// For two normal distributions, the Rényi divergence is computed as
+//  Σ_α = (1-α) Σ_l + αΣ_r
+//  D_α(l||r) = α/2 * (μ_l - μ_r)'*Σ_α^-1*(μ_l - μ_r) + 1/(2(α-1))*ln(|Σ_λ|/(|Σ_l|^(1-α)*|Σ_r|^α))
+//
+// For a more nicely formatted version of the formula, see Eq. 15 of
+//  Kolchinsky, Artemy, and Brendan D. Tracey. "Estimating Mixture Entropy
+//  with Pairwise Distances." arXiv preprint arXiv:1706.02419 (2017).
+// Note that the this formula is for Chernoff divergence, which differs from
+// Rényi divergence by a factor of 1-α. Also be aware that most sources in
+// the literature report this formula incorrectly.
+func (renyi Renyi) DistNormal(l, r *Normal) float64 {
+	if renyi.Alpha < 0 {
+		panic("renyi: alpha < 0")
+	}
+	dim := l.Dim()
+	if dim != r.Dim() {
+		panic(badSizeMismatch)
+	}
+	if renyi.Alpha == 0 {
+		return 0
+	}
+	if renyi.Alpha == 1 {
+		return KullbackLeibler{}.DistNormal(l, r)
+	}
+
+	logDetL := l.chol.LogDet()
+	logDetR := r.chol.LogDet()
+
+	// Σ_α = (1-α)Σ_l + αΣ_r.
+	sigA := mat.NewSymDense(dim, nil)
+	for i := 0; i < dim; i++ {
+		for j := i; j < dim; j++ {
+			v := (1-renyi.Alpha)*l.sigma.At(i, j) + renyi.Alpha*r.sigma.At(i, j)
+			sigA.SetSym(i, j, v)
+		}
+	}
+
+	var chol mat.Cholesky
+	ok := chol.Factorize(sigA)
+	if !ok {
+		return math.NaN()
+	}
+	logDetA := chol.LogDet()
+
+	mahalanobis := stat.Mahalanobis(mat.NewVector(dim, l.mu), mat.NewVector(dim, r.mu), &chol)
+	mahalanobisSq := mahalanobis * mahalanobis
+
+	return (renyi.Alpha/2)*mahalanobisSq + 1/(2*(1-renyi.Alpha))*(logDetA-(1-renyi.Alpha)*logDetL-renyi.Alpha*logDetR)
 }
 
 // Wasserstein is a type for computing the Wasserstein distance between two

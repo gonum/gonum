@@ -141,3 +141,42 @@ func (t *TriDense) set(i, j int, v float64) {
 	}
 	t.mat.Data[i*t.mat.Stride+j] = v
 }
+
+// At returns the element at row i, column j.
+func (b *BandDense) At(i, j int) float64 {
+	return b.at(i, j)
+}
+
+func (b *BandDense) at(i, j int) float64 {
+	if uint(i) >= uint(b.mat.Rows) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(b.mat.Cols) {
+		panic(ErrColAccess)
+	}
+	pj := j + b.mat.KL - i
+	if pj < 0 || b.mat.KL+b.mat.KU+1 <= pj {
+		return 0
+	}
+	return b.mat.Data[i*b.mat.Stride+pj]
+}
+
+// SetBand sets the element at row i, column j to the value v.
+// It panics if the location is outside the appropriate region of the matrix.
+func (b *BandDense) SetBand(i, j int, v float64) {
+	b.set(i, j, v)
+}
+
+func (b *BandDense) set(i, j int, v float64) {
+	if uint(i) >= uint(b.mat.Rows) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(b.mat.Cols) {
+		panic(ErrColAccess)
+	}
+	pj := j + b.mat.KL - i
+	if pj < 0 || b.mat.KL+b.mat.KU+1 <= pj {
+		panic(ErrBandSet)
+	}
+	b.mat.Data[i*b.mat.Stride+pj] = v
+}

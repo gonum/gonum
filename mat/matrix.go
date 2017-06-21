@@ -77,6 +77,12 @@ type Untransposer interface {
 	Untranspose() Matrix
 }
 
+// UntransposeBander is a type that can undo an implicit band transpose.
+type UntransposeBander interface {
+	// Untranspose returns the underlying Banded stored for the implicit transpose.
+	UntransposeBand() Banded
+}
+
 // UntransposeTrier is a type that can undo an implicit triangular transpose.
 type UntransposeTrier interface {
 	// Untranspose returns the underlying Triangular stored for the implicit transpose.

@@ -35,12 +35,12 @@ func ExamplePC() {
 	if !ok {
 		return
 	}
-	fmt.Printf("variances = %.4f\n\n", pc.Vars(nil))
+	fmt.Printf("variances = %.4f\n\n", pc.VarsTo(nil))
 
 	// Project the data onto the first 2 principal components.
 	k := 2
 	var proj mat.Dense
-	proj.Mul(iris, pc.Vectors(nil).Slice(0, d, 0, k))
+	proj.Mul(iris, pc.VectorsTo(nil).Slice(0, d, 0, k))
 
 	fmt.Printf("proj = %.4f", mat.Formatted(&proj, mat.Prefix("       ")))
 

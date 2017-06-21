@@ -157,8 +157,8 @@ tests:
 		var vars []float64
 		for j := 0; j < 2; j++ {
 			ok := pc.PrincipalComponents(test.data, test.weights)
-			vecs = pc.Vectors(vecs)
-			vars = pc.Vars(vars)
+			vecs = pc.VectorsTo(vecs)
+			vars = pc.VarsTo(vars)
 			if !ok {
 				t.Errorf("unexpected SVD failure for test %d use %d", i, j)
 				continue tests

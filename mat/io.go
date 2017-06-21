@@ -109,7 +109,7 @@ func (m Dense) MarshalBinaryTo(w io.Writer) (int, error) {
 // UnmarshalBinary does not limit the size of the unmarshaled matrix, and so
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinary(data []byte) error {
-	if !m.isZero() {
+	if !m.IsZero() {
 		panic("mat: unmarshal into non-zero matrix")
 	}
 
@@ -158,7 +158,7 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 // UnmarshalBinary does not limit the size of the unmarshaled matrix, and so
 // it should not be used on untrusted data.
 func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
-	if !m.isZero() {
+	if !m.IsZero() {
 		panic("mat: unmarshal into non-zero matrix")
 	}
 
@@ -268,7 +268,7 @@ func (v Vector) MarshalBinaryTo(w io.Writer) (int, error) {
 // UnmarshalBinary does not limit the size of the unmarshaled vector, and so
 // it should not be used on untrusted data.
 func (v *Vector) UnmarshalBinary(data []byte) error {
-	if !v.isZero() {
+	if !v.IsZero() {
 		panic("mat: unmarshal into non-zero vector")
 	}
 
@@ -301,7 +301,7 @@ func (v *Vector) UnmarshalBinary(data []byte) error {
 // See MarshalBinary for the on-disk layout.
 // See UnmarshalBinary for the list of sanity checks performed on the input.
 func (v *Vector) UnmarshalBinaryFrom(r io.Reader) (int, error) {
-	if !v.isZero() {
+	if !v.IsZero() {
 		panic("mat: unmarshal into non-zero vector")
 	}
 

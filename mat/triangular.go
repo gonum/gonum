@@ -135,7 +135,7 @@ func (t *TriDense) Dims() (r, c int) {
 // Triangle returns the dimension of t and its orientation. The returned
 // orientation is only valid when n is not zero.
 func (t *TriDense) Triangle() (n int, kind TriKind) {
-	return t.mat.N, TriKind(!t.isZero()) && t.triKind()
+	return t.mat.N, TriKind(!t.IsZero()) && t.triKind()
 }
 
 func (t *TriDense) isUpper() bool {
@@ -200,7 +200,9 @@ func (t *TriDense) Reset() {
 	t.mat.Data = t.mat.Data[:0]
 }
 
-func (t *TriDense) isZero() bool {
+// IsZero returns whether the receiver is zero-sized. Zero-sized matrices can be the
+// receiver for size-restricted operations. TriDense matrices can be zeroed using Reset.
+func (t *TriDense) IsZero() bool {
 	// It must be the case that t.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return t.mat.Stride == 0
@@ -227,7 +229,7 @@ func (t *TriDense) reuseAs(n int, kind TriKind) {
 	if t.mat.N > t.cap {
 		panic(badTriCap)
 	}
-	if t.isZero() {
+	if t.IsZero() {
 		t.mat = blas64.Triangular{
 			N:      n,
 			Stride: n,

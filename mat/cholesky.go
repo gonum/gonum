@@ -475,5 +475,5 @@ func (c *Cholesky) isZero() bool {
 }
 
 func (c *Cholesky) valid() bool {
-	return !c.isZero() && !c.chol.isZero()
+	return !c.isZero() && !c.chol.IsZero()
 }

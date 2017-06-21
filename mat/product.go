@@ -71,7 +71,7 @@ func newMultiplier(m *Dense, factors []Matrix) *multiplier {
 	// allocate data for m.
 	r, c := m.Dims()
 	fr, fc := factors[0].Dims() // newMultiplier is only called with len(factors) > 2.
-	if !m.isZero() {
+	if !m.IsZero() {
 		if fr != r {
 			panic(ErrShape)
 		}

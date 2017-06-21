@@ -67,7 +67,7 @@ func (v *Vector) SliceVec(i, k int) *Vector {
 // Dims returns the number of rows and columns in the matrix. Columns is always 1
 // for a non-Reset vector.
 func (v *Vector) Dims() (r, c int) {
-	if v.isZero() {
+	if v.IsZero() {
 		return 0, 0
 	}
 	return v.n, 1
@@ -76,7 +76,7 @@ func (v *Vector) Dims() (r, c int) {
 // Caps returns the number of rows and columns in the backing matrix. Columns is always 1
 // for a non-Reset vector.
 func (v *Vector) Caps() (r, c int) {
-	if v.isZero() {
+	if v.IsZero() {
 		return 0, 0
 	}
 	return v.Cap(), 1
@@ -89,7 +89,7 @@ func (v *Vector) Len() int {
 
 // Cap returns the capacity of the vector.
 func (v *Vector) Cap() int {
-	if v.isZero() {
+	if v.IsZero() {
 		return 0
 	}
 	return (cap(v.mat.Data)-1)/v.mat.Inc + 1
@@ -426,7 +426,7 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 // reuseAs resizes an empty vector to a r×1 vector,
 // or checks that a non-empty matrix is r×1.
 func (v *Vector) reuseAs(r int) {
-	if v.isZero() {
+	if v.IsZero() {
 		v.mat = blas64.Vector{
 			Inc:  1,
 			Data: use(v.mat.Data, r),
@@ -439,7 +439,9 @@ func (v *Vector) reuseAs(r int) {
 	}
 }
 
-func (v *Vector) isZero() bool {
+// IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the
+// receiver for size-restricted operations. Vectors can be zeroed using Reset.
+func (v *Vector) IsZero() bool {
 	// It must be the case that v.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return v.mat.Inc == 0

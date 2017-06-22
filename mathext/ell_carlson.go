@@ -19,8 +19,11 @@ import (
 //
 // See: http://dx.doi.org/10.1007/BF02198293 for the modified method of computation.
 func CarlsonRF(x, y, z float64) float64 {
-	const lower = 1.1125369292536006915451163586662020321096079902312e-307 // 5*2^-1022
-	const upper = 1 / lower
+	const (
+		lower = 1.1125369292536006915451163586662020321096079902312e-307 // 5*2^-1022
+		upper = 1 / lower
+		tol   = 1.2674918778210762260320167734407048051023273568443e-02 // (3ε)^(1/8)
+	)
 	if x < 0 || y < 0 || z < 0 || math.IsNaN(x) || math.IsNaN(y) || math.IsNaN(z) {
 		return math.NaN()
 	}
@@ -31,7 +34,6 @@ func CarlsonRF(x, y, z float64) float64 {
 		return math.NaN()
 	}
 
-	const tol = 1.2674918778210762260320167734407048051023273568443e-02 // (3ε)^(1/8)
 	A0 := (x + y + z) / 3
 	An := A0
 	Q := math.Max(math.Max(math.Abs(A0-x), math.Abs(A0-y)), math.Abs(A0-z)) / tol
@@ -69,8 +71,11 @@ func CarlsonRF(x, y, z float64) float64 {
 //
 // See: http://dx.doi.org/10.1007/BF02198293 for the modified method of computation.
 func CarlsonRD(x, y, z float64) float64 {
-	const lower = 4.8095540743116787026618007863123676393525016818363e-103 // (5*2^-1022)^(1/3)
-	const upper = 1 / lower
+	const (
+		lower = 4.8095540743116787026618007863123676393525016818363e-103 // (5*2^-1022)^(1/3)
+		upper = 1 / lower
+		tol   = 9.0351169339315770474760122547068324993857488849382e-03 // (ε/5)^(1/8)
+	)
 	if x < 0 || y < 0 || math.IsNaN(x) || math.IsNaN(y) || math.IsNaN(z) {
 		return math.NaN()
 	}
@@ -81,7 +86,6 @@ func CarlsonRD(x, y, z float64) float64 {
 		return math.NaN()
 	}
 
-	const tol = 9.03511693393157704747601225470683249938574888493817e-03 // (ε/5)^(1/8)
 	A0 := (x + y + 3*z) / 5
 	An := A0
 	Q := math.Max(math.Max(math.Abs(A0-x), math.Abs(A0-y)), math.Abs(A0-z)) / tol

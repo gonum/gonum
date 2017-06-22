@@ -13,7 +13,7 @@ import (
 // Testing EllipticF (and CarlsonRF) using the addition theorems from http://dlmf.nist.gov/19.11.i
 func TestEllipticF(t *testing.T) {
 	const tol = 1.0e-14
-	rng := rand.New(rand.NewSource(271829))
+	rng := rand.New(rand.NewSource(1))
 
 	for test := 0; test < 100; test++ {
 		alpha := rng.Float64() * math.Pi / 4
@@ -38,7 +38,7 @@ func TestEllipticF(t *testing.T) {
 // Testing EllipticE (and CarlsonRF, CarlsonRD) using the addition theorems from http://dlmf.nist.gov/19.11.i
 func TestEllipticE(t *testing.T) {
 	const tol = 1.0e-14
-	rng := rand.New(rand.NewSource(271829))
+	rng := rand.New(rand.NewSource(1))
 
 	for test := 0; test < 100; test++ {
 		alpha := rng.Float64() * math.Pi / 4

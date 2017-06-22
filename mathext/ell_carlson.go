@@ -8,19 +8,19 @@ import (
 	"math"
 )
 
-// CarlsonRF computes the symmetric elliptic integral R_F(x,y,z):
+// EllipticRF computes the symmetric elliptic integral R_F(x,y,z):
 //
-//	R_F(x,y,z) = (1/2)\int_{0}^{\infty}{s^{-1}(t)} dt,
-//	s(t) = \sqrt{t+x}\sqrt{t+y}\sqrt{t+z}.
+//	R_F(x,y,z) = (1/2)\int_{0}^{\infty}{1/s(t)} dt,
+//	s(t) = \sqrt{(t+x)(t+y)(t+z)}.
 //
 // See: http://dlmf.nist.gov/19.16.E1 for the definition.
 //
 // See: http://doi.org/10.1145/355958.355970 for the original Fortran code.
 //
 // See: http://dx.doi.org/10.1007/BF02198293 for the modified method of computation.
-func CarlsonRF(x, y, z float64) float64 {
+func EllipticRF(x, y, z float64) float64 {
 	const (
-		lower = 1.1125369292536006915451163586662020321096079902312e-307 // 5*2^-1022
+		lower = 5.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254) // 5*2^-1022
 		upper = 1 / lower
 		tol   = 1.2674918778210762260320167734407048051023273568443e-02 // (3ε)^(1/8)
 	)
@@ -60,17 +60,17 @@ func CarlsonRF(x, y, z float64) float64 {
 	return (E3*(6930*E3+E2*(15015*E2-16380)+17160) + E2*((10010-5775*E2)*E2-24024) + 240240) / (240240 * math.Sqrt(An))
 }
 
-// CarlsonRD computes the symmetric elliptic integral R_D(x,y,z):
+// EllipticRD computes the symmetric elliptic integral R_D(x,y,z):
 //
-//	R_D(x,y,z) = (1/2)\int_{0}^{\infty}{s^{-1}(t)}{(t+z)^{-1}} dt,
-//	s(t) = \sqrt{t+x}\sqrt{t+y}\sqrt{t+z}.
+//	R_D(x,y,z) = (1/2)\int_{0}^{\infty}{1/(s(t)(t+z))} dt,
+//	s(t) = \sqrt{(t+x)(t+y)(t+z)}.
 //
 // See: http://dlmf.nist.gov/19.16.E5 for the definition.
 //
 // See: http://doi.org/10.1145/355958.355970 for the original Fortran code.
 //
 // See: http://dx.doi.org/10.1007/BF02198293 for the modified method of computation.
-func CarlsonRD(x, y, z float64) float64 {
+func EllipticRD(x, y, z float64) float64 {
 	const (
 		lower = 4.8095540743116787026618007863123676393525016818363e-103 // (5*2^-1022)^(1/3)
 		upper = 1 / lower
@@ -126,7 +126,7 @@ func CarlsonRD(x, y, z float64) float64 {
 // See http://dlmf.nist.gov/19.2.E4 for the definition.
 func EllipticF(phi, m float64) float64 {
 	s, c := math.Sincos(phi)
-	return s * CarlsonRF(c*c, 1-m*s*s, 1)
+	return s * EllipticRF(c*c, 1-m*s*s, 1)
 }
 
 // EllipticE computes the Legendre's elliptic integral of the 2nd kind E(\phi|m):
@@ -141,5 +141,5 @@ func EllipticF(phi, m float64) float64 {
 func EllipticE(phi, m float64) float64 {
 	s, c := math.Sincos(phi)
 	x, y := c*c, 1-m*s*s
-	return s * (CarlsonRF(x, y, 1) - (m/3)*s*s*CarlsonRD(x, y, 1))
+	return s * (EllipticRF(x, y, 1) - (m/3)*s*s*EllipticRD(x, y, 1))
 }

@@ -13,11 +13,19 @@ import (
 //	R_F(x,y,z) = (1/2)\int_{0}^{\infty}{1/s(t)} dt,
 //	s(t) = \sqrt{(t+x)(t+y)(t+z)}.
 //
+// The arguments x, y, z must satisfy the following conditions, otherwise the function returns math.NaN():
+//	0 ≤ x,y,z ≤ upper,
+//	lower ≤ x+y,y+z,z+x,
+// where:
+//	lower = 5/(2^1022) = 1.112536929253601e-307,
+//	upper = (2^1022)/5 = 8.988465674311580e+306.
 // See: http://dlmf.nist.gov/19.16.E1 for the definition.
 //
 // See: http://doi.org/10.1145/355958.355970 for the original Fortran code.
 //
 // See: http://dx.doi.org/10.1007/BF02198293 for the modified method of computation.
+//
+// See: https://arxiv.org/abs/math/9409227 for the preprint of the above.
 func EllipticRF(x, y, z float64) float64 {
 	const (
 		lower = 5.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254) // 5*2^-1022
@@ -65,11 +73,20 @@ func EllipticRF(x, y, z float64) float64 {
 //	R_D(x,y,z) = (1/2)\int_{0}^{\infty}{1/(s(t)(t+z))} dt,
 //	s(t) = \sqrt{(t+x)(t+y)(t+z)}.
 //
+// The arguments x, y, z must satisfy the following conditions, otherwise the function returns math.NaN():
+//	0 ≤ x,y ≤ upper,
+//	lower ≤ z ≤ upper,
+//	lower ≤ x+y,
+// where:
+//	lower = (5/(2^1022))^(1/3) = 4.809554074311679e-103,
+//	upper = ((2^1022)/5)^(1/3) = 2.079194837087086e+102.
 // See: http://dlmf.nist.gov/19.16.E5 for the definition.
 //
 // See: http://doi.org/10.1145/355958.355970 for the original Fortran code.
 //
 // See: http://dx.doi.org/10.1007/BF02198293 for the modified method of computation.
+//
+// See: https://arxiv.org/abs/math/9409227 for the preprint of the above.
 func EllipticRD(x, y, z float64) float64 {
 	const (
 		lower = 4.8095540743116787026618007863123676393525016818363e-103 // (5*2^-1022)^(1/3)
@@ -115,9 +132,9 @@ func EllipticRD(x, y, z float64) float64 {
 	return ((471240-540540*E2)*E5+(612612*E2-540540*E3-556920)*E4+E3*(306306*E3+E2*(675675*E2-706860)+680680)+E2*((417690-255255*E2)*E2-875160)+4084080)/(4084080*mul*An*math.Sqrt(An)) + 3*s
 }
 
-// EllipticF computes the Legendre's elliptic integral of the 1st kind F(\phi|m):
+// EllipticF computes the Legendre's elliptic integral of the 1st kind F(\phi|m), 0≤m<1:
 //
-//	F(\phi|m) = \int_{0}^{\phi}1 / \sqrt{1-m\sin^2\theta} d\theta
+//	F(\phi|m) = \int_{0}^{\phi} 1 / \sqrt{1-m\sin^2(\theta)} d\theta
 //
 // Legendre's elliptic integrals can be expressed as symmetric elliptic integrals, in this case:
 //
@@ -129,9 +146,9 @@ func EllipticF(phi, m float64) float64 {
 	return s * EllipticRF(c*c, 1-m*s*s, 1)
 }
 
-// EllipticE computes the Legendre's elliptic integral of the 2nd kind E(\phi|m):
+// EllipticE computes the Legendre's elliptic integral of the 2nd kind E(\phi|m), 0≤m<1:
 //
-//	E(\phi|m) = \int_{0}^{\phi} \sqrt{1-m\sin^2\theta} d\theta
+//	E(\phi|m) = \int_{0}^{\phi} \sqrt{1-m\sin^2(\theta)} d\theta
 //
 // Legendre's elliptic integrals can be expressed as symmetric elliptic integrals, in this case:
 //

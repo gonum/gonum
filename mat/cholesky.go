@@ -58,6 +58,11 @@ func (c *Cholesky) updateCond(norm float64) {
 	c.cond = 1 / v
 }
 
+// Cond returns the condition number of the factorized matrix.
+func (c *Cholesky) Cond() float64 {
+	return c.cond
+}
+
 // Factorize calculates the Cholesky decomposition of the matrix A and returns
 // whether the matrix is positive definite. If Factorize returns false, the
 // factorization must not be used.

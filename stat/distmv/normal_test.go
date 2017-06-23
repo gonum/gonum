@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"testing"
 
+	"gonum.org/v1/gonum/diff/fd"
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
@@ -533,6 +534,40 @@ func TestMarginalSingle(t *testing.T) {
 			if math.Abs(single.Variance()-mult.CovarianceMatrix(nil).At(0, 0)) > 1e-14 {
 				t.Errorf("Variance mismatch")
 			}
+		}
+	}
+}
+
+func TestNormalScoreInput(t *testing.T) {
+	for cas, test := range []struct {
+		mu    []float64
+		sigma *mat.SymDense
+		x     []float64
+	}{
+		{
+			mu:    []float64{2, 3, 4},
+			sigma: mat.NewSymDense(3, []float64{2, 0.5, 3, 0.5, 1, 0.6, 3, 0.6, 10}),
+			x:     []float64{1, 3.1, -2},
+		},
+		{
+			mu:    []float64{2, 3, 4, 5},
+			sigma: mat.NewSymDense(4, []float64{2, 0.5, 3, 0.1, 0.5, 1, 0.6, 0.2, 3, 0.6, 10, 0.3, 0.1, 0.2, 0.3, 3}),
+			x:     []float64{1, 3.1, -2, 5},
+		},
+	} {
+		normal, ok := NewNormal(test.mu, test.sigma, nil)
+		if !ok {
+			t.Fatalf("Bad test, covariance matrix not positive definite")
+		}
+		x := make([]float64, len(test.x))
+		copy(x, test.x)
+		score := normal.ScoreInput(nil, x)
+		if !floats.Equal(x, test.x) {
+			t.Errorf("x modified during call to ScoreInput")
+		}
+		scoreFD := fd.Gradient(nil, normal.LogProb, x, nil)
+		if !floats.EqualApprox(score, scoreFD, 1e-4) {
+			t.Errorf("Case %d: derivative mismatch. Got %v, want %v", cas, score, scoreFD)
 		}
 	}
 }

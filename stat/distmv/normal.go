@@ -277,6 +277,35 @@ func (n *Normal) Rand(x []float64) []float64 {
 	return x
 }
 
+// ScoreInput returns the gradient of the log-probability with respect to the
+// input x. That is, ScoreInput computes
+//  ∇_x log(p(x))
+// If score is nil, a new slice will be allocated and returned. If score is of
+// length the dimension of Normal, then the result will be put in-place into score.
+// If neither of these is true, ScoreInput will panic.
+func (n *Normal) ScoreInput(score, x []float64) []float64 {
+	// Normal log probability is
+	//  c - 0.5*(x-μ)' Σ^-1 (x-μ).
+	// So the derivative is just
+	//  -Σ^-1 (x-μ).
+	if len(x) != n.Dim() {
+		panic(badInputLength)
+	}
+	if score == nil {
+		score = make([]float64, len(x))
+	}
+	if len(score) != len(x) {
+		panic(badSizeMismatch)
+	}
+	tmp := make([]float64, len(x))
+	copy(tmp, x)
+	floats.Sub(tmp, n.mu)
+
+	n.chol.SolveVec(mat.NewVector(len(score), score), mat.NewVector(len(tmp), tmp))
+	floats.Scale(-1, score)
+	return score
+}
+
 // SetMean changes the mean of the normal distribution. SetMean panics if len(mu)
 // does not equal the dimension of the normal distribution.
 func (n *Normal) SetMean(mu []float64) {

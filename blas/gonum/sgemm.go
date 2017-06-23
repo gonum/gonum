@@ -29,17 +29,17 @@ func (Implementation) Sgemm(tA, tB blas.Transpose, m, n, k int, alpha float32, a
 	}
 	aTrans := tA == blas.Trans || tA == blas.ConjTrans
 	if aTrans {
-		checkMatrix32(k, m, a, lda)
+		checkMatrix32('a', k, m, a, lda)
 	} else {
-		checkMatrix32(m, k, a, lda)
+		checkMatrix32('a', m, k, a, lda)
 	}
 	bTrans := tB == blas.Trans || tB == blas.ConjTrans
 	if bTrans {
-		checkMatrix32(n, k, b, ldb)
+		checkMatrix32('b', n, k, b, ldb)
 	} else {
-		checkMatrix32(k, n, b, ldb)
+		checkMatrix32('b', k, n, b, ldb)
 	}
-	checkMatrix32(m, n, c, ldc)
+	checkMatrix32('c', m, n, c, ldc)
 
 	// scale c
 	if beta != 1 {
@@ -125,7 +125,7 @@ func sgemmParallel(aTrans, bTrans bool, m, n, k int, a []float32, lda int, b []f
 		go func() {
 			defer wg.Done()
 			// Make local copies of otherwise global variables to reduce shared memory.
-			// This has a noticable effect on benchmarks in some cases.
+			// This has a noticeable effect on benchmarks in some cases.
 			alpha := alpha
 			aTrans := aTrans
 			bTrans := bTrans
@@ -264,7 +264,7 @@ func sliceView32(a []float32, lda, i, j, r, c int) []float32 {
 	return a[i*lda+j : (i+r-1)*lda+j+c]
 }
 
-func checkMatrix32(m, n int, a []float32, lda int) {
+func checkMatrix32(name byte, m, n int, a []float32, lda int) {
 	if m < 0 {
 		panic("blas: rows < 0")
 	}
@@ -275,6 +275,6 @@ func checkMatrix32(m, n int, a []float32, lda int) {
 		panic("blas: illegal stride")
 	}
 	if len(a) < (m-1)*lda+n {
-		panic("blas: insufficient matrix slice length")
+		panic("blas: index of " + string(name) + " out of range")
 	}
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:generate go run autogen.go
+
 // Package unit provides a set of types and constants that facilitate
 // the use of the International System of Units (SI).
 //

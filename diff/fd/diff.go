@@ -8,9 +8,6 @@ package fd // import "gonum.org/v1/gonum/diff/fd"
 import (
 	"math"
 	"runtime"
-	"sync"
-
-	"gonum.org/v1/gonum/floats"
 )
 
 // A Point is a stencil location in a finite difference formula.
@@ -50,199 +47,6 @@ type Settings struct {
 	Concurrent bool // Should the function calls be executed concurrently.
 }
 
-// Derivative estimates the derivative of the function f at the given location.
-// The finite difference formula, the step size, and other options are
-// specified by settings. If settings is nil, the first derivative will be
-// estimated using the Forward formula and a default step size.
-func Derivative(f func(float64) float64, x float64, settings *Settings) float64 {
-	if settings == nil {
-		settings = &Settings{}
-	}
-	formula := settings.Formula
-	if formula.isZero() {
-		formula = Forward
-	}
-	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
-		panic("fd: bad formula")
-	}
-	step := settings.Step
-	if step == 0 {
-		step = formula.Step
-	}
-
-	var deriv float64
-	if !settings.Concurrent || runtime.GOMAXPROCS(0) == 1 {
-		for _, pt := range formula.Stencil {
-			if settings.OriginKnown && pt.Loc == 0 {
-				deriv += pt.Coeff * settings.OriginValue
-				continue
-			}
-			deriv += pt.Coeff * f(x+step*pt.Loc)
-		}
-		return deriv / math.Pow(step, float64(formula.Derivative))
-	}
-
-	wg := &sync.WaitGroup{}
-	mux := &sync.Mutex{}
-	for _, pt := range formula.Stencil {
-		if settings.OriginKnown && pt.Loc == 0 {
-			mux.Lock()
-			deriv += pt.Coeff * settings.OriginValue
-			mux.Unlock()
-			continue
-		}
-		wg.Add(1)
-		go func(pt Point) {
-			defer wg.Done()
-			fofx := f(x + step*pt.Loc)
-			mux.Lock()
-			defer mux.Unlock()
-			deriv += pt.Coeff * fofx
-		}(pt)
-	}
-	wg.Wait()
-	return deriv / math.Pow(step, float64(formula.Derivative))
-}
-
-// Gradient estimates the gradient of the multivariate function f at the
-// location x. If dst is not nil, the result will be stored in-place into dst
-// and returned, otherwise a new slice will be allocated first. Finite
-// difference kernel and other options are specified by settings. If settings is
-// nil, the gradient will be estimated using the Forward formula and a default
-// step size.
-//
-// Gradient panics if the length of dst and x is not equal, or if the derivative
-// order of the formula is not 1.
-func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *Settings) []float64 {
-	if dst == nil {
-		dst = make([]float64, len(x))
-	}
-	if len(dst) != len(x) {
-		panic("fd: slice length mismatch")
-	}
-	if settings == nil {
-		settings = &Settings{}
-	}
-
-	formula := settings.Formula
-	if formula.isZero() {
-		formula = Forward
-	}
-	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
-		panic("fd: bad formula")
-	}
-	if formula.Derivative != 1 {
-		panic("fd: invalid derivative order")
-	}
-
-	step := settings.Step
-	if step == 0 {
-		step = formula.Step
-	}
-
-	expect := len(formula.Stencil) * len(x)
-	nWorkers := 1
-	if settings.Concurrent {
-		nWorkers = runtime.GOMAXPROCS(0)
-		if nWorkers > expect {
-			nWorkers = expect
-		}
-	}
-
-	var hasOrigin bool
-	for _, pt := range formula.Stencil {
-		if pt.Loc == 0 {
-			hasOrigin = true
-			break
-		}
-	}
-	xcopy := make([]float64, len(x)) // So that x is not modified during the call.
-	originValue := settings.OriginValue
-	if hasOrigin && !settings.OriginKnown {
-		copy(xcopy, x)
-		originValue = f(xcopy)
-	}
-
-	if nWorkers == 1 {
-		for i := range xcopy {
-			var deriv float64
-			for _, pt := range formula.Stencil {
-				if pt.Loc == 0 {
-					deriv += pt.Coeff * originValue
-					continue
-				}
-				copy(xcopy, x)
-				xcopy[i] += pt.Loc * step
-				deriv += pt.Coeff * f(xcopy)
-			}
-			dst[i] = deriv / step
-		}
-		return dst
-	}
-
-	sendChan := make(chan fdrun, expect)
-	ansChan := make(chan fdrun, expect)
-	quit := make(chan struct{})
-	defer close(quit)
-
-	// Launch workers. Workers receive an index and a step, and compute the answer.
-	for i := 0; i < nWorkers; i++ {
-		go func(sendChan <-chan fdrun, ansChan chan<- fdrun, quit <-chan struct{}) {
-			xcopy := make([]float64, len(x))
-			for {
-				select {
-				case <-quit:
-					return
-				case run := <-sendChan:
-					copy(xcopy, x)
-					xcopy[run.idx] += run.pt.Loc * step
-					run.result = f(xcopy)
-					ansChan <- run
-				}
-			}
-		}(sendChan, ansChan, quit)
-	}
-
-	// Launch the distributor. Distributor sends the cases to be computed.
-	go func(sendChan chan<- fdrun, ansChan chan<- fdrun) {
-		for i := range x {
-			for _, pt := range formula.Stencil {
-				if pt.Loc == 0 {
-					// Answer already known. Send the answer on the answer channel.
-					ansChan <- fdrun{
-						idx:    i,
-						pt:     pt,
-						result: originValue,
-					}
-					continue
-				}
-				// Answer not known, send the answer to be computed.
-				sendChan <- fdrun{
-					idx: i,
-					pt:  pt,
-				}
-			}
-		}
-	}(sendChan, ansChan)
-
-	for i := range dst {
-		dst[i] = 0
-	}
-	// Read in all of the results.
-	for i := 0; i < expect; i++ {
-		run := <-ansChan
-		dst[run.idx] += run.pt.Coeff * run.result
-	}
-	floats.Scale(1/step, dst)
-	return dst
-}
-
-type fdrun struct {
-	idx    int
-	pt     Point
-	result float64
-}
-
 // Forward represents a first-order accurate forward approximation
 // to the first derivative.
 var Forward = Formula{
@@ -251,12 +55,28 @@ var Forward = Formula{
 	Step:       2e-8,
 }
 
+// Forward2nd represents a first-order accurate forward approximation
+// to the second derivative.
+var Forward2nd = Formula{
+	Stencil:    []Point{{Loc: 0, Coeff: 1}, {Loc: 1, Coeff: -2}, {Loc: 2, Coeff: 1}},
+	Derivative: 2,
+	Step:       1e-4,
+}
+
 // Backward represents a first-order accurate backward approximation
 // to the first derivative.
 var Backward = Formula{
 	Stencil:    []Point{{Loc: -1, Coeff: -1}, {Loc: 0, Coeff: 1}},
 	Derivative: 1,
 	Step:       2e-8,
+}
+
+// Backward2nd represents a first-order accurate forward approximation
+// to the second derivative.
+var Backward2nd = Formula{
+	Stencil:    []Point{{Loc: 0, Coeff: 1}, {Loc: -1, Coeff: -2}, {Loc: -2, Coeff: 1}},
+	Derivative: 2,
+	Step:       1e-4,
 }
 
 // Central represents a second-order accurate centered approximation
@@ -274,3 +94,53 @@ var Central2nd = Formula{
 	Derivative: 2,
 	Step:       1e-4,
 }
+
+// checkFormula checks if the formula is valid, and panics otherwise.
+func checkFormula(formula Formula) {
+	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
+		panic("fd: bad formula")
+	}
+}
+
+// computeWorkers returns the desired number of workers given the concurrency
+// level and number of evaluations.
+func computeWorkers(concurrent bool, evals int) int {
+	if !concurrent {
+		return 1
+	}
+	nWorkers := runtime.GOMAXPROCS(0)
+	if nWorkers > evals {
+		nWorkers = evals
+	}
+	return nWorkers
+}
+
+// hasOrigin returns whether the stencil uses the origin, which is true iff
+// one of the locations in the stencil equals 0.
+func usesOrigin(stencil []Point) bool {
+	for _, pt := range stencil {
+		if pt.Loc == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// getOrigin returns the value at the origin. It returns originValue if originKnown
+// is true. It returns the value returned by f if stencil contains a point with
+// zero location, and NaN otherwise.
+func getOrigin(originKnown bool, originValue float64, f func() float64, stencil []Point) float64 {
+	if originKnown {
+		return originValue
+	}
+	for _, pt := range stencil {
+		if pt.Loc == 0 {
+			return f()
+		}
+	}
+	return math.NaN()
+}
+
+const (
+	badDerivOrder = "fd: invalid derivative order"
+)

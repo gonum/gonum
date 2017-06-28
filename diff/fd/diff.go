@@ -115,7 +115,7 @@ func computeWorkers(concurrent bool, evals int) int {
 	return nWorkers
 }
 
-// hasOrigin returns whether the stencil uses the origin, which is true iff
+// usesOrigin returns whether the stencil uses the origin, which is true iff
 // one of the locations in the stencil equals 0.
 func usesOrigin(stencil []Point) bool {
 	for _, pt := range stencil {

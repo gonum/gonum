@@ -84,6 +84,7 @@ func hessianSerial(dst *mat.SymDense, f func(x []float64) float64, x []float64, 
 		copy(xCopy, x)
 		return f(x)
 	}
+	is2 := 1 / (step * step)
 	origin := getOrigin(originKnown, originValue, fo, stencil)
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {
@@ -99,7 +100,7 @@ func hessianSerial(dst *mat.SymDense, f func(x []float64) float64, x []float64, 
 						xCopy[j] += ptj.Loc * step
 						v = f(xCopy)
 					}
-					hess += v * pti.Coeff * ptj.Coeff / (step * step)
+					hess += v * pti.Coeff * ptj.Coeff * is2
 				}
 			}
 			dst.SetSym(i, j, hess)
@@ -172,9 +173,10 @@ func hessianConcurrent(dst *mat.SymDense, nWorkers, evals int, f func(x []float6
 		close(ans)
 	}(send)
 
+	is2 := 1 / (step * step)
 	// Read in the results
 	for r := range ans {
-		v := r.result * stencil[r.iIdx].Coeff * stencil[r.jIdx].Coeff / (step * step)
+		v := r.result * stencil[r.iIdx].Coeff * stencil[r.jIdx].Coeff * is2
 		v += dst.At(r.i, r.j)
 		dst.SetSym(r.i, r.j, v)
 	}

@@ -62,8 +62,8 @@ func TestHessian(t *testing.T) {
 		}
 		settings.Concurrent = true
 		got2 := Hessian(nil, test.h.Func, test.x, settings)
-		if !mat.EqualApprox(got, got2, 1e-6) {
-			t.Errorf("Cas %d: Hessian mismatch concurrent\ngot=\n%0.4v\nwant=\n%0.4v\n", cas, mat.Formatted(got2), mat.Formatted(got))
+		if !mat.EqualApprox(got, got2, 1e-5) {
+			t.Errorf("Cas %d: Hessian mismatch concurrent\ngot=\n%0.6v\nwant=\n%0.6v\n", cas, mat.Formatted(got2), mat.Formatted(got))
 		}
 	}
 }

@@ -108,7 +108,7 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src *rand.Rand) (norm 
 		return nil, false
 	}
 	var sigma mat.SymDense
-	sigma.InverseCholesky(&chol)
+	chol.InverseTo(&sigma)
 	return NewNormal(mu, &sigma, src)
 }
 

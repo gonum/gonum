@@ -279,7 +279,7 @@ func TestCloneCholesky(t *testing.T) {
 	}
 }
 
-func TestInverseCholesky(t *testing.T) {
+func TestCholeskyInverseTo(t *testing.T) {
 	for _, n := range []int{1, 3, 5, 9} {
 		data := make([]float64, n*n)
 		for i := range data {
@@ -295,7 +295,7 @@ func TestInverseCholesky(t *testing.T) {
 		}
 
 		var sInv SymDense
-		sInv.InverseCholesky(&chol)
+		chol.InverseTo(&sInv)
 
 		var ans Dense
 		ans.Mul(&sInv, &s)

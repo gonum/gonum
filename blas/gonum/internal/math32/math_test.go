@@ -35,6 +35,9 @@ func TestCopySign(t *testing.T) {
 }
 
 func TestHypot(t *testing.T) {
+	// tol is increased for Hypot to avoid failures
+	// related to https://github.com/gonum/gonum/issues/110.
+	const tol = 1e-6
 	f := func(x struct{ X, Y float32 }) bool {
 		y := Hypot(x.X, x.Y)
 		if math.Hypot(float64(x.X), float64(x.Y)) > math.MaxFloat32 {

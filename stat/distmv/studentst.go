@@ -71,7 +71,7 @@ func NewStudentsT(mu []float64, sigma mat.Symmetric, nu float64, src *rand.Rand)
 	}
 	s.sigma = *mat.NewSymDense(dim, nil)
 	s.sigma.CopySym(sigma)
-	s.lower.LFromCholesky(&s.chol)
+	s.chol.LTo(&s.lower)
 	s.logSqrtDet = 0.5 * s.chol.LogDet()
 	return s, true
 }

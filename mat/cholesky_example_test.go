@@ -43,7 +43,7 @@ func ExampleCholesky() {
 
 	// Extract the factorization and check that it equals the original matrix.
 	var t mat.TriDense
-	t.LFromCholesky(&chol)
+	chol.LTo(&t)
 	var test mat.Dense
 	test.Mul(&t, t.T())
 	fmt.Println()
@@ -93,7 +93,7 @@ func ExampleCholesky_SymRankOne() {
 	a.SymRankOne(a, 1, x)
 
 	var au mat.SymDense
-	au.FromCholesky(&chol)
+	chol.To(&au)
 
 	// Print the matrix that was updated directly.
 	fmt.Printf("\nA' =        %0.4v\n", mat.Formatted(a, mat.Prefix("            ")))

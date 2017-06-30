@@ -54,7 +54,7 @@ func NewWishart(v mat.Symmetric, nu float64, src *rand.Rand) (*Wishart, bool) {
 	}
 
 	var u mat.TriDense
-	u.UFromCholesky(&chol)
+	chol.UTo(&u)
 
 	w := &Wishart{
 		nu:  nu,
@@ -128,7 +128,7 @@ func (w *Wishart) logProbSymChol(cholX *mat.Cholesky) float64 {
 
 	// Compute tr(V^-1 * X), using the fact that X = U^T * U.
 	var u mat.TriDense
-	u.UFromCholesky(cholX)
+	cholX.UTo(&u)
 
 	var vinvx mat.Dense
 	err := vinvx.SolveCholesky(&w.cholv, u.T())
@@ -151,7 +151,7 @@ func (w *Wishart) RandSym(x *mat.SymDense) *mat.SymDense {
 	}
 	var c mat.Cholesky
 	w.RandChol(&c)
-	x.FromCholesky(&c)
+	c.To(x)
 	return x
 }
 
@@ -204,6 +204,6 @@ func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
 func (w *Wishart) setV() {
 	w.once.Do(func() {
 		w.v = mat.NewSymDense(w.dim, nil)
-		w.v.FromCholesky(&w.cholv)
+		w.cholv.To(w.v)
 	})
 }

@@ -54,7 +54,7 @@ func TestCholesky(t *testing.T) {
 				t.Errorf("Condition number mismatch: Want %v, got %v", test.cond, chol.cond)
 			}
 			var U TriDense
-			U.UFromCholesky(chol)
+			chol.UTo(&U)
 			aCopy := DenseCopyOf(test.a)
 			var a Dense
 			a.Mul(U.TTri(), &U)
@@ -63,7 +63,7 @@ func TestCholesky(t *testing.T) {
 			}
 
 			var L TriDense
-			L.LFromCholesky(chol)
+			chol.LTo(&L)
 			a.Mul(&L, L.TTri())
 			if !EqualApprox(&a, aCopy, 1e-14) {
 				t.Error("unexpected Cholesky factor product")
@@ -221,7 +221,7 @@ func TestCholeskySolveVec(t *testing.T) {
 	}
 }
 
-func TestFromCholesky(t *testing.T) {
+func TestCholeskyTo(t *testing.T) {
 	for _, test := range []*SymDense{
 		NewSymDense(3, []float64{
 			53, 59, 37,
@@ -235,7 +235,7 @@ func TestFromCholesky(t *testing.T) {
 			t.Fatal("unexpected Cholesky factorization failure: not positive definite")
 		}
 		var s SymDense
-		s.FromCholesky(&chol)
+		chol.To(&s)
 
 		if !EqualApprox(&s, test, 1e-12) {
 			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(&s))
@@ -341,7 +341,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 			a.SymRankOne(&a, alpha, x)
 
 			var achol SymDense
-			achol.FromCholesky(&chol)
+			chol.To(&achol)
 			if !EqualApprox(&achol, &a, 1e-13) {
 				t.Errorf("n=%v, alpha=%v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
 					n, alpha, Formatted(&a), Formatted(&achol))
@@ -416,7 +416,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 		a.SymRankOne(a, test.alpha, x)
 
 		var achol SymDense
-		achol.FromCholesky(&chol)
+		chol.To(&achol)
 		if !EqualApprox(&achol, a, 1e-13) {
 			t.Errorf("Case %v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
 				i, Formatted(a), Formatted(&achol))

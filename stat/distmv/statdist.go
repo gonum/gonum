@@ -161,7 +161,7 @@ func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 	// TODO(btracey): There may be a more efficient way to just compute the trace
 	// Compute tr(Σ_r^-1*Σ_l) using the fact that Σ_l = U^T * U
 	var u mat.TriDense
-	u.UFromCholesky(&l.chol)
+	l.chol.UTo(&u)
 	var m mat.Dense
 	err := m.SolveCholesky(&r.chol, u.T())
 	if err != nil {

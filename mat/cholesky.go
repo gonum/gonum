@@ -232,39 +232,39 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 
 }
 
-// UFromCholesky extracts the n×n upper triangular matrix U from a Cholesky
-// decomposition
+// UTo extracts the n×n upper triangular matrix U from a Cholesky
+// decomposition into t.
 //  A = U^T * U.
-func (t *TriDense) UFromCholesky(chol *Cholesky) {
-	if !chol.valid() {
+func (c *Cholesky) UTo(t *TriDense) {
+	if !c.valid() {
 		panic(badCholesky)
 	}
-	n := chol.chol.mat.N
+	n := c.chol.mat.N
 	t.reuseAs(n, Upper)
-	t.Copy(chol.chol)
+	t.Copy(c.chol)
 }
 
-// LFromCholesky extracts the n×n lower triangular matrix L from a Cholesky
-// decomposition
+// LTo extracts the n×n lower triangular matrix L from a Cholesky
+// decomposition into t.
 //  A = L * L^T.
-func (t *TriDense) LFromCholesky(chol *Cholesky) {
-	if !chol.valid() {
+func (c *Cholesky) LTo(t *TriDense) {
+	if !c.valid() {
 		panic(badCholesky)
 	}
-	n := chol.chol.mat.N
+	n := c.chol.mat.N
 	t.reuseAs(n, Lower)
-	t.Copy(chol.chol.TTri())
+	t.Copy(c.chol.TTri())
 }
 
-// FromCholesky reconstructs the original positive definite matrix given its
-// Cholesky decomposition.
-func (s *SymDense) FromCholesky(chol *Cholesky) {
-	if !chol.valid() {
+// To reconstructs the original positive definite matrix given its
+// Cholesky decomposition into s.
+func (c *Cholesky) To(s *SymDense) {
+	if !c.valid() {
 		panic(badCholesky)
 	}
-	n := chol.chol.mat.N
+	n := c.chol.mat.N
 	s.reuseAs(n)
-	s.SymOuterK(1, chol.chol.T())
+	s.SymOuterK(1, c.chol.T())
 }
 
 // InverseCholesky computes the inverse of the matrix represented by its Cholesky

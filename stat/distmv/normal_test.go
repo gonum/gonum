@@ -241,7 +241,7 @@ func TestConditionNormal(t *testing.T) {
 		}
 
 		var sigma mat.SymDense
-		sigma.FromCholesky(&newNormal.chol)
+		newNormal.chol.To(&sigma)
 		if !mat.EqualApprox(test.newSigma, &sigma, 1e-12) {
 			t.Errorf("Updated sigma mismatch\n.Want:\n% v\nGot:\n% v\n", test.newSigma, sigma)
 		}
@@ -279,7 +279,7 @@ func TestConditionNormal(t *testing.T) {
 			t.Fatalf("Bad test, update failed")
 		}
 		var newSigma mat.SymDense
-		newSigma.FromCholesky(&newNormal.chol)
+		newNormal.chol.To(&newSigma)
 		trueMean := test.mu[0] + rho*(std[0]/std[1])*(test.value-test.mu[1])
 		if math.Abs(trueMean-newNormal.mu[0]) > 1e-14 {
 			t.Errorf("Mean mismatch. Want %v, got %v", trueMean, newNormal.mu[0])
@@ -376,7 +376,7 @@ func TestConditionNormal(t *testing.T) {
 			}
 		}
 		var sigma mat.SymDense
-		sigma.FromCholesky(&newNormal.chol)
+		newNormal.chol.To(&sigma)
 		if !mat.EqualApprox(&sigma, subEstCov, 1e-1) {
 			t.Errorf("Covariance mismatch. Want:\n%0.8v\nGot:\n%0.8v\n", subEstCov, sigma)
 		}

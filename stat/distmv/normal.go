@@ -59,7 +59,7 @@ func NewNormal(mu []float64, sigma mat.Symmetric, src *rand.Rand) (*Normal, bool
 	}
 	n.sigma = *mat.NewSymDense(dim, nil)
 	n.sigma.CopySym(sigma)
-	n.lower.LFromCholesky(&n.chol)
+	n.chol.LTo(&n.lower)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()
 	return n, true
 }
@@ -79,7 +79,7 @@ func NewNormalChol(mu []float64, chol *mat.Cholesky, src *rand.Rand) *Normal {
 	}
 	n.chol.Clone(chol)
 	copy(n.mu, mu)
-	n.lower.LFromCholesky(chol)
+	chol.LTo(&n.lower)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()
 	return n
 }

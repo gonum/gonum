@@ -128,7 +128,7 @@ func TestSolveLU(t *testing.T) {
 		var lu LU
 		lu.Factorize(a)
 		var x Dense
-		if err := x.SolveLU(&lu, false, b); err != nil {
+		if err := lu.Solve(&x, false, b); err != nil {
 			continue
 		}
 		var got Dense
@@ -149,13 +149,13 @@ func TestSolveLUCond(t *testing.T) {
 		lu.Factorize(test)
 		b := NewDense(m, 2, nil)
 		var x Dense
-		if err := x.SolveLU(&lu, false, b); err == nil {
+		if err := lu.Solve(&x, false, b); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
 		bvec := NewVector(m, nil)
 		var xvec Vector
-		if err := xvec.SolveLUVec(&lu, false, bvec); err == nil {
+		if err := lu.SolveVec(&xvec, false, bvec); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 	}
@@ -176,7 +176,7 @@ func TestSolveLUVec(t *testing.T) {
 		var lu LU
 		lu.Factorize(a)
 		var x Vector
-		if err := x.SolveLUVec(&lu, false, b); err != nil {
+		if err := lu.SolveVec(&x, false, b); err != nil {
 			continue
 		}
 		var got Vector

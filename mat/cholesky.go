@@ -158,13 +158,13 @@ func (c *Cholesky) LogDet() float64 {
 	return det
 }
 
-// SolveCholesky finds the matrix m that solves A * m = b where A is represented
-// by the Cholesky decomposition, placing the result in the receiver.
-func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
-	if !chol.valid() {
+// Solve finds the matrix m that solves A * m = b where A is represented
+// by the Cholesky decomposition, placing the result in m.
+func (c *Cholesky) Solve(m *Dense, b Matrix) error {
+	if !c.valid() {
 		panic(badCholesky)
 	}
-	n := chol.chol.mat.N
+	n := c.chol.mat.N
 	bm, bn := b.Dims()
 	if n != bm {
 		panic(ErrShape)
@@ -174,10 +174,10 @@ func (m *Dense) SolveCholesky(chol *Cholesky, b Matrix) error {
 	if b != m {
 		m.Copy(b)
 	}
-	blas64.Trsm(blas.Left, blas.Trans, 1, chol.chol.mat, m.mat)
-	blas64.Trsm(blas.Left, blas.NoTrans, 1, chol.chol.mat, m.mat)
-	if chol.cond > ConditionTolerance {
-		return Condition(chol.cond)
+	blas64.Trsm(blas.Left, blas.Trans, 1, c.chol.mat, m.mat)
+	blas64.Trsm(blas.Left, blas.NoTrans, 1, c.chol.mat, m.mat)
+	if c.cond > ConditionTolerance {
+		return Condition(c.cond)
 	}
 	return nil
 }
@@ -205,13 +205,13 @@ func (m *Dense) solveTwoChol(a, b *Cholesky) error {
 	return nil
 }
 
-// SolveCholeskyVec finds the vector v that solves A * v = b where A is represented
-// by the Cholesky decomposition, placing the result in the receiver.
-func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
-	if !chol.valid() {
+// SolveVec finds the vector v that solves A * v = b where A is represented
+// by the Cholesky decomposition, placing the result in v.
+func (c *Cholesky) SolveVec(v, b *Vector) error {
+	if !c.valid() {
 		panic(badCholesky)
 	}
-	n := chol.chol.mat.N
+	n := c.chol.mat.N
 	vn := b.Len()
 	if vn != n {
 		panic(ErrShape)
@@ -223,10 +223,10 @@ func (v *Vector) SolveCholeskyVec(chol *Cholesky, b *Vector) error {
 	if v != b {
 		v.CopyVec(b)
 	}
-	blas64.Trsv(blas.Trans, chol.chol.mat, v.mat)
-	blas64.Trsv(blas.NoTrans, chol.chol.mat, v.mat)
-	if chol.cond > ConditionTolerance {
-		return Condition(chol.cond)
+	blas64.Trsv(blas.Trans, c.chol.mat, v.mat)
+	blas64.Trsv(blas.NoTrans, c.chol.mat, v.mat)
+	if c.cond > ConditionTolerance {
+		return Condition(c.cond)
 	}
 	return nil
 

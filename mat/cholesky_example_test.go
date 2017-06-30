@@ -35,7 +35,7 @@ func ExampleCholesky() {
 	// Use the factorization to solve the system of equations a * x = b.
 	b := mat.NewVector(4, []float64{1, 2, 3, 4})
 	var x mat.Vector
-	if err := x.SolveCholeskyVec(&chol, b); err != nil {
+	if err := chol.SolveVec(&x, b); err != nil {
 		fmt.Println("Matrix is near singular: ", err)
 	}
 	fmt.Println("Solve a * x = b")

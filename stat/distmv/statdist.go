@@ -163,7 +163,7 @@ func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 	var u mat.TriDense
 	l.chol.UTo(&u)
 	var m mat.Dense
-	err := m.SolveCholesky(&r.chol, u.T())
+	err := r.chol.Solve(&m, u.T())
 	if err != nil {
 		return math.NaN()
 	}

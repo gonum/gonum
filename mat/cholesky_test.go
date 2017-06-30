@@ -103,7 +103,7 @@ func TestCholeskySolve(t *testing.T) {
 		}
 
 		var x Dense
-		x.SolveCholesky(&chol, test.b)
+		chol.Solve(&x, test.b)
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
@@ -208,7 +208,7 @@ func TestCholeskySolveVec(t *testing.T) {
 		}
 
 		var x Vector
-		x.SolveCholeskyVec(&chol, test.b)
+		chol.SolveVec(&x, test.b)
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}

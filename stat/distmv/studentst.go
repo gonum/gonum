@@ -154,7 +154,7 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 	// Compute mu_1 + sigma_{2,1}^T * sigma_{2,2}^-1 (v - mu_2).
 	v := mat.NewVector(ob, mu2)
 	var tmp, tmp2 mat.Vector
-	err := tmp.SolveCholeskyVec(&chol, v)
+	err := chol.SolveVec(&tmp, v)
 	if err != nil {
 		return math.NaN(), nil, nil
 	}
@@ -167,7 +167,7 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 	// Compute tmp4 = sigma_{2,1}^T * sigma_{2,2}^-1 * sigma_{2,1}.
 	// TODO(btracey): Should this be a method of SymDense?
 	var tmp3, tmp4 mat.Dense
-	err = tmp3.SolveCholesky(&chol, sigma21)
+	err = chol.Solve(&tmp3, sigma21)
 	if err != nil {
 		return math.NaN(), nil, nil
 	}
@@ -259,7 +259,7 @@ func (s *StudentsT) LogProb(y []float64) float64 {
 	x := mat.NewVector(s.dim, shift)
 
 	var tmp mat.Vector
-	tmp.SolveCholeskyVec(&s.chol, x)
+	s.chol.SolveVec(&tmp, x)
 
 	dot := mat.Dot(&tmp, x)
 

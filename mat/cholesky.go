@@ -267,25 +267,25 @@ func (c *Cholesky) To(s *SymDense) {
 	s.SymOuterK(1, c.chol.T())
 }
 
-// InverseCholesky computes the inverse of the matrix represented by its Cholesky
-// factorization and stores the result into the receiver. If the factorized
+// InverseTo computes the inverse of the matrix represented by its Cholesky
+// factorization and stores the result into s. If the factorized
 // matrix is ill-conditioned, a Condition error will be returned.
 // Note that matrix inversion is numerically unstable, and should generally be
 // avoided where possible, for example by using the Solve routines.
-func (s *SymDense) InverseCholesky(chol *Cholesky) error {
-	if !chol.valid() {
+func (c *Cholesky) InverseTo(s *SymDense) error {
+	if !c.valid() {
 		panic(badCholesky)
 	}
 	// TODO(btracey): Replace this code with a direct call to Dpotri when it
 	// is available.
-	s.reuseAs(chol.chol.mat.N)
+	s.reuseAs(c.chol.mat.N)
 	// If:
 	//  chol(A) = U^T * U
 	// Then:
 	//  chol(A^-1) = S * S^T
 	// where S = U^-1
 	var t TriDense
-	err := t.InverseTri(chol.chol)
+	err := t.InverseTri(c.chol)
 	s.SymOuterK(1, &t)
 	return err
 }

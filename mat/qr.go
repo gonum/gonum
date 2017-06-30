@@ -117,7 +117,7 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 	return dst
 }
 
-// SolveQR finds a minimum-norm solution to a system of linear equations defined
+// Solve finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its QR factorized
 // form. If A is singular or near-singular a Condition error is returned. Please
 // see the documentation for Condition for more information.
@@ -125,8 +125,8 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find X such that ||A*X - b||_2 is minimized.
 //  If trans == true, find the minimum norm solution of A^T * X = b.
-// The solution matrix, X, is stored in place into the receiver.
-func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
+// The solution matrix, X, is stored in place into m.
+func (qr *QR) Solve(m *Dense, trans bool, b Matrix) error {
 	r, c := qr.qr.Dims()
 	br, bc := b.Dims()
 
@@ -184,9 +184,9 @@ func (m *Dense) SolveQR(qr *QR, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveQRVec finds a minimum-norm solution to a system of linear equations.
-// Please see Dense.SolveQR for the full documentation.
-func (v *Vector) SolveQRVec(qr *QR, trans bool, b *Vector) error {
+// SolveVec finds a minimum-norm solution to a system of linear equations.
+// Please see QR.Solve for the full documentation.
+func (qr *QR) SolveVec(v *Vector, trans bool, b *Vector) error {
 	if v != b {
 		v.checkOverlap(b.mat)
 	}
@@ -198,5 +198,5 @@ func (v *Vector) SolveQRVec(qr *QR, trans bool, b *Vector) error {
 	} else {
 		v.reuseAs(c)
 	}
-	return v.asDense().SolveQR(qr, trans, b.asDense())
+	return qr.Solve(v.asDense(), trans, b.asDense())
 }

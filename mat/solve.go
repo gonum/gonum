@@ -95,7 +95,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 	case ar > ac:
 		var qr QR
 		qr.Factorize(a)
-		return m.SolveQR(&qr, false, b)
+		return qr.Solve(m, false, b)
 	default:
 		var lq LQ
 		lq.Factorize(a)

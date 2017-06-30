@@ -265,16 +265,16 @@ func (m *Dense) Permutation(r int, swaps []int) {
 	}
 }
 
-// SolveLU solves a system of linear equations using the LU decomposition of a matrix.
+// Solve solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
 //  A * x = b if trans == false
 //  A^T * x = b if trans == true
 // In both cases, A is represented in LU factorized form, and the matrix x is
-// stored into the receiver.
+// stored into m.
 //
 // If A is singular or near-singular a Condition error is returned. Please see
 // the documentation for Condition for more information.
-func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
+func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 	_, n := lu.lu.Dims()
 	br, bc := b.Dims()
 	if br != n {
@@ -308,16 +308,16 @@ func (m *Dense) SolveLU(lu *LU, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveLUVec solves a system of linear equations using the LU decomposition of a matrix.
+// SolveVec solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
 //  A * x = b if trans == false
 //  A^T * x = b if trans == true
 // In both cases, A is represented in LU factorized form, and the matrix x is
-// stored into the receiver.
+// stored into v.
 //
 // If A is singular or near-singular a Condition error is returned. Please see
 // the documentation for Condition for more information.
-func (v *Vector) SolveLUVec(lu *LU, trans bool, b *Vector) error {
+func (lu *LU) SolveVec(v *Vector, trans bool, b *Vector) error {
 	_, n := lu.lu.Dims()
 	bn := b.Len()
 	if bn != n {

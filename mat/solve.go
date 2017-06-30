@@ -99,7 +99,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 	default:
 		var lq LQ
 		lq.Factorize(a)
-		return m.SolveLQ(&lq, false, b)
+		return lq.Solve(m, false, b)
 	}
 }
 

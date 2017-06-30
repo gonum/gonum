@@ -77,7 +77,7 @@ func TestSolveLQ(t *testing.T) {
 			var x Dense
 			lq := &LQ{}
 			lq.Factorize(a)
-			x.SolveLQ(lq, trans, b)
+			lq.Solve(&x, trans, b)
 
 			// Test that the normal equations hold.
 			// A^T * A * x = A^T * b if !trans
@@ -130,7 +130,7 @@ func TestSolveLQVec(t *testing.T) {
 			var x Vector
 			lq := &LQ{}
 			lq.Factorize(a)
-			x.SolveLQVec(lq, trans, b)
+			lq.SolveVec(&x, trans, b)
 
 			// Test that the normal equations hold.
 			// A^T * A * x = A^T * b if !trans
@@ -166,13 +166,13 @@ func TestSolveLQCond(t *testing.T) {
 		lq.Factorize(test)
 		b := NewDense(m, 2, nil)
 		var x Dense
-		if err := x.SolveLQ(&lq, false, b); err == nil {
+		if err := lq.Solve(&x, false, b); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
 		bvec := NewVector(m, nil)
 		var xvec Vector
-		if err := xvec.SolveLQVec(&lq, false, bvec); err == nil {
+		if err := lq.SolveVec(&xvec, false, bvec); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 	}

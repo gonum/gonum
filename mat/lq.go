@@ -121,7 +121,7 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 	return dst
 }
 
-// SolveLQ finds a minimum-norm solution to a system of linear equations defined
+// Solve finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its LQ factorized
 // form. If A is singular or near-singular a Condition error is returned. Please
 // see the documentation for Condition for more information.
@@ -129,8 +129,8 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find the minimum norm solution of A * X = b.
 //  If trans == true, find X such that ||A*X - b||_2 is minimized.
-// The solution matrix, X, is stored in place into the receiver.
-func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
+// The solution matrix, X, is stored in place into m.
+func (lq *LQ) Solve(m *Dense, trans bool, b Matrix) error {
 	r, c := lq.lq.Dims()
 	br, bc := b.Dims()
 
@@ -188,9 +188,9 @@ func (m *Dense) SolveLQ(lq *LQ, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveLQVec finds a minimum-norm solution to a system of linear equations.
-// Please see Dense.SolveLQ for the full documentation.
-func (v *Vector) SolveLQVec(lq *LQ, trans bool, b *Vector) error {
+// SolveVec finds a minimum-norm solution to a system of linear equations.
+// Please see LQ.Solve for the full documentation.
+func (lq *LQ) SolveVec(v *Vector, trans bool, b *Vector) error {
 	if v != b {
 		v.checkOverlap(b.mat)
 	}
@@ -202,5 +202,5 @@ func (v *Vector) SolveLQVec(lq *LQ, trans bool, b *Vector) error {
 	} else {
 		v.reuseAs(c)
 	}
-	return v.asDense().SolveLQ(lq, trans, b.asDense())
+	return lq.Solve(v.asDense(), trans, b.asDense())
 }

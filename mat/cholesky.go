@@ -233,38 +233,56 @@ func (c *Cholesky) SolveVec(v, b *Vector) error {
 }
 
 // UTo extracts the n×n upper triangular matrix U from a Cholesky
-// decomposition into t.
+// decomposition into dst and returns the result. If dst is nil a new
+// TriDense is allocated.
 //  A = U^T * U.
-func (c *Cholesky) UTo(t *TriDense) {
+func (c *Cholesky) UTo(dst *TriDense) *TriDense {
 	if !c.valid() {
 		panic(badCholesky)
 	}
 	n := c.chol.mat.N
-	t.reuseAs(n, Upper)
-	t.Copy(c.chol)
+	if dst == nil {
+		dst = NewTriDense(n, Upper, make([]float64, n*n))
+	} else {
+		dst.reuseAs(n, Upper)
+	}
+	dst.Copy(c.chol)
+	return dst
 }
 
 // LTo extracts the n×n lower triangular matrix L from a Cholesky
-// decomposition into t.
+// decomposition into dst and returns the result. If dst is nil a new
+// TriDense is allocated.
 //  A = L * L^T.
-func (c *Cholesky) LTo(t *TriDense) {
+func (c *Cholesky) LTo(dst *TriDense) *TriDense {
 	if !c.valid() {
 		panic(badCholesky)
 	}
 	n := c.chol.mat.N
-	t.reuseAs(n, Lower)
-	t.Copy(c.chol.TTri())
+	if dst == nil {
+		dst = NewTriDense(n, Lower, make([]float64, n*n))
+	} else {
+		dst.reuseAs(n, Lower)
+	}
+	dst.Copy(c.chol.TTri())
+	return dst
 }
 
 // To reconstructs the original positive definite matrix given its
-// Cholesky decomposition into s.
-func (c *Cholesky) To(s *SymDense) {
+// Cholesky decomposition into dst and returns the result. If dst is nil
+// a new SymDense is allocated.
+func (c *Cholesky) To(dst *SymDense) *SymDense {
 	if !c.valid() {
 		panic(badCholesky)
 	}
 	n := c.chol.mat.N
-	s.reuseAs(n)
-	s.SymOuterK(1, c.chol.T())
+	if dst == nil {
+		dst = NewSymDense(n, make([]float64, n*n))
+	} else {
+		dst.reuseAs(n)
+	}
+	dst.SymOuterK(1, c.chol.T())
+	return dst
 }
 
 // InverseTo computes the inverse of the matrix represented by its Cholesky

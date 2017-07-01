@@ -42,10 +42,9 @@ func ExampleCholesky() {
 	fmt.Printf("x = %0.4v\n", mat.Formatted(&x, mat.Prefix("    ")))
 
 	// Extract the factorization and check that it equals the original matrix.
-	var t mat.TriDense
-	chol.LTo(&t)
+	t := chol.LTo(nil)
 	var test mat.Dense
-	test.Mul(&t, t.T())
+	test.Mul(t, t.T())
 	fmt.Println()
 	fmt.Printf("L * L^T = %0.4v\n", mat.Formatted(&a, mat.Prefix("          ")))
 
@@ -92,13 +91,12 @@ func ExampleCholesky_SymRankOne() {
 	// Rank-1 update the matrix a.
 	a.SymRankOne(a, 1, x)
 
-	var au mat.SymDense
-	chol.To(&au)
+	au := chol.To(nil)
 
 	// Print the matrix that was updated directly.
 	fmt.Printf("\nA' =        %0.4v\n", mat.Formatted(a, mat.Prefix("            ")))
 	// Print the matrix recovered from the factorization.
-	fmt.Printf("\nU'^T * U' = %0.4v\n", mat.Formatted(&au, mat.Prefix("            ")))
+	fmt.Printf("\nU'^T * U' = %0.4v\n", mat.Formatted(au, mat.Prefix("            ")))
 
 	// Output:
 	// A = ⎡ 1   1   1   1⎤

@@ -31,7 +31,7 @@ func TestMaxID(t *testing.T) {
 	delete(nodes, Node(0))
 	g.RemoveNode(Node(2))
 	delete(nodes, Node(2))
-	n := Node(g.NewNodeID())
+	n := g.NewNode()
 	g.AddNode(n)
 	if !g.Has(n) {
 		t.Error("added node does not exist in graph")
@@ -50,14 +50,14 @@ func TestIssue123UndirectedGraph(t *testing.T) {
 	}()
 	g := NewUndirectedGraph(0, math.Inf(1))
 
-	n0 := Node(g.NewNodeID())
+	n0 := g.NewNode()
 	g.AddNode(n0)
 
-	n1 := Node(g.NewNodeID())
+	n1 := g.NewNode()
 	g.AddNode(n1)
 
 	g.RemoveNode(n0)
 
-	n2 := Node(g.NewNodeID())
+	n2 := g.NewNode()
 	g.AddNode(n2)
 }

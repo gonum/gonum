@@ -50,14 +50,14 @@ func TestIssue123DirectedGraph(t *testing.T) {
 	}()
 	g := NewDirectedGraph(0, math.Inf(1))
 
-	n0 := Node(g.NewNodeID())
+	n0 := g.NewNode()
 	g.AddNode(n0)
 
-	n1 := Node(g.NewNodeID())
+	n1 := g.NewNode()
 	g.AddNode(n1)
 
 	g.RemoveNode(n0)
 
-	n2 := Node(g.NewNodeID())
+	n2 := g.NewNode()
 	g.AddNode(n2)
 }

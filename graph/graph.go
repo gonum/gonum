@@ -76,8 +76,9 @@ type Weighter interface {
 
 // NodeAdder is an interface for adding arbitrary nodes to a graph.
 type NodeAdder interface {
-	// NewNodeID returns a new unique arbitrary ID.
-	NewNodeID() int64
+	// NewNode returns a new Node with a unique
+	// arbitrary ID.
+	NewNode() Node
 
 	// Adds a node to the graph. AddNode panics if
 	// the added node ID matches an existing node ID.

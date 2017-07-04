@@ -17,8 +17,6 @@ import (
 type Builder interface {
 	graph.Graph
 	graph.Builder
-	// NewNode adds a new node with a unique node ID to the graph.
-	NewNode() graph.Node
 	// NewEdge adds a new edge from the source to the destination node to the
 	// graph, or returns the existing edge if already present.
 	NewEdge(from, to graph.Node) graph.Edge

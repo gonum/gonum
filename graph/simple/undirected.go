@@ -34,16 +34,16 @@ func NewUndirectedGraph(self, absent float64) *UndirectedGraph {
 	}
 }
 
-// NewNodeID returns a new unique ID for a node to be added to g. The returned ID does
-// not become a valid ID in g until it is added to g.
-func (g *UndirectedGraph) NewNodeID() int64 {
+// NewNode returns a new unique Node to be added to g. The Node's ID does
+// not become valid in g until the Node is added to g.
+func (g *UndirectedGraph) NewNode() graph.Node {
 	if len(g.nodes) == 0 {
-		return 0
+		return Node(0)
 	}
 	if int64(len(g.nodes)) == maxInt {
 		panic("simple: cannot allocate node: no slot")
 	}
-	return g.nodeIDs.newID()
+	return Node(g.nodeIDs.newID())
 }
 
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.

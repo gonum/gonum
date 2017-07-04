@@ -114,7 +114,7 @@ func newDotDirectedGraph() *dotDirectedGraph {
 
 // NewNode adds a new node with a unique node ID to the graph.
 func (g *dotDirectedGraph) NewNode() graph.Node {
-	n := &dotNode{Node: simple.Node(g.NewNodeID())}
+	n := &dotNode{Node: g.DirectedGraph.NewNode()}
 	g.AddNode(n)
 	return n
 }
@@ -157,7 +157,7 @@ func newDotUndirectedGraph() *dotUndirectedGraph {
 
 // NewNode adds a new node with a unique node ID to the graph.
 func (g *dotUndirectedGraph) NewNode() graph.Node {
-	n := &dotNode{Node: simple.Node(g.NewNodeID())}
+	n := &dotNode{Node: g.UndirectedGraph.NewNode()}
 	g.AddNode(n)
 	return n
 }
@@ -186,7 +186,7 @@ func (g *dotUndirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge Unmarshale
 // dotNode extends simple.Node with a label field to test round-trip encoding
 // and decoding of node DOT label attributes.
 type dotNode struct {
-	simple.Node
+	graph.Node
 	dotID string
 	// Node label.
 	Label string

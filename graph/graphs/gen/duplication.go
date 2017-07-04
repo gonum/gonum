@@ -59,13 +59,13 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 	sort.Sort(ordered.ByID(nodes))
 	if len(nodes) == 0 {
 		n--
-		u := simple.Node(dst.NewNodeID())
+		u := dst.NewNode()
 		dst.AddNode(u)
 		nodes = append(nodes, u)
 	}
 	for i := 0; i < n; i++ {
 		u := nodes[rndN(len(nodes))]
-		d := simple.Node(dst.NewNodeID())
+		d := dst.NewNode()
 
 		// Add the duplicate node.
 		dst.AddNode(d)

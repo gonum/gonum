@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"strconv"
 	"testing"
-	"testing/quick"
 )
 
 const (
@@ -922,54 +921,29 @@ func TestReverse(t *testing.T) {
 	}
 }
 
-func roundFloat(x float64, prec int) float64 {
-	f, _ := strconv.ParseFloat(strconv.FormatFloat(x, 'f', prec, 64), 64)
-	if f == 0 {
-		return math.Abs(f)
-	}
-	return f
-}
-
 func TestRound(t *testing.T) {
-	for _, x := range []float64{
-		0,
-		math.Inf(1),
-		math.NaN(),
-		func() float64 { var f float64; return -f }(),
-		math.MaxFloat64 / 2,
-		1 << 64,
-		454.4445,
-		454.44445,
-		0.42499,
-		0.42599,
-		0.424999999999993,
-		0.425000000000001,
-		123.42499999999993,
-
-		// FIXME(kortschak): These values fail due to roundFloat rounding
-		// 454.45 to ±454.4 when prec=1 and 454.445 to ±454.44 when prec=2.
-		// This is a result of fmt's rendering of the value.
-		// 454.45,
-		// 454.445,
-	} {
-		for _, sign := range []float64{1, -1} {
-			for prec := 0; prec < 10; prec++ {
-				got := Round(sign*x, prec)
-				want := roundFloat(sign*x, prec)
-				if (got != want || math.Signbit(got) != math.Signbit(want)) && !(math.IsNaN(got) && math.IsNaN(want)) {
-					t.Errorf("unexpected result for Round(%g, %d): got: %g, want: %g", x, prec, got, want)
-				}
-			}
-		}
-	}
-
-	// Special cases.
 	for _, test := range []struct {
 		x    float64
 		prec int
 		want float64
 	}{
-		// Failing cases above.
+		{x: 0, prec: 1, want: 0},
+		{x: math.Inf(1), prec: 1, want: math.Inf(1)},
+		{x: math.NaN(), prec: 1, want: math.NaN()},
+		{x: func() float64 { var f float64; return -f }(), prec: 1, want: 0},
+		{x: math.MaxFloat64 / 2, prec: 1, want: math.MaxFloat64 / 2},
+		{x: 1 << 64, prec: 1, want: 1 << 64},
+		{x: 454.4445, prec: 3, want: 454.445},
+		{x: 454.44445, prec: 4, want: 454.4445},
+		{x: 0.42499, prec: 4, want: 0.425},
+		{x: 0.42599, prec: 4, want: 0.426},
+		{x: 0.424999999999993, prec: 2, want: 0.42},
+		{x: 0.425, prec: 2, want: 0.43},
+		{x: 0.425000000000001, prec: 2, want: 0.43},
+		{x: 123.4244999999999, prec: 3, want: 123.424},
+		{x: 123.4245, prec: 3, want: 123.425},
+		{x: 123.4245000000001, prec: 3, want: 123.425},
+
 		{x: 454.45, prec: 0, want: 454},
 		{x: 454.45, prec: 1, want: 454.5},
 		{x: 454.45, prec: 2, want: 454.45},
@@ -979,12 +953,23 @@ func TestRound(t *testing.T) {
 		{x: 454.445, prec: 2, want: 454.45},
 		{x: 454.445, prec: 3, want: 454.445},
 		{x: 454.445, prec: 4, want: 454.445},
+		{x: 454.55, prec: 0, want: 455},
+		{x: 454.55, prec: 1, want: 454.6},
+		{x: 454.55, prec: 2, want: 454.55},
+		{x: 454.55, prec: 3, want: 454.55},
+		{x: 454.455, prec: 0, want: 454},
+		{x: 454.455, prec: 1, want: 454.5},
+		{x: 454.455, prec: 2, want: 454.46},
+		{x: 454.455, prec: 3, want: 454.455},
+		{x: 454.455, prec: 4, want: 454.455},
 
 		// Negative precision.
 		{x: 454.45, prec: -1, want: 450},
 		{x: 454.45, prec: -2, want: 500},
 		{x: 500, prec: -3, want: 1000},
 		{x: 500, prec: -4, want: 0},
+		{x: 1500, prec: -3, want: 2000},
+		{x: 1500, prec: -4, want: 0},
 	} {
 		for _, sign := range []float64{1, -1} {
 			got := Round(sign*test.x, test.prec)
@@ -992,60 +977,10 @@ func TestRound(t *testing.T) {
 			if want == 0 {
 				want = 0
 			}
-			if got != want || math.Signbit(got) != math.Signbit(want) {
-				t.Errorf("unexpected result for Round(%g, %d): got: %g, want: %g", test.x, test.prec, got, test.want)
-			}
-		}
-	}
-
-	// Test many large numbers. We hit float precision
-	// issues below 1e16 so we avoid that domain.
-	err := quick.Check(func(x float64, prec int) bool {
-		prec %= 20
-		if prec < 0 {
-			prec = -prec
-		}
-		for x > 1e16 {
-			got := Round(x, prec)
-			want := roundFloat(x, prec)
 			if (got != want || math.Signbit(got) != math.Signbit(want)) && !(math.IsNaN(got) && math.IsNaN(want)) {
-				t.Logf("big numbers failed with prec=%d x=%f got=%f want=%f", prec, x, got, want)
-				return false
+				t.Errorf("unexpected result for Round(%g, %d): got: %g, want: %g", sign*test.x, test.prec, got, want)
 			}
-			x /= 10
 		}
-		return true
-	}, nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	// Test many small numbers.
-	err = quick.Check(func(mant, exp int, prec int) bool {
-		prec %= 20
-		if prec < 0 {
-			prec = -prec
-		}
-		mant %= 1e10
-		exp %= 40
-		if exp > 0 {
-			exp = -exp
-		}
-		x := float64(mant) * math.Pow10(exp)
-		_, x = math.Modf(x)
-		if prec > -exp {
-			prec = -exp
-		}
-		got := strconv.FormatFloat(Round(x, prec), 'g', prec, 64)
-		want := strconv.FormatFloat(roundFloat(x, prec), 'g', prec, 64)
-		if got != want {
-			t.Logf("small numbers failed with prec=%d x=%f got=%s want=%s", prec, x, got, want)
-			return false
-		}
-		return true
-	}, nil)
-	if err != nil {
-		t.Error(err)
 	}
 }
 

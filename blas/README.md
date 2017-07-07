@@ -1,11 +1,11 @@
-# Gonum BLAS [![Build Status](https://travis-ci.org/gonum/blas.svg?branch=master)](https://travis-ci.org/gonum/blas)  [![Coverage Status](https://coveralls.io/repos/gonum/blas/badge.svg?branch=master&service=github)](https://coveralls.io/github/gonum/blas?branch=master) [![GoDoc](https://godoc.org/github.com/gonum/blas?status.svg)](https://godoc.org/github.com/gonum/blas)
+# Gonum BLAS [![GoDoc](https://godoc.org/gonum.org/v1/gonum/blas?status.svg)](https://godoc.org/gonum.org/v1/gonum/blas)
 
 A collection of packages to provide BLAS functionality for the [Go programming
 language](http://golang.org)
 
 ## Installation
 ```sh
-  go get github.com/gonum/blas
+  go get gonum.org/v1/gonum/blas/...
 ```
 
 ### BLAS C-bindings
@@ -23,7 +23,7 @@ environment variable to point to the blas installation. More information can be 
 
 Then install the blas/cgo package:
 ```sh
-  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install github.com/gonum/blas/cgo
+  CGO_LDFLAGS="-L/path/to/OpenBLAS -lopenblas" go install gonum.org/v1/netlib/blas
 ```
 
 For Windows you can download binary packages for OpenBLAS at
@@ -32,12 +32,12 @@ For Windows you can download binary packages for OpenBLAS at
 If you want to use a different BLAS package such as the Intel MKL you can
 adjust the `CGO_LDFLAGS` variable:
 ```sh
-  CGO_LDFLAGS="-lmkl_rt" go install github.com/gonum/blas/cgo
+  CGO_LDFLAGS="-lmkl_rt" go install gonum.org/v1/netlib/blas
 ```
 
 On OS X the easiest solution is to use the libraries provided by the system:
 ```sh
-  CGO_LDFLAGS="-framework Accelerate" go install github.com/gonum/blas/cgo
+  CGO_LDFLAGS="-framework Accelerate" go install gonum.org/v1/netlib/blas
 ```
 
 ## Packages
@@ -47,20 +47,14 @@ On OS X the easiest solution is to use the libraries provided by the system:
 Defines [BLAS API](http://www.netlib.org/blas/blast-forum/cinterface.pdf) split in several
 interfaces.
 
-### blas/native
+### blas/gonum
 
-Go implementation of the BLAS API (incomplete, implements the `float32` and `float64` API)
-
-### blas/cgo
-
-Binding to a C implementation of the cblas interface (e.g. ATLAS, OpenBLAS, Intel MKL)
-
-The recommended (free) option for good performance on both Linux and Darwin is OpenBLAS.
+Go implementation of the BLAS API (incomplete, implements the `float32` and `float64` API).
 
 ### blas/blas64 and blas/blas32
 
 Wrappers for an implementation of the double (i.e., `float64`) and single (`float32`)
-precision real parts of the blas API
+precision real parts of the BLAS API.
 
 ```Go
 package main
@@ -68,7 +62,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/gonum/blas/blas64"
+	"gonum.org/v1/gonum/blas/blas64"
 )
 
 func main() {
@@ -80,17 +74,6 @@ func main() {
 ### blas/cblas128 and blas/cblas64
 
 Wrappers for an implementation of the double (i.e., `complex128`) and single (`complex64`) 
-precision complex parts of the blas API
+precision complex parts of the blas API.
 
-Currently blas/cblas64 and blas/cblas128 require blas/cgo.
-
-## Issues
-
-If you find any bugs, feel free to file an issue on the github issue tracker.
-Discussions on API changes, added features, code review, or similar requests
-are preferred on the [gonum-dev Google Group](https://groups.google.com/forum/#!forum/gonum-dev).
-
-## License
-
-Please see [github.com/gonum/license](https://github.com/gonum/license) for general
-license information, contributors, authors, etc on the Gonum suite of packages.
+Currently blas/cblas64 and blas/cblas128 require gonum.org/v1/netlib/blas.

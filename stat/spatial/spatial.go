@@ -12,7 +12,6 @@ import (
 )
 
 // TODO(kortschak): Implement weighted routines.
-// TODO(kortschak): Make use of banded matrices when they exist in mat.
 
 // GetisOrdGStar returns the Local Getis-Ord G*i statistic for element of of the
 // weighted data using the provided locality matrix. The returned value is a z-score.
@@ -43,11 +42,19 @@ func GetisOrdGStar(i int, data, weights []float64, locality mat.Matrix) float64 
 	n := float64(len(data))
 	mean, std := stat.MeanStdDev(data, weights)
 	var dwd, dww, sw float64
-	for j, v := range data {
-		w := locality.At(i, j)
-		sw += w
-		dwd += w * v
-		dww += w * w
+	if doer, ok := locality.(mat.RowNonZeroDoer); ok {
+		doer.DoRowNonZero(i, func(_, j int, w float64) {
+			sw += w
+			dwd += w * data[j]
+			dww += w * w
+		})
+	} else {
+		for j, v := range data {
+			w := locality.At(i, j)
+			sw += w
+			dwd += w * v
+			dww += w * w
+		}
 	}
 	s := std * math.Sqrt((n-1)/n)
 
@@ -73,16 +80,26 @@ func GlobalMoransI(data, weights []float64, locality mat.Matrix) (i, v, z float6
 	}
 	mean := stat.Mean(data, nil)
 
+	doer, isDoer := locality.(mat.RowNonZeroDoer)
+
 	// Calculate Moran's I for the data.
 	var num, den, sum float64
 	for i, xi := range data {
 		zi := xi - mean
 		den += zi * zi
-		for j, xj := range data {
-			w := locality.At(i, j)
-			sum += w
-			zj := xj - mean
-			num += w * zi * zj
+		if isDoer {
+			doer.DoRowNonZero(i, func(_, j int, w float64) {
+				sum += w
+				zj := data[j] - mean
+				num += w * zi * zj
+			})
+		} else {
+			for j, xj := range data {
+				w := locality.At(i, j)
+				sum += w
+				zj := xj - mean
+				num += w * zi * zj
+			}
 		}
 	}
 	i = (float64(len(data)) / sum) * (num / den)
@@ -102,16 +119,29 @@ func GlobalMoransI(data, weights []float64, locality mat.Matrix) (i, v, z float6
 		var4 += v * v
 
 		var p2 float64
-		for j := range data {
-			wij := locality.At(i, j)
-			wji := locality.At(j, i)
+		if isDoer {
+			doer.DoRowNonZero(i, func(i, j int, wij float64) {
+				wji := locality.At(j, i)
 
-			s0 += wij
+				s0 += wij
 
-			v := wij + wji
-			s1 += v * v
+				v := wij + wji
+				s1 += v * v
 
-			p2 += v
+				p2 += v
+			})
+		} else {
+			for j := range data {
+				wij := locality.At(i, j)
+				wji := locality.At(j, i)
+
+				s0 += wij
+
+				v := wij + wji
+				s1 += v * v
+
+				p2 += v
+			}
 		}
 		s2 += p2 * p2
 	}

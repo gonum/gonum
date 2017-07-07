@@ -30,7 +30,7 @@ type Graph interface {
 	// from the given node.
 	From(Node) []Node
 
-	// HasEdgeBeteen returns whether an edge exists between
+	// HasEdgeBetween returns whether an edge exists between
 	// nodes x and y without considering direction.
 	HasEdgeBetween(x, y Node) bool
 

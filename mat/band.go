@@ -87,7 +87,7 @@ func (t TransposeBand) UntransposeBand() Banded {
 }
 
 // NewBandDense creates a new Band matrix with r rows and c columns. If data == nil,
-// a new slice is allocated for the backing slice. If len(data) == r*(kl+ku+1),
+// a new slice is allocated for the backing slice. If len(data) == min(r, c+kl)*(kl+ku+1),
 // data is used as the backing slice, and changes to the elements of the returned
 // BandDense will be reflected in data. If neither of these is true, NewBandDense
 // will panic. kl must be at least zero and less r, and ku must be at least zero and
@@ -118,11 +118,11 @@ func NewBandDense(r, c, kl, ku int, data []float64) *BandDense {
 		panic("mat: band out of range")
 	}
 	bc := kl + ku + 1
-	if data != nil && len(data) != r*bc {
+	if data != nil && len(data) != min(r, c+kl)*bc {
 		panic(ErrShape)
 	}
 	if data == nil {
-		data = make([]float64, r*bc)
+		data = make([]float64, min(r, c+kl)*bc)
 	}
 	return &BandDense{
 		mat: blas64.Band{

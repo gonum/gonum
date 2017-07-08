@@ -13,6 +13,10 @@ var (
 	_         Matrix    = bandDense
 	_         Banded    = bandDense
 	_         RawBander = bandDense
+
+	_ NonZeroDoer    = bandDense
+	_ RowNonZeroDoer = bandDense
+	_ ColNonZeroDoer = bandDense
 )
 
 // BandDense represents a band matrix in dense storage format.
@@ -37,6 +41,12 @@ type Banded interface {
 // matrix, changes to the Rows, Cols, KL, KU and Stride fields will not.
 type RawBander interface {
 	RawBand() blas64.Band
+}
+
+// A MutableBanded can set elements of a band matrix.
+type MutableBanded interface {
+	Banded
+	SetBand(i, j int, v float64)
 }
 
 var (
@@ -172,4 +182,47 @@ func (b *BandDense) TBand() Banded {
 // in returned blas64.Band.
 func (b *BandDense) RawBand() blas64.Band {
 	return b.mat
+}
+
+// DoNonZero calls the function fn for each of the non-zero elements of b. The function fn
+// takes a row/column index and the element value of b at (i, j).
+func (b *BandDense) DoNonZero(fn func(i, j int, v float64)) {
+	for i := 0; i < min(b.mat.Rows, b.mat.Cols+b.mat.KL); i++ {
+		for j := max(0, i-b.mat.KL); j < min(b.mat.Cols, i+b.mat.KU+1); j++ {
+			v := b.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	}
+}
+
+// DoRowNonZero calls the function fn for each of the non-zero elements of row i of b. The function fn
+// takes a row/column index and the element value of b at (i, j).
+func (b *BandDense) DoRowNonZero(i int, fn func(i, j int, v float64)) {
+	if i < 0 || b.mat.Rows <= i {
+		panic(ErrRowAccess)
+	}
+	for j := max(0, i-b.mat.KL); j < min(b.mat.Cols, i+b.mat.KU+1); j++ {
+		v := b.at(i, j)
+		if v != 0 {
+			fn(i, j, v)
+		}
+	}
+}
+
+// DoColNonZero calls the function fn for each of the non-zero elements of column j of b. The function fn
+// takes a row/column index and the element value of b at (i, j).
+func (b *BandDense) DoColNonZero(j int, fn func(i, j int, v float64)) {
+	if j < 0 || b.mat.Cols <= j {
+		panic(ErrColAccess)
+	}
+	for i := 0; i < min(b.mat.Rows, b.mat.Cols+b.mat.KL); i++ {
+		if i-b.mat.KL <= j && j < i+b.mat.KU+1 {
+			v := b.at(i, j)
+			if v != 0 {
+				fn(i, j, v)
+			}
+		}
+	}
 }

@@ -45,6 +45,7 @@ type RawSymmetricer interface {
 	RawSymmetric() blas64.Symmetric
 }
 
+// A MutableSymmetric can set elements of a symmetric matrix.
 type MutableSymmetric interface {
 	Symmetric
 	SetSym(i, j int, v float64)

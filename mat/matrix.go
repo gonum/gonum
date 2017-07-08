@@ -182,6 +182,24 @@ type RawVectorer interface {
 	RawVector() blas64.Vector
 }
 
+// A NonZeroDoer can call a function for each non-zero element of the receiver.
+// The parameters of the function are the element indices and its value.
+type NonZeroDoer interface {
+	DoNonZero(func(i, j int, v float64))
+}
+
+// A RowNonZeroDoer can call a function for each non-zero element of a row of the receiver.
+// The parameters of the function are the element indices and its value.
+type RowNonZeroDoer interface {
+	DoRowNonZero(i int, fn func(i, j int, v float64))
+}
+
+// A ColNonZeroDoer can call a function for each non-zero element of a column of the receiver.
+// The parameters of the function are the element indices and its value.
+type ColNonZeroDoer interface {
+	DoColNonZero(j int, fn func(i, j int, v float64))
+}
+
 // TODO(btracey): Consider adding CopyCol/CopyRow if the behavior seems useful.
 // TODO(btracey): Add in fast paths to Row/Col for the other concrete types
 // (TriDense, etc.) as well as relevant interfaces (RowColer, RawRowViewer, etc.)

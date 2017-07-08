@@ -129,6 +129,7 @@ var (
 	ErrPivot               = Error{"matrix: malformed pivot list"}
 	ErrTriangle            = Error{"matrix: triangular storage mismatch"}
 	ErrTriangleSet         = Error{"matrix: triangular set out of bounds"}
+	ErrBandSet             = Error{"matrix: band set out of bounds"}
 	ErrSliceLengthMismatch = Error{"matrix: input slice length mismatch"}
 	ErrNotPSD              = Error{"matrix: input not positive symmetric definite"}
 	ErrFailedEigen         = Error{"matrix: eigendecomposition not successful"}

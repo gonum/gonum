@@ -136,6 +136,12 @@ func NewBandDense(r, c, kl, ku int, data []float64) *BandDense {
 	}
 }
 
+// NewDiagonalRect is a convenience function that returns a diagonal matrix represented by a
+// BandDense. The length of data must be min(r, c) otherwise NewDiagonalRect will panic.
+func NewDiagonalRect(r, c int, data []float64) *BandDense {
+	return NewBandDense(r, c, 0, 0, data)
+}
+
 // Dims returns the number of rows and columns in the matrix.
 func (b *BandDense) Dims() (r, c int) {
 	return b.mat.Rows, b.mat.Cols

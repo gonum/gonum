@@ -158,6 +158,96 @@ func TestNewBand(t *testing.T) {
 	}
 }
 
+func TestNewDiagonalRect(t *testing.T) {
+	for i, test := range []struct {
+		data  []float64
+		r, c  int
+		mat   *BandDense
+		dense *Dense
+	}{
+		{
+			data: []float64{1, 2, 3, 4, 5, 6},
+			r:    6, c: 6,
+			mat: &BandDense{
+				mat: blas64.Band{
+					Rows:   6,
+					Cols:   6,
+					Stride: 1,
+					Data:   []float64{1, 2, 3, 4, 5, 6},
+				},
+			},
+			dense: NewDense(6, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+			}),
+		},
+		{
+			data: []float64{1, 2, 3, 4, 5, 6},
+			r:    7, c: 6,
+			mat: &BandDense{
+				mat: blas64.Band{
+					Rows:   7,
+					Cols:   6,
+					Stride: 1,
+					Data:   []float64{1, 2, 3, 4, 5, 6},
+				},
+			},
+			dense: NewDense(7, 6, []float64{
+				1, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0,
+				0, 0, 0, 4, 0, 0,
+				0, 0, 0, 0, 5, 0,
+				0, 0, 0, 0, 0, 6,
+				0, 0, 0, 0, 0, 0,
+			}),
+		},
+		{
+			data: []float64{1, 2, 3, 4, 5, 6},
+			r:    6, c: 7,
+			mat: &BandDense{
+				mat: blas64.Band{
+					Rows:   6,
+					Cols:   7,
+					Stride: 1,
+					Data:   []float64{1, 2, 3, 4, 5, 6},
+				},
+			},
+			dense: NewDense(6, 7, []float64{
+				1, 0, 0, 0, 0, 0, 0,
+				0, 2, 0, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 0, 0,
+				0, 0, 0, 4, 0, 0, 0,
+				0, 0, 0, 0, 5, 0, 0,
+				0, 0, 0, 0, 0, 6, 0,
+			}),
+		},
+	} {
+		band := NewDiagonalRect(test.r, test.c, test.data)
+		rows, cols := band.Dims()
+
+		if rows != test.r {
+			t.Errorf("unexpected number of rows for test %d: got: %d want: %d", i, rows, test.r)
+		}
+		if cols != test.c {
+			t.Errorf("unexpected number of cols for test %d: got: %d want: %d", i, cols, test.c)
+		}
+		if !reflect.DeepEqual(band, test.mat) {
+			t.Errorf("unexpected value via reflect for test %d: got: %v want: %v", i, band, test.mat)
+		}
+		if !Equal(band, test.mat) {
+			t.Errorf("unexpected value via mat.Equal for test %d: got: %v want: %v", i, band, test.mat)
+		}
+		if !Equal(band, test.dense) {
+			t.Errorf("unexpected value via mat.Equal(band, dense) for test %d:\ngot:\n% v\nwant:\n% v", i, Formatted(band), Formatted(test.dense))
+		}
+	}
+}
+
 func TestBandAtSet(t *testing.T) {
 	// 2  3  4  0  0  0
 	// 5  6  7  8  0  0

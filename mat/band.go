@@ -10,9 +10,9 @@ import (
 
 var (
 	bandDense *BandDense
-	_         Matrix  = bandDense
-	_         Banded  = bandDense
-	_         RawBand = bandDense
+	_         Matrix    = bandDense
+	_         Banded    = bandDense
+	_         RawBander = bandDense
 )
 
 // BandDense represents a band matrix in dense storage format.
@@ -20,6 +20,7 @@ type BandDense struct {
 	mat blas64.Band
 }
 
+// Banded is a band matrix representation.
 type Banded interface {
 	Matrix
 	// Bandwidth returns the lower and upper bandwidth values for
@@ -31,7 +32,10 @@ type Banded interface {
 	TBand() Banded
 }
 
-type RawBand interface {
+// A RawBander can return a blas64.Band representation of the receiver.
+// Changes to the blas64.Band.Data slice will be reflected in the original
+// matrix, changes to the Rows, Cols, KL, KU and Stride fields will not.
+type RawBander interface {
 	RawBand() blas64.Band
 }
 

@@ -274,13 +274,13 @@ func TestBandAtSet(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		for j := 0; j < 6; j++ {
 			if band.At(i, j) != want.At(i, j) {
-				t.Errorf("unexpected value for band.At(%d, %d): got:%v want:%v", band.At(i, j), want.At(i, j))
+				t.Errorf("unexpected value for band.At(%d, %d): got:%v want:%v", i, j, band.At(i, j), want.At(i, j))
 			}
 		}
 	}
 	// Do that same thing via a call to Equal.
 	if !Equal(band, want) {
-		t.Errorf("unexpected value via mat.Equal: got: %v want: %v", band, want)
+		t.Errorf("unexpected value via mat.Equal:\ngot:\n% v\nwant:\n% v", Formatted(band), Formatted(want))
 	}
 
 	// Check At out of bounds
@@ -343,7 +343,7 @@ func TestBandAtSet(t *testing.T) {
 		}
 		band.SetBand(st.row, st.col, st.new)
 		if e := band.At(st.row, st.col); e != st.new {
-			t.Errorf("unexpected value for At(%d, %d) after SetTri(%[1]d, %d, %v): got: %v want: %[3]v", st.row, st.col, st.new, e)
+			t.Errorf("unexpected value for At(%d, %d) after SetBand(%[1]d, %d, %v): got: %v want: %[3]v", st.row, st.col, st.new, e)
 		}
 	}
 }

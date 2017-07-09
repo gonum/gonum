@@ -180,3 +180,48 @@ func (b *BandDense) set(i, j int, v float64) {
 	}
 	b.mat.Data[i*b.mat.Stride+pj] = v
 }
+
+// At returns the element at row i, column j.
+func (s *SymBandDense) At(i, j int) float64 {
+	return s.at(i, j)
+}
+
+func (s *SymBandDense) at(i, j int) float64 {
+	if uint(i) >= uint(s.mat.N) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(s.mat.N) {
+		panic(ErrColAccess)
+	}
+	if i > j {
+		i, j = j, i
+	}
+	pj := j - i
+	if pj < 0 || s.mat.K+1 <= pj {
+		return 0
+	}
+	return s.mat.Data[i*s.mat.Stride+pj]
+}
+
+// SetSymBand sets the element at row i, column j to the value v.
+// It panics if the location is outside the appropriate region of the matrix.
+func (s *SymBandDense) SetSymBand(i, j int, v float64) {
+	s.set(i, j, v)
+}
+
+func (s *SymBandDense) set(i, j int, v float64) {
+	if uint(i) >= uint(s.mat.N) {
+		panic(ErrRowAccess)
+	}
+	if uint(j) >= uint(s.mat.N) {
+		panic(ErrColAccess)
+	}
+	if i > j {
+		i, j = j, i
+	}
+	pj := j - i
+	if pj < 0 || s.mat.K+1 <= pj {
+		panic(ErrBandSet)
+	}
+	s.mat.Data[i*s.mat.Stride+pj] = v
+}

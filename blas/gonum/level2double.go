@@ -230,7 +230,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	if (incY > 0 && (lenY-1)*incY >= len(y)) || (incY < 0 && (1-lenY)*incY >= len(y)) {
 		panic(badY)
 	}
-	if lda*(m-1)+kL+kU+1 > len(a) || lda < kL+kU+1 {
+	if lda*(min(m, n+kL)-1)+kL+kU+1 > len(a) || lda < kL+kU+1 {
 		panic(badLdA)
 	}
 
@@ -269,7 +269,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	if tA == blas.NoTrans {
 		iy := ky
 		if incX == 1 {
-			for i := 0; i < m; i++ {
+			for i := 0; i < min(m, n+kL); i++ {
 				l := max(0, kL-i)
 				u := min(nCol, ld+kL-i)
 				off := max(0, i-kL)
@@ -284,7 +284,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 			}
 			return
 		}
-		for i := 0; i < m; i++ {
+		for i := 0; i < min(m, n+kL); i++ {
 			l := max(0, kL-i)
 			u := min(nCol, ld+kL-i)
 			off := max(0, i-kL)
@@ -301,7 +301,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		return
 	}
 	if incX == 1 {
-		for i := 0; i < m; i++ {
+		for i := 0; i < min(m, n+kL); i++ {
 			l := max(0, kL-i)
 			u := min(nCol, ld+kL-i)
 			off := max(0, i-kL)
@@ -316,7 +316,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		return
 	}
 	ix := kx
-	for i := 0; i < m; i++ {
+	for i := 0; i < min(m, n+kL); i++ {
 		l := max(0, kL-i)
 		u := min(nCol, ld+kL-i)
 		off := max(0, i-kL)

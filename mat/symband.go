@@ -23,21 +23,11 @@ type SymBandDense struct {
 	mat blas64.SymmetricBand
 }
 
-// SymBanded represents a symmetric banded matrix (where the element at {i, j} equals
-// the element at {j, i}). Only elements within k of the diagonal are non-zero. Symmetric
-// matrices are always square.
-type SymBanded interface {
-	Symmetric
-
-	// HalfBandwidth returns the half bandwidth value for the matrix.
-	// The total bandwidth of the matrix is 2*k+1.
-	HalfBandwidth() (k int)
-}
-
 // MutableSymBanded is a symmetric band matrix interface type that allows elements
 // to be altered.
 type MutableSymBanded interface {
-	SymBanded
+	Symmetric
+	Bandwidth() (kl, ku int)
 	SetSymBand(i, j int, v float64)
 }
 
@@ -116,11 +106,6 @@ func (s *SymBandDense) Symmetric() int {
 // Bandwidth returns the bandwidths of the matrix.
 func (s *SymBandDense) Bandwidth() (kl, ku int) {
 	return s.mat.K, s.mat.K
-}
-
-// HalfBandwidth returns the bandwidth of the matrix.
-func (s *SymBandDense) HalfBandwidth() (k int) {
-	return s.mat.K
 }
 
 // T implements the Matrix interface. Symmetric matrices, by definition, are

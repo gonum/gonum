@@ -69,7 +69,8 @@ func (t TransposeBand) T() Matrix {
 	return t.Banded
 }
 
-// Bandwidth returns the number of rows/columns in the matrix and its orientation.
+// Bandwidth returns the lower and upper bandwidth values for
+// the transposed matrix.
 func (t TransposeBand) Bandwidth() (kl, ku int) {
 	kl, ku = t.Banded.Bandwidth()
 	return ku, kl

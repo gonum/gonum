@@ -197,7 +197,7 @@ func (s *SymBandDense) at(i, j int) float64 {
 		i, j = j, i
 	}
 	pj := j - i
-	if pj < 0 || s.mat.K+1 <= pj {
+	if s.mat.K+1 <= pj {
 		return 0
 	}
 	return s.mat.Data[i*s.mat.Stride+pj]
@@ -220,7 +220,7 @@ func (s *SymBandDense) set(i, j int, v float64) {
 		i, j = j, i
 	}
 	pj := j - i
-	if pj < 0 || s.mat.K+1 <= pj {
+	if s.mat.K+1 <= pj {
 		panic(ErrBandSet)
 	}
 	s.mat.Data[i*s.mat.Stride+pj] = v

@@ -88,7 +88,8 @@ func NewSymBandDense(n, k int, data []float64) *SymBandDense {
 }
 
 // NewDiagonal is a convenience function that returns a diagonal matrix represented by a
-// SymBandDense. The length of data must be n otherwise NewDiagonal will panic.
+// SymBandDense. The length of data must be n or data must be nil, otherwise NewDiagonal
+// will panic.
 func NewDiagonal(n int, data []float64) *SymBandDense {
 	return NewSymBandDense(n, 0, data)
 }

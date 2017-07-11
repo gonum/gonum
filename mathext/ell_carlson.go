@@ -19,11 +19,12 @@ import (
 //  lower = 5/(2^1022) = 1.112536929253601e-307,
 //  upper = (2^1022)/5 = 8.988465674311580e+306.
 //
-// The definition of the symmetric elliptic integral R_F can be found in NIST Digital Library of Mathematical Functions
-// (http://dlmf.nist.gov/19.16.E1). The original Fortran code was published as Algorithm 577 in ACM TOMS (http://doi.org/10.1145/355958.355970).
-// This code is also available as a part of SLATEC Common Mathematical Library (http://netlib.org/slatec/index.html). Later, Carlson described
-// an improved version in http://dx.doi.org/10.1007/BF02198293 (also available at https://arxiv.org/abs/math/9409227).
+// The definition of the symmetric elliptic integral R_F can be found in NIST
+// Digital Library of Mathematical Functions (http://dlmf.nist.gov/19.16.E1).
 func EllipticRF(x, y, z float64) float64 {
+	// The original Fortran code was published as Algorithm 577 in ACM TOMS (http://doi.org/10.1145/355958.355970).
+	// This code is also available as a part of SLATEC Common Mathematical Library (http://netlib.org/slatec/index.html). Later, Carlson described
+	// an improved version in http://dx.doi.org/10.1007/BF02198293 (also available at https://arxiv.org/abs/math/9409227).
 	const (
 		lower = 5.0 / (1 << 256) / (1 << 256) / (1 << 256) / (1 << 254) // 5*2^-1022
 		upper = 1 / lower
@@ -62,7 +63,7 @@ func EllipticRF(x, y, z float64) float64 {
 	E3 := X * Y * Z
 
 	// http://dlmf.nist.gov/19.36.E1
-	return (E3*(6930*E3+E2*(15015*E2-16380)+17160) + E2*((10010-5775*E2)*E2-24024) + 240240) / (240240 * math.Sqrt(An))
+	return (1 - 1/10.0*E2 + 1/14.0*E3 + 1/24.0*E2*E2 - 3/44.0*E2*E3 - 5/208.0*E2*E2*E2 + 3/104.0*E3*E3 + 1/16.0*E2*E2*E3) / math.Sqrt(An)
 }
 
 // EllipticRD computes the symmetric elliptic integral R_D(x,y,z):
@@ -77,11 +78,12 @@ func EllipticRF(x, y, z float64) float64 {
 //  lower = (5/(2^1022))^(1/3) = 4.809554074311679e-103,
 //  upper = ((2^1022)/5)^(1/3) = 2.079194837087086e+102.
 //
-// The definition of the symmetric elliptic integral R_D can be found in NIST Digital Library of Mathematical Functions
-// (http://dlmf.nist.gov/19.16.E5). The original Fortran code was published as Algorithm 577 in ACM TOMS (http://doi.org/10.1145/355958.355970).
-// This code is also available as a part of SLATEC Common Mathematical Library (http://netlib.org/slatec/index.html). Later, Carlson described
-// an improved version in http://dx.doi.org/10.1007/BF02198293 (also available at https://arxiv.org/abs/math/9409227).
+// The definition of the symmetric elliptic integral R_D can be found in NIST
+// Digital Library of Mathematical Functions (http://dlmf.nist.gov/19.16.E5).
 func EllipticRD(x, y, z float64) float64 {
+	// The original Fortran code was published as Algorithm 577 in ACM TOMS (http://doi.org/10.1145/355958.355970).
+	// This code is also available as a part of SLATEC Common Mathematical Library (http://netlib.org/slatec/index.html). Later, Carlson described
+	// an improved version in http://dx.doi.org/10.1007/BF02198293 (also available at https://arxiv.org/abs/math/9409227).
 	const (
 		lower = 4.8095540743116787026618007863123676393525016818363e-103 // (5*2^-1022)^(1/3)
 		upper = 1 / lower
@@ -123,29 +125,29 @@ func EllipticRD(x, y, z float64) float64 {
 	E5 := X * Y * Z * Z * Z
 
 	// http://dlmf.nist.gov/19.36.E2
-	return ((471240-540540*E2)*E5+(612612*E2-540540*E3-556920)*E4+E3*(306306*E3+E2*(675675*E2-706860)+680680)+E2*((417690-255255*E2)*E2-875160)+4084080)/(4084080*mul*An*math.Sqrt(An)) + 3*s
+	return (1-3/14.0*E2+1/6.0*E3+9/88.0*E2*E2-3/22.0*E4-9/52.0*E2*E3+3/26.0*E5-1/16.0*E2*E2*E2+3/40.0*E3*E3+3/20.0*E2*E4+45/272.0*E2*E2*E3-9/68.0*(E3*E4+E2*E5))/(mul*An*math.Sqrt(An)) + 3*s
 }
 
-// EllipticF computes the Legendre's elliptic integral of the 1st kind F(\phi|m), 0≤m<1:
-//  F(\phi|m) = \int_{0}^{\phi} 1 / \sqrt{1-m\sin^2(\theta)} d\theta
+// EllipticF computes the Legendre's elliptic integral of the 1st kind F(phi,m), 0≤m<1:
+//  F(\phi,m) = \int_{0}^{\phi} 1 / \sqrt{1-m\sin^2(\theta)} d\theta
 //
 // Legendre's elliptic integrals can be expressed as symmetric elliptic integrals, in this case:
-//  F(\phi|m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)
+//  F(\phi,m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)
 //
-// The definition of F(\phi,k) where k=\sqrt{m} can be found in NIST Digital Library of Mathematical
+// The definition of F(phi,k) where k=sqrt(m) can be found in NIST Digital Library of Mathematical
 // Functions (http://dlmf.nist.gov/19.2.E4).
 func EllipticF(phi, m float64) float64 {
 	s, c := math.Sincos(phi)
 	return s * EllipticRF(c*c, 1-m*s*s, 1)
 }
 
-// EllipticE computes the Legendre's elliptic integral of the 2nd kind E(\phi|m), 0≤m<1:
-//  E(\phi|m) = \int_{0}^{\phi} \sqrt{1-m\sin^2(\theta)} d\theta
+// EllipticE computes the Legendre's elliptic integral of the 2nd kind E(phi,m), 0≤m<1:
+//  E(\phi,m) = \int_{0}^{\phi} \sqrt{1-m\sin^2(\theta)} d\theta
 //
 // Legendre's elliptic integrals can be expressed as symmetric elliptic integrals, in this case:
-//  E(\phi|m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)-(m/3)\sin^3\phi R_D(\cos^2\phi,1-m\sin^2\phi,1)
+//  E(\phi,m) = \sin\phi R_F(\cos^2\phi,1-m\sin^2\phi,1)-(m/3)\sin^3\phi R_D(\cos^2\phi,1-m\sin^2\phi,1)
 //
-// The definition of E(\phi,k) where k=\sqrt{m} can be found in NIST Digital Library of Mathematical
+// The definition of E(phi,k) where k=sqrt(m) can be found in NIST Digital Library of Mathematical
 // Functions (http://dlmf.nist.gov/19.2.E5).
 func EllipticE(phi, m float64) float64 {
 	s, c := math.Sincos(phi)

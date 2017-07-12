@@ -290,7 +290,7 @@ func (Implementation) Saxpy(n int, alpha float32, x []float32, incX int, y []flo
 		if len(y) < n {
 			panic(badLenY)
 		}
-		f32.AxpyUnitaryTo(y, alpha, x[:n], y)
+		f32.AxpyUnitary(alpha, x[:n], y[:n])
 		return
 	}
 	var ix, iy int

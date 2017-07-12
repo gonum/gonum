@@ -156,9 +156,6 @@ func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, inc
 func (Implementation) Zcopy(n int, x []complex128, incX int, y []complex128, incY int) {
 	panic(noComplex)
 }
-func (Implementation) Zaxpy(n int, alpha complex128, x []complex128, incX int, y []complex128, incY int) {
-	panic(noComplex)
-}
 func (Implementation) Zscal(n int, alpha complex128, x []complex128, incX int) {
 	panic(noComplex)
 }

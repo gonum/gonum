@@ -231,3 +231,33 @@ func makeIncremented(x []float64, inc int, extra int) []float64 {
 	}
 	return xnew
 }
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func allPairs(x, y []int) [][2]int {
+	var p [][2]int
+	for _, v0 := range x {
+		for _, v1 := range y {
+			p = append(p, [2]int{v0, v1})
+		}
+	}
+	return p
+}
+
+func zsame(x, y []complex128) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	for i, v := range x {
+		w := y[i]
+		if v != w && !math.IsNaN(real(v)) && !math.IsNaN(imag(v)) && !math.IsNaN(real(w)) && !math.IsNaN(imag(w)) {
+			return false
+		}
+	}
+	return true
+}

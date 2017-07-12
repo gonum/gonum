@@ -6,6 +6,8 @@
 
 package gonum
 
+import "math"
+
 type Implementation struct{}
 
 // The following are panic strings used during parameter checks.
@@ -66,4 +68,8 @@ func min(a, b int) int {
 // block size.
 func blocks(dim, bsize int) int {
 	return (dim + bsize - 1) / bsize
+}
+
+func zabs(z complex128) float64 {
+	return math.Abs(real(z)) + math.Abs(imag(z))
 }

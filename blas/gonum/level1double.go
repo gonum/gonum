@@ -270,12 +270,6 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 		return
 	}
 	if incX == 1 && incY == 1 {
-		if len(x) < n {
-			panic(badLenX)
-		}
-		if len(y) < n {
-			panic(badLenY)
-		}
 		f64.AxpyUnitary(alpha, x[:n], y[:n])
 		return
 	}
@@ -285,12 +279,6 @@ func (Implementation) Daxpy(n int, alpha float64, x []float64, incX int, y []flo
 	}
 	if incY < 0 {
 		iy = (-n + 1) * incY
-	}
-	if ix >= len(x) || ix+(n-1)*incX >= len(x) {
-		panic(badLenX)
-	}
-	if iy >= len(y) || iy+(n-1)*incY >= len(y) {
-		panic(badLenY)
 	}
 	f64.AxpyInc(alpha, x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }

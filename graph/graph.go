@@ -99,8 +99,9 @@ type EdgeSetter interface {
 	// If the graph supports node addition the nodes
 	// will be added if they do not exist, otherwise
 	// SetEdge will panic.
-	// If the IDs returned by e.From and e.To are
-	// equal, SetEdge will panic.
+	// The behavior of an EdgeSetter when the IDs
+	// returned by e.From and e.To are equal is
+	// implementation-dependent.
 	SetEdge(e Edge)
 }
 

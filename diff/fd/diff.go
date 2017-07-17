@@ -19,6 +19,7 @@ type Point struct {
 // Formula represents a finite difference formula on a regularly spaced grid
 // that approximates the derivative of order k of a function f at x as
 //  d^k f(x) ≈ (1 / Step^k) * \sum_i Coeff_i * f(x + Step * Loc_i).
+// Step must be positive, or the finite difference formula will panic.
 type Formula struct {
 	// Stencil is the set of sampling Points which are used to estimate the
 	// derivative. The locations will be scaled by Step and are relative to x.
@@ -95,9 +96,11 @@ var Central2nd = Formula{
 	Step:       1e-4,
 }
 
+var negativeStep = "fd: negative step"
+
 // checkFormula checks if the formula is valid, and panics otherwise.
 func checkFormula(formula Formula) {
-	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
+	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step <= 0 {
 		panic("fd: bad formula")
 	}
 }

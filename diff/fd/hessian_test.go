@@ -46,6 +46,29 @@ func TestHessian(t *testing.T) {
 				OriginValue: 7606.529501201192,
 			},
 		},
+		{
+			h:   ConstFunc(5),
+			x:   []float64{1, 9},
+			tol: 1e-16,
+		},
+		{
+			h:   LinearFunc{w: []float64{10, 6, -1}, c: 5},
+			x:   []float64{3, 1, 8},
+			tol: 1e-6,
+		},
+		{
+			h: QuadFunc{
+				a: mat.NewSymDense(3, []float64{
+					10, 2, 1,
+					2, 5, -3,
+					1, -3, 6,
+				}),
+				b: mat.NewVector(3, []float64{3, -2, -1}),
+				c: 5,
+			},
+			x:   []float64{-1.6, -3, 2},
+			tol: 1e-6,
+		},
 	} {
 		n := len(test.x)
 		got := Hessian(nil, test.h.Func, test.x, test.settings)

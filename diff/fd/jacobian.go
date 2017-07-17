@@ -88,7 +88,6 @@ func Jacobian(dst *mat.Dense, f func(y, x []float64), x []float64, settings *Jac
 		return
 	}
 	jacobianConcurrent(dst, f, x, originValue, formula, step, nWorkers)
-	return
 }
 
 func jacobianSerial(dst *mat.Dense, f func([]float64, []float64), x, origin []float64, formula Formula, step float64) {

@@ -12,11 +12,11 @@ import (
 )
 
 // Hessian approximates the Hessian matrix of the multivariate function f
-// at the location. That is
-//  H_{i,j} = ∂^2 f/∂x_i ∂x_j
-// If dst is not nil, the result will be stored in-place into dst
+// at the location x. That is
+//  H_{i,j} = ∂^2 f(x)/∂x_i ∂x_j
+// If dst is not nil, the resulting H will be stored in-place into dst
 // and returned, otherwise a new matrix will be allocated first. Finite difference
-// kernel and other options are specified by settings. If settings is nil,
+// formula and other options are specified by settings. If settings is nil,
 // the Hessian will be estimated using the Forward formula and a default step size.
 //
 // Hessian panics if the size of dst and x is not equal, or if the derivative
@@ -53,6 +53,9 @@ func Hessian(dst *mat.SymDense, f func(x []float64) float64, x []float64, settin
 			}
 		}
 		if settings.Step != 0 {
+			if settings.Step < 0 {
+				panic(negativeStep)
+			}
 			step = settings.Step
 		}
 		originKnown = settings.OriginKnown

@@ -9,7 +9,7 @@ import "gonum.org/v1/gonum/floats"
 // Gradient estimates the gradient of the multivariate function f at the
 // location x. If dst is not nil, the result will be stored in-place into dst
 // and returned, otherwise a new slice will be allocated first. Finite
-// difference kernel and other options are specified by settings. If settings is
+// difference formula and other options are specified by settings. If settings is
 // nil, the gradient will be estimated using the Forward formula and a default
 // step size.
 //

@@ -368,6 +368,10 @@ func TestDorm2r(t *testing.T) {
 	testlapack.Dorm2rTest(t, impl)
 }
 
+func TestDpbtf2(t *testing.T) {
+	testlapack.Dpbtf2Test(t, impl)
+}
+
 func TestDpocon(t *testing.T) {
 	testlapack.DpoconTest(t, impl)
 }

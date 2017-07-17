@@ -97,6 +97,22 @@ func checkVector(n int, v []float64, inc int) {
 	}
 }
 
+func checkSymBanded(ab []float64, n, kd, lda int) {
+	if n < 0 {
+		panic("lapack: negative banded length")
+	}
+	if kd < 0 {
+		panic("lapack: negative bandwidth value")
+	}
+	if lda < kd+1 {
+		panic("lapack: stride less than number of bands")
+	}
+	if len(ab) < (n-1)*lda+kd {
+		panic("lapack: insufficient banded vector length")
+	}
+	return
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a

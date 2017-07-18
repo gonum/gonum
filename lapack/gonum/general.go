@@ -110,7 +110,6 @@ func checkSymBanded(ab []float64, n, kd, lda int) {
 	if len(ab) < (n-1)*lda+kd {
 		panic("lapack: insufficient banded vector length")
 	}
-	return
 }
 
 func min(a, b int) int {

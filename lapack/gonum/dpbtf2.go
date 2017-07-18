@@ -12,7 +12,7 @@ import (
 )
 
 // Dpbtf2 computes the Cholesky factorization of a symmetric positive banded
-// matrix ab. The matrix ab is n×n with kd diagonal bands. The Choleksy
+// matrix ab. The matrix ab is n×n with kd diagonal bands. The Cholesky
 // factorization computed is
 //  A = U^T * U if ul == blas.Upper
 //  A = L * L^T if ul == blas.Lower
@@ -23,8 +23,30 @@ import (
 // into ab depending on the value of ul. Dpbtf2 returns whether the factorization
 // was successfully completed.
 //
+// The band storage scheme is illustrated below when n = 6, and kd = 2.
+// The resulting Cholesky decomposition is stored in the same elements as the
+// input band matrix (a11 becomes u11 or l11, etc.).
+//
+//  ul = blas.Upper
+//  a11 a12 a13
+//  a22 a23 a24
+//  a33 a34 a35
+//  a44 a45 a46
+//  a55 a56  *
+//  a66  *   *
+//
+//  ul = blas.Lower
+//   *   *  a11
+//   *  a21 a22
+//  a31 a32 a33
+//  a42 a43 a44
+//  a53 a54 a55
+//  a64 a65 a66
+//
 // Dpbtf2 is the unblocked version of the algorithm, see Dpbtrf for the blocked
-// version. Dpbtf2 is an internal routine, exported for testing purposes.
+// version.
+//
+// Dpbtf2 is an internal routine, exported for testing purposes.
 func (Implementation) Dpbtf2(ul blas.Uplo, n, kd int, ab []float64, ldab int) (ok bool) {
 	if ul != blas.Upper && ul != blas.Lower {
 		panic(badUplo)
@@ -37,7 +59,7 @@ func (Implementation) Dpbtf2(ul blas.Uplo, n, kd int, ab []float64, ldab int) (o
 	kld := max(1, ldab-1)
 	if ul == blas.Upper {
 		for j := 0; j < n; j++ {
-			// Compute U(J,J) and test for non positive-definiteness
+			// Compute U(J,J) and test for non positive-definiteness.
 			ajj := ab[j*ldab]
 			if ajj <= 0 {
 				return false
@@ -55,7 +77,7 @@ func (Implementation) Dpbtf2(ul blas.Uplo, n, kd int, ab []float64, ldab int) (o
 		return true
 	}
 	for j := 0; j < n; j++ {
-		// Compute L(J,J) and test for non positive-definiteness
+		// Compute L(J,J) and test for non positive-definiteness.
 		ajj := ab[j*ldab+kd]
 		if ajj <= 0 {
 			return false

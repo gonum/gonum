@@ -962,7 +962,8 @@ func randSymBand(ul blas.Uplo, n, ldab, kb int, rnd *rand.Rand) (blas64.Symmetri
 			a[i*n+j] = rnd.NormFloat64()
 		}
 		a[i*n+i] = math.Abs(a[i*n+i])
-		a[i*n+i] += 1.5 * rnd.Float64() // add to the diagonal to improve the condition number
+		// Add an extra amound to the diagonal in order to improve the condition number.
+		a[i*n+i] += 1.5 * rnd.Float64()
 	}
 	agen := blas64.General{
 		Rows:   n,
@@ -980,7 +981,6 @@ func randSymBand(ul blas.Uplo, n, ldab, kb int, rnd *rand.Rand) (blas64.Symmetri
 		Data:   c,
 	}
 	blas64.Gemm(blas.NoTrans, blas.Trans, 1, agen, agen, 0, cgen)
-
 	sym := blas64.Symmetric{
 		N:      n,
 		Stride: n,
@@ -989,7 +989,6 @@ func randSymBand(ul blas.Uplo, n, ldab, kb int, rnd *rand.Rand) (blas64.Symmetri
 	}
 
 	b := symToSymBand(ul, c, n, n, kb, ldab)
-
 	band := blas64.SymmetricBand{
 		N:      n,
 		K:      kb,

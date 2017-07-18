@@ -23,13 +23,13 @@ func Dpbtf2Test(t *testing.T, impl Dpbtf2er) {
 					ldab := kb + 1 + ldoff
 					sym, band := randSymBand(ul, n, ldab, kb, rnd)
 
-					// Compute the Cholesky decomposition of the symmetric matrix
+					// Compute the Cholesky decomposition of the symmetric matrix.
 					ok := impl.Dpotrf(ul, sym.N, sym.Data, sym.Stride)
 					if !ok {
 						panic("bad test: symmetric cholesky decomp failed")
 					}
 
-					// Compute the Cholesky decomposition of the banded matrix
+					// Compute the Cholesky decomposition of the banded matrix.
 					ok = impl.Dpbtf2(band.Uplo, band.N, band.K, band.Data, band.Stride)
 					if !ok {
 						t.Errorf("SymBand cholesky decomp failed")

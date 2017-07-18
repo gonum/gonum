@@ -36,7 +36,8 @@ type stack struct {
 const iNITIAL_STACK_SIZE = 100
 
 func newStack() *stack {
-	return &stack{state: make([]int, 0, iNITIAL_STACK_SIZE),
+	return &stack{
+		state:  make([]int, 0, iNITIAL_STACK_SIZE),
 		attrib: make([]Attrib, 0, iNITIAL_STACK_SIZE),
 	}
 }
@@ -196,7 +197,6 @@ func (this *Parser) Parse(scanner Scanner) (res interface{}, err error) {
 				panic("Error recovery led to invalid action")
 			}
 		}
-
 		// fmt.Printf("S%d %s %s\n", this.stack.top(), token.TokMap.TokenString(this.nextToken), action.String())
 
 		switch act := action.(type) {

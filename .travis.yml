@@ -19,6 +19,8 @@ before_install:
  # Required for coverage.
  - go get golang.org/x/tools/cmd/cover
  - go get github.com/mattn/goveralls
+ # Required for dot parser checks.
+ - go get github.com/goccmack/gocc
 
 go_import_path: gonum.org/v1/gonum
 

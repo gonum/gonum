@@ -51,7 +51,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S1
 		-1, // S'
@@ -84,7 +83,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S2
 		-1, // S'
@@ -117,7 +115,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S3
 		-1, // S'
@@ -150,7 +147,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S4
 		-1, // S'
@@ -183,7 +179,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S5
 		-1, // S'
@@ -216,7 +211,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S6
 		-1, // S'
@@ -249,7 +243,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		10, // ID
 		9,  // OptID
-
 	},
 	gotoRow{ // S7
 		-1, // S'
@@ -282,7 +275,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S8
 		-1, // S'
@@ -315,7 +307,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S9
 		-1, // S'
@@ -348,7 +339,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S10
 		-1, // S'
@@ -381,7 +371,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S11
 		-1, // S'
@@ -414,7 +403,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S12
 		-1, // S'
@@ -447,7 +435,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		27, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S13
 		-1, // S'
@@ -480,7 +467,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S14
 		-1, // S'
@@ -513,7 +499,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S15
 		-1, // S'
@@ -546,7 +531,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		27, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S16
 		-1, // S'
@@ -579,7 +563,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S17
 		-1, // S'
@@ -612,7 +595,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S18
 		-1, // S'
@@ -645,7 +627,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S19
 		-1, // S'
@@ -678,7 +659,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S20
 		-1, // S'
@@ -711,7 +691,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S21
 		-1, // S'
@@ -744,7 +723,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S22
 		-1, // S'
@@ -777,7 +755,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S23
 		-1, // S'
@@ -810,7 +787,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S24
 		-1, // S'
@@ -843,7 +819,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S25
 		-1, // S'
@@ -876,7 +851,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S26
 		-1, // S'
@@ -909,7 +883,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S27
 		-1, // S'
@@ -942,7 +915,6 @@ var gotoTab = gotoTable{
 		44, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S28
 		-1, // S'
@@ -975,7 +947,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S29
 		-1, // S'
@@ -1008,7 +979,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		10, // ID
 		48, // OptID
-
 	},
 	gotoRow{ // S30
 		-1, // S'
@@ -1041,7 +1011,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S31
 		-1, // S'
@@ -1074,7 +1043,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S32
 		-1, // S'
@@ -1107,7 +1075,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S33
 		-1, // S'
@@ -1140,7 +1107,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S34
 		-1, // S'
@@ -1173,7 +1139,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S35
 		-1, // S'
@@ -1206,7 +1171,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S36
 		-1, // S'
@@ -1239,7 +1203,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S37
 		-1, // S'
@@ -1272,7 +1235,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		54, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S38
 		-1, // S'
@@ -1305,7 +1267,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S39
 		-1, // S'
@@ -1338,7 +1299,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		60, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S40
 		-1, // S'
@@ -1371,7 +1331,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S41
 		-1, // S'
@@ -1404,7 +1363,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S42
 		-1, // S'
@@ -1437,7 +1395,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S43
 		-1, // S'
@@ -1470,7 +1427,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		63, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S44
 		-1, // S'
@@ -1503,7 +1459,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S45
 		-1, // S'
@@ -1536,7 +1491,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S46
 		-1, // S'
@@ -1569,7 +1523,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		65, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S47
 		-1, // S'
@@ -1602,7 +1555,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		27, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S48
 		-1, // S'
@@ -1635,7 +1587,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S49
 		-1, // S'
@@ -1668,7 +1619,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S50
 		-1, // S'
@@ -1701,7 +1651,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		54, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S51
 		-1, // S'
@@ -1734,7 +1683,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S52
 		-1, // S'
@@ -1767,7 +1715,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S53
 		-1, // S'
@@ -1800,7 +1747,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		54, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S54
 		-1, // S'
@@ -1833,7 +1779,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S55
 		-1, // S'
@@ -1866,7 +1811,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S56
 		-1, // S'
@@ -1899,7 +1843,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S57
 		-1, // S'
@@ -1932,7 +1875,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S58
 		-1, // S'
@@ -1965,7 +1907,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S59
 		-1, // S'
@@ -1998,7 +1939,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S60
 		-1, // S'
@@ -2031,7 +1971,6 @@ var gotoTab = gotoTable{
 		44, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S61
 		-1, // S'
@@ -2064,7 +2003,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S62
 		-1, // S'
@@ -2097,7 +2035,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S63
 		-1, // S'
@@ -2130,7 +2067,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S64
 		-1, // S'
@@ -2163,7 +2099,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S65
 		-1, // S'
@@ -2196,7 +2131,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S66
 		-1, // S'
@@ -2229,7 +2163,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S67
 		-1, // S'
@@ -2262,7 +2195,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S68
 		-1, // S'
@@ -2295,7 +2227,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S69
 		-1, // S'
@@ -2328,7 +2259,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S70
 		-1, // S'
@@ -2361,7 +2291,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S71
 		-1, // S'
@@ -2394,7 +2323,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S72
 		-1, // S'
@@ -2427,7 +2355,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S73
 		-1, // S'
@@ -2460,7 +2387,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		81, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S74
 		-1, // S'
@@ -2493,7 +2419,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S75
 		-1, // S'
@@ -2526,7 +2451,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S76
 		-1, // S'
@@ -2559,7 +2483,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		27, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S77
 		-1, // S'
@@ -2592,7 +2515,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		84, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S78
 		-1, // S'
@@ -2625,7 +2547,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S79
 		-1, // S'
@@ -2658,7 +2579,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S80
 		-1, // S'
@@ -2691,7 +2611,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S81
 		-1, // S'
@@ -2724,7 +2643,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S82
 		-1, // S'
@@ -2757,7 +2675,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S83
 		-1, // S'
@@ -2790,7 +2707,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S84
 		-1, // S'
@@ -2823,7 +2739,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S85
 		-1, // S'
@@ -2856,7 +2771,6 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 	gotoRow{ // S86
 		-1, // S'
@@ -2889,6 +2803,5 @@ var gotoTab = gotoTable{
 		-1, // OptPort
 		-1, // ID
 		-1, // OptID
-
 	},
 }

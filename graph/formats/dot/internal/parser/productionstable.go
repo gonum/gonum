@@ -304,33 +304,33 @@ var productionsTable = ProdTab{
 		},
 	},
 	ProdTabEntry{
-		String: `Component : graphx	<< ast.KindGraph, nil >>`,
+		String: `Component : graphx	<< ast.GraphKind, nil >>`,
 		Id:         "Component",
 		NTType:     15,
 		Index:      27,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
-			return ast.KindGraph, nil
+			return ast.GraphKind, nil
 		},
 	},
 	ProdTabEntry{
-		String: `Component : node	<< ast.KindNode, nil >>`,
+		String: `Component : node	<< ast.NodeKind, nil >>`,
 		Id:         "Component",
 		NTType:     15,
 		Index:      28,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
-			return ast.KindNode, nil
+			return ast.NodeKind, nil
 		},
 	},
 	ProdTabEntry{
-		String: `Component : edge	<< ast.KindEdge, nil >>`,
+		String: `Component : edge	<< ast.EdgeKind, nil >>`,
 		Id:         "Component",
 		NTType:     15,
 		Index:      29,
 		NumSymbols: 1,
 		ReduceFunc: func(X []Attrib) (Attrib, error) {
-			return ast.KindEdge, nil
+			return ast.EdgeKind, nil
 		},
 	},
 	ProdTabEntry{

@@ -254,9 +254,9 @@ AttrStmt
 ;
 
 Component
-	: graphx                                      << ast.KindGraph, nil >>
-	| node                                        << ast.KindNode, nil >>
-	| edge                                        << ast.KindEdge, nil >>
+	: graphx                                      << ast.GraphKind, nil >>
+	| node                                        << ast.NodeKind, nil >>
+	| edge                                        << ast.EdgeKind, nil >>
 ;
 
 // AttrList : "[" [ AList ] "]" [ AttrList ]

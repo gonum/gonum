@@ -140,19 +140,19 @@ func (gen *generator) addStmt(dst Builder, stmt ast.Stmt) {
 		var n UnmarshalerAttr
 		var dst string
 		switch stmt.Kind {
-		case ast.KindGraph:
+		case ast.GraphKind:
 			if gen.graphAttr == nil {
 				return
 			}
 			n = gen.graphAttr
 			dst = "graph"
-		case ast.KindNode:
+		case ast.NodeKind:
 			if gen.nodeAttr == nil {
 				return
 			}
 			n = gen.nodeAttr
 			dst = "node"
-		case ast.KindEdge:
+		case ast.EdgeKind:
 			if gen.edgeAttr == nil {
 				return
 			}

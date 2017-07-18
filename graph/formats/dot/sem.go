@@ -48,7 +48,7 @@ func checkStmt(graph *ast.Graph, stmt ast.Stmt) error {
 		return checkAttrStmt(graph, stmt)
 	case *ast.Attr:
 		// TODO: Verify that the attribute is indeed of graph component kind.
-		return checkAttr(graph, ast.KindGraph, stmt)
+		return checkAttr(graph, ast.GraphKind, stmt)
 	case *ast.Subgraph:
 		return checkSubgraph(graph, stmt)
 	default:
@@ -63,7 +63,7 @@ func checkNodeStmt(graph *ast.Graph, stmt *ast.NodeStmt) error {
 	}
 	for _, attr := range stmt.Attrs {
 		// TODO: Verify that the attribute is indeed of node component kind.
-		if err := checkAttr(graph, ast.KindNode, attr); err != nil {
+		if err := checkAttr(graph, ast.NodeKind, attr); err != nil {
 			return err
 		}
 	}
@@ -78,7 +78,7 @@ func checkEdgeStmt(graph *ast.Graph, stmt *ast.EdgeStmt) error {
 	}
 	for _, attr := range stmt.Attrs {
 		// TODO: Verify that the attribute is indeed of edge component kind.
-		if err := checkAttr(graph, ast.KindEdge, attr); err != nil {
+		if err := checkAttr(graph, ast.EdgeKind, attr); err != nil {
 			return err
 		}
 	}
@@ -113,13 +113,13 @@ func checkAttrStmt(graph *ast.Graph, stmt *ast.AttrStmt) error {
 // component kind.
 func checkAttr(graph *ast.Graph, kind ast.Kind, attr *ast.Attr) error {
 	switch kind {
-	case ast.KindGraph:
+	case ast.GraphKind:
 		// TODO: Validate key-value pairs for graphs.
 		return nil
-	case ast.KindNode:
+	case ast.NodeKind:
 		// TODO: Validate key-value pairs for nodes.
 		return nil
-	case ast.KindEdge:
+	case ast.EdgeKind:
 		// TODO: Validate key-value pairs for edges.
 		return nil
 	default:

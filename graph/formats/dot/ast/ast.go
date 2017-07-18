@@ -228,22 +228,22 @@ type Kind uint
 
 // Graph component kinds.
 const (
-	KindGraph Kind = iota // graph
-	KindNode              // node
-	KindEdge              // edge
+	GraphKind Kind = iota // graph
+	NodeKind              // node
+	EdgeKind              // edge
 )
 
 // String returns the string representation of the graph component kind.
 func (k Kind) String() string {
 	switch k {
-	case KindGraph:
+	case GraphKind:
 		return "graph"
-	case KindNode:
+	case NodeKind:
 		return "node"
-	case KindEdge:
+	case EdgeKind:
 		return "edge"
 	}
-	panic(fmt.Sprintf("invalid graph component kind (%d)", uint(k)))
+	panic(fmt.Sprintf("invalid graph component kind (%d)", k))
 }
 
 // --- [ Attribute ] -----------------------------------------------------------

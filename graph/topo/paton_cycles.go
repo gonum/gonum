@@ -10,10 +10,8 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
-// UndirectedCyclesIn returns the set of cycle bases in the graph g.
-// All cycles in g can be constructed from the returned cycle bases
-// by combining cycle bases such that presence of edges shared by the
-// bases are xored together.
+// UndirectedCyclesIn returns a set of cycles that forms a cycle basis in the graph g.
+// Any cycle in g can be constructed as a symmetric difference of its elements.
 func UndirectedCyclesIn(g graph.Undirected) [][]graph.Node {
 	// From "An algorithm for finding a fundamental set of cycles of a graph"
 	// https://doi.org/10.1145/363219.363232
@@ -41,10 +39,7 @@ func UndirectedCyclesIn(g graph.Undirected) [][]graph.Node {
 				vid := v.ID()
 				switch {
 				case uid == vid:
-					panic("topo: found self loop")
-					// TODO(kortschak): When multigraphs are supported
-					// this becomes:
-					//  cycles = append(cycles, []graph.Node{u})
+					cycles = append(cycles, []graph.Node{u})
 				case !from.has(vid):
 					done.Add(vid)
 					to[vid] = u

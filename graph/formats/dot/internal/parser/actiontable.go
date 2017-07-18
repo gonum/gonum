@@ -44,7 +44,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S1
@@ -70,7 +69,6 @@ var actionTab = actionTable{
 			nil,          /* subgraph */
 			nil,          /* : */
 			nil,          /* id */
-
 		},
 	},
 	actionRow{ // S2
@@ -96,7 +94,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S3
@@ -122,7 +119,6 @@ var actionTab = actionTable{
 			nil,      /* subgraph */
 			nil,      /* : */
 			nil,      /* id */
-
 		},
 	},
 	actionRow{ // S4
@@ -148,7 +144,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S5
@@ -174,7 +169,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S6
@@ -200,7 +194,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			shift(11),  /* id */
-
 		},
 	},
 	actionRow{ // S7
@@ -226,7 +219,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			reduce(6), /* id, reduce: DirectedGraph */
-
 		},
 	},
 	actionRow{ // S8
@@ -252,7 +244,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			reduce(7), /* id, reduce: DirectedGraph */
-
 		},
 	},
 	actionRow{ // S9
@@ -278,7 +269,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S10
@@ -304,7 +294,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			nil,        /* id */
-
 		},
 	},
 	actionRow{ // S11
@@ -330,7 +319,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			nil,        /* id */
-
 		},
 	},
 	actionRow{ // S12
@@ -356,7 +344,6 @@ var actionTab = actionTable{
 			shift(29),  /* subgraph */
 			nil,        /* : */
 			shift(30),  /* id */
-
 		},
 	},
 	actionRow{ // S13
@@ -382,7 +369,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S14
@@ -408,7 +394,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			nil,        /* id */
-
 		},
 	},
 	actionRow{ // S15
@@ -434,7 +419,6 @@ var actionTab = actionTable{
 			shift(29),  /* subgraph */
 			nil,        /* : */
 			shift(30),  /* id */
-
 		},
 	},
 	actionRow{ // S16
@@ -460,7 +444,6 @@ var actionTab = actionTable{
 			reduce(17), /* subgraph, reduce: OptSemi */
 			nil,        /* : */
 			reduce(17), /* id, reduce: OptSemi */
-
 		},
 	},
 	actionRow{ // S17
@@ -486,7 +469,6 @@ var actionTab = actionTable{
 			reduce(12), /* subgraph, reduce: Stmt */
 			nil,        /* : */
 			reduce(12), /* id, reduce: Stmt */
-
 		},
 	},
 	actionRow{ // S18
@@ -512,7 +494,6 @@ var actionTab = actionTable{
 			reduce(13), /* subgraph, reduce: Stmt */
 			nil,        /* : */
 			reduce(13), /* id, reduce: Stmt */
-
 		},
 	},
 	actionRow{ // S19
@@ -538,7 +519,6 @@ var actionTab = actionTable{
 			reduce(14), /* subgraph, reduce: Stmt */
 			nil,        /* : */
 			reduce(14), /* id, reduce: Stmt */
-
 		},
 	},
 	actionRow{ // S20
@@ -564,7 +544,6 @@ var actionTab = actionTable{
 			reduce(15), /* subgraph, reduce: Stmt */
 			nil,        /* : */
 			reduce(15), /* id, reduce: Stmt */
-
 		},
 	},
 	actionRow{ // S21
@@ -590,7 +569,6 @@ var actionTab = actionTable{
 			reduce(16), /* subgraph, reduce: Stmt */
 			nil,        /* : */
 			reduce(16), /* id, reduce: Stmt */
-
 		},
 	},
 	actionRow{ // S22
@@ -616,7 +594,6 @@ var actionTab = actionTable{
 			reduce(32), /* subgraph, reduce: OptAttrList */
 			nil,        /* : */
 			reduce(32), /* id, reduce: OptAttrList */
-
 		},
 	},
 	actionRow{ // S23
@@ -642,7 +619,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S24
@@ -668,7 +644,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S25
@@ -694,7 +669,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			nil,        /* id */
-
 		},
 	},
 	actionRow{ // S26
@@ -720,7 +694,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			nil,        /* id */
-
 		},
 	},
 	actionRow{ // S27
@@ -746,7 +719,6 @@ var actionTab = actionTable{
 			reduce(50), /* subgraph, reduce: OptPort */
 			shift(46),  /* : */
 			reduce(50), /* id, reduce: OptPort */
-
 		},
 	},
 	actionRow{ // S28
@@ -772,7 +744,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S29
@@ -798,7 +769,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			shift(11),  /* id */
-
 		},
 	},
 	actionRow{ // S30
@@ -824,7 +794,6 @@ var actionTab = actionTable{
 			reduce(52), /* subgraph, reduce: ID */
 			reduce(52), /* :, reduce: ID */
 			reduce(52), /* id, reduce: ID */
-
 		},
 	},
 	actionRow{ // S31
@@ -850,7 +819,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S32
@@ -876,7 +844,6 @@ var actionTab = actionTable{
 			reduce(17), /* subgraph, reduce: OptSemi */
 			nil,        /* : */
 			reduce(17), /* id, reduce: OptSemi */
-
 		},
 	},
 	actionRow{ // S33
@@ -902,7 +869,6 @@ var actionTab = actionTable{
 			reduce(8), /* subgraph, reduce: StmtList */
 			nil,       /* : */
 			reduce(8), /* id, reduce: StmtList */
-
 		},
 	},
 	actionRow{ // S34
@@ -928,7 +894,6 @@ var actionTab = actionTable{
 			reduce(18), /* subgraph, reduce: OptSemi */
 			nil,        /* : */
 			reduce(18), /* id, reduce: OptSemi */
-
 		},
 	},
 	actionRow{ // S35
@@ -954,7 +919,6 @@ var actionTab = actionTable{
 			reduce(19), /* subgraph, reduce: NodeStmt */
 			nil,        /* : */
 			reduce(19), /* id, reduce: NodeStmt */
-
 		},
 	},
 	actionRow{ // S36
@@ -980,7 +944,6 @@ var actionTab = actionTable{
 			reduce(33), /* subgraph, reduce: OptAttrList */
 			nil,        /* : */
 			reduce(33), /* id, reduce: OptAttrList */
-
 		},
 	},
 	actionRow{ // S37
@@ -1006,7 +969,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			shift(55),  /* id */
-
 		},
 	},
 	actionRow{ // S38
@@ -1032,7 +994,6 @@ var actionTab = actionTable{
 			reduce(32), /* subgraph, reduce: OptAttrList */
 			nil,        /* : */
 			reduce(32), /* id, reduce: OptAttrList */
-
 		},
 	},
 	actionRow{ // S39
@@ -1058,7 +1019,6 @@ var actionTab = actionTable{
 			shift(29),  /* subgraph */
 			nil,        /* : */
 			shift(62),  /* id */
-
 		},
 	},
 	actionRow{ // S40
@@ -1084,7 +1044,6 @@ var actionTab = actionTable{
 			reduce(22), /* subgraph, reduce: DirectedEdge */
 			nil,        /* : */
 			reduce(22), /* id, reduce: DirectedEdge */
-
 		},
 	},
 	actionRow{ // S41
@@ -1110,7 +1069,6 @@ var actionTab = actionTable{
 			reduce(23), /* subgraph, reduce: DirectedEdge */
 			nil,        /* : */
 			reduce(23), /* id, reduce: DirectedEdge */
-
 		},
 	},
 	actionRow{ // S42
@@ -1136,7 +1094,6 @@ var actionTab = actionTable{
 			reduce(26), /* subgraph, reduce: AttrStmt */
 			nil,        /* : */
 			reduce(26), /* id, reduce: AttrStmt */
-
 		},
 	},
 	actionRow{ // S43
@@ -1162,7 +1119,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			shift(64), /* id */
-
 		},
 	},
 	actionRow{ // S44
@@ -1188,7 +1144,6 @@ var actionTab = actionTable{
 			reduce(47), /* subgraph, reduce: Node */
 			nil,        /* : */
 			reduce(47), /* id, reduce: Node */
-
 		},
 	},
 	actionRow{ // S45
@@ -1214,7 +1169,6 @@ var actionTab = actionTable{
 			reduce(51), /* subgraph, reduce: OptPort */
 			nil,        /* : */
 			reduce(51), /* id, reduce: OptPort */
-
 		},
 	},
 	actionRow{ // S46
@@ -1240,7 +1194,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			shift(62), /* id */
-
 		},
 	},
 	actionRow{ // S47
@@ -1266,7 +1219,6 @@ var actionTab = actionTable{
 			shift(29),  /* subgraph */
 			nil,        /* : */
 			shift(30),  /* id */
-
 		},
 	},
 	actionRow{ // S48
@@ -1292,7 +1244,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			nil,        /* id */
-
 		},
 	},
 	actionRow{ // S49
@@ -1318,7 +1269,6 @@ var actionTab = actionTable{
 			reduce(9), /* subgraph, reduce: StmtList */
 			nil,       /* : */
 			reduce(9), /* id, reduce: StmtList */
-
 		},
 	},
 	actionRow{ // S50
@@ -1344,7 +1294,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			shift(55),  /* id */
-
 		},
 	},
 	actionRow{ // S51
@@ -1370,7 +1319,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(38), /* id, reduce: OptSep */
-
 		},
 	},
 	actionRow{ // S52
@@ -1396,7 +1344,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S53
@@ -1422,7 +1369,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			shift(55),  /* id */
-
 		},
 	},
 	actionRow{ // S54
@@ -1448,7 +1394,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S55
@@ -1474,7 +1419,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			nil,        /* id */
-
 		},
 	},
 	actionRow{ // S56
@@ -1500,7 +1444,6 @@ var actionTab = actionTable{
 			reduce(20), /* subgraph, reduce: EdgeStmt */
 			nil,        /* : */
 			reduce(20), /* id, reduce: EdgeStmt */
-
 		},
 	},
 	actionRow{ // S57
@@ -1526,7 +1469,6 @@ var actionTab = actionTable{
 			reduce(46), /* subgraph, reduce: Vertex */
 			nil,        /* : */
 			reduce(46), /* id, reduce: Vertex */
-
 		},
 	},
 	actionRow{ // S58
@@ -1552,7 +1494,6 @@ var actionTab = actionTable{
 			reduce(45), /* subgraph, reduce: Vertex */
 			nil,        /* : */
 			reduce(45), /* id, reduce: Vertex */
-
 		},
 	},
 	actionRow{ // S59
@@ -1578,7 +1519,6 @@ var actionTab = actionTable{
 			reduce(24), /* subgraph, reduce: OptEdge */
 			nil,        /* : */
 			reduce(24), /* id, reduce: OptEdge */
-
 		},
 	},
 	actionRow{ // S60
@@ -1604,7 +1544,6 @@ var actionTab = actionTable{
 			reduce(50), /* subgraph, reduce: OptPort */
 			shift(46),  /* : */
 			reduce(50), /* id, reduce: OptPort */
-
 		},
 	},
 	actionRow{ // S61
@@ -1630,7 +1569,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S62
@@ -1656,7 +1594,6 @@ var actionTab = actionTable{
 			reduce(52), /* subgraph, reduce: ID */
 			reduce(52), /* :, reduce: ID */
 			reduce(52), /* id, reduce: ID */
-
 		},
 	},
 	actionRow{ // S63
@@ -1682,7 +1619,6 @@ var actionTab = actionTable{
 			reduce(41), /* subgraph, reduce: Attr */
 			nil,        /* : */
 			reduce(41), /* id, reduce: Attr */
-
 		},
 	},
 	actionRow{ // S64
@@ -1708,7 +1644,6 @@ var actionTab = actionTable{
 			reduce(52), /* subgraph, reduce: ID */
 			nil,        /* : */
 			reduce(52), /* id, reduce: ID */
-
 		},
 	},
 	actionRow{ // S65
@@ -1734,7 +1669,6 @@ var actionTab = actionTable{
 			reduce(48), /* subgraph, reduce: Port */
 			shift(77),  /* : */
 			reduce(48), /* id, reduce: Port */
-
 		},
 	},
 	actionRow{ // S66
@@ -1760,7 +1694,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S67
@@ -1786,7 +1719,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S68
@@ -1812,7 +1744,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(39), /* id, reduce: OptSep */
-
 		},
 	},
 	actionRow{ // S69
@@ -1838,7 +1769,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(34), /* id, reduce: AList */
-
 		},
 	},
 	actionRow{ // S70
@@ -1864,7 +1794,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(40), /* id, reduce: OptSep */
-
 		},
 	},
 	actionRow{ // S71
@@ -1890,7 +1819,6 @@ var actionTab = actionTable{
 			reduce(30), /* subgraph, reduce: AttrList */
 			nil,        /* : */
 			reduce(30), /* id, reduce: AttrList */
-
 		},
 	},
 	actionRow{ // S72
@@ -1916,7 +1844,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(38), /* id, reduce: OptSep */
-
 		},
 	},
 	actionRow{ // S73
@@ -1942,7 +1869,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			shift(82), /* id */
-
 		},
 	},
 	actionRow{ // S74
@@ -1968,7 +1894,6 @@ var actionTab = actionTable{
 			reduce(25), /* subgraph, reduce: OptEdge */
 			nil,        /* : */
 			reduce(25), /* id, reduce: OptEdge */
-
 		},
 	},
 	actionRow{ // S75
@@ -1994,7 +1919,6 @@ var actionTab = actionTable{
 			reduce(21), /* subgraph, reduce: Edge */
 			nil,        /* : */
 			reduce(21), /* id, reduce: Edge */
-
 		},
 	},
 	actionRow{ // S76
@@ -2020,7 +1944,6 @@ var actionTab = actionTable{
 			shift(29),  /* subgraph */
 			nil,        /* : */
 			shift(30),  /* id */
-
 		},
 	},
 	actionRow{ // S77
@@ -2046,7 +1969,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			shift(85), /* id */
-
 		},
 	},
 	actionRow{ // S78
@@ -2072,7 +1994,6 @@ var actionTab = actionTable{
 			reduce(42), /* subgraph, reduce: Subgraph */
 			nil,        /* : */
 			reduce(42), /* id, reduce: Subgraph */
-
 		},
 	},
 	actionRow{ // S79
@@ -2098,7 +2019,6 @@ var actionTab = actionTable{
 			reduce(31), /* subgraph, reduce: AttrList */
 			nil,        /* : */
 			reduce(31), /* id, reduce: AttrList */
-
 		},
 	},
 	actionRow{ // S80
@@ -2124,7 +2044,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(35), /* id, reduce: AList */
-
 		},
 	},
 	actionRow{ // S81
@@ -2150,7 +2069,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(41), /* id, reduce: Attr */
-
 		},
 	},
 	actionRow{ // S82
@@ -2176,7 +2094,6 @@ var actionTab = actionTable{
 			nil,        /* subgraph */
 			nil,        /* : */
 			reduce(52), /* id, reduce: ID */
-
 		},
 	},
 	actionRow{ // S83
@@ -2202,7 +2119,6 @@ var actionTab = actionTable{
 			nil,       /* subgraph */
 			nil,       /* : */
 			nil,       /* id */
-
 		},
 	},
 	actionRow{ // S84
@@ -2228,7 +2144,6 @@ var actionTab = actionTable{
 			reduce(49), /* subgraph, reduce: Port */
 			nil,        /* : */
 			reduce(49), /* id, reduce: Port */
-
 		},
 	},
 	actionRow{ // S85
@@ -2254,7 +2169,6 @@ var actionTab = actionTable{
 			reduce(52), /* subgraph, reduce: ID */
 			nil,        /* : */
 			reduce(52), /* id, reduce: ID */
-
 		},
 	},
 	actionRow{ // S86
@@ -2280,7 +2194,6 @@ var actionTab = actionTable{
 			reduce(42), /* subgraph, reduce: Subgraph */
 			nil,        /* : */
 			reduce(42), /* id, reduce: Subgraph */
-
 		},
 	},
 }

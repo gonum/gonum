@@ -8,6 +8,8 @@
 // This file is made available under a Creative Commons CC0 1.0
 // Universal Public Domain Dedication.
 
+//go:generate ./makeinternal.bash
+
 // Package dot implements a parser for Graphviz DOT files.
 package dot // import "gonum.org/v1/gonum/graph/formats/dot"
 

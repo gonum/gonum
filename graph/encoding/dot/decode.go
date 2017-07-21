@@ -103,6 +103,7 @@ func (gen *generator) node(dst Builder, id string) graph.Node {
 		return n
 	}
 	n := dst.NewNode()
+	dst.AddNode(n)
 	if n, ok := n.(UnmarshalerID); ok {
 		n.UnmarshalDOTID(id)
 	}

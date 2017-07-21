@@ -112,11 +112,9 @@ func newDotDirectedGraph() *dotDirectedGraph {
 	return &dotDirectedGraph{DirectedGraph: simple.NewDirectedGraph(0, 0)}
 }
 
-// NewNode adds a new node with a unique node ID to the graph.
+// NewNode returns a new node with a unique node ID for the graph.
 func (g *dotDirectedGraph) NewNode() graph.Node {
-	n := &dotNode{Node: g.DirectedGraph.NewNode()}
-	g.AddNode(n)
-	return n
+	return &dotNode{Node: g.DirectedGraph.NewNode()}
 }
 
 // NewEdge adds a new edge from the source to the destination node to the graph,
@@ -157,9 +155,7 @@ func newDotUndirectedGraph() *dotUndirectedGraph {
 
 // NewNode adds a new node with a unique node ID to the graph.
 func (g *dotUndirectedGraph) NewNode() graph.Node {
-	n := &dotNode{Node: g.UndirectedGraph.NewNode()}
-	g.AddNode(n)
-	return n
+	return &dotNode{Node: g.UndirectedGraph.NewNode()}
 }
 
 // NewEdge adds a new edge from the source to the destination node to the graph,

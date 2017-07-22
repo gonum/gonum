@@ -12,13 +12,13 @@ import (
 // Triangle represents a triangle distribution (https://en.wikipedia.org/wiki/Triangular_distribution).
 type Triangle struct {
 	a, b, c float64
-	Source  *rand.Rand
+	src     *rand.Rand
 }
 
 // Triangle constructs a new triangle distribution with lower limit a, upper limit b, and mode c.
 // Constraints are a < b and a ≤ c ≤ b.
-// This distribution is uncommon in nature, but may be useful for simulation
-func NewTriangle(a, b, c float64, rnd *rand.Rand) Triangle {
+// This distribution is uncommon in nature, but may be useful for simulation.
+func NewTriangle(a, b, c float64, src *rand.Rand) Triangle {
 	if a >= b {
 		panic("triangle: constraint of a < b violated")
 	}
@@ -28,7 +28,7 @@ func NewTriangle(a, b, c float64, rnd *rand.Rand) Triangle {
 	if c > b {
 		panic("triangle: constraint of c <= b violated")
 	}
-	return Triangle{a, b, c, rnd}
+	return Triangle{a, b, c, src}
 }
 
 // CDF computes the value of the cumulative density function at x.
@@ -120,10 +120,10 @@ func (t Triangle) Quantile(p float64) float64 {
 // Rand returns a random sample drawn from the distribution.
 func (t Triangle) Rand() float64 {
 	var rnd float64
-	if t.Source == nil {
+	if t.src == nil {
 		rnd = rand.Float64()
 	} else {
-		rnd = t.Source.Float64()
+		rnd = t.src.Float64()
 	}
 
 	return t.Quantile(rnd)
@@ -147,6 +147,19 @@ func (t Triangle) Survival(x float64) float64 {
 	return 1 - t.CDF(x)
 }
 
+// MarshalParameters implements the ParameterMarshaler interface
+func (t Triangle) MarshalParameters(p []Parameter) {
+	if len(p) != p.NumParameters() {
+		panic("triangle: improper parameter length")
+	}
+	p[0].Name = "A"
+	p[0].Value = t.a
+	p[1].Name = "B"
+	p[1].Value = t.b
+	p[2].Name = "C"
+	p[2].Value = t.c
+}
+
 // UnmarshalParameters implements the ParameterMarshaler interface
 func (t *Triangle) UnmarshalParameters(p []Parameter) {
 	if len(p) != t.NumParameters() {
@@ -161,6 +174,9 @@ func (t *Triangle) UnmarshalParameters(p []Parameter) {
 	if p[2].Name != "C" {
 		panic("triangle: " + panicNameMismatch)
 	}
+
+	// verify parameters are valid before directly setting
+	NewTriangle(a, b, c, src)
 
 	t.a = p[0].Value
 	t.b = p[1].Value

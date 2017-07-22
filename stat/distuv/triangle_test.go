@@ -1,4 +1,4 @@
-// Copyright ©2015 The gonum Authors. All rights reserved.
+// Copyright ©2017 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,24 +9,40 @@ import (
 	"testing"
 )
 
+func TestTriangleConstraint(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("The constraints were violated, but not caught")
+		}
+	}()
+
+	// test b < a
+	NewTriangle(3, 1, 2, nil)
+	// test c > b
+	NewTriangle(1, 2, 3, nil)
+}
+
 func TestTriangle(t *testing.T) {
-	for i, dist := range []Triangle{
+	for i, test := range []struct {
+		a, b, c float64
+	}{
 		{
-			A: 0.0,
-			C: 0.5,
-			B: 1.0,
+			a: 0.0,
+			b: 1.0,
+			c: 0.5,
 		},
 		{
-			A: 0.1,
-			C: 0.2,
-			B: 0.3,
+			a: 0.1,
+			b: 0.3,
+			c: 0.2,
 		},
 		{
-			A: 1.0,
-			C: 1.5,
-			B: 2.0,
+			a: 1.0,
+			b: 2.0,
+			c: 1.5,
 		},
 	} {
+		dist := NewTriangle(test.a, test.b, test.c, nil)
 		testFullDist(t, dist, i, true)
 	}
 }
@@ -58,5 +74,5 @@ func TestTriangleProb(t *testing.T) {
 			logProb: math.Inf(-1),
 		},
 	}
-	testDistributionProbs(t, Triangle{A: 1, C: 2, B: 3}, "Standard 1,2,3 Triangle", pts)
+	testDistributionProbs(t, NewTriangle(1, 3, 2, nil), "Standard 1,2,3 Triangle", pts)
 }

@@ -9,34 +9,47 @@ import (
 	"math/rand"
 )
 
-// UnitTriangle is an instantiation of the triangle distribution with A=0, C=0.5, and B=1
-var UnitTriangle = Triangle{A: 0, C: 0.5, B: 1}
-
 // Triangle represents a triangle distribution (https://en.wikipedia.org/wiki/Triangular_distribution).
 type Triangle struct {
-	A      float64
-	C      float64
-	B      float64
-	Source *rand.Rand
+	a, b, c float64
+	Source  *rand.Rand
+}
+
+// Triangle constructs a new triangle distribution with lower limit a, upper limit b, and mode c.
+// Constraints are a < b and a ≤ c ≤ b.
+// This distribution is uncommon in nature, but may be useful for simulation
+func NewTriangle(a, b, c float64, rnd *rand.Rand) Triangle {
+	if a >= b {
+		panic("triangle: constraint of a < b violated")
+	}
+	if a > c {
+		panic("triangle: constraint of a <= c violated")
+	}
+	if c > b {
+		panic("triangle: constraint of c <= b violated")
+	}
+	return Triangle{a, b, c, rnd}
 }
 
 // CDF computes the value of the cumulative density function at x.
 func (t Triangle) CDF(x float64) float64 {
-	if x <= t.A {
+	switch {
+	case x <= t.a:
 		return 0
+	case x <= t.c:
+		d := x - t.a
+		return (d * d) / ((t.b - t.a) * (t.c - t.a))
+	case x < t.b:
+		d := t.b - x
+		return 1 - (d*d)/((t.b-t.a)*(t.b-t.c))
+	default:
+		return 1
 	}
-	if x <= t.C {
-		return math.Pow(x-t.A, 2) / ((t.B - t.A) * (t.C - t.A))
-	}
-	if x < t.B {
-		return 1 - math.Pow(t.B-x, 2)/((t.B-t.A)*(t.B-t.C))
-	}
-	return 1
 }
 
 // Entropy returns the entropy of the distribution.
 func (t Triangle) Entropy() float64 {
-	return 1.0/2.0 + math.Log((t.B-t.A)/2)
+	return 0.5 + math.Log(t.b-t.a) - ln2
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.
@@ -51,37 +64,22 @@ func (t Triangle) LogProb(x float64) float64 {
 	return math.Log(t.Prob(x))
 }
 
-// MarshalParameters implements the ParameterMarshaler interface
-func (t Triangle) MarshalParameters(p []Parameter) {
-	if len(p) != t.NumParameters() {
-		panic("triangle: improper parameter length")
-	}
-	p[0].Name = "A"
-	p[0].Value = t.A
-	p[1].Name = "C"
-	p[1].Value = t.C
-	p[2].Name = "B"
-	p[2].Value = t.B
-	return
-}
-
 // Mean returns the mean of the probability distribution.
 func (t Triangle) Mean() float64 {
-	return (t.A + t.B + t.C) / 3
+	return (t.a + t.b + t.c) / 3
 }
 
 // Median returns the median of the probability distribution.
 func (t Triangle) Median() float64 {
-	if t.C >= (t.A+t.B)/2 {
-		return t.A + math.Sqrt((t.B-t.A)*(t.C-t.A)/2)
-	} else {
-		return t.B - math.Sqrt((t.B-t.A)*(t.B-t.C)/2)
+	if t.c >= (t.a+t.b)/2 {
+		return t.a + math.Sqrt((t.b-t.a)*(t.c-t.a)/2)
 	}
+	return t.b - math.Sqrt((t.b-t.a)*(t.b-t.c)/2)
 }
 
 // Mode returns the mode of the probability distribution.
 func (t Triangle) Mode() float64 {
-	return t.C
+	return t.c
 }
 
 // NumParameters returns the number of parameters in the distribution.
@@ -91,19 +89,18 @@ func (Triangle) NumParameters() int {
 
 // Prob computes the value of the probability density function at x.
 func (t Triangle) Prob(x float64) float64 {
-	if x < t.A {
+	switch {
+	case x < t.a:
+		return 0
+	case x < t.c:
+		return 2 * (x - t.a) / ((t.b - t.a) * (t.c - t.a))
+	case x == t.c:
+		return 2 / (t.b - t.a)
+	case x <= t.b:
+		return 2 * (t.b - x) / ((t.b - t.a) * (t.b - t.c))
+	default:
 		return 0
 	}
-	if x < t.C {
-		return 2 * (x - t.A) / ((t.B - t.A) * (t.C - t.A))
-	}
-	if x == t.C {
-		return 2 / (t.B - t.A)
-	}
-	if x <= t.B {
-		return 2 * (t.B - x) / ((t.B - t.A) * (t.B - t.C))
-	}
-	return 0
 }
 
 // Quantile returns the inverse of the cumulative probability distribution.
@@ -112,13 +109,12 @@ func (t Triangle) Quantile(p float64) float64 {
 		panic(badPercentile)
 	}
 
-	f := (t.C - t.A) / (t.B - t.A)
+	f := (t.c - t.a) / (t.b - t.a)
 
 	if p < f {
-		return t.A + math.Sqrt(p*(t.B-t.A)*(t.C-t.A))
-	} else {
-		return t.B - math.Sqrt((1-p)*(t.B-t.A)*(t.B-t.C))
+		return t.a + math.Sqrt(p*(t.b-t.a)*(t.c-t.a))
 	}
+	return t.b - math.Sqrt((1-p)*(t.b-t.a)*(t.b-t.c))
 }
 
 // Rand returns a random sample drawn from the distribution.
@@ -135,8 +131,8 @@ func (t Triangle) Rand() float64 {
 
 // Skewness returns the skewness of the distribution.
 func (t Triangle) Skewness() float64 {
-	n := math.Sqrt2 * (t.A + t.B - 2*t.C) * (2*t.A - t.B - t.C) * (t.A - 2*t.B + t.C)
-	d := 5 * math.Pow(math.Pow(t.A, 2)+math.Pow(t.B, 2)+math.Pow(t.C, 2)-t.A*t.B-t.A*t.C-t.B*t.C, 3/2)
+	n := math.Sqrt2 * (t.a + t.b - 2*t.c) * (2*t.a - t.b - t.c) * (t.a - 2*t.b + t.c)
+	d := 5 * math.Pow(t.a*t.a+t.b*t.b+t.c*t.c-t.a*t.b-t.a*t.c-t.b*t.c, 3/2)
 
 	return n / d
 }
@@ -159,19 +155,19 @@ func (t *Triangle) UnmarshalParameters(p []Parameter) {
 	if p[0].Name != "A" {
 		panic("triangle: " + panicNameMismatch)
 	}
-	if p[1].Name != "C" {
+	if p[1].Name != "B" {
 		panic("triangle: " + panicNameMismatch)
 	}
-	if p[2].Name != "B" {
+	if p[2].Name != "C" {
 		panic("triangle: " + panicNameMismatch)
 	}
 
-	t.A = p[0].Value
-	t.C = p[1].Value
-	t.B = p[2].Value
+	t.a = p[0].Value
+	t.b = p[1].Value
+	t.c = p[2].Value
 }
 
 // Variance returns the variance of the probability distribution.
 func (t Triangle) Variance() float64 {
-	return (math.Pow(t.A, 2) + math.Pow(t.B, 2) + math.Pow(t.C, 2) - t.A*t.B - t.A*t.C - t.B*t.C) / 18
+	return (t.a*t.a + t.b*t.b + t.c*t.c - t.a*t.b - t.a*t.c - t.b*t.c) / 18
 }

@@ -17,9 +17,9 @@ func TestTriangleConstraint(t *testing.T) {
 	}()
 
 	// test b < a
-	NewTriangle(3, 1, 2, nil)
+	NewTriangle(3, 1, 2)
 	// test c > b
-	NewTriangle(1, 2, 3, nil)
+	NewTriangle(1, 2, 3)
 }
 
 func TestTriangle(t *testing.T) {
@@ -42,7 +42,7 @@ func TestTriangle(t *testing.T) {
 			c: 1.5,
 		},
 	} {
-		dist := NewTriangle(test.a, test.b, test.c, nil)
+		dist := NewTriangle(test.a, test.b, test.c)
 		testFullDist(t, dist, i, true)
 	}
 }
@@ -74,5 +74,5 @@ func TestTriangleProb(t *testing.T) {
 			logProb: math.Inf(-1),
 		},
 	}
-	testDistributionProbs(t, NewTriangle(1, 3, 2, nil), "Standard 1,2,3 Triangle", pts)
+	testDistributionProbs(t, NewTriangle(1, 3, 2), "Standard 1,2,3 Triangle", pts)
 }

@@ -12,13 +12,18 @@ import (
 // Triangle represents a triangle distribution (https://en.wikipedia.org/wiki/Triangular_distribution).
 type Triangle struct {
 	a, b, c float64
-	src     *rand.Rand
+	Source  *rand.Rand
 }
 
 // Triangle constructs a new triangle distribution with lower limit a, upper limit b, and mode c.
 // Constraints are a < b and a ≤ c ≤ b.
 // This distribution is uncommon in nature, but may be useful for simulation.
-func NewTriangle(a, b, c float64, src *rand.Rand) Triangle {
+func NewTriangle(a, b, c float64) Triangle {
+	checkTriangleParameters(a, b, c)
+	return Triangle{a, b, c, nil}
+}
+
+func checkTriangleParameters(a, b, c float64) {
 	if a >= b {
 		panic("triangle: constraint of a < b violated")
 	}
@@ -28,7 +33,6 @@ func NewTriangle(a, b, c float64, src *rand.Rand) Triangle {
 	if c > b {
 		panic("triangle: constraint of c <= b violated")
 	}
-	return Triangle{a, b, c, src}
 }
 
 // CDF computes the value of the cumulative density function at x.
@@ -120,10 +124,10 @@ func (t Triangle) Quantile(p float64) float64 {
 // Rand returns a random sample drawn from the distribution.
 func (t Triangle) Rand() float64 {
 	var rnd float64
-	if t.src == nil {
+	if t.Source == nil {
 		rnd = rand.Float64()
 	} else {
-		rnd = t.src.Float64()
+		rnd = t.Source.Float64()
 	}
 
 	return t.Quantile(rnd)
@@ -149,7 +153,7 @@ func (t Triangle) Survival(x float64) float64 {
 
 // MarshalParameters implements the ParameterMarshaler interface
 func (t Triangle) MarshalParameters(p []Parameter) {
-	if len(p) != p.NumParameters() {
+	if len(p) != t.NumParameters() {
 		panic("triangle: improper parameter length")
 	}
 	p[0].Name = "A"
@@ -175,8 +179,7 @@ func (t *Triangle) UnmarshalParameters(p []Parameter) {
 		panic("triangle: " + panicNameMismatch)
 	}
 
-	// verify parameters are valid before directly setting
-	NewTriangle(a, b, c, src)
+	checkTriangleParameters(p[0].Value, p[1].Value, p[2].Value)
 
 	t.a = p[0].Value
 	t.b = p[1].Value

@@ -136,7 +136,7 @@ func (t Triangle) Rand() float64 {
 // Skewness returns the skewness of the distribution.
 func (t Triangle) Skewness() float64 {
 	n := math.Sqrt2 * (t.a + t.b - 2*t.c) * (2*t.a - t.b - t.c) * (t.a - 2*t.b + t.c)
-	d := 5 * math.Pow(t.a*t.a+t.b*t.b+t.c*t.c-t.a*t.b-t.a*t.c-t.b*t.c, 3/2)
+	d := 5 * math.Pow(t.a*t.a+t.b*t.b+t.c*t.c-t.a*t.b-t.a*t.c-t.b*t.c, 3.0/2.0)
 
 	return n / d
 }

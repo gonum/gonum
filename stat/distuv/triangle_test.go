@@ -41,6 +41,11 @@ func TestTriangle(t *testing.T) {
 			b: 2.0,
 			c: 1.5,
 		},
+		{
+			a: 0.0,
+			b: 1.0,
+			c: 0.0,
+		},
 	} {
 		dist := NewTriangle(test.a, test.b, test.c)
 		testFullDist(t, dist, i, true)

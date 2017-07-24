@@ -15,7 +15,7 @@ type Triangle struct {
 	Source  *rand.Rand
 }
 
-// Triangle constructs a new triangle distribution with lower limit a, upper limit b, and mode c.
+// NewTriangle constructs a new triangle distribution with lower limit a, upper limit b, and mode c.
 // Constraints are a < b and a ≤ c ≤ b.
 // This distribution is uncommon in nature, but may be useful for simulation.
 func NewTriangle(a, b, c float64) Triangle {
@@ -53,7 +53,7 @@ func (t Triangle) CDF(x float64) float64 {
 
 // Entropy returns the entropy of the distribution.
 func (t Triangle) Entropy() float64 {
-	return 0.5 + math.Log(t.b-t.a) - ln2
+	return 0.5 + math.Log(t.b-t.a) - math.Ln2
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.

@@ -12,6 +12,6 @@ find . -type f -name '*.go' \
 //\n\
 // Copyright ©2017 Robin Eklind.\n\
 // This file is made available under a Creative Commons CC0 1.0\n\
-// Universal Public Domain Dedication.\n\
+// Universal Public Domain Dedication.\
 |"
 

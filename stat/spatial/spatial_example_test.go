@@ -38,7 +38,7 @@ func ExampleGlobalMoransI_linear() {
 	// Moran's I=0.1111 z-score=0.6335
 }
 
-func ExampleGetisOrd() {
+func ExampleGetisOrdGStar() {
 	data := []float64{0, 0, 0, 1, 1, 1, 0, 1, 0, 0}
 
 	// The locality here describes spatial neighbor

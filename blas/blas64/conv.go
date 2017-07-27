@@ -106,14 +106,18 @@ func (t Symmetric) From(a SymmetricCols) {
 type TriangularCols Triangular
 
 // From fills the receiver with elements from a. The receiver
-// must have the same dimensions as a and have adequate backing
-// data storage.
+// must have the same dimensions, uplo and diag as a and have
+// adequate backing data storage.
 func (t TriangularCols) From(a Triangular) {
 	if t.N != a.N {
 		panic("blas64: mismatched dimension")
 	}
-	t.Uplo = a.Uplo
-	t.Diag = a.Diag
+	if t.Uplo != a.Uplo {
+		panic("blas64: mismatched BLAS uplo")
+	}
+	if t.Diag != a.Diag {
+		panic("blas64: mismatched BLAS diag")
+	}
 	switch a.Uplo {
 	default:
 		panic("blas64: bad BLAS uplo")
@@ -139,14 +143,18 @@ func (t TriangularCols) From(a Triangular) {
 }
 
 // From fills the receiver with elements from a. The receiver
-// must have the same dimensions as a and have adequate backing
-// data storage.
+// must have the same dimensions, uplo and diag as a and have
+// adequate backing data storage.
 func (t Triangular) From(a TriangularCols) {
 	if t.N != a.N {
 		panic("blas64: mismatched dimension")
 	}
-	t.Uplo = a.Uplo
-	t.Diag = a.Diag
+	if t.Uplo != a.Uplo {
+		panic("blas64: mismatched BLAS uplo")
+	}
+	if t.Diag != a.Diag {
+		panic("blas64: mismatched BLAS diag")
+	}
 	switch a.Uplo {
 	default:
 		panic("blas64: bad BLAS uplo")
@@ -242,22 +250,27 @@ func (t SymmetricBandCols) From(a SymmetricBand) {
 	if t.Uplo != a.Uplo {
 		panic("blas64: mismatched BLAS uplo")
 	}
+	dst := BandCols{
+		Rows: t.N, Cols: t.N,
+		Stride: t.Stride,
+		Data:   t.Data,
+	}
+	src := Band{
+		Rows: a.N, Cols: a.N,
+		Stride: a.Stride,
+		Data:   a.Data,
+	}
 	switch a.Uplo {
 	default:
 		panic("blas64: bad BLAS uplo")
 	case blas.Upper:
-		for i := 0; i < a.N; i++ {
-			for j := i; j < min(i+a.K+1, a.N); j++ {
-				t.Data[i+t.K-j+j*t.Stride] = a.Data[j+a.K-i+i*a.Stride]
-			}
-		}
+		dst.KU = t.K
+		src.KU = a.K
 	case blas.Lower:
-		for i := 0; i < a.N; i++ {
-			for j := max(0, i-a.K); j <= i; j++ {
-				t.Data[i+t.K-j+j*t.Stride] = a.Data[j+a.K-i+i*a.Stride]
-			}
-		}
+		dst.KL = t.K
+		src.KL = a.K
 	}
+	dst.From(src)
 }
 
 // From fills the receiver with elements from a. The receiver
@@ -279,22 +292,120 @@ func (t SymmetricBand) From(a SymmetricBandCols) {
 	if t.Uplo != a.Uplo {
 		panic("blas64: mismatched BLAS uplo")
 	}
+	dst := Band{
+		Rows: t.N, Cols: t.N,
+		Stride: t.Stride,
+		Data:   t.Data,
+	}
+	src := BandCols{
+		Rows: a.N, Cols: a.N,
+		Stride: a.Stride,
+		Data:   a.Data,
+	}
 	switch a.Uplo {
 	default:
 		panic("blas64: bad BLAS uplo")
 	case blas.Upper:
-		for j := 0; j < a.N; j++ {
-			for i := j; i < min(j+a.K+1, a.N); i++ {
-				t.Data[j+a.K-i+i*a.Stride] = a.Data[i+t.K-j+j*t.Stride]
-			}
-		}
+		dst.KU = t.K
+		src.KU = a.K
 	case blas.Lower:
-		for j := 0; j < a.N; j++ {
-			for i := max(0, j-a.K); i <= i; i++ {
-				t.Data[j+a.K-i+i*a.Stride] = a.Data[i+t.K-j+j*t.Stride]
-			}
-		}
+		dst.KL = t.K
+		src.KL = a.K
 	}
+	dst.From(src)
+}
+
+// TriangularBandCols represents a symmetric matrix using the band column-major storage scheme.
+type TriangularBandCols TriangularBand
+
+// From fills the receiver with elements from a. The receiver
+// must have the same dimensions, bandwidth and uplo as a and
+// have adequate backing data storage.
+func (t TriangularBandCols) From(a TriangularBand) {
+	if t.N != a.N {
+		panic("blas64: mismatched dimension")
+	}
+	if t.K != a.K {
+		panic("blas64: mismatched bandwidth")
+	}
+	if a.Stride < a.K+1 {
+		panic("blas64: short stride for source")
+	}
+	if t.Stride < t.K+1 {
+		panic("blas64: short stride for destination")
+	}
+	if t.Uplo != a.Uplo {
+		panic("blas64: mismatched BLAS uplo")
+	}
+	if t.Diag != a.Diag {
+		panic("blas64: mismatched BLAS diag")
+	}
+	dst := BandCols{
+		Rows: t.N, Cols: t.N,
+		Stride: t.Stride,
+		Data:   t.Data,
+	}
+	src := Band{
+		Rows: a.N, Cols: a.N,
+		Stride: a.Stride,
+		Data:   a.Data,
+	}
+	switch a.Uplo {
+	default:
+		panic("blas64: bad BLAS uplo")
+	case blas.Upper:
+		dst.KU = t.K
+		src.KU = a.K
+	case blas.Lower:
+		dst.KL = t.K
+		src.KL = a.K
+	}
+	dst.From(src)
+}
+
+// From fills the receiver with elements from a. The receiver
+// must have the same dimensions, bandwidth and uplo as a and
+// have adequate backing data storage.
+func (t TriangularBand) From(a TriangularBandCols) {
+	if t.N != a.N {
+		panic("blas64: mismatched dimension")
+	}
+	if t.K != a.K {
+		panic("blas64: mismatched bandwidth")
+	}
+	if a.Stride < a.K+1 {
+		panic("blas64: short stride for source")
+	}
+	if t.Stride < t.K+1 {
+		panic("blas64: short stride for destination")
+	}
+	if t.Uplo != a.Uplo {
+		panic("blas64: mismatched BLAS uplo")
+	}
+	if t.Diag != a.Diag {
+		panic("blas64: mismatched BLAS diag")
+	}
+	dst := Band{
+		Rows: t.N, Cols: t.N,
+		Stride: t.Stride,
+		Data:   t.Data,
+	}
+	src := BandCols{
+		Rows: a.N, Cols: a.N,
+		Stride: a.Stride,
+		Data:   a.Data,
+	}
+	switch a.Uplo {
+	default:
+		panic("blas64: bad BLAS uplo")
+	case blas.Upper:
+		dst.KU = t.K
+		src.KU = a.K
+	case blas.Lower:
+		dst.KL = t.K
+		src.KL = a.K
+	}
+	dst.From(src)
 }
 
 func min(a, b int) int {

@@ -36,9 +36,9 @@ func (t General) From(a GeneralCols) {
 	if len(t.Data) < (t.Rows-1)*t.Stride+t.Cols {
 		panic("blas64: short data slice")
 	}
-	for i := 0; i < a.Cols; i++ {
-		for j, v := range a.Data[i*a.Stride : i*a.Stride+a.Rows] {
-			t.Data[i+j*t.Stride] = v
+	for j := 0; j < a.Cols; j++ {
+		for i, v := range a.Data[j*a.Stride : j*a.Stride+a.Rows] {
+			t.Data[i*t.Stride+j] = v
 		}
 	}
 }

@@ -65,6 +65,11 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 					deriv += pt.Coeff * originValue
 					continue
 				}
+				// Copying the code anew has two benefits. First, it
+				// avoids floating point issues where adding and then
+				// subtracting the step don't return to the exact same
+				// location. Secondly, it protects against the function
+				// modifying the input data.
 				copy(xcopy, x)
 				xcopy[i] += pt.Loc * step
 				deriv += pt.Coeff * f(xcopy)
@@ -88,6 +93,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 				case <-quit:
 					return
 				case run := <-sendChan:
+					// See above comment on the copy.
 					copy(xcopy, x)
 					xcopy[run.idx] += run.pt.Loc * step
 					run.result = f(xcopy)

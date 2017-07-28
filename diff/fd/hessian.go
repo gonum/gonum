@@ -98,7 +98,12 @@ func hessianSerial(dst *mat.SymDense, f func(x []float64) float64, x []float64, 
 					if pti.Loc == 0 && ptj.Loc == 0 {
 						v = origin
 					} else {
-						copy(xCopy, x) // Perform copy anew because of floating point issues.
+						// Copying the code anew has two benefits. First, it
+						// avoids floating point issues where adding and then
+						// subtracting the step don't return to the exact same
+						// location. Secondly, it protects against the function
+						// modifying the input data.
+						copy(xCopy, x)
 						xCopy[i] += pti.Loc * step
 						xCopy[j] += ptj.Loc * step
 						v = f(xCopy)
@@ -147,6 +152,7 @@ func hessianConcurrent(dst *mat.SymDense, nWorkers, evals int, f func(x []float6
 					originWG.Wait()
 					r.result = originValue
 				} else {
+					// See hessianSerial for comment on the copy.
 					copy(xCopy, x)
 					xCopy[r.i] += stencil[r.iIdx].Loc * step
 					xCopy[r.j] += stencil[r.jIdx].Loc * step

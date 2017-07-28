@@ -84,6 +84,7 @@ func hessianSerial(dst *mat.SymDense, f func(x []float64) float64, x []float64, 
 	n := len(x)
 	xCopy := make([]float64, n)
 	fo := func() float64 {
+		// Copy x in case it is modified during the call.
 		copy(xCopy, x)
 		return f(x)
 	}
@@ -98,7 +99,7 @@ func hessianSerial(dst *mat.SymDense, f func(x []float64) float64, x []float64, 
 					if pti.Loc == 0 && ptj.Loc == 0 {
 						v = origin
 					} else {
-						// Copying the code anew has two benefits. First, it
+						// Copying the data anew has two benefits. First, it
 						// avoids floating point issues where adding and then
 						// subtracting the step don't return to the exact same
 						// location. Secondly, it protects against the function
@@ -125,7 +126,7 @@ func hessianConcurrent(dst *mat.SymDense, nWorkers, evals int, f func(x []float6
 	}
 
 	send := make(chan run, evals)
-	ans := make(chan run)
+	ans := make(chan run, evals)
 
 	var originWG sync.WaitGroup
 	hasOrigin := usesOrigin(stencil)

@@ -71,7 +71,7 @@ func ExampleExcerpt() {
 		mat.Formatted(big, mat.Prefix(" "), mat.Excerpt(3)))
 
 	// The long vector is also too large, ...
-	long := mat.NewVector(100, nil)
+	long := mat.NewVecDense(100, nil)
 	for i := 0; i < 100; i++ {
 		long.SetVec(i, float64(i))
 	}

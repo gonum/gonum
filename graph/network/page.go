@@ -55,7 +55,7 @@ func PageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
 	for i := range last {
 		last[i] = 1
 	}
-	lastV := mat.NewVector(len(nodes), last)
+	lastV := mat.NewVecDense(len(nodes), last)
 
 	vec := make([]float64, len(nodes))
 	var sum float64
@@ -68,7 +68,7 @@ func PageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
 	for i := range vec {
 		vec[i] *= f
 	}
-	v := mat.NewVector(len(nodes), vec)
+	v := mat.NewVecDense(len(nodes), vec)
 
 	for {
 		lastV, v = v, lastV
@@ -122,7 +122,7 @@ func PageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
 	for i := range last {
 		last[i] = 1
 	}
-	lastV := mat.NewVector(len(nodes), last)
+	lastV := mat.NewVecDense(len(nodes), last)
 
 	vec := make([]float64, len(nodes))
 	var sum float64
@@ -135,7 +135,7 @@ func PageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
 	for i := range vec {
 		vec[i] *= f
 	}
-	v := mat.NewVector(len(nodes), vec)
+	v := mat.NewVecDense(len(nodes), vec)
 
 	dt := (1 - damp) / float64(len(nodes))
 	for {
@@ -171,7 +171,7 @@ func (m rowCompressedMatrix) addTo(i, j int, v float64) { m[i].addTo(j, v) }
 // mulVecUnitary multiplies the receiver by the src vector, storing
 // the result in dst. It assumes src and dst are the same length as m
 // and that both have unitary vector increments.
-func (m rowCompressedMatrix) mulVecUnitary(dst, src *mat.Vector) {
+func (m rowCompressedMatrix) mulVecUnitary(dst, src *mat.VecDense) {
 	dMat := dst.RawVector().Data
 	for i, r := range m {
 		dMat[i] = r.dotUnitary(src)
@@ -190,7 +190,7 @@ func (r *compressedRow) addTo(j int, v float64) {
 
 // dotUnitary performs a simplified scatter-based Ddot operations on
 // v and the receiver. v must have have a unitary vector increment.
-func (r compressedRow) dotUnitary(v *mat.Vector) float64 {
+func (r compressedRow) dotUnitary(v *mat.VecDense) float64 {
 	var sum float64
 	vec := v.RawVector().Data
 	for _, e := range r {
@@ -208,7 +208,7 @@ type sparseElement struct {
 // onesDotUnitary performs the equivalent of a Ddot of v with
 // a ones vector of equal length. v must have have a unitary
 // vector increment.
-func onesDotUnitary(alpha float64, v *mat.Vector) float64 {
+func onesDotUnitary(alpha float64, v *mat.VecDense) float64 {
 	var sum float64
 	for _, f := range v.RawVector().Data {
 		sum += alpha * f

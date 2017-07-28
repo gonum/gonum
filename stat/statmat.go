@@ -134,10 +134,10 @@ func corrToCov(c *mat.SymDense, sigma []float64) {
 // Mahalanobis returns NaN if the linear solve fails.
 //
 // See https://en.wikipedia.org/wiki/Mahalanobis_distance for more information.
-func Mahalanobis(x, y *mat.Vector, chol *mat.Cholesky) float64 {
-	var diff mat.Vector
+func Mahalanobis(x, y *mat.VecDense, chol *mat.Cholesky) float64 {
+	var diff mat.VecDense
 	diff.SubVec(x, y)
-	var tmp mat.Vector
+	var tmp mat.VecDense
 	err := chol.SolveVec(&tmp, &diff)
 	if err != nil {
 		return math.NaN()

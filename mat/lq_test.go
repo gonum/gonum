@@ -123,11 +123,11 @@ func TestSolveLQVec(t *testing.T) {
 			if trans {
 				br = n
 			}
-			b := NewVector(br, nil)
+			b := NewVecDense(br, nil)
 			for i := 0; i < br; i++ {
 				b.SetVec(i, rand.Float64())
 			}
-			var x Vector
+			var x VecDense
 			lq := &LQ{}
 			lq.Factorize(a)
 			lq.SolveVec(&x, trans, b)
@@ -170,8 +170,8 @@ func TestSolveLQCond(t *testing.T) {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
-		bvec := NewVector(m, nil)
-		var xvec Vector
+		bvec := NewVecDense(m, nil)
+		var xvec VecDense
 		if err := lq.SolveVec(&xvec, false, bvec); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}

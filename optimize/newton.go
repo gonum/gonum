@@ -88,8 +88,8 @@ func (n *Newton) NextDirection(loc *Location, dir []float64) (stepSize float64) 
 	// the Identity) from Nocedal, Wright (2006), 2nd edition.
 
 	dim := len(loc.X)
-	d := mat.NewVector(dim, dir)
-	grad := mat.NewVector(dim, loc.Gradient)
+	d := mat.NewVecDense(dim, dir)
+	grad := mat.NewVecDense(dim, loc.Gradient)
 	n.hess.CopySym(loc.Hessian)
 
 	// Find the smallest diagonal entry of the Hessian.

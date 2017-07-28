@@ -11,34 +11,34 @@ import (
 )
 
 var (
-	vector *Vector
+	vector *VecDense
 
 	_ Matrix = vector
 
 	_ Reseter = vector
 )
 
-// Vector represents a column vector.
-type Vector struct {
+// VecDense represents a column vector.
+type VecDense struct {
 	mat blas64.Vector
 	n   int
 	// A BLAS vector can have a negative increment, but allowing this
 	// in the mat type complicates a lot of code, and doesn't gain anything.
-	// Vector must have positive increment in this package.
+	// VecDense must have positive increment in this package.
 }
 
-// NewVector creates a new Vector of length n. If data == nil,
+// NewVecDense creates a new VecDense of length n. If data == nil,
 // a new slice is allocated for the backing slice. If len(data) == n, data is
-// used as the backing slice, and changes to the elements of the returned Vector
-// will be reflected in data. If neither of these is true, NewVector will panic.
-func NewVector(n int, data []float64) *Vector {
+// used as the backing slice, and changes to the elements of the returned VecDense
+// will be reflected in data. If neither of these is true, NewVecDense will panic.
+func NewVecDense(n int, data []float64) *VecDense {
 	if len(data) != n && data != nil {
 		panic(ErrShape)
 	}
 	if data == nil {
 		data = make([]float64, n)
 	}
-	return &Vector{
+	return &VecDense{
 		mat: blas64.Vector{
 			Inc:  1,
 			Data: data,
@@ -47,15 +47,15 @@ func NewVector(n int, data []float64) *Vector {
 	}
 }
 
-// SliceVec returns a new Vector that shares backing data with the receiver.
+// SliceVec returns a new VecDense that shares backing data with the receiver.
 // The returned matrix starts at i of the receiver and extends k-i elements.
 // SliceVec panics with ErrIndexOutOfRange if the slice is outside the capacity
 // of the receiver.
-func (v *Vector) SliceVec(i, k int) *Vector {
+func (v *VecDense) SliceVec(i, k int) *VecDense {
 	if i < 0 || k <= i || v.Cap() < k {
 		panic(ErrIndexOutOfRange)
 	}
-	return &Vector{
+	return &VecDense{
 		n: k - i,
 		mat: blas64.Vector{
 			Inc:  v.mat.Inc,
@@ -66,7 +66,7 @@ func (v *Vector) SliceVec(i, k int) *Vector {
 
 // Dims returns the number of rows and columns in the matrix. Columns is always 1
 // for a non-Reset vector.
-func (v *Vector) Dims() (r, c int) {
+func (v *VecDense) Dims() (r, c int) {
 	if v.IsZero() {
 		return 0, 0
 	}
@@ -75,7 +75,7 @@ func (v *Vector) Dims() (r, c int) {
 
 // Caps returns the number of rows and columns in the backing matrix. Columns is always 1
 // for a non-Reset vector.
-func (v *Vector) Caps() (r, c int) {
+func (v *VecDense) Caps() (r, c int) {
 	if v.IsZero() {
 		return 0, 0
 	}
@@ -83,12 +83,12 @@ func (v *Vector) Caps() (r, c int) {
 }
 
 // Len returns the length of the vector.
-func (v *Vector) Len() int {
+func (v *VecDense) Len() int {
 	return v.n
 }
 
 // Cap returns the capacity of the vector.
-func (v *Vector) Cap() int {
+func (v *VecDense) Cap() int {
 	if v.IsZero() {
 		return 0
 	}
@@ -96,7 +96,7 @@ func (v *Vector) Cap() int {
 }
 
 // T performs an implicit transpose by returning the receiver inside a Transpose.
-func (v *Vector) T() Matrix {
+func (v *VecDense) T() Matrix {
 	return Transpose{v}
 }
 
@@ -104,7 +104,7 @@ func (v *Vector) T() Matrix {
 // receiver of a dimensionally restricted operation.
 //
 // See the Reseter interface for more information.
-func (v *Vector) Reset() {
+func (v *VecDense) Reset() {
 	// No change of Inc or n to 0 may be
 	// made unless both are set to 0.
 	v.mat.Inc = 0
@@ -114,7 +114,7 @@ func (v *Vector) Reset() {
 
 // CloneVec makes a copy of a into the receiver, overwriting the previous value
 // of the receiver.
-func (v *Vector) CloneVec(a *Vector) {
+func (v *VecDense) CloneVec(a *VecDense) {
 	if v == a {
 		return
 	}
@@ -126,14 +126,14 @@ func (v *Vector) CloneVec(a *Vector) {
 	blas64.Copy(v.n, a.mat, v.mat)
 }
 
-func (v *Vector) RawVector() blas64.Vector {
+func (v *VecDense) RawVector() blas64.Vector {
 	return v.mat
 }
 
 // CopyVec makes a copy of elements of a into the receiver. It is similar to the
 // built-in copy; it copies as much as the overlap between the two vectors and
 // returns the number of elements it copied.
-func (v *Vector) CopyVec(a *Vector) int {
+func (v *VecDense) CopyVec(a *VecDense) int {
 	n := min(v.Len(), a.Len())
 	if v != a {
 		blas64.Copy(n, a.mat, v.mat)
@@ -142,7 +142,7 @@ func (v *Vector) CopyVec(a *Vector) int {
 }
 
 // ScaleVec scales the vector a by alpha, placing the result in the receiver.
-func (v *Vector) ScaleVec(alpha float64, a *Vector) {
+func (v *VecDense) ScaleVec(alpha float64, a *VecDense) {
 	n := a.Len()
 	if v != a {
 		v.reuseAs(n)
@@ -162,7 +162,7 @@ func (v *Vector) ScaleVec(alpha float64, a *Vector) {
 }
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.
-func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
+func (v *VecDense) AddScaledVec(a *VecDense, alpha float64, b *VecDense) {
 	if alpha == 1 {
 		v.AddVec(a, b)
 		return
@@ -214,7 +214,7 @@ func (v *Vector) AddScaledVec(a *Vector, alpha float64, b *Vector) {
 }
 
 // AddVec adds the vectors a and b, placing the result in the receiver.
-func (v *Vector) AddVec(a, b *Vector) {
+func (v *VecDense) AddVec(a, b *VecDense) {
 	ar := a.Len()
 	br := b.Len()
 
@@ -242,7 +242,7 @@ func (v *Vector) AddVec(a, b *Vector) {
 }
 
 // SubVec subtracts the vector b from a, placing the result in the receiver.
-func (v *Vector) SubVec(a, b *Vector) {
+func (v *VecDense) SubVec(a, b *VecDense) {
 	ar := a.Len()
 	br := b.Len()
 
@@ -271,7 +271,7 @@ func (v *Vector) SubVec(a, b *Vector) {
 
 // MulElemVec performs element-wise multiplication of a and b, placing the result
 // in the receiver.
-func (v *Vector) MulElemVec(a, b *Vector) {
+func (v *VecDense) MulElemVec(a, b *VecDense) {
 	ar := a.Len()
 	br := b.Len()
 
@@ -296,7 +296,7 @@ func (v *Vector) MulElemVec(a, b *Vector) {
 
 // DivElemVec performs element-wise division of a by b, placing the result
 // in the receiver.
-func (v *Vector) DivElemVec(a, b *Vector) {
+func (v *VecDense) DivElemVec(a, b *VecDense) {
 	ar := a.Len()
 	br := b.Len()
 
@@ -321,7 +321,7 @@ func (v *Vector) DivElemVec(a, b *Vector) {
 
 // MulVec computes a * b. The result is stored into the receiver.
 // MulVec panics if the number of columns in a does not equal the number of rows in b.
-func (v *Vector) MulVec(a Matrix, b *Vector) {
+func (v *VecDense) MulVec(a Matrix, b *VecDense) {
 	r, c := a.Dims()
 	br := b.Len()
 	if c != br {
@@ -337,7 +337,7 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 	v.reuseAs(r)
 	var restore func()
 	if v == a {
-		v, restore = v.isolatedWorkspace(a.(*Vector))
+		v, restore = v.isolatedWorkspace(a.(*VecDense))
 		defer restore()
 	} else if v == b {
 		v, restore = v.isolatedWorkspace(b)
@@ -345,7 +345,7 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 	}
 
 	switch a := a.(type) {
-	case *Vector:
+	case *VecDense:
 		if v != a {
 			v.checkOverlap(a.mat)
 		}
@@ -425,7 +425,7 @@ func (v *Vector) MulVec(a Matrix, b *Vector) {
 
 // reuseAs resizes an empty vector to a r×1 vector,
 // or checks that a non-empty matrix is r×1.
-func (v *Vector) reuseAs(r int) {
+func (v *VecDense) reuseAs(r int) {
 	if v.IsZero() {
 		v.mat = blas64.Vector{
 			Inc:  1,
@@ -440,14 +440,14 @@ func (v *Vector) reuseAs(r int) {
 }
 
 // IsZero returns whether the receiver is zero-sized. Zero-sized vectors can be the
-// receiver for size-restricted operations. Vectors can be zeroed using Reset.
-func (v *Vector) IsZero() bool {
+// receiver for size-restricted operations. VecDenses can be zeroed using Reset.
+func (v *VecDense) IsZero() bool {
 	// It must be the case that v.Dims() returns
 	// zeros in this case. See comment in Reset().
 	return v.mat.Inc == 0
 }
 
-func (v *Vector) isolatedWorkspace(a *Vector) (n *Vector, restore func()) {
+func (v *VecDense) isolatedWorkspace(a *VecDense) (n *VecDense, restore func()) {
 	l := a.Len()
 	n = getWorkspaceVec(l, false)
 	return n, func() {
@@ -458,7 +458,7 @@ func (v *Vector) isolatedWorkspace(a *Vector) (n *Vector, restore func()) {
 
 // asDense returns a Dense representation of the receiver with the same
 // underlying data.
-func (v *Vector) asDense() *Dense {
+func (v *VecDense) asDense() *Dense {
 	return &Dense{
 		mat:     v.asGeneral(),
 		capRows: v.n,
@@ -468,7 +468,7 @@ func (v *Vector) asDense() *Dense {
 
 // asGeneral returns a blas64.General representation of the receiver with the
 // same underlying data.
-func (v *Vector) asGeneral() blas64.General {
+func (v *VecDense) asGeneral() blas64.General {
 	return blas64.General{
 		Rows:   v.n,
 		Cols:   1,

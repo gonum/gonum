@@ -83,7 +83,7 @@ func TestInner(t *testing.T) {
 			}
 
 			want := cell.At(0, 0)
-			got := Inner(makeVectorInc(inc.x, test.x), m, makeVectorInc(inc.y, test.y))
+			got := Inner(makeVecDenseInc(inc.x, test.x), m, makeVecDenseInc(inc.y, test.y))
 			if got != want {
 				t.Errorf("Test %v: want %v, got %v", i, want, got)
 			}
@@ -110,8 +110,8 @@ func TestInnerSym(t *testing.T) {
 				data[j*n+i] = data[i*n+j]
 			}
 		}
-		x := makeVectorInc(inc.x, xData)
-		y := makeVectorInc(inc.y, yData)
+		x := makeVecDenseInc(inc.x, xData)
+		y := makeVecDenseInc(inc.y, yData)
 		m := NewDense(n, n, data)
 		ans := Inner(x, m, y)
 		sym := NewSymDense(n, data)
@@ -128,8 +128,8 @@ func TestInnerSym(t *testing.T) {
 	}
 }
 
-func makeVectorInc(inc int, f []float64) *Vector {
-	v := &Vector{
+func makeVecDenseInc(inc int, f []float64) *VecDense {
+	v := &VecDense{
 		n: len(f),
 		mat: blas64.Vector{
 			Inc:  inc,
@@ -151,9 +151,9 @@ func makeVectorInc(inc int, f []float64) *Vector {
 }
 
 func benchmarkInner(b *testing.B, m, n int) {
-	x := NewVector(m, nil)
+	x := NewVecDense(m, nil)
 	randomSlice(x.mat.Data)
-	y := NewVector(n, nil)
+	y := NewVecDense(n, nil)
 	randomSlice(y.mat.Data)
 	data := make([]float64, m*n)
 	randomSlice(data)

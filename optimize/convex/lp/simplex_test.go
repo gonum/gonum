@@ -176,9 +176,9 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 	primalOpt, primalX, _, errPrimal := simplex(initialBasic, c, a, b, convergenceTol)
 	if errPrimal == nil {
 		// No error solving the simplex, check that the solution is feasible.
-		var bCheck mat.Vector
-		bCheck.MulVec(a, mat.NewVector(len(primalX), primalX))
-		if !mat.EqualApprox(&bCheck, mat.NewVector(len(b), b), 1e-10) {
+		var bCheck mat.VecDense
+		bCheck.MulVec(a, mat.NewVecDense(len(primalX), primalX))
+		if !mat.EqualApprox(&bCheck, mat.NewVecDense(len(b), b), 1e-10) {
 			t.Errorf("No error in primal but solution infeasible")
 		}
 	}
@@ -223,9 +223,9 @@ func testSimplex(t *testing.T, initialBasic []int, c []float64, a mat.Matrix, b 
 	dualOpt, dualX, _, errDual := simplex(nil, cNew, aNew, bNew, convergenceTol)
 	if errDual == nil {
 		// Check that the dual is feasible
-		var bCheck mat.Vector
-		bCheck.MulVec(aNew, mat.NewVector(len(dualX), dualX))
-		if !mat.EqualApprox(&bCheck, mat.NewVector(len(bNew), bNew), 1e-10) {
+		var bCheck mat.VecDense
+		bCheck.MulVec(aNew, mat.NewVecDense(len(dualX), dualX))
+		if !mat.EqualApprox(&bCheck, mat.NewVecDense(len(bNew), bNew), 1e-10) {
 			t.Errorf("No error in dual but solution infeasible")
 		}
 	}

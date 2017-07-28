@@ -152,8 +152,8 @@ func studentsTConditional(observed []int, values []float64, nu float64, mu []flo
 	}
 
 	// Compute mu_1 + sigma_{2,1}^T * sigma_{2,2}^-1 (v - mu_2).
-	v := mat.NewVector(ob, mu2)
-	var tmp, tmp2 mat.Vector
+	v := mat.NewVecDense(ob, mu2)
+	var tmp, tmp2 mat.VecDense
 	err := chol.SolveVec(&tmp, v)
 	if err != nil {
 		return math.NaN(), nil, nil
@@ -256,9 +256,9 @@ func (s *StudentsT) LogProb(y []float64) float64 {
 	copy(shift, y)
 	floats.Sub(shift, s.mu)
 
-	x := mat.NewVector(s.dim, shift)
+	x := mat.NewVecDense(s.dim, shift)
 
-	var tmp mat.Vector
+	var tmp mat.VecDense
 	s.chol.SolveVec(&tmp, x)
 
 	dot := mat.Dot(&tmp, x)
@@ -342,8 +342,8 @@ func (s *StudentsT) Rand(x []float64) []float64 {
 			tmp[i] = s.src.NormFloat64()
 		}
 	}
-	xVec := mat.NewVector(s.dim, x)
-	tmpVec := mat.NewVector(s.dim, tmp)
+	xVec := mat.NewVecDense(s.dim, x)
+	tmpVec := mat.NewVecDense(s.dim, tmp)
 	xVec.MulVec(&s.lower, tmpVec)
 
 	u := distuv.ChiSquared{K: s.nu, Src: s.src}.Rand()

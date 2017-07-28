@@ -203,10 +203,10 @@ func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 
 // MarshalBinary encodes the receiver into a binary form and returns the result.
 //
-// Vector is little-endian encoded as follows:
+// VecDense is little-endian encoded as follows:
 //   0 -  7  number of elements     (int64)
 //   8 - ..  vector's data elements (float64)
-func (v Vector) MarshalBinary() ([]byte, error) {
+func (v VecDense) MarshalBinary() ([]byte, error) {
 	bufLen := int64(sizeInt64) + int64(v.n)*int64(sizeFloat64)
 	if bufLen <= 0 {
 		// bufLen is too big and has wrapped around.
@@ -230,7 +230,7 @@ func (v Vector) MarshalBinary() ([]byte, error) {
 // returns the number of bytes written and an error if any.
 //
 // See MarshalBainry for the on-disk format.
-func (v Vector) MarshalBinaryTo(w io.Writer) (int, error) {
+func (v VecDense) MarshalBinaryTo(w io.Writer) (int, error) {
 	var (
 		n   int
 		buf [8]byte
@@ -256,18 +256,18 @@ func (v Vector) MarshalBinaryTo(w io.Writer) (int, error) {
 }
 
 // UnmarshalBinary decodes the binary form into the receiver.
-// It panics if the receiver is a non-zero Vector.
+// It panics if the receiver is a non-zero VecDense.
 //
 // See MarshalBinary for the on-disk layout.
 //
 // Limited checks on the validity of the binary input are performed:
 //  - matrix.ErrShape is returned if the number of rows is negative,
-//  - an error is returned if the resulting Vector is too
+//  - an error is returned if the resulting VecDense is too
 //  big for the current architecture (e.g. a 16GB vector written by a
 //  64b application and read back from a 32b application.)
 // UnmarshalBinary does not limit the size of the unmarshaled vector, and so
 // it should not be used on untrusted data.
-func (v *Vector) UnmarshalBinary(data []byte) error {
+func (v *VecDense) UnmarshalBinary(data []byte) error {
 	if !v.IsZero() {
 		panic("mat: unmarshal into non-zero vector")
 	}
@@ -296,11 +296,11 @@ func (v *Vector) UnmarshalBinary(data []byte) error {
 
 // UnmarshalBinaryFrom decodes the binary form into the receiver, from the
 // io.Reader and returns the number of bytes read and an error if any.
-// It panics if the receiver is a non-zero Vector.
+// It panics if the receiver is a non-zero VecDense.
 //
 // See MarshalBinary for the on-disk layout.
 // See UnmarshalBinary for the list of sanity checks performed on the input.
-func (v *Vector) UnmarshalBinaryFrom(r io.Reader) (int, error) {
+func (v *VecDense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 	if !v.IsZero() {
 		panic("mat: unmarshal into non-zero vector")
 	}

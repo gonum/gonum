@@ -15,7 +15,7 @@ import (
 // A is symmetric positive definite, though the operation works for any matrix A.
 //
 // Inner panics if x.Len != m or y.Len != n when A is an m x n matrix.
-func Inner(x *Vector, A Matrix, y *Vector) float64 {
+func Inner(x *VecDense, A Matrix, y *VecDense) float64 {
 	m, n := A.Dims()
 	if x.Len() != m {
 		panic(ErrShape)

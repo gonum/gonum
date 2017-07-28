@@ -24,11 +24,11 @@ type BFGS struct {
 	ls *LinesearchMethod
 
 	dim  int
-	x    mat.Vector // Location of the last major iteration.
-	grad mat.Vector // Gradient at the last major iteration.
-	s    mat.Vector // Difference between locations in this and the previous iteration.
-	y    mat.Vector // Difference between gradients in this and the previous iteration.
-	tmp  mat.Vector
+	x    mat.VecDense // Location of the last major iteration.
+	grad mat.VecDense // Gradient at the last major iteration.
+	s    mat.VecDense // Difference between locations in this and the previous iteration.
+	y    mat.VecDense // Difference between gradients in this and the previous iteration.
+	tmp  mat.VecDense
 
 	invHess *mat.SymDense
 
@@ -57,8 +57,8 @@ func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 	b.dim = dim
 	b.first = true
 
-	x := mat.NewVector(dim, loc.X)
-	grad := mat.NewVector(dim, loc.Gradient)
+	x := mat.NewVecDense(dim, loc.X)
+	grad := mat.NewVecDense(dim, loc.Gradient)
 	b.x.CloneVec(x)
 	b.grad.CloneVec(grad)
 
@@ -76,7 +76,7 @@ func (b *BFGS) InitDirection(loc *Location, dir []float64) (stepSize float64) {
 
 	// Initial direction is just negative of the gradient because the Hessian
 	// is an identity matrix.
-	d := mat.NewVector(dim, dir)
+	d := mat.NewVecDense(dim, dir)
 	d.ScaleVec(-1, grad)
 	return 1 / mat.Norm(d, 2)
 }
@@ -93,8 +93,8 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 		panic("bfgs: unexpected size mismatch")
 	}
 
-	x := mat.NewVector(dim, loc.X)
-	grad := mat.NewVector(dim, loc.Gradient)
+	x := mat.NewVecDense(dim, loc.X)
+	grad := mat.NewVecDense(dim, loc.Gradient)
 
 	// s = x_{k+1} - x_{k}
 	b.s.SubVec(x, &b.x)
@@ -142,7 +142,7 @@ func (b *BFGS) NextDirection(loc *Location, dir []float64) (stepSize float64) {
 	b.grad.CopyVec(grad)
 
 	// New direction is stored in dir.
-	d := mat.NewVector(dim, dir)
+	d := mat.NewVecDense(dim, dir)
 	d.MulVec(b.invHess, grad)
 	d.ScaleVec(-1, d)
 

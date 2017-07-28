@@ -107,13 +107,13 @@ func (m *Dense) Solve(a, b Matrix) error {
 // by the matrix a and the right-hand side vector b. If A is singular or
 // near-singular, a Condition error is returned. Please see the documentation for
 // Dense.Solve for more information.
-func (v *Vector) SolveVec(a Matrix, b *Vector) error {
+func (v *VecDense) SolveVec(a Matrix, b *VecDense) error {
 	if v != b {
 		v.checkOverlap(b.mat)
 	}
 	_, c := a.Dims()
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
-	// instead recast the Vectors as Dense and call the matrix code.
+	// instead recast the VecDenses as Dense and call the matrix code.
 	v.reuseAs(c)
 	m := v.asDense()
 	// We conditionally create bm as m when b and v are identical

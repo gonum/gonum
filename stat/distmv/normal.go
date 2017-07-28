@@ -183,7 +183,7 @@ func (n *Normal) LogProb(x []float64) float64 {
 		panic(badSizeMismatch)
 	}
 	c := -0.5*float64(dim)*logTwoPi - n.logSqrtDet
-	dst := stat.Mahalanobis(mat.NewVector(dim, x), mat.NewVector(dim, n.mu), &n.chol)
+	dst := stat.Mahalanobis(mat.NewVecDense(dim, x), mat.NewVecDense(dim, n.mu), &n.chol)
 	return c - 0.5*dst*dst
 }
 
@@ -301,7 +301,7 @@ func (n *Normal) ScoreInput(score, x []float64) []float64 {
 	copy(tmp, x)
 	floats.Sub(tmp, n.mu)
 
-	n.chol.SolveVec(mat.NewVector(len(score), score), mat.NewVector(len(tmp), tmp))
+	n.chol.SolveVec(mat.NewVecDense(len(score), score), mat.NewVecDense(len(tmp), tmp))
 	floats.Scale(-1, score)
 	return score
 }
@@ -337,8 +337,8 @@ func (n *Normal) TransformNormal(dst, normal []float64) []float64 {
 // transformNormal performs the same operation as TransformNormal except no
 // safety checks are performed and both input slices must be non-nil.
 func (n *Normal) transformNormal(dst, normal []float64) []float64 {
-	srcVec := mat.NewVector(n.dim, normal)
-	dstVec := mat.NewVector(n.dim, dst)
+	srcVec := mat.NewVecDense(n.dim, normal)
+	dstVec := mat.NewVecDense(n.dim, dst)
 	dstVec.MulVec(&n.lower, srcVec)
 	floats.Add(dst, n.mu)
 	return dst

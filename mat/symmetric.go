@@ -232,7 +232,7 @@ func (s *SymDense) CopySym(a Symmetric) int {
 // SymRankOne performs a symetric rank-one update to the matrix a and stores
 // the result in the receiver
 //  s = a + alpha * x * x'
-func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *Vector) {
+func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *VecDense) {
 	n := x.Len()
 	if a.Symmetric() != n {
 		panic(ErrShape)
@@ -322,7 +322,7 @@ func (s *SymDense) SymOuterK(alpha float64, x Matrix) {
 // RankTwo performs a symmmetric rank-two update to the matrix a and stores
 // the result in the receiver
 //  m = a + alpha * (x * y' + y * x')
-func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *Vector) {
+func (s *SymDense) RankTwo(a Symmetric, alpha float64, x, y *VecDense) {
 	n := s.mat.N
 	if x.Len() != n {
 		panic(ErrShape)

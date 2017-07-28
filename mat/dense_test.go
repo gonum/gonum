@@ -1202,7 +1202,7 @@ func TestCopyDenseAlias(t *testing.T) {
 	}
 }
 
-func TestCopyVectorAlias(t *testing.T) {
+func TestCopyVecDenseAlias(t *testing.T) {
 	for _, horiz := range []bool{false, true} {
 		for do := 0; do < 2; do++ {
 			for di := 0; di < 3; di++ {
@@ -1212,7 +1212,7 @@ func TestCopyVectorAlias(t *testing.T) {
 						4, 5, 6,
 						7, 8, 9,
 					})
-					var src *Vector
+					var src *VecDense
 					var want *Dense
 					if horiz {
 						src = a.RowView(si)
@@ -1549,12 +1549,12 @@ func TestRankOne(t *testing.T) {
 		a := NewDense(flatten(test.m))
 		m := &Dense{}
 		// Check with a new matrix
-		m.RankOne(a, test.alpha, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
+		m.RankOne(a, test.alpha, NewVecDense(len(test.x), test.x), NewVecDense(len(test.y), test.y))
 		if !Equal(m, want) {
 			t.Errorf("unexpected result for RankOne test %d iteration 0: got: %+v want: %+v", i, m, want)
 		}
 		// Check with the same matrix
-		a.RankOne(a, test.alpha, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
+		a.RankOne(a, test.alpha, NewVecDense(len(test.x), test.x), NewVecDense(len(test.y), test.y))
 		if !Equal(a, want) {
 			t.Errorf("unexpected result for Outer test %d iteration 1: got: %+v want: %+v", i, m, want)
 		}
@@ -1603,7 +1603,7 @@ func TestOuter(t *testing.T) {
 			var m Dense
 			for j := 0; j < 2; j++ {
 				// Check with a new matrix - and then again.
-				m.Outer(f, NewVector(len(test.x), test.x), NewVector(len(test.y), test.y))
+				m.Outer(f, NewVecDense(len(test.x), test.x), NewVecDense(len(test.y), test.y))
 				if !Equal(&m, want) {
 					t.Errorf("unexpected result for Outer test %d iteration %d scale %v: got: %+v want: %+v", i, j, f, m, want)
 				}

@@ -178,8 +178,8 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 	an := mat.NewDense(m, len(nonBasicIdx), nil)
 	extractColumns(an, A, nonBasicIdx)
 
-	bVec := mat.NewVector(len(b), b)
-	cbVec := mat.NewVector(len(cb), cb)
+	bVec := mat.NewVecDense(len(b), b)
+	cbVec := mat.NewVecDense(len(cb), cb)
 
 	// Temporary data needed each iteration. (Described later)
 	r := make([]float64, n-m)
@@ -214,13 +214,13 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 	// of the rule in step 4 to avoid cycling.
 	for {
 		// Compute reduced costs -- r = cn - an^T ab^-T cb
-		var tmp mat.Vector
+		var tmp mat.VecDense
 		err = tmp.SolveVec(ab.T(), cbVec)
 		if err != nil {
 			break
 		}
 		data := make([]float64, n-m)
-		tmp2 := mat.NewVector(n-m, data)
+		tmp2 := mat.NewVecDense(n-m, data)
 		tmp2.MulVec(an.T(), &tmp)
 		floats.SubTo(r, cn, data)
 
@@ -267,7 +267,7 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 		an.SetCol(minIdx, tmpCol1)
 
 		// Compute the new xb.
-		xbVec := mat.NewVector(len(xb), xb)
+		xbVec := mat.NewVecDense(len(xb), xb)
 		err = xbVec.SolveVec(ab, bVec)
 		if err != nil {
 			break
@@ -288,12 +288,12 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 func computeMove(move []float64, minIdx int, A mat.Matrix, ab *mat.Dense, xb []float64, nonBasicIdx []int) error {
 	// Find ae.
 	col := mat.Col(nil, nonBasicIdx[minIdx], A)
-	aCol := mat.NewVector(len(col), col)
+	aCol := mat.NewVecDense(len(col), col)
 
 	// d = - Ab^-1 Ae
 	nb, _ := ab.Dims()
 	d := make([]float64, nb)
-	dVec := mat.NewVector(nb, d)
+	dVec := mat.NewVecDense(nb, d)
 	err := dVec.SolveVec(ab, aCol)
 	if err != nil {
 		return ErrLinSolve
@@ -431,9 +431,9 @@ func initializeFromBasic(xb []float64, ab *mat.Dense, b []float64) error {
 	if len(xb) != m {
 		panic("simplex: bad xb length")
 	}
-	xbMat := mat.NewVector(m, xb)
+	xbMat := mat.NewVecDense(m, xb)
 
-	err := xbMat.SolveVec(ab, mat.NewVector(m, b))
+	err := xbMat.SolveVec(ab, mat.NewVecDense(m, b))
 	if err != nil {
 		return errors.New("lp: subcolumns of A for supplied initial basic singular")
 	}

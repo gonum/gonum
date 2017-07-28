@@ -40,7 +40,7 @@ func (m *Dense) set(i, j int, v float64) {
 
 // At returns the element at row i.
 // It panics if i is out of bounds or if j is not zero.
-func (v *Vector) At(i, j int) float64 {
+func (v *VecDense) At(i, j int) float64 {
 	if uint(i) >= uint(v.n) {
 		panic(ErrRowAccess)
 	}
@@ -50,20 +50,20 @@ func (v *Vector) At(i, j int) float64 {
 	return v.at(i)
 }
 
-func (v *Vector) at(i int) float64 {
+func (v *VecDense) at(i int) float64 {
 	return v.mat.Data[i*v.mat.Inc]
 }
 
 // SetVec sets the element at row i to the value val.
 // It panics if i is out of bounds.
-func (v *Vector) SetVec(i int, val float64) {
+func (v *VecDense) SetVec(i int, val float64) {
 	if uint(i) >= uint(v.n) {
 		panic(ErrVectorAccess)
 	}
 	v.setVec(i, val)
 }
 
-func (v *Vector) setVec(i int, val float64) {
+func (v *VecDense) setVec(i int, val float64) {
 	v.mat.Data[i*v.mat.Inc] = val
 }
 

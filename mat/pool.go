@@ -51,7 +51,7 @@ var (
 	// poolTri is the TriDense equivalent of pool.
 	poolTri [63]sync.Pool
 
-	// poolVec is the Vector equivalent of pool.
+	// poolVec is the VecDense equivalent of pool.
 	poolVec [63]sync.Pool
 
 	// poolFloats is the []float64 equivalent of pool.
@@ -81,7 +81,7 @@ func init() {
 			}}
 		}
 		poolVec[i].New = func() interface{} {
-			return &Vector{mat: blas64.Vector{
+			return &VecDense{mat: blas64.Vector{
 				Inc:  1,
 				Data: make([]float64, l),
 			}}
@@ -176,12 +176,12 @@ func putWorkspaceTri(t *TriDense) {
 	poolTri[bits(uint64(cap(t.mat.Data)))].Put(t)
 }
 
-// getWorkspaceVec returns a *Vector of length n and a cap that
+// getWorkspaceVec returns a *VecDense of length n and a cap that
 // is less than 2*n. If clear is true, the data slice visible
 // through the Matrix interface is zeroed.
-func getWorkspaceVec(n int, clear bool) *Vector {
+func getWorkspaceVec(n int, clear bool) *VecDense {
 	l := uint64(n)
-	v := poolVec[bits(l)].Get().(*Vector)
+	v := poolVec[bits(l)].Get().(*VecDense)
 	v.mat.Data = v.mat.Data[:l]
 	if clear {
 		zero(v.mat.Data)
@@ -190,10 +190,10 @@ func getWorkspaceVec(n int, clear bool) *Vector {
 	return v
 }
 
-// putWorkspaceVec replaces a used *Vector into the appropriate size
+// putWorkspaceVec replaces a used *VecDense into the appropriate size
 // workspace pool. putWorkspaceVec must not be called with a matrix
 // where references to the underlying data slice have been kept.
-func putWorkspaceVec(v *Vector) {
+func putWorkspaceVec(v *VecDense) {
 	poolVec[bits(uint64(cap(v.mat.Data)))].Put(v)
 }
 

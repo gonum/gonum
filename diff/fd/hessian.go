@@ -38,7 +38,7 @@ func Hessian(dst *mat.SymDense, f func(x []float64) float64, x []float64, settin
 
 	// Default settings.
 	formula := Forward
-	step := math.Sqrt(formula.Step) // Use the sqrt because taking derivatives of derivatives
+	step := math.Sqrt(formula.Step) // Use the sqrt because taking derivatives of derivatives.
 	var originValue float64
 	var originKnown, concurrent bool
 
@@ -98,7 +98,7 @@ func hessianSerial(dst *mat.SymDense, f func(x []float64) float64, x []float64, 
 					if pti.Loc == 0 && ptj.Loc == 0 {
 						v = origin
 					} else {
-						copy(xCopy, x) // perform copy anew because of floating point issues
+						copy(xCopy, x) // Perform copy anew because of floating point issues.
 						xCopy[i] += pti.Loc * step
 						xCopy[j] += ptj.Loc * step
 						v = f(xCopy)
@@ -177,7 +177,7 @@ func hessianConcurrent(dst *mat.SymDense, nWorkers, evals int, f func(x []float6
 	}(send)
 
 	is2 := 1 / (step * step)
-	// Read in the results
+	// Read in the results.
 	for r := range ans {
 		v := r.result * stencil[r.iIdx].Coeff * stencil[r.jIdx].Coeff * is2
 		v += dst.At(r.i, r.j)

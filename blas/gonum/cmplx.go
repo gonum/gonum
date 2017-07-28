@@ -153,9 +153,6 @@ func (Implementation) Izamax(n int, x []complex128, incX int) int {
 func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, incY int) {
 	panic(noComplex)
 }
-func (Implementation) Zcopy(n int, x []complex128, incX int, y []complex128, incY int) {
-	panic(noComplex)
-}
 func (Implementation) Zscal(n int, alpha complex128, x []complex128, incX int) {
 	panic(noComplex)
 }

@@ -5,7 +5,6 @@
 package fd
 
 import (
-	"runtime"
 	"sync"
 
 	"gonum.org/v1/gonum/floats"
@@ -49,27 +48,30 @@ func Jacobian(dst *mat.Dense, f func(y, x []float64), x []float64, settings *Jac
 		panic("jacobian: mismatched matrix size")
 	}
 
-	if settings == nil {
-		settings = &JacobianSettings{}
-	}
-	if settings.OriginValue != nil && len(settings.OriginValue) != m {
-		panic("jacobian: mismatched OriginValue slice length")
-	}
+	// Default settings.
+	formula := Forward
+	step := formula.Step
+	var originValue []float64
+	var concurrent bool
 
-	formula := settings.Formula
-	if formula.isZero() {
-		formula = Forward
-	}
-	if formula.Derivative == 0 || formula.Stencil == nil || formula.Step == 0 {
-		panic("jacobian: bad formula")
-	}
-	if formula.Derivative != 1 {
-		panic("jacobian: invalid derivative order")
-	}
-
-	step := settings.Step
-	if step == 0 {
-		step = formula.Step
+	// Use user settings if provided.
+	if settings != nil {
+		if !settings.Formula.isZero() {
+			formula = settings.Formula
+			step = formula.Step
+			checkFormula(formula)
+			if formula.Derivative != 1 {
+				panic(badDerivOrder)
+			}
+		}
+		if settings.Step != 0 {
+			step = settings.Step
+		}
+		originValue = settings.OriginValue
+		if originValue != nil && len(originValue) != m {
+			panic("jacobian: mismatched OriginValue slice length")
+		}
+		concurrent = settings.Concurrent
 	}
 
 	evals := n * len(formula.Stencil)
@@ -79,18 +81,13 @@ func Jacobian(dst *mat.Dense, f func(y, x []float64), x []float64, settings *Jac
 			break
 		}
 	}
-	nWorkers := 1
-	if settings.Concurrent {
-		nWorkers = runtime.GOMAXPROCS(0)
-		if nWorkers > evals {
-			nWorkers = evals
-		}
-	}
+
+	nWorkers := computeWorkers(concurrent, evals)
 	if nWorkers == 1 {
-		jacobianSerial(dst, f, x, settings.OriginValue, formula, step)
-	} else {
-		jacobianConcurrent(dst, f, x, settings.OriginValue, formula, step, nWorkers)
+		jacobianSerial(dst, f, x, originValue, formula, step)
+		return
 	}
+	jacobianConcurrent(dst, f, x, originValue, formula, step, nWorkers)
 }
 
 func jacobianSerial(dst *mat.Dense, f func([]float64, []float64), x, origin []float64, formula Formula, step float64) {

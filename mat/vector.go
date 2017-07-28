@@ -13,10 +13,16 @@ import (
 var (
 	vector *VecDense
 
-	_ Matrix = vector
-
+	_ Matrix  = vector
+	_ Vector  = vector
 	_ Reseter = vector
 )
+
+// Vector is a column vector.
+type Vector interface {
+	Matrix
+	Len() int
+}
 
 // VecDense represents a column vector.
 type VecDense struct {

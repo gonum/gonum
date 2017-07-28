@@ -33,8 +33,8 @@ func ExampleCholesky() {
 	fmt.Printf("\nThe determinant of a is %0.4g\n\n", chol.Det())
 
 	// Use the factorization to solve the system of equations a * x = b.
-	b := mat.NewVector(4, []float64{1, 2, 3, 4})
-	var x mat.Vector
+	b := mat.NewVecDense(4, []float64{1, 2, 3, 4})
+	var x mat.VecDense
 	if err := chol.SolveVec(&x, b); err != nil {
 		fmt.Println("Matrix is near singular: ", err)
 	}
@@ -83,7 +83,7 @@ func ExampleCholesky_SymRankOne() {
 		fmt.Println("matrix a is not positive definite.")
 	}
 
-	x := mat.NewVector(4, []float64{0, 0, 0, 1})
+	x := mat.NewVecDense(4, []float64{0, 0, 0, 1})
 	fmt.Printf("\nx = %0.4v\n", mat.Formatted(x, mat.Prefix("    ")))
 
 	// Rank-1 update the factorization.

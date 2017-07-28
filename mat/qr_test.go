@@ -149,11 +149,11 @@ func TestSolveQRVec(t *testing.T) {
 			if trans {
 				br = n
 			}
-			b := NewVector(br, nil)
+			b := NewVecDense(br, nil)
 			for i := 0; i < br; i++ {
 				b.SetVec(i, rand.Float64())
 			}
-			var x Vector
+			var x VecDense
 			var qr QR
 			qr.Factorize(a)
 			qr.SolveVec(&x, trans, b)
@@ -196,8 +196,8 @@ func TestSolveQRCond(t *testing.T) {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
-		bvec := NewVector(m, nil)
-		var xvec Vector
+		bvec := NewVecDense(m, nil)
+		var xvec VecDense
 		if err := qr.SolveVec(&xvec, false, bvec); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}

@@ -62,8 +62,8 @@ func TestLURankOne(t *testing.T) {
 			// Apply a rank one update. Ensure the update magnitude is larger than
 			// the equal tolerance.
 			alpha := rand.Float64() + 1
-			x := NewVector(n, nil)
-			y := NewVector(n, nil)
+			x := NewVecDense(n, nil)
+			y := NewVecDense(n, nil)
 			for i := 0; i < n; i++ {
 				x.setVec(i, rand.Float64()+1)
 				y.setVec(i, rand.Float64()+1)
@@ -153,8 +153,8 @@ func TestSolveLUCond(t *testing.T) {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
 
-		bvec := NewVector(m, nil)
-		var xvec Vector
+		bvec := NewVecDense(m, nil)
+		var xvec VecDense
 		if err := lu.SolveVec(&xvec, false, bvec); err == nil {
 			t.Error("No error for near-singular matrix in matrix solve.")
 		}
@@ -169,17 +169,17 @@ func TestSolveLUVec(t *testing.T) {
 				a.Set(i, j, rand.NormFloat64())
 			}
 		}
-		b := NewVector(n, nil)
+		b := NewVecDense(n, nil)
 		for i := 0; i < n; i++ {
 			b.SetVec(i, rand.NormFloat64())
 		}
 		var lu LU
 		lu.Factorize(a)
-		var x Vector
+		var x VecDense
 		if err := lu.SolveVec(&x, false, b); err != nil {
 			continue
 		}
-		var got Vector
+		var got VecDense
 		got.MulVec(a, &x)
 		if !EqualApprox(&got, b, 1e-12) {
 			t.Errorf("Solve mismatch n = %v.\nWant: %v\nGot: %v", n, b, got)

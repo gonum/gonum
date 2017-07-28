@@ -263,11 +263,11 @@ func TestSolveVec(t *testing.T) {
 			}
 		}
 		br := m
-		b := NewVector(br, nil)
+		b := NewVecDense(br, nil)
 		for i := 0; i < br; i++ {
 			b.SetVec(i, rand.Float64())
 		}
-		var x Vector
+		var x VecDense
 		x.SolveVec(a, b)
 
 		// Test that the normal equations hold.
@@ -284,13 +284,13 @@ func TestSolveVec(t *testing.T) {
 	// Use testTwoInput
 	method := func(receiver, a, b Matrix) {
 		type SolveVecer interface {
-			SolveVec(a Matrix, b *Vector) error
+			SolveVec(a Matrix, b *VecDense) error
 		}
 		rd := receiver.(SolveVecer)
-		rd.SolveVec(a, b.(*Vector))
+		rd.SolveVec(a, b.(*VecDense))
 	}
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Solve(a, b)
 	}
-	testTwoInput(t, "SolveVec", &Vector{}, method, denseComparison, legalTypesNotVecVec, legalSizeSolve, 1e-12)
+	testTwoInput(t, "SolveVec", &VecDense{}, method, denseComparison, legalTypesNotVecVec, legalSizeSolve, 1e-12)
 }

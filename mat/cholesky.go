@@ -207,7 +207,7 @@ func (m *Dense) solveTwoChol(a, b *Cholesky) error {
 
 // SolveVec finds the vector v that solves A * v = b where A is represented
 // by the Cholesky decomposition, placing the result in v.
-func (c *Cholesky) SolveVec(v, b *Vector) error {
+func (c *Cholesky) SolveVec(v, b *VecDense) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
@@ -322,7 +322,7 @@ func (c *Cholesky) InverseTo(s *SymDense) error {
 //
 // SymRankOne updates a Cholesky factorization in O(n²) time. The Cholesky
 // factorization computation from scratch is O(n³).
-func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *Vector) (ok bool) {
+func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *VecDense) (ok bool) {
 	if !orig.valid() {
 		panic(badCholesky)
 	}

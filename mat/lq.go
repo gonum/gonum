@@ -190,13 +190,13 @@ func (lq *LQ) Solve(m *Dense, trans bool, b Matrix) error {
 
 // SolveVec finds a minimum-norm solution to a system of linear equations.
 // Please see LQ.Solve for the full documentation.
-func (lq *LQ) SolveVec(v *Vector, trans bool, b *Vector) error {
+func (lq *LQ) SolveVec(v *VecDense, trans bool, b *VecDense) error {
 	if v != b {
 		v.checkOverlap(b.mat)
 	}
 	r, c := lq.lq.Dims()
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
-	// instead recast the Vectors as Dense and call the matrix code.
+	// instead recast the VecDenses as Dense and call the matrix code.
 	if trans {
 		v.reuseAs(r)
 	} else {

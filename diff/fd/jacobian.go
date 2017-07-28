@@ -135,7 +135,7 @@ func jacobianConcurrent(dst *mat.Dense, f func([]float64, []float64), x, origin 
 		defer wg.Done()
 		xcopy := make([]float64, n)
 		y := make([]float64, m)
-		yVec := mat.NewVector(m, y)
+		yVec := mat.NewVecDense(m, y)
 		for job := range jobs {
 			copy(xcopy, x)
 			xcopy[job.j] += job.pt.Loc * step
@@ -179,7 +179,7 @@ func jacobianConcurrent(dst *mat.Dense, f func([]float64, []float64), x, origin 
 		// all columns of dst. Iterate again over all Formula points
 		// because we don't forbid repeated locations.
 
-		originVec := mat.NewVector(m, origin)
+		originVec := mat.NewVecDense(m, origin)
 		for _, pt := range formula.Stencil {
 			if pt.Loc != 0 {
 				continue

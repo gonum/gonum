@@ -359,7 +359,7 @@ func TestDet(t *testing.T) {
 
 func TestDot(t *testing.T) {
 	f := func(a, b Matrix) interface{} {
-		return Dot(a.(*Vector), b.(*Vector))
+		return Dot(a.(*VecDense), b.(*VecDense))
 	}
 	denseComparison := func(a, b *Dense) interface{} {
 		ra, ca := a.Dims()
@@ -473,7 +473,7 @@ func TestNormZero(t *testing.T) {
 		&SymDense{mat: blas64.Symmetric{Uplo: blas.Upper}},
 		&TriDense{},
 		&TriDense{mat: blas64.Triangular{Uplo: blas.Upper, Diag: blas.NonUnit}},
-		&Vector{},
+		&VecDense{},
 	} {
 		for _, norm := range []float64{1, 2, math.Inf(1)} {
 			panicked, message := panics(func() { Norm(a, norm) })

@@ -98,10 +98,10 @@ type Mutable interface {
 	Matrix
 }
 
-// A RowViewer can return a Vector reflecting a row that is backed by the matrix
-// data. The Vector returned will have length equal to the number of columns.
+// A RowViewer can return a VecDense reflecting a row that is backed by the matrix
+// data. The VecDense returned will have length equal to the number of columns.
 type RowViewer interface {
-	RowView(i int) *Vector
+	RowView(i int) *VecDense
 }
 
 // A RawRowViewer can return a slice of float64 reflecting a row that is backed by the matrix
@@ -110,10 +110,10 @@ type RawRowViewer interface {
 	RawRowView(i int) []float64
 }
 
-// A ColViewer can return a Vector reflecting a column that is backed by the matrix
-// data. The Vector returned will have length equal to the number of rows.
+// A ColViewer can return a VecDense reflecting a column that is backed by the matrix
+// data. The VecDense returned will have length equal to the number of rows.
 type ColViewer interface {
-	ColView(j int) *Vector
+	ColView(j int) *VecDense
 }
 
 // A RawColViewer can return a slice of float64 reflecting a column that is backed by the matrix
@@ -370,7 +370,7 @@ func Det(a Matrix) float64 {
 
 // Dot returns the sum of the element-wise product of a and b.
 // Dot panics if the matrix sizes are unequal.
-func Dot(a, b *Vector) float64 {
+func Dot(a, b *VecDense) float64 {
 	la := a.Len()
 	lb := b.Len()
 	if la != lb {
@@ -428,8 +428,8 @@ func Equal(a, b Matrix) bool {
 			return true
 		}
 	}
-	if ra, ok := aU.(*Vector); ok {
-		if rb, ok := bU.(*Vector); ok {
+	if ra, ok := aU.(*VecDense); ok {
+		if rb, ok := bU.(*VecDense); ok {
 			// If the raw vectors are the same length they must either both be
 			// transposed or both not transposed (or have length 1).
 			for i := 0; i < ra.n; i++ {
@@ -500,8 +500,8 @@ func EqualApprox(a, b Matrix, epsilon float64) bool {
 			return true
 		}
 	}
-	if ra, ok := aU.(*Vector); ok {
-		if rb, ok := bU.(*Vector); ok {
+	if ra, ok := aU.(*VecDense); ok {
+		if rb, ok := bU.(*VecDense); ok {
 			// If the raw vectors are the same length they must either both be
 			// transposed or both not transposed (or have length 1).
 			for i := 0; i < ra.n; i++ {
@@ -723,7 +723,7 @@ func Norm(a Matrix, norm float64) float64 {
 			defer putFloats(work)
 		}
 		return lapack64.Lansy(n, rm, work)
-	case *Vector:
+	case *VecDense:
 		rv := rma.RawVector()
 		switch norm {
 		default:

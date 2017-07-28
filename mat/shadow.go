@@ -154,7 +154,7 @@ func (t *TriDense) checkOverlap(a blas64.Triangular) bool {
 	return false
 }
 
-func (v *Vector) checkOverlap(a blas64.Vector) bool {
+func (v *VecDense) checkOverlap(a blas64.Vector) bool {
 	mat := v.mat
 	if cap(mat.Data) == 0 || cap(a.Data) == 0 {
 		return false

@@ -265,13 +265,13 @@ func TestCorrCov(t *testing.T) {
 func TestMahalanobis(t *testing.T) {
 	// Comparison with scipy.
 	for cas, test := range []struct {
-		x, y  *mat.Vector
+		x, y  *mat.VecDense
 		Sigma *mat.SymDense
 		ans   float64
 	}{
 		{
-			x: mat.NewVector(3, []float64{1, 2, 3}),
-			y: mat.NewVector(3, []float64{0.8, 1.1, -1}),
+			x: mat.NewVecDense(3, []float64{1, 2, 3}),
+			y: mat.NewVecDense(3, []float64{0.8, 1.1, -1}),
 			Sigma: mat.NewSymDense(3,
 				[]float64{
 					0.8, 0.3, 0.1,

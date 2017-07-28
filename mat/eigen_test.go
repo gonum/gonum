@@ -148,11 +148,11 @@ func TestSymEigen(t *testing.T) {
 
 			// Check that the eigenvalues are actually eigenvalues.
 			for i := 0; i < n; i++ {
-				v := NewVector(n, Col(nil, i, es.vectors))
-				var m Vector
+				v := NewVecDense(n, Col(nil, i, es.vectors))
+				var m VecDense
 				m.MulVec(s, v)
 
-				var scal Vector
+				var scal VecDense
 				scal.ScaleVec(es.values[i], v)
 
 				if !EqualApprox(&m, &scal, 1e-8) {

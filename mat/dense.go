@@ -201,14 +201,14 @@ func (m *Dense) T() Matrix {
 	return Transpose{m}
 }
 
-// ColView returns a Vector reflecting the column j, backed by the matrix data.
+// ColView returns a VecDense reflecting the column j, backed by the matrix data.
 //
 // See ColViewer for more information.
-func (m *Dense) ColView(j int) *Vector {
+func (m *Dense) ColView(j int) *VecDense {
 	if j >= m.mat.Cols || j < 0 {
 		panic(ErrColAccess)
 	}
-	return &Vector{
+	return &VecDense{
 		mat: blas64.Vector{
 			Inc:  m.mat.Stride,
 			Data: m.mat.Data[j : (m.mat.Rows-1)*m.mat.Stride+j+1],
@@ -250,11 +250,11 @@ func (m *Dense) SetRow(i int, src []float64) {
 // backed by the matrix data.
 //
 // See RowViewer for more information.
-func (m *Dense) RowView(i int) *Vector {
+func (m *Dense) RowView(i int) *VecDense {
 	if i >= m.mat.Rows || i < 0 {
 		panic(ErrRowAccess)
 	}
-	return &Vector{
+	return &VecDense{
 		mat: blas64.Vector{
 			Inc:  1,
 			Data: m.rawRowView(i),
@@ -391,7 +391,7 @@ func (m *Dense) Clone(a Matrix) {
 				copy(mat.Data[i*c:(i+1)*c], amat.Data[i*amat.Stride:i*amat.Stride+c])
 			}
 		}
-	case *Vector:
+	case *VecDense:
 		amat := aU.mat
 		mat.Data = make([]float64, aU.n)
 		blas64.Copy(aU.n,
@@ -415,7 +415,7 @@ func (m *Dense) Clone(a Matrix) {
 // Copy makes a copy of elements of a into the receiver. It is similar to the
 // built-in copy; it copies as much as the overlap between the two matrices and
 // returns the number of rows and columns it copied. If a aliases the receiver
-// and is a transposed Dense or Vector, with a non-unitary increment, Copy will
+// and is a transposed Dense or VecDense, with a non-unitary increment, Copy will
 // panic.
 //
 // See the Copier interface for more information.
@@ -457,7 +457,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 				// Nothing to do.
 			}
 		}
-	case *Vector:
+	case *VecDense:
 		var n, stride int
 		amat := aU.mat
 		if trans {

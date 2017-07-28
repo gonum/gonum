@@ -44,7 +44,7 @@ func (Bhattacharyya) DistNormal(l, r *Normal) float64 {
 	var chol mat.Cholesky
 	chol.Factorize(&sigma)
 
-	mahalanobis := stat.Mahalanobis(mat.NewVector(dim, l.mu), mat.NewVector(dim, r.mu), &chol)
+	mahalanobis := stat.Mahalanobis(mat.NewVecDense(dim, l.mu), mat.NewVecDense(dim, r.mu), &chol)
 	mahalanobisSq := mahalanobis * mahalanobis
 
 	dl := l.chol.LogDet()
@@ -153,7 +153,7 @@ func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 		panic(badSizeMismatch)
 	}
 
-	mahalanobis := stat.Mahalanobis(mat.NewVector(dim, l.mu), mat.NewVector(dim, r.mu), &r.chol)
+	mahalanobis := stat.Mahalanobis(mat.NewVecDense(dim, l.mu), mat.NewVecDense(dim, r.mu), &r.chol)
 	mahalanobisSq := mahalanobis * mahalanobis
 
 	// TODO(btracey): Optimize where there is a SolveCholeskySym
@@ -269,7 +269,7 @@ func (renyi Renyi) DistNormal(l, r *Normal) float64 {
 	}
 	logDetA := chol.LogDet()
 
-	mahalanobis := stat.Mahalanobis(mat.NewVector(dim, l.mu), mat.NewVector(dim, r.mu), &chol)
+	mahalanobis := stat.Mahalanobis(mat.NewVecDense(dim, l.mu), mat.NewVecDense(dim, r.mu), &chol)
 	mahalanobisSq := mahalanobis * mahalanobis
 
 	return (renyi.Alpha/2)*mahalanobisSq + 1/(2*(1-renyi.Alpha))*(logDetA-(1-renyi.Alpha)*logDetL-renyi.Alpha*logDetR)

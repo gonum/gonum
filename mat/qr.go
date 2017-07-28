@@ -186,13 +186,13 @@ func (qr *QR) Solve(m *Dense, trans bool, b Matrix) error {
 
 // SolveVec finds a minimum-norm solution to a system of linear equations.
 // Please see QR.Solve for the full documentation.
-func (qr *QR) SolveVec(v *Vector, trans bool, b *Vector) error {
+func (qr *QR) SolveVec(v *VecDense, trans bool, b *VecDense) error {
 	if v != b {
 		v.checkOverlap(b.mat)
 	}
 	r, c := qr.qr.Dims()
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
-	// instead recast the Vectors as Dense and call the matrix code.
+	// instead recast the VecDenses as Dense and call the matrix code.
 	if trans {
 		v.reuseAs(r)
 	} else {

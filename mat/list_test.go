@@ -72,8 +72,8 @@ func isAnySize2(ar, ac, br, bc int) bool {
 	return true
 }
 
-// isAnyVector returns true for any column vector sizes.
-func isAnyVector(ar, ac int) bool {
+// isAnyVecDense returns true for any column vector sizes.
+func isAnyVecDense(ar, ac int) bool {
 	return ac == 1
 }
 
@@ -142,27 +142,27 @@ func legalTypesSym(a, b Matrix) bool {
 	return true
 }
 
-// legalTypeVec returns whether v is a *Vector.
+// legalTypeVec returns whether v is a *VecDense.
 func legalTypeVec(v Matrix) bool {
-	_, ok := v.(*Vector)
+	_, ok := v.(*VecDense)
 	return ok
 }
 
-// legalTypesVecVec returns whether both inputs are *Vector.
+// legalTypesVecVec returns whether both inputs are *VecDense.
 func legalTypesVecVec(a, b Matrix) bool {
-	if _, ok := a.(*Vector); !ok {
+	if _, ok := a.(*VecDense); !ok {
 		return false
 	}
-	if _, ok := b.(*Vector); !ok {
+	if _, ok := b.(*VecDense); !ok {
 		return false
 	}
 	return true
 }
 
 // legalTypesNotVecVec returns whether the first input is an arbitrary Matrix
-// and the second input is a *Vector.
+// and the second input is a *VecDense.
 func legalTypesNotVecVec(a, b Matrix) bool {
-	_, ok := b.(*Vector)
+	_, ok := b.(*VecDense)
 	return ok
 }
 
@@ -183,7 +183,7 @@ func legalDims(a Matrix, m, n int) bool {
 			return false
 		}
 		return true
-	case *Vector:
+	case *VecDense:
 		if m < 0 || n < 0 {
 			return false
 		}
@@ -258,9 +258,9 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			}
 		}
 		rMatrix = returnAs(mat, t)
-	case *Vector:
+	case *VecDense:
 		if m == 0 && n == 0 {
-			return &Vector{}
+			return &VecDense{}
 		}
 		if n != 1 {
 			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))
@@ -270,7 +270,7 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 		if t.mat.Inc != 0 {
 			inc = t.mat.Inc
 		}
-		mat := &Vector{
+		mat := &VecDense{
 			mat: blas64.Vector{
 				Inc:  inc,
 				Data: make([]float64, inc*(length-1)+1),
@@ -363,8 +363,8 @@ func makeCopyOf(a Matrix) Matrix {
 			}
 		}
 		return returnAs(m, t)
-	case *Vector:
-		m := &Vector{
+	case *VecDense:
+		m := &VecDense{
 			mat: blas64.Vector{
 				Inc:  t.mat.Inc,
 				Data: make([]float64, t.mat.Inc*(t.n-1)+1),
@@ -492,7 +492,7 @@ func underlyingData(a Matrix) []float64 {
 		return t.mat.Data
 	case *TriDense:
 		return t.mat.Data
-	case *Vector:
+	case *VecDense:
 		return t.mat.Data
 	}
 }
@@ -505,8 +505,8 @@ var testMatrices = []Matrix{
 	&SymDense{},
 	NewTriDense(3, true, nil),
 	NewTriDense(3, false, nil),
-	NewVector(0, nil),
-	&Vector{mat: blas64.Vector{Inc: 10}},
+	NewVecDense(0, nil),
+	&VecDense{mat: blas64.Vector{Inc: 10}},
 	&basicMatrix{},
 	&basicSymmetric{},
 	&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}},
@@ -517,8 +517,8 @@ var testMatrices = []Matrix{
 	TransposeTri{NewTriDense(3, true, nil)},
 	Transpose{NewTriDense(3, false, nil)},
 	TransposeTri{NewTriDense(3, false, nil)},
-	Transpose{NewVector(0, nil)},
-	Transpose{&Vector{mat: blas64.Vector{Inc: 10}}},
+	Transpose{NewVecDense(0, nil)},
+	Transpose{&VecDense{mat: blas64.Vector{Inc: 10}}},
 	Transpose{&basicMatrix{}},
 	Transpose{&basicSymmetric{}},
 	Transpose{&basicTriangular{cap: 3, mat: blas64.Triangular{N: 3, Stride: 3, Uplo: blas.Upper}}},
@@ -893,7 +893,7 @@ func testOneInput(t *testing.T,
 				if !panicked {
 					t.Errorf("Did not panic with wrong size: %s", errStr)
 				}
-			case *Vector:
+			case *VecDense:
 				// Add to the column length.
 				wrongSize := makeRandOf(receiver, rr+1, rc)
 				panicked, _ = panics(func() { method(wrongSize, a) })
@@ -1054,7 +1054,7 @@ func testTwoInput(t *testing.T,
 					if !panicked {
 						t.Errorf("Did not panic with wrong size: %s", errStr)
 					}
-				case *Vector:
+				case *VecDense:
 					// Add to the column length.
 					wrongSize := makeRandOf(receiver, rr+1, rc)
 					panicked, _ = panics(func() { method(wrongSize, a, b) })

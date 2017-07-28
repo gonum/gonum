@@ -18,8 +18,8 @@ import (
 var (
 	_ encoding.BinaryMarshaler   = (*Dense)(nil)
 	_ encoding.BinaryUnmarshaler = (*Dense)(nil)
-	_ encoding.BinaryMarshaler   = (*Vector)(nil)
-	_ encoding.BinaryUnmarshaler = (*Vector)(nil)
+	_ encoding.BinaryMarshaler   = (*VecDense)(nil)
+	_ encoding.BinaryUnmarshaler = (*VecDense)(nil)
 )
 
 var denseData = []struct {
@@ -290,47 +290,47 @@ func TestDenseIORoundTrip(t *testing.T) {
 
 var vectorData = []struct {
 	raw  []byte
-	want *Vector
+	want *VecDense
 	eq   func(got, want Matrix) bool
 }{
 	{
 		raw:  []byte("\x00\x00\x00\x00\x00\x00\x00\x00"),
-		want: NewVector(0, []float64{}),
+		want: NewVecDense(0, []float64{}),
 		eq:   Equal,
 	},
 	{
 		raw:  []byte("\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\b@\x00\x00\x00\x00\x00\x00\x10@"),
-		want: NewVector(4, []float64{1, 2, 3, 4}),
+		want: NewVecDense(4, []float64{1, 2, 3, 4}),
 		eq:   Equal,
 	},
 	{
 		raw:  []byte("\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\b@\x00\x00\x00\x00\x00\x00\x10@\x00\x00\x00\x00\x00\x00\x14@\x00\x00\x00\x00\x00\x00\x18@"),
-		want: NewVector(6, []float64{1, 2, 3, 4, 5, 6}),
+		want: NewVecDense(6, []float64{1, 2, 3, 4, 5, 6}),
 		eq:   Equal,
 	},
 	{
 		raw:  []byte("\t\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\b@\x00\x00\x00\x00\x00\x00\x10@\x00\x00\x00\x00\x00\x00\x14@\x00\x00\x00\x00\x00\x00\x18@\x00\x00\x00\x00\x00\x00\x1c@\x00\x00\x00\x00\x00\x00 @\x00\x00\x00\x00\x00\x00\"@"),
-		want: NewVector(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}),
+		want: NewVecDense(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}),
 		eq:   Equal,
 	},
 	{
 		raw:  []byte("\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\b@"),
-		want: NewVector(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}).SliceVec(0, 3),
+		want: NewVecDense(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}).SliceVec(0, 3),
 		eq:   Equal,
 	},
 	{
 		raw:  []byte("\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\b@\x00\x00\x00\x00\x00\x00\x10@"),
-		want: NewVector(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}).SliceVec(1, 4),
+		want: NewVecDense(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}).SliceVec(1, 4),
 		eq:   Equal,
 	},
 	{
 		raw:  []byte("\b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\b@\x00\x00\x00\x00\x00\x00\x10@\x00\x00\x00\x00\x00\x00\x14@\x00\x00\x00\x00\x00\x00\x18@\x00\x00\x00\x00\x00\x00\x1c@\x00\x00\x00\x00\x00\x00 @"),
-		want: NewVector(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}).SliceVec(0, 8),
+		want: NewVecDense(9, []float64{1, 2, 3, 4, 5, 6, 7, 8, 9}).SliceVec(0, 8),
 		eq:   Equal,
 	},
 	{
 		raw: []byte("\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\b@\x00\x00\x00\x00\x00\x00\x18@"),
-		want: &Vector{
+		want: &VecDense{
 			mat: blas64.Vector{
 				Data: []float64{0, 1, 2, 3, 4, 5, 6},
 				Inc:  3,
@@ -341,7 +341,7 @@ var vectorData = []struct {
 	},
 	{
 		raw:  []byte("\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf0\xff\x00\x00\x00\x00\x00\x00\xf0\u007f\x01\x00\x00\x00\x00\x00\xf8\u007f"),
-		want: NewVector(4, []float64{0, math.Inf(-1), math.Inf(+1), math.NaN()}),
+		want: NewVecDense(4, []float64{0, math.Inf(-1), math.Inf(+1), math.NaN()}),
 		eq: func(got, want Matrix) bool {
 			for _, v := range []bool{
 				got.At(0, 0) == 0,
@@ -358,7 +358,7 @@ var vectorData = []struct {
 	},
 }
 
-func TestVectorMarshal(t *testing.T) {
+func TestVecDenseMarshal(t *testing.T) {
 	for i, test := range vectorData {
 		buf, err := test.want.MarshalBinary()
 		if err != nil {
@@ -383,7 +383,7 @@ func TestVectorMarshal(t *testing.T) {
 	}
 }
 
-func TestVectorMarshalTo(t *testing.T) {
+func TestVecDenseMarshalTo(t *testing.T) {
 	for i, test := range vectorData {
 		buf := new(bytes.Buffer)
 		n, err := test.want.MarshalBinaryTo(buf)
@@ -409,9 +409,9 @@ func TestVectorMarshalTo(t *testing.T) {
 	}
 }
 
-func TestVectorUnmarshal(t *testing.T) {
+func TestVecDenseUnmarshal(t *testing.T) {
 	for i, test := range vectorData {
-		var v Vector
+		var v VecDense
 		err := v.UnmarshalBinary(test.raw)
 		if err != nil {
 			t.Errorf("error decoding test-%d: %v\n", i, err)
@@ -427,9 +427,9 @@ func TestVectorUnmarshal(t *testing.T) {
 	}
 }
 
-func TestVectorUnmarshalFrom(t *testing.T) {
+func TestVecDenseUnmarshalFrom(t *testing.T) {
 	for i, test := range vectorData {
-		var v Vector
+		var v VecDense
 		buf := bytes.NewReader(test.raw)
 		n, err := v.UnmarshalBinaryFrom(buf)
 		if err != nil {
@@ -453,7 +453,7 @@ func TestVectorUnmarshalFrom(t *testing.T) {
 	}
 }
 
-func TestVectorUnmarshalFromError(t *testing.T) {
+func TestVecDenseUnmarshalFromError(t *testing.T) {
 	test := vectorData[1]
 	for i, tt := range []struct {
 		beg int
@@ -501,7 +501,7 @@ func TestVectorUnmarshalFromError(t *testing.T) {
 		},
 	} {
 		buf := bytes.NewReader(test.raw[tt.beg:tt.end])
-		var v Vector
+		var v VecDense
 		_, err := v.UnmarshalBinaryFrom(buf)
 		if err != io.ErrUnexpectedEOF {
 			t.Errorf("test #%d: error decoding. got=%v. want=%v\n", i, err, io.ErrUnexpectedEOF)
@@ -509,14 +509,14 @@ func TestVectorUnmarshalFromError(t *testing.T) {
 	}
 }
 
-func TestVectorIORoundTrip(t *testing.T) {
+func TestVecDenseIORoundTrip(t *testing.T) {
 	for i, test := range vectorData {
 		buf, err := test.want.MarshalBinary()
 		if err != nil {
 			t.Errorf("error encoding test #%d: %v\n", i, err)
 		}
 
-		var got Vector
+		var got VecDense
 		err = got.UnmarshalBinary(buf)
 		if err != nil {
 			t.Errorf("error decoding test #%d: %v\n", i, err)
@@ -537,7 +537,7 @@ func TestVectorIORoundTrip(t *testing.T) {
 			)
 		}
 
-		var wgot Vector
+		var wgot VecDense
 		_, err = wgot.UnmarshalBinaryFrom(wbuf)
 		if err != nil {
 			t.Errorf("error decoding test #%d: %v\n", i, err)
@@ -647,17 +647,17 @@ func unmarshalBinaryFromBenchDense(b *testing.B, size int) {
 	}
 }
 
-func BenchmarkMarshalVector10(b *testing.B)    { marshalBinaryBenchVector(b, 10) }
-func BenchmarkMarshalVector100(b *testing.B)   { marshalBinaryBenchVector(b, 100) }
-func BenchmarkMarshalVector1000(b *testing.B)  { marshalBinaryBenchVector(b, 1000) }
-func BenchmarkMarshalVector10000(b *testing.B) { marshalBinaryBenchVector(b, 10000) }
+func BenchmarkMarshalVecDense10(b *testing.B)    { marshalBinaryBenchVecDense(b, 10) }
+func BenchmarkMarshalVecDense100(b *testing.B)   { marshalBinaryBenchVecDense(b, 100) }
+func BenchmarkMarshalVecDense1000(b *testing.B)  { marshalBinaryBenchVecDense(b, 1000) }
+func BenchmarkMarshalVecDense10000(b *testing.B) { marshalBinaryBenchVecDense(b, 10000) }
 
-func marshalBinaryBenchVector(b *testing.B, size int) {
+func marshalBinaryBenchVecDense(b *testing.B, size int) {
 	data := make([]float64, size)
 	for i := range data {
 		data[i] = float64(i)
 	}
-	vec := NewVector(size, data)
+	vec := NewVecDense(size, data)
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
@@ -665,39 +665,39 @@ func marshalBinaryBenchVector(b *testing.B, size int) {
 	}
 }
 
-func BenchmarkUnmarshalVector10(b *testing.B)    { unmarshalBinaryBenchVector(b, 10) }
-func BenchmarkUnmarshalVector100(b *testing.B)   { unmarshalBinaryBenchVector(b, 100) }
-func BenchmarkUnmarshalVector1000(b *testing.B)  { unmarshalBinaryBenchVector(b, 1000) }
-func BenchmarkUnmarshalVector10000(b *testing.B) { unmarshalBinaryBenchVector(b, 10000) }
+func BenchmarkUnmarshalVecDense10(b *testing.B)    { unmarshalBinaryBenchVecDense(b, 10) }
+func BenchmarkUnmarshalVecDense100(b *testing.B)   { unmarshalBinaryBenchVecDense(b, 100) }
+func BenchmarkUnmarshalVecDense1000(b *testing.B)  { unmarshalBinaryBenchVecDense(b, 1000) }
+func BenchmarkUnmarshalVecDense10000(b *testing.B) { unmarshalBinaryBenchVecDense(b, 10000) }
 
-func unmarshalBinaryBenchVector(b *testing.B, size int) {
+func unmarshalBinaryBenchVecDense(b *testing.B, size int) {
 	data := make([]float64, size)
 	for i := range data {
 		data[i] = float64(i)
 	}
-	buf, err := NewVector(size, data).MarshalBinary()
+	buf, err := NewVecDense(size, data).MarshalBinary()
 	if err != nil {
 		b.Fatalf("error creating binary buffer (size=%d): %v\n", size, err)
 	}
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		var vec Vector
+		var vec VecDense
 		vec.UnmarshalBinary(buf)
 	}
 }
 
-func BenchmarkMarshalToVector10(b *testing.B)    { marshalBinaryToBenchVector(b, 10) }
-func BenchmarkMarshalToVector100(b *testing.B)   { marshalBinaryToBenchVector(b, 100) }
-func BenchmarkMarshalToVector1000(b *testing.B)  { marshalBinaryToBenchVector(b, 1000) }
-func BenchmarkMarshalToVector10000(b *testing.B) { marshalBinaryToBenchVector(b, 10000) }
+func BenchmarkMarshalToVecDense10(b *testing.B)    { marshalBinaryToBenchVecDense(b, 10) }
+func BenchmarkMarshalToVecDense100(b *testing.B)   { marshalBinaryToBenchVecDense(b, 100) }
+func BenchmarkMarshalToVecDense1000(b *testing.B)  { marshalBinaryToBenchVecDense(b, 1000) }
+func BenchmarkMarshalToVecDense10000(b *testing.B) { marshalBinaryToBenchVecDense(b, 10000) }
 
-func marshalBinaryToBenchVector(b *testing.B, size int) {
+func marshalBinaryToBenchVecDense(b *testing.B, size int) {
 	data := make([]float64, size)
 	for i := range data {
 		data[i] = float64(i)
 	}
-	vec := NewVector(size, data)
+	vec := NewVecDense(size, data)
 	w := ioutil.Discard
 	b.ResetTimer()
 
@@ -706,17 +706,17 @@ func marshalBinaryToBenchVector(b *testing.B, size int) {
 	}
 }
 
-func BenchmarkUnmarshalFromVector10(b *testing.B)    { unmarshalBinaryFromBenchVector(b, 10) }
-func BenchmarkUnmarshalFromVector100(b *testing.B)   { unmarshalBinaryFromBenchVector(b, 100) }
-func BenchmarkUnmarshalFromVector1000(b *testing.B)  { unmarshalBinaryFromBenchVector(b, 1000) }
-func BenchmarkUnmarshalFromVector10000(b *testing.B) { unmarshalBinaryFromBenchVector(b, 10000) }
+func BenchmarkUnmarshalFromVecDense10(b *testing.B)    { unmarshalBinaryFromBenchVecDense(b, 10) }
+func BenchmarkUnmarshalFromVecDense100(b *testing.B)   { unmarshalBinaryFromBenchVecDense(b, 100) }
+func BenchmarkUnmarshalFromVecDense1000(b *testing.B)  { unmarshalBinaryFromBenchVecDense(b, 1000) }
+func BenchmarkUnmarshalFromVecDense10000(b *testing.B) { unmarshalBinaryFromBenchVecDense(b, 10000) }
 
-func unmarshalBinaryFromBenchVector(b *testing.B, size int) {
+func unmarshalBinaryFromBenchVecDense(b *testing.B, size int) {
 	data := make([]float64, size)
 	for i := range data {
 		data[i] = float64(i)
 	}
-	buf, err := NewVector(size, data).MarshalBinary()
+	buf, err := NewVecDense(size, data).MarshalBinary()
 	if err != nil {
 		b.Fatalf("error creating binary buffer (size=%d): %v\n", size, err)
 	}
@@ -724,7 +724,7 @@ func unmarshalBinaryFromBenchVector(b *testing.B, size int) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		var vec Vector
+		var vec VecDense
 		vec.UnmarshalBinaryFrom(r)
 		r.reset()
 	}

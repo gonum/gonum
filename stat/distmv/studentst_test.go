@@ -201,9 +201,9 @@ func TestStudentsTConditional(t *testing.T) {
 		floats.Sub(shift, muOb)
 
 		newMu := make([]float64, len(muUnob))
-		newMuVec := mat.NewVector(len(muUnob), newMu)
-		shiftVec := mat.NewVector(len(shift), shift)
-		var tmp mat.Vector
+		newMuVec := mat.NewVecDense(len(muUnob), newMu)
+		shiftVec := mat.NewVecDense(len(shift), shift)
+		var tmp mat.VecDense
 		tmp.SolveVec(&sig22, shiftVec)
 		newMuVec.MulVec(sig12, &tmp)
 		floats.Add(newMu, muUnob)

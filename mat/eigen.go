@@ -141,7 +141,7 @@ func (e *Eigen) succFact() bool {
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.
 func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
-	// TODO(btracey): Change implementation to store Vectors as a *CMat when
+	// TODO(btracey): Change implementation to store VecDenses as a *CMat when
 	// #308 is resolved.
 
 	// Copy a because it is modified during the Lapack call.

@@ -115,7 +115,7 @@
 // if a and b both implement RawMatrixer, that is, they can be represented as a
 // blas64.General, blas64.Gemm (general matrix multiplication) is called, while
 // instead if b is a RawSymmetricer blas64.Symm is used (general-symmetric
-// multiplication), and if b is a *Vector blas64.Gemv is used.
+// multiplication), and if b is a *VecDense blas64.Gemv is used.
 //
 // There are many possible type combinations and special cases. No specific guarantees
 // are made about the performance of any method, and in particular, note that an

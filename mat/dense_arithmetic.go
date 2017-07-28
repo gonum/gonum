@@ -338,7 +338,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			blas64.Trmm(blas.Right, bT, 1, bmat, m.mat)
 			return
 		}
-		if bU, ok := bU.(*Vector); ok {
+		if bU, ok := bU.(*VecDense); ok {
 			m.checkOverlap(bU.asGeneral())
 			bvec := bU.RawVector()
 			if bTrans {
@@ -399,7 +399,7 @@ func (m *Dense) Mul(a, b Matrix) {
 			blas64.Trmm(blas.Left, aT, 1, amat, m.mat)
 			return
 		}
-		if aU, ok := aU.(*Vector); ok {
+		if aU, ok := aU.(*VecDense); ok {
 			m.checkOverlap(aU.asGeneral())
 			avec := aU.RawVector()
 			if aTrans {
@@ -653,7 +653,7 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 // RankOne performs a rank-one update to the matrix a and stores the result
 // in the receiver. If a is zero, see Outer.
 //  m = a + alpha * x * y'
-func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
+func (m *Dense) RankOne(a Matrix, alpha float64, x, y *VecDense) {
 	ar, ac := a.Dims()
 	if x.Len() != ar {
 		panic(ErrShape)
@@ -683,7 +683,7 @@ func (m *Dense) RankOne(a Matrix, alpha float64, x, y *Vector) {
 // in the receiver.
 //  m = alpha * x * y'
 // In order to update an existing matrix, see RankOne.
-func (m *Dense) Outer(alpha float64, x, y *Vector) {
+func (m *Dense) Outer(alpha float64, x, y *VecDense) {
 	r := x.Len()
 	c := y.Len()
 

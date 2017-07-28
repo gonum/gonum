@@ -265,7 +265,7 @@ func TestSymRankOne(t *testing.T) {
 
 		// Check with new receiver
 		s := NewSymDense(n, nil)
-		s.SymRankOne(a, alpha, NewVector(len(x), x))
+		s.SymRankOne(a, alpha, NewVecDense(len(x), x))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
@@ -277,7 +277,7 @@ func TestSymRankOne(t *testing.T) {
 
 		// Check with reused receiver
 		copy(s.mat.Data, a.mat.Data)
-		s.SymRankOne(s, alpha, NewVector(len(x), x))
+		s.SymRankOne(s, alpha, NewVecDense(len(x), x))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				want := m.At(i, j)
@@ -291,10 +291,10 @@ func TestSymRankOne(t *testing.T) {
 	alpha := 3.0
 	method := func(receiver, a, b Matrix) {
 		type SymRankOner interface {
-			SymRankOne(a Symmetric, alpha float64, x *Vector)
+			SymRankOne(a Symmetric, alpha float64, x *VecDense)
 		}
 		rd := receiver.(SymRankOner)
-		rd.SymRankOne(a.(Symmetric), alpha, b.(*Vector))
+		rd.SymRankOne(a.(Symmetric), alpha, b.(*VecDense))
 	}
 	denseComparison := func(receiver, a, b *Dense) {
 		var tmp Dense
@@ -307,7 +307,7 @@ func TestSymRankOne(t *testing.T) {
 		if !ok {
 			return false
 		}
-		_, ok = b.(*Vector)
+		_, ok = b.(*VecDense)
 		return ok
 	}
 	legalSize := func(ar, ac, br, bc int) bool {
@@ -320,7 +320,7 @@ func TestSymRankOne(t *testing.T) {
 }
 
 func TestIssue250SymRankOne(t *testing.T) {
-	x := NewVector(5, []float64{1, 2, 3, 4, 5})
+	x := NewVecDense(5, []float64{1, 2, 3, 4, 5})
 	var s1, s2 SymDense
 	s1.SymRankOne(NewSymDense(5, nil), 1, x)
 	s2.SymRankOne(NewSymDense(5, nil), 1, x)
@@ -366,7 +366,7 @@ func TestRankTwo(t *testing.T) {
 
 		// Check with new receiver
 		s := NewSymDense(n, nil)
-		s.RankTwo(a, alpha, NewVector(len(x), x), NewVector(len(y), y))
+		s.RankTwo(a, alpha, NewVecDense(len(x), x), NewVecDense(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
@@ -377,7 +377,7 @@ func TestRankTwo(t *testing.T) {
 
 		// Check with reused receiver
 		copy(s.mat.Data, a.mat.Data)
-		s.RankTwo(s, alpha, NewVector(len(x), x), NewVector(len(y), y))
+		s.RankTwo(s, alpha, NewVecDense(len(x), x), NewVecDense(len(y), y))
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				if !floats.EqualWithinAbsOrRel(s.At(i, j), m.At(i, j), 1e-14, 1e-14) {
@@ -434,7 +434,7 @@ func TestSymOuterK(t *testing.T) {
 }
 
 func TestIssue250SymOuterK(t *testing.T) {
-	x := NewVector(5, []float64{1, 2, 3, 4, 5})
+	x := NewVecDense(5, []float64{1, 2, 3, 4, 5})
 	var s1, s2 SymDense
 	s1.SymOuterK(1, x)
 	s2.SymOuterK(1, x)

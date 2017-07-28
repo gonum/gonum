@@ -145,7 +145,7 @@ func (lu *LU) Pivot(swaps []int) []int {
 // the original matrix A, storing the result into the receiver. That is, if in
 // the original LU decomposition P * L * U = A, in the updated decomposition
 // P * L * U = A + alpha * x * y^T.
-func (lu *LU) RankOne(orig *LU, alpha float64, x, y *Vector) {
+func (lu *LU) RankOne(orig *LU, alpha float64, x, y *VecDense) {
 	// RankOne uses algorithm a1 on page 28 of "Multiple-Rank Updates to Matrix
 	// Factorizations for Nonlinear Analysis and Circuit Design" by Linzhong Deng.
 	// http://web.stanford.edu/group/SOL/dissertations/Linzhong-Deng-thesis.pdf
@@ -317,7 +317,7 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 //
 // If A is singular or near-singular a Condition error is returned. Please see
 // the documentation for Condition for more information.
-func (lu *LU) SolveVec(v *Vector, trans bool, b *Vector) error {
+func (lu *LU) SolveVec(v *VecDense, trans bool, b *VecDense) error {
 	_, n := lu.lu.Dims()
 	bn := b.Len()
 	if bn != n {

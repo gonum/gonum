@@ -178,16 +178,16 @@ func TestSolveTwoChol(t *testing.T) {
 func TestCholeskySolveVec(t *testing.T) {
 	for _, test := range []struct {
 		a   *SymDense
-		b   *Vector
-		ans *Vector
+		b   *VecDense
+		ans *VecDense
 	}{
 		{
 			a: NewSymDense(2, []float64{
 				1, 0,
 				0, 1,
 			}),
-			b:   NewVector(2, []float64{5, 6}),
-			ans: NewVector(2, []float64{5, 6}),
+			b:   NewVecDense(2, []float64{5, 6}),
+			ans: NewVecDense(2, []float64{5, 6}),
 		},
 		{
 			a: NewSymDense(3, []float64{
@@ -195,8 +195,8 @@ func TestCholeskySolveVec(t *testing.T) {
 				0, 83, 71,
 				0, 0, 101,
 			}),
-			b:   NewVector(3, []float64{5, 6, 7}),
-			ans: NewVector(3, []float64{0.20745069393718094, -0.17421475529583694, 0.11577794010226464}),
+			b:   NewVecDense(3, []float64{5, 6, 7}),
+			ans: NewVecDense(3, []float64{0.20745069393718094, -0.17421475529583694, 0.11577794010226464}),
 		},
 	} {
 		var chol Cholesky
@@ -205,13 +205,13 @@ func TestCholeskySolveVec(t *testing.T) {
 			t.Fatal("unexpected Cholesky factorization failure: not positive definite")
 		}
 
-		var x Vector
+		var x VecDense
 		chol.SolveVec(&x, test.b)
 		if !EqualApprox(&x, test.ans, 1e-12) {
 			t.Error("incorrect Cholesky solve solution")
 		}
 
-		var ans Vector
+		var ans VecDense
 		ans.MulVec(test.a, &x)
 		if !EqualApprox(&ans, test.b, 1e-12) {
 			t.Error("incorrect Cholesky solve solution product")
@@ -320,7 +320,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 			for i := range xdata {
 				xdata[i] = rand.NormFloat64()
 			}
-			x := NewVector(n, xdata)
+			x := NewVecDense(n, xdata)
 
 			var chol Cholesky
 			ok := chol.Factorize(&a)
@@ -397,7 +397,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 			continue
 		}
 
-		x := NewVector(len(test.x), test.x)
+		x := NewVecDense(len(test.x), test.x)
 		ok = chol.SymRankOne(&chol, test.alpha, x)
 		if !ok {
 			if test.wantOk {

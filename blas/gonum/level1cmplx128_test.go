@@ -13,3 +13,7 @@ import (
 func TestZaxpy(t *testing.T) {
 	testblas.ZaxpyTest(t, impl)
 }
+
+func TestZcopy(t *testing.T) {
+	testblas.ZcopyTest(t, impl)
+}

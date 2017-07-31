@@ -182,10 +182,9 @@ func (c *Cholesky) Solve(m *Dense, b Matrix) error {
 	return nil
 }
 
-// TODO(kortschak): Export this as SolveTwoChol.
-// solveTwoChol finds the matrix m that solves A * m = B where A and B are represented
+// SolveChol finds the matrix m that solves A * m = B where A and B are represented
 // by their Cholesky decompositions a and b, placing the result in the receiver.
-func (m *Dense) solveTwoChol(a, b *Cholesky) error {
+func (a *Cholesky) SolveChol(m *Dense, b *Cholesky) error {
 	if !a.valid() || !b.valid() {
 		panic(badCholesky)
 	}

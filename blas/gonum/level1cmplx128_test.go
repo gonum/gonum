@@ -17,3 +17,7 @@ func TestZaxpy(t *testing.T) {
 func TestZcopy(t *testing.T) {
 	testblas.ZcopyTest(t, impl)
 }
+
+func TestZdotc(t *testing.T) {
+	testblas.ZdotcTest(t, impl)
+}

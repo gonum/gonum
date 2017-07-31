@@ -83,3 +83,44 @@ func (Implementation) Zcopy(n int, x []complex128, incX int, y []complex128, inc
 		iy += incY
 	}
 }
+
+// Zdotc computes the dot product
+//  x^H · y
+// of two complex vectors x and y.
+func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, incY int) complex128 {
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
+	if n <= 0 {
+		if n == 0 {
+			return 0
+		}
+		panic(negativeN)
+	}
+	if incX == 1 && incY == 1 {
+		if len(x) < n {
+			panic(badX)
+		}
+		if len(y) < n {
+			panic(badY)
+		}
+		return c128.DotcUnitary(x[:n], y[:n])
+	}
+	var ix, iy int
+	if incX < 0 {
+		ix = (-n + 1) * incX
+	}
+	if incY < 0 {
+		iy = (-n + 1) * incY
+	}
+	if ix >= len(x) || (n-1)*incX >= len(x) {
+		panic(badX)
+	}
+	if iy >= len(y) || (n-1)*incY >= len(y) {
+		panic(badY)
+	}
+	return c128.DotcInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
+}

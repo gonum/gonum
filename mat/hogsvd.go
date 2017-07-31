@@ -80,13 +80,13 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 	defer putWorkspace(sij)
 	for i, ai := range a {
 		for _, aj := range a[i+1:] {
-			gsvd.err = sij.solveTwoChol(&ai, &aj)
+			gsvd.err = ai.SolveChol(sij, &aj)
 			if gsvd.err != nil {
 				return false
 			}
 			s.Add(s, sij)
 
-			gsvd.err = sij.solveTwoChol(&aj, &ai)
+			gsvd.err = aj.SolveChol(sij, &ai)
 			if gsvd.err != nil {
 				return false
 			}

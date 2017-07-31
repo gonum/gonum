@@ -114,7 +114,7 @@ func TestCholeskySolve(t *testing.T) {
 	}
 }
 
-func TestSolveTwoChol(t *testing.T) {
+func TestCholeskySolveChol(t *testing.T) {
 	for _, test := range []struct {
 		a, b *SymDense
 	}{
@@ -162,7 +162,7 @@ func TestSolveTwoChol(t *testing.T) {
 		}
 
 		var x Dense
-		x.solveTwoChol(&chola, &cholb)
+		chola.SolveChol(&x, &cholb)
 
 		var ans Dense
 		ans.Mul(test.a, &x)

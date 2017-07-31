@@ -57,20 +57,20 @@ func (l LinearFunc) Hess(dst mat.MutableSymmetric, x []float64) {
 // QuadFunc is a quadratic function returning 0.5*x'*a*x + b*x + c.
 type QuadFunc struct {
 	a *mat.SymDense
-	b *mat.Vector
+	b *mat.VecDense
 	c float64
 }
 
 func (q QuadFunc) Func(x []float64) float64 {
-	v := mat.NewVector(len(x), x)
-	var tmp mat.Vector
+	v := mat.NewVecDense(len(x), x)
+	var tmp mat.VecDense
 	tmp.MulVec(q.a, v)
 	return 0.5*mat.Dot(&tmp, v) + mat.Dot(q.b, v) + q.c
 }
 
 func (q QuadFunc) Grad(grad, x []float64) {
-	var tmp mat.Vector
-	v := mat.NewVector(len(x), x)
+	var tmp mat.VecDense
+	v := mat.NewVecDense(len(x), x)
 	tmp.MulVec(q.a, v)
 	for i := range grad {
 		grad[i] = tmp.At(i, 0) + q.b.At(i, 0)

@@ -63,7 +63,7 @@ func TestHessian(t *testing.T) {
 					2, 5, -3,
 					1, -3, 6,
 				}),
-				b: mat.NewVector(3, []float64{3, -2, -1}),
+				b: mat.NewVecDense(3, []float64{3, -2, -1}),
 				c: 5,
 			},
 			x:   []float64{-1.6, -3, 2},

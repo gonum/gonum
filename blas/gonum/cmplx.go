@@ -138,9 +138,6 @@ func (Implementation) Cher2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha com
 func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, incY int) (dotu complex128) {
 	panic(noComplex)
 }
-func (Implementation) Zdotc(n int, x []complex128, incX int, y []complex128, incY int) (dotc complex128) {
-	panic(noComplex)
-}
 func (Implementation) Dznrm2(n int, x []complex128, incX int) float64 {
 	panic(noComplex)
 }

@@ -238,7 +238,7 @@ func chi2(ob, ex []float64) (sum float64) {
 func TestWeightedNoResample(t *testing.T) {
 	const (
 		tries = 10
-		n     = 10e5
+		n     = 10e4
 	)
 	ts := NewWeighted(make([]float64, n), nil)
 	w := make([]float64, n)

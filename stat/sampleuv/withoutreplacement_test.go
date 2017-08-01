@@ -46,7 +46,6 @@ func TestWithoutReplacement(t *testing.T) {
 				}
 			}
 			if !allDiff {
-				_ = cas
 				t.Errorf("Cas %d: Repeat in sampling. Idxs =%v", cas, idxs)
 			}
 			for _, v := range idxs {

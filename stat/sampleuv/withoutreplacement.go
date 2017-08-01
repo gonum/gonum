@@ -13,7 +13,7 @@ import (
 // That is, upon return the elements of idx will be unique integers. If source
 // is non-nil it will be used to generate random numbers, otherwise the default
 // source from the math/rand package will be used.
-func WithoutReplacement(idxs []int, n int, source *rand.Rand) {
+func WithoutReplacement(idxs []int, n int, src *rand.Rand) {
 	if len(idxs) == 0 {
 		panic("withoutreplacement: zero length input")
 	}
@@ -25,8 +25,8 @@ func WithoutReplacement(idxs []int, n int, source *rand.Rand) {
 	// the algorithm accordingly.
 	if n < len(idxs)*len(idxs) {
 		var perm []int
-		if source != nil {
-			perm = source.Perm(n)
+		if src != nil {
+			perm = src.Perm(n)
 		} else {
 			perm = rand.Perm(n)
 		}
@@ -37,8 +37,8 @@ func WithoutReplacement(idxs []int, n int, source *rand.Rand) {
 	sorted := make([]int, 0, len(idxs))
 	for i := range idxs {
 		var r int
-		if source != nil {
-			r = source.Intn(n - i)
+		if src != nil {
+			r = src.Intn(n - i)
 		} else {
 			r = rand.Intn(n - i)
 		}

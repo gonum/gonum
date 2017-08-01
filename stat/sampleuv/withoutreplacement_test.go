@@ -15,35 +15,25 @@ func TestWithoutReplacement(t *testing.T) {
 	for cas, test := range []struct {
 		N      int
 		K      int
-		Source *rand.Rand
+		Src    *rand.Rand
 		Trials int
 		Tol    float64
 	}{
 		{
-			// Test with perm.
-			N: 10, K: 5, Source: nil,
-			Trials: 100000, Tol: 1e-3,
-		},
-		{
 			// Test with perm and source.
-			N: 10, K: 5, Source: rand.New(rand.NewSource(1)),
-			Trials: 100000, Tol: 1e-3,
-		},
-		{
-			// Test without perm.
-			N: 10, K: 3, Source: nil,
+			N: 10, K: 5, Src: rand.New(rand.NewSource(1)),
 			Trials: 100000, Tol: 1e-3,
 		},
 		{
 			// Test without perm and with source.
-			N: 10, K: 3, Source: rand.New(rand.NewSource(1)),
+			N: 10, K: 3, Src: rand.New(rand.NewSource(1)),
 			Trials: 100000, Tol: 1e-3,
 		},
 	} {
 		dist := make([]float64, test.N)
 		for trial := 0; trial < test.Trials; trial++ {
 			idxs := make([]int, test.K)
-			WithoutReplacement(idxs, test.N, test.Source)
+			WithoutReplacement(idxs, test.N, test.Src)
 
 			allDiff := true
 			for i := 0; i < len(idxs); i++ {

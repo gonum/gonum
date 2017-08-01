@@ -59,7 +59,7 @@ func TestWithoutReplacement(t *testing.T) {
 			want[i] = 1 / float64(test.N)
 		}
 		if !floats.EqualApprox(want, dist, test.Tol) {
-			t.Errorf("Cas %d: biased sampling. Want = %v, got = %v", want, dist)
+			t.Errorf("Cas %d: biased sampling. Want = %v, got = %v", cas, want, dist)
 		}
 	}
 }

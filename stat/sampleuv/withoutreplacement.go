@@ -9,7 +9,7 @@ import (
 	"sort"
 )
 
-// WithoutReplacement samples len(idxs) integers from [0, max) without replacement.
+// WithoutReplacement samples len(idxs) integers from [0, n) without replacement.
 // That is, upon return the elements of idxs will be unique integers. If source
 // is non-nil it will be used to generate random numbers, otherwise the default
 // source from the math/rand package will be used.

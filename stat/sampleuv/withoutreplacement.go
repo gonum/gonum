@@ -13,15 +13,20 @@ import (
 // That is, upon return the elements of idxs will be unique integers. If source
 // is non-nil it will be used to generate random numbers, otherwise the default
 // source from the math/rand package will be used.
+//
+// WithoutReplacement will panic if len(idxs) > n.
 func WithoutReplacement(idxs []int, n int, src *rand.Rand) {
 	if len(idxs) == 0 {
 		panic("withoutreplacement: zero length input")
+	}
+	if len(idxs) > n {
+		panic("withoutreplacement: impossible size inputs")
 	}
 
 	// There are two algorithms. One is to generate a random permutation
 	// and take the first len(idxs) elements. The second is to generate
 	// individual random numbers for each element and check uniqueness. The first
-	// method scales as O(max), and the second scales as O(len(idxs)^2). Choose
+	// method scales as O(n), and the second scales as O(len(idxs)^2). Choose
 	// the algorithm accordingly.
 	if n < len(idxs)*len(idxs) {
 		var perm []int

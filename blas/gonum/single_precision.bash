@@ -30,7 +30,7 @@ cat level1double.go \
       -e "s_^\(func (Implementation) \)Id\(.*\)\$_$WARNING\1Is\2_" \
       -e 's_^// Id_// Is_' \
       -e 's_"gonum.org/v1/gonum/internal/asm/f64"_"gonum.org/v1/gonum/internal/asm/f32"_' \
-      -e 's_"math"_math "gonum.org/v1/gonum/blas/gonum/internal/math32"_' \
+      -e 's_"math"_math "gonum.org/v1/gonum/internal/math32"_' \
 >> level1single.go
 
 echo Generating level1single_sdot.go
@@ -125,7 +125,7 @@ cat general_double.go \
 | gofmt -r 'newGeneral64 -> newGeneral32' \
 \
 | sed -e 's/(g general64) print()/(g general32) print()/' \
-      -e 's_"math"_math "gonum.org/v1/gonum/blas/gonum/internal/math32"_' \
+      -e 's_"math"_math "gonum.org/v1/gonum/internal/math32"_' \
       -e 's_"gonum.org/v1/gonum/internal/asm/f64"_"gonum.org/v1/gonum/internal/asm/f32"_' \
 >> general_single.go
 

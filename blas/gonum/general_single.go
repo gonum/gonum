@@ -7,7 +7,7 @@
 package gonum
 
 import (
-	math "gonum.org/v1/gonum/blas/gonum/internal/math32"
+	math "gonum.org/v1/gonum/internal/math32"
 )
 
 type general32 struct {

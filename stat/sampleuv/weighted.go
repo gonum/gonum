@@ -42,6 +42,7 @@ func NewWeighted(w []float64, src *rand.Rand) Weighted {
 	s := Weighted{
 		weights: make([]float64, len(w)),
 		heap:    make([]float64, len(w)),
+		src:     src,
 	}
 	s.ReweightAll(w)
 	return s

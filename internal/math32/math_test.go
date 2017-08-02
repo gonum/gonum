@@ -90,6 +90,15 @@ func TestNaN(t *testing.T) {
 	}
 }
 
+func TestSignbit(t *testing.T) {
+	f := func(x float32) bool {
+		return Signbit(x) == math.Signbit(float64(x))
+	}
+	if err := quick.Check(f, nil); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestSqrt(t *testing.T) {
 	f := func(x float32) bool {
 		y := Sqrt(x)

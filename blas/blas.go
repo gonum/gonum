@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate ./single_precision.bash
+//go:generate ./conversions.bash
 
 /*
 Package blas provides interfaces for the BLAS linear algebra standard.

@@ -18,6 +18,10 @@ func TestDznrm2(t *testing.T) {
 	testblas.Dznrm2Test(t, impl)
 }
 
+func TestIzamax(t *testing.T) {
+	testblas.IzamaxTest(t, impl)
+}
+
 func TestZaxpy(t *testing.T) {
 	testblas.ZaxpyTest(t, impl)
 }

@@ -70,6 +70,7 @@ func blocks(dim, bsize int) int {
 	return (dim + bsize - 1) / bsize
 }
 
-func zabs(z complex128) float64 {
+// dcabs1 returns |real(z)|+|imag(z)|.
+func dcabs1(z complex128) float64 {
 	return math.Abs(real(z)) + math.Abs(imag(z))
 }

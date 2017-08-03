@@ -116,6 +116,50 @@ func (Implementation) Dznrm2(n int, x []complex128, incX int) float64 {
 	return scale * math.Sqrt(ssq)
 }
 
+// Izamax returns the index of the first element of x having largest |Re(·)|+|Im(·)|.
+// Izamax returns -1 if n is 0 or incX is negative.
+func (Implementation) Izamax(n int, x []complex128, incX int) int {
+	if incX < 1 {
+		if incX == 0 {
+			panic(zeroIncX)
+		}
+		// Return invalid index.
+		return -1
+	}
+	if n < 1 {
+		if n == 0 {
+			// Return invalid index.
+			return -1
+		}
+		panic(negativeN)
+	}
+	if len(x) <= (n-1)*incX {
+		panic(badX)
+	}
+	idx := 0
+	max := dcabs1(x[0])
+	if incX == 1 {
+		for i, v := range x[1:n] {
+			absV := dcabs1(v)
+			if absV > max {
+				max = absV
+				idx = i + 1
+			}
+		}
+		return idx
+	}
+	ix := incX
+	for i := 1; i < n; i++ {
+		absV := dcabs1(x[ix])
+		if absV > max {
+			max = absV
+			idx = i
+		}
+		ix += incX
+	}
+	return idx
+}
+
 // Zaxpy adds alpha times x to y:
 //  y[i] += alpha * x[i] for all i
 func (Implementation) Zaxpy(n int, alpha complex128, x []complex128, incX int, y []complex128, incY int) {

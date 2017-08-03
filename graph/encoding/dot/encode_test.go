@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -112,17 +113,17 @@ func undirectedNamedIDGraphFrom(g []intset) graph.Graph {
 type attrNode struct {
 	id   int64
 	name string
-	attr []Attribute
+	attr []encoding.Attribute
 }
 
-func (n attrNode) ID() int64                  { return n.id }
-func (n attrNode) DOTAttributes() []Attribute { return n.attr }
+func (n attrNode) ID() int64                        { return n.id }
+func (n attrNode) Attributes() []encoding.Attribute { return n.attr }
 
-func directedNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Directed {
+func directedNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
-		var at []Attribute
+		var at []encoding.Attribute
 		if u < int64(len(attr)) {
 			at = attr[u]
 		}
@@ -138,11 +139,11 @@ func directedNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Directed {
 	return dg
 }
 
-func undirectedNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Graph {
+func undirectedNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
-		var at []Attribute
+		var at []encoding.Attribute
 		if u < int64(len(attr)) {
 			at = attr[u]
 		}
@@ -161,18 +162,18 @@ func undirectedNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Graph {
 type namedAttrNode struct {
 	id   int64
 	name string
-	attr []Attribute
+	attr []encoding.Attribute
 }
 
-func (n namedAttrNode) ID() int64                  { return n.id }
-func (n namedAttrNode) DOTID() string              { return n.name }
-func (n namedAttrNode) DOTAttributes() []Attribute { return n.attr }
+func (n namedAttrNode) ID() int64                        { return n.id }
+func (n namedAttrNode) DOTID() string                    { return n.name }
+func (n namedAttrNode) Attributes() []encoding.Attribute { return n.attr }
 
-func directedNamedIDNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Directed {
+func directedNamedIDNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
-		var at []Attribute
+		var at []encoding.Attribute
 		if u < int64(len(attr)) {
 			at = attr[u]
 		}
@@ -188,11 +189,11 @@ func directedNamedIDNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Dire
 	return dg
 }
 
-func undirectedNamedIDNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Graph {
+func undirectedNamedIDNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
-		var at []Attribute
+		var at []encoding.Attribute
 		if u < int64(len(attr)) {
 			at = attr[u]
 		}
@@ -211,15 +212,15 @@ func undirectedNamedIDNodeAttrGraphFrom(g []intset, attr [][]Attribute) graph.Gr
 type attrEdge struct {
 	from, to graph.Node
 
-	attr []Attribute
+	attr []encoding.Attribute
 }
 
-func (e attrEdge) From() graph.Node           { return e.from }
-func (e attrEdge) To() graph.Node             { return e.to }
-func (e attrEdge) Weight() float64            { return 0 }
-func (e attrEdge) DOTAttributes() []Attribute { return e.attr }
+func (e attrEdge) From() graph.Node                 { return e.from }
+func (e attrEdge) To() graph.Node                   { return e.to }
+func (e attrEdge) Weight() float64                  { return 0 }
+func (e attrEdge) Attributes() []encoding.Attribute { return e.attr }
 
-func directedEdgeAttrGraphFrom(g []intset, attr map[edge][]Attribute) graph.Directed {
+func directedEdgeAttrGraphFrom(g []intset, attr map[edge][]encoding.Attribute) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
@@ -230,7 +231,7 @@ func directedEdgeAttrGraphFrom(g []intset, attr map[edge][]Attribute) graph.Dire
 	return dg
 }
 
-func undirectedEdgeAttrGraphFrom(g []intset, attr map[edge][]Attribute) graph.Graph {
+func undirectedEdgeAttrGraphFrom(g []intset, attr map[edge][]encoding.Attribute) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
@@ -271,11 +272,11 @@ func (e portedEdge) ToPort() (port, compass string) {
 	return e.toPort, e.toCompass
 }
 
-func directedPortedAttrGraphFrom(g []intset, attr [][]Attribute, ports map[edge]portedEdge) graph.Directed {
+func directedPortedAttrGraphFrom(g []intset, attr [][]encoding.Attribute, ports map[edge]portedEdge) graph.Directed {
 	dg := simple.NewDirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
-		var at []Attribute
+		var at []encoding.Attribute
 		if u < int64(len(attr)) {
 			at = attr[u]
 		}
@@ -293,11 +294,11 @@ func directedPortedAttrGraphFrom(g []intset, attr [][]Attribute, ports map[edge]
 	return dg
 }
 
-func undirectedPortedAttrGraphFrom(g []intset, attr [][]Attribute, ports map[edge]portedEdge) graph.Graph {
+func undirectedPortedAttrGraphFrom(g []intset, attr [][]encoding.Attribute, ports map[edge]portedEdge) graph.Graph {
 	dg := simple.NewUndirectedGraph(0, math.Inf(1))
 	for u, e := range g {
 		u := int64(u)
-		var at []Attribute
+		var at []encoding.Attribute
 		if u < int64(len(attr)) {
 			at = attr[u]
 		}
@@ -322,11 +323,11 @@ type graphAttributer struct {
 	edge  attributer
 }
 
-type attributer []Attribute
+type attributer []encoding.Attribute
 
-func (a attributer) DOTAttributes() []Attribute { return a }
+func (a attributer) Attributes() []encoding.Attribute { return a }
 
-func (g graphAttributer) DOTAttributers() (graph, node, edge Attributer) {
+func (g graphAttributer) DOTAttributers() (graph, node, edge encoding.Attributer) {
 	return g.graph, g.node, g.edge
 }
 
@@ -748,7 +749,7 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: directedNodeAttrGraphFrom(powerMethodGraph, [][]Attribute{
+		g: directedNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
 			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
 			4: {},
 		}),
@@ -775,7 +776,7 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: undirectedNodeAttrGraphFrom(powerMethodGraph, [][]Attribute{
+		g: undirectedNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
 			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
 			4: {},
 		}),
@@ -802,7 +803,7 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: directedNamedIDNodeAttrGraphFrom(powerMethodGraph, [][]Attribute{
+		g: directedNamedIDNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
 			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
 			4: {},
 		}),
@@ -829,7 +830,7 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: undirectedNamedIDNodeAttrGraphFrom(powerMethodGraph, [][]Attribute{
+		g: undirectedNamedIDNodeAttrGraphFrom(powerMethodGraph, [][]encoding.Attribute{
 			0: nil,
 			1: nil,
 			2: {{"fontsize", "16"}, {"shape", "ellipse"}},
@@ -903,7 +904,7 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: directedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
+		g: directedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
 			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
 			{from: 2, to: 4}: {},
 			{from: 3, to: 4}: {{"color", "red"}},
@@ -931,7 +932,7 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
+		g: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
 			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
 			{from: 2, to: 4}: {},
 			{from: 3, to: 4}: {{"color", "red"}},
@@ -1004,7 +1005,7 @@ var encodeTests = []struct {
 	},
 	{
 		g: directedPortedAttrGraphFrom(powerMethodGraph,
-			[][]Attribute{
+			[][]encoding.Attribute{
 				2: {{"shape", "record"}, {"label", `"<Two>English|<Zwei>German"`}},
 				4: {{"shape", "record"}, {"label", `"<Four>English|<Vier>German"`}},
 			},
@@ -1044,7 +1045,7 @@ var encodeTests = []struct {
 	},
 	{
 		g: undirectedPortedAttrGraphFrom(powerMethodGraph,
-			[][]Attribute{
+			[][]encoding.Attribute{
 				2: {{"shape", "record"}, {"label", `"<Two>English|<Zwei>German"`}},
 				4: {{"shape", "record"}, {"label", `"<Four>English|<Vier>German"`}},
 			},
@@ -1092,7 +1093,7 @@ var encodeTests = []struct {
 
 	// Handling graph attributes.
 	{
-		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
+		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
 			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
 			{from: 2, to: 4}: {},
 			{from: 3, to: 4}: {{"color", "red"}},
@@ -1120,13 +1121,13 @@ var encodeTests = []struct {
 }`,
 	},
 	{
-		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]Attribute{
+		g: graphAttributer{Graph: undirectedEdgeAttrGraphFrom(powerMethodGraph, map[edge][]encoding.Attribute{
 			{from: 0, to: 2}: {{"label", `"???"`}, {"style", "dashed"}},
 			{from: 2, to: 4}: {},
 			{from: 3, to: 4}: {{"color", "red"}},
 		}),
-			graph: []Attribute{{"rankdir", `"LR"`}},
-			node:  []Attribute{{"fontsize", "16"}, {"shape", "ellipse"}},
+			graph: []encoding.Attribute{{"rankdir", `"LR"`}},
+			node:  []encoding.Attribute{{"fontsize", "16"}, {"shape", "ellipse"}},
 		},
 
 		want: `graph {

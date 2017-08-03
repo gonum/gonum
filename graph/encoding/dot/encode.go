@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 )
 
@@ -32,18 +33,7 @@ type Node interface {
 // Attributers are graph.Graph values that specify top-level DOT
 // attributes.
 type Attributers interface {
-	DOTAttributers() (graph, node, edge Attributer)
-}
-
-// Attributer defines graph.Node or graph.Edge values that can
-// specify DOT attributes.
-type Attributer interface {
-	DOTAttributes() []Attribute
-}
-
-// Attribute is a DOT language key value attribute pair.
-type Attribute struct {
-	Key, Value string
+	DOTAttributers() (graph, node, edge encoding.Attributer)
 }
 
 // Porter defines the behavior of graph.Edge values that can specify
@@ -184,7 +174,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 		}
 		p.newline()
 		p.writeNode(n)
-		if a, ok := n.(Attributer); ok {
+		if a, ok := n.(encoding.Attributer); ok {
 			p.writeAttributeList(a)
 		}
 		p.buf.WriteByte(';')
@@ -252,7 +242,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 				p.writePorts(e.ToPort())
 			}
 
-			if a, ok := g.Edge(n, t).(Attributer); ok {
+			if a, ok := g.Edge(n, t).(encoding.Attributer); ok {
 				p.writeAttributeList(a)
 			}
 
@@ -297,8 +287,8 @@ func graphID(g graph.Graph, n graph.Node) string {
 	}
 }
 
-func (p *printer) writeAttributeList(a Attributer) {
-	attributes := a.DOTAttributes()
+func (p *printer) writeAttributeList(a encoding.Attributer) {
+	attributes := a.Attributes()
 	switch len(attributes) {
 	case 0:
 	case 1:
@@ -324,8 +314,8 @@ var attType = []string{"graph", "node", "edge"}
 func (p *printer) writeAttributeComplex(ca Attributers) {
 	g, n, e := ca.DOTAttributers()
 	haveWrittenBlock := false
-	for i, a := range []Attributer{g, n, e} {
-		attributes := a.DOTAttributes()
+	for i, a := range []encoding.Attributer{g, n, e} {
+		attributes := a.Attributes()
 		if len(attributes) == 0 {
 			continue
 		}

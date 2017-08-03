@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -27,7 +28,7 @@ func TestRoundTrip(t *testing.T) {
 		},
 	}
 	for i, g := range golden {
-		var dst Builder
+		var dst encoding.Builder
 		if g.directed {
 			dst = newDotDirectedGraph()
 		} else {
@@ -129,12 +130,12 @@ func (g *dotDirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
 }
 
 // DOTAttributers implements the dot.Attributers interface.
-func (g *dotDirectedGraph) DOTAttributers() (graph, node, edge Attributer) {
+func (g *dotDirectedGraph) DOTAttributers() (graph, node, edge encoding.Attributer) {
 	return g.graph, g.node, g.edge
 }
 
 // DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
-func (g *dotDirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge UnmarshalerAttr) {
+func (g *dotDirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge encoding.UnmarshalerAttr) {
 	return &g.graph, &g.node, &g.edge
 }
 
@@ -170,12 +171,12 @@ func (g *dotUndirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
 }
 
 // DOTAttributers implements the dot.Attributers interface.
-func (g *dotUndirectedGraph) DOTAttributers() (graph, node, edge Attributer) {
+func (g *dotUndirectedGraph) DOTAttributers() (graph, node, edge encoding.Attributer) {
 	return g.graph, g.node, g.edge
 }
 
 // DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
-func (g *dotUndirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge UnmarshalerAttr) {
+func (g *dotUndirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge encoding.UnmarshalerAttr) {
 	return &g.graph, &g.node, &g.edge
 }
 
@@ -198,8 +199,8 @@ func (n *dotNode) UnmarshalDOTID(id string) {
 	n.dotID = id
 }
 
-// UnmarshalDOTAttr decodes a single DOT attribute.
-func (n *dotNode) UnmarshalDOTAttr(attr Attribute) error {
+// UnmarshalAttr decodes a single DOT attribute.
+func (n *dotNode) UnmarshalAttr(attr encoding.Attribute) error {
 	if attr.Key != "label" {
 		return fmt.Errorf("unable to unmarshal node DOT attribute with key %q", attr.Key)
 	}
@@ -207,16 +208,16 @@ func (n *dotNode) UnmarshalDOTAttr(attr Attribute) error {
 	return nil
 }
 
-// DOTAttributes returns the DOT attributes of the node.
-func (n *dotNode) DOTAttributes() []Attribute {
+// Attributes returns the DOT attributes of the node.
+func (n *dotNode) Attributes() []encoding.Attribute {
 	if len(n.Label) == 0 {
 		return nil
 	}
-	attr := Attribute{
+	attr := encoding.Attribute{
 		Key:   "label",
 		Value: n.Label,
 	}
-	return []Attribute{attr}
+	return []encoding.Attribute{attr}
 }
 
 // dotEdge extends simple.Edge with a label field to test round-trip encoding and
@@ -227,8 +228,8 @@ type dotEdge struct {
 	Label string
 }
 
-// UnmarshalDOTAttr decodes a single DOT attribute.
-func (e *dotEdge) UnmarshalDOTAttr(attr Attribute) error {
+// UnmarshalAttr decodes a single DOT attribute.
+func (e *dotEdge) UnmarshalAttr(attr encoding.Attribute) error {
 	if attr.Key != "label" {
 		return fmt.Errorf("unable to unmarshal node DOT attribute with key %q", attr.Key)
 	}
@@ -236,25 +237,25 @@ func (e *dotEdge) UnmarshalDOTAttr(attr Attribute) error {
 	return nil
 }
 
-// DOTAttributes returns the DOT attributes of the edge.
-func (e *dotEdge) DOTAttributes() []Attribute {
+// Attributes returns the DOT attributes of the edge.
+func (e *dotEdge) Attributes() []encoding.Attribute {
 	if len(e.Label) == 0 {
 		return nil
 	}
-	attr := Attribute{
+	attr := encoding.Attribute{
 		Key:   "label",
 		Value: e.Label,
 	}
-	return []Attribute{attr}
+	return []encoding.Attribute{attr}
 }
 
 // attributes is a helper for global attributes.
-type attributes []Attribute
+type attributes []encoding.Attribute
 
-func (a attributes) DOTAttributes() []Attribute {
-	return []Attribute(a)
+func (a attributes) Attributes() []encoding.Attribute {
+	return []encoding.Attribute(a)
 }
-func (a *attributes) UnmarshalDOTAttr(attr Attribute) error {
+func (a *attributes) UnmarshalAttr(attr encoding.Attribute) error {
 	*a = append(*a, attr)
 	return nil
 }

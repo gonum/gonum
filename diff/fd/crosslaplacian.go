@@ -58,10 +58,8 @@ func CrossLaplacian(f func(x, y []float64) float64, x, y []float64, settings *Se
 	}
 
 	evals := n * len(formula.Stencil) * len(formula.Stencil)
-	for _, pt := range formula.Stencil {
-		if pt.Loc == 0 {
-			evals -= n
-		}
+	if usesOrigin(formula.Stencil) {
+		evals -= n
 	}
 
 	nWorkers := computeWorkers(concurrent, evals)

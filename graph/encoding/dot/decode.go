@@ -8,32 +8,17 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/encoding"
 	"gonum.org/v1/gonum/graph/formats/dot"
 	"gonum.org/v1/gonum/graph/formats/dot/ast"
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
-// Builder is a graph that can have user-defined nodes and edges added.
-type Builder interface {
-	graph.Graph
-	graph.Builder
-	// NewEdge adds a new edge from the source to the destination node to the
-	// graph, or returns the existing edge if already present.
-	NewEdge(from, to graph.Node) graph.Edge
-}
-
 // UnmashalerAttrs is implemented by graph values that can unmarshal global
 // DOT attributes.
 type UnmarshalerAttrs interface {
 	// DOTUnmarshalerAttrs returns the global attribute unmarshalers.
-	DOTUnmarshalerAttrs() (graph, node, edge UnmarshalerAttr)
-}
-
-// UnmarshalerAttr is implemented by types that can unmarshal a DOT
-// attribute description of themselves.
-type UnmarshalerAttr interface {
-	// UnmarshalDOTAttr decodes a single DOT attribute.
-	UnmarshalDOTAttr(attr Attribute) error
+	DOTUnmarshalerAttrs() (graph, node, edge encoding.UnmarshalerAttr)
 }
 
 // UnmarshalerID is implemented by types that can unmarshal a DOT ID.
@@ -43,7 +28,7 @@ type UnmarshalerID interface {
 }
 
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
-func Unmarshal(data []byte, dst Builder) error {
+func Unmarshal(data []byte, dst encoding.Builder) error {
 	file, err := dot.ParseBytes(data)
 	if err != nil {
 		return err
@@ -56,7 +41,7 @@ func Unmarshal(data []byte, dst Builder) error {
 
 // copyGraph copies the nodes and edges from the Graphviz AST source graph to
 // the destination graph. Edge direction is maintained if present.
-func copyGraph(dst Builder, src *ast.Graph) (err error) {
+func copyGraph(dst encoding.Builder, src *ast.Graph) (err error) {
 	defer func() {
 		switch e := recover().(type) {
 		case nil:
@@ -93,12 +78,12 @@ type generator struct {
 	// corresponds to the start index of the active (or inner-most) subgraph.
 	subStart []int
 	// graphAttr, nodeAttr and edgeAttr are global graph attributes.
-	graphAttr, nodeAttr, edgeAttr UnmarshalerAttr
+	graphAttr, nodeAttr, edgeAttr encoding.UnmarshalerAttr
 }
 
 // node returns the gonum node corresponding to the given dot AST node ID,
 // generating a new such node if none exist.
-func (gen *generator) node(dst Builder, id string) graph.Node {
+func (gen *generator) node(dst encoding.Builder, id string) graph.Node {
 	if n, ok := gen.ids[id]; ok {
 		return n
 	}
@@ -119,26 +104,26 @@ func (gen *generator) node(dst Builder, id string) graph.Node {
 }
 
 // addStmt adds the given statement to the graph.
-func (gen *generator) addStmt(dst Builder, stmt ast.Stmt) {
+func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	switch stmt := stmt.(type) {
 	case *ast.NodeStmt:
-		n, ok := gen.node(dst, stmt.Node.ID).(UnmarshalerAttr)
+		n, ok := gen.node(dst, stmt.Node.ID).(encoding.UnmarshalerAttr)
 		if !ok {
 			return
 		}
 		for _, attr := range stmt.Attrs {
-			a := Attribute{
+			a := encoding.Attribute{
 				Key:   attr.Key,
 				Value: attr.Val,
 			}
-			if err := n.UnmarshalDOTAttr(a); err != nil {
+			if err := n.UnmarshalAttr(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s)", a.Key, a.Value))
 			}
 		}
 	case *ast.EdgeStmt:
 		gen.addEdgeStmt(dst, stmt)
 	case *ast.AttrStmt:
-		var n UnmarshalerAttr
+		var n encoding.UnmarshalerAttr
 		var dst string
 		switch stmt.Kind {
 		case ast.GraphKind:
@@ -163,11 +148,11 @@ func (gen *generator) addStmt(dst Builder, stmt ast.Stmt) {
 			panic("unreachable")
 		}
 		for _, attr := range stmt.Attrs {
-			a := Attribute{
+			a := encoding.Attribute{
 				Key:   attr.Key,
 				Value: attr.Val,
 			}
-			if err := n.UnmarshalDOTAttr(a); err != nil {
+			if err := n.UnmarshalAttr(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s)", dst, a.Key, a.Value))
 			}
 		}
@@ -183,21 +168,21 @@ func (gen *generator) addStmt(dst Builder, stmt ast.Stmt) {
 }
 
 // addEdgeStmt adds the given edge statement to the graph.
-func (gen *generator) addEdgeStmt(dst Builder, e *ast.EdgeStmt) {
+func (gen *generator) addEdgeStmt(dst encoding.Builder, e *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, e.From)
 	ts := gen.addEdge(dst, e.To)
 	for _, f := range fs {
 		for _, t := range ts {
-			edge, ok := dst.NewEdge(f, t).(UnmarshalerAttr)
+			edge, ok := dst.NewEdge(f, t).(encoding.UnmarshalerAttr)
 			if !ok {
 				continue
 			}
 			for _, attr := range e.Attrs {
-				a := Attribute{
+				a := encoding.Attribute{
 					Key:   attr.Key,
 					Value: attr.Val,
 				}
-				if err := edge.UnmarshalDOTAttr(a); err != nil {
+				if err := edge.UnmarshalAttr(a); err != nil {
 					panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
 				}
 			}
@@ -206,7 +191,7 @@ func (gen *generator) addEdgeStmt(dst Builder, e *ast.EdgeStmt) {
 }
 
 // addVertex adds the given vertex to the graph, and returns its set of nodes.
-func (gen *generator) addVertex(dst Builder, v ast.Vertex) []graph.Node {
+func (gen *generator) addVertex(dst encoding.Builder, v ast.Vertex) []graph.Node {
 	switch v := v.(type) {
 	case *ast.Node:
 		n := gen.node(dst, v.ID)
@@ -223,7 +208,7 @@ func (gen *generator) addVertex(dst Builder, v ast.Vertex) []graph.Node {
 }
 
 // addEdge adds the given edge to the graph, and returns its set of nodes.
-func (gen *generator) addEdge(dst Builder, to *ast.Edge) []graph.Node {
+func (gen *generator) addEdge(dst encoding.Builder, to *ast.Edge) []graph.Node {
 	if !gen.directed && to.Directed {
 		panic(fmt.Errorf("directed edge to %v in undirected graph", to.Vertex))
 	}

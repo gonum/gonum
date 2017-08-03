@@ -21,3 +21,7 @@ func TestZcopy(t *testing.T) {
 func TestZdotc(t *testing.T) {
 	testblas.ZdotcTest(t, impl)
 }
+
+func TestZdotu(t *testing.T) {
+	testblas.ZdotuTest(t, impl)
+}

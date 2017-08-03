@@ -5,8 +5,83 @@
 package gonum
 
 import (
+	"math"
+
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
+
+// Dznrm2 computes the Euclidean norm of the complex vector x,
+//  ‖x‖_2 = sqrt(\sum_i x[i] * conj(x[i])).
+// This function returns 0 if incX is negative.
+func (Implementation) Dznrm2(n int, x []complex128, incX int) float64 {
+	if incX < 1 {
+		if incX == 0 {
+			panic(zeroIncX)
+		}
+		return 0
+	}
+	if n < 1 {
+		if n == 0 {
+			return 0
+		}
+		panic(negativeN)
+	}
+	if (n-1)*incX >= len(x) {
+		panic(badX)
+	}
+	var (
+		scale float64
+		ssq   float64 = 1
+	)
+	if incX == 1 {
+		for _, v := range x[:n] {
+			re, im := math.Abs(real(v)), math.Abs(imag(v))
+			if re != 0 {
+				if re > scale {
+					ssq = 1 + ssq*(scale/re)*(scale/re)
+					scale = re
+				} else {
+					ssq += (re / scale) * (re / scale)
+				}
+			}
+			if im != 0 {
+				if im > scale {
+					ssq = 1 + ssq*(scale/im)*(scale/im)
+					scale = im
+				} else {
+					ssq += (im / scale) * (im / scale)
+				}
+			}
+		}
+		if math.IsInf(scale, 1) {
+			return math.Inf(1)
+		}
+		return scale * math.Sqrt(ssq)
+	}
+	for ix := 0; ix < n*incX; ix += incX {
+		re, im := math.Abs(real(x[ix])), math.Abs(imag(x[ix]))
+		if re != 0 {
+			if re > scale {
+				ssq = 1 + ssq*(scale/re)*(scale/re)
+				scale = re
+			} else {
+				ssq += (re / scale) * (re / scale)
+			}
+		}
+		if im != 0 {
+			if im > scale {
+				ssq = 1 + ssq*(scale/im)*(scale/im)
+				scale = im
+			} else {
+				ssq += (im / scale) * (im / scale)
+			}
+		}
+	}
+	if math.IsInf(scale, 1) {
+		return math.Inf(1)
+	}
+	return scale * math.Sqrt(ssq)
+}
 
 // Zaxpy adds alpha times x to y:
 //  y[i] += alpha * x[i] for all i

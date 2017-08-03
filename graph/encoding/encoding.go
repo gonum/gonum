@@ -16,11 +16,10 @@ type Builder interface {
 	NewEdge(from, to graph.Node) graph.Edge
 }
 
-// UnmarshalerAttr is implemented by types that can unmarshal a graph
-// attribute description of themselves.
-type UnmarshalerAttr interface {
-	// UnmarshalAttr decodes a single attribute.
-	UnmarshalAttr(attr Attribute) error
+// AttributeSetter is implemented by types that can set an encoded graph
+// attribute.
+type AttributeSetter interface {
+	SetAttribute(Attribute) error
 }
 
 // Attributer defines graph.Node or graph.Edge values that can

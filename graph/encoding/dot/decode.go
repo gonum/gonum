@@ -14,17 +14,16 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
-// UnmashalerAttrs is implemented by graph values that can unmarshal global
+// AttributeSetters is implemented by graph values that can set global
 // DOT attributes.
-type UnmarshalerAttrs interface {
-	// DOTUnmarshalerAttrs returns the global attribute unmarshalers.
-	DOTUnmarshalerAttrs() (graph, node, edge encoding.UnmarshalerAttr)
+type AttributeSetters interface {
+	// DOTAttributeSetters returns the global attribute setters.
+	DOTAttributeSetters() (graph, node, edge encoding.AttributeSetter)
 }
 
-// UnmarshalerID is implemented by types that can unmarshal a DOT ID.
-type UnmarshalerID interface {
-	// UnmarshalDOTID decodes a single DOT ID.
-	UnmarshalDOTID(id string)
+// DOTIDSetter is implemented by types that can set a DOT ID.
+type DOTIDSetter interface {
+	SetDOTID(id string)
 }
 
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
@@ -55,8 +54,8 @@ func copyGraph(dst encoding.Builder, src *ast.Graph) (err error) {
 		directed: src.Directed,
 		ids:      make(map[string]graph.Node),
 	}
-	if a, ok := dst.(UnmarshalerAttrs); ok {
-		gen.graphAttr, gen.nodeAttr, gen.edgeAttr = a.DOTUnmarshalerAttrs()
+	if a, ok := dst.(AttributeSetters); ok {
+		gen.graphAttr, gen.nodeAttr, gen.edgeAttr = a.DOTAttributeSetters()
 	}
 	for _, stmt := range src.Stmts {
 		gen.addStmt(dst, stmt)
@@ -78,7 +77,7 @@ type generator struct {
 	// corresponds to the start index of the active (or inner-most) subgraph.
 	subStart []int
 	// graphAttr, nodeAttr and edgeAttr are global graph attributes.
-	graphAttr, nodeAttr, edgeAttr encoding.UnmarshalerAttr
+	graphAttr, nodeAttr, edgeAttr encoding.AttributeSetter
 }
 
 // node returns the gonum node corresponding to the given dot AST node ID,
@@ -89,8 +88,8 @@ func (gen *generator) node(dst encoding.Builder, id string) graph.Node {
 	}
 	n := dst.NewNode()
 	dst.AddNode(n)
-	if n, ok := n.(UnmarshalerID); ok {
-		n.UnmarshalDOTID(id)
+	if n, ok := n.(DOTIDSetter); ok {
+		n.SetDOTID(id)
 	}
 	gen.ids[id] = n
 	// Check if within the context of a subgraph, that is to be used as a vertex
@@ -107,7 +106,7 @@ func (gen *generator) node(dst encoding.Builder, id string) graph.Node {
 func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	switch stmt := stmt.(type) {
 	case *ast.NodeStmt:
-		n, ok := gen.node(dst, stmt.Node.ID).(encoding.UnmarshalerAttr)
+		n, ok := gen.node(dst, stmt.Node.ID).(encoding.AttributeSetter)
 		if !ok {
 			return
 		}
@@ -116,14 +115,14 @@ func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 				Key:   attr.Key,
 				Value: attr.Val,
 			}
-			if err := n.UnmarshalAttr(a); err != nil {
+			if err := n.SetAttribute(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal node DOT attribute (%s=%s)", a.Key, a.Value))
 			}
 		}
 	case *ast.EdgeStmt:
 		gen.addEdgeStmt(dst, stmt)
 	case *ast.AttrStmt:
-		var n encoding.UnmarshalerAttr
+		var n encoding.AttributeSetter
 		var dst string
 		switch stmt.Kind {
 		case ast.GraphKind:
@@ -152,7 +151,7 @@ func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 				Key:   attr.Key,
 				Value: attr.Val,
 			}
-			if err := n.UnmarshalAttr(a); err != nil {
+			if err := n.SetAttribute(a); err != nil {
 				panic(fmt.Errorf("unable to unmarshal global %s DOT attribute (%s=%s)", dst, a.Key, a.Value))
 			}
 		}
@@ -173,7 +172,7 @@ func (gen *generator) addEdgeStmt(dst encoding.Builder, e *ast.EdgeStmt) {
 	ts := gen.addEdge(dst, e.To)
 	for _, f := range fs {
 		for _, t := range ts {
-			edge, ok := dst.NewEdge(f, t).(encoding.UnmarshalerAttr)
+			edge, ok := dst.NewEdge(f, t).(encoding.AttributeSetter)
 			if !ok {
 				continue
 			}
@@ -182,7 +181,7 @@ func (gen *generator) addEdgeStmt(dst encoding.Builder, e *ast.EdgeStmt) {
 					Key:   attr.Key,
 					Value: attr.Val,
 				}
-				if err := edge.UnmarshalAttr(a); err != nil {
+				if err := edge.SetAttribute(a); err != nil {
 					panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
 				}
 			}

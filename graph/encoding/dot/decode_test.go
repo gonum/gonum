@@ -134,8 +134,8 @@ func (g *dotDirectedGraph) DOTAttributers() (graph, node, edge encoding.Attribut
 	return g.graph, g.node, g.edge
 }
 
-// DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
-func (g *dotDirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge encoding.UnmarshalerAttr) {
+// DOTAttributeSetters implements the dot.AttributeSetters interface.
+func (g *dotDirectedGraph) DOTAttributeSetters() (graph, node, edge encoding.AttributeSetter) {
 	return &g.graph, &g.node, &g.edge
 }
 
@@ -176,7 +176,7 @@ func (g *dotUndirectedGraph) DOTAttributers() (graph, node, edge encoding.Attrib
 }
 
 // DOTUnmarshalerAttrs implements the dot.UnmarshalerAttrs interface.
-func (g *dotUndirectedGraph) DOTUnmarshalerAttrs() (graph, node, edge encoding.UnmarshalerAttr) {
+func (g *dotUndirectedGraph) DOTAttributeSetters() (graph, node, edge encoding.AttributeSetter) {
 	return &g.graph, &g.node, &g.edge
 }
 
@@ -194,13 +194,13 @@ func (n *dotNode) DOTID() string {
 	return n.dotID
 }
 
-// UnmarshalDOTID decodes a DOT ID.
-func (n *dotNode) UnmarshalDOTID(id string) {
+// SetDOTID sets a DOT ID.
+func (n *dotNode) SetDOTID(id string) {
 	n.dotID = id
 }
 
-// UnmarshalAttr decodes a single DOT attribute.
-func (n *dotNode) UnmarshalAttr(attr encoding.Attribute) error {
+// SetAttribute sets a DOT attribute.
+func (n *dotNode) SetAttribute(attr encoding.Attribute) error {
 	if attr.Key != "label" {
 		return fmt.Errorf("unable to unmarshal node DOT attribute with key %q", attr.Key)
 	}
@@ -213,11 +213,10 @@ func (n *dotNode) Attributes() []encoding.Attribute {
 	if len(n.Label) == 0 {
 		return nil
 	}
-	attr := encoding.Attribute{
+	return []encoding.Attribute{{
 		Key:   "label",
 		Value: n.Label,
-	}
-	return []encoding.Attribute{attr}
+	}}
 }
 
 // dotEdge extends simple.Edge with a label field to test round-trip encoding and
@@ -228,8 +227,8 @@ type dotEdge struct {
 	Label string
 }
 
-// UnmarshalAttr decodes a single DOT attribute.
-func (e *dotEdge) UnmarshalAttr(attr encoding.Attribute) error {
+// SetAttribute sets a DOT attribute.
+func (e *dotEdge) SetAttribute(attr encoding.Attribute) error {
 	if attr.Key != "label" {
 		return fmt.Errorf("unable to unmarshal node DOT attribute with key %q", attr.Key)
 	}
@@ -242,11 +241,10 @@ func (e *dotEdge) Attributes() []encoding.Attribute {
 	if len(e.Label) == 0 {
 		return nil
 	}
-	attr := encoding.Attribute{
+	return []encoding.Attribute{{
 		Key:   "label",
 		Value: e.Label,
-	}
-	return []encoding.Attribute{attr}
+	}}
 }
 
 // attributes is a helper for global attributes.
@@ -255,7 +253,7 @@ type attributes []encoding.Attribute
 func (a attributes) Attributes() []encoding.Attribute {
 	return []encoding.Attribute(a)
 }
-func (a *attributes) UnmarshalAttr(attr encoding.Attribute) error {
+func (a *attributes) SetAttribute(attr encoding.Attribute) error {
 	*a = append(*a, attr)
 	return nil
 }

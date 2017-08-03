@@ -10,6 +10,10 @@ import (
 	"gonum.org/v1/gonum/blas/testblas"
 )
 
+func TestDznrm2(t *testing.T) {
+	testblas.Dznrm2Test(t, impl)
+}
+
 func TestZaxpy(t *testing.T) {
 	testblas.ZaxpyTest(t, impl)
 }

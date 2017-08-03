@@ -135,9 +135,6 @@ func (Implementation) Cher2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha com
 
 // Level 1 complex128 routines.
 
-func (Implementation) Dzasum(n int, x []complex128, incX int) float64 {
-	panic(noComplex)
-}
 func (Implementation) Izamax(n int, x []complex128, incX int) int {
 	panic(noComplex)
 }

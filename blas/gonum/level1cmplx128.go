@@ -10,6 +10,39 @@ import (
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
+// Dzasum returns the sum of the absolute values of the elements of x
+//  \sum_i |Re(x[i])| + |Im(x[i])|
+// Dzasum returns 0 if incX is negative.
+func (Implementation) Dzasum(n int, x []complex128, incX int) float64 {
+	if n < 0 {
+		panic(negativeN)
+	}
+	if incX < 1 {
+		if incX == 0 {
+			panic(zeroIncX)
+		}
+		return 0
+	}
+	var sum float64
+	if incX == 1 {
+		if len(x) < n {
+			panic(badX)
+		}
+		for _, v := range x[:n] {
+			sum += dcabs1(v)
+		}
+		return sum
+	}
+	if (n-1)*incX >= len(x) {
+		panic(badX)
+	}
+	for i := 0; i < n; i++ {
+		v := x[i*incX]
+		sum += dcabs1(v)
+	}
+	return sum
+}
+
 // Dznrm2 computes the Euclidean norm of the complex vector x,
 //  ‖x‖_2 = sqrt(\sum_i x[i] * conj(x[i])).
 // This function returns 0 if incX is negative.

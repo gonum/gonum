@@ -138,9 +138,6 @@ func (Implementation) Cher2k(ul blas.Uplo, t blas.Transpose, n, k int, alpha com
 func (Implementation) Zscal(n int, alpha complex128, x []complex128, incX int) {
 	panic(noComplex)
 }
-func (Implementation) Zdscal(n int, alpha float64, x []complex128, incX int) {
-	panic(noComplex)
-}
 
 // Level 2 complex128 routines.
 

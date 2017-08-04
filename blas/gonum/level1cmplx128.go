@@ -318,6 +318,50 @@ func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, inc
 	return c128.DotuInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
 
+// Zdscal scales the vector x by a real scalar alpha.
+// Zdscal has no effect if incX < 0.
+func (Implementation) Zdscal(n int, alpha float64, x []complex128, incX int) {
+	if incX < 1 {
+		if incX == 0 {
+			panic(zeroIncX)
+		}
+		return
+	}
+	if (n-1)*incX >= len(x) {
+		panic(badX)
+	}
+	if n < 1 {
+		if n == 0 {
+			return
+		}
+		panic(negativeN)
+	}
+	if alpha == 0 {
+		if incX == 1 {
+			x = x[:n]
+			for i := range x {
+				x[i] = 0
+			}
+			return
+		}
+		for ix := 0; ix < n*incX; ix += incX {
+			x[ix] = 0
+		}
+		return
+	}
+	if incX == 1 {
+		x = x[:n]
+		for i, v := range x {
+			x[i] = complex(alpha*real(v), alpha*imag(v))
+		}
+		return
+	}
+	for ix := 0; ix < n*incX; ix += incX {
+		v := x[ix]
+		x[ix] = complex(alpha*real(v), alpha*imag(v))
+	}
+}
+
 // Zswap exchanges the elements of two complex vectors x and y.
 func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, incY int) {
 	if incX == 0 {

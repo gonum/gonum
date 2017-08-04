@@ -302,63 +302,23 @@ func Cond(a Matrix, norm float64) float64 {
 	case math.Inf(1):
 		lnorm = lapack.MaxRowSum
 	}
+
 	if m == n {
 		// Use the LU decomposition to compute the condition number.
-		tmp := getWorkspace(m, n, false)
-		tmp.Copy(a)
-		work := getFloats(4*n, false)
-		aNorm := lapack64.Lange(lnorm, tmp.mat, work)
-		pivot := getInts(m, false)
-		lapack64.Getrf(tmp.mat, pivot)
-		iwork := make([]int, n)
-		v := lapack64.Gecon(lnorm, tmp.mat, aNorm, work, iwork)
-		putWorkspace(tmp)
-		putFloats(work)
-		putInts(pivot)
-		return 1 / v
+		var lu LU
+		lu.factorize(a, lnorm)
+		return lu.Cond()
 	}
 	if m > n {
 		// Use the QR factorization to compute the condition number.
-		tmp := getWorkspace(m, n, false)
-		tmp.Copy(a)
-		work := getFloats(3*n, false)
-		tau := getFloats(min(m, n), false)
-		lapack64.Geqrf(tmp.mat, tau, work, -1)
-		if l := int(work[0]); l > len(work) {
-			putFloats(work)
-			work = getFloats(l, false)
-		}
-		lapack64.Geqrf(tmp.mat, tau, work, len(work))
-
-		iwork := getInts(n, false)
-		r := tmp.asTriDense(n, blas.NonUnit, blas.Upper)
-		v := lapack64.Trcon(lnorm, r.mat, work, iwork)
-		putWorkspace(tmp)
-		putFloats(work)
-		putFloats(tau)
-		putInts(iwork)
-		return 1 / v
+		var qr QR
+		qr.factorize(a, lnorm)
+		return qr.Cond()
 	}
 	// Use the LQ factorization to compute the condition number.
-	tmp := getWorkspace(m, n, false)
-	tmp.Copy(a)
-	work := getFloats(3*m, false)
-	tau := getFloats(min(m, n), false)
-	lapack64.Gelqf(tmp.mat, tau, work, -1)
-	if l := int(work[0]); l > len(work) {
-		putFloats(work)
-		work = getFloats(l, false)
-	}
-	lapack64.Gelqf(tmp.mat, tau, work, len(work))
-
-	iwork := getInts(m, false)
-	l := tmp.asTriDense(m, blas.NonUnit, blas.Lower)
-	v := lapack64.Trcon(lnorm, l.mat, work, iwork)
-	putWorkspace(tmp)
-	putFloats(work)
-	putFloats(tau)
-	putInts(iwork)
-	return 1 / v
+	var lq LQ
+	lq.factorize(a, lnorm)
+	return lq.Cond()
 }
 
 // Det returns the determinant of the matrix a. In many expressions using LogDet

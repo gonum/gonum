@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
@@ -19,14 +20,14 @@ type LQ struct {
 	cond float64
 }
 
-func (lq *LQ) updateCond() {
+func (lq *LQ) updateCond(norm lapack.MatrixNorm) {
 	// A = LQ, where Q is orthonormal. Orthonormal multiplications do not change
 	// the condition number. Thus, ||A|| = ||L|| ||Q|| = ||Q||.
 	m := lq.lq.mat.Rows
 	work := getFloats(3*m, false)
 	iwork := getInts(m, false)
 	l := lq.lq.asTriDense(m, blas.NonUnit, blas.Lower)
-	v := lapack64.Trcon(CondNorm, l.mat, work, iwork)
+	v := lapack64.Trcon(norm, l.mat, work, iwork)
 	lq.cond = 1 / v
 	putFloats(work)
 	putInts(iwork)
@@ -39,6 +40,10 @@ func (lq *LQ) updateCond() {
 // The matrix Q is an orthonormal n×n matrix, and L is an m×n upper triangular matrix.
 // L and Q can be extracted from the LTo and QTo methods.
 func (lq *LQ) Factorize(a Matrix) {
+	lq.factorize(a, CondNorm)
+}
+
+func (lq *LQ) factorize(a Matrix, norm lapack.MatrixNorm) {
 	m, n := a.Dims()
 	if m > n {
 		panic(ErrShape)
@@ -54,7 +59,7 @@ func (lq *LQ) Factorize(a Matrix) {
 	work = getFloats(int(work[0]), false)
 	lapack64.Gelqf(lq.lq.mat, lq.tau, work, len(work))
 	putFloats(work)
-	lq.updateCond()
+	lq.updateCond(norm)
 }
 
 // Cond returns the condition number for the factorized matrix.

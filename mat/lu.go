@@ -10,6 +10,7 @@ import (
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/lapack"
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
@@ -22,15 +23,15 @@ type LU struct {
 	cond  float64
 }
 
-// updateCond updates the stored condition number of the matrix. Norm is the
-// norm of the original matrix. If norm is negative it will be estimated.
-func (lu *LU) updateCond(norm float64) {
+// updateCond updates the stored condition number of the matrix. anorm is the
+// norm of the original matrix. If anorm is negative it will be estimated.
+func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 	n := lu.lu.mat.Cols
 	work := getFloats(4*n, false)
 	defer putFloats(work)
 	iwork := getInts(n, false)
 	defer putInts(iwork)
-	if norm < 0 {
+	if anorm < 0 {
 		// This is an approximation. By the definition of a norm, ||AB|| <= ||A|| ||B||.
 		// The condition number is ||A|| || A^-1||, so this will underestimate
 		// the condition number somewhat.
@@ -38,11 +39,11 @@ func (lu *LU) updateCond(norm float64) {
 		// update possibilities, e.g. RankOne.
 		u := lu.lu.asTriDense(n, blas.NonUnit, blas.Upper)
 		l := lu.lu.asTriDense(n, blas.Unit, blas.Lower)
-		unorm := lapack64.Lantr(CondNorm, u.mat, work)
-		lnorm := lapack64.Lantr(CondNorm, l.mat, work)
-		norm = unorm * lnorm
+		unorm := lapack64.Lantr(norm, u.mat, work)
+		lnorm := lapack64.Lantr(norm, l.mat, work)
+		anorm = unorm * lnorm
 	}
-	v := lapack64.Gecon(CondNorm, lu.lu.mat, norm, work, iwork)
+	v := lapack64.Gecon(norm, lu.lu.mat, anorm, work, iwork)
 	lu.cond = 1 / v
 }
 
@@ -54,6 +55,10 @@ func (lu *LU) updateCond(norm float64) {
 // factors can be extracted from the factorization using the Permutation method
 // on Dense, and the LU LTo and UTo methods.
 func (lu *LU) Factorize(a Matrix) {
+	lu.factorize(a, CondNorm)
+}
+
+func (lu *LU) factorize(a Matrix, norm lapack.MatrixNorm) {
 	r, c := a.Dims()
 	if r != c {
 		panic(ErrSquare)
@@ -70,10 +75,10 @@ func (lu *LU) Factorize(a Matrix) {
 	}
 	lu.pivot = lu.pivot[:r]
 	work := getFloats(r, false)
-	anorm := lapack64.Lange(CondNorm, lu.lu.mat, work)
+	anorm := lapack64.Lange(norm, lu.lu.mat, work)
 	putFloats(work)
 	lapack64.Getrf(lu.lu.mat, lu.pivot)
-	lu.updateCond(anorm)
+	lu.updateCond(anorm, norm)
 }
 
 // Cond returns the condition number for the factorized matrix.
@@ -215,7 +220,7 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *VecDense) {
 			lum.Data[j*lum.Stride+i] += gamma * tmp
 		}
 	}
-	lu.updateCond(-1)
+	lu.updateCond(-1, CondNorm)
 }
 
 // LTo extracts the lower triangular matrix from an LU factorization.

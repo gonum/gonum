@@ -237,17 +237,27 @@ func TestCond(t *testing.T) {
 			condInf: 31.153846153846136,
 		},
 	} {
+		orig := DenseCopyOf(test.a)
 		condOne := Cond(test.a, 1)
 		if !floats.EqualWithinAbsOrRel(test.condOne, condOne, 1e-13, 1e-13) {
-			t.Errorf("Case %d: inf norm mismatch. Want %v, got %v", i, test.condOne, condOne)
+			t.Errorf("Case %d: one norm mismatch. Want %v, got %v", i, test.condOne, condOne)
+		}
+		if !Equal(test.a, orig) {
+			t.Errorf("Case %d: unexpected mutation of input matrix for one norm. Want %v, got %v", i, orig, test.a)
 		}
 		condTwo := Cond(test.a, 2)
 		if !floats.EqualWithinAbsOrRel(test.condTwo, condTwo, 1e-13, 1e-13) {
-			t.Errorf("Case %d: inf norm mismatch. Want %v, got %v", i, test.condTwo, condTwo)
+			t.Errorf("Case %d: two norm mismatch. Want %v, got %v", i, test.condTwo, condTwo)
+		}
+		if !Equal(test.a, orig) {
+			t.Errorf("Case %d: unexpected mutation of input matrix for two norm. Want %v, got %v", i, orig, test.a)
 		}
 		condInf := Cond(test.a, math.Inf(1))
 		if !floats.EqualWithinAbsOrRel(test.condInf, condInf, 1e-13, 1e-13) {
 			t.Errorf("Case %d: inf norm mismatch. Want %v, got %v", i, test.condInf, condInf)
+		}
+		if !Equal(test.a, orig) {
+			t.Errorf("Case %d: unexpected mutation of input matrix for inf norm. Want %v, got %v", i, orig, test.a)
 		}
 	}
 

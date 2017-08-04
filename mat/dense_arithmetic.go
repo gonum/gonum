@@ -650,6 +650,22 @@ func (m *Dense) Apply(fn func(i, j int, v float64) float64, a Matrix) {
 	}
 }
 
+// Fill calls the input function for every element in the receiver and stores
+// the result.
+//
+// Fill panics if the receiver is zero.
+func (m *Dense) Fill(f func() float64) {
+	if m.IsZero() {
+		panic(ErrZeroReceiver)
+	}
+	r, c := m.Dims()
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			m.set(i, j, f())
+		}
+	}
+}
+
 // RankOne performs a rank-one update to the matrix a and stores the result
 // in the receiver. If a is zero, see Outer.
 //  m = a + alpha * x * y'

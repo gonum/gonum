@@ -1344,6 +1344,27 @@ func TestApply(t *testing.T) {
 	}
 }
 
+func TestFill(t *testing.T) {
+	a := NewDense(3, 4, nil)
+	a.Fill(func() float64 { return 1 })
+	r, c := a.Dims()
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			if a.At(i, j) != 1 {
+				t.Errorf("Fill mismatch")
+			}
+		}
+	}
+
+	var b Dense
+	f := func() {
+		b.Fill(func() float64 { return 6 })
+	}
+	if panicked, _ := panics(f); !panicked {
+		t.Errorf("Fill did not panic with 0 receiver")
+	}
+}
+
 func TestClone(t *testing.T) {
 	for i, test := range []struct {
 		a    [][]float64

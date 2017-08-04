@@ -37,3 +37,7 @@ func TestZdotc(t *testing.T) {
 func TestZdotu(t *testing.T) {
 	testblas.ZdotuTest(t, impl)
 }
+
+func TestZswap(t *testing.T) {
+	testblas.ZswapTest(t,impl)
+}

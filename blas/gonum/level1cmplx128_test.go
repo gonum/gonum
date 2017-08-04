@@ -38,6 +38,10 @@ func TestZdotu(t *testing.T) {
 	testblas.ZdotuTest(t, impl)
 }
 
+func TestZdscal(t *testing.T) {
+	testblas.ZdscalTest(t, impl)
+}
+
 func TestZswap(t *testing.T) {
-	testblas.ZswapTest(t,impl)
+	testblas.ZswapTest(t, impl)
 }

@@ -317,3 +317,44 @@ func (Implementation) Zdotu(n int, x []complex128, incX int, y []complex128, inc
 	}
 	return c128.DotuInc(x, y, uintptr(n), uintptr(incX), uintptr(incY), uintptr(ix), uintptr(iy))
 }
+
+// Zswap exchanges the elements of two complex vectors x and y.
+func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, incY int) {
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if incY == 0 {
+		panic(zeroIncY)
+	}
+	if n < 1 {
+		if n == 0 {
+			return
+		}
+		panic(negativeN)
+	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic(badX)
+	}
+	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
+		panic(badY)
+	}
+	if incX == 1 && incY == 1 {
+		x = x[:n]
+		for i, v := range x {
+			x[i], y[i] = y[i], v
+		}
+		return
+	}
+	var ix, iy int
+	if incX < 0 {
+		ix = (-n + 1) * incX
+	}
+	if incY < 0 {
+		iy = (-n + 1) * incY
+	}
+	for i := 0; i < n; i++ {
+		x[ix], y[iy] = y[iy], x[ix]
+		ix += incX
+		iy += incY
+	}
+}

@@ -362,6 +362,44 @@ func (Implementation) Zdscal(n int, alpha float64, x []complex128, incX int) {
 	}
 }
 
+// Zscal scales the vector x by a complex scalar alpha.
+// Zscal has no effect if incX < 0.
+func (Implementation) Zscal(n int, alpha complex128, x []complex128, incX int) {
+	if incX < 1 {
+		if incX == 0 {
+			panic(zeroIncX)
+		}
+		return
+	}
+	if (n-1)*incX >= len(x) {
+		panic(badX)
+	}
+	if n < 1 {
+		if n == 0 {
+			return
+		}
+		panic(negativeN)
+	}
+	if alpha == 0 {
+		if incX == 1 {
+			x = x[:n]
+			for i := range x {
+				x[i] = 0
+			}
+			return
+		}
+		for ix := 0; ix < n*incX; ix += incX {
+			x[ix] = 0
+		}
+		return
+	}
+	if incX == 1 {
+		c128.ScalUnitary(alpha, x[:n])
+		return
+	}
+	c128.ScalInc(alpha, x, uintptr(n), uintptr(incX))
+}
+
 // Zswap exchanges the elements of two complex vectors x and y.
 func (Implementation) Zswap(n int, x []complex128, incX int, y []complex128, incY int) {
 	if incX == 0 {

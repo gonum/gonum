@@ -42,6 +42,10 @@ func TestZdscal(t *testing.T) {
 	testblas.ZdscalTest(t, impl)
 }
 
+func TestZscal(t *testing.T) {
+	testblas.ZscalTest(t, impl)
+}
+
 func TestZswap(t *testing.T) {
 	testblas.ZswapTest(t, impl)
 }

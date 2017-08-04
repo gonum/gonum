@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
+	"gonum.org/v1/gonum/lapack"
 	"gonum.org/v1/gonum/lapack/lapack64"
 )
 
@@ -19,14 +20,14 @@ type QR struct {
 	cond float64
 }
 
-func (qr *QR) updateCond() {
+func (qr *QR) updateCond(norm lapack.MatrixNorm) {
 	// A = QR, where Q is orthonormal. Orthonormal multiplications do not change
 	// the condition number. Thus, ||A|| = ||Q|| ||R|| = ||R||.
 	n := qr.qr.mat.Cols
 	work := getFloats(3*n, false)
 	iwork := getInts(n, false)
 	r := qr.qr.asTriDense(n, blas.NonUnit, blas.Upper)
-	v := lapack64.Trcon(CondNorm, r.mat, work, iwork)
+	v := lapack64.Trcon(norm, r.mat, work, iwork)
 	putFloats(work)
 	putInts(iwork)
 	qr.cond = 1 / v
@@ -39,6 +40,10 @@ func (qr *QR) updateCond() {
 // The matrix Q is an orthonormal m×m matrix, and R is an m×n upper triangular matrix.
 // Q and R can be extracted using the QTo and RTo methods.
 func (qr *QR) Factorize(a Matrix) {
+	qr.factorize(a, CondNorm)
+}
+
+func (qr *QR) factorize(a Matrix, norm lapack.MatrixNorm) {
 	m, n := a.Dims()
 	if m < n {
 		panic(ErrShape)
@@ -55,7 +60,7 @@ func (qr *QR) Factorize(a Matrix) {
 	work = getFloats(int(work[0]), false)
 	lapack64.Geqrf(qr.qr.mat, qr.tau, work, len(work))
 	putFloats(work)
-	qr.updateCond()
+	qr.updateCond(norm)
 }
 
 // Cond returns the condition number for the factorized matrix.

@@ -57,6 +57,15 @@ func (lq *LQ) Factorize(a Matrix) {
 	lq.updateCond()
 }
 
+// Cond returns the condition number for the factorized matrix.
+// Cond will panic if the receiver does not contain a successful factorization.
+func (lq *LQ) Cond() float64 {
+	if lq.lq == nil || lq.lq.IsZero() {
+		panic("lq: no decomposition computed")
+	}
+	return lq.cond
+}
+
 // TODO(btracey): Add in the "Reduced" forms for extracting the m×m orthogonal
 // and upper triangular matrices.
 

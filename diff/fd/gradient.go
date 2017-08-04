@@ -51,7 +51,8 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 	nWorkers := computeWorkers(concurrent, evals)
 
 	hasOrigin := usesOrigin(formula.Stencil)
-	xcopy := make([]float64, len(x)) // So that x is not modified during the call.
+	// Copy x in case it is modified during the call.
+	xcopy := make([]float64, len(x))
 	if hasOrigin && !originKnown {
 		copy(xcopy, x)
 		originValue = f(xcopy)
@@ -65,7 +66,7 @@ func Gradient(dst []float64, f func([]float64) float64, x []float64, settings *S
 					deriv += pt.Coeff * originValue
 					continue
 				}
-				// Copying the code anew has two benefits. First, it
+				// Copying the data anew has two benefits. First, it
 				// avoids floating point issues where adding and then
 				// subtracting the step don't return to the exact same
 				// location. Secondly, it protects against the function

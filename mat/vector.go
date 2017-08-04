@@ -18,11 +18,54 @@ var (
 	_ Reseter = vector
 )
 
-// Vector is a column vector.
+// Vector is a vector.
 type Vector interface {
 	Matrix
 	AtVec(int) float64
 	Len() int
+}
+
+// TransposeVec is a type for performing an implicit transpose of a Vector.
+// It implements the Vector interface, returning values from the transpose
+// of the vector within.
+type TransposeVec struct {
+	Vector Vector
+}
+
+// At returns the value of the element at row i and column j of the transposed
+// matrix, that is, row j and column i of the Vector field.
+func (t TransposeVec) At(i, j int) float64 {
+	return t.Vector.At(j, i)
+}
+
+// Dims returns the dimensions of the transposed vector.
+func (t TransposeVec) Dims() (r, c int) {
+	c, r = t.Vector.Dims()
+	return r, c
+}
+
+// T performs an implicit transpose by returning the Vector field.
+func (t TransposeVec) T() Matrix {
+	return t.Vector
+}
+
+// Len returns the number of columns in the vector.
+func (t TransposeVec) Len() int {
+	return t.Vector.Len()
+}
+
+// TVec performs an implicit transpose by returning the Vector field.
+func (t TransposeVec) TVec() Vector {
+	return t.Vector
+}
+
+// Untranspose returns the Vector field.
+func (t TransposeVec) Untranspose() Matrix {
+	return t.Vector
+}
+
+func (t TransposeVec) UntransposeVec() Vector {
+	return t.Vector
 }
 
 // VecDense represents a column vector.

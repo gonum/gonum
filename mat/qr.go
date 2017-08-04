@@ -58,6 +58,15 @@ func (qr *QR) Factorize(a Matrix) {
 	qr.updateCond()
 }
 
+// Cond returns the condition number for the factorized matrix.
+// Cond will panic if the receiver does not contain a successful factorization.
+func (qr *QR) Cond() float64 {
+	if qr.qr == nil || qr.qr.IsZero() {
+		panic("qr: no decomposition computed")
+	}
+	return qr.cond
+}
+
 // TODO(btracey): Add in the "Reduced" forms for extracting the n×n orthogonal
 // and upper triangular matrices.
 

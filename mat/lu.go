@@ -76,6 +76,15 @@ func (lu *LU) Factorize(a Matrix) {
 	lu.updateCond(anorm)
 }
 
+// Cond returns the condition number for the factorized matrix.
+// Cond will panic if the receiver does not contain a successful factorization.
+func (lu *LU) Cond() float64 {
+	if lu.lu == nil || lu.lu.IsZero() {
+		panic("lu: no decomposition computed")
+	}
+	return lu.cond
+}
+
 // Reset resets the factorization so that it can be reused as the receiver of a
 // dimensionally restricted operation.
 func (lu *LU) Reset() {

@@ -4,7 +4,10 @@
 
 package c128
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 var tests = []struct {
 	incX, incY, incDst int
@@ -82,25 +85,6 @@ var tests = []struct {
 		ex:  []complex128{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
 }
 
-func guardVector(vec []complex128, guard_val complex128, guard_len int) (guarded []complex128) {
-	guarded = make([]complex128, len(vec)+guard_len*2)
-	copy(guarded[guard_len:], vec)
-	for i := 0; i < guard_len; i++ {
-		guarded[i] = guard_val
-		guarded[len(guarded)-1-i] = guard_val
-	}
-	return guarded
-}
-
-func isValidGuard(vec []complex128, guard_val complex128, guard_len int) bool {
-	for i := 0; i < guard_len; i++ {
-		if vec[i] != guard_val || vec[len(vec)-1-i] != guard_val {
-			return false
-		}
-	}
-	return true
-}
-
 func TestAxpyUnitary(t *testing.T) {
 	var x_gd, y_gd complex128 = 1, 1
 	for cas, test := range tests {
@@ -149,50 +133,6 @@ func TestAxpyUnitaryTo(t *testing.T) {
 	}
 }
 
-func guardIncVector(vec []complex128, guard_val complex128, incV uintptr, guard_len int) (guarded []complex128) {
-	inc := int(incV)
-	s_ln := len(vec) * inc
-	if inc < 0 {
-		s_ln = len(vec) * -inc
-	}
-	guarded = make([]complex128, s_ln+guard_len*2)
-	for i, cas := 0, 0; i < len(guarded); i++ {
-		switch {
-		case i < guard_len, i > guard_len+s_ln:
-			guarded[i] = guard_val
-		case (i-guard_len)%(inc) == 0 && cas < len(vec):
-			guarded[i] = vec[cas]
-			cas++
-		default:
-			guarded[i] = guard_val
-		}
-	}
-	return guarded
-}
-
-func checkValidIncGuard(t *testing.T, vec []complex128, guard_val complex128, incV uintptr, guard_len int) {
-	inc := int(incV)
-	s_ln := len(vec) - 2*guard_len
-	if inc < 0 {
-		s_ln = len(vec) * -inc
-	}
-
-	for i := range vec {
-		switch {
-		case vec[i] == guard_val:
-			// Correct value
-		case i < guard_len:
-			t.Errorf("Front guard violated at %d %v", i, vec[:guard_len])
-		case i > guard_len+s_ln:
-			t.Errorf("Back guard violated at %d %v", i-guard_len-s_ln, vec[guard_len+s_ln:])
-		case (i-guard_len)%inc == 0 && (i-guard_len)/inc < len(vec):
-			// Ignore input values
-		default:
-			t.Errorf("Internal guard violated at %d %v", i-guard_len, vec[guard_len:guard_len+s_ln])
-		}
-	}
-}
-
 func TestAxpyInc(t *testing.T) {
 	var x_gd, y_gd complex128 = 1, 1
 	for cas, test := range tests {
@@ -227,5 +167,65 @@ func TestAxpyIncTo(t *testing.T) {
 		checkValidIncGuard(t, test.x, x_gd, uintptr(test.incX), xg_ln)
 		checkValidIncGuard(t, test.y, y_gd, uintptr(test.incY), yg_ln)
 		checkValidIncGuard(t, test.dst, dst_gd, uintptr(test.incDst), xg_ln)
+	}
+}
+
+var scalTests = []struct {
+	alpha float64
+	x     []complex128
+	want  []complex128
+}{
+	{
+		alpha: 0,
+		x:     []complex128{},
+		want:  []complex128{},
+	},
+	{
+		alpha: 1,
+		x:     []complex128{1 + 2i},
+		want:  []complex128{1 + 2i},
+	},
+	{
+		alpha: 2,
+		x:     []complex128{1 + 2i},
+		want:  []complex128{2 + 2i},
+	},
+	{
+		alpha: 2,
+		x:     []complex128{1 + 2i},
+		want:  []complex128{2 + 2i},
+	},
+	{
+		alpha: 3,
+		x:     []complex128{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
+		want:  []complex128{3 + 2i, 15 + 4i, 9 + 6i, 24 + 12i, -9 - 2i, -15 + 5i},
+	},
+	{
+		alpha: 5,
+		x:     []complex128{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i, 1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
+		want:  []complex128{5 + 2i, 25 + 4i, 15 + 6i, 40 + 12i, -15 - 2i, -25 + 5i, 5 + 2i, 25 + 4i, 15 + 6i, 40 + 12i, -15 - 2i, -25 + 5i},
+	},
+}
+
+func TestDscalUnitary(t *testing.T) {
+	const xGdVal = -0.5
+	for i, test := range scalTests {
+		for _, align := range align1 {
+			prefix := fmt.Sprintf("Test %v (x:%v)", i, align)
+			xgLn := 4 + align
+			xg := guardVector(test.x, xGdVal, xgLn)
+			x := xg[xgLn : len(xg)-xgLn]
+
+			DscalUnitary(test.alpha, x)
+
+			for i := range test.want {
+				if !same(x[i], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
+				}
+			}
+			if !isValidGuard(xg, xGdVal, xgLn) {
+				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
+			}
+		}
 	}
 }

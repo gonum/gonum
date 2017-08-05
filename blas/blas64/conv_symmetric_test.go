@@ -63,7 +63,7 @@ type symmetric interface {
 	uplo() blas.Uplo
 }
 
-func equalSymmetric(a, b symmetric) bool {
+func sameSymmetric(a, b symmetric) bool {
 	an := a.n()
 	bn := b.n()
 	if an != bn {
@@ -100,12 +100,12 @@ func TestConvertSymmetric(t *testing.T) {
 		for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 			test.Uplo = uplo
 			colmajor := newSymmetricColsFrom(test)
-			if !equalSymmetric(colmajor, test) {
+			if !sameSymmetric(colmajor, test) {
 				t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 					colmajor, test)
 			}
 			rowmajor := newSymmetricFrom(colmajor)
-			if !equalSymmetric(rowmajor, test) {
+			if !sameSymmetric(rowmajor, test) {
 				t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 					rowmajor, test)
 			}
@@ -201,7 +201,7 @@ type symmetricBand interface {
 	uplo() blas.Uplo
 }
 
-func equalSymmetricBand(a, b symmetricBand) bool {
+func sameSymmetricBand(a, b symmetricBand) bool {
 	an := a.n()
 	bn := b.n()
 	if an != bn {
@@ -292,12 +292,12 @@ var symmetricBandTests = []SymmetricBand{
 func TestConvertSymBand(t *testing.T) {
 	for _, test := range symmetricBandTests {
 		colmajor := newSymmetricBandColsFrom(test)
-		if !equalSymmetricBand(colmajor, test) {
+		if !sameSymmetricBand(colmajor, test) {
 			t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 				colmajor, test)
 		}
 		rowmajor := newSymmetricBandFrom(colmajor)
-		if !equalSymmetricBand(rowmajor, test) {
+		if !sameSymmetricBand(rowmajor, test) {
 			t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 				rowmajor, test)
 		}

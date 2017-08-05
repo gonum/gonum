@@ -615,7 +615,5 @@ func (Implementation) Sscal(n int, alpha float32, x []float32, incX int) {
 		f32.ScalUnitary(alpha, x[:n])
 		return
 	}
-	for ix := 0; ix < n*incX; ix += incX {
-		x[ix] *= alpha
-	}
+	f32.ScalInc(alpha, x, uintptr(n), uintptr(incX))
 }

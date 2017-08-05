@@ -40,8 +40,7 @@ func isValidGuard(vec []complex128, guard_val complex128, guard_len int) bool {
 	return true
 }
 
-func guardIncVector(vec []complex128, guard_val complex128, incV uintptr, guard_len int) (guarded []complex128) {
-	inc := int(incV)
+func guardIncVector(vec []complex128, guard_val complex128, inc, guard_len int) (guarded []complex128) {
 	s_ln := len(vec) * inc
 	if inc < 0 {
 		s_ln = len(vec) * -inc
@@ -61,8 +60,7 @@ func guardIncVector(vec []complex128, guard_val complex128, incV uintptr, guard_
 	return guarded
 }
 
-func checkValidIncGuard(t *testing.T, vec []complex128, guard_val complex128, incV uintptr, guard_len int) {
-	inc := int(incV)
+func checkValidIncGuard(t *testing.T, vec []complex128, guard_val complex128, inc, guard_len int) {
 	s_ln := len(vec) - 2*guard_len
 	if inc < 0 {
 		s_ln = len(vec) * -inc

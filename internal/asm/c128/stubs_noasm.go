@@ -65,3 +65,13 @@ func DscalUnitary(alpha float64, x []complex128) {
 		x[i] = complex(real(v)*alpha, imag(v))
 	}
 }
+
+// DscalInc is
+//  for i := 0; i < n; i++ {
+//  	x[i*inc] = complex(real(x[i*inc])*alpha, imag(x[i*inc]))
+//  }
+func DscalInc(n int, alpha float64, x []complex128, inc int) {
+	for i := 0; i < n; i++ {
+		x[i*inc] = complex(real(x[i*inc])*alpha, imag(x[i*inc]))
+	}
+}

@@ -23,6 +23,7 @@ cat level1double.go \
 | gofmt -r 'f64.AxpyUnitary -> f32.AxpyUnitary' \
 | gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
 | gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
+| gofmt -r 'f64.ScalInc -> f32.ScalInc' \
 | gofmt -r 'f64.ScalUnitary -> f32.ScalUnitary' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \

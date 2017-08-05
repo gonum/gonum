@@ -14,20 +14,6 @@ func ScalUnitaryTo(dst []complex128, alpha complex128, x []complex128) {
 	}
 }
 
-// ScalInc is
-//  var ix uintptr
-//  for i := 0; i < int(n); i++ {
-//  	x[ix] *= alpha
-//  	ix += incX
-//  }
-func ScalInc(alpha complex128, x []complex128, n, incX uintptr) {
-	var ix uintptr
-	for i := 0; i < int(n); i++ {
-		x[ix] *= alpha
-		ix += incX
-	}
-}
-
 // ScalIncTo is
 //  var idst, ix uintptr
 //  for i := 0; i < int(n); i++ {

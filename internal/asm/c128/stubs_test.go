@@ -240,7 +240,7 @@ func TestDscalInc(t *testing.T) {
 			xg := guardIncVector(test.x, xGdVal, incX, gdLn)
 			x := xg[gdLn : len(xg)-gdLn]
 
-			DscalInc(n, test.alpha, x, incX)
+			DscalInc(test.alpha, x, n, incX)
 
 			for i := range test.want {
 				if !same(x[i*incX], test.want[i]) {
@@ -308,9 +308,28 @@ func TestScalUnitary(t *testing.T) {
 			if !isValidGuard(xg, xGdVal, xgLn) {
 				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
 			}
-			if t.Failed() {
-				//t.FailNow()
+		}
+	}
+}
+
+func TestScalInc(t *testing.T) {
+	const xGdVal = -0.5
+	gdLn := 4
+	for i, test := range scalTests {
+		n := len(test.x)
+		for _, inc := range []int{1, 2, 3, 4, 7, 10} {
+			prefix := fmt.Sprintf("Test %v (x:%v)", i, inc)
+			xg := guardIncVector(test.x, xGdVal, inc, gdLn)
+			x := xg[gdLn : len(xg)-gdLn]
+
+			ScalInc(test.alpha, x, n, inc)
+
+			for i := range test.want {
+				if !same(x[i*inc], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, x[i*inc], test.want[i])
+				}
 			}
+			checkValidIncGuard(t, xg, xGdVal, inc, gdLn)
 		}
 	}
 }

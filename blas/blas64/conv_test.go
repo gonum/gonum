@@ -44,7 +44,7 @@ type general interface {
 	at(i, j int) float64
 }
 
-func equalGeneral(a, b general) bool {
+func sameGeneral(a, b general) bool {
 	ar, ac := a.dims()
 	br, bc := b.dims()
 	if ar != br || ac != bc {
@@ -94,12 +94,12 @@ var generalTests = []General{
 func TestConvertGeneral(t *testing.T) {
 	for _, test := range generalTests {
 		colmajor := newGeneralColsFrom(test)
-		if !equalGeneral(colmajor, test) {
+		if !sameGeneral(colmajor, test) {
 			t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 				colmajor, test)
 		}
 		rowmajor := newGeneralFrom(colmajor)
-		if !equalGeneral(rowmajor, test) {
+		if !sameGeneral(rowmajor, test) {
 			t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 				rowmajor, test)
 		}
@@ -169,7 +169,7 @@ type triangular interface {
 	diag() blas.Diag
 }
 
-func equalTriangular(a, b triangular) bool {
+func sameTriangular(a, b triangular) bool {
 	an := a.n()
 	bn := b.n()
 	if an != bn {
@@ -205,12 +205,12 @@ func TestConvertTriangular(t *testing.T) {
 				test.Uplo = uplo
 				test.Diag = diag
 				colmajor := newTriangularColsFrom(test)
-				if !equalTriangular(colmajor, test) {
+				if !sameTriangular(colmajor, test) {
 					t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 						colmajor, test)
 				}
 				rowmajor := newTriangularFrom(colmajor)
-				if !equalTriangular(rowmajor, test) {
+				if !sameTriangular(rowmajor, test) {
 					t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 						rowmajor, test)
 				}
@@ -277,7 +277,7 @@ type band interface {
 	bandwidth() (kl, ku int)
 }
 
-func equalBand(a, b band) bool {
+func sameBand(a, b band) bool {
 	ar, ac := a.dims()
 	br, bc := b.dims()
 	if ar != br || ac != bc {
@@ -399,12 +399,12 @@ var bandTests = []Band{
 func TestConvertBand(t *testing.T) {
 	for _, test := range bandTests {
 		colmajor := newBandColsFrom(test)
-		if !equalBand(colmajor, test) {
+		if !sameBand(colmajor, test) {
 			t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 				colmajor, test)
 		}
 		rowmajor := newBandFrom(colmajor)
-		if !equalBand(rowmajor, test) {
+		if !sameBand(rowmajor, test) {
 			t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 				rowmajor, test)
 		}
@@ -511,7 +511,7 @@ type triangularBand interface {
 	diag() blas.Diag
 }
 
-func equalTriangularBand(a, b triangularBand) bool {
+func sameTriangularBand(a, b triangularBand) bool {
 	an := a.n()
 	bn := b.n()
 	if an != bn {
@@ -605,12 +605,12 @@ var triangularBandTests = []TriangularBand{
 func TestConvertTriBand(t *testing.T) {
 	for _, test := range triangularBandTests {
 		colmajor := newTriangularBandColsFrom(test)
-		if !equalTriangularBand(colmajor, test) {
+		if !sameTriangularBand(colmajor, test) {
 			t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 				colmajor, test)
 		}
 		rowmajor := newTriangularBandFrom(colmajor)
-		if !equalTriangularBand(rowmajor, test) {
+		if !sameTriangularBand(rowmajor, test) {
 			t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 				rowmajor, test)
 		}

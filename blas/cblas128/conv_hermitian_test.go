@@ -65,7 +65,7 @@ type hermitian interface {
 	uplo() blas.Uplo
 }
 
-func equalHermitian(a, b hermitian) bool {
+func sameHermitian(a, b hermitian) bool {
 	an := a.n()
 	bn := b.n()
 	if an != bn {
@@ -102,12 +102,12 @@ func TestConvertHermitian(t *testing.T) {
 		for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 			test.Uplo = uplo
 			colmajor := newHermitianColsFrom(test)
-			if !equalHermitian(colmajor, test) {
+			if !sameHermitian(colmajor, test) {
 				t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 					colmajor, test)
 			}
 			rowmajor := newHermitianFrom(colmajor)
-			if !equalHermitian(rowmajor, test) {
+			if !sameHermitian(rowmajor, test) {
 				t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 					rowmajor, test)
 			}
@@ -203,7 +203,7 @@ type hermitianBand interface {
 	uplo() blas.Uplo
 }
 
-func equalHermitianBand(a, b hermitianBand) bool {
+func sameHermitianBand(a, b hermitianBand) bool {
 	an := a.n()
 	bn := b.n()
 	if an != bn {
@@ -294,12 +294,12 @@ var hermitianBandTests = []HermitianBand{
 func TestConvertHermBand(t *testing.T) {
 	for _, test := range hermitianBandTests {
 		colmajor := newHermitianBandColsFrom(test)
-		if !equalHermitianBand(colmajor, test) {
+		if !sameHermitianBand(colmajor, test) {
 			t.Errorf("unexpected result for row major to col major conversion:\n\tgot: %#v\n\tfrom:%#v",
 				colmajor, test)
 		}
 		rowmajor := newHermitianBandFrom(colmajor)
-		if !equalHermitianBand(rowmajor, test) {
+		if !sameHermitianBand(rowmajor, test) {
 			t.Errorf("unexpected result for col major to row major conversion:\n\tgot: %#v\n\twant:%#v",
 				rowmajor, test)
 		}

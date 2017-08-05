@@ -40,3 +40,9 @@ func AxpyIncTo(dst []complex128, incDst, idst uintptr, alpha complex128, x, y []
 //  	x[i] = complex(real(v)*alpha, imag(v))
 //  }
 func DscalUnitary(alpha float64, x []complex128)
+
+// DscalInc is
+//  for i := 0; i < n; i++ {
+//  	x[i*inc] = complex(real(x[i*inc])*alpha, imag(x[i*inc]))
+//  }
+func DscalInc(n int, alpha float64, x []complex128, inc int)

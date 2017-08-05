@@ -4,16 +4,6 @@
 
 package c128
 
-// ScalUnitary is
-//  for i := range x {
-//  	x[i] *= alpha
-//  }
-func ScalUnitary(alpha complex128, x []complex128) {
-	for i := range x {
-		x[i] *= alpha
-	}
-}
-
 // ScalUnitaryTo is
 //  for i, v := range x {
 //  	dst[i] = alpha * v

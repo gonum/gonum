@@ -170,7 +170,7 @@ func TestAxpyIncTo(t *testing.T) {
 	}
 }
 
-var scalTests = []struct {
+var dscalTests = []struct {
 	alpha float64
 	x     []complex128
 	want  []complex128
@@ -209,7 +209,7 @@ var scalTests = []struct {
 
 func TestDscalUnitary(t *testing.T) {
 	const xGdVal = -0.5
-	for i, test := range scalTests {
+	for i, test := range dscalTests {
 		for _, align := range align1 {
 			prefix := fmt.Sprintf("Test %v (x:%v)", i, align)
 			xgLn := 4 + align
@@ -233,7 +233,7 @@ func TestDscalUnitary(t *testing.T) {
 func TestDscalInc(t *testing.T) {
 	const xGdVal = -0.5
 	gdLn := 4
-	for i, test := range scalTests {
+	for i, test := range dscalTests {
 		n := len(test.x)
 		for _, incX := range []int{1, 2, 3, 4, 7, 10} {
 			prefix := fmt.Sprintf("Test %v (x:%v)", i, incX)
@@ -248,6 +248,69 @@ func TestDscalInc(t *testing.T) {
 				}
 			}
 			checkValidIncGuard(t, xg, xGdVal, incX, gdLn)
+		}
+	}
+}
+
+var scalTests = []struct {
+	alpha complex128
+	x     []complex128
+	want  []complex128
+}{
+	{
+		alpha: 0,
+		x:     []complex128{},
+		want:  []complex128{},
+	},
+	{
+		alpha: 1 + 1i,
+		x:     []complex128{1 + 2i},
+		want:  []complex128{-1 + 3i},
+	},
+	{
+		alpha: 2 + 3i,
+		x:     []complex128{1 + 2i},
+		want:  []complex128{-4 + 7i},
+	},
+	{
+		alpha: 2 - 4i,
+		x:     []complex128{1 + 2i},
+		want:  []complex128{10},
+	},
+	{
+		alpha: 2 + 8i,
+		x:     []complex128{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
+		want:  []complex128{-14 + 12i, -22 + 48i, -42 + 36i, -80 + 88i, 10 - 28i, -50 - 30i},
+	},
+	{
+		alpha: 5 - 10i,
+		x:     []complex128{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i, 1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
+		want:  []complex128{25, 65 - 30i, 75, 160 - 20i, -35 + 20i, 25 + 75i, 25, 65 - 30i, 75, 160 - 20i, -35 + 20i, 25 + 75i},
+	},
+}
+
+func TestScalUnitary(t *testing.T) {
+	const xGdVal = -0.5
+	for i, test := range scalTests {
+		for _, align := range align1 {
+			prefix := fmt.Sprintf("Test %v (x:%v)", i, align)
+			xgLn := 4 + align
+			xg := guardVector(test.x, xGdVal, xgLn)
+			x := xg[xgLn : len(xg)-xgLn]
+
+			ScalUnitary(test.alpha, x)
+
+			for i := range test.want {
+				if !same(x[i], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, x[i], test.want[i])
+				}
+			}
+			if !isValidGuard(xg, xGdVal, xgLn) {
+				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
+			}
+			if t.Failed() {
+				//t.FailNow()
+			}
 		}
 	}
 }

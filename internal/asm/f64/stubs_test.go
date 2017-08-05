@@ -4,7 +4,10 @@
 
 package f64
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestL1Norm(t *testing.T) {
 	var src_gd float64 = 1
@@ -161,6 +164,90 @@ func TestAddConst(t *testing.T) {
 		}
 		if !isValidGuard(v.src, src_gd, g_ln) {
 			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:g_ln], v.src[len(v.src)-g_ln:])
+		}
+	}
+}
+
+func TestCopy(t *testing.T) {
+	const sGdVal, dGdVal = -1, 0.5
+	gdLn := 4
+	for i, test := range []struct {
+		dst, src, want []float64
+	}{
+		{
+			dst:  nil,
+			src:  nil,
+			want: nil,
+		},
+		{
+			dst:  []float64{},
+			src:  []float64{},
+			want: []float64{},
+		},
+		{
+			dst:  []float64{2},
+			src:  []float64{3},
+			want: []float64{3},
+		},
+		{
+			dst:  []float64{1, 2},
+			src:  []float64{3, 7},
+			want: []float64{3, 7},
+		},
+		{
+			dst:  []float64{1, 3, 5},
+			src:  []float64{3, 5, 7},
+			want: []float64{3, 5, 7},
+		},
+		{
+			dst:  []float64{1, 2, 3, 4},
+			src:  []float64{2, 4, 6, 8},
+			want: []float64{2, 4, 6, 8},
+		},
+		{
+			dst:  []float64{1, 2, 3, 4},
+			src:  []float64{2, 4, 6},
+			want: []float64{2, 4, 6, 4},
+		},
+		{
+			dst:  []float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+			src:  []float64{2, 8, 32, 128, 512, 2048, 8192, 32768},
+			want: []float64{2, 8, 32, 128, 512, 2048, 8192, 32768},
+		},
+		{
+			dst:  []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+			src:  []float64{2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048},
+			want: []float64{2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048},
+		},
+		{
+			dst:  []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+			src:  []float64{2, 8, 32, 128, 512, 2048, 8192, 32768, 131072, 524288, 2097152},
+			want: []float64{2, 8, 32, 128, 512, 2048, 8192, 32768, 131072, 524288, 2097152},
+		},
+	} {
+		n := len(test.src)
+		for _, inc := range newIncSet(1, 2, 3, 4, 7) {
+			prefix := fmt.Sprintf("Test %v (x:%v y:%v)", i, inc.x, inc.y)
+			sg := guardIncVector(test.src, sGdVal, inc.x, gdLn)
+			dg := guardIncVector(test.dst, dGdVal, inc.y, gdLn)
+			src, dst := sg[gdLn:len(sg)-gdLn], dg[gdLn:len(dg)-gdLn]
+
+			Copy(n, dst, inc.y, src, inc.x)
+
+			for i := range test.want {
+				if !same(dst[i*inc.y], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, dst[i*inc.y], test.want[i])
+				}
+			}
+			if !equalStrided(test.src, src, inc.x) {
+				t.Errorf("%v: modified read-only src argument", prefix)
+			}
+			checkValidIncGuard(t, sg, sGdVal, inc.x, gdLn)
+			checkValidIncGuard(t, dg, dGdVal, inc.y, gdLn)
+			if t.Failed() {
+				t.Error(src, dst)
+				break
+			}
 		}
 	}
 }

@@ -52,6 +52,16 @@ func AddConst(alpha float64, x []float64) {
 	}
 }
 
+// Copy is
+//  for i := 0; i < n; i++ {
+//  	dst[i*incDst] = src[i*incSrc]
+//  }
+func Copy(n int, dst []float64, incDst int, src []float64, incSrc int) {
+	for i := 0; i < n; i++ {
+		dst[i*incDst] = src[i*incSrc]
+	}
+}
+
 // CumSum is
 //  if len(s) == 0 {
 //  	return dst

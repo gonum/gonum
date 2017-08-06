@@ -21,8 +21,13 @@ type LQ struct {
 }
 
 func (lq *LQ) updateCond(norm lapack.MatrixNorm) {
-	// A = LQ, where Q is orthonormal. Orthonormal multiplications do not change
-	// the condition number. Thus, ||A|| = ||L|| ||Q|| = ||Q||.
+	// Since A = L*Q, and Q is orthogonal, we get for the condition number κ
+	//  κ(A) := |A| |A^-1| = |L*Q| |(L*Q)^-1| = |L| |Q^T * L^-1|
+	//        = |L| |L^-1| = κ(L),
+	// where we used that fact that Q^-1 = Q^T. However, this assumes that
+	// the matrix norm is invariant under orthogonal transformations which
+	// is not the case for CondNorm. Hopefully the error is negligible: κ
+	// is only a qualitative measure anyway.
 	m := lq.lq.mat.Rows
 	work := getFloats(3*m, false)
 	iwork := getInts(m, false)

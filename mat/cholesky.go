@@ -40,12 +40,13 @@ func (c *Cholesky) updateCond(norm float64) {
 	work := getFloats(3*n, false)
 	defer putFloats(work)
 	if norm < 0 {
-		// This is an approximation. By the definition of a norm, ||AB|| <= ||A|| ||B||.
-		// Here, A = U^T * U.
-		// The condition number is ||A|| || A^-1||, so this will underestimate
-		// the condition number somewhat.
-		// The norm of the original factorized matrix cannot be stored because of
-		// update possibilities.
+		// This is an approximation. By the definition of a norm,
+		//  |AB| <= |A| |B|.
+		// Since A = U^T*U, we get for the condition number κ that
+		//  κ(A) := |A| |A^-1| = |U^T*U| |A^-1| <= |U^T| |U| |A^-1|,
+		// so this will overestimate the condition number somewhat.
+		// The norm of the original factorized matrix cannot be stored
+		// because of update possibilities.
 		unorm := lapack64.Lantr(CondNorm, c.chol.mat, work)
 		lnorm := lapack64.Lantr(CondNormTrans, c.chol.mat, work)
 		norm = unorm * lnorm

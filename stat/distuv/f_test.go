@@ -72,7 +72,7 @@ func TestF(t *testing.T) {
 func testF(t *testing.T, f F, i int) {
 	const (
 		tol  = 1e-2
-		n    = 2e6
+		n    = 1e5
 		bins = 50
 	)
 	x := make([]float64, n)
@@ -83,7 +83,7 @@ func testF(t *testing.T, f F, i int) {
 	checkProbContinuous(t, i, x, f, 1e-3)
 	checkMean(t, i, x, f, tol)
 	checkVarAndStd(t, i, x, f, tol)
-	checkExKurtosis(t, i, x, f, 5e-2)
-	checkSkewness(t, i, x, f, tol)
-	checkQuantileCDFSurvival(t, i, x, f, 1e-3)
+	checkExKurtosis(t, i, x, f, 1e-1)
+	checkSkewness(t, i, x, f, 5e-2)
+	checkQuantileCDFSurvival(t, i, x, f, 5e-3)
 }

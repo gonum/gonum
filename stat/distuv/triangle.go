@@ -18,9 +18,9 @@ type Triangle struct {
 // NewTriangle constructs a new triangle distribution with lower limit a, upper limit b, and mode c.
 // Constraints are a < b and a ≤ c ≤ b.
 // This distribution is uncommon in nature, but may be useful for simulation.
-func NewTriangle(a, b, c float64) Triangle {
+func NewTriangle(a, b, c float64, src *rand.Rand) Triangle {
 	checkTriangleParameters(a, b, c)
-	return Triangle{a, b, c, nil}
+	return Triangle{a, b, c, src}
 }
 
 func checkTriangleParameters(a, b, c float64) {

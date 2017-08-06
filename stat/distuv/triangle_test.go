@@ -6,6 +6,8 @@ package distuv
 
 import (
 	"math"
+	"math/rand"
+	"sort"
 	"testing"
 )
 
@@ -17,12 +19,13 @@ func TestTriangleConstraint(t *testing.T) {
 	}()
 
 	// test b < a
-	NewTriangle(3, 1, 2)
+	NewTriangle(3, 1, 2, nil)
 	// test c > b
-	NewTriangle(1, 2, 3)
+	NewTriangle(1, 2, 3, nil)
 }
 
 func TestTriangle(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		a, b, c float64
 	}{
@@ -47,8 +50,22 @@ func TestTriangle(t *testing.T) {
 			c: 0.0,
 		},
 	} {
-		dist := NewTriangle(test.a, test.b, test.c)
-		testFullDist(t, dist, i, true)
+		f := NewTriangle(test.a, test.b, test.c, src)
+		tol := 1e-2
+		const n = 1e5
+		x := make([]float64, n)
+		generateSamples(x, f)
+		sort.Float64s(x)
+
+		checkMean(t, i, x, f, tol)
+		checkVarAndStd(t, i, x, f, tol)
+		checkEntropy(t, i, x, f, tol)
+		checkExKurtosis(t, i, x, f, tol)
+		checkSkewness(t, i, x, f, 5e-2)
+		checkMedian(t, i, x, f, tol)
+		checkQuantileCDFSurvival(t, i, x, f, tol)
+		checkProbContinuous(t, i, x, f, 1e-10)
+		checkProbQuantContinuous(t, i, x, f, tol)
 	}
 }
 
@@ -79,5 +96,5 @@ func TestTriangleProb(t *testing.T) {
 			logProb: math.Inf(-1),
 		},
 	}
-	testDistributionProbs(t, NewTriangle(1, 3, 2), "Standard 1,2,3 Triangle", pts)
+	testDistributionProbs(t, NewTriangle(1, 3, 2, nil), "Standard 1,2,3 Triangle", pts)
 }

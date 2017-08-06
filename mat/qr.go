@@ -21,8 +21,13 @@ type QR struct {
 }
 
 func (qr *QR) updateCond(norm lapack.MatrixNorm) {
-	// A = QR, where Q is orthonormal. Orthonormal multiplications do not change
-	// the condition number. Thus, ||A|| = ||Q|| ||R|| = ||R||.
+	// Since A = Q*R, and Q is orthogonal, we get for the condition number κ
+	//  κ(A) := |A| |A^-1| = |Q*R| |(Q*R)^-1| = |R| |R^-1 * Q^T|
+	//        = |R| |R^-1| = κ(R),
+	// where we used that fact that Q^-1 = Q^T. However, this assumes that
+	// the matrix norm is invariant under orthogonal transformations which
+	// is not the case for CondNorm. Hopefully the error is negligible: κ
+	// is only a qualitative measure anyway.
 	n := qr.qr.mat.Cols
 	work := getFloats(3*n, false)
 	iwork := getInts(n, false)

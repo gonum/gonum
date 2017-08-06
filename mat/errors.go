@@ -12,7 +12,7 @@ import (
 )
 
 // Condition is the condition number of a matrix. The condition
-// number is defined as ||A|| * ||A^-1||.
+// number is defined as |A| * |A^-1|.
 //
 // One important use of Condition is during linear solve routines (finding x such
 // that A * x = b). The condition number of A indicates the accuracy of

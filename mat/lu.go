@@ -32,11 +32,13 @@ func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 	iwork := getInts(n, false)
 	defer putInts(iwork)
 	if anorm < 0 {
-		// This is an approximation. By the definition of a norm, ||AB|| <= ||A|| ||B||.
-		// The condition number is ||A|| || A^-1||, so this will underestimate
-		// the condition number somewhat.
-		// The norm of the original factorized matrix cannot be stored because of
-		// update possibilities, e.g. RankOne.
+		// This is an approximation. By the definition of a norm,
+		//  |AB| <= |A| |B|.
+		// Since A = L*U, we get for the condition number κ that
+		//  κ(A) := |A| |A^-1| = |L*U| |A^-1| <= |L| |U| |A^-1|,
+		// so this will overestimate the condition number somewhat.
+		// The norm of the original factorized matrix cannot be stored
+		// because of update possibilities.
 		u := lu.lu.asTriDense(n, blas.NonUnit, blas.Upper)
 		l := lu.lu.asTriDense(n, blas.Unit, blas.Lower)
 		unorm := lapack64.Lantr(norm, u.mat, work)

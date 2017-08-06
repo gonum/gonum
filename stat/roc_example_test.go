@@ -11,7 +11,7 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-func ExampleROC_unweighted() {
+func ExampleROC_weighted() {
 	y := []float64{0, 3, 5, 6, 7.5, 8}
 	classes := []bool{true, false, true, false, false, false}
 	weights := []float64{4, 1, 6, 3, 2, 2}
@@ -25,7 +25,7 @@ func ExampleROC_unweighted() {
 	// false positive rate: [0 0 0.125 0.125 0.5 0.75 1]
 }
 
-func ExampleROC_weighted() {
+func ExampleROC_unweighted() {
 	y := []float64{0, 3, 5, 6, 7.5, 8}
 	classes := []bool{true, false, true, false, false, false}
 

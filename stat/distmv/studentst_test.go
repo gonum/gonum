@@ -85,7 +85,7 @@ func TestStudentTProbs(t *testing.T) {
 
 func TestStudentsTRand(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
-	for _, test := range []struct {
+	for cas, test := range []struct {
 		mean   []float64
 		cov    *mat.SymDense
 		nu     float64
@@ -94,7 +94,7 @@ func TestStudentsTRand(t *testing.T) {
 		{
 			mean:   []float64{0, 0},
 			cov:    mat.NewSymDense(2, []float64{1, 0, 0, 1}),
-			nu:     3,
+			nu:     4,
 			tolcov: 1e-2,
 		},
 		{
@@ -114,7 +114,7 @@ func TestStudentsTRand(t *testing.T) {
 		if !ok {
 			t.Fatal("bad test")
 		}
-		nSamples := 10000000
+		const nSamples = 1e6
 		dim := len(test.mean)
 		samps := mat.NewDense(nSamples, dim, nil)
 		for i := 0; i < nSamples; i++ {
@@ -131,7 +131,7 @@ func TestStudentsTRand(t *testing.T) {
 		cov := s.CovarianceMatrix(nil)
 		estCov := stat.CovarianceMatrix(nil, samps, nil)
 		if !mat.EqualApprox(estCov, cov, test.tolcov) {
-			t.Errorf("Cov mismatch: want: %v, got %v", cov, estCov)
+			t.Errorf("Case %d: Cov mismatch: want: %v, got %v", cas, cov, estCov)
 		}
 	}
 }

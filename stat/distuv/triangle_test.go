@@ -6,6 +6,8 @@ package distuv
 
 import (
 	"math"
+	"math/rand"
+	"sort"
 	"testing"
 )
 
@@ -23,6 +25,7 @@ func TestTriangleConstraint(t *testing.T) {
 }
 
 func TestTriangle(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		a, b, c float64
 	}{
@@ -47,8 +50,23 @@ func TestTriangle(t *testing.T) {
 			c: 0.0,
 		},
 	} {
-		dist := NewTriangle(test.a, test.b, test.c)
-		testFullDist(t, dist, i, true)
+		f := NewTriangle(test.a, test.b, test.c)
+		f.Source = src
+		tol := 1e-2
+		const n = 1e5
+		x := make([]float64, n)
+		generateSamples(x, f)
+		sort.Float64s(x)
+
+		checkMean(t, i, x, f, tol)
+		checkVarAndStd(t, i, x, f, tol)
+		checkEntropy(t, i, x, f, tol)
+		checkExKurtosis(t, i, x, f, tol)
+		checkSkewness(t, i, x, f, 5e-2)
+		checkMedian(t, i, x, f, tol)
+		checkQuantileCDFSurvival(t, i, x, f, tol)
+		checkProbContinuous(t, i, x, f, 1e-10)
+		checkProbQuantContinuous(t, i, x, f, tol)
 	}
 }
 

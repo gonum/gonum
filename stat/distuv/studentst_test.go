@@ -45,7 +45,7 @@ func TestStudentsT(t *testing.T) {
 
 func testStudentsT(t *testing.T, c StudentsT, i int) {
 	tol := 1e-2
-	const n = 1e6
+	const n = 1e5
 	const bins = 50
 	x := make([]float64, n)
 	generateSamples(x, c)
@@ -54,7 +54,7 @@ func testStudentsT(t *testing.T, c StudentsT, i int) {
 	testRandLogProbContinuous(t, i, math.Inf(-1), x, c, tol, bins)
 	checkMean(t, i, x, c, tol)
 	if c.Nu > 2 {
-		checkVarAndStd(t, i, x, c, tol)
+		checkVarAndStd(t, i, x, c, 5e-2)
 	}
 	checkProbContinuous(t, i, x, c, 1e-3)
 	checkQuantileCDFSurvival(t, i, x, c, tol)

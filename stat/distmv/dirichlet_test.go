@@ -39,34 +39,29 @@ func TestDirichlet(t *testing.T) {
 	rnd := rand.New(rand.NewSource(1))
 	for cas, test := range []struct {
 		Dir *Dirichlet
-		N   int
 	}{
 		{
 			NewDirichlet([]float64{1, 1, 1}, rnd),
-			1e6,
 		},
 		{
 			NewDirichlet([]float64{2, 3}, rnd),
-			1e6,
 		},
 		{
 			NewDirichlet([]float64{0.2, 0.3}, rnd),
-			1e6,
 		},
 		{
 			NewDirichlet([]float64{0.2, 4}, rnd),
-			1e6,
 		},
 		{
 			NewDirichlet([]float64{0.1, 4, 20}, rnd),
-			1e6,
 		},
 	} {
+		const n = 1e5
 		d := test.Dir
 		dim := d.Dim()
-		x := mat.NewDense(test.N, dim, nil)
+		x := mat.NewDense(n, dim, nil)
 		generateSamples(x, d)
-		checkMean(t, cas, x, d, 1e-3)
-		checkCov(t, cas, x, d, 1e-3)
+		checkMean(t, cas, x, d, 1e-2)
+		checkCov(t, cas, x, d, 1e-2)
 	}
 }

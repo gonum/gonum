@@ -59,11 +59,11 @@ func TestRejection(t *testing.T) {
 	target := distuv.Normal{Mu: trueMean, Sigma: 2}
 	proposal := distuv.Normal{Mu: 0, Sigma: 5}
 
-	nSamples := 100000
+	nSamples := 20000
 	x := make([]float64, nSamples)
 	Rejection(x, target, proposal, 100, nil)
 	ev := stat.Mean(x, nil)
-	if math.Abs(ev-trueMean) > 1e-2 {
+	if math.Abs(ev-trueMean) > 2e-2 {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
 	}
 }

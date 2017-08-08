@@ -94,7 +94,7 @@ func TestWishartRand(t *testing.T) {
 		{
 			v:       mat.NewSymDense(3, []float64{0.8, 0.3, 0.1, 0.3, 0.7, -0.1, 0.1, -0.1, 7}),
 			nu:      5,
-			samples: 300000,
+			samples: 30000,
 			tol:     3e-2,
 		},
 		{
@@ -104,8 +104,8 @@ func TestWishartRand(t *testing.T) {
 				0.1, -0.1, 7, 1,
 				-0.2, -0.1, 1, 6}),
 			nu:      6,
-			samples: 300000,
-			tol:     3e-2,
+			samples: 30000,
+			tol:     1e-1,
 		},
 	} {
 		rnd := rand.New(rand.NewSource(1))

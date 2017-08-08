@@ -39,7 +39,7 @@ func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
 
 			{130, 130, 130, 500, 900, 900, 500},
 		} {
-			for cas := 0; cas < 100; cas++ {
+			for cas := 0; cas < 10; cas++ {
 				n := test.n
 				ncvt := test.ncvt
 				nru := test.nru

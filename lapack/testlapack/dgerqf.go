@@ -18,6 +18,8 @@ type Dgerqfer interface {
 }
 
 func DgerqfTest(t *testing.T, impl Dgerqfer) {
+	const tol = 1e-13
+
 	rnd := rand.New(rand.NewSource(1))
 	for c, test := range []struct {
 		m, n, lda int
@@ -32,6 +34,9 @@ func DgerqfTest(t *testing.T, impl Dgerqfer) {
 		{4, 3, 0},
 		{6, 2, 0},
 		{12, 1, 0},
+		{200, 180, 0},
+		{180, 200, 0},
+		{200, 200, 0},
 		{1, 1, 20},
 		{2, 2, 20},
 		{3, 2, 20},
@@ -42,6 +47,9 @@ func DgerqfTest(t *testing.T, impl Dgerqfer) {
 		{4, 3, 20},
 		{6, 2, 20},
 		{12, 1, 20},
+		{200, 180, 220},
+		{180, 200, 220},
+		{200, 200, 220},
 	} {
 		n := test.n
 		m := test.m
@@ -126,7 +134,7 @@ func DgerqfTest(t *testing.T, impl Dgerqfer) {
 				Stride: lda,
 				Data:   aCopy,
 			}
-			if !equalApproxGeneral(got, want, 1e-14) {
+			if !equalApproxGeneral(got, want, tol) {
 				t.Errorf("Case %d, R*Q != a %s\ngot: %+v\nwant:%+v", c, wk.name, got, want)
 			}
 		}

@@ -181,7 +181,7 @@ func (Implementation) Zaxpy(n int, alpha complex128, x []complex128, incX int, y
 	if (incY > 0 && (n-1)*incY >= len(y)) || (incY < 0 && (1-n)*incY >= len(y)) {
 		panic(badY)
 	}
-	if dcabs1(alpha) == 0 {
+	if alpha == 0 {
 		return
 	}
 	if incX == 1 && incY == 1 {

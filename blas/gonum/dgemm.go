@@ -25,17 +25,17 @@ func (Implementation) Dgemm(tA, tB blas.Transpose, m, n, k int, alpha float64, a
 	}
 	aTrans := tA == blas.Trans || tA == blas.ConjTrans
 	if aTrans {
-		checkMatrix64('a', k, m, a, lda)
+		checkDMatrix('a', k, m, a, lda)
 	} else {
-		checkMatrix64('a', m, k, a, lda)
+		checkDMatrix('a', m, k, a, lda)
 	}
 	bTrans := tB == blas.Trans || tB == blas.ConjTrans
 	if bTrans {
-		checkMatrix64('b', n, k, b, ldb)
+		checkDMatrix('b', n, k, b, ldb)
 	} else {
-		checkMatrix64('b', k, n, b, ldb)
+		checkDMatrix('b', k, n, b, ldb)
 	}
-	checkMatrix64('c', m, n, c, ldc)
+	checkDMatrix('c', m, n, c, ldc)
 
 	// scale c
 	if beta != 1 {
@@ -258,19 +258,4 @@ func dgemmSerialTransTrans(m, n, k int, a []float64, lda int, b []float64, ldb i
 
 func sliceView64(a []float64, lda, i, j, r, c int) []float64 {
 	return a[i*lda+j : (i+r-1)*lda+j+c]
-}
-
-func checkMatrix64(name byte, m, n int, a []float64, lda int) {
-	if m < 0 {
-		panic("blas: rows < 0")
-	}
-	if n < 0 {
-		panic("blas: cols < 0")
-	}
-	if lda < n {
-		panic("blas: illegal stride")
-	}
-	if len(a) < (m-1)*lda+n {
-		panic("blas: index of " + string(name) + " out of range")
-	}
 }

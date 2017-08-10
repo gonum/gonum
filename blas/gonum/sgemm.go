@@ -29,17 +29,17 @@ func (Implementation) Sgemm(tA, tB blas.Transpose, m, n, k int, alpha float32, a
 	}
 	aTrans := tA == blas.Trans || tA == blas.ConjTrans
 	if aTrans {
-		checkMatrix32('a', k, m, a, lda)
+		checkSMatrix('a', k, m, a, lda)
 	} else {
-		checkMatrix32('a', m, k, a, lda)
+		checkSMatrix('a', m, k, a, lda)
 	}
 	bTrans := tB == blas.Trans || tB == blas.ConjTrans
 	if bTrans {
-		checkMatrix32('b', n, k, b, ldb)
+		checkSMatrix('b', n, k, b, ldb)
 	} else {
-		checkMatrix32('b', k, n, b, ldb)
+		checkSMatrix('b', k, n, b, ldb)
 	}
-	checkMatrix32('c', m, n, c, ldc)
+	checkSMatrix('c', m, n, c, ldc)
 
 	// scale c
 	if beta != 1 {
@@ -262,19 +262,4 @@ func sgemmSerialTransTrans(m, n, k int, a []float32, lda int, b []float32, ldb i
 
 func sliceView32(a []float32, lda, i, j, r, c int) []float32 {
 	return a[i*lda+j : (i+r-1)*lda+j+c]
-}
-
-func checkMatrix32(name byte, m, n int, a []float32, lda int) {
-	if m < 0 {
-		panic("blas: rows < 0")
-	}
-	if n < 0 {
-		panic("blas: cols < 0")
-	}
-	if lda < n {
-		panic("blas: illegal stride")
-	}
-	if len(a) < (m-1)*lda+n {
-		panic("blas: index of " + string(name) + " out of range")
-	}
 }

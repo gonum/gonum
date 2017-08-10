@@ -1,7 +1,12 @@
+// Copyright ©2014 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package testblas
 
 import (
 	"math"
+	"math/cmplx"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -260,4 +265,52 @@ func zsame(x, y []complex128) bool {
 		}
 	}
 	return true
+}
+
+func makeZVector(data []complex128, inc int) []complex128 {
+	if inc == 0 {
+		panic("bad test")
+	}
+	if len(data) == 0 {
+		return nil
+	}
+	inc = abs(inc)
+	x := make([]complex128, (len(data)-1)*inc+1)
+	for i := range x {
+		x[i] = cmplx.NaN()
+	}
+	for i, v := range data {
+		x[i*inc] = v
+	}
+	return x
+}
+
+func makeZGeneral(data []complex128, m, n int, ld int) []complex128 {
+	if m < 0 || n < 0 {
+		panic("bad test")
+	}
+	if len(data) != m*n {
+		panic("bad test")
+	}
+	if ld < max(1, n) {
+		panic("bad test")
+	}
+	if len(data) == 0 {
+		return nil
+	}
+	a := make([]complex128, (m-1)*ld+n)
+	for i := range a {
+		a[i] = cmplx.NaN()
+	}
+	for i := 0; i < m; i++ {
+		copy(a[i*ld:i*ld+n], data[i*n:i*n+n])
+	}
+	return a
+}
+
+func max(a, b int) int {
+	if a < b {
+		return b
+	}
+	return a
 }

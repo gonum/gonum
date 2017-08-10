@@ -64,6 +64,63 @@ func min(a, b int) int {
 	return a
 }
 
+func checkSMatrix(name byte, m, n int, a []float32, lda int) {
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < n {
+		panic("blas: illegal stride of " + string(name))
+	}
+	if len(a) < (m-1)*lda+n {
+		panic("blas: index of " + string(name) + " out of range")
+	}
+}
+
+func checkDMatrix(name byte, m, n int, a []float64, lda int) {
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < n {
+		panic("blas: illegal stride of " + string(name))
+	}
+	if len(a) < (m-1)*lda+n {
+		panic("blas: index of " + string(name) + " out of range")
+	}
+}
+
+func checkZMatrix(name byte, m, n int, a []complex128, lda int) {
+	if m < 0 {
+		panic(mLT0)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	if lda < max(1, n) {
+		panic("blas: illegal stride of " + string(name))
+	}
+	if len(a) < (m-1)*lda+n {
+		panic("blas: insufficient " + string(name) + " matrix slice length")
+	}
+}
+
+func checkZVector(name byte, n int, x []complex128, incX int) {
+	if n < 0 {
+		panic(nLT0)
+	}
+	if incX == 0 {
+		panic(zeroIncX)
+	}
+	if (incX > 0 && (n-1)*incX >= len(x)) || (incX < 0 && (1-n)*incX >= len(x)) {
+		panic("blas: insufficient " + string(name) + " vector slice length")
+	}
+}
+
 // blocks returns the number of divisions of the dimension length with the given
 // block size.
 func blocks(dim, bsize int) int {

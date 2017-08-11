@@ -6,7 +6,6 @@ package testblas
 
 import (
 	"fmt"
-	"math"
 	"testing"
 )
 
@@ -107,32 +106,12 @@ func ZdotcTest(t *testing.T, impl Zdotcer) {
 		for _, inc := range allPairs([]int{-7, -3, 1, 13}, []int{-11, -5, 1, 17}) {
 			incX := inc[0]
 			incY := inc[1]
-			aincX := abs(incX)
-			aincY := abs(incY)
 
-			var x []complex128
-			if n > 0 {
-				x = make([]complex128, (n-1)*aincX+1)
-			}
-			for i := range x {
-				x[i] = complex(math.NaN(), math.NaN())
-			}
-			for i, v := range test.x {
-				x[i*aincX] = v
-			}
+			x := makeZVector(test.x, incX)
 			xCopy := make([]complex128, len(x))
 			copy(xCopy, x)
 
-			var y []complex128
-			if n > 0 {
-				y = make([]complex128, (n-1)*aincY+1)
-			}
-			for i := range y {
-				y[i] = complex(math.NaN(), math.NaN())
-			}
-			for i, v := range test.y {
-				y[i*aincY] = v
-			}
+			y := makeZVector(test.y, incY)
 			yCopy := make([]complex128, len(y))
 			copy(yCopy, y)
 

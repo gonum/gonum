@@ -80,17 +80,7 @@ func Dznrm2Test(t *testing.T, impl Dznrm2er) {
 	} {
 		n := len(test.x)
 		for _, incX := range []int{-10, -1, 1, 2, 9, 17} {
-			aincX := abs(incX)
-			var x []complex128
-			if n > 0 {
-				x = make([]complex128, (n-1)*aincX+1)
-			}
-			for i := range x {
-				x[i] = cmplx.NaN()
-			}
-			for i, v := range test.x {
-				x[i*aincX] = v
-			}
+			x := makeZVector(test.x, incX)
 			xCopy := make([]complex128, len(x))
 			copy(xCopy, x)
 

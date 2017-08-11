@@ -6,7 +6,6 @@ package testblas
 
 import (
 	"fmt"
-	"math/cmplx"
 	"testing"
 )
 
@@ -96,30 +95,11 @@ func ZdscalTest(t *testing.T, impl Zdscaler) {
 			panic("bad test")
 		}
 		for _, incX := range []int{-3, -1, 1, 2, 4, 7, 10} {
-			aincX := abs(incX)
-			var x []complex128
-			if n > 0 {
-				x = make([]complex128, (n-1)*aincX+1)
-			}
-			for i := range x {
-				x[i] = cmplx.NaN()
-			}
-			for i, v := range test.x {
-				x[i*aincX] = v
-			}
+			x := makeZVector(test.x, incX)
 			xCopy := make([]complex128, len(x))
 			copy(xCopy, x)
 
-			var want []complex128
-			if n > 0 {
-				want = make([]complex128, len(x))
-			}
-			for i := range want {
-				x[i] = cmplx.NaN()
-			}
-			for i, v := range test.want {
-				want[i*aincX] = v
-			}
+			want := makeZVector(test.want, incX)
 
 			impl.Zdscal(n, test.alpha, x, incX)
 

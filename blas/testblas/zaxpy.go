@@ -6,7 +6,6 @@ package testblas
 
 import (
 	"fmt"
-	"math"
 	"testing"
 )
 
@@ -128,37 +127,18 @@ func ZaxpyTest(t *testing.T, impl Zaxpyer) {
 		for _, inc := range allPairs([]int{-7, -3, 1, 13}, []int{-11, -5, 1, 17}) {
 			incX := inc[0]
 			incY := inc[1]
-			aincX := abs(incX)
-			aincY := abs(incY)
 
-			x := make([]complex128, (n-1)*aincX+1)
-			for i := range x {
-				x[i] = complex(math.NaN(), math.NaN())
-			}
-			for i, v := range test.x {
-				x[i*aincX] = v
-			}
+			x := makeZVector(test.x, incX)
 			xCopy := make([]complex128, len(x))
 			copy(xCopy, x)
 
-			y := make([]complex128, (n-1)*aincY+1)
-			for i := range y {
-				y[i] = complex(math.NaN(), math.NaN())
-			}
-			for i, v := range test.y {
-				y[i*aincY] = v
-			}
+			y := makeZVector(test.y, incY)
 
-			want := make([]complex128, (n-1)*aincY+1)
-			copy(want, y)
+			var want []complex128
 			if incX*incY > 0 {
-				for i, v := range test.want {
-					want[i*aincY] = v
-				}
+				want = makeZVector(test.want, incY)
 			} else {
-				for i, v := range test.wantRev {
-					want[i*aincY] = v
-				}
+				want = makeZVector(test.wantRev, incY)
 			}
 
 			impl.Zaxpy(n, test.alpha, x, incX, y, incY)

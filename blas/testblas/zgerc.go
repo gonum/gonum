@@ -14,7 +14,6 @@ type Zgercer interface {
 
 func ZgercTest(t *testing.T, impl Zgercer) {
 	for tc, test := range []struct {
-		m, n  int
 		alpha complex128
 		x     []complex128
 		incX  int
@@ -32,8 +31,6 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 		{
 			incX:  1,
 			incY:  1,
-			m:     3,
-			n:     4,
 			alpha: 1 + 2i,
 			x:     []complex128{1 + 13i, 18 + 15i, 10 + 18i},
 			y:     []complex128{15 + 12i, 4 + 8i, 5 + 16i, 19 + 12i},
@@ -49,8 +46,6 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 		{
 			incX:  7,
 			incY:  13,
-			m:     3,
-			n:     4,
 			alpha: 1 + 2i,
 			x:     []complex128{1 + 13i, 18 + 15i, 10 + 18i},
 			y:     []complex128{15 + 12i, 4 + 8i, 5 + 16i, 19 + 12i},
@@ -66,8 +61,6 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 		{
 			incX:  -7,
 			incY:  -13,
-			m:     3,
-			n:     4,
 			alpha: 1 + 2i,
 			x:     []complex128{10 + 18i, 18 + 15i, 1 + 13i},
 			y:     []complex128{19 + 12i, 5 + 16i, 4 + 8i, 15 + 12i},
@@ -83,8 +76,6 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 		{
 			incX:  1,
 			incY:  1,
-			m:     4,
-			n:     3,
 			alpha: 1 + 2i,
 			x:     []complex128{5 + 16i, 12 + 19i, 9 + 7i, 2 + 4i},
 			y:     []complex128{18 + 7i, 20 + 15i, 12 + 14i},
@@ -104,8 +95,6 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 		{
 			incX:  7,
 			incY:  13,
-			m:     4,
-			n:     3,
 			alpha: 1 + 2i,
 			x:     []complex128{5 + 16i, 12 + 19i, 9 + 7i, 2 + 4i},
 			y:     []complex128{18 + 7i, 20 + 15i, 12 + 14i},
@@ -125,8 +114,6 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 		{
 			incX:  -7,
 			incY:  -13,
-			m:     4,
-			n:     3,
 			alpha: 1 + 2i,
 			x:     []complex128{2 + 4i, 9 + 7i, 12 + 19i, 5 + 16i},
 			y:     []complex128{12 + 14i, 20 + 15i, 18 + 7i},
@@ -146,8 +133,6 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 		{
 			incX:  -7,
 			incY:  -13,
-			m:     4,
-			n:     3,
 			alpha: 0,
 			x:     []complex128{2 + 4i, 9 + 7i, 12 + 19i, 5 + 16i},
 			y:     []complex128{12 + 14i, 20 + 15i, 18 + 7i},
@@ -165,8 +150,8 @@ func ZgercTest(t *testing.T, impl Zgercer) {
 			},
 		},
 	} {
-		m := test.m
-		n := test.n
+		m := len(test.x)
+		n := len(test.y)
 		incX := test.incX
 		incY := test.incY
 

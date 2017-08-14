@@ -17,3 +17,7 @@ func TestZgerc(t *testing.T) {
 func TestZgeru(t *testing.T) {
 	testblas.ZgeruTest(t, impl)
 }
+
+func TestZher(t *testing.T) {
+	testblas.ZherTest(t, impl)
+}

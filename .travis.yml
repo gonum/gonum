@@ -21,7 +21,7 @@ before_install:
  - go get golang.org/x/tools/cmd/cover
  - go get github.com/mattn/goveralls
  # Required for dot parser checks.
- - ./.travis/install-gocc.sh 2454fdc
+ - ./.travis/install-gocc.sh cfc6e12
 
 go_import_path: gonum.org/v1/gonum
 

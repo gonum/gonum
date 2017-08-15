@@ -35,8 +35,8 @@ type Pos struct {
 	Column int
 }
 
-func (this Pos) String() string {
-	return fmt.Sprintf("Pos(offset=%d, line=%d, column=%d)", this.Offset, this.Line, this.Column)
+func (p Pos) String() string {
+	return fmt.Sprintf("Pos(offset=%d, line=%d, column=%d)", p.Offset, p.Line, p.Column)
 }
 
 type TokenMap struct {
@@ -44,27 +44,27 @@ type TokenMap struct {
 	idMap   map[string]Type
 }
 
-func (this TokenMap) Id(tok Type) string {
-	if int(tok) < len(this.typeMap) {
-		return this.typeMap[tok]
+func (m TokenMap) Id(tok Type) string {
+	if int(tok) < len(m.typeMap) {
+		return m.typeMap[tok]
 	}
 	return "unknown"
 }
 
-func (this TokenMap) Type(tok string) Type {
-	if typ, exist := this.idMap[tok]; exist {
+func (m TokenMap) Type(tok string) Type {
+	if typ, exist := m.idMap[tok]; exist {
 		return typ
 	}
 	return INVALID
 }
 
-func (this TokenMap) TokenString(tok *Token) string {
+func (m TokenMap) TokenString(tok *Token) string {
 	//TODO: refactor to print pos & token string properly
-	return fmt.Sprintf("%s(%d,%s)", this.Id(tok.Type), tok.Type, tok.Lit)
+	return fmt.Sprintf("%s(%d,%s)", m.Id(tok.Type), tok.Type, tok.Lit)
 }
 
-func (this TokenMap) StringType(typ Type) string {
-	return fmt.Sprintf("%s(%d)", this.Id(typ), typ)
+func (m TokenMap) StringType(typ Type) string {
+	return fmt.Sprintf("%s(%d)", m.Id(typ), typ)
 }
 
 var TokMap = TokenMap{

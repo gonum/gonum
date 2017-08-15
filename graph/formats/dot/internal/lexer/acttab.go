@@ -25,8 +25,8 @@ type ActionRow struct {
 	Ignore string
 }
 
-func (this ActionRow) String() string {
-	return fmt.Sprintf("Accept=%d, Ignore=%s", this.Accept, this.Ignore)
+func (a ActionRow) String() string {
+	return fmt.Sprintf("Accept=%d, Ignore=%s", a.Accept, a.Ignore)
 }
 
 var ActTab = ActionTable{

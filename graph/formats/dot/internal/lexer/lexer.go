@@ -13,11 +13,9 @@
 package lexer
 
 import (
-	// "fmt"
 	"io/ioutil"
 	"unicode/utf8"
 
-	// "gonum.org/v1/gonum/graph/formats/dot/internal/util"
 	"gonum.org/v1/gonum/graph/formats/dot/internal/token"
 )
 
@@ -52,94 +50,75 @@ func NewLexerFile(fpath string) (*Lexer, error) {
 	return NewLexer(src), nil
 }
 
-func (this *Lexer) Scan() (tok *token.Token) {
-	// fmt.Printf("Lexer.Scan() pos=%d\n", this.pos)
+func (l *Lexer) Scan() (tok *token.Token) {
 	tok = new(token.Token)
-	if this.pos >= len(this.src) {
+	if l.pos >= len(l.src) {
 		tok.Type = token.EOF
-		tok.Pos.Offset, tok.Pos.Line, tok.Pos.Column = this.pos, this.line, this.column
+		tok.Pos.Offset, tok.Pos.Line, tok.Pos.Column = l.pos, l.line, l.column
 		return
 	}
-	start, startLine, startColumn, end := this.pos, this.line, this.column, 0
+	start, startLine, startColumn, end := l.pos, l.line, l.column, 0
 	tok.Type = token.INVALID
 	state, rune1, size := 0, rune(-1), 0
 	for state != -1 {
-		// fmt.Printf("\tpos=%d, line=%d, col=%d, state=%d\n", this.pos, this.line, this.column, state)
-		if this.pos >= len(this.src) {
+		if l.pos >= len(l.src) {
 			rune1 = -1
 		} else {
-			rune1, size = utf8.DecodeRune(this.src[this.pos:])
-			this.pos += size
+			rune1, size = utf8.DecodeRune(l.src[l.pos:])
+			l.pos += size
 		}
-		// Production start
-		if rune1 != -1 {
-			state = TransTab[state](rune1)
-		} else {
-			state = -1
-		}
-		// Production end
 
-		// Debug start
-		// nextState := -1
-		// if rune1 != -1 {
-		// 	nextState = TransTab[state](rune1)
-		// }
-		// fmt.Printf("\tS%d, : tok=%s, rune == %s(%x), next state == %d\n", state, token.TokMap.Id(tok.Type), util.RuneToString(rune1), rune1, nextState)
-		// fmt.Printf("\t\tpos=%d, size=%d, start=%d, end=%d\n", this.pos, size, start, end)
-		// if nextState != -1 {
-		// 	fmt.Printf("\t\taction:%s\n", ActTab[nextState].String())
-		// }
-		// state = nextState
-		// Debug end
+		nextState := -1
+		if rune1 != -1 {
+			nextState = TransTab[state](rune1)
+		}
+		state = nextState
 
 		if state != -1 {
 
 			switch rune1 {
 			case '\n':
-				this.line++
-				this.column = 1
+				l.line++
+				l.column = 1
 			case '\r':
-				this.column = 1
+				l.column = 1
 			case '\t':
-				this.column += 4
+				l.column += 4
 			default:
-				this.column++
+				l.column++
 			}
 
 			switch {
 			case ActTab[state].Accept != -1:
 				tok.Type = ActTab[state].Accept
-				// fmt.Printf("\t Accept(%s), %s(%d)\n", string(act), token.TokMap.Id(tok), tok)
-				end = this.pos
+				end = l.pos
 			case ActTab[state].Ignore != "":
-				// fmt.Printf("\t Ignore(%s)\n", string(act))
-				start, startLine, startColumn = this.pos, this.line, this.column
+				start, startLine, startColumn = l.pos, l.line, l.column
 				state = 0
-				if start >= len(this.src) {
+				if start >= len(l.src) {
 					tok.Type = token.EOF
 				}
 
 			}
 		} else {
 			if tok.Type == token.INVALID {
-				end = this.pos
+				end = l.pos
 			}
 		}
 	}
 	if end > start {
-		this.pos = end
-		tok.Lit = this.src[start:end]
+		l.pos = end
+		tok.Lit = l.src[start:end]
 	} else {
 		tok.Lit = []byte{}
 	}
 	tok.Pos.Offset, tok.Pos.Line, tok.Pos.Column = start, startLine, startColumn
-	// fmt.Printf("Token at %s: %s \"%s\"\n", tok.String(), token.TokMap.Id(tok.Type), tok.Lit)
 
 	return
 }
 
-func (this *Lexer) Reset() {
-	this.pos = 0
+func (l *Lexer) Reset() {
+	l.pos = 0
 }
 
 /*

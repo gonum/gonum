@@ -6,6 +6,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package cmplx64 provides complex64 versions of standard library math/cmplx
+// package routines used by gonum/blas.
 package cmplx64
 
 import math "gonum.org/v1/gonum/internal/math32"

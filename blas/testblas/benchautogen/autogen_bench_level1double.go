@@ -2,6 +2,7 @@
 // Use of this code is governed by a BSD-style
 // license that can be found in the LICENSE file
 
+// Script for automatic code generation of the benchmark routines
 package main
 
 import (

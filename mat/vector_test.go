@@ -225,17 +225,17 @@ func TestVecDenseScale(t *testing.T) {
 			want:  NewVecDense(3, []float64{0, -2, -4}),
 		},
 		{
-			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
 			alpha: 0,
 			want:  NewVecDense(3, []float64{0, 0, 0}),
 		},
 		{
-			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
 			alpha: 1,
 			want:  NewVecDense(3, []float64{0, 1, 2}),
 		},
 		{
-			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
 			alpha: -2,
 			want:  NewVecDense(3, []float64{0, -2, -4}),
 		},
@@ -244,7 +244,7 @@ func TestVecDenseScale(t *testing.T) {
 				0, 1, 2,
 				3, 4, 5,
 				6, 7, 8,
-			}).ColView(1),
+			}).ColView(1).(*VecDense),
 			alpha: -2,
 			want:  NewVecDense(3, []float64{-2, -8, -14}),
 		},
@@ -307,12 +307,12 @@ func TestVecDenseAdd(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0, 1, 2}),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{0, 3, 5}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{0, 3, 5}),
 		},
 	} {
@@ -336,12 +336,12 @@ func TestVecDenseSub(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0, 1, 2}),
-			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{0, 0.5, 1}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
-			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0),
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{0, 0.5, 1}),
 		},
 	} {
@@ -365,12 +365,12 @@ func TestVecDenseMulElem(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0, 1, 2}),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{0, 2, 6}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{0, 2, 6}),
 		},
 	} {
@@ -394,12 +394,12 @@ func TestVecDenseDivElem(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0.5, 1, 2}),
-			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0),
+			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{1, 2, 2}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0.5, 1, 2}).ColView(0),
-			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0),
+			a:    NewDense(3, 1, []float64{0.5, 1, 2}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0).(*VecDense),
 			want: NewVecDense(3, []float64{1, 2, 2}),
 		},
 	} {

@@ -101,7 +101,7 @@ type Mutable interface {
 // A RowViewer can return a VecDense reflecting a row that is backed by the matrix
 // data. The VecDense returned will have length equal to the number of columns.
 type RowViewer interface {
-	RowView(i int) *VecDense
+	RowView(i int) Vector
 }
 
 // A RawRowViewer can return a slice of float64 reflecting a row that is backed by the matrix
@@ -113,7 +113,7 @@ type RawRowViewer interface {
 // A ColViewer can return a VecDense reflecting a column that is backed by the matrix
 // data. The VecDense returned will have length equal to the number of rows.
 type ColViewer interface {
-	ColView(j int) *VecDense
+	ColView(j int) Vector
 }
 
 // A RawColViewer can return a slice of float64 reflecting a column that is backed by the matrix

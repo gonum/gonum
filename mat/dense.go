@@ -204,7 +204,7 @@ func (m *Dense) T() Matrix {
 // ColView returns a VecDense reflecting the column j, backed by the matrix data.
 //
 // See ColViewer for more information.
-func (m *Dense) ColView(j int) *VecDense {
+func (m *Dense) ColView(j int) Vector {
 	if j >= m.mat.Cols || j < 0 {
 		panic(ErrColAccess)
 	}
@@ -250,7 +250,7 @@ func (m *Dense) SetRow(i int, src []float64) {
 // backed by the matrix data.
 //
 // See RowViewer for more information.
-func (m *Dense) RowView(i int) *VecDense {
+func (m *Dense) RowView(i int) Vector {
 	if i >= m.mat.Rows || i < 0 {
 		panic(ErrRowAccess)
 	}

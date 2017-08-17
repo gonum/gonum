@@ -103,7 +103,7 @@ func (gsvd *HOGSVD) Factorize(m ...Matrix) (ok bool) {
 	}
 	v := eig.Vectors()
 	for j := 0; j < c; j++ {
-		cv := v.ColView(j)
+		cv := v.ColView(j).(*VecDense)
 		cv.ScaleVec(1/blas64.Nrm2(c, cv.mat), cv)
 	}
 
@@ -160,7 +160,7 @@ func (gsvd *HOGSVD) UTo(dst *Dense, n int) *Dense {
 	}
 	dst.Copy(&gsvd.b[n])
 	for j, f := range gsvd.Values(nil, n) {
-		v := dst.ColView(j)
+		v := dst.ColView(j).(*VecDense)
 		v.ScaleVec(1/f, v)
 	}
 	return dst
@@ -188,7 +188,7 @@ func (gsvd *HOGSVD) Values(s []float64, n int) []float64 {
 		panic(ErrSliceLengthMismatch)
 	}
 	for j := 0; j < c; j++ {
-		s[j] = blas64.Nrm2(r, gsvd.b[n].ColView(j).mat)
+		s[j] = blas64.Nrm2(r, gsvd.b[n].ColView(j).(*VecDense).mat)
 	}
 	return s
 }

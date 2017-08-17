@@ -183,7 +183,7 @@ func legalDims(a Matrix, m, n int) bool {
 			return false
 		}
 		return true
-	case *VecDense:
+	case *VecDense, *basicVector:
 		if m < 0 || n < 0 {
 			return false
 		}
@@ -281,6 +281,20 @@ func makeRandOf(a Matrix, m, n int) Matrix {
 			mat.SetVec(i, rand.NormFloat64())
 		}
 		return mat
+	case *basicVector:
+		if m == 0 && n == 0 {
+			return &basicVector{}
+		}
+		if n != 1 {
+			panic(fmt.Sprintf("bad vector size: m = %v, n = %v", m, n))
+		}
+		mat := &basicVector{
+			m: make([]float64, m),
+		}
+		for i := 0; i < m; i++ {
+			mat.m[i] = rand.NormFloat64()
+		}
+		return mat
 	case *SymDense, *basicSymmetric:
 		if m != n {
 			panic("bad size")
@@ -372,6 +386,12 @@ func makeCopyOf(a Matrix) Matrix {
 			n: t.n,
 		}
 		copy(m.mat.Data, t.mat.Data)
+		return m
+	case *basicVector:
+		m := &basicVector{
+			m: make([]float64, t.Len()),
+		}
+		copy(m.m, t.m)
 		return m
 	}
 }
@@ -506,6 +526,7 @@ var testMatrices = []Matrix{
 	NewTriDense(3, true, nil),
 	NewTriDense(3, false, nil),
 	NewVecDense(0, nil),
+	&basicVector{},
 	&VecDense{mat: blas64.Vector{Inc: 10}},
 	&basicMatrix{},
 	&basicSymmetric{},

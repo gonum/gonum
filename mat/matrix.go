@@ -330,13 +330,18 @@ func Det(a Matrix) float64 {
 
 // Dot returns the sum of the element-wise product of a and b.
 // Dot panics if the matrix sizes are unequal.
-func Dot(a, b *VecDense) float64 {
+func Dot(a, b Vector) float64 {
 	la := a.Len()
 	lb := b.Len()
 	if la != lb {
 		panic(ErrShape)
 	}
-	return blas64.Dot(la, a.mat, b.mat)
+	if avd, ok := a.(*VecDense); ok {
+		if bvd, ok := b.(*VecDense); ok {
+			return blas64.Dot(la, avd.mat, bvd.mat)
+		}
+	}
+	return 0
 }
 
 // Equal returns whether the matrices a and b have the same size

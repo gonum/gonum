@@ -98,8 +98,8 @@ type Mutable interface {
 	Matrix
 }
 
-// A RowViewer can return a VecDense reflecting a row that is backed by the matrix
-// data. The VecDense returned will have length equal to the number of columns.
+// A RowViewer can return a Vector reflecting a row that is backed by the matrix
+// data. The Vector returned will have length equal to the number of columns.
 type RowViewer interface {
 	RowView(i int) Vector
 }
@@ -110,8 +110,8 @@ type RawRowViewer interface {
 	RawRowView(i int) []float64
 }
 
-// A ColViewer can return a VecDense reflecting a column that is backed by the matrix
-// data. The VecDense returned will have length equal to the number of rows.
+// A ColViewer can return a Vector reflecting a column that is backed by the matrix
+// data. The Vector returned will have length equal to the number of rows.
 type ColViewer interface {
 	ColView(j int) Vector
 }
@@ -341,7 +341,11 @@ func Dot(a, b Vector) float64 {
 			return blas64.Dot(la, avd.mat, bvd.mat)
 		}
 	}
-	return 0
+	var sum float64
+	for i := 0; i < la; i++ {
+		sum += a.At(i, 0) * b.At(i, 0)
+	}
+	return sum
 }
 
 // Equal returns whether the matrices a and b have the same size

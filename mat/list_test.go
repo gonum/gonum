@@ -148,8 +148,18 @@ func legalTypeVec(v Matrix) bool {
 	return ok
 }
 
-// legalTypesVecVec returns whether both inputs are *VecDense.
 func legalTypesVecVec(a, b Matrix) bool {
+	if _, ok := a.(Vector); !ok {
+		return false
+	}
+	if _, ok := b.(Vector); !ok {
+		return false
+	}
+	return true
+}
+
+// legalTypesVecDenseVecDense returns whether both inputs are *VecDense.
+func legalTypesVecDenseVecDense(a, b Matrix) bool {
 	if _, ok := a.(*VecDense); !ok {
 		return false
 	}

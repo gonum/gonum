@@ -291,7 +291,7 @@ func TestVecDenseAddScaled(t *testing.T) {
 			sb.Scale(alpha, b)
 			receiver.Add(a, &sb)
 		}
-		testTwoInput(t, "AddScaledVec", &VecDense{}, method, denseComparison, legalTypesVecVec, legalSizeSameVec, 1e-14)
+		testTwoInput(t, "AddScaledVec", &VecDense{}, method, denseComparison, legalTypesVecDenseVecDense, legalSizeSameVec, 1e-14)
 	}
 }
 

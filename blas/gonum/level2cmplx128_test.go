@@ -21,3 +21,7 @@ func TestZgeru(t *testing.T) {
 func TestZher(t *testing.T) {
 	testblas.ZherTest(t, impl)
 }
+
+func TestZher2(t *testing.T) {
+	testblas.Zher2Test(t, impl)
+}

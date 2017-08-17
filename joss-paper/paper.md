@@ -25,7 +25,7 @@ Gonum aims to be the equivalent of NumPy/SciPy but for the Go programming
 language.
 
 Gonum strives to deliver code that run fast (as fast as C/C++ or Fortran)
-and code that is as easy to write than in Matlab, R or Python.
+and code that is as easy to write as in Matlab, R or Python.
 Gonum is still being actively developed but already offers a solid set of
 packages, providing matrices and linear algebra; statistics functions,
 probability distributions and sampling routines; finding the extrema of functions; and tools to compute numerical derivatives.

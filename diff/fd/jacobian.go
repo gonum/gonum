@@ -140,7 +140,7 @@ func jacobianConcurrent(dst *mat.Dense, f func([]float64, []float64), x, origin 
 			copy(xcopy, x)
 			xcopy[job.j] += job.pt.Loc * step
 			f(y, xcopy)
-			col := dst.ColView(job.j)
+			col := dst.ColView(job.j).(*mat.VecDense)
 			mu[job.j].Lock()
 			col.AddScaledVec(col, job.pt.Coeff, yVec)
 			mu[job.j].Unlock()
@@ -185,7 +185,7 @@ func jacobianConcurrent(dst *mat.Dense, f func([]float64, []float64), x, origin 
 				continue
 			}
 			for j := 0; j < n; j++ {
-				col := dst.ColView(j)
+				col := dst.ColView(j).(*mat.VecDense)
 				col.AddScaledVec(col, pt.Coeff, originVec)
 			}
 		}

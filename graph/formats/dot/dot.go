@@ -10,8 +10,7 @@
 
 //go:generate ./makeinternal.bash
 
-// Package dot implements a parser for Graphviz DOT files.
-package dot // import "gonum.org/v1/gonum/graph/formats/dot"
+package dot
 
 import (
 	"fmt"

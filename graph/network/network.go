@@ -10,5 +10,4 @@
 //    http://www.vldb.org/pvldb/vol7/p1023-maehara.pdf
 // * other centrality measures
 
-// Package network provides network analysis functions.
-package network // import "gonum.org/v1/gonum/graph/network"
+package network

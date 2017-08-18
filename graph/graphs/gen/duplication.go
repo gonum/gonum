@@ -12,7 +12,6 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
-	"gonum.org/v1/gonum/graph/simple"
 )
 
 // UndirectedMutator is an undirected graph builder that can remove edges.
@@ -81,9 +80,9 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 					continue
 				}
 				if v.ID() < d.ID() {
-					dst.SetEdge(simple.Edge{F: v, T: d, W: 1})
+					dst.SetEdge(dst.NewEdge(v, d))
 				} else {
-					dst.SetEdge(simple.Edge{F: d, T: v, W: 1})
+					dst.SetEdge(dst.NewEdge(d, v))
 				}
 			}
 
@@ -95,9 +94,9 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 					if !math.IsNaN(sigma) {
 						if i == 0 || rnd() < sigma {
 							if v.ID() < d.ID() {
-								dst.SetEdge(simple.Edge{F: v, T: d, W: 1})
+								dst.SetEdge(dst.NewEdge(v, d))
 							} else {
-								dst.SetEdge(simple.Edge{F: d, T: v, W: 1})
+								dst.SetEdge(dst.NewEdge(d, v))
 							}
 						}
 						continue
@@ -106,9 +105,9 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 				default:
 					if rnd() < scaledAlpha && !dst.HasEdgeBetween(v, d) {
 						if v.ID() < d.ID() {
-							dst.SetEdge(simple.Edge{F: v, T: d, W: 1})
+							dst.SetEdge(dst.NewEdge(v, d))
 						} else {
-							dst.SetEdge(simple.Edge{F: d, T: v, W: 1})
+							dst.SetEdge(dst.NewEdge(d, v))
 						}
 					}
 				}

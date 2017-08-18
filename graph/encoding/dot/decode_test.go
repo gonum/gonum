@@ -118,15 +118,9 @@ func (g *dotDirectedGraph) NewNode() graph.Node {
 	return &dotNode{Node: g.DirectedGraph.NewNode()}
 }
 
-// NewEdge adds a new edge from the source to the destination node to the graph,
-// or returns the existing edge if already present.
+// NewEdge returns a new Edge from the source to the destination node.
 func (g *dotDirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
-	if e := g.Edge(from, to); e != nil {
-		return e
-	}
-	e := &dotEdge{Edge: simple.Edge{F: from, T: to}}
-	g.SetEdge(e)
-	return e
+	return &dotEdge{Edge: g.DirectedGraph.NewEdge(from, to)}
 }
 
 // DOTAttributers implements the dot.Attributers interface.
@@ -159,15 +153,9 @@ func (g *dotUndirectedGraph) NewNode() graph.Node {
 	return &dotNode{Node: g.UndirectedGraph.NewNode()}
 }
 
-// NewEdge adds a new edge from the source to the destination node to the graph,
-// or returns the existing edge if already present.
+// NewEdge returns a new Edge from the source to the destination node.
 func (g *dotUndirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
-	if e := g.Edge(from, to); e != nil {
-		return e
-	}
-	e := &dotEdge{Edge: simple.Edge{F: from, T: to}}
-	g.SetEdge(e)
-	return e
+	return &dotEdge{Edge: g.UndirectedGraph.NewEdge(from, to)}
 }
 
 // DOTAttributers implements the dot.Attributers interface.
@@ -222,7 +210,7 @@ func (n *dotNode) Attributes() []encoding.Attribute {
 // dotEdge extends simple.Edge with a label field to test round-trip encoding and
 // decoding of edge DOT label attributes.
 type dotEdge struct {
-	simple.Edge
+	graph.Edge
 	// Edge label.
 	Label string
 }

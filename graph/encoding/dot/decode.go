@@ -167,21 +167,23 @@ func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 }
 
 // addEdgeStmt adds the given edge statement to the graph.
-func (gen *generator) addEdgeStmt(dst encoding.Builder, e *ast.EdgeStmt) {
-	fs := gen.addVertex(dst, e.From)
-	ts := gen.addEdge(dst, e.To)
+func (gen *generator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
+	fs := gen.addVertex(dst, stmt.From)
+	ts := gen.addEdge(dst, stmt.To)
 	for _, f := range fs {
 		for _, t := range ts {
-			edge, ok := dst.NewEdge(f, t).(encoding.AttributeSetter)
+			edge := dst.NewEdge(f, t)
+			dst.SetEdge(edge)
+			e, ok := edge.(encoding.AttributeSetter)
 			if !ok {
 				continue
 			}
-			for _, attr := range e.Attrs {
+			for _, attr := range stmt.Attrs {
 				a := encoding.Attribute{
 					Key:   attr.Key,
 					Value: attr.Val,
 				}
-				if err := edge.SetAttribute(a); err != nil {
+				if err := e.SetAttribute(a); err != nil {
 					panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
 				}
 			}
@@ -216,7 +218,8 @@ func (gen *generator) addEdge(dst encoding.Builder, to *ast.Edge) []graph.Node {
 		ts := gen.addEdge(dst, to.To)
 		for _, f := range fs {
 			for _, t := range ts {
-				dst.NewEdge(f, t)
+				edge := dst.NewEdge(f, t)
+				dst.SetEdge(edge)
 			}
 		}
 	}

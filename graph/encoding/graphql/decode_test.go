@@ -163,12 +163,7 @@ func (g *directedGraph) NewNode() graph.Node {
 }
 
 func (g *directedGraph) NewEdge(from, to graph.Node) graph.Edge {
-	if e := g.Edge(from, to); e != nil {
-		return e
-	}
-	e := &edge{Edge: simple.Edge{F: from, T: to}}
-	g.SetEdge(e)
-	return e
+	return &edge{Edge: g.DirectedGraph.NewEdge(from, to)}
 }
 
 type node struct {
@@ -189,7 +184,7 @@ func (n *node) SetIDFromString(uid string) error {
 }
 
 type edge struct {
-	simple.Edge
+	graph.Edge
 	label string
 }
 

@@ -93,13 +93,16 @@ type NodeRemover interface {
 	RemoveNode(Node)
 }
 
-// EdgeSetter is an interface for adding edges to a graph.
-type EdgeSetter interface {
+// EdgeAdder is an interface for adding edges to a graph.
+type EdgeAdder interface {
+	// NewEdge returns a new Edge from the source to the destination node.
+	NewEdge(from, to Node) Edge
+
 	// SetEdge adds an edge from one node to another.
 	// If the graph supports node addition the nodes
 	// will be added if they do not exist, otherwise
 	// SetEdge will panic.
-	// The behavior of an EdgeSetter when the IDs
+	// The behavior of an EdgeAdder when the IDs
 	// returned by e.From and e.To are equal is
 	// implementation-dependent.
 	SetEdge(e Edge)
@@ -116,7 +119,7 @@ type EdgeRemover interface {
 // Builder is a graph that can have nodes and edges added.
 type Builder interface {
 	NodeAdder
-	EdgeSetter
+	EdgeAdder
 }
 
 // UndirectedBuilder is an undirected graph builder.

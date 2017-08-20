@@ -86,87 +86,87 @@ var tests = []struct {
 }
 
 func TestAxpyUnitary(t *testing.T) {
-	var x_gd, y_gd complex128 = 1, 1
+	const xGdVal, yGdVal = 1, 1
 	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardVector(test.x, x_gd, xg_ln), guardVector(test.y, y_gd, yg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
 		AxpyUnitary(test.a, x, y)
 		for i := range test.ex {
 			if y[i] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, y[i], test.ex[i])
 			}
 		}
-		if !isValidGuard(test.x, x_gd, xg_ln) {
-			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xg_ln], test.x[len(test.x)-xg_ln:])
+		if !isValidGuard(test.x, xGdVal, xgLn) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xgLn], test.x[len(test.x)-xgLn:])
 		}
-		if !isValidGuard(test.y, y_gd, yg_ln) {
-			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:yg_ln], test.y[len(test.y)-yg_ln:])
+		if !isValidGuard(test.y, yGdVal, ygLn) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:ygLn], test.y[len(test.y)-ygLn:])
 		}
 	}
 }
 
 func TestAxpyUnitaryTo(t *testing.T) {
-	var x_gd, y_gd, dst_gd complex128 = 1, 1, 0
+	const xGdVal, yGdVal, dstGdVal = 1, 1, 0
 	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardVector(test.x, x_gd, xg_ln), guardVector(test.y, y_gd, yg_ln)
-		test.dst = guardVector(test.dst, dst_gd, xg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
-		dst := test.dst[xg_ln : len(test.dst)-xg_ln]
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
+		test.dst = guardVector(test.dst, dstGdVal, xgLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
+		dst := test.dst[xgLn : len(test.dst)-xgLn]
 		AxpyUnitaryTo(dst, test.a, x, y)
 		for i := range test.ex {
 			if dst[i] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, dst[i], test.ex[i])
 			}
 		}
-		if !isValidGuard(test.x, x_gd, xg_ln) {
-			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xg_ln], test.x[len(test.x)-xg_ln:])
+		if !isValidGuard(test.x, xGdVal, xgLn) {
+			t.Errorf("Test %d Guard violated in x vector %v %v", cas, test.x[:xgLn], test.x[len(test.x)-xgLn:])
 		}
-		if !isValidGuard(test.y, y_gd, yg_ln) {
-			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:yg_ln], test.y[len(test.y)-yg_ln:])
+		if !isValidGuard(test.y, yGdVal, ygLn) {
+			t.Errorf("Test %d Guard violated in y vector %v %v", cas, test.y[:ygLn], test.y[len(test.y)-ygLn:])
 		}
-		if !isValidGuard(test.dst, dst_gd, xg_ln) {
-			t.Errorf("Test %d Guard violated in dst vector %v %v", cas, test.dst[:xg_ln], test.dst[len(test.dst)-xg_ln:])
+		if !isValidGuard(test.dst, dstGdVal, xgLn) {
+			t.Errorf("Test %d Guard violated in dst vector %v %v", cas, test.dst[:xgLn], test.dst[len(test.dst)-xgLn:])
 		}
 
 	}
 }
 
 func TestAxpyInc(t *testing.T) {
-	var x_gd, y_gd complex128 = 1, 1
+	const xGdVal, yGdVal = 1, 1
 	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardIncVector(test.x, x_gd, test.incX, xg_ln), guardIncVector(test.y, y_gd, test.incY, yg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardIncVector(test.x, xGdVal, test.incX, xgLn), guardIncVector(test.y, yGdVal, test.incY, ygLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
 		AxpyInc(test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
 		for i := range test.ex {
 			if y[int(test.iy)+i*int(test.incY)] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, y[i*int(test.incY)], test.ex[i])
 			}
 		}
-		checkValidIncGuard(t, test.x, x_gd, test.incX, xg_ln)
-		checkValidIncGuard(t, test.y, y_gd, test.incY, yg_ln)
+		checkValidIncGuard(t, test.x, xGdVal, test.incX, xgLn)
+		checkValidIncGuard(t, test.y, yGdVal, test.incY, ygLn)
 	}
 }
 
 func TestAxpyIncTo(t *testing.T) {
-	var x_gd, y_gd, dst_gd complex128 = 1, 1, 0
+	const xGdVal, yGdVal, dstGdVal = 1, 1, 0
 	for cas, test := range tests {
-		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardIncVector(test.x, x_gd, test.incX, xg_ln), guardIncVector(test.y, y_gd, test.incY, yg_ln)
-		test.dst = guardIncVector(test.dst, dst_gd, test.incDst, xg_ln)
-		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
-		dst := test.dst[xg_ln : len(test.dst)-xg_ln]
+		xgLn, ygLn := 4+cas%2, 4+cas%3
+		test.x, test.y = guardIncVector(test.x, xGdVal, test.incX, xgLn), guardIncVector(test.y, yGdVal, test.incY, ygLn)
+		test.dst = guardIncVector(test.dst, dstGdVal, test.incDst, xgLn)
+		x, y := test.x[xgLn:len(test.x)-xgLn], test.y[ygLn:len(test.y)-ygLn]
+		dst := test.dst[xgLn : len(test.dst)-xgLn]
 		AxpyIncTo(dst, uintptr(test.incDst), test.idst, test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
 		for i := range test.ex {
 			if dst[int(test.idst)+i*int(test.incDst)] != test.ex[i] {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, dst[i*int(test.incDst)], test.ex[i])
 			}
 		}
-		checkValidIncGuard(t, test.x, x_gd, test.incX, xg_ln)
-		checkValidIncGuard(t, test.y, y_gd, test.incY, yg_ln)
-		checkValidIncGuard(t, test.dst, dst_gd, test.incDst, xg_ln)
+		checkValidIncGuard(t, test.x, xGdVal, test.incX, xgLn)
+		checkValidIncGuard(t, test.y, yGdVal, test.incY, ygLn)
+		checkValidIncGuard(t, test.dst, dstGdVal, test.incDst, xgLn)
 	}
 }
 
@@ -240,7 +240,7 @@ func TestDscalInc(t *testing.T) {
 			xg := guardIncVector(test.x, xGdVal, incX, gdLn)
 			x := xg[gdLn : len(xg)-gdLn]
 
-			DscalInc(test.alpha, x, n, incX)
+			DscalInc(test.alpha, x, uintptr(n), uintptr(incX))
 
 			for i := range test.want {
 				if !same(x[i*incX], test.want[i]) {
@@ -322,7 +322,7 @@ func TestScalInc(t *testing.T) {
 			xg := guardIncVector(test.x, xGdVal, inc, gdLn)
 			x := xg[gdLn : len(xg)-gdLn]
 
-			ScalInc(test.alpha, x, n, inc)
+			ScalInc(test.alpha, x, uintptr(n), uintptr(inc))
 
 			for i := range test.want {
 				if !same(x[i*inc], test.want[i]) {

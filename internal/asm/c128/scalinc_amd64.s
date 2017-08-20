@@ -27,7 +27,7 @@
 #define ADDSUBPD_X6_X7    LONG $0xFED00F66 // ADDSUBPD X6, X7
 #define ADDSUBPD_X8_X9    LONG $0xD00F4566; BYTE $0xC8 // ADDSUBPD X8, X9
 
-// func ScalInc(alpha complex128, x []complex128, n, inc int)
+// func ScalInc(alpha complex128, x []complex128, n, inc uintptr)
 TEXT ·ScalInc(SB), NOSPLIT, $0
 	MOVQ x_base+16(FP), SRC // SRC = &x
 	MOVQ n+40(FP), LEN      // LEN = len(x)

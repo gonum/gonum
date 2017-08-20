@@ -17,7 +17,7 @@
 
 #define MOVDDUP_ALPHA    LONG $0x44120FF2; WORD $0x0824 // MOVDDUP 8(SP), X0
 
-// func DscalInc(alpha float64, x []complex128, n, inc int)
+// func DscalInc(alpha float64, x []complex128, n, inc uintptr)
 TEXT ·DscalInc(SB), NOSPLIT, $0
 	MOVQ x_base+8(FP), SRC // SRC = &x
 	MOVQ n+32(FP), LEN     // LEN = n

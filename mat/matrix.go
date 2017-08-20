@@ -336,9 +336,9 @@ func Dot(a, b Vector) float64 {
 	if la != lb {
 		panic(ErrShape)
 	}
-	if avd, ok := a.(*VecDense); ok {
-		if bvd, ok := b.(*VecDense); ok {
-			return blas64.Dot(la, avd.mat, bvd.mat)
+	if arv, ok := a.(RawVectorer); ok {
+		if brv, ok := b.(RawVectorer); ok {
+			return blas64.Dot(la, arv.RawVector(), brv.RawVector())
 		}
 	}
 	var sum float64

@@ -205,6 +205,12 @@ func (m *Dense) T() Matrix {
 //
 // See ColViewer for more information.
 func (m *Dense) ColView(j int) Vector {
+	return m.ColViewVecDense(j)
+}
+
+// ColViewVecDense returns a VecDense reflecting the column j, backed by
+// the matrix data.
+func (m *Dense) ColViewVecDense(j int) *VecDense {
 	if j >= m.mat.Cols || j < 0 {
 		panic(ErrColAccess)
 	}
@@ -251,6 +257,12 @@ func (m *Dense) SetRow(i int, src []float64) {
 //
 // See RowViewer for more information.
 func (m *Dense) RowView(i int) Vector {
+	return m.RowViewVecDense(i)
+}
+
+// RowViewVecDense returns a VecDense reflecting the row i, backed by
+// the matrix data.
+func (m *Dense) RowViewVecDense(i int) *VecDense {
 	if i >= m.mat.Rows || i < 0 {
 		panic(ErrRowAccess)
 	}

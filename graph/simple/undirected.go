@@ -72,6 +72,11 @@ func (g *UndirectedGraph) RemoveNode(n graph.Node) {
 	g.nodeIDs.release(n.ID())
 }
 
+// NewEdge returns a new Edge from the source to the destination node.
+func (g *UndirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
+	return &Edge{F: from, T: to}
+}
+
 // SetEdge adds e, an edge from one node to another. If the nodes do not exist, they are added.
 // It will panic if the IDs of the e.From and e.To are equal.
 func (g *UndirectedGraph) SetEdge(e graph.Edge) {

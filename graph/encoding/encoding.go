@@ -10,9 +10,6 @@ import "gonum.org/v1/gonum/graph"
 type Builder interface {
 	graph.Graph
 	graph.Builder
-	// NewEdge adds a new edge from the source to the destination node to the
-	// graph, or returns the existing edge if already present.
-	NewEdge(from, to graph.Node) graph.Edge
 }
 
 // AttributeSetter is implemented by types that can set an encoded graph

@@ -33,9 +33,9 @@ TEXT ·ScalUnitary(SB), NOSPLIT, $0
 	CMPQ LEN, $0            // if LEN == 0 { return }
 	JE   scal_end
 
-	MOVUPS alpha+0(FP), ALPHA     // ALPHA = { imag(a), real(a) }
+	MOVUPS alpha+0(FP), ALPHA     // ALPHA = { imag(alpha), real(alpha) }
 	MOVAPS ALPHA, ALPHA_C
-	SHUFPD $0x1, ALPHA_C, ALPHA_C // ALPHA_C = { real(a), imag(a) }
+	SHUFPD $0x1, ALPHA_C, ALPHA_C // ALPHA_C = { real(alpha), imag(alpha) }
 
 	XORQ   IDX, IDX          // IDX = 0
 	MOVAPS ALPHA, ALPHA2     // Copy ALPHA and ALPHA_C for pipelining
@@ -62,8 +62,8 @@ scal_loop: // do {
 	SHUFPD $0x3, X6, X6
 	SHUFPD $0x3, X8, X8
 
-	// X_i     = { real(a) * imag(x[i]), imag(a) * imag(x[i])  }
-	// X_(i+1) = { imag(a) * real(x[i]), real(a) * real(x[i])  }
+	// X_i     = { real(ALPHA) * imag(x[i]), imag(ALPHA) * imag(x[i])  }
+	// X_(i+1) = { imag(ALPHA) * real(x[i]), real(ALPHA) * real(x[i])  }
 	MULPD ALPHA_C, X2
 	MULPD ALPHA, X3
 	MULPD ALPHA_C2, X4
@@ -74,15 +74,15 @@ scal_loop: // do {
 	MULPD ALPHA2, X9
 
 	// X_(i+1) = {
-	//	imag(result[i]):  imag(a)*real(x[i]) + real(a)*imag(x[i]),
-	//	real(result[i]):  real(a)*real(x[i]) - imag(a)*imag(x[i])
+	//	imag(result[i]):  imag(ALPHA)*real(x[i]) + real(ALPHA)*imag(x[i]),
+	//	real(result[i]):  real(ALPHA)*real(x[i]) - imag(ALPHA)*imag(x[i])
 	//  }
 	ADDSUBPD_X2_X3
 	ADDSUBPD_X4_X5
 	ADDSUBPD_X6_X7
 	ADDSUBPD_X8_X9
 
-	MOVUPS X3, (DST)(IDX*8)   // y[i] = X_(i+1)
+	MOVUPS X3, (DST)(IDX*8)   // x[i] = X_(i+1)
 	MOVUPS X5, 16(DST)(IDX*8)
 	MOVUPS X7, 32(DST)(IDX*8)
 	MOVUPS X9, 48(DST)(IDX*8)
@@ -98,16 +98,16 @@ scal_tail_loop: // do {
 	MOVUPS (SRC)(IDX*8), X2 // X_i = { imag(x[i]), real(x[i]) }
 	MOVDDUP_X2_X3           // X_(i+1) = { real(x[i], real(x[i]) }
 	SHUFPD $0x3, X2, X2     // X_i = { imag(x[i]), imag(x[i]) }
-	MULPD  ALPHA_C, X2      // X_i     = { real(a) * imag(x[i]), imag(a) * imag(x[i])  }
-	MULPD  ALPHA, X3        // X_(i+1) = { imag(a) * real(x[i]), real(a) * real(x[i])  }
+	MULPD  ALPHA_C, X2      // X_i     = { real(ALPHA) * imag(x[i]), imag(ALPHA) * imag(x[i])  }
+	MULPD  ALPHA, X3        // X_(i+1) = { imag(ALPHA) * real(x[i]), real(ALPHA) * real(x[i])  }
 
 	// X_(i+1) = {
-	//	imag(result[i]):  imag(a)*real(x[i]) + real(a)*imag(x[i]),
-	//	real(result[i]):  real(a)*real(x[i]) - imag(a)*imag(x[i])
+	//	imag(result[i]):  imag(ALPHA)*real(x[i]) + real(ALPHA)*imag(x[i]),
+	//	real(result[i]):  real(ALPHA)*real(x[i]) - imag(ALPHA)*imag(x[i])
 	//  }
 	ADDSUBPD_X2_X3
 
-	MOVUPS X3, (DST)(IDX*8) // y[i] = X_(i+1)
+	MOVUPS X3, (DST)(IDX*8) // x[i] = X_(i+1)
 	ADDQ   $2, IDX          // IDX += 2
 	DECQ   TAIL
 	JNZ    scal_tail_loop   // }  while --LEN > 0

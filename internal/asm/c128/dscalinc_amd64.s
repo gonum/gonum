@@ -34,17 +34,17 @@ TEXT ·DscalInc(SB), NOSPLIT, $0
 	JZ     dscal_tail         // if LEN == 0 { goto dscal_tail }
 
 dscal_loop: // do {
-	MOVUPS (SRC), X2         // X_i = real(x[i])
+	MOVUPS (SRC), X2         // X_i = x[i]
 	MOVUPS (SRC)(INC*1), X3
 	MOVUPS (SRC)(INC*2), X4
 	MOVUPS (SRC)(INC3*1), X5
 
-	MULPD ALPHA, X2   // X_i *= alpha
+	MULPD ALPHA, X2   // X_i *= ALPHA
 	MULPD ALPHA_2, X3
 	MULPD ALPHA, X4
 	MULPD ALPHA_2, X5
 
-	MOVUPS X2, (DST)         // real(x[i]) = X_i
+	MOVUPS X2, (DST)         // x[i] = X_i
 	MOVUPS X3, (DST)(INC*1)
 	MOVUPS X4, (DST)(INC*2)
 	MOVUPS X5, (DST)(INC3*1)
@@ -58,9 +58,9 @@ dscal_tail:
 	JE   dscal_end // if TAIL == 0 { return }
 
 dscal_tail_loop: // do {
-	MOVUPS (SRC), X2       // X_i = real(x[i])
-	MULPD  ALPHA, X2       // X_i *= alpha
-	MOVUPS X2, (DST)       // real(x[i]) = X_i
+	MOVUPS (SRC), X2       // X_i = x[i]
+	MULPD  ALPHA, X2       // X_i *= ALPHA
+	MOVUPS X2, (DST)       // x[i] = X_i
 	ADDQ   INC, SRC        // SRC += INC
 	DECQ   TAIL
 	JNZ    dscal_tail_loop // } while --TAIL > 0

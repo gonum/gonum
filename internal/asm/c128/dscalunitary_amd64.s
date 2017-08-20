@@ -28,20 +28,20 @@ TEXT ·DscalUnitary(SB), NOSPLIT, $0
 	MOVUPS ALPHA, ALPHA_2 // Copy ALPHA to ALPHA_2 for pipelining
 	MOVQ   LEN, TAIL      // TAIL = LEN
 	SHRQ   $2, LEN        // LEN = floor( n / 4 )
-	JZ     dscal_tail     // if LEN == 0 { goto caxy_tail }
+	JZ     dscal_tail     // if LEN == 0 { goto dscal_tail }
 
 dscal_loop: // do {
-	MOVUPS (SRC)(IDX*8), X2   // X_i = real(x[i])
+	MOVUPS (SRC)(IDX*8), X2   // X_i = x[i]
 	MOVUPS 16(SRC)(IDX*8), X3
 	MOVUPS 32(SRC)(IDX*8), X4
 	MOVUPS 48(SRC)(IDX*8), X5
 
-	MULPD ALPHA, X2   // X_i *= alpha
+	MULPD ALPHA, X2   // X_i *= ALPHA
 	MULPD ALPHA_2, X3
 	MULPD ALPHA, X4
 	MULPD ALPHA_2, X5
 
-	MOVUPS X2, (DST)(IDX*8)   // real(x[i]) = X_i
+	MOVUPS X2, (DST)(IDX*8)   // x[i] = X_i
 	MOVUPS X3, 16(DST)(IDX*8)
 	MOVUPS X4, 32(DST)(IDX*8)
 	MOVUPS X5, 48(DST)(IDX*8)
@@ -55,9 +55,9 @@ dscal_tail:
 	JZ   dscal_end // if TAIL == 0 { return }
 
 dscal_tail_loop: // do {
-	MOVUPS (SRC)(IDX*8), X2 // X_i = real(x[i])
-	MULPD  ALPHA, X2        // X_i *= alpha
-	MOVUPS X2, (DST)(IDX*8) // real(x[i]) = X_i
+	MOVUPS (SRC)(IDX*8), X2 // X_i = x[i]
+	MULPD  ALPHA, X2        // X_i *= ALPHA
+	MOVUPS X2, (DST)(IDX*8) // x[i] = X_i
 	ADDQ   $2, IDX          // IDX += 2
 	DECQ   TAIL
 	JNZ    dscal_tail_loop  // } while --TAIL > 0

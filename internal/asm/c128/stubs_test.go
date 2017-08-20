@@ -188,22 +188,22 @@ var dscalTests = []struct {
 	{
 		alpha: 2,
 		x:     []complex128{1 + 2i},
-		want:  []complex128{2 + 2i},
+		want:  []complex128{2 + 4i},
 	},
 	{
 		alpha: 2,
 		x:     []complex128{1 + 2i},
-		want:  []complex128{2 + 2i},
+		want:  []complex128{2 + 4i},
 	},
 	{
 		alpha: 3,
 		x:     []complex128{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
-		want:  []complex128{3 + 2i, 15 + 4i, 9 + 6i, 24 + 12i, -9 - 2i, -15 + 5i},
+		want:  []complex128{3 + 6i, 15 + 12i, 9 + 18i, 24 + 36i, -9 - 6i, -15 + 15i},
 	},
 	{
 		alpha: 5,
 		x:     []complex128{1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i, 1 + 2i, 5 + 4i, 3 + 6i, 8 + 12i, -3 - 2i, -5 + 5i},
-		want:  []complex128{5 + 2i, 25 + 4i, 15 + 6i, 40 + 12i, -15 - 2i, -25 + 5i, 5 + 2i, 25 + 4i, 15 + 6i, 40 + 12i, -15 - 2i, -25 + 5i},
+		want:  []complex128{5 + 10i, 25 + 20i, 15 + 30i, 40 + 60i, -15 - 10i, -25 + 25i, 5 + 10i, 25 + 20i, 15 + 30i, 40 + 60i, -15 - 10i, -25 + 25i},
 	},
 }
 

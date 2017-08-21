@@ -192,8 +192,8 @@ var dscalTests = []struct {
 	},
 	{
 		alpha: 2,
-		x:     []complex128{1 + 2i},
-		want:  []complex128{2 + 4i},
+		x:     []complex128{1 + 2i, 3 + 5i, 6 + 11i, 12 - 23i},
+		want:  []complex128{2 + 4i, 6 + 10i, 12 + 22i, 24 - 46i},
 	},
 	{
 		alpha: 3,

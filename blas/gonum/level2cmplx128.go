@@ -11,6 +11,135 @@ import (
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
+// Zgemv performs one of the matrix-vector operations
+//  y = alpha * A * x + beta * y    if trans = blas.NoTrans
+//  y = alpha * A^T * x + beta * y  if trans = blas.Trans
+//  y = alpha * A^H * x + beta * y  if trans = blas.ConjTrans
+// where alpha and beta are scalars, x and y are vectors, and A is an m×n dense matrix.
+func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	checkZMatrix('A', m, n, a, lda)
+	switch trans {
+	default:
+		panic(badTranspose)
+	case blas.NoTrans:
+		checkZVector('x', n, x, incX)
+		checkZVector('y', m, y, incY)
+	case blas.Trans, blas.ConjTrans:
+		checkZVector('x', m, x, incX)
+		checkZVector('y', n, y, incY)
+	}
+
+	if m == 0 || n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	var lenX, lenY int
+	if trans == blas.NoTrans {
+		lenX = n
+		lenY = m
+	} else {
+		lenX = m
+		lenY = n
+	}
+	var kx int
+	if incX < 0 {
+		kx = (1 - lenX) * incX
+	}
+	var ky int
+	if incY < 0 {
+		ky = (1 - lenY) * incY
+	}
+
+	// Form y := beta*y.
+	if beta != 1 {
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y {
+					y[i] = 0
+				}
+			} else {
+				c128.ScalUnitary(beta, y[:lenY])
+			}
+		} else {
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < lenY; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				if incY > 0 {
+					c128.ScalInc(beta, y, uintptr(lenY), uintptr(incY))
+				} else {
+					c128.ScalInc(beta, y, uintptr(lenY), uintptr(-incY))
+				}
+			}
+		}
+	}
+
+	if alpha == 0 {
+		return
+	}
+
+	switch trans {
+	default:
+		// Form y := alpha*A*x + y.
+		iy := ky
+		if incX == 1 {
+			for i := 0; i < m; i++ {
+				y[iy] += alpha * c128.DotuUnitary(a[i*lda:i*lda+n], x[:n])
+				iy += incY
+			}
+			return
+		}
+		for i := 0; i < m; i++ {
+			y[iy] += alpha * c128.DotuInc(a[i*lda:i*lda+n], x, uintptr(n), 1, uintptr(incX), 0, uintptr(kx))
+			iy += incY
+		}
+		return
+
+	case blas.Trans:
+		// Form y := alpha*A^T*x + y.
+		ix := kx
+		if incY == 1 {
+			for i := 0; i < m; i++ {
+				c128.AxpyUnitary(alpha*x[ix], a[i*lda:i*lda+n], y[:n])
+				ix += incX
+			}
+			return
+		}
+		for i := 0; i < m; i++ {
+			c128.AxpyInc(alpha*x[ix], a[i*lda:i*lda+n], y, uintptr(n), 1, uintptr(incY), 0, uintptr(ky))
+			ix += incX
+		}
+		return
+
+	case blas.ConjTrans:
+		// Form y := alpha*A^H*x + y.
+		ix := kx
+		if incY == 1 {
+			for i := 0; i < m; i++ {
+				tmp := alpha * x[ix]
+				for j := 0; j < n; j++ {
+					y[j] += tmp * cmplx.Conj(a[i*lda+j])
+				}
+				ix += incX
+			}
+			return
+		}
+		for i := 0; i < m; i++ {
+			tmp := alpha * x[ix]
+			jy := ky
+			for j := 0; j < n; j++ {
+				y[jy] += tmp * cmplx.Conj(a[i*lda+j])
+				jy += incY
+			}
+			ix += incX
+		}
+		return
+	}
+}
+
 // Zgerc performs the rank-one operation
 //  A += alpha * x * y^H
 // where A is an m×n dense matrix, alpha is a scalar, x is an m element vector,

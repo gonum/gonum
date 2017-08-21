@@ -14,8 +14,17 @@ import (
 )
 
 var (
-	_ graph.Graph    = (*UndirectedMatrix)(nil)
-	_ graph.Directed = (*DirectedMatrix)(nil)
+	directedMatrix = (*DirectedMatrix)(nil)
+
+	_ graph.Graph            = directedMatrix
+	_ graph.Directed         = directedMatrix
+	_ graph.WeightedDirected = directedMatrix
+
+	undirectedMatrix = (*UndirectedMatrix)(nil)
+
+	_ graph.Graph              = undirectedMatrix
+	_ graph.Undirected         = undirectedMatrix
+	_ graph.WeightedUndirected = undirectedMatrix
 )
 
 func TestBasicDenseImpassable(t *testing.T) {

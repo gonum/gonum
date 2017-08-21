@@ -213,6 +213,12 @@ func (g *DirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
+	return g.WeightedEdge(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *DirectedGraph) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
 	if _, ok := g.nodes[u.ID()]; !ok {
 		return nil
 	}

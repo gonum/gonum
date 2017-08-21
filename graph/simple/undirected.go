@@ -186,11 +186,22 @@ func (g *UndirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *UndirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeBetween(u, v)
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *UndirectedGraph) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(u, v)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
 func (g *UndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
+	return g.WeightedEdgeBetween(x, y)
+}
+
+// WeightedEdgeBetween returns the weighted edge between nodes x and y.
+func (g *UndirectedGraph) WeightedEdgeBetween(x, y graph.Node) graph.WeightedEdge {
 	// We don't need to check if neigh exists because
 	// it's implicit in the edges access.
 	if !g.Has(x) {

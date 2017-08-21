@@ -174,6 +174,12 @@ func (g *DirectedMatrix) HasEdgeBetween(x, y graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *DirectedMatrix) Edge(u, v graph.Node) graph.Edge {
+	return g.WeightedEdge(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *DirectedMatrix) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
 	if g.HasEdgeFromTo(u, v) {
 		// x.ID() and y.ID() are not greater than maximum int by this point.
 		return Edge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}

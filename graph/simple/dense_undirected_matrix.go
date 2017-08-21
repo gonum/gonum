@@ -150,11 +150,22 @@ func (g *UndirectedMatrix) HasEdgeBetween(u, v graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *UndirectedMatrix) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeBetween(u, v)
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *UndirectedMatrix) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(u, v)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
 func (g *UndirectedMatrix) EdgeBetween(u, v graph.Node) graph.Edge {
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdgeBetween returns the weighted edge between nodes x and y.
+func (g *UndirectedMatrix) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
 	if g.HasEdgeBetween(u, v) {
 		// u.ID() and v.ID() are not greater than maximum int by this point.
 		return Edge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}

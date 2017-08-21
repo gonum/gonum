@@ -11,9 +11,13 @@ import (
 	"gonum.org/v1/gonum/graph"
 )
 
-var _ graph.Graph = &DirectedGraph{}
-var _ graph.Directed = &DirectedGraph{}
-var _ graph.Directed = &DirectedGraph{}
+var (
+	directedGraph = (*DirectedGraph)(nil)
+
+	_ graph.Graph            = directedGraph
+	_ graph.Directed         = directedGraph
+	_ graph.WeightedDirected = directedGraph
+)
 
 // Tests Issue #27
 func TestEdgeOvercounting(t *testing.T) {

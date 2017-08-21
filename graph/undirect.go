@@ -31,8 +31,9 @@ type Undirect struct {
 }
 
 var (
-	_ Undirected = Undirect{}
-	_ Weighter   = Undirect{}
+	_ Undirected         = Undirect{}
+	_ WeightedUndirected = Undirect{}
+	_ Weighter           = Undirect{}
 )
 
 // Has returns whether the node exists within the graph.
@@ -68,12 +69,26 @@ func (g Undirect) HasEdgeBetween(x, y Node) bool { return g.G.HasEdgeBetween(x, 
 // If an edge exists, the Edge returned is an EdgePair. The weight of
 // the edge is determined by applying the Merge func to the weights of the
 // edges between u and v.
-func (g Undirect) Edge(u, v Node) Edge { return g.EdgeBetween(u, v) }
+func (g Undirect) Edge(u, v Node) Edge { return g.WeightedEdgeBetween(u, v) }
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+// If an edge exists, the Edge returned is an EdgePair. The weight of
+// the edge is determined by applying the Merge func to the weights of the
+// edges between u and v.
+func (g Undirect) WeightedEdge(u, v Node) WeightedEdge { return g.WeightedEdgeBetween(u, v) }
 
 // EdgeBetween returns the edge between nodes x and y. If an edge exists, the
 // Edge returned is an EdgePair. The weight of the edge is determined by
 // applying the Merge func to the weights of edges between x and y.
 func (g Undirect) EdgeBetween(x, y Node) Edge {
+	return g.WeightedEdgeBetween(x, y)
+}
+
+// WeightedEdgeBetween returns the weighted edge between nodes x and y. If an edge exists, the
+// Edge returned is an EdgePair. The weight of the edge is determined by
+// applying the Merge func to the weights of edges between x and y.
+func (g Undirect) WeightedEdgeBetween(x, y Node) WeightedEdge {
 	fe := g.G.Edge(x, y)
 	re := g.G.Edge(y, x)
 	if fe == nil && re == nil {

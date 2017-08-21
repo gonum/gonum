@@ -18,6 +18,11 @@ type Edge interface {
 	Weight() float64
 }
 
+// WeightedEdge is a graph edge. In directed graphs, the direction
+// of the edge is given from -> to, otherwise the edge is semantically
+// unordered.
+type WeightedEdge Edge
+
 // Graph is a generalized graph.
 type Graph interface {
 	// Has returns whether the node exists within the graph.
@@ -40,6 +45,17 @@ type Graph interface {
 	Edge(u, v Node) Edge
 }
 
+// WeightedGraph is a weighted graph.
+type WeightedGraph interface {
+	Graph
+
+	// WeightedEdge returns the weighted edge from u to v if
+	// such an edge exists and nil otherwise. The node v must
+	// be directly reachable from u as defined by the
+	// From method.
+	WeightedEdge(u, v Node) WeightedEdge
+}
+
 // Undirected is an undirected graph.
 type Undirected interface {
 	Graph
@@ -48,9 +64,31 @@ type Undirected interface {
 	EdgeBetween(x, y Node) Edge
 }
 
+// WeightedUndirected is a weighted undirected graph.
+type WeightedUndirected interface {
+	WeightedGraph
+
+	// WeightedEdgeBetween returns the edge between nodes
+	// x and y.
+	WeightedEdgeBetween(x, y Node) WeightedEdge
+}
+
 // Directed is a directed graph.
 type Directed interface {
 	Graph
+
+	// HasEdgeFromTo returns whether an edge exists
+	// in the graph from u to v.
+	HasEdgeFromTo(u, v Node) bool
+
+	// To returns all nodes that can reach directly
+	// to the given node.
+	To(Node) []Node
+}
+
+// WeightedDirected is a weighted directed graph.
+type WeightedDirected interface {
+	WeightedGraph
 
 	// HasEdgeFromTo returns whether an edge exists
 	// in the graph from u to v.

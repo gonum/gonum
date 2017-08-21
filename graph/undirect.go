@@ -33,7 +33,6 @@ type Undirect struct {
 var (
 	_ Undirected         = Undirect{}
 	_ WeightedUndirected = Undirect{}
-	_ Weighter           = Undirect{}
 )
 
 // Has returns whether the node exists within the graph.
@@ -96,7 +95,7 @@ func (g Undirect) WeightedEdgeBetween(x, y Node) WeightedEdge {
 	}
 
 	var f, r float64
-	if wg, ok := g.G.(Weighter); ok {
+	if wg, ok := g.G.(WeightedDirected); ok {
 		f, ok = wg.Weight(x, y)
 		if !ok {
 			f = g.Absent
@@ -134,7 +133,7 @@ func (g Undirect) Weight(x, y Node) (w float64, ok bool) {
 	re := g.G.Edge(y, x)
 
 	var f, r float64
-	if wg, wOk := g.G.(Weighter); wOk {
+	if wg, wOk := g.G.(WeightedDirected); wOk {
 		var fOk, rOK bool
 		f, fOk = wg.Weight(x, y)
 		if !fOk {

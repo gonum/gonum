@@ -652,13 +652,8 @@ func samePath(a, b []graph.Node) bool {
 	return true
 }
 
-type weightedGraph interface {
-	graph.Graph
-	graph.Weighter
-}
-
 // weightOf return the weight of the path in g.
-func weightOf(path []graph.Node, g weightedGraph) float64 {
+func weightOf(path []graph.Node, g graph.WeightedGraph) float64 {
 	var w float64
 	if len(path) > 1 {
 		for p, n := range path[1:] {
@@ -673,7 +668,7 @@ func weightOf(path []graph.Node, g weightedGraph) float64 {
 }
 
 // simpleEdgesOf returns the weighted edges in g corresponding to the given edges.
-func simpleEdgesOf(g weightedGraph, edges []graph.Edge) []simple.Edge {
+func simpleEdgesOf(g graph.WeightedGraph, edges []graph.Edge) []simple.Edge {
 	w := make([]simple.Edge, len(edges))
 	for i, e := range edges {
 		w[i].F = e.From()

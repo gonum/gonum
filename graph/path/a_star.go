@@ -28,7 +28,7 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded
 		return Shortest{from: s}, 0
 	}
 	var weight Weighting
-	if wg, ok := g.(graph.Weighter); ok {
+	if wg, ok := g.(graph.WeightedGraph); ok {
 		weight = wg.Weight
 	} else {
 		weight = UniformCost(g)

@@ -33,8 +33,8 @@ type DStarLite struct {
 // WorldModel is a mutable weighted directed graph that returns nodes identified
 // by id number.
 type WorldModel interface {
-	graph.DirectedBuilder
-	graph.Weighter
+	graph.Builder
+	graph.WeightedDirected
 	Node(id int64) graph.Node
 }
 
@@ -73,7 +73,7 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 	*/
 	d.last = d.s
 
-	if wg, ok := g.(graph.Weighter); ok {
+	if wg, ok := g.(graph.WeightedGraph); ok {
 		d.weight = wg.Weight
 	} else {
 		d.weight = path.UniformCost(g)

@@ -217,11 +217,21 @@ func (l *LimitedVisionGrid) HasEdgeBetween(u, v graph.Node) bool {
 
 // Edge optimistically returns the edge from u to v.
 func (l *LimitedVisionGrid) Edge(u, v graph.Node) graph.Edge {
-	return l.EdgeBetween(u, v)
+	return l.WeightedEdgeBetween(u, v)
 }
 
-// EdgeBetween optimistically returns the edge between u and v.
+// Edge optimistically returns the weighted edge from u to v.
+func (l *LimitedVisionGrid) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+	return l.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdgeBetween optimistically returns the edge between u and v.
 func (l *LimitedVisionGrid) EdgeBetween(u, v graph.Node) graph.Edge {
+	return l.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdgeBetween optimistically returns the weighted edge between u and v.
+func (l *LimitedVisionGrid) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
 	if l.HasEdgeBetween(u, v) {
 		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
 			return simple.Edge{F: u, T: v, W: 1}

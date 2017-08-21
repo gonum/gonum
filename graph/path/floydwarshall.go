@@ -13,7 +13,7 @@ import "gonum.org/v1/gonum/graph"
 // The time complexity of FloydWarshall is O(|V|^3).
 func FloydWarshall(g graph.Graph) (paths AllShortest, ok bool) {
 	var weight Weighting
-	if wg, ok := g.(graph.Weighter); ok {
+	if wg, ok := g.(graph.WeightedGraph); ok {
 		weight = wg.Weight
 	} else {
 		weight = UniformCost(g)

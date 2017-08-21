@@ -48,13 +48,22 @@ type Graph interface {
 // WeightedGraph is a weighted graph.
 type WeightedGraph interface {
 	Graph
-	Weighter
 
 	// WeightedEdge returns the weighted edge from u to v if
 	// such an edge exists and nil otherwise. The node v must
 	// be directly reachable from u as defined by the
 	// From method.
 	WeightedEdge(u, v Node) WeightedEdge
+
+	// Weight returns the weight for the edge between
+	// x and y if Edge(x, y) returns a non-nil Edge.
+	// If x and y are the same node or there is no
+	// joining edge between the two nodes the weight
+	// value returned is implementation dependent.
+	// Weight returns true if an edge exists between
+	// x and y or if x and y have the same ID, false
+	// otherwise.
+	Weight(x, y Node) (w float64, ok bool)
 }
 
 // Undirected is an undirected graph.
@@ -98,19 +107,6 @@ type WeightedDirected interface {
 	// To returns all nodes that can reach directly
 	// to the given node.
 	To(Node) []Node
-}
-
-// Weighter defines graphs that can report edge weights.
-type Weighter interface {
-	// Weight returns the weight for the edge between
-	// x and y if Edge(x, y) returns a non-nil Edge.
-	// If x and y are the same node or there is no
-	// joining edge between the two nodes the weight
-	// value returned is implementation dependent.
-	// Weight returns true if an edge exists between
-	// x and y or if x and y have the same ID, false
-	// otherwise.
-	Weight(x, y Node) (w float64, ok bool)
 }
 
 // NodeAdder is an interface for adding arbitrary nodes to a graph.

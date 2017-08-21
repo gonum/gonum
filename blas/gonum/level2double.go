@@ -12,9 +12,9 @@ import (
 var _ blas.Float64Level2 = Implementation{}
 
 // Dgemv computes
-//  y = alpha * a * x + beta * y if tA = blas.NoTrans
+//  y = alpha * A * x + beta * y if tA = blas.NoTrans
 //  y = alpha * A^T * x + beta * y if tA = blas.Trans or blas.ConjTrans
-// where A is an m×n dense matrix, x and y are vectors, and alpha is a scalar.
+// where A is an m×n dense matrix, x and y are vectors, and alpha and beta are scalars.
 func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
 		panic(badTranspose)

@@ -20,7 +20,7 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 		return Shortest{from: u}
 	}
 	var weight Weighting
-	if wg, ok := g.(graph.WeightedGraph); ok {
+	if wg, ok := g.(graph.Weighted); ok {
 		weight = wg.Weight
 	} else {
 		weight = UniformCost(g)
@@ -83,7 +83,7 @@ func DijkstraAllPaths(g graph.Graph) (paths AllShortest) {
 // result of the work in the paths parameter which is a reference type.
 func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
 	var weight Weighting
-	if wg, ok := g.(graph.WeightedGraph); ok {
+	if wg, ok := g.(graph.Weighted); ok {
 		weight = wg.Weight
 	} else {
 		weight = UniformCost(g)

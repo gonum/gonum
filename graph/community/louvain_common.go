@@ -358,7 +358,7 @@ const (
 // positiveWeightFuncFor returns a constructed weight function for the
 // positively weighted g.
 func positiveWeightFuncFor(g graph.Graph) func(x, y graph.Node) float64 {
-	if wg, ok := g.(graph.WeightedGraph); ok {
+	if wg, ok := g.(graph.Weighted); ok {
 		return func(x, y graph.Node) float64 {
 			w, ok := wg.Weight(x, y)
 			if !ok {
@@ -386,7 +386,7 @@ func positiveWeightFuncFor(g graph.Graph) func(x, y graph.Node) float64 {
 // negativeWeightFuncFor returns a constructed weight function for the
 // negatively weighted g.
 func negativeWeightFuncFor(g graph.Graph) func(x, y graph.Node) float64 {
-	if wg, ok := g.(graph.WeightedGraph); ok {
+	if wg, ok := g.(graph.Weighted); ok {
 		return func(x, y graph.Node) float64 {
 			w, ok := wg.Weight(x, y)
 			if !ok {

@@ -73,7 +73,7 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 	*/
 	d.last = d.s
 
-	if wg, ok := g.(graph.WeightedGraph); ok {
+	if wg, ok := g.(graph.Weighted); ok {
 		d.weight = wg.Weight
 	} else {
 		d.weight = path.UniformCost(g)

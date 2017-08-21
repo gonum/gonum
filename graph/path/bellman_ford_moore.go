@@ -16,7 +16,7 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 		return Shortest{from: u}, true
 	}
 	var weight Weighting
-	if wg, ok := g.(graph.WeightedGraph); ok {
+	if wg, ok := g.(graph.Weighted); ok {
 		weight = wg.Weight
 	} else {
 		weight = UniformCost(g)

@@ -1197,7 +1197,7 @@ func TestLimitedVisionGrid(t *testing.T) {
 	}
 }
 
-func asConcreteEdges(changes []graph.Edge, in graph.WeightedGraph) []simple.Edge {
+func asConcreteEdges(changes []graph.Edge, in graph.Weighted) []simple.Edge {
 	if changes == nil {
 		return nil
 	}

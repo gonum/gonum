@@ -22,7 +22,7 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 		from:   g.From,
 		edgeTo: g.Edge,
 	}
-	if wg, ok := g.(graph.WeightedGraph); ok {
+	if wg, ok := g.(graph.Weighted); ok {
 		jg.weight = wg.Weight
 	} else {
 		jg.weight = UniformCost(g)
@@ -81,8 +81,8 @@ var (
 	// of a directed graph, but we don't need
 	// to be explicit with the type since it
 	// is not exported.
-	_ graph.Graph         = johnsonWeightAdjuster{}
-	_ graph.WeightedGraph = johnsonWeightAdjuster{}
+	_ graph.Graph    = johnsonWeightAdjuster{}
+	_ graph.Weighted = johnsonWeightAdjuster{}
 )
 
 func (g johnsonWeightAdjuster) Has(n graph.Node) bool {

@@ -45,8 +45,8 @@ type Graph interface {
 	Edge(u, v Node) Edge
 }
 
-// WeightedGraph is a weighted graph.
-type WeightedGraph interface {
+// Weighted is a weighted graph.
+type Weighted interface {
 	Graph
 
 	// WeightedEdge returns the weighted edge from u to v if
@@ -76,7 +76,7 @@ type Undirected interface {
 
 // WeightedUndirected is a weighted undirected graph.
 type WeightedUndirected interface {
-	WeightedGraph
+	Weighted
 
 	// WeightedEdgeBetween returns the edge between nodes
 	// x and y.
@@ -98,7 +98,7 @@ type Directed interface {
 
 // WeightedDirected is a weighted directed graph.
 type WeightedDirected interface {
-	WeightedGraph
+	Weighted
 
 	// HasEdgeFromTo returns whether an edge exists
 	// in the graph from u to v.

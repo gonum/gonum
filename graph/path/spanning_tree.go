@@ -13,19 +13,13 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
-// UndirectedWeighter is an undirected graph that returns edge weights.
-type UndirectedWeighter interface {
-	graph.Undirected
-	graph.Weighter
-}
-
 // Prim generates a minimum spanning tree of g by greedy tree extension, placing
 // the result in the destination, dst. If the edge weights of g are distinct
 // it will be the unique minimum spanning tree of g. The destination is not cleared
 // first. The weight of the minimum spanning tree is returned. If g is not connected,
 // a minimum spanning forest will be constructed in dst and the sum of minimum
 // spanning tree weights will be returned.
-func Prim(dst graph.UndirectedBuilder, g UndirectedWeighter) float64 {
+func Prim(dst graph.UndirectedBuilder, g graph.WeightedUndirected) float64 {
 	nodes := g.Nodes()
 	if len(nodes) == 0 {
 		return 0
@@ -135,7 +129,7 @@ func (q *primQueue) update(u, v graph.Node, key float64) {
 // UndirectedWeightLister is an undirected graph that returns edge weights and
 // the set of edges in the graph.
 type UndirectedWeightLister interface {
-	UndirectedWeighter
+	graph.WeightedUndirected
 	Edges() []graph.Edge
 }
 

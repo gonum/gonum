@@ -48,6 +48,7 @@ type Graph interface {
 // WeightedGraph is a weighted graph.
 type WeightedGraph interface {
 	Graph
+	Weighter
 
 	// WeightedEdge returns the weighted edge from u to v if
 	// such an edge exists and nil otherwise. The node v must

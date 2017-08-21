@@ -111,9 +111,10 @@ type ReducedDirected struct {
 }
 
 var (
-	_ graph.Directed = (*ReducedDirected)(nil)
-	_ graph.Weighter = (*ReducedDirected)(nil)
-	_ ReducedGraph   = (*ReducedUndirected)(nil)
+	reducedDirected = (*ReducedDirected)(nil)
+
+	_ graph.WeightedDirected = reducedDirected
+	_ ReducedGraph           = reducedDirected
 )
 
 // Communities returns the community memberships of the nodes in the
@@ -377,6 +378,12 @@ func (g *ReducedDirected) HasEdgeFromTo(u, v graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *ReducedDirected) Edge(u, v graph.Node) graph.Edge {
+	return g.WeightedEdge(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *ReducedDirected) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
 	uid := u.ID()
 	vid := v.ID()
 	if uid == vid || !isValidID(uid) || !isValidID(vid) {

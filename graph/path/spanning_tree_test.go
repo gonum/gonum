@@ -26,8 +26,8 @@ func init() {
 }
 
 type spanningGraph interface {
-	graph.UndirectedBuilder
-	graph.Weighter
+	graph.Builder
+	graph.WeightedUndirected
 	Edges() []graph.Edge
 }
 

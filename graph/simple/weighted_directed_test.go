@@ -39,7 +39,7 @@ func generateDummyWeightedGraph() *WeightedDirectedGraph {
 	g := NewWeightedDirectedGraph(0, math.Inf(1))
 
 	for _, n := range nodes {
-		g.SetWeightedEdge(Edge{F: Node(n.srcID), T: Node(n.targetID), W: 1})
+		g.SetWeightedEdge(WeightedEdge{F: Node(n.srcID), T: Node(n.targetID), W: 1})
 	}
 
 	return g

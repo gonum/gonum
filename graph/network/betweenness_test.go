@@ -244,7 +244,7 @@ func TestBetweennessWeighted(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -280,7 +280,7 @@ func TestEdgeBetweennessWeighted(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 

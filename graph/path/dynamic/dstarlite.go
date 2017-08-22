@@ -104,7 +104,7 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 			if w < 0 {
 				panic("D* Lite: negative edge weight")
 			}
-			d.model.SetWeightedEdge(simple.Edge{F: u, T: d.model.Node(v.ID()), W: w})
+			d.model.SetWeightedEdge(simple.WeightedEdge{F: u, T: d.model.Node(v.ID()), W: w})
 		}
 	}
 
@@ -302,7 +302,7 @@ func (d *DStarLite) UpdateWorld(changes []graph.Edge) {
 		cOld, _ := d.model.Weight(from, to)
 		u := d.worldNodeFor(from)
 		v := d.worldNodeFor(to)
-		d.model.SetWeightedEdge(simple.Edge{F: u, T: v, W: c})
+		d.model.SetWeightedEdge(simple.WeightedEdge{F: u, T: v, W: c})
 		if cOld > c {
 			if u.ID() != d.t.ID() {
 				u.rhs = math.Min(u.rhs, c+v.g)

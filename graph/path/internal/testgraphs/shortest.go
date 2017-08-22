@@ -26,7 +26,7 @@ func init() {
 var ShortestPathTests = []struct {
 	Name              string
 	Graph             func() graph.WeightedEdgeAdder
-	Edges             []simple.Edge
+	Edges             []simple.WeightedEdge
 	HasNegativeWeight bool
 	HasNegativeCycle  bool
 
@@ -59,7 +59,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "one edge directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 		},
 
@@ -75,7 +75,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "one edge self directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 		},
 
@@ -91,7 +91,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "one edge undirected",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 		},
 
@@ -107,7 +107,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "two paths directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(2), W: 2},
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -126,7 +126,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "two paths undirected",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(2), W: 2},
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -145,7 +145,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "confounding paths directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -179,7 +179,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "confounding paths undirected",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -213,7 +213,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "confounding paths directed 2-step",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -248,7 +248,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "confounding paths undirected 2-step",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->5 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -283,7 +283,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight cycle directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -307,7 +307,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight cycle^2 directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -334,7 +334,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight cycle^2 confounding directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -364,7 +364,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight cycle^3 directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -394,7 +394,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight 3·cycle^2 confounding directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -430,7 +430,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight reversed 3·cycle^2 confounding directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			// Add a path from 0->4 of weight 4
 			{F: simple.Node(0), T: simple.Node(1), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -466,8 +466,8 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight |V|·cycle^(n/|V|) directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: func() []simple.Edge {
-			e := []simple.Edge{
+		Edges: func() []simple.WeightedEdge {
+			e := []simple.WeightedEdge{
 				// Add a path from 0->4 of weight 4
 				{F: simple.Node(0), T: simple.Node(1), W: 1},
 				{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -480,8 +480,8 @@ var ShortestPathTests = []struct {
 			const n = 100
 			for i := 0; i < n; i++ {
 				e = append(e,
-					simple.Edge{F: simple.Node(next + i), T: simple.Node(i), W: 0},
-					simple.Edge{F: simple.Node(i), T: simple.Node(next + i), W: 0},
+					simple.WeightedEdge{F: simple.Node(next + i), T: simple.Node(i), W: 0},
+					simple.WeightedEdge{F: simple.Node(i), T: simple.Node(next + i), W: 0},
 				)
 			}
 			return e
@@ -499,8 +499,8 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight n·cycle directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: func() []simple.Edge {
-			e := []simple.Edge{
+		Edges: func() []simple.WeightedEdge {
+			e := []simple.WeightedEdge{
 				// Add a path from 0->4 of weight 4
 				{F: simple.Node(0), T: simple.Node(1), W: 1},
 				{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -513,8 +513,8 @@ var ShortestPathTests = []struct {
 			const n = 100
 			for i := 0; i < n; i++ {
 				e = append(e,
-					simple.Edge{F: simple.Node(next + i), T: simple.Node(1), W: 0},
-					simple.Edge{F: simple.Node(1), T: simple.Node(next + i), W: 0},
+					simple.WeightedEdge{F: simple.Node(next + i), T: simple.Node(1), W: 0},
+					simple.WeightedEdge{F: simple.Node(1), T: simple.Node(next + i), W: 0},
 				)
 			}
 			return e
@@ -532,8 +532,8 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "zero-weight bi-directional tree with single exit directed",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: func() []simple.Edge {
-			e := []simple.Edge{
+		Edges: func() []simple.WeightedEdge {
+			e := []simple.WeightedEdge{
 				// Add a path from 0->4 of weight 4
 				{F: simple.Node(0), T: simple.Node(1), W: 1},
 				{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -555,13 +555,13 @@ var ShortestPathTests = []struct {
 			for l := 0; l < depth; l++ {
 				for i = 0; i < branching; i++ {
 					last = next + i
-					e = append(e, simple.Edge{F: simple.Node(src), T: simple.Node(last), W: 0})
-					e = append(e, simple.Edge{F: simple.Node(last), T: simple.Node(src), W: 0})
+					e = append(e, simple.WeightedEdge{F: simple.Node(src), T: simple.Node(last), W: 0})
+					e = append(e, simple.WeightedEdge{F: simple.Node(last), T: simple.Node(src), W: 0})
 				}
 				src = next + 1
 				next += branching
 			}
-			e = append(e, simple.Edge{F: simple.Node(last), T: simple.Node(4), W: 2})
+			e = append(e, simple.WeightedEdge{F: simple.Node(last), T: simple.Node(4), W: 2})
 			return e
 		}(),
 
@@ -580,7 +580,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "one edge directed negative",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: -1},
 		},
 		HasNegativeWeight: true,
@@ -597,7 +597,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "one edge undirected negative",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: -1},
 		},
 		HasNegativeWeight: true,
@@ -608,7 +608,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "wp graph negative", // http://en.wikipedia.org/w/index.php?title=Johnson%27s_algorithm&oldid=564595231
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node('w'), T: simple.Node('z'), W: 2},
 			{F: simple.Node('x'), T: simple.Node('w'), W: 6},
 			{F: simple.Node('x'), T: simple.Node('y'), W: 3},
@@ -631,7 +631,7 @@ var ShortestPathTests = []struct {
 	{
 		Name:  "roughgarden negative",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
-		Edges: []simple.Edge{
+		Edges: []simple.WeightedEdge{
 			{F: simple.Node('a'), T: simple.Node('b'), W: -2},
 			{F: simple.Node('b'), T: simple.Node('c'), W: -1},
 			{F: simple.Node('c'), T: simple.Node('a'), W: 4},

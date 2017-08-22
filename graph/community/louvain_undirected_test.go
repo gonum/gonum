@@ -284,7 +284,7 @@ func TestCommunityQWeightedUndirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -337,7 +337,7 @@ func TestCommunityDeltaQWeightedUndirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -462,7 +462,7 @@ func TestReduceQConsistencyWeightedUndirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -580,7 +580,7 @@ func TestMoveLocalWeightedUndirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -642,7 +642,7 @@ func TestModularizeWeightedUndirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -752,7 +752,7 @@ func TestNonContiguousUndirected(t *testing.T) {
 
 func TestNonContiguousWeightedUndirected(t *testing.T) {
 	g := simple.NewWeightedUndirectedGraph(0, 0)
-	for _, e := range []simple.Edge{
+	for _, e := range []simple.WeightedEdge{
 		{F: simple.Node(0), T: simple.Node(1), W: 1},
 		{F: simple.Node(4), T: simple.Node(5), W: 1},
 	} {

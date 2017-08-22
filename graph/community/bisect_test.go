@@ -66,7 +66,7 @@ func init() {
 			friends.AddNode(simple.Node(u))
 		}
 		for v := range e {
-			friends.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+			friends.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 		}
 	}
 	enemies = simple.NewWeightedUndirectedGraph(0, 0)
@@ -76,7 +76,7 @@ func init() {
 			enemies.AddNode(simple.Node(u))
 		}
 		for v := range e {
-			enemies.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: -1})
+			enemies.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: -1})
 		}
 	}
 }
@@ -148,7 +148,7 @@ func TestProfileWeightedUndirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -207,7 +207,7 @@ func TestProfileWeightedDirected(t *testing.T) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 

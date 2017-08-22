@@ -106,7 +106,7 @@ func (g *UndirectedMatrix) Edges() []graph.Edge {
 	for i := 0; i < r; i++ {
 		for j := i + 1; j < r; j++ {
 			if w := g.mat.At(i, j); !isSame(w, g.absent) {
-				edges = append(edges, Edge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
+				edges = append(edges, WeightedEdge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
 			}
 		}
 	}
@@ -168,7 +168,7 @@ func (g *UndirectedMatrix) EdgeBetween(u, v graph.Node) graph.Edge {
 func (g *UndirectedMatrix) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
 	if g.HasEdgeBetween(u, v) {
 		// u.ID() and v.ID() are not greater than maximum int by this point.
-		return Edge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}
+		return WeightedEdge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}
 	}
 	return nil
 }

@@ -637,7 +637,7 @@ func TestNonContiguousUndirectedMultiplex(t *testing.T) {
 
 func TestNonContiguousWeightedUndirectedMultiplex(t *testing.T) {
 	g := simple.NewWeightedUndirectedGraph(0, 0)
-	for _, e := range []simple.Edge{
+	for _, e := range []simple.WeightedEdge{
 		{F: simple.Node(0), T: simple.Node(1), W: 1},
 		{F: simple.Node(4), T: simple.Node(5), W: 1},
 	} {
@@ -677,7 +677,7 @@ func undirectedMultiplexFrom(raw []layer) (UndirectedLayers, []float64, error) {
 				if l.edgeWeight != 0 {
 					w = l.edgeWeight
 				}
-				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: w})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: w})
 			}
 		}
 		layers = append(layers, g)

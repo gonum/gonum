@@ -22,7 +22,7 @@ var weightedDirectedGraphs = []struct {
 	skipUnweighted bool
 
 	g      func() weightedDirectedBuilder
-	edges  []simple.Edge
+	edges  []simple.WeightedEdge
 	absent float64
 	merge  func(x, y float64, xe, ye graph.Edge) float64
 
@@ -30,7 +30,7 @@ var weightedDirectedGraphs = []struct {
 }{
 	{
 		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -43,7 +43,7 @@ var weightedDirectedGraphs = []struct {
 	},
 	{
 		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -60,7 +60,7 @@ var weightedDirectedGraphs = []struct {
 		skipUnweighted: true, // The min merge function cannot be used in the unweighted case.
 
 		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -74,7 +74,7 @@ var weightedDirectedGraphs = []struct {
 	},
 	{
 		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -96,7 +96,7 @@ var weightedDirectedGraphs = []struct {
 	},
 	{
 		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},

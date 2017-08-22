@@ -218,11 +218,11 @@ func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
 func (g *Grid) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
 	if g.HasEdgeBetween(u, v) {
 		if !g.AllowDiagonal || g.UnitEdgeWeight {
-			return simple.Edge{F: u, T: v, W: 1}
+			return simple.WeightedEdge{F: u, T: v, W: 1}
 		}
 		ux, uy := g.XY(u)
 		vx, vy := g.XY(v)
-		return simple.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
+		return simple.WeightedEdge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }

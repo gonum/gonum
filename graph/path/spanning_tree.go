@@ -27,10 +27,10 @@ func Prim(dst graph.UndirectedBuilder, g graph.WeightedUndirected) float64 {
 
 	q := &primQueue{
 		indexOf: make(map[int64]int, len(nodes)-1),
-		nodes:   make([]simple.Edge, 0, len(nodes)-1),
+		nodes:   make([]simple.WeightedEdge, 0, len(nodes)-1),
 	}
 	for _, u := range nodes[1:] {
-		heap.Push(q, simple.Edge{F: u, W: math.Inf(1)})
+		heap.Push(q, simple.WeightedEdge{F: u, W: math.Inf(1)})
 	}
 
 	u := nodes[0]
@@ -44,7 +44,7 @@ func Prim(dst graph.UndirectedBuilder, g graph.WeightedUndirected) float64 {
 
 	var w float64
 	for q.Len() > 0 {
-		e := heap.Pop(q).(simple.Edge)
+		e := heap.Pop(q).(simple.WeightedEdge)
 		if e.To() != nil && g.HasEdgeBetween(e.From(), e.To()) {
 			dst.SetEdge(e)
 			w += e.Weight()
@@ -72,7 +72,7 @@ func Prim(dst graph.UndirectedBuilder, g graph.WeightedUndirected) float64 {
 // spanning forest.
 type primQueue struct {
 	indexOf map[int64]int
-	nodes   []simple.Edge
+	nodes   []simple.WeightedEdge
 }
 
 func (q *primQueue) Less(i, j int) bool {
@@ -90,7 +90,7 @@ func (q *primQueue) Len() int {
 }
 
 func (q *primQueue) Push(x interface{}) {
-	n := x.(simple.Edge)
+	n := x.(simple.WeightedEdge)
 	q.indexOf[n.From().ID()] = len(q.nodes)
 	q.nodes = append(q.nodes, n)
 }
@@ -141,7 +141,7 @@ type UndirectedWeightLister interface {
 // spanning tree weights will be returned.
 func Kruskal(dst graph.UndirectedBuilder, g UndirectedWeightLister) float64 {
 	edges := g.Edges()
-	ascend := make([]simple.Edge, 0, len(edges))
+	ascend := make([]simple.WeightedEdge, 0, len(edges))
 	for _, e := range edges {
 		u := e.From()
 		v := e.To()
@@ -149,7 +149,7 @@ func Kruskal(dst graph.UndirectedBuilder, g UndirectedWeightLister) float64 {
 		if !ok {
 			panic("kruskal: unexpected invalid weight")
 		}
-		ascend = append(ascend, simple.Edge{F: u, T: v, W: w})
+		ascend = append(ascend, simple.WeightedEdge{F: u, T: v, W: w})
 	}
 	sort.Sort(byWeight(ascend))
 
@@ -169,7 +169,7 @@ func Kruskal(dst graph.UndirectedBuilder, g UndirectedWeightLister) float64 {
 	return w
 }
 
-type byWeight []simple.Edge
+type byWeight []simple.WeightedEdge
 
 func (e byWeight) Len() int           { return len(e) }
 func (e byWeight) Less(i, j int) bool { return e[i].Weight() < e[j].Weight() }

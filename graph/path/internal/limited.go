@@ -234,11 +234,11 @@ func (l *LimitedVisionGrid) EdgeBetween(u, v graph.Node) graph.Edge {
 func (l *LimitedVisionGrid) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
 	if l.HasEdgeBetween(u, v) {
 		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
-			return simple.Edge{F: u, T: v, W: 1}
+			return simple.WeightedEdge{F: u, T: v, W: 1}
 		}
 		ux, uy := l.XY(u)
 		vx, vy := l.XY(v)
-		return simple.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
+		return simple.WeightedEdge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }

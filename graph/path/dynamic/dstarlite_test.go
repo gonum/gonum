@@ -596,7 +596,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 			}
 
 			dp.dump(true)
-			dp.printEdges("Initial world knowledge: %s\n\n", simpleEdgesOf(l, world.Edges()))
+			dp.printEdges("Initial world knowledge: %s\n\n", simpleWeightedEdgesOf(l, world.Edges()))
 			for d.Step() {
 				changes, _ := l.MoveTo(d.Here())
 				got = append(got, l.Location)
@@ -609,7 +609,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 							i, memory(remember), gotPath, wantedPath)
 					}
 				}
-				dp.printEdges("Edges changing after last step:\n%s\n\n", simpleEdgesOf(l, changes))
+				dp.printEdges("Edges changing after last step:\n%s\n\n", simpleWeightedEdgesOf(l, changes))
 			}
 
 			if weight := weightOf(got, l.Grid); !samePath(got, test.want) || weight != test.weight {
@@ -667,9 +667,9 @@ func weightOf(path []graph.Node, g graph.Weighted) float64 {
 	return w
 }
 
-// simpleEdgesOf returns the weighted edges in g corresponding to the given edges.
-func simpleEdgesOf(g graph.Weighted, edges []graph.Edge) []simple.Edge {
-	w := make([]simple.Edge, len(edges))
+// simpleWeightedEdgesOf returns the weighted edges in g corresponding to the given edges.
+func simpleWeightedEdgesOf(g graph.Weighted, edges []graph.Edge) []simple.WeightedEdge {
+	w := make([]simple.WeightedEdge, len(edges))
 	for i, e := range edges {
 		w[i].F = e.From()
 		w[i].T = e.To()

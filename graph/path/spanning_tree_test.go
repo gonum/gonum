@@ -28,7 +28,7 @@ func init() {
 type spanningGraph interface {
 	graph.WeightedBuilder
 	graph.WeightedUndirected
-	Edges() []graph.Edge
+	WeightedEdges() []graph.WeightedEdge
 }
 
 var spanningTreeTests = []struct {
@@ -240,14 +240,14 @@ var spanningTreeTests = []struct {
 	},
 }
 
-func testMinumumSpanning(mst func(dst graph.UndirectedBuilder, g spanningGraph) float64, t *testing.T) {
+func testMinumumSpanning(mst func(dst WeightedBuilder, g spanningGraph) float64, t *testing.T) {
 	for _, test := range spanningTreeTests {
 		g := test.graph()
 		for _, e := range test.edges {
 			g.SetWeightedEdge(e)
 		}
 
-		dst := edgeAdder{simple.NewWeightedUndirectedGraph(0, math.Inf(1))}
+		dst := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
 		w := mst(dst, g)
 		if w != test.want {
 			t.Errorf("unexpected minimum spanning tree weight for %q: got: %f want: %f",
@@ -281,26 +281,14 @@ func testMinumumSpanning(mst func(dst graph.UndirectedBuilder, g spanningGraph) 
 	}
 }
 
-type edgeAdder struct {
-	*simple.WeightedUndirectedGraph
-}
-
-func (g edgeAdder) NewEdge(x, y graph.Node) graph.Edge {
-	return g.WeightedUndirectedGraph.NewWeightedEdge(x, y, 1)
-}
-
-func (g edgeAdder) SetEdge(e graph.Edge) {
-	g.WeightedUndirectedGraph.SetWeightedEdge(e.(graph.WeightedEdge))
-}
-
 func TestKruskal(t *testing.T) {
-	testMinumumSpanning(func(dst graph.UndirectedBuilder, g spanningGraph) float64 {
+	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Kruskal(dst, g)
 	}, t)
 }
 
 func TestPrim(t *testing.T) {
-	testMinumumSpanning(func(dst graph.UndirectedBuilder, g spanningGraph) float64 {
+	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Prim(dst, g)
 	}, t)
 }

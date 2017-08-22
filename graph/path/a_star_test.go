@@ -228,7 +228,7 @@ func (e weightedEdge) Weight() float64  { return e.cost }
 
 func isMonotonic(g UndirectedWeightLister, h Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
 	for _, goal := range g.Nodes() {
-		for _, edge := range g.Edges() {
+		for _, edge := range g.WeightedEdges() {
 			from := edge.From()
 			to := edge.To()
 			w, ok := g.Weight(from, to)

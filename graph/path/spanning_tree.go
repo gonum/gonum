@@ -13,13 +13,25 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
+// WeightedBuilder is a type that can add nodes and weighted edges.
+type WeightedBuilder interface {
+	AddNode(graph.Node)
+	SetWeightedEdge(graph.WeightedEdge)
+}
+
 // Prim generates a minimum spanning tree of g by greedy tree extension, placing
 // the result in the destination, dst. If the edge weights of g are distinct
 // it will be the unique minimum spanning tree of g. The destination is not cleared
 // first. The weight of the minimum spanning tree is returned. If g is not connected,
 // a minimum spanning forest will be constructed in dst and the sum of minimum
 // spanning tree weights will be returned.
-func Prim(dst graph.UndirectedBuilder, g graph.WeightedUndirected) float64 {
+//
+// Nodes and Edges from g are used to construct dst, so if the Node and Edge
+// types used in g are pointer or reference-like, then the values will be shared
+// between the graphs.
+//
+// If dst has nodes that exist in g, Prim will panic.
+func Prim(dst WeightedBuilder, g graph.WeightedUndirected) float64 {
 	nodes := g.Nodes()
 	if len(nodes) == 0 {
 		return 0
@@ -29,7 +41,9 @@ func Prim(dst graph.UndirectedBuilder, g graph.WeightedUndirected) float64 {
 		indexOf: make(map[int64]int, len(nodes)-1),
 		nodes:   make([]simple.WeightedEdge, 0, len(nodes)-1),
 	}
+	dst.AddNode(nodes[0])
 	for _, u := range nodes[1:] {
+		dst.AddNode(u)
 		heap.Push(q, simple.WeightedEdge{F: u, W: math.Inf(1)})
 	}
 
@@ -46,7 +60,7 @@ func Prim(dst graph.UndirectedBuilder, g graph.WeightedUndirected) float64 {
 	for q.Len() > 0 {
 		e := heap.Pop(q).(simple.WeightedEdge)
 		if e.To() != nil && g.HasEdgeBetween(e.From(), e.To()) {
-			dst.SetEdge(e)
+			dst.SetWeightedEdge(g.WeightedEdge(e.From(), e.To()))
 			w += e.Weight()
 		}
 
@@ -130,7 +144,7 @@ func (q *primQueue) update(u, v graph.Node, key float64) {
 // the set of edges in the graph.
 type UndirectedWeightLister interface {
 	graph.WeightedUndirected
-	Edges() []graph.Edge
+	WeightedEdges() []graph.WeightedEdge
 }
 
 // Kruskal generates a minimum spanning tree of g by greedy tree coalescence, placing
@@ -139,37 +153,34 @@ type UndirectedWeightLister interface {
 // first. The weight of the minimum spanning tree is returned. If g is not connected,
 // a minimum spanning forest will be constructed in dst and the sum of minimum
 // spanning tree weights will be returned.
-func Kruskal(dst graph.UndirectedBuilder, g UndirectedWeightLister) float64 {
-	edges := g.Edges()
-	ascend := make([]simple.WeightedEdge, 0, len(edges))
-	for _, e := range edges {
-		u := e.From()
-		v := e.To()
-		w, ok := g.Weight(u, v)
-		if !ok {
-			panic("kruskal: unexpected invalid weight")
-		}
-		ascend = append(ascend, simple.WeightedEdge{F: u, T: v, W: w})
-	}
-	sort.Sort(byWeight(ascend))
+//
+// Nodes and Edges from g are used to construct dst, so if the Node and Edge
+// types used in g are pointer or reference-like, then the values will be shared
+// between the graphs.
+//
+// If dst has nodes that exist in g, Kruskal will panic.
+func Kruskal(dst WeightedBuilder, g UndirectedWeightLister) float64 {
+	edges := g.WeightedEdges()
+	sort.Sort(byWeight(edges))
 
 	ds := newDisjointSet()
 	for _, node := range g.Nodes() {
+		dst.AddNode(node)
 		ds.makeSet(node.ID())
 	}
 
 	var w float64
-	for _, e := range ascend {
+	for _, e := range edges {
 		if s1, s2 := ds.find(e.From().ID()), ds.find(e.To().ID()); s1 != s2 {
 			ds.union(s1, s2)
-			dst.SetEdge(e)
+			dst.SetWeightedEdge(g.WeightedEdge(e.From(), e.To()))
 			w += e.Weight()
 		}
 	}
 	return w
 }
 
-type byWeight []simple.WeightedEdge
+type byWeight []graph.WeightedEdge
 
 func (e byWeight) Len() int           { return len(e) }
 func (e byWeight) Less(i, j int) bool { return e[i].Weight() < e[j].Weight() }

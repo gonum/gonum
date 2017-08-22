@@ -6,11 +6,15 @@ package f32
 
 import "testing"
 
+const (
+	benchLen = 1e5
+	a        = 2
+)
+
 var (
-	a = float32(2)
-	x = make([]float32, 1000000)
-	y = make([]float32, 1000000)
-	z = make([]float32, 1000000)
+	x = make([]float32, benchLen)
+	y = make([]float32, benchLen)
+	z = make([]float32, benchLen)
 )
 
 func init() {

@@ -616,12 +616,32 @@ func TestLouvainMultiplex(t *testing.T) {
 }
 
 func TestNonContiguousUndirectedMultiplex(t *testing.T) {
-	g := simple.NewUndirectedGraph(0, 0)
+	g := simple.NewUndirectedGraph()
+	for _, e := range []simple.Edge{
+		{F: simple.Node(0), T: simple.Node(1)},
+		{F: simple.Node(4), T: simple.Node(5)},
+	} {
+		g.SetEdge(e)
+	}
+
+	func() {
+		defer func() {
+			r := recover()
+			if r != nil {
+				t.Error("unexpected panic with non-contiguous ID range")
+			}
+		}()
+		ModularizeMultiplex(UndirectedLayers{g}, nil, nil, true, nil)
+	}()
+}
+
+func TestNonContiguousWeightedUndirectedMultiplex(t *testing.T) {
+	g := simple.NewWeightedUndirectedGraph(0, 0)
 	for _, e := range []simple.Edge{
 		{F: simple.Node(0), T: simple.Node(1), W: 1},
 		{F: simple.Node(4), T: simple.Node(5), W: 1},
 	} {
-		g.SetEdge(e)
+		g.SetWeightedEdge(e)
 	}
 
 	func() {
@@ -646,7 +666,7 @@ func undirectedMultiplexFrom(raw []layer) (UndirectedLayers, []float64, error) {
 	var layers []graph.Undirected
 	var weights []float64
 	for _, l := range raw {
-		g := simple.NewUndirectedGraph(0, 0)
+		g := simple.NewWeightedUndirectedGraph(0, 0)
 		for u, e := range l.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -657,7 +677,7 @@ func undirectedMultiplexFrom(raw []layer) (UndirectedLayers, []float64, error) {
 				if l.edgeWeight != 0 {
 					w = l.edgeWeight
 				}
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: w})
+				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: w})
 			}
 		}
 		layers = append(layers, g)

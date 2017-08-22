@@ -155,7 +155,7 @@ type directedGraph struct {
 }
 
 func newDirectedGraph() *directedGraph {
-	return &directedGraph{DirectedGraph: simple.NewDirectedGraph(0, 0)}
+	return &directedGraph{DirectedGraph: simple.NewDirectedGraph()}
 }
 
 func (g *directedGraph) NewNode() graph.Node {

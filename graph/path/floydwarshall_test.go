@@ -19,7 +19,7 @@ func TestFloydWarshall(t *testing.T) {
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
 		pt, ok := FloydWarshall(g.(graph.Graph))

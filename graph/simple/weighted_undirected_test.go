@@ -5,27 +5,29 @@
 package simple
 
 import (
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 )
 
 var (
-	undirectedGraph = (*UndirectedGraph)(nil)
+	weightedUndirectedGraph = (*WeightedUndirectedGraph)(nil)
 
-	_ graph.Graph      = undirectedGraph
-	_ graph.Undirected = undirectedGraph
+	_ graph.Graph              = weightedUndirectedGraph
+	_ graph.Undirected         = weightedUndirectedGraph
+	_ graph.WeightedUndirected = weightedUndirectedGraph
 )
 
-func TestAssertMutableNotDirected(t *testing.T) {
-	var g graph.UndirectedBuilder = NewUndirectedGraph()
+func TestAssertWeightedMutableNotDirected(t *testing.T) {
+	var g graph.UndirectedWeightedBuilder = NewWeightedUndirectedGraph(0, math.Inf(1))
 	if _, ok := g.(graph.Directed); ok {
 		t.Fatal("Graph is directed, but a MutableGraph cannot safely be directed!")
 	}
 }
 
-func TestMaxID(t *testing.T) {
-	g := NewUndirectedGraph()
+func TestWeightedMaxID(t *testing.T) {
+	g := NewWeightedUndirectedGraph(0, math.Inf(1))
 	nodes := make(map[graph.Node]struct{})
 	for i := Node(0); i < 3; i++ {
 		g.AddNode(i)
@@ -46,13 +48,13 @@ func TestMaxID(t *testing.T) {
 }
 
 // Test for issue #123 https://github.com/gonum/graph/issues/123
-func TestIssue123UndirectedGraph(t *testing.T) {
+func TestIssue123WeightedUndirectedGraph(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("unexpected panic: %v", r)
 		}
 	}()
-	g := NewUndirectedGraph()
+	g := NewWeightedUndirectedGraph(0, math.Inf(1))
 
 	n0 := g.NewNode()
 	g.AddNode(n0)

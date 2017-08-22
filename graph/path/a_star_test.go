@@ -154,7 +154,7 @@ func TestAStar(t *testing.T) {
 }
 
 func TestExhaustiveAStar(t *testing.T) {
-	g := simple.NewUndirectedGraph(0, math.Inf(1))
+	g := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
 	nodes := []locatedNode{
 		{id: 1, x: 0, y: 6},
 		{id: 2, x: 1, y: 0},
@@ -179,7 +179,7 @@ func TestExhaustiveAStar(t *testing.T) {
 		{from: g.Node(5), to: g.Node(6), cost: 9},
 	}
 	for _, e := range edges {
-		g.SetEdge(e)
+		g.SetWeightedEdge(e)
 	}
 
 	heuristic := func(u, v graph.Node) float64 {
@@ -247,7 +247,7 @@ func TestAStarNullHeuristic(t *testing.T) {
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
 		var (

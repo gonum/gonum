@@ -229,8 +229,8 @@ func hasNegative(f []float64) bool {
 }
 
 var (
-	dupGraph         = simple.NewUndirectedGraph(0, 0)
-	dupGraphDirected = simple.NewDirectedGraph(0, 0)
+	dupGraph         = simple.NewUndirectedGraph()
+	dupGraphDirected = simple.NewDirectedGraph()
 )
 
 func init() {

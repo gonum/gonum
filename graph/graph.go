@@ -15,13 +15,15 @@ type Node interface {
 type Edge interface {
 	From() Node
 	To() Node
-	Weight() float64
 }
 
-// WeightedEdge is a graph edge. In directed graphs, the direction
+// WeightedEdge is a weighted graph edge. In directed graphs, the direction
 // of the edge is given from -> to, otherwise the edge is semantically
 // unordered.
-type WeightedEdge Edge
+type WeightedEdge interface {
+	Edge
+	Weight() float64
+}
 
 // Graph is a generalized graph.
 type Graph interface {
@@ -143,6 +145,22 @@ type EdgeAdder interface {
 	SetEdge(e Edge)
 }
 
+// WeightedEdgeAdder is an interface for adding edges to a graph.
+type WeightedEdgeAdder interface {
+	// NewWeightedEdge returns a new WeightedEdge from
+	// the source to the destination node.
+	NewWeightedEdge(from, to Node, weight float64) WeightedEdge
+
+	// SetWeightedEdge adds an edge from one node to
+	// another. If the graph supports node addition
+	// the nodes will be added if they do not exist,
+	// otherwise SetWeightedEdge will panic.
+	// The behavior of a WeightedEdgeAdder when the IDs
+	// returned by e.From and e.To are equal is
+	// implementation-dependent.
+	SetWeightedEdge(e WeightedEdge)
+}
+
 // EdgeRemover is an interface for removing nodes from a graph.
 type EdgeRemover interface {
 	// RemoveEdge removes the given edge, leaving the
@@ -157,10 +175,22 @@ type Builder interface {
 	EdgeAdder
 }
 
+// WeightedBuilder is a graph that can have nodes and weighted edges added.
+type WeightedBuilder interface {
+	NodeAdder
+	WeightedEdgeAdder
+}
+
 // UndirectedBuilder is an undirected graph builder.
 type UndirectedBuilder interface {
 	Undirected
 	Builder
+}
+
+// UndirectedWeightedBuilder is an undirected weighted graph builder.
+type UndirectedWeightedBuilder interface {
+	Undirected
+	WeightedBuilder
 }
 
 // DirectedBuilder is a directed graph builder.
@@ -169,7 +199,31 @@ type DirectedBuilder interface {
 	Builder
 }
 
+// DirectedWeightedBuilder is a directed weighted graph builder.
+type DirectedWeightedBuilder interface {
+	Directed
+	WeightedBuilder
+}
+
 // Copy copies nodes and edges as undirected edges from the source to the destination
+// without first clearing the destination. Copy will panic if a node ID in the source
+// graph matches a node ID in the destination.
+//
+// If the source is undirected and the destination is directed both directions will
+// be present in the destination after the copy is complete.
+func Copy(dst Builder, src Graph) {
+	nodes := src.Nodes()
+	for _, n := range nodes {
+		dst.AddNode(n)
+	}
+	for _, u := range nodes {
+		for _, v := range src.From(u) {
+			dst.SetEdge(src.Edge(u, v))
+		}
+	}
+}
+
+// CopyWeighted copies nodes and edges as undirected edges from the source to the destination
 // without first clearing the destination. Copy will panic if a node ID in the source
 // graph matches a node ID in the destination.
 //
@@ -179,15 +233,15 @@ type DirectedBuilder interface {
 // If the source is a directed graph, the destination is undirected, and a fundamental
 // cycle exists with two nodes where the edge weights differ, the resulting destination
 // graph's edge weight between those nodes is undefined. If there is a defined function
-// to resolve such conflicts, an Undirect may be used to do this.
-func Copy(dst Builder, src Graph) {
+// to resolve such conflicts, an UndirectWeighted may be used to do this.
+func CopyWeighted(dst WeightedBuilder, src Weighted) {
 	nodes := src.Nodes()
 	for _, n := range nodes {
 		dst.AddNode(n)
 	}
 	for _, u := range nodes {
 		for _, v := range src.From(u) {
-			dst.SetEdge(src.Edge(u, v))
+			dst.SetWeightedEdge(src.WeightedEdge(u, v))
 		}
 	}
 }

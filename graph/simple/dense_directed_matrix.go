@@ -218,9 +218,19 @@ func (g *DirectedMatrix) Weight(x, y graph.Node) (w float64, ok bool) {
 	return g.absent, false
 }
 
-// SetEdge sets e, an edge from one node to another. If the ends of the edge are not in g
-// or the edge is a self loop, SetEdge panics.
+// SetEdge sets e, an edge from one node to another with unit weight. If the ends of the edge
+// are not in g or the edge is a self loop, SetEdge panics.
 func (g *DirectedMatrix) SetEdge(e graph.Edge) {
+	g.setWeightedEdge(e, 1)
+}
+
+// SetWeightedEdge sets e, an edge from one node to another. If the ends of the edge are not in g
+// or the edge is a self loop, SetWeightedEdge panics.
+func (g *DirectedMatrix) SetWeightedEdge(e graph.WeightedEdge) {
+	g.setWeightedEdge(e, e.Weight())
+}
+
+func (g *DirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
 	fid := e.From().ID()
 	tid := e.To().ID()
 	if fid == tid {
@@ -233,7 +243,7 @@ func (g *DirectedMatrix) SetEdge(e graph.Edge) {
 		panic("simple: unavailable to node ID for dense graph")
 	}
 	// fid and tid are not greater than maximum int by this point.
-	g.mat.Set(int(fid), int(tid), e.Weight())
+	g.mat.Set(int(fid), int(tid), weight)
 }
 
 // RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist

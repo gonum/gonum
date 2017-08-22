@@ -5,7 +5,6 @@
 package topo
 
 import (
-	"math"
 	"reflect"
 	"sort"
 	"testing"
@@ -16,7 +15,7 @@ import (
 )
 
 func TestIsPath(t *testing.T) {
-	dg := simple.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph()
 	if !IsPathIn(dg, nil) {
 		t.Error("IsPath returns false on nil path")
 	}
@@ -33,7 +32,7 @@ func TestIsPath(t *testing.T) {
 	if IsPathIn(dg, p) {
 		t.Error("IsPath returns true on bad path of length 2")
 	}
-	dg.SetEdge(simple.Edge{F: p[0], T: p[1], W: 1})
+	dg.SetEdge(simple.Edge{F: p[0], T: p[1]})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath returns false on correct path of length 2")
 	}
@@ -42,13 +41,13 @@ func TestIsPath(t *testing.T) {
 		t.Error("IsPath erroneously returns true for a reverse path")
 	}
 	p = []graph.Node{p[1], p[0], simple.Node(2)}
-	dg.SetEdge(simple.Edge{F: p[1], T: p[2], W: 1})
+	dg.SetEdge(simple.Edge{F: p[1], T: p[2]})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not find a correct path for path > 2 nodes")
 	}
-	ug := simple.NewUndirectedGraph(0, math.Inf(1))
-	ug.SetEdge(simple.Edge{F: p[1], T: p[0], W: 1})
-	ug.SetEdge(simple.Edge{F: p[1], T: p[2], W: 1})
+	ug := simple.NewUndirectedGraph()
+	ug.SetEdge(simple.Edge{F: p[1], T: p[0]})
+	ug.SetEdge(simple.Edge{F: p[1], T: p[2]})
 	if !IsPathIn(dg, p) {
 		t.Error("IsPath does not correctly account for undirected behavior")
 	}
@@ -69,7 +68,7 @@ var pathExistsInUndirectedTests = []struct {
 
 func TestPathExistsInUndirected(t *testing.T) {
 	for i, test := range pathExistsInUndirectedTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph()
 
 		for u, e := range test.g {
 			if !g.Has(simple.Node(u)) {
@@ -108,7 +107,7 @@ var pathExistsInDirectedTests = []struct {
 
 func TestPathExistsInDirected(t *testing.T) {
 	for i, test := range pathExistsInDirectedTests {
-		g := simple.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph()
 
 		for u, e := range test.g {
 			if !g.Has(simple.Node(u)) {
@@ -145,7 +144,7 @@ var connectedComponentTests = []struct {
 
 func TestConnectedComponents(t *testing.T) {
 	for i, test := range connectedComponentTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph()
 
 		for u, e := range test.g {
 			if !g.Has(simple.Node(u)) {

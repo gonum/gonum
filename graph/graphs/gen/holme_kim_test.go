@@ -5,7 +5,6 @@
 package gen
 
 import (
-	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph/simple"
@@ -15,7 +14,7 @@ func TestTunableClusteringScaleFree(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for m := 0; m < n; m++ {
 			for p := 0.; p <= 1; p += 0.1 {
-				g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph(0, math.Inf(1))}
+				g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
 				err := TunableClusteringScaleFree(g, n, m, p, nil)
 				if err != nil {
 					t.Fatalf("unexpected error: n=%d, m=%d, p=%v: %v", n, m, p, err)
@@ -37,7 +36,7 @@ func TestTunableClusteringScaleFree(t *testing.T) {
 func TestPreferentialAttachment(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for m := 0; m < n; m++ {
-			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph(0, math.Inf(1))}
+			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
 			err := PreferentialAttachment(g, n, m, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, m=%d: %v", n, m, err)

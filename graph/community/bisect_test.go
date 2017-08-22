@@ -10,8 +10,8 @@ import (
 	"sort"
 	"testing"
 
+	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
-
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -24,10 +24,10 @@ func ExampleProfile_simple() {
 	//  |/     \|
 	//  1       5
 	//
-	g := simple.NewUndirectedGraph(0, 0)
+	g := simple.NewUndirectedGraph()
 	for u, e := range smallDumbell {
 		for v := range e {
-			g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+			g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 		}
 	}
 
@@ -56,27 +56,27 @@ func ExampleProfile_simple() {
 	// Low:3.5 High:10 Score:0 Communities:[[0] [1] [2] [3] [4] [5]] Q=-0.607
 }
 
-var friends, enemies *simple.UndirectedGraph
+var friends, enemies *simple.WeightedUndirectedGraph
 
 func init() {
-	friends = simple.NewUndirectedGraph(0, 0)
+	friends = simple.NewWeightedUndirectedGraph(0, 0)
 	for u, e := range middleEast.friends {
 		// Ensure unconnected nodes are included.
 		if !friends.Has(simple.Node(u)) {
 			friends.AddNode(simple.Node(u))
 		}
 		for v := range e {
-			friends.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+			friends.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
 		}
 	}
-	enemies = simple.NewUndirectedGraph(0, 0)
+	enemies = simple.NewWeightedUndirectedGraph(0, 0)
 	for u, e := range middleEast.enemies {
 		// Ensure unconnected nodes are included.
 		if !enemies.Has(simple.Node(u)) {
 			enemies.AddNode(simple.Node(u))
 		}
 		for v := range e {
-			enemies.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: -1})
+			enemies.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: -1})
 		}
 	}
 }
@@ -112,8 +112,8 @@ func ExampleProfile_multiplex() {
 	// Output:
 	// Low:0.1 High:0.72 Score:26 Communities:[[0] [1 7 9 12] [2 8 11] [3 4 5 10] [6]] Q=[24.7 1.97]
 	// Low:0.72 High:1.1 Score:24 Communities:[[0 6] [1 7 9 12] [2 8 11] [3 4 5 10]] Q=[16.9 14.1]
-	// Low:1.1 High:1.2 Score:18 Communities:[[0 2 6 11] [1 7 9 12] [3 4 5 8 10]] Q=[9.16 25.1]
-	// Low:1.2 High:1.6 Score:10 Communities:[[0 3 4 5 6 10] [1 7 9 12] [2 8 11]] Q=[11.4 24.1]
+	// Low:1.1 High:1.1 Score:18 Communities:[[0 2 6 11] [1 7 9 12] [3 4 5 8 10]] Q=[9.16 25.1]
+	// Low:1.1 High:1.6 Score:10 Communities:[[0 3 4 5 6 10] [1 7 9 12] [2 8 11]] Q=[11.5 23.9]
 	// Low:1.6 High:1.6 Score:8 Communities:[[0 1 6 7 9 12] [2 8 11] [3 4 5 10]] Q=[5.56 39.8]
 	// Low:1.6 High:1.8 Score:2 Communities:[[0 2 3 4 5 6 10] [1 7 8 9 11 12]] Q=[-1.82 48.6]
 	// Low:1.8 High:2.3 Score:-6 Communities:[[0 2 3 4 5 6 8 10 11] [1 7 9 12]] Q=[-5 57.5]
@@ -124,76 +124,118 @@ func ExampleProfile_multiplex() {
 
 func TestProfileUndirected(t *testing.T) {
 	for _, test := range communityUndirectedQTests {
-		g := simple.NewUndirectedGraph(0, 0)
+		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 
-		fn := ModularScore(g, Weight, 10, nil)
-		p, err := Profile(fn, true, 1e-3, 0.1, 10)
-		if err != nil {
-			t.Errorf("%s: unexpected error: %v", test.name, err)
+		testProfileUndirected(t, test, g)
+	}
+}
+
+func TestProfileWeightedUndirected(t *testing.T) {
+	for _, test := range communityUndirectedQTests {
+		g := simple.NewWeightedUndirectedGraph(0, 0)
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
+			}
+			for v := range e {
+				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+			}
 		}
 
-		const tries = 1000
-		for i, d := range p {
-			var score float64
-			for i := 0; i < tries; i++ {
-				score, _ = fn(d.Low)
-				if score >= d.Score {
-					break
-				}
+		testProfileUndirected(t, test, g)
+	}
+}
+
+func testProfileUndirected(t *testing.T, test communityUndirectedQTest, g graph.Undirected) {
+	fn := ModularScore(g, Weight, 10, nil)
+	p, err := Profile(fn, true, 1e-3, 0.1, 10)
+	if err != nil {
+		t.Errorf("%s: unexpected error: %v", test.name, err)
+	}
+
+	const tries = 1000
+	for i, d := range p {
+		var score float64
+		for i := 0; i < tries; i++ {
+			score, _ = fn(d.Low)
+			if score >= d.Score {
+				break
 			}
-			if score < d.Score {
-				t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
-			}
-			if i != 0 && d.Score >= p[i-1].Score {
-				t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
-			}
+		}
+		if score < d.Score {
+			t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
+		}
+		if i != 0 && d.Score >= p[i-1].Score {
+			t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
 		}
 	}
 }
 
 func TestProfileDirected(t *testing.T) {
 	for _, test := range communityDirectedQTests {
-		g := simple.NewDirectedGraph(0, 0)
+		g := simple.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 
-		fn := ModularScore(g, Weight, 10, nil)
-		p, err := Profile(fn, true, 1e-3, 0.1, 10)
-		if err != nil {
-			t.Errorf("%s: unexpected error: %v", test.name, err)
+		testProfileDirected(t, test, g)
+	}
+}
+
+func TestProfileWeightedDirected(t *testing.T) {
+	for _, test := range communityDirectedQTests {
+		g := simple.NewWeightedDirectedGraph(0, 0)
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
+			}
+			for v := range e {
+				g.SetWeightedEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+			}
 		}
 
-		const tries = 1000
-		for i, d := range p {
-			var score float64
-			for i := 0; i < tries; i++ {
-				score, _ = fn(d.Low)
-				if score >= d.Score {
-					break
-				}
+		testProfileDirected(t, test, g)
+	}
+}
+
+func testProfileDirected(t *testing.T, test communityDirectedQTest, g graph.Directed) {
+	fn := ModularScore(g, Weight, 10, nil)
+	p, err := Profile(fn, true, 1e-3, 0.1, 10)
+	if err != nil {
+		t.Errorf("%s: unexpected error: %v", test.name, err)
+	}
+
+	const tries = 1000
+	for i, d := range p {
+		var score float64
+		for i := 0; i < tries; i++ {
+			score, _ = fn(d.Low)
+			if score >= d.Score {
+				break
 			}
-			if score < d.Score {
-				t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
-			}
-			if i != 0 && d.Score >= p[i-1].Score {
-				t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
-			}
+		}
+		if score < d.Score {
+			t.Errorf("%s: failed to recover low end score: got: %v want: %v", test.name, score, d.Score)
+		}
+		if i != 0 && d.Score >= p[i-1].Score {
+			t.Errorf("%s: not monotonically decreasing: %v -> %v", test.name, p[i-1], d)
 		}
 	}
 }

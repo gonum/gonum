@@ -81,7 +81,7 @@ var pageRankTests = []struct {
 
 func TestPageRank(t *testing.T) {
 	for i, test := range pageRankTests {
-		g := simple.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -105,7 +105,7 @@ func TestPageRank(t *testing.T) {
 
 func TestPageRankSparse(t *testing.T) {
 	for i, test := range pageRankTests {
-		g := simple.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {

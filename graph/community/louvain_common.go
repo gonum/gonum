@@ -356,7 +356,8 @@ const (
 )
 
 // positiveWeightFuncFor returns a constructed weight function for the
-// positively weighted g.
+// positively weighted g. Unweighted graphs have unit weight for existing
+// edges.
 func positiveWeightFuncFor(g graph.Graph) func(x, y graph.Node) float64 {
 	if wg, ok := g.(graph.Weighted); ok {
 		return func(x, y graph.Node) float64 {
@@ -375,16 +376,13 @@ func positiveWeightFuncFor(g graph.Graph) func(x, y graph.Node) float64 {
 		if e == nil {
 			return 0
 		}
-		w := e.Weight()
-		if w < 0 {
-			panic(negativeWeight)
-		}
-		return w
+		return 1
 	}
 }
 
 // negativeWeightFuncFor returns a constructed weight function for the
-// negatively weighted g.
+// negatively weighted g. Unweighted graphs have unit weight for existing
+// edges.
 func negativeWeightFuncFor(g graph.Graph) func(x, y graph.Node) float64 {
 	if wg, ok := g.(graph.Weighted); ok {
 		return func(x, y graph.Node) float64 {
@@ -403,11 +401,7 @@ func negativeWeightFuncFor(g graph.Graph) func(x, y graph.Node) float64 {
 		if e == nil {
 			return 0
 		}
-		w := e.Weight()
-		if w > 0 {
-			panic(positiveWeight)
-		}
-		return -w
+		return 1
 	}
 }
 

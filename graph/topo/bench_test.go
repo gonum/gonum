@@ -5,7 +5,6 @@
 package topo
 
 import (
-	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -23,7 +22,7 @@ var (
 )
 
 func gnpDirected(n int, p float64) graph.Directed {
-	g := simple.NewDirectedGraph(0, math.Inf(1))
+	g := simple.NewDirectedGraph()
 	gen.Gnp(g, n, p, nil)
 	return g
 }

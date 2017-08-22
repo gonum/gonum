@@ -5,7 +5,6 @@
 package gen
 
 import (
-	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph/simple"
@@ -22,7 +21,7 @@ func TestNavigableSmallWorldUndirected(t *testing.T) {
 		for q := 0; q < 10; q++ {
 			for r := 0.5; r < 10; r++ {
 				for _, dims := range smallWorldDimensionParameters {
-					g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph(0, math.Inf(1))}
+					g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
 					err := NavigableSmallWorld(g, dims, p, q, r, nil)
 					n := 1
 					for _, d := range dims {
@@ -51,7 +50,7 @@ func TestNavigableSmallWorldDirected(t *testing.T) {
 		for q := 0; q < 10; q++ {
 			for r := 0.5; r < 10; r++ {
 				for _, dims := range smallWorldDimensionParameters {
-					g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph(0, math.Inf(1))}
+					g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
 					err := NavigableSmallWorld(g, dims, p, q, r, nil)
 					n := 1
 					for _, d := range dims {

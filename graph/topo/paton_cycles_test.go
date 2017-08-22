@@ -5,7 +5,6 @@
 package topo
 
 import (
-	"math"
 	"reflect"
 	"sort"
 	"testing"
@@ -74,7 +73,7 @@ var undirectedCyclesInTests = []struct {
 
 func TestUndirectedCyclesIn(t *testing.T) {
 	for i, test := range undirectedCyclesInTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph()
 		g.AddNode(simple.Node(-10)) // Make sure we test graphs with sparse IDs.
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.

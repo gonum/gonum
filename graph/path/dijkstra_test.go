@@ -19,7 +19,7 @@ func TestDijkstraFrom(t *testing.T) {
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
 		var (
@@ -85,7 +85,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 	for _, test := range testgraphs.ShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
 		var (

@@ -35,7 +35,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 
 		g := test.Graph()
 		for _, e := range test.Edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
 		var (
@@ -47,7 +47,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			d = NewDStarLite(test.Query.From(), test.Query.To(), g.(graph.Graph), path.NullHeuristic, simple.NewDirectedGraph(0, math.Inf(1)))
+			d = NewDStarLite(test.Query.From(), test.Query.To(), g.(graph.Graph), path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
 		}()
 		if panicked || test.HasNegativeWeight {
 			if !test.HasNegativeWeight {
@@ -579,7 +579,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 				return test.heuristic(ax-bx, ay-by)
 			}
 
-			world := simple.NewDirectedGraph(0, math.Inf(1))
+			world := simple.NewWeightedDirectedGraph(0, math.Inf(1))
 			d := NewDStarLite(test.s, test.t, l, heuristic, world)
 			var (
 				dp  *dumper

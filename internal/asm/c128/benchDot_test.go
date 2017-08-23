@@ -24,7 +24,7 @@ func BenchmarkDotUnitary(t *testing.B) {
 				x, y := x[:v], y[:v]
 				b.SetBytes(256 * v)
 				for i := 0; i < b.N; i++ {
-					_ = test.f(x, y)
+					benchSink = test.f(x, y)
 				}
 			})
 		}
@@ -48,7 +48,9 @@ func BenchmarkDotInc(t *testing.B) {
 						idx = (-ln + 1) * inc
 					}
 					for i := 0; i < b.N; i++ {
-						_ = test.f(x, y, uintptr(ln), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
+						benchSink = test.f(x, y, uintptr(ln),
+							uintptr(inc), uintptr(inc),
+							uintptr(idx), uintptr(idx))
 					}
 				})
 			}

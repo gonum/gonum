@@ -15,7 +15,8 @@ const (
 )
 
 var (
-	inf = math.Inf(1)
+	inf       = math.Inf(1)
+	benchSink complex128
 )
 
 func same(x, y complex128) bool {

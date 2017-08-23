@@ -12,7 +12,7 @@ func benchdotu(b *testing.B, n int64, fn func(x, y []complex128) complex128) {
 	x, y := x[:n], y[:n]
 	b.SetBytes(256 * n)
 	for i := 0; i < b.N; i++ {
-		_ = fn(x, y)
+		benchSink = fn(x, y)
 	}
 }
 
@@ -46,7 +46,7 @@ func benchdoti(b *testing.B, ln, inc int, fn func(x, y []complex128, n, incX, in
 		idx = (-ln + 1) * inc
 	}
 	for i := 0; i < b.N; i++ {
-		_ = fn(x, y, uintptr(ln), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
+		benchSink = fn(x, y, uintptr(ln), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
 	}
 }
 

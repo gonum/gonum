@@ -39,7 +39,7 @@ TEXT ·DdotInc(SB), NOSPLIT, $0
 	MOVQ LEN, TAIL
 	ANDQ $3, TAIL  // TAIL = LEN % 4
 	SHRQ $2, LEN   // LEN = floor( LEN / 4 )
-	JZ   dot_tail  // if LEN == 0 { goto dot_tail_start }
+	JZ   dot_tail  // if LEN == 0 { goto dot_tail }
 
 	PXOR P_SUM, P_SUM              // P_SUM = 0  for pipelining
 	LEAQ (INC_X)(INC_X*2), INCx3_X // INCx3_X = INC_X * 3

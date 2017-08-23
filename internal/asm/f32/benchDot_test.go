@@ -11,6 +11,11 @@ import (
 	"testing"
 )
 
+var (
+	benchSink   float32
+	benchSink64 float64
+)
+
 func BenchmarkDotUnitary(t *testing.B) {
 	const name = "DotUnitary"
 	for _, v := range []int64{1, 2, 3, 4, 5, 10, 100, 1e3, 5e3, 1e4, 5e4} {
@@ -18,7 +23,7 @@ func BenchmarkDotUnitary(t *testing.B) {
 			x, y := x[:v], y[:v]
 			b.SetBytes(32 * v)
 			for i := 0; i < b.N; i++ {
-				DotUnitary(x, y)
+				benchSink = DotUnitary(x, y)
 			}
 		})
 	}
@@ -31,7 +36,7 @@ func BenchmarkDdotUnitary(t *testing.B) {
 			x, y := x[:v], y[:v]
 			b.SetBytes(32 * v)
 			for i := 0; i < b.N; i++ {
-				DdotUnitary(x, y)
+				benchSink64 = DdotUnitary(x, y)
 			}
 		})
 	}
@@ -63,7 +68,7 @@ func BenchmarkDotInc(t *testing.B) {
 					idx = (-tt.len + 1) * inc
 				}
 				for i := 0; i < b.N; i++ {
-					DotInc(x, y, uintptr(tt.len), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
+					benchSink = DotInc(x, y, uintptr(tt.len), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
 				}
 			})
 		}
@@ -81,7 +86,7 @@ func BenchmarkDdotInc(t *testing.B) {
 					idx = (-tt.len + 1) * inc
 				}
 				for i := 0; i < b.N; i++ {
-					DdotInc(x, y, uintptr(tt.len), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
+					benchSink64 = DdotInc(x, y, uintptr(tt.len), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
 				}
 			})
 		}

@@ -30,7 +30,7 @@ TEXT ·DdotUnitary(SB), NOSPLIT, $0
 	XORQ IDX, IDX
 	MOVQ Y_PTR, DX
 	ANDQ $0xF, DX    // Align on 16-byte boundary for ADDPS
-	JZ   dot_no_trim // if DX == 0 { goto axpy_no_trim }
+	JZ   dot_no_trim // if DX == 0 { goto dot_no_trim }
 
 	SUBQ $16, DX
 

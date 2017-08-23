@@ -11,6 +11,8 @@ import (
 	"testing"
 )
 
+var benchSink complex64
+
 func BenchmarkDotUnitary(t *testing.B) {
 	for _, tst := range []struct {
 		name string
@@ -24,7 +26,7 @@ func BenchmarkDotUnitary(t *testing.B) {
 				x, y := x[:v], y[:v]
 				b.SetBytes(128 * v)
 				for i := 0; i < b.N; i++ {
-					_ = tst.f(x, y)
+					benchSink = tst.f(x, y)
 				}
 			})
 		}
@@ -48,7 +50,7 @@ func BenchmarkDotInc(t *testing.B) {
 						idx = (-ln + 1) * inc
 					}
 					for i := 0; i < b.N; i++ {
-						_ = tst.f(x, y, uintptr(ln), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
+						benchSink = tst.f(x, y, uintptr(ln), uintptr(inc), uintptr(inc), uintptr(idx), uintptr(idx))
 					}
 				})
 			}

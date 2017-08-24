@@ -14,8 +14,17 @@ import (
 )
 
 var (
-	_ graph.Graph    = (*UndirectedMatrix)(nil)
-	_ graph.Directed = (*DirectedMatrix)(nil)
+	directedMatrix = (*DirectedMatrix)(nil)
+
+	_ graph.Graph            = directedMatrix
+	_ graph.Directed         = directedMatrix
+	_ graph.WeightedDirected = directedMatrix
+
+	undirectedMatrix = (*UndirectedMatrix)(nil)
+
+	_ graph.Graph              = undirectedMatrix
+	_ graph.Undirected         = undirectedMatrix
+	_ graph.WeightedUndirected = undirectedMatrix
 )
 
 func TestBasicDenseImpassable(t *testing.T) {
@@ -66,7 +75,7 @@ func TestBasicDensePassable(t *testing.T) {
 
 func TestDirectedDenseAddRemove(t *testing.T) {
 	dg := NewDirectedMatrix(10, math.Inf(1), 0, math.Inf(1))
-	dg.SetEdge(Edge{F: Node(0), T: Node(2), W: 1})
+	dg.SetWeightedEdge(WeightedEdge{F: Node(0), T: Node(2), W: 1})
 
 	if neighbors := dg.From(Node(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.Edge(Node(0), Node(2)) == nil {
@@ -83,7 +92,7 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 		t.Errorf("Removing directed edge wrongly kept predecessor")
 	}
 
-	dg.SetEdge(Edge{F: Node(0), T: Node(2), W: 2})
+	dg.SetWeightedEdge(WeightedEdge{F: Node(0), T: Node(2), W: 2})
 	// I figure we've torture tested From/To at this point
 	// so we'll just use the bool functions now
 	if dg.Edge(Node(0), Node(2)) == nil {

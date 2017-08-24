@@ -16,7 +16,7 @@ import (
 type changes struct {
 	n graph.Node
 
-	new, old []simple.Edge
+	new, old []simple.WeightedEdge
 }
 
 var limitedVisionTests = []struct {
@@ -44,7 +44,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -56,7 +56,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(2), T: simple.Node(1), W: 1},
 					{F: simple.Node(2), T: simple.Node(3), W: math.Inf(1)},
@@ -68,7 +68,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(6), W: 1},
 					{F: simple.Node(5), T: simple.Node(6), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(2), W: 1},
@@ -82,7 +82,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(6), T: simple.Node(10), W: 1},
 					{F: simple.Node(9), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(6), W: 1},
@@ -96,7 +96,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(14),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(10), T: simple.Node(14), W: 1},
 					{F: simple.Node(13), T: simple.Node(14), W: math.Inf(1)},
 					{F: simple.Node(14), T: simple.Node(10), W: 1},
@@ -123,7 +123,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(4), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
@@ -143,7 +143,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(1), W: 1},
@@ -163,7 +163,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(1), W: 1},
@@ -193,7 +193,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(5), T: simple.Node(6), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(5), W: math.Inf(1)},
@@ -223,7 +223,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(14),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(9), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(13), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(9), W: math.Inf(1)},
@@ -258,7 +258,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -270,14 +270,14 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(6), W: 1},
 					{F: simple.Node(3), T: simple.Node(2), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(2), W: 1},
 					{F: simple.Node(6), T: simple.Node(5), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
@@ -286,14 +286,14 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(6), T: simple.Node(7), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(10), W: 1},
 					{F: simple.Node(7), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(7), T: simple.Node(6), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(6), W: 1},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(1), W: 1},
 					{F: simple.Node(2), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(6), W: 1},
@@ -305,7 +305,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(9), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(9), W: math.Inf(1)},
@@ -315,7 +315,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(11), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(14), T: simple.Node(10), W: 1},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(6), T: simple.Node(2), W: 1},
 					{F: simple.Node(6), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(7), W: math.Inf(1)},
@@ -325,7 +325,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(14),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(13), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(13), T: simple.Node(14), W: math.Inf(1)},
 					{F: simple.Node(14), T: simple.Node(13), W: math.Inf(1)},
@@ -333,7 +333,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(15), T: simple.Node(11), W: math.Inf(1)},
 					{F: simple.Node(15), T: simple.Node(14), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(10), T: simple.Node(6), W: 1},
 					{F: simple.Node(10), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(11), W: math.Inf(1)},
@@ -358,7 +358,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(4), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
@@ -378,7 +378,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(3), T: simple.Node(2), W: math.Inf(1)},
 					{F: simple.Node(3), T: simple.Node(7), W: math.Inf(1)},
@@ -386,7 +386,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(7), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(7), T: simple.Node(6), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
@@ -401,7 +401,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(5), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(10), W: 1},
 					{F: simple.Node(7), T: simple.Node(11), W: math.Inf(1)},
@@ -413,7 +413,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(11), T: simple.Node(7), W: math.Inf(1)},
 					{F: simple.Node(11), T: simple.Node(10), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
@@ -434,7 +434,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(9), T: simple.Node(13), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(14), W: 1},
 					{F: simple.Node(11), T: simple.Node(15), W: math.Inf(1)},
@@ -446,7 +446,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(15), T: simple.Node(11), W: math.Inf(1)},
 					{F: simple.Node(15), T: simple.Node(14), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(5), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(4), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(6), W: math.Inf(1)},
@@ -470,7 +470,7 @@ var limitedVisionTests = []struct {
 			{
 				n:   node(14),
 				new: nil,
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(9), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(13), W: math.Inf(1)},
@@ -507,7 +507,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
@@ -523,7 +523,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(6), W: math.Sqrt2},
 					{F: simple.Node(2), T: simple.Node(1), W: 1},
@@ -539,7 +539,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(6), W: 1},
 					{F: simple.Node(2), T: simple.Node(7), W: math.Inf(1)},
@@ -561,7 +561,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(6), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(10), W: 1},
 					{F: simple.Node(6), T: simple.Node(11), W: math.Inf(1)},
@@ -583,7 +583,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(14),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(10), T: simple.Node(13), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(14), W: 1},
 					{F: simple.Node(10), T: simple.Node(15), W: math.Inf(1)},
@@ -614,7 +614,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(4), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(5), W: math.Inf(1)},
@@ -642,7 +642,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(6), W: math.Sqrt2},
@@ -670,7 +670,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(6), W: math.Sqrt2},
@@ -716,7 +716,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(5), T: simple.Node(6), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(10), W: math.Inf(1)},
@@ -762,7 +762,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(14),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(9), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(13), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(14), W: math.Inf(1)},
@@ -805,7 +805,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
@@ -821,7 +821,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(6), W: math.Sqrt2},
 					{F: simple.Node(2), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(6), W: 1},
@@ -832,7 +832,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(6), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(5), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(5), W: math.Inf(1)},
@@ -842,7 +842,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(7), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(7), W: math.Inf(1)},
@@ -855,7 +855,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(10), T: simple.Node(6), W: 1},
 					{F: simple.Node(10), T: simple.Node(7), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(1), W: 1},
 					{F: simple.Node(2), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(5), W: math.Inf(1)},
@@ -872,7 +872,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(6), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(11), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(5), W: math.Inf(1)},
@@ -890,7 +890,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(14), T: simple.Node(10), W: 1},
 					{F: simple.Node(14), T: simple.Node(11), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(6), T: simple.Node(1), W: math.Sqrt2},
 					{F: simple.Node(6), T: simple.Node(2), W: 1},
 					{F: simple.Node(6), T: simple.Node(3), W: math.Inf(1)},
@@ -904,7 +904,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(14),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(10), T: simple.Node(13), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(15), W: math.Inf(1)},
 					{F: simple.Node(13), T: simple.Node(9), W: math.Inf(1)},
@@ -916,7 +916,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(15), T: simple.Node(11), W: math.Inf(1)},
 					{F: simple.Node(15), T: simple.Node(14), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(10), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(6), W: 1},
 					{F: simple.Node(10), T: simple.Node(7), W: math.Inf(1)},
@@ -945,7 +945,7 @@ var limitedVisionTests = []struct {
 		want: []changes{
 			{
 				n: node(1),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(0), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(4), W: math.Inf(1)},
 					{F: simple.Node(0), T: simple.Node(5), W: math.Inf(1)},
@@ -973,7 +973,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(2),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(2), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(2), T: simple.Node(7), W: math.Inf(1)},
 					{F: simple.Node(3), T: simple.Node(2), W: math.Inf(1)},
@@ -985,7 +985,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(7), T: simple.Node(3), W: math.Inf(1)},
 					{F: simple.Node(7), T: simple.Node(6), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(4), W: math.Inf(1)},
@@ -1006,7 +1006,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(6),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(5), T: simple.Node(9), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(10), W: math.Inf(1)},
 					{F: simple.Node(6), T: simple.Node(9), W: math.Inf(1)},
@@ -1027,7 +1027,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(11), T: simple.Node(7), W: math.Inf(1)},
 					{F: simple.Node(11), T: simple.Node(10), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(1), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(1), T: simple.Node(2), W: 1},
 					{F: simple.Node(1), T: simple.Node(4), W: math.Inf(1)},
@@ -1058,7 +1058,7 @@ var limitedVisionTests = []struct {
 			},
 			{
 				n: node(10),
-				new: []simple.Edge{
+				new: []simple.WeightedEdge{
 					{F: simple.Node(9), T: simple.Node(13), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(14), W: math.Inf(1)},
 					{F: simple.Node(10), T: simple.Node(13), W: math.Inf(1)},
@@ -1078,7 +1078,7 @@ var limitedVisionTests = []struct {
 					{F: simple.Node(15), T: simple.Node(11), W: math.Inf(1)},
 					{F: simple.Node(15), T: simple.Node(14), W: math.Inf(1)},
 				},
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(5), T: simple.Node(0), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(1), W: math.Inf(1)},
 					{F: simple.Node(5), T: simple.Node(2), W: math.Inf(1)},
@@ -1116,7 +1116,7 @@ var limitedVisionTests = []struct {
 			{
 				n:   node(14),
 				new: nil,
-				old: []simple.Edge{
+				old: []simple.WeightedEdge{
 					{F: simple.Node(9), T: simple.Node(4), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(5), W: math.Inf(1)},
 					{F: simple.Node(9), T: simple.Node(6), W: math.Inf(1)},
@@ -1197,11 +1197,11 @@ func TestLimitedVisionGrid(t *testing.T) {
 	}
 }
 
-func asConcreteEdges(changes []graph.Edge, in graph.Weighter) []simple.Edge {
+func asConcreteEdges(changes []graph.Edge, in graph.Weighted) []simple.WeightedEdge {
 	if changes == nil {
 		return nil
 	}
-	we := make([]simple.Edge, len(changes))
+	we := make([]simple.WeightedEdge, len(changes))
 	for i, e := range changes {
 		we[i].F = e.From()
 		we[i].T = e.To()

@@ -139,12 +139,6 @@ func brandes(g graph.Graph, accumulate func(s graph.Node, stack linear.NodeStack
 	}
 }
 
-// WeightedGraph is a graph with edge weights.
-type WeightedGraph interface {
-	graph.Graph
-	graph.Weighter
-}
-
 // BetweennessWeighted returns the non-zero betweenness centrality for nodes in the weighted
 // graph g used to construct the given shortest paths.
 //
@@ -152,7 +146,7 @@ type WeightedGraph interface {
 //
 // where \sigma_{st} and \sigma_{st}(v) are the number of shortest paths from s to t,
 // and the subset of those paths containing v respectively.
-func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int64]float64 {
+func BetweennessWeighted(g graph.Weighted, p path.AllShortest) map[int64]float64 {
 	cb := make(map[int64]float64)
 
 	nodes := g.Nodes()
@@ -203,7 +197,7 @@ func BetweennessWeighted(g WeightedGraph, p path.AllShortest) map[int64]float64 
 //
 // If g is undirected, edges are retained such that u.ID < v.ID where u and v are
 // the nodes of e.
-func EdgeBetweennessWeighted(g WeightedGraph, p path.AllShortest) map[[2]int64]float64 {
+func EdgeBetweennessWeighted(g graph.Weighted, p path.AllShortest) map[[2]int64]float64 {
 	cb := make(map[[2]int64]float64)
 
 	_, isUndirected := g.(graph.Undirected)

@@ -5,7 +5,6 @@
 package gen
 
 import (
-	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -54,7 +53,7 @@ func (g *gnDirected) SetEdge(e graph.Edge) {
 func TestGnpUndirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for p := 0.; p <= 1; p += 0.1 {
-			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph(0, math.Inf(1))}
+			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
 			err := Gnp(g, n, p, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, p=%v: %v", n, p, err)
@@ -75,7 +74,7 @@ func TestGnpUndirected(t *testing.T) {
 func TestGnpDirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for p := 0.; p <= 1; p += 0.1 {
-			g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph(0, math.Inf(1))}
+			g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
 			err := Gnp(g, n, p, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, p=%v: %v", n, p, err)
@@ -94,7 +93,7 @@ func TestGnmUndirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		nChoose2 := (n - 1) * n / 2
 		for m := 0; m <= nChoose2; m++ {
-			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph(0, math.Inf(1))}
+			g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
 			err := Gnm(g, n, m, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, m=%d: %v", n, m, err)
@@ -116,7 +115,7 @@ func TestGnmDirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		nChoose2 := (n - 1) * n / 2
 		for m := 0; m <= nChoose2*2; m++ {
-			g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph(0, math.Inf(1))}
+			g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
 			err := Gnm(g, n, m, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, m=%d: %v", n, m, err)
@@ -135,7 +134,7 @@ func TestSmallWorldsBBUndirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= (n-1)/2; d++ {
 			for p := 0.; p < 1; p += 0.1 {
-				g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph(0, math.Inf(1))}
+				g := &gnUndirected{UndirectedBuilder: simple.NewUndirectedGraph()}
 				err := SmallWorldsBB(g, n, d, p, nil)
 				if err != nil {
 					t.Fatalf("unexpected error: n=%d, d=%d, p=%v: %v", n, d, p, err)
@@ -158,7 +157,7 @@ func TestSmallWorldsBBDirected(t *testing.T) {
 	for n := 2; n <= 20; n++ {
 		for d := 1; d <= (n-1)/2; d++ {
 			for p := 0.; p < 1; p += 0.1 {
-				g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph(0, math.Inf(1))}
+				g := &gnDirected{DirectedBuilder: simple.NewDirectedGraph()}
 				err := SmallWorldsBB(g, n, d, p, nil)
 				if err != nil {
 					t.Fatalf("unexpected error: n=%d, d=%d, p=%v: %v", n, d, p, err)

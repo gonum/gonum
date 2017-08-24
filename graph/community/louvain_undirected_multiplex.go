@@ -206,9 +206,8 @@ type ReducedUndirectedMultiplex struct {
 }
 
 var (
-	_ UndirectedMultiplex = (*ReducedUndirectedMultiplex)(nil)
-	_ graph.Undirected    = (*undirectedLayerHandle)(nil)
-	_ graph.Weighter      = (*undirectedLayerHandle)(nil)
+	_ UndirectedMultiplex      = (*ReducedUndirectedMultiplex)(nil)
+	_ graph.WeightedUndirected = (*undirectedLayerHandle)(nil)
 )
 
 // Nodes returns all the nodes in the graph.
@@ -486,24 +485,35 @@ func (g undirectedLayerHandle) HasEdgeBetween(x, y graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g undirectedLayerHandle) Edge(u, v graph.Node) graph.Edge {
-	uid := u.ID()
-	vid := v.ID()
-	if uid == vid || !isValidID(uid) || !isValidID(vid) {
-		return nil
-	}
-	if vid < uid {
-		uid, vid = vid, uid
-	}
-	w, ok := g.multiplex.layers[g.layer].weights[[2]int{int(uid), int(vid)}]
-	if !ok {
-		return nil
-	}
-	return multiplexEdge{from: g.multiplex.nodes[u.ID()], to: g.multiplex.nodes[v.ID()], weight: w}
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g undirectedLayerHandle) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(u, v)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
 func (g undirectedLayerHandle) EdgeBetween(x, y graph.Node) graph.Edge {
-	return g.Edge(x, y)
+	return g.WeightedEdgeBetween(x, y)
+}
+
+// WeightedEdgeBetween returns the weighted edge between nodes x and y.
+func (g undirectedLayerHandle) WeightedEdgeBetween(x, y graph.Node) graph.WeightedEdge {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid || !isValidID(xid) || !isValidID(yid) {
+		return nil
+	}
+	if yid < xid {
+		xid, yid = yid, xid
+	}
+	w, ok := g.multiplex.layers[g.layer].weights[[2]int{int(xid), int(yid)}]
+	if !ok {
+		return nil
+	}
+	return multiplexEdge{from: g.multiplex.nodes[x.ID()], to: g.multiplex.nodes[y.ID()], weight: w}
 }
 
 // Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.

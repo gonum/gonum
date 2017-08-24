@@ -143,14 +143,14 @@ func TestDistanceCentralityUndirected(t *testing.T) {
 	prec := 1 - int(math.Log10(tol))
 
 	for i, test := range undirectedCentralityTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 		p, ok := path.FloydWarshall(g)
@@ -333,14 +333,14 @@ func TestDistanceCentralityDirected(t *testing.T) {
 	prec := 1 - int(math.Log10(tol))
 
 	for i, test := range directedCentralityTests {
-		g := simple.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewWeightedDirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 		p, ok := path.FloydWarshall(g)

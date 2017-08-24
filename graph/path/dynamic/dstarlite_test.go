@@ -35,7 +35,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 
 		g := test.Graph()
 		for _, e := range test.Edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
 		var (
@@ -47,7 +47,7 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 			defer func() {
 				panicked = recover() != nil
 			}()
-			d = NewDStarLite(test.Query.From(), test.Query.To(), g.(graph.Graph), path.NullHeuristic, simple.NewDirectedGraph(0, math.Inf(1)))
+			d = NewDStarLite(test.Query.From(), test.Query.To(), g.(graph.Graph), path.NullHeuristic, simple.NewWeightedDirectedGraph(0, math.Inf(1)))
 		}()
 		if panicked || test.HasNegativeWeight {
 			if !test.HasNegativeWeight {
@@ -579,7 +579,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 				return test.heuristic(ax-bx, ay-by)
 			}
 
-			world := simple.NewDirectedGraph(0, math.Inf(1))
+			world := simple.NewWeightedDirectedGraph(0, math.Inf(1))
 			d := NewDStarLite(test.s, test.t, l, heuristic, world)
 			var (
 				dp  *dumper
@@ -596,7 +596,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 			}
 
 			dp.dump(true)
-			dp.printEdges("Initial world knowledge: %s\n\n", simpleEdgesOf(l, world.Edges()))
+			dp.printEdges("Initial world knowledge: %s\n\n", simpleWeightedEdgesOf(l, world.Edges()))
 			for d.Step() {
 				changes, _ := l.MoveTo(d.Here())
 				got = append(got, l.Location)
@@ -609,7 +609,7 @@ func TestDStarLiteDynamic(t *testing.T) {
 							i, memory(remember), gotPath, wantedPath)
 					}
 				}
-				dp.printEdges("Edges changing after last step:\n%s\n\n", simpleEdgesOf(l, changes))
+				dp.printEdges("Edges changing after last step:\n%s\n\n", simpleWeightedEdgesOf(l, changes))
 			}
 
 			if weight := weightOf(got, l.Grid); !samePath(got, test.want) || weight != test.weight {
@@ -652,13 +652,8 @@ func samePath(a, b []graph.Node) bool {
 	return true
 }
 
-type weightedGraph interface {
-	graph.Graph
-	graph.Weighter
-}
-
 // weightOf return the weight of the path in g.
-func weightOf(path []graph.Node, g weightedGraph) float64 {
+func weightOf(path []graph.Node, g graph.Weighted) float64 {
 	var w float64
 	if len(path) > 1 {
 		for p, n := range path[1:] {
@@ -672,9 +667,9 @@ func weightOf(path []graph.Node, g weightedGraph) float64 {
 	return w
 }
 
-// simpleEdgesOf returns the weighted edges in g corresponding to the given edges.
-func simpleEdgesOf(g weightedGraph, edges []graph.Edge) []simple.Edge {
-	w := make([]simple.Edge, len(edges))
+// simpleWeightedEdgesOf returns the weighted edges in g corresponding to the given edges.
+func simpleWeightedEdgesOf(g graph.Weighted, edges []graph.Edge) []simple.WeightedEdge {
+	w := make([]simple.WeightedEdge, len(edges))
 	for i, e := range edges {
 		w[i].F = e.From()
 		w[i].T = e.To()

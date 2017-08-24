@@ -5,20 +5,22 @@
 package simple
 
 import (
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
 )
 
 var (
-	directedGraph = (*DirectedGraph)(nil)
+	weightedDirectedGraph = (*WeightedDirectedGraph)(nil)
 
-	_ graph.Graph    = directedGraph
-	_ graph.Directed = directedGraph
+	_ graph.Graph            = weightedDirectedGraph
+	_ graph.Directed         = weightedDirectedGraph
+	_ graph.WeightedDirected = weightedDirectedGraph
 )
 
 // Tests Issue #27
-func TestEdgeOvercounting(t *testing.T) {
+func TestWeightedEdgeOvercounting(t *testing.T) {
 	g := generateDummyGraph()
 
 	if neigh := g.From(Node(Node(2))); len(neigh) != 2 {
@@ -26,7 +28,7 @@ func TestEdgeOvercounting(t *testing.T) {
 	}
 }
 
-func generateDummyGraph() *DirectedGraph {
+func generateDummyWeightedGraph() *WeightedDirectedGraph {
 	nodes := [4]struct{ srcID, targetID int }{
 		{2, 1},
 		{1, 0},
@@ -34,23 +36,23 @@ func generateDummyGraph() *DirectedGraph {
 		{0, 2},
 	}
 
-	g := NewDirectedGraph()
+	g := NewWeightedDirectedGraph(0, math.Inf(1))
 
 	for _, n := range nodes {
-		g.SetEdge(Edge{F: Node(n.srcID), T: Node(n.targetID)})
+		g.SetWeightedEdge(WeightedEdge{F: Node(n.srcID), T: Node(n.targetID), W: 1})
 	}
 
 	return g
 }
 
 // Test for issue #123 https://github.com/gonum/graph/issues/123
-func TestIssue123DirectedGraph(t *testing.T) {
+func TestIssue123WeightedDirectedGraph(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("unexpected panic: %v", r)
 		}
 	}()
-	g := NewDirectedGraph()
+	g := NewWeightedDirectedGraph(0, math.Inf(1))
 
 	n0 := g.NewNode()
 	g.AddNode(n0)

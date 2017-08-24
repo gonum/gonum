@@ -72,7 +72,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 					if wid == int64(v) || dst.HasEdgeBetween(w, simple.Node(v)) {
 						continue
 					}
-					dst.SetEdge(simple.Edge{F: w, T: simple.Node(v), W: 1})
+					dst.SetEdge(simple.Edge{F: w, T: simple.Node(v)})
 					wt[wid]++
 					wt[v]++
 					continue pa
@@ -89,7 +89,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 				if u == v || dst.HasEdgeBetween(simple.Node(u), simple.Node(v)) {
 					continue
 				}
-				dst.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				dst.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 				wt[u]++
 				wt[v]++
 				break
@@ -149,7 +149,7 @@ func PreferentialAttachment(dst graph.UndirectedBuilder, n, m int, src *rand.Ran
 			if !ok {
 				return errors.New("gen: depleted distribution")
 			}
-			dst.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+			dst.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			wt[u]++
 			wt[v]++
 		}

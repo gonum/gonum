@@ -176,15 +176,14 @@ var betweennessTests = []struct {
 
 func TestBetweenness(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				// Weight omitted to show weight-independence.
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 0})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		got := Betweenness(g)
@@ -206,15 +205,14 @@ func TestBetweenness(t *testing.T) {
 
 func TestEdgeBetweenness(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				// Weight omitted to show weight-independence.
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 0})
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
 		got := EdgeBetweenness(g)
@@ -239,14 +237,14 @@ func TestEdgeBetweenness(t *testing.T) {
 
 func TestBetweennessWeighted(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 
@@ -275,14 +273,14 @@ func TestBetweennessWeighted(t *testing.T) {
 
 func TestEdgeBetweennessWeighted(t *testing.T) {
 	for i, test := range betweennessTests {
-		g := simple.NewUndirectedGraph(0, math.Inf(1))
+		g := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: 1})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: 1})
 			}
 		}
 

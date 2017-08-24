@@ -207,9 +207,8 @@ type ReducedDirectedMultiplex struct {
 }
 
 var (
-	_ DirectedMultiplex = (*ReducedDirectedMultiplex)(nil)
-	_ graph.Directed    = (*directedLayerHandle)(nil)
-	_ graph.Weighter    = (*directedLayerHandle)(nil)
+	_ DirectedMultiplex      = (*ReducedDirectedMultiplex)(nil)
+	_ graph.WeightedDirected = (*directedLayerHandle)(nil)
 )
 
 // Nodes returns all the nodes in the graph.
@@ -544,6 +543,12 @@ func (g directedLayerHandle) HasEdgeFromTo(u, v graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g directedLayerHandle) Edge(u, v graph.Node) graph.Edge {
+	return g.WeightedEdge(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g directedLayerHandle) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
 	uid := u.ID()
 	vid := v.ID()
 	if uid == vid || !isValidID(uid) || !isValidID(vid) {
@@ -554,11 +559,6 @@ func (g directedLayerHandle) Edge(u, v graph.Node) graph.Edge {
 		return nil
 	}
 	return multiplexEdge{from: g.multiplex.nodes[u.ID()], to: g.multiplex.nodes[v.ID()], weight: w}
-}
-
-// EdgeBetween returns the edge between nodes x and y.
-func (g directedLayerHandle) EdgeBetween(x, y graph.Node) graph.Edge {
-	return g.Edge(x, y)
 }
 
 // Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.

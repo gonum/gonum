@@ -201,18 +201,28 @@ func abs(i int) int {
 
 // Edge returns the edge between u and v.
 func (g *Grid) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeBetween(u, v)
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdge returns the weighted edge between u and v.
+func (g *Grid) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(u, v)
 }
 
 // EdgeBetween returns the edge between u and v.
 func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdgeBetween returns the weighted edge between u and v.
+func (g *Grid) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
 	if g.HasEdgeBetween(u, v) {
 		if !g.AllowDiagonal || g.UnitEdgeWeight {
-			return simple.Edge{F: u, T: v, W: 1}
+			return simple.WeightedEdge{F: u, T: v, W: 1}
 		}
 		ux, uy := g.XY(u)
 		vx, vy := g.XY(v)
-		return simple.Edge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
+		return simple.WeightedEdge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }

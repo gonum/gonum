@@ -5,7 +5,6 @@
 package topo
 
 import (
-	"math"
 	"reflect"
 	"sort"
 	"testing"
@@ -130,7 +129,7 @@ var tarjanTests = []struct {
 
 func TestSort(t *testing.T) {
 	for i, test := range tarjanTests {
-		g := simple.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -161,7 +160,7 @@ func TestSort(t *testing.T) {
 
 func TestTarjanSCC(t *testing.T) {
 	for i, test := range tarjanTests {
-		g := simple.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -288,7 +287,7 @@ var stabilizedSortTests = []struct {
 
 func TestSortStabilized(t *testing.T) {
 	for i, test := range stabilizedSortTests {
-		g := simple.NewDirectedGraph(0, math.Inf(1))
+		g := simple.NewDirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {

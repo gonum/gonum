@@ -10,20 +10,25 @@ import (
 	"gonum.org/v1/gonum/graph"
 )
 
-// UndirectedGraph implements a generalized undirected graph.
-type UndirectedGraph struct {
+// WeightedUndirectedGraph implements a generalized weighted undirected graph.
+type WeightedUndirectedGraph struct {
 	nodes map[int64]graph.Node
-	edges map[int64]map[int64]graph.Edge
+	edges map[int64]map[int64]graph.WeightedEdge
+
+	self, absent float64
 
 	nodeIDs idSet
 }
 
-// NewUndirectedGraph returns an UndirectedGraph with the specified self and absent
+// NewWeightedUndirectedGraph returns an WeightedUndirectedGraph with the specified self and absent
 // edge weight values.
-func NewUndirectedGraph() *UndirectedGraph {
-	return &UndirectedGraph{
+func NewWeightedUndirectedGraph(self, absent float64) *WeightedUndirectedGraph {
+	return &WeightedUndirectedGraph{
 		nodes: make(map[int64]graph.Node),
-		edges: make(map[int64]map[int64]graph.Edge),
+		edges: make(map[int64]map[int64]graph.WeightedEdge),
+
+		self:   self,
+		absent: absent,
 
 		nodeIDs: newIDSet(),
 	}
@@ -31,7 +36,7 @@ func NewUndirectedGraph() *UndirectedGraph {
 
 // NewNode returns a new unique Node to be added to g. The Node's ID does
 // not become valid in g until the Node is added to g.
-func (g *UndirectedGraph) NewNode() graph.Node {
+func (g *WeightedUndirectedGraph) NewNode() graph.Node {
 	if len(g.nodes) == 0 {
 		return Node(0)
 	}
@@ -42,18 +47,18 @@ func (g *UndirectedGraph) NewNode() graph.Node {
 }
 
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
-func (g *UndirectedGraph) AddNode(n graph.Node) {
+func (g *WeightedUndirectedGraph) AddNode(n graph.Node) {
 	if _, exists := g.nodes[n.ID()]; exists {
 		panic(fmt.Sprintf("simple: node ID collision: %d", n.ID()))
 	}
 	g.nodes[n.ID()] = n
-	g.edges[n.ID()] = make(map[int64]graph.Edge)
+	g.edges[n.ID()] = make(map[int64]graph.WeightedEdge)
 	g.nodeIDs.use(n.ID())
 }
 
 // RemoveNode removes n from the graph, as well as any edges attached to it. If the node
 // is not in the graph it is a no-op.
-func (g *UndirectedGraph) RemoveNode(n graph.Node) {
+func (g *WeightedUndirectedGraph) RemoveNode(n graph.Node) {
 	if _, ok := g.nodes[n.ID()]; !ok {
 		return
 	}
@@ -67,14 +72,14 @@ func (g *UndirectedGraph) RemoveNode(n graph.Node) {
 	g.nodeIDs.release(n.ID())
 }
 
-// NewEdge returns a new Edge from the source to the destination node.
-func (g *UndirectedGraph) NewEdge(from, to graph.Node) graph.Edge {
-	return &Edge{F: from, T: to}
+// NewWeightedEdge returns a new weighted edge from the source to the destination node.
+func (g *WeightedUndirectedGraph) NewWeightedEdge(from, to graph.Node, weight float64) graph.WeightedEdge {
+	return &WeightedEdge{F: from, T: to, W: weight}
 }
 
-// SetEdge adds e, an edge from one node to another. If the nodes do not exist, they are added.
+// SetWeightedEdge adds a weighted edge from one node to another. If the nodes do not exist, they are added.
 // It will panic if the IDs of the e.From and e.To are equal.
-func (g *UndirectedGraph) SetEdge(e graph.Edge) {
+func (g *WeightedUndirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 	var (
 		from = e.From()
 		fid  = from.ID()
@@ -99,7 +104,7 @@ func (g *UndirectedGraph) SetEdge(e graph.Edge) {
 
 // RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist
 // it is a no-op.
-func (g *UndirectedGraph) RemoveEdge(e graph.Edge) {
+func (g *WeightedUndirectedGraph) RemoveEdge(e graph.Edge) {
 	from, to := e.From(), e.To()
 	if _, ok := g.nodes[from.ID()]; !ok {
 		return
@@ -113,18 +118,18 @@ func (g *UndirectedGraph) RemoveEdge(e graph.Edge) {
 }
 
 // Node returns the node in the graph with the given ID.
-func (g *UndirectedGraph) Node(id int64) graph.Node {
+func (g *WeightedUndirectedGraph) Node(id int64) graph.Node {
 	return g.nodes[id]
 }
 
 // Has returns whether the node exists within the graph.
-func (g *UndirectedGraph) Has(n graph.Node) bool {
+func (g *WeightedUndirectedGraph) Has(n graph.Node) bool {
 	_, ok := g.nodes[n.ID()]
 	return ok
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *UndirectedGraph) Nodes() []graph.Node {
+func (g *WeightedUndirectedGraph) Nodes() []graph.Node {
 	nodes := make([]graph.Node, len(g.nodes))
 	i := 0
 	for _, n := range g.nodes {
@@ -136,7 +141,7 @@ func (g *UndirectedGraph) Nodes() []graph.Node {
 }
 
 // Edges returns all the edges in the graph.
-func (g *UndirectedGraph) Edges() []graph.Edge {
+func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
 	var edges []graph.Edge
 
 	seen := make(map[[2]int64]struct{})
@@ -156,8 +161,29 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 	return edges
 }
 
+// WeightedEdges returns all the weighted edges in the graph.
+func (g *WeightedUndirectedGraph) WeightedEdges() []graph.WeightedEdge {
+	var edges []graph.WeightedEdge
+
+	seen := make(map[[2]int64]struct{})
+	for _, u := range g.edges {
+		for _, e := range u {
+			uid := e.From().ID()
+			vid := e.To().ID()
+			if _, ok := seen[[2]int64{uid, vid}]; ok {
+				continue
+			}
+			seen[[2]int64{uid, vid}] = struct{}{}
+			seen[[2]int64{vid, uid}] = struct{}{}
+			edges = append(edges, e)
+		}
+	}
+
+	return edges
+}
+
 // From returns all nodes in g that can be reached directly from n.
-func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
+func (g *WeightedUndirectedGraph) From(n graph.Node) []graph.Node {
 	if !g.Has(n) {
 		return nil
 	}
@@ -173,19 +199,30 @@ func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g *UndirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
+func (g *WeightedUndirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 	_, ok := g.edges[x.ID()][y.ID()]
 	return ok
 }
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeBetween(u, v)
+func (g *WeightedUndirectedGraph) Edge(u, v graph.Node) graph.Edge {
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *WeightedUndirectedGraph) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(u, v)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
-func (g *UndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
+func (g *WeightedUndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
+	return g.WeightedEdgeBetween(x, y)
+}
+
+// WeightedEdgeBetween returns the weighted edge between nodes x and y.
+func (g *WeightedUndirectedGraph) WeightedEdgeBetween(x, y graph.Node) graph.WeightedEdge {
 	// We don't need to check if neigh exists because
 	// it's implicit in the edges access.
 	if !g.Has(x) {
@@ -195,8 +232,26 @@ func (g *UndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
 	return g.edges[x.ID()][y.ID()]
 }
 
+// Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
+// If x and y are the same node or there is no joining edge between the two nodes the weight
+// value returned is either the graph's absent or self value. Weight returns true if an edge
+// exists between x and y or if x and y have the same ID, false otherwise.
+func (g *WeightedUndirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
+	xid := x.ID()
+	yid := y.ID()
+	if xid == yid {
+		return g.self, true
+	}
+	if n, ok := g.edges[xid]; ok {
+		if e, ok := n[yid]; ok {
+			return e.Weight(), true
+		}
+	}
+	return g.absent, false
+}
+
 // Degree returns the degree of n in g.
-func (g *UndirectedGraph) Degree(n graph.Node) int {
+func (g *WeightedUndirectedGraph) Degree(n graph.Node) int {
 	if _, ok := g.nodes[n.ID()]; !ok {
 		return 0
 	}

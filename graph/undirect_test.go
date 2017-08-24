@@ -13,17 +13,24 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-var directedGraphs = []struct {
-	g      func() graph.DirectedBuilder
-	edges  []simple.Edge
+type weightedDirectedBuilder interface {
+	graph.WeightedBuilder
+	graph.WeightedDirected
+}
+
+var weightedDirectedGraphs = []struct {
+	skipUnweighted bool
+
+	g      func() weightedDirectedBuilder
+	edges  []simple.WeightedEdge
 	absent float64
 	merge  func(x, y float64, xe, ye graph.Edge) float64
 
 	want mat.Matrix
 }{
 	{
-		g: func() graph.DirectedBuilder { return simple.NewDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -35,8 +42,8 @@ var directedGraphs = []struct {
 		}),
 	},
 	{
-		g: func() graph.DirectedBuilder { return simple.NewDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -50,8 +57,10 @@ var directedGraphs = []struct {
 		}),
 	},
 	{
-		g: func() graph.DirectedBuilder { return simple.NewDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		skipUnweighted: true, // The min merge function cannot be used in the unweighted case.
+
+		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -64,8 +73,8 @@ var directedGraphs = []struct {
 		}),
 	},
 	{
-		g: func() graph.DirectedBuilder { return simple.NewDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -86,8 +95,8 @@ var directedGraphs = []struct {
 		}),
 	},
 	{
-		g: func() graph.DirectedBuilder { return simple.NewDirectedGraph(0, 0) },
-		edges: []simple.Edge{
+		g: func() weightedDirectedBuilder { return simple.NewWeightedDirectedGraph(0, 0) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 2},
 			{F: simple.Node(1), T: simple.Node(0), W: 1},
 			{F: simple.Node(1), T: simple.Node(2), W: 1},
@@ -102,13 +111,16 @@ var directedGraphs = []struct {
 }
 
 func TestUndirect(t *testing.T) {
-	for _, test := range directedGraphs {
+	for i, test := range weightedDirectedGraphs {
+		if test.skipUnweighted {
+			continue
+		}
 		g := test.g()
 		for _, e := range test.edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
-		src := graph.Undirect{G: g, Absent: test.absent, Merge: test.merge}
+		src := graph.Undirect{G: g}
 		dst := simple.NewUndirectedMatrixFrom(src.Nodes(), 0, 0, 0)
 		for _, u := range src.Nodes() {
 			for _, v := range src.From(u) {
@@ -116,11 +128,48 @@ func TestUndirect(t *testing.T) {
 			}
 		}
 
+		want := unit{test.want}
+		if !mat.Equal(dst.Matrix(), want) {
+			t.Errorf("unexpected result for case %d:\ngot:\n%.4v\nwant:\n%.4v", i,
+				mat.Formatted(dst.Matrix()),
+				mat.Formatted(want),
+			)
+		}
+	}
+}
+
+func TestUndirectWeighted(t *testing.T) {
+	for i, test := range weightedDirectedGraphs {
+		g := test.g()
+		for _, e := range test.edges {
+			g.SetWeightedEdge(e)
+		}
+
+		src := graph.UndirectWeighted{G: g, Absent: test.absent, Merge: test.merge}
+		dst := simple.NewUndirectedMatrixFrom(src.Nodes(), 0, 0, 0)
+		for _, u := range src.Nodes() {
+			for _, v := range src.From(u) {
+				dst.SetWeightedEdge(src.WeightedEdge(u, v))
+			}
+		}
+
 		if !mat.Equal(dst.Matrix(), test.want) {
-			t.Errorf("unexpected result:\ngot:\n%.4v\nwant:\n%.4v",
+			t.Errorf("unexpected result for case %d:\ngot:\n%.4v\nwant:\n%.4v", i,
 				mat.Formatted(dst.Matrix()),
 				mat.Formatted(test.want),
 			)
 		}
 	}
+}
+
+type unit struct {
+	mat.Matrix
+}
+
+func (m unit) At(i, j int) float64 {
+	v := m.Matrix.At(i, j)
+	if v == 0 {
+		return 0
+	}
+	return 1
 }

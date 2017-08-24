@@ -647,12 +647,32 @@ func TestLouvainDirectedMultiplex(t *testing.T) {
 }
 
 func TestNonContiguousDirectedMultiplex(t *testing.T) {
-	g := simple.NewDirectedGraph(0, 0)
+	g := simple.NewDirectedGraph()
 	for _, e := range []simple.Edge{
+		{F: simple.Node(0), T: simple.Node(1)},
+		{F: simple.Node(4), T: simple.Node(5)},
+	} {
+		g.SetEdge(e)
+	}
+
+	func() {
+		defer func() {
+			r := recover()
+			if r != nil {
+				t.Error("unexpected panic with non-contiguous ID range")
+			}
+		}()
+		ModularizeMultiplex(DirectedLayers{g}, nil, nil, true, nil)
+	}()
+}
+
+func TestNonContiguousWeightedDirectedMultiplex(t *testing.T) {
+	g := simple.NewWeightedDirectedGraph(0, 0)
+	for _, e := range []simple.WeightedEdge{
 		{F: simple.Node(0), T: simple.Node(1), W: 1},
 		{F: simple.Node(4), T: simple.Node(5), W: 1},
 	} {
-		g.SetEdge(e)
+		g.SetWeightedEdge(e)
 	}
 
 	func() {
@@ -677,7 +697,7 @@ func directedMultiplexFrom(raw []layer) (DirectedLayers, []float64, error) {
 	var layers []graph.Directed
 	var weights []float64
 	for _, l := range raw {
-		g := simple.NewDirectedGraph(0, 0)
+		g := simple.NewWeightedDirectedGraph(0, 0)
 		for u, e := range l.g {
 			// Add nodes that are not defined by an edge.
 			if !g.Has(simple.Node(u)) {
@@ -688,7 +708,7 @@ func directedMultiplexFrom(raw []layer) (DirectedLayers, []float64, error) {
 				if l.edgeWeight != 0 {
 					w = l.edgeWeight
 				}
-				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v), W: w})
+				g.SetWeightedEdge(simple.WeightedEdge{F: simple.Node(u), T: simple.Node(v), W: w})
 			}
 		}
 		layers = append(layers, g)

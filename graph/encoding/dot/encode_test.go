@@ -5,7 +5,6 @@
 package dot
 
 import (
-	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -55,7 +54,7 @@ var (
 )
 
 func directedGraphFrom(g []intset) graph.Directed {
-	dg := simple.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph()
 	for u, e := range g {
 		for v := range e {
 			dg.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
@@ -65,7 +64,7 @@ func directedGraphFrom(g []intset) graph.Directed {
 }
 
 func undirectedGraphFrom(g []intset) graph.Graph {
-	dg := simple.NewUndirectedGraph(0, math.Inf(1))
+	dg := simple.NewUndirectedGraph()
 	for u, e := range g {
 		for v := range e {
 			dg.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
@@ -85,7 +84,7 @@ func (n namedNode) ID() int64     { return n.id }
 func (n namedNode) DOTID() string { return n.name }
 
 func directedNamedIDGraphFrom(g []intset) graph.Directed {
-	dg := simple.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		nu := namedNode{id: u, name: alpha[u : u+1]}
@@ -98,7 +97,7 @@ func directedNamedIDGraphFrom(g []intset) graph.Directed {
 }
 
 func undirectedNamedIDGraphFrom(g []intset) graph.Graph {
-	dg := simple.NewUndirectedGraph(0, math.Inf(1))
+	dg := simple.NewUndirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		nu := namedNode{id: u, name: alpha[u : u+1]}
@@ -120,7 +119,7 @@ func (n attrNode) ID() int64                        { return n.id }
 func (n attrNode) Attributes() []encoding.Attribute { return n.attr }
 
 func directedNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Directed {
-	dg := simple.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		var at []encoding.Attribute
@@ -140,7 +139,7 @@ func directedNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Di
 }
 
 func undirectedNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Graph {
-	dg := simple.NewUndirectedGraph(0, math.Inf(1))
+	dg := simple.NewUndirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		var at []encoding.Attribute
@@ -170,7 +169,7 @@ func (n namedAttrNode) DOTID() string                    { return n.name }
 func (n namedAttrNode) Attributes() []encoding.Attribute { return n.attr }
 
 func directedNamedIDNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Directed {
-	dg := simple.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		var at []encoding.Attribute
@@ -190,7 +189,7 @@ func directedNamedIDNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) g
 }
 
 func undirectedNamedIDNodeAttrGraphFrom(g []intset, attr [][]encoding.Attribute) graph.Graph {
-	dg := simple.NewUndirectedGraph(0, math.Inf(1))
+	dg := simple.NewUndirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		var at []encoding.Attribute
@@ -221,7 +220,7 @@ func (e attrEdge) Weight() float64                  { return 0 }
 func (e attrEdge) Attributes() []encoding.Attribute { return e.attr }
 
 func directedEdgeAttrGraphFrom(g []intset, attr map[edge][]encoding.Attribute) graph.Directed {
-	dg := simple.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		for v := range e {
@@ -232,7 +231,7 @@ func directedEdgeAttrGraphFrom(g []intset, attr map[edge][]encoding.Attribute) g
 }
 
 func undirectedEdgeAttrGraphFrom(g []intset, attr map[edge][]encoding.Attribute) graph.Graph {
-	dg := simple.NewUndirectedGraph(0, math.Inf(1))
+	dg := simple.NewUndirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		for v := range e {
@@ -273,7 +272,7 @@ func (e portedEdge) ToPort() (port, compass string) {
 }
 
 func directedPortedAttrGraphFrom(g []intset, attr [][]encoding.Attribute, ports map[edge]portedEdge) graph.Directed {
-	dg := simple.NewDirectedGraph(0, math.Inf(1))
+	dg := simple.NewDirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		var at []encoding.Attribute
@@ -295,7 +294,7 @@ func directedPortedAttrGraphFrom(g []intset, attr [][]encoding.Attribute, ports 
 }
 
 func undirectedPortedAttrGraphFrom(g []intset, attr [][]encoding.Attribute, ports map[edge]portedEdge) graph.Graph {
-	dg := simple.NewUndirectedGraph(0, math.Inf(1))
+	dg := simple.NewUndirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		var at []encoding.Attribute
@@ -337,10 +336,10 @@ type structuredGraph struct {
 }
 
 func undirectedStructuredGraphFrom(c []edge, g ...[]intset) graph.Graph {
-	s := &structuredGraph{UndirectedGraph: simple.NewUndirectedGraph(0, math.Inf(1))}
+	s := &structuredGraph{UndirectedGraph: simple.NewUndirectedGraph()}
 	var base int64
 	for i, sg := range g {
-		sub := simple.NewUndirectedGraph(0, math.Inf(1))
+		sub := simple.NewUndirectedGraph()
 		for u, e := range sg {
 			u := int64(u)
 			for v := range e {
@@ -382,7 +381,7 @@ func undirectedSubGraphFrom(g []intset, s map[int64][]intset) graph.Graph {
 	var base int64
 	subs := make(map[int64]subGraph)
 	for i, sg := range s {
-		sub := simple.NewUndirectedGraph(0, math.Inf(1))
+		sub := simple.NewUndirectedGraph()
 		for u, e := range sg {
 			u := int64(u)
 			for v := range e {
@@ -394,7 +393,7 @@ func undirectedSubGraphFrom(g []intset, s map[int64][]intset) graph.Graph {
 		base += int64(len(sg))
 	}
 
-	dg := simple.NewUndirectedGraph(0, math.Inf(1))
+	dg := simple.NewUndirectedGraph()
 	for u, e := range g {
 		u := int64(u)
 		var nu graph.Node

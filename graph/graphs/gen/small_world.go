@@ -62,7 +62,7 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 				return
 			}
 			vid := idFromDelta(u, delta, dims, -p)
-			e := simple.Edge{F: simple.Node(uid), T: simple.Node(vid), W: 1}
+			e := simple.Edge{F: simple.Node(uid), T: simple.Node(vid)}
 			if uid > vid {
 				e.F, e.T = e.T, e.F
 			}
@@ -105,7 +105,7 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 			if !ok {
 				panic("depleted distribution")
 			}
-			e := simple.Edge{F: simple.Node(uid), T: simple.Node(vid), W: 1}
+			e := simple.Edge{F: simple.Node(uid), T: simple.Node(vid)}
 			if !isDirected && uid > vid {
 				e.F, e.T = e.T, e.F
 			}

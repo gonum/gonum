@@ -110,7 +110,7 @@ type dotDirectedGraph struct {
 // newDotDirectedGraph returns a new directed capable of creating user-defined
 // nodes and edges.
 func newDotDirectedGraph() *dotDirectedGraph {
-	return &dotDirectedGraph{DirectedGraph: simple.NewDirectedGraph(0, 0)}
+	return &dotDirectedGraph{DirectedGraph: simple.NewDirectedGraph()}
 }
 
 // NewNode returns a new node with a unique node ID for the graph.
@@ -145,7 +145,7 @@ type dotUndirectedGraph struct {
 // newDotUndirectedGraph returns a new undirected capable of creating user-
 // defined nodes and edges.
 func newDotUndirectedGraph() *dotUndirectedGraph {
-	return &dotUndirectedGraph{UndirectedGraph: simple.NewUndirectedGraph(0, 0)}
+	return &dotUndirectedGraph{UndirectedGraph: simple.NewUndirectedGraph()}
 }
 
 // NewNode adds a new node with a unique node ID to the graph.

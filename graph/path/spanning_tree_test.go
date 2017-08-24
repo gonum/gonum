@@ -26,21 +26,21 @@ func init() {
 }
 
 type spanningGraph interface {
-	graph.UndirectedBuilder
-	graph.Weighter
-	Edges() []graph.Edge
+	graph.WeightedBuilder
+	graph.WeightedUndirected
+	WeightedEdges() []graph.WeightedEdge
 }
 
 var spanningTreeTests = []struct {
 	name      string
 	graph     func() spanningGraph
-	edges     []simple.Edge
+	edges     []simple.WeightedEdge
 	want      float64
-	treeEdges []simple.Edge
+	treeEdges []simple.WeightedEdge
 }{
 	{
 		name:  "Empty",
-		graph: func() spanningGraph { return simple.NewUndirectedGraph(0, math.Inf(1)) },
+		graph: func() spanningGraph { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
 		want:  0,
 	},
 	{
@@ -48,8 +48,8 @@ var spanningTreeTests = []struct {
 		// Modified to make edge weights unique; A--B is increased to 2.5 otherwise
 		// to prevent the alternative solution being found.
 		name:  "Prim WP figure 1",
-		graph: func() spanningGraph { return simple.NewUndirectedGraph(0, math.Inf(1)) },
-		edges: []simple.Edge{
+		graph: func() spanningGraph { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('B'), W: 2.5},
 			{F: simple.Node('A'), T: simple.Node('D'), W: 1},
 			{F: simple.Node('B'), T: simple.Node('D'), W: 2},
@@ -57,7 +57,7 @@ var spanningTreeTests = []struct {
 		},
 
 		want: 6,
-		treeEdges: []simple.Edge{
+		treeEdges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('D'), W: 1},
 			{F: simple.Node('B'), T: simple.Node('D'), W: 2},
 			{F: simple.Node('C'), T: simple.Node('D'), W: 3},
@@ -66,8 +66,8 @@ var spanningTreeTests = []struct {
 	{
 		// https://upload.wikimedia.org/wikipedia/commons/5/5c/MST_kruskal_en.gif
 		name:  "Kruskal WP figure 1",
-		graph: func() spanningGraph { return simple.NewUndirectedGraph(0, math.Inf(1)) },
-		edges: []simple.Edge{
+		graph: func() spanningGraph { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node('a'), T: simple.Node('b'), W: 3},
 			{F: simple.Node('a'), T: simple.Node('e'), W: 1},
 			{F: simple.Node('b'), T: simple.Node('c'), W: 5},
@@ -78,7 +78,7 @@ var spanningTreeTests = []struct {
 		},
 
 		want: 11,
-		treeEdges: []simple.Edge{
+		treeEdges: []simple.WeightedEdge{
 			{F: simple.Node('a'), T: simple.Node('b'), W: 3},
 			{F: simple.Node('a'), T: simple.Node('e'), W: 1},
 			{F: simple.Node('b'), T: simple.Node('c'), W: 5},
@@ -88,8 +88,8 @@ var spanningTreeTests = []struct {
 	{
 		// https://upload.wikimedia.org/wikipedia/commons/8/87/Kruskal_Algorithm_6.svg
 		name:  "Kruskal WP example",
-		graph: func() spanningGraph { return simple.NewUndirectedGraph(0, math.Inf(1)) },
-		edges: []simple.Edge{
+		graph: func() spanningGraph { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('B'), W: 7},
 			{F: simple.Node('A'), T: simple.Node('D'), W: 5},
 			{F: simple.Node('B'), T: simple.Node('C'), W: 8},
@@ -104,7 +104,7 @@ var spanningTreeTests = []struct {
 		},
 
 		want: 39,
-		treeEdges: []simple.Edge{
+		treeEdges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('B'), W: 7},
 			{F: simple.Node('A'), T: simple.Node('D'), W: 5},
 			{F: simple.Node('B'), T: simple.Node('E'), W: 7},
@@ -116,8 +116,8 @@ var spanningTreeTests = []struct {
 	{
 		// https://upload.wikimedia.org/wikipedia/commons/2/2e/Boruvka%27s_algorithm_%28Sollin%27s_algorithm%29_Anim.gif
 		name:  "Borůvka WP example",
-		graph: func() spanningGraph { return simple.NewUndirectedGraph(0, math.Inf(1)) },
-		edges: []simple.Edge{
+		graph: func() spanningGraph { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('B'), W: 13},
 			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
 			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
@@ -141,7 +141,7 @@ var spanningTreeTests = []struct {
 		},
 
 		want: 83,
-		treeEdges: []simple.Edge{
+		treeEdges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
 			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
 			{F: simple.Node('B'), T: simple.Node('D'), W: 1},
@@ -159,8 +159,8 @@ var spanningTreeTests = []struct {
 		// https://upload.wikimedia.org/wikipedia/commons/d/d2/Minimum_spanning_tree.svg
 		// Nodes labelled row major.
 		name:  "Minimum Spanning Tree WP figure 1",
-		graph: func() spanningGraph { return simple.NewUndirectedGraph(0, math.Inf(1)) },
-		edges: []simple.Edge{
+		graph: func() spanningGraph { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node(1), T: simple.Node(2), W: 4},
 			{F: simple.Node(1), T: simple.Node(3), W: 1},
 			{F: simple.Node(1), T: simple.Node(4), W: 4},
@@ -185,7 +185,7 @@ var spanningTreeTests = []struct {
 		},
 
 		want: 38,
-		treeEdges: []simple.Edge{
+		treeEdges: []simple.WeightedEdge{
 			{F: simple.Node(1), T: simple.Node(2), W: 4},
 			{F: simple.Node(1), T: simple.Node(3), W: 1},
 			{F: simple.Node(2), T: simple.Node(8), W: 7},
@@ -202,8 +202,8 @@ var spanningTreeTests = []struct {
 		// https://upload.wikimedia.org/wikipedia/commons/2/2e/Boruvka%27s_algorithm_%28Sollin%27s_algorithm%29_Anim.gif
 		// but with C--H and E--J cut.
 		name:  "Borůvka WP example cut",
-		graph: func() spanningGraph { return simple.NewUndirectedGraph(0, math.Inf(1)) },
-		edges: []simple.Edge{
+		graph: func() spanningGraph { return simple.NewWeightedUndirectedGraph(0, math.Inf(1)) },
+		edges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('B'), W: 13},
 			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
 			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
@@ -225,7 +225,7 @@ var spanningTreeTests = []struct {
 		},
 
 		want: 65,
-		treeEdges: []simple.Edge{
+		treeEdges: []simple.WeightedEdge{
 			{F: simple.Node('A'), T: simple.Node('C'), W: 6},
 			{F: simple.Node('B'), T: simple.Node('C'), W: 7},
 			{F: simple.Node('B'), T: simple.Node('D'), W: 1},
@@ -240,21 +240,21 @@ var spanningTreeTests = []struct {
 	},
 }
 
-func testMinumumSpanning(mst func(dst graph.UndirectedBuilder, g spanningGraph) float64, t *testing.T) {
+func testMinumumSpanning(mst func(dst WeightedBuilder, g spanningGraph) float64, t *testing.T) {
 	for _, test := range spanningTreeTests {
 		g := test.graph()
 		for _, e := range test.edges {
-			g.SetEdge(e)
+			g.SetWeightedEdge(e)
 		}
 
-		dst := simple.NewUndirectedGraph(0, math.Inf(1))
+		dst := simple.NewWeightedUndirectedGraph(0, math.Inf(1))
 		w := mst(dst, g)
 		if w != test.want {
 			t.Errorf("unexpected minimum spanning tree weight for %q: got: %f want: %f",
 				test.name, w, test.want)
 		}
 		var got float64
-		for _, e := range dst.Edges() {
+		for _, e := range dst.WeightedEdges() {
 			got += e.Weight()
 		}
 		if got != test.want {
@@ -282,13 +282,13 @@ func testMinumumSpanning(mst func(dst graph.UndirectedBuilder, g spanningGraph) 
 }
 
 func TestKruskal(t *testing.T) {
-	testMinumumSpanning(func(dst graph.UndirectedBuilder, g spanningGraph) float64 {
+	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Kruskal(dst, g)
 	}, t)
 }
 
 func TestPrim(t *testing.T) {
-	testMinumumSpanning(func(dst graph.UndirectedBuilder, g spanningGraph) float64 {
+	testMinumumSpanning(func(dst WeightedBuilder, g spanningGraph) float64 {
 		return Prim(dst, g)
 	}, t)
 }

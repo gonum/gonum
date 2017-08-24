@@ -5,7 +5,6 @@
 package gen
 
 import (
-	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
@@ -38,7 +37,7 @@ func TestDuplication(t *testing.T) {
 		for alpha := 0.1; alpha <= 1; alpha += 0.1 {
 			for delta := 0.; delta <= 1; delta += 0.2 {
 				for sigma := 0.; sigma <= 1; sigma += 0.2 {
-					g := &duplication{UndirectedMutator: simple.NewUndirectedGraph(0, math.Inf(1))}
+					g := &duplication{UndirectedMutator: simple.NewUndirectedGraph()}
 					err := Duplication(g, n, delta, alpha, sigma, nil)
 					if err != nil {
 						t.Fatalf("unexpected error: n=%d, alpha=%v, delta=%v sigma=%v: %v", n, alpha, delta, sigma, err)

@@ -106,7 +106,7 @@ func (g *UndirectedMatrix) Edges() []graph.Edge {
 	for i := 0; i < r; i++ {
 		for j := i + 1; j < r; j++ {
 			if w := g.mat.At(i, j); !isSame(w, g.absent) {
-				edges = append(edges, Edge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
+				edges = append(edges, WeightedEdge{F: g.Node(int64(i)), T: g.Node(int64(j)), W: w})
 			}
 		}
 	}
@@ -150,14 +150,25 @@ func (g *UndirectedMatrix) HasEdgeBetween(u, v graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *UndirectedMatrix) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeBetween(u, v)
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
+// The node v must be directly reachable from u as defined by the From method.
+func (g *UndirectedMatrix) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(u, v)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
 func (g *UndirectedMatrix) EdgeBetween(u, v graph.Node) graph.Edge {
+	return g.WeightedEdgeBetween(u, v)
+}
+
+// WeightedEdgeBetween returns the weighted edge between nodes x and y.
+func (g *UndirectedMatrix) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
 	if g.HasEdgeBetween(u, v) {
 		// u.ID() and v.ID() are not greater than maximum int by this point.
-		return Edge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}
+		return WeightedEdge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}
 	}
 	return nil
 }
@@ -179,9 +190,19 @@ func (g *UndirectedMatrix) Weight(x, y graph.Node) (w float64, ok bool) {
 	return g.absent, false
 }
 
-// SetEdge sets e, an edge from one node to another. If the ends of the edge are not in g
-// or the edge is a self loop, SetEdge panics.
+// SetEdge sets e, an edge from one node to another with unit weight. If the ends of the edge are
+// not in g or the edge is a self loop, SetEdge panics.
 func (g *UndirectedMatrix) SetEdge(e graph.Edge) {
+	g.setWeightedEdge(e, 1)
+}
+
+// SetWeightedEdge sets e, an edge from one node to another. If the ends of the edge are not in g
+// or the edge is a self loop, SetWeightedEdge panics.
+func (g *UndirectedMatrix) SetWeightedEdge(e graph.WeightedEdge) {
+	g.setWeightedEdge(e, e.Weight())
+}
+
+func (g *UndirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
 	fid := e.From().ID()
 	tid := e.To().ID()
 	if fid == tid {
@@ -194,7 +215,7 @@ func (g *UndirectedMatrix) SetEdge(e graph.Edge) {
 		panic("simple: unavailable to node ID for dense graph")
 	}
 	// fid and tid are not greater than maximum int by this point.
-	g.mat.SetSym(int(fid), int(tid), e.Weight())
+	g.mat.SetSym(int(fid), int(tid), weight)
 }
 
 // RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist

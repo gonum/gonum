@@ -22,7 +22,6 @@ func (n Node) ID() int64 {
 // Edge is a simple graph edge.
 type Edge struct {
 	F, T graph.Node
-	W    float64
 }
 
 // From returns the from-node of the edge.
@@ -31,8 +30,20 @@ func (e Edge) From() graph.Node { return e.F }
 // To returns the to-node of the edge.
 func (e Edge) To() graph.Node { return e.T }
 
+// WeightedEdge is a simple weighted graph edge.
+type WeightedEdge struct {
+	F, T graph.Node
+	W    float64
+}
+
+// From returns the from-node of the edge.
+func (e WeightedEdge) From() graph.Node { return e.F }
+
+// To returns the to-node of the edge.
+func (e WeightedEdge) To() graph.Node { return e.T }
+
 // Weight returns the weight of the edge.
-func (e Edge) Weight() float64 { return e.W }
+func (e WeightedEdge) Weight() float64 { return e.W }
 
 // isSame returns whether two float64 values are the same where NaN values
 // are equalable.

@@ -148,6 +148,7 @@ func legalTypeVec(v Matrix) bool {
 	return ok
 }
 
+// legalTypesVecVec returns whether both inputs are Vectot
 func legalTypesVecVec(a, b Matrix) bool {
 	if _, ok := a.(Vector); !ok {
 		return false

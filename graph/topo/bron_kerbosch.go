@@ -143,7 +143,8 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 	}
 	x := make(set.Nodes)
 	var bk bronKerbosch
-	order, _ := VertexOrdering(g)
+	order, _ := degeneracyOrdering(g)
+	ordered.Reverse(order)
 	for _, v := range order {
 		neighbours := g.From(v)
 		nv := make(set.Nodes, len(neighbours))

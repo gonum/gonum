@@ -73,7 +73,7 @@ func TestVertexOrdering(t *testing.T) {
 			}
 			sort.Sort(ordered.Int64s(got))
 			if !reflect.DeepEqual(got, want) {
-				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, test.wantCore)
+				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, want)
 			}
 
 			for j, n := range core[k] {

@@ -6,19 +6,50 @@ package topo
 
 import (
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // VertexOrdering returns the vertex ordering and the k-cores of
 // the undirected graph g.
 func VertexOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Node) {
+	order, offsets := degeneracyOrdering(g)
+
+	ordered.Reverse(order)
+	cores = make([][]graph.Node, len(offsets))
+	offset := len(order)
+	for i, n := range offsets {
+		cores[i] = order[offset-n : offset]
+		offset -= n
+	}
+	return order, cores
+}
+
+// KCore returns the k-core of the undirected graph g with nodes in an
+// optimal ordering for the coloring number.
+func KCore(k int, g graph.Undirected) []graph.Node {
+	order, offsets := degeneracyOrdering(g)
+
+	var offset int
+	for _, n := range offsets[:k] {
+		offset += n
+	}
+	core := make([]graph.Node, len(order)-offset)
+	copy(core, order[offset:])
+	return core
+}
+
+// degeneracyOrdering is the common code for VertexOrdering and KCore. It
+// returns l, the nodes of g in optimal ordering for coloring number and
+// s, a set of relative offsets into l for each k-core, where k is an index
+// into s.
+func degeneracyOrdering(g graph.Undirected) (l []graph.Node, s []int) {
 	nodes := g.Nodes()
 
 	// The algorithm used here is essentially as described at
 	// http://en.wikipedia.org/w/index.php?title=Degeneracy_%28graph_theory%29&oldid=640308710
 
-	// Initialize an output list L.
-	var l []graph.Node
+	// Initialize an output list L in return parameters.
 
 	// Compute a number d_v for each vertex v in G,
 	// the number of neighbors of v that are not already in L.
@@ -48,7 +79,7 @@ func VertexOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Nod
 	// Initialize k to 0.
 	k := 0
 	// Repeat n times:
-	s := []int{0}
+	s = []int{0}
 	for range nodes {
 		// Scan the array cells D[0], D[1], ... until
 		// finding an i for which D[i] is nonempty.
@@ -96,16 +127,7 @@ func VertexOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Nod
 		}
 	}
 
-	for i, j := 0, len(l)-1; i < j; i, j = i+1, j-1 {
-		l[i], l[j] = l[j], l[i]
-	}
-	cores = make([][]graph.Node, len(s))
-	offset := len(l)
-	for i, n := range s {
-		cores[i] = l[offset-n : offset]
-		offset -= n
-	}
-	return l, cores
+	return l, s
 }
 
 // BronKerbosch returns the set of maximal cliques of the undirected graph g.

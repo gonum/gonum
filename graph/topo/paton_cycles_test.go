@@ -134,10 +134,7 @@ func canonicalise(c []graph.Node) []graph.Node {
 		c = append(c[idx:], c[:idx]...)
 	}
 	if c[len(c)-1].ID() < c[1].ID() {
-		s := c[1:]
-		for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-			s[i], s[j] = s[j], s[i]
-		}
+		ordered.Reverse(c[1:])
 	}
 	return c
 }

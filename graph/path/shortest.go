@@ -9,6 +9,7 @@ import (
 	"math/rand"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -101,7 +102,7 @@ func (p Shortest) To(v graph.Node) (path []graph.Node, weight float64) {
 		path = append(path, p.nodes[p.next[to]])
 		to = p.next[to]
 	}
-	reverse(path)
+	ordered.Reverse(path)
 	return path, p.dist[p.indexOf[v.ID()]]
 }
 
@@ -248,7 +249,7 @@ func (p AllShortest) Between(u, v graph.Node) (path []graph.Node, weight float64
 		}
 	}
 	if !p.forward {
-		reverse(path)
+		ordered.Reverse(path)
 	}
 
 	return path, weight, unique
@@ -289,7 +290,7 @@ func (p AllShortest) allBetween(from, to int, seen []bool, path []graph.Node, pa
 			return paths
 		}
 		if !p.forward {
-			reverse(path)
+			ordered.Reverse(path)
 		}
 		return append(paths, path)
 	}
@@ -310,10 +311,4 @@ func (p AllShortest) allBetween(from, to int, seen []bool, path []graph.Node, pa
 		paths = p.allBetween(from, to, append([]bool(nil), seen...), append(path, p.nodes[n]), paths)
 	}
 	return paths
-}
-
-func reverse(p []graph.Node) {
-	for i, j := 0, len(p)-1; i < j; i, j = i+1, j-1 {
-		p[i], p[j] = p[j], p[i]
-	}
 }

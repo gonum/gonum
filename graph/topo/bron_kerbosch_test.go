@@ -81,9 +81,46 @@ func TestVertexOrdering(t *testing.T) {
 			}
 			sort.Sort(ordered.Int64s(got))
 			if !reflect.DeepEqual(got, want) {
-				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, test.wantCore)
+				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, want)
 			}
 			offset += len(want)
+		}
+	}
+}
+
+func TestKCore(t *testing.T) {
+	for i, test := range vOrderTests {
+		g := simple.NewUndirectedGraph()
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
+			}
+			for v := range e {
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
+			}
+		}
+
+		for k := 0; k <= test.wantK+1; k++ {
+			var want []int64
+			for _, c := range test.wantCore[k:] {
+				want = append(want, c...)
+			}
+			core := KCore(k, g)
+			if len(core) != len(want) {
+				t.Errorf("unexpected %d-core length for test %d:\ngot: %v\nwant:%v", k, i, len(core), len(want))
+				continue
+			}
+
+			var got []int64
+			for _, n := range core {
+				got = append(got, n.ID())
+			}
+			sort.Sort(ordered.Int64s(got))
+			sort.Sort(ordered.Int64s(want))
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("unexpected %d-core for test %d:\ngot: %v\nwant:%v", k, i, got, want)
+			}
 		}
 	}
 }

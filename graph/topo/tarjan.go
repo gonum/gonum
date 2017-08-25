@@ -76,14 +76,8 @@ func sortedFrom(sccs [][]graph.Node, order func([]graph.Node)) ([]graph.Node, er
 		}
 		err = sc
 	}
-	reverse(sorted)
+	ordered.Reverse(sorted)
 	return sorted, err
-}
-
-func reverse(p []graph.Node) {
-	for i, j := 0, len(p)-1; i < j; i, j = i+1, j-1 {
-		p[i], p[j] = p[j], p[i]
-	}
 }
 
 // TarjanSCC returns the strongly connected components of the graph g using Tarjan's algorithm.
@@ -106,12 +100,12 @@ func tarjanSCCstabilized(g graph.Directed, order func([]graph.Node)) [][]graph.N
 		succ = g.From
 	} else {
 		order(nodes)
-		reverse(nodes)
+		ordered.Reverse(nodes)
 
 		succ = func(n graph.Node) []graph.Node {
 			to := g.From(n)
 			order(to)
-			reverse(to)
+			ordered.Reverse(to)
 			return to
 		}
 	}

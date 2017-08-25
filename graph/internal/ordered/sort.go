@@ -67,3 +67,10 @@ type Int64s []int64
 func (s Int64s) Len() int           { return len(s) }
 func (s Int64s) Less(i, j int) bool { return s[i] < s[j] }
 func (s Int64s) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+// Reverse reverses the order of nodes.
+func Reverse(nodes []graph.Node) {
+	for i, j := 0, len(nodes)-1; i < j; i, j = i+1, j-1 {
+		nodes[i], nodes[j] = nodes[j], nodes[i]
+	}
+}

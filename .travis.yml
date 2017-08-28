@@ -4,7 +4,6 @@ language: go
 
 # Versions of go that are explicitly supported by gonum plus go tip.
 go:
- - 1.6.x
  - 1.7.x
  - 1.8.x
  - master

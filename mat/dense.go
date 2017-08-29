@@ -205,22 +205,9 @@ func (m *Dense) T() Matrix {
 //
 // See ColViewer for more information.
 func (m *Dense) ColView(j int) Vector {
-	return m.ColViewVecDense(j)
-}
-
-// ColViewVecDense returns a VecDense reflecting the column j, backed by
-// the matrix data.
-func (m *Dense) ColViewVecDense(j int) *VecDense {
-	if j >= m.mat.Cols || j < 0 {
-		panic(ErrColAccess)
-	}
-	return &VecDense{
-		mat: blas64.Vector{
-			Inc:  m.mat.Stride,
-			Data: m.mat.Data[j : (m.mat.Rows-1)*m.mat.Stride+j+1],
-		},
-		n: m.mat.Rows,
-	}
+	v := &VecDense{}
+	v.ColViewOf(m, j)
+	return v
 }
 
 // SetCol sets the values in the specified column of the matrix to the values
@@ -257,22 +244,9 @@ func (m *Dense) SetRow(i int, src []float64) {
 //
 // See RowViewer for more information.
 func (m *Dense) RowView(i int) Vector {
-	return m.RowViewVecDense(i)
-}
-
-// RowViewVecDense returns a VecDense reflecting the row i, backed by
-// the matrix data.
-func (m *Dense) RowViewVecDense(i int) *VecDense {
-	if i >= m.mat.Rows || i < 0 {
-		panic(ErrRowAccess)
-	}
-	return &VecDense{
-		mat: blas64.Vector{
-			Inc:  1,
-			Data: m.rawRowView(i),
-		},
-		n: m.mat.Cols,
-	}
+	v := &VecDense{}
+	v.RowViewOf(m, i)
+	return v
 }
 
 // RawRowView returns a slice backed by the same array as backing the

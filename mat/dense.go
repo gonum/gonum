@@ -205,9 +205,9 @@ func (m *Dense) T() Matrix {
 //
 // See ColViewer for more information.
 func (m *Dense) ColView(j int) Vector {
-	v := &VecDense{}
+	var v VecDense
 	v.ColViewOf(m, j)
-	return v
+	return &v
 }
 
 // SetCol sets the values in the specified column of the matrix to the values
@@ -244,9 +244,9 @@ func (m *Dense) SetRow(i int, src []float64) {
 //
 // See RowViewer for more information.
 func (m *Dense) RowView(i int) Vector {
-	v := &VecDense{}
+	var v VecDense
 	v.RowViewOf(m, i)
-	return v
+	return &v
 }
 
 // RawRowView returns a slice backed by the same array as backing the

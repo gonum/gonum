@@ -205,7 +205,7 @@ func TestVecDenseMul(t *testing.T) {
 
 func TestVecDenseScale(t *testing.T) {
 	for i, test := range []struct {
-		a     *VecDense
+		a     Vector
 		alpha float64
 		want  *VecDense
 	}{
@@ -225,17 +225,17 @@ func TestVecDenseScale(t *testing.T) {
 			want:  NewVecDense(3, []float64{0, -2, -4}),
 		},
 		{
-			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
 			alpha: 0,
 			want:  NewVecDense(3, []float64{0, 0, 0}),
 		},
 		{
-			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
 			alpha: 1,
 			want:  NewVecDense(3, []float64{0, 1, 2}),
 		},
 		{
-			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
+			a:     NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
 			alpha: -2,
 			want:  NewVecDense(3, []float64{0, -2, -4}),
 		},
@@ -244,18 +244,18 @@ func TestVecDenseScale(t *testing.T) {
 				0, 1, 2,
 				3, 4, 5,
 				6, 7, 8,
-			}).ColView(1).(*VecDense),
+			}).ColView(1),
 			alpha: -2,
 			want:  NewVecDense(3, []float64{-2, -8, -14}),
 		},
 	} {
 		var v VecDense
-		v.ScaleVec(test.alpha, test.a)
+		v.ScaleVec(test.alpha, test.a.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("test %d: unexpected result for v = alpha * a: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 
-		v.CopyVec(test.a)
+		v.CopyVec(test.a.(*VecDense))
 		v.ScaleVec(test.alpha, &v)
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("test %d: unexpected result for v = alpha * v: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
@@ -297,7 +297,7 @@ func TestVecDenseAddScaled(t *testing.T) {
 
 func TestVecDenseAdd(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -307,17 +307,17 @@ func TestVecDenseAdd(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0, 1, 2}),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
 			want: NewVecDense(3, []float64{0, 3, 5}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
 			want: NewVecDense(3, []float64{0, 3, 5}),
 		},
 	} {
 		var v VecDense
-		v.AddVec(test.a, test.b)
+		v.AddVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
@@ -326,7 +326,7 @@ func TestVecDenseAdd(t *testing.T) {
 
 func TestVecDenseSub(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -336,17 +336,17 @@ func TestVecDenseSub(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0, 1, 2}),
-			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0),
 			want: NewVecDense(3, []float64{0, 0.5, 1}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
-			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0).(*VecDense),
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 0.5, 1}).ColView(0),
 			want: NewVecDense(3, []float64{0, 0.5, 1}),
 		},
 	} {
 		var v VecDense
-		v.SubVec(test.a, test.b)
+		v.SubVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
@@ -355,7 +355,7 @@ func TestVecDenseSub(t *testing.T) {
 
 func TestVecDenseMulElem(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -365,17 +365,17 @@ func TestVecDenseMulElem(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0, 1, 2}),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
 			want: NewVecDense(3, []float64{0, 2, 6}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0).(*VecDense),
-			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0).(*VecDense),
+			a:    NewDense(3, 1, []float64{0, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0, 2, 3}).ColView(0),
 			want: NewVecDense(3, []float64{0, 2, 6}),
 		},
 	} {
 		var v VecDense
-		v.MulElemVec(test.a, test.b)
+		v.MulElemVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
@@ -384,7 +384,7 @@ func TestVecDenseMulElem(t *testing.T) {
 
 func TestVecDenseDivElem(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -394,17 +394,17 @@ func TestVecDenseDivElem(t *testing.T) {
 		},
 		{
 			a:    NewVecDense(3, []float64{0.5, 1, 2}),
-			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0).(*VecDense),
+			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0),
 			want: NewVecDense(3, []float64{1, 2, 2}),
 		},
 		{
-			a:    NewDense(3, 1, []float64{0.5, 1, 2}).ColView(0).(*VecDense),
-			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0).(*VecDense),
+			a:    NewDense(3, 1, []float64{0.5, 1, 2}).ColView(0),
+			b:    NewDense(3, 1, []float64{0.5, 0.5, 1}).ColView(0),
 			want: NewVecDense(3, []float64{1, 2, 2}),
 		},
 	} {
 		var v VecDense
-		v.DivElemVec(test.a, test.b)
+		v.DivElemVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}

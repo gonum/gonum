@@ -496,10 +496,10 @@ func (s *SymDense) PowPSD(a Symmetric, pow float64) error {
 
 	s.SymOuterK(values[0], u.ColView(0))
 
-	v := &VecDense{}
+	var v VecDense
 	for i := 1; i < dim; i++ {
 		v.ColViewOf(&u, i)
-		s.SymRankOne(s, values[i], v)
+		s.SymRankOne(s, values[i], &v)
 	}
 	return nil
 }

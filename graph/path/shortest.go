@@ -10,6 +10,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
+	"gonum.org/v1/gonum/graph/internal/set"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -17,7 +18,8 @@ import (
 // single-source shortest path functions.
 type Shortest struct {
 	// from holds the source node given to
-	// DijkstraFrom.
+	// the function that returned the
+	// Shortest value.
 	from graph.Node
 
 	// nodes hold the nodes of the analysed
@@ -43,6 +45,13 @@ type Shortest struct {
 	// tree of the graph. The index is a
 	// linear mapping of to-dense-id.
 	next []int
+
+	// hasNegativeCycle indicates
+	// whether the Shortest includes
+	// a negative cycle. This should
+	// be set by the function that
+	// returned the Shortest value.
+	hasNegativeCycle bool
 }
 
 func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
@@ -81,7 +90,8 @@ func (p Shortest) set(to int, weight float64, mid int) {
 // From returns the starting node of the paths held by the Shortest.
 func (p Shortest) From() graph.Node { return p.from }
 
-// WeightTo returns the weight of the minimum path to v.
+// WeightTo returns the weight of the minimum path to v. If the path to v includes
+// a negative cycle, the returned weight will not reflect the true path weight.
 func (p Shortest) WeightTo(v graph.Node) float64 {
 	to, toOK := p.indexOf[v.ID()]
 	if !toOK {
@@ -90,7 +100,9 @@ func (p Shortest) WeightTo(v graph.Node) float64 {
 	return p.dist[to]
 }
 
-// To returns a shortest path to v and the weight of the path.
+// To returns a shortest path to v and the weight of the path. If the path
+// to v includes a negative cycle, one pass through the cycle will be included
+// in path and weight will be returned as NaN.
 func (p Shortest) To(v graph.Node) (path []graph.Node, weight float64) {
 	to, toOK := p.indexOf[v.ID()]
 	if !toOK || math.IsInf(p.dist[to], 1) {
@@ -98,12 +110,32 @@ func (p Shortest) To(v graph.Node) (path []graph.Node, weight float64) {
 	}
 	from := p.indexOf[p.from.ID()]
 	path = []graph.Node{p.nodes[to]}
-	for to != from {
-		path = append(path, p.nodes[p.next[to]])
-		to = p.next[to]
+	weight = math.Inf(1)
+	if p.hasNegativeCycle {
+		seen := make(set.Ints)
+		seen.Add(from)
+		for to != from {
+			if seen.Has(to) {
+				weight = math.NaN()
+				break
+			}
+			seen.Add(to)
+			path = append(path, p.nodes[p.next[to]])
+			to = p.next[to]
+		}
+	} else {
+		n := len(p.nodes)
+		for to != from {
+			path = append(path, p.nodes[p.next[to]])
+			to = p.next[to]
+			if n < 0 {
+				panic("path: unexpected negative cycle")
+			}
+			n--
+		}
 	}
 	ordered.Reverse(path)
-	return path, p.dist[p.indexOf[v.ID()]]
+	return path, math.Min(weight, p.dist[p.indexOf[v.ID()]])
 }
 
 // AllShortest is a shortest-path tree created by the DijkstraAllPaths, FloydWarshall

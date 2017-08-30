@@ -58,6 +58,7 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 				panic("bellman-ford: unexpected invalid weight")
 			}
 			if path.dist[j]+w < path.dist[k] {
+				path.hasNegativeCycle = true
 				return path, false
 			}
 		}

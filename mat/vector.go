@@ -484,7 +484,7 @@ func (v *VecDense) asGeneral() blas64.General {
 }
 
 // ColViewOf reflects the column j of the RawMatrixer m, into the receiver
-// backed by the same underlying data.  The length of the receiver does not need
+// backed by the same underlying data. The length of the receiver does not need
 // to match the number of rows in m.
 func (v *VecDense) ColViewOf(m RawMatrixer, j int) {
 	rm := m.RawMatrix()
@@ -499,7 +499,7 @@ func (v *VecDense) ColViewOf(m RawMatrixer, j int) {
 }
 
 // RowViewOf reflects the row i of the RawMatrixer m, into the receiver
-// backed by the same underlying data.  The length of the receiver does not need
+// backed by the same underlying data. The length of the receiver does not need
 // to match the number of columns in m.
 func (v *VecDense) RowViewOf(m RawMatrixer, i int) {
 	rm := m.RawMatrix()

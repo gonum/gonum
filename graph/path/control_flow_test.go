@@ -6,9 +6,11 @@ package path
 
 import (
 	"reflect"
+	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -16,13 +18,13 @@ var dominatorsTests = []struct {
 	n     graph.Node
 	edges []simple.Edge
 
-	want map[int64]graph.Node
+	want DominatorTree
 }{
-	{ // Example from Lengauer and Tarjan, fig 1.
+	{ // Example from Lengauer and Tarjan http://www.dtic.mil/dtic/tr/fulltext/u2/a054144.pdf fig 1.
 		n: char('R'),
 		edges: []simple.Edge{
 			{F: char('A'), T: char('D')},
-			{F: char('B'), T: char('A')}, // Direction inferred from fig 3.
+			{F: char('B'), T: char('A')},
 			{F: char('B'), T: char('D')},
 			{F: char('B'), T: char('E')},
 			{F: char('C'), T: char('F')},
@@ -40,23 +42,32 @@ var dominatorsTests = []struct {
 			{F: char('K'), T: char('R')},
 			{F: char('L'), T: char('H')},
 			{F: char('R'), T: char('A')},
-			{F: char('R'), T: char('B')}, // Direction inferred from fig 2.
+			{F: char('R'), T: char('B')},
 			{F: char('R'), T: char('C')},
 		},
 
-		want: map[int64]graph.Node{
-			'A': char('R'),
-			'B': char('R'),
-			'C': char('R'),
-			'D': char('R'),
-			'E': char('R'),
-			'F': char('C'),
-			'G': char('C'),
-			'H': char('R'),
-			'I': char('R'),
-			'J': char('G'),
-			'K': char('R'),
-			'L': char('D'),
+		want: DominatorTree{
+			root: char('R'),
+			dominatorOf: map[int64]graph.Node{
+				'A': char('R'),
+				'B': char('R'),
+				'C': char('R'),
+				'D': char('R'),
+				'E': char('R'),
+				'F': char('C'),
+				'G': char('C'),
+				'H': char('R'),
+				'I': char('R'),
+				'J': char('G'),
+				'K': char('R'),
+				'L': char('D'),
+			},
+			dominatedBy: map[int64][]graph.Node{
+				'C': {char('F'), char('G')},
+				'D': {char('L')},
+				'G': {char('J')},
+				'R': {char('A'), char('B'), char('C'), char('D'), char('E'), char('H'), char('I'), char('K')},
+			},
 		},
 	},
 	{ // WP example: https://en.wikipedia.org/w/index.php?title=Dominator_(graph_theory)&oldid=758099236.
@@ -71,12 +82,19 @@ var dominatorsTests = []struct {
 			{F: simple.Node(5), T: simple.Node(2)},
 		},
 
-		want: map[int64]graph.Node{
-			2: simple.Node(1),
-			3: simple.Node(2),
-			4: simple.Node(2),
-			5: simple.Node(2),
-			6: simple.Node(2),
+		want: DominatorTree{
+			root: simple.Node(1),
+			dominatorOf: map[int64]graph.Node{
+				2: simple.Node(1),
+				3: simple.Node(2),
+				4: simple.Node(2),
+				5: simple.Node(2),
+				6: simple.Node(2),
+			},
+			dominatedBy: map[int64][]graph.Node{
+				1: {simple.Node(2)},
+				2: {simple.Node(3), simple.Node(4), simple.Node(5), simple.Node(6)},
+			},
 		},
 	},
 	{ // WP example with node IDs decremented by 1.
@@ -91,12 +109,19 @@ var dominatorsTests = []struct {
 			{F: simple.Node(4), T: simple.Node(1)},
 		},
 
-		want: map[int64]graph.Node{
-			1: simple.Node(0),
-			2: simple.Node(1),
-			3: simple.Node(1),
-			4: simple.Node(1),
-			5: simple.Node(1),
+		want: DominatorTree{
+			root: simple.Node(0),
+			dominatorOf: map[int64]graph.Node{
+				1: simple.Node(0),
+				2: simple.Node(1),
+				3: simple.Node(1),
+				4: simple.Node(1),
+				5: simple.Node(1),
+			},
+			dominatedBy: map[int64][]graph.Node{
+				0: {simple.Node(1)},
+				1: {simple.Node(2), simple.Node(3), simple.Node(4), simple.Node(5)},
+			},
 		},
 	},
 }
@@ -114,8 +139,19 @@ func TestDominators(t *testing.T) {
 		}
 
 		got := Dominators(test.n, g)
-		if !reflect.DeepEqual(got, test.want) {
-			t.Errorf("unexpected dominator tree: got:%v want:%v", got, test.want)
+		if !reflect.DeepEqual(got.root, test.want.root) {
+			t.Errorf("unexpected dominator tree root: got:%v want:%v", got.root, test.want.root)
+		}
+
+		if !reflect.DeepEqual(got.dominatorOf, test.want.dominatorOf) {
+			t.Errorf("unexpected dominator tree: got:%v want:%v", got.dominatorOf, test.want.dominatorOf)
+		}
+
+		for _, nodes := range got.dominatedBy {
+			sort.Sort(ordered.ByID(nodes))
+		}
+		if !reflect.DeepEqual(got.dominatedBy, test.want.dominatedBy) {
+			t.Errorf("unexpected dominator tree: got:%v want:%v", got.dominatedBy, test.want.dominatedBy)
 		}
 	}
 }

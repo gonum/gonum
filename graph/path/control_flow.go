@@ -10,9 +10,9 @@ import (
 	"gonum.org/v1/gonum/graph/traverse"
 )
 
-// Dominators returns immediate dominators for all nodes in the flow graph
+// Dominators returns a dominator tree for all nodes in the flow graph
 // g starting from the given root node.
-func Dominators(root graph.Node, g graph.Directed) map[int64]graph.Node {
+func Dominators(root graph.Node, g graph.Directed) DominatorTree {
 	// The algorithm used here is the Lengauer and Tarjan
 	// algorithm described in https://doi.org/10.1145%2F357062.357071
 
@@ -73,7 +73,16 @@ func Dominators(root graph.Node, g graph.Directed) map[int64]graph.Node {
 	}
 	delete(lt.dom, root.ID())
 
-	return lt.dom
+	nodes := make(set.Nodes)
+	for _, n := range g.Nodes() {
+		nodes.Add(n)
+	}
+	dominatedBy := make(map[int64][]graph.Node)
+	for nid, d := range lt.dom {
+		did := d.ID()
+		dominatedBy[did] = append(dominatedBy[did], nodes[nid])
+	}
+	return DominatorTree{root: root, dominatorOf: lt.dom, dominatedBy: dominatedBy}
 }
 
 type lengauerTarjan struct {
@@ -160,4 +169,25 @@ func (lt *lengauerTarjan) eval(v graph.Node) graph.Node {
 
 func (lt *lengauerTarjan) link(v, w graph.Node) {
 	lt.ancestor[w.ID()] = v
+}
+
+// DominatorTree is a flow graph dominator tree.
+type DominatorTree struct {
+	root        graph.Node
+	dominatorOf map[int64]graph.Node
+	dominatedBy map[int64][]graph.Node
+}
+
+// Root returns the root of the tree.
+func (d DominatorTree) Root() graph.Node { return d.root }
+
+// DominatorOf returns the immediate dominator of n.
+func (d DominatorTree) DominatorOf(n graph.Node) graph.Node {
+	return d.dominatorOf[n.ID()]
+}
+
+// DominatedBy returns a slice of all nodes immediately dominated by n.
+// Elements of the slice are retained by the DominatorTree.
+func (d DominatorTree) DominatedBy(n graph.Node) []graph.Node {
+	return d.dominatedBy[n.ID()]
 }

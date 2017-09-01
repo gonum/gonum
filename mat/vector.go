@@ -492,6 +492,9 @@ func (v *VecDense) ColViewOf(m RawMatrixer, j int) {
 	if j >= rm.Cols || j < 0 {
 		panic(ErrColAccess)
 	}
+	if !v.IsZero() && v.n != rm.Rows {
+		panic(ErrShape)
+	}
 
 	v.mat.Inc = rm.Stride
 	v.mat.Data = rm.Data[j : (rm.Rows-1)*rm.Stride+j+1]
@@ -506,6 +509,9 @@ func (v *VecDense) RowViewOf(m RawMatrixer, i int) {
 
 	if i >= rm.Rows || i < 0 {
 		panic(ErrRowAccess)
+	}
+	if !v.IsZero() && v.n != rm.Cols {
+		panic(ErrShape)
 	}
 
 	v.mat.Inc = 1

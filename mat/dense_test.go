@@ -1212,7 +1212,7 @@ func TestCopyVecDenseAlias(t *testing.T) {
 						4, 5, 6,
 						7, 8, 9,
 					})
-					var src *VecDense
+					var src Vector
 					var want *Dense
 					if horiz {
 						src = a.RowView(si)

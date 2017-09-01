@@ -205,7 +205,7 @@ func TestVecDenseMul(t *testing.T) {
 
 func TestVecDenseScale(t *testing.T) {
 	for i, test := range []struct {
-		a     *VecDense
+		a     Vector
 		alpha float64
 		want  *VecDense
 	}{
@@ -250,12 +250,12 @@ func TestVecDenseScale(t *testing.T) {
 		},
 	} {
 		var v VecDense
-		v.ScaleVec(test.alpha, test.a)
+		v.ScaleVec(test.alpha, test.a.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("test %d: unexpected result for v = alpha * a: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
 
-		v.CopyVec(test.a)
+		v.CopyVec(test.a.(*VecDense))
 		v.ScaleVec(test.alpha, &v)
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("test %d: unexpected result for v = alpha * v: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
@@ -291,13 +291,13 @@ func TestVecDenseAddScaled(t *testing.T) {
 			sb.Scale(alpha, b)
 			receiver.Add(a, &sb)
 		}
-		testTwoInput(t, "AddScaledVec", &VecDense{}, method, denseComparison, legalTypesVecVec, legalSizeSameVec, 1e-14)
+		testTwoInput(t, "AddScaledVec", &VecDense{}, method, denseComparison, legalTypesVecDenseVecDense, legalSizeSameVec, 1e-14)
 	}
 }
 
 func TestVecDenseAdd(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -317,7 +317,7 @@ func TestVecDenseAdd(t *testing.T) {
 		},
 	} {
 		var v VecDense
-		v.AddVec(test.a, test.b)
+		v.AddVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
@@ -326,7 +326,7 @@ func TestVecDenseAdd(t *testing.T) {
 
 func TestVecDenseSub(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -346,7 +346,7 @@ func TestVecDenseSub(t *testing.T) {
 		},
 	} {
 		var v VecDense
-		v.SubVec(test.a, test.b)
+		v.SubVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
@@ -355,7 +355,7 @@ func TestVecDenseSub(t *testing.T) {
 
 func TestVecDenseMulElem(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -375,7 +375,7 @@ func TestVecDenseMulElem(t *testing.T) {
 		},
 	} {
 		var v VecDense
-		v.MulElemVec(test.a, test.b)
+		v.MulElemVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}
@@ -384,7 +384,7 @@ func TestVecDenseMulElem(t *testing.T) {
 
 func TestVecDenseDivElem(t *testing.T) {
 	for i, test := range []struct {
-		a, b *VecDense
+		a, b Vector
 		want *VecDense
 	}{
 		{
@@ -404,7 +404,7 @@ func TestVecDenseDivElem(t *testing.T) {
 		},
 	} {
 		var v VecDense
-		v.DivElemVec(test.a, test.b)
+		v.DivElemVec(test.a.(*VecDense), test.b.(*VecDense))
 		if !reflect.DeepEqual(v.RawVector(), test.want.RawVector()) {
 			t.Errorf("unexpected result for test %d: got: %v want: %v", i, v.RawVector(), test.want.RawVector())
 		}

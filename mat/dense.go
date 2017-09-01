@@ -201,20 +201,13 @@ func (m *Dense) T() Matrix {
 	return Transpose{m}
 }
 
-// ColView returns a VecDense reflecting the column j, backed by the matrix data.
+// ColView returns a Vector reflecting the column j, backed by the matrix data.
 //
 // See ColViewer for more information.
-func (m *Dense) ColView(j int) *VecDense {
-	if j >= m.mat.Cols || j < 0 {
-		panic(ErrColAccess)
-	}
-	return &VecDense{
-		mat: blas64.Vector{
-			Inc:  m.mat.Stride,
-			Data: m.mat.Data[j : (m.mat.Rows-1)*m.mat.Stride+j+1],
-		},
-		n: m.mat.Rows,
-	}
+func (m *Dense) ColView(j int) Vector {
+	var v VecDense
+	v.ColViewOf(m, j)
+	return &v
 }
 
 // SetCol sets the values in the specified column of the matrix to the values
@@ -250,17 +243,10 @@ func (m *Dense) SetRow(i int, src []float64) {
 // backed by the matrix data.
 //
 // See RowViewer for more information.
-func (m *Dense) RowView(i int) *VecDense {
-	if i >= m.mat.Rows || i < 0 {
-		panic(ErrRowAccess)
-	}
-	return &VecDense{
-		mat: blas64.Vector{
-			Inc:  1,
-			Data: m.rawRowView(i),
-		},
-		n: m.mat.Cols,
-	}
+func (m *Dense) RowView(i int) Vector {
+	var v VecDense
+	v.RowViewOf(m, i)
+	return &v
 }
 
 // RawRowView returns a slice backed by the same array as backing the

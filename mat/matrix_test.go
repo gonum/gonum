@@ -367,9 +367,35 @@ func TestDet(t *testing.T) {
 	testOneInputFunc(t, "DetVsChol", f, denseComparison, sameAnswerFloatApproxTol(1e-10), isAnyType, isWide)
 }
 
+type basicVector struct {
+	m []float64
+}
+
+func (v *basicVector) At(r, c int) float64 {
+	if c != 0 {
+		panic(ErrColAccess)
+	}
+	if r < 0 || r >= v.Len() {
+		panic(ErrRowAccess)
+	}
+	return v.m[r]
+}
+
+func (v *basicVector) Dims() (r, c int) {
+	return v.Len(), 1
+}
+
+func (v *basicVector) T() Matrix {
+	return Transpose{v}
+}
+
+func (v *basicVector) Len() int {
+	return len(v.m)
+}
+
 func TestDot(t *testing.T) {
 	f := func(a, b Matrix) interface{} {
-		return Dot(a.(*VecDense), b.(*VecDense))
+		return Dot(a.(Vector), b.(Vector))
 	}
 	denseComparison := func(a, b *Dense) interface{} {
 		ra, ca := a.Dims()

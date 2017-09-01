@@ -84,8 +84,8 @@ func (a argsort) Swap(i, j int) {
 	a.inds[i], a.inds[j] = a.inds[j], a.inds[i]
 }
 
-// Argsort sorts the elements of s while tracking their original order.
-// At the conclusion of Argsort, s will contain the original elements of s
+// Argsort sorts the elements of dst while tracking their original order.
+// At the conclusion of Argsort, dst will contain the original elements of dst
 // but sorted in increasing order, and inds will contain the original position
 // of the elements in the slice such that dst[i] = origDst[inds[i]].
 // It panics if the lengths of dst and inds do not match.

@@ -173,21 +173,14 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 		x = x[:m]
 		y = y[:n]
 		for i, xv := range x {
-			tmp := alpha * xv
-			if tmp != 0 {
-				atmp := a[i*lda : i*lda+n]
-				f32.AxpyUnitaryTo(atmp, tmp, y, atmp)
-			}
+			f32.AxpyUnitary(alpha*xv, y, a[i*lda:i*lda+n])
 		}
 		return
 	}
 
 	ix := kx
 	for i := 0; i < m; i++ {
-		tmp := alpha * x[ix]
-		if tmp != 0 {
-			f32.AxpyInc(tmp, y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
-		}
+		f32.AxpyInc(alpha*x[ix], y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
 		ix += incX
 	}
 }

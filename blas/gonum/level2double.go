@@ -149,34 +149,11 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 	if m == 0 || n == 0 || alpha == 0 {
 		return
 	}
-
-	var ky, kx int
-	if incY > 0 {
-		ky = 0
-	} else {
-		ky = -(n - 1) * incY
-	}
-
-	if incX > 0 {
-		kx = 0
-	} else {
-		kx = -(m - 1) * incX
-	}
-
-	if incX == 1 && incY == 1 {
-		x = x[:m]
-		y = y[:n]
-		for i, xv := range x {
-			f64.AxpyUnitary(alpha*xv, y, a[i*lda:i*lda+n])
-		}
-		return
-	}
-
-	ix := kx
-	for i := 0; i < m; i++ {
-		f64.AxpyInc(alpha*x[ix], y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
-		ix += incX
-	}
+	f64.Ger(uintptr(m), uintptr(n),
+		alpha,
+		x, uintptr(incX),
+		y, uintptr(incY),
+		a, uintptr(lda))
 }
 
 // Dgbmv computes

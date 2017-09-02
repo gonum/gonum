@@ -1,6 +1,9 @@
 package testblas
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 type Dgerer interface {
 	Dger(m, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int)
@@ -114,6 +117,17 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 			incY:    2,
 			trueAns: [][]float64{{3.5, 2.4, -34.5, -17.2, 19.55, -23}, {2.6, 2.8, 3.3, -3.4, 6.2, -8.7}, {-11.2, -4.3, 161.3, 95.9, -74.08, 71.9}},
 		},
+		{
+			name:    "Y NaN element",
+			m:       1,
+			n:       1,
+			a:       [][]float64{{1.3}},
+			x:       []float64{1.3},
+			y:       []float64{math.NaN()},
+			incX:    1,
+			incY:    1,
+			trueAns: [][]float64{{math.NaN()}},
+		},
 	} {
 		// TODO: Add tests where a is longer
 		// TODO: Add panic tests
@@ -148,15 +162,15 @@ func DgerTest(t *testing.T, blasser Dgerer) {
 
 func dgercomp(t *testing.T, x, xCopy, y, yCopy []float64, ans [][]float64, trueAns [][]float64, name string) {
 	if !dSliceEqual(x, xCopy) {
-		t.Errorf("case %v: x modified during call to dger", name)
+		t.Errorf("case %v: x modified during call to dger\n%v\n%v", name, x, xCopy)
 	}
 	if !dSliceEqual(y, yCopy) {
-		t.Errorf("case %v: x modified during call to dger", name)
+		t.Errorf("case %v: y modified during call to dger\n%v\n%v", name, y, yCopy)
 	}
 
 	for i := range ans {
 		if !dSliceTolEqual(ans[i], trueAns[i]) {
-			t.Errorf("case %v: answer mismatch. Expected %v, Found %v", name, trueAns, ans)
+			t.Errorf("case %v: answer mismatch at %v. Expected %v, Found %v", name, i, trueAns, ans)
 			break
 		}
 	}

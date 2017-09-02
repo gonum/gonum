@@ -168,10 +168,8 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		y = y[:n]
 		for i, xv := range x {
 			tmp := alpha * xv
-			if tmp != 0 {
-				atmp := a[i*lda : i*lda+n]
-				f64.AxpyUnitaryTo(atmp, tmp, y, atmp)
-			}
+			atmp := a[i*lda : i*lda+n]
+			f64.AxpyUnitaryTo(atmp, tmp, y, atmp)
 		}
 		return
 	}
@@ -179,9 +177,7 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 	ix := kx
 	for i := 0; i < m; i++ {
 		tmp := alpha * x[ix]
-		if tmp != 0 {
-			f64.AxpyInc(tmp, y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
-		}
+		f64.AxpyInc(tmp, y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
 		ix += incX
 	}
 }

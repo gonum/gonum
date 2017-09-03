@@ -69,7 +69,7 @@ func dSliceEqual(a, b []float64) bool {
 		return false
 	}
 	for i := range a {
-		if !(a[i] == b[i]) {
+		if !dTolEqual(a[i], b[i]) {
 			return false
 		}
 	}

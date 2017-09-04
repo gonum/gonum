@@ -7,7 +7,6 @@ package path
 import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/set"
-	"gonum.org/v1/gonum/graph/traverse"
 )
 
 // Dominators returns a dominator tree for all nodes in the flow graph
@@ -31,7 +30,7 @@ func Dominators(root graph.Node, g graph.Directed) DominatorTree {
 	// step 1.
 	lt.dfs(g, root)
 
-	for i := len(lt.vertex) - 1; i >= 2; i-- {
+	for i := lt.n; i >= 2; i-- {
 		w := lt.vertex[i]
 		wid := w.ID()
 		// step 2.
@@ -65,7 +64,8 @@ func Dominators(root graph.Node, g graph.Directed) DominatorTree {
 	}
 
 	// step 4.
-	for _, w := range lt.vertex[2:] {
+	for i := 2; i <= lt.n; i++ {
+		w := lt.vertex[i]
 		wid := w.ID()
 		if lt.dom[wid].ID() != lt.vertex[lt.semi[wid]].ID() {
 			lt.dom[wid] = lt.dom[lt.dom[wid].ID()]
@@ -125,26 +125,24 @@ type lengauerTarjan struct {
 
 	// Initially label[v] is v.
 	label map[int64]graph.Node
+
+	n int
 }
 
-func (lt *lengauerTarjan) dfs(g graph.Directed, root graph.Node) {
-	df := traverse.DepthFirst{EdgeFilter: func(e graph.Edge) bool {
-		u := e.From()
-		vid := e.To().ID()
-		lt.pred[vid] = append(lt.pred[vid], u)
-		if _, ok := lt.semi[vid]; ok {
-			return false
+func (lt *lengauerTarjan) dfs(g graph.Directed, v graph.Node) {
+	vid := v.ID()
+	lt.n++
+	lt.semi[vid] = lt.n
+	lt.label[vid] = v
+	lt.vertex = append(lt.vertex, v)
+	for _, w := range g.From(v) {
+		wid := w.ID()
+		if _, ok := lt.semi[wid]; !ok {
+			lt.parent[wid] = v
+			lt.dfs(g, w)
 		}
-		lt.parent[vid] = u
-		return true
-	}}
-	df.Walk(g, root, func(u graph.Node) bool {
-		uid := u.ID()
-		lt.label[uid] = u
-		lt.semi[uid] = len(lt.vertex)
-		lt.vertex = append(lt.vertex, u)
-		return false
-	})
+		lt.pred[wid] = append(lt.pred[wid], v)
+	}
 }
 
 func (lt *lengauerTarjan) compress(v graph.Node) {

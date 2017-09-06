@@ -7,6 +7,7 @@
 package path
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"math"
@@ -22,6 +23,8 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/topo"
 )
+
+var slta = flag.Bool("slta", false, "specify DominatorsSLT benchmark")
 
 func BenchmarkDominators(b *testing.B) {
 	testdata := filepath.FromSlash("./testdata/flow")
@@ -55,14 +58,25 @@ func BenchmarkDominators(b *testing.B) {
 			continue
 		}
 
-		b.Run(test, func(b *testing.B) {
-			for i := 0; i < b.N; i++ {
-				d := Dominators(g.root, g)
-				if got := d.Root(); got.ID() != want.ID() {
-					b.Fatalf("unexpected root node: got:%d want:%d", got.ID(), want.ID())
+		if *slta {
+			b.Run(test, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					d := DominatorsSLT(g.root, g)
+					if got := d.Root(); got.ID() != want.ID() {
+						b.Fatalf("unexpected root node: got:%d want:%d", got.ID(), want.ID())
+					}
 				}
-			}
-		})
+			})
+		} else {
+			b.Run(test, func(b *testing.B) {
+				for i := 0; i < b.N; i++ {
+					d := Dominators(g.root, g)
+					if got := d.Root(); got.ID() != want.ID() {
+						b.Fatalf("unexpected root node: got:%d want:%d", got.ID(), want.ID())
+					}
+				}
+			})
+		}
 	}
 }
 

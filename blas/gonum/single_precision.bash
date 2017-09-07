@@ -93,6 +93,7 @@ cat level2double.go \
 | gofmt -r 'f64.AxpyUnitaryTo -> f32.AxpyUnitaryTo' \
 | gofmt -r 'f64.DotInc -> f32.DotInc' \
 | gofmt -r 'f64.DotUnitary -> f32.DotUnitary' \
+| gofmt -r 'f64.Ger -> f32.Ger' \
 \
 | sed -e "s_^\(func (Implementation) \)D\(.*\)\$_$WARNING\1S\2_" \
       -e 's_^// D_// S_' \

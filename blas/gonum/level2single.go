@@ -155,34 +155,11 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 	if m == 0 || n == 0 || alpha == 0 {
 		return
 	}
-
-	var ky, kx int
-	if incY > 0 {
-		ky = 0
-	} else {
-		ky = -(n - 1) * incY
-	}
-
-	if incX > 0 {
-		kx = 0
-	} else {
-		kx = -(m - 1) * incX
-	}
-
-	if incX == 1 && incY == 1 {
-		x = x[:m]
-		y = y[:n]
-		for i, xv := range x {
-			f32.AxpyUnitary(alpha*xv, y, a[i*lda:i*lda+n])
-		}
-		return
-	}
-
-	ix := kx
-	for i := 0; i < m; i++ {
-		f32.AxpyInc(alpha*x[ix], y, a[i*lda:i*lda+n], uintptr(n), uintptr(incY), 1, uintptr(ky), 0)
-		ix += incX
-	}
+	f32.Ger(uintptr(m), uintptr(n),
+		alpha,
+		x, uintptr(incX),
+		y, uintptr(incY),
+		a, uintptr(lda))
 }
 
 // Sgbmv computes

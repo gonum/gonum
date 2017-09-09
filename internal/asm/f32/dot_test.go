@@ -10,11 +10,6 @@ import (
 	"testing"
 )
 
-const (
-	msgRes   = "%v: unexpected result Got: %v Expected: %v"
-	msgGuard = "%v: Guard violated in %s vector %v %v"
-)
-
 var dotTests = []struct {
 	x, y     []float32
 	sWant    float32 // single-precision

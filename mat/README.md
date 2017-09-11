@@ -1,3 +1,3 @@
-# Gonum matrix [![GoDoc](https://godoc.org/gonum.org/v1/gonum/matrix?status.svg)](https://godoc.org/gonum.org/v1/gonum/matrix)
+# Gonum matrix [![GoDoc](https://godoc.org/gonum.org/v1/gonum/mat?status.svg)](https://godoc.org/gonum.org/v1/gonum/mat)
 
-Package matrix is a matrix package for the Go language.
+Package mat is a matrix package for the Go language.

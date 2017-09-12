@@ -10,6 +10,10 @@ import (
 	"gonum.org/v1/gonum/blas/testblas"
 )
 
+func TestZgemv(t *testing.T) {
+	testblas.ZgemvTest(t, impl)
+}
+
 func TestZgerc(t *testing.T) {
 	testblas.ZgercTest(t, impl)
 }

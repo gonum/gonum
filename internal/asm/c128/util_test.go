@@ -14,6 +14,11 @@ const (
 	msgGuard = "%v: Guard violated in %s vector %v %v"
 )
 
+var (
+	inf       = math.Inf(1)
+	benchSink complex128
+)
+
 func same(x, y complex128) bool {
 	return (x == y ||
 		math.IsNaN(real(x)) && math.IsNaN(real(y)) && imag(x) == imag(y) ||

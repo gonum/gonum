@@ -34,3 +34,35 @@ func AxpyInc(alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr)
 //  	idst += incDst
 //  }
 func AxpyIncTo(dst []complex64, incDst, idst uintptr, alpha complex64, x, y []complex64, n, incX, incY, ix, iy uintptr)
+
+// DotcUnitary is
+//  for i, v := range x {
+//  	sum += y[i] * conj(v)
+//  }
+//  return sum
+func DotcUnitary(x, y []complex64) (sum complex64)
+
+// DotcInc is
+//  for i := 0; i < int(n); i++ {
+//  	sum += y[iy] * conj(x[ix])
+//  	ix += incX
+//  	iy += incY
+//  }
+//  return sum
+func DotcInc(x, y []complex64, n, incX, incY, ix, iy uintptr) (sum complex64)
+
+// DotuUnitary is
+//  for i, v := range x {
+//  	sum += y[i] * v
+//  }
+//  return sum
+func DotuUnitary(x, y []complex64) (sum complex64)
+
+// DotuInc is
+//  for i := 0; i < int(n); i++ {
+//  	sum += y[iy] * x[ix]
+//  	ix += incX
+//  	iy += incY
+//  }
+//  return sum
+func DotuInc(x, y []complex64, n, incX, incY, ix, iy uintptr) (sum complex64)

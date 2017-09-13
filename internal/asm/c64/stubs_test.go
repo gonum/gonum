@@ -82,25 +82,6 @@ var tests = []struct {
 		ex:  []complex64{2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 2 + 1i, 3 + 1i, 2 + 1i, 2 + 1i}},
 }
 
-func guardVector(vec []complex64, guard_val complex64, guard_len int) (guarded []complex64) {
-	guarded = make([]complex64, len(vec)+guard_len*2)
-	copy(guarded[guard_len:], vec)
-	for i := 0; i < guard_len; i++ {
-		guarded[i] = guard_val
-		guarded[len(guarded)-1-i] = guard_val
-	}
-	return guarded
-}
-
-func isValidGuard(vec []complex64, guard_val complex64, guard_len int) bool {
-	for i := 0; i < guard_len; i++ {
-		if vec[i] != guard_val || vec[len(vec)-1-i] != guard_val {
-			return false
-		}
-	}
-	return true
-}
-
 func TestAxpyUnitary(t *testing.T) {
 	var x_gd, y_gd complex64 = 1, 1
 	for cas, test := range tests {
@@ -145,51 +126,6 @@ func TestAxpyUnitaryTo(t *testing.T) {
 		if !isValidGuard(test.dst, dst_gd, xg_ln) {
 			t.Errorf("Test %d Guard violated in dst vector %v %v", cas, test.dst[:xg_ln], test.dst[len(test.dst)-xg_ln:])
 		}
-
-	}
-}
-
-func guardIncVector(vec []complex64, guard_val complex64, incV uintptr, guard_len int) (guarded []complex64) {
-	inc := int(incV)
-	s_ln := len(vec) * inc
-	if inc < 0 {
-		s_ln = len(vec) * -inc
-	}
-	guarded = make([]complex64, s_ln+guard_len*2)
-	for i, cas := 0, 0; i < len(guarded); i++ {
-		switch {
-		case i < guard_len, i > guard_len+s_ln:
-			guarded[i] = guard_val
-		case (i-guard_len)%(inc) == 0 && cas < len(vec):
-			guarded[i] = vec[cas]
-			cas++
-		default:
-			guarded[i] = guard_val
-		}
-	}
-	return guarded
-}
-
-func checkValidIncGuard(t *testing.T, vec []complex64, guard_val complex64, incV uintptr, guard_len int) {
-	inc := int(incV)
-	s_ln := len(vec) - 2*guard_len
-	if inc < 0 {
-		s_ln = len(vec) * -inc
-	}
-
-	for i := range vec {
-		switch {
-		case vec[i] == guard_val:
-			// Correct value
-		case i < guard_len:
-			t.Errorf("Front guard violated at %d %v", i, vec[:guard_len])
-		case i > guard_len+s_ln:
-			t.Errorf("Back guard violated at %d %v", i-guard_len-s_ln, vec[guard_len+s_ln:])
-		case (i-guard_len)%inc == 0 && (i-guard_len)/inc < len(vec):
-			// Ignore input values
-		default:
-			t.Errorf("Internal guard violated at %d %v", i-guard_len, vec[guard_len:guard_len+s_ln])
-		}
 	}
 }
 
@@ -197,7 +133,7 @@ func TestAxpyInc(t *testing.T) {
 	var x_gd, y_gd complex64 = 1, 1
 	for cas, test := range tests {
 		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardIncVector(test.x, x_gd, uintptr(test.incX), xg_ln), guardIncVector(test.y, y_gd, uintptr(test.incY), yg_ln)
+		test.x, test.y = guardIncVector(test.x, x_gd, test.incX, xg_ln), guardIncVector(test.y, y_gd, test.incY, yg_ln)
 		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
 		AxpyInc(test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
 		for i := range test.ex {
@@ -205,8 +141,8 @@ func TestAxpyInc(t *testing.T) {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, y[i*int(test.incY)], test.ex[i])
 			}
 		}
-		checkValidIncGuard(t, test.x, x_gd, uintptr(test.incX), xg_ln)
-		checkValidIncGuard(t, test.y, y_gd, uintptr(test.incY), yg_ln)
+		checkValidIncGuard(t, test.x, x_gd, test.incX, xg_ln)
+		checkValidIncGuard(t, test.y, y_gd, test.incY, yg_ln)
 	}
 }
 
@@ -214,8 +150,8 @@ func TestAxpyIncTo(t *testing.T) {
 	var x_gd, y_gd, dst_gd complex64 = 1, 1, 0
 	for cas, test := range tests {
 		xg_ln, yg_ln := 4+cas%2, 4+cas%3
-		test.x, test.y = guardIncVector(test.x, x_gd, uintptr(test.incX), xg_ln), guardIncVector(test.y, y_gd, uintptr(test.incY), yg_ln)
-		test.dst = guardIncVector(test.dst, dst_gd, uintptr(test.incDst), xg_ln)
+		test.x, test.y = guardIncVector(test.x, x_gd, test.incX, xg_ln), guardIncVector(test.y, y_gd, test.incY, yg_ln)
+		test.dst = guardIncVector(test.dst, dst_gd, test.incDst, xg_ln)
 		x, y := test.x[xg_ln:len(test.x)-xg_ln], test.y[yg_ln:len(test.y)-yg_ln]
 		dst := test.dst[xg_ln : len(test.dst)-xg_ln]
 		AxpyIncTo(dst, uintptr(test.incDst), test.idst, test.a, x, y, uintptr(len(test.ex)), uintptr(test.incX), uintptr(test.incY), test.ix, test.iy)
@@ -224,8 +160,8 @@ func TestAxpyIncTo(t *testing.T) {
 				t.Errorf("Test %d Unexpected result at %d Got: %v Expected: %v", cas, i, dst[i*int(test.incDst)], test.ex[i])
 			}
 		}
-		checkValidIncGuard(t, test.x, x_gd, uintptr(test.incX), xg_ln)
-		checkValidIncGuard(t, test.y, y_gd, uintptr(test.incY), yg_ln)
-		checkValidIncGuard(t, test.dst, dst_gd, uintptr(test.incDst), xg_ln)
+		checkValidIncGuard(t, test.x, x_gd, test.incX, xg_ln)
+		checkValidIncGuard(t, test.y, y_gd, test.incY, yg_ln)
+		checkValidIncGuard(t, test.dst, dst_gd, test.incDst, xg_ln)
 	}
 }

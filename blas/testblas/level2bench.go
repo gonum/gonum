@@ -8,7 +8,7 @@ import (
 	"gonum.org/v1/gonum/blas"
 )
 
-func DgemvBenchmark(b *testing.B, blasser Dgemver, tA blas.Transpose, m, n, incX, incY int) {
+func DgemvBenchmark(b *testing.B, impl Dgemver, tA blas.Transpose, m, n, incX, incY int) {
 	var lenX, lenY int
 	if tA == blas.NoTrans {
 		lenX = n
@@ -34,11 +34,11 @@ func DgemvBenchmark(b *testing.B, blasser Dgemver, tA blas.Transpose, m, n, incX
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		blasser.Dgemv(tA, m, n, 2, a, n, x, incX, 3, y, incY)
+		impl.Dgemv(tA, m, n, 2, a, n, x, incX, 3, y, incY)
 	}
 }
 
-func DgerBenchmark(b *testing.B, blasser Dgerer, m, n, incX, incY int) {
+func DgerBenchmark(b *testing.B, impl Dgerer, m, n, incX, incY int) {
 	xr := make([]float64, m)
 	for i := range xr {
 		xr[i] = rand.Float64()
@@ -56,6 +56,32 @@ func DgerBenchmark(b *testing.B, blasser Dgerer, m, n, incX, incY int) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		blasser.Dger(m, n, 2, x, incX, y, incY, a, n)
+		impl.Dger(m, n, 2, x, incX, y, incY, a, n)
+	}
+}
+
+type Sgerer interface {
+	Sger(m, n int, alpha float32, x []float32, incX int, y []float32, incY int, a []float32, lda int)
+}
+
+func SgerBenchmark(b *testing.B, blasser Sgerer, m, n, incX, incY int) {
+	xr := make([]float32, m)
+	for i := range xr {
+		xr[i] = rand.Float32()
+	}
+	x := makeIncremented32(xr, incX, 0)
+	yr := make([]float32, n)
+	for i := range yr {
+		yr[i] = rand.Float32()
+	}
+	y := makeIncremented32(yr, incY, 0)
+	a := make([]float32, m*n)
+	for i := range a {
+		a[i] = rand.Float32()
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		blasser.Sger(m, n, 2, x, incX, y, incY, a, n)
 	}
 }

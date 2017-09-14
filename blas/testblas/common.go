@@ -200,7 +200,7 @@ func flattenBanded(a [][]float64, ku, kl int) []float64 {
 	return aflat
 }
 
-// makeIncremented takes a slice with inc == 1 and makes an incremented version
+// makeIncremented takes a float64 slice with inc == 1 and makes an incremented version
 // and adds extra values on the end
 func makeIncremented(x []float64, inc int, extra int) []float64 {
 	if inc == 0 {
@@ -223,6 +223,45 @@ func makeIncremented(x []float64, inc int, extra int) []float64 {
 	// Do use a weird unique value for easier debugging
 	counter := 100.0
 	var xnew []float64
+	for i, v := range xcopy {
+		xnew = append(xnew, v)
+		if i != len(x)-1 {
+			for j := 0; j < absinc-1; j++ {
+				xnew = append(xnew, counter)
+				counter++
+			}
+		}
+	}
+	for i := 0; i < extra; i++ {
+		xnew = append(xnew, counter)
+		counter++
+	}
+	return xnew
+}
+
+// makeIncremented32 takes a float32 slice with inc == 1 and makes an incremented version
+// and adds extra values on the end
+func makeIncremented32(x []float32, inc int, extra int) []float32 {
+	if inc == 0 {
+		panic("zero inc")
+	}
+	absinc := inc
+	if absinc < 0 {
+		absinc = -inc
+	}
+	xcopy := make([]float32, len(x))
+	if inc > 0 {
+		copy(xcopy, x)
+	} else {
+		for i := 0; i < len(x); i++ {
+			xcopy[i] = x[len(x)-i-1]
+		}
+	}
+
+	// don't use NaN because it makes comparison hard
+	// Do use a weird unique value for easier debugging
+	var counter float32 = 100.0
+	var xnew []float32
 	for i, v := range xcopy {
 		xnew = append(xnew, v)
 		if i != len(x)-1 {

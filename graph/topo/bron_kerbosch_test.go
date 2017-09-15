@@ -48,7 +48,7 @@ var vOrderTests = []struct {
 	},
 }
 
-func TestVertexOrdering(t *testing.T) {
+func TestDegeneracyOrdering(t *testing.T) {
 	for i, test := range vOrderTests {
 		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
@@ -60,7 +60,7 @@ func TestVertexOrdering(t *testing.T) {
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
-		order, core := VertexOrdering(g)
+		order, core := DegeneracyOrdering(g)
 		if len(core)-1 != test.wantK {
 			t.Errorf("unexpected value of k for test %d: got: %d want: %d", i, len(core)-1, test.wantK)
 		}

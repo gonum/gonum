@@ -10,9 +10,9 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
-// VertexOrdering returns the vertex ordering and the k-cores of
+// DegeneracyOrdering returns the degeneracy ordering and the k-cores of
 // the undirected graph g.
-func VertexOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Node) {
+func DegeneracyOrdering(g graph.Undirected) (order []graph.Node, cores [][]graph.Node) {
 	order, offsets := degeneracyOrdering(g)
 
 	ordered.Reverse(order)
@@ -39,7 +39,7 @@ func KCore(k int, g graph.Undirected) []graph.Node {
 	return core
 }
 
-// degeneracyOrdering is the common code for VertexOrdering and KCore. It
+// degeneracyOrdering is the common code for DegeneracyOrdering and KCore. It
 // returns l, the nodes of g in optimal ordering for coloring number and
 // s, a set of relative offsets into l for each k-core, where k is an index
 // into s.

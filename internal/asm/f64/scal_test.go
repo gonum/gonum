@@ -122,7 +122,7 @@ func TestScalUnitaryTo(t *testing.T) {
 				t.Errorf(msgGuard, prefix, "y", dg[:dgLn], dg[len(dg)-dgLn:])
 			}
 			if !equalStrided(test.x, x, 1) {
-				t.Errorf("%v: modified read-only x argument", prefix)
+				t.Errorf(msgReadOnly, prefix, "x")
 			}
 		}
 	}

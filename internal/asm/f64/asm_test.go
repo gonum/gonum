@@ -11,6 +11,13 @@ import (
 	"golang.org/x/exp/rand"
 )
 
+const (
+	msgVal      = "%v: unexpected value at %v Got: %v Expected: %v"
+	msgGuard    = "%v: Guard violated in %s vector %v %v"
+	msgReadOnly = "%v: modified read-only %v argument"
+	epsilon     = 1e-13
+)
+
 var (
 	nan = math.NaN()
 	inf = math.Inf(1)
@@ -138,6 +145,11 @@ func checkValidIncGuard(t *testing.T, vec []float64, gdVal float64, inc, gdLen i
 // same tests for nan-aware equality.
 func same(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
+}
+
+// within tests for nan-aware equality within epsilon.
+func within(a, b float64) bool {
+	return same(a, b) || math.Abs(a-b) <= epsilon
 }
 
 var ( // Offset sets for testing alignment handling in Unitary assembly functions.

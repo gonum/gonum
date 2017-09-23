@@ -9,11 +9,6 @@ import (
 	"testing"
 )
 
-const (
-	msgVal   = "%v: unexpected value at %v Got: %v Expected: %v"
-	msgGuard = "%v: Guard violated in %s vector %v %v"
-)
-
 var axpyTests = []struct {
 	alpha   float64
 	x       []float64

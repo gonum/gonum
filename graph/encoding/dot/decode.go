@@ -54,6 +54,9 @@ func copyGraph(dst encoding.Builder, src *ast.Graph) (err error) {
 		directed: src.Directed,
 		ids:      make(map[string]graph.Node),
 	}
+	if dst, ok := dst.(DOTIDSetter); ok {
+		dst.SetDOTID(src.ID)
+	}
 	if a, ok := dst.(AttributeSetters); ok {
 		gen.graphAttr, gen.nodeAttr, gen.edgeAttr = a.DOTAttributeSetters()
 	}

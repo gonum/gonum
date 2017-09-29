@@ -1132,21 +1132,21 @@ func TestMixedMoment(t *testing.T) {
 			ans:     1.598600579313326e+03,
 		},
 	} {
-		m := MixedMoment(test.r, test.s, test.x, test.y, test.weights)
+		m := BivariateMoment(test.r, test.s, test.x, test.y, test.weights)
 		if math.Abs(test.ans-m) > 1e-14 {
 			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
 		}
 	}
-	if !Panics(func() { MixedMoment(1, 1, make([]float64, 3), make([]float64, 2), nil) }) {
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 3), make([]float64, 2), nil) }) {
 		t.Errorf("Moment did not panic with x, y length mismatch")
 	}
-	if !Panics(func() { MixedMoment(1, 1, make([]float64, 2), make([]float64, 3), nil) }) {
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 2), make([]float64, 3), nil) }) {
 		t.Errorf("Moment did not panic with x, y length mismatch")
 	}
-	if !Panics(func() { MixedMoment(1, 1, make([]float64, 2), make([]float64, 2), make([]float64, 3)) }) {
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 2), make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Moment did not panic with x, weights length mismatch")
 	}
-	if !Panics(func() { MixedMoment(1, 1, make([]float64, 2), make([]float64, 2), make([]float64, 1)) }) {
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 2), make([]float64, 2), make([]float64, 1)) }) {
 		t.Errorf("Moment did not panic with x, weights length mismatch")
 	}
 }
@@ -1174,9 +1174,6 @@ func TestMoment(t *testing.T) {
 		if math.Abs(test.ans-m) > 1e-14 {
 			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
 		}
-	}
-	if !Panics(func() { Moment(1, make([]float64, 3), make([]float64, 2)) }) {
-		t.Errorf("Moment did not panic with x, weights length mismatch")
 	}
 	if !Panics(func() { Moment(1, make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Moment did not panic with x, weights length mismatch")

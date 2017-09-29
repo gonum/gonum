@@ -1094,6 +1094,63 @@ func TestMode(t *testing.T) {
 	}
 }
 
+func TestMixedMoment(t *testing.T) {
+	for i, test := range []struct {
+		x, y, weights []float64
+		r, s          float64
+		ans           float64
+	}{
+		{
+			x:   []float64{10, 2, 1, 8, 5},
+			y:   []float64{8, 15, 1, 6, 3},
+			r:   1,
+			s:   1,
+			ans: 0.48,
+		},
+		{
+			x:       []float64{10, 2, 1, 8, 5},
+			y:       []float64{8, 15, 1, 6, 3},
+			weights: []float64{1, 1, 1, 1, 1},
+			r:       1,
+			s:       1,
+			ans:     0.48,
+		},
+		{
+			x:       []float64{10, 2, 1, 8, 5},
+			y:       []float64{8, 15, 1, 6, 3},
+			weights: []float64{2, 3, 0.2, 8, 4},
+			r:       1,
+			s:       1,
+			ans:     -4.786371011357490,
+		},
+		{
+			x:       []float64{10, 2, 1, 8, 5},
+			y:       []float64{8, 15, 1, 6, 3},
+			weights: []float64{2, 3, 0.2, 8, 4},
+			r:       2,
+			s:       3,
+			ans:     1.598600579313326e+03,
+		},
+	} {
+		m := BivariateMoment(test.r, test.s, test.x, test.y, test.weights)
+		if math.Abs(test.ans-m) > 1e-14 {
+			t.Errorf("Moment mismatch case %d. Expected %v, found %v", i, test.ans, m)
+		}
+	}
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 3), make([]float64, 2), nil) }) {
+		t.Errorf("Moment did not panic with x, y length mismatch")
+	}
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 2), make([]float64, 3), nil) }) {
+		t.Errorf("Moment did not panic with x, y length mismatch")
+	}
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 2), make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Moment did not panic with x, weights length mismatch")
+	}
+	if !Panics(func() { BivariateMoment(1, 1, make([]float64, 2), make([]float64, 2), make([]float64, 1)) }) {
+		t.Errorf("Moment did not panic with x, weights length mismatch")
+	}
+}
+
 func TestMoment(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64

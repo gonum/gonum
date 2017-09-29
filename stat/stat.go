@@ -862,6 +862,41 @@ func Mode(x, weights []float64) (val float64, count float64) {
 	return max, maxCount
 }
 
+// BivariateMoment computes the weighted mixed moment between the samples x and y.
+//  E[(x - μ_x)^r*(y - μ_y)^s]
+// No degrees of freedom correction is done.
+// The lengths of x and y must be equal. If weights is nil then all of the
+// weights are 1. If weights is not nil, then len(x) must equal len(weights).
+func BivariateMoment(r, s float64, x, y, weights []float64) float64 {
+	meanX := Mean(x, weights)
+	meanY := Mean(y, weights)
+	if len(x) != len(y) {
+		panic("stat: slice length mismatch")
+	}
+	if weights == nil {
+		var m float64
+		for i, vx := range x {
+			vy := y[i]
+			m += math.Pow(vx-meanX, r) * math.Pow(vy-meanY, s)
+		}
+		return m / float64(len(x))
+	}
+	if len(weights) != len(x) {
+		panic("stat: slice length mismatch")
+	}
+	var (
+		m          float64
+		sumWeights float64
+	)
+	for i, vx := range x {
+		vy := y[i]
+		w := weights[i]
+		m += w * math.Pow(vx-meanX, r) * math.Pow(vy-meanY, s)
+		sumWeights += w
+	}
+	return m / sumWeights
+}
+
 // Moment computes the weighted n^th moment of the samples,
 //  E[(x - μ)^N]
 // No degrees of freedom correction is done.

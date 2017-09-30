@@ -66,11 +66,12 @@ func TestNewNormalChol(t *testing.T) {
 		if !ok {
 			panic("bad test")
 		}
-		n := NewNormalChol(test.mean, &chol, nil)
+		n := NewNormalData(test.mean, test.cov, &chol, nil)
 		// Generate a random number and calculate probability to ensure things
 		// have been set properly. See issue #426.
 		x := n.Rand(nil)
 		_ = n.Prob(x)
+		_, _ = n.ConditionNormal([]int{0}, []float64{8.7}, nil)
 	}
 }
 

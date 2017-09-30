@@ -219,7 +219,7 @@ func TestCholeskySolveVec(t *testing.T) {
 	}
 }
 
-func TestCholeskyTo(t *testing.T) {
+func TestCholeskyToSym(t *testing.T) {
 	for _, test := range []*SymDense{
 		NewSymDense(3, []float64{
 			53, 59, 37,

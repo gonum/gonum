@@ -91,7 +91,7 @@ func ExampleCholesky_SymRankOne() {
 	// Rank-1 update the matrix a.
 	a.SymRankOne(a, 1, x)
 
-	au := chol.To(nil)
+	au := chol.ToSym(nil)
 
 	// Print the matrix that was updated directly.
 	fmt.Printf("\nA' =        %0.4v\n", mat.Formatted(a, mat.Prefix("            ")))

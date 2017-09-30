@@ -232,7 +232,7 @@ func TestCholeskyTo(t *testing.T) {
 		if !ok {
 			t.Fatal("unexpected Cholesky factorization failure: not positive definite")
 		}
-		s := chol.To(nil)
+		s := chol.ToSym(nil)
 
 		if !EqualApprox(s, test, 1e-12) {
 			t.Errorf("Cholesky reconstruction not equal to original matrix.\nWant:\n% v\nGot:\n% v\n", Formatted(test), Formatted(s))
@@ -338,7 +338,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 			a.SymRankOne(&a, alpha, x)
 
 			var achol SymDense
-			chol.To(&achol)
+			chol.ToSym(&achol)
 			if !EqualApprox(&achol, &a, 1e-13) {
 				t.Errorf("n=%v, alpha=%v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
 					n, alpha, Formatted(&a), Formatted(&achol))
@@ -413,7 +413,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 		a.SymRankOne(a, test.alpha, x)
 
 		var achol SymDense
-		chol.To(&achol)
+		chol.ToSym(&achol)
 		if !EqualApprox(&achol, a, 1e-13) {
 			t.Errorf("Case %v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
 				i, Formatted(a), Formatted(&achol))

@@ -268,10 +268,10 @@ func (c *Cholesky) LTo(dst *TriDense) *TriDense {
 	return dst
 }
 
-// To reconstructs the original positive definite matrix given its
+// ToSym reconstructs the original positive definite matrix given its
 // Cholesky decomposition into dst and returns the result. If dst is nil
 // a new SymDense is allocated.
-func (c *Cholesky) To(dst *SymDense) *SymDense {
+func (c *Cholesky) ToSym(dst *SymDense) *SymDense {
 	if !c.valid() {
 		panic(badCholesky)
 	}

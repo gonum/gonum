@@ -1178,6 +1178,9 @@ func TestMoment(t *testing.T) {
 	if !Panics(func() { Moment(1, make([]float64, 3), make([]float64, 2)) }) {
 		t.Errorf("Moment did not panic with x, weights length mismatch")
 	}
+	if !Panics(func() { Moment(1, make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Moment did not panic with x, weights length mismatch")
+	}
 }
 
 func TestMomentAbout(t *testing.T) {

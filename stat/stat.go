@@ -903,6 +903,7 @@ func BivariateMoment(r, s float64, x, y, weights []float64) float64 {
 // If weights is nil then all of the weights are 1. If weights is not nil, then
 // len(x) must equal len(weights).
 func Moment(moment float64, x, weights []float64) float64 {
+	// This also checks that x and weights have the same length.
 	mean := Mean(x, weights)
 	if weights == nil {
 		var m float64
@@ -916,8 +917,9 @@ func Moment(moment float64, x, weights []float64) float64 {
 		sumWeights float64
 	)
 	for i, v := range x {
-		m += weights[i] * math.Pow(v-mean, moment)
-		sumWeights += weights[i]
+		w := weights[i]
+		m += w * math.Pow(v-mean, moment)
+		sumWeights += w
 	}
 	return m / sumWeights
 }

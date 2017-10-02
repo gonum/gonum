@@ -238,7 +238,7 @@ func Col(dst []float64, j int, a Matrix) []float64 {
 	return dst
 }
 
-// Row copies the elements in the jth column of the matrix into the slice dst.
+// Row copies the elements in the ith row of the matrix into the slice dst.
 // The length of the provided slice must equal the number of columns, unless the
 // slice is nil in which case a new slice is first allocated.
 func Row(dst []float64, i int, a Matrix) []float64 {

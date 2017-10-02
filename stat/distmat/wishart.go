@@ -151,7 +151,7 @@ func (w *Wishart) RandSym(x *mat.SymDense) *mat.SymDense {
 	}
 	var c mat.Cholesky
 	w.RandChol(&c)
-	c.To(x)
+	c.ToSym(x)
 	return x
 }
 
@@ -204,6 +204,6 @@ func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
 func (w *Wishart) setV() {
 	w.once.Do(func() {
 		w.v = mat.NewSymDense(w.dim, nil)
-		w.cholv.To(w.v)
+		w.cholv.ToSym(w.v)
 	})
 }

@@ -1702,5 +1702,4 @@ func TestStdScore(t *testing.T) {
 			t.Errorf("StdScore mismatch case %d. Expected %v, Found %v", i, test.z, z)
 		}
 	}
-
 }

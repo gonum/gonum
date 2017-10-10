@@ -78,7 +78,27 @@ func (p Poisson) Prob(x float64) float64 {
 
 // Rand returns a random sample drawn from the distribution.
 func (p Poisson) Rand() float64 {
-	panic("not implemented")
+	// poisson generator based upon the multiplication of
+	// uniform random variates.
+	// see:
+	//  Non-Uniform Random Variate Generation,
+	//  Luc Devroye (p504)
+	//  http://www.eirene.de/Devroye.pdf
+	x := 0.0
+	prod := 1.0
+	exp := math.Exp(-p.Lambda)
+	rnd := rand.Float64
+	if p.Source != nil {
+		rnd = p.Source.Float64
+	}
+
+	for {
+		prod *= rnd()
+		if prod <= exp {
+			return x
+		}
+		x++
+	}
 }
 
 // Skewness returns the skewness of the distribution.

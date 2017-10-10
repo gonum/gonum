@@ -1,0 +1,97 @@
+// Copyright ©2017 The gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package distuv
+
+import (
+	"math"
+	"math/rand"
+
+	"gonum.org/v1/gonum/mathext"
+)
+
+// Poisson implements the Poisson distribution, a discrete probability distribution
+// that expresses the probability of a given number of events occurring in a fixed
+// interval of time and/or space.
+//
+// The poisson distribution has density function:
+//
+//  λ^k / k! e^(-λ)
+//
+// For more information, see https://en.wikipedia.org/wiki/Poisson_distribution
+type Poisson struct {
+	// Lambda is the average number of events in an interval.
+	// Lambda must be greater than 0.
+	Lambda float64
+
+	Source *rand.Rand
+}
+
+// CDF computes the value of the cumulative distribution function at x.
+func (p Poisson) CDF(x float64) float64 {
+	if x < 0 {
+		return 0
+	}
+	kfac := 1
+	ix := int(math.Floor(x))
+	for i := 1; i <= ix; i++ {
+		kfac *= i
+	}
+	return mathext.GammaInc(math.Floor(x+1), p.Lambda) / float64(kfac)
+}
+
+// Entropy returns the entropy of the distribution.
+func (p Poisson) Entropy() float64 {
+	panic("not implemented")
+}
+
+// ExKurtosis returns the excess kurtosis of the distribution.
+func (p Poisson) ExKurtosis() float64 {
+	return 1 / p.Lambda
+}
+
+// LogProb computes the natural logarithm of the value of the probability
+// density function at x.
+func (p Poisson) LogProb(x float64) float64 {
+	if x < 0 {
+		return math.Inf(-1)
+	}
+	lg, _ := math.Lgamma(x + 1)
+	return x*math.Log(p.Lambda) - p.Lambda - lg
+}
+
+// Mean returns the mean of the probability distribution.
+func (p Poisson) Mean() float64 {
+	return p.Lambda
+}
+
+// NumParameters returns the number of parameters in the distribution.
+func (Poisson) NumParameters() int {
+	return 1
+}
+
+// Prob computes the value of the probability density function at x.
+func (p Poisson) Prob(x float64) float64 {
+	return math.Exp(p.LogProb(x))
+}
+
+// Rand returns a random sample drawn from the distribution.
+func (p Poisson) Rand() float64 {
+	panic("not implemented")
+}
+
+// Skewness returns the skewness of the distribution.
+func (p Poisson) Skewness() float64 {
+	return 1 / math.Sqrt(p.Lambda)
+}
+
+// StdDev returns the standard deviation of the probability distribution.
+func (p Poisson) StdDev() float64 {
+	return math.Sqrt(p.Variance())
+}
+
+// Variance returns the variance of the probability distribution.
+func (p Poisson) Variance() float64 {
+	return p.Lambda
+}

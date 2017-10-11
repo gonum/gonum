@@ -15,7 +15,7 @@ import (
 // that expresses the probability of a given number of events occurring in a fixed
 // interval of time and/or space.
 // The poisson distribution has density function:
-//  λ^k / k! e^(-λ)
+//  f(k) = λ^k / k! e^(-λ)
 // For more information, see https://en.wikipedia.org/wiki/Poisson_distribution.
 type Poisson struct {
 	// Lambda is the average number of events in an interval.

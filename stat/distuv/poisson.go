@@ -120,3 +120,11 @@ func (p Poisson) Survival(x float64) float64 {
 func (p Poisson) Variance() float64 {
 	return p.Lambda
 }
+
+// Quantile returns the inverse of the cumulative probability distribution.
+func (p Poisson) Quantile(q float64) float64 {
+	if q < 0 || q > 1 {
+		panic(badPercentile)
+	}
+	panic("not implemented")
+}

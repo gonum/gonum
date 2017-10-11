@@ -14,12 +14,9 @@ import (
 // Poisson implements the Poisson distribution, a discrete probability distribution
 // that expresses the probability of a given number of events occurring in a fixed
 // interval of time and/or space.
-//
 // The poisson distribution has density function:
-//
 //  λ^k / k! e^(-λ)
-//
-// For more information, see https://en.wikipedia.org/wiki/Poisson_distribution
+// For more information, see https://en.wikipedia.org/wiki/Poisson_distribution.
 type Poisson struct {
 	// Lambda is the average number of events in an interval.
 	// Lambda must be greater than 0.
@@ -33,17 +30,7 @@ func (p Poisson) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	}
-	kfac := 1
-	ix := int(math.Floor(x))
-	for i := 1; i <= ix; i++ {
-		kfac *= i
-	}
-	return mathext.GammaInc(math.Floor(x+1), p.Lambda) / float64(kfac)
-}
-
-// Entropy returns the entropy of the distribution.
-func (p Poisson) Entropy() float64 {
-	panic("not implemented")
+	return mathext.GammaInc(math.Floor(x+1), p.Lambda) / math.Gamma(x+1)
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.
@@ -57,7 +44,7 @@ func (p Poisson) LogProb(x float64) float64 {
 	if x < 0 {
 		return math.Inf(-1)
 	}
-	lg, _ := math.Lgamma(x + 1)
+	lg, _ := math.Lgamma(math.Floor(x) + 1)
 	return x*math.Log(p.Lambda) - p.Lambda - lg
 }
 
@@ -119,12 +106,4 @@ func (p Poisson) Survival(x float64) float64 {
 // Variance returns the variance of the probability distribution.
 func (p Poisson) Variance() float64 {
 	return p.Lambda
-}
-
-// Quantile returns the inverse of the cumulative probability distribution.
-func (p Poisson) Quantile(q float64) float64 {
-	if q < 0 || q > 1 {
-		panic(badPercentile)
-	}
-	panic("not implemented")
 }

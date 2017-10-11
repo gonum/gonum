@@ -12,7 +12,7 @@ import (
 	"gonum.org/v1/gonum/stat/combin"
 )
 
-// Binomial represents a random variable that characterizes characterizes the
+// Binomial represents a random variable that characterizes the
 // number of successes in a sequence of independent trials. It has two
 // parameters: n, the number of trials, and p, the probability of success in an
 // individual trial. The value of P must be between 0 and 1 and N must be

@@ -88,6 +88,22 @@ func (v *VecDense) Caps() (r, c int) {
 	return v.Cap(), 1
 }
 
+// ConvolveVec convolves the vectors a and b, placing the result in the receiver.
+func (v *VecDense) ConvolveVec(a, b *VecDense) {
+	panic("not implemented.")
+}
+
+// ReverseVec reverses the order of the elements of the vector.
+func (v *VecDense) ReverseVec() {
+	data := make([]float64, v.n)
+
+	copy(data, v.mat.Data)
+
+	for i := 0; i < v.n; i++ {
+		v.mat.Data[i] = data[v.n-i-1]
+	}
+}
+
 // Len returns the length of the vector.
 func (v *VecDense) Len() int {
 	return v.n

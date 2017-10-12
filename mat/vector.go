@@ -88,6 +88,17 @@ func (v *VecDense) Caps() (r, c int) {
 	return v.Cap(), 1
 }
 
+// ReverseVec reverses the order of the elements of the vector.
+func (v *VecDense) ReverseVec() {
+	data := make([]float64, v.n)
+
+	copy(data, v.mat.Data)
+
+	for i := 0; i < v.n; i++ {
+		v.mat.Data[i] = data[v.n-i-1]
+	}
+}
+
 // Len returns the length of the vector.
 func (v *VecDense) Len() int {
 	return v.n

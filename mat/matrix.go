@@ -321,6 +321,23 @@ func Cond(a Matrix, norm float64) float64 {
 	return lq.Cond()
 }
 
+// Convolve returns a vector representing the result of convolving a and b.
+func Convolve(a, b Vector) *VecDense {
+	ar := a.Len()
+	br := b.Len()
+
+	if ar < 1 || br < 1 {
+		panic(ErrShape)
+	}
+
+	n := ar + br - 1
+	v := NewVecDense(n, nil)
+
+	// TODO: implement convolution
+
+	return v
+}
+
 // Det returns the determinant of the matrix a. In many expressions using LogDet
 // will be more numerically stable.
 func Det(a Matrix) float64 {

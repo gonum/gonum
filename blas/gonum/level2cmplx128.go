@@ -209,6 +209,130 @@ func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int
 	}
 }
 
+// Zhemv performs the matrix-vector operation
+//  y = alpha * A * x + beta * y
+// where alpha and beta are scalars, x and y are vectors, and A is an n×n
+// Hermitian matrix. The imaginary parts of the diagonal elements of A are
+// ignored and assumed to be zero.
+func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	checkZMatrix('A', n, n, a, lda)
+	checkZVector('x', n, x, incX)
+	checkZVector('y', n, y, incY)
+
+	if n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	var kx int
+	if incX < 0 {
+		kx = (1 - n) * incX
+	}
+	var ky int
+	if incY < 0 {
+		ky = (1 - n) * incY
+	}
+
+	if beta != 1 {
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y {
+					y[i] = 0
+				}
+			} else {
+				for i, v := range y {
+					y[i] = beta * v
+				}
+			}
+		} else {
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					y[iy] = beta * y[iy]
+					iy += incY
+				}
+			}
+		}
+	}
+
+	if alpha == 0 {
+		return
+	}
+
+	if uplo == blas.Upper {
+		if incX == 1 && incY == 1 {
+			for i := 0; i < n; i++ {
+				tmp1 := alpha * x[i]
+				var tmp2 complex128
+				for j := i + 1; j < n; j++ {
+					y[j] += tmp1 * cmplx.Conj(a[i*lda+j])
+					tmp2 += a[i*lda+j] * x[j]
+				}
+				aii := complex(real(a[i*lda+i]), 0)
+				y[i] += tmp1*aii + alpha*tmp2
+			}
+		} else {
+			ix := kx
+			iy := ky
+			for i := 0; i < n; i++ {
+				tmp1 := alpha * x[ix]
+				var tmp2 complex128
+				jx := ix
+				jy := iy
+				for j := i + 1; j < n; j++ {
+					jx += incX
+					jy += incY
+					y[jy] += tmp1 * cmplx.Conj(a[i*lda+j])
+					tmp2 += a[i*lda+j] * x[jx]
+				}
+				aii := complex(real(a[i*lda+i]), 0)
+				y[iy] += tmp1*aii + alpha*tmp2
+				ix += incX
+				iy += incY
+			}
+		}
+		return
+	}
+	if incX == 1 && incY == 1 {
+		for i := 0; i < n; i++ {
+			tmp1 := alpha * x[i]
+			var tmp2 complex128
+			for j := 0; j < i; j++ {
+				y[j] += tmp1 * cmplx.Conj(a[i*lda+j])
+				tmp2 += a[i*lda+j] * x[j]
+			}
+			aii := complex(real(a[i*lda+i]), 0)
+			y[i] += tmp1*aii + alpha*tmp2
+		}
+	} else {
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			tmp1 := alpha * x[ix]
+			var tmp2 complex128
+			jx := kx
+			jy := ky
+			for j := 0; j < i; j++ {
+				y[jy] += tmp1 * cmplx.Conj(a[i*lda+j])
+				tmp2 += a[i*lda+j] * x[jx]
+				jx += incX
+				jy += incY
+			}
+			aii := complex(real(a[i*lda+i]), 0)
+			y[iy] += tmp1*aii + alpha*tmp2
+			ix += incX
+			iy += incY
+		}
+	}
+}
+
 // Zher performs the Hermitian rank-one operation
 //  A += alpha * x * x^H
 // where A is an n×n Hermitian matrix, alpha is a real scalar, and x is an n

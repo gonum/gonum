@@ -25,7 +25,8 @@ type Binomial struct {
 
 // CDF computes the value of the cumulative density function at x.
 func (b Binomial) CDF(x float64) float64 {
-	return mathext.RegIncBeta(float64(b.N)-x, x+1, 1-b.P)
+	xf := math.Floor(x)
+	return mathext.RegIncBeta(float64(b.N)-xf, xf+1, 1-b.P)
 }
 
 // Entropy returns the entropy of the distribution.

@@ -23,19 +23,6 @@ type Binomial struct {
 	Source *rand.Rand
 }
 
-// Mean returns the mean of the probability distribution.
-func (b Binomial) Mean() float64 {
-	return b.P * float64(b.N)
-}
-
-// Prob computes the value of the probability distribution at x.
-func (b Binomial) Prob(x float64) float64 {
-	xi := int(x)
-	return float64(combin.Binomial(b.N, xi)) *
-		math.Pow(b.P, x) *
-		math.Pow(1-b.P, float64(b.N-xi))
-}
-
 // CDF computes the value of the cumulative density function at x.
 func (b Binomial) CDF(x float64) float64 {
 	return mathext.RegIncBeta(float64(b.N)-x, x+1, 1-b.P)
@@ -68,6 +55,11 @@ func (b Binomial) LogProb(x float64) float64 {
 	return math.Log(b.Prob(x))
 }
 
+// Mean returns the mean of the probability distribution.
+func (b Binomial) Mean() float64 {
+	return b.P * float64(b.N)
+}
+
 // Median returns the median of the probability distribution.
 func (b Binomial) Median() float64 {
 	return math.Ceil(float64(b.N) * b.P)
@@ -76,6 +68,31 @@ func (b Binomial) Median() float64 {
 // NumParameters returns the number of parameters in the distribution.
 func (Binomial) NumParameters() int {
 	return 2
+}
+
+// Prob computes the value of the probability distribution at x.
+func (b Binomial) Prob(x float64) float64 {
+	xi := int(x)
+	return float64(combin.Binomial(b.N, xi)) *
+		math.Pow(b.P, x) *
+		math.Pow(1-b.P, float64(b.N-xi))
+}
+
+// Quantile returns the inverse of the cumulative probability distribution.
+func (b Binomial) Quantile(p float64) float64 {
+	// TODO(sglyon): need to implement this
+	panic("Not implemented!!!")
+}
+
+// Rand returns a random sample drawn from the distribution.
+func (b Binomial) Rand() float64 {
+	// TODO(sglyon): right now we just apply n independent Bernoulli...
+	out := 0.0
+	bern := Bernoulli{P: b.P, Source: b.Source}
+	for i := 0; i < b.N; i++ {
+		out += bern.Rand()
+	}
+	return out
 }
 
 // Skewness returns the skewness of the distribution.
@@ -97,21 +114,4 @@ func (b Binomial) Survival(x float64) float64 {
 // Variance returns the variance of the probability distribution.
 func (b Binomial) Variance() float64 {
 	return float64(b.N) * b.P * (1 - b.P)
-}
-
-// Rand returns a random sample drawn from the distribution.
-func (b Binomial) Rand() float64 {
-	// TODO(sglyon): right now we just apply n independent Bernoulli...
-	out := 0.0
-	bern := Bernoulli{P: b.P, Source: b.Source}
-	for i := 0; i < b.N; i++ {
-		out += bern.Rand()
-	}
-	return out
-}
-
-// Quantile returns the inverse of the cumulative probability distribution.
-func (b Binomial) Quantile(p float64) float64 {
-	// TODO(sglyon): need to implement this
-	panic("Not implemented!!!")
 }

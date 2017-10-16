@@ -73,6 +73,9 @@ func (Binomial) NumParameters() int {
 // Prob computes the value of the probability distribution at x.
 func (b Binomial) Prob(x float64) float64 {
 	xi := int(x)
+	if float64(xi) != x {
+		return 0.0
+	}
 	return float64(combin.Binomial(b.N, xi)) *
 		math.Pow(b.P, x) *
 		math.Pow(1-b.P, float64(b.N-xi))

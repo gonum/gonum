@@ -148,10 +148,10 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 			status = checkConvergence(optLoc, settings, true)
 		default: // Any of the Evaluation operations.
 			status, err = evaluate(p, loc, op, x)
-			updateStats(stats, op)
+			updateEvaluationStats(stats, op)
 		}
 
-		status, err = iterCleanup(status, err, stats, settings, statuser, startTime, loc, op)
+		status, err = finishIteration(status, err, stats, settings, statuser, startTime, loc, op)
 		if status != NotTerminated || err != nil {
 			return
 		}
@@ -209,7 +209,7 @@ func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stat
 		}
 		x := make([]float64, len(loc.X))
 		evaluate(p, loc, eval, x)
-		updateStats(stats, eval)
+		updateEvaluationStats(stats, eval)
 	}
 
 	if math.IsInf(loc.F, 1) || math.IsNaN(loc.F) {

@@ -121,8 +121,8 @@ func checkConvergence(loc *Location, settings *Settings, local bool) Status {
 	return NotTerminated
 }
 
-// updateStats updates the statistics based on the operation.
-func updateStats(stats *Stats, op Operation) {
+// updateEvaluationStats updates the statistics based on the operation.
+func updateEvaluationStats(stats *Stats, op Operation) {
 	if op&FuncEvaluation != 0 {
 		stats.FuncEvaluations++
 	}
@@ -169,8 +169,9 @@ func checkLimits(loc *Location, stats *Stats, settings *Settings) Status {
 	return NotTerminated
 }
 
-// TODO(btracey): better name
-func iterCleanup(status Status, err error, stats *Stats, settings *Settings, statuser Statuser, startTime time.Time, loc *Location, op Operation) (Status, error) {
+// finishIteration performs cleanup tasks at the end of an optimization iteration.
+// It checks the status, sends information to recorders, and updates the runtime.
+func finishIteration(status Status, err error, stats *Stats, settings *Settings, statuser Statuser, startTime time.Time, loc *Location, op Operation) (Status, error) {
 	if status != NotTerminated || err != nil {
 		return status, err
 	}

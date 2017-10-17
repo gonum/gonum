@@ -22,6 +22,10 @@ func TestZgeru(t *testing.T) {
 	testblas.ZgeruTest(t, impl)
 }
 
+func TestZhemv(t *testing.T) {
+	testblas.ZhemvTest(t, impl)
+}
+
 func TestZher(t *testing.T) {
 	testblas.ZherTest(t, impl)
 }

@@ -64,28 +64,65 @@ func (p Poisson) Prob(x float64) float64 {
 }
 
 // Rand returns a random sample drawn from the distribution.
-func (p Poisson) Rand() float64 {
+func (p Poisson) Rand() int {
 	// poisson generator based upon the multiplication of
 	// uniform random variates.
 	// see:
 	//  Non-Uniform Random Variate Generation,
 	//  Luc Devroye (p504)
 	//  http://www.eirene.de/Devroye.pdf
-	x := 0.0
-	prod := 1.0
-	exp := math.Exp(-p.Lambda)
 	rnd := rand.Float64
 	if p.Source != nil {
 		rnd = p.Source.Float64
 	}
 
-	for {
-		prod *= rnd()
-		if prod <= exp {
-			return x
+	if p.Lambda <= 0 {
+		return 0
+	} else if p.Lambda < 25 {
+		x := 0.0
+		prod := 1.0
+		exp := math.Exp(-p.Lambda)
+
+		for {
+			prod *= rnd()
+			if prod <= exp {
+				return int(x)
+			}
+			x++
 		}
-		x++
+
+	} else if p.Lambda < 1e9 {
+
+		sq := math.Sqrt(2*p.Lambda)
+		alxm := math.Log(p.Lambda)
+		lg, _ := math.Lgamma(p.Lambda + 1.0)
+		g := p.Lambda * alxm - lg
+
+		y := 0.0
+		em := 0.0
+		t := 0.0
+		for {
+			for {
+				y = math.Tan(math.Pi * rnd())
+				em = sq*y + p.Lambda
+				if em >= 0 {
+					break
+				}
+			}
+			em = math.Floor(em)
+			lg, _ = math.Lgamma(em + 1.0)
+			t = 0.9*(1.0 + y*y)*math.Exp(em*alxm-lg - g)
+			if rnd() <= t {
+				break
+			}
+		}
+		return int(em)
+
+	} else {
+		norm := Normal{Mu: p.Lambda, Sigma: math.Sqrt(p.Lambda), Source: p.Source}
+		return int(norm.Rand())
 	}
+
 }
 
 // Skewness returns the skewness of the distribution.

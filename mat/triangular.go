@@ -416,6 +416,51 @@ func (t *TriDense) MulTri(a, b Triangular) {
 	}
 }
 
+// ScaleTri multiplies the elements of a by f, placing the result in the receiver.
+// If the receiver is non-zero, the size and kind of the receiver must match
+// the input, or ScaleTri will panic.
+func (t *TriDense) ScaleTri(f float64, a Triangular) {
+	n, kind := a.Triangle()
+	t.reuseAs(n, kind)
+
+	// TODO(btracey): Improve the set of fast-paths.
+	switch a := a.(type) {
+	case RawTriangular:
+		amat := a.RawTriangular()
+		if kind == Upper {
+			for i := 0; i < n; i++ {
+				ts := t.mat.Data[i*t.mat.Stride+i : i*t.mat.Stride+n]
+				as := amat.Data[i*amat.Stride+i : i*amat.Stride+n]
+				for i, v := range as {
+					ts[i] = v * f
+				}
+			}
+			return
+		}
+		for i := 0; i < n; i++ {
+			ts := t.mat.Data[i*t.mat.Stride : i*t.mat.Stride+i+1]
+			as := amat.Data[i*amat.Stride : i*amat.Stride+i+1]
+			for i, v := range as {
+				ts[i] = v * f
+			}
+		}
+		return
+	default:
+		isUpper := kind == Upper
+		for i := 0; i < n; i++ {
+			if isUpper {
+				for j := i; j < n; j++ {
+					t.set(i, j, f*a.At(i, j))
+				}
+			} else {
+				for j := 0; j <= i; j++ {
+					t.set(i, j, f*a.At(i, j))
+				}
+			}
+		}
+	}
+}
+
 // copySymIntoTriangle copies a symmetric matrix into a TriDense
 func copySymIntoTriangle(t *TriDense, s Symmetric) {
 	n, upper := t.Triangle()

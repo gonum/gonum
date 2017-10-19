@@ -447,7 +447,7 @@ func TestCholeskyScale(t *testing.T) {
 		var cholUpdate Cholesky
 		cholUpdate.Scale(test.f, &chol)
 		chol.Scale(test.f, &chol)
-		if !equalApproxChol(&chol, &cholUpdate, 1e-14, 1e-14) {
+		if !equalChol(&chol, &cholUpdate) {
 			t.Errorf("Case %d: cholesky mismatch new receiver", cas)
 		}
 		var sym SymDense
@@ -464,6 +464,14 @@ func TestCholeskyScale(t *testing.T) {
 			t.Errorf("Case %d: cholesky mismatch with scaled matrix. %v, %v", cas, cholTest.cond, chol.cond)
 		}
 	}
+}
+
+// equalApproxChol checks that the two Cholesky decompositions are equal.
+func equalChol(a, b *Cholesky) bool {
+	if !Equal(a.chol, b.chol) {
+		return false
+	}
+	return a.cond == b.cond
 }
 
 // equalApproxChol checks that the two Cholesky decompositions are approximately

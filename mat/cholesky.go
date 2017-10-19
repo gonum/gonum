@@ -308,7 +308,7 @@ func (c *Cholesky) InverseTo(s *SymDense) error {
 	return err
 }
 
-// Scale multiplies the original matrix A by a non-negative constant using
+// Scale multiplies the original matrix A by a positive constant using
 // its Cholesky decomposition, storing the result in-place into the receiver.
 // That is, if the original Cholesky factorization is
 //  U^T * U = A
@@ -320,14 +320,14 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 	if !orig.valid() {
 		panic(badCholesky)
 	}
+	if f <= 0 {
+		panic("cholesky: scaling by a non-positive constant")
+	}
 	n := orig.Size()
 	if c.isZero() {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else if c.chol.mat.N != n {
 		panic(ErrShape)
-	}
-	if f <= 0 {
-		panic("cholesky: scaling by a non-positive constant")
 	}
 	c.chol.ScaleTri(math.Sqrt(f), orig.chol)
 	c.cond = orig.cond // Scaling by a positive constant does not change the condition number.

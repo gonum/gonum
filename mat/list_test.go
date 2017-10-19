@@ -131,6 +131,32 @@ func legalTypeSym(a Matrix) bool {
 	return ok
 }
 
+// legalTypeTri returns whether a is a Triangular.
+func legalTypeTri(a Matrix) bool {
+	_, ok := a.(Triangular)
+	return ok
+}
+
+// legalTypeTriLower returns whether a is a Triangular with kind == Lower.
+func legalTypeTriLower(a Matrix) bool {
+	t, ok := a.(Triangular)
+	if !ok {
+		return false
+	}
+	_, kind := t.Triangle()
+	return kind == Lower
+}
+
+// legalTypeTriUpper returns whether a is a Triangular with kind == Upper.
+func legalTypeTriUpper(a Matrix) bool {
+	t, ok := a.(Triangular)
+	if !ok {
+		return false
+	}
+	_, kind := t.Triangle()
+	return kind == Upper
+}
+
 // legalTypesSym returns whether both input arguments are Symmetric.
 func legalTypesSym(a, b Matrix) bool {
 	if _, ok := a.(Symmetric); !ok {

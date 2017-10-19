@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/blas/testblas"
+	"gonum.org/v1/gonum/floats"
 )
 
 func TestCholesky(t *testing.T) {
@@ -419,6 +420,65 @@ func TestCholeskySymRankOne(t *testing.T) {
 				i, Formatted(a), Formatted(&achol))
 		}
 	}
+}
+
+func TestCholeskyScale(t *testing.T) {
+	for cas, test := range []struct {
+		a *SymDense
+		f float64
+	}{
+		{
+			a: NewSymDense(3, []float64{
+				4, 1, 1,
+				0, 2, 3,
+				0, 0, 6,
+			}),
+			f: 0.5,
+		},
+	} {
+		var chol Cholesky
+		ok := chol.Factorize(test.a)
+		if !ok {
+			t.Errorf("Case %v: bad test, Cholesky factorization failed", cas)
+			continue
+		}
+
+		// Compare the update to a new Cholesky to an update in-place.
+		var cholUpdate Cholesky
+		cholUpdate.Scale(test.f, &chol)
+		chol.Scale(test.f, &chol)
+		if !equalChol(&chol, &cholUpdate) {
+			t.Errorf("Case %d: cholesky mismatch new receiver", cas)
+		}
+		var sym SymDense
+		chol.ToSym(&sym)
+		var comp SymDense
+		comp.ScaleSym(test.f, test.a)
+		if !EqualApprox(&comp, &sym, 1e-14) {
+			t.Errorf("Case %d: cholesky reconstruction doesn't match scaled matrix", cas)
+		}
+
+		var cholTest Cholesky
+		cholTest.Factorize(&comp)
+		if !equalApproxChol(&cholTest, &chol, 1e-12, 1e-12) {
+			t.Errorf("Case %d: cholesky mismatch with scaled matrix. %v, %v", cas, cholTest.cond, chol.cond)
+		}
+	}
+}
+
+// equalApproxChol checks that the two Cholesky decompositions are equal.
+func equalChol(a, b *Cholesky) bool {
+	return Equal(a.chol, b.chol) && a.cond == b.cond
+}
+
+// equalApproxChol checks that the two Cholesky decompositions are approximately
+// the same with the given tolerance on equality for the Triangular component and
+// condition.
+func equalApproxChol(a, b *Cholesky, matTol, condTol float64) bool {
+	if !EqualApprox(a.chol, b.chol, matTol) {
+		return false
+	}
+	return floats.EqualWithinAbsOrRel(a.cond, b.cond, condTol, condTol)
 }
 
 func BenchmarkCholeskySmall(b *testing.B) {

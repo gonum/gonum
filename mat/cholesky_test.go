@@ -468,10 +468,7 @@ func TestCholeskyScale(t *testing.T) {
 
 // equalApproxChol checks that the two Cholesky decompositions are equal.
 func equalChol(a, b *Cholesky) bool {
-	if !Equal(a.chol, b.chol) {
-		return false
-	}
-	return a.cond == b.cond
+	return Equal(a.chol, b.chol) && a.cond == b.cond
 }
 
 // equalApproxChol checks that the two Cholesky decompositions are approximately

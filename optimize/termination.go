@@ -18,6 +18,7 @@ const (
 	GradientThreshold
 	StepConvergence
 	FunctionNegativeInfinity
+	MethodConverge
 	Failure
 	IterationLimit
 	RuntimeLimit
@@ -69,6 +70,9 @@ var statuses = []struct {
 	},
 	{
 		name: "FunctionNegativeInfinity",
+	},
+	{
+		name: "MethodConverge",
 	},
 	{
 		name:  "Failure",

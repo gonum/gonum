@@ -30,7 +30,8 @@ func (p Poisson) CDF(x float64) float64 {
 	if x < 0 {
 		return 0
 	}
-	return mathext.GammaInc(math.Floor(x+1), p.Lambda) / math.Gamma(x+1)
+	fx := math.Floor(x) + 1
+	return mathext.GammaInc(fx, p.Lambda) / fx
 }
 
 // ExKurtosis returns the excess kurtosis of the distribution.

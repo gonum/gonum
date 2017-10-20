@@ -10,11 +10,9 @@ import (
 	"sort"
 	"sync"
 
-	"gonum.org/v1/gonum/stat/distmv"
-
-	"gonum.org/v1/gonum/mat"
-
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/stat/distmv"
 )
 
 // TODO(btracey): If we ever implement the traditional CMA-ES algorithm, provide

@@ -226,6 +226,7 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 		return
 	}
 
+	// Set up the start indices in X and Y.
 	var kx int
 	if incX < 0 {
 		kx = (1 - n) * incX
@@ -235,6 +236,7 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 		ky = (1 - n) * incY
 	}
 
+	// Form y := beta*y.
 	if beta != 1 {
 		if incY == 1 {
 			if beta == 0 {
@@ -266,7 +268,11 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 		return
 	}
 
+	// The elements of A are accessed sequentially with one pass through
+	// the triangular part of A.
+
 	if uplo == blas.Upper {
+		// Form y when A is stored in upper triangle.
 		if incX == 1 && incY == 1 {
 			for i := 0; i < n; i++ {
 				tmp1 := alpha * x[i]
@@ -300,6 +306,8 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 		}
 		return
 	}
+
+	// Form y when A is stored in lower triangle.
 	if incX == 1 && incY == 1 {
 		for i := 0; i < n; i++ {
 			tmp1 := alpha * x[i]

@@ -29,7 +29,6 @@ type Normal struct {
 	sigma mat.SymDense
 
 	chol       mat.Cholesky
-	lower      mat.TriDense
 	logSqrtDet float64
 	dim        int
 
@@ -59,7 +58,6 @@ func NewNormal(mu []float64, sigma mat.Symmetric, src *rand.Rand) (*Normal, bool
 	}
 	n.sigma = *mat.NewSymDense(dim, nil)
 	n.sigma.CopySym(sigma)
-	n.chol.LTo(&n.lower)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()
 	return n, true
 }
@@ -79,7 +77,6 @@ func NewNormalChol(mu []float64, chol *mat.Cholesky, src *rand.Rand) *Normal {
 	}
 	n.chol.Clone(chol)
 	copy(n.mu, mu)
-	chol.LTo(&n.lower)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()
 	return n
 }
@@ -262,18 +259,32 @@ func (n *Normal) Quantile(x, p []float64) []float64 {
 // If the input slice is nil, new memory is allocated, otherwise the result is stored
 // in place.
 func (n *Normal) Rand(x []float64) []float64 {
-	x = reuseAs(x, n.dim)
-	tmp := make([]float64, n.dim)
-	if n.src == nil {
+	return NormalRand(x, n.mu, &n.chol, n.src)
+}
+
+// NormalRand generates a random number with the given mean and Cholesky
+// decomposition of the covariance matrix.
+// If x is nil, new memory is allocated and returned, otherwise the result is stored
+// in place into x. NormalRand panics if x is non-nil and not equal to len(mu),
+// or if len(mu) != chol.Size().
+//
+// This function saves time and memory if the Cholesky decomposition is already
+// available. Otherwise, the NewNormal function should be used.
+func NormalRand(x, mean []float64, chol *mat.Cholesky, src *rand.Rand) []float64 {
+	x = reuseAs(x, len(mean))
+	if len(mean) != chol.Size() {
+		panic(badInputLength)
+	}
+	if src == nil {
 		for i := range x {
-			tmp[i] = rand.NormFloat64()
+			x[i] = rand.NormFloat64()
 		}
 	} else {
 		for i := range x {
-			tmp[i] = n.src.NormFloat64()
+			x[i] = src.NormFloat64()
 		}
 	}
-	n.transformNormal(x, tmp)
+	transformNormal(x, x, mean, chol)
 	return x
 }
 
@@ -330,16 +341,22 @@ func (n *Normal) TransformNormal(dst, normal []float64) []float64 {
 	if len(dst) != len(normal) {
 		panic(badInputLength)
 	}
-	n.transformNormal(dst, normal)
+	transformNormal(dst, normal, n.mu, &n.chol)
 	return dst
 }
 
-// transformNormal performs the same operation as TransformNormal except no
-// safety checks are performed and both input slices must be non-nil.
-func (n *Normal) transformNormal(dst, normal []float64) []float64 {
-	srcVec := mat.NewVecDense(n.dim, normal)
-	dstVec := mat.NewVecDense(n.dim, dst)
-	dstVec.MulVec(&n.lower, srcVec)
-	floats.Add(dst, n.mu)
+// transformNormal performs the same operation as Normal.TransformNormal except
+// no safety checks are performed and all memory must be provided.
+func transformNormal(dst, normal, mu []float64, chol *mat.Cholesky) []float64 {
+	dim := len(mu)
+	dstVec := mat.NewVecDense(dim, dst)
+	srcVec := mat.NewVecDense(dim, normal)
+	// If dst and normal are the same slice, make them the same Vector otherwise
+	// mat complains about being tricky.
+	if &normal[0] == &dst[0] {
+		srcVec = dstVec
+	}
+	dstVec.MulVec(chol.RawU().T(), srcVec)
+	floats.Add(dst, mu)
 	return dst
 }

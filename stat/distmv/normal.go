@@ -255,6 +255,13 @@ func (n *Normal) Quantile(x, p []float64) []float64 {
 	return x
 }
 
+// Rand generates a random number according to the distributon.
+// If the input slice is nil, new memory is allocated, otherwise the result is stored
+// in place.
+func (n *Normal) Rand(x []float64) []float64 {
+	return NormalRand(x, n.mu, &n.chol, n.src)
+}
+
 // NormalRand generates a random number with the given mean and Cholesky
 // decomposition of the covariance matrix.
 // If x is nil, new memory is allocated and returned, otherwise the result is stored
@@ -279,13 +286,6 @@ func NormalRand(x, mean []float64, chol *mat.Cholesky, src *rand.Rand) []float64
 	}
 	transformNormal(x, x, mean, chol)
 	return x
-}
-
-// Rand generates a random number according to the distributon.
-// If the input slice is nil, new memory is allocated, otherwise the result is stored
-// in place.
-func (n *Normal) Rand(x []float64) []float64 {
-	return NormalRand(x, n.mu, &n.chol, n.src)
 }
 
 // ScoreInput returns the gradient of the log-probability with respect to the

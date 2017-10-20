@@ -170,13 +170,17 @@ func minimizeGlobal(p *Problem, method GlobalMethod, settings *Settings, stats *
 	}
 
 	nTasks := settings.Concurrent
+	if nTasks == 0 {
+		nTasks = 1
+	}
 	newNTasks := method.InitGlobal(dim, nTasks)
 	if newNTasks > nTasks {
 		panic("global: too many tasks returned by GlobalMethod")
 	}
 	nTasks = newNTasks
 
-	// Launch optimization workers
+	// Launch optimization workers. Each worker is individually responsible
+	// for maintaining stats and evaluating the function.
 	var wg sync.WaitGroup
 	for task := 0; task < nTasks; task++ {
 		wg.Add(1)
@@ -268,7 +272,7 @@ func (g *globalStatus) updateStats(op Operation) {
 func (g *globalStatus) updateStatus(s Status, err error) {
 	g.mux.Lock()
 	defer g.mux.Unlock()
-	if g.status != NotTerminated {
+	if s != NotTerminated {
 		g.status = s
 		g.err = err
 	}
@@ -322,4 +326,11 @@ func DefaultSettingsGlobal() *Settings {
 			Iterations: 100,
 		},
 	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

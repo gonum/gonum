@@ -232,6 +232,13 @@ func (c *Cholesky) SolveVec(v, b *VecDense) error {
 
 }
 
+// RawU returns the Triangular matrix used to store the Cholesky decomposition of
+// the original matrix A. The returned matrix should not be modified. If it is
+// modified, the decomposition is invalid and should not be used.
+func (c *Cholesky) RawU() Triangular {
+	return c.chol
+}
+
 // UTo extracts the n×n upper triangular matrix U from a Cholesky
 // decomposition into dst and returns the result. If dst is nil a new
 // TriDense is allocated.

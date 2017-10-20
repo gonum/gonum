@@ -50,12 +50,12 @@ import (
 //  https://arxiv.org/pdf/1604.00772.pdf
 type CmaEsChol struct {
 	// InitStepSize sets the initial size of the covariance matrix adaptation.
-	// If InitStepSize is 0, a default vaule of 0.5 is used. InitStepSize cannot
-	// be negative.
+	// If InitStepSize is 0, a default value of 0.5 is used. InitStepSize cannot
+	// be negative, or CmaEsChol will panic.
 	InitStepSize float64
 	// Population sets the population size for the algorithm. If Population is
 	// 0, a default value of 4 + math.Floor(3*math.Log(float64(dim))) is used.
-	// Population cannot be negative.
+	// Population cannot be negative or CmaEsChol will panic.
 	Population int
 	// InitMean is the initial mean of the multivariate normal for sampling
 	// input locations. If InitMean is nil, the zero vector is used. If InitMean
@@ -97,10 +97,10 @@ type CmaEsChol struct {
 	fs []float64
 
 	// Adaptive algorithm parameters.
-	sigma  float64
-	pc, ps []float64
-	mean   []float64
-	chol   mat.Cholesky
+	invSigma float64 // inverse of the sigma parameter
+	pc, ps   []float64
+	mean     []float64
+	chol     mat.Cholesky
 
 	// Parallel fields.
 	taskIdxs []int          // Stores which simulation the task ran.
@@ -114,8 +114,8 @@ type CmaEsChol struct {
 }
 
 var (
-	_ Statuser     = &CmaEsChol{}
-	_ GlobalMethod = &CmaEsChol{}
+	_ Statuser     = (*CmaEsChol)(nil)
+	_ GlobalMethod = (*CmaEsChol)(nil)
 )
 
 func (cma *CmaEsChol) Needs() struct{ Gradient, Hessian bool } {
@@ -182,10 +182,10 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	cma.fs = resize(cma.fs, cma.pop)
 
 	// Allocate and initialize adaptive parameters.
-	cma.sigma = cma.InitStepSize
-	if cma.sigma == 0 {
-		cma.sigma = 0.3
-	} else if cma.sigma < 0 {
+	cma.invSigma = 1 / cma.InitStepSize
+	if cma.InitStepSize == 0 {
+		cma.invSigma = 10.0 / 3
+	} else if cma.InitStepSize < 0 {
 		panic("cma-es-chol: negative initial step size")
 	}
 	cma.pc = resize(cma.pc, dim)
@@ -221,7 +221,7 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	}
 
 	cma.evals = make([]int, cma.pop)
-	for i := 0; i < cma.pop; i++ {
+	for i := range cma.evals {
 		cma.evals[i] = i
 	}
 
@@ -233,7 +233,8 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	for i := 0; i < t; i++ {
 		cma.taskIdxs[i] = -1
 	}
-	// Get a new waitgroup so that if the struct is re-used the.
+	// Get a new mutex and waitgroup so that if the structure is reused there
+	// aren't residual interractions with the previous optimization.
 	cma.mux = sync.Mutex{}
 	cma.wg = sync.WaitGroup{}
 	return t
@@ -241,7 +242,7 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 
 func (cma *CmaEsChol) IterateGlobal(task int, loc *Location) (Operation, error) {
 	// Check the status of the incoming task. If it is a number, it means
-	// that taks contains a valid location.
+	// that task contains a valid location.
 	idx := cma.taskIdxs[task]
 	if idx != -1 {
 		cma.fs[idx] = loc.F
@@ -329,7 +330,7 @@ func (cma *CmaEsChol) update() error {
 
 	// p_{c,t+1} = (1-c_c) p_{c,t} + \sqrt(c_c*(2-c_c)*mueff) (m_{t+1}-m_t)/sigma_t
 	floats.Scale(1-cma.cc, cma.pc)
-	scaleC := math.Sqrt(cma.cc*(2-cma.cc)*cma.muEff) / cma.sigma
+	scaleC := math.Sqrt(cma.cc*(2-cma.cc)*cma.muEff) * cma.invSigma
 	floats.AddScaled(cma.pc, scaleC, meanDiff)
 
 	// p_{sigma, t+1} = (1-c_sigma) p_{sigma,t} + \sqrt(c_s*(2-c_s)*mueff) A_t^-1 (m_{t+1}-m_t)/sigma_t
@@ -342,7 +343,7 @@ func (cma *CmaEsChol) update() error {
 	if err != nil {
 		return err
 	}
-	scaleS := math.Sqrt(cma.cs*(2-cma.cs)*cma.muEff) / cma.sigma
+	scaleS := math.Sqrt(cma.cs*(2-cma.cs)*cma.muEff) * cma.invSigma
 	floats.AddScaled(cma.ps, scaleS, tmp)
 
 	// Compute the update to A.
@@ -355,12 +356,12 @@ func (cma *CmaEsChol) update() error {
 	for i, w := range cma.weights {
 		idx := indexes[i]
 		floats.SubTo(tmp, cma.xs.RawRowView(idx), meanOld)
-		cma.chol.SymRankOne(&cma.chol, cma.cmu*w/cma.sigma, tmpVec)
+		cma.chol.SymRankOne(&cma.chol, cma.cmu*w*cma.invSigma, tmpVec)
 	}
 
 	// sigma_{t+1} = sigma_t exp(c_sigma/d_sigma * norm(p_{sigma,t+1}/ E[chi] -1)
 	normPs := floats.Norm(cma.ps, 2)
-	cma.sigma *= math.Exp(cma.cs / cma.ds * (normPs/cma.eChi - 1))
+	cma.invSigma /= math.Exp(cma.cs / cma.ds * (normPs/cma.eChi - 1))
 	return nil
 }
 

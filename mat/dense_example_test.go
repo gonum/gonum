@@ -1,4 +1,4 @@
-// Copyright ©2013 The gonum Authors. All rights reserved.
+// Copyright ©2017 The gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -96,17 +96,19 @@ func ExampleDense_Inverse() {
 	fa := mat.Formatted(&ia, mat.Prefix("     "), mat.Squeeze())
 	fmt.Printf("Result:\nia = %.2g\n\n", fa)
 
-	// Show that [A] * [A]^(-1) = [I]
+	// Confirm that A * A^-1 = I
 	var r mat.Dense
 	r.Mul(a, &ia)
 	fr := mat.Formatted(&r, mat.Prefix("    "), mat.Squeeze())
 	fmt.Printf("Result:\nr = %v\n\n", fr)
 
-	// An alternative to using Inverse is to solve [A] * [X] = [I].
-	// ...Note that matrix inversion should generally be accomplished in this way, rather than using Inverse.
-	i := mat.NewDense(2, 2, []float64{1, 0, 0, 1})
+	// The Inverse operation, however, is numerically unstable, and should typically be avoided.
+	// For example, a common need is to find x = A^-1 * b. In this case, the SolveVec method of VecDense
+	// (if b is a Vector) or Solve method of Dense (if b is a matrix) should used instead of computing
+	// the Inverse of A.
+	b := mat.NewDense(2, 2, []float64{2, 0, 0, 2})
 	var x mat.Dense
-	x.Solve(a, i)
+	x.Solve(a, b)
 
 	// Print the result using the formatter.
 	fx := mat.Formatted(&x, mat.Prefix("    "), mat.Squeeze())
@@ -122,7 +124,7 @@ func ExampleDense_Inverse() {
 	//     ⎣0  1⎦
 	//
 	// Result:
-	// x = ⎡0.25     0⎤
-	//     ⎣   0  0.25⎦
+	// x = ⎡0.5    0⎤
+	//     ⎣  0  0.5⎦
 	//
 }

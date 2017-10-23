@@ -41,9 +41,9 @@ import (
 //
 // The CMA-ES-Chol algorithm differs from the standard CMA-ES algorithm in that
 // it directly updates the Cholesky decomposition of the normal distribution.
-// This changes the runtime is O(dim^2*pop) rather than O(dim^3). The evolution
-// of the multi-variate normal will be similar to the baseline CMA-ES algorithm,
-// but the covariance update equation is not identical.
+// This changes the runtime from O(dimension^3) to O(dimension^2*population)
+// The evolution of the multi-variate normal will be similar to the baseline
+// CMA-ES algorithm, but the covariance update equation is not identical.
 //
 // For more information about the CMA-ES algorithm, see
 //  https://en.wikipedia.org/wiki/CMA-ES
@@ -71,8 +71,8 @@ type CmaEsChol struct {
 	// (log) "volume" of the normal distribution, and when it is too small
 	// the samples are almost the same. If the log determinant of the covariance
 	// matrix becomes less than StopLogDet, the optimization run is concluded.
-	// If StopDeterminant is 0, a default value of dim*log(1e-16) is used.
-	// If StopDeterminant is NaN, the stopping criteria is not used, though
+	// If StopLogDet is 0, a default value of dim*log(1e-16) is used.
+	// If StopLogDet is NaN, the stopping criteria is not used, though
 	// this can cause numeric instabilities in the algorithm.
 	StopLogDet float64
 	// ForgetBest, when true, does not track the best overall function value found,
@@ -103,10 +103,11 @@ type CmaEsChol struct {
 	chol     mat.Cholesky
 
 	// Parallel fields.
-	taskIdxs []int          // Stores which simulation the task ran.
-	evals    []int          // remaining evaluations in this iteration.
-	mux      sync.Mutex     // protect access to evals.
-	wg       sync.WaitGroup // wait for simulations to finish before iterating.
+	taskIdxs []int // Stores which simulation the task ran.
+	evals    []int // remaining evaluations in this iteration.
+
+	mux sync.Mutex     // protect access to evals.
+	wg  sync.WaitGroup // wait for simulations to finish before iterating.
 
 	// Overall best.
 	bestX []float64
@@ -124,7 +125,7 @@ func (cma *CmaEsChol) Needs() struct{ Gradient, Hessian bool } {
 
 func (cma *CmaEsChol) Done() {}
 
-// Status returns the status of the method. CMA
+// Status returns the status of the method.
 func (cma *CmaEsChol) Status() (Status, error) {
 	sd := cma.StopLogDet
 	switch {
@@ -229,7 +230,7 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	cma.bestF = math.Inf(1)
 
 	t := min(tasks, cma.pop)
-	cma.taskIdxs = make([]int, cma.pop)
+	cma.taskIdxs = make([]int, t)
 	for i := 0; i < t; i++ {
 		cma.taskIdxs[i] = -1
 	}

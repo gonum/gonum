@@ -68,7 +68,7 @@ func (c *Cholesky) Cond() float64 {
 // factorization must not be used.
 func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 	n := a.Symmetric()
-	if c.isZero() {
+	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else {
 		c.chol = NewTriDense(n, Upper, use(c.chol.mat.Data, n*n))
@@ -91,7 +91,7 @@ func (c *Cholesky) Factorize(a Symmetric) (ok bool) {
 // Reset resets the factorization so that it can be reused as the receiver of a
 // dimensionally restricted operation.
 func (c *Cholesky) Reset() {
-	if !c.isZero() {
+	if c.chol != nil {
 		c.chol.Reset()
 	}
 	c.cond = math.Inf(1)
@@ -105,7 +105,7 @@ func (c *Cholesky) SetFromU(t *TriDense) {
 	if kind != Upper {
 		panic("cholesky: matrix must be upper triangular")
 	}
-	if c.isZero() {
+	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else {
 		c.chol = NewTriDense(n, Upper, use(c.chol.mat.Data, n*n))
@@ -122,7 +122,7 @@ func (c *Cholesky) Clone(chol *Cholesky) {
 		panic(badCholesky)
 	}
 	n := chol.Size()
-	if c.isZero() {
+	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else {
 		c.chol = NewTriDense(n, Upper, use(c.chol.mat.Data, n*n))
@@ -331,7 +331,7 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 		panic("cholesky: scaling by a non-positive constant")
 	}
 	n := orig.Size()
-	if c.isZero() {
+	if c.chol == nil {
 		c.chol = NewTriDense(n, Upper, nil)
 	} else if c.chol.mat.N != n {
 		panic(ErrShape)
@@ -363,7 +363,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *VecDense) (ok bo
 		panic(ErrShape)
 	}
 	if orig != c {
-		if c.isZero() {
+		if c.chol == nil {
 			c.chol = NewTriDense(n, Upper, nil)
 		} else if c.chol.mat.N != n {
 			panic(ErrShape)
@@ -502,10 +502,6 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *VecDense) (ok bo
 	return ok
 }
 
-func (c *Cholesky) isZero() bool {
-	return c.chol == nil
-}
-
 func (c *Cholesky) valid() bool {
-	return !c.isZero() && !c.chol.IsZero()
+	return c.chol != nil && !c.chol.IsZero()
 }

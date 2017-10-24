@@ -22,7 +22,7 @@ func (h Haltoner) Sample(batch *mat.Dense) {
 type HaltonKind int
 
 const (
-	// HaltonOwen generates (scrambled) Halton samples using the Randomized van der Corput
+	// Owen generates (scrambled) Halton samples using the Randomized van der Corput
 	// algorithm described in
 	//  A randomized Halton algorithm
 	//  Art Owen
@@ -31,7 +31,7 @@ const (
 	Owen = iota + 1
 )
 
-// Halton generates rows(batch) samples using Halton sequence from
+// Halton generates rows(batch) samples using the Halton sequence from
 // the given distribution. The specific method for scrambling (or lack thereof)
 // is specified by the HaltonKind. If src is not nil, it will be used to generate
 // the randomness needed to scramble the sequence (if necessary). Halton
@@ -41,7 +41,7 @@ const (
 // where the samples are generated to be evenly spaced out across the distribution.
 // Note that this means the sample locations are correlated with one another.
 // The distmv.NewUnitUniform function can be used for easy sampling from the unit hypercube.
-func Halton(batch *mat.Dense, h HaltonKind, q distmv.Quantiler, src *rand.Rand) {
+func Halton(batch *mat.Dense, kind HaltonKind, q distmv.Quantiler, src *rand.Rand) {
 	// Code based from https://arxiv.org/pdf/1706.02808.pdf .
 	perm := rand.Perm
 	if src != nil {
@@ -50,9 +50,9 @@ func Halton(batch *mat.Dense, h HaltonKind, q distmv.Quantiler, src *rand.Rand) 
 
 	n, d := batch.Dims()
 	// Each case should generate random numbers over the unit cube.
-	switch h {
+	switch kind {
 	default:
-		panic("halton: unknown HaltonType")
+		panic("halton: unknown HaltonKind")
 	case Owen:
 		for j := 0; j < d; j++ {
 			b := nthPrime(j)

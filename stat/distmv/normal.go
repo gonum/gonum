@@ -179,8 +179,33 @@ func (n *Normal) LogProb(x []float64) float64 {
 	if len(x) != dim {
 		panic(badSizeMismatch)
 	}
-	c := -0.5*float64(dim)*logTwoPi - n.logSqrtDet
-	dst := stat.Mahalanobis(mat.NewVecDense(dim, x), mat.NewVecDense(dim, n.mu), &n.chol)
+	return normalLogProb(x, n.mu, &n.chol, n.logSqrtDet)
+}
+
+// NormalLogProb computes the log probability of the location x for a Normal
+// distribution the given mean and Cholesky decomposition of the covariance matrix.
+// NormalLogProb panics if len(x) is not equal to len(mu), or if len(mu) != chol.Size().
+//
+// This function saves time and memory if the Cholesky decomposition is already
+// available. Otherwise, the NewNormal function should be used.
+func NormalLogProb(x, mu []float64, chol *mat.Cholesky) float64 {
+	dim := len(mu)
+	if len(x) != dim {
+		panic(badSizeMismatch)
+	}
+	if chol.Size() != dim {
+		panic(badSizeMismatch)
+	}
+	logSqrtDet := 0.5 * chol.LogDet()
+	return normalLogProb(x, mu, chol, logSqrtDet)
+}
+
+// normalLogProb is the same as NormalLogProb, but does not make size checks and
+// additionally requires log(|Σ|^-0.5)
+func normalLogProb(x, mu []float64, chol *mat.Cholesky, logSqrtDet float64) float64 {
+	dim := len(mu)
+	c := -0.5*float64(dim)*logTwoPi - logSqrtDet
+	dst := stat.Mahalanobis(mat.NewVecDense(dim, x), mat.NewVecDense(dim, mu), chol)
 	return c - 0.5*dst*dst
 }
 

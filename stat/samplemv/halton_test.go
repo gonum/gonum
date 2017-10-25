@@ -19,7 +19,7 @@ func TestHalton(t *testing.T) {
 		{1000, 3},
 	} {
 		src := rand.New(rand.NewSource(1))
-		// Generate the samples
+		// Generate the samples.
 		batch := mat.NewDense(test.n, test.d, nil)
 		Halton(batch, Owen, distmv.NewUnitUniform(test.d, nil), src)
 
@@ -31,13 +31,15 @@ func TestHalton(t *testing.T) {
 			fk := math.Log(float64(test.n)) / math.Log(b)
 			k := math.Ceil(fk)
 			den := math.Pow(b, k)
-			m := make(map[int]struct{})
+			m := make(map[int]int)
 			for i := 0; i < test.n; i++ {
 				bucket := int(batch.At(i, d) * den)
-				if _, ok := m[bucket]; ok {
-					t.Errorf("cas %d: multiple samples in bucket", cas)
+				m[bucket]++
+			}
+			for bucket, n := range m {
+				if n > 1 {
+					t.Errorf("case %d: bucket %v has %v samples", cas, bucket, n)
 				}
-				m[bucket] = struct{}{}
 			}
 		}
 	}

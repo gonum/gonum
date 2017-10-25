@@ -175,7 +175,6 @@ func (n *Normal) Entropy() float64 {
 
 // LogProb computes the log of the pdf of the point x.
 func (n *Normal) LogProb(x []float64) float64 {
-	//return
 	dim := n.dim
 	if len(x) != dim {
 		panic(badSizeMismatch)

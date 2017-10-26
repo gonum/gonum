@@ -128,3 +128,89 @@ func ExampleDense_Inverse() {
 	//     ⎣  0  0.5⎦
 	//
 }
+
+func ExampleDense_Mul() {
+	// Initialize two matrices, a and b.
+	a := mat.NewDense(2, 2, []float64{4, 0, 0, 4})
+	b := mat.NewDense(2, 3, []float64{4, 0, 0, 0, 0, 4})
+
+	// Take the matrix product of a and b and place the result in c.
+	var c mat.Dense
+	c.Mul(a, b)
+
+	// Print the result using the formatter.
+	fc := mat.Formatted(&c, mat.Prefix("    "), mat.Squeeze())
+	fmt.Printf("Result:\nc = %v\n\n", fc)
+	// Output:
+	// Result:
+	// c = ⎡16  0   0⎤
+	//     ⎣ 0  0  16⎦
+	//
+}
+
+func ExampleDense_Exp() {
+	// Initialize a matrix a with some data.
+	a := mat.NewDense(2, 2, []float64{1, 0, 0, 1})
+
+	// Take the exponential of the matrix and place the result in m.
+	var m mat.Dense
+	m.Exp(a)
+
+	// Print the result using the formatter.
+	fm := mat.Formatted(&m, mat.Prefix("    "), mat.Squeeze())
+	fmt.Printf("Result:\nm = %4.2f\n\n", fm)
+	// Output:
+	// Result:
+	// m = ⎡2.72  0.00⎤
+	//     ⎣0.00  2.72⎦
+	//
+}
+
+func ExampleDense_Pow() {
+	// Initialize a matrix with some data.
+	a := mat.NewDense(2, 2, []float64{4, 4, 4, 4})
+
+	// Take the second power of matrix a and place the result in m.
+	var m mat.Dense
+	m.Pow(a, 2)
+
+	// Print the result using the formatter.
+	fm := mat.Formatted(&m, mat.Prefix("    "), mat.Squeeze())
+	fmt.Printf("Result:\nm = %v\n\n", fm)
+
+	// Take the zeroth power of matrix a and place the result in n.
+	// We expect an identity matrix of the same size as matrix a.
+	var n mat.Dense
+	n.Pow(a, 0)
+
+	// Print the result using the formatter.
+	fn := mat.Formatted(&n, mat.Prefix("    "), mat.Squeeze())
+	fmt.Printf("Result:\nn = %v\n\n", fn)
+	// Output:
+	// Result:
+	// m = ⎡32  32⎤
+	//     ⎣32  32⎦
+	//
+	// Result:
+	// n = ⎡1  0⎤
+	//     ⎣0  1⎦
+	//
+}
+
+func ExampleDense_Scale() {
+	// Initialize a matrix with some data.
+	a := mat.NewDense(2, 2, []float64{4, 4, 4, 4})
+
+	// Scale the matrix by a factor of 0.25 and place the result in m.
+	var m mat.Dense
+	m.Scale(0.25, a)
+
+	// Print the result using the formatter.
+	fm := mat.Formatted(&m, mat.Prefix("    "), mat.Squeeze())
+	fmt.Printf("Result:\nm = %4.3f\n\n", fm)
+	// Output:
+	// Result:
+	// m = ⎡1.000  1.000⎤
+	//     ⎣1.000  1.000⎦
+	//
+}

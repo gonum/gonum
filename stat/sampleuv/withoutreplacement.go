@@ -36,6 +36,7 @@ func WithoutReplacement(idxs []int, n int, src *rand.Rand) {
 			perm = rand.Perm(n)
 		}
 		copy(idxs, perm)
+		return
 	}
 
 	// Instead, generate the random numbers directly.

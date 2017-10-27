@@ -22,14 +22,15 @@ type lhDist interface {
 }
 
 func TestLatinHypercube(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
 	for _, nSamples := range []int{1, 2, 5, 10, 20} {
 		for _, dist := range []lhDist{
-			distmv.NewUniform([]distmv.Bound{{0, 3}}, nil),
-			distmv.NewUniform([]distmv.Bound{{0, 3}, {-1, 5}, {-4, -1}}, nil),
+			distmv.NewUniform([]distmv.Bound{{0, 3}}, src),
+			distmv.NewUniform([]distmv.Bound{{0, 3}, {-1, 5}, {-4, -1}}, src),
 		} {
 			dim := dist.Dim()
 			batch := mat.NewDense(nSamples, dim, nil)
-			LatinHypercube(batch, dist, nil)
+			LatinHypercube(batch, dist, src)
 			// Latin hypercube should have one entry per hyperrow.
 			present := make([][]bool, nSamples)
 			for i := range present {
@@ -60,9 +61,10 @@ func TestLatinHypercube(t *testing.T) {
 }
 
 func TestImportance(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
 	// Test by finding the expected value of a multi-variate normal.
 	dim := 3
-	target, ok := randomNormal(dim)
+	target, ok := randomNormal(dim, src)
 	if !ok {
 		t.Fatal("bad test, sigma not pos def")
 	}
@@ -72,12 +74,12 @@ func TestImportance(t *testing.T) {
 	for i := 0; i < dim; i++ {
 		sigmaImp.SetSym(i, i, 3)
 	}
-	proposal, ok := distmv.NewNormal(muImp, sigmaImp, nil)
+	proposal, ok := distmv.NewNormal(muImp, sigmaImp, src)
 	if !ok {
 		t.Fatal("bad test, sigma not pos def")
 	}
 
-	nSamples := 100000
+	nSamples := 200000
 	batch := mat.NewDense(nSamples, dim, nil)
 	weights := make([]float64, nSamples)
 	Importance(batch, weights, target, proposal)
@@ -86,6 +88,7 @@ func TestImportance(t *testing.T) {
 }
 
 func TestRejection(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
 	// Test by finding the expected value of a uniform.
 	dim := 3
 	bounds := make([]distmv.Bound, dim)
@@ -106,7 +109,7 @@ func TestRejection(t *testing.T) {
 	for i := 0; i < dim; i++ {
 		sigmaImp.SetSym(i, i, 6)
 	}
-	proposal, ok := distmv.NewNormal(muImp, sigmaImp, nil)
+	proposal, ok := distmv.NewNormal(muImp, sigmaImp, src)
 	if !ok {
 		t.Fatal("bad test, sigma not pos def")
 	}
@@ -114,7 +117,7 @@ func TestRejection(t *testing.T) {
 	nSamples := 1000
 	batch := mat.NewDense(nSamples, dim, nil)
 	weights := make([]float64, nSamples)
-	_, ok = Rejection(batch, target, proposal, 1000, nil)
+	_, ok = Rejection(batch, target, proposal, 1000, src)
 	if !ok {
 		t.Error("Bad test, nan samples")
 	}
@@ -129,9 +132,10 @@ func TestRejection(t *testing.T) {
 }
 
 func TestMetropolisHastings(t *testing.T) {
+	src := rand.New(rand.NewSource(1))
 	// Test by finding the expected value of a normal distribution.
 	dim := 3
-	target, ok := randomNormal(dim)
+	target, ok := randomNormal(dim, src)
 	if !ok {
 		t.Fatal("bad test, sigma not pos def")
 	}
@@ -140,7 +144,7 @@ func TestMetropolisHastings(t *testing.T) {
 	for i := 0; i < dim; i++ {
 		sigmaImp.SetSym(i, i, 0.25)
 	}
-	proposal, ok := NewProposalNormal(sigmaImp, nil)
+	proposal, ok := NewProposalNormal(sigmaImp, src)
 	if !ok {
 		t.Fatal("bad test, sigma not pos def")
 	}
@@ -149,14 +153,14 @@ func TestMetropolisHastings(t *testing.T) {
 	burnin := 5000
 	batch := mat.NewDense(nSamples, dim, nil)
 	initial := make([]float64, dim)
-	MetropolisHastings(batch, initial, target, proposal, nil)
+	MetropolisHastings(batch, initial, target, proposal, src)
 	batch = batch.Slice(burnin, nSamples, 0, dim).(*mat.Dense)
 
 	compareNormal(t, target, batch, nil, 5e-1, 5e-1)
 }
 
 // randomNormal constructs a random Normal distribution.
-func randomNormal(dim int) (*distmv.Normal, bool) {
+func randomNormal(dim int, src *rand.Rand) (*distmv.Normal, bool) {
 	data := make([]float64, dim*dim)
 	for i := range data {
 		data[i] = rand.Float64()
@@ -168,7 +172,7 @@ func randomNormal(dim int) (*distmv.Normal, bool) {
 	for i := range mu {
 		mu[i] = rand.NormFloat64()
 	}
-	return distmv.NewNormal(mu, &sigma, nil)
+	return distmv.NewNormal(mu, &sigma, src)
 }
 
 func compareNormal(t *testing.T, want *distmv.Normal, batch *mat.Dense, weights []float64, meanTol, covTol float64) {
@@ -197,7 +201,7 @@ func compareNormal(t *testing.T, want *distmv.Normal, batch *mat.Dense, weights 
 }
 
 func TestMetropolisHastingser(t *testing.T) {
-	for seed, test := range []struct {
+	for _, test := range []struct {
 		dim, burnin, rate, samples int
 	}{
 		{3, 10, 1, 1},
@@ -217,7 +221,7 @@ func TestMetropolisHastingser(t *testing.T) {
 		dim := test.dim
 
 		initial := make([]float64, dim)
-		target, ok := randomNormal(dim)
+		target, ok := randomNormal(dim, nil)
 		if !ok {
 			t.Fatal("bad test, sigma not pos def")
 		}
@@ -226,19 +230,20 @@ func TestMetropolisHastingser(t *testing.T) {
 		for i := 0; i < dim; i++ {
 			sigmaImp.SetSym(i, i, 0.25)
 		}
-		proposal, ok := NewProposalNormal(sigmaImp, nil)
+
+		// Test the Metropolis Hastingser by generating all the samples, then generating
+		// the same samples with a burnin and rate.
+		src := rand.New(rand.NewSource(1))
+		proposal, ok := NewProposalNormal(sigmaImp, src)
 		if !ok {
 			t.Fatal("bad test, sigma not pos def")
 		}
 
-		// Test the Metropolis Hastingser by generating all the samples, then generating
-		// the same samples with a burnin and rate.
-		rand.Seed(int64(seed))
 		mh := MetropolisHastingser{
 			Initial:  initial,
 			Target:   target,
 			Proposal: proposal,
-			Src:      nil,
+			Src:      src,
 			BurnIn:   0,
 			Rate:     0,
 		}
@@ -247,15 +252,17 @@ func TestMetropolisHastingser(t *testing.T) {
 		rate := test.rate
 		fullBatch := mat.NewDense(1+burnin+rate*(samples-1), dim, nil)
 		mh.Sample(fullBatch)
+
+		src = rand.New(rand.NewSource(1))
+		proposal, _ = NewProposalNormal(sigmaImp, src)
 		mh = MetropolisHastingser{
 			Initial:  initial,
 			Target:   target,
 			Proposal: proposal,
-			Src:      nil,
+			Src:      src,
 			BurnIn:   burnin,
 			Rate:     rate,
 		}
-		rand.Seed(int64(seed))
 		batch := mat.NewDense(samples, dim, nil)
 		mh.Sample(batch)
 

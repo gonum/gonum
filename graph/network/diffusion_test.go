@@ -1,4 +1,4 @@
-// Copyright ©2017 The gonum Authors. All rights reserved.
+// Copyright ©2017 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -89,6 +89,35 @@ var heatDiffusionTests = []struct {
 			},
 		},
 	},
+	{
+		g: grid(5),
+		h: func() map[int64]float64 {
+			m := make(map[int64]float64, 25)
+			for i := int64(A); i <= Y; i++ {
+				m[i] = 1
+			}
+			return m
+		}(),
+		t: 0.01, // FIXME(kortschak): Low t used due to instability in mat.Exp.
+
+		wantTol: 1e-2, // FIXME(kortschak): High tolerance used due to instability in mat.Exp.
+		want: map[bool]map[int64]float64{
+			false: {
+				A: 1, B: 1, C: 1, D: 1, E: 1,
+				F: 1, G: 1, H: 1, I: 1, J: 1,
+				K: 1, L: 1, M: 1, N: 1, O: 1,
+				P: 1, Q: 1, R: 1, S: 1, T: 1,
+				U: 1, V: 1, W: 1, X: 1, Y: 1,
+			},
+			true: {
+				A: 1, B: 1, C: 1, D: 1, E: 1,
+				F: 1, G: 1, H: 1, I: 1, J: 1,
+				K: 1, L: 1, M: 1, N: 1, O: 1,
+				P: 1, Q: 1, R: 1, S: 1, T: 1,
+				U: 1, V: 1, W: 1, X: 1, Y: 1,
+			},
+		},
+	},
 }
 
 func grid(d int) []set {
@@ -121,9 +150,11 @@ func TestHeatDiffusion(t *testing.T) {
 			}
 		}
 		for _, normalize := range []bool{false, true} {
+			var wantTemp float64
 			h := make(map[int64]float64)
 			for k, v := range test.h {
 				h[k] = v
+				wantTemp += v
 			}
 			got := HeatDiffusion(g, h, test.t, normalize)
 			prec := 1 - int(math.Log10(test.wantTol))
@@ -133,6 +164,21 @@ func TestHeatDiffusion(t *testing.T) {
 						i, normalize, orderedFloats(got, prec), orderedFloats(test.want[normalize], prec))
 					break
 				}
+			}
+
+			if normalize {
+				continue
+			}
+
+			var gotTemp float64
+			for _, v := range got {
+				gotTemp += v
+			}
+			gotTemp /= float64(len(got))
+			wantTemp /= float64(len(got))
+			if !floats.EqualWithinAbsOrRel(gotTemp, wantTemp, test.wantTol, test.wantTol) {
+				t.Errorf("unexpected total heat for test %d with normalize=%t: got:%v want:%v",
+					i, normalize, gotTemp, wantTemp)
 			}
 		}
 	}

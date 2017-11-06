@@ -1,4 +1,4 @@
-// Copyright ©2017 The gonum Authors. All rights reserved.
+// Copyright ©2017 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -13,10 +13,9 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// HeatDiffusion performs a heat diffusion network propagation across nodes
-// of the undirected graph g using the initial heat query h provided, and
-// diffusing for time t. The resulting heat diffusion is returned, written
-// into the map h,
+// HeatDiffusion performs a heat diffusion across nodes of the undirected
+// graph g using the initial heat distribution, h, and diffusing for time t.
+// The resulting heat distribution is returned, written into the map h,
 //  d = exp(-Lt)×h
 // where L is the graph Laplacian or symmetric normalized Laplacian.
 //

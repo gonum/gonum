@@ -6,14 +6,17 @@ package network
 
 import (
 	"math"
+	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/simple"
+	"gonum.org/v1/gonum/mat"
 )
 
-var heatDiffusionTests = []struct {
+var diffuseTests = []struct {
 	g []set
 	h map[int64]float64
 	t float64
@@ -119,27 +122,32 @@ var heatDiffusionTests = []struct {
 			},
 		},
 	},
-}
+	{
+		g: []set{
+			A: linksTo(B, C),
+			B: linksTo(D),
+			C: nil,
+			D: nil,
+			E: linksTo(F),
+			F: nil,
+		},
+		h: map[int64]float64{A: 1, E: 10},
+		t: 0.1,
 
-func grid(d int) []set {
-	dim := int64(d)
-	s := make([]set, dim*dim)
-	for i := range s {
-		s[i] = make(set)
-	}
-	for i := int64(0); i < dim*dim; i++ {
-		if i%dim != 0 {
-			s[i][i-1] = struct{}{}
-		}
-		if i/dim != 0 {
-			s[i][i-dim] = struct{}{}
-		}
-	}
-	return s
+		wantTol: 1e-9,
+		want: map[bool]map[int64]float64{
+			false: {
+				A: 0.8270754166, B: 0.0822899600, C: 0.0863904410, D: 0.0042441824, E: 9.0936537654, F: 0.9063462346,
+			},
+			true: {
+				A: 0.9082331512, B: 0.0453361743, C: 0.0640616812, D: 0.0016012085, E: 9.0936537654, F: 0.9063462346,
+			},
+		},
+	},
 }
 
 func TestDiffuse(t *testing.T) {
-	for i, test := range heatDiffusionTests {
+	for i, test := range diffuseTests {
 		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
 			// Add nodes that are not defined by an edge.
@@ -162,7 +170,7 @@ func TestDiffuse(t *testing.T) {
 			prec := 1 - int(math.Log10(test.wantTol))
 			for n := range test.g {
 				if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[normalize][int64(n)], test.wantTol, test.wantTol) {
-					t.Errorf("unexpected HeatDiffusion result for test %d with normalize=%t:\ngot: %v\nwant:%v",
+					t.Errorf("unexpected Diffuse result for test %d with normalize=%t:\ngot: %v\nwant:%v",
 						i, normalize, orderedFloats(got, prec), orderedFloats(test.want[normalize], prec))
 					break
 				}
@@ -184,4 +192,308 @@ func TestDiffuse(t *testing.T) {
 			}
 		}
 	}
+}
+
+var randomWalkLaplacianTests = []struct {
+	g    []set
+	damp float64
+
+	want *mat.Dense
+}{
+	{
+		g: []set{
+			A: linksTo(B, C),
+			B: linksTo(C),
+			C: nil,
+		},
+
+		want: mat.NewDense(3, 3, []float64{
+			1, 0, 0,
+			-0.5, 1, 0,
+			-0.5, -1, 0,
+		}),
+	},
+	{
+		g: []set{
+			A: linksTo(B, C),
+			B: linksTo(C),
+			C: nil,
+		},
+		damp: 0.85,
+
+		want: mat.NewDense(3, 3, []float64{
+			0.15, 0, 0,
+			-0.075, 0.15, 0,
+			-0.075, -0.15, 0,
+		}),
+	},
+	{
+		g: []set{
+			A: linksTo(B),
+			B: linksTo(C),
+			C: linksTo(A),
+		},
+		damp: 0.85,
+
+		want: mat.NewDense(3, 3, []float64{
+			0.15, 0, -0.15,
+			-0.15, 0.15, 0,
+			0, -0.15, 0.15,
+		}),
+	},
+	{
+		// Example graph from http://en.wikipedia.org/wiki/File:PageRanks-Example.svg 16:17, 8 July 2009
+		g: []set{
+			A: nil,
+			B: linksTo(C),
+			C: linksTo(B),
+			D: linksTo(A, B),
+			E: linksTo(D, B, F),
+			F: linksTo(B, E),
+			G: linksTo(B, E),
+			H: linksTo(B, E),
+			I: linksTo(B, E),
+			J: linksTo(E),
+			K: linksTo(E),
+		},
+
+		want: mat.NewDense(11, 11, []float64{
+			0, 0, 0, -0.5, 0, 0, 0, 0, 0, 0, 0,
+			0, 1, -1, -0.5, -1. / 3., -0.5, -0.5, -0.5, -0.5, 0, 0,
+			0, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 1, -1. / 3., 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 1, -0.5, -0.5, -0.5, -0.5, -1, -1,
+			0, 0, 0, 0, -1. / 3., 1, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		}),
+	},
+}
+
+func TestRandomWalkLaplacian(t *testing.T) {
+	const tol = 1e-14
+	for i, test := range randomWalkLaplacianTests {
+		g := simple.NewDirectedGraph()
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
+			}
+			for v := range e {
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
+			}
+		}
+		l := NewRandomWalkLaplacian(g, test.damp)
+		_, c := l.Dims()
+		for j := 0; j < c; j++ {
+			if got := mat.Sum(l.Matrix.(*mat.Dense).ColView(j)); !floats.EqualWithinAbsOrRel(got, 0, tol, tol) {
+				t.Errorf("unexpected column sum for test %d, column %d: got:%v want:0", i, j, got)
+			}
+		}
+		l = NewRandomWalkLaplacian(sortedNodeGraph{g}, test.damp)
+		if !mat.EqualApprox(l, test.want, tol) {
+			t.Errorf("unexpected result for test %d:\ngot:\n% .2v\nwant:\n% .2v",
+				i, mat.Formatted(l), mat.Formatted(test.want))
+		}
+	}
+}
+
+type sortedNodeGraph struct {
+	graph.Graph
+}
+
+func (g sortedNodeGraph) Nodes() []graph.Node {
+	n := g.Graph.Nodes()
+	sort.Sort(ordered.ByID(n))
+	return n
+}
+
+var diffuseToEquilibriumTests = []struct {
+	g       []set
+	builder builder
+	h       map[int64]float64
+	damp    float64
+	tol     float64
+	iter    int
+
+	want   map[int64]float64
+	wantOK bool
+}{
+	{
+		g:       grid(5),
+		builder: simple.NewUndirectedGraph(),
+		h:       map[int64]float64{0: 1},
+		damp:    0.85,
+		tol:     1e-6,
+		iter:    1e4,
+
+		want: map[int64]float64{
+			A: 0.025000, B: 0.037500, C: 0.037500, D: 0.037500, E: 0.025000,
+			F: 0.037500, G: 0.050000, H: 0.050000, I: 0.050000, J: 0.037500,
+			K: 0.037500, L: 0.050000, M: 0.050000, N: 0.050000, O: 0.037500,
+			P: 0.037500, Q: 0.050000, R: 0.050000, S: 0.050000, T: 0.037500,
+			U: 0.025000, V: 0.037500, W: 0.037500, X: 0.037500, Y: 0.025000,
+		},
+		wantOK: true,
+	},
+	{
+		// Example graph from http://en.wikipedia.org/wiki/File:PageRanks-Example.svg 16:17, 8 July 2009
+		g: []set{
+			A: nil,
+			B: linksTo(C),
+			C: linksTo(B),
+			D: linksTo(A, B),
+			E: linksTo(D, B, F),
+			F: linksTo(B, E),
+			G: linksTo(B, E),
+			H: linksTo(B, E),
+			I: linksTo(B, E),
+			J: linksTo(E),
+			K: linksTo(E),
+		},
+		builder: simple.NewDirectedGraph(),
+		h: map[int64]float64{
+			A: 1. / 11.,
+			B: 1. / 11.,
+			C: 1. / 11.,
+			D: 1. / 11.,
+			E: 1. / 11.,
+			F: 1. / 11.,
+			G: 1. / 11.,
+			H: 1. / 11.,
+			I: 1. / 11.,
+			J: 1. / 11.,
+			K: 1. / 11.,
+		},
+		damp: 0.85,
+		tol:  1e-6,
+		iter: 1e4,
+
+		// This does not look like Page Rank because we do not
+		// do the random node hops. An alternative Laplacian
+		// value that does do that would replicate PageRank. This
+		// is left as an excercise for the reader.
+		want: map[int64]float64{
+			A: 0.227273,
+			B: 0.386364,
+			C: 0.386364,
+			D: 0.000000,
+			E: 0.000000,
+			F: 0.000000,
+			G: 0.000000,
+			H: 0.000000,
+			I: 0.000000,
+			J: 0.000000,
+			K: 0.000000,
+		},
+		wantOK: true,
+	},
+	{
+		g: []set{
+			A: linksTo(B, C),
+			B: linksTo(D, C),
+			C: nil,
+			D: nil,
+			E: linksTo(F),
+			F: nil,
+		},
+		builder: simple.NewDirectedGraph(),
+		h:       map[int64]float64{A: 1, E: -10},
+		tol:     1e-6,
+		iter:    2,
+
+		want: map[int64]float64{
+			A: 0, B: 0, C: 0.75, D: 0.25, E: 0, F: -10,
+		},
+		wantOK: true,
+	},
+	{
+		g: []set{
+			A: linksTo(B, C),
+			B: linksTo(D, C),
+			C: nil,
+			D: nil,
+			E: linksTo(F),
+			F: nil,
+		},
+		builder: simple.NewUndirectedGraph(),
+		h:       map[int64]float64{A: 1, E: -10},
+		damp:    0.85,
+		tol:     1e-6,
+		iter:    1e4,
+
+		want: map[int64]float64{
+			A: 0.25, B: 0.375, C: 0.25, D: 0.125, E: -5, F: -5,
+		},
+		wantOK: true,
+	},
+}
+
+func TestDiffuseToEquilibrium(t *testing.T) {
+	for i, test := range diffuseToEquilibriumTests {
+		g := test.builder
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.Has(simple.Node(u)) {
+				g.AddNode(simple.Node(u))
+			}
+			for v := range e {
+				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
+			}
+		}
+		var wantTemp float64
+		h := make(map[int64]float64)
+		for k, v := range test.h {
+			h[k] = v
+			wantTemp += v
+		}
+		got, ok := DiffuseToEquilibrium(h, NewRandomWalkLaplacian(g, test.damp), test.tol*test.tol, test.iter)
+		if ok != test.wantOK {
+			t.Errorf("unexpected success value: got:%t want:%t", ok, test.wantOK)
+		}
+		prec := -int(math.Log10(test.tol))
+		for n := range test.g {
+			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.tol, test.tol) {
+				t.Errorf("unexpected DiffuseToEquilibrium result for test %d:\ngot: %v\nwant:%v",
+					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
+				break
+			}
+		}
+
+		var gotTemp float64
+		for _, v := range got {
+			gotTemp += v
+		}
+		gotTemp /= float64(len(got))
+		wantTemp /= float64(len(got))
+		if !floats.EqualWithinAbsOrRel(gotTemp, wantTemp, test.tol, test.tol) {
+			t.Errorf("unexpected total heat for test %d: got:%v want:%v",
+				i, gotTemp, wantTemp)
+		}
+	}
+}
+
+type builder interface {
+	graph.Graph
+	graph.Builder
+}
+
+func grid(d int) []set {
+	dim := int64(d)
+	s := make([]set, dim*dim)
+	for i := range s {
+		s[i] = make(set)
+	}
+	for i := int64(0); i < dim*dim; i++ {
+		if i%dim != 0 {
+			s[i][i-1] = struct{}{}
+		}
+		if i/dim != 0 {
+			s[i][i-dim] = struct{}{}
+		}
+	}
+	return s
 }

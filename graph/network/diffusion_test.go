@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -137,7 +138,7 @@ func grid(d int) []set {
 	return s
 }
 
-func TestHeatDiffusion(t *testing.T) {
+func TestDiffuse(t *testing.T) {
 	for i, test := range heatDiffusionTests {
 		g := simple.NewUndirectedGraph()
 		for u, e := range test.g {
@@ -149,14 +150,15 @@ func TestHeatDiffusion(t *testing.T) {
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
-		for _, normalize := range []bool{false, true} {
+		for j, lfn := range []func(g graph.Undirected) Laplacian{NewLaplacian, NewSymNormLaplacian} {
+			normalize := j == 1
 			var wantTemp float64
 			h := make(map[int64]float64)
 			for k, v := range test.h {
 				h[k] = v
 				wantTemp += v
 			}
-			got := HeatDiffusion(g, h, test.t, normalize)
+			got := Diffuse(h, lfn(g), test.t)
 			prec := 1 - int(math.Log10(test.wantTol))
 			for n := range test.g {
 				if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[normalize][int64(n)], test.wantTol, test.wantTol) {
@@ -166,7 +168,7 @@ func TestHeatDiffusion(t *testing.T) {
 				}
 			}
 
-			if normalize {
+			if j == 1 {
 				continue
 			}
 

@@ -422,6 +422,67 @@ func TestCholeskySymRankOne(t *testing.T) {
 	}
 }
 
+func TestCholeskyAppendOneSym(t *testing.T) {
+	for cas, test := range []struct {
+		a *SymDense
+	}{
+		{
+			a: NewSymDense(3, []float64{
+				4, 1, 1,
+				0, 2, 3,
+				0, 0, 6,
+			}),
+		},
+	} {
+		n := test.a.Symmetric()
+		as := test.a.SliceSquare(0, n-1).(*SymDense)
+
+		// Compute the full factorization to use later (but do first to make
+		// sure the matrix is positive definite.)
+		var cholFull Cholesky
+		ok := cholFull.Factorize(test.a)
+		if !ok {
+			panic("mat: bad test, matrix not positive definite")
+		}
+
+		var chol Cholesky
+		ok = chol.Factorize(as)
+		if !ok {
+			panic("mat: bad test, subset is not positive definite")
+		}
+		row := NewVecDense(n, nil)
+		for i := 0; i < n; i++ {
+			row.SetVec(i, test.a.At(n-1, i))
+		}
+
+		var cholNew Cholesky
+		ok = cholNew.AppendOneSym(&chol, row)
+		if !ok {
+			t.Errorf("cas %v: update not positive definite", cas)
+		}
+		a := cholNew.ToSym(nil)
+		if !EqualApprox(a, test.a, 1e-12) {
+			t.Errorf("cas %v: mismatch", cas)
+		}
+
+		// test in-place
+		ok = chol.AppendOneSym(&chol, row)
+		if !ok {
+			t.Errorf("cas %v: in-place update not positive definite", cas)
+		}
+		if !equalChol(&chol, &cholNew) {
+			t.Errorf("cas %v: Cholesky different in-place vs. new", cas)
+		}
+
+		// Test that the factorization is about right compared with the direct
+		// full factorization. Use a high tolerance on the condition number
+		// since the condition number with the updated rule is approximate.
+		if !equalApproxChol(&chol, &cholFull, 1e-12, 0.3) {
+			t.Errorf("cas %v: updated Cholesky does not match full", cas)
+		}
+	}
+}
+
 func TestCholeskyScale(t *testing.T) {
 	for cas, test := range []struct {
 		a *SymDense

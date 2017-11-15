@@ -20,7 +20,8 @@ import (
 // Laplacian Index field.
 //
 // Nodes without corresponding entries in h are given an initial heat of zero,
-// and entries in h without a corresponding node in g are not altered.
+// and entries in h without a corresponding node in the original graph are
+// not altered.
 func Diffuse(h map[int64]float64, by Laplacian, t float64) map[int64]float64 {
 	heat := make([]float64, len(by.Index))
 	for id, i := range by.Index {
@@ -50,7 +51,8 @@ func Diffuse(h map[int64]float64, by Laplacian, t float64) map[int64]float64 {
 // Indexing into h is defined by the Laplacian Index field.
 //
 // Nodes without corresponding entries in h are given an initial heat of zero,
-// and entries in h without a corresponding node in g are not altered.
+// and entries in h without a corresponding node in the original graph are
+// not altered.
 func DiffuseToEquilibrium(h map[int64]float64, by Laplacian, tol float64, iters int) (eq map[int64]float64, ok bool) {
 	heat := make([]float64, len(by.Index))
 	for id, i := range by.Index {
@@ -125,7 +127,7 @@ func NewLaplacian(g graph.Undirected) Laplacian {
 	return Laplacian{Matrix: l, Nodes: nodes, Index: indexOf}
 }
 
-// NewSymNormLaplacian returns a symmetric normalised Laplacian matrix for the
+// NewSymNormLaplacian returns a symmetric normalized Laplacian matrix for the
 // simple undirected graph g.
 // The Laplacian is defined by I-D^(-1/2)AD^(-1/2) where D is a diagonal matrix holding the
 // degree of each node and A is the graph adjacency matrix of the input graph.

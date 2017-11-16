@@ -490,6 +490,30 @@ func MulTo(dst, s, t []float64) []float64 {
 	return dst
 }
 
+const (
+	nanBits = 0x7ff8000000000000
+	nanMask = 0xfff8000000000000
+)
+
+// NaN returns an IEEE 754 "quiet not-a-number" value with the
+// payload specified in the low 51 bits of payload.
+// The NaN returned by math.NaN has a bit pattern equal to NaN(1).
+func NaN(payload uint64) float64 {
+	payload &^= nanMask
+	return math.Float64frombits(nanBits | payload)
+}
+
+// NaNPayload returns the lowest 51 bits of an IEEE 754 "quiet
+// not-a-number" and true, or zero and false if f is not NaN
+// or is not quiet.
+func NaNPayload(f float64) (payload uint64, ok bool) {
+	b := math.Float64bits(f)
+	if b&nanBits != nanBits {
+		return 0, false
+	}
+	return b &^ nanMask, true
+}
+
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.

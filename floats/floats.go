@@ -337,7 +337,6 @@ func EqualLengths(slices ...[]float64) bool {
 // all of the found elements will be returned along with an error.
 // At the return of the function, the input inds will be in an undetermined state.
 func Find(inds []int, f func(float64) bool, s []float64, k int) ([]int, error) {
-
 	// inds is also returned to allow for calling with nil
 
 	// Reslice inds to have zero length

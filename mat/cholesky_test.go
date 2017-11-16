@@ -422,7 +422,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 	}
 }
 
-func TestCholeskyAppendOneSym(t *testing.T) {
+func TestCholeskyExtendVecSym(t *testing.T) {
 	for cas, test := range []struct {
 		a *SymDense
 	}{
@@ -437,8 +437,8 @@ func TestCholeskyAppendOneSym(t *testing.T) {
 		n := test.a.Symmetric()
 		as := test.a.SliceSquare(0, n-1).(*SymDense)
 
-		// Compute the full factorization to use later (but do first to make
-		// sure the matrix is positive definite.)
+		// Compute the full factorization to use later (do the full factorization
+		// first to ensure the matrix is positive definite).
 		var cholFull Cholesky
 		ok := cholFull.Factorize(test.a)
 		if !ok {
@@ -456,7 +456,7 @@ func TestCholeskyAppendOneSym(t *testing.T) {
 		}
 
 		var cholNew Cholesky
-		ok = cholNew.AppendOneSym(&chol, row)
+		ok = cholNew.ExtendVecSym(&chol, row)
 		if !ok {
 			t.Errorf("cas %v: update not positive definite", cas)
 		}
@@ -466,7 +466,7 @@ func TestCholeskyAppendOneSym(t *testing.T) {
 		}
 
 		// test in-place
-		ok = chol.AppendOneSym(&chol, row)
+		ok = chol.ExtendVecSym(&chol, row)
 		if !ok {
 			t.Errorf("cas %v: in-place update not positive definite", cas)
 		}

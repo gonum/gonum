@@ -340,65 +340,65 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 	c.cond = orig.cond // Scaling by a positive constant does not change the condition number.
 }
 
-// AppendOneSym computes the Cholesky decomposition of the original matrix A
-// with the data appended to the original matrix A, storing the result into the
-// receiver. That is orig contains the Cholesky decomposition of A, and at completion
-// it contains the Cholesky decomposition of
-//  [A a]
-//  [a k]
-// where k = r[len(r)-1] and a = r[:len(r)-1]. In order for the updated matrix
-// to be positive definite, it must be the case that n > a' A^-1 a. If this
-// condition does not hold then AppendOneSym will return false and the receiver
-// will not be updated.
+// ExtendVecSym computes the Cholesky decomposition of the original matrix A,
+// whose Cholesky decomposition is in a, extended by an n×1 vector according to
+//  [A  w]
+//  [w' k]
+// where k = v[n-1] and w = v[:n-1]. The result is stored into the receiver.
+// In order for the updated matrix to be positive definite, it must be the case
+// that n > w' A^-1 w. If this condition does not hold then ExtendVecSym will
+// return false and the receiver will not be updated.
 //
-// AppendRow will panic if len(r) != orig.Size()+1 or if orig does not contain
+// ExtendVecSym will panic if len(v) != a.Size()+1 or if a does not contain
 // a valid decomposition.
-func (chol *Cholesky) AppendOneSym(orig *Cholesky, r Vector) (ok bool) {
-	n := orig.Size()
-	if r.Len() != n+1 {
+func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
+	n := a.Size()
+	if v.Len() != n+1 {
 		panic(badSliceLength)
 	}
-	if !orig.valid() {
+	if !a.valid() {
 		panic(badCholesky)
 	}
 
 	// The algorithm is commented here, but see also
 	//  https://math.stackexchange.com/questions/955874/cholesky-factor-when-adding-a-row-and-column-to-already-factorized-matrix
 	// We have A and want to compute the Cholesky of
-	//  [A a]
-	//  [a k]
+	//  [A  w]
+	//  [w' k]
 	// We want
 	//  [U c]
 	//  [0 d]
-	// to be the updated Choleksy, and so it must be that
-	//  [A a] = [U' 0 ] [U c]
-	//  [a k]   [c' d'] [0 d]
+	// to be the updated Cholesky, and so it must be that
+	//  [A  w] = [U' 0] [U c]
+	//  [w' k]   [c' d] [0 d]
 	// Thus, we need
-	//  1) A = U'U (true by orig being a valid Cholesky decomposition),
-	//  2) U' * c = a  =>  c = U'^-1 a
-	//  3) c'*c + d'*d = n  =>  d = sqrt(n-c'*c)
+	//  1) A = U'U (true by the original decomposition being valid),
+	//  2) U' * c = w  =>  c = U'^-1 w
+	//  3) c'*c + d'*d = k  =>  d = sqrt(k-c'*c)
 
 	// First, compute c = U'^-1 a
-	a := NewVecDense(n, nil)
+	// TODO(btracey): Replace this with CopyVec when issue 167 is fixed.
+	w := NewVecDense(n, nil)
 	for i := 0; i < n; i++ {
-		a.SetVec(i, r.At(i, 0))
+		w.SetVec(i, v.At(i, 0))
 	}
-	d := r.At(n, 0)
+	k := v.At(n, 0)
 
 	c := NewVecDense(n, nil)
-	c.SolveVec(orig.chol.T(), a)
+	c.SolveVec(a.chol.T(), w)
 
 	dot := Dot(c, c)
-	if dot > d {
+	if dot > k {
 		return false
 	}
+	d := math.Sqrt(k - dot)
 
 	newU := NewTriDense(n+1, Upper, nil)
-	newU.Copy(orig.chol)
+	newU.Copy(a.chol)
 	for i := 0; i < n; i++ {
 		newU.SetTri(i, n, c.At(i, 0))
 	}
-	newU.SetTri(n, n, math.Sqrt(d-dot))
+	newU.SetTri(n, n, d)
 	chol.chol = newU
 	chol.updateCond(-1)
 	return true

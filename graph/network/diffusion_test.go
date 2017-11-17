@@ -161,12 +161,10 @@ func TestDiffuse(t *testing.T) {
 		for j, lfn := range []func(g graph.Undirected) Laplacian{NewLaplacian, NewSymNormLaplacian} {
 			normalize := j == 1
 			var wantTemp float64
-			h := make(map[int64]float64)
-			for k, v := range test.h {
-				h[k] = v
+			for _, v := range test.h {
 				wantTemp += v
 			}
-			got := Diffuse(h, lfn(g), test.t)
+			got := Diffuse(nil, test.h, lfn(g), test.t)
 			prec := 1 - int(math.Log10(test.wantTol))
 			for n := range test.g {
 				if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[normalize][int64(n)], test.wantTol, test.wantTol) {
@@ -445,12 +443,10 @@ func TestDiffuseToEquilibrium(t *testing.T) {
 			}
 		}
 		var wantTemp float64
-		h := make(map[int64]float64)
-		for k, v := range test.h {
-			h[k] = v
+		for _, v := range test.h {
 			wantTemp += v
 		}
-		got, ok := DiffuseToEquilibrium(h, NewRandomWalkLaplacian(g, test.damp), test.tol*test.tol, test.iter)
+		got, ok := DiffuseToEquilibrium(nil, test.h, NewRandomWalkLaplacian(g, test.damp), test.tol*test.tol, test.iter)
 		if ok != test.wantOK {
 			t.Errorf("unexpected success value: got:%t want:%t", ok, test.wantOK)
 		}

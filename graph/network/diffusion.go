@@ -13,16 +13,17 @@ import (
 
 // Diffuse performs a heat diffusion across nodes of the undirected
 // graph described by the given Laplacian using the initial heat distribution,
-// h, according to the Laplacian and diffusing for time t.
-// The resulting heat distribution is returned, written into the map h,
+// h, according to the Laplacian with a diffusion time of t.
+// The resulting heat distribution is returned, written into the map dst and
+// returned,
 //  d = exp(-Lt)×h
-// where L is the graph Laplacian. Indexing into h is defined by the
-// Laplacian Index field.
+// where L is the graph Laplacian. Indexing into h and dst is defined by the
+// Laplacian Index field. If dst is nil, a new map is created.
 //
 // Nodes without corresponding entries in h are given an initial heat of zero,
 // and entries in h without a corresponding node in the original graph are
-// not altered.
-func Diffuse(h map[int64]float64, by Laplacian, t float64) map[int64]float64 {
+// not altered when written to dst.
+func Diffuse(dst, h map[int64]float64, by Laplacian, t float64) map[int64]float64 {
 	heat := make([]float64, len(by.Index))
 	for id, i := range by.Index {
 		heat[i] = h[id]
@@ -34,10 +35,13 @@ func Diffuse(h map[int64]float64, by Laplacian, t float64) map[int64]float64 {
 	m.Exp(&tl)
 	v.MulVec(&m, v)
 
-	for i, n := range v.RawVector().Data {
-		h[by.Nodes[i].ID()] = n
+	if dst == nil {
+		dst = make(map[int64]float64)
 	}
-	return h
+	for i, n := range v.RawVector().Data {
+		dst[by.Nodes[i].ID()] = n
+	}
+	return dst
 }
 
 // DiffuseToEquilibrium performs a heat diffusion across nodes of the
@@ -46,14 +50,15 @@ func Diffuse(h map[int64]float64, by Laplacian, t float64) map[int64]float64 {
 //  h_{n+1} = h_n - L×h_n
 // results in a 2-norm update difference within tol, or iter updates have
 // been made.
-// The resulting heat distribution is returned as eq, written into the map h,
-// and a boolean indicating whether the equilibrium converged.
-// Indexing into h is defined by the Laplacian Index field.
+// The resulting heat distribution is returned as eq, written into the map dst,
+// and a boolean indicating whether the equilibrium converged to within tol.
+// Indexing into h and dst is defined by the Laplacian Index field. If dst
+// is nil, a new map is created.
 //
 // Nodes without corresponding entries in h are given an initial heat of zero,
 // and entries in h without a corresponding node in the original graph are
-// not altered.
-func DiffuseToEquilibrium(h map[int64]float64, by Laplacian, tol float64, iters int) (eq map[int64]float64, ok bool) {
+// not altered when written to dst.
+func DiffuseToEquilibrium(dst, h map[int64]float64, by Laplacian, tol float64, iters int) (eq map[int64]float64, ok bool) {
 	heat := make([]float64, len(by.Index))
 	for id, i := range by.Index {
 		heat[i] = h[id]
@@ -81,10 +86,13 @@ func DiffuseToEquilibrium(h map[int64]float64, by Laplacian, tol float64, iters 
 		}
 	}
 
-	for i, n := range v.RawVector().Data {
-		h[by.Nodes[i].ID()] = n
+	if dst == nil {
+		dst = make(map[int64]float64)
 	}
-	return h, ok
+	for i, n := range v.RawVector().Data {
+		dst[by.Nodes[i].ID()] = n
+	}
+	return dst, ok
 }
 
 // Laplacian is a graph Laplacian matrix.
@@ -101,8 +109,9 @@ type Laplacian struct {
 }
 
 // NewLaplacian returns a Laplacian matrix for the simple undirected graph g.
-// The Laplacian is defined by D-A where D is a diagonal matrix holding the
+// The Laplacian is defined as D-A where D is a diagonal matrix holding the
 // degree of each node and A is the graph adjacency matrix of the input graph.
+// If g contains self edges, NewLaplacian will panic.
 func NewLaplacian(g graph.Undirected) Laplacian {
 	nodes := g.Nodes()
 	indexOf := make(map[int64]int, len(nodes))
@@ -118,6 +127,9 @@ func NewLaplacian(g graph.Undirected) Laplacian {
 		uid := u.ID()
 		for _, v := range to {
 			vid := v.ID()
+			if uid == vid {
+				panic("network: self edge in graph")
+			}
 			if uid < vid {
 				l.SetSym(indexOf[vid], j, -1)
 			}
@@ -129,8 +141,10 @@ func NewLaplacian(g graph.Undirected) Laplacian {
 
 // NewSymNormLaplacian returns a symmetric normalized Laplacian matrix for the
 // simple undirected graph g.
-// The Laplacian is defined by I-D^(-1/2)AD^(-1/2) where D is a diagonal matrix holding the
-// degree of each node and A is the graph adjacency matrix of the input graph.
+// The normalized Laplacian is defined as I-D^(-1/2)AD^(-1/2) where D is a
+// diagonal matrix holding the degree of each node and A is the graph adjacency
+// matrix of the input graph.
+// If g contains self edges, NewSymNormLaplacian will panic.
 func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 	nodes := g.Nodes()
 	indexOf := make(map[int64]int, len(nodes))
@@ -147,11 +161,14 @@ func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 		}
 		l.SetSym(j, j, 1)
 		uid := u.ID()
-		udeg := math.Sqrt(float64(len(to)))
+		squdeg := math.Sqrt(float64(len(to)))
 		for _, v := range to {
 			vid := v.ID()
+			if uid == vid {
+				panic("network: self edge in graph")
+			}
 			if uid < vid {
-				l.SetSym(indexOf[vid], j, -1/(udeg*math.Sqrt(float64(len(g.From(v))))))
+				l.SetSym(indexOf[vid], j, -1/(squdeg*math.Sqrt(float64(len(g.From(v))))))
 			}
 		}
 	}
@@ -161,8 +178,10 @@ func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 
 // NewRandomWalkLaplacian returns a random walk Laplacian matrix for the
 // simple graph g.
-// The Laplacian is defined by I-D^(-1)A where D is a diagonal matrix holding the
-// degree of each node and A is the graph adjacency matrix of the input graph.
+// The random walk Laplacian is defined as I-D^(-1)A where D is a diagonal matrix
+// holding the degree of each node and A is the graph adjacency matrix of the input
+// graph.
+// If g contains self edges, NewRandomWalkLaplacian will panic.
 func NewRandomWalkLaplacian(g graph.Graph, damp float64) Laplacian {
 	nodes := g.Nodes()
 	indexOf := make(map[int64]int, len(nodes))
@@ -173,6 +192,7 @@ func NewRandomWalkLaplacian(g graph.Graph, damp float64) Laplacian {
 
 	l := mat.NewDense(len(nodes), len(nodes), nil)
 	for j, u := range nodes {
+		uid := u.ID()
 		to := g.From(u)
 		if len(to) == 0 {
 			continue
@@ -180,7 +200,11 @@ func NewRandomWalkLaplacian(g graph.Graph, damp float64) Laplacian {
 		l.Set(j, j, 1-damp)
 		rudeg := (damp - 1) / float64(len(to))
 		for _, v := range to {
-			l.Set(indexOf[v.ID()], j, rudeg)
+			vid := v.ID()
+			if uid == vid {
+				panic("network: self edge in graph")
+			}
+			l.Set(indexOf[vid], j, rudeg)
 		}
 	}
 

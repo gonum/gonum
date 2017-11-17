@@ -346,7 +346,7 @@ func (c *Cholesky) Scale(f float64, orig *Cholesky) {
 //  [w' k]
 // where k = v[n-1] and w = v[:n-1]. The result is stored into the receiver.
 // In order for the updated matrix to be positive definite, it must be the case
-// that n > w' A^-1 w. If this condition does not hold then ExtendVecSym will
+// that k > w' A^-1 w. If this condition does not hold then ExtendVecSym will
 // return false and the receiver will not be updated.
 //
 // ExtendVecSym will panic if v.Len() != a.Size()+1 or if a does not contain
@@ -388,7 +388,7 @@ func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 	c.SolveVec(a.chol.T(), w)
 
 	dot := Dot(c, c)
-	if dot > k {
+	if dot >= k {
 		return false
 	}
 	d := math.Sqrt(k - dot)

@@ -401,7 +401,7 @@ var diffuseToEquilibriumTests = []struct {
 		builder: simple.NewDirectedGraph(),
 		h:       map[int64]float64{A: 1, E: -10},
 		tol:     1e-6,
-		iter:    2,
+		iter:    3,
 
 		want: map[int64]float64{
 			A: 0, B: 0, C: 0.75, D: 0.25, E: 0, F: -10,
@@ -448,7 +448,7 @@ func TestDiffuseToEquilibrium(t *testing.T) {
 		}
 		got, ok := DiffuseToEquilibrium(nil, test.h, NewRandomWalkLaplacian(g, test.damp), test.tol*test.tol, test.iter)
 		if ok != test.wantOK {
-			t.Errorf("unexpected success value: got:%t want:%t", ok, test.wantOK)
+			t.Errorf("unexpected success value for test %d: got:%t want:%t", i, ok, test.wantOK)
 		}
 		prec := -int(math.Log10(test.tol))
 		for n := range test.g {

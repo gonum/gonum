@@ -48,7 +48,7 @@ func Diffuse(dst, h map[int64]float64, by Laplacian, t float64) map[int64]float6
 // graph described by the given Laplacian using the initial heat
 // distribution, h, according to the Laplacian until the update function
 //  h_{n+1} = h_n - L×h_n
-// results in a 2-norm update difference within tol, or iter updates have
+// results in a 2-norm update difference within tol, or iters updates have
 // been made.
 // The resulting heat distribution is returned as eq, written into the map dst,
 // and a boolean indicating whether the equilibrium converged to within tol.
@@ -67,21 +67,21 @@ func DiffuseToEquilibrium(dst, h map[int64]float64, by Laplacian, tol float64, i
 
 	last := make([]float64, len(by.Index))
 	for id, i := range by.Index {
-		heat[i] = h[id]
+		last[i] = h[id]
 	}
 	lastV := mat.NewVecDense(len(last), last)
 
 	var tmp mat.VecDense
 	for {
+		iters--
+		if iters < 0 {
+			break
+		}
 		lastV, v = v, lastV
 		tmp.MulVec(by.Matrix, lastV)
 		v.SubVec(lastV, &tmp)
 		if normDiff(heat, last) < tol {
 			ok = true
-			break
-		}
-		iters--
-		if iters < 0 {
 			break
 		}
 	}

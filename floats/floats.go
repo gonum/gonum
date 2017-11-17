@@ -495,12 +495,11 @@ const (
 	nanMask = 0xfff8000000000000
 )
 
-// NaN returns an IEEE 754 "quiet not-a-number" value with the
+// NaNWith returns an IEEE 754 "quiet not-a-number" value with the
 // payload specified in the low 51 bits of payload.
 // The NaN returned by math.NaN has a bit pattern equal to NaN(1).
-func NaN(payload uint64) float64 {
-	payload &^= nanMask
-	return math.Float64frombits(nanBits | payload)
+func NaNWith(payload uint64) float64 {
+	return math.Float64frombits(nanBits | (payload &^ nanMask))
 }
 
 // NaNPayload returns the lowest 51 bits of an IEEE 754 "quiet

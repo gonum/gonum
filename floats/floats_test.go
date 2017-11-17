@@ -760,7 +760,7 @@ func TestMulTo(t *testing.T) {
 	}
 }
 
-func TestNaN(t *testing.T) {
+func TestNaNWith(t *testing.T) {
 	tests := []struct {
 		payload uint64
 		bits    uint64
@@ -771,7 +771,7 @@ func TestNaN(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		nan := NaN(test.payload)
+		nan := NaNWith(test.payload)
 		if !math.IsNaN(nan) {
 			t.Errorf("expected NaN value, got:%f", nan)
 		}
@@ -801,7 +801,7 @@ func TestNaNPayload(t *testing.T) {
 		{math.Float64frombits(math.Float64bits(math.NaN()) | (1 << 63)), 1, true},  // math.Copysign(math.NaN(), -1)
 		{math.Float64frombits(math.Float64bits(math.NaN()) &^ (1 << 63)), 1, true}, // math.Copysign(math.NaN(), 1)
 
-		{NaN(1954), 1954, true}, // R NA.
+		{NaNWith(1954), 1954, true}, // R NA.
 
 		{math.Copysign(0, -1), 0, false},
 		{0, 0, false},

@@ -497,7 +497,7 @@ const (
 
 // NaNWith returns an IEEE 754 "quiet not-a-number" value with the
 // payload specified in the low 51 bits of payload.
-// The NaN returned by math.NaN has a bit pattern equal to NaN(1).
+// The NaN returned by math.NaN has a bit pattern equal to NaNWith(1).
 func NaNWith(payload uint64) float64 {
 	return math.Float64frombits(nanBits | (payload &^ nanMask))
 }

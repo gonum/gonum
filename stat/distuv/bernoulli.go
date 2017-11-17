@@ -6,7 +6,8 @@ package distuv
 
 import (
 	"math"
-	"math/rand"
+
+	"golang.org/x/exp/rand"
 )
 
 // Bernoulli represents a random variable whose value is 1 with probability p and

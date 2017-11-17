@@ -6,7 +6,8 @@ package distuv
 
 import (
 	"math"
-	"math/rand"
+
+	"golang.org/x/exp/rand"
 )
 
 // Categorical is an extension of the Bernoulli distribution where x takes

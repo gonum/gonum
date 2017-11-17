@@ -6,9 +6,10 @@ package amos
 
 import (
 	"math"
-	"math/rand"
 	"strconv"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )

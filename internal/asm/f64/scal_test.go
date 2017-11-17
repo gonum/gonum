@@ -6,8 +6,9 @@ package f64
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 var scalTests = []struct {

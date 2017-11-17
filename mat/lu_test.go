@@ -5,8 +5,9 @@
 package mat
 
 import (
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 func TestLUD(t *testing.T) {

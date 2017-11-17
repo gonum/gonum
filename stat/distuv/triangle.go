@@ -6,7 +6,8 @@ package distuv
 
 import (
 	"math"
-	"math/rand"
+
+	"golang.org/x/exp/rand"
 )
 
 // Triangle represents a triangle distribution (https://en.wikipedia.org/wiki/Triangular_distribution).

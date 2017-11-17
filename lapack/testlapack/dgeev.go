@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"math"
 	"math/cmplx"
-	"math/rand"
 	"strconv"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"

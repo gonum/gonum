@@ -15,9 +15,10 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"log"
-	"math/rand"
 	"os"
 	"path/filepath"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/lapack/internal/testdata/netlib"
 )

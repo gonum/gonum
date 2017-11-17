@@ -5,8 +5,9 @@
 package testlapack
 
 import (
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/lapack"

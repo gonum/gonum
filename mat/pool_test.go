@@ -6,9 +6,10 @@ package mat
 
 import (
 	"math"
-	"math/rand"
 	"reflect"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 func TestPool(t *testing.T) {

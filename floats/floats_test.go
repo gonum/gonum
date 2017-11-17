@@ -6,9 +6,10 @@ package floats
 
 import (
 	"math"
-	"math/rand"
 	"strconv"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 const (

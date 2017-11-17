@@ -6,10 +6,11 @@ package sampleuv
 
 import (
 	"flag"
-	"math/rand"
 	"reflect"
 	"testing"
 	"time"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )

@@ -8,8 +8,23 @@ import (
 	"math/big"
 	"testing"
 
+	"gonum.org/v1/gonum/mat"
+
 	"gonum.org/v1/gonum/floats"
 )
+
+// intsEqual returns whether the two slices of int are equal.
+func intsEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
 
 // intSosMatch returns true if the two slices of slices are equal.
 func intSosMatch(a, b [][]int) bool {
@@ -175,6 +190,99 @@ func TestCombinationGenerator(t *testing.T) {
 			}
 			if !intSosMatch(combinations, genCombs) {
 				t.Errorf("Combinations and generated combinations do not match. n = %v, k = %v", n, k)
+			}
+		}
+	}
+}
+
+func TestCartesian(t *testing.T) {
+	// First, test with a known return
+	data := [][]float64{
+		{1, 2},
+		{3, 4},
+		{5, 6},
+	}
+	want := mat.NewDense(8, 3, []float64{
+		1, 3, 5,
+		1, 3, 6,
+		1, 4, 5,
+		1, 4, 6,
+		2, 3, 5,
+		2, 3, 6,
+		2, 4, 5,
+		2, 4, 6,
+	})
+	got := Cartesian(nil, data)
+	if !mat.Equal(want, got) {
+		t.Errorf("cartesian data mismatch. \nwant:\n%v\ngot:\n%v", mat.Formatted(want), mat.Formatted(got))
+	}
+	gotTo := mat.NewDense(8, 3, nil)
+	Cartesian(gotTo, data)
+	if !mat.Equal(want, got) {
+		t.Errorf("cartesian data mismatch with supplied. \nwant:\n%v\ngot:\n%v", mat.Formatted(want), mat.Formatted(gotTo))
+	}
+
+	// Test that Cartesian generates unique vectors.
+	for cas, data := range [][][]float64{
+		{{1}, {2, 3}, {8, 9, 10}},
+		{{1, 10}, {2, 3}, {8, 9, 10}},
+		{{1, 10, 11}, {2, 3}, {8}},
+	} {
+		cart := Cartesian(nil, data)
+		r, c := cart.Dims()
+		if c != len(data) {
+			t.Errorf("Case %v: wrong number of columns. Want %v, got %v", cas, len(data), c)
+		}
+		wantRows := 1
+		for _, v := range data {
+			wantRows *= len(v)
+		}
+		if r != wantRows {
+			t.Errorf("Case %v: wrong number of rows. Want %v, got %v", cas, wantRows, r)
+		}
+		for i := 0; i < r; i++ {
+			for j := i + 1; j < r; j++ {
+				if floats.Equal(cart.RawRowView(i), cart.RawRowView(j)) {
+					t.Errorf("Cas %v: rows %d and %d are equal", cas, i, j)
+				}
+			}
+		}
+
+		cartTo := mat.NewDense(r, c, nil)
+		Cartesian(cartTo, data)
+		if !mat.Equal(cart, cartTo) {
+			t.Errorf("cartesian data mismatch with supplied. \nwant:\n%v\ngot:\n%v", mat.Formatted(cart), mat.Formatted(cartTo))
+		}
+	}
+}
+
+func TestIdxSubFor(t *testing.T) {
+	for cas, dims := range [][]int{
+		{2, 2},
+		{3, 1, 6},
+		{2, 4, 6, 7},
+	} {
+		// Loop over all of the indexes. Confirm that the subscripts make sense
+		// and that IdxFor is the converse of SubFor
+		maxIdx := 1
+		for _, v := range dims {
+			maxIdx *= v
+		}
+		to := make([]int, len(dims))
+		for idx := 0; idx < maxIdx; idx++ {
+			sub := SubFor(nil, idx, dims)
+			for i := range sub {
+				if sub[i] < 0 || sub[i] >= dims[i] {
+					t.Errorf("cas %v: bad subscript. dims: %v, sub: %v", cas, dims, sub)
+				}
+			}
+			SubFor(to, idx, dims)
+			if !intsEqual(sub, to) {
+				t.Errorf("cas %v: subscript mismatch with supplied slice. Got %v, want %v", cas, to, sub)
+			}
+			idxOut := IdxFor(sub, dims)
+			if idxOut != idx {
+				t.Errorf("cas %v: returned index mismatch. Got %v, want %v", cas, idxOut, idx)
 			}
 		}
 	}

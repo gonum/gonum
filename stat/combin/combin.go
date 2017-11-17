@@ -187,7 +187,7 @@ func nextCombination(s []int, n, k int) {
 
 // Cartesian returns the cartesian product of the slices in data. The Cartesian
 // product of two sets is the set of all combinations of the items. For example,
-// gives the input
+// given the input
 //  [][]float64{{1,2},{3,4},{5,6}}
 // the returned matrix will be
 //  [ 1 3 5 ]
@@ -198,7 +198,7 @@ func nextCombination(s []int, n, k int) {
 //  [ 2 3 6 ]
 //  [ 2 4 5 ]
 //  [ 2 4 6 ]
-// If dst is nil, a new matrix will be allocated and used, otherwise the number
+// If dst is nil, a new matrix will be allocated and returned, otherwise the number
 // of rows of dst must equal \prod_i len(data[i]), and the number of columns in
 // dst must equal len(data). Cartesian also panics if len(data) = 0.
 func Cartesian(dst *mat.Dense, data [][]float64) *mat.Dense {

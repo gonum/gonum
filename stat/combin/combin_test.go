@@ -196,7 +196,7 @@ func TestCombinationGenerator(t *testing.T) {
 }
 
 func TestCartesian(t *testing.T) {
-	// First, test with a known return
+	// First, test with a known return.
 	data := [][]float64{
 		{1, 2},
 		{3, 4},
@@ -263,7 +263,7 @@ func TestIdxSubFor(t *testing.T) {
 		{2, 4, 6, 7},
 	} {
 		// Loop over all of the indexes. Confirm that the subscripts make sense
-		// and that IdxFor is the converse of SubFor
+		// and that IdxFor is the converse of SubFor.
 		maxIdx := 1
 		for _, v := range dims {
 			maxIdx *= v

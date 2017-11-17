@@ -54,7 +54,7 @@ func TestTriangle(t *testing.T) {
 		f := NewTriangle(test.a, test.b, test.c)
 		f.Source = src
 		tol := 1e-2
-		const n = 1e5
+		const n = 1e6
 		x := make([]float64, n)
 		generateSamples(x, f)
 		sort.Float64s(x)

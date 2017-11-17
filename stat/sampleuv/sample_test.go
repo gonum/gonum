@@ -5,13 +5,15 @@
 package sampleuv
 
 import (
-	"math"
 	"sort"
 	"testing"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/gonum/stat/distuv"
 )
+
+const tol = 1e-2
 
 type lhDist interface {
 	Quantile(float64) float64
@@ -48,7 +50,7 @@ func TestImportance(t *testing.T) {
 	weights := make([]float64, nSamples)
 	Importance(x, weights, target, proposal)
 	ev := stat.Mean(x, weights)
-	if math.Abs(ev-trueMean) > 1e-2 {
+	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
 	}
 }
@@ -63,7 +65,7 @@ func TestRejection(t *testing.T) {
 	x := make([]float64, nSamples)
 	Rejection(x, target, proposal, 100, nil)
 	ev := stat.Mean(x, nil)
-	if math.Abs(ev-trueMean) > 2e-2 {
+	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
 	}
 }
@@ -93,7 +95,7 @@ func TestMetropolisHastings(t *testing.T) {
 	// Remove burnin
 	x = x[burnin:]
 	ev := stat.Mean(x, nil)
-	if math.Abs(ev-trueMean) > 1e-2 {
+	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
 	}
 }

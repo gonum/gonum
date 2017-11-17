@@ -96,7 +96,7 @@ func TestWishartRand(t *testing.T) {
 			v:       mat.NewSymDense(3, []float64{0.8, 0.3, 0.1, 0.3, 0.7, -0.1, 0.1, -0.1, 7}),
 			nu:      5,
 			samples: 30000,
-			tol:     3e-2,
+			tol:     3e-1,
 		},
 		{
 			v: mat.NewSymDense(4, []float64{

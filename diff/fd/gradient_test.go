@@ -65,7 +65,7 @@ func TestGradient(t *testing.T) {
 		},
 		{
 			nDim:    40,
-			tol:     1e-6,
+			tol:     1e-5,
 			formula: Central,
 		},
 	} {

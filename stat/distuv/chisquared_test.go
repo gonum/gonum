@@ -64,7 +64,7 @@ func TestChiSquared(t *testing.T) {
 
 func testChiSquared(t *testing.T, c ChiSquared, i int) {
 	tol := 1e-2
-	const n = 1e5
+	const n = 1e6
 	const bins = 50
 	x := make([]float64, n)
 	generateSamples(x, c)

@@ -72,8 +72,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: -0.0019631298955953233,
-		wantZ:      -0.03039477405151108,
+		wantMoranI: -0.04387221370785312,
+		wantZ:      -1.3543515772206267,
 		wantSegs:   0,
 	},
 	{
@@ -98,8 +98,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: 0.031195199553564902,
-		wantZ:      1.0171161514080056,
+		wantMoranI: 0.0259414094549987,
+		wantZ:      0.8511426395944303,
 		wantSegs:   0,
 	},
 	{
@@ -112,8 +112,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: -0.016245135637562223,
-		wantZ:      -0.48157993864993476,
+		wantMoranI: -0.0003533345592575677,
+		wantZ:      0.0204605353504713,
 		wantSegs:   0,
 	},
 	{
@@ -126,8 +126,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacency,
 
-		wantMoranI: -0.8565268969272998,
-		wantZ:      -27.027057520918113,
+		wantMoranI: -0.8587138204405251,
+		wantZ:      -27.09614459007475,
 		wantSegs:   0,
 	},
 	{
@@ -150,8 +150,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: -0.0019631298955953233,
-		wantZ:      -0.03039477405151108,
+		wantMoranI: -0.04387221370785312,
+		wantZ:      -1.3543515772206267,
 		wantSegs:   0,
 	},
 	{
@@ -176,8 +176,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: 0.031195199553564902,
-		wantZ:      1.0171161514080056,
+		wantMoranI: 0.0259414094549987,
+		wantZ:      0.8511426395944303,
 		wantSegs:   0,
 	},
 	{
@@ -190,8 +190,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: -0.016245135637562223,
-		wantZ:      -0.48157993864993476,
+		wantMoranI: -0.0003533345592575677,
+		wantZ:      0.0204605353504713,
 		wantSegs:   0,
 	},
 	{
@@ -204,8 +204,8 @@ var spatialTests = []struct {
 		},
 		locality: simpleAdjacencyBand,
 
-		wantMoranI: -0.8565268969272998,
-		wantZ:      -27.027057520918113,
+		wantMoranI: -0.8587138204405251,
+		wantZ:      -27.09614459007475,
 		wantSegs:   0,
 	},
 	{

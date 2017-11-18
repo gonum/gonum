@@ -29,7 +29,7 @@ func TestDigamma(t *testing.T) {
 		{-1.111111111e9, 30.497454343508262861},
 	} {
 
-		if got := Digamma(test.x); math.Abs(got-test.want) > 1e-10 {
+		if got := Digamma(test.x); math.Abs(got-test.want) > 1e-10*math.Abs(test.want) {
 			t.Errorf("test %d Digamma(%g) failed: got %g want %g", i, test.x, got, test.want)
 		}
 	}

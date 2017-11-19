@@ -6,25 +6,13 @@ package combin
 
 import (
 	"math/big"
+	"reflect"
 	"testing"
 
 	"gonum.org/v1/gonum/mat"
 
 	"gonum.org/v1/gonum/floats"
 )
-
-// intsEqual returns whether the two slices of int are equal.
-func intsEqual(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
 
 // intSosMatch returns true if the two slices of slices are equal.
 func intSosMatch(a, b [][]int) bool {
@@ -268,7 +256,7 @@ func TestIdxSubFor(t *testing.T) {
 		for _, v := range dims {
 			maxIdx *= v
 		}
-		to := make([]int, len(dims))
+		into := make([]int, len(dims))
 		for idx := 0; idx < maxIdx; idx++ {
 			sub := SubFor(nil, idx, dims)
 			for i := range sub {
@@ -276,9 +264,9 @@ func TestIdxSubFor(t *testing.T) {
 					t.Errorf("cas %v: bad subscript. dims: %v, sub: %v", cas, dims, sub)
 				}
 			}
-			SubFor(to, idx, dims)
-			if !intsEqual(sub, to) {
-				t.Errorf("cas %v: subscript mismatch with supplied slice. Got %v, want %v", cas, to, sub)
+			SubFor(into, idx, dims)
+			if !reflect.DeepEqual(sub, into) {
+				t.Errorf("cas %v: subscript mismatch with supplied slice. Got %v, want %v", cas, into, sub)
 			}
 			idxOut := IdxFor(sub, dims)
 			if idxOut != idx {

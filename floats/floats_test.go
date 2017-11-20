@@ -761,6 +761,68 @@ func TestMulTo(t *testing.T) {
 	}
 }
 
+func TestNaNWith(t *testing.T) {
+	tests := []struct {
+		payload uint64
+		bits    uint64
+	}{
+		{0, math.Float64bits(0 / func() float64 { return 0 }())}, // Hide the division by zero from the compiler.
+		{1, math.Float64bits(math.NaN())},
+		{1954, 0x7ff80000000007a2}, // R NA.
+	}
+
+	for _, test := range tests {
+		nan := NaNWith(test.payload)
+		if !math.IsNaN(nan) {
+			t.Errorf("expected NaN value, got:%f", nan)
+		}
+
+		bits := math.Float64bits(nan)
+
+		// Strip sign bit.
+		const sign = 1 << 63
+		bits &^= sign
+		test.bits &^= sign
+
+		if bits != test.bits {
+			t.Errorf("expected NaN bit representation: got:%x want:%x", bits, test.bits)
+		}
+	}
+}
+
+func TestNaNPayload(t *testing.T) {
+	tests := []struct {
+		f       float64
+		payload uint64
+		ok      bool
+	}{
+		{0 / func() float64 { return 0 }(), 0, true}, // Hide the division by zero from the compiler.
+
+		// The following two line are written explicitly to defend against potential changes to math.Copysign.
+		{math.Float64frombits(math.Float64bits(math.NaN()) | (1 << 63)), 1, true},  // math.Copysign(math.NaN(), -1)
+		{math.Float64frombits(math.Float64bits(math.NaN()) &^ (1 << 63)), 1, true}, // math.Copysign(math.NaN(), 1)
+
+		{NaNWith(1954), 1954, true}, // R NA.
+
+		{math.Copysign(0, -1), 0, false},
+		{0, 0, false},
+		{math.Inf(-1), 0, false},
+		{math.Inf(1), 0, false},
+
+		{math.Float64frombits(0x7ff0000000000001), 0, false}, // Signalling NaN.
+	}
+
+	for _, test := range tests {
+		payload, ok := NaNPayload(test.f)
+		if payload != test.payload {
+			t.Errorf("expected NaN payload: got:%x want:%x", payload, test.payload)
+		}
+		if ok != test.ok {
+			t.Errorf("expected NaN status: got:%t want:%t", ok, test.ok)
+		}
+	}
+}
+
 func TestNearest(t *testing.T) {
 	s := []float64{6.2, 3, 5, 6.2, 8}
 	ind := Nearest(s, 2.0)

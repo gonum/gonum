@@ -38,7 +38,7 @@ func Diffuse(dst, h map[int64]float64, by Laplacian, t float64) map[int64]float6
 	if dst == nil {
 		dst = make(map[int64]float64)
 	}
-	for i, n := range v.RawVector().Data {
+	for i, n := range heat {
 		dst[by.Nodes[i].ID()] = n
 	}
 	return dst
@@ -89,7 +89,7 @@ func DiffuseToEquilibrium(dst, h map[int64]float64, by Laplacian, tol float64, i
 	if dst == nil {
 		dst = make(map[int64]float64)
 	}
-	for i, n := range v.RawVector().Data {
+	for i, n := range heat {
 		dst[by.Nodes[i].ID()] = n
 	}
 	return dst, ok
@@ -176,8 +176,8 @@ func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 	return Laplacian{Matrix: l, Nodes: nodes, Index: indexOf}
 }
 
-// NewRandomWalkLaplacian returns a random walk Laplacian matrix for the
-// simple graph g.
+// NewRandomWalkLaplacian returns a damp-scaled random walk Laplacian matrix for
+// the simple graph g.
 // The random walk Laplacian is defined as I-D^(-1)A where D is a diagonal matrix
 // holding the degree of each node and A is the graph adjacency matrix of the input
 // graph.

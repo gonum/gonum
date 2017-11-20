@@ -4,12 +4,17 @@
 
 package combin
 
-import "math"
+import (
+	"math"
+
+	"gonum.org/v1/gonum/mat"
+)
 
 const (
-	badNegInput = "combin: negative input"
-	badSetSize  = "combin: n < k"
-	badInput    = "combin: wrong input slice length"
+	badNegInput          = "combin: negative input"
+	badSetSize           = "combin: n < k"
+	badInput             = "combin: wrong input slice length"
+	nonpositiveDimension = "combin: non-positive dimension"
 )
 
 // Binomial returns the binomial coefficient of (n,k), also commonly referred to
@@ -178,4 +183,116 @@ func nextCombination(s []int, n, k int) {
 		}
 		break
 	}
+}
+
+// Cartesian returns the cartesian product of the slices in data. The Cartesian
+// product of two sets is the set of all combinations of the items. For example,
+// given the input
+//  [][]float64{{1,2},{3,4},{5,6}}
+// the returned matrix will be
+//  [ 1 3 5 ]
+//  [ 1 3 6 ]
+//  [ 1 4 5 ]
+//  [ 1 4 6 ]
+//  [ 2 3 5 ]
+//  [ 2 3 6 ]
+//  [ 2 4 5 ]
+//  [ 2 4 6 ]
+// If dst is nil, a new matrix will be allocated and returned, otherwise the number
+// of rows of dst must equal \prod_i len(data[i]), and the number of columns in
+// dst must equal len(data). Cartesian also panics if len(data) = 0.
+func Cartesian(dst *mat.Dense, data [][]float64) *mat.Dense {
+	if len(data) == 0 {
+		panic("combin: empty data input")
+	}
+	cols := len(data)
+	rows := 1
+	lens := make([]int, cols)
+	for i, d := range data {
+		v := len(d)
+		lens[i] = v
+		rows *= v
+	}
+	if dst == nil {
+		dst = mat.NewDense(rows, cols, nil)
+	}
+	r, c := dst.Dims()
+	if r != rows || c != cols {
+		panic("combin: destination matrix size mismatch")
+	}
+	idxs := make([]int, cols)
+	for i := 0; i < rows; i++ {
+		SubFor(idxs, i, lens)
+		for j := 0; j < len(data); j++ {
+			dst.Set(i, j, data[j][idxs[j]])
+		}
+	}
+	return dst
+}
+
+// IdxFor converts a multi-dimensional index into a linear index for a
+// multi-dimensional space. sub specifies the index for each dimension, and dims
+// specifies the size of each dimension. IdxFor is the inverse of SubFor.
+// IdxFor panics if any of the entries of sub are negative, any of the entries
+// of dim are non-positive, or if sub[i] >= dims[i] for any i.
+func IdxFor(sub, dims []int) int {
+	// The index returned is "row-major", that is the last index of sub is
+	// continuous.
+	var idx int
+	stride := 1
+	for i := len(dims) - 1; i >= 0; i-- {
+		v := sub[i]
+		d := dims[i]
+		if d <= 0 {
+			panic(nonpositiveDimension)
+		}
+		if v < 0 || v >= d {
+			panic("combin: invalid subscript")
+		}
+		idx += v * stride
+		stride *= d
+	}
+	return idx
+}
+
+// SubFor returns the multi-dimensional subscript for the input linear index to
+// the multi-dimensional space. dims specifies the size of each dimension, and
+// idx specifies the linear index. SubFor is the inverse of IdxFor.
+//
+// If sub is non-nil the result is stored in-place into sub, and SubFor will panic
+// if len(sub) != len(dims). If sub is nil a new slice of the appropriate length
+// is allocated. SubFor panics if idx < 0 or if idx is greater than or equal to
+// the product of the dimensions.
+func SubFor(sub []int, idx int, dims []int) []int {
+	if sub == nil {
+		sub = make([]int, len(dims))
+	}
+	if len(sub) != len(dims) {
+		panic(badInput)
+	}
+	if idx < 0 {
+		panic(badNegInput)
+	}
+	stride := 1
+	for i := len(dims) - 1; i >= 1; i-- {
+		stride *= dims[i]
+	}
+	for i := 0; i < len(dims)-1; i++ {
+		v := idx / stride
+		d := dims[i]
+		if d < 0 {
+			panic(nonpositiveDimension)
+		}
+		if v >= dims[i] {
+			panic("combin: index too large")
+		}
+		sub[i] = v
+		idx -= v * stride
+		stride /= dims[i+1]
+	}
+	if idx > dims[len(sub)-1] {
+		panic("combin: index too large")
+	}
+	sub[len(sub)-1] = idx
+	return sub
 }

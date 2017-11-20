@@ -7,8 +7,9 @@ package testlapack
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 type Dlanv2er interface {

@@ -7,8 +7,9 @@ package testblas
 import (
 	"fmt"
 	"math/cmplx"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 type Zswaper interface {

@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"math"
 	"math/cmplx"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )

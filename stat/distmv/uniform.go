@@ -6,7 +6,8 @@ package distmv
 
 import (
 	"math"
-	"math/rand"
+
+	"golang.org/x/exp/rand"
 )
 
 type Bound struct {

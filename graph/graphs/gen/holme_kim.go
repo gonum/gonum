@@ -7,7 +7,8 @@ package gen
 import (
 	"errors"
 	"fmt"
-	"math/rand"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"

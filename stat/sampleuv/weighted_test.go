@@ -6,10 +6,11 @@ package sampleuv
 
 import (
 	"flag"
-	"math/rand"
 	"reflect"
 	"testing"
 	"time"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -24,7 +25,7 @@ var (
 	}
 	exp = newExp()
 
-	obt = []float64{973, 1937, 3898, 7897, 15769, 31284, 62176, 125408, 250295, 500363}
+	obt = []float64{1020, 1909, 3937, 7881, 15687, 31486, 62310, 124632, 250453, 500685}
 )
 
 func newTestWeighted() Weighted {
@@ -91,7 +92,7 @@ func TestWeightedTimeSeeded(t *testing.T) {
 	}
 	t.Log("Note: This test is stochastic and is expected to fail with probability ≈ 0.05.")
 
-	rand.Seed(time.Now().Unix())
+	rand.Seed(uint64(time.Now().Unix()))
 
 	f := make([]float64, len(obt))
 	for i := 0; i < 1e6; i++ {

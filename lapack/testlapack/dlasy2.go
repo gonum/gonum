@@ -7,8 +7,9 @@ package testlapack
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -38,7 +39,7 @@ func Dlasy2Test(t *testing.T, impl Dlasy2er) {
 }
 
 func testDlasy2(t *testing.T, impl Dlasy2er, tranl, tranr bool, isgn, n1, n2, extra int, rnd *rand.Rand) {
-	const tol = 1e-11
+	const tol = 1e-10
 
 	tl := randomGeneral(n1, n1, n1+extra, rnd)
 	tr := randomGeneral(n2, n2, n2+extra, rnd)

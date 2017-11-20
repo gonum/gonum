@@ -5,8 +5,9 @@
 package gonum
 
 import (
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 func benchmarkZdscal(b *testing.B, n, inc int) {

@@ -7,8 +7,9 @@ package f64
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 func TestDotUnitary(t *testing.T) {

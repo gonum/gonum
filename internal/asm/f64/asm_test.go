@@ -6,8 +6,9 @@ package f64
 
 import (
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 var (

@@ -6,8 +6,9 @@ package samplemv
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
@@ -93,15 +94,15 @@ func TestRejection(t *testing.T) {
 	dim := 3
 	bounds := make([]distmv.Bound, dim)
 	for i := 0; i < dim; i++ {
-		min := rand.NormFloat64()
-		max := rand.NormFloat64()
+		min := src.NormFloat64()
+		max := src.NormFloat64()
 		if min > max {
 			min, max = max, min
 		}
 		bounds[i].Min = min
 		bounds[i].Max = max
 	}
-	target := distmv.NewUniform(bounds, nil)
+	target := distmv.NewUniform(bounds, src)
 	mu := target.Mean(nil)
 
 	muImp := make([]float64, dim)

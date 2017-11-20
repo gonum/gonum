@@ -6,8 +6,9 @@ package mat
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 type dims struct{ r, c int }

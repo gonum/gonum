@@ -7,7 +7,8 @@ package samplemv
 import (
 	"errors"
 	"math"
-	"math/rand"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat/distmv"
@@ -205,7 +206,7 @@ func (r *Rejectioner) Sample(batch *mat.Dense) {
 // numbers, otherwise rand.Float64 will be used.
 //
 // Rejection sampling generates points from the target distribution by using
-// the proposal distribution. At each step of the algorithm, the proposaed point
+// the proposal distribution. At each step of the algorithm, the proposed point
 // is accepted with probability
 //  p = target(x) / (proposal(x) * c)
 // where target(x) is the probability of the point according to the target distribution

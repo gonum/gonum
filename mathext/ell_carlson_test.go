@@ -6,8 +6,9 @@ package mathext
 
 import (
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 // Testing EllipticF (and EllipticRF) using the addition theorems from http://dlmf.nist.gov/19.11.i

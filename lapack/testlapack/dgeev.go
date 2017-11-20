@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"math"
 	"math/cmplx"
-	"math/rand"
 	"strconv"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"
@@ -532,7 +533,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 						a:      a,
 						evWant: ev,
 						valTol: 1e-12,
-						vecTol: 1e-8,
+						vecTol: 1e-7,
 					}
 					testDgeev(t, impl, "random", test, jobvl, jobvr, 0, optimumWork)
 				}
@@ -542,7 +543,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 }
 
 func testDgeev(t *testing.T, impl Dgeever, tc string, test dgeevTest, jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, extra int, wl worklen) {
-	const defaultTol = 1e-13
+	const defaultTol = 1e-12
 	valTol := test.valTol
 	if valTol == 0 {
 		valTol = defaultTol

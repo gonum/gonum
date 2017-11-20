@@ -6,8 +6,9 @@ package distmat
 
 import (
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
@@ -95,7 +96,7 @@ func TestWishartRand(t *testing.T) {
 			v:       mat.NewSymDense(3, []float64{0.8, 0.3, 0.1, 0.3, 0.7, -0.1, 0.1, -0.1, 7}),
 			nu:      5,
 			samples: 30000,
-			tol:     3e-2,
+			tol:     3e-1,
 		},
 		{
 			v: mat.NewSymDense(4, []float64{

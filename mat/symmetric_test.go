@@ -6,10 +6,11 @@ package mat
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"reflect"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/blas/blas64"

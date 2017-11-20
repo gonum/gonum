@@ -7,8 +7,9 @@ package testblas
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 type Zcopyer interface {

@@ -5,8 +5,9 @@
 package sampleuv
 
 import (
-	"math/rand"
 	"sort"
+
+	"golang.org/x/exp/rand"
 )
 
 // WithoutReplacement samples len(idxs) integers from [0, n) without replacement.

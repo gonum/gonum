@@ -5,8 +5,9 @@
 package testlapack
 
 import (
-	"math/rand"
 	"testing"
+
+	"golang.org/x/exp/rand"
 )
 
 type Dgebd2er interface {

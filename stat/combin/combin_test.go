@@ -9,9 +9,8 @@ import (
 	"reflect"
 	"testing"
 
-	"gonum.org/v1/gonum/mat"
-
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/mat"
 )
 
 // intSosMatch returns true if the two slices of slices are equal.
@@ -202,12 +201,12 @@ func TestCartesian(t *testing.T) {
 	})
 	got := Cartesian(nil, data)
 	if !mat.Equal(want, got) {
-		t.Errorf("cartesian data mismatch. \nwant:\n%v\ngot:\n%v", mat.Formatted(want), mat.Formatted(got))
+		t.Errorf("cartesian data mismatch.\nwant:\n%v\ngot:\n%v", mat.Formatted(want), mat.Formatted(got))
 	}
 	gotTo := mat.NewDense(8, 3, nil)
 	Cartesian(gotTo, data)
 	if !mat.Equal(want, got) {
-		t.Errorf("cartesian data mismatch with supplied. \nwant:\n%v\ngot:\n%v", mat.Formatted(want), mat.Formatted(gotTo))
+		t.Errorf("cartesian data mismatch with supplied.\nwant:\n%v\ngot:\n%v", mat.Formatted(want), mat.Formatted(gotTo))
 	}
 
 	// Test that Cartesian generates unique vectors.
@@ -239,7 +238,7 @@ func TestCartesian(t *testing.T) {
 		cartTo := mat.NewDense(r, c, nil)
 		Cartesian(cartTo, data)
 		if !mat.Equal(cart, cartTo) {
-			t.Errorf("cartesian data mismatch with supplied. \nwant:\n%v\ngot:\n%v", mat.Formatted(cart), mat.Formatted(cartTo))
+			t.Errorf("cartesian data mismatch with supplied.\nwant:\n%v\ngot:\n%v", mat.Formatted(cart), mat.Formatted(cartTo))
 		}
 	}
 }

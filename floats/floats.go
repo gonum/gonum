@@ -502,9 +502,9 @@ func NaNWith(payload uint64) float64 {
 	return math.Float64frombits(nanBits | (payload &^ nanMask))
 }
 
-// NaNPayload returns the lowest 51 bits of an IEEE 754 "quiet
-// not-a-number" and true, or zero and false if f is not NaN
-// or is not quiet.
+// NaNPayload returns the lowest 51 bits payload of an IEEE 754 "quiet
+// not-a-number". For values of f other than quiet-NaN, NaNPayload
+// returns zero and false.
 func NaNPayload(f float64) (payload uint64, ok bool) {
 	b := math.Float64bits(f)
 	if b&nanBits != nanBits {

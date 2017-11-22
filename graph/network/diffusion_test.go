@@ -428,6 +428,36 @@ var diffuseToEquilibriumTests = []struct {
 		},
 		wantOK: true,
 	},
+	{
+		g: []set{
+			A: linksTo(B),
+			B: linksTo(C),
+			C: nil,
+		},
+		builder: simple.NewUndirectedGraph(),
+		h:       map[int64]float64{B: 1},
+		iter:    1,
+		tol:     1e-6,
+		want: map[int64]float64{
+			A: 0.5, B: 0, C: 0.5,
+		},
+		wantOK: false,
+	},
+	{
+		g: []set{
+			A: linksTo(B),
+			B: linksTo(C),
+			C: nil,
+		},
+		builder: simple.NewUndirectedGraph(),
+		h:       map[int64]float64{B: 1},
+		iter:    2,
+		tol:     1e-6,
+		want: map[int64]float64{
+			A: 0, B: 1, C: 0,
+		},
+		wantOK: false,
+	},
 }
 
 func TestDiffuseToEquilibrium(t *testing.T) {

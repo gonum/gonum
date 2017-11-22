@@ -89,7 +89,7 @@ func DiffuseToEquilibrium(dst, h map[int64]float64, by Laplacian, tol float64, i
 	if dst == nil {
 		dst = make(map[int64]float64)
 	}
-	for i, n := range heat {
+	for i, n := range v.RawVector().Data {
 		dst[by.Nodes[i].ID()] = n
 	}
 	return dst, ok

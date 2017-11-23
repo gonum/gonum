@@ -104,7 +104,7 @@ var diffuseTests = []struct {
 		}(),
 		t: 0.01, // FIXME(kortschak): Low t used due to instability in mat.Exp.
 
-		wantTol: 1e-2, // FIXME(kortschak): High tolerance used due to instability in mat.Exp.
+		wantTol: 1e-1, // FIXME(kortschak): High tolerance used due to instability in mat.Exp.
 		want: map[bool]map[int64]float64{
 			false: {
 				A: 1, B: 1, C: 1, D: 1, E: 1,
@@ -114,11 +114,12 @@ var diffuseTests = []struct {
 				U: 1, V: 1, W: 1, X: 1, Y: 1,
 			},
 			true: {
-				A: 1, B: 1, C: 1, D: 1, E: 1,
-				F: 1, G: 1, H: 1, I: 1, J: 1,
-				K: 1, L: 1, M: 1, N: 1, O: 1,
-				P: 1, Q: 1, R: 1, S: 1, T: 1,
-				U: 1, V: 1, W: 1, X: 1, Y: 1,
+				// Output from the python implementation associated with doi:10.1371/journal.pcbi.1005598.
+				A: 0.98264450473308107, B: 1.002568278028513, C: 0.9958911385307706, D: 1.002568278028513, E: 0.98264450473308107,
+				F: 1.002568278028513, G: 1.0075291695232433, H: 1.0038067383118021, I: 1.0075291695232433, J: 1.002568278028513,
+				K: 0.9958911385307706, L: 1.0038067383118021, M: 1.0001850837547184, N: 1.0038067383118021, O: 0.9958911385307706,
+				P: 1.002568278028513, Q: 1.0075291695232433, R: 1.0038067383118021, S: 1.0075291695232433, T: 1.002568278028513,
+				U: 0.98264450473308107, V: 1.002568278028513, W: 0.9958911385307706, X: 1.002568278028513, Y: 0.98264450473308107,
 			},
 		},
 	},

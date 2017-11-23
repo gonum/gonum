@@ -15,9 +15,9 @@ import (
 func TestPoissonProb(t *testing.T) {
 	const tol = 1e-10
 	for i, tt := range []struct {
-		k    float64
-		l    float64
-		want float64
+		k      float64
+		lambda float64
+		want   float64
 	}{
 		{0, 1, 3.678794411714423e-01},
 		{1, 1, 3.678794411714423e-01},
@@ -52,7 +52,7 @@ func TestPoissonProb(t *testing.T) {
 		{8.5, 2.5, 0},
 		{9.5, 2.5, 0},
 	} {
-		p := Poisson{Lambda: tt.l}
+		p := Poisson{Lambda: tt.lambda}
 		got := p.Prob(tt.k)
 		if !floats.EqualWithinAbs(got, tt.want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)
@@ -63,9 +63,9 @@ func TestPoissonProb(t *testing.T) {
 func TestPoissonCDF(t *testing.T) {
 	const tol = 1e-10
 	for i, tt := range []struct {
-		k    float64
-		l    float64
-		want float64
+		k      float64
+		lambda float64
+		want   float64
 	}{
 		{0, 1, 0.367879441171442},
 		{1, 1, 0.735758882342885},
@@ -89,7 +89,7 @@ func TestPoissonCDF(t *testing.T) {
 		{8, 2.5, 0.998859747167396},
 		{9, 2.5, 0.999722647905379},
 	} {
-		p := Poisson{Lambda: tt.l}
+		p := Poisson{Lambda: tt.lambda}
 		got := p.CDF(tt.k)
 		if !floats.EqualWithinAbs(got, tt.want, tol) {
 			t.Errorf("test-%d: got=%e. want=%e\n", i, got, tt.want)

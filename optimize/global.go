@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+var (
+	nonpositiveDimension string = "optimize: non-positive input dimension"
+	negativeTasks        string = "optimize: negative input number of tasks"
+)
+
 // GlobalMethod is an optimization method which seeks to find the global minimum
 // of an objective function.
 //

@@ -6,9 +6,10 @@ package optimize
 
 import (
 	"math"
-	"math/rand"
 	"sort"
 	"sync"
+
+	"math/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
@@ -72,7 +73,7 @@ type CmaEsChol struct {
 	// the samples are almost the same. If the log determinant of the covariance
 	// matrix becomes less than StopLogDet, the optimization run is concluded.
 	// If StopLogDet is 0, a default value of dim*log(1e-16) is used.
-	// If StopLogDet is NaN, the stopping criteria is not used, though
+	// If StopLogDet is NaN, the stopping criterion is not used, though
 	// this can cause numeric instabilities in the algorithm.
 	StopLogDet float64
 	// ForgetBest, when true, does not track the best overall function value found,
@@ -81,7 +82,7 @@ type CmaEsChol struct {
 	// iterations, regardless of when that sample was generated.
 	ForgetBest bool
 	// Src allows a random number generator to be supplied for generating samples.
-	// If Src is nil the generator in math/rand is used.
+	// If Src is nil the generator in golang.org/x/math/rand is used.
 	Src *rand.Rand
 
 	// Fixed algorithm parameters.
@@ -103,11 +104,10 @@ type CmaEsChol struct {
 	chol     mat.Cholesky
 
 	// Parallel fields.
-	taskIdxs []int // Stores which simulation the task ran.
-	evals    []int // remaining evaluations in this iteration.
-
-	mux sync.Mutex     // protect access to evals.
-	wg  sync.WaitGroup // wait for simulations to finish before iterating.
+	mux      sync.Mutex     // protect access to evals.
+	wg       sync.WaitGroup // wait for simulations to finish before iterating.
+	taskIdxs []int          // Stores which simulation the task ran.
+	evals    []int          // remaining evaluations in this iteration.
 
 	// Overall best.
 	bestX []float64
@@ -141,6 +141,12 @@ func (cma *CmaEsChol) Status() (Status, error) {
 }
 
 func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
+	if dim <= 0 {
+		panic(nonpositiveDimension)
+	}
+	if tasks < 0 {
+		panic(negativeTasks)
+	}
 	// Initialize the parameters
 	if cma.InitMean != nil && len(cma.InitMean) != dim {
 		panic("cma-es-chol: initial mean must be nil or have length equal to dimension")
@@ -150,8 +156,9 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	// Parameter values are from https://arxiv.org/pdf/1604.00772.pdf .
 	cma.dim = dim
 	cma.pop = cma.Population
+	n := float64(dim)
 	if cma.pop == 0 {
-		cma.pop = 4 + int(3*math.Log(float64(dim))) // Note the implicit floor.
+		cma.pop = 4 + int(3*math.Log(n)) // Note the implicit floor.
 	} else if cma.pop < 0 {
 		panic("cma-es-chol: negative population size")
 	}
@@ -168,7 +175,6 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	}
 	cma.muEff = 1 / cma.muEff
 
-	n := float64(dim)
 	cma.cc = (4 + cma.muEff/n) / (n + 4 + 2*cma.muEff/n)
 	cma.cs = (cma.muEff + 2) / (n + cma.muEff + 5)
 	cma.c1 = 2 / ((n+1.3)*(n+1.3) + cma.muEff)
@@ -199,13 +205,12 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	}
 	cma.mean = resize(cma.mean, dim)
 	if cma.InitMean != nil {
-		if len(cma.InitMean) != dim {
-			panic("cma-es-chol: InitMean length mismatch")
-		}
 		copy(cma.mean, cma.InitMean)
 	}
 	if cma.InitCholesky != nil {
-		cma.chol = mat.Cholesky{}
+		if cma.InitCholesky.Size() != dim {
+			panic("cma-es-chol: incorrect InitCholesky size")
+		}
 		cma.chol.Clone(cma.InitCholesky)
 	} else {
 		// Set the initial Cholesky to I.
@@ -235,7 +240,7 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 		cma.taskIdxs[i] = -1
 	}
 	// Get a new mutex and waitgroup so that if the structure is reused there
-	// aren't residual interractions with the previous optimization.
+	// aren't residual interactions with the previous optimization.
 	cma.mux = sync.Mutex{}
 	cma.wg = sync.WaitGroup{}
 	return t

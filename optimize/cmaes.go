@@ -9,7 +9,7 @@ import (
 	"sort"
 	"sync"
 
-	"math/rand"
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"

@@ -37,3 +37,7 @@ func TestZher2(t *testing.T) {
 func TestZtrmv(t *testing.T) {
 	testblas.ZtrmvTest(t, impl)
 }
+
+func TestZtrsv(t *testing.T) {
+	testblas.ZtrsvTest(t, impl)
+}

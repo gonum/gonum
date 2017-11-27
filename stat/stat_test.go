@@ -136,6 +136,59 @@ func TestCorrelation(t *testing.T) {
 	}
 }
 
+func ExampleKendallCorrelation() {
+	x := []float64{8, -3, 7, 8, -4}
+	y := []float64{10, 5, 6, 3, -1}
+
+	fmt.Println("Kendall correlation computes the number of ordered pairs")
+	fmt.Println("between two datasets.")
+
+	c := KendallCorrelation(x, y)
+	fmt.Printf("Kendall correlation is %.5f\n", c)
+
+	// Output:
+	// Kendall correlation computes the number of ordered pairs
+	// between two datasets.
+	// Kendall correlation is 0.40000
+}
+
+func TestKendallCorrelation(t *testing.T) {
+	for i, test := range []struct {
+		x   []float64
+		y   []float64
+		ans float64
+	}{
+		{
+			x:   []float64{0, 1, 2, 3},
+			y:   []float64{0, 1, 2, 3},
+			ans: 1,
+		},
+		{
+			x:   []float64{0, 1},
+			y:   []float64{1, 0},
+			ans: -1,
+		},
+		{
+			x:   []float64{8, -3, 7, 8, -4},
+			y:   []float64{10, 15, 4, 5, -1},
+			ans: 0.2,
+		},
+		{
+			x:   []float64{8, -3, 7, 8, -4},
+			y:   []float64{10, 5, 6, 3, -1},
+			ans: 0.4,
+		},
+	} {
+		c := KendallCorrelation(test.x, test.y)
+		if math.Abs(test.ans-c) > 1e-14 {
+			t.Errorf("Correlation mismatch case %d. Expected %v, Found %v", i, test.ans, c)
+		}
+	}
+	if !panics(func() { KendallCorrelation(make([]float64, 2), make([]float64, 3)) }) {
+		t.Errorf("Correlation did not panic with length mismatch")
+	}
+}
+
 func ExampleCovariance() {
 	fmt.Println("Covariance computes the degree to which datasets move together")
 	fmt.Println("about their mean.")

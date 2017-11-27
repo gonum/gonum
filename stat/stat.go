@@ -217,6 +217,35 @@ func Correlation(x, y, weights []float64) float64 {
 	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
 }
 
+// KendallCorrelation returns the weighted Kendall correlation between the
+// samples of x and y.
+// The lengths of x and y must be equal.
+func KendallCorrelation(x, y []float64) float64 {
+	if len(x) != len(y) {
+		panic("stat: slice length mismatch")
+	}
+
+	var (
+		cc int // number of concordant pairs
+		dc int // number of discordant pairs
+		n  = len(x)
+	)
+
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			if i == j {
+				continue
+			}
+			if math.Signbit(x[j]-x[i]) == math.Signbit(y[j]-y[i]) {
+				cc++
+			} else {
+				dc++
+			}
+		}
+	}
+	return float64(cc-dc) / float64(n*(n-1)/2)
+}
+
 // Covariance returns the weighted covariance between the samples of x and y.
 //  sum_i {w_i (x_i - meanX) * (y_i - meanY)} / (sum_j {w_j} - 1)
 // The lengths of x and y must be equal. If weights is nil then all of the

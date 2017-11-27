@@ -298,21 +298,23 @@ func makeZGeneral(data []complex128, m, n int, ld int) []complex128 {
 	if m < 0 || n < 0 {
 		panic("bad test")
 	}
-	if len(data) != m*n {
+	if data != nil && len(data) != m*n {
 		panic("bad test")
 	}
 	if ld < max(1, n) {
 		panic("bad test")
 	}
-	if len(data) == 0 {
+	if m == 0 || n == 0 {
 		return nil
 	}
 	a := make([]complex128, (m-1)*ld+n)
 	for i := range a {
 		a[i] = cmplx.NaN()
 	}
-	for i := 0; i < m; i++ {
-		copy(a[i*ld:i*ld+n], data[i*n:i*n+n])
+	if data != nil {
+		for i := 0; i < m; i++ {
+			copy(a[i*ld:i*ld+n], data[i*n:i*n+n])
+		}
 	}
 	return a
 }

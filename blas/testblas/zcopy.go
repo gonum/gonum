@@ -7,6 +7,7 @@ package testblas
 import (
 	"fmt"
 	"math"
+	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -47,6 +48,9 @@ func ZcopyTest(t *testing.T, impl Zcopyer) {
 			}
 
 			want := make([]complex128, len(y))
+			for i := range want {
+				want[i] = cmplx.NaN()
+			}
 			if incX*incY > 0 {
 				for i := 0; i < n; i++ {
 					want[i*aincY] = x[i*aincX]

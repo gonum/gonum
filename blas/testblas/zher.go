@@ -5,7 +5,6 @@
 package testblas
 
 import (
-	"math"
 	"math/cmplx"
 	"testing"
 
@@ -128,7 +127,6 @@ func ZherTest(t *testing.T, impl Zherer) {
 								a[i*lda+j] = cmplx.NaN()
 								want[i*lda+j] = cmplx.NaN()
 							}
-							a[i*lda+i] = complex(real(a[i*lda+i]), math.NaN())
 						}
 					} else {
 						for i := 0; i < n; i++ {
@@ -136,17 +134,16 @@ func ZherTest(t *testing.T, impl Zherer) {
 								a[i*lda+j] = cmplx.NaN()
 								want[i*lda+j] = cmplx.NaN()
 							}
-							a[i*lda+i] = complex(real(a[i*lda+i]), math.NaN())
 						}
 					}
 
 					impl.Zher(uplo, n, test.alpha, x, incX, a, lda)
 
 					if !zsame(x, xCopy) {
-						t.Errorf("Case %v (uplo=%v,incX=%v,lda=%v: unexpected modification of x", tc, uplo, incX, lda)
+						t.Errorf("Case %v (uplo=%v,incX=%v,lda=%v,alpha=%v): unexpected modification of x", tc, uplo, incX, test.alpha, lda)
 					}
 					if !zsame(want, a) {
-						t.Errorf("Case %v (uplo=%v,incX=%v,lda=%v: unexpected result\nwant: %v\ngot:  %v", tc, uplo, incX, lda, want, a)
+						t.Errorf("Case %v (uplo=%v,incX=%v,lda=%v,alpha=%v): unexpected result\nwant: %v\ngot:  %v", tc, uplo, incX, lda, test.alpha, want, a)
 					}
 				}
 			}

@@ -44,7 +44,7 @@ func ExampleROC_aUC() {
 
 	tpr, fpr := stat.ROC(0, y, classes, nil)
 	// compute Area Under Curve
-	auc := integrate.Trapezoidal(fpr, tpr)
+	auc := integrate.Trapezoidal(tpr, fpr)
 	fmt.Printf("true  positive rate: %v\n", tpr)
 	fmt.Printf("false positive rate: %v\n", fpr)
 	fmt.Printf("auc: %v\n", auc)
@@ -52,5 +52,5 @@ func ExampleROC_aUC() {
 	// Output:
 	// true  positive rate: [0 0.5 0.5 1 1]
 	// false positive rate: [0 0 0.5 0.5 1]
-	// auc: 0.75
+	// auc: 0.25
 }

@@ -42,7 +42,13 @@ func ZswapTest(t *testing.T, impl Zswaper) {
 			}
 
 			xWant := make([]complex128, len(x))
+			for i := range xWant {
+				xWant[i] = cmplx.NaN()
+			}
 			yWant := make([]complex128, len(y))
+			for i := range yWant {
+				yWant[i] = cmplx.NaN()
+			}
 			if incX*incY > 0 {
 				for i := 0; i < n; i++ {
 					xWant[i*aincX] = y[i*aincY]

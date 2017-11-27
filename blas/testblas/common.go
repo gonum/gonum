@@ -260,7 +260,16 @@ func zsame(x, y []complex128) bool {
 	}
 	for i, v := range x {
 		w := y[i]
-		if v != w && !math.IsNaN(real(v)) && !math.IsNaN(imag(v)) && !math.IsNaN(real(w)) && !math.IsNaN(imag(w)) {
+		if math.IsNaN(real(v)) && math.IsNaN(imag(v)) && math.IsNaN(real(w)) && math.IsNaN(imag(w)) {
+			continue
+		}
+		if math.IsNaN(real(v)) && math.IsNaN(real(w)) && imag(v) == imag(w) {
+			continue
+		}
+		if math.IsNaN(imag(v)) && math.IsNaN(imag(w)) && real(v) == real(w) {
+			continue
+		}
+		if v != w {
 			return false
 		}
 	}

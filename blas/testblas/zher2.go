@@ -5,7 +5,6 @@
 package testblas
 
 import (
-	"math"
 	"math/cmplx"
 	"testing"
 
@@ -228,7 +227,6 @@ func Zher2Test(t *testing.T, impl Zher2er) {
 							a[i*lda+j] = cmplx.NaN()
 							want[i*lda+j] = cmplx.NaN()
 						}
-						a[i*lda+i] = complex(real(a[i*lda+i]), math.NaN())
 					}
 				} else {
 					for i := 0; i < n; i++ {
@@ -236,7 +234,6 @@ func Zher2Test(t *testing.T, impl Zher2er) {
 							a[i*lda+j] = cmplx.NaN()
 							want[i*lda+j] = cmplx.NaN()
 						}
-						a[i*lda+i] = complex(real(a[i*lda+i]), math.NaN())
 					}
 				}
 

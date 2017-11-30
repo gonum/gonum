@@ -549,6 +549,122 @@ func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex
 	}
 }
 
+// Zhpr performs the Hermitian rank-1 operation
+//  A += alpha * x * x^H,
+// where alpha is a real scalar, x is a vector, and A is an n×n hermitian matrix
+// in packed form. On entry, the imaginary parts of the diagonal elements are
+// assumed to be zero, and on return they are set to zero.
+func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128, incX int, ap []complex128) {
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	checkZVector('x', n, x, incX)
+	if len(ap) < n*(n+1)/2 {
+		panic("blas: insufficient A packed matrix slice length")
+	}
+
+	if n == 0 || alpha == 0 {
+		return
+	}
+
+	// Set up start index in X.
+	var kx int
+	if incX < 0 {
+		kx = (1 - n) * incX
+	}
+
+	// The elements of A are accessed sequentially with one pass through ap.
+
+	var ii int
+	if uplo == blas.Upper {
+		// Form A when upper triangle is stored in AP.
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				xi := x[i]
+				if xi != 0 {
+					aii := real(ap[ii]) + alpha*real(cmplx.Conj(xi)*xi)
+					ap[ii] = complex(aii, 0)
+
+					tmp := complex(alpha, 0) * xi
+					a := ap[ii+1 : ii+n-i]
+					x := x[i+1 : n]
+					for j, v := range x {
+						a[j] += tmp * cmplx.Conj(v)
+					}
+				} else {
+					ap[ii] = complex(real(ap[ii]), 0)
+				}
+				ii += n - i
+			}
+		} else {
+			ix := kx
+			for i := 0; i < n; i++ {
+				xi := x[ix]
+				if xi != 0 {
+					aii := real(ap[ii]) + alpha*real(cmplx.Conj(xi)*xi)
+					ap[ii] = complex(aii, 0)
+
+					tmp := complex(alpha, 0) * xi
+					jx := ix + incX
+					a := ap[ii+1 : ii+n-i]
+					for k := range a {
+						a[k] += tmp * cmplx.Conj(x[jx])
+						jx += incX
+					}
+				} else {
+					ap[ii] = complex(real(ap[ii]), 0)
+				}
+				ix += incX
+				ii += n - i
+			}
+		}
+		return
+	}
+
+	// Form A when lower triangle is stored in AP.
+	if incX == 1 {
+		for i := 0; i < n; i++ {
+			xi := x[i]
+			if xi != 0 {
+				tmp := complex(alpha, 0) * xi
+				a := ap[ii : ii+i]
+				for j, v := range x[:i] {
+					a[j] += tmp * cmplx.Conj(v)
+				}
+
+				aii := real(ap[ii+i]) + alpha*real(cmplx.Conj(xi)*xi)
+				ap[ii+i] = complex(aii, 0)
+			} else {
+			}
+			ii += i + 1
+		}
+	} else {
+		ix := kx
+		for i := 0; i < n; i++ {
+			xi := x[ix]
+			if xi != 0 {
+				tmp := complex(alpha, 0) * xi
+				a := ap[ii : ii+i]
+				jx := kx
+				for k := range a {
+					a[k] += tmp * cmplx.Conj(x[jx])
+					jx += incX
+				}
+
+				aii := real(ap[ii+i]) + alpha*real(cmplx.Conj(xi)*xi)
+				ap[ii+i] = complex(aii, 0)
+			} else {
+				ap[ii+i] = complex(real(ap[ii+i]), 0)
+			}
+			ix += incX
+			ii += i + 1
+		}
+	}
+}
+
 // Ztrmv performs one of the matrix-vector operations
 //  x = A * x    if trans = blas.NoTrans
 //  x = A^T * x  if trans = blas.Trans

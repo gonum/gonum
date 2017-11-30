@@ -156,9 +156,6 @@ func (Implementation) Zhbmv(ul blas.Uplo, n, k int, alpha complex128, a []comple
 func (Implementation) Zhpmv(ul blas.Uplo, n int, alpha complex128, ap []complex128, x []complex128, incX int, beta complex128, y []complex128, incY int) {
 	panic(noComplex)
 }
-func (Implementation) Zhpr(ul blas.Uplo, n int, alpha float64, x []complex128, incX int, a []complex128) {
-	panic(noComplex)
-}
 func (Implementation) Zhpr2(ul blas.Uplo, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, ap []complex128) {
 	panic(noComplex)
 }

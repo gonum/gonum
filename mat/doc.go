@@ -154,8 +154,6 @@
 // mat will use the following rules to detect overlap between the receiver and one
 // of the inputs:
 //  - the input implements one of the Raw methods, and
-//  - the Raw type matches that of the receiver or
-//    one is a RawMatrixer and the other is a RawVectorer, and
 //  - the address ranges of the backing data slices overlap, and
 //  - the strides differ or there is an overlap in the used data elements.
 // If such an overlap is detected, the method will panic.

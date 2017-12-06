@@ -349,3 +349,62 @@ func max(a, b int) int {
 	}
 	return a
 }
+
+// packHermitian returns an n×n Hermitian matrix in packed format stored in
+// the uplo triangle of the general matrix A.
+func packHermitian(uplo blas.Uplo, n int, a []complex128, lda int) []complex128 {
+	if n == 0 {
+		return nil
+	}
+	ap := make([]complex128, n*(n+1)/2)
+	var ii int
+	if uplo == blas.Upper {
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				ap[ii] = a[i*lda+j]
+				ii++
+			}
+		}
+	} else {
+		for i := 0; i < n; i++ {
+			for j := 0; j <= i; j++ {
+				ap[ii] = a[i*lda+j]
+				ii++
+			}
+		}
+	}
+	return ap
+}
+
+// unpackHermitian returns an n×n general Hermitian matrix (with stride n)
+// whose packed uplo triangle is stored on entry in ap.
+func unpackHermitian(uplo blas.Uplo, n int, ap []complex128) []complex128 {
+	if n == 0 {
+		return nil
+	}
+	a := make([]complex128, n*n)
+	lda := n
+	var ii int
+	if uplo == blas.Upper {
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				a[i*lda+j] = ap[ii]
+				if i != j {
+					a[j*lda+i] = cmplx.Conj(ap[ii])
+				}
+				ii++
+			}
+		}
+	} else {
+		for i := 0; i < n; i++ {
+			for j := 0; j <= i; j++ {
+				a[i*lda+j] = ap[ii]
+				if i != j {
+					a[j*lda+i] = cmplx.Conj(ap[ii])
+				}
+				ii++
+			}
+		}
+	}
+	return a
+}

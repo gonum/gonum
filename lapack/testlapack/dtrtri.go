@@ -20,7 +20,7 @@ type Dtrtrier interface {
 }
 
 func DtrtriTest(t *testing.T, impl Dtrtrier) {
-	const tol = 1e-6
+	const tol = 1e-10
 	rnd := rand.New(rand.NewSource(1))
 	bi := blas64.Implementation()
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
@@ -42,7 +42,11 @@ func DtrtriTest(t *testing.T, impl Dtrtrier) {
 				}
 				a := make([]float64, n*lda)
 				for i := range a {
-					a[i] = rnd.Float64() + 1 // This keeps the matrices well conditioned.
+					a[i] = rnd.Float64()
+				}
+				for i := 0; i < n; i++ {
+					// This keeps the matrices well conditioned.
+					a[i*lda+i] += float64(n)
 				}
 				aCopy := make([]float64, len(a))
 				copy(aCopy, a)

@@ -344,7 +344,7 @@ func (t *TriDense) Copy(a Matrix) (r, c int) {
 // avoided where possible, for example by using the Solve routines.
 func (t *TriDense) InverseTri(a Triangular) error {
 	if rt, ok := a.(RawTriangular); ok {
-		t.checkOverlap(rt.RawTriangular())
+		t.checkOverlap(generalFromTriangular(rt.RawTriangular()))
 	}
 	n, _ := a.Triangle()
 	t.reuseAs(a.Triangle())

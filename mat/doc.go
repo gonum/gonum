@@ -164,8 +164,6 @@
 //    the value has been untransposed if necessary.
 //
 // mat will not attempt to detect element overlap if the input does not implement a
-// Raw method, or if the Raw method differs from that of the receiver except when a
-// conversion has occurred through a mat API function. Method behavior is undefined
-// if there is undetected overlap.
+// Raw method. Method behavior is undefined if there is undetected overlap.
 //
 package mat // import "gonum.org/v1/gonum/mat"

@@ -166,7 +166,7 @@ func Dggsvd3Test(t *testing.T, impl Dggsvd3er) {
 		d20r := nanGeneral(p, n, n)
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d2, zeroR, 0, d20r)
 
-		if !equalApproxGeneral(vAns, d20r, 1e-14) {
+		if !equalApproxGeneral(vAns, d20r, 1e-13) {
 			t.Errorf("test %d: V^T*B*Q != D2*[ 0 R ]\nV^T*B*Q:\n%+v\nD2*[ 0 R ]:\n%+v",
 				cas, vAns, d20r)
 		}

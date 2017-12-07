@@ -578,68 +578,71 @@ func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128,
 
 	// The elements of A are accessed sequentially with one pass through ap.
 
-	var ii int
+	var kk int
 	if uplo == blas.Upper {
 		// Form A when upper triangle is stored in AP.
+		// Here, kk points to the current diagonal element in ap.
 		if incX == 1 {
 			for i := 0; i < n; i++ {
 				xi := x[i]
 				if xi != 0 {
-					aii := real(ap[ii]) + alpha*real(cmplx.Conj(xi)*xi)
-					ap[ii] = complex(aii, 0)
+					aii := real(ap[kk]) + alpha*real(cmplx.Conj(xi)*xi)
+					ap[kk] = complex(aii, 0)
 
 					tmp := complex(alpha, 0) * xi
-					a := ap[ii+1 : ii+n-i]
+					a := ap[kk+1 : kk+n-i]
 					x := x[i+1 : n]
 					for j, v := range x {
 						a[j] += tmp * cmplx.Conj(v)
 					}
 				} else {
-					ap[ii] = complex(real(ap[ii]), 0)
+					ap[kk] = complex(real(ap[kk]), 0)
 				}
-				ii += n - i
+				kk += n - i
 			}
 		} else {
 			ix := kx
 			for i := 0; i < n; i++ {
 				xi := x[ix]
 				if xi != 0 {
-					aii := real(ap[ii]) + alpha*real(cmplx.Conj(xi)*xi)
-					ap[ii] = complex(aii, 0)
+					aii := real(ap[kk]) + alpha*real(cmplx.Conj(xi)*xi)
+					ap[kk] = complex(aii, 0)
 
 					tmp := complex(alpha, 0) * xi
 					jx := ix + incX
-					a := ap[ii+1 : ii+n-i]
+					a := ap[kk+1 : kk+n-i]
 					for k := range a {
 						a[k] += tmp * cmplx.Conj(x[jx])
 						jx += incX
 					}
 				} else {
-					ap[ii] = complex(real(ap[ii]), 0)
+					ap[kk] = complex(real(ap[kk]), 0)
 				}
 				ix += incX
-				ii += n - i
+				kk += n - i
 			}
 		}
 		return
 	}
 
 	// Form A when lower triangle is stored in AP.
+	// Here, kk points to the beginning of current row in ap.
 	if incX == 1 {
 		for i := 0; i < n; i++ {
 			xi := x[i]
 			if xi != 0 {
 				tmp := complex(alpha, 0) * xi
-				a := ap[ii : ii+i]
+				a := ap[kk : kk+i]
 				for j, v := range x[:i] {
 					a[j] += tmp * cmplx.Conj(v)
 				}
 
-				aii := real(ap[ii+i]) + alpha*real(cmplx.Conj(xi)*xi)
-				ap[ii+i] = complex(aii, 0)
+				aii := real(ap[kk+i]) + alpha*real(cmplx.Conj(xi)*xi)
+				ap[kk+i] = complex(aii, 0)
 			} else {
+				ap[kk+i] = complex(real(ap[kk+i]), 0)
 			}
-			ii += i + 1
+			kk += i + 1
 		}
 	} else {
 		ix := kx
@@ -647,20 +650,20 @@ func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128,
 			xi := x[ix]
 			if xi != 0 {
 				tmp := complex(alpha, 0) * xi
-				a := ap[ii : ii+i]
+				a := ap[kk : kk+i]
 				jx := kx
 				for k := range a {
 					a[k] += tmp * cmplx.Conj(x[jx])
 					jx += incX
 				}
 
-				aii := real(ap[ii+i]) + alpha*real(cmplx.Conj(xi)*xi)
-				ap[ii+i] = complex(aii, 0)
+				aii := real(ap[kk+i]) + alpha*real(cmplx.Conj(xi)*xi)
+				ap[kk+i] = complex(aii, 0)
 			} else {
-				ap[ii+i] = complex(real(ap[ii+i]), 0)
+				ap[kk+i] = complex(real(ap[kk+i]), 0)
 			}
 			ix += incX
-			ii += i + 1
+			kk += i + 1
 		}
 	}
 }

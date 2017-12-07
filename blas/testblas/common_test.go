@@ -2,8 +2,10 @@ package testblas
 
 import (
 	"math"
+	"math/cmplx"
 	"testing"
 
+	"golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/blas"
 	"gonum.org/v1/gonum/floats"
 )
@@ -182,6 +184,50 @@ func TestFlattenTriangular(t *testing.T) {
 		a := flattenTriangular(test.a, test.ul)
 		if !floats.Equal(a, test.ans) {
 			t.Errorf("Case %v. Want %v, got %v.", i, test.ans, a)
+		}
+	}
+}
+
+func TestPackUnpackHermitian(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
+		for _, n := range []int{1, 2, 5, 50} {
+			for _, lda := range []int{max(1, n), n + 11} {
+				a := makeZGeneral(nil, n, n, lda)
+				for i := 0; i < n; i++ {
+					for j := i; j < n; j++ {
+						a[i*lda+j] = complex(rnd.NormFloat64(), rnd.NormFloat64())
+						if i != j {
+							a[j*lda+i] = cmplx.Conj(a[i*lda+j])
+						}
+					}
+				}
+				aCopy := make([]complex128, len(a))
+				copy(aCopy, a)
+
+				ap := packHermitian(uplo, n, a, lda)
+				if !zsame(a, aCopy) {
+					t.Errorf("Case uplo=%v,n=%v,lda=%v: packHermitian modified a", uplo, n, lda)
+				}
+
+				apCopy := make([]complex128, len(ap))
+				copy(apCopy, ap)
+
+				art := unpackHermitian(uplo, n, ap)
+				if !zsame(ap, apCopy) {
+					t.Errorf("Case uplo=%v,n=%v,lda=%v: unpackHermitian modified ap", uplo, n, lda)
+				}
+
+				// Copy the round-tripped A into a matrix with the same stride
+				// as the original.
+				got := makeZGeneral(nil, n, n, lda)
+				for i := 0; i < n; i++ {
+					copy(got[i*lda:i*lda+n], art[i*n:i*n+n])
+				}
+				if !zsame(got, a) {
+					t.Errorf("Case uplo=%v,n=%v,lda=%v: packHermitian and unpackHermitian do not roundtrip", uplo, n, lda)
+				}
+			}
 		}
 	}
 }

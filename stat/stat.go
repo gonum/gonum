@@ -217,9 +217,10 @@ func Correlation(x, y, weights []float64) float64 {
 	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
 }
 
-// KendallCorrelation returns the weighted Kendall correlation between the
+// KendallCorrelation returns the weighted Tau-a Kendall correlation between the
 // samples of x and y.
-// The lengths of x and y must be equal.
+// The lengths of x and y must be equal. If weights is nil then all of the
+// weights are 1. If weights is not nil, then len(x) must equal len(weights).
 func KendallCorrelation(x, y, weights []float64) float64 {
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")

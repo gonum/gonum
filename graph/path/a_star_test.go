@@ -224,6 +224,7 @@ type weightedEdge struct {
 
 func (e weightedEdge) From() graph.Node { return e.from }
 func (e weightedEdge) To() graph.Node   { return e.to }
+func (e weightedEdge) ID() int64        { return 0 }
 func (e weightedEdge) Weight() float64  { return e.cost }
 
 func isMonotonic(g UndirectedWeightLister, h Heuristic) (ok bool, at graph.Edge, goal graph.Node) {

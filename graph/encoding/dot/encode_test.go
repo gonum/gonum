@@ -216,6 +216,7 @@ type attrEdge struct {
 
 func (e attrEdge) From() graph.Node                 { return e.from }
 func (e attrEdge) To() graph.Node                   { return e.to }
+func (e attrEdge) ID() int64                        { return 0 }
 func (e attrEdge) Weight() float64                  { return 0 }
 func (e attrEdge) Attributes() []encoding.Attribute { return e.attr }
 
@@ -254,6 +255,7 @@ type portedEdge struct {
 
 func (e portedEdge) From() graph.Node { return e.from }
 func (e portedEdge) To() graph.Node   { return e.to }
+func (e portedEdge) ID() int64        { return 0 }
 func (e portedEdge) Weight() float64  { return 0 }
 
 // TODO(kortschak): Figure out a better way to handle the fact that

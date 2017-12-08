@@ -214,6 +214,16 @@ func (e EdgePair) To() Node {
 	return nil
 }
 
+// ID returns the ID of the first non-nil edge, or 0.
+func (e EdgePair) ID() int64 {
+	if e[0] != nil {
+		return e[0].ID()
+	} else if e[1] != nil {
+		return e[1].ID()
+	}
+	return 0
+}
+
 // WeightedEdgePair is an opposed pair of directed edges.
 type WeightedEdgePair struct {
 	EdgePair

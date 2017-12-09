@@ -46,7 +46,11 @@ func (lu *LU) updateCond(anorm float64, norm lapack.MatrixNorm) {
 		anorm = unorm * lnorm
 	}
 	v := lapack64.Gecon(norm, lu.lu.mat, anorm, work, iwork)
-	lu.cond = 1 / v
+	if v != 0 {
+		lu.cond = 1 / v
+	} else {
+		lu.cond = math.Inf(1)
+	}
 }
 
 // Factorize computes the LU factorization of the square matrix a and stores the
@@ -298,8 +302,8 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 	}
 	// TODO(btracey): Should test the condition number instead of testing that
 	// the determinant is exactly zero.
-	if lu.Det() == 0 {
-		return Condition(math.Inf(1))
+	if lu.cond > ConditionTolerance {
+		return Condition(lu.cond)
 	}
 
 	m.reuseAs(n, bc)
@@ -318,9 +322,7 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 		t = blas.Trans
 	}
 	lapack64.Getrs(t, lu.lu.mat, m.mat, lu.pivot)
-	if lu.cond > ConditionTolerance {
-		return Condition(lu.cond)
-	}
+	
 	return nil
 }
 
@@ -333,19 +335,20 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 //
 // If A is singular or near-singular a Condition error is returned. Please see
 // the documentation for Condition for more information.
-func (lu *LU) SolveVec(v *VecDense, trans bool, b *VecDense) error {
+func (lu *LU) SolveVec(v *VecDense, trans bool, b Vector) error {
 	_, n := lu.lu.Dims()
 	bn := b.Len()
 	if bn != n {
 		panic(ErrShape)
 	}
-	if v != b {
-		v.checkOverlap(b.mat)
+	db, ok := b.(*VecDense)
+	if ok && v != db {
+		v.checkOverlap(db.mat)
 	}
 	// TODO(btracey): Should test the condition number instead of testing that
 	// the determinant is exactly zero.
-	if lu.Det() == 0 {
-		return Condition(math.Inf(1))
+	if lu.cond > ConditionTolerance {
+		return Condition(lu.cond)
 	}
 
 	v.reuseAs(n)
@@ -366,8 +369,9 @@ func (lu *LU) SolveVec(v *VecDense, trans bool, b *VecDense) error {
 		t = blas.Trans
 	}
 	lapack64.Getrs(t, lu.lu.mat, vMat, lu.pivot)
-	if lu.cond > ConditionTolerance {
-		return Condition(lu.cond)
-	}
+	// (dezmondgoff) is this final check now redundant?
+	// if lu.cond > ConditionTolerance {
+	//	return Condition(lu.cond)
+	// }
 	return nil
 }

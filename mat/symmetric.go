@@ -203,6 +203,34 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 	}
 }
 
+func (s *SymDense) ApplySym(fn func(i, j int, v float64) float64, a Symmetric) {
+	n := a.Symmetric()
+	s.reuseAs(n)
+
+	if ra, ok := a.(RawSymmetricer); ok {
+		amat := ra.RawSymmetric()
+		if s == a || s.checkOverlap(amat){
+			var restore func()
+			s, restore = s.isolatedWorkspace(a)
+			defer restore()
+		}
+		for i := 0; i < n; i++ {
+			stmp := s.mat.Data[i*s.mat.Stride+i : i*s.mat.Stride+n]
+			for j, v := range amat.Data[i*amat.Stride+i : i*amat.Stride+n] {
+				stmp[j] = fn(i, j, v)
+			}
+		}
+		return
+	}
+
+	for i := 0; i < n; i++ {
+		stmp := s.mat.Data[i*s.mat.Stride : i*s.mat.Stride+n]
+		for j := i; j < n; j++ {
+			stmp[j] = fn(i, j, a.At(i, j))
+		}
+	}
+}
+
 func (s *SymDense) CopySym(a Symmetric) int {
 	n := a.Symmetric()
 	n = min(n, s.mat.N)

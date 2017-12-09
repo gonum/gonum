@@ -136,7 +136,7 @@ func TestCorrelation(t *testing.T) {
 	}
 }
 
-func ExampleKendallCorrelation() {
+func ExampleKendall() {
 	x := []float64{8, -3, 7, 8, -4}
 	y := []float64{10, 5, 6, 3, -1}
 	w := []float64{2, 1.5, 3, 3, 2}
@@ -144,7 +144,7 @@ func ExampleKendallCorrelation() {
 	fmt.Println("Kendall correlation computes the number of ordered pairs")
 	fmt.Println("between two datasets.")
 
-	c := KendallCorrelation(x, y, w)
+	c := Kendall(x, y, w)
 	fmt.Printf("Kendall correlation is %.5f\n", c)
 
 	// Output:
@@ -153,7 +153,7 @@ func ExampleKendallCorrelation() {
 	// Kendall correlation is 0.25000
 }
 
-func TestKendallCorrelation(t *testing.T) {
+func TestKendall(t *testing.T) {
 	for i, test := range []struct {
 		x       []float64
 		y       []float64
@@ -197,19 +197,19 @@ func TestKendallCorrelation(t *testing.T) {
 			ans:     1,
 		},
 	} {
-		c := KendallCorrelation(test.x, test.y, test.weights)
+		c := Kendall(test.x, test.y, test.weights)
 		if math.Abs(test.ans-c) > 1e-14 {
 			t.Errorf("Correlation mismatch case %d. Expected %v, Found %v", i, test.ans, c)
 		}
 	}
-	if !panics(func() { KendallCorrelation(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
-		t.Errorf("KendallCorrelation did not panic with length mismatch")
+	if !panics(func() { Kendall(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
+		t.Errorf("Kendall did not panic with length mismatch")
 	}
-	if !panics(func() { KendallCorrelation(make([]float64, 2), make([]float64, 3), nil) }) {
-		t.Errorf("KendallCorrelation did not panic with length mismatch")
+	if !panics(func() { Kendall(make([]float64, 2), make([]float64, 3), nil) }) {
+		t.Errorf("Kendall did not panic with length mismatch")
 	}
-	if !panics(func() { KendallCorrelation(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
-		t.Errorf("KendallCorrelation did not panic with weights length mismatch")
+	if !panics(func() { Kendall(make([]float64, 3), make([]float64, 3), make([]float64, 2)) }) {
+		t.Errorf("Kendall did not panic with weights length mismatch")
 	}
 }
 

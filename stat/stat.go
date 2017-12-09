@@ -217,11 +217,14 @@ func Correlation(x, y, weights []float64) float64 {
 	return (sxy - xcompensation*ycompensation/sumWeights) / math.Sqrt(sxx*syy)
 }
 
-// KendallCorrelation returns the weighted Tau-a Kendall correlation between the
-// samples of x and y.
+// Kendall returns the weighted Tau-a Kendall correlation between the
+// samples of x and y. The Kendall correlation measures the quantity of
+// concordant and discordant pairs of numbers. If weights are specified then
+// each pair is weighted by weights[i] * weights[j] and the final sum is
+// normalized to stay between -1 and 1.
 // The lengths of x and y must be equal. If weights is nil then all of the
 // weights are 1. If weights is not nil, then len(x) must equal len(weights).
-func KendallCorrelation(x, y, weights []float64) float64 {
+func Kendall(x, y, weights []float64) float64 {
 	if len(x) != len(y) {
 		panic("stat: slice length mismatch")
 	}
@@ -250,15 +253,12 @@ func KendallCorrelation(x, y, weights []float64) float64 {
 
 	var sumWeights float64
 
-	var c int
-
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {
 			if i == j {
 				continue
 			}
-			c++
-			var weight = weights[i] * weights[j]
+			weight := weights[i] * weights[j]
 			if math.Signbit(x[j]-x[i]) == math.Signbit(y[j]-y[i]) {
 				cc += weight
 			} else {

@@ -190,6 +190,103 @@ func TestSymAdd(t *testing.T) {
 	testTwoInput(t, "AddSym", &SymDense{}, method, denseComparison, legalTypesSym, legalSizeSameSquare, 1e-14)
 }
 
+func TestApplySym(t *testing.T) {
+	for i, test := range []struct {
+		a, want [][]float64
+		fn      func(r, c int, v float64) float64
+	}{
+		{
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+			[][]float64{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}},
+			identity,
+		},
+		{
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			[][]float64{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}},
+			identity,
+		},
+		{
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			[][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
+			identity,
+		},
+		{
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			[][]float64{{-1, 0, 0}, {0, -1, 0}, {0, 0, -1}},
+			identity,
+		},
+		{
+			[][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			[][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			identity,
+		},
+		{
+			[][]float64{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}},
+			[][]float64{{2, 4, 6}, {8, 10, 12}, {14, 16, 18}},
+			func(r, c int, v float64) float64 { return v * 2 },
+		},
+		{
+			[][]float64{{1, 2, 3}, {2, 1, 2}, {3, 2, 1}},
+			[][]float64{{0, 2, 0}, {2, 1, 2}, {0, 2, 0}},
+			func(r, c int, v float64) float64 {
+				if r == 1 || c == 1 {
+					return v
+				}
+				return 0
+			},
+		},
+	} {
+		var n int
+		var arr []float64
+		_, n, arr = flatten(test.a)
+		a := NewSymDense(n, arr)
+		_, n, arr = flatten(test.want)
+		want := NewSymDense(n, arr)
+
+		var got SymDense
+
+		for j := 0; j < 2; j++ {
+			got.ApplySym(test.fn, a)
+			if !Equal(&got, want) {
+				t.Errorf("unexpected result for test %d iteration %d: got: %v want: %v", i, j, got.mat.Data, want.mat.Data)
+			}
+		}
+	}
+
+	for _, fn := range []func(r, c int, v float64) float64{
+		identity,
+		func(r, c int, v float64) float64 {
+			if r%2 == 0 && c%2 == 0 {
+				return v
+			}
+			return -v
+		},
+		func(_, _ int, v float64) float64 { return v * v },
+		func(_, _ int, v float64) float64 { return -v },
+	} {
+		method := func(receiver, x Matrix) {
+			type SymApplier interface {
+				ApplySym(func(r, c int, v float64) float64, Symmetric)
+			}
+			rd := receiver.(SymApplier)
+			rd.ApplySym(fn, x.(Symmetric))
+		}
+		denseComparison := func(receiver, x *Dense) {
+			receiver.Apply(fn, x)
+		}
+		testOneInput(t, "ApplySym", &SymDense{}, method, denseComparison,
+			func(a Matrix) bool{
+				_, ok := a.(Symmetric)
+				return ok
+			},
+			func (ar, ac int) bool {
+				if ar != ac {
+					return false}
+				return true
+			}, 0)
+	}
+}
+
 func TestCopy(t *testing.T) {
 	for _, test := range []struct {
 		n int

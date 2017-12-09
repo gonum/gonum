@@ -18,16 +18,61 @@ var (
 	_ Reseter = vector
 )
 
-// Vector is a column vector.
+// Vector is a vector.
 type Vector interface {
 	Matrix
+	AtVec(int) float64
 	Len() int
 }
 
+<<<<<<< HEAD
 // A MutableVector can set elements of vector.
 type MutableVector interface {
 	Vector
 	SetVec(i int, val float64)
+=======
+// TransposeVec is a type for performing an implicit transpose of a Vector.
+// It implements the Vector interface, returning values from the transpose
+// of the vector within.
+type TransposeVec struct {
+	Vector Vector
+}
+
+// At returns the value of the element at row i and column j of the transposed
+// matrix, that is, row j and column i of the Vector field.
+func (t TransposeVec) At(i, j int) float64 {
+	return t.Vector.At(j, i)
+}
+
+// Dims returns the dimensions of the transposed vector.
+func (t TransposeVec) Dims() (r, c int) {
+	c, r = t.Vector.Dims()
+	return r, c
+}
+
+// T performs an implicit transpose by returning the Vector field.
+func (t TransposeVec) T() Matrix {
+	return t.Vector
+}
+
+// Len returns the number of columns in the vector.
+func (t TransposeVec) Len() int {
+	return t.Vector.Len()
+}
+
+// TVec performs an implicit transpose by returning the Vector field.
+func (t TransposeVec) TVec() Vector {
+	return t.Vector
+}
+
+// Untranspose returns the Vector field.
+func (t TransposeVec) Untranspose() Matrix {
+	return t.Vector
+}
+
+func (t TransposeVec) UntransposeVec() Vector {
+	return t.Vector
+>>>>>>> 2c1a58c742acc7a9838c1f1e477bf796eaa3eb37
 }
 
 // VecDense represents a column vector.
@@ -126,16 +171,29 @@ func (v *VecDense) Reset() {
 
 // CloneVec makes a copy of a into the receiver, overwriting the previous value
 // of the receiver.
-func (v *VecDense) CloneVec(a *VecDense) {
+func (v *VecDense) CloneVec(a Vector) {
 	if v == a {
 		return
 	}
-	v.n = a.n
+	v.n = a.Len()
 	v.mat = blas64.Vector{
 		Inc:  1,
 		Data: use(v.mat.Data, v.n),
 	}
-	blas64.Copy(v.n, a.mat, v.mat)
+	if r, ok := a.(RawVectorer); ok {
+		blas64.Copy(v.n, r.RawVector(), v.mat)
+		return
+	}
+	for i := 0; i < a.Len(); i++ {
+		v.SetVec(i, a.AtVec(i))
+	}
+}
+
+// VecDenseCopyOf returns a newly allocated copy of the elements of a.
+func VecDenseCopyOf(a Vector) *VecDense {
+	v := &VecDense{}
+	v.CloneVec(a)
+	return v
 }
 
 func (v *VecDense) RawVector() blas64.Vector {

@@ -412,6 +412,103 @@ func TestVecDenseDivElem(t *testing.T) {
 	}
 }
 
+func identity_vec(i int, v float64) float64 { return v }
+
+func TestApplyVec(t *testing.T) {
+	for i, test := range []struct {
+		a, want []float64
+		fn      func(i int, v float64) float64
+	}{
+		{
+			[]float64{0, 0, 0, 0, 0},
+			[]float64{0, 0, 0, 0, 0},
+			identity_vec,
+		},
+		{
+			[]float64{1, 1, 1, 1, 1},
+			[]float64{1, 1, 1, 1, 1},
+			identity_vec,
+		},
+		{
+			[]float64{1, 0, 1, 1, 0},
+			[]float64{1, 0, 1, 1, 0},
+			identity_vec,
+		},
+		{
+			[]float64{-1, 0, 1, -1, 0},
+			[]float64{-1, 0, 1, -1, 0},
+			identity_vec,
+		},
+		{
+			[]float64{1, 2, 3, 4, 5},
+			[]float64{1, 2, 3, 4, 5},
+			identity_vec,
+		},
+		{
+			[]float64{1, 2, 3, 4, 5},
+			[]float64{2, 4, 6, 8, 10},
+			func(i int, v float64) float64 { return v * 2 },
+		},
+		{
+			[]float64{1, 2, 3, 4, 5},
+			[]float64{0, 2, 0, 0, 0},
+			func(i int, v float64) float64 {
+				if i == 1 {
+					return v
+				}
+				return 0
+			},
+		},
+	} {
+		a := NewVecDense(len(test.a), test.a)
+		want := NewVecDense(len(test.want), test.want)
+
+		var got VecDense
+
+		for j := 0; j < 2; j++ {
+			got.ApplyVec(test.fn, a)
+			if !Equal(&got, want) {
+				t.Errorf("unexpected result for test %d iteration %d: got: %v want: %v", i, j, got.mat.Data, want.mat.Data)
+			}
+		}
+	}
+
+	for _, fn := range []func(i int, v float64) float64{
+		identity_vec,
+		func(i int, v float64) float64 {
+			if i % 2 == 0 {
+				return v
+			}
+			return -v
+		},
+		func(_ int, v float64) float64 { return v * v },
+		func(_ int, v float64) float64 { return -v },
+	} {
+		method := func(receiver, x Matrix) {
+			type Applier interface {
+				ApplyVec(func(i int, v float64) float64, Vector)
+			}
+			rd := receiver.(Applier)
+			rd.ApplyVec(fn, x.(Vector))
+		}
+		denseComparison := func(receiver, x *Dense) {
+			var wrap func(r, c int, v float64) float64
+			wrap = func(r, c int, v float64) float64 { return fn(r, v) }
+			receiver.Apply(wrap, x)
+		}
+		testOneInput(t, "ApplyVec", &VecDense{}, method, denseComparison,
+			func(a Matrix) bool{
+				_, ok := a.(Vector)
+				return ok
+			},
+			func (ar, ac int) bool {
+				if ac != 1 {
+					return false}
+				return true
+			}, 0)
+	}
+}
+
 func BenchmarkAddScaledVec10Inc1(b *testing.B)      { addScaledVecBench(b, 10, 1) }
 func BenchmarkAddScaledVec100Inc1(b *testing.B)     { addScaledVecBench(b, 100, 1) }
 func BenchmarkAddScaledVec1000Inc1(b *testing.B)    { addScaledVecBench(b, 1000, 1) }

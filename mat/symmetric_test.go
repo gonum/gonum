@@ -265,10 +265,10 @@ func TestApplySym(t *testing.T) {
 		func(_, _ int, v float64) float64 { return -v },
 	} {
 		method := func(receiver, x Matrix) {
-			type SymApplier interface {
+			type Applier interface {
 				ApplySym(func(r, c int, v float64) float64, Symmetric)
 			}
-			rd := receiver.(SymApplier)
+			rd := receiver.(Applier)
 			rd.ApplySym(fn, x.(Symmetric))
 		}
 		denseComparison := func(receiver, x *Dense) {

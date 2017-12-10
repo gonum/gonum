@@ -80,7 +80,10 @@ func ztrsvTest(t *testing.T, impl Ztrsver, uplo blas.Uplo, trans blas.Transpose,
 	if !zsame(a, aCopy) {
 		t.Errorf("Case uplo=%v,trans=%v,diag=%v,n=%v,lda=%v,incX=%v: unexpected modification of A", uplo, trans, diag, n, lda, incX)
 	}
-	if !zEqualApprox(x, want, incX, tol) {
+	if !zSameAtNonstrided(x, want, incX) {
+		t.Errorf("Case uplo=%v,trans=%v,diag=%v,n=%v,lda=%v,incX=%v: unexpected modification of x\nwant %v\ngot  %v", uplo, trans, diag, n, lda, incX, want, x)
+	}
+	if !zEqualApproxAtStrided(x, want, incX, tol) {
 		t.Errorf("Case uplo=%v,trans=%v,diag=%v,n=%v,lda=%v,incX=%v: unexpected result\nwant %v\ngot  %v", uplo, trans, diag, n, lda, incX, want, x)
 	}
 }

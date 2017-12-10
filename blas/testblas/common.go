@@ -275,10 +275,9 @@ func zsame(x, y []complex128) bool {
 	return true
 }
 
-// zEqualApprox returns whether vectors x and y with stride inc
-// are approximately equal within tol. Elements at non-strided
-// positions must be same in both x and y.
-func zEqualApprox(x, y []complex128, inc int, tol float64) bool {
+// zSameAtNonstrided returns whether elements at non-stride positions of vectors
+// x and y are same.
+func zSameAtNonstrided(x, y []complex128, inc int) bool {
 	if len(x) != len(y) {
 		return false
 	}
@@ -286,14 +285,30 @@ func zEqualApprox(x, y []complex128, inc int, tol float64) bool {
 		inc = -inc
 	}
 	for i, v := range x {
-		w := y[i]
 		if i%inc == 0 {
-			if cmplx.Abs(v-w) > tol {
-				return false
-			}
 			continue
 		}
+		w := y[i]
 		if !sameComplex128(v, w) {
+			return false
+		}
+	}
+	return true
+}
+
+// zEqualApprox returns whether elements at stride positions of vectors x and y
+// are approximately equal within tol.
+func zEqualApproxAtStrided(x, y []complex128, inc int, tol float64) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	if inc < 0 {
+		inc = -inc
+	}
+	for i := 0; i < len(x); i += inc {
+		v := x[i]
+		w := y[i]
+		if !(cmplx.Abs(v-w) <= tol) {
 			return false
 		}
 	}

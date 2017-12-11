@@ -118,7 +118,7 @@ func (CrossInTray) Func(x []float64) float64 {
 //  f(x) = (x_0-1)^2 + \sum_{i=1}^{d-1} (i+1) * (2*x_i^2-x_{i-1})^2
 // where d is the input dimension. There is a single global minimum, which has
 // a location and value of
-//  x_i = 2^{-(2^{i+1}-2)/(2^{i+1})} for i = 0, ..., d-1.
+//  x_i^* = 2^{-(2^{i+1}-2)/(2^{i+1})} for i = 0, ..., d-1.
 //  f(x^*) = 0
 // Reference:
 //  https://www.sfu.ca/~ssurjano/dixonpr.html (obtained June 2017)

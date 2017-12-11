@@ -296,8 +296,8 @@ func zSameAtNonstrided(x, y []complex128, inc int) bool {
 	return true
 }
 
-// zEqualApprox returns whether elements at stride positions of vectors x and y
-// are approximately equal within tol.
+// zEqualApproxAtStrided returns whether elements at stride positions of vectors
+// x and y are approximately equal within tol.
 func zEqualApproxAtStrided(x, y []complex128, inc int, tol float64) bool {
 	if len(x) != len(y) {
 		return false

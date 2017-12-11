@@ -47,6 +47,52 @@ func (Bukin6) Func(x []float64) float64 {
 	return 100*math.Sqrt(math.Abs(x[1]-0.01*x[0]*x[0])) + 0.01*math.Abs(x[0]+10)
 }
 
+// CamelThree implements the three-hump camel function, a two-dimensional function
+// with three local minima, one of which is global.
+// The function is given by
+//  f(x) = 2*x_0^2 - 1.05*x_0^4 + x_0^6/6 + x_0*x_1 + x_1^2
+// with the global minimum at
+//  x^* = (0, 0)
+//  f(x^*) = 0
+// The typical domain is x_i ∈ [-5, 5] for all i.
+// Reference:
+//  https://www.sfu.ca/~ssurjano/camel3.html (obtained December 2017)
+type CamelThree struct{}
+
+func (c CamelThree) Func(x []float64) float64 {
+	if len(x) != 2 {
+		panic("camelthree: dimension must be 2")
+	}
+	x0 := x[0]
+	x1 := x[1]
+	x02 := x0 * x0
+	x04 := x02 * x02
+	return 2*x02 - 1.05*x04 + x04*x02/6 + x0*x1 + x1*x1
+}
+
+// CamelSix implements the six-hump camel function, a two-dimensional function.
+// with six local minima, two of which are global.
+// The function is given by
+//  f(x) = (4 - 2.1*x_0^2 + x_0^4/3)*x_0^2 + x_0*x_1 + (-4 + 4*x_1^2)*x_1^2
+// with the global minima at
+//  x^* = (0.0898, -0.7126), (-0.0898, 0.7126)
+//  f(x^*) = -1.0316
+// The typical domain is x_0 ∈ [-3, 3], x_1 ∈ [-2, 2].
+// Reference:
+//  https://www.sfu.ca/~ssurjano/camel6.html (obtained December 2017)
+type CamelSix struct{}
+
+func (c CamelSix) Func(x []float64) float64 {
+	if len(x) != 2 {
+		panic("camelsix: dimension must be 2")
+	}
+	x0 := x[0]
+	x1 := x[1]
+	x02 := x0 * x0
+	x12 := x1 * x1
+	return (4-2.1*x02+x02*x02/3)*x02 + x0*x1 + (-4+4*x12)*x12
+}
+
 // CrossInTray implements the cross-in-tray function. The cross-in-tray function
 // is a two-dimensional function with many local minima, and four global minima
 // at (±1.3491, ±1.3491). The function is typically evaluated in the square
@@ -64,6 +110,30 @@ func (CrossInTray) Func(x []float64) float64 {
 	x1 := x[1]
 	exp := math.Abs(100 - math.Sqrt((x0*x0+x1*x1)/math.Pi))
 	return -0.0001 * math.Pow(math.Abs(math.Sin(x0)*math.Sin(x1)*math.Exp(exp))+1, 0.1)
+}
+
+// DixonPrice implements the DixonPrice function, a function of arbitrary dimension
+// Its typical domain is the hypercube of [-10, 10]^d.
+// The function is given by
+//  f(x) = (x_0-1)^2 + \sum_{i=1}^{d-1} (i+1) * (2*x_i^2-x_{i-1})^2
+// where d is the input dimension. There is a single global minimum, which has
+// a location and value of
+//  x_i^* = 2^{-(2^{i+1}-2)/(2^{i+1})} for i = 0, ..., d-1.
+//  f(x^*) = 0
+// Reference:
+//  https://www.sfu.ca/~ssurjano/dixonpr.html (obtained June 2017)
+type DixonPrice struct{}
+
+func (DixonPrice) Func(x []float64) float64 {
+	xp := x[0]
+	v := (xp - 1) * (xp - 1)
+	for i := 1; i < len(x); i++ {
+		xn := x[i]
+		tmp := (2*xn*xn - xp)
+		v += float64(i+1) * tmp * tmp
+		xp = xn
+	}
+	return v
 }
 
 // DropWave implements the drop-wave function, a two-dimensional function with

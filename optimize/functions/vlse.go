@@ -48,10 +48,10 @@ func (Bukin6) Func(x []float64) float64 {
 }
 
 // CamelThree implements the three-hump camel function, a two-dimensional function
-// with three local minima and a single global minimum.
+// with three local minima, one of which is global.
 // The function is given by
 //  f(x) = 2*x_0^2 - 1.05*x_0^4 + x_0^6/6 + x_0*x_1 + x_1^2
-// with the global minima at
+// with the global minimum at
 //  x^* = (0, 0)
 //  f(x^*) = 0
 // The typical domain is x_i ∈ [-5, 5] for all i.
@@ -70,12 +70,12 @@ func (c CamelThree) Func(x []float64) float64 {
 	return 2*x02 - 1.05*x04 + x04*x02/6 + x0*x1 + x1*x1
 }
 
-// CamelSix implements the six-hump camel function, a two-dimensional function
-// with six local minima and two global minima.
+// CamelSix implements the six-hump camel function, a two-dimensional function.
+// with six local minima, two of which are global.
 // The function is given by
 //  f(x) = (4 - 2.1*x_0^2 + x_0^4/3)*x_0^2 + x_0*x_1 + (-4 + 4*x_1^2)*x_1^2
 // with the global minima at
-//  x^* = (±0.0898, -0.7126)
+//  x^* = (0.0898, -0.7126), (-0.0898, 0.7126)
 //  f(x^*) = -1.0316
 // The typical domain is x_0 ∈ [-3, 3], x_1 ∈ [-2, 2].
 // Reference:
@@ -117,9 +117,9 @@ func (CrossInTray) Func(x []float64) float64 {
 // The function is given by
 //  f(x) = (x_0-1)^2 + \sum_{i=1}^{d-1} (i+1) * (2*x_i^2-x_{i-1})^2
 // where d is the input dimension. There is a single global minimum, which has
-// a value of
-//  f(x) = 0
-//  x_i = 2^{-(2^{i-1}-2)/(2^{i-1})} for i = 0, ..., d-1.
+// a location and value of
+//  x_i = 2^{-(2^{i+1}-2)/(2^{i+1})} for i = 0, ..., d-1.
+//  f(x^*) = 0
 // Reference:
 //  https://www.sfu.ca/~ssurjano/dixonpr.html (obtained June 2017)
 type DixonPrice struct{}

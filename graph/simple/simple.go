@@ -30,9 +30,6 @@ func (e Edge) From() graph.Node { return e.F }
 // To returns the to-node of the edge.
 func (e Edge) To() graph.Node { return e.T }
 
-// ID returns zero.
-func (e Edge) ID() int64 { return 0 }
-
 // WeightedEdge is a simple weighted graph edge.
 type WeightedEdge struct {
 	F, T graph.Node
@@ -44,9 +41,6 @@ func (e WeightedEdge) From() graph.Node { return e.F }
 
 // To returns the to-node of the edge.
 func (e WeightedEdge) To() graph.Node { return e.T }
-
-// ID returns zero.
-func (e WeightedEdge) ID() int64 { return 0 }
 
 // Weight returns the weight of the edge.
 func (e WeightedEdge) Weight() float64 { return e.W }

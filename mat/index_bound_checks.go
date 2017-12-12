@@ -47,6 +47,12 @@ func (v *VecDense) At(i, j int) float64 {
 	return v.at(i)
 }
 
+// AtVec returns the element at row i.
+// It panics if i is out of bounds.
+func (v *VecDense) AtVec(i int) float64 {
+	return v.at(i)
+}
+
 func (v *VecDense) at(i int) float64 {
 	if uint(i) >= uint(v.n) {
 		panic(ErrRowAccess)

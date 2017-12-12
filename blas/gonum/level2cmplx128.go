@@ -549,6 +549,150 @@ func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex
 	}
 }
 
+// Zhpmv performs the matrix-vector operation
+//  y = alpha * A * x + beta * y
+// where alpha and beta are scalars, x and y are vectors, and A is an n×n
+// Hermitian matrix in packed form. The imaginary parts of the diagonal
+// elements of A are ignored and assumed to be zero.
+func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []complex128, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	checkZVector('x', n, x, incX)
+	checkZVector('y', n, y, incY)
+	if len(ap) < n*(n+1)/2 {
+		panic("blas: insufficient A packed matrix slice length")
+	}
+
+	if n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	// Set up the start indices in X and Y.
+	var kx int
+	if incX < 0 {
+		kx = (1 - n) * incX
+	}
+	var ky int
+	if incY < 0 {
+		ky = (1 - n) * incY
+	}
+
+	// Form y := beta*y.
+	if beta != 1 {
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y[:n] {
+					y[i] = 0
+				}
+			} else {
+				for i, v := range y[:n] {
+					y[i] = beta * v
+				}
+			}
+		} else {
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					y[iy] *= beta
+					iy += incY
+				}
+			}
+		}
+	}
+
+	if alpha == 0 {
+		return
+	}
+
+	// The elements of A are accessed sequentially with one pass through ap.
+
+	var kk int
+	if uplo == blas.Upper {
+		// Form y when ap contains the upper triangle.
+		// Here, kk points to the current diagonal element in ap.
+		if incX == 1 && incY == 1 {
+			for i := 0; i < n; i++ {
+				tmp1 := alpha * x[i]
+				y[i] += tmp1 * complex(real(ap[kk]), 0)
+				var tmp2 complex128
+				k := kk + 1
+				for j := i + 1; j < n; j++ {
+					y[j] += tmp1 * cmplx.Conj(ap[k])
+					tmp2 += ap[k] * x[j]
+					k++
+				}
+				y[i] += alpha * tmp2
+				kk += n - i
+			}
+		} else {
+			ix := kx
+			iy := ky
+			for i := 0; i < n; i++ {
+				tmp1 := alpha * x[ix]
+				y[iy] += tmp1 * complex(real(ap[kk]), 0)
+				var tmp2 complex128
+				jx := ix
+				jy := iy
+				for k := kk + 1; k < kk+n-i; k++ {
+					jx += incX
+					jy += incY
+					y[jy] += tmp1 * cmplx.Conj(ap[k])
+					tmp2 += ap[k] * x[jx]
+				}
+				y[iy] += alpha * tmp2
+				ix += incX
+				iy += incY
+				kk += n - i
+			}
+		}
+		return
+	}
+
+	// Form y when ap contains the lower triangle.
+	// Here, kk points to the beginning of current row in ap.
+	if incX == 1 && incY == 1 {
+		for i := 0; i < n; i++ {
+			tmp1 := alpha * x[i]
+			var tmp2 complex128
+			k := kk
+			for j := 0; j < i; j++ {
+				y[j] += tmp1 * cmplx.Conj(ap[k])
+				tmp2 += ap[k] * x[j]
+				k++
+			}
+			aii := complex(real(ap[kk+i]), 0)
+			y[i] += tmp1*aii + alpha*tmp2
+			kk += i + 1
+		}
+	} else {
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			tmp1 := alpha * x[ix]
+			var tmp2 complex128
+			jx := kx
+			jy := ky
+			for k := kk; k < kk+i; k++ {
+				y[jy] += tmp1 * cmplx.Conj(ap[k])
+				tmp2 += ap[k] * x[jx]
+				jx += incX
+				jy += incY
+			}
+			aii := complex(real(ap[kk+i]), 0)
+			y[iy] += tmp1*aii + alpha*tmp2
+			ix += incX
+			iy += incY
+			kk += i + 1
+		}
+	}
+}
+
 // Zhpr performs the Hermitian rank-1 operation
 //  A += alpha * x * x^H,
 // where alpha is a real scalar, x is a vector, and A is an n×n hermitian matrix

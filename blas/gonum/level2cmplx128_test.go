@@ -38,6 +38,10 @@ func TestZhpr(t *testing.T) {
 	testblas.ZhprTest(t, impl)
 }
 
+func TestZhpr2(t *testing.T) {
+	testblas.Zhpr2Test(t, impl)
+}
+
 func TestZtrmv(t *testing.T) {
 	testblas.ZtrmvTest(t, impl)
 }

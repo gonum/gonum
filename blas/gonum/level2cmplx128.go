@@ -668,6 +668,133 @@ func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128,
 	}
 }
 
+// Zhpr2 performs the Hermitian rank-2 operation
+//  A += alpha*x*y^H + conj(alpha)*y*x^H,
+// where alpha is a complex scalar, x and y are n element vectors, and A is an
+// n×n Hermitian matrix, supplied in packed form. On entry, the imaginary parts
+// of the diagonal elements are assumed to be zero, and on return they are set to zero.
+func (Implementation) Zhpr2(uplo blas.Uplo, n int, alpha complex128, x []complex128, incX int, y []complex128, incY int, ap []complex128) {
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	if n < 0 {
+		panic(nLT0)
+	}
+	checkZVector('x', n, x, incX)
+	checkZVector('y', n, y, incY)
+	if len(ap) < n*(n+1)/2 {
+		panic("blas: insufficient A packed matrix slice length")
+	}
+
+	if n == 0 || alpha == 0 {
+		return
+	}
+
+	// Set up start indices in X and Y.
+	var kx int
+	if incX < 0 {
+		kx = (1 - n) * incX
+	}
+	var ky int
+	if incY < 0 {
+		ky = (1 - n) * incY
+	}
+
+	// The elements of A are accessed sequentially with one pass through ap.
+
+	var kk int
+	if uplo == blas.Upper {
+		// Form A when upper triangle is stored in AP.
+		// Here, kk points to the current diagonal element in ap.
+		if incX == 1 && incY == 1 {
+			for i := 0; i < n; i++ {
+				if x[i] != 0 || y[i] != 0 {
+					tmp1 := alpha * x[i]
+					tmp2 := cmplx.Conj(alpha) * y[i]
+					aii := real(ap[kk]) + real(tmp1*cmplx.Conj(y[i])) + real(tmp2*cmplx.Conj(x[i]))
+					ap[kk] = complex(aii, 0)
+					k := kk + 1
+					for j := i + 1; j < n; j++ {
+						ap[k] += tmp1*cmplx.Conj(y[j]) + tmp2*cmplx.Conj(x[j])
+						k++
+					}
+				} else {
+					ap[kk] = complex(real(ap[kk]), 0)
+				}
+				kk += n - i
+			}
+		} else {
+			ix := kx
+			iy := ky
+			for i := 0; i < n; i++ {
+				if x[ix] != 0 || y[iy] != 0 {
+					tmp1 := alpha * x[ix]
+					tmp2 := cmplx.Conj(alpha) * y[iy]
+					aii := real(ap[kk]) + real(tmp1*cmplx.Conj(y[iy])) + real(tmp2*cmplx.Conj(x[ix]))
+					ap[kk] = complex(aii, 0)
+					jx := ix + incX
+					jy := iy + incY
+					for k := kk + 1; k < kk+n-i; k++ {
+						ap[k] += tmp1*cmplx.Conj(y[jy]) + tmp2*cmplx.Conj(x[jx])
+						jx += incX
+						jy += incY
+					}
+				} else {
+					ap[kk] = complex(real(ap[kk]), 0)
+				}
+				ix += incX
+				iy += incY
+				kk += n - i
+			}
+		}
+		return
+	}
+
+	// Form A when lower triangle is stored in AP.
+	// Here, kk points to the beginning of current row in ap.
+	if incX == 1 && incY == 1 {
+		for i := 0; i < n; i++ {
+			if x[i] != 0 || y[i] != 0 {
+				tmp1 := alpha * x[i]
+				tmp2 := cmplx.Conj(alpha) * y[i]
+				k := kk
+				for j := 0; j < i; j++ {
+					ap[k] += tmp1*cmplx.Conj(y[j]) + tmp2*cmplx.Conj(x[j])
+					k++
+				}
+				aii := real(ap[kk+i]) + real(tmp1*cmplx.Conj(y[i])) + real(tmp2*cmplx.Conj(x[i]))
+				ap[kk+i] = complex(aii, 0)
+			} else {
+				ap[kk+i] = complex(real(ap[kk+i]), 0)
+			}
+			kk += i + 1
+		}
+	} else {
+		ix := kx
+		iy := ky
+		for i := 0; i < n; i++ {
+			if x[ix] != 0 || y[iy] != 0 {
+				tmp1 := alpha * x[ix]
+				tmp2 := cmplx.Conj(alpha) * y[iy]
+				jx := kx
+				jy := ky
+				for k := kk; k < kk+i; k++ {
+					ap[k] += tmp1*cmplx.Conj(y[jy]) + tmp2*cmplx.Conj(x[jx])
+					jx += incX
+					jy += incY
+				}
+				aii := real(ap[kk+i]) + real(tmp1*cmplx.Conj(y[iy])) + real(tmp2*cmplx.Conj(x[ix]))
+				ap[kk+i] = complex(aii, 0)
+			} else {
+				ap[kk+i] = complex(real(ap[kk+i]), 0)
+			}
+			ix += incX
+			iy += incY
+			kk += i + 1
+		}
+	}
+}
+
 // Ztrmv performs one of the matrix-vector operations
 //  x = A * x    if trans = blas.NoTrans
 //  x = A^T * x  if trans = blas.Trans

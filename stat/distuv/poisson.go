@@ -70,30 +70,30 @@ func (p Poisson) Rand() float64 {
 	// p. 294
 	// <http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf>
 
-	g := math.Exp(-p.Lambda)
-	rnd := rand.Float64
+	rnd := rand.ExpFloat64
 	if p.Source != nil {
-		rnd = p.Source.Float64
+		rnd = p.Source.ExpFloat64
 	}
 
 	if p.Lambda < 10.0 {
 		// Use direct method.
-		em := -1.0
-		t := 1.0
+		var em float64
+		t := 0.0
 		for {
-			em++
-			t *= rnd()
-			if t <= g {
+			t += rnd()
+			if t >= p.Lambda {
 				break
 			}
+			em++
 		}
 		return em
 	}
 	// Use rejection method.
+	rnd = rand.Float64
 	sq := math.Sqrt(2.0 * p.Lambda)
 	alxm := math.Log(p.Lambda)
 	lg, _ := math.Lgamma(p.Lambda + 1)
-	g = p.Lambda*alxm - lg
+	g := p.Lambda*alxm - lg
 	for {
 		var em, y float64
 		for {

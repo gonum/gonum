@@ -90,6 +90,9 @@ func (p Poisson) Rand() float64 {
 	}
 	// Use rejection method.
 	rnd = rand.Float64
+	if p.Source != nil {
+		rnd = p.Source.Float64
+	}
 	sq := math.Sqrt(2.0 * p.Lambda)
 	alxm := math.Log(p.Lambda)
 	lg, _ := math.Lgamma(p.Lambda + 1)

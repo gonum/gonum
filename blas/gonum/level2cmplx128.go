@@ -488,7 +488,7 @@ func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex
 			return
 		}
 		for i := 0; i < n; i++ {
-			if x[i] != 0 || y[i] != 0 {
+			if x[ix] != 0 || y[iy] != 0 {
 				tmp1 := alpha * x[ix]
 				tmp2 := cmplx.Conj(alpha) * y[iy]
 				aii := real(a[i*lda+i]) + real(tmp1*cmplx.Conj(y[iy])) + real(tmp2*cmplx.Conj(x[ix]))
@@ -528,7 +528,7 @@ func (Implementation) Zher2(uplo blas.Uplo, n int, alpha complex128, x []complex
 		return
 	}
 	for i := 0; i < n; i++ {
-		if x[i] != 0 || y[i] != 0 {
+		if x[ix] != 0 || y[iy] != 0 {
 			tmp1 := alpha * x[ix]
 			tmp2 := cmplx.Conj(alpha) * y[iy]
 			jx := kx

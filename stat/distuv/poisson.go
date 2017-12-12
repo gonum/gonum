@@ -66,26 +66,52 @@ func (p Poisson) Prob(x float64) float64 {
 
 // Rand returns a random sample drawn from the distribution.
 func (p Poisson) Rand() float64 {
-	// poisson generator based upon the multiplication of
-	// uniform random variates.
-	// see:
-	//  Non-Uniform Random Variate Generation,
-	//  Luc Devroye (p504)
-	//  http://www.eirene.de/Devroye.pdf
-	x := 0.0
-	prod := 1.0
-	exp := math.Exp(-p.Lambda)
-	rnd := rand.Float64
+	// NUMERICAL RECIPES IN C: THE ART OF SCIENTIFIC COMPUTING (ISBN 0-521-43108-5)
+	// p. 294
+	// <http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf>
+
+	rnd := rand.ExpFloat64
+	if p.Source != nil {
+		rnd = p.Source.ExpFloat64
+	}
+
+	if p.Lambda < 10.0 {
+		// Use direct method.
+		var em float64
+		t := 0.0
+		for {
+			t += rnd()
+			if t >= p.Lambda {
+				break
+			}
+			em++
+		}
+		return em
+	}
+	// Use rejection method.
+	rnd = rand.Float64
 	if p.Source != nil {
 		rnd = p.Source.Float64
 	}
-
+	sq := math.Sqrt(2.0 * p.Lambda)
+	alxm := math.Log(p.Lambda)
+	lg, _ := math.Lgamma(p.Lambda + 1)
+	g := p.Lambda*alxm - lg
 	for {
-		prod *= rnd()
-		if prod <= exp {
-			return x
+		var em, y float64
+		for {
+			y = math.Tan(math.Pi * rnd())
+			em = sq*y + p.Lambda
+			if em >= 0 {
+				break
+			}
 		}
-		x++
+		em = math.Floor(em)
+		lg, _ = math.Lgamma(em + 1)
+		t := 0.9 * (1.0 + y*y) * math.Exp(em*alxm-lg-g)
+		if rnd() <= t {
+			return em
+		}
 	}
 }
 

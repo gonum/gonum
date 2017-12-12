@@ -101,6 +101,10 @@ func TestPoissonCDF(t *testing.T) {
 func TestPoisson(t *testing.T) {
 	src := rand.New(rand.NewSource(1))
 	for i, b := range []Poisson{
+		{100, src},
+		{15, src},
+		{10, src},
+		{9.9, src},
 		{3, src},
 		{1.5, src},
 		{0.9, src},

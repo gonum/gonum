@@ -4,18 +4,15 @@
 
 package graph
 
-// Node is a graph node. It returns a graph-unique integer node ID.
+// Node is a graph node. It returns a graph-unique integer ID.
 type Node interface {
 	ID() int64
 }
 
 // Edge is a graph edge. In directed graphs, the direction of the
 // edge is given from -> to, otherwise the edge is semantically
-// unordered. An Edge returns an ID which must be graph-unique
-// integer edge ID if the containing graph is a multigraph, otherwise
-// no constraint exists on ID values.
+// unordered.
 type Edge interface {
-	ID() int64
 	From() Node
 	To() Node
 }

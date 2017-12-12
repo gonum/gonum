@@ -101,9 +101,6 @@ func (e CliqueGraphEdge) From() graph.Node { return e.from }
 // To returns the to node of the edge.
 func (e CliqueGraphEdge) To() graph.Node { return e.to }
 
-// ID returns zero.
-func (e CliqueGraphEdge) ID() int64 { return 0 }
-
 // Nodes returns the common nodes in the cliques of the underlying graph
 // corresponding to the from and to nodes in the clique graph.
 func (e CliqueGraphEdge) Nodes() []graph.Node { return e.nodes }

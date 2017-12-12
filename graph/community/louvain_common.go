@@ -259,7 +259,6 @@ type edge struct {
 
 func (e edge) From() graph.Node { return e.from }
 func (e edge) To() graph.Node   { return e.to }
-func (e edge) ID() int64        { return 0 }
 func (e edge) Weight() float64  { return e.weight }
 
 // multiplexCommunity is a reduced multiplex graph node describing its membership.
@@ -283,7 +282,6 @@ type multiplexEdge struct {
 
 func (e multiplexEdge) From() graph.Node { return e.from }
 func (e multiplexEdge) To() graph.Node   { return e.to }
-func (e multiplexEdge) ID() int64        { return 0 }
 func (e multiplexEdge) Weight() float64  { return e.weight }
 
 // commIdx is an index of a node in a community held by a localMover.

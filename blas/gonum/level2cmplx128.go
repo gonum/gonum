@@ -54,7 +54,7 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 	if beta != 1 {
 		if incY == 1 {
 			if beta == 0 {
-				for i := range y {
+				for i := range y[:lenY] {
 					y[i] = 0
 				}
 			} else {
@@ -240,11 +240,11 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 	if beta != 1 {
 		if incY == 1 {
 			if beta == 0 {
-				for i := range y {
+				for i := range y[:n] {
 					y[i] = 0
 				}
 			} else {
-				for i, v := range y {
+				for i, v := range y[:n] {
 					y[i] = beta * v
 				}
 			}

@@ -43,8 +43,8 @@ type Multigraph interface {
 type WeightedMultigraph interface {
 	Multigraph
 
-	// WeightedEdge returns the weighted edge from u to v if
-	// such an edge exists and nil otherwise. The node v must
+	// WeightedLines returns the weighted lines from u to v if
+	// any such lines exist and nil otherwise. The node v must
 	// be directly reachable from u as defined by the
 	// From method.
 	WeightedLines(u, v Node) []WeightedLine
@@ -62,7 +62,7 @@ type UndirectedMultigraph interface {
 type WeightedUndirectedMultigraph interface {
 	WeightedMultigraph
 
-	// WeightedEdgeBetween returns the edge between nodes
+	// WeightedLinesBetween returns the lines between nodes
 	// x and y.
 	WeightedLinesBetween(x, y Node) []WeightedLine
 }
@@ -96,7 +96,7 @@ type WeightedDirectedMultigraph interface {
 // LineAdder is an interface for adding lines to a multigraph.
 type LineAdder interface {
 	// NewLine returns a new Line from the source to the destination node.
-	NewLine(from, to Node) Edge
+	NewLine(from, to Node) Line
 
 	// SetLine adds an edge from one node to another.
 	// If the multigraph supports node addition the nodes
@@ -105,16 +105,16 @@ type LineAdder interface {
 	SetLine(l Line)
 }
 
-// WeightedLineAdder is an interface for adding liness to a multigraph.
+// WeightedLineAdder is an interface for adding lines to a multigraph.
 type WeightedLineAdder interface {
 	// NewWeightedLine returns a new WeightedLine from
 	// the source to the destination node.
 	NewWeightedLine(from, to Node, weight float64) WeightedLine
 
-	// SetWeightedEdge adds an edge from one node to
-	// another. If the multigraph supports node addition
+	// SetWeightedLine adds a weighted line from one node
+	// to another. If the multigraph supports node addition
 	// the nodes will be added if they do not exist,
-	// otherwise SetWeightedEdge will panic.
+	// otherwise SetWeightedLine will panic.
 	SetWeightedLine(e WeightedLine)
 }
 

@@ -98,7 +98,7 @@ type LineAdder interface {
 	// NewLine returns a new Line from the source to the destination node.
 	NewLine(from, to Node) Line
 
-	// SetLine adds an edge from one node to another.
+	// SetLine adds a Line from one node to another.
 	// If the multigraph supports node addition the nodes
 	// will be added if they do not exist, otherwise
 	// SetLine will panic.

@@ -7,7 +7,6 @@ package optimize
 import (
 	"math"
 	"sort"
-	"sync"
 
 	"golang.org/x/exp/rand"
 
@@ -103,15 +102,15 @@ type CmaEsChol struct {
 	mean     []float64
 	chol     mat.Cholesky
 
-	// Parallel fields.
-	mux      sync.Mutex     // protect access to evals.
-	wg       sync.WaitGroup // wait for simulations to finish before iterating.
-	taskIdxs []int          // Stores which simulation the task ran.
-	evals    []int          // remaining evaluations in this iteration.
-
 	// Overall best.
 	bestX []float64
 	bestF float64
+
+	// Synchronization.
+	taskIdx     int
+	receivedIdx int
+	operation   chan<- GlobalTask
+	updateErr   error
 }
 
 var (
@@ -123,21 +122,26 @@ func (cma *CmaEsChol) Needs() struct{ Gradient, Hessian bool } {
 	return struct{ Gradient, Hessian bool }{false, false}
 }
 
-func (cma *CmaEsChol) Done() {}
-
-// Status returns the status of the method.
-func (cma *CmaEsChol) Status() (Status, error) {
+func (cma *CmaEsChol) methodConverged() Status {
 	sd := cma.StopLogDet
 	switch {
 	case math.IsNaN(sd):
-		return NotTerminated, nil
+		return NotTerminated
 	case sd == 0:
 		sd = float64(cma.dim) * -36.8413614879 // ln(1e-16)
 	}
 	if cma.chol.LogDet() < sd {
-		return MethodConverge, nil
+		return MethodConverge
 	}
-	return NotTerminated, nil
+	return NotTerminated
+}
+
+// Status returns the status of the method.
+func (cma *CmaEsChol) Status() (Status, error) {
+	if cma.updateErr != nil {
+		return Failure, cma.updateErr
+	}
+	return cma.methodConverged(), nil
 }
 
 func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
@@ -226,90 +230,167 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 		cma.chol = chol
 	}
 
-	cma.evals = make([]int, cma.pop)
-	for i := range cma.evals {
-		cma.evals[i] = i
-	}
-
 	cma.bestX = resize(cma.bestX, dim)
 	cma.bestF = math.Inf(1)
 
+	// New ones TODO: reorient
+	cma.taskIdx = 0
+	cma.receivedIdx = 0
+	cma.operation = nil
+	cma.updateErr = nil
 	t := min(tasks, cma.pop)
-	cma.taskIdxs = make([]int, t)
-	for i := 0; i < t; i++ {
-		cma.taskIdxs[i] = -1
-	}
-	// Get a new mutex and waitgroup so that if the structure is reused there
-	// aren't residual interactions with the previous optimization.
-	cma.mux = sync.Mutex{}
-	cma.wg = sync.WaitGroup{}
 	return t
 }
 
-func (cma *CmaEsChol) IterateGlobal(task int, loc *Location) (Operation, error) {
-	// Check the status of the incoming task. If it is a number, it means
-	// that task contains a valid location.
-	idx := cma.taskIdxs[task]
-	if idx != -1 {
-		cma.fs[idx] = loc.F
-		cma.wg.Done()
+func (cma *CmaEsChol) sendInitTasks(tasks []GlobalTask) {
+	for i, task := range tasks {
+		cma.sendTask(i, task)
 	}
+	cma.taskIdx = len(tasks)
+}
 
-	// Get the next task and send it to be run if there is a next task to be run.
-	// If all of the tasks have been run, perform an update step. Note that the
-	// use of this mutex means that only one task can proceed, all of the
-	// other tasks should get stuck and then get a new location.
-	cma.mux.Lock()
-	if len(cma.evals) != 0 {
-		// There are still tasks to evaluate. Grab one and remove it from the list.
-		newIdx := cma.evals[len(cma.evals)-1]
-		cma.evals = cma.evals[:len(cma.evals)-1]
-		cma.wg.Add(1)
-		cma.mux.Unlock()
+// sendTask generates a sample and sends the task. It does not update the cma index.
+func (cma *CmaEsChol) sendTask(idx int, task GlobalTask) {
+	task.Index = idx
+	task.Operation = FuncEvaluation
+	distmv.NormalRand(cma.xs.RawRowView(idx), cma.mean, &cma.chol, cma.Src)
+	copy(task.X, cma.xs.RawRowView(idx))
+	cma.operation <- task
+}
 
-		// Sample x and send it to be evaluated.
-		distmv.NormalRand(cma.xs.RawRowView(newIdx), cma.mean, &cma.chol, cma.Src)
-		copy(loc.X, cma.xs.RawRowView(newIdx))
-		cma.taskIdxs[task] = newIdx
-		return FuncEvaluation, nil
+// bestIdx returns the best index in the functions. Returns -1 if all values
+// are NaN.
+func (cma *CmaEsChol) bestIdx() int {
+	best := -1
+	bestVal := math.Inf(1)
+	for i, v := range cma.fs {
+		if math.IsNaN(v) {
+			continue
+		}
+		if v < bestVal {
+			best = i
+			bestVal = v
+		}
 	}
-	// There are no more tasks to evaluate. This means the iteration is over.
-	// Find the best current f, update the parameters, and re-establish
-	// the evaluations to run.
+	return best
+}
 
-	// Wait for all of the outstanding tasks to finish, so the full set of functions
-	// has been evaluated.
-	cma.wg.Wait()
-
-	// Find the best f out of all the tasks.
-	best := floats.MinIdx(cma.fs)
+// findBestAndUpdateTask finds the best task in the current list, updates the
+// new best overall, and then stores the best location into task.
+func (cma *CmaEsChol) findBestAndUpdateTask(task GlobalTask) GlobalTask {
+	// Find and update the best location.
+	// Don't use floats because there may be NaN values.
+	best := cma.bestIdx()
 	bestF := cma.fs[best]
 	bestX := cma.xs.RawRowView(best)
 	if cma.ForgetBest {
-		loc.F = bestF
-		copy(loc.X, bestX)
+		task.F = bestF
+		copy(task.X, bestX)
 	} else {
 		if bestF < cma.bestF {
 			cma.bestF = bestF
 			copy(cma.bestX, bestX)
 		}
-		loc.F = cma.bestF
-		copy(loc.X, cma.bestX)
+		task.F = cma.bestF
+		copy(task.X, cma.bestX)
+
 	}
-
-	cma.taskIdxs[task] = -1
-
-	// Update the parameters of the distribution
-	err := cma.update()
-
-	// Reset the tasks
-	cma.evals = cma.evals[:cma.pop]
-
-	cma.mux.Unlock()
-	return MajorIteration, err
+	return task
 }
 
-// update computes the new parameters (mean, cholesky, etc.)
+func (cma *CmaEsChol) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	cma.operation = operation
+	// Send the initial tasks. We know there are at most as many tasks as elements
+	// of the populaiton.
+	cma.sendInitTasks(tasks)
+	cma.taskIdx = len(tasks)
+
+Outer:
+	for {
+		task := <-result
+		switch task.Operation {
+		default:
+			panic("unknown operation")
+		case PostIteration:
+			break Outer
+		case MajorIteration:
+			// The last thing we did was update all of the tasks and send the
+			// major iteration. Now we can send a group of tasks again.
+			cma.sendInitTasks(tasks)
+			cma.taskIdx = len(tasks)
+		case FuncEvaluation:
+			// fmt.Println("fun received", cma.taskIdx, cma.receivedIdx)
+			cma.receivedIdx++
+			cma.fs[task.Index] = task.F
+			switch {
+			case cma.taskIdx < cma.pop:
+				// There are still tasks to evaluate. Send the next.
+				cma.sendTask(cma.taskIdx, task)
+				cma.taskIdx++
+			case cma.receivedIdx < cma.pop:
+				// All the tasks have been sent, but not all of them have been received.
+				// Need to wait until all are back.
+				continue Outer
+			default:
+				// All of the evaluations have been received.
+				if cma.receivedIdx != cma.pop {
+					panic("bad logic")
+				}
+				cma.receivedIdx = 0
+				cma.taskIdx = 0
+
+				task = cma.findBestAndUpdateTask(task)
+				// Update the parameters and send a MajorIteration or a convergence.
+				err := cma.update()
+				// Kill the existing data.
+				for i := range cma.fs {
+					cma.fs[i] = math.NaN()
+					cma.xs.Set(i, 0, math.NaN())
+				}
+				switch {
+				case err != nil:
+					cma.updateErr = err
+					task.Operation = MethodDone
+				case cma.methodConverged() != NotTerminated:
+					task.Operation = MethodDone
+				default:
+					task.Operation = MajorIteration
+					task.Index = -1
+				}
+				operation <- task
+			}
+		}
+	}
+
+	// Been told to stop. Clean up.
+	// Need to see best of our evaluated tasks so far. Should instead just
+	// collect, then see.
+	for task := range result {
+		switch task.Operation {
+		case MajorIteration:
+		case FuncEvaluation:
+			cma.fs[task.Index] = task.F
+		default:
+			panic("unknown operation")
+		}
+	}
+	// Send the new best value if the evaluation is better than any we've
+	// found so far.
+	if !cma.ForgetBest {
+		best := cma.bestIdx()
+		if best != -1 && cma.fs[best] < cma.bestF {
+			task := tasks[0]
+			task = cma.findBestAndUpdateTask(task)
+			task.Operation = MajorIteration
+			task.Index = -1
+			operation <- task
+		}
+	}
+	close(operation)
+}
+
+// update computes the new parameters (mean, cholesky, etc.). Does not update
+// any of the synchronization parameters (taskIdx).
 func (cma *CmaEsChol) update() error {
 	// Sort the function values to find the elite samples.
 	ftmp := make([]float64, cma.pop)

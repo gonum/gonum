@@ -11,8 +11,8 @@ import (
 
 	"golang.org/x/exp/rand"
 
-	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/optimize/functions"
 )
 
@@ -21,11 +21,12 @@ type cmaTestCase struct {
 	problem  Problem
 	method   *CmaEsChol
 	settings *Settings
-	good     func(*Result, error) error
+	good     func(result *Result, err error, concurrent int) error
 }
 
 func cmaTestCases() []cmaTestCase {
 	localMinMean := []float64{2.2, -2.2}
+	_ = localMinMean
 	s := mat.NewSymDense(2, []float64{0.01, 0, 0, 0.01})
 	var localMinChol mat.Cholesky
 	localMinChol.Factorize(s)
@@ -42,7 +43,7 @@ func cmaTestCases() []cmaTestCase {
 			settings: &Settings{
 				FunctionThreshold: 0.01,
 			},
-			good: func(result *Result, err error) error {
+			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != FunctionThreshold {
 					return errors.New("result not function threshold")
 				}
@@ -63,7 +64,7 @@ func cmaTestCases() []cmaTestCase {
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
 			},
-			good: func(result *Result, err error) error {
+			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != MethodConverge {
 					return errors.New("result not method converge")
 				}
@@ -82,24 +83,30 @@ func cmaTestCases() []cmaTestCase {
 			},
 			method: &CmaEsChol{
 				Population: 100,
+				ForgetBest: true, // Otherwise may get an update at the end.
 			},
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
 				MajorIterations:   10,
 			},
-			good: func(result *Result, err error) error {
+			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != IterationLimit {
 					return errors.New("result not iteration limit")
 				}
-				if result.FuncEvaluations != 1000 {
-					return errors.New("wrong number of evaluations")
+				threshLower := 10
+				threshUpper := 10
+				if concurrent != 0 {
+					// Could have one more from final update.
+					threshUpper++
+				}
+				if result.MajorIterations < threshLower || result.MajorIterations > threshUpper {
+					return errors.New("wrong number of iterations")
 				}
 				return nil
 			},
 		},
 		{
-			// Test that works properly in parallel, and stops with some
-			// number of function evaluations.
+			// Test that worksstops with some number of function evaluations.
 			dim: 5,
 			problem: Problem{
 				Func: functions.ExtendedRosenbrock{}.Func,
@@ -108,18 +115,22 @@ func cmaTestCases() []cmaTestCase {
 				Population: 100,
 			},
 			settings: &Settings{
-				Concurrent:        5,
 				FunctionThreshold: math.Inf(-1),
 				FuncEvaluations:   250, // Somewhere in the middle of an iteration.
 			},
-			good: func(result *Result, err error) error {
+			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != FunctionEvaluationLimit {
 					return errors.New("result not function evaluations")
 				}
-				if result.FuncEvaluations < 250 {
+				threshLower := 250
+				threshUpper := 251
+				if concurrent != 0 {
+					threshUpper = threshLower + concurrent
+				}
+				if result.FuncEvaluations < threshLower {
 					return errors.New("too few function evaluations")
 				}
-				if result.FuncEvaluations > 250+4 { // can't guarantee exactly, because could grab extras in parallel first.
+				if result.FuncEvaluations > threshUpper {
 					return errors.New("too many function evaluations")
 				}
 				return nil
@@ -137,7 +148,7 @@ func cmaTestCases() []cmaTestCase {
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
 			},
-			good: func(result *Result, err error) error {
+			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != MethodConverge {
 					return errors.New("result not method converge")
 				}
@@ -157,15 +168,16 @@ func cmaTestCases() []cmaTestCase {
 				Population:   100, // Increase the population size to reduce noise.
 				InitMean:     localMinMean,
 				InitCholesky: &localMinChol,
+				ForgetBest:   true, // So that if it accidentally finds a better place we still converge to the minimum.
 			},
 			settings: &Settings{
 				FunctionThreshold: math.Inf(-1),
 			},
-			good: func(result *Result, err error) error {
+			good: func(result *Result, err error, concurrent int) error {
 				if result.Status != MethodConverge {
 					return errors.New("result not method converge")
 				}
-				if !floats.EqualApprox(result.X, []float64{2, -2}, 1e-2) {
+				if !floats.EqualApprox(result.X, []float64{2, -2}, 3e-2) {
 					return errors.New("local minimum not found")
 				}
 				return nil
@@ -181,14 +193,22 @@ func TestCmaEsChol(t *testing.T) {
 		method.Src = src
 		// Run and check that the expected termination occurs.
 		result, err := Global(test.problem, test.dim, test.settings, method)
-		if testErr := test.good(result, err); testErr != nil {
+		if testErr := test.good(result, err, test.settings.Concurrent); testErr != nil {
 			t.Errorf("cas %d: %v", i, testErr)
 		}
 
 		// Run a second time to make sure there are no residual effects
 		result, err = Global(test.problem, test.dim, test.settings, method)
-		if testErr := test.good(result, err); testErr != nil {
+		if testErr := test.good(result, err, test.settings.Concurrent); testErr != nil {
 			t.Errorf("cas %d second: %v", i, testErr)
 		}
+
+		// Test the problem in parallel.
+		test.settings.Concurrent = 5
+		result, err = Global(test.problem, test.dim, test.settings, method)
+		if testErr := test.good(result, err, test.settings.Concurrent); testErr != nil {
+			t.Errorf("cas %d concurrent: %v", i, testErr)
+		}
+		test.settings.Concurrent = 0
 	}
 }

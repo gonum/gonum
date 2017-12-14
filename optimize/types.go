@@ -26,10 +26,12 @@ const (
 	// NoOperation specifies that no evaluation or convergence check should
 	// take place.
 	NoOperation Operation = 0
+	// signal is used interally to signal completion.
+	signalOperation Operation = 1 << (iota - 1)
 	// InitIteration is sent to Recorder to indicate the initial location.
 	// All fields of the location to record must be valid.
 	// Method must not return it.
-	InitIteration Operation = 1 << (iota - 1)
+	InitIteration
 	// PostIteration is sent to Recorder to indicate the final location
 	// reached during an optimization run.
 	// All fields of the location to record must be valid.
@@ -38,6 +40,10 @@ const (
 	// MajorIteration indicates that the next candidate location for
 	// an optimum has been found and convergence should be checked.
 	MajorIteration
+	// MethodDone declares that the method is done running. A method must
+	// be a Statuser in order to use this iteration, and after returning
+	// MethodDone, the Status must return other than NotTerminated.
+	MethodDone
 	// FuncEvaluation specifies that the objective function
 	// should be evaluated.
 	FuncEvaluation
@@ -72,10 +78,12 @@ func (op Operation) String() string {
 }
 
 var operationNames = map[Operation]string{
-	NoOperation:    "NoOperation",
-	InitIteration:  "InitIteration",
-	MajorIteration: "MajorIteration",
-	PostIteration:  "PostIteration",
+	NoOperation:     "NoOperation",
+	signalOperation: "signalOperation",
+	InitIteration:   "InitIteration",
+	MajorIteration:  "MajorIteration",
+	PostIteration:   "PostIteration",
+	MethodDone:      "MethodDone",
 }
 
 // Location represents a location in the optimization procedure.
@@ -201,7 +209,7 @@ type Settings struct {
 
 	// Runtime is the maximum runtime allowed. RuntimeLimit status is returned
 	// if the duration of the run is longer than this value. Runtime is only
-	// checked at iterations of the Method.
+	// checked at MajorIterations of the Method.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	Runtime time.Duration

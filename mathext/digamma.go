@@ -27,7 +27,7 @@ func Digamma(x float64) float64 {
 		}
 		// Reflection formula, http://dlmf.nist.gov/5.5#E4
 		_, r := math.Modf(x)
-		result = -math.Pi / math.Tan(math.Pi * r)
+		result = -math.Pi / math.Tan(math.Pi*r)
 		x = 1 - x
 	}
 	for ; x < 7; x++ {

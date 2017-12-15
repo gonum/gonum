@@ -133,6 +133,49 @@ func TestAddScaledTo(t *testing.T) {
 	}
 }
 
+func TestAreUnique(t *testing.T) {
+	for _, test := range []struct {
+		s    []float64
+		want bool
+	}{
+		{
+			s:    []float64{1, 2, 3, 4},
+			want: true,
+		},
+		{
+			s:    []float64{1, 2, 3, 4, 1},
+			want: false,
+		},
+		{
+			s:    []float64{1, 1, 1, 1},
+			want: false,
+		},
+		{
+			s: []float64{
+				0.3,
+				0.1 + 0.2,
+				3 / 10,
+			},
+			want: false,
+		},
+		{
+			s: []float64{
+				0,
+				math.SmallestNonzeroFloat64,
+				2 * math.SmallestNonzeroFloat64,
+				3 * math.SmallestNonzeroFloat64,
+				4 * math.SmallestNonzeroFloat64,
+			},
+			want: true,
+		},
+	} {
+		got := AreUnique(test.s)
+		if got != test.want {
+			t.Errorf("AreUnique returned incorrect value for %v, got %v, want %v", test.s, got, test.want)
+		}
+	}
+}
+
 func TestArgsort(t *testing.T) {
 	s := []float64{3, 4, 1, 7, 5}
 	inds := make([]int, len(s))

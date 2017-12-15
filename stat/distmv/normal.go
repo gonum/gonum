@@ -63,12 +63,16 @@ func NewNormal(mu []float64, sigma mat.Symmetric, src *rand.Rand) (*Normal, bool
 	return n, true
 }
 
-// NewNormalChol creates a new Normal distribution with the given mean and
-// covariance matrix represented by its Cholesky decomposition. NewNormalChol
-// panics if len(mu) is not equal to chol.Size().
-func NewNormalChol(mu []float64, chol *mat.Cholesky, src *rand.Rand) *Normal {
+// NewNormalData creates a new Normal distribution with the given mean and
+// covariance matrix when the Cholesky decomposition of the covariance matrix
+// is already known. NewNormalChol panics if len(mu) is not equal to chol.Size()
+// or sigma.Symmetric().
+func NewNormalData(mu []float64, sigma mat.Symmetric, chol *mat.Cholesky, src *rand.Rand) *Normal {
 	dim := len(mu)
 	if dim != chol.Size() {
+		panic(badSizeMismatch)
+	}
+	if dim != sigma.Symmetric() {
 		panic(badSizeMismatch)
 	}
 	n := &Normal{
@@ -76,6 +80,8 @@ func NewNormalChol(mu []float64, chol *mat.Cholesky, src *rand.Rand) *Normal {
 		dim: dim,
 		mu:  make([]float64, dim),
 	}
+	n.sigma = *mat.NewSymDense(dim, nil)
+	n.sigma.CopySym(sigma)
 	n.chol.Clone(chol)
 	copy(n.mu, mu)
 	n.logSqrtDet = 0.5 * n.chol.LogDet()

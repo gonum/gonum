@@ -141,9 +141,6 @@ func (Implementation) Zgbmv(tA blas.Transpose, m, n int, kL int, kU int, alpha c
 func (Implementation) Ztbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []complex128, lda int, x []complex128, incX int) {
 	panic(noComplex)
 }
-func (Implementation) Ztpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []complex128, x []complex128, incX int) {
-	panic(noComplex)
-}
 func (Implementation) Ztbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []complex128, lda int, x []complex128, incX int) {
 	panic(noComplex)
 }

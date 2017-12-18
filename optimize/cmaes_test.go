@@ -26,7 +26,6 @@ type cmaTestCase struct {
 
 func cmaTestCases() []cmaTestCase {
 	localMinMean := []float64{2.2, -2.2}
-	_ = localMinMean
 	s := mat.NewSymDense(2, []float64{0.01, 0, 0, 0.01})
 	var localMinChol mat.Cholesky
 	localMinChol.Factorize(s)
@@ -106,7 +105,7 @@ func cmaTestCases() []cmaTestCase {
 			},
 		},
 		{
-			// Test that worksstops with some number of function evaluations.
+			// Test that work stops with some number of function evaluations.
 			dim: 5,
 			problem: Problem{
 				Func: functions.ExtendedRosenbrock{}.Func,

@@ -21,10 +21,11 @@ func DefaultSettingsGlobal() *Settings {
 	}
 }
 
-// GlobalTask is a task to communicate between the GlobalMethod and
+// GlobalTask is a type to communicate between the GlobalMethod and the outer
+// calling script.
 type GlobalTask struct {
-	Index int
-	Operation
+	Index     int
+	Operation Operation
 	*Location
 }
 
@@ -53,7 +54,7 @@ type GlobalMethod interface {
 	// the same Index and Operation as the sent task, which can be used to
 	// determine the next appropriate action.
 	//
-	// One per RunGlobal, a PostIteration task will be sent on result, signaling the
+	// Once per RunGlobal, a PostIteration task will be sent on result, signaling the
 	// conclusion of the optimization (i.e. convergence from user settings).
 	// More tasks may still be sent on operation, after this occurs, but
 	// no additional Evaluations will be conducted. MajorIteration operations,
@@ -78,6 +79,43 @@ type GlobalMethod interface {
 	RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask)
 }
 
+// Global uses a global optimizer to search for the global minimum of a
+// function. A maximization problem can be transformed into a
+// minimization problem by multiplying the function by -1.
+//
+// The first argument represents the problem to be minimized. Its fields are
+// routines that evaluate the objective function, gradient, and other
+// quantities related to the problem. The objective function, p.Func, must not
+// be nil. The optimization method used may require other fields to be non-nil
+// as specified by method.Needs. Global will panic if these are not met. The
+// method can be determined automatically from the supplied problem which is
+// described below.
+//
+// If p.Status is not nil, it is called before every evaluation. If the
+// returned Status is other than NotTerminated or if the error is not nil, the
+// optimization run is terminated.
+//
+// The third argument contains the settings for the minimization. The
+// DefaultGlobalSettings function can be called for a Settings struct with the
+// default values initialized. If settings == nil, the default settings are used.
+// All of the settings will be followed, but many of them may be counterproductive
+// to use (such as GradientThreshold). Global cannot guarantee strict adherence
+// to the bounds specified when performing concurrent evaluations and updates.
+//
+// The final argument is the optimization method to use. If method == nil, then
+// an appropriate default is chosen based on the properties of the other arguments
+// (dimension, gradient-free or gradient-based, etc.).
+//
+// Global returns a Result struct and any error that occurred. See the
+// documentation of Result for more information.
+//
+// Please see the documentation for GlobalMethod for the details on implementing
+// a method.
+//
+// Be aware that the default behavior of Global is to find the minimum.
+// For certain functions and optimization methods, this process can take many
+// function evaluations. The Settings input struct can be used to limit this,
+// for example by modifying the maximum runtime or maximum function evaluations.
 func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Result, error) {
 	startTime := time.Now()
 	if method == nil {
@@ -186,12 +224,10 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 	results := make(chan GlobalTask, nTasks)    // return results to GlobalMethod.
 	workerChan := make(chan GlobalTask)         // Delegate tasks to the workers.
 	evalStatsChan := make(chan GlobalTask)      // Send evaluation updates.
-	//iterStatsChan := make(chan GlobalTask)      // Send iteration updates.
-	statusChan := make(chan final)    // Send a termination status.
-	statusSent := make(chan struct{}) // Communicate the optimizaiton is done.
-	//statsDone := make(chan struct{})            // No further stats to update.
-	var statWG sync.WaitGroup // All stats are updated.
-	var distWG sync.WaitGroup // Distributor has successfully terminated.
+	statusChan := make(chan final)              // Send a termination status.
+	statusSent := make(chan struct{})           // Communicate the optimization is done.
+	var statWG sync.WaitGroup                   // All stats are updated.
+	var distWG sync.WaitGroup                   // Distributor has successfully terminated.
 
 	// Launch the method.
 	go func() {

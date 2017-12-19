@@ -13,7 +13,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-var (
+const (
 	nonpositiveDimension string = "optimize: non-positive input dimension"
 	negativeTasks        string = "optimize: negative input number of tasks"
 )

@@ -174,9 +174,9 @@ func (w *Wishart) RandChol(c *mat.Cholesky) *mat.Cholesky {
 	// Instead, generate A^T, by using the procedure above, except as an upper
 	// triangular matrix.
 	norm := distuv.Normal{
-		Mu:     0,
-		Sigma:  1,
-		Source: w.src,
+		Mu:    0,
+		Sigma: 1,
+		Src:   w.src,
 	}
 
 	t := mat.NewTriDense(w.dim, mat.Upper, nil)

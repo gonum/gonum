@@ -316,6 +316,11 @@ func (s *StudentsT) Mean(x []float64) []float64 {
 	return x
 }
 
+// Nu returns the degrees of freedom parameter of the distribution.
+func Nu(s *StudentsT) float64 {
+	return s.nu
+}
+
 // Prob computes the value of the probability density function at x.
 func (s *StudentsT) Prob(y []float64) float64 {
 	return math.Exp(s.LogProb(y))

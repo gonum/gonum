@@ -13,15 +13,25 @@ import (
 	"gonum.org/v1/gonum/stat/distmv"
 )
 
-// Haltoner is a wrapper around the Halton sampling generation method.
-type Haltoner struct {
+// Halton is a type for sampling using the Halton sequence from
+// the given distribution. The specific method for scrambling (or lack thereof)
+// is specified by the HaltonKind. If src is not nil, it will be used to generate
+// the randomness needed to scramble the sequence (if necessary). Halton
+// panics if the HaltonKind is unrecognized or if q is nil.
+//
+// Halton sequence random number generation is a quasi-Monte Carlo procedure
+// where the samples are generated to be evenly spaced out across the distribution.
+// Note that this means the sample locations are correlated with one another.
+// The distmv.NewUnitUniform function can be used for easy sampling from the unit hypercube.
+type Halton struct {
 	Kind HaltonKind
 	Q    distmv.Quantiler
 	Src  *rand.Rand
 }
 
-func (h Haltoner) Sample(batch *mat.Dense) {
-	Halton(batch, h.Kind, h.Q, h.Src)
+// Sample generates rows(batch) samples using the Halton generation procedure.
+func (h Halton) Sample(batch *mat.Dense) {
+	halton(batch, h.Kind, h.Q, h.Src)
 }
 
 type HaltonKind int
@@ -36,17 +46,7 @@ const (
 	Owen = iota + 1
 )
 
-// Halton generates rows(batch) samples using the Halton sequence from
-// the given distribution. The specific method for scrambling (or lack thereof)
-// is specified by the HaltonKind. If src is not nil, it will be used to generate
-// the randomness needed to scramble the sequence (if necessary). Halton
-// panics if the HaltonKind is unrecognized or if q is nil.
-//
-// Halton sequence random number generation is a quasi-Monte Carlo procedure
-// where the samples are generated to be evenly spaced out across the distribution.
-// Note that this means the sample locations are correlated with one another.
-// The distmv.NewUnitUniform function can be used for easy sampling from the unit hypercube.
-func Halton(batch *mat.Dense, kind HaltonKind, q distmv.Quantiler, src *rand.Rand) {
+func halton(batch *mat.Dense, kind HaltonKind, q distmv.Quantiler, src *rand.Rand) {
 	// Code based from https://arxiv.org/pdf/1706.02808.pdf .
 	perm := rand.Perm
 	if src != nil {

@@ -137,7 +137,7 @@ func (d *Dirichlet) Prob(x []float64) float64 {
 func (d *Dirichlet) Rand(x []float64) []float64 {
 	x = reuseAs(x, d.dim)
 	for i := range x {
-		x[i] = distuv.Gamma{Alpha: d.alpha[i], Beta: 1, Source: d.src}.Rand()
+		x[i] = distuv.Gamma{Alpha: d.alpha[i], Beta: 1, Src: d.src}.Rand()
 	}
 	sum := floats.Sum(x)
 	floats.Scale(1/sum, x)

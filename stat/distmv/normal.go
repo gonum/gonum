@@ -236,9 +236,9 @@ func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 // The input src is passed to the constructed distuv.Normal.
 func (n *Normal) MarginalNormalSingle(i int, src *rand.Rand) distuv.Normal {
 	return distuv.Normal{
-		Mu:     n.mu[i],
-		Sigma:  math.Sqrt(n.sigma.At(i, i)),
-		Source: src,
+		Mu:    n.mu[i],
+		Sigma: math.Sqrt(n.sigma.At(i, i)),
+		Src:   src,
 	}
 }
 

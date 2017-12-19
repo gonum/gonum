@@ -52,7 +52,7 @@ func TestTriangle(t *testing.T) {
 		},
 	} {
 		f := NewTriangle(test.a, test.b, test.c)
-		f.Source = src
+		f.Src = src
 		tol := 1e-2
 		const n = 1e6
 		x := make([]float64, n)

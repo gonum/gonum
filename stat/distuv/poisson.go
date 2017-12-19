@@ -23,7 +23,7 @@ type Poisson struct {
 	// Lambda must be greater than 0.
 	Lambda float64
 
-	Source *rand.Rand
+	Src *rand.Rand
 }
 
 // CDF computes the value of the cumulative distribution function at x.
@@ -71,8 +71,8 @@ func (p Poisson) Rand() float64 {
 	// <http://www.aip.de/groups/soe/local/numres/bookcpdf/c7-3.pdf>
 
 	rnd := rand.ExpFloat64
-	if p.Source != nil {
-		rnd = p.Source.ExpFloat64
+	if p.Src != nil {
+		rnd = p.Src.ExpFloat64
 	}
 
 	if p.Lambda < 10.0 {
@@ -90,8 +90,8 @@ func (p Poisson) Rand() float64 {
 	}
 	// Use rejection method.
 	rnd = rand.Float64
-	if p.Source != nil {
-		rnd = p.Source.Float64
+	if p.Src != nil {
+		rnd = p.Src.Float64
 	}
 	sq := math.Sqrt(2.0 * p.Lambda)
 	alxm := math.Log(p.Lambda)

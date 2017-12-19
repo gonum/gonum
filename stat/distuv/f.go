@@ -21,9 +21,9 @@ import (
 //
 // For more information, see https://en.wikipedia.org/wiki/F-distribution
 type F struct {
-	D1     float64 // Degrees of freedom for the numerator
-	D2     float64 // Degrees of freedom for the denominator
-	Source *rand.Rand
+	D1  float64 // Degrees of freedom for the numerator
+	D2  float64 // Degrees of freedom for the denominator
+	Src *rand.Rand
 }
 
 // CDF computes the value of the cumulative density function at x.
@@ -88,8 +88,8 @@ func (f F) Quantile(p float64) float64 {
 
 // Rand returns a random sample drawn from the distribution.
 func (f F) Rand() float64 {
-	u1 := ChiSquared{f.D1, f.Source}.Rand()
-	u2 := ChiSquared{f.D2, f.Source}.Rand()
+	u1 := ChiSquared{f.D1, f.Src}.Rand()
+	u2 := ChiSquared{f.D2, f.Src}.Rand()
 	return (u1 / f.D1) / (u2 / f.D2)
 }
 

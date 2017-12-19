@@ -16,9 +16,9 @@ var UnitUniform = Uniform{Min: 0, Max: 1}
 
 // Uniform represents a continuous uniform distribution (https://en.wikipedia.org/wiki/Uniform_distribution_%28continuous%29).
 type Uniform struct {
-	Min    float64
-	Max    float64
-	Source *rand.Rand
+	Min float64
+	Max float64
+	Src *rand.Rand
 }
 
 // CDF computes the value of the cumulative density function at x.
@@ -108,10 +108,10 @@ func (u Uniform) Quantile(p float64) float64 {
 // Rand returns a random sample drawn from the distribution.
 func (u Uniform) Rand() float64 {
 	var rnd float64
-	if u.Source == nil {
+	if u.Src == nil {
 		rnd = rand.Float64()
 	} else {
-		rnd = u.Source.Float64()
+		rnd = u.Src.Float64()
 	}
 	return rnd*(u.Max-u.Min) + u.Min
 }

@@ -24,26 +24,17 @@ func ExampleMetropolisHastings_samplingRate() {
 	// Successive samples are correlated with one another through the
 	// Markov Chain defined by the proposal distribution. To get less
 	// correlated samples, one may use a sampling rate, in which only
-	// one sample from every few is accepted from the chain. This can
-	// be accomplished through a for loop.
+	// one sample from every few is accepted from the chain.
 	rate := 50
 
-	tmp := make([]float64, max(rate, burnin))
-
-	// First deal with burnin.
-	tmp = tmp[:burnin]
-	MetropolisHastings(tmp, initial, target, proposal, nil)
-	// The final sample in tmp in the final point in the chain.
-	// Use it as the new initial location.
-	initial = tmp[len(tmp)-1]
-
-	// Now, generate samples by using one every rate samples.
-	tmp = tmp[:rate]
-	samples := make([]float64, n)
-	samples[0] = initial
-	for i := 1; i < len(samples); i++ {
-		MetropolisHastings(tmp, initial, target, proposal, nil)
-		initial = tmp[len(tmp)-1]
-		samples[i] = initial
+	mh := MetropolisHastings{
+		Initial:  initial,
+		Target:   target,
+		Proposal: proposal,
+		BurnIn:   burnin,
+		Rate:     rate,
 	}
+
+	samples := make([]float64, n)
+	mh.Sample(samples)
 }

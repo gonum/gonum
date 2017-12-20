@@ -126,9 +126,6 @@ func latinHypercube(batch *mat.Dense, q distmv.Quantiler, src *rand.Rand) {
 // a good proposal distribution will bound this sampling weight. This implies the
 // support of q(x) should be at least as broad as p(x), and q(x) should be "fatter tailed"
 // than p(x).
-//
-// If weights is nil, the weights are not stored. The length of weights must equal
-// the length of batch, otherwise Importance will panic.
 type Importance struct {
 	Target   distmv.LogProber
 	Proposal distmv.RandLogProber
@@ -136,6 +133,9 @@ type Importance struct {
 
 // SampleWeighted generates rows(batch) samples using the Importance sampling
 // generation procedure.
+//
+// If weights is nil, the weights are not stored. The length of weights must equal
+// the length of batch, otherwise Importance will panic.
 func (l Importance) SampleWeighted(batch *mat.Dense, weights []float64) {
 	importance(batch, weights, l.Target, l.Proposal)
 }
@@ -199,7 +199,7 @@ func (r *Rejection) Proposed() int {
 
 // Sample generates rows(batch) using the Rejection sampling generation procedure.
 // Rejection sampling may fail if the constant is insufficiently high, as described
-// in the function comment for Rejection. If the generation fails, the samples
+// in the type comment for Rejection. If the generation fails, the samples
 // are set to math.NaN(), and a call to Err will return a non-nil value.
 func (r *Rejection) Sample(batch *mat.Dense) {
 	r.err = nil

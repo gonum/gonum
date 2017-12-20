@@ -16,8 +16,9 @@ import (
 // Halton is a type for sampling using the Halton sequence from
 // the given distribution. The specific method for scrambling (or lack thereof)
 // is specified by the HaltonKind. If src is not nil, it will be used to generate
-// the randomness needed to scramble the sequence (if necessary). Halton
-// panics if the HaltonKind is unrecognized or if q is nil.
+// the randomness needed to scramble the sequence (if necessary), otherwise
+// the rand package will be used. Halton panics if the HaltonKind is unrecognized
+// or if q is nil.
 //
 // Halton sequence random number generation is a quasi-Monte Carlo procedure
 // where the samples are generated to be evenly spaced out across the distribution.

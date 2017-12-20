@@ -18,13 +18,13 @@ var (
 )
 
 var (
-	_ Sampler = LatinHypercuber{}
-	_ Sampler = MetropolisHastingser{}
-	_ Sampler = (*Rejectioner)(nil)
+	_ Sampler = LatinHypercube{}
+	_ Sampler = MetropolisHastings{}
+	_ Sampler = (*Rejection)(nil)
 	_ Sampler = IIDer{}
 
 	_ WeightedSampler = SampleUniformWeighted{}
-	_ WeightedSampler = Importancer{}
+	_ WeightedSampler = Importance{}
 )
 
 func min(a, b int) int {
@@ -69,28 +69,26 @@ func (w SampleUniformWeighted) SampleWeighted(batch, weights []float64) {
 	}
 }
 
-// LatinHypercuber is a wrapper around the LatinHypercube sampling generation
-// method.
-type LatinHypercuber struct {
+// LatinHypercube is a type for sampling using Latin hypercube sampling
+// from the given distribution. If src is not nil, it will be used to generate
+// random numbers, otherwise rand.Float64 will be used.
+//
+// Latin hypercube sampling divides the cumulative distribution function into equally
+// spaced bins and guarantees that one sample is generated per bin. Within each bin,
+// the location is randomly sampled. The distuv.UnitUniform variable can be used
+// for easy sampling from the unit hypercube.
+type LatinHypercube struct {
 	Q   distuv.Quantiler
 	Src *rand.Rand
 }
 
 // Sample generates len(batch) samples using the LatinHypercube generation
 // procedure.
-func (l LatinHypercuber) Sample(batch []float64) {
-	LatinHypercube(batch, l.Q, l.Src)
+func (l LatinHypercube) Sample(batch []float64) {
+	latinHypercube(batch, l.Q, l.Src)
 }
 
-// LatinHypercube generates len(batch) samples using Latin hypercube sampling
-// from the given distribution. If src != nil, it will be used to generate
-// random numbers, otherwise rand.Float64 will be used.
-//
-// Latin hypercube sampling divides the cumulative distribution function into equally
-// spaced bins and guarantees that one sample is generated per bin. Within each bin,
-// the location is randomly sampled. The distuv.UnitUniform variable can be used
-// for easy generation from the unit interval.
-func LatinHypercube(batch []float64, q distuv.Quantiler, src *rand.Rand) {
+func latinHypercube(batch []float64, q distuv.Quantiler, src *rand.Rand) {
 	n := len(batch)
 	var perm []int
 	var f64 func() float64
@@ -107,20 +105,8 @@ func LatinHypercube(batch []float64, q distuv.Quantiler, src *rand.Rand) {
 	}
 }
 
-// Importancer is a wrapper around the Importance sampling generation method.
-type Importancer struct {
-	Target   distuv.LogProber
-	Proposal distuv.RandLogProber
-}
-
-// Sample generates len(batch) samples using the Importance sampling generation
-// procedure.
-func (l Importancer) SampleWeighted(batch, weights []float64) {
-	Importance(batch, weights, l.Target, l.Proposal)
-}
-
-// Importance sampling generates len(batch) samples from the proposal distribution,
-// and stores the locations and importance sampling weights in place.
+// Importance is a type for performing importance sampling using the given
+// Target and Proposal distributions.
 //
 // Importance sampling is a variance reduction technique where samples are
 // generated from a proposal distribution, q(x), instead of the target distribution
@@ -130,10 +116,21 @@ func (l Importancer) SampleWeighted(batch, weights []float64) {
 // a good proposal distribution will bound this sampling weight. This implies the
 // support of q(x) should be at least as broad as p(x), and q(x) should be "fatter tailed"
 // than p(x).
+type Importance struct {
+	Target   distuv.LogProber
+	Proposal distuv.RandLogProber
+}
+
+// SampleWeighted generates len(batch) samples using the Importance sampling
+// generation procedure.
 //
 // If weights is nil, the weights are not stored. The length of weights must equal
 // the length of batch, otherwise Importance will panic.
-func Importance(batch, weights []float64, target distuv.LogProber, proposal distuv.RandLogProber) {
+func (l Importance) SampleWeighted(batch, weights []float64) {
+	importance(batch, weights, l.Target, l.Proposal)
+}
+
+func importance(batch, weights []float64, target distuv.LogProber, proposal distuv.RandLogProber) {
 	if len(batch) != len(weights) {
 		panic(badLengthMismatch)
 	}
@@ -147,10 +144,27 @@ func Importance(batch, weights []float64, target distuv.LogProber, proposal dist
 // ErrRejection is returned when the constant in Rejection is not sufficiently high.
 var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 
-// Rejectioner is a wrapper around the Rejection sampling generation procedure.
-// If the rejection sampling fails during the call to Sample, all samples will
-// be set to math.NaN() and a call to Err will return a non-nil value.
-type Rejectioner struct {
+// Rejection is a type for sampling using the rejection sampling algorithm.
+//
+// Rejection sampling generates points from the target distribution by using
+// the proposal distribution. At each step of the algorithm, the proposed point
+// is accepted with probability
+//  p = target(x) / (proposal(x) * c)
+// where target(x) is the probability of the point according to the target distribution
+// and proposal(x) is the probability according to the proposal distribution.
+// The constant c must be chosen such that target(x) < proposal(x) * c for all x.
+// The expected number of proposed samples is len(samples) * c.
+//
+// The number of proposed locations during sampling can be found with a call to
+// Proposed. If there was an error during sampling, all elements of samples are
+// set to NaN and the error can be accesssed with the Err method. If src != nil,
+// it will be used to generate random numbers, otherwise rand.Float64 will be used.
+//
+// Target may return the true (log of) the probablity of the location, or it may return
+// a value that is proportional to the probability (logprob + constant). This is
+// useful for cases where the probability distribution is only known up to a normalization
+// constant.
+type Rejection struct {
 	C        float64
 	Target   distuv.LogProber
 	Proposal distuv.RandLogProber
@@ -162,52 +176,31 @@ type Rejectioner struct {
 
 // Err returns nil if the most recent call to sample was successful, and returns
 // ErrRejection if it was not.
-func (r *Rejectioner) Err() error {
+func (r *Rejection) Err() error {
 	return r.err
 }
 
 // Proposed returns the number of samples proposed during the most recent call to
 // Sample.
-func (r *Rejectioner) Proposed() int {
+func (r *Rejection) Proposed() int {
 	return r.proposed
 }
 
 // Sample generates len(batch) using the Rejection sampling generation procedure.
 // Rejection sampling may fail if the constant is insufficiently high, as described
-// in the function comment for Rejection. If the generation fails, the samples
+// in the type comment for Rejection. If the generation fails, the samples
 // are set to math.NaN(), and a call to Err will return a non-nil value.
-func (r *Rejectioner) Sample(batch []float64) {
+func (r *Rejection) Sample(batch []float64) {
 	r.err = nil
 	r.proposed = 0
-	proposed, ok := Rejection(batch, r.Target, r.Proposal, r.C, r.Src)
+	proposed, ok := rejection(batch, r.Target, r.Proposal, r.C, r.Src)
 	if !ok {
 		r.err = ErrRejection
 	}
 	r.proposed = proposed
 }
 
-// Rejection generates len(batch) samples using the rejection sampling algorithm
-// and stores them in place into samples. Sampling continues until batch is
-// filled. Rejection returns the total number of proposed locations and a boolean
-// indicating if the rejection sampling assumption is violated (see details
-// below). If the returned boolean is false, all elements of samples are set to
-// NaN. If src is not nil, it will be used to generate random numbers, otherwise
-// rand.Float64 will be used.
-//
-// Rejection sampling generates points from the target distribution by using
-// the proposal distribution. At each step of the algorithm, the proposed point
-// is accepted with probability
-//  p = target(x) / (proposal(x) * c)
-// where target(x) is the probability of the point according to the target distribution
-// and proposal(x) is the probability according to the proposal distribution.
-// The constant c must be chosen such that target(x) < proposal(x) * c for all x.
-// The expected number of proposed samples is len(samples) * c.
-//
-// Target may return the true (log of) the probablity of the location, or it may return
-// a value that is proportional to the probability (logprob + constant). This is
-// useful for cases where the probability distribution is only known up to a normalization
-// constant.
-func Rejection(batch []float64, target distuv.LogProber, proposal distuv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
+func rejection(batch []float64, target distuv.LogProber, proposal distuv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
 	if c < 1 {
 		panic("rejection: acceptance constant must be greater than 1")
 	}
@@ -252,20 +245,38 @@ type MHProposal interface {
 	ConditionalRand(y float64) (x float64)
 }
 
-// MetropolisHastingser is a wrapper around the MetropolisHastings sampling type.
+// MetropolisHastings is a type for generating samples using the Metropolis Hastings
+// algorithm (http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm),
+// with the given target and proposal distributions, starting at the location
+// specified by Initial. If src != nil, it will be used to generate random
+// numbers, otherwise rand.Float64 will be used.
 //
-// BurnIn sets the number of samples to discard before keeping the first sample.
-// A properly set BurnIn rate will decorrelate the sampling chain from the initial
-// location. The proper BurnIn value will depend on the mixing time of the
-// Markov chain defined by the target and proposal distributions.
+// Metropolis-Hastings is a Markov-chain Monte Carlo algorithm that generates
+// samples according to the distribution specified by target by using the Markov
+// chain implicitly defined by the proposal distribution. At each
+// iteration, a proposal point is generated randomly from the current location.
+// This proposal point is accepted with probability
+//  p = min(1, (target(new) * proposal(current|new)) / (target(current) * proposal(new|current)))
+// If the new location is accepted, it becomes the new current location.
+// If it is rejected, the current location remains. This is the sample stored in
+// batch, ignoring BurnIn and Rate (discussed below).
 //
-// Rate sets the number of samples to discard in between each kept sample. A
-// higher rate will better approximate independently and identically distributed
-// samples, while a lower rate will keep more information (at the cost of
-// higher correlation between samples). If Rate is 0 it is defaulted to 1.
+// The samples in Metropolis Hastings are correlated with one another through the
+// Markov chain. As a result, the initial value can have a significant influence
+// on the early samples, and so, typically, the first samples generated by the chain
+// are ignored. This is known as "burn-in", and the number of samples ignored
+// at the beginning is specified by BurnIn. The proper BurnIn value will depend
+// on the mixing time of the Markov chain defined by the target and proposal
+// distributions.
+//
+// Many choose to have a sampling "rate" where a number of samples
+// are ignored in between each kept sample. This helps decorrelate
+// the samples from one another, but also reduces the number of available samples.
+// This value is specified by Rate. If Rate is 0 it is defaulted to 1 (keep
+// every sample).
 //
 // The initial value is NOT changed during calls to Sample.
-type MetropolisHastingser struct {
+type MetropolisHastings struct {
 	Initial  float64
 	Target   distuv.LogProber
 	Proposal MHProposal
@@ -277,7 +288,7 @@ type MetropolisHastingser struct {
 
 // Sample generates len(batch) samples using the Metropolis Hastings sample
 // generation method. The initial location is NOT updated during the call to Sample.
-func (m MetropolisHastingser) Sample(batch []float64) {
+func (m MetropolisHastings) Sample(batch []float64) {
 	burnIn := m.BurnIn
 	rate := m.Rate
 	if rate == 0 {
@@ -298,13 +309,13 @@ func (m MetropolisHastingser) Sample(batch []float64) {
 	initial := m.Initial
 	for remaining != 0 {
 		newSamp := min(len(tmp), remaining)
-		MetropolisHastings(tmp[newSamp:], initial, m.Target, m.Proposal, m.Src)
+		metropolisHastings(tmp[newSamp:], initial, m.Target, m.Proposal, m.Src)
 		initial = tmp[newSamp-1]
 		remaining -= newSamp
 	}
 
 	if rate == 1 {
-		MetropolisHastings(batch, initial, m.Target, m.Proposal, m.Src)
+		metropolisHastings(batch, initial, m.Target, m.Proposal, m.Src)
 		return
 	}
 
@@ -313,47 +324,20 @@ func (m MetropolisHastingser) Sample(batch []float64) {
 	}
 
 	// Take a single sample from the chain
-	MetropolisHastings(batch[0:1], initial, m.Target, m.Proposal, m.Src)
+	metropolisHastings(batch[0:1], initial, m.Target, m.Proposal, m.Src)
 	initial = batch[0]
 
 	// For all of the other samples, first generate Rate samples and then actually
 	// accept the last one.
 	for i := 1; i < len(batch); i++ {
-		MetropolisHastings(tmp, initial, m.Target, m.Proposal, m.Src)
+		metropolisHastings(tmp, initial, m.Target, m.Proposal, m.Src)
 		v := tmp[rate-1]
 		batch[i] = v
 		initial = v
 	}
 }
 
-// MetropolisHastings generates len(batch) samples using the Metropolis Hastings
-// algorithm (http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm),
-// with the given target and proposal distributions, starting at the initial location
-// and storing the results in-place into samples. If src != nil, it will be used to generate random
-// numbers, otherwise rand.Float64 will be used.
-//
-// Metropolis-Hastings is a Markov-chain Monte Carlo algorithm that generates
-// samples according to the distribution specified by target by using the Markov
-// chain implicitly defined by the proposal distribution. At each
-// iteration, a proposal point is generated randomly from the current location.
-// This proposal point is accepted with probability
-//  p = min(1, (target(new) * proposal(current|new)) / (target(current) * proposal(new|current)))
-// If the new location is accepted, it is stored into batch and becomes the
-// new current location. If it is rejected, the current location remains and
-// is stored into samples. Thus, a location is stored into batch at every iteration.
-//
-// The samples in Metropolis Hastings are correlated with one another through the
-// Markov chain. As a result, the initial value can have a significant influence
-// on the early samples, and so, typically, the first samples generated by the chain
-// are ignored. This is known as "burn-in", and can be accomplished with slicing.
-// The best choice for burn-in length will depend on the sampling and target
-// distributions.
-//
-// Many choose to have a sampling "rate" where a number of samples
-// are ignored in between each kept sample. This helps decorrelate
-// the samples from one another, but also reduces the number of available samples.
-// A sampling rate can be implemented with successive calls to MetropolisHastings.
-func MetropolisHastings(batch []float64, initial float64, target distuv.LogProber, proposal MHProposal, src *rand.Rand) {
+func metropolisHastings(batch []float64, initial float64, target distuv.LogProber, proposal MHProposal, src *rand.Rand) {
 	f64 := rand.Float64
 	if src != nil {
 		f64 = src.Float64
@@ -375,20 +359,15 @@ func MetropolisHastings(batch []float64, initial float64, target distuv.LogProbe
 	}
 }
 
-// IIDer is a wrapper around the IID sample generation method.
+// IID generates a set of independently and identically distributed samples from
+// the input distribution.
 type IIDer struct {
 	Dist distuv.Rander
 }
 
 // Sample generates a set of identically and independently distributed samples.
 func (iid IIDer) Sample(batch []float64) {
-	IID(batch, iid.Dist)
-}
-
-// IID generates a set of independently and identically distributed samples from
-// the input distribution.
-func IID(batch []float64, d distuv.Rander) {
 	for i := range batch {
-		batch[i] = d.Rand()
+		batch[i] = iid.Dist.Rand()
 	}
 }

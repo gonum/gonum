@@ -317,7 +317,7 @@ func (s *StudentsT) Mean(x []float64) []float64 {
 }
 
 // Nu returns the degrees of freedom parameter of the distribution.
-func Nu(s *StudentsT) float64 {
+func (s *StudentsT) Nu() float64 {
 	return s.nu
 }
 

@@ -97,11 +97,11 @@ func NewVecDense(n int, data []float64) *VecDense {
 	}
 }
 
-// SliceVec returns a new VecDense that shares backing data with the receiver.
+// SliceVec returns a new Vector that shares backing data with the receiver.
 // The returned matrix starts at i of the receiver and extends k-i elements.
 // SliceVec panics with ErrIndexOutOfRange if the slice is outside the capacity
 // of the receiver.
-func (v *VecDense) SliceVec(i, k int) *VecDense {
+func (v *VecDense) SliceVec(i, k int) Vector {
 	if i < 0 || k <= i || v.Cap() < k {
 		panic(ErrIndexOutOfRange)
 	}

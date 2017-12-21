@@ -184,10 +184,10 @@ func TestVecDenseAtSet(t *testing.T) {
 func TestVecDenseMul(t *testing.T) {
 	method := func(receiver, a, b Matrix) {
 		type mulVecer interface {
-			MulVec(a Matrix, b *VecDense)
+			MulVec(a Matrix, b Vector)
 		}
 		rd := receiver.(mulVecer)
-		rd.MulVec(a, b.(*VecDense))
+		rd.MulVec(a, b.(Vector))
 	}
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Mul(a, b)

@@ -543,11 +543,6 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 			}
 		}
 
-		if aU.Len() == 1 {
-			// {1,1} x {1,1}
-			v.SetVec(0, aU.AtVec(0)*b.AtVec(0))
-			return
-		}
 		if b.Len() == 1 {
 			// {n,1} x {1,1}
 			bv := b.AtVec(0)

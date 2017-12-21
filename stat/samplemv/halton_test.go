@@ -26,7 +26,7 @@ func TestHalton(t *testing.T) {
 		src := rand.New(rand.NewSource(1))
 		// Generate the samples.
 		batch := mat.NewDense(test.n, test.d, nil)
-		Halton(batch, Owen, distmv.NewUnitUniform(test.d, nil), src)
+		Halton{Kind: Owen, Q: distmv.NewUnitUniform(test.d, nil), Src: src}.Sample(batch)
 
 		// In each dimension, the samples should be stratefied according to the
 		// prime for that dimension. There should be at most 1 sample per

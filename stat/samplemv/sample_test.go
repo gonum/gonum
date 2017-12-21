@@ -31,7 +31,7 @@ func TestLatinHypercube(t *testing.T) {
 		} {
 			dim := dist.Dim()
 			batch := mat.NewDense(nSamples, dim, nil)
-			LatinHypercube(batch, dist, src)
+			LatinHypercube{Src: src, Q: dist}.Sample(batch)
 			// Latin hypercube should have one entry per hyperrow.
 			present := make([][]bool, nSamples)
 			for i := range present {
@@ -83,7 +83,7 @@ func TestImportance(t *testing.T) {
 	nSamples := 200000
 	batch := mat.NewDense(nSamples, dim, nil)
 	weights := make([]float64, nSamples)
-	Importance(batch, weights, target, proposal)
+	Importance{Target: target, Proposal: proposal}.SampleWeighted(batch, weights)
 
 	compareNormal(t, target, batch, weights, 5e-2, 5e-2)
 }
@@ -118,8 +118,10 @@ func TestRejection(t *testing.T) {
 	nSamples := 1000
 	batch := mat.NewDense(nSamples, dim, nil)
 	weights := make([]float64, nSamples)
-	_, ok = Rejection(batch, target, proposal, 1000, src)
-	if !ok {
+	rej := Rejection{Target: target, Proposal: proposal, C: 1000, Src: src}
+	rej.Sample(batch)
+	err := rej.Err()
+	if err != nil {
 		t.Error("Bad test, nan samples")
 	}
 
@@ -154,7 +156,7 @@ func TestMetropolisHastings(t *testing.T) {
 	burnin := 5000
 	batch := mat.NewDense(nSamples, dim, nil)
 	initial := make([]float64, dim)
-	MetropolisHastings(batch, initial, target, proposal, src)
+	metropolisHastings(batch, initial, target, proposal, src)
 	batch = batch.Slice(burnin, nSamples, 0, dim).(*mat.Dense)
 
 	compareNormal(t, target, batch, nil, 5e-1, 5e-1)

@@ -28,7 +28,7 @@ func TestLatinHypercube(t *testing.T) {
 			distuv.Uniform{Min: 0, Max: 10},
 			distuv.Normal{Mu: 5, Sigma: 3},
 		} {
-			LatinHypercube(samples, dist, nil)
+			LatinHypercube{Q: dist}.Sample(samples)
 			sort.Float64s(samples)
 			for i, v := range samples {
 				p := dist.CDF(v)
@@ -48,7 +48,7 @@ func TestImportance(t *testing.T) {
 	nSamples := 100000
 	x := make([]float64, nSamples)
 	weights := make([]float64, nSamples)
-	Importance(x, weights, target, proposal)
+	Importance{Target: target, Proposal: proposal}.SampleWeighted(x, weights)
 	ev := stat.Mean(x, weights)
 	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
@@ -63,7 +63,8 @@ func TestRejection(t *testing.T) {
 
 	nSamples := 20000
 	x := make([]float64, nSamples)
-	Rejection(x, target, proposal, 100, nil)
+	r := &Rejection{Target: target, Proposal: proposal, C: 100}
+	r.Sample(x)
 	ev := stat.Mean(x, nil)
 	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)
@@ -91,9 +92,15 @@ func TestMetropolisHastings(t *testing.T) {
 	burnin := 500
 	nSamples := 100000 + burnin
 	x := make([]float64, nSamples)
-	MetropolisHastings(x, 100, target, proposal, nil)
-	// Remove burnin
-	x = x[burnin:]
+	mh := MetropolisHastings{
+		Initial:  100,
+		Target:   target,
+		Proposal: proposal,
+
+		BurnIn: burnin,
+	}
+	mh.Sample(x)
+
 	ev := stat.Mean(x, nil)
 	if !floats.EqualWithinAbsOrRel(ev, trueMean, tol, tol) {
 		t.Errorf("Mean mismatch: Want %v, got %v", trueMean, ev)

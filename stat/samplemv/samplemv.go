@@ -19,12 +19,12 @@ var (
 )
 
 var (
-	_ Sampler = LatinHypercuber{}
-	_ Sampler = (*Rejectioner)(nil)
-	_ Sampler = IIDer{}
+	_ Sampler = LatinHypercube{}
+	_ Sampler = (*Rejection)(nil)
+	_ Sampler = IID{}
 
 	_ WeightedSampler = SampleUniformWeighted{}
-	_ WeightedSampler = Importancer{}
+	_ WeightedSampler = Importance{}
 )
 
 func min(a, b int) int {
@@ -70,20 +70,7 @@ func (w SampleUniformWeighted) SampleWeighted(batch *mat.Dense, weights []float6
 	}
 }
 
-// LatinHypercuber is a wrapper around the LatinHypercube sampling generation
-// method.
-type LatinHypercuber struct {
-	Q   distmv.Quantiler
-	Src *rand.Rand
-}
-
-// Sample generates rows(batch) samples using the LatinHypercube generation
-// procedure.
-func (l LatinHypercuber) Sample(batch *mat.Dense) {
-	LatinHypercube(batch, l.Q, l.Src)
-}
-
-// LatinHypercube generates rows(batch) samples using Latin hypercube sampling
+// LatinHypercube is a type for sampling using Latin hypercube sampling
 // from the given distribution. If src is not nil, it will be used to generate
 // random numbers, otherwise rand.Float64 will be used.
 //
@@ -91,7 +78,18 @@ func (l LatinHypercuber) Sample(batch *mat.Dense) {
 // spaced bins and guarantees that one sample is generated per bin. Within each bin,
 // the location is randomly sampled. The distmv.NewUnitUniform function can be used
 // for easy sampling from the unit hypercube.
-func LatinHypercube(batch *mat.Dense, q distmv.Quantiler, src *rand.Rand) {
+type LatinHypercube struct {
+	Q   distmv.Quantiler
+	Src *rand.Rand
+}
+
+// Sample generates rows(batch) samples using the LatinHypercube generation
+// procedure.
+func (l LatinHypercube) Sample(batch *mat.Dense) {
+	latinHypercube(batch, l.Q, l.Src)
+}
+
+func latinHypercube(batch *mat.Dense, q distmv.Quantiler, src *rand.Rand) {
 	r, c := batch.Dims()
 	var f64 func() float64
 	var perm func(int) []int
@@ -117,20 +115,8 @@ func LatinHypercube(batch *mat.Dense, q distmv.Quantiler, src *rand.Rand) {
 	}
 }
 
-// Importancer is a wrapper around the Importance sampling generation method.
-type Importancer struct {
-	Target   distmv.LogProber
-	Proposal distmv.RandLogProber
-}
-
-// SampleWeighted generates rows(batch) samples using the Importance sampling
-// generation procedure.
-func (l Importancer) SampleWeighted(batch *mat.Dense, weights []float64) {
-	Importance(batch, weights, l.Target, l.Proposal)
-}
-
-// Importance sampling generates rows(batch) samples from the proposal distribution,
-// and stores the locations and importance sampling weights in place.
+// Importance is a type for performing importance sampling using the given
+// Target and Proposal distributions.
 //
 // Importance sampling is a variance reduction technique where samples are
 // generated from a proposal distribution, q(x), instead of the target distribution
@@ -140,10 +126,20 @@ func (l Importancer) SampleWeighted(batch *mat.Dense, weights []float64) {
 // a good proposal distribution will bound this sampling weight. This implies the
 // support of q(x) should be at least as broad as p(x), and q(x) should be "fatter tailed"
 // than p(x).
+type Importance struct {
+	Target   distmv.LogProber
+	Proposal distmv.RandLogProber
+}
+
+// SampleWeighted generates rows(batch) samples using the Importance sampling
+// generation procedure.
 //
-// If weights is nil, the weights are not stored. The length of weights must equal
-// the length of batch, otherwise Importance will panic.
-func Importance(batch *mat.Dense, weights []float64, target distmv.LogProber, proposal distmv.RandLogProber) {
+// The length of weights must equal the length of batch, otherwise Importance will panic.
+func (l Importance) SampleWeighted(batch *mat.Dense, weights []float64) {
+	importance(batch, weights, l.Target, l.Proposal)
+}
+
+func importance(batch *mat.Dense, weights []float64, target distmv.LogProber, proposal distmv.RandLogProber) {
 	r, _ := batch.Dims()
 	if r != len(weights) {
 		panic(badLengthMismatch)
@@ -158,10 +154,27 @@ func Importance(batch *mat.Dense, weights []float64, target distmv.LogProber, pr
 // ErrRejection is returned when the constant in Rejection is not sufficiently high.
 var ErrRejection = errors.New("rejection: acceptance ratio above 1")
 
-// Rejectioner is a wrapper around the Rejection sampling generation procedure.
-// If the rejection sampling fails during the call to Sample, all samples will
-// be set to math.NaN() and a call to Err will return a non-nil value.
-type Rejectioner struct {
+// Rejection is a type for sampling using the rejection sampling algorithm.
+//
+// Rejection sampling generates points from the target distribution by using
+// the proposal distribution. At each step of the algorithm, the proposed point
+// is accepted with probability
+//  p = target(x) / (proposal(x) * c)
+// where target(x) is the probability of the point according to the target distribution
+// and proposal(x) is the probability according to the proposal distribution.
+// The constant c must be chosen such that target(x) < proposal(x) * c for all x.
+// The expected number of proposed samples is len(samples) * c.
+//
+// The number of proposed locations during sampling can be found with a call to
+// Proposed. If there was an error during sampling, all elements of samples are
+// set to NaN and the error can be accesssed with the Err method. If src != nil,
+// it will be used to generate random numbers, otherwise rand.Float64 will be used.
+//
+// Target may return the true (log of) the probablity of the location, or it may return
+// a value that is proportional to the probability (logprob + constant). This is
+// useful for cases where the probability distribution is only known up to a normalization
+// constant.
+type Rejection struct {
 	C        float64
 	Target   distmv.LogProber
 	Proposal distmv.RandLogProber
@@ -173,52 +186,31 @@ type Rejectioner struct {
 
 // Err returns nil if the most recent call to sample was successful, and returns
 // ErrRejection if it was not.
-func (r *Rejectioner) Err() error {
+func (r *Rejection) Err() error {
 	return r.err
 }
 
 // Proposed returns the number of samples proposed during the most recent call to
 // Sample.
-func (r *Rejectioner) Proposed() int {
+func (r *Rejection) Proposed() int {
 	return r.proposed
 }
 
 // Sample generates rows(batch) using the Rejection sampling generation procedure.
 // Rejection sampling may fail if the constant is insufficiently high, as described
-// in the function comment for Rejection. If the generation fails, the samples
+// in the type comment for Rejection. If the generation fails, the samples
 // are set to math.NaN(), and a call to Err will return a non-nil value.
-func (r *Rejectioner) Sample(batch *mat.Dense) {
+func (r *Rejection) Sample(batch *mat.Dense) {
 	r.err = nil
 	r.proposed = 0
-	proposed, ok := Rejection(batch, r.Target, r.Proposal, r.C, r.Src)
+	proposed, ok := rejection(batch, r.Target, r.Proposal, r.C, r.Src)
 	if !ok {
 		r.err = ErrRejection
 	}
 	r.proposed = proposed
 }
 
-// Rejection generates rows(batch) samples using the rejection sampling algorithm and
-// stores them in place into samples.
-// Sampling continues until batch is filled. Rejection returns the total number of proposed
-// locations and a boolean indicating if the rejection sampling assumption is
-// violated (see details below). If the returned boolean is false, all elements
-// of samples are set to NaN. If src != nil, it will be used to generate random
-// numbers, otherwise rand.Float64 will be used.
-//
-// Rejection sampling generates points from the target distribution by using
-// the proposal distribution. At each step of the algorithm, the proposed point
-// is accepted with probability
-//  p = target(x) / (proposal(x) * c)
-// where target(x) is the probability of the point according to the target distribution
-// and proposal(x) is the probability according to the proposal distribution.
-// The constant c must be chosen such that target(x) < proposal(x) * c for all x.
-// The expected number of proposed samples is len(samples) * c.
-//
-// Target may return the true (log of) the probablity of the location, or it may return
-// a value that is proportional to the probability (logprob + constant). This is
-// useful for cases where the probability distribution is only known up to a normalization
-// constant.
-func Rejection(batch *mat.Dense, target distmv.LogProber, proposal distmv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
+func rejection(batch *mat.Dense, target distmv.LogProber, proposal distmv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
 	if c < 1 {
 		panic("rejection: acceptance constant must be greater than 1")
 	}
@@ -255,21 +247,16 @@ func Rejection(batch *mat.Dense, target distmv.LogProber, proposal distmv.RandLo
 	return nProposed, true
 }
 
-// IIDer is a wrapper around the IID sample generation method.
-type IIDer struct {
+// IID generates a set of independently and identically distributed samples from
+// the input distribution.
+type IID struct {
 	Dist distmv.Rander
 }
 
 // Sample generates a set of identically and independently distributed samples.
-func (iid IIDer) Sample(batch *mat.Dense) {
-	IID(batch, iid.Dist)
-}
-
-// IID generates a set of independently and identically distributed samples from
-// the input distribution.
-func IID(batch *mat.Dense, d distmv.Rander) {
+func (iid IID) Sample(batch *mat.Dense) {
 	r, _ := batch.Dims()
 	for i := 0; i < r; i++ {
-		d.Rand(batch.RawRowView(i))
+		iid.Dist.Rand(batch.RawRowView(i))
 	}
 }

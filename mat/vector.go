@@ -244,7 +244,7 @@ func (v *VecDense) ScaleVec(alpha float64, a Vector) {
 }
 
 // AddScaledVec adds the vectors a and alpha*b, placing the result in the receiver.
-func (v *VecDense) AddScaledVec(a *VecDense, alpha float64, b *VecDense) {
+func (v *VecDense) AddScaledVec(a Vector, alpha float64, b Vector) {
 	if alpha == 1 {
 		v.AddVec(a, b)
 		return
@@ -261,36 +261,57 @@ func (v *VecDense) AddScaledVec(a *VecDense, alpha float64, b *VecDense) {
 		panic(ErrShape)
 	}
 
-	if v != a {
-		v.checkOverlap(a.mat)
+	var amat, bmat blas64.Vector
+	fast := true
+	aU, _ := untranspose(a)
+	if rv, ok := aU.(RawVectorer); ok {
+		amat = rv.RawVector()
+		if v != a {
+			v.checkOverlap(amat)
+		}
+	} else {
+		fast = false
 	}
-	if v != b {
-		v.checkOverlap(b.mat)
+	bU, _ := untranspose(b)
+	if rv, ok := bU.(RawVectorer); ok {
+		bmat = rv.RawVector()
+		if v != b {
+			v.checkOverlap(bmat)
+		}
+	} else {
+		fast = false
 	}
 
 	v.reuseAs(ar)
 
 	switch {
 	case alpha == 0: // v <- a
+		if v == a {
+			return
+		}
 		v.CopyVec(a)
 	case v == a && v == b: // v <- v + alpha * v = (alpha + 1) * v
 		blas64.Scal(ar, alpha+1, v.mat)
+	case !fast: // v <- a + alpha * b without blas64 support.
+		for i := 0; i < ar; i++ {
+			v.setVec(i, a.AtVec(i)+alpha*b.AtVec(i))
+		}
 	case v == a && v != b: // v <- v + alpha * b
-		if v.mat.Inc == 1 && b.mat.Inc == 1 {
+		if v.mat.Inc == 1 && bmat.Inc == 1 {
 			// Fast path for a common case.
-			f64.AxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
+			f64.AxpyUnitaryTo(v.mat.Data, alpha, bmat.Data, amat.Data)
 		} else {
-			f64.AxpyInc(alpha, b.mat.Data, v.mat.Data,
-				uintptr(ar), uintptr(b.mat.Inc), uintptr(v.mat.Inc), 0, 0)
+			f64.AxpyInc(alpha, bmat.Data, v.mat.Data,
+				uintptr(ar), uintptr(bmat.Inc), uintptr(v.mat.Inc), 0, 0)
 		}
 	default: // v <- a + alpha * b or v <- a + alpha * v
-		if v.mat.Inc == 1 && a.mat.Inc == 1 && b.mat.Inc == 1 {
+		if v.mat.Inc == 1 && amat.Inc == 1 && bmat.Inc == 1 {
 			// Fast path for a common case.
-			f64.AxpyUnitaryTo(v.mat.Data, alpha, b.mat.Data, a.mat.Data)
+			f64.AxpyUnitaryTo(v.mat.Data, alpha, bmat.Data, amat.Data)
 		} else {
 			f64.AxpyIncTo(v.mat.Data, uintptr(v.mat.Inc), 0,
-				alpha, b.mat.Data, a.mat.Data,
-				uintptr(ar), uintptr(b.mat.Inc), uintptr(a.mat.Inc), 0, 0)
+				alpha, bmat.Data, amat.Data,
+				uintptr(ar), uintptr(bmat.Inc), uintptr(amat.Inc), 0, 0)
 		}
 	}
 }

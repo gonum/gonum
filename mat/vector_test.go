@@ -282,10 +282,10 @@ func TestVecDenseAddScaled(t *testing.T) {
 	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
 		method := func(receiver, a, b Matrix) {
 			type addScaledVecer interface {
-				AddScaledVec(*VecDense, float64, *VecDense)
+				AddScaledVec(Vector, float64, Vector)
 			}
 			v := receiver.(addScaledVecer)
-			v.AddScaledVec(a.(*VecDense), alpha, b.(*VecDense))
+			v.AddScaledVec(a.(Vector), alpha, b.(Vector))
 		}
 		denseComparison := func(receiver, a, b *Dense) {
 			var sb Dense

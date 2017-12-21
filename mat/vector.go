@@ -555,14 +555,14 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 			return
 		}
 		if b.Len() == 1 {
-			// {1,n} x {1,1}
+			// {n,1} x {1,1}
 			bv := b.AtVec(0)
 			for i := 0; i < aU.Len(); i++ {
 				v.mat.Data[i*v.mat.Inc] = bv * aU.mat.Data[i*aU.mat.Inc]
 			}
 			return
 		}
-		// {n,1} x {1,n}
+		// {1,n} x {n,1}
 		var sum float64
 		for i := 0; i < c; i++ {
 			sum += aU.AtVec(i) * b.AtVec(i)

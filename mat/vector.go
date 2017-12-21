@@ -502,11 +502,12 @@ func (v *VecDense) DivElemVec(a, b Vector) {
 }
 
 // MulVec computes a * b. The result is stored into the receiver.
-// MulVec panics if the number of columns in a does not equal the number of rows in b.
+// MulVec panics if the number of columns in a does not equal the number of rows in b
+// or if the number of columns in b does not equal 1.
 func (v *VecDense) MulVec(a Matrix, b Vector) {
 	r, c := a.Dims()
-	br, _ := b.Dims()
-	if c != br {
+	br, bc := b.Dims()
+	if c != br || bc != 1 {
 		panic(ErrShape)
 	}
 
@@ -535,30 +536,23 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 
 	// TODO(kortschak): Improve the non-fast paths.
 	switch aU := aU.(type) {
-	case *VecDense:
-		if v != aU {
-			v.checkOverlap(aU.mat)
+	case Vector:
+		if rv, ok := aU.(RawVectorer); ok {
+			if v != aU {
+				v.checkOverlap(rv.RawVector())
+			}
 		}
 
 		if aU.Len() == 1 {
-			// {1,1} x {1,n}
-			av := aU.At(0, 0)
-			if fast {
-				for i := 0; i < b.Len(); i++ {
-					v.mat.Data[i*v.mat.Inc] = av * bmat.Data[i*bmat.Inc]
-				}
-				return
-			}
-			for i := 0; i < b.Len(); i++ {
-				v.mat.Data[i*v.mat.Inc] = av * b.AtVec(i)
-			}
+			// {1,1} x {1,1}
+			v.SetVec(0, aU.AtVec(0)*b.AtVec(0))
 			return
 		}
 		if b.Len() == 1 {
 			// {n,1} x {1,1}
 			bv := b.AtVec(0)
 			for i := 0; i < aU.Len(); i++ {
-				v.mat.Data[i*v.mat.Inc] = bv * aU.mat.Data[i*aU.mat.Inc]
+				v.SetVec(i, bv*aU.AtVec(i))
 			}
 			return
 		}

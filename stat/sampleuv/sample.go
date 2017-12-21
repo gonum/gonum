@@ -124,8 +124,7 @@ type Importance struct {
 // SampleWeighted generates len(batch) samples using the Importance sampling
 // generation procedure.
 //
-// If weights is nil, the weights are not stored. The length of weights must equal
-// the length of batch, otherwise Importance will panic.
+// The length of weights must equal the length of batch, otherwise Importance will panic.
 func (l Importance) SampleWeighted(batch, weights []float64) {
 	importance(batch, weights, l.Target, l.Proposal)
 }
@@ -252,7 +251,7 @@ type MHProposal interface {
 // numbers, otherwise rand.Float64 will be used.
 //
 // Metropolis-Hastings is a Markov-chain Monte Carlo algorithm that generates
-// samples according to the distribution specified by target by using the Markov
+// samples according to the distribution specified by target using the Markov
 // chain implicitly defined by the proposal distribution. At each
 // iteration, a proposal point is generated randomly from the current location.
 // This proposal point is accepted with probability

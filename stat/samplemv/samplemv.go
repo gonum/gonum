@@ -134,8 +134,7 @@ type Importance struct {
 // SampleWeighted generates rows(batch) samples using the Importance sampling
 // generation procedure.
 //
-// If weights is nil, the weights are not stored. The length of weights must equal
-// the length of batch, otherwise Importance will panic.
+// The length of weights must equal the length of batch, otherwise Importance will panic.
 func (l Importance) SampleWeighted(batch *mat.Dense, weights []float64) {
 	importance(batch, weights, l.Target, l.Proposal)
 }

@@ -37,7 +37,7 @@ type MHProposal interface {
 // numbers, otherwise rand.Float64 will be used.
 //
 // Metropolis-Hastings is a Markov-chain Monte Carlo algorithm that generates
-// samples according to the distribution specified by target by using the Markov
+// samples according to the distribution specified by target using the Markov
 // chain implicitly defined by the proposal distribution. At each
 // iteration, a proposal point is generated randomly from the current location.
 // This proposal point is accepted with probability

@@ -22,9 +22,11 @@ func ExampleMetropolisHastings_samplingRate() {
 	proposal := ProposalDist{Sigma: 0.2}
 
 	// Successive samples are correlated with one another through the
-	// Markov Chain defined by the proposal distribution. To get less
-	// correlated samples, one may use a sampling rate, in which only
-	// one sample from every few is accepted from the chain.
+	// Markov Chain defined by the proposal distribution. One may use
+	// a sampling rate to decrease the correlation in the samples for
+	// an increase in computation cost. The rate parameter specifies
+	// that for every accepted sample stored in `samples`, rate - 1 accepted
+	// samples are not stored in `samples`.
 	rate := 50
 
 	mh := MetropolisHastings{

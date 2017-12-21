@@ -436,10 +436,9 @@ func (v *VecDense) MulElemVec(a, b Vector) {
 				}
 				return
 			}
-			var iv, ia, ib int
+			var ia, ib int
 			for i := 0; i < ar; i++ {
-				v.mat.Data[iv] = amat.Data[ia] * bmat.Data[ib]
-				iv += v.mat.Inc
+				v.setVec(i, amat.Data[ia]*bmat.Data[ib])
 				ia += amat.Inc
 				ib += bmat.Inc
 			}
@@ -482,14 +481,13 @@ func (v *VecDense) DivElemVec(a, b Vector) {
 			if v.mat.Inc == 1 && amat.Inc == 1 && bmat.Inc == 1 {
 				// Fast path for a common case.
 				for i, a := range amat.Data {
-					v.mat.Data[i] = a / bmat.Data[i]
+					v.setVec(i, a/bmat.Data[i])
 				}
 				return
 			}
-			var iv, ia, ib int
+			var ia, ib int
 			for i := 0; i < ar; i++ {
-				v.mat.Data[iv] = amat.Data[ia] / bmat.Data[ib]
-				iv += v.mat.Inc
+				v.setVec(i, amat.Data[ia]/bmat.Data[ib])
 				ia += amat.Inc
 				ib += bmat.Inc
 			}
@@ -537,26 +535,35 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 	// TODO(kortschak): Improve the non-fast paths.
 	switch aU := aU.(type) {
 	case Vector:
-		if rv, ok := aU.(RawVectorer); ok {
-			if v != aU {
-				v.checkOverlap(rv.RawVector())
-			}
-		}
-
 		if b.Len() == 1 {
 			// {n,1} x {1,1}
-			bv := b.AtVec(0)
-			for i := 0; i < aU.Len(); i++ {
-				v.SetVec(i, bv*aU.AtVec(i))
-			}
+			v.ScaleVec(b.AtVec(0), aU)
 			return
 		}
+
 		// {1,n} x {n,1}
+		if fast {
+			if rv, ok := aU.(RawVectorer); ok {
+				amat := rv.RawVector()
+				if v != aU {
+					v.checkOverlap(amat)
+				}
+
+				if amat.Inc == 1 && bmat.Inc == 1 {
+					// Fast path for a common case.
+					v.setVec(0, f64.DotUnitary(amat.Data, bmat.Data))
+					return
+				}
+				v.setVec(0, f64.DotInc(amat.Data, bmat.Data,
+					uintptr(c), uintptr(amat.Inc), uintptr(bmat.Inc), 0, 0))
+				return
+			}
+		}
 		var sum float64
 		for i := 0; i < c; i++ {
 			sum += aU.AtVec(i) * b.AtVec(i)
 		}
-		v.SetVec(0, sum)
+		v.setVec(0, sum)
 		return
 	case RawSymmetricer:
 		if fast {
@@ -592,7 +599,7 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 				for j := 0; j < c; j++ {
 					f += a.At(i, j) * bmat.Data[j*bmat.Inc]
 				}
-				v.mat.Data[i*v.mat.Inc] = f
+				v.setVec(i, f)
 			}
 			return
 		}
@@ -603,7 +610,7 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 		for j := 0; j < c; j++ {
 			f += a.At(i, j) * b.AtVec(j)
 		}
-		v.mat.Data[i*v.mat.Inc] = f
+		v.setVec(i, f)
 	}
 }
 

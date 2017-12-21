@@ -568,12 +568,18 @@ func (v *VecDense) MulVec(a Matrix, b Vector) {
 	case RawSymmetricer:
 		if fast {
 			amat := aU.RawSymmetric()
+			// We don't know that a is a *SymDense, so make
+			// a temporary SymDense to check overlap.
+			(&SymDense{mat: amat}).checkOverlap(v.asGeneral())
 			blas64.Symv(1, amat, bmat, 0, v.mat)
 			return
 		}
 	case RawTriangular:
 		v.CopyVec(b)
 		amat := aU.RawTriangular()
+		// We don't know that a is a *TriDense, so make
+		// a temporary TriDense to check overlap.
+		(&TriDense{mat: amat}).checkOverlap(v.asGeneral())
 		ta := blas.NoTrans
 		if trans {
 			ta = blas.Trans

@@ -19,8 +19,7 @@ type UndirectedGraph struct {
 	nodeIDs uid.Set
 }
 
-// NewUndirectedGraph returns an UndirectedGraph with the specified self and absent
-// edge weight values.
+// NewUndirectedGraph returns an UndirectedGraph.
 func NewUndirectedGraph() *UndirectedGraph {
 	return &UndirectedGraph{
 		nodes: make(map[int64]graph.Node),

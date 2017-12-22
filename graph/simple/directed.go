@@ -20,8 +20,7 @@ type DirectedGraph struct {
 	nodeIDs uid.Set
 }
 
-// NewDirectedGraph returns a DirectedGraph with the specified self and absent
-// edge weight values.
+// NewDirectedGraph returns a DirectedGraph.
 func NewDirectedGraph() *DirectedGraph {
 	return &DirectedGraph{
 		nodes: make(map[int64]graph.Node),

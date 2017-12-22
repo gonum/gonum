@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/uid"
 )
 
 // DirectedGraph implements a generalized directed graph.
@@ -16,7 +17,7 @@ type DirectedGraph struct {
 	from  map[int64]map[int64]graph.Edge
 	to    map[int64]map[int64]graph.Edge
 
-	nodeIDs idSet
+	nodeIDs uid.Set
 }
 
 // NewDirectedGraph returns a DirectedGraph with the specified self and absent
@@ -27,7 +28,7 @@ func NewDirectedGraph() *DirectedGraph {
 		from:  make(map[int64]map[int64]graph.Edge),
 		to:    make(map[int64]map[int64]graph.Edge),
 
-		nodeIDs: newIDSet(),
+		nodeIDs: uid.NewSet(),
 	}
 }
 
@@ -37,10 +38,10 @@ func (g *DirectedGraph) NewNode() graph.Node {
 	if len(g.nodes) == 0 {
 		return Node(0)
 	}
-	if int64(len(g.nodes)) == maxInt {
+	if int64(len(g.nodes)) == uid.Max {
 		panic("simple: cannot allocate node: no slot")
 	}
-	return Node(g.nodeIDs.newID())
+	return Node(g.nodeIDs.NewID())
 }
 
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
@@ -51,7 +52,7 @@ func (g *DirectedGraph) AddNode(n graph.Node) {
 	g.nodes[n.ID()] = n
 	g.from[n.ID()] = make(map[int64]graph.Edge)
 	g.to[n.ID()] = make(map[int64]graph.Edge)
-	g.nodeIDs.use(n.ID())
+	g.nodeIDs.Use(n.ID())
 }
 
 // RemoveNode removes n from the graph, as well as any edges attached to it. If the node
@@ -72,7 +73,7 @@ func (g *DirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.to, n.ID())
 
-	g.nodeIDs.release(n.ID())
+	g.nodeIDs.Release(n.ID())
 }
 
 // NewEdge returns a new Edge from the source to the destination node.

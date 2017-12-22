@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/uid"
 )
 
 // WeightedUndirectedGraph implements a generalized weighted undirected graph.
@@ -17,7 +18,7 @@ type WeightedUndirectedGraph struct {
 
 	self, absent float64
 
-	nodeIDs idSet
+	nodeIDs uid.Set
 }
 
 // NewWeightedUndirectedGraph returns an WeightedUndirectedGraph with the specified self and absent
@@ -30,7 +31,7 @@ func NewWeightedUndirectedGraph(self, absent float64) *WeightedUndirectedGraph {
 		self:   self,
 		absent: absent,
 
-		nodeIDs: newIDSet(),
+		nodeIDs: uid.NewSet(),
 	}
 }
 
@@ -40,10 +41,10 @@ func (g *WeightedUndirectedGraph) NewNode() graph.Node {
 	if len(g.nodes) == 0 {
 		return Node(0)
 	}
-	if int64(len(g.nodes)) == maxInt {
+	if int64(len(g.nodes)) == uid.Max {
 		panic("simple: cannot allocate node: no slot")
 	}
-	return Node(g.nodeIDs.newID())
+	return Node(g.nodeIDs.NewID())
 }
 
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
@@ -53,7 +54,7 @@ func (g *WeightedUndirectedGraph) AddNode(n graph.Node) {
 	}
 	g.nodes[n.ID()] = n
 	g.edges[n.ID()] = make(map[int64]graph.WeightedEdge)
-	g.nodeIDs.use(n.ID())
+	g.nodeIDs.Use(n.ID())
 }
 
 // RemoveNode removes n from the graph, as well as any edges attached to it. If the node
@@ -69,7 +70,7 @@ func (g *WeightedUndirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.edges, n.ID())
 
-	g.nodeIDs.release(n.ID())
+	g.nodeIDs.Release(n.ID())
 }
 
 // NewWeightedEdge returns a new weighted edge from the source to the destination node.

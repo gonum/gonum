@@ -8,7 +8,6 @@ import (
 	"math"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // Node is a simple graph node.
@@ -49,51 +48,4 @@ func (e WeightedEdge) Weight() float64 { return e.W }
 // are equalable.
 func isSame(a, b float64) bool {
 	return a == b || (math.IsNaN(a) && math.IsNaN(b))
-}
-
-// maxInt is the maximum value of int64.
-const maxInt = int64(^uint64(0) >> 1)
-
-// idSet implements available ID storage.
-type idSet struct {
-	maxID      int64
-	used, free set.Int64s
-}
-
-// newIDSet returns a new idSet. The returned value should not be passed
-// except by pointer.
-func newIDSet() idSet {
-	return idSet{maxID: -1, used: make(set.Int64s), free: make(set.Int64s)}
-}
-
-// newID returns a new unique ID. The ID returned is not considered used
-// until passed in a call to use.
-func (s *idSet) newID() int64 {
-	for id := range s.free {
-		return id
-	}
-	if s.maxID != maxInt {
-		return s.maxID + 1
-	}
-	for id := int64(0); id <= s.maxID+1; id++ {
-		if !s.used.Has(id) {
-			return id
-		}
-	}
-	panic("unreachable")
-}
-
-// use adds the id to the used IDs in the idSet.
-func (s *idSet) use(id int64) {
-	s.used.Add(id)
-	s.free.Remove(id)
-	if id > s.maxID {
-		s.maxID = id
-	}
-}
-
-// free frees the id for reuse.
-func (s *idSet) release(id int64) {
-	s.free.Add(id)
-	s.used.Remove(id)
 }

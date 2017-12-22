@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/uid"
 )
 
 // UndirectedGraph implements a generalized undirected graph.
@@ -15,7 +16,7 @@ type UndirectedGraph struct {
 	nodes map[int64]graph.Node
 	edges map[int64]map[int64]graph.Edge
 
-	nodeIDs idSet
+	nodeIDs uid.Set
 }
 
 // NewUndirectedGraph returns an UndirectedGraph with the specified self and absent
@@ -25,7 +26,7 @@ func NewUndirectedGraph() *UndirectedGraph {
 		nodes: make(map[int64]graph.Node),
 		edges: make(map[int64]map[int64]graph.Edge),
 
-		nodeIDs: newIDSet(),
+		nodeIDs: uid.NewSet(),
 	}
 }
 
@@ -35,10 +36,10 @@ func (g *UndirectedGraph) NewNode() graph.Node {
 	if len(g.nodes) == 0 {
 		return Node(0)
 	}
-	if int64(len(g.nodes)) == maxInt {
+	if int64(len(g.nodes)) == uid.Max {
 		panic("simple: cannot allocate node: no slot")
 	}
-	return Node(g.nodeIDs.newID())
+	return Node(g.nodeIDs.NewID())
 }
 
 // AddNode adds n to the graph. It panics if the added node ID matches an existing node ID.
@@ -48,7 +49,7 @@ func (g *UndirectedGraph) AddNode(n graph.Node) {
 	}
 	g.nodes[n.ID()] = n
 	g.edges[n.ID()] = make(map[int64]graph.Edge)
-	g.nodeIDs.use(n.ID())
+	g.nodeIDs.Use(n.ID())
 }
 
 // RemoveNode removes n from the graph, as well as any edges attached to it. If the node
@@ -64,7 +65,7 @@ func (g *UndirectedGraph) RemoveNode(n graph.Node) {
 	}
 	delete(g.edges, n.ID())
 
-	g.nodeIDs.release(n.ID())
+	g.nodeIDs.Release(n.ID())
 }
 
 // NewEdge returns a new Edge from the source to the destination node.

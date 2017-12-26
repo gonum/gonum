@@ -293,5 +293,5 @@ func TestSolveVec(t *testing.T) {
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Solve(a, b)
 	}
-	testTwoInput(t, "SolveVec", &VecDense{}, method, denseComparison, legalTypesNotVecVec, legalSizeSolve, 1e-12)
+	testTwoInput(t, "SolveVec", &VecDense{}, method, denseComparison, legalTypesNotVectorVecDense, legalSizeSolve, 1e-12)
 }

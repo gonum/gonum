@@ -6,16 +6,17 @@ package mat
 
 import (
 	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/internal/asm/f64"
 )
 
 // Inner computes the generalized inner product
 //   x^T A y
-// between vectors x and y with matrix A. This is only a true inner product if
+// between column vectors x and y with matrix A. This is only a true inner product if
 // A is symmetric positive definite, though the operation works for any matrix A.
 //
 // Inner panics if x.Len != m or y.Len != n when A is an m x n matrix.
-func Inner(x *VecDense, A Matrix, y *VecDense) float64 {
+func Inner(x Vector, A Matrix, y Vector) float64 {
 	m, n := A.Dims()
 	if x.Len() != m {
 		panic(ErrShape)
@@ -36,66 +37,84 @@ func Inner(x *VecDense, A Matrix, y *VecDense) float64 {
 			// Panic as a string not a mat.Error.
 			panic(badSymTriangle)
 		}
+		var xmat, ymat blas64.Vector
+		if xrv, ok := x.(RawVectorer); ok {
+			xmat = xrv.RawVector()
+		} else {
+			break
+		}
+		if yrv, ok := y.(RawVectorer); ok {
+			ymat = yrv.RawVector()
+		} else {
+			break
+		}
 		for i := 0; i < x.Len(); i++ {
-			xi := x.at(i)
+			xi := x.AtVec(i)
 			if xi != 0 {
-				if y.mat.Inc == 1 {
+				if ymat.Inc == 1 {
 					sum += xi * f64.DotUnitary(
 						bmat.Data[i*bmat.Stride+i:i*bmat.Stride+n],
-						y.mat.Data[i:],
+						ymat.Data[i:],
 					)
 				} else {
 					sum += xi * f64.DotInc(
 						bmat.Data[i*bmat.Stride+i:i*bmat.Stride+n],
-						y.mat.Data[i*y.mat.Inc:], uintptr(n-i),
-						1, uintptr(y.mat.Inc),
+						ymat.Data[i*ymat.Inc:], uintptr(n-i),
+						1, uintptr(ymat.Inc),
 						0, 0,
 					)
 				}
 			}
-			yi := y.at(i)
+			yi := y.AtVec(i)
 			if i != n-1 && yi != 0 {
-				if x.mat.Inc == 1 {
+				if xmat.Inc == 1 {
 					sum += yi * f64.DotUnitary(
 						bmat.Data[i*bmat.Stride+i+1:i*bmat.Stride+n],
-						x.mat.Data[i+1:],
+						xmat.Data[i+1:],
 					)
 				} else {
 					sum += yi * f64.DotInc(
 						bmat.Data[i*bmat.Stride+i+1:i*bmat.Stride+n],
-						x.mat.Data[(i+1)*x.mat.Inc:], uintptr(n-i-1),
-						1, uintptr(x.mat.Inc),
+						xmat.Data[(i+1)*xmat.Inc:], uintptr(n-i-1),
+						1, uintptr(xmat.Inc),
 						0, 0,
 					)
 				}
 			}
 		}
+		return sum
 	case RawMatrixer:
 		bmat := b.RawMatrix()
+		var ymat blas64.Vector
+		if yrv, ok := y.(RawVectorer); ok {
+			ymat = yrv.RawVector()
+		} else {
+			break
+		}
 		for i := 0; i < x.Len(); i++ {
-			xi := x.at(i)
+			xi := x.AtVec(i)
 			if xi != 0 {
-				if y.mat.Inc == 1 {
+				if ymat.Inc == 1 {
 					sum += xi * f64.DotUnitary(
 						bmat.Data[i*bmat.Stride:i*bmat.Stride+n],
-						y.mat.Data,
+						ymat.Data,
 					)
 				} else {
 					sum += xi * f64.DotInc(
 						bmat.Data[i*bmat.Stride:i*bmat.Stride+n],
-						y.mat.Data, uintptr(n),
-						1, uintptr(y.mat.Inc),
+						ymat.Data, uintptr(n),
+						1, uintptr(ymat.Inc),
 						0, 0,
 					)
 				}
 			}
 		}
-	default:
-		for i := 0; i < x.Len(); i++ {
-			xi := x.at(i)
-			for j := 0; j < y.Len(); j++ {
-				sum += xi * A.At(i, j) * y.at(j)
-			}
+		return sum
+	}
+	for i := 0; i < x.Len(); i++ {
+		xi := x.AtVec(i)
+		for j := 0; j < y.Len(); j++ {
+			sum += xi * A.At(i, j) * y.AtVec(j)
 		}
 	}
 	return sum

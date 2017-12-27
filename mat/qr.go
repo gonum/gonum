@@ -203,19 +203,31 @@ func (qr *QR) Solve(m *Dense, trans bool, b Matrix) error {
 	return nil
 }
 
-// SolveVec finds a minimum-norm solution to a system of linear equations.
+// SolveVec finds a minimum-norm solution to a system of linear equations,
+//  Ax = b.
 // Please see QR.Solve for the full documentation.
-func (qr *QR) SolveVec(v *VecDense, trans bool, b *VecDense) error {
-	if v != b {
-		v.checkOverlap(b.mat)
-	}
+func (qr *QR) SolveVec(v *VecDense, trans bool, b Vector) error {
 	r, c := qr.qr.Dims()
+	if _, bc := b.Dims(); bc != 1 {
+		panic(ErrShape)
+	}
+
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
 	// instead recast the VecDenses as Dense and call the matrix code.
+	bm := Matrix(b)
+	if rv, ok := b.(RawVectorer); ok {
+		bmat := rv.RawVector()
+		if v != b {
+			v.checkOverlap(bmat)
+		}
+		b := VecDense{mat: bmat, n: b.Len()}
+		bm = b.asDense()
+	}
 	if trans {
 		v.reuseAs(r)
 	} else {
 		v.reuseAs(c)
 	}
-	return qr.Solve(v.asDense(), trans, b.asDense())
+	return qr.Solve(v.asDense(), trans, bm)
+
 }

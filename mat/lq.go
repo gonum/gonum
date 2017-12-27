@@ -209,17 +209,27 @@ func (lq *LQ) Solve(m *Dense, trans bool, b Matrix) error {
 
 // SolveVec finds a minimum-norm solution to a system of linear equations.
 // Please see LQ.Solve for the full documentation.
-func (lq *LQ) SolveVec(v *VecDense, trans bool, b *VecDense) error {
-	if v != b {
-		v.checkOverlap(b.mat)
-	}
+func (lq *LQ) SolveVec(v *VecDense, trans bool, b Vector) error {
 	r, c := lq.lq.Dims()
+	if _, bc := b.Dims(); bc != 1 {
+		panic(ErrShape)
+	}
+
 	// The Solve implementation is non-trivial, so rather than duplicate the code,
 	// instead recast the VecDenses as Dense and call the matrix code.
+	bm := Matrix(b)
+	if rv, ok := b.(RawVectorer); ok {
+		bmat := rv.RawVector()
+		if v != b {
+			v.checkOverlap(bmat)
+		}
+		b := VecDense{mat: bmat, n: b.Len()}
+		bm = b.asDense()
+	}
 	if trans {
 		v.reuseAs(r)
 	} else {
 		v.reuseAs(c)
 	}
-	return lq.Solve(v.asDense(), trans, b.asDense())
+	return lq.Solve(v.asDense(), trans, bm)
 }

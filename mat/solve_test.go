@@ -285,13 +285,13 @@ func TestSolveVec(t *testing.T) {
 	// Use testTwoInput
 	method := func(receiver, a, b Matrix) {
 		type SolveVecer interface {
-			SolveVec(a Matrix, b *VecDense) error
+			SolveVec(a Matrix, b Vector) error
 		}
 		rd := receiver.(SolveVecer)
-		rd.SolveVec(a, b.(*VecDense))
+		rd.SolveVec(a, b.(Vector))
 	}
 	denseComparison := func(receiver, a, b *Dense) {
 		receiver.Solve(a, b)
 	}
-	testTwoInput(t, "SolveVec", &VecDense{}, method, denseComparison, legalTypesMatrixVecDense, legalSizeSolve, 1e-12)
+	testTwoInput(t, "SolveVec", &VecDense{}, method, denseComparison, legalTypesMatrixVector, legalSizeSolve, 1e-12)
 }

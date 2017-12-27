@@ -207,29 +207,34 @@ func (a *Cholesky) SolveChol(m *Dense, b *Cholesky) error {
 
 // SolveVec finds the vector v that solves A * v = b where A is represented
 // by the Cholesky decomposition, placing the result in v.
-func (c *Cholesky) SolveVec(v, b *VecDense) error {
+func (c *Cholesky) SolveVec(v *VecDense, b Vector) error {
 	if !c.valid() {
 		panic(badCholesky)
 	}
 	n := c.chol.mat.N
-	vn := b.Len()
-	if vn != n {
+	if br, bc := b.Dims(); br != n || bc != 1 {
 		panic(ErrShape)
 	}
-	if v != b {
-		v.checkOverlap(b.mat)
+	switch rv := b.(type) {
+	default:
+		v.reuseAs(n)
+		return c.Solve(v.asDense(), b)
+	case RawVectorer:
+		bmat := rv.RawVector()
+		if v != b {
+			v.checkOverlap(bmat)
+		}
+		v.reuseAs(n)
+		if v != b {
+			v.CopyVec(b)
+		}
+		blas64.Trsv(blas.Trans, c.chol.mat, v.mat)
+		blas64.Trsv(blas.NoTrans, c.chol.mat, v.mat)
+		if c.cond > ConditionTolerance {
+			return Condition(c.cond)
+		}
+		return nil
 	}
-	v.reuseAs(n)
-	if v != b {
-		v.CopyVec(b)
-	}
-	blas64.Trsv(blas.Trans, c.chol.mat, v.mat)
-	blas64.Trsv(blas.NoTrans, c.chol.mat, v.mat)
-	if c.cond > ConditionTolerance {
-		return Condition(c.cond)
-	}
-	return nil
-
 }
 
 // RawU returns the Triangular matrix used to store the Cholesky decomposition of

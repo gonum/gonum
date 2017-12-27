@@ -333,41 +333,46 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 //
 // If A is singular or near-singular a Condition error is returned. Please see
 // the documentation for Condition for more information.
-func (lu *LU) SolveVec(v *VecDense, trans bool, b *VecDense) error {
+func (lu *LU) SolveVec(v *VecDense, trans bool, b Vector) error {
 	_, n := lu.lu.Dims()
-	bn := b.Len()
-	if bn != n {
+	if br, bc := b.Dims(); br != n || bc != 1 {
 		panic(ErrShape)
 	}
-	if v != b {
-		v.checkOverlap(b.mat)
-	}
-	// TODO(btracey): Should test the condition number instead of testing that
-	// the determinant is exactly zero.
-	if lu.Det() == 0 {
-		return Condition(math.Inf(1))
-	}
+	switch rv := b.(type) {
+	default:
+		v.reuseAs(n)
+		return lu.Solve(v.asDense(), trans, b)
+	case RawVectorer:
+		if v != b {
+			v.checkOverlap(rv.RawVector())
+		}
+		// TODO(btracey): Should test the condition number instead of testing that
+		// the determinant is exactly zero.
+		if lu.Det() == 0 {
+			return Condition(math.Inf(1))
+		}
 
-	v.reuseAs(n)
-	var restore func()
-	if v == b {
-		v, restore = v.isolatedWorkspace(b)
-		defer restore()
+		v.reuseAs(n)
+		var restore func()
+		if v == b {
+			v, restore = v.isolatedWorkspace(b)
+			defer restore()
+		}
+		v.CopyVec(b)
+		vMat := blas64.General{
+			Rows:   n,
+			Cols:   1,
+			Stride: v.mat.Inc,
+			Data:   v.mat.Data,
+		}
+		t := blas.NoTrans
+		if trans {
+			t = blas.Trans
+		}
+		lapack64.Getrs(t, lu.lu.mat, vMat, lu.pivot)
+		if lu.cond > ConditionTolerance {
+			return Condition(lu.cond)
+		}
+		return nil
 	}
-	v.CopyVec(b)
-	vMat := blas64.General{
-		Rows:   n,
-		Cols:   1,
-		Stride: v.mat.Inc,
-		Data:   v.mat.Data,
-	}
-	t := blas.NoTrans
-	if trans {
-		t = blas.Trans
-	}
-	lapack64.Getrs(t, lu.lu.mat, vMat, lu.pivot)
-	if lu.cond > ConditionTolerance {
-		return Condition(lu.cond)
-	}
-	return nil
 }

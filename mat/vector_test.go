@@ -201,7 +201,7 @@ func TestVecDenseMul(t *testing.T) {
 		}
 		return legal
 	}
-	testTwoInput(t, "MulVec", &VecDense{}, method, denseComparison, legalTypesNotVectorVector, legalSizeMulVec, 1e-14)
+	testTwoInput(t, "MulVec", &VecDense{}, method, denseComparison, legalTypesMatrixVector, legalSizeMulVec, 1e-14)
 }
 
 func TestVecDenseScale(t *testing.T) {

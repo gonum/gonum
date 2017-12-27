@@ -201,7 +201,7 @@ func TestVecDenseMul(t *testing.T) {
 		}
 		return legal
 	}
-	testTwoInput(t, "MulVec", &VecDense{}, method, denseComparison, legalTypesNotVecVec, legalSizeMulVec, 1e-14)
+	testTwoInput(t, "MulVec", &VecDense{}, method, denseComparison, legalTypesMatrixVector, legalSizeMulVec, 1e-14)
 }
 
 func TestVecDenseScale(t *testing.T) {
@@ -274,7 +274,7 @@ func TestVecDenseScale(t *testing.T) {
 		denseComparison := func(receiver, a *Dense) {
 			receiver.Scale(alpha, a)
 		}
-		testOneInput(t, "ScaleVec", &VecDense{}, method, denseComparison, legalTypeVec, isAnyVecDense, 0)
+		testOneInput(t, "ScaleVec", &VecDense{}, method, denseComparison, legalTypeVector, isAnyVecDense, 0)
 	}
 }
 
@@ -292,7 +292,7 @@ func TestVecDenseAddScaled(t *testing.T) {
 			sb.Scale(alpha, b)
 			receiver.Add(a, &sb)
 		}
-		testTwoInput(t, "AddScaledVec", &VecDense{}, method, denseComparison, legalTypesVecDenseVecDense, legalSizeSameVec, 1e-14)
+		testTwoInput(t, "AddScaledVec", &VecDense{}, method, denseComparison, legalTypesVectorVector, legalSizeSameVec, 1e-14)
 	}
 }
 

@@ -169,14 +169,20 @@ func legalTypesSym(a, b Matrix) bool {
 	return true
 }
 
+// legalTypeVector returns whether v is a Vector.
+func legalTypeVector(v Matrix) bool {
+	_, ok := v.(Vector)
+	return ok
+}
+
 // legalTypeVec returns whether v is a *VecDense.
-func legalTypeVec(v Matrix) bool {
+func legalTypeVecDense(v Matrix) bool {
 	_, ok := v.(*VecDense)
 	return ok
 }
 
-// legalTypesVecVec returns whether both inputs are Vector
-func legalTypesVecVec(a, b Matrix) bool {
+// legalTypesVectorVector returns whether both inputs are Vector
+func legalTypesVectorVector(a, b Matrix) bool {
 	if _, ok := a.(Vector); !ok {
 		return false
 	}
@@ -197,9 +203,16 @@ func legalTypesVecDenseVecDense(a, b Matrix) bool {
 	return true
 }
 
-// legalTypesNotVecVec returns whether the first input is an arbitrary Matrix
+// legalTypesMatrixVector returns whether the first input is an arbitrary Matrix
+// and the second input is a Vector.
+func legalTypesMatrixVector(a, b Matrix) bool {
+	_, ok := b.(Vector)
+	return ok
+}
+
+// legalTypesMatrixVecDense returns whether the first input is an arbitrary Matrix
 // and the second input is a *VecDense.
-func legalTypesNotVecVec(a, b Matrix) bool {
+func legalTypesMatrixVecDense(a, b Matrix) bool {
 	_, ok := b.(*VecDense)
 	return ok
 }

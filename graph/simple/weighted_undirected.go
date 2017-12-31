@@ -130,20 +130,24 @@ func (g *WeightedUndirectedGraph) Has(n graph.Node) bool {
 
 // Nodes returns all the nodes in the graph.
 func (g *WeightedUndirectedGraph) Nodes() []graph.Node {
+	if len(g.nodes) == 0 {
+		return nil
+	}
 	nodes := make([]graph.Node, len(g.nodes))
 	i := 0
 	for _, n := range g.nodes {
 		nodes[i] = n
 		i++
 	}
-
 	return nodes
 }
 
 // Edges returns all the edges in the graph.
 func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
+	if len(g.edges) == 0 {
+		return nil
+	}
 	var edges []graph.Edge
-
 	seen := make(map[[2]int64]struct{})
 	for _, u := range g.edges {
 		for _, e := range u {
@@ -157,14 +161,12 @@ func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
 			edges = append(edges, e)
 		}
 	}
-
 	return edges
 }
 
 // WeightedEdges returns all the weighted edges in the graph.
 func (g *WeightedUndirectedGraph) WeightedEdges() []graph.WeightedEdge {
 	var edges []graph.WeightedEdge
-
 	seen := make(map[[2]int64]struct{})
 	for _, u := range g.edges {
 		for _, e := range u {
@@ -178,7 +180,6 @@ func (g *WeightedUndirectedGraph) WeightedEdges() []graph.WeightedEdge {
 			edges = append(edges, e)
 		}
 	}
-
 	return edges
 }
 
@@ -194,7 +195,6 @@ func (g *WeightedUndirectedGraph) From(n graph.Node) []graph.Node {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-
 	return nodes
 }
 
@@ -223,13 +223,11 @@ func (g *WeightedUndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
 
 // WeightedEdgeBetween returns the weighted edge between nodes x and y.
 func (g *WeightedUndirectedGraph) WeightedEdgeBetween(x, y graph.Node) graph.WeightedEdge {
-	// We don't need to check if neigh exists because
-	// it's implicit in the edges access.
-	if !g.Has(x) {
+	edge, ok := g.edges[x.ID()][y.ID()]
+	if !ok {
 		return nil
 	}
-
-	return g.edges[x.ID()][y.ID()]
+	return edge
 }
 
 // Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
@@ -255,6 +253,5 @@ func (g *WeightedUndirectedGraph) Degree(n graph.Node) int {
 	if _, ok := g.nodes[n.ID()]; !ok {
 		return 0
 	}
-
 	return len(g.edges[n.ID()])
 }

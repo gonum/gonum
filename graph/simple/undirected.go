@@ -125,20 +125,24 @@ func (g *UndirectedGraph) Has(n graph.Node) bool {
 
 // Nodes returns all the nodes in the graph.
 func (g *UndirectedGraph) Nodes() []graph.Node {
+	if len(g.nodes) == 0 {
+		return nil
+	}
 	nodes := make([]graph.Node, len(g.nodes))
 	i := 0
 	for _, n := range g.nodes {
 		nodes[i] = n
 		i++
 	}
-
 	return nodes
 }
 
 // Edges returns all the edges in the graph.
 func (g *UndirectedGraph) Edges() []graph.Edge {
+	if len(g.edges) == 0 {
+		return nil
+	}
 	var edges []graph.Edge
-
 	seen := make(map[[2]int64]struct{})
 	for _, u := range g.edges {
 		for _, e := range u {
@@ -152,7 +156,6 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 			edges = append(edges, e)
 		}
 	}
-
 	return edges
 }
 
@@ -168,7 +171,6 @@ func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-
 	return nodes
 }
 
@@ -186,13 +188,11 @@ func (g *UndirectedGraph) Edge(u, v graph.Node) graph.Edge {
 
 // EdgeBetween returns the edge between nodes x and y.
 func (g *UndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
-	// We don't need to check if neigh exists because
-	// it's implicit in the edges access.
-	if !g.Has(x) {
+	edge, ok := g.edges[x.ID()][y.ID()]
+	if !ok {
 		return nil
 	}
-
-	return g.edges[x.ID()][y.ID()]
+	return edge
 }
 
 // Degree returns the degree of n in g.
@@ -200,6 +200,5 @@ func (g *UndirectedGraph) Degree(n graph.Node) int {
 	if _, ok := g.nodes[n.ID()]; !ok {
 		return 0
 	}
-
 	return len(g.edges[n.ID()])
 }

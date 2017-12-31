@@ -128,19 +128,20 @@ func (g *DirectedGraph) Node(id int64) graph.Node {
 // Has returns whether the node exists within the graph.
 func (g *DirectedGraph) Has(n graph.Node) bool {
 	_, ok := g.nodes[n.ID()]
-
 	return ok
 }
 
 // Nodes returns all the nodes in the graph.
 func (g *DirectedGraph) Nodes() []graph.Node {
-	nodes := make([]graph.Node, len(g.from))
+	if len(g.nodes) == 0 {
+		return nil
+	}
+	nodes := make([]graph.Node, len(g.nodes))
 	i := 0
 	for _, n := range g.nodes {
 		nodes[i] = n
 		i++
 	}
-
 	return nodes
 }
 
@@ -167,7 +168,6 @@ func (g *DirectedGraph) From(n graph.Node) []graph.Node {
 		from[i] = g.nodes[id]
 		i++
 	}
-
 	return from
 }
 
@@ -183,7 +183,6 @@ func (g *DirectedGraph) To(n graph.Node) []graph.Node {
 		to[i] = g.nodes[id]
 		i++
 	}
-
 	return to
 }
 
@@ -192,12 +191,6 @@ func (g *DirectedGraph) To(n graph.Node) []graph.Node {
 func (g *DirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 	xid := x.ID()
 	yid := y.ID()
-	if _, ok := g.nodes[xid]; !ok {
-		return false
-	}
-	if _, ok := g.nodes[yid]; !ok {
-		return false
-	}
 	if _, ok := g.from[xid][yid]; ok {
 		return true
 	}
@@ -208,12 +201,6 @@ func (g *DirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	if _, ok := g.nodes[u.ID()]; !ok {
-		return nil
-	}
-	if _, ok := g.nodes[v.ID()]; !ok {
-		return nil
-	}
 	edge, ok := g.from[u.ID()][v.ID()]
 	if !ok {
 		return nil
@@ -223,12 +210,6 @@ func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
 
 // HasEdgeFromTo returns whether an edge exists in the graph from u to v.
 func (g *DirectedGraph) HasEdgeFromTo(u, v graph.Node) bool {
-	if _, ok := g.nodes[u.ID()]; !ok {
-		return false
-	}
-	if _, ok := g.nodes[v.ID()]; !ok {
-		return false
-	}
 	if _, ok := g.from[u.ID()][v.ID()]; !ok {
 		return false
 	}
@@ -240,6 +221,5 @@ func (g *DirectedGraph) Degree(n graph.Node) int {
 	if _, ok := g.nodes[n.ID()]; !ok {
 		return 0
 	}
-
 	return len(g.from[n.ID()]) + len(g.to[n.ID()])
 }

@@ -142,8 +142,8 @@ func (lq *LQ) QTo(dst *Dense) *Dense {
 
 // Solve finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its LQ factorized
-// form. If A is singular or near-singular a Condition error is returned. Please
-// see the documentation for Condition for more information.
+// form. If A is singular or near-singular a Condition error is returned.
+// See the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find the minimum norm solution of A * X = b.
@@ -208,7 +208,7 @@ func (lq *LQ) Solve(m *Dense, trans bool, b Matrix) error {
 }
 
 // SolveVec finds a minimum-norm solution to a system of linear equations.
-// Please see LQ.Solve for the full documentation.
+// See LQ.Solve for the full documentation.
 func (lq *LQ) SolveVec(v *VecDense, trans bool, b Vector) error {
 	r, c := lq.lq.Dims()
 	if _, bc := b.Dims(); bc != 1 {

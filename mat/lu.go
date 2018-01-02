@@ -288,7 +288,7 @@ func (m *Dense) Permutation(r int, swaps []int) {
 // In both cases, A is represented in LU factorized form, and the matrix x is
 // stored into m.
 //
-// If A is singular or near-singular a Condition error is returned. Please see
+// If A is singular or near-singular a Condition error is returned. See
 // the documentation for Condition for more information.
 func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 	_, n := lu.lu.Dims()
@@ -331,7 +331,7 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 // In both cases, A is represented in LU factorized form, and the matrix x is
 // stored into v.
 //
-// If A is singular or near-singular a Condition error is returned. Please see
+// If A is singular or near-singular a Condition error is returned. See
 // the documentation for Condition for more information.
 func (lu *LU) SolveVec(v *VecDense, trans bool, b Vector) error {
 	_, n := lu.lu.Dims()

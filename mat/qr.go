@@ -138,8 +138,8 @@ func (qr *QR) QTo(dst *Dense) *Dense {
 
 // Solve finds a minimum-norm solution to a system of linear equations defined
 // by the matrices A and b, where A is an m×n matrix represented in its QR factorized
-// form. If A is singular or near-singular a Condition error is returned. Please
-// see the documentation for Condition for more information.
+// form. If A is singular or near-singular a Condition error is returned.
+// See the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters.
 //  If trans == false, find X such that ||A*X - b||_2 is minimized.
@@ -205,7 +205,7 @@ func (qr *QR) Solve(m *Dense, trans bool, b Matrix) error {
 
 // SolveVec finds a minimum-norm solution to a system of linear equations,
 //  Ax = b.
-// Please see QR.Solve for the full documentation.
+// See QR.Solve for the full documentation.
 func (qr *QR) SolveVec(v *VecDense, trans bool, b Vector) error {
 	r, c := qr.qr.Dims()
 	if _, bc := b.Dims(); bc != 1 {

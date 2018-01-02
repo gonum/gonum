@@ -185,7 +185,7 @@ func (u unitPrinters) Swap(i, j int) {
 // NewDimension will panic if the input symbol matches an existing symbol.
 //
 // NewDimension should only be called for unit types that are actually orthogonal
-// to the base dimensions defined in this package. Please see the package-level
+// to the base dimensions defined in this package. See the package-level
 // documentation for further explanation.
 func NewDimension(symbol string) Dimension {
 	_, ok := dimensions[symbol]
@@ -208,7 +208,7 @@ func SymbolExists(symbol string) bool {
 // units, but can also include dimensions created with NewDimension. The Unit type
 // is most useful for ensuring dimensional consistency when manipulating types
 // with different units, for example, by multiplying  an acceleration with a
-// mass to get a force. Please see the package documentation for further explanation.
+// mass to get a force. See the package documentation for further explanation.
 type Unit struct {
 	dimensions Dimensions
 	formatted  string

@@ -12,7 +12,7 @@ import (
 
 // Solve finds a minimum-norm solution to a system of linear equations defined
 // by the matrices a and b. If A is singular or near-singular, a Condition error
-// is returned. Please see the documentation for Condition for more information.
+// is returned. See the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters:
 //  - if m >= n, find X such that ||A*X - B||_2 is minimized,
@@ -105,7 +105,7 @@ func (m *Dense) Solve(a, b Matrix) error {
 
 // SolveVec finds a minimum-norm solution to a system of linear equations defined
 // by the matrix a and the right-hand side column vector b. If A is singular or
-// near-singular, a Condition error is returned. Please see the documentation for
+// near-singular, a Condition error is returned. See the documentation for
 // Dense.Solve for more information.
 func (v *VecDense) SolveVec(a Matrix, b Vector) error {
 	if _, bc := b.Dims(); bc != 1 {

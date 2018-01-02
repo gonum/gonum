@@ -22,7 +22,7 @@ import (
 // and lower triangular otherwise. This function will panic if t is not of
 // sufficient size.
 //
-// store describes the storage of the elementary reflectors in v. Please see
+// store describes the storage of the elementary reflectors in v. See
 // Dlarfb for a description of layout.
 //
 // tau contains the scalar factors of the elementary reflectors H_i.

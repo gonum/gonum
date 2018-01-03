@@ -232,19 +232,33 @@ func (s *SymDense) CopySym(a Symmetric) int {
 // SymRankOne performs a symetric rank-one update to the matrix a and stores
 // the result in the receiver
 //  s = a + alpha * x * x'
-func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x *VecDense) {
-	n := x.Len()
-	if a.Symmetric() != n {
+func (s *SymDense) SymRankOne(a Symmetric, alpha float64, x Vector) {
+	n, c := x.Dims()
+	if a.Symmetric() != n || c != 1 {
 		panic(ErrShape)
 	}
 	s.reuseAs(n)
+
 	if s != a {
 		if rs, ok := a.(RawSymmetricer); ok {
 			s.checkOverlap(generalFromSymmetric(rs.RawSymmetric()))
 		}
 		s.CopySym(a)
 	}
-	blas64.Syr(alpha, x.mat, s.mat)
+
+	xU, _ := untranspose(x)
+	if rv, ok := xU.(RawVectorer); ok {
+		xmat := rv.RawVector()
+		s.checkOverlap((&VecDense{mat: xmat, n: n}).asGeneral())
+		blas64.Syr(alpha, xmat, s.mat)
+		return
+	}
+
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			s.set(i, j, s.at(i, j)+alpha*x.AtVec(i)*x.AtVec(j))
+		}
+	}
 }
 
 // SymRankK performs a symmetric rank-k update to the matrix a and stores the

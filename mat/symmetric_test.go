@@ -292,10 +292,10 @@ func TestSymRankOne(t *testing.T) {
 	alpha := 3.0
 	method := func(receiver, a, b Matrix) {
 		type SymRankOner interface {
-			SymRankOne(a Symmetric, alpha float64, x *VecDense)
+			SymRankOne(a Symmetric, alpha float64, x Vector)
 		}
 		rd := receiver.(SymRankOner)
-		rd.SymRankOne(a.(Symmetric), alpha, b.(*VecDense))
+		rd.SymRankOne(a.(Symmetric), alpha, b.(Vector))
 	}
 	denseComparison := func(receiver, a, b *Dense) {
 		var tmp Dense
@@ -308,7 +308,7 @@ func TestSymRankOne(t *testing.T) {
 		if !ok {
 			return false
 		}
-		_, ok = b.(*VecDense)
+		_, ok = b.(Vector)
 		return ok
 	}
 	legalSize := func(ar, ac, br, bc int) bool {

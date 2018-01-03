@@ -57,6 +57,11 @@ func legalSizeSolve(ar, ac, br, bc int) bool {
 	return ar == br
 }
 
+// legalSizeSameVec returns whether the two matrices are column vectors.
+func legalSizeVector(_, ac, _, bc int) bool {
+	return ac == 1 && bc == 1
+}
+
 // legalSizeSameVec returns whether the two matrices are column vectors of the
 // same dimension.
 func legalSizeSameVec(ar, ac, br, bc int) bool {
@@ -73,8 +78,8 @@ func isAnySize2(ar, ac, br, bc int) bool {
 	return true
 }
 
-// isAnyVecDense returns true for any column vector sizes.
-func isAnyVecDense(ar, ac int) bool {
+// isAnyColumnVector returns true for any column vector sizes.
+func isAnyColumnVector(ar, ac int) bool {
 	return ac == 1
 }
 

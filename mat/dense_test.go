@@ -1557,7 +1557,7 @@ func TestRankOne(t *testing.T) {
 		// Check with the same matrix
 		a.RankOne(a, test.alpha, NewVecDense(len(test.x), test.x), NewVecDense(len(test.y), test.y))
 		if !Equal(a, want) {
-			t.Errorf("unexpected result for Outer test %d iteration 1: got: %+v want: %+v", i, m, want)
+			t.Errorf("unexpected result for RankOne test %d iteration 1: got: %+v want: %+v", i, m, want)
 		}
 	}
 }
@@ -1610,6 +1610,21 @@ func TestOuter(t *testing.T) {
 				}
 			}
 		}
+	}
+
+	for _, alpha := range []float64{0, 1, -1, 2.3, -2.3} {
+		method := func(receiver, x, y Matrix) {
+			type outerer interface {
+				Outer(alpha float64, x, y Vector)
+			}
+			m := receiver.(outerer)
+			m.Outer(alpha, x.(Vector), y.(Vector))
+		}
+		denseComparison := func(receiver, x, y *Dense) {
+			receiver.Mul(x, y.T())
+			receiver.Scale(alpha, receiver)
+		}
+		testTwoInput(t, "Outer", &Dense{}, method, denseComparison, legalTypesVectorVector, legalSizeVector, 1e-12)
 	}
 }
 

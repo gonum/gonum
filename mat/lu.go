@@ -161,15 +161,15 @@ func (lu *LU) Pivot(swaps []int) []int {
 // the original matrix A, storing the result into the receiver. That is, if in
 // the original LU decomposition P * L * U = A, in the updated decomposition
 // P * L * U = A + alpha * x * y^T.
-func (lu *LU) RankOne(orig *LU, alpha float64, x, y *VecDense) {
+func (lu *LU) RankOne(orig *LU, alpha float64, x, y Vector) {
 	// RankOne uses algorithm a1 on page 28 of "Multiple-Rank Updates to Matrix
 	// Factorizations for Nonlinear Analysis and Circuit Design" by Linzhong Deng.
 	// http://web.stanford.edu/group/SOL/dissertations/Linzhong-Deng-thesis.pdf
 	_, n := orig.lu.Dims()
-	if x.Len() != n {
+	if r, c := x.Dims(); r != n || c != 1 {
 		panic(ErrShape)
 	}
-	if y.Len() != n {
+	if r, c := y.Dims(); r != n || c != 1 {
 		panic(ErrShape)
 	}
 	if orig != lu {
@@ -195,8 +195,8 @@ func (lu *LU) RankOne(orig *LU, alpha float64, x, y *VecDense) {
 	ys := getFloats(n, false)
 	defer putFloats(ys)
 	for i := 0; i < n; i++ {
-		xs[i] = x.at(i)
-		ys[i] = y.at(i)
+		xs[i] = x.AtVec(i)
+		ys[i] = y.AtVec(i)
 	}
 
 	// Adjust for the pivoting in the LU factorization

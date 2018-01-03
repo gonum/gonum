@@ -423,12 +423,12 @@ func (chol *Cholesky) ExtendVecSym(a *Cholesky, v Vector) (ok bool) {
 //
 // SymRankOne updates a Cholesky factorization in O(n²) time. The Cholesky
 // factorization computation from scratch is O(n³).
-func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *VecDense) (ok bool) {
+func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool) {
 	if !orig.valid() {
 		panic(badCholesky)
 	}
 	n := orig.Size()
-	if x.Len() != n {
+	if r, c := x.Dims(); r != n || c != 1 {
 		panic(ErrShape)
 	}
 	if orig != c {
@@ -472,7 +472,15 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x *VecDense) (ok bo
 
 	work := getFloats(n, false)
 	defer putFloats(work)
-	blas64.Copy(n, x.RawVector(), blas64.Vector{1, work})
+	var xmat blas64.Vector
+	if rv, ok := x.(RawVectorer); ok {
+		xmat = rv.RawVector()
+	} else {
+		var tmp *VecDense
+		tmp.CopyVec(x)
+		xmat = tmp.RawVector()
+	}
+	blas64.Copy(n, xmat, blas64.Vector{1, work})
 
 	if alpha > 0 {
 		// Compute rank-1 update.

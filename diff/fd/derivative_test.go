@@ -143,3 +143,31 @@ func TestDerivativeDefault(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkDerivativeSerial(b *testing.B) {
+	// run the Derivative benchmark b.N times
+	for n := 0; n < b.N; n++ {
+		Derivative(xSquared, 10, &Settings{Concurrent: false})
+	}
+}
+
+func BenchmarkDerivativeConcurrent(b *testing.B) {
+	// run the Derivative benchmark b.N times
+	for n := 0; n < b.N; n++ {
+		Derivative(xSquared, 10, &Settings{Concurrent: true})
+	}
+}
+
+func BenchmarkDerivative2ndSerial(b *testing.B) {
+	// run the Derivative benchmark b.N times
+	for n := 0; n < b.N; n++ {
+		Derivative(xSquared, 10, &Settings{Formula: Forward2nd, Concurrent: false})
+	}
+}
+
+func BenchmarkDerivative2ndConcurrent(b *testing.B) {
+	// run the Derivative benchmark b.N times
+	for n := 0; n < b.N; n++ {
+		Derivative(xSquared, 10, &Settings{Formula: Forward2nd, Concurrent: true})
+	}
+}

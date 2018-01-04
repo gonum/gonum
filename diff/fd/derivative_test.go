@@ -7,12 +7,9 @@ package fd
 import (
 	"math"
 	"testing"
-	"time"
 )
 
 var xSquared = func(x float64) float64 { return x * x }
-
-var xSquaredSlow = func(x float64) float64 { time.Sleep(500); return x * x }
 
 type testPoint struct {
 	f    func(float64) float64

@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"sort"
+	"time"
 
 	"golang.org/x/exp/rand"
 
@@ -19,26 +20,26 @@ import (
 )
 
 type IntFloat64Pair struct {
-    x []int
+	x []int
 	y []float64
 }
 
-func (p IntFloat64Pair) Len() int  {
-    return len(p.x)
+func (p IntFloat64Pair) Len() int {
+	return len(p.x)
 }
 
 func (p IntFloat64Pair) Swap(i, j int) {
-    p.x[i], p.x[j] = p.x[j], p.x[i]
-    p.y[i], p.y[j] = p.y[j], p.y[i]
+	p.x[i], p.x[j] = p.x[j], p.x[i]
+	p.y[i], p.y[j] = p.y[j], p.y[i]
 }
 
 func (p IntFloat64Pair) Less(i, j int) bool {
-    if p.x[i] < p.x[j] {
-        return true
-    } else if p.x[i] == p.x[j] && p.y[i] < p.y[j] {
-        return true
-    }
-    return false
+	if p.x[i] < p.x[j] {
+		return true
+	} else if p.x[i] == p.x[j] && p.y[i] < p.y[j] {
+		return true
+	}
+	return false
 }
 
 func ExampleParametric() {
@@ -47,7 +48,7 @@ func ExampleParametric() {
 	A := mat.NewDense(2, 4, []float64{-1, 2, 1, 0, 3, 1, 0, 1})
 	b := []float64{4, 9}
 
-	opt, x, err := lp.Parametric(c, A, b, 0, nil, rnd)
+	opt, x, _, err := lp.Parametric(c, A, b, 0, nil, true, rnd)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,7 +81,7 @@ func ExampleParametricWithTrace() {
 
 	betadata := make([]float64, d)
 	for _, v := range idxdata {
-		if a, b := rnd.Float64(), 1 + rnd.NormFloat64(); a < 0.5  {
+		if a, b := rnd.Float64(), 1+rnd.NormFloat64(); a < 0.5 {
 			betadata[v] = b
 		} else {
 			betadata[v] = -b
@@ -88,7 +89,7 @@ func ExampleParametricWithTrace() {
 	}
 	beta := mat.NewVecDense(d, betadata)
 
-	xdata := make([]float64, n * d)
+	xdata := make([]float64, n*d)
 	for i := range xdata {
 		xdata[i] = rnd.NormFloat64()
 	}
@@ -117,53 +118,55 @@ func ExampleParametricWithTrace() {
 	y.MulVec(X, beta)
 	y.AddVec(y, eps)
 
-	b := make([]float64, 2 * d)
-	XTy := mat.NewVecDense(d, b[0 : d])
+	b := make([]float64, 2*d)
+	XTy := mat.NewVecDense(d, b[0:d])
 	XTy.MulVec(X.T(), y)
-	XTy.ScaleVec(1.0 / n, XTy)
+	XTy.ScaleVec(1.0/n, XTy)
 
-	adata := make([]float64, 8 * d * d)
-	A := mat.NewDense(2 * d, 4 * d, adata)
+	adata := make([]float64, 8*d*d)
+	A := mat.NewDense(2*d, 4*d, adata)
 	A11 := A.Slice(0, d, 0, d).(*mat.Dense)
-	A12 := A.Slice(0, d, d, 2 * d).(*mat.Dense)
-	A21 := A.Slice(d, 2 * d, 0, d).(*mat.Dense)
-	A22 := A.Slice(d, 2 * d, d, 2 * d).(*mat.Dense)
+	A12 := A.Slice(0, d, d, 2*d).(*mat.Dense)
+	A21 := A.Slice(d, 2*d, 0, d).(*mat.Dense)
+	A22 := A.Slice(d, 2*d, d, 2*d).(*mat.Dense)
 	A11.Mul(X.T(), X)
-	A11.Scale(1.0 / n, A11)
+	A11.Scale(1.0/n, A11)
 	A12.Scale(-1, A11)
 	A21.Copy(A12)
 	A22.Copy(A11)
-	for i := 0; i < 2 * d; i++ {
-		adata[i * 4 * d + 2 * d + i] = 1
+	for i := 0; i < 2*d; i++ {
+		adata[i*4*d+2*d+i] = 1
 	}
 
-	c := make([]float64, 4 * d)
-	for i := 0; i < 2 * d; i++ {
+	c := make([]float64, 4*d)
+	for i := 0; i < 2*d; i++ {
 		c[i] = 1
 	}
 
 	for i := 0; i < d; i++ {
-		b[i + d] = -b[i]
+		b[i+d] = -b[i]
 	}
 
-	cbar := make([]float64, 4 * d)
-	bbar := make([]float64, 2 * d)
+	cbar := make([]float64, 4*d)
+	bbar := make([]float64, 2*d)
 	for i := range bbar {
 		bbar[i] = 1
 	}
 	tol := math.Sqrt(math.Log(d) / n)
+	secs := time.Now().UnixNano()
 	optTr, err := lp.ParametricWithTrace(c, A, b, cbar, bbar, tol, nil, rnd)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println((time.Now().UnixNano() - secs) / 1000)
 
 	iter := len(optTr.Lambda)
 	idx := 0
 	for i := 0; i < iter; i++ {
 		tmp := 0
-		basicIdxs := optTr.Idx[2 * d * i : 2 * d * (i + 1)]
+		basicIdxs := optTr.Idx[2*d*i : 2*d*(i+1)]
 		for _, v := range basicIdxs {
-			if v < 2 * d {
+			if v < 2*d {
 				tmp++
 			}
 		}
@@ -173,12 +176,12 @@ func ExampleParametricWithTrace() {
 		}
 	}
 
-	finalX := optTr.X[2 * d * idx : 2 * d * (idx + 1)]
-	finalBasicIdxs := optTr.Idx[2 * d * idx : 2 * d * (idx + 1)]
-	xopt := make([]float64, 4 * d)
-    for i, v := range finalBasicIdxs {
-        xopt[v] = finalX[i]
-    }
+	finalX := optTr.X[2*d*idx : 2*d*(idx+1)]
+	finalBasicIdxs := optTr.Idx[2*d*idx : 2*d*(idx+1)]
+	xopt := make([]float64, 4*d)
+	for i, v := range finalBasicIdxs {
+		xopt[v] = finalX[i]
+	}
 
 	var bCheck mat.VecDense
 	bCheck.MulVec(A, mat.NewVecDense(len(xopt), xopt))
@@ -192,17 +195,17 @@ func ExampleParametricWithTrace() {
 	for i, v := range finalBasicIdxs {
 		if v < d {
 			betamap[v] += finalX[i]
-		} else if v < 2 * d {
-			betamap[v - d] -= finalX[i]
+		} else if v < 2*d {
+			betamap[v-d] -= finalX[i]
 		}
 	}
 
-    keys := make([]int, 0, len(betamap))
+	keys := make([]int, 0, len(betamap))
 	values := make([]float64, 0, len(betamap))
-    for k, v := range betamap {
-        keys = append(keys, k)
+	for k, v := range betamap {
+		keys = append(keys, k)
 		values = append(values, v)
-    }
+	}
 
 	p := IntFloat64Pair{
 		x: keys,

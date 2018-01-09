@@ -28,9 +28,9 @@ func Zhpr2Test(t *testing.T, impl Zhpr2er) {
 			yCopy := make([]complex128, len(y))
 			copy(yCopy, y)
 
-			ap := packHermitian(uplo, n, test.a, n)
+			ap := zPack(uplo, n, test.a, n)
 			impl.Zhpr2(uplo, n, test.alpha, x, incX, y, incY, ap)
-			a := unpackHermitian(uplo, n, ap)
+			a := zUnpackAsHermitian(uplo, n, ap)
 
 			if !zsame(x, xCopy) {
 				t.Errorf("Case %v (uplo=%v,incX=%v,incY=%v): unexpected modification of x", tc, uplo, incX, incY)

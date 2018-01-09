@@ -28,7 +28,7 @@ func ZhpmvTest(t *testing.T, impl Zhpmver) {
 
 				y := makeZVector(test.y, incY)
 
-				ap := packHermitian(uplo, n, test.a, n)
+				ap := zPack(uplo, n, test.a, n)
 				apCopy := make([]complex128, len(ap))
 				copy(apCopy, ap)
 

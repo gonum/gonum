@@ -23,9 +23,9 @@ func ZhprTest(t *testing.T, impl Zhprer) {
 				xCopy := make([]complex128, len(x))
 				copy(xCopy, x)
 
-				ap := packHermitian(uplo, n, test.a, n)
+				ap := zPack(uplo, n, test.a, n)
 				impl.Zhpr(uplo, n, test.alpha, x, incX, ap)
-				a := unpackHermitian(uplo, n, ap)
+				a := zUnpackAsHermitian(uplo, n, ap)
 
 				var want []complex128
 				if incX > 0 {

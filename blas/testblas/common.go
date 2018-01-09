@@ -365,9 +365,8 @@ func max(a, b int) int {
 	return a
 }
 
-// packHermitian returns an n×n Hermitian matrix in packed format stored in
-// the uplo triangle of the general matrix A.
-func packHermitian(uplo blas.Uplo, n int, a []complex128, lda int) []complex128 {
+// zPack returns the uplo triangle of an n×n matrix A in packed format.
+func zPack(uplo blas.Uplo, n int, a []complex128, lda int) []complex128 {
 	if n == 0 {
 		return nil
 	}
@@ -391,9 +390,9 @@ func packHermitian(uplo blas.Uplo, n int, a []complex128, lda int) []complex128 
 	return ap
 }
 
-// unpackHermitian returns an n×n general Hermitian matrix (with stride n)
+// zUnpackAsHermitian returns an n×n general Hermitian matrix (with stride n)
 // whose packed uplo triangle is stored on entry in ap.
-func unpackHermitian(uplo blas.Uplo, n int, ap []complex128) []complex128 {
+func zUnpackAsHermitian(uplo blas.Uplo, n int, ap []complex128) []complex128 {
 	if n == 0 {
 		return nil
 	}

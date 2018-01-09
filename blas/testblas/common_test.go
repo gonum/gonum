@@ -189,7 +189,7 @@ func TestFlattenTriangular(t *testing.T) {
 	}
 }
 
-func TestPackUnpackHermitian(t *testing.T) {
+func TestPackUnpackAsHermitian(t *testing.T) {
 	rnd := rand.New(rand.NewSource(1))
 	for _, uplo := range []blas.Uplo{blas.Upper, blas.Lower} {
 		for _, n := range []int{1, 2, 5, 50} {
@@ -206,17 +206,17 @@ func TestPackUnpackHermitian(t *testing.T) {
 				aCopy := make([]complex128, len(a))
 				copy(aCopy, a)
 
-				ap := packHermitian(uplo, n, a, lda)
+				ap := zPack(uplo, n, a, lda)
 				if !zsame(a, aCopy) {
-					t.Errorf("Case uplo=%v,n=%v,lda=%v: packHermitian modified a", uplo, n, lda)
+					t.Errorf("Case uplo=%v,n=%v,lda=%v: zPack modified a", uplo, n, lda)
 				}
 
 				apCopy := make([]complex128, len(ap))
 				copy(apCopy, ap)
 
-				art := unpackHermitian(uplo, n, ap)
+				art := zUnpackAsHermitian(uplo, n, ap)
 				if !zsame(ap, apCopy) {
-					t.Errorf("Case uplo=%v,n=%v,lda=%v: unpackHermitian modified ap", uplo, n, lda)
+					t.Errorf("Case uplo=%v,n=%v,lda=%v: zUnpackAsHermitian modified ap", uplo, n, lda)
 				}
 
 				// Copy the round-tripped A into a matrix with the same stride
@@ -226,7 +226,7 @@ func TestPackUnpackHermitian(t *testing.T) {
 					copy(got[i*lda:i*lda+n], art[i*n:i*n+n])
 				}
 				if !zsame(got, a) {
-					t.Errorf("Case uplo=%v,n=%v,lda=%v: packHermitian and unpackHermitian do not roundtrip", uplo, n, lda)
+					t.Errorf("Case uplo=%v,n=%v,lda=%v: zPack and zUnpackAsHermitian do not roundtrip", uplo, n, lda)
 				}
 			}
 		}

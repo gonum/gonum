@@ -38,6 +38,11 @@ func (t TransposeVec) At(i, j int) float64 {
 	return t.Vector.At(j, i)
 }
 
+// AtVec returns the element at position i. It panics if i is out of bounds.
+func (t TransposeVec) AtVec(i int) float64 {
+	return t.Vector.AtVec(i)
+}
+
 // Dims returns the dimensions of the transposed vector.
 func (t TransposeVec) Dims() (r, c int) {
 	c, r = t.Vector.Dims()
@@ -148,6 +153,11 @@ func (v *VecDense) Cap() int {
 // T performs an implicit transpose by returning the receiver inside a Transpose.
 func (v *VecDense) T() Matrix {
 	return Transpose{v}
+}
+
+// TVec performs an implicit transpose by returning the receiver inside a TransposeVec.
+func (v *VecDense) TVec() Vector {
+	return TransposeVec{v}
 }
 
 // Reset zeros the length of the vector so that it can be reused as the

@@ -15,6 +15,8 @@ import (
 // throwPanic will throw unexpected panics if true, or will just report them as errors if false
 const throwPanic = true
 
+var znan = cmplx.NaN()
+
 func dTolEqual(a, b float64) bool {
 	if math.IsNaN(a) && math.IsNaN(b) {
 		return true
@@ -325,7 +327,7 @@ func makeZVector(data []complex128, inc int) []complex128 {
 	inc = abs(inc)
 	x := make([]complex128, (len(data)-1)*inc+1)
 	for i := range x {
-		x[i] = cmplx.NaN()
+		x[i] = znan
 	}
 	for i, v := range data {
 		x[i*inc] = v
@@ -348,7 +350,7 @@ func makeZGeneral(data []complex128, m, n int, ld int) []complex128 {
 	}
 	a := make([]complex128, (m-1)*ld+n)
 	for i := range a {
-		a[i] = cmplx.NaN()
+		a[i] = znan
 	}
 	if data != nil {
 		for i := 0; i < m; i++ {

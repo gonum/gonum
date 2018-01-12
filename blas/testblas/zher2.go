@@ -5,7 +5,6 @@
 package testblas
 
 import (
-	"math/cmplx"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -284,15 +283,15 @@ func Zher2Test(t *testing.T, impl Zher2er) {
 				if uplo == blas.Upper {
 					for i := 0; i < n; i++ {
 						for j := 0; j < i; j++ {
-							a[i*lda+j] = cmplx.NaN()
-							want[i*lda+j] = cmplx.NaN()
+							a[i*lda+j] = znan
+							want[i*lda+j] = znan
 						}
 					}
 				} else {
 					for i := 0; i < n; i++ {
 						for j := i + 1; j < n; j++ {
-							a[i*lda+j] = cmplx.NaN()
-							want[i*lda+j] = cmplx.NaN()
+							a[i*lda+j] = znan
+							want[i*lda+j] = znan
 						}
 					}
 				}

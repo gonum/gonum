@@ -5,7 +5,6 @@
 package testblas
 
 import (
-	"math/cmplx"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -38,9 +37,9 @@ var ztrmvTestCases = []struct {
 		uplo: blas.Upper,
 		a: []complex128{
 			6 - 8i, -10 + 10i, -6 - 3i, -1 - 8i,
-			0, 7 + 8i, -7 + 9i, 3 + 6i,
-			0, 0, 6 - 4i, -2 - 5i,
-			0, 0, 0, 4 - 8i,
+			znan, 7 + 8i, -7 + 9i, 3 + 6i,
+			znan, znan, 6 - 4i, -2 - 5i,
+			znan, znan, znan, 4 - 8i,
 		},
 		x: []complex128{
 			10 - 5i,
@@ -126,9 +125,9 @@ var ztrmvTestCases = []struct {
 	{
 		uplo: blas.Lower,
 		a: []complex128{
-			10 - 8i, 0, 0, 0,
-			1 - 6i, -4 + 8i, 0, 0,
-			2 - 6i, 4 - 8i, 5 + 3i, 0,
+			10 - 8i, znan, znan, znan,
+			1 - 6i, -4 + 8i, znan, znan,
+			2 - 6i, 4 - 8i, 5 + 3i, znan,
 			-7 - 4i, 1 + 3i, -2 - 4i, 9 + 8i,
 		},
 		x: []complex128{
@@ -219,7 +218,6 @@ type Ztrmver interface {
 }
 
 func ZtrmvTest(t *testing.T, impl Ztrmver) {
-	nan := cmplx.NaN()
 	for tc, test := range ztrmvTestCases {
 		n := len(test.x)
 		uplo := test.uplo
@@ -228,22 +226,9 @@ func ZtrmvTest(t *testing.T, impl Ztrmver) {
 				for _, incX := range []int{-11, -2, -1, 1, 2, 7} {
 					for _, lda := range []int{max(1, n), n + 11} {
 						a := makeZGeneral(test.a, n, n, lda)
-						if uplo == blas.Upper {
-							for i := 0; i < n; i++ {
-								for j := 0; j < i; j++ {
-									a[i*lda+j] = nan
-								}
-							}
-						} else {
-							for i := 0; i < n; i++ {
-								for j := i + 1; j < n; j++ {
-									a[i*lda+j] = nan
-								}
-							}
-						}
 						if diag == blas.Unit {
 							for i := 0; i < n; i++ {
-								a[i*lda+i] = nan
+								a[i*lda+i] = znan
 							}
 						}
 						aCopy := make([]complex128, len(a))

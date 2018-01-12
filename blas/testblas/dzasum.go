@@ -5,7 +5,6 @@
 package testblas
 
 import (
-	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -28,7 +27,7 @@ func DzasumTest(t *testing.T, impl Dzasumer) {
 				x = make([]complex128, (n-1)*aincX+1)
 			}
 			for i := range x {
-				x[i] = cmplx.NaN()
+				x[i] = znan
 			}
 			for i := 0; i < n; i++ {
 				re := float64(2*i + 1)

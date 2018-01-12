@@ -7,7 +7,6 @@ package testblas
 import (
 	"fmt"
 	"math"
-	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -122,7 +121,7 @@ func Dznrm2Test(t *testing.T, impl Dznrm2er) {
 
 			x := make([]complex128, (n-1)*incX+1)
 			for i := range x {
-				x[i] = cmplx.NaN()
+				x[i] = znan
 			}
 			for i := range re {
 				x[i*incX] = complex(re[i], im[i])

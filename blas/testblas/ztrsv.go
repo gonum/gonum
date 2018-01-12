@@ -5,7 +5,6 @@
 package testblas
 
 import (
-	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -58,7 +57,7 @@ func ztrsvTest(t *testing.T, impl Ztrsver, uplo blas.Uplo, trans blas.Transpose,
 	}
 	if diag == blas.Unit {
 		for i := 0; i < n; i++ {
-			a[i*lda+i] = cmplx.NaN()
+			a[i*lda+i] = znan
 		}
 	}
 	aCopy := make([]complex128, len(a))

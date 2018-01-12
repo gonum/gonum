@@ -5,7 +5,6 @@
 package testblas
 
 import (
-	"math/cmplx"
 	"testing"
 
 	"gonum.org/v1/gonum/blas"
@@ -39,9 +38,9 @@ var zhemvTestCases = []struct {
 		alpha: 6 + 2i,
 		a: []complex128{
 			7, 8 + 4i, -9 - 6i, -9 + 3i,
-			0, -3, -10 - 6i, 0 + 3i,
-			0, 0, 6, 2 + 8i,
-			0, 0, 0, -4,
+			znan, -3, -10 - 6i, 0 + 3i,
+			znan, znan, 6, 2 + 8i,
+			znan, znan, znan, -4,
 		},
 		x: []complex128{
 			-4 + 0i,
@@ -85,9 +84,9 @@ var zhemvTestCases = []struct {
 		uplo:  blas.Lower,
 		alpha: 6 + 2i,
 		a: []complex128{
-			7, 0, 0, 0,
-			8 - 4i, -3, 0, 0,
-			-9 + 6i, -10 + 6i, 6, 0,
+			7, znan, znan, znan,
+			8 - 4i, -3, znan, znan,
+			-9 + 6i, -10 + 6i, 6, znan,
 			-9 - 3i, 0 - 3i, 2 - 8i, -4,
 		},
 		x: []complex128{
@@ -133,9 +132,9 @@ var zhemvTestCases = []struct {
 		alpha: 0,
 		a: []complex128{
 			7, 8 + 4i, -9 - 6i, -9 + 3i,
-			0, -3, -10 - 6i, 0 + 3i,
-			0, 0, 6, 2 + 8i,
-			0, 0, 0, -4,
+			znan, -3, -10 - 6i, 0 + 3i,
+			znan, znan, 6, 2 + 8i,
+			znan, znan, znan, -4,
 		},
 		x: []complex128{
 			-4 + 0i,
@@ -180,9 +179,9 @@ var zhemvTestCases = []struct {
 		alpha: 6 + 2i,
 		a: []complex128{
 			7, 8 + 4i, -9 - 6i, -9 + 3i,
-			0, -3, -10 - 6i, 0 + 3i,
-			0, 0, 6, 2 + 8i,
-			0, 0, 0, -4,
+			znan, -3, -10 - 6i, 0 + 3i,
+			znan, znan, 6, 2 + 8i,
+			znan, znan, znan, -4,
 		},
 		x: []complex128{
 			-4 + 0i,
@@ -229,30 +228,15 @@ type Zhemver interface {
 }
 
 func ZhemvTest(t *testing.T, impl Zhemver) {
-	nan := cmplx.NaN()
 	for tc, test := range zhemvTestCases {
 		n := len(test.x)
 		for _, incX := range []int{-11, -2, -1, 1, 2, 7} {
 			for _, incY := range []int{-11, -2, -1, 1, 2, 7} {
 				for _, lda := range []int{max(1, n), n + 11} {
-
 					alpha := test.alpha
 					beta := test.beta
 
 					a := makeZGeneral(test.a, n, n, lda)
-					if test.uplo == blas.Upper {
-						for i := 0; i < n; i++ {
-							for j := 0; j < i; j++ {
-								a[i*lda+j] = nan
-							}
-						}
-					} else {
-						for i := 0; i < n; i++ {
-							for j := i + 1; j < n; j++ {
-								a[i*lda+j] = nan
-							}
-						}
-					}
 					aCopy := make([]complex128, len(a))
 					copy(aCopy, a)
 

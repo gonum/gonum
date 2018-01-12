@@ -6,8 +6,6 @@ package testblas
 
 import (
 	"fmt"
-	"math"
-	"math/cmplx"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -31,7 +29,7 @@ func ZcopyTest(t *testing.T, impl Zcopyer) {
 				x = make([]complex128, (n-1)*aincX+1)
 			}
 			for i := range x {
-				x[i] = complex(math.NaN(), math.NaN())
+				x[i] = znan
 			}
 			for i := 0; i < n; i++ {
 				x[i*aincX] = complex(rnd.NormFloat64(), rnd.NormFloat64())
@@ -44,12 +42,12 @@ func ZcopyTest(t *testing.T, impl Zcopyer) {
 				y = make([]complex128, (n-1)*aincY+1)
 			}
 			for i := range y {
-				y[i] = complex(math.NaN(), math.NaN())
+				y[i] = znan
 			}
 
 			want := make([]complex128, len(y))
 			for i := range want {
-				want[i] = cmplx.NaN()
+				want[i] = znan
 			}
 			if incX*incY > 0 {
 				for i := 0; i < n; i++ {

@@ -57,12 +57,8 @@ type Shortest struct {
 
 func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
 	indexOf := make(map[int64]int, len(nodes))
-	uid := u.ID()
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
-		if n.ID() == uid {
-			u = n
-		}
 	}
 
 	p := Shortest{
@@ -78,7 +74,7 @@ func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
 		p.dist[i] = math.Inf(1)
 		p.next[i] = -1
 	}
-	p.dist[indexOf[uid]] = 0
+	p.dist[indexOf[u.ID()]] = 0
 
 	return p
 }

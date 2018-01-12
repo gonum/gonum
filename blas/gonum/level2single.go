@@ -73,7 +73,7 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 		ky = -(lenY - 1) * incY
 	}
 
-	// First form y := beta * y
+	// First form y = beta * y
 	if incY > 0 {
 		Implementation{}.Sscal(lenY, beta, y, incY)
 	} else {
@@ -84,7 +84,7 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 		return
 	}
 
-	// Form y := alpha * A * x + y
+	// Form y = alpha * A * x + y
 	if tA == blas.NoTrans {
 		if incX == 1 && incY == 1 {
 			for i := 0; i < m; i++ {
@@ -252,7 +252,7 @@ func (Implementation) Sgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float32, 
 		ky = -(lenY - 1) * incY
 	}
 
-	// First form y := beta * y
+	// First form y = beta * y
 	if incY > 0 {
 		Implementation{}.Sscal(lenY, beta, y, incY)
 	} else {
@@ -1453,7 +1453,7 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 		ky = -(lenY - 1) * incY
 	}
 
-	// First form y := beta * y
+	// First form y = beta * y
 	if incY > 0 {
 		Implementation{}.Sscal(lenY, beta, y, incY)
 	} else {

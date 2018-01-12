@@ -445,7 +445,7 @@ func DgeevTest(t *testing.T, impl Dgeever) {
 		{
 			a:      Wilk12{}.Matrix(),
 			evWant: Wilk12{}.Eigenvalues(),
-			valTol: 1e-8,
+			valTol: 1e-7,
 		},
 		{
 			a:      Wilk20(0).Matrix(),

@@ -50,7 +50,7 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 		ky = (1 - lenY) * incY
 	}
 
-	// Form y := beta*y.
+	// Form y = beta*y.
 	if beta != 1 {
 		if incY == 1 {
 			if beta == 0 {
@@ -83,7 +83,7 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 
 	switch trans {
 	default:
-		// Form y := alpha*A*x + y.
+		// Form y = alpha*A*x + y.
 		iy := ky
 		if incX == 1 {
 			for i := 0; i < m; i++ {
@@ -99,7 +99,7 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 		return
 
 	case blas.Trans:
-		// Form y := alpha*A^T*x + y.
+		// Form y = alpha*A^T*x + y.
 		ix := kx
 		if incY == 1 {
 			for i := 0; i < m; i++ {
@@ -115,7 +115,7 @@ func (Implementation) Zgemv(trans blas.Transpose, m, n int, alpha complex128, a 
 		return
 
 	case blas.ConjTrans:
-		// Form y := alpha*A^H*x + y.
+		// Form y = alpha*A^H*x + y.
 		ix := kx
 		if incY == 1 {
 			for i := 0; i < m; i++ {
@@ -236,7 +236,7 @@ func (Implementation) Zhemv(uplo blas.Uplo, n int, alpha complex128, a []complex
 		ky = (1 - n) * incY
 	}
 
-	// Form y := beta*y.
+	// Form y = beta*y.
 	if beta != 1 {
 		if incY == 1 {
 			if beta == 0 {
@@ -578,7 +578,7 @@ func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []comple
 		ky = (1 - n) * incY
 	}
 
-	// Form y := beta*y.
+	// Form y = beta*y.
 	if beta != 1 {
 		if incY == 1 {
 			if beta == 0 {
@@ -940,9 +940,9 @@ func (Implementation) Zhpr2(uplo blas.Uplo, n int, alpha complex128, x []complex
 }
 
 // Ztpmv performs one of the matrix-vector operations
-//  x := A * x    if trans = blas.NoTrans
-//  x := A^T * x  if trans = blas.Trans
-//  x := A^H * x  if trans = blas.ConjTrans
+//  x = A * x    if trans = blas.NoTrans
+//  x = A^T * x  if trans = blas.Trans
+//  x = A^H * x  if trans = blas.ConjTrans
 // where x is an n element vector and A is an n×n triangular matrix, supplied in
 // packed form.
 func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int, ap []complex128, x []complex128, incX int) {
@@ -973,7 +973,7 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	// The elements of A are accessed sequentially with one pass through A.
 
 	if trans == blas.NoTrans {
-		// Form x := A*x.
+		// Form x = A*x.
 		if uplo == blas.Upper {
 			// kk points to the current diagonal element in ap.
 			kk := 0
@@ -1032,7 +1032,7 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	}
 
 	if trans == blas.Trans {
-		// Form x := A^T*x.
+		// Form x = A^T*x.
 		if uplo == blas.Upper {
 			// kk points to the current diagonal element in ap.
 			kk := n*(n+1)/2 - 1
@@ -1092,7 +1092,7 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		return
 	}
 
-	// Form x := A^H*x.
+	// Form x = A^H*x.
 	if uplo == blas.Upper {
 		// kk points to the current diagonal element in ap.
 		kk := n*(n+1)/2 - 1
@@ -1191,7 +1191,7 @@ func (Implementation) Ztrmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	// The elements of A are accessed sequentially with one pass through A.
 
 	if trans == blas.NoTrans {
-		// Form x := A*x.
+		// Form x = A*x.
 		if uplo == blas.Upper {
 			if incX == 1 {
 				for i := 0; i < n; i++ {
@@ -1241,7 +1241,7 @@ func (Implementation) Ztrmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	}
 
 	if trans == blas.Trans {
-		// Form x := A^T*x.
+		// Form x = A^T*x.
 		if uplo == blas.Upper {
 			if incX == 1 {
 				for i := n - 1; i >= 0; i-- {
@@ -1292,7 +1292,7 @@ func (Implementation) Ztrmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		return
 	}
 
-	// Form x := A^H*x.
+	// Form x = A^H*x.
 	if uplo == blas.Upper {
 		if incX == 1 {
 			for i := n - 1; i >= 0; i-- {
@@ -1383,7 +1383,7 @@ func (Implementation) Ztrsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	// The elements of A are accessed sequentially with one pass through A.
 
 	if trans == blas.NoTrans {
-		// Form x := inv(A)*x.
+		// Form x = inv(A)*x.
 		if uplo == blas.Upper {
 			if incX == 1 {
 				for i := n - 1; i >= 0; i-- {
@@ -1435,7 +1435,7 @@ func (Implementation) Ztrsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	}
 
 	if trans == blas.Trans {
-		// Form x := inv(A^T)*x.
+		// Form x = inv(A^T)*x.
 		if uplo == blas.Upper {
 			if incX == 1 {
 				for j := 0; j < n; j++ {
@@ -1485,7 +1485,7 @@ func (Implementation) Ztrsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		return
 	}
 
-	// Form x := inv(A^H)*x.
+	// Form x = inv(A^H)*x.
 	if uplo == blas.Upper {
 		if incX == 1 {
 			for j := 0; j < n; j++ {

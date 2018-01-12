@@ -10,8 +10,6 @@ import (
 	"gonum.org/v1/gonum/lapack/testlapack"
 )
 
-var appengine bool
-
 var impl = Implementation{}
 
 func TestDbdsqr(t *testing.T) {
@@ -35,9 +33,6 @@ func TestDgebd2(t *testing.T) {
 }
 
 func TestDgebrd(t *testing.T) {
-	if appengine {
-		t.Skip("non-asm implementation fails test")
-	}
 	testlapack.DgebrdTest(t, impl)
 }
 
@@ -46,9 +41,6 @@ func TestDgecon(t *testing.T) {
 }
 
 func TestDgeev(t *testing.T) {
-	if appengine {
-		t.Skip("non-asm implementation fails test")
-	}
 	testlapack.DgeevTest(t, impl)
 }
 

@@ -9,7 +9,6 @@ import (
 	"log"
 	"math"
 	"sort"
-	"time"
 
 	"golang.org/x/exp/rand"
 
@@ -158,7 +157,6 @@ func ExampleParametricWithTrace() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println((time.Now().UnixNano() - secs) / 1000)
 
 	iter := len(optTr.Lambda)
 	idx := 0

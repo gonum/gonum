@@ -167,7 +167,7 @@ func (u *Uniform) Rand(x []float64) []float64 {
 		return x
 	}
 	for i, b := range u.bounds {
-		x[i] = rand.Float64()*(b.Max-b.Min) + b.Min
+		x[i] = u.src.Float64()*(b.Max-b.Min) + b.Min
 	}
 	return x
 }

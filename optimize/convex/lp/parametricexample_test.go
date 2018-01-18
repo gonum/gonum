@@ -78,11 +78,14 @@ func ExampleParametricWithTrace() {
 		inIdx[idx] = struct{}{}
 	}
 
+	betanonzero := make([]float64, s)
 	betadata := make([]float64, d)
-	for _, v := range idxdata {
+	for i, v := range idxdata {
 		if a, b := rnd.Float64(), 1+rnd.NormFloat64(); a < 0.5 {
+			betanonzero[i] = b
 			betadata[v] = b
 		} else {
+			betanonzero[i] = -b
 			betadata[v] = -b
 		}
 	}
@@ -152,7 +155,6 @@ func ExampleParametricWithTrace() {
 		bbar[i] = 1
 	}
 	tol := math.Sqrt(math.Log(d) / n)
-	secs := time.Now().UnixNano()
 	optTr, err := lp.ParametricWithTrace(c, A, b, cbar, bbar, tol, nil, rnd)
 	if err != nil {
 		panic(err)
@@ -210,11 +212,18 @@ func ExampleParametricWithTrace() {
 		y: values,
 	}
 	sort.Sort(p)
-	fmt.Printf("num selected: %v\n", len(betamap))
-	fmt.Printf("idx: %v\n", keys)
-	fmt.Printf("est: %v\n", values)
+
+	p.x = idxdata
+	p.y = betanonzero
+	sort.Sort(p)
+
+	fmt.Printf("true idx: %v\n", idxdata)
+	fmt.Printf("true value: %v\n", betanonzero)
+	fmt.Printf("est idx: %v\n", keys)
+	fmt.Printf("est value: %v\n", values)
 	// Output:
-	// num selected: 8
-	// idx: [32 33 54 122 186 227 229 244]
-	// est: [-1.3767259886061176 -0.20328979569981956 0.7595477723815178 -0.20771185072465692 2.139833618293029 -0.9784601263043735 0.7263435538015337 -2.0692216936117083]
+	// true idx: [32 33 54 122 186 227 229 244]
+	// true value: [-1.781754430770282 -0.5138849228108555 1.1834965711647096 -0.47070118536056604 2.6271559815452794 -1.2921716191987018 1.1125797334946754 -2.3826174159276245]
+	// est idx: [32 33 54 122 186 227 229 244]
+	// est value: [-1.3767259886061176 -0.20328979569981956 0.7595477723815178 -0.20771185072465692 2.139833618293029 -0.9784601263043735 0.7263435538015337 -2.0692216936117083]
 }

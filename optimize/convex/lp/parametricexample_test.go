@@ -1,4 +1,4 @@
-// Copyright ©2016 The Gonum Authors. All rights reserved.
+// Copyright ©2016 The Gonum authors. all rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -33,9 +33,7 @@ func (p IntFloat64Pair) Swap(i, j int) {
 }
 
 func (p IntFloat64Pair) Less(i, j int) bool {
-	if p.x[i] < p.x[j] {
-		return true
-	} else if p.x[i] == p.x[j] && p.y[i] < p.y[j] {
+	if math.Abs(p.y[i]) > math.Abs(p.y[j]) {
 		return true
 	}
 	return false
@@ -44,10 +42,10 @@ func (p IntFloat64Pair) Less(i, j int) bool {
 func ExampleParametric() {
 	rnd := rand.New(rand.NewSource(0))
 	c := []float64{-1, -2, 0, 0}
-	A := mat.NewDense(2, 4, []float64{-1, 2, 1, 0, 3, 1, 0, 1})
+	a := mat.NewDense(2, 4, []float64{-1, 2, 1, 0, 3, 1, 0, 1})
 	b := []float64{4, 9}
 
-	opt, x, _, err := lp.Parametric(c, A, b, 0, nil, true, rnd)
+	opt, x, _, err := lp.Parametric(c, a, b, 0, nil, true, rnd)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,8 +59,8 @@ func ExampleParametric() {
 func ExampleParametricWithTrace() {
 	// The Dantzig selector as discussed in Candes, E., & Tao, T. (2007).
 	// "The Dantzig selector: Statistical estimation when p is much larger than n".
-	// The Annals of Statistics, 2313-2351.
-	const n, d, s = 100, 250, 8
+	// The annals of Statistics, 2313-2351.
+	const n, m, d, s = 150, 100, 250, 8
 	rnd := rand.New(rand.NewSource(0))
 
 	idxdata := make([]int, s)
@@ -78,14 +76,14 @@ func ExampleParametricWithTrace() {
 		inIdx[idx] = struct{}{}
 	}
 
-	betanonzero := make([]float64, s)
 	betadata := make([]float64, d)
+	nonzero := make([]float64, s)
 	for i, v := range idxdata {
 		if a, b := rnd.Float64(), 1+rnd.NormFloat64(); a < 0.5 {
-			betanonzero[i] = b
+			nonzero[i] = b
 			betadata[v] = b
 		} else {
-			betanonzero[i] = -b
+			nonzero[i] = -b
 			betadata[v] = -b
 		}
 	}
@@ -108,6 +106,8 @@ func ExampleParametricWithTrace() {
 		}
 		X.SetCol(j, coltmp)
 	}
+	trainX := X.Slice(0, m, 0, d)
+	validateX := X.Slice(m, n, 0, d)
 
 	epsdata := make([]float64, n)
 	for i := range epsdata {
@@ -117,25 +117,27 @@ func ExampleParametricWithTrace() {
 
 	ydata := make([]float64, n)
 	y := mat.NewVecDense(n, ydata)
+	trainY := mat.NewVecDense(m, ydata[:m])
+	validateY := mat.NewVecDense(n-m, ydata[m:n])
 	y.MulVec(X, beta)
 	y.AddVec(y, eps)
 
 	b := make([]float64, 2*d)
 	XTy := mat.NewVecDense(d, b[0:d])
-	XTy.MulVec(X.T(), y)
-	XTy.ScaleVec(1.0/n, XTy)
+	XTy.MulVec(trainX.T(), trainY)
+	XTy.ScaleVec(1.0/m, XTy)
 
 	adata := make([]float64, 8*d*d)
-	A := mat.NewDense(2*d, 4*d, adata)
-	A11 := A.Slice(0, d, 0, d).(*mat.Dense)
-	A12 := A.Slice(0, d, d, 2*d).(*mat.Dense)
-	A21 := A.Slice(d, 2*d, 0, d).(*mat.Dense)
-	A22 := A.Slice(d, 2*d, d, 2*d).(*mat.Dense)
-	A11.Mul(X.T(), X)
-	A11.Scale(1.0/n, A11)
-	A12.Scale(-1, A11)
-	A21.Copy(A12)
-	A22.Copy(A11)
+	a := mat.NewDense(2*d, 4*d, adata)
+	a11 := a.Slice(0, d, 0, d).(*mat.Dense)
+	a12 := a.Slice(0, d, d, 2*d).(*mat.Dense)
+	a21 := a.Slice(d, 2*d, 0, d).(*mat.Dense)
+	a22 := a.Slice(d, 2*d, d, 2*d).(*mat.Dense)
+	a11.Mul(trainX.T(), trainX)
+	a11.Scale(1.0/m, a11)
+	a12.Scale(-1, a11)
+	a21.Copy(a12)
+	a22.Copy(a11)
 	for i := 0; i < 2*d; i++ {
 		adata[i*4*d+2*d+i] = 1
 	}
@@ -154,25 +156,39 @@ func ExampleParametricWithTrace() {
 	for i := range bbar {
 		bbar[i] = 1
 	}
-	tol := math.Sqrt(math.Log(d) / n)
-	optTr, err := lp.ParametricWithTrace(c, A, b, cbar, bbar, tol, nil, rnd)
+	tol := math.Sqrt(math.Log(d) / m)
+	optTr, err := lp.ParametricWithTrace(c, a, b, cbar, bbar, tol, nil, rnd)
 	if err != nil {
 		panic(err)
 	}
 
 	iter := len(optTr.Lambda)
 	idx := 0
+
+	// check SSE on validation set
+	lo := math.Inf(1)
+	yhat_data := make([]float64, n-m)
+	yhat := mat.NewVecDense(n-m, yhat_data)
+	betahat_data := make([]float64, d)
+	betahat := mat.NewVecDense(d, betahat_data)
 	for i := 0; i < iter; i++ {
-		tmp := 0
+		for j := range betahat_data {
+			betahat_data[j] = 0
+		}
 		basicIdxs := optTr.Idx[2*d*i : 2*d*(i+1)]
-		for _, v := range basicIdxs {
-			if v < 2*d {
-				tmp++
+		optx := optTr.X[2*d*i : 2*d*(i+1)]
+		for i, v := range basicIdxs {
+			if v < d {
+				betahat_data[v] += optx[i]
+			} else if v < 2*d {
+				betahat_data[v-d] -= optx[i]
 			}
 		}
-		if tmp > s {
-			idx = i - 1
-			break
+		yhat.MulVec(validateX, betahat)
+		yhat.SubVec(yhat, validateY)
+		if sse := floats.Dot(yhat_data, yhat_data); sse < lo {
+			lo = sse
+			idx = i
 		}
 	}
 
@@ -183,8 +199,9 @@ func ExampleParametricWithTrace() {
 		xopt[v] = finalX[i]
 	}
 
+	// check for correctness of solution
 	var bCheck mat.VecDense
-	bCheck.MulVec(A, mat.NewVecDense(len(xopt), xopt))
+	bCheck.MulVec(a, mat.NewVecDense(len(xopt), xopt))
 	tmp := make([]float64, len(b))
 	floats.AddScaledTo(tmp, b, optTr.Lambda[idx], bbar)
 	if !mat.EqualApprox(&bCheck, mat.NewVecDense(len(tmp), tmp), 1e-10) {
@@ -214,16 +231,14 @@ func ExampleParametricWithTrace() {
 	sort.Sort(p)
 
 	p.x = idxdata
-	p.y = betanonzero
+	p.y = nonzero
 	sort.Sort(p)
 
+	fmt.Println("in order of decreasing absolute value")
 	fmt.Printf("true idx: %v\n", idxdata)
-	fmt.Printf("true value: %v\n", betanonzero)
-	fmt.Printf("est idx: %v\n", keys)
-	fmt.Printf("est value: %v\n", values)
+	fmt.Printf("est idx:  %v\n", keys)
 	// Output:
-	// true idx: [32 33 54 122 186 227 229 244]
-	// true value: [-1.781754430770282 -0.5138849228108555 1.1834965711647096 -0.47070118536056604 2.6271559815452794 -1.2921716191987018 1.1125797334946754 -2.3826174159276245]
-	// est idx: [32 33 54 122 186 227 229 244]
-	// est value: [-1.3767259886061176 -0.20328979569981956 0.7595477723815178 -0.20771185072465692 2.139833618293029 -0.9784601263043735 0.7263435538015337 -2.0692216936117083]
+	// in order of decreasing absolute value
+	// true idx: [186 244 32 227 54 229 33 122]
+	// est idx:  [186 244 32 227 54 229 122 33 145 49 165 202 75 194 114 147]
 }

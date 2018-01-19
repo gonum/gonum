@@ -38,6 +38,8 @@ func Add(dst, s []float64)
 //  }
 func AxpyUnitary(alpha float64, x, y []float64)
 
+func AxpyUnitaryAVX(alpha float64, x, y []float64)
+
 // AxpyUnitaryTo is
 //  for i, v := range x {
 //  	dst[i] = alpha*v + y[i]

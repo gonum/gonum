@@ -129,6 +129,33 @@ func TestAxpyUnitary(t *testing.T) {
 	}
 }
 
+func TestAxpyUnitaryAVX(t *testing.T) {
+	const xGdVal, yGdVal = -1, 0.5
+	for i, test := range axpyTests {
+		for _, align := range align2 {
+			prefix := fmt.Sprintf("Test %v (x:%v y:%v)", i, align.x, align.y)
+			xgLn, ygLn := 4+align.x, 4+align.y
+			xg, yg := guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
+			x, y := xg[xgLn:len(xg)-xgLn], yg[ygLn:len(yg)-ygLn]
+			AxpyUnitaryAVX(test.alpha, x, y)
+			for i := range test.want {
+				if !same(y[i], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, y[i], test.want[i])
+				}
+			}
+			if !isValidGuard(xg, xGdVal, xgLn) {
+				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
+			}
+			if !isValidGuard(yg, yGdVal, ygLn) {
+				t.Errorf(msgGuard, prefix, "y", yg[:ygLn], yg[len(yg)-ygLn:])
+			}
+			if !equalStrided(test.x, x, 1) {
+				t.Errorf("%v: modified read-only x argument", prefix)
+			}
+		}
+	}
+}
+
 func TestAxpyUnitaryTo(t *testing.T) {
 	const dstGdVal, xGdVal, yGdVal = 1, -1, 0.5
 	for i, test := range axpyTests {

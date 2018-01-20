@@ -194,6 +194,44 @@ func TestAxpyUnitaryTo(t *testing.T) {
 	}
 }
 
+func TestAxpyUnitaryToAVX(t *testing.T) {
+	const dstGdVal, xGdVal, yGdVal = 1, -1, 0.5
+	for i, test := range axpyTests {
+		for _, align := range align3 {
+			prefix := fmt.Sprintf("Test %v (x:%v y:%v dst:%v)", i, align.x, align.y, align.dst)
+
+			dgLn, xgLn, ygLn := 4+align.dst, 4+align.x, 4+align.y
+			dstOrig := make([]float64, len(test.x))
+			xg, yg := guardVector(test.x, xGdVal, xgLn), guardVector(test.y, yGdVal, ygLn)
+			dstg := guardVector(dstOrig, dstGdVal, dgLn)
+			x, y := xg[xgLn:len(xg)-xgLn], yg[ygLn:len(yg)-ygLn]
+			dst := dstg[dgLn : len(dstg)-dgLn]
+
+			AxpyUnitaryToAVX(dst, test.alpha, x, y)
+			for i := range test.want {
+				if !same(dst[i], test.want[i]) {
+					t.Errorf(msgVal, prefix, i, dst[i], test.want[i])
+				}
+			}
+			if !isValidGuard(xg, xGdVal, xgLn) {
+				t.Errorf(msgGuard, prefix, "x", xg[:xgLn], xg[len(xg)-xgLn:])
+			}
+			if !isValidGuard(yg, yGdVal, ygLn) {
+				t.Errorf(msgGuard, prefix, "y", yg[:ygLn], yg[len(yg)-ygLn:])
+			}
+			if !isValidGuard(dstg, dstGdVal, dgLn) {
+				t.Errorf(msgGuard, prefix, "dst", dstg[:dgLn], dstg[len(dstg)-dgLn:])
+			}
+			if !equalStrided(test.x, x, 1) {
+				t.Errorf("%v: modified read-only x argument", prefix)
+			}
+			if !equalStrided(test.y, y, 1) {
+				t.Errorf("%v: modified read-only y argument", prefix)
+			}
+		}
+	}
+}
+
 func TestAxpyInc(t *testing.T) {
 	const xGdVal, yGdVal = -1, 0.5
 	gdLn := 4

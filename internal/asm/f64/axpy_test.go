@@ -274,6 +274,48 @@ func TestAxpyInc(t *testing.T) {
 	}
 }
 
+func TestAxpyIncAVX(t *testing.T) {
+	const xGdVal, yGdVal = -1, 0.5
+	gdLn := 4
+	for i, test := range axpyTests {
+		n := len(test.x)
+		for _, inc := range newIncSet(-7, -4, -3, -2, -1, 1, 2, 3, 4, 7) {
+			var ix, iy int
+			if inc.x < 0 {
+				ix = (-n + 1) * inc.x
+			}
+			if inc.y < 0 {
+				iy = (-n + 1) * inc.y
+			}
+			prefix := fmt.Sprintf("test %v, inc.x = %v, inc.y = %v", i, inc.x, inc.y)
+			xg := guardIncVector(test.x, xGdVal, inc.x, gdLn)
+			yg := guardIncVector(test.y, yGdVal, inc.y, gdLn)
+			x, y := xg[gdLn:len(xg)-gdLn], yg[gdLn:len(yg)-gdLn]
+
+			AxpyIncAVX(test.alpha, x, y, uintptr(n),
+				uintptr(inc.x), uintptr(inc.y), uintptr(ix), uintptr(iy))
+
+			want := test.want
+			if inc.x*inc.y < 0 {
+				want = test.wantRev
+			}
+			if inc.y < 0 {
+				inc.y = -inc.y
+			}
+			for i := range want {
+				if !same(y[i*inc.y], want[i]) {
+					t.Errorf(msgVal, prefix, i, y[iy+i*inc.y], want[i])
+				}
+			}
+			if !equalStrided(test.x, x, inc.x) {
+				t.Errorf("%v: modified read-only x argument", prefix)
+			}
+			checkValidIncGuard(t, xg, xGdVal, inc.x, gdLn)
+			checkValidIncGuard(t, yg, yGdVal, inc.y, gdLn)
+		}
+	}
+}
+
 func TestAxpyIncTo(t *testing.T) {
 	const dstGdVal, xGdVal, yGdVal = 1, -1, 0.5
 	var want []float64

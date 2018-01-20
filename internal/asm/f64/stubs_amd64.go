@@ -56,6 +56,8 @@ func AxpyUnitaryToAVX(dst []float64, alpha float64, x, y []float64)
 //  }
 func AxpyInc(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 
+func AxpyIncAVX(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
+
 // AxpyIncTo is
 //  for i := 0; i < int(n); i++ {
 //  	dst[idst] = alpha*x[ix] + y[iy]

@@ -289,16 +289,18 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 	return nil
 }
 
-/*
 // Multigraph generators.
 
-type EdgeAdder interface {
-	AddEdge(graph.Edge)
-}
-
-func PreferentialAttachment(dst EdgeAdder, n, d int, src *rand.Rand) {
+// PowerLaw constructs a power-law degree graph by preferential attachment in dst
+// with n nodes and minimum degree d. PowerLaw does not consider nodes in dst prior
+// to the call. PowerLaw does not consider nodes in dst prior to the call.
+// If src is not nil it is used as the random source, otherwise rand.Intn is used.
+// The graph is constructed in O(nd) — O(n+m) — time.
+//
+// The algorithm used is described in http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf
+func PowerLaw(dst graph.MultigraphBuilder, n, d int, src *rand.Rand) error {
 	if d < 1 {
-		panic("gen: bad d")
+		return fmt.Errorf("gen: bad minimum degree: d=%d", d)
 	}
 	var rnd func(int) int
 	if src == nil {
@@ -307,21 +309,33 @@ func PreferentialAttachment(dst EdgeAdder, n, d int, src *rand.Rand) {
 		rnd = src.Intn
 	}
 
-	m := make([]simple.Node, 2*n*d)
+	m := make([]graph.Node, 2*n*d)
 	for v := 0; v < n; v++ {
+		x := dst.NewNode()
+		dst.AddNode(x)
+
 		for i := 0; i < d; i++ {
-			m[2*(v*d+i)] = simple.Node(v)
-			m[2*(v*d+i)+1] = simple.Node(m[rnd(2*v*d+i+1)])
+			m[2*(v*d+i)] = x
+			m[2*(v*d+i)+1] = m[rnd(2*v*d+i+1)]
 		}
 	}
 	for i := 0; i < n*d; i++ {
-		dst.AddEdge(simple.Edge{F: m[2*i], T: m[2*i+1], W: 1})
+		dst.SetLine(dst.NewLine(m[2*i], m[2*i+1]))
 	}
+
+	return nil
 }
 
-func BipartitePreferentialAttachment(dst EdgeAdder, n, d int, src *rand.Rand) {
+// BipartitePowerLaw constructs a bipartite power-law degree graph by preferential attachment
+// in dst with 2×n nodes and minimum degree d. BipartitePowerLaw does not consider nodes in
+// dst prior to the call. The two partitions are returned in p1 and p2. If src is not nil it is
+// used as the random source, otherwise rand.Intn is used.
+// The graph is constructed in O(nd) — O(n+m) — time.
+//
+// The algorithm used is described in http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf
+func BipartitePowerLaw(dst graph.MultigraphBuilder, n, d int, src *rand.Rand) (p1, p2 []graph.Node, err error) {
 	if d < 1 {
-		panic("gen: bad d")
+		return nil, nil, fmt.Errorf("gen: bad minimum degree: d=%d", d)
 	}
 	var rnd func(int) int
 	if src == nil {
@@ -330,12 +344,19 @@ func BipartitePreferentialAttachment(dst EdgeAdder, n, d int, src *rand.Rand) {
 		rnd = src.Intn
 	}
 
-	m1 := make([]simple.Node, 2*n*d)
-	m2 := make([]simple.Node, 2*n*d)
+	p := make([]graph.Node, 2*n)
+	for i := range p {
+		u := dst.NewNode()
+		dst.AddNode(u)
+		p[i] = u
+	}
+
+	m1 := make([]graph.Node, 2*n*d)
+	m2 := make([]graph.Node, 2*n*d)
 	for v := 0; v < n; v++ {
 		for i := 0; i < d; i++ {
-			m1[2*(v*d+i)] = simple.Node(v)
-			m2[2*(v*d+i)] = simple.Node(n + v)
+			m1[2*(v*d+i)] = p[v]
+			m2[2*(v*d+i)] = p[n+v]
 
 			if r := rnd(2*v*d + i + 1); r&0x1 == 0 {
 				m1[2*(v*d+i)+1] = m2[r]
@@ -351,8 +372,8 @@ func BipartitePreferentialAttachment(dst EdgeAdder, n, d int, src *rand.Rand) {
 		}
 	}
 	for i := 0; i < n*d; i++ {
-		dst.AddEdge(simple.Edge{F: m1[2*i], T: m1[2*i+1], W: 1})
-		dst.AddEdge(simple.Edge{F: m2[2*i], T: m2[2*i+1], W: 1})
+		dst.SetLine(dst.NewLine(m1[2*i], m1[2*i+1]))
+		dst.SetLine(dst.NewLine(m2[2*i], m2[2*i+1]))
 	}
+	return p[:n], p[n:], nil
 }
-*/

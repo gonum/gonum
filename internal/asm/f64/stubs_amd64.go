@@ -67,6 +67,8 @@ func AxpyIncAVX(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 //  }
 func AxpyIncTo(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 
+func AxpyIncToAVX(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
+
 // CumSum is
 //  if len(s) == 0 {
 //  	return dst

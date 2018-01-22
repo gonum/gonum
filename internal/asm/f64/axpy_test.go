@@ -374,3 +374,62 @@ func TestAxpyIncTo(t *testing.T) {
 		}
 	}
 }
+
+func TestAxpyIncToAVX(t *testing.T) {
+	const dstGdVal, xGdVal, yGdVal = 1, -1, 0.5
+	var want []float64
+	gdLn := 4
+	for i, test := range axpyTests {
+		n := len(test.x)
+		for _, inc := range newIncToSet(-7, -4, -3, -2, -1, 1, 2, 3, 4, 7) {
+			var ix, iy, idst uintptr
+			if inc.x < 0 {
+				ix = uintptr((-n + 1) * inc.x)
+			}
+			if inc.y < 0 {
+				iy = uintptr((-n + 1) * inc.y)
+			}
+			if inc.dst < 0 {
+				idst = uintptr((-n + 1) * inc.dst)
+			}
+
+			prefix := fmt.Sprintf("Test %v: (x: %v, y: %v, dst:%v)", i, inc.x, inc.y, inc.dst)
+			dstOrig := make([]float64, len(test.want))
+			xg := guardIncVector(test.x, xGdVal, inc.x, gdLn)
+			yg := guardIncVector(test.y, yGdVal, inc.y, gdLn)
+			dstg := guardIncVector(dstOrig, dstGdVal, inc.dst, gdLn)
+			x, y := xg[gdLn:len(xg)-gdLn], yg[gdLn:len(yg)-gdLn]
+			dst := dstg[gdLn : len(dstg)-gdLn]
+
+			AxpyIncToAVX(dst, uintptr(inc.dst), idst,
+				test.alpha, x, y, uintptr(n),
+				uintptr(inc.x), uintptr(inc.y), ix, iy)
+			want = test.want
+			if inc.x*inc.y < 0 {
+				want = test.wantRev
+			}
+			var iW, incW int = 0, 1
+			if inc.y*inc.dst < 0 {
+				iW, incW = len(want)-1, -1
+			}
+			if inc.dst < 0 {
+				inc.dst = -inc.dst
+			}
+			for i := range want {
+				if !same(dst[i*inc.dst], want[iW+i*incW]) {
+					t.Errorf(msgVal, prefix, i, dst[i*inc.dst], want[iW+i*incW])
+				}
+			}
+
+			checkValidIncGuard(t, xg, xGdVal, inc.x, gdLn)
+			checkValidIncGuard(t, yg, yGdVal, inc.y, gdLn)
+			checkValidIncGuard(t, dstg, dstGdVal, inc.dst, gdLn)
+			if !equalStrided(test.x, x, inc.x) {
+				t.Errorf("%v: modified read-only x argument", prefix)
+			}
+			if !equalStrided(test.y, y, inc.y) {
+				t.Errorf("%v: modified read-only y argument", prefix)
+			}
+		}
+	}
+}

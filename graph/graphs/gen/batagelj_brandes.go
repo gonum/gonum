@@ -293,8 +293,8 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 
 // PowerLaw constructs a power-law degree graph by preferential attachment in dst
 // with n nodes and minimum degree d. PowerLaw does not consider nodes in dst prior
-// to the call. PowerLaw does not consider nodes in dst prior to the call.
-// If src is not nil it is used as the random source, otherwise rand.Intn is used.
+// to the call. If src is not nil it is used as the random source, otherwise rand.Intn
+// is used.
 // The graph is constructed in O(nd) — O(n+m) — time.
 //
 // The algorithm used is described in http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf

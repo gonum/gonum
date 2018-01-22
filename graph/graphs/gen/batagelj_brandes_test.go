@@ -183,22 +183,21 @@ func TestPowerLawUndirected(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, d=%d: %v", n, d, err)
 			}
+
 			nodes := g.Nodes()
 			if len(nodes) != n {
 				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
 			}
-			var minDegree int
+
 			for _, u := range nodes {
 				var lines int
 				for _, v := range g.From(u) {
 					lines += len(g.Lines(u, v))
 				}
-				if lines > minDegree {
-					minDegree = lines
+				if lines < d {
+					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
+					break
 				}
-			}
-			if minDegree < d {
-				t.Errorf("unexpected minimum degree: n=%d, d=%d: got:%d", n, d, minDegree)
 			}
 		}
 	}
@@ -212,22 +211,21 @@ func TestPowerLawDirected(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, d=%d: %v", n, d, err)
 			}
+
 			nodes := g.Nodes()
 			if len(nodes) != n {
 				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
 			}
-			var minDegree int
+
 			for _, u := range nodes {
 				var lines int
 				for _, v := range g.From(u) {
 					lines += len(g.Lines(u, v))
 				}
-				if lines > minDegree {
-					minDegree = lines
+				if lines < d {
+					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
+					break
 				}
-			}
-			if minDegree < d {
-				t.Errorf("unexpected minimum degree: n=%d, d=%d: got:%d", n, d, minDegree)
 			}
 		}
 	}
@@ -241,6 +239,7 @@ func TestBipartitePowerLawUndirected(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, d=%d: %v", n, d, err)
 			}
+
 			nodes := g.Nodes()
 			if len(nodes) != 2*n {
 				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
@@ -265,18 +264,15 @@ func TestBipartitePowerLawUndirected(t *testing.T) {
 				t.Errorf("unexpected overlap in partitian membership: n=%d, d=%d: got:%d", n, d, len(o))
 			}
 
-			var minDegree int
 			for _, u := range nodes {
 				var lines int
 				for _, v := range g.From(u) {
 					lines += len(g.Lines(u, v))
 				}
-				if lines > minDegree {
-					minDegree = lines
+				if lines < d {
+					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
+					break
 				}
-			}
-			if minDegree < d {
-				t.Errorf("unexpected minimum degree: n=%d, d=%d: got:%d", n, d, minDegree)
 			}
 		}
 	}
@@ -290,6 +286,7 @@ func TestBipartitePowerLawDirected(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: n=%d, d=%d: %v", n, d, err)
 			}
+
 			nodes := g.Nodes()
 			if len(nodes) != 2*n {
 				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
@@ -314,18 +311,15 @@ func TestBipartitePowerLawDirected(t *testing.T) {
 				t.Errorf("unexpected overlap in partitian membership: n=%d, d=%d: got:%d", n, d, len(o))
 			}
 
-			var minDegree int
 			for _, u := range nodes {
 				var lines int
 				for _, v := range g.From(u) {
 					lines += len(g.Lines(u, v))
 				}
-				if lines > minDegree {
-					minDegree = lines
+				if lines < d {
+					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
+					break
 				}
-			}
-			if minDegree < d {
-				t.Errorf("unexpected minimum degree: n=%d, d=%d: got:%d", n, d, minDegree)
 			}
 		}
 	}

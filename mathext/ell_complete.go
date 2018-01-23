@@ -8,13 +8,17 @@ import (
 	"math"
 )
 
-// CompleteK computes the complete elliptic integral of the 1st kind, 0≤m≤1.
-// It returns math.NaN() if m is not in [0,1].
+// CompleteK computes the complete elliptic integral of the 1st kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//	K(m) = \int_{0}^{\pi/2} 1 / {\sqrt{1-m{\sin^2\theta}}} d\theta
-//
-// See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
+//  K(m) = \int_{0}^{π/2} 1/{\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteK(m float64) float64 {
+	// Reference:
+	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals
+	// by piecewise minimax rational function approximation,
+	// Journal of Computational and Applied Mathematics, Volume 282, 2015, Pages 71-76.
+	// https://doi.org/10.1016/j.cam.2014.12.038
+	// Original Fortran code available at:
+	// https://www.researchgate.net/publication/295857819_xceitxt_F90_package_of_complete_elliptic_integral_computation
 	if m < 0 || 1 < m || math.IsNaN(m) {
 		return math.NaN()
 	}
@@ -85,13 +89,17 @@ func CompleteK(m float64) float64 {
 	return math.Inf(1)
 }
 
-// CompleteE computes the complete elliptic integral of the 2nd kind, 0≤m≤1.
-// It returns math.NaN() if m is not in [0,1].
+// CompleteE computes the complete elliptic integral of the 2nd kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//	E(m) = \int_{0}^{\pi/2} {\sqrt{1-m{\sin^2\theta}}} d\theta
-//
-// See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
+//  E(m) = \int_{0}^{π/2} {\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteE(m float64) float64 {
+	// Reference:
+	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals
+	// by piecewise minimax rational function approximation,
+	// Journal of Computational and Applied Mathematics, Volume 282, 2015, Pages 71-76.
+	// https://doi.org/10.1016/j.cam.2014.12.038
+	// Original Fortran code available at:
+	// https://www.researchgate.net/publication/295857819_xceitxt_F90_package_of_complete_elliptic_integral_computation
 	if m < 0 || 1 < m || math.IsNaN(m) {
 		return math.NaN()
 	}
@@ -156,13 +164,17 @@ func CompleteE(m float64) float64 {
 	return 1
 }
 
-// CompleteB computes an associate complete elliptic integral of the 2nd kind, 0≤m≤1.
-// It returns math.NaN() if m is not in [0,1].
+// CompleteB computes an associate complete elliptic integral of the 2nd kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//	B(m) = \int_{0}^{\pi/2} {\cos^2\theta} / {\sqrt{1-m{\sin^2\theta}}} d\theta
-//
-// See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
+//  B(m) = \int_{0}^{π/2} {\cos^2θ} / {\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteB(m float64) float64 {
+	// Reference:
+	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals
+	// by piecewise minimax rational function approximation,
+	// Journal of Computational and Applied Mathematics, Volume 282, 2015, Pages 71-76.
+	// https://doi.org/10.1016/j.cam.2014.12.038
+	// Original Fortran code available at:
+	// https://www.researchgate.net/publication/295857819_xceitxt_F90_package_of_complete_elliptic_integral_computation
 	if m < 0 || 1 < m || math.IsNaN(m) {
 		return math.NaN()
 	}
@@ -235,13 +247,17 @@ func CompleteB(m float64) float64 {
 	return 1
 }
 
-// CompleteD computes an associate complete elliptic integral of the 2nd kind, 0≤m≤1.
-// It returns math.NaN() if m is not in [0,1].
+// CompleteD computes an associate complete elliptic integral of the 2nd kind, 0≤m≤1. It returns math.NaN() if m is not in [0,1].
 //
-//	D(m) = \int_{0}^{\pi/2} {\sin^2\theta} / {\sqrt{1-m{\sin^2\theta}}} d\theta
-//
-// See: http://dx.doi.org/10.1016/j.cam.2014.12.038 for the computation method.
+//  D(m) = \int_{0}^{π/2} {\sin^2θ} / {\sqrt{1-m{\sin^2θ}}} dθ
 func CompleteD(m float64) float64 {
+	// Reference:
+	// Toshio Fukushima, Precise and fast computation of complete elliptic integrals
+	// by piecewise minimax rational function approximation,
+	// Journal of Computational and Applied Mathematics, Volume 282, 2015, Pages 71-76.
+	// https://doi.org/10.1016/j.cam.2014.12.038
+	// Original Fortran code available at:
+	// https://www.researchgate.net/publication/295857819_xceitxt_F90_package_of_complete_elliptic_integral_computation
 	if m < 0 || 1 < m || math.IsNaN(m) {
 		return math.NaN()
 	}

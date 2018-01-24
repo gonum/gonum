@@ -6,7 +6,6 @@ package optimize
 
 import (
 	"math"
-	"sync"
 	"time"
 )
 
@@ -215,18 +214,12 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 		finalStatus Status
 		finalError  error
 	)
-	type final struct {
-		Status Status
-		Err    error
-	}
 
 	operations := make(chan GlobalTask, nTasks) // GlobalMethod sends tasks.
 	results := make(chan GlobalTask, nTasks)    // return results to GlobalMethod.
 	workerChan := make(chan GlobalTask)         // Delegate tasks to the workers.
 	evalStatsChan := make(chan GlobalTask)      // Send evaluation updates.
-	statusChan := make(chan final)              // Send a termination status.
 	statusSent := make(chan struct{})           // Communicate the optimization is done.
-	var statWG sync.WaitGroup                   // All stats are updated.
 
 	// Launch the method.
 	go func() {
@@ -249,77 +242,6 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 			evalStatsChan <- GlobalTask{Operation: signalOperation}
 		}()
 	}
-
-	// Launch the stats combiner.
-	statWG.Add(1)
-	go func() {
-		defer statWG.Done()
-		var workerDone int // effective wg for the workers
-		var status Status
-		var err error
-		for task := range evalStatsChan {
-			switch task.Operation {
-			default:
-				updateEvaluationStats(stats, task.Operation)
-				status, err = checkEvaluationLimits(prob, stats, settings)
-			case signalOperation:
-				workerDone++
-				if workerDone == nTasks {
-					close(results)
-				}
-				continue
-			case NoOperation:
-				// Just send the task back.
-			case MajorIteration:
-				status = performMajorIteration(optLoc, task.Location, stats, startTime, settings)
-			case MethodDone:
-				statuser, ok := method.(Statuser)
-				if !ok {
-					panic("optimize: global method returned MethodDone is not a Statuser")
-				}
-				status, err = statuser.Status()
-				if status == NotTerminated {
-					panic("optimize: global method returned MethodDone but a NotTerminated status")
-				}
-			}
-			if settings.Recorder != nil && status == NotTerminated && err == nil {
-				stats.Runtime = time.Since(startTime)
-				// Allow err to be overloaded if the Recorder fails.
-				err = settings.Recorder.Record(task.Location, task.Operation, stats)
-				if err != nil {
-					status = Failure
-				}
-			}
-			// If the optimization should be over, send the signal.
-			if status != NotTerminated || err != nil {
-				f := final{
-					Status: status,
-					Err:    err,
-				}
-				// Two cases: 1) A NotTerminated status has already been sent on
-				// statusChan, and so we can send the first here. 2) A NotTerminated
-				// status has already been sent. This means statusSent is closed
-				// and can be received from.
-				select {
-				case <-statusSent:
-				case statusChan <- f:
-					// Tell the distributor to quit, and send a PostIteration
-					close(statusSent)
-					results <- GlobalTask{
-						Operation: PostIteration,
-					}
-				}
-			}
-
-			// If there are still workers remaining, send the result back.
-			// Don't send MethodDone back.
-			if task.Operation != MethodDone {
-				if workerDone != nTasks {
-					results <- task
-				}
-			}
-		}
-	}()
 
 	// Launch the distributor
 	go func() {
@@ -354,11 +276,70 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 		}
 	}()
 
-	// Wait until a termination is sent.
-	f := <-statusChan
-	finalStatus = f.Status
-	finalError = f.Err
-	// Wait for all the stats to be updated.
-	statWG.Wait()
+	// Launch the stats combiner.
+	var workerDone int // effective wg for the workers
+	var status Status
+	var err error
+	for task := range evalStatsChan {
+		switch task.Operation {
+		default:
+			updateEvaluationStats(stats, task.Operation)
+			status, err = checkEvaluationLimits(prob, stats, settings)
+		case signalOperation:
+			workerDone++
+			if workerDone == nTasks {
+				close(results)
+			}
+			continue
+		case NoOperation:
+			// Just send the task back.
+		case MajorIteration:
+			status = performMajorIteration(optLoc, task.Location, stats, startTime, settings)
+		case MethodDone:
+			statuser, ok := method.(Statuser)
+			if !ok {
+				panic("optimize: global method returned MethodDone is not a Statuser")
+			}
+			status, err = statuser.Status()
+			if status == NotTerminated {
+				panic("optimize: global method returned MethodDone but a NotTerminated status")
+			}
+		}
+		if settings.Recorder != nil && status == NotTerminated && err == nil {
+			stats.Runtime = time.Since(startTime)
+			// Allow err to be overloaded if the Recorder fails.
+			err = settings.Recorder.Record(task.Location, task.Operation, stats)
+			if err != nil {
+				status = Failure
+			}
+		}
+		// If the optimization should be over, send the signal.
+		if status != NotTerminated || err != nil {
+			// Two cases: 1) A NotTerminated status has already been sent on
+			// statusChan, and so we can send the first here. 2) A NotTerminated
+			// status has already been sent. This means statusSent is closed
+			// and can be received from.
+			select {
+			case <-statusSent:
+			default:
+				finalStatus = status
+				finalError = err
+				// Tell the distributor to quit, and send a PostIteration
+				close(statusSent)
+				results <- GlobalTask{
+					Operation: PostIteration,
+				}
+			}
+		}
+
+		// If there are still workers remaining, send the result back.
+		// Don't send MethodDone back.
+		if task.Operation != MethodDone {
+			if workerDone != nTasks {
+				results <- task
+			}
+		}
+	}
+
 	return finalStatus, finalError
 }

@@ -43,7 +43,7 @@ func DlarfgTest(t *testing.T, impl Dlarfger) {
 		},
 		{
 			alpha: 1,
-			n:     2,
+			n:     4,
 			x:     []float64{4, 5, 6},
 		},
 	} {
@@ -56,6 +56,9 @@ func DlarfgTest(t *testing.T, impl Dlarfger) {
 				x[i] = rnd.Float64()
 			}
 		} else {
+			if len(test.x) != n-1 {
+				panic("bad test")
+			}
 			x = make([]float64, n-1)
 			copy(x, test.x)
 		}

@@ -227,7 +227,6 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 	statusChan := make(chan final)              // Send a termination status.
 	statusSent := make(chan struct{})           // Communicate the optimization is done.
 	var statWG sync.WaitGroup                   // All stats are updated.
-	var distWG sync.WaitGroup                   // Distributor has successfully terminated.
 
 	// Launch the method.
 	go func() {
@@ -236,32 +235,6 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 			tasks[i].Location = newLocation(dim, method)
 		}
 		method.RunGlobal(operations, results, tasks)
-	}()
-
-	// Launch the distributor
-	distWG.Add(1)
-	go func() {
-		defer distWG.Done()
-		// Note: This cannot be a range loop over operations because we want to
-		// still send to operation even after a termination Status has been sent.
-	Outer:
-		for {
-			select {
-			case <-statusSent:
-				break Outer
-			case task := <-operations: // Delegate the Operation.
-				switch task.Operation {
-				case InitIteration:
-					panic("optimize: GlobalMethod returned InitIteration")
-				case PostIteration:
-					panic("optimize: GlobalMethod returned PostIteration")
-				case NoOperation, MajorIteration, MethodDone:
-					evalStatsChan <- task
-				default: // Any of the Evaluation operations.
-					workerChan <- task
-				}
-			}
-		}
 	}()
 
 	// Launch the workers. After workerChan is closed, each worker signals
@@ -348,23 +321,44 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 		}
 	}()
 
+	// Launch the distributor
+	go func() {
+		// Note: This cannot simply be a range loop over operations because we want to
+		// still send to operation even after a termination Status has been sent.
+		for {
+			select {
+			case <-statusSent:
+				close(workerChan)
+				// Read the final operations, only performing an action if MajorIteration.
+				for task := range operations {
+					switch task.Operation {
+					case MajorIteration:
+						evalStatsChan <- task
+					}
+				}
+				// All stats have been sent. Close the channel and wait until all are updated.
+				close(evalStatsChan)
+				return
+			case task := <-operations: // Delegate the Operation.
+				switch task.Operation {
+				case InitIteration:
+					panic("optimize: GlobalMethod returned InitIteration")
+				case PostIteration:
+					panic("optimize: GlobalMethod returned PostIteration")
+				case NoOperation, MajorIteration, MethodDone:
+					evalStatsChan <- task
+				default: // Any of the Evaluation operations.
+					workerChan <- task
+				}
+			}
+		}
+	}()
+
 	// Wait until a termination is sent.
 	f := <-statusChan
 	finalStatus = f.Status
 	finalError = f.Err
-
-	// Sending the status triggered the distributor to quit. Wait until it does.
-	distWG.Wait()
-	close(workerChan)
-	// Read the final operations, only performing an action if MajorIteration.
-	for task := range operations {
-		switch task.Operation {
-		case MajorIteration:
-			evalStatsChan <- task
-		}
-	}
-	// All stats have been sent. Close the channel and wait until all are updated.
-	close(evalStatsChan)
+	// Wait for all the stats to be updated.
 	statWG.Wait()
 	return finalStatus, finalError
 }

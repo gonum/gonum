@@ -319,7 +319,6 @@ Outer:
 			cma.sendInitTasks(tasks)
 			cma.taskIdx = len(tasks)
 		case FuncEvaluation:
-			// fmt.Println("fun received", cma.taskIdx, cma.receivedIdx)
 			cma.receivedIdx++
 			cma.fs[task.Index] = task.F
 			switch {

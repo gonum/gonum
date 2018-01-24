@@ -46,6 +46,16 @@ func DlarfgTest(t *testing.T, impl Dlarfger) {
 			n:     4,
 			x:     []float64{4, 5, 6},
 		},
+		{
+			alpha: 1,
+			n:     4,
+			x:     []float64{0, 0, 0},
+		},
+		{
+			alpha: dlamchS,
+			n:     4,
+			x:     []float64{dlamchS, dlamchS, dlamchS},
+		},
 	} {
 		n := test.n
 		incX := 1

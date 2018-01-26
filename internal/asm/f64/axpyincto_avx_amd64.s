@@ -40,6 +40,8 @@
 
 #define X_PTR SI
 #define Y_PTR DI
+#define X_PTR_INC4 R11
+#define Y_PTR_INC4 R12
 #define DST_PTR DX
 #define IDX AX
 #define LEN CX
@@ -52,6 +54,10 @@
 #define INCx3_DST R13
 #define ALPHA X0
 #define ALPHA_Y Y0
+#define X_IDX Y1
+#define X_IDX2 X1
+#define Y_IDX Y2
+#define Y_IDX2 X2
 
 // func AxpyIncToAVX(dst []float64, incDst, idst uintptr, alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyIncToAVX(SB), NOSPLIT, $0
@@ -84,6 +90,12 @@ TEXT ·AxpyIncToAVX(SB), NOSPLIT, $0
 	LEAQ (INC_X)(INC_X*2), INCx3_X       // INCx3_X = INC_X * 3
 	LEAQ (INC_Y)(INC_Y*2), INCx3_Y       // INCx3_Y = INC_Y * 3
 	LEAQ (INC_DST)(INC_DST*2), INCx3_DST // INCx3_DST = INC_DST * 3
+
+	CMPQ INC_DST, $8
+	JNE  loop
+	CMPQ LEN, $0
+	JLE  loop
+	JMP  axpy_gather
 
 loop:  // do {  // y[i] += alpha * x[i] unrolled 2x.
 	VMOVSD (X_PTR), X2            // X_i = x[i]
@@ -133,4 +145,98 @@ tail_one:
 	VMOVSD      X2, (DST_PTR)      // dst[i] = X2
 
 end:
+	RET
+
+axpy_gather:
+	XORQ         IDX, IDX             // IDX = 0
+	VPXOR        X1, X1, X1           // X1 = { 0, 0 }
+	VPXOR        X2, X2, X2           // X2 = { 0, 0 }
+	VMOVQ        INC_X, X1            // X1 = { INC_X, 0 }
+	VMOVQ        INC_Y, X2            // X2 = { INC_Y, 0 }
+	VMOVQ        INCx3_X, X3          // X3 = { 3 * INC_X, 0 }
+	VMOVQ        INCx3_Y, X4          // X4 = { 3 * INC_Y, 0 }
+	VPADDQ       X1, X1, X5           // X5 = 2 * INC_X
+	VPADDQ       X2, X2, X6           // X7 = 2 * INC_Y
+	VSHUFPD      $1, X1, X1, X1       // X1 = { 0, INC_X }
+	VSHUFPD      $1, X2, X2, X2       // X2 = { 0, INC_Y }
+	VSHUFPD      $0, X3, X5, X3       // X3 = { 2 * INC_X, 3 * INC_X }
+	VSHUFPD      $0, X4, X6, X4       // X4 = { 2 * INC_Y, 3 * INC_Y }
+	VINSERTI128  $1, X3, X_IDX, X_IDX // X_IDX = { 0, INC_X, 2 * INC_X, 3 * INC_X }
+	VINSERTI128  $1, X4, Y_IDX, Y_IDX // Y_IDX = { 0, INC_X, 2 * INC_X, 3 * INC_X }
+	VPCMPEQD     Y12, Y12, Y12        // set mask register to all 1's
+	VBROADCASTSD ALPHA, ALPHA_Y       // ALPHA_Y = { alpha, alpha, alpha, alpha }
+
+	SHRQ $1, LEN                      // LEN = floor( n / 4 )
+	JZ   g_tail4
+	LEAQ (X_PTR)(INC_X*4), X_PTR_INC4
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR_INC4
+
+g_loop:
+	VMOVUPS    Y12, Y10
+	VMOVUPS    Y12, Y9
+	VMOVUPS    Y12, Y8
+	VMOVUPS    Y12, Y7
+	VGATHERQPD Y10, (X_PTR)(X_IDX * 1), Y3     // Y_i = X[IDX:IDX+3]
+	VGATHERQPD Y9, (X_PTR_INC4)(X_IDX * 1), Y4
+	VGATHERQPD Y8, (Y_PTR)(Y_IDX * 1), Y5      // Y_i = X[IDX:IDX+3]
+	VGATHERQPD Y7, (Y_PTR_INC4)(Y_IDX * 1), Y6
+
+	VFMADD213PD Y5, ALPHA_Y, Y3        // Y_i = Y_i * a + y[i]
+	VFMADD213PD Y6, ALPHA_Y, Y4
+	VMOVUPS     Y3, (DST_PTR)(IDX*8)   // y[i] = Y_i
+	VMOVUPS     Y4, 32(DST_PTR)(IDX*8)
+
+	LEAQ (X_PTR)(INC_X*8), X_PTR           // X_PTR = &(X_PTR[incX*8])
+	LEAQ (Y_PTR)(INC_Y*8), Y_PTR           // Y_PTR = &(Y_PTR[incY*8])
+	LEAQ (X_PTR_INC4)(INC_X*8), X_PTR_INC4
+	LEAQ (Y_PTR_INC4)(INC_Y*8), Y_PTR_INC4
+	ADDQ $8, IDX                           // i += 8
+	DECQ LEN
+	JNZ  g_loop
+
+	ANDQ $7, TAIL // if TAIL & 7 == 0 { return }
+	JE   g_end
+
+g_tail4:
+	TESTQ $4, TAIL
+	JZ    g_tail2
+
+	VMOVUPS    Y12, Y10
+	VMOVUPS    Y12, Y8
+	VGATHERQPD Y10, (X_PTR)(X_IDX * 1), Y3 // Y_i = X[IDX:IDX+3]
+	VGATHERQPD Y8, (Y_PTR)(Y_IDX * 1), Y5  // Y_i = X[IDX:IDX+3]
+
+	VFMADD213PD Y5, ALPHA_Y, Y3      // Y_i = Y_i * a + y[i]
+	VMOVUPS     Y3, (DST_PTR)(IDX*8) // y[i] = Y_i
+
+	LEAQ (X_PTR)(INC_X*4), X_PTR // X_PTR = &(X_PTR[incX*4])
+	LEAQ (Y_PTR)(INC_Y*4), Y_PTR // Y_PTR = &(Y_PTR[incY*4])
+	ADDQ $4, IDX                 // i += 4
+
+g_tail2:
+	TESTQ $2, TAIL
+	JZ    g_tail1
+
+	VMOVUPS    X12, X10
+	VMOVUPS    X12, X8
+	VGATHERQPD X10, (X_PTR)(X_IDX2 * 1), X3 // X_i = X[IDX:IDX+1]
+	VGATHERQPD X8, (Y_PTR)(Y_IDX2 * 1), X5  // X_i = X[IDX:IDX+1]
+
+	VFMADD213PD X5, ALPHA, X3        // X_i = X_i * a + x[i]
+	VMOVUPS     X3, (DST_PTR)(IDX*8) // x[i] = X_i
+
+	LEAQ (X_PTR)(INC_X*2), X_PTR // X_PTR = &(X_PTR[incX*2])
+	LEAQ (Y_PTR)(INC_Y*2), Y_PTR // Y_PTR = &(Y_PTR[incY*2])
+	ADDQ $2, IDX                 // i += 2
+
+g_tail1:
+	TESTQ $1, TAIL
+	JZ    g_end
+
+	VMOVSD      (X_PTR), X2
+	VFMADD213SD (Y_PTR), ALPHA, X2
+	VMOVSD      X2, (DST_PTR)(IDX*8)
+
+g_end:
+	VZEROALL
 	RET

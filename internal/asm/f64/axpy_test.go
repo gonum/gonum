@@ -16,84 +16,84 @@ var axpyTests = []struct {
 	want    []float64
 	wantRev []float64 // Result when x is traversed in reverse direction.
 }{
-	{
+	{ // 0
 		alpha:   0,
 		x:       []float64{},
 		y:       []float64{},
 		want:    []float64{},
 		wantRev: []float64{},
 	},
-	{
+	{ // 1
 		alpha:   0,
 		x:       []float64{2},
 		y:       []float64{-3},
 		want:    []float64{-3},
 		wantRev: []float64{-3},
 	},
-	{
+	{ // 2
 		alpha:   1,
 		x:       []float64{2},
 		y:       []float64{-3},
 		want:    []float64{-1},
 		wantRev: []float64{-1},
 	},
-	{
+	{ // 3
 		alpha:   3,
 		x:       []float64{2},
 		y:       []float64{-3},
 		want:    []float64{3},
 		wantRev: []float64{3},
 	},
-	{
+	{ // 4
 		alpha:   -3,
 		x:       []float64{2},
 		y:       []float64{-3},
 		want:    []float64{-9},
 		wantRev: []float64{-9},
 	},
-	{
+	{ // 5
 		alpha:   1,
 		x:       []float64{1, 5},
 		y:       []float64{2, -3},
 		want:    []float64{3, 2},
 		wantRev: []float64{7, -2},
 	},
-	{
+	{ // 6
 		alpha:   1,
 		x:       []float64{2, 3, 4},
 		y:       []float64{-3, -2, -1},
 		want:    []float64{-1, 1, 3},
 		wantRev: []float64{1, 1, 1},
 	},
-	{
+	{ // 7
 		alpha:   0,
 		x:       []float64{0, 0, 1, 1, 2, -3, -4},
 		y:       []float64{0, 1, 0, 3, -4, 5, -6},
 		want:    []float64{0, 1, 0, 3, -4, 5, -6},
 		wantRev: []float64{0, 1, 0, 3, -4, 5, -6},
 	},
-	{
+	{ // 8
 		alpha:   1,
 		x:       []float64{0, 0, 1, 1, 2, -3, -4},
 		y:       []float64{0, 1, 0, 3, -4, 5, -6},
 		want:    []float64{0, 1, 1, 4, -2, 2, -10},
 		wantRev: []float64{-4, -2, 2, 4, -3, 5, -6},
 	},
-	{
+	{ // 9
 		alpha:   3,
 		x:       []float64{0, 0, 1, 1, 2, -3, -4},
 		y:       []float64{0, 1, 0, 3, -4, 5, -6},
 		want:    []float64{0, 1, 3, 6, 2, -4, -18},
 		wantRev: []float64{-12, -8, 6, 6, -1, 5, -6},
 	},
-	{
+	{ // 10
 		alpha:   -3,
 		x:       []float64{0, 0, 1, 1, 2, -3, -4, 0, 0, 1, 1, 2, -3, -4},
 		y:       []float64{0, 1, 0, 3, -4, 5, -6, 0, 1, 0, 3, -4, 5, -6},
 		want:    []float64{0, 1, -3, 0, -10, 14, 6, 0, 1, -3, 0, -10, 14, 6},
 		wantRev: []float64{12, 10, -6, 0, -7, 5, -6, 12, 10, -6, 0, -7, 5, -6},
 	},
-	{
+	{ // 11
 		alpha:   -5,
 		x:       []float64{0, 0, 1, 1, 2, -3, -4, 5, 1, 2, -3, -4, 5},
 		y:       []float64{0, 1, 0, 3, -4, 5, -6, 7, 3, -4, 5, -6, 7},

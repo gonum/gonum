@@ -53,6 +53,7 @@
 #define ALPHA X0
 #define ALPHA_Y Y0
 #define G_IDX Y1
+#define G_IDX2 X1
 
 // func AxpyIncAVX(alpha float64, x, y []float64, n, incX, incY, ix, iy uintptr)
 TEXT ·AxpyIncAVX(SB), NOSPLIT, $0
@@ -82,7 +83,7 @@ TEXT ·AxpyIncAVX(SB), NOSPLIT, $0
 	LEAQ (INC_Y)(INC_Y*2), INCx3_Y // INCx3_Y = INC_Y * 3
 	CMPQ INC_Y, $1
 	JNE  loop
-	CMPQ LEN, $4
+	CMPQ LEN, $1
 	JLE  loop
 	JMP  axpy_gather
 
@@ -141,16 +142,40 @@ axpy_gather:
 	XORQ         IDX, IDX             // IDX = 0
 	VPXOR        X1, X1, X1           // X1 = { 0, 0 }
 	VMOVQ        INC_X, X1            // X1 = { 0, INC_X }
-	VMOVQ        INCx3_X, X3          // X3 = { 0, INC_X }
+	VMOVQ        INCx3_X, X3          // X3 = { 0, 3 * INC_X }
 	VPADDQ       X1, X1, X2           // X2 = 2 * INC_X
-	VPADDQ       X3, X1, X4           // X4 = 4 * INC_X
 	VSHUFPD      $1, X1, X1, X1       // X1 = { 0, INC_X }
 	VSHUFPD      $0, X3, X2, X3       // X3 = { 2 * INC_X, 3 * INC_X }
 	VINSERTI128  $1, X3, G_IDX, G_IDX // G_IDX = { 0, INC_X, 2 * INC_X, 3 * INC_X }
 	VPCMPEQD     Y10, Y10, Y10        // set mask register to all 1's
 	VBROADCASTSD ALPHA, ALPHA_Y       // ALPHA_Y = { alpha, alpha, alpha, alpha }
 
+	SHRQ $1, LEN // LEN = floor( n / 4 )
+	JZ   g_tail4
+
 g_loop:
+	VMOVUPS    Y10, Y9
+	VMOVUPS    Y10, Y8
+	VGATHERQPD Y9, (X_PTR)(G_IDX * 1), Y2 // Y_i = X[IDX:IDX+3]
+	VGATHERQPD Y8, (X_PTR)(G_IDX * 2), Y3
+
+	VFMADD213PD (Y_PTR)(IDX*8), ALPHA_Y, Y2   // Y_i = Y_i * a + y[i]
+	VFMADD213PD 32(Y_PTR)(IDX*8), ALPHA_Y, Y3
+	VMOVUPS     Y2, (DST_PTR)(IDX*8)          // y[i] = Y_i
+	VMOVUPS     Y3, 32(DST_PTR)(IDX*8)
+
+	LEAQ (X_PTR)(INC_X*8), X_PTR // X_PTR = &(X_PTR[incX*8])
+	ADDQ $8, IDX                 // i += 8
+	DECQ LEN
+	JNZ  g_loop
+
+	ANDQ $7, TAIL // if TAIL & 7 == 0 { return }
+	JE   g_end
+
+g_tail4:
+	TESTQ $4, TAIL
+	JZ    g_tail2
+
 	VMOVUPS    Y10, Y9
 	VGATHERQPD Y9, (X_PTR)(G_IDX * 1), Y2 // Y_i = X[IDX:IDX+3]
 
@@ -159,21 +184,16 @@ g_loop:
 
 	LEAQ (X_PTR)(INC_X*4), X_PTR // X_PTR = &(X_PTR[incX*4])
 	ADDQ $4, IDX                 // i += 4
-	DECQ LEN
-	JNZ  g_loop
-
-	CMPQ TAIL, $0 // if TAIL == 0 { return }
-	JE   g_end
 
 g_tail2:
 	TESTQ $2, TAIL
 	JZ    g_tail1
 
-	VMOVUPS    Y10, Y9
-	VGATHERQPD Y9, (X_PTR)(G_IDX * 1), Y2 // Y_i = X[IDX:IDX+3]
+	VMOVUPS    X10, X9
+	VGATHERQPD X9, (X_PTR)(G_IDX2 * 1), X2 // X_i = X[IDX:IDX+1]
 
-	VFMADD213PD (Y_PTR)(IDX*8), ALPHA_Y, Y2 // Y_i = Y_i * a + y[i]
-	VMOVUPS     Y2, (DST_PTR)(IDX*8)        // y[i] = Y_i
+	VFMADD213PD (Y_PTR)(IDX*8), ALPHA, X2 // Y_i = Y_i * a + y[i]
+	VMOVUPS     X2, (DST_PTR)(IDX*8)      // y[i] = Y_i
 
 	LEAQ (X_PTR)(INC_X*2), X_PTR // X_PTR = &(X_PTR[incX*4])
 	ADDQ $2, IDX                 // i += 4
@@ -182,10 +202,9 @@ g_tail1:
 	TESTQ $1, TAIL
 	JZ    g_end
 
-	VMOVUPS     X10, X9
-	VGATHERQPD  X9, (X_PTR)(X1 * 1), X2
-	VFMADD213PD (Y_PTR)(IDX*8), ALPHA, X2
-	VMOVUPS     X2, (DST_PTR)(IDX*8)
+	VMOVSD      (X_PTR), X2
+	VFMADD213SD (Y_PTR)(IDX*8), ALPHA, X2
+	VMOVSD      X2, (DST_PTR)(IDX*8)
 
 g_end:
 	RET

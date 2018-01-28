@@ -233,7 +233,6 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	cma.bestX = resize(cma.bestX, dim)
 	cma.bestF = math.Inf(1)
 
-	// New ones TODO: reorient
 	cma.taskIdx = 0
 	cma.receivedIdx = 0
 	cma.operation = nil
@@ -251,8 +250,8 @@ func (cma *CmaEsChol) sendInitTasks(tasks []GlobalTask) {
 
 // sendTask generates a sample and sends the task. It does not update the cma index.
 func (cma *CmaEsChol) sendTask(idx int, task GlobalTask) {
-	task.Index = idx
-	task.Operation = FuncEvaluation
+	task.ID = idx
+	task.Op = FuncEvaluation
 	distmv.NormalRand(cma.xs.RawRowView(idx), cma.mean, &cma.chol, cma.Src)
 	copy(task.X, cma.xs.RawRowView(idx))
 	cma.operation <- task
@@ -301,14 +300,14 @@ func (cma *CmaEsChol) findBestAndUpdateTask(task GlobalTask) GlobalTask {
 func (cma *CmaEsChol) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
 	cma.operation = operation
 	// Send the initial tasks. We know there are at most as many tasks as elements
-	// of the populaiton.
+	// of the population.
 	cma.sendInitTasks(tasks)
 	cma.taskIdx = len(tasks)
 
 Outer:
 	for {
 		task := <-result
-		switch task.Operation {
+		switch task.Op {
 		default:
 			panic("unknown operation")
 		case PostIteration:
@@ -320,7 +319,7 @@ Outer:
 			cma.taskIdx = len(tasks)
 		case FuncEvaluation:
 			cma.receivedIdx++
-			cma.fs[task.Index] = task.F
+			cma.fs[task.ID] = task.F
 			switch {
 			case cma.taskIdx < cma.pop:
 				// There are still tasks to evaluate. Send the next.
@@ -349,12 +348,12 @@ Outer:
 				switch {
 				case err != nil:
 					cma.updateErr = err
-					task.Operation = MethodDone
+					task.Op = MethodDone
 				case cma.methodConverged() != NotTerminated:
-					task.Operation = MethodDone
+					task.Op = MethodDone
 				default:
-					task.Operation = MajorIteration
-					task.Index = -1
+					task.Op = MajorIteration
+					task.ID = -1
 				}
 				operation <- task
 			}
@@ -365,10 +364,10 @@ Outer:
 	// Need to see best of our evaluated tasks so far. Should instead just
 	// collect, then see.
 	for task := range result {
-		switch task.Operation {
+		switch task.Op {
 		case MajorIteration:
 		case FuncEvaluation:
-			cma.fs[task.Index] = task.F
+			cma.fs[task.ID] = task.F
 		default:
 			panic("unknown operation")
 		}
@@ -380,8 +379,8 @@ Outer:
 		if best != -1 && cma.fs[best] < cma.bestF {
 			task := tasks[0]
 			task = cma.findBestAndUpdateTask(task)
-			task.Operation = MajorIteration
-			task.Index = -1
+			task.Op = MajorIteration
+			task.ID = -1
 			operation <- task
 		}
 	}

@@ -26,12 +26,10 @@ const (
 	// NoOperation specifies that no evaluation or convergence check should
 	// take place.
 	NoOperation Operation = 0
-	// signal is used interally to signal completion.
-	signalOperation Operation = 1 << (iota - 1)
 	// InitIteration is sent to Recorder to indicate the initial location.
 	// All fields of the location to record must be valid.
 	// Method must not return it.
-	InitIteration
+	InitIteration Operation = 1 << (iota - 1)
 	// PostIteration is sent to Recorder to indicate the final location
 	// reached during an optimization run.
 	// All fields of the location to record must be valid.
@@ -53,6 +51,8 @@ const (
 	// HessEvaluation specifies that the Hessian
 	// of the objective function should be evaluated.
 	HessEvaluation
+	// signalDone is used internally to signal completion.
+	signalDone
 
 	// Mask for the evaluating operations.
 	evalMask = FuncEvaluation | GradEvaluation | HessEvaluation
@@ -78,12 +78,12 @@ func (op Operation) String() string {
 }
 
 var operationNames = map[Operation]string{
-	NoOperation:     "NoOperation",
-	signalOperation: "signalOperation",
-	InitIteration:   "InitIteration",
-	MajorIteration:  "MajorIteration",
-	PostIteration:   "PostIteration",
-	MethodDone:      "MethodDone",
+	NoOperation:    "NoOperation",
+	InitIteration:  "InitIteration",
+	MajorIteration: "MajorIteration",
+	PostIteration:  "PostIteration",
+	MethodDone:     "MethodDone",
+	signalDone:     "signalDone",
 }
 
 // Location represents a location in the optimization procedure.

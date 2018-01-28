@@ -31,7 +31,7 @@ func (g *GuessAndCheck) InitGlobal(dim, tasks int) int {
 
 func (g *GuessAndCheck) sendNewLoc(operation chan<- GlobalTask, task GlobalTask) {
 	g.Rander.Rand(task.X)
-	task.Operation = FuncEvaluation
+	task.Op = FuncEvaluation
 	operation <- task
 }
 
@@ -44,14 +44,14 @@ func (g *GuessAndCheck) updateMajor(operation chan<- GlobalTask, task GlobalTask
 		task.F = g.bestF
 		copy(task.X, g.bestX)
 	}
-	task.Operation = MajorIteration
+	task.Op = MajorIteration
 	operation <- task
 }
 
 func (g *GuessAndCheck) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
 	// Send initial tasks to evaluate
 	for i, task := range tasks {
-		task.Index = i + 1
+		task.ID = i + 1
 		g.sendNewLoc(operation, task)
 	}
 
@@ -59,7 +59,7 @@ func (g *GuessAndCheck) RunGlobal(operation chan<- GlobalTask, result <-chan Glo
 Outer:
 	for {
 		task := <-result
-		switch task.Operation {
+		switch task.Op {
 		default:
 			panic("unknown operation")
 		case PostIteration:
@@ -73,7 +73,7 @@ Outer:
 
 	// PostIteration was sent. Update the best new values.
 	for task := range result {
-		switch task.Operation {
+		switch task.Op {
 		default:
 			panic("unknown operation")
 		case MajorIteration:

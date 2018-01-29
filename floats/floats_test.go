@@ -1130,7 +1130,7 @@ func TestSame(t *testing.T) {
 	}
 	s1 = []float64{1, 2, math.NaN(), 4}
 	s2 = []float64{1, math.NaN(), 3, 4}
-	if !Same(s1, s2) {
+	if Same(s1, s2) {
 		t.Errorf("Slices with unmatching NaN values returned as equal")
 	}
 }

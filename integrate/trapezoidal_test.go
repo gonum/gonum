@@ -11,6 +11,15 @@ import (
 	"gonum.org/v1/gonum/floats"
 )
 
+func assertPanic(t *testing.T, f func() float64, desiredPanic string) {
+	defer func() {
+		if r := recover(); r != desiredPanic {
+			t.Errorf("The code did not panic with \"%s\"", desiredPanic)
+		}
+	}()
+	f()
+}
+
 func TestTrapezoidal(t *testing.T) {
 	const N = 1e6
 	x := floats.Span(make([]float64, N), 0, 1)
@@ -78,5 +87,34 @@ func TestTrapezoidal(t *testing.T) {
 		if !floats.EqualWithinAbs(v, test.want, 1e-12) {
 			t.Errorf("test #%d: got=%v want=%v\n", i, v, test.want)
 		}
+	}
+}
+
+func TestTrapezoidalErrorHandling(t *testing.T) {
+	lengthTen := floats.Span(make([]float64, 10), -1, 1)
+	lengthOne := []float64{1.0}
+	unSorted := []float64{2.0, 1.0}
+	for _, test := range []struct {
+		x            []float64
+		y            []float64
+		desiredPanic string
+	}{
+		{
+			x:            lengthTen,
+			y:            lengthOne,
+			desiredPanic: "integrate: slice length mismatch",
+		},
+		{
+			x:            lengthOne,
+			y:            lengthOne,
+			desiredPanic: "integrate: input data too small",
+		},
+		{
+			x:            unSorted,
+			y:            unSorted,
+			desiredPanic: "integrate: input must be sorted",
+		},
+	} {
+		assertPanic(t, func() float64 { return Trapezoidal(test.x, test.y) }, test.desiredPanic)
 	}
 }

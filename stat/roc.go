@@ -108,8 +108,13 @@ func ROC(n int, y []float64, classes []bool, weights []float64) (tpr, fpr []floa
 		fpr = fpr[:(bin + 1)]
 	}
 
-	invNeg := 1 / nNeg
-	invPos := 1 / nPos
+	var invNeg, invPos float64
+	if nNeg != 0 {
+		invNeg = 1 / nNeg
+	}
+	if nPos != 0 {
+		invPos = 1 / nPos
+	}
 	for i := range tpr {
 		tpr[i] *= invPos
 		fpr[i] *= invNeg

@@ -6,7 +6,6 @@ of the problem, prefixed by the primary affected package.
 
 
 ### What did you do?
-
 <!-- Please include a link to a minimal reproducer here. -->
 
 
@@ -16,9 +15,11 @@ of the problem, prefixed by the primary affected package.
 ### What actually happened?
 
 
-### What version of Gonum are you using?
-
-<!-- If you are installing from source paste the output of `(cd $(go env GOPATH)/src/gonum.org/v1/gonum && git rev-parse HEAD)`. -->
+### What version of Go and Gonum are you using?
+<!--
+Paste the output of `go version` and if you are installing Gonum from source, paste
+the output of `(cd $(go env GOPATH)/src/gonum.org/v1/gonum && git rev-parse HEAD)`.
+-->
 
 
 ### Does this issue reproduce with the current master?

@@ -24,6 +24,12 @@ func (g *GuessAndCheck) Needs() struct{ Gradient, Hessian bool } {
 }
 
 func (g *GuessAndCheck) InitGlobal(dim, tasks int) int {
+	if dim <= 0 {
+		panic(nonpositiveDimension)
+	}
+	if tasks < 0 {
+		panic(negativeTasks)
+	}
 	g.bestF = math.Inf(1)
 	g.bestX = resize(g.bestX, dim)
 	return tasks
@@ -50,20 +56,19 @@ func (g *GuessAndCheck) updateMajor(operation chan<- GlobalTask, task GlobalTask
 
 func (g *GuessAndCheck) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
 	// Send initial tasks to evaluate
-	for i, task := range tasks {
-		task.ID = i + 1
+	for _, task := range tasks {
 		g.sendNewLoc(operation, task)
 	}
 
 	// Read from the channel until PostIteration is sent.
-Outer:
+Loop:
 	for {
 		task := <-result
 		switch task.Op {
 		default:
 			panic("unknown operation")
 		case PostIteration:
-			break Outer
+			break Loop
 		case MajorIteration:
 			g.sendNewLoc(operation, task)
 		case FuncEvaluation:

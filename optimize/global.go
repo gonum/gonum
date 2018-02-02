@@ -31,8 +31,8 @@ type GlobalTask struct {
 // GlobalMethod is a type which can search for a global optimum for an objective function.
 type GlobalMethod interface {
 	Needser
-	// InitGlobal takes as input the problem dimension and maximum number of
-	// concurrent tasks. InitGlobal returns the number of concurrent processes
+	// InitGlobal takes as input the problem dimension and number of available
+	// concurrent tasks, and returns the number of concurrent processes to be used.
 	// The returned value must be less than or equal to tasks.
 	InitGlobal(dim, tasks int) int
 	// RunGlobal runs a global optimization. The method sends GlobalTasks on
@@ -45,14 +45,14 @@ type GlobalMethod interface {
 	// Op field on result. More tasks may still be sent on operation after this
 	// occurs, but only MajorIteration operations will still be conducted
 	// appropriately. Thus, it can not be guaranteed that all Evaluations sent
-	// on operation will be evaluated, however if the Evaluation is started,
+	// on operation will be evaluated, however if an Evaluation is started,
 	// the results of that evaluation will be sent on results.
 	//
 	// The GlobalMethod must read from the result channel until it is closed.
 	// During this, the GlobalMethod may want to send new MajorIteration(s) on
 	// operation. GlobalMethod then must close operation, and return from RunGlobal.
 	//
-	// The final input to RunGlobal is a slice of tasks with length equal to
+	// The las parameter to RunGlobal is a slice of tasks with length equal to
 	// the return from InitGlobal. GlobalTask has an ID field which may be
 	// set and modified by GlobalMethod, and must not be modified by the caller.
 	//
@@ -97,8 +97,7 @@ type GlobalMethod interface {
 // Global returns a Result struct and any error that occurred. See the
 // documentation of Result for more information.
 //
-// Please see the documentation for GlobalMethod for the details on implementing
-// a method.
+// See the documentation for GlobalMethod for the details on implementing a method.
 //
 // Be aware that the default behavior of Global is to find the minimum.
 // For certain functions and optimization methods, this process can take many
@@ -197,9 +196,9 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 	// signal their shutdown to the stats combiner. When all workers have successfully
 	// finished, the stats combiner closes the results channel, signaling to the
 	// method that all results have been collected. At this point, the method
-	// may sent MajorIteration(s) to update an optimum location based on these
+	// may send MajorIteration(s) to update an optimum location based on these
 	// last returned results, and then the method will close the operations channel.
-	// Now that no more tasks will be comanded by the method, the distributor
+	// Now that no more tasks will be commanded by the method, the distributor
 	// closes statsChan, and with no more statistics to update the optimization
 	// concludes.
 
@@ -256,7 +255,7 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 	}
 
 	var (
-		workerDone  int // effective wg for the workers
+		workersDone int // effective wg for the workers
 		status      Status
 		err         error
 		finalStatus Status
@@ -273,8 +272,8 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 			updateEvaluationStats(stats, task.Op)
 			status, err = checkEvaluationLimits(prob, stats, settings)
 		case signalDone:
-			workerDone++
-			if workerDone == nTasks {
+			workersDone++
+			if workersDone == nTasks {
 				close(results)
 			}
 			continue
@@ -316,7 +315,7 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 		}
 
 		// Send the result back to the Problem if there are still active workers.
-		if workerDone != nTasks && task.Op != MethodDone {
+		if workersDone != nTasks && task.Op != MethodDone {
 			results <- task
 		}
 	}

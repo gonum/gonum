@@ -145,11 +145,11 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 		case MethodDone:
 			statuser, ok := method.(Statuser)
 			if !ok {
-				panic("optimize: global method returned MethodDone is not a Statuser")
+				panic("optimize: method returned MethodDone is not a Statuser")
 			}
 			status, err = statuser.Status()
 			if status == NotTerminated {
-				panic("optimize: global method returned MethodDone but a NotTerminated status")
+				panic("optimize: method returned MethodDone but a NotTerminated status")
 			}
 		default: // Any of the Evaluation operations.
 			evaluate(p, loc, op, x)

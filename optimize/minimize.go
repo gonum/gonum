@@ -165,13 +165,11 @@ func checkEvaluationLimits(p *Problem, stats *Stats, settings *Settings) (Status
 	return NotTerminated, nil
 }
 
-// checkIterationLimits checks if any of the limits on iterations affected by
-// MajorIteration.
+// checkIterationLimits checks the limits on iterations affected by MajorIteration.
 func checkIterationLimits(loc *Location, stats *Stats, settings *Settings) Status {
 	if settings.MajorIterations > 0 && stats.MajorIterations >= settings.MajorIterations {
 		return IterationLimit
 	}
-	// TODO(vladimir-ch): It would be nice to update Runtime here.
 	if settings.Runtime > 0 && stats.Runtime >= settings.Runtime {
 		return RuntimeLimit
 	}

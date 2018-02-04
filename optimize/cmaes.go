@@ -107,7 +107,7 @@ type CmaEsChol struct {
 	bestF float64
 
 	// Synchronization.
-	taskIdx     int
+	sentIdx     int
 	receivedIdx int
 	operation   chan<- GlobalTask
 	updateErr   error
@@ -233,7 +233,7 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	cma.bestX = resize(cma.bestX, dim)
 	cma.bestF = math.Inf(1)
 
-	cma.taskIdx = 0
+	cma.sentIdx = 0
 	cma.receivedIdx = 0
 	cma.operation = nil
 	cma.updateErr = nil
@@ -245,7 +245,7 @@ func (cma *CmaEsChol) sendInitTasks(tasks []GlobalTask) {
 	for i, task := range tasks {
 		cma.sendTask(i, task)
 	}
-	cma.taskIdx = len(tasks)
+	cma.sentIdx = len(tasks)
 }
 
 // sendTask generates a sample and sends the task. It does not update the cma index.
@@ -266,7 +266,8 @@ func (cma *CmaEsChol) bestIdx() int {
 		if math.IsNaN(v) {
 			continue
 		}
-		if v < bestVal {
+		// Use equality in case somewhere evaluates to +inf.
+		if v <= bestVal {
 			best = i
 			bestVal = v
 		}
@@ -280,8 +281,12 @@ func (cma *CmaEsChol) findBestAndUpdateTask(task GlobalTask) GlobalTask {
 	// Find and update the best location.
 	// Don't use floats because there may be NaN values.
 	best := cma.bestIdx()
-	bestF := cma.fs[best]
-	bestX := cma.xs.RawRowView(best)
+	bestF := math.NaN()
+	bestX := cma.xs.RawRowView(0)
+	if best != -1 {
+		bestF = cma.fs[best]
+		bestX = cma.xs.RawRowView(best)
+	}
 	if cma.ForgetBest {
 		task.F = bestF
 		copy(task.X, bestX)
@@ -292,52 +297,49 @@ func (cma *CmaEsChol) findBestAndUpdateTask(task GlobalTask) GlobalTask {
 		}
 		task.F = cma.bestF
 		copy(task.X, cma.bestX)
-
 	}
 	return task
 }
 
-func (cma *CmaEsChol) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	cma.operation = operation
+func (cma *CmaEsChol) RunGlobal(operations chan<- GlobalTask, results <-chan GlobalTask, tasks []GlobalTask) {
+	cma.operation = operations
 	// Send the initial tasks. We know there are at most as many tasks as elements
 	// of the population.
 	cma.sendInitTasks(tasks)
-	cma.taskIdx = len(tasks)
 
-Outer:
+Loop:
 	for {
-		task := <-result
-		switch task.Op {
+		result := <-results
+		switch result.Op {
 		default:
 			panic("unknown operation")
 		case PostIteration:
-			break Outer
+			break Loop
 		case MajorIteration:
 			// The last thing we did was update all of the tasks and send the
 			// major iteration. Now we can send a group of tasks again.
 			cma.sendInitTasks(tasks)
-			cma.taskIdx = len(tasks)
 		case FuncEvaluation:
 			cma.receivedIdx++
-			cma.fs[task.ID] = task.F
+			cma.fs[result.ID] = result.F
 			switch {
-			case cma.taskIdx < cma.pop:
+			case cma.sentIdx < cma.pop:
 				// There are still tasks to evaluate. Send the next.
-				cma.sendTask(cma.taskIdx, task)
-				cma.taskIdx++
+				cma.sendTask(cma.sentIdx, result)
+				cma.sentIdx++
 			case cma.receivedIdx < cma.pop:
 				// All the tasks have been sent, but not all of them have been received.
 				// Need to wait until all are back.
-				continue Outer
+				continue Loop
 			default:
 				// All of the evaluations have been received.
 				if cma.receivedIdx != cma.pop {
 					panic("bad logic")
 				}
 				cma.receivedIdx = 0
-				cma.taskIdx = 0
+				cma.sentIdx = 0
 
-				task = cma.findBestAndUpdateTask(task)
+				task := cma.findBestAndUpdateTask(result)
 				// Update the parameters and send a MajorIteration or a convergence.
 				err := cma.update()
 				// Kill the existing data.
@@ -355,7 +357,7 @@ Outer:
 					task.Op = MajorIteration
 					task.ID = -1
 				}
-				operation <- task
+				operations <- task
 			}
 		}
 	}
@@ -363,7 +365,7 @@ Outer:
 	// Been told to stop. Clean up.
 	// Need to see best of our evaluated tasks so far. Should instead just
 	// collect, then see.
-	for task := range result {
+	for task := range results {
 		switch task.Op {
 		case MajorIteration:
 		case FuncEvaluation:
@@ -373,18 +375,20 @@ Outer:
 		}
 	}
 	// Send the new best value if the evaluation is better than any we've
-	// found so far.
+	// found so far. Keep this separate from findBestAndUpdateTask so that
+	// we only send an iteration if we find a better location.
 	if !cma.ForgetBest {
 		best := cma.bestIdx()
 		if best != -1 && cma.fs[best] < cma.bestF {
 			task := tasks[0]
-			task = cma.findBestAndUpdateTask(task)
+			task.F = cma.fs[best]
+			copy(task.X, cma.xs.RawRowView(best))
 			task.Op = MajorIteration
 			task.ID = -1
-			operation <- task
+			operations <- task
 		}
 	}
-	close(operation)
+	close(operations)
 }
 
 // update computes the new parameters (mean, cholesky, etc.). Does not update

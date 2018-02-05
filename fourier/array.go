@@ -13,24 +13,6 @@ import "fmt"
 // TODO(kortschak): Make a bounds-checking and non-bounds-checking version
 // for testing/production.
 
-type oneIntArray []int
-
-func (a oneIntArray) at(i int) int {
-	i--
-	if i < 0 || len(a) <= i {
-		panic(fmt.Sprintf("out of bounds at(%d): bounds i=%d", i, len(a)))
-	}
-	return a[i]
-}
-
-func (a oneIntArray) set(i, v int) {
-	i--
-	if i < 0 || len(a) <= i {
-		panic(fmt.Sprintf("out of bounds set(%d): bounds i=%d", i, len(a)))
-	}
-	a[i] = v
-}
-
 type oneArray []float64
 
 func (a oneArray) sliceFrom(i int) oneArray {

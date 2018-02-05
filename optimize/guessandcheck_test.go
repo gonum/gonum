@@ -27,6 +27,7 @@ func TestGuessAndCheck(t *testing.T) {
 		panic("bad test")
 	}
 	Global(problem, dim, nil, &GuessAndCheck{Rander: d})
+
 	settings := DefaultSettingsGlobal()
 	settings.Concurrent = 5
 	settings.MajorIterations = 15

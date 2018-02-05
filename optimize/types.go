@@ -38,6 +38,10 @@ const (
 	// MajorIteration indicates that the next candidate location for
 	// an optimum has been found and convergence should be checked.
 	MajorIteration
+	// MethodDone declares that the method is done running. A method must
+	// be a Statuser in order to use this iteration, and after returning
+	// MethodDone, the Status must return other than NotTerminated.
+	MethodDone
 	// FuncEvaluation specifies that the objective function
 	// should be evaluated.
 	FuncEvaluation
@@ -47,6 +51,8 @@ const (
 	// HessEvaluation specifies that the Hessian
 	// of the objective function should be evaluated.
 	HessEvaluation
+	// signalDone is used internally to signal completion.
+	signalDone
 
 	// Mask for the evaluating operations.
 	evalMask = FuncEvaluation | GradEvaluation | HessEvaluation
@@ -76,6 +82,8 @@ var operationNames = map[Operation]string{
 	InitIteration:  "InitIteration",
 	MajorIteration: "MajorIteration",
 	PostIteration:  "PostIteration",
+	MethodDone:     "MethodDone",
+	signalDone:     "signalDone",
 }
 
 // Location represents a location in the optimization procedure.
@@ -201,7 +209,7 @@ type Settings struct {
 
 	// Runtime is the maximum runtime allowed. RuntimeLimit status is returned
 	// if the duration of the run is longer than this value. Runtime is only
-	// checked at iterations of the Method.
+	// checked at MajorIterations of the Method.
 	// If it equals zero, this setting has no effect.
 	// The default value is 0.
 	Runtime time.Duration

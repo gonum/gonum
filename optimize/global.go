@@ -6,65 +6,65 @@ package optimize
 
 import (
 	"math"
-	"sync"
 	"time"
 )
 
-var (
-	nonpositiveDimension string = "optimize: non-positive input dimension"
-	negativeTasks        string = "optimize: negative input number of tasks"
-)
+// DefaultSettingsGlobal returns the default settings for Global optimization.
+func DefaultSettingsGlobal() *Settings {
+	return &Settings{
+		FunctionThreshold: math.Inf(-1),
+		FunctionConverge: &FunctionConverge{
+			Absolute:   1e-10,
+			Iterations: 100,
+		},
+	}
+}
 
-// GlobalMethod is an optimization method which seeks to find the global minimum
-// of an objective function.
-//
-// At the beginning of the optimization, InitGlobal is called to communicate
-// the dimension of the input and maximum number of concurrent tasks.
-// The actual number of concurrent tasks will be set from the return of InitGlobal,
-// which must not be greater than the input tasks.
-//
-// During the optimization, a reverse-communication interface is used between
-// the GlobalMethod and the caller.
-// GlobalMethod acts as a client that asks the caller to perform
-// needed operations given the return from IterateGlobal.
-// This allows and enforces automation of maintaining statistics and checking for
-// (various types of) convergence.
-//
-// The return from IterateGlobal can be an Evaluation, a MajorIteration or NoOperation.
-//
-// An evaluation is one or more of the Evaluation operations (FuncEvaluation,
-// GradEvaluation, etc.) combined with the bitwise or operator. In an evaluation
-// operation, the requested fields of Problem will be evaluated at the value
-// in Location.X, filling the corresponding fields of Location. These values
-// can be retrieved and used upon the next call to IterateGlobal with that task id.
-// The GlobalMethod interface requires that entries of Location are not modified
-// aside from the commanded evaluations. Thus, the type implementing GlobalMethod
-// may use multiple Operations to set the Location fields at a particular x value.
-//
-// When IterateGlobal declares MajorIteration, the caller updates the optimal
-// location to the values in Location, and checks for convergence. The type
-// implementing GlobalMethod must make sure that the fields of Location are valid
-// and consistent.
-//
-// IterateGlobal must not return InitIteration and PostIteration operations. These are
-// reserved for the clients to be passed to Recorders. A Method must also not
-// combine the Evaluation operations with the Iteration operations.
+// GlobalTask is a type to communicate between the GlobalMethod and the outer
+// calling script.
+type GlobalTask struct {
+	ID int
+	Op Operation
+	*Location
+}
+
+// GlobalMethod is a type which can search for a global optimum for an objective function.
 type GlobalMethod interface {
 	Needser
-	// InitGlobal communicates the input dimension and maximum number of tasks,
-	// and returns the number of concurrent processes. The return must be less
-	// than or equal to tasks.
+	// InitGlobal takes as input the problem dimension and number of available
+	// concurrent tasks, and returns the number of concurrent processes to be used.
+	// The returned value must be less than or equal to tasks.
 	InitGlobal(dim, tasks int) int
-
-	// IterateGlobal retrieves information from the location associated with
-	// the given task ID, and returns the next operation to perform with that
-	// Location. IterateGlobal may assume that the same pointer is associated
-	// with the same task.
-	IterateGlobal(task int, loc *Location) (Operation, error)
-
-	// Done communicates that the optimization has concluded to allow for shutdown.
-	// After Done is called, no more calls to IterateGlobal will be made.
-	Done()
+	// RunGlobal runs a global optimization. The method sends GlobalTasks on
+	// the operation channel (for performing function evaluations, major
+	// iterations, etc.). The result of the tasks will be returned on Result.
+	// See the documentation for Operation types for the possible tasks.
+	//
+	// The caller of RunGlobal will signal the termination of the optimization
+	// (i.e. convergence from user settings) by sending a task with a PostIteration
+	// Op field on result. More tasks may still be sent on operation after this
+	// occurs, but only MajorIteration operations will still be conducted
+	// appropriately. Thus, it can not be guaranteed that all Evaluations sent
+	// on operation will be evaluated, however if an Evaluation is started,
+	// the results of that evaluation will be sent on results.
+	//
+	// The GlobalMethod must read from the result channel until it is closed.
+	// During this, the GlobalMethod may want to send new MajorIteration(s) on
+	// operation. GlobalMethod then must close operation, and return from RunGlobal.
+	//
+	// The las parameter to RunGlobal is a slice of tasks with length equal to
+	// the return from InitGlobal. GlobalTask has an ID field which may be
+	// set and modified by GlobalMethod, and must not be modified by the caller.
+	//
+	// GlobalMethod may have its own specific convergence criteria, which can
+	// be communicated using a MethodDone operation. This will trigger a
+	// PostIteration to be sent on result, and the MethodDone task will not be
+	// returned on result. The GlobalMethod must implement Statuser, and the
+	// call to Status must return a Status other than NotTerminated.
+	//
+	// The operation and result tasks are guaranteed to have a buffer length
+	// equal to the return from InitGlobal.
+	RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask)
 }
 
 // Global uses a global optimizer to search for the global minimum of a
@@ -86,30 +86,23 @@ type GlobalMethod interface {
 // The third argument contains the settings for the minimization. The
 // DefaultGlobalSettings function can be called for a Settings struct with the
 // default values initialized. If settings == nil, the default settings are used.
-// Global optimization methods typically do not make assumptions about the number
-// and location of local minima. Thus, the only convergence metric used is the
-// function values found at major iterations of the optimization. Bounds on the
-// length of optimization are obeyed, such as the number of allowed function
-// evaluations.
+// All of the settings will be followed, but many of them may be counterproductive
+// to use (such as GradientThreshold). Global cannot guarantee strict adherence
+// to the bounds specified when performing concurrent evaluations and updates.
 //
 // The final argument is the optimization method to use. If method == nil, then
 // an appropriate default is chosen based on the properties of the other arguments
 // (dimension, gradient-free or gradient-based, etc.).
 //
-// If method implements Statuser, method.Status is called before every call
-// to method.Iterate. If the returned Status is not NotTerminated or the
-// error is non-nil, the optimization run is terminated.
-//
 // Global returns a Result struct and any error that occurred. See the
 // documentation of Result for more information.
+//
+// See the documentation for GlobalMethod for the details on implementing a method.
 //
 // Be aware that the default behavior of Global is to find the minimum.
 // For certain functions and optimization methods, this process can take many
 // function evaluations. The Settings input struct can be used to limit this,
 // for example by modifying the maximum runtime or maximum function evaluations.
-//
-// Global cannot guarantee strict adherence to the bounds specified in Settings
-// when performing concurrent evaluations and updates.
 func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Result, error) {
 	startTime := time.Now()
 	if method == nil {
@@ -157,23 +150,10 @@ func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Resul
 	}, err
 }
 
-// minimizeGlobal is the high-level function for a Global optimization. It launches
-// concurrent workers to perform the mimization, and shuts them down properly
-// at the conclusion.
-func minimizeGlobal(p *Problem, method GlobalMethod, settings *Settings, stats *Stats, optLoc *Location, startTime time.Time) (status Status, err error) {
+// minimizeGlobal performs a Global optimization. minimizeGlobal updates the
+// settings and optLoc, and returns the final Status and error.
+func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stats *Stats, optLoc *Location, startTime time.Time) (Status, error) {
 	dim := len(optLoc.X)
-	statuser, _ := method.(Statuser)
-	gs := &globalStatus{
-		mux:       &sync.RWMutex{},
-		stats:     stats,
-		status:    NotTerminated,
-		p:         p,
-		startTime: startTime,
-		optLoc:    optLoc,
-		settings:  settings,
-		statuser:  statuser,
-	}
-
 	nTasks := settings.Concurrent
 	if nTasks == 0 {
 		nTasks = 1
@@ -184,158 +164,160 @@ func minimizeGlobal(p *Problem, method GlobalMethod, settings *Settings, stats *
 	}
 	nTasks = newNTasks
 
-	// Launch optimization workers. Each worker is individually responsible
-	// for maintaining stats and evaluating the function.
-	var wg sync.WaitGroup
-	for task := 0; task < nTasks; task++ {
-		wg.Add(1)
-		go func(task int) {
-			defer wg.Done()
-			loc := newLocation(dim, method)
-			x := make([]float64, dim)
-			globalWorker(task, method, gs, loc, x)
-		}(task)
-	}
-	wg.Wait()
-	method.Done()
-	return gs.status, gs.err
-}
+	// Launch the method. The method communicates tasks using the operations
+	// channel, and results is used to return the evaluated results.
+	operations := make(chan GlobalTask, nTasks)
+	results := make(chan GlobalTask, nTasks)
+	go func() {
+		tasks := make([]GlobalTask, nTasks)
+		for i := range tasks {
+			tasks[i].Location = newLocation(dim, method)
+		}
+		method.RunGlobal(operations, results, tasks)
+	}()
 
-// globalWorker runs the optimization steps for a single (concurrently-executing)
-// optimization task.
-func globalWorker(task int, m GlobalMethod, g *globalStatus, loc *Location, x []float64) {
-	for {
-		// Find Evaluation location
-		op, err := m.IterateGlobal(task, loc)
-		if err != nil {
-			g.updateStatus(Failure, err)
-			break
+	// Algorithmic Overview:
+	// There are three pieces to performing a concurrent global optimization,
+	// the distributor, the workers, and the stats combiner. At a high level,
+	// the distributor reads in tasks sent by method, sending evaluations to the
+	// workers, and forwarding other operations to the statsCombiner. The workers
+	// read these forwarded evaluation tasks, evaluate the relevant parts of Problem
+	// and forward the results on to the stats combiner. The stats combiner reads
+	// in results from the workers, as well as tasks from the distributor, and
+	// uses them to update optimization statistics (function evaluations, etc.)
+	// and to check optimization convergence.
+	//
+	// The complicated part is correctly shutting down the optimization. The
+	// procedure is as follows. First, the stats combiner closes done and sends
+	// a PostIteration to the method. The distributor then reads that done has
+	// been closed, and closes the channel with the workers. At this point, no
+	// more evaluation operations will be executed. As the workers finish their
+	// evaluations, they forward the results onto the stats combiner, and then
+	// signal their shutdown to the stats combiner. When all workers have successfully
+	// finished, the stats combiner closes the results channel, signaling to the
+	// method that all results have been collected. At this point, the method
+	// may send MajorIteration(s) to update an optimum location based on these
+	// last returned results, and then the method will close the operations channel.
+	// Now that no more tasks will be commanded by the method, the distributor
+	// closes statsChan, and with no more statistics to update the optimization
+	// concludes.
+
+	workerChan := make(chan GlobalTask) // Delegate tasks to the workers.
+	statsChan := make(chan GlobalTask)  // Send evaluation updates.
+	done := make(chan struct{})         // Communicate the optimization is done.
+
+	// Read tasks from the method and distribute as appropriate.
+	distributor := func() {
+		for {
+			select {
+			case task := <-operations:
+				switch task.Op {
+				case InitIteration:
+					panic("optimize: GlobalMethod returned InitIteration")
+				case PostIteration:
+					panic("optimize: GlobalMethod returned PostIteration")
+				case NoOperation, MajorIteration, MethodDone:
+					statsChan <- task
+				default:
+					if !task.Op.isEvaluation() {
+						panic("global: expecting evaluation operation")
+					}
+					workerChan <- task
+				}
+			case <-done:
+				// No more evaluations will be sent, shut down the workers, and
+				// read the final tasks.
+				close(workerChan)
+				for task := range operations {
+					if task.Op == MajorIteration {
+						statsChan <- task
+					}
+				}
+				close(statsChan)
+				return
+			}
+		}
+	}
+	go distributor()
+
+	// Evaluate the Problem concurrently.
+	worker := func() {
+		x := make([]float64, dim)
+		for task := range workerChan {
+			evaluate(prob, task.Location, task.Op, x)
+			statsChan <- task
+		}
+		// Signal successful worker completion.
+		statsChan <- GlobalTask{Op: signalDone}
+	}
+	for i := 0; i < nTasks; i++ {
+		go worker()
+	}
+
+	var (
+		workersDone int // effective wg for the workers
+		status      Status
+		err         error
+		finalStatus Status
+		finalError  error
+	)
+
+	// Update optimization statistics and check convergence.
+	for task := range statsChan {
+		switch task.Op {
+		default:
+			if !task.Op.isEvaluation() {
+				panic("global: evaluation task expected")
+			}
+			updateEvaluationStats(stats, task.Op)
+			status, err = checkEvaluationLimits(prob, stats, settings)
+		case signalDone:
+			workersDone++
+			if workersDone == nTasks {
+				close(results)
+			}
+			continue
+		case NoOperation:
+			// Just send the task back.
+		case MajorIteration:
+			status = performMajorIteration(optLoc, task.Location, stats, startTime, settings)
+		case MethodDone:
+			statuser, ok := method.(Statuser)
+			if !ok {
+				panic("optimize: global method returned MethodDone but is not a Statuser")
+			}
+			status, err = statuser.Status()
+			if status == NotTerminated {
+				panic("optimize: global method returned MethodDone but a NotTerminated status")
+			}
+		}
+		if settings.Recorder != nil && status == NotTerminated && err == nil {
+			stats.Runtime = time.Since(startTime)
+			// Allow err to be overloaded if the Recorder fails.
+			err = settings.Recorder.Record(task.Location, task.Op, stats)
+			if err != nil {
+				status = Failure
+			}
+		}
+		// If this is the first termination status, trigger the conclusion of
+		// the optimization.
+		if status != NotTerminated || err != nil {
+			select {
+			case <-done:
+			default:
+				finalStatus = status
+				finalError = err
+				results <- GlobalTask{
+					Op: PostIteration,
+				}
+				close(done)
+			}
 		}
 
-		// Evaluate location and/or update stats.
-		status := g.globalOperation(op, loc, x)
-		if status != NotTerminated {
-			break
+		// Send the result back to the Problem if there are still active workers.
+		if workersDone != nTasks && task.Op != MethodDone {
+			results <- task
 		}
 	}
-}
-
-// globalStatus coordinates access to information shared between concurrently
-// executing optimization tasks.
-type globalStatus struct {
-	mux       *sync.RWMutex
-	stats     *Stats
-	status    Status
-	p         *Problem
-	startTime time.Time
-	optLoc    *Location
-	settings  *Settings
-	method    GlobalMethod
-	statuser  Statuser
-	err       error
-}
-
-// getStatus returns the current status of the optimization.
-func (g *globalStatus) getStatus() Status {
-	var status Status
-	g.mux.RLock()
-	defer g.mux.RUnlock()
-	status = g.status
-	return status
-}
-
-func (g *globalStatus) incrementMajorIteration() {
-	g.mux.Lock()
-	defer g.mux.Unlock()
-	g.stats.MajorIterations++
-}
-
-func (g *globalStatus) updateOptLoc(loc *Location) {
-	g.mux.Lock()
-	defer g.mux.Unlock()
-	copyLocation(g.optLoc, loc)
-}
-
-// checkConvergence checks the convergence of the global optimization and returns
-// the status
-func (g *globalStatus) checkConvergence() Status {
-	g.mux.RLock()
-	defer g.mux.RUnlock()
-	return checkConvergence(g.optLoc, g.settings, false)
-}
-
-// updateStats updates the evaluation statistics for the given operation.
-func (g *globalStatus) updateStats(op Operation) {
-	g.mux.Lock()
-	defer g.mux.Unlock()
-	updateEvaluationStats(g.stats, op)
-}
-
-// updateStatus updates the status and error fields of g. This update only happens
-// if status == NotTerminated, so that the first different status is the one
-// maintained.
-func (g *globalStatus) updateStatus(s Status, err error) {
-	g.mux.Lock()
-	defer g.mux.Unlock()
-	if s != NotTerminated {
-		g.status = s
-		g.err = err
-	}
-}
-
-func (g *globalStatus) finishIteration(status Status, err error, loc *Location, op Operation) (Status, error) {
-	g.mux.Lock()
-	defer g.mux.Unlock()
-	return finishIteration(status, err, g.stats, g.settings, g.statuser, g.startTime, loc, op)
-}
-
-// globalOperation executes the requested operation at the given location.
-// When modifying this function, keep in mind that it can be called concurrently.
-// Uses of the internal fields should be through the methods of globalStatus and
-// protected by a mutex where appropriate.
-func (g *globalStatus) globalOperation(op Operation, loc *Location, x []float64) Status {
-	// Do a quick check to see if one of the other workers converged in the meantime.
-	status := g.getStatus()
-	if status != NotTerminated {
-		return status
-	}
-	var err error
-	switch op {
-	case NoOperation:
-	case InitIteration:
-		panic("optimize: GlobalMethod returned InitIteration")
-	case PostIteration:
-		panic("optimize: GlobalMethod returned PostIteration")
-	case MajorIteration:
-		g.incrementMajorIteration()
-		g.updateOptLoc(loc)
-		status = g.checkConvergence()
-	default: // Any of the Evaluation operations.
-		status, err = evaluate(g.p, loc, op, x)
-		g.updateStats(op)
-	}
-
-	status, err = g.finishIteration(status, err, loc, op)
-	if status != NotTerminated || err != nil {
-		g.updateStatus(status, err)
-	}
-	return status
-}
-
-// DefaultSettingsGlobal returns the default settings for Global optimization.
-func DefaultSettingsGlobal() *Settings {
-	return &Settings{
-		FunctionThreshold: math.Inf(-1),
-		FunctionConverge: &FunctionConverge{
-			Absolute:   1e-10,
-			Iterations: 100,
-		},
-	}
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
+	return finalStatus, finalError
 }

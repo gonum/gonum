@@ -95,7 +95,7 @@ func Local(p Problem, initX []float64, settings *Settings, method Method) (*Resu
 	}
 
 	// Check if the starting location satisfies the convergence criteria.
-	status := checkConvergence(optLoc, settings, true)
+	status := checkLocationConvergence(optLoc, settings)
 
 	// Run optimization
 	if status == NotTerminated && err == nil {
@@ -123,8 +123,6 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 	copyLocation(loc, optLoc)
 	x := make([]float64, len(loc.X))
 
-	statuser, _ := method.(Statuser)
-
 	var op Operation
 	op, err = method.Init(loc)
 	if err != nil {
@@ -143,17 +141,33 @@ func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLo
 		case PostIteration:
 			panic("optimize: Method returned PostIteration")
 		case MajorIteration:
-			copyLocation(optLoc, loc)
-			stats.MajorIterations++
-			status = checkConvergence(optLoc, settings, true)
+			status = performMajorIteration(optLoc, loc, stats, startTime, settings)
+		case MethodDone:
+			statuser, ok := method.(Statuser)
+			if !ok {
+				panic("optimize: method returned MethodDone is not a Statuser")
+			}
+			status, err = statuser.Status()
+			if status == NotTerminated {
+				panic("optimize: method returned MethodDone but a NotTerminated status")
+			}
 		default: // Any of the Evaluation operations.
-			status, err = evaluate(p, loc, op, x)
+			evaluate(p, loc, op, x)
 			updateEvaluationStats(stats, op)
+			status, err = checkEvaluationLimits(p, stats, settings)
 		}
-
-		status, err = finishIteration(status, err, stats, settings, statuser, startTime, loc, op)
 		if status != NotTerminated || err != nil {
 			return
+		}
+		if settings.Recorder != nil {
+			stats.Runtime = time.Since(startTime)
+			err = settings.Recorder.Record(loc, op, stats)
+			if err != nil {
+				if status == NotTerminated {
+					status = Failure
+				}
+				return status, err
+			}
 		}
 
 		op, err = method.Iterate(loc)

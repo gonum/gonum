@@ -156,14 +156,14 @@ func cfftf(n int, r, work []float64, ifac []int) {
 	cfftf1(n, r, work, work[2*n:], ifac)
 }
 
-func cfftf1(n int, c, ch []float64, wa oneArray, ifac oneIntArray) {
-	nf := ifac.at(2)
+func cfftf1(n int, c, ch []float64, wa oneArray, ifac []int) {
+	nf := ifac[1]
 	na := 0
 	l1 := 1
 	iw := 1
 
 	for k1 := 1; k1 <= nf; k1++ {
-		ip := ifac.at(k1 + 2)
+		ip := ifac[k1+1]
 		l2 := ip * l1
 		ido := n / l2
 		idot := 2 * ido
@@ -621,14 +621,14 @@ func cfftb(n int, r, work []float64, ifac []int) {
 	cfftb1(n, r, work, work[2*n:], ifac)
 }
 
-func cfftb1(n int, c, ch []float64, wa oneArray, ifac oneIntArray) {
-	nf := ifac.at(2)
+func cfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
+	nf := ifac[1]
 	na := 0
 	l1 := 1
 	iw := 1
 
 	for k1 := 1; k1 <= nf; k1++ {
-		ip := ifac.at(k1 + 2)
+		ip := ifac[k1+1]
 		l2 := ip * l1
 		ido := n / l2
 		idot := 2 * ido

@@ -159,15 +159,15 @@ func rfftf(n int, r, work []float64, ifac []int) {
 	rfftf1(n, r, work, work[n:], ifac)
 }
 
-func rfftf1(n int, c, ch []float64, wa oneArray, ifac oneIntArray) {
-	nf := ifac.at(2)
+func rfftf1(n int, c, ch []float64, wa oneArray, ifac []int) {
+	nf := ifac[1]
 	na := 1
 	l2 := n
 	iw := n
 
 	for k1 := 1; k1 <= nf; k1++ {
 		kh := nf - k1
-		ip := ifac.at(kh + 3)
+		ip := ifac[kh+2]
 		l1 := l2 / ip
 		ido := n / l2
 		idl1 := ido * l1
@@ -664,14 +664,14 @@ func rfftb(n int, r, work []float64, ifac []int) {
 	rfftb1(n, r, work, work[n:], ifac)
 }
 
-func rfftb1(n int, c, ch []float64, wa oneArray, ifac oneIntArray) {
-	nf := ifac.at(2)
+func rfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
+	nf := ifac[1]
 	na := 0
 	l1 := 1
 	iw := 1
 
 	for k1 := 1; k1 <= nf; k1++ {
-		ip := ifac.at(k1 + 2)
+		ip := ifac[k1+1]
 		l2 := ip * l1
 		ido := n / l2
 		idl1 := ido * l1

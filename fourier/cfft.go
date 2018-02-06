@@ -156,11 +156,11 @@ func cfftf(n int, r, work []float64, ifac []int) {
 	cfftf1(n, r, work, work[2*n:], ifac)
 }
 
-func cfftf1(n int, c, ch []float64, wa oneArray, ifac []int) {
+func cfftf1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
 	na := 0
 	l1 := 1
-	iw := 1
+	iw := 0
 
 	for k1 := 1; k1 <= nf; k1++ {
 		ip := ifac[k1+1]
@@ -174,24 +174,24 @@ func cfftf1(n int, c, ch []float64, wa oneArray, ifac []int) {
 			ix2 := iw + idot
 			ix3 := ix2 + idot
 			if na == 0 {
-				passf4(idot, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				passf4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			} else {
-				passf4(idot, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				passf4(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
 			}
 			na = 1 - na
 		case 2:
 			if na == 0 {
-				passf2(idot, l1, c, ch, wa.sliceFrom(iw))
+				passf2(idot, l1, c, ch, wa[iw:])
 			} else {
-				passf2(idot, l1, ch, c, wa.sliceFrom(iw))
+				passf2(idot, l1, ch, c, wa[iw:])
 			}
 			na = 1 - na
 		case 3:
 			ix2 := iw + idot
 			if na == 0 {
-				passf3(idot, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				passf3(idot, l1, c, ch, wa[iw:], wa[ix2:])
 			} else {
-				passf3(idot, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				passf3(idot, l1, ch, c, wa[iw:], wa[ix2:])
 			}
 			na = 1 - na
 		case 5:
@@ -199,17 +199,17 @@ func cfftf1(n int, c, ch []float64, wa oneArray, ifac []int) {
 			ix3 := ix2 + idot
 			ix4 := ix3 + idot
 			if na == 0 {
-				passf5(idot, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				passf5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			} else {
-				passf5(idot, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				passf5(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			}
 			na = 1 - na
 		default:
 			var nac bool
 			if na == 0 {
-				nac = passf(idot, ip, l1, idl1, c, c, c, ch, ch, wa.sliceFrom(iw))
+				nac = passf(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 			} else {
-				nac = passf(idot, ip, l1, idl1, ch, ch, ch, c, c, wa.sliceFrom(iw))
+				nac = passf(idot, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
 			}
 			if nac {
 				na = 1 - na
@@ -621,11 +621,11 @@ func cfftb(n int, r, work []float64, ifac []int) {
 	cfftb1(n, r, work, work[2*n:], ifac)
 }
 
-func cfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
+func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
 	na := 0
 	l1 := 1
-	iw := 1
+	iw := 0
 
 	for k1 := 1; k1 <= nf; k1++ {
 		ip := ifac[k1+1]
@@ -639,24 +639,24 @@ func cfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
 			ix2 := iw + idot
 			ix3 := ix2 + idot
 			if na == 0 {
-				passb4(idot, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				passb4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			} else {
-				passb4(idot, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				passb4(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
 			}
 			na = 1 - na
 		case 2:
 			if na == 0 {
-				passb2(idot, l1, c, ch, wa.sliceFrom(iw))
+				passb2(idot, l1, c, ch, wa[iw:])
 			} else {
-				passb2(idot, l1, ch, c, wa.sliceFrom(iw))
+				passb2(idot, l1, ch, c, wa[iw:])
 			}
 			na = 1 - na
 		case 3:
 			ix2 := iw + idot
 			if na == 0 {
-				passb3(idot, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				passb3(idot, l1, c, ch, wa[iw:], wa[ix2:])
 			} else {
-				passb3(idot, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				passb3(idot, l1, ch, c, wa[iw:], wa[ix2:])
 			}
 			na = 1 - na
 		case 5:
@@ -664,17 +664,17 @@ func cfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
 			ix3 := ix2 + idot
 			ix4 := ix3 + idot
 			if na == 0 {
-				passb5(idot, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				passb5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			} else {
-				passb5(idot, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				passb5(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			}
 			na = 1 - na
 		default:
 			var nac bool
 			if na == 0 {
-				nac = passb(idot, ip, l1, idl1, c, c, c, ch, ch, wa.sliceFrom(iw))
+				nac = passb(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 			} else {
-				nac = passb(idot, ip, l1, idl1, ch, ch, ch, c, c, wa.sliceFrom(iw))
+				nac = passb(idot, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
 			}
 			if nac {
 				na = 1 - na

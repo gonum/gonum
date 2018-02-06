@@ -17,17 +17,17 @@ import "math"
 //
 //  input parameter
 //
-//  n      the length of the sequence to be transformed.
+//  n      The length of the sequence to be transformed.
 //
-//  output parameters
+//  Output parameters:
 //
-//  work   a work array which must be dimensioned at least 4*n.
+//  work   A work array which must be dimensioned at least 4*n.
 //         the same work array can be used for both cfftf and cfftb
-//         as long as n remains unchanged. different work arrays
-//         are required for different values of n. the contents of
+//         as long as n remains unchanged. Different work arrays
+//         are required for different values of n. The contents of
 //         work must not be changed between calls of cfftf or cfftb.
 //
-//  ifac   a work array containing the factors of n. ifac must have
+//  ifac   A work array containing the factors of n. ifac must have
 //         length 15.
 func cffti(n int, work []float64, ifac []int) {
 	if len(work) < 4*n {
@@ -113,37 +113,37 @@ outer:
 	}
 }
 
-// cfftf computes the forward complex discrete fourier
-// transform (the fourier analysis). equivalently , cfftf computes
-// the fourier coefficients of a complex periodic sequence.
-// the transform is defined below at output parameter c.
+// cfftf computes the forward complex Discrete Fourier transform
+// (the Fourier analysis). Equivalently, cfftf computes the
+// Fourier coefficients of a complex periodic sequence. The
+// transform is defined below at output parameter c.
 //
-//  input parameters
+//  Input parameters:
 //
-//  n      the length of the array c to be transformed.  the method
+//  n      The length of the array c to be transformed. The method
 //         is most efficient when n is a product of small primes.
-//         n may change so long as different work arrays are provided
+//         n may change so long as different work arrays are provided.
 //
-//  c      a complex array of length n which contains the sequence
-//         to be transformed
+//  c      A complex array of length n which contains the sequence
+//         to be transformed.
 //
-//  work   a real work array which must be dimensioned at least 4*n.
-//         in the program that calls cfftf. the work array must be
-//         initialized by calling subroutine cffti(n,work) and a
+//  work   A real work array which must be dimensioned at least 4*n.
+//         in the program that calls cfftf. The work array must be
+//         initialized by calling subroutine cffti(n,work,ifac) and a
 //         different work array must be used for each different
-//         value of n. this initialization does not have to be
+//         value of n. This initialization does not have to be
 //         repeated so long as n remains unchanged thus subsequent
 //         transforms can be obtained faster than the first.
 //         the same work array can be used by cfftf and cfftb.
 //
-//  ifac   a work array containing the factors of n. ifac must have
-//         length 15.
+//  ifac   A work array containing the factors of n. ifac must have
+//         length of at least 15.
 //
-//  output parameters
+//  Output parameters:
 //
 //   c     for j=1,...,n
-//           c(j)=the sum from k=1,...,n of
-//             c(k)*exp(-i*(j-1)*(k-1)*2*pi/n)
+//           c[j]=the sum from k=1,...,n of
+//             c[k]*exp(-i*(j-1)*(k-1)*2*pi/n)
 //
 //         where i=sqrt(-1)
 //
@@ -151,9 +151,12 @@ outer:
 //  followed by a call of cfftb will multiply the input
 //  sequence by n.
 //
-//  work   contains results which must not be destroyed between
+//  The n elements of c are represented in n pairs of real
+//  values in r where c[j] = r[j*2]+r[j*2+1]i.
+//
+//  work   Contains results which must not be destroyed between
 //         calls of cfftf or cfftb.
-//  ifac   contains results which must not be destroyed between
+//  ifac   Contains results which must not be destroyed between
 //         calls of cfftf or cfftb.
 func cfftf(n int, r, work []float64, ifac []int) {
 	if len(r) < 2*n {
@@ -171,37 +174,37 @@ func cfftf(n int, r, work []float64, ifac []int) {
 	cfft1(n, r[:2*n], work[:2*n], work[2*n:4*n], ifac[:15], -1)
 }
 
-// cfftb computes the forward complex discrete fourier
-// transform (the fourier analysis). equivalently , cfftb computes
-// the fourier coefficients of a complex periodic sequence.
-// the transform is defined below at output parameter c.
+// cfftb computes the backward complex Discrete Fourier Transform
+// (the Fourier synthesis). Equivalently, cfftf computes the computes
+// a complex periodic sequence from its Fourier coefficients. The
+// transform is defined below at output parameter c.
 //
-//  input parameters
+//  Input parameters:
 //
-//  n      the length of the array c to be transformed.  the method
+//  n      The length of the array c to be transformed. The method
 //         is most efficient when n is a product of small primes.
-//         n may change so long as different work arrays are provided
+//         n may change so long as different work arrays are provided.
 //
-//  c      a complex array of length n which contains the sequence
-//         to be transformed
+//  c      A complex array of length n which contains the sequence
+//         to be transformed.
 //
-//  work   a real work array which must be dimensioned at least 4*n.
-//         in the program that calls cfftb. the work array must be
-//         initialized by calling subroutine cffti(n,work) and a
+//  work   A real work array which must be dimensioned at least 4*n.
+//         in the program that calls cfftb. The work array must be
+//         initialized by calling subroutine cffti(n,work,ifac) and a
 //         different work array must be used for each different
-//         value of n. this initialization does not have to be
+//         value of n. This initialization does not have to be
 //         repeated so long as n remains unchanged thus subsequent
 //         transforms can be obtained faster than the first.
-//         the same work array can be used by cfftb and cfftb.
+//         The same work array can be used by cfftb and cfftb.
 //
-//  ifac   a work array containing the factors of n. ifac must have
-//         length 15.
+//  ifac   A work array containing the factors of n. ifac must have
+//         length of at least 15.
 //
-//  output parameters
+//  Output parameters:
 //
 //  c      for j=1,...,n
-//           c(j)=the sum from k=1,...,n of
-//             c(k)*exp(i*(j-1)*(k-1)*2*pi/n)
+//           c[j]=the sum from k=1,...,n of
+//             c[k]*exp(i*(j-1)*(k-1)*2*pi/n)
 //
 //         where i=sqrt(-1)
 //
@@ -209,9 +212,12 @@ func cfftf(n int, r, work []float64, ifac []int) {
 //  followed by a call of cfftb will multiply the input
 //  sequence by n.
 //
-//  work   contains results which must not be destroyed between
+//  The n elements of c are represented in n pairs of real
+//  values in r where c[j] = r[j*2]+r[j*2+1]i.
+//
+//  work   Contains results which must not be destroyed between
 //         calls of cfftf or cfftb.
-//  ifac   contains results which must not be destroyed between
+//  ifac   Contains results which must not be destroyed between
 //         calls of cfftf or cfftb.
 func cfftb(n int, r, work []float64, ifac []int) {
 	if len(r) < 2*n {

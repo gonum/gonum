@@ -161,7 +161,7 @@ func rfftf(n int, r, work []float64, ifac []int) {
 
 func rfftf1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
-	na := 1
+	na := true
 	l2 := n
 	iw := n - 1
 
@@ -172,56 +172,56 @@ func rfftf1(n int, c, ch, wa []float64, ifac []int) {
 		ido := n / l2
 		idl1 := ido * l1
 		iw -= (ip - 1) * ido
-		na = 1 - na
+		na = !na
 
 		switch ip {
 		case 4:
 			ix2 := iw + ido
 			ix3 := ix2 + ido
-			if na == 0 {
-				radf4(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
-			} else {
+			if na {
 				radf4(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
+			} else {
+				radf4(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			}
 		case 2:
-			if na == 0 {
-				radf2(ido, l1, c, ch, wa[iw:])
-			} else {
+			if na {
 				radf2(ido, l1, ch, c, wa[iw:])
+			} else {
+				radf2(ido, l1, c, ch, wa[iw:])
 			}
 		case 3:
 			ix2 := iw + ido
-			if na == 0 {
-				radf3(ido, l1, c, ch, wa[iw:], wa[ix2:])
-			} else {
+			if na {
 				radf3(ido, l1, ch, c, wa[iw:], wa[ix2:])
+			} else {
+				radf3(ido, l1, c, ch, wa[iw:], wa[ix2:])
 			}
 		case 5:
 			ix2 := iw + ido
 			ix3 := ix2 + ido
 			ix4 := ix3 + ido
-			if na == 0 {
-				radf5(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
-			} else {
+			if na {
 				radf5(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
+			} else {
+				radf5(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			}
 		default:
 			if ido == 1 {
-				na = 1 - na
+				na = !na
 			}
-			if na == 0 {
-				radfg(ido, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
-				na = 1
-			} else {
+			if na {
 				radfg(ido, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
-				na = 0
+				na = false
+			} else {
+				radfg(ido, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
+				na = true
 			}
 		}
 
 		l2 = l1
 	}
 
-	if na == 1 {
+	if na {
 		return
 	}
 	for i := 0; i < n; i++ {
@@ -666,7 +666,7 @@ func rfftb(n int, r, work []float64, ifac []int) {
 
 func rfftb1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
-	na := 0
+	na := false
 	l1 := 1
 	iw := 0
 
@@ -680,45 +680,45 @@ func rfftb1(n int, c, ch, wa []float64, ifac []int) {
 		case 4:
 			ix2 := iw + ido
 			ix3 := ix2 + ido
-			if na == 0 {
-				radb4(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
-			} else {
+			if na {
 				radb4(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
-			}
-			na = 1 - na
-		case 2:
-			if na == 0 {
-				radb2(ido, l1, c, ch, wa[iw:])
 			} else {
-				radb2(ido, l1, ch, c, wa[iw:])
+				radb4(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			}
-			na = 1 - na
+			na = !na
+		case 2:
+			if na {
+				radb2(ido, l1, ch, c, wa[iw:])
+			} else {
+				radb2(ido, l1, c, ch, wa[iw:])
+			}
+			na = !na
 		case 3:
 			ix2 := iw + ido
-			if na == 0 {
-				radb3(ido, l1, c, ch, wa[iw:], wa[ix2:])
-			} else {
+			if na {
 				radb3(ido, l1, ch, c, wa[iw:], wa[ix2:])
+			} else {
+				radb3(ido, l1, c, ch, wa[iw:], wa[ix2:])
 			}
-			na = 1 - na
+			na = !na
 		case 5:
 			ix2 := iw + ido
 			ix3 := ix2 + ido
 			ix4 := ix3 + ido
-			if na == 0 {
-				radb5(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
-			} else {
+			if na {
 				radb5(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
-			}
-			na = 1 - na
-		default:
-			if na == 0 {
-				radbg(ido, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 			} else {
+				radb5(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
+			}
+			na = !na
+		default:
+			if na {
 				radbg(ido, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
+			} else {
+				radbg(ido, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 			}
 			if ido == 1 {
-				na = 1 - na
+				na = !na
 			}
 		}
 
@@ -726,11 +726,10 @@ func rfftb1(n int, c, ch, wa []float64, ifac []int) {
 		iw += (ip - 1) * ido
 	}
 
-	if na == 0 {
-		return
-	}
-	for i := 0; i < n; i++ {
-		c[i] = ch[i]
+	if na {
+		for i := 0; i < n; i++ {
+			c[i] = ch[i]
+		}
 	}
 }
 

@@ -158,7 +158,7 @@ func cfftf(n int, r, work []float64, ifac []int) {
 
 func cfftf1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
-	na := 0
+	na := false
 	l1 := 1
 	iw := 0
 
@@ -173,46 +173,46 @@ func cfftf1(n int, c, ch, wa []float64, ifac []int) {
 		case 4:
 			ix2 := iw + idot
 			ix3 := ix2 + idot
-			if na == 0 {
-				passf4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
-			} else {
+			if na {
 				passf4(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
-			}
-			na = 1 - na
-		case 2:
-			if na == 0 {
-				passf2(idot, l1, c, ch, wa[iw:])
 			} else {
-				passf2(idot, l1, ch, c, wa[iw:])
+				passf4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			}
-			na = 1 - na
+			na = !na
+		case 2:
+			if na {
+				passf2(idot, l1, ch, c, wa[iw:])
+			} else {
+				passf2(idot, l1, c, ch, wa[iw:])
+			}
+			na = !na
 		case 3:
 			ix2 := iw + idot
-			if na == 0 {
-				passf3(idot, l1, c, ch, wa[iw:], wa[ix2:])
-			} else {
+			if na {
 				passf3(idot, l1, ch, c, wa[iw:], wa[ix2:])
+			} else {
+				passf3(idot, l1, c, ch, wa[iw:], wa[ix2:])
 			}
-			na = 1 - na
+			na = !na
 		case 5:
 			ix2 := iw + idot
 			ix3 := ix2 + idot
 			ix4 := ix3 + idot
-			if na == 0 {
-				passf5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
-			} else {
+			if na {
 				passf5(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
+			} else {
+				passf5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			}
-			na = 1 - na
+			na = !na
 		default:
 			var nac bool
-			if na == 0 {
-				nac = passf(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
-			} else {
+			if na {
 				nac = passf(idot, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
+			} else {
+				nac = passf(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 			}
 			if nac {
-				na = 1 - na
+				na = !na
 			}
 		}
 
@@ -220,11 +220,10 @@ func cfftf1(n int, c, ch, wa []float64, ifac []int) {
 		iw += (ip - 1) * idot
 	}
 
-	if na == 0 {
-		return
-	}
-	for i := 0; i < 2*n; i++ {
-		c[i] = ch[i]
+	if na {
+		for i := 0; i < 2*n; i++ {
+			c[i] = ch[i]
+		}
 	}
 }
 
@@ -623,7 +622,7 @@ func cfftb(n int, r, work []float64, ifac []int) {
 
 func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
-	na := 0
+	na := false
 	l1 := 1
 	iw := 0
 
@@ -638,46 +637,46 @@ func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 		case 4:
 			ix2 := iw + idot
 			ix3 := ix2 + idot
-			if na == 0 {
-				passb4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
-			} else {
+			if na {
 				passb4(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
-			}
-			na = 1 - na
-		case 2:
-			if na == 0 {
-				passb2(idot, l1, c, ch, wa[iw:])
 			} else {
-				passb2(idot, l1, ch, c, wa[iw:])
+				passb4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			}
-			na = 1 - na
+			na = !na
+		case 2:
+			if na {
+				passb2(idot, l1, ch, c, wa[iw:])
+			} else {
+				passb2(idot, l1, c, ch, wa[iw:])
+			}
+			na = !na
 		case 3:
 			ix2 := iw + idot
-			if na == 0 {
-				passb3(idot, l1, c, ch, wa[iw:], wa[ix2:])
-			} else {
+			if na {
 				passb3(idot, l1, ch, c, wa[iw:], wa[ix2:])
+			} else {
+				passb3(idot, l1, c, ch, wa[iw:], wa[ix2:])
 			}
-			na = 1 - na
+			na = !na
 		case 5:
 			ix2 := iw + idot
 			ix3 := ix2 + idot
 			ix4 := ix3 + idot
-			if na == 0 {
-				passb5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
-			} else {
+			if na {
 				passb5(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
+			} else {
+				passb5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			}
-			na = 1 - na
+			na = !na
 		default:
 			var nac bool
-			if na == 0 {
-				nac = passb(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
-			} else {
+			if na {
 				nac = passb(idot, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
+			} else {
+				nac = passb(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 			}
 			if nac {
-				na = 1 - na
+				na = !na
 			}
 		}
 
@@ -685,11 +684,10 @@ func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 		iw += (ip - 1) * idot
 	}
 
-	if na == 0 {
-		return
-	}
-	for i := 0; i < 2*n; i++ {
-		c[i] = ch[i]
+	if na {
+		for i := 0; i < 2*n; i++ {
+			c[i] = ch[i]
+		}
 	}
 }
 

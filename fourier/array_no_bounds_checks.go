@@ -35,6 +35,10 @@ func (a twoArray) set(i, j int, v float64) {
 	a.data[i+a.jStride*j] = v
 }
 
+func (a twoArray) add(i, j int, v float64) {
+	a.data[i+a.jStride*j] += v
+}
+
 type threeArray struct {
 	jStride, kStride int
 	data             []float64

@@ -30,10 +30,16 @@ import "math"
 //  ifac   a work array containing the factors of n. ifac must have
 //         length 15.
 func cffti(n int, work []float64, ifac []int) {
+	if len(work) < 4*n {
+		panic("fourier: short work")
+	}
+	if len(ifac) < 15 {
+		panic("fourier: short ifac")
+	}
 	if n == 1 {
 		return
 	}
-	cffti1(n, work[2*n:], ifac)
+	cffti1(n, work[2*n:4*n], ifac[:15])
 }
 
 func cffti1(n int, wa []float64, ifac []int) {
@@ -150,10 +156,19 @@ outer:
 //  ifac   contains results which must not be destroyed between
 //         calls of cfftf or cfftb.
 func cfftf(n int, r, work []float64, ifac []int) {
+	if len(r) < 2*n {
+		panic("fourier: short sequence")
+	}
+	if len(work) < 4*n {
+		panic("fourier: short work")
+	}
+	if len(ifac) < 15 {
+		panic("fourier: short ifac")
+	}
 	if n == 1 {
 		return
 	}
-	cfft1(n, r, work, work[2*n:], ifac, -1)
+	cfft1(n, r[:2*n], work[:2*n], work[2*n:4*n], ifac[:15], -1)
 }
 
 // cfftb computes the forward complex discrete fourier
@@ -184,7 +199,7 @@ func cfftf(n int, r, work []float64, ifac []int) {
 //
 //  output parameters
 //
-//   c     for j=1,...,n
+//  c      for j=1,...,n
 //           c(j)=the sum from k=1,...,n of
 //             c(k)*exp(i*(j-1)*(k-1)*2*pi/n)
 //
@@ -199,10 +214,19 @@ func cfftf(n int, r, work []float64, ifac []int) {
 //  ifac   contains results which must not be destroyed between
 //         calls of cfftf or cfftb.
 func cfftb(n int, r, work []float64, ifac []int) {
+	if len(r) < 2*n {
+		panic("fourier: short sequence")
+	}
+	if len(work) < 4*n {
+		panic("fourier: short work")
+	}
+	if len(ifac) < 15 {
+		panic("fourier: short ifac")
+	}
 	if n == 1 {
 		return
 	}
-	cfft1(n, r, work, work[2*n:], ifac, 1)
+	cfft1(n, r[:2*n], work[:2*n], work[2*n:4*n], ifac[:15], 1)
 }
 
 func cfft1(n int, c, ch, wa []float64, ifac []int, sign float64) {

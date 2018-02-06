@@ -30,10 +30,16 @@ import "math"
 //  ifac   a work array containing the factors of n. ifac must have
 //         length 15.
 func rffti(n int, work []float64, ifac []int) {
+	if len(work) < 2*n {
+		panic("fourier: short work")
+	}
+	if len(ifac) < 15 {
+		panic("fourier: short ifac")
+	}
 	if n == 1 {
 		return
 	}
-	rffti1(n, work[n:], ifac)
+	rffti1(n, work[n:2*n], ifac[:15])
 }
 
 func rffti1(n int, wa []float64, ifac []int) {
@@ -153,10 +159,19 @@ outer:
 //  ifac   contains results which must not be destroyed between
 //         calls of rfftf or rfftb.
 func rfftf(n int, r, work []float64, ifac []int) {
+	if len(r) < n {
+		panic("fourier: short sequence")
+	}
+	if len(work) < 2*n {
+		panic("fourier: short work")
+	}
+	if len(ifac) < 15 {
+		panic("fourier: short ifac")
+	}
 	if n == 1 {
 		return
 	}
-	rfftf1(n, r, work, work[n:], ifac)
+	rfftf1(n, r[:n], work[:n], work[n:2*n], ifac[:15])
 }
 
 func rfftf1(n int, c, ch, wa []float64, ifac []int) {
@@ -656,10 +671,19 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 //  ifac   contains results which must not be destroyed between
 //         calls of rfftf or rfftb.
 func rfftb(n int, r, work []float64, ifac []int) {
+	if len(r) < n {
+		panic("fourier: short sequence")
+	}
+	if len(work) < 2*n {
+		panic("fourier: short work")
+	}
+	if len(ifac) < 15 {
+		panic("fourier: short ifac")
+	}
 	if n == 1 {
 		return
 	}
-	rfftb1(n, r, work, work[n:], ifac)
+	rfftb1(n, r[:n], work[:n], work[n:2*n], ifac[:15])
 }
 
 func rfftb1(n int, c, ch, wa []float64, ifac []int) {

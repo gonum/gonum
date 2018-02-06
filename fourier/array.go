@@ -8,28 +8,9 @@ import "fmt"
 
 // The types in array.go implement Fortran-like arrays for bootstrapping
 // the implementation of the FFT functions translated from FFTPACK; they
-// are column-major one-based.
-// TODO(kortschak): Make types zero-based and remove linear array types.
+// are column-major.
 // TODO(kortschak): Make a bounds-checking and non-bounds-checking version
 // for testing/production.
-
-type oneArray []float64
-
-func (a oneArray) at(i int) float64 {
-	i--
-	if i < 0 || len(a) <= i {
-		panic(fmt.Sprintf("out of bounds at(%d): bounds i=%d", i, len(a)))
-	}
-	return a[i]
-}
-
-func (a oneArray) set(i int, v float64) {
-	i--
-	if i < 0 || len(a) <= i {
-		panic(fmt.Sprintf("out of bounds set(%d): bounds i=%d", i, len(a)))
-	}
-	a[i] = v
-}
 
 type twoArray struct {
 	i, j    int
@@ -50,8 +31,6 @@ func newTwoArray(i, j int, data []float64) twoArray {
 }
 
 func (a twoArray) at(i, j int) float64 {
-	i--
-	j--
 	if i < 0 || a.i <= i || j < 0 || a.j <= j {
 		panic(fmt.Sprintf("out of bounds at(%d, %d): bounds i=%d, j=%d", i, j, a.i, a.j))
 	}
@@ -59,8 +38,6 @@ func (a twoArray) at(i, j int) float64 {
 }
 
 func (a twoArray) set(i, j int, v float64) {
-	i--
-	j--
 	if i < 0 || a.i <= i || j < 0 || a.j <= j {
 		panic(fmt.Sprintf("out of bounds set(%d, %d): bounds i=%d, j=%d", i, j, a.i, a.j))
 	}
@@ -88,9 +65,6 @@ func newThreeArray(i, j, k int, data []float64) threeArray {
 }
 
 func (a threeArray) at(i, j, k int) float64 {
-	i--
-	j--
-	k--
 	if i < 0 || a.i <= i || j < 0 || a.j <= j || k < 0 || a.k <= k {
 		panic(fmt.Sprintf("out of bounds at(%d, %d, %d): bounds i=%d, j=%d, k=%d", i, j, k, a.i, a.j, a.k))
 	}
@@ -98,9 +72,6 @@ func (a threeArray) at(i, j, k int) float64 {
 }
 
 func (a threeArray) set(i, j, k int, v float64) {
-	i--
-	j--
-	k--
 	if i < 0 || a.i <= i || j < 0 || a.j <= j || k < 0 || a.k <= k {
 		panic(fmt.Sprintf("out of bounds set(%d, %d, %d): bounds i=%d, j=%d, k=%d", i, j, k, a.i, a.j, a.k))
 	}

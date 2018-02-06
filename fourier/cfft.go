@@ -498,15 +498,15 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 			war := wa[idlj-1]
 			wai := wa[idlj]
 			for ik := 0; ik < idl1; ik++ {
-				c2m.set(ik, l, c2m.at(ik, l)+war*ch2m.at(ik, j))
-				c2m.set(ik, lc, c2m.at(ik, lc)-wai*ch2m.at(ik, jc))
+				c2m.add(ik, l, war*ch2m.at(ik, j))
+				c2m.add(ik, lc, -wai*ch2m.at(ik, jc))
 			}
 		}
 	}
 
 	for j := 1; j < ipph; j++ {
 		for ik := 0; ik < idl1; ik++ {
-			ch2m.set(ik, 0, ch2m.at(ik, 0)+ch2m.at(ik, j))
+			ch2m.add(ik, 0, ch2m.at(ik, j))
 		}
 	}
 
@@ -961,15 +961,15 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 			war := wa[idlj-1]
 			wai := wa[idlj]
 			for ik := 0; ik < idl1; ik++ {
-				c2m.set(ik, l, c2m.at(ik, l)+war*ch2m.at(ik, j))
-				c2m.set(ik, lc, c2m.at(ik, lc)+wai*ch2m.at(ik, jc))
+				c2m.add(ik, l, war*ch2m.at(ik, j))
+				c2m.add(ik, lc, wai*ch2m.at(ik, jc))
 			}
 		}
 	}
 
 	for j := 1; j < ipph; j++ {
 		for ik := 0; ik < idl1; ik++ {
-			ch2m.set(ik, 0, ch2m.at(ik, 0)+ch2m.at(ik, j))
+			ch2m.add(ik, 0, ch2m.at(ik, j))
 		}
 	}
 

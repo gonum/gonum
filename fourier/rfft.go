@@ -542,14 +542,14 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 			ai2 = dc2*ai2 + ds2*ar2
 			ar2 = ar2h
 			for ik := 0; ik < idl1; ik++ {
-				ch2m.set(ik, l, ch2m.at(ik, l)+ar2*c2m.at(ik, j))
-				ch2m.set(ik, lc, ch2m.at(ik, lc)+ai2*c2m.at(ik, jc))
+				ch2m.add(ik, l, ar2*c2m.at(ik, j))
+				ch2m.add(ik, lc, ai2*c2m.at(ik, jc))
 			}
 		}
 	}
 	for j := 1; j < ipph; j++ {
 		for ik := 0; ik < idl1; ik++ {
-			ch2m.set(ik, 0, ch2m.at(ik, 0)+c2m.at(ik, j))
+			ch2m.add(ik, 0, c2m.at(ik, j))
 		}
 	}
 
@@ -1039,15 +1039,15 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 			ai2 = dc2*ai2 + ds2*ar2
 			ar2 = ar2h
 			for ik := 0; ik < idl1; ik++ {
-				c2m.set(ik, l, c2m.at(ik, l)+ar2*ch2m.at(ik, j))
-				c2m.set(ik, lc, c2m.at(ik, lc)+ai2*ch2m.at(ik, jc))
+				c2m.add(ik, l, ar2*ch2m.at(ik, j))
+				c2m.add(ik, lc, ai2*ch2m.at(ik, jc))
 			}
 		}
 	}
 
 	for j := 1; j < ipph; j++ {
 		for ik := 0; ik < idl1; ik++ {
-			ch2m.set(ik, 0, ch2m.at(ik, 0)+ch2m.at(ik, j))
+			ch2m.add(ik, 0, ch2m.at(ik, j))
 		}
 	}
 	for j := 1; j < ipph; j++ {

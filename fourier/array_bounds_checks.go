@@ -46,6 +46,13 @@ func (a twoArray) set(i, j int, v float64) {
 	a.data[i+a.jStride*j] = v
 }
 
+func (a twoArray) add(i, j int, v float64) {
+	if i < 0 || a.i <= i || j < 0 || a.j <= j {
+		panic(fmt.Sprintf("out of bounds set(%d, %d): bounds i=%d, j=%d", i, j, a.i, a.j))
+	}
+	a.data[i+a.jStride*j] += v
+}
+
 type threeArray struct {
 	i, j, k          int
 	jStride, kStride int

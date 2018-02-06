@@ -434,7 +434,7 @@ func radf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 	}
 }
 
-func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
+func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	cc3 := newThreeArray(ido, ip, l1, cc)
 	c13 := newThreeArray(ido, l1, ip, c1)
 	ch3 := newThreeArray(ido, l1, ip, ch)
@@ -445,55 +445,55 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
 	dcp := math.Cos(arg)
 	dsp := math.Sin(arg)
 	ipph := (ip + 1) / 2
-	ipp2 := ip + 2
-	idp2 := ido + 2
+	ipp2 := ip + 1
+	idp2 := ido + 1
 	nbd := (ido - 1) / 2
 
 	if ido == 1 {
-		for ik := 1; ik <= idl1; ik++ {
-			c2m.set(ik, 1, ch2m.at(ik, 1))
+		for ik := 0; ik < idl1; ik++ {
+			c2m.set(ik, 0, ch2m.at(ik, 0))
 		}
 	} else {
-		for ik := 1; ik <= idl1; ik++ {
-			ch2m.set(ik, 1, c2m.at(ik, 1))
+		for ik := 0; ik < idl1; ik++ {
+			ch2m.set(ik, 0, c2m.at(ik, 0))
 		}
-		for j := 2; j <= ip; j++ {
-			for k := 1; k <= l1; k++ {
-				ch3.set(1, k, j, c13.at(1, k, j))
+		for j := 1; j < ip; j++ {
+			for k := 0; k < l1; k++ {
+				ch3.set(0, k, j, c13.at(0, k, j))
 			}
 		}
 
-		is := -ido
+		is := -ido - 1
 		if nbd > l1 {
-			for j := 2; j <= ip; j++ {
+			for j := 1; j < ip; j++ {
 				is += ido
-				for k := 1; k <= l1; k++ {
+				for k := 0; k < l1; k++ {
 					idij := is
-					for i := 3; i <= ido; i += 2 {
+					for i := 2; i < ido; i += 2 {
 						idij += 2
-						ch3.set(i-1, k, j, wa.at(idij-1)*c13.at(i-1, k, j)+wa.at(idij)*c13.at(i, k, j))
-						ch3.set(i, k, j, wa.at(idij-1)*c13.at(i, k, j)-wa.at(idij)*c13.at(i-1, k, j))
+						ch3.set(i-1, k, j, wa[idij-1]*c13.at(i-1, k, j)+wa[idij]*c13.at(i, k, j))
+						ch3.set(i, k, j, wa[idij-1]*c13.at(i, k, j)-wa[idij]*c13.at(i-1, k, j))
 					}
 				}
 			}
 		} else {
-			for j := 2; j <= ip; j++ {
+			for j := 1; j < ip; j++ {
 				is += ido
 				idij := is
-				for i := 3; i <= ido; i += 2 {
+				for i := 2; i < ido; i += 2 {
 					idij += 2
-					for k := 1; k <= l1; k++ {
-						ch3.set(i-1, k, j, wa.at(idij-1)*c13.at(i-1, k, j)+wa.at(idij)*c13.at(i, k, j))
-						ch3.set(i, k, j, wa.at(idij-1)*c13.at(i, k, j)-wa.at(idij)*c13.at(i-1, k, j))
+					for k := 0; k < l1; k++ {
+						ch3.set(i-1, k, j, wa[idij-1]*c13.at(i-1, k, j)+wa[idij]*c13.at(i, k, j))
+						ch3.set(i, k, j, wa[idij-1]*c13.at(i, k, j)-wa[idij]*c13.at(i-1, k, j))
 					}
 				}
 			}
 		}
 		if nbd < l1 {
-			for j := 2; j <= ipph; j++ {
-				jc := ipp2 - j
-				for i := 3; i <= ido; i += 2 {
-					for k := 1; k <= l1; k++ {
+			for j := 1; j < ipph; j++ {
+				jc := ipp2 - (j + 1)
+				for i := 2; i < ido; i += 2 {
+					for k := 0; k < l1; k++ {
 						c13.set(i-1, k, j, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
 						c13.set(i-1, k, jc, ch3.at(i, k, j)-ch3.at(i, k, jc))
 						c13.set(i, k, j, ch3.at(i, k, j)+ch3.at(i, k, jc))
@@ -502,10 +502,10 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
 				}
 			}
 		} else {
-			for j := 2; j <= ipph; j++ {
-				jc := ipp2 - j
-				for k := 1; k <= l1; k++ {
-					for i := 3; i <= ido; i += 2 {
+			for j := 1; j < ipph; j++ {
+				jc := ipp2 - (j + 1)
+				for k := 0; k < l1; k++ {
+					for i := 2; i < ido; i += 2 {
 						c13.set(i-1, k, j, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
 						c13.set(i-1, k, jc, ch3.at(i, k, j)-ch3.at(i, k, jc))
 						c13.set(i, k, j, ch3.at(i, k, j)+ch3.at(i, k, jc))
@@ -516,64 +516,64 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
 		}
 	}
 
-	for j := 2; j <= ipph; j++ {
-		jc := ipp2 - j
-		for k := 1; k <= l1; k++ {
-			c13.set(1, k, j, ch3.at(1, k, j)+ch3.at(1, k, jc))
-			c13.set(1, k, jc, ch3.at(1, k, jc)-ch3.at(1, k, j))
+	for j := 1; j < ipph; j++ {
+		jc := ipp2 - (j + 1)
+		for k := 0; k < l1; k++ {
+			c13.set(0, k, j, ch3.at(0, k, j)+ch3.at(0, k, jc))
+			c13.set(0, k, jc, ch3.at(0, k, jc)-ch3.at(0, k, j))
 		}
 	}
 	ar1 := 1.0
 	ai1 := 0.0
-	for l := 2; l <= ipph; l++ {
-		lc := ipp2 - l
+	for l := 1; l < ipph; l++ {
+		lc := ipp2 - (l + 1)
 		ar1h := dcp*ar1 - dsp*ai1
 		ai1 = dcp*ai1 + dsp*ar1
 		ar1 = ar1h
-		for ik := 1; ik <= idl1; ik++ {
-			ch2m.set(ik, l, c2m.at(ik, 1)+ar1*c2m.at(ik, 2))
-			ch2m.set(ik, lc, ai1*c2m.at(ik, ip))
+		for ik := 0; ik < idl1; ik++ {
+			ch2m.set(ik, l, c2m.at(ik, 0)+ar1*c2m.at(ik, 1))
+			ch2m.set(ik, lc, ai1*c2m.at(ik, ip-1))
 		}
 		dc2 := ar1
 		ds2 := ai1
 		ar2 := ar1
 		ai2 := ai1
-		for j := 3; j <= ipph; j++ {
-			jc := ipp2 - j
+		for j := 2; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
 			ar2h := dc2*ar2 - ds2*ai2
 			ai2 = dc2*ai2 + ds2*ar2
 			ar2 = ar2h
-			for ik := 1; ik <= idl1; ik++ {
+			for ik := 0; ik < idl1; ik++ {
 				ch2m.set(ik, l, ch2m.at(ik, l)+ar2*c2m.at(ik, j))
 				ch2m.set(ik, lc, ch2m.at(ik, lc)+ai2*c2m.at(ik, jc))
 			}
 		}
 	}
-	for j := 2; j <= ipph; j++ {
-		for ik := 1; ik <= idl1; ik++ {
-			ch2m.set(ik, 1, ch2m.at(ik, 1)+c2m.at(ik, j))
+	for j := 1; j < ipph; j++ {
+		for ik := 0; ik < idl1; ik++ {
+			ch2m.set(ik, 0, ch2m.at(ik, 0)+c2m.at(ik, j))
 		}
 	}
 
 	if ido < l1 {
-		for i := 1; i <= ido; i++ {
-			for k := 1; k <= l1; k++ {
-				cc3.set(i, 1, k, ch3.at(i, k, 1))
+		for i := 0; i < ido; i++ {
+			for k := 0; k < l1; k++ {
+				cc3.set(i, 0, k, ch3.at(i, k, 0))
 			}
 		}
 	} else {
-		for k := 1; k <= l1; k++ {
-			for i := 1; i <= ido; i++ {
-				cc3.set(i, 1, k, ch3.at(i, k, 1))
+		for k := 0; k < l1; k++ {
+			for i := 0; i < ido; i++ {
+				cc3.set(i, 0, k, ch3.at(i, k, 0))
 			}
 		}
 	}
-	for j := 2; j <= ipph; j++ {
-		jc := ipp2 - j
+	for j := 1; j < ipph; j++ {
+		jc := ipp2 - (j + 1)
 		j2 := 2 * j
-		for k := 1; k <= l1; k++ {
-			cc3.set(ido, j2-2, k, ch3.at(1, k, j))
-			cc3.set(1, j2-1, k, ch3.at(1, k, jc))
+		for k := 0; k < l1; k++ {
+			cc3.set(ido-1, j2-1, k, ch3.at(0, k, j))
+			cc3.set(0, j2, k, ch3.at(0, k, jc))
 		}
 	}
 
@@ -581,31 +581,31 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
 		return
 	}
 	if nbd < l1 {
-		for j := 2; j <= ipph; j++ {
-			jc := ipp2 - j
+		for j := 1; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
 			j2 := 2 * j
-			for i := 3; i <= ido; i += 2 {
-				ic := idp2 - i
-				for k := 1; k <= l1; k++ {
-					cc3.set(i-1, j2-1, k, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
-					cc3.set(ic-1, j2-2, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
-					cc3.set(i, j2-1, k, ch3.at(i, k, j)+ch3.at(i, k, jc))
-					cc3.set(ic, j2-2, k, ch3.at(i, k, jc)-ch3.at(i, k, j))
+			for i := 2; i < ido; i += 2 {
+				ic := idp2 - (i + 1)
+				for k := 0; k < l1; k++ {
+					cc3.set(i-1, j2, k, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
+					cc3.set(ic-1, j2-1, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
+					cc3.set(i, j2, k, ch3.at(i, k, j)+ch3.at(i, k, jc))
+					cc3.set(ic, j2-1, k, ch3.at(i, k, jc)-ch3.at(i, k, j))
 				}
 			}
 		}
 		return
 	}
-	for j := 2; j <= ipph; j++ {
-		jc := ipp2 - j
+	for j := 1; j < ipph; j++ {
+		jc := ipp2 - (j + 1)
 		j2 := 2 * j
-		for k := 1; k <= l1; k++ {
-			for i := 3; i <= ido; i += 2 {
-				ic := idp2 - i
-				cc3.set(i-1, j2-1, k, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
-				cc3.set(ic-1, j2-2, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
-				cc3.set(i, j2-1, k, ch3.at(i, k, j)+ch3.at(i, k, jc))
-				cc3.set(ic, j2-2, k, ch3.at(i, k, jc)-ch3.at(i, k, j))
+		for k := 0; k < l1; k++ {
+			for i := 2; i < ido; i += 2 {
+				ic := ido - i
+				cc3.set(i-1, j2, k, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
+				cc3.set(ic-1, j2-1, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
+				cc3.set(i, j2, k, ch3.at(i, k, j)+ch3.at(i, k, jc))
+				cc3.set(ic, j2-1, k, ch3.at(i, k, jc)-ch3.at(i, k, j))
 			}
 		}
 	}
@@ -952,68 +952,70 @@ func radb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 	}
 }
 
-func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
-	cc3 := newThreeArray(ido, ip, l1, cc)
-	c13 := newThreeArray(ido, l1, ip, c1)
-	ch3 := newThreeArray(ido, l1, ip, ch)
-	c2m := newTwoArray(idl1, ip, c2)
-	ch2m := newTwoArray(idl1, ip, ch2)
+func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
+	cc3 := newThreeArrayZ(ido, ip, l1, cc)
+	c13 := newThreeArrayZ(ido, l1, ip, c1)
+	ch3 := newThreeArrayZ(ido, l1, ip, ch)
+	c2m := newTwoArrayZ(idl1, ip, c2)
+	ch2m := newTwoArrayZ(idl1, ip, ch2)
 
 	arg := 2 * math.Pi / float64(ip)
 	dcp := math.Cos(arg)
 	dsp := math.Sin(arg)
 	ipph := (ip + 1) / 2
-	ipp2 := ip + 2
-	idp2 := ido + 2
+	ipp2 := ip + 1
+	idp2 := ido + 1
 	nbd := (ido - 1) / 2
 
 	if ido < l1 {
-		for i := 1; i <= ido; i++ {
-			for k := 1; k <= l1; k++ {
-				ch3.set(i, k, 1, cc3.at(i, 1, k))
+		for i := 0; i < ido; i++ {
+			for k := 0; k < l1; k++ {
+				ch3.set(i, k, 0, cc3.at(i, 0, k))
 			}
 		}
 	} else {
-		for k := 1; k <= l1; k++ {
-			for i := 1; i <= ido; i++ {
-				ch3.set(i, k, 1, cc3.at(i, 1, k))
+		for k := 0; k < l1; k++ {
+			for i := 0; i < ido; i++ {
+				ch3.set(i, k, 0, cc3.at(i, 0, k))
 			}
 		}
 	}
 
-	for j := 2; j <= ipph; j++ {
-		jc := ipp2 - j
+	for j := 1; j < ipph; j++ {
+		jc := ipp2 - (j + 1)
 		j2 := 2 * j
-		for k := 1; k <= l1; k++ {
-			ch3.set(1, k, j, cc3.at(ido, j2-2, k)+cc3.at(ido, j2-2, k))
-			ch3.set(1, k, jc, cc3.at(1, j2-1, k)+cc3.at(1, j2-1, k))
+		for k := 0; k < l1; k++ {
+			ch3.set(0, k, j, cc3.at(ido-1, j2-1, k)+cc3.at(ido-1, j2-1, k))
+			ch3.set(0, k, jc, cc3.at(0, j2, k)+cc3.at(0, j2, k))
 		}
 	}
 
 	if ido != 1 {
 		if nbd < l1 {
-			for j := 2; j <= ipph; j++ {
-				jc := ipp2 - j
-				for i := 3; i <= ido; i += 2 {
-					ic := idp2 - i
-					for k := 1; k <= l1; k++ {
-						ch3.set(i-1, k, j, cc3.at(i-1, 2*j-1, k)+cc3.at(ic-1, 2*j-2, k))
-						ch3.set(i-1, k, jc, cc3.at(i-1, 2*j-1, k)-cc3.at(ic-1, 2*j-2, k))
-						ch3.set(i, k, j, cc3.at(i, 2*j-1, k)-cc3.at(ic, 2*j-2, k))
-						ch3.set(i, k, jc, cc3.at(i, 2*j-1, k)+cc3.at(ic, 2*j-2, k))
+			for j := 1; j < ipph; j++ {
+				jc := ipp2 - (j + 1)
+				j2 := 2 * j
+				for i := 2; i < ido; i += 2 {
+					ic := idp2 - (i + 1)
+					for k := 0; k < l1; k++ {
+						ch3.set(i-1, k, j, cc3.at(i-1, j2, k)+cc3.at(ic-1, j2-1, k))
+						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
+						ch3.set(i, k, j, cc3.at(i, j2, k)-cc3.at(ic, j2-1, k))
+						ch3.set(i, k, jc, cc3.at(i, j2, k)+cc3.at(ic, j2-1, k))
 					}
 				}
 			}
 		} else {
-			for j := 2; j <= ipph; j++ {
-				jc := ipp2 - j
-				for k := 1; k <= l1; k++ {
-					for i := 3; i <= ido; i += 2 {
-						ic := idp2 - i
-						ch3.set(i-1, k, j, cc3.at(i-1, 2*j-1, k)+cc3.at(ic-1, 2*j-2, k))
-						ch3.set(i-1, k, jc, cc3.at(i-1, 2*j-1, k)-cc3.at(ic-1, 2*j-2, k))
-						ch3.set(i, k, j, cc3.at(i, 2*j-1, k)-cc3.at(ic, 2*j-2, k))
-						ch3.set(i, k, jc, cc3.at(i, 2*j-1, k)+cc3.at(ic, 2*j-2, k))
+			for j := 1; j < ipph; j++ {
+				jc := ipp2 - (j + 1)
+				j2 := 2 * j
+				for k := 0; k < l1; k++ {
+					for i := 2; i < ido; i += 2 {
+						ic := idp2 - (i + 1)
+						ch3.set(i-1, k, j, cc3.at(i-1, j2, k)+cc3.at(ic-1, j2-1, k))
+						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
+						ch3.set(i, k, j, cc3.at(i, j2, k)-cc3.at(ic, j2-1, k))
+						ch3.set(i, k, jc, cc3.at(i, j2, k)+cc3.at(ic, j2-1, k))
 					}
 				}
 			}
@@ -1022,50 +1024,50 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
 
 	ar1 := 1.0
 	ai1 := 0.0
-	for l := 2; l <= ipph; l++ {
-		lc := ipp2 - l
+	for l := 1; l < ipph; l++ {
+		lc := ipp2 - (l + 1)
 		ar1h := dcp*ar1 - dsp*ai1
 		ai1 = dcp*ai1 + dsp*ar1
 		ar1 = ar1h
-		for ik := 1; ik <= idl1; ik++ {
-			c2m.set(ik, l, ch2m.at(ik, 1)+ar1*ch2m.at(ik, 2))
-			c2m.set(ik, lc, ai1*ch2m.at(ik, ip))
+		for ik := 0; ik < idl1; ik++ {
+			c2m.set(ik, l, ch2m.at(ik, 0)+ar1*ch2m.at(ik, 1))
+			c2m.set(ik, lc, ai1*ch2m.at(ik, ip-1))
 		}
 		dc2 := ar1
 		ds2 := ai1
 		ar2 := ar1
 		ai2 := ai1
-		for j := 3; j <= ipph; j++ {
-			jc := ipp2 - j
+		for j := 2; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
 			ar2h := dc2*ar2 - ds2*ai2
 			ai2 = dc2*ai2 + ds2*ar2
 			ar2 = ar2h
-			for ik := 1; ik <= idl1; ik++ {
+			for ik := 0; ik < idl1; ik++ {
 				c2m.set(ik, l, c2m.at(ik, l)+ar2*ch2m.at(ik, j))
 				c2m.set(ik, lc, c2m.at(ik, lc)+ai2*ch2m.at(ik, jc))
 			}
 		}
 	}
 
-	for j := 2; j <= ipph; j++ {
-		for ik := 1; ik <= idl1; ik++ {
-			ch2m.set(ik, 1, ch2m.at(ik, 1)+ch2m.at(ik, j))
+	for j := 1; j < ipph; j++ {
+		for ik := 0; ik < idl1; ik++ {
+			ch2m.set(ik, 0, ch2m.at(ik, 0)+ch2m.at(ik, j))
 		}
 	}
-	for j := 2; j <= ipph; j++ {
-		jc := ipp2 - j
-		for k := 1; k <= l1; k++ {
-			ch3.set(1, k, j, c13.at(1, k, j)-c13.at(1, k, jc))
-			ch3.set(1, k, jc, c13.at(1, k, j)+c13.at(1, k, jc))
+	for j := 1; j < ipph; j++ {
+		jc := ipp2 - (j + 1)
+		for k := 0; k < l1; k++ {
+			ch3.set(0, k, j, c13.at(0, k, j)-c13.at(0, k, jc))
+			ch3.set(0, k, jc, c13.at(0, k, j)+c13.at(0, k, jc))
 		}
 	}
 
 	if ido != 1 {
 		if nbd < l1 {
-			for j := 2; j <= ipph; j++ {
-				jc := ipp2 - j
-				for i := 3; i <= ido; i += 2 {
-					for k := 1; k <= l1; k++ {
+			for j := 1; j < ipph; j++ {
+				jc := ipp2 - (j + 1)
+				for i := 2; i < ido; i += 2 {
+					for k := 0; k < l1; k++ {
 						ch3.set(i-1, k, j, c13.at(i-1, k, j)-c13.at(i, k, jc))
 						ch3.set(i-1, k, jc, c13.at(i-1, k, j)+c13.at(i, k, jc))
 						ch3.set(i, k, j, c13.at(i, k, j)+c13.at(i-1, k, jc))
@@ -1074,10 +1076,10 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
 				}
 			}
 		} else {
-			for j := 2; j <= ipph; j++ {
-				jc := ipp2 - j
-				for k := 1; k <= l1; k++ {
-					for i := 3; i <= ido; i += 2 {
+			for j := 1; j < ipph; j++ {
+				jc := ipp2 - (j + 1)
+				for k := 0; k < l1; k++ {
+					for i := 2; i < ido; i += 2 {
 						ch3.set(i-1, k, j, c13.at(i-1, k, j)-c13.at(i, k, jc))
 						ch3.set(i-1, k, jc, c13.at(i-1, k, j)+c13.at(i, k, jc))
 						ch3.set(i, k, j, c13.at(i, k, j)+c13.at(i-1, k, jc))
@@ -1091,38 +1093,38 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) {
 	if ido == 1 {
 		return
 	}
-	for ik := 1; ik <= idl1; ik++ {
-		c2m.set(ik, 1, ch2m.at(ik, 1))
+	for ik := 0; ik < idl1; ik++ {
+		c2m.set(ik, 0, ch2m.at(ik, 0))
 	}
-	for j := 2; j <= ip; j++ {
-		for k := 1; k <= l1; k++ {
-			c13.set(1, k, j, ch3.at(1, k, j))
+	for j := 1; j < ip; j++ {
+		for k := 0; k < l1; k++ {
+			c13.set(0, k, j, ch3.at(0, k, j))
 		}
 	}
 
-	is := -ido
+	is := -ido - 1
 	if nbd > l1 {
-		for j := 2; j <= ip; j++ {
+		for j := 1; j < ip; j++ {
 			is += ido
-			for k := 1; k <= l1; k++ {
+			for k := 0; k < l1; k++ {
 				idij := is
-				for i := 3; i <= ido; i += 2 {
+				for i := 2; i < ido; i += 2 {
 					idij = idij + 2
-					c13.set(i-1, k, j, wa.at(idij-1)*ch3.at(i-1, k, j)-wa.at(idij)*ch3.at(i, k, j))
-					c13.set(i, k, j, wa.at(idij-1)*ch3.at(i, k, j)+wa.at(idij)*ch3.at(i-1, k, j))
+					c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-wa[idij]*ch3.at(i, k, j))
+					c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+wa[idij]*ch3.at(i-1, k, j))
 				}
 			}
 		}
 		return
 	}
-	for j := 2; j <= ip; j++ {
+	for j := 1; j < ip; j++ {
 		is += ido
 		idij := is
-		for i := 3; i <= ido; i += 2 {
+		for i := 2; i < ido; i += 2 {
 			idij += 2
-			for k := 1; k <= l1; k++ {
-				c13.set(i-1, k, j, wa.at(idij-1)*ch3.at(i-1, k, j)-wa.at(idij)*ch3.at(i, k, j))
-				c13.set(i, k, j, wa.at(idij-1)*ch3.at(i, k, j)+wa.at(idij)*ch3.at(i-1, k, j))
+			for k := 0; k < l1; k++ {
+				c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-wa[idij]*ch3.at(i, k, j))
+				c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+wa[idij]*ch3.at(i-1, k, j))
 			}
 		}
 	}

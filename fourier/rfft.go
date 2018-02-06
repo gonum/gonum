@@ -445,8 +445,6 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	dcp := math.Cos(arg)
 	dsp := math.Sin(arg)
 	ipph := (ip + 1) / 2
-	ipp2 := ip + 1
-	idp2 := ido + 1
 	nbd := (ido - 1) / 2
 
 	if ido == 1 {
@@ -491,7 +489,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 		}
 		if nbd < l1 {
 			for j := 1; j < ipph; j++ {
-				jc := ipp2 - (j + 1)
+				jc := ip - j
 				for i := 2; i < ido; i += 2 {
 					for k := 0; k < l1; k++ {
 						c13.set(i-1, k, j, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
@@ -503,7 +501,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 			}
 		} else {
 			for j := 1; j < ipph; j++ {
-				jc := ipp2 - (j + 1)
+				jc := ip - j
 				for k := 0; k < l1; k++ {
 					for i := 2; i < ido; i += 2 {
 						c13.set(i-1, k, j, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
@@ -517,7 +515,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	}
 
 	for j := 1; j < ipph; j++ {
-		jc := ipp2 - (j + 1)
+		jc := ip - j
 		for k := 0; k < l1; k++ {
 			c13.set(0, k, j, ch3.at(0, k, j)+ch3.at(0, k, jc))
 			c13.set(0, k, jc, ch3.at(0, k, jc)-ch3.at(0, k, j))
@@ -526,7 +524,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	ar1 := 1.0
 	ai1 := 0.0
 	for l := 1; l < ipph; l++ {
-		lc := ipp2 - (l + 1)
+		lc := ip - l
 		ar1h := dcp*ar1 - dsp*ai1
 		ai1 = dcp*ai1 + dsp*ar1
 		ar1 = ar1h
@@ -539,7 +537,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 		ar2 := ar1
 		ai2 := ai1
 		for j := 2; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			ar2h := dc2*ar2 - ds2*ai2
 			ai2 = dc2*ai2 + ds2*ar2
 			ar2 = ar2h
@@ -569,7 +567,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 		}
 	}
 	for j := 1; j < ipph; j++ {
-		jc := ipp2 - (j + 1)
+		jc := ip - j
 		j2 := 2 * j
 		for k := 0; k < l1; k++ {
 			cc3.set(ido-1, j2-1, k, ch3.at(0, k, j))
@@ -582,10 +580,10 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	}
 	if nbd < l1 {
 		for j := 1; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			j2 := 2 * j
 			for i := 2; i < ido; i += 2 {
-				ic := idp2 - (i + 1)
+				ic := ido - i
 				for k := 0; k < l1; k++ {
 					cc3.set(i-1, j2, k, ch3.at(i-1, k, j)+ch3.at(i-1, k, jc))
 					cc3.set(ic-1, j2-1, k, ch3.at(i-1, k, j)-ch3.at(i-1, k, jc))
@@ -597,7 +595,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 		return
 	}
 	for j := 1; j < ipph; j++ {
-		jc := ipp2 - (j + 1)
+		jc := ip - j
 		j2 := 2 * j
 		for k := 0; k < l1; k++ {
 			for i := 2; i < ido; i += 2 {
@@ -963,8 +961,6 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	dcp := math.Cos(arg)
 	dsp := math.Sin(arg)
 	ipph := (ip + 1) / 2
-	ipp2 := ip + 1
-	idp2 := ido + 1
 	nbd := (ido - 1) / 2
 
 	if ido < l1 {
@@ -982,7 +978,7 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	}
 
 	for j := 1; j < ipph; j++ {
-		jc := ipp2 - (j + 1)
+		jc := ip - j
 		j2 := 2 * j
 		for k := 0; k < l1; k++ {
 			ch3.set(0, k, j, cc3.at(ido-1, j2-1, k)+cc3.at(ido-1, j2-1, k))
@@ -993,10 +989,10 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	if ido != 1 {
 		if nbd < l1 {
 			for j := 1; j < ipph; j++ {
-				jc := ipp2 - (j + 1)
+				jc := ip - j
 				j2 := 2 * j
 				for i := 2; i < ido; i += 2 {
-					ic := idp2 - (i + 1)
+					ic := ido - i
 					for k := 0; k < l1; k++ {
 						ch3.set(i-1, k, j, cc3.at(i-1, j2, k)+cc3.at(ic-1, j2-1, k))
 						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
@@ -1007,11 +1003,11 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 			}
 		} else {
 			for j := 1; j < ipph; j++ {
-				jc := ipp2 - (j + 1)
+				jc := ip - j
 				j2 := 2 * j
 				for k := 0; k < l1; k++ {
 					for i := 2; i < ido; i += 2 {
-						ic := idp2 - (i + 1)
+						ic := ido - i
 						ch3.set(i-1, k, j, cc3.at(i-1, j2, k)+cc3.at(ic-1, j2-1, k))
 						ch3.set(i-1, k, jc, cc3.at(i-1, j2, k)-cc3.at(ic-1, j2-1, k))
 						ch3.set(i, k, j, cc3.at(i, j2, k)-cc3.at(ic, j2-1, k))
@@ -1025,7 +1021,7 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	ar1 := 1.0
 	ai1 := 0.0
 	for l := 1; l < ipph; l++ {
-		lc := ipp2 - (l + 1)
+		lc := ip - l
 		ar1h := dcp*ar1 - dsp*ai1
 		ai1 = dcp*ai1 + dsp*ar1
 		ar1 = ar1h
@@ -1038,7 +1034,7 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 		ar2 := ar1
 		ai2 := ai1
 		for j := 2; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			ar2h := dc2*ar2 - ds2*ai2
 			ai2 = dc2*ai2 + ds2*ar2
 			ar2 = ar2h
@@ -1055,7 +1051,7 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 		}
 	}
 	for j := 1; j < ipph; j++ {
-		jc := ipp2 - (j + 1)
+		jc := ip - j
 		for k := 0; k < l1; k++ {
 			ch3.set(0, k, j, c13.at(0, k, j)-c13.at(0, k, jc))
 			ch3.set(0, k, jc, c13.at(0, k, j)+c13.at(0, k, jc))
@@ -1065,7 +1061,7 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	if ido != 1 {
 		if nbd < l1 {
 			for j := 1; j < ipph; j++ {
-				jc := ipp2 - (j + 1)
+				jc := ip - j
 				for i := 2; i < ido; i += 2 {
 					for k := 0; k < l1; k++ {
 						ch3.set(i-1, k, j, c13.at(i-1, k, j)-c13.at(i, k, jc))
@@ -1077,7 +1073,7 @@ func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 			}
 		} else {
 			for j := 1; j < ipph; j++ {
-				jc := ipp2 - (j + 1)
+				jc := ip - j
 				for k := 0; k < l1; k++ {
 					for i := 2; i < ido; i += 2 {
 						ch3.set(i-1, k, j, c13.at(i-1, k, j)-c13.at(i, k, jc))

@@ -443,13 +443,12 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 	ch2m := newTwoArray(idl1, ip, ch2)
 
 	idot := ido / 2
-	ipp2 := ip + 1
 	ipph := (ip + 1) / 2
 	idp := ip * ido
 
 	if ido < l1 {
 		for j := 1; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			for i := 0; i < ido; i++ {
 				for k := 0; k < l1; k++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
@@ -464,7 +463,7 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 		}
 	} else {
 		for j := 1; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			for k := 0; k < l1; k++ {
 				for i := 0; i < ido; i++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
@@ -482,7 +481,7 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 	idl := 1 - ido
 	inc := 0
 	for l := 1; l < ipph; l++ {
-		lc := ipp2 - (l + 1)
+		lc := ip - l
 		idl += ido
 		for ik := 0; ik < idl1; ik++ {
 			c2m.set(ik, l, ch2m.at(ik, 0)+wa[idl-1]*ch2m.at(ik, 1))
@@ -491,7 +490,7 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 		idlj := idl
 		inc += ido
 		for j := 2; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			idlj += inc
 			if idlj > idp {
 				idlj -= idp
@@ -512,7 +511,7 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 	}
 
 	for j := 1; j < ipph; j++ {
-		jc := ipp2 - (j + 1)
+		jc := ip - j
 		for ik := 1; ik < idl1; ik += 2 {
 			ch2m.set(ik-1, j, c2m.at(ik-1, j)-c2m.at(ik, jc))
 			ch2m.set(ik-1, jc, c2m.at(ik-1, j)+c2m.at(ik, jc))
@@ -907,13 +906,12 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 	ch2m := newTwoArray(idl1, ip, ch2)
 
 	idot := ido / 2
-	ipp2 := ip + 1
 	ipph := (ip + 1) / 2
 	idp := ip * ido
 
 	if ido < l1 {
 		for j := 1; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			for i := 0; i < ido; i++ {
 				for k := 0; k < l1; k++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
@@ -928,7 +926,7 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 		}
 	} else {
 		for j := 1; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			for k := 0; k < l1; k++ {
 				for i := 0; i < ido; i++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
@@ -946,7 +944,7 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 	idl := 1 - ido
 	inc := 0
 	for l := 1; l < ipph; l++ {
-		lc := ipp2 - (l + 1)
+		lc := ip - l
 		idl += ido
 		for ik := 0; ik < idl1; ik++ {
 			c2m.set(ik, l, ch2m.at(ik, 0)+wa[idl-1]*ch2m.at(ik, 1))
@@ -955,7 +953,7 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 		idlj := idl
 		inc += ido
 		for j := 2; j < ipph; j++ {
-			jc := ipp2 - (j + 1)
+			jc := ip - j
 			idlj += inc
 			if idlj > idp {
 				idlj -= idp
@@ -976,7 +974,7 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 	}
 
 	for j := 1; j < ipph; j++ {
-		jc := ipp2 - (j + 1)
+		jc := ip - j
 		for ik := 1; ik < idl1; ik += 2 {
 			ch2m.set(ik-1, j, c2m.at(ik-1, j)-c2m.at(ik, jc))
 			ch2m.set(ik-1, jc, c2m.at(ik-1, j)+c2m.at(ik, jc))

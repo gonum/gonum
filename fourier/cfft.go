@@ -153,422 +153,8 @@ func cfftf(n int, r, work []float64, ifac []int) {
 	if n == 1 {
 		return
 	}
-	cfftf1(n, r, work, work[2*n:], ifac)
+	cfft1(n, r, work, work[2*n:], ifac, -1)
 }
-
-func cfftf1(n int, c, ch, wa []float64, ifac []int) {
-	nf := ifac[1]
-	na := false
-	l1 := 1
-	iw := 0
-
-	for k1 := 1; k1 <= nf; k1++ {
-		ip := ifac[k1+1]
-		l2 := ip * l1
-		ido := n / l2
-		idot := 2 * ido
-		idl1 := idot * l1
-
-		switch ip {
-		case 4:
-			ix2 := iw + idot
-			ix3 := ix2 + idot
-			if na {
-				passf4(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
-			} else {
-				passf4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
-			}
-			na = !na
-		case 2:
-			if na {
-				passf2(idot, l1, ch, c, wa[iw:])
-			} else {
-				passf2(idot, l1, c, ch, wa[iw:])
-			}
-			na = !na
-		case 3:
-			ix2 := iw + idot
-			if na {
-				passf3(idot, l1, ch, c, wa[iw:], wa[ix2:])
-			} else {
-				passf3(idot, l1, c, ch, wa[iw:], wa[ix2:])
-			}
-			na = !na
-		case 5:
-			ix2 := iw + idot
-			ix3 := ix2 + idot
-			ix4 := ix3 + idot
-			if na {
-				passf5(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
-			} else {
-				passf5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
-			}
-			na = !na
-		default:
-			var nac bool
-			if na {
-				nac = passf(idot, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
-			} else {
-				nac = passf(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
-			}
-			if nac {
-				na = !na
-			}
-		}
-
-		l1 = l2
-		iw += (ip - 1) * idot
-	}
-
-	if na {
-		for i := 0; i < 2*n; i++ {
-			c[i] = ch[i]
-		}
-	}
-}
-
-func passf2(ido, l1 int, cc, ch, wa1 []float64) {
-	cc3 := newThreeArray(ido, 2, l1, cc)
-	ch3 := newThreeArray(ido, l1, 2, ch)
-
-	if ido <= 2 {
-		for k := 0; k < l1; k++ {
-			ch3.set(0, k, 0, cc3.at(0, 0, k)+cc3.at(0, 1, k))
-			ch3.set(0, k, 1, cc3.at(0, 0, k)-cc3.at(0, 1, k))
-			ch3.set(1, k, 0, cc3.at(1, 0, k)+cc3.at(1, 1, k))
-			ch3.set(1, k, 1, cc3.at(1, 0, k)-cc3.at(1, 1, k))
-		}
-		return
-	}
-	for k := 0; k < l1; k++ {
-		for i := 1; i < ido; i += 2 {
-			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+cc3.at(i-1, 1, k))
-			tr2 := cc3.at(i-1, 0, k) - cc3.at(i-1, 1, k)
-			ch3.set(i, k, 0, cc3.at(i, 0, k)+cc3.at(i, 1, k))
-			ti2 := cc3.at(i, 0, k) - cc3.at(i, 1, k)
-			ch3.set(i, k, 1, wa1[i-1]*ti2-wa1[i]*tr2)
-			ch3.set(i-1, k, 1, wa1[i-1]*tr2+wa1[i]*ti2)
-		}
-	}
-}
-
-func passf3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
-	const (
-		taur = -0.5
-		taui = -0.866025403784439 // -sqrt(3)/2
-	)
-
-	cc3 := newThreeArray(ido, 3, l1, cc)
-	ch3 := newThreeArray(ido, l1, 3, ch)
-
-	if ido == 2 {
-		for k := 0; k < l1; k++ {
-			tr2 := cc3.at(0, 1, k) + cc3.at(0, 2, k)
-			cr2 := cc3.at(0, 0, k) + taur*tr2
-			ch3.set(0, k, 0, cc3.at(0, 0, k)+tr2)
-			ti2 := cc3.at(1, 1, k) + cc3.at(1, 2, k)
-			ci2 := cc3.at(1, 0, k) + taur*ti2
-			ch3.set(1, k, 0, cc3.at(1, 0, k)+ti2)
-			cr3 := taui * (cc3.at(0, 1, k) - cc3.at(0, 2, k))
-			ci3 := taui * (cc3.at(1, 1, k) - cc3.at(1, 2, k))
-			ch3.set(0, k, 1, cr2-ci3)
-			ch3.set(0, k, 2, cr2+ci3)
-			ch3.set(1, k, 1, ci2+cr3)
-			ch3.set(1, k, 2, ci2-cr3)
-		}
-		return
-	}
-	for k := 0; k < l1; k++ {
-		for i := 1; i < ido; i += 2 {
-			tr2 := cc3.at(i-1, 1, k) + cc3.at(i-1, 2, k)
-			cr2 := cc3.at(i-1, 0, k) + taur*tr2
-			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2)
-			ti2 := cc3.at(i, 1, k) + cc3.at(i, 2, k)
-			ci2 := cc3.at(i, 0, k) + taur*ti2
-			ch3.set(i, k, 0, cc3.at(i, 0, k)+ti2)
-			cr3 := taui * (cc3.at(i-1, 1, k) - cc3.at(i-1, 2, k))
-			ci3 := taui * (cc3.at(i, 1, k) - cc3.at(i, 2, k))
-			dr2 := cr2 - ci3
-			dr3 := cr2 + ci3
-			di2 := ci2 + cr3
-			di3 := ci2 - cr3
-			ch3.set(i, k, 1, wa1[i-1]*di2-wa1[i]*dr2)
-			ch3.set(i-1, k, 1, wa1[i-1]*dr2+wa1[i]*di2)
-			ch3.set(i, k, 2, wa2[i-1]*di3-wa2[i]*dr3)
-			ch3.set(i-1, k, 2, wa2[i-1]*dr3+wa2[i]*di3)
-		}
-	}
-}
-
-func passf4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
-	cc3 := newThreeArray(ido, 4, l1, cc)
-	ch3 := newThreeArray(ido, l1, 4, ch)
-
-	if ido == 2 {
-		for k := 0; k < l1; k++ {
-			ti1 := cc3.at(1, 0, k) - cc3.at(1, 2, k)
-			ti2 := cc3.at(1, 0, k) + cc3.at(1, 2, k)
-			tr4 := cc3.at(1, 1, k) - cc3.at(1, 3, k)
-			ti3 := cc3.at(1, 1, k) + cc3.at(1, 3, k)
-			tr1 := cc3.at(0, 0, k) - cc3.at(0, 2, k)
-			tr2 := cc3.at(0, 0, k) + cc3.at(0, 2, k)
-			ti4 := cc3.at(0, 3, k) - cc3.at(0, 1, k)
-			tr3 := cc3.at(0, 1, k) + cc3.at(0, 3, k)
-			ch3.set(0, k, 0, tr2+tr3)
-			ch3.set(0, k, 2, tr2-tr3)
-			ch3.set(1, k, 0, ti2+ti3)
-			ch3.set(1, k, 2, ti2-ti3)
-			ch3.set(0, k, 1, tr1+tr4)
-			ch3.set(0, k, 3, tr1-tr4)
-			ch3.set(1, k, 1, ti1+ti4)
-			ch3.set(1, k, 3, ti1-ti4)
-		}
-		return
-	}
-	for k := 0; k < l1; k++ {
-		for i := 1; i < ido; i += 2 {
-			ti1 := cc3.at(i, 0, k) - cc3.at(i, 2, k)
-			ti2 := cc3.at(i, 0, k) + cc3.at(i, 2, k)
-			ti3 := cc3.at(i, 1, k) + cc3.at(i, 3, k)
-			tr4 := cc3.at(i, 1, k) - cc3.at(i, 3, k)
-			tr1 := cc3.at(i-1, 0, k) - cc3.at(i-1, 2, k)
-			tr2 := cc3.at(i-1, 0, k) + cc3.at(i-1, 2, k)
-			ti4 := cc3.at(i-1, 3, k) - cc3.at(i-1, 1, k)
-			tr3 := cc3.at(i-1, 1, k) + cc3.at(i-1, 3, k)
-			ch3.set(i-1, k, 0, tr2+tr3)
-			cr3 := tr2 - tr3
-			ch3.set(i, k, 0, ti2+ti3)
-			ci3 := ti2 - ti3
-			cr2 := tr1 + tr4
-			cr4 := tr1 - tr4
-			ci2 := ti1 + ti4
-			ci4 := ti1 - ti4
-			ch3.set(i-1, k, 1, wa1[i-1]*cr2+wa1[i]*ci2)
-			ch3.set(i, k, 1, wa1[i-1]*ci2-wa1[i]*cr2)
-			ch3.set(i-1, k, 2, wa2[i-1]*cr3+wa2[i]*ci3)
-			ch3.set(i, k, 2, wa2[i-1]*ci3-wa2[i]*cr3)
-			ch3.set(i-1, k, 3, wa3[i-1]*cr4+wa3[i]*ci4)
-			ch3.set(i, k, 3, wa3[i-1]*ci4-wa3[i]*cr4)
-		}
-	}
-}
-
-func passf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
-	const (
-		tr11 = 0.309016994374947
-		ti11 = -0.951056516295154
-		tr12 = -0.809016994374947
-		ti12 = -0.587785252292473
-	)
-
-	cc3 := newThreeArray(ido, 5, l1, cc)
-	ch3 := newThreeArray(ido, l1, 5, ch)
-
-	if ido == 2 {
-		for k := 0; k < l1; k++ {
-			ti5 := cc3.at(1, 1, k) - cc3.at(1, 4, k)
-			ti2 := cc3.at(1, 1, k) + cc3.at(1, 4, k)
-			ti4 := cc3.at(1, 2, k) - cc3.at(1, 3, k)
-			ti3 := cc3.at(1, 2, k) + cc3.at(1, 3, k)
-			tr5 := cc3.at(0, 1, k) - cc3.at(0, 4, k)
-			tr2 := cc3.at(0, 1, k) + cc3.at(0, 4, k)
-			tr4 := cc3.at(0, 2, k) - cc3.at(0, 3, k)
-			tr3 := cc3.at(0, 2, k) + cc3.at(0, 3, k)
-			ch3.set(0, k, 0, cc3.at(0, 0, k)+tr2+tr3)
-			ch3.set(1, k, 0, cc3.at(1, 0, k)+ti2+ti3)
-			cr2 := cc3.at(0, 0, k) + tr11*tr2 + tr12*tr3
-			ci2 := cc3.at(1, 0, k) + tr11*ti2 + tr12*ti3
-			cr3 := cc3.at(0, 0, k) + tr12*tr2 + tr11*tr3
-			ci3 := cc3.at(1, 0, k) + tr12*ti2 + tr11*ti3
-			cr5 := ti11*tr5 + ti12*tr4
-			ci5 := ti11*ti5 + ti12*ti4
-			cr4 := ti12*tr5 - ti11*tr4
-			ci4 := ti12*ti5 - ti11*ti4
-			ch3.set(0, k, 1, cr2-ci5)
-			ch3.set(0, k, 4, cr2+ci5)
-			ch3.set(1, k, 1, ci2+cr5)
-			ch3.set(1, k, 2, ci3+cr4)
-			ch3.set(0, k, 2, cr3-ci4)
-			ch3.set(0, k, 3, cr3+ci4)
-			ch3.set(1, k, 3, ci3-cr4)
-			ch3.set(1, k, 4, ci2-cr5)
-		}
-		return
-	}
-	for k := 0; k < l1; k++ {
-		for i := 1; i < ido; i += 2 {
-			ti5 := cc3.at(i, 1, k) - cc3.at(i, 4, k)
-			ti2 := cc3.at(i, 1, k) + cc3.at(i, 4, k)
-			ti4 := cc3.at(i, 2, k) - cc3.at(i, 3, k)
-			ti3 := cc3.at(i, 2, k) + cc3.at(i, 3, k)
-			tr5 := cc3.at(i-1, 1, k) - cc3.at(i-1, 4, k)
-			tr2 := cc3.at(i-1, 1, k) + cc3.at(i-1, 4, k)
-			tr4 := cc3.at(i-1, 2, k) - cc3.at(i-1, 3, k)
-			tr3 := cc3.at(i-1, 2, k) + cc3.at(i-1, 3, k)
-			ch3.set(i-1, k, 0, cc3.at(i-1, 0, k)+tr2+tr3)
-			ch3.set(i, k, 0, cc3.at(i, 0, k)+ti2+ti3)
-			cr2 := cc3.at(i-1, 0, k) + tr11*tr2 + tr12*tr3
-			ci2 := cc3.at(i, 0, k) + tr11*ti2 + tr12*ti3
-			cr3 := cc3.at(i-1, 0, k) + tr12*tr2 + tr11*tr3
-			ci3 := cc3.at(i, 0, k) + tr12*ti2 + tr11*ti3
-			cr5 := ti11*tr5 + ti12*tr4
-			ci5 := ti11*ti5 + ti12*ti4
-			cr4 := ti12*tr5 - ti11*tr4
-			ci4 := ti12*ti5 - ti11*ti4
-			dr3 := cr3 - ci4
-			dr4 := cr3 + ci4
-			di3 := ci3 + cr4
-			di4 := ci3 - cr4
-			dr5 := cr2 + ci5
-			dr2 := cr2 - ci5
-			di5 := ci2 - cr5
-			di2 := ci2 + cr5
-			ch3.set(i-1, k, 1, wa1[i-1]*dr2+wa1[i]*di2)
-			ch3.set(i, k, 1, wa1[i-1]*di2-wa1[i]*dr2)
-			ch3.set(i-1, k, 2, wa2[i-1]*dr3+wa2[i]*di3)
-			ch3.set(i, k, 2, wa2[i-1]*di3-wa2[i]*dr3)
-			ch3.set(i-1, k, 3, wa3[i-1]*dr4+wa3[i]*di4)
-			ch3.set(i, k, 3, wa3[i-1]*di4-wa3[i]*dr4)
-			ch3.set(i-1, k, 4, wa4[i-1]*dr5+wa4[i]*di5)
-			ch3.set(i, k, 4, wa4[i-1]*di5-wa4[i]*dr5)
-		}
-	}
-}
-
-func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) {
-	cc3 := newThreeArray(ido, ip, l1, cc)
-	c13 := newThreeArray(ido, l1, ip, c1)
-	ch3 := newThreeArray(ido, l1, ip, ch)
-	c2m := newTwoArray(idl1, ip, c2)
-	ch2m := newTwoArray(idl1, ip, ch2)
-
-	idot := ido / 2
-	ipph := (ip + 1) / 2
-	idp := ip * ido
-
-	if ido < l1 {
-		for j := 1; j < ipph; j++ {
-			jc := ip - j
-			for i := 0; i < ido; i++ {
-				for k := 0; k < l1; k++ {
-					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
-					ch3.set(i, k, jc, cc3.at(i, j, k)-cc3.at(i, jc, k))
-				}
-			}
-		}
-		for i := 0; i < ido; i++ {
-			for k := 0; k < l1; k++ {
-				ch3.set(i, k, 0, cc3.at(i, 0, k))
-			}
-		}
-	} else {
-		for j := 1; j < ipph; j++ {
-			jc := ip - j
-			for k := 0; k < l1; k++ {
-				for i := 0; i < ido; i++ {
-					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
-					ch3.set(i, k, jc, cc3.at(i, j, k)-cc3.at(i, jc, k))
-				}
-			}
-		}
-		for k := 0; k < l1; k++ {
-			for i := 0; i < ido; i++ {
-				ch3.set(i, k, 0, cc3.at(i, 0, k))
-			}
-		}
-	}
-
-	idl := 1 - ido
-	inc := 0
-	for l := 1; l < ipph; l++ {
-		lc := ip - l
-		idl += ido
-		for ik := 0; ik < idl1; ik++ {
-			c2m.set(ik, l, ch2m.at(ik, 0)+wa[idl-1]*ch2m.at(ik, 1))
-			c2m.set(ik, lc, -wa[idl]*ch2m.at(ik, ip-1))
-		}
-		idlj := idl
-		inc += ido
-		for j := 2; j < ipph; j++ {
-			jc := ip - j
-			idlj += inc
-			if idlj > idp {
-				idlj -= idp
-			}
-			war := wa[idlj-1]
-			wai := wa[idlj]
-			for ik := 0; ik < idl1; ik++ {
-				c2m.add(ik, l, war*ch2m.at(ik, j))
-				c2m.add(ik, lc, -wai*ch2m.at(ik, jc))
-			}
-		}
-	}
-
-	for j := 1; j < ipph; j++ {
-		for ik := 0; ik < idl1; ik++ {
-			ch2m.add(ik, 0, ch2m.at(ik, j))
-		}
-	}
-
-	for j := 1; j < ipph; j++ {
-		jc := ip - j
-		for ik := 1; ik < idl1; ik += 2 {
-			ch2m.set(ik-1, j, c2m.at(ik-1, j)-c2m.at(ik, jc))
-			ch2m.set(ik-1, jc, c2m.at(ik-1, j)+c2m.at(ik, jc))
-			ch2m.set(ik, j, c2m.at(ik, j)+c2m.at(ik-1, jc))
-			ch2m.set(ik, jc, c2m.at(ik, j)-c2m.at(ik-1, jc))
-		}
-	}
-
-	if ido == 2 {
-		return true
-	}
-
-	for ik := 0; ik < idl1; ik++ {
-		c2m.set(ik, 0, ch2m.at(ik, 0))
-	}
-
-	for j := 1; j < ip; j++ {
-		for k := 0; k < l1; k++ {
-			c13.set(0, k, j, ch3.at(0, k, j))
-			c13.set(1, k, j, ch3.at(1, k, j))
-		}
-	}
-
-	if idot > l1 {
-		idj := 1 - ido
-		for j := 1; j < ip; j++ {
-			idj += ido
-			for k := 0; k < l1; k++ {
-				idij := idj
-				for i := 3; i < ido; i += 2 {
-					idij += 2
-					c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)+wa[idij]*ch3.at(i, k, j))
-					c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)-wa[idij]*ch3.at(i-1, k, j))
-				}
-			}
-		}
-		return false
-	}
-
-	idij := 0
-	for j := 1; j < ip; j++ {
-		idij += 2
-		for i := 3; i < ido; i += 2 {
-			idij += 2
-			for k := 0; k < l1; k++ {
-				c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)+wa[idij]*ch3.at(i, k, j))
-				c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)-wa[idij]*ch3.at(i-1, k, j))
-			}
-		}
-	}
-	return false
-}
-
-// TODO(kortschak): As described in the documentation below, the
-// only change between cfftf and cfftb is the sign before the i in
-// the inner loop. The entirety of the code below cfft? could be
-// shared between cfftf and cfftb by passing a sign parameter.
 
 // cfftb computes the forward complex discrete fourier
 // transform (the fourier analysis). equivalently , cfftb computes
@@ -616,10 +202,10 @@ func cfftb(n int, r, work []float64, ifac []int) {
 	if n == 1 {
 		return
 	}
-	cfftb1(n, r, work, work[2*n:], ifac)
+	cfft1(n, r, work, work[2*n:], ifac, 1)
 }
 
-func cfftb1(n int, c, ch, wa []float64, ifac []int) {
+func cfft1(n int, c, ch, wa []float64, ifac []int, sign float64) {
 	nf := ifac[1]
 	na := false
 	l1 := 1
@@ -637,24 +223,24 @@ func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 			ix2 := iw + idot
 			ix3 := ix2 + idot
 			if na {
-				passb4(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
+				pass4(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], sign)
 			} else {
-				passb4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
+				pass4(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], sign)
 			}
 			na = !na
 		case 2:
 			if na {
-				passb2(idot, l1, ch, c, wa[iw:])
+				pass2(idot, l1, ch, c, wa[iw:], sign)
 			} else {
-				passb2(idot, l1, c, ch, wa[iw:])
+				pass2(idot, l1, c, ch, wa[iw:], sign)
 			}
 			na = !na
 		case 3:
 			ix2 := iw + idot
 			if na {
-				passb3(idot, l1, ch, c, wa[iw:], wa[ix2:])
+				pass3(idot, l1, ch, c, wa[iw:], wa[ix2:], sign)
 			} else {
-				passb3(idot, l1, c, ch, wa[iw:], wa[ix2:])
+				pass3(idot, l1, c, ch, wa[iw:], wa[ix2:], sign)
 			}
 			na = !na
 		case 5:
@@ -662,17 +248,17 @@ func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 			ix3 := ix2 + idot
 			ix4 := ix3 + idot
 			if na {
-				passb5(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
+				pass5(idot, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:], sign)
 			} else {
-				passb5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
+				pass5(idot, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:], sign)
 			}
 			na = !na
 		default:
 			var nac bool
 			if na {
-				nac = passb(idot, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
+				nac = pass(idot, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:], sign)
 			} else {
-				nac = passb(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
+				nac = pass(idot, ip, l1, idl1, c, c, c, ch, ch, wa[iw:], sign)
 			}
 			if nac {
 				na = !na
@@ -690,7 +276,7 @@ func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 	}
 }
 
-func passb2(ido, l1 int, cc, ch, wa1 []float64) {
+func pass2(ido, l1 int, cc, ch, wa1 []float64, sign float64) {
 	cc3 := newThreeArray(ido, 2, l1, cc)
 	ch3 := newThreeArray(ido, l1, 2, ch)
 
@@ -709,13 +295,13 @@ func passb2(ido, l1 int, cc, ch, wa1 []float64) {
 			tr2 := cc3.at(i-1, 0, k) - cc3.at(i-1, 1, k)
 			ch3.set(i, k, 0, cc3.at(i, 0, k)+cc3.at(i, 1, k))
 			ti2 := cc3.at(i, 0, k) - cc3.at(i, 1, k)
-			ch3.set(i, k, 1, wa1[i-1]*ti2+wa1[i]*tr2)
-			ch3.set(i-1, k, 1, wa1[i-1]*tr2-wa1[i]*ti2)
+			ch3.set(i, k, 1, wa1[i-1]*ti2+sign*wa1[i]*tr2)
+			ch3.set(i-1, k, 1, wa1[i-1]*tr2-sign*wa1[i]*ti2)
 		}
 	}
 }
 
-func passb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
+func pass3(ido, l1 int, cc, ch, wa1, wa2 []float64, sign float64) {
 	const (
 		taur = -0.5
 		taui = 0.866025403784439 // sqrt(3)/2
@@ -732,8 +318,8 @@ func passb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 			ti2 := cc3.at(1, 1, k) + cc3.at(1, 2, k)
 			ci2 := cc3.at(1, 0, k) + taur*ti2
 			ch3.set(1, k, 0, cc3.at(1, 0, k)+ti2)
-			cr3 := taui * (cc3.at(0, 1, k) - cc3.at(0, 2, k))
-			ci3 := taui * (cc3.at(1, 1, k) - cc3.at(1, 2, k))
+			cr3 := sign * taui * (cc3.at(0, 1, k) - cc3.at(0, 2, k))
+			ci3 := sign * taui * (cc3.at(1, 1, k) - cc3.at(1, 2, k))
 			ch3.set(0, k, 1, cr2-ci3)
 			ch3.set(0, k, 2, cr2+ci3)
 			ch3.set(1, k, 1, ci2+cr3)
@@ -749,21 +335,21 @@ func passb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 			ti2 := cc3.at(i, 1, k) + cc3.at(i, 2, k)
 			ci2 := cc3.at(i, 0, k) + taur*ti2
 			ch3.set(i, k, 0, cc3.at(i, 0, k)+ti2)
-			cr3 := taui * (cc3.at(i-1, 1, k) - cc3.at(i-1, 2, k))
-			ci3 := taui * (cc3.at(i, 1, k) - cc3.at(i, 2, k))
+			cr3 := sign * taui * (cc3.at(i-1, 1, k) - cc3.at(i-1, 2, k))
+			ci3 := sign * taui * (cc3.at(i, 1, k) - cc3.at(i, 2, k))
 			dr2 := cr2 - ci3
 			dr3 := cr2 + ci3
 			di2 := ci2 + cr3
 			di3 := ci2 - cr3
-			ch3.set(i, k, 1, wa1[i-1]*di2+wa1[i]*dr2)
-			ch3.set(i-1, k, 1, wa1[i-1]*dr2-wa1[i]*di2)
-			ch3.set(i, k, 2, wa2[i-1]*di3+wa2[i]*dr3)
-			ch3.set(i-1, k, 2, wa2[i-1]*dr3-wa2[i]*di3)
+			ch3.set(i, k, 1, wa1[i-1]*di2+sign*wa1[i]*dr2)
+			ch3.set(i-1, k, 1, wa1[i-1]*dr2-sign*wa1[i]*di2)
+			ch3.set(i, k, 2, wa2[i-1]*di3+sign*wa2[i]*dr3)
+			ch3.set(i-1, k, 2, wa2[i-1]*dr3-sign*wa2[i]*di3)
 		}
 	}
 }
 
-func passb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
+func pass4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64, sign float64) {
 	cc3 := newThreeArray(ido, 4, l1, cc)
 	ch3 := newThreeArray(ido, l1, 4, ch)
 
@@ -771,11 +357,11 @@ func passb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
 		for k := 0; k < l1; k++ {
 			ti1 := cc3.at(1, 0, k) - cc3.at(1, 2, k)
 			ti2 := cc3.at(1, 0, k) + cc3.at(1, 2, k)
-			tr4 := cc3.at(1, 3, k) - cc3.at(1, 1, k)
+			tr4 := sign * (cc3.at(1, 3, k) - cc3.at(1, 1, k))
 			ti3 := cc3.at(1, 1, k) + cc3.at(1, 3, k)
 			tr1 := cc3.at(0, 0, k) - cc3.at(0, 2, k)
 			tr2 := cc3.at(0, 0, k) + cc3.at(0, 2, k)
-			ti4 := cc3.at(0, 1, k) - cc3.at(0, 3, k)
+			ti4 := sign * (cc3.at(0, 1, k) - cc3.at(0, 3, k))
 			tr3 := cc3.at(0, 1, k) + cc3.at(0, 3, k)
 			ch3.set(0, k, 0, tr2+tr3)
 			ch3.set(0, k, 2, tr2-tr3)
@@ -793,10 +379,10 @@ func passb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
 			ti1 := cc3.at(i, 0, k) - cc3.at(i, 2, k)
 			ti2 := cc3.at(i, 0, k) + cc3.at(i, 2, k)
 			ti3 := cc3.at(i, 1, k) + cc3.at(i, 3, k)
-			tr4 := cc3.at(i, 3, k) - cc3.at(i, 1, k)
+			tr4 := sign * (cc3.at(i, 3, k) - cc3.at(i, 1, k))
 			tr1 := cc3.at(i-1, 0, k) - cc3.at(i-1, 2, k)
 			tr2 := cc3.at(i-1, 0, k) + cc3.at(i-1, 2, k)
-			ti4 := cc3.at(i-1, 1, k) - cc3.at(i-1, 3, k)
+			ti4 := sign * (cc3.at(i-1, 1, k) - cc3.at(i-1, 3, k))
 			tr3 := cc3.at(i-1, 1, k) + cc3.at(i-1, 3, k)
 			ch3.set(i-1, k, 0, tr2+tr3)
 			cr3 := tr2 - tr3
@@ -806,17 +392,17 @@ func passb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
 			cr4 := tr1 - tr4
 			ci2 := ti1 + ti4
 			ci4 := ti1 - ti4
-			ch3.set(i-1, k, 1, wa1[i-1]*cr2-wa1[i]*ci2)
-			ch3.set(i, k, 1, wa1[i-1]*ci2+wa1[i]*cr2)
-			ch3.set(i-1, k, 2, wa2[i-1]*cr3-wa2[i]*ci3)
-			ch3.set(i, k, 2, wa2[i-1]*ci3+wa2[i]*cr3)
-			ch3.set(i-1, k, 3, wa3[i-1]*cr4-wa3[i]*ci4)
-			ch3.set(i, k, 3, wa3[i-1]*ci4+wa3[i]*cr4)
+			ch3.set(i-1, k, 1, wa1[i-1]*cr2-sign*wa1[i]*ci2)
+			ch3.set(i, k, 1, wa1[i-1]*ci2+sign*wa1[i]*cr2)
+			ch3.set(i-1, k, 2, wa2[i-1]*cr3-sign*wa2[i]*ci3)
+			ch3.set(i, k, 2, wa2[i-1]*ci3+sign*wa2[i]*cr3)
+			ch3.set(i-1, k, 3, wa3[i-1]*cr4-sign*wa3[i]*ci4)
+			ch3.set(i, k, 3, wa3[i-1]*ci4+sign*wa3[i]*cr4)
 		}
 	}
 }
 
-func passb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
+func pass5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64, sign float64) {
 	const (
 		tr11 = 0.309016994374947
 		ti11 = 0.951056516295154
@@ -843,10 +429,10 @@ func passb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 			ci2 := cc3.at(1, 0, k) + tr11*ti2 + tr12*ti3
 			cr3 := cc3.at(0, 0, k) + tr12*tr2 + tr11*tr3
 			ci3 := cc3.at(1, 0, k) + tr12*ti2 + tr11*ti3
-			cr5 := ti11*tr5 + ti12*tr4
-			ci5 := ti11*ti5 + ti12*ti4
-			cr4 := ti12*tr5 - ti11*tr4
-			ci4 := ti12*ti5 - ti11*ti4
+			cr5 := sign * (ti11*tr5 + ti12*tr4)
+			ci5 := sign * (ti11*ti5 + ti12*ti4)
+			cr4 := sign * (ti12*tr5 - ti11*tr4)
+			ci4 := sign * (ti12*ti5 - ti11*ti4)
 			ch3.set(0, k, 1, cr2-ci5)
 			ch3.set(0, k, 4, cr2+ci5)
 			ch3.set(1, k, 1, ci2+cr5)
@@ -874,10 +460,10 @@ func passb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 			ci2 := cc3.at(i, 0, k) + tr11*ti2 + tr12*ti3
 			cr3 := cc3.at(i-1, 0, k) + tr12*tr2 + tr11*tr3
 			ci3 := cc3.at(i, 0, k) + tr12*ti2 + tr11*ti3
-			cr5 := ti11*tr5 + ti12*tr4
-			ci5 := ti11*ti5 + ti12*ti4
-			cr4 := ti12*tr5 - ti11*tr4
-			ci4 := ti12*ti5 - ti11*ti4
+			cr5 := sign * (ti11*tr5 + ti12*tr4)
+			ci5 := sign * (ti11*ti5 + ti12*ti4)
+			cr4 := sign * (ti12*tr5 - ti11*tr4)
+			ci4 := sign * (ti12*ti5 - ti11*ti4)
 			dr3 := cr3 - ci4
 			dr4 := cr3 + ci4
 			di3 := ci3 + cr4
@@ -886,19 +472,19 @@ func passb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 			dr2 := cr2 - ci5
 			di5 := ci2 - cr5
 			di2 := ci2 + cr5
-			ch3.set(i-1, k, 1, wa1[i-1]*dr2-wa1[i]*di2)
-			ch3.set(i, k, 1, wa1[i-1]*di2+wa1[i]*dr2)
-			ch3.set(i-1, k, 2, wa2[i-1]*dr3-wa2[i]*di3)
-			ch3.set(i, k, 2, wa2[i-1]*di3+wa2[i]*dr3)
-			ch3.set(i-1, k, 3, wa3[i-1]*dr4-wa3[i]*di4)
-			ch3.set(i, k, 3, wa3[i-1]*di4+wa3[i]*dr4)
-			ch3.set(i-1, k, 4, wa4[i-1]*dr5-wa4[i]*di5)
-			ch3.set(i, k, 4, wa4[i-1]*di5+wa4[i]*dr5)
+			ch3.set(i-1, k, 1, wa1[i-1]*dr2-sign*wa1[i]*di2)
+			ch3.set(i, k, 1, wa1[i-1]*di2+sign*wa1[i]*dr2)
+			ch3.set(i-1, k, 2, wa2[i-1]*dr3-sign*wa2[i]*di3)
+			ch3.set(i, k, 2, wa2[i-1]*di3+sign*wa2[i]*dr3)
+			ch3.set(i-1, k, 3, wa3[i-1]*dr4-sign*wa3[i]*di4)
+			ch3.set(i, k, 3, wa3[i-1]*di4+sign*wa3[i]*dr4)
+			ch3.set(i-1, k, 4, wa4[i-1]*dr5-sign*wa4[i]*di5)
+			ch3.set(i, k, 4, wa4[i-1]*di5+sign*wa4[i]*dr5)
 		}
 	}
 }
 
-func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) {
+func pass(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64, sign float64) (nac bool) {
 	cc3 := newThreeArray(ido, ip, l1, cc)
 	c13 := newThreeArray(ido, l1, ip, c1)
 	ch3 := newThreeArray(ido, l1, ip, ch)
@@ -948,7 +534,7 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 		idl += ido
 		for ik := 0; ik < idl1; ik++ {
 			c2m.set(ik, l, ch2m.at(ik, 0)+wa[idl-1]*ch2m.at(ik, 1))
-			c2m.set(ik, lc, wa[idl]*ch2m.at(ik, ip-1))
+			c2m.set(ik, lc, sign*wa[idl]*ch2m.at(ik, ip-1))
 		}
 		idlj := idl
 		inc += ido
@@ -962,7 +548,7 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 			wai := wa[idlj]
 			for ik := 0; ik < idl1; ik++ {
 				c2m.add(ik, l, war*ch2m.at(ik, j))
-				c2m.add(ik, lc, wai*ch2m.at(ik, jc))
+				c2m.add(ik, lc, sign*wai*ch2m.at(ik, jc))
 			}
 		}
 	}
@@ -1006,8 +592,8 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 				idij := idj
 				for i := 3; i < ido; i += 2 {
 					idij += 2
-					c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-wa[idij]*ch3.at(i, k, j))
-					c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+wa[idij]*ch3.at(i-1, k, j))
+					c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-sign*wa[idij]*ch3.at(i, k, j))
+					c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+sign*wa[idij]*ch3.at(i-1, k, j))
 				}
 			}
 		}
@@ -1021,8 +607,8 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) 
 		for i := 3; i < ido; i += 2 {
 			idij += 2
 			for k := 0; k < l1; k++ {
-				c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-wa[idij]*ch3.at(i, k, j))
-				c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+wa[idij]*ch3.at(i-1, k, j))
+				c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-sign*wa[idij]*ch3.at(i, k, j))
+				c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+sign*wa[idij]*ch3.at(i-1, k, j))
 			}
 		}
 	}

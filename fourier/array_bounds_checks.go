@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// This file must be kept in sync with array_no_bound_checks.go.
+
+// +build bounds
+
 package fourier
 
 import "fmt"
@@ -9,8 +13,6 @@ import "fmt"
 // The types in array.go implement Fortran-like arrays for bootstrapping
 // the implementation of the FFT functions translated from FFTPACK; they
 // are column-major.
-// TODO(kortschak): Make a bounds-checking and non-bounds-checking version
-// for testing/production.
 
 type twoArray struct {
 	i, j    int

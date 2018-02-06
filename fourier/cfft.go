@@ -435,85 +435,85 @@ func passf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 	}
 }
 
-func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) (nac bool) {
-	cc3 := newThreeArray(ido, ip, l1, cc)
-	c13 := newThreeArray(ido, l1, ip, c1)
-	ch3 := newThreeArray(ido, l1, ip, ch)
-	c2m := newTwoArray(idl1, ip, c2)
-	ch2m := newTwoArray(idl1, ip, ch2)
+func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) {
+	cc3 := newThreeArrayZ(ido, ip, l1, cc)
+	c13 := newThreeArrayZ(ido, l1, ip, c1)
+	ch3 := newThreeArrayZ(ido, l1, ip, ch)
+	c2m := newTwoArrayZ(idl1, ip, c2)
+	ch2m := newTwoArrayZ(idl1, ip, ch2)
 
 	idot := ido / 2
-	ipp2 := ip + 2
+	ipp2 := ip + 1
 	ipph := (ip + 1) / 2
 	idp := ip * ido
 
 	if ido < l1 {
-		for j := 2; j <= ipph; j++ {
-			jc := ipp2 - j
-			for i := 1; i <= ido; i++ {
-				for k := 1; k <= l1; k++ {
+		for j := 1; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
+			for i := 0; i < ido; i++ {
+				for k := 0; k < l1; k++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
 					ch3.set(i, k, jc, cc3.at(i, j, k)-cc3.at(i, jc, k))
 				}
 			}
 		}
-		for i := 1; i <= ido; i++ {
-			for k := 1; k <= l1; k++ {
-				ch3.set(i, k, 1, cc3.at(i, 1, k))
+		for i := 0; i < ido; i++ {
+			for k := 0; k < l1; k++ {
+				ch3.set(i, k, 0, cc3.at(i, 0, k))
 			}
 		}
 	} else {
-		for j := 2; j <= ipph; j++ {
-			jc := ipp2 - j
-			for k := 1; k <= l1; k++ {
-				for i := 1; i <= ido; i++ {
+		for j := 1; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
+			for k := 0; k < l1; k++ {
+				for i := 0; i < ido; i++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
 					ch3.set(i, k, jc, cc3.at(i, j, k)-cc3.at(i, jc, k))
 				}
 			}
 		}
-		for k := 1; k <= l1; k++ {
-			for i := 1; i <= ido; i++ {
-				ch3.set(i, k, 1, cc3.at(i, 1, k))
+		for k := 0; k < l1; k++ {
+			for i := 0; i < ido; i++ {
+				ch3.set(i, k, 0, cc3.at(i, 0, k))
 			}
 		}
 	}
 
-	idl := 2 - ido
+	idl := 1 - ido
 	inc := 0
-	for l := 2; l <= ipph; l++ {
-		lc := ipp2 - l
+	for l := 1; l < ipph; l++ {
+		lc := ipp2 - (l + 1)
 		idl += ido
-		for ik := 1; ik <= idl1; ik++ {
-			c2m.set(ik, l, ch2m.at(ik, 1)+wa.at(idl-1)*ch2m.at(ik, 2))
-			c2m.set(ik, lc, -wa.at(idl)*ch2m.at(ik, ip))
+		for ik := 0; ik < idl1; ik++ {
+			c2m.set(ik, l, ch2m.at(ik, 0)+wa[idl-1]*ch2m.at(ik, 1))
+			c2m.set(ik, lc, -wa[idl]*ch2m.at(ik, ip-1))
 		}
 		idlj := idl
 		inc += ido
-		for j := 3; j <= ipph; j++ {
-			jc := ipp2 - j
+		for j := 2; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
 			idlj += inc
 			if idlj > idp {
 				idlj -= idp
 			}
-			war := wa.at(idlj - 1)
-			wai := wa.at(idlj)
-			for ik := 1; ik <= idl1; ik++ {
+			war := wa[idlj-1]
+			wai := wa[idlj]
+			for ik := 0; ik < idl1; ik++ {
 				c2m.set(ik, l, c2m.at(ik, l)+war*ch2m.at(ik, j))
 				c2m.set(ik, lc, c2m.at(ik, lc)-wai*ch2m.at(ik, jc))
 			}
 		}
 	}
 
-	for j := 2; j <= ipph; j++ {
-		for ik := 1; ik <= idl1; ik++ {
-			ch2m.set(ik, 1, ch2m.at(ik, 1)+ch2m.at(ik, j))
+	for j := 1; j < ipph; j++ {
+		for ik := 0; ik < idl1; ik++ {
+			ch2m.set(ik, 0, ch2m.at(ik, 0)+ch2m.at(ik, j))
 		}
 	}
 
-	for j := 2; j <= ipph; j++ {
-		jc := ipp2 - j
-		for ik := 2; ik <= idl1; ik += 2 {
+	for j := 1; j < ipph; j++ {
+		jc := ipp2 - (j + 1)
+		for ik := 1; ik < idl1; ik += 2 {
 			ch2m.set(ik-1, j, c2m.at(ik-1, j)-c2m.at(ik, jc))
 			ch2m.set(ik-1, jc, c2m.at(ik-1, j)+c2m.at(ik, jc))
 			ch2m.set(ik, j, c2m.at(ik, j)+c2m.at(ik-1, jc))
@@ -525,27 +525,27 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) (n
 		return true
 	}
 
-	for ik := 1; ik <= idl1; ik++ {
-		c2m.set(ik, 1, ch2m.at(ik, 1))
+	for ik := 0; ik < idl1; ik++ {
+		c2m.set(ik, 0, ch2m.at(ik, 0))
 	}
 
-	for j := 2; j <= ip; j++ {
-		for k := 1; k <= l1; k++ {
+	for j := 1; j < ip; j++ {
+		for k := 0; k < l1; k++ {
+			c13.set(0, k, j, ch3.at(0, k, j))
 			c13.set(1, k, j, ch3.at(1, k, j))
-			c13.set(2, k, j, ch3.at(2, k, j))
 		}
 	}
 
 	if idot > l1 {
-		idj := 2 - ido
-		for j := 2; j <= ip; j++ {
+		idj := 1 - ido
+		for j := 1; j < ip; j++ {
 			idj += ido
-			for k := 1; k <= l1; k++ {
+			for k := 0; k < l1; k++ {
 				idij := idj
-				for i := 4; i <= ido; i += 2 {
+				for i := 3; i < ido; i += 2 {
 					idij += 2
-					c13.set(i-1, k, j, wa.at(idij-1)*ch3.at(i-1, k, j)+wa.at(idij)*ch3.at(i, k, j))
-					c13.set(i, k, j, wa.at(idij-1)*ch3.at(i, k, j)-wa.at(idij)*ch3.at(i-1, k, j))
+					c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)+wa[idij]*ch3.at(i, k, j))
+					c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)-wa[idij]*ch3.at(i-1, k, j))
 				}
 			}
 		}
@@ -553,13 +553,13 @@ func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) (n
 	}
 
 	idij := 0
-	for j := 2; j <= ip; j++ {
+	for j := 1; j < ip; j++ {
 		idij += 2
-		for i := 4; i <= ido; i += 2 {
+		for i := 3; i < ido; i += 2 {
 			idij += 2
-			for k := 1; k <= l1; k++ {
-				c13.set(i-1, k, j, wa.at(idij-1)*ch3.at(i-1, k, j)+wa.at(idij)*ch3.at(i, k, j))
-				c13.set(i, k, j, wa.at(idij-1)*ch3.at(i, k, j)-wa.at(idij)*ch3.at(i-1, k, j))
+			for k := 0; k < l1; k++ {
+				c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)+wa[idij]*ch3.at(i, k, j))
+				c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)-wa[idij]*ch3.at(i-1, k, j))
 			}
 		}
 	}
@@ -899,85 +899,85 @@ func passb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 	}
 }
 
-func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) (nac bool) {
-	cc3 := newThreeArray(ido, ip, l1, cc)
-	c13 := newThreeArray(ido, l1, ip, c1)
-	ch3 := newThreeArray(ido, l1, ip, ch)
-	c2m := newTwoArray(idl1, ip, c2)
-	ch2m := newTwoArray(idl1, ip, ch2)
+func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) {
+	cc3 := newThreeArrayZ(ido, ip, l1, cc)
+	c13 := newThreeArrayZ(ido, l1, ip, c1)
+	ch3 := newThreeArrayZ(ido, l1, ip, ch)
+	c2m := newTwoArrayZ(idl1, ip, c2)
+	ch2m := newTwoArrayZ(idl1, ip, ch2)
 
 	idot := ido / 2
-	ipp2 := ip + 2
+	ipp2 := ip + 1
 	ipph := (ip + 1) / 2
 	idp := ip * ido
 
 	if ido < l1 {
-		for j := 2; j <= ipph; j++ {
-			jc := ipp2 - j
-			for i := 1; i <= ido; i++ {
-				for k := 1; k <= l1; k++ {
+		for j := 1; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
+			for i := 0; i < ido; i++ {
+				for k := 0; k < l1; k++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
 					ch3.set(i, k, jc, cc3.at(i, j, k)-cc3.at(i, jc, k))
 				}
 			}
 		}
-		for i := 1; i <= ido; i++ {
-			for k := 1; k <= l1; k++ {
-				ch3.set(i, k, 1, cc3.at(i, 1, k))
+		for i := 0; i < ido; i++ {
+			for k := 0; k < l1; k++ {
+				ch3.set(i, k, 0, cc3.at(i, 0, k))
 			}
 		}
 	} else {
-		for j := 2; j <= ipph; j++ {
-			jc := ipp2 - j
-			for k := 1; k <= l1; k++ {
-				for i := 1; i <= ido; i++ {
+		for j := 1; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
+			for k := 0; k < l1; k++ {
+				for i := 0; i < ido; i++ {
 					ch3.set(i, k, j, cc3.at(i, j, k)+cc3.at(i, jc, k))
 					ch3.set(i, k, jc, cc3.at(i, j, k)-cc3.at(i, jc, k))
 				}
 			}
 		}
-		for k := 1; k <= l1; k++ {
-			for i := 1; i <= ido; i++ {
-				ch3.set(i, k, 1, cc3.at(i, 1, k))
+		for k := 0; k < l1; k++ {
+			for i := 0; i < ido; i++ {
+				ch3.set(i, k, 0, cc3.at(i, 0, k))
 			}
 		}
 	}
 
-	idl := 2 - ido
+	idl := 1 - ido
 	inc := 0
-	for l := 2; l <= ipph; l++ {
-		lc := ipp2 - l
+	for l := 1; l < ipph; l++ {
+		lc := ipp2 - (l + 1)
 		idl += ido
-		for ik := 1; ik <= idl1; ik++ {
-			c2m.set(ik, l, ch2m.at(ik, 1)+wa.at(idl-1)*ch2m.at(ik, 2))
-			c2m.set(ik, lc, wa.at(idl)*ch2m.at(ik, ip))
+		for ik := 0; ik < idl1; ik++ {
+			c2m.set(ik, l, ch2m.at(ik, 0)+wa[idl-1]*ch2m.at(ik, 1))
+			c2m.set(ik, lc, wa[idl]*ch2m.at(ik, ip-1))
 		}
 		idlj := idl
 		inc += ido
-		for j := 3; j <= ipph; j++ {
-			jc := ipp2 - j
+		for j := 2; j < ipph; j++ {
+			jc := ipp2 - (j + 1)
 			idlj += inc
 			if idlj > idp {
 				idlj -= idp
 			}
-			war := wa.at(idlj - 1)
-			wai := wa.at(idlj)
-			for ik := 1; ik <= idl1; ik++ {
+			war := wa[idlj-1]
+			wai := wa[idlj]
+			for ik := 0; ik < idl1; ik++ {
 				c2m.set(ik, l, c2m.at(ik, l)+war*ch2m.at(ik, j))
 				c2m.set(ik, lc, c2m.at(ik, lc)+wai*ch2m.at(ik, jc))
 			}
 		}
 	}
 
-	for j := 2; j <= ipph; j++ {
-		for ik := 1; ik <= idl1; ik++ {
-			ch2m.set(ik, 1, ch2m.at(ik, 1)+ch2m.at(ik, j))
+	for j := 1; j < ipph; j++ {
+		for ik := 0; ik < idl1; ik++ {
+			ch2m.set(ik, 0, ch2m.at(ik, 0)+ch2m.at(ik, j))
 		}
 	}
 
-	for j := 2; j <= ipph; j++ {
-		jc := ipp2 - j
-		for ik := 2; ik <= idl1; ik += 2 {
+	for j := 1; j < ipph; j++ {
+		jc := ipp2 - (j + 1)
+		for ik := 1; ik < idl1; ik += 2 {
 			ch2m.set(ik-1, j, c2m.at(ik-1, j)-c2m.at(ik, jc))
 			ch2m.set(ik-1, jc, c2m.at(ik-1, j)+c2m.at(ik, jc))
 			ch2m.set(ik, j, c2m.at(ik, j)+c2m.at(ik-1, jc))
@@ -989,41 +989,42 @@ func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2 []float64, wa oneArray) (n
 		return true
 	}
 
-	for ik := 1; ik <= idl1; ik++ {
-		c2m.set(ik, 1, ch2m.at(ik, 1))
+	for ik := 0; ik < idl1; ik++ {
+		c2m.set(ik, 0, ch2m.at(ik, 0))
 	}
 
-	for j := 2; j <= ip; j++ {
-		for k := 1; k <= l1; k++ {
+	for j := 1; j < ip; j++ {
+		for k := 0; k < l1; k++ {
+			c13.set(0, k, j, ch3.at(0, k, j))
 			c13.set(1, k, j, ch3.at(1, k, j))
-			c13.set(2, k, j, ch3.at(2, k, j))
 		}
 	}
 
 	if idot > l1 {
-		idj := 2 - ido
-		for j := 2; j <= ip; j++ {
+		idj := 1 - ido
+		for j := 1; j < ip; j++ {
 			idj += ido
-			for k := 1; k <= l1; k++ {
+			for k := 0; k < l1; k++ {
 				idij := idj
-				for i := 4; i <= ido; i += 2 {
+				for i := 3; i < ido; i += 2 {
 					idij += 2
-					c13.set(i-1, k, j, wa.at(idij-1)*ch3.at(i-1, k, j)-wa.at(idij)*ch3.at(i, k, j))
-					c13.set(i, k, j, wa.at(idij-1)*ch3.at(i, k, j)+wa.at(idij)*ch3.at(i-1, k, j))
+					c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-wa[idij]*ch3.at(i, k, j))
+					c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+wa[idij]*ch3.at(i-1, k, j))
 				}
 			}
 		}
+
 		return false
 	}
 
-	idij := 0
-	for j := 2; j <= ip; j++ {
+	idij := -1
+	for j := 1; j < ip; j++ {
 		idij += 2
-		for i := 4; i <= ido; i += 2 {
+		for i := 3; i < ido; i += 2 {
 			idij += 2
-			for k := 1; k <= l1; k++ {
-				c13.set(i-1, k, j, wa.at(idij-1)*ch3.at(i-1, k, j)-wa.at(idij)*ch3.at(i, k, j))
-				c13.set(i, k, j, wa.at(idij-1)*ch3.at(i, k, j)+wa.at(idij)*ch3.at(i-1, k, j))
+			for k := 0; k < l1; k++ {
+				c13.set(i-1, k, j, wa[idij-1]*ch3.at(i-1, k, j)-wa[idij]*ch3.at(i, k, j))
+				c13.set(i, k, j, wa[idij-1]*ch3.at(i, k, j)+wa[idij]*ch3.at(i-1, k, j))
 			}
 		}
 	}

@@ -15,14 +15,6 @@ import "fmt"
 
 type oneArray []float64
 
-func (a oneArray) sliceFrom(i int) oneArray {
-	i--
-	if i < 0 || len(a) <= i {
-		panic(fmt.Sprintf("out of bounds sliceFrom(%d): bounds i=%d", i, len(a)))
-	}
-	return a[i:]
-}
-
 func (a oneArray) at(i int) float64 {
 	i--
 	if i < 0 || len(a) <= i {

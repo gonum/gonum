@@ -159,11 +159,11 @@ func rfftf(n int, r, work []float64, ifac []int) {
 	rfftf1(n, r, work, work[n:], ifac)
 }
 
-func rfftf1(n int, c, ch []float64, wa oneArray, ifac []int) {
+func rfftf1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
 	na := 1
 	l2 := n
-	iw := n
+	iw := n - 1
 
 	for k1 := 1; k1 <= nf; k1++ {
 		kh := nf - k1
@@ -179,41 +179,41 @@ func rfftf1(n int, c, ch []float64, wa oneArray, ifac []int) {
 			ix2 := iw + ido
 			ix3 := ix2 + ido
 			if na == 0 {
-				radf4(ido, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				radf4(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			} else {
-				radf4(ido, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				radf4(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
 			}
 		case 2:
 			if na == 0 {
-				radf2(ido, l1, c, ch, wa.sliceFrom(iw))
+				radf2(ido, l1, c, ch, wa[iw:])
 			} else {
-				radf2(ido, l1, ch, c, wa.sliceFrom(iw))
+				radf2(ido, l1, ch, c, wa[iw:])
 			}
 		case 3:
 			ix2 := iw + ido
 			if na == 0 {
-				radf3(ido, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				radf3(ido, l1, c, ch, wa[iw:], wa[ix2:])
 			} else {
-				radf3(ido, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				radf3(ido, l1, ch, c, wa[iw:], wa[ix2:])
 			}
 		case 5:
 			ix2 := iw + ido
 			ix3 := ix2 + ido
 			ix4 := ix3 + ido
 			if na == 0 {
-				radf5(ido, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				radf5(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			} else {
-				radf5(ido, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				radf5(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			}
 		default:
 			if ido == 1 {
 				na = 1 - na
 			}
 			if na == 0 {
-				radfg(ido, ip, l1, idl1, c, c, c, ch, ch, wa.sliceFrom(iw))
+				radfg(ido, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 				na = 1
 			} else {
-				radfg(ido, ip, l1, idl1, ch, ch, ch, c, c, wa.sliceFrom(iw))
+				radfg(ido, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
 				na = 0
 			}
 		}
@@ -664,11 +664,11 @@ func rfftb(n int, r, work []float64, ifac []int) {
 	rfftb1(n, r, work, work[n:], ifac)
 }
 
-func rfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
+func rfftb1(n int, c, ch, wa []float64, ifac []int) {
 	nf := ifac[1]
 	na := 0
 	l1 := 1
-	iw := 1
+	iw := 0
 
 	for k1 := 1; k1 <= nf; k1++ {
 		ip := ifac[k1+1]
@@ -681,24 +681,24 @@ func rfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
 			ix2 := iw + ido
 			ix3 := ix2 + ido
 			if na == 0 {
-				radb4(ido, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				radb4(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:])
 			} else {
-				radb4(ido, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3))
+				radb4(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:])
 			}
 			na = 1 - na
 		case 2:
 			if na == 0 {
-				radb2(ido, l1, c, ch, wa.sliceFrom(iw))
+				radb2(ido, l1, c, ch, wa[iw:])
 			} else {
-				radb2(ido, l1, ch, c, wa.sliceFrom(iw))
+				radb2(ido, l1, ch, c, wa[iw:])
 			}
 			na = 1 - na
 		case 3:
 			ix2 := iw + ido
 			if na == 0 {
-				radb3(ido, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				radb3(ido, l1, c, ch, wa[iw:], wa[ix2:])
 			} else {
-				radb3(ido, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2))
+				radb3(ido, l1, ch, c, wa[iw:], wa[ix2:])
 			}
 			na = 1 - na
 		case 5:
@@ -706,16 +706,16 @@ func rfftb1(n int, c, ch []float64, wa oneArray, ifac []int) {
 			ix3 := ix2 + ido
 			ix4 := ix3 + ido
 			if na == 0 {
-				radb5(ido, l1, c, ch, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				radb5(ido, l1, c, ch, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			} else {
-				radb5(ido, l1, ch, c, wa.sliceFrom(iw), wa.sliceFrom(ix2), wa.sliceFrom(ix3), wa.sliceFrom(ix4))
+				radb5(ido, l1, ch, c, wa[iw:], wa[ix2:], wa[ix3:], wa[ix4:])
 			}
 			na = 1 - na
 		default:
 			if na == 0 {
-				radbg(ido, ip, l1, idl1, c, c, c, ch, ch, wa.sliceFrom(iw))
+				radbg(ido, ip, l1, idl1, c, c, c, ch, ch, wa[iw:])
 			} else {
-				radbg(ido, ip, l1, idl1, ch, ch, ch, c, c, wa.sliceFrom(iw))
+				radbg(ido, ip, l1, idl1, ch, ch, ch, c, c, wa[iw:])
 			}
 			if ido == 1 {
 				na = 1 - na

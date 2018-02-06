@@ -230,8 +230,8 @@ func rfftf1(n int, c, ch, wa []float64, ifac []int) {
 }
 
 func radf2(ido, l1 int, cc, ch, wa1 []float64) {
-	cc3 := newThreeArrayZ(ido, l1, 2, cc)
-	ch3 := newThreeArrayZ(ido, 2, l1, ch)
+	cc3 := newThreeArray(ido, l1, 2, cc)
+	ch3 := newThreeArray(ido, 2, l1, ch)
 
 	for k := 0; k < l1; k++ {
 		ch3.set(0, 0, k, cc3.at(0, k, 0)+cc3.at(0, k, 1))
@@ -269,8 +269,8 @@ func radf3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 		taui = 0.866025403784439 // sqrt(3)/2
 	)
 
-	cc3 := newThreeArrayZ(ido, l1, 3, cc)
-	ch3 := newThreeArrayZ(ido, 3, l1, ch)
+	cc3 := newThreeArray(ido, l1, 3, cc)
+	ch3 := newThreeArray(ido, 3, l1, ch)
 
 	for k := 0; k < l1; k++ {
 		cr2 := cc3.at(0, k, 1) + cc3.at(0, k, 2)
@@ -308,8 +308,8 @@ func radf3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 func radf4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
 	const hsqt2 = math.Sqrt2 / 2
 
-	cc3 := newThreeArrayZ(ido, l1, 4, cc)
-	ch3 := newThreeArrayZ(ido, 4, l1, ch)
+	cc3 := newThreeArray(ido, l1, 4, cc)
+	ch3 := newThreeArray(ido, 4, l1, ch)
 
 	for k := 0; k < l1; k++ {
 		tr1 := cc3.at(0, k, 1) + cc3.at(0, k, 3)
@@ -374,8 +374,8 @@ func radf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 		ti12 = 0.587785252292473
 	)
 
-	cc3 := newThreeArrayZ(ido, l1, 5, cc)
-	ch3 := newThreeArrayZ(ido, 5, l1, ch)
+	cc3 := newThreeArray(ido, l1, 5, cc)
+	ch3 := newThreeArray(ido, 5, l1, ch)
 
 	for k := 0; k < l1; k++ {
 		cr2 := cc3.at(0, k, 4) + cc3.at(0, k, 1)
@@ -734,8 +734,8 @@ func rfftb1(n int, c, ch, wa []float64, ifac []int) {
 }
 
 func radb2(ido, l1 int, cc, ch, wa1 []float64) {
-	cc3 := newThreeArrayZ(ido, 2, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 2, ch)
+	cc3 := newThreeArray(ido, 2, l1, cc)
+	ch3 := newThreeArray(ido, l1, 2, ch)
 
 	for k := 0; k < l1; k++ {
 		ch3.set(0, k, 0, cc3.at(0, 0, k)+cc3.at(ido-1, 1, k))
@@ -775,8 +775,8 @@ func radb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 		taui = 0.866025403784439 // sqrt(3)/2
 	)
 
-	cc3 := newThreeArrayZ(ido, 3, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 3, ch)
+	cc3 := newThreeArray(ido, 3, l1, cc)
+	ch3 := newThreeArray(ido, l1, 3, ch)
 
 	for k := 0; k < l1; k++ {
 		tr2 := cc3.at(ido-1, 1, k) + cc3.at(ido-1, 1, k)
@@ -816,8 +816,8 @@ func radb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 }
 
 func radb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
-	cc3 := newThreeArrayZ(ido, 4, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 4, ch)
+	cc3 := newThreeArray(ido, 4, l1, cc)
+	ch3 := newThreeArray(ido, l1, 4, ch)
 
 	for k := 0; k < l1; k++ {
 		tr1 := cc3.at(0, 0, k) - cc3.at(ido-1, 3, k)
@@ -887,8 +887,8 @@ func radb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 		ti12 = 0.587785252292473
 	)
 
-	cc3 := newThreeArrayZ(ido, 5, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 5, ch)
+	cc3 := newThreeArray(ido, 5, l1, cc)
+	ch3 := newThreeArray(ido, l1, 5, ch)
 
 	for k := 0; k < l1; k++ {
 		ti5 := cc3.at(0, 2, k) + cc3.at(0, 2, k)
@@ -953,11 +953,11 @@ func radb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 }
 
 func radbg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
-	cc3 := newThreeArrayZ(ido, ip, l1, cc)
-	c13 := newThreeArrayZ(ido, l1, ip, c1)
-	ch3 := newThreeArrayZ(ido, l1, ip, ch)
-	c2m := newTwoArrayZ(idl1, ip, c2)
-	ch2m := newTwoArrayZ(idl1, ip, ch2)
+	cc3 := newThreeArray(ido, ip, l1, cc)
+	c13 := newThreeArray(ido, l1, ip, c1)
+	ch3 := newThreeArray(ido, l1, ip, ch)
+	c2m := newTwoArray(idl1, ip, c2)
+	ch2m := newTwoArray(idl1, ip, ch2)
 
 	arg := 2 * math.Pi / float64(ip)
 	dcp := math.Cos(arg)

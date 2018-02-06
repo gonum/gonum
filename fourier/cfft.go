@@ -228,8 +228,8 @@ func cfftf1(n int, c, ch, wa []float64, ifac []int) {
 }
 
 func passf2(ido, l1 int, cc, ch, wa1 []float64) {
-	cc3 := newThreeArrayZ(ido, 2, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 2, ch)
+	cc3 := newThreeArray(ido, 2, l1, cc)
+	ch3 := newThreeArray(ido, l1, 2, ch)
 
 	if ido <= 2 {
 		for k := 0; k < l1; k++ {
@@ -258,8 +258,8 @@ func passf3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 		taui = -0.866025403784439 // -sqrt(3)/2
 	)
 
-	cc3 := newThreeArrayZ(ido, 3, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 3, ch)
+	cc3 := newThreeArray(ido, 3, l1, cc)
+	ch3 := newThreeArray(ido, l1, 3, ch)
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
@@ -301,8 +301,8 @@ func passf3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 }
 
 func passf4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
-	cc3 := newThreeArrayZ(ido, 4, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 4, ch)
+	cc3 := newThreeArray(ido, 4, l1, cc)
+	ch3 := newThreeArray(ido, l1, 4, ch)
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
@@ -361,8 +361,8 @@ func passf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 		ti12 = -0.587785252292473
 	)
 
-	cc3 := newThreeArrayZ(ido, 5, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 5, ch)
+	cc3 := newThreeArray(ido, 5, l1, cc)
+	ch3 := newThreeArray(ido, l1, 5, ch)
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
@@ -436,11 +436,11 @@ func passf5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 }
 
 func passf(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) {
-	cc3 := newThreeArrayZ(ido, ip, l1, cc)
-	c13 := newThreeArrayZ(ido, l1, ip, c1)
-	ch3 := newThreeArrayZ(ido, l1, ip, ch)
-	c2m := newTwoArrayZ(idl1, ip, c2)
-	ch2m := newTwoArrayZ(idl1, ip, ch2)
+	cc3 := newThreeArray(ido, ip, l1, cc)
+	c13 := newThreeArray(ido, l1, ip, c1)
+	ch3 := newThreeArray(ido, l1, ip, ch)
+	c2m := newTwoArray(idl1, ip, c2)
+	ch2m := newTwoArray(idl1, ip, ch2)
 
 	idot := ido / 2
 	ipp2 := ip + 1
@@ -692,8 +692,8 @@ func cfftb1(n int, c, ch, wa []float64, ifac []int) {
 }
 
 func passb2(ido, l1 int, cc, ch, wa1 []float64) {
-	cc3 := newThreeArrayZ(ido, 2, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 2, ch)
+	cc3 := newThreeArray(ido, 2, l1, cc)
+	ch3 := newThreeArray(ido, l1, 2, ch)
 
 	if ido <= 2 {
 		for k := 0; k < l1; k++ {
@@ -722,8 +722,8 @@ func passb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 		taui = 0.866025403784439 // sqrt(3)/2
 	)
 
-	cc3 := newThreeArrayZ(ido, 3, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 3, ch)
+	cc3 := newThreeArray(ido, 3, l1, cc)
+	ch3 := newThreeArray(ido, l1, 3, ch)
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
@@ -765,8 +765,8 @@ func passb3(ido, l1 int, cc, ch, wa1, wa2 []float64) {
 }
 
 func passb4(ido, l1 int, cc, ch, wa1, wa2, wa3 []float64) {
-	cc3 := newThreeArrayZ(ido, 4, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 4, ch)
+	cc3 := newThreeArray(ido, 4, l1, cc)
+	ch3 := newThreeArray(ido, l1, 4, ch)
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
@@ -825,8 +825,8 @@ func passb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 		ti12 = 0.587785252292473
 	)
 
-	cc3 := newThreeArrayZ(ido, 5, l1, cc)
-	ch3 := newThreeArrayZ(ido, l1, 5, ch)
+	cc3 := newThreeArray(ido, 5, l1, cc)
+	ch3 := newThreeArray(ido, l1, 5, ch)
 
 	if ido == 2 {
 		for k := 0; k < l1; k++ {
@@ -900,11 +900,11 @@ func passb5(ido, l1 int, cc, ch, wa1, wa2, wa3, wa4 []float64) {
 }
 
 func passb(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) (nac bool) {
-	cc3 := newThreeArrayZ(ido, ip, l1, cc)
-	c13 := newThreeArrayZ(ido, l1, ip, c1)
-	ch3 := newThreeArrayZ(ido, l1, ip, ch)
-	c2m := newTwoArrayZ(idl1, ip, c2)
-	ch2m := newTwoArrayZ(idl1, ip, ch2)
+	cc3 := newThreeArray(ido, ip, l1, cc)
+	c13 := newThreeArray(ido, l1, ip, c1)
+	ch3 := newThreeArray(ido, l1, ip, ch)
+	c2m := newTwoArray(idl1, ip, c2)
+	ch2m := newTwoArray(idl1, ip, ch2)
 
 	idot := ido / 2
 	ipp2 := ip + 1

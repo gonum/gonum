@@ -51,6 +51,49 @@ func TestFFT(t *testing.T) {
 			}
 		}
 	})
+	t.Run("known FFT", func(t *testing.T) {
+		// Values confirmed with reference to numpy rfft.
+		fft := NewFFT(1000)
+		cases := []struct {
+			in   []float64
+			want []complex128
+		}{
+			{
+				in:   []float64{1, 0, 1, 0, 1, 0, 1, 0},
+				want: []complex128{4, 0, 0, 0, 4},
+			},
+			{
+				in: []float64{1, 0, 1, 0, 1, 0, 1},
+				want: []complex128{
+					4,
+					0.5 + 0.24078730940376442i,
+					0.5 + 0.6269801688313512i,
+					0.5 + 2.190643133767413i,
+				},
+			},
+			{
+				in: []float64{1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 2, 0, 1, 0},
+				want: []complex128{
+					12,
+					-2.301937735804838 - 1.108554787638881i,
+					0.7469796037174659 + 0.9366827961047095i,
+					-0.9450418679126271 - 4.140498958131061i,
+					-0.9450418679126271 + 4.140498958131061i,
+					0.7469796037174659 - 0.9366827961047095i,
+					-2.301937735804838 + 1.108554787638881i,
+					12,
+				},
+			},
+		}
+		for _, test := range cases {
+			fft.Reset(len(test.in))
+			got := fft.FFT(nil, test.in)
+			if !equalApprox(got, test.want, tol) {
+				t.Errorf("unexpected result for fft(%g):\ngot: %g\nwant:%g",
+					test.in, got, test.want)
+			}
+		}
+	})
 }
 
 func TestCmplxFFT(t *testing.T) {

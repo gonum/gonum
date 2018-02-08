@@ -237,3 +237,16 @@ func (t *CmplxFFT) Shift(i int) int {
 	}
 	return i - h
 }
+
+// Unshift returns inverse of Shift. Unshift will panic if i is
+// negative or greater than or equal to t.Len().
+func (t *CmplxFFT) Unshift(i int) int {
+	if i < 0 || t.Len() <= i {
+		panic("fourier: index out of range")
+	}
+	h := (t.Len() + 1) / 2
+	if i < h {
+		return i + t.Len()/2
+	}
+	return i - h
+}

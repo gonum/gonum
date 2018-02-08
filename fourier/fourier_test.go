@@ -200,6 +200,11 @@ func TestCmplxFFT(t *testing.T) {
 			got := make([]int, len(test.index))
 			for i := range test.index {
 				got[i] = test.index[fft.Shift(i)]
+				su := fft.Unshift(fft.Shift(i))
+				if su != i {
+					t.Errorf("unexpected result for unshift(shift(%d)) with length %d:\ngot: %d\nwant:%d",
+						i, len(test.index), su, i)
+				}
 			}
 			if !reflect.DeepEqual(got, test.want) {
 				t.Errorf("unexpected result for shift(%d):\ngot: %d\nwant:%d",

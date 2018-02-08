@@ -53,19 +53,22 @@ func ExampleCmplxFFT_FFT() {
 	floats.Span(freqs[n+1:], -float64(len(coeff)/2), -1)
 	floats.Scale(1/float64(len(period)), freqs)
 
-	for i, f := range freqs {
+	for i := range freqs {
+		// Center the spectrum.
+		i = fft.Shift(i)
+
 		fmt.Printf("freq=%v cycles/period, magnitude=%v, phase=%.4g\n",
-			f, cmplx.Abs(coeff[i]), cmplx.Phase(coeff[i]))
+			freqs[i], cmplx.Abs(coeff[i]), cmplx.Phase(coeff[i]))
 	}
 
 	// Output:
 	//
-	// freq=0 cycles/period, magnitude=9, phase=0
-	// freq=0.125 cycles/period, magnitude=3, phase=3.142
-	// freq=0.25 cycles/period, magnitude=1, phase=0
-	// freq=0.375 cycles/period, magnitude=3, phase=3.142
 	// freq=-0.5 cycles/period, magnitude=9, phase=0
 	// freq=-0.375 cycles/period, magnitude=3, phase=3.142
 	// freq=-0.25 cycles/period, magnitude=1, phase=0
 	// freq=-0.125 cycles/period, magnitude=3, phase=3.142
+	// freq=0 cycles/period, magnitude=9, phase=0
+	// freq=0.125 cycles/period, magnitude=3, phase=3.142
+	// freq=0.25 cycles/period, magnitude=1, phase=0
+	// freq=0.375 cycles/period, magnitude=3, phase=3.142
 }

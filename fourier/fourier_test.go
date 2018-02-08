@@ -5,6 +5,7 @@
 package fourier
 
 import (
+	"reflect"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -138,6 +139,30 @@ func TestCmplxFFT(t *testing.T) {
 
 			if !equalApprox(got, want, tol) {
 				t.Errorf("unexpected result for complex ifft(fft(x)) for length %d", n)
+			}
+		}
+	})
+	t.Run("Shift", func(t *testing.T) {
+		var fft CmplxFFT
+		cases := []struct {
+			index []int
+			want  []int
+		}{
+			{index: []int{0}, want: []int{0}},
+			{index: []int{0, -1}, want: []int{-1, 0}},
+			{index: []int{0, 1, -1}, want: []int{-1, 0, 1}},
+			{index: []int{0, 1, -2, -1}, want: []int{-2, -1, 0, 1}},
+			{index: []int{0, 1, 2, -2, -1}, want: []int{-2, -1, 0, 1, 2}},
+		}
+		for _, test := range cases {
+			fft.Reset(len(test.index))
+			got := make([]int, len(test.index))
+			for i := range test.index {
+				got[i] = test.index[fft.Shift(i)]
+			}
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("unexpected result for shift(%d):\ngot: %d\nwant:%d",
+					test.index, got, test.want)
 			}
 		}
 	})

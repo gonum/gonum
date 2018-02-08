@@ -198,3 +198,19 @@ func (t *CmplxFFT) IFFT(dst, coeff []complex128) []complex128 {
 	}
 	return dst
 }
+
+// Shift returns returns a shifted index into a slice of
+// coefficients returned by the CmplxFFT so that indexing
+// into the coefficients places the zero frequency component
+// at the center of the spectrum. Shift will panic if i is
+// negative or greater than or equal to t.Len().
+func (t *CmplxFFT) Shift(i int) int {
+	if i < 0 || t.Len() <= i {
+		panic("fourier: index out of range")
+	}
+	h := t.Len() / 2
+	if i < h {
+		return i + (t.Len()+1)/2
+	}
+	return i - h
+}

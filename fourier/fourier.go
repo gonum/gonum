@@ -109,6 +109,16 @@ func (t *FFT) IFFT(dst []float64, coeff []complex128) []float64 {
 	return dst
 }
 
+// Freq returns the relative frequency center for coefficient i.
+// Freq will panic if i is negative or greater than or equal to t.Len().
+func (t *FFT) Freq(i int) float64 {
+	if i < 0 || t.Len() <= i {
+		panic("fourier: index out of range")
+	}
+	step := 1 / float64(t.Len())
+	return step * float64(i)
+}
+
 // CmplxFFT implements Fast Fourier Transform and its inverse for real sequences.
 type CmplxFFT struct {
 	work []float64
@@ -197,6 +207,19 @@ func (t *CmplxFFT) IFFT(dst, coeff []complex128) []complex128 {
 		dst[i] = complex(t.real[2*i], t.real[2*i+1])
 	}
 	return dst
+}
+
+// Freq returns the relative frequency center for coefficient i.
+// Freq will panic if i is negative or greater than or equal to t.Len().
+func (t *CmplxFFT) Freq(i int) float64 {
+	if i < 0 || t.Len() <= i {
+		panic("fourier: index out of range")
+	}
+	step := 1 / float64(t.Len())
+	if i < (t.Len()-1)/2+1 {
+		return step * float64(i)
+	}
+	return step * float64(i-t.Len())
 }
 
 // Shift returns returns a shifted index into a slice of

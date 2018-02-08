@@ -95,6 +95,27 @@ func TestFFT(t *testing.T) {
 			}
 		}
 	})
+	t.Run("Freq", func(t *testing.T) {
+		var fft FFT
+		cases := []struct {
+			n    int
+			want []float64
+		}{
+			{n: 1, want: []float64{0}},
+			{n: 2, want: []float64{0, 0.5}},
+			{n: 3, want: []float64{0, 1.0 / 3.0}},
+			{n: 4, want: []float64{0, 0.25, 0.5}},
+		}
+		for _, test := range cases {
+			fft.Reset(test.n)
+			for i, want := range test.want {
+				if got := fft.Freq(i); got != want {
+					t.Errorf("unexpected result for freq(%d) for length %d: got:%v want:%v",
+						i, test.n, got, want)
+				}
+			}
+		}
+	})
 }
 
 func TestCmplxFFT(t *testing.T) {
@@ -139,6 +160,26 @@ func TestCmplxFFT(t *testing.T) {
 
 			if !equalApprox(got, want, tol) {
 				t.Errorf("unexpected result for complex ifft(fft(x)) for length %d", n)
+			}
+		}
+	})
+	t.Run("Freq", func(t *testing.T) {
+		var fft CmplxFFT
+		cases := []struct {
+			want []float64
+		}{
+			{want: []float64{0}},
+			{want: []float64{0, -0.5}},
+			{want: []float64{0, 1.0 / 3.0, -1.0 / 3.0}},
+			{want: []float64{0, 0.25, -0.5, -0.25}},
+		}
+		for _, test := range cases {
+			fft.Reset(len(test.want))
+			for i, want := range test.want {
+				if got := fft.Freq(i); got != want {
+					t.Errorf("unexpected result for freq(%d) for length %d: got:%v want:%v",
+						i, len(test.want), got, want)
+				}
 			}
 		}
 	})

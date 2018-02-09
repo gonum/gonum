@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"math/cmplx"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/fourier"
+	"gonum.org/v1/gonum/mat"
 )
 
 func ExampleFFT_FFT() {
@@ -59,4 +61,127 @@ func ExampleCmplxFFT_FFT() {
 	// freq=0.125 cycles/period, magnitude=3, phase=3.142
 	// freq=0.25 cycles/period, magnitude=1, phase=0
 	// freq=0.375 cycles/period, magnitude=3, phase=3.142
+}
+
+func Example_fFT2() {
+	// Image is a set of diagonal lines.
+	image := mat.NewDense(11, 11, []float64{
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+	})
+
+	// Make appropriately sized real and complex FFT types.
+	r, c := image.Dims()
+	fft := fourier.NewFFT(c)
+	cfft := fourier.NewCmplxFFT(r)
+
+	// Only c/2+1 coefficients will be returned for
+	// the real FFT.
+	c = c/2 + 1
+
+	// Perform the first axis transform.
+	rows := make([]complex128, r*c)
+	for i := 0; i < r; i++ {
+		fft.FFT(rows[c*i:c*(i+1)], image.RawRowView(i))
+	}
+
+	// Perform the second axis transform, storing
+	// the result in freqs.
+	freqs := mat.NewDense(c, c, nil)
+	column := make([]complex128, r)
+	for j := 0; j < c; j++ {
+		for i := 0; i < r; i++ {
+			column[i] = rows[i*c+j]
+		}
+		cfft.FFT(column, column)
+		for i, v := range column[:c] {
+			freqs.Set(i, j, floats.Round(cmplx.Abs(v), 1))
+		}
+	}
+
+	fmt.Printf("%v\n", mat.Formatted(freqs))
+
+	// Output:
+	//
+	// ⎡  40   0.4   0.5   1.4   3.2   1.1⎤
+	// ⎢ 0.4   0.5   0.7   1.8     4   1.2⎥
+	// ⎢ 0.5   0.7   1.1   2.8   5.9   1.7⎥
+	// ⎢ 1.4   1.8   2.8   6.8  14.1   3.8⎥
+	// ⎢ 3.2     4   5.9  14.1  27.5   6.8⎥
+	// ⎣ 1.1   1.2   1.7   3.8   6.8   1.6⎦
+
+}
+
+func Example_cmplxFFT2() {
+	// Image is a set of diagonal lines.
+	image := mat.NewDense(11, 11, []float64{
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+		1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+	})
+
+	// Make appropriately sized complex FFT.
+	// Rows and columns are the same, so the same
+	// CmplxFFT can be used for both axes.
+	r, c := image.Dims()
+	cfft := fourier.NewCmplxFFT(r)
+
+	// Perform the first axis transform.
+	rows := make([]complex128, r*c)
+	for i := 0; i < r; i++ {
+		row := rows[c*i : c*(i+1)]
+		for j, v := range image.RawRowView(i) {
+			row[j] = complex(v, 0)
+		}
+		cfft.FFT(row, row)
+	}
+
+	// Perform the second axis transform, storing
+	// the result in freqs.
+	freqs := mat.NewDense(c, c, nil)
+	column := make([]complex128, r)
+	for j := 0; j < c; j++ {
+		for i := 0; i < r; i++ {
+			column[i] = rows[i*c+j]
+		}
+		cfft.FFT(column, column)
+		for i, v := range column {
+			// Center the frequencies.
+			freqs.Set(cfft.Unshift(i), cfft.Unshift(j), floats.Round(cmplx.Abs(v), 1))
+		}
+	}
+
+	fmt.Printf("%v\n", mat.Formatted(freqs))
+
+	// Output:
+	//
+	// ⎡ 1.6   6.8   3.8   1.7   1.2   1.1   1.1   1.4   2.6   3.9   1.1⎤
+	// ⎢ 6.8  27.5  14.1   5.9     4   3.2     3     3   3.9   3.2   3.9⎥
+	// ⎢ 3.8  14.1   6.8   2.8   1.8   1.4   1.2   1.1   1.4   3.9   2.6⎥
+	// ⎢ 1.7   5.9   2.8   1.1   0.7   0.5   0.5   0.5   1.1     3   1.4⎥
+	// ⎢ 1.2     4   1.8   0.7   0.5   0.4   0.4   0.5   1.2     3   1.1⎥
+	// ⎢ 1.1   3.2   1.4   0.5   0.4    40   0.4   0.5   1.4   3.2   1.1⎥
+	// ⎢ 1.1     3   1.2   0.5   0.4   0.4   0.5   0.7   1.8     4   1.2⎥
+	// ⎢ 1.4     3   1.1   0.5   0.5   0.5   0.7   1.1   2.8   5.9   1.7⎥
+	// ⎢ 2.6   3.9   1.4   1.1   1.2   1.4   1.8   2.8   6.8  14.1   3.8⎥
+	// ⎢ 3.9   3.2   3.9     3     3   3.2     4   5.9  14.1  27.5   6.8⎥
+	// ⎣ 1.1   3.9   2.6   1.4   1.1   1.1   1.2   1.7   3.8   6.8   1.6⎦
+
 }

@@ -161,6 +161,7 @@ func (t *CmplxFFT) Reset(n int) {
 // If the length of seq is not t.Len(), FFT will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
 // the length of dst does not equal the length of seq, FFT will panic.
+// It is safe to use the same slice for dst and seq.
 func (t *CmplxFFT) FFT(dst, seq []complex128) []complex128 {
 	if len(seq) != t.Len() {
 		panic("fourier: sequence length mismatch")
@@ -189,6 +190,7 @@ func (t *CmplxFFT) FFT(dst, seq []complex128) []complex128 {
 // If the length of coeff is not t.Len(), IFFT will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
 // the length of dst does not equal the length of coeff, IFFT will panic.
+// It is safe to use the same slice for dst and coeff.
 func (t *CmplxFFT) IFFT(dst, coeff []complex128) []complex128 {
 	if len(coeff) != t.Len() {
 		panic("fourier: coefficients length mismatch")

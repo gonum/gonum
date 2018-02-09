@@ -518,8 +518,18 @@ func NaNPayload(f float64) (payload uint64, ok bool) {
 // Panics if len(s) == 0.
 func Nearest(s []float64, v float64) int {
 	var ind int
-	dist := math.Abs(v - s[0])
+	dist := math.NaN()
+	for _, val := range s {
+		if !math.IsNaN(val) {
+			dist = math.Abs(v - val)
+			break
+		}
+	}
 	for i, val := range s {
+		if math.IsNaN(val) && math.IsNaN(v) {
+			ind = i
+			break
+		}
 		newDist := math.Abs(v - val)
 		if newDist < dist {
 			dist = newDist

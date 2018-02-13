@@ -515,13 +515,32 @@ func NaNPayload(f float64) (payload uint64, ok bool) {
 // Nearest returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.
-// Panics if len(s) == 0.
+// Nearest panics if len(s) == 0.
 func Nearest(s []float64, v float64) int {
+	if len(s) == 0 {
+		panic("floats: zero length slice")
+	}
+	switch {
+	case math.IsNaN(v):
+		return 0
+	case math.IsInf(v, 1):
+		return MaxIdx(s)
+	case math.IsInf(v, -1):
+		return MinIdx(s)
+	}
 	var ind int
 	dist := math.Abs(v - s[0])
 	for i, val := range s {
 		newDist := math.Abs(v - val)
-		if newDist < dist {
+		// A NaN distance will not be closer.
+		if math.IsNaN(newDist) {
+			continue
+		}
+		// The inverted test here is used to
+		// ensure that a test of newDist against
+		// a NaN dist results in a change to dist
+		// and the current index value.
+		if !(newDist >= dist) {
 			dist = newDist
 			ind = i
 		}
@@ -529,17 +548,76 @@ func Nearest(s []float64, v float64) int {
 	return ind
 }
 
-// NearestWithinSpan return the index of a hypothetical vector created
+// NearestIdx return the index of a hypothetical vector created
 // by Span with length n and bounds l and u whose value is closest
-// to v. NearestWithinSpan panics if u < l. If the value is greater than u or
-// less than l, the function returns -1.
-func NearestWithinSpan(n int, l, u float64, v float64) int {
-	if u < l {
-		panic("floats: upper bound greater than lower bound")
+// to v. NearestIdx panics if n is zero.
+func NearestIdx(n int, l, u float64, v float64) int {
+	if n == 0 {
+		panic("floats: zero length span")
 	}
-	if v < l || v > u {
-		return -1
+	if math.IsNaN(v) {
+		return 0
 	}
+
+	// Special cases for Inf and NaN.
+	switch {
+	case math.IsNaN(l) && !math.IsNaN(u):
+		return n - 1
+	case math.IsNaN(u):
+		return 0
+	case math.IsInf(l, 0) && math.IsInf(u, 0):
+		if l == u {
+			return 0
+		}
+		if n%2 == 1 && !math.IsInf(v, 0) {
+			return n / 2
+		}
+		if math.Copysign(1, v) == math.Copysign(1, l) {
+			return 0
+		}
+		return n / 2
+	case math.IsInf(l, 0):
+		if v == l {
+			return 0
+		}
+		return n - 1
+	case math.IsInf(u, 0):
+		if v == u {
+			return n - 1
+		}
+		return 0
+	case math.IsInf(v, -1):
+		if l <= u {
+			return 0
+		}
+		return n - 1
+	case math.IsInf(v, 1):
+		if u <= l {
+			return 0
+		}
+		return n - 1
+	}
+
+	// Special cases for v outside (l, u) and (u, l).
+	switch {
+	case l < u:
+		if v <= l {
+			return 0
+		}
+		if v >= u {
+			return n - 1
+		}
+	case l > u:
+		if v >= l {
+			return 0
+		}
+		if v <= u {
+			return n - 1
+		}
+	default:
+		return 0
+	}
+
 	// Can't guarantee anything about exactly halfway between
 	// because of floating point weirdness.
 	return int((float64(n)-1)/(u-l)*(v-l) + 0.5)
@@ -733,6 +811,48 @@ func Span(dst []float64, l, u float64) []float64 {
 	if n < 2 {
 		panic("floats: destination must have length >1")
 	}
+
+	// Special cases for Inf and NaN.
+	switch {
+	case math.IsNaN(l):
+		for i := range dst[:len(dst)-1] {
+			dst[i] = math.NaN()
+		}
+		dst[len(dst)-1] = u
+		return dst
+	case math.IsNaN(u):
+		for i := range dst[1:] {
+			dst[i+1] = math.NaN()
+		}
+		dst[0] = l
+		return dst
+	case math.IsInf(l, 0) && math.IsInf(u, 0):
+		for i := range dst[:len(dst)/2] {
+			dst[i] = l
+			dst[len(dst)-i-1] = u
+		}
+		if len(dst)%2 == 1 {
+			if l != u {
+				dst[len(dst)/2] = 0
+			} else {
+				dst[len(dst)/2] = l
+			}
+		}
+		return dst
+	case math.IsInf(l, 0):
+		for i := range dst[:len(dst)-1] {
+			dst[i] = l
+		}
+		dst[len(dst)-1] = u
+		return dst
+	case math.IsInf(u, 0):
+		for i := range dst[1:] {
+			dst[i] = u
+		}
+		dst[0] = l
+		return dst
+	}
+
 	step := (u - l) / float64(n-1)
 	for i := range dst {
 		dst[i] = l + step*float64(i)

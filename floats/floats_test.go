@@ -5,6 +5,7 @@
 package floats
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"testing"
@@ -24,6 +25,26 @@ func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
 	if !EqualApprox(comp, truth, EqTolerance) {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
 	}
+}
+
+func AreSlicesSame(t *testing.T, truth, comp []float64, str string) {
+	ok := len(truth) == len(comp)
+	if ok {
+		for i, a := range truth {
+			if !EqualWithinAbsOrRel(a, comp[i], EqTolerance, EqTolerance) && !same(a, comp[i]) {
+				ok = false
+				break
+			}
+		}
+
+	}
+	if !ok {
+		t.Errorf(str+". Expected %v, returned %v", truth, comp)
+	}
+}
+
+func same(a, b float64) bool {
+	return a == b || (math.IsNaN(a) && math.IsNaN(b))
 }
 
 func Panics(fun func()) (b bool) {
@@ -824,45 +845,93 @@ func TestNaNPayload(t *testing.T) {
 }
 
 func TestNearest(t *testing.T) {
-	s := []float64{6.2, 3, 5, 6.2, 8}
-	ind := Nearest(s, 2.0)
-	if ind != 1 {
-		t.Errorf("Wrong index returned when value is less than all of elements")
-	}
-	ind = Nearest(s, 9.0)
-	if ind != 4 {
-		t.Errorf("Wrong index returned when value is greater than all of elements")
-	}
-	ind = Nearest(s, 3.1)
-	if ind != 1 {
-		t.Errorf("Wrong index returned when value is greater than closest element")
-	}
-	ind = Nearest(s, 3.1)
-	if ind != 1 {
-		t.Errorf("Wrong index returned when value is greater than closest element")
-	}
-	ind = Nearest(s, 2.9)
-	if ind != 1 {
-		t.Errorf("Wrong index returned when value is less than closest element")
-	}
-	ind = Nearest(s, 3)
-	if ind != 1 {
-		t.Errorf("Wrong index returned when value is equal to element")
-	}
-	ind = Nearest(s, 6.2)
-	if ind != 0 {
-		t.Errorf("Wrong index returned when value is equal to several elements")
-	}
-	ind = Nearest(s, 4)
-	if ind != 1 {
-		t.Errorf("Wrong index returned when value is exactly between two closest elements")
+	for _, test := range []struct {
+		in    []float64
+		query float64
+		want  int
+		desc  string
+	}{
+		{
+			in:    []float64{6.2, 3, 5, 6.2, 8},
+			query: 2,
+			want:  1,
+			desc:  "Wrong index returned when value is less than all of elements",
+		},
+		{
+			in:    []float64{6.2, 3, 5, 6.2, 8},
+			query: 9,
+			want:  4,
+			desc:  "Wrong index returned when value is greater than all of elements",
+		},
+		{
+			in:    []float64{6.2, 3, 5, 6.2, 8},
+			query: 3.1,
+			want:  1,
+			desc:  "Wrong index returned when value is greater than closest element",
+		},
+		{
+			in:    []float64{6.2, 3, 5, 6.2, 8},
+			query: 2.9,
+			want:  1,
+			desc:  "Wrong index returned when value is less than closest element",
+		},
+		{
+			in:    []float64{6.2, 3, 5, 6.2, 8},
+			query: 3,
+			want:  1,
+			desc:  "Wrong index returned when value is equal to element",
+		},
+		{
+			in:    []float64{6.2, 3, 5, 6.2, 8},
+			query: 6.2,
+			want:  0,
+			desc:  "Wrong index returned when value is equal to several elements",
+		},
+		{
+			in:    []float64{6.2, 3, 5, 6.2, 8},
+			query: 4,
+			want:  1,
+			desc:  "Wrong index returned when value is exactly between two closest elements",
+		},
+		{
+			in:    []float64{math.NaN(), 3, 2, -1},
+			query: 2,
+			want:  2,
+			desc:  "Wrong index returned when initial element is NaN",
+		},
+		{
+			in:    []float64{0, math.NaN(), -1, 2},
+			query: math.NaN(),
+			want:  0,
+			desc:  "Wrong index returned when query is NaN and a NaN element exists",
+		},
+		{
+			in:    []float64{0, math.NaN(), -1, 2},
+			query: math.Inf(1),
+			want:  3,
+			desc:  "Wrong index returned when query is +Inf and no +Inf element exists",
+		},
+		{
+			in:    []float64{0, math.NaN(), -1, 2},
+			query: math.Inf(-1),
+			want:  2,
+			desc:  "Wrong index returned when query is -Inf and no -Inf element exists",
+		},
+		{
+			in:    []float64{math.NaN(), math.NaN(), math.NaN()},
+			query: 1,
+			want:  0,
+			desc:  "Wrong index returned when query is a number and only NaN elements exist",
+		},
+	} {
+		ind := Nearest(test.in, test.query)
+		if ind != test.want {
+			t.Errorf(test.desc+": got:%d want:%d", ind, test.want)
+		}
 	}
 }
 
-func TestNearestWithinSpan(t *testing.T) {
-	if !Panics(func() { NearestWithinSpan(10, 8, 2, 4.5) }) {
-		t.Errorf("Did not panic when upper bound is lower than greater bound")
-	}
+func TestNearestIdx(t *testing.T) {
 	for i, test := range []struct {
 		length int
 		lower  float64
@@ -875,14 +944,14 @@ func TestNearestWithinSpan(t *testing.T) {
 			lower:  7,
 			upper:  8.2,
 			value:  6,
-			idx:    -1,
+			idx:    0,
 		},
 		{
 			length: 13,
 			lower:  7,
 			upper:  8.2,
 			value:  10,
-			idx:    -1,
+			idx:    12,
 		},
 		{
 			length: 13,
@@ -919,8 +988,50 @@ func TestNearestWithinSpan(t *testing.T) {
 			value:  7.249,
 			idx:    2,
 		},
+		{
+			length: 4,
+			lower:  math.Inf(-1),
+			upper:  math.Inf(1),
+			value:  math.Copysign(0, -1),
+			idx:    0,
+		},
+		{
+			length: 4,
+			lower:  math.Inf(-1),
+			upper:  math.Inf(1),
+			value:  0,
+			idx:    2,
+		},
+		{
+			length: 4,
+			lower:  math.Inf(-1),
+			upper:  math.Inf(1),
+			value:  math.Inf(1),
+			idx:    2,
+		},
+		{
+			length: 4,
+			lower:  math.Inf(-1),
+			upper:  math.Inf(1),
+			value:  math.Inf(-1),
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  math.Inf(1),
+			upper:  math.Inf(1),
+			value:  1,
+			idx:    0,
+		},
+		{
+			length: 5,
+			lower:  math.NaN(),
+			upper:  math.NaN(),
+			value:  1,
+			idx:    0,
+		},
 	} {
-		if idx := NearestWithinSpan(test.length, test.lower, test.upper, test.value); test.idx != idx {
+		if idx := NearestIdx(test.length, test.lower, test.upper, test.value); test.idx != idx {
 			t.Errorf("Case %v mismatch: Want: %v, Got: %v", i, test.idx, idx)
 		}
 	}
@@ -1158,6 +1269,57 @@ func TestSpan(t *testing.T) {
 	}
 	if !Panics(func() { Span(make([]float64, 1), 1, 5) }) {
 		t.Errorf("Span accepts argument of len = 1")
+	}
+
+	for _, test := range []struct {
+		n    int
+		l, u float64
+		want []float64
+	}{
+		{
+			n: 4, l: math.Inf(-1), u: math.Inf(1),
+			want: []float64{math.Inf(-1), math.Inf(-1), math.Inf(1), math.Inf(1)},
+		},
+		{
+			n: 4, l: math.Inf(1), u: math.Inf(-1),
+			want: []float64{math.Inf(1), math.Inf(1), math.Inf(-1), math.Inf(-1)},
+		},
+		{
+			n: 5, l: math.Inf(-1), u: math.Inf(1),
+			want: []float64{math.Inf(-1), math.Inf(-1), 0, math.Inf(1), math.Inf(1)},
+		},
+		{
+			n: 5, l: math.Inf(1), u: math.Inf(-1),
+			want: []float64{math.Inf(1), math.Inf(1), 0, math.Inf(-1), math.Inf(-1)},
+		},
+		{
+			n: 5, l: math.Inf(1), u: math.Inf(1),
+			want: []float64{math.Inf(1), math.Inf(1), math.Inf(1), math.Inf(1), math.Inf(1)},
+		},
+		{
+			n: 5, l: math.Inf(-1), u: math.Inf(-1),
+			want: []float64{math.Inf(-1), math.Inf(-1), math.Inf(-1), math.Inf(-1), math.Inf(-1)},
+		},
+		{
+			n: 5, l: math.Inf(-1), u: math.NaN(),
+			want: []float64{math.Inf(-1), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+		},
+		{
+			n: 5, l: math.Inf(1), u: math.NaN(),
+			want: []float64{math.Inf(1), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+		},
+		{
+			n: 5, l: math.NaN(), u: math.Inf(-1),
+			want: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.Inf(-1)},
+		},
+		{
+			n: 5, l: math.NaN(), u: math.Inf(1),
+			want: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.Inf(1)},
+		},
+	} {
+		got := Span(make([]float64, test.n), test.l, test.u)
+		AreSlicesSame(t, test.want, got,
+			fmt.Sprintf("Unexpected slice of length %d for %f to %f", test.n, test.l, test.u))
 	}
 }
 

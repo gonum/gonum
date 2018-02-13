@@ -894,7 +894,7 @@ func TestNaNPayload(t *testing.T) {
 	}
 }
 
-func TestNearest(t *testing.T) {
+func TestNearestIdx(t *testing.T) {
 	for _, test := range []struct {
 		in    []float64
 		query float64
@@ -974,14 +974,14 @@ func TestNearest(t *testing.T) {
 			desc:  "Wrong index returned when query is a number and only NaN elements exist",
 		},
 	} {
-		ind := Nearest(test.in, test.query)
+		ind := NearestIdx(test.in, test.query)
 		if ind != test.want {
 			t.Errorf(test.desc+": got:%d want:%d", ind, test.want)
 		}
 	}
 }
 
-func TestNearestIdx(t *testing.T) {
+func TestNearestIdxForSpan(t *testing.T) {
 	for i, test := range []struct {
 		length int
 		lower  float64
@@ -1046,6 +1046,13 @@ func TestNearestIdx(t *testing.T) {
 			idx:    0,
 		},
 		{
+			length: 5,
+			lower:  math.Inf(-1),
+			upper:  math.Inf(1),
+			value:  0,
+			idx:    2,
+		},
+		{
 			length: 4,
 			lower:  math.Inf(-1),
 			upper:  math.Inf(1),
@@ -1081,7 +1088,7 @@ func TestNearestIdx(t *testing.T) {
 			idx:    0,
 		},
 	} {
-		if idx := NearestIdx(test.length, test.lower, test.upper, test.value); test.idx != idx {
+		if idx := NearestIdxForSpan(test.length, test.lower, test.upper, test.value); test.idx != idx {
 			t.Errorf("Case %v mismatch: Want: %v, Got: %v", i, test.idx, idx)
 		}
 	}

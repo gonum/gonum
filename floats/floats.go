@@ -521,11 +521,11 @@ func NaNPayload(f float64) (payload uint64, ok bool) {
 	return b &^ nanMask, true
 }
 
-// Nearest returns the index of the element in s
+// NearestIdx returns the index of the element in s
 // whose value is nearest to v.  If several such
 // elements exist, the lowest index is returned.
-// Nearest panics if len(s) == 0.
-func Nearest(s []float64, v float64) int {
+// NearestIdx panics if len(s) == 0.
+func NearestIdx(s []float64, v float64) int {
 	if len(s) == 0 {
 		panic("floats: zero length slice")
 	}
@@ -538,18 +538,14 @@ func Nearest(s []float64, v float64) int {
 		return MinIdx(s)
 	}
 	var ind int
-	dist := math.Abs(v - s[0])
+	dist := math.Inf(1)
 	for i, val := range s {
 		newDist := math.Abs(v - val)
 		// A NaN distance will not be closer.
 		if math.IsNaN(newDist) {
 			continue
 		}
-		// The inverted test here is used to
-		// ensure that a test of newDist against
-		// a NaN dist results in a change to dist
-		// and the current index value.
-		if !(newDist >= dist) {
+		if newDist < dist {
 			dist = newDist
 			ind = i
 		}
@@ -557,10 +553,13 @@ func Nearest(s []float64, v float64) int {
 	return ind
 }
 
-// NearestIdx return the index of a hypothetical vector created
+// NearestIdxForSpan return the index of a hypothetical vector created
 // by Span with length n and bounds l and u whose value is closest
-// to v. NearestIdx panics if n is zero.
-func NearestIdx(n int, l, u float64, v float64) int {
+// to v. That is, NearestIdxForSpan(n, l, u, v) is equivalent to
+// Nearest(Span(make([]float64, n),l,u),v) without an allocation and
+// with a relaxation for the paramater n.
+// NearestIdxForSpan panics if n is less than one.
+func NearestIdxForSpan(n int, l, u float64, v float64) int {
 	if n == 0 {
 		panic("floats: zero length span")
 	}
@@ -578,8 +577,14 @@ func NearestIdx(n int, l, u float64, v float64) int {
 		if l == u {
 			return 0
 		}
-		if n%2 == 1 && !math.IsInf(v, 0) {
-			return n / 2
+		if n%2 == 1 {
+			if !math.IsInf(v, 0) {
+				return n / 2
+			}
+			if math.Copysign(1, v) == math.Copysign(1, l) {
+				return 0
+			}
+			return n/2 + 1
 		}
 		if math.Copysign(1, v) == math.Copysign(1, l) {
 			return 0

@@ -433,9 +433,12 @@ func MaxIdx(s []float64) int {
 	if len(s) == 0 {
 		panic("floats: zero slice length")
 	}
-	max := s[0]
+	max := math.Inf(-1)
 	var ind int
 	for i, v := range s {
+		if math.IsNaN(v) {
+			continue
+		}
 		if v > max {
 			max = v
 			ind = i
@@ -453,9 +456,15 @@ func Min(s []float64) float64 {
 // entries have the maximum value, the first such index is returned. If the slice
 // is empty, MinIdx will panic.
 func MinIdx(s []float64) int {
-	min := s[0]
+	if len(s) == 0 {
+		panic("floats: zero slice length")
+	}
+	min := math.Inf(1)
 	var ind int
 	for i, v := range s {
+		if math.IsNaN(v) {
+			continue
+		}
 		if v < min {
 			min = v
 			ind = i

@@ -703,26 +703,76 @@ func TestLogSumExp(t *testing.T) {
 }
 
 func TestMaxAndIdx(t *testing.T) {
-	s := []float64{3, 4, 1, 7, 5}
-	ind := MaxIdx(s)
-	val := Max(s)
-	if val != 7 {
-		t.Errorf("Wrong value returned")
-	}
-	if ind != 3 {
-		t.Errorf("Wrong index returned")
+	for _, test := range []struct {
+		in      []float64
+		wantIdx int
+		wantVal float64
+		desc    string
+	}{
+		{
+			in:      []float64{3, 4, 1, 7, 5},
+			wantIdx: 3,
+			wantVal: 7,
+			desc:    "with only finite entries",
+		},
+		{
+			in:      []float64{math.NaN(), 4, 1, 7, 5},
+			wantIdx: 3,
+			wantVal: 7,
+			desc:    "with leading NaN",
+		},
+		{
+			in:      []float64{math.NaN(), math.NaN(), math.NaN()},
+			wantIdx: 0,
+			wantVal: math.NaN(),
+			desc:    "when only NaN elements exist",
+		},
+	} {
+		ind := MaxIdx(test.in)
+		if ind != test.wantIdx {
+			t.Errorf("Wrong index "+test.desc+": got:%d want:%d", ind, test.wantIdx)
+		}
+		val := Max(test.in)
+		if !same(val, test.wantVal) {
+			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
+		}
 	}
 }
 
 func TestMinAndIdx(t *testing.T) {
-	s := []float64{3, 4, 1, 7, 5}
-	ind := MinIdx(s)
-	val := Min(s)
-	if val != 1 {
-		t.Errorf("Wrong value returned")
-	}
-	if ind != 2 {
-		t.Errorf("Wrong index returned")
+	for _, test := range []struct {
+		in      []float64
+		wantIdx int
+		wantVal float64
+		desc    string
+	}{
+		{
+			in:      []float64{3, 4, 1, 7, 5},
+			wantIdx: 2,
+			wantVal: 1,
+			desc:    "with only finite entries",
+		},
+		{
+			in:      []float64{math.NaN(), 4, 1, 7, 5},
+			wantIdx: 2,
+			wantVal: 1,
+			desc:    "with leading NaN",
+		},
+		{
+			in:      []float64{math.NaN(), math.NaN(), math.NaN()},
+			wantIdx: 0,
+			wantVal: math.NaN(),
+			desc:    "when only NaN elements exist",
+		},
+	} {
+		ind := MinIdx(test.in)
+		if ind != test.wantIdx {
+			t.Errorf("Wrong index "+test.desc+": got:%d want:%d", ind, test.wantIdx)
+		}
+		val := Min(test.in)
+		if !same(val, test.wantVal) {
+			t.Errorf("Wrong value "+test.desc+": got:%f want:%f", val, test.wantVal)
+		}
 	}
 }
 

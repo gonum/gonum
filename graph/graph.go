@@ -218,7 +218,7 @@ func Copy(dst Builder, src Graph) {
 	}
 	for _, u := range nodes {
 		for _, v := range src.From(u) {
-			dst.SetEdge(src.Edge(u, v))
+			dst.SetEdge(dst.NewEdge(u, v))
 		}
 	}
 }
@@ -241,7 +241,7 @@ func CopyWeighted(dst WeightedBuilder, src Weighted) {
 	}
 	for _, u := range nodes {
 		for _, v := range src.From(u) {
-			dst.SetWeightedEdge(src.WeightedEdge(u, v))
+			dst.SetWeightedEdge(dst.NewWeightedEdge(u, v, src.WeightedEdge(u, v).Weight()))
 		}
 	}
 }

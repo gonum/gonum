@@ -283,14 +283,14 @@ func (m *Dense) Permutation(r int, swaps []int) {
 
 // Solve solves a system of linear equations using the LU decomposition of a matrix.
 // It computes
-//  A * x = b if trans == false
-//  A^T * x = b if trans == true
-// In both cases, A is represented in LU factorized form, and the matrix x is
-// stored into m.
+//  A * X = B if trans == false
+//  A^T * X = B if trans == true
+// In both cases, A is represented in LU factorized form, and the matrix X is
+// stored into x.
 //
 // If A is singular or near-singular a Condition error is returned. See
 // the documentation for Condition for more information.
-func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
+func (lu *LU) Solve(x *Dense, trans bool, b Matrix) error {
 	_, n := lu.lu.Dims()
 	br, bc := b.Dims()
 	if br != n {
@@ -302,22 +302,22 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 		return Condition(math.Inf(1))
 	}
 
-	m.reuseAs(n, bc)
+	x.reuseAs(n, bc)
 	bU, _ := untranspose(b)
 	var restore func()
-	if m == bU {
-		m, restore = m.isolatedWorkspace(bU)
+	if x == bU {
+		x, restore = x.isolatedWorkspace(bU)
 		defer restore()
 	} else if rm, ok := bU.(RawMatrixer); ok {
-		m.checkOverlap(rm.RawMatrix())
+		x.checkOverlap(rm.RawMatrix())
 	}
 
-	m.Copy(b)
+	x.Copy(b)
 	t := blas.NoTrans
 	if trans {
 		t = blas.Trans
 	}
-	lapack64.Getrs(t, lu.lu.mat, m.mat, lu.pivot)
+	lapack64.Getrs(t, lu.lu.mat, x.mat, lu.pivot)
 	if lu.cond > ConditionTolerance {
 		return Condition(lu.cond)
 	}
@@ -328,23 +328,23 @@ func (lu *LU) Solve(m *Dense, trans bool, b Matrix) error {
 // It computes
 //  A * x = b if trans == false
 //  A^T * x = b if trans == true
-// In both cases, A is represented in LU factorized form, and the matrix x is
-// stored into v.
+// In both cases, A is represented in LU factorized form, and the vector x is
+// stored into x.
 //
 // If A is singular or near-singular a Condition error is returned. See
 // the documentation for Condition for more information.
-func (lu *LU) SolveVec(v *VecDense, trans bool, b Vector) error {
+func (lu *LU) SolveVec(x *VecDense, trans bool, b Vector) error {
 	_, n := lu.lu.Dims()
 	if br, bc := b.Dims(); br != n || bc != 1 {
 		panic(ErrShape)
 	}
 	switch rv := b.(type) {
 	default:
-		v.reuseAs(n)
-		return lu.Solve(v.asDense(), trans, b)
+		x.reuseAs(n)
+		return lu.Solve(x.asDense(), trans, b)
 	case RawVectorer:
-		if v != b {
-			v.checkOverlap(rv.RawVector())
+		if x != b {
+			x.checkOverlap(rv.RawVector())
 		}
 		// TODO(btracey): Should test the condition number instead of testing that
 		// the determinant is exactly zero.
@@ -352,18 +352,18 @@ func (lu *LU) SolveVec(v *VecDense, trans bool, b Vector) error {
 			return Condition(math.Inf(1))
 		}
 
-		v.reuseAs(n)
+		x.reuseAs(n)
 		var restore func()
-		if v == b {
-			v, restore = v.isolatedWorkspace(b)
+		if x == b {
+			x, restore = x.isolatedWorkspace(b)
 			defer restore()
 		}
-		v.CopyVec(b)
+		x.CopyVec(b)
 		vMat := blas64.General{
 			Rows:   n,
 			Cols:   1,
-			Stride: v.mat.Inc,
-			Data:   v.mat.Data,
+			Stride: x.mat.Inc,
+			Data:   x.mat.Data,
 		}
 		t := blas.NoTrans
 		if trans {

@@ -11,7 +11,7 @@ import (
 )
 
 // Solve finds a minimum-norm solution to a system of linear equations defined
-// by the matrices a and b. If A is singular or near-singular, a Condition error
+// by the matrices A and B. If A is singular or near-singular, a Condition error
 // is returned. See the documentation for Condition for more information.
 //
 // The minimization problem solved depends on the input parameters:

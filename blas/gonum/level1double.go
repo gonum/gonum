@@ -326,122 +326,113 @@ func (Implementation) Drotg(a, b float64) (c, s, r, z float64) {
 // http://www.netlib.org/lapack/explore-html/df/deb/drotmg_8f.html
 // for more details.
 func (Implementation) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64) {
-	var p1, p2, q1, q2, u float64
-
 	const (
 		gam    = 4096.0
-		gamsq  = 16777216.0
-		rgamsq = 5.9604645e-8
+		gamsq  = gam * gam
+		rgamsq = 1.0 / gamsq
 	)
 
+	var h11, h12, h21, h22 float64
 	if d1 < 0 {
 		p.Flag = blas.Rescaling
-		return
-	}
-
-	p2 = d2 * y1
-	if p2 == 0 {
-		p.Flag = blas.Identity
-		rd1 = d1
-		rd2 = d2
-		rx1 = x1
-		return
-	}
-	p1 = d1 * x1
-	q2 = p2 * y1
-	q1 = p1 * x1
-
-	absQ1 := math.Abs(q1)
-	absQ2 := math.Abs(q2)
-
-	if absQ1 < absQ2 && q2 < 0 {
-		p.Flag = blas.Rescaling
-		return
-	}
-
-	if d1 == 0 {
-		p.Flag = blas.Diagonal
-		p.H[0] = p1 / p2
-		p.H[3] = x1 / y1
-		u = 1 + p.H[0]*p.H[3]
-		rd1, rd2 = d2/u, d1/u
-		rx1 = y1 / u
-		return
-	}
-
-	// Now we know that d1 != 0, and d2 != 0. If d2 == 0, it would be caught
-	// when p2 == 0, and if d1 == 0, then it is caught above
-
-	if absQ1 > absQ2 {
-		p.H[1] = -y1 / x1
-		p.H[2] = p2 / p1
-		u = 1 - p.H[2]*p.H[1]
-		rd1 = d1
-		rd2 = d2
-		rx1 = x1
-		p.Flag = blas.OffDiagonal
-		// u must be greater than zero because |q1| > |q2|, so check from netlib
-		// is unnecessary
-		// This is left in for ease of comparison with complex routines
-		//if u > 0 {
-		rd1 /= u
-		rd2 /= u
-		rx1 *= u
-		//}
+		d1 = 0
+		d2 = 0
+		x1 = 0
 	} else {
-		p.Flag = blas.Diagonal
-		p.H[0] = p1 / p2
-		p.H[3] = x1 / y1
-		u = 1 + p.H[0]*p.H[3]
-		rd1 = d2 / u
-		rd2 = d1 / u
-		rx1 = y1 * u
+		p2 := d2 * y1
+		if p2 == 0 {
+			p.Flag = blas.Identity
+			return p, d1, d2, x1
+		}
+		p1 := d1 * x1
+		q2 := p2 * y1
+		q1 := p1 * x1
+
+		if math.Abs(q1) > math.Abs(q2) {
+			h21 = -y1 / x1
+			h12 = p2 / p1
+			u := 1 - h12*h21
+			if u > 0 {
+				p.Flag = blas.OffDiagonal
+				d1 /= u
+				d2 /= u
+				x1 *= u
+			}
+		} else {
+			if q2 < 0 {
+				p.Flag = blas.Rescaling
+				d1 = 0
+				d2 = 0
+				x1 = 0
+			} else {
+				p.Flag = blas.Diagonal
+				h11 = p1 / p2
+				h22 = x1 / y1
+				u := 1 + h11*h22
+				d1, d2 = d2/u, d1/u
+				x1 = y1 * u
+			}
+		}
 	}
 
-	for rd1 <= rgamsq || rd1 >= gamsq {
-		if p.Flag == blas.OffDiagonal {
-			p.H[0] = 1
-			p.H[3] = 1
-			p.Flag = blas.Rescaling
-		} else if p.Flag == blas.Diagonal {
-			p.H[1] = -1
-			p.H[2] = 1
-			p.Flag = blas.Rescaling
-		}
-		if rd1 <= rgamsq {
-			rd1 *= gam * gam
-			rx1 /= gam
-			p.H[0] /= gam
-			p.H[2] /= gam
-		} else {
-			rd1 /= gam * gam
-			rx1 *= gam
-			p.H[0] *= gam
-			p.H[2] *= gam
+	if d1 != 0 {
+		for d1 <= rgamsq || d1 >= gamsq {
+			if p.Flag == blas.OffDiagonal {
+				h11 = 1
+				h22 = 1
+				p.Flag = blas.Rescaling
+			} else {
+				h21 = -1
+				h12 = 1
+				p.Flag = blas.Rescaling
+			}
+			if d1 <= rgamsq {
+				d1 *= gamsq
+				x1 /= gam
+				h11 /= gam
+				h12 /= gam
+			} else {
+				d1 /= gamsq
+				x1 *= gam
+				h11 *= gam
+				h12 *= gam
+			}
 		}
 	}
 
-	for math.Abs(rd2) <= rgamsq || math.Abs(rd2) >= gamsq {
-		if p.Flag == blas.OffDiagonal {
-			p.H[0] = 1
-			p.H[3] = 1
-			p.Flag = blas.Rescaling
-		} else if p.Flag == blas.Diagonal {
-			p.H[1] = -1
-			p.H[2] = 1
-			p.Flag = blas.Rescaling
-		}
-		if math.Abs(rd2) <= rgamsq {
-			rd2 *= gam * gam
-			p.H[1] /= gam
-			p.H[3] /= gam
-		} else {
-			rd2 /= gam * gam
-			p.H[1] *= gam
-			p.H[3] *= gam
+	if d2 != 0 {
+		for math.Abs(d2) <= rgamsq || math.Abs(d2) >= gamsq {
+			if p.Flag == blas.OffDiagonal {
+				h11 = 1
+				h22 = 1
+				p.Flag = blas.Rescaling
+			} else {
+				h21 = -1
+				h12 = 1
+				p.Flag = blas.Rescaling
+			}
+			if math.Abs(d2) <= rgamsq {
+				d2 *= gamsq
+				h21 /= gam
+				h22 /= gam
+			} else {
+				d2 /= gamsq
+				h21 *= gam
+				h22 *= gam
+			}
 		}
 	}
-	return
+
+	switch {
+	case p.Flag < blas.OffDiagonal:
+		p.H = [4]float64{h11, h21, h12, h22}
+	case p.Flag == blas.OffDiagonal:
+		p.H = [4]float64{1: h21, 2: h12}
+	default:
+		p.H = [4]float64{0: h11, 3: h22}
+	}
+
+	return p, d1, d2, x1
 }
 
 // Drot applies a plane transformation.

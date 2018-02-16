@@ -1772,7 +1772,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "RD1_Big_RD2_Big_Flag_0",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{4096, -3584, 1792, 4096},
+			H:    [4]float64{4096, -4096, 1, 4096},
 		},
 		D1:  1600000000,
 		D2:  800000000,
@@ -1786,7 +1786,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "RD1_Big_RD2_Big_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2340.5714285714284, -4096, 4096, 4681.142857142857},
+			H:    [4]float64{2340.5714285714284, -4096, 1, 4681.142857142857},
 		},
 		D1:  800000000,
 		D2:  1600000000,
@@ -1830,7 +1830,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "D1_Big_D2_Small_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 4096, 2.44140625e-16},
+			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 1, 2.44140625e-16},
 		},
 		D1:  0.000000014,
 		D2:  2000000000,
@@ -1902,7 +1902,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "D1_Small_D2_Big_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 0.000244140625, 1.6777216e-07},
+			H:    [4]float64{2.3731773997569866e+10, -4096, 1, 1.6777216e-07},
 		},
 		D1:  120000000000000000,
 		D2:  0.000000000012345,
@@ -1939,6 +1939,22 @@ var DrotmgTests = []DrotmgTestStruct{
 		Rd1: 6.710886366445568e-05,
 		Rd2: 0.019999999900000003,
 		Rx1: 1953.125009765625,
+	},
+	{
+		// Values consistent with the low precision output posted at the  OpenBLAS issue.
+		// See https://github.com/xianyi/OpenBLAS/issues/1452.
+		Name: "OpenBLAS#1452",
+		P: &blas.DrotmParams{
+			Flag: blas.Rescaling,
+			H:    [4]float64{1.6110934624105326e-06, -0.000244140625, 1, 1.6276041666666668e-06},
+		},
+		D1:  5.9e-8,
+		D2:  5.960464e-8,
+		X1:  1,
+		Y1:  150,
+		Rd1: 0.9999559282289687,
+		Rd2: 0.9898121986058326,
+		Rx1: 0.03662270484346241,
 	},
 	// TODO: Add Small, Small, 0 case
 	// TODO: Add Small, Small, 1 case

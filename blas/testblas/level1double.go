@@ -1987,6 +1987,27 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 		if !dTolEqual(rx1, test.Rx1) {
 			t.Errorf("drotmg rx1 mismatch %v: expected %v, found %v", test.Name, test.Rx1, rx1)
 		}
+
+		fd1, fd2, fx1, fp := drotmg_f77(test.D1, test.D2, test.X1, test.Y1)
+		if !dTolEqual(rd1, fd1) {
+			t.Errorf("drotmg/drotmg_f77 rd1 mismatch %v: expected %v, found %v", test.Name, fd1, rd1)
+		}
+		if !dTolEqual(rd2, fd2) {
+			t.Errorf("drotmg/drotmg_f77 rd2 mismatch %v: expected %v, found %v", test.Name, fd2, rd2)
+		}
+		if !dTolEqual(rx1, fx1) {
+			t.Errorf("drotmg/drotmg_f77 rx1 mismatch %v: expected %v, found %v", test.Name, fx1, rx1)
+		}
+		if p.Flag != blas.Flag(fp[0]) {
+			t.Errorf("drotmg/drotmg_f77 flag mismatch %v: expected %v, found %v", test.Name, fp[0], p.Flag)
+		}
+		for i, val := range fp[1:] {
+			if !dTolEqual(p.H[i], val) {
+				t.Errorf("drotmg/drotmg_f77 H mismatch %v: expected %v %v, found %v %v", test.Name, fp[0], fp[1:], p.Flag, p.H)
+				break
+			}
+		}
+
 	}
 }
 

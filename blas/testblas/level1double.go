@@ -2030,21 +2030,21 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "netlib/BLAS/TESTING#6",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{1, -1000000, 0.5e-6, 1},
+			H:    [4]float64{4096, -999999.99999999988, 2.0479999999999999e-3, 1},
 		},
 		D1:  40000000000,
 		D2:  2e-2,
 		X1:  1.0000000000000001e-5,
 		Y1:  10,
-		Rd1: 26666666666.666668,
+		Rd1: 1589.4571940104167,
 		Rd2: 1.3333333333333334e-2,
-		Rx1: 1.5000000000000002e-5,
+		Rx1: 6.1440000000000008e-2,
 	},
 	{
 		Name: "netlib/BLAS/TESTING#7",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{0.5e-4, -0.2441406250e-3, 1.000000000, 2.441406250},
+			H:    [4]float64{0.5e-4, -0.2441406250e-3, 1, 2.441406250},
 		},
 		D1:  2.0000000000000001e-10,
 		D2:  4.0000000000000001e-2,
@@ -2058,14 +2058,14 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "netlib/BLAS/TESTING#8",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{500000, -1, 1, 0.1e-5},
+			H:    [4]float64{500000, -4096, 1, 4.096e-3},
 		},
 		D1:  20000000000,
 		D2:  4.0000000000000001e-2,
 		X1:  1.0000000000000001e-5,
 		Y1:  10,
 		Rd1: 2.6666666666666668e-2,
-		Rd2: 13333333333.333334,
+		Rd2: 794.72859700520837,
 		Rx1: 15,
 	},
 	// TODO: Add Small, Small, 0 case
@@ -2099,27 +2099,6 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 		if !dTolEqual(rx1, test.Rx1) {
 			t.Errorf("drotmg rx1 mismatch %v: expected %v, found %v", test.Name, test.Rx1, rx1)
 		}
-
-		fd1, fd2, fx1, fp := drotmg_f77(test.D1, test.D2, test.X1, test.Y1)
-		if !dTolEqual(rd1, fd1) {
-			t.Errorf("drotmg/drotmg_f77 rd1 mismatch %v: expected %v, found %v", test.Name, fd1, rd1)
-		}
-		if !dTolEqual(rd2, fd2) {
-			t.Errorf("drotmg/drotmg_f77 rd2 mismatch %v: expected %v, found %v", test.Name, fd2, rd2)
-		}
-		if !dTolEqual(rx1, fx1) {
-			t.Errorf("drotmg/drotmg_f77 rx1 mismatch %v: expected %v, found %v", test.Name, fx1, rx1)
-		}
-		if p.Flag != blas.Flag(fp[0]) {
-			t.Errorf("drotmg/drotmg_f77 flag mismatch %v: expected %v, found %v", test.Name, fp[0], p.Flag)
-		}
-		for i, val := range fp[1:] {
-			if !dTolEqual(p.H[i], val) {
-				t.Errorf("drotmg/drotmg_f77 H mismatch %v: expected %v %v, found %v %v", test.Name, fp[0], fp[1:], p.Flag, p.H)
-				break
-			}
-		}
-
 	}
 }
 

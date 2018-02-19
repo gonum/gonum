@@ -376,7 +376,7 @@ func (Implementation) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, r
 	}
 
 	if d1 != 0 {
-		for d1 <= rgamsq || d1 >= gamsq {
+		if d1 <= rgamsq || d1 >= gamsq {
 			if p.Flag == blas.OffDiagonal {
 				h11 = 1
 				h22 = 1
@@ -386,12 +386,16 @@ func (Implementation) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, r
 				h12 = 1
 				p.Flag = blas.Rescaling
 			}
-			if d1 <= rgamsq {
+		}
+		if d1 <= rgamsq {
+			for d1 <= rgamsq {
 				d1 *= gamsq
 				x1 /= gam
 				h11 /= gam
 				h12 /= gam
-			} else {
+			}
+		} else {
+			for d1 >= gamsq {
 				d1 /= gamsq
 				x1 *= gam
 				h11 *= gam
@@ -401,7 +405,7 @@ func (Implementation) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, r
 	}
 
 	if d2 != 0 {
-		for math.Abs(d2) <= rgamsq || math.Abs(d2) >= gamsq {
+		if math.Abs(d2) <= rgamsq || math.Abs(d2) >= gamsq {
 			if p.Flag == blas.OffDiagonal {
 				h11 = 1
 				h22 = 1
@@ -411,11 +415,15 @@ func (Implementation) Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, r
 				h12 = 1
 				p.Flag = blas.Rescaling
 			}
-			if math.Abs(d2) <= rgamsq {
+		}
+		if math.Abs(d2) <= rgamsq {
+			for math.Abs(d2) <= rgamsq {
 				d2 *= gamsq
 				h21 /= gam
 				h22 /= gam
-			} else {
+			}
+		} else {
+			for math.Abs(d2) >= gamsq {
 				d2 /= gamsq
 				h21 *= gam
 				h22 *= gam

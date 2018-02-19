@@ -1902,7 +1902,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "D1_Small_D2_Big_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2.3731773997569866e+10, -4096, 1, 1.6777216e-07},
+			H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 1, 1.6777216e-07},
 		},
 		D1:  120000000000000000,
 		D2:  0.000000000012345,
@@ -2074,6 +2074,7 @@ var DrotmgTests = []DrotmgTestStruct{
 
 type Drotmger interface {
 	Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64)
+	Drotmer
 }
 
 func DrotmgTest(t *testing.T, d Drotmger) {
@@ -2098,6 +2099,15 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 		}
 		if !dTolEqual(rx1, test.Rx1) {
 			t.Errorf("drotmg rx1 mismatch %v: expected %v, found %v", test.Name, test.Rx1, rx1)
+		}
+
+		y := []float64{test.Y1}
+		d.Drotm(1, []float64{test.X1}, 1, y, 1, p)
+		for i, v := range y {
+			v *= test.D2
+			if !dTolEqual(v, 0) {
+				t.Errorf("drotm y_%d mismatch %v: expected 0, found %v", i, test.Name, y[0])
+			}
 		}
 	}
 }

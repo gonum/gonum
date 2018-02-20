@@ -857,6 +857,26 @@ func TestNearest(t *testing.T) {
 	if ind != 1 {
 		t.Errorf("Wrong index returned when value is exactly between two closest elements")
 	}
+
+	sn := []float64{math.NaN(), 1, 2, math.NaN(), 3}
+	ind = Nearest(sn, 2)
+	if ind != 2 {
+		t.Errorf("Wrong index returned when value is exactly between two closest elements")
+	}
+	ind = Nearest(sn, math.NaN())
+	if ind != 0 {
+		t.Errorf("Wrong index returned when value is exactly between two closest elements")
+	}
+
+	san := []float64{math.NaN(), math.NaN()}
+	ind = Nearest(san, 1)
+	if ind != 0 {
+		t.Errorf("Wrong index returned when value is exactly between two closest elements")
+	}
+	ind = Nearest(san, math.NaN())
+	if ind != 0 {
+		t.Errorf("Wrong index returned when value is exactly between two closest elements")
+	}
 }
 
 func TestNearestWithinSpan(t *testing.T) {

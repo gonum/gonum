@@ -184,7 +184,7 @@ func (c *Cholesky) Solve(x *Dense, b Matrix) error {
 }
 
 // SolveChol finds the matrix x that solves A * X = B where A and B are represented
-// by their Cholesky decompositions a and b, placing the result in the receiver.
+// by their Cholesky decompositions a and b, placing the result in x.
 func (a *Cholesky) SolveChol(x *Dense, b *Cholesky) error {
 	if !a.valid() || !b.valid() {
 		panic(badCholesky)

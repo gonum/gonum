@@ -556,12 +556,11 @@ func NearestIdx(s []float64, v float64) int {
 // NearestIdxForSpan return the index of a hypothetical vector created
 // by Span with length n and bounds l and u whose value is closest
 // to v. That is, NearestIdxForSpan(n, l, u, v) is equivalent to
-// Nearest(Span(make([]float64, n),l,u),v) without an allocation and
-// with a relaxation for the paramater n.
-// NearestIdxForSpan panics if n is less than one.
+// Nearest(Span(make([]float64, n),l,u),v) without an allocation.
+// NearestIdxForSpan panics if n is less than two.
 func NearestIdxForSpan(n int, l, u float64, v float64) int {
-	if n == 0 {
-		panic("floats: zero length span")
+	if n <= 1 {
+		panic("floats: span must have length >1")
 	}
 	if math.IsNaN(v) {
 		return 0
@@ -815,9 +814,6 @@ func Scale(c float64, dst []float64) {
 // Span returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u.
-//
-// If l and u  are infinities of opposite sign, then on return dst will contain half
-// of one infinity, and half the other, with the middle element being zero if dst is odd.
 //
 // Panics if len(dst) < 2.
 //

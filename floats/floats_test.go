@@ -21,13 +21,13 @@ const (
 	Huge        = 10000000
 )
 
-func AreSlicesEqual(t *testing.T, truth, comp []float64, str string) {
+func areSlicesEqual(t *testing.T, truth, comp []float64, str string) {
 	if !EqualApprox(comp, truth, EqTolerance) {
 		t.Errorf(str+". Expected %v, returned %v", truth, comp)
 	}
 }
 
-func AreSlicesSame(t *testing.T, truth, comp []float64, str string) {
+func areSlicesSame(t *testing.T, truth, comp []float64, str string) {
 	ok := len(truth) == len(comp)
 	if ok {
 		for i, a := range truth {
@@ -68,10 +68,10 @@ func TestAdd(t *testing.T) {
 	Add(n, a)
 	Add(n, b)
 	Add(n, c)
-	AreSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
+	areSlicesEqual(t, truth, n, "Wrong addition of slices new receiver")
 	Add(a, b)
 	Add(a, c)
-	AreSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
+	areSlicesEqual(t, truth, n, "Wrong addition of slices for no new receiver")
 
 	// Test that it panics
 	if !Panics(func() { Add(make([]float64, 2), make([]float64, 3)) }) {
@@ -86,8 +86,8 @@ func TestAddTo(t *testing.T) {
 	n1 := make([]float64, len(a))
 
 	n2 := AddTo(n1, a, b)
-	AreSlicesEqual(t, truth, n1, "Bad addition from mutator")
-	AreSlicesEqual(t, truth, n2, "Bad addition from returned slice")
+	areSlicesEqual(t, truth, n1, "Bad addition from mutator")
+	areSlicesEqual(t, truth, n2, "Bad addition from returned slice")
 
 	// Test that it panics
 	if !Panics(func() { AddTo(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
@@ -104,7 +104,7 @@ func TestAddConst(t *testing.T) {
 	c := 6.0
 	truth := []float64{9, 10, 7, 13, 11}
 	AddConst(c, s)
-	AreSlicesEqual(t, truth, s, "Wrong addition of constant")
+	areSlicesEqual(t, truth, s, "Wrong addition of constant")
 }
 
 func TestAddScaled(t *testing.T) {
@@ -193,10 +193,10 @@ func TestCumProd(t *testing.T) {
 	receiver := make([]float64, len(s))
 	result := CumProd(receiver, s)
 	truth := []float64{3, 12, 12, 84, 420}
-	AreSlicesEqual(t, truth, receiver, "Wrong cumprod mutated with new receiver")
-	AreSlicesEqual(t, truth, result, "Wrong cumprod result with new receiver")
+	areSlicesEqual(t, truth, receiver, "Wrong cumprod mutated with new receiver")
+	areSlicesEqual(t, truth, result, "Wrong cumprod result with new receiver")
 	CumProd(receiver, s)
-	AreSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
+	areSlicesEqual(t, truth, receiver, "Wrong cumprod returned with reused receiver")
 
 	// Test that it panics
 	if !Panics(func() { CumProd(make([]float64, 2), make([]float64, 3)) }) {
@@ -207,7 +207,7 @@ func TestCumProd(t *testing.T) {
 	emptyReceiver := make([]float64, 0)
 	truth = []float64{}
 	CumProd(emptyReceiver, emptyReceiver)
-	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with empty receiver")
+	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumprod returned with empty receiver")
 
 }
 
@@ -216,10 +216,10 @@ func TestCumSum(t *testing.T) {
 	receiver := make([]float64, len(s))
 	result := CumSum(receiver, s)
 	truth := []float64{3, 7, 8, 15, 20}
-	AreSlicesEqual(t, truth, receiver, "Wrong cumsum mutated with new receiver")
-	AreSlicesEqual(t, truth, result, "Wrong cumsum returned with new receiver")
+	areSlicesEqual(t, truth, receiver, "Wrong cumsum mutated with new receiver")
+	areSlicesEqual(t, truth, result, "Wrong cumsum returned with new receiver")
 	CumSum(receiver, s)
-	AreSlicesEqual(t, truth, receiver, "Wrong cumsum returned with reused receiver")
+	areSlicesEqual(t, truth, receiver, "Wrong cumsum returned with reused receiver")
 
 	// Test that it panics
 	if !Panics(func() { CumSum(make([]float64, 2), make([]float64, 3)) }) {
@@ -230,7 +230,7 @@ func TestCumSum(t *testing.T) {
 	emptyReceiver := make([]float64, 0)
 	truth = []float64{}
 	CumSum(emptyReceiver, emptyReceiver)
-	AreSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with empty receiver")
+	areSlicesEqual(t, truth, emptyReceiver, "Wrong cumsum returned with empty receiver")
 
 }
 
@@ -647,12 +647,12 @@ func TestLogSpan(t *testing.T) {
 	for i := range comp {
 		comp[i] = 1
 	}
-	AreSlicesEqual(t, comp, tst, "Improper logspace from mutator")
+	areSlicesEqual(t, comp, tst, "Improper logspace from mutator")
 
 	for i := range truth {
 		tst[i] = receiver2[i] / truth[i]
 	}
-	AreSlicesEqual(t, comp, tst, "Improper logspace from returned slice")
+	areSlicesEqual(t, comp, tst, "Improper logspace from returned slice")
 
 	if !Panics(func() { LogSpan(nil, 1, 5) }) {
 		t.Errorf("Span accepts nil argument")
@@ -1308,19 +1308,19 @@ func TestScale(t *testing.T) {
 	c := 5.0
 	truth := []float64{15, 20, 5, 35, 25}
 	Scale(c, s)
-	AreSlicesEqual(t, truth, s, "Bad scaling")
+	areSlicesEqual(t, truth, s, "Bad scaling")
 }
 
 func TestSpan(t *testing.T) {
 	receiver1 := make([]float64, 5)
 	truth := []float64{1, 2, 3, 4, 5}
 	receiver2 := Span(receiver1, 1, 5)
-	AreSlicesEqual(t, truth, receiver1, "Improper linspace from mutator")
-	AreSlicesEqual(t, truth, receiver2, "Improper linspace from returned slice")
+	areSlicesEqual(t, truth, receiver1, "Improper linspace from mutator")
+	areSlicesEqual(t, truth, receiver2, "Improper linspace from returned slice")
 	receiver1 = make([]float64, 6)
 	truth = []float64{0, 0.2, 0.4, 0.6, 0.8, 1.0}
 	Span(receiver1, 0, 1)
-	AreSlicesEqual(t, truth, receiver1, "Improper linspace")
+	areSlicesEqual(t, truth, receiver1, "Improper linspace")
 	if !Panics(func() { Span(nil, 1, 5) }) {
 		t.Errorf("Span accepts nil argument")
 	}
@@ -1375,7 +1375,7 @@ func TestSpan(t *testing.T) {
 		},
 	} {
 		got := Span(make([]float64, test.n), test.l, test.u)
-		AreSlicesSame(t, test.want, got,
+		areSlicesSame(t, test.want, got,
 			fmt.Sprintf("Unexpected slice of length %d for %f to %f", test.n, test.l, test.u))
 	}
 }
@@ -1385,7 +1385,7 @@ func TestSub(t *testing.T) {
 	v := []float64{1, 2, 3, 4, 5}
 	truth := []float64{2, 2, -2, 3, 0}
 	Sub(s, v)
-	AreSlicesEqual(t, truth, s, "Bad subtract")
+	areSlicesEqual(t, truth, s, "Bad subtract")
 	// Test that it panics
 	if !Panics(func() { Sub(make([]float64, 2), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with length mismatch")
@@ -1398,8 +1398,8 @@ func TestSubTo(t *testing.T) {
 	truth := []float64{2, 2, -2, 3, 0}
 	dst1 := make([]float64, len(s))
 	dst2 := SubTo(dst1, s, v)
-	AreSlicesEqual(t, truth, dst1, "Bad subtract from mutator")
-	AreSlicesEqual(t, truth, dst2, "Bad subtract from returned slice")
+	areSlicesEqual(t, truth, dst1, "Bad subtract from mutator")
+	areSlicesEqual(t, truth, dst2, "Bad subtract from returned slice")
 	// Test that all mismatch combinations panic
 	if !Panics(func() { SubTo(make([]float64, 2), make([]float64, 3), make([]float64, 3)) }) {
 		t.Errorf("Did not panic with dst different length")

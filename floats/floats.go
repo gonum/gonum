@@ -433,13 +433,13 @@ func MaxIdx(s []float64) int {
 	if len(s) == 0 {
 		panic("floats: zero slice length")
 	}
-	max := math.Inf(-1)
+	max := math.NaN()
 	var ind int
 	for i, v := range s {
 		if math.IsNaN(v) {
 			continue
 		}
-		if v > max {
+		if v > max || math.IsNaN(max) {
 			max = v
 			ind = i
 		}
@@ -459,13 +459,13 @@ func MinIdx(s []float64) int {
 	if len(s) == 0 {
 		panic("floats: zero slice length")
 	}
-	min := math.Inf(1)
+	min := math.NaN()
 	var ind int
 	for i, v := range s {
 		if math.IsNaN(v) {
 			continue
 		}
-		if v < min {
+		if v < min || math.IsNaN(min) {
 			min = v
 			ind = i
 		}
@@ -538,14 +538,14 @@ func NearestIdx(s []float64, v float64) int {
 		return MinIdx(s)
 	}
 	var ind int
-	dist := math.Inf(1)
+	dist := math.NaN()
 	for i, val := range s {
 		newDist := math.Abs(v - val)
 		// A NaN distance will not be closer.
 		if math.IsNaN(newDist) {
 			continue
 		}
-		if newDist < dist {
+		if newDist < dist || math.IsNaN(dist) {
 			dist = newDist
 			ind = i
 		}
@@ -815,9 +815,14 @@ func Scale(c float64, dst []float64) {
 // Span returns a set of N equally spaced points between l and u, where N
 // is equal to the length of the destination. The first element of the destination
 // is l, the final element of the destination is u.
+//
+// If l and u  are infinities of opposite sign, then on return dst will contain half
+// of one infinity, and half the other, with the middle element being zero if dst is odd.
+//
 // Panics if len(dst) < 2.
 //
-// Also returns the mutated slice dst, so that it can be used in range expressions, like:
+// Span also returns the mutated slice dst, so that it can be used in range expressions,
+// like:
 //
 //     for i, x := range Span(dst, l, u) { ... }
 func Span(dst []float64, l, u float64) []float64 {
@@ -861,7 +866,7 @@ func Span(dst []float64, l, u float64) []float64 {
 		return dst
 	case math.IsInf(u, 0):
 		for i := range dst[1:] {
-			dst[i] = u
+			dst[i+1] = u
 		}
 		dst[0] = l
 		return dst

@@ -727,6 +727,18 @@ func TestMaxAndIdx(t *testing.T) {
 			wantVal: math.NaN(),
 			desc:    "when only NaN elements exist",
 		},
+		{
+			in:      []float64{math.NaN(), math.Inf(-1)},
+			wantIdx: 1,
+			wantVal: math.Inf(-1),
+			desc:    "leading NaN followed by -Inf",
+		},
+		{
+			in:      []float64{math.NaN(), math.Inf(1)},
+			wantIdx: 1,
+			wantVal: math.Inf(1),
+			desc:    "leading NaN followed by +Inf",
+		},
 	} {
 		ind := MaxIdx(test.in)
 		if ind != test.wantIdx {
@@ -763,6 +775,18 @@ func TestMinAndIdx(t *testing.T) {
 			wantIdx: 0,
 			wantVal: math.NaN(),
 			desc:    "when only NaN elements exist",
+		},
+		{
+			in:      []float64{math.NaN(), math.Inf(-1)},
+			wantIdx: 1,
+			wantVal: math.Inf(-1),
+			desc:    "leading NaN followed by -Inf",
+		},
+		{
+			in:      []float64{math.NaN(), math.Inf(1)},
+			wantIdx: 1,
+			wantVal: math.Inf(1),
+			desc:    "leading NaN followed by +Inf",
 		},
 	} {
 		ind := MinIdx(test.in)
@@ -972,6 +996,12 @@ func TestNearestIdx(t *testing.T) {
 			query: 1,
 			want:  0,
 			desc:  "Wrong index returned when query is a number and only NaN elements exist",
+		},
+		{
+			in:    []float64{math.NaN(), math.Inf(-1)},
+			query: 1,
+			want:  1,
+			desc:  "Wrong index returned when query is a number and single NaN preceeds -Inf",
 		},
 	} {
 		ind := NearestIdx(test.in, test.query)
@@ -1372,6 +1402,30 @@ func TestSpan(t *testing.T) {
 		{
 			n: 5, l: math.NaN(), u: math.Inf(1),
 			want: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.Inf(1)},
+		},
+		{
+			n: 5, l: 42, u: math.Inf(-1),
+			want: []float64{42, math.Inf(-1), math.Inf(-1), math.Inf(-1), math.Inf(-1)},
+		},
+		{
+			n: 5, l: 42, u: math.Inf(1),
+			want: []float64{42, math.Inf(1), math.Inf(1), math.Inf(1), math.Inf(1)},
+		},
+		{
+			n: 5, l: 42, u: math.NaN(),
+			want: []float64{42, math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+		},
+		{
+			n: 5, l: math.Inf(-1), u: 42,
+			want: []float64{math.Inf(-1), math.Inf(-1), math.Inf(-1), math.Inf(-1), 42},
+		},
+		{
+			n: 5, l: math.Inf(1), u: 42,
+			want: []float64{math.Inf(1), math.Inf(1), math.Inf(1), math.Inf(1), 42},
+		},
+		{
+			n: 5, l: math.NaN(), u: 42,
+			want: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), 42},
 		},
 	} {
 		got := Span(make([]float64, test.n), test.l, test.u)

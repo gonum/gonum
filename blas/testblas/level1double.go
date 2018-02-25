@@ -2101,10 +2101,17 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 			t.Errorf("drotmg rx1 mismatch %v: expected %v, found %v", test.Name, test.Rx1, rx1)
 		}
 
-		y := []float64{test.Y1}
-		d.Drotm(1, []float64{test.X1}, 1, y, 1, p)
+		// Drotmg routines compute the components of a modified Givens transformation
+		// matrix H that zeros the y-component of the resulting vector,
+		//
+		//  [x1; 0] := H[x1 sqrt(d1); y1 sqrt(d2)].
+		//
+		// Drotm performs a modified Givens rotation of points in the plane,
+		//
+		//  [x1; y1] := H[x1; y1].
+		y := []float64{test.Y1 * math.Sqrt(test.D2)}
+		d.Drotm(1, []float64{test.X1 * math.Sqrt(test.D1)}, 1, y, 1, p)
 		for i, v := range y {
-			v *= test.D2
 			if !dTolEqual(v, 0) {
 				t.Errorf("drotm y_%d mismatch %v: expected 0, found %v", i, test.Name, y[0])
 			}

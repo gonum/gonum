@@ -10,10 +10,10 @@ package blas
 type Flag int
 
 const (
-	Identity    Flag = iota - 2 // H is the identity matrix; no rotation is needed.
-	Rescaling                   // H specifies rescaling.
-	OffDiagonal                 // Off-diagonal elements of H are units.
-	Diagonal                    // Diagonal elements of H are units.
+	Identity    Flag = -2 // H is the identity matrix; no rotation is needed.
+	Rescaling   Flag = -1 // H specifies rescaling.
+	OffDiagonal Flag = 0  // Off-diagonal elements of H are non-unit.
+	Diagonal    Flag = 1  // Diagonal elements of H are non-unit.
 )
 
 // SrotmParams contains Givens transformation parameters returned

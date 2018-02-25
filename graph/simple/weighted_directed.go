@@ -100,10 +100,10 @@ func (g *WeightedDirectedGraph) SetWeightedEdge(e graph.WeightedEdge) {
 		panic("simple: adding self edge")
 	}
 
-	if !g.Has(from) {
+	if !g.Has(fid) {
 		g.AddNode(from)
 	}
-	if !g.Has(to) {
+	if !g.Has(tid) {
 		g.AddNode(to)
 	}
 
@@ -132,8 +132,8 @@ func (g *WeightedDirectedGraph) Node(id int64) graph.Node {
 }
 
 // Has returns whether the node exists within the graph.
-func (g *WeightedDirectedGraph) Has(n graph.Node) bool {
-	_, ok := g.nodes[n.ID()]
+func (g *WeightedDirectedGraph) Has(id int64) bool {
+	_, ok := g.nodes[id]
 	return ok
 }
 
@@ -174,30 +174,30 @@ func (g *WeightedDirectedGraph) WeightedEdges() []graph.WeightedEdge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *WeightedDirectedGraph) From(n graph.Node) []graph.Node {
-	if _, ok := g.from[n.ID()]; !ok {
+func (g *WeightedDirectedGraph) From(id int64) []graph.Node {
+	if _, ok := g.from[id]; !ok {
 		return nil
 	}
 
-	from := make([]graph.Node, len(g.from[n.ID()]))
+	from := make([]graph.Node, len(g.from[id]))
 	i := 0
-	for id := range g.from[n.ID()] {
-		from[i] = g.nodes[id]
+	for vid := range g.from[id] {
+		from[i] = g.nodes[vid]
 		i++
 	}
 	return from
 }
 
 // To returns all nodes in g that can reach directly to n.
-func (g *WeightedDirectedGraph) To(n graph.Node) []graph.Node {
-	if _, ok := g.from[n.ID()]; !ok {
+func (g *WeightedDirectedGraph) To(id int64) []graph.Node {
+	if _, ok := g.from[id]; !ok {
 		return nil
 	}
 
-	to := make([]graph.Node, len(g.to[n.ID()]))
+	to := make([]graph.Node, len(g.to[id]))
 	i := 0
-	for id := range g.to[n.ID()] {
-		to[i] = g.nodes[id]
+	for uid := range g.to[id] {
+		to[i] = g.nodes[uid]
 		i++
 	}
 	return to
@@ -205,9 +205,7 @@ func (g *WeightedDirectedGraph) To(n graph.Node) []graph.Node {
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
 // considering direction.
-func (g *WeightedDirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
-	xid := x.ID()
-	yid := y.ID()
+func (g *WeightedDirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 	if _, ok := g.from[xid][yid]; ok {
 		return true
 	}
@@ -217,14 +215,14 @@ func (g *WeightedDirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedDirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.WeightedEdge(u, v)
+func (g *WeightedDirectedGraph) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdge(uid, vid)
 }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedDirectedGraph) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
-	edge, ok := g.from[u.ID()][v.ID()]
+func (g *WeightedDirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	edge, ok := g.from[uid][vid]
 	if !ok {
 		return nil
 	}
@@ -232,8 +230,8 @@ func (g *WeightedDirectedGraph) WeightedEdge(u, v graph.Node) graph.WeightedEdge
 }
 
 // HasEdgeFromTo returns whether an edge exists in the graph from u to v.
-func (g *WeightedDirectedGraph) HasEdgeFromTo(u, v graph.Node) bool {
-	if _, ok := g.from[u.ID()][v.ID()]; !ok {
+func (g *WeightedDirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
+	if _, ok := g.from[uid][vid]; !ok {
 		return false
 	}
 	return true
@@ -243,9 +241,7 @@ func (g *WeightedDirectedGraph) HasEdgeFromTo(u, v graph.Node) bool {
 // If x and y are the same node or there is no joining edge between the two nodes the weight
 // value returned is either the graph's absent or self value. Weight returns true if an edge
 // exists between x and y or if x and y have the same ID, false otherwise.
-func (g *WeightedDirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
-	xid := x.ID()
-	yid := y.ID()
+func (g *WeightedDirectedGraph) Weight(xid, yid int64) (w float64, ok bool) {
 	if xid == yid {
 		return g.self, true
 	}
@@ -258,9 +254,9 @@ func (g *WeightedDirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
 }
 
 // Degree returns the in+out degree of n in g.
-func (g *WeightedDirectedGraph) Degree(n graph.Node) int {
-	if _, ok := g.nodes[n.ID()]; !ok {
+func (g *WeightedDirectedGraph) Degree(id int64) int {
+	if _, ok := g.nodes[id]; !ok {
 		return 0
 	}
-	return len(g.from[n.ID()]) + len(g.to[n.ID()])
+	return len(g.from[id]) + len(g.to[id])
 }

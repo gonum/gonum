@@ -75,8 +75,8 @@ func (g *UndirectedMatrix) Node(id int64) graph.Node {
 }
 
 // Has returns whether the node exists within the graph.
-func (g *UndirectedMatrix) Has(n graph.Node) bool {
-	return g.has(n.ID())
+func (g *UndirectedMatrix) Has(id int64) bool {
+	return g.has(id)
 }
 
 func (g *UndirectedMatrix) has(id int64) bool {
@@ -114,8 +114,7 @@ func (g *UndirectedMatrix) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *UndirectedMatrix) From(n graph.Node) []graph.Node {
-	id := n.ID()
+func (g *UndirectedMatrix) From(id int64) []graph.Node {
 	if !g.has(id) {
 		return nil
 	}
@@ -134,12 +133,10 @@ func (g *UndirectedMatrix) From(n graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g *UndirectedMatrix) HasEdgeBetween(u, v graph.Node) bool {
-	uid := u.ID()
+func (g *UndirectedMatrix) HasEdgeBetween(uid, vid int64) bool {
 	if !g.has(uid) {
 		return false
 	}
-	vid := v.ID()
 	if !g.has(vid) {
 		return false
 	}
@@ -149,26 +146,26 @@ func (g *UndirectedMatrix) HasEdgeBetween(u, v graph.Node) bool {
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedMatrix) Edge(u, v graph.Node) graph.Edge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *UndirectedMatrix) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedMatrix) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *UndirectedMatrix) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
-func (g *UndirectedMatrix) EdgeBetween(u, v graph.Node) graph.Edge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *UndirectedMatrix) EdgeBetween(uid, vid int64) graph.Edge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // WeightedEdgeBetween returns the weighted edge between nodes x and y.
-func (g *UndirectedMatrix) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
-	if g.HasEdgeBetween(u, v) {
-		// u.ID() and v.ID() are not greater than maximum int by this point.
-		return WeightedEdge{F: g.Node(u.ID()), T: g.Node(v.ID()), W: g.mat.At(int(u.ID()), int(v.ID()))}
+func (g *UndirectedMatrix) WeightedEdgeBetween(uid, vid int64) graph.WeightedEdge {
+	if g.HasEdgeBetween(uid, vid) {
+		// uid and vid are not greater than maximum int by this point.
+		return WeightedEdge{F: g.Node(uid), T: g.Node(vid), W: g.mat.At(int(uid), int(vid))}
 	}
 	return nil
 }
@@ -177,9 +174,7 @@ func (g *UndirectedMatrix) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEd
 // If x and y are the same node or there is no joining edge between the two nodes the weight
 // value returned is either the graph's absent or self value. Weight returns true if an edge
 // exists between x and y or if x and y have the same ID, false otherwise.
-func (g *UndirectedMatrix) Weight(x, y graph.Node) (w float64, ok bool) {
-	xid := x.ID()
-	yid := y.ID()
+func (g *UndirectedMatrix) Weight(xid, yid int64) (w float64, ok bool) {
 	if xid == yid {
 		return g.self, true
 	}
@@ -234,8 +229,7 @@ func (g *UndirectedMatrix) RemoveEdge(e graph.Edge) {
 }
 
 // Degree returns the degree of n in g.
-func (g *UndirectedMatrix) Degree(n graph.Node) int {
-	id := n.ID()
+func (g *UndirectedMatrix) Degree(id int64) int {
 	if !g.has(id) {
 		return 0
 	}

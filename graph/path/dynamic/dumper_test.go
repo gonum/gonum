@@ -61,7 +61,7 @@ func (d *dumper) dump(withpath bool) {
 				switch ln {
 				case 0:
 					if n.ID() == d.grid.Location.ID() {
-						if d.grid.Grid.HasOpen(n) {
+						if d.grid.Grid.HasOpen(n.ID()) {
 							fmt.Fprintf(w, "id:%2d  >@<", n.ID())
 						} else {
 							// Mark location as illegal.
@@ -70,19 +70,19 @@ func (d *dumper) dump(withpath bool) {
 					} else if n.ID() == d.dStarLite.t.ID() {
 						fmt.Fprintf(w, "id:%2d   G", n.ID())
 						// Mark goal cell as illegal.
-						if !d.grid.Grid.HasOpen(n) {
+						if !d.grid.Grid.HasOpen(n.ID()) {
 							fmt.Fprint(w, "!")
 						}
 					} else if pathStep[n.ID()] > 0 {
 						fmt.Fprintf(w, "id:%2d  %2d", n.ID(), pathStep[n.ID()])
 						// Mark path cells with an obstruction.
-						if !d.grid.Grid.HasOpen(n) {
+						if !d.grid.Grid.HasOpen(n.ID()) {
 							fmt.Fprint(w, "!")
 						}
 					} else {
 						fmt.Fprintf(w, "id:%2d", n.ID())
 						// Mark cells with an obstruction.
-						if !d.grid.Grid.HasOpen(n) {
+						if !d.grid.Grid.HasOpen(n.ID()) {
 							fmt.Fprint(w, "   *")
 						}
 					}

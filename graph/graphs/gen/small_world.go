@@ -40,7 +40,7 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 		n *= d
 	}
 	for i := 0; i < n; i++ {
-		if !dst.Has(simple.Node(i)) {
+		if !dst.Has(int64(i)) {
 			dst.AddNode(simple.Node(i))
 		}
 	}
@@ -67,14 +67,14 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 			if uid > vid {
 				e.F, e.T = e.T, e.F
 			}
-			if !hasEdge(e.From(), e.To()) {
+			if !hasEdge(e.From().ID(), e.To().ID()) {
 				dst.SetEdge(e)
 			}
 			if !isDirected {
 				return
 			}
 			e.F, e.T = e.T, e.F
-			if !hasEdge(e.From(), e.To()) {
+			if !hasEdge(e.From().ID(), e.To().ID()) {
 				dst.SetEdge(e)
 			}
 		})
@@ -110,7 +110,7 @@ func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src 
 			if !isDirected && uid > vid {
 				e.F, e.T = e.T, e.F
 			}
-			if !hasEdge(e.From(), e.To()) {
+			if !hasEdge(e.From().ID(), e.To().ID()) {
 				dst.SetEdge(e)
 			}
 		}

@@ -35,12 +35,12 @@ func TestBellmanFordFrom(t *testing.T) {
 			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", test.Name, pt.From().ID(), test.Query.From().ID())
 		}
 
-		p, weight := pt.To(test.Query.To())
+		p, weight := pt.To(test.Query.To().ID())
 		if weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
-		if weight := pt.WeightTo(test.Query.To()); weight != test.Weight {
+		if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
@@ -61,7 +61,7 @@ func TestBellmanFordFrom(t *testing.T) {
 				test.Name, p, test.WantPaths)
 		}
 
-		np, weight := pt.To(test.NoPathFor.To())
+		np, weight := pt.To(test.NoPathFor.To().ID())
 		if pt.From().ID() == test.NoPathFor.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
 			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f\nwant:path=<nil> weight=+Inf",
 				test.Name, np, weight)

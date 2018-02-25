@@ -389,7 +389,8 @@ var dynamicDStarLiteTests = []struct {
 			all := l.Grid.AllVisible
 			l.Grid.AllVisible = false
 			for _, n := range l.Nodes() {
-				l.Known[n.ID()] = !l.Grid.Has(n)
+				id := n.ID()
+				l.Known[id] = !l.Grid.Has(id)
 			}
 			l.Grid.AllVisible = all
 
@@ -401,19 +402,21 @@ var dynamicDStarLiteTests = []struct {
 
 			// Check we have a correctly modified representation.
 			for _, u := range l.Nodes() {
+				uid := u.ID()
 				for _, v := range l.Nodes() {
-					if l.HasEdgeBetween(u, v) != l.Grid.HasEdgeBetween(u, v) {
-						ur, uc := l.RowCol(u.ID())
-						vr, vc := l.RowCol(v.ID())
+					vid := v.ID()
+					if l.HasEdgeBetween(uid, vid) != l.Grid.HasEdgeBetween(uid, vid) {
+						ur, uc := l.RowCol(uid)
+						vr, vc := l.RowCol(vid)
 						if (ur == wallRow && uc == wallCol) || (vr == wallRow && vc == wallCol) {
-							if !l.HasEdgeBetween(u, v) {
+							if !l.HasEdgeBetween(uid, vid) {
 								panic(fmt.Sprintf("expected to believe edge between %v (%d,%d) and %v (%d,%d) is passable",
 									u, v, ur, uc, vr, vc))
 							}
 							continue
 						}
 						panic(fmt.Sprintf("disagreement about edge between %v (%d,%d) and %v (%d,%d): got:%t want:%t",
-							u, v, ur, uc, vr, vc, l.HasEdgeBetween(u, v), l.Grid.HasEdgeBetween(u, v)))
+							u, v, ur, uc, vr, vc, l.HasEdgeBetween(uid, vid), l.Grid.HasEdgeBetween(uid, vid)))
 					}
 				}
 			}
@@ -574,8 +577,8 @@ func TestDStarLiteDynamic(t *testing.T) {
 			l.MoveTo(test.s)
 
 			heuristic := func(a, b graph.Node) float64 {
-				ax, ay := l.XY(a)
-				bx, by := l.XY(b)
+				ax, ay := l.XY(a.ID())
+				bx, by := l.XY(b.ID())
 				return test.heuristic(ax-bx, ay-by)
 			}
 
@@ -657,7 +660,7 @@ func weightOf(path []graph.Node, g graph.Weighted) float64 {
 	var w float64
 	if len(path) > 1 {
 		for p, n := range path[1:] {
-			ew, ok := g.Weight(path[p], n)
+			ew, ok := g.Weight(path[p].ID(), n.ID())
 			if !ok {
 				return math.Inf(1)
 			}
@@ -673,7 +676,7 @@ func simpleWeightedEdgesOf(g graph.Weighted, edges []graph.Edge) []simple.Weight
 	for i, e := range edges {
 		w[i].F = e.From()
 		w[i].T = e.To()
-		ew, _ := g.Weight(e.From(), e.To())
+		ew, _ := g.Weight(e.From().ID(), e.To().ID())
 		w[i].W = ew
 	}
 	return w

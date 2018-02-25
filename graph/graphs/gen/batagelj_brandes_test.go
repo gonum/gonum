@@ -27,7 +27,7 @@ func (g *gnUndirected) SetEdge(e graph.Edge) {
 		return
 	case e.From().ID() > e.To().ID():
 		g.addBackwards = true
-	case g.UndirectedBuilder.HasEdgeBetween(e.From(), e.To()):
+	case g.UndirectedBuilder.HasEdgeBetween(e.From().ID(), e.To().ID()):
 		g.addMultipleEdge = true
 	}
 
@@ -45,7 +45,7 @@ func (g *gnDirected) SetEdge(e graph.Edge) {
 	case e.From().ID() == e.To().ID():
 		g.addSelfLoop = true
 		return
-	case g.DirectedBuilder.HasEdgeFromTo(e.From(), e.To()):
+	case g.DirectedBuilder.HasEdgeFromTo(e.From().ID(), e.To().ID()):
 		g.addMultipleEdge = true
 	}
 
@@ -190,9 +190,10 @@ func TestPowerLawUndirected(t *testing.T) {
 			}
 
 			for _, u := range nodes {
+				uid := u.ID()
 				var lines int
-				for _, v := range g.From(u) {
-					lines += len(g.Lines(u, v))
+				for _, v := range g.From(uid) {
+					lines += len(g.Lines(uid, v.ID()))
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
@@ -218,9 +219,10 @@ func TestPowerLawDirected(t *testing.T) {
 			}
 
 			for _, u := range nodes {
+				uid := u.ID()
 				var lines int
-				for _, v := range g.From(u) {
-					lines += len(g.Lines(u, v))
+				for _, v := range g.From(uid) {
+					lines += len(g.Lines(uid, v.ID()))
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
@@ -265,9 +267,10 @@ func TestBipartitePowerLawUndirected(t *testing.T) {
 			}
 
 			for _, u := range nodes {
+				uid := u.ID()
 				var lines int
-				for _, v := range g.From(u) {
-					lines += len(g.Lines(u, v))
+				for _, v := range g.From(uid) {
+					lines += len(g.Lines(uid, v.ID()))
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
@@ -312,9 +315,10 @@ func TestBipartitePowerLawDirected(t *testing.T) {
 			}
 
 			for _, u := range nodes {
+				uid := u.ID()
 				var lines int
-				for _, v := range g.From(u) {
-					lines += len(g.Lines(u, v))
+				for _, v := range g.From(uid) {
+					lines += len(g.Lines(uid, v.ID()))
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)

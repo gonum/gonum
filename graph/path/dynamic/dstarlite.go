@@ -99,12 +99,14 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 		}
 	}
 	for _, u := range d.model.Nodes() {
-		for _, v := range g.From(u) {
-			w := edgeWeight(d.weight, u, v)
+		uid := u.ID()
+		for _, v := range g.From(uid) {
+			vid := v.ID()
+			w := edgeWeight(d.weight, uid, vid)
 			if w < 0 {
 				panic("D* Lite: negative edge weight")
 			}
-			d.model.SetWeightedEdge(simple.WeightedEdge{F: u, T: d.model.Node(v.ID()), W: w})
+			d.model.SetWeightedEdge(simple.WeightedEdge{F: u, T: d.model.Node(vid), W: w})
 		}
 	}
 
@@ -120,8 +122,8 @@ func NewDStarLite(s, t graph.Node, g graph.Graph, h path.Heuristic, m WorldModel
 // edgeWeight is a helper function that returns the weight of the edge between
 // two connected nodes, u and v, using the provided weight function. It panics
 // if there is no edge between u and v.
-func edgeWeight(weight path.Weighting, u, v graph.Node) float64 {
-	w, ok := weight(u, v)
+func edgeWeight(weight path.Weighting, uid, vid int64) float64 {
+	w, ok := weight(uid, vid)
 	if !ok {
 		panic("D* Lite: unexpected invalid weight")
 	}
@@ -187,29 +189,33 @@ func (d *DStarLite) findShortestPath() {
 		if !u.key.less(d.keyFor(d.s)) && d.s.rhs <= d.s.g {
 			break
 		}
+		uid := u.ID()
 		switch kNew := d.keyFor(u); {
 		case u.key.less(kNew):
 			d.queue.update(u, kNew)
 		case u.g > u.rhs:
 			u.g = u.rhs
 			d.queue.remove(u)
-			for _, _s := range d.model.To(u) {
+			for _, _s := range d.model.To(uid) {
 				s := _s.(*dStarLiteNode)
-				if s.ID() != d.t.ID() {
-					s.rhs = math.Min(s.rhs, edgeWeight(d.model.Weight, s, u)+u.g)
+				sid := s.ID()
+				if sid != d.t.ID() {
+					s.rhs = math.Min(s.rhs, edgeWeight(d.model.Weight, sid, uid)+u.g)
 				}
 				d.update(s)
 			}
 		default:
 			gOld := u.g
 			u.g = math.Inf(1)
-			for _, _s := range append(d.model.To(u), u) {
+			for _, _s := range append(d.model.To(uid), u) {
 				s := _s.(*dStarLiteNode)
-				if s.rhs == edgeWeight(d.model.Weight, s, u)+gOld {
+				sid := s.ID()
+				if s.rhs == edgeWeight(d.model.Weight, sid, uid)+gOld {
 					if s.ID() != d.t.ID() {
 						s.rhs = math.Inf(1)
-						for _, t := range d.model.From(s) {
-							s.rhs = math.Min(s.rhs, edgeWeight(d.model.Weight, s, t)+t.(*dStarLiteNode).g)
+						for _, t := range d.model.From(sid) {
+							tid := t.ID()
+							s.rhs = math.Min(s.rhs, edgeWeight(d.model.Weight, sid, tid)+t.(*dStarLiteNode).g)
 						}
 					}
 				}
@@ -243,9 +249,10 @@ func (d *DStarLite) Step() bool {
 	min := math.Inf(1)
 
 	var next *dStarLiteNode
-	for _, _s := range d.model.From(d.s) {
+	dsid := d.s.ID()
+	for _, _s := range d.model.From(dsid) {
 		s := _s.(*dStarLiteNode)
-		w := edgeWeight(d.model.Weight, d.s, s) + s.g
+		w := edgeWeight(d.model.Weight, dsid, s.ID()) + s.g
 		if w < min || (w == min && s.rhs < rhs) {
 			next = s
 			min = w
@@ -294,24 +301,27 @@ func (d *DStarLite) UpdateWorld(changes []graph.Edge) {
 	d.last = d.s
 	for _, e := range changes {
 		from := e.From()
+		fid := from.ID()
 		to := e.To()
-		c, _ := d.weight(from, to)
+		tid := to.ID()
+		c, _ := d.weight(fid, tid)
 		if c < 0 {
 			panic("D* Lite: negative edge weight")
 		}
-		cOld, _ := d.model.Weight(from, to)
+		cOld, _ := d.model.Weight(fid, tid)
 		u := d.worldNodeFor(from)
 		v := d.worldNodeFor(to)
 		d.model.SetWeightedEdge(simple.WeightedEdge{F: u, T: v, W: c})
+		uid := u.ID()
 		if cOld > c {
-			if u.ID() != d.t.ID() {
+			if uid != d.t.ID() {
 				u.rhs = math.Min(u.rhs, c+v.g)
 			}
 		} else if u.rhs == cOld+v.g {
-			if u.ID() != d.t.ID() {
+			if uid != d.t.ID() {
 				u.rhs = math.Inf(1)
-				for _, t := range d.model.From(u) {
-					u.rhs = math.Min(u.rhs, edgeWeight(d.model.Weight, u, t)+t.(*dStarLiteNode).g)
+				for _, t := range d.model.From(uid) {
+					u.rhs = math.Min(u.rhs, edgeWeight(d.model.Weight, uid, t.ID())+t.(*dStarLiteNode).g)
 				}
 			}
 		}
@@ -354,9 +364,11 @@ func (d *DStarLite) Path() (p []graph.Node, weight float64) {
 			next *dStarLiteNode
 			cost float64
 		)
-		for _, _v := range d.model.From(u) {
+		uid := u.ID()
+		for _, _v := range d.model.From(uid) {
 			v := _v.(*dStarLiteNode)
-			w := edgeWeight(d.model.Weight, u, v)
+			vid := v.ID()
+			w := edgeWeight(d.model.Weight, uid, vid)
 			if rhs := w + v.g; rhs < min || (rhs == min && v.rhs < rhsMin) {
 				next = v
 				min = rhs

@@ -24,7 +24,7 @@ import (
 // falling back to NullHeuristic otherwise. If the graph does not implement graph.Weighter,
 // UniformCost is used. AStar will panic if g has an A*-reachable negative edge weight.
 func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded int) {
-	if !g.Has(s) || !g.Has(t) {
+	if !g.Has(s.ID()) || !g.Has(t.ID()) {
 		return Shortest{from: s}, 0
 	}
 	var weight Weighting
@@ -59,14 +59,14 @@ func AStar(s, t graph.Node, g graph.Graph, h Heuristic) (path Shortest, expanded
 		}
 
 		visited.Add(uid)
-		for _, v := range g.From(u.node) {
+		for _, v := range g.From(u.node.ID()) {
 			vid := v.ID()
 			if visited.Has(vid) {
 				continue
 			}
 			j := path.indexOf[vid]
 
-			w, ok := weight(u.node, v)
+			w, ok := weight(u.node.ID(), vid)
 			if !ok {
 				panic("A*: unexpected invalid weight")
 			}

@@ -35,7 +35,7 @@ func UndirectedCyclesIn(g graph.Undirected) [][]graph.Node {
 			u := tree.Pop()
 			uid := u.ID()
 			adj := from[uid]
-			for _, v := range g.From(u) {
+			for _, v := range g.From(uid) {
 				vid := v.ID()
 				switch {
 				case uid == vid:

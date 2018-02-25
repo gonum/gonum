@@ -47,7 +47,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 	// Initial condition.
 	wt := make([]float64, n)
 	for u := 0; u < m; u++ {
-		if !dst.Has(simple.Node(u)) {
+		if !dst.Has(int64(0)) {
 			dst.AddNode(simple.Node(u))
 		}
 		// We need to give equal probability for
@@ -68,9 +68,9 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 		for i := 0; i < m; i++ {
 			// Triad formation.
 			if i != 0 && rnd() < p {
-				for _, w := range permute(dst.From(simple.Node(u)), rndN) {
+				for _, w := range permute(dst.From(int64(u)), rndN) {
 					wid := w.ID()
-					if wid == int64(v) || dst.HasEdgeBetween(w, simple.Node(v)) {
+					if wid == int64(v) || dst.HasEdgeBetween(wid, int64(v)) {
 						continue
 					}
 					dst.SetEdge(simple.Edge{F: w, T: simple.Node(v)})
@@ -87,7 +87,7 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 				if !ok {
 					return errors.New("gen: depleted distribution")
 				}
-				if u == v || dst.HasEdgeBetween(simple.Node(u), simple.Node(v)) {
+				if u == v || dst.HasEdgeBetween(int64(u), int64(v)) {
 					continue
 				}
 				dst.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
@@ -128,7 +128,7 @@ func PreferentialAttachment(dst graph.UndirectedBuilder, n, m int, src *rand.Ran
 	// Initial condition.
 	wt := make([]float64, n)
 	for u := 0; u < m; u++ {
-		if !dst.Has(simple.Node(u)) {
+		if !dst.Has(int64(u)) {
 			dst.AddNode(simple.Node(u))
 		}
 		// We need to give equal probability for

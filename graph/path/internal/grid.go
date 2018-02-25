@@ -104,17 +104,12 @@ func (g *Grid) Nodes() []graph.Node {
 // Has returns whether n is a node in the grid. The state of
 // the AllVisible field determines whether a non-open node is
 // present.
-func (g *Grid) Has(n graph.Node) bool {
-	return g.has(n.ID())
-}
-
-func (g *Grid) has(id int64) bool {
+func (g *Grid) Has(id int64) bool {
 	return 0 <= id && id < int64(len(g.open)) && (g.AllVisible || g.open[id])
 }
 
 // HasOpen returns whether n is an open node in the grid.
-func (g *Grid) HasOpen(n graph.Node) bool {
-	id := n.ID()
+func (g *Grid) HasOpen(id int64) bool {
 	return 0 <= id && id < int64(len(g.open)) && g.open[id]
 }
 
@@ -145,11 +140,11 @@ func (g *Grid) RowCol(id int64) (r, c int) {
 
 // XY returns the cartesian coordinates of n. If n is not a node
 // in the grid, (NaN, NaN) is returned.
-func (g *Grid) XY(n graph.Node) (x, y float64) {
-	if !g.Has(n) {
+func (g *Grid) XY(id int64) (x, y float64) {
+	if !g.Has(id) {
 		return math.NaN(), math.NaN()
 	}
-	r, c := g.RowCol(n.ID())
+	r, c := g.RowCol(id)
 	return float64(c), float64(r)
 }
 
@@ -163,15 +158,15 @@ func (g *Grid) NodeAt(r, c int) graph.Node {
 
 // From returns all the nodes reachable from u. Reachabilty requires that both
 // ends of an edge must be open.
-func (g *Grid) From(u graph.Node) []graph.Node {
-	if !g.HasOpen(u) {
+func (g *Grid) From(uid int64) []graph.Node {
+	if !g.HasOpen(uid) {
 		return nil
 	}
-	nr, nc := g.RowCol(u.ID())
+	nr, nc := g.RowCol(uid)
 	var to []graph.Node
 	for r := nr - 1; r <= nr+1; r++ {
 		for c := nc - 1; c <= nc+1; c++ {
-			if v := g.NodeAt(r, c); v != nil && g.HasEdgeBetween(u, v) {
+			if v := g.NodeAt(r, c); v != nil && g.HasEdgeBetween(uid, v.ID()) {
 				to = append(to, v)
 			}
 		}
@@ -180,12 +175,12 @@ func (g *Grid) From(u graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween returns whether there is an edge between u and v.
-func (g *Grid) HasEdgeBetween(u, v graph.Node) bool {
-	if !g.HasOpen(u) || !g.HasOpen(v) || u.ID() == v.ID() {
+func (g *Grid) HasEdgeBetween(uid, vid int64) bool {
+	if !g.HasOpen(uid) || !g.HasOpen(vid) || uid == vid {
 		return false
 	}
-	ur, uc := g.RowCol(u.ID())
-	vr, vc := g.RowCol(v.ID())
+	ur, uc := g.RowCol(uid)
+	vr, vc := g.RowCol(vid)
 	if abs(ur-vr) > 1 || abs(uc-vc) > 1 {
 		return false
 	}
@@ -200,47 +195,47 @@ func abs(i int) int {
 }
 
 // Edge returns the edge between u and v.
-func (g *Grid) Edge(u, v graph.Node) graph.Edge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *Grid) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // WeightedEdge returns the weighted edge between u and v.
-func (g *Grid) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *Grid) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // EdgeBetween returns the edge between u and v.
-func (g *Grid) EdgeBetween(u, v graph.Node) graph.Edge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *Grid) EdgeBetween(uid, vid int64) graph.Edge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // WeightedEdgeBetween returns the weighted edge between u and v.
-func (g *Grid) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
-	if g.HasEdgeBetween(u, v) {
+func (g *Grid) WeightedEdgeBetween(uid, vid int64) graph.WeightedEdge {
+	if g.HasEdgeBetween(uid, vid) {
 		if !g.AllowDiagonal || g.UnitEdgeWeight {
-			return simple.WeightedEdge{F: u, T: v, W: 1}
+			return simple.WeightedEdge{F: simple.Node(uid), T: simple.Node(vid), W: 1}
 		}
-		ux, uy := g.XY(u)
-		vx, vy := g.XY(v)
-		return simple.WeightedEdge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
+		ux, uy := g.XY(uid)
+		vx, vy := g.XY(vid)
+		return simple.WeightedEdge{F: simple.Node(uid), T: simple.Node(vid), W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }
 
 // Weight returns the weight of the given edge.
-func (g *Grid) Weight(x, y graph.Node) (w float64, ok bool) {
-	if x.ID() == y.ID() {
+func (g *Grid) Weight(xid, yid int64) (w float64, ok bool) {
+	if xid == yid {
 		return 0, true
 	}
-	if !g.HasEdgeBetween(x, y) {
+	if !g.HasEdgeBetween(xid, yid) {
 		return math.Inf(1), false
 	}
-	if e := g.EdgeBetween(x, y); e != nil {
+	if e := g.EdgeBetween(xid, yid); e != nil {
 		if !g.AllowDiagonal || g.UnitEdgeWeight {
 			return 1, true
 		}
-		ux, uy := g.XY(e.From())
-		vx, vy := g.XY(e.To())
+		ux, uy := g.XY(e.From().ID())
+		vx, vy := g.XY(e.To().ID())
 		return math.Hypot(ux-vx, uy-vy), true
 	}
 	return math.Inf(1), true
@@ -274,15 +269,15 @@ func (g *Grid) Render(path []graph.Node) ([]byte, error) {
 	// We don't use topo.IsPathIn at the outset because we
 	// want to draw as much as possible before failing.
 	for i, n := range path {
-		if !g.Has(n) || (i != 0 && !g.HasEdgeBetween(path[i-1], n)) {
-			id := n.ID()
+		id := n.ID()
+		if !g.Has(id) || (i != 0 && !g.HasEdgeBetween(path[i-1].ID(), id)) {
 			if 0 <= id && id < int64(len(g.open)) {
-				r, c := g.RowCol(n.ID())
+				r, c := g.RowCol(id)
 				b[r*(g.c+1)+c] = '!'
 			}
 			return b, errors.New("grid: not a path in graph")
 		}
-		r, c := g.RowCol(n.ID())
+		r, c := g.RowCol(id)
 		switch i {
 		case len(path) - 1:
 			b[r*(g.c+1)+c] = 'G'

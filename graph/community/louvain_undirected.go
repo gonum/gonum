@@ -34,19 +34,21 @@ func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution floa
 	var m2 float64
 	k := make(map[int64]float64, len(nodes))
 	for _, u := range nodes {
-		w := weight(u, u)
-		for _, v := range g.From(u) {
-			w += weight(u, v)
+		uid := u.ID()
+		w := weight(uid, uid)
+		for _, v := range g.From(uid) {
+			w += weight(uid, v.ID())
 		}
 		m2 += w
-		k[u.ID()] = w
+		k[uid] = w
 	}
 
 	if communities == nil {
 		var q float64
 		for _, u := range nodes {
-			kU := k[u.ID()]
-			q += weight(u, u) - resolution*kU*kU/m2
+			uid := u.ID()
+			kU := k[uid]
+			q += weight(uid, uid) - resolution*kU*kU/m2
 		}
 		return q / m2
 	}
@@ -57,10 +59,12 @@ func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution floa
 	var q float64
 	for _, c := range communities {
 		for i, u := range c {
-			kU := k[u.ID()]
-			q += weight(u, u) - resolution*kU*kU/m2
+			uid := u.ID()
+			kU := k[uid]
+			q += weight(uid, uid) - resolution*kU*kU/m2
 			for _, v := range c[i+1:] {
-				q += 2 * (weight(u, v) - resolution*kU*k[v.ID()]/m2)
+				vid := v.ID()
+				q += 2 * (weight(uid, vid) - resolution*kU*k[vid]/m2)
 			}
 		}
 	}
@@ -198,19 +202,21 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 			communityOf[n.ID()] = i
 		}
 		for _, u := range nodes {
+			uid := u.ID()
+			ucid := communityOf[uid]
 			var out []int
-			uid := communityOf[u.ID()]
-			for _, v := range g.From(u) {
-				vid := communityOf[v.ID()]
-				if vid != uid {
-					out = append(out, vid)
+			for _, v := range g.From(uid) {
+				vid := v.ID()
+				vcid := communityOf[vid]
+				if vcid != ucid {
+					out = append(out, vcid)
 				}
-				if uid < vid {
+				if ucid < vcid {
 					// Only store the weight once.
-					r.weights[[2]int{uid, vid}] = weight(u, v)
+					r.weights[[2]int{ucid, vcid}] = weight(uid, vid)
 				}
 			}
-			r.edges[uid] = out
+			r.edges[ucid] = out
 		}
 		return &r
 	}
@@ -254,39 +260,40 @@ func reduceUndirected(g graph.Undirected, communities [][]graph.Node) *ReducedUn
 			communityOf[n.ID()] = i
 		}
 	}
-	for uid, comm := range communities {
+	for ucid, comm := range communities {
 		var out []int
 		for i, u := range comm {
-			r.nodes[uid].weight += weight(u, u)
+			uid := u.ID()
+			r.nodes[ucid].weight += weight(uid, uid)
 			for _, v := range comm[i+1:] {
-				r.nodes[uid].weight += 2 * weight(u, v)
+				r.nodes[ucid].weight += 2 * weight(uid, v.ID())
 			}
-			for _, v := range g.From(u) {
-				vid := communityOf[v.ID()]
+			for _, v := range g.From(uid) {
+				vid := v.ID()
+				vcid := communityOf[vid]
 				found := false
 				for _, e := range out {
-					if e == vid {
+					if e == vcid {
 						found = true
 						break
 					}
 				}
-				if !found && vid != uid {
-					out = append(out, vid)
+				if !found && vcid != ucid {
+					out = append(out, vcid)
 				}
-				if uid < vid {
+				if ucid < vcid {
 					// Only store the weight once.
-					r.weights[[2]int{uid, vid}] += weight(u, v)
+					r.weights[[2]int{ucid, vcid}] += weight(uid, vid)
 				}
 			}
 		}
-		r.edges[uid] = out
+		r.edges[ucid] = out
 	}
 	return &r
 }
 
 // Has returns whether the node exists within the graph.
-func (g *ReducedUndirected) Has(n graph.Node) bool {
-	id := n.ID()
+func (g *ReducedUndirected) Has(id int64) bool {
 	return 0 <= id || id < int64(len(g.nodes))
 }
 
@@ -300,8 +307,8 @@ func (g *ReducedUndirected) Nodes() []graph.Node {
 }
 
 // From returns all nodes in g that can be reached directly from u.
-func (g *ReducedUndirected) From(u graph.Node) []graph.Node {
-	out := g.edges[u.ID()]
+func (g *ReducedUndirected) From(uid int64) []graph.Node {
+	out := g.edges[uid]
 	nodes := make([]graph.Node, len(out))
 	for i, vid := range out {
 		nodes[i] = g.nodes[vid]
@@ -310,9 +317,7 @@ func (g *ReducedUndirected) From(u graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g *ReducedUndirected) HasEdgeBetween(x, y graph.Node) bool {
-	xid := x.ID()
-	yid := y.ID()
+func (g *ReducedUndirected) HasEdgeBetween(xid, yid int64) bool {
 	if xid == yid || !isValidID(xid) || !isValidID(yid) {
 		return false
 	}
@@ -325,25 +330,23 @@ func (g *ReducedUndirected) HasEdgeBetween(x, y graph.Node) bool {
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *ReducedUndirected) Edge(u, v graph.Node) graph.Edge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *ReducedUndirected) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *ReducedUndirected) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
-	return g.WeightedEdgeBetween(u, v)
+func (g *ReducedUndirected) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	return g.WeightedEdgeBetween(uid, vid)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
-func (g *ReducedUndirected) EdgeBetween(x, y graph.Node) graph.Edge {
-	return g.WeightedEdgeBetween(x, y)
+func (g *ReducedUndirected) EdgeBetween(xid, yid int64) graph.Edge {
+	return g.WeightedEdgeBetween(xid, yid)
 }
 
 // WeightedEdgeBetween returns the weighted edge between nodes x and y.
-func (g *ReducedUndirected) WeightedEdgeBetween(x, y graph.Node) graph.WeightedEdge {
-	xid := x.ID()
-	yid := y.ID()
+func (g *ReducedUndirected) WeightedEdgeBetween(xid, yid int64) graph.WeightedEdge {
 	if xid == yid || !isValidID(xid) || !isValidID(yid) {
 		return nil
 	}
@@ -354,16 +357,14 @@ func (g *ReducedUndirected) WeightedEdgeBetween(x, y graph.Node) graph.WeightedE
 	if !ok {
 		return nil
 	}
-	return edge{from: g.nodes[x.ID()], to: g.nodes[y.ID()], weight: w}
+	return edge{from: g.nodes[xid], to: g.nodes[yid], weight: w}
 }
 
 // Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
 // If x and y are the same node the internal node weight is returned. If there is no joining
 // edge between the two nodes the weight value returned is zero. Weight returns true if an edge
 // exists between x and y or if x and y have the same ID, false otherwise.
-func (g *ReducedUndirected) Weight(x, y graph.Node) (w float64, ok bool) {
-	xid := x.ID()
-	yid := y.ID()
+func (g *ReducedUndirected) Weight(xid, yid int64) (w float64, ok bool) {
 	if !isValidID(xid) || !isValidID(yid) {
 		return 0, false
 	}
@@ -396,7 +397,7 @@ type undirectedLocalMover struct {
 	// that returns the Weight value
 	// of the non-nil edge between x
 	// and y.
-	weight func(x, y graph.Node) float64
+	weight func(xid, yid int64) float64
 
 	// communities is the current
 	// division of g.
@@ -440,11 +441,12 @@ func newUndirectedLocalMover(g *ReducedUndirected, communities [][]graph.Node, r
 	// Calculate the total edge weight of the graph
 	// and degree weights for each node.
 	for _, u := range l.nodes {
-		w := l.weight(u, u)
-		for _, v := range g.From(u) {
-			w += l.weight(u, v)
+		uid := u.ID()
+		w := l.weight(uid, uid)
+		for _, v := range g.From(uid) {
+			w += l.weight(uid, v.ID())
 		}
-		l.edgeWeightOf[u.ID()] = w
+		l.edgeWeightOf[uid] = w
 		l.m2 += w
 	}
 	if l.m2 == 0 {
@@ -514,7 +516,7 @@ func (l *undirectedLocalMover) move(dst int, src commIdx) {
 // is in communities.
 func (l *undirectedLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst int, src commIdx) {
 	id := n.ID()
-	a_aa := l.weight(n, n)
+	a_aa := l.weight(id, id)
 	k_a := l.edgeWeightOf[id]
 	m2 := l.m2
 	gamma := l.resolution
@@ -559,7 +561,7 @@ func (l *undirectedLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst int, sr
 				removal = true
 			}
 
-			k_aC += l.weight(n, u)
+			k_aC += l.weight(id, uid)
 			// sigma_totC could be kept for each community
 			// and updated for moves, changing the calculation
 			// of sigma_totC here from O(n_c) to O(1), but

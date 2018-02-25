@@ -115,17 +115,19 @@ func brandes(g graph.Graph, accumulate func(s graph.Node, stack linear.NodeStack
 		queue.Enqueue(s)
 		for queue.Len() != 0 {
 			v := queue.Dequeue()
+			vid := v.ID()
 			stack.Push(v)
-			for _, w := range g.From(v) {
+			for _, w := range g.From(vid) {
+				wid := w.ID()
 				// w found for the first time?
-				if d[w.ID()] < 0 {
+				if d[wid] < 0 {
 					queue.Enqueue(w)
-					d[w.ID()] = d[v.ID()] + 1
+					d[wid] = d[vid] + 1
 				}
 				// shortest path to w via v?
-				if d[w.ID()] == d[v.ID()]+1 {
-					sigma[w.ID()] += sigma[v.ID()]
-					p[w.ID()] = append(p[w.ID()], v)
+				if d[wid] == d[vid]+1 {
+					sigma[wid] += sigma[vid]
+					p[wid] = append(p[wid], v)
 				}
 			}
 		}
@@ -151,18 +153,20 @@ func BetweennessWeighted(g graph.Weighted, p path.AllShortest) map[int64]float64
 
 	nodes := g.Nodes()
 	for i, s := range nodes {
+		sid := s.ID()
 		for j, t := range nodes {
 			if i == j {
 				continue
 			}
-			d := p.Weight(s, t)
+			tid := t.ID()
+			d := p.Weight(sid, tid)
 			if math.IsInf(d, 0) {
 				continue
 			}
 
 			// If we have a unique path, don't do the
 			// extra work needed to get all paths.
-			path, _, unique := p.Between(s, t)
+			path, _, unique := p.Between(sid, tid)
 			if unique {
 				for _, v := range path[1 : len(path)-1] {
 					// For undirected graphs we double count
@@ -174,7 +178,7 @@ func BetweennessWeighted(g graph.Weighted, p path.AllShortest) map[int64]float64
 			}
 
 			// Otherwise iterate over all paths.
-			paths, _ := p.AllBetween(s, t)
+			paths, _ := p.AllBetween(sid, tid)
 			stFrac := 1 / float64(len(paths))
 			for _, path := range paths {
 				for _, v := range path[1 : len(path)-1] {
@@ -203,18 +207,20 @@ func EdgeBetweennessWeighted(g graph.Weighted, p path.AllShortest) map[[2]int64]
 	_, isUndirected := g.(graph.Undirected)
 	nodes := g.Nodes()
 	for i, s := range nodes {
+		sid := s.ID()
 		for j, t := range nodes {
 			if i == j {
 				continue
 			}
-			d := p.Weight(s, t)
+			tid := t.ID()
+			d := p.Weight(sid, tid)
 			if math.IsInf(d, 0) {
 				continue
 			}
 
 			// If we have a unique path, don't do the
 			// extra work needed to get all paths.
-			path, _, unique := p.Between(s, t)
+			path, _, unique := p.Between(sid, tid)
 			if unique {
 				for k, v := range path[1:] {
 					// For undirected graphs we double count
@@ -231,7 +237,7 @@ func EdgeBetweennessWeighted(g graph.Weighted, p path.AllShortest) map[[2]int64]
 			}
 
 			// Otherwise iterate over all paths.
-			paths, _ := p.AllBetween(s, t)
+			paths, _ := p.AllBetween(sid, tid)
 			stFrac := 1 / float64(len(paths))
 			for _, path := range paths {
 				for k, v := range path[1:] {

@@ -36,7 +36,7 @@ func Gnp(dst GraphBuilder, n int, p float64, src *rand.Rand) error {
 	}
 
 	for i := 0; i < n; i++ {
-		if !dst.Has(simple.Node(i)) {
+		if !dst.Has(int64(i)) {
 			dst.AddNode(simple.Node(i))
 		}
 	}
@@ -112,7 +112,7 @@ func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 	}
 
 	for i := 0; i < n; i++ {
-		if !dst.Has(simple.Node(i)) {
+		if !dst.Has(int64(i)) {
 			dst.AddNode(simple.Node(i))
 		}
 	}
@@ -122,7 +122,7 @@ func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 		for {
 			v, w := edgeNodesFor(rnd(nChoose2))
 			e := simple.Edge{F: w, T: v}
-			if !hasEdge(e.F, e.T) {
+			if !hasEdge(e.F.ID(), e.T.ID()) {
 				dst.SetEdge(e)
 				break
 			}
@@ -137,7 +137,7 @@ func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 		for {
 			v, w := edgeNodesFor(rnd(nChoose2))
 			e := simple.Edge{F: v, T: w}
-			if !hasEdge(e.F, e.T) {
+			if !hasEdge(e.F.ID(), e.T.ID()) {
 				dst.SetEdge(e)
 				break
 			}
@@ -182,7 +182,7 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 	}
 
 	for i := 0; i < n; i++ {
-		if !dst.Has(simple.Node(i)) {
+		if !dst.Has(int64(i)) {
 			dst.AddNode(simple.Node(i))
 		}
 	}
@@ -201,14 +201,14 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 				j := v*(v-1)/2 + (v+i)%n
 				var ej simple.Edge
 				ej.T, ej.F = edgeNodesFor(j)
-				if !hasEdge(ej.From(), ej.To()) {
+				if !hasEdge(ej.From().ID(), ej.To().ID()) {
 					dst.SetEdge(ej)
 				}
 				k--
 				m++
 				var em simple.Edge
 				em.T, em.F = edgeNodesFor(m)
-				if !hasEdge(em.From(), em.To()) {
+				if !hasEdge(em.From().ID(), em.To().ID()) {
 					replace[j] = m
 				} else {
 					replace[j] = replace[m]
@@ -222,17 +222,17 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 		r := rndN(nChoose2-i) + i
 		var er simple.Edge
 		er.T, er.F = edgeNodesFor(r)
-		if !hasEdge(er.From(), er.To()) {
+		if !hasEdge(er.From().ID(), er.To().ID()) {
 			dst.SetEdge(er)
 		} else {
 			er.T, er.F = edgeNodesFor(replace[r])
-			if !hasEdge(er.From(), er.To()) {
+			if !hasEdge(er.From().ID(), er.To().ID()) {
 				dst.SetEdge(er)
 			}
 		}
 		var ei simple.Edge
 		ei.T, ei.F = edgeNodesFor(i)
-		if !hasEdge(ei.From(), ei.To()) {
+		if !hasEdge(ei.From().ID(), ei.To().ID()) {
 			replace[r] = i
 		} else {
 			replace[r] = replace[i]
@@ -252,12 +252,12 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 				j := v*(v-1)/2 + (v+i)%n
 				var ej simple.Edge
 				ej.F, ej.T = edgeNodesFor(j)
-				if !hasEdge(ej.From(), ej.To()) {
+				if !hasEdge(ej.From().ID(), ej.To().ID()) {
 					dst.SetEdge(ej)
 				}
 				k--
 				m++
-				if !hasEdge(edgeNodesFor(m)) {
+				if u, v := edgeNodesFor(m); !hasEdge(u.ID(), v.ID()) {
 					replace[j] = m
 				} else {
 					replace[j] = replace[m]
@@ -271,15 +271,15 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 		r := rndN(nChoose2-i) + i
 		var er simple.Edge
 		er.F, er.T = edgeNodesFor(r)
-		if !hasEdge(er.From(), er.To()) {
+		if !hasEdge(er.From().ID(), er.To().ID()) {
 			dst.SetEdge(er)
 		} else {
 			er.F, er.T = edgeNodesFor(replace[r])
-			if !hasEdge(er.From(), er.To()) {
+			if !hasEdge(er.From().ID(), er.To().ID()) {
 				dst.SetEdge(er)
 			}
 		}
-		if !hasEdge(edgeNodesFor(i)) {
+		if u, v := edgeNodesFor(i); !hasEdge(u.ID(), v.ID()) {
 			replace[r] = i
 		} else {
 			replace[r] = replace[i]

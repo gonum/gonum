@@ -22,12 +22,14 @@ func Closeness(g graph.Graph, p path.AllShortest) map[int64]float64 {
 	nodes := g.Nodes()
 	c := make(map[int64]float64, len(nodes))
 	for _, u := range nodes {
+		uid := u.ID()
 		var sum float64
 		for _, v := range nodes {
+			vid := v.ID()
 			// The ordering here is not relevant for
 			// undirected graphs, but we make sure we
 			// are counting incoming paths.
-			d := p.Weight(v, u)
+			d := p.Weight(vid, uid)
 			if math.IsInf(d, 0) {
 				continue
 			}
@@ -49,12 +51,14 @@ func Farness(g graph.Graph, p path.AllShortest) map[int64]float64 {
 	nodes := g.Nodes()
 	f := make(map[int64]float64, len(nodes))
 	for _, u := range nodes {
+		uid := u.ID()
 		var sum float64
 		for _, v := range nodes {
+			vid := v.ID()
 			// The ordering here is not relevant for
 			// undirected graphs, but we make sure we
 			// are counting incoming paths.
-			d := p.Weight(v, u)
+			d := p.Weight(vid, uid)
 			if math.IsInf(d, 0) {
 				continue
 			}
@@ -76,12 +80,14 @@ func Harmonic(g graph.Graph, p path.AllShortest) map[int64]float64 {
 	nodes := g.Nodes()
 	h := make(map[int64]float64, len(nodes))
 	for i, u := range nodes {
+		uid := u.ID()
 		var sum float64
 		for j, v := range nodes {
+			vid := v.ID()
 			// The ordering here is not relevant for
 			// undirected graphs, but we make sure we
 			// are counting incoming paths.
-			d := p.Weight(v, u)
+			d := p.Weight(vid, uid)
 			if math.IsInf(d, 0) {
 				continue
 			}
@@ -105,12 +111,14 @@ func Residual(g graph.Graph, p path.AllShortest) map[int64]float64 {
 	nodes := g.Nodes()
 	r := make(map[int64]float64, len(nodes))
 	for i, u := range nodes {
+		uid := u.ID()
 		var sum float64
 		for j, v := range nodes {
+			vid := v.ID()
 			// The ordering here is not relevant for
 			// undirected graphs, but we make sure we
 			// are counting incoming paths.
-			d := p.Weight(v, u)
+			d := p.Weight(vid, uid)
 			if math.IsInf(d, 0) {
 				continue
 			}

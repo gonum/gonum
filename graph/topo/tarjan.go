@@ -95,15 +95,15 @@ func TarjanSCC(g graph.Directed) [][]graph.Node {
 
 func tarjanSCCstabilized(g graph.Directed, order func([]graph.Node)) [][]graph.Node {
 	nodes := g.Nodes()
-	var succ func(graph.Node) []graph.Node
+	var succ func(id int64) []graph.Node
 	if order == nil {
 		succ = g.From
 	} else {
 		order(nodes)
 		ordered.Reverse(nodes)
 
-		succ = func(n graph.Node) []graph.Node {
-			to := g.From(n)
+		succ = func(id int64) []graph.Node {
+			to := g.From(id)
 			order(to)
 			ordered.Reverse(to)
 			return to
@@ -131,7 +131,7 @@ func tarjanSCCstabilized(g graph.Directed, order func([]graph.Node)) [][]graph.N
 // http://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm?oldid=642744644
 //
 type tarjan struct {
-	succ func(graph.Node) []graph.Node
+	succ func(id int64) []graph.Node
 
 	index      int
 	indexTable map[int64]int
@@ -156,7 +156,7 @@ func (t *tarjan) strongconnect(v graph.Node) {
 	t.onStack.Add(vID)
 
 	// Consider successors of v.
-	for _, w := range t.succ(v) {
+	for _, w := range t.succ(vID) {
 		wID := w.ID()
 		if t.indexTable[wID] == 0 {
 			// Successor w has not yet been visited; recur on it.

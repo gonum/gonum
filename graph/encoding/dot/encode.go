@@ -151,7 +151,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 		if s, ok := n.(Subgrapher); ok {
 			// If the node is not linked to any other node
 			// the graph needs to be written now.
-			if len(g.From(n)) == 0 {
+			if len(g.From(n.ID())) == 0 {
 				g := s.Subgraph()
 				_, subIsDirected := g.(graph.Directed)
 				if subIsDirected != isDirected {
@@ -182,20 +182,22 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 
 	havePrintedEdgeHeader := false
 	for _, n := range nodes {
-		to := g.From(n)
+		nid := n.ID()
+		to := g.From(nid)
 		sort.Sort(ordered.ByID(to))
 		for _, t := range to {
+			tid := t.ID()
 			if isDirected {
-				if p.visited[edge{inGraph: name, from: n.ID(), to: t.ID()}] {
+				if p.visited[edge{inGraph: name, from: nid, to: tid}] {
 					continue
 				}
-				p.visited[edge{inGraph: name, from: n.ID(), to: t.ID()}] = true
+				p.visited[edge{inGraph: name, from: nid, to: tid}] = true
 			} else {
-				if p.visited[edge{inGraph: name, from: n.ID(), to: t.ID()}] {
+				if p.visited[edge{inGraph: name, from: nid, to: tid}] {
 					continue
 				}
-				p.visited[edge{inGraph: name, from: n.ID(), to: t.ID()}] = true
-				p.visited[edge{inGraph: name, from: t.ID(), to: n.ID()}] = true
+				p.visited[edge{inGraph: name, from: nid, to: tid}] = true
+				p.visited[edge{inGraph: name, from: tid, to: n.ID()}] = true
 			}
 
 			if !havePrintedEdgeHeader {
@@ -217,7 +219,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			} else {
 				p.writeNode(n)
 			}
-			e, edgeIsPorter := g.Edge(n, t).(Porter)
+			e, edgeIsPorter := g.Edge(nid, tid).(Porter)
 			if edgeIsPorter {
 				p.writePorts(e.FromPort())
 			}
@@ -242,7 +244,7 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 				p.writePorts(e.ToPort())
 			}
 
-			if a, ok := g.Edge(n, t).(encoding.Attributer); ok {
+			if a, ok := g.Edge(nid, tid).(encoding.Attributer); ok {
 				p.writeAttributeList(a)
 			}
 

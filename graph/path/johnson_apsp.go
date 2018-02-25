@@ -52,12 +52,12 @@ func JohnsonAllPaths(g graph.Graph) (paths AllShortest, ok bool) {
 	dijkstraAllPaths(jg, paths)
 
 	for i, u := range paths.nodes {
-		hu := jg.adjustBy.WeightTo(u)
+		hu := jg.adjustBy.WeightTo(u.ID())
 		for j, v := range paths.nodes {
 			if i == j {
 				continue
 			}
-			hv := jg.adjustBy.WeightTo(v)
+			hv := jg.adjustBy.WeightTo(v.ID())
 			paths.dist.Set(i, j, paths.dist.At(i, j)-hu+hv)
 		}
 	}
@@ -69,8 +69,8 @@ type johnsonWeightAdjuster struct {
 	q int64
 	g graph.Graph
 
-	from   func(graph.Node) []graph.Node
-	edgeTo func(graph.Node, graph.Node) graph.Edge
+	from   func(id int64) []graph.Node
+	edgeTo func(uid, vid int64) graph.Edge
 	weight Weighting
 
 	bellmanFord bool
@@ -86,11 +86,11 @@ var (
 	_ graph.Weighted = johnsonWeightAdjuster{}
 )
 
-func (g johnsonWeightAdjuster) Has(n graph.Node) bool {
-	if g.bellmanFord && n.ID() == g.q {
+func (g johnsonWeightAdjuster) Has(id int64) bool {
+	if g.bellmanFord && id == g.q {
 		return true
 	}
-	return g.g.Has(n)
+	return g.g.Has(id)
 
 }
 
@@ -101,40 +101,40 @@ func (g johnsonWeightAdjuster) Nodes() []graph.Node {
 	return g.g.Nodes()
 }
 
-func (g johnsonWeightAdjuster) From(n graph.Node) []graph.Node {
-	if g.bellmanFord && n.ID() == g.q {
+func (g johnsonWeightAdjuster) From(id int64) []graph.Node {
+	if g.bellmanFord && id == g.q {
 		return g.g.Nodes()
 	}
-	return g.from(n)
+	return g.from(id)
 }
 
-func (g johnsonWeightAdjuster) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
+func (g johnsonWeightAdjuster) WeightedEdge(_, _ int64) graph.WeightedEdge {
 	panic("path: unintended use of johnsonWeightAdjuster")
 }
 
-func (g johnsonWeightAdjuster) Edge(u, v graph.Node) graph.Edge {
-	if g.bellmanFord && u.ID() == g.q && g.g.Has(v) {
-		return simple.Edge{F: johnsonGraphNode(g.q), T: v}
+func (g johnsonWeightAdjuster) Edge(uid, vid int64) graph.Edge {
+	if g.bellmanFord && uid == g.q && g.g.Has(vid) {
+		return simple.Edge{F: johnsonGraphNode(g.q), T: simple.Node(vid)}
 	}
-	return g.edgeTo(u, v)
+	return g.edgeTo(uid, vid)
 }
 
-func (g johnsonWeightAdjuster) Weight(x, y graph.Node) (w float64, ok bool) {
+func (g johnsonWeightAdjuster) Weight(xid, yid int64) (w float64, ok bool) {
 	if g.bellmanFord {
 		switch g.q {
-		case x.ID():
+		case xid:
 			return 0, true
-		case y.ID():
+		case yid:
 			return math.Inf(1), false
 		default:
-			return g.weight(x, y)
+			return g.weight(xid, yid)
 		}
 	}
-	w, ok = g.weight(x, y)
-	return w + g.adjustBy.WeightTo(x) - g.adjustBy.WeightTo(y), ok
+	w, ok = g.weight(xid, yid)
+	return w + g.adjustBy.WeightTo(xid) - g.adjustBy.WeightTo(yid), ok
 }
 
-func (johnsonWeightAdjuster) HasEdgeBetween(_, _ graph.Node) bool {
+func (johnsonWeightAdjuster) HasEdgeBetween(_, _ int64) bool {
 	panic("path: unintended use of johnsonWeightAdjuster")
 }
 

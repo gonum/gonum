@@ -66,6 +66,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 	for i := 0; i < n; i++ {
 		u := nodes[rndN(len(nodes))]
 		d := dst.NewNode()
+		did := d.ID()
 
 		// Add the duplicate node.
 		dst.AddNode(d)
@@ -74,13 +75,14 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 		// into the rest of the graph.
 		for {
 			// Add edges to parent's neighbours.
-			to := dst.From(u)
+			to := dst.From(u.ID())
 			sort.Sort(ordered.ByID(to))
 			for _, v := range to {
-				if rnd() < delta || dst.HasEdgeBetween(v, d) {
+				vid := v.ID()
+				if rnd() < delta || dst.HasEdgeBetween(vid, did) {
 					continue
 				}
-				if v.ID() < d.ID() {
+				if vid < did {
 					dst.SetEdge(dst.NewEdge(v, d))
 				} else {
 					dst.SetEdge(dst.NewEdge(d, v))
@@ -90,11 +92,13 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 			// Add edges to old nodes.
 			scaledAlpha := alpha / float64(len(nodes))
 			for _, v := range nodes {
-				switch v.ID() {
-				case u.ID():
+				uid := u.ID()
+				vid := v.ID()
+				switch vid {
+				case uid:
 					if !math.IsNaN(sigma) {
 						if i == 0 || rnd() < sigma {
-							if v.ID() < d.ID() {
+							if vid < did {
 								dst.SetEdge(dst.NewEdge(v, d))
 							} else {
 								dst.SetEdge(dst.NewEdge(d, v))
@@ -104,8 +108,8 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 					}
 					fallthrough
 				default:
-					if rnd() < scaledAlpha && !dst.HasEdgeBetween(v, d) {
-						if v.ID() < d.ID() {
+					if rnd() < scaledAlpha && !dst.HasEdgeBetween(vid, did) {
+						if vid < did {
 							dst.SetEdge(dst.NewEdge(v, d))
 						} else {
 							dst.SetEdge(dst.NewEdge(d, v))
@@ -114,7 +118,7 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 				}
 			}
 
-			if len(dst.From(d)) != 0 {
+			if len(dst.From(did)) != 0 {
 				break
 			}
 		}

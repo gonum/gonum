@@ -12,20 +12,20 @@ type Undirect struct {
 var _ Undirected = Undirect{}
 
 // Has returns whether the node exists within the graph.
-func (g Undirect) Has(n Node) bool { return g.G.Has(n) }
+func (g Undirect) Has(id int64) bool { return g.G.Has(id) }
 
 // Nodes returns all the nodes in the graph.
 func (g Undirect) Nodes() []Node { return g.G.Nodes() }
 
 // From returns all nodes in g that can be reached directly from u.
-func (g Undirect) From(u Node) []Node {
+func (g Undirect) From(uid int64) []Node {
 	var nodes []Node
 	seen := make(map[int64]struct{})
-	for _, n := range g.G.From(u) {
+	for _, n := range g.G.From(uid) {
 		seen[n.ID()] = struct{}{}
 		nodes = append(nodes, n)
 	}
-	for _, n := range g.G.To(u) {
+	for _, n := range g.G.To(uid) {
 		id := n.ID()
 		if _, ok := seen[id]; ok {
 			continue
@@ -37,21 +37,21 @@ func (g Undirect) From(u Node) []Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g Undirect) HasEdgeBetween(x, y Node) bool { return g.G.HasEdgeBetween(x, y) }
+func (g Undirect) HasEdgeBetween(xid, yid int64) bool { return g.G.HasEdgeBetween(xid, yid) }
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 // If an edge exists, the Edge returned is an EdgePair. The weight of
 // the edge is determined by applying the Merge func to the weights of the
 // edges between u and v.
-func (g Undirect) Edge(u, v Node) Edge { return g.EdgeBetween(u, v) }
+func (g Undirect) Edge(uid, vid int64) Edge { return g.EdgeBetween(uid, vid) }
 
 // EdgeBetween returns the edge between nodes x and y. If an edge exists, the
 // Edge returned is an EdgePair. The weight of the edge is determined by
 // applying the Merge func to the weights of edges between x and y.
-func (g Undirect) EdgeBetween(x, y Node) Edge {
-	fe := g.G.Edge(x, y)
-	re := g.G.Edge(y, x)
+func (g Undirect) EdgeBetween(xid, yid int64) Edge {
+	fe := g.G.Edge(xid, yid)
+	re := g.G.Edge(yid, xid)
 	if fe == nil && re == nil {
 		return nil
 	}
@@ -91,20 +91,20 @@ var (
 )
 
 // Has returns whether the node exists within the graph.
-func (g UndirectWeighted) Has(n Node) bool { return g.G.Has(n) }
+func (g UndirectWeighted) Has(id int64) bool { return g.G.Has(id) }
 
 // Nodes returns all the nodes in the graph.
 func (g UndirectWeighted) Nodes() []Node { return g.G.Nodes() }
 
 // From returns all nodes in g that can be reached directly from u.
-func (g UndirectWeighted) From(u Node) []Node {
+func (g UndirectWeighted) From(uid int64) []Node {
 	var nodes []Node
 	seen := make(map[int64]struct{})
-	for _, n := range g.G.From(u) {
+	for _, n := range g.G.From(uid) {
 		seen[n.ID()] = struct{}{}
 		nodes = append(nodes, n)
 	}
-	for _, n := range g.G.To(u) {
+	for _, n := range g.G.To(uid) {
 		id := n.ID()
 		if _, ok := seen[id]; ok {
 			continue
@@ -116,44 +116,46 @@ func (g UndirectWeighted) From(u Node) []Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g UndirectWeighted) HasEdgeBetween(x, y Node) bool { return g.G.HasEdgeBetween(x, y) }
+func (g UndirectWeighted) HasEdgeBetween(xid, yid int64) bool { return g.G.HasEdgeBetween(xid, yid) }
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 // If an edge exists, the Edge returned is an EdgePair. The weight of
 // the edge is determined by applying the Merge func to the weights of the
 // edges between u and v.
-func (g UndirectWeighted) Edge(u, v Node) Edge { return g.WeightedEdgeBetween(u, v) }
+func (g UndirectWeighted) Edge(uid, vid int64) Edge { return g.WeightedEdgeBetween(uid, vid) }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 // If an edge exists, the Edge returned is an EdgePair. The weight of
 // the edge is determined by applying the Merge func to the weights of the
 // edges between u and v.
-func (g UndirectWeighted) WeightedEdge(u, v Node) WeightedEdge { return g.WeightedEdgeBetween(u, v) }
+func (g UndirectWeighted) WeightedEdge(uid, vid int64) WeightedEdge {
+	return g.WeightedEdgeBetween(uid, vid)
+}
 
 // EdgeBetween returns the edge between nodes x and y. If an edge exists, the
 // Edge returned is an EdgePair. The weight of the edge is determined by
 // applying the Merge func to the weights of edges between x and y.
-func (g UndirectWeighted) EdgeBetween(x, y Node) Edge {
-	return g.WeightedEdgeBetween(x, y)
+func (g UndirectWeighted) EdgeBetween(xid, yid int64) Edge {
+	return g.WeightedEdgeBetween(xid, yid)
 }
 
 // WeightedEdgeBetween returns the weighted edge between nodes x and y. If an edge exists, the
 // Edge returned is an EdgePair. The weight of the edge is determined by
 // applying the Merge func to the weights of edges between x and y.
-func (g UndirectWeighted) WeightedEdgeBetween(x, y Node) WeightedEdge {
-	fe := g.G.Edge(x, y)
-	re := g.G.Edge(y, x)
+func (g UndirectWeighted) WeightedEdgeBetween(xid, yid int64) WeightedEdge {
+	fe := g.G.Edge(xid, yid)
+	re := g.G.Edge(yid, xid)
 	if fe == nil && re == nil {
 		return nil
 	}
 
-	f, ok := g.G.Weight(x, y)
+	f, ok := g.G.Weight(xid, yid)
 	if !ok {
 		f = g.Absent
 	}
-	r, ok := g.G.Weight(y, x)
+	r, ok := g.G.Weight(yid, xid)
 	if !ok {
 		r = g.Absent
 	}
@@ -171,15 +173,15 @@ func (g UndirectWeighted) WeightedEdgeBetween(x, y Node) WeightedEdge {
 // If x and y are the same node the internal node weight is returned. If there is no joining
 // edge between the two nodes the weight value returned is zero. Weight returns true if an edge
 // exists between x and y or if x and y have the same ID, false otherwise.
-func (g UndirectWeighted) Weight(x, y Node) (w float64, ok bool) {
-	fe := g.G.Edge(x, y)
-	re := g.G.Edge(y, x)
+func (g UndirectWeighted) Weight(xid, yid int64) (w float64, ok bool) {
+	fe := g.G.Edge(xid, yid)
+	re := g.G.Edge(yid, xid)
 
-	f, fOk := g.G.Weight(x, y)
+	f, fOk := g.G.Weight(xid, yid)
 	if !fOk {
 		f = g.Absent
 	}
-	r, rOK := g.G.Weight(y, x)
+	r, rOK := g.G.Weight(yid, xid)
 	if !rOK {
 		r = g.Absent
 	}

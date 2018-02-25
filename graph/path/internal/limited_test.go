@@ -1165,23 +1165,25 @@ func TestLimitedVisionGrid(t *testing.T) {
 		}
 		l.Grid.AllowDiagonal = test.diag
 
-		x, y := l.XY(test.path[0])
+		x, y := l.XY(test.path[0].ID())
 		for _, u := range l.Nodes() {
-			ux, uy := l.XY(u)
+			uid := u.ID()
+			ux, uy := l.XY(uid)
 			uNear := math.Hypot(x-ux, y-uy) <= test.radius
 			for _, v := range l.Nodes() {
-				vx, vy := l.XY(v)
+				vid := v.ID()
+				vx, vy := l.XY(vid)
 				vNear := math.Hypot(x-vx, y-vy) <= test.radius
-				if u.ID() == v.ID() && l.HasEdgeBetween(u, v) {
+				if u.ID() == v.ID() && l.HasEdgeBetween(uid, vid) {
 					t.Errorf("unexpected self edge: %v -- %v", u, v)
 				}
-				if !uNear && !vNear && !l.HasEdgeBetween(u, v) && couldConnectIn(l, u, v) {
+				if !uNear && !vNear && !l.HasEdgeBetween(uid, vid) && couldConnectIn(l, uid, vid) {
 					t.Errorf("unexpected pessimism: no hope in distant edge between %v and %v for test %d",
 						u, v, i)
 				}
-				if (uNear && vNear) && l.HasEdgeBetween(u, v) != l.Grid.HasEdgeBetween(u, v) {
+				if (uNear && vNear) && l.HasEdgeBetween(uid, vid) != l.Grid.HasEdgeBetween(uid, vid) {
 					t.Errorf("unrealistic optimism: disagreement about edge between %v and %v for test %d: got:%t want:%t",
-						u, v, i, l.HasEdgeBetween(u, v), l.Grid.HasEdgeBetween(u, v))
+						u, v, i, l.HasEdgeBetween(uid, vid), l.Grid.HasEdgeBetween(uid, vid))
 				}
 			}
 		}
@@ -1205,7 +1207,7 @@ func asConcreteEdges(changes []graph.Edge, in graph.Weighted) []simple.WeightedE
 	for i, e := range changes {
 		we[i].F = e.From()
 		we[i].T = e.To()
-		w, ok := in.Weight(e.From(), e.To())
+		w, ok := in.Weight(e.From().ID(), e.To().ID())
 		if !ok && !math.IsInf(w, 1) {
 			panic("unexpected invalid finite weight")
 		}
@@ -1214,13 +1216,13 @@ func asConcreteEdges(changes []graph.Edge, in graph.Weighted) []simple.WeightedE
 	return we
 }
 
-func couldConnectIn(l *LimitedVisionGrid, u, v graph.Node) bool {
-	if u.ID() == v.ID() {
+func couldConnectIn(l *LimitedVisionGrid, uid, vid int64) bool {
+	if uid == vid {
 		return false
 	}
 
-	ur, uc := l.RowCol(u.ID())
-	vr, vc := l.RowCol(v.ID())
+	ur, uc := l.RowCol(uid)
+	vr, vc := l.RowCol(vid)
 	if abs(ur-vr) > 1 || abs(uc-vc) > 1 {
 		return false
 	}
@@ -1228,13 +1230,13 @@ func couldConnectIn(l *LimitedVisionGrid, u, v graph.Node) bool {
 		return false
 	}
 
-	if !l.Known[u.ID()] && !l.Known[v.ID()] {
+	if !l.Known[uid] && !l.Known[vid] {
 		return true
 	}
-	if l.Known[u.ID()] && !l.Grid.HasOpen(u) {
+	if l.Known[uid] && !l.Grid.HasOpen(uid) {
 		return false
 	}
-	if l.Known[v.ID()] && !l.Grid.HasOpen(v) {
+	if l.Known[vid] && !l.Grid.HasOpen(vid) {
 		return false
 	}
 

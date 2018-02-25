@@ -25,7 +25,7 @@ func (g *duplication) SetEdge(e graph.Edge) {
 		return
 	case e.From().ID() > e.To().ID():
 		g.addBackwards = true
-	case g.UndirectedMutator.HasEdgeBetween(e.From(), e.To()):
+	case g.UndirectedMutator.HasEdgeBetween(e.From().ID(), e.To().ID()):
 		g.addMultipleEdge = true
 	}
 

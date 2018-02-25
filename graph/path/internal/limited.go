@@ -47,23 +47,25 @@ func (l *LimitedVisionGrid) MoveTo(n graph.Node) (new, old []graph.Edge) {
 			if u == nil {
 				continue
 			}
-			ux, uy := l.XY(u)
+			uid := u.ID()
+			ux, uy := l.XY(uid)
 			if math.Hypot(x-ux, y-uy) > l.VisionRadius {
 				continue
 			}
-			for _, v := range l.allPossibleFrom(u) {
-				if seen[[2]int64{u.ID(), v.ID()}] {
+			for _, v := range l.allPossibleFrom(uid) {
+				vid := v.ID()
+				if seen[[2]int64{uid, vid}] {
 					continue
 				}
-				seen[[2]int64{u.ID(), v.ID()}] = true
+				seen[[2]int64{uid, vid}] = true
 
-				vx, vy := l.XY(v)
-				if !l.Known[v.ID()] && math.Hypot(x-vx, y-vy) > l.VisionRadius {
+				vx, vy := l.XY(vid)
+				if !l.Known[vid] && math.Hypot(x-vx, y-vy) > l.VisionRadius {
 					continue
 				}
 
 				e := simple.Edge{F: u, T: v}
-				if !l.Known[u.ID()] || !l.Known[v.ID()] {
+				if !l.Known[uid] || !l.Known[vid] {
 					new = append(new, e)
 				} else {
 					old = append(old, e)
@@ -79,18 +81,20 @@ func (l *LimitedVisionGrid) MoveTo(n graph.Node) (new, old []graph.Edge) {
 				if u == nil {
 					continue
 				}
-				ux, uy := l.XY(u)
+				uid := u.ID()
+				ux, uy := l.XY(uid)
 				if math.Hypot(x-ux, y-uy) > l.VisionRadius {
 					continue
 				}
-				for _, v := range l.allPossibleFrom(u) {
-					vx, vy := l.XY(v)
+				for _, v := range l.allPossibleFrom(uid) {
+					vid := v.ID()
+					vx, vy := l.XY(vid)
 					if math.Hypot(x-vx, y-vy) > l.VisionRadius {
 						continue
 					}
-					l.Known[v.ID()] = true
+					l.Known[vid] = true
 				}
-				l.Known[u.ID()] = true
+				l.Known[uid] = true
 			}
 		}
 
@@ -100,19 +104,19 @@ func (l *LimitedVisionGrid) MoveTo(n graph.Node) (new, old []graph.Edge) {
 }
 
 // allPossibleFrom returns all the nodes possibly reachable from u.
-func (l *LimitedVisionGrid) allPossibleFrom(u graph.Node) []graph.Node {
-	if !l.Has(u) {
+func (l *LimitedVisionGrid) allPossibleFrom(uid int64) []graph.Node {
+	if !l.Has(uid) {
 		return nil
 	}
-	nr, nc := l.RowCol(u.ID())
+	nr, nc := l.RowCol(uid)
 	var to []graph.Node
 	for r := nr - 1; r <= nr+1; r++ {
 		for c := nc - 1; c <= nc+1; c++ {
 			v := l.NodeAt(r, c)
-			if v == nil || u.ID() == v.ID() {
+			if v == nil || uid == v.ID() {
 				continue
 			}
-			ur, uc := l.RowCol(u.ID())
+			ur, uc := l.RowCol(uid)
 			vr, vc := l.RowCol(v.ID())
 			if abs(ur-vr) > 1 || abs(uc-vc) > 1 {
 				continue
@@ -134,11 +138,11 @@ func (l *LimitedVisionGrid) RowCol(id int64) (r, c int) {
 
 // XY returns the cartesian coordinates of n. If n is not a node
 // in the grid, (NaN, NaN) is returned.
-func (l *LimitedVisionGrid) XY(n graph.Node) (x, y float64) {
-	if !l.Has(n) {
+func (l *LimitedVisionGrid) XY(id int64) (x, y float64) {
+	if !l.Has(id) {
 		return math.NaN(), math.NaN()
 	}
-	r, c := l.RowCol(n.ID())
+	r, c := l.RowCol(id)
 	return float64(c), float64(r)
 }
 
@@ -157,25 +161,21 @@ func (l *LimitedVisionGrid) NodeAt(r, c int) graph.Node {
 }
 
 // Has returns whether n is a node in the grid.
-func (l *LimitedVisionGrid) Has(n graph.Node) bool {
-	return l.has(n.ID())
-}
-
-func (l *LimitedVisionGrid) has(id int64) bool {
+func (l *LimitedVisionGrid) Has(id int64) bool {
 	return 0 <= id && id < int64(len(l.Grid.open))
 }
 
 // From returns nodes that are optimistically reachable from u.
-func (l *LimitedVisionGrid) From(u graph.Node) []graph.Node {
-	if !l.Has(u) {
+func (l *LimitedVisionGrid) From(uid int64) []graph.Node {
+	if !l.Has(uid) {
 		return nil
 	}
 
-	nr, nc := l.RowCol(u.ID())
+	nr, nc := l.RowCol(uid)
 	var to []graph.Node
 	for r := nr - 1; r <= nr+1; r++ {
 		for c := nc - 1; c <= nc+1; c++ {
-			if v := l.NodeAt(r, c); v != nil && l.HasEdgeBetween(u, v) {
+			if v := l.NodeAt(r, c); v != nil && l.HasEdgeBetween(uid, v.ID()) {
 				to = append(to, v)
 			}
 		}
@@ -184,12 +184,12 @@ func (l *LimitedVisionGrid) From(u graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween optimistically returns whether an edge is exists between u and v.
-func (l *LimitedVisionGrid) HasEdgeBetween(u, v graph.Node) bool {
-	if u.ID() == v.ID() {
+func (l *LimitedVisionGrid) HasEdgeBetween(uid, vid int64) bool {
+	if uid == vid {
 		return false
 	}
-	ur, uc := l.RowCol(u.ID())
-	vr, vc := l.RowCol(v.ID())
+	ur, uc := l.RowCol(uid)
+	vr, vc := l.RowCol(vid)
 	if abs(ur-vr) > 1 || abs(uc-vc) > 1 {
 		return false
 	}
@@ -197,66 +197,66 @@ func (l *LimitedVisionGrid) HasEdgeBetween(u, v graph.Node) bool {
 		return false
 	}
 
-	x, y := l.XY(l.Location)
-	ux, uy := l.XY(u)
-	vx, vy := l.XY(v)
-	uKnown := l.Known[u.ID()] || math.Hypot(x-ux, y-uy) <= l.VisionRadius
-	vKnown := l.Known[v.ID()] || math.Hypot(x-vx, y-vy) <= l.VisionRadius
+	x, y := l.XY(l.Location.ID())
+	ux, uy := l.XY(uid)
+	vx, vy := l.XY(vid)
+	uKnown := l.Known[uid] || math.Hypot(x-ux, y-uy) <= l.VisionRadius
+	vKnown := l.Known[vid] || math.Hypot(x-vx, y-vy) <= l.VisionRadius
 
 	switch {
 	case uKnown && vKnown:
-		return l.Grid.HasEdgeBetween(u, v)
+		return l.Grid.HasEdgeBetween(uid, vid)
 	case uKnown:
-		return l.Grid.HasOpen(u)
+		return l.Grid.HasOpen(uid)
 	case vKnown:
-		return l.Grid.HasOpen(v)
+		return l.Grid.HasOpen(vid)
 	default:
 		return true
 	}
 }
 
 // Edge optimistically returns the edge from u to v.
-func (l *LimitedVisionGrid) Edge(u, v graph.Node) graph.Edge {
-	return l.WeightedEdgeBetween(u, v)
+func (l *LimitedVisionGrid) Edge(uid, vid int64) graph.Edge {
+	return l.WeightedEdgeBetween(uid, vid)
 }
 
 // Edge optimistically returns the weighted edge from u to v.
-func (l *LimitedVisionGrid) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
-	return l.WeightedEdgeBetween(u, v)
+func (l *LimitedVisionGrid) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	return l.WeightedEdgeBetween(uid, vid)
 }
 
 // WeightedEdgeBetween optimistically returns the edge between u and v.
-func (l *LimitedVisionGrid) EdgeBetween(u, v graph.Node) graph.Edge {
-	return l.WeightedEdgeBetween(u, v)
+func (l *LimitedVisionGrid) EdgeBetween(uid, vid int64) graph.Edge {
+	return l.WeightedEdgeBetween(uid, vid)
 }
 
 // WeightedEdgeBetween optimistically returns the weighted edge between u and v.
-func (l *LimitedVisionGrid) WeightedEdgeBetween(u, v graph.Node) graph.WeightedEdge {
-	if l.HasEdgeBetween(u, v) {
+func (l *LimitedVisionGrid) WeightedEdgeBetween(uid, vid int64) graph.WeightedEdge {
+	if l.HasEdgeBetween(uid, vid) {
 		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
-			return simple.WeightedEdge{F: u, T: v, W: 1}
+			return simple.WeightedEdge{F: simple.Node(uid), T: simple.Node(vid), W: 1}
 		}
-		ux, uy := l.XY(u)
-		vx, vy := l.XY(v)
-		return simple.WeightedEdge{F: u, T: v, W: math.Hypot(ux-vx, uy-vy)}
+		ux, uy := l.XY(uid)
+		vx, vy := l.XY(vid)
+		return simple.WeightedEdge{F: simple.Node(uid), T: simple.Node(vid), W: math.Hypot(ux-vx, uy-vy)}
 	}
 	return nil
 }
 
 // Weight returns the weight of the given edge.
-func (l *LimitedVisionGrid) Weight(x, y graph.Node) (w float64, ok bool) {
-	if x.ID() == y.ID() {
+func (l *LimitedVisionGrid) Weight(xid, yid int64) (w float64, ok bool) {
+	if xid == yid {
 		return 0, true
 	}
-	if !l.HasEdgeBetween(x, y) {
+	if !l.HasEdgeBetween(xid, yid) {
 		return math.Inf(1), false
 	}
-	if e := l.EdgeBetween(x, y); e != nil {
+	if e := l.EdgeBetween(xid, yid); e != nil {
 		if !l.Grid.AllowDiagonal || l.Grid.UnitEdgeWeight {
 			return 1, true
 		}
-		ux, uy := l.XY(e.From())
-		vx, vy := l.XY(e.To())
+		ux, uy := l.XY(e.From().ID())
+		vx, vy := l.XY(e.To().ID())
 		return math.Hypot(ux-vx, uy-vy), true
 
 	}
@@ -294,15 +294,15 @@ func (l *LimitedVisionGrid) Render(path []graph.Node) ([]byte, error) {
 	// We don't use topo.IsPathIn at the outset because we
 	// want to draw as much as possible before failing.
 	for i, n := range path {
-		if !l.Has(n) || (i != 0 && !l.HasEdgeBetween(path[i-1], n)) {
-			id := n.ID()
+		id := n.ID()
+		if !l.Has(id) || (i != 0 && !l.HasEdgeBetween(path[i-1].ID(), id)) {
 			if 0 <= id && id < int64(len(l.Grid.open)) {
-				r, c := l.RowCol(n.ID())
+				r, c := l.RowCol(id)
 				b[r*(cols+1)+c] = '!'
 			}
 			return b, errors.New("grid: not a path in graph")
 		}
-		r, c := l.RowCol(n.ID())
+		r, c := l.RowCol(id)
 		switch i {
 		case len(path) - 1:
 			b[r*(cols+1)+c] = 'G'

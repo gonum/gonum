@@ -27,53 +27,57 @@ type WeightedEdge interface {
 
 // Graph is a generalized graph.
 type Graph interface {
-	// Has returns whether the node exists within the graph.
-	Has(Node) bool
+	// Has returns whether a node with the given ID exists
+	// within the graph.
+	Has(id int64) bool
 
 	// Nodes returns all the nodes in the graph.
 	Nodes() []Node
 
 	// From returns all nodes that can be reached directly
-	// from the given node.
-	From(Node) []Node
+	// from the node with the given ID.
+	From(id int64) []Node
 
 	// HasEdgeBetween returns whether an edge exists between
-	// nodes x and y without considering direction.
-	HasEdgeBetween(x, y Node) bool
+	// nodes with IDs xid and yid without considering direction.
+	HasEdgeBetween(xid, yid int64) bool
 
-	// Edge returns the edge from u to v if such an edge
-	// exists and nil otherwise. The node v must be directly
-	// reachable from u as defined by the From method.
-	Edge(u, v Node) Edge
+	// Edge returns the edge from u to v, with IDs uid and vid,
+	// if such an edge exists and nil otherwise. The node v
+	// must be directly reachable from u as defined by the
+	// From method.
+	Edge(uid, vid int64) Edge
 }
 
 // Weighted is a weighted graph.
 type Weighted interface {
 	Graph
 
-	// WeightedEdge returns the weighted edge from u to v if
-	// such an edge exists and nil otherwise. The node v must
-	// be directly reachable from u as defined by the
-	// From method.
-	WeightedEdge(u, v Node) WeightedEdge
+	// WeightedEdge returns the weighted edge from u to v
+	// with IDs uid and vid if such an edge exists and
+	// nil otherwise. The node v must be directly
+	// reachable from u as defined by the From method.
+	WeightedEdge(uid, vid int64) WeightedEdge
 
 	// Weight returns the weight for the edge between
-	// x and y if Edge(x, y) returns a non-nil Edge.
+	// x and y with IDs xid and yid if Edge(xid, yid)
+	// returns a non-nil Edge.
 	// If x and y are the same node or there is no
 	// joining edge between the two nodes the weight
 	// value returned is implementation dependent.
 	// Weight returns true if an edge exists between
 	// x and y or if x and y have the same ID, false
 	// otherwise.
-	Weight(x, y Node) (w float64, ok bool)
+	Weight(xid, yid int64) (w float64, ok bool)
 }
 
 // Undirected is an undirected graph.
 type Undirected interface {
 	Graph
 
-	// EdgeBetween returns the edge between nodes x and y.
-	EdgeBetween(x, y Node) Edge
+	// EdgeBetween returns the edge between nodes x and y
+	// with IDs xid and yid.
+	EdgeBetween(xid, yid int64) Edge
 }
 
 // WeightedUndirected is a weighted undirected graph.
@@ -81,8 +85,8 @@ type WeightedUndirected interface {
 	Weighted
 
 	// WeightedEdgeBetween returns the edge between nodes
-	// x and y.
-	WeightedEdgeBetween(x, y Node) WeightedEdge
+	// x and y with IDs xid and yid.
+	WeightedEdgeBetween(xid, yid int64) WeightedEdge
 }
 
 // Directed is a directed graph.
@@ -90,12 +94,12 @@ type Directed interface {
 	Graph
 
 	// HasEdgeFromTo returns whether an edge exists
-	// in the graph from u to v.
-	HasEdgeFromTo(u, v Node) bool
+	// in the graph from u to v with IDs uid and vid.
+	HasEdgeFromTo(uid, vid int64) bool
 
 	// To returns all nodes that can reach directly
-	// to the given node.
-	To(Node) []Node
+	// to the node with the given ID.
+	To(id int64) []Node
 }
 
 // WeightedDirected is a weighted directed graph.
@@ -103,12 +107,13 @@ type WeightedDirected interface {
 	Weighted
 
 	// HasEdgeFromTo returns whether an edge exists
-	// in the graph from u to v.
-	HasEdgeFromTo(u, v Node) bool
+	// in the graph from u to v with the IDs uid and
+	// vid.
+	HasEdgeFromTo(uid, vid int64) bool
 
 	// To returns all nodes that can reach directly
-	// to the given node.
-	To(Node) []Node
+	// to the node with the given ID.
+	To(id int64) []Node
 }
 
 // NodeAdder is an interface for adding arbitrary nodes to a graph.
@@ -217,7 +222,7 @@ func Copy(dst Builder, src Graph) {
 		dst.AddNode(n)
 	}
 	for _, u := range nodes {
-		for _, v := range src.From(u) {
+		for _, v := range src.From(u.ID()) {
 			dst.SetEdge(dst.NewEdge(u, v))
 		}
 	}
@@ -240,8 +245,8 @@ func CopyWeighted(dst WeightedBuilder, src Weighted) {
 		dst.AddNode(n)
 	}
 	for _, u := range nodes {
-		for _, v := range src.From(u) {
-			dst.SetWeightedEdge(dst.NewWeightedEdge(u, v, src.WeightedEdge(u, v).Weight()))
+		for _, v := range src.From(u.ID()) {
+			dst.SetWeightedEdge(dst.NewWeightedEdge(u, v, src.WeightedEdge(u.ID(), v.ID()).Weight()))
 		}
 	}
 }

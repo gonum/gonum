@@ -2113,7 +2113,7 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 		d.Drotm(1, []float64{test.X1 * math.Sqrt(test.D1)}, 1, y, 1, p)
 		for i, v := range y {
 			if !dTolEqual(v, 0) {
-				t.Errorf("drotm y_%d mismatch %v: expected 0, found %v", i, test.Name, y[0])
+				t.Errorf("drotm y_%d mismatch %v: expected 0, found %v", i, test.Name, v)
 			}
 		}
 	}

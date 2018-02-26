@@ -70,7 +70,7 @@ func DbdsqrTest(t *testing.T, impl Dbdsqrer) {
 				copy(dCopy, d)
 				eCopy := make([]float64, len(e))
 				copy(eCopy, e)
-				work := make([]float64, 4*n)
+				work := make([]float64, 4*(n-1))
 				for i := range work {
 					work[i] = rnd.NormFloat64()
 				}

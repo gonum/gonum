@@ -511,47 +511,88 @@ func (Implementation) Drotm(n int, x []float64, incX int, y []float64, incY int,
 		panic(badY)
 	}
 
-	var h11, h12, h21, h22 float64
-	var ix, iy int
+	if p.Flag == blas.Identity {
+		return
+	}
+
 	switch p.Flag {
-	case blas.Identity:
-		return
 	case blas.Rescaling:
-		h11 = p.H[0]
-		h12 = p.H[2]
-		h21 = p.H[1]
-		h22 = p.H[3]
-	case blas.OffDiagonal:
-		h11 = 1
-		h12 = p.H[2]
-		h21 = p.H[1]
-		h22 = 1
-	case blas.Diagonal:
-		h11 = p.H[0]
-		h12 = 1
-		h21 = -1
-		h22 = p.H[3]
-	}
-	if incX < 0 {
-		ix = (-n + 1) * incX
-	}
-	if incY < 0 {
-		iy = (-n + 1) * incY
-	}
-	if incX == 1 && incY == 1 {
-		x = x[:n]
-		for i, vx := range x {
-			vy := y[i]
-			x[i], y[i] = vx*h11+vy*h12, vx*h21+vy*h22
+		h11 := p.H[0]
+		h12 := p.H[2]
+		h21 := p.H[1]
+		h22 := p.H[3]
+		if incX == 1 && incY == 1 {
+			x = x[:n]
+			for i, vx := range x {
+				vy := y[i]
+				x[i], y[i] = vx*h11+vy*h12, vx*h21+vy*h22
+			}
+			return
 		}
-		return
-	}
-	for i := 0; i < n; i++ {
-		vx := x[ix]
-		vy := y[iy]
-		x[ix], y[iy] = vx*h11+vy*h12, vx*h21+vy*h22
-		ix += incX
-		iy += incY
+		var ix, iy int
+		if incX < 0 {
+			ix = (-n + 1) * incX
+		}
+		if incY < 0 {
+			iy = (-n + 1) * incY
+		}
+		for i := 0; i < n; i++ {
+			vx := x[ix]
+			vy := y[iy]
+			x[ix], y[iy] = vx*h11+vy*h12, vx*h21+vy*h22
+			ix += incX
+			iy += incY
+		}
+	case blas.OffDiagonal:
+		h12 := p.H[2]
+		h21 := p.H[1]
+		if incX == 1 && incY == 1 {
+			x = x[:n]
+			for i, vx := range x {
+				vy := y[i]
+				x[i], y[i] = vx+vy*h12, vx*h21+vy
+			}
+			return
+		}
+		var ix, iy int
+		if incX < 0 {
+			ix = (-n + 1) * incX
+		}
+		if incY < 0 {
+			iy = (-n + 1) * incY
+		}
+		for i := 0; i < n; i++ {
+			vx := x[ix]
+			vy := y[iy]
+			x[ix], y[iy] = vx+vy*h12, vx*h21+vy
+			ix += incX
+			iy += incY
+		}
+	case blas.Diagonal:
+		h11 := p.H[0]
+		h22 := p.H[3]
+		if incX == 1 && incY == 1 {
+			x = x[:n]
+			for i, vx := range x {
+				vy := y[i]
+				x[i], y[i] = vx*h11+vy, -vx+vy*h22
+			}
+			return
+		}
+		var ix, iy int
+		if incX < 0 {
+			ix = (-n + 1) * incX
+		}
+		if incY < 0 {
+			iy = (-n + 1) * incY
+		}
+		for i := 0; i < n; i++ {
+			vx := x[ix]
+			vy := y[iy]
+			x[ix], y[iy] = vx*h11+vy, -vx+vy*h22
+			ix += incX
+			iy += incY
+		}
 	}
 }
 

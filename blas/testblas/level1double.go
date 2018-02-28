@@ -1702,7 +1702,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "ZeroD1",
 		P: &blas.DrotmParams{
 			Flag: blas.Diagonal,
-			H:    [4]float64{0, 0, 0, 2},
+			H:    [4]float64{0, 0, 0, 0},
 		},
 		D1:  0,
 		D2:  2,
@@ -1940,12 +1940,141 @@ var DrotmgTests = []DrotmgTestStruct{
 		Rd2: 0.019999999900000003,
 		Rx1: 1953.125009765625,
 	},
+	{
+		// Values consistent with the low precision output posted at the  OpenBLAS issue.
+		// See https://github.com/xianyi/OpenBLAS/issues/1452.
+		Name: "OpenBLAS#1452",
+		P: &blas.DrotmParams{
+			Flag: blas.Rescaling,
+			H:    [4]float64{1.6110934624105326e-06, -0.000244140625, 0.000244140625, 1.6276041666666668e-06},
+		},
+		D1:  5.9e-8,
+		D2:  5.960464e-8,
+		X1:  1,
+		Y1:  150,
+		Rd1: 0.9999559282289687,
+		Rd2: 0.9898121986058326,
+		Rx1: 0.03662270484346241,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#1",
+		P: &blas.DrotmParams{
+			Flag: blas.OffDiagonal,
+			H:    [4]float64{0, -0.16666666666666669, 0.5, 0},
+		},
+		D1:  0.10000000000000001,
+		D2:  0.29999999999999999,
+		X1:  1.2000000000000000,
+		Y1:  0.20000000000000001,
+		Rd1: 9.2307692307692313e-2,
+		Rd2: 0.27692307692307694,
+		Rx1: 1.2999999999999998,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#2",
+		P: &blas.DrotmParams{
+			Flag: blas.Diagonal,
+			H:    [4]float64{0.5, 0, 0, 0.14285714285714285},
+		},
+		D1:  0.69999999999999996,
+		D2:  0.20000000000000001,
+		X1:  0.59999999999999998,
+		Y1:  4.2000000000000002,
+		Rd1: 0.18666666666666668,
+		Rd2: 0.65333333333333332,
+		Rx1: 4.5000000000000000,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#3",
+		P: &blas.DrotmParams{
+			Flag: blas.Identity,
+			H:    [4]float64{0, 0, 0, 0},
+		},
+		D1:  0,
+		D2:  0,
+		X1:  0,
+		Y1:  0,
+		Rd1: 0,
+		Rd2: 0,
+		Rx1: 0,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#4",
+		P: &blas.DrotmParams{
+			Flag: blas.Rescaling,
+			H:    [4]float64{0, 0, 0, 0},
+		},
+		D1:  4,
+		D2:  -1,
+		X1:  2,
+		Y1:  4,
+		Rd1: 0,
+		Rd2: 0,
+		Rx1: 0,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#5",
+		P: &blas.DrotmParams{
+			Flag: blas.Rescaling,
+			H:    [4]float64{0.244140625e-03, -0.1e-3, 0.8138020833333334, 1},
+		},
+		D1:  6e-10,
+		D2:  2e-2,
+		X1:  100000,
+		Y1:  10,
+		Rd1: 7.5497471999999991e-3,
+		Rd2: 1.4999999999999999e-2,
+		Rx1: 32.552083333333336,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#6",
+		P: &blas.DrotmParams{
+			Flag: blas.Rescaling,
+			H:    [4]float64{4096, -999999.99999999988, 2.0479999999999999e-3, 1},
+		},
+		D1:  40000000000,
+		D2:  2e-2,
+		X1:  1.0000000000000001e-5,
+		Y1:  10,
+		Rd1: 1589.4571940104167,
+		Rd2: 1.3333333333333334e-2,
+		Rx1: 6.1440000000000008e-2,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#7",
+		P: &blas.DrotmParams{
+			Flag: blas.Rescaling,
+			H:    [4]float64{0.5e-4, -0.2441406250e-3, 1, 2.441406250},
+		},
+		D1:  2.0000000000000001e-10,
+		D2:  4.0000000000000001e-2,
+		X1:  100000,
+		Y1:  10,
+		Rd1: 2.6666666666666668e-2,
+		Rd2: 2.2369621333333334e-3,
+		Rx1: 15,
+	},
+	{
+		Name: "netlib/BLAS/TESTING#8",
+		P: &blas.DrotmParams{
+			Flag: blas.Rescaling,
+			H:    [4]float64{500000, -4096, 1, 4.096e-3},
+		},
+		D1:  20000000000,
+		D2:  4.0000000000000001e-2,
+		X1:  1.0000000000000001e-5,
+		Y1:  10,
+		Rd1: 2.6666666666666668e-2,
+		Rd2: 794.72859700520837,
+		Rx1: 15,
+	},
 	// TODO: Add Small, Small, 0 case
 	// TODO: Add Small, Small, 1 case
 }
 
 type Drotmger interface {
 	Drotmg(d1, d2, x1, y1 float64) (p blas.DrotmParams, rd1, rd2, rx1 float64)
+	Drotmer
 }
 
 func DrotmgTest(t *testing.T, d Drotmger) {
@@ -1970,6 +2099,25 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 		}
 		if !dTolEqual(rx1, test.Rx1) {
 			t.Errorf("drotmg rx1 mismatch %v: expected %v, found %v", test.Name, test.Rx1, rx1)
+		}
+
+		// Drotmg routines compute the components of a modified Givens transformation
+		// matrix H that zeros the y-component of the resulting vector,
+		//
+		//  [x1; 0] := H[x1 sqrt(d1); y1 sqrt(d2)].
+		//
+		// Drotm performs a modified Givens rotation of points in the plane,
+		//
+		//  [x1; y1] := H[x1; y1].
+		y := []float64{test.Y1}
+		d.Drotm(1, []float64{test.X1}, 1, y, 1, p)
+		for i, v := range y {
+			if rd2 >= 0 {
+				v *= math.Sqrt(rd2)
+			}
+			if !dTolEqual(v, 0) {
+				t.Errorf("drotm y_%d mismatch %v: expected 0, found %v", i, test.Name, v)
+			}
 		}
 	}
 }

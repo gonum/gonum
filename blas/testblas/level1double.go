@@ -1702,7 +1702,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "ZeroD1",
 		P: &blas.DrotmParams{
 			Flag: blas.Diagonal,
-			H:    [4]float64{0, 0, 0, 2},
+			H:    [4]float64{0, 0, 0, 0},
 		},
 		D1:  0,
 		D2:  2,
@@ -1772,7 +1772,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "RD1_Big_RD2_Big_Flag_0",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{4096, -4096, 1, 4096},
+			H:    [4]float64{4096, -3584, 1792, 4096},
 		},
 		D1:  1600000000,
 		D2:  800000000,
@@ -1786,7 +1786,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "RD1_Big_RD2_Big_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2340.5714285714284, -4096, 1, 4681.142857142857},
+			H:    [4]float64{2340.5714285714284, -4096, 4096, 4681.142857142857},
 		},
 		D1:  800000000,
 		D2:  1600000000,
@@ -1830,7 +1830,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "D1_Big_D2_Small_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 1, 2.44140625e-16},
+			H:    [4]float64{2.8671999999999997e-26, -0.000244140625, 4096, 2.44140625e-16},
 		},
 		D1:  0.000000014,
 		D2:  2000000000,
@@ -1902,7 +1902,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "D1_Small_D2_Big_Flag_1",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 1, 1.6777216e-07},
+			H:    [4]float64{2.3731773997569866e+10, -1.6777216e+07, 0.000244140625, 1.6777216e-07},
 		},
 		D1:  120000000000000000,
 		D2:  0.000000000012345,
@@ -1946,7 +1946,7 @@ var DrotmgTests = []DrotmgTestStruct{
 		Name: "OpenBLAS#1452",
 		P: &blas.DrotmParams{
 			Flag: blas.Rescaling,
-			H:    [4]float64{1.6110934624105326e-06, -0.000244140625, 1, 1.6276041666666668e-06},
+			H:    [4]float64{1.6110934624105326e-06, -0.000244140625, 0.000244140625, 1.6276041666666668e-06},
 		},
 		D1:  5.9e-8,
 		D2:  5.960464e-8,
@@ -2109,9 +2109,12 @@ func DrotmgTest(t *testing.T, d Drotmger) {
 		// Drotm performs a modified Givens rotation of points in the plane,
 		//
 		//  [x1; y1] := H[x1; y1].
-		y := []float64{test.Y1 * math.Sqrt(test.D2)}
-		d.Drotm(1, []float64{test.X1 * math.Sqrt(test.D1)}, 1, y, 1, p)
+		y := []float64{test.Y1}
+		d.Drotm(1, []float64{test.X1}, 1, y, 1, p)
 		for i, v := range y {
+			if rd2 >= 0 {
+				v *= math.Sqrt(rd2)
+			}
 			if !dTolEqual(v, 0) {
 				t.Errorf("drotm y_%d mismatch %v: expected 0, found %v", i, test.Name, v)
 			}

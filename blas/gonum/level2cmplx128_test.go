@@ -50,6 +50,10 @@ func TestZtpmv(t *testing.T) {
 	testblas.ZtpmvTest(t, impl)
 }
 
+func TestZtpsv(t *testing.T) {
+	testblas.ZtpsvTest(t, impl)
+}
+
 func TestZtrmv(t *testing.T) {
 	testblas.ZtrmvTest(t, impl)
 }

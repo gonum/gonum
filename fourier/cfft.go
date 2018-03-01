@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// This is a translation of the FFTPACK rfft functions by
+// This is a translation of the FFTPACK cfft functions by
 // Paul N Swarztrauber, placed in the public domain at
 // http://www.netlib.org/fftpack/.
 

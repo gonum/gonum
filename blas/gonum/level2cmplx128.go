@@ -1160,6 +1160,225 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 	}
 }
 
+// Ztpsv solves one of the systems of equations
+//  A*x = b     if trans == blas.NoTrans,
+//  A^T*x = b,  if trans == blas.Trans,
+//  A^H*x = b,  if trans == blas.ConjTrans,
+// where b and x are n element vectors and A is an n×n triangular matrix in
+// packed form.
+//
+// On entry, x contains the values of b, and the solution is
+// stored in-place into x.
+//
+// No test for singularity or near-singularity is included in this
+// routine. Such tests must be performed before calling this routine.
+func (Implementation) Ztpsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n int, ap []complex128, x []complex128, incX int) {
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	if trans != blas.NoTrans && trans != blas.Trans && trans != blas.ConjTrans {
+		panic(badTranspose)
+	}
+	if diag != blas.Unit && diag != blas.NonUnit {
+		panic(badDiag)
+	}
+	if len(ap) < n*(n+1)/2 {
+		panic("blas: insufficient A packed matrix slice length")
+	}
+	checkZVector('x', n, x, incX)
+
+	if n == 0 {
+		return
+	}
+
+	// Set up start index in X.
+	var kx int
+	if incX < 0 {
+		kx = (1 - n) * incX
+	}
+
+	// The elements of A are accessed sequentially with one pass through ap.
+
+	if trans == blas.NoTrans {
+		// Form x = inv(A)*x.
+		if uplo == blas.Upper {
+			kk := n*(n+1)/2 - 1
+			if incX == 1 {
+				for i := n - 1; i >= 0; i-- {
+					aii := ap[kk]
+					if n-i-1 > 0 {
+						x[i] -= c128.DotuUnitary(x[i+1:n], ap[kk+1:kk+n-i])
+					}
+					if diag == blas.NonUnit {
+						x[i] /= aii
+					}
+					kk -= n - i + 1
+				}
+			} else {
+				ix := kx + (n-1)*incX
+				for i := n - 1; i >= 0; i-- {
+					aii := ap[kk]
+					if n-i-1 > 0 {
+						x[ix] -= c128.DotuInc(x, ap[kk+1:kk+n-i], uintptr(n-i-1), uintptr(incX), 1, uintptr(ix+incX), 0)
+					}
+					if diag == blas.NonUnit {
+						x[ix] /= aii
+					}
+					ix -= incX
+					kk -= n - i + 1
+				}
+			}
+		} else {
+			kk := 0
+			if incX == 1 {
+				for i := 0; i < n; i++ {
+					if i > 0 {
+						x[i] -= c128.DotuUnitary(x[:i], ap[kk:kk+i+1])
+					}
+					if diag == blas.NonUnit {
+						x[i] /= ap[kk+i]
+					}
+					kk += i + 1
+				}
+			} else {
+				ix := kx
+				for i := 0; i < n; i++ {
+					if i > 0 {
+						x[ix] -= c128.DotuInc(x, ap[kk:kk+i+1], uintptr(i), uintptr(incX), 1, uintptr(kx), 0)
+					}
+					if diag == blas.NonUnit {
+						x[ix] /= ap[kk+i]
+					}
+					ix += incX
+					kk += i + 1
+				}
+			}
+		}
+		return
+	}
+
+	if trans == blas.Trans {
+		// Form x = inv(A^T)*x.
+		if uplo == blas.Upper {
+			kk := 0
+			if incX == 1 {
+				for j := 0; j < n; j++ {
+					if diag == blas.NonUnit {
+						x[j] /= ap[kk]
+					}
+					if n-j-1 > 0 {
+						c128.AxpyUnitary(-x[j], ap[kk+1:kk+n-j], x[j+1:n])
+					}
+					kk += n - j
+				}
+			} else {
+				jx := kx
+				for j := 0; j < n; j++ {
+					if diag == blas.NonUnit {
+						x[jx] /= ap[kk]
+					}
+					if n-j-1 > 0 {
+						c128.AxpyInc(-x[jx], ap[kk+1:kk+n-j], x, uintptr(n-j-1), 1, uintptr(incX), 0, uintptr(jx+incX))
+					}
+					jx += incX
+					kk += n - j
+				}
+			}
+		} else {
+			kk := n*(n+1)/2 - n
+			if incX == 1 {
+				for j := n - 1; j >= 0; j-- {
+					if diag == blas.NonUnit {
+						x[j] /= ap[kk+j]
+					}
+					if j > 0 {
+						c128.AxpyUnitary(-x[j], ap[kk:kk+j], x[:j])
+					}
+					kk -= j
+				}
+			} else {
+				jx := kx + (n-1)*incX
+				for j := n - 1; j >= 0; j-- {
+					if diag == blas.NonUnit {
+						x[jx] /= ap[kk+j]
+					}
+					if j > 0 {
+						c128.AxpyInc(-x[jx], ap[kk:kk+j], x, uintptr(j), 1, uintptr(incX), 0, uintptr(kx))
+					}
+					jx -= incX
+					kk -= j
+				}
+			}
+		}
+		return
+	}
+
+	// Form x = inv(A^H)*x.
+	if uplo == blas.Upper {
+		kk := 0
+		if incX == 1 {
+			for j := 0; j < n; j++ {
+				if diag == blas.NonUnit {
+					x[j] /= cmplx.Conj(ap[kk])
+				}
+				xj := x[j]
+				k := kk + 1
+				for i := j + 1; i < n; i++ {
+					x[i] -= xj * cmplx.Conj(ap[k])
+					k++
+				}
+				kk += n - j
+			}
+		} else {
+			jx := kx
+			for j := 0; j < n; j++ {
+				if diag == blas.NonUnit {
+					x[jx] /= cmplx.Conj(ap[kk])
+				}
+				xj := x[jx]
+				ix := jx + incX
+				k := kk + 1
+				for i := j + 1; i < n; i++ {
+					x[ix] -= xj * cmplx.Conj(ap[k])
+					ix += incX
+					k++
+				}
+				jx += incX
+				kk += n - j
+			}
+		}
+	} else {
+		kk := n*(n+1)/2 - n
+		if incX == 1 {
+			for j := n - 1; j >= 0; j-- {
+				if diag == blas.NonUnit {
+					x[j] /= cmplx.Conj(ap[kk+j])
+				}
+				xj := x[j]
+				for i := 0; i < j; i++ {
+					x[i] -= xj * cmplx.Conj(ap[kk+i])
+				}
+				kk -= j
+			}
+		} else {
+			jx := kx + (n-1)*incX
+			for j := n - 1; j >= 0; j-- {
+				if diag == blas.NonUnit {
+					x[jx] /= cmplx.Conj(ap[kk+j])
+				}
+				xj := x[jx]
+				ix := kx
+				for i := 0; i < j; i++ {
+					x[ix] -= xj * cmplx.Conj(ap[kk+i])
+					ix += incX
+				}
+				jx -= incX
+				kk -= j
+			}
+		}
+	}
+}
+
 // Ztrmv performs one of the matrix-vector operations
 //  x = A * x    if trans = blas.NoTrans
 //  x = A^T * x  if trans = blas.Trans

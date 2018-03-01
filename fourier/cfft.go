@@ -141,9 +141,9 @@ outer:
 //
 //  Output parameters:
 //
-//   c     for j=1,...,n
-//           c[j]=the sum from k=1,...,n of
-//             c[k]*exp(-i*(j-1)*(k-1)*2*pi/n)
+//   c     for j=0, ..., n-1
+//           c[j]=the sum from k=0, ..., n-1 of
+//             c[k]*exp(-i*j*k*2*pi/n)
 //
 //         where i=sqrt(-1)
 //
@@ -202,9 +202,9 @@ func cfftf(n int, r, work []float64, ifac []int) {
 //
 //  Output parameters:
 //
-//  c      for j=1,...,n
-//           c[j]=the sum from k=1,...,n of
-//             c[k]*exp(i*(j-1)*(k-1)*2*pi/n)
+//  c      for j=0, ..., n-1
+//           c[j]=the sum from k=0, ..., n-1 of
+//             c[k]*exp(i*j*k*2*pi/n)
 //
 //         where i=sqrt(-1)
 //

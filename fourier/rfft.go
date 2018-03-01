@@ -137,18 +137,18 @@ outer:
 //
 //  Output parameters:
 //
-//  r      r(1) = the sum from i=1 to i=n of r(i)
+//  r      r[0] = the sum from i=0 to i=n-1 of r[i]
 //
 //         if n is even set l=n/2, if n is odd set l = (n+1)/2
-//           then for k = 2,...,l
-//             r(2*k-2) = the sum from i = 1 to i = n of
-//               r(i)*cos((k-1)*(i-1)*2*pi/n)
-//             r(2*k-1) = the sum from i = 1 to i = n of
-//               -r(i)*sin((k-1)*(i-1)*2*pi/n)
+//           then for k = 1, ..., l-1
+//             r[2*k-1] = the sum from i = 0 to i = n-1 of
+//               r[i]*cos(k*i*2*pi/n)
+//             r[2*k] = the sum from i = 0 to i = n-1 of
+//               -r[i]*sin(k*i*2*pi/n)
 //
 //         if n is even
-//           r(n) = the sum from i = 1 to i = n of
-//             (-1)**(i-1)*r(i)
+//           r[n-1] = the sum from i = 0 to i = n-1 of
+//             (-1)^i*r[i]
 //
 //  This transform is unnormalized since a call of rfftf
 //  followed by a call of rfftb will multiply the input
@@ -651,16 +651,16 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 //
 //  output parameters
 //
-//  r      for n even and for i = 1,...,n
-//           r(i) = r(1)+(-1)**(i-1)*r(n)
-//             plus the sum from k=2 to k=n/2 of
-//               2.*r(2*k-2)*cos((k-1)*(i-1)*2*pi/n)
-//               -2.*r(2*k-1)*sin((k-1)*(i-1)*2*pi/n)
+//  r      for n even and for i = 0, ..., n
+//           r[i] = r[0]+(-1)^i*r[n-1]
+//             plus the sum from k=1 to k=n/2-1 of
+//               2*r(2*k-1)*cos(k*i*2*pi/n)
+//               -2*r(2*k)*sin(k*i*2*pi/n)
 //
-//         for n odd and for i = 1,...,n
-//           r(i) = r(1) plus the sum from k=2 to k=(n+1)/2 of
-//             2.*r(2*k-2)*cos((k-1)*(i-1)*2*pi/n)
-//             -2.*r(2*k-1)*sin((k-1)*(i-1)*2*pi/n)
+//         for n odd and for i = 0, ..., n-1
+//           r[i] = r[0] plus the sum from k=1 to k=(n-1)/2 of
+//             2*r(2*k-1)*cos(k*i*2*pi/n)
+//             -2*r(2*k)*sin(k*i*2*pi/n)
 //
 //  This transform is unnormalized since a call of rfftf
 //  followed by a call of rfftb will multiply the input

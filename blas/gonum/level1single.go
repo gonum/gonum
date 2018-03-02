@@ -359,11 +359,13 @@ func (Implementation) Srotmg(d1, d2, x1, y1 float32) (p blas.SrotmParams, rd1, r
 		return p, 0, 0, 0
 	}
 
-	var h11, h12, h21, h22 float32
 	if d2 == 0 || y1 == 0 {
 		p.Flag = blas.Identity
 		return p, d1, d2, x1
-	} else if (d1 == 0 || x1 == 0) && d2 > 0 {
+	}
+
+	var h11, h12, h21, h22 float32
+	if (d1 == 0 || x1 == 0) && d2 > 0 {
 		p.Flag = blas.Diagonal
 		h12 = 1
 		h21 = -1
@@ -384,25 +386,25 @@ func (Implementation) Srotmg(d1, d2, x1, y1 float32) (p blas.SrotmParams, rd1, r
 			if u <= 0 {
 				p.Flag = blas.Rescaling // Error state.
 				return p, 0, 0, 0
-			} else {
-				d1 /= u
-				d2 /= u
-				x1 *= u
 			}
+
+			d1 /= u
+			d2 /= u
+			x1 *= u
 		} else {
 			if q2 < 0 {
 				p.Flag = blas.Rescaling // Error state.
 				return p, 0, 0, 0
-			} else {
-				p.Flag = blas.Diagonal
-				h21 = -1
-				h12 = 1
-				h11 = p1 / p2
-				h22 = x1 / y1
-				u := 1 + h11*h22
-				d1, d2 = d2/u, d1/u
-				x1 = y1 * u
 			}
+
+			p.Flag = blas.Diagonal
+			h21 = -1
+			h12 = 1
+			h11 = p1 / p2
+			h22 = x1 / y1
+			u := 1 + h11*h22
+			d1, d2 = d2/u, d1/u
+			x1 = y1 * u
 		}
 	}
 

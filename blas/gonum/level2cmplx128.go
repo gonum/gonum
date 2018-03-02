@@ -11,6 +11,166 @@ import (
 	"gonum.org/v1/gonum/internal/asm/c128"
 )
 
+// Zgbmv performs one of the matrix-vector operations
+//  y = alpha * A * x + beta * y    if trans = blas.NoTrans
+//  y = alpha * A^T * x + beta * y  if trans = blas.Trans
+//  y = alpha * A^H * x + beta * y  if trans = blas.ConjTrans
+// where alpha and beta are scalars, x and y are vectors, and A is an m×n band matrix
+// with kL subdiagonals and kU superdiagonals.
+func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha complex128, ab []complex128, ldab int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	checkZBandMatrix('A', m, n, kL, kU, ab, ldab)
+	var lenX, lenY int
+	switch trans {
+	default:
+		panic(badTranspose)
+	case blas.NoTrans:
+		lenX = n
+		lenY = m
+	case blas.Trans, blas.ConjTrans:
+		lenX = m
+		lenY = n
+	}
+	checkZVector('x', lenX, x, incX)
+	checkZVector('y', lenY, y, incY)
+
+	if m == 0 || n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	var kx int
+	if incX < 0 {
+		kx = (1 - lenX) * incX
+	}
+	var ky int
+	if incY < 0 {
+		ky = (1 - lenY) * incY
+	}
+
+	// Form y = beta*y.
+	if beta != 1 {
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y[:lenY] {
+					y[i] = 0
+				}
+			} else {
+				c128.ScalUnitary(beta, y[:lenY])
+			}
+		} else {
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < lenY; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				if incY > 0 {
+					c128.ScalInc(beta, y, uintptr(lenY), uintptr(incY))
+				} else {
+					c128.ScalInc(beta, y, uintptr(lenY), uintptr(-incY))
+				}
+			}
+		}
+	}
+
+	nRow := min(m, n+kL)
+	nCol := kL + 1 + kU
+	switch trans {
+	case blas.NoTrans:
+		iy := ky
+		if incX == 1 {
+			for i := 0; i < nRow; i++ {
+				l := max(0, kL-i)
+				u := min(nCol, n+kL-i)
+				aRow := ab[i*ldab+l : i*ldab+u]
+				off := max(0, i-kL)
+				xtmp := x[off : off+u-l]
+				var sum complex128
+				for j, v := range aRow {
+					sum += xtmp[j] * v
+				}
+				y[iy] += alpha * sum
+				iy += incY
+			}
+		} else {
+			for i := 0; i < nRow; i++ {
+				l := max(0, kL-i)
+				u := min(nCol, n+kL-i)
+				aRow := ab[i*ldab+l : i*ldab+u]
+				off := max(0, i-kL) * incX
+				jx := kx
+				var sum complex128
+				for _, v := range aRow {
+					sum += x[off+jx] * v
+					jx += incX
+				}
+				y[iy] += alpha * sum
+				iy += incY
+			}
+		}
+	case blas.Trans:
+		if incX == 1 {
+			for i := 0; i < nRow; i++ {
+				l := max(0, kL-i)
+				u := min(nCol, n+kL-i)
+				aRow := ab[i*ldab+l : i*ldab+u]
+				off := max(0, i-kL) * incY
+				alphaxi := alpha * x[i]
+				jy := ky
+				for _, v := range aRow {
+					y[off+jy] += alphaxi * v
+					jy += incY
+				}
+			}
+		} else {
+			ix := kx
+			for i := 0; i < nRow; i++ {
+				l := max(0, kL-i)
+				u := min(nCol, n+kL-i)
+				aRow := ab[i*ldab+l : i*ldab+u]
+				off := max(0, i-kL) * incY
+				alphaxi := alpha * x[ix]
+				jy := ky
+				for _, v := range aRow {
+					y[off+jy] += alphaxi * v
+					jy += incY
+				}
+				ix += incX
+			}
+		}
+	case blas.ConjTrans:
+		if incX == 1 {
+			for i := 0; i < nRow; i++ {
+				l := max(0, kL-i)
+				u := min(nCol, n+kL-i)
+				aRow := ab[i*ldab+l : i*ldab+u]
+				off := max(0, i-kL) * incY
+				alphaxi := alpha * x[i]
+				jy := ky
+				for _, v := range aRow {
+					y[off+jy] += alphaxi * cmplx.Conj(v)
+					jy += incY
+				}
+			}
+		} else {
+			ix := kx
+			for i := 0; i < nRow; i++ {
+				l := max(0, kL-i)
+				u := min(nCol, n+kL-i)
+				aRow := ab[i*ldab+l : i*ldab+u]
+				off := max(0, i-kL) * incY
+				alphaxi := alpha * x[ix]
+				jy := ky
+				for _, v := range aRow {
+					y[off+jy] += alphaxi * cmplx.Conj(v)
+					jy += incY
+				}
+				ix += incX
+			}
+		}
+	}
+}
+
 // Zgemv performs one of the matrix-vector operations
 //  y = alpha * A * x + beta * y    if trans = blas.NoTrans
 //  y = alpha * A^T * x + beta * y  if trans = blas.Trans

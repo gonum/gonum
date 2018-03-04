@@ -367,6 +367,13 @@ func max(a, b int) int {
 	return a
 }
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 // zPack returns the uplo triangle of an n×n matrix A in packed format.
 func zPack(uplo blas.Uplo, n int, a []complex128, lda int) []complex128 {
 	if n == 0 {

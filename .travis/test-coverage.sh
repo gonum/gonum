@@ -13,7 +13,7 @@ testCover() {
 	# switch to the directory to check
 	pushd $d > /dev/null
 	# create the coverage profile
-	coverageresult=`go test -v -coverprofile=$PROFILE_OUT`
+	coverageresult=`go test -v $TAGS -coverprofile=$PROFILE_OUT`
 	# output the result so we can check the shell output
 	echo ${coverageresult}
 	# append the results to acc.out if coverage didn't fail, else set the retval to 1 (failed)

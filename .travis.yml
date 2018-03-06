@@ -10,10 +10,11 @@ go:
  - master
 
 env:
- - TAGS=""
- - TAGS="-tags bounds"
- - TAGS="-tags noasm"
- - TAGS="-tags appengine"
+ - FLAGS=""
+ - FLAGS="-tags bounds"
+ - FLAGS="-tags noasm"
+ - FLAGS="-tags appengine"
+ - FLAGS="-race" TIMEOUT=50
 
 matrix:
  fast_finish: true
@@ -36,9 +37,11 @@ go_import_path: gonum.org/v1/gonum
 script:
  - ${TRAVIS_BUILD_DIR}/.travis/check-formatting.sh
  - go get -d -t -v ./...
- - go build -v ./...
- - go test -a $TAGS -v ./...
- - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash ./.travis/test-coverage.sh; fi
+ - go build -v $FLAGS ./...
+ - TESTFLAGS="$FLAGS"
+ - if [[ $TIMEOUT != "" ]]; then TESTFLAGS="$TESTFLAGS -timeout=${TIMEOUT}m"; fi
+ - travis_wait $TIMEOUT go test -a -v $TESTFLAGS ./...
+ - if [[ $TRAVIS_SECURE_ENV_VARS = "true" && "$FLAGS" != *"-race"* ]]; then bash ./.travis/test-coverage.sh; fi
  - ${TRAVIS_BUILD_DIR}/.travis/check-rand.sh
  # This is run last since it alters the tree.
  - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh

@@ -34,10 +34,10 @@ type Multigraph interface {
 	// nodes with IDs xid and yid without considering direction.
 	HasEdgeBetween(xid, yid int64) bool
 
-	// Lines returns the edge from u to v, with IDs uid and vid,
-	// if such an edge exists and nil otherwise. The node v
-	// must be directly reachable from u as defined by the
-	// From method.
+	// Lines returns the lines from u to v, with IDs uid and
+	// vid, if any such lines exist and nil otherwise. The
+	// node v must be directly reachable from u as defined by
+	// the From method.
 	Lines(uid, vid int64) []Line
 }
 

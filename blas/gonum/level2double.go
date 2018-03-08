@@ -257,14 +257,13 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 
 	// i and j are indices of the compacted banded matrix.
 	// off is the offset into the dense matrix (off + j = densej)
-	ld := min(m, n)
 	nCol := kU + 1 + kL
 	if tA == blas.NoTrans {
 		iy := ky
 		if incX == 1 {
 			for i := 0; i < min(m, n+kL); i++ {
 				l := max(0, kL-i)
-				u := min(nCol, ld+kL-i)
+				u := min(nCol, n+kL-i)
 				off := max(0, i-kL)
 				atmp := a[i*lda+l : i*lda+u]
 				xtmp := x[off : off+u-l]
@@ -279,7 +278,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 		}
 		for i := 0; i < min(m, n+kL); i++ {
 			l := max(0, kL-i)
-			u := min(nCol, ld+kL-i)
+			u := min(nCol, n+kL-i)
 			off := max(0, i-kL)
 			atmp := a[i*lda+l : i*lda+u]
 			jx := kx
@@ -296,7 +295,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	if incX == 1 {
 		for i := 0; i < min(m, n+kL); i++ {
 			l := max(0, kL-i)
-			u := min(nCol, ld+kL-i)
+			u := min(nCol, n+kL-i)
 			off := max(0, i-kL)
 			atmp := a[i*lda+l : i*lda+u]
 			tmp := alpha * x[i]
@@ -311,7 +310,7 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	ix := kx
 	for i := 0; i < min(m, n+kL); i++ {
 		l := max(0, kL-i)
-		u := min(nCol, ld+kL-i)
+		u := min(nCol, n+kL-i)
 		off := max(0, i-kL)
 		atmp := a[i*lda+l : i*lda+u]
 		tmp := alpha * x[ix]

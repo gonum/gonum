@@ -108,6 +108,24 @@ func DgbmvTest(t *testing.T, blasser Dgbmver) {
 			y:   []float64{-1, -2, -3},
 			ans: []float64{1, 2, 3},
 		},
+		{
+			tA:    blas.NoTrans,
+			m:     3,
+			n:     5,
+			lda:   4,
+			kL:    1,
+			kU:    2,
+			alpha: 2.0,
+			beta:  1.0,
+			a: [][]float64{
+				{1, 2, 3, 0, 0},
+				{1, 3, 6, 9, 0},
+				{0, 1, 1, 1, 1},
+			},
+			x:   []float64{1, 2, 3, 4, 5},
+			y:   []float64{-1, -2, -3},
+			ans: []float64{-1 + 2*(1+4+9), -2 + 2*(1+6+18+36), -3 + 2*(2+3+4+5)},
+		},
 	} {
 		extra := 3
 		aFlat := flattenBanded(test.a, test.kU, test.kL)

@@ -20,5 +20,7 @@ var (
 )
 
 var (
-	expNegOneHalf = math.Exp(-0.5)
+	expNegOneHalf   = math.Exp(-0.5)
+	eulerMascheroni = 0.5772156649015328606065120900824024310421
+	apery           = 1.2020569031595942853997381615114499907649
 )

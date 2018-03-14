@@ -131,6 +131,21 @@ func checkZBandMatrix(name byte, m, n, kL, kU int, ab []complex128, ldab int) {
 	}
 }
 
+func checkZhbMatrix(name byte, n, k int, ab []complex128, ldab int) {
+	if n < 0 {
+		panic(nLT0)
+	}
+	if k < 0 {
+		panic(kLT0)
+	}
+	if ldab < k+1 {
+		panic("blas: illegal stride of Hermitian band matrix " + string(name))
+	}
+	if len(ab) < (n-1)*ldab+k+1 {
+		panic("blas: insufficient " + string(name) + " Hermitian band matrix slice length")
+	}
+}
+
 func checkZVector(name byte, n int, x []complex128, incX int) {
 	if n < 0 {
 		panic(nLT0)

@@ -369,6 +369,146 @@ func (Implementation) Zgeru(m, n int, alpha complex128, x []complex128, incX int
 	}
 }
 
+// Zhbmv performs the matrix-vector operation
+//  y = alpha * A * x + beta * y
+// where alpha and beta are scalars, x and y are vectors, and A is an n×n
+// Hermitian band matrix with k super-diagonals. The imaginary parts of
+// the diagonal elements of A are ignored and assumed to be zero.
+func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []complex128, ldab int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
+	if uplo != blas.Upper && uplo != blas.Lower {
+		panic(badUplo)
+	}
+	checkZhbMatrix('A', n, k, ab, ldab)
+	checkZVector('x', n, x, incX)
+	checkZVector('y', n, y, incY)
+
+	if n == 0 || (alpha == 0 && beta == 1) {
+		return
+	}
+
+	// Set up the start indices in X and Y.
+	var kx int
+	if incX < 0 {
+		kx = (1 - n) * incX
+	}
+	var ky int
+	if incY < 0 {
+		ky = (1 - n) * incY
+	}
+
+	// Form y = beta*y.
+	if beta != 1 {
+		if incY == 1 {
+			if beta == 0 {
+				for i := range y[:n] {
+					y[i] = 0
+				}
+			} else {
+				for i, v := range y[:n] {
+					y[i] = beta * v
+				}
+			}
+		} else {
+			iy := ky
+			if beta == 0 {
+				for i := 0; i < n; i++ {
+					y[iy] = 0
+					iy += incY
+				}
+			} else {
+				for i := 0; i < n; i++ {
+					y[iy] = beta * y[iy]
+					iy += incY
+				}
+			}
+		}
+	}
+
+	if alpha == 0 {
+		return
+	}
+
+	// The elements of A are accessed sequentially with one pass through ab.
+	switch uplo {
+	case blas.Upper:
+		iy := ky
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				aRow := ab[i*ldab:]
+				alphaxi := alpha * x[i]
+				sum := alphaxi * complex(real(aRow[0]), 0)
+				u := min(k+1, n-i)
+				jy := incY
+				for j := 1; j < u; j++ {
+					v := aRow[j]
+					sum += alpha * x[i+j] * v
+					y[iy+jy] += alphaxi * cmplx.Conj(v)
+					jy += incY
+				}
+				y[iy] += sum
+				iy += incY
+			}
+		} else {
+			ix := kx
+			for i := 0; i < n; i++ {
+				aRow := ab[i*ldab:]
+				alphaxi := alpha * x[ix]
+				sum := alphaxi * complex(real(aRow[0]),0)
+				u := min(k+1, n-i)
+				jx := incX
+				jy := incY
+				for j := 1; j < u; j++ {
+					v := aRow[j]
+					sum += alpha * x[ix+jx] * v
+					y[iy+jy] += alphaxi * cmplx.Conj(v)
+					jx += incX
+					jy += incY
+				}
+				y[iy] += sum
+				ix += incX
+				iy += incY
+			}
+		}
+	case blas.Lower:
+		iy := ky
+		if incX == 1 {
+			for i := 0; i < n; i++ {
+				l := max(0, k-i)
+				alphaxi := alpha * x[i]
+				jy := l * incY
+				aRow := ab[i*ldab:]
+				for j := l; j < k; j++ {
+					v := aRow[j]
+					y[iy] += alpha * v * x[i-k+j]
+					y[iy-k*incY+jy] += alphaxi * cmplx.Conj(v)
+					jy += incY
+				}
+				y[iy] += alphaxi * complex(real(aRow[k]),0)
+				iy += incY
+			}
+		} else {
+			ix := kx
+			for i := 0; i < n; i++ {
+				l := max(0, k-i)
+				alphaxi := alpha * x[ix]
+				jx := l * incX
+				jy := l * incY
+				aRow := ab[i*ldab:]
+				for j := l; j < k; j++ {
+					v := aRow[j]
+					y[iy] += alpha * v * x[ix-k*incX+jx]
+					y[iy-k*incY+jy] += alphaxi * cmplx.Conj(v)
+					jx += incX
+					jy += incY
+				}
+				y[iy] += alphaxi * complex(real(aRow[k]),0)
+				ix += incX
+				iy += incY
+			}
+		}
+	}
+}
+
 // Zhemv performs the matrix-vector operation
 //  y = alpha * A * x + beta * y
 // where alpha and beta are scalars, x and y are vectors, and A is an n×n

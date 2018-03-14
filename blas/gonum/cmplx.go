@@ -141,9 +141,6 @@ func (Implementation) Ztbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 func (Implementation) Ztbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []complex128, lda int, x []complex128, incX int) {
 	panic(noComplex)
 }
-func (Implementation) Zhbmv(ul blas.Uplo, n, k int, alpha complex128, a []complex128, lda int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
-	panic(noComplex)
-}
 
 // Level 3 complex128 routines.
 

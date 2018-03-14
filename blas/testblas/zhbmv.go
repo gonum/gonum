@@ -1,4 +1,4 @@
-// Copyright ©2017 The Gonum Authors. All rights reserved.
+// Copyright ©2018 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -77,7 +77,7 @@ func testZhbmv(t *testing.T, impl Zhbmver, rnd *rand.Rand, uplo blas.Uplo, n, k 
 			a[i*lda+i] = complex(rnd.NormFloat64(), math.NaN())
 		}
 	}
-	ab := zPackHermitianBand(k, ldab, uplo, n, a, lda)
+	ab := zPackTriBand(k, ldab, uplo, n, a, lda)
 	abCopy := make([]complex128, len(ab))
 	copy(abCopy, ab)
 

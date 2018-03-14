@@ -454,9 +454,9 @@ func zPackBand(kL, kU, ldab int, m, n int, a []complex128, lda int) []complex128
 	return ab
 }
 
-// zPackHermitianBand returns the (k+1) band of an n×n Hermitian matrix A in band
-// matrix format with ldab stride. Out-of-range elements are filled with NaN.
-func zPackHermitianBand(k, ldab int, uplo blas.Uplo, n int, a []complex128, lda int) []complex128 {
+// zPackTriBand returns in band matrix format the (k+1) band in the uplo
+// triangle of an n×n matrix A. Out-of-range elements are filled with NaN.
+func zPackTriBand(k, ldab int, uplo blas.Uplo, n int, a []complex128, lda int) []complex128 {
 	if n == 0 {
 		return nil
 	}

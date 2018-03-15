@@ -103,11 +103,16 @@ func simplex(initialBasic []int, c []float64, A mat.Matrix, b []float64, tol flo
 	if m == n {
 		// Problem is exactly constrained, perform a linear solve.
 		bVec := mat.NewVecDense(len(b), b)
-		x := make([]float64, m)
+		x := make([]float64, n)
 		xVec := mat.NewVecDense(n, x)
 		err := xVec.SolveVec(A, bVec)
 		if err != nil {
 			return math.NaN(), nil, nil, ErrSingular
+		}
+		for _, v := range x {
+			if v < 0 {
+				return math.NaN(), nil, nil, ErrInfeasible
+			}
 		}
 		f := floats.Dot(x, c)
 		return f, x, nil, nil

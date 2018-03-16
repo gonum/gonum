@@ -895,13 +895,14 @@ func TestExp(t *testing.T) {
 		want [][]float64
 		mod  func(*Dense)
 	}{
+		// Expected values obtained from scipy.linalg.expm with the equivalent numpy.array.
 		{
 			a:    [][]float64{{-49, 24}, {-64, 31}},
-			want: [][]float64{{-0.7357587581474017, 0.5518190996594223}, {-1.4715175990917921, 1.103638240717339}},
+			want: [][]float64{{-0.735758758144758, 0.551819099658100}, {-1.471517599088267, 1.103638240715576}},
 		},
 		{
 			a:    [][]float64{{-49, 24}, {-64, 31}},
-			want: [][]float64{{-0.7357587581474017, 0.5518190996594223}, {-1.4715175990917921, 1.103638240717339}},
+			want: [][]float64{{-0.735758758144758, 0.551819099658100}, {-1.471517599088267, 1.103638240715576}},
 			mod: func(a *Dense) {
 				d := make([]float64, 100)
 				for i := range d {
@@ -914,14 +915,30 @@ func TestExp(t *testing.T) {
 			a:    [][]float64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}},
 			want: [][]float64{{2.71828182845905, 0, 0}, {0, 2.71828182845905, 0}, {0, 0, 2.71828182845905}},
 		},
+		{
+			a: [][]float64{
+				{-200, 100, 100, 0},
+				{100, -200, 0, 100},
+				{100, 0, -200, 100},
+				{0, 100, 100, -200},
+			},
+			want: [][]float64{
+				{0.25, 0.25, 0.25, 0.25},
+				{0.25, 0.25, 0.25, 0.25},
+				{0.25, 0.25, 0.25, 0.25},
+				{0.25, 0.25, 0.25, 0.25},
+			},
+		},
 	} {
 		var got Dense
 		if test.mod != nil {
 			test.mod(&got)
 		}
 		got.Exp(NewDense(flatten(test.a)))
-		if !EqualApprox(&got, NewDense(flatten(test.want)), 1e-12) {
-			t.Errorf("unexpected result for Exp test %d", i)
+		want := NewDense(flatten(test.want))
+		if !EqualApprox(&got, want, 1e-14) {
+			t.Errorf("unexpected result for Exp test %d\ngot:\n%v\nwant:\n%v",
+				i, Formatted(&got), Formatted(want))
 		}
 	}
 }

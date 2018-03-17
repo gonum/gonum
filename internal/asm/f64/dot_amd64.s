@@ -45,8 +45,8 @@ TEXT ·DotUnitary(SB), NOSPLIT, $0
 	MOVQ x_len+8(FP), DI // n = len(x)
 	MOVQ y+24(FP), R9
 
-	MOVSD $(0.0), X7 // sum = 0
-	MOVSD $(0.0), X8 // sum = 0
+	XORPS X7, X7 // sum = 0
+	XORPS X8, X8 // sum = 0
 
 	MOVQ $0, SI   // i = 0
 	SUBQ $4, DI   // n -= 4

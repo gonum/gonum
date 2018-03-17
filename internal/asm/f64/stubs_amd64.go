@@ -111,6 +111,8 @@ func DivTo(dst, x, y []float64) []float64
 //  return sum
 func DotUnitary(x, y []float64) (sum float64)
 
+func DotUnitaryAVX(x, y []float64) (sum float64)
+
 // DotInc is
 //  for i := 0; i < int(n); i++ {
 //  	sum += y[iy] * x[ix]

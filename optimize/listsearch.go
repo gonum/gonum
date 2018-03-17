@@ -11,11 +11,11 @@ import (
 )
 
 // ListSearch finds the optimum location from a specified list of possible
-// optimum locations. The dimension specified in init must match the number
-// of columns of Locs, and Locs must have at least one row.
+// optimum locations.
 type ListSearch struct {
 	// Locs is the list of locations to optimize. Each row of Locs is a location
-	// to optimize.
+	// to optimize. The number of columns of Locs must match the dimensions
+	// passed to InitGlobal, and Locs must have at least one row.
 	Locs mat.Matrix
 
 	eval    int
@@ -28,6 +28,8 @@ func (*ListSearch) Needs() struct{ Gradient, Hessian bool } {
 	return struct{ Gradient, Hessian bool }{false, false}
 }
 
+// InitGlobal initializes the method for optimization. The input dimension
+// must match the number of columns of Locs.
 func (l *ListSearch) InitGlobal(dim, tasks int) int {
 	if dim <= 0 {
 		panic(nonpositiveDimension)

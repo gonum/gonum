@@ -473,19 +473,19 @@ func (m *Dense) Exp(a Matrix) {
 	}
 
 	pade := []struct {
-		phi float64
-		b   []float64
+		theta float64
+		b     []float64
 	}{
-		{phi: 0.015, b: []float64{
+		{theta: 0.015, b: []float64{
 			120, 60, 12, 1,
 		}},
-		{phi: 0.25, b: []float64{
+		{theta: 0.25, b: []float64{
 			30240, 15120, 3360, 420, 30, 1,
 		}},
-		{phi: 0.95, b: []float64{
+		{theta: 0.95, b: []float64{
 			17297280, 8648640, 1995840, 277200, 25200, 1512, 56, 1,
 		}},
-		{phi: 2.1, b: []float64{
+		{theta: 2.1, b: []float64{
 			17643225600, 8821612800, 2075673600, 302702400, 30270240, 2162160, 110880, 3960, 90, 1,
 		}},
 	}
@@ -507,7 +507,7 @@ func (m *Dense) Exp(a Matrix) {
 
 	n1 := Norm(a, 1)
 	for i, t := range pade {
-		if n1 > t.phi {
+		if n1 > t.theta {
 			continue
 		}
 
@@ -518,10 +518,10 @@ func (m *Dense) Exp(a Matrix) {
 		pvec := blas64.Vector{Inc: 1, Data: praw.Data}
 		defer putWorkspace(p)
 
-		for i := 0; i < r; i++ {
-			p.set(i, i, 1)
-			v.set(i, i, t.b[0])
-			u.set(i, i, t.b[1])
+		for k := 0; k < r; k++ {
+			p.set(k, k, 1)
+			v.set(k, k, t.b[0])
+			u.set(k, k, t.b[1])
 		}
 
 		a2.Mul(a1, a1)
@@ -544,14 +544,14 @@ func (m *Dense) Exp(a Matrix) {
 	}
 
 	// Remaining Padé table line.
-	const phi13 = 5.4
+	const theta13 = 5.4
 	b := [...]float64{
 		64764752532480000, 32382376266240000, 7771770303897600, 1187353796428800,
 		129060195264000, 10559470521600, 670442572800, 33522128640,
 		1323241920, 40840800, 960960, 16380, 182, 1,
 	}
 
-	s := math.Log2(n1 / phi13)
+	s := math.Log2(n1 / theta13)
 	if s >= 0 {
 		s = math.Ceil(s)
 		a1.Scale(1/math.Pow(2, s), a1)

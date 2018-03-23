@@ -27,7 +27,7 @@ type Multigraph interface {
 	Nodes() []Node
 
 	// From returns all nodes that can be reached directly
-	// from the node with the given ID
+	// from the node with the given ID.
 	From(id int64) []Node
 
 	// HasEdgeBetween returns whether an edge exists between

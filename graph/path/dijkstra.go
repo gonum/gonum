@@ -16,7 +16,7 @@ import (
 //
 // The time complexity of DijkstrFrom is O(|E|.log|V|).
 func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
-	if !g.Has(u) {
+	if !g.Has(u.ID()) {
 		return Shortest{from: u}
 	}
 	var weight Weighting
@@ -46,9 +46,11 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 		if mid.dist > path.dist[k] {
 			continue
 		}
-		for _, v := range g.From(mid.node) {
-			j := path.indexOf[v.ID()]
-			w, ok := weight(mid.node, v)
+		mnid := mid.node.ID()
+		for _, v := range g.From(mnid) {
+			vid := v.ID()
+			j := path.indexOf[vid]
+			w, ok := weight(mnid, vid)
 			if !ok {
 				panic("dijkstra: unexpected invalid weight")
 			}
@@ -106,9 +108,11 @@ func dijkstraAllPaths(g graph.Graph, paths AllShortest) {
 			if mid.dist < paths.dist.At(i, k) {
 				paths.dist.Set(i, k, mid.dist)
 			}
-			for _, v := range g.From(mid.node) {
-				j := paths.indexOf[v.ID()]
-				w, ok := weight(mid.node, v)
+			mnid := mid.node.ID()
+			for _, v := range g.From(mnid) {
+				vid := v.ID()
+				j := paths.indexOf[vid]
+				w, ok := weight(mnid, vid)
 				if !ok {
 					panic("dijkstra: unexpected invalid weight")
 				}

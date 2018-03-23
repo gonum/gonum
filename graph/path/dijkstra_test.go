@@ -47,12 +47,12 @@ func TestDijkstraFrom(t *testing.T) {
 			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", test.Name, pt.From().ID(), test.Query.From().ID())
 		}
 
-		p, weight := pt.To(test.Query.To())
+		p, weight := pt.To(test.Query.To().ID())
 		if weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
-		if weight := pt.WeightTo(test.Query.To()); weight != test.Weight {
+		if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
@@ -73,7 +73,7 @@ func TestDijkstraFrom(t *testing.T) {
 				test.Name, p, test.WantPaths)
 		}
 
-		np, weight := pt.To(test.NoPathFor.To())
+		np, weight := pt.To(test.NoPathFor.To().ID())
 		if pt.From().ID() == test.NoPathFor.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
 			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f\nwant:path=<nil> weight=+Inf",
 				test.Name, np, weight)
@@ -111,12 +111,12 @@ func TestDijkstraAllPaths(t *testing.T) {
 
 		// Check all random paths returned are OK.
 		for i := 0; i < 10; i++ {
-			p, weight, unique := pt.Between(test.Query.From(), test.Query.To())
+			p, weight, unique := pt.Between(test.Query.From().ID(), test.Query.To().ID())
 			if weight != test.Weight {
 				t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
 					test.Name, weight, test.Weight)
 			}
-			if weight := pt.Weight(test.Query.From(), test.Query.To()); weight != test.Weight {
+			if weight := pt.Weight(test.Query.From().ID(), test.Query.To().ID()); weight != test.Weight {
 				t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
 					test.Name, weight, test.Weight)
 			}
@@ -142,13 +142,13 @@ func TestDijkstraAllPaths(t *testing.T) {
 			}
 		}
 
-		np, weight, unique := pt.Between(test.NoPathFor.From(), test.NoPathFor.To())
+		np, weight, unique := pt.Between(test.NoPathFor.From().ID(), test.NoPathFor.To().ID())
 		if np != nil || !math.IsInf(weight, 1) || unique {
 			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f unique=%t\nwant:path=<nil> weight=+Inf unique=false",
 				test.Name, np, weight, unique)
 		}
 
-		paths, weight := pt.AllBetween(test.Query.From(), test.Query.To())
+		paths, weight := pt.AllBetween(test.Query.From().ID(), test.Query.To().ID())
 		if weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
 				test.Name, weight, test.Weight)
@@ -169,7 +169,7 @@ func TestDijkstraAllPaths(t *testing.T) {
 				test.Name, got, test.WantPaths)
 		}
 
-		nps, weight := pt.AllBetween(test.NoPathFor.From(), test.NoPathFor.To())
+		nps, weight := pt.AllBetween(test.NoPathFor.From().ID(), test.NoPathFor.To().ID())
 		if nps != nil || !math.IsInf(weight, 1) {
 			t.Errorf("%q: unexpected path:\ngot: paths=%v weight=%f\nwant:path=<nil> weight=+Inf",
 				test.Name, nps, weight)

@@ -201,7 +201,7 @@ func BenchmarkRandomGraphDominators(b *testing.B) {
 				if v == nil {
 					v = unordered[ui][rnd.Intn(len(unordered[ui]))]
 				}
-				if !g.HasEdgeFromTo(u, v) {
+				if !g.HasEdgeFromTo(u.ID(), v.ID()) {
 					g.SetEdge(g.NewEdge(u, v))
 				}
 			}
@@ -253,16 +253,16 @@ type undirected struct {
 	*simple.DirectedGraph
 }
 
-func (g undirected) From(n graph.Node) []graph.Node {
-	return append(g.DirectedGraph.From(n), g.DirectedGraph.To(n)...)
+func (g undirected) From(id int64) []graph.Node {
+	return append(g.DirectedGraph.From(id), g.DirectedGraph.To(id)...)
 }
 
-func (g undirected) HasEdgeBetween(x, y graph.Node) bool {
-	return g.DirectedGraph.HasEdgeFromTo(x, y)
+func (g undirected) HasEdgeBetween(xid, yid int64) bool {
+	return g.DirectedGraph.HasEdgeFromTo(xid, yid)
 }
 
-func (g undirected) EdgeBetween(x, y graph.Node) graph.Edge {
-	return g.DirectedGraph.Edge(x, y)
+func (g undirected) EdgeBetween(xid, yid int64) graph.Edge {
+	return g.DirectedGraph.Edge(xid, yid)
 }
 
 func (g undirected) SetEdge(e graph.Edge) {

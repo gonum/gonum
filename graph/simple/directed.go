@@ -94,10 +94,10 @@ func (g *DirectedGraph) SetEdge(e graph.Edge) {
 		panic("simple: adding self edge")
 	}
 
-	if !g.Has(from) {
+	if !g.Has(fid) {
 		g.AddNode(from)
 	}
-	if !g.Has(to) {
+	if !g.Has(tid) {
 		g.AddNode(to)
 	}
 
@@ -126,8 +126,8 @@ func (g *DirectedGraph) Node(id int64) graph.Node {
 }
 
 // Has returns whether the node exists within the graph.
-func (g *DirectedGraph) Has(n graph.Node) bool {
-	_, ok := g.nodes[n.ID()]
+func (g *DirectedGraph) Has(id int64) bool {
+	_, ok := g.nodes[id]
 	return ok
 }
 
@@ -157,30 +157,30 @@ func (g *DirectedGraph) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *DirectedGraph) From(n graph.Node) []graph.Node {
-	if _, ok := g.from[n.ID()]; !ok {
+func (g *DirectedGraph) From(id int64) []graph.Node {
+	if _, ok := g.from[id]; !ok {
 		return nil
 	}
 
-	from := make([]graph.Node, len(g.from[n.ID()]))
+	from := make([]graph.Node, len(g.from[id]))
 	i := 0
-	for id := range g.from[n.ID()] {
-		from[i] = g.nodes[id]
+	for vid := range g.from[id] {
+		from[i] = g.nodes[vid]
 		i++
 	}
 	return from
 }
 
 // To returns all nodes in g that can reach directly to n.
-func (g *DirectedGraph) To(n graph.Node) []graph.Node {
-	if _, ok := g.from[n.ID()]; !ok {
+func (g *DirectedGraph) To(id int64) []graph.Node {
+	if _, ok := g.from[id]; !ok {
 		return nil
 	}
 
-	to := make([]graph.Node, len(g.to[n.ID()]))
+	to := make([]graph.Node, len(g.to[id]))
 	i := 0
-	for id := range g.to[n.ID()] {
-		to[i] = g.nodes[id]
+	for uid := range g.to[id] {
+		to[i] = g.nodes[uid]
 		i++
 	}
 	return to
@@ -188,9 +188,7 @@ func (g *DirectedGraph) To(n graph.Node) []graph.Node {
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
 // considering direction.
-func (g *DirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
-	xid := x.ID()
-	yid := y.ID()
+func (g *DirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 	if _, ok := g.from[xid][yid]; ok {
 		return true
 	}
@@ -200,8 +198,8 @@ func (g *DirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	edge, ok := g.from[u.ID()][v.ID()]
+func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
+	edge, ok := g.from[uid][vid]
 	if !ok {
 		return nil
 	}
@@ -209,17 +207,17 @@ func (g *DirectedGraph) Edge(u, v graph.Node) graph.Edge {
 }
 
 // HasEdgeFromTo returns whether an edge exists in the graph from u to v.
-func (g *DirectedGraph) HasEdgeFromTo(u, v graph.Node) bool {
-	if _, ok := g.from[u.ID()][v.ID()]; !ok {
+func (g *DirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
+	if _, ok := g.from[uid][vid]; !ok {
 		return false
 	}
 	return true
 }
 
 // Degree returns the in+out degree of n in g.
-func (g *DirectedGraph) Degree(n graph.Node) int {
-	if _, ok := g.nodes[n.ID()]; !ok {
+func (g *DirectedGraph) Degree(id int64) int {
+	if _, ok := g.nodes[id]; !ok {
 		return 0
 	}
-	return len(g.from[n.ID()]) + len(g.to[n.ID()])
+	return len(g.from[id]) + len(g.to[id])
 }

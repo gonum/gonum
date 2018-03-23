@@ -35,7 +35,7 @@ func PageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
 	m := mat.NewDense(len(nodes), len(nodes), nil)
 	dangling := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.From(u)
+		to := g.From(u.ID())
 		f := damp / float64(len(to))
 		for _, v := range to {
 			m.Set(indexOf[v.ID()], j, f)
@@ -109,7 +109,7 @@ func PageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
 	var dangling compressedRow
 	df := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.From(u)
+		to := g.From(u.ID())
 		f := damp / float64(len(to))
 		for _, v := range to {
 			m.addTo(indexOf[v.ID()], j, f)

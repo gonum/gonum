@@ -12,7 +12,7 @@ import "gonum.org/v1/gonum/graph"
 //
 // The time complexity of BellmanFordFrom is O(|V|.|E|).
 func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
-	if !g.Has(u) {
+	if !g.Has(u.ID()) {
 		return Shortest{from: u}, true
 	}
 	var weight Weighting
@@ -32,9 +32,11 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 	for i := 1; i < len(nodes); i++ {
 		changed := false
 		for j, u := range nodes {
-			for _, v := range g.From(u) {
-				k := path.indexOf[v.ID()]
-				w, ok := weight(u, v)
+			uid := u.ID()
+			for _, v := range g.From(uid) {
+				vid := v.ID()
+				k := path.indexOf[vid]
+				w, ok := weight(uid, vid)
 				if !ok {
 					panic("bellman-ford: unexpected invalid weight")
 				}
@@ -51,9 +53,11 @@ func BellmanFordFrom(u graph.Node, g graph.Graph) (path Shortest, ok bool) {
 	}
 
 	for j, u := range nodes {
-		for _, v := range g.From(u) {
-			k := path.indexOf[v.ID()]
-			w, ok := weight(u, v)
+		uid := u.ID()
+		for _, v := range g.From(uid) {
+			vid := v.ID()
+			k := path.indexOf[vid]
+			w, ok := weight(uid, vid)
 			if !ok {
 				panic("bellman-ford: unexpected invalid weight")
 			}

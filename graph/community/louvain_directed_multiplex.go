@@ -63,7 +63,7 @@ func qDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, weights
 			layerResolution = resolutions[l]
 		}
 
-		var weight func(x, y graph.Node) float64
+		var weight func(xid, yid int64) float64
 		if layerWeight < 0 {
 			weight = negativeWeightFuncFor(layer)
 		} else {
@@ -77,15 +77,18 @@ func qDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, weights
 		for _, n := range nodes {
 			var wOut float64
 			u := n
-			for _, v := range layer.From(u) {
-				wOut += weight(u, v)
+			uid := u.ID()
+			for _, v := range layer.From(uid) {
+				wOut += weight(uid, v.ID())
 			}
 			var wIn float64
 			v := n
-			for _, u := range layer.To(v) {
-				wIn += weight(u, v)
+			vid := v.ID()
+			for _, u := range layer.To(vid) {
+				wIn += weight(u.ID(), vid)
 			}
-			w := weight(n, n)
+			id := n.ID()
+			w := weight(id, id)
 			m += w + wOut // We only need to count edges once.
 			k[n.ID()] = directedWeights{out: w + wOut, in: w + wIn}
 		}
@@ -93,8 +96,9 @@ func qDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, weights
 		if communities == nil {
 			var qLayer float64
 			for _, u := range nodes {
-				kU := k[u.ID()]
-				qLayer += weight(u, u) - layerResolution*kU.out*kU.in/m
+				uid := u.ID()
+				kU := k[uid]
+				qLayer += weight(uid, uid) - layerResolution*kU.out*kU.in/m
 			}
 			q[l] = layerWeight * qLayer
 			continue
@@ -103,10 +107,12 @@ func qDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, weights
 		var qLayer float64
 		for _, c := range communities {
 			for _, u := range c {
-				kU := k[u.ID()]
+				uid := u.ID()
+				kU := k[uid]
 				for _, v := range c {
-					kV := k[v.ID()]
-					qLayer += weight(u, v) - layerResolution*kU.out*kV.in/m
+					vid := v.ID()
+					kV := k[vid]
+					qLayer += weight(uid, vid) - layerResolution*kU.out*kV.in/m
 				}
 			}
 		}
@@ -321,7 +327,7 @@ func reduceDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, we
 				continue
 			}
 			var sign float64
-			var weight func(x, y graph.Node) float64
+			var weight func(xid, yid int64) float64
 			if w < 0 {
 				sign, weight = -1, negativeWeightFuncFor(layer)
 			} else {
@@ -332,23 +338,27 @@ func reduceDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, we
 
 				var out []int
 				u := n
-				for _, v := range layer.From(u) {
-					vid := communityOf[v.ID()]
-					if vid != id {
-						out = append(out, vid)
+				uid := u.ID()
+				for _, v := range layer.From(uid) {
+					vid := v.ID()
+					vcid := communityOf[vid]
+					if vcid != id {
+						out = append(out, vcid)
 					}
-					r.layers[l].weights[[2]int{id, vid}] = sign * weight(u, v)
+					r.layers[l].weights[[2]int{id, vcid}] = sign * weight(uid, vid)
 				}
 				r.layers[l].edgesFrom[id] = out
 
 				var in []int
 				v := n
-				for _, u := range layer.To(v) {
-					uid := communityOf[u.ID()]
-					if uid != id {
-						in = append(in, uid)
+				vid := v.ID()
+				for _, u := range layer.To(vid) {
+					uid := u.ID()
+					ucid := communityOf[uid]
+					if ucid != id {
+						in = append(in, ucid)
 					}
-					r.layers[l].weights[[2]int{uid, id}] = sign * weight(u, v)
+					r.layers[l].weights[[2]int{ucid, id}] = sign * weight(uid, vid)
 				}
 				r.layers[l].edgesTo[id] = in
 			}
@@ -408,7 +418,7 @@ func reduceDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, we
 			continue
 		}
 		var sign float64
-		var weight func(x, y graph.Node) float64
+		var weight func(xid, yid int64) float64
 		if w < 0 {
 			sign, weight = -1, negativeWeightFuncFor(layer)
 		} else {
@@ -418,43 +428,47 @@ func reduceDirectedMultiplex(g DirectedMultiplex, communities [][]graph.Node, we
 			var out, in []int
 			for _, n := range comm {
 				u := n
+				uid := u.ID()
 				for _, v := range comm {
-					r.nodes[id].weights[l] += sign * weight(u, v)
+					r.nodes[id].weights[l] += sign * weight(uid, v.ID())
 				}
 
-				for _, v := range layer.From(u) {
-					vid := communityOf[v.ID()]
+				for _, v := range layer.From(uid) {
+					vid := v.ID()
+					vcid := communityOf[vid]
 					found := false
 					for _, e := range out {
-						if e == vid {
+						if e == vcid {
 							found = true
 							break
 						}
 					}
-					if !found && vid != id {
-						out = append(out, vid)
+					if !found && vcid != id {
+						out = append(out, vcid)
 					}
 					// Add half weights because the other
 					// ends of edges are also counted.
-					r.layers[l].weights[[2]int{id, vid}] += sign * weight(u, v) / 2
+					r.layers[l].weights[[2]int{id, vcid}] += sign * weight(uid, vid) / 2
 				}
 
 				v := n
-				for _, u := range layer.To(v) {
-					uid := communityOf[u.ID()]
+				vid := v.ID()
+				for _, u := range layer.To(vid) {
+					uid := u.ID()
+					ucid := communityOf[uid]
 					found := false
 					for _, e := range in {
-						if e == uid {
+						if e == ucid {
 							found = true
 							break
 						}
 					}
-					if !found && uid != id {
-						in = append(in, uid)
+					if !found && ucid != id {
+						in = append(in, ucid)
 					}
 					// Add half weights because the other
 					// ends of edges are also counted.
-					r.layers[l].weights[[2]int{uid, id}] += sign * weight(u, v) / 2
+					r.layers[l].weights[[2]int{ucid, id}] += sign * weight(uid, vid) / 2
 				}
 
 			}
@@ -478,8 +492,7 @@ type directedLayerHandle struct {
 }
 
 // Has returns whether the node exists within the graph.
-func (g directedLayerHandle) Has(n graph.Node) bool {
-	id := n.ID()
+func (g directedLayerHandle) Has(id int64) bool {
 	return 0 <= id && id < int64(len(g.multiplex.nodes))
 }
 
@@ -493,8 +506,8 @@ func (g directedLayerHandle) Nodes() []graph.Node {
 }
 
 // From returns all nodes in g that can be reached directly from u.
-func (g directedLayerHandle) From(u graph.Node) []graph.Node {
-	out := g.multiplex.layers[g.layer].edgesFrom[u.ID()]
+func (g directedLayerHandle) From(uid int64) []graph.Node {
+	out := g.multiplex.layers[g.layer].edgesFrom[uid]
 	nodes := make([]graph.Node, len(out))
 	for i, vid := range out {
 		nodes[i] = g.multiplex.nodes[vid]
@@ -503,8 +516,8 @@ func (g directedLayerHandle) From(u graph.Node) []graph.Node {
 }
 
 // To returns all nodes in g that can reach directly to v.
-func (g directedLayerHandle) To(v graph.Node) []graph.Node {
-	in := g.multiplex.layers[g.layer].edgesTo[v.ID()]
+func (g directedLayerHandle) To(vid int64) []graph.Node {
+	in := g.multiplex.layers[g.layer].edgesTo[vid]
 	nodes := make([]graph.Node, len(in))
 	for i, uid := range in {
 		nodes[i] = g.multiplex.nodes[uid]
@@ -513,9 +526,7 @@ func (g directedLayerHandle) To(v graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g directedLayerHandle) HasEdgeBetween(x, y graph.Node) bool {
-	xid := x.ID()
-	yid := y.ID()
+func (g directedLayerHandle) HasEdgeBetween(xid, yid int64) bool {
 	if xid == yid {
 		return false
 	}
@@ -531,9 +542,7 @@ func (g directedLayerHandle) HasEdgeBetween(x, y graph.Node) bool {
 }
 
 // HasEdgeFromTo returns whether an edge exists from node u to v.
-func (g directedLayerHandle) HasEdgeFromTo(u, v graph.Node) bool {
-	uid := u.ID()
-	vid := v.ID()
+func (g directedLayerHandle) HasEdgeFromTo(uid, vid int64) bool {
 	if uid == vid || !isValidID(uid) || !isValidID(vid) {
 		return false
 	}
@@ -543,15 +552,13 @@ func (g directedLayerHandle) HasEdgeFromTo(u, v graph.Node) bool {
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g directedLayerHandle) Edge(u, v graph.Node) graph.Edge {
-	return g.WeightedEdge(u, v)
+func (g directedLayerHandle) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdge(uid, vid)
 }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g directedLayerHandle) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
-	uid := u.ID()
-	vid := v.ID()
+func (g directedLayerHandle) WeightedEdge(uid, vid int64) graph.WeightedEdge {
 	if uid == vid || !isValidID(uid) || !isValidID(vid) {
 		return nil
 	}
@@ -559,16 +566,14 @@ func (g directedLayerHandle) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
 	if !ok {
 		return nil
 	}
-	return multiplexEdge{from: g.multiplex.nodes[u.ID()], to: g.multiplex.nodes[v.ID()], weight: w}
+	return multiplexEdge{from: g.multiplex.nodes[uid], to: g.multiplex.nodes[vid], weight: w}
 }
 
 // Weight returns the weight for the edge between x and y if Edge(x, y) returns a non-nil Edge.
 // If x and y are the same node the internal node weight is returned. If there is no joining
 // edge between the two nodes the weight value returned is zero. Weight returns true if an edge
 // exists between x and y or if x and y have the same ID, false otherwise.
-func (g directedLayerHandle) Weight(x, y graph.Node) (w float64, ok bool) {
-	xid := x.ID()
-	yid := y.ID()
+func (g directedLayerHandle) Weight(xid, yid int64) (w float64, ok bool) {
 	if !isValidID(xid) || !isValidID(yid) {
 		return 0, false
 	}
@@ -598,7 +603,7 @@ type directedMultiplexLocalMover struct {
 	// that returns the Weight value
 	// of the non-nil edge between x
 	// and y.
-	weight []func(x, y graph.Node) float64
+	weight []func(xid, yid int64) float64
 
 	// communities is the current
 	// division of g.
@@ -648,7 +653,7 @@ func newDirectedMultiplexLocalMover(g *ReducedDirectedMultiplex, communities [][
 		memberships:   make([]int, len(nodes)),
 		resolutions:   resolutions,
 		weights:       weights,
-		weight:        make([]func(x, y graph.Node) float64, g.Depth()),
+		weight:        make([]func(xid, yid int64) float64, g.Depth()),
 	}
 
 	// Calculate the total edge weight of the graph
@@ -656,7 +661,7 @@ func newDirectedMultiplexLocalMover(g *ReducedDirectedMultiplex, communities [][
 	var zero int
 	for i := 0; i < g.Depth(); i++ {
 		l.edgeWeightsOf[i] = make([]directedWeights, len(nodes))
-		var weight func(x, y graph.Node) float64
+		var weight func(xid, yid int64) float64
 
 		if weights != nil {
 			if weights[i] == 0 {
@@ -677,19 +682,22 @@ func newDirectedMultiplexLocalMover(g *ReducedDirectedMultiplex, communities [][
 		layer := g.Layer(i)
 		for _, n := range l.nodes {
 			u := n
+			uid := u.ID()
 			var wOut float64
-			for _, v := range layer.From(u) {
-				wOut += weight(u, v)
+			for _, v := range layer.From(uid) {
+				wOut += weight(uid, v.ID())
 			}
 
 			v := n
+			vid := v.ID()
 			var wIn float64
-			for _, u := range layer.To(v) {
-				wIn += weight(u, v)
+			for _, u := range layer.To(vid) {
+				wIn += weight(u.ID(), vid)
 			}
 
-			w := weight(n, n)
-			l.edgeWeightsOf[i][u.ID()] = directedWeights{out: w + wOut, in: w + wIn}
+			id := n.ID()
+			w := weight(id, id)
+			l.edgeWeightsOf[i][uid] = directedWeights{out: w + wOut, in: w + wIn}
 			l.m[i] += w + wOut
 		}
 		if l.m[i] == 0 {
@@ -836,8 +844,8 @@ func (l *directedMultiplexLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst 
 					removal = true
 				}
 
-				k_aC.in += l.weight[layer](n, u)
-				k_aC.out += l.weight[layer](u, n)
+				k_aC.in += l.weight[layer](id, uid)
+				k_aC.out += l.weight[layer](uid, id)
 				// sigma_totC could be kept for each community
 				// and updated for moves, changing the calculation
 				// of sigma_totC here from O(n_c) to O(1), but
@@ -849,7 +857,7 @@ func (l *directedMultiplexLocalMover) deltaQ(n graph.Node) (deltaQ float64, dst 
 				sigma_totC.out += w.out
 			}
 
-			a_aa := l.weight[layer](n, n)
+			a_aa := l.weight[layer](id, id)
 			k_a := l.edgeWeightsOf[layer][id]
 			gamma := 1.0
 			if l.resolutions != nil {

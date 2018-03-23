@@ -48,8 +48,9 @@ func Prim(dst WeightedBuilder, g graph.WeightedUndirected) float64 {
 	}
 
 	u := nodes[0]
-	for _, v := range g.From(u) {
-		w, ok := g.Weight(u, v)
+	uid := u.ID()
+	for _, v := range g.From(uid) {
+		w, ok := g.Weight(uid, v.ID())
 		if !ok {
 			panic("prim: unexpected invalid weight")
 		}
@@ -59,15 +60,16 @@ func Prim(dst WeightedBuilder, g graph.WeightedUndirected) float64 {
 	var w float64
 	for q.Len() > 0 {
 		e := heap.Pop(q).(simple.WeightedEdge)
-		if e.To() != nil && g.HasEdgeBetween(e.From(), e.To()) {
-			dst.SetWeightedEdge(g.WeightedEdge(e.From(), e.To()))
+		if e.To() != nil && g.HasEdgeBetween(e.From().ID(), e.To().ID()) {
+			dst.SetWeightedEdge(g.WeightedEdge(e.From().ID(), e.To().ID()))
 			w += e.Weight()
 		}
 
 		u = e.From()
-		for _, n := range g.From(u) {
+		uid := u.ID()
+		for _, n := range g.From(uid) {
 			if key, ok := q.key(n); ok {
-				w, ok := g.Weight(u, n)
+				w, ok := g.Weight(uid, n.ID())
 				if !ok {
 					panic("prim: unexpected invalid weight")
 				}
@@ -173,7 +175,7 @@ func Kruskal(dst WeightedBuilder, g UndirectedWeightLister) float64 {
 	for _, e := range edges {
 		if s1, s2 := ds.find(e.From().ID()), ds.find(e.To().ID()); s1 != s2 {
 			ds.union(s1, s2)
-			dst.SetWeightedEdge(g.WeightedEdge(e.From(), e.To()))
+			dst.SetWeightedEdge(g.WeightedEdge(e.From().ID(), e.To().ID()))
 			w += e.Weight()
 		}
 	}

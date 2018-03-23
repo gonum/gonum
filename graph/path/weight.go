@@ -12,18 +12,16 @@ import (
 
 // Weighting is a mapping between a pair of nodes and a weight. It follows the
 // semantics of the Weighter interface.
-type Weighting func(x, y graph.Node) (w float64, ok bool)
+type Weighting func(xid, yid int64) (w float64, ok bool)
 
 // UniformCost returns a Weighting that returns an edge cost of 1 for existing
 // edges, zero for node identity and Inf for otherwise absent edges.
 func UniformCost(g graph.Graph) Weighting {
-	return func(x, y graph.Node) (w float64, ok bool) {
-		xid := x.ID()
-		yid := y.ID()
+	return func(xid, yid int64) (w float64, ok bool) {
 		if xid == yid {
 			return 0, true
 		}
-		if e := g.Edge(x, y); e != nil {
+		if e := g.Edge(xid, yid); e != nil {
 			return 1, true
 		}
 		return math.Inf(1), false

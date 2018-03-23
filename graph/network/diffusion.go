@@ -122,9 +122,9 @@ func NewLaplacian(g graph.Undirected) Laplacian {
 
 	l := mat.NewSymDense(len(nodes), nil)
 	for j, u := range nodes {
-		to := g.From(u)
-		l.SetSym(j, j, float64(len(to)))
 		uid := u.ID()
+		to := g.From(uid)
+		l.SetSym(j, j, float64(len(to)))
 		for _, v := range to {
 			vid := v.ID()
 			if uid == vid {
@@ -155,12 +155,12 @@ func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 
 	l := mat.NewSymDense(len(nodes), nil)
 	for j, u := range nodes {
-		to := g.From(u)
+		uid := u.ID()
+		to := g.From(uid)
 		if len(to) == 0 {
 			continue
 		}
 		l.SetSym(j, j, 1)
-		uid := u.ID()
 		squdeg := math.Sqrt(float64(len(to)))
 		for _, v := range to {
 			vid := v.ID()
@@ -168,7 +168,7 @@ func NewSymNormLaplacian(g graph.Undirected) Laplacian {
 				panic("network: self edge in graph")
 			}
 			if uid < vid {
-				l.SetSym(indexOf[vid], j, -1/(squdeg*math.Sqrt(float64(len(g.From(v))))))
+				l.SetSym(indexOf[vid], j, -1/(squdeg*math.Sqrt(float64(len(g.From(vid))))))
 			}
 		}
 	}
@@ -193,7 +193,7 @@ func NewRandomWalkLaplacian(g graph.Graph, damp float64) Laplacian {
 	l := mat.NewDense(len(nodes), len(nodes), nil)
 	for j, u := range nodes {
 		uid := u.ID()
-		to := g.From(u)
+		to := g.From(uid)
 		if len(to) == 0 {
 			continue
 		}

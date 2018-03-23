@@ -390,7 +390,7 @@ tests:
 							}
 							layer := g.Layer(l)
 							for n := range c {
-								if layer.HasEdgeBetween(simple.Node(n), target) {
+								if layer.HasEdgeBetween(int64(n), target.ID()) {
 									connected = true
 									break search
 								}
@@ -701,7 +701,7 @@ func directedMultiplexFrom(raw []layer) (DirectedLayers, []float64, error) {
 		g := simple.NewWeightedDirectedGraph(0, 0)
 		for u, e := range l.g {
 			// Add nodes that are not defined by an edge.
-			if !g.Has(simple.Node(u)) {
+			if !g.Has(int64(u)) {
 				g.AddNode(simple.Node(u))
 			}
 			for v := range e {

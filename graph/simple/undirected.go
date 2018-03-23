@@ -86,10 +86,10 @@ func (g *UndirectedGraph) SetEdge(e graph.Edge) {
 		panic("simple: adding self edge")
 	}
 
-	if !g.Has(from) {
+	if !g.Has(fid) {
 		g.AddNode(from)
 	}
-	if !g.Has(to) {
+	if !g.Has(tid) {
 		g.AddNode(to)
 	}
 
@@ -118,8 +118,8 @@ func (g *UndirectedGraph) Node(id int64) graph.Node {
 }
 
 // Has returns whether the node exists within the graph.
-func (g *UndirectedGraph) Has(n graph.Node) bool {
-	_, ok := g.nodes[n.ID()]
+func (g *UndirectedGraph) Has(id int64) bool {
+	_, ok := g.nodes[id]
 	return ok
 }
 
@@ -160,14 +160,14 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
-	if !g.Has(n) {
+func (g *UndirectedGraph) From(id int64) []graph.Node {
+	if !g.Has(id) {
 		return nil
 	}
 
-	nodes := make([]graph.Node, len(g.edges[n.ID()]))
+	nodes := make([]graph.Node, len(g.edges[id]))
 	i := 0
-	for from := range g.edges[n.ID()] {
+	for from := range g.edges[id] {
 		nodes[i] = g.nodes[from]
 		i++
 	}
@@ -175,20 +175,20 @@ func (g *UndirectedGraph) From(n graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g *UndirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
-	_, ok := g.edges[x.ID()][y.ID()]
+func (g *UndirectedGraph) HasEdgeBetween(xid, yid int64) bool {
+	_, ok := g.edges[xid][yid]
 	return ok
 }
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.EdgeBetween(u, v)
+func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
+	return g.EdgeBetween(uid, vid)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
-func (g *UndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
-	edge, ok := g.edges[x.ID()][y.ID()]
+func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
+	edge, ok := g.edges[xid][yid]
 	if !ok {
 		return nil
 	}
@@ -196,9 +196,9 @@ func (g *UndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
 }
 
 // Degree returns the degree of n in g.
-func (g *UndirectedGraph) Degree(n graph.Node) int {
-	if _, ok := g.nodes[n.ID()]; !ok {
+func (g *UndirectedGraph) Degree(id int64) int {
+	if _, ok := g.nodes[id]; !ok {
 		return 0
 	}
-	return len(g.edges[n.ID()])
+	return len(g.edges[id])
 }

@@ -129,7 +129,7 @@ func TestAStar(t *testing.T) {
 	for _, test := range aStarTests {
 		pt, _ := AStar(simple.Node(test.s), simple.Node(test.t), test.g, test.heuristic)
 
-		p, cost := pt.To(simple.Node(test.t))
+		p, cost := pt.To(test.t)
 
 		if !topo.IsPathIn(test.g, p) {
 			t.Errorf("got path that is not path in input graph for %q", test.name)
@@ -139,7 +139,7 @@ func TestAStar(t *testing.T) {
 		if !ok {
 			t.Fatalf("unexpected negative cycle in %q", test.name)
 		}
-		if want := bfp.WeightTo(simple.Node(test.t)); cost != want {
+		if want := bfp.WeightTo(test.t); cost != want {
 			t.Errorf("unexpected cost for %q: got:%v want:%v", test.name, cost, want)
 		}
 
@@ -196,8 +196,8 @@ func TestExhaustiveAStar(t *testing.T) {
 	for _, start := range g.Nodes() {
 		for _, goal := range g.Nodes() {
 			pt, _ := AStar(start, goal, g, heuristic)
-			gotPath, gotWeight := pt.To(goal)
-			wantPath, wantWeight, _ := ps.Between(start, goal)
+			gotPath, gotWeight := pt.To(goal.ID())
+			wantPath, wantWeight, _ := ps.Between(start.ID(), goal.ID())
 			if gotWeight != wantWeight {
 				t.Errorf("unexpected path weight from %v to %v result: got:%f want:%f",
 					start, goal, gotWeight, wantWeight)
@@ -231,7 +231,7 @@ func isMonotonic(g UndirectedWeightLister, h Heuristic) (ok bool, at graph.Edge,
 		for _, edge := range g.WeightedEdges() {
 			from := edge.From()
 			to := edge.To()
-			w, ok := g.Weight(from, to)
+			w, ok := g.Weight(from.ID(), to.ID())
 			if !ok {
 				panic("A*: unexpected invalid weight")
 			}
@@ -275,12 +275,12 @@ func TestAStarNullHeuristic(t *testing.T) {
 			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", test.Name, pt.From().ID(), test.Query.From().ID())
 		}
 
-		p, weight := pt.To(test.Query.To())
+		p, weight := pt.To(test.Query.To().ID())
 		if weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
-		if weight := pt.WeightTo(test.Query.To()); weight != test.Weight {
+		if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
 			t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
 				test.Name, weight, test.Weight)
 		}
@@ -301,7 +301,7 @@ func TestAStarNullHeuristic(t *testing.T) {
 				test.Name, p, test.WantPaths)
 		}
 
-		np, weight := pt.To(test.NoPathFor.To())
+		np, weight := pt.To(test.NoPathFor.To().ID())
 		if pt.From().ID() == test.NoPathFor.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
 			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f\nwant:path=<nil> weight=+Inf",
 				test.Name, np, weight)

@@ -142,14 +142,15 @@ func johnsonGraphFrom(g graph.Directed) johnsonGraph {
 		succ:  make(map[int64]set.Int64s),
 	}
 	for i, u := range nodes {
-		c.index[u.ID()] = i
-		for _, v := range g.From(u) {
-			if c.succ[u.ID()] == nil {
-				c.succ[u.ID()] = make(set.Int64s)
-				c.nodes.Add(u.ID())
+		uid := u.ID()
+		c.index[uid] = i
+		for _, v := range g.From(uid) {
+			if c.succ[uid] == nil {
+				c.succ[uid] = make(set.Int64s)
+				c.nodes.Add(uid)
 			}
 			c.nodes.Add(v.ID())
-			c.succ[u.ID()].Add(v.ID())
+			c.succ[uid].Add(v.ID())
 		}
 	}
 	return c
@@ -247,31 +248,31 @@ func (g johnsonGraph) Nodes() []graph.Node {
 }
 
 // Successors is required to satisfy Tarjan.
-func (g johnsonGraph) From(n graph.Node) []graph.Node {
-	adj := g.succ[n.ID()]
+func (g johnsonGraph) From(id int64) []graph.Node {
+	adj := g.succ[id]
 	if len(adj) == 0 {
 		return nil
 	}
 	succ := make([]graph.Node, 0, len(adj))
-	for n := range adj {
-		succ = append(succ, johnsonGraphNode(n))
+	for id := range adj {
+		succ = append(succ, johnsonGraphNode(id))
 	}
 	return succ
 }
 
-func (johnsonGraph) Has(graph.Node) bool {
+func (johnsonGraph) Has(int64) bool {
 	panic("topo: unintended use of johnsonGraph")
 }
-func (johnsonGraph) HasEdgeBetween(_, _ graph.Node) bool {
+func (johnsonGraph) HasEdgeBetween(_, _ int64) bool {
 	panic("topo: unintended use of johnsonGraph")
 }
-func (johnsonGraph) Edge(_, _ graph.Node) graph.Edge {
+func (johnsonGraph) Edge(_, _ int64) graph.Edge {
 	panic("topo: unintended use of johnsonGraph")
 }
-func (johnsonGraph) HasEdgeFromTo(_, _ graph.Node) bool {
+func (johnsonGraph) HasEdgeFromTo(_, _ int64) bool {
 	panic("topo: unintended use of johnsonGraph")
 }
-func (johnsonGraph) To(graph.Node) []graph.Node {
+func (johnsonGraph) To(int64) []graph.Node {
 	panic("topo: unintended use of johnsonGraph")
 }
 

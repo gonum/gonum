@@ -40,17 +40,19 @@ func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.N
 		if until != nil && until(t, depth) {
 			return t
 		}
-		for _, n := range g.From(t) {
-			if b.EdgeFilter != nil && !b.EdgeFilter(g.Edge(t, n)) {
+		tid := t.ID()
+		for _, n := range g.From(tid) {
+			nid := n.ID()
+			if b.EdgeFilter != nil && !b.EdgeFilter(g.Edge(tid, nid)) {
 				continue
 			}
-			if b.visited.Has(n.ID()) {
+			if b.visited.Has(nid) {
 				continue
 			}
 			if b.Visit != nil {
 				b.Visit(t, n)
 			}
-			b.visited.Add(n.ID())
+			b.visited.Add(nid)
 			children++
 			b.queue.Enqueue(n)
 		}
@@ -125,17 +127,19 @@ func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node)
 		if until != nil && until(t) {
 			return t
 		}
-		for _, n := range g.From(t) {
-			if d.EdgeFilter != nil && !d.EdgeFilter(g.Edge(t, n)) {
+		tid := t.ID()
+		for _, n := range g.From(tid) {
+			nid := n.ID()
+			if d.EdgeFilter != nil && !d.EdgeFilter(g.Edge(tid, nid)) {
 				continue
 			}
-			if d.visited.Has(n.ID()) {
+			if d.visited.Has(nid) {
 				continue
 			}
 			if d.Visit != nil {
 				d.Visit(t, n)
 			}
-			d.visited.Add(n.ID())
+			d.visited.Add(nid)
 			d.stack.Push(n)
 		}
 	}

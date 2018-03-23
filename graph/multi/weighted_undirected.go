@@ -99,13 +99,13 @@ func (g *WeightedUndirectedGraph) SetWeighted(l graph.WeightedLine) {
 		lid  = l.ID()
 	)
 
-	if !g.Has(from) {
+	if !g.Has(fid) {
 		g.AddNode(from)
 	}
 	if g.lines[fid][tid] == nil {
 		g.lines[fid][tid] = make(map[int64]graph.WeightedLine)
 	}
-	if !g.Has(to) {
+	if !g.Has(tid) {
 		g.AddNode(to)
 	}
 	if g.lines[tid][fid] == nil {
@@ -142,8 +142,8 @@ func (g *WeightedUndirectedGraph) Node(id int64) graph.Node {
 }
 
 // Has returns whether the node exists within the graph.
-func (g *WeightedUndirectedGraph) Has(n graph.Node) bool {
-	_, ok := g.nodes[n.ID()]
+func (g *WeightedUndirectedGraph) Has(id int64) bool {
+	_, ok := g.nodes[id]
 	return ok
 }
 
@@ -189,14 +189,14 @@ func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *WeightedUndirectedGraph) From(n graph.Node) []graph.Node {
-	if !g.Has(n) {
+func (g *WeightedUndirectedGraph) From(id int64) []graph.Node {
+	if !g.Has(id) {
 		return nil
 	}
 
-	nodes := make([]graph.Node, len(g.lines[n.ID()]))
+	nodes := make([]graph.Node, len(g.lines[id]))
 	i := 0
-	for from := range g.lines[n.ID()] {
+	for from := range g.lines[id] {
 		nodes[i] = g.nodes[from]
 		i++
 	}
@@ -204,20 +204,20 @@ func (g *WeightedUndirectedGraph) From(n graph.Node) []graph.Node {
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
-func (g *WeightedUndirectedGraph) HasEdgeBetween(x, y graph.Node) bool {
-	_, ok := g.lines[x.ID()][y.ID()]
+func (g *WeightedUndirectedGraph) HasEdgeBetween(xid, yid int64) bool {
+	_, ok := g.lines[xid][yid]
 	return ok
 }
 
 // Lines returns the lines from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedUndirectedGraph) Lines(u, v graph.Node) []graph.Line {
-	return g.LinesBetween(u, v)
+func (g *WeightedUndirectedGraph) Lines(uid, vid int64) []graph.Line {
+	return g.LinesBetween(uid, vid)
 }
 
 // LinesBetween returns the lines between nodes x and y.
-func (g *WeightedUndirectedGraph) LinesBetween(x, y graph.Node) []graph.Line {
-	edge := g.lines[x.ID()][y.ID()]
+func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) []graph.Line {
+	edge := g.lines[xid][yid]
 	if len(edge) == 0 {
 		return nil
 	}
@@ -237,20 +237,20 @@ func (g *WeightedUndirectedGraph) LinesBetween(x, y graph.Node) []graph.Line {
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.Edge is a multi.WeightedEdge if an edge exists.
-func (g *WeightedUndirectedGraph) Edge(u, v graph.Node) graph.Edge {
-	return g.WeightedEdge(u, v)
+func (g *WeightedUndirectedGraph) Edge(uid, vid int64) graph.Edge {
+	return g.WeightedEdge(uid, vid)
 }
 
 // EdgeBetween returns the edge between nodes x and y.
-func (g *WeightedUndirectedGraph) EdgeBetween(x, y graph.Node) graph.Edge {
-	return g.WeightedEdge(x, y)
+func (g *WeightedUndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
+	return g.WeightedEdge(xid, yid)
 }
 
 // WeightedEdge returns the weighted edge from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.WeightedEdge is a multi.WeightedEdge if an edge exists.
-func (g *WeightedUndirectedGraph) WeightedEdge(u, v graph.Node) graph.WeightedEdge {
-	lines := g.WeightedLines(u, v)
+func (g *WeightedUndirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge {
+	lines := g.WeightedLines(uid, vid)
 	if len(lines) == 0 {
 		return nil
 	}
@@ -258,19 +258,19 @@ func (g *WeightedUndirectedGraph) WeightedEdge(u, v graph.Node) graph.WeightedEd
 }
 
 // WeightedEdgeBetween returns the weighted edge between nodes x and y.
-func (g *WeightedUndirectedGraph) WeightedEdgeBetween(x, y graph.Node) graph.WeightedEdge {
-	return g.WeightedEdge(x, y)
+func (g *WeightedUndirectedGraph) WeightedEdgeBetween(xid, yid int64) graph.WeightedEdge {
+	return g.WeightedEdge(xid, yid)
 }
 
 // WeightedLines returns the lines from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedUndirectedGraph) WeightedLines(u, v graph.Node) []graph.WeightedLine {
-	return g.WeightedLinesBetween(u, v)
+func (g *WeightedUndirectedGraph) WeightedLines(uid, vid int64) []graph.WeightedLine {
+	return g.WeightedLinesBetween(uid, vid)
 }
 
 // WeightedLinesBetween returns the lines between nodes x and y.
-func (g *WeightedUndirectedGraph) WeightedLinesBetween(x, y graph.Node) []graph.WeightedLine {
-	edge := g.lines[x.ID()][y.ID()]
+func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) []graph.WeightedLine {
+	edge := g.lines[xid][yid]
 	if len(edge) == 0 {
 		return nil
 	}
@@ -289,18 +289,18 @@ func (g *WeightedUndirectedGraph) WeightedLinesBetween(x, y graph.Node) []graph.
 
 // Weight returns the weight for the lines between x and y summarised by the receiver's
 // EdgeWeightFunc. Weight returns true if an edge exists between x and y, false otherwise.
-func (g *WeightedUndirectedGraph) Weight(x, y graph.Node) (w float64, ok bool) {
-	lines := g.WeightedLines(x, y)
+func (g *WeightedUndirectedGraph) Weight(xid, yid int64) (w float64, ok bool) {
+	lines := g.WeightedLines(xid, yid)
 	return WeightedEdge{Lines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), len(lines) != 0
 }
 
 // Degree returns the degree of n in g.
-func (g *WeightedUndirectedGraph) Degree(n graph.Node) int {
-	if _, ok := g.nodes[n.ID()]; !ok {
+func (g *WeightedUndirectedGraph) Degree(id int64) int {
+	if _, ok := g.nodes[id]; !ok {
 		return 0
 	}
 	var deg int
-	for _, e := range g.lines[n.ID()] {
+	for _, e := range g.lines[id] {
 		deg += len(e)
 	}
 	return deg

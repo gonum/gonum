@@ -18,9 +18,9 @@ func IsPathIn(g graph.Graph, path []graph.Node) bool {
 	case 0:
 		return true
 	case 1:
-		return g.Has(path[0])
+		return g.Has(path[0].ID())
 	default:
-		var canReach func(u, v graph.Node) bool
+		var canReach func(uid, vid int64) bool
 		switch g := g.(type) {
 		case graph.Directed:
 			canReach = g.HasEdgeFromTo
@@ -29,7 +29,7 @@ func IsPathIn(g graph.Graph, path []graph.Node) bool {
 		}
 
 		for i, u := range path[:len(path)-1] {
-			if !canReach(u, path[i+1]) {
+			if !canReach(u.ID(), path[i+1].ID()) {
 				return false
 			}
 		}

@@ -273,8 +273,8 @@ func same(a, b graph.Graph) bool {
 		}
 	}
 	for _, u := range a.Nodes() {
-		aFromU := a.From(u)
-		bFromU := b.From(u)
+		aFromU := a.From(u.ID())
+		bFromU := b.From(u.ID())
 		if len(aFromU) != len(bFromU) {
 			return false
 		}
@@ -288,7 +288,7 @@ func same(a, b graph.Graph) bool {
 			aW, aWok := a.(graph.Weighted)
 			bW, bWok := b.(graph.Weighted)
 			if aWok && bWok {
-				if aW.WeightedEdge(u, va).Weight() != bW.WeightedEdge(u, vb).Weight() {
+				if aW.WeightedEdge(u.ID(), va.ID()).Weight() != bW.WeightedEdge(u.ID(), vb.ID()).Weight() {
 					return false
 				}
 			}

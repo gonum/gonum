@@ -57,20 +57,20 @@ func (g *WeightedUndirectedGraph) AddNode(n graph.Node) {
 	g.nodeIDs.Use(n.ID())
 }
 
-// RemoveNode removes n from the graph, as well as any edges attached to it. If the node
-// is not in the graph it is a no-op.
-func (g *WeightedUndirectedGraph) RemoveNode(n graph.Node) {
-	if _, ok := g.nodes[n.ID()]; !ok {
+// RemoveNode removes the node with the given ID from the graph, as well as any edges attached
+// to it. If the node is not in the graph it is a no-op.
+func (g *WeightedUndirectedGraph) RemoveNode(id int64) {
+	if _, ok := g.nodes[id]; !ok {
 		return
 	}
-	delete(g.nodes, n.ID())
+	delete(g.nodes, id)
 
-	for from := range g.edges[n.ID()] {
-		delete(g.edges[from], n.ID())
+	for from := range g.edges[id] {
+		delete(g.edges[from], id)
 	}
-	delete(g.edges, n.ID())
+	delete(g.edges, id)
 
-	g.nodeIDs.Release(n.ID())
+	g.nodeIDs.Release(id)
 }
 
 // NewWeightedEdge returns a new weighted edge from the source to the destination node.

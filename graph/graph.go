@@ -129,10 +129,11 @@ type NodeAdder interface {
 
 // NodeRemover is an interface for removing nodes from a graph.
 type NodeRemover interface {
-	// RemoveNode removes a node from the graph, as
-	// well as any edges attached to it. If the node
-	// is not in the graph it is a no-op.
-	RemoveNode(Node)
+	// RemoveNode removes the node with the given ID
+	// from the graph, as well as any edges attached
+	// to it. If the node is not in the graph it is
+	// a no-op.
+	RemoveNode(id int64)
 }
 
 // EdgeAdder is an interface for adding edges to a graph.

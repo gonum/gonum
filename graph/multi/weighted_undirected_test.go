@@ -17,9 +17,9 @@ func TestWeightedMaxID(t *testing.T) {
 		g.AddNode(i)
 		nodes[i] = struct{}{}
 	}
-	g.RemoveNode(Node(0))
+	g.RemoveNode(int64(0))
 	delete(nodes, Node(0))
-	g.RemoveNode(Node(2))
+	g.RemoveNode(int64(2))
 	delete(nodes, Node(2))
 	n := g.NewNode()
 	g.AddNode(n)
@@ -46,7 +46,7 @@ func TestIssue123WeightedUndirectedGraph(t *testing.T) {
 	n1 := g.NewNode()
 	g.AddNode(n1)
 
-	g.RemoveNode(n0)
+	g.RemoveNode(n0.ID())
 
 	n2 := g.NewNode()
 	g.AddNode(n2)

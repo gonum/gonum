@@ -60,7 +60,7 @@ func TestIssue123WeightedDirectedGraph(t *testing.T) {
 	n1 := g.NewNode()
 	g.AddNode(n1)
 
-	g.RemoveNode(n0)
+	g.RemoveNode(n0.ID())
 
 	n2 := g.NewNode()
 	g.AddNode(n2)

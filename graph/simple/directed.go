@@ -105,19 +105,18 @@ func (g *DirectedGraph) SetEdge(e graph.Edge) {
 	g.to[tid][fid] = e
 }
 
-// RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist
-// it is a no-op.
-func (g *DirectedGraph) RemoveEdge(e graph.Edge) {
-	from, to := e.From(), e.To()
-	if _, ok := g.nodes[from.ID()]; !ok {
+// RemoveEdge removes the edge with the given end point IDs from the graph, leaving the terminal
+// nodes. If the edge does not exist it is a no-op.
+func (g *DirectedGraph) RemoveEdge(fid, tid int64) {
+	if _, ok := g.nodes[fid]; !ok {
 		return
 	}
-	if _, ok := g.nodes[to.ID()]; !ok {
+	if _, ok := g.nodes[tid]; !ok {
 		return
 	}
 
-	delete(g.from[from.ID()], to.ID())
-	delete(g.to[to.ID()], from.ID())
+	delete(g.from[fid], tid)
+	delete(g.to[tid], fid)
 }
 
 // Node returns the node in the graph with the given ID.

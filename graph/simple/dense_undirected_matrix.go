@@ -213,14 +213,12 @@ func (g *UndirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
 	g.mat.SetSym(int(fid), int(tid), weight)
 }
 
-// RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist
-// it is a no-op.
-func (g *UndirectedMatrix) RemoveEdge(e graph.Edge) {
-	fid := e.From().ID()
+// RemoveEdge removes the edge with the given end point IDs from the graph, leaving the terminal
+// nodes. If the edge does not exist it is a no-op.
+func (g *UndirectedMatrix) RemoveEdge(fid, tid int64) {
 	if !g.has(fid) {
 		return
 	}
-	tid := e.To().ID()
 	if !g.has(tid) {
 		return
 	}

@@ -169,10 +169,10 @@ type WeightedEdgeAdder interface {
 
 // EdgeRemover is an interface for removing nodes from a graph.
 type EdgeRemover interface {
-	// RemoveEdge removes the given edge, leaving the
-	// terminal nodes. If the edge does not exist it
-	// is a no-op.
-	RemoveEdge(Edge)
+	// RemoveEdge removes the edge with the given end
+	// IDs, leaving the terminal nodes. If the edge
+	// does not exist it is a no-op.
+	RemoveEdge(fid, tid int64)
 }
 
 // Builder is a graph that can have nodes and edges added.

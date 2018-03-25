@@ -113,23 +113,22 @@ func (g *UndirectedGraph) SetLine(l graph.Line) {
 	g.lineIDs.Use(lid)
 }
 
-// RemoveLine removes l from the graph, leaving the terminal nodes. If the line does not exist
-// it is a no-op.
-func (g *UndirectedGraph) RemoveLine(l graph.Line) {
-	from, to := l.From(), l.To()
-	if _, ok := g.nodes[from.ID()]; !ok {
+// RemoveLine removes the line with the given end point and line Ids from the graph, leaving
+// the terminal nodes. If the line does not exist it is a no-op.
+func (g *UndirectedGraph) RemoveLine(fid, tid, id int64) {
+	if _, ok := g.nodes[fid]; !ok {
 		return
 	}
-	if _, ok := g.nodes[to.ID()]; !ok {
+	if _, ok := g.nodes[tid]; !ok {
 		return
 	}
 
-	delete(g.lines[from.ID()], to.ID())
-	delete(g.lines[to.ID()], from.ID())
-	if len(g.lines[to.ID()][from.ID()]) == 0 {
-		delete(g.lines[to.ID()], from.ID())
+	delete(g.lines[fid], tid)
+	delete(g.lines[tid], fid)
+	if len(g.lines[tid][fid]) == 0 {
+		delete(g.lines[tid], fid)
 	}
-	g.lineIDs.Release(l.ID())
+	g.lineIDs.Release(id)
 }
 
 // Node returns the node in the graph with the given ID.

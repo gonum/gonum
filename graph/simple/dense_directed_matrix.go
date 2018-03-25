@@ -238,14 +238,12 @@ func (g *DirectedMatrix) setWeightedEdge(e graph.Edge, weight float64) {
 	g.mat.Set(int(fid), int(tid), weight)
 }
 
-// RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist
-// it is a no-op.
-func (g *DirectedMatrix) RemoveEdge(e graph.Edge) {
-	fid := e.From().ID()
+// RemoveEdge removes the edge with the given end point nodes from the graph, leaving the terminal
+// nodes. If the edge does not exist it is a no-op.
+func (g *DirectedMatrix) RemoveEdge(fid, tid int64) {
 	if !g.has(fid) {
 		return
 	}
-	tid := e.To().ID()
 	if !g.has(tid) {
 		return
 	}

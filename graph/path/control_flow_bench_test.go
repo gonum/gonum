@@ -242,7 +242,7 @@ func duplication(n int, delta, alpha, sigma float64) func() *simple.DirectedGrap
 		}
 		for _, e := range g.Edges() {
 			if rnd.Intn(2) == 0 {
-				g.RemoveEdge(e)
+				g.RemoveEdge(e.From().ID(), e.To().ID())
 			}
 		}
 		return g.DirectedGraph

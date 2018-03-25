@@ -125,10 +125,10 @@ type WeightedLineAdder interface {
 
 // LineRemover is an interface for removing lines from a multigraph.
 type LineRemover interface {
-	// RemoveLine removes the given line, leaving the
-	// terminal nodes. If the line does not exist it
-	// is a no-op.
-	RemoveLine(Line)
+	// RemoveLine removes the line with the given end
+	// and line IDs, leaving the terminal nodes. If
+	// the line does not exist it is a no-op.
+	RemoveLine(fid, tid, id int64)
 }
 
 // MultigraphBuilder is a multigraph that can have nodes and lines added.

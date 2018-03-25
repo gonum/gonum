@@ -82,7 +82,7 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 		t.Errorf("Adding edge didn't create successor")
 	}
 
-	dg.RemoveEdge(Edge{F: Node(0), T: Node(2)})
+	dg.RemoveEdge(int64(0), int64(2))
 
 	if neighbors := dg.From(int64(0)); len(neighbors) != 0 || dg.Edge(int64(0), int64(2)) != nil {
 		t.Errorf("Removing edge didn't properly remove successor")
@@ -141,7 +141,7 @@ func TestDenseLists(t *testing.T) {
 		t.Errorf("Improper number of edges for passable dense graph")
 	}
 
-	dg.RemoveEdge(Edge{F: Node(12), T: Node(11)})
+	dg.RemoveEdge(int64(12), int64(11))
 	edges = dg.Edges()
 	if len(edges) != (15*14)-1 {
 		t.Errorf("Removing edge didn't affect edge listing properly")

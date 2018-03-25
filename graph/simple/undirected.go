@@ -97,19 +97,18 @@ func (g *UndirectedGraph) SetEdge(e graph.Edge) {
 	g.edges[tid][fid] = e
 }
 
-// RemoveEdge removes e from the graph, leaving the terminal nodes. If the edge does not exist
-// it is a no-op.
-func (g *UndirectedGraph) RemoveEdge(e graph.Edge) {
-	from, to := e.From(), e.To()
-	if _, ok := g.nodes[from.ID()]; !ok {
+// RemoveEdge removes the edge with the given end IDs from the graph, leaving the terminal nodes.
+// If the edge does not exist it is a no-op.
+func (g *UndirectedGraph) RemoveEdge(fid, tid int64) {
+	if _, ok := g.nodes[fid]; !ok {
 		return
 	}
-	if _, ok := g.nodes[to.ID()]; !ok {
+	if _, ok := g.nodes[tid]; !ok {
 		return
 	}
 
-	delete(g.edges[from.ID()], to.ID())
-	delete(g.edges[to.ID()], from.ID())
+	delete(g.edges[fid], tid)
+	delete(g.edges[tid], fid)
 }
 
 // Node returns the node in the graph with the given ID.

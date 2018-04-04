@@ -70,10 +70,10 @@ const (
 //
 // The Convert function can be used to transform a general LP into standard form.
 //
-// The input matrix A must have full rank and may not contain any columns with
-// all zeros. Furthermore, len(c) must equal the number of columns of A, and len(b)
-// must equal the number of rows of A. Simplex will panic if these conditions are
-// not met.
+// The input matrix A must have at least as many columns as rows, must have
+// full row rank and may not contain any columns with all zeros. Furthermore,
+// len(c) must equal the number of columns of A, and len(b) must equal the number
+// of rows of A. Simplex will panic if these conditions are not met.
 //
 // initialBasic can be used to set the initial set of indices for a feasible
 // solution to the LP. If an initial feasible solution is not known, initialBasic
@@ -384,6 +384,9 @@ func replaceBland(A mat.Matrix, ab *mat.Dense, xb []float64, basicIdxs, nonBasic
 
 func verifyInputs(initialBasic []int, c []float64, A mat.Matrix, b []float64) error {
 	m, n := A.Dims()
+	if m > n {
+		panic("lp: more equality constraints than variables")
+	}
 	if len(c) != n {
 		panic("lp: c vector incorrect length")
 	}

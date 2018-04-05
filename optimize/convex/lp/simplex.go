@@ -71,8 +71,8 @@ const (
 // The Convert function can be used to transform a general LP into standard form.
 //
 // The input matrix A must have at least as many columns as rows, len(c) must
-// equal the number of columns of A, and len(b) must equal the number of rows of,
-// or Simplex will panic. A must also have full row rank and may not contain any,
+// equal the number of columns of A, and len(b) must equal the number of rows of
+// A or Simplex will panic. A must also have full row rank and may not contain any,
 // columns with all zeros, or Simplex will return an error.
 //
 // initialBasic can be used to set the initial set of indices for a feasible

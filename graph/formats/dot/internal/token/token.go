@@ -10,7 +10,7 @@
 // This file is made available under a Creative Commons CC0 1.0
 // Universal Public Domain Dedication.
 
-package token
+package token // import "gonum.org/v1/gonum/graph/formats/dot/internal/token"
 
 import (
 	"fmt"

@@ -555,6 +555,7 @@ func (c *Cholesky) SymRankOne(orig *Cholesky, alpha float64, x Vector) (ok bool)
 	umat := c.chol.mat
 	stride := umat.Stride
 	for i := n - 1; i >= 0; i-- {
+		work[i] = 0
 		// Apply Givens matrices to U.
 		// TODO(vladimir-ch): Use workspace to avoid modifying the
 		// receiver in case an invalid factorization is created.

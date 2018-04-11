@@ -358,7 +358,7 @@ func TestCholeskySymRankOne(t *testing.T) {
 			cholUpdate.ToSym(&aCompare)
 			if !EqualApprox(&aCompare, aUpdate, 1e-13) {
 				t.Errorf("n=%v, alpha=%v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
-					n, alpha, Formatted(&a), Formatted(&aCompare))
+					n, alpha, Formatted(aUpdate), Formatted(&aCompare))
 			}
 		}
 	}

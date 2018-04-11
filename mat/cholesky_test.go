@@ -309,21 +309,37 @@ func TestCholeskyInverseTo(t *testing.T) {
 func TestCholeskySymRankOne(t *testing.T) {
 	rand.Seed(1)
 	for _, n := range []int{1, 2, 3, 4, 5, 7, 10, 20, 50, 100} {
-		for k := 0; k < 10; k++ {
+		for k := 0; k < 50; k++ {
+			// Construct a random positive definite matrix.
 			data := make([]float64, n*n)
 			for i := range data {
 				data[i] = rand.NormFloat64()
 			}
-
 			var a SymDense
 			a.SymOuterK(1, NewDense(n, n, data))
 
+			// Construct random data for updating.
 			xdata := make([]float64, n)
 			for i := range xdata {
 				xdata[i] = rand.NormFloat64()
 			}
 			x := NewVecDense(n, xdata)
+			alpha := rand.NormFloat64()
 
+			// Compute the updated matrix directly. If alpha > 0, there are no
+			// issues. If alpha < 0, it could be that the final matrix is not
+			// positive definite, so instead switch the two matrices.
+			aUpdate := NewSymDense(n, nil)
+			if alpha > 0 {
+				aUpdate.SymRankOne(&a, alpha, x)
+			} else {
+				aUpdate.CopySym(&a)
+				a.Reset()
+				a.SymRankOne(aUpdate, -alpha, x)
+			}
+
+			// Compare the Cholesky decomposition computed with Cholesky.SymRankOne
+			// with that computed from updating A directly.
 			var chol Cholesky
 			ok := chol.Factorize(&a)
 			if !ok {
@@ -331,19 +347,18 @@ func TestCholeskySymRankOne(t *testing.T) {
 				continue
 			}
 
-			alpha := rand.Float64()
-			ok = chol.SymRankOne(&chol, alpha, x)
+			var cholUpdate Cholesky
+			ok = cholUpdate.SymRankOne(&chol, alpha, x)
 			if !ok {
 				t.Errorf("n=%v, alpha=%v: unexpected failure", n, alpha)
 				continue
 			}
-			a.SymRankOne(&a, alpha, x)
 
-			var achol SymDense
-			chol.ToSym(&achol)
-			if !EqualApprox(&achol, &a, 1e-13) {
+			var aCompare SymDense
+			cholUpdate.ToSym(&aCompare)
+			if !EqualApprox(&aCompare, aUpdate, 1e-13) {
 				t.Errorf("n=%v, alpha=%v: mismatch between updated matrix and from Cholesky:\nupdated:\n%v\nfrom Cholesky:\n%v",
-					n, alpha, Formatted(&a), Formatted(&achol))
+					n, alpha, Formatted(aUpdate), Formatted(&aCompare))
 			}
 		}
 	}
@@ -389,6 +404,13 @@ func TestCholeskySymRankOne(t *testing.T) {
 			}),
 			alpha:  -1 / 2,
 			x:      []float64{0, 0, 0, 1},
+			wantOk: true,
+		},
+		{
+			// Issue #453.
+			a:      NewSymDense(1, []float64{1}),
+			alpha:  -1,
+			x:      []float64{0.25},
 			wantOk: true,
 		},
 	} {

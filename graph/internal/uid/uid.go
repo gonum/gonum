@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package uid implements unique ID provision for graphs.
-package uid
+package uid // import "gonum.org/v1/gonum/graph/internal/uid"
 
 import "gonum.org/v1/gonum/graph/internal/set"
 

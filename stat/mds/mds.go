@@ -38,8 +38,8 @@ func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) *mat.Dense {
 		}
 	}
 	c := mat.NewSymDense(n, nil)
+	s := -1 / float64(n)
 	for i := 0; i < n; i++ {
-		s := -1 / float64(n)
 		c.SetSym(i, i, 1+s)
 		for j := i + 1; j < n; j++ {
 			c.SetSym(i, j, s)

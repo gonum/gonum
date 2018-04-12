@@ -219,9 +219,14 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 			} else {
 				p.writeNode(n)
 			}
-			e, edgeIsPorter := g.Edge(nid, tid).(Porter)
+			e := g.Edge(nid, tid)
+			porter, edgeIsPorter := e.(Porter)
 			if edgeIsPorter {
-				p.writePorts(e.FromPort())
+				if e.From().ID() == nid {
+					p.writePorts(porter.FromPort())
+				} else {
+					p.writePorts(porter.ToPort())
+				}
 			}
 
 			if isDirected {
@@ -241,7 +246,11 @@ func (p *printer) print(g graph.Graph, name string, needsIndent, isSubgraph bool
 				p.writeNode(t)
 			}
 			if edgeIsPorter {
-				p.writePorts(e.ToPort())
+				if e.From().ID() == nid {
+					p.writePorts(porter.ToPort())
+				} else {
+					p.writePorts(porter.FromPort())
+				}
 			}
 
 			if a, ok := g.Edge(nid, tid).(encoding.Attributer); ok {

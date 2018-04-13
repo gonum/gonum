@@ -91,7 +91,11 @@ var torgersonScalingTests = []struct {
 
 func TestTorgersonScaling(t *testing.T) {
 	for i, test := range torgersonScalingTests {
-		got := TorgersonScaling(nil, test.dis)
+		got, ok := TorgersonScaling(nil, test.dis)
+		if !ok {
+			t.Error("unexpected scaling failure")
+			continue
+		}
 		_, wc := test.want.Dims()
 		n := test.dis.Symmetric()
 		if !mat.EqualApprox(colAbs{got.Slice(0, n, 0, wc)}, colAbs{test.want}, 1e-6) {

@@ -14,12 +14,13 @@ import (
 
 // TorgersonScaling converts a dissimilarity matrix to a matrix containing
 // Euclidean coordinates. TorgersonScaling places the coordinates in dst and
-// returns it.
+// returns it and true if successful. If the scaling is not successful, dst
+// is returned, but will not be a valid scaling.
 //
 // If dst is nil, a new mat.Dense is allocated. If dst is not a zero matrix,
 // the dimensions of dst and dis must match otherwise TorgersonScaling will panic.
 // The dis matrix must be square or TorgersonScaling will panic.
-func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) *mat.Dense {
+func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) (mds *mat.Dense, ok bool) {
 	// https://doi.org/10.1007/0-387-28981-X_12
 
 	n := dis.Symmetric()
@@ -53,7 +54,10 @@ func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) *mat.Dense {
 	}
 
 	var ed mat.EigenSym
-	ed.Factorize(b, true)
+	ok = ed.Factorize(b, true)
+	if !ok {
+		return dst, false
+	}
 	dst.EigenvectorsSym(&ed)
 	vals := ed.Values(nil)
 	sort.Sort(byValues{
@@ -69,7 +73,7 @@ func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) *mat.Dense {
 	}
 	dst.Mul(dst, mat.NewDiagonal(len(vals), vals))
 
-	return dst
+	return dst, true
 }
 
 type byValues struct {

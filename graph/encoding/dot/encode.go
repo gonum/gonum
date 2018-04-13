@@ -40,6 +40,10 @@ type Attributers interface {
 // connection ports for their end points. The returned port corresponds
 // to the the DOT node port to be used by the edge, compass corresponds
 // to DOT compass point to which the edge will be aimed.
+//
+// When encoded, the From() and To() sides of the graph.Edge will receive the
+// FromPort() and ToPort() annotations respectively, even when the edge is
+// represented in an UndirectedGraph.
 type Porter interface {
 	FromPort() (port, compass string)
 	ToPort() (port, compass string)

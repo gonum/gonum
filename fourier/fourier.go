@@ -4,6 +4,8 @@
 
 package fourier
 
+import "gonum.org/v1/gonum/fourier/internal/fftpack"
+
 // FFT implements Fast Fourier Transform and its inverse for real sequences.
 type FFT struct {
 	work []float64
@@ -35,7 +37,7 @@ func (t *FFT) Reset(n int) {
 		t.work = make([]float64, 2*n)
 		t.real = make([]float64, n)
 	}
-	rffti(n, t.work, t.ifac[:])
+	fftpack.Rffti(n, t.work, t.ifac[:])
 }
 
 // FFT computes the Fourier coefficients of the input sequence, seq,
@@ -56,7 +58,7 @@ func (t *FFT) FFT(dst []complex128, seq []float64) []complex128 {
 		panic("fourier: destination length mismatch")
 	}
 	copy(t.real, seq)
-	rfftf(len(t.real), t.real, t.work, t.ifac[:])
+	fftpack.Rfftf(len(t.real), t.real, t.work, t.ifac[:])
 	dst[0] = complex(t.real[0], 0)
 	if len(seq) < 2 {
 		return dst
@@ -105,7 +107,7 @@ func (t *FFT) IFFT(dst []float64, coeff []complex128) []float64 {
 		dst[2*i+1] = real(cv)
 		dst[2*i+2] = imag(cv)
 	}
-	rfftb(len(dst), dst, t.work, t.ifac[:])
+	fftpack.Rfftb(len(dst), dst, t.work, t.ifac[:])
 	return dst
 }
 
@@ -150,7 +152,7 @@ func (t *CmplxFFT) Reset(n int) {
 		t.work = make([]float64, 4*n)
 		t.real = make([]float64, 2*n)
 	}
-	cffti(n, t.work, t.ifac[:])
+	fftpack.Cffti(n, t.work, t.ifac[:])
 }
 
 // FFT computes the Fourier coefficients of a complex input sequence,
@@ -175,7 +177,7 @@ func (t *CmplxFFT) FFT(dst, seq []complex128) []complex128 {
 		t.real[2*i] = real(cv)
 		t.real[2*i+1] = imag(cv)
 	}
-	cfftf(len(dst), t.real, t.work, t.ifac[:])
+	fftpack.Cfftf(len(dst), t.real, t.work, t.ifac[:])
 	for i := range dst {
 		dst[i] = complex(t.real[2*i], t.real[2*i+1])
 	}
@@ -204,7 +206,7 @@ func (t *CmplxFFT) IFFT(dst, coeff []complex128) []complex128 {
 		t.real[2*i] = real(cv)
 		t.real[2*i+1] = imag(cv)
 	}
-	cfftb(len(dst), t.real, t.work, t.ifac[:])
+	fftpack.Cfftb(len(dst), t.real, t.work, t.ifac[:])
 	for i := range dst {
 		dst[i] = complex(t.real[2*i], t.real[2*i+1])
 	}

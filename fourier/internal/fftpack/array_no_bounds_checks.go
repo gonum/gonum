@@ -6,7 +6,7 @@
 
 // +build !bounds
 
-package fourier
+package fftpack
 
 // The types in array.go implement Fortran-like arrays for bootstrapping
 // the implementation of the FFT functions translated from FFTPACK; they

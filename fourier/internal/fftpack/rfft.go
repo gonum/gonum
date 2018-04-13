@@ -6,12 +6,12 @@
 // Paul N Swarztrauber, placed in the public domain at
 // http://www.netlib.org/fftpack/.
 
-package fourier
+package fftpack
 
 import "math"
 
-// rffti initializes the array work which is used in both rfftf
-// and rfftb. The prime factorization of n together with a
+// Rffti initializes the array work which is used in both Rfftf
+// and Rfftb. The prime factorization of n together with a
 // tabulation of the trigonometric functions are computed and
 // stored in work.
 //
@@ -22,14 +22,14 @@ import "math"
 //  Output parameters:
 //
 //  work   A work array which must be dimensioned at least 2*n.
-//         The same work array can be used for both rfftf and rfftb
+//         The same work array can be used for both Rfftf and Rfftb
 //         as long as n remains unchanged. different work arrays
 //         are required for different values of n. The contents of
-//         work must not be changed between calls of rfftf or rfftb.
+//         work must not be changed between calls of Rfftf or Rfftb.
 //
 //  ifac   A work array containing the factors of n. ifac must have
 //         length of at least 15.
-func rffti(n int, work []float64, ifac []int) {
+func Rffti(n int, work []float64, ifac []int) {
 	if len(work) < 2*n {
 		panic("fourier: short work")
 	}
@@ -110,7 +110,7 @@ outer:
 	}
 }
 
-// rfftf computes the Fourier coefficients of a real perodic sequence
+// Rfftf computes the Fourier coefficients of a real perodic sequence
 // (Fourier analysis). The transform is defined below at output
 // parameter r.
 //
@@ -124,13 +124,13 @@ outer:
 //         to be transformed.
 //
 //  work   a work array which must be dimensioned at least 2*n.
-//         in the program that calls rfftf. the work array must be
+//         in the program that calls Rfftf. the work array must be
 //         initialized by calling subroutine rffti(n,work,ifac) and a
 //         different work array must be used for each different
 //         value of n. This initialization does not have to be
 //         repeated so long as n remains unchanged. Thus subsequent
 //         transforms can be obtained faster than the first.
-//         The same work array can be used by rfftf and rfftb.
+//         The same work array can be used by Rfftf and Rfftb.
 //
 //  ifac   A work array containing the factors of n. ifac must have
 //         length of at least 15.
@@ -150,15 +150,15 @@ outer:
 //           r[n-1] = the sum from i = 0 to i = n-1 of
 //             (-1)^i*r[i]
 //
-//  This transform is unnormalized since a call of rfftf
-//  followed by a call of rfftb will multiply the input
+//  This transform is unnormalized since a call of Rfftf
+//  followed by a call of Rfftb will multiply the input
 //  sequence by n.
 //
 //  work   contains results which must not be destroyed between
-//         calls of rfftf or rfftb.
+//         calls of Rfftf or Rfftb.
 //  ifac   contains results which must not be destroyed between
-//         calls of rfftf or rfftb.
-func rfftf(n int, r, work []float64, ifac []int) {
+//         calls of Rfftf or Rfftb.
+func Rfftf(n int, r, work []float64, ifac []int) {
 	if len(r) < n {
 		panic("fourier: short sequence")
 	}
@@ -624,7 +624,7 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 	}
 }
 
-// rfftb computes the real perodic sequence from its Fourier
+// Rfftb computes the real perodic sequence from its Fourier
 // coefficients (Fourier synthesis). The transform is defined
 // below at output parameter r.
 //
@@ -638,13 +638,13 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 //         to be transformed.
 //
 //  work   A work array which must be dimensioned at least 2*n.
-//         in the program that calls rfftb. The work array must be
+//         in the program that calls Rfftb. The work array must be
 //         initialized by calling subroutine rffti(n,work,ifac) and a
 //         different work array must be used for each different
 //         value of n. This initialization does not have to be
 //         repeated so long as n remains unchanged thus subsequent
 //         transforms can be obtained faster than the first.
-//         The same work array can be used by rfftf and rfftb.
+//         The same work array can be used by Rfftf and Rfftb.
 //
 //  ifac   A work array containing the factors of n. ifac must have
 //         length of at least 15.
@@ -662,15 +662,15 @@ func radfg(ido, ip, l1, idl1 int, cc, c1, c2, ch, ch2, wa []float64) {
 //             2*r(2*k-1)*cos(k*i*2*pi/n)
 //             -2*r(2*k)*sin(k*i*2*pi/n)
 //
-//  This transform is unnormalized since a call of rfftf
-//  followed by a call of rfftb will multiply the input
+//  This transform is unnormalized since a call of Rfftf
+//  followed by a call of Rfftb will multiply the input
 //  sequence by n.
 //
 //  work   Contains results which must not be destroyed between
-//         calls of rfftf or rfftb.
+//         calls of Rfftf or Rfftb.
 //  ifac   Contains results which must not be destroyed between
-//         calls of rfftf or rfftb.
-func rfftb(n int, r, work []float64, ifac []int) {
+//         calls of Rfftf or Rfftb.
+func Rfftb(n int, r, work []float64, ifac []int) {
 	if len(r) < n {
 		panic("fourier: short sequence")
 	}

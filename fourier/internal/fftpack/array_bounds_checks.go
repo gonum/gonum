@@ -6,7 +6,7 @@
 
 // +build bounds
 
-package fourier
+package fftpack
 
 import "fmt"
 

@@ -6,7 +6,7 @@
 // functions by Paul N Swarztrauber, placed in the public
 // domain at http://www.netlib.org/fftpack/.
 
-package fourier
+package fftpack
 
 import (
 	"math"
@@ -22,7 +22,7 @@ func TestRfft(t *testing.T) {
 	for _, test := range rfftTests {
 		work := make([]float64, 2*test.n)
 		ifac := make([]int, 15)
-		rffti(test.n, work, ifac)
+		Rffti(test.n, work, ifac)
 		var failed bool
 		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
 			failed = true
@@ -69,7 +69,7 @@ func TestRfft(t *testing.T) {
 			y[test.n-1] = sum1 - sum2
 		}
 
-		rfftf(test.n, x, work, ifac)
+		Rfftf(test.n, x, work, ifac)
 		var rftf float64
 		for i := 0; i < test.n; i++ {
 			rftf = math.Max(rftf, math.Abs(x[i]-y[i]))
@@ -95,7 +95,7 @@ func TestRfft(t *testing.T) {
 			}
 			y[i] = 2 * sum
 		}
-		rfftb(test.n, x, work, ifac)
+		Rfftb(test.n, x, work, ifac)
 		var rftb float64
 		for i := 0; i < test.n; i++ {
 			rftb = math.Max(rftb, math.Abs(x[i]-y[i]))
@@ -106,8 +106,8 @@ func TestRfft(t *testing.T) {
 			t.Errorf("unexpected rftb value for n=%d: got:%f want:0", test.n, rftb)
 		}
 
-		rfftb(test.n, y, work, ifac)
-		rfftf(test.n, y, work, ifac)
+		Rfftb(test.n, y, work, ifac)
+		Rfftf(test.n, y, work, ifac)
 		cf := 1.0 / fn
 		var rftfb float64
 		for i := 0; i < test.n; i++ {
@@ -284,7 +284,7 @@ func TestCfft(t *testing.T) {
 	for _, test := range cfftTests {
 		work := make([]float64, 4*test.n)
 		ifac := make([]int, 15)
-		cffti(test.n, work, ifac)
+		Cffti(test.n, work, ifac)
 		var failed bool
 		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
 			failed = true
@@ -304,7 +304,7 @@ func TestCfft(t *testing.T) {
 		x, y1 := cmplxSeries(test.n)
 
 		cx := cmplxAsFloat(x)
-		cfftf(test.n, cx, work, ifac)
+		Cfftf(test.n, cx, work, ifac)
 		x = floatAsCmplx(cx)
 
 		var cftf float64
@@ -321,7 +321,7 @@ func TestCfft(t *testing.T) {
 		y2 := updatedCmplxSeries(x)
 
 		cx = cmplxAsFloat(x)
-		cfftb(test.n, cx, work, ifac)
+		Cfftb(test.n, cx, work, ifac)
 		x = floatAsCmplx(cx)
 
 		var cftb float64
@@ -335,8 +335,8 @@ func TestCfft(t *testing.T) {
 		}
 
 		cx = cmplxAsFloat(x)
-		cfftf(test.n, cx, work, ifac)
-		cfftb(test.n, cx, work, ifac)
+		Cfftf(test.n, cx, work, ifac)
+		Cfftb(test.n, cx, work, ifac)
 		x = floatAsCmplx(cx)
 
 		var cftfb float64

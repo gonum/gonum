@@ -353,7 +353,6 @@ func (e *dotEdge) ToPort() (port, compass string) {
 	return e.ToPortLabels.Port, e.ToPortLabels.Compass
 }
 
-
 // attributes is a helper for global attributes.
 type attributes []encoding.Attribute
 
@@ -364,4 +363,3 @@ func (a *attributes) SetAttribute(attr encoding.Attribute) error {
 	*a = append(*a, attr)
 	return nil
 }
-

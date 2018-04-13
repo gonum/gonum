@@ -351,7 +351,7 @@ func (p *Port) String() string {
 	if len(p.ID) > 0 {
 		fmt.Fprintf(buf, ":%s", p.ID)
 	}
-	if p.CompassPoint != CompassPointDefault {
+	if p.CompassPoint != CompassPointNone {
 		fmt.Fprintf(buf, ":%s", p.CompassPoint)
 	}
 	return buf.String()
@@ -372,6 +372,9 @@ const (
 	CompassPointWest                          // w
 	CompassPointNorthWest                     // nw
 	CompassPointCenter                        // c
+)
+const (
+	CompassPointNone = CompassPoint(^uint(0) - iota)
 )
 
 // String returns the string representation of the compass point.
@@ -397,6 +400,8 @@ func (c CompassPoint) String() string {
 		return "nw"
 	case CompassPointCenter:
 		return "c"
+	case CompassPointNone:
+		return ""
 	}
 	panic(fmt.Sprintf("invalid compass point (%d)", uint(c)))
 }

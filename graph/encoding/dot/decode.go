@@ -26,6 +26,11 @@ type DOTIDSetter interface {
 	SetDOTID(id string)
 }
 
+type PortSetter interface {
+	SetFromPort(port, compass string)
+	SetToPort(port, compass string)
+}
+
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
 func Unmarshal(data []byte, dst encoding.Builder) error {
 	file, err := dot.ParseBytes(data)
@@ -177,6 +182,21 @@ func (gen *generator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 		for _, t := range ts {
 			edge := dst.NewEdge(f, t)
 			dst.SetEdge(edge)
+
+			if ps, isPortSetter := edge.(PortSetter); isPortSetter {
+				if n, vertexIsNode := stmt.From.(*ast.Node); vertexIsNode {
+					if n.Port != nil {
+						ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
+					}
+				}
+
+				if n, vertexIsNode := stmt.To.Vertex.(*ast.Node); vertexIsNode {
+					if n.Port != nil {
+						ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
+					}
+				}
+			}
+
 			e, ok := edge.(encoding.AttributeSetter)
 			if !ok {
 				continue

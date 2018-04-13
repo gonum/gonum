@@ -54,10 +54,7 @@ func TestParseFile(t *testing.T) {
 			out: "../testdata/attr_sep.golden",
 		},
 		{in: "../testdata/subgraph_vertex.dot"},
-		{
-			in:  "../testdata/port.dot",
-			out: "../testdata/port.golden",
-		},
+		{in:  "../testdata/port.dot"},
 		{in: "../testdata/quoted_id.dot"},
 		{
 			in:  "../testdata/backslash_newline_id.dot",

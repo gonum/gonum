@@ -174,6 +174,22 @@ func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	}
 }
 
+func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
+	if ps, isPortSetter := edge.(PortSetter); isPortSetter {
+		if n, vertexIsNode := from.(*ast.Node); vertexIsNode {
+			if n.Port != nil {
+				ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
+			}
+		}
+
+		if n, vertexIsNode := to.Vertex.(*ast.Node); vertexIsNode {
+			if n.Port != nil {
+				ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
+			}
+		}
+	}
+}
+
 // addEdgeStmt adds the given edge statement to the graph.
 func (gen *generator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, stmt.From)
@@ -182,20 +198,7 @@ func (gen *generator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 		for _, t := range ts {
 			edge := dst.NewEdge(f, t)
 			dst.SetEdge(edge)
-
-			if ps, isPortSetter := edge.(PortSetter); isPortSetter {
-				if n, vertexIsNode := stmt.From.(*ast.Node); vertexIsNode {
-					if n.Port != nil {
-						ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
-					}
-				}
-
-				if n, vertexIsNode := stmt.To.Vertex.(*ast.Node); vertexIsNode {
-					if n.Port != nil {
-						ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
-					}
-				}
-			}
+			applyPortsToEdge(stmt.From, stmt.To, edge)
 
 			e, ok := edge.(encoding.AttributeSetter)
 			if !ok {
@@ -243,6 +246,7 @@ func (gen *generator) addEdge(dst encoding.Builder, to *ast.Edge) []graph.Node {
 			for _, t := range ts {
 				edge := dst.NewEdge(f, t)
 				dst.SetEdge(edge)
+				applyPortsToEdge(to.Vertex, to.To, edge)
 			}
 		}
 	}

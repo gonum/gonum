@@ -6,7 +6,6 @@ package mds
 
 import (
 	"math"
-	"sort"
 
 	"gonum.org/v1/gonum/blas/blas64"
 	"gonum.org/v1/gonum/mat"
@@ -60,10 +59,7 @@ func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) (mds *mat.Dense, ok boo
 	}
 	dst.EigenvectorsSym(&ed)
 	vals := ed.Values(nil)
-	sort.Sort(byValues{
-		values:  vals,
-		vectors: dst.RawMatrix(),
-	})
+	reverse(vals, dst.RawMatrix())
 	for i, v := range vals {
 		if v < 0 {
 			vals[i] = 0
@@ -76,17 +72,12 @@ func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) (mds *mat.Dense, ok boo
 	return dst, true
 }
 
-type byValues struct {
-	values  []float64
-	vectors blas64.General
-}
-
-func (e byValues) Len() int           { return len(e.values) }
-func (e byValues) Less(i, j int) bool { return e.values[i] > e.values[j] }
-func (e byValues) Swap(i, j int) {
-	e.values[i], e.values[j] = e.values[j], e.values[i]
-	blas64.Swap(e.vectors.Rows,
-		blas64.Vector{Inc: e.vectors.Stride, Data: e.vectors.Data[i:]},
-		blas64.Vector{Inc: e.vectors.Stride, Data: e.vectors.Data[j:]},
-	)
+func reverse(values []float64, vectors blas64.General) {
+	for i, j := 0, len(values)-1; i < j; i, j = i+1, j-1 {
+		values[i], values[j] = values[j], values[i]
+		blas64.Swap(vectors.Rows,
+			blas64.Vector{Inc: vectors.Stride, Data: vectors.Data[i:]},
+			blas64.Vector{Inc: vectors.Stride, Data: vectors.Data[j:]},
+		)
+	}
 }

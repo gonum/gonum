@@ -214,6 +214,153 @@ func TestCmplxFFT(t *testing.T) {
 	})
 }
 
+func TestDCT(t *testing.T) {
+	const tol = 1e-10
+	t.Run("NewDCT", func(t *testing.T) {
+		for n := 2; n <= 200; n++ {
+			dct := NewDCT(n)
+
+			want := make([]float64, n)
+			for i := range want {
+				want[i] = rand.Float64()
+			}
+
+			coeff := dct.Transform(nil, want)
+			got := dct.Transform(nil, coeff)
+			floats.Scale(1/float64(2*(n-1)), got)
+
+			if !floats.EqualApprox(got, want, tol) {
+				t.Errorf("unexpected result for transform(transform(x)) for length %d", n)
+			}
+		}
+	})
+	t.Run("Reset DCT", func(t *testing.T) {
+		dct := NewDCT(1000)
+		for n := 2; n <= 2000; n++ {
+			dct.Reset(n)
+
+			want := make([]float64, n)
+			for i := range want {
+				want[i] = rand.Float64()
+			}
+
+			coeff := dct.Transform(nil, want)
+			got := dct.Transform(nil, coeff)
+			floats.Scale(1/float64(2*(n-1)), got)
+
+			if !floats.EqualApprox(got, want, tol) {
+				t.Errorf("unexpected result for transform(transform(x)) for length %d", n)
+			}
+		}
+	})
+}
+
+func TestDST(t *testing.T) {
+	const tol = 1e-10
+	t.Run("NewDST", func(t *testing.T) {
+		for n := 1; n <= 200; n++ {
+			dst := NewDST(n)
+
+			want := make([]float64, n)
+			for i := range want {
+				want[i] = rand.Float64()
+			}
+
+			coeff := dst.Transform(nil, want)
+			got := dst.Transform(nil, coeff)
+			floats.Scale(1/float64(2*(n+1)), got)
+
+			if !floats.EqualApprox(got, want, tol) {
+				t.Errorf("unexpected result for transform(transform(x)) for length %d", n)
+			}
+		}
+	})
+	t.Run("Reset DST", func(t *testing.T) {
+		dst := NewDST(1000)
+		for n := 1; n <= 2000; n++ {
+			dst.Reset(n)
+
+			want := make([]float64, n)
+			for i := range want {
+				want[i] = rand.Float64()
+			}
+
+			coeff := dst.Transform(nil, want)
+			got := dst.Transform(nil, coeff)
+			floats.Scale(1/float64(2*(n+1)), got)
+
+			if !floats.EqualApprox(got, want, tol) {
+				t.Errorf("unexpected result for transform(transform(x)) for length %d", n)
+			}
+		}
+	})
+}
+
+func TestQuarterWaveFFT(t *testing.T) {
+	const tol = 1e-10
+	t.Run("NewQuarterWaveFFT", func(t *testing.T) {
+		for n := 1; n <= 200; n++ {
+			qw := NewQuarterWaveFFT(n)
+
+			want := make([]float64, n)
+			for i := range want {
+				want[i] = rand.Float64()
+			}
+
+			{
+				coeff := qw.CosFFT(nil, want)
+				got := qw.CosIFFT(nil, coeff)
+				floats.Scale(1/float64(4*n), got)
+
+				if !floats.EqualApprox(got, want, tol) {
+					t.Errorf("unexpected result for CosFFT(CosIFFT(x)) for length %d", n)
+				}
+			}
+
+			{
+				coeff := qw.SinFFT(nil, want)
+				got := qw.SinIFFT(nil, coeff)
+				floats.Scale(1/float64(4*n), got)
+
+				if !floats.EqualApprox(got, want, tol) {
+					t.Errorf("unexpected result for SinFFT(SinIFFT(x)) for length %d", n)
+				}
+			}
+		}
+	})
+	t.Run("Reset QuarterWaveFFT", func(t *testing.T) {
+		qw := NewQuarterWaveFFT(1000)
+		for n := 1; n <= 2000; n++ {
+			qw.Reset(n)
+
+			want := make([]float64, n)
+			for i := range want {
+				want[i] = rand.Float64()
+			}
+
+			{
+				coeff := qw.CosFFT(nil, want)
+				got := qw.CosIFFT(nil, coeff)
+				floats.Scale(1/float64(4*n), got)
+
+				if !floats.EqualApprox(got, want, tol) {
+					t.Errorf("unexpected result for CosFFT(CosIFFT(x)) for length %d", n)
+				}
+			}
+
+			{
+				coeff := qw.SinFFT(nil, want)
+				got := qw.SinIFFT(nil, coeff)
+				floats.Scale(1/float64(4*n), got)
+
+				if !floats.EqualApprox(got, want, tol) {
+					t.Errorf("unexpected result for SinFFT(SinIFFT(x)) for length %d", n)
+				}
+			}
+		}
+	})
+}
+
 func equalApprox(a, b []complex128, tol float64) bool {
 	if len(a) != len(b) {
 		return false

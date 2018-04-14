@@ -26,8 +26,14 @@ type DOTIDSetter interface {
 	SetDOTID(id string)
 }
 
+// PortSetter is implemented by graph.Edge and graph.Line that want to
+// access to the DOT port and compass directions of an edge.
 type PortSetter interface {
+	// SetFromPort will receive the port and compass direction of the
+	// From side of an edge, if defined.
 	SetFromPort(port, compass string)
+	// SetTo will receive the port and compass direction of the To side
+	// of an edge, if defined.
 	SetToPort(port, compass string)
 }
 
@@ -174,6 +180,8 @@ func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	}
 }
 
+// applyPortsToEdge applies the available port metadata from an ast.Edge
+// to a graph.Edge
 func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
 	if ps, isPortSetter := edge.(PortSetter); isPortSetter {
 		if n, vertexIsNode := from.(*ast.Node); vertexIsNode {

@@ -362,7 +362,7 @@ type CompassPoint uint
 
 // Compass points.
 const (
-	CompassPointDefault   CompassPoint = iota // _
+	CompassPointNone      CompassPoint = iota //
 	CompassPointNorth                         // n
 	CompassPointNorthEast                     // ne
 	CompassPointEast                          // e
@@ -372,16 +372,14 @@ const (
 	CompassPointWest                          // w
 	CompassPointNorthWest                     // nw
 	CompassPointCenter                        // c
-)
-const (
-	CompassPointNone = CompassPoint(^uint(0) - iota)
+	CompassPointDefault                       // _
 )
 
 // String returns the string representation of the compass point.
 func (c CompassPoint) String() string {
 	switch c {
-	case CompassPointDefault:
-		return "_"
+	case CompassPointNone:
+		return ""
 	case CompassPointNorth:
 		return "n"
 	case CompassPointNorthEast:
@@ -400,8 +398,8 @@ func (c CompassPoint) String() string {
 		return "nw"
 	case CompassPointCenter:
 		return "c"
-	case CompassPointNone:
-		return ""
+	case CompassPointDefault:
+		return "_"
 	}
 	panic(fmt.Sprintf("invalid compass point (%d)", uint(c)))
 }

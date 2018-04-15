@@ -24,8 +24,8 @@ func TestFFT(t *testing.T) {
 				want[i] = rand.Float64()
 			}
 
-			coeff := fft.FFT(nil, want)
-			got := fft.IFFT(nil, coeff)
+			coeff := fft.Coefficients(nil, want)
+			got := fft.Sequence(nil, coeff)
 			floats.Scale(1/float64(n), got)
 
 			if !floats.EqualApprox(got, want, tol) {
@@ -43,8 +43,8 @@ func TestFFT(t *testing.T) {
 				want[i] = rand.Float64()
 			}
 
-			coeff := fft.FFT(nil, want)
-			got := fft.IFFT(nil, coeff)
+			coeff := fft.Coefficients(nil, want)
+			got := fft.Sequence(nil, coeff)
 			floats.Scale(1/float64(n), got)
 
 			if !floats.EqualApprox(got, want, tol) {
@@ -88,7 +88,7 @@ func TestFFT(t *testing.T) {
 		}
 		for _, test := range cases {
 			fft.Reset(len(test.in))
-			got := fft.FFT(nil, test.in)
+			got := fft.Coefficients(nil, test.in)
 			if !equalApprox(got, test.want, tol) {
 				t.Errorf("unexpected result for fft(%g):\ngot: %g\nwant:%g",
 					test.in, got, test.want)
@@ -129,8 +129,8 @@ func TestCmplxFFT(t *testing.T) {
 				want[i] = complex(rand.Float64(), rand.Float64())
 			}
 
-			coeff := fft.FFT(nil, want)
-			got := fft.IFFT(nil, coeff)
+			coeff := fft.Coefficients(nil, want)
+			got := fft.Sequence(nil, coeff)
 			sf := complex(1/float64(n), 0)
 			for i := range got {
 				got[i] *= sf
@@ -151,8 +151,8 @@ func TestCmplxFFT(t *testing.T) {
 				want[i] = complex(rand.Float64(), rand.Float64())
 			}
 
-			coeff := fft.FFT(nil, want)
-			got := fft.IFFT(nil, coeff)
+			coeff := fft.Coefficients(nil, want)
+			got := fft.Sequence(nil, coeff)
 			sf := complex(1/float64(n), 0)
 			for i := range got {
 				got[i] *= sf
@@ -308,8 +308,8 @@ func TestQuarterWaveFFT(t *testing.T) {
 			}
 
 			{
-				coeff := qw.CosFFT(nil, want)
-				got := qw.CosIFFT(nil, coeff)
+				coeff := qw.CosCoefficients(nil, want)
+				got := qw.CosSequence(nil, coeff)
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {
@@ -318,8 +318,8 @@ func TestQuarterWaveFFT(t *testing.T) {
 			}
 
 			{
-				coeff := qw.SinFFT(nil, want)
-				got := qw.SinIFFT(nil, coeff)
+				coeff := qw.SinCoefficients(nil, want)
+				got := qw.SinSequence(nil, coeff)
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {
@@ -339,8 +339,8 @@ func TestQuarterWaveFFT(t *testing.T) {
 			}
 
 			{
-				coeff := qw.CosFFT(nil, want)
-				got := qw.CosIFFT(nil, coeff)
+				coeff := qw.CosCoefficients(nil, want)
+				got := qw.CosSequence(nil, coeff)
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {
@@ -349,8 +349,8 @@ func TestQuarterWaveFFT(t *testing.T) {
 			}
 
 			{
-				coeff := qw.SinFFT(nil, want)
-				got := qw.SinIFFT(nil, coeff)
+				coeff := qw.SinCoefficients(nil, want)
+				got := qw.SinSequence(nil, coeff)
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {

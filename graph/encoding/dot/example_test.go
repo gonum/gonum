@@ -1,10 +1,14 @@
+// Copyright ©2018 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package dot_test
 
 import (
 	"fmt"
 
-	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/encoding/dot"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 type edgeWithPorts struct {
@@ -23,9 +27,9 @@ func (e *edgeWithPorts) ToPort() (string, string) {
 func ExamplePorter() {
 	g := simple.NewUndirectedGraph()
 	g.SetEdge(&edgeWithPorts{
-		Edge: simple.Edge{ simple.Node(1), simple.Node(0) },
+		Edge:     simple.Edge{simple.Node(1), simple.Node(0)},
 		fromPort: "p1",
-		toPort: "p2",
+		toPort:   "p2",
 	})
 
 	result, _ := dot.Marshal(g, "", "", "  ", true)
@@ -41,4 +45,3 @@ func ExamplePorter() {
 	//   0:p2 -- 1:p1;
 	// }
 }
-

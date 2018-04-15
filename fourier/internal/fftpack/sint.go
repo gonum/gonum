@@ -10,10 +10,9 @@ package fftpack
 
 import "math"
 
-// Subroutine Sinti initializes the array work which is used in
-// subroutine Sint. The prime factorization of n together with
-// a tabulation of the trigonometric functions are computed and
-// stored in work.
+// Sinti initializes the array work which is used in subroutine Sint.
+// The prime factorization of n together with a tabulation of the
+// trigonometric functions are computed and stored in work.
 //
 // Input parameter
 //
@@ -45,9 +44,8 @@ func Sinti(n int, work []float64, ifac []int) {
 	Rffti(n+1, work[n/2:], ifac)
 }
 
-// Subroutine Sint computes the discrete fourier sine transform
-// of an odd sequence x(i). The transform is defined below at
-// output parameter x.
+// Sint computes the Discrete Fourier Sine Transform of an odd
+// sequence x(i). The transform is defined below at output parameter x.
 //
 // Sint is the unnormalized inverse of itself since a call of Sint
 // followed by another call of Sint will multiply the input sequence

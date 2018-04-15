@@ -10,9 +10,9 @@ package fftpack
 
 import "math"
 
-// Subroutine Cosqi initializes the array work which is used in
-// both Cosqf and Cosqb. The prime factorization of n together with
-// a tabulation of the trigonometric functions are computed and
+// Cosqi initializes the array work which is used in both Cosqf
+// and Cosqb. The prime factorization of n together with a
+// tabulation of the trigonometric functions are computed and
 // stored in work.
 //
 // Input parameter
@@ -43,10 +43,10 @@ func Cosqi(n int, work []float64, ifac []int) {
 	Rffti(n, work[n:], ifac)
 }
 
-// subroutine Cosqf computes the fast fourier transform of quarter
-// wave data. That is, Cosqf computes the coefficients in a cosine
-// series representation with only odd wave numbers. The transform
-// is defined below at output parameter x.
+// Cosqf computes the Fast Fourier Transform of quarter wave data.
+// That is, Cosqf computes the coefficients in a cosine series
+// representation with only odd wave numbers. The transform is
+// defined below at output parameter x.
 //
 // Cosqb is the unnormalized inverse of Cosqf since a call of Cosqf
 // followed by a call of Cosqb will multiply the input sequence x
@@ -130,10 +130,10 @@ func cosqf1(n int, x, w, xh []float64, ifac []int) {
 	}
 }
 
-// Subroutine Cosqb computes the fast fourier transform of quarter
-// wave data. That is, Cosqb computes a sequence from its
-// representation in terms of a cosine series with odd wave numbers.
-// the transform is defined below at output parameter x.
+// Cosqb computes the Fast Fourier Transform of quarter wave data.
+// That is, Cosqb computes a sequence from its representation in
+// terms of a cosine series with odd wave numbers. The transform
+// is defined below at output parameter x.
 //
 // Cosqf is the unnormalized inverse of Cosqb since a call of Cosqb
 // followed by a call of Cosqf will multiply the input sequence x

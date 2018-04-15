@@ -10,10 +10,9 @@ package fftpack
 
 import "math"
 
-// Subroutine Sinqi initializes the array work which is used in
-// both Sinqf and Sinqb. The prime factorization of n together with
-// a tabulation of the trigonometric functions are computed and
-// stored in work.
+// Sinqi initializes the array work which is used in both Sinqf and
+// Sinqb. The prime factorization of n together with a tabulation
+// of the trigonometric functions are computed and stored in work.
 //
 // Input parameter
 //
@@ -43,10 +42,10 @@ func Sinqi(n int, work []float64, ifac []int) {
 	Rffti(n, work[n:], ifac)
 }
 
-// Subroutine Sinqf computes the fast fourier transform of quarter
-// wave data. That is, Sinqf computes the coefficients in a sine
-// series representation with only odd wave numbers. The transform
-// is defined below at output parameter x.
+// Sinqf computes the Fast Fourier Transform of quarter wave data.
+// That is, Sinqf computes the coefficients in a sine series
+// representation with only odd wave numbers. The transform is
+// defined below at output parameter x.
 //
 // Sinqb is the unnormalized inverse of Sinqf since a call of Sinqf
 // followed by a call of Sinqb will multiply the input sequence x
@@ -109,10 +108,10 @@ func Sinqf(n int, x, work []float64, ifac []int) {
 	}
 }
 
-// Subroutine Sinqb computes the fast fourier transform of quarter
-// wave data. That is, Sinqb computes a sequence from its
-// representation in terms of a sine series with odd wave numbers.
-// the transform is defined below at output parameter x.
+// Sinqb computes the Fast Fourier Transform of quarter wave data.
+// That is, Sinqb computes a sequence from its representation in
+// terms of a sine series with odd wave numbers. The transform is
+// defined below at output parameter x.
 //
 // Sinqf is the unnormalized inverse of Sinqb since a call of Sinqb
 // followed by a call of Sinqf will multiply the input sequence x
@@ -120,7 +119,6 @@ func Sinqf(n int, x, work []float64, ifac []int) {
 //
 // The array work which is used by subroutine Sinqb must be
 // initialized by calling subroutine Sinqi(n,work).
-//
 //
 // Input parameters
 //

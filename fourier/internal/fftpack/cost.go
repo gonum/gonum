@@ -10,10 +10,9 @@ package fftpack
 
 import "math"
 
-// Subroutine Costi initializes the array work which is used in
-// subroutine cost. The prime factorization of n together with
-// a tabulation of the trigonometric functions are computed and
-// stored in work.
+// Costi initializes the array work which is used in subroutine
+// Cost. The prime factorization of n together with a tabulation
+// of the trigonometric functions are computed and stored in work.
 //
 // Input parameter
 //
@@ -25,7 +24,7 @@ import "math"
 // work    A work array which must be dimensioned at least 3*n.
 //         Different work arrays are required for different values
 //         of n. The contents of work must not be changed between
-//         calls of cost.
+//         calls of Cost.
 //
 // ifac    An integer work array of length at least 15.
 func Costi(n int, work []float64, ifac []int) {
@@ -47,15 +46,14 @@ func Costi(n int, work []float64, ifac []int) {
 	Rffti(n-1, work[n:], ifac)
 }
 
-// Subroutine cost computes the discrete fourier cosine transform
-// of an even sequence x(i). The transform is defined below at output
-// parameter x.
+// Cost computes the Discrete Fourier Cosine Transform of an even
+// sequence x(i). The transform is defined below at output parameter x.
 //
-// Cost is the unnormalized inverse of itself since a call of cost
-// followed by another call of cost will multiply the input sequence
+// Cost is the unnormalized inverse of itself since a call of Cost
+// followed by another call of Cost will multiply the input sequence
 // x by 2*(n-1). The transform is defined below at output parameter x
 //
-// The array work which is used by subroutine cost must be
+// The array work which is used by subroutine Cost must be
 // initialized by calling subroutine Costi(n,work).
 //
 // Input parameters
@@ -67,7 +65,7 @@ func Costi(n int, work []float64, ifac []int) {
 // x       An array which contains the sequence to be transformed.
 //
 // work    A work array which must be dimensioned at least 3*n
-//         in the program that calls cost. The work array must be
+//         in the program that calls Cost. The work array must be
 //         initialized by calling subroutine Costi(n,work) and a
 //         different work array must be used for each different
 //         value of n. This initialization does not have to be
@@ -83,13 +81,13 @@ func Costi(n int, work []float64, ifac []int) {
 //             + the sum from k=2 to k=n-1
 //               2*x(k)*cos((k-1)*(i-1)*pi/(n-1))
 //
-//         A call of cost followed by another call of
-//         cost will multiply the sequence x by 2*(n-1).
-//         Hence cost is the unnormalized inverse
+//         A call of Cost followed by another call of
+//         Cost will multiply the sequence x by 2*(n-1).
+//         Hence Cost is the unnormalized inverse
 //         of itself.
 //
 // work    Contains initialization calculations which must not be
-//         destroyed between calls of cost.
+//         destroyed between calls of Cost.
 //
 // ifac    An integer work array of length at least 15.
 func Cost(n int, x, work []float64, ifac []int) {

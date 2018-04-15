@@ -117,7 +117,7 @@ type QuarterWaveFFT struct {
 	ifac [15]int
 }
 
-// NewQuarterWave returns a QuarterWave initialized for work on sequences of length n.
+// NewQuarterWaveFFT returns a QuarterWaveFFT initialized for work on sequences of length n.
 func NewQuarterWaveFFT(n int) *QuarterWaveFFT {
 	var t QuarterWaveFFT
 	t.Reset(n)

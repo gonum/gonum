@@ -335,14 +335,16 @@ func (e *dotEdge) Attributes() []encoding.Attribute {
 	}}
 }
 
-func (e *dotEdge) SetFromPort(port, compass string) {
+func (e *dotEdge) SetFromPort(port, compass string) error {
 	e.FromPortLabels.Port = port
 	e.FromPortLabels.Compass = compass
+	return nil
 }
 
-func (e *dotEdge) SetToPort(port, compass string) {
+func (e *dotEdge) SetToPort(port, compass string) error {
 	e.ToPortLabels.Port = port
 	e.ToPortLabels.Compass = compass
+	return nil
 }
 
 func (e *dotEdge) FromPort() (port, compass string) {

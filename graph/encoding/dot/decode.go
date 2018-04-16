@@ -31,10 +31,10 @@ type DOTIDSetter interface {
 type PortSetter interface {
 	// SetFromPort sets the From port and
 	// compass direction of the receiver.
-	SetFromPort(port, compass string)
+	SetFromPort(port, compass string) error
 	// SetToPort sets the To port and compass
 	// direction of the receiver.
-	SetToPort(port, compass string)
+	SetToPort(port, compass string) error
 }
 
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
@@ -186,13 +186,19 @@ func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
 	if ps, isPortSetter := edge.(PortSetter); isPortSetter {
 		if n, vertexIsNode := from.(*ast.Node); vertexIsNode {
 			if n.Port != nil {
-				ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
+				err := ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
+				if err != nil {
+					panic(fmt.Errorf("unable to unmarshal edge port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
+				}
 			}
 		}
 
 		if n, vertexIsNode := to.Vertex.(*ast.Node); vertexIsNode {
 			if n.Port != nil {
-				ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
+				err := ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
+				if err != nil {
+					panic(fmt.Errorf("unable to unmarshal edge DOT port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
+				}
 			}
 		}
 	}

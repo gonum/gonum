@@ -453,7 +453,7 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 			for i := 0; i < n; i++ {
 				aRow := ab[i*ldab:]
 				alphaxi := alpha * x[ix]
-				sum := alphaxi * complex(real(aRow[0]),0)
+				sum := alphaxi * complex(real(aRow[0]), 0)
 				u := min(k+1, n-i)
 				jx := incX
 				jy := incY
@@ -483,7 +483,7 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 					y[iy-k*incY+jy] += alphaxi * cmplx.Conj(v)
 					jy += incY
 				}
-				y[iy] += alphaxi * complex(real(aRow[k]),0)
+				y[iy] += alphaxi * complex(real(aRow[k]), 0)
 				iy += incY
 			}
 		} else {
@@ -501,7 +501,7 @@ func (Implementation) Zhbmv(uplo blas.Uplo, n, k int, alpha complex128, ab []com
 					jx += incX
 					jy += incY
 				}
-				y[iy] += alphaxi * complex(real(aRow[k]),0)
+				y[iy] += alphaxi * complex(real(aRow[k]), 0)
 				ix += incX
 				iy += incY
 			}

@@ -40,7 +40,6 @@ script:
  - go build -v ./...
  - go test -a $TAGS -v ./...
  - if [[ $TRAVIS_SECURE_ENV_VARS = "true" ]]; then bash ./.travis/test-coverage.sh; fi
- - ${TRAVIS_BUILD_DIR}/.travis/check-rand.sh
  # This is run last since it alters the tree.
  - ${TRAVIS_BUILD_DIR}/.travis/check-generate.sh
 

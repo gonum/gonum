@@ -15,7 +15,7 @@ import (
 //
 // If dst is nil, a new mat.Dense is allocated. If dst is not a zero matrix,
 // the dimensions of dst and cdt must match otherwise TransformDisjunctive will
-// panic. If cdt contains values other 0 or 1 TransformDisjunctive will panic.
+// panic. If cdt contains values other than 0 or 1 TransformDisjunctive will panic.
 //
 // It is safe to reuse cdt as dst.
 func TransformDisjunctive(dst *mat.Dense, cdt mat.Matrix) *mat.Dense {

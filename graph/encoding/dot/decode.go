@@ -26,14 +26,14 @@ type DOTIDSetter interface {
 	SetDOTID(id string)
 }
 
-// PortSetter is implemented by graph.Edge and graph.Line that want to
-// access to the DOT port and compass directions of an edge.
+// PortSetter is implemented by graph.Edge and graph.Line that can set
+// the DOT port and compass directions of an edge.
 type PortSetter interface {
-	// SetFromPort will receive the port and compass direction of the
-	// From side of an edge, if defined.
+	// SetFromPort sets the From port and
+	// compass direction of the receiver.
 	SetFromPort(port, compass string)
-	// SetTo will receive the port and compass direction of the To side
-	// of an edge, if defined.
+	// SetToPort sets the To port and compass
+	// direction of the receiver.
 	SetToPort(port, compass string)
 }
 

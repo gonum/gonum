@@ -15,17 +15,32 @@ import (
 
 var (
 	blacklist = []string{
-		"github.com/gonum/", // prefer gonum.org/v1/gonum
-		"math/rand",         // prefer golang.org/x/exp/rand
+		"github.com/gonum/.*", // prefer gonum.org/v1/gonum
+		"math/rand",           // prefer golang.org/x/exp/rand
 	}
 )
 
 func TestCheck(t *testing.T) {
+	blacklist, err := str2RE(blacklist)
+	if err != nil {
+		t.Fatal(err)
+	}
 	fset := token.NewFileSet()
 	for _, tc := range []struct {
 		pkg string
 		err error
 	}{
+		{
+			pkg: "math/rand",
+			err: Error{
+				File:    "file.go",
+				Imports: []string{"math/rand"},
+			},
+		},
+		{
+			pkg: "math",
+			err: nil,
+		},
 		{
 			pkg: "github.com/gonum/",
 			err: Error{

@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -21,8 +22,13 @@ import (
 // If Check encounters multiple files importing deprecated imports, the
 // first error is returned to the user.
 func CheckBlacklisted(dir string, blacklist []string) error {
+	list, err := str2RE(blacklist)
+	if err != nil {
+		return err
+	}
+
 	var files []string
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		switch {
 		case info.IsDir():
 			switch info.Name() {
@@ -43,7 +49,7 @@ func CheckBlacklisted(dir string, blacklist []string) error {
 
 	fset := token.NewFileSet()
 	for _, fname := range files {
-		e := process(fname, fset, blacklist)
+		e := process(fname, fset, list)
 		if e != nil {
 			if err == nil {
 				err = e
@@ -53,7 +59,7 @@ func CheckBlacklisted(dir string, blacklist []string) error {
 	return err
 }
 
-func process(fname string, fset *token.FileSet, blacklist []string) error {
+func process(fname string, fset *token.FileSet, blacklist []*regexp.Regexp) error {
 	src, err := ioutil.ReadFile(fname)
 	if err != nil {
 		return err
@@ -61,7 +67,7 @@ func process(fname string, fset *token.FileSet, blacklist []string) error {
 	return checkImports(fset, src, fname, blacklist)
 }
 
-func checkImports(fset *token.FileSet, src []byte, fname string, blacklist []string) error {
+func checkImports(fset *token.FileSet, src []byte, fname string, blacklist []*regexp.Regexp) error {
 	f, err := parser.ParseFile(fset, fname, src, parser.ImportsOnly)
 	if err != nil {
 		return err
@@ -80,13 +86,27 @@ func checkImports(fset *token.FileSet, src []byte, fname string, blacklist []str
 	return nil
 }
 
-func blacklisted(path string, blacklist []string) bool {
+func blacklisted(path string, blacklist []*regexp.Regexp) bool {
 	for _, v := range blacklist {
-		if strings.HasPrefix(path, v) {
+		if v.MatchString(path) {
 			return true
 		}
 	}
 	return false
+}
+
+func str2RE(vs []string) ([]*regexp.Regexp, error) {
+	var (
+		err error
+		o   = make([]*regexp.Regexp, len(vs))
+	)
+	for i, v := range vs {
+		o[i], err = regexp.Compile(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return o, nil
 }
 
 // Error stores information about a deprecated import in a Go file.

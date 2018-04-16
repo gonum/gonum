@@ -55,10 +55,7 @@ func TestParseFile(t *testing.T) {
 			out: "../internal/testdata/attr_sep.golden",
 		},
 		{in: "../internal/testdata/subgraph_vertex.dot"},
-		{
-			in:  "../internal/testdata/port.dot",
-			out: "../internal/testdata/port.golden",
-		},
+		{in: "../internal/testdata/port.dot"},
 	}
 	for _, g := range golden {
 		file, err := dot.ParseFile(g.in)

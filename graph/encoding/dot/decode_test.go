@@ -34,6 +34,14 @@ func TestRoundTrip(t *testing.T) {
 			want:     undirectedID,
 			directed: false,
 		},
+		{
+			want:     directedWithPorts,
+			directed: true,
+		},
+		{
+			want:     undirectedWithPorts,
+			directed: false,
+		},
 	}
 	for i, g := range golden {
 		var dst encoding.Builder
@@ -118,6 +126,42 @@ const undirectedID = `graph H {
 
 	// Edge definitions.
 	A -- B;
+}`
+
+const directedWithPorts = `digraph {
+	// Node definitions.
+	A;
+	B;
+	C;
+	D;
+	E;
+	F;
+
+	// Edge definitions.
+	A:foo -> B:bar;
+	A -> C:bar;
+	B:foo -> C;
+	D:foo:n -> E:bar:s;
+	D:e -> F:bar:w;
+	E:_ -> F:c;
+}`
+
+const undirectedWithPorts = `graph {
+	// Node definitions.
+	A;
+	B;
+	C;
+	D;
+	E;
+	F;
+
+	// Edge definitions.
+	A:foo -- B:bar;
+	A -- C:bar;
+	B:foo -- C;
+	D:foo:n -- E:bar:s;
+	D:e -- F:bar:w;
+	E:_ -- F:c;
 }`
 
 // Below follows a minimal implementation of a graph capable of validating the
@@ -257,12 +301,18 @@ func (n *dotNode) Attributes() []encoding.Attribute {
 	}}
 }
 
+type dotPortLabels struct {
+	Port, Compass string
+}
+
 // dotEdge extends simple.Edge with a label field to test round-trip encoding and
 // decoding of edge DOT label attributes.
 type dotEdge struct {
 	graph.Edge
 	// Edge label.
-	Label string
+	Label          string
+	FromPortLabels dotPortLabels
+	ToPortLabels   dotPortLabels
 }
 
 // SetAttribute sets a DOT attribute.
@@ -283,6 +333,26 @@ func (e *dotEdge) Attributes() []encoding.Attribute {
 		Key:   "label",
 		Value: e.Label,
 	}}
+}
+
+func (e *dotEdge) SetFromPort(port, compass string) error {
+	e.FromPortLabels.Port = port
+	e.FromPortLabels.Compass = compass
+	return nil
+}
+
+func (e *dotEdge) SetToPort(port, compass string) error {
+	e.ToPortLabels.Port = port
+	e.ToPortLabels.Compass = compass
+	return nil
+}
+
+func (e *dotEdge) FromPort() (port, compass string) {
+	return e.FromPortLabels.Port, e.FromPortLabels.Compass
+}
+
+func (e *dotEdge) ToPort() (port, compass string) {
+	return e.ToPortLabels.Port, e.ToPortLabels.Compass
 }
 
 // attributes is a helper for global attributes.

@@ -299,7 +299,7 @@ func getCompassPoint(s string) (ast.CompassPoint, bool) {
 	case "c":
 		return ast.CompassPointCenter, true
 	}
-	return ast.CompassPointDefault, false
+	return ast.CompassPointNone, false
 }
 
 // === [ Identifiers ] =========================================================

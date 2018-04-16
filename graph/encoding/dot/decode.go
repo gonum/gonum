@@ -26,6 +26,18 @@ type DOTIDSetter interface {
 	SetDOTID(id string)
 }
 
+// PortSetter is implemented by graph.Edge and graph.Line that can set
+// the DOT port and compass directions of an edge.
+type PortSetter interface {
+	// SetFromPort sets the From port and
+	// compass direction of the receiver.
+	SetFromPort(port, compass string) error
+	
+	// SetToPort sets the To port and compass
+	// direction of the receiver.
+	SetToPort(port, compass string) error
+}
+
 // Unmarshal parses the Graphviz DOT-encoded data and stores the result in dst.
 func Unmarshal(data []byte, dst encoding.Builder) error {
 	file, err := dot.ParseBytes(data)
@@ -169,6 +181,30 @@ func (gen *generator) addStmt(dst encoding.Builder, stmt ast.Stmt) {
 	}
 }
 
+// applyPortsToEdge applies the available port metadata from an ast.Edge
+// to a graph.Edge
+func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
+	if ps, isPortSetter := edge.(PortSetter); isPortSetter {
+		if n, vertexIsNode := from.(*ast.Node); vertexIsNode {
+			if n.Port != nil {
+				err := ps.SetFromPort(n.Port.ID, n.Port.CompassPoint.String())
+				if err != nil {
+					panic(fmt.Errorf("unable to unmarshal edge port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
+				}
+			}
+		}
+
+		if n, vertexIsNode := to.Vertex.(*ast.Node); vertexIsNode {
+			if n.Port != nil {
+				err := ps.SetToPort(n.Port.ID, n.Port.CompassPoint.String())
+				if err != nil {
+					panic(fmt.Errorf("unable to unmarshal edge DOT port (:%s:%s)", n.Port.ID, n.Port.CompassPoint.String()))
+				}
+			}
+		}
+	}
+}
+
 // addEdgeStmt adds the given edge statement to the graph.
 func (gen *generator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, stmt.From)
@@ -177,6 +213,8 @@ func (gen *generator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 		for _, t := range ts {
 			edge := dst.NewEdge(f, t)
 			dst.SetEdge(edge)
+			applyPortsToEdge(stmt.From, stmt.To, edge)
+
 			e, ok := edge.(encoding.AttributeSetter)
 			if !ok {
 				continue
@@ -223,6 +261,7 @@ func (gen *generator) addEdge(dst encoding.Builder, to *ast.Edge) []graph.Node {
 			for _, t := range ts {
 				edge := dst.NewEdge(f, t)
 				dst.SetEdge(edge)
+				applyPortsToEdge(to.Vertex, to.To, edge)
 			}
 		}
 	}

@@ -256,14 +256,6 @@ func (e portedEdge) From() graph.Node { return e.from }
 func (e portedEdge) To() graph.Node   { return e.to }
 func (e portedEdge) Weight() float64  { return 0 }
 
-// TODO(kortschak): Figure out a better way to handle the fact that
-// headedness is an undefined concept in undirected graphs. We sort
-// nodes by ID, so lower ID nodes are always from nodes in undirected
-// graphs. We can probably do this in the printer, but I am leaving
-// this here as a WARNING.
-// Maybe the approach should be to document that for undirected graphs
-// the low ID node should be returned by the FromPort and the high ID
-// by the ToPort calls.
 func (e portedEdge) FromPort() (port, compass string) {
 	return e.fromPort, e.fromCompass
 }
@@ -1054,14 +1046,7 @@ var encodeTests = []struct {
 				{from: 2, to: 3}: {fromPort: "Zwei", fromCompass: "e"},
 				{from: 2, to: 4}: {fromPort: "Two", fromCompass: "w", toPort: "Four", toCompass: "w"},
 				{from: 3, to: 4}: {toPort: "Four", toCompass: "w"},
-
-				// This definition is reversed (see comment above at portedEdge
-				// definition) so that 4 gets the from port. This is a result
-				// of the fact that we sort nodes by ID, so the lower node
-				// will be always be printed first when the graph is undirected,
-				// thus becoming the from port, but we define the edges here
-				// from a directed adjacency list.
-				{from: 4, to: 0}: {fromCompass: "s", toPort: "Four", toCompass: "_"},
+				{from: 4, to: 0}: {fromPort: "Four", fromCompass: "_", toCompass: "s"},
 			},
 		),
 

@@ -43,7 +43,7 @@ func (g InverseGamma) CDF(x float64) float64 {
 
 // ExKurtosis returns the excess kurtosis of the distribution.
 func (g InverseGamma) ExKurtosis() float64 {
-	if g.Alpha < 4 {
+	if g.Alpha <= 4 {
 		return math.Inf(1)
 	}
 	return (30*g.Alpha - 66) / (g.Alpha - 3) / (g.Alpha - 4)
@@ -63,7 +63,7 @@ func (g InverseGamma) LogProb(x float64) float64 {
 
 // Mean returns the mean of the probability distribution.
 func (g InverseGamma) Mean() float64 {
-	if g.Alpha < 1 {
+	if g.Alpha <= 1 {
 		return math.Inf(1)
 	}
 	return g.Beta / (g.Alpha - 1)
@@ -71,9 +71,6 @@ func (g InverseGamma) Mean() float64 {
 
 // Mode returns the mode of the distribution.
 func (g InverseGamma) Mode() float64 {
-	if g.Alpha < 1 {
-		return math.NaN()
-	}
 	return g.Beta / (g.Alpha + 1)
 }
 
@@ -89,7 +86,7 @@ func (g InverseGamma) Prob(x float64) float64 {
 
 // Quantile returns the inverse of the cumulative distribution function.
 func (g InverseGamma) Quantile(p float64) float64 {
-	if p < 0 || p > 1 {
+	if p < 0 || 1 < p {
 		panic(badPercentile)
 	}
 	return (1 / (mathext.GammaIncCompInv(g.Alpha, p))) * g.Beta
@@ -118,7 +115,7 @@ func (g InverseGamma) StdDev() float64 {
 
 // Variance returns the variance of the probability distribution.
 func (g InverseGamma) Variance() float64 {
-	if g.Alpha < 2 {
+	if g.Alpha <= 2 {
 		return math.Inf(1)
 	}
 	v := g.Beta / (g.Alpha - 1)

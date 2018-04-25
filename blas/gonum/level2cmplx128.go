@@ -1273,10 +1273,10 @@ func (Implementation) Ztbmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		if uplo == blas.Upper {
 			if incX == 1 {
 				for i := 0; i < n; i++ {
-					kk := min(k, n-i-1)
 					if diag == blas.NonUnit {
 						x[i] *= ab[i*ldab]
 					}
+					kk := min(k, n-i-1)
 					for j, aij := range ab[i*ldab+1 : i*ldab+kk+1] {
 						x[i] += x[i+j+1] * aij
 					}
@@ -1284,10 +1284,10 @@ func (Implementation) Ztbmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 			} else {
 				ix := kx
 				for i := 0; i < n; i++ {
-					kk := min(k, n-i-1)
 					if diag == blas.NonUnit {
 						x[ix] *= ab[i*ldab]
 					}
+					kk := min(k, n-i-1)
 					jx := ix + incX
 					for _, aij := range ab[i*ldab+1 : i*ldab+kk+1] {
 						x[ix] += x[jx] * aij
@@ -1299,10 +1299,10 @@ func (Implementation) Ztbmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 		} else {
 			if incX == 1 {
 				for i := n - 1; i >= 0; i-- {
-					kk := min(k, i)
 					if diag == blas.NonUnit {
 						x[i] *= ab[i*ldab+k]
 					}
+					kk := min(k, i)
 					for j, aij := range ab[i*ldab+k-kk : i*ldab+k] {
 						x[i] += x[i-kk+j] * aij
 					}
@@ -1310,10 +1310,10 @@ func (Implementation) Ztbmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 			} else {
 				ix := kx + (n-1)*incX
 				for i := n - 1; i >= 0; i-- {
-					kk := min(k, i)
 					if diag == blas.NonUnit {
 						x[ix] *= ab[i*ldab+k]
 					}
+					kk := min(k, i)
 					jx := ix - kk*incX
 					for _, aij := range ab[i*ldab+k-kk : i*ldab+k] {
 						x[ix] += x[jx] * aij

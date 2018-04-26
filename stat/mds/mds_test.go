@@ -123,7 +123,7 @@ func TestTorgersonScaling(t *testing.T) {
 			t.Errorf("unexpected result for test %d:\ngot:\n%.4f\nwant:\n%.4f",
 				i, mat.Formatted(got.Slice(0, n, 0, wc)), mat.Formatted(test.want))
 		}
-		if !floats.EqualApprox(gotVals, test.wantVals, 1e-12) {
+		if !floats.EqualApprox(gotVals, test.wantVals, 1e-10) {
 			t.Errorf("unexpected Eigenvalues for test %d:\ngot: %.12e\nwant:%.12e", i, gotVals, test.wantVals)
 		}
 	}

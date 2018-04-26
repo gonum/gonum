@@ -13,13 +13,14 @@ import (
 
 // TorgersonScaling converts a dissimilarity matrix to a matrix containing
 // Euclidean coordinates. TorgersonScaling places the coordinates in dst and
-// returns it and true if successful. If the scaling is not successful, dst
-// is returned, but will not be a valid scaling.
+// returns it and the number of positive Eigenvalues if successful.
+// If the scaling is not successful, dst is returned, but will not be a valid scaling.
+// Eigenvalues will be copied into eigdst and returned as eig if it is provided.
 //
 // If dst is nil, a new mat.Dense is allocated. If dst is not a zero matrix,
 // the dimensions of dst and dis must match otherwise TorgersonScaling will panic.
 // The dis matrix must be square or TorgersonScaling will panic.
-func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) (mds *mat.Dense, ok bool) {
+func TorgersonScaling(dst *mat.Dense, eigdst []float64, dis mat.Symmetric) (k int, mds *mat.Dense, eig []float64) {
 	// https://doi.org/10.1007/0-387-28981-X_12
 
 	n := dis.Symmetric()
@@ -53,23 +54,28 @@ func TorgersonScaling(dst *mat.Dense, dis mat.Symmetric) (mds *mat.Dense, ok boo
 	}
 
 	var ed mat.EigenSym
-	ok = ed.Factorize(b, true)
+	ok := ed.Factorize(b, true)
 	if !ok {
-		return dst, false
+		return 0, dst, eigdst
 	}
 	dst.EigenvectorsSym(&ed)
 	vals := ed.Values(nil)
 	reverse(vals, dst.RawMatrix())
+	copy(eigdst, vals)
 	for i, v := range vals {
 		if v < 0 {
 			vals[i] = 0
 			continue
 		}
+		k = i + 1
 		vals[i] = math.Sqrt(v)
 	}
+
+	// TODO(kortschak): Make use of the knowledge
+	// of k to avoid doing unnecessary work.
 	dst.Mul(dst, mat.NewDiagonal(len(vals), vals))
 
-	return dst, true
+	return k, dst, eigdst
 }
 
 func reverse(values []float64, vectors blas64.General) {

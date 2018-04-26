@@ -7,12 +7,15 @@ package mds
 import (
 	"testing"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 
 var torgersonScalingTests = []struct {
-	dis  mat.Symmetric
-	want *mat.Dense
+	dis      mat.Symmetric
+	wantK    int
+	want     *mat.Dense
+	wantVals []float64
 }{
 	// All expected values obtained from running R cmdscale with the input here.
 	{
@@ -27,6 +30,7 @@ var torgersonScalingTests = []struct {
 			2130, 1991, 3604, 2652, 3008, 2720, 0, 3288,
 			1161, 2026, 732, 3146, 1057, 713, 3288, 0,
 		}),
+		wantK: 4,
 		want: mat.NewDense(8, 4, []float64{
 			-208.3266, 369.5373, 80.544010, 7.078974,
 			904.8449, -356.0745, 92.309541, -19.077511,
@@ -37,6 +41,10 @@ var torgersonScalingTests = []struct {
 			1591.6571, 1511.3688, -43.308441, 1.043611,
 			-1118.9564, -351.0825, -8.372847, 9.587699,
 		}),
+		wantVals: []float64{
+			1.172027697614e+07, 5.686036184502e+06, 2.474981412369e+04, 1.238300279584e+03,
+			-5.444455825182e-10, -2.471028925712e+02, -2.412961483429e+03, -8.452858567111e+04,
+		},
 	},
 	{
 		// R eurodist dataset.
@@ -63,6 +71,7 @@ var torgersonScalingTests = []struct {
 			3927, 2868, 1616, 1786, 2196, 1403, 650, 2068, 3886, 949, 1500, 3231, 2108, 3188, 2428, 2187, 1754, 1827, 2707, 0, 2105,
 			1991, 1802, 1175, 1381, 1588, 937, 1455, 1019, 2974, 1155, 1205, 2937, 1157, 2409, 1363, 898, 428, 1249, 1209, 2105, 0,
 		}),
+		wantK: 12,
 		want: mat.NewDense(21, 11, []float64{
 			2290.274680, 1798.80293, 53.79314, -103.826958, -156.955115, 54.755434, -47.6768205, 1.241284, -14.893196, -6.366664, 4.818373,
 			-825.382790, 546.81148, -113.85842, 84.585831, 291.440759, -33.046236, -74.5267190, 3.766233, 225.620420, -21.270973, 22.050484,
@@ -86,21 +95,36 @@ var torgersonScalingTests = []struct {
 			839.445911, -1836.79055, -541.35188, -108.755016, 25.155430, 41.399927, 71.8793196, 9.438407, 73.554358, -35.415426, -6.021569,
 			911.230500, 205.93020, 98.02313, 62.375253, 198.960032, -525.197308, -13.9515306, -183.562155, -44.881159, -43.133195, 15.060856,
 		}),
+		wantVals: []float64{
+			1.953837708954e+07, 1.185655533400e+07, 1.528844467987e+06, 1.118741950509e+06,
+			7.893472026801e+05, 5.816552067198e+05, 2.623192077011e+05, 1.925975616762e+05,
+			1.450845349644e+05, 1.079673069262e+05, 5.139484110774e+04, 7.598368987955e-11,
+			-9.496124219168e+03, -5.305819566947e+04, -1.322165749977e+05, -2.573360255637e+05,
+			-3.326719007160e+05, -5.162522542344e+05, -9.191490984121e+05, -1.006503960172e+06,
+			-2.251844331736e+06,
+		},
 	},
 }
 
 func TestTorgersonScaling(t *testing.T) {
 	for i, test := range torgersonScalingTests {
-		got, ok := TorgersonScaling(nil, test.dis)
-		if !ok {
+		_, c := test.dis.Dims()
+		gotK, got, gotVals := TorgersonScaling(nil, make([]float64, c), test.dis)
+		if gotK == 0 {
 			t.Error("unexpected scaling failure")
 			continue
 		}
 		_, wc := test.want.Dims()
 		n := test.dis.Symmetric()
+		if gotK != test.wantK {
+			t.Errorf("unexpected k for test %d: got:%d want:%d", i, gotK, test.wantK)
+		}
 		if !mat.EqualApprox(colAbs{got.Slice(0, n, 0, wc)}, colAbs{test.want}, 1e-6) {
 			t.Errorf("unexpected result for test %d:\ngot:\n%.4f\nwant:\n%.4f",
 				i, mat.Formatted(got.Slice(0, n, 0, wc)), mat.Formatted(test.want))
+		}
+		if !floats.EqualApprox(gotVals, test.wantVals, 1e-12) {
+			t.Errorf("unexpected Eigenvalues for test %d:\ngot: %.12e\nwant:%.12e", i, gotVals, test.wantVals)
 		}
 	}
 }

@@ -40,10 +40,11 @@ func (t *FFT) Reset(n int) {
 	fftpack.Rffti(n, t.work, t.ifac[:])
 }
 
-// Coefficients computes the Fourier coefficients of the input sequence, seq,
-// placing the result in dst and returning it. This transform is
-// unnormalized; a call to Coefficients followed by a call of Sequence will
-// multiply the input sequence by the length of the sequence.
+// Coefficients computes the Fourier coefficients of the input sequence,
+// converting the time series in seq into the frequency spectrum, placing
+// the result in dst and returning it. This transform is unnormalized; a
+// call to Coefficients followed by a call of Sequence will multiply the
+// input sequence by the length of the sequence.
 //
 // If the length of seq is not t.Len(), Coefficients will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
@@ -75,9 +76,10 @@ func (t *FFT) Coefficients(dst []complex128, seq []float64) []complex128 {
 }
 
 // Sequence computes the real perodic sequence from the Fourier coefficients,
-// coeff, placing the result in dst and returning it. This transform is
-// unnormalized; a call to Coefficients followed by a call of Sequence will
-// multiply the input sequence by the length of the sequence.
+// converting the frequency spectrum in coeff into a time series, placing the
+// result in dst and returning it. This transform is unnormalized; a call to
+// Coefficients followed by a call of Sequence will multiply the input sequence
+// by the length of the sequence.
 //
 // If the length of coeff is not t.Len()/2+1, Sequence will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
@@ -156,9 +158,10 @@ func (t *CmplxFFT) Reset(n int) {
 }
 
 // Coefficients computes the Fourier coefficients of a complex input sequence,
-// seq, placing the result in dst and returning it. This transform is
-// unnormalized; a call to Coefficients followed by a call of Sequence will
-// multiply the input sequence by the length of the sequence.
+// converting the time series in seq into the frequency spectrum, placing
+// the result in dst and returning it. This transform is unnormalized; a call
+// to Coefficients followed by a call of Sequence will multiply the input
+// sequence by the length of the sequence.
 //
 // If the length of seq is not t.Len(), Coefficients will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
@@ -185,9 +188,10 @@ func (t *CmplxFFT) Coefficients(dst, seq []complex128) []complex128 {
 }
 
 // Sequence computes the complex perodic sequence from the Fourier coefficients,
-// coeff, placing the result in dst and returning it. This transform is
-// unnormalized; a call to Coefficients followed by a call of Sequence will
-// multiply the input sequence by the length of the sequence.
+// converting the frequency spectrum in coeff into a time series, placing the
+// result in dst and returning it. This transform is unnormalized; a call to
+// Coefficients followed by a call of Sequence will multiply the input sequence
+// by the length of the sequence.
 //
 // If the length of coeff is not t.Len(), Sequence will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and

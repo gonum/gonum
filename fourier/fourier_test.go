@@ -15,13 +15,14 @@ import (
 
 func TestFFT(t *testing.T) {
 	const tol = 1e-10
+	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewFFT", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			fft := NewFFT(n)
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			coeff := fft.Coefficients(nil, want)
@@ -40,7 +41,7 @@ func TestFFT(t *testing.T) {
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			coeff := fft.Coefficients(nil, want)
@@ -120,13 +121,14 @@ func TestFFT(t *testing.T) {
 
 func TestCmplxFFT(t *testing.T) {
 	const tol = 1e-12
+	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewFFT", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			fft := NewCmplxFFT(n)
 
 			want := make([]complex128, n)
 			for i := range want {
-				want[i] = complex(rand.Float64(), rand.Float64())
+				want[i] = complex(rnd.Float64(), rnd.Float64())
 			}
 
 			coeff := fft.Coefficients(nil, want)
@@ -148,7 +150,7 @@ func TestCmplxFFT(t *testing.T) {
 
 			want := make([]complex128, n)
 			for i := range want {
-				want[i] = complex(rand.Float64(), rand.Float64())
+				want[i] = complex(rnd.Float64(), rnd.Float64())
 			}
 
 			coeff := fft.Coefficients(nil, want)
@@ -216,13 +218,14 @@ func TestCmplxFFT(t *testing.T) {
 
 func TestDCT(t *testing.T) {
 	const tol = 1e-10
+	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewDCT", func(t *testing.T) {
 		for n := 2; n <= 200; n++ {
 			dct := NewDCT(n)
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			coeff := dct.Transform(nil, want)
@@ -241,7 +244,7 @@ func TestDCT(t *testing.T) {
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			coeff := dct.Transform(nil, want)
@@ -257,13 +260,14 @@ func TestDCT(t *testing.T) {
 
 func TestDST(t *testing.T) {
 	const tol = 1e-10
+	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewDST", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			dst := NewDST(n)
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			coeff := dst.Transform(nil, want)
@@ -282,7 +286,7 @@ func TestDST(t *testing.T) {
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			coeff := dst.Transform(nil, want)
@@ -298,13 +302,14 @@ func TestDST(t *testing.T) {
 
 func TestQuarterWaveFFT(t *testing.T) {
 	const tol = 1e-10
+	rnd := rand.New(rand.NewSource(1))
 	t.Run("NewQuarterWaveFFT", func(t *testing.T) {
 		for n := 1; n <= 200; n++ {
 			qw := NewQuarterWaveFFT(n)
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			{
@@ -335,7 +340,7 @@ func TestQuarterWaveFFT(t *testing.T) {
 
 			want := make([]float64, n)
 			for i := range want {
-				want[i] = rand.Float64()
+				want[i] = rnd.Float64()
 			}
 
 			{

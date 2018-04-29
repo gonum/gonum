@@ -30,7 +30,7 @@ func TestFFT(t *testing.T) {
 			floats.Scale(1/float64(n), got)
 
 			if !floats.EqualApprox(got, want, tol) {
-				t.Errorf("unexpected result for ifft(fft(x)) for length %d", n)
+				t.Errorf("unexpected result for sequence(coefficients(x)) for length %d", n)
 			}
 		}
 	})
@@ -49,7 +49,7 @@ func TestFFT(t *testing.T) {
 			floats.Scale(1/float64(n), got)
 
 			if !floats.EqualApprox(got, want, tol) {
-				t.Errorf("unexpected result for ifft(fft(x)) for length %d", n)
+				t.Errorf("unexpected result for sequence(coefficients(x)) for length %d", n)
 			}
 		}
 	})
@@ -91,7 +91,7 @@ func TestFFT(t *testing.T) {
 			fft.Reset(len(test.in))
 			got := fft.Coefficients(nil, test.in)
 			if !equalApprox(got, test.want, tol) {
-				t.Errorf("unexpected result for fft(%g):\ngot: %g\nwant:%g",
+				t.Errorf("unexpected result for coefficients(%g):\ngot: %g\nwant:%g",
 					test.in, got, test.want)
 			}
 		}
@@ -139,7 +139,7 @@ func TestCmplxFFT(t *testing.T) {
 			}
 
 			if !equalApprox(got, want, tol) {
-				t.Errorf("unexpected result for complex ifft(fft(x)) for length %d", n)
+				t.Errorf("unexpected result for complex sequence(coefficients(x)) for length %d", n)
 			}
 		}
 	})
@@ -161,7 +161,7 @@ func TestCmplxFFT(t *testing.T) {
 			}
 
 			if !equalApprox(got, want, tol) {
-				t.Errorf("unexpected result for complex ifft(fft(x)) for length %d", n)
+				t.Errorf("unexpected result for complex sequence(coefficients(x)) for length %d", n)
 			}
 		}
 	})
@@ -318,7 +318,7 @@ func TestQuarterWaveFFT(t *testing.T) {
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {
-					t.Errorf("unexpected result for CosFFT(CosIFFT(x)) for length %d", n)
+					t.Errorf("unexpected result for cossequence(coscoefficient(x)) for length %d", n)
 				}
 			}
 
@@ -328,7 +328,7 @@ func TestQuarterWaveFFT(t *testing.T) {
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {
-					t.Errorf("unexpected result for SinFFT(SinIFFT(x)) for length %d", n)
+					t.Errorf("unexpected result for sinsequence(sincoefficient(x)) for length %d", n)
 				}
 			}
 		}
@@ -349,7 +349,7 @@ func TestQuarterWaveFFT(t *testing.T) {
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {
-					t.Errorf("unexpected result for CosFFT(CosIFFT(x)) for length %d", n)
+					t.Errorf("unexpected result for cossequence(coscoefficient(x)) for length %d", n)
 				}
 			}
 
@@ -359,7 +359,7 @@ func TestQuarterWaveFFT(t *testing.T) {
 				floats.Scale(1/float64(4*n), got)
 
 				if !floats.EqualApprox(got, want, tol) {
-					t.Errorf("unexpected result for SinFFT(SinIFFT(x)) for length %d", n)
+					t.Errorf("unexpected result for sinsequence(sincoefficient(x)) for length %d", n)
 				}
 			}
 		}

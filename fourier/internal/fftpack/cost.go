@@ -116,13 +116,13 @@ func Cost(n int, x, work []float64, ifac []int) {
 		c1 := x[0] - x[n-1]
 		x[0] += x[n-1]
 		for k := 1; k < n/2; k++ {
-			kc := n - k
-			t1 := x[k] + x[kc-1]
-			t2 := x[k] - x[kc-1]
-			c1 += work[kc-1] * t2
+			kc := n - k - 1
+			t1 := x[k] + x[kc]
+			t2 := x[k] - x[kc]
+			c1 += work[kc] * t2
 			t2 *= work[k]
 			x[k] = t1 - t2
-			x[kc-1] = t1 + t2
+			x[kc] = t1 + t2
 		}
 		if n%2 != 0 {
 			x[n/2] *= 2

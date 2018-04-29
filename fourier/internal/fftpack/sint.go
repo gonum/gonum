@@ -119,11 +119,11 @@ func sint1(n int, war, was, xh, x []float64, ifac []int) {
 	default:
 		x[0] = 0
 		for k := 0; k < n/2; k++ {
-			kc := n - k
-			t1 := xh[k] - xh[kc-1]
-			t2 := was[k] * (xh[k] + xh[kc-1])
+			kc := n - k - 1
+			t1 := xh[k] - xh[kc]
+			t2 := was[k] * (xh[k] + xh[kc])
 			x[k+1] = t1 + t2
-			x[kc+1-1] = t2 - t1
+			x[kc+1] = t2 - t1
 		}
 		if n%2 != 0 {
 			x[n/2+1] = 4 * xh[n/2]

@@ -27,7 +27,7 @@ type Beta struct {
 	// than 0.
 	Beta float64
 
-	Src *rand.Rand
+	Src rand.Source
 }
 
 // CDF computes the value of the cumulative distribution function at x.

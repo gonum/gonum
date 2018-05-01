@@ -79,7 +79,7 @@ func (w SampleUniformWeighted) SampleWeighted(batch, weights []float64) {
 // for easy sampling from the unit hypercube.
 type LatinHypercube struct {
 	Q   distuv.Quantiler
-	Src *rand.Rand
+	Src rand.Source
 }
 
 // Sample generates len(batch) samples using the LatinHypercube generation
@@ -88,13 +88,14 @@ func (l LatinHypercube) Sample(batch []float64) {
 	latinHypercube(batch, l.Q, l.Src)
 }
 
-func latinHypercube(batch []float64, q distuv.Quantiler, src *rand.Rand) {
+func latinHypercube(batch []float64, q distuv.Quantiler, src rand.Source) {
 	n := len(batch)
 	var perm []int
 	var f64 func() float64
 	if src != nil {
-		f64 = src.Float64
-		perm = src.Perm(n)
+		r := rand.New(src)
+		f64 = r.Float64
+		perm = r.Perm(n)
 	} else {
 		f64 = rand.Float64
 		perm = rand.Perm(n)
@@ -167,7 +168,7 @@ type Rejection struct {
 	C        float64
 	Target   distuv.LogProber
 	Proposal distuv.RandLogProber
-	Src      *rand.Rand
+	Src      rand.Source
 
 	err      error
 	proposed int
@@ -199,13 +200,13 @@ func (r *Rejection) Sample(batch []float64) {
 	r.proposed = proposed
 }
 
-func rejection(batch []float64, target distuv.LogProber, proposal distuv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
+func rejection(batch []float64, target distuv.LogProber, proposal distuv.RandLogProber, c float64, src rand.Source) (nProposed int, ok bool) {
 	if c < 1 {
 		panic("rejection: acceptance constant must be greater than 1")
 	}
 	f64 := rand.Float64
 	if src != nil {
-		f64 = src.Float64
+		f64 = rand.New(src).Float64
 	}
 	var idx int
 	for {
@@ -279,7 +280,7 @@ type MetropolisHastings struct {
 	Initial  float64
 	Target   distuv.LogProber
 	Proposal MHProposal
-	Src      *rand.Rand
+	Src      rand.Source
 
 	BurnIn int
 	Rate   int
@@ -336,10 +337,10 @@ func (m MetropolisHastings) Sample(batch []float64) {
 	}
 }
 
-func metropolisHastings(batch []float64, initial float64, target distuv.LogProber, proposal MHProposal, src *rand.Rand) {
+func metropolisHastings(batch []float64, initial float64, target distuv.LogProber, proposal MHProposal, src rand.Source) {
 	f64 := rand.Float64
 	if src != nil {
-		f64 = src.Float64
+		f64 = rand.New(src).Float64
 	}
 	current := initial
 	currentLogProb := target.LogProb(initial)

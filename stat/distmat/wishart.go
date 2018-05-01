@@ -27,7 +27,7 @@ import (
 // See https://en.wikipedia.org/wiki/Wishart_distribution for more information.
 type Wishart struct {
 	nu  float64
-	src *rand.Rand
+	src rand.Source
 
 	dim     int
 	cholv   mat.Cholesky
@@ -43,7 +43,7 @@ type Wishart struct {
 // successful.
 //
 // NewWishart panics if nu <= d - 1 where d is the order of v.
-func NewWishart(v mat.Symmetric, nu float64, src *rand.Rand) (*Wishart, bool) {
+func NewWishart(v mat.Symmetric, nu float64, src rand.Source) (*Wishart, bool) {
 	dim := v.Symmetric()
 	if nu <= float64(dim-1) {
 		panic("wishart: nu must be greater than dim-1")

@@ -21,7 +21,7 @@ var UnitNormal = Normal{Mu: 0, Sigma: 1}
 type Normal struct {
 	Mu    float64 // Mean of the normal distribution
 	Sigma float64 // Standard deviation of the normal distribution
-	Src   *rand.Rand
+	Src   rand.Source
 
 	// Needs to be Mu and Sigma and not Mean and StdDev because Normal has functions
 	// Mean and StdDev
@@ -134,7 +134,7 @@ func (n Normal) Rand() float64 {
 	if n.Src == nil {
 		rnd = rand.NormFloat64()
 	} else {
-		rnd = n.Src.NormFloat64()
+		rnd = rand.New(n.Src).NormFloat64()
 	}
 	return rnd*n.Sigma + n.Mu
 }

@@ -165,7 +165,7 @@ func (g UndirectedLayers) Layer(l int) graph.Undirected { return g[l] }
 // edge weight that does not sign-match the layer weight.
 //
 // graph.Undirect may be used as a shim to allow modularization of directed graphs.
-func louvainUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []float64, all bool, src *rand.Rand) *ReducedUndirectedMultiplex {
+func louvainUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []float64, all bool, src rand.Source) *ReducedUndirectedMultiplex {
 	if weights != nil && len(weights) != g.Depth() {
 		panic("community: weights vector length mismatch")
 	}
@@ -179,7 +179,7 @@ func louvainUndirectedMultiplex(g UndirectedMultiplex, weights, resolutions []fl
 	c := reduceUndirectedMultiplex(g, nil, weights)
 	rnd := rand.Intn
 	if src != nil {
-		rnd = src.Intn
+		rnd = rand.New(src).Intn
 	}
 	for {
 		l := newUndirectedMultiplexLocalMover(c, c.communities, weights, resolutions, all)

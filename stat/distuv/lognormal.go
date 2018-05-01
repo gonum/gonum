@@ -16,7 +16,7 @@ import (
 type LogNormal struct {
 	Mu    float64
 	Sigma float64
-	Src   *rand.Rand
+	Src   rand.Source
 }
 
 // CDF computes the value of the cumulative density function at x.
@@ -85,7 +85,7 @@ func (l LogNormal) Rand() float64 {
 	if l.Src == nil {
 		rnd = rand.NormFloat64()
 	} else {
-		rnd = l.Src.NormFloat64()
+		rnd = rand.New(l.Src).NormFloat64()
 	}
 	return math.Exp(rnd*l.Sigma + l.Mu)
 }

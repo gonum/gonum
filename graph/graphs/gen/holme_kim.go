@@ -117,7 +117,7 @@ func permute(n []graph.Node, rnd func(int) int) []graph.Node {
 // node having degree m-1. At each iteration of graph addition, one node is added
 // with m additional edges joining existing nodes with probability proportional
 // to the nodes' degrees. If src is not nil it is used as the random source,
-// otherwise rand.Float64 is for the random number generator.
+// otherwise rand.Float64 is used for the random number generator.
 //
 // The algorithm is essentially as described in http://arxiv.org/abs/cond-mat/0110452
 // after 10.1126/science.286.5439.509.

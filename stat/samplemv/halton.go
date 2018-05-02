@@ -27,7 +27,7 @@ import (
 type Halton struct {
 	Kind HaltonKind
 	Q    distmv.Quantiler
-	Src  *rand.Rand
+	Src  rand.Source
 }
 
 // Sample generates rows(batch) samples using the Halton generation procedure.
@@ -47,11 +47,11 @@ const (
 	Owen = iota + 1
 )
 
-func halton(batch *mat.Dense, kind HaltonKind, q distmv.Quantiler, src *rand.Rand) {
+func halton(batch *mat.Dense, kind HaltonKind, q distmv.Quantiler, src rand.Source) {
 	// Code based from https://arxiv.org/pdf/1706.02808.pdf .
 	perm := rand.Perm
 	if src != nil {
-		perm = src.Perm
+		perm = rand.New(src).Perm
 	}
 
 	n, d := batch.Dims()

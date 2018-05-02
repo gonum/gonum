@@ -24,7 +24,7 @@ import (
 // Manhattan distance between non-local nodes.
 //
 // The algorithm is essentially as described on p4 of http://www.cs.cornell.edu/home/kleinber/swn.pdf.
-func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src *rand.Rand) (err error) {
+func NavigableSmallWorld(dst GraphBuilder, dims []int, p, q int, r float64, src rand.Source) (err error) {
 	if p < 1 {
 		return fmt.Errorf("gen: bad local distance: p=%v", p)
 	}

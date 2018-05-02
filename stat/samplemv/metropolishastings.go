@@ -65,7 +65,7 @@ type MetropolisHastingser struct {
 	Initial  []float64
 	Target   distmv.LogProber
 	Proposal MHProposal
-	Src      *rand.Rand
+	Src      rand.Source
 
 	BurnIn int
 	Rate   int
@@ -131,10 +131,10 @@ func (m MetropolisHastingser) Sample(batch *mat.Dense) {
 	}
 }
 
-func metropolisHastings(batch *mat.Dense, initial []float64, target distmv.LogProber, proposal MHProposal, src *rand.Rand) {
+func metropolisHastings(batch *mat.Dense, initial []float64, target distmv.LogProber, proposal MHProposal, src rand.Source) {
 	f64 := rand.Float64
 	if src != nil {
-		f64 = src.Float64
+		f64 = rand.New(src).Float64
 	}
 	if len(initial) == 0 {
 		panic("metropolishastings: zero length initial")
@@ -172,7 +172,7 @@ type ProposalNormal struct {
 // and the mean of the distribution changes.
 //
 // NewProposalNormal returns {nil, false} if the covariance matrix is not positive-definite.
-func NewProposalNormal(sigma *mat.SymDense, src *rand.Rand) (*ProposalNormal, bool) {
+func NewProposalNormal(sigma *mat.SymDense, src rand.Source) (*ProposalNormal, bool) {
 	mu := make([]float64, sigma.Symmetric())
 	normal, ok := distmv.NewNormal(mu, sigma, src)
 	if !ok {

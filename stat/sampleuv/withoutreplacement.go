@@ -16,7 +16,7 @@ import (
 // source from the math/rand package will be used.
 //
 // WithoutReplacement will panic if len(idxs) > n.
-func WithoutReplacement(idxs []int, n int, src *rand.Rand) {
+func WithoutReplacement(idxs []int, n int, src rand.Source) {
 	if len(idxs) == 0 {
 		panic("withoutreplacement: zero length input")
 	}
@@ -32,7 +32,7 @@ func WithoutReplacement(idxs []int, n int, src *rand.Rand) {
 	if n < len(idxs)*len(idxs) {
 		var perm []int
 		if src != nil {
-			perm = src.Perm(n)
+			perm = rand.New(src).Perm(n)
 		} else {
 			perm = rand.Perm(n)
 		}
@@ -45,7 +45,7 @@ func WithoutReplacement(idxs []int, n int, src *rand.Rand) {
 	for i := range idxs {
 		var r int
 		if src != nil {
-			r = src.Intn(n - i)
+			r = rand.New(src).Intn(n - i)
 		} else {
 			r = rand.Intn(n - i)
 		}

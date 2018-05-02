@@ -21,7 +21,7 @@ import (
 // between nodes are formed with the probability, p. If src is not nil it is used
 // as the random source, otherwise rand.Float64 is used. The graph is constructed
 // in O(n+m) time where m is the number of edges added.
-func Gnp(dst GraphBuilder, n int, p float64, src *rand.Rand) error {
+func Gnp(dst GraphBuilder, n int, p float64, src rand.Source) error {
 	if p == 0 {
 		return nil
 	}
@@ -32,7 +32,7 @@ func Gnp(dst GraphBuilder, n int, p float64, src *rand.Rand) error {
 	if src == nil {
 		r = rand.Float64
 	} else {
-		r = src.Float64
+		r = rand.New(src).Float64
 	}
 
 	for i := 0; i < n; i++ {
@@ -87,7 +87,7 @@ func edgeNodesFor(i int) (v, w simple.Node) {
 // order n and size m. If src is not nil it is used as the random source,
 // otherwise rand.Intn is used. The graph is constructed in O(m) expected
 // time for m ≤ (n choose 2)/2.
-func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
+func Gnm(dst GraphBuilder, n, m int, src rand.Source) error {
 	if m == 0 {
 		return nil
 	}
@@ -108,7 +108,7 @@ func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 	if src == nil {
 		rnd = rand.Intn
 	} else {
-		rnd = src.Intn
+		rnd = rand.New(src).Intn
 	}
 
 	for i := 0; i < n; i++ {
@@ -153,7 +153,7 @@ func Gnm(dst GraphBuilder, n, m int, src *rand.Rand) error {
 // The graph is constructed in O(nd) time.
 //
 // The algorithm used is described in http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf
-func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error {
+func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src rand.Source) error {
 	if d < 1 || d > (n-1)/2 {
 		return fmt.Errorf("gen: bad degree: d=%d", d)
 	}
@@ -171,8 +171,9 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 		rnd = rand.Float64
 		rndN = rand.Intn
 	} else {
-		rnd = src.Float64
-		rndN = src.Intn
+		r := rand.New(src)
+		rnd = r.Float64
+		rndN = r.Intn
 	}
 
 	hasEdge := dst.HasEdgeBetween
@@ -298,7 +299,7 @@ func SmallWorldsBB(dst GraphBuilder, n, d int, p float64, src *rand.Rand) error 
 // The graph is constructed in O(nd) — O(n+m) — time.
 //
 // The algorithm used is described in http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf
-func PowerLaw(dst graph.MultigraphBuilder, n, d int, src *rand.Rand) error {
+func PowerLaw(dst graph.MultigraphBuilder, n, d int, src rand.Source) error {
 	if d < 1 {
 		return fmt.Errorf("gen: bad minimum degree: d=%d", d)
 	}
@@ -306,7 +307,7 @@ func PowerLaw(dst graph.MultigraphBuilder, n, d int, src *rand.Rand) error {
 	if src == nil {
 		rnd = rand.Intn
 	} else {
-		rnd = src.Intn
+		rnd = rand.New(src).Intn
 	}
 
 	m := make([]graph.Node, 2*n*d)
@@ -333,7 +334,7 @@ func PowerLaw(dst graph.MultigraphBuilder, n, d int, src *rand.Rand) error {
 // The graph is constructed in O(nd) — O(n+m) — time.
 //
 // The algorithm used is described in http://algo.uni-konstanz.de/publications/bb-eglrn-05.pdf
-func BipartitePowerLaw(dst graph.MultigraphBuilder, n, d int, src *rand.Rand) (p1, p2 []graph.Node, err error) {
+func BipartitePowerLaw(dst graph.MultigraphBuilder, n, d int, src rand.Source) (p1, p2 []graph.Node, err error) {
 	if d < 1 {
 		return nil, nil, fmt.Errorf("gen: bad minimum degree: d=%d", d)
 	}
@@ -341,7 +342,7 @@ func BipartitePowerLaw(dst graph.MultigraphBuilder, n, d int, src *rand.Rand) (p
 	if src == nil {
 		rnd = rand.Intn
 	} else {
-		rnd = src.Intn
+		rnd = rand.New(src).Intn
 	}
 
 	p := make([]graph.Node, 2*n)

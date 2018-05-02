@@ -82,7 +82,7 @@ type CmaEsChol struct {
 	ForgetBest bool
 	// Src allows a random number generator to be supplied for generating samples.
 	// If Src is nil the generator in golang.org/x/math/rand is used.
-	Src *rand.Rand
+	Src rand.Source
 
 	// Fixed algorithm parameters.
 	dim                 int

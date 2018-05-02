@@ -80,7 +80,7 @@ func (w SampleUniformWeighted) SampleWeighted(batch *mat.Dense, weights []float6
 // for easy sampling from the unit hypercube.
 type LatinHypercube struct {
 	Q   distmv.Quantiler
-	Src *rand.Rand
+	Src rand.Source
 }
 
 // Sample generates rows(batch) samples using the LatinHypercube generation
@@ -89,13 +89,14 @@ func (l LatinHypercube) Sample(batch *mat.Dense) {
 	latinHypercube(batch, l.Q, l.Src)
 }
 
-func latinHypercube(batch *mat.Dense, q distmv.Quantiler, src *rand.Rand) {
+func latinHypercube(batch *mat.Dense, q distmv.Quantiler, src rand.Source) {
 	r, c := batch.Dims()
 	var f64 func() float64
 	var perm func(int) []int
 	if src != nil {
-		f64 = src.Float64
-		perm = src.Perm
+		r := rand.New(src)
+		f64 = r.Float64
+		perm = r.Perm
 	} else {
 		f64 = rand.Float64
 		perm = rand.Perm
@@ -178,7 +179,7 @@ type Rejection struct {
 	C        float64
 	Target   distmv.LogProber
 	Proposal distmv.RandLogProber
-	Src      *rand.Rand
+	Src      rand.Source
 
 	err      error
 	proposed int
@@ -210,13 +211,13 @@ func (r *Rejection) Sample(batch *mat.Dense) {
 	r.proposed = proposed
 }
 
-func rejection(batch *mat.Dense, target distmv.LogProber, proposal distmv.RandLogProber, c float64, src *rand.Rand) (nProposed int, ok bool) {
+func rejection(batch *mat.Dense, target distmv.LogProber, proposal distmv.RandLogProber, c float64, src rand.Source) (nProposed int, ok bool) {
 	if c < 1 {
 		panic("rejection: acceptance constant must be greater than 1")
 	}
 	f64 := rand.Float64
 	if src != nil {
-		f64 = src.Float64
+		f64 = rand.New(src).Float64
 	}
 	r, dim := batch.Dims()
 	v := make([]float64, dim)

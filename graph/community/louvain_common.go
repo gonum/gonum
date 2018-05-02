@@ -82,7 +82,7 @@ type ReducedGraph interface {
 //
 // graph.Undirect may be used as a shim to allow modularization of
 // directed graphs with the undirected modularity function.
-func Modularize(g graph.Graph, resolution float64, src *rand.Rand) ReducedGraph {
+func Modularize(g graph.Graph, resolution float64, src rand.Source) ReducedGraph {
 	switch g := g.(type) {
 	case graph.Undirected:
 		return louvainUndirected(g, resolution, src)
@@ -192,7 +192,7 @@ type ReducedMultiplex interface {
 //
 // graph.Undirect may be used as a shim to allow modularization of
 // directed graphs with the undirected modularity function.
-func ModularizeMultiplex(g Multiplex, weights, resolutions []float64, all bool, src *rand.Rand) ReducedMultiplex {
+func ModularizeMultiplex(g Multiplex, weights, resolutions []float64, all bool, src rand.Source) ReducedMultiplex {
 	if weights != nil && len(weights) != g.Depth() {
 		panic("community: weights vector length mismatch")
 	}

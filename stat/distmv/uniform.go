@@ -19,11 +19,11 @@ type Bound struct {
 type Uniform struct {
 	bounds []Bound
 	dim    int
-	src    *rand.Rand
+	rnd    *rand.Rand
 }
 
 // NewUniform creates a new uniform distribution with the given bounds.
-func NewUniform(bnds []Bound, src *rand.Rand) *Uniform {
+func NewUniform(bnds []Bound, src rand.Source) *Uniform {
 	dim := len(bnds)
 	if dim == 0 {
 		panic(badZeroDimension)
@@ -36,7 +36,9 @@ func NewUniform(bnds []Bound, src *rand.Rand) *Uniform {
 	u := &Uniform{
 		bounds: make([]Bound, dim),
 		dim:    dim,
-		src:    src,
+	}
+	if src != nil {
+		u.rnd = rand.New(src)
 	}
 	for i, b := range bnds {
 		u.bounds[i].Min = b.Min
@@ -48,7 +50,7 @@ func NewUniform(bnds []Bound, src *rand.Rand) *Uniform {
 // NewUnitUniform creates a new Uniform distribution over the dim-dimensional
 // unit hypercube. That is, a uniform distribution where each dimension has
 // Min = 0 and Max = 1.
-func NewUnitUniform(dim int, src *rand.Rand) *Uniform {
+func NewUnitUniform(dim int, src rand.Source) *Uniform {
 	if dim <= 0 {
 		panic(nonPosDimension)
 	}
@@ -57,11 +59,14 @@ func NewUnitUniform(dim int, src *rand.Rand) *Uniform {
 		bounds[i].Min = 0
 		bounds[i].Max = 1
 	}
-	return &Uniform{
+	u := Uniform{
 		bounds: bounds,
 		dim:    dim,
-		src:    src,
 	}
+	if src != nil {
+		u.rnd = rand.New(src)
+	}
+	return &u
 }
 
 // Bounds returns the bounds on the variables of the distribution. If the input
@@ -160,14 +165,14 @@ func (u *Uniform) Prob(x []float64) float64 {
 // in place.
 func (u *Uniform) Rand(x []float64) []float64 {
 	x = reuseAs(x, u.dim)
-	if u.src == nil {
+	if u.rnd == nil {
 		for i, b := range u.bounds {
 			x[i] = rand.Float64()*(b.Max-b.Min) + b.Min
 		}
 		return x
 	}
 	for i, b := range u.bounds {
-		x[i] = u.src.Float64()*(b.Max-b.Min) + b.Min
+		x[i] = u.rnd.Float64()*(b.Max-b.Min) + b.Min
 	}
 	return x
 }

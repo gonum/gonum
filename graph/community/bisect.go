@@ -62,7 +62,7 @@ func Weight(g ReducedGraph) float64 {
 // ModularScore returns a modularized scoring function for Profile based on the
 // graph g and the given score function. The effort parameter determines how
 // many attempts will be made to get an improved score for any given resolution.
-func ModularScore(g graph.Graph, score func(ReducedGraph) float64, effort int, src *rand.Rand) func(float64) (float64, Reduced) {
+func ModularScore(g graph.Graph, score func(ReducedGraph) float64, effort int, src rand.Source) func(float64) (float64, Reduced) {
 	return func(resolution float64) (float64, Reduced) {
 		max := math.Inf(-1)
 		var best Reduced
@@ -108,7 +108,7 @@ func WeightMultiplex(g ReducedMultiplex) float64 {
 // ModularMultiplexScore returns a modularized scoring function for Profile based
 // on the graph g and the given score function. The effort parameter determines how
 // many attempts will be made to get an improved score for any given resolution.
-func ModularMultiplexScore(g Multiplex, weights []float64, all bool, score func(ReducedMultiplex) float64, effort int, src *rand.Rand) func(float64) (float64, Reduced) {
+func ModularMultiplexScore(g Multiplex, weights []float64, all bool, score func(ReducedMultiplex) float64, effort int, src rand.Source) func(float64) (float64, Reduced) {
 	return func(resolution float64) (float64, Reduced) {
 		max := math.Inf(-1)
 		var best Reduced

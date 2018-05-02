@@ -79,14 +79,14 @@ func qDirected(g graph.Directed, communities [][]graph.Node, resolution float64)
 // resolution using the Louvain algorithm. If src is nil, rand.Intn is used
 // as the random generator. louvainDirected will panic if g has any edge with negative
 // edge weight.
-func louvainDirected(g graph.Directed, resolution float64, src *rand.Rand) ReducedGraph {
+func louvainDirected(g graph.Directed, resolution float64, src rand.Source) ReducedGraph {
 	// See louvain.tex for a detailed description
 	// of the algorithm used here.
 
 	c := reduceDirected(g, nil)
 	rnd := rand.Intn
 	if src != nil {
-		rnd = src.Intn
+		rnd = rand.New(src).Intn
 	}
 	for {
 		l := newDirectedLocalMover(c, c.communities, resolution)

@@ -27,7 +27,7 @@ import (
 type Dirichlet struct {
 	alpha []float64
 	dim   int
-	src   *rand.Rand
+	src   rand.Source
 
 	lbeta    float64
 	sumAlpha float64
@@ -35,7 +35,7 @@ type Dirichlet struct {
 
 // NewDirichlet creates a new dirichlet distribution with the given parameters alpha.
 // NewDirichlet will panic if len(alpha) == 0, or if any alpha is <= 0.
-func NewDirichlet(alpha []float64, src *rand.Rand) *Dirichlet {
+func NewDirichlet(alpha []float64, src rand.Source) *Dirichlet {
 	dim := len(alpha)
 	if dim == 0 {
 		panic(badZeroDimension)

@@ -77,14 +77,14 @@ func qUndirected(g graph.Undirected, communities [][]graph.Node, resolution floa
 // weight.
 //
 // graph.Undirect may be used as a shim to allow modularization of directed graphs.
-func louvainUndirected(g graph.Undirected, resolution float64, src *rand.Rand) *ReducedUndirected {
+func louvainUndirected(g graph.Undirected, resolution float64, src rand.Source) *ReducedUndirected {
 	// See louvain.tex for a detailed description
 	// of the algorithm used here.
 
 	c := reduceUndirected(g, nil)
 	rnd := rand.Intn
 	if src != nil {
-		rnd = src.Intn
+		rnd = rand.New(src).Intn
 	}
 	for {
 		l := newUndirectedLocalMover(c, c.communities, resolution)

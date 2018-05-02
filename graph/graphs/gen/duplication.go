@@ -29,7 +29,7 @@ type UndirectedMutator interface {
 // created with probability sigma. With the exception of the sigma parameter, this
 // corresponds to the completely correlated case in doi:10.1016/S0022-5193(03)00028-6.
 // If src is not nil it is used as the random source, otherwise rand.Float64 is used.
-func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src *rand.Rand) error {
+func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src rand.Source) error {
 	// As described in doi:10.1016/S0022-5193(03)00028-6 but
 	// also clarified in doi:10.1186/gb-2007-8-4-r51.
 
@@ -51,8 +51,9 @@ func Duplication(dst UndirectedMutator, n int, delta, alpha, sigma float64, src 
 		rnd = rand.Float64
 		rndN = rand.Intn
 	} else {
-		rnd = src.Float64
-		rndN = src.Intn
+		r := rand.New(src)
+		rnd = r.Float64
+		rndN = r.Intn
 	}
 
 	nodes := dst.Nodes()

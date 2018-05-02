@@ -33,13 +33,15 @@ type Normal struct {
 	logSqrtDet float64
 	dim        int
 
-	src *rand.Rand
+	// If src is altered, rnd must be updated.
+	src rand.Source
+	rnd *rand.Rand
 }
 
 // NewNormal creates a new Normal with the given mean and covariance matrix.
 // NewNormal panics if len(mu) == 0, or if len(mu) != sigma.N. If the covariance
 // matrix is not positive-definite, the returned boolean is false.
-func NewNormal(mu []float64, sigma mat.Symmetric, src *rand.Rand) (*Normal, bool) {
+func NewNormal(mu []float64, sigma mat.Symmetric, src rand.Source) (*Normal, bool) {
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
@@ -49,6 +51,7 @@ func NewNormal(mu []float64, sigma mat.Symmetric, src *rand.Rand) (*Normal, bool
 	}
 	n := &Normal{
 		src: src,
+		rnd: rand.New(src),
 		dim: dim,
 		mu:  make([]float64, dim),
 	}
@@ -66,13 +69,14 @@ func NewNormal(mu []float64, sigma mat.Symmetric, src *rand.Rand) (*Normal, bool
 // NewNormalChol creates a new Normal distribution with the given mean and
 // covariance matrix represented by its Cholesky decomposition. NewNormalChol
 // panics if len(mu) is not equal to chol.Size().
-func NewNormalChol(mu []float64, chol *mat.Cholesky, src *rand.Rand) *Normal {
+func NewNormalChol(mu []float64, chol *mat.Cholesky, src rand.Source) *Normal {
 	dim := len(mu)
 	if dim != chol.Size() {
 		panic(badSizeMismatch)
 	}
 	n := &Normal{
 		src: src,
+		rnd: rand.New(src),
 		dim: dim,
 		mu:  make([]float64, dim),
 	}
@@ -87,7 +91,7 @@ func NewNormalChol(mu []float64, chol *mat.Cholesky, src *rand.Rand) *Normal {
 // panics if len(mu) is not equal to prec.Symmetric(). If the precision matrix
 // is not positive-definite, NewNormalPrecision returns nil for norm and false
 // for ok.
-func NewNormalPrecision(mu []float64, prec *mat.SymDense, src *rand.Rand) (norm *Normal, ok bool) {
+func NewNormalPrecision(mu []float64, prec *mat.SymDense, src rand.Source) (norm *Normal, ok bool) {
 	if len(mu) == 0 {
 		panic(badZeroDimension)
 	}
@@ -126,7 +130,7 @@ func NewNormalPrecision(mu []float64, prec *mat.SymDense, src *rand.Rand) (norm 
 //
 // ConditionNormal returns {nil, false} if there is a failure during the update.
 // Mathematically this is impossible, but can occur with finite precision arithmetic.
-func (n *Normal) ConditionNormal(observed []int, values []float64, src *rand.Rand) (*Normal, bool) {
+func (n *Normal) ConditionNormal(observed []int, values []float64, src rand.Source) (*Normal, bool) {
 	if len(observed) == 0 {
 		panic("normal: no observed value")
 	}
@@ -217,7 +221,7 @@ func normalLogProb(x, mu []float64, chol *mat.Cholesky, logSqrtDet float64) floa
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
 //
 // The input src is passed to the call to NewNormal.
-func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
+func (n *Normal) MarginalNormal(vars []int, src rand.Source) (*Normal, bool) {
 	newMean := make([]float64, len(vars))
 	for i, v := range vars {
 		newMean[i] = n.mu[v]
@@ -234,7 +238,7 @@ func (n *Normal) MarginalNormal(vars []int, src *rand.Rand) (*Normal, bool) {
 // See https://en.wikipedia.org/wiki/Marginal_distribution for more information.
 //
 // The input src is passed to the constructed distuv.Normal.
-func (n *Normal) MarginalNormalSingle(i int, src *rand.Rand) distuv.Normal {
+func (n *Normal) MarginalNormalSingle(i int, src rand.Source) distuv.Normal {
 	return distuv.Normal{
 		Mu:    n.mu[i],
 		Sigma: math.Sqrt(n.sigma.At(i, i)),
@@ -296,7 +300,7 @@ func (n *Normal) Rand(x []float64) []float64 {
 //
 // This function saves time and memory if the Cholesky decomposition is already
 // available. Otherwise, the NewNormal function should be used.
-func NormalRand(x, mean []float64, chol *mat.Cholesky, src *rand.Rand) []float64 {
+func NormalRand(x, mean []float64, chol *mat.Cholesky, src rand.Source) []float64 {
 	x = reuseAs(x, len(mean))
 	if len(mean) != chol.Size() {
 		panic(badInputLength)
@@ -306,8 +310,9 @@ func NormalRand(x, mean []float64, chol *mat.Cholesky, src *rand.Rand) []float64
 			x[i] = rand.NormFloat64()
 		}
 	} else {
+		rnd := rand.New(src)
 		for i := range x {
-			x[i] = src.NormFloat64()
+			x[i] = rnd.NormFloat64()
 		}
 	}
 	transformNormal(x, x, mean, chol)

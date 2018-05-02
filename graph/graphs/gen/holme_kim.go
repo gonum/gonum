@@ -21,10 +21,10 @@ import (
 // additional edges joining existing nodes with probability proportional to the nodes'
 // degrees. The edges are formed as a triad with probability, p.
 // If src is not nil it is used as the random source, otherwise rand.Float64 and
-// rand.Intn are used.
+// rand.Intn are used for the random number generators.
 //
 // The algorithm is essentially as described in http://arxiv.org/abs/cond-mat/0110452.
-func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64, src *rand.Rand) error {
+func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64, src rand.Source) error {
 	if p < 0 || p > 1 {
 		return fmt.Errorf("gen: bad probability: p=%v", p)
 	}
@@ -40,8 +40,9 @@ func TunableClusteringScaleFree(dst graph.UndirectedBuilder, n, m int, p float64
 		rnd = rand.Float64
 		rndN = rand.Intn
 	} else {
-		rnd = src.Float64
-		rndN = src.Intn
+		r := rand.New(src)
+		rnd = r.Float64
+		rndN = r.Intn
 	}
 
 	// Initial condition.
@@ -116,11 +117,11 @@ func permute(n []graph.Node, rnd func(int) int) []graph.Node {
 // node having degree m-1. At each iteration of graph addition, one node is added
 // with m additional edges joining existing nodes with probability proportional
 // to the nodes' degrees. If src is not nil it is used as the random source,
-// otherwise rand.Float64 is used.
+// otherwise rand.Float64 is used for the random number generator.
 //
 // The algorithm is essentially as described in http://arxiv.org/abs/cond-mat/0110452
 // after 10.1126/science.286.5439.509.
-func PreferentialAttachment(dst graph.UndirectedBuilder, n, m int, src *rand.Rand) error {
+func PreferentialAttachment(dst graph.UndirectedBuilder, n, m int, src rand.Source) error {
 	if n <= m {
 		return fmt.Errorf("gen: n <= m: n=%v m=%d", n, m)
 	}

@@ -27,7 +27,7 @@ func TestInverseGamma(t *testing.T) {
 			t.Errorf("Pdf mismatch. Got %v, want %v", pdf, test.want)
 		}
 	}
-	src := rand.New(rand.NewSource(1))
+	src := rand.NewSource(1)
 	for i, g := range []InverseGamma{
 		{Alpha: 5.6, Beta: 0.5, Src: src},
 		{Alpha: 30, Beta: 1.7, Src: src},

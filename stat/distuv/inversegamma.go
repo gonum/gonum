@@ -27,7 +27,7 @@ type InverseGamma struct {
 	// Beta is the scale parameter of the distribution. Beta must be greater than 0.
 	Beta float64
 
-	Src *rand.Rand
+	Src rand.Source
 }
 
 // CDF computes the value of the cumulative distribution function at x.

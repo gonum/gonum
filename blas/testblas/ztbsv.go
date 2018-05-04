@@ -27,10 +27,7 @@ func ZtbsvTest(t *testing.T, impl Ztbsver) {
 					for k := 0; k < n; k++ {
 						for _, ldab := range []int{k + 1, k + 1 + 10} {
 							for _, incX := range []int{-4, 1, 5} {
-								name := fmt.Sprintf("uplo=%v,trans=%v,diag=%v,n=%v,k=%v,ldab=%v,incX=%v", uplo, trans, diag, n, k, ldab, incX)
-								t.Run(name, func(t *testing.T) {
-									ztbsvTest(t, impl, rnd, uplo, trans, diag, n, k, ldab, incX)
-								})
+								ztbsvTest(t, impl, rnd, uplo, trans, diag, n, k, ldab, incX)
 							}
 						}
 					}
@@ -93,13 +90,15 @@ func ztbsvTest(t *testing.T, impl Ztbsver, rnd *rand.Rand, uplo blas.Uplo, trans
 	// x <- A^{-1}*b.
 	impl.Ztbsv(uplo, trans, diag, n, k, ab, ldab, x, incX)
 
+	name := fmt.Sprintf("uplo=%v,trans=%v,diag=%v,n=%v,k=%v,ldab=%v,incX=%v", uplo, trans, diag, n, k, ldab, incX)
+
 	if !zsame(ab, abCopy) {
-		t.Errorf("unexpected modification of A")
+		t.Errorf("%v: unexpected modification of A", name)
 	}
 	if !zSameAtNonstrided(x, want, incX) {
-		t.Errorf("unexpected modification of x\nwant %v\ngot  %v", want, x)
+		t.Errorf("%v: unexpected modification of x\nwant %v\ngot  %v", name, want, x)
 	}
 	if !zEqualApproxAtStrided(x, want, incX, tol) {
-		t.Errorf("unexpected result\nwant %v\ngot  %v", want, x)
+		t.Errorf("%v: unexpected result\nwant %v\ngot  %v", name, want, x)
 	}
 }

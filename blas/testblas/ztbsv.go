@@ -15,7 +15,7 @@ import (
 type Ztbsver interface {
 	Ztbsv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, k int, ab []complex128, ldab int, x []complex128, incX int)
 
-	Ztrmver
+	Ztbmver
 }
 
 func ZtbsvTest(t *testing.T, impl Ztbsver) {
@@ -86,7 +86,7 @@ func ztbsvTest(t *testing.T, impl Ztbsver, rnd *rand.Rand, uplo blas.Uplo, trans
 	copy(want, x)
 
 	// b <- A*x.
-	impl.Ztrmv(uplo, trans, diag, n, a, lda, x, incX)
+	impl.Ztbmv(uplo, trans, diag, n, k, ab, ldab, x, incX)
 	// x <- A^{-1}*b.
 	impl.Ztbsv(uplo, trans, diag, n, k, ab, ldab, x, incX)
 

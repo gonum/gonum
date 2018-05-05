@@ -20,6 +20,7 @@ import (
 func TestRfft(t *testing.T) {
 	const tol = 1e-12
 	for _, test := range rfftTests {
+		// Compute the work and factor slices and compare to known values.
 		work := make([]float64, 2*test.n)
 		ifac := make([]int, 15)
 		Rffti(test.n, work, ifac)
@@ -36,6 +37,8 @@ func TestRfft(t *testing.T) {
 			continue
 		}
 
+		// Construct a sequence with known a frequency spectrum and compare
+		// the computed spectrum.
 		modn := test.n % 2
 		fn := float64(test.n)
 		nm1 := test.n - 1
@@ -80,6 +83,7 @@ func TestRfft(t *testing.T) {
 			t.Errorf("unexpected rftf value for n=%d: got:%f want:0", test.n, rftf)
 		}
 
+		// Construct a frequency spectrum and compare the computed sequence.
 		for i := 0; i < test.n; i++ {
 			sum := x[0] / 2
 			arg := float64(i) * dt
@@ -106,6 +110,7 @@ func TestRfft(t *testing.T) {
 			t.Errorf("unexpected rftb value for n=%d: got:%f want:0", test.n, rftb)
 		}
 
+		// Check that Rfftb and Rfftf are inverses.
 		Rfftb(test.n, y, work, ifac)
 		Rfftf(test.n, y, work, ifac)
 		cf := 1.0 / fn
@@ -117,18 +122,6 @@ func TestRfft(t *testing.T) {
 			t.Errorf("unexpected rftfb value for n=%d: got:%f want:0", test.n, rftfb)
 		}
 	}
-}
-
-func series(n int) (x, y, xh []float64) {
-	x = make([]float64, n)
-	y = make([]float64, n)
-	xh = make([]float64, n)
-	for i := 0; i < n; i++ {
-		x[i] = math.Sin(float64(i+1) * math.Sqrt2)
-		y[i] = x[i]
-		xh[i] = x[i]
-	}
-	return x, y, xh
 }
 
 var rfftTests = []struct {
@@ -282,6 +275,7 @@ var rfftTests = []struct {
 func TestCfft(t *testing.T) {
 	const tol = 1e-12
 	for _, test := range cfftTests {
+		// Compute the work and factor slices and compare to known values.
 		work := make([]float64, 4*test.n)
 		ifac := make([]int, 15)
 		Cffti(test.n, work, ifac)
@@ -298,6 +292,8 @@ func TestCfft(t *testing.T) {
 			continue
 		}
 
+		// Construct a sequence with known a frequency spectrum and compare
+		// the computed spectrum.
 		fn := float64(test.n)
 		cn := complex(fn, 0)
 
@@ -318,6 +314,7 @@ func TestCfft(t *testing.T) {
 			t.Errorf("unexpected cftf value for n=%d: got:%f want:0", test.n, cftf)
 		}
 
+		// Construct a frequency spectrum and compare the computed sequence.
 		y2 := updatedCmplxSeries(x)
 
 		cx = cmplxAsFloat(x)
@@ -334,6 +331,7 @@ func TestCfft(t *testing.T) {
 			t.Errorf("unexpected cftb value for n=%d: got:%f want:0", test.n, cftb)
 		}
 
+		// Check that Cfftb and Cfftf are inverses.
 		cx = cmplxAsFloat(x)
 		Cfftf(test.n, cx, work, ifac)
 		Cfftb(test.n, cx, work, ifac)
@@ -620,9 +618,9 @@ var cfftTests = []struct {
 func TestSint(t *testing.T) {
 	const tol = 1e-12
 	for _, test := range sintTests {
+		// Compute the work and factor slices and compare to known values.
 		work := make([]float64, 5*(test.n)/2)
 		ifac := make([]int, 15)
-
 		Sinti(test.n-1, work, ifac)
 		var failed bool
 		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
@@ -637,6 +635,8 @@ func TestSint(t *testing.T) {
 			continue
 		}
 
+		// Construct a sequence with known a frequency spectrum and compare
+		// the computed spectrum.
 		fn := float64(test.n)
 		x, _, xh := series(test.n - 1)
 		y := make([]float64, test.n-1)
@@ -664,6 +664,7 @@ func TestSint(t *testing.T) {
 			t.Errorf("unexpected sintt value for n=%d: got:%f want:0", test.n, sintt)
 		}
 
+		// Check that the transform is its own inverse.
 		Sint(test.n-1, x, work, ifac)
 		Sint(test.n-1, x, work, ifac)
 
@@ -846,9 +847,9 @@ var sintTests = []struct {
 func TestCost(t *testing.T) {
 	const tol = 1e-12
 	for _, test := range costTests {
+		// Compute the work and factor slices and compare to known values.
 		work := make([]float64, 3*(test.n+1))
 		ifac := make([]int, 15)
-
 		Costi(test.n+1, work, ifac)
 		var failed bool
 		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
@@ -863,6 +864,8 @@ func TestCost(t *testing.T) {
 			continue
 		}
 
+		// Construct a sequence with known a frequency spectrum and compare
+		// the computed spectrum.
 		fn := float64(test.n)
 		x, _, xh := series(test.n + 1)
 		y := make([]float64, test.n+1)
@@ -891,6 +894,7 @@ func TestCost(t *testing.T) {
 			t.Errorf("unexpected costt value for n=%d: got:%f want:0", test.n, costt)
 		}
 
+		// Check that the transform is its own inverse.
 		Cost(test.n+1, x, work, ifac)
 		Cost(test.n+1, x, work, ifac)
 
@@ -1095,9 +1099,9 @@ var costTests = []struct {
 func TestCosq(t *testing.T) {
 	const tol = 1e-12
 	for _, test := range sincosqTests {
+		// Compute the work and factor slices and compare to known values.
 		work := make([]float64, 3*test.n)
 		ifac := make([]int, 15)
-
 		Cosqi(test.n, work, ifac)
 		var failed bool
 		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
@@ -1113,6 +1117,8 @@ func TestCosq(t *testing.T) {
 			continue
 		}
 
+		// Construct a sequence with known a frequency spectrum and compare
+		// the computed spectrum.
 		fn := float64(test.n)
 		x := make([]float64, test.n)
 		y, _, xh := series(test.n)
@@ -1139,6 +1145,7 @@ func TestCosq(t *testing.T) {
 			t.Errorf("unexpected cosqbt value for n=%d: got:%f want:0", test.n, cosqbt)
 		}
 
+		// Construct a frequency spectrum and compare the computed sequence.
 		for i := 0; i < test.n; i++ {
 			y[i] = 0.5 * x[0]
 			arg := float64(2*i+1) * dt
@@ -1161,6 +1168,7 @@ func TestCosq(t *testing.T) {
 			t.Errorf("unexpected cosqft value for n=%d: got:%f want:0", test.n, cosqft)
 		}
 
+		// Check that Cosqb and Cosqf are inverses.
 		Cosqb(test.n, x, work, ifac)
 		Cosqf(test.n, x, work, ifac)
 
@@ -1177,9 +1185,9 @@ func TestCosq(t *testing.T) {
 func TestSinq(t *testing.T) {
 	const tol = 1e-12
 	for _, test := range sincosqTests {
+		// Compute the work and factor slices and compare to known values.
 		work := make([]float64, 3*test.n)
 		ifac := make([]int, 15)
-
 		Sinqi(test.n, work, ifac)
 		var failed bool
 		if !floats.EqualApprox(work, test.wantiwork, 1e-6) {
@@ -1195,6 +1203,8 @@ func TestSinq(t *testing.T) {
 			continue
 		}
 
+		// Construct a sequence with known a frequency spectrum and compare
+		// the computed spectrum.
 		fn := float64(test.n)
 		x := make([]float64, test.n)
 		y, _, xh := series(test.n)
@@ -1221,6 +1231,7 @@ func TestSinq(t *testing.T) {
 			t.Errorf("unexpected sinqbt value for n=%d: got:%f want:0", test.n, sinqbt)
 		}
 
+		// Construct a frequency spectrum and compare the computed sequence.
 		for i := 0; i < test.n; i++ {
 			arg := float64(2*i+1) * dt
 			y[i] = 0.5 * math.Pow(-1, float64(i)) * x[test.n-1]
@@ -1243,6 +1254,7 @@ func TestSinq(t *testing.T) {
 			t.Errorf("unexpected sinqft value for n=%d: got:%f want:0", test.n, sinqft)
 		}
 
+		// Check that Sinqb and Sinqf are inverses.
 		Sinqb(test.n, x, work, ifac)
 		Sinqf(test.n, x, work, ifac)
 
@@ -1439,4 +1451,17 @@ var sincosqTests = []struct {
 		},
 		wantiifac: []int{2, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	},
+}
+
+// series returns three copies of a sinusoidal sequence n samples long.
+func series(n int) (x, y, xh []float64) {
+	x = make([]float64, n)
+	y = make([]float64, n)
+	xh = make([]float64, n)
+	for i := 0; i < n; i++ {
+		x[i] = math.Sin(float64(i+1) * math.Sqrt2)
+		y[i] = x[i]
+		xh[i] = x[i]
+	}
+	return x, y, xh
 }

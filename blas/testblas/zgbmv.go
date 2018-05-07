@@ -5,6 +5,7 @@
 package testblas
 
 import (
+	"fmt"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -20,9 +21,12 @@ type Zgbmver interface {
 func ZgbmvTest(t *testing.T, impl Zgbmver) {
 	rnd := rand.New(rand.NewSource(1))
 	for _, trans := range []blas.Transpose{blas.NoTrans, blas.Trans, blas.ConjTrans} {
+		// Generate all possible size combinations.
 		for _, mn := range allPairs([]int{1, 2, 3, 5}, []int{1, 2, 3, 5}) {
 			m := mn[0]
 			n := mn[1]
+			// Generate all possible numbers of lower and upper
+			// diagonals. Use slices to reduce indentation.
 			kLs := make([]int, max(1, m))
 			for i := range kLs {
 				kLs[i] = i
@@ -38,6 +42,8 @@ func ZgbmvTest(t *testing.T, impl Zgbmver) {
 					alpha complex128
 					beta  complex128
 				}{
+					// All potentially relevant values of
+					// alpha and beta.
 					{0, 0},
 					{0, 1},
 					{0, complex(rnd.NormFloat64(), rnd.NormFloat64())},
@@ -58,16 +64,21 @@ func ZgbmvTest(t *testing.T, impl Zgbmver) {
 	}
 }
 
+// testZgbmv tests Zgbmv by comparing its output to that of Zgemv.
 func testZgbmv(t *testing.T, impl Zgbmver, rnd *rand.Rand, trans blas.Transpose, m, n, kL, kU int, alpha, beta complex128, ldab, incX, incY int) {
 	const tol = 1e-13
 
+	// Allocate a dense-storage band matrix filled with NaNs that will be
+	// used as the reference matrix for Zgemv.
 	lda := max(1, n)
 	a := makeZGeneral(nil, m, n, lda)
+	// Fill the matrix with zeros.
 	for i := 0; i < m; i++ {
 		for j := 0; j < n; j++ {
 			a[i*lda+j] = 0
 		}
 	}
+	// Fill the band with random data.
 	for i := 0; i < m; i++ {
 		for j := max(0, i-kL); j < min(n, i+kU+1); j++ {
 			re := rnd.NormFloat64()
@@ -75,10 +86,12 @@ func testZgbmv(t *testing.T, impl Zgbmver, rnd *rand.Rand, trans blas.Transpose,
 			a[i*lda+j] = complex(re, im)
 		}
 	}
+	// Create the actual band matrix.
 	ab := zPackBand(kL, kU, ldab, m, n, a, lda)
 	abCopy := make([]complex128, len(ab))
 	copy(abCopy, ab)
 
+	// Compute correct lengths of vectors x and y.
 	var lenX, lenY int
 	switch trans {
 	case blas.NoTrans:
@@ -89,6 +102,7 @@ func testZgbmv(t *testing.T, impl Zgbmver, rnd *rand.Rand, trans blas.Transpose,
 		lenY = n
 	}
 
+	// Generate a random complex vector x.
 	xtest := make([]complex128, lenX)
 	for i := range xtest {
 		re := rnd.NormFloat64()
@@ -99,6 +113,7 @@ func testZgbmv(t *testing.T, impl Zgbmver, rnd *rand.Rand, trans blas.Transpose,
 	xCopy := make([]complex128, len(x))
 	copy(xCopy, x)
 
+	// Generate a random complex vector y.
 	ytest := make([]complex128, lenY)
 	for i := range ytest {
 		re := rnd.NormFloat64()
@@ -110,19 +125,23 @@ func testZgbmv(t *testing.T, impl Zgbmver, rnd *rand.Rand, trans blas.Transpose,
 	want := make([]complex128, len(y))
 	copy(want, y)
 
+	// Compute the reference result of alpha*op(A)*x + beta*y, storing it
+	// into want.
 	impl.Zgemv(trans, m, n, alpha, a, lda, x, incX, beta, want, incY)
+	// Compute alpha*op(A)*x + beta*y, storing the result in-place into y.
 	impl.Zgbmv(trans, m, n, kL, kU, alpha, ab, ldab, x, incX, beta, y, incY)
 
+	name := fmt.Sprintf("trans=%v,m=%v,n=%v,kL=%v,kU=%v,lda=%v,incX=%v,incY=%v", trans, m, n, kL, kU, lda, incX, incY)
 	if !zsame(ab, abCopy) {
-		t.Errorf("Case trans=%v,m=%v,n=%v,kL=%v,kU=%v,lda=%v,incX=%v,incY=%v: unexpected modification of ab", trans, m, n, kL, kU, lda, incX, incY)
+		t.Errorf("%v: unexpected modification of ab", name)
 	}
 	if !zsame(x, xCopy) {
-		t.Errorf("Case trans=%v,m=%v,n=%v,kL=%v,kU=%v,lda=%v,incX=%v,incY=%v: unexpected modification of x", trans, m, n, kL, kU, lda, incX, incY)
+		t.Errorf("%v: unexpected modification of x", name)
 	}
 	if !zSameAtNonstrided(y, want, incY) {
-		t.Errorf("Case trans=%v,m=%v,n=%v,kL=%v,kU=%v,lda=%v,incX=%v,incY=%v: unexpected modification of y", trans, m, n, kL, kU, lda, incX, incY)
+		t.Errorf("%v: unexpected modification of y", name)
 	}
 	if !zEqualApproxAtStrided(y, want, incY, tol) {
-		t.Errorf("Case trans=%v,m=%v,n=%v,kL=%v,kU=%v,lda=%v,incX=%v,incY=%v: unexpected result\ngot  %v\nwant %v\n", trans, m, n, kL, kU, lda, incX, incY, y, want)
+		t.Errorf("%v: unexpected result\ngot  %v\nwant %v\n", name, y, want)
 	}
 }

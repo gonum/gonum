@@ -5,6 +5,7 @@
 package testblas
 
 import (
+	"fmt"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -34,10 +35,14 @@ func ZtrsvTest(t *testing.T, impl Ztrsver) {
 	}
 }
 
+// ztrsvTest tests Ztrsv by checking whether Ztrmv followed by Ztrsv
+// round-trip.
 func ztrsvTest(t *testing.T, impl Ztrsver, uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, lda, incX int, rnd *rand.Rand) {
 	const tol = 1e-10
 
+	// Allocate a dense-storage triangular matrix A filled with NaNs.
 	a := makeZGeneral(nil, n, n, lda)
+	// Fill the referenced triangle of A with random data.
 	if uplo == blas.Upper {
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
@@ -56,6 +61,8 @@ func ztrsvTest(t *testing.T, impl Ztrsver, uplo blas.Uplo, trans blas.Transpose,
 		}
 	}
 	if diag == blas.Unit {
+		// The diagonal should not be referenced by Ztrmv and Ztrsv, so
+		// invalidate it with NaNs.
 		for i := 0; i < n; i++ {
 			a[i*lda+i] = znan
 		}
@@ -63,6 +70,7 @@ func ztrsvTest(t *testing.T, impl Ztrsver, uplo blas.Uplo, trans blas.Transpose,
 	aCopy := make([]complex128, len(a))
 	copy(aCopy, a)
 
+	// Generate a random complex vector x.
 	xtest := make([]complex128, n)
 	for i := range xtest {
 		re := rnd.NormFloat64()
@@ -70,19 +78,25 @@ func ztrsvTest(t *testing.T, impl Ztrsver, uplo blas.Uplo, trans blas.Transpose,
 		xtest[i] = complex(re, im)
 	}
 	x := makeZVector(xtest, incX)
+
+	// Store a copy of x as the correct result that we want.
 	want := make([]complex128, len(x))
 	copy(want, x)
 
+	// Compute A*x, denoting the result by b and storing it in x.
 	impl.Ztrmv(uplo, trans, diag, n, a, lda, x, incX)
+	// Solve A*x = b, that is, x = A^{-1}*b = A^{-1}*A*x.
 	impl.Ztrsv(uplo, trans, diag, n, a, lda, x, incX)
+	// If Ztrsv is correct, A^{-1}*A = I and x contains again its original value.
 
+	name := fmt.Sprintf("uplo=%v,trans=%v,diag=%v,n=%v,lda=%v,incX=%v", uplo, trans, diag, n, lda, incX)
 	if !zsame(a, aCopy) {
-		t.Errorf("Case uplo=%v,trans=%v,diag=%v,n=%v,lda=%v,incX=%v: unexpected modification of A", uplo, trans, diag, n, lda, incX)
+		t.Errorf("%v: unexpected modification of A", name)
 	}
 	if !zSameAtNonstrided(x, want, incX) {
-		t.Errorf("Case uplo=%v,trans=%v,diag=%v,n=%v,lda=%v,incX=%v: unexpected modification of x\nwant %v\ngot  %v", uplo, trans, diag, n, lda, incX, want, x)
+		t.Errorf("%v: unexpected modification of x\nwant %v\ngot  %v", name, want, x)
 	}
 	if !zEqualApproxAtStrided(x, want, incX, tol) {
-		t.Errorf("Case uplo=%v,trans=%v,diag=%v,n=%v,lda=%v,incX=%v: unexpected result\nwant %v\ngot  %v", uplo, trans, diag, n, lda, incX, want, x)
+		t.Errorf("%v: unexpected result\nwant %v\ngot  %v", name, want, x)
 	}
 }

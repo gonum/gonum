@@ -25,6 +25,8 @@ func ZhbmvTest(t *testing.T, impl Zhbmver) {
 		for _, n := range []int{0, 1, 2, 3, 5} {
 			for k := 0; k < n; k++ {
 				for _, ldab := range []int{k + 1, k + 1 + 10} {
+					// Generate all possible combinations of given increments.
+					// Use slices to reduce indentation.
 					for _, inc := range allPairs([]int{-11, 1, 7}, []int{-3, 1, 5}) {
 						incX := inc[0]
 						incY := inc[1]
@@ -32,6 +34,8 @@ func ZhbmvTest(t *testing.T, impl Zhbmver) {
 							alpha complex128
 							beta  complex128
 						}{
+							// All potentially relevant values of
+							// alpha and beta.
 							{0, 0},
 							{0, 1},
 							{0, complex(rnd.NormFloat64(), rnd.NormFloat64())},
@@ -48,16 +52,23 @@ func ZhbmvTest(t *testing.T, impl Zhbmver) {
 	}
 }
 
+// testZhbmv tests Zhbmv by comparing its output to that of Zhemv.
 func testZhbmv(t *testing.T, impl Zhbmver, rnd *rand.Rand, uplo blas.Uplo, n, k int, alpha, beta complex128, ldab, incX, incY int) {
 	const tol = 1e-13
 
+	// Allocate a dense-storage Hermitian band matrix filled with NaNs that will be
+	// used as the reference matrix for Zhemv.
 	lda := max(1, n)
 	a := makeZGeneral(nil, n, n, lda)
+	// Fill the matrix with zeros.
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			a[i*lda+j] = 0
 		}
 	}
+	// Fill the triangle band with random data, invalidating the imaginary
+	// part of diagonal elements because it should not be referenced by
+	// Zhbmv and Zhemv.
 	if uplo == blas.Upper {
 		for i := 0; i < n; i++ {
 			a[i*lda+i] = complex(rnd.NormFloat64(), math.NaN())
@@ -77,10 +88,12 @@ func testZhbmv(t *testing.T, impl Zhbmver, rnd *rand.Rand, uplo blas.Uplo, n, k 
 			a[i*lda+i] = complex(rnd.NormFloat64(), math.NaN())
 		}
 	}
+	// Create the actual Hermitian band matrix.
 	ab := zPackTriBand(k, ldab, uplo, n, a, lda)
 	abCopy := make([]complex128, len(ab))
 	copy(abCopy, ab)
 
+	// Generate a random complex vector x.
 	xtest := make([]complex128, n)
 	for i := range xtest {
 		re := rnd.NormFloat64()
@@ -91,6 +104,7 @@ func testZhbmv(t *testing.T, impl Zhbmver, rnd *rand.Rand, uplo blas.Uplo, n, k 
 	xCopy := make([]complex128, len(x))
 	copy(xCopy, x)
 
+	// Generate a random complex vector y.
 	ytest := make([]complex128, n)
 	for i := range ytest {
 		re := rnd.NormFloat64()
@@ -102,10 +116,13 @@ func testZhbmv(t *testing.T, impl Zhbmver, rnd *rand.Rand, uplo blas.Uplo, n, k 
 	want := make([]complex128, len(y))
 	copy(want, y)
 
+	// Compute the reference result of alpha*op(A)*x + beta*y, storing it
+	// into want.
 	impl.Zhemv(uplo, n, alpha, a, lda, x, incX, beta, want, incY)
+	// Compute alpha*op(A)*x + beta*y, storing the result in-place into y.
 	impl.Zhbmv(uplo, n, k, alpha, ab, ldab, x, incX, beta, y, incY)
 
-	prefix := fmt.Sprintf("Case uplo=%v,n=%v,k=%v,incX=%v,incY=%v,ldab=%v", uplo, n, k, incX, incY, ldab)
+	prefix := fmt.Sprintf("uplo=%v,n=%v,k=%v,incX=%v,incY=%v,ldab=%v", uplo, n, k, incX, incY, ldab)
 	if !zsame(x, xCopy) {
 		t.Errorf("%v: unexpected modification of x", prefix)
 	}

@@ -14,13 +14,13 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func ExampleFFT_FFT() {
+func ExampleFFT_Coefficients() {
 	// Period is a set of samples over a given period.
 	period := []float64{1, 0, 2, 0, 4, 0, 2, 0}
 
 	// Initialize an FFT and perform the analysis.
 	fft := fourier.NewFFT(len(period))
-	coeff := fft.FFT(nil, period)
+	coeff := fft.Coefficients(nil, period)
 
 	for i, c := range coeff {
 		fmt.Printf("freq=%v cycles/period, magnitude=%v, phase=%.4g\n",
@@ -36,7 +36,7 @@ func ExampleFFT_FFT() {
 	// freq=0.5 cycles/period, magnitude=9, phase=0
 }
 
-func ExampleFFT_FFT_tone() {
+func ExampleFFT_Coefficients_tone() {
 	// Tone is a set of samples over a second of a pure Middle C.
 	const (
 		mC      = 261.625565 // Hz
@@ -49,7 +49,7 @@ func ExampleFFT_FFT_tone() {
 
 	// Initialize an FFT and perform the analysis.
 	fft := fourier.NewFFT(samples)
-	coeff := fft.FFT(nil, tone)
+	coeff := fft.Coefficients(nil, tone)
 
 	var maxFreq, magnitude, mean float64
 	for i, c := range coeff {
@@ -67,13 +67,13 @@ func ExampleFFT_FFT_tone() {
 	// freq=262 Hz, magnitude=17296.195519181776, mean=2.783457755654771
 }
 
-func ExampleCmplxFFT_FFT() {
+func ExampleCmplxFFT_Coefficients() {
 	// Period is a set of samples over a given period.
 	period := []complex128{1, 0, 2, 0, 4, 0, 2, 0}
 
 	// Initialize a complex FFT and perform the analysis.
 	fft := fourier.NewCmplxFFT(len(period))
-	coeff := fft.FFT(nil, period)
+	coeff := fft.Coefficients(nil, period)
 
 	for i := range coeff {
 		// Center the spectrum.
@@ -127,7 +127,7 @@ func Example_fFT2() {
 	// Perform the first axis transform.
 	rows := make([]complex128, r*c)
 	for i := 0; i < r; i++ {
-		fft.FFT(rows[c*i:c*(i+1)], image.RawRowView(i))
+		fft.Coefficients(rows[c*i:c*(i+1)], image.RawRowView(i))
 	}
 
 	// Perform the second axis transform, storing
@@ -138,7 +138,7 @@ func Example_fFT2() {
 		for i := 0; i < r; i++ {
 			column[i] = rows[i*c+j]
 		}
-		cfft.FFT(column, column)
+		cfft.Coefficients(column, column)
 		for i, v := range column[:c] {
 			freqs.Set(i, j, floats.Round(cmplx.Abs(v), 1))
 		}
@@ -186,7 +186,7 @@ func Example_cmplxFFT2() {
 		for j, v := range image.RawRowView(i) {
 			row[j] = complex(v, 0)
 		}
-		cfft.FFT(row, row)
+		cfft.Coefficients(row, row)
 	}
 
 	// Perform the second axis transform, storing
@@ -197,7 +197,7 @@ func Example_cmplxFFT2() {
 		for i := 0; i < r; i++ {
 			column[i] = rows[i*c+j]
 		}
-		cfft.FFT(column, column)
+		cfft.Coefficients(column, column)
 		for i, v := range column {
 			// Center the frequencies.
 			freqs.Set(cfft.UnshiftIdx(i), cfft.UnshiftIdx(j), floats.Round(cmplx.Abs(v), 1))

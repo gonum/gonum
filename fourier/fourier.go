@@ -40,15 +40,16 @@ func (t *FFT) Reset(n int) {
 	fftpack.Rffti(n, t.work, t.ifac[:])
 }
 
-// FFT computes the Fourier coefficients of the input sequence, seq,
-// placing the result in dst and returning it. This transform is
-// unnormalized; a call to FFT followed by a call of IFFT will
-// multiply the input sequence by the length of the sequence.
+// Coefficients computes the Fourier coefficients of the input sequence,
+// converting the time series in seq into the frequency spectrum, placing
+// the result in dst and returning it. This transform is unnormalized; a
+// call to Coefficients followed by a call of Sequence will multiply the
+// input sequence by the length of the sequence.
 //
-// If the length of seq is not t.Len(), FFT will panic.
+// If the length of seq is not t.Len(), Coefficients will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
-// the length of dst does not equal t.Len()/2+1, FFT will panic.
-func (t *FFT) FFT(dst []complex128, seq []float64) []complex128 {
+// the length of dst does not equal t.Len()/2+1, Coefficients will panic.
+func (t *FFT) Coefficients(dst []complex128, seq []float64) []complex128 {
 	if len(seq) != t.Len() {
 		panic("fourier: sequence length mismatch")
 	}
@@ -74,15 +75,16 @@ func (t *FFT) FFT(dst []complex128, seq []float64) []complex128 {
 	return dst
 }
 
-// IFFT computes the real perodic sequence from the Fourier coefficients,
-// coeff, placing the result in dst and returning it. This transform is
-// unnormalized; a call to FFT followed by a call of IFFT will
-// multiply the input sequence by the length of the sequence.
+// Sequence computes the real perodic sequence from the Fourier coefficients,
+// converting the frequency spectrum in coeff into a time series, placing the
+// result in dst and returning it. This transform is unnormalized; a call to
+// Coefficients followed by a call of Sequence will multiply the input sequence
+// by the length of the sequence.
 //
-// If the length of coeff is not t.Len()/2+1, IFFT will panic.
+// If the length of coeff is not t.Len()/2+1, Sequence will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
-// the length of dst does not equal the length of coeff, IFFT will panic.
-func (t *FFT) IFFT(dst []float64, coeff []complex128) []float64 {
+// the length of dst does not equal the length of coeff, Sequence will panic.
+func (t *FFT) Sequence(dst []float64, coeff []complex128) []float64 {
 	if len(coeff) != t.Len()/2+1 {
 		panic("fourier: coefficients length mismatch")
 	}
@@ -155,16 +157,17 @@ func (t *CmplxFFT) Reset(n int) {
 	fftpack.Cffti(n, t.work, t.ifac[:])
 }
 
-// FFT computes the Fourier coefficients of a complex input sequence,
-// seq, placing the result in dst and returning it. This transform is
-// unnormalized; a call to FFT followed by a call of IFFT will
-// multiply the input sequence by the length of the sequence.
+// Coefficients computes the Fourier coefficients of a complex input sequence,
+// converting the time series in seq into the frequency spectrum, placing
+// the result in dst and returning it. This transform is unnormalized; a call
+// to Coefficients followed by a call of Sequence will multiply the input
+// sequence by the length of the sequence.
 //
-// If the length of seq is not t.Len(), FFT will panic.
+// If the length of seq is not t.Len(), Coefficients will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
-// the length of dst does not equal the length of seq, FFT will panic.
+// the length of dst does not equal the length of seq, Coefficients will panic.
 // It is safe to use the same slice for dst and seq.
-func (t *CmplxFFT) FFT(dst, seq []complex128) []complex128 {
+func (t *CmplxFFT) Coefficients(dst, seq []complex128) []complex128 {
 	if len(seq) != t.Len() {
 		panic("fourier: sequence length mismatch")
 	}
@@ -184,16 +187,17 @@ func (t *CmplxFFT) FFT(dst, seq []complex128) []complex128 {
 	return dst
 }
 
-// IFFT computes the complex perodic sequence from the Fourier coefficients,
-// coeff, placing the result in dst and returning it. This transform is
-// unnormalized; a call to FFT followed by a call of IFFT will
-// multiply the input sequence by the length of the sequence.
+// Sequence computes the complex perodic sequence from the Fourier coefficients,
+// converting the frequency spectrum in coeff into a time series, placing the
+// result in dst and returning it. This transform is unnormalized; a call to
+// Coefficients followed by a call of Sequence will multiply the input sequence
+// by the length of the sequence.
 //
-// If the length of coeff is not t.Len(), IFFT will panic.
+// If the length of coeff is not t.Len(), Sequence will panic.
 // If dst is nil, a new slice is allocated and returned. If dst is not nil and
-// the length of dst does not equal the length of coeff, IFFT will panic.
+// the length of dst does not equal the length of coeff, Sequence will panic.
 // It is safe to use the same slice for dst and coeff.
-func (t *CmplxFFT) IFFT(dst, coeff []complex128) []complex128 {
+func (t *CmplxFFT) Sequence(dst, coeff []complex128) []complex128 {
 	if len(coeff) != t.Len() {
 		panic("fourier: coefficients length mismatch")
 	}

@@ -37,11 +37,17 @@ func ZtbsvTest(t *testing.T, impl Ztbsver) {
 	}
 }
 
+// ztbsvTest tests Ztbsv by checking whether Ztbmv followed by Ztbsv
+// round-trip.
 func ztbsvTest(t *testing.T, impl Ztbsver, rnd *rand.Rand, uplo blas.Uplo, trans blas.Transpose, diag blas.Diag, n, k, ldab, incX int) {
 	const tol = 1e-10
 
+	// Allocate a dense-storage triangular band matrix filled with NaNs that
+	// will be used as a for creating the actual triangular band matrix.
 	lda := max(1, n)
 	a := makeZGeneral(nil, n, n, lda)
+	// Fill the referenced triangle of A with random data within the band
+	// and with zeros outside.
 	if uplo == blas.Upper {
 		for i := 0; i < n; i++ {
 			for j := i; j < min(n, i+k+1); j++ {
@@ -66,14 +72,18 @@ func ztbsvTest(t *testing.T, impl Ztbsver, rnd *rand.Rand, uplo blas.Uplo, trans
 		}
 	}
 	if diag == blas.Unit {
+		// The diagonal should not be referenced by Ztbmv and Ztbsv, so
+		// invalidate it with NaNs.
 		for i := 0; i < n; i++ {
 			a[i*lda+i] = znan
 		}
 	}
+	// Create the triangular band matrix.
 	ab := zPackTriBand(k, ldab, uplo, n, a, lda)
 	abCopy := make([]complex128, len(ab))
 	copy(abCopy, ab)
 
+	// Generate a random complex vector x.
 	xtest := make([]complex128, n)
 	for i := range xtest {
 		re := rnd.NormFloat64()
@@ -82,16 +92,17 @@ func ztbsvTest(t *testing.T, impl Ztbsver, rnd *rand.Rand, uplo blas.Uplo, trans
 	}
 	x := makeZVector(xtest, incX)
 
+	// Store a copy of x as the correct result that we want.
 	want := make([]complex128, len(x))
 	copy(want, x)
 
-	// b <- A*x.
+	// Compute A*x, denoting the result by b and storing it in x.
 	impl.Ztbmv(uplo, trans, diag, n, k, ab, ldab, x, incX)
-	// x <- A^{-1}*b.
+	// Solve A*x = b, that is, x = A^{-1}*b = A^{-1}*A*x.
 	impl.Ztbsv(uplo, trans, diag, n, k, ab, ldab, x, incX)
+	// If Ztbsv is correct, A^{-1}*A = I and x contains again its original value.
 
 	name := fmt.Sprintf("uplo=%v,trans=%v,diag=%v,n=%v,k=%v,ldab=%v,incX=%v", uplo, trans, diag, n, k, ldab, incX)
-
 	if !zsame(ab, abCopy) {
 		t.Errorf("%v: unexpected modification of A", name)
 	}

@@ -10,6 +10,21 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
+var _ Graph = graph.Graph(nil)
+
+// Graph is the subset of graph.Graph necessary for graph traversal.
+type Graph interface {
+	// From returns all nodes that can be reached directly
+	// from the node with the given ID.
+	From(id int64) []graph.Node
+
+	// Edge returns the edge from u to v, with IDs uid and vid,
+	// if such an edge exists and nil otherwise. The node v
+	// must be directly reachable from u as defined by the
+	// From method.
+	Edge(uid, vid int64) graph.Edge
+}
+
 // BreadthFirst implements stateful breadth-first graph traversal.
 type BreadthFirst struct {
 	EdgeFilter func(graph.Edge) bool
@@ -23,7 +38,7 @@ type BreadthFirst struct {
 // traversal follows edges for which EdgeFilter(edge) is true and returns the first node
 // for which until(node, depth) is true. During the traversal, if the Visit field is
 // non-nil, it is called with the nodes joined by each followed edge.
-func (b *BreadthFirst) Walk(g graph.Graph, from graph.Node, until func(n graph.Node, d int) bool) graph.Node {
+func (b *BreadthFirst) Walk(g Graph, from graph.Node, until func(n graph.Node, d int) bool) graph.Node {
 	if b.visited == nil {
 		b.visited = make(set.Int64s)
 	}
@@ -115,7 +130,7 @@ type DepthFirst struct {
 // traversal follows edges for which EdgeFilter(edge) is true and returns the first node
 // for which until(node) is true. During the traversal, if the Visit field is non-nil, it
 // is called with the nodes joined by each followed edge.
-func (d *DepthFirst) Walk(g graph.Graph, from graph.Node, until func(graph.Node) bool) graph.Node {
+func (d *DepthFirst) Walk(g Graph, from graph.Node, until func(graph.Node) bool) graph.Node {
 	if d.visited == nil {
 		d.visited = make(set.Int64s)
 	}

@@ -1155,7 +1155,7 @@ func TestNewton(t *testing.T) {
 }
 
 func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
-	for _, test := range tests {
+	for cas, test := range tests {
 		if test.long && testing.Short() {
 			continue
 		}
@@ -1182,11 +1182,11 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		result, err := Local(test.p, test.x, settings, method)
 		if err != nil {
-			t.Errorf("error finding minimum (%v) for:\n%v", err, test)
+			t.Errorf("Cas %d: error finding minimum (%v) for:\n%v", cas, err, test)
 			continue
 		}
 		if result == nil {
-			t.Errorf("nil result without error for:\n%v", test)
+			t.Errorf("Cas %d: nil result without error for:\n%v", cas, test)
 			continue
 		}
 
@@ -1194,8 +1194,8 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		// equal to result.F.
 		optF := test.p.Func(result.X)
 		if optF != result.F {
-			t.Errorf("Function value at the optimum location %v not equal to the returned value %v for:\n%v",
-				optF, result.F, test)
+			t.Errorf("Cas %d: Function value at the optimum location %v not equal to the returned value %v for:\n%v",
+				cas, optF, result.F, test)
 		}
 		if result.Gradient != nil {
 			// Evaluate the norm of the gradient at the found optimum location.
@@ -1203,15 +1203,15 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			test.p.Grad(g, result.X)
 
 			if !floats.Equal(result.Gradient, g) {
-				t.Errorf("Gradient at the optimum location not equal to the returned value for:\n%v", test)
+				t.Errorf("Cas %d: Gradient at the optimum location not equal to the returned value for:\n%v", cas, test)
 			}
 
 			optNorm := floats.Norm(g, math.Inf(1))
 			// Check that the norm of the gradient at the found optimum location is
 			// smaller than the tolerance.
 			if optNorm >= settings.GradientThreshold {
-				t.Errorf("Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
-					optNorm, settings.GradientThreshold, test)
+				t.Errorf("Cas %d: Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
+					cas, optNorm, settings.GradientThreshold, test)
 			}
 		}
 

@@ -13,7 +13,7 @@ import (
 )
 
 func TestGuessAndCheck(t *testing.T) {
-	dim := 3000
+	dim := 30
 	problem := Problem{
 		Func: functions.ExtendedRosenbrock{}.Func,
 	}

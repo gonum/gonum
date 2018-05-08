@@ -13,16 +13,23 @@ type FunctionConverge struct {
 	Relative   float64
 	Iterations int
 
-	best float64
-	iter int
+	first bool
+	best  float64
+	iter  int
 }
 
 func (fc *FunctionConverge) Init(f float64) {
-	fc.best = f
+	fc.first = true
+	fc.best = 0
 	fc.iter = 0
 }
 
 func (fc *FunctionConverge) FunctionConverged(f float64) Status {
+	if fc.first {
+		fc.best = f
+		fc.first = false
+		return NotTerminated
+	}
 	if fc.Iterations == 0 {
 		return NotTerminated
 	}

@@ -90,8 +90,7 @@ func (g johnsonWeightAdjuster) Has(id int64) bool {
 	if g.bellmanFord && id == g.q {
 		return true
 	}
-	return g.g.Has(id)
-
+	panic("path: unintended use of johnsonWeightAdjuster")
 }
 
 func (g johnsonWeightAdjuster) Nodes() []graph.Node {

@@ -51,8 +51,11 @@ type GlobalMethod interface {
 	// The GlobalMethod must read from the result channel until it is closed.
 	// During this, the GlobalMethod may want to send new MajorIteration(s) on
 	// operation. GlobalMethod then must close operation, and return from RunGlobal.
+	// These steps must establish a "happens-before" relationship between result
+	// being closed (externally) and RunGlobal closing operation, for example
+	// by using a range loop to read from result even if no results are expected.
 	//
-	// The las parameter to RunGlobal is a slice of tasks with length equal to
+	// The last parameter to RunGlobal is a slice of tasks with length equal to
 	// the return from InitGlobal. GlobalTask has an ID field which may be
 	// set and modified by GlobalMethod, and must not be modified by the caller.
 	//
@@ -117,6 +120,9 @@ func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Resul
 		return nil, err
 	}
 
+	// TODO(btracey): These init calls don't do anything with their arguments
+	// because optLoc is meaningless at this point. Should change the function
+	// signatures.
 	optLoc := newLocation(dim, method)
 	optLoc.F = math.Inf(1)
 
@@ -198,6 +204,8 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 	// method that all results have been collected. At this point, the method
 	// may send MajorIteration(s) to update an optimum location based on these
 	// last returned results, and then the method will close the operations channel.
+	// The GlobalMethod must ensure that the closing of results happens before the
+	// closing of operations in order to ensure proper shutdown order.
 	// Now that no more tasks will be commanded by the method, the distributor
 	// closes statsChan, and with no more statistics to update the optimization
 	// concludes.

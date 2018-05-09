@@ -4,10 +4,7 @@
 
 package optimize
 
-import (
-	"math"
-	"time"
-)
+import "math"
 
 // Local finds a local minimum of a minimization problem using a sequential
 // algorithm. A maximization problem can be transformed into a minimization
@@ -59,123 +56,18 @@ import (
 // maximum runtime or maximum function evaluations, modify the Settings
 // input struct.
 func Local(p Problem, initX []float64, settings *Settings, method Method) (*Result, error) {
-	startTime := time.Now()
-	dim := len(initX)
 	if method == nil {
 		method = getDefaultMethod(&p)
 	}
 	if settings == nil {
 		settings = DefaultSettings()
 	}
-
-	stats := &Stats{}
-
-	err := checkOptimization(p, dim, method, settings.Recorder)
-	if err != nil {
-		return nil, err
+	lg := &localGlobal{
+		Method:   method,
+		InitX:    initX,
+		Settings: settings,
 	}
-
-	optLoc, err := getStartingLocation(&p, method, initX, stats, settings)
-	if err != nil {
-		return nil, err
-	}
-
-	if settings.FunctionConverge != nil {
-		settings.FunctionConverge.Init(optLoc.F)
-	}
-
-	stats.Runtime = time.Since(startTime)
-
-	// Send initial location to Recorder
-	if settings.Recorder != nil {
-		err = settings.Recorder.Record(optLoc, InitIteration, stats)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Check if the starting location satisfies the convergence criteria.
-	status := checkLocationConvergence(optLoc, settings)
-
-	// Run optimization
-	if status == NotTerminated && err == nil {
-		// The starting location is not good enough, we need to perform a
-		// minimization. The optimal location will be stored in-place in
-		// optLoc.
-		status, err = minimize(&p, method, settings, stats, optLoc, startTime)
-	}
-
-	// Cleanup and collect results
-	if settings.Recorder != nil && err == nil {
-		// Send the optimal location to Recorder.
-		err = settings.Recorder.Record(optLoc, PostIteration, stats)
-	}
-	stats.Runtime = time.Since(startTime)
-	return &Result{
-		Location: *optLoc,
-		Stats:    *stats,
-		Status:   status,
-	}, err
-}
-
-func minimize(p *Problem, method Method, settings *Settings, stats *Stats, optLoc *Location, startTime time.Time) (status Status, err error) {
-	loc := &Location{}
-	copyLocation(loc, optLoc)
-	x := make([]float64, len(loc.X))
-
-	var op Operation
-	op, err = method.Init(loc)
-	if err != nil {
-		status = Failure
-		return
-	}
-
-	for {
-		// Sequentially call method.Iterate, performing the operations it has
-		// commanded, until convergence.
-
-		switch op {
-		case NoOperation:
-		case InitIteration:
-			panic("optimize: Method returned InitIteration")
-		case PostIteration:
-			panic("optimize: Method returned PostIteration")
-		case MajorIteration:
-			status = performMajorIteration(optLoc, loc, stats, startTime, settings)
-		case MethodDone:
-			statuser, ok := method.(Statuser)
-			if !ok {
-				panic("optimize: method returned MethodDone is not a Statuser")
-			}
-			status, err = statuser.Status()
-			if status == NotTerminated {
-				panic("optimize: method returned MethodDone but a NotTerminated status")
-			}
-		default: // Any of the Evaluation operations.
-			evaluate(p, loc, op, x)
-			updateEvaluationStats(stats, op)
-			status, err = checkEvaluationLimits(p, stats, settings)
-		}
-		if status != NotTerminated || err != nil {
-			return
-		}
-		if settings.Recorder != nil {
-			stats.Runtime = time.Since(startTime)
-			err = settings.Recorder.Record(loc, op, stats)
-			if err != nil {
-				if status == NotTerminated {
-					status = Failure
-				}
-				return status, err
-			}
-		}
-
-		op, err = method.Iterate(loc)
-		if err != nil {
-			status = Failure
-			return
-		}
-	}
+	return Global(p, len(initX), settings, lg)
 }
 
 func getDefaultMethod(p *Problem) Method {
@@ -185,55 +77,155 @@ func getDefaultMethod(p *Problem) Method {
 	return &NelderMead{}
 }
 
-// getStartingLocation allocates and initializes the starting location for the minimization.
-func getStartingLocation(p *Problem, method Method, initX []float64, stats *Stats, settings *Settings) (*Location, error) {
-	dim := len(initX)
-	loc := newLocation(dim, method)
-	copy(loc.X, initX)
+// localGlobal is a wrapper for Local methods to allow them to be optimized by Global.
+type localGlobal struct {
+	Method   Method
+	InitX    []float64
+	Settings *Settings
 
-	if settings.UseInitialData {
-		loc.F = settings.InitialValue
-		if loc.Gradient != nil {
-			initG := settings.InitialGradient
-			if initG == nil {
+	dim    int
+	status Status
+	err    error
+}
+
+func (l *localGlobal) InitGlobal(dim, tasks int) int {
+	if dim != len(l.InitX) {
+		panic("optimize: initial length mismatch")
+	}
+	l.dim = dim
+	l.status = NotTerminated
+	l.err = nil
+	return 1 // Local optimizations always run in serial.
+}
+
+func (l *localGlobal) Status() (Status, error) {
+	return l.status, l.err
+}
+
+func (l *localGlobal) Needs() struct {
+	Gradient bool
+	Hessian  bool
+} {
+	return l.Method.Needs()
+}
+
+func (l *localGlobal) RunGlobal(operations chan<- GlobalTask, results <-chan GlobalTask, tasks []GlobalTask) {
+	// Local methods start with a fully-specified initial location.
+	task := tasks[0]
+	op := l.getStartingLocation(operations, results, task)
+	if op == PostIteration {
+		l.cleanup(operations, results)
+		return
+	}
+	// Check the starting condition.
+	if math.IsInf(task.F, 1) || math.IsNaN(task.F) {
+		l.status = Failure
+		l.err = ErrFunc(task.F)
+	}
+	for i, v := range task.Gradient {
+		if math.IsInf(v, 0) || math.IsNaN(v) {
+			l.status = Failure
+			l.err = ErrGrad{Grad: v, Index: i}
+			break
+		}
+	}
+	if l.status == Failure {
+		l.exitFailure(operations, results, tasks[0])
+		return
+	}
+
+	// Send a major iteration with the starting location.
+	task.Op = MajorIteration
+	operations <- task
+	task = <-results
+	if task.Op == PostIteration {
+		l.cleanup(operations, results)
+		return
+	}
+
+	op, err := l.Method.Init(task.Location)
+	if err != nil {
+		l.status = Failure
+		l.err = err
+		l.exitFailure(operations, results, tasks[0])
+		return
+	}
+	task.Op = op
+	operations <- task
+Loop:
+	for {
+		result := <-results
+		switch result.Op {
+		case PostIteration:
+			break Loop
+		default:
+			op, err := l.Method.Iterate(result.Location)
+			if err != nil {
+				l.status = Failure
+				l.err = err
+				l.exitFailure(operations, results, result)
+				return
+			}
+			result.Op = op
+			operations <- result
+		}
+	}
+	l.cleanup(operations, results)
+}
+
+// exitFailure cleans up from a failure of the local method.
+func (l *localGlobal) exitFailure(operation chan<- GlobalTask, result <-chan GlobalTask, task GlobalTask) {
+	task.Op = MethodDone
+	operation <- task
+	task = <-result
+	if task.Op != PostIteration {
+		panic("task should have returned post iteration")
+	}
+	l.cleanup(operation, result)
+}
+
+func (l *localGlobal) cleanup(operation chan<- GlobalTask, result <-chan GlobalTask) {
+	// Guarantee that result is closed before operation is closed.
+	for range result {
+	}
+	close(operation)
+}
+
+func (l *localGlobal) getStartingLocation(operation chan<- GlobalTask, result <-chan GlobalTask, task GlobalTask) Operation {
+	copy(task.X, l.InitX)
+	if l.Settings.UseInitialData {
+		task.F = l.Settings.InitialValue
+		if task.Gradient != nil {
+			g := l.Settings.InitialGradient
+			if g == nil {
 				panic("optimize: initial gradient is nil")
 			}
-			if len(initG) != dim {
+			if len(g) != l.dim {
 				panic("optimize: initial gradient size mismatch")
 			}
-			copy(loc.Gradient, initG)
+			copy(task.Gradient, g)
 		}
-		if loc.Hessian != nil {
-			initH := settings.InitialHessian
-			if initH == nil {
+		if task.Hessian != nil {
+			h := l.Settings.InitialHessian
+			if h == nil {
 				panic("optimize: initial Hessian is nil")
 			}
-			if initH.Symmetric() != dim {
+			if h.Symmetric() != l.dim {
 				panic("optimize: initial Hessian size mismatch")
 			}
-			loc.Hessian.CopySym(initH)
+			task.Hessian.CopySym(h)
 		}
-	} else {
-		eval := FuncEvaluation
-		if loc.Gradient != nil {
-			eval |= GradEvaluation
-		}
-		if loc.Hessian != nil {
-			eval |= HessEvaluation
-		}
-		x := make([]float64, len(loc.X))
-		evaluate(p, loc, eval, x)
-		updateEvaluationStats(stats, eval)
+		return NoOperation
 	}
-
-	if math.IsInf(loc.F, 1) || math.IsNaN(loc.F) {
-		return loc, ErrFunc(loc.F)
+	eval := FuncEvaluation
+	if task.Gradient != nil {
+		eval |= GradEvaluation
 	}
-	for i, v := range loc.Gradient {
-		if math.IsInf(v, 0) || math.IsNaN(v) {
-			return loc, ErrGrad{Grad: v, Index: i}
-		}
+	if task.Hessian != nil {
+		eval |= HessEvaluation
 	}
-
-	return loc, nil
+	task.Op = eval
+	operation <- task
+	task = <-result
+	return task.Op
 }

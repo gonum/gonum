@@ -1182,11 +1182,11 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		result, err := Local(test.p, test.x, settings, method)
 		if err != nil {
-			t.Errorf("Cas %d: error finding minimum (%v) for:\n%v", cas, err, test)
+			t.Errorf("Case %d: error finding minimum (%v) for:\n%v", cas, err, test)
 			continue
 		}
 		if result == nil {
-			t.Errorf("Cas %d: nil result without error for:\n%v", cas, test)
+			t.Errorf("Case %d: nil result without error for:\n%v", cas, test)
 			continue
 		}
 
@@ -1194,7 +1194,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		// equal to result.F.
 		optF := test.p.Func(result.X)
 		if optF != result.F {
-			t.Errorf("Cas %d: Function value at the optimum location %v not equal to the returned value %v for:\n%v",
+			t.Errorf("Case %d: Function value at the optimum location %v not equal to the returned value %v for:\n%v",
 				cas, optF, result.F, test)
 		}
 		if result.Gradient != nil {
@@ -1203,14 +1203,14 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 			test.p.Grad(g, result.X)
 
 			if !floats.Equal(result.Gradient, g) {
-				t.Errorf("Cas %d: Gradient at the optimum location not equal to the returned value for:\n%v", cas, test)
+				t.Errorf("Case %d: Gradient at the optimum location not equal to the returned value for:\n%v", cas, test)
 			}
 
 			optNorm := floats.Norm(g, math.Inf(1))
 			// Check that the norm of the gradient at the found optimum location is
 			// smaller than the tolerance.
 			if optNorm >= settings.GradientThreshold {
-				t.Errorf("Cas %d: Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
+				t.Errorf("Case %d: Norm of the gradient at the optimum location %v not smaller than tolerance %v for:\n%v",
 					cas, optNorm, settings.GradientThreshold, test)
 			}
 		}

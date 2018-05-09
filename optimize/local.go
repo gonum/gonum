@@ -197,7 +197,7 @@ func (l *localGlobal) getStartingLocation(operation chan<- GlobalTask, result <-
 		task.F = l.Settings.InitialValue
 		if task.Gradient != nil {
 			g := l.Settings.InitialGradient
-			if task.Gradient != nil && g == nil {
+			if g == nil {
 				panic("optimize: initial gradient is nil")
 			}
 			if len(g) != l.dim {

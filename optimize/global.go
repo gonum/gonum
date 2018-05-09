@@ -127,7 +127,7 @@ func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Resul
 	optLoc.F = math.Inf(1)
 
 	if settings.FunctionConverge != nil {
-		settings.FunctionConverge.Init(optLoc.F)
+		settings.FunctionConverge.Init()
 	}
 
 	stats.Runtime = time.Since(startTime)

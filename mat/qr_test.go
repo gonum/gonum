@@ -17,6 +17,7 @@ func TestQR(t *testing.T) {
 	for _, test := range []struct {
 		m, n int
 	}{
+		{0, 0}, // Check that there is no panic for zero-sized matrix.
 		{5, 5},
 		{10, 5},
 	} {

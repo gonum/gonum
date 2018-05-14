@@ -180,6 +180,18 @@ tests:
 				t.Errorf("%d use %d: unexpected variance result got:%v, want:%v",
 					i, j, vars, test.wantVars)
 			}
+
+			// Check that the set of principal vectors is
+			// orthonormal by comparing V^T*V to the identity matrix.
+			I := mat.NewDiagonal(c, nil)
+			for k := 0; k < c; k++ {
+				I.SetSymBand(k, k, 1)
+			}
+			var vv mat.Dense
+			vv.Mul(vecs.T(), vecs)
+			if !mat.EqualApprox(&vv, I, test.epsilon) {
+				t.Errorf("%d use %d: vectors not orthonormal\n%v", i, j, mat.Formatted(I))
+			}
 		}
 	}
 }

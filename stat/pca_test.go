@@ -5,18 +5,16 @@
 package stat
 
 import (
+	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 
-var appengine bool
-
 func TestPrincipalComponents(t *testing.T) {
-	if appengine {
-		t.Skip("non-asm implementation fails test")
-	}
+	// Threshold for detecting zero variances.
+	const epsilon = 1e-15
 tests:
 	for i, test := range []struct {
 		data     mat.Matrix
@@ -163,7 +161,18 @@ tests:
 				t.Errorf("unexpected SVD failure for test %d use %d", i, j)
 				continue tests
 			}
-			if !mat.EqualApprox(vecs, test.wantVecs, test.epsilon) {
+
+			// Find the number of non-zero variances to handle
+			// non-uniqueness in SVD result (issue #21).
+			nnz := len(vars)
+			for k, v := range vars {
+				if math.Abs(v) < epsilon {
+					nnz = k
+					break
+				}
+			}
+			r, c := vecs.Dims()
+			if !mat.EqualApprox(vecs.Slice(0, r, 0, nnz), test.wantVecs.Slice(0, r, 0, nnz), test.epsilon) {
 				t.Errorf("%d use %d: unexpected PCA result got:\n%v\nwant:\n%v",
 					i, j, mat.Formatted(vecs), mat.Formatted(test.wantVecs))
 			}

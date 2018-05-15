@@ -18,7 +18,7 @@ type FunctionConverge struct {
 	iter  int
 }
 
-func (fc *FunctionConverge) Init(f float64) {
+func (fc *FunctionConverge) Init() {
 	fc.first = true
 	fc.best = 0
 	fc.iter = 0

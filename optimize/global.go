@@ -58,6 +58,12 @@ type GlobalMethod interface {
 	// The last parameter to RunGlobal is a slice of tasks with length equal to
 	// the return from InitGlobal. GlobalTask has an ID field which may be
 	// set and modified by GlobalMethod, and must not be modified by the caller.
+	// The first element of tasks contains information about the initial location
+	// if any is specified in Settings. The Location field will contain the value
+	// specified by InitLocation, defaulted to a value of zero if none was specified.
+	// The Operation field specifies which other values of Location are known.
+	// If Operation == NoOperation, none of the values should be used, otherwise
+	// the Evaluation operations will be composed to specify the valid fields.
 	//
 	// GlobalMethod may have its own specific convergence criteria, which can
 	// be communicated using a MethodDone operation. This will trigger a
@@ -120,15 +126,14 @@ func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Resul
 		return nil, err
 	}
 
-	// TODO(btracey): These init calls don't do anything with their arguments
-	// because optLoc is meaningless at this point. Should change the function
-	// signatures.
 	optLoc := newLocation(dim, method)
 	optLoc.F = math.Inf(1)
 
 	if settings.FunctionConverge != nil {
 		settings.FunctionConverge.Init()
 	}
+
+	initLoc := getInitLocation(dim, settings.InitLocation, settings.InitOperation, method)
 
 	stats.Runtime = time.Since(startTime)
 
@@ -142,7 +147,7 @@ func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Resul
 
 	// Run optimization
 	var status Status
-	status, err = minimizeGlobal(&p, method, settings, stats, optLoc, startTime)
+	status, err = minimizeGlobal(&p, method, settings, stats, settings.InitOperation, initLoc, optLoc, startTime)
 
 	// Cleanup and collect results
 	if settings.Recorder != nil && err == nil {
@@ -158,7 +163,7 @@ func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Resul
 
 // minimizeGlobal performs a Global optimization. minimizeGlobal updates the
 // settings and optLoc, and returns the final Status and error.
-func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stats *Stats, optLoc *Location, startTime time.Time) (Status, error) {
+func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stats *Stats, initOp Operation, initLoc, optLoc *Location, startTime time.Time) (Status, error) {
 	dim := len(optLoc.X)
 	nTasks := settings.Concurrent
 	if nTasks == 0 {
@@ -176,7 +181,9 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 	results := make(chan GlobalTask, nTasks)
 	go func() {
 		tasks := make([]GlobalTask, nTasks)
-		for i := range tasks {
+		tasks[0].Location = initLoc
+		tasks[0].Op = initOp
+		for i := 1; i < len(tasks); i++ {
 			tasks[i].Location = newLocation(dim, method)
 		}
 		method.RunGlobal(operations, results, tasks)

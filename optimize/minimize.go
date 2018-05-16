@@ -26,14 +26,12 @@ func min(a, b int) int {
 }
 
 // newLocation allocates a new locatian structure of the appropriate size. It
-// allocates memory based on the dimension and the values in Needs. The initial
-// function value is set to math.Inf(1).
+// allocates memory based on the dimension and the values in Needs.
 func newLocation(dim int, method Needser) *Location {
 	// TODO(btracey): combine this with Local.
 	loc := &Location{
 		X: make([]float64, dim),
 	}
-	loc.F = math.Inf(1)
 	if method.Needs().Gradient {
 		loc.Gradient = make([]float64, dim)
 	}
@@ -58,6 +56,56 @@ func copyLocation(dst, src *Location) {
 		}
 		dst.Hessian.CopySym(src.Hessian)
 	}
+}
+
+// getInitLocation checks the validity of initLocation and initOperation and
+// returns the initial values as a *Location.
+func getInitLocation(dim int, initLocation *Location, initOperation Operation, method Needser) *Location {
+	needs := method.Needs()
+	loc := newLocation(dim, method)
+	if initLocation == nil {
+		return loc
+	}
+	// Check consistency of initOperation and initLocation even if initLocation.X == nil
+	// to catch common bugs.
+	if initOperation != NoOperation {
+		if initLocation.X == nil {
+			panic("optimize: initOperation set but no initial X specified")
+		}
+		if initOperation&GradEvaluation != 0 {
+			if initLocation.Gradient == nil {
+				panic("optimize: operation specifies gradient, but no gradient specified")
+			}
+			if len(initLocation.Gradient) != dim {
+				panic("optimize: initial gradient does not match problem dimension")
+			}
+		}
+		if initOperation&HessEvaluation != 0 {
+			if initLocation.Hessian == nil {
+				panic("optimize: operation specifies gradient, but no gradient specified")
+			}
+			if initLocation.Hessian.Symmetric() != dim {
+				panic("optimize: initial Hessian does not match problem dimension")
+			}
+		}
+	}
+	if initLocation.X == nil {
+		return loc
+	}
+	if len(initLocation.X) != dim {
+		panic("optimize: specified initial location does not match problem dimension")
+	}
+	copy(loc.X, initLocation.X)
+	if initOperation&FuncEvaluation != 0 {
+		loc.F = initLocation.F
+	}
+	if needs.Gradient && initOperation&GradEvaluation != 0 {
+		copy(loc.Gradient, initLocation.Gradient)
+	}
+	if needs.Hessian && initOperation&HessEvaluation != 0 {
+		loc.Hessian.CopySym(initLocation.Hessian)
+	}
+	return loc
 }
 
 func checkOptimization(p Problem, dim int, method Needser, recorder Recorder) error {

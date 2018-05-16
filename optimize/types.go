@@ -164,15 +164,16 @@ func (p Problem) satisfies(method Needser) error {
 // settings, convergence information, and Recorder information. In general, users
 // should use DefaultSettings rather than constructing a Settings literal.
 //
-// If UseInitData is true, InitialValue, InitialGradient and InitialHessian
-// specify function information at the initial location.
-//
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
-	UseInitialData  bool          // Use supplied information about the conditions at the initial x.
-	InitialValue    float64       // Function value at the initial x.
-	InitialGradient []float64     // Gradient at the initial x.
-	InitialHessian  *mat.SymDense // Hessian at the initial x.
+	// InitX specifies an initial location to communicate to the Method. If InitX
+	// is nil, then a default location of 0 is used.
+	InitX []float64
+	// InitValues specifies properties known at InitX (function value, gradient, etc.).
+	// InitValues is nil, then no values are known, and if InitX is nil, then InitValues
+	// must be also. If InitValues is non-nil, then the function value must be provided,
+	// and other fields are optional.
+	InitValues *Location
 
 	// FunctionThreshold is the threshold for acceptably small values of the
 	// objective function. FunctionThreshold status is returned if

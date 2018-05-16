@@ -1230,15 +1230,16 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// We are going to restart the solution using known initial data, so
 		// evaluate them.
-		settings.UseInitialData = true
-		settings.InitialValue = test.p.Func(test.x)
+		settings.InitX = test.x
+		settings.InitValues = &Location{}
+		settings.InitValues.F = test.p.Func(test.x)
 		if method.Needs().Gradient {
-			settings.InitialGradient = resize(settings.InitialGradient, len(test.x))
-			test.p.Grad(settings.InitialGradient, test.x)
+			settings.InitValues.Gradient = resize(settings.InitValues.Gradient, len(test.x))
+			test.p.Grad(settings.InitValues.Gradient, test.x)
 		}
 		if method.Needs().Hessian {
-			settings.InitialHessian = mat.NewSymDense(len(test.x), nil)
-			test.p.Hess(settings.InitialHessian, test.x)
+			settings.InitValues.Hessian = mat.NewSymDense(len(test.x), nil)
+			test.p.Hess(settings.InitValues.Hessian, test.x)
 		}
 
 		// Rerun the test again to make sure that it gets the same answer with

@@ -7,8 +7,6 @@ package imports
 import (
 	"fmt"
 	"go/token"
-	"os"
-	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -82,17 +80,5 @@ func TestCheck(t *testing.T) {
 				t.Fatalf("error\ngot= %v\nwant=%v", err, tc.err)
 			}
 		})
-	}
-}
-
-func TestBlacklistedImports(t *testing.T) {
-	pwd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("could not retrieve current working directory: %v", err)
-	}
-	dir := filepath.Join(pwd, "../..") // Gonum top directory
-	err = CheckBlacklisted(dir, blacklist)
-	if err != nil {
-		t.Fatal(err)
 	}
 }

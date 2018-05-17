@@ -83,6 +83,22 @@ func newShortestFrom(u graph.Node, nodes []graph.Node) Shortest {
 	return p
 }
 
+// add adds a node to the Shortest, initialising its stored index and returning, and
+// setting the distance and position as unconnected. add will panic if the node is
+// already present.
+func (p *Shortest) add(u graph.Node) int {
+	uid := u.ID()
+	if _, exists := p.indexOf[uid]; exists {
+		panic("shortest: adding existing node")
+	}
+	idx := len(p.nodes)
+	p.indexOf[uid] = idx
+	p.nodes = append(p.nodes, u)
+	p.dist = append(p.dist, math.Inf(1))
+	p.next = append(p.next, -1)
+	return idx
+}
+
 func (p Shortest) set(to int, weight float64, mid int) {
 	p.dist[to] = weight
 	p.next[to] = mid

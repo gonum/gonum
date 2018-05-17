@@ -13,6 +13,7 @@ import (
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/ordered"
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
+	"gonum.org/v1/gonum/graph/traverse"
 )
 
 func TestDijkstraFrom(t *testing.T) {
@@ -22,63 +23,80 @@ func TestDijkstraFrom(t *testing.T) {
 			g.SetWeightedEdge(e)
 		}
 
-		var (
-			pt Shortest
+		for _, tg := range []struct {
+			typ string
+			g   traverse.Graph
+		}{
+			{"complete", g.(graph.Graph)},
+			{"incremental", incremental{g.(graph.Weighted)}},
+		} {
+			var (
+				pt Shortest
 
-			panicked bool
-		)
-		func() {
-			defer func() {
-				panicked = recover() != nil
+				panicked bool
+			)
+			func() {
+				defer func() {
+					panicked = recover() != nil
+				}()
+				pt = DijkstraFrom(test.Query.From(), tg.g)
 			}()
-			pt = DijkstraFrom(test.Query.From(), g.(graph.Graph))
-		}()
-		if panicked || test.HasNegativeWeight {
-			if !test.HasNegativeWeight {
-				t.Errorf("%q: unexpected panic", test.Name)
+			if panicked || test.HasNegativeWeight {
+				if !test.HasNegativeWeight {
+					t.Errorf("%q %s: unexpected panic", test.Name, tg.typ)
+				}
+				if !panicked {
+					t.Errorf("%q %s: expected panic for negative edge weight", test.Name, tg.typ)
+				}
+				continue
 			}
-			if !panicked {
-				t.Errorf("%q: expected panic for negative edge weight", test.Name)
+
+			if pt.From().ID() != test.Query.From().ID() {
+				t.Fatalf("%q %s: unexpected from node ID: got:%d want:%d", test.Name, tg.typ, pt.From().ID(), test.Query.From().ID())
 			}
-			continue
-		}
 
-		if pt.From().ID() != test.Query.From().ID() {
-			t.Fatalf("%q: unexpected from node ID: got:%d want:%d", test.Name, pt.From().ID(), test.Query.From().ID())
-		}
-
-		p, weight := pt.To(test.Query.To().ID())
-		if weight != test.Weight {
-			t.Errorf("%q: unexpected weight from Between: got:%f want:%f",
-				test.Name, weight, test.Weight)
-		}
-		if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
-			t.Errorf("%q: unexpected weight from Weight: got:%f want:%f",
-				test.Name, weight, test.Weight)
-		}
-
-		var got []int64
-		for _, n := range p {
-			got = append(got, n.ID())
-		}
-		ok := len(got) == 0 && len(test.WantPaths) == 0
-		for _, sp := range test.WantPaths {
-			if reflect.DeepEqual(got, sp) {
-				ok = true
-				break
+			p, weight := pt.To(test.Query.To().ID())
+			if weight != test.Weight {
+				t.Errorf("%q %s: unexpected weight from Between: got:%f want:%f",
+					test.Name, tg.typ, weight, test.Weight)
 			}
-		}
-		if !ok {
-			t.Errorf("%q: unexpected shortest path:\ngot: %v\nwant from:%v",
-				test.Name, p, test.WantPaths)
-		}
+			if weight := pt.WeightTo(test.Query.To().ID()); weight != test.Weight {
+				t.Errorf("%q %s: unexpected weight from Weight: got:%f want:%f",
+					test.Name, tg.typ, weight, test.Weight)
+			}
 
-		np, weight := pt.To(test.NoPathFor.To().ID())
-		if pt.From().ID() == test.NoPathFor.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
-			t.Errorf("%q: unexpected path:\ngot: path=%v weight=%f\nwant:path=<nil> weight=+Inf",
-				test.Name, np, weight)
+			var got []int64
+			for _, n := range p {
+				got = append(got, n.ID())
+			}
+			ok := len(got) == 0 && len(test.WantPaths) == 0
+			for _, sp := range test.WantPaths {
+				if reflect.DeepEqual(got, sp) {
+					ok = true
+					break
+				}
+			}
+			if !ok {
+				t.Errorf("%q %s: unexpected shortest path:\ngot: %v\nwant from:%v",
+					test.Name, tg.typ, p, test.WantPaths)
+			}
+
+			np, weight := pt.To(test.NoPathFor.To().ID())
+			if pt.From().ID() == test.NoPathFor.From().ID() && (np != nil || !math.IsInf(weight, 1)) {
+				t.Errorf("%q %s: unexpected path:\ngot: path=%v weight=%f\nwant:path=<nil> weight=+Inf",
+					test.Name, tg.typ, np, weight)
+			}
 		}
 	}
+}
+
+type weightedTraverseGraph interface {
+	traverse.Graph
+	Weighted
+}
+
+type incremental struct {
+	weightedTraverseGraph
 }
 
 func TestDijkstraAllPaths(t *testing.T) {

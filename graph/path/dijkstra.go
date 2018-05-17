@@ -8,26 +8,37 @@ import (
 	"container/heap"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/traverse"
 )
 
 // DijkstraFrom returns a shortest-path tree for a shortest path from u to all nodes in
-// the graph g. If the graph does not implement graph.Weighter, UniformCost is used.
+// the graph g. If the graph does not implement Weighted, UniformCost is used.
 // DijkstraFrom will panic if g has a u-reachable negative edge weight.
 //
+// If g is a graph.Graph, all nodes of the graph will be stored in the shortest-path
+// tree, otherwise only nodes reachable from u will be stored.
+//
 // The time complexity of DijkstrFrom is O(|E|.log|V|).
-func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
-	if !g.Has(u.ID()) {
-		return Shortest{from: u}
+func DijkstraFrom(u graph.Node, g traverse.Graph) Shortest {
+	var path Shortest
+	if h, ok := g.(graph.Graph); ok {
+		if !h.Has(u.ID()) {
+			return Shortest{from: u}
+		}
+		path = newShortestFrom(u, h.Nodes())
+	} else {
+		if g.From(u.ID()) == nil {
+			return Shortest{from: u}
+		}
+		path = newShortestFrom(u, []graph.Node{u})
 	}
+
 	var weight Weighting
-	if wg, ok := g.(graph.Weighted); ok {
+	if wg, ok := g.(Weighted); ok {
 		weight = wg.Weight
 	} else {
 		weight = UniformCost(g)
 	}
-
-	nodes := g.Nodes()
-	path := newShortestFrom(u, nodes)
 
 	// Dijkstra's algorithm here is implemented essentially as
 	// described in Function B.2 in figure 6 of UTCS Technical
@@ -49,7 +60,10 @@ func DijkstraFrom(u graph.Node, g graph.Graph) Shortest {
 		mnid := mid.node.ID()
 		for _, v := range g.From(mnid) {
 			vid := v.ID()
-			j := path.indexOf[vid]
+			j, ok := path.indexOf[vid]
+			if !ok {
+				j = path.add(v)
+			}
 			w, ok := weight(mnid, vid)
 			if !ok {
 				panic("dijkstra: unexpected invalid weight")

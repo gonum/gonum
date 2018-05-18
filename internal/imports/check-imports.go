@@ -13,12 +13,10 @@ import (
 	"gonum.org/v1/gonum/internal/imports"
 )
 
-var (
-	blacklist = []string{
-		"github.com/gonum/.*", // prefer gonum.org/v1/gonum
-		"math/rand",           // prefer golang.org/x/exp/rand
-	}
-)
+var blacklist = []string{
+	"github.com/gonum/.*", // prefer gonum.org/v1/gonum
+	"math/rand",           // prefer golang.org/x/exp/rand
+}
 
 func main() {
 	log.SetPrefix("check-imports: ")

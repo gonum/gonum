@@ -11,12 +11,10 @@ import (
 	"testing"
 )
 
-var (
-	blacklist = []string{
-		"github.com/gonum/.*", // prefer gonum.org/v1/gonum
-		"math/rand",           // prefer golang.org/x/exp/rand
-	}
-)
+var blacklist = []string{
+	"github.com/gonum/.*", // prefer gonum.org/v1/gonum
+	"math/rand",           // prefer golang.org/x/exp/rand
+}
 
 func TestCheck(t *testing.T) {
 	blacklist, err := str2RE(blacklist)

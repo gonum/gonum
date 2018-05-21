@@ -5,6 +5,7 @@
 package mat
 
 import (
+	"sort"
 	"testing"
 
 	"golang.org/x/exp/rand"
@@ -159,6 +160,11 @@ func TestSymEigen(t *testing.T) {
 				if !EqualApprox(&m, &scal, 1e-8) {
 					t.Errorf("Eigenvalue does not match")
 				}
+			}
+
+			// Check that the eigenvalues are in ascending order.
+			if !sort.Float64sAreSorted(es.values) {
+				t.Errorf("Eigenvalues not ascending")
 			}
 		}
 	}

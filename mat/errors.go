@@ -118,7 +118,7 @@ var (
 	ErrRowAccess           = Error{"matrix: row index out of range"}
 	ErrColAccess           = Error{"matrix: column index out of range"}
 	ErrVectorAccess        = Error{"matrix: vector index out of range"}
-	ErrZeroLength          = Error{"matrix: zero length in matrix definition"}
+	ErrZeroLength          = Error{"matrix: zero length in matrix dimension"}
 	ErrRowLength           = Error{"matrix: row length mismatch"}
 	ErrColLength           = Error{"matrix: col length mismatch"}
 	ErrSquare              = Error{"matrix: expect square matrix"}

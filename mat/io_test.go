@@ -25,11 +25,13 @@ var (
 var denseData = []struct {
 	raw  []byte
 	want *Dense
+	err  error
 	eq   func(got, want Matrix) bool
 }{
 	{
 		raw:  []byte("\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"),
 		want: NewDense(0, 0, []float64{}),
+		err:  ErrZeroLength,
 		eq:   Equal,
 	},
 	{
@@ -142,7 +144,9 @@ func TestDenseUnmarshal(t *testing.T) {
 		var v Dense
 		err := v.UnmarshalBinary(test.raw)
 		if err != nil {
-			t.Errorf("error decoding test-%d: %v\n", i, err)
+			if err != test.err {
+				t.Errorf("error decoding test-%d: %v\n", i, err)
+			}
 			continue
 		}
 		if !test.eq(&v, test.want) {
@@ -161,7 +165,9 @@ func TestDenseUnmarshalFrom(t *testing.T) {
 		buf := bytes.NewReader(test.raw)
 		n, err := v.UnmarshalBinaryFrom(buf)
 		if err != nil {
-			t.Errorf("error decoding test-%d: %v\n", i, err)
+			if err != test.err {
+				t.Errorf("error decoding test-%d: %v\n", i, err)
+			}
 			continue
 		}
 		if n != len(test.raw) {
@@ -257,7 +263,10 @@ func TestDenseIORoundTrip(t *testing.T) {
 		var got Dense
 		err = got.UnmarshalBinary(buf)
 		if err != nil {
-			t.Errorf("error decoding test #%d: %v\n", i, err)
+			if err != test.err {
+				t.Errorf("error decoding test #%d: %v\n", i, err)
+			}
+			continue
 		}
 
 		if !test.eq(&got, test.want) {
@@ -291,11 +300,13 @@ func TestDenseIORoundTrip(t *testing.T) {
 var vectorData = []struct {
 	raw  []byte
 	want *VecDense
+	err  error
 	eq   func(got, want Matrix) bool
 }{
 	{
 		raw:  []byte("\x00\x00\x00\x00\x00\x00\x00\x00"),
 		want: NewVecDense(0, []float64{}),
+		err:  ErrZeroLength,
 		eq:   Equal,
 	},
 	{
@@ -414,7 +425,9 @@ func TestVecDenseUnmarshal(t *testing.T) {
 		var v VecDense
 		err := v.UnmarshalBinary(test.raw)
 		if err != nil {
-			t.Errorf("error decoding test-%d: %v\n", i, err)
+			if err != test.err {
+				t.Errorf("error decoding test-%d: %v\n", i, err)
+			}
 			continue
 		}
 		if !test.eq(&v, test.want) {
@@ -433,7 +446,9 @@ func TestVecDenseUnmarshalFrom(t *testing.T) {
 		buf := bytes.NewReader(test.raw)
 		n, err := v.UnmarshalBinaryFrom(buf)
 		if err != nil {
-			t.Errorf("error decoding test-%d: %v\n", i, err)
+			if err != test.err {
+				t.Errorf("error decoding test-%d: %v\n", i, err)
+			}
 			continue
 		}
 		if n != len(test.raw) {
@@ -519,7 +534,10 @@ func TestVecDenseIORoundTrip(t *testing.T) {
 		var got VecDense
 		err = got.UnmarshalBinary(buf)
 		if err != nil {
-			t.Errorf("error decoding test #%d: %v\n", i, err)
+			if err != test.err {
+				t.Errorf("error decoding test #%d: %v\n", i, err)
+			}
+			continue
 		}
 		if !test.eq(&got, test.want) {
 			t.Errorf("r/w test #%d failed\n got=%#v\nwant=%#v\n", i, &got, test.want)

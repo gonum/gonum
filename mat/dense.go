@@ -485,6 +485,7 @@ func (m *Dense) Copy(a Matrix) (r, c int) {
 			// Nothing to do.
 		}
 	default:
+		m.checkOverlapMatrix(aU)
 		for i := 0; i < r; i++ {
 			for j := 0; j < c; j++ {
 				m.set(i, j, a.At(i, j))

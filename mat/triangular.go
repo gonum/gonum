@@ -346,9 +346,7 @@ func (t *TriDense) Copy(a Matrix) (r, c int) {
 // Note that matrix inversion is numerically unstable, and should generally be
 // avoided where possible, for example by using the Solve routines.
 func (t *TriDense) InverseTri(a Triangular) error {
-	if rt, ok := a.(RawTriangular); ok {
-		t.checkOverlap(generalFromTriangular(rt.RawTriangular()))
-	}
+	t.checkOverlapMatrix(a)
 	n, _ := a.Triangle()
 	t.reuseAs(a.Triangle())
 	t.Copy(a)
@@ -385,6 +383,8 @@ func (t *TriDense) MulTri(a, b Triangular) {
 
 	aU, _ := untransposeTri(a)
 	bU, _ := untransposeTri(b)
+	t.checkOverlapMatrix(bU)
+	t.checkOverlapMatrix(aU)
 	t.reuseAs(n, kind)
 	var restore func()
 	if t == aU {
@@ -430,6 +430,9 @@ func (t *TriDense) ScaleTri(f float64, a Triangular) {
 	switch a := a.(type) {
 	case RawTriangular:
 		amat := a.RawTriangular()
+		if t != a {
+			t.checkOverlap(generalFromTriangular(amat))
+		}
 		if kind == Upper {
 			for i := 0; i < n; i++ {
 				ts := t.mat.Data[i*t.mat.Stride+i : i*t.mat.Stride+n]
@@ -449,6 +452,7 @@ func (t *TriDense) ScaleTri(f float64, a Triangular) {
 		}
 		return
 	default:
+		t.checkOverlapMatrix(a)
 		isUpper := kind == Upper
 		for i := 0; i < n; i++ {
 			if isUpper {

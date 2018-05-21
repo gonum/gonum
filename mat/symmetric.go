@@ -201,6 +201,8 @@ func (s *SymDense) AddSym(a, b Symmetric) {
 		}
 	}
 
+	s.checkOverlapMatrix(a)
+	s.checkOverlapMatrix(b)
 	for i := 0; i < n; i++ {
 		stmp := s.mat.Data[i*s.mat.Stride : i*s.mat.Stride+n]
 		for j := i; j < n; j++ {

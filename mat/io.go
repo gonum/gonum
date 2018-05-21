@@ -127,6 +127,9 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 	}
 
 	size := rows * cols
+	if size == 0 {
+		return ErrZeroLength
+	}
 	if int(size) < 0 || size > maxLen {
 		return errTooBig
 	}
@@ -184,6 +187,9 @@ func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 	}
 
 	size := rows * cols
+	if size == 0 {
+		return n, ErrZeroLength
+	}
 	if int(size) < 0 || size > maxLen {
 		return n, errTooBig
 	}
@@ -274,6 +280,9 @@ func (v *VecDense) UnmarshalBinary(data []byte) error {
 
 	p := 0
 	n := int64(binary.LittleEndian.Uint64(data[p : p+sizeInt64]))
+	if n == 0 {
+		return ErrZeroLength
+	}
 	p += sizeInt64
 	if n < 0 {
 		return errBadSize
@@ -315,6 +324,9 @@ func (v *VecDense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 		return n, err
 	}
 	sz := int64(binary.LittleEndian.Uint64(buf[:]))
+	if sz == 0 {
+		return n, ErrZeroLength
+	}
 	if sz < 0 {
 		return n, errBadSize
 	}

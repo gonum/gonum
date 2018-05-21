@@ -235,6 +235,9 @@ func untransposeTri(a Triangular) (Triangular, bool) {
 // orientation. If the receiver is non-zero, reuseAs checks that the receiver
 // is the correct size and orientation.
 func (t *TriDense) reuseAs(n int, kind TriKind) {
+	if n == 0 {
+		panic(ErrZeroLength)
+	}
 	ul := blas.Lower
 	if kind == Upper {
 		ul = blas.Upper
@@ -267,7 +270,7 @@ func (t *TriDense) reuseAs(n int, kind TriKind) {
 func (t *TriDense) isolatedWorkspace(a Triangular) (w *TriDense, restore func()) {
 	n, kind := a.Triangle()
 	if n == 0 {
-		panic("zero size")
+		panic(ErrZeroLength)
 	}
 	w = getWorkspaceTri(n, kind, false)
 	return w, func() {

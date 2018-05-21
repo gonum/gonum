@@ -27,8 +27,9 @@ type EigenSym struct {
 // The Eigen decomposition is defined as
 //  A = P * D * P^-1
 // where D is a diagonal matrix containing the eigenvalues of the matrix, and
-// P is a matrix of the eigenvectors of A. If the vectors input argument is
-// false, the eigenvectors are not computed.
+// P is a matrix of the eigenvectors of A. Factorize computes the eigenvalues
+// in ascending order. If the vectors input argument is false, the eigenvectors
+// are not computed.
 //
 // Factorize returns whether the decomposition succeeded. If the decomposition
 // failed, methods that require a successful factorization will panic.

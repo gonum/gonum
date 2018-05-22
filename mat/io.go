@@ -5,23 +5,26 @@
 package mat
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"math"
 )
 
-const (
-	// maxLen is the biggest slice/array len one can create on a 32/64b platform.
-	maxLen = int64(int(^uint(0) >> 1))
-)
+// version is the current on-disk codec version.
+const version uint64 = 0x1
+
+// maxLen is the biggest slice/array len one can create on a 32/64b platform.
+const maxLen = int64(int(^uint(0) >> 1))
 
 var (
+	headerSize  = binary.Size(storage{})
 	sizeInt64   = binary.Size(int64(0))
 	sizeFloat64 = binary.Size(float64(0))
 
-	errWrongType  = errors.New("mat: wrong data type")
-	errWrongShape = errors.New("mat: wrong number of dimensions")
+	errWrongType = errors.New("mat: wrong data type")
 
 	errTooBig    = errors.New("mat: resulting data slice too big")
 	errTooSmall  = errors.New("mat: input slice too small")
@@ -32,41 +35,47 @@ var (
 // MarshalBinary encodes the receiver into a binary form and returns the result.
 //
 // Dense is little-endian encoded as follows:
-//   0 -  1  'D', 'G' - type annotation (int8)
-//   2       2 - dimensions        (int8)
-//   3 - 10  number of rows        (int64)
-//  11 - 18  number of columns     (int64)
-//  19 - ..  matrix data elements (float64)
+//   0 -  7  Version = 1          (uint64)
+//   8       'G'                  (byte)
+//   9       'F'                  (byte)
+//  10       'A'                  (byte)
+//  11       0                    (byte)
+//  12 - 19  number of rows       (int64)
+//  20 - 27  number of columns    (int64)
+//  28 - 35  0                    (int64)
+//  36 - 43  0                    (int64)
+//  44 - ..  matrix data elements (float64)
 //           [0,0] [0,1] ... [0,ncols-1]
 //           [1,0] [1,1] ... [1,ncols-1]
 //           ...
 //           [nrows-1,0] ... [nrows-1,ncols-1]
 func (m Dense) MarshalBinary() ([]byte, error) {
-	bufLen := int64(m.mat.Rows)*int64(m.mat.Cols)*int64(sizeFloat64) + 2*int64(sizeInt64) + 3
+	bufLen := int64(headerSize) + int64(m.mat.Rows)*int64(m.mat.Cols)*int64(sizeFloat64)
 	if bufLen <= 0 {
 		// bufLen is too big and has wrapped around.
 		return nil, errTooBig
 	}
 
-	buf := make([]byte, bufLen)
-	buf[0] = 'D'
-	buf[1] = 'G'
-	buf[2] = 2
-	p := 3
-	binary.LittleEndian.PutUint64(buf[p:p+sizeInt64], uint64(m.mat.Rows))
-	p += sizeInt64
-	binary.LittleEndian.PutUint64(buf[p:p+sizeInt64], uint64(m.mat.Cols))
-	p += sizeInt64
-
+	b := make([]byte, bufLen)
+	buf := bytes.NewBuffer(b[:0])
+	err := binary.Write(buf, binary.LittleEndian, storage{
+		Form: 'G', Packing: 'F', Uplo: 'A',
+		Rows: int64(m.mat.Rows), Cols: int64(m.mat.Cols),
+		Version: version,
+	})
+	if err != nil {
+		return buf.Bytes(), err
+	}
+	p := headerSize
 	r, c := m.Dims()
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
-			binary.LittleEndian.PutUint64(buf[p:p+sizeFloat64], math.Float64bits(m.at(i, j)))
+			binary.LittleEndian.PutUint64(b[p:p+sizeFloat64], math.Float64bits(m.at(i, j)))
 			p += sizeFloat64
 		}
 	}
 
-	return buf, nil
+	return b, nil
 }
 
 // MarshalBinaryTo encodes the receiver into a binary form and writes it into w.
@@ -74,34 +83,26 @@ func (m Dense) MarshalBinary() ([]byte, error) {
 //
 // See MarshalBinary for the on-disk layout.
 func (m Dense) MarshalBinaryTo(w io.Writer) (int, error) {
-	var n int
-	var buf [8]byte
-	buf[0] = 'D'
-	buf[1] = 'G'
-	buf[2] = 2
-	nn, err := w.Write(buf[:3])
-	n += nn
+	buf := bytes.NewBuffer(make([]byte, 0, headerSize))
+	err := binary.Write(buf, binary.LittleEndian, storage{
+		Form: 'G', Packing: 'F', Uplo: 'A',
+		Rows: int64(m.mat.Rows), Cols: int64(m.mat.Cols),
+		Version: version,
+	})
 	if err != nil {
-		return n, err
+		return 0, err
 	}
-	binary.LittleEndian.PutUint64(buf[:], uint64(m.mat.Rows))
-	nn, err = w.Write(buf[:])
-	n += nn
-	if err != nil {
-		return n, err
-	}
-	binary.LittleEndian.PutUint64(buf[:], uint64(m.mat.Cols))
-	nn, err = w.Write(buf[:])
-	n += nn
+	n, err := w.Write(buf.Bytes())
 	if err != nil {
 		return n, err
 	}
 
 	r, c := m.Dims()
+	var b [8]byte
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
-			binary.LittleEndian.PutUint64(buf[:], math.Float64bits(m.at(i, j)))
-			nn, err = w.Write(buf[:])
+			binary.LittleEndian.PutUint64(b[:], math.Float64bits(m.at(i, j)))
+			nn, err := w.Write(b[:])
 			n += nn
 			if err != nil {
 				return n, err
@@ -129,29 +130,26 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 		panic("mat: unmarshal into non-zero matrix")
 	}
 
-	if len(data) < 2*sizeInt64 {
+	if len(data) < headerSize {
 		return errTooSmall
 	}
 
-	if data[0] != 'D' {
+	var s storage
+	binary.Read(bytes.NewReader(data[:headerSize]), binary.LittleEndian, &s)
+	if s.Version != version {
+		return fmt.Errorf("mat: incorrect version: %d", s.Version)
+	}
+	rows := s.Rows
+	cols := s.Cols
+	s.Version = 0
+	s.Rows = 0
+	s.Cols = 0
+	if (s != storage{Form: 'G', Packing: 'F', Uplo: 'A'}) {
 		return errWrongType
 	}
-	if data[1] != 'G' {
-		return errWrongType
-	}
-	if data[2] != 2 {
-		return errWrongShape
-	}
-
-	p := 3
-	rows := int64(binary.LittleEndian.Uint64(data[p : p+sizeInt64]))
-	p += sizeInt64
-	cols := int64(binary.LittleEndian.Uint64(data[p : p+sizeInt64]))
-	p += sizeInt64
 	if rows < 0 || cols < 0 {
 		return errBadSize
 	}
-
 	size := rows * cols
 	if size == 0 {
 		return ErrZeroLength
@@ -159,11 +157,11 @@ func (m *Dense) UnmarshalBinary(data []byte) error {
 	if int(size) < 0 || size > maxLen {
 		return errTooBig
 	}
-
-	if len(data) != int(size)*sizeFloat64+2*sizeInt64+3 {
+	if len(data) != headerSize+int(rows*cols)*sizeFloat64 {
 		return errBadBuffer
 	}
 
+	p := headerSize
 	m.reuseAs(int(rows), int(cols))
 	for i := range m.mat.Data {
 		m.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(data[p : p+sizeFloat64]))
@@ -191,42 +189,30 @@ func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 		panic("mat: unmarshal into non-zero matrix")
 	}
 
-	var (
-		n   int
-		buf [8]byte
-	)
-	nn, err := readFull(r, buf[:3])
-	n += nn
+	var s storage
+	buf := make([]byte, headerSize)
+	n, err := readFull(r, buf)
 	if err != nil {
 		return n, err
 	}
-	if buf[0] != 'D' {
+	err = binary.Read(bytes.NewReader(buf), binary.LittleEndian, &s)
+	if err != nil {
+		return n, err
+	}
+	if s.Version != version {
+		return n, fmt.Errorf("mat: incorrect version: %d", s.Version)
+	}
+	rows := s.Rows
+	cols := s.Cols
+	s.Version = 0
+	s.Rows = 0
+	s.Cols = 0
+	if (s != storage{Form: 'G', Packing: 'F', Uplo: 'A'}) {
 		return n, errWrongType
 	}
-	if buf[1] != 'G' {
-		return n, errWrongType
-	}
-	if buf[2] != 2 {
-		return n, errWrongShape
-	}
-
-	nn, err = readFull(r, buf[:])
-	n += nn
-	if err != nil {
-		return n, err
-	}
-	rows := int64(binary.LittleEndian.Uint64(buf[:]))
-
-	nn, err = readFull(r, buf[:])
-	n += nn
-	if err != nil {
-		return n, err
-	}
-	cols := int64(binary.LittleEndian.Uint64(buf[:]))
 	if rows < 0 || cols < 0 {
 		return n, errBadSize
 	}
-
 	size := rows * cols
 	if size == 0 {
 		return n, ErrZeroLength
@@ -236,17 +222,17 @@ func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 	}
 
 	m.reuseAs(int(rows), int(cols))
+	var b [8]byte
 	for i := range m.mat.Data {
-		nn, err = readFull(r, buf[:])
+		nn, err := readFull(r, b[:])
 		n += nn
 		if err != nil {
+			if err == io.EOF {
+				return n, io.ErrUnexpectedEOF
+			}
 			return n, err
 		}
-		m.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(buf[:]))
-	}
-
-	if n < int(size)*sizeFloat64+2*sizeInt64+2 {
-		return n, io.ErrUnexpectedEOF
+		m.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(b[:]))
 	}
 
 	return n, nil
@@ -256,30 +242,41 @@ func (m *Dense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 //
 // VecDense is little-endian encoded as follows:
 //
-//   0       'D' - type annotation  (int8)
-//   1       1 - dimensions         (int8)
-//   2 -  9  number of elements     (int64)
-//  10 - ..  vector's data elements (float64)
+//   0 -  7  Version = 1            (uint64)
+//   8       'G'                    (byte)
+//   9       'F'                    (byte)
+//  10       'A'                    (byte)
+//  11       0                      (byte)
+//  12 - 19  number of elements     (int64)
+//  20 - 27  1                      (int64)
+//  28 - 35  0                      (int64)
+//  36 - 43  0                      (int64)
+//  44 - ..  vector's data elements (float64)
 func (v VecDense) MarshalBinary() ([]byte, error) {
-	bufLen := int64(sizeInt64) + int64(v.n)*int64(sizeFloat64) + 2
+	bufLen := int64(headerSize) + int64(v.n)*int64(sizeFloat64)
 	if bufLen <= 0 {
 		// bufLen is too big and has wrapped around.
 		return nil, errTooBig
 	}
 
-	buf := make([]byte, bufLen)
-	buf[0] = 'D'
-	buf[1] = 1
-	p := 2
-	binary.LittleEndian.PutUint64(buf[p:p+sizeInt64], uint64(v.n))
-	p += sizeInt64
+	b := make([]byte, bufLen)
+	buf := bytes.NewBuffer(b[:0])
+	err := binary.Write(buf, binary.LittleEndian, storage{
+		Form: 'G', Packing: 'F', Uplo: 'A',
+		Rows: int64(v.n), Cols: 1,
+		Version: version,
+	})
+	if err != nil {
+		return buf.Bytes(), err
+	}
 
+	p := headerSize
 	for i := 0; i < v.n; i++ {
-		binary.LittleEndian.PutUint64(buf[p:p+sizeFloat64], math.Float64bits(v.at(i)))
+		binary.LittleEndian.PutUint64(b[p:p+sizeFloat64], math.Float64bits(v.at(i)))
 		p += sizeFloat64
 	}
 
-	return buf, nil
+	return b, nil
 }
 
 // MarshalBinaryTo encodes the receiver into a binary form, writes it to w and
@@ -287,28 +284,24 @@ func (v VecDense) MarshalBinary() ([]byte, error) {
 //
 // See MarshalBainry for the on-disk format.
 func (v VecDense) MarshalBinaryTo(w io.Writer) (int, error) {
-	var (
-		n   int
-		buf [8]byte
-	)
-
-	buf[0] = 'D'
-	buf[1] = 1
-	nn, err := w.Write(buf[:2])
-	n += nn
+	buf := bytes.NewBuffer(make([]byte, 0, headerSize))
+	err := binary.Write(buf, binary.LittleEndian, storage{
+		Form: 'G', Packing: 'F', Uplo: 'A',
+		Rows: int64(v.n), Cols: 1,
+		Version: version,
+	})
 	if err != nil {
-		return n, err
+		return 0, err
 	}
-	binary.LittleEndian.PutUint64(buf[:], uint64(v.n))
-	nn, err = w.Write(buf[:])
-	n += nn
+	n, err := w.Write(buf.Bytes())
 	if err != nil {
 		return n, err
 	}
 
+	var b [8]byte
 	for i := 0; i < v.n; i++ {
-		binary.LittleEndian.PutUint64(buf[:], math.Float64bits(v.at(i)))
-		nn, err = w.Write(buf[:])
+		binary.LittleEndian.PutUint64(b[:], math.Float64bits(v.at(i)))
+		nn, err := w.Write(b[:])
 		n += nn
 		if err != nil {
 			return n, err
@@ -335,29 +328,39 @@ func (v *VecDense) UnmarshalBinary(data []byte) error {
 		panic("mat: unmarshal into non-zero vector")
 	}
 
-	if data[0] != 'D' {
-		return errWrongType
-	}
-	if data[1] != 1 {
-		return errWrongShape
+	if len(data) < headerSize {
+		return errTooSmall
 	}
 
-	p := 2
-	n := int64(binary.LittleEndian.Uint64(data[p : p+sizeInt64]))
+	var s storage
+	binary.Read(bytes.NewReader(data[:headerSize]), binary.LittleEndian, &s)
+	if s.Version != version {
+		return fmt.Errorf("mat: incorrect version: %d", s.Version)
+	}
+	if s.Cols != 1 {
+		return ErrShape
+	}
+	n := s.Rows
+	s.Version = 0
+	s.Rows = 0
+	s.Cols = 0
+	if (s != storage{Form: 'G', Packing: 'F', Uplo: 'A'}) {
+		return errWrongType
+	}
 	if n == 0 {
 		return ErrZeroLength
 	}
-	p += sizeInt64
 	if n < 0 {
 		return errBadSize
 	}
-	if n > maxLen {
+	if int64(maxLen) < n {
 		return errTooBig
 	}
-	if len(data) != int(n)*sizeFloat64+sizeInt64+2 {
+	if len(data) != headerSize+int(n)*sizeFloat64 {
 		return errBadBuffer
 	}
 
+	p := headerSize
 	v.reuseAs(int(n))
 	for i := range v.mat.Data {
 		v.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(data[p : p+sizeFloat64]))
@@ -378,50 +381,51 @@ func (v *VecDense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 		panic("mat: unmarshal into non-zero vector")
 	}
 
-	var (
-		n   int
-		buf [8]byte
-	)
-	nn, err := readFull(r, buf[:2])
-	n += nn
+	var s storage
+	buf := make([]byte, headerSize)
+	n, err := readFull(r, buf)
 	if err != nil {
 		return n, err
 	}
-	if buf[0] != 'D' {
+	err = binary.Read(bytes.NewReader(buf), binary.LittleEndian, &s)
+	if err != nil {
+		return n, err
+	}
+	if s.Version != version {
+		return n, fmt.Errorf("mat: incorrect version: %d", s.Version)
+	}
+	if s.Cols != 1 {
+		return n, ErrShape
+	}
+	l := s.Rows
+	s.Version = 0
+	s.Rows = 0
+	s.Cols = 0
+	if (s != storage{Form: 'G', Packing: 'F', Uplo: 'A'}) {
 		return n, errWrongType
 	}
-	if buf[1] != 1 {
-		return n, errWrongShape
-	}
-
-	nn, err = readFull(r, buf[:])
-	n += nn
-	if err != nil {
-		return n, err
-	}
-	sz := int64(binary.LittleEndian.Uint64(buf[:]))
-	if sz == 0 {
+	if l == 0 {
 		return n, ErrZeroLength
 	}
-	if sz < 0 {
+	if l < 0 {
 		return n, errBadSize
 	}
-	if sz > maxLen {
+	if int64(maxLen) < l {
 		return n, errTooBig
 	}
 
-	v.reuseAs(int(sz))
+	v.reuseAs(int(l))
+	var b [8]byte
 	for i := range v.mat.Data {
-		nn, err = readFull(r, buf[:])
+		nn, err := readFull(r, b[:])
 		n += nn
 		if err != nil {
+			if err == io.EOF {
+				return n, io.ErrUnexpectedEOF
+			}
 			return n, err
 		}
-		v.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(buf[:]))
-	}
-
-	if n < sizeInt64+int(sz)*sizeFloat64+2 {
-		return n, io.ErrUnexpectedEOF
+		v.mat.Data[i] = math.Float64frombits(binary.LittleEndian.Uint64(b[:]))
 	}
 
 	return n, nil
@@ -445,4 +449,18 @@ func readFull(r io.Reader, buf []byte) (int, error) {
 		return n, io.ErrUnexpectedEOF
 	}
 	return n, err
+}
+
+// storage is the internal representation of the storage format of a
+// serialised matrix.
+type storage struct {
+	Version uint64 // Keep this first.
+	Form    byte   // [GST]
+	Packing byte   // [BPF]
+	Uplo    byte   // [AUL]
+	Unit    bool
+	Rows    int64
+	Cols    int64
+	KU      int64
+	KL      int64
 }

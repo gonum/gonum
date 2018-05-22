@@ -8,6 +8,11 @@ Installation is done using `go get`.
 go get -u gonum.org/v1/gonum/...
 ```
 
+## Supported Go versions
+
+Gonum supports and tests on the [three most recent major versions of Go](https://github.com/gonum/gonum/blob/master/.travis.yml#L6-L11).
+
+
 ## Build tags
 
 The gonum packages use a variety of build tags to set non-standard build conditions.

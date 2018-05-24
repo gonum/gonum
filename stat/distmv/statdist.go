@@ -7,6 +7,8 @@ package distmv
 import (
 	"math"
 
+	"gonum.org/v1/gonum/mathext"
+
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 	"gonum.org/v1/gonum/stat"
@@ -141,6 +143,36 @@ func (Hellinger) DistNormal(l, r *Normal) float64 {
 // Note that the Kullback-Liebler divergence is not symmetric with respect to
 // the order of the input arguments.
 type KullbackLeibler struct{}
+
+// DistDirichlet returns the KullbackLeibler distance between Dirichlet
+// distributions l and r. The dimensions of the input distributions must match
+// or DistDirichlet will panic.
+//
+// For two Dirichlet distributions, the KL divergence is computed as
+//   D_KL(l || r) = log Γ(α_0_l) - \sum_i log Γ(α_i_l) - log Γ(α_0_r) + \sum_i log Γ(α_i_r)
+//                  + \sum_i (α_i_l - α_i_r)(ψ(α_i_l)- ψ(α_0_l))
+// Where Γ is the gamma function, ψ is the digamma function, and α_0 is the
+// sum of the Dirichlet parameters.
+func (KullbackLeibler) DistDirichlet(l, r *Dirichlet) float64 {
+	// http://bariskurt.com/kullback-leibler-divergence-between-two-dirichlet-and-beta-distributions/
+	if l.Dim() != r.Dim() {
+		panic(badSizeMismatch)
+	}
+	l0, _ := math.Lgamma(l.sumAlpha)
+	r0, _ := math.Lgamma(r.sumAlpha)
+	dl := mathext.Digamma(l.sumAlpha)
+
+	var l1, r1, c float64
+	for i, al := range l.alpha {
+		ar := r.alpha[i]
+		vl, _ := math.Lgamma(al)
+		l1 += vl
+		vr, _ := math.Lgamma(ar)
+		r1 += vr
+		c += (al - ar) * (mathext.Digamma(al) - dl)
+	}
+	return l0 - l1 - r0 + r1 + c
+}
 
 // DistNormal returns the KullbackLeibler distance between normal distributions l and r.
 // The dimensions of the input distributions must match or DistNormal will panic.

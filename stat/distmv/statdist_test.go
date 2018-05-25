@@ -186,6 +186,35 @@ func TestHellingerNormal(t *testing.T) {
 	}
 }
 
+func TestKullbackLeiblerDirichlet(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for cas, test := range []struct {
+		a, b    *Dirichlet
+		samples int
+		tol     float64
+	}{
+		{
+			a:       NewDirichlet([]float64{2, 3, 4}, rnd),
+			b:       NewDirichlet([]float64{4, 2, 1.1}, rnd),
+			samples: 100000,
+			tol:     1e-2,
+		},
+		{
+			a:       NewDirichlet([]float64{2, 3, 4, 0.1, 8}, rnd),
+			b:       NewDirichlet([]float64{2, 2, 6, 0.5, 9}, rnd),
+			samples: 100000,
+			tol:     1e-2,
+		},
+	} {
+		a, b := test.a, test.b
+		want := klSample(a.Dim(), test.samples, a, b)
+		got := KullbackLeibler{}.DistDirichlet(a, b)
+		if !floats.EqualWithinAbsOrRel(want, got, test.tol, test.tol) {
+			t.Errorf("Kullback-Leibler mismatch, case %d: got %v, want %v", cas, got, want)
+		}
+	}
+}
+
 func TestKullbackLeiblerNormal(t *testing.T) {
 	for cas, test := range []struct {
 		am, bm  []float64

@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
+	"gonum.org/v1/gonum/mathext"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -134,15 +135,45 @@ func (Hellinger) DistNormal(l, r *Normal) float64 {
 	return math.Sqrt(1 - bc)
 }
 
-// KullbackLiebler is a type for computing the Kullback-Leibler divergence from l to r.
+// KullbackLeibler is a type for computing the Kullback-Leibler divergence from l to r.
 //
-// The Kullback-Liebler divergence is defined as
+// The Kullback-Leibler divergence is defined as
 //  D_KL(l || r ) = \int_x p(x) log(p(x)/q(x)) dx
-// Note that the Kullback-Liebler divergence is not symmetric with respect to
+// Note that the Kullback-Leibler divergence is not symmetric with respect to
 // the order of the input arguments.
 type KullbackLeibler struct{}
 
-// DistNormal returns the KullbackLeibler distance between normal distributions l and r.
+// DistDirichlet returns the Kullback-Leibler divergence between Dirichlet
+// distributions l and r. The dimensions of the input distributions must match
+// or DistDirichlet will panic.
+//
+// For two Dirichlet distributions, the KL divergence is computed as
+//   D_KL(l || r) = log Γ(α_0_l) - \sum_i log Γ(α_i_l) - log Γ(α_0_r) + \sum_i log Γ(α_i_r)
+//                  + \sum_i (α_i_l - α_i_r)(ψ(α_i_l)- ψ(α_0_l))
+// Where Γ is the gamma function, ψ is the digamma function, and α_0 is the
+// sum of the Dirichlet parameters.
+func (KullbackLeibler) DistDirichlet(l, r *Dirichlet) float64 {
+	// http://bariskurt.com/kullback-leibler-divergence-between-two-dirichlet-and-beta-distributions/
+	if l.Dim() != r.Dim() {
+		panic(badSizeMismatch)
+	}
+	l0, _ := math.Lgamma(l.sumAlpha)
+	r0, _ := math.Lgamma(r.sumAlpha)
+	dl := mathext.Digamma(l.sumAlpha)
+
+	var l1, r1, c float64
+	for i, al := range l.alpha {
+		ar := r.alpha[i]
+		vl, _ := math.Lgamma(al)
+		l1 += vl
+		vr, _ := math.Lgamma(ar)
+		r1 += vr
+		c += (al - ar) * (mathext.Digamma(al) - dl)
+	}
+	return l0 - l1 - r0 + r1 + c
+}
+
+// DistNormal returns the KullbackLeibler divergence between normal distributions l and r.
 // The dimensions of the input distributions must match or DistNormal will panic.
 //
 // For two normal distributions, the KL divergence is computed as
@@ -172,7 +203,7 @@ func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 	return r.logSqrtDet - l.logSqrtDet + 0.5*(mahalanobisSq+tr-float64(l.dim))
 }
 
-// DistUniform returns the KullbackLeibler distance between uniform distributions
+// DistUniform returns the KullbackLeibler divergence between uniform distributions
 // l and r. The dimensions of the input distributions must match or DistUniform
 // will panic.
 func (KullbackLeibler) DistUniform(l, r *Uniform) float64 {

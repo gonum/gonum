@@ -10,15 +10,15 @@ import (
 	"gonum.org/v1/gonum/mathext"
 )
 
-// KullbackLiebler is a type for computing the Kullback-Leibler divergence from l to r.
+// KullbackLeibler is a type for computing the Kullback-Leibler divergence from l to r.
 //
-// The Kullback-Liebler divergence is defined as
+// The Kullback-Leibler divergence is defined as
 //  D_KL(l || r ) = \int_x p(x) log(p(x)/q(x)) dx
-// Note that the Kullback-Liebler divergence is not symmetric with respect to
+// Note that the Kullback-Leibler divergence is not symmetric with respect to
 // the order of the input arguments.
 type KullbackLeibler struct{}
 
-// DistBeta returns the KullbackLeibler distance between Beta distributions
+// DistBeta returns the Kullback-Leibler divergence between Beta distributions
 // l and r.
 //
 // For two Beta distributions, the KL divergence is computed as
@@ -49,10 +49,9 @@ func (KullbackLeibler) DistBeta(l, r Beta) float64 {
 	ct := (l.Alpha-r.Alpha)*(mathext.Digamma(l.Alpha)-d0) + (l.Beta-r.Beta)*(mathext.Digamma(l.Beta)-d0)
 
 	return lt - rt + ct
-
 }
 
-// DistNormal returns the KullbackLeibler distance between Normal distributions
+// DistNormal returns the Kullback-Leibler divergence between Normal distributions
 // l and r.
 //
 // For two Normal distributions, the KL divergence is computed as

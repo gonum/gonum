@@ -135,15 +135,15 @@ func (Hellinger) DistNormal(l, r *Normal) float64 {
 	return math.Sqrt(1 - bc)
 }
 
-// KullbackLiebler is a type for computing the Kullback-Leibler divergence from l to r.
+// KullbackLeibler is a type for computing the Kullback-Leibler divergence from l to r.
 //
-// The Kullback-Liebler divergence is defined as
+// The Kullback-Leibler divergence is defined as
 //  D_KL(l || r ) = \int_x p(x) log(p(x)/q(x)) dx
-// Note that the Kullback-Liebler divergence is not symmetric with respect to
+// Note that the Kullback-Leibler divergence is not symmetric with respect to
 // the order of the input arguments.
 type KullbackLeibler struct{}
 
-// DistDirichlet returns the KullbackLeibler distance between Dirichlet
+// DistDirichlet returns the Kullback-Leibler divergence between Dirichlet
 // distributions l and r. The dimensions of the input distributions must match
 // or DistDirichlet will panic.
 //
@@ -173,7 +173,7 @@ func (KullbackLeibler) DistDirichlet(l, r *Dirichlet) float64 {
 	return l0 - l1 - r0 + r1 + c
 }
 
-// DistNormal returns the KullbackLeibler distance between normal distributions l and r.
+// DistNormal returns the KullbackLeibler divergence between normal distributions l and r.
 // The dimensions of the input distributions must match or DistNormal will panic.
 //
 // For two normal distributions, the KL divergence is computed as
@@ -203,7 +203,7 @@ func (KullbackLeibler) DistNormal(l, r *Normal) float64 {
 	return r.logSqrtDet - l.logSqrtDet + 0.5*(mahalanobisSq+tr-float64(l.dim))
 }
 
-// DistUniform returns the KullbackLeibler distance between uniform distributions
+// DistUniform returns the KullbackLeibler divergence between uniform distributions
 // l and r. The dimensions of the input distributions must match or DistUniform
 // will panic.
 func (KullbackLeibler) DistUniform(l, r *Uniform) float64 {

@@ -49,7 +49,6 @@ func (KullbackLeibler) DistBeta(l, r Beta) float64 {
 	ct := (l.Alpha-r.Alpha)*(mathext.Digamma(l.Alpha)-d0) + (l.Beta-r.Beta)*(mathext.Digamma(l.Beta)-d0)
 
 	return lt - rt + ct
-
 }
 
 // DistNormal returns the Kullback-Leibler divergence between Normal distributions

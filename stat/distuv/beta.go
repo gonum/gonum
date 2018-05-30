@@ -43,6 +43,9 @@ func (b Beta) CDF(x float64) float64 {
 
 // Entropy returns the differential entropy of the distribution.
 func (b Beta) Entropy() float64 {
+	if b.Alpha <= 0 || b.Beta <= 0 {
+		panic("beta: negative parameters")
+	}
 	return mathext.Lbeta(b.Alpha, b.Beta) - (b.Alpha-1)*mathext.Digamma(b.Alpha) -
 		(b.Beta-1)*mathext.Digamma(b.Beta) + (b.Alpha+b.Beta-2)*mathext.Digamma(b.Alpha+b.Beta)
 }

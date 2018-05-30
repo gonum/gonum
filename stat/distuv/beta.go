@@ -41,6 +41,12 @@ func (b Beta) CDF(x float64) float64 {
 	return mathext.RegIncBeta(b.Alpha, b.Beta, x)
 }
 
+// Entropy returns the differential entropy of the distribution.
+func (b Beta) Entropy() float64 {
+	return mathext.Lbeta(b.Alpha, b.Beta) - (b.Alpha-1)*mathext.Digamma(b.Alpha) -
+		(b.Beta-1)*mathext.Digamma(b.Beta) + (b.Alpha+b.Beta-2)*mathext.Digamma(b.Alpha+b.Beta)
+}
+
 // ExKurtosis returns the excess kurtosis of the distribution.
 func (b Beta) ExKurtosis() float64 {
 	num := 6 * ((b.Alpha-b.Beta)*(b.Alpha-b.Beta)*(b.Alpha+b.Beta+1) - b.Alpha*b.Beta*(b.Alpha+b.Beta+2))

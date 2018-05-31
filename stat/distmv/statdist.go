@@ -114,7 +114,8 @@ func (CrossEntropy) DistNormal(l, r *Normal) float64 {
 //
 // The Hellinger distance is defined as
 //  H^2(l,r) = 1/2 * int_x (\sqrt(l(x)) - \sqrt(r(x)))^2 dx
-// and is bounded between 0 and 1.
+// and is bounded between 0 and 1. Note the above formula defines the squared
+// Hellinger distance, while this returns the Hellinger distance itself.
 // The Hellinger distance is related to the Bhattacharyya distance by
 //  H^2 = 1 - exp(-Db)
 // For more information, see

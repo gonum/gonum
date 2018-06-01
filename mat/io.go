@@ -32,6 +32,23 @@ var (
 	errBadSize   = errors.New("mat: invalid dimension")
 )
 
+// Type encoding scheme:
+//
+// Type 		Form 	Packing 	Uplo 		Unit 		Rows 	Columns kU 	kL
+// uint8 		[GST] 	uint8 [BPF] 	uint8 [AUL] 	bool 		int64 	int64 	int64 	int64
+// General 		'G' 	'F' 		'A' 		false 		r 	c 	0 	0
+// Band 		'G' 	'B' 		'A' 		false 		r 	c 	kU 	kL
+// Symmetric 		'S' 	'F' 		ul 		false 		n 	n 	0 	0
+// SymmetricBand 	'S' 	'B' 		ul 		false 		n 	n 	k 	k
+// SymmetricPacked 	'S' 	'P' 		ul 		false 		n 	n 	0 	0
+// Triangular 		'T' 	'F' 		ul 		Diag==Unit 	n 	n 	0 	0
+// TriangularBand 	'T' 	'B' 		ul 		Diag==Unit 	n 	n 	k 	k
+// TriangularPacked 	'T' 	'P' 		ul	 	Diag==Unit 	n 	n 	0 	0
+//
+// G - general, S - symmetric, T - triangular
+// F - full, B - band, P - packed
+// A - all, U - upper, L - lower
+
 // MarshalBinary encodes the receiver into a binary form and returns the result.
 //
 // Dense is little-endian encoded as follows:
@@ -408,26 +425,6 @@ func (v *VecDense) UnmarshalBinaryFrom(r io.Reader) (int, error) {
 	return n, nil
 }
 
-// readFull reads from r into buf until it has read len(buf).
-// It returns the number of bytes copied and an error if fewer bytes were read.
-// If an EOF happens after reading fewer than len(buf) bytes, io.ErrUnexpectedEOF is returned.
-func readFull(r io.Reader, buf []byte) (int, error) {
-	var n int
-	var err error
-	for n < len(buf) && err == nil {
-		var nn int
-		nn, err = r.Read(buf[n:])
-		n += nn
-	}
-	if n == len(buf) {
-		return n, nil
-	}
-	if err == io.EOF {
-		return n, io.ErrUnexpectedEOF
-	}
-	return n, err
-}
-
 // storage is the internal representation of the storage format of a
 // serialised matrix.
 type storage struct {
@@ -441,6 +438,9 @@ type storage struct {
 	KU      int64
 	KL      int64
 }
+
+// TODO(kortschak): Consider replacing these with calls to direct
+// encoding/decoding of fields rather than to binary.Write/binary.Read.
 
 func (s storage) marshalBinaryTo(w io.Writer) (int, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, headerSize))
@@ -468,12 +468,25 @@ func (s *storage) unmarshalBinaryFrom(r io.Reader) (int, error) {
 	if err != nil {
 		return n, err
 	}
-	err = binary.Read(bytes.NewReader(buf), binary.LittleEndian, s)
-	if err != nil {
-		return n, err
+	return n, s.unmarshalBinary(buf[:n])
+}
+
+// readFull reads from r into buf until it has read len(buf).
+// It returns the number of bytes copied and an error if fewer bytes were read.
+// If an EOF happens after reading fewer than len(buf) bytes, io.ErrUnexpectedEOF is returned.
+func readFull(r io.Reader, buf []byte) (int, error) {
+	var n int
+	var err error
+	for n < len(buf) && err == nil {
+		var nn int
+		nn, err = r.Read(buf[n:])
+		n += nn
 	}
-	if s.Version != version {
-		return n, fmt.Errorf("mat: incorrect version: %d", s.Version)
+	if n == len(buf) {
+		return n, nil
 	}
-	return n, nil
+	if err == io.EOF {
+		return n, io.ErrUnexpectedEOF
+	}
+	return n, err
 }

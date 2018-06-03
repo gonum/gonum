@@ -21,9 +21,8 @@ import (
 // The right eigenvector x of T corresponding to an
 // eigenvalue λ is defined by
 //  T x = λ x,
-// and the left eigenvector is defined by
-//  y^H T = λ y^H,
-// where y^H is the conjugate transpose of y.
+// and the left eigenvector y is defined by
+//  y^T T = λ y^T.
 //
 // The eigenvalues are read directly from the diagonal blocks of T.
 //

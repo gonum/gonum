@@ -55,7 +55,7 @@ func (e *Error) Error() string {
 	w := new(bytes.Buffer)
 	fmt.Fprintf(w, "Error in S%d: %s, %s", e.StackTop, token.TokMap.TokenString(e.ErrorToken), e.ErrorToken.Pos.String())
 	if e.Err != nil {
-		fmt.Fprintf(w, e.Err.Error())
+		fmt.Fprintf(w, ": %+v", e.Err)
 	} else {
 		fmt.Fprintf(w, ", expected one of: ")
 		for _, expected := range e.ExpectedTokens {

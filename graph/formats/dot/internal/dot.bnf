@@ -131,6 +131,7 @@ _html_char
 	| '\x3D'
 	// skip right angle bracket (0x3E)
 	| '\x3F' - '\xFF'
+	| _unicode_byte
 ;
 
 _html_chars : { _html_char } ;

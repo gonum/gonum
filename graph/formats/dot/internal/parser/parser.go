@@ -79,11 +79,16 @@ func (s *stack) String() string {
 	w := new(bytes.Buffer)
 	fmt.Fprintf(w, "stack:\n")
 	for i, st := range s.state {
-		fmt.Fprintf(w, "\t%d:%d , ", i, st)
+		fmt.Fprintf(w, "\t%d: %d , ", i, st)
 		if s.attrib[i] == nil {
 			fmt.Fprintf(w, "nil")
 		} else {
-			fmt.Fprintf(w, "%v", s.attrib[i])
+			switch attr := s.attrib[i].(type) {
+			case *token.Token:
+				fmt.Fprintf(w, "%s", attr.Lit)
+			default:
+				fmt.Fprintf(w, "%v", attr)
+			}
 		}
 		fmt.Fprintf(w, "\n")
 	}
@@ -147,7 +152,7 @@ func (p *Parser) Error(err error, scanner Scanner) (recovered bool, errorAttrib 
 
 func (p *Parser) popNonRecoveryStates() (removedAttribs []parseError.ErrorSymbol) {
 	if rs, ok := p.firstRecoveryState(); ok {
-		errorSymbols := p.stack.popN(int(p.stack.topIndex() - rs))
+		errorSymbols := p.stack.popN(p.stack.topIndex() - rs)
 		removedAttribs = make([]parseError.ErrorSymbol, len(errorSymbols))
 		for i, e := range errorSymbols {
 			removedAttribs[i] = e

@@ -1,14 +1,14 @@
 gen: dot.bnf
 	gocc $<
-	./paste_copyright.bash
+	go run paste_copyright.go
 
 debug_lexer: dot.bnf
 	gocc -debug_lexer -v -a $<
-	./paste_copyright.bash
+	go run paste_copyright.go
 
 debug_parser: dot.bnf
 	gocc -debug_parser -v -a $<
-	./paste_copyright.bash
+	go run paste_copyright.go
 
 clean:
 	rm -f errors/errors.go

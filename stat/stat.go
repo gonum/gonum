@@ -14,12 +14,15 @@ import (
 // CumulantKind specifies the behavior for calculating the empirical CDF or Quantile
 type CumulantKind int
 
+// List of supported CumulantKind values for the Quantile function.
+// Constant values should match the R nomenclature. See
+// https://en.wikipedia.org/wiki/Quantile#Estimating_the_quantiles_of_a_population
 const (
-	// Constant values should match the R nomenclature. See
-	// https://en.wikipedia.org/wiki/Quantile#Estimating_the_quantiles_of_a_population
-
 	// Empirical treats the distribution as the actual empirical distribution.
 	Empirical CumulantKind = 1
+
+	// AvgDiscont is like Empirical but with averaging at discontinuities.
+	AvgDiscont CumulantKind = 2
 )
 
 // bhattacharyyaCoeff computes the Bhattacharyya Coefficient for probability distributions given by:
@@ -1018,6 +1021,7 @@ func MomentAbout(moment float64, x []float64, mean float64, weights []float64) f
 // CumulantKind behaviors:
 //  - Empirical: Returns the lowest value q for which q is greater than or equal
 //  to the fraction p of samples
+//  - AvgDiscont: like Empirical, but it returns an averaging at discontinuities.
 func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	if !(p >= 0 && p <= 1) {
 		panic("stat: percentile out of bounds")
@@ -1041,22 +1045,66 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	}
 	switch c {
 	case Empirical:
-		var cumsum float64
-		fidx := p * sumWeights
-		for i := range x {
-			if weights == nil {
-				cumsum++
-			} else {
-				cumsum += weights[i]
-			}
-			if cumsum >= fidx {
-				return x[i]
-			}
-		}
-		panic("impossible")
+		return empiricalQuantile(p, x, weights, sumWeights)
+	case AvgDiscont:
+		return avgDiscontQuantile(p, x, weights, sumWeights)
 	default:
 		panic("stat: bad cumulant kind")
 	}
+}
+
+func empiricalQuantile(p float64, x, weights []float64, sumWeights float64) float64 {
+	var cumsum float64
+	fidx := p * sumWeights
+	for i := range x {
+		if weights == nil {
+			cumsum++
+		} else {
+			cumsum += weights[i]
+		}
+		if cumsum >= fidx {
+			return x[i]
+		}
+	}
+	panic("impossible")
+}
+
+func avgDiscontQuantile(p float64, x, weights []float64, sumWeights float64) float64 {
+	// use algorithm from:
+	//  Hyndman, R.J and Fan, Y, (1996)
+	//  "Sample quantiles in statistical packages"
+	//  American Statistician, 50, 361-365
+	//
+	// also available from R's documentation:
+	//  https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html
+	fidx := p * sumWeights
+	const eps = math.SmallestNonzeroFloat64
+	j := math.Floor(fidx + eps)
+	gamma := 0.5
+	if fidx-j > j*eps {
+		gamma = 1
+	}
+
+	var j0 int
+	switch {
+	case j > 0 && j <= sumWeights:
+		j0 = int(j - 1)
+	case j <= 0:
+		j0 = 0
+	default:
+		j0 = int(sumWeights - 1)
+	}
+
+	var j1 int
+	switch {
+	case j > 0 && j < sumWeights:
+		j1 = int(j)
+	case j <= 0:
+		j1 = 0
+	default:
+		j1 = int(sumWeights - 1)
+	}
+	return (1-gamma)*x[j0] + gamma*x[j1]
 }
 
 // Skew computes the skewness of the sample data.

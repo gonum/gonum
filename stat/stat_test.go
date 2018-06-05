@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"sort"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -1702,5 +1703,75 @@ func TestStdScore(t *testing.T) {
 			t.Errorf("StdScore mismatch case %d. Expected %v, Found %v", i, test.z, z)
 		}
 	}
+}
 
+func ExampleQuantile_median() {
+	var weights []float64
+	x1 := []float64{1, 3, 3, 6, 7, 8, 9}
+	// the median of a dataset is also known as the 2-quantile of a dataset.
+	m1 := Quantile(0.5, AvgDiscont, x1, weights)
+	fmt.Printf("median = %v\n", m1)
+
+	x2 := []float64{1, 2, 3, 4, 5, 6, 8, 9}
+	m2 := Quantile(0.5, AvgDiscont, x2, weights)
+	fmt.Printf("median = %v\n", m2)
+
+	// Output:
+	// median = 6
+	// median = 4.5
+}
+
+func TestQuantileMedian(t *testing.T) {
+	for i, test := range []struct {
+		xs   []float64
+		want float64
+	}{
+		{
+			xs:   []float64{10, 20},
+			want: 15,
+		},
+		{
+			xs:   []float64{10, 20, 30},
+			want: 20,
+		},
+		{
+			xs:   []float64{10, 20, 30, 40},
+			want: 25,
+		},
+		{
+			xs:   []float64{10, 20, 20, 40},
+			want: 20,
+		},
+		{
+			xs:   []float64{10, 20, 20, 20},
+			want: 20,
+		},
+		{
+			xs: []float64{
+				42, 71, 42, 49, 4, 99, 60, 83, 87, 38, 46, 71, 99, 36, 0, 94, 4,
+				67, 43, 24, 75, 19, 21, 69, 81, 72, 94, 67, 53, 39, 3, 66, 4, 63,
+				78, 32, 82, 41, 24, 95, 57, 10, 98, 65, 71, 35, 25, 13, 9, 63,
+			},
+			want: 55,
+		},
+		{
+			xs: []float64{
+				16, 65, 84, 42, 54, 39, 63, 98, 77, 7, 45, 40, 77, 45, 31, 39, 86,
+				44, 15, 97, 91, 16, 64, 31, 87, 67, 65, 43, 36, 42, 34, 66, 49, 35,
+				64, 72, 88, 3, 73, 64, 95, 62, 51, 96, 28, 91, 57, 5, 93, 57, 54,
+				47, 99, 22, 29, 12, 75, 47, 6, 35, 93, 73, 82, 29, 52, 28, 71, 4,
+				2, 70, 38, 59, 46, 66, 67, 21, 60, 50, 2, 25, 28, 95, 6, 75, 12,
+				55, 98, 90, 83, 66, 37, 60, 92, 83, 43, 82, 85, 45, 10, 36,
+			},
+			want: 54.0,
+		},
+	} {
+		xs := make([]float64, len(test.xs))
+		copy(xs, test.xs)
+		sort.Float64s(xs)
+		got := Quantile(0.5, AvgDiscont, xs, nil)
+		if got != test.want {
+			t.Errorf("test-%d: got=%v want=%v", i, got, test.want)
+		}
+	}
 }

@@ -10,6 +10,69 @@ import (
 	"gonum.org/v1/gonum/mathext"
 )
 
+// Bhattacharyya is a type for computing the Bhattacharyya distance between
+// probability distributions.
+//
+// The Bhattacharyya distance is defined as
+//  D_B = -ln(BC(l,r))
+//  BC = \int_-∞^∞ (p(x)q(x))^(1/2) dx
+// Where BC is known as the Bhattacharyya coefficient.
+// The Bhattacharyya distance is related to the Hellinger distance by
+//  H(l,r) = sqrt(1-BC(l,r))
+// For more information, see
+//  https://en.wikipedia.org/wiki/Bhattacharyya_distance
+type Bhattacharyya struct{}
+
+// DistBeta returns the Bhattacharyya distance between Beta distributions l and r.
+// For Beta distributions, the Bhattacharyya distance is given by
+//  -ln(B((α_l + α_r)/2, (β_l + β_r)/2) / (B(α_l,β_l), B(α_r,β_r)))
+// Where B is the Beta function.
+func (Bhattacharyya) DistBeta(l, r Beta) float64 {
+	// Reference: https://en.wikipedia.org/wiki/Hellinger_distance#Examples
+	return -mathext.Lbeta((l.Alpha+r.Alpha)/2, (l.Beta+r.Beta)/2) +
+		0.5*mathext.Lbeta(l.Alpha, l.Beta) + 0.5*mathext.Lbeta(r.Alpha, r.Beta)
+}
+
+// DistNormal returns the Bhattacharyya distance Normal distributions l and r.
+// For Normal distributions, the Bhattacharyya distance is given by
+//  s = (σ_l^2 + σ_r^2)/2
+//  BC = 1/8 (μ_l-μ_r)^2/s + 1/2 ln(s/(σ_l*σ_r))
+func (Bhattacharyya) DistNormal(l, r Normal) float64 {
+	// Reference: https://en.wikipedia.org/wiki/Bhattacharyya_distance
+	m := l.Mu - r.Mu
+	s := (l.Sigma*l.Sigma + r.Sigma*r.Sigma) / 2
+	return 0.125*m*m/s + 0.5*math.Log(s) - 0.5*math.Log(l.Sigma) - 0.5*math.Log(r.Sigma)
+}
+
+// Hellinger is a type for computing the Hellinger distance between probability
+// distributions.
+//
+// The Hellinger distance is defined as
+//  H^2(l,r) = 1/2 * int_x (\sqrt(l(x)) - \sqrt(r(x)))^2 dx
+// and is bounded between 0 and 1. Note the above formula defines the squared
+// Hellinger distance, while this returns the Hellinger distance itself.
+// The Hellinger distance is related to the Bhattacharyya distance by
+//  H^2 = 1 - exp(-D_B)
+// For more information, see
+//  https://en.wikipedia.org/wiki/Hellinger_distance
+type Hellinger struct{}
+
+// DistBeta computes the Hellinger distance between Beta distributions l and r.
+// See the documentation of Bhattacharyya.DistBeta for the distance formula.
+func (Hellinger) DistBeta(l, r Beta) float64 {
+	db := Bhattacharyya{}.DistBeta(l, r)
+	bc := math.Exp(-db)
+	return math.Sqrt(1 - bc)
+}
+
+// DistHellinger computes the Hellinger distance between Normal distributions l and r.
+// See the documentation of Bhattacharyya.DistNormal for the distance formula.
+func (Hellinger) DistNormal(l, r Normal) float64 {
+	db := Bhattacharyya{}.DistNormal(l, r)
+	bc := math.Exp(-db)
+	return math.Sqrt(1 - bc)
+}
+
 // KullbackLeibler is a type for computing the Kullback-Leibler divergence from l to r.
 //
 // The Kullback-Leibler divergence is defined as

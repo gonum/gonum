@@ -18,7 +18,7 @@ import (
 //  BC = \int_-∞^∞ (p(x)q(x))^(1/2) dx
 // Where BC is known as the Bhattacharyya coefficient.
 // The Bhattacharyya distance is related to the Hellinger distance by
-//  H = sqrt(1-BC)
+//  H(l,r) = sqrt(1-BC(l,r))
 // For more information, see
 //  https://en.wikipedia.org/wiki/Bhattacharyya_distance
 type Bhattacharyya struct{}
@@ -52,7 +52,7 @@ func (Bhattacharyya) DistNormal(l, r Normal) float64 {
 // and is bounded between 0 and 1. Note the above formula defines the squared
 // Hellinger distance, while this returns the Hellinger distance itself.
 // The Hellinger distance is related to the Bhattacharyya distance by
-//  H^2 = 1 - exp(-Db)
+//  H^2 = 1 - exp(-D_B)
 // For more information, see
 //  https://en.wikipedia.org/wiki/Hellinger_distance
 type Hellinger struct{}

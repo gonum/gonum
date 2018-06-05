@@ -72,6 +72,10 @@ func getInitLocation(dim int, initX []float64, initValues *Location, method Need
 	copy(loc.X, initX)
 	if initValues == nil {
 		return NoOperation, loc
+	} else {
+		if initValues.X != nil {
+			panic("optimize: location specified in InitValues (only use InitX)")
+		}
 	}
 	loc.F = initValues.F
 	op := FuncEvaluation

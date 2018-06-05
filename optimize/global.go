@@ -58,12 +58,12 @@ type GlobalMethod interface {
 	// The last parameter to RunGlobal is a slice of tasks with length equal to
 	// the return from InitGlobal. GlobalTask has an ID field which may be
 	// set and modified by GlobalMethod, and must not be modified by the caller.
-	// The first element of tasks contains information about the initial location
-	// if any is specified in Settings. The Location field will contain the value
-	// specified by InitLocation, defaulted to a value of zero if none was specified.
-	// The Operation field specifies which other values of Location are known.
-	// If Operation == NoOperation, none of the values should be used, otherwise
-	// the Evaluation operations will be composed to specify the valid fields.
+	// The first element of tasks contains information about the initial location.
+	// The Location.X field is always valid. The Operation field specifies which
+	// other values of Location are known. If Operation == NoOperation, none of
+	// the values should be used, otherwise the Evaluation operations will be
+	// composed to specify the valid fields. GlobalsMethods are free to use or
+	// ignore these values.
 	//
 	// GlobalMethod may have its own specific convergence criteria, which can
 	// be communicated using a MethodDone operation. This will trigger a

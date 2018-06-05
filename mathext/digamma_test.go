@@ -7,11 +7,15 @@ package mathext
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/floats"
 )
 
 var result float64
 
 func TestDigamma(t *testing.T) {
+	const tol = 1e-10
+
 	for i, test := range []struct {
 		x, want float64
 	}{
@@ -26,10 +30,12 @@ func TestDigamma(t *testing.T) {
 		{.5, -1.96351002602142347944097633299875556719315960466043},
 		{10, 2.251752589066721107647456163885851537211808918028330369448},
 		{math.Pow10(20), 46.05170185988091368035482909368728415202202143924212618733},
-		{-1.111111111e9, 30.497454343508262861},
+		{-1.111111111e9, math.NaN()},
+		{1.46, -0.001580561987083417676105544023567034348339520110000},
 	} {
 
-		if got := Digamma(test.x); math.Abs(got-test.want) > 1e-10 {
+		got := Digamma(test.x)
+		if !(math.IsNaN(got) && math.IsNaN(test.want)) && !floats.EqualWithinAbsOrRel(got, test.want, tol, tol) {
 			t.Errorf("test %d Digamma(%g) failed: got %g want %g", i, test.x, got, test.want)
 		}
 	}

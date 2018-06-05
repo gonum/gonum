@@ -62,7 +62,7 @@ type GlobalMethod interface {
 	// The Location.X field is always valid. The Operation field specifies which
 	// other values of Location are known. If Operation == NoOperation, none of
 	// the values should be used, otherwise the Evaluation operations will be
-	// composed to specify the valid fields. GlobalsMethods are free to use or
+	// composed to specify the valid fields. GlobalMethods are free to use or
 	// ignore these values.
 	//
 	// GlobalMethod may have its own specific convergence criteria, which can

@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/path/internal"
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
 	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/graph/topo"
@@ -27,7 +26,7 @@ var aStarTests = []struct {
 	{
 		name: "simple path",
 		g: func() graph.Graph {
-			return internal.NewGridFrom(
+			return testgraphs.NewGridFrom(
 				"*..*",
 				"**.*",
 				"**.*",
@@ -40,20 +39,20 @@ var aStarTests = []struct {
 	},
 	{
 		name: "small open graph",
-		g:    internal.NewGrid(3, 3, true),
+		g:    testgraphs.NewGrid(3, 3, true),
 
 		s: 0, t: 8,
 	},
 	{
 		name: "large open graph",
-		g:    internal.NewGrid(1000, 1000, true),
+		g:    testgraphs.NewGrid(1000, 1000, true),
 
 		s: 0, t: 999*1000 + 999,
 	},
 	{
 		name: "no path",
 		g: func() graph.Graph {
-			tg := internal.NewGrid(5, 5, true)
+			tg := testgraphs.NewGrid(5, 5, true)
 
 			// Create a complete "wall" across the middle row.
 			tg.Set(2, 0, false)
@@ -70,7 +69,7 @@ var aStarTests = []struct {
 	{
 		name: "partially obstructed",
 		g: func() graph.Graph {
-			tg := internal.NewGrid(10, 10, true)
+			tg := testgraphs.NewGrid(10, 10, true)
 
 			// Create a partial "wall" across the middle
 			// row with a gap at the left-hand end.
@@ -92,7 +91,7 @@ var aStarTests = []struct {
 	{
 		name: "partially obstructed with heuristic",
 		g: func() graph.Graph {
-			tg := internal.NewGrid(10, 10, true)
+			tg := testgraphs.NewGrid(10, 10, true)
 
 			// Create a partial "wall" across the middle
 			// row with a gap at the left-hand end.

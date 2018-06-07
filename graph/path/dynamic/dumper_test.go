@@ -11,7 +11,7 @@ import (
 	"sort"
 	"text/tabwriter"
 
-	"gonum.org/v1/gonum/graph/path/internal"
+	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
 	"gonum.org/v1/gonum/graph/simple"
 )
 
@@ -20,7 +20,7 @@ type dumper struct {
 	step int
 
 	dStarLite *DStarLite
-	grid      *internal.LimitedVisionGrid
+	grid      *testgraphs.LimitedVisionGrid
 
 	w io.Writer
 }

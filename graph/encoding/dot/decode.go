@@ -32,7 +32,7 @@ type PortSetter interface {
 	// SetFromPort sets the From port and
 	// compass direction of the receiver.
 	SetFromPort(port, compass string) error
-	
+
 	// SetToPort sets the To port and compass
 	// direction of the receiver.
 	SetToPort(port, compass string) error

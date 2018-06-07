@@ -500,8 +500,8 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	if x[0] < dividers[0] {
 		panic("histogram: minimum x value is less than lowest divider")
 	}
-	if x[len(x)-1] >= dividers[len(dividers)-1] {
-		panic("histogram: minimum x value is greater than highest divider")
+	if dividers[len(dividers)-1] <= x[len(x)-1] {
+		panic("histogram: maximum x value is greater than or equal to highest divider")
 	}
 
 	idx := 0

@@ -2,5 +2,5 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package fourier provides functions to perform Discrete Fourier Transforms.
-package fourier // import "gonum.org/v1/gonum/fourier"
+// Package token provides generated internal tokenizing functions for DOT parsing.
+package token // import "gonum.org/v1/gonum/graph/formats/dot/internal/token"

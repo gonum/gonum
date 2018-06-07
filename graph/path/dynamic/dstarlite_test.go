@@ -15,7 +15,6 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/path"
-	"gonum.org/v1/gonum/graph/path/internal"
 	"gonum.org/v1/gonum/graph/path/internal/testgraphs"
 	"gonum.org/v1/gonum/graph/simple"
 )
@@ -88,12 +87,12 @@ func TestDStarLiteNullHeuristic(t *testing.T) {
 }
 
 var dynamicDStarLiteTests = []struct {
-	g          *internal.Grid
+	g          *testgraphs.Grid
 	radius     float64
 	all        bool
 	diag, unit bool
 	remember   []bool
-	modify     func(*internal.LimitedVisionGrid)
+	modify     func(*testgraphs.LimitedVisionGrid)
 
 	heuristic func(dx, dy float64) float64
 
@@ -105,7 +104,7 @@ var dynamicDStarLiteTests = []struct {
 }{
 	{
 		// This is the example shown in figures 6 and 7 of doi:10.1109/tro.2004.838026.
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"...",
 			".*.",
 			".*.",
@@ -139,7 +138,7 @@ var dynamicDStarLiteTests = []struct {
 		// may be taken incorrectly at 90° or correctly at 45° because the
 		// calculated rhs values of 12 and 17 are tied when moving from node
 		// 16, and the grid is small enough to examine by a dump.
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			".....",
 			"...*.",
 			"**.*.",
@@ -176,7 +175,7 @@ var dynamicDStarLiteTests = []struct {
 		// with the exception that diagonal edge weights are calculated with the hypot
 		// function instead of a step count and only allowing information to be known
 		// from exploration.
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"..................",
 			"..................",
 			"..................",
@@ -239,7 +238,7 @@ var dynamicDStarLiteTests = []struct {
 		// with the exception that diagonal edge weights are calculated with the hypot
 		// function instead of a step count, not closing the exit and only allowing
 		// information to be known from exploration.
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"..................",
 			"..................",
 			"..................",
@@ -299,7 +298,7 @@ var dynamicDStarLiteTests = []struct {
 		// with the exception that diagonal edge weights are calculated with the hypot
 		// function instead of a step count, the exit is closed at a distance and
 		// information is allowed to be known from exploration.
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"..................",
 			"..................",
 			"..................",
@@ -363,7 +362,7 @@ var dynamicDStarLiteTests = []struct {
 		// This is the example shown in figure 2 of doi:10.1109/tro.2004.838026
 		// with the exception that diagonal edge weights are calculated with the hypot
 		// function instead of a step count.
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"..................",
 			"..................",
 			"..................",
@@ -385,7 +384,7 @@ var dynamicDStarLiteTests = []struct {
 		diag:     true,
 		remember: []bool{true},
 
-		modify: func(l *internal.LimitedVisionGrid) {
+		modify: func(l *testgraphs.LimitedVisionGrid) {
 			all := l.Grid.AllVisible
 			l.Grid.AllVisible = false
 			for _, n := range l.Nodes() {
@@ -459,7 +458,7 @@ var dynamicDStarLiteTests = []struct {
 		weight: 21.242640687119287,
 	},
 	{
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"*..*",
 			"**.*",
 			"**.*",
@@ -487,7 +486,7 @@ var dynamicDStarLiteTests = []struct {
 		weight: 4,
 	},
 	{
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"*..*",
 			"**.*",
 			"**.*",
@@ -514,7 +513,7 @@ var dynamicDStarLiteTests = []struct {
 		weight: math.Sqrt2 + 2,
 	},
 	{
-		g: internal.NewGridFrom(
+		g: testgraphs.NewGridFrom(
 			"...",
 			".*.",
 			".*.",
@@ -555,7 +554,7 @@ var dynamicDStarLiteTests = []struct {
 func TestDStarLiteDynamic(t *testing.T) {
 	for i, test := range dynamicDStarLiteTests {
 		for _, remember := range test.remember {
-			l := &internal.LimitedVisionGrid{
+			l := &testgraphs.LimitedVisionGrid{
 				Grid:         test.g,
 				VisionRadius: test.radius,
 				Location:     test.s,

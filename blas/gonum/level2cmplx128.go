@@ -16,7 +16,7 @@ import (
 //  y = alpha * A^T * x + beta * y  if trans = blas.Trans
 //  y = alpha * A^H * x + beta * y  if trans = blas.ConjTrans
 // where alpha and beta are scalars, x and y are vectors, and A is an m×n band matrix
-// with kL subdiagonals and kU superdiagonals.
+// with kL sub-diagonals and kU super-diagonals.
 func (Implementation) Zgbmv(trans blas.Transpose, m, n, kL, kU int, alpha complex128, ab []complex128, ldab int, x []complex128, incX int, beta complex128, y []complex128, incY int) {
 	checkZBandMatrix('A', m, n, kL, kU, ab, ldab)
 	var lenX, lenY int
@@ -741,7 +741,7 @@ func (Implementation) Zher(uplo blas.Uplo, n int, alpha float64, x []complex128,
 }
 
 // Zher2 performs the Hermitian rank-two operation
-//  A += alpha*x*y^H + conj(alpha)*y*x^H
+//  A += alpha * x * y^H + conj(alpha) * y * x^H
 // where alpha is a scalar, x and y are n element vectors and A is an n×n
 // Hermitian matrix. On entry, the imaginary parts of the diagonal elements are
 // ignored and assumed to be zero. On return they will be set to zero.
@@ -994,7 +994,7 @@ func (Implementation) Zhpmv(uplo blas.Uplo, n int, alpha complex128, ap []comple
 }
 
 // Zhpr performs the Hermitian rank-1 operation
-//  A += alpha * x * x^H,
+//  A += alpha * x * x^H
 // where alpha is a real scalar, x is a vector, and A is an n×n hermitian matrix
 // in packed form. On entry, the imaginary parts of the diagonal elements are
 // assumed to be zero, and on return they are set to zero.
@@ -1113,7 +1113,7 @@ func (Implementation) Zhpr(uplo blas.Uplo, n int, alpha float64, x []complex128,
 }
 
 // Zhpr2 performs the Hermitian rank-2 operation
-//  A += alpha*x*y^H + conj(alpha)*y*x^H,
+//  A += alpha * x * y^H + conj(alpha) * y * x^H
 // where alpha is a complex scalar, x and y are n element vectors, and A is an
 // n×n Hermitian matrix, supplied in packed form. On entry, the imaginary parts
 // of the diagonal elements are assumed to be zero, and on return they are set to zero.
@@ -1451,9 +1451,9 @@ func (Implementation) Ztbmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 }
 
 // Ztbsv solves one of the systems of equations
-//  A*x = b     if trans == blas.NoTrans,
-//  A^T*x = b,  if trans == blas.Trans,
-//  A^H*x = b,  if trans == blas.ConjTrans,
+//  A * x = b    if trans == blas.NoTrans
+//  A^T * x = b  if trans == blas.Trans
+//  A^H * x = b  if trans == blas.ConjTrans
 // where b and x are n element vectors and A is an n×n triangular band matrix
 // with (k+1) diagonals.
 //
@@ -1889,9 +1889,9 @@ func (Implementation) Ztpmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 }
 
 // Ztpsv solves one of the systems of equations
-//  A*x = b     if trans == blas.NoTrans,
-//  A^T*x = b,  if trans == blas.Trans,
-//  A^H*x = b,  if trans == blas.ConjTrans,
+//  A * x = b    if trans == blas.NoTrans
+//  A^T * x = b  if trans == blas.Trans
+//  A^H * x = b  if trans == blas.ConjTrans
 // where b and x are n element vectors and A is an n×n triangular matrix in
 // packed form.
 //
@@ -2294,9 +2294,9 @@ func (Implementation) Ztrmv(uplo blas.Uplo, trans blas.Transpose, diag blas.Diag
 }
 
 // Ztrsv solves one of the systems of equations
-//  A*x = b     if trans == blas.NoTrans,
-//  A^T*x = b,  if trans == blas.Trans,
-//  A^H*x = b,  if trans == blas.ConjTrans,
+//  A * x = b    if trans == blas.NoTrans
+//  A^T * x = b  if trans == blas.Trans
+//  A^H * x = b  if trans == blas.ConjTrans
 // where b and x are n element vectors and A is an n×n triangular matrix.
 //
 // On entry, x contains the values of b, and the solution is

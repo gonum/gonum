@@ -11,7 +11,7 @@ import (
 
 var _ blas.Float64Level2 = Implementation{}
 
-// Dgemv computes
+// Dgemv performs one of the matrix-vector operations
 //  y = alpha * A * x + beta * y    if tA = blas.NoTrans
 //  y = alpha * A^T * x + beta * y  if tA = blas.Trans or blas.ConjTrans
 // where A is an m×n dense matrix, x and y are vectors, and alpha and beta are scalars.
@@ -152,11 +152,10 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		a, uintptr(lda))
 }
 
-// Dgbmv computes
-//  y = alpha * A * x + beta * y if tA == blas.NoTrans
-//  y = alpha * A^T * x + beta * y if tA == blas.Trans or blas.ConjTrans
-// where a is an m×n band matrix kL subdiagonals and kU super-diagonals, and
-// m and n refer to the size of the full dense matrix it represents.
+// Dgbmv performs one of the matrix-vector operations
+//  y = alpha * A * x + beta * y    if tA == blas.NoTrans
+//  y = alpha * A^T * x + beta * y  if tA == blas.Trans or blas.ConjTrans
+// where A is an m×n band matrix with kL sub-diagonals and kU super-diagonals,
 // x and y are vectors, and alpha and beta are scalars.
 func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if tA != blas.NoTrans && tA != blas.Trans && tA != blas.ConjTrans {
@@ -292,10 +291,10 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	}
 }
 
-// Dtrmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
-// A is an n×n Triangular matrix and x is a vector.
+// Dtrmv performs one of the matrix-vector operations
+//  x = A * x    if tA == blas.NoTrans
+//  x = A^T * x  if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular matrix, and x is a vector.
 func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, a []float64, lda int, x []float64, incX int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -440,12 +439,13 @@ func (Implementation) Dtrmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 }
 
-// Dtrsv solves
-//  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
-// A is an n×n triangular matrix and x is a vector.
+// Dtrsv solves one of the systems of equations
+//  A * x = b    if tA == blas.NoTrans
+//  A^T * x = b  if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular matrix, and x and b are vectors.
+//
 // At entry to the function, x contains the values of b, and the result is
-// stored in place into x.
+// stored in-place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
@@ -615,9 +615,9 @@ func (Implementation) Dtrsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 }
 
-// Dsymv computes
-//    y = alpha * A * x + beta * y,
-// where a is an n×n symmetric matrix, x and y are vectors, and alpha and
+// Dsymv performs the matrix-vector operation
+//  y = alpha * A * x + beta * y
+// where A is an n×n symmetric matrix, x and y are vectors, and alpha and
 // beta are scalars.
 func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	// Check inputs
@@ -758,10 +758,10 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 	}
 }
 
-// Dtbmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
-// where A is an n×n triangular banded matrix with k diagonals, and x is a vector.
+// Dtbmv performs one of the matrix-vector operations
+//  x = A * x    if tA == blas.NoTrans
+//  x = A^T * x  if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular band matrix with k+1 diagonals, and x is a vector.
 func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k int, a []float64, lda int, x []float64, incX int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -959,10 +959,10 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 }
 
-// Dtpmv computes
-//  x = A * x if tA == blas.NoTrans
-//  x = A^T * x if tA == blas.Trans or blas.ConjTrans
-// where A is an n×n unit triangular matrix in packed format, and x is a vector.
+// Dtpmv performs one of the matrix-vector operations
+//  x = A * x    if tA == blas.NoTrans
+//  x = A^T * x  if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular matrix in packed format, and x is a vector.
 func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int, ap []float64, x []float64, incX int) {
 	// Verify inputs
 	if ul != blas.Lower && ul != blas.Upper {
@@ -1134,12 +1134,14 @@ func (Implementation) Dtpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 }
 
-// Dtbsv solves
-//  A * x = b
-// where A is an n×n triangular banded matrix with k diagonals in packed format,
-// and x is a vector.
+// Dtbsv solves one of the systems of equations
+//  A * x = b    if tA == blas.NoTrans
+//  A^T * x = b  if tA == blas.Trans or tA == blas.ConjTrans
+// where A is an n×n triangular band matrix with k+1 diagonals,
+// and x and b are vectors.
+//
 // At entry to the function, x contains the values of b, and the result is
-// stored in place into x.
+// stored in-place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
@@ -1343,10 +1345,10 @@ func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	}
 }
 
-// Dsbmv performs
+// Dsbmv performs the matrix-vector operation
 //  y = alpha * A * x + beta * y
-// where A is an n×n symmetric banded matrix, x and y are vectors, and alpha
-// and beta are scalars.
+// where A is an n×n symmetric band matrix with k super-diagonals, x and y are
+// vectors, and alpha and beta are scalars.
 func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, lda int, x []float64, incX int, beta float64, y []float64, incY int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1481,9 +1483,9 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 	}
 }
 
-// Dsyr performs the rank-one update
-//  a += alpha * x * x^T
-// where a is an n×n symmetric matrix, and x is a vector.
+// Dsyr performs the symmetric rank-one update
+//  A += alpha * x * x^T
+// where A is an n×n symmetric matrix, and x is a vector.
 func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64, lda int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1569,7 +1571,7 @@ func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 
 // Dsyr2 performs the symmetric rank-two update
 //  A += alpha * x * y^T + alpha * y * x^T
-// where A is a symmetric n×n matrix, x and y are vectors, and alpha is a scalar.
+// where A is an n×n symmetric matrix, x and y are vectors, and alpha is a scalar.
 func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, a []float64, lda int) {
 	if ul != blas.Lower && ul != blas.Upper {
 		panic(badUplo)
@@ -1662,12 +1664,13 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	}
 }
 
-// Dtpsv solves
-//  A * x = b if tA == blas.NoTrans
-//  A^T * x = b if tA == blas.Trans or blas.ConjTrans
-// where A is an n×n triangular matrix in packed format and x is a vector.
+// Dtpsv solves one of the systems of equations
+//  A * x = b    if tA == blas.NoTrans
+//  A^T * x = b  if tA == blas.Trans or blas.ConjTrans
+// where A is an n×n triangular matrix in packed format, and x and b are vectors.
+//
 // At entry to the function, x contains the values of b, and the result is
-// stored in place into x.
+// stored in-place into x.
 //
 // No test for singularity or near-singularity is included in this
 // routine. Such tests must be performed before calling this routine.
@@ -1841,9 +1844,9 @@ func (Implementation) Dtpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 	}
 }
 
-// Dspmv performs
-//    y = alpha * A * x + beta * y,
-// where A is an n×n symmetric matrix in packed format, x and y are vectors
+// Dspmv performs the matrix-vector operation
+//  y = alpha * A * x + beta * y
+// where A is an n×n symmetric matrix in packed format, x and y are vectors,
 // and alpha and beta are scalars.
 func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x []float64, incX int, beta float64, y []float64, incY int) {
 	// Verify inputs
@@ -1983,9 +1986,9 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x [
 	}
 }
 
-// Dspr computes the rank-one operation
-//  a += alpha * x * x^T
-// where a is an n×n symmetric matrix in packed format, x is a vector, and
+// Dspr performs the symmetric rank-one operation
+//  A += alpha * x * x^T
+// where A is an n×n symmetric matrix in packed format, x is a vector, and
 // alpha is a scalar.
 func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX int, a []float64) {
 	if ul != blas.Lower && ul != blas.Upper {
@@ -2066,7 +2069,7 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 }
 
 // Dspr2 performs the symmetric rank-2 update
-//  A += alpha * x * y^T + alpha * y * x^T,
+//  A += alpha * x * y^T + alpha * y * x^T
 // where A is an n×n symmetric matrix in packed format, x and y are vectors,
 // and alpha is a scalar.
 func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, incX int, y []float64, incY int, ap []float64) {

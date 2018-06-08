@@ -1,4 +1,4 @@
 #!/bin/bash
 
 set -e
-go run ./internal/imports/check-imports.go
+check-imports -b "math/rand,github.com/gonum/.*"

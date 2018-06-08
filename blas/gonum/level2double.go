@@ -58,14 +58,10 @@ func (Implementation) Dgemv(tA blas.Transpose, m, n int, alpha float64, a []floa
 	}
 
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(lenX - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY <= 0 {
 		ky = -(lenY - 1) * incY
 	}
 
@@ -210,14 +206,10 @@ func (Implementation) Dgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float64, 
 	}
 
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(lenX - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY <= 0 {
 		ky = -(lenY - 1) * incY
 	}
 
@@ -660,14 +652,10 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 
 	// Set up start points
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(n - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY <= 0 {
 		ky = -(n - 1) * incY
 	}
 
@@ -805,8 +793,6 @@ func (Implementation) Dtbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	var kx int
 	if incX <= 0 {
 		kx = -(n - 1) * incX
-	} else if incX != 1 {
-		kx = 0
 	}
 
 	nonunit := d != blas.Unit
@@ -1185,8 +1171,6 @@ func (Implementation) Dtbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	var kx int
 	if incX < 0 {
 		kx = -(n - 1) * incX
-	} else {
-		kx = 0
 	}
 	nonUnit := d == blas.NonUnit
 	// Form x = A^-1 x.
@@ -1396,14 +1380,10 @@ func (Implementation) Dsbmv(ul blas.Uplo, n, k int, alpha float64, a []float64, 
 	lenX := n
 	lenY := n
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(lenX - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY <= 0 {
 		ky = -(lenY - 1) * incY
 	}
 
@@ -1526,9 +1506,7 @@ func (Implementation) Dsyr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 
 	lenX := n
 	var kx int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(lenX - 1) * incX
 	}
 	if ul == blas.Upper {
@@ -1619,14 +1597,10 @@ func (Implementation) Dsyr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 	}
 
 	var ky, kx int
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY <= 0 {
 		ky = -(n - 1) * incY
 	}
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(n - 1) * incX
 	}
 	if ul == blas.Upper {
@@ -1901,14 +1875,10 @@ func (Implementation) Dspmv(ul blas.Uplo, n int, alpha float64, a []float64, x [
 
 	// Set up start points
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(n - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY <= 0 {
 		ky = -(n - 1) * incY
 	}
 
@@ -2038,9 +2008,7 @@ func (Implementation) Dspr(ul blas.Uplo, n int, alpha float64, x []float64, incX
 	}
 	lenX := n
 	var kx int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(lenX - 1) * incX
 	}
 	var offset int // Offset is the index of (i,i).
@@ -2127,14 +2095,10 @@ func (Implementation) Dspr2(ul blas.Uplo, n int, alpha float64, x []float64, inc
 		return
 	}
 	var ky, kx int
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY <= 0 {
 		ky = -(n - 1) * incY
 	}
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX <= 0 {
 		kx = -(n - 1) * incX
 	}
 	var offset int // Offset is the index of (i,i).

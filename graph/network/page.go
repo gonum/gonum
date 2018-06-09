@@ -37,7 +37,7 @@ func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 	dangling := damp / float64(len(nodes))
 	for j, u := range nodes {
 		to := g.From(u.ID())
-		z := float64(0)
+		var z float64
 		for _, v := range to {
 			if w, ok := g.Weight(u.ID(), v.ID()); ok {
 				z += w
@@ -101,7 +101,7 @@ func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 // graph g using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func edgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
+func EdgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
 	// edgeWeightedPageRankSparse is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack" with the modification that
 	// the columns of hyperlink matrix H are calculated with edge weights.
@@ -121,7 +121,7 @@ func edgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map
 	df := damp / float64(len(nodes))
 	for j, u := range nodes {
 		to := g.From(u.ID())
-		z := float64(0)
+		var z float64
 		for _, v := range to {
 			if w, ok := g.Weight(u.ID(), v.ID()); ok {
 				z += w

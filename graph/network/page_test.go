@@ -232,7 +232,7 @@ func TestEdgeWeightedPageRankSparse(t *testing.T) {
 				}
 			}
 		}
-		got := edgeWeightedPageRankSparse(g, test.damp, test.tol)
+		got := EdgeWeightedPageRankSparse(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
 			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {

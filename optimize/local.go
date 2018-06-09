@@ -4,7 +4,11 @@
 
 package optimize
 
-import "math"
+import (
+	"math"
+
+	"gonum.org/v1/gonum/floats"
+)
 
 // Local finds a local minimum of a minimization problem using a sequential
 // algorithm. A maximization problem can be transformed into a minimization
@@ -61,6 +65,10 @@ func Local(p Problem, initX []float64, settings *Settings, method Method) (*Resu
 	}
 	if settings == nil {
 		settings = DefaultSettings()
+	}
+	// Check that the initial location matches the one in settings.
+	if settings.InitX != nil && !floats.Equal(settings.InitX, initX) {
+		panic("local: initX does not match settings x location")
 	}
 	lg := &localGlobal{
 		Method:   method,
@@ -193,38 +201,24 @@ func (l *localGlobal) cleanup(operation chan<- GlobalTask, result <-chan GlobalT
 
 func (l *localGlobal) getStartingLocation(operation chan<- GlobalTask, result <-chan GlobalTask, task GlobalTask) Operation {
 	copy(task.X, l.InitX)
-	if l.Settings.UseInitialData {
-		task.F = l.Settings.InitialValue
-		if task.Gradient != nil {
-			g := l.Settings.InitialGradient
-			if g == nil {
-				panic("optimize: initial gradient is nil")
-			}
-			if len(g) != l.dim {
-				panic("optimize: initial gradient size mismatch")
-			}
-			copy(task.Gradient, g)
-		}
-		if task.Hessian != nil {
-			h := l.Settings.InitialHessian
-			if h == nil {
-				panic("optimize: initial Hessian is nil")
-			}
-			if h.Symmetric() != l.dim {
-				panic("optimize: initial Hessian size mismatch")
-			}
-			task.Hessian.CopySym(h)
-		}
+	// Construct the operation by what is missing.
+	needs := l.Method.Needs()
+	initOp := task.Op
+	op := NoOperation
+	if initOp&FuncEvaluation == 0 {
+		op |= FuncEvaluation
+	}
+	if needs.Gradient && initOp&GradEvaluation == 0 {
+		op |= GradEvaluation
+	}
+	if needs.Hessian && initOp&HessEvaluation == 0 {
+		op |= HessEvaluation
+	}
+
+	if op == NoOperation {
 		return NoOperation
 	}
-	eval := FuncEvaluation
-	if task.Gradient != nil {
-		eval |= GradEvaluation
-	}
-	if task.Hessian != nil {
-		eval |= HessEvaluation
-	}
-	task.Op = eval
+	task.Op = op
 	operation <- task
 	task = <-result
 	return task.Op

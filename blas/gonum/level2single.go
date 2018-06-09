@@ -62,14 +62,10 @@ func (Implementation) Sgemv(tA blas.Transpose, m, n int, alpha float32, a []floa
 	}
 
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(lenX - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY < 0 {
 		ky = -(lenY - 1) * incY
 	}
 
@@ -218,14 +214,10 @@ func (Implementation) Sgbmv(tA blas.Transpose, m, n, kL, kU int, alpha float32, 
 	}
 
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(lenX - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY < 0 {
 		ky = -(lenY - 1) * incY
 	}
 
@@ -674,14 +666,10 @@ func (Implementation) Ssymv(ul blas.Uplo, n int, alpha float32, a []float32, lda
 
 	// Set up start points
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(n - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY < 0 {
 		ky = -(n - 1) * incY
 	}
 
@@ -819,10 +807,8 @@ func (Implementation) Stbmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 		return
 	}
 	var kx int
-	if incX <= 0 {
+	if incX < 0 {
 		kx = -(n - 1) * incX
-	} else if incX != 1 {
-		kx = 0
 	}
 
 	nonunit := d != blas.Unit
@@ -1022,7 +1008,7 @@ func (Implementation) Stpmv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		return
 	}
 	var kx int
-	if incX <= 0 {
+	if incX < 0 {
 		kx = -(n - 1) * incX
 	}
 
@@ -1205,8 +1191,6 @@ func (Implementation) Stbsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n, k i
 	var kx int
 	if incX < 0 {
 		kx = -(n - 1) * incX
-	} else {
-		kx = 0
 	}
 	nonUnit := d == blas.NonUnit
 	// Form x = A^-1 x.
@@ -1418,14 +1402,10 @@ func (Implementation) Ssbmv(ul blas.Uplo, n, k int, alpha float32, a []float32, 
 	lenX := n
 	lenY := n
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(lenX - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY < 0 {
 		ky = -(lenY - 1) * incY
 	}
 
@@ -1550,9 +1530,7 @@ func (Implementation) Ssyr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 
 	lenX := n
 	var kx int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(lenX - 1) * incX
 	}
 	if ul == blas.Upper {
@@ -1645,14 +1623,10 @@ func (Implementation) Ssyr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 	}
 
 	var ky, kx int
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY < 0 {
 		ky = -(n - 1) * incY
 	}
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(n - 1) * incX
 	}
 	if ul == blas.Upper {
@@ -1752,7 +1726,7 @@ func (Implementation) Stpsv(ul blas.Uplo, tA blas.Transpose, d blas.Diag, n int,
 		return
 	}
 	var kx int
-	if incX <= 0 {
+	if incX < 0 {
 		kx = -(n - 1) * incX
 	}
 
@@ -1931,14 +1905,10 @@ func (Implementation) Sspmv(ul blas.Uplo, n int, alpha float32, a []float32, x [
 
 	// Set up start points
 	var kx, ky int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(n - 1) * incX
 	}
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY < 0 {
 		ky = -(n - 1) * incY
 	}
 
@@ -2070,9 +2040,7 @@ func (Implementation) Sspr(ul blas.Uplo, n int, alpha float32, x []float32, incX
 	}
 	lenX := n
 	var kx int
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(lenX - 1) * incX
 	}
 	var offset int // Offset is the index of (i,i).
@@ -2161,14 +2129,10 @@ func (Implementation) Sspr2(ul blas.Uplo, n int, alpha float32, x []float32, inc
 		return
 	}
 	var ky, kx int
-	if incY > 0 {
-		ky = 0
-	} else {
+	if incY < 0 {
 		ky = -(n - 1) * incY
 	}
-	if incX > 0 {
-		kx = 0
-	} else {
+	if incX < 0 {
 		kx = -(n - 1) * incX
 	}
 	var offset int // Offset is the index of (i,i).

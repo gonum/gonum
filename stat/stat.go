@@ -14,10 +14,10 @@ import (
 // CumulantKind specifies the behavior for calculating the empirical CDF or Quantile
 type CumulantKind int
 
+// List of supported CumulantKind values for the Quantile function.
+// Constant values should match the R nomenclature. See
+// https://en.wikipedia.org/wiki/Quantile#Estimating_the_quantiles_of_a_population
 const (
-	// Constant values should match the R nomenclature. See
-	// https://en.wikipedia.org/wiki/Quantile#Estimating_the_quantiles_of_a_population
-
 	// Empirical treats the distribution as the actual empirical distribution.
 	Empirical CumulantKind = 1
 )
@@ -500,8 +500,8 @@ func Histogram(count, dividers, x, weights []float64) []float64 {
 	if x[0] < dividers[0] {
 		panic("histogram: minimum x value is less than lowest divider")
 	}
-	if x[len(x)-1] >= dividers[len(dividers)-1] {
-		panic("histogram: minimum x value is greater than highest divider")
+	if dividers[len(dividers)-1] <= x[len(x)-1] {
+		panic("histogram: maximum x value is greater than or equal to highest divider")
 	}
 
 	idx := 0
@@ -1041,22 +1041,26 @@ func Quantile(p float64, c CumulantKind, x, weights []float64) float64 {
 	}
 	switch c {
 	case Empirical:
-		var cumsum float64
-		fidx := p * sumWeights
-		for i := range x {
-			if weights == nil {
-				cumsum++
-			} else {
-				cumsum += weights[i]
-			}
-			if cumsum >= fidx {
-				return x[i]
-			}
-		}
-		panic("impossible")
+		return empiricalQuantile(p, x, weights, sumWeights)
 	default:
 		panic("stat: bad cumulant kind")
 	}
+}
+
+func empiricalQuantile(p float64, x, weights []float64, sumWeights float64) float64 {
+	var cumsum float64
+	fidx := p * sumWeights
+	for i := range x {
+		if weights == nil {
+			cumsum++
+		} else {
+			cumsum += weights[i]
+		}
+		if cumsum >= fidx {
+			return x[i]
+		}
+	}
+	panic("impossible")
 }
 
 // Skew computes the skewness of the sample data.

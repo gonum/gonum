@@ -26,14 +26,12 @@ func min(a, b int) int {
 }
 
 // newLocation allocates a new locatian structure of the appropriate size. It
-// allocates memory based on the dimension and the values in Needs. The initial
-// function value is set to math.Inf(1).
+// allocates memory based on the dimension and the values in Needs.
 func newLocation(dim int, method Needser) *Location {
 	// TODO(btracey): combine this with Local.
 	loc := &Location{
 		X: make([]float64, dim),
 	}
-	loc.F = math.Inf(1)
 	if method.Needs().Gradient {
 		loc.Gradient = make([]float64, dim)
 	}
@@ -58,6 +56,48 @@ func copyLocation(dst, src *Location) {
 		}
 		dst.Hessian.CopySym(src.Hessian)
 	}
+}
+
+// getInitLocation checks the validity of initLocation and initOperation and
+// returns the initial values as a *Location.
+func getInitLocation(dim int, initX []float64, initValues *Location, method Needser) (Operation, *Location) {
+	needs := method.Needs()
+	loc := newLocation(dim, method)
+	if initX == nil {
+		if initValues != nil {
+			panic("optimize: initValues is non-nil but no initial location specified")
+		}
+		return NoOperation, loc
+	}
+	copy(loc.X, initX)
+	if initValues == nil {
+		return NoOperation, loc
+	} else {
+		if initValues.X != nil {
+			panic("optimize: location specified in InitValues (only use InitX)")
+		}
+	}
+	loc.F = initValues.F
+	op := FuncEvaluation
+	if initValues.Gradient != nil {
+		if len(initValues.Gradient) != dim {
+			panic("optimize: initial gradient does not match problem dimension")
+		}
+		if needs.Gradient {
+			copy(loc.Gradient, initValues.Gradient)
+			op |= GradEvaluation
+		}
+	}
+	if initValues.Hessian != nil {
+		if initValues.Hessian.Symmetric() != dim {
+			panic("optimize: initial Hessian does not match problem dimension")
+		}
+		if needs.Hessian {
+			loc.Hessian.CopySym(initValues.Hessian)
+			op |= HessEvaluation
+		}
+	}
+	return op, loc
 }
 
 func checkOptimization(p Problem, dim int, method Needser, recorder Recorder) error {

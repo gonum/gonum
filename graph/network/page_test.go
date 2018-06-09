@@ -91,7 +91,7 @@ func TestPageRank(t *testing.T) {
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
-		got := PageRank(g, test.damp, test.tol)
+		got := pageRank(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
 			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
@@ -115,7 +115,7 @@ func TestPageRankSparse(t *testing.T) {
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
-		got := PageRankSparse(g, test.damp, test.tol)
+		got := pageRankSparse(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
 			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
@@ -201,7 +201,7 @@ func TestEdgeWeightedPageRank(t *testing.T) {
 				}
 			}
 		}
-		got := EdgeWeightedPageRank(g, test.damp, test.tol)
+		got := edgeWeightedPageRank(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
 			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
@@ -232,7 +232,7 @@ func TestEdgeWeightedPageRankSparse(t *testing.T) {
 				}
 			}
 		}
-		got := EdgeWeightedPageRankSparse(g, test.damp, test.tol)
+		got := edgeWeightedPageRankSparse(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
 			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {

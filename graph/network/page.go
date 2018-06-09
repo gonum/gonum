@@ -14,12 +14,36 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// EdgeWeightedPageRank returns the PageRank weights for nodes of the weighted directed graph g
+// PageRank returns the PageRank weights for nodes of the directed graph g
 // using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
-	// EdgeWeightedPageRank is implemented according to "How Google Finds Your Needle
+// If g is a graph.WeightedDirected, an edge-weighted PageRank is calculated.
+func PageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
+	if g, ok := g.(graph.WeightedDirected); ok {
+		return edgeWeightedPageRank(g, damp, tol)
+	}
+	return pageRank(g, damp, tol)
+}
+
+// PageRankSparse returns the PageRank weights for nodes of the sparse directed
+// graph g using the given damping factor and terminating when the 2-norm of the
+// vector difference between iterations is below tol. The returned map is
+// keyed on the graph node IDs.
+// If g is a graph.WeightedDirected, an edge-weighted PageRank is calculated.
+func PageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
+	if g, ok := g.(graph.WeightedDirected); ok {
+		return edgeWeightedPageRankSparse(g, damp, tol)
+	}
+	return pageRankSparse(g, damp, tol)
+}
+
+// edgeWeightedPageRank returns the PageRank weights for nodes of the weighted directed graph g
+// using the given damping factor and terminating when the 2-norm of the
+// vector difference between iterations is below tol. The returned map is
+// keyed on the graph node IDs.
+func edgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
+	// edgeWeightedPageRank is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack" with the modification that
 	// the columns of hyperlink matrix H are calculated with edge weights.
 	//
@@ -101,7 +125,7 @@ func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 // graph g using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func EdgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
+func edgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
 	// edgeWeightedPageRankSparse is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack" with the modification that
 	// the columns of hyperlink matrix H are calculated with edge weights.
@@ -179,12 +203,12 @@ func EdgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map
 	return ranks
 }
 
-// PageRank returns the PageRank weights for nodes of the directed graph g
+// pageRank returns the PageRank weights for nodes of the directed graph g
 // using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func PageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
-	// PageRank is implemented according to "How Google Finds Your Needle
+func pageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
+	// pageRank is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack".
 	//
 	// G.I^k = alpha.S.I^k + (1-alpha).1/n.1.I^k
@@ -252,12 +276,12 @@ func PageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
 	return ranks
 }
 
-// PageRankSparse returns the PageRank weights for nodes of the sparse directed
+// pageRankSparse returns the PageRank weights for nodes of the sparse directed
 // graph g using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
-func PageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
-	// PageRankSparse is implemented according to "How Google Finds Your Needle
+func pageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
+	// pageRankSparse is implemented according to "How Google Finds Your Needle
 	// in the Web's Haystack".
 	//
 	// G.I^k = alpha.H.I^k + alpha.A.I^k + (1-alpha).1/n.1.I^k

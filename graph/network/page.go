@@ -14,16 +14,18 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// EdgeWeightedPageRank returns the PageRank weights for nodes of the directed graph g
+// EdgeWeightedPageRank returns the PageRank weights for nodes of the weighted directed graph g
 // using the given damping factor and terminating when the 2-norm of the
 // vector difference between iterations is below tol. The returned map is
 // keyed on the graph node IDs.
 func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
-	// EdgeWeightedPageRank is implemented according to "PageRank beyond the Web"
+	// EdgeWeightedPageRank is implemented according to "How Google Finds Your Needle
+	// in the Web's Haystack" with the modification that
+	// the columns of hyperlink matrix H are calculated with edge weights.
 	//
-	// we solve the equation (2.1) in [1] by the power iteration method
+	// G.I^k = alpha.H.I^k + alpha.A.I^k + (1-alpha).1/n.1.I^k
 	//
-	// ref: [1] https://arxiv.org/abs/1407.5107
+	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
 	nodes := g.Nodes()
 	indexOf := make(map[int64]int, len(nodes))
@@ -32,6 +34,7 @@ func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 	}
 
 	m := mat.NewDense(len(nodes), len(nodes), nil)
+	dangling := damp / float64(len(nodes))
 	for j, u := range nodes {
 		to := g.From(u.ID())
 		z := float64(0)
@@ -47,7 +50,6 @@ func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 				}
 			}
 		} else {
-			dangling := damp / float64(len(nodes))
 			for i := range nodes {
 				m.Set(i, j, dangling)
 			}
@@ -82,6 +84,88 @@ func EdgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 	for {
 		lastV, v = v, lastV
 		v.MulVec(m, lastV)
+		if normDiff(vec, last) < tol {
+			break
+		}
+	}
+
+	ranks := make(map[int64]float64, len(nodes))
+	for i, r := range v.RawVector().Data {
+		ranks[nodes[i].ID()] = r
+	}
+
+	return ranks
+}
+
+// edgeWeightedPageRankSparse returns the PageRank weights for nodes of the sparse weighted directed
+// graph g using the given damping factor and terminating when the 2-norm of the
+// vector difference between iterations is below tol. The returned map is
+// keyed on the graph node IDs.
+func edgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map[int64]float64 {
+	// edgeWeightedPageRankSparse is implemented according to "How Google Finds Your Needle
+	// in the Web's Haystack" with the modification that
+	// the columns of hyperlink matrix H are calculated with edge weights.
+	//
+	// G.I^k = alpha.H.I^k + alpha.A.I^k + (1-alpha).1/n.1.I^k
+	//
+	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
+
+	nodes := g.Nodes()
+	indexOf := make(map[int64]int, len(nodes))
+	for i, n := range nodes {
+		indexOf[n.ID()] = i
+	}
+
+	m := make(rowCompressedMatrix, len(nodes))
+	var dangling compressedRow
+	df := damp / float64(len(nodes))
+	for j, u := range nodes {
+		to := g.From(u.ID())
+		z := float64(0)
+		for _, v := range to {
+			if w, ok := g.Weight(u.ID(), v.ID()); ok {
+				z += w
+			}
+		}
+		if z != 0 {
+			for _, v := range to {
+				if w, ok := g.Weight(u.ID(), v.ID()); ok {
+					m.addTo(indexOf[v.ID()], j, (w*damp)/z)
+				}
+			}
+		} else {
+			dangling.addTo(j, df)
+		}
+	}
+
+	last := make([]float64, len(nodes))
+	for i := range last {
+		last[i] = 1
+	}
+	lastV := mat.NewVecDense(len(nodes), last)
+
+	vec := make([]float64, len(nodes))
+	var sum float64
+	for i := range vec {
+		r := rand.NormFloat64()
+		sum += r
+		vec[i] = r
+	}
+	f := 1 / sum
+	for i := range vec {
+		vec[i] *= f
+	}
+	v := mat.NewVecDense(len(nodes), vec)
+
+	dt := (1 - damp) / float64(len(nodes))
+	for {
+		lastV, v = v, lastV
+
+		m.mulVecUnitary(v, lastV)          // First term of the G matrix equation;
+		with := dangling.dotUnitary(lastV) // Second term;
+		away := onesDotUnitary(dt, lastV)  // Last term.
+
+		floats.AddConst(with+away, v.RawVector().Data)
 		if normDiff(vec, last) < tol {
 			break
 		}

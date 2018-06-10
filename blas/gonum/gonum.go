@@ -14,8 +14,6 @@ type Implementation struct{}
 const (
 	zeroIncX = "blas: zero x index increment"
 	zeroIncY = "blas: zero y index increment"
-	badLenX  = "blas: x index out of range"
-	badLenY  = "blas: y index out of range"
 
 	mLT0  = "blas: m < 0"
 	nLT0  = "blas: n < 0"
@@ -32,8 +30,8 @@ const (
 	badLdB = "blas: index of b out of range"
 	badLdC = "blas: index of c out of range"
 
-	badX = "blas: x index out of range"
-	badY = "blas: y index out of range"
+	badX = "blas: bad length of x"
+	badY = "blas: bad length of y"
 )
 
 // [SD]gemm behavior constants. These are kept here to keep them out of the

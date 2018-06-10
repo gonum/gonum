@@ -26,9 +26,9 @@ const (
 	badDiag      = "blas: illegal diagonal"
 	badSide      = "blas: illegal side"
 
-	badLdA = "blas: index of a out of range"
-	badLdB = "blas: index of b out of range"
-	badLdC = "blas: index of c out of range"
+	badLdA = "blas: bad leading dimension of A"
+	badLdB = "blas: bad leading dimension of B"
+	badLdC = "blas: bad leading dimension of C"
 
 	badX = "blas: bad length of x"
 	badY = "blas: bad length of y"

@@ -12,11 +12,10 @@ type Implementation struct{}
 
 // The following are panic strings used during parameter checks.
 const (
-	negativeN = "blas: n < 0"
-	zeroIncX  = "blas: zero x index increment"
-	zeroIncY  = "blas: zero y index increment"
-	badLenX   = "blas: x index out of range"
-	badLenY   = "blas: y index out of range"
+	zeroIncX = "blas: zero x index increment"
+	zeroIncY = "blas: zero y index increment"
+	badLenX  = "blas: x index out of range"
+	badLenY  = "blas: y index out of range"
 
 	mLT0  = "blas: m < 0"
 	nLT0  = "blas: n < 0"

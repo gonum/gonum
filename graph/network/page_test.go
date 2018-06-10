@@ -91,7 +91,7 @@ func TestPageRank(t *testing.T) {
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
-		got := PageRank(g, test.damp, test.tol)
+		got := pageRank(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
 			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
@@ -115,7 +115,124 @@ func TestPageRankSparse(t *testing.T) {
 				g.SetEdge(simple.Edge{F: simple.Node(u), T: simple.Node(v)})
 			}
 		}
-		got := PageRankSparse(g, test.damp, test.tol)
+		got := pageRankSparse(g, test.damp, test.tol)
+		prec := 1 - int(math.Log10(test.wantTol))
+		for n := range test.g {
+			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
+				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
+					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
+				break
+			}
+		}
+	}
+}
+
+var edgeWeightedPageRankTests = []struct {
+	g            []set
+	self, absent float64
+	edges        map[int]map[int64]float64
+	damp         float64
+	tol          float64
+
+	wantTol float64
+	want    map[int64]float64
+}{
+	{
+		// This test case is created according to the result with the following python code
+		// on python 3.6.4 (using "networkx" of version 2.1)
+		//
+		// >>> import networkx as nx
+		// >>> D = nx.DiGraph()
+		// >>> D.add_weighted_edges_from([('A', 'B', 0.3), ('A','C', 1.2), ('B', 'A', 0.4), ('C', 'B', 0.3), ('D', 'A', 0.3), ('D', 'B', 2.1)])
+		// >>> nx.pagerank(D, alpha=0.85, tol=1e-10)
+		// {'A': 0.3409109390701202, 'B': 0.3522682754411842, 'C': 0.2693207854886954, 'D': 0.037500000000000006}
+
+		g: []set{
+			A: linksTo(B, C),
+			B: linksTo(A),
+			C: linksTo(B),
+			D: linksTo(A, B),
+		},
+		edges: map[int]map[int64]float64{
+			A: {
+				B: 0.3,
+				C: 1.2,
+			},
+			B: {
+				A: 0.4,
+			},
+			C: {
+				B: 0.3,
+			},
+			D: {
+				A: 0.3,
+				B: 2.1,
+			},
+		},
+		damp: 0.85,
+		tol:  1e-10,
+
+		wantTol: 1e-8,
+		want: map[int64]float64{
+			A: 0.3409120160955594,
+			B: 0.3522678129306601,
+			C: 0.2693201709737804,
+			D: 0.037500000000000006,
+		},
+	},
+}
+
+func TestEdgeWeightedPageRank(t *testing.T) {
+	for i, test := range edgeWeightedPageRankTests {
+		g := simple.NewWeightedDirectedGraph(test.self, test.absent)
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.Has(int64(u)) {
+				g.AddNode(simple.Node(u))
+			}
+			ws, ok := test.edges[u]
+			if !ok {
+				t.Errorf("edges not found for %v", u)
+			}
+
+			for v := range e {
+				if w, ok := ws[v]; ok {
+					g.SetWeightedEdge(g.NewWeightedEdge(simple.Node(u), simple.Node(v), w))
+				}
+			}
+		}
+		got := edgeWeightedPageRank(g, test.damp, test.tol)
+		prec := 1 - int(math.Log10(test.wantTol))
+		for n := range test.g {
+			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {
+				t.Errorf("unexpected PageRank result for test %d:\ngot: %v\nwant:%v",
+					i, orderedFloats(got, prec), orderedFloats(test.want, prec))
+				break
+			}
+		}
+	}
+}
+
+func TestEdgeWeightedPageRankSparse(t *testing.T) {
+	for i, test := range edgeWeightedPageRankTests {
+		g := simple.NewWeightedDirectedGraph(test.self, test.absent)
+		for u, e := range test.g {
+			// Add nodes that are not defined by an edge.
+			if !g.Has(int64(u)) {
+				g.AddNode(simple.Node(u))
+			}
+			ws, ok := test.edges[u]
+			if !ok {
+				t.Errorf("edges not found for %v", u)
+			}
+
+			for v := range e {
+				if w, ok := ws[v]; ok {
+					g.SetWeightedEdge(g.NewWeightedEdge(simple.Node(u), simple.Node(v), w))
+				}
+			}
+		}
+		got := edgeWeightedPageRankSparse(g, test.damp, test.tol)
 		prec := 1 - int(math.Log10(test.wantTol))
 		for n := range test.g {
 			if !floats.EqualWithinAbsOrRel(got[int64(n)], test.want[int64(n)], test.wantTol, test.wantTol) {

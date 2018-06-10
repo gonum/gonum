@@ -120,7 +120,7 @@ func (Implementation) Dger(m, n int, alpha float64, x []float64, incX int, y []f
 		panic("m < 0")
 	}
 	if n < 0 {
-		panic(negativeN)
+		panic(nLT0)
 	}
 	if incX == 0 {
 		panic(zeroIncX)
@@ -625,7 +625,7 @@ func (Implementation) Dsymv(ul blas.Uplo, n int, alpha float64, a []float64, lda
 		panic(badUplo)
 	}
 	if n < 0 {
-		panic(negativeN)
+		panic(nLT0)
 	}
 	if lda > 1 && lda < n {
 		panic(badLdA)

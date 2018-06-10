@@ -25,7 +25,7 @@ func (Implementation) Sdsdot(n int, alpha float32, x []float32, incX int, y []fl
 		if n == 0 {
 			return 0
 		}
-		panic(negativeN)
+		panic(nLT0)
 	}
 	if incX == 1 && incY == 1 {
 		if len(x) < n {

@@ -25,7 +25,7 @@ func (Implementation) Dsdot(n int, x []float32, incX int, y []float32, incY int)
 		if n == 0 {
 			return 0
 		}
-		panic(negativeN)
+		panic(nLT0)
 	}
 	if incX == 1 && incY == 1 {
 		if len(x) < n {

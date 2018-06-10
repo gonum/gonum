@@ -126,7 +126,7 @@ func (Implementation) Sger(m, n int, alpha float32, x []float32, incX int, y []f
 		panic("m < 0")
 	}
 	if n < 0 {
-		panic(negativeN)
+		panic(nLT0)
 	}
 	if incX == 0 {
 		panic(zeroIncX)
@@ -639,7 +639,7 @@ func (Implementation) Ssymv(ul blas.Uplo, n int, alpha float32, a []float32, lda
 		panic(badUplo)
 	}
 	if n < 0 {
-		panic(negativeN)
+		panic(nLT0)
 	}
 	if lda > 1 && lda < n {
 		panic(badLdA)

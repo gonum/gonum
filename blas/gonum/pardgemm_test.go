@@ -10,9 +10,11 @@ import (
 	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/blas"
+	"gonum.org/v1/gonum/floats"
 )
 
 func TestDgemmParallel(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
 	for i, test := range []struct {
 		m     int
 		n     int
@@ -118,14 +120,14 @@ func TestDgemmParallel(t *testing.T) {
 			tB:    blas.NoTrans,
 		},
 	} {
-		testMatchParallelSerial(t, i, blas.NoTrans, blas.NoTrans, test.m, test.n, test.k, test.alpha)
-		testMatchParallelSerial(t, i, blas.Trans, blas.NoTrans, test.m, test.n, test.k, test.alpha)
-		testMatchParallelSerial(t, i, blas.NoTrans, blas.Trans, test.m, test.n, test.k, test.alpha)
-		testMatchParallelSerial(t, i, blas.Trans, blas.Trans, test.m, test.n, test.k, test.alpha)
+		testMatchParallelSerial(t, rnd, i, blas.NoTrans, blas.NoTrans, test.m, test.n, test.k, test.alpha)
+		testMatchParallelSerial(t, rnd, i, blas.Trans, blas.NoTrans, test.m, test.n, test.k, test.alpha)
+		testMatchParallelSerial(t, rnd, i, blas.NoTrans, blas.Trans, test.m, test.n, test.k, test.alpha)
+		testMatchParallelSerial(t, rnd, i, blas.Trans, blas.Trans, test.m, test.n, test.k, test.alpha)
 	}
 }
 
-func testMatchParallelSerial(t *testing.T, i int, tA, tB blas.Transpose, m, n, k int, alpha float64) {
+func testMatchParallelSerial(t *testing.T, rnd *rand.Rand, i int, tA, tB blas.Transpose, m, n, k int, alpha float64) {
 	var (
 		rowA, colA int
 		rowB, colB int
@@ -144,39 +146,40 @@ func testMatchParallelSerial(t *testing.T, i int, tA, tB blas.Transpose, m, n, k
 		rowB = n
 		colB = k
 	}
-	a := randmat(rowA, colA, colA)
-	b := randmat(rowB, colB, colB)
-	c := randmat(m, n, n)
-
-	aClone := a.clone()
-	bClone := b.clone()
-	cClone := c.clone()
 
 	lda := colA
+	a := randmat(rowA, colA, lda, rnd)
+	aCopy := make([]float64, len(a))
+	copy(aCopy, a)
+
 	ldb := colB
+	b := randmat(rowB, colB, ldb, rnd)
+	bCopy := make([]float64, len(b))
+	copy(bCopy, b)
+
 	ldc := n
-	dgemmSerial(tA == blas.Trans, tB == blas.Trans, m, n, k, a.data, lda, b.data, ldb, cClone.data, ldc, alpha)
-	dgemmParallel(tA == blas.Trans, tB == blas.Trans, m, n, k, a.data, lda, b.data, ldb, c.data, ldc, alpha)
-	if !a.equal(aClone) {
+	c := randmat(m, n, ldc, rnd)
+	want := make([]float64, len(c))
+	copy(want, c)
+
+	dgemmSerial(tA == blas.Trans, tB == blas.Trans, m, n, k, a, lda, b, ldb, want, ldc, alpha)
+	dgemmParallel(tA == blas.Trans, tB == blas.Trans, m, n, k, a, lda, b, ldb, c, ldc, alpha)
+
+	if !floats.Equal(a, aCopy) {
 		t.Errorf("Case %v: a changed during call to dgemmParallel", i)
 	}
-	if !b.equal(bClone) {
+	if !floats.Equal(b, bCopy) {
 		t.Errorf("Case %v: b changed during call to dgemmParallel", i)
 	}
-	if !c.equalWithinAbs(cClone, 1e-12) {
+	if !floats.EqualApprox(c, want, 1e-12) {
 		t.Errorf("Case %v: answer not equal parallel and serial", i)
 	}
 }
 
-func randmat(r, c, stride int) general64 {
+func randmat(r, c, stride int, rnd *rand.Rand) []float64 {
 	data := make([]float64, r*stride+c)
 	for i := range data {
-		data[i] = rand.Float64()
+		data[i] = rnd.NormFloat64()
 	}
-	return general64{
-		data:   data,
-		rows:   r,
-		cols:   c,
-		stride: stride,
-	}
+	return data
 }

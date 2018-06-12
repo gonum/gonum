@@ -30,7 +30,7 @@ type dlaqr23Test struct {
 
 func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Test {
 	var nw int
-	if nw <= 75 {
+	if n <= 75 {
 		nw = rnd.Intn(n) + 1
 	} else {
 		nw = 76 + rnd.Intn(n-75)

@@ -28,6 +28,37 @@ type dlaqr23Test struct {
 	evWant []complex128 // Optional slice with known eigenvalues.
 }
 
+func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Test {
+	var nw int
+	if nw <= 75 {
+		nw = rnd.Intn(n) + 1
+	} else {
+		nw = 76 + rnd.Intn(n-75)
+	}
+	ktop := rnd.Intn(n - nw + 1)
+	kbot := ktop + nw - 1
+	kbot += rnd.Intn(n - kbot)
+	h := randomHessenberg(n, ldh, rnd)
+	if ktop-1 >= 0 {
+		h.Data[ktop*h.Stride+ktop-1] = 0
+	}
+	if kbot+1 < n {
+		h.Data[(kbot+1)*h.Stride+kbot] = 0
+	}
+	iloz := rnd.Intn(ktop + 1)
+	ihiz := kbot + rnd.Intn(n-kbot)
+	return dlaqr23Test{
+		wantt: wantt,
+		wantz: wantz,
+		ktop:  ktop,
+		kbot:  kbot,
+		nw:    nw,
+		h:     h,
+		iloz:  iloz,
+		ihiz:  ihiz,
+	}
+}
+
 func Dlaqr23Test(t *testing.T, impl Dlaqr23er) {
 	rnd := rand.New(rand.NewSource(1))
 
@@ -36,34 +67,7 @@ func Dlaqr23Test(t *testing.T, impl Dlaqr23er) {
 			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 100} {
 				for _, extra := range []int{0, 11} {
 					for cas := 0; cas < 30; cas++ {
-						var nw int
-						if nw <= 75 {
-							nw = rnd.Intn(n) + 1
-						} else {
-							nw = 76 + rnd.Intn(n-75)
-						}
-						ktop := rnd.Intn(n - nw + 1)
-						kbot := ktop + nw - 1
-						kbot += rnd.Intn(n - kbot)
-						h := randomHessenberg(n, n+extra, rnd)
-						if ktop-1 >= 0 {
-							h.Data[ktop*h.Stride+ktop-1] = 0
-						}
-						if kbot+1 < n {
-							h.Data[(kbot+1)*h.Stride+kbot] = 0
-						}
-						iloz := rnd.Intn(ktop + 1)
-						ihiz := kbot + rnd.Intn(n-kbot)
-						test := dlaqr23Test{
-							wantt: wantt,
-							wantz: wantz,
-							ktop:  ktop,
-							kbot:  kbot,
-							nw:    nw,
-							h:     h,
-							iloz:  iloz,
-							ihiz:  ihiz,
-						}
+						test := newDlaqr23TestCase(wantt, wantz, n, n+extra, rnd)
 						testDlaqr23(t, impl, test, false, 1, rnd)
 						testDlaqr23(t, impl, test, true, 1, rnd)
 						testDlaqr23(t, impl, test, false, 0, rnd)

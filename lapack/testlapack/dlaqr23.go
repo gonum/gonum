@@ -29,22 +29,35 @@ type dlaqr23Test struct {
 }
 
 func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Test {
+	// Generate the deflation window size.
 	var nw int
 	if n <= 75 {
+		// For small matrices any window size works because they will
+		// always use Dlahrq inside Dlaqr23.
 		nw = rnd.Intn(n) + 1
 	} else {
+		// For sufficiently large matrices generate a large enough
+		// window to assure that the Dlaqr4 path is taken.
 		nw = 76 + rnd.Intn(n-75)
 	}
+	// Generate a random Hessenberg matrix.
+	h := randomHessenberg(n, ldh, rnd)
+	// Generate the block limits of H on which Dlaqr23 will operate so that
+	// the restriction
+	//  0 <= nw <= kbot-ktop+1
+	// is satisfied.
 	ktop := rnd.Intn(n - nw + 1)
 	kbot := ktop + nw - 1
 	kbot += rnd.Intn(n - kbot)
-	h := randomHessenberg(n, ldh, rnd)
+	// Make the block isolated by zeroing out the sub-diagonal elements.
 	if ktop-1 >= 0 {
 		h.Data[ktop*h.Stride+ktop-1] = 0
 	}
 	if kbot+1 < n {
 		h.Data[(kbot+1)*h.Stride+kbot] = 0
 	}
+	// Generate the rows of Z to which transformations will be applied if
+	// wantz is true.
 	iloz := rnd.Intn(ktop + 1)
 	ihiz := kbot + rnd.Intn(n-kbot)
 	return dlaqr23Test{
@@ -62,6 +75,7 @@ func newDlaqr23TestCase(wantt, wantz bool, n, ldh int, rnd *rand.Rand) dlaqr23Te
 func Dlaqr23Test(t *testing.T, impl Dlaqr23er) {
 	rnd := rand.New(rand.NewSource(1))
 
+	// Randomized tests.
 	for _, wantt := range []bool{true, false} {
 		for _, wantz := range []bool{true, false} {
 			for _, n := range []int{1, 2, 3, 4, 5, 6, 10, 18, 31, 100} {
@@ -223,7 +237,9 @@ func Dlaqr23Test(t *testing.T, impl Dlaqr23er) {
 func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur int, rnd *rand.Rand) {
 	const tol = 1e-14
 
+	// Clone the test matrix to avoid modifying test data.
 	h := cloneGeneral(test.h)
+	// Extract test values to simplify notation.
 	n := h.Cols
 	extra := h.Stride - h.Cols
 	wantt := test.wantt
@@ -236,13 +252,18 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 
 	var z, zCopy blas64.General
 	if wantz {
+		// Using the identity matrix for Z is the easiest way to check
+		// that the transformation accumulated into it by Dlaqr23 is orthogonal.
 		z = eye(n, n+extra)
 		zCopy = cloneGeneral(z)
 	}
 
+	// Allocate slices for storing the converged eigenvalues, initially
+	// filled with NaN.
 	sr := nanSlice(kbot + 1)
 	si := nanSlice(kbot + 1)
 
+	// Allocate work matrices.
 	v := randomGeneral(nw, nw, nw+extra, rnd)
 	var nh int
 	if nw > 0 {
@@ -257,11 +278,13 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 
 	var work []float64
 	if opt {
+		// Allocate work slice with optimal length.
 		work = nanSlice(1)
 		impl.Dlaqr23(wantt, wantz, n, ktop, kbot, nw, nil, h.Stride, iloz, ihiz, nil, z.Stride,
 			nil, nil, nil, v.Stride, tmat.Cols, nil, tmat.Stride, wv.Rows, nil, wv.Stride, work, -1, recur)
 		work = nanSlice(int(work[0]))
 	} else {
+		// Allocate work slice with minimum length.
 		work = nanSlice(max(1, 2*nw))
 	}
 
@@ -298,6 +321,7 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 	}
 
 	if test.evWant != nil {
+		// Check all converged eigenvalues against known eigenvalues.
 		for i := kbot - nd + 1; i <= kbot; i++ {
 			ev := complex(sr[i], si[i])
 			found, _ := containsComplex(test.evWant, ev, tol)
@@ -307,17 +331,19 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 		}
 	}
 
+	// Checks below need the matrix Z.
 	if !wantz {
 		return
 	}
 
+	// Test whether the matrix Z was modified outside the given block.
 	var zmod bool
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			if z.Data[i*z.Stride+j] == zCopy.Data[i*zCopy.Stride+j] {
 				continue
 			}
-			if i < iloz || i > ihiz || j < kbot-nw+1 || j > kbot {
+			if i < iloz || ihiz < i || j < kbot-nw+1 || kbot < j {
 				zmod = true
 			}
 		}
@@ -330,9 +356,12 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 	}
 	if wantt {
 		hu := eye(n, n)
+		// Compute H_in*Z.
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, test.h, z, 0, hu)
 		uhu := eye(n, n)
+		// Compute Z^T*H_in*Z.
 		blas64.Gemm(blas.Trans, blas.NoTrans, 1, z, hu, 0, uhu)
+		// Compare Z^T*H_in*Z and H_out.
 		if !equalApproxGeneral(uhu, h, 10*tol) {
 			t.Errorf("%v: Z^T*(initial H)*Z and (final H) are not equal", prefix)
 		}

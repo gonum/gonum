@@ -1,65 +1,74 @@
-// Copyright ©2015 The Gonum Authors. All rights reserved.
+// Copyright ©2018 The Gonum Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 package path
 
 import (
-	"reflect"
+	"fmt"
 	"sort"
 	
 	"gonum.org/v1/gonum/graph"
 )
 
 type YenShortest struct {
-	path []graph.node,
+	path []graph.Node
 	weight float64
 }
 
-func YenKSP(source graph.Node, sink graph.Node, g graph.Graph, k int) []Shortest {
-	paths := make([]Shortest, k)
+func YenKSP(source graph.Node, sink graph.Node, g graph.Graph, k int) [][]graph.Node {
+	paths := make([][]graph.Node, k)
 
-	rootPath, _ = DijkstraFrom(source, g).To(sink.ID())
+	paths[0], _ = DijkstraFrom(source, g).To(sink.ID())
 
-	paths[0] = newShortestfrom(source, rootPath)
-	
 	var pot []YenShortest
 	
-	for i := 1; i < k; i++ {
-		for n := 0; n < len(paths[i - 1].nodes) - 2; n++ {
-			spur := paths[i - 1].nodes[i]
-			root := paths[i - 1].nodes[:i]
+	for i := int64(1); i < int64(k); i++ {
+		fmt.Printf("%d \n", i)
+		for n := 0; n < len(paths[i - 1]) - 2; n++ {
+			fmt.Printf("%d \n", n)
+			spur := paths[i - 1][n]
+			root := paths[i - 1][:n]
 
 			var rootWeight float64
 			for x := 1; x < len(root); x++ {
-				rootWeight += g.Weight(root[x - 1], root[x])
+				w, _ := g.(graph.Weighted).Weight(root[x - 1].ID(), root[x].ID())
+				rootWeight += w
 			}
 			
 			var edges []graph.Edge
 			var nodes []graph.Node
 
-			for _, p := range paths {
-				if reflect.DeepEqual(p.nodes[:i], root) {
-					append(edges, g.Edge(i, i + 1))
-					g.RemoveEdge(i, i + 1)
+			for _, path := range paths {
+				contains := true
+				for x := 0; x < len(root); x++ {
+					if path[x].ID() != root[x].ID() {
+						contains = false
+						break
+					}
+				}
+				
+				if contains {
+					edges = append(edges, g.Edge(i, i + 1))
+					g.(graph.EdgeRemover).RemoveEdge(i, i + 1)
 				}
 			}
 
 			for _, node := range root {
 				if (node != spur) {
-					append(nodes, node)
-					g.RemoveNode(node)
+					nodes = append(nodes, node)
+					g.(graph.NodeRemover).RemoveNode(node.ID())
 				}
 			}
 
-			spath, weight := DjikstraFrom(spur, g).To(sink.ID())
+			spath, weight := DijkstraFrom(spur, g).To(sink.ID())
 			var total []graph.Node
-			append(total, root, spath)
+			total = append(root, spath...)
 			potential := YenShortest {total, weight + rootWeight}
-			append(pot, potential)
+			pot = append(pot, potential)
 			
 			for _, edge := range edges {
-				g.SetEdge(edge)
+				g.(graph.WeightedEdgeAdder).SetWeightedEdge(edge.(graph.WeightedEdge))
 			}
 
 		}
@@ -73,7 +82,7 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Graph, k int) []Shortest
 		})
 
 		
-		paths[i] = newShortestfrom(source, pot[0].path)
+		paths[i] = pot[0].path
 		pot = pot[1:]
 	}
 	

@@ -18,13 +18,42 @@ type Dlanv2er interface {
 
 func Dlanv2Test(t *testing.T, impl Dlanv2er) {
 	rnd := rand.New(rand.NewSource(1))
-	for i := 0; i < 1000; i++ {
-		a := rnd.NormFloat64()
-		b := rnd.NormFloat64()
-		c := rnd.NormFloat64()
-		d := rnd.NormFloat64()
-		dlanv2Test(t, impl, a, b, c, d)
-	}
+	t.Run("UpperTriangular", func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			a := rnd.NormFloat64()
+			b := rnd.NormFloat64()
+			d := rnd.NormFloat64()
+			dlanv2Test(t, impl, a, b, 0, d)
+		}
+	})
+	t.Run("LowerTriangular", func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			a := rnd.NormFloat64()
+			c := rnd.NormFloat64()
+			d := rnd.NormFloat64()
+			dlanv2Test(t, impl, a, 0, c, d)
+		}
+	})
+	t.Run("StandardSchur", func(t *testing.T) {
+		for i := 0; i < 10; i++ {
+			a := rnd.NormFloat64()
+			b := rnd.NormFloat64()
+			c := rnd.NormFloat64()
+			if math.Signbit(b) == math.Signbit(c) {
+				c = -c
+			}
+			dlanv2Test(t, impl, a, b, c, a)
+		}
+	})
+	t.Run("General", func(t *testing.T) {
+		for i := 0; i < 100; i++ {
+			a := rnd.NormFloat64()
+			b := rnd.NormFloat64()
+			c := rnd.NormFloat64()
+			d := rnd.NormFloat64()
+			dlanv2Test(t, impl, a, b, c, d)
+		}
+	})
 }
 
 func dlanv2Test(t *testing.T, impl Dlanv2er, a, b, c, d float64) {

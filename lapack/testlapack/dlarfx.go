@@ -21,6 +21,7 @@ type Dlarfxer interface {
 func DlarfxTest(t *testing.T, impl Dlarfxer) {
 	rnd := rand.New(rand.NewSource(1))
 	for _, side := range []blas.Side{blas.Right, blas.Left} {
+		// For m and n greater than 10 we are testing Dlarf, so avoid unnecessary work.
 		for m := 1; m < 12; m++ {
 			for n := 1; n < 12; n++ {
 				for _, extra := range []int{0, 1, 11} {
@@ -36,22 +37,28 @@ func DlarfxTest(t *testing.T, impl Dlarfxer) {
 func testDlarfx(t *testing.T, impl Dlarfxer, side blas.Side, m, n, extra int, rnd *rand.Rand) {
 	const tol = 1e-13
 
-	c := randomGeneral(m, n, n+extra, rnd)
-	cWant := randomGeneral(m, n, n+extra, rnd)
-	tau := rnd.NormFloat64()
-
-	var (
-		v []float64
-		h blas64.General
-	)
+	// Generate random input data.
+	var v []float64
 	if side == blas.Left {
 		v = randomSlice(m, rnd)
-		h = eye(m, m+extra)
 	} else {
 		v = randomSlice(n, rnd)
+	}
+	tau := rnd.NormFloat64()
+	ldc := n + extra
+	c := randomGeneral(m, n, ldc, rnd)
+
+	// Compute the matrix H explicitly as H := I - tau * v * v^T.
+	var h blas64.General
+	if side == blas.Left {
+		h = eye(m, m+extra)
+	} else {
 		h = eye(n, n+extra)
 	}
 	blas64.Ger(-tau, blas64.Vector{Inc: 1, Data: v}, blas64.Vector{Inc: 1, Data: v}, h)
+
+	// Compute the product H * C or C * H explicitly.
+	cWant := nanGeneral(m, n, ldc)
 	if side == blas.Left {
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, h, c, 0, cWant)
 	} else {

@@ -34,9 +34,8 @@ func Dlaln2Test(t *testing.T, impl Dlaln2er) {
 
 func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd *rand.Rand) {
 	const tol = 1e-12
-	const dlamchE = 1.0 / (1 << 53)
-	const dlamchP = 2 * dlamchE
 
+	// Generate random input scalars.
 	ca := rnd.NormFloat64()
 	d1 := rnd.NormFloat64()
 	d2 := rnd.NormFloat64()
@@ -49,6 +48,7 @@ func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd 
 	}
 	smin := dlamchP * (math.Abs(real(w)) + math.Abs(imag(w)))
 
+	// Generate random input matrices.
 	a := randomGeneral(na, na, na+extra, rnd)
 	b := randomGeneral(na, nw, nw+extra, rnd)
 	x := randomGeneral(na, nw, nw+extra, rnd)
@@ -67,10 +67,12 @@ func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd 
 		t.Errorf("%v: out-of-range write to X\n%v", prefix, x.Data)
 	}
 
+	// Scale is documented to be <= 1.
 	if scale <= 0 || 1 < scale {
 		t.Errorf("%v: invalid value of scale=%v", prefix, scale)
 	}
 
+	// Calculate the infinity norm of X explicitly.
 	var xnormWant float64
 	for i := 0; i < na; i++ {
 		var rowsum float64
@@ -92,25 +94,33 @@ func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd 
 		return
 	}
 
+	// Compute a complex matrix
+	//  M := ca * A - w * D
+	// or
+	//  M := ca * A^T - w * D.
 	m := make([]complex128, na*na)
 	if trans {
+		// M = ca * A^T
 		for i := 0; i < na; i++ {
 			for j := 0; j < na; j++ {
 				m[i*na+j] = complex(ca*a.Data[j*a.Stride+i], 0)
 			}
 		}
 	} else {
+		// M = ca * A^T
 		for i := 0; i < na; i++ {
 			for j := 0; j < na; j++ {
 				m[i*na+j] = complex(ca*a.Data[i*a.Stride+j], 0)
 			}
 		}
 	}
+	// Subtract the diagonal matrix w * D.
 	m[0] -= w * complex(d1, 0)
 	if na == 2 {
 		m[3] -= w * complex(d2, 0)
 	}
 
+	// Convert real na×2 matrices X and scale*B into complex na-vectors.
 	cx := make([]complex128, na)
 	cb := make([]complex128, na)
 	switch nw {
@@ -126,12 +136,14 @@ func testDlaln2(t *testing.T, impl Dlaln2er, trans bool, na, nw, extra int, rnd 
 		}
 	}
 
+	// Compute M * X.
 	mx := make([]complex128, na)
 	for i := 0; i < na; i++ {
 		for j := 0; j < na; j++ {
 			mx[i] += m[i*na+j] * cx[j]
 		}
 	}
+	// Check whether |M * X - scale * B|_max <= tol.
 	for i := 0; i < na; i++ {
 		if cmplx.Abs(mx[i]-cb[i]) > tol {
 			t.Errorf("Case %v: unexpected value of left-hand side at row %v with scale=%v. Want %v, got %v", prefix, i, scale, cb[i], mx[i])

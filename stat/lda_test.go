@@ -7,11 +7,10 @@ import (
   "encoding/csv"
   "os"
   "log"
-
 	"gonum.org/v1/gonum/mat"
 )
 func TestLinearDiscriminant(t *testing.T) {
-	// Threshold for detecting zero variances.
+	// Threshold for detecting zero variances
 	const epsilon = 1e-15
 tests:
 	for i, test := range []struct {
@@ -517,54 +516,16 @@ tests:
     },
 	} {
 	var ld LD
-	//	var vecs *mat.Dense
-	//	var vars []float64
   fmt.Println(i)
   fmt.Println(test)
 		for j := 0; j < 2; j++ {
 		ok := ld.LinearDiscriminant(test.data, test.labels)
-    //  vecs = pc.VectorsTo(vecs)
-		//	vars = pc.VarsTo(vars)
 			if !ok {
 				t.Errorf("unexpected SVD failure for test %d use %d", i, j)
 				continue tests
 			}
      result :=  ld.Transform(test.data)
      fmt.Printf("this is the result %v \n", result)
-
-/**
-			// Find the number of non-zero variances to handle
-			// non-uniqueness in SVD result (issue #21).
-			nnz := len(vars)
-			for k, v := range vars {
-				if math.Abs(v) < epsilon {
-					nnz = k
-					break
-				}
-			}
-			r, c := vecs.Dims()
-			if !mat.EqualApprox(vecs.Slice(0, r, 0, nnz), test.wantVecs.Slice(0, r, 0, nnz), test.epsilon) {
-				t.Errorf("%d use %d: unexpected PCA result got:\n%v\nwant:\n%v",
-					i, j, mat.Formatted(vecs), mat.Formatted(test.wantVecs))
-			}
-			if !approxEqual(vars, test.wantVars, test.epsilon) {
-				t.Errorf("%d use %d: unexpected variance result got:%v, want:%v",
-					i, j, vars, test.wantVars)
-			}
-
-			// Check that the set of principal vectors is
-			// orthonormal by comparing V^T*V to the identity matrix.
-			I := mat.NewDiagonal(c, nil)
-			for k := 0; k < c; k++ {
-				I.SetSymBand(k, k, 1)
-			}
-			var vv mat.Dense
-			vv.Mul(vecs.T(), vecs)
-			if !mat.EqualApprox(&vv, I, test.epsilon) {
-				t.Errorf("%d use %d: vectors not orthonormal\n%v", i, j, mat.Formatted(I))
-			}
-		}
-    */
     fileName := fmt.Sprintf("result %d.csv", i)
     file,err := os.Create(fileName)
     checkError("Cannot create file" , err)
@@ -585,20 +546,6 @@ tests:
 
 	}
 }
-
-/**
-func approxEqual(a, b []float64, epsilon float64) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if !floats.EqualWithinAbsOrRel(v, b[i], epsilon, epsilon) {
-			return false
-		}
-	}
-	return true
-  }
-  */
 }
 
 func checkError(message string, err error) {

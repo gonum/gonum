@@ -21,6 +21,8 @@ type BFGS struct {
 	// If Linesearcher == nil, an appropriate default is chosen.
 	Linesearcher Linesearcher
 
+	local *LocalController
+
 	ls *LinesearchMethod
 
 	dim  int
@@ -33,6 +35,22 @@ type BFGS struct {
 	invHess *mat.SymDense
 
 	first bool // Indicator of the first iteration.
+}
+
+func (b *BFGS) Status() (Status, error) {
+	return b.local.Status()
+}
+
+func (b *BFGS) InitGlobal(dim, tasks int) int {
+	if b.local == nil {
+		b.local = &LocalController{Method: b}
+	}
+	return b.local.InitGlobal(dim, tasks)
+}
+
+func (b *BFGS) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	b.local.RunGlobal(operation, result, tasks)
+	return
 }
 
 func (b *BFGS) Init(loc *Location) (Operation, error) {

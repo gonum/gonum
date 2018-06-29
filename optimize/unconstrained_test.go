@@ -1154,7 +1154,7 @@ func TestNewton(t *testing.T) {
 	testLocal(t, newtonTests, &Newton{})
 }
 
-func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
+func testLocal(t *testing.T, tests []unconstrainedTest, method GlobalMethod) {
 	for cas, test := range tests {
 		if test.long && testing.Short() {
 			continue
@@ -1180,7 +1180,9 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		}
 		settings.GradientThreshold = test.gradTol
 
-		result, err := Local(test.p, test.x, settings, method)
+		dim := len(test.x)
+		settings.InitX = test.x
+		result, err := Global(test.p, dim, settings, method)
 		if err != nil {
 			t.Errorf("Case %d: error finding minimum (%v) for:\n%v", cas, err, test)
 			continue
@@ -1244,7 +1246,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// Rerun the test again to make sure that it gets the same answer with
 		// the same starting condition. Moreover, we are using the initial data.
-		result2, err2 := Local(test.p, test.x, settings, method)
+		result2, err2 := Global(test.p, dim, settings, method)
 		if err2 != nil {
 			t.Errorf("error finding minimum second time (%v) for:\n%v", err2, test)
 			continue
@@ -1296,7 +1298,8 @@ func TestIssue76(t *testing.T) {
 		Linesearcher: &Backtracking{},
 	}
 	// We are not interested in the error, only in the returned status.
-	r, _ := Local(p, x, s, m)
+	s.InitX = x
+	r, _ := Global(p, len(x), s, m)
 	// With the above stringent tolerance, the optimizer will never
 	// successfully reach the minimum. Check if it terminated in a finite
 	// number of steps.

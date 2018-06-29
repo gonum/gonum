@@ -12,7 +12,7 @@ import (
 	"gonum.org/v1/gonum/optimize/functions"
 )
 
-func ExampleLocal() {
+func ExampleMinimize() {
 	p := optimize.Problem{
 		Func: functions.ExtendedRosenbrock{}.Func,
 		Grad: functions.ExtendedRosenbrock{}.Grad,
@@ -23,8 +23,9 @@ func ExampleLocal() {
 	settings.Recorder = nil
 	settings.GradientThreshold = 1e-12
 	settings.FunctionConverge = nil
+	settings.InitX = x
 
-	result, err := optimize.Local(p, x, settings, &optimize.BFGS{})
+	result, err := optimize.Global(p, len(x), settings, &optimize.BFGS{})
 	if err != nil {
 		log.Fatal(err)
 	}

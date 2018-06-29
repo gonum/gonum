@@ -27,6 +27,8 @@ type LBFGS struct {
 	// If Store is 0, it will be defaulted to 15.
 	Store int
 
+	local *LocalController
+
 	ls *LinesearchMethod
 
 	dim  int       // Dimension of the problem
@@ -39,6 +41,22 @@ type LBFGS struct {
 	s      [][]float64 // Last Store values of s
 	rho    []float64   // Last Store values of rho
 	a      []float64   // Cache of Hessian updates
+}
+
+func (l *LBFGS) Status() (Status, error) {
+	return l.local.Status()
+}
+
+func (l *LBFGS) InitGlobal(dim, tasks int) int {
+	if l.local == nil {
+		l.local = &LocalController{Method: l}
+	}
+	return l.local.InitGlobal(dim, tasks)
+}
+
+func (l *LBFGS) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	l.local.RunGlobal(operation, result, tasks)
+	return
 }
 
 func (l *LBFGS) Init(loc *Location) (Operation, error) {

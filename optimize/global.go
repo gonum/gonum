@@ -115,7 +115,7 @@ type GlobalMethod interface {
 func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Result, error) {
 	startTime := time.Now()
 	if method == nil {
-		method = &GuessAndCheck{}
+		method = getDefaultMethod(&p)
 	}
 	if settings == nil {
 		settings = DefaultSettingsGlobal()
@@ -159,6 +159,13 @@ func Global(p Problem, dim int, settings *Settings, method GlobalMethod) (*Resul
 		Stats:    *stats,
 		Status:   status,
 	}, err
+}
+
+func getDefaultMethod(p *Problem) GlobalMethod {
+	if p.Grad != nil {
+		return &BFGS{}
+	}
+	return &NelderMead{}
 }
 
 // minimizeGlobal performs a Global optimization. minimizeGlobal updates the

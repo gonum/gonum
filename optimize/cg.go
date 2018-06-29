@@ -88,6 +88,8 @@ type CG struct {
 	// CG will panic if AngleRestartThreshold is not in the interval [-1, 0].
 	AngleRestartThreshold float64
 
+	local *LocalController
+
 	ls *LinesearchMethod
 
 	restartAfter    int
@@ -96,6 +98,22 @@ type CG struct {
 	dirPrev      []float64
 	gradPrev     []float64
 	gradPrevNorm float64
+}
+
+func (cg *CG) Status() (Status, error) {
+	return cg.local.Status()
+}
+
+func (cg *CG) InitGlobal(dim, tasks int) int {
+	if cg.local == nil {
+		cg.local = &LocalController{Method: cg}
+	}
+	return cg.local.InitGlobal(dim, tasks)
+}
+
+func (cg *CG) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	cg.local.RunGlobal(operation, result, tasks)
+	return
 }
 
 func (cg *CG) Init(loc *Location) (Operation, error) {

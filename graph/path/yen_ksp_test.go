@@ -1,3 +1,7 @@
+// Copyright ©2018 The Gonum Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package path
 
 import (
@@ -17,7 +21,7 @@ func TestYenKSP(t *testing.T) {
 		{F: simple.Node(0), T: simple.Node(2), W: 2},
 		{F: simple.Node(2), T: simple.Node(1), W: 1},
 		{F: simple.Node(1), T: simple.Node(3), W: 4},
-		{F: simple.Node(2), T: simple.Node(3), W: 1},
+		{F: simple.Node(2), T: simple.Node(3), W: 2},
 		{F: simple.Node(2), T: simple.Node(4), W: 3},
 		{F: simple.Node(3), T: simple.Node(4), W: 2},
 		{F: simple.Node(3), T: simple.Node(5), W: 1},

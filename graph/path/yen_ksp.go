@@ -5,13 +5,12 @@
 package path
 
 import (
-	"fmt"
 	"sort"
 
 	"gonum.org/v1/gonum/graph"
 )
 
-type YenShortest struct {
+type yenShortest struct {
 	p   []graph.Node
 	weight float64
 }
@@ -23,21 +22,18 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]gra
 		from:    g.From,
 	}
 
-
 	paths := make([][]graph.Node, k)
 
 	paths[0], _ = DijkstraFrom(source, yk).To(sink.ID())
 	
-	var pot []YenShortest
+	var pot []yenShortest
 
 	for i := int64(1); i < int64(k); i++ {
 		for n := 0; n < (len(paths[i-1])-1); n++ {
 			spur := paths[i-1][n]
-			//fmt.Printf("SPUR: %d \n", spur)
 			root := make([]graph.Node, len(paths[i-1][:n + 1]))
 			copy(root, paths[i-1][:n + 1])
 
-			//fmt.Println(root)
 			var rootWeight float64
 			for x := 1; x < len(root); x++ {
 				w, _ := g.Weight(root[x-1].ID(), root[x].ID())
@@ -59,37 +55,22 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]gra
 				}
 			}
 
-			if spur.ID() == 2 {
-				fmt.Println(yk.visited[2])
-			}
-
 			spath, weight := DijkstraFrom(spur, yk).To(sink.ID())
 			size := len(root) - 1
-			//fmt.Println(spath)
-			//fmt.Println(weight)
+
 			if len(root) > 1 {
 				nroot := root[:size]
 				nroot = append(nroot, spath...)
-				potential := YenShortest{nroot, weight + rootWeight}
-				if i == 2 {
-					fmt.Println(potential)
-				}
+				potential := yenShortest{nroot, weight + rootWeight}
 				pot = append(pot, potential)
 			} else {
-				potential := YenShortest{spath, weight}
-				if i == 2 {
-					fmt.Println(potential)
-				}
+				potential := yenShortest{spath, weight}
 				pot = append(pot, potential)
 			}
-
-			//fmt.Println(pot)
 
 			yk.visited = make(map[int64][]int64)
 		}
 
-		//fmt.Printf("POTENTIAL: ")
-		//fmt.Println(pot)
 		if len(pot) == 0 {
 			break
 		}
@@ -97,9 +78,6 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]gra
 		sort.Slice(pot, func(a, b int) bool {
 			return pot[a].weight < pot[b].weight
 		})
-
-		//fmt.Printf("SORTED POTENTIAL: ")
-		//fmt.Println(pot)
 
 		paths[i] = pot[0].p
 		
@@ -127,16 +105,11 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 		}
 	}
 
-	if id == 2 {
-		fmt.Println("Final 2 List: ")
-		fmt.Println(nodes)
-	}
 	return nodes
 }
 
 func (g yenKSPAdjuster) AddVisited(parent, id int64) {
 	if !contains(g.visited[parent], id) {
-		fmt.Printf("Visited %d , %d \n", parent, id)
 		g.visited[parent] = append(g.visited[parent], id)
 	}
 }

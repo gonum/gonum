@@ -128,13 +128,3 @@ func (g yenKSPAdjuster) Weight(xid, yid int64) (w float64, ok bool) {
 func (g yenKSPAdjuster) HasEdgeBetween(xid, yid int64) bool {
 	return g.g.HasEdgeBetween(xid, yid)
 }
-	
-
-func contains(visited []int64, id int64) bool {
-	for _, n := range visited {
-		if n == id {
-			return true
-		}
-	}
-	return false
-}

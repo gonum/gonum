@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/internal/set"
 )
 
 type yenShortest struct {
@@ -18,7 +19,7 @@ type yenShortest struct {
 func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]graph.Node {
 	yk := yenKSPAdjuster{
 		g:       g,
-		visited: make(map[int64][]int64),
+		visited: make(map[int64]set.Int64s),
 		from:    g.From,
 	}
 
@@ -68,7 +69,7 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]gra
 				pot = append(pot, potential)
 			}
 
-			yk.visited = make(map[int64][]int64)
+			yk.visited = make(map[int64]set.Int64s)
 		}
 
 		if len(pot) == 0 {
@@ -89,7 +90,7 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]gra
 
 type yenKSPAdjuster struct {
 	g graph.Weighted
-	visited map[int64][]int64
+	visited map[int64]set.Int64s
 
 	from   func(id int64) []graph.Node
 }
@@ -98,7 +99,7 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 	nodes := g.from(id)
 
 	for i := 0; i < len(nodes); i++{
-		if contains(g.visited[id], int64(nodes[i].ID())) {
+		if g.visited[id].Has(int64(nodes[i].ID())) {
 			nodes[int64(i)] = nodes[len(nodes)-1]
 			nodes = nodes[:len(nodes)-1]
 			i--;
@@ -109,9 +110,11 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 }
 
 func (g yenKSPAdjuster) AddVisited(parent, id int64) {
-	if !contains(g.visited[parent], id) {
-		g.visited[parent] = append(g.visited[parent], id)
+	if g.visited[parent] == nil {
+		g.visited[parent] = make(set.Int64s)
 	}
+	
+	g.visited[parent].Add(id)
 }
 
 func (g yenKSPAdjuster) Edge(uid, vid int64) graph.Edge {

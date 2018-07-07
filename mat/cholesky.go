@@ -175,8 +175,7 @@ func (c *Cholesky) Solve(x *Dense, b Matrix) error {
 	if b != x {
 		x.Copy(b)
 	}
-	blas64.Trsm(blas.Left, blas.Trans, 1, c.chol.mat, x.mat)
-	blas64.Trsm(blas.Left, blas.NoTrans, 1, c.chol.mat, x.mat)
+	lapack64.Potrs(c.chol.mat, x.mat)
 	if c.cond > ConditionTolerance {
 		return Condition(c.cond)
 	}
@@ -228,8 +227,7 @@ func (c *Cholesky) SolveVec(x *VecDense, b Vector) error {
 		if x != b {
 			x.CopyVec(b)
 		}
-		blas64.Trsv(blas.Trans, c.chol.mat, x.mat)
-		blas64.Trsv(blas.NoTrans, c.chol.mat, x.mat)
+		lapack64.Potrs(c.chol.mat, x.asGeneral())
 		if c.cond > ConditionTolerance {
 			return Condition(c.cond)
 		}

@@ -21,9 +21,10 @@ type BFGS struct {
 	// If Linesearcher == nil, an appropriate default is chosen.
 	Linesearcher Linesearcher
 
-	local *LocalController
-
 	ls *LinesearchMethod
+
+	status Status
+	err    error
 
 	dim  int
 	x    mat.VecDense // Location of the last major iteration.
@@ -38,18 +39,18 @@ type BFGS struct {
 }
 
 func (b *BFGS) Status() (Status, error) {
-	return b.local.Status()
+	return b.status, b.err
 }
 
 func (b *BFGS) InitGlobal(dim, tasks int) int {
-	if b.local == nil {
-		b.local = &LocalController{Method: b}
-	}
-	return b.local.InitGlobal(dim, tasks)
+	b.status = NotTerminated
+	b.err = nil
+	return 1
 }
 
 func (b *BFGS) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	b.local.RunGlobal(operation, result, tasks)
+	b.status, b.err = localOptimizer{}.runGlobal(b, operation, result, tasks)
+	close(operation)
 	return
 }
 

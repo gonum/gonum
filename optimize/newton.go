@@ -46,7 +46,8 @@ type Newton struct {
 	// Increase must be greater than 1. If Increase is 0, it is defaulted to 5.
 	Increase float64
 
-	local *LocalController
+	status Status
+	err    error
 
 	ls *LinesearchMethod
 
@@ -56,18 +57,18 @@ type Newton struct {
 }
 
 func (n *Newton) Status() (Status, error) {
-	return n.local.Status()
+	return n.status, n.err
 }
 
 func (n *Newton) InitGlobal(dim, tasks int) int {
-	if n.local == nil {
-		n.local = &LocalController{Method: n}
-	}
-	return n.local.InitGlobal(dim, tasks)
+	n.status = NotTerminated
+	n.err = nil
+	return 1
 }
 
 func (n *Newton) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	n.local.RunGlobal(operation, result, tasks)
+	n.status, n.err = localOptimizer{}.runGlobal(n, operation, result, tasks)
+	close(operation)
 	return
 }
 

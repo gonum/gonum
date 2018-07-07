@@ -27,7 +27,8 @@ type LBFGS struct {
 	// If Store is 0, it will be defaulted to 15.
 	Store int
 
-	local *LocalController
+	status Status
+	err    error
 
 	ls *LinesearchMethod
 
@@ -44,18 +45,18 @@ type LBFGS struct {
 }
 
 func (l *LBFGS) Status() (Status, error) {
-	return l.local.Status()
+	return l.status, l.err
 }
 
 func (l *LBFGS) InitGlobal(dim, tasks int) int {
-	if l.local == nil {
-		l.local = &LocalController{Method: l}
-	}
-	return l.local.InitGlobal(dim, tasks)
+	l.status = NotTerminated
+	l.err = nil
+	return 1
 }
 
 func (l *LBFGS) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	l.local.RunGlobal(operation, result, tasks)
+	l.status, l.err = localOptimizer{}.runGlobal(l, operation, result, tasks)
+	close(operation)
 	return
 }
 

@@ -4,7 +4,9 @@
 
 package optimize
 
-import "gonum.org/v1/gonum/floats"
+import (
+	"gonum.org/v1/gonum/floats"
+)
 
 // GradientDescent implements the steepest descent optimization method that
 // performs successive steps along the direction of the negative gradient.
@@ -18,22 +20,23 @@ type GradientDescent struct {
 
 	ls *LinesearchMethod
 
-	local *LocalController
+	status Status
+	err    error
 }
 
 func (g *GradientDescent) Status() (Status, error) {
-	return g.local.Status()
+	return g.status, g.err
 }
 
 func (g *GradientDescent) InitGlobal(dim, tasks int) int {
-	if g.local == nil {
-		g.local = &LocalController{Method: g}
-	}
-	return g.local.InitGlobal(dim, tasks)
+	g.status = NotTerminated
+	g.err = nil
+	return 1
 }
 
 func (g *GradientDescent) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	g.local.RunGlobal(operation, result, tasks)
+	g.status, g.err = localOptimizer{}.runGlobal(g, operation, result, tasks)
+	close(operation)
 	return
 }
 

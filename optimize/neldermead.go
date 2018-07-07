@@ -67,7 +67,8 @@ type NelderMead struct {
 	Shrink          float64 // Shrink parameter (>0, <1)
 	SimplexSize     float64 // size of auto-constructed initial simplex
 
-	local *LocalController
+	status Status
+	err    error
 
 	reflection  float64
 	expansion   float64
@@ -85,18 +86,18 @@ type NelderMead struct {
 }
 
 func (n *NelderMead) Status() (Status, error) {
-	return n.local.Status()
+	return n.status, n.err
 }
 
 func (n *NelderMead) InitGlobal(dim, tasks int) int {
-	if n.local == nil {
-		n.local = &LocalController{Method: n}
-	}
-	return n.local.InitGlobal(dim, tasks)
+	n.status = NotTerminated
+	n.err = nil
+	return 1
 }
 
 func (n *NelderMead) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	n.local.RunGlobal(operation, result, tasks)
+	n.status, n.err = localOptimizer{}.runGlobal(n, operation, result, tasks)
+	close(operation)
 	return
 }
 

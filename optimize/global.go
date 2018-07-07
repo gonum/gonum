@@ -285,6 +285,7 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 	)
 
 	// Update optimization statistics and check convergence.
+	var methodDone bool
 	for task := range statsChan {
 		switch task.Op {
 		default:
@@ -304,14 +305,8 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 		case MajorIteration:
 			status = performMajorIteration(optLoc, task.Location, stats, startTime, settings)
 		case MethodDone:
-			statuser, ok := method.(Statuser)
-			if !ok {
-				panic("optimize: global method returned MethodDone but is not a Statuser")
-			}
-			status, err = statuser.Status()
-			if status == NotTerminated {
-				panic("optimize: global method returned MethodDone but a NotTerminated status")
-			}
+			methodDone = true
+			status = MethodConverge
 		}
 		if settings.Recorder != nil && status == NotTerminated && err == nil {
 			stats.Runtime = time.Since(startTime)
@@ -339,6 +334,18 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 		// Send the result back to the Problem if there are still active workers.
 		if workersDone != nTasks && task.Op != MethodDone {
 			results <- task
+		}
+	}
+	// This code block is here rather than above to ensure Status() is not called
+	// before Method() closes operations.
+	if methodDone {
+		statuser, ok := method.(Statuser)
+		if !ok {
+			panic("optimize: global method returned MethodDone but is not a Statuser")
+		}
+		finalStatus, finalError = statuser.Status()
+		if finalStatus == NotTerminated {
+			panic("optimize: global method returned MethodDone but a NotTerminated status")
 		}
 	}
 	return finalStatus, finalError

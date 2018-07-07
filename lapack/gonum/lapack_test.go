@@ -376,6 +376,10 @@ func TestDpotrf(t *testing.T) {
 	testlapack.DpotrfTest(t, impl)
 }
 
+func TestDpotrs(t *testing.T) {
+	testlapack.DpotrsTest(t, impl)
+}
+
 func TestDrscl(t *testing.T) {
 	testlapack.DrsclTest(t, impl)
 }

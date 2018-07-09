@@ -18,7 +18,7 @@ func YenKShortestPath(g graph.Weighted, k int, s, t graph.Node) [][]graph.Node {
 		visited: make(map[int64]set.Int64s),
 	}
 
-	paths := make([][]graph.Node, k)
+	paths := make([][]graph.Node, 0, k)
 
 	paths[0], _ = DijkstraFrom(s, yk).To(t.ID())
 	
@@ -75,7 +75,7 @@ func YenKShortestPath(g graph.Weighted, k int, s, t graph.Node) [][]graph.Node {
 			return pot[a].weight < pot[b].weight
 		})
 
-		paths[i] = pot[0].p
+		paths = append(pahts, pot[0].p)
 		
 		pot = pot[1:]
 	}

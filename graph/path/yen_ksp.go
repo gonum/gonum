@@ -75,7 +75,7 @@ func YenKShortestPath(g graph.Weighted, k int, s, t graph.Node) [][]graph.Node {
 			return pot[a].weight < pot[b].weight
 		})
 
-		paths = append(pahts, pot[0].p)
+		paths = append(paths, pot[0].p)
 		
 		pot = pot[1:]
 	}

@@ -11,21 +11,16 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
-type yenShortest struct {
-	p   []graph.Node
-	weight float64
-}
 
-func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]graph.Node {
+func YenKShortestPath(g graph.Weighted, k int, s, t graph.Node) [][]graph.Node {
 	yk := yenKSPAdjuster{
 		g:       g,
 		visited: make(map[int64]set.Int64s),
-		from:    g.From,
 	}
 
 	paths := make([][]graph.Node, k)
 
-	paths[0], _ = DijkstraFrom(source, yk).To(sink.ID())
+	paths[0], _ = DijkstraFrom(s, yk).To(t.ID())
 	
 	var pot []yenShortest
 
@@ -51,12 +46,12 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]gra
 						}
 					}
 					if ok {
-						yk.AddVisited(path[n].ID(), path[n + 1].ID())
+						yk.addVisited(path[n].ID(), path[n + 1].ID())
 					}
 				}
 			}
 
-			spath, weight := DijkstraFrom(spur, yk).To(sink.ID())
+			spath, weight := DijkstraFrom(spur, yk).To(t.ID())
 			size := len(root) - 1
 
 			if len(root) > 1 {
@@ -88,15 +83,18 @@ func YenKSP(source graph.Node, sink graph.Node, g graph.Weighted, k int) [][]gra
 	return paths
 }
 
+type yenShortest struct {
+	p   []graph.Node
+	weight float64
+}
+
 type yenKSPAdjuster struct {
 	g graph.Weighted
 	visited map[int64]set.Int64s
-
-	from   func(id int64) []graph.Node
 }
 
 func (g yenKSPAdjuster) From(id int64) []graph.Node {
-	nodes := g.from(id)
+	nodes := g.g.From(id)
 
 	for i := 0; i < len(nodes); i++{
 		if g.visited[id].Has(int64(nodes[i].ID())) {
@@ -109,12 +107,14 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 	return nodes
 }
 
-func (g yenKSPAdjuster) AddVisited(parent, id int64) {
-	if g.visited[parent] == nil {
-		g.visited[parent] = make(set.Int64s)
+func (g yenKSPAdjuster) addVisited(parent, id int64) {
+	visited, ok := g.visited[parent]
+	if !ok {
+		visited = make(set.Int64s)
+		g.visited[parent] = visited
 	}
-	
-	g.visited[parent].Add(id)
+
+	visited.Add(id)
 }
 
 func (g yenKSPAdjuster) Edge(uid, vid int64) graph.Edge {

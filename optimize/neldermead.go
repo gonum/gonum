@@ -108,14 +108,23 @@ func (n *NelderMead) Init(loc *Location) (Operation, error) {
 	n.expansion = n.Expansion
 	if n.expansion == 0 {
 		n.expansion = 1 + 2/float64(dim)
+		if dim == 1 {
+			n.expansion = 2
+		}
 	}
 	n.contraction = n.Contraction
 	if n.contraction == 0 {
 		n.contraction = 0.75 - 1/(2*float64(dim))
+		if dim == 1 {
+			n.contraction = 0.5
+		}
 	}
 	n.shrink = n.Shrink
 	if n.shrink == 0 {
 		n.shrink = 1 - 1/float64(dim)
+		if dim == 1 {
+			n.shrink = 0.5
+		}
 	}
 
 	if n.InitialVertices != nil {

@@ -12,12 +12,19 @@ import (
 )
 
 
-func YenKShortestPath(g graph.Weighted, k int, s, t graph.Node) [][]graph.Node {
+func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	yk := yenKSPAdjuster{
 		g:       g,
 		visited: make(map[int64]set.Int64s),
 	}
 
+	var weight Weighting
+	if wg, ok := g.(Weighted); ok {
+		weight = wg.Weight
+	} else {
+		weight = UniformCost(g)
+	}
+	
 	paths := make([][]graph.Node, 0, k)
 
 	shortest, _ := DijkstraFrom(s, yk).To(t.ID())
@@ -33,7 +40,7 @@ func YenKShortestPath(g graph.Weighted, k int, s, t graph.Node) [][]graph.Node {
 
 			var rootWeight float64
 			for x := 1; x < len(root); x++ {
-				w, _ := g.Weight(root[x-1].ID(), root[x].ID())
+				w, _ := weight(root[x-1].ID(), root[x].ID())
 				rootWeight += w
 			}
 
@@ -90,7 +97,7 @@ type yenShortest struct {
 }
 
 type yenKSPAdjuster struct {
-	g graph.Weighted
+	g graph.Graph
 	visited map[int64]set.Int64s
 }
 
@@ -123,7 +130,13 @@ func (g yenKSPAdjuster) Edge(uid, vid int64) graph.Edge {
 }
 
 func (g yenKSPAdjuster) Weight(xid, yid int64) (w float64, ok bool) {
-	return g.g.Weight(xid, yid)
+	var weight Weighting
+	if wg, ok := g.g.(Weighted); ok {
+		weight = wg.Weight
+	} else {
+		weight = UniformCost(g.g)
+	}
+	return weight(xid, yid)
 }
 
 func (g yenKSPAdjuster) HasEdgeBetween(xid, yid int64) bool {

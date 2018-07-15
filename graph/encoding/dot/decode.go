@@ -208,26 +208,13 @@ func applyPortsToEdge(from ast.Vertex, to *ast.Edge, edge graph.Edge) {
 // addEdgeStmt adds the given edge statement to the graph.
 func (gen *generator) addEdgeStmt(dst encoding.Builder, stmt *ast.EdgeStmt) {
 	fs := gen.addVertex(dst, stmt.From)
-	ts := gen.addEdge(dst, stmt.To)
+	ts := gen.addEdge(dst, stmt.To, stmt.Attrs)
 	for _, f := range fs {
 		for _, t := range ts {
 			edge := dst.NewEdge(f, t)
 			dst.SetEdge(edge)
 			applyPortsToEdge(stmt.From, stmt.To, edge)
-
-			e, ok := edge.(encoding.AttributeSetter)
-			if !ok {
-				continue
-			}
-			for _, attr := range stmt.Attrs {
-				a := encoding.Attribute{
-					Key:   attr.Key,
-					Value: attr.Val,
-				}
-				if err := e.SetAttribute(a); err != nil {
-					panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
-				}
-			}
+			addEdgeAttrs(edge, stmt.Attrs)
 		}
 	}
 }
@@ -250,18 +237,19 @@ func (gen *generator) addVertex(dst encoding.Builder, v ast.Vertex) []graph.Node
 }
 
 // addEdge adds the given edge to the graph, and returns its set of nodes.
-func (gen *generator) addEdge(dst encoding.Builder, to *ast.Edge) []graph.Node {
+func (gen *generator) addEdge(dst encoding.Builder, to *ast.Edge, attrs []*ast.Attr) []graph.Node {
 	if !gen.directed && to.Directed {
 		panic(fmt.Errorf("directed edge to %v in undirected graph", to.Vertex))
 	}
 	fs := gen.addVertex(dst, to.Vertex)
 	if to.To != nil {
-		ts := gen.addEdge(dst, to.To)
+		ts := gen.addEdge(dst, to.To, attrs)
 		for _, f := range fs {
 			for _, t := range ts {
 				edge := dst.NewEdge(f, t)
 				dst.SetEdge(edge)
 				applyPortsToEdge(to.Vertex, to.To, edge)
+				addEdgeAttrs(edge, attrs)
 			}
 		}
 	}
@@ -317,4 +305,21 @@ func (gen *generator) isInSubgraph() bool {
 // within the context of a subgraph.
 func (gen *generator) appendSubgraphNode(n graph.Node) {
 	gen.subNodes = append(gen.subNodes, n)
+}
+
+// addEdgeAttrs adds the attributes to the given edge.
+func addEdgeAttrs(edge graph.Edge, attrs []*ast.Attr) {
+	e, ok := edge.(encoding.AttributeSetter)
+	if !ok {
+		return
+	}
+	for _, attr := range attrs {
+		a := encoding.Attribute{
+			Key:   attr.Key,
+			Value: attr.Val,
+		}
+		if err := e.SetAttribute(a); err != nil {
+			panic(fmt.Errorf("unable to unmarshal edge DOT attribute (%s=%s)", a.Key, a.Value))
+		}
+	}
 }

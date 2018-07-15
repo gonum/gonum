@@ -24,6 +24,8 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	} else {
 		weight = UniformCost(g)
 	}
+
+	yk.weight = weight
 	
 	paths := make([][]graph.Node, 0, k)
 
@@ -111,6 +113,7 @@ func (s byPathWeight) Less(i, j int) bool {
 type yenKSPAdjuster struct {
 	g graph.Graph
 	visited map[int64]set.Int64s
+	weight Weighting
 }
 
 func (g yenKSPAdjuster) From(id int64) []graph.Node {
@@ -142,13 +145,7 @@ func (g yenKSPAdjuster) Edge(uid, vid int64) graph.Edge {
 }
 
 func (g yenKSPAdjuster) Weight(xid, yid int64) (w float64, ok bool) {
-	var weight Weighting
-	if wg, ok := g.g.(Weighted); ok {
-		weight = wg.Weight
-	} else {
-		weight = UniformCost(g.g)
-	}
-	return weight(xid, yid)
+	return g.weight(xid, yid)
 }
 
 func (g yenKSPAdjuster) HasEdgeBetween(xid, yid int64) bool {

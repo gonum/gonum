@@ -164,6 +164,135 @@ const undirectedWithPorts = `graph {
 	E:_ -- F:c;
 }`
 
+func TestChainedEdgeAttributes(t *testing.T) {
+	golden := []struct {
+		in, want string
+		directed bool
+	}{
+		{
+			in:       directedChained,
+			want:     directedNonchained,
+			directed: true,
+		},
+		{
+			in:       undirectedChained,
+			want:     undirectedNonchained,
+			directed: false,
+		},
+	}
+	for i, g := range golden {
+		var dst encoding.Builder
+		if g.directed {
+			dst = newDotDirectedGraph()
+		} else {
+			dst = newDotUndirectedGraph()
+		}
+		data := []byte(g.in)
+		if err := Unmarshal(data, dst); err != nil {
+			t.Errorf("i=%d: unable to unmarshal DOT graph; %v", i, err)
+			continue
+		}
+		buf, err := Marshal(dst, "", "", "\t", false)
+		if err != nil {
+			t.Errorf("i=%d: unable to marshal graph; %v", i, dst)
+			continue
+		}
+		got := string(buf)
+		if got != g.want {
+			t.Errorf("i=%d: graph content mismatch; want:\n%s\n\ngot:\n%s", i, g.want, got)
+			continue
+		}
+	}
+}
+
+const directedChained = `digraph {
+	graph [
+		outputorder=edgesfirst
+	];
+	node [
+		shape=circle
+		style=filled
+	];
+	edge [
+		penwidth=5
+		color=gray
+	];
+
+	// Node definitions.
+	A [label="foo 2"];
+	B [label="bar 2"];
+
+	// Edge definitions.
+	A -> B -> A [label="baz 2"];
+}`
+
+const directedNonchained = `digraph {
+	graph [
+		outputorder=edgesfirst
+	];
+	node [
+		shape=circle
+		style=filled
+	];
+	edge [
+		penwidth=5
+		color=gray
+	];
+
+	// Node definitions.
+	A [label="foo 2"];
+	B [label="bar 2"];
+
+	// Edge definitions.
+	A -> B [label="baz 2"];
+	B -> A [label="baz 2"];
+}`
+
+const undirectedChained = `graph {
+	graph [
+		outputorder=edgesfirst
+	];
+	node [
+		shape=circle
+		style=filled
+	];
+	edge [
+		penwidth=5
+		color=gray
+	];
+
+	// Node definitions.
+	A [label="foo 2"];
+	B [label="bar 2"];
+	C [label="bif 2"];
+
+	// Edge definitions.
+	A -- B -- C [label="baz 2"];
+}`
+
+const undirectedNonchained = `graph {
+	graph [
+		outputorder=edgesfirst
+	];
+	node [
+		shape=circle
+		style=filled
+	];
+	edge [
+		penwidth=5
+		color=gray
+	];
+
+	// Node definitions.
+	A [label="foo 2"];
+	B [label="bar 2"];
+	C [label="bif 2"];
+
+	// Edge definitions.
+	A -- B [label="baz 2"];
+	B -- C [label="baz 2"];
+}`
+
 // Below follows a minimal implementation of a graph capable of validating the
 // round-trip encoding and decoding of DOT graphs with nodes and edges
 // containing DOT attributes.

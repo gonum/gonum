@@ -79,9 +79,7 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 			break
 		}
 
-		sort.Slice(pot, func(a, b int) bool {
-			return pot[a].weight < pot[b].weight
-		})
+		sort.Sort(byPathWeight(pot))
 
 		paths = append(paths, pot[0].p)
 		
@@ -94,6 +92,20 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 type yenShortest struct {
 	p   []graph.Node
 	weight float64
+}
+
+type byPathWeight []yenShortest
+
+func (s byPathWeight) Len() int {
+	return len(s)
+}
+
+func (s byPathWeight) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s byPathWeight) Less(i, j int) bool {
+	return s[i].weight < s[j].weight
 }
 
 type yenKSPAdjuster struct {

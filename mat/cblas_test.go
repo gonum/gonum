@@ -8,9 +8,9 @@ package mat
 
 import (
 	"gonum.org/v1/gonum/blas/blas64"
-	"gonum.org/v1/netlib/blas"
+	"gonum.org/v1/netlib/blas/netlib"
 )
 
 func init() {
-	blas64.Use(blas.Implementation{})
+	blas64.Use(netlib.Implementation{})
 }

@@ -258,7 +258,7 @@ func (c *CC) RightTo(dst *mat.Dense, spheredSpace bool) *mat.Dense {
 	}
 
 	if dst != nil {
-		if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.yd) {
+		if d, n := dst.Dims(); (n != 0 || d != 0) && (n != c.yd || d != c.xd) {
 			panic(mat.ErrShape)
 		}
 	}

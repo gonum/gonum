@@ -166,13 +166,10 @@ func (p Problem) satisfies(method Needser) error {
 //
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
-	// InitX specifies an initial location to communicate to the Method. If InitX
-	// is nil, then a slice of zeros is used as a default value.
-	InitX []float64
-	// InitValues specifies properties known at InitX (function value, gradient, etc.).
-	// If InitX is nil, InitValues must be also. If InitValues is non-nil, then
+	// InitValues specifies properties (function value, gradient, etc.). known
+	// at the initial location passed to Minimize. If InitValues is non-nil, then
 	// the function value F must be provided, the location X must not be specified
-	// (use InitX instead), and other fields may be specified.
+	// and other fields may be specified.
 	InitValues *Location
 
 	// FunctionThreshold is the threshold for acceptably small values of the

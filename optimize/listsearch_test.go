@@ -49,7 +49,8 @@ func TestListSearch(t *testing.T) {
 			Locs: locs,
 		}
 		settings := &Settings{}
-		result, err := Minimize(p, c, settings, method)
+		initX := make([]float64, c)
+		result, err := Minimize(p, initX, settings, method)
 		if err != nil {
 			t.Errorf("cas %v: error optimizing: %s", cas, err)
 		}
@@ -63,7 +64,7 @@ func TestListSearch(t *testing.T) {
 		// Check that the optimization works concurrently.
 		concurrent := 6
 		settings.Concurrent = concurrent
-		result, err = Minimize(p, c, settings, method)
+		result, err = Minimize(p, initX, settings, method)
 		if err != nil {
 			t.Errorf("cas %v: error optimizing: %s", cas, err)
 		}
@@ -76,7 +77,7 @@ func TestListSearch(t *testing.T) {
 
 		// Check that the optimization works concurrently with more than the number of samples.
 		settings.Concurrent = test.r + concurrent
-		result, err = Minimize(p, c, settings, method)
+		result, err = Minimize(p, initX, settings, method)
 		if err != nil {
 			t.Errorf("cas %v: error optimizing: %s", cas, err)
 		}
@@ -92,7 +93,7 @@ func TestListSearch(t *testing.T) {
 		swapSamples(locs, fs, minIdx, test.r-1)
 		minIdx = test.r - 1
 		settings.Concurrent = concurrent
-		result, err = Minimize(p, c, settings, method)
+		result, err = Minimize(p, initX, settings, method)
 		if err != nil {
 			t.Errorf("cas %v: error optimizing: %s", cas, err)
 		}
@@ -111,7 +112,7 @@ func TestListSearch(t *testing.T) {
 		minIdxFirst := floats.MinIdx(fs[:evals])
 		settings.Concurrent = 0
 		settings.FuncEvaluations = evals
-		result, err = Minimize(p, c, settings, method)
+		result, err = Minimize(p, initX, settings, method)
 		if err != nil {
 			t.Errorf("cas %v: error optimizing: %s", cas, err)
 		}
@@ -134,7 +135,7 @@ func TestListSearch(t *testing.T) {
 
 		minIdxFirst = floats.MinIdx(fs[:evals])
 		settings.Concurrent = concurrent
-		result, err = Minimize(p, c, settings, method)
+		result, err = Minimize(p, initX, settings, method)
 		if err != nil {
 			t.Errorf("cas %v: error optimizing: %s", cas, err)
 		}

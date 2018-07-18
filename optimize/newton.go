@@ -46,11 +46,30 @@ type Newton struct {
 	// Increase must be greater than 1. If Increase is 0, it is defaulted to 5.
 	Increase float64
 
+	status Status
+	err    error
+
 	ls *LinesearchMethod
 
 	hess *mat.SymDense // Storage for a copy of the Hessian matrix.
 	chol mat.Cholesky  // Storage for the Cholesky factorization.
 	tau  float64
+}
+
+func (n *Newton) Status() (Status, error) {
+	return n.status, n.err
+}
+
+func (n *Newton) InitGlobal(dim, tasks int) int {
+	n.status = NotTerminated
+	n.err = nil
+	return 1
+}
+
+func (n *Newton) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	n.status, n.err = localOptimizer{}.runGlobal(n, operation, result, tasks)
+	close(operation)
+	return
 }
 
 func (n *Newton) Init(loc *Location) (Operation, error) {

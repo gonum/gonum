@@ -17,6 +17,25 @@ type GradientDescent struct {
 	StepSizer StepSizer
 
 	ls *LinesearchMethod
+
+	status Status
+	err    error
+}
+
+func (g *GradientDescent) Status() (Status, error) {
+	return g.status, g.err
+}
+
+func (g *GradientDescent) InitGlobal(dim, tasks int) int {
+	g.status = NotTerminated
+	g.err = nil
+	return 1
+}
+
+func (g *GradientDescent) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	g.status, g.err = localOptimizer{}.runGlobal(g, operation, result, tasks)
+	close(operation)
+	return
 }
 
 func (g *GradientDescent) Init(loc *Location) (Operation, error) {

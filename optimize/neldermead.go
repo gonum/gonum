@@ -67,6 +67,9 @@ type NelderMead struct {
 	Shrink          float64 // Shrink parameter (>0, <1)
 	SimplexSize     float64 // size of auto-constructed initial simplex
 
+	status Status
+	err    error
+
 	reflection  float64
 	expansion   float64
 	contraction float64
@@ -80,6 +83,22 @@ type NelderMead struct {
 	lastIter       nmIterType // Last iteration
 	reflectedPoint []float64  // Storage of the reflected point location
 	reflectedValue float64    // Value at the last reflection point
+}
+
+func (n *NelderMead) Status() (Status, error) {
+	return n.status, n.err
+}
+
+func (n *NelderMead) InitGlobal(dim, tasks int) int {
+	n.status = NotTerminated
+	n.err = nil
+	return 1
+}
+
+func (n *NelderMead) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	n.status, n.err = localOptimizer{}.runGlobal(n, operation, result, tasks)
+	close(operation)
+	return
 }
 
 func (n *NelderMead) Init(loc *Location) (Operation, error) {

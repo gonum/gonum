@@ -90,12 +90,31 @@ type CG struct {
 
 	ls *LinesearchMethod
 
+	status Status
+	err    error
+
 	restartAfter    int
 	iterFromRestart int
 
 	dirPrev      []float64
 	gradPrev     []float64
 	gradPrevNorm float64
+}
+
+func (cg *CG) Status() (Status, error) {
+	return cg.status, cg.err
+}
+
+func (cg *CG) InitGlobal(dim, tasks int) int {
+	cg.status = NotTerminated
+	cg.err = nil
+	return 1
+}
+
+func (cg *CG) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	cg.status, cg.err = localOptimizer{}.runGlobal(cg, operation, result, tasks)
+	close(operation)
+	return
 }
 
 func (cg *CG) Init(loc *Location) (Operation, error) {

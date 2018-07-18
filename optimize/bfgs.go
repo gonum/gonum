@@ -23,6 +23,9 @@ type BFGS struct {
 
 	ls *LinesearchMethod
 
+	status Status
+	err    error
+
 	dim  int
 	x    mat.VecDense // Location of the last major iteration.
 	grad mat.VecDense // Gradient at the last major iteration.
@@ -33,6 +36,22 @@ type BFGS struct {
 	invHess *mat.SymDense
 
 	first bool // Indicator of the first iteration.
+}
+
+func (b *BFGS) Status() (Status, error) {
+	return b.status, b.err
+}
+
+func (b *BFGS) InitGlobal(dim, tasks int) int {
+	b.status = NotTerminated
+	b.err = nil
+	return 1
+}
+
+func (b *BFGS) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+	b.status, b.err = localOptimizer{}.runGlobal(b, operation, result, tasks)
+	close(operation)
+	return
 }
 
 func (b *BFGS) Init(loc *Location) (Operation, error) {

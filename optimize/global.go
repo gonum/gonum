@@ -28,14 +28,14 @@ type Task struct {
 	*Location
 }
 
-// Method is a type which can search for a global optimum for an objective function.
+// Method is a type which can search for an optimum of an objective function.
 type Method interface {
 	Needser
 	// Init takes as input the problem dimension and number of available
 	// concurrent tasks, and returns the number of concurrent processes to be used.
 	// The returned value must be less than or equal to tasks.
 	Init(dim, tasks int) int
-	// Run runs a global optimization. The method sends Tasks on
+	// Run runs an optimization. The method sends Tasks on
 	// the operation channel (for performing function evaluations, major
 	// iterations, etc.). The result of the tasks will be returned on Result.
 	// See the documentation for Operation types for the possible tasks.
@@ -76,7 +76,7 @@ type Method interface {
 	Run(operation chan<- Task, result <-chan Task, tasks []Task)
 }
 
-// Global uses a global optimizer to search for the global minimum of a
+// Minimize uses an optimizer to search for the minimum of a
 // function. A maximization problem can be transformed into a
 // minimization problem by multiplying the function by -1.
 //
@@ -84,7 +84,7 @@ type Method interface {
 // routines that evaluate the objective function, gradient, and other
 // quantities related to the problem. The objective function, p.Func, must not
 // be nil. The optimization method used may require other fields to be non-nil
-// as specified by method.Needs. Global will panic if these are not met. The
+// as specified by method.Needs. Minimize will panic if these are not met. The
 // method can be determined automatically from the supplied problem which is
 // described below.
 //
@@ -93,32 +93,36 @@ type Method interface {
 // optimization run is terminated.
 //
 // The third argument contains the settings for the minimization. The
-// DefaultGlobalSettings function can be called for a Settings struct with the
-// default values initialized. If settings == nil, the default settings are used.
-// All of the settings will be followed, but many of them may be counterproductive
-// to use (such as GradientThreshold). Global cannot guarantee strict adherence
-// to the bounds specified when performing concurrent evaluations and updates.
+// DefaultLocalSettings and DefaultGlobalSettings functions can be called for
+// different default settings depending on the optimization method. If
+// settings == nil, the default settings are used. All settings will be honored
+// for all Methods, even if that setting is counter-productive to the method.
+// However, the information used to check the Settings, and the times at which
+// they are checked, are controlled by the Method. For example, if the Method
+// never evaluates the gradient of the function then GradientThreshold will not
+// be checked.  Minimize cannot guarantee strict adherence to the bounds
+// specified when performing concurrent evaluations and updates.
 //
 // The final argument is the optimization method to use. If method == nil, then
 // an appropriate default is chosen based on the properties of the other arguments
 // (dimension, gradient-free or gradient-based, etc.).
 //
-// Global returns a Result struct and any error that occurred. See the
+// Minimize returns a Result struct and any error that occurred. See the
 // documentation of Result for more information.
 //
 // See the documentation for Method for the details on implementing a method.
 //
-// Be aware that the default behavior of Global is to find the minimum.
-// For certain functions and optimization methods, this process can take many
+// Be aware that the default settings of Minimize are to accurately find the
+// minimum. For certain functions and optimization methods, this can take many
 // function evaluations. The Settings input struct can be used to limit this,
-// for example by modifying the maximum runtime or maximum function evaluations.
-func Global(p Problem, dim int, settings *Settings, method Method) (*Result, error) {
+// for example by modifying the maximum function evaluations or gradient tolerance.
+func Minimize(p Problem, dim int, settings *Settings, method Method) (*Result, error) {
 	startTime := time.Now()
 	if method == nil {
 		method = getDefaultMethod(&p)
 	}
 	if settings == nil {
-		settings = DefaultSettingsGlobal()
+		settings = DefaultSettingsLocal()
 	}
 	stats := &Stats{}
 	err := checkOptimization(p, dim, method, settings.Recorder)
@@ -147,7 +151,7 @@ func Global(p Problem, dim int, settings *Settings, method Method) (*Result, err
 
 	// Run optimization
 	var status Status
-	status, err = minimizeGlobal(&p, method, settings, stats, initOp, initLoc, optLoc, startTime)
+	status, err = minimize(&p, method, settings, stats, initOp, initLoc, optLoc, startTime)
 
 	// Cleanup and collect results
 	if settings.Recorder != nil && err == nil {
@@ -168,9 +172,9 @@ func getDefaultMethod(p *Problem) Method {
 	return &NelderMead{}
 }
 
-// minimizeGlobal performs a Global optimization. minimizeGlobal updates the
-// settings and optLoc, and returns the final Status and error.
-func minimizeGlobal(prob *Problem, method Method, settings *Settings, stats *Stats, initOp Operation, initLoc, optLoc *Location, startTime time.Time) (Status, error) {
+// minimize performs an optimization. minimize updates the settings and optLoc,
+// and returns the final Status and error.
+func minimize(prob *Problem, method Method, settings *Settings, stats *Stats, initOp Operation, initLoc, optLoc *Location, startTime time.Time) (Status, error) {
 	dim := len(optLoc.X)
 	nTasks := settings.Concurrent
 	if nTasks == 0 {
@@ -178,7 +182,7 @@ func minimizeGlobal(prob *Problem, method Method, settings *Settings, stats *Sta
 	}
 	newNTasks := method.Init(dim, nTasks)
 	if newNTasks > nTasks {
-		panic("global: too many tasks returned by Method")
+		panic("optimize: too many tasks returned by Method")
 	}
 	nTasks = newNTasks
 
@@ -197,7 +201,7 @@ func minimizeGlobal(prob *Problem, method Method, settings *Settings, stats *Sta
 	}()
 
 	// Algorithmic Overview:
-	// There are three pieces to performing a concurrent global optimization,
+	// There are three pieces to performing a concurrent optimization,
 	// the distributor, the workers, and the stats combiner. At a high level,
 	// the distributor reads in tasks sent by method, sending evaluations to the
 	// workers, and forwarding other operations to the statsCombiner. The workers
@@ -242,7 +246,7 @@ func minimizeGlobal(prob *Problem, method Method, settings *Settings, stats *Sta
 					statsChan <- task
 				default:
 					if !task.Op.isEvaluation() {
-						panic("global: expecting evaluation operation")
+						panic("optimize: expecting evaluation operation")
 					}
 					workerChan <- task
 				}
@@ -290,7 +294,7 @@ func minimizeGlobal(prob *Problem, method Method, settings *Settings, stats *Sta
 		switch task.Op {
 		default:
 			if !task.Op.isEvaluation() {
-				panic("global: evaluation task expected")
+				panic("minimize: evaluation task expected")
 			}
 			updateEvaluationStats(stats, task.Op)
 			status, err = checkEvaluationLimits(prob, stats, settings)

@@ -191,20 +191,20 @@ func TestCmaEsChol(t *testing.T) {
 		method := test.method
 		method.Src = src
 		// Run and check that the expected termination occurs.
-		result, err := Global(test.problem, test.dim, test.settings, method)
+		result, err := Minimize(test.problem, test.dim, test.settings, method)
 		if testErr := test.good(result, err, test.settings.Concurrent); testErr != nil {
 			t.Errorf("cas %d: %v", i, testErr)
 		}
 
 		// Run a second time to make sure there are no residual effects
-		result, err = Global(test.problem, test.dim, test.settings, method)
+		result, err = Minimize(test.problem, test.dim, test.settings, method)
 		if testErr := test.good(result, err, test.settings.Concurrent); testErr != nil {
 			t.Errorf("cas %d second: %v", i, testErr)
 		}
 
 		// Test the problem in parallel.
 		test.settings.Concurrent = 5
-		result, err = Global(test.problem, test.dim, test.settings, method)
+		result, err = Minimize(test.problem, test.dim, test.settings, method)
 		if testErr := test.good(result, err, test.settings.Concurrent); testErr != nil {
 			t.Errorf("cas %d concurrent: %v", i, testErr)
 		}

@@ -23,7 +23,7 @@ func (g *GuessAndCheck) Needs() struct{ Gradient, Hessian bool } {
 	return struct{ Gradient, Hessian bool }{false, false}
 }
 
-func (g *GuessAndCheck) InitGlobal(dim, tasks int) int {
+func (g *GuessAndCheck) Init(dim, tasks int) int {
 	if dim <= 0 {
 		panic(nonpositiveDimension)
 	}
@@ -35,13 +35,13 @@ func (g *GuessAndCheck) InitGlobal(dim, tasks int) int {
 	return tasks
 }
 
-func (g *GuessAndCheck) sendNewLoc(operation chan<- GlobalTask, task GlobalTask) {
+func (g *GuessAndCheck) sendNewLoc(operation chan<- Task, task Task) {
 	g.Rander.Rand(task.X)
 	task.Op = FuncEvaluation
 	operation <- task
 }
 
-func (g *GuessAndCheck) updateMajor(operation chan<- GlobalTask, task GlobalTask) {
+func (g *GuessAndCheck) updateMajor(operation chan<- Task, task Task) {
 	// Update the best value seen so far, and send a MajorIteration.
 	if task.F < g.bestF {
 		g.bestF = task.F
@@ -54,7 +54,7 @@ func (g *GuessAndCheck) updateMajor(operation chan<- GlobalTask, task GlobalTask
 	operation <- task
 }
 
-func (g *GuessAndCheck) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+func (g *GuessAndCheck) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
 	// Send initial tasks to evaluate
 	for _, task := range tasks {
 		g.sendNewLoc(operation, task)

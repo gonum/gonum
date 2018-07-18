@@ -60,14 +60,14 @@ func (n *Newton) Status() (Status, error) {
 	return n.status, n.err
 }
 
-func (n *Newton) InitGlobal(dim, tasks int) int {
+func (n *Newton) Init(dim, tasks int) int {
 	n.status = NotTerminated
 	n.err = nil
 	return 1
 }
 
-func (n *Newton) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	n.status, n.err = localOptimizer{}.runGlobal(n, operation, result, tasks)
+func (n *Newton) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
+	n.status, n.err = localOptimizer{}.run(n, operation, result, tasks)
 	close(operation)
 	return
 }

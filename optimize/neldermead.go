@@ -89,14 +89,14 @@ func (n *NelderMead) Status() (Status, error) {
 	return n.status, n.err
 }
 
-func (n *NelderMead) InitGlobal(dim, tasks int) int {
+func (n *NelderMead) Init(dim, tasks int) int {
 	n.status = NotTerminated
 	n.err = nil
 	return 1
 }
 
-func (n *NelderMead) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	n.status, n.err = localOptimizer{}.runGlobal(n, operation, result, tasks)
+func (n *NelderMead) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
+	n.status, n.err = localOptimizer{}.run(n, operation, result, tasks)
 	close(operation)
 	return
 }

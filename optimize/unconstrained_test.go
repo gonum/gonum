@@ -1154,7 +1154,7 @@ func TestNewton(t *testing.T) {
 	testLocal(t, newtonTests, &Newton{})
 }
 
-func testLocal(t *testing.T, tests []unconstrainedTest, method GlobalMethod) {
+func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 	for cas, test := range tests {
 		if test.long && testing.Short() {
 			continue

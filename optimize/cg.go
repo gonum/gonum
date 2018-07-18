@@ -105,14 +105,14 @@ func (cg *CG) Status() (Status, error) {
 	return cg.status, cg.err
 }
 
-func (cg *CG) InitGlobal(dim, tasks int) int {
+func (cg *CG) Init(dim, tasks int) int {
 	cg.status = NotTerminated
 	cg.err = nil
 	return 1
 }
 
-func (cg *CG) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	cg.status, cg.err = localOptimizer{}.runGlobal(cg, operation, result, tasks)
+func (cg *CG) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
+	cg.status, cg.err = localOptimizer{}.run(cg, operation, result, tasks)
 	close(operation)
 	return
 }

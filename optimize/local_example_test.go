@@ -19,7 +19,7 @@ func ExampleMinimize() {
 	}
 
 	x := []float64{1.3, 0.7, 0.8, 1.9, 1.2}
-	settings := optimize.DefaultSettings()
+	settings := optimize.DefaultSettingsLocal()
 	settings.Recorder = nil
 	settings.GradientThreshold = 1e-12
 	settings.FunctionConverge = nil

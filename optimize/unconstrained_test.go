@@ -1160,7 +1160,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method GlobalMethod) {
 			continue
 		}
 
-		settings := DefaultSettings()
+		settings := DefaultSettingsLocal()
 		settings.Recorder = nil
 		if method != nil && method.Needs().Gradient {
 			// Turn off function convergence checks for gradient-based methods.
@@ -1314,7 +1314,7 @@ func TestNelderMeadOneD(t *testing.T) {
 	}
 	x := []float64{10}
 	m := &NelderMead{}
-	s := DefaultSettings()
+	s := DefaultSettingsLocal()
 	s.InitX = x
 	result, err := Global(p, len(x), s, m)
 	if err != nil {

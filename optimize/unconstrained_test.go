@@ -1307,3 +1307,31 @@ func TestIssue76(t *testing.T) {
 		t.Error("Issue https://github.com/gonum/optimize/issues/76 not fixed")
 	}
 }
+
+func TestNelderMeadOneD(t *testing.T) {
+	p := Problem{
+		Func: func(x []float64) float64 { return x[0] * x[0] },
+	}
+	x := []float64{10}
+	m := &NelderMead{}
+	s := DefaultSettings()
+	result, err := Local(p, x, s, m)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if !floats.EqualApprox(result.X, []float64{0}, 1e-10) {
+		t.Errorf("Minimum not found")
+	}
+	if m.reflection != 1 {
+		t.Errorf("Wrong value of reflection")
+	}
+	if m.expansion != 2 {
+		t.Errorf("Wrong value of expansion")
+	}
+	if m.contraction != 0.5 {
+		t.Errorf("Wrong value of contraction")
+	}
+	if m.shrink != 0.5 {
+		t.Errorf("Wrong value of shrink")
+	}
+}

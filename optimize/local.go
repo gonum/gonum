@@ -11,11 +11,11 @@ import (
 // localOptimizer is a helper type for running an optimization using a LocalMethod.
 type localOptimizer struct{}
 
-// RunGlobal controls the optimization run for a LocalMethod. The calling method
+// RunGlobal controls the optimization run for a localMethod. The calling method
 // must close the operation channel at the conclusion of the optimization. This
 // provides a happens before relationship between the return of status and the
 // closure of operation, and thus a call to method.Status (if necessary).
-func (l localOptimizer) runGlobal(method Method, operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) (Status, error) {
+func (l localOptimizer) runGlobal(method localMethod, operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) (Status, error) {
 	// Local methods start with a fully-specified initial location.
 	task := tasks[0]
 	task = l.initialLocation(operation, result, task, method)
@@ -38,7 +38,7 @@ func (l localOptimizer) runGlobal(method Method, operation chan<- GlobalTask, re
 		return NotTerminated, nil
 	}
 
-	op, err := method.Init(task.Location)
+	op, err := method.initLocal(task.Location)
 	if err != nil {
 		l.finishMethodDone(operation, result, task)
 		return Failure, err
@@ -52,7 +52,7 @@ Loop:
 		case PostIteration:
 			break Loop
 		default:
-			op, err := method.Iterate(r.Location)
+			op, err := method.iterateLocal(r.Location)
 			if err != nil {
 				l.finishMethodDone(operation, result, r)
 				return Failure, err

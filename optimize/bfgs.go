@@ -54,7 +54,7 @@ func (b *BFGS) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, 
 	return
 }
 
-func (b *BFGS) Init(loc *Location) (Operation, error) {
+func (b *BFGS) initLocal(loc *Location) (Operation, error) {
 	if b.Linesearcher == nil {
 		b.Linesearcher = &Bisection{}
 	}
@@ -67,7 +67,7 @@ func (b *BFGS) Init(loc *Location) (Operation, error) {
 	return b.ls.Init(loc)
 }
 
-func (b *BFGS) Iterate(loc *Location) (Operation, error) {
+func (b *BFGS) iterateLocal(loc *Location) (Operation, error) {
 	return b.ls.Iterate(loc)
 }
 

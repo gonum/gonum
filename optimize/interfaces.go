@@ -4,7 +4,7 @@
 
 package optimize
 
-// A Method can optimize an objective function.
+// A localMethod can optimize an objective function.
 //
 // It uses a reverse-communication interface between the optimization method
 // and the caller. Method acts as a client that asks the caller to perform
@@ -34,15 +34,15 @@ package optimize
 // A Method must not return InitIteration and PostIteration operations. These are
 // reserved for the clients to be passed to Recorders. A Method must also not
 // combine the Evaluation operations with the Iteration operations.
-type Method interface {
+type localMethod interface {
 	// Init initializes the method based on the initial data in loc, updates it
 	// and returns the first operation to be carried out by the caller.
 	// The initial location must be valid as specified by Needs.
-	Init(loc *Location) (Operation, error)
+	initLocal(loc *Location) (Operation, error)
 
 	// Iterate retrieves data from loc, performs one iteration of the method,
 	// updates loc and returns the next operation.
-	Iterate(loc *Location) (Operation, error)
+	iterateLocal(loc *Location) (Operation, error)
 
 	Needser
 }

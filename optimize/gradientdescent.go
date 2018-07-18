@@ -38,7 +38,7 @@ func (g *GradientDescent) RunGlobal(operation chan<- GlobalTask, result <-chan G
 	return
 }
 
-func (g *GradientDescent) Init(loc *Location) (Operation, error) {
+func (g *GradientDescent) initLocal(loc *Location) (Operation, error) {
 	if g.Linesearcher == nil {
 		g.Linesearcher = &Backtracking{}
 	}
@@ -55,7 +55,7 @@ func (g *GradientDescent) Init(loc *Location) (Operation, error) {
 	return g.ls.Init(loc)
 }
 
-func (g *GradientDescent) Iterate(loc *Location) (Operation, error) {
+func (g *GradientDescent) iterateLocal(loc *Location) (Operation, error) {
 	return g.ls.Iterate(loc)
 }
 

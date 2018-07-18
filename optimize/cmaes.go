@@ -31,7 +31,9 @@ import (
 // normal distribution to generate a population of input locations. The input locations
 // with the lowest function values are used to update the parameters of the normal
 // distribution, a new set of input locations are generated, and this procedure
-// is iterated until convergence.
+// is iterated until convergence. The initial sampling distribution will have
+// a mean specified by the initial x location, and a covariance specified by
+// the InitCholesky field.
 //
 // As the normal distribution is progressively updated according to the best samples,
 // it can be that the mean of the distribution is updated in a gradient-descent
@@ -57,10 +59,6 @@ type CmaEsChol struct {
 	// 0, a default value of 4 + math.Floor(3*math.Log(float64(dim))) is used.
 	// Population cannot be negative or CmaEsChol will panic.
 	Population int
-	// InitMean is the initial mean of the multivariate normal for sampling
-	// input locations. If InitMean is nil, the zero vector is used. If InitMean
-	// is not nil, it must have length equal to the problem dimension.
-	InitMean []float64
 	// InitCholesky specifies the Cholesky decomposition of the covariance
 	// matrix for the initial sampling distribution. If InitCholesky is nil,
 	// a default value of I is used. If it is non-nil, then it must have
@@ -151,10 +149,6 @@ func (cma *CmaEsChol) Init(dim, tasks int) int {
 	if tasks < 0 {
 		panic(negativeTasks)
 	}
-	// Initialize the parameters
-	if cma.InitMean != nil && len(cma.InitMean) != dim {
-		panic("cma-es-chol: initial mean must be nil or have length equal to dimension")
-	}
 
 	// Set fixed algorithm parameters.
 	// Parameter values are from https://arxiv.org/pdf/1604.00772.pdf .
@@ -207,10 +201,8 @@ func (cma *CmaEsChol) Init(dim, tasks int) int {
 	for i := range cma.ps {
 		cma.ps[i] = 0
 	}
-	cma.mean = resize(cma.mean, dim)
-	if cma.InitMean != nil {
-		copy(cma.mean, cma.InitMean)
-	}
+	cma.mean = resize(cma.mean, dim) // mean location initialized at the start of Run
+
 	if cma.InitCholesky != nil {
 		if cma.InitCholesky.Size() != dim {
 			panic("cma-es-chol: incorrect InitCholesky size")
@@ -302,6 +294,7 @@ func (cma *CmaEsChol) findBestAndUpdateTask(task Task) Task {
 }
 
 func (cma *CmaEsChol) Run(operations chan<- Task, results <-chan Task, tasks []Task) {
+	copy(cma.mean, tasks[0].X)
 	cma.operation = operations
 	// Send the initial tasks. We know there are at most as many tasks as elements
 	// of the population.

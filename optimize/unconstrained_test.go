@@ -1315,7 +1315,8 @@ func TestNelderMeadOneD(t *testing.T) {
 	x := []float64{10}
 	m := &NelderMead{}
 	s := DefaultSettings()
-	result, err := Local(p, x, s, m)
+	s.InitX = x
+	result, err := Global(p, len(x), s, m)
 	if err != nil {
 		t.Errorf(err.Error())
 	}

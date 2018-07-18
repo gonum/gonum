@@ -86,8 +86,7 @@ func (localOptimizer) initialOperation(task GlobalTask, needser Needser) Operati
 // initialLocation fills the initial location based on the needs of the method.
 // The task passed to initialLocation should be the first task sent in RunGlobal.
 func (l localOptimizer) initialLocation(operation chan<- GlobalTask, result <-chan GlobalTask, task GlobalTask, needser Needser) GlobalTask {
-	op := l.initialOperation(task, needser)
-	task.Op = op
+	task.Op = l.initialOperation(task, needser)
 	operation <- task
 	return <-result
 }

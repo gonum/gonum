@@ -337,7 +337,7 @@ func minimizeGlobal(prob *Problem, method GlobalMethod, settings *Settings, stat
 		}
 	}
 	// This code block is here rather than above to ensure Status() is not called
-	// before Method() closes operations.
+	// before Method.RunGlobal closes operations.
 	if methodDone {
 		statuser, ok := method.(Statuser)
 		if !ok {

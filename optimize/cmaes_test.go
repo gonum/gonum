@@ -20,6 +20,7 @@ type cmaTestCase struct {
 	dim      int
 	problem  Problem
 	method   *CmaEsChol
+	initX    []float64
 	settings *Settings
 	good     func(result *Result, err error, concurrent int) error
 }
@@ -163,9 +164,9 @@ func cmaTestCases() []cmaTestCase {
 			problem: Problem{
 				Func: functions.Rastrigin{}.Func,
 			},
+			initX: localMinMean,
 			method: &CmaEsChol{
 				Population:   100, // Increase the population size to reduce noise.
-				InitMean:     localMinMean,
 				InitCholesky: &localMinChol,
 				ForgetBest:   true, // So that if it accidentally finds a better place we still converge to the minimum.
 			},
@@ -190,7 +191,7 @@ func TestCmaEsChol(t *testing.T) {
 		src := rand.New(rand.NewSource(1))
 		method := test.method
 		method.Src = src
-		initX := method.InitMean
+		initX := test.initX
 		if initX == nil {
 			initX = make([]float64, test.dim)
 		}

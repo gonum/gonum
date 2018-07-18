@@ -166,7 +166,7 @@ func (p Problem) satisfies(method Needser) error {
 //
 // If Recorder is nil, no information will be recorded.
 type Settings struct {
-	// InitValues specifies properties (function value, gradient, etc.). known
+	// InitValues specifies properties (function value, gradient, etc.) known
 	// at the initial location passed to Minimize. If InitValues is non-nil, then
 	// the function value F must be provided, the location X must not be specified
 	// and other fields may be specified.

@@ -242,8 +242,9 @@ type Settings struct {
 	Concurrent int
 }
 
-// DefaultSettings returns a new Settings struct containing the default settings.
-func DefaultSettings() *Settings {
+// DefaultSettingsLocal returns a new Settings struct that contains default settings
+// for running a local optimization.
+func DefaultSettingsLocal() *Settings {
 	return &Settings{
 		GradientThreshold: defaultGradientAbsTol,
 		FunctionThreshold: math.Inf(-1),

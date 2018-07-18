@@ -1180,9 +1180,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 		}
 		settings.GradientThreshold = test.gradTol
 
-		dim := len(test.x)
-		settings.InitX = test.x
-		result, err := Minimize(test.p, dim, settings, method)
+		result, err := Minimize(test.p, test.x, settings, method)
 		if err != nil {
 			t.Errorf("Case %d: error finding minimum (%v) for:\n%v", cas, err, test)
 			continue
@@ -1232,7 +1230,6 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// We are going to restart the solution using known initial data, so
 		// evaluate them.
-		settings.InitX = test.x
 		settings.InitValues = &Location{}
 		settings.InitValues.F = test.p.Func(test.x)
 		if method.Needs().Gradient {
@@ -1246,7 +1243,7 @@ func testLocal(t *testing.T, tests []unconstrainedTest, method Method) {
 
 		// Rerun the test again to make sure that it gets the same answer with
 		// the same starting condition. Moreover, we are using the initial data.
-		result2, err2 := Minimize(test.p, dim, settings, method)
+		result2, err2 := Minimize(test.p, test.x, settings, method)
 		if err2 != nil {
 			t.Errorf("error finding minimum second time (%v) for:\n%v", err2, test)
 			continue
@@ -1298,8 +1295,7 @@ func TestIssue76(t *testing.T) {
 		Linesearcher: &Backtracking{},
 	}
 	// We are not interested in the error, only in the returned status.
-	s.InitX = x
-	r, _ := Minimize(p, len(x), s, m)
+	r, _ := Minimize(p, x, s, m)
 	// With the above stringent tolerance, the optimizer will never
 	// successfully reach the minimum. Check if it terminated in a finite
 	// number of steps.
@@ -1315,8 +1311,7 @@ func TestNelderMeadOneD(t *testing.T) {
 	x := []float64{10}
 	m := &NelderMead{}
 	s := DefaultSettingsLocal()
-	s.InitX = x
-	result, err := Minimize(p, len(x), s, m)
+	result, err := Minimize(p, x, s, m)
 	if err != nil {
 		t.Errorf(err.Error())
 	}

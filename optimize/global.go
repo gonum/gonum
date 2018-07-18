@@ -76,9 +76,9 @@ type Method interface {
 	Run(operation chan<- Task, result <-chan Task, tasks []Task)
 }
 
-// Minimize uses an optimizer to search for the minimum of a
-// function. A maximization problem can be transformed into a
-// minimization problem by multiplying the function by -1.
+// Minimize uses an optimizer to search for the minimum of a function. A
+// maximization problem can be transformed into a minimization problem by
+// multiplying the function by -1.
 //
 // The first argument represents the problem to be minimized. Its fields are
 // routines that evaluate the objective function, gradient, and other
@@ -91,6 +91,10 @@ type Method interface {
 // If p.Status is not nil, it is called before every evaluation. If the
 // returned Status is other than NotTerminated or if the error is not nil, the
 // optimization run is terminated.
+//
+// The second argument specifies the initial location for the optimization.
+// Some Methods do not require an initial location, but initX must still be
+// specified for the dimension of the optimization problem.
 //
 // The third argument contains the settings for the minimization. The
 // DefaultLocalSettings and DefaultGlobalSettings functions can be called for
@@ -116,7 +120,7 @@ type Method interface {
 // minimum. For certain functions and optimization methods, this can take many
 // function evaluations. The Settings input struct can be used to limit this,
 // for example by modifying the maximum function evaluations or gradient tolerance.
-func Minimize(p Problem, dim int, settings *Settings, method Method) (*Result, error) {
+func Minimize(p Problem, initX []float64, settings *Settings, method Method) (*Result, error) {
 	startTime := time.Now()
 	if method == nil {
 		method = getDefaultMethod(&p)
@@ -125,6 +129,7 @@ func Minimize(p Problem, dim int, settings *Settings, method Method) (*Result, e
 		settings = DefaultSettingsLocal()
 	}
 	stats := &Stats{}
+	dim := len(initX)
 	err := checkOptimization(p, dim, method, settings.Recorder)
 	if err != nil {
 		return nil, err
@@ -137,7 +142,7 @@ func Minimize(p Problem, dim int, settings *Settings, method Method) (*Result, e
 		settings.FunctionConverge.Init()
 	}
 
-	initOp, initLoc := getInitLocation(dim, settings.InitX, settings.InitValues, method)
+	initOp, initLoc := getInitLocation(dim, initX, settings.InitValues, method)
 
 	stats.Runtime = time.Since(startTime)
 

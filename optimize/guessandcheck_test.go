@@ -26,10 +26,11 @@ func TestGuessAndCheck(t *testing.T) {
 	if !ok {
 		panic("bad test")
 	}
-	Minimize(problem, dim, nil, &GuessAndCheck{Rander: d})
+	initX := make([]float64, dim)
+	Minimize(problem, initX, nil, &GuessAndCheck{Rander: d})
 
 	settings := DefaultSettingsGlobal()
 	settings.Concurrent = 5
 	settings.MajorIterations = 15
-	Minimize(problem, dim, settings, &GuessAndCheck{Rander: d})
+	Minimize(problem, initX, settings, &GuessAndCheck{Rander: d})
 }

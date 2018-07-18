@@ -23,9 +23,8 @@ func ExampleMinimize() {
 	settings.Recorder = nil
 	settings.GradientThreshold = 1e-12
 	settings.FunctionConverge = nil
-	settings.InitX = x
 
-	result, err := optimize.Minimize(p, len(x), settings, &optimize.BFGS{})
+	result, err := optimize.Minimize(p, x, settings, &optimize.BFGS{})
 	if err != nil {
 		log.Fatal(err)
 	}

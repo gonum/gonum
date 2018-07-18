@@ -30,7 +30,7 @@ func (*ListSearch) Needs() struct{ Gradient, Hessian bool } {
 
 // InitGlobal initializes the method for optimization. The input dimension
 // must match the number of columns of Locs.
-func (l *ListSearch) InitGlobal(dim, tasks int) int {
+func (l *ListSearch) Init(dim, tasks int) int {
 	if dim <= 0 {
 		panic(nonpositiveDimension)
 	}
@@ -51,7 +51,7 @@ func (l *ListSearch) InitGlobal(dim, tasks int) int {
 	return min(r, tasks)
 }
 
-func (l *ListSearch) sendNewLoc(operation chan<- GlobalTask, task GlobalTask) {
+func (l *ListSearch) sendNewLoc(operation chan<- Task, task Task) {
 	task.Op = FuncEvaluation
 	task.ID = l.eval
 	mat.Row(task.X, l.eval, l.Locs)
@@ -59,7 +59,7 @@ func (l *ListSearch) sendNewLoc(operation chan<- GlobalTask, task GlobalTask) {
 	operation <- task
 }
 
-func (l *ListSearch) updateMajor(operation chan<- GlobalTask, task GlobalTask) {
+func (l *ListSearch) updateMajor(operation chan<- Task, task Task) {
 	// Update the best value seen so far, and send a MajorIteration.
 	if task.F < l.bestF {
 		l.bestF = task.F
@@ -79,7 +79,7 @@ func (l *ListSearch) Status() (Status, error) {
 	return MethodConverge, nil
 }
 
-func (l *ListSearch) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
+func (l *ListSearch) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
 	// Send initial tasks to evaluate
 	for _, task := range tasks {
 		l.sendNewLoc(operation, task)

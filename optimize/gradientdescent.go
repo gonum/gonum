@@ -26,14 +26,14 @@ func (g *GradientDescent) Status() (Status, error) {
 	return g.status, g.err
 }
 
-func (g *GradientDescent) InitGlobal(dim, tasks int) int {
+func (g *GradientDescent) Init(dim, tasks int) int {
 	g.status = NotTerminated
 	g.err = nil
 	return 1
 }
 
-func (g *GradientDescent) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	g.status, g.err = localOptimizer{}.runGlobal(g, operation, result, tasks)
+func (g *GradientDescent) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
+	g.status, g.err = localOptimizer{}.run(g, operation, result, tasks)
 	close(operation)
 	return
 }

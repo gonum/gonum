@@ -11,11 +11,11 @@ import (
 // localOptimizer is a helper type for running an optimization using a LocalMethod.
 type localOptimizer struct{}
 
-// RunGlobal controls the optimization run for a localMethod. The calling method
+// run controls the optimization run for a localMethod. The calling method
 // must close the operation channel at the conclusion of the optimization. This
 // provides a happens before relationship between the return of status and the
 // closure of operation, and thus a call to method.Status (if necessary).
-func (l localOptimizer) runGlobal(method localMethod, operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) (Status, error) {
+func (l localOptimizer) run(method localMethod, operation chan<- Task, result <-chan Task, tasks []Task) (Status, error) {
 	// Local methods start with a fully-specified initial location.
 	task := tasks[0]
 	task = l.initialLocation(operation, result, task, method)
@@ -67,7 +67,7 @@ Loop:
 
 // initialOperation returns the Operation needed to fill the initial location
 // based on the needs of the method and the values already supplied.
-func (localOptimizer) initialOperation(task GlobalTask, needser Needser) Operation {
+func (localOptimizer) initialOperation(task Task, needser Needser) Operation {
 	var newOp Operation
 	op := task.Op
 	if op&FuncEvaluation == 0 {
@@ -85,13 +85,13 @@ func (localOptimizer) initialOperation(task GlobalTask, needser Needser) Operati
 
 // initialLocation fills the initial location based on the needs of the method.
 // The task passed to initialLocation should be the first task sent in RunGlobal.
-func (l localOptimizer) initialLocation(operation chan<- GlobalTask, result <-chan GlobalTask, task GlobalTask, needser Needser) GlobalTask {
+func (l localOptimizer) initialLocation(operation chan<- Task, result <-chan Task, task Task, needser Needser) Task {
 	task.Op = l.initialOperation(task, needser)
 	operation <- task
 	return <-result
 }
 
-func (localOptimizer) checkStartingLocation(task GlobalTask) (Status, error) {
+func (localOptimizer) checkStartingLocation(task Task) (Status, error) {
 	if math.IsInf(task.F, 1) || math.IsNaN(task.F) {
 		return Failure, ErrFunc(task.F)
 	}
@@ -104,7 +104,7 @@ func (localOptimizer) checkStartingLocation(task GlobalTask) (Status, error) {
 }
 
 // finish completes the channel operations to finish an optimization.
-func (localOptimizer) finish(operation chan<- GlobalTask, result <-chan GlobalTask) {
+func (localOptimizer) finish(operation chan<- Task, result <-chan Task) {
 	// Guarantee that result is closed before operation is closed.
 	for range result {
 	}
@@ -112,7 +112,7 @@ func (localOptimizer) finish(operation chan<- GlobalTask, result <-chan GlobalTa
 
 // finishMethodDone sends a MethodDone signal on operation, reads the result,
 // and completes the channel operations to finish an optimization.
-func (l localOptimizer) finishMethodDone(operation chan<- GlobalTask, result <-chan GlobalTask, task GlobalTask) {
+func (l localOptimizer) finishMethodDone(operation chan<- Task, result <-chan Task, task Task) {
 	task.Op = MethodDone
 	operation <- task
 	task = <-result

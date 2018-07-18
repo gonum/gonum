@@ -42,14 +42,14 @@ func (b *BFGS) Status() (Status, error) {
 	return b.status, b.err
 }
 
-func (b *BFGS) InitGlobal(dim, tasks int) int {
+func (b *BFGS) Init(dim, tasks int) int {
 	b.status = NotTerminated
 	b.err = nil
 	return 1
 }
 
-func (b *BFGS) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, tasks []GlobalTask) {
-	b.status, b.err = localOptimizer{}.runGlobal(b, operation, result, tasks)
+func (b *BFGS) Run(operation chan<- Task, result <-chan Task, tasks []Task) {
+	b.status, b.err = localOptimizer{}.run(b, operation, result, tasks)
 	close(operation)
 	return
 }

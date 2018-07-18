@@ -109,13 +109,13 @@ type CmaEsChol struct {
 	// Synchronization.
 	sentIdx     int
 	receivedIdx int
-	operation   chan<- GlobalTask
+	operation   chan<- Task
 	updateErr   error
 }
 
 var (
-	_ Statuser     = (*CmaEsChol)(nil)
-	_ GlobalMethod = (*CmaEsChol)(nil)
+	_ Statuser = (*CmaEsChol)(nil)
+	_ Method   = (*CmaEsChol)(nil)
 )
 
 func (cma *CmaEsChol) Needs() struct{ Gradient, Hessian bool } {
@@ -144,7 +144,7 @@ func (cma *CmaEsChol) Status() (Status, error) {
 	return cma.methodConverged(), nil
 }
 
-func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
+func (cma *CmaEsChol) Init(dim, tasks int) int {
 	if dim <= 0 {
 		panic(nonpositiveDimension)
 	}
@@ -241,7 +241,7 @@ func (cma *CmaEsChol) InitGlobal(dim, tasks int) int {
 	return t
 }
 
-func (cma *CmaEsChol) sendInitTasks(tasks []GlobalTask) {
+func (cma *CmaEsChol) sendInitTasks(tasks []Task) {
 	for i, task := range tasks {
 		cma.sendTask(i, task)
 	}
@@ -249,7 +249,7 @@ func (cma *CmaEsChol) sendInitTasks(tasks []GlobalTask) {
 }
 
 // sendTask generates a sample and sends the task. It does not update the cma index.
-func (cma *CmaEsChol) sendTask(idx int, task GlobalTask) {
+func (cma *CmaEsChol) sendTask(idx int, task Task) {
 	task.ID = idx
 	task.Op = FuncEvaluation
 	distmv.NormalRand(cma.xs.RawRowView(idx), cma.mean, &cma.chol, cma.Src)
@@ -277,7 +277,7 @@ func (cma *CmaEsChol) bestIdx() int {
 
 // findBestAndUpdateTask finds the best task in the current list, updates the
 // new best overall, and then stores the best location into task.
-func (cma *CmaEsChol) findBestAndUpdateTask(task GlobalTask) GlobalTask {
+func (cma *CmaEsChol) findBestAndUpdateTask(task Task) Task {
 	// Find and update the best location.
 	// Don't use floats because there may be NaN values.
 	best := cma.bestIdx()
@@ -301,7 +301,7 @@ func (cma *CmaEsChol) findBestAndUpdateTask(task GlobalTask) GlobalTask {
 	return task
 }
 
-func (cma *CmaEsChol) RunGlobal(operations chan<- GlobalTask, results <-chan GlobalTask, tasks []GlobalTask) {
+func (cma *CmaEsChol) Run(operations chan<- Task, results <-chan Task, tasks []Task) {
 	cma.operation = operations
 	// Send the initial tasks. We know there are at most as many tasks as elements
 	// of the population.

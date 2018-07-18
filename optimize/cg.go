@@ -117,7 +117,7 @@ func (cg *CG) RunGlobal(operation chan<- GlobalTask, result <-chan GlobalTask, t
 	return
 }
 
-func (cg *CG) Init(loc *Location) (Operation, error) {
+func (cg *CG) initLocal(loc *Location) (Operation, error) {
 	if cg.IterationRestartFactor < 0 {
 		panic("cg: IterationRestartFactor is negative")
 	}
@@ -151,7 +151,7 @@ func (cg *CG) Init(loc *Location) (Operation, error) {
 	return cg.ls.Init(loc)
 }
 
-func (cg *CG) Iterate(loc *Location) (Operation, error) {
+func (cg *CG) iterateLocal(loc *Location) (Operation, error) {
 	return cg.ls.Iterate(loc)
 }
 

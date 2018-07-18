@@ -101,7 +101,7 @@ func (n *NelderMead) RunGlobal(operation chan<- GlobalTask, result <-chan Global
 	return
 }
 
-func (n *NelderMead) Init(loc *Location) (Operation, error) {
+func (n *NelderMead) initLocal(loc *Location) (Operation, error) {
 	dim := len(loc.X)
 	if cap(n.vertices) < dim+1 {
 		n.vertices = make([][]float64, dim+1)
@@ -194,7 +194,7 @@ func computeCentroid(vertices [][]float64, centroid []float64) {
 	}
 }
 
-func (n *NelderMead) Iterate(loc *Location) (Operation, error) {
+func (n *NelderMead) iterateLocal(loc *Location) (Operation, error) {
 	dim := len(loc.X)
 	switch n.lastIter {
 	case nmInitialize:

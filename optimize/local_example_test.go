@@ -25,7 +25,7 @@ func ExampleMinimize() {
 	settings.FunctionConverge = nil
 	settings.InitX = x
 
-	result, err := optimize.Global(p, len(x), settings, &optimize.BFGS{})
+	result, err := optimize.Minimize(p, len(x), settings, &optimize.BFGS{})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -45,6 +45,26 @@ var yenShortestPathTests = []struct {
 			{0, 1, 3, 5},
 		},
 	},
+	{
+		Name:  "1 Edge graph",
+		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		Edges: []simple.WeightedEdge{
+			{F: simple.Node(0), T: simple.Node(1), W: 3},
+		},
+		Query: simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+		K:     1,
+		WantPaths: [][]int64{
+			{0, 1},
+		},
+	},
+	{
+		Name:      "Empty Graph",
+		Graph:     func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		Edges:     []simple.WeightedEdge{},
+		Query:     simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+		K:         2,
+		WantPaths: nil,
+	},
 }
 
 func toIntPath(nodePaths [][]graph.Node) [][]int64 {

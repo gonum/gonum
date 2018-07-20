@@ -11,7 +11,6 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
-
 func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	yk := yenKSPAdjuster{
 		g:       g,
@@ -26,19 +25,19 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	}
 
 	yk.weight = weight
-	
+
 	paths := make([][]graph.Node, 0, k)
 
 	shortest, _ := DijkstraFrom(s, yk).To(t.ID())
 	paths = append(paths, shortest)
-	
+
 	var pot []yenShortest
 
 	for i := int64(1); i < int64(k); i++ {
-		for n := 0; n < (len(paths[i-1])-1); n++ {
+		for n := 0; n < (len(paths[i-1]) - 1); n++ {
 			spur := paths[i-1][n]
-			root := make([]graph.Node, len(paths[i-1][:n + 1]))
-			copy(root, paths[i-1][:n + 1])
+			root := make([]graph.Node, len(paths[i-1][:n+1]))
+			copy(root, paths[i-1][:n+1])
 
 			var rootWeight float64
 			for x := 1; x < len(root); x++ {
@@ -56,7 +55,7 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 						}
 					}
 					if ok {
-						yk.addVisited(path[n].ID(), path[n + 1].ID())
+						yk.addVisited(path[n].ID(), path[n+1].ID())
 					}
 				}
 			}
@@ -84,7 +83,7 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 		sort.Sort(byPathWeight(pot))
 
 		paths = append(paths, pot[0].p)
-		
+
 		pot = pot[1:]
 	}
 
@@ -92,7 +91,7 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 }
 
 type yenShortest struct {
-	p   []graph.Node
+	p      []graph.Node
 	weight float64
 }
 
@@ -111,19 +110,19 @@ func (s byPathWeight) Less(i, j int) bool {
 }
 
 type yenKSPAdjuster struct {
-	g graph.Graph
+	g       graph.Graph
 	visited map[int64]set.Int64s
-	weight Weighting
+	weight  Weighting
 }
 
 func (g yenKSPAdjuster) From(id int64) []graph.Node {
 	nodes := g.g.From(id)
 
-	for i := 0; i < len(nodes); i++{
+	for i := 0; i < len(nodes); i++ {
 		if g.visited[id].Has(int64(nodes[i].ID())) {
 			nodes[int64(i)] = nodes[len(nodes)-1]
 			nodes = nodes[:len(nodes)-1]
-			i--;
+			i--
 		}
 	}
 

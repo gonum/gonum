@@ -13,15 +13,14 @@ import (
 	"gonum.org/v1/gonum/graph/simple"
 )
 
+var yenShortestPathTests = []struct {
+	Name  string
+	Graph func() graph.WeightedEdgeAdder
+	Edges []simple.WeightedEdge
 
-var YenShortestPathTests = []struct {
-	Name              string
-	Graph             func() graph.WeightedEdgeAdder
-	Edges             []simple.WeightedEdge
-
-	Query         simple.Edge
-	K int
-	WantPaths     [][]int64
+	Query     simple.Edge
+	K         int
+	WantPaths [][]int64
 }{
 	// Positive weighted graphs.
 	{
@@ -38,20 +37,21 @@ var YenShortestPathTests = []struct {
 			{F: simple.Node(3), T: simple.Node(5), W: 1},
 			{F: simple.Node(4), T: simple.Node(5), W: 2},
 		},
-		Query:  simple.Edge{F: simple.Node(0), T: simple.Node(5)},
-		K: 3,
+		Query: simple.Edge{F: simple.Node(0), T: simple.Node(5)},
+		K:     3,
 		WantPaths: [][]int64{
 			{0, 2, 3, 5},
 			{0, 2, 4, 5},
 			{0, 1, 3, 5},
-		},	
+		},
 	},
 }
 
 func toIntPath(nodePaths [][]graph.Node) [][]int64 {
-	paths := make([][]int64, 0)
+	var paths [][]int64
+
 	for _, nodes := range nodePaths {
-		path := make([]int64, 0)
+		var path []int64
 		for _, node := range nodes {
 			path = append(path, node.ID())
 		}
@@ -62,24 +62,17 @@ func toIntPath(nodePaths [][]graph.Node) [][]int64 {
 }
 
 func TestYenKSP(t *testing.T) {
-	for _, test := range YenShortestPathTests {
+	for _, test := range yenShortestPathTests {
 		g := test.Graph()
 		for _, e := range test.Edges {
 			g.SetWeightedEdge(e)
 		}
 
-		paths := toIntPath(YenKShortestPath(g.(graph.Graph), test.K, test.Query.From(), test.Query.To()))
+		got := YenKShortestPath(g.(graph.Graph), test.K, test.Query.From(), test.Query.To())
+		gotIds := toIntPath(got)
 
-		expected := test.WantPaths
-		
-		if len(expected) != len(paths) {
-			t.Errorf("ERROR: expected %d paths, got %d paths", len(expected), len(paths))
-		} else {
-			for i := 0; i < len(paths); i++ {
-				if !reflect.DeepEqual(expected[i], paths[i]) {
-					t.Errorf("ERROR: path #%d expected: %d, got: %d", i+1, expected[i], paths[i])
-				}
-			}
+		if !reflect.DeepEqual(test.WantPaths, gotIds) {
+			t.Errorf("unexpected result for %q:\ngot: %v\nwant:%v", test.Name, gotIds, test.WantPaths)
 		}
 	}
 }

@@ -26,10 +26,14 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 
 	yk.weight = weight
 
-	paths := make([][]graph.Node, 0, k)
+	var paths [][]graph.Node
 
 	shortest, _ := DijkstraFrom(s, yk).To(t.ID())
-	paths = append(paths, shortest)
+	if len(shortest) != 0 {
+		paths = append(paths, shortest)
+	} else {
+		return paths
+	}
 
 	var pot []yenShortest
 

@@ -62,8 +62,22 @@ var yenShortestPathTests = []struct {
 		Graph:     func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
 		Edges:     []simple.WeightedEdge{},
 		Query:     simple.Edge{F: simple.Node(0), T: simple.Node(1)},
-		K:         2,
+		K:         1,
 		WantPaths: nil,
+	},
+	{
+		Name:  "N Star Graph",
+		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
+		Edges: []simple.WeightedEdge{
+			{F: simple.Node(0), T: simple.Node(1), W: 3},
+			{F: simple.Node(0), T: simple.Node(2), W: 3},
+			{F: simple.Node(0), T: simple.Node(3), W: 3},
+		},
+		Query: simple.Edge{F: simple.Node(0), T: simple.Node(1)},
+		K:     1,
+		WantPaths: [][]int64{
+			{0, 1},
+		},
 	},
 }
 

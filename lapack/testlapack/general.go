@@ -818,26 +818,33 @@ func printRowise(a []float64, m, n, lda int, beyond bool) {
 	}
 }
 
-// isOrthonormal checks that a general matrix is orthonormal.
+// isOrthonormal returns whether a square matrix Q is orthogonal.
 func isOrthonormal(q blas64.General) bool {
 	n := q.Rows
+	if n != q.Cols {
+		panic("matrix not square")
+	}
+	// A real square matrix is orthogonal if and only if its rows form
+	// an orthonormal basis of the Euclidean space R^n.
+	const tol = 1e-13
 	for i := 0; i < n; i++ {
-		for j := i; j < n; j++ {
+		nrm := blas64.Nrm2(n, blas64.Vector{Data: q.Data[i*q.Stride:], Inc: 1})
+		if math.IsNaN(nrm) {
+			return false
+		}
+		if math.Abs(nrm-1) > tol {
+			return false
+		}
+		for j := i + 1; j < n; j++ {
 			dot := blas64.Dot(n,
-				blas64.Vector{Inc: 1, Data: q.Data[i*q.Stride:]},
-				blas64.Vector{Inc: 1, Data: q.Data[j*q.Stride:]},
+				blas64.Vector{Data: q.Data[i*q.Stride:], Inc: 1},
+				blas64.Vector{Data: q.Data[j*q.Stride:], Inc: 1},
 			)
 			if math.IsNaN(dot) {
 				return false
 			}
-			if i == j {
-				if math.Abs(dot-1) > 1e-10 {
-					return false
-				}
-			} else {
-				if math.Abs(dot) > 1e-10 {
-					return false
-				}
+			if math.Abs(dot) > tol {
+				return false
 			}
 		}
 	}

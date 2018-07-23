@@ -351,7 +351,7 @@ func testDlaqr23(t *testing.T, impl Dlaqr23er, test dlaqr23Test, opt bool, recur
 	if zmod {
 		t.Errorf("%v: unexpected modification of Z", prefix)
 	}
-	if !isOrthonormal(z) {
+	if !isOrthogonal(z) {
 		t.Errorf("%v: Z is not orthogonal", prefix)
 	}
 	if wantt {

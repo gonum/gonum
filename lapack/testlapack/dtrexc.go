@@ -195,7 +195,7 @@ func testDtrexc(t *testing.T, impl Dtrexcer, compq lapack.EVComp, tmat blas64.Ge
 		return
 	}
 
-	if !isOrthonormal(q) {
+	if !isOrthogonal(q) {
 		t.Errorf("%v: Q is not orthogonal", prefix)
 	}
 	// Check that Q is unchanged outside of columns [modMin,modMax].

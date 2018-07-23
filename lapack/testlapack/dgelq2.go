@@ -70,7 +70,7 @@ func Dgelq2Test(t *testing.T, impl Dgelq2er) {
 		Q := constructQ("LQ", m, n, a, lda, tau)
 
 		// Check that Q is orthogonal.
-		if !isOrthonormal(Q) {
+		if !isOrthogonal(Q) {
 			t.Errorf("Case %v: Q not orthogonal", c)
 		}
 

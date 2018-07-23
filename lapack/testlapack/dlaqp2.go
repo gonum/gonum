@@ -74,7 +74,7 @@ func Dlaqp2Test(t *testing.T, impl Dlaqp2er) {
 			mo := m - test.offset
 			q := constructQ("QR", mo, n, a.Data[test.offset*a.Stride:], a.Stride, tau)
 			// Check that Q is orthogonal.
-			if !isOrthonormal(q) {
+			if !isOrthogonal(q) {
 				t.Errorf("Case %v, Q not orthogonal", ti)
 			}
 

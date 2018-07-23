@@ -178,7 +178,7 @@ func testDhseqr(t *testing.T, impl Dhseqrer, i int, test dhseqrTest, job lapack.
 	}
 
 	// Z must be orthogonal.
-	if !isOrthonormal(z) {
+	if !isOrthogonal(z) {
 		t.Errorf("%v: Z is not orthogonal", prefix)
 	}
 

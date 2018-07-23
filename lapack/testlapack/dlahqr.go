@@ -415,7 +415,7 @@ func testDlahqr(t *testing.T, impl Dlahqrer, test dlahqrTest) {
 	}
 
 	// Z should contain the orthogonal matrix U.
-	if !isOrthonormal(z) {
+	if !isOrthogonal(z) {
 		t.Errorf("%v: Z is not orthogonal", prefix)
 	}
 	// Z should have been modified only in the

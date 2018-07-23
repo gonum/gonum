@@ -261,10 +261,10 @@ func svdCheck(t *testing.T, thin bool, errStr string, m, n int, s, a, u []float6
 
 	if !thin {
 		// Check that U and V are orthogonal.
-		if !isOrthonormal(uMat) {
+		if !isOrthogonal(uMat) {
 			t.Errorf("U not orthogonal %s", errStr)
 		}
-		if !isOrthonormal(vTMat) {
+		if !isOrthogonal(vTMat) {
 			t.Errorf("V not orthogonal %s", errStr)
 		}
 	}

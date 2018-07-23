@@ -95,7 +95,7 @@ func DgerqfTest(t *testing.T, impl Dgerqfer) {
 			q := constructQ("RQ", m, n, a, lda, tau)
 
 			// Check that Q is orthogonal.
-			if !isOrthonormal(q) {
+			if !isOrthogonal(q) {
 				t.Errorf("Case %v, Q not orthogonal", c)
 			}
 			// Check that A = R * Q

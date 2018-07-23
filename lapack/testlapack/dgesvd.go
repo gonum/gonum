@@ -261,27 +261,11 @@ func svdCheck(t *testing.T, thin bool, errStr string, m, n int, s, a, u []float6
 
 	if !thin {
 		// Check that U and V are orthogonal.
-		for i := 0; i < uMat.Rows; i++ {
-			for j := i + 1; j < uMat.Rows; j++ {
-				dot := blas64.Dot(uMat.Cols,
-					blas64.Vector{Inc: 1, Data: uMat.Data[i*uMat.Stride:]},
-					blas64.Vector{Inc: 1, Data: uMat.Data[j*uMat.Stride:]},
-				)
-				if dot > 1e-8 {
-					t.Errorf("U not orthogonal %s", errStr)
-				}
-			}
+		if !isOrthonormal(uMat) {
+			t.Errorf("U not orthogonal %s", errStr)
 		}
-		for i := 0; i < vTMat.Rows; i++ {
-			for j := i + 1; j < vTMat.Rows; j++ {
-				dot := blas64.Dot(vTMat.Cols,
-					blas64.Vector{Inc: 1, Data: vTMat.Data[i*vTMat.Stride:]},
-					blas64.Vector{Inc: 1, Data: vTMat.Data[j*vTMat.Stride:]},
-				)
-				if dot > 1e-8 {
-					t.Errorf("V not orthogonal %s", errStr)
-				}
-			}
+		if !isOrthonormal(vTMat) {
+			t.Errorf("V not orthogonal %s", errStr)
 		}
 	}
 }

@@ -675,9 +675,6 @@ func randomOrthogonal(n int, rnd *rand.Rand) blas64.General {
 		// Compute Q * H_j and store the result into Q.
 		applyReflector(q, q, v)
 	}
-	if !isOrthogonal(q) {
-		panic("Q not orthogonal")
-	}
 	return q
 }
 

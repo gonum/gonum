@@ -89,3 +89,13 @@ func TestDlagge(t *testing.T) {
 	}
 
 }
+
+func TestRandomOrthogonal(t *testing.T) {
+	rnd := rand.New(rand.NewSource(1))
+	for n := 1; n <= 20; n++ {
+		q := randomOrthogonal(n, rnd)
+		if !isOrthogonal(q) {
+			t.Errorf("Case n=%v: Q not orthogonal", n)
+		}
+	}
+}

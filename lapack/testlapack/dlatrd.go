@@ -133,7 +133,7 @@ func DlatrdTest(t *testing.T, impl Dlatrder) {
 				}
 			}
 			errStr := fmt.Sprintf("isUpper = %v, n = %v, nb = %v", uplo == blas.Upper, n, nb)
-			if !isOrthonormal(q) {
+			if !isOrthogonal(q) {
 				t.Errorf("Q not orthonormal. %s", errStr)
 			}
 			aGen := genFromSym(blas64.Symmetric{N: n, Stride: lda, Uplo: uplo, Data: aCopy})

@@ -164,7 +164,7 @@ func testDgehrd(t *testing.T, impl Dgehrder, n, ilo, ihi, extra int, optwork boo
 		nh := ihi - ilo
 		impl.Dorgqr(nh, nh, nh, q.Data[(ilo+1)*q.Stride+ilo+1:], q.Stride, tau[ilo:ihi], work, len(work))
 	}
-	if !isOrthonormal(q) {
+	if !isOrthogonal(q) {
 		t.Errorf("%v: Q is not orthogonal\nQ=%v", prefix, q)
 	}
 

@@ -818,8 +818,8 @@ func printRowise(a []float64, m, n, lda int, beyond bool) {
 	}
 }
 
-// isOrthonormal returns whether a square matrix Q is orthogonal.
-func isOrthonormal(q blas64.General) bool {
+// isOrthogonal returns whether a square matrix Q is orthogonal.
+func isOrthogonal(q blas64.General) bool {
 	n := q.Rows
 	if n != q.Cols {
 		panic("matrix not square")
@@ -1382,7 +1382,7 @@ func randomOrthogonal(n int, rnd *rand.Rand) blas64.General {
 		// Compute Q * H_j and store the result into Q.
 		applyReflector(q, q, v)
 	}
-	if !isOrthonormal(q) {
+	if !isOrthogonal(q) {
 		panic("Q not orthogonal")
 	}
 	return q

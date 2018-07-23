@@ -71,7 +71,7 @@ func DlaqpsTest(t *testing.T, impl Dlaqpser) {
 			q := constructQ("QR", mo, kb, a.Data[test.offset*a.Stride:], a.Stride, tau)
 
 			// Check that Q is orthogonal.
-			if !isOrthonormal(q) {
+			if !isOrthogonal(q) {
 				t.Errorf("Case %v, Q not orthogonal", ti)
 			}
 

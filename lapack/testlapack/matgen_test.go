@@ -82,7 +82,7 @@ func TestDlagge(t *testing.T) {
 
 			Dlagge(a.Rows, a.Cols, 0, 0, d, a.Data, a.Stride, rnd, work)
 
-			if !isOrthonormal(a) {
+			if !isOrthogonal(a) {
 				t.Errorf("Case n=%v,lda=%v: unexpected result", n, lda)
 			}
 		}

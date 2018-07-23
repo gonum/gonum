@@ -23,8 +23,9 @@ var yenShortestPathTests = []struct {
 	WantPaths [][]int64
 }{
 	// Positive weighted graphs.
+	// https://en.wikipedia.org/wiki/Yen%27s_algorithm
 	{
-		Name:  "simple graph",
+		Name:  "wikipedia example",
 		Graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
 		Edges: []simple.WeightedEdge{
 			{F: simple.Node(0), T: simple.Node(1), W: 3},

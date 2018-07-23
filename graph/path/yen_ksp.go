@@ -11,29 +11,27 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
+
+// YenKShortestPath returns the k-shortest loopless paths from s to t in g. YenKShortestPath will
+// panic if g contains a negative edge weight.
 func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	yk := yenKSPAdjuster{
 		g:       g,
 		visited: make(map[int64]set.Int64s),
 	}
 
-	var weight Weighting
 	if wg, ok := g.(Weighted); ok {
-		weight = wg.Weight
+		yk.weight = wg.Weight
 	} else {
-		weight = UniformCost(g)
+		yk.weight = UniformCost(g)
 	}
-
-	yk.weight = weight
-
-	var paths [][]graph.Node
 
 	shortest, _ := DijkstraFrom(s, yk).To(t.ID())
-	if len(shortest) != 0 {
-		paths = append(paths, shortest)
-	} else {
-		return paths
+	if len(shortest) == 0 {
+		return nil
+
 	}
+	paths := [][]graph.Node{shortest}
 
 	var pot []yenShortest
 
@@ -45,7 +43,7 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 
 			var rootWeight float64
 			for x := 1; x < len(root); x++ {
-				w, _ := weight(root[x-1].ID(), root[x].ID())
+				w, _ := yk.weight(root[x-1].ID(), root[x].ID())
 				rootWeight += w
 			}
 
@@ -65,16 +63,12 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 			}
 
 			spath, weight := DijkstraFrom(spur, yk).To(t.ID())
-			size := len(root) - 1
 
 			if len(root) > 1 {
-				nroot := root[:size]
-				nroot = append(nroot, spath...)
-				potential := yenShortest{nroot, weight + rootWeight}
-				pot = append(pot, potential)
+				root = append(root[:len(root)-1], spath...)
+				pot = append(pot, yenShortest{root, weight + rootWeight})
 			} else {
-				potential := yenShortest{spath, weight}
-				pot = append(pot, potential)
+				pot = append(pot, yenShortest{spath, weight})
 			}
 
 			yk.visited = make(map[int64]set.Int64s)
@@ -85,9 +79,7 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 		}
 
 		sort.Sort(byPathWeight(pot))
-
 		paths = append(paths, pot[0].p)
-
 		pot = pot[1:]
 	}
 
@@ -123,7 +115,7 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 	nodes := g.g.From(id)
 
 	for i := 0; i < len(nodes); i++ {
-		if g.visited[id].Has(int64(nodes[i].ID())) {
+		if g.visited[id].Has(nodes[i].ID()) {
 			nodes[int64(i)] = nodes[len(nodes)-1]
 			nodes = nodes[:len(nodes)-1]
 			i--

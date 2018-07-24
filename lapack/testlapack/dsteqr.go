@@ -60,13 +60,14 @@ func DsteqrTest(t *testing.T, impl Dsteqrer) {
 				aCopy := make([]float64, len(a))
 				copy(aCopy, a)
 				if compz == lapack.OriginalEV {
-					// Compute triangular decomposition and orthonormal matrix.
 					uplo := blas.Upper
 					tau := make([]float64, n)
 					work := make([]float64, 1)
 					impl.Dsytrd(blas.Upper, n, a, lda, d, e, tau, work, -1)
 					work = make([]float64, int(work[0]))
+					// Reduce A to symmetric tridiagonal form.
 					impl.Dsytrd(uplo, n, a, lda, d, e, tau, work, len(work))
+					// Compute the orthogonal matrix Q.
 					impl.Dorgtr(uplo, n, a, lda, tau, work, len(work))
 				} else {
 					for i := 0; i < n; i++ {

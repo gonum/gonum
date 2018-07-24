@@ -851,6 +851,38 @@ func isOrthogonal(q blas64.General) bool {
 	return true
 }
 
+// hasOrthonormalColumns returns whether the columns of Q are orthonormal.
+func hasOrthonormalColumns(q blas64.General) bool {
+	m, n := q.Rows, q.Cols
+	if m < n {
+		panic("m < n")
+	}
+	ldq := q.Stride
+	const tol = 1e-13
+	for i := 0; i < n; i++ {
+		nrm := blas64.Nrm2(m, blas64.Vector{Data: q.Data[i:], Inc: ldq})
+		if math.IsNaN(nrm) {
+			return false
+		}
+		if math.Abs(nrm-1) > tol {
+			return false
+		}
+		for j := i + 1; j < n; j++ {
+			dot := blas64.Dot(m,
+				blas64.Vector{Data: q.Data[i:], Inc: ldq},
+				blas64.Vector{Data: q.Data[j:], Inc: ldq},
+			)
+			if math.IsNaN(dot) {
+				return false
+			}
+			if math.Abs(dot) > tol {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // copyMatrix copies an m×n matrix src of stride n into an m×n matrix dst of stride ld.
 func copyMatrix(m, n int, dst []float64, ld int, src []float64) {
 	for i := 0; i < m; i++ {

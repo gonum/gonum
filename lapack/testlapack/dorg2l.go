@@ -48,12 +48,12 @@ func Dorg2lTest(t *testing.T, impl Dorg2ler) {
 		copy(aCopy, a)
 		impl.Dorg2l(m, n, k, a, lda, tau[n-k:], work)
 		if !hasOrthonormalColumns(m, n, a, lda) {
-			t.Errorf("Q is not orthonormal. m = %v, n = %v, k = %v", m, n, k)
+			t.Errorf("Case m=%v, n=%v, k=%v: columns of Q not orthonormal", m, n, k)
 		}
 	}
 }
 
-// hasOrthornormalColumns checks that the columns of a are orthonormal.
+// hasOrthonormalColumns returns whether the columns of A are orthonormal.
 func hasOrthonormalColumns(m, n int, a []float64, lda int) bool {
 	for i := 0; i < n; i++ {
 		for j := i; j < n; j++ {

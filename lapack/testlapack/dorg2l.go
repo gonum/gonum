@@ -25,6 +25,10 @@ func Dorg2lTest(t *testing.T, impl Dorg2ler) {
 		{5, 4, 4, 0},
 		{3, 3, 2, 0},
 		{5, 5, 5, 0},
+		{5, 4, 3, 11},
+		{5, 4, 4, 11},
+		{3, 3, 2, 11},
+		{5, 5, 5, 11},
 	} {
 		m := test.m
 		n := test.n
@@ -42,8 +46,6 @@ func Dorg2lTest(t *testing.T, impl Dorg2ler) {
 		work := make([]float64, n)
 		impl.Dgeql2(m, n, a, lda, tau, work)
 
-		aCopy := make([]float64, len(a))
-		copy(aCopy, a)
 		impl.Dorg2l(m, n, k, a, lda, tau[n-k:], work)
 		if !hasOrthonormalColumns(blas64.General{m, n, lda, a}) {
 			t.Errorf("Case m=%v, n=%v, k=%v: columns of Q not orthonormal", m, n, k)

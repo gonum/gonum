@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"golang.org/x/exp/rand"
+
 	"gonum.org/v1/gonum/blas/blas64"
 )
 

@@ -282,7 +282,10 @@ func (m *Dense) rawRowView(i int) []float64 {
 // of the receiver.
 func (m *Dense) Slice(i, k, j, l int) Matrix {
 	mr, mc := m.Caps()
-	if i < 0 || mr <= i || j < 0 || mc <= j || k <= i || mr < k || l <= j || mc < l {
+	if i < 0 || mr <= i || j < 0 || mc <= j || k < i || mr < k || l < j || mc < l {
+		if i == k || j == l {
+			panic(ErrZeroLength)
+		}
 		panic(ErrIndexOutOfRange)
 	}
 	t := *m

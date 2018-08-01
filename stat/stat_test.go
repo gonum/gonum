@@ -7,10 +7,11 @@ package stat
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"golang.org/x/exp/rand"
 
 	"gonum.org/v1/gonum/floats"
 )

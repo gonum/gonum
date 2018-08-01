@@ -7,7 +7,9 @@ package stat
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"gonum.org/v1/gonum/floats"
@@ -986,6 +988,49 @@ func TestLinearRegression(t *testing.T) {
 		}
 		if !floats.EqualWithinAbsOrRel(r, test.r, test.tol, test.tol) {
 			t.Errorf("%s: unexpected r estimate: want:%v got:%v", test.name, test.r, r)
+		}
+	}
+}
+
+func BenchmarkLinearRegression(b *testing.B) {
+	rnd := rand.New(rand.NewSource(1))
+	slope, offset := 2.0, 3.0
+
+	maxn := 10000
+	xs := make([]float64, maxn)
+	ys := make([]float64, maxn)
+	weights := make([]float64, maxn)
+	for i := range xs {
+		x := rnd.Float64()
+		xs[i] = x
+		ys[i] = slope*x + offset
+		weights[i] = rnd.Float64()
+	}
+
+	for _, n := range []int{10, 100, 1000, maxn} {
+		for _, weighted := range []bool{true, false} {
+			for _, origin := range []bool{true, false} {
+				name := "n" + strconv.Itoa(n)
+				if weighted {
+					name += "wt"
+				} else {
+					name += "wf"
+				}
+				if origin {
+					name += "ot"
+				} else {
+					name += "of"
+				}
+				b.Run(name, func(b *testing.B) {
+					for i := 0; i < b.N; i++ {
+						var ws []float64
+						if weighted {
+							ws = weights[:n]
+						}
+						LinearRegression(xs[:n], ys[:n], ws, origin)
+					}
+				})
+			}
 		}
 	}
 }

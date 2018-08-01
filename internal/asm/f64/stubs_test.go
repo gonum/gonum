@@ -557,6 +557,7 @@ func TestLinfDist(t *testing.T) {
 			expect: 6,
 		},
 	} {
+
 		sg_ln, tg_ln := 4+j%2, 4+j%3
 		v.s, v.t = guardVector(v.s, s_gd, sg_ln), guardVector(v.t, t_gd, tg_ln)
 		s_lc, t_lc := v.s[sg_ln:len(v.s)-sg_ln], v.t[tg_ln:len(v.t)-tg_ln]
@@ -569,6 +570,66 @@ func TestLinfDist(t *testing.T) {
 		}
 		if !isValidGuard(v.t, t_gd, tg_ln) {
 			t.Errorf("Test %d Guard violated in t vector %v %v", j, v.t[:tg_ln], v.t[len(v.t)-tg_ln:])
+		}
+	}
+}
+
+func TestSum(t *testing.T) {
+	var srcGd float64 = -1
+	for j, v := range []struct {
+		src    []float64
+		expect float64
+	}{
+		{
+			src:    []float64{},
+			expect: 0,
+		},
+		{
+			src:    []float64{1},
+			expect: 1,
+		},
+		{
+			src:    []float64{nan},
+			expect: nan,
+		},
+		{
+			src:    []float64{1, 2, 3},
+			expect: 6,
+		},
+		{
+			src:    []float64{1, -4, 3},
+			expect: 0,
+		},
+		{
+			src:    []float64{1, 2, 3, 4},
+			expect: 10,
+		},
+		{
+			src:    []float64{1, 1, nan, 1, 1},
+			expect: nan,
+		},
+		{
+			src:    []float64{inf, 4, nan, -inf, 9},
+			expect: nan,
+		},
+		{
+			src:    []float64{1, 1, 1, 1, 9, 1, 1, 1, 2, 1, 1, 1, 1, 1, 5, 1},
+			expect: 29,
+		},
+		{
+			src:    []float64{1, 1, 1, 1, 9, 1, 1, 1, 2, 1, 1, 1, 1, 1, 5, 11, 1, 1, 1, 9, 1, 1, 1, 2, 1, 1, 1, 1, 1, 5, 1},
+			expect: 67,
+		},
+	} {
+		gdLn := 4 + j%2
+		v.src = guardVector(v.src, srcGd, gdLn)
+		src := v.src[gdLn : len(v.src)-gdLn]
+		ret := Sum(src)
+		if !same(ret, v.expect) {
+			t.Errorf("Test %d Sum error Got: %v Expected: %v", j, ret, v.expect)
+		}
+		if !isValidGuard(v.src, srcGd, gdLn) {
+			t.Errorf("Test %d Guard violated in src vector %v %v", j, v.src[:gdLn], v.src[len(v.src)-gdLn:])
 		}
 	}
 }

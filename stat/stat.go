@@ -284,6 +284,13 @@ func Covariance(x, y, weights []float64) float64 {
 	}
 	xu := Mean(x, weights)
 	yu := Mean(y, weights)
+	return covarianceMeans(x, y, weights, xu, yu)
+}
+
+// covarianceMeans returns the weighted covariance between x and y with the mean
+// of x and y already specified. See the documentation of Covariance for more
+// information.
+func covarianceMeans(x, y, weights []float64, xu, yu float64) float64 {
 	var (
 		ss            float64
 		xcompensation float64
@@ -761,8 +768,11 @@ func LinearRegression(x, y, weights []float64, origin bool) (alpha, beta float64
 		return 0, beta
 	}
 
-	beta = Covariance(x, y, weights) / Variance(x, weights)
-	alpha = Mean(y, weights) - beta*Mean(x, weights)
+	xu, xv := MeanVariance(x, weights)
+	yu := Mean(y, weights)
+	cov := covarianceMeans(x, y, weights, xu, yu)
+	beta = cov / xv
+	alpha = yu - beta*xu
 	return alpha, beta
 }
 

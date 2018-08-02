@@ -11,7 +11,6 @@ import (
 	"gonum.org/v1/gonum/graph/internal/set"
 )
 
-
 // YenKShortestPath returns the k-shortest loopless paths from s to t in g. YenKShortestPath will
 // panic if g contains a negative edge weight.
 func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
@@ -34,7 +33,6 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	paths := [][]graph.Node{shortest}
 
 	var pot []yenShortest
-
 	for i := int64(1); i < int64(k); i++ {
 		for n := 0; n < (len(paths[i-1]) - 1); n++ {
 			spur := paths[i-1][n]
@@ -63,7 +61,6 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 			}
 
 			spath, weight := DijkstraFrom(spur, yk).To(t.ID())
-
 			if len(root) > 1 {
 				root = append(root[:len(root)-1], spath...)
 				pot = append(pot, yenShortest{root, weight + rootWeight})
@@ -87,24 +84,19 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 }
 
 type yenShortest struct {
-	path      []graph.Node
+	path   []graph.Node
 	weight float64
 }
 
 type byPathWeight []yenShortest
 
-func (s byPathWeight) Len() int {
-	return len(s)
-}
+func (s byPathWeight) Len() int           { return len(s) }
+func (s byPathWeight) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s byPathWeight) Less(i, j int) bool { return s[i].weight < s[j].weight }
 
-func (s byPathWeight) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s byPathWeight) Less(i, j int) bool {
-	return s[i].weight < s[j].weight
-}
-
+// A wrapper for the graph imported to the YenKShotestPath functions.
+// This wrapper modifies the From function by not returning edges in the visited map.
+// The visited map is updated through each iteration of the YenKShortestPath function.
 type yenKSPAdjuster struct {
 	g       graph.Graph
 	visited map[int64]set.Int64s

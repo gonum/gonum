@@ -28,22 +28,22 @@ var yenShortestPathTests = []struct {
 		name:  "wikipedia example",
 		graph: func() graph.WeightedEdgeAdder { return simple.NewWeightedDirectedGraph(0, math.Inf(1)) },
 		edges: []simple.WeightedEdge{
-			{F: simple.Node(0), T: simple.Node(1), W: 3},
-			{F: simple.Node(0), T: simple.Node(2), W: 2},
-			{F: simple.Node(2), T: simple.Node(1), W: 1},
-			{F: simple.Node(1), T: simple.Node(3), W: 4},
-			{F: simple.Node(2), T: simple.Node(3), W: 2},
-			{F: simple.Node(2), T: simple.Node(4), W: 3},
-			{F: simple.Node(3), T: simple.Node(4), W: 2},
-			{F: simple.Node(3), T: simple.Node(5), W: 1},
-			{F: simple.Node(4), T: simple.Node(5), W: 2},
+			{F: simple.Node('C'), T: simple.Node('D'), W: 3},
+			{F: simple.Node('C'), T: simple.Node('E'), W: 2},
+			{F: simple.Node('E'), T: simple.Node('D'), W: 1},
+			{F: simple.Node('D'), T: simple.Node('F'), W: 4},
+			{F: simple.Node('E'), T: simple.Node('F'), W: 2},
+			{F: simple.Node('E'), T: simple.Node('G'), W: 3},
+			{F: simple.Node('F'), T: simple.Node('G'), W: 2},
+			{F: simple.Node('F'), T: simple.Node('H'), W: 1},
+			{F: simple.Node('G'), T: simple.Node('H'), W: 2},
 		},
-		query: simple.Edge{F: simple.Node(0), T: simple.Node(5)},
+		query: simple.Edge{F: simple.Node('C'), T: simple.Node('H')},
 		k:     3,
 		wantPaths: [][]int64{
-			{0, 2, 3, 5},
-			{0, 2, 4, 5},
-			{0, 1, 3, 5},
+			{'C', 'E', 'F', 'H'},
+			{'C', 'E', 'G', 'H'},
+			{'C', 'D', 'F', 'H'},
 		},
 	},
 	{
@@ -64,7 +64,7 @@ var yenShortestPathTests = []struct {
 		edges:     []simple.WeightedEdge{},
 		query:     simple.Edge{F: simple.Node(0), T: simple.Node(1)},
 		k:         1,
-		wantPaths: nil,
+		wantPaths: [][]int64{},
 	},
 	{
 		name:  "N Star Graph",
@@ -82,18 +82,15 @@ var yenShortestPathTests = []struct {
 	},
 }
 
-func toIntPath(nodePaths [][]graph.Node) [][]int64 {
-	var paths [][]int64
-
-	for _, nodes := range nodePaths {
-		var path []int64
-		for _, node := range nodes {
-			path = append(path, node.ID())
+func pathIDs(paths [][]graph.Node) [][]int64 {
+	ids := make([][]int64, len(paths))
+	for i, p := range paths {
+		ids[i] = make([]int64, len(p))
+		for j, n := range p {
+			ids[i][j] = n.ID()
 		}
-		paths = append(paths, path)
 	}
-
-	return paths
+	return ids
 }
 
 func TestYenKSP(t *testing.T) {
@@ -104,10 +101,10 @@ func TestYenKSP(t *testing.T) {
 		}
 
 		got := YenKShortestPath(g.(graph.Graph), test.k, test.query.From(), test.query.To())
-		gotIds := toIntPath(got)
+		gotIDs := pathIDs(got)
 
-		if !reflect.DeepEqual(test.wantPaths, gotIds) {
-			t.Errorf("unexpected result for %q:\ngot: %v\nwant:%v", test.name, gotIds, test.wantPaths)
+		if !reflect.DeepEqual(test.wantPaths, gotIDs) {
+			t.Errorf("unexpected result for %q:\ngot: %v\nwant:%v", test.name, gotIDs, test.wantPaths)
 		}
 	}
 }

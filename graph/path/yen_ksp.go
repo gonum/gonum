@@ -8,7 +8,7 @@ import (
 	"sort"
 
 	"gonum.org/v1/gonum/graph"
-	"gonum.org/v1/gonum/graph/internal/set"
+	//"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // YenKShortestPath returns the k-shortest loopless paths from s to t in g. YenKShortestPath will
@@ -16,7 +16,7 @@ import (
 func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	yk := yenKSPAdjuster{
 		g:       g,
-		visited: make(map[int64]set.Int64s),
+		visited: make(map[[2]int64]bool),
 	}
 
 	if wg, ok := g.(Weighted); ok {
@@ -68,7 +68,7 @@ func YenKShortestPath(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 				pot = append(pot, yenShortest{spath, weight})
 			}
 
-			yk.visited = make(map[int64]set.Int64s)
+			yk.visited = make(map[[2]int64]bool)
 		}
 
 		if len(pot) == 0 {
@@ -99,7 +99,7 @@ func (s byPathWeight) Less(i, j int) bool { return s[i].weight < s[j].weight }
 // The visited map is updated through each iteration of the YenKShortestPath function.
 type yenKSPAdjuster struct {
 	g       graph.Graph
-	visited map[int64]set.Int64s
+	visited map[[2]int64]bool
 	weight  Weighting
 }
 
@@ -107,7 +107,7 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 	nodes := g.g.From(id)
 
 	for i := 0; i < len(nodes); i++ {
-		if g.visited[id].Has(nodes[i].ID()) {
+		if g.visited[[2]int64{id, nodes[i].ID()}] {
 			nodes[int64(i)] = nodes[len(nodes)-1]
 			nodes = nodes[:len(nodes)-1]
 			i--
@@ -117,14 +117,14 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 	return nodes
 }
 
-func (g yenKSPAdjuster) addVisited(parent, id int64) {
-	visited, ok := g.visited[parent]
-	if !ok {
+func (g yenKSPAdjuster) addVisited(u, v int64) {
+	g.visited[[2]int64{u, v}] = true
+	/*if !ok {
 		visited = make(set.Int64s)
 		g.visited[parent] = visited
 	}
 
-	visited.Add(id)
+	visited.Add(id)*/
 }
 
 func (g yenKSPAdjuster) Edge(uid, vid int64) graph.Edge {

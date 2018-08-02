@@ -8,7 +8,6 @@ import (
 	"sort"
 
 	"gonum.org/v1/gonum/graph"
-	//"gonum.org/v1/gonum/graph/internal/set"
 )
 
 // YenKShortestPath returns the k-shortest loopless paths from s to t in g. YenKShortestPath will
@@ -119,12 +118,11 @@ func (g yenKSPAdjuster) From(id int64) []graph.Node {
 
 func (g yenKSPAdjuster) addVisited(u, v int64) {
 	g.visited[[2]int64{u, v}] = true
-	/*if !ok {
-		visited = make(set.Int64s)
-		g.visited[parent] = visited
-	}
 
-	visited.Add(id)*/
+	/*
+		if g.isDirected {
+			g.visited[[2]int64{v, u}] = true
+		}*/
 }
 
 func (g yenKSPAdjuster) Edge(uid, vid int64) graph.Edge {

@@ -192,8 +192,8 @@ func TestExhaustiveAStar(t *testing.T) {
 	}
 
 	ps := DijkstraAllPaths(g)
-	for _, start := range g.Nodes() {
-		for _, goal := range g.Nodes() {
+	for _, start := range graph.NodesOf(g.Nodes()) {
+		for _, goal := range graph.NodesOf(g.Nodes()) {
 			pt, _ := AStar(start, goal, g, heuristic)
 			gotPath, gotWeight := pt.To(goal.ID())
 			wantPath, wantWeight, _ := ps.Between(start.ID(), goal.ID())
@@ -226,8 +226,8 @@ func (e weightedEdge) To() graph.Node   { return e.to }
 func (e weightedEdge) Weight() float64  { return e.cost }
 
 func isMonotonic(g UndirectedWeightLister, h Heuristic) (ok bool, at graph.Edge, goal graph.Node) {
-	for _, goal := range g.Nodes() {
-		for _, edge := range g.WeightedEdges() {
+	for _, goal := range graph.NodesOf(g.Nodes()) {
+		for _, edge := range graph.WeightedEdgesOf(g.WeightedEdges()) {
 			from := edge.From()
 			to := edge.To()
 			w, ok := g.Weight(from.ID(), to.ID())

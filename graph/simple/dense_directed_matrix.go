@@ -85,18 +85,14 @@ func (g *DirectedMatrix) has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *DirectedMatrix) Nodes() []graph.Node {
+func (g *DirectedMatrix) Nodes() graph.Nodes {
 	if g.nodes != nil {
 		nodes := make([]graph.Node, len(g.nodes))
 		copy(nodes, g.nodes)
-		return nodes
+		return NewNodeIterator(nodes)
 	}
 	r, _ := g.mat.Dims()
-	nodes := make([]graph.Node, r)
-	for i := 0; i < r; i++ {
-		nodes[i] = Node(i)
-	}
-	return nodes
+	return newImplicitIterator(0, r)
 }
 
 // Edges returns all the edges in the graph.
@@ -117,11 +113,11 @@ func (g *DirectedMatrix) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *DirectedMatrix) From(id int64) []graph.Node {
+func (g *DirectedMatrix) From(id int64) graph.Nodes {
 	if !g.has(id) {
 		return nil
 	}
-	var neighbors []graph.Node
+	var nodes []graph.Node
 	_, c := g.mat.Dims()
 	for j := 0; j < c; j++ {
 		if int64(j) == id {
@@ -129,18 +125,18 @@ func (g *DirectedMatrix) From(id int64) []graph.Node {
 		}
 		// id is not greater than maximum int by this point.
 		if !isSame(g.mat.At(int(id), j), g.absent) {
-			neighbors = append(neighbors, g.Node(int64(j)))
+			nodes = append(nodes, g.Node(int64(j)))
 		}
 	}
-	return neighbors
+	return NewNodeIterator(nodes)
 }
 
 // To returns all nodes in g that can reach directly to n.
-func (g *DirectedMatrix) To(id int64) []graph.Node {
+func (g *DirectedMatrix) To(id int64) graph.Nodes {
 	if !g.has(id) {
 		return nil
 	}
-	var neighbors []graph.Node
+	var nodes []graph.Node
 	r, _ := g.mat.Dims()
 	for i := 0; i < r; i++ {
 		if int64(i) == id {
@@ -148,10 +144,10 @@ func (g *DirectedMatrix) To(id int64) []graph.Node {
 		}
 		// id is not greater than maximum int by this point.
 		if !isSame(g.mat.At(i, int(id)), g.absent) {
-			neighbors = append(neighbors, g.Node(int64(i)))
+			nodes = append(nodes, g.Node(int64(i)))
 		}
 	}
-	return neighbors
+	return NewNodeIterator(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
@@ -249,34 +245,6 @@ func (g *DirectedMatrix) RemoveEdge(fid, tid int64) {
 	}
 	// fid and tid are not greater than maximum int by this point.
 	g.mat.Set(int(fid), int(tid), g.absent)
-}
-
-// Degree returns the in+out degree of n in g.
-func (g *DirectedMatrix) Degree(id int64) int {
-	if !g.has(id) {
-		return 0
-	}
-	var deg int
-	r, c := g.mat.Dims()
-	for i := 0; i < r; i++ {
-		if int64(i) == id {
-			continue
-		}
-		// id is not greater than maximum int by this point.
-		if !isSame(g.mat.At(int(id), i), g.absent) {
-			deg++
-		}
-	}
-	for i := 0; i < c; i++ {
-		if int64(i) == id {
-			continue
-		}
-		// id is not greater than maximum int by this point.
-		if !isSame(g.mat.At(i, int(id)), g.absent) {
-			deg++
-		}
-	}
-	return deg
 }
 
 // Matrix returns the mat.Matrix representation of the graph. The orientation

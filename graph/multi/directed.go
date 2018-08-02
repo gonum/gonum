@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 var (
@@ -154,7 +155,7 @@ func (g *DirectedGraph) Has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *DirectedGraph) Nodes() []graph.Node {
+func (g *DirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
 		return nil
 	}
@@ -164,12 +165,12 @@ func (g *DirectedGraph) Nodes() []graph.Node {
 		nodes[i] = n
 		i++
 	}
-	return nodes
+	return simple.NewNodeIterator(nodes)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
 // is a multi.Edge.
-func (g *DirectedGraph) Edges() []graph.Edge {
+func (g *DirectedGraph) Edges() graph.Edges {
 	var edges []graph.Edge
 	for _, u := range g.nodes {
 		for _, e := range g.from[u.ID()] {
@@ -182,11 +183,11 @@ func (g *DirectedGraph) Edges() []graph.Edge {
 			}
 		}
 	}
-	return edges
+	return simple.NewEdgeIterator(edges)
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *DirectedGraph) From(id int64) []graph.Node {
+func (g *DirectedGraph) From(id int64) graph.Nodes {
 	if _, ok := g.from[id]; !ok {
 		return nil
 	}
@@ -197,11 +198,11 @@ func (g *DirectedGraph) From(id int64) []graph.Node {
 		from[i] = g.nodes[vid]
 		i++
 	}
-	return from
+	return simple.NewNodeIterator(from)
 }
 
 // To returns all nodes in g that can reach directly to n.
-func (g *DirectedGraph) To(id int64) []graph.Node {
+func (g *DirectedGraph) To(id int64) graph.Nodes {
 	if _, ok := g.from[id]; !ok {
 		return nil
 	}
@@ -212,7 +213,7 @@ func (g *DirectedGraph) To(id int64) []graph.Node {
 		to[i] = g.nodes[uid]
 		i++
 	}
-	return to
+	return simple.NewNodeIterator(to)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
@@ -229,7 +230,7 @@ func (g *DirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.Edge is a multi.Edge if an edge exists.
 func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
-	lines := g.Lines(uid, vid)
+	lines := graph.LinesOf(g.Lines(uid, vid))
 	if len(lines) == 0 {
 		return nil
 	}
@@ -238,7 +239,7 @@ func (g *DirectedGraph) Edge(uid, vid int64) graph.Edge {
 
 // Lines returns the lines from u to v if such any such lines exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *DirectedGraph) Lines(uid, vid int64) []graph.Line {
+func (g *DirectedGraph) Lines(uid, vid int64) graph.Lines {
 	edge := g.from[uid][vid]
 	if len(edge) == 0 {
 		return nil
@@ -247,26 +248,11 @@ func (g *DirectedGraph) Lines(uid, vid int64) []graph.Line {
 	for _, l := range edge {
 		lines = append(lines, l)
 	}
-	return lines
+	return NewLineIterator(lines)
 }
 
 // HasEdgeFromTo returns whether an edge exists in the graph from u to v.
 func (g *DirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
 	_, ok := g.from[uid][vid]
 	return ok
-}
-
-// Degree returns the in+out degree of n in g.
-func (g *DirectedGraph) Degree(id int64) int {
-	if _, ok := g.nodes[id]; !ok {
-		return 0
-	}
-	var deg int
-	for _, e := range g.from[id] {
-		deg += len(e)
-	}
-	for _, e := range g.to[id] {
-		deg += len(e)
-	}
-	return deg
 }

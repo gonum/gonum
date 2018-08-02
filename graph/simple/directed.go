@@ -131,7 +131,7 @@ func (g *DirectedGraph) Has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *DirectedGraph) Nodes() []graph.Node {
+func (g *DirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
 		return nil
 	}
@@ -141,7 +141,7 @@ func (g *DirectedGraph) Nodes() []graph.Node {
 		nodes[i] = n
 		i++
 	}
-	return nodes
+	return NewNodeIterator(nodes)
 }
 
 // Edges returns all the edges in the graph.
@@ -156,7 +156,7 @@ func (g *DirectedGraph) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *DirectedGraph) From(id int64) []graph.Node {
+func (g *DirectedGraph) From(id int64) graph.Nodes {
 	if _, ok := g.from[id]; !ok {
 		return nil
 	}
@@ -167,11 +167,11 @@ func (g *DirectedGraph) From(id int64) []graph.Node {
 		from[i] = g.nodes[vid]
 		i++
 	}
-	return from
+	return NewNodeIterator(from)
 }
 
 // To returns all nodes in g that can reach directly to n.
-func (g *DirectedGraph) To(id int64) []graph.Node {
+func (g *DirectedGraph) To(id int64) graph.Nodes {
 	if _, ok := g.from[id]; !ok {
 		return nil
 	}
@@ -182,7 +182,7 @@ func (g *DirectedGraph) To(id int64) []graph.Node {
 		to[i] = g.nodes[uid]
 		i++
 	}
-	return to
+	return NewNodeIterator(to)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y without
@@ -211,12 +211,4 @@ func (g *DirectedGraph) HasEdgeFromTo(uid, vid int64) bool {
 		return false
 	}
 	return true
-}
-
-// Degree returns the in+out degree of n in g.
-func (g *DirectedGraph) Degree(id int64) int {
-	if _, ok := g.nodes[id]; !ok {
-		return 0
-	}
-	return len(g.from[id]) + len(g.to[id])
 }

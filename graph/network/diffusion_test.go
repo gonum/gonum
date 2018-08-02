@@ -304,10 +304,10 @@ type sortedNodeGraph struct {
 	graph.Graph
 }
 
-func (g sortedNodeGraph) Nodes() []graph.Node {
-	n := g.Graph.Nodes()
+func (g sortedNodeGraph) Nodes() graph.Nodes {
+	n := graph.NodesOf(g.Graph.Nodes())
 	sort.Sort(ordered.ByID(n))
-	return n
+	return simple.NewNodeIterator(n)
 }
 
 var diffuseToEquilibriumTests = []struct {

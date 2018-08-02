@@ -123,7 +123,7 @@ func (g *UndirectedGraph) Has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *UndirectedGraph) Nodes() []graph.Node {
+func (g *UndirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
 		return nil
 	}
@@ -133,7 +133,7 @@ func (g *UndirectedGraph) Nodes() []graph.Node {
 		nodes[i] = n
 		i++
 	}
-	return nodes
+	return NewNodeIterator(nodes)
 }
 
 // Edges returns all the edges in the graph.
@@ -159,7 +159,7 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *UndirectedGraph) From(id int64) []graph.Node {
+func (g *UndirectedGraph) From(id int64) graph.Nodes {
 	if !g.Has(id) {
 		return nil
 	}
@@ -170,7 +170,7 @@ func (g *UndirectedGraph) From(id int64) []graph.Node {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return nodes
+	return NewNodeIterator(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -192,12 +192,4 @@ func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 		return nil
 	}
 	return edge
-}
-
-// Degree returns the degree of n in g.
-func (g *UndirectedGraph) Degree(id int64) int {
-	if _, ok := g.nodes[id]; !ok {
-		return 0
-	}
-	return len(g.edges[id])
 }

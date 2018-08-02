@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 var (
@@ -147,7 +148,7 @@ func (g *WeightedUndirectedGraph) Has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *WeightedUndirectedGraph) Nodes() []graph.Node {
+func (g *WeightedUndirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
 		return nil
 	}
@@ -157,7 +158,7 @@ func (g *WeightedUndirectedGraph) Nodes() []graph.Node {
 		nodes[i] = n
 		i++
 	}
-	return nodes
+	return simple.NewNodeIterator(nodes)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
@@ -188,7 +189,7 @@ func (g *WeightedUndirectedGraph) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *WeightedUndirectedGraph) From(id int64) []graph.Node {
+func (g *WeightedUndirectedGraph) From(id int64) graph.Nodes {
 	if !g.Has(id) {
 		return nil
 	}
@@ -199,7 +200,7 @@ func (g *WeightedUndirectedGraph) From(id int64) []graph.Node {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return nodes
+	return simple.NewNodeIterator(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -210,12 +211,12 @@ func (g *WeightedUndirectedGraph) HasEdgeBetween(xid, yid int64) bool {
 
 // Lines returns the lines from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedUndirectedGraph) Lines(uid, vid int64) []graph.Line {
+func (g *WeightedUndirectedGraph) Lines(uid, vid int64) graph.Lines {
 	return g.LinesBetween(uid, vid)
 }
 
 // LinesBetween returns the lines between nodes x and y.
-func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) []graph.Line {
+func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 	edge := g.lines[xid][yid]
 	if len(edge) == 0 {
 		return nil
@@ -230,7 +231,7 @@ func (g *WeightedUndirectedGraph) LinesBetween(xid, yid int64) []graph.Line {
 		seen[lid] = struct{}{}
 		lines = append(lines, l)
 	}
-	return lines
+	return NewLineIterator(lines)
 }
 
 // Edge returns the edge from u to v if such an edge exists and nil otherwise.
@@ -249,7 +250,7 @@ func (g *WeightedUndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.WeightedEdge is a multi.WeightedEdge if an edge exists.
 func (g *WeightedUndirectedGraph) WeightedEdge(uid, vid int64) graph.WeightedEdge {
-	lines := g.WeightedLines(uid, vid)
+	lines := graph.WeightedLinesOf(g.WeightedLines(uid, vid))
 	if len(lines) == 0 {
 		return nil
 	}
@@ -263,12 +264,12 @@ func (g *WeightedUndirectedGraph) WeightedEdgeBetween(xid, yid int64) graph.Weig
 
 // WeightedLines returns the lines from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *WeightedUndirectedGraph) WeightedLines(uid, vid int64) []graph.WeightedLine {
+func (g *WeightedUndirectedGraph) WeightedLines(uid, vid int64) graph.WeightedLines {
 	return g.WeightedLinesBetween(uid, vid)
 }
 
 // WeightedLinesBetween returns the lines between nodes x and y.
-func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) []graph.WeightedLine {
+func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) graph.WeightedLines {
 	edge := g.lines[xid][yid]
 	if len(edge) == 0 {
 		return nil
@@ -283,24 +284,12 @@ func (g *WeightedUndirectedGraph) WeightedLinesBetween(xid, yid int64) []graph.W
 		seen[lid] = struct{}{}
 		lines = append(lines, l)
 	}
-	return lines
+	return NewWeightedLineIterator(lines)
 }
 
 // Weight returns the weight for the lines between x and y summarised by the receiver's
 // EdgeWeightFunc. Weight returns true if an edge exists between x and y, false otherwise.
 func (g *WeightedUndirectedGraph) Weight(xid, yid int64) (w float64, ok bool) {
-	lines := g.WeightedLines(xid, yid)
+	lines := graph.WeightedLinesOf(g.WeightedLines(xid, yid))
 	return WeightedEdge{Lines: lines, WeightFunc: g.EdgeWeightFunc}.Weight(), len(lines) != 0
-}
-
-// Degree returns the degree of n in g.
-func (g *WeightedUndirectedGraph) Degree(id int64) int {
-	if _, ok := g.nodes[id]; !ok {
-		return 0
-	}
-	var deg int
-	for _, e := range g.lines[id] {
-		deg += len(e)
-	}
-	return deg
 }

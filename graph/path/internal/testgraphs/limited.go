@@ -147,12 +147,12 @@ func (l *LimitedVisionGrid) XY(id int64) (x, y float64) {
 }
 
 // Nodes returns all the nodes in the grid.
-func (l *LimitedVisionGrid) Nodes() []graph.Node {
+func (l *LimitedVisionGrid) Nodes() graph.Nodes {
 	nodes := make([]graph.Node, 0, len(l.Grid.open))
 	for id := range l.Grid.open {
 		nodes = append(nodes, simple.Node(id))
 	}
-	return nodes
+	return simple.NewNodeIterator(nodes)
 }
 
 // NodeAt returns the node at (r, c). The returned node may be open or closed.
@@ -166,7 +166,7 @@ func (l *LimitedVisionGrid) Has(id int64) bool {
 }
 
 // From returns nodes that are optimistically reachable from u.
-func (l *LimitedVisionGrid) From(uid int64) []graph.Node {
+func (l *LimitedVisionGrid) From(uid int64) graph.Nodes {
 	if !l.Has(uid) {
 		return nil
 	}
@@ -180,7 +180,7 @@ func (l *LimitedVisionGrid) From(uid int64) []graph.Node {
 			}
 		}
 	}
-	return to
+	return simple.NewNodeIterator(to)
 }
 
 // HasEdgeBetween optimistically returns whether an edge is exists between u and v.

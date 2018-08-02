@@ -51,7 +51,7 @@ func edgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -60,7 +60,7 @@ func edgeWeightedPageRank(g graph.WeightedDirected, damp, tol float64) map[int64
 	m := mat.NewDense(len(nodes), len(nodes), nil)
 	dangling := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.From(u.ID())
+		to := graph.NodesOf(g.From(u.ID()))
 		var z float64
 		for _, v := range to {
 			if w, ok := g.Weight(u.ID(), v.ID()); ok {
@@ -134,7 +134,7 @@ func edgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -144,7 +144,7 @@ func edgeWeightedPageRankSparse(g graph.WeightedDirected, damp, tol float64) map
 	var dangling compressedRow
 	df := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.From(u.ID())
+		to := graph.NodesOf(g.From(u.ID()))
 		var z float64
 		for _, v := range to {
 			if w, ok := g.Weight(u.ID(), v.ID()); ok {
@@ -215,7 +215,7 @@ func pageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -224,7 +224,7 @@ func pageRank(g graph.Directed, damp, tol float64) map[int64]float64 {
 	m := mat.NewDense(len(nodes), len(nodes), nil)
 	dangling := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.From(u.ID())
+		to := graph.NodesOf(g.From(u.ID()))
 		f := damp / float64(len(to))
 		for _, v := range to {
 			m.Set(indexOf[v.ID()], j, f)
@@ -288,7 +288,7 @@ func pageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
 	//
 	// http://www.ams.org/samplings/feature-column/fcarc-pagerank
 
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 	indexOf := make(map[int64]int, len(nodes))
 	for i, n := range nodes {
 		indexOf[n.ID()] = i
@@ -298,7 +298,7 @@ func pageRankSparse(g graph.Directed, damp, tol float64) map[int64]float64 {
 	var dangling compressedRow
 	df := damp / float64(len(nodes))
 	for j, u := range nodes {
-		to := g.From(u.ID())
+		to := graph.NodesOf(g.From(u.ID()))
 		f := damp / float64(len(to))
 		for _, v := range to {
 			m.addTo(indexOf[v.ID()], j, f)

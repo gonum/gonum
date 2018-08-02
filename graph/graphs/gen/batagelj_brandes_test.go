@@ -185,15 +185,16 @@ func TestPowerLawUndirected(t *testing.T) {
 			}
 
 			nodes := g.Nodes()
-			if len(nodes) != n {
-				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
+			if nodes.Len() != n {
+				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, nodes.Len())
 			}
 
-			for _, u := range nodes {
+			for nodes.Next() {
+				u := nodes.Node()
 				uid := u.ID()
 				var lines int
-				for _, v := range g.From(uid) {
-					lines += len(g.Lines(uid, v.ID()))
+				for _, v := range graph.NodesOf(g.From(uid)) {
+					lines += g.Lines(uid, v.ID()).Len()
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
@@ -214,15 +215,16 @@ func TestPowerLawDirected(t *testing.T) {
 			}
 
 			nodes := g.Nodes()
-			if len(nodes) != n {
-				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
+			if nodes.Len() != n {
+				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, nodes.Len())
 			}
 
-			for _, u := range nodes {
+			for nodes.Next() {
+				u := nodes.Node()
 				uid := u.ID()
 				var lines int
-				for _, v := range g.From(uid) {
-					lines += len(g.Lines(uid, v.ID()))
+				for _, v := range graph.NodesOf(g.From(uid)) {
+					lines += g.Lines(uid, v.ID()).Len()
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
@@ -243,8 +245,8 @@ func TestBipartitePowerLawUndirected(t *testing.T) {
 			}
 
 			nodes := g.Nodes()
-			if len(nodes) != 2*n {
-				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
+			if nodes.Len() != 2*n {
+				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, nodes.Len())
 			}
 			if len(p1) != n {
 				t.Errorf("unexpected number of nodes in p1: n=%d, d=%d: got:%d", n, d, len(p1))
@@ -266,11 +268,12 @@ func TestBipartitePowerLawUndirected(t *testing.T) {
 				t.Errorf("unexpected overlap in partition membership: n=%d, d=%d: got:%d", n, d, len(o))
 			}
 
-			for _, u := range nodes {
+			for nodes.Next() {
+				u := nodes.Node()
 				uid := u.ID()
 				var lines int
-				for _, v := range g.From(uid) {
-					lines += len(g.Lines(uid, v.ID()))
+				for _, v := range graph.NodesOf(g.From(uid)) {
+					lines += g.Lines(uid, v.ID()).Len()
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)
@@ -291,8 +294,8 @@ func TestBipartitePowerLawDirected(t *testing.T) {
 			}
 
 			nodes := g.Nodes()
-			if len(nodes) != 2*n {
-				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, len(nodes))
+			if nodes.Len() != 2*n {
+				t.Errorf("unexpected number of nodes in graph: n=%d, d=%d: got:%d", n, d, nodes.Len())
 			}
 			if len(p1) != n {
 				t.Errorf("unexpected number of nodes in p1: n=%d, d=%d: got:%d", n, d, len(p1))
@@ -314,11 +317,12 @@ func TestBipartitePowerLawDirected(t *testing.T) {
 				t.Errorf("unexpected overlap in partition membership: n=%d, d=%d: got:%d", n, d, len(o))
 			}
 
-			for _, u := range nodes {
+			for nodes.Next() {
+				u := nodes.Node()
 				uid := u.ID()
 				var lines int
-				for _, v := range g.From(uid) {
-					lines += len(g.Lines(uid, v.ID()))
+				for _, v := range graph.NodesOf(g.From(uid)) {
+					lines += g.Lines(uid, v.ID()).Len()
 				}
 				if lines < d {
 					t.Errorf("unexpected degree below d: n=%d, d=%d: got:%d", n, d, lines)

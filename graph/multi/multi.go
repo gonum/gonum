@@ -110,3 +110,113 @@ func (l WeightedLine) ID() int64 { return l.UID }
 
 // Weight returns the weight of the edge.
 func (l WeightedLine) Weight() float64 { return l.W }
+
+// LineIterator implements the graph.Lines and graph.LineSlicer interfaces.
+// The iteration order of LineIterator is the order of edges passed to
+// NewLineIterator.
+type LineIterator struct {
+	idx   int
+	edges []graph.Line
+}
+
+// NewLineIterator returns an LineIterator initialized with the provided edges.
+func NewLineIterator(edges []graph.Line) *LineIterator {
+	return &LineIterator{idx: -1, edges: edges}
+}
+
+func (e *LineIterator) Len() int {
+	if e.idx >= len(e.edges) {
+		return 0
+	}
+	if e.idx <= 0 {
+		return len(e.edges)
+	}
+	return len(e.edges[e.idx:])
+}
+
+func (e *LineIterator) Next() bool {
+	if uint(e.idx)+1 < uint(len(e.edges)) {
+		e.idx++
+		return true
+	}
+	e.idx = len(e.edges)
+	return false
+}
+
+func (e *LineIterator) Line() graph.Line {
+	if e.idx >= len(e.edges) || e.idx < 0 {
+		return nil
+	}
+	return e.edges[e.idx]
+}
+
+func (e *LineIterator) LineSlice() []graph.Line {
+	if e.idx >= len(e.edges) {
+		return nil
+	}
+	idx := e.idx
+	if idx == -1 {
+		idx = 0
+	}
+	e.idx = len(e.edges)
+	return e.edges[idx:]
+}
+
+func (e *LineIterator) Reset() {
+	e.idx = -1
+}
+
+// WeightedLineIterator implements the graph.Lines and graph.LineSlicer interfaces.
+// The iteration order of WeightedLineIterator is the order of edges passed to
+// NewLineIterator.
+type WeightedLineIterator struct {
+	idx   int
+	edges []graph.WeightedLine
+}
+
+// NewWeightedLineIterator returns an WeightedLineIterator initialized with the provided edges.
+func NewWeightedLineIterator(edges []graph.WeightedLine) *WeightedLineIterator {
+	return &WeightedLineIterator{idx: -1, edges: edges}
+}
+
+func (e *WeightedLineIterator) Len() int {
+	if e.idx >= len(e.edges) {
+		return 0
+	}
+	if e.idx <= 0 {
+		return len(e.edges)
+	}
+	return len(e.edges[e.idx:])
+}
+
+func (e *WeightedLineIterator) Next() bool {
+	if uint(e.idx)+1 < uint(len(e.edges)) {
+		e.idx++
+		return true
+	}
+	e.idx = len(e.edges)
+	return false
+}
+
+func (e *WeightedLineIterator) WeightedLine() graph.WeightedLine {
+	if e.idx >= len(e.edges) || e.idx < 0 {
+		return nil
+	}
+	return e.edges[e.idx]
+}
+
+func (e *WeightedLineIterator) WeightedLines() []graph.WeightedLine {
+	if e.idx >= len(e.edges) {
+		return nil
+	}
+	idx := e.idx
+	if idx == -1 {
+		idx = 0
+	}
+	e.idx = len(e.edges)
+	return e.edges[idx:]
+}
+
+func (e *WeightedLineIterator) Reset() {
+	e.idx = -1
+}

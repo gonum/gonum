@@ -26,7 +26,7 @@ func KCliqueCommunities(k int, g graph.Undirected) [][]graph.Node {
 	}
 	switch k {
 	case 1:
-		return [][]graph.Node{g.Nodes()}
+		return [][]graph.Node{graph.NodesOf(g.Nodes())}
 	case 2:
 		return topo.ConnectedComponents(g)
 	default:

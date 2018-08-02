@@ -44,7 +44,7 @@ func KCore(k int, g graph.Undirected) []graph.Node {
 // s, a set of relative offsets into l for each k-core, where k is an index
 // into s.
 func degeneracyOrdering(g graph.Undirected) (l []graph.Node, s []int) {
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 
 	// The algorithm used here is essentially as described at
 	// http://en.wikipedia.org/w/index.php?title=Degeneracy_%28graph_theory%29&oldid=640308710
@@ -61,7 +61,7 @@ func degeneracyOrdering(g graph.Undirected) (l []graph.Node, s []int) {
 	)
 	for _, n := range nodes {
 		id := n.ID()
-		adj := g.From(id)
+		adj := graph.NodesOf(g.From(id))
 		neighbours[id] = adj
 		dv[id] = len(adj)
 		if len(adj) > maxDegree {
@@ -133,7 +133,7 @@ func degeneracyOrdering(g graph.Undirected) (l []graph.Node, s []int) {
 
 // BronKerbosch returns the set of maximal cliques of the undirected graph g.
 func BronKerbosch(g graph.Undirected) [][]graph.Node {
-	nodes := g.Nodes()
+	nodes := graph.NodesOf(g.Nodes())
 
 	// The algorithm used here is essentially BronKerbosch3 as described at
 	// http://en.wikipedia.org/w/index.php?title=Bron%E2%80%93Kerbosch_algorithm&oldid=656805858
@@ -147,7 +147,7 @@ func BronKerbosch(g graph.Undirected) [][]graph.Node {
 	order, _ := degeneracyOrdering(g)
 	ordered.Reverse(order)
 	for _, v := range order {
-		neighbours := g.From(v.ID())
+		neighbours := graph.NodesOf(g.From(v.ID()))
 		nv := make(set.Nodes, len(neighbours))
 		for _, n := range neighbours {
 			nv.Add(n)
@@ -177,7 +177,7 @@ func (bk *bronKerbosch) maximalCliquePivot(g graph.Undirected, r []graph.Node, p
 			continue
 		}
 		vid := v.ID()
-		neighbours := g.From(vid)
+		neighbours := graph.NodesOf(g.From(vid))
 		nv := make(set.Nodes, len(neighbours))
 		for _, n := range neighbours {
 			nv.Add(n)
@@ -207,10 +207,10 @@ func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x set.Nodes) (neighb
 	// compile time option.
 	if !tomitaTanakaTakahashi {
 		for _, n := range p {
-			return g.From(n.ID())
+			return graph.NodesOf(g.From(n.ID()))
 		}
 		for _, n := range x {
-			return g.From(n.ID())
+			return graph.NodesOf(g.From(n.ID()))
 		}
 		panic("bronKerbosch: empty set")
 	}
@@ -222,7 +222,7 @@ func (*bronKerbosch) choosePivotFrom(g graph.Undirected, p, x set.Nodes) (neighb
 	maxNeighbors := func(s set.Nodes) {
 	outer:
 		for _, u := range s {
-			nb := g.From(u.ID())
+			nb := graph.NodesOf(g.From(u.ID()))
 			c := len(nb)
 			if c <= max {
 				continue

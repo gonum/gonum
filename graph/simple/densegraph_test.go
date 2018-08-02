@@ -38,7 +38,7 @@ func TestBasicDenseImpassable(t *testing.T) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
-		if degree := dg.Degree(int64(i)); degree != 0 {
+		if degree := dg.From(int64(i)).Len(); degree != 0 {
 			t.Errorf("Node in impassable graph has a neighbor. Node: %d Degree: %d", i, degree)
 		}
 	}
@@ -61,7 +61,7 @@ func TestBasicDensePassable(t *testing.T) {
 			t.Errorf("Node that should exist doesn't: %d", i)
 		}
 
-		if degree := dg.Degree(int64(i)); degree != 4 {
+		if degree := dg.From(int64(i)).Len(); degree != 4 {
 			t.Errorf("Node in passable graph missing neighbors. Node: %d Degree: %d", i, degree)
 		}
 	}
@@ -77,18 +77,18 @@ func TestDirectedDenseAddRemove(t *testing.T) {
 	dg := NewDirectedMatrix(10, math.Inf(1), 0, math.Inf(1))
 	dg.SetWeightedEdge(WeightedEdge{F: Node(0), T: Node(2), W: 1})
 
-	if neighbors := dg.From(int64(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
+	if neighbors := graph.NodesOf(dg.From(int64(0))); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.Edge(int64(0), int64(2)) == nil {
 		t.Errorf("Adding edge didn't create successor")
 	}
 
 	dg.RemoveEdge(int64(0), int64(2))
 
-	if neighbors := dg.From(int64(0)); len(neighbors) != 0 || dg.Edge(int64(0), int64(2)) != nil {
+	if neighbors := graph.NodesOf(dg.From(int64(0))); len(neighbors) != 0 || dg.Edge(int64(0), int64(2)) != nil {
 		t.Errorf("Removing edge didn't properly remove successor")
 	}
 
-	if neighbors := dg.To(int64(2)); len(neighbors) != 0 || dg.Edge(int64(0), int64(2)) != nil {
+	if neighbors := graph.NodesOf(dg.To(int64(2))); len(neighbors) != 0 || dg.Edge(int64(0), int64(2)) != nil {
 		t.Errorf("Removing directed edge wrongly kept predecessor")
 	}
 
@@ -109,12 +109,12 @@ func TestUndirectedDenseAddRemove(t *testing.T) {
 	dg := NewUndirectedMatrix(10, math.Inf(1), 0, math.Inf(1))
 	dg.SetEdge(Edge{F: Node(0), T: Node(2)})
 
-	if neighbors := dg.From(int64(0)); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
+	if neighbors := graph.NodesOf(dg.From(int64(0))); len(neighbors) != 1 || neighbors[0].ID() != 2 ||
 		dg.EdgeBetween(int64(0), int64(2)) == nil {
 		t.Errorf("Couldn't add neighbor")
 	}
 
-	if neighbors := dg.From(int64(2)); len(neighbors) != 1 || neighbors[0].ID() != 0 ||
+	if neighbors := graph.NodesOf(dg.From(int64(2))); len(neighbors) != 1 || neighbors[0].ID() != 0 ||
 		dg.EdgeBetween(int64(2), int64(0)) == nil {
 		t.Errorf("Adding an undirected neighbor didn't add it reciprocally")
 	}
@@ -122,15 +122,15 @@ func TestUndirectedDenseAddRemove(t *testing.T) {
 
 func TestDenseLists(t *testing.T) {
 	dg := NewDirectedMatrix(15, 1, 0, math.Inf(1))
-	nodes := dg.Nodes()
+	nodes := graph.NodesOf(dg.Nodes())
 
 	if len(nodes) != 15 {
-		t.Fatalf("Wrong number of nodes")
+		t.Fatalf("Wrong number of nodes: got:%v want:%v", len(nodes), 15)
 	}
 
 	sort.Sort(ordered.ByID(nodes))
 
-	for i, node := range dg.Nodes() {
+	for i, node := range graph.NodesOf(dg.Nodes()) {
 		if int64(i) != node.ID() {
 			t.Errorf("Node list doesn't return properly id'd nodes")
 		}

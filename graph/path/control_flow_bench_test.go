@@ -253,8 +253,10 @@ type undirected struct {
 	*simple.DirectedGraph
 }
 
-func (g undirected) From(id int64) []graph.Node {
-	return append(g.DirectedGraph.From(id), g.DirectedGraph.To(id)...)
+func (g undirected) From(id int64) graph.Nodes {
+	return simple.NewNodeIterator(append(
+		graph.NodesOf(g.DirectedGraph.From(id)),
+		graph.NodesOf(g.DirectedGraph.To(id))...))
 }
 
 func (g undirected) HasEdgeBetween(xid, yid int64) bool {

@@ -9,6 +9,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/internal/uid"
+	"gonum.org/v1/gonum/graph/simple"
 )
 
 var (
@@ -143,7 +144,7 @@ func (g *UndirectedGraph) Has(id int64) bool {
 }
 
 // Nodes returns all the nodes in the graph.
-func (g *UndirectedGraph) Nodes() []graph.Node {
+func (g *UndirectedGraph) Nodes() graph.Nodes {
 	if len(g.nodes) == 0 {
 		return nil
 	}
@@ -153,7 +154,7 @@ func (g *UndirectedGraph) Nodes() []graph.Node {
 		nodes[i] = n
 		i++
 	}
-	return nodes
+	return simple.NewNodeIterator(nodes)
 }
 
 // Edges returns all the edges in the graph. Each edge in the returned slice
@@ -184,7 +185,7 @@ func (g *UndirectedGraph) Edges() []graph.Edge {
 }
 
 // From returns all nodes in g that can be reached directly from n.
-func (g *UndirectedGraph) From(id int64) []graph.Node {
+func (g *UndirectedGraph) From(id int64) graph.Nodes {
 	if !g.Has(id) {
 		return nil
 	}
@@ -195,7 +196,7 @@ func (g *UndirectedGraph) From(id int64) []graph.Node {
 		nodes[i] = g.nodes[from]
 		i++
 	}
-	return nodes
+	return simple.NewNodeIterator(nodes)
 }
 
 // HasEdgeBetween returns whether an edge exists between nodes x and y.
@@ -213,7 +214,7 @@ func (g *UndirectedGraph) EdgeBetween(xid, yid int64) graph.Edge {
 // The node v must be directly reachable from u as defined by the From method.
 // The returned graph.Edge is a multi.Edge if an edge exists.
 func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
-	lines := g.LinesBetween(uid, vid)
+	lines := graph.LinesOf(g.LinesBetween(uid, vid))
 	if len(lines) == 0 {
 		return nil
 	}
@@ -222,27 +223,15 @@ func (g *UndirectedGraph) Edge(uid, vid int64) graph.Edge {
 
 // Lines returns the lines from u to v if such an edge exists and nil otherwise.
 // The node v must be directly reachable from u as defined by the From method.
-func (g *UndirectedGraph) Lines(uid, vid int64) []graph.Line {
+func (g *UndirectedGraph) Lines(uid, vid int64) graph.Lines {
 	return g.LinesBetween(uid, vid)
 }
 
 // LinesBetween returns the lines between nodes x and y.
-func (g *UndirectedGraph) LinesBetween(xid, yid int64) []graph.Line {
+func (g *UndirectedGraph) LinesBetween(xid, yid int64) graph.Lines {
 	var lines []graph.Line
 	for _, l := range g.lines[xid][yid] {
 		lines = append(lines, l)
 	}
-	return lines
-}
-
-// Degree returns the degree of n in g.
-func (g *UndirectedGraph) Degree(id int64) int {
-	if _, ok := g.nodes[id]; !ok {
-		return 0
-	}
-	var deg int
-	for _, e := range g.lines[id] {
-		deg += len(e)
-	}
-	return deg
+	return NewLineIterator(lines)
 }

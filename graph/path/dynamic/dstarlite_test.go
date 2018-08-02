@@ -387,7 +387,7 @@ var dynamicDStarLiteTests = []struct {
 		modify: func(l *testgraphs.LimitedVisionGrid) {
 			all := l.Grid.AllVisible
 			l.Grid.AllVisible = false
-			for _, n := range l.Nodes() {
+			for _, n := range graph.NodesOf(l.Nodes()) {
 				id := n.ID()
 				l.Known[id] = !l.Grid.Has(id)
 			}
@@ -400,9 +400,9 @@ var dynamicDStarLiteTests = []struct {
 			l.Known[l.NodeAt(wallRow, wallCol).ID()] = false
 
 			// Check we have a correctly modified representation.
-			for _, u := range l.Nodes() {
+			for _, u := range graph.NodesOf(l.Nodes()) {
 				uid := u.ID()
-				for _, v := range l.Nodes() {
+				for _, v := range graph.NodesOf(l.Nodes()) {
 					vid := v.ID()
 					if l.HasEdgeBetween(uid, vid) != l.Grid.HasEdgeBetween(uid, vid) {
 						ur, uc := l.RowCol(uid)

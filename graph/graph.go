@@ -32,11 +32,11 @@ type Graph interface {
 	Has(id int64) bool
 
 	// Nodes returns all the nodes in the graph.
-	Nodes() []Node
+	Nodes() Nodes
 
 	// From returns all nodes that can be reached directly
 	// from the node with the given ID.
-	From(id int64) []Node
+	From(id int64) Nodes
 
 	// HasEdgeBetween returns whether an edge exists between
 	// nodes with IDs xid and yid without considering direction.
@@ -99,7 +99,7 @@ type Directed interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
-	To(id int64) []Node
+	To(id int64) Nodes
 }
 
 // WeightedDirected is a weighted directed graph.
@@ -113,7 +113,7 @@ type WeightedDirected interface {
 
 	// To returns all nodes that can reach directly
 	// to the node with the given ID.
-	To(id int64) []Node
+	To(id int64) Nodes
 }
 
 // NodeAdder is an interface for adding arbitrary nodes to a graph.
@@ -219,11 +219,15 @@ type DirectedWeightedBuilder interface {
 // be present in the destination after the copy is complete.
 func Copy(dst Builder, src Graph) {
 	nodes := src.Nodes()
-	for _, n := range nodes {
-		dst.AddNode(n)
+	for nodes.Next() {
+		dst.AddNode(nodes.Node())
 	}
-	for _, u := range nodes {
-		for _, v := range src.From(u.ID()) {
+	nodes.Reset()
+	for nodes.Next() {
+		u := nodes.Node()
+		to := src.From(u.ID())
+		for to.Next() {
+			v := to.Node()
 			dst.SetEdge(dst.NewEdge(u, v))
 		}
 	}
@@ -242,11 +246,15 @@ func Copy(dst Builder, src Graph) {
 // to resolve such conflicts, an UndirectWeighted may be used to do this.
 func CopyWeighted(dst WeightedBuilder, src Weighted) {
 	nodes := src.Nodes()
-	for _, n := range nodes {
-		dst.AddNode(n)
+	for nodes.Next() {
+		dst.AddNode(nodes.Node())
 	}
-	for _, u := range nodes {
-		for _, v := range src.From(u.ID()) {
+	nodes.Reset()
+	for nodes.Next() {
+		u := nodes.Node()
+		to := src.From(u.ID())
+		for to.Next() {
+			v := to.Node()
 			dst.SetWeightedEdge(dst.NewWeightedEdge(u, v, src.WeightedEdge(u.ID(), v.ID()).Weight()))
 		}
 	}

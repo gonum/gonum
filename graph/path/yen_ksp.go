@@ -36,19 +36,13 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 	paths := [][]graph.Node{shortest}
 
 	var pot []yenShortest
+	var root []graph.Node
 	for i := int64(1); i < int64(k); i++ {
 		for n := 0; n < len(paths[i-1])-1; n++ {
 			yk.reset()
 
 			spur := paths[i-1][n]
-			root := make([]graph.Node, len(paths[i-1][:n+1]))
-			copy(root, paths[i-1][:n+1])
-
-			var rootWeight float64
-			for x := 1; x < len(root); x++ {
-				w, _ := yk.weight(root[x-1].ID(), root[x].ID())
-				rootWeight += w
-			}
+			root := append(root[:0], paths[i-1][:n+1]...)
 
 			for _, path := range paths {
 				if len(path) > n {
@@ -67,6 +61,11 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 
 			spath, weight := DijkstraFrom(spur, yk).To(t.ID())
 			if len(root) > 1 {
+				var rootWeight float64
+				for x := 1; x < len(root); x++ {
+					w, _ := yk.weight(root[x-1].ID(), root[x].ID())
+					rootWeight += w
+				}
 				root = append(root[:len(root)-1], spath...)
 				pot = append(pot, yenShortest{root, weight + rootWeight})
 			} else {

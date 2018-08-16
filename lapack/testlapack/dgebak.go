@@ -73,14 +73,14 @@ func testDgebak(t *testing.T, impl Dgebaker, job lapack.Job, side lapack.EVSide,
 		for i := n - 1; i > ihi; i-- {
 			scale[i] = float64(rnd.Intn(i + 1))
 			blas64.Swap(n,
-				blas64.Vector{p.Stride, p.Data[i:]},
-				blas64.Vector{p.Stride, p.Data[int(scale[i]):]})
+				blas64.Vector{p.Data[i:], p.Stride},
+				blas64.Vector{p.Data[int(scale[i]):], p.Stride})
 		}
 		for i := 0; i < ilo; i++ {
 			scale[i] = float64(i + rnd.Intn(ihi-i+1))
 			blas64.Swap(n,
-				blas64.Vector{p.Stride, p.Data[i:]},
-				blas64.Vector{p.Stride, p.Data[int(scale[i]):]})
+				blas64.Vector{p.Data[i:], p.Stride},
+				blas64.Vector{p.Data[int(scale[i]):], p.Stride})
 		}
 	}
 

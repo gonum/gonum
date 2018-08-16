@@ -48,7 +48,7 @@ func Dorg2lTest(t *testing.T, impl Dorg2ler) {
 		impl.Dgeql2(m, n, a, lda, tau, work)
 
 		impl.Dorg2l(m, n, k, a, lda, tau[n-k:], work)
-		if !hasOrthonormalColumns(blas64.General{m, n, lda, a}) {
+		if !hasOrthonormalColumns(blas64.General{m, n, a, lda}) {
 			t.Errorf("Case m=%v, n=%v, k=%v: columns of Q not orthonormal", m, n, k)
 		}
 	}

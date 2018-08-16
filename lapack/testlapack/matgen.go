@@ -716,7 +716,7 @@ func applyReflector(qh blas64.General, q blas64.General, v []float64) {
 		panic("bad size of q")
 	}
 	qv := make([]float64, n)
-	blas64.Gemv(blas.NoTrans, 1, q, blas64.Vector{1, v}, 0, blas64.Vector{1, qv})
+	blas64.Gemv(blas.NoTrans, 1, q, blas64.Vector{v, 1}, 0, blas64.Vector{qv, 1})
 	for i := 0; i < n; i++ {
 		for j := 0; j < n; j++ {
 			qh.Data[i*qh.Stride+j] = q.Data[i*q.Stride+j]

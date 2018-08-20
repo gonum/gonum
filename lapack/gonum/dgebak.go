@@ -20,10 +20,10 @@ import (
 // the eigenvectors of the original matrix.
 //
 // Dgebak is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dgebak(job lapack.Job, side lapack.EVSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
+func (impl Implementation) Dgebak(job lapack.BalanceJob, side lapack.EVSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int) {
 	switch job {
 	default:
-		panic(badJob)
+		panic(badBalanceJob)
 	case lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale:
 	}
 	switch side {

@@ -16,13 +16,13 @@ import (
 )
 
 type Dgebaler interface {
-	Dgebal(job lapack.Job, n int, a []float64, lda int, scale []float64) (int, int)
+	Dgebal(job lapack.BalanceJob, n int, a []float64, lda int, scale []float64) (int, int)
 }
 
 func DgebalTest(t *testing.T, impl Dgebaler) {
 	rnd := rand.New(rand.NewSource(1))
 
-	for _, job := range []lapack.Job{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
+	for _, job := range []lapack.BalanceJob{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53, 100} {
 			for _, extra := range []int{0, 11} {
 				for cas := 0; cas < 100; cas++ {
@@ -34,7 +34,7 @@ func DgebalTest(t *testing.T, impl Dgebaler) {
 	}
 }
 
-func testDgebal(t *testing.T, impl Dgebaler, job lapack.Job, a blas64.General) {
+func testDgebal(t *testing.T, impl Dgebaler, job lapack.BalanceJob, a blas64.General) {
 	const tol = 1e-14
 
 	n := a.Rows

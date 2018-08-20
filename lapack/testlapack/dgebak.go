@@ -16,13 +16,13 @@ import (
 )
 
 type Dgebaker interface {
-	Dgebak(job lapack.Job, side lapack.EVSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int)
+	Dgebak(job lapack.BalanceJob, side lapack.EVSide, n, ilo, ihi int, scale []float64, m int, v []float64, ldv int)
 }
 
 func DgebakTest(t *testing.T, impl Dgebaker) {
 	rnd := rand.New(rand.NewSource(1))
 
-	for _, job := range []lapack.Job{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
+	for _, job := range []lapack.BalanceJob{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
 		for _, side := range []lapack.EVSide{lapack.LeftEV, lapack.RightEV} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 				for _, extra := range []int{0, 11} {
@@ -44,7 +44,7 @@ func DgebakTest(t *testing.T, impl Dgebaker) {
 	}
 }
 
-func testDgebak(t *testing.T, impl Dgebaker, job lapack.Job, side lapack.EVSide, ilo, ihi int, v blas64.General, rnd *rand.Rand) {
+func testDgebak(t *testing.T, impl Dgebaker, job lapack.BalanceJob, side lapack.EVSide, ilo, ihi int, v blas64.General, rnd *rand.Rand) {
 	const tol = 1e-15
 	n := v.Rows
 	m := v.Cols

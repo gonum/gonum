@@ -155,11 +155,13 @@ const (
 	ComputeRightEV RightEVJob = 'V' // Compute right eigenvectors.
 )
 
-// Jobs for Dgebal.
+// BalanceJob specifies matrix balancing operation.
+type BalanceJob byte
+
 const (
-	Permute      Job = 'P'
-	Scale        Job = 'S'
-	PermuteScale Job = 'B'
+	Permute      BalanceJob = 'P'
+	Scale        BalanceJob = 'S'
+	PermuteScale BalanceJob = 'B'
 )
 
 // Job constants for Dhseqr.

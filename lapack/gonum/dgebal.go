@@ -54,10 +54,10 @@ import (
 // scale must have length equal to n, otherwise Dgebal will panic.
 //
 // Dgebal is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dgebal(job lapack.Job, n int, a []float64, lda int, scale []float64) (ilo, ihi int) {
+func (impl Implementation) Dgebal(job lapack.BalanceJob, n int, a []float64, lda int, scale []float64) (ilo, ihi int) {
 	switch job {
 	default:
-		panic(badJob)
+		panic(badBalanceJob)
 	case lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale:
 	}
 	checkMatrix(n, n, a, lda)

@@ -35,7 +35,7 @@ const (
 	badIlo          = "lapack: ilo out of range"
 	badIhi          = "lapack: ihi out of range"
 	badIpiv         = "lapack: bad permutation length"
-	badJob          = "lapack: bad Job"
+	badBalanceJob   = "lapack: bad BalanceJob"
 	badK1           = "lapack: k1 out of range"
 	badK2           = "lapack: k2 out of range"
 	badKperm        = "lapack: incorrect permutation length"

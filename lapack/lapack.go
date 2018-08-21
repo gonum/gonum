@@ -8,8 +8,6 @@ import "gonum.org/v1/gonum/blas"
 
 const None = 'N'
 
-type Comp byte
-
 // Complex128 defines the public complex128 LAPACK API supported by gonum/lapack.
 type Complex128 interface{}
 

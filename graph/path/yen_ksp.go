@@ -31,7 +31,6 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 		return nil
 	case 1:
 		return [][]graph.Node{shortest}
-
 	}
 	paths := [][]graph.Node{shortest}
 
@@ -45,17 +44,18 @@ func YenKShortestPaths(g graph.Graph, k int, s, t graph.Node) [][]graph.Node {
 			root := append(root[:0], paths[i-1][:n+1]...)
 
 			for _, path := range paths {
-				if len(path) > n {
-					ok := true
-					for x := 0; x < len(root); x++ {
-						if path[x].ID() != root[x].ID() {
-							ok = false
-							break
-						}
+				if len(path) <= n {
+					continue
+				}
+				ok := true
+				for x := 0; x < len(root); x++ {
+					if path[x].ID() != root[x].ID() {
+						ok = false
+						break
 					}
-					if ok {
-						yk.removeEdge(path[n].ID(), path[n+1].ID())
-					}
+				}
+				if ok {
+					yk.removeEdge(path[n].ID(), path[n+1].ID())
 				}
 			}
 
@@ -118,22 +118,20 @@ type yenKSPAdjuster struct {
 
 func (g yenKSPAdjuster) From(id int64) []graph.Node {
 	nodes := g.Graph.From(id)
-
-	for i := 0; i < len(nodes); i++ {
-		if !g.canWalk(id, nodes[i].ID()) {
+	for i := 0; i < len(nodes); {
+		if g.canWalk(id, nodes[i].ID()) {
+			i++
 			continue
 		}
-		nodes[int64(i)] = nodes[len(nodes)-1]
+		nodes[i] = nodes[len(nodes)-1]
 		nodes = nodes[:len(nodes)-1]
-		i--
 	}
-
 	return nodes
 }
 
 func (g yenKSPAdjuster) canWalk(u, v int64) bool {
 	_, ok := g.visitedEdges[[2]int64{u, v}]
-	return ok
+	return !ok
 }
 
 func (g yenKSPAdjuster) removeEdge(u, v int64) {

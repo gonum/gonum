@@ -170,10 +170,12 @@ const (
 	PermuteScale BalanceJob = 'B'
 )
 
-// Job constants for Dhseqr.
+// SchurJob specifies whether the Schur form is computed in Dhseqr.
+type SchurJob byte
+
 const (
-	EigenvaluesOnly     EVJob = 'E'
-	EigenvaluesAndSchur EVJob = 'S'
+	EigenvaluesOnly     SchurJob = 'E'
+	EigenvaluesAndSchur SchurJob = 'S'
 )
 
 // EVSide specifies what eigenvectors will be computed.

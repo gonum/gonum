@@ -123,7 +123,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 		if wantvr {
 			side = lapack.EVRight
 		}
-		impl.Dtrevc3(side, lapack.AllEVMulQ, nil, n, nil, 1, nil, 1, nil, 1,
+		impl.Dtrevc3(side, lapack.EVAllMulQ, nil, n, nil, 1, nil, 1, nil, 1,
 			n, work, -1)
 		maxwrk = max(maxwrk, n+int(work[0]))
 		maxwrk = max(maxwrk, 4*n)
@@ -215,7 +215,7 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 
 	if wantvl || wantvr {
 		// Compute left and/or right eigenvectors.
-		impl.Dtrevc3(side, lapack.AllEVMulQ, nil, n,
+		impl.Dtrevc3(side, lapack.EVAllMulQ, nil, n,
 			a, lda, vl, ldvl, vr, ldvr, n, work[iwrk:], lwork-iwrk)
 	}
 	bi := blas64.Implementation()

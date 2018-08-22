@@ -24,7 +24,7 @@ func (impl Implementation) Dgebak(job lapack.BalanceJob, side lapack.EVSide, n, 
 	switch job {
 	default:
 		panic(badBalanceJob)
-	case lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale:
+	case lapack.BalanceNone, lapack.Permute, lapack.Scale, lapack.PermuteScale:
 	}
 	switch side {
 	default:
@@ -40,7 +40,7 @@ func (impl Implementation) Dgebak(job lapack.BalanceJob, side lapack.EVSide, n, 
 	}
 
 	// Quick return if possible.
-	if n == 0 || m == 0 || job == lapack.None {
+	if n == 0 || m == 0 || job == lapack.BalanceNone {
 		return
 	}
 

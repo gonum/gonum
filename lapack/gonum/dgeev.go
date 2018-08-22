@@ -36,9 +36,10 @@ import (
 // where i is the imaginary unit. The computed eigenvectors are normalized to
 // have Euclidean norm equal to 1 and largest component real.
 //
-// Left eigenvectors will be computed only if jobvl == lapack.ComputeLeftEV,
-// otherwise jobvl must be lapack.None. Right eigenvectors will be computed
-// only if jobvr == lapack.ComputeRightEV, otherwise jobvr must be lapack.None.
+// Left eigenvectors will be computed only if jobvl == lapack.LeftEVCompute,
+// otherwise jobvl must be lapack.LeftEVNone.
+// Right eigenvectors will be computed only if jobvr == lapack.RightEVCompute,
+// otherwise jobvr must be lapack.RightEVNone.
 // For other values of jobvl and jobvr Dgeev will panic.
 //
 // wr and wi contain the real and imaginary parts, respectively, of the computed
@@ -64,17 +65,17 @@ func (impl Implementation) Dgeev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob
 	switch jobvl {
 	default:
 		panic("lapack: invalid LeftEVJob")
-	case lapack.ComputeLeftEV:
+	case lapack.LeftEVCompute:
 		wantvl = true
-	case lapack.None:
+	case lapack.LeftEVNone:
 	}
 	var wantvr bool
 	switch jobvr {
 	default:
 		panic("lapack: invalid RightEVJob")
-	case lapack.ComputeRightEV:
+	case lapack.RightEVCompute:
 		wantvr = true
-	case lapack.None:
+	case lapack.RightEVNone:
 	}
 	switch {
 	case n < 0:

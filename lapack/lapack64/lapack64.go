@@ -515,10 +515,10 @@ func Trtrs(trans blas.Transpose, a blas64.Triangular, b blas64.General) (ok bool
 // where i is the imaginary unit. The computed eigenvectors are normalized to
 // have Euclidean norm equal to 1 and largest component real.
 //
-// Left eigenvectors will be computed only if jobvl == lapack.ComputeLeftEV,
-// otherwise jobvl must be lapack.None.
-// Right eigenvectors will be computed only if jobvr == lapack.ComputeRightEV,
-// otherwise jobvr must be lapack.None.
+// Left eigenvectors will be computed only if jobvl == lapack.LeftEVCompute,
+// otherwise jobvl must be lapack.LeftEVNone.
+// Right eigenvectors will be computed only if jobvr == lapack.RightEVCompute,
+// otherwise jobvr must be lapack.RightEVNone.
 // For other values of jobvl and jobvr Geev will panic.
 //
 // On return, wr and wi will contain the real and imaginary parts, respectively,
@@ -544,10 +544,10 @@ func Geev(jobvl lapack.LeftEVJob, jobvr lapack.RightEVJob, a blas64.General, wr,
 	if a.Cols != n {
 		panic("lapack64: matrix not square")
 	}
-	if jobvl == lapack.ComputeLeftEV && (vl.Rows != n || vl.Cols != n) {
+	if jobvl == lapack.LeftEVCompute && (vl.Rows != n || vl.Cols != n) {
 		panic("lapack64: bad size of VL")
 	}
-	if jobvr == lapack.ComputeRightEV && (vr.Rows != n || vr.Cols != n) {
+	if jobvr == lapack.RightEVCompute && (vr.Rows != n || vr.Cols != n) {
 		panic("lapack64: bad size of VR")
 	}
 	return lapack64.Dgeev(jobvl, jobvr, n, a.Data, a.Stride, wr, wi, vl.Data, vl.Stride, vr.Data, vr.Stride, work, lwork)

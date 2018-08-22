@@ -137,16 +137,22 @@ const (
 	UpdateSchur EVComp = 'V'
 )
 
+// EVJob specifies whether eigenvectors are computed in Dsyev.
+type EVJob byte
+
+const (
+	EVCompute EVJob = 'V' // Eigenvectors are computed.
+	EVNone    EVJob = 'N' // Eigenvectors are not computed.
+)
+
 // Job types for computation of eigenvectors.
 type (
-	EVJob      byte
 	LeftEVJob  byte
 	RightEVJob byte
 )
 
 // Job constants for computation of eigenvectors.
 const (
-	ComputeEV      EVJob      = 'V' // Compute eigenvectors in Dsyev.
 	ComputeLeftEV  LeftEVJob  = 'V' // Compute left eigenvectors.
 	ComputeRightEV RightEVJob = 'V' // Compute right eigenvectors.
 )

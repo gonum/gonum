@@ -55,9 +55,9 @@ func DsyevTest(t *testing.T, impl Dsyever) {
 				}
 
 				work := make([]float64, 1)
-				impl.Dsyev(lapack.ComputeEV, uplo, n, a, lda, w, work, -1)
+				impl.Dsyev(lapack.EVCompute, uplo, n, a, lda, w, work, -1)
 				work = make([]float64, int(work[0]))
-				impl.Dsyev(lapack.ComputeEV, uplo, n, a, lda, w, work, len(work))
+				impl.Dsyev(lapack.EVCompute, uplo, n, a, lda, w, work, len(work))
 
 				// Check that the decomposition is correct
 				orig := blas64.General{

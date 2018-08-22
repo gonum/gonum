@@ -38,9 +38,9 @@ func (e *EigenSym) Factorize(a Symmetric, vectors bool) (ok bool) {
 	sd := NewSymDense(n, nil)
 	sd.CopySym(a)
 
-	jobz := lapack.EVJob(lapack.None)
+	jobz := lapack.EVNone
 	if vectors {
-		jobz = lapack.ComputeEV
+		jobz = lapack.EVCompute
 	}
 	w := make([]float64, n)
 	work := []float64{0}

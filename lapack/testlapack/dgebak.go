@@ -23,7 +23,7 @@ func DgebakTest(t *testing.T, impl Dgebaker) {
 	rnd := rand.New(rand.NewSource(1))
 
 	for _, job := range []lapack.BalanceJob{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
-		for _, side := range []lapack.EVSide{lapack.LeftEV, lapack.RightEV} {
+		for _, side := range []lapack.EVSide{lapack.EVLeft, lapack.EVRight} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 				for _, extra := range []int{0, 11} {
 					for cas := 0; cas < 100; cas++ {
@@ -96,7 +96,7 @@ func testDgebak(t *testing.T, impl Dgebaker, job lapack.BalanceJob, side lapack.
 
 	// Compute D*V or D^{-1}*V and store into dv.
 	dv := zeros(n, m, m)
-	if side == lapack.RightEV {
+	if side == lapack.EVRight {
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, d, v, 0, dv)
 	} else {
 		blas64.Gemm(blas.NoTrans, blas.NoTrans, 1, dinv, v, 0, dv)

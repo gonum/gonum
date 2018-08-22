@@ -178,14 +178,13 @@ const (
 	EigenvaluesAndSchur SchurJob = 'S'
 )
 
-// EVSide specifies what eigenvectors will be computed.
+// EVSide specifies what eigenvectors are computed in Dtrevc3.
 type EVSide byte
 
-// EVSide constants for Dtrevc3.
 const (
-	RightEV     EVSide = 'R' // Compute right eigenvectors only.
-	LeftEV      EVSide = 'L' // Compute left eigenvectors only.
-	RightLeftEV EVSide = 'B' // Compute both right and left eigenvectors.
+	EVRight     EVSide = 'R' // Only right eigenvectors are computed.
+	EVLeft      EVSide = 'L' // Only left eigenvectors are computed.
+	EVRightLeft EVSide = 'B' // Both right and left eigenvectors are computed.
 )
 
 // HowMany specifies which eigenvectors will be computed.

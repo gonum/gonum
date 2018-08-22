@@ -10,8 +10,8 @@ import (
 )
 
 // Dgebak updates an n×m matrix V as
-//  V = P D V,        if side == lapack.RightEV,
-//  V = P D^{-1} V,   if side == lapack.LeftEV,
+//  V = P D V,        if side == lapack.EVRight,
+//  V = P D^{-1} V,   if side == lapack.EVLeft,
 // where P and D are n×n permutation and scaling matrices, respectively,
 // implicitly represented by job, scale, ilo and ihi as returned by Dgebal.
 //
@@ -29,7 +29,7 @@ func (impl Implementation) Dgebak(job lapack.BalanceJob, side lapack.EVSide, n, 
 	switch side {
 	default:
 		panic(badEVSide)
-	case lapack.LeftEV, lapack.RightEV:
+	case lapack.EVLeft, lapack.EVRight:
 	}
 	checkMatrix(n, m, v, ldv)
 	switch {
@@ -47,7 +47,7 @@ func (impl Implementation) Dgebak(job lapack.BalanceJob, side lapack.EVSide, n, 
 	bi := blas64.Implementation()
 	if ilo != ihi && job != lapack.Permute {
 		// Backward balance.
-		if side == lapack.RightEV {
+		if side == lapack.EVRight {
 			for i := ilo; i <= ihi; i++ {
 				bi.Dscal(m, scale[i], v[i*ldv:], 1)
 			}

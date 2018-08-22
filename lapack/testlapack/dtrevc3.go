@@ -22,8 +22,8 @@ type Dtrevc3er interface {
 
 func Dtrevc3Test(t *testing.T, impl Dtrevc3er) {
 	rnd := rand.New(rand.NewSource(1))
-	for _, side := range []lapack.EVSide{lapack.RightEV, lapack.LeftEV, lapack.RightLeftEV} {
-		for _, howmny := range []lapack.HowMany{lapack.AllEV, lapack.AllEVMulQ, lapack.SelectedEV} {
+	for _, side := range []lapack.EVSide{lapack.EVRight, lapack.EVLeft, lapack.EVRightLeft} {
+		for _, howmny := range []lapack.EVHowMany{lapack.EVAll, lapack.EVAllMulQ, lapack.EVSelected} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 10, 34, 100} {
 				for _, extra := range []int{0, 11} {
 					for _, optwork := range []bool{true, false} {
@@ -43,8 +43,8 @@ func testDtrevc3(t *testing.T, impl Dtrevc3er, side lapack.EVSide, howmny lapack
 
 	n := tmat.Rows
 	extra := tmat.Stride - tmat.Cols
-	right := side != lapack.LeftEV
-	left := side != lapack.RightEV
+	right := side != lapack.EVLeft
+	left := side != lapack.EVRight
 
 	var selected, selectedWant []bool
 	var mWant int // How many columns will the eigenvectors occupy.

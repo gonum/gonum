@@ -31,9 +31,9 @@ import (
 // orthogonal factor that reduces a matrix A to Schur form T, then Q*X and Q*Y
 // are the matrices of right and left eigenvectors of A.
 //
-// If side == lapack.RightEV, only right eigenvectors will be computed.
-// If side == lapack.LeftEV, only left eigenvectors will be computed.
-// If side == lapack.RightLeftEV, both right and left eigenvectors will be computed.
+// If side == lapack.EVRight, only right eigenvectors will be computed.
+// If side == lapack.EVLeft, only left eigenvectors will be computed.
+// If side == lapack.EVRightLeft, both right and left eigenvectors will be computed.
 // For other values of side, Dtrevc3 will panic.
 //
 // If howmny == lapack.AllEV, all right and/or left eigenvectors will be
@@ -60,13 +60,13 @@ import (
 // selected complex eigenvector occupies two columns. If mm is not sufficiently
 // large, Dtrevc3 will panic.
 //
-// On entry, if howmny == lapack.AllEVMulQ, it is assumed that VL (if side
-// is lapack.LeftEV or lapack.RightLeftEV) contains an n×n matrix QL,
-// and that VR (if side is lapack.LeftEV or lapack.RightLeftEV) contains
+// On entry, if howmny is lapack.EVAllMulQ, it is assumed that VL (if side
+// is lapack.EVLeft or lapack.EVRightLeft) contains an n×n matrix QL,
+// and that VR (if side is lapack.EVLeft or lapack.EVRightLeft) contains
 // an n×n matrix QR. QL and QR are typically the orthogonal matrix Q of Schur
 // vectors returned by Dhseqr.
 //
-// On return, if side is lapack.LeftEV or lapack.RightLeftEV,
+// On return, if side is lapack.EVLeft or lapack.EVRightLeft,
 // VL will contain:
 //  if howmny == lapack.AllEV,      the matrix Y of left eigenvectors of T,
 //  if howmny == lapack.AllEVMulQ,  the matrix Q*Y,
@@ -74,9 +74,9 @@ import (
 //                                  selected, stored consecutively in the
 //                                  columns of VL, in the same order as their
 //                                  eigenvalues.
-// VL is not referenced if side == lapack.RightEV.
+// VL is not referenced if side == lapack.EVRight.
 //
-// On return, if side is lapack.RightEV or lapack.RightLeftEV,
+// On return, if side is lapack.EVRight or lapack.EVRightLeft,
 // VR will contain:
 //  if howmny == lapack.AllEV,      the matrix X of right eigenvectors of T,
 //  if howmny == lapack.AllEVMulQ,  the matrix Q*X,
@@ -84,7 +84,7 @@ import (
 //                                  selected, stored consecutively in the
 //                                  columns of VR, in the same order as their
 //                                  eigenvalues.
-// VR is not referenced if side == lapack.LeftEV.
+// VR is not referenced if side == lapack.EVLeft.
 //
 // Complex eigenvectors corresponding to a complex eigenvalue are stored in VL
 // and VR in two consecutive columns, the first holding the real part, and the
@@ -109,7 +109,7 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.HowMany, se
 	switch side {
 	default:
 		panic(badEVSide)
-	case lapack.RightEV, lapack.LeftEV, lapack.RightLeftEV:
+	case lapack.EVRight, lapack.EVLeft, lapack.EVRightLeft:
 	}
 	switch howmny {
 	default:
@@ -158,10 +158,10 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.HowMany, se
 			panic("lapack: insufficient number of columns")
 		}
 		checkMatrix(n, n, t, ldt)
-		if (side == lapack.RightEV || side == lapack.RightLeftEV) && m > 0 {
+		if (side == lapack.EVRight || side == lapack.EVRightLeft) && m > 0 {
 			checkMatrix(n, m, vr, ldvr)
 		}
-		if (side == lapack.LeftEV || side == lapack.RightLeftEV) && m > 0 {
+		if (side == lapack.EVLeft || side == lapack.EVRightLeft) && m > 0 {
 			checkMatrix(n, m, vl, ldvl)
 		}
 	}
@@ -230,7 +230,7 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.HowMany, se
 		iscomplex [nbmax]int // Stores ip for each column in current block.
 	)
 
-	if side == lapack.LeftEV {
+	if side == lapack.EVLeft {
 		goto leftev
 	}
 
@@ -539,7 +539,7 @@ func (impl Implementation) Dtrevc3(side lapack.EVSide, howmny lapack.HowMany, se
 		}
 	}
 
-	if side == lapack.RightEV {
+	if side == lapack.EVRight {
 		return m
 	}
 

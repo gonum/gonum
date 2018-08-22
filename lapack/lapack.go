@@ -187,12 +187,11 @@ const (
 	EVRightLeft EVSide = 'B' // Both right and left eigenvectors are computed.
 )
 
-// HowMany specifies which eigenvectors will be computed.
-type HowMany byte
+// EVHowMany specifies which eigenvectors are computed in Dtrevc3 and how.
+type EVHowMany byte
 
-// HowMany constants for Dhseqr.
 const (
-	AllEV      HowMany = 'A' // Compute all right and/or left eigenvectors.
-	AllEVMulQ  HowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
-	SelectedEV HowMany = 'S' // Compute selected right and/or left eigenvectors.
+	EVAll      EVHowMany = 'A' // Compute all right and/or left eigenvectors.
+	EVAllMulQ  EVHowMany = 'B' // Compute all right and/or left eigenvectors multiplied by an input matrix.
+	EVSelected EVHowMany = 'S' // Compute selected right and/or left eigenvectors.
 )

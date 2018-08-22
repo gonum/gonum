@@ -145,16 +145,20 @@ const (
 	EVNone    EVJob = 'N' // Eigenvectors are not computed.
 )
 
-// Job types for computation of eigenvectors.
-type (
-	LeftEVJob  byte
-	RightEVJob byte
+// LeftEVJob specifies whether left eigenvectors are computed in Dgeev.
+type LeftEVJob byte
+
+const (
+	LeftEVCompute LeftEVJob = 'V' // Left eigenvectors are computed.
+	LeftEVNone    LeftEVJob = 'N' // Left eigenvectors are not computed.
 )
 
-// Job constants for computation of eigenvectors.
+// RightEVJob specifies whether right eigenvectors are computed in Dgeev.
+type RightEVJob byte
+
 const (
-	ComputeLeftEV  LeftEVJob  = 'V' // Compute left eigenvectors.
-	ComputeRightEV RightEVJob = 'V' // Compute right eigenvectors.
+	RightEVCompute RightEVJob = 'V' // Right eigenvectors are computed.
+	RightEVNone    RightEVJob = 'N' // Right eigenvectors are not computed.
 )
 
 // BalanceJob specifies matrix balancing operation.

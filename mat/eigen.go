@@ -154,15 +154,15 @@ func (e *Eigen) Factorize(a Matrix, left, right bool) (ok bool) {
 	sd.Clone(a)
 
 	var vl, vr Dense
-	var jobvl lapack.LeftEVJob = lapack.None
-	var jobvr lapack.RightEVJob = lapack.None
+	jobvl := lapack.LeftEVNone
+	jobvr := lapack.RightEVNone
 	if left {
 		vl = *NewDense(r, r, nil)
-		jobvl = lapack.ComputeLeftEV
+		jobvl = lapack.LeftEVCompute
 	}
 	if right {
 		vr = *NewDense(c, c, nil)
-		jobvr = lapack.ComputeRightEV
+		jobvr = lapack.RightEVCompute
 	}
 
 	wr := getFloats(c, false)

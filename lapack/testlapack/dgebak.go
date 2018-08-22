@@ -22,7 +22,7 @@ type Dgebaker interface {
 func DgebakTest(t *testing.T, impl Dgebaker) {
 	rnd := rand.New(rand.NewSource(1))
 
-	for _, job := range []lapack.BalanceJob{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
+	for _, job := range []lapack.BalanceJob{lapack.BalanceNone, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
 		for _, side := range []lapack.EVSide{lapack.EVLeft, lapack.EVRight} {
 			for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53} {
 				for _, extra := range []int{0, 11} {

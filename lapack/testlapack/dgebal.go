@@ -22,7 +22,7 @@ type Dgebaler interface {
 func DgebalTest(t *testing.T, impl Dgebaler) {
 	rnd := rand.New(rand.NewSource(1))
 
-	for _, job := range []lapack.BalanceJob{lapack.None, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
+	for _, job := range []lapack.BalanceJob{lapack.BalanceNone, lapack.Permute, lapack.Scale, lapack.PermuteScale} {
 		for _, n := range []int{0, 1, 2, 3, 4, 5, 6, 10, 18, 31, 53, 100} {
 			for _, extra := range []int{0, 11} {
 				for cas := 0; cas < 100; cas++ {
@@ -65,12 +65,12 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.BalanceJob, a blas64.Gen
 		return
 	}
 
-	if job == lapack.None {
+	if job == lapack.BalanceNone {
 		if ilo != 0 {
-			t.Errorf("%v: unexpected ilo when job=None. Want 0, got %v", prefix, ilo)
+			t.Errorf("%v: unexpected ilo when job=BalanceNone. Want 0, got %v", prefix, ilo)
 		}
 		if ihi != n-1 {
-			t.Errorf("%v: unexpected ihi when job=None. Want %v, got %v", prefix, n-1, ihi)
+			t.Errorf("%v: unexpected ihi when job=BalanceNone. Want %v, got %v", prefix, n-1, ihi)
 		}
 		k := -1
 		for i := range scale {
@@ -80,10 +80,10 @@ func testDgebal(t *testing.T, impl Dgebaler, job lapack.BalanceJob, a blas64.Gen
 			}
 		}
 		if k != -1 {
-			t.Errorf("%v: unexpected scale[%v] when job=None. Want 1, got %v", prefix, k, scale[k])
+			t.Errorf("%v: unexpected scale[%v] when job=BalanceNone. Want 1, got %v", prefix, k, scale[k])
 		}
 		if !equalApproxGeneral(a, want, 0) {
-			t.Errorf("%v: unexpected modification of A when job=None", prefix)
+			t.Errorf("%v: unexpected modification of A when job=BalanceNone", prefix)
 		}
 		return
 	}

@@ -168,6 +168,7 @@ const (
 	Permute      BalanceJob = 'P'
 	Scale        BalanceJob = 'S'
 	PermuteScale BalanceJob = 'B'
+	BalanceNone  BalanceJob = 'N'
 )
 
 // SchurJob specifies whether the Schur form is computed in Dhseqr.

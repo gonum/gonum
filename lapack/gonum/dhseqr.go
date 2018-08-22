@@ -118,11 +118,11 @@ import (
 //      URL: http://dx.doi.org/10.1137/S0895479801384585
 //
 // Dhseqr is an internal routine. It is exported for testing purposes.
-func (impl Implementation) Dhseqr(job lapack.EVJob, compz lapack.EVComp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
+func (impl Implementation) Dhseqr(job lapack.SchurJob, compz lapack.EVComp, n, ilo, ihi int, h []float64, ldh int, wr, wi []float64, z []float64, ldz int, work []float64, lwork int) (unconverged int) {
 	var wantt bool
 	switch job {
 	default:
-		panic(badEVJob)
+		panic(badSchurJob)
 	case lapack.EigenvaluesOnly:
 	case lapack.EigenvaluesAndSchur:
 		wantt = true

@@ -90,11 +90,20 @@ const (
 	Bottom   Pivot = 'B'
 )
 
-type DecompUpdate byte
+// ApplyOrtho specifies which orthogonal matrix is applied in Dormbr.
+type ApplyOrtho byte
 
 const (
-	ApplyP DecompUpdate = 'P'
-	ApplyQ DecompUpdate = 'Q'
+	ApplyP ApplyOrtho = 'P' // Apply P or P^T.
+	ApplyQ ApplyOrtho = 'Q' // Apply Q or Q^T.
+)
+
+// GenOrtho specifies which orthogonal matrix is generated in Dorgbr.
+type GenOrtho byte
+
+const (
+	GeneratePT GenOrtho = 'P' // Generate P^T.
+	GenerateQ  GenOrtho = 'Q' // Generate Q.
 )
 
 // SVDJob specifies the singular vector computation type for SVD.

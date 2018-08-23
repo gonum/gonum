@@ -681,7 +681,7 @@ func checkBidiagonal(t *testing.T, m, n, nb int, a []float64, lda int, d, e, tau
 
 // constructQPBidiagonal constructs Q or P from the Bidiagonal decomposition
 // computed by dlabrd and bgebd2.
-func constructQPBidiagonal(vect lapack.DecompUpdate, m, n, nb int, a []float64, lda int, tau []float64) blas64.General {
+func constructQPBidiagonal(vect lapack.ApplyOrtho, m, n, nb int, a []float64, lda int, tau []float64) blas64.General {
 	sz := n
 	if vect == lapack.ApplyQ {
 		sz = m
